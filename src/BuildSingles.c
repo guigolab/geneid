@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildSingles.c,v 1.1 2000-07-07 08:22:28 eblanco Exp $  */
+/*  $Id: BuildSingles.c,v 1.2 2000-08-08 14:15:54 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern long NUMEXONS;
 
 long BuildSingles(site *Start, long nStarts, 
 		  site *Stop, long nStops,
@@ -40,7 +42,7 @@ long BuildSingles(site *Start, long nStarts,
   /* main loop, for each Start codon */
   for (i=0, j=0, nSingles=0;
       (i < nStarts) && (j<nStops) &&
-      (nSingles<NUMEXONS);
+      (nSingles<(int)(NUMEXONS/RSINGL));
       i++)
     {
       Frame = (Start+i)->Position % 3;
@@ -79,8 +81,8 @@ long BuildSingles(site *Start, long nStarts,
 	}
     }
 
-  if (nSingles==NUMEXONS)
-    printError("Too many predicted exons: Change NUMEXONS parameter");
+  if (nSingles>=(int)(NUMEXONS/RSINGL))
+    printError("Too many predicted exons: Change RSINGL parameter");
   
   return(nSingles);
 }
