@@ -13,7 +13,7 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.nw,v 1.3 2000-10-11 19:10:27 jabril Exp $
+% $Id: sgp2.nw,v 1.4 2000-10-12 20:09:57 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
@@ -42,7 +42,7 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.nw,v 1.3 2000-10-11 19:10:27 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.nw,v 1.4 2000-10-12 20:09:57 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
@@ -88,6 +88,9 @@ Our initial program outline (our root chunk) looks like:\\[1ex]
 <<POD man page trailer>>
 @ % 
 
+[[<<declare uses>>]] will cover all the modules (standard or not) that our program will need in the coresponding section.
+[[<<declare variables>>]] collect all the variables that need to be declared global within this program.
+
 <<shebang>>=
 #!/usr/bin/perl -w
 <<copyleft>>
@@ -101,7 +104,7 @@ contains program starting time (seconds since \textsc{Unix} ``epoch''), which wi
 
 <<version control>>=
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.3 2000-10-11 19:10:27 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.4 2000-10-12 20:09:57 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 @ %def $PROGRAM $VERSION @tmp_ver
 
@@ -119,8 +122,10 @@ use strict;
 # get options
 &Which_Options();
 # main external program calls
-&Run_Blast()   if $blast_flg;
-&Extract_HSP() if $hsps_flg;
+DOBLAST: {
+    &Run_Blast() if $blast_flg;
+    &Extract_HSP();
+} unless $hsps_flg;
 &Run_geneid()  if $geneid_flg;
 &Make_Plots()  if $plots_flg; 
 # timing
@@ -134,12 +139,11 @@ exit(1);
 
 <<define defaults>>=
 # some defaults
-my $file_number = 0;
 my $S_CUTOFF = 50;
 my $SCF = 12; # substract to tblastx scores S_CUTOFF - SCF;
-@ %def $NF $S_CUTOFF $SCF
+@ %def $S_CUTOFF $SCF
 
-[[$file_number]] used later to check whether the user provided two sequences or not. [[$S_CUTOFF]] and [[$SCF]] are used when the program parses [[tblastx]] output to rescore HSPs by subtracting [[$S_CUTOFF]] - [[$SCF]] to HSP scores.
+[[$S_CUTOFF]] and [[$SCF]] are used when the program parses [[tblastx]] output to rescore HSPs by subtracting [[$S_CUTOFF]] - [[$SCF]] to HSP scores.
 
 <<define defaults>>=
 # setting paths
@@ -208,12 +212,6 @@ my ( $seq1, $seq2, $geneid_opt, $geneid_param,
 
 Those variables will receive the values passed from command-line options in [[Which_Options()]] function.
 
-<<declare variables>>=
-my ($blast_flg, $hsps_flg, $geneid_flg, $plots_flg) = (1, 1, 1, 1);
-@ %def $blast_flg $hsps_flg $geneid_flg $plots_flg
-
-We initialize those flag variables to '1' in order to pass by default by all the main subroutines called from main loop. They will be modified by [[Which_Options()]] function.
-
 <<get options>>=
 # Parsing command-line options and processing its parameters.
 <<getopts subs>>
@@ -221,39 +219,98 @@ sub Which_Options() {
     GetOptions( 
                 "1=s"      => \$seq1         , # seqfile_1
                 "2=s"      => \$seq2         , # seqfile_2
-                "g"        => \$geneid_opt   , # geneid options      
-                "P"        => \$geneid_param , # geneid parameter file 
-                "o"        => \$blast_opt    , # tblastx options 
-                "c"        => \$score_cutoff , # tblastx score cutoff 
-                "s"        => \$shrink       , # shrink hsp's by
-                "t"        => \$tbx          , # read tblastx from file
-                "f"        => \$hsp          , # read HSP files in directory
-                "k"        => \$ofn          , # intermediate filename
-                "p"        => \$ps_output    , # postscript output 
+                "g=s"      => \$geneid_opt   , # geneid options      
+                "P=s"      => \$geneid_param , # geneid parameter file 
+                "o=s"      => \$blast_opt    , # tblastx options 
+                "c=f"      => \$score_cutoff , # tblastx score cutoff 
+                "s=f"      => \$shrink       , # shrink hsp's by
+                "t=s"      => \$tbx          , # read tblastx from file
+                "f=s"      => \$hsp          , # read HSP files in directory
+                "k=s"      => \$ofn          , # intermediate filename
+                "p=s"      => \$ps_output    , # postscript output 
                 "v"        => \$verbose_flg  , # verbose    
                 "h|help|?" => \$help_flg     , # print help
                 );
     &prt_Help if $help_flg;
     <<set flags>>
 }; # sub Which_Options
-@ %def &Which_Options 
+@ %def &Which_Options Need a file: $geneid_param $tbx $hsp $ofn $ps_output
+%$
 
+In [[GetOptions()]] function, sufixing an option with '=s' implies that it will require a mandatory string parameter, with '=f' the option must be provided with a real number.
+ 
 <<getopts subs>>=
 # Checking input sequence files
 sub exits_file() {
     my @files = @_;
     my ($n, $r) = ('', 0);
     foreach $n @files {
-        $r++ if (-f $n && -T _);
+        $r++ if (-e $n);
     };
     return $r;
 }
+sub check_fasta_format() {
+    my $file = $_[0];
+    my ($n, $c) = (undef, 0);
+    open(TMP,"< $file");
+    while (<TMP>) {
+		next unless /^>/;
+        />(\S+)\b/ && do {
+            $n = $1;
+            $c++;
+            next unless $c>1;
+        };
+		die "FATAL ERROR !!! Multiple locus names found.\n  File '$file' must contain only one sequence definition.\n";
+    }
+    die "FATAL ERROR !!! There is no '>' line, locus name not found.\n  Please, verify your fasta file '$file'\n" unless defined($n);
+    return $n;
+}
+@ %def &exits_file &check_fasta_format
+%$
+
+[[exits_file()]] : Given a list of filenames, this function returns how many among them does exist.
+[[check_fasta_format()]] : For a given file, returns the \textit{locus} name if file is in [[fasta]] format, else program dies.
+
+<<declare uses>>=
+use File::Basename;
 @
 
+This standard module contains routines to split up a filename. [[basename]] is provided for programmer compatibility with the same name \textsc{Unix} shell command.
+
+<<declare variables>>=
+# sequence files
+my ($Seq1_Name, $Seq2_Name, $Loc1, $Loc2, $SGPtmp1, $SGPtmp2, $SGPtmpG);
+@ %def $Seq1_Name $Seq2_Name $Loc1 $Loc2 $SGPtmp1 $SGPtmp2 $SGPtmpG
+
 <<set flags>>=
-$file_number = &exits_file($seq1, $seq2);
-die "FATAL ERROR!!! Two sequences are needed (-1 and -2 options are mandatory): $!"
+# do seq files exists
+my $file_number = &exits_file($seq1, $seq2);
+die "FATAL ERROR!!! Two sequences are needed (-1 and -2 options are mandatory)."
     unless $file_number == 2; 
+# extract basenames
+$Seq1_Name = basename($seq1);
+$Seq2_Name = basename($seq2);
+# check if files are provided in fasta format and get locus names
+$Loc1 = &check_fasta_format($seq1);
+$Loc2 = &check_fasta_format($seq2);
+die "FATAL ERROR!!! Locus1($Loc1) have the same name as Locus2($Loc2).\n  Sequences '$Seq1_Name' and '$Seq2_Name' must have different locus names.\n"
+    if $Loc1 eq $Loc2;
+# tmpfiles prefix
+$SGPtmp1 = $SGPTMP.$Seq1_Name;
+$SGPtmp2 = $SGPTMP.$Seq2_Name;
+$SGPtmpG = "${SGPTMP}${Loc1}_${Loc2}"; 
+@
+
+We check here whether the user provided two sequences or not, either they are given in fasta format. We extract locus names and build some base filenames from which we can derive, when needed, several temporary output filenames.
+
+<<declare variables>>=
+# file flags
+my ($blast_flg, $hsps_flg, $geneid_flg, $plots_flg) = (1, 1, 1, 1);
+@ %def $blast_flg $hsps_flg $geneid_flg $plots_flg
+
+We initialize those flag variables to '1' in order to pass by default by all the main subroutines called from main loop. They will be modified when [[Which_Options()]] function resets some of the option variables.
+
+<<set flags>>=
 $blast_flg  = 0;
 $hsps_flg   = 0;
 $geneid_flg = 0;
