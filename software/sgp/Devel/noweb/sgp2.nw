@@ -13,7 +13,7 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.nw,v 1.4 2000-10-12 20:09:57 jabril Exp $
+% $Id: sgp2.nw,v 1.5 2000-10-13 19:56:06 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
@@ -42,7 +42,7 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.nw,v 1.4 2000-10-12 20:09:57 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.nw,v 1.5 2000-10-13 19:56:06 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
@@ -64,8 +64,8 @@ Our initial program outline (our root chunk) looks like:\\[1ex]
 
 ### VARS ###
 
-<<declare variables>>
 <<define defaults>>
+<<declare variables>>
 
 ### SUBS ###
 
@@ -104,7 +104,7 @@ contains program starting time (seconds since \textsc{Unix} ``epoch''), which wi
 
 <<version control>>=
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.4 2000-10-12 20:09:57 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.5 2000-10-13 19:56:06 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 @ %def $PROGRAM $VERSION @tmp_ver
 
@@ -122,16 +122,16 @@ use strict;
 # get options
 &Which_Options();
 # main external program calls
-DOBLAST: {
+DOBLAST: do {
     &Run_Blast() if $blast_flg;
     &Extract_HSP();
-} unless $hsps_flg;
+} if $hsps_flg;
 &Run_geneid()  if $geneid_flg;
 &Make_Plots()  if $plots_flg; 
-# timing
-&get_exec_time(time);
-# removing temporary files and exit
+# removing temporary files
 &clean_tmp();
+# timing and exit
+&get_exec_time(time);
 exit(1);
 @
 
@@ -147,13 +147,14 @@ my $SCF = 12; # substract to tblastx scores S_CUTOFF - SCF;
 
 <<define defaults>>=
 # setting paths
-my $SGP2   = '';
+my $SGP2   = '/home3/jabril/development/sgp/Devel';
 my $SGP2bin = "$SGP2/bin";
 my $SGP2param = "$SGP2bin/param";
 my $TMP    = '/tmp';
-my $SGPTMP = "$TMP/sgp2_$$";
+my $TMPROOT = "sgp2_$$";
+my $SGPTMP = "$TMP/$TMPROOT";
 <<trap temporary files>>
-@ %def $SGP2 $SGP2bin $SGP2param $TMP $SGPTMP
+@ %def $SGP2 $SGP2bin $SGP2param $TMP $TMPROOT $SGPTMP
 %$
 
 [[$NF]] %$ 
@@ -170,10 +171,10 @@ $SIG{QUIT} = \&trap_signals;
 $SIG{TERM} = \&trap_signals;
 $SIG{CHLD} = 'IGNORE';
 sub trap_signals() {
-    # opendir(TDIR, $TMP) or die "Can't open directory $TMP: $!";
+    # opendir(TDIR, $TMP) or &go_to_die("Can't open directory $TMP: $!");
     # while (defined(my $file = readdir(TDIR)))
     &clean_tmp();
-    die "WARNING !!! $PROGRAM has been stopped by user.";
+    &go_to_die("WARNING !!! $PROGRAM has been stopped by user.");
 }
 @ %$
 
@@ -192,9 +193,9 @@ Getopt::Long::Configure qw/ bundling pass_through /;
 @ 
 
 \begin{description}
-\desc{\cd{use Getopt::Long;}} This module implements an extended getopt function called \cd{GetOptions()}. This function adheres to the POSIX syntax for command line options, with GNU extensions. In general, this means that options having long names instead of single letters are introduced with a double dash "\-\-". 
+\desc{\cd{use Getopt::Long;}} This module implements an extended getopt function called \cd{GetOptions()}. This function adheres to the POSIX syntax for command line options, with GNU extensions. In general, this means that options having long names instead of single letters are introduced with a double dash "-\/-". 
 
-\desc{\cd{Getopt::Long::Configure qw(} \cv{bundling} \cv{pass\_through} \cd{);}} \cd{GetOptions} can be configured by calling subroutine \cd{Getopt::Long::Configure}. This subroutine takes a list of quoted strings, each specifying a configuration option to be set. Options can be reset by prefixing with \cv{no\_}. 
+\desc{\cd{Getopt::Long::Configure qw(} \cv{bundling} \cv{pass\_through} \cd{);}} \cd{GetOptions} can be configured by calling subroutine \cd{Getopt::Long::Configure}. This subroutine takes a list of quoted strings, each specifying a configuration option to be set. Options can be reset by prefixing with '\cv{no\_}'. 
 
  \begin{description}
  \desc{\cv{bundling}} Support for bundling of command line options, as was the case with the more traditional single-letter approach (introduced with a single dash "-"), is provided but not enabled by default. 
@@ -205,20 +206,22 @@ Getopt::Long::Configure qw/ bundling pass_through /;
 
 <<declare variables>>=
 # GetOptions Variables
-my ( $seq1, $seq2, $geneid_opt, $geneid_param, 
+my ( $Seq1, $Seq2, $geneid_opt, $geneid_param, 
      $blast_opt, $score_cutoff, $shrink, $tbx,
-     $hsp, $ofn, $ps_output, $verbose_flg, $help_flg );
-@ %def $seq1 $seq2 $geneid_opt $geneid_param $blast_opt $score_cutoff $shrink $tbx $hsp $ofn $ps_output $verbose_flg $help_flg
+     $hsp, $ofn, $ps_output, $savefiles_flg, $verbose_flg, $help_flg
+     ) = ( undef, undef, undef, undef, undef, undef,
+           undef, undef, undef, undef, undef, 0, 0, 0 );
+@ %def $Seq1 $Seq2 $geneid_opt $geneid_param $blast_opt $score_cutoff $shrink $tbx $hsp $ofn $ps_output $savefiles_flg $verbose_flg $help_flg
 
-Those variables will receive the values passed from command-line options in [[Which_Options()]] function.
+Those variables will receive the values passed from command-line options in [[Which_Options()]] function. We set them as [[undef]] to check after [[Which_Options()]] if they have received any value (with [[defined()]] function).
 
 <<get options>>=
 # Parsing command-line options and processing its parameters.
 <<getopts subs>>
 sub Which_Options() {
     GetOptions( 
-                "1=s"      => \$seq1         , # seqfile_1
-                "2=s"      => \$seq2         , # seqfile_2
+                "1=s"      => \$Seq1         , # seqfile_1
+                "2=s"      => \$Seq2         , # seqfile_2
                 "g=s"      => \$geneid_opt   , # geneid options      
                 "P=s"      => \$geneid_param , # geneid parameter file 
                 "o=s"      => \$blast_opt    , # tblastx options 
@@ -232,19 +235,20 @@ sub Which_Options() {
                 "h|help|?" => \$help_flg     , # print help
                 );
     &prt_Help if $help_flg;
-    <<set flags>>
-}; # sub Which_Options
-@ %def &Which_Options Need a file: $geneid_param $tbx $hsp $ofn $ps_output
+    &prt_Header("Processsing Command-Line Options") if $verbose_flg;
+    <<set flags-vars>>
+} # sub Which_Options
+@ %def &Which_Options 
 %$
 
-In [[GetOptions()]] function, sufixing an option with '=s' implies that it will require a mandatory string parameter, with '=f' the option must be provided with a real number.
+In [[GetOptions()]] function, sufixing an option with '=s' implies that it will require a mandatory string parameter, with '=f' the option must be provided with a real number. The following variables need a filename: [[$geneid_param]] [[$tbx]] [[$hsp]] [[$ofn]] [[$ps_output]].
  
 <<getopts subs>>=
 # Checking input sequence files
-sub exits_file() {
+sub exists_file() {
     my @files = @_;
     my ($n, $r) = ('', 0);
-    foreach $n @files {
+    foreach $n (@files) {
         $r++ if (-e $n);
     };
     return $r;
@@ -260,15 +264,15 @@ sub check_fasta_format() {
             $c++;
             next unless $c>1;
         };
-		die "FATAL ERROR !!! Multiple locus names found.\n  File '$file' must contain only one sequence definition.\n";
+		&go_to_die("FATAL ERROR !!! Multiple locus names found.\n  File '$file' must contain only one sequence definition.\n");
     }
-    die "FATAL ERROR !!! There is no '>' line, locus name not found.\n  Please, verify your fasta file '$file'\n" unless defined($n);
+    &go_to_die("FATAL ERROR !!! There is no '>' line, locus name not found.\n  Please, verify your fasta file '$file'\n") unless defined($n);
     return $n;
 }
-@ %def &exits_file &check_fasta_format
+@ %def &exists_file &check_fasta_format
 %$
 
-[[exits_file()]] : Given a list of filenames, this function returns how many among them does exist.
+[[exists_file()]] : Given a list of filenames, this function returns how many among them does exist.
 [[check_fasta_format()]] : For a given file, returns the \textit{locus} name if file is in [[fasta]] format, else program dies.
 
 <<declare uses>>=
@@ -282,18 +286,18 @@ This standard module contains routines to split up a filename. [[basename]] is p
 my ($Seq1_Name, $Seq2_Name, $Loc1, $Loc2, $SGPtmp1, $SGPtmp2, $SGPtmpG);
 @ %def $Seq1_Name $Seq2_Name $Loc1 $Loc2 $SGPtmp1 $SGPtmp2 $SGPtmpG
 
-<<set flags>>=
+<<set flags-vars>>=
 # do seq files exists
-my $file_number = &exits_file($seq1, $seq2);
-die "FATAL ERROR!!! Two sequences are needed (-1 and -2 options are mandatory)."
+my $file_number = &exists_file($Seq1, $Seq2);
+&go_to_die("FATAL ERROR!!! Two sequences are needed (-1 and -2 options are mandatory).\n")
     unless $file_number == 2; 
 # extract basenames
-$Seq1_Name = basename($seq1);
-$Seq2_Name = basename($seq2);
+$Seq1_Name = basename($Seq1);
+$Seq2_Name = basename($Seq2);
 # check if files are provided in fasta format and get locus names
-$Loc1 = &check_fasta_format($seq1);
-$Loc2 = &check_fasta_format($seq2);
-die "FATAL ERROR!!! Locus1($Loc1) have the same name as Locus2($Loc2).\n  Sequences '$Seq1_Name' and '$Seq2_Name' must have different locus names.\n"
+$Loc1 = &check_fasta_format($Seq1);
+$Loc2 = &check_fasta_format($Seq2);
+&go_to_die("FATAL ERROR!!! Locus1($Loc1) have the same name as Locus2($Loc2).\n  Sequences '$Seq1_Name' and '$Seq2_Name' must have different locus names.\n")
     if $Loc1 eq $Loc2;
 # tmpfiles prefix
 $SGPtmp1 = $SGPTMP.$Seq1_Name;
@@ -308,13 +312,32 @@ We check here whether the user provided two sequences or not, either they are gi
 my ($blast_flg, $hsps_flg, $geneid_flg, $plots_flg) = (1, 1, 1, 1);
 @ %def $blast_flg $hsps_flg $geneid_flg $plots_flg
 
-We initialize those flag variables to '1' in order to pass by default by all the main subroutines called from main loop. They will be modified when [[Which_Options()]] function resets some of the option variables.
+We initialize those flag variables to '1' in order to pass by default by all the main subroutines called from main loop. They will be modified when [[Which_Options()]] function resets some of the option variables. 
 
-<<set flags>>=
-$blast_flg  = 0;
-$hsps_flg   = 0;
-$geneid_flg = 0;
-$plots_flg  = 0;
+<<global subroutines>>=
+# copying files
+sub copy_files() {
+  	&go_to_die("FATAL ERROR!!! Couln't find '$_[0]' file. $!\n")
+         unless &exists_file($_[0]);
+    copy(@_) or &copy_error(@_);
+}
+sub copy_error() { &go_to_die("FATAL ERROR !!! Could not copy file '$_[0]' to '$_[1]': $!\n") }
+@ %def &copy_files &copy_error
+
+<<set flags-vars>>=
+defined($hsp) and do {
+    &copy_files("$hsp${Loc1}_${Loc2}.srQ", "$SGPtmpG.srQ");
+    &copy_files("$hsp${Loc1}_${Loc2}.srS", "$SGPtmpG.srS");
+    &copy_files("$hsp${Loc1}_${Loc2}.aln", "$SGPtmpG.aln");
+    $hsps_flg = 0;
+};
+defined($tbx) and do {
+    &copy_files("$tbx", "$SGPTMP.tbx");
+    $blast_flg = 0;
+};
+# $geneid_flg = 0;
+defined($ofn) and ($savefiles_flg = 1);
+defined($ps_output) or ($plots_flg = 0);
 @
 
 
@@ -338,7 +361,7 @@ sub prt_Help() {
     };
     close(KI);
     pod2text($tmp_pod_file);
-    unlink($tmp_pod_file) or die "Can't delete $tmp_pod_file: $!\n";
+    unlink($tmp_pod_file) or &go_to_die("Can't delete $tmp_pod_file: $!\n");
     exit(1);
 }
 @ %def &prt_Help
@@ -349,16 +372,31 @@ sub prt_Help() {
 \subsctn{Some general subroutines}
 
 <<declare uses>>=
-<<declare variables>>=
+use File::Copy;
+@
+
+The [[File::Copy]] module provides [[copy]] and [[move]] functions ([[move]] works across file-sytem boundaries, the standard [[Perl]] built-in [[rename]] ---usually--- does not).
+
+%@<<declare variables>>=
 <<global subroutines>>=
 # Deleting temporary files on TMP
 sub clean_tmp() {
-    my @files = glob($SGPTMP."*");
-    unlink(@files) or warn "Can't unlink @files : $? $!";
+    opendir(DIR,"$TMP");
+    my @files = map { "$TMP/$_" } grep { /^$TMPROOT/ } readdir(DIR);
+    closedir(DIR);
+    $#files and 
+        ( unlink(@files)
+          and die "********* Temporary files were deleted *********\n"
+          or die "********* Can't unlink @files : $! *********"
+        );
+    die "********* There are no temporary files in $TMP *********";
 }
-@ 
+# writing die messages to STDERR and clean_tmp before exit.
+sub go_to_die() { (print STDERR "@_") && &clean_tmp() }
+@ %def &clean_tmp &go_to_die
 %$
-The [[glob()]] function provides globbing (get a list of filenames using wildcards) with the \textsc{Unix} C-shell semantics.
+
+The [[glob()]] function provides globbing (get a list of filenames using wildcards) with the \textsc{Unix} C-shell semantics. Although that, we have to work with [[opendir]]/[[readdir]].
 
 <<global subroutines>>=
 # Reporting IN/OUT progress.
@@ -375,8 +413,11 @@ sub prt_foeprg() {
 # Get a fixed length string from a given string and filling char/s.
 sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
 sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { my $l = length($_[0]); my $k = int(($_[1] - $l)/2); ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k))) }
 # returns the max value from input array
-sub max() { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z; } 
+sub max() { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z } 
+# section headers to STDERR
+sub prt_Header() { print STDERR ("*" x 80)."\n** ".&fill_mid("@_",74," ")." **\n".("*" x 80)."\n" }
 @ %def &prt_progress &prt_foeprg &fill_right &fill_left &max
 
 \begin{description}
@@ -417,15 +458,13 @@ EOF
 
 <<declare variables>>=
 # Processes
-my $status
+my $status;
 # Blast 
 my $BlastProgram = "tblastx";
 my $PressdbProgram = "pressdb";
-my $BlosumMatrix = "$SGP2param/blosum62mod"; 
-my $BlastOptions = "-matrix $BlosumMatrix -hspmax=10000 -nogap";
-my @pressdb = ( "$PressdbProgram" );
-my @blast = ( "$BlastProgram" "$BlastOptions" );
-@ %def $status $BlastProgram $PressdbProgram $BlosumMatrix $BlastOptions @pressdb $pressdb @blast $blast
+my $BlastMatrix = "$SGP2param/blosum62mod"; 
+my $BlastOptions = "-warnings -hspmax 10000 -nogap";
+@ %def $status $BlastProgram $PressdbProgram $BlastMatrix $BlastOptions
 %$
 
 [[$BlastProgram]] %$
@@ -435,42 +474,153 @@ is the program to build a [[blast]] database from a given set of sequences in fa
 
 We will run [[blast]] with the following parameters which are set in [[$BlastOptions]]:%$
 \begin{description}
-\desc{\cv{-matrix} \cp{\$BlosumMatrix}} [[blosum62mod]] defined in [[$BlosumMatrix]] %$
+\desc{\cv{-matrix} \cp{\$BlastMatrix}} [[blosum62mod]] defined in [[$BlastMatrix]] %$
 is a blosum matrix where stop codon score has been modified to forbide stop codons within HSP alignments.
 \desc{\cv{-hspmax=}\cp{value}} Here ``\cp{value}'' is set to 10000, to allow finding as much HSPs as possible.
 \desc{\cv{-nogap}} This option forces [[blast]] to avoid any gap within the HSP alignment.
 \end{description}
 
-[[@blast]] is a multivalued list that is interpreted by [[system]] function in a safe way (safe from expanding wildcards or splitting up words with whitespace in them) as an indirect object. 
-
 <<run blast>>=
 # Runnig blast
 sub Run_Blast() {
-    $status = system { $pressdb[0] } @pressdb;
-    die "FATAL ERROR !!! $? $!\n  Unsuccessful PRESSDB command : @pressdb \n" unless $status == 0;
-    $status = system { $blast[0] } @blast;
-    die "FATAL ERROR !!! $? $!\n  Unsuccessful BLAST command : @blast \n" unless $status == 0;
+    # building DB on SEQ1
+    # convert the first fasta file to database
+    &prt_Header("Compiling BLAST DB on ${Loc1}") if $verbose_flg;
+    my $Seq1DB = "$SGPTMP.$Seq1_Name.DB";   #temporal name for database
+    copy("$Seq1", "$Seq1DB")
+        or &go_to_die("FATAL ERROR !!! Could not copy file '$Seq1' to '$Seq1DB' : $!\n");
+    my $pressdb = "$PressdbProgram $Seq1DB";
+    $status = system $pressdb;
+    &go_to_die("FATAL ERROR !!! $? $!\n  Unsuccessful PRESSDB command :\n  $pressdb \n")
+        unless $status == 0;
+    # running blast program: Seq1 as DB, Seq2 as query.
+    &prt_Header("Running BLAST on ${Loc1}(DB) : ${Loc2}(Query)") if $verbose_flg;
+    my ($dir, $ext);
+    ($Seq1DB, $ENV{'BLASTDB'}, $ext) = fileparse($Seq1DB,'');
+    ($BlastMatrix, $dir, $ext) = fileparse($BlastMatrix,'');
+    ($ENV{'BLASTMAT'} = $dir) =~ s%/$%% ;
+    my $blast = "$BlastProgram $Seq1DB $Seq2 -matrix $BlastMatrix $BlastOptions > $SGPTMP.tbx";
+    $status = system $blast;
+    &go_to_die("FATAL ERROR !!! $? $!\n  Unsuccessful BLAST command :\n  $blast \n")
+        unless $status == 0;
+    unlink("$ENV{'BLASTDB'}$Seq1DB");
+    # saving files
+    copy("$SGPTMP.tbx", "$ofn${Loc1}_${Loc2}.tbx") if $savefiles_flg;
 } # END_SUB: Run_Blast
-@ %def &Run_Blast
+@ %def &Run_Blast $Seq1DB $ext $pressdb $blast
 %$
+
+[[@blast]] is a multivalued list that is interpreted by [[system]] function in a safe way (safe from expanding wildcards or splitting up words with whitespace in them) as an indirect object. The problem with such approach was that all the list elements are taken as input file arguments, so I have returned to a more traditional form.
+
+We redefine the environment variables [[BLASTDB]] and [[BLASTMAT]] as follows: 
+\begin{itemize}
+\item [[BLASTDB]] to the path in which [[blast]] program can find the user defined database (by default [[BLASTDB]] is set to '/Seq/blast' in our system).
+\item [[BLASTMAT]] to the path in which [[blast]] program can find the given scoring matrix (by default [[BLASTMAT]] is set to '/usr/local/molbio/Install/wublast/matrix' in our system).
+\end{itemize}
 
 \sctn{Processing HSPs from [[blast]]}
 
+<<declare variables>>=
+# Extract HSPs
+my $GetSRsProgram = "$SGP2bin/GetSRsAln.pl";
+@  %def $GetSRsProgram
+
+Take care that [[GetSRsAln]] program requires [[parseblast]] filter (TODO : check if paths to [[parseblast]] are correctly defined in [[GetSRsAln]]). We are using the following [[GetSRsAln]] options:
+\begin{itemize}
+\item [[-b]] : set GFF [[<score>]] field from HSP bit score.
+\item [[-C <real_num>]] : [[<real_num>]] is a real number for lower HSP score cutoff.
+\item [[-H <file_name>]] : include HSPs in output (in GFF format) and write to [[<file_name>]].
+\item [[-W <file_name>]] : write output to separate files, '[[<file_name>.srQ]]' for QUERY and '[[<file_name>.srS]]' for SUBJECT.
+\end{itemize}
+
 <<extract HSPs>>=
-# Extracting HSPs
+# Extracting and processing HSPs
+<<extract subs>>
 sub Extract_HSP() {
+    &prt_Header("Extracting SRs from BLAST output") if $verbose_flg;
+    #
+    my $getSR = "$GetSRsProgram -bC $S_CUTOFF -H $SGPtmpG -W $SGPtmpG -- $SGPTMP.tbx";
+    $status = system $getSR;
+    &go_to_die("FATAL ERROR !!! $? $!\n  Unsuccessful GETSRs command :\n  $getSR \n")
+        unless $status == 0;
+    #
+    &write_HSP_files("$SGPtmpG.srS", "$SGPtmp1.hsp-sr"); # I suposse that $SGPtmp1 is Subject
+    &write_HSP_files("$SGPtmpG.srS", "$SGPtmp2.hsp-sr"); # and $SGPtmp2 is query, else modify this lines.
+    &write_HSP_files("$SGPtmpG.hsp", "$SGPtmp2.hsp", "$SGPtmp1.hsp", "$SGPTMP.aln"); 
+    # 
+  SAVEFILES: do {
+      copy("$SGPtmpG.srQ",    "$ofn${Loc1}_$Loc2.srQ"); # Those files have the relationships between
+      copy("$SGPtmpG.srS",    "$ofn${Loc1}_$Loc2.srS");  # Query and Subject coordinates so you can
+      copy("$SGPtmpG.hsp",    "$ofn${Loc1}_$Loc2.hsp");  # recover the sequence substring for both.
+      copy("$SGPtmp1.hsp-sr", "$ofn$Loc1.hsp-sr");
+      copy("$SGPtmp2.hsp-sr", "$ofn$Loc2.hsp-sr");
+      copy("$SGPtmp1.hsp",    "$ofn$Loc1.hsp");
+      copy("$SGPtmp2.hsp",    "$ofn$Loc2.hsp");
+      copy("$SGPTMP.aln",     "$ofn${Loc1}_$Loc2.aln");
+    } if $savefiles_flg;
 } # END_SUB: Extract_HSP
-@ %def &Extract_HSP
+@ %def &Extract_HSP $getSR
+%$
+
+<<extract subs>>=
+sub write_HSP_files() {
+    my @names = @_;
+    my ($DSC, $SHSP, $scnd, $thrd) = (38, 0, 0, 0);
+    open(SR,"< ".(shift @names));
+    open(S1,"> $names[0]");
+    @names >= 2 and (open(S2,"> $names[1]"), $scnd = 1);
+    @names == 3 and (open(S3,"> $names[2]"), $thrd = 1);
+    while (<SR>) {
+		next if /^\#/;
+        next if /^[ \t]*$/;
+        chomp;
+        my @ln = split;
+        $ln[10] =~ s/\"//go;
+        print S1 "$ln[1] $ln[2] $ln[3] ".($ln[4]+$SHSP)." ".($ln[5]-$SHSP)." ".($ln[6]-$DSC)." $ln[7] $ln[8]\n";
+        print S2 "$ln[10] $ln[2] $ln[3] ".($ln[11]+$SHSP)." ".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[16] $ln[18]\n"
+            if $scnd;
+        print S3 "$ln[1]:$ln[10] $ln[2] hsp:hsp ".($ln[4]+$SHSP).":".($ln[11]+$SHSP)." ".($ln[5]-$SHSP).":".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[7]:$ln[16] $ln[8]:$ln[18]\n"
+            if $thrd;
+    };
+    close(S3) if $thrd;
+    close(S2) if $scnd;
+    close(S1);
+    close(SR);
+}
+@ %def &write_HSP_files
+%$
+
+[[write_HSP_files()]] can receive a list, using the first element as input file, and the others (from one up to three) as output files. First output file is 
 
 \sctn{Running [[geneid]] on SRs}
 
+A number of modifications need to be made to the standard
+geneid. Modifications need to be kept to a  mininmum; the
+goal is that sgp-2 works as geneid when in absence of sequence
+conservation. % ~rguigo/research/humus/SGP2/Reports/humus.tex
+
+\begin{enumerate}
+\item geneid scores converted to {\tt log2}.
+\item new scoring schema ([[ScoreExons.c]]):
+$$
+ scoreExons = (wS \times scoreSites) + (wM \times scoreMarkov) + (wSR
+ \times scoreSR)
+$$
+
+currently, $wS = 1$, $wM =1$ and $wSR = 0.20$. In addition, there is a
+penalty for the nucleotides in a predicted exon overlapping SRs, not
+in an SR. If $nosr$ is the number of nucleotides not in an SR, then
+we substract from $scoreSR$, $nosr \times NOSCORE$. Currently,
+$NOSCORE=0.30$.
+
+\end{enumerate}
+ 
 <<declare variables>>=
 # geneid
 my $GeneidProgram = "$SGP2bin/geneid.v1.0-sgp/bin/geneid";
 my $GeneidParam   = "$SGP2bin/geneid.v1.0-sgp/param/human3iso.param";
-my $GeneidOptions = "-GP $GeneidParam";
-my @geneid = ( "$GeneidProgram" "$GeneidOptions" );
-@ %def $GeneidProgram $GeneidParam $GeneidOptions @geneid $geneid
+my $GeneidOptions = "-G";
+@ %def $GeneidProgram $GeneidParam $GeneidOptions
 
 [[$GeneidParam]] %$
 is set to [[human3iso.param]]. This parameter file defines three Markov models for three differnt isochores of G+C content. A Markov chain of order two for defining the start sites, another one of order one for the acceptors and a Position Weight Matrix (PWM) donors. The gene model used by [[geneid]] to assemble predicted exons into the best solution, is also defined within that parameter file. 
@@ -485,25 +635,61 @@ We will run [[geneid]] with the following parameters which are set in [[$GeneidO
 <<run geneid>>=
 # Running geneid
 sub Run_geneid() {
-    $status = system { $geneid[0] } @geneid;
-    die "FATAL ERROR !!! $? $!\nUnsuccessfull GENEID command : @geneid \n" unless $status == 0;
+	my $geneid;
+    # running geneid in $Seq1 with tblastx output
+    &prt_Header("Running GENEID program on $Loc1") if $verbose_flg;
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp1.hsp-sr $Seq1 >  $SGPtmp1.sgp";
+    $status = system $geneid;
+    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GENEID command on '$Loc1':\n  $geneid \n") unless $status == 0;
+    # running geneid in $Seq2 with tblastx output
+    &prt_Header("Running GENEID program on $Loc2") if $verbose_flg;
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp2.hsp-sr $Seq2 >  $SGPtmp2.sgp";
+    $status = system $geneid;
+    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GENEID command on '$Loc2':\n  $geneid \n") unless $status == 0;
+  SAVEFILES: do {
+      copy("$SGPtmp1.sgp", "$ofn$Loc1.sgp");
+      copy("$SGPtmp2.sgp", "$ofn$Loc2.sgp");
+    } if $savefiles_flg;
+  ECHOFILES: do {
+      system "cat $SGPtmp1.sgp $SGPtmp2.sgp 1>&2"; 
+    } if $verbose_flg;
 } # END_SUB: Run_geneid
-@ %def &Run_geneid
+@ %def &Run_geneid $geneid
 
 \sctn{Obtaining figures}
 
 <<declare variables>>=
 # gff2ps and aplot
-@ %def 
+my $Gff2psProgram = "$SGP2bin/gff2ps";
+my $AplotProgram  = "$SGP2bin/gff2aplot";
+@ %def $Gff2psProgram $AplotProgram
 <<graphical output>>=
 # Running gff2ps and aplot
 sub Make_Plots() {
-    $status = system { $gff2ps[0] } @gff2ps;
-    die "FATAL ERROR !!! $? $!\nUnsuccessfull GFF2PS command : @gff2ps \n" unless $status == 0;
-    $status = system { $aplot[0] } @aplot;
-    die "FATAL ERROR !!! $? $!\nUnsuccessfull APLOT command : @aplot \n" unless $status == 0;
+    my ($gff2ps, $aplot);
+    # predicted genes separately -- gff2ps on Loc1
+    &prt_Header("Running GFF2PS program on $Loc1") if $verbose_flg;
+    $gff2ps = "$Gff2psProgram $SGPtmp1.sgp $SGPtmp1.hsp-sr > $ps_output$Loc1.ps";
+    $status = system $gff2ps;
+    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
+        unless $status == 0;
+    # predicted genes separately -- gff2ps on Loc2
+    &prt_Header("Running GFF2PS program on $Loc2") if $verbose_flg;
+    $gff2ps = "$Gff2psProgram $SGPtmp2.sgp $SGPtmp2.hsp-sr > $ps_output$Loc2.ps";
+    $status = system $gff2ps;
+    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
+        unless $status == 0;
+    <<run aplot>>
 } # END_SUB: Make_Plots
-@ %def &Make_Plots
+@ %def &Make_Plots $gff2ps
+<<run aplot>>=
+# run aplot
+&prt_Header("Running APLOT program on $Loc1:$Loc2") if $verbose_flg;
+$aplot = "$AplotProgram ";
+$status = system $aplot;
+&go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull APLOT command : $aplot \n")
+    unless $status == 0;
+@ %def $aplot
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%APPENDIX
 
