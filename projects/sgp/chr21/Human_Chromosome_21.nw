@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: Human_Chromosome_21.nw,v 1.1 2001-10-13 18:50:34 gparra Exp $ 
+% # $Id: Human_Chromosome_21.nw,v 1.2 2001-10-13 18:53:10 gparra Exp $ 
 %
 % THIS FILE WAS GENERATED WITH THE FOLOWING COMMAND:
 % ~jabril/bin/deploy Human_Chromosome_21  /home/ug/jabril/development/softjabril/deploy/data/report.nw
@@ -216,7 +216,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.1 2001-10-13 18:50:34 gparra Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.2 2001-10-13 18:53:10 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -448,18 +448,6 @@ $SGPBIN/evaluation  $ANALYSIS/blast/wublast.tblastx/masked3X+/gff/chr22 \
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
-\sctn{empty appendix section}
-
-\subsctn{empty appendix subsection}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment}
-\end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%
-\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \sctn{Common code blocks}
 
 \subsctn{PERL scripts}
@@ -633,7 +621,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_21.nw,v 1.1 2001-10-13 18:50:34 gparra Exp $
+# $Id: Human_Chromosome_21.nw,v 1.2 2001-10-13 18:53:10 gparra Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
