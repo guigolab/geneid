@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.54 2002-06-17 19:06:29 jabril Exp $ 
+% # $Id: humus.nw,v 1.55 2002-06-19 11:24:43 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.54 2002-06-17 19:06:29 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.55 2002-06-19 11:24:43 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1002,6 +1002,32 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                     \
 \item Evaluation records (extended and brief) for each seq and for each chromosome.
 \item ...
 }
+
+
+
+\subsubsctn{Retrieving gene prediction results from Golden Path ({\twsc})}
+
+
+<<>>=
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      HD="$HUMUS/chr$N/twinscan" ;
+      OD="/home/ug/gparra/no_backup/twinscan/H.sapiens" ;
+      MkDirs $HD ;
+      HD="$HD/20020613" ;
+      MkDirs $HD $HD/gtf $HD/gff $HD/eval ;
+      cp -v $OD/chr$n.gtf $HD/gtf/ ;
+      } ;
+   done ;   
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      HD="$HUMUS/chr$N/twinscan/20020613" ;
+      $BIN/gtf2gff.pl $HD/gtf/chr$n.gtf >  $HD/gff/chr$n.gff;
+      } ;
+   done ;   
+@ 
 
 
 \subsctn{Sequence analysis: \textit{M.musculus}}
@@ -4909,6 +4935,125 @@ sub output_results() {
     }; # foreach $cs
 } # output_results
 @ 
+
+
+\subsubsctn{[[gtf2gff.pl]]: reformatting GTF into GFF}
+
+<<tangling: perl scripts>>=
+echo "# --> \$BIN/gtf2gff.pl" 1>&2 ;
+notangle -R"gtf2gff.pl" $WORK/$nwfile.nw | cpif $BIN/gtf2gff.pl ;
+perl -c $BIN/gtf2gff.pl ;
+is_exec $BIN/gtf2gff.pl ;
+@ 
+<<gtf2gff.pl>>=
+<<PERL shebang>>
+#
+# Converting GTF cds + stop_codon into GFF cds
+# (assuming that start_codon is included in cds coords but not stop_codon)
+#
+# USAGE: gtf2gff.pl gtf_file > stdout
+#
+use strict;
+#
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+#
+use global qw( :ExecReport :ExitStatus );
+&init_timer(\@exectime);
+#
+$PROG = 'gtf2gff.pl';
+$PRGVER = '0.9alpha';
+#
+# ARGVS
+&match_argv_num(\@ARGV,1);
+my $ifile = shift @ARGV;
+#
+# VARS
+my %genes = ();
+my @geneslst = ();
+#
+# MAIN
+&program_started($PROG);
+
+&load_gtf_records($ifile) || exit(1);
+&sort_gff_records();
+print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
+
+&program_finished($PROG);
+exit(0);
+#
+# SUBS
+sub load_gtf_records() {
+    my $fgff = shift;
+    my $gcnt = 0;
+    my %gnc = ();
+    my %gene_list = ();
+    open(GTF,"< $fgff") || do {
+        print $ERRFH "## $PROG ## SKIPPING: CANNOT open GTF file $fgff\n";
+        return $F;
+    };
+    print $ERRFH "## $PROG ## READING GTF FILE: $fgff\n";
+    ($n,$_cntN) = (0,50);
+    while (<GTF>) {
+        my ($_cnt,$key,$grp);
+        $c = '.';
+        next if /^\#/o;
+        next if /^\s*$/o;
+        chomp;
+        @f = split /\s+/og, $_;
+        ($grp = $f[9]) =~ s/\"//og ;
+        $key = $grp.$f[6];
+        print STDERR "### $key\n";
+        defined($gene_list{$key}) || do { # group + strand
+            $c = 'X';
+            $gcnt++;
+            $gene_list{$key} = $gcnt;
+            $genes{$gcnt}{NAME} = $grp;
+            $genes{$gcnt}{START} = $f[3];
+            $genes{$gcnt}{STOP} = $f[4];
+            $genes{$gcnt}{STRAND} = $f[6];
+            $genes{$gcnt}{LEN} = ($f[4] - $f[3] + 1);
+            push @{ $genes{$gcnt}{FEATURES} }, [ @f[0..7] ];
+            defined($gnc{$f[6]}) || ($gnc{$f[6]} = 0);
+            $gnc{$f[6]}++;
+            next;
+        };
+        $c = 'x';
+        $_cnt = $gene_list{$key};
+        $genes{$_cnt}{LEN} += ($f[4] - $f[3] + 1);
+        $genes{$_cnt}{START} = &min($f[3],$genes{$_cnt}{START});
+        $genes{$_cnt}{STOP}  = &max($f[4],$genes{$_cnt}{STOP});
+        push @{ $genes{$_cnt}{FEATURES} }, [ @f[0..7] ];
+    } continue {
+        &counter(++$n,$c);
+    }; # while GTF
+    &counter_end($n,$c);
+    print $ERRFH "## $PROG ## GTF file has $n lines, ".
+                 "$gnc{'+'} (+) genes, $gnc{'-'} (-) genes...\n";
+    close(GTF);
+    return $T;
+} # load_gtf_records
+sub sort_gff_records() {
+    print $ERRFH "## $PROG ## SORTING GFF RECORDS... FEATURES\n";
+    foreach my $gnm (keys %genes) {
+        my $rf = \@{ $genes{$gnm}{FEATURES} };
+        @{$rf} = map  { $_->[2] }
+                 sort { $a->[0] <=> $b->[0]
+                                ||
+                        $a->[1] <=> $b->[1] }
+                 map  { $_->[3], $_->[4], $_ } @{$rf};
+    }; # foreach $gnm
+    print $ERRFH "## $PROG ## SORTING GFF RECORDS... GROUPS\n";
+    @geneslst = map  { $_->[2] }
+                sort { $a->[0] <=> $b->[0]
+                               ||
+                       $a->[1] <=> $b->[1] }
+                map  { $genes{$_}{START}, $genes{$_}{STOP}, $_ } (keys %genes);
+    }; # foreach $ref
+} # sort_gff_records
+@ 
+
 
 \subsubsctn{[[gp2gff.pl]]: Processing Golden Path annotation}
 
@@ -10615,7 +10760,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.54 2002-06-17 19:06:29 jabril Exp $
+# $Id: humus.nw,v 1.55 2002-06-19 11:24:43 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
