@@ -22,11 +22,11 @@ SGPTMP=$TMP/sgp2_$$  # prefix for temporal files
 BLASTPROGRAM=tblastx
 PRESSDB=pressdb 
 BLMATRIX=blosum62mod 
-BLASTOPTIONS="-matrix $BLMATRIX -hspmax=10000"
+BLASTOPTIONS="-matrix $BLMATRIX -hspmax=10000 -nogap"
 
 
 # geneid defaults
-GENEID=$SGP2/geneid
+GENEID=$SGP2/geneid.sun
 PARAM=$SGP2/param.hum.iso3.p3.op
 
 # parsing tblastx output defaults
@@ -174,8 +174,8 @@ $SGP2/aln2gff $SGPTMP2.hsp $SGPTMP1.hsp $S_CUTOFF $SGPTMP.aln
 
 if [ $VRB ] 
 then
-    echo `wc $SGPTMP1.hsp | gawk '{print $1}'` projected hsps over $S_SCUTOFF in $SEQ1>&2
-    echo `wc $SGPTMP2.hsp | gawk '{print $1}'` projected hsps over $S_SCUTOFF in $SEQ2>&2
+    echo `wc $SGPTMP1.hsp | gawk '{print $1}'` projected hsps over $S_CUTOFF in $SEQ1>&2
+    echo `wc $SGPTMP2.hsp | gawk '{print $1}'` projected hsps over $S_CUTOFF in $SEQ2>&2
 fi
 
 if [ $OFN ]
@@ -213,26 +213,35 @@ then
 fi
 
 
-$GENEID -GP $PARAM -S  $SGPTMP1.hsp-rs $SEQ1
-$GENEID -GP $PARAM -S  $SGPTMP2.hsp-rs $SEQ2
+$GENEID -GP $PARAM -S  $SGPTMP1.hsp-rs $SEQ1 >  $SGPTMP1.sgp
+$GENEID -GP $PARAM -S  $SGPTMP2.hsp-rs $SEQ2 >  $SGPTMP2.sgp 
+if [ $OFN ]
+then
+    cp  $SGPTMP1.sgp $OFN$LOC1.sgp
+    cp  $SGPTMP2.sgp $OFN$LOC2.sgp
+fi
 
-exit;
+cat $SGPTMP1.sgp $SGPTMP2.sgp
+
+
 # --------------------------------------------------
 # 4. graphical output
 # --------------------------------------------------
 
 
-# include seqlimits
+if [ $PSO ]
+then
+ echo creating postscript output
+# 9.1 predicted genes separately -- gff2ps
+$SGP2/gff2ps $SGPTMP1.sgp $SGPTMP1.hsp-rs > $PSO$LOC1.ps  2> /dev/null
+$SGP2/gff2ps $SGPTMP2.sgp $SGPTMP2.hsp-rs > $PSO$LOC2.ps  2> /dev/null
 
-echo $LOC1:$LOC2 SOURCE seqbounds 1:1 $LSEQ1:$LSEQ2 0  . 0 0 >>  $ALNTFN.aplot
+# 9.2 predicted genes in aplot
 
-# 9.1 predicted genes
+echo $LOC1:$LOC2 SOURCE seqbounds 1:1 $LSEQ1:$LSEQ2 0  . 0 0 >  $SGPTMP.aplot
+gawk 'BEGIN{strand["+"]=0;strand["-"]=1;}substr($1,1,1)!="#" && NF>0 {print $1, $2, "exon", $4, $5, 1.00, strand[$7],$8, "gene" $9 ":"}'  $SGPTMP1.sgp >> $SGPTMP.aplot
 
-    gawk 'BEGIN{strand["+"]=0;strand["-"]=1;}substr($1,1,1)!="#" && NF>0 {print $1, $2, "exon", $4, $5, 1.00, strand[
-$7],$8, "gene" $9 ":"}'  $LOC1TFN.genes >> $ALNTFN.aplot
-    gawk 'BEGIN{strand["+"]=0;strand["-"]=1;}substr($1,1,1)!="#" && NF>0 {print $1, $2, "exon", $4, $5, 1.00, strand[
-$7],$8, "gene" $9 ":"}'  $LOC2TFN.genes >> $ALNTFN.aplot
-
+gawk 'BEGIN{strand["+"]=0;strand["-"]=1;}substr($1,1,1)!="#" && NF>0 {print $1, $2, "exon", $4, $5, 1.00, strand[$7],$8, "gene" $9 ":"}'  $SGPTMP2.sgp >> $SGPTMP.aplot
 # 9.2 monotonic alignment
     gawk 'BEGIN{
   # defaults ----------------------------------------------------------
@@ -269,16 +278,17 @@ substr($1,1,1)!="#" && NF>0 {
 # here score is divided by 1000 to use the %box in gff2aplot. 
 # ideally, similarity instead of score should be use. 
 #    print $seqname, $source, "align", start_[1] ":" start_[2],  end_[1] ":" end_[2], $score, ".", ".";
-    print $seqname, $source, "align", start_[1] ":" start_[2],  end_[1] ":" end_[2], $score/1000, ".", ".";
-}' $ALNTFN.mondisj >> $ALNTFN.aplot
+    print $seqname, $source, "align", start_[1] ":" start_[2],  end_[1] ":" end_[2], $score/2, ".", ".";
+}' $SGPTMP.aln >> $SGPTMP.aplot
+
 
 if [ $OFN ]
 then
-      cp $ALNTFN.aplot $ALNOFN.aplot
+      cp $SGPTMP.aplot  $OFN$LOC1"_"$LOC2.aplot
 fi
 
 # 9.3 creating postscript
-    $BIN/gff2aplot $ALNTFN.aplot > $PSO
+    $SGP2/gff2aplot -vP -O $SGP2/gff2aplot.sgp.rc $SGPTMP.aplot > $PSO$LOC1"_"$LOC2.ps
 fi
 
 
