@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.7 2001-10-17 18:43:44 jabril Exp $
+% $Id: Human_Chromosome_22.nw,v 0.8 2001-10-18 08:39:47 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -159,7 +159,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.7 2001-10-17 18:43:44 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.8 2001-10-18 08:39:47 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2713,7 +2713,7 @@ gawk 'BEGIN{OFS="\t";gp=last=1}
       $1 !~ /^\#|^[ \t]*$/ {
         $1=$9; gsub("ENST","ENSG",$1); 
         $2="annotation"; $3="exon"; $6=1; print $0;
-        }' /projects/datasets/chr22/annotation/ensembl/cds/gff/chr22 \
+        }' /projects/datasets/chr22/annotation/set/cds/chr22 \
         > $BASE/chr22_local-annot.gff ;
 gawk 'BEGIN{OFS="\t"}
       $1 !~ /^\#|^[ \t]*$/ {
@@ -2727,21 +2727,21 @@ gawk 'BEGIN{OFS="\t"}
         $2="geneid-raw"; $3="exon";
         # split($9,n,"_"); $9=n[2]; # needed for chr21
         print $0;
-        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+/gff/chr22 \
+        }' /projects/sgp/chr22/geneid/Hsap.raw/gff/chr22 \
         > $BASE/chr22_geneid_raw.gff ;
 gawk 'BEGIN{OFS="\t"}
       $1 !~ /^\#|^[ \t]*$/ {
         $2="geneid-masked"; $3="exon";
         # split($9,n,"_"); $9=n[2]; # needed for chr21
         print $0;
-        }' /projects/sgp/chr22/sgp/Hsap.masked.3X+/gff/chr22 \
+        }' /projects/sgp/chr22/geneid/Hsap.masked.gnid_fix/gff/chr22 \
         > $BASE/chr22_geneid_masked.gff ;
 gawk 'BEGIN{OFS="\t"}
       $1 !~ /^\#|^[ \t]*$/ {
         $2="sgp-raw"; $3="exon";
         # split($9,n,"_"); $9=n[2]; # needed for chr21
         print $0;
-        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+/gff/chr22 \
+        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+.fix.gnid_fix/gff/chr22 \
         > $BASE/chr22_sgp_raw.gff ;
 gawk 'BEGIN{OFS="\t"}
       $1 !~ /^\#|^[ \t]*$/ {
@@ -2755,7 +2755,7 @@ gawk 'BEGIN{OFS="\t"}
         $2="sgp"; $3="exon";
         # split($9,n,"_"); $9=n[2]; # needed for chr21
         print $0;
-        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+.ew-2+2/gff/chr22 \
+        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+.fix.gnid_fix.ew-2+2/gff/chr22 \
         > $BASE/chr22_sgp_ew.gff ;
 #
 cat $BASE/chr22_est.gff $BASE/chr22_genscan.gff \
@@ -3128,7 +3128,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.7 2001-10-17 18:43:44 jabril Exp $
+# $Id: Human_Chromosome_22.nw,v 0.8 2001-10-18 08:39:47 jabril Exp $
 @ 
 
 \newpage
