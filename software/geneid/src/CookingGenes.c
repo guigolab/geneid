@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.2 2000-08-22 10:12:56 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.3 2000-08-22 10:19:49 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -302,7 +302,7 @@ void PrintGene(exonGFF* start, exonGFF* end, char Name[],
 	  selectFeatures(end->Type,end->Strand,
 			 &p1,&p2,&type1,&type2,&strand,gp);
 	  PrintSite(end->Acceptor,type1,Name,strand,s,p1);
-	  PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+	  PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
 	  PrintSite(end->Donor,type2,Name,strand,s,p2);
 	}
       else
