@@ -1,0 +1,220 @@
+################################################################################
+###                                                                          ###
+###                            RUNNING gff2aplot                             ###
+###                                                                          ###
+###                               User: jabril                               ###
+###                      Date: Fri Feb  7 20:32:14 2003                      ###
+###                               Perl: v5.6.1                               ###
+################################################################################
+################################################################################
+###                             SETTING DEFAULTS                             ###
+################################################################################
+################################################################################
+###                      CHECKING COMMAND-LINE OPTIONS                       ###
+################################################################################
+###
+### Validating INPUT FILENAMES
+###
+###---> "four_strands_aplotformat.gff" exists, including as Input File.
+###
+### Validating CUSTOM FILENAMES
+###
+###---> ".gff2aplotrc" NOT FOUND, skipping!!!
+###---> "four_strands_extra.rc" exists, including as Custom File.
+###---> "four_strands.rc" exists, including as Custom File.
+###
+### Checking COMMAND-LINE Options
+###
+...... [000006]
+###
+### Checking Custom Variables SET by COMMAND-LINE
+###
+L [000001]
+################################################################################
+###                       COMMAND-LINE OPTIONS CHECKED                       ###
+###           0 wallclock secs ( 0.06 usr +  0.00 sys =  0.06 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           COMMAND-LINE CHECKED                           ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           READING CUSTOM FILES                           ###
+################################################################################
+###
+### Reading Customization Parameters from "four_strands_extra.rc"
+###
+.............*........XXXXXXXXXXXXXX [000036]
+###
+### Reading Customization Parameters from "four_strands.rc"
+###
+.............*...LL..LL..LL..L..*...G..*...F..FF.. [000050]
+FFFFF.. [000057]
+################################################################################
+###                           CUSTOM FILES LOADED                            ###
+###           0 wallclock secs ( 0.02 usr +  0.00 sys =  0.02 CPU)           ###
+################################################################################
+###
+################################################################################
+###                MAPPING CUSTOMIZATION INPUTS TO MAIN VARS                 ###
+################################################################################
+################################################################################
+###                         VALUES SET for MAIN VARS                         ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                        PARSING INPUT GFF RECORDS                         ###
+################################################################################
+###
+### Reading GFF records from "four_strands_aplotformat.gff"
+###
+..............xxxx...ooooo...ooo...ooo...ooo.... [000048]
+################################################################################
+###                               DATA LOADED                                ###
+###           0 wallclock secs ( 0.02 usr +  0.00 sys =  0.02 CPU)           ###
+################################################################################
+###
+################################################################################
+###                  SETTING CUSTOM VALUES TO GFF ELEMENTS                   ###
+################################################################################
+################################################################################
+###                       VALUES SET for GFF ELEMENTS                        ###
+###           0 wallclock secs ( 0.02 usr +  0.00 sys =  0.02 CPU)           ###
+################################################################################
+###
+################################################################################
+###                   SORTING ELEMENTS BY ACCEPTOR (START)                   ###
+################################################################################
+*- Sorting ANNOTATION DATA
+|  *- Sequence: KoKo
+|  |  *- Source: 4strands
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: KoKo_4strands_+_1
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+|  |  |  *- Strand: -
+|  |  |  |  *- Group: KoKo_4strands_-_2
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+|  *- Sequence: LaLa
+|  |  *- Source: 4strands
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: LaLa_4strands_+_3
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+|  |  |  *- Strand: -
+|  |  |  |  *- Group: LaLa_4strands_-_4
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+*- Sorting ALIGNMENT DATA
+|  *- Sequence: KoKo:LaLa
+|  |  *- Source: 4strands
+|  |  |  *- Strand: ++
+|  |  |  |  *- Group: KoKo_LaLa_4strands_++_2
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  *- Group: KoKo_LaLa_4strands_++_1
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 2 groups.
+|  |  |  *- Strand: +-
+|  |  |  |  *- Group: KoKo_LaLa_4strands_+-_6
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  *- Group: KoKo_LaLa_4strands_+-_7
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 2 groups.
+|  |  |  *- Strand: +.
+|  |  |  |  *- Group: KoKo_LaLa_4strands_+._3
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+|  |  |  *- Strand: -+
+|  |  |  |  *- Group: KoKo_LaLa_4strands_-+_10
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  *- Group: KoKo_LaLa_4strands_-+_9
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 2 groups.
+|  |  |  *- Strand: .+
+|  |  |  |  *- Group: KoKo_LaLa_4strands_.+_14
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+|  |  |  *- Strand: --
+|  |  |  |  *- Group: KoKo_LaLa_4strands_--_12
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  *- Group: KoKo_LaLa_4strands_--_13
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 2 groups.
+|  |  |  *- Strand: -.
+|  |  |  |  *- Group: KoKo_LaLa_4strands_-._11
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+|  |  |  *- Strand: .-
+|  |  |  |  *- Group: KoKo_LaLa_4strands_.-_8
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 1 groups.
+|  |  |  *- Strand: ..
+|  |  |  |  *- Group: KoKo_LaLa_4strands_.._5
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  *- Group: KoKo_LaLa_4strands_.._4
+|  |  |  |  |         Sorted 1 elements.
+|  |  |  |  `Sorted 2 groups.
+################################################################################
+###                             ELEMENTS SORTED                              ###
+###           0 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           SETTING PAGE LAYOUT                            ###
+################################################################################
+###---> Page size set to "a4" ( 595 x 842 )...
+###---> Setting plot AXES: 
+###     ALIGNMENT "KoKo:LaLa" was found. PLOTTING IT...
+###     X-SEQUENCE "KoKo" was found. PLOTTING IT...
+###     Y-SEQUENCE "LaLa" was found. PLOTTING IT...
+###---> SEQUENCE BOUNDARIES selected for this plot:
+###      X : 0 to 3000
+###      Y : 0 to 3000
+###---> SEQUENCE ZOOM is not enabled for this plot...
+###---> NO ZOOM AREA was selected for this plot... 
+###---> SCORE BOUNDARIES selected for this plot:
+###      ALIGNMENT:   0.25 to 1.00
+###      PERCENT box: 0 to 1.25
+###---> TICKMARKS were set: 
+###      Nucleotide-Scale: Major step 1000 - Minor step 200
+###      Score-Scale:      Major step 1 - Minor step 0.25
+###---> X/Y scale settings are: 
+###     XY-RATIO is not taken into account for this plot ...
+###     Are X/Y axes going to have same length ?  YES 
+################################################################################
+###                     PAGE LAYOUT SET for CURRENT PLOT                     ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                       WRITING POSTSCRIPT TO STDOUT                       ###
+################################################################################
+###---> PostScript Header DONE...
+###---> PostScript Colors Table SET...
+###---> PostScript Page-formats Table SET...
+###---> PostScript Variables SET...
+###---> PostScript Functions SET...
+###---> Writting PostScript Page:
+###     + APLOT-BOX section :
+###       + drawing X-sequence annotation (KoKo)...
+###       + drawing Y-sequence annotation (LaLa)...
+###       + drawing alignment features (KoKo:LaLa)...
+###       + drawing special features from custom files...
+###       + APLOT-BOX section DONE...
+###     + PERCENT-BOX section :
+###       + drawing alignment features (KoKo:LaLa)...
+###       + PERCENT-BOX section DONE...
+###---> PostScript Page FINISHED...
+################################################################################
+###                       WRITING POSTSCRIPT FINISHED                        ###
+###           0 wallclock secs ( 0.02 usr +  0.00 sys =  0.02 CPU)           ###
+################################################################################
+###
+################################################################################
+###                          gff2aplot HAS FINISHED                          ###
+###        [  0 wallclock secs ( 0.15 usr +  0.00 sys =  0.15 CPU) ]         ###
+################################################################################
