@@ -3,7 +3,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: GFF2APLOT_MANUAL.tex,v 1.1 2001-04-11 18:00:17 jabril Exp $
+% $Id: GFF2APLOT_MANUAL.tex,v 1.2 2001-10-31 19:55:25 jabril Exp $
 %
 % latex GFF2APLOT_MANUAL.tex ; dvips GFF2APLOT_MANUAL.dvi -o GFF2APLOT_MANUAL.ps -t a4 ;
 %
@@ -39,7 +39,7 @@
 %\usepackage{fancyheadings}
 %\usepackage{fancybox}
 \usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
-%\usepackage{lscape}
+\usepackage{lscape}
 %\usepackage{rotating}
 %\usepackage{multicol}
 \usepackage{verbatim}
@@ -50,17 +50,19 @@
  
 % Colors for gff2ps
 \input tables/AplotColorDefs.tex
+
 % New Commands are defined here
+\input ./tabledefs.tex
+
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
-\newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
 
-\newcommand{\op}[1]{{\bfseries\sffamily #1}}
+\newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
+% \newcommand{\op}[1]{{\bfseries\sffamily #1}}
 \newcommand{\tp}[1]{{'{\bfseries\sffamily #1}'}}
 \newcommand{\pr}[1]{{\mdseries\sffamily\slshape $<$#1$>$}}
-\newcommand{\x}{\textmd{\,,\,}}
 
 % PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
@@ -96,7 +98,7 @@
 
 \ \vfill
 \begin{center}
-\fbox{\parbox{0.6\linewidth}{\centering\textbf{\Huge \\[1ex]{\prog}\\[2ex]USER's\\[2ex]MANUAL\\[2ex]}}}\\[5ex]
+\fbox{\parbox{0.6\linewidth}{\centering\textbf{\Huge \\[2ex]{\prog}\\[2ex]\textsc{User's Manual}\\[3ex]}}}\\[5ex]
 
 \textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
 
@@ -104,7 +106,7 @@
 
 \vskip 5ex
 
-{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.1 2001-04-11 18:00:17 jabril Exp $$>$ }
+{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.2 2001-10-31 19:55:25 jabril Exp $$>$ }
 
 \vfill
 
@@ -175,13 +177,57 @@ Universitat Pompeu Fabra\\[2ex]
 
 % This section describes command-line options and customization variables as they will appear in the {\prog} manual.
 
-\input tables/AplotCLoptions.tex
+ \begin{itemize}
+  \input tables/AplotCLopts_dsc.tex % tables/AplotCLoptions.tex
+ \end{itemize}
 
 \newpage
 
 \sctn{Customization Variables Description}
 
-\input tables/AplotCustomVars.tex
+% tables/AplotCustomVars.tex
+
+\subsctn{Layout Attributes}
+
+ \begin{itemize}
+  \input tables/AplotCFvars_dscLayout.tex
+ \end{itemize}
+
+\subsctn{GFF-Feature Attributes}
+
+ \begin{itemize}
+  \input tables/AplotCFvars_dscFeature.tex
+  \item 
+ \end{itemize}
+
+\subsctn{GFF-Group Attributes}
+
+ \begin{itemize}
+  \input tables/AplotCFvars_dscGroup.tex
+  \item 
+ \end{itemize}
+
+\subsctn{GFF-Strand Attributes}
+
+ \begin{itemize}
+  \input tables/AplotCFvars_dscStrand.tex
+  \item 
+ \end{itemize}
+
+\subsctn{GFF-Source Attributes}
+
+ \begin{itemize}
+  \input tables/AplotCFvars_dscSource.tex
+  \item 
+ \end{itemize}
+
+\subsctn{GFF-Sequence Attributes}
+
+ \begin{itemize}
+  \input tables/AplotCFvars_dscSequence.tex
+  \item 
+ \end{itemize}
+
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER: Bibliography, APPENDIXES, Index.
 
@@ -196,15 +242,36 @@ Universitat Pompeu Fabra\\[2ex]
 
 \sctn{Command-Line Options Summary for \prog.}
 
-\input tables/AplotCLoptionsTbl.tex
+  \input tables/AplotCLopts_tbl.tex % tables/AplotCLoptionsTbl.tex
 
 \newpage
 
 \sctn{Customization Variables Sumary for \prog.}
 
-\input tables/AplotCustomVarsTbl.tex
+% tables/AplotCustomVarsTbl.tex
 
 \newpage
+\landscape
+
+  \input tables/AplotCFvars_tblplayout.tex
+  \input tables/AplotCFvars_tblzoom.tex
+  \input tables/AplotCFvars_tbllabel.tex
+  \input tables/AplotCFvars_tblticks.tex
+  \input tables/AplotCFvars_tblaplot.tex
+  \input tables/AplotCFvars_tblgeneral.tex
+
+  \input tables/AplotCFvars_tblfeat.tex
+
+  \input tables/AplotCFvars_tblgrp.tex
+
+  \input tables/AplotCFvars_tblstr.tex
+
+  \input tables/AplotCFvars_tblsrc.tex
+
+  \input tables/AplotCFvars_tblseq.tex
+
+\newpage
+\endlandscape
 
 \sctn{CMYK color definition}
 
