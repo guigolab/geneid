@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.6 2000-08-10 22:51:31 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.7 2000-08-10 22:57:39 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln.pl";
@@ -138,7 +138,7 @@ COMMAND-LINE OPTIONS:
                            If "<file_name>" is not provided, input filename is
                            set by default as "<file_name>".
     -v, --verbose        : warnings sent to <STDERR>.
-    -D, --debuggingv     : extended report for debugging sent to <STDERR>.
+    -D, --debugging      : extended report for debugging sent to <STDERR>.
     -h, --help           : show this help pages.
 
 BUGS:    Report any problem to: abril\@imim.es
