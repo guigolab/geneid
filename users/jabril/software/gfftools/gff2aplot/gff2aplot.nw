@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $
+% $Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -395,9 +395,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.2 $', #'
-     '$Date: 2001-08-22 19:15:53 $', #'
-     '$Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $', #'
+     '$Revision: 1.3 $', #'
+     '$Date: 2001-08-24 08:14:23 $', #'
+     '$Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -514,7 +514,7 @@ sub set_default_vars() {
             <<default feature vars values>>
         },
     ); # %DefaultVars
-    print LOGFILE Dumper(\%DefaultVars) if ($LogFile && $Debug);
+    print LOGFILE '>>> \%DefaultVars : '.(Dumper(\%DefaultVars)) if ($LogFile && $Debug);
 } # set_default_vars
 @
 
@@ -897,7 +897,8 @@ sub parse_custom_files() {
         close(THIS);
     }; # LOAD
   }; # MAIN
-    print LOGFILE Dumper(\%CustomVars) if ($LogFile && $Debug);
+    print LOGFILE '>>> \%CustomVars : '.(Dumper(\%CustomVars))
+        if ($LogFile && $Debug);
     &footer("CUSTOM FILES LOADED");
 } # parse_custom_files
 @ 
@@ -1952,7 +1953,8 @@ sub parse_GFF_files() {
       &counter_end($n,$c) if ($Verbose && !$Quiet);
       close(THIS);
   }; # LOAD
-    print LOGFILE Dumper(\%GFF_DATA) if ($LogFile && $Debug);
+    print LOGFILE '>>> \%GFF_DATA : '.(Dumper(\%GFF_DATA))
+        if ($LogFile && $Debug);
     &footer("DATA LOADED");
 } # sub parse_GFF
 @ %$
@@ -2399,9 +2401,10 @@ We declare here the main variable containing all the GFF data, and auxiliary var
 <<Global Vars>>=
 my (%GFF_DATA,$seq_COUNT);
 my ($_counter,$_prop,$_element) = (0,1,2);
-my ($_order,$_elemNum,$_ori,$_end) = (0,1,2,4);
+my ($_order,$_elemNum,$_ori,$_end) = (0,1,2,3);
 @ 
 
+\label{func:loadgffvar}
 <<Parsing Input Data>>=
 sub load_gff_var() {
     my ($_value,$_var,$_cnt,$_type) = @_;
@@ -2627,63 +2630,119 @@ sub map_vars_data() {
 } # map_vars_data
 @ 
 
-\sctn{Sorting elements by acceptor} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\sctn{Sorting GFF features} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We need to sort the GFF elements by acceptor, it is more or less easy to sort them because they were defined in [[%GFF_DATA]] or [[%ALN_DATA]]
+as arrays (it is implemented with the [[map]]/[[sort]]/[[map]] technique as it can be appreciated in [[<<sorting group elements>>]] code chunk). But we also need to sort groups by their coordinates and to sort sequences and sources by their input order (as they were read from input file I mean). This will be difficult to do on the original hashes because coords and order were placed in a subarray for a given group/source/sequence key name (that key point to an anonymous array containing that counters as you can see in table~\ref{tbl:gffdata}, page~\pageref{tbl:gffdata}). As we are looking for the GFF elements that belong to a group, which is related to a given strand of a source within a sequence, we can build an auxiliary variable that holds the proper ordering at each level as we go deep in the [[%GFF_DATA]]/[[%ALN_DATA]] variables hierarchy.
+At the same time we can fill the [[$_ori]] and [[$_end]] fields we left set to zero for the counters array in [[&load_gff_var]] (see function definition in page~\pageref{func:loadgffvar}).
 
 \todo{
-\item Planning: 2001/08/22
+\item Set ordering for [[%ALN_DATA]].
 } % todo
 <<Sorting Features>>=
 sub sort_elements() {
     &header("SORTING ELEMENTS BY ACCEPTOR (START)");
+    %Order = ();
     # sorting %GFF_DATA contents 
     scalar(%GFF_DATA) && do {
         &report('SORT_GFF','*- ','ANNOTATION DATA');
+        my ($v_max,$v_min);
+        my $sq_ord = \@{ $Order{GFF} } ;
+        @{ $sq_ord } = ();
         my $s_ref = \%GFF_DATA;
         foreach my $s_seq (keys %{ $s_ref }) {
-            &report('SORT_SEQ','|  *- ',$s_seq);
-            my $ss_ref = \%{ $s_ref->{$s_seq}[$_element] };
-            foreach my $s_src (keys %{ $ss_ref }) {
-                &report('SORT_SRC',(('|  ' x 2).'*- '),$s_src);
-                my $sc_ref = \%{ $ss_ref->{$s_src}[$_element] };
-                foreach my $s_str (keys %{ $sc_ref }) {
-                    <<sorting groups>>
-                }; # foreach $s_str
-            }; # foreach $s_src
+            <<sorting sequences>>
         }; # foreach $s_seq
+        &sort_by_inputorder($sq_ord);
+        print LOGFILE '>>> \%Order{GFF} : '.(Dumper(\%{ $Order{GFF} }))
+            if ($LogFile && $Debug);
     }; # scalar(%GFF_DATA) > 0
     # sorting %ALN_DATA contents 
     scalar(%ALN_DATA) && do {
         my $s_ref = \%ALN_DATA;
         &report('SORT_GFF','*- ','ALIGNMENT DATA');
     }; # scalar(%ALN_DATA) > 0
+  # print LOGFILE '>>> \%GFF_DATA : '.(Dumper(\%GFF_DATA))
+  #     if ($LogFile && $Debug);
     &footer("ELEMENTS SORTED");
 } # sort_elements
+@
+
+Once we get into [[&sort_elements]] function we initialize the arrays within the [[%Order]] hash as we are requiring them.
+
+<<Global Vars>>=
+my %Order;
 @ 
 
-<<sorting groups>>=
+<<messages - sorting GFF data>>=
+SORT_GFF => "\%sSorting \%s\n",
+@
+
+\subsctn{Descending from sequences to groups}
+
+<<sorting sequences>>=
+&report('SORT_SEQ','|  *- ',$s_seq);
+my @sc_coords = ();
+push @{ $sq_ord },
+        [ $s_seq,
+          $s_ref->{$s_seq}[$_counter][$_order],
+          () ];
+my $sc_ord = \@{ $sq_ord->[ $#{$sq_ord} ][2] };
+my $ss_ref = \%{ $s_ref->{$s_seq}[$_element] };
+foreach my $s_src (keys %{ $ss_ref }) {
+    <<sorting sources>>
+}; # foreach $s_src
+&sort_by_inputorder($sc_ord);
+<<set sequence elements boundaries>>
+@ 
+
+<<sorting sources>>=
+&report('SORT_SRC',(('|  ' x 2).'*- '),$s_src);
+my @sr_coords = ();
+push @{ $sc_ord },
+        [ $s_src,
+          $ss_ref->{$s_src}[$_counter][$_order],
+          () ];
+my $sr_ord = \@{ $sc_ord->[ $#{$sc_ord} ][2] };
+my $sc_ref = \%{ $ss_ref->{$s_src}[$_element] };
+foreach my $s_str (keys %{ $sc_ref }) {
+    <<sorting GFF groups>>
+}; # foreach $s_str
+<<set source elements boundaries>>
+@
+
+<<messages - sorting GFF data>>=
+SORT_SEQ => "\%sSequence: \%s\n",
+SORT_SRC => "\%sSource: \%s\n",
+@ 
+
+\subsctn{Sorting features for groups}
+
+<<sorting GFF groups>>=
 &report('SORT_STR',(('|  ' x 3).'*- '),$s_str);
-my $s_elem;
+my @ft_coords = ();
+push @{ $sr_ord },
+        [ $s_str,
+          # $sc_ref->{$s_str}[$_counter][$_order],
+          () ]; # if uncomment '$sc_ref' set next to [2] instead of [1].
+my $st_ord = \@{ $sr_ord->[ $#{$sr_ord} ][1] };
 my $sr_ref = \%{ $sc_ref->{$s_str}[$_element] };
-my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
-#
+<<set forward/reverse sorting functon>>
+my $s_elem;
 foreach my $s_grp (keys %{ $sr_ref }) {
-    &report('SORT_GRP',(('|  ' x 4).'*- '),$s_grp);
     <<sorting group elements>>
 }; # foreach $s_grp
-#
-$s_elem = $sc_ref->{$s_str}[$_counter][$_elemNum];
-$s_elem > 1 && do {
-    @{ $sr_ref } = map { $_->[2] }
-                   sort { &$sortfunct }
-                   map { [ $_->[$_counter][$_ori], 
-                           $_->[$_counter][$_end],
-                           $_ ] } @{ $sr_ref }; # maps 'start 'end 'arrayelement
-}; # $s_elem > 1
-print LOGFILE Dumper(\@{ $sr_ref }) if ($LogFile && $Debug);
-&report('SORT_GPN',('|  ' x 4),$s_elem);
+<<sorting group coords by acceptor>>
 @ 
 
+<<messages - sorting GFF data>>=
+SORT_STR => "\%sStrand: \%s\n",
+@
+
+The main difference between this piece of code and the previous three ones is that we also find the boundaries of the groups here ([[$ft_min]]/[[$ft_max]] variables). This make possible to sort them and to know the first and the last coords that we can find in a strand/source/sequence (as we do in the last lines of the following piece of code, and in the next one [[<<sorting group coords by acceptor>>]]).
+
 <<sorting group elements>>=
+&report('SORT_GRP',(('|  ' x 4).'*- '),$s_grp);
 my $sg_ref = \@{ $sr_ref->{$s_grp}[$_element] };
 $s_elem = $sr_ref->{$s_grp}[$_counter][$_elemNum];
 $s_elem > 1 && do {
@@ -2693,11 +2752,74 @@ $s_elem > 1 && do {
                            $_->[5],
                            $_ ] } @{ $sg_ref }; # maps 'start 'end 'arrayelement
 }; # $s_elem > 1
-print LOGFILE Dumper(\@{ $sg_ref }) if ($LogFile && $Debug);
+@ft_coords = ( map { $_->[4], $_->[5] } @{ $sg_ref } );
+$v_min = &min(@ft_coords);
+$v_max = &max(@ft_coords);
+$sr_ref->{$s_grp}[$_counter][$_ori] = $v_min;
+$sr_ref->{$s_grp}[$_counter][$_end] = $v_max;
+push @{ $st_ord }, [ $s_grp, $v_min, $v_max ];
 &report('SORT_FTR',('|  ' x 5),$s_elem);
+@
+
+Something that really boost the ordering, if we compare to the old [[gawk]] version of {\prog}, is that we are performing the sort only on those groups that have more that one element, and we are also ordering short sets of GFF elements instead of sorting the whole input records first and then sort the groups we found in those records.
+
+<<messages - sorting GFF data>>=
+SORT_GRP => "\%sGroup: \%s\n",
+SORT_FTR => "\%s       Sorted \%s elements.\n",
 @ 
 
-As we are saving feature boundaries always in forward coords (meaning that feature start is always smaller than feature end, this was already checked by [[&check_coords]] which is defined in page~\pageref{func:checkcoords}).
+\subsctn{Sorting groups by coords and upper features by input order}
+
+Here we take advantage of having the group coords in a list of lists ([[@{ $st_ord }]]) instead of having it as a list within a key/value hash of lists.
+
+<<sorting group coords by acceptor>>=
+@ft_coords = ( map { $_->[1], $_->[2] } @{ $st_ord } );
+$v_min = &min(@ft_coords);
+$v_max = &max(@ft_coords);
+$sc_ref->{$s_str}[$_counter][$_ori] = $v_min;
+$sc_ref->{$s_str}[$_counter][$_end] = $v_max;
+push @sr_coords, $v_min, $v_max;
+#
+@{ $st_ord } = map { $_->[2] }
+               sort { &$sortfunct }
+               map { [ $_->[1], $_->[2], $_->[0] ] } @{ $st_ord };
+$s_elem = $sc_ref->{$s_str}[$_counter][$_elemNum];
+&report('SORT_GPN',('|  ' x 4),$s_elem);
+@ 
+
+We reduced the group order subarray just to contain the group names sorted (their coords were saved in the corresponding variable within )
+
+<<messages - sorting GFF data>>=
+SORT_GPN => "\%s\`Sorted \%s groups.\n",
+@ 
+
+We are going to skip the strand sorting, because the program will process always strands in a fixed order, that is: '+', '.' and '-' (so forward features first, followed by those features that does not have a defined strand, and finally reverse features).
+
+<<set source elements boundaries>>=
+$v_min = &min(@sr_coords);
+$v_max = &max(@sr_coords);
+$ss_ref->{$s_src}[$_counter][$_ori] = $v_min;
+$ss_ref->{$s_src}[$_counter][$_end] = $v_max;
+push @sc_coords, $v_min, $v_max;
+@ 
+
+<<set sequence elements boundaries>>=
+$s_ref ->{$s_seq}[$_counter][$_ori] = &min(@sc_coords);
+$s_ref ->{$s_seq}[$_counter][$_end] = &max(@sc_coords);
+@ 
+
+<<Sorting Features>>=
+sub sort_by_inputorder() {
+    my $ref = $_[0];
+    @{ $ref } = map { [ $_->[0], $_->[2] ] }
+                sort { $a->[1] <=> $b->[1] }
+                map { [ $_->[0], $_->[1], $_->[2] ] } @{ $ref };
+} # sort_by_inputorder
+@ 
+
+\subsctn{Sorting forward/reverse strands}
+
+As we are saving feature boundaries always in forward coords (meaning that feature start is always smaller than feature end, this was already checked by [[&check_coords]] which is defined in page~\pageref{func:checkcoords}), we need two sort functions, one for sorting forward features that is slightly different than the one used for sorting reverse ones. The main reason is that we want to avoid feature overlapping upstream (so that an element that ends downstream a previous element but starts within the boundaries of this one do not hide it ), this works from left to right for forward features, but must be done counterclockwise (say here from right to left) on reverse features.
 
 <<Sorting Features>>=
 sub sort_forward {
@@ -2713,17 +2835,12 @@ sub sort_reverse {
 } # sort_forward
 @
 
+We choose between those two functions (both defining which fields to order and the direction --ascending/descending--), assigning by reference to [[$sortfunct]] variable which is de-referenced within the [[sort]] functions.
 
+<<set forward/reverse sorting functon>>=
+my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
+@
 
-<<messages - sorting GFF data>>=
-SORT_GFF => "\%sSorting \%s\n",
-SORT_SEQ => "\%sSequence: \%s\n",
-SORT_SRC => "\%sSource: \%s\n",
-SORT_STR => "\%sStrand: \%s\n",
-SORT_GRP => "\%sGroup: \%s\n",
-SORT_FTR => "\%s       Sorted \%s elements.\n",
-SORT_GPN => "\%s\`Sorted \%s groups.\n",
-@ 
 
 \sctn{Obtaining {\ps} output} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -4618,7 +4735,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $
+# $Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
