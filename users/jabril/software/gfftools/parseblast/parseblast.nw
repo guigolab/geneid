@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.9 2003-03-07 16:56:25 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.10 2004-05-15 00:02:12 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.9 2003-03-07 16:56:25 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.10 2004-05-15 00:02:12 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -323,7 +323,7 @@ my @exectime = ();
 ##############################################################################
 #
 my $PROGRAM = "parseblast";
-my $VERSION = "v2.0";
+my $VERSION = "v2.1";
 my $PLVER = sprintf("v%vd",$^V);
 my $DATE  = localtime;
 my $CDATE = &get_date();
@@ -342,12 +342,15 @@ if (defined($ENV{HOSTNAME})) {
 # FLAGS
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg,
     $subject_flg, $sequence_flg, $full_scores, $comment_flg, $nocmmnt_flg,
-    $split_flg, $help_flg, $ver_flg, $err_flg, $expanded_flg, $short_tgt_flg,
+    $split_flg, $help_flg, $ver_flg, $err_flg,
+    $hitbl_flg, $expanded_flg, $short_tgt_flg,
     $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg, $noframe_flg);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param, $aln_split, $prt_pos_flg
 	) = (0, 0, 0, 0, 0, 0, 0, 0);
 #
 # Parser Vars
+my ($ifh, $sin_flg, $file);
+my @ifiles = ();
 my ($fs,$GFFfmt,$GFFtgs,$GFFtgl,$GFFtg);
 my ($prt_funct, $prog_params, $program, $version, $seqname);
 my ($scQ, $scS);   # reSCale_Query/Subject : 1 to re-scalate lengths.
@@ -377,9 +380,14 @@ my ($n, $nm, $wnm, $tq, $ts,   # couNter, NaMe, TagQuery, TagSubject
 ##                              MAIN LOOP                                   ##
 ##############################################################################
 #
+&init_main_vars();
 &get_commandline_opts(); # if help is ON no start header must be shown...
 &program_started("$PROGRAM $VERSION");
-&parseblast();
+foreach $file (@ifiles) {
+    ($ifh, $sin_flg) = &getIFH($file);
+    &parseblast($ifh,$file);
+    close($ifh) unless $sin_flg == 2;
+};
 &program_finished("$PROGRAM $VERSION");
 exit(0);
 
@@ -393,6 +401,7 @@ sub get_commandline_opts(){
                 "A|aplot"          => \$aplot_flg    ,
                 "S|subject"        => \$subject_flg  ,
                 "Q|sequence"       => \$sequence_flg ,
+                "H|hit-table"      => \$hitbl_flg    ,
                 "X|extended"       => \$expanded_flg ,
                 "P|pairwise"       => \$pairwise_flg ,
                 "M|msf"            => \$msf_flg      ,
@@ -434,6 +443,7 @@ sub get_commandline_opts(){
     	$expanded_flg
     		&& ($aln_flg=$msf_flg=$pairwise_flg=$hsp_flg=0,
     			$nogff_flg=1, last FLGS);
+        # $hitbl_flg => $hsp_flg
     	$hsp_flg = 1; $nogff_flg = 1;
     }; # FLGS
     #
@@ -449,6 +459,8 @@ sub get_commandline_opts(){
     $GFFtg  = $short_tgt_flg ? $GFFtgs : $GFFtgl;
     #
     $nocmmnt_flg && ($comment_flg = 0);
+    # 
+    @ifiles = (scalar(@ARGV) > 0 ? @ARGV : "-");
 } # get_commandline_opts
 
 
@@ -458,9 +470,8 @@ sub get_commandline_opts(){
 #
 sub program_started() {
     my $prog = shift;
-    print STDERR &header("RUNNING $prog",'',"Host: $HOST","User: $USER",
-                         "Perl: $PLVER",'',"Date: $DATE")
-                 if $err_flg;
+    &header("RUNNING $prog",'',"Host: $HOST","User: $USER",
+            "Perl: $PLVER",'',"Date: $DATE") if $err_flg;
 } # program_started
 sub program_finished() {
     my $prog = shift;
@@ -469,19 +480,19 @@ sub program_finished() {
         $txt = sprintf("Total Execution Time: %02d:%02d:%02d (%d secs)%s",
                   sub { ($_[2]-1, $_[1], $_[0]) }->(localtime($1)),$1,$txt);
     };
-    print STDERR &header("$prog HAS FINISHED",'',(split /\n/, $txt))
-                 if $err_flg;
+    &header("$prog HAS FINISHED",'',(split /\n/o, $txt)) if $err_flg;
 } # program_finished
 #
 sub header() {
-    my @lns = @_;
-    my $str = ("#" x ($tlen + 4))."\n";
-    my $t = ("#" x 2);
-    my $comment = $str;
+    my (@lns,$str,$t,$comment);
+    @lns = @_;
+    $str = ("#" x ($tlen + 4))."\n";
+    $t = ("#" x 2);
+    $comment = $str;
     foreach my $ln (@lns) {
         $comment .= "$t".(&fill_mid($ln,$tlen," "))."$t\n";
-        };
-    return $comment.$str;
+    };
+    print STDERR $comment.$str;
 } # header
 #
 sub fill_right { $_[0].($_[2] x ($_[1] - length($_[0]))) }
@@ -612,7 +623,9 @@ COMMAND-LINE OPTIONS:
     -W, --show-coords    : adds start/end positions to alignment output.
 
   GENERAL OPTIONS:
-    -X, --expanded       : expanded output (producing multiline output records).
+    -H, --hit-table      : "HITBL" output, similar to blast hit table output
+                           but simpler than default "HSP" format.
+    -X, --expanded       : "EXPANDED" output (generating multiline records).
     -c, --comments       : include parameters from blast program as comments.
     -n, --no-comments    : do not print "#" lines (raw output without comments).
     -v, --verbose        : warnings sent to <STDERR>.
@@ -652,6 +665,11 @@ OUTPUT FORMATS:
    ... <Q_Strand>:<S_Strand> <Q_Frame>:<S_Frame> <BitScore>:<HSP_Number> ...
    ... \# E_value <E_Value>
 
+[HITBL]
+ <Q_Name> <Q_Start> <Q_End> <Q_Strand> <Q_Frame> ...
+   ... <S_Name> <S_Start> <S_End> <S_Strand> <S_Frame> ...
+   ... <IdentityScore> <AlignmentScore> <BitScore> <E_Value> <P_Sum>
+
 [EXPANDED]
  MATCH(<HSP_Number>): <Q_Name> x <S_Name>
  SCORE(<HSP_Number>): <AlignmentScore>
@@ -678,12 +696,50 @@ exit(2);
 # print STDOUT "HSP:$hsp_flg GFF:$gff_flg COM:$comment_flg SPL:$split_flg HLP:$help_flg\n";
 
 #
+# Retrieving file handles
+sub getIFH() {
+    my $file = shift;
+    my ($fstr,$ferr,$sflg);
+    local *D;
+    defined($file) || do {
+        &header(" WARNING!!! FILE NAME NOT DEFINED !!!\n");
+        exit(1);
+    };
+    ($file ne '-') || do {
+        &header("## Input Stream set to STDIN...") if $err_flg;
+        return (*STDIN, 2);
+    };
+    if ($file =~ /\|\s*$/o) {
+        $fstr = $file;
+        $ferr = 'NOREADPIPE';
+        $sflg = 1;
+    } elsif (! -e $file) {
+        &header(" WARNING!!! INPUT File does not exist: \"$file\"\n");
+        exit(1);
+    } elsif ($file =~ /\.gz\s*$/o) {
+        $fstr = "zcat $file |";
+        $ferr = 'NOREADPIPE';
+        $sflg = 1;
+    } else {
+        $fstr = "< $file";
+        $ferr = 'NOREADFILE';
+        $sflg = 0;
+    };
+    open(D, $fstr) || do {
+        &header(" WARNING!!! Cannot open input stream \"$fstr\"");
+        exit(1);
+    };
+    &header("## Input Stream set to: \"$fstr\"") if $err_flg;
+    return (*D, $sflg);
+} # getIFH
+
+#
 # Get new lines while empty line is not found and append to last line.
 sub get_lines {
-	my $spc = $_[0];
+	my ($spc,$ifh) = @_;
 	my $tmp;
 	# local($tmp);
-	while (<>) {
+	while (<$ifh>) {
 		last if /^\s*$/;
 		# print STDERR "$_";
 		chomp;
@@ -745,6 +801,13 @@ print STDOUT <<"EndOfHSPs";
 $prg $dbase{$nm} : $id $lnmin $gsc $sc $bt $ex $pv : $query{$nm} $hsq $heq $stq $frq : $wnm $hss $hes $sts $frs : $desc{$nm}
 EndOfHSPs
 } # prt_hsp
+#
+sub prt_hittbl {
+print STDOUT <<"EndOfHSPs";
+$query{$nm} $hsq $heq $stq $frq $wnm $hss $hes $sts $frs $gsc $sc $bt $ex $pv
+EndOfHSPs
+# $id $lnmin $lnmx $lnq $lns $gpt $gpq $gps
+} # prt_hittbl
 #
 sub prt_ext {
 print STDOUT <<"EndOfPlain";
@@ -858,7 +921,8 @@ EndOfALIGN
 sub setprtfunct() {
   CHOOSE: {
     if ($hsp_flg) {
-        $prt_funct = sub { &prt_hsp() };
+        $prt_funct = $hitbl_flg ? sub { &prt_hittbl() }
+                                : sub { &prt_hsp() };
     } elsif (!$nogff_flg) {
         if ($subject_flg) {
             $gff_flg && ($prt_funct = sub { &prt_S_gff() }, last CHOOSE);
@@ -883,7 +947,7 @@ sub prt_out() {
     my $ht = 0;
     $CT++;
 	$prt = 0;
-	$err_flg && print STDERR &header("WRITING OUTPUT TO STDOUT");
+	&header("WRITING OUTPUT TO STDOUT") if $err_flg;
     &setprtfunct();
 	while (@seqlist) {
 		$nm = shift(@seqlist);
@@ -959,11 +1023,22 @@ sub prt_out() {
 	}; # foreach
 	&prt_foeprg($ht);
     $HT += $ht;
+    &header("FROM $. INPUT LINES",
+            "$PT INPUT RECORDS READ",
+            "TOTAL HSPs WRITTEN: $HT") if $err_flg;
+} # prt_out
+sub init_main_vars() {
     @seqlist = ();
-    print STDERR &header("FROM $. INPUT LINES",
-                         "$PT INPUT RECORDS READ",
-                         "TOTAL HSPs WRITTEN: $HT") if $err_flg;
-}
+    %prgseq = ();
+    %dbase = ();
+    %query = ();
+    %cnt = ();
+    %desc = ();
+    %sco = ();
+    %hsp_start = ();
+    %hsp_end = ();
+    %hsp_seq = ();
+} # init_main_vars
 
 ###################################################
 ## Main Loop function
@@ -974,20 +1049,21 @@ sub check_blastprogname() {
     # print STDERR "$_\n";
 	($prt == 0 && $fragment == 1) && do {
         $prt = 1;
-        $err_flg && print STDERR "##\n## NO PARAMETERS SECTION FOUND...\n##\n";
+        &header("","WARNING!!! NO PARAMETERS SECTION FOUND...","") if $err_flg;
 	};
     $prt && do {
         &prt_foeprg($$pt);
         $PT += $$pt;
         $$pt = 0;
         &prt_out;
+        &init_main_vars();
         $err_flg && do {
             print STDERR "##\n";
-            print STDERR &header("PARSING STDIN (More Results From BLAST)");        
+            &header("PARSING MORE RESULTS FROM BLAST");
         };
     }; # $prt
     #
-    ($program, $version) = split /\s+/og, $str, 2;
+    ($program, $version) = split /\s+/o, $str, 2;
     # typeQ/typeS: 0 for proteins - 1 for nucleic acids.
     # Amino Acids vs Amino Acids
     ($program =~ /^BLASTP$/o ) && ( $scQ = 0, $scS = 0);
@@ -1007,7 +1083,7 @@ sub check_blastprogname() {
 } # check_blastprogname
 #
 sub check_seqids() {
-    my $str = shift;
+    my ($str,$ifh) = @_;
 	# print STDERR "$_\n";
     defined($program) || do { # assuming to parse blastn???
         $program = "BLASTN";
@@ -1015,7 +1091,7 @@ sub check_seqids() {
 	    $prog_params = "#\n# $program $version\n#";
 	    $query_name = $db_name = '';
     };
-	($seqname, $descr) = split /\s+/og, $str, 2;
+	($seqname, $descr) = split /\s+/o, $str, 2;
 	$seqname =~ s/^\s*>//o;
 	$seqname =~ s/\s|:|\|/_/og;
 	$seqname .= "_".($index++);
@@ -1024,18 +1100,21 @@ sub check_seqids() {
 	($db_name =~ /([^\/]+)$/o) && ($dbase{$seqname} = $1);
 	push(@seqlist,$seqname);
 	$desc{$seqname} = defined($descr)
-                    ? join(' ', $descr, &get_lines(' ')) : '';
+                    ? join(' ', $descr, &get_lines(' ',$ifh)) : '';
 #	$cnt{$seqname} = 0;
 	$seqflg = 1;
 	$main = $hsp = $fragment = $param = 0;
 } # check_seqids
 #
 sub parseblast() {
-    my $pt = 0;
+    my ($ifh, $file, $pt);
+    ($ifh, $file) = @_;
+    $pt = 0;
     ($CT,$PT,$HT) = (0,0,0);
-    $err_flg && print STDERR &header("PARSING STDIN FROM BLAST");
+    &header("PARSING ".
+            ($file eq '-' ? "STDIN" : $file)." BLAST OUTPUT") if $err_flg;
     $program = undef; # default program name
-    while (<>) {
+    while (<$ifh>) {
     	next if /^\s*$/o;
         &prt_progress(++$pt);
     	my $tmpinput = $_;
@@ -1051,7 +1130,7 @@ sub parseblast() {
 	      }; # /^\s*T?BLAST[PNX]?/
 	      # Starts with ">" ?: sequences.
           $_ =~ /^>/o && do {
-		      &check_seqids($_);
+		      &check_seqids($_,$ifh);
               last CHECK;
 	      }; # /^\s*>/
 	      # Starts with "Score" ?: HSPs.
@@ -1059,7 +1138,8 @@ sub parseblast() {
 		  # print STDERR "$_\n";
               ( $score = $_ ) =~ s/^\s*//o;
 	    	  $cnt{$seqname}++;
-	    	  $sco{$seqname.$cnt{$seqname}} = join('', $score, &get_lines(', '));
+	    	  $sco{$seqname.$cnt{$seqname}} = 
+                  join('', $score, &get_lines(', ',$ifh));
 	    	  # print STDOUT $sco{$seqname.$cnt{$seqname}}."\n";
 	    	  $hsp = 1;
 	    	  $fragment = 0;
@@ -1068,7 +1148,7 @@ sub parseblast() {
           # Starts with "Query" ?: Fragments.
 	      ($_ =~ /^Query:/o && $hsp) && do {
 	    	  # print STDERR "$_\n";
-	    	  $fragment = 1;          
+	    	  $fragment = 1;
 	    	  last CHECK;
 	      }; # (/^\s*Query/ && ($hsp))
           # Parameters Section.
@@ -1118,7 +1198,7 @@ sub parseblast() {
 	    	  /^\s*Database:\s+(.*?)(\s+([^\s]*)?)?$/o && do { 
 	    		  # print STDERR "$_\n";
 	    		  $db_name = $1;
-	    		  while (<>) {
+	    		  while (<$ifh>) {
 	    			  last if /^(?:.*\bletter.*|\s*)$/o;
 	    			  # print STDERR "$_\n";
 		    		  chomp;
@@ -1153,6 +1233,7 @@ sub parseblast() {
         $PT += $pt;
         $pt = 0;
         &prt_out;
+        &init_main_vars();
     }; # $prt
     # $prt || &prt_foeprg($pt);
 } # parseblast
@@ -1209,7 +1290,6 @@ sub parseblast() {
 
 % This is perl, version 5.005_03 built for i386-linux
 <<PERL shebang>>=
-#!/usr/local/bin/perl -w
 # 
 <<GNU License>>
 <<Version Control Id Tag>>
@@ -1365,15 +1445,15 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.9 2003-03-07 16:56:25 jabril Exp $
+# $Id: parseblast.nw,v 1.10 2004-05-15 00:02:12 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
 
 <<GNU License>>=
-# #----------------------------------------------------------------#
+# ##################################################################
 # #                          parseblast                            #
-# #----------------------------------------------------------------#
+# ##################################################################
 # 
 #             Extracting HSPs from blast programs output.
 # 
@@ -1393,7 +1473,7 @@ This document is under Revision Control System (RCS). The version you are curren
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
-# #----------------------------------------------------------------#
+# ##################################################################
 # 
 @ 
 
@@ -1419,10 +1499,12 @@ chmod a+x $BIN/parseblast.pl ;
 <<tangling>>=
 # program without line numbering comments
 notangle -t4 -R"parseblast" $WORK/$nwfile.nw | \
-    cpif $BIN/parseblast.pl ;
+    cpif $SRC/parseblast.pl ;
+( echo '#!'`which perl`' -w'; cat $SRC/$nwfile.pl ) | cpif $BIN/parseblast.pl ;
 # reformating program with perltidy
 notangle -R"parseblast" $WORK/$nwfile.nw | \
-    perltidy - | cpif $BIN/parseblast.pl ;
+    perltidy - | cpif $SRC/parseblast.pl ;
+( echo '#!'`which perl`' -w'; cat $SRC/$nwfile.pl ) | cpif $BIN/$nwfile.pl;
 # pretty-printing program with perltidy
 notangle -R"parseblast" $WORK/$nwfile.nw | \
     perltidy -html - | cpif $DOCS/html/parseblast.html ;
@@ -1493,6 +1575,7 @@ popd ;
 # Setting Global Variables
 # WORK="$HOME/development/softjabril/parseblast" ; # now defined via "setcwd"
 BIN="$WORK/bin" ;
+SRC="$WORK/src" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
