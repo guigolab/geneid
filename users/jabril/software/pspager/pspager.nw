@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $
+% $Id: pspager.nw,v 1.2 2001-08-21 13:36:18 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -69,6 +69,7 @@
 % Setting text for footers and headers
 
 % \def\tit{\textsc{[[pspager.pl]] }}
+\begin{latex}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
@@ -77,6 +78,7 @@
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
+\end{latex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -100,6 +102,7 @@ Printing virtual pages on multiple real pages. This perl script inserts a {\ps} 
 @ 
 \thispagestyle{empty}
 
+\begin{latex}
 \begin{titlepage}
 
 \ \vfill
@@ -145,6 +148,7 @@ Universitat Pompeu Fabra\\[2ex]
 \end{raggedleft}
 
 \end{titlepage} %'
+\end{latex}
 
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
@@ -163,7 +167,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $$>$ }
+{\small$<$ \verb$Id: pspager.nw,v 1.2 2001-08-21 13:36:18 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -617,7 +621,7 @@ end % helper_procs
 
 <<EPSbbox>>=
 %%
-% $Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $
+% $Id: pspager.nw,v 1.2 2001-08-21 13:36:18 jabril Exp $
 %
 % Place this after the "%% EndComments" tag for small snapshots of the figure.
 %
@@ -1080,7 +1084,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $
+# $Id: pspager.nw,v 1.2 2001-08-21 13:36:18 jabril Exp $
 @ 
 
 \newpage
@@ -1137,6 +1141,7 @@ latex $nwfile.tex ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+pdflatex $nwfile.tex ;
 popd ;
 <<BASH script end>>
 @ %$
