@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.38 2000-01-05 08:58:03 jabril Exp $	
+#         $Id: gff2ps,v 1.39 2000-01-10 17:46:38 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.38 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-05 08:58:03 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.39 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-10 17:46:38 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.38 2000-01-05 08:58:03 jabril Exp $
+%    $Id: gff2ps,v 1.39 2000-01-10 17:46:38 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -776,11 +776,11 @@ true setstrokeadjust
 # Testing parameters passed by User: Colors.
 CheckColor () {
   gawk 'BEGIN{
-    color=ARGV[1]
+    color=ARGV[1];
     if (tolower(color)!~/^((b|f)g(color)?|black|white|(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown))$/) {
       if (ARGV[4]) {
 		printf "\n<<<<ERROR>>>> \"%s\" is not a defined color.\n", color | "cat 1>&2";
-		printf "              Default \" ARGV[2] \" is asigned to this option.\n" | "cat 1>&2";
+		printf "              Default \"" ARGV[2] "\" is asigned to this option.\n" | "cat 1>&2";
 		printf "              You can choose one of this colors:\n" | "cat 1>&2";
 		print ARGV[3] | "cat 1>&2";
 		print "" | "cat 1>&2";
@@ -2500,14 +2500,14 @@ function PRINTTRACKS(    tmpup) {
 #
 function CREATECUSTOM() {
   if (Var["create_default_customfile"]) { 
-    PrintWRN(sprintf("\n%s\n*  Custom File:\n*  %s\n\n%s\n\n", BigLINE,BigLINE, Default["customfile_name_default"]));
+    PrintWRN(sprintf("\n%s\n*  Custom File:\n*  %s\n\n%s\n\n", BigLINE,BigLINE, Var["customfile_name_default"]));
     if (Var["exist_default_customfile"]) {
       PrintWRN(sprintf("Warning: I am going to rewrite your Default Custom File.\n"));
-	  PrintWRN(sprintf("         Moving last Default Custom File to %s.old.%s\n",Default["customfile_name_default"],PID));
-      system("cp "Default["customfile_name_default"]" "Default["customfile_name_default"]".old."PID);
+	  PrintWRN(sprintf("         Moving last Default Custom File to %s.old.%s\n",Var["customfile_name_default"],PID));
+      system("cp "Var["customfile_name_default"]" "Var["customfile_name_default"]".old."PID);
 	}
     else {
-      PrintWRN(sprintf("Warning: Writing Default Custom File %s.\n",Default["customfile_name_default"]));
+      PrintWRN(sprintf("Warning: Writing Default Custom File %s.\n",Var["customfile_name_default"]));
 	}
     CreateProps(2);
   } # if create
@@ -2518,7 +2518,7 @@ function CREATECUSTOM() {
 	NTC=NTC"*          you must pass the command-line option -d to the program.\n";
 	NTC=NTC"*          Default custom-file name: %s\n*\n";
 	NTC=NTC"*          ...See help for -d and -D <filename> options...\n*\n";
-    PrintWRN(sprintf(NTC,BigLINE,Default["customfile_name_default"]));
+    PrintWRN(sprintf(NTC,BigLINE,Var["customfile_name_default"]));
   } # else !created
   # Object Properties Report...
   CreateProps(1);
