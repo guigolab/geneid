@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadSequence.c,v 1.1 2000-07-05 08:24:30 eblanco Exp $  */
+/*  $Id: ReadSequence.c,v 1.2 2000-08-08 14:22:03 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -37,10 +37,18 @@ int IniReadSequence(FILE* seqfile, char* line)
   char sAux[MAXSTRING];
   char cAux;
 
+  /* Searching ">" */
+  res = fscanf(seqfile,"%c",&cAux);
+
+  if ((res == -1) || cAux != '>')
+    printError("Bad format: FASTA sequence");
+
   /* Get locus name */
   res = fscanf(seqfile,"%s",sAux);
-  /* Delete '>' */
-  strcpy(line,sAux+1);
+  if (res==-1)
+    printError("Bad format: FASTA sequence");
+  else
+    strcpy(line,sAux);
 
   /* Jumping until \n of the first fasta line */
   res = fscanf(seqfile,"%c",&cAux);
