@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.6 2001-10-02 19:57:35 jabril Exp $
+% $Id: Human_Chromosome_22.tex,v 1.1 2001-10-02 19:57:35 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -106,7 +106,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-@ 
+\nwfilename{/home/ug/jabril/development/projects/sgp/chr22/Human_Chromosome_22.nw}\nwbegindocs{1}\nwdocspar
 \thispagestyle{empty}
 
 \begin{titlepage}
@@ -159,7 +159,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.6 2001-10-02 19:57:35 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.tex,v 1.1 2001-10-02 19:57:35 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -292,12 +292,12 @@ Abstract URL: \url|http://www.nature.com/cgi-taf/DynaPage.taf?file=/nature/journ
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
 \end{comment}
 
-<<BASH Commands>>=
-grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \
-  fold -1 | sort | uniq -c | sort -nr | \
-  perl -ane 'BEGIN{$cnt=0}
-             print "@F\n"; $cnt+=$F[0];
-             END{print "$cnt TOTAL BP\n"}' ;
+\nwenddocs{}\nwbegincode{2}\sublabel{NWHum17-BASD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASD-1}}}\moddef{BASH Commands~{\nwtagstyle{}\subpageref{NWHum17-BASD-1}}}\endmoddef
+grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \\
+  fold -1 | sort | uniq -c | sort -nr | \\
+  perl -ane 'BEGIN\{$cnt=0\}
+             print "@F\\n"; $cnt+=$F[0];
+             END\{print "$cnt TOTAL BP\\n"\}' ;
      13876897 N
       6332938 a
       6306417 t
@@ -309,21 +309,21 @@ grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \
       2258158 G
            16 n
      47662662 TOTAL BP
-grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \
-  fold -1 | tr 'a-z' 'A-Z' | sort | uniq -c | sort -nr | \
-  perl -ane 'BEGIN{$cnt=0}
-             print "@F\n"; $cnt+=$F[0];
-             END{print "$cnt TOTAL BP\n"}' ;
+grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \\
+  fold -1 | tr 'a-z' 'A-Z' | sort | uniq -c | sort -nr | \\
+  perl -ane 'BEGIN\{$cnt=0\}
+             print "@F\\n"; $cnt+=$F[0];
+             END\{print "$cnt TOTAL BP\\n"\}' ;
      13876913 N
       8837391 A
       8791272 T
       8081748 C
       8075338 G
      47662662 TOTAL BP
-grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \
-  fold -1 | perl -ne 'chomp; $_ !~ "N" && print "$.\n"' | head -1 ; 
+grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \\
+  fold -1 | perl -ne 'chomp; $_ !~ "N" && print "$.\\n"' | head -1 ; 
      13000001
-@ %$
+\nwnotused{BASH\ Commands}\nwendcode{}\nwbegindocs{3}%$
 
 \begin{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -538,10 +538,10 @@ We are using the ***WHICH VERSION*** verion of the {\chr} sequence. It has ***bp
 
 Pankaj has sent us the sequence and its masked version (he run repeatblaster on the raw sequence). After running {\bl}, he used his own blast2hsps to filter the {\bl} results into HSPs. He used the {\chr} sequence from the URL which is identical to the one in April goldenPath from UCSC.
 
-<<BASH commands DATASETS>>=
+\nwenddocs{}\nwbegincode{4}\sublabel{NWHum17-BASM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM-1}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWHum17-BASM-1}}}\endmoddef
 #
 # Preparing some dirs
-ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \
+ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \\
          $DATASETS/annotation $DATASETS/annotation/desc ;
 #
 # MOVING and RENAMING fasta files
@@ -551,58 +551,58 @@ IDIR="$DATASETS/_tmp/Pankaj/seq" ;
 ODIR="$DATASETS/fasta/raw" ;
 counter=0 ; # fix for missing counter values on file names...(i.e. line674)
 while [ -e "$IDIR/chr22_$counter" ] ;
-  do {
+  do \{
     echo "### Processing $IDIR/chr22_$counter" 1>&2 ;
-    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter | \
+    gawk '$0 !~/^>|^[ \\t]*$/ \{print $0\}' $IDIR/chr22_$counter | \\
         perl -e ' # Removing "N"bp from overlapping sequences
             $seq=""; $count= shift @ARGV; $bases= shift @ARGV;
-            while (<>) { chomp; $seq.=$_; };
+            while (<>) \{ chomp; $seq.=$_; \};
             $count > 0 && ($out=substr($seq,$bases)) || ($out=$seq);
             ($i,$e) = (1, length($out));
-            while ($i<=$e) { print substr($out,$i-1,60)."\n"; $i += 60; };
+            while ($i<=$e) \{ print substr($out,$i-1,60)."\\n"; $i += 60; \};
           ' $counter 1000 - ;
     counter=`expr $counter + 100000` ;
-    } ;
+    \} ;
   done | (echo ">chr22"; cat -) > $ODIR/chr22.tmp ;
 perl -e ' # Reformatting fasta sequence
     use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
     use Bio::Seq;
     use Bio::SeqIO;
-    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDIN );
-    my $seqout = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDOUT);
-    while (my $sequence = $seqin->next_seq()) {
+    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \\*STDIN );
+    my $seqout = Bio::SeqIO->new(-format => "largefasta", -fh => \\*STDOUT);
+    while (my $sequence = $seqin->next_seq()) \{
         $seqout->write_seq($sequence);
-    }; # while
+    \}; # while
     exit(0);
-  ' < $ODIR/chr22.tmp | \
-  gawk '($0 !~/^>|^[ \t]*$/ || NR==1) {print $0}' - > $ODIR/chr22 ;
+  ' < $ODIR/chr22.tmp | \\
+  gawk '($0 !~/^>|^[ \\t]*$/ || NR==1) \{print $0\}' - > $ODIR/chr22 ;
 # looking for errors... 
 wc $ODIR/chr22* ;
   953256  953255 48615924 _tmp/MichaelBrent/chr22.fa
   794538  794538 48457206 chr22/fasta/raw/chr22.tmp
   794379  794379 48457047 chr22/fasta/raw/chr22
-gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22.tmp | wc ;
+gawk 'length($0)!=60 \{print NR, $0\}' $ODIR/chr22.tmp | wc ;
      478     956   22823
-gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22 | wc ;
+gawk 'length($0)!=60 \{print NR, $0\}' $ODIR/chr22 | wc ;
        2       4      59
     :: 000001 >chr22
     :: 794379 GGTATGGCGGGAAGGAGGCTGGTGCCAGAGTGGATTCGGATT
-perl -ne 'chomp; /^\s*$/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
-perl -ne 'chomp;    /^>/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
-grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr | \
-  perl -ane 'BEGIN{$cnt=0}
-             print "@F\n"; $cnt+=$F[0];
-             END{print "$cnt TOTAL BP\n"}' ;
+perl -ne 'chomp; /^\\s*$/o && print "$. \\"$_\\"\\n"' $ODIR/chr22 ;
+perl -ne 'chomp;    /^>/o && print "$. \\"$_\\"\\n"' $ODIR/chr22 ;
+grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr | \\
+  perl -ane 'BEGIN\{$cnt=0\}
+             print "@F\\n"; $cnt+=$F[0];
+             END\{print "$cnt TOTAL BP\\n"\}' ;
      13876913 N
       8837391 A
       8791272 T
       8081748 C
       8075338 G
      47662662 TOTAL BP
-grep -v "^>" $DATASETS/fasta/raw/chr22 | fold -1 | \
-  perl -ne 'chomp; $_ !~ "N" && print "$.\n"' | head -1 ;
+grep -v "^>" $DATASETS/fasta/raw/chr22 | fold -1 | \\
+  perl -ne 'chomp; $_ !~ "N" && print "$.\\n"' | head -1 ;
      13000001
-TblToFasta /projects/datasets/chr22/_tmp/MichaelBrent/chr22.tbl | \
+TblToFasta /projects/datasets/chr22/_tmp/MichaelBrent/chr22.tbl | \\
            tr  a-z A-Z | diff - $DATASETS/fasta/raw/chr22 | more ;
      1c1
      < >CHR22
@@ -610,72 +610,72 @@ TblToFasta /projects/datasets/chr22/_tmp/MichaelBrent/chr22.tbl | \
      > >chr22
 ## Raw sequences
 #
-@ 
+\nwalsodefined{\\{NWHum17-BASM-2}\\{NWHum17-BASM-3}\\{NWHum17-BASM-4}\\{NWHum17-BASM-5}}\nwused{\\{NWHum17-DATF-1}}\nwendcode{}\nwbegindocs{5}\nwdocspar
 
 \subsctn{Getting annotations}
 
 As the annotations are provided in GTF, we need to filter to GFF files.
 
-<<BASH Functions: GTF to GFF>>=
+\nwenddocs{}\nwbegincode{6}\sublabel{NWHum17-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASQ-1}}}\moddef{BASH Functions: GTF to GFF~{\nwtagstyle{}\subpageref{NWHum17-BASQ-1}}}\endmoddef
 #
 # Processing GTF annotation files
 get_annotation ()
-{
+\{
   # USAGE:  get_annotation GFFfeature input_file
-  perl -ne 'BEGIN{ $feat = shift @ARGV; }
+  perl -ne 'BEGIN\{ $feat = shift @ARGV; \}
       chomp;
-      if ($_ =~ m/^\#/o) {
-          print STDERR "$_\n";
-      } else {
-          @fields = split /\s+/og, $_;
-          ($fields[2] eq $feat) && do {
+      if ($_ =~ m/^\\#/o) \{
+          print STDERR "$_\\n";
+      \} else \{
+          @fields = split /\\s+/og, $_;
+          ($fields[2] eq $feat) && do \{
               $fields[0] = "chr22";
               ($fields[8] = $fields[9]) =~ s/[";]//og; 
-              print STDOUT join("\t",@fields[0 .. 8])."\n";
-          };
-      } ' $1 $2 | sort +0 -1 +3n +4n ;
-}
+              print STDOUT join("\\t",@fields[0 .. 8])."\\n";
+          \};
+      \} ' $1 $2 | sort +0 -1 +3n +4n ;
+\}
 #
-@
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{7}\nwdocspar
 
 We obtained the chromosome annotaions from \url|http://genes.cs.wustl.edu/data/|, we have to reformat into GFF due to redundant data contained in the GTF original file.
 
-<<BASH commands DATASETS>>=
+\nwenddocs{}\nwbegincode{8}\sublabel{NWHum17-BASM-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM-2}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWHum17-BASM-1}}}\plusendmoddef
 #
 IDIR="$DATASETS/_tmp/MichaelBrent" ;
 ODIR="$DATASETS/annotation" ;
 ChckDirs $ODIR/all $ODIR/fixed ;
-get_annotation CDS $IDIR/All_genes_plus.gene+cds.frameV2.noPseudogenes.GBD.gtf \
+get_annotation CDS $IDIR/All_genes_plus.gene+cds.frameV2.noPseudogenes.GBD.gtf \\
        > $ODIR/all/chr22 ;
 # We remove "dJ437M21.C22.1b" because it has same coords as "dJ437M21.C22.1"
-get_annotation CDS $IDIR/chr22-fixed.gtf | \
+get_annotation CDS $IDIR/chr22-fixed.gtf | \\
        grep -v "dJ437M21.C22.1b" > $ODIR/fixed/chr22 ;
 #
 # Checking GFF files for annotations 
 grep -v "^#" all/chr22 | wc
    3627   32643  223781
- grep -v "^#" all/chr22 | gawk '{print $9}' | sort | uniq -c | sort -nr | wc
+ grep -v "^#" all/chr22 | gawk '\{print $9\}' | sort | uniq -c | sort -nr | wc
     538    1076   15275
 # so there are 538 genes in all/chr22
 grep -v "^#" fixed/chr22 | wc
    3766   33894  214107 
-grep -v "^#" fixed/chr22 | gawk '{print $9}' | sort | uniq -c | sort -nr | wc
+grep -v "^#" fixed/chr22 | gawk '\{print $9\}' | sort | uniq -c | sort -nr | wc
     553    1106   13253 
 # so there are 553 genes in fixed/chr22 ?????
-@ 
+\nwendcode{}\nwbegindocs{9}\nwdocspar
 
 We also downloaded Victoria Haghighi's annotation dataset from \url|http://www.cs.columbia.edu/~vic/sanger2gbd/| %'
 (\url|vic@cs.columbia.edu|).
 
-<<BASH commands DATASETS>>=
+\nwenddocs{}\nwbegincode{10}\sublabel{NWHum17-BASM-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM-3}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWHum17-BASM-1}}}\plusendmoddef
 #
 IDIR="$DATASETS/_tmp/VictoriaHaghighi" ;
 ODIR="$DATASETS/annotation/set" ;
 ChckDirs $ODIR $ODIR/cds $ODIR/exons $ODIR/pseudo $ODIR/evidences ;
 # Only CDS (554genes - 1)
 # We remove "dJ437M21.C22.1b" because it has same coords as "dJ437M21.C22.1"
-perl -pne 's/^\s+//o' $IDIR/Chr22.2.x.cds.frameV1.GBD.gtf.txt | \
-       get_annotation CDS - | \
+perl -pne 's/^\\s+//o' $IDIR/Chr22.2.x.cds.frameV1.GBD.gtf.txt | \\
+       get_annotation CDS - | \\
        grep -v "dJ437M21.C22.1b" > $ODIR/cds/chr22 ;
 # Only exons (722genes - 1)
 # We remove "bK250D10.C22.6c.mRNA" because it has same coords as "bK250D10.C22.6.mRNA"
@@ -684,111 +684,111 @@ perl -pne 's/^\s+//o' $IDIR/Chr22.2.x.cds.frameV1.GBD.gtf.txt | \
 # (without "dJ437M21.C22.1b") and joining into 
 # $IDIR/All_genes_plus.gene+cds.frameV1.noPseudogenes.fixed.gtf
 # then, we get 730 genes in this file.
-perl -pne 's/^\s+//o' $IDIR/All_genes_plus.gene+cds.frameV1.noPseudogenes.fixed.gtf | \
-       get_annotation exon - | \
-       egrep -v 'dJ(437M21.C22.1b|402G11.C22.8.1)|(bK(250D10.C22.6c|125H2.C22.1b|216E10.C22.2b)|Em:AP000354.C22.3).mRNA' \
+perl -pne 's/^\\s+//o' $IDIR/All_genes_plus.gene+cds.frameV1.noPseudogenes.fixed.gtf | \\
+       get_annotation exon - | \\
+       egrep -v 'dJ(437M21.C22.1b|402G11.C22.8.1)|(bK(250D10.C22.6c|125H2.C22.1b|216E10.C22.2b)|Em:AP000354.C22.3).mRNA' \\
      > $ODIR/exons/chr22 ;
 # Pseudogenes - only exons (157pseudogenes)
-perl -pne 's/^\s+//o' $IDIR/All_genes_plus.gene.GBD.gtf.txt > $IDIR/All_genes_plus.gene.GBD.gtf.tmp ;
-grep "Pseudogene" $IDIR/All_genes_plus.gene.GBD.gtf.tmp | \
-     gawk '{print $2}' > PseudoGene.list ;
-gawk 'BEGIN{ while (getline < ARGV[1] >0) { pseudo[$1] = $1 };
-             ARGV[1]=""; }
-      $1!~/^#/{ n=$10; gsub(/\"/,"",n);
-             if (n in pseudo) {$3="exon_pseudo";print $0}
-           }' $IDIR/PseudoGene.list \
+perl -pne 's/^\\s+//o' $IDIR/All_genes_plus.gene.GBD.gtf.txt > $IDIR/All_genes_plus.gene.GBD.gtf.tmp ;
+grep "Pseudogene" $IDIR/All_genes_plus.gene.GBD.gtf.tmp | \\
+     gawk '\{print $2\}' > PseudoGene.list ;
+gawk 'BEGIN\{ while (getline < ARGV[1] >0) \{ pseudo[$1] = $1 \};
+             ARGV[1]=""; \}
+      $1!~/^#/\{ n=$10; gsub(/\\"/,"",n);
+             if (n in pseudo) \{$3="exon_pseudo";print $0\}
+           \}' $IDIR/PseudoGene.list \\
       $IDIR/All_genes_plus.gene.GBD.gtf.tmp > $IDIR/PseudoGene.gff ;
 get_annotation exon_pseudo $IDIR/PseudoGene.gff > $ODIR/pseudo/chr22 ;
 #
-gawk '{print $9}' $ODIR/cds/chr22 | sort | uniq -c | wc ;
+gawk '\{print $9\}' $ODIR/cds/chr22 | sort | uniq -c | wc ;
     553    1106   13253
-gawk '{print $9}' $ODIR/exons/chr22 | sort | uniq -c | wc ;
+gawk '\{print $9\}' $ODIR/exons/chr22 | sort | uniq -c | wc ;
     726    1452   20464
 #   721    1442   20358 # All_genes_plus.gene+cds.frameV1.noPseudogenes.GBD.gtf.txt
-gawk '{print $9}' $ODIR/pseudo/chr22 | sort | uniq -c | wc ;
+gawk '\{print $9\}' $ODIR/pseudo/chr22 | sort | uniq -c | wc ;
     157     314    3920 
 #
-cat  $ODIR/exons/chr22 $ODIR/pseudo/chr22 | sort +3n | \
-gawk '($1 != "#") {
-        if (START[$9]==0 || $4 < START[$9]) {
-           START[$9]=$4; STRAND[$9]=$7};
+cat  $ODIR/exons/chr22 $ODIR/pseudo/chr22 | sort +3n | \\
+gawk '($1 != "#") \{
+        if (START[$9]==0 || $4 < START[$9]) \{
+           START[$9]=$4; STRAND[$9]=$7\};
            if ($5>STOP[$9]) STOP[$9]=$5;
-        }
-      END{
+        \}
+      END\{
         for (locus in START) 
-          print "chr22\tsanger\tGENE\t" START[locus] "\t" STOP[locus] "\t.\t" STRAND[locus] "\t.\t"locus;
-      }' | sort +3n | \
-gawk 'BEGIN{OFS="\t"}
-      {if ($4 < STOPant+500 ) {
+          print "chr22\\tsanger\\tGENE\\t" START[locus] "\\t" STOP[locus] "\\t.\\t" STRAND[locus] "\\t.\\t"locus;
+      \}' | sort +3n | \\
+gawk 'BEGIN\{OFS="\\t"\}
+      \{if ($4 < STOPant+500 ) \{
            $4=STARTant;
            $9=gene_ant"_"$9;
-           if ($5<STOPant){
-             $5=STOPant;}
-       } else if (NR!=1)
-           print "chr22\tsanger\tGENE\t" STARTant "\t" STOPant "\t.\t" STRAND "\t.\t" gene_ant;
+           if ($5<STOPant)\{
+             $5=STOPant;\}
+       \} else if (NR!=1)
+           print "chr22\\tsanger\\tGENE\\t" STARTant "\\t" STOPant "\\t.\\t" STRAND "\\t.\\t" gene_ant;
        STARTant=$4;STOPant=$5; gene_ant=$9;STRAND=$7;
-       }
-       END{
-         print "chr22\tsanger\tGENE\t" STARTant "\t" STOPant "\t.\t" STRAND "\t.\t" gene_ant;
-       }' | \
-gawk 'BEGIN{OFS="\t"}{$3="Annotation";$9=NR;print;}' > $ODIR/evidences/chr22 ;
+       \}
+       END\{
+         print "chr22\\tsanger\\tGENE\\t" STARTant "\\t" STOPant "\\t.\\t" STRAND "\\t.\\t" gene_ant;
+       \}' | \\
+gawk 'BEGIN\{OFS="\\t"\}\{$3="Annotation";$9=NR;print;\}' > $ODIR/evidences/chr22 ;
 # (726evidences)
-@
+\nwendcode{}\nwbegindocs{11}\nwdocspar
 
 \subsctn{Preparing masked sequences}
 
-<<BASH commands DATASETS>>=
+\nwenddocs{}\nwbegincode{12}\sublabel{NWHum17-BASM-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM-4}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWHum17-BASM-1}}}\plusendmoddef
 #
-# perl -ne 'BEGIN{ print ">bigseq\n"; } 
-#           $_ !~ /^>|^\s*$/o && print ;
+# perl -ne 'BEGIN\{ print ">bigseq\\n"; \} 
+#           $_ !~ /^>|^\\s*$/o && print ;
 #          ' $INDIR/*.fa
 #
 # Merging masked sequences
 ODIR="$DATASETS/fasta/masked" ;
 counter=0 ; # fix for missing counter values on file names...(i.e. line674)
 while [ -e "$IDIR/chr22_$counter.masked" ] ;
-  do {
+  do \{
     echo "### Processing $IDIR/chr22_$counter.masked" 1>&2 ;
-    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter.masked | \
+    gawk '$0 !~/^>|^[ \\t]*$/ \{print $0\}' $IDIR/chr22_$counter.masked | \\
         perl -e ' # Removing "N"bp from overlapping sequences
             $seq=""; $count= shift @ARGV; $bases= shift @ARGV;
-            while (<>) { chomp; $seq.=$_; };
+            while (<>) \{ chomp; $seq.=$_; \};
             $count > 0 && ($out=substr($seq,$bases)) || ($out=$seq);
             ($i,$e) = (1, length($out));
-            while ($i<=$e) { print substr($out,$i-1,60)."\n"; $i += 60; };
+            while ($i<=$e) \{ print substr($out,$i-1,60)."\\n"; $i += 60; \};
           ' $counter 1000 - ;
     counter=`expr $counter + 100000` ;
-    } ;
+    \} ;
   done |  (echo ">chr22"; cat -) > $ODIR/chr22.tmp ;
 perl -e ' # Reformatting fasta sequence
     use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
     use Bio::Seq;
     use Bio::SeqIO;
-    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDIN );
-    my $seqout = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDOUT);
-    while (my $sequence = $seqin->next_seq()) {
+    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \\*STDIN );
+    my $seqout = Bio::SeqIO->new(-format => "largefasta", -fh => \\*STDOUT);
+    while (my $sequence = $seqin->next_seq()) \{
         $seqout->write_seq($sequence);
-    }; # while
+    \}; # while
     exit(0);
-  ' < $ODIR/chr22.tmp | \
-  gawk '($0 !~/^>|^[ \t]*$/ || NR==1) {print $0}' - > $ODIR/chr22 ;
+  ' < $ODIR/chr22.tmp | \\
+  gawk '($0 !~/^>|^[ \\t]*$/ || NR==1) \{print $0\}' - > $ODIR/chr22 ;
 # looking for errors...
 wc $ODIR/chr22* ;
    953256  953255 48615924 _tmp/MichaelBrent/chr22.fa
    794538  794538 48457206 chr22/fasta/masked/chr22.tmp
    794379  794379 48457047 chr22/fasta/masked/chr22
-gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22.tmp | wc ;
+gawk 'length($0)!=60 \{print NR, $0\}' $ODIR/chr22.tmp | wc ;
       478     956   22823
-gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22 | wc ;
+gawk 'length($0)!=60 \{print NR, $0\}' $ODIR/chr22 | wc ;
        2       4      59
     :: 000001 >chr22
     :: 794379 GGTATGGCGGGAAGGAGGCTGGTGCCAGAGTGGATTCGGATT
-perl -ne 'chomp; /^\s*$/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
-perl -ne 'chomp;    /^>/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
-grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr | \
-  perl -ane 'BEGIN{$cnt=0}
-             print "@F\n"; $cnt+=$F[0];
-             END{print "$cnt TOTAL BP\n"}' ;
+perl -ne 'chomp; /^\\s*$/o && print "$. \\"$_\\"\\n"' $ODIR/chr22 ;
+perl -ne 'chomp;    /^>/o && print "$. \\"$_\\"\\n"' $ODIR/chr22 ;
+grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr | \\
+  perl -ane 'BEGIN\{$cnt=0\}
+             print "@F\\n"; $cnt+=$F[0];
+             END\{print "$cnt TOTAL BP\\n"\}' ;
      27534498 N
       5144849 A
       5124474 T
@@ -797,9 +797,9 @@ grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr | \
      47662662 TOTAL BP
 ## Masked sequences
 #
-@ 
+\nwendcode{}\nwbegindocs{13}\nwdocspar
 
-<<BASH commands DATASETS>>=
+\nwenddocs{}\nwbegincode{14}\sublabel{NWHum17-BASM-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM-5}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWHum17-BASM-1}}}\plusendmoddef
 #
 # MASKING FASTA SEQUENCES
 ChckDirs $DATASETS/masking ;
@@ -812,30 +812,30 @@ ChckDirs $ODIR $ODIR/gff $ODIR/gff-projection $ODIR/logs ;
 max=48000000 ; # it is 47600000 but just to ensure...
 counter=0 ;
 while [ $counter -le $max ] ;
-  do {
+  do \{
     echo "### COUNTER: $counter" 1>&2 ;
     if [ -e "$IDIR/chr22_$counter.out" ] ;
       then
         echo "### Processing $IDIR/chr22_$counter.out" 1>&2 ;
-        gawk 'BEGIN{ OFS="\t"; cnt=ARGV[1]; ARGV[1]=""; }
-          {
+        gawk 'BEGIN\{ OFS="\\t"; cnt=ARGV[1]; ARGV[1]=""; \}
+          \{
             str = ($9!="C") ? "+" : "-";
             $6+=cnt; $7+=cnt;
-            if ($1~/^[0-9]+$/) {
-              print "chr22\tRepeatMasker",
+            if ($1~/^[0-9]+$/) \{
+              print "chr22\\tRepeatMasker",
                     $11,$6,$7,$1,str,".",$10"."NR-3,"# "$5;
-            } else {
+            \} else \{
               print $0 | "cat 1>&2";
-            };
-          }' $counter $IDIR/chr22_$counter.out ;
+            \};
+          \}' $counter $IDIR/chr22_$counter.out ;
       fi;
     counter=`expr $counter + 100000` ;
-    } ;
+    \} ;
   done > $ODIR/gff/chr22 ;
-gawk '{print $3}' $ODIR/gff/chr22 | sort | uniq -c | sort -nr \
+gawk '\{print $3\}' $ODIR/gff/chr22 | sort | uniq -c | sort -nr \\
                 > $ODIR/repeat_summary ;
 #
-@ 
+\nwendcode{}\nwbegindocs{15}\nwdocspar
 
 There are 65307 masked regions in the whole {\chr} sequence.
 
@@ -848,11 +848,11 @@ There are 65307 masked regions in the whole {\chr} sequence.
 
 {\tbx} results provided by Pankaj must be parsed and mapped to the corresponding coords in the {\chr} sequence. The reason for such mapping is that we have multiple 100Kbp fragments from the original chromosomic sequence, which were used to run {\tbx} against mouse WGS-3X database. We had to deal with the frame issue of the HSPs fragments; once the HSP coords were mapped to the chromosome, frames also must be recomputed taking into account if HSP was in forward or in reverse strand (see figure~\ref{fig:blastframes}).
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{16}\sublabel{NWHum17-BASM.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\endmoddef
 #
 # RUNNING TBLASTX
-ChckDirs $ANALYSIS/blast $ANALYSIS/blast/wublast.tblastx \
-         $ANALYSIS/blast/wublast.tblastx/masked3X \
+ChckDirs $ANALYSIS/blast $ANALYSIS/blast/wublast.tblastx \\
+         $ANALYSIS/blast/wublast.tblastx/masked3X \\
          $ANALYSIS/blast/wublast.tblastx/masked3X+ ;
 #
 # Filtering HSPs from tblastx output (Pankaj)
@@ -864,28 +864,28 @@ ChckDirs $ODIR $ODIR/out $ODIR/gff $ODIR/aplot $ODIR/ps $ODIR/logs ;
 max=47600000 ;
 counter=0 ;
 while [ $counter -le $max ] ;
-  do {
+  do \{
     echo "### COUNTER: $counter" 1>&2 ;
     if [ -e "$IDIR/chr22_$counter" ] ;
       then
         echo "### RUNNING PARSEBLAST on $IDIR/chr22_$counter" 1>&2 ;
-        gawk '$1~/^>/ { $1=$1":"$2; gsub(/[\|]/,":",$1); }
-                      { print $0; }' $IDIR/chr22_$counter | \
-        parseblast --fullgff --full-scores --comments --verbose --bit-score - \
-                   2> $ODIR/logs/parseblast.chr22_$counter | \
-        gawk 'BEGIN{ OFS="\t";
+        gawk '$1~/^>/ \{ $1=$1":"$2; gsub(/[\\|]/,":",$1); \}
+                      \{ print $0; \}' $IDIR/chr22_$counter | \\
+        parseblast --fullgff --full-scores --comments --verbose --bit-score - \\
+                   2> $ODIR/logs/parseblast.chr22_$counter | \\
+        gawk 'BEGIN\{ OFS="\\t";
                      c=ARGV[1]; SEQlen=ARGV[2]; ARGV[1]=ARGV[2]="";
-                     frame[0]=3; frame[1]=1; frame[2]=2; }
-              $0 !~ /^[ \t]*$/ {
+                     frame[0]=3; frame[1]=1; frame[2]=2; \}
+              $0 !~ /^[ \\t]*$/ \{
                   $1="chr22"; $4+=c; $5+=c;
-                  if ($7=="-") { $8=frame[((SEQlen - $5 + 1) % 3)] }
-                  else { $8=frame[($4 % 3)] };
+                  if ($7=="-") \{ $8=frame[((SEQlen - $5 + 1) % 3)] \}
+                  else \{ $8=frame[($4 % 3)] \};
                   print $0;
-              }' $counter 47662662 - ;
+              \}' $counter 47662662 - ;
       fi;
     counter=`expr $counter + 100000` ;
-    } ;
-  done | gawk '$3 =="hsp" {print}' | sort +3n -6 +6 -7 > $ODIR/gff/chr22 ; 
+    \} ;
+  done | gawk '$3 =="hsp" \{print\}' | sort +3n -6 +6 -7 > $ODIR/gff/chr22 ; 
                                                        # $ODIR/gff/chr22.frame
 #
 diff chr22.old chr22 | grep "<" | wc
@@ -893,7 +893,7 @@ diff chr22.old chr22 | grep "<" | wc
 wc chr22*
  192721 7901561 48561489 chr22
 # There were 43281 HSPs with wrong frame
-@
+\nwalsodefined{\\{NWHum17-BASM.2-2}\\{NWHum17-BASM.2-3}\\{NWHum17-BASM.2-4}\\{NWHum17-BASM.2-5}\\{NWHum17-BASM.2-6}\\{NWHum17-BASM.2-7}\\{NWHum17-BASM.2-8}\\{NWHum17-BASM.2-9}\\{NWHum17-BASM.2-A}\\{NWHum17-BASM.2-B}\\{NWHum17-BASM.2-C}\\{NWHum17-BASM.2-D}\\{NWHum17-BASM.2-E}\\{NWHum17-BASM.2-F}}\nwused{\\{NWHum17-SGPA-1}}\nwendcode{}\nwbegindocs{17}\nwdocspar
 
 \newcommand{\tss}[1]{\textsf{\scriptsize #1}}
 \newcommand{\msf}[1]{\mbox{\textsf{\footnotesize #1}}}
@@ -996,7 +996,7 @@ where \:\:\: \msf{rev\_comp(pos,LAST)} = \msf{LAST} - \msf{pos} + 1\\
 \end{figure}
 
 \begin{comment}
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{18}\sublabel{NWHum17-BASM.2-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-2}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # Preparing files for Jim Kent
 ODIR="$ANALYSIS/blast/wublast.tblastx" ;
@@ -1004,22 +1004,22 @@ ODIR="$ANALYSIS/blast/wublast.tblastx" ;
 EXP="tbx_chr22_3X+" ;
 ChckDirs $ODIR/$EXP ;
 perl -ane '($F[8]=$F[9])=~ s/[";]//og; 
-           print STDOUT (join("\t",@F[0 .. 8]))."\n";
-          ' $ANALYSIS/blast/wublast.tblastx/masked3X+/gff/chr22 \
+           print STDOUT (join("\\t",@F[0 .. 8]))."\\n";
+          ' $ANALYSIS/blast/wublast.tblastx/masked3X+/gff/chr22 \\
           > $ODIR/$EXP/chr22.hsp ;
 # cp $ANALYSIS/sgp/Hsap.masked.3X+/sr/chr22 $ODIR/chr22.sr ;
 cp $ANALYSIS/sgp/Hsap.masked.3X+.fix/sr/chr22 $ODIR/$EXP/chr22.sr ;
-gawk 'BEGIN{n="#\n## Filtered from chr22.sr - Score Cutoff: <26\n#"}
-      $6>=26 {print $0}
-      $0 ~ /^#/ {
-         if ($2=="Created") {$0=$0"\n"n};
+gawk 'BEGIN\{n="#\\n## Filtered from chr22.sr - Score Cutoff: <26\\n#"\}
+      $6>=26 \{print $0\}
+      $0 ~ /^#/ \{
+         if ($2=="Created") \{$0=$0"\\n"n\};
          print $0;
-      }' $ODIR/$EXP/chr22.sr > $ODIR/$EXP/chr22.sr-rs ;
+      \}' $ODIR/$EXP/chr22.sr > $ODIR/$EXP/chr22.sr-rs ;
 pushd $ODIR ;
 star $EXP.tar.gz $EXP ; # move to ftp dir...
 popd ;
 #
-@
+\nwendcode{}\nwbegindocs{19}\nwdocspar
 \end{comment}
 
 \begin{description}
@@ -1036,31 +1036,31 @@ popd ;
     -filter=xnu
     -matrix=blosum62mod
 \end{verbatim}
-<<HIDE: BASH commands>>=
-#
-ls -1 chr22_* | while read n ;
-  do {
-    perl -ne 'BEGIN{$prt=0};
-      $_ =~ s/^(Parameters):/$1/o && ($prt=1);
-      s/:\s+/= /o;
-      $prt && print $_' $n;
-    } ; 
-  done | perl -ne '$follow=0;
-      $_ =~ /^\s+([^\s].*?)=(.*)$/ && ($v=$1,$c=$2,$follow=1);
-      $follow || next;
-      defined($vars{$v}) || do {
-          push @{ $vars{$v} }, $c;
-      };
-      (grep (/^$c$/, @{ $vars{$v} })>0) || do {
-          push @{ $vars{$v} }, $c;
-      };
-      END{
-        foreach $n (keys %vars) {
-            print "$n :: ".(join(" * ", @{ $vars{$n} }))."\n";
-        };
-      }' - > kk
-#
-@
+\nwenddocs{}%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+\nwbegindocs{21}\nwdocspar
 
 \item[From Pankaj:]
 In addition to the topcombon=4, another difference between the 2 analysis, we use the masked WGS from NCBI and removed all mouse sequences that did not have at leat 50 bp contiguous of unmasked mosue sequence. Thus, the effective mouse WGS database size was 10,513,154 sequences; 6,054,167,851 total letters. But presumably this is a more enriched source (slightly more X coverage), so sensitivity should be slightly higher as observed.
@@ -1078,7 +1078,7 @@ Hsap_BTK   TBLASTX HSP  66384 67763 1031.0 + 3 0
 
 We check if we did right mapping to the chromosome coords the HSPs filtered from the multiple blast-output files (computed on 100Kbp length subsequences from the {\chr}).
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{22}\sublabel{NWHum17-BASM.2-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-3}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # Checking filtered blast results
 #
@@ -1117,21 +1117,21 @@ perl -e ' # geting fragments of large fasta sequence
     use Bio::SeqIO;
     @coord_pairs = ( 13393381, 13393968,
                      13393966, 13394019 );
-    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDIN );
-    my $seqout = Bio::SeqIO->new(-format => "fasta", -fh => \*STDOUT);
-    while (my $sequence = $seqin->next_seq()) {
-        for (my $p = 0; $p <= $#coord_pairs; $p+=2) {
+    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \\*STDIN );
+    my $seqout = Bio::SeqIO->new(-format => "fasta", -fh => \\*STDOUT);
+    while (my $sequence = $seqin->next_seq()) \{
+        for (my $p = 0; $p <= $#coord_pairs; $p+=2) \{
             my ($o,$e,$subseq);
             $subseq = Bio::Seq->new();
             ($o,$e) = @coord_pairs[$p..($p + 1)];
             $subseq = $sequence->trunc($o,$e); # ($o,($e - $o + 1)));
-            $subseq->display_id("chr22\_$o\_$e");
+            $subseq->display_id("chr22\\_$o\\_$e");
             $subseq = $subseq->revcom();
             $seqout->write_seq($subseq);
             $subseq = $subseq->translate;
             $seqout->write_seq($subseq);
-        }; # for
-    }; # while
+        \}; # for
+    \}; # while
     exit(0);
   ' < $DATASETS/fasta/masked/chr22 ;
 #
@@ -1185,7 +1185,7 @@ change it to
 
 This is of course a workaround, but should take care of things.  
 #
-@ 
+\nwendcode{}\nwbegindocs{23}\nwdocspar
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1197,13 +1197,13 @@ We analyzed the {\data} sequence dataset with different gene-prediction tools an
 
 \subsctn{Gene-prediction evaluation}
 
-<<BASH Functions: Gene-Prediction Evaluation>>=
+\nwenddocs{}\nwbegincode{24}\sublabel{NWHum17-BASg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASg-1}}}\moddef{BASH Functions: Gene-Prediction Evaluation~{\nwtagstyle{}\subpageref{NWHum17-BASg-1}}}\endmoddef
 #
 # PREPARING EVALUATION STUFF
 export GENEIDVERSION="geneid v1.1" ;
 #
 run_evaluation ()
-{
+\{
   #
   # USAGE:
   #     run_evaluation #chrom program param prog_results_dir annotation_dir testset
@@ -1217,35 +1217,35 @@ run_evaluation ()
   RESULTS="$BASE/gff/chr$CHR" ;
   SUBSET="$6" ;
   TESTSET="$5/chr$CHR" ;
-  LONG_OUTPUT="$BASE/eval_$prog.$RUN.chr${CHR}_$SUBSET" ;
-  SHORT_OUTPUT="$BASE/eval_${prog}_brief.$RUN.chr${CHR}_$SUBSET" ;
-  GVER="------------------------- <${GENEIDVERSION}> -------------------------";
+  LONG_OUTPUT="$BASE/eval_$prog.$RUN.chr$\{CHR\}_$SUBSET" ;
+  SHORT_OUTPUT="$BASE/eval_$\{prog\}_brief.$RUN.chr$\{CHR\}_$SUBSET" ;
+  GVER="------------------------- <$\{GENEIDVERSION\}> -------------------------";
   # EVALUATION tool command-line options:
   #  -v: Verbose. Print all messages
   #  -a: Average. Print average stats (more than 1 sequence)
   #  -t: Total. Print total stats (more than 1 sequence)
   #  -s: Short. Print a short output
-  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
     echo "### $LONG_OUTPUT" ; echo "###" ;
     echo "### "`whoami`" - "`date` ; echo "###" ;
-    echo "### $GVER" ; echo "###" ; } > $LONG_OUTPUT ;
+    echo "### $GVER" ; echo "###" ; \} > $LONG_OUTPUT ;
   $SGPBIN/evaluation -ta $RESULTS $TESTSET >> $LONG_OUTPUT ;
-  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
     echo "### $SHORT_OUTPUT" ; echo "###" ;
     echo "### "`whoami`" - "`date` ; echo "###" ;
-    echo "### $GVER" ; echo "###" ; } > $SHORT_OUTPUT ;
+    echo "### $GVER" ; echo "###" ; \} > $SHORT_OUTPUT ;
   $SGPBIN/evaluation -tsa $RESULTS $TESTSET >> $SHORT_OUTPUT ;
-}
+\}
 #
-@ 
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{25}\nwdocspar
 
 \subsctn{Running {\gnid}} 
 
-<<BASH Functions: Running GENEID>>=
+\nwenddocs{}\nwbegincode{26}\sublabel{NWHum17-BASU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASU-1}}}\moddef{BASH Functions: Running GENEID~{\nwtagstyle{}\subpageref{NWHum17-BASU-1}}}\endmoddef
 #
 # RUNNING GENEID
 run_GENEID () 
-{
+\{
   #
   # run_GENEID - Running GENEID on a chromosome
   #
@@ -1256,8 +1256,8 @@ run_GENEID ()
 ##  GENEID="/projects/sgp/param/geneid/human3iso.param" ;
 ##  CMD="/projects/sgp/bin/geneid -vG" ;
   version=$4 ;
-  [ "$version" ] || { 
-      echo "### Running version 1.0 by default"; version="1.0"; };
+  [ "$version" ] || \{ 
+      echo "### Running version 1.0 by default"; version="1.0"; \};
   if [ "$version" == "1.0" ] ;
     then 
       GENEID="/usr/local/molbio/Install/geneid_v1.0/param/human3iso.param" ;
@@ -1281,20 +1281,20 @@ run_GENEID ()
   # Checking if DIRS does EXIST
   ChckDirs $MAIN $BASE ;
   for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
-    do { ChckDirs $BASE/$c ; } ; done ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
   #
   # Run program
   echo "### Running $PROG on $locus ..." 1>&2 ;
   $CMD $ISEQ/$locus > $ODIR/$locus 2> $EDIR/$locus ;
-  cp $ODIR/$locus $ODIR/$locus.${prog}_v$version ;
+  cp $ODIR/$locus $ODIR/$locus.$\{prog\}_v$version ;
   #
-  { echo "###"; echo "### Execution time for [$0] : $SECONDS secs"; 
-    echo "###"; } 1>&2;
-}
+  \{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs"; 
+    echo "###"; \} 1>&2;
+\}
 #
-@
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{27}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{28}\sublabel{NWHum17-BASM.2-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-4}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # Testing on Hsap_BTK
 run_GENEID test /projects/datasets/orthologous/fasta/masked Hsap_BTK 1.0 ;
@@ -1303,11 +1303,11 @@ enscript -1C -Gjf Courier7 -M A4 gff/Hsap_BTK.geneid_v1.0 ;
 run_GENEID test /projects/datasets/orthologous/fasta/masked Hsap_BTK 1.1 ;
 enscript -1C -Gjf Courier7 -M A4 gff/Hsap_BTK.geneid_v1.1 ;
 #
-@ 
+\nwendcode{}\nwbegindocs{29}\nwdocspar
 
 \subsubsctn{{\gnid} on raw sequences} 
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{30}\sublabel{NWHum17-BASM.2-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-5}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # Raw sequences
 run_GENEID Hsap.raw $DATASETS/fasta/raw chr22 1.0 ;
@@ -1321,11 +1321,11 @@ run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/set/cds 
 run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/set/exons VH_exons ;
 run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo ;
 #
-@ 
+\nwendcode{}\nwbegindocs{31}\nwdocspar
  
 \subsubsctn{{\gnid} on masked sequences} 
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{32}\sublabel{NWHum17-BASM.2-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-6}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # Masked sequences
 run_GENEID Hsap.masked $DATASETS/fasta/masked chr22 1.0 ;
@@ -1345,15 +1345,15 @@ run_evaluation 22 geneid Hsap.masked.gnid_fix $ANALYSIS/geneid $DATASETS/annotat
 run_evaluation 22 geneid Hsap.masked.gnid_fix $ANALYSIS/geneid $DATASETS/annotation/set/exons VH_exons ;
 run_evaluation 22 geneid Hsap.masked.gnid_fix $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo ;
 # The same resuls were obtained with the old and the new geneid.
-@ 
+\nwendcode{}\nwbegindocs{33}\nwdocspar
 
 \subsctn{Running {\gnid} with annotation evidences}
 
-<<BASH Functions: Running GENEID + Evidences>>=
+\nwenddocs{}\nwbegincode{34}\sublabel{NWHum17-BASg.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASg.2-1}}}\moddef{BASH Functions: Running GENEID + Evidences~{\nwtagstyle{}\subpageref{NWHum17-BASg.2-1}}}\endmoddef
 #
 # RUNNING SGP
 run_GENEIDevidences () 
-{
+\{
   #
   # run_GENEIDevidences - Running geneid for a given sequence set
   #
@@ -1379,7 +1379,7 @@ run_GENEIDevidences ()
   # Checking if DIRS does EXIST
   ChckDirs $MAIN $BASE ;
   for c in hsp sr hsp-rs geneid_format tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
-    do { ChckDirs $BASE/$c ; } ; done ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
   #
   # Running SGP TOOL ############################### Excerpt from 
   # export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
@@ -1388,49 +1388,49 @@ run_GENEIDevidences ()
   GENEID="$GNDBIN/bin/geneid" ;
   PARAM="$GNDBIN/src/geneid_v1.1/param/human3iso.param" ;
   echo "### Running geneid" ;
-  $GENEID -v -D -E $EW -P $PARAM \
-          -R $EVIDENCES $ISEQ/$locus \
+  $GENEID -v -D -E $EW -P $PARAM \\
+          -R $EVIDENCES $ISEQ/$locus \\
           2>&1 > $BASE/geneid_format/$locus | tee $BASE/logs/geneid.$locus ;
   # Running SGP TOOL ############################### 
-  { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
-    echo "###"; } 1>&2;
-}
+  \{ echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
+    echo "###"; \} 1>&2;
+\}
 #
-@ 
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{35}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{36}\sublabel{NWHum17-BASM.2-7}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-7}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # running geneid with evidences
-run_GENEIDevidences Hsap.masked.evid $DATASETS/fasta/masked \
+run_GENEIDevidences Hsap.masked.evid $DATASETS/fasta/masked \\
            $DATASETS/annotation/fixed/chr22.evidences chr22 ;
 #
-run_GENEIDevidences Hsap.masked.evid_VH $DATASETS/fasta/masked \
+run_GENEIDevidences Hsap.masked.evid_VH $DATASETS/fasta/masked \\
            $DATASETS/annotation/set/evidences/chr22 chr22 ;
 #
 # After modifications due a bug in geneid 1.1 we executed again it to detect if it works properly. 
 # The evidences were also modified, all the length evidences are multiple of 3, and we force the frame to 0 to avoid problems. Odl evidences were moved to  $DATASETS/annotation/set/evidences/chr22.old
-run_GENEIDevidences Hsap.masked.gnid_fix.evid $DATASETS/fasta/masked \
+run_GENEIDevidences Hsap.masked.gnid_fix.evid $DATASETS/fasta/masked \\
            $DATASETS/annotation/set/evidences/chr22 chr22 ;
 
 # IDIR="$ANALYSIS/geneid/Hsap.masked.evid" ;
 # IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
 IDIR="$ANALYSIS/geneid/Hsap.masked.gnid_fix.evid" ;
 geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
-sort +3n +4n -5 $IDIR/gff/chr22_* \
+sort +3n +4n -5 $IDIR/gff/chr22_* \\
               > $IDIR/gff/chr22 ; 
-gawk '{print $9}' $IDIR/gff/chr22 | sort | uniq -c | \
+gawk '\{print $9\}' $IDIR/gff/chr22 | sort | uniq -c | \\
      sort -nr > $IDIR/gff/chr22.gene_list ;
 # 
-@
+\nwendcode{}\nwbegindocs{37}\nwdocspar
 
 
 \subsctn{Running {\sgp}}
 
-<<BASH Functions: Running SGP>>=
+\nwenddocs{}\nwbegincode{38}\sublabel{NWHum17-BASR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASR-1}}}\moddef{BASH Functions: Running SGP~{\nwtagstyle{}\subpageref{NWHum17-BASR-1}}}\endmoddef
 #
 # RUNNING SGP
 run_mod_SGP () 
-{
+\{
   #
   # run_mod_SGP - Running SGP for a given sequence set
   #
@@ -1456,7 +1456,7 @@ run_mod_SGP ()
   # Checking if DIRS does EXIST
   ChckDirs $MAIN $BASE ;
   for c in hsp sr hsp-rs tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
-    do { ChckDirs $BASE/$c ; } ; done ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
   #
   # Running SGP TOOL ############################### Excerpt from 
   # export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
@@ -1482,27 +1482,27 @@ run_mod_SGP ()
   WTBXT=0.30 ; # weigth of tblastx score
   LSEQ=$5 ;
   echo "### Building $BASE/tmp/$locus.termini file" ;
-  gawk "BEGIN{ printf \"%s\t%s\t%s\t%d\t%d\t%s\t%1s\t%1d\\n\", 
-              \"$locus\", \"force\", \"cap\", -2, 0, \".\",  
-              \"+\", 0}" > $BASE/tmp/$locus.termini ;
-  gawk "BEGIN{ printf \"%s\t%s\t%s\t%d\t%d\t%s\t%1s\t%1d\\n\", 
-              \"$locus\", \"force\", \"poly\", $LSEQ - 1, $LSEQ - 1,
-              \".\", \"+\", 0}" >> $BASE/tmp/$locus.termini ;
+  gawk "BEGIN\{ printf \\"%s\\t%s\\t%s\\t%d\\t%d\\t%s\\t%1s\\t%1d\\\\n\\", 
+              \\"$locus\\", \\"force\\", \\"cap\\", -2, 0, \\".\\",  
+              \\"+\\", 0\}" > $BASE/tmp/$locus.termini ;
+  gawk "BEGIN\{ printf \\"%s\\t%s\\t%s\\t%d\\t%d\\t%s\\t%1s\\t%1d\\\\n\\", 
+              \\"$locus\\", \\"force\\", \\"poly\\", $LSEQ - 1, $LSEQ - 1,
+              \\".\\", \\"+\\", 0\}" >> $BASE/tmp/$locus.termini ;
   echo "### Running blast2gff" ;
-  $PROBIN/blast2gff -g $HSPs/$locus > $BASE/sr/$locus \
+  $PROBIN/blast2gff -g $HSPs/$locus > $BASE/sr/$locus \\
           2> $BASE/logs/geneid_sgp.$locus ;
-  gawk "\$6 > $S_CUTOFF {
-          \$6 = (\$6-$DSC)*$WTBX; \$4=\$4+$SHSP; \$5=\$5-$SHSP; print \$0;
-        }" < $BASE/sr/$locus > $BASE/hsp-rs/$locus ;
+  gawk "\\$6 > $S_CUTOFF \{
+          \\$6 = (\\$6-$DSC)*$WTBX; \\$4=\\$4+$SHSP; \\$5=\\$5-$SHSP; print \\$0;
+        \}" < $BASE/sr/$locus > $BASE/hsp-rs/$locus ;
   echo "### Running geneid" ;
-  { $GENEID -v -E $EW -GP $PARAM -S $BASE/hsp-rs/$locus \
-          -R $BASE/tmp/$locus.termini $ISEQ/$locus | grep -v evidence \
+  \{ $GENEID -v -E $EW -GP $PARAM -S $BASE/hsp-rs/$locus \\
+          -R $BASE/tmp/$locus.termini $ISEQ/$locus | grep -v evidence \\
           > $BASE/gff/$locus ;
-    } 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
+    \} 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
   # Running SGP TOOL ############################### 
-  { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
-    echo "###"; } 1>&2;
-} 
+  \{ echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
+    echo "###"; \} 1>&2;
+\} 
 #
 # Geneid compiled on ik13 but when running on monstre we got this:
 #
@@ -1510,26 +1510,26 @@ run_mod_SGP ()
 #    /lib/libc.so.6: version 'GLIBC_2.1.3' not found 
 #    (required by /home/ug/gparra/Research/selfgenome/bin/geneid)
 #
-@ 
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{39}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{40}\sublabel{NWHum17-BASM.2-8}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-8}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 ####
 #### Roderic's TESTS on a SGP variant #'
 #
 # testing on Hsap_BTK
-run_mod_SGP Hsap.masked /projects/datasets/orthologous/fasta/masked \
-        /projects/sgp/orthologous/sgp/rguigo.masked3X_pankaj_W5/hsp \
+run_mod_SGP Hsap.masked /projects/datasets/orthologous/fasta/masked \\
+        /projects/sgp/orthologous/sgp/rguigo.masked3X_pankaj_W5/hsp \\
         Hsap_BTK 78931 ;
 enscript -1C -Gjf Courier7 -M A4 $ANALYSIS/sgp/Hsap.masked/gff/Hsap_BTK ;
 #
 # SGP on Masked chr22 sequence
-run_mod_SGP Hsap.masked $DATASETS/fasta/masked \
+run_mod_SGP Hsap.masked $DATASETS/fasta/masked \\
         $ANALYSIS/blast/wublast.tblastx/masked3X/gff chr22 47662662 ;
 run_evaluation 22 sgp Hsap.masked $ANALYSIS/sgp $DATASETS/annotation/all all ;
 run_evaluation 22 sgp Hsap.masked $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
 #
-run_mod_SGP Hsap.masked.frame $DATASETS/fasta/masked \
+run_mod_SGP Hsap.masked.frame $DATASETS/fasta/masked \\
         $ANALYSIS/blast/wublast.tblastx/masked3X/gff chr22 47662662 ;
 run_evaluation 22 sgp Hsap.masked.frame $ANALYSIS/sgp $DATASETS/annotation/all all ;
 run_evaluation 22 sgp Hsap.masked.frame $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
@@ -1537,13 +1537,13 @@ run_evaluation 22 sgp Hsap.masked.frame $ANALYSIS/sgp $DATASETS/annotation/fixed
 export GENEIDVERSION="geneid v1.1" ;
 #
 # We have fixed frames and run on 19Mreads
-run_mod_SGP Hsap.masked.3X+ $DATASETS/fasta/masked \
+run_mod_SGP Hsap.masked.3X+ $DATASETS/fasta/masked \\
         $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr22 47662662 ;
 run_evaluation 22 sgp Hsap.masked.3X+ $ANALYSIS/sgp $DATASETS/annotation/all all ;
 run_evaluation 22 sgp Hsap.masked.3X+ $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
 #
 # We have fixed frames for reverse strand too
-run_mod_SGP Hsap.masked.3X+.fix $DATASETS/fasta/masked \
+run_mod_SGP Hsap.masked.3X+.fix $DATASETS/fasta/masked \\
         $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr22 47662662 ;
 run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
 run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds ;
@@ -1551,7 +1551,7 @@ run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set
 run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set/pseudo VH_pseudo ;
 #
 # We have modified geneid 1.1 source (frame remainder problem)
-run_mod_SGP Hsap.masked.3X+.fix.gnid_fix $DATASETS/fasta/masked \
+run_mod_SGP Hsap.masked.3X+.fix.gnid_fix $DATASETS/fasta/masked \\
         $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr22 47662662 ;
 run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
 run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds ;
@@ -1559,62 +1559,62 @@ run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annot
 run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/pseudo VH_pseudo ;
 #
 
-@ 
+\nwendcode{}\nwbegindocs{41}\nwdocspar
 
 \subsctn{Gene-prediction statistics}
 
 See table~\ref{tbl:genepredresults} on page~\pageref{tbl:genepredresults}, for a summary of gene prediction statistics.
 
-<<BASH Gene Prediction Stats>>=
+\nwenddocs{}\nwbegincode{42}\sublabel{NWHum17-BASQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASQ.2-1}}}\moddef{BASH Gene Prediction Stats~{\nwtagstyle{}\subpageref{NWHum17-BASQ.2-1}}}\endmoddef
 #
 echo "### BUILDING GENE PREDICTION STATS LaTeX TABLE..." ;
 perl -ne '
-      BEGIN{
+      BEGIN\{
         @header = qw/ Test SN SP CC SNe SPe SNSP raME raWE
                            SNg SPg SNSPg raMG raWG raJG raSG / ;
-        for ($j=0; $j<=$#header; $j++) {
-          $header{$j} = "\\textbf\{$header{$j}\}";
-        };
-        print STDOUT "\\begin{tabular}{|c*{15}{|r}|}\\hline\n".
-                     join("\&", @header)."\\\\\\hline\n";
+        for ($j=0; $j<=$#header; $j++) \{
+          $header\{$j\} = "\\\\textbf\\\{$header\{$j\}\\\}";
+        \};
+        print STDOUT "\\\\begin\{tabular\}\{|c*\{15\}\{|r\}|\}\\\\hline\\n".
+                     join("\\&", @header)."\\\\\\\\\\\\hline\\n";
         $n = 0;
-      }
+      \}
       chomp;
-      $_ =~ m%^### /projects%o && do {
-        $_ =~ s/(_)/\\$1/og;
-        @file = split /\//og, $_;
-        $file = "\\parbox\[c\]\[6ex\]\[c\]\{7cm\}\{\\centering".
-                "\\shortstack\{\\texttt\{\\bfseries $file[($#file-2)]\} ".
-                "\$\\rightarrow\$ $file[($#file-1)]\\\\\[-0.25ex\]($file[$#file])\}\}\n";
-      }; 
-      $_ =~ s%^\s+chr22\s+%%o    && do {
-        ($n%3==0) && print STDOUT "\\hline\n";
+      $_ =~ m%^### /projects%o && do \{
+        $_ =~ s/(_)/\\\\$1/og;
+        @file = split /\\//og, $_;
+        $file = "\\\\parbox\\[c\\]\\[6ex\\]\\[c\\]\\\{7cm\\\}\\\{\\\\centering".
+                "\\\\shortstack\\\{\\\\texttt\\\{\\\\bfseries $file[($#file-2)]\\\} ".
+                "\\$\\\\rightarrow\\$ $file[($#file-1)]\\\\\\\\\\[-0.25ex\\]($file[$#file])\\\}\\\}\\n";
+      \}; 
+      $_ =~ s%^\\s+chr22\\s+%%o    && do \{
+        ($n%3==0) && print STDOUT "\\\\hline\\n";
         $n++;
-        @field = split /\s+/og, $_;
-        print STDOUT "$file \& ".join(" \& ",@field)."\\\\\[2ex\]\n" ;
-      }; 
-      END{
-        print STDOUT "\\hline\n\\end{tabular}\n";
-      }' \
-  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_fixed \
-  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_fixed \
-  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_fixed \
-\
-  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_cds \
-  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_cds \
-  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_cds \
-\
-  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_exons \
-  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_exons \
-  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_exons \
-\
-  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_pseudo \
-  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_pseudo \
-  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_pseudo \
-\
+        @field = split /\\s+/og, $_;
+        print STDOUT "$file \\& ".join(" \\& ",@field)."\\\\\\\\\\[2ex\\]\\n" ;
+      \}; 
+      END\{
+        print STDOUT "\\\\hline\\n\\\\end\{tabular\}\\n";
+      \}' \\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_fixed \\
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_fixed \\
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_fixed \\
+\\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_cds \\
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_cds \\
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_cds \\
+\\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_exons \\
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_exons \\
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_exons \\
+\\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_pseudo \\
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_pseudo \\
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_pseudo \\
+\\
   | cpif $DOCS/tables/gene-pred.tex ;
 #
-@  
+\nwused{\\{NWHum17-wea7-1}}\nwendcode{}\nwbegindocs{43} 
 \begin{table}[!ht]
 \begin{center}
 \begin{sideways}
@@ -1629,46 +1629,46 @@ perl -ne '
 \end{center}
 \end{table}
 
-<<HIDE: BASH commands ANALYSIS>>=
-#
-### PRINTING GENE-PREDICTION EVALUATIONS
-ENSCRIPT="enscript -1C -Gjf Courier7 -M A4" ;
-#
-# GENEID evaluation
-$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw.chr22_all ;
-$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_all ;
-$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw.chr22_fixed ;
-$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_fixed ;
-#
-$ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked.chr22_all ;
-$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_all ;
-$ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked.chr22_fixed ;
-$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_fixed ;
-#
-$ENSCRIPT $ANALYSIS/geneid/Hsap.masked.evid/eval_geneid.Hsap.masked.evid.chr22_fixed ;
-$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked.evid/eval_geneid_brief.Hsap.masked.evid.chr22_fixed ;
-#
-# SGP evaluation
-$ENSCRIPT $ANALYSIS/sgp/Hsap.masked/eval_sgp.Hsap.masked.chr22_all ;
-$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked/eval_sgp_brief.Hsap.masked.chr22_all ;
-$ENSCRIPT $ANALYSIS/sgp/Hsap.masked/eval_sgp.Hsap.masked.chr22_fixed ;
-$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked/eval_sgp_brief.Hsap.masked.chr22_fixed ;
-#
-$ENSCRIPT $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp.Hsap.masked.frame.chr22_all ;
-$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp_brief.Hsap.masked.frame.chr22_all ;
-$ENSCRIPT $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp.Hsap.masked.frame.chr22_fixed ;
-$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp_brief.Hsap.masked.frame.chr22_fixed ;
-#
-@
+\nwenddocs{}%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+\nwbegindocs{45}\nwdocspar
 
 \subsctn{Running {\sgp} with annotation evidences}
 
-<<BASH Functions: SGP + Evidences>>=
+\nwenddocs{}\nwbegincode{46}\sublabel{NWHum17-BASV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASV-1}}}\moddef{BASH Functions: SGP + Evidences~{\nwtagstyle{}\subpageref{NWHum17-BASV-1}}}\endmoddef
 #
 # RUNNING SGP + Evidences
 #
 run_mod_SGPevidences () 
-{
+\{
   #
   # run_mod_SGPevidences - Running SGP for a given sequence set
   #
@@ -1696,7 +1696,7 @@ run_mod_SGPevidences ()
   # Checking if DIRS does EXIST
   ChckDirs $MAIN $BASE ;
   for c in hsp sr hsp-rs geneid_format tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
-    do { ChckDirs $BASE/$c ; } ; done ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
   #
   # Running SGP TOOL ############################### Excerpt from 
   # export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
@@ -1716,87 +1716,87 @@ run_mod_SGPevidences ()
   WTBXI=0.20 ; # weigth of tblastx score
   WTBXT=0.30 ; # weigth of tblastx score
   echo "### Running blast2gff" ;
-  $PROBIN/blast2gff -g $HSPs/$locus > $BASE/sr/$locus \
+  $PROBIN/blast2gff -g $HSPs/$locus > $BASE/sr/$locus \\
           2> $BASE/logs/geneid_sgp.$locus ;
-  gawk "\$6 > $S_CUTOFF {
-          \$6 = (\$6-$DSC)*$WTBX; \$4=\$4+$SHSP; \$5=\$5-$SHSP; print \$0;
-        }" < $BASE/sr/$locus > $BASE/hsp-rs/$locus ;
+  gawk "\\$6 > $S_CUTOFF \{
+          \\$6 = (\\$6-$DSC)*$WTBX; \\$4=\\$4+$SHSP; \\$5=\\$5-$SHSP; print \\$0;
+        \}" < $BASE/sr/$locus > $BASE/hsp-rs/$locus ;
   echo "### Running geneid" ;
-  { $GENEID -v -D -E $EW -P $PARAM -S $BASE/hsp-rs/$locus \
-          -R $EVIDENCES $ISEQ/$locus \
+  \{ $GENEID -v -D -E $EW -P $PARAM -S $BASE/hsp-rs/$locus \\
+          -R $EVIDENCES $ISEQ/$locus \\
           > $BASE/geneid_format/$locus ;
-    } 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
+    \} 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
   # Running SGP TOOL ############################### 
-  { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
-    echo "###"; } 1>&2;
-}
+  \{ echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
+    echo "###"; \} 1>&2;
+\}
 # 
-@
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{47}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{48}\sublabel{NWHum17-BASM.2-9}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-9}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 ####
 #### SGP plus evidences
 #
 # SGP on Masked chr22 sequence
-run_mod_SGPevidences Hsap.masked.evidences $DATASETS/fasta/masked \
-        $ANALYSIS/blast/wublast.tblastx/masked3X/gff \
+run_mod_SGPevidences Hsap.masked.evidences $DATASETS/fasta/masked \\
+        $ANALYSIS/blast/wublast.tblastx/masked3X/gff \\
         $DATASETS/annotation/fixed/chr22.evidences chr22 47662662 ;
 #
-run_mod_SGPevidences Hsap.masked.3X+.evid $DATASETS/fasta/masked \
-        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+run_mod_SGPevidences Hsap.masked.3X+.evid $DATASETS/fasta/masked \\
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \\
         $DATASETS/annotation/fixed/chr22.evidences chr22 47662662 ;
 #
-run_mod_SGPevidences Hsap.masked.3X+.fix.evid $DATASETS/fasta/masked \
-        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+run_mod_SGPevidences Hsap.masked.3X+.fix.evid $DATASETS/fasta/masked \\
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \\
         $DATASETS/annotation/fixed/chr22.evidences chr22 47662662 ;
 #
-run_mod_SGPevidences Hsap.masked.3X+.fix.evid_VH $DATASETS/fasta/masked \
-        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+run_mod_SGPevidences Hsap.masked.3X+.fix.evid_VH $DATASETS/fasta/masked \\
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \\
         $DATASETS/annotation/set/evidences/chr22 chr22 47662662 ;
 #
 # After the bug modification and the frame.
-run_mod_SGPevidences Hsap.masked.3X+.fix.gnid_fix.evid/ $DATASETS/fasta/masked \
-        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+run_mod_SGPevidences Hsap.masked.3X+.fix.gnid_fix.evid/ $DATASETS/fasta/masked \\
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \\
         $DATASETS/annotation/set/evidences/chr22 chr22 47662662 ;
 
-@ 
+\nwendcode{}\nwbegindocs{49}\nwdocspar
 
-<<BASH Functions: Filtering GENEID RAW Output>>=
+\nwenddocs{}\nwbegincode{50}\sublabel{NWHum17-BASh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASh-1}}}\moddef{BASH Functions: Filtering GENEID RAW Output~{\nwtagstyle{}\subpageref{NWHum17-BASh-1}}}\endmoddef
 #
 # Script from gparra to retrieve GFF annotation from geneid big output
 geneid_raw2GFF ()
-{
+\{
   # USAGE:  geneid_raw2GFF output_dir geneid_file
   # filtering geneid output (obtained with "-D" option -> default output+cDNA)
   PD=$1 ;
   /bin/rm -vf $PD/gff/* $PD/prot/* $PD/cds/* ;
-  gawk 'BEGIN{ OFS="\t"; odir=ARGV[1]; ARGV[1]="" }
-    { if ($2=="Sequence") seqname=$3;
+  gawk 'BEGIN\{ OFS="\\t"; odir=ARGV[1]; ARGV[1]="" \}
+    \{ if ($2=="Sequence") seqname=$3;
       if ($2=="Gene") gene=$3;
       if (NF>8 && substr($1,1,1)!="#" && $1!="Annotation")
-        print seqname,"geneid_v1.1",$1,$2,$3,$4,$5,$6,seqname"_"gene \
+        print seqname,"geneid_v1.1",$1,$2,$3,$4,$5,$6,seqname"_"gene \\
               > odir "/gff/" seqname"_"gene;
-      if (substr($1,1,1)==">") {
-        if (substr($1,length($1)-1,2)=="NN") {
+      if (substr($1,1,1)==">") \{
+        if (substr($1,length($1)-1,2)=="NN") \{
           print ">"seqname"_"gene > odir "/cds/" seqname"_"gene;
           bol=1;
-        } else if (substr($1,length($1)-1,2)=="AA") {
+        \} else if (substr($1,length($1)-1,2)=="AA") \{
           print ">"seqname"_"gene > odir "/prot/" seqname"_"gene;
           bol=2;
-        };
-      } else {
+        \};
+      \} else \{
         if (bol==1 && NF==1 && substr($1,1,1)!=">" ) 
           print $0 > odir "/cds/" seqname"_"gene;
-      };
+      \};
       if (bol==2 && NF==1 && substr($1,1,1)!=">" )
         print $0 > odir "/prot/" seqname"_"gene;
-    }' $PD $2 ;
-}
+    \}' $PD $2 ;
+\}
 #
-@ 
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{51}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{52}\sublabel{NWHum17-BASM.2-A}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-A}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.evid" ;
 # IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid" ;
@@ -1805,23 +1805,23 @@ geneid_raw2GFF ()
 IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix.evid" ;
 geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
 sort +3n +4n -5 $IDIR/gff/chr22_* > $IDIR/gff/chr22 ;
-gawk '{
+gawk '\{
       genes[$9]++;
-      if (genes[$9]>1) {
+      if (genes[$9]>1) \{
         min[$9] = $4<min[$9] ? $4 : min[$9] ;
         max[$9] = $5>max[$9] ? $5 : max[$9] ;
-      } else {
+      \} else \{
         min[$9] = $4 ;
         max[$9] = $5 ;
         strand[$9] = $7;
-      };
-    }
-    END {
-      for (n in genes) {
+      \};
+    \}
+    END \{
+      for (n in genes) \{
         print n, min[n], max[n], strand[n], genes[n];
-      };
-    }' $IDIR/gff/chr22 | sort +1n +2n -3 > $IDIR/gff/chr22.gene_list ;
-# gawk '{print $9}' $IDIR/gff/chr22 | sort | uniq -c | \
+      \};
+    \}' $IDIR/gff/chr22 | sort +1n +2n -3 > $IDIR/gff/chr22.gene_list ;
+# gawk '\{print $9\}' $IDIR/gff/chr22 | sort | uniq -c | \\
 #      sort -nr > $IDIR/gff/chr22.gene_list ;
 #
 wc $ANALYSIS/sgp/Hsap.masked.3X+.evid/gff/chr22.gene_list ;
@@ -1835,51 +1835,51 @@ wc $ANALYSIS/geneid/Hsap.masked.evid_VH/gff/chr22.gene_list ;
 # we got more genes once we fixed frame from HSPS for both strands.
 wc $ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix.evid/gff/chr22.gene_list ; 
      115     575    3667 
-@
+\nwendcode{}\nwbegindocs{53}\nwdocspar
 
-<<HIDE: BASH commands ANALYSIS>>=
-#
-# Preparing files for Michael Brent
-IDIR="$ANALYSIS/sgp" ;
-# EXP="Hsap.masked.3X" ;
-# EXP="Hsap.masked.3X+.fix" ;
-EXP="Hsap.masked.3X+.fix.gnid_fix" ;
-# ODIR="$IDIR/sgp_chr22_3X" ;
-# ODIR="$IDIR/sgp_chr22_3X+" ;
-ODIR="$IDIR/sgp_chr22_3X+_VH" ;
-#
-ChckDirs $ODIR ;
-#
-cp $ANALYSIS/geneid/Hsap.masked/gff/chr22 $ODIR/chr22_geneid.gff ;
-$SGPBIN/gff2gtf.pl < $ODIR/chr22_geneid.gff \
-                   > $ODIR/chr22_geneid.gtf2 ;
-cp $ODIR/chr22_geneid.gtf2 $ANALYSIS/geneid/Hsap.masked/gtf2/chr22 ;
-#
-cp $IDIR/$EXP/gff/chr22 $ODIR/chr22_all.gff ;
-$SGPBIN/gff2gtf.pl < $ODIR/chr22_all.gff \
-                   > $ODIR/chr22_all.gtf2 ;
-cp $ODIR/chr22_all.gtf2 $IDIR/$EXP/gtf2/chr22 ;
-#
-perl -ne '
-  chomp;
-  $_ !~ /^#/o && do {
-     @F = split /\s+/og, $_;
-     $F[8] =~ s/.*?_//o;
-     print STDOUT join("\t",@F)."\n";
-     next;
-  };
-  print STDOUT "$_\n";
-  ' $IDIR/$EXP.evid/gff/chr22 > $ODIR/chr22_evid.gff ;
-$SGPBIN/gff2gtf.pl < $ODIR/chr22_evid.gff \
-                   > $ODIR/chr22_evid.gtf2 ;
-cp $ODIR/chr22_evid.gtf2 $IDIR/$EXP.evid/gtf2/chr22 ;
-#
-pushd $IDIR ;
-# star sgp_chr22_3X.tgz sgp_chr22_3X ;
-star sgp_chr22_3X+.tar.gz sgp_chr22_3X+ ;
-popd ;
-#
-@ 
+\nwenddocs{}%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+\nwbegindocs{55}\nwdocspar
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1887,7 +1887,7 @@ popd ;
 
 \subsctn{Preparing GFF files}
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{56}\sublabel{NWHum17-BASM.2-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-B}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # MAKING PLOTS with GFF2PS
 #
@@ -1896,98 +1896,98 @@ popd ;
 export CHR="chr22";
 #
 # Preparing annotaton and repeats
-# gawk '$0!~/^#/ {$2="annotation";print $0}'\
-#          $DATASETS/annotation/fixed/chr22 \
+# gawk '$0!~/^#/ \{$2="annotation";print $0\}'\\
+#          $DATASETS/annotation/fixed/chr22 \\
 #        > $DATASETS/annotation/fixed/chr22.gff2ps ;
-gawk '$0!~/^#/ {$2="annotation";print $0}' \
-      $DATASETS/annotation/set/cds/chr22   \
-      $DATASETS/annotation/set/exons/chr22 \
-      $DATASETS/annotation/set/pseudo/chr22 | \
-      sort +3n +4n -5 +2 -3 \
+gawk '$0!~/^#/ \{$2="annotation";print $0\}' \\
+      $DATASETS/annotation/set/cds/chr22   \\
+      $DATASETS/annotation/set/exons/chr22 \\
+      $DATASETS/annotation/set/pseudo/chr22 | \\
+      sort +3n +4n -5 +2 -3 \\
       > $DATASETS/annotation/set/gff2ps/chr22_annot.all ;
-gawk 'BEGIN{ori=end=0}
-      { if ($3=="CDS") {
+gawk 'BEGIN\{ori=end=0\}
+      \{ if ($3=="CDS") \{
           ori=$4; end=$5;
-        };
-        if ($3=="exon") {
-          gsub(/\.mRNA$/,"",$9);
+        \};
+        if ($3=="exon") \{
+          gsub(/\\.mRNA$/,"",$9);
           if (!($4==ori && $5==end)) print $0;
-        } else print $0;
-      }' $DATASETS/annotation/set/gff2ps/chr22_annot.all \
+        \} else print $0;
+      \}' $DATASETS/annotation/set/gff2ps/chr22_annot.all \\
        > $DATASETS/annotation/set/gff2ps/chr22_annot ;
 #
-gawk '$0!~/^#/ {$2=$3="evidence";print $0}'    \
-      $DATASETS/annotation/set/evidences/chr22 \
+gawk '$0!~/^#/ \{$2=$3="evidence";print $0\}'    \\
+      $DATASETS/annotation/set/evidences/chr22 \\
     > $DATASETS/annotation/set/gff2ps/chr22_evid ;
 #
-gawk '{
+gawk '\{
     if ($9 in names) names[$9]++; 
     else names[$9]=1;
     gp = $9"-"names[$9];
     print $1,$2,$3,$4,$5,$6,$7,$8,gp;
-    }' $DATASETS/masking/default/gff/chr22 \
+    \}' $DATASETS/masking/default/gff/chr22 \\
      > $DATASETS/masking/default/gff/chr22.gff2ps ;
 #
-@ 
+\nwendcode{}\nwbegindocs{57}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{58}\sublabel{NWHum17-BASM.2-C}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-C}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # Preparing geneid files
 #IDIR="$ANALYSIS/geneid/Hsap.masked" ;
 ODIR="$IDIR/ps/_tmp/geneid" ;
 [ -e $ODIR ] || ChckDirs $ODIR ;
-gawk 'BEGIN{OFS="\t"}
-      $1!~/^#|^[ \t]*$/ {
+gawk 'BEGIN\{OFS="\\t"\}
+      $1!~/^#|^[ \\t]*$/ \{
           $2="geneid";
           print $0;
-      }' $IDIR/gff/$CHR.geneid_v1.1 > $ODIR/$CHR ;
+      \}' $IDIR/gff/$CHR.geneid_v1.1 > $ODIR/$CHR ;
 # IDIR="$ANALYSIS/geneid/Hsap.masked.evid" ;
 #IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
 IDIR="$ANALYSIS/geneid/Hsap.masked.gnid_fix.evid" 
 ODIR="$IDIR/ps/_tmp/geneid" ;
 [ -e $ODIR ] || ChckDirs $ODIR ;
-gawk 'BEGIN{OFS="\t"}
-      $1!~/^#|^[ \t]*$/ {
+gawk 'BEGIN\{OFS="\\t"\}
+      $1!~/^#|^[ \\t]*$/ \{
           $2="geneid";
           print $0;
-      }' $IDIR/gff/$CHR > $ODIR/$CHR ;
+      \}' $IDIR/gff/$CHR > $ODIR/$CHR ;
 #
-@ 
+\nwendcode{}\nwbegindocs{59}\nwdocspar
 
-<<BASH Functions: Preparing SGP Output>>=
+\nwenddocs{}\nwbegincode{60}\sublabel{NWHum17-BASa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASa-1}}}\moddef{BASH Functions: Preparing SGP Output~{\nwtagstyle{}\subpageref{NWHum17-BASa-1}}}\endmoddef
 #
 # Preparing SGP files
 set_feats_sgp ()
-{
+\{
   # USAGE:  set_feats_sgp input_dir
   IDIR="$1";
   #
   # set tblastx GFF files from last SGP run
   ODIR="$IDIR/ps/_tmp/sr" ;
   [ -e $ODIR ] || ChckDirs $ODIR ;
-  gawk 'BEGIN{ OFS="\t" }
-        { if ($1 !~ /^#|^[ \t]*$/) { $2="SR.3X"; $8="." };
+  gawk 'BEGIN\{ OFS="\\t" \}
+        \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SR.3X"; $8="." \};
           print $0;
-          }' $IDIR/sr/$CHR > $ODIR/$CHR ;
+          \}' $IDIR/sr/$CHR > $ODIR/$CHR ;
   ODIR="$IDIR/ps/_tmp/sr-rs" ;
   [ -e $ODIR ] || ChckDirs $ODIR ;
-  gawk 'BEGIN{ OFS="\t" }
-        { if ($1 !~ /^#|^[ \t]*$/) { $2="SR-RS.3X"; $8="." };
+  gawk 'BEGIN\{ OFS="\\t" \}
+        \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SR-RS.3X"; $8="." \};
           print $0;
-          }' $IDIR/hsp-rs/$CHR > $ODIR/$CHR ;
+          \}' $IDIR/hsp-rs/$CHR > $ODIR/$CHR ;
   #
   # set SGP GFF files from SGP run
   ODIR="$IDIR/ps/_tmp/sgp" ;
   [ -e $ODIR ] || ChckDirs $ODIR ;
-  gawk 'BEGIN{ OFS="\t" }
-        { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.3X" };
+  gawk 'BEGIN\{ OFS="\\t" \}
+        \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SGP.3X" \};
           print $0;
-          }' $IDIR/gff/$CHR > $ODIR/$CHR ;
-}
+          \}' $IDIR/gff/$CHR > $ODIR/$CHR ;
+\}
 #
-@ 
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{61}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{62}\sublabel{NWHum17-BASM.2-D}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-D}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 set_feats_sgp $ANALYSIS/sgp/Hsap.masked ;
 set_feats_sgp $ANALYSIS/sgp/Hsap.masked.frame ;
@@ -1999,35 +1999,35 @@ set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH ;
 set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix ; 
 set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix.evid ;
 #
-@ 
+\nwendcode{}\nwbegindocs{63}\nwdocspar
 
-<<BASH Functions: Predicted Genes Boundaries>>=
+\nwenddocs{}\nwbegincode{64}\sublabel{NWHum17-BASg.3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASg.3-1}}}\moddef{BASH Functions: Predicted Genes Boundaries~{\nwtagstyle{}\subpageref{NWHum17-BASg.3-1}}}\endmoddef
 #
 # Extracting list of coords for predicted genes
 get_gene_boundaries ()
-{
+\{
   # USAGE:  get_gene_boundaries input_dir
   IDIR="$1" ;
   ODIR="$IDIR/ps/_tmp" ;
   [ -e $ODIR ] || ChckDirs $ODIR ;
   
-}
+\}
 #
-@ 
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{65}\nwdocspar
 
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{66}\sublabel{NWHum17-BASM.2-E}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-E}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 get_gene_boundaries $ANALYSIS/sgp/Hsap.masked.3X+.fix ;
 get_gene_boundaries $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH ;
 #
-@
+\nwendcode{}\nwbegindocs{67}\nwdocspar
 
 \subsctn{Making plots with {\gps}}
 
-<<BASH Functions: Running GFF2PS>>=
+\nwenddocs{}\nwbegincode{68}\sublabel{NWHum17-BASU.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASU.2-1}}}\moddef{BASH Functions: Running GFF2PS~{\nwtagstyle{}\subpageref{NWHum17-BASU.2-1}}}\endmoddef
 #
 run_GFF2PS ()
-{
+\{
   # 
   # run_GFF2PS - Making plots with gff2ps (a4+a3+wide formats)
   #
@@ -2041,24 +2041,24 @@ run_GFF2PS ()
   PARM="$BIN/param/gff2ps/$3" ;
   [ "$4" ] && XTR="$4" || XTR="";
   #
-  ChckDirs $ODIR \
-           $ODIR/a3      $ODIR/a4      $ODIR/wide \
+  ChckDirs $ODIR \\
+           $ODIR/a3      $ODIR/a4      $ODIR/wide \\
            $ODIR/a3/logs $ODIR/a4/logs $ODIR/wide/logs ;
   #
   CHR="chr22" ;
   START="-S 13000000" ;
   #
-  gff2ps -VC ${PARM}_wide.rc $START -- $GFFfiles \
-          2>&1 > $ODIR/wide/${CHR}${XTR} | tee $ODIR/wide/logs/${CHR}${XTR} ;
-#  gff2ps -VC ${PARM}_a4.rc   $START -- $GFFfiles \
-#          2>&1 > $ODIR/a4/${CHR}${XTR}   | tee $ODIR/a4/logs/${CHR}${XTR}   ;
-#  gff2ps -VC ${PARM}_a3.rc   $START -- $GFFfiles \
-#          2>&1 > $ODIR/a3/${CHR}${XTR}   | tee $ODIR/a3/logs/${CHR}${XTR}   ;
-}
+  gff2ps -VC $\{PARM\}_wide.rc $START -- $GFFfiles \\
+          2>&1 > $ODIR/wide/$\{CHR\}$\{XTR\} | tee $ODIR/wide/logs/$\{CHR\}$\{XTR\} ;
+#  gff2ps -VC $\{PARM\}_a4.rc   $START -- $GFFfiles \\
+#          2>&1 > $ODIR/a4/$\{CHR\}$\{XTR\}   | tee $ODIR/a4/logs/$\{CHR\}$\{XTR\}   ;
+#  gff2ps -VC $\{PARM\}_a3.rc   $START -- $GFFfiles \\
+#          2>&1 > $ODIR/a3/$\{CHR\}$\{XTR\}   | tee $ODIR/a3/logs/$\{CHR\}$\{XTR\}   ;
+\}
 #
-@
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{69}\nwdocspar
  
-<<BASH commands ANALYSIS>>=
+\nwenddocs{}\nwbegincode{70}\sublabel{NWHum17-BASM.2-F}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASM.2-F}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}}\plusendmoddef
 #
 # Running GFF2PS on CHR22 Hsap masked against Mmus WGS-3X
 IDIR="$ANALYSIS/sgp/Hsap.masked/ps" ;
@@ -2113,7 +2113,7 @@ run_GFF2PS $IDIR "$GFFIN" chr22_masked "_20010910_noRPTs" ;
 IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid/ps" ;
 #
 # GFFIN="$ANALYSIS/geneid/Hsap.masked.evid/ps/_tmp/geneid/chr22";# geneid+evid
-# GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                          # \sgp+evid_/
+# GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                          # \\sgp+evid_/
 GFFIN="$IDIR/_tmp/sgp/chr22" ;                                   # sgp + evid
 GFFIN="$GFFIN $IDIR/_tmp/sr-rs/chr22" ;                          # sr-rs
 # GFFIN="$GFFIN $IDIR/_tmp/sr/chr22" ;                           # sr
@@ -2140,13 +2140,13 @@ GFFIN="$GFFIN $DATASETS/annotation/set/gff2ps/chr22_evid" ;        # evidences
 # run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010914_noRPT_geneid+sgp" ;
 run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010927_noRPT_geneid+sgp" ;
 #
-@ 
+\nwendcode{}\nwbegindocs{71}\nwdocspar
 
 \subsctn{Customization files for {\gps}}
 
 \subsubsctn{LAYOUT SETTINGS}
 
-<<Common Layout Settings>>=
+\nwenddocs{}\nwbegincode{72}\sublabel{NWHum17-ComM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComM-1}}}\moddef{Common Layout Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM-1}}}\endmoddef
 zoom=*..*
 # major_tickmarks_num=10
 # minor_tickmarks_num=10
@@ -2159,54 +2159,54 @@ show_blocks_top-bottom=on
 #
 group_label_scale=2.25
 #
-@
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}}\nwendcode{}\nwbegindocs{73}\nwdocspar
 
-<<Settings for a3 paper size>>=
+\nwenddocs{}\nwbegincode{74}\sublabel{NWHum17-SetQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SetQ-1}}}\moddef{Settings for a3 paper size~{\nwtagstyle{}\subpageref{NWHum17-SetQ-1}}}\endmoddef
 page_size=a3
 page_orientation=Landscape
 # page_number=1
 blocks_x_page=4
 nucleotides_x_line=50000
 #
-@ 
+\nwused{\\{NWHum17-GFFb.2-1}}\nwendcode{}\nwbegindocs{75}\nwdocspar
 
-<<Settings for a3 paper size (evid)>>=
+\nwenddocs{}\nwbegincode{76}\sublabel{NWHum17-SetX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SetX-1}}}\moddef{Settings for a3 paper size (evid)~{\nwtagstyle{}\subpageref{NWHum17-SetX-1}}}\endmoddef
 page_size=a3
 page_orientation=Landscape
 # page_number=1
 blocks_x_page=10
 nucleotides_x_line=50000
 #
-@ 
+\nwused{\\{NWHum17-GFFi.2-1}}\nwendcode{}\nwbegindocs{77}\nwdocspar
 
-<<Settings for a4 paper size>>=
+\nwenddocs{}\nwbegincode{78}\sublabel{NWHum17-SetQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SetQ.2-1}}}\moddef{Settings for a4 paper size~{\nwtagstyle{}\subpageref{NWHum17-SetQ.2-1}}}\endmoddef
 page_size=a4
 page_orientation=Landscape
 # page_number=1
 blocks_x_page=3
 nucleotides_x_line=50000
 #
-@ 
+\nwused{\\{NWHum17-GFFb-1}}\nwendcode{}\nwbegindocs{79}\nwdocspar
 
-<<Settings for a4 paper size (evid)>>=
+\nwenddocs{}\nwbegincode{80}\sublabel{NWHum17-SetX.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SetX.2-1}}}\moddef{Settings for a4 paper size (evid)~{\nwtagstyle{}\subpageref{NWHum17-SetX.2-1}}}\endmoddef
 page_size=a4
 page_orientation=Landscape
 # page_number=1
 blocks_x_page=6
 nucleotides_x_line=50000
 #
-@ 
+\nwused{\\{NWHum17-GFFi-1}}\nwendcode{}\nwbegindocs{81}\nwdocspar
 
-<<Settings for wide display>>=
+\nwenddocs{}\nwbegincode{82}\sublabel{NWHum17-SetP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SetP-1}}}\moddef{Settings for wide display~{\nwtagstyle{}\subpageref{NWHum17-SetP-1}}}\endmoddef
 page_bbox=wide,16000,800 # 564.37 x 28.22 cm
 page_orientation=Portrait
 # page_number=1
 blocks_x_page=4
 nucleotides_x_line=250000
 #
-@ 
+\nwused{\\{NWHum17-GFFd-1}}\nwendcode{}\nwbegindocs{83}\nwdocspar
 
-<<Common Layout Settings for wide display>>=
+\nwenddocs{}\nwbegincode{84}\sublabel{NWHum17-Comd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-Comd-1}}}\moddef{Common Layout Settings for wide display~{\nwtagstyle{}\subpageref{NWHum17-Comd-1}}}\endmoddef
 zoom=*..*
 # major_tickmarks_num=10
 # minor_tickmarks_num=10
@@ -2219,18 +2219,18 @@ show_blocks_top-bottom=on
 #
 group_label_scale=2.25
 #
-@
+\nwused{\\{NWHum17-GFFd-1}}\nwendcode{}\nwbegindocs{85}\nwdocspar
 
-<<Settings for wide display (evid)>>=
+\nwenddocs{}\nwbegincode{86}\sublabel{NWHum17-SetW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SetW-1}}}\moddef{Settings for wide display (evid)~{\nwtagstyle{}\subpageref{NWHum17-SetW-1}}}\endmoddef
 page_bbox=wide,16000,800 # 564.37 x 28.22 cm
 page_orientation=Portrait
 # page_number=1
 blocks_x_page=5
 nucleotides_x_line=200000
 #
-@ 
+\nwused{\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{87}\nwdocspar
 
-<<Common Layout Settings for wide display (evid)>>=
+\nwenddocs{}\nwbegincode{88}\sublabel{NWHum17-Comk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-Comk-1}}}\moddef{Common Layout Settings for wide display (evid)~{\nwtagstyle{}\subpageref{NWHum17-Comk-1}}}\endmoddef
 zoom=*..*
 # major_tickmarks_num=10
 # minor_tickmarks_num=10
@@ -2245,25 +2245,25 @@ show_blocks_top-bottom=on
 #
 group_label_scale=2.25
 #
-@
+\nwused{\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{89}\nwdocspar
 
 \subsubsctn{FEATURES SETTINGS}
 
-<<Common Features Settings>>=
+\nwenddocs{}\nwbegincode{90}\sublabel{NWHum17-ComO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}}\moddef{Common Features Settings~{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}}\endmoddef
 *::fill_shape_mode=1_color
 gene::shape=none
 cds::layer=1
 cds::feature_color=darkgreen
 exon::feature_color=verylightgreen
 exon_pseudo::feature_color=lightblue
-@
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{91}\nwdocspar
 
-<<HIDE: BASH commands>>=
-gawk '{print $3}' $DATASETS/masking/default/gff/chr22 | \
-    sort | uniq -c | sort -nr | prtcode 
-@ 
+\nwenddocs{}%
+%
+%
+\nwbegindocs{93}\nwdocspar
 
-<<Repeats Features Settings>>=
+\nwenddocs{}\nwbegincode{94}\sublabel{NWHum17-RepP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}}\moddef{Repeats Features Settings~{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}}\endmoddef
 sine/alu::feature_color=verydarkgreen
 sine/mir::feature_color=verydarkbrown
 line/l1::feature_color=lightred
@@ -2272,18 +2272,18 @@ ltr/erv1::feature_color=verydarkblue
 simple_repeat::feature_color=verydarkorange
 low_complexity::feature_color=verydarkyellow
 #
-@
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{95}\nwdocspar
 
 \subsubsctn{GROUPS SETTINGS}
 
-<<Common Group Settings>>=
+\nwenddocs{}\nwbegincode{96}\sublabel{NWHum17-ComL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}}\moddef{Common Group Settings~{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}}\endmoddef
 *::group_line=none
 *::group_shape=thick_line
-@
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{97}\nwdocspar
 
 \subsubsctn{SOURCES SETTINGS}
 
-<<Common Source Settings>>=
+\nwenddocs{}\nwbegincode{98}\sublabel{NWHum17-ComM.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComM.2-1}}}\moddef{Common Source Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM.2-1}}}\endmoddef
 *::unfold_grouped_ungrouped=off
 *::unfold_ungrouped_line=off
 *::unfold_grouped_line=off
@@ -2291,9 +2291,9 @@ low_complexity::feature_color=verydarkyellow
 *::source_line_color=black
 *::source_line=long_dotted
 #
-@
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}}\nwendcode{}\nwbegindocs{99}\nwdocspar
 
-<<Common Source Settings for wide display>>=
+\nwenddocs{}\nwbegincode{100}\sublabel{NWHum17-Comd.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-Comd.2-1}}}\moddef{Common Source Settings for wide display~{\nwtagstyle{}\subpageref{NWHum17-Comd.2-1}}}\endmoddef
 *::unfold_grouped_ungrouped=off
 *::unfold_ungrouped_line=off
 *::unfold_grouped_line=off
@@ -2301,304 +2301,304 @@ low_complexity::feature_color=verydarkyellow
 # *::source_line_color=black
 *::source_line=none
 #
-@
+\nwused{\\{NWHum17-GFFd-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{101}\nwdocspar
  
-<<annotation source settings>>=
+\nwenddocs{}\nwbegincode{102}\sublabel{NWHum17-annQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-annQ-1}}}\moddef{annotation source settings~{\nwtagstyle{}\subpageref{NWHum17-annQ-1}}}\endmoddef
 # annotation::feature_color=darkgreen
 annotation::group_color=verydarkgreen
 annotation::left_label=SANGER
 annotation::track_spacing_scale=0
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}}\nwendcode{}\nwbegindocs{103}\nwdocspar
 
-<<annotation source settings (evid)>>=
+\nwenddocs{}\nwbegincode{104}\sublabel{NWHum17-annX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-annX-1}}}\moddef{annotation source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-annX-1}}}\endmoddef
 # annotation::vert_align=bottom
 # annotation::feature_color=darkgreen
 annotation::group_color=verydarkgreen
 annotation::left_label=SANGER
 annotation::track_spacing_scale=0
-@ 
+\nwused{\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{105}\nwdocspar
 
-<<evidence source settings>>=
+\nwenddocs{}\nwbegincode{106}\sublabel{NWHum17-eviO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-eviO-1}}}\moddef{evidence source settings~{\nwtagstyle{}\subpageref{NWHum17-eviO-1}}}\endmoddef
 evidence::source_line_color=black
 evidence::source_line=dotted
 evidence::left_label=++none++
 evidence::vert_align=top
 evidence::track_scale=0.5
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}}\nwendcode{}\nwbegindocs{107}\nwdocspar
 
-<<evidence source settings (evid)>>=
+\nwenddocs{}\nwbegincode{108}\sublabel{NWHum17-eviV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-eviV-1}}}\moddef{evidence source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-eviV-1}}}\endmoddef
 evidence::source_line_color=black
 evidence::source_line=dotted
 evidence::left_label=++none++
 evidence::vert_align=bottom
 evidence::track_scale=0.25
 evidence::track_spacing_scale=0
-@ 
+\nwused{\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{109}\nwdocspar
 
-<<sgp source settings>>=
+\nwenddocs{}\nwbegincode{110}\sublabel{NWHum17-sgpJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}}\moddef{sgp source settings~{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}}\endmoddef
 SGP.3X::feature_color=lightred
 SGP.3X::group_color=red
 SGP.3X::left_label=SGP 3X
 SGP.homol::feature_color=red
 SGP.homol::group_color=darkred
 SGP.homol::left_label=SGP
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{111}\nwdocspar
 
-<<geneid source settings>>=
+\nwenddocs{}\nwbegincode{112}\sublabel{NWHum17-genM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-genM-1}}}\moddef{geneid source settings~{\nwtagstyle{}\subpageref{NWHum17-genM-1}}}\endmoddef
 geneid::feature_color=lightviolet
 geneid::group_color=darkviolet
 geneid::left_label=GENEID v1.1
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{113}\nwdocspar
 
-<<twinscan source settings>>=
+\nwenddocs{}\nwbegincode{114}\sublabel{NWHum17-twiO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}}\moddef{twinscan source settings~{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}}\endmoddef
 Twinscan-1.0::feature_color=verylightbrown
 Twinscan-1.0::group_color=brown
 Twinscan-1.0::left_label=TWINSCAN
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{115}\nwdocspar
 
-<<genscan source settings>>=
+\nwenddocs{}\nwbegincode{116}\sublabel{NWHum17-genN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-genN-1}}}\moddef{genscan source settings~{\nwtagstyle{}\subpageref{NWHum17-genN-1}}}\endmoddef
 genscan::feature_color=blue
 genscan::group_color=verydarkblue
 genscan::left_label=GENSCAN
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{117}\nwdocspar
 
-<<tblastx source settings>>=
+\nwenddocs{}\nwbegincode{118}\sublabel{NWHum17-tblN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}}\moddef{tblastx source settings~{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}}\endmoddef
 SR.3X::feature_color=red
 SR.3X::group_color=verydarkred
 SR.3X::left_label=SRs 3X
 SR-RS.3X::feature_color=orange
 SR-RS.3X::group_color=verydarkred
 SR-RS.3X::left_label=SR-RSs 3X
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}}\nwendcode{}\nwbegindocs{119}\nwdocspar
 
-<<repeatmasker source settings>>=
+\nwenddocs{}\nwbegincode{120}\sublabel{NWHum17-repS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-repS-1}}}\moddef{repeatmasker source settings~{\nwtagstyle{}\subpageref{NWHum17-repS-1}}}\endmoddef
 # RepeatMasker::feature_color=####
 # RepeatMasker::group_color=####
 RepeatMasker::left_label=REPEATS
-@ 
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}}\nwendcode{}\nwbegindocs{121}\nwdocspar
 
-<<orimasked source settings>>=
+\nwenddocs{}\nwbegincode{122}\sublabel{NWHum17-oriP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-oriP-1}}}\moddef{orimasked source settings~{\nwtagstyle{}\subpageref{NWHum17-oriP-1}}}\endmoddef
 # masked::feature_color=####
 # masked::group_color=####
 masked::left_label=MASKED
-@ 
+\nwnotused{orimasked\ source\ settings}\nwendcode{}\nwbegindocs{123}\nwdocspar
 
 \subsubsctn{Assembling CUSTOM FILES: {\sgp} + Homology}
 
-<<GFF2PS customization: chr22 masked a4>>=
+\nwenddocs{}\nwbegincode{124}\sublabel{NWHum17-GFFb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GFFb-1}}}\moddef{GFF2PS customization: chr22 masked a4~{\nwtagstyle{}\subpageref{NWHum17-GFFb-1}}}\endmoddef
 ##########################################
 ##   CUSTOM FILE FOR GFF2PS - A4 PAGE   ##
 ##########################################
 #
 # chr22_masked_a4.rc
 #
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
-<<Settings for a4 paper size>>
-<<Common Layout Settings>>
+\LA{}Settings for a4 paper size~{\nwtagstyle{}\subpageref{NWHum17-SetQ.2-1}}\RA{}
+\LA{}Common Layout Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM-1}}\RA{}
 #
 # F ############GENOMIC FEATURES############
 #
-<<Common Features Settings>>
-<<Repeats Features Settings>>
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}\RA{}
+\LA{}Repeats Features Settings~{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}\RA{}
 #
 # G ############GROUP FEATURES##############
 #
-<<Common Group Settings>>
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}\RA{}
 #
 # S ############SOURCE FEATURES#############
 #
-<<Common Source Settings>>
-<<annotation source settings>>
-<<evidence source settings>>
-<<sgp source settings>>
-<<geneid source settings>>
-<<twinscan source settings>>
-<<genscan source settings>>
-<<tblastx source settings>>
-<<repeatmasker source settings>>
-@ 
+\LA{}Common Source Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM.2-1}}\RA{}
+\LA{}annotation source settings~{\nwtagstyle{}\subpageref{NWHum17-annQ-1}}\RA{}
+\LA{}evidence source settings~{\nwtagstyle{}\subpageref{NWHum17-eviO-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWHum17-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWHum17-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}\RA{}
+\LA{}repeatmasker source settings~{\nwtagstyle{}\subpageref{NWHum17-repS-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ chr22\ masked\ a4}\nwendcode{}\nwbegindocs{125}\nwdocspar
 
-<<GFF2PS customization: chr22 masked a3>>=
+\nwenddocs{}\nwbegincode{126}\sublabel{NWHum17-GFFb.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GFFb.2-1}}}\moddef{GFF2PS customization: chr22 masked a3~{\nwtagstyle{}\subpageref{NWHum17-GFFb.2-1}}}\endmoddef
 ##########################################
 ##   CUSTOM FILE FOR GFF2PS - A3 PAGE   ##
 ##########################################
 #
 # chr22_masked_a3.rc
 #
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
-<<Settings for a3 paper size>>
-<<Common Layout Settings>>
+\LA{}Settings for a3 paper size~{\nwtagstyle{}\subpageref{NWHum17-SetQ-1}}\RA{}
+\LA{}Common Layout Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM-1}}\RA{}
 #
 # F ############GENOMIC FEATURES############
 #
-<<Common Features Settings>>
-<<Repeats Features Settings>>
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}\RA{}
+\LA{}Repeats Features Settings~{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}\RA{}
 #
 # G ############GROUP FEATURES##############
 #
-<<Common Group Settings>>
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}\RA{}
 #
 # S ############SOURCE FEATURES#############
 #
-<<Common Source Settings>>
-<<annotation source settings>>
-<<evidence source settings>>
-<<sgp source settings>>
-<<geneid source settings>>
-<<twinscan source settings>>
-<<genscan source settings>>
-<<tblastx source settings>>
-<<repeatmasker source settings>>
-@ 
+\LA{}Common Source Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM.2-1}}\RA{}
+\LA{}annotation source settings~{\nwtagstyle{}\subpageref{NWHum17-annQ-1}}\RA{}
+\LA{}evidence source settings~{\nwtagstyle{}\subpageref{NWHum17-eviO-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWHum17-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWHum17-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}\RA{}
+\LA{}repeatmasker source settings~{\nwtagstyle{}\subpageref{NWHum17-repS-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ chr22\ masked\ a3}\nwendcode{}\nwbegindocs{127}\nwdocspar
 
-<<GFF2PS customization: chr22 masked wide>>=
+\nwenddocs{}\nwbegincode{128}\sublabel{NWHum17-GFFd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GFFd-1}}}\moddef{GFF2PS customization: chr22 masked wide~{\nwtagstyle{}\subpageref{NWHum17-GFFd-1}}}\endmoddef
 ############################################
 ##   CUSTOM FILE FOR GFF2PS - WIDE PAGE   ##
 ############################################
 #
 # chr22_masked_wide.rc
 #
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
-<<Settings for wide display>>
-<<Common Layout Settings for wide display>>
+\LA{}Settings for wide display~{\nwtagstyle{}\subpageref{NWHum17-SetP-1}}\RA{}
+\LA{}Common Layout Settings for wide display~{\nwtagstyle{}\subpageref{NWHum17-Comd-1}}\RA{}
 #
 # F ############GENOMIC FEATURES############
 #
-<<Common Features Settings>>
-<<Repeats Features Settings>>
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}\RA{}
+\LA{}Repeats Features Settings~{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}\RA{}
 #
 # G ############GROUP FEATURES##############
 #
-<<Common Group Settings>>
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}\RA{}
 #
 # S ############SOURCE FEATURES#############
 #
-<<Common Source Settings for wide display>>
-<<annotation source settings>>
-<<evidence source settings>>
-<<sgp source settings>>
-<<geneid source settings>>
-<<twinscan source settings>>
-<<genscan source settings>>
-<<tblastx source settings>>
-<<repeatmasker source settings>>
-@ 
+\LA{}Common Source Settings for wide display~{\nwtagstyle{}\subpageref{NWHum17-Comd.2-1}}\RA{}
+\LA{}annotation source settings~{\nwtagstyle{}\subpageref{NWHum17-annQ-1}}\RA{}
+\LA{}evidence source settings~{\nwtagstyle{}\subpageref{NWHum17-eviO-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWHum17-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWHum17-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}\RA{}
+\LA{}repeatmasker source settings~{\nwtagstyle{}\subpageref{NWHum17-repS-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ chr22\ masked\ wide}\nwendcode{}\nwbegindocs{129}\nwdocspar
 
 \subsubsctn{Assembling CUSTOM FILES: {\sgp} + Homology + Evidences}
 
-<<GFF2PS customization: chr22 masked a4 (evid)>>=
+\nwenddocs{}\nwbegincode{130}\sublabel{NWHum17-GFFi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GFFi-1}}}\moddef{GFF2PS customization: chr22 masked a4 (evid)~{\nwtagstyle{}\subpageref{NWHum17-GFFi-1}}}\endmoddef
 ##########################################
 ##   CUSTOM FILE FOR GFF2PS - A4 PAGE   ##
 ##########################################
 #
 # chr22_masked_evid_a4.rc
 #
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
-<<Settings for a4 paper size (evid)>>
-<<Common Layout Settings>>
+\LA{}Settings for a4 paper size (evid)~{\nwtagstyle{}\subpageref{NWHum17-SetX.2-1}}\RA{}
+\LA{}Common Layout Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM-1}}\RA{}
 #
 # F ############GENOMIC FEATURES############
 #
-<<Common Features Settings>>
-<<Repeats Features Settings>>
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}\RA{}
+\LA{}Repeats Features Settings~{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}\RA{}
 #
 # G ############GROUP FEATURES##############
 #
-<<Common Group Settings>>
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}\RA{}
 #
 # S ############SOURCE FEATURES#############
 #
-<<Common Source Settings>>
-<<annotation source settings (evid)>>
-<<evidence source settings (evid)>>
-<<sgp source settings>>
-<<geneid source settings>>
-<<twinscan source settings>>
-<<genscan source settings>>
-<<tblastx source settings>>
-@ 
+\LA{}Common Source Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM.2-1}}\RA{}
+\LA{}annotation source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-annX-1}}\RA{}
+\LA{}evidence source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-eviV-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWHum17-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWHum17-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ chr22\ masked\ a4\ (evid)}\nwendcode{}\nwbegindocs{131}\nwdocspar
 
-<<GFF2PS customization: chr22 masked a3 (evid)>>=
+\nwenddocs{}\nwbegincode{132}\sublabel{NWHum17-GFFi.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GFFi.2-1}}}\moddef{GFF2PS customization: chr22 masked a3 (evid)~{\nwtagstyle{}\subpageref{NWHum17-GFFi.2-1}}}\endmoddef
 ##########################################
 ##   CUSTOM FILE FOR GFF2PS - A3 PAGE   ##
 ##########################################
 #
 # chr22_masked_evid_a3.rc
 #
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
-<<Settings for a3 paper size (evid)>>
-<<Common Layout Settings>>
+\LA{}Settings for a3 paper size (evid)~{\nwtagstyle{}\subpageref{NWHum17-SetX-1}}\RA{}
+\LA{}Common Layout Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM-1}}\RA{}
 #
 # F ############GENOMIC FEATURES############
 #
-<<Common Features Settings>>
-<<Repeats Features Settings>>
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}\RA{}
+\LA{}Repeats Features Settings~{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}\RA{}
 #
 # G ############GROUP FEATURES##############
 #
-<<Common Group Settings>>
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}\RA{}
 #
 # S ############SOURCE FEATURES#############
 #
-<<Common Source Settings>>
-<<annotation source settings (evid)>>
-<<evidence source settings (evid)>>
-<<sgp source settings>>
-<<geneid source settings>>
-<<twinscan source settings>>
-<<genscan source settings>>
-<<tblastx source settings>>
-@ 
+\LA{}Common Source Settings~{\nwtagstyle{}\subpageref{NWHum17-ComM.2-1}}\RA{}
+\LA{}annotation source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-annX-1}}\RA{}
+\LA{}evidence source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-eviV-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWHum17-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWHum17-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ chr22\ masked\ a3\ (evid)}\nwendcode{}\nwbegindocs{133}\nwdocspar
 
-<<GFF2PS customization: chr22 masked wide (evid)>>=
+\nwenddocs{}\nwbegincode{134}\sublabel{NWHum17-GFFk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GFFk-1}}}\moddef{GFF2PS customization: chr22 masked wide (evid)~{\nwtagstyle{}\subpageref{NWHum17-GFFk-1}}}\endmoddef
 ############################################
 ##   CUSTOM FILE FOR GFF2PS - WIDE PAGE   ##
 ############################################
 #
 # chr22_masked_evid_wide.rc
 #
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
-<<Settings for wide display (evid)>>
-<<Common Layout Settings for wide display (evid)>>
+\LA{}Settings for wide display (evid)~{\nwtagstyle{}\subpageref{NWHum17-SetW-1}}\RA{}
+\LA{}Common Layout Settings for wide display (evid)~{\nwtagstyle{}\subpageref{NWHum17-Comk-1}}\RA{}
 #
 # F ############GENOMIC FEATURES############
 #
-<<Common Features Settings>>
-<<Repeats Features Settings>>
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWHum17-ComO-1}}\RA{}
+\LA{}Repeats Features Settings~{\nwtagstyle{}\subpageref{NWHum17-RepP-1}}\RA{}
 #
 # G ############GROUP FEATURES##############
 #
-<<Common Group Settings>>
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWHum17-ComL-1}}\RA{}
 #
 # S ############SOURCE FEATURES#############
 #
-<<Common Source Settings for wide display>>
-<<annotation source settings (evid)>>
-<<evidence source settings (evid)>>
-<<sgp source settings>>
-<<geneid source settings>>
-<<twinscan source settings>>
-<<genscan source settings>>
-<<tblastx source settings>>
-@ 
+\LA{}Common Source Settings for wide display~{\nwtagstyle{}\subpageref{NWHum17-Comd.2-1}}\RA{}
+\LA{}annotation source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-annX-1}}\RA{}
+\LA{}evidence source settings (evid)~{\nwtagstyle{}\subpageref{NWHum17-eviV-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWHum17-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWHum17-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWHum17-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWHum17-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWHum17-tblN-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ chr22\ masked\ wide\ (evid)}\nwendcode{}\nwbegindocs{135}\nwdocspar
 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2609,7 +2609,7 @@ masked::left_label=MASKED
 IDIR="/projects/sgp/chr22" ;
 ODIR="/usr/local/apache/htdocs/datasets/humanmouse/HsapCHROMOSOMES" ;
 \end{comment}
-<<BASH commands>>=
+\nwenddocs{}\nwbegincode{136}\sublabel{NWHum17-BASD.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASD.2-1}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWHum17-BASD.2-1}}}\endmoddef
 #
 # EXP="sgp_chr22_3X" ;
 # EXP="sgp_chr22_3X+" ;
@@ -2631,7 +2631,7 @@ cp $IDIR/sgp/$EXP/chr22_all.gtf2     $ODIR/Hsap_chr22_homol.gtf ;
 cp $IDIR/sgp/$EXP/chr22_evid.gff     $ODIR/Hsap_chr22_evid.gff ;
 cp $IDIR/sgp/$EXP/chr22_evid.gtf2    $ODIR/Hsap_chr22_evid.gtf ;
 #
-@ 
+\nwnotused{BASH\ commands}\nwendcode{}\nwbegindocs{137}\nwdocspar
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2641,41 +2641,41 @@ cp $IDIR/sgp/$EXP/chr22_evid.gtf2    $ODIR/Hsap_chr22_evid.gtf ;
 
 \subsctn{Annotated Human Genes for Homologous Sequences Set}
 
-<<HIDE: BASH commands>>=
-gawk 'BEGIN{ 
-        lncnt=0;
-        ROWS=47;
-        header="\\begin{tabular}[t]{|lrrc|}\n\\hline\n";
-        header=header"\\lb{1.5cm}{l}{GENE} & ";
-        header=header"\\lb{1cm}{r}{START} & \\lb{1cm}{r}{END} & ";
-        header=header"\\lb{0.5cm}{c}{STR} \\\\";
-        print "\\newcommand{\\lb}[3]{\\makebox[#1][#2]{#3}}\n";
-        print "\\begin{tabular}{c@{\\quad}c@{\\quad}c@{\\quad}c}"; # main table
-        print header;
-        }
-      { split($1,n,"_");
-        corr="";
-        if ( lncnt%ROWS == 0 && lncnt > 0 ) {
-          print "\\hline\n\\end{tabular}\n &";
-          print header;
-          n[2]="\\raisebox{-2.25ex}{\\shortstack{" n[2] "\\\\(\\textit{cont.})}}";
-          corr="[-1.75ex]";
-          } 
-        if ( cnt[n[2]] && n[2] !~ /\{cont\.\}/ ) {
-          n[2]=""; 
-          } 
-        else { 
-          printf "\\hline\n"; 
-          cnt[n[2]]++;
-          }
-        printf "%8s & %-10s & %8s & %8s & %s \\\\%s\n", n[2],$2,$3,$4,$5,corr;
-        lncnt++;
-        }
-      END{ 
-        print "\\hline\n\\end{tabular}\n\\\\";
-        print "\\end{tabular}"; # main table
-        }' $DATASETS/genes.Hsap > $DOCS/tables/genelist.tex ;
-@ 
+\nwenddocs{}%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+\nwbegindocs{139}\nwdocspar
 %$
 
 \begin{table}[!h]
@@ -2695,67 +2695,67 @@ gawk 'BEGIN{
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\sctn{Main [[README]] files}
+\sctn{Main {\tt{}README} files}
 
-Here we provide the basic skeleton for the [[README]] files we will generate on each main directories for the current dataset.
+Here we provide the basic skeleton for the {\tt{}README} files we will generate on each main directories for the current dataset.
 
-<<DATASETS README>>=
+\nwenddocs{}\nwbegincode{140}\sublabel{NWHum17-DATF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-DATF-1}}}\moddef{DATASETS README~{\nwtagstyle{}\subpageref{NWHum17-DATF-1}}}\endmoddef
 #
 #                 PREPARING DATASETS FOR
-<<README common>>
-<<BASH commands DATASETS>>
-@ 
+\LA{}README common~{\nwtagstyle{}\subpageref{NWHum17-READ-1}}\RA{}
+\LA{}BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWHum17-BASM-1}}\RA{}
+\nwnotused{DATASETS\ README}\nwendcode{}\nwbegindocs{141}\nwdocspar
 
-<<SGP README>>=
+\nwenddocs{}\nwbegincode{142}\sublabel{NWHum17-SGPA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SGPA-1}}}\moddef{SGP README~{\nwtagstyle{}\subpageref{NWHum17-SGPA-1}}}\endmoddef
 #
 #               RUNNING GENE-PREDICTION FOR
-<<README common>>
-<<BASH commands ANALYSIS>>
-@ 
+\LA{}README common~{\nwtagstyle{}\subpageref{NWHum17-READ-1}}\RA{}
+\LA{}BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWHum17-BASM.2-1}}\RA{}
+\nwnotused{SGP\ README}\nwendcode{}\nwbegindocs{143}\nwdocspar
 
-<<SPLICING README>>=
+\nwenddocs{}\nwbegincode{144}\sublabel{NWHum17-SPLF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SPLF-1}}}\moddef{SPLICING README~{\nwtagstyle{}\subpageref{NWHum17-SPLF-1}}}\endmoddef
 #
 #                  SPLICING ANALYSIS ON
-<<README common>>
-<<BASH commands SPLICING>>
-@ 
+\LA{}README common~{\nwtagstyle{}\subpageref{NWHum17-READ-1}}\RA{}
+\LA{}BASH commands SPLICING~{\nwtagstyle{}\subpageref{nw@notdef}}\RA{}
+\nwnotused{SPLICING\ README}\nwendcode{}\nwbegindocs{145}\nwdocspar
 
-<<README common>>=
+\nwenddocs{}\nwbegincode{146}\sublabel{NWHum17-READ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-READ-1}}}\moddef{README common~{\nwtagstyle{}\subpageref{NWHum17-READ-1}}}\endmoddef
 #           8 ORTHOLOGOUS HUMAN/MOUSE SEQUENCES
 #
 # This README file was tangled from ORTHOLOGOUS_dataset.nw
 #
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 ################################################################################
 #
 ### EXPORTING GLOBAL VARS
-<<BASH Environment Variables>>
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWHum17-BASQ.4-1}}\RA{}
 #
 ################################################################################
 #
 ### DEFINING BASIC SHELL FUNCTIONS 
-<<BASH Functions Block>>
+\LA{}BASH Functions Block~{\nwtagstyle{}\subpageref{NWHum17-BASK-1}}\RA{}
 #
 ################################################################################
-@ 
+\nwused{\\{NWHum17-DATF-1}\\{NWHum17-SGPA-1}\\{NWHum17-SPLF-1}}\nwendcode{}\nwbegindocs{147}\nwdocspar
 
-<<tangling - READMEs>>=
+\nwenddocs{}\nwbegincode{148}\sublabel{NWHum17-tanI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-tanI-1}}}\moddef{tangling - READMEs~{\nwtagstyle{}\subpageref{NWHum17-tanI-1}}}\endmoddef
 #
-notangle -R"DATASETS README" $WORK/$nwfile.nw | \
+notangle -R"DATASETS README" $WORK/$nwfile.nw | \\
     cpif $DATASETS/README ;
-notangle -R"SGP README" $WORK/$nwfile.nw | \
+notangle -R"SGP README" $WORK/$nwfile.nw | \\
     cpif $ANALYSIS/README ;
-# notangle -R"SPLICING README" $WORK/$nwfile.nw | \
+# notangle -R"SPLICING README" $WORK/$nwfile.nw | \\
 #     cpif $SPLICING/README ;
 #
-@
+\nwnotused{tangling\ -\ READMEs}\nwendcode{}\nwbegindocs{149}\nwdocspar
 
 % \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Programs not included in this document}
 
-The \sgp used in this approach uses different scrips and programs. When we started it was still not well controled. Therefore we decided to copy the binary files from [[~rguigo/research/humus/SGP2-2/sggp2/bin]] to [[/projects/sgp/bin/SGP2-2/]]. The copied files were the following:
+The \sgp used in this approach uses different scrips and programs. When we started it was still not well controled. Therefore we decided to copy the binary files from {\tt{}{\char126}rguigo/research/humus/SGP2-2/sggp2/bin} to {\tt{}/projects/sgp/bin/SGP2-2/}. The copied files were the following:
 
 \begin{center}
 \begin{tabular}{l}
@@ -2766,16 +2766,16 @@ human3iso.param \\
 \end{tabular}
 \end{center}
 
-The path variable in the sggp2 shell script has been changed to [[/projects/sgp/bin/SGP2-2/]].
+The path variable in the sggp2 shell script has been changed to {\tt{}/projects/sgp/bin/SGP2-2/}.
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Scripts Central}
 
-\subsctn{[[fasta_renamer.pl]]: renaming and reformating fasta files}
+\subsctn{{\tt{}fasta{\char95}renamer.pl}: renaming and reformating fasta files}
 
-<<Renaming fasta sequence IDs>>=
-<<PERL shebang>>
+\nwenddocs{}\nwbegincode{150}\sublabel{NWHum17-RenR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-RenR-1}}}\moddef{Renaming fasta sequence IDs~{\nwtagstyle{}\subpageref{NWHum17-RenR-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWHum17-PERC-1}}\RA{}
 #
 # fasta_renamer.pl infile descfile new_seq_id > outfile
 #
@@ -2790,28 +2790,28 @@ use Bio::SeqIO;
 my ($infile,$descfile,$newid) = @ARGV;
 
 my $seqin  = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
-my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
+my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \\*STDOUT);
 
 open(DESC,"> $descfile");
-while (my $sequence = $seqin->next_seq()) {
+while (my $sequence = $seqin->next_seq()) \{
     my ($sid,$len,$seq,$desc);
-    print STDERR "### READING FASTA... $newid\n";
+    print STDERR "### READING FASTA... $newid\\n";
     $sid  = $sequence->display_id();
     $desc = $sequence->desc();
     $len  = $sequence->length();
     $seq  = $sequence->seq();
-    $sid =~ s/\s+/\_/og;
+    $sid =~ s/\\s+/\\_/og;
     $seq =~ tr/[a-z]/[A-Z]/;
-    print STDERR "### WRITING FASTA... $newid\n";
-    print DESC "$newid $sid $len $desc\n";
+    print STDERR "### WRITING FASTA... $newid\\n";
+    print DESC "$newid $sid $len $desc\\n";
     $sequence->display_id($newid);
     $sequence->desc('');
     $sequence->seq($seq);
     $seqout->write_seq($sequence);
-}; # while 
+\}; # while 
 close(DESC);
 exit(0);
-@
+\nwnotused{Renaming\ fasta\ sequence\ IDs}\nwendcode{}\nwbegindocs{151}\nwdocspar
 
 \newpage
 
@@ -2819,185 +2819,185 @@ exit(0);
 
 \subsctn{PERL scripts}
 
-<<PERL shebang>>=
+\nwenddocs{}\nwbegincode{152}\sublabel{NWHum17-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWHum17-PERC-1}}}\endmoddef
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 use strict;
-@
+\nwused{\\{NWHum17-RenR-1}}\nwendcode{}\nwbegindocs{153}\nwdocspar
 
-<<Global Constants - Boolean>>=
+\nwenddocs{}\nwbegincode{154}\sublabel{NWHum17-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWHum17-GloQ-1}}}\endmoddef
 my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
-@ %def $T $F
-
+\eatline
+\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{155}\nwdocspar
 We also set here the date when the script is running and who is the user running it.
 
-<<Global Vars - User and Date>>=
+\nwenddocs{}\nwbegincode{156}\sublabel{NWHum17-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWHum17-GloR-1}}}\endmoddef
 my $DATE = localtime;
-my $USER = $ENV{USER};
-@ %def $DATE $USER
-
+my $USER = $ENV\{USER\};
+\eatline
+\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{157}\nwdocspar
 
 \subsubsctn{Timing our scripts}
 
-The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+The '{\tt{}Benchmark}' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
 
-<<Use Modules - Benchmark>>=
+\nwenddocs{}\nwbegincode{158}\sublabel{NWHum17-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWHum17-UseN-1}}}\endmoddef
 use Benchmark;
-  <<Timer ON>>
-@ 
+  \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWHum17-Tim8-1}}\RA{}
+\nwnotused{Use\ Modules\ -\ Benchmark}\nwendcode{}\nwbegindocs{159}\nwdocspar
 
-See '[[man Benchmark]]' for further info about this package. 
+See '{\tt{}man\ Benchmark}' for further info about this package. 
 We set an array to keep record of timing for each section.
 
-<<Timer ON>>=
+\nwenddocs{}\nwbegincode{160}\sublabel{NWHum17-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWHum17-Tim8-1}}}\endmoddef
 my @Timer = (new Benchmark);
-@ 
+\nwused{\\{NWHum17-UseN-1}}\nwendcode{}\nwbegindocs{161}\nwdocspar
 
-<<Common PERL subs - Benchmark>>=
-sub timing() {
+\nwenddocs{}\nwbegincode{162}\sublabel{NWHum17-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWHum17-ComS-1}}}\endmoddef
+sub timing() \{
     push @Timer, (new Benchmark);
     # partial time 
     $_[0] || 
         (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
     # total time
     return timestr(timediff($Timer[$#Timer],$Timer[0]));
-} # timing
-@ 
+\} # timing
+\nwnotused{Common\ PERL\ subs\ -\ Benchmark}\nwendcode{}\nwbegindocs{163}\nwdocspar
 
 
 \subsubsctn{Printing complex Data Structures}
 
-With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them.
+With '{\tt{}Data::Dumper}' we are able to pretty print complex data structures for debugging them.
 
 
-<<Use Modules - Dumper>>=
+\nwenddocs{}\nwbegincode{164}\sublabel{NWHum17-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWHum17-UseK-1}}}\endmoddef
 use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
-@ 
+\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{165}\nwdocspar
 
 
 \subsubsctn{Common functions}
 
-<<Skip comments and empty records>>=
-next if /^\#/o;
-next if /^\s*$/o;
+\nwenddocs{}\nwbegincode{166}\sublabel{NWHum17-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWHum17-SkiV-1}}}\endmoddef
+next if /^\\#/o;
+next if /^\\s*$/o;
 chomp;
-@
+\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{167}\nwdocspar
 
-<<Common PERL subs - Min Max>>=
+\nwenddocs{}\nwbegincode{168}\sublabel{NWHum17-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWHum17-ComQ-1}}}\endmoddef
 #
-sub max() {
+sub max() \{
     my $z = shift @_;
-    foreach my $l (@_) { $z = $l if $l > $z };
+    foreach my $l (@_) \{ $z = $l if $l > $z \};
     return $z;
-} # max
-sub min() {
+\} # max
+sub min() \{
     my $z = shift @_;
-    foreach my $l (@_) { $z = $l if $l < $z };
+    foreach my $l (@_) \{ $z = $l if $l < $z \};
     return $z;
-} # min
-@
+\} # min
+\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{169}\nwdocspar
 
-<<Common PERL subs - Text fill>>=
+\nwenddocs{}\nwbegincode{170}\sublabel{NWHum17-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWHum17-ComS.2-1}}}\endmoddef
 #
-sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
-sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
-sub fill_mid()   { 
+sub fill_right() \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
+sub fill_left()  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
+sub fill_mid()   \{ 
     my $l = length($_[0]);
     my $k = int(($_[1] - $l)/2);
     ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
-} # fill_mid
-@
+\} # fill_mid
+\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{171}\nwdocspar
 
 These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
 
-<<Common PERL subs - Counter>>=
+\nwenddocs{}\nwbegincode{172}\sublabel{NWHum17-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWHum17-ComQ.2-1}}}\endmoddef
 #
-sub counter { # $_[0]~current_pos++ $_[1]~char
+sub counter \{ # $_[0]~current_pos++ $_[1]~char
     print STDERR "$_[1]";
-    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
-} # counter
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter
 #
-sub counter_end { # $_[0]~current_pos   $_[1]~char
-    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
-} # counter_end
-@
+sub counter_end \{ # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter_end
+\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{173}\nwdocspar
 
-<<Global Vars - Counter>>=
+\nwenddocs{}\nwbegincode{174}\sublabel{NWHum17-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWHum17-GloL-1}}}\endmoddef
 my ($n,$c); # counter and char (for &counter function)
-@ %def $n $c
-
+\eatline
+\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{175}\nwdocspar
 
 \subsubsctn{Common functions for reporting program processes}
 \label{sec:messagerpt}
 
-Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
+Function '{\tt{}report}' requires that a hash variable '{\tt{}{\char37}MessageList}' has been set, such hash contains the strings for each report message we will need. The first parameter for '{\tt{}report}' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the {\tt{}sprintf} function on that string.
 
-<<Common PERL subs - STDERR>>=
-sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
-@
+\nwenddocs{}\nwbegincode{176}\sublabel{NWHum17-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWHum17-ComP-1}}}\endmoddef
+sub report() \{ print STDERR sprintf($MessageList\{ shift @_ \},@_) \}
+\nwalsodefined{\\{NWHum17-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{177}\nwdocspar
 
-The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
+The same happens to '{\tt{}warn}' function which also requires a hash variable '{\tt{}{\char37}ErrorList}' containing the error messages.
 
-<<Common PERL subs - STDERR>>=
-sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
-@
+\nwenddocs{}\nwbegincode{178}\sublabel{NWHum17-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWHum17-ComP-1}}}\plusendmoddef
+sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
+\nwendcode{}\nwbegindocs{179}\nwdocspar
 
 \subsctn{{\biop} modules}
 
-\def\bioseq{\htmladdnormallinkfoot{[[Bio::Seq]]}{http://bioperl.org/Core/POD/Bio/Seq.html}}
-\def\bioseqIO{\htmladdnormallinkfoot{[[Bio::SeqIO]]}{http://bioperl.org/Core/POD/Bio/SeqIO.html}}
+\def\bioseq{\htmladdnormallinkfoot{{\tt{}Bio::Seq}}{http://bioperl.org/Core/POD/Bio/Seq.html}}
+\def\bioseqIO{\htmladdnormallinkfoot{{\tt{}Bio::SeqIO}}{http://bioperl.org/Core/POD/Bio/SeqIO.html}}
 
 {\bioseq} is the {\biop} main sequence object while {\bioseqIO} is the {\bp} support for sequence input/output into files.
 
-<<Use Modules - Bio::Seq>>=
+\nwenddocs{}\nwbegincode{180}\sublabel{NWHum17-UseM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-UseM-1}}}\moddef{Use Modules - Bio::Seq~{\nwtagstyle{}\subpageref{NWHum17-UseM-1}}}\endmoddef
 use Bio::Seq;
 use Bio::SeqIO;
-@
+\nwnotused{Use\ Modules\ -\ Bio::Seq}\nwendcode{}\nwbegindocs{181}\nwdocspar
 
 
 \subsctn{AWK scripts}
 
-<<GAWK shebang>>=
+\nwenddocs{}\nwbegincode{182}\sublabel{NWHum17-GAWC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-GAWC-1}}}\moddef{GAWK shebang~{\nwtagstyle{}\subpageref{NWHum17-GAWC-1}}}\endmoddef
 #!/usr/bin/gawk -f
 # GNU Awk 3.0.4
-<<Version Control Id Tag>>
-@
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
+\nwnotused{GAWK\ shebang}\nwendcode{}\nwbegindocs{183}\nwdocspar
 
 \subsctn{BASH scripts}
 
-<<BASH shebang>>=
+\nwenddocs{}\nwbegincode{184}\sublabel{NWHum17-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWHum17-BASC-1}}}\endmoddef
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-<<Version Control Id Tag>>
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}\RA{}
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
 L="####################"
-{ echo "$L$L$L$L";
+\{ echo "$L$L$L$L";
   echo "### RUNNING [$0]";
   echo "### Current date:`date`";
-  echo "###"; } 1>&2;
-@
+  echo "###"; \} 1>&2;
+\nwused{\\{NWHum17-wea7-1}\\{NWHum17-LaT8-1}}\nwendcode{}\nwbegindocs{185}\nwdocspar
 
-<<BASH script end>>=
-{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+\nwenddocs{}\nwbegincode{186}\sublabel{NWHum17-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWHum17-BASF-1}}}\endmoddef
+\{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
   echo "$L$L$L$L";
-  echo ""; } 1>&2;
+  echo ""; \} 1>&2;
 #
 exit 0
-@
+\nwused{\\{NWHum17-wea7-1}\\{NWHum17-LaT8-1}}\nwendcode{}\nwbegindocs{187}\nwdocspar
 
 \subsctn{Version control tags}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
-<<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.6 2001-10-02 19:57:35 jabril Exp $
-@ 
+\nwenddocs{}\nwbegincode{188}\sublabel{NWHum17-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWHum17-VerM-1}}}\endmoddef
+# $Id: Human_Chromosome_22.tex,v 1.1 2001-10-02 19:57:35 jabril Exp $
+\nwused{\\{NWHum17-GFFb-1}\\{NWHum17-GFFb.2-1}\\{NWHum17-GFFd-1}\\{NWHum17-GFFi-1}\\{NWHum17-GFFi.2-1}\\{NWHum17-GFFk-1}\\{NWHum17-READ-1}\\{NWHum17-PERC-1}\\{NWHum17-GAWC-1}\\{NWHum17-BASC-1}}\nwendcode{}\nwbegindocs{189}\nwdocspar
 
 \newpage
 
@@ -3006,63 +3006,63 @@ This document is under Revision Control System (RCS). The version you are curren
 From this file we can obtain both the code and the
 documentation. The following instructions are needed:
 
-\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+\subsctn{Extracts Script code chunks from the {\tt{}noweb} file} % \\[-0.5ex]
 
-Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\tt{}noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
-<<tangling>>=
+\nwenddocs{}\nwbegincode{190}\sublabel{NWHum17-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWHum17-tan8-1}}}\endmoddef
 # PBS
-notangle -R"PBS tblastx shell" $WORK/$nwfile.nw | \
+notangle -R"PBS tblastx shell" $WORK/$nwfile.nw | \\
     cpif /home/ug/jabril/no_backup/PBS/PBS.sh ;
 chmod a+x /home/ug/jabril/no_backup/PBS/PBS.sh ;
 # showing line numbering comments in program (DEVEL VERSIONS)
-notangle -L -R"Renaming fasta sequence IDs" $WORK/$nwfile.nw | \
+notangle -L -R"Renaming fasta sequence IDs" $WORK/$nwfile.nw | \\
     perl -ne '$.>1 && print' | cpif $BIN/fasta_renamer.pl ;
 # making them runnable
 chmod a+x $BIN/fasta_renamer.pl ;
 #
-@ 
+\nwalsodefined{\\{NWHum17-tan8-2}\\{NWHum17-tan8-3}\\{NWHum17-tan8-4}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{191}\nwdocspar
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
-<<tangling>>=
+\nwenddocs{}\nwbegincode{192}\sublabel{NWHum17-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWHum17-tan8-1}}}\plusendmoddef
 #
 ChckDirs $PARAM/gff2ps $PARAM/gff2aplot ;
 # GENEID SGP SRs HSPs ANNOTATED REPEATS -> SGP homology
-notangle -R"GFF2PS customization: chr22 masked a4" $WORK/$nwfile.nw | \
+notangle -R"GFF2PS customization: chr22 masked a4" $WORK/$nwfile.nw | \\
          cpif $PARAM/gff2ps/chr22_masked_a4.rc ;
-notangle -R"GFF2PS customization: chr22 masked a3" $WORK/$nwfile.nw | \
+notangle -R"GFF2PS customization: chr22 masked a3" $WORK/$nwfile.nw | \\
          cpif $PARAM/gff2ps/chr22_masked_a3.rc ;
-notangle -R"GFF2PS customization: chr22 masked wide" $WORK/$nwfile.nw | \
+notangle -R"GFF2PS customization: chr22 masked wide" $WORK/$nwfile.nw | \\
          cpif $PARAM/gff2ps/chr22_masked_wide.rc ;
 # GENEID SGP SRs HSPs ANNOTATED -> SGP homology + evidences
-notangle -R"GFF2PS customization: chr22 masked a4 (evid)" $WORK/$nwfile.nw | \
+notangle -R"GFF2PS customization: chr22 masked a4 (evid)" $WORK/$nwfile.nw | \\
          cpif $PARAM/gff2ps/chr22_masked_evid_a4.rc ;
-notangle -R"GFF2PS customization: chr22 masked a3 (evid)" $WORK/$nwfile.nw | \
+notangle -R"GFF2PS customization: chr22 masked a3 (evid)" $WORK/$nwfile.nw | \\
          cpif $PARAM/gff2ps/chr22_masked_evid_a3.rc ;
-notangle -R"GFF2PS customization: chr22 masked wide (evid)" $WORK/$nwfile.nw | \
+notangle -R"GFF2PS customization: chr22 masked wide (evid)" $WORK/$nwfile.nw | \\
          cpif $PARAM/gff2ps/chr22_masked_evid_wide.rc ;
 #
-@ %$
+\nwendcode{}\nwbegindocs{193}%$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
-<<tangling>>=
+\nwenddocs{}\nwbegincode{194}\sublabel{NWHum17-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWHum17-tan8-1}}}\plusendmoddef
 #
 notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
 #
-@ 
+\nwendcode{}\nwbegindocs{195}\nwdocspar
 
-<<weaving>>=
-<<BASH shebang>>
+\nwenddocs{}\nwbegincode{196}\sublabel{NWHum17-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWHum17-wea7-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWHum17-BASC-1}}\RA{}
 # weaving and LaTeXing
-<<BASH Environment Variables>>
-<<BASH Gene Prediction Stats>>
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWHum17-BASQ.4-1}}\RA{}
+\LA{}BASH Gene Prediction Stats~{\nwtagstyle{}\subpageref{NWHum17-BASQ.2-1}}\RA{}
 #
 echo "### WEAVING LaTeX MAIN DOCUMENT..." ;
-noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \\
         $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 #
 echo "### LaTeXING MAIN DOCUMENT..." ;
@@ -3071,13 +3071,13 @@ latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 popd;
 #
-<<BASH script end>>
-@ 
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWHum17-BASF-1}}\RA{}
+\nwnotused{weaving}\nwendcode{}\nwbegindocs{197}\nwdocspar
 
-<<LaTeXing>>=
-<<BASH shebang>>
+\nwenddocs{}\nwbegincode{198}\sublabel{NWHum17-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWHum17-LaT8-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWHum17-BASC-1}}\RA{}
 # only LaTeXing
-<<BASH Environment Variables>>
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWHum17-BASQ.4-1}}\RA{}
 #
 echo "### LaTeXING MAIN DOCUMENT..." ;
 pushd $DOCS/ ;
@@ -3087,59 +3087,59 @@ latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 popd ;
 #
-<<BASH script end>>
-@ %$
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWHum17-BASF-1}}\RA{}
+\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{199}%$
 
 \subsctn{Defining shell functions for the current project} % \\[-0.5ex]
 
-<<BASH Functions Block>>=
-<<BASH Basic Shell Functions>>
-<<BASH Functions: GTF to GFF>>
-<<BASH Functions: Gene-Prediction Evaluation>>
-<<BASH Functions: Running GENEID>>
-<<BASH Functions: Running GENEID + Evidences>>
-<<BASH Functions: Filtering GENEID RAW Output>>
-<<BASH Functions: Running SGP>>
-<<BASH Functions: SGP + Evidences>>
-<<BASH Functions: Preparing SGP Output>>
-<<BASH Functions: Predicted Genes Boundaries>>
-<<BASH Functions: Running GFF2PS>>
-@ 
+\nwenddocs{}\nwbegincode{200}\sublabel{NWHum17-BASK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASK-1}}}\moddef{BASH Functions Block~{\nwtagstyle{}\subpageref{NWHum17-BASK-1}}}\endmoddef
+\LA{}BASH Basic Shell Functions~{\nwtagstyle{}\subpageref{NWHum17-BASQ.3-1}}\RA{}
+\LA{}BASH Functions: GTF to GFF~{\nwtagstyle{}\subpageref{NWHum17-BASQ-1}}\RA{}
+\LA{}BASH Functions: Gene-Prediction Evaluation~{\nwtagstyle{}\subpageref{NWHum17-BASg-1}}\RA{}
+\LA{}BASH Functions: Running GENEID~{\nwtagstyle{}\subpageref{NWHum17-BASU-1}}\RA{}
+\LA{}BASH Functions: Running GENEID + Evidences~{\nwtagstyle{}\subpageref{NWHum17-BASg.2-1}}\RA{}
+\LA{}BASH Functions: Filtering GENEID RAW Output~{\nwtagstyle{}\subpageref{NWHum17-BASh-1}}\RA{}
+\LA{}BASH Functions: Running SGP~{\nwtagstyle{}\subpageref{NWHum17-BASR-1}}\RA{}
+\LA{}BASH Functions: SGP + Evidences~{\nwtagstyle{}\subpageref{NWHum17-BASV-1}}\RA{}
+\LA{}BASH Functions: Preparing SGP Output~{\nwtagstyle{}\subpageref{NWHum17-BASa-1}}\RA{}
+\LA{}BASH Functions: Predicted Genes Boundaries~{\nwtagstyle{}\subpageref{NWHum17-BASg.3-1}}\RA{}
+\LA{}BASH Functions: Running GFF2PS~{\nwtagstyle{}\subpageref{NWHum17-BASU.2-1}}\RA{}
+\nwused{\\{NWHum17-READ-1}\\{NWHum17-BASC.2-1}}\nwendcode{}\nwbegindocs{201}\nwdocspar
 
-<<BASH Basic Shell Functions>>=
+\nwenddocs{}\nwbegincode{202}\sublabel{NWHum17-BASQ.3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASQ.3-1}}}\moddef{BASH Basic Shell Functions~{\nwtagstyle{}\subpageref{NWHum17-BASQ.3-1}}}\endmoddef
 #
 # BASIC Shell Functions
 #
 ChckDirs ()
-{
+\{
   #
   # USAGE: ChckDirs <path_list>
   #
   for name in "$@" ;
-    do {
+    do \{
          [ -d "$name" ] && 
            echo "### Directory Already Exist: $name" ||
              mkdir --verbose $name ;
-      } ;
+      \} ;
     done ;
-}
+\}
 #
 renameSEQS ()
-{
+\{
   #
   # USAGE: renameSEQS ls_command reg_exp substitution_value
   # Example: renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA'
   #
   $1 | while read n ; 
-    do {
+    do \{
       k=`echo $n | sed "s/$2/$3/"` ;
       [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
-    } ;
+    \} ;
     done ;
-}
+\}
 #
 MergeFiles ()
-{
+\{
   #
   # USAGE: MergeFiles <working_path>
   #
@@ -3150,16 +3150,16 @@ MergeFiles ()
     /bin/rm --force --verbose $1/all.Mmus ;
   echo "### WORKING on HUMAN LOCI..." ;
   cat $HSAP | while read locus ;
-    do { cat $1/$locus >> $1/all.Hsap ; } ; done ;
+    do \{ cat $1/$locus >> $1/all.Hsap ; \} ; done ;
   echo "### WORKING on MOUSE LOCI..." ;
   cat $MMUS | while read locus ;
-    do { cat $1/$locus >> $1/all.Mmus ; } ; done ;
+    do \{ cat $1/$locus >> $1/all.Mmus ; \} ; done ;
   echo "### MERGING HUMAN and MOUSE..." ;
   cat $1/all.Hsap $1/all.Mmus > $1/all ;
-}
+\}
 #
 MergeGFF () 
-{
+\{
   #
   # USAGE: MergeGFF <working_path> <species_id> <flag>
   #
@@ -3171,21 +3171,21 @@ MergeGFF ()
   echo "### WORKING on $2 LOCI..." ;
   c=0 ;
   while read locus ;
-    do {
+    do \{
          let c=c+1 ;
          [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
          [ $flag -eq 1 ] &&
              cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
-         gawk 'BEGIN{OFS="\t"}
-             ($1 !~ /^#/ && $3 != "Gene") {
+         gawk 'BEGIN\{OFS="\\t"\}
+             ($1 !~ /^#/ && $3 != "Gene") \{
                  print $0;
-             }' $1/$locus | sort +3n -5 - >> $1/all.$2 ; 
-       } ;
+             \}' $1/$locus | sort +3n -5 - >> $1/all.$2 ; 
+       \} ;
     done < $DATASETS/id.$2 ;
-}
+\}
 #
 MergeALLGFF () 
-{
+\{
   #
   # USAGE: MergeGFF <working_path>
   #
@@ -3195,12 +3195,12 @@ MergeALLGFF ()
   MergeGFF $1 Mmus 1 ;
   echo "### MERGING HUMAN and MOUSE..." ;
   echo '#$ ' | cat $1/all.Hsap - $1/all.Mmus > $1/all ;
-}
-@ 
+\}
+\nwused{\\{NWHum17-BASK-1}}\nwendcode{}\nwbegindocs{203}\nwdocspar
 
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
-<<BASH Environment Variables>>=
+\nwenddocs{}\nwbegincode{204}\sublabel{NWHum17-BASQ.4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASQ.4-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWHum17-BASQ.4-1}}}\endmoddef
 #
 # NOWEB Document Variables
 # 
@@ -3228,20 +3228,103 @@ SPLICING="/projects/splicing/chr22" ;
 export SPLICING ;
 # Allowing for users and group file permisions
 umask 002;
-@ 
+\nwused{\\{NWHum17-READ-1}\\{NWHum17-wea7-1}\\{NWHum17-LaT8-1}\\{NWHum17-BASC.2-1}}\nwendcode{}\nwbegindocs{205}\nwdocspar
 
-<<BASH RC FILE>>=
-<<BASH Environment Variables>>
-<<BASH Functions Block>>
-@ 
+\nwenddocs{}\nwbegincode{206}\sublabel{NWHum17-BASC.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-BASC.2-1}}}\moddef{BASH RC FILE~{\nwtagstyle{}\subpageref{NWHum17-BASC.2-1}}}\endmoddef
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWHum17-BASQ.4-1}}\RA{}
+\LA{}BASH Functions Block~{\nwtagstyle{}\subpageref{NWHum17-BASK-1}}\RA{}
+\nwnotused{BASH\ RC\ FILE}\nwendcode{}\nwbegindocs{207}\nwdocspar
 
-<<tangling>>=
+\nwenddocs{}\nwbegincode{208}\sublabel{NWHum17-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWHum17-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWHum17-tan8-1}}}\plusendmoddef
 #
 # BASH shell
-notangle -R'BASH RC FILE' $WORK/$nwfile.nw | \
+notangle -R'BASH RC FILE' $WORK/$nwfile.nw | \\
          cpif $WORK/.bash_VARS ; 
 # sourcing
 source $WORK/.bash_VARS ;
-@
+\nwendcode{}
+
+\nwixlogsorted{c}{{BASH Basic Shell Functions}{NWHum17-BASQ.3-1}{\nwixu{NWHum17-BASK-1}\nwixd{NWHum17-BASQ.3-1}}}%
+\nwixlogsorted{c}{{BASH Commands}{NWHum17-BASD-1}{\nwixd{NWHum17-BASD-1}}}%
+\nwixlogsorted{c}{{BASH Environment Variables}{NWHum17-BASQ.4-1}{\nwixu{NWHum17-READ-1}\nwixu{NWHum17-wea7-1}\nwixu{NWHum17-LaT8-1}\nwixd{NWHum17-BASQ.4-1}\nwixu{NWHum17-BASC.2-1}}}%
+\nwixlogsorted{c}{{BASH Functions Block}{NWHum17-BASK-1}{\nwixu{NWHum17-READ-1}\nwixd{NWHum17-BASK-1}\nwixu{NWHum17-BASC.2-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Filtering GENEID RAW Output}{NWHum17-BASh-1}{\nwixd{NWHum17-BASh-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: GTF to GFF}{NWHum17-BASQ-1}{\nwixd{NWHum17-BASQ-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Gene-Prediction Evaluation}{NWHum17-BASg-1}{\nwixd{NWHum17-BASg-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Predicted Genes Boundaries}{NWHum17-BASg.3-1}{\nwixd{NWHum17-BASg.3-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Preparing SGP Output}{NWHum17-BASa-1}{\nwixd{NWHum17-BASa-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Running GENEID}{NWHum17-BASU-1}{\nwixd{NWHum17-BASU-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Running GENEID + Evidences}{NWHum17-BASg.2-1}{\nwixd{NWHum17-BASg.2-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Running GFF2PS}{NWHum17-BASU.2-1}{\nwixd{NWHum17-BASU.2-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: Running SGP}{NWHum17-BASR-1}{\nwixd{NWHum17-BASR-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Functions: SGP + Evidences}{NWHum17-BASV-1}{\nwixd{NWHum17-BASV-1}\nwixu{NWHum17-BASK-1}}}%
+\nwixlogsorted{c}{{BASH Gene Prediction Stats}{NWHum17-BASQ.2-1}{\nwixd{NWHum17-BASQ.2-1}\nwixu{NWHum17-wea7-1}}}%
+\nwixlogsorted{c}{{BASH RC FILE}{NWHum17-BASC.2-1}{\nwixd{NWHum17-BASC.2-1}}}%
+\nwixlogsorted{c}{{BASH commands}{NWHum17-BASD.2-1}{\nwixd{NWHum17-BASD.2-1}}}%
+\nwixlogsorted{c}{{BASH commands ANALYSIS}{NWHum17-BASM.2-1}{\nwixd{NWHum17-BASM.2-1}\nwixd{NWHum17-BASM.2-2}\nwixd{NWHum17-BASM.2-3}\nwixd{NWHum17-BASM.2-4}\nwixd{NWHum17-BASM.2-5}\nwixd{NWHum17-BASM.2-6}\nwixd{NWHum17-BASM.2-7}\nwixd{NWHum17-BASM.2-8}\nwixd{NWHum17-BASM.2-9}\nwixd{NWHum17-BASM.2-A}\nwixd{NWHum17-BASM.2-B}\nwixd{NWHum17-BASM.2-C}\nwixd{NWHum17-BASM.2-D}\nwixd{NWHum17-BASM.2-E}\nwixd{NWHum17-BASM.2-F}\nwixu{NWHum17-SGPA-1}}}%
+\nwixlogsorted{c}{{BASH commands DATASETS}{NWHum17-BASM-1}{\nwixd{NWHum17-BASM-1}\nwixd{NWHum17-BASM-2}\nwixd{NWHum17-BASM-3}\nwixd{NWHum17-BASM-4}\nwixd{NWHum17-BASM-5}\nwixu{NWHum17-DATF-1}}}%
+\nwixlogsorted{c}{{BASH commands SPLICING}{nw@notdef}{\nwixu{NWHum17-SPLF-1}}}%
+\nwixlogsorted{c}{{BASH script end}{NWHum17-BASF-1}{\nwixd{NWHum17-BASF-1}\nwixu{NWHum17-wea7-1}\nwixu{NWHum17-LaT8-1}}}%
+\nwixlogsorted{c}{{BASH shebang}{NWHum17-BASC-1}{\nwixd{NWHum17-BASC-1}\nwixu{NWHum17-wea7-1}\nwixu{NWHum17-LaT8-1}}}%
+\nwixlogsorted{c}{{Common Features Settings}{NWHum17-ComO-1}{\nwixd{NWHum17-ComO-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{Common Group Settings}{NWHum17-ComL-1}{\nwixd{NWHum17-ComL-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{Common Layout Settings}{NWHum17-ComM-1}{\nwixd{NWHum17-ComM-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}}}%
+\nwixlogsorted{c}{{Common Layout Settings for wide display}{NWHum17-Comd-1}{\nwixd{NWHum17-Comd-1}\nwixu{NWHum17-GFFd-1}}}%
+\nwixlogsorted{c}{{Common Layout Settings for wide display (evid)}{NWHum17-Comk-1}{\nwixd{NWHum17-Comk-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Benchmark}{NWHum17-ComS-1}{\nwixd{NWHum17-ComS-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Counter}{NWHum17-ComQ.2-1}{\nwixd{NWHum17-ComQ.2-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Min Max}{NWHum17-ComQ-1}{\nwixd{NWHum17-ComQ-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - STDERR}{NWHum17-ComP-1}{\nwixd{NWHum17-ComP-1}\nwixd{NWHum17-ComP-2}}}%
+\nwixlogsorted{c}{{Common PERL subs - Text fill}{NWHum17-ComS.2-1}{\nwixd{NWHum17-ComS.2-1}}}%
+\nwixlogsorted{c}{{Common Source Settings}{NWHum17-ComM.2-1}{\nwixd{NWHum17-ComM.2-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}}}%
+\nwixlogsorted{c}{{Common Source Settings for wide display}{NWHum17-Comd.2-1}{\nwixd{NWHum17-Comd.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{DATASETS README}{NWHum17-DATF-1}{\nwixd{NWHum17-DATF-1}}}%
+\nwixlogsorted{c}{{GAWK shebang}{NWHum17-GAWC-1}{\nwixd{NWHum17-GAWC-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: chr22 masked a3}{NWHum17-GFFb.2-1}{\nwixd{NWHum17-GFFb.2-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: chr22 masked a4}{NWHum17-GFFb-1}{\nwixd{NWHum17-GFFb-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: chr22 masked a3 (evid)}{NWHum17-GFFi.2-1}{\nwixd{NWHum17-GFFi.2-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: chr22 masked a4 (evid)}{NWHum17-GFFi-1}{\nwixd{NWHum17-GFFi-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: chr22 masked wide}{NWHum17-GFFd-1}{\nwixd{NWHum17-GFFd-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: chr22 masked wide (evid)}{NWHum17-GFFk-1}{\nwixd{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{Global Constants - Boolean}{NWHum17-GloQ-1}{\nwixd{NWHum17-GloQ-1}}}%
+\nwixlogsorted{c}{{Global Vars - Counter}{NWHum17-GloL-1}{\nwixd{NWHum17-GloL-1}}}%
+\nwixlogsorted{c}{{Global Vars - User and Date}{NWHum17-GloR-1}{\nwixd{NWHum17-GloR-1}}}%
+\nwixlogsorted{c}{{HIDE: BASH commands}{NWHum17-HIDJ-1}{\nwixd{NWHum17-HIDJ-1}\nwixd{NWHum17-HIDJ-2}\nwixd{NWHum17-HIDJ-3}}}%
+\nwixlogsorted{c}{{HIDE: BASH commands ANALYSIS}{NWHum17-HIDS-1}{\nwixd{NWHum17-HIDS-1}\nwixd{NWHum17-HIDS-2}}}%
+\nwixlogsorted{c}{{LaTeXing}{NWHum17-LaT8-1}{\nwixd{NWHum17-LaT8-1}}}%
+\nwixlogsorted{c}{{PERL shebang}{NWHum17-PERC-1}{\nwixu{NWHum17-RenR-1}\nwixd{NWHum17-PERC-1}}}%
+\nwixlogsorted{c}{{README common}{NWHum17-READ-1}{\nwixu{NWHum17-DATF-1}\nwixu{NWHum17-SGPA-1}\nwixu{NWHum17-SPLF-1}\nwixd{NWHum17-READ-1}}}%
+\nwixlogsorted{c}{{Renaming fasta sequence IDs}{NWHum17-RenR-1}{\nwixd{NWHum17-RenR-1}}}%
+\nwixlogsorted{c}{{Repeats Features Settings}{NWHum17-RepP-1}{\nwixd{NWHum17-RepP-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{SGP README}{NWHum17-SGPA-1}{\nwixd{NWHum17-SGPA-1}}}%
+\nwixlogsorted{c}{{SPLICING README}{NWHum17-SPLF-1}{\nwixd{NWHum17-SPLF-1}}}%
+\nwixlogsorted{c}{{Settings for a3 paper size}{NWHum17-SetQ-1}{\nwixd{NWHum17-SetQ-1}\nwixu{NWHum17-GFFb.2-1}}}%
+\nwixlogsorted{c}{{Settings for a4 paper size}{NWHum17-SetQ.2-1}{\nwixd{NWHum17-SetQ.2-1}\nwixu{NWHum17-GFFb-1}}}%
+\nwixlogsorted{c}{{Settings for a3 paper size (evid)}{NWHum17-SetX-1}{\nwixd{NWHum17-SetX-1}\nwixu{NWHum17-GFFi.2-1}}}%
+\nwixlogsorted{c}{{Settings for a4 paper size (evid)}{NWHum17-SetX.2-1}{\nwixd{NWHum17-SetX.2-1}\nwixu{NWHum17-GFFi-1}}}%
+\nwixlogsorted{c}{{Settings for wide display}{NWHum17-SetP-1}{\nwixd{NWHum17-SetP-1}\nwixu{NWHum17-GFFd-1}}}%
+\nwixlogsorted{c}{{Settings for wide display (evid)}{NWHum17-SetW-1}{\nwixd{NWHum17-SetW-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{Skip comments and empty records}{NWHum17-SkiV-1}{\nwixd{NWHum17-SkiV-1}}}%
+\nwixlogsorted{c}{{Timer ON}{NWHum17-Tim8-1}{\nwixu{NWHum17-UseN-1}\nwixd{NWHum17-Tim8-1}}}%
+\nwixlogsorted{c}{{Use Modules - Benchmark}{NWHum17-UseN-1}{\nwixd{NWHum17-UseN-1}}}%
+\nwixlogsorted{c}{{Use Modules - Bio::Seq}{NWHum17-UseM-1}{\nwixd{NWHum17-UseM-1}}}%
+\nwixlogsorted{c}{{Use Modules - Dumper}{NWHum17-UseK-1}{\nwixd{NWHum17-UseK-1}}}%
+\nwixlogsorted{c}{{Version Control Id Tag}{NWHum17-VerM-1}{\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}\nwixu{NWHum17-READ-1}\nwixu{NWHum17-PERC-1}\nwixu{NWHum17-GAWC-1}\nwixu{NWHum17-BASC-1}\nwixd{NWHum17-VerM-1}}}%
+\nwixlogsorted{c}{{annotation source settings}{NWHum17-annQ-1}{\nwixd{NWHum17-annQ-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}}}%
+\nwixlogsorted{c}{{annotation source settings (evid)}{NWHum17-annX-1}{\nwixd{NWHum17-annX-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{evidence source settings}{NWHum17-eviO-1}{\nwixd{NWHum17-eviO-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}}}%
+\nwixlogsorted{c}{{evidence source settings (evid)}{NWHum17-eviV-1}{\nwixd{NWHum17-eviV-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{geneid source settings}{NWHum17-genM-1}{\nwixd{NWHum17-genM-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{genscan source settings}{NWHum17-genN-1}{\nwixd{NWHum17-genN-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{orimasked source settings}{NWHum17-oriP-1}{\nwixd{NWHum17-oriP-1}}}%
+\nwixlogsorted{c}{{repeatmasker source settings}{NWHum17-repS-1}{\nwixd{NWHum17-repS-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}}}%
+\nwixlogsorted{c}{{sgp source settings}{NWHum17-sgpJ-1}{\nwixd{NWHum17-sgpJ-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{tangling}{NWHum17-tan8-1}{\nwixd{NWHum17-tan8-1}\nwixd{NWHum17-tan8-2}\nwixd{NWHum17-tan8-3}\nwixd{NWHum17-tan8-4}}}%
+\nwixlogsorted{c}{{tangling - READMEs}{NWHum17-tanI-1}{\nwixd{NWHum17-tanI-1}}}%
+\nwixlogsorted{c}{{tblastx source settings}{NWHum17-tblN-1}{\nwixd{NWHum17-tblN-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{twinscan source settings}{NWHum17-twiO-1}{\nwixd{NWHum17-twiO-1}\nwixu{NWHum17-GFFb-1}\nwixu{NWHum17-GFFb.2-1}\nwixu{NWHum17-GFFd-1}\nwixu{NWHum17-GFFi-1}\nwixu{NWHum17-GFFi.2-1}\nwixu{NWHum17-GFFk-1}}}%
+\nwixlogsorted{c}{{weaving}{NWHum17-wea7-1}{\nwixd{NWHum17-wea7-1}}}%
+\nwbegindocs{209}\nwdocspar
 
 \end{document}
+\nwenddocs{}

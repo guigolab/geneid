@@ -1,0 +1,92 @@
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A3 PAGE   ##
+##########################################
+#
+# chr22_masked_evid_a3.rc
+#
+# $Id: chr22_masked_evid_a3.rc,v 1.1 2001-10-02 19:57:35 jabril Exp $
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+page_size=a3
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=10
+nucleotides_x_line=50000
+#
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=5000
+minor_tickmarks_nucleotides=500
+nucleotide_scale=kb
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=on
+#
+group_label_scale=2.25
+#
+#
+# F ############GENOMIC FEATURES############
+#
+*::fill_shape_mode=1_color
+gene::shape=none
+cds::layer=1
+cds::feature_color=darkgreen
+exon::feature_color=verylightgreen
+exon_pseudo::feature_color=lightblue
+sine/alu::feature_color=verydarkgreen
+sine/mir::feature_color=verydarkbrown
+line/l1::feature_color=lightred
+line/l2::feature_color=verydarkred
+ltr/erv1::feature_color=verydarkblue
+simple_repeat::feature_color=verydarkorange
+low_complexity::feature_color=verydarkyellow
+#
+#
+# G ############GROUP FEATURES##############
+#
+*::group_line=none
+*::group_shape=thick_line
+#
+# S ############SOURCE FEATURES#############
+#
+*::unfold_grouped_ungrouped=off
+*::unfold_ungrouped_line=off
+*::unfold_grouped_line=off
+*::range=none
+*::source_line_color=black
+*::source_line=long_dotted
+#
+# annotation::vert_align=bottom
+# annotation::feature_color=darkgreen
+annotation::group_color=verydarkgreen
+annotation::left_label=SANGER
+annotation::track_spacing_scale=0
+evidence::source_line_color=black
+evidence::source_line=dotted
+evidence::left_label=++none++
+evidence::vert_align=bottom
+evidence::track_scale=0.25
+evidence::track_spacing_scale=0
+SGP.3X::feature_color=lightred
+SGP.3X::group_color=red
+SGP.3X::left_label=SGP 3X
+SGP.homol::feature_color=red
+SGP.homol::group_color=darkred
+SGP.homol::left_label=SGP
+geneid::feature_color=lightviolet
+geneid::group_color=darkviolet
+geneid::left_label=GENEID v1.1
+Twinscan-1.0::feature_color=verylightbrown
+Twinscan-1.0::group_color=brown
+Twinscan-1.0::left_label=TWINSCAN
+genscan::feature_color=blue
+genscan::group_color=verydarkblue
+genscan::left_label=GENSCAN
+SR.3X::feature_color=red
+SR.3X::group_color=verydarkred
+SR.3X::left_label=SRs 3X
+SR-RS.3X::feature_color=orange
+SR-RS.3X::group_color=verydarkred
+SR-RS.3X::left_label=SR-RSs 3X

@@ -1,0 +1,103 @@
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+# $Id: nw2tex,v 1.1 2001-10-02 19:57:35 jabril Exp $
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+# weaving and LaTeXing
+#
+# NOWEB Document Variables
+# 
+WORK="$HOME/development/projects/sgp/chr22" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="Human_Chromosome_22" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
+# CHR22 Dataset Variables
+#
+DATASETS="/projects/datasets/chr22" ;
+ANALYSIS="/projects/sgp/chr22" ;
+SGPBIN="/projects/sgp/bin" ;
+SGPPARAM="$SGPBIN/param" ;
+#
+ID="$DATASETS/id" ;
+HSAP="$DATASETS/id.Hsap" ;
+MMUS="$DATASETS/id.Mmus" ;
+export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
+#
+SPLICING="/projects/splicing/chr22" ;
+export SPLICING ;
+# Allowing for users and group file permisions
+umask 002;
+#
+echo "### BUILDING GENE PREDICTION STATS LaTeX TABLE..." ;
+perl -ne '
+      BEGIN{
+        @header = qw/ Test SN SP CC SNe SPe SNSP raME raWE
+                           SNg SPg SNSPg raMG raWG raJG raSG / ;
+        for ($j=0; $j<=$#header; $j++) {
+          $header{$j} = "\\textbf\{$header{$j}\}";
+        };
+        print STDOUT "\\begin{tabular}{|c*{15}{|r}|}\\hline\n".
+                     join("\&", @header)."\\\\\\hline\n";
+        $n = 0;
+      }
+      chomp;
+      $_ =~ m%^### /projects%o && do {
+        $_ =~ s/(_)/\\$1/og;
+        @file = split /\//og, $_;
+        $file = "\\parbox\[c\]\[6ex\]\[c\]\{7cm\}\{\\centering".
+                "\\shortstack\{\\texttt\{\\bfseries $file[($#file-2)]\} ".
+                "\$\\rightarrow\$ $file[($#file-1)]\\\\\[-0.25ex\]($file[$#file])\}\}\n";
+      }; 
+      $_ =~ s%^\s+chr22\s+%%o    && do {
+        ($n%3==0) && print STDOUT "\\hline\n";
+        $n++;
+        @field = split /\s+/og, $_;
+        print STDOUT "$file \& ".join(" \& ",@field)."\\\\\[2ex\]\n" ;
+      }; 
+      END{
+        print STDOUT "\\hline\n\\end{tabular}\n";
+      }' \
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_fixed \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_fixed \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_fixed \
+\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_cds \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_cds \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_cds \
+\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_exons \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_exons \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_exons \
+\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_pseudo \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_pseudo \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_pseudo \
+\
+  | cpif $DOCS/tables/gene-pred.tex ;
+#
+#
+echo "### WEAVING LaTeX MAIN DOCUMENT..." ;
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+        $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
+#
+echo "### LaTeXING MAIN DOCUMENT..." ;
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+#
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
