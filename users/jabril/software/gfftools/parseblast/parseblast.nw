@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.1 2001-09-06 18:26:37 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.2 2003-02-21 12:05:45 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.1 2001-09-06 18:26:37 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.2 2003-02-21 12:05:45 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -256,7 +256,15 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \subsctn{Program outline}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 <<parseblast>>=
+<<PERL shebang>>
+#
+<<whole script>>
+@ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<NEW parseblast>>=
 <<PERL shebang>>
 #
 # MODULES
@@ -274,10 +282,6 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 # FUNCTIONS
 #
 <<Functions>>
-#
-# TEMPORARY
-# 
-<<whole script>>
 @ 
 
 <<Use Modules>>=
@@ -382,7 +386,8 @@ $nocmmnt_flg && ($comment_flg = 0);
 ##############################################################################
 ##                          Global Variables                                ##
 ##############################################################################
-
+my $GFF1fmt = (("\%s ")x8)."\%s"."\n";
+my $GFF2fmt = (("\%s\t")x8)."\%s"."\n";
 my ($prog_params, $program, $version, $seqname);
 my ($scQ, $scS);   # reSCale_Query/Subject : 1 to re-scalate lengths.
 my ($query_name, $db_name, $score, $descr,
@@ -448,6 +453,24 @@ PROGRAM:
 
 USAGE:	parseblast.pl [options] <results.from.blast>
 
+DESCRIPTION:
+
+  Filtering High-scoring Segment Pairs (HSPs) from WU/NCBI BLAST
+  (it also can parse WEB-BLAST files, but take care that the hsp
+  coordinates for query and target are not joint to their
+  sequences or the program will not work properly). Different 
+  output options are available, the most important here are those
+  allowing to write HSPs in GFF format (GFFv1, GFFv2 or APLOT).
+  Sequences can be included in the GFF records as a comment field.
+  Furthermore, this script can output also the alignments
+  for each HSP in ALN, MSF or tabular formats. 
+
+  NOTE.- If first line from blast program output (the one containing
+      which flavour has been run, say here BLASTN, BLASTP, BLASTX,
+      TBLASTN or TBLASTX), is missing, the program assumes that it
+      contains BLASTN HSP records. So that, ensure that you feed
+      the $PROGRAM script with a well formatted BLAST file.
+
 COMMAND-LINE OPTIONS:
 
     "$PROGRAM" prints output in "HSP" format by default (see below).
@@ -460,9 +483,9 @@ COMMAND-LINE OPTIONS:
 
   GFF OPTIONS:
 
-    -G, --gff            : prints output in GFF format.
-    -F, --fullgff        : prints output in GFF "alignment" format.
-    -A, --aplot          : prints output in APLOT "GFF" format.
+    -G, --gff            : prints output in GFFv1 format.
+    -F, --fullgff        : prints output in GFFv2 "alignment" format ("target").
+    -A, --aplot          : prints output in pseudo-GFF APLOT "alignment" format.
     -S, --subject        : projecting GFF output by SUBJECT (default by QUERY).
     -Q, --sequence       : append query and subject sequences to GFF record.
     -b, --bit-score      : set <score> field to Bits (default Alignment Score).
@@ -534,7 +557,7 @@ OUTPUT FORMATS:
 
 BUGS:    Report any problem to: abril\@imim.es
 
-AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
+AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000-2003, Josep F. Abril
 
 EndOfHelp
 	close(HELP);
@@ -552,7 +575,7 @@ sub get_lines {
 	while (<>) {
 		last if /^\s*$/;
 		# print STDERR "$_";
-		chop;
+		chomp;
 		s/^\s*/$spc/;
 		$tmp .= $_;
 	};
@@ -627,40 +650,28 @@ EndOfPlain
 last PRINT;
 }
 sub prt_Q_gff {
-print STDOUT <<"EndOfGFF";
-$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\t$wnm\t\# E_value $ex$scores$sq
-EndOfGFF
-last PRINT;
+    printf STDOUT $GFF1fmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"$wnm \# E_value $ex$scores$sq";
+	last PRINT;
 }
 sub prt_S_gff {
-print STDOUT <<"EndOfGFF";
-$wnm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\t$query{$nm}\t\# E_value $ex$scores$sq
-EndOfGFF
-last PRINT;
+    printf STDOUT $GFF1fmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"$query{$nm} \# E_value $ex$scores$sq";
+	last PRINT;
 }
 sub prt_Q_fullgff {
-print STDOUT <<"EndOfFullGFF";
-$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\tTarget \"$wnm\"\t$hss\t$hes ;\tStrand $sts ;\tFrame $frs ;\tE_value $ex$scores$sq
-EndOfFullGFF
-last PRINT;
+    printf STDOUT $GFF2fmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"Target \"$wnm\" $hss $hes;\tStrand $sts;\tFrame $frs;\tE_value $ex$scores$sq";
+	last PRINT;
 }
 sub prt_S_fullgff {
-print STDOUT <<"EndOfFullGFF";
-$wnm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\tTarget \"$query{$nm}\"\t$hsq\t$heq ;\tStrand $sts ;\tFrame $frs ;\tE_value $ex$scores$sq
-EndOfFullGFF
-last PRINT;
+    printf STDOUT $GFF2fmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"Target \"$query{$nm}\" $hsq $heq;\tStrand $stq;\tFrame $frq;\tE_value $ex$scores$sq";
+	last PRINT;
 }
 sub prt_Q_aplot {
-print STDOUT <<"EndOfAPLOT";
-$query{$nm}:$wnm\t$prg\thsp\t$hsq:$hss\t$heq:$hes\t$gsc\t$stq:$sts\t$frq:$frs\t$bt:$n\t\# E_value $ex$scores$sq
-EndOfAPLOT
-last PRINT;
+    printf STDOUT $GFF1fmt, "$query{$nm}:$wnm",$prg,'hsp',"$hsq:$hss","$heq:$hes",$gsc,"$stq:$sts","$frq:$frs","$bt:$n \# E_value $ex$scores$sq";
+	last PRINT;
 }
 sub prt_S_aplot {
-print STDOUT <<"EndOfAPLOT";
-$wnm:$query{$nm}\t$prg\thsp\t$hss:$hsq\t$hes:$heq\t$gsc\t$sts:$stq\t$frs:$frq\t$bt:$n\t\# E_value $ex$scores$sq
-EndOfAPLOT
-last PRINT;
+    printf STDOUT $GFF1fmt, "$wnm:$query{$nm}",$prg,'hsp',"$hss:$hsq","$hes:$heq",$gsc,"$sts:$stq","$frs:$frq","$bt:$n \# E_value $ex$scores$sq";
+	last PRINT;
 }
 sub prt_pairwise {
 	$prt_pos_flg && do {
@@ -824,12 +835,13 @@ sub prt_out {
 ###################################################
 
 $err_flg && print STDERR ("#"x58)."\n## PARSING STDIN FROM BLAST ".("#"x30)."\n".("#"x58)."\n";
+$program = undef; # default program name
 while (<>) {
 	# s/\r\n$/\n/; # if your input records finish with "\r\n" (like EMBL).
 	next if /^\s*$/;  # /^\s*$/ is similar to AWK /^[ \t]*$/
     &prt_progress(++$pt);
 	my $tmpinput = $_;
-	chop;
+	chomp;
     # print STDOUT "$. : $_ \n"; # "$." is record number && "$_" is whole record
   CHECK: {
 	  /^\s*T?BLAST[PNX]?/o        && do { # Starts with "T?BLAST[PNX]?" ?
@@ -850,6 +862,14 @@ while (<>) {
 	  }; # /^\s*T?BLAST[PNX]?/
 	  /^>/o                    && do { # Starts with ">" ?: sequences.
 		  # print STDERR "$_\n";
+          defined($program) || do { # assuming to parse blastn???
+              $program = "BLASTN";
+              ($scQ,$scS) = (0,0);
+		      $prog_params = "#\n# $program $version\n#";
+		      $query_name = $db_name = '';
+		      $main = 1;
+ 		      $seqflg = $hsp = $fragment = $param = 0;
+          };
 		  ($seqname, $descr) = split(/\s+/, $_, 2);
 		  $seqname =~ s/^\s*>//o;
 		  $seqname =~ s/\s|:|\|/_/og;
@@ -898,7 +918,7 @@ while (<>) {
 			  $hsp_end{$seqname."query".$tt} = $end;
 			  $hsp_seq{$seqname."query".$tt} .= $seq;
 		  } # if ($txt =~ /Query/)
-		  elsif ($txt =~ /^Sbjct:/o) {
+		  elsif ($txt =~ /^Su?bje?ct:/o) {
 			  # print STDERR "$_\n";
 			  ($hsp_start{$seqname."sbjct".$tt}) || ($hsp_start{$seqname."sbjct".$tt} = $ori);
 			  $hsp_end{$seqname."sbjct".$tt} = $end;
@@ -908,17 +928,17 @@ while (<>) {
 		  else { last LOAD; };
 	  }; # ($fragment)
 	  $main && do { # We are within the blast file header.
-		  /^\s*Query= +(.*)\s*$/o && do {
+		  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
 			  # print STDERR "$_\n";
 			  ($query_name = $1) =~ s/\s|:|\|/_/g ;
 		  };
-		  /^\s*Database: +(.*)\s*$/o && do { 
+		  /^\s*Database:\s+(.*?)(\s+([^\s]*)?)?$/o && do { 
 			  # print STDERR "$_\n";
 			  $db_name = $1;
 			  while (<>) {
 				  last if /^(?:.*\bletter.*|\s*)$/o;
 				  # print STDERR "$_\n";
-				  chop;
+				  chomp;
 				  s/^\s*//o;
 				  s/\s*$//o;
 				  $db_name .= $_;
@@ -927,7 +947,7 @@ while (<>) {
 		  last LOAD;
 	  }; # ($main)
 	  $param && do { # We are within the blast file trailer.
-		  /^\s*Query= +(.*)\s*$/o && do {
+		  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
 			  # print STDERR "$_\n";
 			  &prt_foeprg($pt);
 			  $prt && &prt_out;
@@ -940,7 +960,7 @@ while (<>) {
 		  };
 		  if (/^\s*[^\[\<\-]/o) {
 			  # print STDERR "$_\n";
-			  chop;
+			  chomp;
 			  s/^/\n\# /o;
 			  $prog_params = join('', $prog_params, $_);
 		  } else { $param = 0; }
@@ -957,7 +977,9 @@ while (<>) {
 &get_exec_time(time);
 
 exit(0);
+@ 
 
+<<COMPILING PARSEBLAST AS BIN FILE>>=
 ###################################################
 ## TESTING how to compile into a binary file.... ##
 #
@@ -1006,9 +1028,10 @@ exit(0);
 
 \subsctn{PERL scripts}
 
+% This is perl, version 5.005_03 built for i386-linux
 <<PERL shebang>>=
-#!/usr/bin/perl -w
-# This is perl, version 5.005_03 built for i386-linux
+#!/usr/local/bin/perl -w
+# 
 <<GNU License>>
 <<Version Control Id Tag>>
 #
@@ -1163,7 +1186,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.1 2001-09-06 18:26:37 jabril Exp $
+# $Id: parseblast.nw,v 1.2 2003-02-21 12:05:45 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -1173,9 +1196,9 @@ This document is under Revision Control System (RCS). The version you are curren
 # #                          parseblast                            #
 # #----------------------------------------------------------------#
 # 
-#                Extracting HSPs from blast output.
+#             Extracting HSPs from blast programs output.
 # 
-#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+#       Copyright (C) 2000-2003, Josep Francesc ABRIL FERRANDO  
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1192,6 +1215,7 @@ This document is under Revision Control System (RCS). The version you are curren
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 # #----------------------------------------------------------------#
+# 
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1288,7 +1312,7 @@ popd ;
 <<BASH Environment Variables>>=
 #
 # Setting Global Variables
-WORK="$HOME/development/softjabril/parseblast" ;
+# WORK="$HOME/development/softjabril/parseblast" ; # now defined via "setcwd"
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
