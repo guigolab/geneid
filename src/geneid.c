@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.5 2001-03-07 20:44:04 eblanco Exp $ */
+/* $Id: geneid.c,v 1.6 2001-04-23 08:46:00 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -38,7 +38,7 @@ int   SFP=0, SDP=0, SAP=0, STP=0,
       GENAMIC = 1, GENEID = 1, 
       GFF = 0, X10 = 0, 
       EVD = 0, SRP = 0,
-      scanORF = 0, XML = 0;
+      scanORF = 0, XML = 0, cDNA = 0;
 
 float EW = NOVALUE;
 
