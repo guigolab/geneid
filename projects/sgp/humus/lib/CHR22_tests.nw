@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: CHR22_tests.nw,v 1.1 2002-05-19 10:21:33 jabril Exp $ 
+% # $Id: CHR22_tests.nw,v 1.2 2002-05-20 09:29:00 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: CHR22_tests.nw,v 1.1 2002-05-19 10:21:33 jabril Exp $$>$ }
+{\small$<$ \verb$Id: CHR22_tests.nw,v 1.2 2002-05-20 09:29:00 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -503,8 +503,9 @@ SEQ="chr22" ;
 HOMOLOGY="$HUMUS/$NCHR/sgp/$OXID/hsp-sr/$SEQ.gff" ;
 # remember that geneid does not allow overlapping features... :^<
 EVIDIR="$HUMUS/$NCHR/annotation/20011222/refseq" ;
-EVIDENCE="$EVIDIR/$SEQ.eval.gff" ;
+# EVIDENCE="$EVIDIR/$SEQ.eval.gff" ;
 ODIR="$HUMUS/$NCHR/sgp/$NXID" ;
+EVIDENCE="$ODIR/evids/$SEQ.evids.gff" ;
 #
 MkDirs $ODIR ;
 for c in out gff gtf2 cds prot hsp-sr logs tmp eval evids ;
@@ -664,11 +665,12 @@ if [ -f "$HOMOLOGY" ] ;
 if [ -f "$EVIDENCE" ] ;
   then
     echo "### Using termini file: $EVIDENCE" 1>&2 ;
-    sort +3n -4 $EVIDENCE | \
-      gawk 'BEGIN{ OFS="\t" }
-         ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { 
-             $8="."; print $0 }' > $ODIR/tmp/$SEQ.gff ;
-    EVIDENCE_PAR="-R $ODIR/tmp/$SEQ.gff" ;
+    # sort +3n -4 $EVIDENCE | \
+    #   gawk 'BEGIN{ OFS="\t" }
+    #      ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { 
+    #          $8="."; print $0 }' > $ODIR/tmp/$SEQ.gff ;
+    # EVIDENCE_PAR="-R $ODIR/tmp/$SEQ.gff" ;
+    EVIDENCE_PAR="-R $EVIDENCE" ;
   else
     EVIDENCE_PAR="" ;
   fi ;
@@ -678,7 +680,7 @@ CheckFile R $PARAM $ISEQ $HOMOLOGY $EVIDENCE ;
 GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $EVIDENCE_PAR $ISEQ" ;
 echo "$GENEID $GENEID_CMDLN 2> $ODIR/$SEQ.sgp" 1>&2 ;
 $GENEID $GENEID_CMDLN 2> $ODIR/logs/$SEQ.sgp > $ODIR/out/$SEQ.all ;
-grep -v 'evidence' $ODIR/out/$SEQ.all > $ODIR/out/$SEQ ;
+egrep -v '^Annotation' $ODIR/out/$SEQ.all > $ODIR/out/$SEQ ;
 $BIN/geneid_raw2GFF.pl $SEQ $ODIR $ODIR/out/$SEQ ;
 #
 ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
@@ -690,41 +692,59 @@ ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
 #
 get_geneid_genes $ODIR/gff/$SEQ > $ODIR/$SEQ.gene_list ;
 #
+gawk 'BEGIN{OFS="\t"} $1!~/^\#/ {$6=500; print $0}' $EVIDIR/$SEQ.eval.gff | \
+    cat - $ODIR/gff/$SEQ | egrep -v '^#' - | \
+    sort +3n -4 - > $ODIR/gff/$SEQ.geneid+refseq
+#
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
-               $ODIR/gff/$SEQ > $ODIR/eval/$SEQ.eval.gff ;
+     $ODIR/gff/$SEQ.geneid+refseq > $ODIR/eval/$SEQ.geneid+refseq.eval.gff ;
 #
 VDIR="$ODIR/eval" ;
-$BIN/gffsplitstrand.pl $VDIR/$SEQ.eval.gff ; # no sequence length record required here
+$BIN/gffsplitstrand.pl $VDIR/$SEQ.geneid+refseq.eval.gff ; # no sequence length record required here
+cp $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/vicky.cds.gff \
+   $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/chr22.eval.gff
+$BIN/gffsplitstrand.pl -l $HUMUS/$NCHR/annotation/20011222/length.$SEQ.gff \
+    $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/$SEQ.eval.gff
 #
 A_REFSEQ="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval" ;
 A_ENSEMBL="$HUMUS/$NCHR/annotation/20011222/ensembl/$SEQ.eval" ;
+A_VICTORIA="$HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/$SEQ.eval" ;
 cat > $VDIR/${SEQ}.summary <<EOT ;
 #
 # Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
 #
-# --> Hsap GP20011222 x Mmus MGSCv3 homology + Hsap RefSeq GP20011222 evidences (Without Frame info, set as '.')
+# --> Hsap GP20011222 x Mmus MGSCv3 homology + Hsap RefSeq GP20011222 evidences (passed as singles...)
 #
 EOT
 #
-CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
-            $A_ENSEMBL.fwd.gff $A_ENSEMBL.rev.gff ;
+CheckFile R $A_REFSEQ.fwd.gff   $A_REFSEQ.rev.gff   \
+            $A_ENSEMBL.fwd.gff  $A_ENSEMBL.rev.gff  \
+            $A_VICTORIA.fwd.gff $A_VICTORIA.rev.gff ;
 #
-$BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.geneid+refseq.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
     >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
-$BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+$BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.geneid+refseq.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
     >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
-$BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.geneid+refseq.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
     >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
-$BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.geneid+refseq.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
     >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $VDIR/$SEQ.geneid+refseq.eval.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $VDIR/$SEQ.geneid+refseq.eval.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_victoria.rev ;
 #
 @ 
 
+<<>>=
 
+@ 
 
 \subsctn{}
 
