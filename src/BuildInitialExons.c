@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInitialExons.c,v 1.3 2001-12-18 15:02:24 eblanco Exp $  */
+/*  $Id: BuildInitialExons.c,v 1.4 2003-02-26 10:50:58 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -69,7 +69,8 @@ long BuildInitialExons(site *Start, long nStarts,
 	  /* Reset the best local exons array */
 	  nLocalExons = 0;
 	  LowestLocalScore = DBL_MAX;
-	  
+	  LowestLocalExon = 0;
+
 	  /* Computing the frame to look for the first stop in frame */
 	  Frame = (Start+i)->Position % 3;
 	  
