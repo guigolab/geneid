@@ -1,0 +1,3699 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+%\usepackage{fancyheadings}
+%\usepackage{fancybox}
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+\usepackage{verbatim}
+%\usepackage{version}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+ 
+% Colors for gff2ps
+\input tables/AplotColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+
+% defs
+\def\prog{\textsc{\textbf{gff2aplot}}}
+\def\ps{\textsc{PostScript}}
+
+% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textbf{\Huge A perl development for {\prog}}\\[5ex]
+
+\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old [[GNUawk]] format. Taking advantage of some capabilities of [[Perl]], such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using [[noweb]] I pretend to improve the overall design and to open the code to other developers.
+} % parbox
+\end{center}
+\end{abstract}\vskip 5ex
+{\large$<$\verb$Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $$>$ }
+
+\vfill
+
+\begin{flushright}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+\end{flushright}
+\end{center}
+
+\end{titlepage}
+
+%'%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\textbf{\prog}\hspace{4ex}\thesection.\ #1}} 
+\renewcommand{\subsectionmark}[1]{\markboth{}{\textbf{\prog}\hspace{4ex}\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+
+\listoftables
+
+\listoffigures
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Main program definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This is the {\prog} program outline:
+
+<<APLOT>>=
+<<PERL shebang>>
+<<Program Info>>
+#
+# MODULES
+#
+<<Use Modules>>
+#
+# CONSTANTS
+#
+<<Global Constants>>
+#
+# VARIABLES
+#
+<<Global Vars>>
+<<UNDEFINED VARS>>
+#
+# MAIN PROGRAM LOOP
+#
+<<Main Loop>>
+#
+# MAIN FUNCTIONS
+#
+<<Main Routines>>
+#
+# GENERAL FUNCTIONS
+#
+<<Common Routines>>
+#
+# POSTSCRIPT CODE
+#
+<<PostScript CODE Chunks>>
+@ 
+
+\subsctn{The main loop}
+
+At the first stage of the new {\prog} implementation, we are going to define a simple main loop that performs a serial process, such in the old [[GNUawk]] version. So that, the program will read the input files and parameters defined by user and perform the plots, finishing the job. Once the new version will be operative, we will try to implement an iterative mode and/or a GUI in [[perlTK]].  
+
+<<Main Loop>>=
+
+  # &set_default_vars;
+
+  %CmdLineVars = ();            # Reseting Command-Line OPTIONS
+  &parse_command_line;
+
+  %CustomVars = ();             # Reseting Customization OPTIONS
+  &parse_custom_files;
+  %gff_data = %aplot_data = (); # Reseting DATA
+  &parse_GFF_files;
+
+  &map_vars_data;
+
+  &sort_elements;
+  &make_plot;
+
+  $total_time = &timing($T);
+  &header("$PROGRAM HAS FINISHED","Timing: $total_time secs");
+  
+  &close_logfile();
+  exit(0);
+@ 
+
+We force that all the variables must be declared before using them and restrict unsafe constructs with'[[use strict]]'. After that we switch on signal trapping.
+
+<<Use Modules>>=
+use strict;
+#
+<<Trapping signals>>
+#
+@ 
+
+<<Global Constants>>=
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+@
+
+Those are the main variables containing customization parameters and input data from GFF records.
+
+<<Global Vars>>=
+my (%DefaultVars,%CmdLineVars,%CustomVars,%gff_data,%aplot_data);
+@ 
+
+Some info about the program itself.
+
+<<Global Constants>>=
+my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
+   ( 'gff2aplot','v2.0',
+     '$Revision: 1.1 $',
+     '$Date: 2001-04-06 14:21:44 $',
+     '$Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $',
+    );
+$REVISION =~ s/\$//og;
+$REVISION_DATE =~ s/\$//og;
+@ 
+
+<<UNDEFINED VARS>>=
+@
+
+\subsctn{Main function sections}
+
+Main function calls share a similar internal structure: a '[[header]]' reporting which function is running, the '[[code]]' for that function and maybe a '[[closing report]]' summarizing what the function did. After each main function definition, you should find those constants, variables and routines being used by that function.  
+
+<<Main Routines>>=
+<<Setting Defaults>>
+<<Parsing Command-Line Options>>
+<<Parsing Custom Files>>
+<<Parsing Input Data>>
+<<Sorting Features>>
+<<Features Setting>>
+<<Making PS Figures>>
+@
+
+\subsctn{Printing Help}
+
+Here is shown the basic outline being diplayed when user choose the '[[help]]' command-line option. The '[[REQUIRES]]' section summarizes those perl modules used in this program by joining all the comments in this document under '[[<<requires help>>]]' tag. Similar happens to '[[COMMAND-LINE OPTIONS]]', in which the single descriptions for each option (that follows each option '[[Getopts]]' definition) are collected by the '[[<<command-line help>>]]' tag.
+
+<<Main Routines>>=
+sub prt_help() {
+    open(HELP, "| more") ;
+    print HELP <<"+++EndOfHelp+++";
+PROGRAM:
+                        $PROGRAM - $VERSION
+
+    Converting GFF files for pairwise alignments to PostScript.
+
+USAGE:        $PROGRAM [options] <GFF_files|STDIN>
+
+DESCRIPTION:
+
+    This program draws color-filled alignment plots from GFF
+    files for that alignment and two sequences annotations.
+
+REQUIRES:
+
+    <<perl requires help>>
+
+COMMAND-LINE OPTIONS:
+
+    <<command-line help>>
+
+    <<colors help>>
+
+    <<pages help>>
+
+BUGS:    Report any problem to 'jabril\@imim.es'.
+
+AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
+
++++EndOfHelp+++
+    close(HELP);
+    exit(1);
+} # prt_help
+@ 
+
+<<perl requires help>>=
+$PROGRAM needs the following Perl modules installed in 
+your system, we used those available from the standard 
+Perl distribution. Those that are not in the standard 
+distribution are marked with an '(*)', in such cases 
+make sure that you already have downloaded them from 
+CPAN (http://www.perl.com/CPAN) and installed.
+
+@ 
+
+<<command-line help>>=
+A double dash on itself "--" signals end of the options
+and start of file names (if present). Due to "Getopt::Long"
+you may have problems trying to define STDIN as a single 
+dash "-", because the module considers that as an option 
+name defined with an empty string (POSIX syntax for 
+command-line options, with GNU extensions). 
+
+Available options and a short description are listed here:
+
+@
+
+\sctn{Variable Definition and Customization} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The functions described in this section process each GFF-record, each custom definition or each command-line options, not only loading the internal variables, also checking for the correctness of the user input in each case.
+
+\subsctn{Setting customization parameters from defaults} 
+
+The main difference from older versions, besides a cleaner hash structure than the GAWK one, is that we include some customization variables at sequence and strand levels.
+
+<<Setting Defaults>>=
+sub set_default_vars() {
+    %DefaultVars = (
+        LAYOUT   => {           ## '# L #'
+            <<default layout vars values>>
+        },					  
+        SEQUENCE => {           ## '# Q #'
+            <<default sequence vars values>>
+        },					  
+        SOURCE   => {           ## '# S #'
+            <<default source vars values>>
+        },					  
+        STRAND   => {           ## '# T #'
+            <<default strand vars values>>
+        },					  
+        GROUP    => {           ## '# G #'
+            <<default group vars values>>
+        },					  
+        FEATURE  => {           ## '# F #'
+            <<default feature vars values>>
+        },
+    ); # %DefaultVars
+    print LOGFILE Dumper(\%DefaultVars) if ($LogFile && $Debug);
+} # set_default_vars
+@
+
+\subsctn{Setting customization parameters from command-line} 
+
+'[[GetOptions]]' loads command-line options as key-value pairs in the hash variable '[[%CmdLineVars]]' that is reset in '[[<<Main Loop>>]]'. Once parsed all the command-line options what remains in '[[@ARGV]]' is just input filenames (which have to be in GFF format), or '[[STDIN]]' if there is none.
+
+<<Parsing Command-Line Options>>=
+sub parse_command_line() {
+    <<looking for STDIN>>
+
+    $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$T,$_[0]) };
+    GetOptions(
+               <<command-line options>>
+               ) || (&warn('CMD_LINE_ERROR',$T), exit(1));
+    $SIG{__WARN__} = 'DEFAULT';
+
+    <<open LOGFILE>>
+
+    &header('',"RUNNING $PROGRAM",'',"User: $USER","Date: $DATE");
+
+    &header("SETTING DEFAULTS");
+    %DefaultVars = ();
+    &set_default_vars;
+
+    &header("CHECKING COMMAND-LINE OPTIONS");
+    @data_files = ();
+    &set_input_file($cmdln_stdin);
+    @ARGV = (); # ensuring that command-line ARGVs array is empty
+    <<Check command-line options>>
+
+    &footer("COMMAND-LINE CHECKED");
+} # parse_command_line
+@ 
+
+As the '[[GetOptions]]' function has a problem, in the way we are using here to preserve backwards compatibility, when we want to use a single dash as a way to tell the program that '[[STDIN]]' must be read in the given order (when input filenames are also given and we would load input from a pipe after/before a given file). We show the warnings printed by the program when '[[--]]' is missing or missplaced in the table~\ref{tbl:STDINhandle}.
+
+\begin{table}[!t]
+\begin{center}
+\begin{small}
+\begin{tabular}{|c|}\hline
+\begin{minipage}{15cm}
+\begin{verbatim}
+
+# CORRECT
+> $BIN/gff2aplot -v -T 'Howdy World!' -- - DATA-SAMPLE.gff 
+> $BIN/gff2aplot -v -T 'Howdy World!' -- DATA-SAMPLE.gff -
+
+# WRONG???
+> $BIN/gff2aplot -v -T 'Howdy World!' DATA-SAMPLE.gff -
+> $BIN/gff2aplot -v -T 'Howdy World!' - DATA-SAMPLE.gff
+> $BIN/gff2aplot -v -T 'Howdy World!' - -- tests/DATA-SAMPLE.gff
+
+# COMMON MESSAGE when WRONG
+### WARNING ### Error trapped while processing command-line:
+                substr outside of string at lib/Getopt/Long.pm
+                  (autosplit into lib/auto/Getopt/Long/FindOption.al)
+                line >NNNNN<
+### WARNING ### Error trapped while processing command-line:
+                Use of uninitialized value at lib/Getopt/Long.pm
+                  (autosplit into lib/auto/Getopt/Long/FindOption.al) 
+                line >NNNNN<
+### WARNING ### Error trapped while processing command-line:
+                Unknown option:
+
+\end{verbatim}
+% $
+\end{minipage}\\\hline
+\end{tabular}
+\end{small}
+\caption{\label{tbl:STDINhandle} Errors reported when using '[[-]]' as '[[STDIN]]' mark and fixed width [[<<looking for STDIN>>]].}
+\end{center}
+\end{table}
+
+To avoid such errors, we capture the single dash when present in the command-line arguments list. 
+
+'[[$cmdln_stdin]]' will be used by '[[&set_input_file]]' function to include the '[[STDIN]]' in the correct ordering.\label{sec:stdinfix}
+
+<<looking for STDIN>>=
+my $cmdln_stdin = undef;
+for (my $a = 0; $a <= $#ARGV; $a++) { 
+    next unless $ARGV[$a] =~ /^-$/o;
+    $cmdln_stdin = $a - $#ARGV;
+    splice(@ARGV,$a,1);
+};    
+@ 
+
+The following two code chunks define what to do if reports are sent to a file which is set in '[[$logs_filename]]'.
+
+<<open LOGFILE>>=
+CHKLOG:
+  (defined($logs_filename)) && do {
+      open(LOGFILE,"> ".$logs_filename) ||
+          (&warn('FILE_NO_OPEN',$T,$logs_filename),last CHKLOG);
+      $LogFile = 1;
+  };
+@
+
+<<Common Routines>>=
+sub close_logfile() { close(LOGFILE) if $LogFile };
+@ 
+
+<<Use Modules>>=
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling /;
+@ 
+
+<<perl requires help>>=
+"Getopt::Long" - processing command-line options.
+@
+
+See '[[man Getopt::Long]]' for further info about this package.
+
+<<Global Vars>>=
+my ($Debug,$Verbose,$Quiet,$LogFile,$logs_filename) = (0,0,0,0,undef);
+@ 
+
+<<warnings - parsing command-line options>>=
+UNKNOWN_CL_OPTION =>
+  $Warn."Error trapped while processing command-line:\n".(" "x16)."\%s",
+CMD_LINE_ERROR =>
+  $spl.$spw." Please, check your command-line options!!!\n".$Error."\n".
+  $spw." ".("."x12)." Type \"gff2aplot -h\" for help.\n".$spl,
+@
+
+\subsubsctn{Special command-line options (with program exit)}
+
+The first command-line checking looks for those options exiting the program: '[[help]]' and '[[version]]'. Both need to output to screen without any other message/warning being displayed at the same time.
+
+<<command-line options>>=
+"h|help|?"  => \&prt_help,
+"version"   => \&prt_version, 
+@ 
+<<command-line help>>=
+-h, --help    Shows this help.
+--version     Shows current version and exits.
+@
+\begin{comment}
+<<command-line latex short>>=
+\rw{-h{\x}-\/-help}{Shows this help.}
+\rw{-\/-version}{Shows current version and exits.}
+@ 
+%<command-line latex>>=
+%\clritem{-h{\x}-\/-help}
+%\clritem{-\/-version}
+%@
+\end{comment}
+
+<<Parsing Command-Line Options>>=
+sub prt_version() {
+    my $comment = $MessageList{'SHOW_VERSION'};
+    $comment = sprintf($comment,$PROGRAM,$VERSION);
+    &prt_to_stderr($comment);
+    exit(1);
+}
+@ 
+
+<<messages - parsing command-line options>>=
+SHOW_VERSION =>
+  $sp."### \%s -- \%s\n".$sp,
+@
+
+\subsubsctn{Testing command-line input filenames}
+
+<<Global Vars>>=
+my (@data_files,$file);
+@ 
+
+<<Parsing Command-Line Options>>=
+sub set_input_file() {
+    my $stdin_flg = $F;
+    <<STDIN backwards compatibility>>
+    &report("CHECKING_FILENAMES");
+  FILECHK: foreach my $test_file (@ARGV) {
+        $test_file ne '-' && do {
+            -e $test_file || do {
+                &warn('FILE_NO_OPEN',$T,$test_file);
+                next FILECHK;
+            };
+            &report('READING_FILE',$test_file);
+            push @data_files, $test_file;
+            next FILECHK;
+        };
+        $stdin_flg = $T;
+        push @data_files, '-';
+	}; # foreach
+    scalar(@data_files) == 0 && do {
+        push @data_files, '-';
+        $stdin_flg = $T;
+    };
+    $stdin_flg && &report('READING_STDIN');
+}
+@ 
+
+<<warnings - input/output>>=
+FILE_NO_OPEN =>
+  $spl.$Warn."Cannot Open Current file \"\%s\" . Not used !!!\n".$spl,
+@
+
+<<messages - input/output>>=
+CHECKING_FILENAMES =>
+  $sp."### Validating INPUT FILENAMES\n".$sp,
+READING_FILE =>
+  "###---> \"\%s\" exists, including as Input File.\n",
+READING_STDIN =>
+  "###---> Including GFF records from standard input.\n",  
+@
+
+Here is the fix for the explained in section~\ref{sec:stdinfix} on page~\pageref{sec:stdinfix} ([[<<looking for STDIN>>]] code).
+
+<<STDIN backwards compatibility>>=
+my $chk_stdin = shift @_;
+my $t = scalar(@ARGV);
+defined($chk_stdin) && do {
+    abs($chk_stdin) > $t && ($chk_stdin = -$t);
+	$chk_stdin > 0  && ($chk_stdin = 0 );
+    $t += $chk_stdin;
+    splice(@ARGV,$t,0,'-');
+};
+@
+
+\subsubsctn{Verifying command-line settings}
+
+<<Check command-line options>>=
+@
+
+\subsctn{Setting customization parameters from files} 
+
+<<Parsing Custom Files>>=
+sub parse_custom_files() {
+    &header("READING CUSTOM FILES");
+    &footer("CUSTOM FILES LOADED");
+} # parse_custom_files
+@ 
+
+\sctn{Customization Variables Description} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \subsctn{Command-line options}
+
+Two options are used for reporting how program is running. By default no messages are shown to standard error, only errors. One reports to a log file defined by user and the other shows the messages to standard error, both can be activated at the same time. A third one is needed to disable STDERR warnings.
+
+<<command-line options>>=
+"v|verbose"   => \$Verbose, # Print_Report
+@ 
+<<command-line help>>=
+-v, --verbose    Verbose mode, a full report is sent to standard error 
+                 (default is set to showing only WARNINGS).
+@
+\begin{comment}
+<<command-line latex short>>=
+\rw{-v{\x}-\/-verbose}
+  {Verbose mode, a full report is sent to standard error.}
+@ 
+<<command-line latex>>=
+\clmitem{-v\\-\/-verbose}
+By default, warnings and errors are sent to standard error. This option 
+switches on process reporting messages to appear on standard error too.
+@
+\end{comment}
+
+<<command-line options>>=
+"V|logs-filename=s"  => \$logs_filename, # Print_Report -> LogFile
+@ 
+<<command-line help>>=
+-V, --logs-filename <logs_filename>    Report is written to a log file.
+@
+\begin{comment}
+<<command-line latex short>>=
+\rw{-V{\x}-\/-logs-filename \pr{file}}
+  {Report is written to a log file.}
+@ 
+<<command-line latex>>=
+\clmitem{-V \pr{logs\_filename}\\-\/-logs-filename \pr{logs\_filename}}
+If is possible to open '\pr{logs\_filename}' then such file will contain 
+all the messages and warnings produced by the program even though they 
+will be disabled from standard error with \tp{-\/-quiet} option.
+@
+\end{comment}
+
+<<command-line options>>=
+"q|quiet"   => \$Quiet, # Quiet_Mode
+@
+<<command-line help>>=
+-q, --quiet    Quiet mode, do not show any message/warning
+               to standard error (only ERRORS are reported).
+@
+\begin{comment}
+<<command-line latex short>>=
+\rw{-q{\x}-\/-quiet}
+  {Quiet mode, messages/warnings disabled (only ERRORS are reported)}
+@ 
+<<command-line latex>>=
+\clmitem{-q\\-\/-quiet}
+This option disables any message or warning from standard error. It does not 
+disable error report because such errors are pointing a problem which can 
+make {\prog} produce unexpected results. Solve the cause of such problems 
+before continuing to run the program in a silent mode. 
+@
+\end{comment}
+
+The following variables define the boundary/clipping coordinates for each sequence, so you can select a region to be displayed in the {\ps} output.
+
+<<command-line options>>=
+"S|sequence1-start=i"  => \$CmdLineVars{"sequence1_start"}, # SEQUENCE1_ORIGIN # Zoom_SEQUENCE1_ORIGIN
+@ 
+<<command-line help>>=
+-S, --sequence1-start <pos>   Sets X-sequence first nucleotide.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"E|sequence1_end=i"  => \$CmdLineVars{"sequence1_end"}, # SEQUENCE1_END    # Zoom_SEQUENCE1_END
+@ 
+<<command-line help>>=
+-E, --sequence1-end <pos>     Sets X-sequence last nucleotide.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"s|sequence2_start=i"  => \$CmdLineVars{"sequence2_start"}, # SEQUENCE2_ORIGIN # Zoom_SEQUENCE2_ORIGIN
+@ 
+<<command-line help>>=
+-s, --sequence2-start <pos>   Sets Y-sequence first nucleotide.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"e|sequence2_end=i"  => \$CmdLineVars{"sequence2_end"}, # SEQUENCE2_END    # Zoom_SEQUENCE2_END
+@ 
+<<command-line help>>=
+-e, --sequence2-end <pos>     Sets Y-sequence last nucleotide.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"Z|zoom"   => \$CmdLineVars{"zoom"}, # ZOOM_Zoom; Zoom_Marks
+@ 
+<<command-line help>>=
+-Z, --zoom [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
+               This option zooms an area you have selected
+               with -S,-E,-s,-e (all 4 are optional).
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"z|zoom-area"   => \$CmdLineVars{"zoom_area"}, # ZOOM_Area
+@ 
+<<command-line help>>=
+-z, --zoom-area [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
+               This option marks a zoom area on your plot,
+               but does not make a zoom.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"G|display-grid"   => \$CmdLineVars{"display_grid"}, # Display_GRID
+# "g"    => \$CmdLineVars{""}, # Display_GRID
+@ 
+<<command-line help>>=
+-G, --display-grid   Switches 'on' grid (default is 'off').
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"P|display-percent-box"   => \$CmdLineVars{"display_percent_box"}, # Display_PERCENT-BOX
+# "p"    => \$CmdLineVars{""}, # Display_PERCENT-BOX
+@ 
+<<command-line help>>=
+-P, --display-percent-box   Switches 'on' Percent box (default is 'off').
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"Q|display-extra-box"   => \$CmdLineVars{"display_extra_box"}, # Display_EXTRA-BOX
+# "q"    => \$CmdLineVars{""}, # Display_EXTRA-BOX
+@ 
+<<command-line help>>=
+-Q, --display-extra-box   Switches 'on' Extra box (default is 'off').
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"T|title=s"  => \$CmdLineVars{"title"}, # TITLE
+@ 
+<<command-line help>>=
+-T, --title <Title>   Definning Plot Title.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"t|subtitle=s"  => \$CmdLineVars{"subtitle"}, # SUBTITLE
+@ 
+<<command-line help>>=
+-t, --subtitle <Subtitle>   Definning Plot SubTitle.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"X|x-label=s"  => \$CmdLineVars{"x-axis_label"}, # X-Axis_LABEL
+@ 
+<<command-line help>>=
+-X, --x-label <X-Label>   Definning X-Axis Label.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"Y|y-label=s"  => \$CmdLineVars{"y-axis_label"}, # Y-Axis_LABEL
+@ 
+<<command-line help>>=
+-Y, --y-label <Y-Label>   Defining Y-Axis Label.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"L|percent-box-label=s"  => \$CmdLineVars{"percent_box_label"}, # Percent-Box_LABEL
+@ 
+<<command-line help>>=
+-L, --percent-box-label <PBox-Label>   Definning Percent-Box Label.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"l|extra-box-label=s"  => \$CmdLineVars{"extra_box_label"}, # Extra-Box_LABEL
+@ 
+<<command-line help>>=
+-l, --extra-box-label <XBox-Label>   Definning Extra-Box Label.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"R|xy-axes-scale"   => \$CmdLineVars{"xy_axes_scale"}, # XY_AXES_Same-SIZE
+# "r"    => \$CmdLineVars{""}, # XY_AXES_Same-SIZE
+@ 
+<<command-line help>>=
+-R, --xy-axes-scale   X and Y axes having same scale (default is 'off').
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"W|aln-scale-width"    => \$CmdLineVars{"alignment_scale_width"}, # APlotLine_ScaleWidth; APlotLine_GroupScore
+@ 
+<<command-line help>>=
+-W, --aln-scale-width   Scaling score on width for Aplot line.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"w|aln-scale-color"    => \$CmdLineVars{"alignment_scale_color"}, # APlotLine_ScaleGrey; APlotLine_GroupScore
+@ 
+<<command-line help>>=
+-w, --aln-scale-color   Scaling score on color for Aplot line.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"B|background-color=s"  => \$CmdLineVars{"background_color"}, # BACKGROUND_COLOR
+@ 
+<<command-line help>>=
+-B, --background-color <color>   Background color.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"F|foreground-color=s"  => \$CmdLineVars{"foreground_color"}, # FOREGROUND_COLOR
+@ 
+<<command-line help>>=
+-F, --foreground-color <color>   Foreground color.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"D|aplot-box-color=s"  => \$CmdLineVars{"aplot_box_color"}, # APlotBox_BqGCOLOR
+@ 
+<<command-line help>>=
+-D, --aplot-box-color <color>   Aplot main box background color.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"C|percent-box-color=s"  => \$CmdLineVars{"percent_box_color"}, # PercentBox_BGCOLOR
+@ 
+<<command-line help>>=
+-C, --percent-box-color <color>   Percent box background color.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"c|extra-box-color=s"  => \$CmdLineVars{"extra_box_color"}, # ExtraBox_BGCOLOR
+@ 
+<<command-line help>>=
+-c, --extra-box-color <color>   Extra box background color.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"A|alignment-name=s"  => \$CmdLineVars{"alignment_name"}, # Align_NAME
+@ 
+<<command-line help>>=
+-A, --alignment-name <SeqXName:SeqYName>   Defining which alignment is going to be plotted 
+                  if you have more than one alignment in your gff files.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"N|x-sequence-name=s"  => \$CmdLineVars{"x-sequence_name"}, # X-Sequence_NAME
+@ 
+<<command-line help>>=
+-N, --x-sequence-name <SeqXName>   Defining which sequence is going to be plotted at X-axes.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"n|y-sequence-name=s"  => \$CmdLineVars{"y-sequence_name"}, # Y-Sequence_NAME
+@ 
+<<command-line help>>=
+-n, --y-sequence-name <SeqYName>   Defining which sequence is going to be plotted at Y-axes.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"K|show-ribbons=s"   => \$CmdLineVars{"show_ribbons"}, # Show_Ribbons (NLRB)
+@ 
+<<command-line help>>=
+-K, --show-ribbons <ribbon_type> Force Ribbons for all features on axes:
+                 (N)one, (L)ines, (R)ibbons, (B)oth.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"I|page-size=s"  => \$CmdLineVars{"page_size"}, # PAGE_SIZE
+@ 
+<<command-line help>>=
+-I, --page-size <page_size> Set page size for plot (default is a4).
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"O|custom-filename=s"  => \$CmdLineVars{"custom_filename"}, # CustomFile_Name
+@ 
+<<command-line help>>=
+-O, --custom-filename <Config_filename> Define configuration file name (default is \".gff2aplotrc\").
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<command-line options>>=
+"a|show-credits"   => \$CmdLineVars{"show_credits"}, # Show_Credits
+@ 
+<<command-line help>>=
+-a, --show-credits  Switch off $PROGRAM CopyRight line on plot.
+@
+\begin{comment}
+<<command-line latex short>>=
+@ 
+<<command-line latex>>=
+\clmitem{}
+@
+\end{comment}
+
+<<Changes in command-line options>>=
+# "i"  => # Page_Orientation
+# "F"  => \$CmdLineVars{""}, # Function_COLOR;Display_FUNCTION;Display_EXTRA-BOX
+# "f"  => \$CmdLineVars{""}, # Display_FUNCTION; Display_EXTRA-BOX
+# "M"  => \$CmdLineVars{""}, # Display_GFF; Display_EXTRA-BOX
+# "m"  => \$CmdLineVars{""}, # Display_GFF-ReverseOrder; Display_EXTRA-BOX
+@
+
+<<default layout vars values>>=
+#						  
+page_size                  => { TYPE => 'PAGE'   , VALUE => 'a4'   },
+background_color           => { TYPE => 'COLOR'  , VALUE => 'white' },
+foreground_color           => { TYPE => 'COLOR'  , VALUE => 'black' },
+# GLOBAL Labels			  
+show_title                 => { TYPE => 'BOOLEAN', VALUE => $T     },
+title                      => { TYPE => 'STRING' , VALUE => undef  },
+show_subtitle              => { TYPE => 'BOOLEAN', VALUE => $T     },
+subtitle                   => { TYPE => 'STRING' , VALUE => undef  },
+show_x_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
+x_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
+show_y_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
+x_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
+# TICKMARK features		  										 
+show_tickmark_label        => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_aplot_x_ticks         => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_percent_x_ticks       => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_extrabox_x_ticks      => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_aplot_y_ticks         => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_percent_y_ticks       => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_extrabox_y_ticks      => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_onlylower_x_ticks     => { TYPE => 'BOOLEAN', VALUE => $F     },
+aplot_major_tickmark       => { TYPE => 'INTEGER', VALUE => 2      },
+aplot_minor_tickmark       => { TYPE => 'INTEGER', VALUE => 5      },
+percent_major_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
+percent_minor_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
+extra_major_tickmark       => { TYPE => 'INTEGER', VALUE => 2      },
+extra_minor_tickmark       => { TYPE => 'INTEGER', VALUE => 5      },
+major_tickmark_nucleotide  => { TYPE => 'DNABASE', VALUE => undef  },
+minor_tickmark_nucleotide  => { TYPE => 'DNABASE', VALUE => undef  },
+percent_box_score_range    => { TYPE => 'RANGE'  , VALUE => '50..100' },
+show_grid                  => { TYPE => 'BOOLEAN', VALUE => $F     },
+# APLOT box features	  
+aplot_axes_same_scale      => { TYPE => 'BOOLEAN', VALUE => $F     },
+aplot_box_bgcolor          => { TYPE => 'COLOR'  , VALUE => 'bg'   },
+#						  
+sequence1_start            => { TYPE => 'DNABASE', VALUE => undef  },
+sequence1_end              => { TYPE => 'DNABASE', VALUE => undef  },
+sequence2_start            => { TYPE => 'DNABASE', VALUE => undef  },
+sequence2_end              => { TYPE => 'DNABASE', VALUE => undef  },
+#						  
+sequence1_zoom_start       => { TYPE => 'DNABASE', VALUE => undef  },
+sequence1_zoom_end         => { TYPE => 'DNABASE', VALUE => undef  },
+sequence2_zoom_start       => { TYPE => 'DNABASE', VALUE => undef  },
+sequence2_zoom_end         => { TYPE => 'DNABASE', VALUE => undef  },
+zoom                       => { TYPE => 'BOOLEAN', VALUE => $F     },
+zoom_area                  => { TYPE => 'BOOLEAN', VALUE => $F     },
+zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F     },
+zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
+# PERCENT box features	  
+show_percent_box           => { TYPE => 'BOOLEAN', VALUE => $F     },
+percent_box_bgcolor        => { TYPE => 'COLOR'  , VALUE => 'bg'   },
+show_percent_box_label     => { TYPE => 'BOOLEAN', VALUE => $T     },
+percent_box_label          => { TYPE => 'STRING' , VALUE => undef  },
+percent_box_sublabel       => { TYPE => 'STRING' , VALUE => undef  },
+# EXTRA box features	  
+show_extra_box             => { TYPE => 'BOOLEAN', VALUE => $F     },
+extra_box_bgcolor          => { TYPE => 'COLOR'  , VALUE => 'bg'   },
+show_extra_box_label       => { TYPE => 'BOOLEAN', VALUE => $T     },
+extra_box_label            => { TYPE => 'STRING' , VALUE => undef  },
+extra_box_sublabel         => { TYPE => 'STRING' , VALUE => undef  },
+#						  
+feature_x_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+feature_label_length       => { TYPE => 'INTEGER', VALUE => 0      },
+feature_labels_font        => { TYPE => 'FONT'   , VALUE => 'helvetica' },
+feature_labels_fontsize    => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+group_x_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
+group_y_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
+group_label_length         => { TYPE => 'INTEGER', VALUE => 0      },
+group_labels_font          => { TYPE => 'FONT'   , VALUE => 'helvetica' },
+group_labels_fontsize      => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+@
+
+<<default sequence vars values>>=
+NIL => { TYPE => 'NIL', VALUE => "empty array" },
+@
+
+<<default source vars values>>=
+NIL => { TYPE => 'NIL', VALUE => "empty array" },
+@
+
+<<default strand vars values>>=
+NIL => { TYPE => 'NIL', VALUE => "empty array" },
+@
+
+<<default group vars values>>=
+show_group_label           => { TYPE => 'BOOLEAN', VALUE => $T     }, 
+show_group_rule            => { TYPE => 'BOOLEAN', VALUE => $T     },
+show_group_arrow           => { TYPE => 'BOOLEAN', VALUE => $T     },
+feature_arrows_color       => { TYPE => 'COLOR'  , VALUE => 'fg'   },
+Show_JOINS                 => { TYPE => 'BOOLEAN', VALUE => $T     },
+Join_Lines_COLOR           => { TYPE => 'COLOR'  , VALUE => 'fg'   },
+@
+
+<<default feature vars values>>=
+Show_HalfHeightBOX         => { TYPE => 'BOOLEAN', VALUE => $T     },
+HalfSizeBox_BGCOLOR        => { TYPE => 'COLOR'  , VALUE => 'DEFAULT' },
+Show_FullHeightBOX         => { TYPE => 'BOOLEAN', VALUE => $T     },
+FullSizeBox_BGCOLOR        => { TYPE => 'COLOR'  , VALUE => 'DEFAULT' },
+Show_BOX_LABEL             => { TYPE => 'BOOLEAN', VALUE => $T     },
+Show_UserDef_BOX_LABEL     => { TYPE => 'BOOLEAN', VALUE => $T     },
+Show_RIBBON                => { TYPE => 'BOOLEAN', VALUE => $T     },
+Ribbon_BGCOLOR             => { TYPE => 'COLOR'  , VALUE => 'DEFAULT' },
+Show_GFF                   => { TYPE => 'BOOLEAN', VALUE => $F     },
+Show_GFF_ReverseOrder      => { TYPE => 'BOOLEAN', VALUE => $F     },
+Show_FUNCTION              => { TYPE => 'BOOLEAN', VALUE => $F     },
+APlotLine_GroupScore       => { TYPE => 'BOOLEAN', VALUE => $F     },
+APlotLine_ScaleWidth       => { TYPE => 'BOOLEAN', VALUE => $F     },
+APlotLine_ScaleGrey        => { TYPE => 'BOOLEAN', VALUE => $F     },
+Show_SELECTION_BOX         => { TYPE => 'BOOLEAN', VALUE => $T     },
+SelectionBox_BGCOLOR       => { TYPE => 'COLOR'  , VALUE => 'grey' },
+Function_COLOR             => { TYPE => 'COLOR'  , VALUE => 'red'  },
+@
+
+
+<<Changes in custom Vars>>=
+# PERCENT_ORIGIN => "50",
+# PERCENT_END => "100",
+Align_NAME       \
+X_Sequence_NAME   >--> To be defined in SOURCE
+Y_Sequence_NAME  /
+### FL ## FLAGs ##
+### DF ## DEFAULT VALUES ##
+### OP ## OPTIONs ##
+### FT ## GFF FEATUREs DEFINITION ##
+  # FTcounter++,
+  # FTindex[""]="",
+  # FTputEXTRA[""]=OnOff(""),
+  # FTBoxType[""]="",
+  # FTLineType[""]="",
+  # FTputJoin[""]=OnOff(""),
+  # FTputArrow[""]=OnOff(""),
+  # FTputLabel[""]=OnOff(""),
+  # FTLineWidth[""]="",
+  # FTLayer[""]="",
+  # FTColor[""]=Var["BACKGROUND_COLOR"],
+  # FTRbnColor[""]=Var["BACKGROUND_COLOR"],
+### SP ## Special gff Features ##
+  # FTGeneBounds="genebounds", NOT NEEDED NOW !!!
+  FTLimits="seqbounds",
+  FTAPlot="align",
+  FTHighLight="boxit",
+  FTRectangle="rectangle",
+  FTCircle="circle",
+  FTText="text",
+  FTExtraFunction="function",
+  FTExtraDisplay="est",
+@
+ 
+\begin{comment}
+<<custom-vars latex short>>=
+@ 
+<<custom-vars latex>>=
+\vnlitem{title}{string}{align\_name} \tp{title} sets the main title
+for the figure, by default showing \pr{align\_name} in the form of
+'sequence1\_name x sequence2\_name'.
+@
+\end{comment}
+
+\sctn{Reading GFF records} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We have to deal with two basic formats, the \textsl{standard} General Feature Format (GFF) and the derived \textsl{aplot} format, the former having two versions with some minor differences at field level. We are going to asume the record formats shown in the table~\ref{fig:formats} for the input files.
+
+
+\begin{table}[!t]
+% \newcommand{\m}[1]{\multicolumn{2}{@{}c@{}}{#1}}
+\begin{center}\setlength{\fboxsep}{10pt}
+\fbox{
+\begin{minipage}[c]{0.95\linewidth}
+\begin{center}
+\footnotesize
+\textbf{\normalsize Record Format}\\[1ex]
+\pa{seqname} \pa{source} \pa{feature} \pa{start} \pa{end} \pa{score} \pa{strand} \pa{frame} [attributes] [comments]\\[2ex]
+\renewcommand{\arraystretch}{1.5}\begin{tabular}{ccc}
+\textbf{Field Name} & \textbf{GFF Version 1/Version 2} & \textbf{Aplot format} \\
+\pa{seqname} & [[ [^\# ]+ ]]     & \pa{seqname1}:\pa{seqname2} \\
+\pa{source}  & [[ [^\# ]+ ]]     & \pa{source}[:\pa{source}]   \\
+\pa{feature} & [[ [^\# ]+ ]]     & \pa{feature}[:\pa{feature}] \\
+\pa{start}   & [[ [+-]?[0-9]+ ]] & \pa{start1}:\pa{start2}     \\
+\pa{end}     & [[ [+-]?[0-9]+ ]] & \pa{end1}:\pa{end2}         \\
+\pa{score}   & [[ [+-]?[0-9]*[.]?[0-9]*(e[+-]?[0-9]+)? ]] & \pa{alignment\_score}       \\[-1.5ex]
+  (no score) & GFFv1 [[=> 0]] / GFFv2 [[=> .]] & . \\
+\pa{strand}  & [[ [+-.] ]]  & \pa{strand1}[:\pa{strand2}] \\
+\pa{frame}   & [[ [.012] ]] & \pa{frame1}[:\pa{frame2}]   \\[0.5ex]
+\textbf{Field Separator} & GFFv1 [[=> \s+ ]] / GFFv2 [[=> [\t]+ ]] & [[ \s+ ]] \\
+\end{tabular}\\[4ex]
+\textbf{\normalsize Grouping fields}\\[1ex]
+\begin{tabular}{rl}
+ \,[attributes]  & \hspace{0.25cm}(\textsl{GFF v1\&v2, APLOT})\\
+                 & group\_name [extra\_data]\\
+                 & "group\_name" [extra\_data]\\
+                 & \pa{tag} "group\_name" [extra\_data]\\[1ex]
+ \,[extra\_data] & \\
+                 & [\,[\pa{start2} \pa{end2} [\pa{strand2}] [\pa{frame2}]\,]; \pa{tag} \pa{value} [ \ldots ; \pa{tag} \pa{value}]\,]\\[2ex]
+ \,[attributes]  & \hspace{0.25cm}(\textsl{APLOT old format})\\
+                 & group\_name:element\_name [extra\_data]\\[1ex]
+ \,[extra\_data] & \hspace{0.25cm}(\textsl{APLOT old format})\\
+                 & [\,; \pa{tag} \pa{value} [ \ldots [ ; \pa{tag} \pa{value}]\,]\,]\\
+\end{tabular}\\[4ex]
+\textbf{\normalsize Other definitions}\\[1ex]
+\begin{tabular}{rl}
+ \,[comments]    & [[# Whatever extra information about this record...]] \\
+\end{tabular}
+\end{center}
+\end{minipage}
+} %fbox
+\caption{\label{fig:formats} Input records format definition for {\prog}.}
+\end{center}
+\end{table}
+
+
+Function '[[&parse_GFF_files]]' is only a wrapper for reporting the parsing process over GFF records. The main function call is '[[&fieldscheck]]',which processes each GFF record and loads the values in its fields to the corresponding data structure. Although that, the wrapper checks if there are enough fields (8 required at least) and removes also any comment from the input record, assuming that a white space or a tab followed by a '[[#]]' (as shown in this regular expression: '[[ /\s+\#/ ]]') is a comment mark, from there to the end of line everything is ignored.
+
+<<Parsing Input Data>>=
+sub parse_GFF_files() {
+    &header("PARSING INPUT GFF RECORDS");
+  LOAD: foreach $file (@data_files) {
+      open(THIS,"< $file") ||
+          ( &warn('FILE_NO_OPEN',$T,$file), next LOAD);
+      $file eq '-' && ($file = 'STANDARD INPUT');
+      &report('READ_GFF_FILE',$file);
+      ($n,$c) = (0,undef);
+      while (<THIS>) {
+          my (@line,$main);
+          ($c = '.', next) if /^\#/o;
+          ($c = '.', next) if /^\s*$/o;
+          chomp;
+          $c = $noGFF;
+          ($main,undef) = split /\s+\#/o;
+          @line = split /\s+/o, $main, 9;        
+          scalar(@line) < 8 &&
+              (&warn('NOT_ENOUGH_FIELDS',$F,$file,$n,join(" ",@line)), next);
+          $c = &GFF_format(&fieldscheck(\@line));
+      } continue {
+          &counter(++$n,$c) if ($Verbose && !$Quiet);
+      };
+      &counter_end($n,$c) if ($Verbose && !$Quiet);
+      close(THIS);
+  }; # LOAD
+    print LOGFILE Dumper(\%GFF_DATA) if ($LogFile && $Debug);
+    &footer("DATA LOADED");
+} # sub parse_GFF
+@ %$
+
+We define the following constants, used to report which format was found in the current read record (See table~\ref{tbl:keysXreport}).
+
+\begin{table}[!t]
+\begin{center}
+\begin{tabular}{cc}
+\fbox{
+\begin{tabular}[b]{c>{\bfseries}c}
+\textbf{Record TYPE} & \textbf{Symbol} \\
+Empty record        & . \\
+Comment             & . \\
+GFF (grouped)       & X \\
+GFF (ungrouped)     & x \\
+GFF (alignment)     & A \\
+GFF (vector)        & V \\
+APLOT (grouped)     & O \\
+APLOT (ungrouped)   & o \\
+Unknown             & ? \\
+\end{tabular}
+} %fbox
+&
+\parbox[b]{0.4\linewidth}{
+\caption[Symbols used to report record type]{\label{tbl:keysXreport} Symbols used to report record type when parsing input GFF files (and [[STDERR]] verbose mode is enabled with '[[-v]]' switch).}
+} % parbox
+\\
+\end{tabular}
+\end{center}
+\end{table}
+
+<<Global Constants>>=
+my ($GFF,$GFF_NOGP,$VECTOR,$ALIGN,
+    $APLOT,$APLOT_NOGP,$noGFF) =
+    qw/ X x V A O o ? /;
+@ 
+
+<<Global Vars>>=
+my ($n,$c);
+@
+
+<<warnings - parsing GFF files>>=
+NOT_ENOUGH_FIELDS =>
+  $Warn."Not enough fields in file \"\%s\", line \%s :\n\t\%s\n",
+@ 
+
+<<messages - parsing GFF files>>=
+READ_GFF_FILE => 
+  $sp."### Reading GFF records from \"\%s\"\n".$sp,
+@
+
+We set the character being printed in the parsing status output.
+
+<<Parsing Input Data>>=
+sub GFF_format() {
+    my $gff = $_[0];
+    # return "x" if $GFF == $version1;
+    return $GFF        if $gff eq $GFF;        # $version2
+    return $GFF_NOGP   if $gff eq $GFF_NOGP;   # $version2 (ungrouped)
+    return $VECTOR     if $gff eq $VECTOR;     # VECTOR: GFFv2 particular case 
+    return $ALIGN      if $gff eq $ALIGN;      # ALIGN: GFFv2 particular case
+    return $APLOT      if $gff eq $APLOT;      # Old aplot format (with colons)
+    return $APLOT_NOGP if $gff eq $APLOT_NOGP; # Old aplot format (ungrouped)
+    return $noGFF;
+} # GFF_format
+@
+
+Here we decide to parse records as they are in GFF or in APLOT format. '[[load_gff]]' and '[[load_aplot]]' do the field error checking and load the program variables '[[%gff_data]]' and '[[%aplot_data]]'. Those variables are reset in '[[<<Main Loop>>]]'.
+
+<<Parsing Input Data>>=
+sub fieldscheck() {
+    my ($list) = @_;
+    my ($seqname,$start,$end) = @$list[0,3,4]; # ($list->[0],$list->[3],$list->[4]);
+    (&fcolon($seqname) && &fcolon($start) && &fcolon($end)) && do {
+        return &load_aplot(\@$list);
+    };
+    return &load_gff(\@$list);
+} # fieldscheck
+@
+
+For historical reasons the program can work with APLOT format (see Table~\ref{fig:formats}). Initial field checking determines whether the record being processed is under that alignment GFF-like format, by determining that first, fourth and fifth fields contain a colon char. Then we assume we are under APLOT format.
+
+<<Parsing Input Data>>=
+sub fcolon() { return ($_[0] =~ /.+:.+/o ? $T : $F) }
+@
+
+\subsctn{Validating fields}
+
+The following functions checks whether some of the input GFF fields are well defined. They return '[[True]]' ('[[$T]]') if no error found and '[[False]]' ('[[$F]]') when input fields are wrong. The returned value forces '[[&load_aplot]]' or '[[&load_gff]]' functions to skip the records having format errors.
+
+Here we test that '\pa{start}' field must be lower or equal than '\pa{end}':
+
+<<Parsing Input Data>>=
+sub check_coords() { # ((ori,end)_1,...,(ori,end)_n)
+    my @ary = @_;
+    for (my $j=0; $j<=$#ary; $j+=2) {
+        $ary[$j] > $ary[$j+1] && do {
+            &warn('ORI_GREATER_END',$F,$ary[$j],$ary[$j+1],$file,$n+1);
+            return $F;
+        };
+    }; # foreach
+    return $T;
+} # check_coords
+@
+
+<<warnings - parsing GFF files>>=
+ORI_GREATER_END =>
+  $Warn."Start greater than end \"\%s > \%s\" in file \"\%s\" line \"\%s\".\n", 
+@
+
+'\pa{strand}' field must contain only '+', '-' or '.' (for records having no strand).
+
+<<Parsing Input Data>>=
+sub check_strand() { # (str_1,...,srt_n)
+    foreach my $str (@_) {
+        $str !~ /[+-.]/o && do {
+            &warn('STRAND_MISMATCH',$F,$str,$file,$n+1);
+            return $F;
+        };
+    }; # foreach
+    return $T;
+} # check_strand
+@
+
+<<warnings - parsing GFF files>>=
+STRAND_MISMATCH =>
+  $Warn." Strand mismatch definition \"\%s\" in file \"\%s\" line \"\%s\".\n",
+@ 
+
+Same happens to '\pa{frame}', which only '0', '1', '2' or '.' (for those records having no frame) values are allowed.
+
+<<Parsing Input Data>>=
+sub check_frame() { # (frm_1,...,frm_n)
+    foreach my $frm (@_) {
+        $frm !~ /[.012]/o && do {
+            &warn('FRAME_MISMATCH',$F,$frm,$file,$n+1);
+            return $F;
+        };
+    }; # foreach
+    return $T;
+} # check_frame
+@
+
+<<warnings - parsing GFF files>>=
+FRAME_MISMATCH =>
+  $Warn." Frame mismatch definition \"\%s\" in file \"\%s\" line \"\%s\".\n",
+@ 
+
+\subsctn{Parsing APLOT format}
+
+'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOT-DS}).
+
+<<Parsing Input Data>>=
+sub load_aplot() { # if errors found > return $noGFF
+    my ($list) = @_;
+    my $w_gff;
+    $w_gff = &load_aplot_grouping($list->[8]);
+    ($seqname_1,$seqname_2,$source_1,$source_2,$feature_1,$feature_2,
+     $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
+     $strand_1,$strand_2,$frame_1,$frame_2) = 
+     &remove_colon(@$list[0,1,2,3,4,5,6,7]);
+    &check_aplot_fields || ($w_gff=$noGFF);
+    return $w_gff;
+} # load_aplot
+@ %$
+
+<<Global Vars>>=
+my ($seqname_1,$seqname_2,
+    $source_1,$source_2,$feature_1,$feature_2,
+    $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
+    $strand_1,$strand_2,$frame_1,$frame_2); # APLOT temporary vars
+my ($tag,$group,$group_id,$id,$group_counter,$label); # GROUPING temporary vars
+@ 
+
+'[[$group_counter]]' must be replaced by '[[scalar(@group_ary)]]' when defined. %$
+
+\begin{table}[!t]
+\begin{center}
+\fbox{
+\begin{tabular}{c@{\qquad}c}
+Strand
+\(
+\quad\Rightarrow\quad
+\left\{
+\begin{array}{c@{\quad\Rightarrow\quad}c}
+\mbox{[[+]]} & \mbox{[[+:+]]}\\
+\mbox{[[-]]} & \mbox{[[-:-]]}\\
+\mbox{[[.]]} & \mbox{[[.:.]]}\\
+\end{array}
+\right.
+\)
+ &
+Frame
+\(
+\quad\Rightarrow\quad
+\left\{
+\begin{array}{c@{\quad\Rightarrow\quad}c}
+\mbox{[[2]]} & \mbox{[[2:2]]}\\
+\mbox{[[1]]} & \mbox{[[1:1]]}\\
+\mbox{[[0]]} & \mbox{[[0:0]]}\\
+\mbox{[[.]]} & \mbox{[[.:.]]}\\
+\end{array}
+\right.
+\)
+ \\
+\end{tabular}
+} % fbox
+\parbox{0.75\linewidth}{
+\caption{\label{tbl:missingfields} For {\prog} old format, when in a '\pa{element1}:\pa{element2}' field pair the second element is missing, second is set to first element.}
+} % parbox
+\end{center}
+\end{table}
+
+When checking for colons, we assume that any element defined without colons is equal to the same value repeated twice (see Table~\ref{tbl:missingfields}). 
+
+<<Parsing Input Data>>=
+sub remove_colon() {
+    my @ary_out = ();
+    my ($a,$b) = (undef,undef);
+	foreach my $fld (@_) {
+		($a,$b) = split /:/o, $fld, 2;
+        $a = '.' unless defined($a);
+        $b = $a  unless defined($b);
+		push @ary_out, $a, $b;
+	};
+	return @ary_out;
+} # remove_colon
+@ %$
+
+\subsubsctn{Checking fields and accepting APLOT records}
+
+If records are OK, then we can append a new record to the variable defined for APLOT records (so called later in this section as '[[%ALN_DATA]]').
+
+<<Parsing Input Data>>=
+sub check_aplot_fields() {
+    &check_coords($start_1,$end_1,$start_2,$end_2) || (return $F);
+    &check_strand($strand_1,$strand_2) || (return $F);
+    &check_frame($frame_1,$frame_2) || (return $F);
+    &add_aplot_record;
+    return $T; 
+} # check_aplot_fields
+@
+
+\begin{comment}
+%<DEBUG - aplot format fields>>
+<<DEBUG - aplot format fields>>=
+    print STDOUT <<"EOL";
+*----------------------------------------
+Sq1: \"$seqname_1\"
+Sq2: \"$seqname_2\"
+Sr1: \"$source_1\"
+Sr2: \"$source_2\"
+Ft1: \"$feature_1\"
+Ft2: \"$feature_2\"
+Or1: \"$start_1\"
+Or2: \"$start_2\"
+En1: \"$end_1\"
+En2: \"$end_2\"
+Sc1: \"$score_1\"
+Sc2: \"$score_2\"
+St1: \"$strand_1\"
+St2: \"$strand_2\"
+Fr1: \"$frame_1\"
+Fr2: \"$frame_2\"
+Tag: \"$tag\"
+Grp: \"$group\"
+Id:  \"$group_id\"
+Mbr: \"$label\"
+-----------------------------------------
+EOL
+@ 
+\end{comment}
+
+<<Parsing Input Data>>=
+sub add_aplot_record() {
+    return;
+} # add_aplot_record
+@ %$
+
+\label{sec:APLOT-DS}
+
+<<Global Vars>>=
+my (%ALN_DATA);
+@
+
+\subsubsctn{Parsing APLOT groups}
+
+Once we have the attribute string from the GFF record, we first check if it is empty, then we split by semicolons which will have or not white spaces or tabs before and/or after, as shown in this regular expression:\\
+\centerline{'[[/\b\s*;\s*\b/]]'}\\
+This will define tag-value pairs (and maybe some extra fields).  
+
+<<Parsing Input Data>>=
+sub load_aplot_grouping() {
+    my $attributes = $_[0];
+    defined($attributes) || do {
+		$group_id = ++$group_counter;
+        $group = "$seqname_1\_$seqname_2\_$source_1\_$group_id";
+        $label = $id;
+	    return $APLOT_NOGP;
+    };
+    my @grouping_list = ();
+    @grouping_list = split /\s*;\s*/o, $attributes;
+	<<parse aplot grouping>>
+	<<parse aplot other>>
+    return $APLOT;
+}
+@ 
+
+%% my $groupregexp = '^([^\"]*)(?:[\"]([^\"]+)[\"](?:\s+\b(.*))?)?$'; #'
+<<Global Vars>>=
+my $groupregexp = '^(.*?)(?:"(.+?)"(?:\s+\b(.*))?)?$'; #'
+@ 
+
+We may find four basic grouping field structures (detailed in Table~\ref{fig:formats}) within the first element of '[[@grouping_list]]'. We check first for double-quotes in the first or second field within that element. If second field is double-quoted, the first field is set as 'Tag' and the quoted as 'Value', else 'Tag' is set to default value ('target'). Then looking for extra fields defining start, end, strand and frame (all related to the second sequence); in {\prog} GFF-like format, those values are deprecated (they must be defined in the first eight fields following the first sequence values and a colon). 
+
+<<parse aplot grouping>>=
+my @new_group = ();
+my $aplot_grouping = 0;
+my $group_string = shift @grouping_list;
+($group_string =~ /$groupregexp/o) && 
+    (@new_group = ($1,$2,$3));
+$new_group[0] =~ s/\b\s*$//o;
+$new_group[0] || do {  # type 2 attributes
+    $aplot_grouping = 1;
+    $new_group[0] = $SOURCE{"align_tag"}; # %SOURCE temporary defined
+};
+$new_group[1] || do {  # type 1 attributes
+    $aplot_grouping = 1;
+    $new_group[1] = $new_group[0];
+    $new_group[0] = $SOURCE{"align_tag"};
+};
+# In aplot-format $new_group[2] values are deprecated.
+($tag,$group,$label,$group_id) = 
+    (lc($new_group[0]),@new_group[1,1],++$group_counter);
+# Here looking for colon field separator in aplot GFF-like grouping
+($aplot_grouping && $group !~ /\s+/o) && do {
+    if ($group =~ /^(.*?):(.*?)$/o) { 
+        (($group,$label) = ($1,$2));
+	} else {
+		$label = $group_id;
+	};
+};
+@
+
+Here we look for other fields, in principle we are only interested in finding 'id' tag, that defines the label for a single record.
+
+<<parse aplot other>>=
+scalar(@grouping_list) > 0 && do{
+    foreach my $element (@grouping_list) {
+        ($element =~ /$groupregexp/o) && (@new_group = ($1,$2,$3));
+        lc($new_group[0]) =~ $SOURCE{"label_tag"} && do {
+            $label = $new_group[1];
+            $label eq "" && do {
+                (undef,$label,undef) = split /\s+/og, $new_group[0];
+            };
+        };
+    };
+};
+@
+
+\subsctn{Parsing standard GFF format}
+
+'[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFF-DS}).
+
+<<Parsing Input Data>>=
+sub load_gff() { # if errors found > return $noGFF
+    my ($list) = @_ ;
+    my $w_gff;
+    $w_gff = &load_grouping($list->[8]);
+    ($seqname,$source,$feature,$start,$end,
+     $score,$strand,$frame) = @$list[0,1,2,3,4,5,6,7];
+    &check_gff_fields($w_gff) || ($w_gff=$noGFF);
+    return $w_gff;
+} # load_gff
+@
+
+<<Global Vars>>=
+my ($seqname,$source,$feature,$start,
+    $end,$score,$strand,$frame); # GFF temporary vars
+@
+
+\subsubsctn{Checking fields and accepting GFF records}
+
+<<Parsing Input Data>>=
+sub check_gff_fields() {
+    &check_coords($start,$end) || (return $F);
+    &check_strand($strand) || (return $F);
+    &check_frame($frame) || (return $F);
+    &add_gff_record($_[0]);
+    return $T; 
+} # check_gff_fields
+@
+
+Once fields checking is done, we proceed to load the data structure defined for the GFF records as '[[%GFF_DATA]]' hash.
+The outline of the inner structure of that variable is shown in table~\ref{tbl:gffdata}.
+
+\begin{table}[!ht]
+\begin{center}
+\input tables/DataStructure_GFF.tex
+\caption{\label{tbl:gffdata} GFF internal data structure for {\prog}. The topmost hash corresponds to '[[%GFF_DATA]]', the others are anonymous lists/hashes expanding from it.}
+\end{center}
+\end{table}
+
+\begin{comment}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<GFF DATA STRUCTURE>>= 
+% DataStructure_GFF.tex
+ \newcommand{\arry}[1]{@[\:#1\:]}
+ \newcommand{\hash}[1]{\%\{\:#1\:\}}
+ \newcommand{\aryrow}[3]{\mbox{#1}_#2 & \Rightarrow & \arry{\arry{\mbox{Counters}}_#2,\:\hash{\mbox{Properties}}_#2,\:\hash{\mbox{#3}}_#2},}
+ \newcommand{\aryrowb}[3]{\mbox{#1}_#2 & \Rightarrow & \arry{\arry{\mbox{Counters}}_#2,\:\hash{\mbox{Properties}}_#2,\:\arry{\mbox{#3}}_#2},}
+ \newcommand{\tbl}[2]{  
+  \% \left\{
+  \begin{array}{ccc}
+   \aryrow{#1}{0}{#2} \\ 
+       & \vdots &     \\
+   \aryrow{#1}{n}{#2}  
+  \end{array}
+  \right\}
+  } % \tbl
+ \newcommand{\tblb}[2]{  
+  \% \left\{
+  \begin{array}{ccc}
+   \aryrowb{#1}{0}{#2} \\ 
+       & \vdots &      \\
+   \aryrowb{#1}{n}{#2}  
+  \end{array}
+  \right\}
+ } % \tbl
+ \newcommand{\connect}[3]{
+   \put(#1,#2){
+    \put(0,0){\line(0,-1){0.5}}
+    \put(0,-0.5){\line(-1,0){#3}\vector(-1,-2){0.35}}
+   } % put
+  } % connect
+ %
+\fbox{
+\begin{minipage}[t]{0.975\linewidth}
+\unitlength1cm
+\begin{picture}(14,19.5)
+ \put(7,17.0){\makebox(2,14)[b]{$\tbl{SEQUENCE}{SOURCES}$}}
+ \connect{12.75}{16.95}{9.25}
+ \put(7,14.0){\makebox(2,14)[b]{$\tbl{SOURCE}{STRANDS}$}}
+ \connect{12.50}{13.95}{9.0}
+ \put(7,11.0){\makebox(2,14)[b]{$\tbl{STRAND}{GROUPS}$}}
+ \connect{12.50}{10.95}{9.0}
+ \put(7, 8.0){\makebox(2,14)[b]{$\tblb{GROUP}{ELEMENTS}$}}
+ \connect{12.40}{7.95}{9.4}
+ \put(7, 5.0){\makebox(2,14)[b]{
+   $ @\left[ \begin{array}{c}
+   \arry{\mbox{Type},\:\hash{\mbox{Properties}},\:\mbox{GFF-Feature},\:\mbox{ID},\:\mbox{Start},\:\mbox{End},\:\mbox{Score},\:\mbox{Frame}}_0 \\
+   \hfill \vdots \hfill \vdots \hfill \vdots \hfill \vdots \hfill \qquad \\
+   \arry{\mbox{Type},\:\hash{\mbox{Properties}},\:\mbox{GFF-Feature},\:\mbox{ID},\:\mbox{Start},\:\mbox{End},\:\mbox{Score},\:\mbox{Frame}}_n \\
+   \end{array} \right] $
+  } % makebox
+ } % put
+ \put(2,3.75){\line(1,0){12}}
+ \put(7,0.5){ \makebox(2,14)[b]{
+$ \begin{array}{r@{\quad=\quad}l}
+\arry{\mbox{COUNTERS}} & 
+(\:\mbox{Order \#},\:\mbox{Elements \#},\:\mbox{Start},\:\mbox{End}\:) \\[2.5ex]
+\hash{\mbox{PROPERTIES}} & 
+\left\{
+ \begin{array}{ccc}
+  \mbox{VAR\_NAME}_0 & \Rightarrow & \backslash\mbox{\$VALUE}_0 \\ 
+                     &    \vdots   &  \\
+  \mbox{VAR\_NAME}_k & \Rightarrow & \backslash\mbox{\$VALUE}_k
+ \end{array}
+\right\}
+\end{array} $ 
+  } % makebox
+ } % put
+\end{picture}
+\end{minipage}
+} % fbox
+@ 
+\end{comment}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<Parsing Input Data>>=
+sub add_gff_record() {
+    my $_gff = $_[0];
+    <<add align records to aplot DS>>
+    my ($VarName,$Counter,$Type);
+    ($VarName,$Counter,$Type) = (
+        \%GFF_DATA,
+        \$seq_COUNT,
+        'SEQUENCE' );
+    &load_gff_var($seqname,$VarName,$Counter,$Type);
+    ($VarName,$Counter,$Type) = (
+        \%{$VarName->{$seqname}[$_element]},
+        \$$VarName{$seqname}[$_counter][$_elemNum],
+        'SOURCE' );
+    &load_gff_var($source,$VarName,$Counter,$Type);
+    ($VarName,$Counter,$Type) = ( 
+        \%{$VarName->{$source}[$_element]},
+        \$$VarName{$source}[$_counter][$_elemNum],
+        'STRAND' );
+    &load_gff_var($strand,$VarName,$Counter,$Type);
+    ($VarName,$Counter,$Type) = (
+        \%{$VarName->{$strand}[$_element]},
+        \$$VarName{$strand}[$_counter][$_elemNum],
+        'GROUP' );
+    &load_gff_var($group,$VarName,$Counter,$Type);
+    <<adding new feature elements>>
+    return;
+} # add_gff_record
+@
+
+First we load the plain GFF attributes for a given record, when such record is defining a vector we add a new element to the feature anonymous array. That element is a list of the scores provided by the '[[&load_GFF_vector]]' function defined in section~\ref{sec:loadvector}, page~\pageref{sec:loadvector}.
+
+<<adding new feature elements>>=
+push @{$VarName->{$group}[$_element]},
+    [
+      'G',      # Type == plain GFF
+	  {},       # Properties hash, now empty
+      $feature, # GFF feature (3rd field)
+      $label,   # Record ID if exist, order# otherwise
+      $start,
+      $end,
+      $score,
+      $frame,
+    ];
+my $t = ++$VarName->{$group}[$_counter][$_elemNum];
+&set_var_defaults('FEATURE',
+                  \%{$VarName->{$group}[$_element][($t-1)][$_prop]});
+$_gff eq $VECTOR && do {
+	@{$VarName->{$group}[$_element][8]} = [ @vect_ary ];
+};
+@ 
+
+If the standard GFF alignment format is found, we process them as if it was an aplot records, so that we have to set all the variables required to fill such data structure ('[[%ALN_DATA]]' in section~\ref{sec:APLOT-DS} , page~\pageref{sec:APLOT-DS}).
+
+<<add align records to aplot DS>>=
+$_gff eq $ALIGN && do {
+    &add_aplot_record;
+    return;
+};
+@ 
+
+We declare here the main variable containing all the GFF data, and auxiliary variables containing the array indexes used in the anonymous arrays defined within that variable.\label{sec:GFF-DS}
+
+<<Global Vars>>=
+my (%GFF_DATA,$seq_COUNT);
+my ($_counter,$_prop,$_element) = (0,1,2);
+my ($_order,$_elemNum,$_ori,$_end) = (0,1,2,4);
+@ 
+
+<<Parsing Input Data>>=
+sub load_gff_var() {
+    my ($_value,$_var,$_cnt,$_type) = @_;
+	defined($$_var{$_value}) || do {
+		$$_var{$_value}[$_counter] = [ ++$$_cnt, 0, 0, 0 ];
+		&set_var_defaults($_type,\%{$$_var{$_value}[$_prop]});
+	};
+	return;
+} # load_gff_var
+@
+
+We initialize properties for each new element as references to '[[%DefaultVars]]' given level corresponding values. 
+
+<<Parsing Input Data>>=
+sub set_var_defaults() {
+    my ($sect,$varhash) = @_;
+    foreach my $nm (keys %{$DefaultVars{$sect}}) {
+        $$varhash{$nm} = \$DefaultVars{$sect}{$nm}{'VALUE'};
+	};
+	return;
+} # load_gff_var
+@
+
+\subsubsctn{Parsing GFF groups}
+
+<<Parsing Input Data>>=
+sub load_grouping() {
+    my $attributes = $_[0];
+    defined($attributes) || do {
+		$group_id = ++$group_counter;
+        $group = "$seqname\_$source\_$strand\_$group_id";
+        $label = $id;
+        return $GFF_NOGP;
+    };
+    my @grouping_list = ();
+    @grouping_list = split /\s*;\s*/o, $attributes;
+    my @new_group = ();
+    my $group_string = shift @grouping_list;
+    ($group_string =~ /$groupregexp/o) && 
+         (@new_group = ($1,$2,$3));
+    my $group_tag = '';
+    ($group_tag = lc $new_group[0]) =~ s/\b\s*$//o;
+    $group_tag =~ /$SOURCE{"align_tag"}/ && do { # %SOURCE is a temporary hash name
+        &load_GFF_align;
+        return $ALIGN;
+    }; 
+    $group_tag =~ /$SOURCE{"vector_tag"}/ && do {
+        &load_GFF_vector;
+        return $VECTOR;
+	};
+	<<parse gff grouping>>
+	#<parse aplot other>>
+    return $GFF;
+} # load_grouping
+@
+
+<<Global Vars>>=
+my %SOURCE = ( # this is a temporary hash name (to implement later)
+               align_tag  => 'target',
+               vector_tag => 'vector',
+               label_tag  => 'id',
+               );
+@ 
+
+<<parse gff grouping>>=
+my $gff_grouping = 0;
+$new_group[0] || do {  # type 2 attributes
+    $gff_grouping = 1;
+    $new_group[0] = $SOURCE{"align_tag"}; # %SOURCE temporary defined
+};
+$new_group[1] || do {  # type 1 attributes
+    $gff_grouping = 1;
+    $new_group[1] = $new_group[0];
+    $new_group[0] = $SOURCE{"align_tag"};
+};
+# In aplot-format $new_group[2] values are deprecated.
+($tag,$group,$label,$group_id) = 
+    (lc($new_group[0]),@new_group[1,1],++$group_counter);
+# Here looking for colon field separator in aplot GFF-like grouping
+($gff_grouping && $group !~ /\s+/o) && do {
+    if ($group =~ /^(.*?):(.*?)$/o) { 
+        (($group,$label) = ($1,$2));
+	} else {
+		$label = $group_id;
+	};
+};
+@
+
+\subsubsctn{Parsing alignment records}
+
+<<Parsing Input Data>>=
+sub load_GFF_align() {
+
+} # load_GFF_align
+@
+
+\subsubsctn{Parsing scoring vectors} \label{sec:loadvector}
+
+<<Parsing Input Data>>=
+sub load_GFF_vector() {
+	@vect_ary = ();
+} # load_GFF_vector
+@
+
+<<Global Vars>>=
+my @vect_ary;
+@ 
+
+\sctn{Setting custom features to figure elements} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<Features Setting>>=
+sub map_vars_data() {
+    &header("SETTING CUSTOM VALUES TO GFF ELEMENTS");
+
+    &footer("VALUES SET");
+} # customize_options
+@ 
+
+\sctn{Sorting elements by acceptor} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<Sorting Features>>=
+sub sort_elements() {
+    &header("SORTING ELEMENTS BY ACCEPTOR (START)");
+
+    &footer("ELEMENTS SORTED");
+} # sort_elements
+@ 
+
+\sctn{Obtaining {\ps} output} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<Making PS Figures>>=
+sub make_plot() {
+    &header("WRITING POSTSCRIPT TO STDOUT");
+
+    &ps_header;
+    &ps_colors;
+    &ps_page_formats;
+    &ps_variables;
+    &ps_main;
+
+    &ps_plot; 
+
+    &ps_trailer;
+
+    &footer("WRITING POSTSCRIPT FINISHED");
+} # make_plot
+@ 
+
+<<PostScript CODE Chunks>>=
+<<PostScript PLOT>>
+<<PostScript HEADER>>
+<<PostScript COLORS>>
+<<PostScript FORMATS>>
+<<PostScript VARS>>
+<<PostScript MAIN>>
+<<Postscript OPEN PAGE>>
+<<Postscript CLOSE PAGE>>
+<<Postscript TRAILER>>
+@
+
+\subsctn{Header comments and constants definition}
+ 
+<<PostScript PLOT>>=
+sub ps_plot(){
+} # ps_plot
+@
+
+\subsctn{Header comments and constants definition}
+ 
+<<PostScript HEADER>>=
+sub ps_header() {
+    print STDOUT << "+++HEADER+++";
+%!PS-Adobe-3.0
+%%Title: title
+%%Creator: $PROGRAM
+%%Version: $VERSION
+%%CreationDate: $DATE
+%%For: $USER
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EndComments
+%
+<<GNU License PostScript>>
+%
+% $LAST_UPDATE
+%
+% Report BUGS to: jabril@\imim.es 
+%
+%%BeginProlog
+%
+<<POSTSCRIPT shortnames>>
+<<POSTSCRIPT constants>>
++++HEADER+++
+} # ps_header
+@
+
+\subsctn{CMYK color definition}
+
+<<PostScript COLORS>>=
+sub ps_colors() {
+  my %tmp = ();
+  print STDOUT "%% Fixed Color Variables (CMYK)\n";
+  print STDOUT "/colordict ".($colors + 28)." dict def colordict begin %% ".
+               $colors." colors + 28 definitions\n";
+  foreach my $key (keys %COLORS) { $tmp{$COLORS{$key}->[0]} = $key };
+  for (my $j = 1; $j <= $colors; $j++) { 
+      my $name = $tmp{$j};
+      my $ref = \$COLORS{$name};
+      my $cmyk = "$$ref->[1] $$ref->[2] $$ref->[3] $$ref->[4]";
+      print STDOUT "/".(&fill_right($name,20," "))."{ $cmyk } def\n";
+      };
+  print STDOUT "end %% colordict\n";
+} # ps_colors
+@
+
+<<Global Vars>>=
+my $colors = 0;
+my %COLORS = (    # [ ColorNUMBER, qw/ CYAN MAGENTA YELLOW BLACK / ]
+  <<cmyk colors perl definition>>
+  ); # %COLORS
+@
+
+\subsctn{Page formats definition}
+
+<<PostScript FORMATS>>=
+sub ps_page_formats() {
+  my %tmp = ();
+  print STDOUT "%% Paper Sizes (in points)\n";
+  print STDOUT "/pagedict ".($formats + 2)." dict def pagedict begin %% ".
+               $formats." formats + 2 definitions\n";
+  foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
+  for (my $j = 1; $j <= $formats; $j++) { 
+      my $name = $tmp{$j};
+      my $ref = \$FORMATS{$name};
+      my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
+      print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } def\n";
+      };
+  print STDOUT "end %% pagedict\n";}
+@
+
+<<Global Vars>>=
+my $formats = 0;
+my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
+  <<page sizes perl definition>>
+  );
+@ 
+
+\subsctn{Setting up {\ps} variables}
+
+<<PostScript VARS>>=
+sub ps_variables() {
+    print STDOUT << '+++PSVARS+++';
+%%BeginProcSet: Setting_Vars 1.0 0
+%
+%%EndProcSet:   Setting_Vars 1.0 0
+%
++++PSVARS+++
+} # ps_variables
+@
+
+\subsctn{Main {\ps} functions}
+
+<<PostScript MAIN>>=
+sub ps_main() {
+    print STDOUT << '+++MAINProcs+++';
+<<POSTSCRIPT layout>>
+<<POSTSCRIPT text functions>>
+<<POSTSCRIPT aplotdict>>
+<<POSTSCRIPT main function calls>>
+%
+%%EndProlog
+%
+%%BeginSetup
+%
+% initgraphics
+% true setpacking
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%
+%%EndSetup
+%
++++MAINProcs+++
+} # ps_main
+@
+
+\subsctn{{\ps} code chunks}
+
+<<Postscript OPEN PAGE>>=
+sub ps_open_page() {
+    print STDOUT << '+++OPEN+++';
+%%Page: 1 1
+%%BeginPageSetup
+%
+% Saving current page settings
+/pgsave save def
+% Setting BGcolor for sheet
+Dpage 0 0 bbox S BGcolor scmyk fill R clip newpath
+% Setting page-size scale
+1 CSF dup F
+%%EndPageSetup
+%
++++OPEN+++
+} # ps_open_page
+@
+
+<<Postscript CLOSE PAGE>>=
+sub ps_close_page() {
+    print STDOUT << '+++CLOSE+++';
+%
+flgcrd { s_credits } if
+grestoreall
+pgsave restore
+showpage
+%
+%%PageEND: 1 1
+%
++++CLOSE+++
+} # ps_close_page
+@
+
+<<Postscript TRAILER>>=
+sub ps_trailer() {
+    print STDOUT << "+++EOF+++";
+%%Trailer
+%
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EOF
++++EOF+++
+} # ps_trailer
+@
+
+\sctn{CMYK color definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, their {\LaTeX} definition ('[[AplotColorDefs.tex]]') and the table sumarizing them for the manual ('[[AplotColorTbl.tex]]'). % outlined in page~\pageref{sec:cmykfiles}.
+
+\subsctn{Black and White}
+
+\newcommand{\clrtbl}[5]{\vskip -2.5ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}}
+\newcommand{\clrtblg}[7]{\vskip -2.5ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}\cln{#6}\cln{#7}}
+
+\clrtblg{black}{verydarkgrey}{darkgrey}{grey}{lightgrey}{verylightgrey}{white}
+
+<<cmyk colors perl definition>>=
+# black+grey+white
+black              => [ ++$colors, qw/ 0.00 0.00 0.00 1.00 / ],
+verydarkgrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.80 / ],
+darkgrey           => [ ++$colors, qw/ 0.00 0.00 0.00 0.60 / ],
+grey               => [ ++$colors, qw/ 0.00 0.00 0.00 0.40 / ],
+lightgrey          => [ ++$colors, qw/ 0.00 0.00 0.00 0.20 / ],
+verylightgrey      => [ ++$colors, qw/ 0.00 0.00 0.00 0.10 / ],
+white              => [ ++$colors, qw/ 0.00 0.00 0.00 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% black+grey+white
+\definecolor{black}              {cmyk}{0.00,0.00,0.00,1.00}
+\definecolor{verydarkgrey}       {cmyk}{0.00,0.00,0.00,0.80}
+\definecolor{darkgrey}           {cmyk}{0.00,0.00,0.00,0.60}
+\definecolor{grey}               {cmyk}{0.00,0.00,0.00,0.40}
+\definecolor{lightgrey}          {cmyk}{0.00,0.00,0.00,0.20}
+\definecolor{verylightgrey}      {cmyk}{0.00,0.00,0.00,0.10}
+\definecolor{white}              {cmyk}{0.00,0.00,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% black+grey+white
+\clspc
+\clrow{black}                    & 0.00 & 0.00 & 0.00 & 1.00 \\
+\clrow{verydarkgrey}             & 0.00 & 0.00 & 0.00 & 0.80 \\
+\clrow{darkgrey}                 & 0.00 & 0.00 & 0.00 & 0.60 \\
+\clrow{grey}                     & 0.00 & 0.00 & 0.00 & 0.40 \\
+\clrow{lightgrey}                & 0.00 & 0.00 & 0.00 & 0.20 \\
+\clrow{verylightgrey}            & 0.00 & 0.00 & 0.00 & 0.10 \\
+\clrow{white}                    & 0.00 & 0.00 & 0.00 & 0.00 \\
+@
+
+\subsctn{Magenta}
+
+\clrtbl{verydarkmagenta}{darkmagenta}{magenta}{lightmagenta}{verylightmagenta}
+
+<<cmyk colors perl definition>>=
+# magenta				  
+verydarkmagenta    => [ ++$colors, qw/ 0.00 1.00 0.00 0.30 / ],
+darkmagenta        => [ ++$colors, qw/ 0.00 0.80 0.00 0.05 / ],
+magenta            => [ ++$colors, qw/ 0.00 0.60 0.00 0.00 / ],
+lightmagenta       => [ ++$colors, qw/ 0.00 0.40 0.00 0.00 / ],
+verylightmagenta   => [ ++$colors, qw/ 0.00 0.20 0.00 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% magenta
+\definecolor{verydarkmagenta}    {cmyk}{0.00,1.00,0.00,0.30}
+\definecolor{darkmagenta}        {cmyk}{0.00,0.80,0.00,0.05}
+\definecolor{magenta}            {cmyk}{0.00,0.60,0.00,0.00}
+\definecolor{lightmagenta}       {cmyk}{0.00,0.40,0.00,0.00}
+\definecolor{verylightmagenta}   {cmyk}{0.00,0.20,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% magenta
+\clspc
+\clrow{verydarkmagenta}          & 0.00 & 1.00 & 0.00 & 0.30 \\
+\clrow{darkmagenta}              & 0.00 & 0.80 & 0.00 & 0.05 \\
+\clrow{magenta}                  & 0.00 & 0.60 & 0.00 & 0.00 \\
+\clrow{lightmagenta}             & 0.00 & 0.40 & 0.00 & 0.00 \\
+\clrow{verylightmagenta}         & 0.00 & 0.20 & 0.00 & 0.00 \\
+@
+
+\subsctn{Violet}
+
+\clrtbl{verydarkviolet}{darkviolet}{violet}{lightviolet}{verylightviolet}
+
+<<cmyk colors perl definition>>=
+# violet				  
+verydarkviolet     => [ ++$colors, qw/ 0.45 0.85 0.00 0.00 / ],
+darkviolet         => [ ++$colors, qw/ 0.30 0.65 0.00 0.00 / ],
+violet             => [ ++$colors, qw/ 0.22 0.55 0.00 0.00 / ],
+lightviolet        => [ ++$colors, qw/ 0.15 0.40 0.00 0.00 / ],
+verylightviolet    => [ ++$colors, qw/ 0.10 0.20 0.00 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% violet
+\definecolor{verydarkviolet}     {cmyk}{0.45,0.85,0.00,0.00}
+\definecolor{darkviolet}         {cmyk}{0.30,0.65,0.00,0.00}
+\definecolor{violet}             {cmyk}{0.22,0.55,0.00,0.00}
+\definecolor{lightviolet}        {cmyk}{0.15,0.40,0.00,0.00}
+\definecolor{verylightviolet}    {cmyk}{0.10,0.20,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% violet
+\clspc
+\clrow{verydarkviolet}           & 0.45 & 0.85 & 0.00 & 0.00 \\
+\clrow{darkviolet}               & 0.30 & 0.65 & 0.00 & 0.00 \\
+\clrow{violet}                   & 0.22 & 0.55 & 0.00 & 0.00 \\
+\clrow{lightviolet}              & 0.15 & 0.40 & 0.00 & 0.00 \\
+\clrow{verylightviolet}          & 0.10 & 0.20 & 0.00 & 0.00 \\
+@
+
+\subsctn{Blue}
+
+\clrtbl{verydarkblue}{darkblue}{blue}{lightblue}{verylightblue}
+
+<<cmyk colors perl definition>>=
+# blue				  
+verydarkblue       => [ ++$colors, qw/ 1.00 1.00 0.00 0.20 / ],
+darkblue           => [ ++$colors, qw/ 0.90 0.90 0.00 0.00 / ],
+blue               => [ ++$colors, qw/ 0.75 0.75 0.00 0.00 / ],
+lightblue          => [ ++$colors, qw/ 0.50 0.50 0.00 0.00 / ],
+verylightblue      => [ ++$colors, qw/ 0.30 0.30 0.00 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% blue
+\definecolor{verydarkblue}       {cmyk}{1.00,1.00,0.00,0.20}
+\definecolor{darkblue}           {cmyk}{0.90,0.90,0.00,0.00}
+\definecolor{blue}               {cmyk}{0.75,0.75,0.00,0.00}
+\definecolor{lightblue}          {cmyk}{0.50,0.50,0.00,0.00}
+\definecolor{verylightblue}      {cmyk}{0.30,0.30,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% blue
+\clspc
+\clrow{verydarkblue}             & 1.00 & 1.00 & 0.00 & 0.20 \\
+\clrow{darkblue}                 & 0.90 & 0.90 & 0.00 & 0.00 \\
+\clrow{blue}                     & 0.75 & 0.75 & 0.00 & 0.00 \\
+\clrow{lightblue}                & 0.50 & 0.50 & 0.00 & 0.00 \\
+\clrow{verylightblue}            & 0.30 & 0.30 & 0.00 & 0.00 \\
+@
+
+\subsctn{Skyblue}
+
+\clrtbl{verydarkskyblue}{darkskyblue}{skyblue}{lightskyblue}{verylightskyblue}
+
+<<cmyk colors perl definition>>=
+# skyblue				  
+verydarkskyblue    => [ ++$colors, qw/ 0.90 0.50 0.00 0.15 / ],
+darkskyblue        => [ ++$colors, qw/ 0.75 0.45 0.00 0.00 / ],
+skyblue            => [ ++$colors, qw/ 0.60 0.38 0.00 0.00 / ],
+lightskyblue       => [ ++$colors, qw/ 0.45 0.25 0.00 0.00 / ],
+verylightskyblue   => [ ++$colors, qw/ 0.30 0.15 0.00 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% skyblue
+\definecolor{verydarkskyblue}    {cmyk}{0.90,0.50,0.00,0.15}
+\definecolor{darkskyblue}        {cmyk}{0.75,0.45,0.00,0.00}
+\definecolor{skyblue}            {cmyk}{0.60,0.38,0.00,0.00}
+\definecolor{lightskyblue}       {cmyk}{0.45,0.25,0.00,0.00}
+\definecolor{verylightskyblue}   {cmyk}{0.30,0.15,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% skyblue
+\clspc
+\clrow{verydarkskyblue}          & 0.90 & 0.50 & 0.00 & 0.15 \\
+\clrow{darkskyblue}              & 0.75 & 0.45 & 0.00 & 0.00 \\
+\clrow{skyblue}                  & 0.60 & 0.38 & 0.00 & 0.00 \\
+\clrow{lightskyblue}             & 0.45 & 0.25 & 0.00 & 0.00 \\
+\clrow{verylightskyblue}         & 0.30 & 0.15 & 0.00 & 0.00 \\
+@
+
+\subsctn{Cyan}
+
+\clrtbl{verydarkcyan}{darkcyan}{cyan}{lightcyan}{verylightcyan}
+
+<<cmyk colors perl definition>>=
+# cyan				  
+verydarkcyan       => [ ++$colors, qw/ 1.00 0.00 0.00 0.10 / ],
+darkcyan           => [ ++$colors, qw/ 0.80 0.00 0.00 0.00 / ],
+cyan               => [ ++$colors, qw/ 0.60 0.00 0.00 0.00 / ],
+lightcyan          => [ ++$colors, qw/ 0.40 0.00 0.00 0.00 / ],
+verylightcyan      => [ ++$colors, qw/ 0.20 0.00 0.00 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% cyan
+\definecolor{verydarkcyan}       {cmyk}{1.00,0.00,0.00,0.10}
+\definecolor{darkcyan}           {cmyk}{0.80,0.00,0.00,0.00}
+\definecolor{cyan}               {cmyk}{0.60,0.00,0.00,0.00}
+\definecolor{lightcyan}          {cmyk}{0.40,0.00,0.00,0.00}
+\definecolor{verylightcyan}      {cmyk}{0.20,0.00,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% cyan
+\clspc
+\clrow{verydarkcyan}             & 1.00 & 0.00 & 0.00 & 0.10 \\
+\clrow{darkcyan}                 & 0.80 & 0.00 & 0.00 & 0.00 \\
+\clrow{cyan}                     & 0.60 & 0.00 & 0.00 & 0.00 \\
+\clrow{lightcyan}                & 0.40 & 0.00 & 0.00 & 0.00 \\
+\clrow{verylightcyan}            & 0.20 & 0.00 & 0.00 & 0.00 \\
+@
+
+\subsctn{Seagreen}
+
+\clrtbl{verydarkseagreen}{darkseagreen}{seagreen}{lightseagreen}{verylightseagreen}
+
+<<cmyk colors perl definition>>=
+# seagreen			  
+verydarkseagreen   => [ ++$colors, qw/ 0.75 0.00 0.45 0.00 / ],
+darkseagreen       => [ ++$colors, qw/ 0.62 0.00 0.38 0.00 / ],
+seagreen           => [ ++$colors, qw/ 0.50 0.00 0.30 0.00 / ],
+lightseagreen      => [ ++$colors, qw/ 0.38 0.00 0.22 0.00 / ],
+verylightseagreen  => [ ++$colors, qw/ 0.25 0.00 0.15 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% seagreen
+\definecolor{verydarkseagreen}   {cmyk}{0.75,0.00,0.45,0.00}
+\definecolor{darkseagreen}       {cmyk}{0.62,0.00,0.38,0.00}
+\definecolor{seagreen}           {cmyk}{0.50,0.00,0.30,0.00}
+\definecolor{lightseagreen}      {cmyk}{0.38,0.00,0.22,0.00}
+\definecolor{verylightseagreen}  {cmyk}{0.25,0.00,0.15,0.00}
+@ 
+<<cmyk color table - right>>=
+% seagreen
+\clspc
+\clrow{verydarkseagreen}         & 0.75 & 0.00 & 0.45 & 0.00 \\
+\clrow{darkseagreen}             & 0.62 & 0.00 & 0.38 & 0.00 \\
+\clrow{seagreen}                 & 0.50 & 0.00 & 0.30 & 0.00 \\
+\clrow{lightseagreen}            & 0.38 & 0.00 & 0.22 & 0.00 \\
+\clrow{verylightseagreen}        & 0.25 & 0.00 & 0.15 & 0.00 \\
+@
+
+\subsctn{Green}
+
+\clrtbl{verydarkgreen}{darkgreen}{green}{lightgreen}{verylightgreen}
+
+<<cmyk colors perl definition>>=
+# green				  
+verydarkgreen      => [ ++$colors, qw/ 1.00 0.00 1.00 0.25 / ],
+darkgreen          => [ ++$colors, qw/ 0.80 0.00 0.80 0.00 / ],
+green              => [ ++$colors, qw/ 0.60 0.00 0.60 0.00 / ],
+lightgreen         => [ ++$colors, qw/ 0.40 0.00 0.40 0.00 / ],
+verylightgreen     => [ ++$colors, qw/ 0.20 0.00 0.20 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% green
+\definecolor{verydarkgreen}      {cmyk}{1.00,0.00,1.00,0.25}
+\definecolor{darkgreen}          {cmyk}{0.80,0.00,0.80,0.00}
+\definecolor{green}              {cmyk}{0.60,0.00,0.60,0.00}
+\definecolor{lightgreen}         {cmyk}{0.40,0.00,0.40,0.00}
+\definecolor{verylightgreen}     {cmyk}{0.20,0.00,0.20,0.00}
+@ 
+<<cmyk color table - right>>=
+% green
+\clspc
+\clrow{verydarkgreen}            & 1.00 & 0.00 & 1.00 & 0.25 \\
+\clrow{darkgreen}                & 0.80 & 0.00 & 0.80 & 0.00 \\
+\clrow{green}                    & 0.60 & 0.00 & 0.60 & 0.00 \\
+\clrow{lightgreen}               & 0.40 & 0.00 & 0.40 & 0.00 \\
+\clrow{verylightgreen}           & 0.20 & 0.00 & 0.20 & 0.00 \\
+@
+
+\subsctn{Limegreen}
+
+\clrtbl{verydarklimegreen}{darklimegreen}{limegreen}{lightlimegreen}{verylightlimegreen}
+
+<<cmyk colors perl definition>>=
+# limegreen			  
+verydarklimegreen  => [ ++$colors, qw/ 0.50 0.00 1.00 0.10 / ],
+darklimegreen      => [ ++$colors, qw/ 0.40 0.00 0.95 0.00 / ],
+limegreen          => [ ++$colors, qw/ 0.30 0.00 0.80 0.00 / ],
+lightlimegreen     => [ ++$colors, qw/ 0.20 0.00 0.65 0.00 / ],
+verylightlimegreen => [ ++$colors, qw/ 0.10 0.00 0.50 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% limegreen
+\definecolor{verydarklimegreen}  {cmyk}{0.50,0.00,1.00,0.10}
+\definecolor{darklimegreen}      {cmyk}{0.40,0.00,0.95,0.00}
+\definecolor{limegreen}          {cmyk}{0.30,0.00,0.80,0.00}
+\definecolor{lightlimegreen}     {cmyk}{0.20,0.00,0.65,0.00}
+\definecolor{verylightlimegreen} {cmyk}{0.10,0.00,0.50,0.00}
+@ 
+<<cmyk color table - right>>=
+% limegreen
+\clspc
+\clrow{verydarklimegreen}        & 0.50 & 0.00 & 1.00 & 0.10 \\
+\clrow{darklimegreen}            & 0.40 & 0.00 & 0.95 & 0.00 \\
+\clrow{limegreen}                & 0.30 & 0.00 & 0.80 & 0.00 \\
+\clrow{lightlimegreen}           & 0.20 & 0.00 & 0.65 & 0.00 \\
+\clrow{verylightlimegreen}       & 0.10 & 0.00 & 0.50 & 0.00 \\
+@
+
+\subsctn{Yellow}
+
+\clrtbl{verydarkyellow}{darkyellow}{yellow}{lightyellow}{verylightyellow}
+
+<<cmyk colors perl definition>>=
+# yellow				  
+verydarkyellow     => [ ++$colors, qw/ 0.00 0.00 1.00 0.25 / ],
+darkyellow         => [ ++$colors, qw/ 0.00 0.00 1.00 0.10 / ],
+yellow             => [ ++$colors, qw/ 0.00 0.00 1.00 0.00 / ],
+lightyellow        => [ ++$colors, qw/ 0.00 0.00 0.50 0.00 / ],
+verylightyellow    => [ ++$colors, qw/ 0.00 0.00 0.25 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% yellow
+\definecolor{verydarkyellow}     {cmyk}{0.00,0.00,1.00,0.25}
+\definecolor{darkyellow}         {cmyk}{0.00,0.00,1.00,0.10}
+\definecolor{yellow}             {cmyk}{0.00,0.00,1.00,0.00}
+\definecolor{lightyellow}        {cmyk}{0.00,0.00,0.50,0.00}
+\definecolor{verylightyellow}    {cmyk}{0.00,0.00,0.25,0.00}
+@ 
+<<cmyk color table - right>>=
+% yellow
+\clspc
+\clrow{verydarkyellow}           & 0.00 & 0.00 & 1.00 & 0.25 \\
+\clrow{darkyellow}               & 0.00 & 0.00 & 1.00 & 0.10 \\
+\clrow{yellow}                   & 0.00 & 0.00 & 1.00 & 0.00 \\
+\clrow{lightyellow}              & 0.00 & 0.00 & 0.50 & 0.00 \\
+\clrow{verylightyellow}          & 0.00 & 0.00 & 0.25 & 0.00 \\
+@
+
+\subsctn{Orange}
+
+\clrtbl{verydarkorange}{darkorange}{orange}{lightorange}{verylightorange}
+
+<<cmyk colors perl definition>>=
+# orange				  
+verydarkorange     => [ ++$colors, qw/ 0.00 0.50 0.80 0.10 / ],
+darkorange         => [ ++$colors, qw/ 0.00 0.40 0.80 0.00 / ],
+orange             => [ ++$colors, qw/ 0.00 0.30 0.80 0.00 / ],
+lightorange        => [ ++$colors, qw/ 0.00 0.20 0.75 0.00 / ],
+verylightorange    => [ ++$colors, qw/ 0.00 0.15 0.70 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% orange
+\definecolor{verydarkorange}     {cmyk}{0.00,0.50,0.80,0.10}
+\definecolor{darkorange}         {cmyk}{0.00,0.40,0.80,0.00}
+\definecolor{orange}             {cmyk}{0.00,0.30,0.80,0.00}
+\definecolor{lightorange}        {cmyk}{0.00,0.20,0.75,0.00}
+\definecolor{verylightorange}    {cmyk}{0.00,0.15,0.70,0.00}
+@ 
+<<cmyk color table - right>>=
+% orange
+\clspc
+\clrow{verydarkorange}           & 0.00 & 0.50 & 0.80 & 0.10 \\
+\clrow{darkorange}               & 0.00 & 0.40 & 0.80 & 0.00 \\
+\clrow{orange}                   & 0.00 & 0.30 & 0.80 & 0.00 \\
+\clrow{lightorange}              & 0.00 & 0.20 & 0.75 & 0.00 \\
+\clrow{verylightorange}          & 0.00 & 0.15 & 0.70 & 0.00 \\
+@
+
+\subsctn{Red}
+
+\clrtbl{verydarkred}{darkred}{red}{lightred}{verylightred}
+
+<<cmyk colors perl definition>>=
+# red					  
+verydarkred        => [ ++$colors, qw/ 0.00 1.00 1.00 0.15 / ],
+darkred            => [ ++$colors, qw/ 0.00 0.80 0.80 0.00 / ],
+red                => [ ++$colors, qw/ 0.00 0.60 0.60 0.00 / ],
+lightred           => [ ++$colors, qw/ 0.00 0.40 0.40 0.00 / ],
+verylightred       => [ ++$colors, qw/ 0.00 0.20 0.20 0.00 / ],
+@
+<<cmyk colors latex definition>>=
+% red
+\definecolor{verydarkred}        {cmyk}{0.00,1.00,1.00,0.15}
+\definecolor{darkred}            {cmyk}{0.00,0.80,0.80,0.00}
+\definecolor{red}                {cmyk}{0.00,0.60,0.60,0.00}
+\definecolor{lightred}           {cmyk}{0.00,0.40,0.40,0.00}
+\definecolor{verylightred}       {cmyk}{0.00,0.20,0.20,0.00}
+@ 
+<<cmyk color table - right>>=
+% red
+\clspc
+\clrow{verydarkred}              & 0.00 & 1.00 & 1.00 & 0.15 \\
+\clrow{darkred}                  & 0.00 & 0.80 & 0.80 & 0.00 \\
+\clrow{red}                      & 0.00 & 0.60 & 0.60 & 0.00 \\
+\clrow{lightred}                 & 0.00 & 0.40 & 0.40 & 0.00 \\
+\clrow{verylightred}             & 0.00 & 0.20 & 0.20 & 0.00 \\
+@
+
+\subsctn{Brown}
+
+\clrtbl{verydarkbrown}{darkbrown}{brown}{lightbrown}{verylightbrown}
+
+<<cmyk colors perl definition>>=
+# brown				  
+verydarkbrown      => [ ++$colors, qw/ 0.35 0.85 1.00 0.40 / ],
+darkbrown          => [ ++$colors, qw/ 0.30 0.70 1.00 0.35 / ],
+brown              => [ ++$colors, qw/ 0.25 0.75 1.00 0.25 / ],
+lightbrown         => [ ++$colors, qw/ 0.20 0.60 0.70 0.15 / ],
+verylightbrown     => [ ++$colors, qw/ 0.15 0.45 0.55 0.00 / ],
+@ 
+<<cmyk colors latex definition>>=
+% brown
+\definecolor{verydarkbrown}     {cmyk}{0.35,0.85,1.00,0.40}
+\definecolor{darkbrown}         {cmyk}{0.30,0.70,1.00,0.35}
+\definecolor{brown}             {cmyk}{0.25,0.75,1.00,0.25}
+\definecolor{lightbrown}        {cmyk}{0.20,0.60,0.70,0.15}
+\definecolor{verylightbrown}    {cmyk}{0.15,0.45,0.55,0.00}
+@ 
+<<cmyk color table - right>>=
+% brown
+\clspc
+\clrow{verydarkbrown}            & 0.35 & 0.85 & 1.00 & 0.40 \\
+\clrow{darkbrown}                & 0.30 & 0.70 & 1.00 & 0.35 \\
+\clrow{brown}                    & 0.25 & 0.75 & 1.00 & 0.25 \\
+\clrow{lightbrown}               & 0.20 & 0.60 & 0.70 & 0.15 \\
+\clrow{verylightbrown}           & 0.15 & 0.45 & 0.55 & 0.00 \\
+@
+
+\subsctn{Colors Help}
+
+<<colors help>>=
+Those are the colors defined in $PROGRAM:
++ Basic Colors: black white.
++ Variable Colors: 
+      grey magenta violet blue skyblue cyan seagreen
+         green limegreen yellow orange red brown
+  You can get five color shades from Variable Colors with
+  \"verydark\", \"dark\", \"light\" and \"verylight\" prefixes,
+  as example: 
+    verydarkblue, darkblue, blue, lightblue and verylightblue.
+@
+
+\sctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<page sizes perl definition>>=
+  a0        => [ ++$formats, 2384, 3370 ],
+  a1        => [ ++$formats, 1684, 2384 ],
+  a2        => [ ++$formats, 1190, 1684 ],
+  a3        => [ ++$formats,  842, 1190 ],
+  a4        => [ ++$formats,  595,  842 ],
+  a5        => [ ++$formats,  420,  595 ],
+  a6        => [ ++$formats,  297,  420 ],
+  a7        => [ ++$formats,  210,  297 ],
+  a8        => [ ++$formats,  148,  210 ],
+  a9        => [ ++$formats,  105,  148 ],
+  a10       => [ ++$formats,   73,  105 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
+a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
+a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
+a4          &  595 &  842 &  21.0 &  29.7 &   8.3 &  11.7 \\
+a5          &  420 &  595 &  14.8 &  21.0 &   5.8 &   8.3 \\
+a6          &  297 &  420 &  10.5 &  14.8 &   4.1 &   5.8 \\
+a7          &  210 &  297 &   7.4 &  10.5 &   2.9 &   4.1 \\
+a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
+a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
+a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
+@
+
+<<page sizes perl definition>>=
+  b0        => [ ++$formats, 2920, 4127 ],
+  b1        => [ ++$formats, 2064, 2920 ],
+  b2        => [ ++$formats, 1460, 2064 ],
+  b3        => [ ++$formats, 1032, 1460 ],
+  b4        => [ ++$formats,  729, 1032 ],
+  b5        => [ ++$formats,  516,  729 ],
+  b6        => [ ++$formats,  363,  516 ],
+  b7        => [ ++$formats,  258,  363 ],
+  b8        => [ ++$formats,  181,  258 ],
+  b9        => [ ++$formats,  127,  181 ],
+  b10       => [ ++$formats,   91,  127 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+b0          & 2920 & 4127 & 103.0 & 145.6 &  40.6 &  57.3 \\
+b1          & 2064 & 2920 &  72.8 & 103.0 &  28.7 &  40.6 \\
+b2          & 1460 & 2064 &  51.5 &  72.8 &  20.3 &  28.7 \\
+b3          & 1032 & 1460 &  36.4 &  51.5 &  14.3 &  20.3 \\
+b4          &  729 & 1032 &  25.7 &  36.4 &  10.1 &  14.3 \\
+b5          &  516 &  729 &  18.2 &  25.7 &   7.2 &  10.1 \\
+b6          &  363 &  516 &  12.8 &  18.2 &   5.0 &   7.2 \\
+b7          &  258 &  363 &   9.1 &  12.8 &   3.6 &   5.0 \\
+b8          &  181 &  258 &   6.4 &   9.1 &   2.5 &   3.6 \\
+b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
+b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
+@
+
+<<page sizes perl definition>>=
+  executive => [ ++$formats,  540,  720 ],
+  folio     => [ ++$formats,  612,  936 ],
+  legal     => [ ++$formats,  612, 1008 ],
+  letter    => [ ++$formats,  612,  792 ],
+  quarto    => [ ++$formats,  610,  780 ],
+  statement => [ ++$formats,  396,  612 ],
+ '10x14'    => [ ++$formats,  720, 1008 ],
+  ledger    => [ ++$formats, 1224,  792 ],
+  tabloid   => [ ++$formats,  792, 1224 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+executive   &  540 &  720 &  19.0 &  25.4 &   7.5 &  10.0 \\
+folio       &  612 &  936 &  21.6 &  33.0 &   8.5 &  13.0 \\
+legal       &  612 & 1008 &  21.6 &  35.6 &   8.5 &  14.0 \\
+letter      &  612 &  792 &  21.6 &  27.9 &   8.5 &  11.0 \\
+quarto      &  610 &  780 &  21.5 &  27.5 &   8.5 &  10.8 \\
+statement   &  396 &  612 &  14.0 &  21.6 &   5.5 &   8.5 \\ \hline\hline
+10x14       &  720 & 1008 &  25.4 &  35.6 &  10.0 &  14.0 \\
+ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
+tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
+@
+
+<<pages help>>=
+The following page sizes are available: from A0 to A10, 
+from B0 to B10, 10x14, executive, folio, ledger, legal, 
+letter, quarto, statement and tabloid.
+@
+
+\sctn{{\ps} main program and routines} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<POSTSCRIPT shortnames>>=
+%%BeginProcSet: Short_names 1.0 0
+%
+/tflg false def % test flag
+/bdf { bind def } bind def
+/xdf { exch def } bdf
+/cm { 28.35 mul } bdf
+/ivcm { 28.35 div } bdf
+/in { 72    mul } bdf
+/F { scale } bdf
+/T { translate } bdf
+/S { gsave } bdf
+/R { grestore } bdf
+/m { moveto } bdf
+/rm { rmoveto } bdf
+/l { lineto } bdf
+/rl { rlineto } bdf
+/K { stroke } bdf
+/scmyk { setcmykcolor } bdf
+/slw { setlinewidth } bdf
+/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll m l l l closepath } bdf
+/dotted { [ 1 ] 0 setdash } def
+%
+%%EndProcSet:   Short_names 1.0 0
+%
+@
+
+<<POSTSCRIPT constants>>=
+%%BeginProcSet: Constants 1.0 0
+%
+% Printing Offset
+/VUpOS 0.25 cm def  % offset defines non printable
+/VDnOS 0.25 cm def  % paper area for pages (printer outlimits).
+/HLtOS 0.25 cm def
+/HRtOS 0.25 cm def
+/htag   0 def
+/Xmarg  5.0 cm def       % Starting Point (upper left corner)
+/Ymarg  842 2 cm sub def
+/Y Ymarg def
+/PlotWidth  14 cm def    % Blocks Size
+/Spacer   1.00 cm def    % BBox relative to dotplot
+/BBoxX  PlotWidth def    % SBox relative to percent box
+/BBoxY   14.00 cm def    % XBox relative to extra box
+/SBoxX  PlotWidth def
+/SBoxY    2.25 cm def
+/XBoxX  PlotWidth def
+/XBoxY    3.00 cm def
+/WBox     0.50 cm def    % TagBox Size
+/HWBox WBox 2 div    def
+/Warw  WBox 0.75 mul def
+/HWarw Warw 2 div    def
+%
+%%EndProcSet:   Constants 1.0 0
+%
+@
+
+<<POSTSCRIPT layout>>=
+%%BeginProcSet: Page_Layout 1.0 0
+%
+/TitleFont    { 24 /Times-Bold  } def
+/SubTtFont    { 16 /Times-Roman } def
+/ElmFont      { 12 FTLbsc mul /Times-Roman } def
+/TagFont      { 14 GPLbsc mul /Times-Roman } def
+/TagLabelFont { 16 /Times-Bold  } def
+/TickFont     { 10 /Helvetica } def
+%
+/xBDspl  1.8 putExon add putExLbl add putGnLbl add def % 1.25
+/xGLDspl 1.0 putExon add putExLbl add def              % 0.85
+/xGDspl  0.75 putExon add putExLbl add def
+/FBDspl 0.60 def % For example, for mRNA.
+%
+/vertical   { /htag 0 def } bdf
+/horizontal { /htag 1 def } bdf
+%
+/FSF 4 def % Point size for Credits for A4
+/CSF { pagedict begin pga4 pop end Dpage pop exch div mul } bdf
+%
+% checking if margins are within the defined offset
+flglscape {
+ UpM HLtOS lt { /UpM HLtOS def } if % Checking margins for flglscape mode
+ DnM HRtOS lt { /DnM HRtOS def } if
+ LtM VDnOS lt { /LtM VDnOS def } if
+ RtM VUpOS lt { /RtM VUpOS def } if
+ } {
+  UpM VUpOS lt { /UpM VUpOS def } if % Checking margins for portrait mode
+  DnM VDnOS lt { /DnM VDnOS def } if
+  LtM HLtOS lt { /LtM HLtOS def } if
+  RtM HRtOS lt { /RtM HRtOS def } if
+  } ifelse
+% defining pagelimits and X - Y scales (Xlim Ylim)
+/pglim { Dpage pop LtM RtM add sub Dpage exch pop UpM DnM add sub } def
+% Defining starting point on page.
+/XORI LtM def
+/YORI UpM def
+%
+%%EndProcSet:   Page_Layout 1.0 0
+%
+@
+
+<<POSTSCRIPT text functions>>=
+%%BeginProcSet: text_functions 1.0 0
+%
+/sfont { findfont exch scalefont setfont } bdf
+/tshow { S scmyk sfont m rotate show R } bdf
+/ctshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfont stringwidth pop R 2 div htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bdf
+/ltshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfont stringwidth pop R htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bdf
+%
+% X Y angle string valign halign fnt color ttxt
+ % valign : tv (top)  cv (middle) bv (bottom)
+ % halign : lh (left) ch (center) rh (right)
+/chrh { S newpath 0 0 m false charpath flattenpath pathbbox exch pop 3 -1 roll pop R } bdf
+/strh { 2 dict begin /lly 0.0 def /ury 0.0 def { ( ) dup 0 4 -1 roll put chrh dup ury gt { /ury xdf } { pop } ifelse dup lly lt { /lly xdf } { pop } ifelse } forall ury end } bdf
+/ttxt { S scmyk sfont 8 dict begin /h xdf /v xdf /lbl xdf /angle xdf /y xdf /x xdf /hs lbl stringwidth pop neg def /vs lbl strh neg def x y T angle rotate h (rh) eq { hs } { h (ch) eq { hs 2 div } { 0 } ifelse } ifelse v (tv) eq { vs } { v (cv) eq { vs 2 div } { 0 } ifelse } ifelse m lbl show end R } bdf
+%
+/Title { S 0 Xmarg Y TitleFont FGcolor tshow R /Y Y 0.75 cm sub def } bdf 
+/SubTitle { S 0 Xmarg Y SubTtFont FGcolor tshow R /Y Y 2.5 cm sub def } bdf 
+%
+%%EndProcSet:   text_functions 1.0 0
+%
+@
+
+<<POSTSCRIPT aplotdict>>=
+%%BeginProcSet: aplotdict 1.0 0
+%
+/aplot 120 dict def aplot begin
+/min { 2 copy gt { exch } if pop } bdf 
+/max { 2 copy lt { exch } if pop } bdf
+/Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
+/Yscm { Yscale mul } bdf /Yscme { Yscm exch } bdf
+/fmt { Yscme Xscme m } bdf /flt { Yscme Xscme l } bdf
+/line { scmyk slw m l K } bdf
+/uline { scmyk slw m S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rl K R l S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rl K R K } bdf
+/ZoomTicks { /zmdict 3 dict def zmdict begin /r { TxWB BDspl mul Xscm } def /s { TyWB BDspl mul Yscm } def /corner { S 10 -2 roll m 2 { rl S BGcolor scmyk .4 slw K R rl S FGcolor scmyk 2 slw [1 3] 0 setdash K R } repeat R } def 4 copy 3 1 roll exch 0 s 0 s neg r neg 0 r 0 corner 0 s neg 0 s r 0 r neg 0 corner 0 s neg 0 s r neg 0 r 0 corner 0 s 0 s neg r 0 r neg 0 corner end } def
+/Line { S 9 5 roll 2 { Yscm 4 1 roll Xscm 4 1 roll } repeat 9 4 roll line R } bdf
+/Xline { S 3 1 roll Xscme Xscme 3 -1 roll Yscm xwdt sub dup 3 1 roll xwdt 9 -4 roll line R } bdf
+/Bline { S htag 1 eq { Xscme Xscme y0 Yscme y1 Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X1 Xscme bbox } ifelse S scmyk fill R scmyk slw K R } bdf
+/Bsquare { S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox S scmyk fill R scmyk slw K R } bdf
+/Msquare { S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox scmyk slw K R } bdf
+/Mcircle { S Yscme Xscme 3 -1 roll Xscm 0 360 arc closepath scmyk slw K R } bdf
+/Join { S 2 copy 2 copy pop sub 2 div add exch htag 1 eq { y1 TyWB add dup dup TyWB 0.75 mul add 4 1 roll 5 1 roll } { X0 TxWB sub dup dup TxWB 0.75 mul sub 5 1 roll 6 1 roll exch } ifelse 3 { Yscme Xscme 6 2 roll } repeat m l l 0.25 slw scmyk K R } bdf
+/Arrow { /acol [ 9 -4 roll ] def /acolor { acol aload pop } def S 1 eq { exch /sn { 1 mul } def } { /sn { 1 neg mul } def } ifelse htag 1 eq { Xscm dup y1 Yscm HWBox add m HWarw sn HWarw rl 0 Warw neg rl HWarw neg sn HWarw rl closepath S acolor scmyk fill R y1 Yscm HWBox add m Xscm y1 Yscm HWBox add l acolor scmyk 1 slw K } { Yscm dup X0 Xscm HWBox sub exch m HWarw neg HWarw sn rl Warw 0 rl HWarw neg HWarw neg sn rl closepath S acolor scmyk fill R X0 Xscm HWBox sub exch m Yscm X0 Xscm HWBox sub exch l acolor scmyk 1 slw K } ifelse R } bdf
+/FBox { htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB FBDspl mul add Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X0 TxWB FBDspl mul sub Xscme bbox } ifelse S scmyk fill R FGcolor scmyk 1 slw K } bdf
+/FTalgn { htag 1 eq { FTXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse } { FTYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse } ifelse } bdf
+/GPalgn { htag 1 eq { GPXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse } { GPYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse } ifelse } bdf
+/Box { 2 copy 2 copy pop sub 2 div add 7 1 roll S htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB add Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X0 TxWB sub Xscme bbox } ifelse S scmyk fill R FGcolor scmyk 1 slw K htag 1 eq { Xscm y1 TyWB 1.75 mul add Yscm FTXangle } { Yscm X0 TxWB 1.75 mul sub Xscme FTYangle } ifelse 6 -1 roll FTalgn 8 -2 roll FGcolor ttxt R } bdf
+%
+/GDmore { MxFtLBL S ElmFont sfont (M) stringwidth pop R mul htag 1 eq { FTXangle sin } { FTYangle cos } ifelse abs mul ivcm add } bdf
+/BDmore { MxGpLBL S TagFont sfont (M) stringwidth pop R mul htag 1 eq { GPXangle sin } { GPYangle cos } ifelse abs mul ivcm add } bdf
+%
+/GnBanner{ S 1 eq { 2 copy htag 1 eq { Xscme Xscme y1 TyWB GDspl mul add dup Yscme Yscm 3 1 roll } { Yscme Yscme X0 TxWB GDspl mul sub dup Xscme Xscme 4 1 roll exch } ifelse 0.5 FGcolor uline } if 2 copy pop sub 2 div add htag 1 eq { Xscm y1 TyWB GLDspl mul add Yscm GPXangle } { Yscm X0 TxWB GLDspl mul sub Xscme GPYangle } ifelse 6 -1 roll GPalgn 8 -2 roll FGcolor ttxt R } bdf
+/SbBanner { S htag 1 eq { 0 X0 X1 X0 sub 2 div add Xscm y1 TyWB GDspl mul add Yscm } { 90 X0 TxWB GDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm } ifelse 5 -2 roll FGcolor ctshow R } bdf
+/Banner { S htag 1 eq { 0 X0 X1 X0 sub 2 div add Xscm y1 TyWB BDspl mul add Yscm } { 90 X0 TxWB BDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm } ifelse 5 -2 roll FGcolor ctshow R } bdf
+%
+% mxt mnt xp yp ori end htick
+/tckdict 15 dict def tckdict begin /mkmxt { dup 0 lt { neg } if dup 10 lt { 10 mul log round 10 exch exp cvi } { log round 10 exch exp cvi } ifelse } def /nwmod { dup 1 le { 100 mul cvi exch 100 mul cvi exch mod 100 div } { exch dup 1 le { 100 mul cvi exch 100 mul cvi mod 100 div } { cvi exch cvi mod } ifelse } ifelse } def /isltone { dup 1 lt { 100 mul cvi 100 div } if } def end
+/htick { S tckdict begin horizontal /yp exch Yscm def /xp exch Xscm def /xend xdf /xori xdf /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp T lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Xscm 0 m dup dup Xscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse neg l 1 slw FGcolor scmyk K GridON 1 eq { S 0 y0 Yscm neg T dup Xscm dup y0 Yscm m y1 Yscm l 0.1 slw verylightgrey scmyk K R } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 3 -1 roll Xscm -18 TickFont FGcolor ctshow } if } { pop } ifelse } if } for xori Xscm dup 0 m 7.5 neg l 2 slw FGcolor scmyk K xori 10 string cvs 0 xori Xscm ZoomON 1 eq { 4 sub } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { ltshow } ifelse xend Xscm dup 0 m 7.5 neg l 2 slw FGcolor scmyk K xend 10 string cvs 0 xend Xscm ZoomON 1 eq { 4 add } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { tshow } ifelse end R } def
+/vtick { S tckdict begin vertical /yp exch Yscm def /xp exch Xscm def /xend xdf /xori xdf /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp T lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Yscm 0 exch m dup dup Yscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse exch l 1 slw FGcolor scmyk K GridON 1 eq { S X0 Xscm 0 T dup Yscm dup X0 neg Xscme m X1 neg Xscme l 0.1 slw verylightgrey scmyk K R } if dup 0 eq { S dup dup X0 Xscme Yscm m X1 neg Xscme Yscm l 0.1 slw FGcolor scmyk K R } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 10 4 -1 roll Yscm 2.5 sub TickFont FGcolor tshow } if } { pop } ifelse } if } for 7.5 xori Yscm dup 0 exch m l 2 slw FGcolor scmyk K xori 10 string cvs 0 10 xori Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow 7.5 xend Yscm dup 0 exch m l 2 slw FGcolor scmyk K xend 10 string cvs 0 10 xend Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow end R } def
+/nucltick { tickmn tickmx maxtck mintck X0 X1 0 y0 htick } def
+/pctmarks { S y0 10 y1 { Yscm dup X0 Xscm X1 Xscm 3 1 roll 4 1 roll 0.5 FGcolor line } for R } bdf
+%
+/beginfunct { R S 3 dict begin /maxx exch ceiling def /minx exch floor def /Yscale XBoxY maxx minx sub div def minx 0 lt { 0 minx neg Yscm T } if S XBYtickflg 1 eq { -1 -1 xtrmxt xtrmnt minx maxx X1 0 vtick S X0 Xscm 0 m X1 Xscm 0 l dotted FGcolor scmyk K R } if R } def /endfunct { end R } def
+end % aplot dict
+%
+%%EndProcSet:   aplotdict 1.0 0
+%
+@
+
+<<POSTSCRIPT main function calls>>=
+%%BeginProcSet: main_function_calls 1.0 0
+%
+/s_credits { S 1 dict begin /fs_cd FSF def pagedict begin pga4 pop end 1 cm sub DnM T 0 0 0 (This plot has been obtained using GFF2APLOT. The most recent version of GFF2APLOT is freely available at \042http:\/\/www1.imim.es/software/gfftools/APLOT.html\042. Copyright      1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) (cv) (rh) fs_cd /Times-Roman FGcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol FGcolor ttxt end R } bdf
+%
+/estlbl { S 3 dict begin /lbl xdf /ypos xdf /xpos xdf horizontal 0 Xlwdt 4 div neg T lbl 0 xpos Xscm ypos Yscm 5 /Helvetica black ctshow vertical end R } bdf
+%
+/GsclonX { /Y exch Y Spacer sub exch sub def Xmarg Y T axesp 0 eq { /Xscale { BBoxX X1 X0 sub Y1 Y0 sub max div } def } { /Xscale { BBoxX X1 X0 sub div } def } ifelse } bdf
+%
+% DOTPLOT BOX
+/begindata { aplot begin S /y1 Y1 def /y0 Y0 def BBoxY GsclonX axesp 0 eq { /Yscale Xscale def } { /Yscale { BBoxY y1 y0 sub div } def } ifelse /TxWB { WBox Xscale div } def /TyWB { WBox Yscale div } def /GDspl { xGDspl GDmore } def /GLDspl { xGLDspl GDmore } def /BDspl { xBDspl GDmore BDmore } def X0 Xscm neg y0 Yscm neg T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox BBoxcol scmyk fill R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm ZoomON 1 eq { 4 copy ZoomTicks } if bbox 2 slw FGcolor scmyk K R S BBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse BBYtickflg 1 eq { tickmn tickmx maxtck mintck y0 y1 X1 0 vtick } if R newpath } def /enddata { R /GDspl xGDspl def /GLDspl xGLDspl def /BDspl xBDspl def end } def
+%
+% PERCENT BOX
+/beginmatches { aplot begin /ZoomON 0 def S /y1 xdf /y0 xdf SBoxY GsclonX /Yscale SBoxY y1 y0 sub div def X0 Xscm neg y0 Yscm neg T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox S S SBoxcol scmyk fill R S SBoxLab TagLabelFont Banner SBoxSLab TagFont SbBanner SBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse R S SBYtickflg 1 eq { -1 -1 pctmxt pctmnt y0 y1 X1 0 vtick } if R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R R clip newpath } def /endmatches { R R end } def
+%
+% EXTRA BOX
+/beginextra { aplot begin S /nlines xdf /y0 0 def XBoxY GsclonX /Yscale XBoxY nlines 1 add div def /Xlwdt Yscale 0.75 mul def /xwdt Yscale 2 div def /y1 XBoxY Yscale div def X0 Xscm neg 0 T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox S XBoxcol scmyk fill R S XBoxLab TagLabelFont Banner XBoxSLab TagFont SbBanner XBXtickflg 1 eq { nucltick } if R newpath } def /endextra { /Yscale XBoxY nlines 1 add div def X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R  R end } def
+%
+%%EndProcSet:   main_function_calls 1.0 0
+%
+@
+
+\sctn{Reporting Program Execution} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsctn{Signal trapping}
+
+In this version of {\prog} we are trapping signals, to exit from this program but reporting that was a user action, not a program error. We will close '[[LOGFILE]]' if opened. 
+
+<<Trapping signals>>=
+$SIG{HUP}  = \&trap_signals_prog;
+$SIG{ABRT} = \&trap_signals;
+$SIG{INT}  = \&trap_signals;
+$SIG{QUIT} = \&trap_signals;
+$SIG{TERM} = \&trap_signals;
+$SIG{KILL} = \&trap_signals;
+$SIG{CHLD} = 'IGNORE';
+@ 
+
+<<Common Routines>>=
+sub trap_signals() {
+    &prt_to_logfile($ErrorList{'USER_HALT'});
+    &close_logfile();
+    die($ErrorList{'USER_HALT'});
+}
+@ 
+
+<<Common Routines>>=
+sub trap_signals_prog() {
+    &prt_to_logfile($ErrorList{'PROCESS_HALT'});
+    &close_logfile();
+    die($ErrorList{'PROCESS_HALT'});
+}
+@
+
+<<warnings - input/output>>=
+USER_HALT =>
+  $spl.$Warn."$PROGRAM has been stopped by user !!!\n".
+  $spl.$Warn."---------- Exiting NOW !!! ----------\n".$spl,
+PROCESS_HALT =>
+  $spl.$Warn."------- $PROGRAM is down !!! -------\n".
+  $spl.$Warn."---------- Exiting NOW !!! ----------\n".$spl,
+@
+
+\subsctn{Dumping complex data structures}
+
+With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them. We include also a command-line switch to enable this feature, but it requires a log file definition with '[[-V]]' option.
+
+<<Use Modules>>=
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+@ 
+
+<<perl requires help>>=
+"Data::Dumper" - pretty printing data structures for debugging (*).
+@
+
+<<command-line options>>=
+"debug"  => \$Debug, # Dumps Vars -> LogFile
+@ 
+<<command-line help>>=
+-debug    Reporting variable contents when testing the program.
+@
+
+\subsctn{Reporting errors and warnings}
+
+<<Global Constants>>=
+my $Error = "\<\<\<  ERROR  \>\>\> ";
+my $Warn  = "\<\<\< WARNING \>\>\> ";
+my $spl   = "\<\<\<\-\-\-\-\-\-\-\-\-\>\>\>\n";
+my $spw   = "\<\<\<         \>\>\> ";
+@ 
+
+<<Global Vars>>=
+#
+# Error/Warning Message List
+my %ErrorList = (
+                 <<warnings - input/output>>
+                 <<warnings - parsing command-line options>>
+                 <<warnings - parsing GFF files>>
+                 );
+@
+
+<<Common Routines>>=
+sub warn() {
+    my $type = shift @_;
+    my $screen_flg = shift @_;
+    my $comment = sprintf($ErrorList{$type}, @_);
+    # ALWAYS to STDERR if $screen_flg==$T unless $Quiet==$T
+    $screen_flg && ($Quiet || print STDERR $comment); 
+    &prt_to_logfile($comment);
+} # warn
+@
+
+<<Common Routines>>=
+sub prt_to_logfile() { $LogFile && (print LOGFILE $_[0]) }
+sub prt_to_stderr()  { $Verbose && ($Quiet || print STDERR $_[0]) }
+@ 
+
+\subsctn{Reporting messages}
+
+<<Global Constants>>=
+my $line = ("#" x 80)."\n";
+my $sp = "###\n";
+@ 
+<<Global Vars>>=
+#
+# Verbose Message List
+my %MessageList = (
+                   <<messages - input/output>>
+                   <<messages - parsing command-line options>>
+                   <<messages - parsing GFF files>>
+                   );
+@
+
+<<Common Routines>>=
+sub report() {
+    my $type = shift @_;
+    my $comment = sprintf($MessageList{$type},@_);
+    &prt_to_stderr($comment);
+    &prt_to_logfile($comment);
+} # report
+@
+
+<<Common Routines>>=
+sub header() {
+    my $comment = $line;
+    foreach my $ln (@_) { 
+        $comment .= "### ".&fill_mid("$ln",72," ")." ###\n";
+        };
+    $comment .= $line;
+    &prt_to_stderr($comment);
+    &prt_to_logfile($comment);
+} # header
+sub footer() {
+    $total_time = &timing($F);
+    &header(@_,$total_time);
+    &prt_to_stderr("###\n");
+    &prt_to_logfile("###\n");
+}
+@
+
+\subsctn{Timing procedures}
+
+The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+<<Use Modules>>=
+use Benchmark;
+  <<Timer ON>>
+@ 
+
+<<perl requires help>>=
+"Benchmark" - checking and comparing running times of code.
+@
+
+See '[[man Benchmark]]' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+<<Timer ON>>=
+my @Timer = (new Benchmark);
+@ 
+
+<<Common Routines>>=
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+}
+@ 
+
+We also set here the date when the script is running and who is the user running it.
+
+<<Global Vars>>=
+my $total_time = 0;
+my $DATE = localtime;
+my $USER = $ENV{USER};
+@ 
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\appendix
+
+\newcommand{\op}[1]{{\bfseries\sffamily #1}}
+\newcommand{\tp}[1]{{'{\bfseries\sffamily #1}'}}
+\newcommand{\pr}[1]{{\mdseries\sffamily\slshape $<$#1$>$}}
+\newcommand{\x}{\textmd{\,,\,}}
+
+\newpage
+
+\sctn{\LaTeX{} wrappers} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsctn{Customization parameters}
+
+Summarizing command-line options for their description in the {\prog} manual:
+
+<<LATEX command-line>>=
+%
+% AplotCLoptions.tex
+%
+% Command-Line Options for "gff2aplot".
+%
+% <<Version Control Id Tag>>
+%
+<<latex wrappers code>>
+%
+\newcommand{\cltitem}[4]{
+  \item[\op{#1 \pr{#2}}]\hfill\op{#3}=\op{#4}\\[1ex]
+  }
+\newcommand{\clpitem}[3]{
+  \item[\op{#1 \pr{#3}}]\hfill\op{#2}=\pr{#3}\\[1ex]
+  }
+\newcommand{\clsitem}[3]{
+  \item[\op{#1}]\hfill\op{#2}=\op{#3}\\[1ex]
+  }
+\newcommand{\clritem}[1]{
+  \item[\op{#1}]\ \\[1ex]
+  }
+\newcommand{\clmitem}[1]{
+  \item[\op{\shortstack[l]{\ #1}}]\ \\[1ex]
+  }
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{description}
+<<command-line latex>>
+\end{description}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@ 
+
+We build the command-line table:
+
+<<LATEX command-line table>>=
+%
+% AplotCLoptionsTbl.tex
+%
+% Command-Line Options for "gff2aplot".
+%
+% <<Version Control Id Tag>>
+%
+<<latex wrappers code>>
+%
+\label{sec:CLoptions}
+\newcommand{\rw}[2]{ \op{ #1 } & #2 \\}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vfill 
+%\setlength{\intextsep}{0ex}
+%\setlength{\textfloatsep}{0ex}
+%\setlength{\floatsep}{0ex}
+\begin{table}[!ht]
+\begin{center}
+\label{tbl:CLopt}
+% \refstepcounter{section}\refstepcounter{table}
+% \addcontentsline{lot}{section}{
+%   \thesection\hspace{1em}Shell command-line options for \prog.}
+% \addcontentsline{toc}{section}{
+%   \thesection\hspace{1em}Shell command-line options for \prog.}
+\setlength{\fboxsep}{10pt}
+\footnotesize
+\fbox{
+  \begin{tabular}{rl}
+<<command-line latex short>>
+  \end{tabular}
+} % fbox
+\vspace{0.5cm}
+
+%\vfill
+\fbox{
+\begin{tabular}{rl}
+\pa{int}       &
+  An integer value. \\
+\pa{float}     &
+  A float value. \\
+\pa{string}    &
+  A free text string, single or double-quoted \\[-0.5ex]
+ &  if special chars or white-spaces/tabs are present respectively. \\
+\pa{format}    &
+  Page format, see available values on Appendix~\ref{tbl:PageSztbl} table. \\
+\pa{color}     &
+  A color name chosen from table on Appendix~\ref{tbl:CMYKcolortbl}. \\
+\pa{file}      &
+  A valid file name (including path if necessary). \\
+NOTE:          &
+  When a parameter is required, it applies for both short and long options. \\
+\end{tabular}
+} % fbox
+%
+\end{center}
+\end{table}
+\vfill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+We collect all customization variables for the manual too:
+
+<<LATEX custom-vars>>=
+%
+% AplotCustomVars.tex
+%
+% Customization Variables for "gff2aplot".
+%
+% <<Version Control Id Tag>>
+%
+<<latex wrappers code>>
+%
+\newcommand{\vnlitem}[3]{
+  \item[\op{#1=\pr{#2}}]\hfill\textbf{Default\quad=\quad}\op{#3}\ \\[1ex]
+  }
+\newcommand{\vnfitem}[4]{
+  \item[\pa{#1}\op{::#2=\pr{#3}}]\hfill\textbf{Default\quad=\quad}\op{#4}\ \\[1ex]
+  }
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{description}
+<<custom-vars latex>>
+\end{description}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@ 
+
+Generating the custom variables table:
+
+<<LATEX custom-vars table>>=
+%
+% AplotCustomVarsTbl.tex
+%
+% Customization Variables for "gff2aplot".
+%
+% <<Version Control Id Tag>>
+%
+<<latex wrappers code>>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<custom-vars latex short>>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@ 
+
+And here the common code for those files:
+
+<<latex wrappers code>>=
+% \newcommand{\op}[1]{\bfseries\sffamily #1}
+% \newcommand{\tp}[1]{'{\bfseries\sffamily #1}'}
+% \newcommand{\pr}[1]{\mdseries\sffamily\slshape $<$#1$>$}
+% \newcommand{\x}{\textmd{\,,\,}}
+@
+
+\subsctn{CMYK color palette}
+
+Building the color definition file used by this file to produce the CMYK color definitions used in this document and the ``{\prog} User's Manual''.
+% Table~\ref{tbl:CMYKcolortbl}.
+\label{sec:cmykfiles}
+
+<<LATEX cmyk colors>>=
+%
+% AplotColorDefs.tex
+%
+% Color CMYK definition used in "gff2aplot".
+%
+% <<Version Control Id Tag>>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<cmyk colors latex definition>>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+Building the CMYK color table for the ``{\prog} User's Manual''.
+% Table~\ref{tbl:CMYKcolortbl} \LaTeX{} file.
+
+<<LATEX colors table>>=
+%
+% AplotColorTbl.tex
+%
+% Colors used in "gff2aplot": CMYK values table.
+%
+\label{sec:colortable}
+\newcommand{\clrow}[1]{
+  \fcolorbox{black}{#1}{
+    \textcolor{#1}{\rule[-.3ex]{1cm}{1.8ex}}
+    } % fcolorbox
+  & #1
+  } % newcommand
+\newcommand{\clspc}{&&&&&\\}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vfill
+\begin{table}[!ht]
+%\setlength{\parindent}{-0.5cm}
+\begin{center}
+\begin{scriptsize}
+  \begin{tabular}{c@{\quad}c}
+    \begin{tabular}{|c|c|cccc|} \hline
+      <<cmyk color table - left>>
+      \clspc
+      \hline
+    \end{tabular} 
+   &
+    \begin{tabular}{|c|c|cccc|} \hline
+      <<cmyk color table - right>>
+      \clspc
+      \hline
+    \end{tabular}
+   \\
+  \end{tabular}
+\end{scriptsize}
+%\begin{center}
+  \caption{\label{tbl:CMYKcolortbl}
+    {\prog} CMYK color definition table and Color Names.
+    } % caption
+  %\refstepcounter{table}
+  %\addcontentsline{lot}{section}{
+  %   \thetable\hspace{1em}{\prog}\ CMYK color definition table.
+  %   }
+\end{center}
+\end{table}
+\vfill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+\subsctn{Available page sizes}
+
+<<LATEX page format table>>=
+%
+% AplotPageSizeTbl.tex
+%
+% Page Sizes used in "gff2aplot".
+%
+% <<Version Control Id Tag>>
+%
+\label{sec:pagesizes}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vfill
+\begin{table}[!ht]
+\begin{center}
+\setlength{\fboxsep}{2pt}
+%\setlength{\arrayrulewidth}{1pt}
+\fbox{
+ \begin{tabular}{|c||r|r||r|r||r|r|} \hline
+  \raisebox{-0.5ex}[0pt]{PAGE} &
+  \multicolumn{6}{c|}{PAGE SIZE}\\ \cline{2-7} \raisebox{0.25ex}[0pt]{FORMAT} &
+  \multicolumn{2}{c||}{(in points)} &
+  \multicolumn{2}{c||}{(in cms)} &
+  \multicolumn{2}{c|}{(in inches)}\\ \hline\hline
+  <<page sizes latex definition>>
+ \end{tabular}
+} % fbox
+\caption{\label{tbl:PageSztbl}Page Sizes defined in {\prog}.}\hspace{1cm}
+  %\refstepcounter{table}
+  %\addcontentsline{lot}{section}{
+  %   \thetable\hspace{1em}Page Sizes available at {\prog}.}
+\end{center}
+\end{table}
+\vfill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+\newpage
+
+\sctn{Common code blocks} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsctn{PERL scripts}
+
+<<PERL shebang>>=
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+@ 
+
+The 'shebang' line can be emulated in several ways. Those systems that do not support '[[#!]]' will emulate it with:
+
+<<PERL shebang emulation>>=
+#!/usr/bin/perl -w
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' if $running_under_some_shell;
+@ 
+
+Another way to emulate the 'shebang' line is the following devious construct that will work under any of csh, sh, or perl system.
+
+<<PERL shebang general emulation>>=
+eval '{exit $?0}' && 
+  eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' &&
+    eval 'exec /usr/bin/perl -w -S $0 $argv:q' 
+      if 0;
+@
+
+We also include a copy of the GNU-GPL as a comment at first lines on the program, and the version control tag.
+
+<<Program Info>>=
+#
+<<GNU License PERL>>
+#
+<<Version Control Id Tag>>
+#
+@
+
+We are using here [[perl -w]] to show all warnings when running the script. We also [[use strict]] to force all variable names to be declared.
+
+<<Skip comments and empty records>>=
+next if /^\#/o;
+next if /^\s*$/o;
+chomp;
+@
+
+<<Common Routines>>=
+#
+sub max() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min
+#
+sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+} # fill_mid
+#
+sub counter { # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter
+#
+sub counter_end { # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter_end
+@
+
+\subsctn{BASH scripts}
+
+<<BASH shebang>>=
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+<<Version Control Id Tag>>
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+@
+
+<<BASH script closure>>=
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
+@
+
+\subsctn{AWK scripts}
+
+<<GAWK shebang>>=
+#!/usr/bin/gawk -f
+# GNU Awk 3.0.4
+<<Version Control Id Tag>>
+@
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $
+@ 
+
+\subsctn{GNU General Public License}
+
+<<GNU License PERL>>=
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %                          GFF2APLOT                               %
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 
+#    Converting alignments in GFF format to PostScript dotplots.
+# 
+#     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+#                                  Thomas WIEHE                   
+#                                 Roderic GUIGO SERRA       
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@ 
+
+<<GNU License PostScript>>=
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                          GFF2APLOT                               %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%    Converting alignments in GFF format to PostScript dotplots.
+% 
+%     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+%                                  Thomas WIEHE                   
+%                                 Roderic GUIGO SERRA       
+%
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@ 
+
+\newpage
+
+\sctn{Extracting code blocks from this document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracting Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+
+<<tangling>>=
+notangle -L -R"APLOT" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' - > $BIN/gff2aplot ;
+notangle -R"shebang swapper" $WORK/$nwfile.nw > $BIN/swapper.pl ;
+@ 
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+<<tangling>>=
+@
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+<<tangling>>=
+notangle -R"weaving"    $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -R"LaTeXing"   $WORK/$nwfile.nw > $WORK/ltx ;
+notangle -R"The Manual" $WORK/$nwfile.nw > $WORK/mkdoc ;
+@ 
+
+<<weaving>>=
+<<BASH shebang>>
+# weaving and LaTeXing
+<<BASH Environment Variables>>
+# extracting complementary material 
+echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." ;
+notangle -R"LATEX command-line" $WORK/$nwfile.nw \
+         > $DOCS/tables/AplotCLoptions.tex ;
+echo "Extracting \"$DOCS/AplotCLoptionsTbl.tex\"..." ;
+notangle -R"LATEX command-line table" $WORK/$nwfile.nw \
+         > $DOCS/tables/AplotCLoptionsTbl.tex ;
+echo "Extracting \"$DOCS/AplotCustomVars.tex\"..." ;
+notangle -R"LATEX custom-vars" $WORK/$nwfile.nw  \
+         > $DOCS/tables/AplotCustomVars.tex ;
+echo "Extracting \"$DOCS/AplotCustomVarsTbl.tex\"..." ;
+notangle -R"LATEX custom-vars table" $WORK/$nwfile.nw  \
+         > $DOCS/tables/AplotCustomVarsTbl.tex ;
+echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." ;
+notangle -R"LATEX cmyk colors" $WORK/$nwfile.nw  \
+         > $DOCS/tables/AplotColorDefs.tex ;
+echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." ;
+notangle -R"LATEX colors table" $WORK/$nwfile.nw  \
+         > $DOCS/tables/AplotColorTbl.tex ;
+echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." ;
+notangle -R"LATEX page format table" $WORK/$nwfile.nw \
+         > $DOCS/tables/AplotPageSizeTbl.tex ;
+echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." ;
+notangle -R"GFF DATA STRUCTURE" $WORK/$nwfile.nw \
+         > $DOCS/tables/DataStructure_GFF.tex ;
+# extracting main documentation
+echo "Weaving \"$DOCS/$nwfile.tex\"..." ;
+noweave -t4 -delay -x $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+# LaTeXing 
+echo "LaTeXing \"$DOCS/$nwfile.tex\"..." ;
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+<<BASH script closure>>
+@ 
+
+<<LaTeXing>>=
+<<BASH shebang>>
+# only LaTeXing
+<<BASH Environment Variables>>
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+<<BASH script closure>>
+@ %$
+
+<<The Manual>>=
+<<BASH shebang>>
+# only LaTeXing
+<<BASH Environment Variables>>
+MANUAL="GFF2APLOT_MANUAL";
+pushd $DOCS/ ;
+latex $MANUAL.tex ; 
+latex $MANUAL.tex ; 
+latex $MANUAL.tex ;
+dvips $MANUAL.dvi -o $MANUAL.ps -t a4 ;
+popd ;
+<<BASH script closure>>
+@ %$
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be swapped with the second line to make them runnable. So that you can use this script:
+
+<<shebang swapper>>=
+<<PERL shebang>>
+# USAGE: swapper script > new_script
+while (<>) {
+  $.  > 2 && do { 
+    print;
+    next;
+  };
+  $. == 1 && do { 
+#    split / /, $_, 3; 
+#    $n = "$_[0] ".(++$_[1])." $_[2]";
+      $n = $_;
+  }; 
+  $. == 2 && ( print "$_$n" );
+};
+@
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH Environment Variables>>=
+# Global Variables
+export WORK="$HOME/development/gfftools/Devel/aplot" ;
+export DOCS="$WORK/docs" ;
+export BIN="$WORK/bin" ;
+export TEST="$WORK/tests" ;
+export nwfile="GFF2APLOT" ;
+@ 
+
+<<CSH Environment Variables>>=
+# Global Variables
+setenv WORK "$HOME/development/gfftools/Devel/aplot" ;
+setenv DOCS "$WORK/docs" ;
+setenv BIN  "$WORK/bin" ;
+setenv TEST "$WORK/tests" ;
+setenv nwfile "GFF2APLOT" ;
+@ 
+
+<<tangling>>=
+# TO DO: add a test to check which shell is running
+# BASH shell
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
+         > $WORK/.bash_VARS ; 
+source $WORK/.bash_VARS ;
+# CSH shell
+notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
+         > $WORK/.csh_VARS ; 
+source $WORK/.csh_VARS ;
+@
+
+\end{document}
