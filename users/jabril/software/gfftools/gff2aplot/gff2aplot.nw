@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.29 2001-12-19 09:38:26 jabril Exp $
+% $Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.29 2001-12-19 09:38:26 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -430,7 +430,8 @@ This is the main loop for the {\prog} ``Filter'' mode:
 {\gft}, say here {\prog} and {\gps}, share many of the basic procedures, both must parse same format input files, must map the read fields to the customization variables and sort groups and their elements by acceptor site coord. That is the main reason for developing a module containing the definitions of such common functions.
 
 <<Basic common block for gfftools>>=
-%CustomVars = ();             # Reseting Customization OPTIONS
+@SpecialCache = ();         # Reseting Special features cache
+%CustomVars = ();           # Reseting Customization OPTIONS
 &parse_custom_files;
 
 %Vars = ();
@@ -447,6 +448,7 @@ This is the main loop for the {\prog} ``Filter'' mode:
 
 @
 
+[[@SpecialCache]] array is initialized here, it is used to save temporary data for the special features passed by custom files that are defined in section~\ref{sec:specfeatvarscfile}, page~\pageref{sec:specfeatvarscfile}.
 We force that all the variables must be declared before using them and restrict unsafe constructs with'[[use strict]]'. After that we switch on signal trapping.
  
 <<Use Modules>>=
@@ -490,9 +492,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.29 $', #'
-     '$Date: 2001-12-19 09:38:26 $', #'
-     '$Id: gff2aplot.nw,v 1.29 2001-12-19 09:38:26 jabril Exp $', #'
+     '$Revision: 1.30 $', #'
+     '$Date: 2001-12-22 02:29:49 $', #'
+     '$Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -839,13 +841,13 @@ The first command-line checking looks for those options exiting the program: '[[
 ORD: 1
 OPT: h
 LNG: help
-SDE: Shows this help.
+SDE: Showing the command-line help (and exit).
 LDE:
 Shows command-line help.
 ###EOR###
 ORD: 2
 LNG: version
-SDE: Shows current version and exits.
+SDE: Shows current version and exits from program.
 LDE:
 Shows current program version and exits.
 ###EOR###
@@ -1029,37 +1031,80 @@ sub command_line_for_vars() {
          customization variable from command-line. You can set
          several variables by repeating any of these options, 
          i.e.:
-               ... --feature-var cds::shape=box \
-                   --feature-var cds::feature_color=blue ... 
+           ... --feature-var 'cds::feature_shape=box' \
+               --feature-var 'cds::feature_color=blue' ... 
 @
-<<HIDE: command-line latex short custom>>=
-\rw{-\/-feature-var '\pr{feature::variable=value}'}
-  {Set a feature customization variable from command-line.}
-\rw{-\/-group-var '\pr{group::variable=value}'}
-  {Set a group customization variable from command-line.}
-\rw{-\/-strand-var '\pr{strand::variable=value}'}
-  {Set a strand customization variable from command-line.}
-\rw{-\/-source-var '\pr{source::variable=value}'}
-  {Set a source customization variable from command-line.}
-\rw{-\/-sequence-var '\pr{sequence::variable=value}'}
-  {Set a sequence customization variable from command-line.}
-\rw{-\/-layout-var '\pr{variable=value}'}
-  {Set a layout customization variable from command-line.}
-@ 
-<<HIDE: command-line latex custom>>=
-\clmitem{-\/-feature-var '\pr{feature::variable=value}'}
-Loading a customization variable for a GFF feature element from command-line. % '\pr{custom\_file}'. 
-\clmitem{-\/-group-var '\pr{group::variable=value}'}
-Loading a customization variable for a GFF group element from command-line. % '\pr{custom\_file}'. 
-\clmitem{-\/-strand-var '\pr{strand::variable=value}'}
-Loading a customization variable for a GFF strand element from command-line. % '\pr{custom\_file}'. 
-\clmitem{-\/-source-var '\pr{source::variable=value}'}
-Loading a customization variable for a GFF source element from command-line. % '\pr{custom\_file}'. 
-\clmitem{-\/-sequence-var '\pr{sequence::variable=value}'}
-Loading a customization variable for a GFF sequence element from command-line. % '\pr{custom\_file}'. 
-\clmitem{-\/-layout-var '\pr{variable=value}'}
-Loading a customization variable for page layout from command-line. % '\pr{custom\_file}'. 
+<<DESC command-line options>>=
+ORD: 500
+LNG: layout-var
+PAR: '<variable=value>'
+EQV: [variable]=|value|
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+ORD: 501
+LNG: sequence-var
+PAR: '<sequence::variable=value>'
+EQV: [sequence::variable]=|value|
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+ORD: 502
+LNG: source-var
+PAR: '<source::variable=value>'
+EQV: [source::variable]=|value|
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+ORD: 503
+LNG: strand-var
+PAR: '<strand::variable=value>'
+EQV: [strand::variable]=|value|
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+ORD: 504
+LNG: group-var
+PAR: '<group::variable=value>'
+EQV: [group::variable]=|value|
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+ORD: 505
+LNG: feature-var
+PAR: '<feature::variable=value>'
+EQV: [feature::variable]=|value|
+SDE: Set a GFF-element customization variable from command-line.
+LDE: 
+Loading any of feature/group/strand/source/sequence/layout customization
+variables from command-line. You can set several variables by repeating 
+any of these options, i.e.:\\%{1.5ex%} \n\
+\begin{minipage}{\linewidth}
+\begin{center}
+\sffamily\small
+  \ldots -\/-feature-var '/\^{ }cds.*/::feature_shape=box'
+         -\/-feature-var 'exon::feature_color=blue' \ldots 
+\end{center}
+\end{minipage}\\%{1.5ex%} \n\
+In the previous example, '\textbf{\textsf{/\^{ }cds.*/}}' is a regular 
+expression matching any GFF-feature which name starts with 
+'\textbf{\textsf{cds}}', setting their shape to |box|. The second line sets 
+GFF-feature color (filling the feature shape) only for those GFF-features that
+match exactly with '\textbf{\textsf{exon}}' (as if we passed the feature name 
+as a regular expression, in this case as '\textbf{\textsf{/\^{ }exon\$/}}').
+ \n\ \n\
+These command-line options allow users to change on the fly any variable for 
+the current {\prog} execution. It is very useful for testing dinamically 
+customizations before including them in the custom files. But it also lets 
+users to keep a fixed customization file shared among several runs, while 
+making small changes among them. Take care of protecting the parameters given
+to those command-line options by single-quoting them, just to avoid any 
+undesirable side effect produced by shell-substitution of wild-chars 
+(especially when passing regular expressions to match several elements to 
+which set the same variable). 
+###EOR###
 @
+
 
 \subsctn{Setting customization parameters from files} 
 
@@ -1161,8 +1206,9 @@ sub parse_custom_files() {
         my (@line,$main,$_c,$_v,$v_flag);
         while (<THIS>) {
 		    /^\#/o && do {
-                /^\# ([LQSTGF]) \#/o && do { 
+                /^\# ([XLQSTGF]) \#/o && do { 
                      $_c = $1; $c = '*';
+                     $_c ne 'X' && ($ExtraCustomFlg = $F);
                      $v_flag = ($_c ne 'L') ? $T : $F;
                      $_v = $VarKeys{$_c};
                      next;
@@ -1172,6 +1218,11 @@ sub parse_custom_files() {
             ($c = '.', next) if /^\s*$/o;
             chomp;
             ($main,undef) = split /\b\s+\#/o;
+            $_c eq 'X' && do {
+                $c = &parse_special_customs($main,$ExtraCustomFlg)
+                     ? $_c : $noCV;
+                next;
+            };
           TWOTHREE: {
               $v_flag && do {
 				  $main =~ /^(.*?):{2}(.*?)={1}(.*?)$/o &&
@@ -1188,8 +1239,8 @@ sub parse_custom_files() {
         close(THIS);
     }; # LOAD
   }; # MAIN
-    print LOGFILE (Data::Dumper->Dump([ \%CustomVars ],
-                                   [ qw( *CustomVars ) ]))
+    print LOGFILE (Data::Dumper->Dump([ \@SpecialCache, \%CustomVars ],
+                                   [ qw( *SpecialCache   *CustomVars ) ]))
         if ($LogFile && $Debug);
     &footer("CUSTOM FILES LOADED");
 } # parse_custom_files
@@ -1211,6 +1262,7 @@ Source Vars             & S \\
 Strand Vars             & T \\
 Group Vars              & G \\
 Feature Vars            & F \\
+Special Features        & X \\
 Unknown                 & ? \\
 \end{tabular}
 } %fbox
@@ -1235,8 +1287,15 @@ $noCV = '?';
     T => 'STRAND',
     G => 'GROUP',
     F => 'FEATURE',
+    X => 'EXTRA',
     );
 @ 
+
+The following variable, [[$ExtraCustomFlg]], must be defined as global because it only can be true at the very beginning of the current program execution, until the first customization variables from files were loaded (to force new fonts and/or colors aliases to be defined at that moment and not later, so users can use them on any customization variable ---see section~\ref{sec:specfeatvarscfile} on page~\pageref{sec:specfeatvarscfile} for further info about special customization features).
+
+<<Global Vars>>=
+my $ExtraCustomFlg = $T;
+@
 
 <<messages - parsing custom files>>=
 READ_CUSTOM_FILE => 
@@ -1317,10 +1376,10 @@ VARTYPE_NOT_DEFINED =>
   $spw."  could not check value for \"\%s\".\n",
 @
 
-There are several global variable names that are defined in different sections of this document. We are declaring here because they are somewhat related, you can find them following these references: [[%Fonts]] is set on section~\ref{sec:FontsHsh} (page~\pageref{sec:FontsHsh}), [[%Ribbons]] is set on section~\ref{sec:RibbonsHsh} (page~\pageref{sec:RibbonsHsh}), [[%Shapes]] is set on section~\ref{sec:ShapesHsh} (page~\pageref{sec:ShapesHsh}), [[%GroupShapes]] is set on section~\ref{sec:GroupShapesHsh} (page~\pageref{sec:GroupShapesHsh}), [[%COLORS]] is set on section~\ref{sec:ColorsHsh} (page~\pageref{sec:ColorsHsh}), [[%FORMATS]] is set on section~\ref{sec:FormatsHsh} (page~\pageref{sec:FormatsHsh}), and [[%UNITS]] is set on section~\ref{sec:UnitsHsh} (page~\pageref{sec:UnitsHsh}).
+There are several global variable names that are defined in different sections of this document. We are declaring here because they are somewhat related, you can find them following these references: [[%Fonts]] is set on section~\ref{sec:FontsHsh} (page~\pageref{sec:FontsHsh}), [[%LineStyles]] and [[%Ribbons]] are set on section~\ref{sec:RibbonsHsh} (page~\pageref{sec:RibbonsHsh}), [[%Shapes]] is set on section~\ref{sec:ShapesHsh} (page~\pageref{sec:ShapesHsh}), [[%GroupShapes]] is set on section~\ref{sec:GroupShapesHsh} (page~\pageref{sec:GroupShapesHsh}), [[%COLORS]] is set on section~\ref{sec:ColorsHsh} (page~\pageref{sec:ColorsHsh}), [[%FORMATS]] is set on section~\ref{sec:FormatsHsh} (page~\pageref{sec:FormatsHsh}), and [[%UNITS]] is set on section~\ref{sec:UnitsHsh} (page~\pageref{sec:UnitsHsh}).
 
 <<Pre-Declared Vars>>=
-%TESTS %Ribbons %Shapes %GroupShapes 
+%TESTS %Ribbons %Shapes %GroupShapes %LineStyles %TextAlign
 %Fonts %FORMATS $formats %COLORS $colors %UNITS
 @ 
 
@@ -1455,6 +1514,7 @@ This section is dedicated to those test we need to ensure that customization var
 [[FLOAT]]    & Numbers with decimal values (subset of reals).\\
 [[REAL]]     & Any real number (including scientific notation).\\
 [[COLOR]]    & Available colors are defined in '[[%COLORS]]' hash.\\
+[[CMYKFLOAT]] & Decimal number between 0 and 1 defining C/M/Y/K color amounts.\\
 [[FONT]]     & A {\ps} font from those defined in '[[%Fonts]]' hash.\\
 [[BBOX]]     & '[[<width>,<height>]]' pair (in [[PS_UNIT]] units).\\
 [[PAGE]]     & Page sizes are set in '[[%FORMATS]]' variable.\\
@@ -1463,6 +1523,12 @@ This section is dedicated to those test we need to ensure that customization var
 [[RANGE]]    & A '[[lower-limit..upper-limit]]' numeric pair.\\
 [[PSRANGE]]  & A '[[lower-limit..upper-limit]]' {\ps} lengths pair.\\
 [[SEQRANGE]] & A '[[lower-limit..upper-limit]]' sequence coords pair.\\
+[[SHAPE]]    & Selecting feature shapes from [[%Shapes]].\\
+[[RIBBON]]   & Feature ribbons on aplot box set on [[%Ribbons]].\\
+[[GPSHAPE]]  & Grouping bracket styles are choosen from [[%GroupShapes]].\\
+[[LINESTY]]  & Line styles for special feats from custom files, see [[%LineStyles]].\\
+[[TXTALIGN]] & Checks vertical and horizontal string alignment relative to\\[-0.25ex] 
+             &  a coords pair (values are set in [[%TextAlign]]).
 \end{tabular}
 } % fbox
 \caption[Customization parameters available formats]{\label{tbl:varformats} Parameter available formats we are going to use for customization variables checking.}
@@ -1695,6 +1761,20 @@ NOT_A_COLOR =>
   $Warn."\"\%s\" color not defined in \"\%s\" variable.\n",
 @
 
+<<variable value checking>>=
+CMYKFLOAT => sub { # Value, varName, Lowercase
+      my ($_v,$_n,undef) = @_;
+      ($$_v =~ /$regexp_float/o && ($$_v >= 0 && $$_v <= 1)) && return $T;
+      &warn('NOTCMYKFLOAT',$F,$_n,$$_v);
+      return $F;
+  },
+@ %def {CMYKFLOAT}
+
+<<warnings - parsing custom files>>=
+NOTCMYKFLOAT =>
+  $Warn."\"\%s\": value must be a float between 0 and 1, \"\%s\" not valid.\n",
+@
+
 
 \subsubsctn{Checking for available fonts and font-sizes}
 
@@ -1721,6 +1801,7 @@ We provide three basic fonts that are standard in most {\ps} devices (a serif, a
 <<Global Vars>>=
 %Fonts = (
     # serif
+    'default'               => '/Times-Roman',
     'times'                 => '/Times-Roman',
     'times-roman'           => '/Times-Roman',
     'times-italic'          => '/Times-Italic',
@@ -1973,6 +2054,37 @@ RANGE_NOTOK =>
 \subsubsctn{Plot features}
 
 <<variable value checking>>=
+LINESTY => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      (defined($$_v) && defined($LineStyles{$_l})) &&
+          ($$_v = $_l, return $T);
+      &warn('LINESTY_NOTOK',$F,$$_v,$_n);      return $F;
+  },
+@ %def {LINESTY}
+
+<<warnings - parsing custom files>>=
+LINESTY_NOTOK =>
+  $Warn."LINE style \"\%s\" is not defined, setting to \"solid\"...\n",
+@
+
+<<Global Vars>>=
+%LineStyles =(
+    's'             => 'solid',
+    'solid'         => 'solid',
+    'd'             => 'dotted',
+    'dotted'        => 'dotted',
+    'ld'            => 'ldotted',
+    'long_dotted'   => 'ldotted',
+    'l'             => 'dashed',
+    'dashed'        => 'dashed',
+    'll'            => 'ldashed',
+    'long_dashed'   => 'ldashed',
+    'dd'            => 'ddashed',
+    'dashed_dotted' => 'ddashed',
+    ); # %LineStyles
+@
+
+<<variable value checking>>=
 RIBBON => sub { # Value, varName, Lowercase
       my ($_v,$_n,$_l) = @_;
       (defined($$_v) && defined($Ribbons{$_l})) &&
@@ -1984,7 +2096,7 @@ RIBBON => sub { # Value, varName, Lowercase
 
 <<warnings - parsing custom files>>=
 RIBBON_NOTOK =>
-  $Warn."RIBBON style \"\%s\" is not defined, using \"\%s=none\"...\n",
+  $Warn."RIBBON style \"\%s\" is not defined, using \"\%s=none\" instead...\n",
 @
 
 The following hash definition sets the available ribbon styles:
@@ -2000,7 +2112,7 @@ The following hash definition sets the available ribbon styles:
     'ribbon' => [ $T, $F ],
     'b'      => [ $T, $T ],
     'both'   => [ $T, $T ],
-    );
+    ); # %Ribbons
 @
 
 <<variable value checking>>=
@@ -2023,7 +2135,7 @@ SHAPE_NOTOK =>
 <<Global Vars>>=
 %Shapes = (
     <<Shapes hash definitions>>
-    );
+    ); # %Shapes
 @
 
 <<variable value checking>>=
@@ -2046,7 +2158,470 @@ GRP_SHAPE_NOTOK =>
 <<Global Vars>>=
 %GroupShapes = (
     <<Group-shapes hash definitions>>
+    ); # %GroupShapes
+@
+
+The following test will check which horizontal and vertical alignments are asked for the placement of text strings.
+
+<<variable value checking>>=
+TXTALIGN => sub { # Value, varName, Lowercase, flag
+      my ($_v,$_n,$_l,$a_flg) = @_;
+      (defined($$_v) && defined($TextAlign{($a_flg ? 'H' : 'V')}{$_l})) && 
+          ($$_v = $_l, return $T);
+      &warn('ALIGN_NOTOK',$F,$_n,$$_v);
+      return $F;
+  },
+@ %def {TXTALIGN}
+
+<<Global Vars>>=
+%TextAlign = (
+    H => {
+           'l'      => 'lh',
+           'left'   => 'lh',
+           'c'      => 'ch',
+           'center' => 'ch',
+           'r'      => 'rh',
+           'right'  => 'rh',
+          },
+    V => {
+           't'      => 'tv',
+           'top'    => 'tv',
+           'c'      => 'cv',
+           'center' => 'cv',
+           'b'      => 'bv',
+           'bottom' => 'bv',
+          },
+    ); # %TextAlign
+@
+
+
+\subsctn{Processing special custom variables}
+
+\label{sec:specfeatvarscfile}
+In the old {\prog} version we had to define a special section on the custom files which told to the program which GFF features were containing information about extra drawing features (such boxes, circles, text strings, and so on). But that approach enforced user to define GFF records on the input files having information not related with annotations. The new approach takes advantage of new abilities of {\prog}, especifically the ability of loading multiple customization files, because you can now split layout and GFF elements properties from those extra features (or you can put into the same customization file). Each extra feature have a fixed fields format that will be explained in this section. 
+
+The only restriction is that extra features defining new fonts and/or colors aliases must be passed in first place, \textbf{\textsc{before any other customization variables}}, so it is recommended to place them at the very beginning of the first customization file (remember to include in the default custom file if that file exists, due to the fact that it is the first customization file to be loaded). Once users follow that  can be used on command-line options too.
+
+<<Parsing Custom Files>>=
+sub parse_special_customs() {
+    my ($string,$sflg) = @_;
+    my (@psc,$tpsc);
+    $string =~ s/^\s+//o;
+    @psc = split /\s+/o, $string, 2;
+    $tpsc = lc($psc[0]);
+    defined($SpecialVars{$tpsc}) || do {
+        &warn('SPECIAL_NOT_DEF',$F,$tpsc);
+        return $F;
+    };
+    return $SpecialVars{$tpsc}->($psc[1],$sflg);
+} # parse_special_customs
+@ %def &parse_special_customs
+
+<<Pre-Declared Vars>>=
+%SpecialVars @SpecialCache
+@ %def SpecialVars SpecialCache
+
+<<Global Vars>>=
+%SpecialVars = (
+    <<Special customization features hash definitions>>
     );
+@
+
+<<warnings - parsing custom files>>=
+SPECIAL_NOT_DEF =>
+  $Warn."Current special feature \"\%s\", NOT recognized, NOT set...\n",
+@
+
+
+\subsubsctn{Checking special records: fonts}
+
+If user printer has built-in fonts other than standard default ones (which are implemented in this code in the [[%Fonts]] hash), now she can define them for later use in any other customization variable that requires a FONT name. To use them later she has to prepend '[[my_]]' string to the alias defined to be able of using its definition. Remember that this customization variables must be provided at the very beginning of any customization files and that can be used on command-line options too. User must take care that the given {\ps} font-name has to be part of the drivers and/or printer font set, that font is not loaded into the {\prog} {\ps} code so it cannot be reproduced on other devices.
+
+<<Special customization features hash definitions>>=
+font => sub {
+        my ($cstr,$cflg) = @_;
+        my @fld;
+        $cflg || do {
+            &warn('CANNOTDEFNOW',$F,'CUSTOM FONT ALIAS',$cstr);
+            return $F;
+        }; # $cflg
+        @fld = split /\s+/og, $cstr;
+        (defined($fld[0]) && defined($fld[1])) || do {
+            &warn('WRONGSPECREC',$F,'FONT',2,
+                  'font  <font-alias> <PostScript-font-name>');
+            return $F;
+        }; # defined
+        $fld[1] =~ s{^/}{}o;
+        $Fonts{'my_'.$fld[0]} = '/'.$fld[1];
+        return $T;
+    }, # font
+@
+
+<<warnings - parsing custom files>>=
+CANNOTDEFNOW =>
+  $Warn."\%s \"\%s\", must be defined at the very beginning \n".
+  $spl."of the first loaded custom file (within an EXTRA section, \"\# X \#\")...\n",
+WRONGSPECREC =>
+  $Warn."A \%s special feature record requires \n".
+  $spl."  at least \%s fields, and must follow this format:\n".
+  $spl."  \"\%s\"\n",
+@
+
+<<DESC custom file variables>>=
+ORD: 901
+SEC: EXTRA
+SUB: Extra
+OPT: font
+PAR: <font-alias>  <font-name>
+SDE: 
+LDE: 
+Record format for font special features is the following:
+
+font  font-alias  font-name
+
+where font-alias will serve to call this font in other customization variables 
+section. As example, having font-alias set as palatino for a font-name defined 
+as Palatino-Roman in the printer, you have to recall it as my_palatino.
+###EOR###
+@ 
+
+
+\subsubsctn{Checking special records: colors}
+
+In this case user can define a new color name on [[%COLORS]] hash, as she did with the fonts. To use them later she has to prepend '[[my_]]' string to the alias (say here the new color name) previously defined for being able to use its color CMYK definition on any customization variable that requires a COLOR name.
+
+<<Special customization features hash definitions>>=
+color => sub {
+        my ($cstr,$cflg) = @_;
+        my @fld;
+        my $_n = 'Special Features [CMYK COLOR] ';
+        $cflg || do {
+            &warn('CANNOTDEFNOW',$F,'CUSTOM CMYK COLOR',$cstr);
+            return $F;
+        }; # $cflg
+        @fld = split /\s+/og, $cstr;
+        scalar(@fld) < 5 && do {
+            &warn('WRONGSPECREC',$F,'CMYK COLOR',5,
+                  'color  <color-alias> <cyan> <magenta> <yellow> <black>');
+            return $F;
+        }; # defined
+        # CMYKFLOAT checking color amount between 0..1
+        $TESTS{CMYKFLOAT}->(\$fld[1],$_n.'(cyan)'   ,$fld[1]) || return $F;
+        $TESTS{CMYKFLOAT}->(\$fld[2],$_n.'(magenta)',$fld[2]) || return $F;
+        $TESTS{CMYKFLOAT}->(\$fld[3],$_n.'(yellow)' ,$fld[3]) || return $F;
+        $TESTS{CMYKFLOAT}->(\$fld[4],$_n.'(black)'  ,$fld[4]) || return $F;
+        @{$COLORS{('my_'.$fld[0])}} = [ ++$colors, @fld[1..5] ];
+        return $T;
+    }, # color
+@
+<<DESC custom file variables>>=
+ORD: 902
+SEC: EXTRA
+SUB: Extra
+OPT: color
+PAR: <color-alias>  <cyan> <magenta> <yellow> <black>
+SDE: 
+LDE: 
+Record format for color special features is the following:
+
+color  <color-alias>  <cyan> <magenta> <yellow> <black>
+
+<cyan>, <magenta>, <yellow> and <black> correspond to each color amount that 
+is required to produce the desired CMYK color.
+###EOR###
+@ 
+
+
+\subsubsctn{Checking special records: boxes}
+
+<<Special customization features hash definitions>>=
+box => sub {
+        my ($cstr,undef) = @_;
+        my (@fld,@tld);
+        my $_n = 'Special Features [BOX] ';
+        @fld = split /\s+/og, $cstr, 5;
+        scalar(@fld) < 4 && do {
+            &warn('WRONGSPECREC',$F,'BOX',4,
+                 'box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> '.
+                 '[ S:<line_style> [ W:<line_width> [ F:<fill_color> ] ] ] ]');
+            return $F;
+        }; # defined
+        $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Xori)',lc($fld[0])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Xend)',lc($fld[1])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[2],$_n.'(Yori)',lc($fld[2])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[3],$_n.'(Yend)',lc($fld[3])) || return $F;
+        @tld = &get_spfeat_props($fld[4],$F,$_n);
+        push @SpecialCache,
+             [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[1]}),
+               &get_units(\@{$fld[2]}),&get_units(\@{$fld[3]}),
+               join(" ",@tld[2,4,3,5],
+                    &get_units(\@{$fld[0]}),&get_units(\@{$fld[1]}),
+                    &get_units(\@{$fld[2]}),&get_units(\@{$fld[3]}))." xbox" ];
+        return $T;
+    }, # box
+@
+%           0    1    2     3     4     5     6    7    8   9   10
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+% PS --> l_col l_wdth l_sty { fill_col+fill_flg } xo xe yo ye  xbox
+<<DESC custom file variables>>=
+ORD: 903
+SEC: EXTRA
+SUB: Extra
+OPT: box
+PAR: <Xori> <Xend> <Yori> <Yend> %{ L:<line_color> %{ S:<line_style> %{ W:<line_width> %{ F:<fill_color> %} %} %} %}
+SDE: 
+LDE: 
+###EOR###
+@ 
+
+
+\subsubsctn{Checking special records: circles}
+
+<<Special customization features hash definitions>>=
+circle => sub {
+        my ($cstr,undef) = @_;
+        my (@fld,@tld);
+        my $_n = 'Special Features [CIRCLE] ';
+        @fld = split /\s+/og, $cstr, 5;
+        scalar(@fld) < 4 && do {
+            &warn('WRONGSPECREC',$F,'CIRCLE',4,
+                  'circle  <Cx> <Cy> <Rx> <Ry> '.
+                  '[ A:<angle> [ L:<line_color> [ S:<line_style> '.
+                  '[ W:<line_width> [ F:<fill_color> ] ] ] ] ]');
+            return $F;
+        }; # defined
+        $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Cy)',lc($fld[1])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[2],$_n.'(Rx)',lc($fld[2])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[3],$_n.'(Ry)',lc($fld[3])) || return $F;
+        @tld = &get_spfeat_props($fld[4],$F,$_n);
+        push @SpecialCache,
+             [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
+               &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
+               join(" ",@tld[2,4,3,5],
+                    &get_units(\@{$fld[2]}),&get_units(\@{$fld[3]}),$tld[1],
+                    &get_units(\@{$fld[0]}),&get_units(\@{$fld[1]}))." xcir" ];
+        return $T;
+    }, # circle
+@
+%           0    1    2     3     4     5     6    7    8   9   10
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+% PS --> l_col l_wdth l_sty { fill_col+fill_flg } Rx Ry angle xo yo xcir
+<<DESC custom file variables>>=
+ORD: 904
+SEC: EXTRA
+SUB: Extra
+OPT: color
+PAR: <Cx> <Cy> <Rx> <Ry> %{ A:<angle> %{ L:<line_color> %{ S:<line_style> %{ W:<line_width> %{ F:<fill_color> %} %} %} %} %}
+SDE: 
+LDE: 
+###EOR###
+@ 
+
+
+\subsubsctn{Checking special records: arrows}
+
+<<Special customization features hash definitions>>=
+arrow => sub {
+        my ($cstr,undef) = @_;
+        my (@fld,@tld);
+        my $_n = 'Special Features [ARROW] ';
+        @fld = split /\s+/og, $cstr, 4;
+        scalar(@fld) < 3 && do {
+            &warn('WRONGSPECREC',$F,'ARROW',3,
+                  'arrow  <Cx> <Cy> <length> [ A:<angle> '.
+                  '[ L:<line_color> [ S:<line_style> [ W:<line_width> '.
+                  '[ F:<fill_color> [ N:<font_name> [ Z:<font_size> '.
+                  '[ T:<text_color> [ "<string>" ] ] ] ] ] ] ] ] ]');
+            return $F;
+        }; # defined
+        $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Cy)',lc($fld[1])) || return $F;
+        $TESTS{PS_UNIT}->(\$fld[2],$_n.'(length)',lc($fld[2])) || return $F;
+        @tld = &get_spfeat_props($fld[3],$T,$_n);
+        $tld[0] ne '' || ($tld[0] = '( )');
+        push @SpecialCache,
+             [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
+               &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
+               '[ '.join(" ",@tld[0,6..10,2,4],&get_units(\@{$fld[2]}),
+                         $tld[1],&get_units(\@{$fld[0]}),
+                         &get_units(\@{$fld[1]}))." xarw" ];
+        return $T;
+    }, # arrow
+@
+%           0    1    2     3     4     5     6    7    8   9   10
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+% PS --> [string valn haln {fz fn} {tcol tflg}] lcol lw len angle x y xarw
+<<DESC custom file variables>>=
+ORD: 905
+SEC: EXTRA
+SUB: Extra
+OPT: arrow
+PAR: <Cx> <Cy> <length> %{ A:<angle> %{ L:<line_color> %{ S:<line_style> %{ W:<line_width> %{ F:<fill_color> %{ N:<font_name> %{ Z:<font_size> %{ T:<text_color> %{ "<string>" %} %} %} %} %} %} %} %} %}
+SDE: 
+LDE: 
+###EOR###
+@ 
+
+
+\subsubsctn{Checking special records: free-text strings}
+([str] lcol lsty lwdth fcol hal val tcol)
+
+<<Special customization features hash definitions>>=
+text => sub {
+        my ($cstr,undef) = @_;
+        my (@fld,@tld);
+        my $_n = 'Special Features [TEXT] ';
+        @fld = split /\s+/og, $cstr, 4;
+        scalar(@fld) < 3 && do {
+            &warn('WRONGSPECREC',$F,'TEXT',3,
+                  'text  <Cx> <Cy> '.
+                  '[ N:<font_name> [ Z:<font_size> [ A:<angle> '.
+                  '[ H:<horizontal_align> [ V:<vertical_align> '.
+                  '[ T:<text_color> ] ] ] ] ] ] "<string>"');
+            return $F;
+        }; # defined
+        $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
+        $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Cy)',lc($fld[1])) || return $F;
+        @tld = &get_spfeat_props($fld[2],$T,$_n);
+        $tld[0] ne '' && do {
+             push @SpecialCache,
+                  [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
+                    &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
+                    '[ '.join(" ",@tld[1,0,6..10],&get_units(\@{$fld[0]}),
+                              &get_units(\@{$fld[1]}))." xtxt" ];
+             return $T;
+        };
+        &warn('EMPTYSTRING',$F,$_n);
+        return $F;
+    }, # 
+@
+%           0    1    2     3     4     5     6    7    8   9   10
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+% PS --> angle string valn haln {fz fn} tcol x y  xtxt
+
+<<warnings - parsing custom files>>=
+EMPTYSTRING =>
+  $Warn."\"\%s\", contains an EMPTY STRING, skipping...\n",
+@
+
+<<DESC custom file variables>>=
+ORD: 906
+SEC: EXTRA
+SUB: Extra
+OPT: text
+PAR: <Cx> <Cy> %{ N:<font_name> %{ Z:<font_size> %{ A:<angle> %{ H:<horizontal_align> %{ V:<vertical_align> %{ T:<text_color> %} %} %} %} %} %} "<string>"
+SDE: 
+LDE: 
+###EOR###
+@ 
+
+
+\subsubsctn{Parsing optional fields of ``special'' features}
+
+<<Parsing Custom Files>>=
+sub get_spfeat_props() {
+    my ($cstr,$cflg,$vna) = @_;
+    my (@kao,@rr,$rr);
+    my ($a,$l,$s,$w,$f,$h,$v,$t,$fn,$fz,$str) = (undef) x 11;
+    $cflg && do {
+        $cstr =~ s/\"(.+?)\"//o && ($str = $1);
+    }; # $cflg
+    @kao = split /\s+/og, $cstr;
+    scalar(@kao) && do {
+        <<looping through optional fields for special features>>
+    }; # scalar(@kao)
+    <<preparing validated optional fields for special features>>
+    return @rr;
+} # get_spfeat_props
+@ %def &get_spfeat_props
+
+
+<<looping through optional fields for special features>>=
+foreach my $oc (@kao) {
+    $oc =~ /^\s*$/o && next; # empty fields
+    $oc =~ /^A:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{FLOAT}->(\$rr,$vna.'(angle)',$rr)
+            && ($a = $rr);
+        next;
+    };
+    $oc =~ /^L:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{COLOR}->(\$rr,$vna.'(line_color)',lc($rr)) 
+            && ($l = $rr);
+        next;
+    };
+    $oc =~ /^S:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{LINESTY}->(\$rr,$vna.'(line_style)',lc($rr)) 
+            && ($s = $rr);
+        next;
+    };
+    $oc =~ /^W:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{PS_UNIT}->(\$rr,$vna.'(line_width)',lc($rr)) 
+            && ($w = $rr);
+        next;
+    };
+    $oc =~ /^F:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{COLOR}->(\$rr,$vna.'(fill_color)',lc($rr)) 
+            && ($f = $rr);
+        next;
+    };
+    $oc =~ /^H:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{TXTALIGN}->(\$rr,$vna.'(horizontal_align)',lc($rr),$T) 
+            && ($h = $rr);
+        next;
+    };
+    $oc =~ /^V:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{TXTALIGN}->(\$rr,$vna.'(vertical_align)',lc($rr),$F) 
+            && ($v = $rr);
+        next;
+    };
+    $oc =~ /^T:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{COLOR}->(\$rr,$vna.'(text_color)',lc($rr)) 
+            && ($t = $rr);
+        next;
+    };
+    $oc =~ /^N:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{FONT}->(\$rr,$vna.'(font_name)',lc($rr)) 
+            && ($fn = $rr);
+        next;
+    };
+    $oc =~ /^Z:(.*)$/o && do {
+        $rr = $1;
+        $TESTS{PS_UNIT}->(\$rr,$vna.'(font_size)',lc($rr)) 
+            && ($fz = &get_units(\@{$rr}));
+        next;
+    };
+}; # foreach
+@ 
+
+%          0    1    2     3     4     5     6    7    8   9   10
+% @rr = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+<<preparing validated optional fields for special features>>=
+@rr = (
+	    '',
+        defined($a)  ? "$a"              : '0'         ,
+        defined($l)  ? "$l"              : 'fg'        ,
+        defined($s)  ? "($s)"            : '(solid)'   ,
+        defined($w)  ? "@{$w}"           : 'Clw'       ,
+        defined($f)  ? "$f ".&tobool($T) : &tobool($F) ,
+        defined($v)  ? "($TextAlign{'V'}{$v})"
+                                         : '(bv)'      ,
+        defined($h)  ? "($TextAlign{'H'}{$h})"
+                                         : '(lh)'      ,
+        defined($fz) ? "$fz"             : '8 pt'      ,
+        defined($fn) ? "$fn"             : $Fonts{'helvetica'} ,
+        defined($t)  ? "$t ".&tobool($T) : &tobool($F) ,
+        );
+$rr[0] = (defined($str)) ? &tostring($str) : '';
 @
 
 
@@ -3998,8 +4573,8 @@ LDE:
 @
 
 <<default layout vars values>>=
-percent_major_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
-percent_minor_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
+percent_major_tickmark     => { TYPE => 'INTEGER', VALUE => undef  },
+percent_minor_tickmark     => { TYPE => 'INTEGER', VALUE => 4      },
 percent_box_score_range    => { TYPE => 'RANGE'  , VALUE => undef  },
 @ %def {percent_major_tickmark} {percent_minor_tickmark} {percent_box_score_range}
 <<DESC custom file variables>>=
@@ -4007,7 +4582,6 @@ ORD: 111
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: percent_major_tickmark
-DEF: |5|
 PAR: <integer>
 SDE: 
 LDE: 
@@ -4017,7 +4591,7 @@ ORD: 112
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: percent_minor_tickmark
-DEF: |5|
+DEF: |4|
 PAR: <integer>
 SDE: 
 LDE: 
@@ -4598,6 +5172,37 @@ LDE:
 ###EOR###
 @
 
+<<default feature vars values>>=
+group_layer                  => { TYPE => 'INTEGER', VALUE => undef },
+@ %def {group_layer}
+<<DESC custom file variables>>=
+ORD: 625
+SEC: GROUP
+SUB: Groups
+OPT: group_layer
+PAR: <integer>
+SDE: Setting layer on annotation tiers where to draw the given group.
+LDE: 
+Setting layer on annotation tiers where to draw this group shape. By default
+all groups are drawn on layer 0, which represents the bottomest layer. Higher
+layer values move features forward, this allows users to visualize groups that
+were hidden by others if they were overlapping. {\prog} sorts groups prior
+visualization by acceptor, but before that, it sorts by layer, so groups 
+having smaller acceptor coords and are longer than others can be forced to
+appear on top. This is done before sorting by layer all the features, so that,
+features for the choosen group are raised to the group layer. This means that
+you actually have two layer levels, the group and the feature layer levels.
+ \n\ \n\
+Imagine you have ``exons'' and the ``mrna'' features for a gene, and would like
+to display the ``mrna'' (which contains all the ``exons'' between its starting 
+and final coordinates), as a lower ---than the ``exons''--- box. If all 
+feature had same layer you will see fragments of the ``mrna'' rising between 
+each consecutive ``exons''. Increasing layer number for ``mrna'' while 
+preserving layer number for ``exons'' will make ``mrna'' box to be fully drawn
+on top of the exons. 
+###EOR###
+@
+
 <<default group vars values>>=
 # show_group_rule            => { TYPE => 'BOOLEAN', VALUE => $T     },
 # show_group_arrow           => { TYPE => 'BOOLEAN', VALUE => $T     },
@@ -4768,8 +5373,8 @@ PAR: <boolean>
 SDE: Feature shape height depends on score by default.
 LDE: 
 When this variable is |on|, height of the feature shapes is proportional to 
-the score, ranging from minimum to maximum score values of the sequence to which
-the feature belongs.
+the score, ranging from minimum to maximum score values of the sequence to 
+which the feature belongs.
 ###EOR###
 ORD: 716
 SEC: FEATURE
@@ -4809,6 +5414,37 @@ PAR: <boolean>
 SDE: Drawing alignment lines while painting with its color as a score dependent gradient.
 LDE: 
 
+###EOR###
+@
+
+<<default feature vars values>>=
+feature_layer                => { TYPE => 'INTEGER', VALUE => undef },
+@ %def {feature_layer}
+<<DESC custom file variables>>=
+ORD: 725
+SEC: FEATURE
+SUB: Features
+OPT: feature_layer
+PAR: <integer>
+SDE: Setting layer on annotation tiers where to draw this feature shape.
+LDE: 
+Setting layer on annotation tiers where to draw this feature shape. By default
+all features are drawn on layer 0, which represents the bottomest layer. Higher
+layer values move features forward, this allows users to visualize features 
+that were hidden by others if they were overlapping. {\prog} sorts features 
+prior visualization by acceptor, but before that it sorts by layer, so 
+features having smaller acceptor coords and are longer than others can be 
+placed on top. What it actually happens is that feature layers are contained 
+into their group layer, it migth be seen as those feature layers are 
+sub-layers of the group ones.
+\n\ \n\
+Imagine you have ``exons'' and the ``mrna'' features for a gene, and would like
+to display the ``mrna'' (which contains all the ``exons'' between its starting 
+and final coordinates), as a lower ---than the ``exons''--- box. If all 
+feature had same layer you will see fragments of the ``mrna'' rising between 
+each consecutive ``exons''. Increasing layer number for ``mrna'' while 
+preserving layer number for ``exons'' will make ``mrna'' box to be fully drawn
+on top of the exons. 
 ###EOR###
 @
 
@@ -5619,6 +6255,7 @@ This will define tag-value pairs (and maybe some extra fields).
 sub load_grouping() {
     my ($_type,$attributes) = @_;
     my ($grp_string,$grp_counter,$grp_GP,$grp_NOGP,$grp_tag);
+    my ($grp_flag,$group_string,@tt,@new_group,@grouping_list);
   GFF_CHOICE: {
     $_type && do { 
         $grp_string = "$seqname\_$source\_$strand";
@@ -5639,7 +6276,6 @@ sub load_grouping() {
         $group = "$grp_string\_$group_id";
 	    return $grp_NOGP;
     };
-    my @grouping_list = ();
     @grouping_list = split /\s*;\s*/og, $attributes;
 	<<parse grouping attributes>>
 	<<parse other attributes>>
@@ -5650,9 +6286,8 @@ sub load_grouping() {
 We may find four basic grouping field structures (detailed in Table~\ref{tbl:formats}) within the first element of '[[@grouping_list]]'. We check first for double-quotes in the first or second field within that element. If second field is double-quoted, the first field is set as 'Tag' and the quoted as 'Value', else 'Tag' is set to default value (empty string for GFF records and 'target' for APLOT GFF-like ones) and 'Value' is set with the first field. Then we are looking in GFF grouping attributes for extra fields defining start, end, strand and frame (all related to the second sequence); in APLOT GFF-like format, those values are deprecated (because they must be defined in the first eight fields following the first sequence values and a colon as shown in table~\ref{tbl:formats}). 
 
 <<parse grouping attributes>>=
-my $grp_flag = 0;
-my @new_group = ();
-my $group_string = shift @grouping_list;
+$grp_flag = 0;
+$group_string = shift @grouping_list;
 ($group_string =~ /$regexp_group/o) && 
     (@new_group = ($1,$2,$3));
 $new_group[0] =~ s/\s*$//o;
@@ -5674,26 +6309,22 @@ defined($new_group[1]) || do {  # type 1 attributes
 $regexp_group
 @ %def $regexp_group
 <<Global Constants>>=
-$regexp_group = '^(.*?)(?:"(.+?)"(?:\s+([^\s]+))?)?$'; #'
+$regexp_group = '^(.*?)(?:"(.+?)"(?:\s+(.+))?)?$'; #'
 @
 
 Here we look for other attribute fields, those defining coords for the target sequence match in standard GFF format and those defining a scoring vector, both formats are explained more in detail in the following two subsections.
 
 <<parse other attributes>>=
 $_type && do { # GFF grouping
-    unshift @grouping_list,
-            ( (defined($new_group[2]) && $new_group[2] ne '')
-              ? $new_group[2] : undef )
-#    $new_group[2] .= 
-#        (defined($new_group[2] && $new_group[2] ne '') ? ' ' : '').
-#        join(' ',);
-    $tag =~ /^$Vars{LAYOUT}{align_tag}/ && do {
-#        return &load_GFF_align($new_group[2],$grp_counter);
-        return &load_GFF_align(\@grouping_list,$grp_counter);
+    @tt = ( ((defined($new_group[2]) && $new_group[2] ne '')
+                ? $new_group[2]
+                : '@@NO@@NE@@'),
+            @grouping_list );
+    $tag =~ /^$Vars{LAYOUT}{align_tag}$/ && do {
+        return &load_GFF_align(\@tt);
     }; 
-    $tag =~ /^$Vars{LAYOUT}{vector_tag}/ && do {
-        &load_GFF_vector;
-        return $VECTOR;
+    $tag =~ /^$Vars{LAYOUT}{vector_tag}$/ && do {
+        return &load_GFF_vector(\@tt);
 	};
 };
 @ 
@@ -5701,10 +6332,10 @@ $_type && do { # GFF grouping
 We are interested in finding 'id' tag, that defines the label for a single record, this is implemented in the '[[&load_GFF_align]]' and '[[&load_GFF_vector]]'functions but has to be parsed in plain GFF records.
 
 <<parse other attributes>>=
-scalar(@grouping_list) > 0 && do{ 
+scalar(@grouping_list) > 0 && do { 
     foreach my $element (@grouping_list) {
-        ($element =~ /$regexp_group/o) && (@new_group = ($1,$2,$3));
-        lc($new_group[0]) =~ /$Vars{LAYOUT}{label_tag}/ && do {
+        $element =~ /$regexp_group/o && (@new_group = ($1,$2,$3));
+        lc($new_group[0]) =~ /^$Vars{LAYOUT}{label_tag}$/ && do {
             $label = $new_group[1];
             $label eq "" && do {
                 (undef,$label,undef) = split /\s+/og, $new_group[0];
@@ -5715,8 +6346,8 @@ scalar(@grouping_list) > 0 && do{
 @
 
 \subsubsctn{Layout variables involved in grouping tags}
-\label{sec:groupingtagkeys}
 
+\label{sec:groupingtagkeys}
 <<default layout vars values>>=
 align_tag                  => { TYPE => 'ALPHA', VALUE => 'target'   },
 vector_tag                 => { TYPE => 'ALPHA', VALUE => 'vector'   },
@@ -5732,16 +6363,36 @@ PAR: <tag>
 SDE: 
 LDE: 
 [align_tag] holds the specific tag (for a grouping Tag-Value pair) to detect 
-those GFF records coding for alignment data and having the following group 
-structure:\\%{1ex%} \n\
-\centerline{
- \shortstack%{r%}{align_tag "group_name" <seq2_start> <seq2_end> 
-   %{ ; Strand <seq2_strand> \eoline\\\,%{ ; Frame <seq2_frame> %{ ; 
-        E_value <score> %}\,%}\,%}\hspace{3ex}
+those GFF records coding for alignment data and having any of the three
+following group structures:\\%{1.5ex%} \n\
+\begin{minipage}{\linewidth}
+\begin{small}
+\flushleft
+ \hspace{0.5cm}\shortstack%{l%}{
+   %{ \ldots %}\,\,\,align_tag "group_name"
+   <seq2_start> <seq2_end> \eoline\\\hspace{20ex}
+   %{ <seq2_strand> %{ <seq2_frame> %}\,%}\,\,\,%{ ; \ldots %}
   }
- }\\%{0.75ex%} \n\
-so the program can recover the coords for the target sequence from the 
-grouping fields. Remember that tags are not case-sensitive. 
+ \\%{1.5ex%}
+ \hspace{0.5cm}\shortstack%{l%}{
+   %{ \ldots %}\,\,\,align_tag "group_name"
+   <seq2_start> <seq2_end> 
+   \eoline\\\hspace{20ex} %{ ; strand_tag <seq2_strand> %{
+      ; frame_tag <seq2_frame> %}\,%}\,\,\,%{ ; \ldots %}
+  }
+ \\%{1.5ex%}
+ \hspace{0.5cm}\shortstack%{l%}{
+   %{ \ldots %}\,\,\,align_tag "group_name" ;
+   start_tag <seq2_start> ; end_tag <seq2_end>
+   \eoline\\\hspace{20ex} %{ ; strand_tag <seq2_strand> %{
+      ; frame_tag <seq2_frame> %}\,%}\,\,\,%{ ; \ldots %}
+  }
+\end{small}
+\end{minipage}\\%{1.5ex%} \n\
+The program can recover the coords for the target sequence from those grouping 
+fields. If no strand or frame are given for the subject sequence then {\prog}
+gets them from query sequence. Remember that tags are not case-sensitive and 
+that the grouping fields separator is the semi-colon (';'). 
 ###EOR###
 ORD: 241
 SEC: LAYOUT
@@ -5753,15 +6404,20 @@ SDE:
 LDE: 
 [vector_tag] sets the specific tag (for a grouping Tag-Value pair) to detect 
 scoring vector GFF records, which have the following group structure:
-\\%{1ex%} \n\
-\centerline{
- \shortstack%{r%}{vector_tag "group_name" <vector_type> %{ ;
-   Window <window_length> \eoline\\\, %{ ; Step <step_length> %}\,%} ;
-   Scores <score$%-0$> ... <score$%-n$>\hspace{3ex}
+\\%{1.5ex%} \n\
+\begin{minipage}{\linewidth}
+\begin{small}
+\flushleft
+ \hspace{0.5cm}\shortstack%{r%}{
+   %{ \ldots %}\,\,\,vector_tag "group_name" %{ <vector_type> %}
+   %{ ; Window <window_length> \eoline\\\, %{ ; Step <step_length> %}\,%} ;
+        Scores <score$%-0$> ... <score$%-n$>\hspace{3ex}
   }
-  }\\%{0.75ex%} \n\
+\end{small}
+\end{minipage}\\%{1.5ex%} \n\
 so the program can parse the list of single scores from the grouping fields. 
-Remember that tags are not case-sensitive.
+Remember that tags are not case-sensitive and that the grouping fields 
+separator is the semi-colon (';'). 
 ###EOR###
 ORD: 242
 SEC: LAYOUT
@@ -5777,10 +6433,67 @@ for which the tag matches [label_tag] and takes <value> as the specific record
 label. You must have an attribute like this within the grouping attribute list:
 \\%{0.75ex%} \n\
 \centerline{
-  \ldots ; label_tag "element_label" %{ ; \ldots %}
-  }\\%{0.5ex%} \n\
-Using this attribute makes easy to set specific properties for one or more 
-elements. Remember that tags are not case-sensitive.
+  \ldots ; label_tag "element_label" %{ \ldots other sub-fields \ldots %} %{ ; \ldots %}
+  }\\%{0.75ex%} \n\
+if ``other sub-fields'' are present they are ignored by \prog. Using this 
+attribute makes easy to set specific properties for one or more records of 
+your GFF dataset. Remember that tags are not case-sensitive.
+###EOR###
+@
+
+\label{sec:groupingfieldstagkeys}
+<<default layout vars values>>=
+start_tag                  => { TYPE => 'ALPHA', VALUE => 'start'    },
+end_tag                    => { TYPE => 'ALPHA', VALUE => 'end'      },
+score_tag                  => { TYPE => 'ALPHA', VALUE => 'e_value'  },
+strand_tag                 => { TYPE => 'ALPHA', VALUE => 'strand'   },
+frame_tag                  => { TYPE => 'ALPHA', VALUE => 'frame'    },
+@ %def {start_tag} {end_tag} {score_tag} {strand_tag} {frame_tag}
+<<DESC custom file variables>>=
+ORD: 243
+SEC: LAYOUT
+SUB: General
+OPT: start_tag
+DEF: |start|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+ORD: 244
+SEC: LAYOUT
+SUB: General
+OPT: end_tag
+DEF: |end|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+ORD: 245
+SEC: LAYOUT
+SUB: General
+OPT: score_tag
+DEF: |e_value|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+ORD: 246
+SEC: LAYOUT
+SUB: General
+OPT: strand_tag
+DEF: |strand|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+ORD: 247
+SEC: LAYOUT
+SUB: General
+OPT: frame_tag
+DEF: |frame|
+PAR: <tag>
+SDE: 
+LDE: 
 ###EOR###
 @
 
@@ -5789,106 +6502,103 @@ The following record formats share the field structure of a GFF standard record,
 
 <<HIDE: DONE>>=
 \doneitem{20011113}{[[%SOURCE]] is a \textbf{provisional varname} that must be replaced by the corresponding [[$DefaultVars{LAYOUT}]], [[$CustomVars{LAYOUT}]] or [[$CmdLineVars{LAYOUT}]]. Those 'LAYOUT' variables must be set before reading GFF input files because some settings are used by parser functions.}
-@
-
+@ 
 \subsubsctn{Parsing alignment records}
 
-\label{todo:ERA}
-<<HIDE: new defs TODO>>=
-\def\todoERA{
+<<HIDE: DONE>>=
+\doneitem{20011219}{
 Parsing alignment records:\\
-\centerline{[[aln_tag "value" target_ori target_end target_frame target_strand (...)]]}
-} % todoERA
+\centerline{[[aln_tag "value" target_ori target_end target_frame target_strand [ ; (...) ] ]]}
+}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoERA}{todo:ERA}
-@
-\todo{ \item \todoERA } % todo
+
+See the customization variable [[aln_tag]] description (section~\ref{sec:groupingtagkeys} on page~\pageref{sec:groupingtagkeys}) to get info about the three recognized formats for the GFF version 2 alignment records. The grouping fields for those records are processed by the following function:
 
 <<Parsing Input Data>>=
 sub load_GFF_align() {
-    my ($str,$aln_counter) = @_;
-print STDERR "$aln_counter: $str\n";
-    my @str;
-    @str = split /\s+/og, $str;
-    my ($aln_ori,$aln_end,$aln_str,$aln_frm,$aln_lbl,$bgn) = ((undef) x 5, 0);
+    my ($strf) = @_;
+    my ($aln_ori,$aln_end,$aln_sco,$aln_str,$aln_frm,$aln_lbl) = (undef) x 6;
+    my (@lst, $fst);
     <<load-GFF-align: checking simple coords>>
     <<load-GFF-align: looping through tag-value pairs>>
     <<load-GFF-align: loading variables>>
 } # load_GFF_align
 @ %def &load_GFF_align
 
-We must check if alignment coordinates for subject are provided in a format like the following or not:\\[1ex]
-
-\centerline{\scriptsize [[... aln_tag "group_value" target_ori target_end [ target_frame [ target_strand ] ] ; (...)]]}
-
-If it is not the case, then we skip this code chunk and starts the tag-value checking loop of the next one.
+We must check if alignment coordinates for subject are provided in a format like the following or not:\\
+\centerline{\scriptsize [[... aln_tag "group_value" target_ori target_end [ target_strand [ target_frame ] ] ; (...)]]}
+\vskip 1ex
+If it is not the case, then we skip this code chunk and starts the tag-value checking loop of the next one, as we also look for tag-value definition fields for each of those four target sequence elements (start, end, strand and frame).
 
 <<load-GFF-align: checking simple coords>>=
-(defined($str[0]) && defined($str[1])) && do {
-    (($str[1] =~ /$regexp_float/o) && ($str[1] =~ /$regexp_float/o)) && do {
-        ($aln_ori,$aln_end) = @str[0,1];
-        $bgn = 2;
-        (defined($str[$bgn]) &&
-         $TESTS{STRAND}->(\$str[$bgn],'grouping')) && do {
-            $aln_str = $str[$bgn];
-            $bgn = 3;
-            (defined($str[$bgn]) && $str[$bgn] =~ /$regexp_frame/o) && do {
-                $aln_frm = $str[$bgn];
-                $bgn = 4;
+($fst) = shift @$strf;
+$fst ne '@@NO@@NE@@' && do {
+    @lst = split /\s+/og, $fst;
+    ((defined($lst[0]) && $lst[0] =~ /$regexp_float/o) &&
+     (defined($lst[1]) && $lst[1] =~ /$regexp_float/o)) && do {
+        ($aln_ori,$aln_end) = @lst[0,1];
+        (defined($lst[2]) &&
+         $lst[2] =~ /$regexp_strand/o) && do {
+            $aln_str = $lst[2];
+            (defined($lst[3]) &&
+             $lst[3] =~ /$regexp_frame/o) && do {
+                $aln_frm = $lst[3];
             }; # $aln_frm
         }; # $aln_str
-    }; # numbers?($aln_ori && $aln_end)
-}; # defined($aln_ori && $aln_end)
+    }; # numbers?($lst[0] && $lst[1])
+}; # defined($strf[0])
 @
 
-Now it is time for looking if there are any tag-value pairs other than grouping one.
+Now it is time for looking if there are any tag-value pairs other than grouping one. We are looking for the following tag-value pairs, extra elements (shown in their descriptions as '[[ [ ... ] ]]') in those fields are ignored:
+
+\begin{description}
+\item[Start:]    {\scriptsize [[... ; start_tag target_start [ ... ] [ ; (...) ] ]]}
+\item[End:]      {\scriptsize [[... ; end_tag target_end [ ... ] [ ; (...) ] ]]}
+\item[Frame:]    {\scriptsize [[... ; frame_tag target_frame [ ... ] [ ; (...) ] ]]}
+\item[Strand:]   {\scriptsize [[... ; strand_tag target_strand [ ... ] [ ; (...) ] ]]}
+\item[Score:]    {\scriptsize [[... ; score_tag secondary_score [ ... ] [ ; (...) ] ]]}
+\item[Id label:] {\scriptsize [[... ; id_tag "group_id" [ ... ] [ ; (...) ] ]]}
+\end{description}
+
+See section~\ref{sec:groupingfieldstagkeys}, page~\pageref{sec:groupingfieldstagkeys}, for a description of the customization variables related to those fields tags.
 
 <<load-GFF-align: looping through tag-value pairs>>=
-for (my $gh = $bgn; $gh <= $#str; $gh++) {
-    my $q;
-    my $t = lc($str[$gh]);
-    $t =~ /$Vars{LAYOUT}{start_tag}/ && do {
-        ++$gh;
-        $q = $str[$gh];
-        (defined($str[$gh]) && $TESTS{FLOAT}->(\$q,'start_tag'))
-            && ($aln_ori = $q);
+for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
+    my (@q, $t, @new_id);
+    @q = split /\s+/og, $strf->[$gh];
+    $t = lc($q[0]);
+    # print STDERR join(' : ',$strf->[$gh], join('***',@q).'**|', 
+    #                   $t, $Vars{LAYOUT}{label_tag})."\n";
+    $t =~ /^($Vars{LAYOUT}{label_tag})$/ && do {
+        ($strf->[$gh] =~ /$regexp_group/o) && (@new_id = ($1,$2,$3));
+        defined($new_id[1]) && ($aln_lbl = $new_id[1]);
         next;
-    };
-    $t =~ /$Vars{LAYOUT}{end_tag}/ && do {
-        ++$gh;
-        $q = $str[$gh];
-        (defined($str[$gh]) && $TESTS{FLOAT}->(\$q,'end_tag'))
-            && ($aln_end = $q);
+    }; # id_tag
+    $t =~ /^$Vars{LAYOUT}{start_tag}$/ && do {
+        (defined($q[1]) && $q[1] =~ /$regexp_float/o)
+            && ($aln_ori = $q[1]);
         next;
-    };
-    $t =~ /$Vars{LAYOUT}{strand_tag}/ && do {
-        ++$gh;
-        $q = $str[$gh];
-        (defined($str[$gh]) && $TESTS{STRAND}->(\$q,'strand_tag'))
-            && ($aln_str = $q);
+    }; # start_tag
+    $t =~ /^$Vars{LAYOUT}{end_tag}$/ && do {
+        (defined($q[1]) && $q[1] =~ /$regexp_float/o)
+            && ($aln_end = $q[1]);
         next;
-    };
-    $t =~ /$Vars{LAYOUT}{frame_tag}/ && do {
-        ++$gh;
-        (defined($str[$gh]) && $str[$gh] =~ /$regexp_frame/o)
-            && ($aln_frm = $str[$gh]);
+    }; # end_tag
+    $t =~ /^$Vars{LAYOUT}{strand_tag}$/ && do {
+        (defined($q[1]) && $q[1] =~ /$regexp_strand/o)
+            && ($aln_str = $q[1]);
         next;
-    };
-    $t =~ /$Vars{LAYOUT}{id_tag}/ && do {
-        ++$gh; 
-        defined($str[$gh]) && ($aln_lbl = $str[$gh]);
-        # next;
-    };
+    }; # strand_tag
+    $t =~ /^$Vars{LAYOUT}{frame_tag}$/ && do {
+        (defined($q[1]) && $q[1] =~ /$regexp_frame/o)
+            && ($aln_frm = $q[1]);
+    }; # frame_tag
+    $t =~ /^$Vars{LAYOUT}{score_tag}$/ && do {
+        (defined($q[1]) && $q[1] =~ /$regexp_real/o)
+            && ($aln_sco = $q[1]);
+    }; # frame_tag
 }; # for $gh
-@ # take a look to [[<parse other attributes>]] chunk
-
-<<default layout vars values>>=
-start_tag                  => { TYPE => 'ALPHA', VALUE => 'start'    },
-end_tag                    => { TYPE => 'ALPHA', VALUE => 'end'      },
-strand_tag                 => { TYPE => 'ALPHA', VALUE => 'strand'   },
-frame_tag                  => { TYPE => 'ALPHA', VALUE => 'frame'    },
-@ %def {start_tag} {end_tag} {strand_tag} {frame_tag}
+@
 
 Finally, we must set up all the variables that will be loaded when parsing a ``standard'' old aplot record, although it may seem redundant, because the rest of the functions working on the parsing process will expect them loaded the same way if we assume that we got an alignment record.
 
@@ -5899,10 +6609,11 @@ Finally, we must set up all the variables that will be loaded when parsing a ``s
 ($source_2, $feature_2) = (undef) x 2;
 ($start_1, $end_1) = ($start, $end);
 ($start_2, $end_2) = ($aln_ori, $aln_end);
+($score_1,$score_2) = ($score,$aln_sco);
 ($strand_1,$frame_1) = ($strand,$frame);
 $strand_2 = defined($aln_str) ? $aln_str : $strand_1;
 $frame_2  = defined($aln_frm) ? $aln_frm : $frame_1;
-$label = defined($aln_lbl) ? $aln_lbl : $aln_counter;
+$label = defined($aln_lbl) ? $aln_lbl : $label;
 return $ALIGN;
 @ 
 
@@ -5923,7 +6634,9 @@ Parsing scoring vectors:\\
 
 <<Parsing Input Data>>=
 sub load_GFF_vector() {
+    my ($strf) = @_;
 	@vect_ary = ();
+    return $VECTOR;
 } # load_GFF_vector
 @ %def &load_GFF_vector
 
@@ -6245,6 +6958,7 @@ my $sc_ref = \%{ $ss_ref->{$s_src}[$_element] };
 foreach my $s_str (keys %{ $sc_ref }) {
     <<sorting GFF groups>>
 }; # foreach $s_str
+<<sorting strands for current source>>
 <<set source elements boundaries>>
 @
 
@@ -6253,7 +6967,8 @@ SORT_SEQ => "\%sSequence: \%s\n",
 SORT_SRC => "\%sSource: \%s\n",
 @ 
 
-\subsctn{Sorting features for groups}
+
+\subsctn{Sorting GFF features for groups}
 
 <<sorting GFF groups>>=
 &report('SORT_STR',(('|  ' x 3).'*- '),$s_str);
@@ -6265,10 +6980,15 @@ push @{ $sr_ord },
 my $st_ord = \@{ $sr_ord->[ $#{$sr_ord} ][1] };
 my $sr_ref = \%{ $sc_ref->{$s_str}[$_element] };
 <<set forward/reverse sorting function>>
-my $s_elem;
+my (@layer_ary,$s_elem);
 foreach my $s_grp (keys %{ $sr_ref }) {
+    @layer_ary = ( \%{ $sr_ref->{$s_grp}[$_prop] },
+                   \%{ $sc_ref->{$s_str}[$_prop] },
+                   \%{ $ss_ref->{$s_src}[$_prop] },
+                   \%{ $s_ref->{$s_seq}[$_prop]  }  );
     <<sorting group elements>>
 }; # foreach $s_grp
+shift @layer_ary;
 <<sorting group coords by acceptor>>
 @ 
 
@@ -6283,11 +7003,16 @@ The main difference between this piece of code and the previous three ones is th
 my $sg_ref = \@{ $sr_ref->{$s_grp}[$_element] };
 $s_elem = $sr_ref->{$s_grp}[$_counter][$_elemNum];
 $s_elem > 1 && do {
-    @{ $sg_ref } = map { $_->[2] }
+    @{ $sg_ref } = map { $_->[3] }
                    sort { &$sortfunct }
-                   map { [ $_->[$_ftori],
+                   map { [
+                           &get_layer('feature_layer', # {feature_layer}
+                                      \%{ $_->[$_ftprop] },
+                                      @layer_ary),
+                           $_->[$_ftori],
                            $_->[$_ftend],
-                           $_ ] } @{ $sg_ref }; # maps start,end,arrayelement
+                           $_
+                         ] } @{ $sg_ref }; # maps layer,start,end,arrayelement
 }; # $s_elem > 1
 # @ft_coords = ( map { $_->[$_ftori], $_->[$_ftend] } @{ $sg_ref } );
 $v_min = &min(map { $_->[$_ftori] } @{ $sg_ref });
@@ -6324,12 +7049,29 @@ $aflg || do {
 &report('SORT_FTR',('|  ' x 5),$s_elem);
 @
 
+We can find if user has set a layer for the current GFF-feature/group with the [[&get_layer]] function (it is similar to [[&get_var_value]] used in section~\ref{sec:getvarvalues} on page~\pageref{sec:getvarvalues}):
+
+<<Sorting Features>>=
+sub get_layer() {
+    my ($name,@refs) = @_;
+    my ($out,$v);
+    $out = 0; # 
+    foreach $v (qw/ FEATURE GROUP STRAND SOURCE SEQUENCE /) {
+        defined($Defaults{$v}{$name}) && ($out = $Defaults{$v}{$name});
+    }; # foreach
+    foreach $v (@refs) {
+        defined($v->{$name}) && ($out = $v->{$name});
+    }; # foreach
+    return $out;
+} # get_layer
+@ %def &get_layer
+
 <<messages - sorting GFF data>>=
 SORT_GRP => "\%sGroup: \%s\n",
 SORT_FTR => "\%s       Sorted \%s elements.\n",
 @ 
 
-\subsctn{Sorting groups by coords and upper features by input order}
+\subsctn{Sorting groups by start coords}
 
 Here we take advantage of having the group coords in a list of lists ([[@{ $st_ord }]]) instead of having it as a list within a key/value hash of lists. Minimum and maximum values from a group counters array are already the minimum and maximum for all the elements within a group, then we do not need a temporary array to which list all coords or scores (as we did in [[<<sorting group elements>>]]).
 
@@ -6364,11 +7106,16 @@ $aflg || do {
          [ $v_min, $v_max, $s_min, $s_max, $l_max, $L_max ];
 }; 
 #
-@{ $st_ord } = map { $_->[2] }
+@{ $st_ord } = map { $_->[3] }
                sort { &$sortfunct }
-               map { [ $_->[1],
+               map { [ 
+                       &get_layer('group_layer', # {group_layer}
+                                  \%{ $sr_ref->{ $_->[0] }[$_prop] },
+                                  @layer_ary),
+                       $_->[1],
                        $_->[2],
-                       $_->[0] ] } @{ $st_ord };
+                       $_->[0]
+                     ] } @{ $st_ord };
 $s_elem = $sc_ref->{$s_str}[$_counter][$_elemNum];
 &report('SORT_GPN',('|  ' x 4),$s_elem);
 @ 
@@ -6379,7 +7126,29 @@ We reduced the group order subarray just to contain the group names sorted (thei
 SORT_GPN => "\%s\`Sorted \%s groups.\n",
 @ 
 
-We are going to skip the strand sorting, because the program will process always strands in a fixed order, that is: '+', '.' and '-' (so forward features first, followed by those features that does not have a defined strand, and finally reverse features).
+
+\subsctn{Sorting strands in a predefined ordering}
+
+The program will process always strands in a fixed order, that is: '+', '.' and '-' (so forward features first, followed by those features that does not have a defined strand, and finally reverse features). The problem appears when looking at alignment strands, which are a composite of the strands for the query and the target sequences. To workaround that we define a ordering hash containing each strand as keys pointing to an increasing number (see [[%StrandNum]] hash), and use that on the sorting process later. 
+
+<<sorting strands for current source>>=
+@{ $sr_ord } = map { $_->[1] }
+               sort { 
+                      $a->[0] <=> $b->[0]  # sort by "strand number"
+                    }
+               map { [ $StrandNum{$_->[0]}, $_ ] } @{ $sr_ord };
+@ 
+
+By setting the following hash we do not need to check if a strand data structure is defined or not. Four values are not ocurring if data does not contain info on strand of target sequence, because program takes the query strand as the target one, but user input may contain them. Those four values are '+.', '.+', '.-' and '-.'.
+
+<<Global Vars>>=
+my %StrandNum; my $ttt = 0;
+foreach my $w (qw/ + ++ +- +. .+ . .. .- -. -+ -- - /) {
+    $StrandNum{$w} = $ttt++;
+}; # foreach
+@ %def $StrandNum
+
+\subsctn{Sorting source and sequence GFF-features by input order}
 
 <<set source elements boundaries>>=
 # @tt_coords = ( map { $_->[0], $_->[1] } @sr_coords );
@@ -6441,21 +7210,25 @@ sub sort_by_inputorder() {
 
 \subsctn{Sorting forward/reverse strands}
 
-As we are saving feature boundaries always in forward coords (meaning that feature start is always smaller than feature end, this was already checked by [[&check_coords]] which is defined in page~\pageref{func:checkcoords}), we need two sort functions, one for sorting forward features that is slightly different than the one used for sorting reverse ones. The main reason is that we want to avoid feature overlapping upstream (so that an element that ends downstream a previous element but starts within the boundaries of this one do not hide it ), this works from left to right for forward features, but must be done counterclockwise (say here from right to left) on reverse features.
+As we are saving feature boundaries always in forward coords (meaning that feature start is always smaller than feature end, this was already checked by [[&check_coords]] which is defined in page~\pageref{func:checkcoords}), we need two sort functions, one for sorting forward features that is slightly different than the one used for sorting reverse ones. The main reason is that we want to avoid feature overlapping upstream (so that an element that ends downstream a previous element but starts within the boundaries of this one do not hide it ), this works from left to right for forward features, but must be done counterclockwise (say here from right to left) on reverse features. Before sorting by acceptors, we perform a sort by layer, being layer number greater or equal to zero (zero represents the bottomest layer and higher layer numbers make features to be ploted on top in the annotation tiers).
 
 <<Sorting Features>>=
 sub sort_forward {
-    $a->[0] <=> $b->[0]  # sorting by start
+    $a->[0] <=> $b->[0]  # sorting by layer
              or
-    $b->[1] <=> $a->[1]; # reverse sorting by end if same start
+    $a->[1] <=> $b->[1]  # sorting by start
+             or
+    $b->[2] <=> $a->[2]; # reverse sorting by end if same start
 } # sort_forward
 #
 sub sort_reverse {
-    $b->[1] <=> $a->[1] # reverse sorting by end
+    $a->[0] <=> $b->[0]  # sorting by layer
              or
-    $a->[0] <=> $b->[0];  # sorting by start if same end
-} # sort_forward
-@ %def &sort_forward &sort_forward
+    $b->[2] <=> $a->[2]  # reverse sorting by end
+             or
+    $a->[1] <=> $b->[1]; # sorting by start if same end
+} # sort_reverse
+@ %def &sort_forward &sort_reverse
 
 We choose between those two functions (both defining which fields to order and the direction --ascending/descending--), assigning by reference to [[$sortfunct]] variable which is de-referenced within the [[sort]] functions.
 
@@ -6929,10 +7702,10 @@ Here we are implementing how the script is going to set major and minor tickmark
 $vrf->{_pbox_len} = $vrf->{_pbox_max_score} - $vrf->{_pbox_min_score} + 1;
 if ( defined($vrf->{percent_major_tickmark}) && 
     !defined($vrf->{major_tickmark_score}) ) {
-    $stplen = 10**( int( &logdec( $vrf->{_pbox_len} * 1000 ) ) - 3 )
+    $stplen = 10**( int( &logdec( $vrf->{_pbox_len} * 1000 ) ) - 2 )
               / $vrf->{percent_major_tickmark};
 } else {
-    $stplen = 10**( int( &logdec( $vrf->{_pbox_len} * 1000 ) - 4 ) );
+    $stplen = 10**( int( &logdec( $vrf->{_pbox_len} * 1000 ) - 3 ) );
 };
 defined($vrf->{major_tickmark_score}) || do {
     $vrf->{major_tickmark_score} = $stplen;
@@ -7718,18 +8491,24 @@ D                 %:%
 
 \subsubsctn{Page main blocks color variables}
 
+When setting background and foregroun colors we must ensure that we do not define them as themselves if user made a mistake, in those cases we return to default values (as they were defined in the customization variables description section).
+
 <<PSVariables - layout>>=
 %-% Background Colors
-/bg {                       %-% bg -> c m y k 
-  colordict begin           %-> recovering from colordict dictionary
-    $vr->{background_color}    %-%            this color cmyk values
-  end                       %-% close colordict
-} D                         %-% 
-/fg {                       %-% fg -> c m y k 
-  colordict begin           %->
-    $vr->{foreground_color}    %-%
-  end                       %-%
-} D                         %-% 
+/bg {                                      %-% bg -> c m y k 
+  colordict begin                          %-> recovering from colordict 
+    @{[ ($vr->{background_color} ne 'bg')  %-% dictionary this color cmyk values
+        ? $vr->{background_color}          %-%
+        : 'white' ]}                       %-%
+  end                                      %-% close colordict
+} D                                        %-% 
+/fg {                                      %-% fg -> c m y k 
+  colordict begin                          %->
+    @{[ ($vr->{foreground_color} ne 'fg')  %-%
+        ? $vr->{foreground_color}          %-%
+        : 'black' ]}                       %-%
+  end                                      %-%
+} D                                        %-% 
 /ABc {                      %-% ABc -> c m y k 
   colordict begin           %->
     $vr->{aplot_box_bgcolor}   %-%
@@ -7763,8 +8542,8 @@ D                 %:%
 @ %def XO XE XD YO YE YD PO PE PD
 
 <<PSVariables - layout>>=
-/QO 0 D  %-% $vr->{_pbox_min_score}
-/QE 1 D  %-% $vr->{_pbox_max_score}
+/QO 0 D  %-% $vr->{_qbox_min_score}
+/QE 1 D  %-% $vr->{_qbox_max_score}
 /QD PE PO sub D        %:%
 @ %def QO QE QD
 
@@ -8173,7 +8952,7 @@ BLOCKXY =>
 BLOCKA =>
   "###       + drawing alignment features...\n",
 BLOCKFX =>
-  "###     + APLOT-BOX extra features from custom files...\n",
+  "###       + drawing special features from custom files...\n",
 BLOCKTODO =>
   "###     + \%s section :\n",
 BLOCKDONE =>
@@ -8215,13 +8994,14 @@ begindata
         &ps_plot_outlines($vlr->{_x_sequence_name},$T);
     $vlr->{_plot_y_sequence} && 
         &ps_plot_outlines($vlr->{_y_sequence_name},$F);
+    scalar(@SpecialCache) > 0 && do {
+        &ps_plot_addons;
+    }; # _plot_addons
     # alignment
     $vlr->{_plot_aln} && do {
         &ps_plot_aln($vlr->{_alignment_name});
     }; # _plot_aln
-    $vlr->{_plot_addons} && do {
-        &ps_plot_addons; # PLOTREMARKS(seqname,flag)
-    }; # _plot_addons
+    #
     $vlr->{zoom_area} && do {
         my $kt = defined($vlr->{zoom_area_fill_color}) 
                  ? "$vlr->{zoom_area_fill_color} ".&tobool($T)
@@ -8331,10 +9111,10 @@ $this{rbnflg} && do {
 <<getting values and customization parameters for current feature>>=
 #
 ($this{strnd},undef) = split //o, $str, 2;
-# {feature_color} {feature_scale_color} {feature_scale_width}
+# {feature_color} {feature_scale_color} {feature_scale_heigth}
 $this{col} = &get_var_value('feature_color',\@rflst)." ".
              &tobool(&get_var_value('feature_scale_color',\@rflst))." ".
-             &tobool(&get_var_value('feature_scale_width',\@rflst));
+             &tobool(&get_var_value('feature_scale_heigth',\@rflst));
 $this{sco} = &norm_score($elst->[$_ftsco],
                          $qlst->[$_counter][$_mnsco],
                          $qlst->[$_counter][$_mxsco]);
@@ -8381,6 +9161,28 @@ print STDOUT "\/$this{shape} $this{grid_flg} $this{col} $this{lbl} ".
              "$this{so} $this{se} ($this{strnd}) grp\n";
 #
 @
+
+
+\subsubsctn{Main aplot box: drawing special features}
+
+<<PostScript PLOT>>=
+sub ps_plot_addons() {
+    my $vsf = \%{ $Vars{LAYOUT} };
+    my %they;
+    &report('BLOCKFX');
+    print STDOUT "\%\n\%\%\%\% Extra features from custom files...\n\%\nbeginaln\n"; 
+    foreach my $ilm (@SpecialCache) {
+        ($they{xo},$they{xe},$they{yo},$they{ye},$they{string}) = @{ $ilm };
+        ( &check_seqlim($they{xo},$they{xe},
+                        $vsf->{_x_start},$vsf->{_x_end}) &&
+          &check_seqlim($they{yo},$they{ye},
+                        $vsf->{_y_start},$vsf->{_y_end}) ) && do {
+            print STDOUT "$they{string}\n";
+        }; # check_nuclim
+    }; # foreach $ilm
+    print STDOUT "endseq\n";
+} # ps_plot_addons
+@ %def &ps_plot_addons
 
 
 \subsubsctn{Main aplot box: drawing alignment}
@@ -8476,16 +9278,6 @@ $vaf->{show_percent_box} && do {
     }; # if check_inlim(ysc)
 }; # show_percent_box
 @ 
-
-<<PostScript PLOT>>=
-sub ps_plot_addons() {
-    &report('BLOCKFX');
-    print STDOUT "\%\n\%\%\%\% Extra features from custom files...\n\%\nbeginaln\n"; 
- 
-
-    print STDOUT "endseq\n";
-} # ps_plot_addons
-@ %def &ps_plot_addons
 
 
 \subsubsctn{Generating percent box}
@@ -8638,6 +9430,7 @@ sub check_inlim() {
 @ %def &check_seqlim &check_inlim
 
 If we have to look if a variable is set at any of the GFF elements level (say here sequence, source, strand, group or feature), we need the following function, [[&get_var_value]]. It takes as parameters the variable name to check (must be the first element), and then a list of references to the element array (which will be used to retrieve the value for the variable if it is defined in the [[$_prop]] sub-hash of that array). The input order of the references list is very important, as the latest reference checked returning a value overrides any previous setting. But before checking any user-defined setting, we look for the variable in the Defaults hash.
+\label{sec:getvarvalues}
 
 <<PostScript PLOT>>=
 sub get_var_value() {
@@ -8837,9 +9630,13 @@ The variables and functions defined in this section are appended directly to the
 %-% styles
 /cmyk { setcmykcolor } B       %-% we are going to use only CMYK colors
 /slw  { setlinewidth } B       %-%
+/solid   { [     ] 0 setdash } D  %-% solid  line style: dashing off
 /dotted  { [ 1   ] 0 setdash } D  %-% dotted line style: 1 ON 1 OFF, offset=0
 /ldotted { [ 1 2 ] 0 setdash } D  %-% dotted line style: 1 ON 2 OFF, offset=0
-/dashed  { [ 3 2 ] 0 setdash } D  %:% dashed line style: 3 ON 2 OFF, offset=0
+/dashed  { [ 3 3 ] 0 setdash } D  %-% dashed line style: 3 ON 3 OFF, offset=0
+/ldashed { [ 6 4 ] 0 setdash } D  %-% dashed line style: 6 ON 4 OFF, offset=0
+/ddashed { [ 4 3 1 3              %-% dashed-dotted line style:
+                 ] 0 setdash } D  %:%   4 ON 3 OFF 1 ON 3 OFF, offset=0
 %
 %%EndProcSet:   Short_names 1.0 0
 %
@@ -9672,6 +10469,10 @@ tflg { (%%% Setting aplot dictionary %%%) msg } if
   <<PSFunctions - ribbons>>
   <<PSFunctions - grp>>
   <<PSFunctions - aln>>
+  <<PSFunctions - xbox>>
+  <<PSFunctions - xcir>>
+  <<PSFunctions - xtxt>>
+  <<PSFunctions - xarw>>
   <<PSFunctions - common tick functions>>
   <<PSFunctions - htick>>
   <<PSFunctions - vtick>>
@@ -9745,7 +10546,7 @@ end % aplotdict
 @ %def fmt flt
 
 
-\subsubsctn{Drawing major functions}
+\subsubsctn{Main drawing functions}
 
 <<PSFunctions - corner>>=
 /corner {        %-> X Y r s  corner
@@ -10066,12 +10867,189 @@ end % aplotdict
 @ %def aln
 
 
+\subsubsctn{Drawing functions for special features}
+
+<<PSFunctions - xbox>>=
+%-%
+/xbox { %-> l_col l_wdth l_sty { fill_col fill_flg } xo xe yo ye  xbox
+  S            %->
+    Yscme      %-> l_col l_wdth l_sty { fill_col fill_flg } xo xe ye! yo
+    Yscme      %-> l_col l_wdth l_sty { fill_col fill_flg } xo xe yo! ye!
+    4 -2 roll  %-> l_col l_wdth l_sty { fill_col fill_flg } yo! ye! xo xe
+    Xscme      %-> l_col l_wdth l_sty { fill_col fill_flg } yo! ye! xe! xo
+    Xscm       %-> l_col l_wdth l_sty { fill_col fill_flg } yo! ye! xe! xo!
+    4 1 roll   %-> l_col l_wdth l_sty { fill_col fill_flg } xo! yo! ye! xe!
+    exch       %-> l_col l_wdth l_sty { fill_col fill_flg } xo! yo! xe! ye!
+    bbox       %-> l_col l_wdth l_sty { fill_col fill_flg }
+    {          %-%   if shape must be filled then get color and fill it.
+      S        %->
+        cmyk   %->
+        fill   %->
+      R        %->
+    } if       %-> l_col l_wdth l_sty
+    cvx exec   %-> l_col l_wdth (l_sty->setdash)
+    slw        %-> l_col
+    cmyk       %->
+    K          %-> 
+  R            %->
+} B            %:%
+@ %def xbox
+
+
+<<PSFunctions - xcir>>=
+%-%
+/xcir { %-% l_col l_wdth l_sty { fill_col fill_flg } Rx Ry angle xo yo xcir
+  S               %->
+    Yscme         %-> l_c l_w l_s f_c f_flg Rx Ry angle yo! xo
+    Xscme         %-> l_c l_w l_s f_c f_flg Rx Ry angle xo! yo!
+    T             %-> l_c l_w l_s f_c f_flg Rx Ry angle
+    rotate        %-> l_c l_w l_s f_c f_flg Rx Ry
+    Yscme         %-> l_c l_w l_s f_c f_flg Ry! Rx
+    Xscme         %-> l_c l_w l_s f_c f_flg Rx! Ry!
+    2 copy        %-> l_c l_w l_s f_c f_flg Rx! Ry! Rx! Ry!
+    5 2 roll      %-> l_c l_w l_s f_c Rx! Ry! f_flg Rx! Ry!
+    F             %->
+    0 0 1         %-% x y radius start end arc
+    0 360 arc     %-%
+    closepath     %-> l_c l_w l_s f_c Rx! Ry! f_flg
+    {             %-%  if shape must be filled then get color and fill it.
+      S           %->
+        6 2 roll  %-> l_c l_w l_s Rx! Ry! f_cyan f_magenta f_yellow f_black
+        cmyk      %->
+        fill      %->
+      R           %->
+    } if          %-> l_c l_w l_s Rx! Ry!
+    2 {           %->
+      1 exch div  %->
+      exch        %->
+    } repeat      %-> l_c l_w l_s 1/Rx! 1/Ry!
+    F             %-> l_c l_w l_s
+    cvx exec      %-> l_c l_w (l_s->setdash)
+    slw           %-> l_c
+    cmyk          %->
+    K             %-> 
+  R               %->
+} B               %:%
+@ %def xcir
+
+
+<<PSFunctions - xtxt>>=
+%-%
+/xtxt { %-% mark angle string valn haln {fz fn} {tcol tflg} x y  xtxt
+  S            %->
+    Yscme      %-> mark angle string valn haln {fz fn} {tcol tflg} y! x
+    Xscme      %-> mark angle string valn haln {fz fn} {tcol tflg} x! y!
+    counttomark %->
+        2 roll  %-> mark x! y! angle string valn haln {fz fn} {tcol tflg}
+    {          %->  if text color is not given, use foreground color
+      fg       %->
+    } if       %-> mark x! y! angle string valn haln {fz fn} tcol
+    cmyk            %->
+    sfnt            %->
+    8 dict begin    %->
+      /h X          %->
+      /v X          %->
+      /lbl X        %->
+      /angle X      %->
+      /y X          %->
+      /x X          %->
+      /hs           %->
+        lbl         %->
+        stringwidth %->
+        pop         %->
+      D             %->
+      /vs           %->
+        lbl         %->
+        strh        %->
+      D             %->
+      x y T         %->
+      angle rotate  %->
+      h (rh) eq {   %->
+        hs          %->
+      } {           %->
+        h (ch) eq { %->
+          hs 2 div  %->
+        } {         %->
+          0         %->
+        } ifelse    %->
+      } ifelse      %->
+      neg           %->
+      v (tv) eq {   %->
+        vs          %->
+      } {           %->
+        v (cv) eq { %->
+          vs 2 div  %->
+        } {         %->
+          0         %->
+        } ifelse    %->
+      } ifelse      %->
+      neg           %->
+      m             %->
+      lbl show      %->
+    end             %->
+%    ttshw      %-> %%% X Y angle string valign halign fnt color ttshw
+    pop        %-% removing mark     
+  R            %->
+} B            %:%
+@ %def xtxt
+
+
+We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be defined before using it).
+
+<<PSFunctions - xarw>>=
+%-%
+/xarw { %-% [string valn haln {fz fn} {tcol tflg}] lcol lw len angle x y  xarw
+  S            %->
+    Yscme      %-> [...] lcol lw len angle y! x
+    Xscme      %-> [...] lcol lw len angle x! y!
+    T          %-> [...] lcol lw len angle x! y!
+    dup neg    %-> [...] lcol lw len angle -angle
+    counttomark %->
+        1 roll  %-> -angle [...] lcol lw len angle
+    rotate     %-> -angle [...] lcol lw len
+    2 dict begin  %->
+      /la X       %-> -angle [...] lcol lw
+      /lb X       %-> -angle [...] lcol
+      cmyk        %-> -angle [...]
+      0 0 m       %-% drawing arrow head
+      lb 6 mul    %-> ... ax
+      dup         %-> ... ax ax
+      la gt {     %-> ... ax
+        pop la    %-> ... ax
+      } if        %-> ... ax
+      dup         %-> ... ax ax
+      dup         %-> ... ax ax ax
+      3 div       %-> ... ax ax ay
+      dup         %-> ... ax ax ay ay
+      1.5 mul     %-> ... ax ax ay ay'
+      neg         %-> ... ax ax ay -ay'
+      3 1 roll    %-> ... ax -ay' ax ay
+      l l         %-> ...
+      closepath   %-> 
+      fill        %-% filling arrow head
+      0 0 m       %->
+      la 0 l      %-% arrow line
+      lb slw      %->
+      K           %->
+                  %-% preparing x coord for text label
+      la          %->
+      lb 2 mul    %->
+      add         %-> -angle [string valn haln {fz fn} {tcol tflg}] x
+    end           %->
+    0          %-> -angle [string valn haln {fz fn} {tcol tflg}] x y 
+    xtxt       %-% xtxt removes current mark
+  R            %->
+} B            %:%
+@ %def xarw
+
+
 \subsubsctn{Tickmarks related functions: shared}
 
 <<PSFunctions - common tick functions>>=
 %-% we provide a number to this function to find how many  
 %-%   decimal digits it has, and chktk function returns that value (ge 0)
 /chktk {          %-> number  chktk
+  %-% vflg { (chktk : ) mst } if
   3 dict begin    %-> 
     /pk X         %-> load "number" into a local variable (pk)
     /ck 0 D       %-> initializing counters
@@ -10102,7 +11080,7 @@ end % aplotdict
 } B               %->
 %-%
 /mymod {          %-> a b  mymod
-  %-% vflg { (mymod) msg } if
+  %-% vflg { (mymod : ) mst } if
   2 copy          %-> a b a b
   chktk           %-> a b a bc
   exch            %-> a b bc a
@@ -10137,8 +11115,19 @@ end % aplotdict
       ff div      %-> which we can use to recover the real modulus
     end           %-> of the original two decimal numbers
   } ifelse        %->
-} B               %:% returns the a/b modulus via the stack
-@ %def chktk mymod
+} B               %-% returns the a/b modulus via the stack
+%-%
+%-%
+/rndtk {     %-> cnt  rndtk 
+  %-% vflg { (rndtk : ) mst } if
+  dup        %-> cnt cnt
+  abs        %-> cnt |cnt|
+  10 -6 exp  %-> cnt |cnt| 10e-6
+  le {       %-% if |cnt| is lower or equal than 10e-6
+    pop 0    %-%   then replace cnt by 0
+  } if       %->
+} B          %:%  cnt! = cnt || 0
+@ %def chktk mymod rndtk
 
 <<PSFunctions - common tick functions>>=
 %-% mkgrid prints the grid lines if needed
@@ -10280,14 +11269,14 @@ end % aplotdict
         /cnt             %->
           lxo            %->
         D                %->
-        to neg Xscm 0 T  %-> translating to sequence absolute start
-        {                %-> begin loop
+        to neg Xscm 0 T  %-% translating to sequence absolute start
+        {                %-% begin loop
           cnt te ge {    %->
-            exit         %-> if current tick greater than last tick
-          } if           %->   then exit from tickmarks loop
+            exit         %-% if current tick greater than last tick
+          } if           %-%   then exit from tickmarks loop
           cnt to gt      %->
           cnt te lt      %->
-          and {          %-> draw major tickmark if it is within limits
+          and {          %-% draw major tickmark if it is within limits
             cnt Xscm     %->
             S            %->
               0 T               %-> move to (current_coord, 0)
@@ -10295,13 +11284,17 @@ end % aplotdict
               KGb {             %->
                 _t 0 yt mkgrid  %->
               } if              %-> must show grid ?            
-              cnt hticklbl      %-> show tickmark coord
+              cnt rndtk  %-% due to internal aritmethic of PostScript,
+                         %-%   we must fix cnt because loop will not
+                         %-%   generate zero but a very small number, 
+                         %-%   rndtk function is a workaround to solve that
+              hticklbl   %-% show tickmark coord
             R            %->
           } if           %->
-          /cnt           %-> adding new tickmark to counter
+          /cnt           %-% adding new tickmark to counter
             cnt tmx add  %->
           D              %->
-         } loop          %-> end loop
+         } loop          %-% end loop
       R                  %->
       %-% Making minor tickmarks
       S                  %->
@@ -10453,28 +11446,32 @@ end % aplotdict
           lxo            %->
         D                %->
         0 to neg Yscm T  %-> translating to sequence absolute start
-        {                %-> begin loop
+        {                %-% begin loop
           cnt te ge {    %->
-            exit         %-> if current tick greater than last tick
-          } if           %->   then exit from tickmarks loop
+            exit         %-% if current tick greater than last tick
+          } if           %-%   then exit from tickmarks loop
           cnt to gt      %->
           cnt te lt      %->
-          and {          %-> draw major tickmark if it is within limits
+          and {          %-% draw major tickmark if it is within limits
             cnt Yscm     %->
             S            %->
-              0 exch T       %-> move to (0,current_coord)
-              _f mjrtick     %-> draw major tick line (false==vertical)
+              0 exch T       %-% move to (0,current_coord)
+              _f mjrtick     %-% draw major tick line (false==vertical)
               KGb {          %->
                 _t xt neg 0  %->
                      mkgrid  %->
-              } if           %-> must show grid ?            
-              cnt vticklbl   %-> show tickmark coord
+              } if           %-% must show grid ?            
+              cnt rndtk  %-% due to internal aritmethic of PostScript,
+                         %-%   we must fix cnt because loop will not
+                         %-%   generate zero but a very small number, 
+                         %-%   rndtk function is a workaround to solve that
+              vticklbl   %-% show tickmark coord
             R            %->
           } if           %->
-          /cnt           %-> adding new tickmark to counter
+          /cnt           %-% adding new tickmark to counter
             cnt tmx add  %->
           D              %->
-         } loop          %-> end loop
+         } loop          %-% end loop
         %-% Making minor tickmarks
         /cnt             %->
           lno            %->
@@ -12695,7 +13692,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.29 2001-12-19 09:38:26 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -13843,6 +14840,29 @@ $BIN/gff2aplot.pl --debug -V $WORK/tests/running.log \
     2> $WORK/tests/running.err  ;
 egrep -v '^#' $WORK/tests/running.ps.t > $WORK/tests/running.ps ;
 gv -portrait $WORK/tests/running.ps ;
+#
+$BIN/gff2aplot.pl --debug -V $WORK/tests/running.log
+     --custom-filename $WORK/tests/running.extra.rc
+     --custom-filename $WORK/tests/running.rc
+     --subtitle "A simple test set is being drawn using GFF2APLOT..."
+     --background-color  verylightviolet
+     --aplot-box-color   lightyellow
+     --percent-box-color lightcyan
+     --extra-box-color   lightseagreen
+     --show-percent-box --show-extra-box
+     --feature-var 'exon::ribbons_style=lines'
+     --feature-var 'exon@e4::show_feature_label=on'
+     --feature-var 'mrna::ribbons_style=r'
+     --feature-var '*::show_ribbons=on'
+     --feature-var 'mrna::feature_layer=-1'
+     --feature-var 'align::feature_layer=5'
+     --feature-var 'mrna::feature_color=lightgreen'
+     --feature-var 'mrna::feature_scale_height=on'
+     --feature-var 'mrna::feature_score_range=0..0.5'
+     --layout-var 'percent_box_score_range=0..1'
+     -- $WORK/tests/GFFmix.gff
+      > $WORK/tests/running.ps
+     2> $WORK/tests/running.err  ;
 @ 
 
 \label{todo:TAA}
@@ -14266,7 +15286,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.29 2001-12-19 09:38:26 jabril Exp $
+# $Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
