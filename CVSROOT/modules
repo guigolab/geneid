@@ -52,7 +52,8 @@ rguigo        users/rguigo
 #
 jabril        users/jabril
 docsjabril    users/jabril/docs
-docsjabril/DEA/psfigures  -o  docsjabril/TESI/biblio/papers
+papersjabril  -a docsjabril/TESI/biblio/papers
+docsjabril/DEA/psfigures  -o  papersjabril
 softjabril    users/jabril/software
 gfftools      users/jabril/software/gfftools
 gffperlmod    users/jabril/software/gfftools/gfftools
