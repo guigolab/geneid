@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.17 1999-06-19 21:12:31 jabril Exp $	
+#         $Id: gff2ps,v 1.18 1999-06-22 20:58:32 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -47,13 +47,10 @@ Defaults () {
  # 
  # Constants: 
   PROGRAM="gff2ps"
-  VERSION="v1.1"
-  SHCREATION="01.03.1999"
-  SHREVISION="01.06.1999"
-  PSPROGRAM="gffPSplot"
-  PSVERSION="v1.0"
-  PSCREATION="01.06.1999"
-  PSREVISION="01.06.1999"
+  VERSION="v1.0"
+  REVISION='$Revision: 1.18 $'
+  DATERELEASE='$Date: 1999-06-22 20:58:32 $'
+  PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
   MAIL="%                  Dept. Informatica Medica
@@ -71,6 +68,7 @@ Defaults () {
      verydarkorange | darkorange | orange | lightorange | verylightorange 
      verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow 
         verydarkbrown | darkbrown | brown | lightbrown | verylightbrown"
+
  # 
  # Default User-Defined Options: 
   CFDIR=`pwd`
@@ -101,6 +99,7 @@ Defaults () {
   v09=1; n09="blocks_x_page"
   v10=0; n10="nucleotides_x_line"
   v11=1; n11="show_blocks_top-bottom"
+  v12="a4,595,842"; n12="page_bbox"
 # Layout Properties
   c01="1cm"; m01="margin_left"
   c02="1cm"; m02="margin_right"
@@ -118,6 +117,31 @@ Defaults () {
   c14="1cm";    m14="default_track_width"
   c15="1cm";    m15="default_track_spacing_width"
   c16="0.25cm"; m16="default_block_spacing_width"
+  c17="blue";  m17="frame0_color"
+  c18="red";   m18="frame1_color"
+  c19="green"; m19="frame2_color"
+  c20=1; m20="show_inner_scale"
+  c21=1; m21="show_outer_scale"
+}
+
+#  
+# Default PageSizes:
+#
+pagesizes () {  # Size_name Portrait_minor-axes:X Portrait_major-axes:Y
+cat <<'@@@PAGESIZES@@@'
+a2         1190 1684
+a3          842 1190
+a4          595  842
+a5          420  595
+b4          708 1003
+b5          516  729
+executive   540  720
+ledger     1224  792
+legal       612 1008
+letter      612  792
+tabloid     792 1224
+userdefined 595 2448
+@@@PAGESIZES@@@
 }
 
 #
@@ -149,6 +173,7 @@ Help () {
   echo "     -h  Shows this help."
   echo "     -H <option> Shows only help for the especified option."
   echo "     -v Verbose mode, a report is sent to standard error."
+  echo "     -S <page_size> Useful for modifying the page size (default is a4)."
   echo "     -p Switches page orientation to Portrait (default is Landscape)."
   echo "     -P <\#> Sets how many pages are needed to split your output (default is one)."
   echo "     -B <\#> Sets blocks per page (default is one)."
@@ -177,7 +202,7 @@ Help () {
   echo "       Mail  : "
   gawk 'BEGIN{tt=ARGV[1];ARGV[1]="";gsub("\%\%","",tt);printf tt;print}' "$MAIL"
   echo ""
-  return
+ return 0
 }
 
 ShowHelpLine () {
@@ -187,23 +212,56 @@ ShowHelpLine () {
   { if ($0~srch) { print $0; flg=1 } }
   END{ if (!flg) printf "\n\tERROR: Option %s is not defined,\n\t\tmake sure which option you need help.\n",srch }' $1 
  echo ""
- return
+ return 0
 }
 
 ##############################################################
 ################# POSTSCRIPT MAIN FUNCTIONS ##################
+
 #
-# Printing %%Prolog Constant Definitions...
+# Printing PostScript Prolog (Constants,Variables and Functions)...
 #
-MAINPSCPR () {
-cat <<'@@@EndCopyRight@@@'
+MAINPSHEADER () {
+
+gawk 'BEGIN{ 
+ # Find actual date...
+ "date" | getline d
+ split(d,dt," ")
+ date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
+ # Finding logged user...
+ "whoami" | getline usr
+ # Printing PostScript Header...
+ bg=  "%%\!PS-Adobe-3.0\n"
+ bg=bg"%%%%Title: %s\n"
+ bg=bg"%%%%Creator: %s\n"
+ bg=bg"%%%%Version: %s\n"
+ bg=bg"%%%%CreationDate: %s\n"
+ bg=bg"%%%%For: %s\n"
+ bg=bg"%%%%Pages: (atend)\n"
+ bg=bg"%%%%Orientation: (atend)\n"
+ bg=bg"%%%%BoundingBox: (atend)\n"
+ bg=bg"%%%%EndComments\n%%\n"
+ bg=bg"%% Author : %s\n"
+ bg=bg"%% e-mail : %s\n"
+ bg=bg"%% Mail Adress:\n%s\n%%\n"
+ if (ARGV[1]!~"##dflt##") title=ARGV[1]
+ else title="GFF to PostScript"
+ printf bg, title, ARGV[2], ARGV[3], date, usr, ARGV[4], ARGV[5], ARGV[6]
+ printf "%% ------------------------------------------------------------------------\n"
+ printf "%%                     %s\n",ARGV[7]
+ printf "%% ------------------------------------------------------------------------\n"
+ for (i=1;i<=7;i++) ARGV[i]=""
+}' "##dflt##" "$PROGRAM" "$VERSION" "$AUTHOR" "$EMAIL" "$MAIL" "$PSPROGRAM"
+
+cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.17 1999-06-19 21:12:31 jabril Exp $
+%    $Id: gff2ps,v 1.18 1999-06-22 20:58:32 jabril Exp $
 % 
-%          Converting GFF files to PostScript plots.
+% 
+%        Converting GFF files to PostScript plots.
 %
-%          Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
-%                                      Roderic GUIGO SERRA       
+%        Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+%                                    Roderic GUIGO SERRA       
 %
 %    This program is free software; you can redistribute it and/or modify
 %    it under the terms of the GNU General Public License as published by
@@ -220,28 +278,24 @@ cat <<'@@@EndCopyRight@@@'
 %    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 %
 % ------------------------------------------------------------------------
-@@@EndCopyRight@@@
-}
-
-MAINPSSETUP () {
-cat <<'@@@EndProlog@@@'
 %
-%%BeginSetup
+%%BeginProlog
 %
-% true setpacking
-true setstrokeadjust
-0.125 setlinewidth
-0 setlinejoin
-0 setlinecap
-%
+%%BeginProcSet: Basics 1.0 0
+/tflg false def % test flag
 /bdf { bind def } bind def
 /xdf { exch def } bdf
 /cm { 28.35 mul } bdf
 /in { 72    mul } bdf
+%%EndProcSet:   Basics 1.0 0
 %
+%%BeginProcSet: Constants 1.0 0
+% Printing Offset
+/VUpOS 0.25 cm def  % offset defines non printable
+/VDnOS 0.25 cm def  % paper area for pages (printer outlimits).
+/HLtOS 0.25 cm def
+/HRtOS 0.25 cm def
 % Fixed Color Variables (CMYK)
-% -----------------------------
-%
 /colordict 80 dict def colordict begin % 52 colors + 28 definitions
 /black            { 0.00 0.00 0.00 1.00 } def /verydarkgrey     { 0.00 0.00 0.00 0.90 } def
 /darkgrey         { 0.00 0.00 0.00 0.75 } def /grey             { 0.00 0.00 0.00 0.50 } def
@@ -270,46 +324,25 @@ true setstrokeadjust
 /darkbrown        { 0.00 0.75 1.00 0.60 } def /brown            { 0.00 0.70 1.00 0.40 } def
 /lightbrown       { 0.30 0.60 0.70 0.00 } def /verylightbrown   { 0.15 0.45 0.55 0.00 } def
 end % colordict
-%
-%  Paper Sizes  (in points)  <--- Probably it is better to generate each time.
-% --------------------------
-%
-/pagedict 14 dict def pagedict begin % Portrait { minor-axes:X major-axes:Y }
-/pga2          { 1190 1684 } def /pga3          {  842 1190 } def
-/pga4          {  595  842 } def /pga5          {  420  595 } def
-/pgb4          {  708 1003 } def /pgb5          {  516  729 } def
-/pgexecutive   {  540  720 } def /pgledger      { 1224  792 } def
-/pglegal       {  612 1008 } def /pgletter      {  612  792 } def
-/pgtabloid     {  792 1224 } def /pguserdefined {  595 2448 } def
-end % pagedict
-%
-%  Defining CONSTANTS
-% --------------------
-%
-/tflg false def     % test flag
-%
-/VUpOS 0.25 cm def  % offset defines non printable
-/VDnOS 0.25 cm def  % paper area for pages (printer outlimits).
-/HLtOS 0.25 cm def
-/HRtOS 0.25 cm def
-%
-%  Defining VARIABLES
-% --------------------
-%
+%  Paper Sizes  (in points)
 @@@EndProlog@@@
+
+pagesizes | gawk 'BEGIN{ i=0 } { count[i++]=$1; X[$1]=$2; Y[$1]=$3 }
+ END{ 
+  printf "/pagedict %s dict def pagedict begin\n",(i+1);
+  for (j=0;j<i;j++) printf "/pg%-12s { %4s %4s } def\n", count[j], X[count[j]], Y[count[j]];
+  printf "end %% pagedict\n%%%%EndProcSet:   Constants 1.0 0\n"
+ }' -
+
 }
-#### End of MAINPSSETUP function
+#### End of MAINPSHEADER function
 
 #
 # Printing Main PostScript Routines...
 #
 MAINPSPROCS () { 
 cat <<'@@@MAINProcs@@@'
-% /pgXsc { pglim pop 100 div } def
-% /pgYsc { pglim exch pop 100 div } def
-%%EndSetup
-%
-%%BeginProlog
+%%EndProcSet:   Setting_Vars 1.0 0
 %
 %%BeginProcSet: Page_Layout 1.0 0
 % checking if margins are within the defined offset
@@ -326,48 +359,33 @@ flglscape {
   } ifelse
 % defining pagelimits and X - Y scales (Xlim Ylim)
 /pglim { Dpage pop LtM RtM add sub Dpage exch pop UpM DnM add sub } def
-%
 % Defining starting point on page.
 /XORI LtM def
 /YORI UpM def
-% Defining page layout.
+% Defining page-elements layout.
 /XSTitl pglim pop XOriTitl 2 mul sub def
 /XSBlck pglim pop def
 /YSBlck pglim exch pop YSTitl BlckSp NBlck mul add YOriTitl add sub NBlck div def
-%
 /XOriBlck 0 def
-/Nuc_Offset XOriBlck def
 /YOriBlck YOriTitl YSTitl BlckSp add add def
-/Y YOriBlck def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
 /XOriPlot { XOriBlck FLftLbl { XLftLbl add } if } def
 /Xscale XSPlot MaxNuclPage div def
-/Yscale tracksize def
-%
-/up   YSBlck def
-/down YSBlck def
-%
-/is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and LnFwd 0 eq LnRvs 0 eq and or and def % true if must plot two tickmark lines
 /YSLine YSBlck LnTot div def
-%
-% /LnTot LnFwd LnBth LnRvs add add def
-% /putuptck LnFwd 0 gt LnFwd LnRvs add 0 eq or def
-% /putdntck LnBth 0 gt LnFwd LnBth add 0 eq or def
-% /TmpYSB YSBlck TkMrkW is2tck { 2 mul } if sub def  % Adjusting plot area size with tickmarks.
-% /YSFwd LnFwd LnTot div TmpYSB mul def
-% /YOriFwd YOriBlck def
-% /YSBth LnBth LnTot div TmpYSB mul def
-% /YOriBth YOriFwd YSFwd add putuptck { TkMrkW add } if def
-% /YSRvs LnRvs LnTot div TmpYSB mul def
-% /YOriRvs YOriBth YSBth add putdntck { TkMrkW add } if def
-%
+/tracksize tracksize YSLine mul def
+/spcrsize spcrsize YSLine mul def
+/YSFwd LnFwd YSLine mul def
+/YSBth LnBth YSLine mul def
+/YSRvs LnRvs YSLine mul def
+/YSTck LnTck YSLine mul def
+% /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and LnFwd 0 eq LnRvs 0 eq and or and def % true if must plot two tickmark lines
+ /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
 %%EndProcSet:   Page_Layout 1.0 0
 %
 %%BeginProcSet: functions 1.0 0
 /min { 2 copy gt { exch } if pop } bdf 
 /max { 2 copy lt { exch } if pop } bdf
 /Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
-/Yscm { Yscale mul } bdf /Yscme { Yscm exch } bdf
 /ChkLimits { 3 copy pop 5 2 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or { pop false } { true } ifelse } def 
 /nucdif { 2 copy exch sub } bdf
 %%EndProcSet:   functions 1.0 0
@@ -418,33 +436,37 @@ end % colordict
  /MkCtick { setlinewidth 0 0 moveto 0 TkMrkHW 3 -1 roll { TkMrkDW sub } if lineto FGcolor scmyk stroke } bdf
  /MkDtick { gsave dup Xscm 0 translate CheckCloser { 10 string cvs bltextick } if ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if false 1 MkCtick grestore } bdf
  /baseline { gsave Xscm TkMrkDW moveto Xscm TkMrkDW lineto TkMrkDW 2 mul setlinewidth FGcolor scmyk stroke grestore } bdf
- /r { /Gridup true def /Griddn true def /flgup true def 0 exch TkMrkW add translate gsave 0 translate 1 -1 scale 5 { 2 copy } repeat pop neg Xscm 0 translate 0 tonormtick MinTick exch { ChkLimits { gsave Xscm 0 translate 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if grestore } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat grestore } bdf
+ /r { /Gridup true def /Griddn true def /flgup true def 0 exch translate gsave 0 translate 1 -1 scale 5 { 2 copy } repeat pop neg Xscm 0 translate 0 tonormtick MinTick exch { ChkLimits { gsave Xscm 0 translate 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if grestore } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat grestore } bdf
  /x { 6 { 2 copy } repeat pop neg Xscm 0 translate baseline 0 tonormtick MinTick exch { ChkLimits { gsave Xscm 0 translate true 0.25 MkCtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if grestore } if } for 1 tonormtick MaxTick exch { ChkLimits { MkDtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkDtick } { pop } ifelse } repeat } bdf 
- /s { /Gridup false def /Griddn true def /flgup true def 0 exch translate gsave 0 translate 1 -1 scale x grestore } bdf
- /z { /Gridup true def /Griddn false def /flgup false def 0 exch TkMrkHW add translate gsave 0 translate 1 1 scale x grestore } bdf
+ /s { /Gridup false def /Griddn true def /flgup true def 0 exch TkMrkW add translate gsave 0 translate 1 -1 scale x grestore } bdf
+ /z { /Gridup true def /Griddn false def /flgup false def 0 exch translate gsave 0 translate 1 1 scale x grestore } bdf
 end % tmdct
 %%EndProcSet:   tickmarks 1.4 0
 %
 %%BeginProcSet: objects 1.1 0
 /shpdct 46 dict def shpdct begin
- /LY { tracksize 1.5 mul } bdf
  /ShFont { TkMrkW 2 div /Helvetica } def
+ /LY { tracksize 0.75 mul } bdf
+ /trackbb { LY 0.55 mul } bdf
  /RWTS { LY 1.5 mul } bdf
  /mtrx matrix def
+% Shapes......
  /cpt { moveto { lineto } repeat closepath } bdf
  /hline { 0 0 moveto 1 0 lineto closepath } bdf
- /fline { hline tracksize sc mul setlinewidth } bdf
- /harw {  0.0  0.0  0.0  -1.0  0.745 -1.0  0.745 -1.1  0.75 -1.1  5  1.0  0.0  cpt } bdf
- /farw {  0.75   0.6  0.745  0.6  0.745  0.5  0.0   0.5  0.0  -0.5
-          0.745 -0.5  0.745 -0.6  0.75 -0.6                        8  1.0  0.0  cpt } bdf
- /hend {  0.0  0.0  -1.0   0.0 -1.0   1.0                        3  0.75 0.0  cpt } bdf
- /fend {  0.5  1.0   0.5   0.0 -0.5   0.0 -0.5   1.0             4  0.75 0.0  cpt } bdf
- /hbox {  1.0  0.0   1.0  -1.0  0.0  -1.0                        3  0.0  0.0  cpt } bdf
- /fbox {  0.0  0.5   1.0   0.5  1.0  -0.5                        3  0.0 -0.5  cpt } bdf
- /hcir {  0.5 -0.5   0.5   0   360 arc closepath } bdf
- /fcir {  0.5  0.0   0.5   0   360 arc closepath } bdf
-%%% /getcol { colordict begin /ct xdf /s end } bdf
-% must define frame colors /frm0 /frm1 /frm2...
+ /fline { hline trackbb sc mul setlinewidth } bdf
+ /harw {  0.0    0.0  0.0   -1.0  0.745 -1.0  0.745 -1.1  0.75 -1.1  5  1.0  0.0  cpt } bdf
+ /farw {  0.75   0.6  0.745  0.6  0.745  0.5  0.0    0.5  0.0  -0.5
+          0.745 -0.5  0.745 -0.6  0.75  -0.6                         8  1.0  0.0  cpt } bdf
+ /hend {  0.25   0.0  0.0   -1.0  1.0   -1.0                         3  1.0  0.0  cpt } bdf
+ /fend {  0.0    0.5  1.0    0.5  1.0   -0.5  0.0 -0.5               4  0.25 0.0  cpt } bdf
+ /hbox {  1.0    0.0  1.0   -1.0  0.0   -1.0                         3  0.0  0.0  cpt } bdf
+ /fbox {  0.0    0.5  1.0    0.5  1.0   -0.5                         3  0.0 -0.5  cpt } bdf
+ /hsgl {  0.25   0.0  0.0   -1.0  0.745 -1.0  0.745 -1.1  0.75 -1.1  5  1.0  0.0  cpt } bdf
+ /fsgl {  0.75   0.6  0.745  0.6  0.745  0.5  0.0    0.5  0.25  0.0
+          0.0   -0.5  0.745 -0.5  0.745 -0.6  0.75  -0.6             9  1.0  0.0  cpt } bdf
+ /hcir {  0.5   -0.5  0.5    0   360 arc closepath } bdf
+ /fcir {  0.5    0.0  0.5    0   360 arc closepath } bdf
+% ......Shapes
  /getfrcol { dup 0 eq { pop frm0 } { dup 1 eq { pop frm1 } { 2 eq { frm2 } if } ifelse } ifelse } bdf
  /cmdln { 0 moveto sqdif 2 div 0 lineto scmyk stroke } bdf
  /lnfill { gsave RWTS setlinewidth sqdif 2 div cmdln 0 cmdln grestore } bdf
@@ -453,16 +475,15 @@ end % tmdct
 % /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf strnd (-) eq { exch } if 2 copy exch sub /sqdif exch Xscm def /sqdsc sqdif Xscale div def /seqend exch Xscm def /seqori exch Xscm def /cmod xdf } bdf
  /getvar { /ftlbl xdf /cmod xdf /sc xdf /rmd xdf /frm xdf nucdif /sqdif exch Xscm def /sqend exch def /sqori exch def /seqend sqend Xscm def /seqori sqori Xscm def } bdf
  /setcolmod { colordict begin cmod cvx exec dup 1 eq { pop scmyk fill } { dup 2 eq { pop lnfill } { dup 3 eq { pop frmfill } { dup 4 eq { pop rnbfill } { 0 eq { BGcolor scmyk fill } if } ifelse } ifelse } ifelse } ifelse end } bdf
- /shwpos { flpos { sqend sqori strnd (-) eq { exch } if sqdif exch 0 2 { gsave tracksize 1 mul moveto 10 string cvs gsave strnd (-) eq { -1 -1 scale -45 } { 45 } ifelse rotate ShFont sfont FGcolor scmyk show grestore grestore } repeat } if } bdf
- /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def LY sc mul sqdif flglscape { exch } if scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos pop } bdf
+ /shwpos { flpos { sqend sqori strnd (-) eq { exch } if sqdif exch 0 2 { gsave trackbb 1 mul moveto 10 string cvs gsave strnd (-) eq { -1 -1 scale -45 } { 45 } ifelse rotate ShFont sfont FGcolor scmyk show grestore grestore } repeat } if } bdf
+ % /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def LY sc mul sqdif flglscape { exch } if scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos pop } bdf
+ /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def sqdif LY sc mul scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos pop } bdf
  /f { gsave getvar strnd (-) eq { seqend } { seqori } ifelse 0 translate frshared grestore } bdf
- /gpuline { gsave 0 0
- moveto grdif 0 rlineto /red scolor 1 setlinewidth stroke grestore } bdf
- /shgplbl { FgpLbl { gsave grori tracksize 1 mul strnd (-) ne { neg } if translate gpuline grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
+ /gpuline { gsave gplmod 1 eq { 0 0 moveto grdif 0 rlineto /red scolor 1 setlinewidth stroke } if grestore } bdf
+ /shgplbl { FgpLbl { gsave grori trackbb strnd (-) ne { neg } if translate gplmod 0 gt { gpuline } if grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
  /g_end { end exit } bdf 
 %
 % functions for vectors-like data-sets
-%
  /resizetrack tracksize 0.95 mul def
  /vtoffset vectoffset 2 div Xscm def
  /clrselc { colordict begin dup 2 eq { pop load2col /clrproc { {col2} } def } { dup 3 eq { pop load3col /clrproc { {col3} } def } { dup 0 eq { pop white black load2col /clrproc { {col2} } def } { dup 4 eq { pop /clrproc { {rainbow} } def } { 1 eq { white 8 4 roll load2col /clrproc { {col2} } def } if } ifelse } ifelse } ifelse } ifelse } bdf % no end for closing dict because grdct must be closed by calling function
@@ -472,48 +493,57 @@ end % shpdct
 %%EndProcSet:   objects 1.1 0
 %
 %%BeginProcSet: blocks 1.0 0
-%
-% /blckdct 16 dict def blckdct begin
- /pbox { XOriBlck YOriBlck 10 sub XSBlck YSBlck 20 add bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
- /bline { Fbline { gsave FGcolor scmyk 0 0 moveto XSPlot 0 lineto stroke grestore } if } bdf
+/blckdct 30 dict def blckdct begin
+ /Y 0 def
+% /pbox { XOriBlck YOriBlck XSBlck YSBlck bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
+ /pbox { XOriBlck 5 sub 0 XSBlck 10 add YSBlck bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
+ /bline { Fbline { gsave FGcolor scmyk 0.25 setlinewidth 0 0 moveto XSPlot 0 lineto stroke grestore } if } bdf
  /shsrclbl { FLftLbl { gsave srclbl FGcolor 10 /Courier XLftLbl 2 div neg ct grestore } if } bdf
- /srcbndbox { tracksize spcrsize add 2 mul dup -5 exch neg XSPlot 10 add 4 -1 roll bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
- /source { /strnd xdf /nxtspacer exch spcrsize mul def 2 dict begin /Yscl exch tracksize mul def /srclbl xdf /Y Y strnd (-) eq { nxtspacer add } { Yscl add } ifelse def 0 Y translate gsave XOriPlot 0 translate 1 -1 scale bline shsrclbl srcbndbox Nuc_Offset Xscm neg 0 translate } bdf
- /s_end { grestore /Y Y strnd (-) eq { Yscl add } { nxtspacer add } ifelse def end } bdf
+ /srcbndbox { tracksize spcrsize add YSLine mul dup neg -5 exch XSPlot 10 add  4 -1 roll bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
+% /source { /strnd xdf /nxtspacer exch spcrsize mul def 2 dict begin /Yscl exch tracksize mul 2 div def /srclbl xdf /Y Y nxtspacer add Yscl add def 0 Y translate gsave XOriPlot 0 translate gsave 1 -1 scale bline shsrclbl srcbndbox blckori Xscm neg 0 translate } bdf
+ /source { /strnd xdf /nxtspacer exch spcrsize mul def /Yscl exch tracksize mul 2 div def /srclbl xdf /Y Y nxtspacer strnd (.) eq { 2 div } if add Yscl add def gsave 0 Y translate gsave XOriPlot 0 translate gsave 1 -1 scale bline shsrclbl srcbndbox blckori Xscm neg 0 translate } bdf
+ /s_end { grestore grestore grestore /Y Y Yscl add strnd (.) eq { nxtspacer 2 div add } if def } bdf
 %
- /gp { gsave shpdct begin nucdif /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
+ /gp { gsave shpdct begin nucdif /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /gplmod xdf /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
 %
  /ov { gsave vctdct begin exch Xscm exch translate { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
 %
- /tm { /Y Y TkMrkW add def tmdct begin /ShowGrid xdf exec end } bdf
+ /tm { gsave tmdct begin /ShowGrid xdf exec end grestore } bdf
+ /shwtck { /down   YSFwd YSTck 1.5 mul add def
+           /up     YSRvs def
+           blckori blckend XOriPlot 0 {s} 2 tm
+           blckori blckend XOriPlot YSTck YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm
+  is2tck { blckori blckend XOriPlot YSTck 2 mul YSFwd add YSBth add {r} 0 tm } if
+           blckori blckend XOriPlot YSBlck TkMrkW sub {z} 2 tm
+           } bdf
 %
-% /b_end { end grestore } bdf
-% end
+ /ChangeStrand { /Y Y YSTck def } bdf
+ /b_end { end grestore } bdf
+end
 %%EndProcSet:   blocks 1.0 0
 %
 %%BeginProcSet: main_function_calls 1.0 0
 %
-% /block { gsave blckdct begin /Y YOriBlck def /blcknum xdf pbox } bdf
-/block { gsave /Y YOriBlck def /blcknum xdf pbox } bdf
-/b_end { grestore } bdf
+/block { blckdct begin /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck YSBlck blcknum mul add BlckSp blcknum mul add def gsave 0 YB translate pbox shwtck /Y 0 def } bdf
 %
 %%EndProcSet:   main_function_calls 1.0 0
+%
 %%EndProlog
+%
+%%BeginSetup
+%
+% initgraphics
+% true setpacking
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%
+%%EndSetup
+%
 @@@MAINProcs@@@
 } 
 #### End of MAINPSPROCS function
-
-#
-# PostScript end of file... 
-# 
-MAINPSTRAILER () {
-cat <<'@@@EndTrailer@@@'
-%%Trailer
-%
-%%EOF
-@@@EndTrailer@@@
-} 
-#### End of MAINPSTRAILER function
 
 ##############################################################
 ####################### PROGRAM FUNCTIONS ####################
@@ -554,20 +584,43 @@ CheckInt () {
 }
 
 #
-# Testing if exist Custom File.
+# Testing parameters passed by User: Page Sizes.
+#
+chkpagesize () {
+  pagesizes | gawk `BEGIN{
+    pg=ARGV[1]; ARGV[1]=""; ec=0 }
+    pg==$1 { ec=1; ps=sprintf("%s,%s,%s",$1,$2,$3) }
+    END{ if (ec) { print ps };
+         else { print "a4,595,842" }` $1 -
+  return 0
+}
+
+#
+# Testing if exist a File.
 #
 ExistCustomfile () {
   if [ ! -f "$1" ]
     then echo "0"
       echo "Report: Default Custom File does not exist." 1>&2
-#     echo "        Program is going to write a Local Custom File." 1>&2 
+      return 0
     else echo "1" # exist_default_customfile
       echo "Warning: Default Custom File exist." 1>&2
-#     echo "         Program is going to overwrite your Local Custom File." 1>&2
+      echo "          Custom_Filename: $1" 1>&2
+      return 1
     fi
-  echo "          Custom_Filename: $1" 1>&2
-  return 0
 }
+
+ExistFile () {
+  if [ ! -f "$1" ]
+    then echo "0"
+      echo "Warning: File "$1" is empty or does not exist." 1>&2
+      return 1
+    else echo "1" # exist_file
+      echo "Report: File "$1" exist, included as a gff file." 1>&2
+      return 0
+    fi
+}
+
 ###################################################################
 ################## MAIN GFF2PS SHELL SCRIPT #######################
 #
@@ -613,7 +666,7 @@ case $1 in
 #
 # Processing all options and parameters passed to program.
 #
-while getopts :dD:C:vpP:B:N:bHh W_OPTION
+while getopts :dD:C:vS:pP:B:N:bHh W_OPTION
   do
     case $W_OPTION in
       H|h) Help; exit 2;;
@@ -627,7 +680,9 @@ while getopts :dD:C:vpP:B:N:bHh W_OPTION
 	         echo "Report: Adding $OPTARG Custom File to Default Custom File." 1>&2 ;
              v02="$CFDIR/$OPTARG";
            fi;;
-      v) v05=1;;                      # print_report
+      v) v05=1;;                        # print_report
+      S) v07=$OPTARG;                   # page_bbox
+         v12=`chkpagesize $v07`;;  
       p) v06="Portrait";;               # page_orientation
       P) v08=$OPTARG;;                  # page_number
       B) v09=$OPTARG;;                  # blocks_x_page
@@ -646,6 +701,20 @@ while getopts :dD:C:vpP:B:N:bHh W_OPTION
  while [ $OPTIND -gt $incr ]
    do shift; incr=`expr $incr + 1`; done
 
+ GFF_INPUT_FILES=""; ck=0
+ for files in $@
+   do
+     if [ `ExistFile ./$files` ]  # $CFDIR/
+       then 
+         if [ $ck -eq 1 ] 
+           then
+              GFF_INPUT_FILES=$GFF_INPUT_FILES" "
+           fi
+         GFF_INPUT_FILES=$GFF_INPUT_FILES./$files;  # $CFDIR/
+         shift; ck=1;
+       fi
+   done
+
 #
 # Defining PLOToptions STRING for GNU awk programs.
 #
@@ -653,11 +722,12 @@ while getopts :dD:C:vpP:B:N:bHh W_OPTION
    P="BACKGROUND_COLOR:="$bgcolor"::FOREGROUND_COLOR:="$fgcolor"::"$n04_1":="$v04_1"::"
  P=$P$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05"::"
  P=$P$n06":="$v06"::"$n07":="$v07"::"$n08":="$v08"::"$n09":="$v09"::"$n10":="$v10"::"
- P=$P$n11":="$v11"::"
+ P=$P$n11":="$v11"::"$n12":="$v12"::"
  P=$P$m01":="$c01"::"$m02":="$c02"::"$m03":="$c03"::"$m04":="$c04"::"$m05":="$c05"::"
  P=$P$m06":="$c06"::"$m07":="$c07"::"$m08":="$c08"::"$m09":="$c09"::"$m10":="$c10"::"
  P=$P$m11":="$c11"::"$m12":="$c12"::"$m13":="$c13"::"$m14":="$c14"::"$m15":="$c15"::"
- P=$P$m16":="$c16
+ P=$P$m16":="$c16"::"$m17":="$c17"::"$m18":="$c18"::"$m19":="$c19"::"$m20":="$c20"::"
+ P=$P$m21":="$c21"::DCF:=$CFDIR/.gff2psrc"
  PLOToptions=$P
  if [ $v05 -eq 1 ]
    then
@@ -672,44 +742,11 @@ while getopts :dD:C:vpP:B:N:bHh W_OPTION
 
 ###################################################################
 ############### CONVERTING GFF TO POSTSCRIPT ######################
+###################################################################
 #
-# Printing PostScript Header...
+# PostScript Header.
 #
-gawk 'BEGIN{ 
- # Find actual date...
- "date" | getline d
- split(d,dt," ")
- date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
- # Finding logged user...
- "whoami" | getline usr
- # Printing PostScript Header...
- bigchain=        "%%\!PS-Adobe-2.0\n"
- bigchain=bigchain"%%%%Title: %s\n"
- bigchain=bigchain"%%\n%%%%User: %s\n"
- bigchain=bigchain"%%%%Date: %s\n"
- bigchain=bigchain"%%\n%%%%Program: %s\n"
- bigchain=bigchain"%%%%Version: %s\n"
- bigchain=bigchain"%%%%CreationDate: %s\n"
- bigchain=bigchain"%%%%LastRevision: %s\n"
- bigchain=bigchain"%%%%Author : %s\n"
- bigchain=bigchain"%%%%e-mail : %s\n"
- bigchain=bigchain"%%%%Mail Adress:\n%s\n%%\n"
- if (ARGV[1]!~"##dflt##") title=ARGV[1]
- else title="GFF to PostScript"
- printf bigchain, title, usr, date, ARGV[2], ARGV[3], ARGV[4], ARGV[5], ARGV[6], ARGV[7], ARGV[8]
- printf "%%\n%% ------------------------------------------------------------------------\n"
- printf "%%                           %s - %s\n",ARGV[2], ARGV[3]
- printf "%% ------------------------------------------------------------------------\n"
-  for (i=1;i<=8;i++) ARGV[i]=""
-}' "##dflt##" "$PSPROGRAM" "$PSVERSION" "$PSCREATION" "$PSREVISION" "$AUTHOR" "$EMAIL" "$MAIL"
-
-#
-# Printing PostScript Setup Constants...
-#
-  MAINPSCPR
-  echo "%%Orientation: "$v06 # "page_orientation"
-  echo "%%BoundingBox:  0  0  842   595"
-  MAINPSSETUP
+MAINPSHEADER
 
 #
 # Main GFF2PS GNU awk Program...
@@ -718,11 +755,10 @@ gawk 'BEGIN{
 # @@@EndPROGRAM@@@
 # gawk -v CUSTOMFILE=$v03 -f - "$@"
 #
-(echo $PLOToptions"::DCF:=$CFDIR/.gff2psrc"; MAINPSPROCS) |
+(echo "$PLOToptions"; MAINPSPROCS) |
 gawk 'BEGIN{
-  ############ INITIALITATION ############
-
-  # gff data structure
+############ INITIALITATION ############
+# gff data structure
   seqname  = 1;
   source   = 2;
   feature  = 3;
@@ -732,264 +768,220 @@ gawk 'BEGIN{
   strand   = 7;
   frame    = 8;
   group    = 9;
-
-  # gff strand codification
+# gff strand codification
   strands["+"]=strands["."]=strands["-"]=1;
   wstr[1]="+";wstr[2]=".";wstr[3]="-";
-
-  # Find actual date...
-  "date" | getline d
-  split(d,dt," ")
-  date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
-  # Finding logged user...
-  "whoami" | getline usr
-  # Finding current process...
-  "echo $$" | getline IDP
-
-  # Loading PSMainProgram. Line 0 is the Command Line Parameter String.
-  psline=0
-  while ((getline < ARGV[1])>0) PSMAIN[psline++]=$0;
-  ARGV[1]=""
-
- ############## Defining pre-variables by CommandLine ############ 
- PARAM=PSMAIN[0]
- npar=split(PARAM,parm,"::") 
+# Loading PSMainProgram. Line 0 is the Command Line Parameter String.
+  psline=0;
+  while ((getline < ARGV[1])>0) { PSMAIN[psline++]=$0 };
+  ARGV[1]="";
+############## Defining pre-variables by CommandLine ############ 
+ npar=split(PSMAIN[0],parm,"::");
  for (r=1;r<=npar;r++) {
-   split(parm[r],elem,":=")
+   split(parm[r],elem,":=");
    if (elem[2]!="##dflt##") {
      if (elem[1]~/COLOR\$/) {
-       ecolor=elem[2]
+       ecolor=elem[2];
        if (ChkColor(ecolor)) {
-         if (ecolor~/^BG\$|(##DEFAULT##)/) { elem[2]=Var["BACKGROUND_COLOR"] }
-         else if (ecolor~/^FG\$/) { elem[2]=Var["FOREGROUND_COLOR"] }
-         }
-       else { elem[2]=Var["BACKGROUND_COLOR"] }
-       }
-     Var[elem[1]]=elem[2]
-     }
-   }
-  for (v in Var) printf "VAR: %-25s :: Value: %s\n", v, Var[v] | "cat 1>&2" 
-
+         if (ecolor~/^BG\$|(##DEFAULT##)/) elem[2]=Var["BACKGROUND_COLOR"]
+         else if (ecolor~/^FG\$/) elem[2]=Var["FOREGROUND_COLOR"] } # if ChkColor
+       else elem[2]=Var["BACKGROUND_COLOR"] } # if elem[1]
+     Var[elem[1]]=elem[2] } # if elem[2]
+   } # for
+  delete PSMAIN[0]
+  for (v in Var) printf "VAR: %-25s :: Value: %s\n", v, Var[v] | "cat 1>&2"
 # Layout Properties
-  Default["load_customfile"]=Var["load_customfile"]  # in this case we need to force variables.
-  Default["customfile_name"]=Var["customfile_name"]  # in this case we need to force variables.
-  Default["customfile_name_default"]=Var["DCF"]      # DCF="$CFDIR/.gff2psrc"
-#  Default["exist_default_customfile"]="0"  # only as a Var
-#  Default["create_default_customfile"]="0" # only as a Var
-#  Default["print_report"]="0"              # only as a Var
-  Default["page_size"]="a4"               # Var["page_size"]
-  Default["page_orientation"]="Landscape" # Var["page_orientation"] : Landscape (default), Portrait.
-  Default["margin_left"]="1cm"            # cm, in, pt
-  Default["margin_right"]="1cm"           #
-  Default["margin_upper"]="1cm"           #
-  Default["margin_bottom"]="1cm"          #
-  Default["foreground_color"]="FGcolor"
-  Default["background_color"]="BGcolor"
-  Default["nucleotides_x_line"]=0 # Var["nucleotides_x_line"] : Default=0,gets the seqlenght from data
-  Default["blocks_x_page"]=1      # Var["blocks_x_page"] : Default=1
-  # Default["max_blocks_x_page"]=5  # You can change on .gff2psrc file.
-  Default["show_blocks_top-bottom"]=1 # Var["show_blocks_top-bottom"] : 1->TopBottom, 2->LeftRight.
-  Default["page_number"]=1        # Var["page_number"] : Default=1
-  Default["strand_show_forward"]="on"     #
-  Default["strand_show_reverse"]="on"     #
-  Default["strand_show_independent"]="on" #
+  Default["load_customfile"]=Var["load_customfile"];  # in this case we need to force variables.
+  Default["customfile_name"]=Var["customfile_name"];  # in this case we need to force variables.
+  Default["customfile_name_default"]=Var["DCF"];      # DCF="$CFDIR/.gff2psrc"
+  Default["page_size"]="a4";               # Var["page_size"]
+  Default["page_bbox"]="a4,595,842";       # Var["page_bbox"]
+  Default["page_orientation"]="Landscape"; # Var["page_orientation"] : Landscape (default), Portrait.
+  Default["margin_left"]="1cm";            # cm, in, pt
+  Default["margin_right"]="1cm";           #
+  Default["margin_upper"]="1cm";           #
+  Default["margin_bottom"]="1cm";          #
+  Default["foreground_color"]="FGcolor";  #
+  Default["background_color"]="BGcolor";  #
+  Default["nucleotides_x_line"]=0;     # Var["nucleotides_x_line"] : Default=0,gets the seqlenght from data
+  Default["blocks_x_page"]=1;          # Var["blocks_x_page"] : Default=1
+  Default["show_blocks_top-bottom"]=1; # Var["show_blocks_top-bottom"] : 1->TopBottom, 2->LeftRight.
+  Default["page_number"]=1;            # Var["page_number"] : Default=1
+  Default["strand_show_forward"]="on";     #
+  Default["strand_show_reverse"]="on";     #
+  Default["strand_show_independent"]="on"; #
 # General Properties
-  Default["text_color"]=Default["foreground_color"]
-  Default["default_scale_width"]="0.25cm"
-  Default["default_track_width"]="1cm"
-  Default["default_track_spacing_width"]="1cm"
-  Default["default_block_spacing_width"]="0.25cm"
-  Default["label"]="none"
+  Default["text_color"]=Default["foreground_color"];
+  Default["default_scale_width"]="0.25cm";         #
+  Default["default_track_width"]="1cm";            #
+  Default["default_track_spacing_width"]="1cm";    #
+  Default["default_block_spacing_width"]="0.25cm"; #
+  Default["label"]="none";
+  Default["frame0_color"]="blue";
+  Default["frame1_color"]="red";
+  Default["frame2_color"]="green";
+  Default["show_inner_scale"]=1;
+  Default["show_outer_scale"]=1;
 # Features Properties
-  FT_PROP["fill_shape_mode"]="default" # none(BGcolor), default(FGcolor 1color), 1_color, 2_color, frame-remainder, rainbow
-  FT_PROP["fill_vector_mode"]="default" # none(0 BGcolor grad), default(0 black grad), rainbow(1), 1_color(BGcolor color 2), 2_color(color1 color2 2), 3_color(col1 col2 col3 2)
-  FT_PROP["label"]="default" # none , default , "user-def"
-  FT_PROP["color"]=Default["foreground_color"] # 1color(color),2color(color..color),3color(color..color..color)
-  FT_PROP["shape"]="box" #box, arrow, end_arrow, circle # still not implemented: vector, spike, block
-  FT_PROP["vert_align"]="baseline" #center,baseline # still not implemented: reverse
-  FT_PROP["layer"]=0     # now is implemented, first sorting for feature lines is made on FT_PROP["layer"]
-  FT_PROP["join"]="on"
-  FT_PROP["show"]="on"
+  FT_PROP["fill_shape_mode"]="default"; # none(BGcolor), default(FGcolor 1color), 1_color, 2_color, frame-remainder, rainbow
+  FT_PROP["fill_vector_mode"]="default"; # none(0 BGcolor grad), default(0 black grad), rainbow(1), 1_color(BGcolor color 2), 2_color(color1 color2 2), 3_color(col1 col2 col3 2)
+  FT_PROP["label"]="default"; # none , default , "user-def"
+  FT_PROP["color"]=Default["foreground_color"]; # 1color(color),2color(color..color),3color(color..color..color)
+  FT_PROP["shape"]="box"; #box, arrow, end_arrow, circle # still not implemented: vector, spike, block
+  FT_PROP["vert_align"]="baseline"; #center,baseline # still not implemented: reverse
+  FT_PROP["layer"]=0;     # now is implemented, first sorting for feature lines is made on FT_PROP["layer"]
+  FT_PROP["join"]="on";
+  FT_PROP["show"]="on";
 # Group Properties
-  GR_PROP["label"]="default"        # none , default , "user-def"
-  GR_PROP["range"]="0:1"             # range of lower-upper scores
-  #  GR_PROP["vert_align"]="center" # center or baseline
-  GR_PROP["join_align"]="center"
-  GR_PROP["join_color"]=Default["foreground_color"]
-  GR_PROP["join_linetype"]="solid"
-  GR_PROP["join_show"]="off"
+  GR_PROP["label"]="default";        # none , default , "user-def"
+  GR_PROP["group_line"]="default";   # none , default (red line) , ...
+  GR_PROP["range"]="0:1";            # range of lower-upper scores
+  GR_PROP["vert_align"]="center"; # center or baseline
+  GR_PROP["join_align"]="center";
+  GR_PROP["join_color"]=Default["foreground_color"];
+  GR_PROP["join_linetype"]="solid";
+  GR_PROP["join_show"]="off";
 # Lines (Method-Source) Properties
-  SO_PROP["label"]="default"     # none , default , "user-def"
-  SO_PROP["vert_align"]="center" # center or baseline
-  SO_PROP["baseline_align"]="center"
-  SO_PROP["baseline_color"]=Default["foreground_color"]
-  SO_PROP["baseline_linetype"]="dotted"
-  SO_PROP["baseline_show"]="off"
-  SO_PROP["bbox_color"]=Default["foreground_color"]
-  SO_PROP["bbox_show"]="off"
-  SO_PROP["track_scale"]=1
-  SO_PROP["track_spacing_scale"]=0.5
-  SO_PROP["rule_scale"]="nucleotide"
-  SO_PROP["rule_rel"]="none"
-  SO_PROP["rule_abs"]="none"
-# Default[""]=
-
- # Data for upper-case to lower-case function #lcase()#
+  SO_PROP["label"]="default";     # none , default , "user-def"
+  SO_PROP["vert_align"]="center"; # center or baseline
+  SO_PROP["baseline_align"]="center";
+  SO_PROP["baseline_color"]=Default["foreground_color"];
+  SO_PROP["baseline_linetype"]="dotted";
+  SO_PROP["baseline_show"]="off";
+  SO_PROP["bbox_color"]=Default["foreground_color"];
+  SO_PROP["bbox_show"]="off";
+  SO_PROP["track_scale"]=1;
+  SO_PROP["track_spacing_scale"]=0.5;
+  SO_PROP["rule_scale"]="nucleotide";
+  SO_PROP["rule_rel"]="none";
+  SO_PROP["rule_abs"]="none";
+# Data for upper-case to lower-case function #lcase()#
  CM["A"]="a";CM["B"]="b";CM["C"]="c";CM["D"]="d";CM["E"]="e";
  CM["F"]="f";CM["G"]="g";CM["H"]="h";CM["I"]="i";CM["J"]="j";
  CM["K"]="k";CM["L"]="l";CM["M"]="m";CM["N"]="n";CM["O"]="o";
  CM["P"]="p";CM["Q"]="q";CM["R"]="r";CM["S"]="s";CM["T"]="t";
  CM["U"]="u";CM["V"]="v";CM["W"]="w";CM["X"]="x";CM["Y"]="y";
- CM["Z"]="z";CM["Ñ"]="ñ";CM["Ç"]="ç"
-
- # Initialization for some vars.
+ CM["Z"]="z";# CM["Ñ"]="ñ";CM["Ç"]="ç";
+# Initialization for some vars.
  BigLINE="########################################";
  MINSCORE=0.10;
  MAXSCORE=1.00;
  FIRST_POS=0;
  LAST_POS=0;
- nordcnt=ordcnt=0
+ nordcnt=ordcnt=0;
+#
+ if (Var["print_report"])
+  printf "\n%s\nInput File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
 
- if (Var["print_report"]) 
-   printf "\n%s\nInput File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
- }
+}
 { ############ READING .GFF FILES  ############
-
-  # skips those comment lines (starting with "#") or empty lines
-  #
-  is_EOF=0
+# skips those comment lines (starting with "#") or empty lines
+  is_EOF=0;
   while ($0~/^(\#)+/ || NF==0 ) { 
-    if (Var["print_report"]) 
-      printf "%10s :: Not Read :: %s\n", NR, $0 | "cat 1>&2"
-    if (getline<=0) { is_EOF=1; break }
-    }
-
+    if (Var["print_report"]) { printf "%10s :: Not Read :: %s\n", NR, $0 | "cat 1>&2" };
+    if (getline<=0) { is_EOF=1; break };
+    }; # while
  if (!is_EOF) {
-
-  # Printing Input Lines
-  #
-  if (Var["print_report"]) 
-   printf "%10s : %s\n", NR, $0 | "cat 1>&2"
-
-  # getting source order from file...
-  #
+# Printing Input Lines
+  if (Var["print_report"]) { printf "%10s : %s\n", NR, $0 | "cat 1>&2" };
+# getting source order from file...
   if (($strand=="+" || $strand=="-") && !($source in sources)) {
     order["strand",ordcnt]=$source; ordcnt++ } # order for sources input.
   else if ($strand=="." && !($source in sources)) {
-    order["none",nordcnt]=$source; nordcnt++ }
-
-  # read gff element within source and strand
-  #
+    order["none",nordcnt]=$source; nordcnt++ };
+# read gff element within source and strand
   sources[$source]++;                       # field 2 (source) counter
   if ($group=="") $group=".";               # empty group defined as default (none==".")
   GP_ary[$group]++;                         # field 9 (group) counter
-#   The same as ng[sc,s] 
-#   GP_SO[$source,$strand,$group]++;          # groups per source and strand
-  FT_ary[$feature]++;                       # field 3 (gff-feature) counter
-#   FT_GP[$source,$strand,$group,$feature]++; # features per group, source and strand
-  n[$source,$strand]++;                     # elements per source and strand
-
   $feature=lcase($feature);
+  FT_ary[$feature]++ ;                       # field 3 (gff-feature) counter
+  n[$source,$strand]++ ;                     # elements per source and strand
   element[$source,$strand,n[$source,$strand],feature] = $feature; 
   element[$source,$strand,n[$source,$strand],start]   = $start;
   element[$source,$strand,n[$source,$strand],end]     = $end;
   element[$source,$strand,n[$source,$strand],frame]   = $frame;  
   element[$source,$strand,n[$source,$strand],score]   = $score;  
   element[$source,$strand,n[$source,$strand],group]   = $group; 
-  if ($NF>group) {
-    for (i=(group+1);i<=$NF;i++) {
-      if ($i~"Label")
-        element[$source,$strand,n[$source,$strand],$i]= $(i+1);  
-    }
-  }
-
+  if (NF>group) {
+    for (i=(group+1);i<=NF;i++) {
+      if ($i~"Label") element[$source,$strand,n[$source,$strand],$i]= $(i+1);  
+      } # for i
+    } # if NF
   if (FIRST_POS>$start) FIRST_POS=$start;
   if (LAST_POS<$end) LAST_POS=$end;
-
-  # recompute scores between MINSCORE and MAXSCORE
-  #
-  if ($score < MINSCORE)
-    element[$source,$strand,n[$source,$strand],score]  = MINSCORE;
-  else if ($score > MAXSCORE)
-    element[$source,$strand,n[$source,$strand],score]  = MAXSCORE;
-
-  # place gff element in sort array by acceptor position
-  #
+# recompute scores between MINSCORE and MAXSCORE
+  if ($score < MINSCORE) {
+    element[$source,$strand,n[$source,$strand],score]=MINSCORE }
+  else {
+    if ($score > MAXSCORE) element[$source,$strand,n[$source,$strand],score]=MAXSCORE }
+# place gff element in sort array by acceptor position
   ns=n[$source,$strand]-1;
   while ($start < element[$source,$strand,S[$source,$strand,ns],start]) {
-    S[$source,$strand,ns+1]=S[$source,$strand,ns];
-    ns--;
-  }
+    S[$source,$strand,ns+1]=S[$source,$strand,ns]; ns-- } # while
   S[$source,$strand,ns+1]=n[$source,$strand]
-
- } # if (!is_EOF)
-
-}
+  } # if (!is_EOF)
+ }  # Main Loop END
 END{
-
-  # Printing elements sorted
-  #
+# Printing elements sorted
   if (Var["print_report"]) {
    printf "\n%s\ngff elements are sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
    for (sc in sources) 
     for (s in strands) {
       printf "\nSOURCE: %s\nSTRAND: %s\n",sc,s | "cat 1>&2"
-      if (n[sc,s]>0)
-        for (i=1;i<=n[sc,s];i++) {
+      if (n[sc,s]>0) {
+        for (i=1;i<=n[sc,s];i++)
           printf "%10s %s\n", S[sc,s,i],showelemS(sc,s,S[sc,s,i]) | "cat 1>&2"
-        
         }
       else
         printf "%10s This block is empty ##\n", "##" | "cat 1>&2"
       }
    close("cat 1>&2")
    }
-
-  ########## Defining Object Properties ##########
-  #
-  # Variable definition hierarchy:
-  # Program Defaults < Default Custom File < Custom File < Command Line.
-  #
+########## Defining Object Properties ##########
+# Variable definition hierarchy:
+# Program Defaults < Default Custom File < Custom File < Command Line.
   CreateProps(0)
-  if (Var["exist_default_customfile"]) {
+  ECF=0
+  if (Var["exist_default_customfile"]) { # Modifying Defaults with default custom file
     if (Var["print_report"]) printf "\n%s\nReading Default Custom File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
     RCFile(Var["customfile_name_default"])
+    ECF=1
     }
-  if (Default["load_customfile"]) {
+  if (Default["load_customfile"]) { # Modifying Defaults with custom file
     if (Var["print_report"]) printf "\n%s\nReading Custom File...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
     RCFile(Default["customfile_name"])
+    ECF=1
     }
-
-  # Calculating Page Number, Blocks and NucxLine
-  #
+  if (ECF==0) { # Modifying Defaults with Vars if no exist custom file
+    if (Var["print_report"]) printf "\n%s\nModified options...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
+    for (lytdef in Default) {
+      dft=Default[lytdef]
+      if (dft!=Var[lytdef] && Var[lytdef]!="") Default[lytdef]=Var[lytdef]
+      if (Var["print_report"]) printf "%s : Default Value=%s Custom File=%s Command-Line=%s : Using=%s\n", lytdef,dft,PLOT_LY[lytdef],Var[lytdef],Default[lytdef] | "sort | cat 1>&2"
+    } # for lytdef
+  }   # if ECF==0
+# Calculating Page Number, Blocks and NucxLine
   PORI=Nuc_round(FIRST_POS,0) # floor
   PEND=Nuc_round(LAST_POS,1)  # ceiling
-  # Zoom must be defined here
+# Zoom must be defined here
   if (PORI!=0) PDIF=PEND-PORI+1
-  else PDIF=PEND-PORI
-
+  else PDIF=PEND
   P=Default["page_number"]
   B=Default["blocks_x_page"]
-
   if (Default["nucleotides_x_line"]==0) {
-    if (B>1 || P>1) POFFSET=Nuc_round((PDIF/(B*P)),1)
-    else POFFSET=PDIF
+    if (B>1 || P>1) NOFFSET=Nuc_round((PDIF/(B*P)),1)
+    else NOFFSET=PDIF
     }
-  else POFFSET=Default["nucleotides_x_line"]
-  if (POFFSET>PDIF) POFFSET=PDIF # necessary if it is defined a Zoom.
-
-  B1= PDIF%POFFSET!=0 ? ((PDIF-(PDIF%POFFSET))/POFFSET)+1 : ((PDIF-(PDIF%POFFSET))/POFFSET)
+  else NOFFSET=Default["nucleotides_x_line"]
+  if (NOFFSET>PDIF) NOFFSET=PDIF # necessary if it is defined a Zoom.
+  B1= PDIF%NOFFSET!=0 ? ((PDIF-(PDIF%NOFFSET))/NOFFSET)+1 : ((PDIF-(PDIF%NOFFSET))/NOFFSET)
   P = B1%B!=0 ? ((B1-(B1%B))/B)+1 : ((B1-(B1%B))/B)
-  
-  if (Default["show_blocks_top-bottom"]) BOFFSET=POFFSET
-  else BOFFSET=POFFSET*P
-
+  if (Default["show_blocks_top-bottom"]) { BOFFSET=NOFFSET; POFFSET=B*NOFFSET }
+  else { BOFFSET=P*NOFFSET; POFFSET=NOFFSET }
   printf "\n%s\nPostScript Page Definitions...\n%s\n",BigLINE,BigLINE | "cat 1>&2"  
   printf "\npage_number %s\nblocks_x_page %s\nnucleotides_x_line %s\nshow_blocks_top-bottom %s\n",Default["page_number"],Default["blocks_x_page"],Default["nucleotides_x_line"],Default["show_blocks_top-bottom"] | "cat 1>&2"  
-  printf "\nPORI %s\nPEND %s\nP %s\nB %s\nPOFFSET %s\nBOFFSET %s\n\n",PORI,PEND,P,B,POFFSET,BOFFSET | "cat 1>&2"  
-
-  # Calculating Block scale factor.
-  #
+  printf "\nPORI %s\nPEND %s\nP %s\nB %s\nNOFFSET %s\nBOFFSET %s\n\n",PORI,PEND,P,B,NOFFSET,BOFFSET | "cat 1>&2"  
+# Calculating Block scale factor.
   StrSize=0; NStSize=0; # for strands...
   aS=calcpt(Default["default_track_width"]);
   bS=calcpt(Default["default_track_spacing_width"]);
@@ -1003,31 +995,26 @@ END{
   if (OnOff(Default["strand_show_forward"])) StrSizeFwd=StrSize; else StrSizeFwd=0
   if (OnOff(Default["strand_show_reverse"])) StrSizeRvs=StrSize; else StrSizeRvs=0
   if (!OnOff(Default["strand_show_independent"])) NStSize=0
-  SclSize=0 # for scales...
-  
-  # Default["default_scale_width"]
-  BSize=StrSizeFwd+StrSizeRvs+NStSize+SclSize # (cms)
-
-  # PostScript Variables Setup.
-  #
+  cpsc=calcpt(Default["default_scale_width"])
+  SclSize=2*cpsc # for scales...
+  if (OnOff(Default["show_inner_scale"])) {
+   if (StrSizeFwd>0 && (NStSize>0 || StrSizeRvs>0)) SclSize=SclSize+cpsc
+   if (NStSize>0 && StrSizeRvs>0) SclSize=SclSize+cpsc
+  }
+  BSize=StrSizeFwd+StrSizeRvs+NStSize+SclSize # (points)
+# PostScript Variables Setup.
   defPSvars()
-
-  # PostScript Main Procs.
-  #
+# PostScript Main Procs.
   for (i=1;i<psline;i++) print PSMAIN[i]; 
-
-  # Pages MAIN LOOP.
-  #
+# Pages MAIN LOOP.
   for (pages=1;pages<=P;pages++) {
     BORI=PORI
-    startPSpage(pages,pages,BORI,POFFSET)  # PostSCript PageSetup.
-
+    startPSpage(pages,pages)  # PostSCript PageSetup.
     for (blocks=1;blocks<=B;blocks++) {
+      BEND=BORI+NOFFSET
       printf "%%\n%% Block Num: %s Page: %s\n%%\n",blocks,pages
-      printf "%s block\n", blocks
-      BEND=BORI+POFFSET
-  # make groups. assumes elements sorted by increasing acceptor position
-  #
+      printf "%s %s %s block\n", BORI, BEND, blocks
+# make groups. assumes elements sorted by increasing acceptor position
   cntstr_fwd=cntstr_bth=cntstr_rvs=0
   printf "\n%s\nPostScript Code...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
   for (sc in sources) {
@@ -1035,7 +1022,6 @@ END{
       for (i=1;i<=n[sc,s];i++) {
         start_=element[sc,s,S[sc,s,i],start];
         end_=element[sc,s,S[sc,s,i],end];
-
 	    tgr=element[sc,s,S[sc,s,i],group];
 	    if (!grouping[sc,s,tgr,start]) {
 	      grouping[sc,s,tgr,start]=element[sc,s,S[sc,s,i],start];
@@ -1044,41 +1030,27 @@ END{
           }
         if (grouping[sc,s,tgr,end]<element[sc,s,S[sc,s,i],end])
           grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
-
-       # only goes on when features are inside page limits.
+     # only goes on when features are inside page limits.
        if (ChkLimits(start_,BORI,end_,(BEND))) {
         feature_=element[sc,s,S[sc,s,i],feature];
         score_=element[sc,s,S[sc,s,i],score];
-
-        # for gene mode. try to recompute relative frame and remainder
+     # for gene mode. try to recompute relative frame and remainder
         frame_[sc,s,tgr]= element[sc,s,S[sc,s,i],frame];
-
         if (feature_=="First" || feature_=="Single") 
           frame_[sc,s,tgr]=0;
         else if (feature_=="Internal" || feature_=="Terminal" )
           frame_[sc,s,tgr]=remainder_[sc,s,tgr];
-
         remainder_[sc,s,tgr]=(3-(end_-(start_+frame_[sc,s,tgr])+1)%3)%3;
-
         printf "%s %s %s : %s \/%s %d %d %d %d %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_), Plot_Lbl(feature_) | "cat 1>&2"
         grouping[sc,s,tgr,group,blocks,pages] = sprintf("%s%s \/%s %d %d %d %d %4.2f (%s) (%s) f\n", grouping[sc,s,tgr,group,blocks,pages], PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_), Plot_Lbl(feature_))
         plot_group[tgr,blocks,pages]=1
        } # if ChkLimits
       }  # for i
-        printf "\n" | "cat 1>&2"
+      printf "\n" | "cat 1>&2"
     }    # for s
-    # Percent of plot area for each strand
-    # if (ng[sc,"+"]>0) cntstr_fwd+=PLOT_FT[sc,":","track_scale"]
-    # if (ng[sc,"."]>0) cntstr_bth+=PLOT_FT[sc,":","track_scale"]
-    # if (ng[sc,"-"]>0) cntstr_rvs+=PLOT_FT[sc,":","track_scale"]
   }      # for sc
-    # cntstr_TOT=cntstr_fwd+cntstr_bth+cntstr_rvs
-    #  printf "/LnFwd %s def %% groups for each strand\n/LnBth %s def\n/LnRvs %s def\n", cntstr_fwd/cntstr_TOT, cntstr_bth/cntstr_TOT, cntstr_rvs/cntstr_TOT
-
-  # PostScript Drawing strands, sources, groups, features
-  #
-  # make plotlines. Put non-overlapping groups into the same plotting line.
-  #
+# PostScript Drawing strands, sources, groups, features
+# make plotlines. Put non-overlapping groups into the same plotting line.
   if (Var["print_report"]) printf "\n%s\nPrinting Lines......\nPage: %s Block: %s\nNuc_Ori: %s - Nuc_End: %s\n%s\n\n",BigLINE,pages,blocks,BORI,BEND,BigLINE | "cat 1>&2"
   for (stp=1;stp<=3;stp++) { # for s in strand
     prtrule=0
@@ -1086,7 +1058,7 @@ END{
     if (s=="+" || s=="-") lastcnt=ordcnt
     else { lastcnt=nordcnt; prtrule=1 }
     printf "------ Source: --- Strand: %s Counter: %s\n", s, lastcnt | "cat 1>&2" 
-    if (prtrule) printf "%s %s XOriPlot Y {r} 2 tm\n",BORI,BEND
+    if (prtrule && (StrSizeFwd>0 && NStSize>0)) printf "ChangeStrand\n"
     printf "%% ------------------ Strand(%s) Begin\n",s
     for (srcord=0;srcord<lastcnt;srcord++) { # for sc in sources
       if (s=="-") { ngcnt=lastcnt-(srcord+1); sc=order["strand",ngcnt] }
@@ -1095,8 +1067,7 @@ END{
         else sc=order["none",srcord]      # (s==".")
         }
       printf "------ Source: %10s Strand: %s Counter: %s\n", sc, s, srcord | "cat 1>&2" 
-      # if (n[sc,s]>0) 
-      printf "(%s) %s %s (%s) source\n", sc"("s")", PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],s
+      printf "(%s) %s %s (%s) source\n", Plot_Lbl(sc)"("s")", PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],s
       scnt=0
       for (i=1;i<=ng[sc,s];i++) {
         scnt++
@@ -1104,37 +1075,42 @@ END{
         for (j=1;j<=nl[sc,s] && grouping[sc,s,g,start] < endline[sc,s,j];j++);
         nl[sc,s] = j==nl[sc,s]+1 ? j : nl[sc,s];
         endline[sc,s,j]=grouping[sc,s,g,end];
-	    # plot group in file
+    # plot group in file
         if (Var["print_report"])
           printf "GROUP : %-10s : %s %10d %10d \n", g, s, grouping[sc,s,g,start], grouping[sc,s,g,end] | " sort +6 | cat 1>&2";
-        if (PLOT_FT[g,":","label"]=="default") labl=g
-        else labl=PLOT_FT[g,":","label"]
+        if (PLOT_FT[g,":","group_line"]=="none") gplt=0         # group without lines
+        else if (PLOT_FT[g,":","group_line"]=="default") gplt=1 # group red-line
         if (plot_group[g,blocks,pages]==1) {
-          printf "(%s) %s %s gp \n", checklbl(labl), grouping[sc,s,g,start], grouping[sc,s,g,end]
+          printf "(%s) %s %s %s gp \n", Plot_Lbl(g), gplt, grouping[sc,s,g,start], grouping[sc,s,g,end]
           printf "%s", grouping[sc,s,g,group,blocks,pages] | "sort +0nr +6nr +2n +3nr"
           close("sort +0nr +6nr +2n +3nr")
           printf "g_end\n"
           } # if plot_group
         } # for ng[]
-        # if (n[sc,s]>0) 
         printf "s_end\n"
       }   # for sources
       printf "%% ------------------ Strand(%s) End\n",s
-      if (prtrule && scnt>0) printf "%s %s XOriPlot Y {r} 2 tm\n",BORI,BEND
+      if (prtrule && (StrSizeRvs>0 && (StrSizeFwd>0 || NStSize>0))) printf "ChangeStrand\n"
     }     # for strands
   if (Var["print_report"]) close(" sort +6 | cat 1>&2")
-
-  # Closing Pages MAIN LOOP.
-  #
+# Closing Pages MAIN LOOP.
     printf "b_end\n"
     BORI+=BOFFSET
     } # for blocks
-  endPSpage(pages,pages)     # PostSCript Page Trailer.
+# PostSCript Page Trailer.
+  printf "%%\ngrestoreall\npgsave restore\nshowpage\n%%\n%% PageEND: %s %s\n%%\n",pages,pages;
   PORI+=POFFSET
   } # for pages
-
-  # If not exist, create custom file (.gff2psrc)
-  #
+# Closing PostScript document.
+  split(Default["page_bbox"],bbm,",")
+  if (Default["page_orientation"]=="Landscape") { bbx=bbm[2]; bby=bbm[1] }
+  else { bbx=bbm[1]; bby=bbm[2] }
+  # PostScript end of page (Trailer)
+  printf "%%%%Trailer\n%%\n";
+  printf "%%%%Pages: %s\n", P;
+  printf "%%%%Orientation: %s\n", Default["page_orientation"];
+  printf "%%%%BoundingBox: 0 0 %s %s\n%%%%EOF\n", bbx, bby;
+# If not exist, create custom file (.gff2psrc)
   if (Var["create_default_customfile"]) { 
     printf "\n%s\nCustom File:\n%s\n\n%s\n\n", BigLINE,BigLINE, Default["customfile_name_default"] | "cat 1>&2"
     if (Var["exist_default_customfile"]) {
@@ -1155,13 +1131,10 @@ END{
     printf "         ...See help for -d and -D <filename> options...\n" | "cat 1>&2"
     printf "%s%s\n\n",BigLINE,BigLINE | "cat 1>&2"
     }
-
-  # Object Properties Report...
-  #
+# Object Properties Report...
   if (Var["print_report"]) {
     printf "\n%s\nObject Properties Defined....\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
-    CreateProps(1)    }
-
+    CreateProps(1) }
 }
 function lcase(string,    chr) { for (chr in CM) gsub(chr,CM[chr],string); return string }
 function min(a,b) { if (a<=b) return a; else return b }
@@ -1210,43 +1183,38 @@ function Nuc_round(nm,flg,    sign,nmp,i,mlt,smm,t) { # flg=0 then floor; flg=1 
    else t=0 }
  else { if (nm>0) t=nm>=100?sign*((int(nmp*10^(mlt-1)))*10^(i-mlt)):0; else t=0 }
  return t }
-#
-function tick(nm) { # Still not adapted.
- end1=ESQ1-OSQ1; if (end1==0) end1=10000
- # end2=ESQ2-OSQ2; if (end2==0) end2=10000
- wy=max(end1,end2);
- y=wy/nm;
- ylog=(log(y)/log(10));
- yfloor=int(ylog);
- y1=y/(10^yfloor);
- y2=int(y1);
- t=y2*(10^yfloor);
- return t }
-#
-function Plot_Lbl(gff_feat) {
- if (PLOT_FT[gff_feat,":","label"]=="none") lbl=" ";
- else if (PLOT_FT[gff_feat,":","label"]=="default") lbl=gff_feat;
- else lbl=PLOT_FT[gff_feat,":","label"];
+function Plot_Lbl(gff_feat,    lbl,vn) {
+ vn=PLOT_FT[gff_feat,":","label"]
+ if (vn=="none") lbl=" ";
+ else if (vn=="default") lbl=gff_feat;
+ else lbl=vn;
  return checklbl(lbl) }
-function Set_feat_Clr(gff_feat,    clrmode,color1,color2) { # remaining to add vector definition colors.
+function Set_feat_Clr(gff_feat,    clrmode,color1,color2,vn,clm) { # remaining to add vector definition colors.
  clrmode=0; color1=""; color2=""; # "none" or not defined
- k=split(PLOT_FT[gff_feat,":","color"],clm,"..");
- if (PLOT_FT[gff_feat,":","fill_shape_mode"]=="default") { clrmode=1; color1="FGcolor " }
- else if (PLOT_FT[gff_feat,":","fill_shape_mode"]=="1_color") { 
-   clrmode=1; color1=PLOT_FT[gff_feat,":","color"]" " }
- else if (PLOT_FT[gff_feat,":","fill_shape_mode"]=="2_color") {
-   clrmode=2; color1=clm[1]" "; if (k>=2) color2=clm[2]" "; else color2="FGcolor " }
- else if (PLOT_FT[gff_feat,":","fill_shape_mode"]=="frame-remainder") { clrmode=3 }
- else if (PLOT_FT[gff_feat,":","fill_shape_mode"]=="rainbow") { clrmode=4 }
+ k=split(PLOT_FT[gff_feat,":","color"],clm,/\.\./);
+ vn=PLOT_FT[gff_feat,":","fill_shape_mode"]
+ if (vn=="default") { clrmode=1; color1="FGcolor " }
+ else {
+   if (vn=="1_color") { 
+     clrmode=1; color1=PLOT_FT[gff_feat,":","color"]" " }
+   else {
+     if (vn=="2_color") {
+       clrmode=2; color1=clm[1]" "; if (k>1) color2=clm[2]" "; else color2="FGcolor " }
+     else {
+       if (vn=="frame-remainder") { clrmode=3 }
+       else if (vn=="rainbow") { clrmode=4 }
+       }}}
  tmp=color1""color2""clrmode
  return tmp }
-function Set_feat_Shape(gff_feat,src    ,shp,pos,tmp) {
- if (PLOT_FT[gff_feat,":","shape"]=="box") shp="box";
- else if (PLOT_FT[gff_feat,":","shape"]=="arrow") shp="arw";
- else if (PLOT_FT[gff_feat,":","shape"]=="end_arrow") shp="end";
- else if (PLOT_FT[gff_feat,":","shape"]=="circle") shp="cir";
+function Set_feat_Shape(gff_feat,src    ,shp,pos,tmp,vn) {
+ vn=PLOT_FT[gff_feat,":","shape"]
+ if (vn=="box") shp="box";
+ else if (vn=="arrow") shp="arw";
+ else if (vn=="end_arrow") shp="end";
+ else if (vn=="circle") shp="cir";
+ else if (vn=="single") shp="sgl";
  else shp="line";
-  # else if (PLOT_FT[gff_feat,":","shape"]==" vector, spike, block ")
+  # else if (vn==" vector, spike, block ")
  if (PLOT_FT[src,":","vert_align"]=="center") pos="f";
  else if (PLOT_FT[src,":","vert_align"]=="baseline") pos="h";
  tmp=pos""shp;
@@ -1312,8 +1280,6 @@ function CreateProps(flag,    STRING,prop,dffeat,feat,gpfeat,sofeat) {
       }
     if (flag==1)
       printf "# %s:%s=%s\n#\n", gpfeat, "feature_number", GP_ary[gpfeat] | "cat 1>&2"
-    # else if (flag==2)
-    #   printf "# %s:%s=%s\n#\n", gpfeat, "feature_number", GP_ary[gpfeat] >> Default["customfile_name_default"]
     }
   STRING="#\n# S ############SOURCE FEATURES############\n#\n"
   if (flag==1) { 
@@ -1334,13 +1300,11 @@ function CreateProps(flag,    STRING,prop,dffeat,feat,gpfeat,sofeat) {
       }
     if (flag==1)
       printf "# %s:%s=%s\n#\n", sofeat, "group_number", sources[sofeat] | "cat 1>&2"
-    # else if (flag==2)
-    #  printf "# %s:%s=%s\n#\n", sofeat, "group_number", sources[sofeat] >> Default["customfile_name_default"]
     }
   if (flag==1) { close("sort 1>&2"); close("cat 1>&2") }
   else if (flag==2) close(Default["customfile_name_default"])
  }
-function RCFile(file,    STRING,nothere,first,gffirst,second,ft_type,feat) { ############ Read CustomFile
+function RCFile(file,    STRING,nothere,first,gffirst,second,ft_type,feat,lytdef,dft) { ############ Read CustomFile
   STRING="Match between: %s & %s : %s=%s\n"
   while ((getline < file) > 0 ) {
    if ( $1!~/^(\#)+/ && NF>0 ) { 
@@ -1362,7 +1326,6 @@ function RCFile(file,    STRING,nothere,first,gffirst,second,ft_type,feat) { ###
             printf "Feature "STRING,feat,first,(feat":"second),defs[2] | "cat 1>&2"
           }
         }
-      # print ">>>New Feature>>>" $0
       if (nothere==0 && !global) {
         FT_ary[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
@@ -1381,7 +1344,6 @@ function RCFile(file,    STRING,nothere,first,gffirst,second,ft_type,feat) { ###
             printf "Group "STRING,feat,first,(feat":"second),defs[2] | "cat 1>&2"
           }
         }
-      # print ">>>New Feature>>>" $0
       if (nothere==0 && !global) {
         GP_ary[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
@@ -1400,7 +1362,6 @@ function RCFile(file,    STRING,nothere,first,gffirst,second,ft_type,feat) { ###
             printf "Source "STRING,feat,first,(feat":"second),defs[2] | "cat 1>&2"
           }
         }
-      # print ">>>New Feature>>>" $0
       if (nothere==0 && !global) {
         sources[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
@@ -1420,10 +1381,8 @@ function RCFile(file,    STRING,nothere,first,gffirst,second,ft_type,feat) { ###
      if ( $1~/^(\#)$/ && $2~/^[LFGS]$/) ft_type=$2
   } # while getline
   close(file) 
-  # if (first==".*") { for (props in PLOT_FT) if ( }   
-  #
-  # Modifying Vars
-  #
+# if (first==".*") { for (props in PLOT_FT) if ( }   
+# Modifying Vars
   if (Var["print_report"]) printf "\n%s\nCommand-Line Modified options...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
   for (lytdef in Default) {
     dft=Default[lytdef]
@@ -1434,10 +1393,13 @@ function RCFile(file,    STRING,nothere,first,gffirst,second,ft_type,feat) { ###
     if (OnOff(PLOT_LY["load_customfile"])) Default["load_customfile"]=PLOT_LY["load_customfile"]
   close("sort | cat 1>&2")
  }
-function defPSvars(){
+function defPSvars() {
  printf "%% BG \& FG colors\n";
  printf "/BGcolor { colordict begin %s end } def\n", Var["BACKGROUND_COLOR"];
  printf "/FGcolor { colordict begin %s end } def\n", Var["FOREGROUND_COLOR"];
+ printf "/frm0 { colordict begin %s end } def\n", Default["frame0_color"];
+ printf "/frm1 { colordict begin %s end } def\n", Default["frame1_color"];
+ printf "/frm2 { colordict begin %s end } def\n", Default["frame2_color"];
  printf "%% page orientation flag\n";
  printf "/flglscape %s def\n", chkpo(Default["page_orientation"]);
  printf "%%%% page size in points used for plot % pgA4 == 595  842\n";
@@ -1453,18 +1415,16 @@ function defPSvars(){
  printf "/XNucOffSet %s def\n", PORI; 
  printf "/NPages %s def\n", P; 
  printf "/NBlck %s def\n", B; 
- printf "/MaxNuclPage %s def\n", POFFSET;
- printf "/MaxTick 100 def\n";
- printf "/MinTick  10 def\n%%\n";
+ printf "/MaxNuclPage %s def\n", NOFFSET;
+ printf "/MaxTick 1000 def\n";
+ printf "/MinTick  100 def\n%%\n";
  printf "/tracksize %s def\n", chkun(Default["default_track_width"]);
  printf "/spcrsize  %s def\n", chkun(Default["default_track_spacing_width"]);
  printf "/LnTot  %s def\n", BSize;     # size in points (size is relative here)
  printf "/LnFwd %s def\n", StrSizeFwd; # if they are 0 then not showed
- # printf "/FwdFlg %s def\n", OnOff(Default["strand_show_forward"]);
  printf "/LnRvs %s def\n", StrSizeRvs;
- # printf "/RvsFlg %s def\n", OnOff(Default["strand_show_reverse"]);
  printf "/LnBth %s def\n", NStSize;
- # printf "/BthFlg %s def\n", OnOff(Default["strand_show_independent"]);
+ printf "/LnTck %s def\n", cpsc;
  printf "/vectoffset 10 def\n";
  printf "/flpos true def %% flag for showing Seq Xpos for all elements.\n%%\n";
  printf "/Fbline true def %% flag for showing baseline for each method.\n";
@@ -1472,13 +1432,13 @@ function defPSvars(){
  printf "/XLftLbl 4 cm  def\n";
  printf "/FLftLbl true  def\n";
  printf "/XRgtLbl 4 cm  def\n";
- printf "/FRgtLbl true  def\n%%\n";
+ printf "/FRgtLbl false  def\n%%\n";
  printf "/XOriTitl 1 cm def\n";
  printf "/YOriTitl 0 cm def\n";
  printf "/YSTitl 1 cm def\n";
  printf "/FlgTitl true def\n";
  printf "%%\n" }
-function startPSpage(num,tot,ns,ne){
+function startPSpage(num,tot) {
  printf "%%%%Page: %s %s\n",num,num;
  printf "%%%%BeginPageSetup\n%%\n";
  printf "%% Saving current page settings\n";
@@ -1486,8 +1446,7 @@ function startPSpage(num,tot,ns,ne){
  printf "%% Defining pagenumber\n";
  printf "/PageNumber (Page %s/%s) def\n",num,tot;
  printf "%% Defining page variables\n";
- printf "/Y YOriBlck def\n";
- printf "/Nuc_Offset %s def\n",ns;
+ # printf "/Y YOriBlck def\n";
  printf "%% Setting BGcolor for sheet \n";
  printf "Dpage flglscape { exch } if 0 0 bbox FGcolor 1 tbbox BGcolor scmyk fill\n";
  printf "%% setting coordinate axes for page orientation\n";
@@ -1499,16 +1458,8 @@ function startPSpage(num,tot,ns,ne){
  printf "%% Header\n%%\n";
  printf "%%%%EndPageSetup\n";
  printf "%%\n" }
-function endPSpage(num,tot){
- printf "%%\ngrestoreall\npgsave restore\nshowpage\n%%\n%% PageEND: %s %s\n",num,tot;
- printf "%%\n" }
-' - "$@"
+' - $GFF_INPUT_FILES
 #### Main GFF2APLOT GNU awk Program DONE.
-
-#
-# PostScript end of page (Trailer)
-# 
-  MAINPSTRAILER
 
 #
 ##################### EOF #####################
