@@ -24,7 +24,28 @@
 # character to interpose another module into the current module.  This
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
-gfftools software/gfftools
-geneid   software/geneid
-sgp      software/sgp
-sggp     software/sggp
+#
+# software CVS
+#
+gfftools      software/gfftools
+geneid        software/geneid
+sgp           software/sgp
+sggp          software/sggp
+#
+# users CVS
+#
+rguigo        users/rguigo
+#
+jabril        users/jabril
+webjabril     users/jabril/webs/HOMEjabril
+homejabril    users/jabril/webs/HOMEjabril/public_html
+webprecarios  users/jabril/webs/PRECARIOS
+homeprecarios users/jabril/webs/PRECARIOS/public_html
+#
+gparra        users/gparra
+#
+scaste        users/scaste
+#
+eblanco       users/eblanco
+#
+xfustero      users/xfustero
