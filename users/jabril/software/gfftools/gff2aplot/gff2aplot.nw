@@ -1,10 +1,10 @@
 % -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
-\documentclass[11pt]{article}
+\documentclass[11pt]{report}
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $
+% $Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -46,12 +46,14 @@
 %\usepackage{lscape}
 %\usepackage{rotating}
 %\usepackage{multicol}
-\usepackage{verbatim}
+%\usepackage{verbatim}
+\usepackage{fancyvrb}
 %\usepackage{version}
 %% fonts
 \usepackage{times}\fontfamily{ptm}\selectfont
 \usepackage{t1enc}
  
+\input current_version.tex
 \input defs.tex
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,7 +72,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -91,10 +93,10 @@
 \input tables/AplotColorDefs.tex
 
 %%%%% New Commands are defined here
-\newcommand{\sctn}[1]{\section{#1}}
-\newcommand{\subsctn}[1]{\subsection{#1}}
-\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
-\newcommand{\subsubsubsctn}[1]{\paragraph{#1}}
+\newcommand{\sctn}[1]{\chapter{#1}} % \section{#1}}
+\newcommand{\subsctn}[1]{\section{#1}} % \subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsection{#1}} % \subsubsection{#1}}
+\newcommand{\subsubsubsctn}[1]{\subsubsection{#1}} % \paragraph{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 \newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
 \newcommand{\todo}[1]{
@@ -123,6 +125,7 @@
 %%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
 \newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newcommand{\clns}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{0.75cm}{1ex}}}}
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
 % \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
 <<HIDE: new LaTeX pstricks>>
@@ -133,13 +136,15 @@
 <<HIDE: new LaTeX urls>>
 
 %%%%% defs
-\def\prog{\textsc{\textbf{gff2aplot}}}
+\def\prog{\textsc{\textbf{\PROGname}}}
 \def\gps{\textsc{\textbf{gff2ps}}}
 \def\gft{\textsc{\textbf{gfftools}}}
 \def\noweb{\textsc{noweb}}
+\def\gv{\textsc{ghostview}}
+\def\gs{\textsc{ghostscript}}
 \def\ps{\textsc{PostScript}}
 \def\eoline{$\backslash\backslash$}
-\def\ver{2.0}
+\def\ver{\PROGversion}
 <<HIDE: new LaTeX definitions>>
 
 %%%%% TODO defs
@@ -148,7 +153,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \def\genomelab{\textbf{Genome BioInformatics Lab}}
-\def\progname{gff2aplot.pl}
+\def\progname{{\PROGname}.pl}
 \def\tit{\textsc{\progname}}
 %
 \def\mtjabril{
@@ -205,6 +210,7 @@ Universitat Pompeu Fabra\\[2ex]
 <<HIDE: new LaTeX pstricks>>=
 @
 <<HIDE: new LaTeX definitions>>=
+\def\lastyear{2003}
 @ 
 
 \pagestyle{empty}
@@ -223,7 +229,7 @@ Universitat Pompeu Fabra\\[2ex]
 \rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
 \multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
                                \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
-Program Name: & {\Huge\progname}                       \\[3ex]
+Program Name: & {\Huge\progname\hspace{1em}{\huge\ver}}     \\[3ex]
 \multicolumn{2}{c}{\rule[0.5ex]{0.95\linewidth}{2pt}}\\[2ex]
      Authors: & {\Large
                  \begin{minipage}[t]{0.95\rttbl}
@@ -253,10 +259,8 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \end{titlepage}
 
 \newpage
-
 \ % \vfill
 % \hrulefill
-
 \newpage
 
 \input ./manual/GNU_GPL.tex
@@ -264,10 +268,8 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 %'%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
 \newpage
-
 \ % \vfill
 % \hrulefill
-
 \newpage
 \pagenumbering{roman}
 \setcounter{page}{1}
@@ -309,19 +311,16 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 At the first stage of the new {\prog} implementation, we are going to define a simple main loop that performs a serial process, such in the old [[bash/GNUawk]] version. So that, the program will read the input files and parameters defined by user, performing the plots and then exiting, just finishing the job. Once the new version will be operative, we will try to implement an iterative mode and/or a GUI in [[perlTK]].  
 
-\label{todo:AAA}
-<<HIDE: new defs TODO>>=
-\def\todoAAA{Flow diagram (Serial/Filter mode) for figure~\ref{fig:filtermode}.} % todoAAA
+<<HIDE: DONE>>=
+\doneitem{20030114}{Flow diagram (Serial/Filter mode) for figure~\ref{fig:filtermode}.} % todoAAA
 @
-<<HIDE: TODO>>=
-\todoitem{\todoAAA}{todo:AAA}
-@
-\todo{ \item \todoAAA } % todo
 
 \begin{figure}[!ht]
 \begin{center}
-\fbox{\parbox[c][6cm][c]{\linewidth}{\hfill}}
-% \includegraphics[]{}
+\fbox{ % \parbox[c][6cm][c]{\linewidth}{\hfill}
+ \includegraphics[bb= 315 55 475 795, clip, angle=270, width=\linewidth]
+                 {./psfigures/blockdiagram_filter.ps}
+} %fbox
 \caption[``Filter'' mode of {\prog}.]{\label{fig:filtermode} Input, output and main code blocks are represented in this flowchart for the ``Filter'' mode of {\prog}.}
 \end{center}
 \end{figure}
@@ -352,17 +351,25 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 
 \label{todo:AAB}
 <<HIDE: new defs TODO>>=
-\def\todoAAB{Flow diagram here (Interactive, Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.} % todoAAB
+\def\todoAAB{Flow diagram here (Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.} % todoAAB
 @
 <<HIDE: TODO>>=
 \todoitem{\todoAAB}{todo:AAB}
 @
 \todo{ \item \todoAAB } % todo
+<<HIDE: DONE>>=
+\doneitem{20030114}{Flow diagram (Interactive) for figure~\ref{fig:othermodes}.} % todoAAA
+@
 
 \begin{figure}[!ht]
 \begin{center}
-\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
-% \includegraphics[]{}
+\fbox{ % \parbox[c][8cm][c]{\linewidth}{\hfill}}
+ \begin{tabular}{c}
+ \includegraphics[bb= 315 55 515 795, clip, angle=270, width=\linewidth]
+                 {./psfigures/blockdiagram_interactive.ps} \\
+ \parbox[c][8cm][c]{\linewidth}{\hfill} \\
+ \end{tabular}
+} %fbox
 \caption[Future modes of {\prog}.]{\label{fig:othermodes} Input, output and main code blocks are represented in this flowchart for the ``Interactive'', ``Graphic'' and ``Web/CGI'' versions of {\prog}.}
 \end{center}
 \end{figure}
@@ -390,11 +397,13 @@ This is the {\prog} program outline:
 #
 # CONSTANTS
 #
+<<Global Constants: Version>>
 <<Global Constants>>
 #
 # VARIABLES
 #
 <<Global Vars>>
+<<Global Vars: USED>>
 <<UNDEFINED VARS>>
 #
 # MAIN PROGRAM LOOP
@@ -500,12 +509,12 @@ Some info about the program itself.
 <<Pre-Declared Vars>>=
 $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 @ 
-<<Global Constants>>=
+<<Global Constants: Version>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.34 $', #'
-     '$Date: 2002-12-24 13:39:08 $', #'
-     '$Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $', #'
+     '$Revision: 1.35 $', #'
+     '$Date: 2003-03-04 18:05:30 $', #'
+     '$Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -575,7 +584,7 @@ AUTHORS:
                  Thomas WIEHE                   
                 Roderic GUIGO SERRA       
 
-            Copyright (C) 1999-2001
+            Copyright (C) 1999-2003
 
 +++EndOfHelp+++
     close(HELP);
@@ -616,10 +625,10 @@ The functions described in this section process each GFF-record, each custom def
 \begin{figure}[!ht]
 \begin{center}
 \fbox{ % \parbox[c][8cm][c]{\linewidth}{\hfill}
- \includegraphics[bb=20 5 540 770,clip,angle=270,width=\linewidth]
+ \includegraphics[bb= 35 55 540 810, clip, angle=270, width=\linewidth]
                  {./psfigures/flowchart_settingvariables.ps}
-}%fbox
-\caption[Structure of main customization variables]{\label{fig:customvarstruc} Data structure schemma of main customization variables and their relationships: [[%DefaultVars]], [[%CmdLineVars]], [[%CustomVars]], [[%Defaults]], [[%Vars]]. Last three variables share the same internal data structure. Above them, a graph showing the processes involved in the parsing of customization parameters from different sources (defaults, customization file and command-line) and the functions involved in the definition of those variables. Green arrow and boxes correspond to main loop functions, which are also executed in that order.}
+} %fbox
+\caption[Structure of main customization variables and flowchart of the related parsing functions]{\label{fig:customvarstruc} Data structure schemma of main customization variables and their relationships: [[%DefaultVars]], [[%CmdLineVars]], [[%CustomVars]], [[%Defaults]], [[%Vars]]. Last three variables share the same internal data structure. Above them, a graph showing the processes involved in the parsing of customization parameters from different sources (defaults, customization file and command-line) and the functions involved in the definition of those variables. Green arrow and boxes correspond to main loop functions, which are also executed in that order.}
 \end{center}
 \end{figure}
 
@@ -1322,7 +1331,7 @@ NO_CUSTOM_FOUND =>
 \subsubsctn{Validating customization parameters} 
 \label{sec:paramvalid}
 
-'[[$rec]]' is a reference to an array that contains three elements: feature, variable and value. First we check if variable name is defined in , then we check if the given value matches the variable type. After that we analyse the feature element, testing if it is a regular expression or not. We have slightly modified ths function to be able to process input from [[&parse_custom_files]] and [[&check_command_line_vars]], we pass by reference the main hash variable that must be loaded with the data being parsed ([[%CustomVars]] and [[%CmdLineVars]] respectively).
+'[[$rec]]' is a reference to an array that contains three elements: feature, variable and value. First we check if variable name is defined in , then we check if the given value matches the variable type. After that we analyse the feature element, testing if it is a regular expression or not. We have slightly modified ths function to be able to process input from [[&parse_custom_files]] and [[&check_command_line_vars]], we pass by reference the main hash variable that must be loaded with the data being parsed ([[%CustomVars]] and [[%CmdLineVars]] respectively). GFF-features are NOT case sensitive, so in that case we force them to lower case. That must be synchronized with the code block [[<<adding new feature elements>>]].
 
 <<Parsing Custom Files>>=
 sub varscheck() {
@@ -1340,6 +1349,7 @@ sub varscheck() {
             @{ $varec->{$class}{$$rec[1]} } = ();
         };
         @tmpary = &find_regexp($$rec[0]);
+        $tmpary[3] = lc($tmpary[3]) if ($class eq 'FEATURE');
         (shift @tmpary) || return $F;
         push @{ $varec->{$class}{$$rec[1]} }, 
              ( @tmpary, $$rec[2] );
@@ -1385,8 +1395,10 @@ There are several global variable names that are defined in different sections o
 
 <<Pre-Declared Vars>>=
 %TESTS %Ribbons %Shapes %GroupShapes %LineStyles %TextAlign
-%Fonts %FORMATS $formats %COLORS $colors %UNITS
+%Fonts %FORMATS $formats %COLORS $colors %GRADIENTS %UNITS %USED
 @ 
+
+[[%USED]] will contain sub-hashes for those features which used values we would keep track, for instance to build dynamic dictionaries (colors, page-formats, shapes, and so on). At this moment it is applied only to reduce the size of the colors and page-formats dictionaries.
 
 The following hash keys serve as references to annonymous functions, each one defining a single test for the variable value passed by reference and modifying it if needed.
 
@@ -1413,13 +1425,13 @@ that we do not need to introduce a new field in the array.
 <<Parsing Custom Files>>=
 sub find_regexp() {
     my $string = $_[0];
-    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid);
+    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid,$escflg);
     $isOK_flg = $T;
     $not_flg = $F;
     $id_flg = undef;
     $string =~ s{^!}{}o && ($not_flg = $T); # not_regexp is true
     $string =~ s{(\\@)$}{@@}o; # scaping trailing '@' (if element ends with) 
-    $string = &escape_input($string);
+    ($string,$escflg) = &escape_input($string);
     ($tmpstr, $tmpid) = (undef, undef);
     ( reverse($string) =~ m{^([^\/@]*?)(?:@){1}(.*)$}o ) && do {
         $tmpstr = reverse($2);
@@ -1474,7 +1486,7 @@ $tmpstr =~ m{^/(.*)/$}o && do {
 #     $isOK_flg = $F;  
 #     last REGEXPS;
 # }; # $tmpstr is a bad defined regexp
-$string = '^'.(quotemeta($tmpstr)).'$'; #' 
+$string = '^'.($escflg ? $tmpstr : quotemeta($tmpstr)).'$'; #' 
 @ 
 
 <<Parsing Custom Files>>=
@@ -1497,8 +1509,9 @@ to avoid security issues. This will make a CGI developed on {\prog} a little bit
 <<Parsing Custom Files>>=
 sub escape_input() {
     my $var = $_[0];
-    $var =~ s{([;,<>&!\{\}`'"])}{\\$1}g; #"'`
-    return $var;
+    my $c;
+    $c = ($var =~ s{([;,<>&!\{\}`'"])}{\\$1}g) || 0; #"'`
+    return $var, ($c > 0) ? $T : $F;
 } # escape_input
 @ %def &escape_input
 
@@ -1742,11 +1755,71 @@ COLOR => sub { # Value, varName, Lowercase
           ($$_v = 'bg', return $T);
       $_l =~ /^f(ore)?g(round)?(color)?/o &&
           ($$_v = 'fg', return $T);
-      defined($COLORS{$_l}) && ($$_v = $_l, return $T);
+      defined($COLORS{$_l}) && do {
+          $$_v = $_l;
+          defined($USED{'COLORS'}{$_l}) || 
+              ($USED{'COLORS'}{$_l} = $COLORS{$_l}->[0]);
+          return $T;
+      }; # defined
       &warn('NOT_A_COLOR',$F,$_l,$_n);
       return $F;
   },
 @ %def {COLOR}
+
+We include an extended color name checking for gradients, which are also taken as color names, but require a slightly different parsing. Up to six colors (which is defined in [[$maxcolornum]]) can be passed to the [[gradient]] color feature, to set the colors that define the inflexion points for such gradient (see section~\ref{sec:psfunctiongradients}, on page~\pageref{sec:psfunctiongradients}, to see the {\ps} implementation). If a color name is not recognized it is skipped from the color list, if that list gets finally empty, we load it with the default foreground color (say here [[fg]]).
+
+<<variable value checking>>=
+EXTCOLOR => sub { # Value, varName, Lowercase
+      my $maxcolornum = 6;
+      my ($_v,$_n,$_l) = @_;
+      my ($_vt,$_lt,@_cl,@_ll,$_t);
+      $_l =~ /^(.*)$gradregex$/ && do {
+          $_vt = defined($1) ? $1 : ''; 
+          $_lt = defined($2) ? $2 : '';
+          defined($GRADIENTS{$_lt}) && do {
+              defined($USED{'GRADIENTS'}{$_lt})
+                  || ($USED{'GRADIENTS'}{$_lt} = $_vt);
+              if ($_lt eq 'rainbow' ) {
+                  $$_v = $_lt;
+              } else {
+                  $_vt =~ s/\s*$//og;
+                  @_cl = split /\s+|_/og, $_vt;
+                  @_ll = ();
+                  for (my $l = 0; ($l <= $#_cl && $l < $maxcolornum); $l++) {
+                      $_t = '';
+                      $TESTS{COLOR}->(\$_t,$_n,$_cl[$l]) && (push @_ll, $_t);
+                  };
+                  scalar(@_ll) > 0 || (push @_ll, 'fg');
+                  $$_v = join(" ", @_ll, scalar(@_ll), $_lt);
+              };
+              return $T;
+          }; # defined
+          &warn('NOT_A_GRADIENT',$F,$_l,$_n);
+          return $F;
+      }; 
+      return $TESTS{COLOR}->($_v,$_n,$_l);
+  },
+@ %def {EXTCOLOR}
+
+<<Pre-Declared Vars: regexp>>=
+$gradregex
+@ %def $gradregex
+<<Global Constants>>=
+$gradregex = '(gradient|rainbow)';
+@
+
+We must set at least two basic colors in the [[%USED]] colors subhash, in case that user will not select any color for the variables in the customization. But remember to include in this default setting all those colors that will be set by default for a variable in [[%DefaultVars]]
+
+<<Global Vars: USED>>=
+%{$USED{'COLORS'}} = (
+                  <<DEFAULT USED COLORS>>
+                  );
+%{$USED{'GRADIENTS'}} = ();
+@
+<<DEFAULT USED COLORS>>=
+'white' => $COLORS{'white'}->[0],
+'black' => $COLORS{'black'}->[0],
+@ 
 
 <<HIDE: DONE>>=
 \doneitem{20011107}{Set fg/bg multiple strings to a single color name such fgcolor/bgcolor for later use in the whole program (PS code too).}
@@ -1755,6 +1828,8 @@ COLOR => sub { # Value, varName, Lowercase
 <<warnings - parsing custom files>>=
 NOT_A_COLOR =>
   $Warn."\"\%s\" color not defined in \"\%s\" variable.\n",
+NOT_A_GRADIENT =>
+  $Warn."\"\%s\" gradient color wrongly defined in \"\%s\" variable.\n",
 @
 
 <<variable value checking>>=
@@ -1780,7 +1855,7 @@ Font names must be in first capital letter format for {\ps}.
 FONT => sub { # Value, varName, Lowercase
       my ($_v,$_n,$_l) = @_;
       defined($Fonts{$_l}) && 
-          ($$_v = $Fonts{$_l}, return $T);
+          ($$_v = $_l, return $T);
       &warn('NOT_A_FONT',$F,$$_v,$_n);
       return $F;
   },
@@ -1791,7 +1866,16 @@ NOT_A_FONT =>
   $Warn."Sorry, \"\%s\" font is not defined for \"\%s\".\n",
 @
 
-We provide three basic fonts that are standard in most {\ps} devices (a serif, a sans-serif and a monospaced font), and four series for each one (an upright ``normal'', an italic/oblique, a bold, and a bold italic/oblique series). 
+\begin{figure}[!ht]
+\begin{center}
+\fbox{%
+ \includegraphics[bb= 30 220 400 820,clip]{psfigures/psdefaultfonts.ps}
+}%fbox
+\parbox{0.75\linewidth}{\caption[Default {\ps} fonts that are available for labeling related variables]{\label{fig:psdefaultfonts} Default {\ps} fonts that are available for labeling related variables. Font size was set to 10 points for the twelve fonts shown above.}}
+\end{center}
+\end{figure}
+
+We provide three basic fonts that are standard in most {\ps} devices (a serif, a sans-serif and a monospaced font), and four series for each one (an upright ``normal'', an italic/oblique, a bold, and a bold italic/oblique series). See figure~\ref{fig:psdefaultfonts} to see how they look like.
 \label{sec:FontsHsh}
 
 <<Global Vars>>=
@@ -1856,7 +1940,12 @@ Available page sizes are shown in section~\ref{sec:PAGEdef}, page~\pageref{sec:P
 <<variable value checking>>=
 PAGE => sub { # Value, varName, Lowercase
       my ($_v,$_n,$_l) = @_;            
-	  defined($FORMATS{$_l}) && ($$_v = $_l, return $T);
+	  defined($FORMATS{$_l}) && do {
+          $$_v = $_l;
+          defined($USED{'FORMATS'}{$_l}) || 
+              ($USED{'FORMATS'}{$_l} = $FORMATS{$_l}->[0]);
+          return $T;
+      };
       &warn('NOT_A_PAGE',$F,$_l,$$_v);
       return $F;
   },
@@ -1866,6 +1955,17 @@ PAGE => sub { # Value, varName, Lowercase
 NOT_A_PAGE =>
   $Warn."\"\%s\" page-size is not defined for \"\%s\" variable.\n",
 @
+
+We must set at least the [[a4]] page in the [[%USED]] page-formats subhash, in case that user will not select any other page size for the variables in the customization (mainly [[page_bbox]] and [[page_size]]). [[a4]] definition is always required, even though the user required another page format, as it is used to calculate the proportionality constant set in the {\ps} variable [[PPC]] from [[<<PSVariables - layout>>]].
+
+<<Global Vars: USED>>=
+%{$USED{'FORMATS'}} = (
+                  <<DEFAULT USED FORMATS>>
+                  );
+@
+<<DEFAULT USED FORMATS>>=
+'a4' => $FORMATS{'a4'}->[0],
+@ 
 
 \subsubsctn{Nucleotide coords}
 
@@ -2339,15 +2439,17 @@ box => sub {
         @fld = split /\s+/og, $cstr, 5;
         scalar(@fld) < 4 && do {
             &warn('WRONGSPECREC',$F,'BOX',4,
-                 'box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> ] '.
-                 '[ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ]');
+                'box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> ] '.
+                '[ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ] [ K:<score> ]');
             return $F;
         }; # defined
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Xori)',lc($fld[0])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Xend)',lc($fld[1])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[2],$_n.'(Yori)',lc($fld[2])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[3],$_n.'(Yend)',lc($fld[3])) || return $F;
-        @tld = &get_spfeat_props($fld[4],$F,$_n);
+        @tld = &get_spfeat_props($fld[4],$F,$T,$_n);
+        ($tld[2] =~ /$gradregex/o) && ($tld[2] = "$tld[11] $tld[2]");
+        ($tld[5] =~ /$gradregex/o) && ($tld[5] = "$tld[11] $tld[5]");
         push @{ $SpecialCache{PRE} },
              [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[1]}),
                &get_units(\@{$fld[2]}),&get_units(\@{$fld[3]}),
@@ -2357,8 +2459,8 @@ box => sub {
         return $T;
     }, # box
 @
-%           0    1    2     3     4     5     6    7    8   9   10
-% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+%           0    1    2     3     4     5     6    7    8   9   10   11
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol $sco )
 % PS --> l_col l_wdth l_sty { fill_col+fill_flg } xo xe yo ye  xbox
 <<DESC custom file variables>>=
 ORD: 903
@@ -2385,14 +2487,16 @@ circle => sub {
             &warn('WRONGSPECREC',$F,'CIRCLE',4,
                   'circle  <Cx> <Cy> <Rx> <Ry> '.
                   '[ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] '.
-                  '[ W:<line_width> ] [ F:<fill_color> ]');
+                  '[ W:<line_width> ] [ F:<fill_color> ] [ K:<score> ]');
             return $F;
         }; # defined
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Cy)',lc($fld[1])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[2],$_n.'(Rx)',lc($fld[2])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[3],$_n.'(Ry)',lc($fld[3])) || return $F;
-        @tld = &get_spfeat_props($fld[4],$F,$_n);
+        @tld = &get_spfeat_props($fld[4],$F,$T,$_n);
+        ($tld[2] =~ /$gradregex/o) && ($tld[2] = "$tld[11] $tld[2]");
+        ($tld[5] =~ /$gradregex/o) && ($tld[5] = "$tld[11] $tld[5]");
         push @{ $SpecialCache{PRE} },
              [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
                &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
@@ -2402,8 +2506,8 @@ circle => sub {
         return $T;
     }, # circle
 @
-%           0    1    2     3     4     5     6    7    8   9   10
-% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+%           0    1    2     3     4     5     6    7    8   9   10   11
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol $sco )
 % PS --> l_col l_wdth l_sty { fill_col+fill_flg } Rx Ry angle xo yo xcir
 <<DESC custom file variables>>=
 ORD: 904
@@ -2437,7 +2541,8 @@ arrow => sub {
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Cy)',lc($fld[1])) || return $F;
         $TESTS{PS_UNIT}->(\$fld[2],$_n.'(length)',lc($fld[2])) || return $F;
-        @tld = &get_spfeat_props($fld[3],$T,$_n);
+        @tld = &get_spfeat_props($fld[3],$T,$T,$_n);
+        ($tld[2] =~ /$gradregex/o) && ($tld[2] = "$tld[11] $tld[2]");
         $tld[0] ne '' || ($tld[0] = '( )');
         push @{ $SpecialCache{POST} },
              [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
@@ -2448,8 +2553,8 @@ arrow => sub {
         return $T;
     }, # arrow
 @
-%           0    1    2     3     4     5     6    7    8   9   10
-% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+%           0    1    2     3     4     5     6    7    8   9   10   11
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol $sco )
 % PS --> [string valn haln {fz fn} {tcol tflg}] lcol lw len angle x y xarw
 <<DESC custom file variables>>=
 ORD: 905
@@ -2483,7 +2588,7 @@ text => sub {
         }; # defined
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Cy)',lc($fld[1])) || return $F;
-        @tld = &get_spfeat_props($fld[2],$T,$_n);
+        @tld = &get_spfeat_props($fld[2],$T,$F,$_n);
         $tld[0] ne '' && do {
             push @{ $SpecialCache{POST} },
                  [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
@@ -2496,8 +2601,8 @@ text => sub {
         return $F;
     }, # 
 @
-%           0    1    2     3     4     5     6    7    8   9   10
-% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
+%           0    1    2     3     4     5     6    7    8   9   10   11
+% @tld = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol $sco )
 % PS --> angle string valn haln {fz fn} tcol x y  xtxt
 
 <<warnings - parsing custom files>>=
@@ -2522,9 +2627,9 @@ LDE:
 
 <<Parsing Custom Files>>=
 sub get_spfeat_props() {
-    my ($cstr,$cflg,$vna) = @_;
+    my ($cstr,$cflg,$gflg,$vna) = @_;
     my (@kao,@rr,$rr);
-    my ($a,$l,$s,$w,$f,$h,$v,$t,$fn,$fz,$str) = (undef) x 11;
+    my ($a,$l,$s,$w,$f,$h,$v,$t,$fn,$fz,$fk,$str) = (undef) x 12;
     $cflg && do {
         $cstr =~ s/\"(.+?)\"//o && ($str = $1);
     }; # $cflg
@@ -2547,12 +2652,6 @@ foreach my $oc (@kao) {
             && ($a = $rr);
         next;
     };
-    $oc =~ /^L:(.*)$/o && do {
-        $rr = $1;
-        $TESTS{COLOR}->(\$rr,$vna.'(line_color)',lc($rr)) 
-            && ($l = $rr);
-        next;
-    };
     $oc =~ /^S:(.*)$/o && do {
         $rr = $1;
         $TESTS{LINESTY}->(\$rr,$vna.'(line_style)',lc($rr)) 
@@ -2565,42 +2664,58 @@ foreach my $oc (@kao) {
             && ($w = $rr);
         next;
     };
-    $oc =~ /^F:(.*)$/o && do {
-        $rr = $1;
-        $TESTS{COLOR}->(\$rr,$vna.'(fill_color)',lc($rr)) 
-            && ($f = $rr);
-        next;
-    };
-    $oc =~ /^H:(.*)$/o && do {
-        $rr = $1;
-        $TESTS{TXTALIGN}->(\$rr,$vna.'(horizontal_align)',lc($rr),$T) 
-            && ($h = $rr);
-        next;
-    };
-    $oc =~ /^V:(.*)$/o && do {
-        $rr = $1;
-        $TESTS{TXTALIGN}->(\$rr,$vna.'(vertical_align)',lc($rr),$F) 
-            && ($v = $rr);
-        next;
-    };
-    $oc =~ /^T:(.*)$/o && do {
-        $rr = $1;
-        $TESTS{COLOR}->(\$rr,$vna.'(text_color)',lc($rr)) 
-            && ($t = $rr);
-        next;
-    };
-    $oc =~ /^N:(.*)$/o && do {
-        $rr = $1;
-        $TESTS{FONT}->(\$rr,$vna.'(font_name)',lc($rr)) 
-            && ($fn = $rr);
-        next;
-    };
-    $oc =~ /^Z:(.*)$/o && do {
-        $rr = $1;
-        $TESTS{PS_UNIT}->(\$rr,$vna.'(font_size)',lc($rr)) 
-            && ($fz = &get_units(\@{$rr}));
-        next;
-    };
+    if ($gflg) {
+        $oc =~ /^L:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{EXTCOLOR}->(\$rr,$vna.'(line_color)',lc($rr)) 
+                && ($l = $rr);
+            next;
+        };
+        $oc =~ /^F:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{EXTCOLOR}->(\$rr,$vna.'(fill_color)',lc($rr)) 
+                && ($f = $rr);
+            next;
+        };
+        $oc =~ /^K:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{CMYKFLOAT}->(\$rr,$vna.'(score)',$rr) 
+                && ($fk = $rr);
+            next;
+        };
+    }; # if $gflg
+    if ($cflg) {
+        $oc =~ /^H:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{TXTALIGN}->(\$rr,$vna.'(horizontal_align)',lc($rr),$T) 
+                && ($h = $rr);
+            next;
+        };
+        $oc =~ /^V:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{TXTALIGN}->(\$rr,$vna.'(vertical_align)',lc($rr),$F) 
+                && ($v = $rr);
+            next;
+        };
+        $oc =~ /^T:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{COLOR}->(\$rr,$vna.'(text_color)',lc($rr)) 
+                && ($t = $rr);
+            next;
+        };
+        $oc =~ /^N:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{FONT}->(\$rr,$vna.'(font_name)',lc($rr)) 
+                && ($fn = $rr);
+            next;
+        };
+        $oc =~ /^Z:(.*)$/o && do {
+            $rr = $1;
+            $TESTS{PS_UNIT}->(\$rr,$vna.'(font_size)',lc($rr)) 
+                && ($fz = &get_units(\@{$rr}));
+            next;
+        };
+    }; # if $cflg
 }; # foreach
 @ 
 
@@ -2620,8 +2735,9 @@ $a = defined($a) ? $a : 0;
         defined($h)  ? "($TextAlign{'H'}{$h})" :
                        (cos($a*$torad) >= 0 ? '(lh)' : '(rh)')       ,
         defined($fz) ? "$fz"                   : '8 pt'              ,
-        defined($fn) ? "$fn"                   : $Fonts{'helvetica'} ,
+        defined($fn) ? $Fonts{$fn}             : $Fonts{'helvetica'} ,
         defined($t)  ? "$t ".&tobool($T)       : &tobool($F)         ,
+        defined($fk) ? "$fk"                   : '1'                 ,
         );
 $rr[0] = (defined($str)) ? &tostring($str) : '';
 @
@@ -2637,6 +2753,17 @@ my $torad = 3.1415926535898 / 180;
 \sctn{Customization Variables Description} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\label{sec:customvardesc}
 % \subsctn{Command-line options}
+
+This section summarizes the description for almost all the variables that are available to set the {\prog} customization parameters. They are provided in a fixed record structure which is explained in section~\ref{sec:customizationVARSparser}, page~\pageref{sec:customizationVARSparser}, and in section~\ref{sec:customizationCMDLNparser}, page~\pageref{sec:customizationCMDLNparser}, for customization variables and command-line options respectively. Table~\ref{tbl:noweblatexcodes} describes the shortcuts that code for specific {\LaTeX} commands provinding a sort of common style for different features of the variable description in the user's manual documentation. To filter the records extracted by [[noweb]] to produce the {\LaTeX} files to be included in that manual, we pipe that output to [[pagebbox2tex.pl]] (described in section~\ref{sec:PBBOXprg}, page~\pageref{sec:PBBOXprg}).
+
+% comments, if any, refer to the old aplot variable names.
+
+\begin{table}[!h]
+\begin{center}
+ \input tables/variable_definition_codes.tex
+\end{center}
+\end{table}
+
 
 <<HIDE: DONE>>=
 \doneitem{20011031}{
@@ -2765,7 +2892,8 @@ SEC: LAYOUT
 SUB: PageLayout
 OPT: page_bbox
 PAR: <width,height>
-SDE: Defining arbitrary page formats. Overrides any setting for [page_size].
+SDE: Defining arbitrary page formats.
+     Overrides any setting for [page_size].
 LDE:
 \label{sec:pagebbox}
 This variable allows users to define an arbitrary page format, by
@@ -2781,6 +2909,8 @@ mm, cm or in, respectively). See table~\ref{tbl:PageSizes} for a reference
 on already defined page sizes and their dimensions.
 ###EOR###
 @ 
+
+[[%{$USED{'FORMATS'}}]] already contains [[a4]], as it is the default page size. That is the main reason not to include here a [[<<DEFAULT USED FORMATS>>]] code chunk.
 
 <<default layout vars values>>=
 page_size                  => { TYPE => 'PAGE'   , VALUE => 'a4'    },
@@ -2812,7 +2942,8 @@ SUB: PageLayout
 OPT: page_size
 DEF: |a4|
 PAR: <format_name>
-SDE: Sets a standard page size, available format names are listed in table~\ref{tbl:PageSizes}.
+SDE: Sets a standard page size, available format names
+     are listed in table~\ref{tbl:PageSizes}.
 LDE:
 Setting a standard page size, available values for <format_name> are 
 listed in table~\ref{tbl:PageSizes}. Page width and height values are 
@@ -2963,7 +3094,8 @@ SUB: PageLayout
 OPT: background_color
 DEF: |white|
 PAR: <color>
-SDE: Setting background color for the page. Available colors are listed on table~\ref{tbl:CMYKcolor}.
+SDE: Setting background color for the page.
+     Available colors are listed on table~\ref{tbl:CMYKcolor}.
 LDE: JOIN-NEXT
 ###EOR###
 @ 
@@ -2999,7 +3131,8 @@ SUB: PageLayout
 OPT: foreground_color
 DEF: |black|
 PAR: <color>
-SDE: Setting foreground color for the page. Find available colors on table~\ref{tbl:CMYKcolor}.
+SDE: Setting foreground color for the page.
+     Find available colors on table~\ref{tbl:CMYKcolor}.
 LDE:
 These two customization variables accept any <color> from those listed on 
 table~\ref{tbl:CMYKcolor}. Default values are |white| and |black| for 
@@ -3039,7 +3172,7 @@ in the form of |sequence1_name| x |sequence2_name|.
 <<DESC custom file variables>>=
 ORD: 9
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: title
 PAR: <string>
 SDE: Setting figure title to <string>.
@@ -3052,7 +3185,7 @@ in the form of |sequence1_name| x |sequence2_name|.
 <<DESC custom file variables>>=
 ORD: 10
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_title
 DEF: |on|
 PAR: <boolean>
@@ -3072,7 +3205,7 @@ title_fontsize             => { TYPE => 'PS_UNIT', VALUE => [ 24, 'pt' ]  },
 <<DESC custom file variables>>=
 ORD: 11
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: title_font
 DEF: |helvetica-bold|
 PAR: <font>
@@ -3081,11 +3214,12 @@ LDE:
 ###EOR###
 ORD: 12
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: title_fontsize
 DEF: |24pt|
 PAR: <length>
-SDE: Sets title fontsize, <length> can be in pt, mm, cm or in (default is points if no units are given).
+SDE: Sets title fontsize, <length> can be in pt, mm, cm or in
+     (default is points if no units are given).
 LDE:
 Sets title fontsize, <length> can be in pt, mm, cm or in 
 (default is points if no units are given).
@@ -3119,7 +3253,7 @@ Setting <string> as the current figure subtitle, by default an empty string.
 <<DESC custom file variables>>=
 ORD: 13
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: subtitle
 PAR: <string>
 SDE: Setting subtitle to <string>.
@@ -3131,7 +3265,7 @@ it is defined as an empty string.
 <<DESC custom file variables>>=
 ORD: 14
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_subtitle
 DEF: |on|
 PAR: <boolean>
@@ -3151,7 +3285,7 @@ subtitle_fontsize          => { TYPE => 'PS_UNIT', VALUE => [ 16, 'pt' ]  },
 <<DESC custom file variables>>=
 ORD: 15
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: subtitle_font
 DEF: |helvetica|
 PAR: <font>
@@ -3160,11 +3294,12 @@ LDE:
 ###EOR###
 ORD: 16
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: subtitle_fontsize
 DEF: |16pt|
 PAR: <length>
-SDE: Sets subtitle fontsize, <length> can be in pt, mm, cm or in (default is points if no units are given).
+SDE: Sets subtitle fontsize, <length> can be in pt, mm, cm or in
+     (default is points if no units are given).
 LDE:
 Sets subtitle fontsize, <length> can be in pt, mm, cm or in 
 (default is points if no units are given).
@@ -3198,7 +3333,7 @@ LDE:
 <<DESC custom file variables>>=
 ORD: 17
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: x_label
 PAR: <string>
 SDE: <string>.
@@ -3209,7 +3344,7 @@ LDE:
 <<DESC custom file variables>>=
 ORD: 18
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_x_label
 DEF: |on|
 PAR: <boolean>
@@ -3229,7 +3364,7 @@ x_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => [ 12, 'pt' ]  },
 <<DESC custom file variables>>=
 ORD: 19
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: x_label_font
 DEF: |helvetica-bold|
 PAR: <font>
@@ -3239,11 +3374,12 @@ LDE:
 ###EOR###
 ORD: 20
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: x_label_fontsize
 DEF: |12pt|
 PAR: <length>
-SDE: Sets X-label fontsize, <length> can be in pt, mm, cm or in (default is points if no units are given).
+SDE: Sets X-label fontsize, <length> can be in pt, mm, cm or in
+     (default is points if no units are given).
 LDE:
 Sets X-label fontsize, <length> can be in pt, mm, cm or in 
 (default is points if no units are given).
@@ -3277,7 +3413,7 @@ LDE:
 <<DESC custom file variables>>=
 ORD: 21
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: y_label
 PAR: <string>
 SDE: <string>.
@@ -3288,7 +3424,7 @@ LDE:
 <<DESC custom file variables>>=
 ORD: 22
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_y_label
 DEF: |on|
 PAR: <boolean>
@@ -3308,7 +3444,7 @@ y_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => [ 12, 'pt' ]  },
 <<DESC custom file variables>>=
 ORD: 23
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: y_label_font
 DEF: |helvetica-bold|
 PAR: <font>
@@ -3318,11 +3454,12 @@ LDE:
 ###EOR###
 ORD: 24
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: y_label_fontsize
 DEF: |12pt|
 PAR: <length>
-SDE: Sets Y-label fontsize, <length> can be in pt, mm, cm or in (default is points if no units are given).
+SDE: Sets Y-label fontsize, <length> can be in pt, mm, cm or in
+     (default is points if no units are given).
 LDE:
 Sets Y-label fontsize, <length> can be in pt, mm, cm or in 
 (default is points if no units are given).
@@ -3356,7 +3493,7 @@ LDE:
 <<DESC custom file variables>>=
 ORD: 25
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_percent_box_label
 DEF: |on|
 PAR: <boolean>
@@ -3366,7 +3503,7 @@ LDE:
 ###EOR###
 ORD: 26
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: percent_box_label
 PAR: <string>
 SDE: 
@@ -3381,7 +3518,7 @@ percent_box_label_fontsize => { TYPE => 'PS_UNIT', VALUE => [ 12, 'pt' ]  },
 <<DESC custom file variables>>=
 ORD: 27
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: percent_box_label_font
 DEF: |helvetica-bold|
 PAR: <font>
@@ -3391,7 +3528,7 @@ LDE:
 ###EOR###
 ORD: 28
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: percent_box_label_fontsize
 DEF: |12pt|
 PAR: <length>
@@ -3409,7 +3546,7 @@ percent_box_sublabel       => { TYPE => 'STRING' , VALUE => undef  },
 <<DESC custom file variables>>=
 ORD: 29
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_percent_box_sublabel
 DEF: |on|
 PAR: <boolean>
@@ -3419,7 +3556,7 @@ LDE:
 ###EOR###
 ORD: 30
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: percent_box_sublabel
 DEF: 
 PAR: <string>
@@ -3435,7 +3572,7 @@ percent_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => [ 9, 'pt' ]  },
 <<DESC custom file variables>>=
 ORD: 31
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: percent_box_label_font
 DEF: |helvetica|
 PAR: <font>
@@ -3445,7 +3582,7 @@ LDE:
 ###EOR###
 ORD: 32
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: percent_box_label_fontsize
 DEF: |9pt|
 PAR: <length>
@@ -3480,7 +3617,7 @@ LDE:
 <<DESC custom file variables>>=
 ORD: 33
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_extra_box_label
 DEF: |on|
 PAR: <boolean>
@@ -3490,7 +3627,7 @@ LDE:
 ###EOR###
 ORD: 34
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: extra_box_label
 PAR: <string>
 SDE: 
@@ -3505,7 +3642,7 @@ extra_box_label_fontsize   => { TYPE => 'PS_UNIT', VALUE => [ 10, 'pt' ]     },
 <<DESC custom file variables>>=
 ORD: 35
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: extra_box_label_font
 DEF: |helvetica-bold|
 PAR: <font>
@@ -3515,7 +3652,7 @@ LDE:
 ###EOR###
 ORD: 36
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: extra_box_label_fontsize
 DEF: |10pt|
 PAR: <length>
@@ -3533,7 +3670,7 @@ extra_box_sublabel         => { TYPE => 'STRING' , VALUE => undef  },
 <<DESC custom file variables>>=
 ORD: 37
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: show_extra_box_sublabel
 DEF: |on|
 PAR: <boolean>
@@ -3543,7 +3680,7 @@ LDE:
 ###EOR###
 ORD: 38
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: extra_box_sublabel
 PAR: <string>
 SDE: 
@@ -3558,7 +3695,7 @@ extra_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => [ 9, 'pt' ]  },
 <<DESC custom file variables>>=
 ORD: 39
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: extra_box_sublabel_font
 DEF: |helvetica|
 PAR: <font>
@@ -3568,7 +3705,7 @@ LDE:
 ###EOR###
 ORD: 40
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsA
 OPT: extra_box_sublabel_fontsize
 DEF: |9pt|
 PAR: <length>
@@ -3913,6 +4050,9 @@ zoom_area_mark_style       => { TYPE => 'LINESTY', VALUE => 'solid'      },
 zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred'   },
 zoom_area_fill_color       => { TYPE => 'COLOR'  , VALUE => undef        },
 @ %def {zoom_marks} {zoom_area_mark_width} {zoom_area_mark_style} {zoom_area_mark_color} {zoom_area_fill_color}
+<<DEFAULT USED COLORS>>=
+'lightred' => $COLORS{'lightred'}->[0],
+@
 <<DESC custom file variables>>=
 ORD: 75
 SEC: LAYOUT
@@ -4034,7 +4174,8 @@ SEC: LAYOUT
 SUB: Aplot
 OPT: alignment_name
 PAR: <seqXname:seqYname>
-SDE: Selects <seqXname:seqYname> alignment (useful when input contain many alignments).
+SDE: Selects <seqXname:seqYname> alignment
+     (useful when input contain many alignments).
 LDE: 
 \label{sec:seqXseqY}
 When you are providing several alignments from input, you can select which one
@@ -4212,26 +4353,21 @@ LDE:
 
 <<default layout vars values>>=
 show_ribbons               => { TYPE => 'BOOLEAN', VALUE => undef  },
-ribbon_style              => { TYPE => 'RIBBON',  VALUE => undef  },
+ribbon_color_merge         => { TYPE => 'BOOLEAN', VALUE => $F     },
+color_merge_factor         => { TYPE => 'FLOAT',   VALUE => 0.5    },
+ribbon_style               => { TYPE => 'RIBBON',  VALUE => undef  },
 ribbon_color               => { TYPE => 'COLOR',   VALUE => undef  },
-show_grid                  => { TYPE => 'BOOLEAN', VALUE => $F     },
-@ %def {show_grid}
+@ %def {show_ribbons} {ribbon_color_merge } {color_merge_factor} {ribbon_style} {ribbon_color}
 <<command-line options>>=
 "K|show-ribbons=s"   => sub {
                               $CmdLineVars{LAYOUT}{"show_ribbons"} = $T;
                               $CmdLineVars{LAYOUT}{"ribbon_style"} = $_[1];
                              },
-"G|show-grid"        => \$CmdLineVars{LAYOUT}{"show_grid"},
-"g|hide-grid"        => sub { $CmdLineVars{LAYOUT}{"show_grid"} = $F },
-@
+@ 
 <<command-line help>>=
 -K, --show-ribbons <ribbon_type>
       Force Ribbons for all features on axes to be:
          (N)one, (L)ines, (R)ibbons, (B)oth.
--G, --show-grid
-      Switches 'on' grid (default is 'off').
--g, --hide-grid
-      Switches 'off' grid (if switched on from customization files).
 @
 <<DESC command-line options>>=
 ORD: 87
@@ -4239,22 +4375,6 @@ OPT: K
 LNG: show-ribbons
 PAR: <ribbon-type>
 EQV: [show_ribbons]=<ribbon-type>
-SDE: 
-LDE: 
-
-###EOR###
-ORD: 88
-OPT: G
-LNG: show-grid
-EQV: [show_grid]=|on|
-SDE: 
-LDE: 
-
-###EOR###
-ORD: 
-OPT: g
-LNG: hide-grid
-EQV: [show_grid]=|off|
 SDE: 
 LDE: 
 
@@ -4269,6 +4389,29 @@ PAR: <boolean>
 SDE: 
 LDE: 
 
+###EOR###
+ORD: 
+SEC: LAYOUT
+SUB: Aplot
+OPT: ribbon_color_merge
+PAR: <boolean>
+SDE: Enabling pattern color fill for projection ribbons to emulate
+     color blending when horizontal and vertical ribbons overlap.
+LDE: 
+This property is device dependant, lower resolution devices (such as screen)
+will not show properly the color blending.
+###EOR###
+ORD: 
+SEC: LAYOUT
+SUB: Aplot
+OPT: color_merge_factor
+DEF: |0.5|
+PAR: <alpha_factor>
+SDE: Setting the pattern point size for the color blend emulation.
+LDE:
+<alpha_factor> ranges from |0.07| up to |2|, default is set to |0.5|. 
+If you plan to scale down your figures, it is advisable to increase it 
+to |1| or |2|. 
 ###EOR###
 ORD: 
 SEC: LAYOUT
@@ -4288,11 +4431,57 @@ SDE:
 LDE: 
 
 ###EOR###
+@ 
+
+
+<<default layout vars values>>=
+show_grid                  => { TYPE => 'BOOLEAN', VALUE => $F     },
+show_percent_box_grid      => { TYPE => 'BOOLEAN', VALUE => $T     },
+@ %def {show_grid} {show_percent_box_grid}
+<<command-line options>>=
+"G|show-grid"        => \$CmdLineVars{LAYOUT}{"show_grid"},
+"g|hide-grid"        => sub { $CmdLineVars{LAYOUT}{"show_grid"} = $F },
+@
+<<command-line help>>=
+-G, --show-grid
+      Switches 'on' grid (default is 'off').
+-g, --hide-grid
+      Switches 'off' grid (if switched on from customization files).
+@
+<<DESC command-line options>>=
+ORD: 88
+OPT: G
+LNG: show-grid
+EQV: [show_grid]=|on|
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 
+OPT: g
+LNG: hide-grid
+EQV: [show_grid]=|off|
+SDE: 
+LDE: 
+
+###EOR###
+@ 
+<<DESC custom file variables>>=
 ORD: 88
 SEC: LAYOUT
 SUB: Aplot
 OPT: show_grid
 DEF: |off|
+PAR: <boolean>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 89
+SEC: LAYOUT
+SUB: Aplot
+OPT: show_percent_box_grid
+DEF: |on|
 PAR: <boolean>
 SDE: 
 LDE: 
@@ -4766,7 +4955,7 @@ feature_label_fontsize     => { TYPE => 'PS_UNIT', VALUE => [ 6, 'pt' ] },
 <<DESC custom file variables>>=
 ORD: 141
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: show_feature_label
 DEF: |on|
 PAR: <boolean>
@@ -4775,7 +4964,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 142
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_label_font
 DEF: |helvetica|
 PAR: <font>
@@ -4784,7 +4973,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 143
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_label_fontsize
 DEF: |6pt|
 PAR: <length>
@@ -4796,13 +4985,13 @@ LDE:
 
 <<default layout vars values>>=
 feature_x_label_length     => { TYPE => 'INTEGER', VALUE => undef  },
-feature_x_label_angle      => { TYPE => 'DEGREES', VALUE => 0      },
+feature_x_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
 feature_x_label_rotate     => { TYPE => 'BOOLEAN', VALUE => $F     },
 @ %def {feature_x_label_length} {feature_x_label_angle} {feature_x_label_rotate}
 <<DESC custom file variables>>=
 ORD: 145
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_x_label_length
 PAR: <char-length>
 SDE: 
@@ -4810,7 +4999,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 146
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_x_label_angle
 DEF: |$0^{\,\circ}$|
 PAR: <degrees>
@@ -4819,7 +5008,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 147
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_x_label_rotate
 DEF: |off|
 PAR: <boolean>
@@ -4837,7 +5026,7 @@ feature_y_label_rotate     => { TYPE => 'BOOLEAN', VALUE => $T     },
 <<DESC custom file variables>>=
 ORD: 150
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_y_label_length
 PAR: <char-length>
 SDE: 
@@ -4845,7 +5034,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 151
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_y_label_angle
 DEF: |$0^{\,\circ}$|
 PAR: <degrees>
@@ -4854,7 +5043,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 152
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: feature_y_label_rotate
 DEF: |on|
 PAR: <boolean>
@@ -4875,7 +5064,7 @@ group_label_fontsize       => { TYPE => 'PS_UNIT', VALUE => [ 8, 'pt' ] },
 <<DESC custom file variables>>=
 ORD: 161
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: show_group_label
 DEF: |on|
 PAR: <boolean>
@@ -4884,7 +5073,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 162
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_label_font
 DEF: |helvetica|
 PAR: <font>
@@ -4893,7 +5082,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 163
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_label_fontsize
 DEF: |8pt|
 PAR: <length>
@@ -4905,13 +5094,13 @@ LDE:
 
 <<default layout vars values>>=
 group_x_label_length       => { TYPE => 'INTEGER', VALUE => undef  },
-group_x_label_angle        => { TYPE => 'DEGREES', VALUE => 0      },
+group_x_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
 group_x_label_rotate       => { TYPE => 'BOOLEAN', VALUE => $F     },
 @ %def {group_x_label_length} {group_x_label_angle} {group_x_label_rotate}
 <<DESC custom file variables>>=
 ORD: 164
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_x_label_length
 PAR: <char-length>
 SDE: 
@@ -4919,7 +5108,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 165
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_x_label_angle
 DEF: |$0^{\,\circ}$|
 PAR: <degrees>
@@ -4928,7 +5117,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 166
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_x_label_rotate
 DEF: |off|
 PAR: <boolean>
@@ -4946,7 +5135,7 @@ group_y_label_rotate     => { TYPE => 'BOOLEAN', VALUE => $T     },
 <<DESC custom file variables>>=
 ORD: 170
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_y_label_length
 PAR: <char-length>
 SDE: 
@@ -4954,7 +5143,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 171
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_y_label_angle
 DEF: |$0^{\,\circ}$|
 PAR: <degrees>
@@ -4963,7 +5152,7 @@ LDE: JOIN-NEXT
 ###EOR###
 ORD: 172
 SEC: LAYOUT
-SUB: Labels
+SUB: LabelsB
 OPT: group_y_label_rotate
 DEF: |on|
 PAR: <boolean>
@@ -4976,6 +5165,55 @@ LDE:
 
 \subsubsctn{Miscellanea}
 
+The following variable shows/hides the messages warning that X sequence, Y sequence and/or alignment were not found, that appear on the final {\ps} figure. This will help to identify what is missing from input data, but sometimes it must be ignored.
+
+<<default layout vars values>>=
+show_ps_warnings                 => { TYPE => 'BOOLEAN', VALUE => $T      },
+@ %def {show_ps_warnings}
+<<command-line options>>=
+"nopswarnings"   => sub { $CmdLineVars{LAYOUT}{"show_ps_warnings"} = $F },
+@ 
+<<command-line help>>=
+--nopswarnings
+      Switch off warnings that may appear on the final PostScript figure
+      when X sequence, Y sequence and/or alignment input data is missing.
+@
+<<DESC command-line options>>=
+ORD: 250
+LNG: nopswarnings
+EQV: [show_ps_warnings]=|off|
+SDE: Switch off warnings on final PS figure.
+LDE: 
+<<show-ps-warnings common def>>
+###EOR###
+@
+<<DESC custom file variables>>=
+ORD: 250
+SEC: LAYOUT
+SUB: General
+OPT: show_ps_warnings
+DEF: |on|
+PAR: <boolean>
+SDE: Switch off warnings on final PS figure.
+LDE: 
+<<show-ps-warnings common def>>
+###EOR###
+@
+<<show-ps-warnings common def>>=
+  When input data is missing, regardless you do not provide X or Y sequence 
+annotation, or even alignment records, {\prog} will include a warning message
+in the final {\ps} output. This will help to identify what is missing from 
+such input data, but sometimes it must be ignored and you may need to switch
+those warnings off. You can switch off on a single figure from command-line,
+or disable from a default customization file variable. The last choice
+it is not recommended unless you already know what you are doing and you are
+sure that you will get annotations along only for one of the axes or there are
+sequence pairs that do not have the corresponding alignment data.
+@
+
+
+By default, {\prog} displays a copyright line as a figure footer, users may switch it off with the following option.
+
 <<default layout vars values>>=
 hide_credits               => { TYPE => 'BOOLEAN', VALUE => $F      },
 @ %def {hide_credits}
@@ -4987,17 +5225,20 @@ hide_credits               => { TYPE => 'BOOLEAN', VALUE => $F      },
       Switch off $PROGRAM credits line on plot.
 @
 <<DESC command-line options>>=
-ORD: 250
+ORD: 251
 OPT: a
 LNG: hide-credits
 EQV: [hide_credits]=|on|
 SDE: Switch off program credits line on plot.
 LDE: 
-
+{\prog} always displays a tiny copyright footer on the output {\ps} figures
+that users can remove using this command-line option for a single case,
+or the corresponding customization variable in a default customization file
+for all the figures.
 ###EOR###
 @
 <<DESC custom file variables>>=
-ORD: 250
+ORD: 251
 SEC: LAYOUT
 SUB: General
 OPT: hide_credits
@@ -5005,9 +5246,14 @@ DEF: |off|
 PAR: <boolean>
 SDE: Switch off program credits line on plot.
 LDE: 
-
+{\prog} always displays a tiny copyright footer on the output {\ps} figures.
+Users can remove it by switching on this customization variable in a default 
+customization file for all the figures obtained using that file. It also can be
+disabled from command-line for a single execution of the program by the
+corresponding command-line option.
 ###EOR###
 @
+
 
 
 <<Changes in command-line options>>=
@@ -5027,8 +5273,8 @@ There is no [[hide]] variable for sequences, as they are shown following a diffe
 \subsubsctn{Feature variables that can be modified at sequence section}
 
 <<default sequence vars values>>=
-feature_color                => { TYPE => 'COLOR', VALUE => undef },
-ribbon_color                 => { TYPE => 'COLOR', VALUE => undef },
+feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef },
+ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef },
 @
 <<DESC custom file variables>>=
 ORD: 301
@@ -5045,7 +5291,8 @@ SEC: SEQUENCE
 SUB: Sequences
 OPT: ribbon_color
 PAR: <color>
-SDE: Setting fill color of aplot ribbons for all the sequence features that show them.
+SDE: Setting fill color of aplot ribbons for all the sequence features
+     that show them.
 LDE: 
 
 ###EOR###
@@ -5071,14 +5318,29 @@ LDE:
 @
 
 
+<<default source vars values>>=
+source_layer                  => { TYPE => 'INTEGER', VALUE => undef },
+@ %def {source_layer}
+<<DESC custom file variables>>=
+ORD: 410
+SEC: SOURCE
+SUB: Sources
+OPT: source_layer
+PAR: <integer>
+SDE: Setting layer on annotation tiers where to draw the given source.
+LDE: 
+
+###EOR###
+@
+
 \subsubsctn{Feature variables that can be modified at source section}
 
 <<default source vars values>>=
-feature_color                => { TYPE => 'COLOR', VALUE => undef },
-ribbon_color                 => { TYPE => 'COLOR', VALUE => undef },
+feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef },
+ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef },
 @
 <<DESC custom file variables>>=
-ORD: 401
+ORD: 451
 SEC: SOURCE
 SUB: Sources
 OPT: feature_color
@@ -5087,12 +5349,13 @@ SDE: Fill shapes for all elements of the selected source with that color.
 LDE: 
 
 ###EOR###
-ORD: 402
+ORD: 452
 SEC: SOURCE
 SUB: Sources
 OPT: ribbon_color
 PAR: <color>
-SDE: Setting fill color of aplot ribbons for all the features within the given source that show them.
+SDE: Setting fill color of aplot ribbons for all the features within
+     the given source that show them.
 LDE: 
 
 ###EOR###
@@ -5117,15 +5380,29 @@ LDE:
 ###EOR###
 @
 
+<<default strand vars values>>=
+strand_layer                  => { TYPE => 'INTEGER', VALUE => undef },
+@ %def {strand_layer}
+<<DESC custom file variables>>=
+ORD: 510
+SEC: STRAND
+SUB: Strands
+OPT: strand_layer
+PAR: <integer>
+SDE: Setting layer on annotation tiers where to draw the given strand.
+LDE: 
+
+###EOR###
+@
 
 \subsubsctn{Feature variables that can be modified at strand section}
 
 <<default strand vars values>>=
-feature_color                => { TYPE => 'COLOR', VALUE => undef },
-ribbon_color                 => { TYPE => 'COLOR', VALUE => undef },
+feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef },
+ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef },
 @
 <<DESC custom file variables>>=
-ORD: 501
+ORD: 551
 SEC: STRAND
 SUB: Strands
 OPT: feature_color
@@ -5134,12 +5411,13 @@ SDE: Fill shapes for all elements of that strand with the given color.
 LDE: 
 
 ###EOR###
-ORD: 502
+ORD: 552
 SEC: STRAND
 SUB: Strands
 OPT: ribbon_color
 PAR: <color>
-SDE: Setting fill color of aplot ribbons for all features of that strand showing them.
+SDE: Setting fill color of aplot ribbons for all features of
+     that strand showing them.
 LDE: 
 
 ###EOR###
@@ -5270,8 +5548,8 @@ Join_Lines_COLOR           => { TYPE => 'COLOR'  , VALUE => 'fg'   },
 \subsubsctn{Feature variables that can be modified at group section}
 
 <<default group vars values>>=
-feature_color                => { TYPE => 'COLOR', VALUE => undef   },
-ribbon_color                 => { TYPE => 'COLOR', VALUE => undef   },
+feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef   },
+ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef   },
 @
 <<DESC custom file variables>>=
 ORD: 651
@@ -5288,7 +5566,8 @@ SEC: GROUP
 SUB: Groups
 OPT: ribbon_color
 PAR: <color>
-SDE: Setting fill color of aplot ribbons for all the features of that group showing them.
+SDE: Setting fill color of aplot ribbons for all the features of
+     that group showing them.
 LDE: 
 
 ###EOR###
@@ -5314,10 +5593,14 @@ LDE:
 @
 
 <<default feature vars values>>=
-feature_color                => { TYPE => 'COLOR', VALUE => 'lightred'      },
-alignment_color              => { TYPE => 'COLOR', VALUE => 'fg'            },
-ribbon_color                 => { TYPE => 'COLOR', VALUE => 'verylightgrey' },
+feature_color               => { TYPE => 'EXTCOLOR', VALUE => 'lightred'      },
+alignment_color             => { TYPE => 'EXTCOLOR', VALUE => 'fg'            },
+ribbon_color                => { TYPE => 'COLOR',    VALUE => 'verylightgrey' },
 @ %def {feature_color} {alignment_color} {ribbon_color}
+% 'lightred' already defined as USED... 
+<<DEFAULT USED COLORS>>=
+'verylightgrey' => $COLORS{'verylightgrey'}->[0],
+@
 <<DESC custom file variables>>=
 ORD: 701
 SEC: FEATURE
@@ -5467,7 +5750,8 @@ SUB: Features
 OPT: alignment_scale_color
 DEF: |off|
 PAR: <boolean>
-SDE: Drawing alignment lines while painting with its color as a score dependent gradient.
+SDE: Drawing alignment lines while painting with its color
+     as a score dependent gradient.
 LDE: 
 
 ###EOR###
@@ -5522,6 +5806,10 @@ Show_FUNCTION              => { TYPE => 'BOOLEAN', VALUE => $F     },
 Show_SELECTION_BOX         => { TYPE => 'BOOLEAN', VALUE => $T     },
 SelectionBox_BGCOLOR       => { TYPE => 'COLOR'  , VALUE => 'grey' },
 Function_COLOR             => { TYPE => 'COLOR'  , VALUE => 'red'  },
+@
+<<DEFAULT USED COLORS>>=
+'grey' => $COLORS{'grey'}->[0],
+'red'  => $COLORS{'red'}->[0],
 @
 
 \begin{comment}
@@ -5615,7 +5903,7 @@ Move this section to a perl package: \\ suggesting [[gfftools::parser]].
 \begin{figure}[!t]
 \begin{center}
 \fbox{ % \parbox[c][8cm][c]{\linewidth}{\hfill}}
- \includegraphics[bb=5 435 600 740,clip,width=\linewidth]
+ \includegraphics[bb=10 495 590 770,clip,width=\linewidth]
                  {./psfigures/flowchart_GFFrecordparsing.ps}
 }%fbox
 \caption[Flow diagram of the input GFF-records parsing.]{\label{fig:parsingGFF} Flow diagram of the input GFF-records parsing showing the main function names involved in this process.}
@@ -5851,7 +6139,7 @@ STRAND_MISMATCH =>
   $Warn." Strand mismatch definition \"\%s\" in file \"\%s\" line \"\%s\".\n",
 @ 
 
-Same happens to '\pa{frame}', which only '0', '1', '2' or '.' (for those records having no frame) values are allowed.
+Same happens to '\pa{frame}', which only '0', '1', '2' or '.' (for those records having no frame) values are allowed (now also allowing '3' to make program compatible with blast output frames).
 
 <<Parsing Input Data>>=
 sub check_frame() { # (frm_1,...,frm_n)
@@ -5869,7 +6157,7 @@ sub check_frame() { # (frm_1,...,frm_n)
 $regexp_frame
 @ %def $regexp_frame
 <<Global Constants>>=
-$regexp_frame = '^[.012]$'; #'
+$regexp_frame = '^[.0123]$'; #' Accepting blast-formated frames (.123)
 @
 
 <<warnings - parsing GFF files>>=
@@ -5893,7 +6181,7 @@ STRAND => sub { # Value, varName, Lowercase
 $regexp_strand
 @ %def $regexp_strand
 <<Global Constants>>=
-$regexp_strand = '^[+-.]$'; #'
+$regexp_strand = '^[\.\+\-]$'; #'
 @
      
 <<warnings - parsing GFF files>>=
@@ -6222,17 +6510,18 @@ ISALN: {
 }; # ISALN
 @ 
 
-First we load the plain GFF attributes for a given record, when such record is defining a vector we add a new element to the feature anonymous array. That element is a list of the scores provided by the '[[&load_GFF_vector]]' function defined in section~\ref{sec:loadvector}, page~\pageref{sec:loadvector}.
+First we load the plain GFF attributes for a given record, when such record is defining a vector we add a new element to the feature anonymous array. That element is a list of the scores provided by the '[[&load_GFF_vector]]' function defined in section~\ref{sec:loadvector}, page~\pageref{sec:loadvector}. Features are NOT case-sensitive, so we force all to lower-case. This is also taken into account at section~\ref{sec:paramvalid}, page~\pageref{sec:paramvalid}, where variables are set for each feature string (see function [[&varscheck()]]).
 
 <<adding new feature elements>>=
+$feature = lc($feature); # GFF feature (3rd field) [MUST NOT be case-sensitive]
 LDALN: {
     $isaln && do {
         push @{$VarName->{$group}[$_element]},
             [
-              'A',       # Type == ALIGNMENT
-        	  {},        # Properties hash, now empty
-              $feature,  # GFF feature (3rd field)
-              $label,    # Record ID if exist, order# otherwise
+              'A',          # Type == ALIGNMENT
+        	  {},           # Properties hash, now empty
+              $feature,     # GFF feature [AGAIN: MUST NOT be case-sensitive]
+              $label,       # Record ID if exist, order# otherwise
               $start_1, $end_1, $score_1, $frame_1,
               $start_2, $end_2, $score_2, $frame_2,
             ];
@@ -6241,10 +6530,10 @@ LDALN: {
     my $first_fld = ($_gff eq $VECTOR) ? 'V' : 'G';
     push @{$VarName->{$group}[$_element]},
         [
-          $first_fld,      # Type == plain GFF or vector
-    	  {},              # Properties hash, now empty
-          $feature,        # GFF feature (3rd field)
-          $label,          # Record ID if exist, order# otherwise
+          $first_fld,    # Type == plain GFF or vector
+    	  {},            # Properties hash, now empty
+          $feature,      # GFF feature [AGAIN: MUST NOT be case-sensitive]
+          $label,        # Record ID if exist, order# otherwise
           $start, $end, $score, $frame,
         ];
     $_gff eq $VECTOR && do {
@@ -6347,7 +6636,8 @@ sub load_grouping() {
     $grp_NOGP = $APLOT_NOGP;
     $grp_tag = $Vars{LAYOUT}{align_tag}; # %SOURCE is a temporary hash name
   };
-    $label = $group_id = $grp_counter;
+    $label = '';
+    $group_id = $grp_counter;
     defined($attributes) || do {
         $group = "$grp_string\_$group_id";
 	    return $grp_NOGP;
@@ -6364,14 +6654,17 @@ We may find four basic grouping field structures (detailed in Table~\ref{tbl:for
 <<parse grouping attributes>>=
 $grp_flag = 0;
 $group_string = shift @grouping_list;
-($group_string =~ /$regexp_group/o) && 
-    (@new_group = ($1,$2,$3));
+($group_string =~ /$regexp_group/o) && do {
+    @new_group = (defined($1) ? $1 : '',
+                  defined($2) ? $2 : '',
+                  defined($3) ? $3 : '');
+};
 $new_group[0] =~ s/\s*$//o;
-defined($new_group[0]) || do {  # type 2 attributes
+($new_group[0] eq '') && do {  # type 2 attributes
     $grp_flag = 1;
     $new_group[0] = $grp_tag;
 };
-defined($new_group[1]) || do {  # type 1 attributes
+($new_group[1] eq '') && do {  # type 1 attributes
     $grp_flag = 1;
     $new_group[1] = $new_group[0];
     $new_group[0] = $grp_tag;
@@ -6405,20 +6698,24 @@ $_type && do { # GFF grouping
 };
 @ 
 
-We are interested in finding 'id' tag, that defines the label for a single record, this is implemented in the '[[&load_GFF_align]]' and '[[&load_GFF_vector]]'functions but has to be parsed in plain GFF records.
+We are interested in finding 'id' tag, that defines the label for a single record, this is implemented in the '[[&load_GFF_align]]' and '[[&load_GFF_vector]]' functions but has to be parsed in plain GFF records.
 
 <<parse other attributes>>=
-scalar(@grouping_list) > 0 && do { 
-    foreach my $element (@grouping_list) {
-        $element =~ /$regexp_group/o && (@new_group = ($1,$2,$3));
-        lc($new_group[0]) =~ /^$Vars{LAYOUT}{label_tag}$/ && do {
-            $label = $new_group[1];
-            $label eq "" && do {
-                (undef,$label,undef) = split /\s+/og, $new_group[0];
-            };
-        };
+for (my $element = 0; $element <= $#grouping_list; $element++) {
+    $grouping_list[$element] =~ /$regexp_group/o && do {
+        @new_group = (defined($1) ? $1 : '',
+                      defined($2) ? $2 : '',
+                      defined($3) ? $3 : '');
     };
-};
+    $new_group[0] =~ s/\s*$//og;
+    lc($new_group[0]) =~ /^$Vars{LAYOUT}{label_tag}$/ && do {
+        ($new_group[1] eq '') || ($label = $new_group[1]);
+#            $label = $new_group[1];
+#            $label eq "" && do {
+#                (undef,$label,undef) = split /\s+/og, $new_group[0];
+#            };
+    };
+}; # for $element
 @
 
 \subsubsctn{Layout variables involved in grouping tags}
@@ -6701,8 +6998,12 @@ for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
     # print STDERR join(' : ',$strf->[$gh], join('***',@q).'**|', 
     #                   $t, $Vars{LAYOUT}{label_tag})."\n";
     $t =~ /^($Vars{LAYOUT}{label_tag})$/ && do {
-        ($strf->[$gh] =~ /$regexp_group/o) && (@new_id = ($1,$2,$3));
-        defined($new_id[1]) && ($aln_lbl = $new_id[1]);
+        ($strf->[$gh] =~ /$regexp_group/o) && do {
+            @new_id = (defined($1) ? $1 : '',
+                       defined($2) ? $2 : '',
+                       defined($3) ? $3 : '');
+        };
+        ($new_id[1] eq '') || ($aln_lbl = $new_id[1]);
         next;
     }; # id_tag
     $t =~ /^$Vars{LAYOUT}{start_tag}$/ && do {
@@ -6791,7 +7092,7 @@ DATA STRUCTURE for vectors within [[%GFF_DATA]] at elements level.
 <<Parsing Input Data>>=
 sub load_GFF_vector() {
     my ($strf) = @_;
-    my ($v_type,$v_window,$v_step) = ($vect_type{'sco'}, undef, undef);
+    my ($v_type,$v_window,$v_step,$vct_lbl) = ($vect_type{'sco'}, (undef) x 3);
     my (@lst, $fst);
 	@vect_ary = ();
     <<load-GFF-vector: simple fields>>
@@ -6848,21 +7149,30 @@ for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
     $t = lc($q[0]);
     # print STDERR join(' : ',$strf->[$gh], join('***',@q).'**|', 
     #                   $t, $Vars{LAYOUT}{label_tag})."\n";
+    $t =~ /^($Vars{LAYOUT}{label_tag})$/ && do {
+        ($strf->[$gh] =~ /$regexp_group/o) && do {
+            @new_id = (defined($1) ? $1 : '',
+                       defined($2) ? $2 : '',
+                       defined($3) ? $3 : '');
+        };
+        ($new_id[1] eq '') || ($vct_lbl = $new_id[1]);
+        next;
+    }; # id_tag
     $t =~ /^($Vars{LAYOUT}{scotype_tag})$/ && do {
         defined($vect_type{lc($strf->[$gh])}) &&
             ($v_type = $vect_type{lc($strf->[$gh])});
         next;
-    }; # id_tag
+    }; # scotype_tag
     $t =~ /^($Vars{LAYOUT}{window_tag})$/ && do {
         (defined($q[1]) && $q[1] =~ /$regexp_float/o)
             && ($v_window = $q[1]);
         next;
-    }; # id_tag
+    }; # window_tag
     $t =~ /^($Vars{LAYOUT}{step_tag})$/ && do {
         (defined($q[1]) && $q[1] =~ /$regexp_float/o)
             && ($v_step = $q[1]);
         next;
-    }; # id_tag
+    }; # step_tag
     $t =~ /^$Vars{LAYOUT}{scoary_tag}$/ && do {
         @vect_ary = split /\s+/og, $q[1];
     }; # frame_tag
@@ -6880,6 +7190,7 @@ scalar(@vect_ary) > 0 || return $GFF;
     ($v_type = $vect_type{'ERROR'}); 
 defined($v_step) || ($v_step = $v_window);
 @vect_ary = ($v_type,$v_window,$v_step,@vect_ary);
+$label = defined($vct_lbl) ? $vct_lbl : $label;
 return $VECTOR;
 @
 
@@ -7181,7 +7492,7 @@ my $ss_ref = \%{ $s_ref->{$s_seq}[$_element] };
 foreach my $s_src (keys %{ $ss_ref }) {
     <<sorting sources>>
 }; # foreach $s_src
-&sort_by_inputorder($sc_ord);
+&sort_by_inputorderlayer($sc_ord,$ss_ref,\%{ $s_ref->{$s_seq}[$_prop] });
 <<set sequence elements boundaries>>
 @ 
 
@@ -7220,11 +7531,10 @@ my $st_ord = \@{ $sr_ord->[ $#{$sr_ord} ][1] };
 my $sr_ref = \%{ $sc_ref->{$s_str}[$_element] };
 <<set forward/reverse sorting function>>
 my (@layer_ary,$s_elem);
+@layer_ary = ( \%{ $sc_ref->{$s_str}[$_prop] },
+               \%{ $ss_ref->{$s_src}[$_prop] },
+               \%{ $s_ref->{$s_seq}[$_prop]  }  );
 foreach my $s_grp (keys %{ $sr_ref }) {
-    @layer_ary = ( \%{ $sr_ref->{$s_grp}[$_prop] },
-                   \%{ $sc_ref->{$s_str}[$_prop] },
-                   \%{ $ss_ref->{$s_src}[$_prop] },
-                   \%{ $s_ref->{$s_seq}[$_prop]  }  );
     <<sorting group elements>>
 }; # foreach $s_grp
 shift @layer_ary;
@@ -7247,6 +7557,7 @@ $s_elem > 1 && do {
                    map { [
                            &get_layer('feature_layer', # {feature_layer}
                                       \%{ $_->[$_ftprop] },
+                                      \%{ $sr_ref->{$s_grp}[$_prop] },
                                       @layer_ary),
                            $_->[$_ftori],
                            $_->[$_ftend],
@@ -7295,12 +7606,18 @@ sub get_layer() {
     my ($name,@refs) = @_;
     my ($out,$v);
     $out = 0; # 
+# print STDERR ("#"x40)."\n";
     foreach $v (qw/ FEATURE GROUP STRAND SOURCE SEQUENCE /) {
+# print STDERR "### GET LAYER: $v ($name) : ".
+#              (defined($Defaults{$v}{$name})?$Defaults{$v}{$name}:"undef")."\n";
         defined($Defaults{$v}{$name}) && ($out = $Defaults{$v}{$name});
     }; # foreach
     foreach $v (@refs) {
+# print STDERR "### GET LAYER: $v ($name) : ".
+#              (defined($v->{$name})?$v->{$name}:"undef")."\n";
         defined($v->{$name}) && ($out = $v->{$name});
     }; # foreach
+# print STDERR "### GET LAYER: $name = $out \n";
     return $out;
 } # get_layer
 @ %def &get_layer
@@ -7371,11 +7688,20 @@ SORT_GPN => "\%s\`Sorted \%s groups.\n",
 The program will process always strands in a fixed order, that is: '+', '.' and '-' (so forward features first, followed by those features that does not have a defined strand, and finally reverse features). The problem appears when looking at alignment strands, which are a composite of the strands for the query and the target sequences. To workaround that we define a ordering hash containing each strand as keys pointing to an increasing number (see [[%StrandNum]] hash), and use that on the sorting process later. 
 
 <<sorting strands for current source>>=
-@{ $sr_ord } = map { $_->[1] }
+@{ $sr_ord } = map { $_->[2] }
                sort { 
-                      $a->[0] <=> $b->[0]  # sort by "strand number"
+                      $a->[0] <=> $b->[0]  # sort by layer
+                              ||
+                      $a->[1] <=> $b->[1]  # sort by "strand number"
                     }
-               map { [ $StrandNum{$_->[0]}, $_ ] } @{ $sr_ord };
+               map { [ 
+                       &get_layer('strand_layer', # {strand_layer}
+                                  \%{ $sc_ref->{ $_->[0] }[$_prop] },
+                                  \%{ $ss_ref->{$s_src}[$_prop] },
+                                  \%{ $s_ref->{$s_seq}[$_prop]  }),
+                       $StrandNum{$_->[0]},
+                       $_
+                     ] } @{ $sr_ord };
 @ 
 
 By setting the following hash we do not need to check if a strand data structure is defined or not. Four values are not ocurring if data does not contain info on strand of target sequence, because program takes the query strand as the target one, but user input may contain them. Those four values are '+.', '.+', '.-' and '-.'.
@@ -7438,6 +7764,8 @@ $aflg && do {
 }; 
 @ 
 
+Here we must sort also by source/sequence layers.
+
 <<Sorting Features>>=
 sub sort_by_inputorder() {
     my $ref = $_[0];
@@ -7445,7 +7773,21 @@ sub sort_by_inputorder() {
                 sort { $a->[1] <=> $b->[1] }
                 map { [ $_->[0], $_->[1], $_->[2] ] } @{ $ref };
 } # sort_by_inputorder
-@ %def &sort_by_inputorder
+sub sort_by_inputorderlayer() {
+    my ($ref,$soref,$sqref) = @_;
+    @{ $ref } = map { [ $_->[0], $_->[3] ] }
+                sort { $a->[1] <=> $b->[1] # {source_layer}
+                                ||
+                       $a->[2] <=> $b->[2] # input order
+                     }
+                map { [ $_->[0],
+                        &get_layer('source_layer',
+                                   \%{ $soref->{ $_->[0] }[$_prop] },
+                                   $sqref ),
+                        $_->[1], $_->[2]
+                      ] } @{ $ref };
+} # sort_by_inputorderlayer
+@ %def &sort_by_inputorder &sort_by_inputorderlayer
 
 \subsctn{Sorting forward/reverse strands}
 
@@ -7557,20 +7899,27 @@ sub set_page_margins() {
 Now, we should choose which alignment and which annotations will appear on the plot, by default the first ones read from input files. This process is done in three steps: 
 
 \begin{enumerate}
-\item First we should look for customization variables sequence names if defined ([[alignment_name]], [[x_sequence_name]] and [[y_sequence_name]] variables and their corresponding command-line options, see section~\ref{sec:customvardesc} on page~\pageref{sec:customvardesc} for further info).
+\item First we should look for customization variables sequence names if defined ([[alignment_name]], [[x_sequence_name]] and [[y_sequence_name]] variables and their corresponding command-line options, see section~\ref{sec:customvardesc} on page~\pageref{sec:customvardesc} for further info). If no alignment name was forced from [[alignment_name]], we take the first that can be found in [[$Order{ALN}]] array.
 
 <<setting axes - step 1>>=
 $vrf->{_x_sequence_name} = defined($vrf->{x_sequence_name})
     ? $vrf->{x_sequence_name} : '.+';
 $vrf->{_y_sequence_name} = defined($vrf->{y_sequence_name})
     ? $vrf->{y_sequence_name} : '.+';
-defined($vrf->{alignment_name}) && do {
+if (defined($vrf->{alignment_name})) {
     ($vrf->{_x_sequence_name},
      $vrf->{_y_sequence_name}) = 
          split /:/o, $vrf->{alignment_name}, 2;
+} elsif (scalar(@{ $Order{ALN} }) > 0) {
+    ($vrf->{_x_sequence_name},
+     $vrf->{_y_sequence_name}) = 
+         split /:/o, $Order{ALN}[0][0], 2;
 }; # defined($vrf->{alignment_name})
 $vrf->{_alignment_name} = 
     [ $vrf->{_x_sequence_name}, $vrf->{_y_sequence_name} ];
+#
+# $Debug && print STDERR "###OOPS(1)### $vrf->{_x_sequence_name} x $vrf->{_y_sequence_name} = @{$vrf->{_alignment_name}}\n";
+#
 @ %def {_alignment_name}
 
 \item Then we must find if the resulting alignment has been loaded, searching on [[@{$Order{ALN}}]], and setting X and Y sequences accordingly. [[&search_alnname]] will return the final X-Y sequence names by modifying [[@{ $vrf->{_alignment_name} }]]. We do not swap sequence names on [[$vrf->{_alignment_name}]] at [[$vrf->{_swap_aln}]] test because it is already swapped within that function.
@@ -7588,21 +7937,35 @@ $vrf->{_plot_aln} && do {
     $vrf->{_y_sequence_name} = defined($vrf->{y_sequence_name})
         ? $vrf->{y_sequence_name} : $vrf->{_alignment_name}[1];
 }; # $vrf->{_plot_aln}
-($vrf->{_report_x_sequence_name},$vrf->{_report_y_sequence_name}) =
-     ($vrf->{_x_sequence_name},$vrf->{_y_sequence_name});
-@ %def {_plot_aln} {_swap_aln} {_report_x_sequence_name} {_report_y_sequence_name}
+#
+# $Debug && print STDERR "###OOPS(2)### $vrf->{_x_sequence_name} x $vrf->{_y_sequence_name} = @{$vrf->{_alignment_name}}\n";
+#
+@ %def {_plot_aln} {_swap_aln}
 
 \item Finally we grep those X and Y sequences from [[@{$Order{GFF}}]], so we sholud know if they are present there or not. This depends on what we have found in [[@{$Order{ALN}}]] but also on [[$Vars{LAYOUT}{x_sequence_name}]] and [[$Vars{LAYOUT}{y_sequence_name}]] settings.
 
 <<setting axes - step 3>>=
-$vrf->{_alignment_name} = join(":", @{ $vrf->{_alignment_name} });
-$vrf->{_report_alignment_name} = $vrf->{_alignment_name};
 ($vrf->{_plot_x_sequence},$vrf->{_x_sequence_name}) =
-    &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
+      &search_seqname($vrf->{_x_sequence_name}, undef,
+                      \@{ $Order{GFF} });
 ($vrf->{_plot_y_sequence},$vrf->{_y_sequence_name}) =
-    &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
-                    \@{ $Order{GFF} });
-@ %def {_plot_x_sequence} {_plot_y_sequence} {_report_alignment_name}
+      &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
+                      \@{ $Order{GFF} });
+($vrf->{_report_x_sequence_name},$vrf->{_report_y_sequence_name}) =
+     ($vrf->{_x_sequence_name},$vrf->{_y_sequence_name});
+$vrf->{_alignment_name} = join(":",
+                               $vrf->{_alignment_name}[0] ne '.+'
+                                   ? $vrf->{_alignment_name}[0]
+                                   : $vrf->{_x_sequence_name},
+                               $vrf->{_alignment_name}[1] ne '.+'
+                                   ? $vrf->{_alignment_name}[1]
+                                   : $vrf->{_y_sequence_name}
+                               );
+$vrf->{_report_alignment_name} = $vrf->{_alignment_name};
+#
+# $Debug && print STDERR "###OOPS(3)### $vrf->{_x_sequence_name} x $vrf->{_y_sequence_name} = $vrf->{_alignment_name}\n";
+#
+@ %def {_plot_x_sequence} {_plot_y_sequence} {_report_x_sequence_name} {_report_y_sequence_name} {_report_alignment_name}
 \end{enumerate}
 
 While following those points, we will set also three variables that tell {\prog} if it is worth to plot alignments, x and y sequence ([[_plot_aln]], [[_plot_x_sequence]] and [[_plot_y_sequence]] respectively).
@@ -7647,7 +8010,7 @@ sub search_alnname() {
     ($sq_a,$sq_b) = @$_ra;
     foreach $naln (@$_ro) {
         ($nm_a,$nm_b) = split /:/o, $naln->[0], 2; 
-        ($nm_a =~ /^$sq_a$/ && $nm_b =~ /^$sq_b$/) && do {
+        ("$nm_a" eq "$sq_a" && "$nm_b" eq "$sq_b") && do {
             @$_ra = ($nm_a,$nm_b);
             return ($T, $F);
         };
@@ -7655,7 +8018,7 @@ sub search_alnname() {
     # swapping
     foreach $naln (@$_ro) {
         ($nm_a,$nm_b) = split /:/o, $naln->[0], 2; 
-        ($nm_a =~ /^$sq_b$/ && $nm_b =~ /^$sq_a$/) && do {
+        ("$nm_a" eq "$sq_b" && "$nm_b" eq "$sq_a") && do {
             @$_ra = ($nm_a,$nm_b);
             return ($T, $T);
         };
@@ -7670,8 +8033,8 @@ sub search_seqname() {
     my ($sq_a,$sq_b,$_ro) = @_;
     my ($a_found,$naln);
     foreach $naln (@$_ro) {
-        ($sq_a eq '.+' && defined($sq_b) && $naln->[0] eq $sq_b) && next;
-        $naln->[0] =~ /^$sq_a$/ && do {
+        ($sq_a eq '.+' && defined($sq_b) && "$naln->[0]" eq "$sq_b") && next;
+        ($sq_a eq '.+' || "$naln->[0]" eq "$sq_a") && do {
             $sq_a = $naln->[0];
             return ($T, $sq_a);
         };
@@ -8067,12 +8430,36 @@ sub logdec() { return (log($_[0])/log(10)); }
 
 \subsctn{Finding X/Y axes proportionality ratio}
 
-We will want to set a fixed X/Y scale ratio (using [[aplot_xy_scale]] layout variable) and we have to set the proper values (or defaults) for the correspoding variables. If user provides a reasonable [[aplot_xy_scale]] value, then we must disable [[aplot_xy_same_length]], else we have to disable the first variable unless user has switched off the second one. We are interested in that case to know how much different are both axes lengths, so we are taking the X and Y axes ratio of their order of magnitude to get a well dimensioned plot (formula is similar to the tickmark step formula we have described in the previous section).
+We will want to set a fixed X/Y scale ratio (using [[aplot_xy_scale]] layout variable) and we have to set the proper values (or defaults) for the correspoding variables. If user provides a reasonable [[aplot_xy_scale]] value, then we must disable [[aplot_xy_same_length]], else we have to disable the first variable unless user has switched off the second one. We are interested in that case to know how much different are both axes lengths, just by obtaining the X:Y ratio. %, so we are taking the X and Y axes ratio of their order of magnitude to get a well dimensioned plot (formula is similar to the tickmark step formula we have described in the previous section).
 
 <<Layout Settings>>=
 sub find_prop_ratio() {
     my ($vrf) = @_;
-    my ($a,$b,$r);
+    RATIO: {
+        defined($vrf->{aplot_xy_scale}) && do {
+            ( $vrf->{aplot_xy_scale} > 0 &&
+              $vrf->{aplot_xy_scale} < 10 ) && do {
+                $vrf->{aplot_xy_same_length} = $F;
+                last RATIO;
+            };
+        }; # {aplot_xy_scale}
+	    $vrf->{aplot_xy_same_length} && do {
+            $vrf->{aplot_xy_scale} = -1;
+            last RATIO;
+        }; # {aplot_xy_same_length}
+        $vrf->{aplot_xy_scale} = sprintf("%5.4f",
+                                         ($vrf->{_x_len} / $vrf->{_y_len}));
+    }; # RATIO
+    &report('SCALEDONE',
+            (($vrf->{aplot_xy_scale} ne -1)
+             ? "Current plot has an XY-RATIO of $vrf->{aplot_xy_scale} ..."
+             : "XY-RATIO is not taken into account for this plot ..."
+             ), ($vrf->{aplot_xy_same_length} ? 'YES' : 'NO'));
+    return;
+} # find_prop_ratio
+@ %def &find_prop_ratio
+
+<<HIDE: Layout Settings>>=
     $a = 10**( int( &logdec( $vrf->{_x_len} ) ) );
     $b = 10**( int( &logdec( $vrf->{_y_len} ) ) );
     $r = $a / $b;
@@ -8098,7 +8485,7 @@ sub find_prop_ratio() {
              ), ($vrf->{aplot_xy_same_length} ? 'YES' : 'NO'));
     return;
 } # find_prop_ratio
-@ %def &find_prop_ratio
+@
 
 <<messages - input/output>>=
 SCALEDONE =>
@@ -8167,6 +8554,27 @@ sub set_page_labels() {
     my ($vrf) = @_;
     defined($vrf->{title})    || do {
         ($vrf->{title} = $vrf->{_alignment_name}) =~ s/:/ x /o;
+    }; # defined($vrf->{title})
+    defined($vrf->{subtitle}) || ($vrf->{subtitle} = "");
+    defined($vrf->{x_label})  || do {
+        $vrf->{x_label} = $vrf->{_x_sequence_name};
+    }; # defined($vrf->{x_label})
+    defined($vrf->{y_label})  || do {
+        $vrf->{y_label} = $vrf->{_y_sequence_name};
+    }; # defined($vrf->{y_label})
+    defined($vrf->{percent_box_label})    ||
+        ($vrf->{percent_box_label} = '');
+    defined($vrf->{percent_box_sublabel}) ||
+        ($vrf->{percent_box_sublabel} = '');
+    defined($vrf->{extra_box_label})      ||
+        ($vrf->{extra_box_label} = '');
+    defined($vrf->{extra_box_sublabel})   ||
+        ($vrf->{extra_box_sublabel} = '');
+    $vrf->{show_ps_warnings} && do {
+        $vrf->{_plot_x_sequence} ||
+            ($vrf->{x_label} .= " ... X-Sequence Annotation NOT FOUND ... ");
+        $vrf->{_plot_y_sequence} ||
+            ($vrf->{y_label} .= " ... Y-Sequence Annotation NOT FOUND ... ");
         $vrf->{_plot_aln} || do {
             # PS --> angle string valn haln {fz fn} tcol x y  xtxt
             my ($epo,$epe) = (
@@ -8184,26 +8592,7 @@ sub set_page_labels() {
                    'input files...) (tv) (ch) 15 pt /Helvetica _f '.
                    ($epo + 10).' '.($epe - 10).' xtxt' ];
         }; # _plot_aln
-    }; # defined($vrf->{title})
-    defined($vrf->{subtitle}) || ($vrf->{subtitle} = "");
-    defined($vrf->{x_label})  || do {
-        $vrf->{x_label} = $vrf->{_x_sequence_name};
-        $vrf->{_plot_x_sequence} ||
-            ($vrf->{x_label} .= " ... X-Sequence Annotation NOT FOUND ... ");
-    }; # defined($vrf->{x_label})
-    defined($vrf->{y_label})  || do {
-        $vrf->{y_label} = $vrf->{_y_sequence_name};
-        $vrf->{_plot_y_sequence} ||
-            ($vrf->{y_label} .= " ... Y-Sequence Annotation NOT FOUND ... ");
-    }; # defined($vrf->{y_label})
-    defined($vrf->{percent_box_label})    ||
-        ($vrf->{percent_box_label} = '');
-    defined($vrf->{percent_box_sublabel}) ||
-        ($vrf->{percent_box_sublabel} = '');
-    defined($vrf->{extra_box_label})      ||
-        ($vrf->{extra_box_label} = '');
-    defined($vrf->{extra_box_sublabel})   ||
-        ($vrf->{extra_box_sublabel} = '');
+    }; # $vrf->{show_ps_warnings}
     return;
 } # set_page_labels
 @ %def &set_page_labels
@@ -8307,22 +8696,39 @@ PSHEADER =>
 \label{sec:CMYKcolordef}
 
 % \subsctn{CMYK color definition}
-This is the function that fills up the {\ps} colors array:
+This is the function that fills up the {\ps} colors array and also sets the ribbons color filling function:
 
 <<PostScript COLORS>>=
 sub ps_colors() {
-    my %tmp = ();
+    my ($colornum, $j, @tmp, @colary, @gradary);
+    @tmp = ();
+    @colary = ();
+    @gradary = ();
+    @colary = (keys %{$USED{'COLORS'}});
+    ($Debug) && (@colary = (keys %COLORS));
+    @gradary = (keys %{$USED{'GRADIENTS'}});
+    ($Debug) && (@gradary = (keys %GRADIENTS));
+    $colornum = scalar(@colary) + scalar(@gradary);
+                # &min(scalar(@colary), $colors);
     print STDOUT "%% Fixed Color Variables (CMYK)\n";
-    print STDOUT "/colordict ".($colors + 28)." dict D colordict begin %% ".
-                 $colors." colors + 28 definitions\n";
-    foreach my $key (keys %COLORS) { $tmp{$COLORS{$key}->[0]} = $key };
-    for (my $j = 1; $j <= $colors; $j++) { 
-        my $name = $tmp{$j};
+    print STDOUT "/colordict ".($colornum + 28).
+                 " dict D colordict begin %% using ".
+                 $colornum." colors + 28 definitions\n";
+    @tmp = map { $_->[1] }
+           sort { $a->[0] <=> $b->[0] }
+           map { [ $COLORS{$_}->[0], $_ ] } @colary;
+    # print STDERR "### colary: @colary\n### colary-tmp: @tmp\n";
+    for ($j = 0; $j <= $#tmp; $j++) { 
+        my $name = $tmp[$j];
         my $ref = \$COLORS{$name};
         my $cmyk = "$$ref->[1] $$ref->[2] $$ref->[3] $$ref->[4]";
-        print STDOUT "/".(&fill_right($name,20," "))."{ $cmyk } D\n";
-        };
+        print STDOUT "/".$name." { $cmyk } D"; # (&fill_right($name,20," "))
+        print STDOUT (($j % 5 == 0 && $j > 0) ? "\n" : " ");
+    }; # for $j
+    print STDOUT "\n" if ($j % 5 > 0);
+    &ps_color_gradients(\@gradary) if scalar(@gradary) > 0;
     print STDOUT "end %% colordict\n";
+    &ps_color_pattern;
     &report('PSCOLORS');
 } # ps_colors
 @ %def &ps_colors colordict
@@ -8337,23 +8743,23 @@ $colors = 0;
 %COLORS = (    # [ ColorNUMBER, qw/ CYAN MAGENTA YELLOW BLACK / ]
   <<cmyk colors perl definition>>
   ); # %COLORS
+%GRADIENTS = (
+  <<gradients perl definition>>
+  ); # %GRADIENTS
 @ %def COLORS
 
-\label{todo:JAA}\label{todo:JAB}
+<<HIDE: DONE>>=
+\doneitem{20030116}{Re-define the color palette, including verypale/pale/.../deep/verydeep (four extra color intensities). Look for new color gradients: khaki, pink, ...} % todoJAB
+@
+\label{todo:JAA}
 <<HIDE: new defs TODO>>=
 \def\todoJAA{
 Move this section to a perl package: \\ suggesting [[gfftools::PostScript::colors]].
 } % todoJAA
-\def\todoJAB{
-Re-define the color palette, including verypale/pale/.../deep/verydeep (four extra color intensities). Look for new color gradients: khaki, pink, ...
-} % todoJAB
-@
 <<HIDE: TODO>>=
 \todoitem{\todoJAA}{todo:JAA}
-\todoitem{\todoJAB}{todo:JAB}
 @
-\todo{ \item \todoJAA
-       \item \todoJAB } % todo
+\todo{ \item \todoJAA } % todo
 
 To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, then the corresponding chunks are processedby [[colors2tex.pl]] to obtain the definitions {\LaTeX} file ('[[AplotColorDefs.tex]]') and the table summarizing them for the manual ('[[AplotColorTbl.tex]]').See appendix~\ref{sec:COLORprg} on page~\pageref{sec:COLORprg} to look at that script implementation. % outlined in page~\pageref{sec:cmykfiles}.
 
@@ -8361,194 +8767,312 @@ To avoid mistakes when working with three separate files, we define here CMYK co
 
 \subsubsctn{Black and White}
 
-\newcommand{\clrtbl}[5]{\vskip -2.95ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}}
-\newcommand{\clrtblg}[7]{\vskip -2.95ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}\cln{#6}\cln{#7}}
 
-\clrtblg{black}{verydarkgrey}{darkgrey}{grey}{lightgrey}{verylightgrey}{white}
+<<HIDE: new LaTeX pstricks>>=
+\newcommand{\clrtbl}[9]{\vskip -2.95ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}\cln{#6}\cln{#7}\cln{#8}\cln{#9}}
+\newcommand{\clrtblg}[9]{\vskip -2.95ex \noindent\hrulefill\clns{black}\clns{#1}\clns{#2}\clns{#3}\clns{#4}\clns{#5}\clns{#6}\clns{#7}\clns{#8}\clns{#9}\clns{white}}
+@
+
+\clrtblg{verydeepgrey}{deepgrey}{verydarkgrey}{darkgrey}{grey}{lightgrey}{verylightgrey}{palegrey}{verypalegrey}
 
 <<cmyk colors perl definition>>=
 # black+grey+white
 black              => [ ++$colors, qw/ 0.00 0.00 0.00 1.00 / ],
-verydarkgrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.80 / ],
+verydeepgrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.90 / ],
+deepgrey           => [ ++$colors, qw/ 0.00 0.00 0.00 0.80 / ],
+verydarkgrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.70 / ],
 darkgrey           => [ ++$colors, qw/ 0.00 0.00 0.00 0.60 / ],
-grey               => [ ++$colors, qw/ 0.00 0.00 0.00 0.40 / ],
-lightgrey          => [ ++$colors, qw/ 0.00 0.00 0.00 0.20 / ],
-verylightgrey      => [ ++$colors, qw/ 0.00 0.00 0.00 0.10 / ],
+grey               => [ ++$colors, qw/ 0.00 0.00 0.00 0.50 / ],
+lightgrey          => [ ++$colors, qw/ 0.00 0.00 0.00 0.40 / ],
+verylightgrey      => [ ++$colors, qw/ 0.00 0.00 0.00 0.30 / ],
+palegrey           => [ ++$colors, qw/ 0.00 0.00 0.00 0.20 / ],
+verypalegrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.10 / ],
 white              => [ ++$colors, qw/ 0.00 0.00 0.00 0.00 / ],
 @
 
+\subsubsctn{Pink}
+
+\clrtbl{verydeeppink}{deeppink}{verydarkpink}{darkpink}{pink}{lightpink}{verylightpink}{palepink}{verypalepink}
+
+<<cmyk colors perl definition>>=
+# pink				  
+verydeeppink      => [ ++$colors, qw/ 0.00 0.60 0.15 0.35 / ],
+deeppink          => [ ++$colors, qw/ 0.00 0.75 0.20 0.15 / ],
+verydarkpink      => [ ++$colors, qw/ 0.00 0.90 0.25 0.00 / ],
+darkpink          => [ ++$colors, qw/ 0.00 0.75 0.30 0.00 / ],
+pink              => [ ++$colors, qw/ 0.00 0.60 0.25 0.00 / ],
+lightpink         => [ ++$colors, qw/ 0.00 0.45 0.20 0.00 / ],
+verylightpink     => [ ++$colors, qw/ 0.00 0.30 0.15 0.00 / ],
+palepink          => [ ++$colors, qw/ 0.00 0.20 0.10 0.00 / ],
+verypalepink      => [ ++$colors, qw/ 0.00 0.10 0.05 0.00 / ],
+@ 
+
 \subsubsctn{Magenta}
 
-\clrtbl{verydarkmagenta}{darkmagenta}{magenta}{lightmagenta}{verylightmagenta}
+\clrtbl{verydeepmagenta}{deepmagenta}{verydarkmagenta}{darkmagenta}{magenta}{lightmagenta}{verylightmagenta}{palemagenta}{verypalemagenta}
 
 <<cmyk colors perl definition>>=
 # magenta				  
-verydarkmagenta    => [ ++$colors, qw/ 0.00 1.00 0.00 0.30 / ],
-darkmagenta        => [ ++$colors, qw/ 0.00 0.80 0.00 0.05 / ],
+verydeepmagenta    => [ ++$colors, qw/ 0.00 0.60 0.00 0.40 / ],
+deepmagenta        => [ ++$colors, qw/ 0.00 0.75 0.00 0.20 / ],
+verydarkmagenta    => [ ++$colors, qw/ 0.00 0.90 0.00 0.00 / ],
+darkmagenta        => [ ++$colors, qw/ 0.00 0.75 0.00 0.00 / ],
 magenta            => [ ++$colors, qw/ 0.00 0.60 0.00 0.00 / ],
-lightmagenta       => [ ++$colors, qw/ 0.00 0.40 0.00 0.00 / ],
-verylightmagenta   => [ ++$colors, qw/ 0.00 0.20 0.00 0.00 / ],
+lightmagenta       => [ ++$colors, qw/ 0.00 0.45 0.00 0.00 / ],
+verylightmagenta   => [ ++$colors, qw/ 0.00 0.30 0.00 0.00 / ],
+palemagenta        => [ ++$colors, qw/ 0.00 0.20 0.00 0.00 / ],
+verypalemagenta    => [ ++$colors, qw/ 0.00 0.10 0.00 0.00 / ],
 @
 
 \subsubsctn{Violet}
 
-\clrtbl{verydarkviolet}{darkviolet}{violet}{lightviolet}{verylightviolet}
+\clrtbl{verydeepviolet}{deepviolet}{verydarkviolet}{darkviolet}{violet}{lightviolet}{verylightviolet}{paleviolet}{verypaleviolet}
 
 <<cmyk colors perl definition>>=
 # violet				  
-verydarkviolet     => [ ++$colors, qw/ 0.45 0.85 0.00 0.00 / ],
-darkviolet         => [ ++$colors, qw/ 0.30 0.65 0.00 0.00 / ],
-violet             => [ ++$colors, qw/ 0.22 0.55 0.00 0.00 / ],
-lightviolet        => [ ++$colors, qw/ 0.15 0.40 0.00 0.00 / ],
-verylightviolet    => [ ++$colors, qw/ 0.10 0.20 0.00 0.00 / ],
+verydeepviolet     => [ ++$colors, qw/ 0.30 0.60 0.00 0.40 / ],
+deepviolet         => [ ++$colors, qw/ 0.35 0.75 0.00 0.20 / ],
+verydarkviolet     => [ ++$colors, qw/ 0.45 0.90 0.00 0.00 / ],
+darkviolet         => [ ++$colors, qw/ 0.35 0.75 0.00 0.00 / ],
+violet             => [ ++$colors, qw/ 0.30 0.60 0.00 0.00 / ],
+lightviolet        => [ ++$colors, qw/ 0.22 0.45 0.00 0.00 / ],
+verylightviolet    => [ ++$colors, qw/ 0.15 0.30 0.00 0.00 / ],
+paleviolet         => [ ++$colors, qw/ 0.10 0.20 0.00 0.00 / ],
+verypaleviolet     => [ ++$colors, qw/ 0.05 0.10 0.00 0.00 / ],
 @
 
 \subsubsctn{Blue}
 
-\clrtbl{verydarkblue}{darkblue}{blue}{lightblue}{verylightblue}
+\clrtbl{verydeepblue}{deepblue}{verydarkblue}{darkblue}{blue}{lightblue}{verylightblue}{paleblue}{verypaleblue}
 
 <<cmyk colors perl definition>>=
 # blue				  
-verydarkblue       => [ ++$colors, qw/ 1.00 1.00 0.00 0.20 / ],
-darkblue           => [ ++$colors, qw/ 0.90 0.90 0.00 0.00 / ],
-blue               => [ ++$colors, qw/ 0.75 0.75 0.00 0.00 / ],
-lightblue          => [ ++$colors, qw/ 0.50 0.50 0.00 0.00 / ],
+verydeepblue       => [ ++$colors, qw/ 0.60 0.60 0.00 0.40 / ],
+deepblue           => [ ++$colors, qw/ 0.75 0.75 0.00 0.20 / ],
+verydarkblue       => [ ++$colors, qw/ 0.90 0.90 0.00 0.00 / ],
+darkblue           => [ ++$colors, qw/ 0.75 0.75 0.00 0.00 / ],
+blue               => [ ++$colors, qw/ 0.60 0.60 0.00 0.00 / ],
+lightblue          => [ ++$colors, qw/ 0.45 0.45 0.00 0.00 / ],
 verylightblue      => [ ++$colors, qw/ 0.30 0.30 0.00 0.00 / ],
+paleblue           => [ ++$colors, qw/ 0.20 0.20 0.00 0.00 / ],
+verypaleblue       => [ ++$colors, qw/ 0.10 0.10 0.00 0.00 / ],
 @
 
 \subsubsctn{Skyblue}
 
-\clrtbl{verydarkskyblue}{darkskyblue}{skyblue}{lightskyblue}{verylightskyblue}
+\clrtbl{verydeepskyblue}{deepskyblue}{verydarkskyblue}{darkskyblue}{skyblue}{lightskyblue}{verylightskyblue}{paleskyblue}{verypaleskyblue}
 
 <<cmyk colors perl definition>>=
 # skyblue				  
-verydarkskyblue    => [ ++$colors, qw/ 0.90 0.50 0.00 0.15 / ],
-darkskyblue        => [ ++$colors, qw/ 0.75 0.45 0.00 0.00 / ],
-skyblue            => [ ++$colors, qw/ 0.60 0.38 0.00 0.00 / ],
-lightskyblue       => [ ++$colors, qw/ 0.45 0.25 0.00 0.00 / ],
-verylightskyblue   => [ ++$colors, qw/ 0.30 0.15 0.00 0.00 / ],
+verydeepskyblue    => [ ++$colors, qw/ 0.60 0.40 0.00 0.40 / ],
+deepskyblue        => [ ++$colors, qw/ 0.75 0.50 0.00 0.20 / ],
+verydarkskyblue    => [ ++$colors, qw/ 0.90 0.60 0.00 0.00 / ],
+darkskyblue        => [ ++$colors, qw/ 0.75 0.50 0.00 0.00 / ],
+skyblue            => [ ++$colors, qw/ 0.60 0.40 0.00 0.00 / ],
+lightskyblue       => [ ++$colors, qw/ 0.45 0.30 0.00 0.00 / ],
+verylightskyblue   => [ ++$colors, qw/ 0.30 0.22 0.00 0.00 / ],
+paleskyblue        => [ ++$colors, qw/ 0.20 0.14 0.00 0.00 / ],
+verypaleskyblue    => [ ++$colors, qw/ 0.10 0.07 0.00 0.00 / ],
 @
 
 \subsubsctn{Cyan}
 
-\clrtbl{verydarkcyan}{darkcyan}{cyan}{lightcyan}{verylightcyan}
+\clrtbl{verydeepcyan}{deepcyan}{verydarkcyan}{darkcyan}{cyan}{lightcyan}{verylightcyan}{palecyan}{verypalecyan}
 
 <<cmyk colors perl definition>>=
 # cyan				  
-verydarkcyan       => [ ++$colors, qw/ 1.00 0.00 0.00 0.10 / ],
-darkcyan           => [ ++$colors, qw/ 0.80 0.00 0.00 0.00 / ],
+verydeepcyan       => [ ++$colors, qw/ 0.60 0.00 0.00 0.40 / ],
+deepcyan           => [ ++$colors, qw/ 0.75 0.00 0.00 0.20 / ],
+verydarkcyan       => [ ++$colors, qw/ 0.90 0.00 0.00 0.00 / ],
+darkcyan           => [ ++$colors, qw/ 0.75 0.00 0.00 0.00 / ],
 cyan               => [ ++$colors, qw/ 0.60 0.00 0.00 0.00 / ],
-lightcyan          => [ ++$colors, qw/ 0.40 0.00 0.00 0.00 / ],
-verylightcyan      => [ ++$colors, qw/ 0.20 0.00 0.00 0.00 / ],
+lightcyan          => [ ++$colors, qw/ 0.45 0.00 0.00 0.00 / ],
+verylightcyan      => [ ++$colors, qw/ 0.30 0.00 0.00 0.00 / ],
+palecyan           => [ ++$colors, qw/ 0.20 0.00 0.00 0.00 / ],
+verypalecyan       => [ ++$colors, qw/ 0.10 0.00 0.00 0.00 / ],
 @
 
 \subsubsctn{Seagreen}
 
-\clrtbl{verydarkseagreen}{darkseagreen}{seagreen}{lightseagreen}{verylightseagreen}
+\clrtbl{verydeepseagreen}{deepseagreen}{verydarkseagreen}{darkseagreen}{seagreen}{lightseagreen}{verylightseagreen}{paleseagreen}{verypaleseagreen}
 
 <<cmyk colors perl definition>>=
 # seagreen			  
-verydarkseagreen   => [ ++$colors, qw/ 0.75 0.00 0.45 0.00 / ],
-darkseagreen       => [ ++$colors, qw/ 0.62 0.00 0.38 0.00 / ],
-seagreen           => [ ++$colors, qw/ 0.50 0.00 0.30 0.00 / ],
-lightseagreen      => [ ++$colors, qw/ 0.38 0.00 0.22 0.00 / ],
-verylightseagreen  => [ ++$colors, qw/ 0.25 0.00 0.15 0.00 / ],
+verydeepseagreen   => [ ++$colors, qw/ 0.60 0.00 0.15 0.40 / ],
+deepseagreen       => [ ++$colors, qw/ 0.75 0.00 0.20 0.20 / ],
+verydarkseagreen   => [ ++$colors, qw/ 0.90 0.00 0.25 0.00 / ],
+darkseagreen       => [ ++$colors, qw/ 0.75 0.00 0.30 0.00 / ],
+seagreen           => [ ++$colors, qw/ 0.60 0.00 0.25 0.00 / ],
+lightseagreen      => [ ++$colors, qw/ 0.45 0.00 0.20 0.00 / ],
+verylightseagreen  => [ ++$colors, qw/ 0.30 0.00 0.15 0.00 / ],
+paleseagreen       => [ ++$colors, qw/ 0.20 0.00 0.10 0.00 / ],
+verypaleseagreen   => [ ++$colors, qw/ 0.10 0.00 0.05 0.00 / ],
 @
 
 \subsubsctn{Green}
 
-\clrtbl{verydarkgreen}{darkgreen}{green}{lightgreen}{verylightgreen}
+\clrtbl{verydeepgreen}{deepgreen}{verydarkgreen}{darkgreen}{green}{lightgreen}{verylightgreen}{palegreen}{verypalegreen}
 
 <<cmyk colors perl definition>>=
 # green				  
-verydarkgreen      => [ ++$colors, qw/ 1.00 0.00 1.00 0.25 / ],
-darkgreen          => [ ++$colors, qw/ 0.80 0.00 0.80 0.00 / ],
+verydeepgreen      => [ ++$colors, qw/ 0.60 0.00 0.60 0.40 / ],
+deepgreen          => [ ++$colors, qw/ 0.75 0.00 0.75 0.20 / ],
+verydarkgreen      => [ ++$colors, qw/ 0.90 0.00 0.90 0.00 / ],
+darkgreen          => [ ++$colors, qw/ 0.75 0.00 0.75 0.00 / ],
 green              => [ ++$colors, qw/ 0.60 0.00 0.60 0.00 / ],
-lightgreen         => [ ++$colors, qw/ 0.40 0.00 0.40 0.00 / ],
-verylightgreen     => [ ++$colors, qw/ 0.20 0.00 0.20 0.00 / ],
+lightgreen         => [ ++$colors, qw/ 0.45 0.00 0.45 0.00 / ],
+verylightgreen     => [ ++$colors, qw/ 0.30 0.00 0.30 0.00 / ],
+palegreen          => [ ++$colors, qw/ 0.20 0.00 0.20 0.00 / ],
+verypalegreen      => [ ++$colors, qw/ 0.10 0.00 0.10 0.00 / ],
 @
 
 \subsubsctn{Limegreen}
 
-\clrtbl{verydarklimegreen}{darklimegreen}{limegreen}{lightlimegreen}{verylightlimegreen}
+\clrtbl{verydeeplimegreen}{deeplimegreen}{verydarklimegreen}{darklimegreen}{limegreen}{lightlimegreen}{verylightlimegreen}{palelimegreen}{verypalelimegreen}
 
 <<cmyk colors perl definition>>=
 # limegreen			  
-verydarklimegreen  => [ ++$colors, qw/ 0.50 0.00 1.00 0.10 / ],
-darklimegreen      => [ ++$colors, qw/ 0.40 0.00 0.95 0.00 / ],
-limegreen          => [ ++$colors, qw/ 0.30 0.00 0.80 0.00 / ],
-lightlimegreen     => [ ++$colors, qw/ 0.20 0.00 0.65 0.00 / ],
-verylightlimegreen => [ ++$colors, qw/ 0.10 0.00 0.50 0.00 / ],
+verydeeplimegreen  => [ ++$colors, qw/ 0.15 0.00 0.60 0.40 / ],
+deeplimegreen      => [ ++$colors, qw/ 0.20 0.00 0.75 0.20 / ],
+verydarklimegreen  => [ ++$colors, qw/ 0.25 0.00 0.90 0.00 / ],
+darklimegreen      => [ ++$colors, qw/ 0.30 0.00 0.75 0.00 / ],
+limegreen          => [ ++$colors, qw/ 0.25 0.00 0.60 0.00 / ],
+lightlimegreen     => [ ++$colors, qw/ 0.20 0.00 0.45 0.00 / ],
+verylightlimegreen => [ ++$colors, qw/ 0.15 0.00 0.30 0.00 / ],
+palelimegreen      => [ ++$colors, qw/ 0.10 0.00 0.20 0.00 / ],
+verypalelimegreen  => [ ++$colors, qw/ 0.05 0.00 0.10 0.00 / ],
 @
 
 \subsubsctn{Yellow}
 
-\clrtbl{verydarkyellow}{darkyellow}{yellow}{lightyellow}{verylightyellow}
+\clrtbl{verydeepyellow}{deepyellow}{verydarkyellow}{darkyellow}{yellow}{lightyellow}{verylightyellow}{paleyellow}{verypaleyellow}
 
 <<cmyk colors perl definition>>=
 # yellow				  
-verydarkyellow     => [ ++$colors, qw/ 0.00 0.00 1.00 0.25 / ],
-darkyellow         => [ ++$colors, qw/ 0.00 0.00 1.00 0.10 / ],
-yellow             => [ ++$colors, qw/ 0.00 0.00 1.00 0.00 / ],
-lightyellow        => [ ++$colors, qw/ 0.00 0.00 0.50 0.00 / ],
-verylightyellow    => [ ++$colors, qw/ 0.00 0.00 0.25 0.00 / ],
+verydeepyellow     => [ ++$colors, qw/ 0.00 0.00 0.60 0.40 / ],
+deepyellow         => [ ++$colors, qw/ 0.00 0.00 0.75 0.20 / ],
+verydarkyellow     => [ ++$colors, qw/ 0.00 0.00 0.90 0.00 / ],
+darkyellow         => [ ++$colors, qw/ 0.00 0.00 0.75 0.00 / ],
+yellow             => [ ++$colors, qw/ 0.00 0.00 0.60 0.00 / ],
+lightyellow        => [ ++$colors, qw/ 0.00 0.00 0.45 0.00 / ],
+verylightyellow    => [ ++$colors, qw/ 0.00 0.00 0.30 0.00 / ],
+paleyellow         => [ ++$colors, qw/ 0.00 0.00 0.20 0.00 / ],
+verypaleyellow     => [ ++$colors, qw/ 0.00 0.00 0.10 0.00 / ],
 @
 
 \subsubsctn{Orange}
 
-\clrtbl{verydarkorange}{darkorange}{orange}{lightorange}{verylightorange}
+\clrtbl{verydeeporange}{deeporange}{verydarkorange}{darkorange}{orange}{lightorange}{verylightorange}{paleorange}{verypaleorange}
 
 <<cmyk colors perl definition>>=
 # orange				  
-verydarkorange     => [ ++$colors, qw/ 0.00 0.50 0.80 0.10 / ],
-darkorange         => [ ++$colors, qw/ 0.00 0.40 0.80 0.00 / ],
-orange             => [ ++$colors, qw/ 0.00 0.30 0.80 0.00 / ],
-lightorange        => [ ++$colors, qw/ 0.00 0.20 0.75 0.00 / ],
-verylightorange    => [ ++$colors, qw/ 0.00 0.15 0.70 0.00 / ],
+verydeeporange     => [ ++$colors, qw/ 0.00 0.30 0.80 0.40 / ],
+deeporange         => [ ++$colors, qw/ 0.00 0.32 0.85 0.20 / ],
+verydarkorange     => [ ++$colors, qw/ 0.00 0.35 0.90 0.00 / ],
+darkorange         => [ ++$colors, qw/ 0.00 0.30 0.75 0.00 / ],
+orange             => [ ++$colors, qw/ 0.00 0.25 0.60 0.00 / ],
+lightorange        => [ ++$colors, qw/ 0.00 0.20 0.45 0.00 / ],
+verylightorange    => [ ++$colors, qw/ 0.00 0.15 0.30 0.00 / ],
+paleorange         => [ ++$colors, qw/ 0.00 0.10 0.20 0.00 / ],
+verypaleorange     => [ ++$colors, qw/ 0.00 0.05 0.10 0.00 / ],
 @
 
 \subsubsctn{Red}
 
-\clrtbl{verydarkred}{darkred}{red}{lightred}{verylightred}
+\clrtbl{verydeepred}{deepred}{verydarkred}{darkred}{red}{lightred}{verylightred}{palered}{verypalered}
 
 <<cmyk colors perl definition>>=
 # red					  
-verydarkred        => [ ++$colors, qw/ 0.00 1.00 1.00 0.15 / ],
-darkred            => [ ++$colors, qw/ 0.00 0.80 0.80 0.00 / ],
+verydeepred        => [ ++$colors, qw/ 0.00 0.60 0.60 0.40 / ],
+deepred            => [ ++$colors, qw/ 0.00 0.75 0.75 0.20 / ],
+verydarkred        => [ ++$colors, qw/ 0.00 0.90 0.90 0.00 / ],
+darkred            => [ ++$colors, qw/ 0.00 0.75 0.75 0.00 / ],
 red                => [ ++$colors, qw/ 0.00 0.60 0.60 0.00 / ],
-lightred           => [ ++$colors, qw/ 0.00 0.40 0.40 0.00 / ],
-verylightred       => [ ++$colors, qw/ 0.00 0.20 0.20 0.00 / ],
+lightred           => [ ++$colors, qw/ 0.00 0.45 0.45 0.00 / ],
+verylightred       => [ ++$colors, qw/ 0.00 0.30 0.30 0.00 / ],
+palered            => [ ++$colors, qw/ 0.00 0.20 0.20 0.00 / ],
+verypalered        => [ ++$colors, qw/ 0.00 0.10 0.10 0.00 / ],
 @
 
 \subsubsctn{Brown}
 
-\clrtbl{verydarkbrown}{darkbrown}{brown}{lightbrown}{verylightbrown}
+\clrtbl{verydeepbrown}{deepbrown}{verydarkbrown}{darkbrown}{brown}{lightbrown}{verylightbrown}{palebrown}{verypalebrown}
 
 <<cmyk colors perl definition>>=
 # brown				  
-verydarkbrown      => [ ++$colors, qw/ 0.35 0.85 1.00 0.40 / ],
-darkbrown          => [ ++$colors, qw/ 0.30 0.70 1.00 0.35 / ],
-brown              => [ ++$colors, qw/ 0.25 0.75 1.00 0.25 / ],
-lightbrown         => [ ++$colors, qw/ 0.20 0.60 0.70 0.15 / ],
-verylightbrown     => [ ++$colors, qw/ 0.15 0.45 0.55 0.00 / ],
+verydeepbrown      => [ ++$colors, qw/ 0.35 0.85 0.90 0.35 / ],
+deepbrown          => [ ++$colors, qw/ 0.30 0.75 0.90 0.25 / ],
+verydarkbrown      => [ ++$colors, qw/ 0.25 0.70 0.90 0.15 / ],
+darkbrown          => [ ++$colors, qw/ 0.20 0.60 0.75 0.05 / ],
+brown              => [ ++$colors, qw/ 0.17 0.50 0.65 0.00 / ],
+lightbrown         => [ ++$colors, qw/ 0.15 0.40 0.55 0.00 / ],
+verylightbrown     => [ ++$colors, qw/ 0.12 0.28 0.45 0.00 / ],
+palebrown          => [ ++$colors, qw/ 0.10 0.18 0.30 0.00 / ],
+verypalebrown      => [ ++$colors, qw/ 0.05 0.10 0.20 0.00 / ],
 @ 
 
 \subsubsctn{Colors Help}
 
 <<colors help>>=
 Those are the colors defined in $PROGRAM:
-+ Basic Colors: black white.
-+ Variable Colors: 
-      grey magenta violet blue skyblue cyan seagreen
++ Default Colors: black white.
++ Color Palette: 
+      grey pink magenta violet blue skyblue cyan seagreen
          green limegreen yellow orange red brown
-  You can get five color shades from Variable Colors with
-  \"verydark\", \"dark\", \"light\" and \"verylight\" prefixes,
+  You can get up to nine color shades from Variable Colors with
+    \"verydeep\", \"deep\", \"verydark\", \"dark\",
+    \"light\", \"verylight\", \"pale\" and \"verypale\" prefixes,
   as example: 
-    verydarkblue, darkblue, blue, lightblue and verylightblue.
+    verydeepblue, deepblue, verydarkblue, darkblue,
+    blue, lightblue, verylightblue, paleblue and verypaleblue.
++ Dynamic colors: gradient rainbow.
 @
 
 
-\subsctn{Filling up the page formats hash} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsctn{Color gradients definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:colorgraddef}
+
+Apart from the fixed color palette, we are including dynamic colors that depend on the score of the features. The first implementation will produce the [[rainbow]] gradient (a continuous color scale from violet to red passing through blue, green and yellow tonalities).
+
+<<PostScript COLORS>>=
+sub ps_color_gradients() {
+    my $gary = shift;
+    foreach my $gr (@$gary) {
+        print STDOUT "$GRADIENTS{$gr}\n";
+    };
+} # ps_color_gradients
+@ %def ps_color_gradients
+
+<<gradients perl definition>>=
+'gradient' => '<<PSFunctions - gradient>>',
+'rainbow'  => '<<PSFunctions - rainbow>>',
+@
+
+\subsubsctn{Color pattern definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:colorpatterndef}
+
+% \subsctn{CMYK color definition}
+When [[ribbon_color_merge]] is on we replace the simple [[setcmykcolor]] with a function calling a color-dependant [[setpattern]] (a {\ps} level 2 command). This emulates the blending of the colors for the vertical and horizontal ribbon projections. A secondary variable sets the ``alpha'' factor [[color_merge_factor]], in other words, the pattern dot size to emulate the color blending. It will range from 0.07 up to 2, as the lower limit maybe it is the smaller grid available from {\ps} (as observed in the preliminary test pages) and the upper limit will look too pixelized. 
+
+<<PostScript COLORS>>=
+sub ps_color_pattern() {
+    print STDOUT "%% Ribbon color mode (cmyk/pattern)\n";
+    $Vars{LAYOUT}{ribbon_color_merge} || do {
+        print STDOUT '/rbxcol { cmyk } B'."\n";
+        return;
+    };
+    $Vars{LAYOUT}{color_merge_factor} = 
+        &max(0.07,&min(2,$Vars{LAYOUT}{color_merge_factor}));
+    print STDOUT '/PG '.$Vars{LAYOUT}{color_merge_factor}.
+                 ' D % "alpha" color blending factor '."\n";
+    print STDOUT << '+++PatternProcs+++';
+<<POSTSCRIPT Ribbon Color Pattern>>
++++PatternProcs+++
+} # ps_color_pattern
+@ %def ps_color_pattern PG
+
+
+\subsctn{Filling up the page formats hash} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % \subsctn{Page formats definition}
 
@@ -8558,17 +9082,28 @@ Now we have to fill the page formats {\ps} array:
 
 <<PostScript FORMATS>>=
 sub ps_page_formats() {
-    my %tmp = ();
+    my ($formatnum, $j, @tmp, @fmtary);
+    @tmp = ();
+    @fmtary = ();
+    @fmtary = (keys %{$USED{FORMATS}});
+    ($Debug) && (@fmtary = (keys %FORMATS));
+    $formatnum = scalar(@fmtary); # &min(scalar(@fmtary), $formats);
     print STDOUT "%% Paper Sizes (in points)\n";
-    print STDOUT "/pagedict ".($formats + 2)." dict D pagedict begin %% ".
-                 $formats." formats + 2 definitions\n";
-    foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
-    for (my $j = 1; $j <= $formats; $j++) { 
-        my $name = $tmp{$j};
+    print STDOUT "/pagedict ".($formatnum + 2).
+                 " dict D pagedict begin %% ".
+                 $formatnum." formats + 2 definitions\n";
+    @tmp = map { $_->[1] }
+           sort { $a->[0] <=> $b->[0] }
+           map { [ $FORMATS{$_}->[0], $_ ] } @fmtary;
+    for ($j = 0; $j <= $#tmp; $j++) { 
+        my $name = $tmp[$j];
         my $ref = \$FORMATS{$name};
-        my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
-        print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } D\n";
+        my $pgsz = "$$ref->[1] $$ref->[2]";
+                 # &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
+        print STDOUT "/pg".$name."{ $pgsz } D"; # (&fill_right($name,10," "))
+        print STDOUT (($j % 5 == 0 && $j > 0) ? "\n" : " ");
         };
+        print STDOUT "\n" if ($j % 5 > 0);
     print STDOUT "end %% pagedict\n";
     &report('PSFORMATS');
 } # ps_page_formats
@@ -8992,7 +9527,7 @@ D              %-%
   FTz 0 gt {                           %-%
     $vr->{feature_x_label_length}      %-%
     FTf glblw                          %-%
-  } { 0 } ifelse                       %-%
+  } { 0 } ie                           %-%
 D                                      %-%
 /FTXa $vr->{feature_x_label_angle} D   %-%
 /FTXrb @{[ &tobool($vr->{feature_x_label_rotate}) ]} D  %-%
@@ -9001,7 +9536,7 @@ D                                      %-%
   FTz 0 gt {                           %-%
     $vr->{feature_y_label_length}      %-%
     FTf glblw                          %-%
-  } { 0 } ifelse                       %-%
+  } { 0 } ie                           %-%
 D                                      %-%
 /FTYa $vr->{feature_y_label_angle} D   %-%
 /FTYrb @{[ &tobool($vr->{feature_y_label_rotate}) ]} D  %:%
@@ -9029,7 +9564,7 @@ D               %-%
   GPz 0 gt {                         %-%
     $vr->{group_x_label_length}      %-%
     GPf glblw                        %-%
-  } { 0 } ifelse                     %-%
+  } { 0 } ie                         %-%
 D                                    %-%
 /GPXa $vr->{group_x_label_angle} D   %-%
 /GPXrb @{[ &tobool($vr->{group_x_label_rotate}) ]} D  %-%
@@ -9038,7 +9573,7 @@ D                                    %-%
   GPz 0 gt {                         %-%
     $vr->{group_y_label_length}      %-%
     GPf glblw                        %-%
-  } { 0 } ifelse                     %-%
+  } { 0 } ie                         %-%
 D                                    %-%
 /GPYa $vr->{group_y_label_angle} D   %-%
 /GPYrb @{[ &tobool($vr->{group_y_label_rotate}) ]} D  %:%
@@ -9143,6 +9678,7 @@ D        %:%
 <<HIDE: DONE>>=
 \doneitem{20011218}{Page layout must be redefined (taking into account page size too).}
 @
+
 
 <<PostScript MAIN>>=
 sub ps_main() {
@@ -9344,21 +9880,34 @@ for (my $a = 0; $a <= $#{ $orf }; $a++) {
             $grp = $orf->[$a][1][$b][1][$c];
             $glst = \@{ $nlst->[$_element]{$grp} };
             &show_element($glst) || next; # group:{hide}
-            for (my $d = 0; $d < $glst->[$_counter][$_elemNum]; $d++) {
-                $elst = \@{ $glst->[$_element][$d] };
-                &show_element($elst) || next; # feature:{hide}
-                <<getting current sequence feature coords>>
-                $this{sflag} && do {
-                    <<generating annotation ps code for current GFF-element>>
-                }; # check_nuclim
-            }; # for $d 
-            <<generating annotation ps code for current GFF-group>>
+            <<getting current sequence group coords>>
+            $this{sflag} && do {
+                for (my $d = 0; $d < $glst->[$_counter][$_elemNum]; $d++) {
+                    $elst = \@{ $glst->[$_element][$d] };
+                    &show_element($elst) || next; # feature:{hide}
+                    <<getting current sequence feature coords>>
+                    $this{sflag} && do {
+                        <<generating annotation ps code for current GFF-element>>
+                    }; # check_nuclim for features
+                }; # for $d 
+                <<generating annotation ps code for current GFF-group>>
+            }; # check_nuclim for groups
         }; # for $c
     }; # for $b
 }; # for $a
 @
 
-Here we retrieve current feature coords and we check they are within plot coord limits for the given sequence. This makes {\ps} output faster as we are only going to output those features within that coords limits window.
+Here we retrieve current group and feature coords and we check they are within plot coord limits for the given sequence. This makes {\ps} output faster as we are only going to output those features within that coords limits window.
+
+<<getting current sequence group coords>>=
+$this{go} = $glst->[$_counter][$_ori];
+$this{ge} = $glst->[$_counter][$_end];
+$this{sflag} = $flg
+               ? &check_seqlim($this{go},$this{ge},
+                               $vaf->{_x_start},$vaf->{_x_end})
+               : &check_seqlim($this{go},$this{ge},
+                               $vaf->{_y_start},$vaf->{_y_end});
+@
 
 <<getting current sequence feature coords>>=
 $this{so} = $elst->[$_ftori];
@@ -9392,26 +9941,46 @@ $this{rbnflg} && do {
 }; # show_ribbons
 @
 
+We obtain the score before the color setting as it is needed when a color gradient was choosen to fill up the feature.
+
 <<getting values and customization parameters for current feature>>=
 #
 ($this{strnd},undef) = split //o, $str, 2;
-# {feature_color} {feature_scale_color} {feature_scale_heigth}
-$this{col} = &get_var_value('feature_color',\@rflst)." ".
-             &tobool(&get_var_value('feature_scale_color',\@rflst))." ".
-             &tobool(&get_var_value('feature_scale_heigth',\@rflst));
+# setting score
 $this{sco} = &norm_score($elst->[$_ftsco],
                          $qlst->[$_counter][$_mnsco],
                          $qlst->[$_counter][$_mxsco]);
+# {feature_color} {feature_scale_color} {feature_scale_heigth}
+$this{col} = &get_var_value('feature_color',\@rflst);
+$this{colscl} = &tobool(&get_var_value('feature_scale_color',\@rflst));
+$this{col} =~ /$gradregex/o && do {
+    $this{col} = "$this{sco} $this{col}";
+    $this{colscl} = &tobool($F);
+};
+$this{col} .= " ".$this{colscl}.
+              " ".&tobool(&get_var_value('feature_scale_heigth',\@rflst));
 # {feature_shape}
 $this{shape} = $Shapes{&get_var_value('feature_shape',\@rflst)};
+@
+
+The following piece of code is an attempt to provide default labels for single feature elements from the corresponding group's element counter if no label is provided via [[tag_label]] tag-value pair or from the [[feature_label]] customization variable.  %'
+
+<<getting values and customization parameters for current feature>>=
 # {feature_label} {show_feature_label}
 $this{lbl_tmp} = &get_var_value('feature_label',\@rflst);
 $this{lbl_flg} = &get_var_value('show_feature_label',\@rflst);
 $this{lbl} = $this{lbl_flg}
-             ? (defined($this{lbl_tmp})
-                ? "($this{lbl_tmp}) _t"
-                : "($elst->[$_ftid]) _t")
-             : "_f"; 
+             ? ((defined($elst->[$_ftid]) && $elst->[$_ftid] ne '')
+                ? "($elst->[$_ftid]) _t"
+                : ((defined($this{lbl_tmp}) && $this{lbl_tmp} ne '')
+                   ? "($this{lbl_tmp}) _t"
+                   : "(".($d+1).") _t"
+                  )
+               )
+             : "_f"; # defined($this{lbl_tmp})
+@
+
+<<getting values and customization parameters for current feature>>=
 # {show_ribbons} {ribbon_style}
 @@{ $this{rbnsty} } = @{ $Ribbons{&get_var_value('ribbon_style',\@rflst)} };
 (!$this{rbnsty}[0] &&  $this{rbnsty}[1]) && ($this{rbnflg} = $T);
@@ -9425,8 +9994,6 @@ Once we have drawn all the features for the current group in the for loop, we ou
 <<generating annotation ps code for current GFF-group>>=
 @@rflst = ($glst, $nlst, $slst, $qlst);
 #
-$this{so} = $glst->[$_counter][$_ori];
-$this{se} = $glst->[$_counter][$_end];
 ($this{strnd},undef) = split //o, $str, 2;
 # {group_color} {group_shape} {show_group_limits}
 $this{col} = &get_var_value('group_color',\@rflst);
@@ -9442,7 +10009,7 @@ $this{lbl} = $this{lbl_flg}
              : "_f"; 
 #
 print STDOUT "\/$this{shape} $this{grid_flg} $this{col} $this{lbl} ".
-             "$this{so} $this{se} ($this{strnd}) grp\n";
+             "$this{go} $this{ge} ($this{strnd}) grp\n";
 #
 @
 
@@ -9515,13 +10082,10 @@ for (my $a = 0; $a <= $#{ $orf }; $a++) {
                 $elst = \@{ $glst->[$_element][$d] };
                 &show_element($elst) || next; # feature:{hide}
                 <<getting current alignment feature coords>>
-                ( &check_seqlim($this{xo},$this{xe},
-                                $vaf->{_x_start},$vaf->{_x_end}) &&
-                  &check_seqlim($this{yo},$this{ye},
-                                $vaf->{_y_start},$vaf->{_y_end}) ) && do {
+                $this{aflag} && do {
                     <<strand correction for alignment feature coords>>
                     <<generating alignment ps code for current aln>>
-                }; # check_nuclim
+                }; # check_nuclim aln
             }; # for $d 
         }; # for $c
     }; # for $b
@@ -9542,6 +10106,10 @@ if ($vaf->{_swap_aln}) {
     $this{yo} = $elst->[$_ftnori];
     $this{ye} = $elst->[$_ftnend];
 };
+$this{aflag} = ( &check_seqlim($this{xo},$this{xe},
+                              $vaf->{_x_start},$vaf->{_x_end}) &&
+                &check_seqlim($this{yo},$this{ye},
+                              $vaf->{_y_start},$vaf->{_y_end}) );
 @ 
 
 We must swap coords for reverse strand features in order to display alignments properly.
@@ -9600,6 +10168,9 @@ beginmatches
         &ps_plot_ribbons($vlr->{_x_sequence_name},$T);
         &ps_plot_outlines($vlr->{_x_sequence_name},$T);
     }; # show_ribbons && _plot_x_sequence
+    ($vlr->{show_percent_box_grid} && !$vlr->{show_grid}) && do {
+        print STDOUT "\%\npvtick\n"; 
+    }; # show_percent_box_grid
     $vlr->{_plot_aln} && do {
         &ps_plot_pctaln($vlr->{_alignment_name});
     }; # _plot_aln
@@ -9733,16 +10304,26 @@ If we have to look if a variable is set at any of the GFF elements level (say he
 sub get_var_value() {
     my ($name, $refs) = @_;
     my ($out,$v);
+# print STDERR ("#"x40)."\n";
     foreach $v (qw/ FEATURE GROUP STRAND SOURCE SEQUENCE /) {
         defined($Defaults{$v}{$name}) && ($out = $Defaults{$v}{$name});
+# print STDERR "### GET VAR VALUE: $v ($name) : ".
+#              (defined($Defaults{$v}{$name})?$Defaults{$v}{$name}:"undef")."\n";
     }; # foreach
     foreach $v (@$refs) {
         defined($v->[$_prop]{$name}) && ($out = $v->[$_prop]{$name});
+# print STDERR "### GET VAR VALUE: $v ($name) : ".
+#              (defined($v->[$_prop]{$name})?$v->[$_prop]{$name}:"undef")."\n";
     }; # foreach
     (defined($Vars{LAYOUT}{$name}) && 
      ( ! defined($Defaults{LAYOUT}{$name}) ||
        $Vars{LAYOUT}{$name} ne $Defaults{LAYOUT}{$name})) &&
          ($out = $Vars{LAYOUT}{$name});
+# print STDERR "### GET VAR VALUE: Vars{LAYOUT} ($name) : ".
+#              (defined($Vars{LAYOUT}{$name})?$Vars{LAYOUT}{$name}:"undef")."\n".
+#              "### GET VAR VALUE: Defaults{LAYOUT} ($name) : ".
+#              (defined($Defaults{LAYOUT}{$name})?$Defaults{LAYOUT}{$name}:"undef")."\n";
+# print STDERR "### GET VAR VALUE: $name = ".(defined($out)?$out:"undef")."\n";
     return $out;
 } # get_var_value
 @ %def &get_var_value
@@ -9864,7 +10445,8 @@ DoEnd
 pgsave restore
 showpage
 %
-%%PageEND: 1 1
+% Page: 1 1
+%%PageTrailer
 %
 +++CLOSE+++
 } # ps_close_page
@@ -9928,6 +10510,8 @@ The variables and functions defined in this section are appended directly to the
 /l  { lineto  } B              %-%
 /rl { rlineto } B              %-%
 /K  { stroke  } B              %-%
+%-% other
+/ie { ifelse } B               %-%
 %-% styles
 /cmyk { setcmykcolor } B       %-% we are going to use only CMYK colors
 /slw  { setlinewidth } B       %-%
@@ -10173,7 +10757,7 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
     0        %->   value returned is set to zero
   } {        %-> else
     clim     %->   return value within interval
-  } ifelse   %->
+  } ie       %->
 } B          %:% (value == 0) OR (min_value <= value <= max_value)
 @ %def clim zlim
 
@@ -10240,12 +10824,14 @@ $
 } B          %:%
 @ %def sfnt
 
+We first defined \textbf{X} as the default char that was used by [[glblw]] function to estimate the drawing length of a string which have n chars (one of the parameters to be passed to the function). When monospaced fonts were used, the choose of the letter did not matter as much (i.e., all chars are 6 points wide using Courier-Bold scaled at 10 points). But, when using other fonts, this could be critical to set a more or less acurate estimate of the length for the required string. We found that another capital letter, in case we would also take care of char height, should be used instead of \textbf{X}. The average length for chars using Helvetica-Bold scaled at 10 points was 5.68696 (\textbf{X} is 6.66992 points wide for that font settings), and the closer candidates were \textbf{J} (5.56152), \textbf{L} (6.1084) and \textbf{Z} (6.1084). We finally chose \textbf{Z}, as it is the most square-like one (or in another words, fills the char grid corners like \textbf{X}). We save almost 0.5 points for each char in the string, it may seems a small quantity but for a 10 chars-long string we are saving 5 points, almost the length of one extra char.
+
 <<PSFunctions - glblw>>=
 %-% glblw returns the length in points of a string having n chars
 /glblw {               %-> char_length {font_size font}  glblw
   %-% vflg { (glblw) msg } if
   sfnt                 %-> char_length font_def
-  (X) stringwidth pop  %-> getting length for a single char
+  (Z) stringwidth pop  %-> getting length for a single char
   mul                  %->   at the given font and fontsize
 } B                    %:%
 @ %def glblw
@@ -10288,8 +10874,8 @@ $
 } B             %:%
 @ %def ctshw
 
-% /ctshw { vflg { (ctshw) msg } if 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfnt stringwidth pop R 2 div H { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse rtshw } B
-% /ltshw { vflg { (ltshw) msg } if 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfnt stringwidth pop R H { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse rtshw } B
+% /ctshw { vflg { (ctshw) msg } if 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfnt stringwidth pop R 2 div H { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ie     rtshw } B
+% /ltshw { vflg { (ltshw) msg } if 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfnt stringwidth pop R H { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ie     rtshw } B
 
 <<PSFunctions - ltshw>>=
 %-% ltshw shows strings from (x,y) coords to left 
@@ -10351,13 +10937,13 @@ $
         /ury X  %->
       } {       %->
         pop     %->
-      } ifelse  %->
+      } ie      %->
       dup       %->
       lly lt {  %->
         /lly X  %->
       } {       %->
         pop     %->
-      } ifelse  %->
+      } ie      %->
     } forall    %->
     ury    	    %->
   end           %->
@@ -10410,8 +10996,8 @@ $
           hs 2 div  %->
         } {         %->
           0         %->
-        } ifelse    %->
-      } ifelse      %->
+        } ie        %->
+      } ie          %->
       neg           %->
       v (tv) eq {   %->
         vs          %->
@@ -10420,8 +11006,8 @@ $
           vs 2 div  %->
         } {         %->
           0         %->
-        } ifelse    %->
-      } ifelse      %->
+        } ie        %->
+      } ie          %->
       neg           %->
       m             %->
       lbl show      %->
@@ -10429,6 +11015,238 @@ $
   R                 %->
 } B                 %:%
 @ %def ttshw
+
+
+\subsubsctn{Color gradient functions}
+\label{sec:psfunctiongradients}
+
+<<PSFunctions - gradient>>=
+%-% In case that a single color was given, we must provide
+%-% the background color to set the starting color
+%-% score color [ color [ color [ color ] ] ] colornum gradient
+/gradient {           %-> sco col..col nc
+  dup 1 eq {          %-> sco col nc (nc)
+    bg 9 4 roll       %-> sco bg col nc=1
+    1 add             %-> sco bg col nc=2
+  } if                %-> sco col..col nc
+  dup dup 1 sub exch  %-> sco col..col nc nc ng=nc-1
+  4 mul 3 add 1 roll  %-> ng sco col..col nc
+  4 mul array         %-> ng sco col..col (nc array)
+  astore              %-> ng sco array
+  exch                %-> ng array sco
+  dup dup             %-> ng array sco sco sco
+  0 eq exch 1 eq or { %-> ng array sco (sco==1 (sco==0) or)
+    3 -1 roll mul     %-> array (sco ng)
+    4 mul cvi         %-> --> set getinterval index to 0 or 4
+    4 getinterval     %-> [ ary_sco ary_sco+1 ary_sco+2 ary_sco+3 ]
+    aload pop         %-> c_sco m_sco y_sco k_sco
+  } {                 %-> ng array sco
+    3 -1 roll         %-> array sco ng
+    2 copy            %-> array sco ng sco ng
+    5 2 roll          %-> sco ng array ng sco
+    mul               %-> sco ng array ns
+    floor dup         %-> sco ng array nsi nsi
+    4 1 roll          %-> sco nsi ng array nsi 
+    4 mul cvi         %-> --> set getinterval index to nsi * 4
+    8 getinterval     %-> sco nsi ng [ c_l m_l y_l k_l c_u m_u y_u k_u ]
+    aload pop         %-> sco nsi ng c_l m_l y_l k_l c_u m_u y_u k_u
+    9 dict begin      %-> sco nsi ng c_l m_l y_l k_l c_u m_u y_u k_u
+      /_ku X          %->
+      /_yu X          %->
+      /_mu X          %->
+      /_cu X          %->
+      /_kd X          %->
+      /_yd X          %->
+      /_md X          %->
+      /_cd X          %-> sco nsi ng
+      1 exch div      %-> sco nsi nf
+      3 -1 roll       %-> nsi nf sco
+      exch div        %-> nsi (sco/nf)
+      exch sub        %-> (sco/nf)-nsi
+      /_sc X          %-> 
+      _cd _cu _cd sub _sc mul add %-> c_sco
+      _md _mu _md sub _sc mul add %-> c_sco m_sco
+      _yd _yu _yd sub _sc mul add %-> c_sco m_sco y_sco
+      _kd _ku _kd sub _sc mul add %-> c_sco m_sco y_sco k_sco
+    end               %-> c_sco m_sco y_sco k_sco
+  } ie                %-> c_sco m_sco y_sco k_sco
+} B                   %:%
+@ %def gradient
+
+<<HIDE:>>=
+    8 copy            %->
+    4 { pop } repeat  %-> sc nsi c_l m_l y_l k_l c_u m_u y_u k_u c_l m_l y_l k_l
+    14 4 roll         %-> c m y k sc nsi c_l m_l y_l k_l c_u m_u y_u k_u
+    4 1 roll          %-> c m y k sc nsi c_l m_l y_l k_l k_u c_u m_u y_u
+    5 1 roll          %-> c m y k sc nsi c_l m_l y_l y_u k_l k_u c_u m_u
+    6 1 roll          %-> c m y k sc nsi c_l m_l m_u y_l y_u k_l k_u c_u
+    7 1 roll          %-> c m y k sc nsi c_l c_u m_l m_u y_l y_u k_l k_u
+    sub 7 1 roll      %-> c m y k sc nsi k' c_l c_u m_l m_u y_l y_u
+    sub 5 1 roll      %-> c m y k sc nsi k' y' c_l c_u m_l m_u
+    sub 3 1 roll      %-> c m y k sc nsi k' y' m' c_l c_u
+    sub               %-> c m y k sc nsi k' y' m' c'
+    6 -2 roll         %-> c m y k k' y' m' c' sc nsi
+    dup dup 0 gt {    %-> c m y k k' y' m' c' sc nsi nsi (nsi>0)
+      1 exch div      %-> 
+	} if              %-> c m y k k' y' m' c' sc nsi nsi'
+    exch 1 add        %-> c m y k k' y' m' c' sc nsi' nsii
+    1 exch div        %-> c m y k k' y' m' c' sc nsi' nsii'
+    2 copy pop        %-> c m y k k' y' m' c' sc nsi sc
+@
+
+<<PSFunctions - rainbow>>=
+%-% This function is taking score from perl code as CMYKFLOAT
+%-% sco rainbow
+/rainbow {                                %-> sco'
+  dup (-) ne {                            %-> sco (sco)
+    dup 0.1 le {                          %-> sco (sco)
+      0.2 div 0.5 add                     %-> sco
+      1                                   %-> s 1
+      0                                   %-> s 1 0
+      0                                   %-> s 1 0 0
+                                          %-> setting violet to blue gradation
+    } {                                   %-> sco'
+      dup 0.4 le {                        %-> sco (sco)
+        1                                 %-> sco 1
+        1 3 -1 roll 0.1 sub 0.3 div sub   %-> sco 1 1 -> 1 (1 sco) 
+        0                                 %-> 1 s 0
+        0                                 %-> 1 s 0 0
+                                          %-> setting blue to green gradation
+      } {                                 %-> sco'
+        dup 0.6 le {                      %-> sco (sco)
+          1                               %-> sco 1
+          0                               %-> sco 1 0
+          3 -1 roll 0.4 sub 0.2 div       %-> 1 0 sco
+          0                               %-> 1 0 s 0
+                                          %-> setting green to yellow gradation
+        } {                               %-> sco'
+          dup 0.8 le {                    %-> sco (sco)
+            1 exch 0.6 sub 0.2 div sub    %-> sco 1 -> (1 sco)
+            0                             %-> s 0
+            1                             %-> s 0 1
+            0                             %-> s 0 1 0
+                                          %-> setting yellow to orange gradation
+          } {                             %-> sco'
+            0                             %-> sco 0
+            exch 0.8 sub 0.2 div          %-> 0 sco
+            1                             %-> 0 s 1
+            0                             %-> 0 s 1 0
+                                          %-> setting orange to red gradation
+          } ie                            %->
+        } ie                              %->
+      } ie                                %->
+    } ie                                  %->
+  } {                                     %-> sco'
+    pop                                   %-> cmyk must be executed by the
+  } ie                                    %-> corresponding calling function
+} B                                       %:%
+@ %def rainbow
+
+
+\subsubsctn{Color pattern fill}
+
+\begin{figure}[!ht]
+\hspace{-1cm}\fbox{
+  \includegraphics[bb= 15 80 555 490, clip, width=19cm]
+                  {./psfigures/color_pattern_fullsize.ps}
+} %fbox
+\begin{center}
+\caption[Color patterns emulating color blending and [[color_merge_factor]].]{\label{fig:PScolpatfull} In this example we can see how different values of [[color_merge_factor]] affect the way the pseudo color blending effect will be displayed. Complementary patterns were used to emulate the color mix when horizontal and vertical ribbons are crossing each other. Seven colors were used in the example: red, green and blue from the RGB color space, and cyan, magenta, yellow and black from the CMYK color space.}
+\end{center}
+\end{figure}
+
+The following commands are only included to the {\ps} output when [[ribbon_color_merge]] is switched on. Figure~\ref{fig:PScolpatfull} exemplifies how the color blend looks like for different values of [[color_merge_factor]]. We provided such variable to allow user to enhance blendings on scaled figures, as the pattern used is scaled accordingly width the figure. Figure~\ref{fig:PScolpathalf} shows what happens to the figure~\ref{fig:PScolpatfull} color blends if scale is reduced by factor two. Also this is a device dependant feature, as higher resolution devices will push the color blending to lower values of [[color_merge_factor]].
+To visualize the color patterns with {\gv} when [[antialias]] is on, the following options must be included to the \textbf{Antialias Device} box in the \textbf{Ghostscript Options} panel from the \textbf{STATE} menu: [[-dGraphicsAlphaBits=1 -dTextAlphaBits=4]] (this means disabling graphical features antialiasing but keeping antialiasing on for drawing fonts).
+
+<<POSTSCRIPT Ribbon Color Pattern>>=
+%-% Functions to pseudo color-blending for feature projected ribbons.
+%-% Those functions depend on PS level 2 commands that are not 
+%-% backward compatible with PS level 1, user must take care of this.
+/PS PG 2 mul D %:% setting side size for a square pattern (so PS ~ Pattern Size)
+%-%
+<<POSTSCRIPT Ribbon Color Horizontal Pattern>>
+%-%
+<<POSTSCRIPT Ribbon Color Vertical Pattern>>
+%-%
+[ /Pattern /DeviceCMYK ] %-> specifying that patterns will use CMYK colors
+           setcolorspace %:% (so CMYK, four values, must be passed to setcolor)
+%-%
+/rbxcol {        %-> color rbxcol
+  %-% vflg { (rbxcol) msg } if
+  H {            %-> checking whether horizontal or vertical pattern to be shown
+    HP           %-> putting horizontal pattern into the stack: color Hpat
+  } {            %->
+    VP           %-> putting vertical pattern into the stack:   color Vpat
+  } ie           %->
+  setcolor       %-> setting coloured pattern instead of a cmyk solid color
+} B              %:%
+@ %def PS rbxcol
+
+\begin{figure}[!ht]
+\hspace{-1cm}\fbox{
+  \includegraphics[bb= 15 80 555 490, clip, width=19cm]
+                  {./psfigures/color_pattern_halfsize.ps}
+} %fbox
+\begin{center}
+\caption[Color patterns being scaled down to half size.]{\label{fig:PScolpathalf} Scaling down (half size) the patterns shown in figure~\ref{fig:PScolpatfull}. We can see how the color blend has been lost for [[color_merge_factor]] values lower than \textbf{0.2} (this is device dependant).}
+\end{center}
+\end{figure}
+
+<<POSTSCRIPT Ribbon Color Horizontal Pattern>>=
+%-% Horizontal pattern
+%-%
+  <<               %-> Begin prototype pattern dictionary
+    /PaintType   2 %-> Required: 2 - colored pattern
+    /PatternType 1 %-> Required: must be "1"
+    /TilingType  1 %-> Required: 1 - constant spacing
+    /BBox [ PG neg PG neg  PG PG ] %-> Required: pattern cell bounding box
+    /XStep PS      %-> Required: horizontal spacing between pattern cells
+    /YStep PS      %-> Required: vertical spacing between pattern cells
+    /PaintProc {   %-> Required: PS procedure for painting the pattern cell
+      pop          %-> pop pattern dictionary
+      PG slw           %-> Current pattern looks like:
+      0 setlinecap     %->    ############
+      PG 2 div     0 m %->    #     ######
+           0 PG     rl %->    #     ######
+                     K %->    #     ######
+      PG 2 div neg 0 m %->    ######     #
+           0 PG neg rl %->    ######     #
+                     K %->    ######     #
+    }                  %->    ############
+  >>               %-> End prototype pattern dictionary
+matrix             %-> identity matrix
+makepattern        %-> instantiate the pattern
+/HP X              %:% Setting the horizontal pattern on the system dict
+@ %def HP
+
+As we can see from the pattern ASCII simulations on the previous and next code chunks, they are complementary, so the region one is filling is empty on the other one and viceversa. This way we can do the trick of the pseudo merging colors for the annotation projections ribbons.
+
+<<POSTSCRIPT Ribbon Color Vertical Pattern>>=
+%-% Vertical pattern
+%-%
+  <<               %-> Begin prototype pattern dictionary
+    /PaintType   2 %-> Required: 2 - colored pattern
+    /PatternType 1 %-> Required: must be "1"
+    /TilingType  1 %-> Required: 1 - constant spacing
+    /BBox [ PG neg PG neg PG PG ] %-> Required: pattern cell bounding box
+    /XStep PS      %-> Required: horizontal spacing between pattern cells
+    /YStep PS      %-> Required: vertical spacing between pattern cells
+    /PaintProc {   %-> Required: PS procedure for painting the pattern cell
+      pop          %-> pop pattern dictionary
+      PG slw           %-> Current pattern looks like:
+      0 setlinecap     %->    ############
+      PG 2 div neg 0 m %->    ######     #
+           0 PG     rl %->    ######     #
+                     K %->    ######     #
+      PG 2 div     0 m %->    #     ######
+           0 PG neg rl %->    #     ######
+                     K %->    #     ######
+    }                  %->    ############
+  >>               %-> End prototype pattern dictionary
+matrix             %-> identity matrix
+makepattern        %-> instantiate the pattern
+/VP X              %:% Setting the vertical pattern on the system dict
+@ %def VP
 
 
 \subsctn{Page layout}
@@ -10439,6 +11257,7 @@ In this section we are going to compute in the {\ps} code, the relative amount o
 %%BeginProcSet: Page_layout 1.0 0
 %
 <<POSTSCRIPT layout: usable page area>>
+<<POSTSCRIPT layout: label string alignment for ttshw>>
 <<POSTSCRIPT layout: feature labels>>
 <<POSTSCRIPT layout: group labels>>
 <<POSTSCRIPT layout: aplot box area>>
@@ -10462,7 +11281,7 @@ tflg { (%%% Computing page layout %%%) msg } if
   /MB MB OSB max D  %-%
   /ML ML OSL max D  %-%
   /MR MR OSR max D  %:%
-%->% } ifelse 
+%->% } ie     
 %-%
 %-% defining pagelimits
 /FL {            %-> FL -> usable_width usable_height
@@ -10487,7 +11306,7 @@ tflg { (%%% Computing page layout %%%) msg } if
     pop      %-> page_height
     MT sub   %-> page_height - margin_top
   D          %:%
-%->% } ifelse 
+%->% } ie     
 @ %def FL FXO FYO
 % tflg { %-%
 %   mark (Dpage:) Dpage ( PPC:) PPC ( ZM:) ZM (*>*>*>) msc %-%
@@ -10498,36 +11317,112 @@ tflg { (%%% Computing page layout %%%) msg } if
 %   mark (FL:) FL ( FXO:) FXO ( FYO:) FYO     (*>*>*>) msc %-%
 % } if %:%
 
+We also need to know how much ``vertical'' space is required for feature and group labels. The label text alignment is pre-calculated too. In both cases, the height and the alignment, we depend on the corresponding angle definition for such labels.
 
-We also need to know how much space is required for feature and group labels.
+% string_width * abs(sin alpha) + font_size * cos alpha
 
 <<POSTSCRIPT layout: feature labels>>=
-/FTXh      %-% X-sequence feature labels height
-  FTz FTp add  %-%
-  %-% FTXw FTXa
-D          %-%
-/FTYh      %-% Y-sequence feature labels height
-  FTz FTp add  %-%
-  %-% FTYw FTYa
-D          %:%
-@ %def FTXh FTYh
+%-%
+/FTXh                   %-% X-sequence feature labels height
+  FTz  FTXa cos mul     %-%
+  FTXw FTXa sin abs mul %-%
+  add                   %-%
+  FTp add               %-%
+D                       %-%
+%-%
+/FTXt {                 %-% X-sequence feature labels text alignment
+  FTXa getYt            %-% (vertical_align)
+  FTXa getXt            %-% (vertical_align) (horizontal_align)
+} D                     %-%
+%-%
+/FTYh                   %-% Y-sequence feature labels height
+  FTz  FTYa cos mul     %-%
+  FTYw FTYa sin abs mul %-%
+  add                   %-%
+  FTp add               %-%
+D                       %-%
+%-%
+/FTYt {                 %-% Y-sequence feature labels text alignment
+  FTYa getYt            %-% (vertical_align)
+  FTYa getXt            %-% (vertical_align) (horizontal_align)
+} D                     %:%
+@ %def FTXh FTXt FTYh FTYt
 
 
 <<POSTSCRIPT layout: group labels>>=
-/GPXh          %-%
-  GPz GPp add  %-%
-               %-% GPXw GPXa
-D              %-% group labels height
-/GPYh          %-%
-  GPz GPp add  %-%
-               %-% GPYw GPYa
-D              %:% group labels height
-@ %def GPXh GPYh
+%-%
+/GPXh                   %-% X-sequence group labels height
+  GPz  GPXa cos mul     %-%
+  GPXw GPXa sin abs mul %-%
+  add                   %-%
+  GPp add               %-%
+D                       %-%
+%-%
+/GPXt {                 %-% X-sequence group labels text alignment
+  GPXa getYt            %-% (vertical_align)
+  GPXa getXt            %-% (vertical_align) (horizontal_align)
+} D                     %-%
+%-%
+/GPYh                   %-% Y-sequence group labels height
+  GPz  GPYa cos mul     %-%
+  GPYw GPYa sin abs mul %-%
+  add                   %-%
+  GPp add               %-%
+D                       %-%
+%-%
+/GPYt {                 %-% Y-sequence group labels text alignment
+  GPYa getYt            %-% (vertical_align)
+  GPYa getXt            %-% (vertical_align) (horizontal_align)
+} D                     %:%
+@ %def GPXh GPXt GPYh GPYt
 
+\begin{figure}[!ht]
+\begin{center}
+\fbox{%
+ \includegraphics[bb= 25 465 560 760,clip,width=\linewidth]
+                 {psfigures/labelangle.ps}
+}%fbox
+
+\parbox{0.85\linewidth}{\caption[Group and feature labels string alignment depends on angle.]{\label{fig:labelsaln} Different angles were provided to the functions [[getXt]] and [[getYt]]. Their output correspond to the horizontal and vertical alignment of the GFF-features and GFF-groups labels appearing on the annotation axes. The upper two rows show examples for horizontal axes labels while the lower one visualizes same angles for vertical axes labels. There are only two constraints, the string has to be attached at a fixed coordinate pair, represented on the above plots as a blue dot, and we cannot print the labels below the main reference line, the grey axes. The bounding box for the label string is delimited as a green dotted line, the string baseline is shown as a red straight line underlining the label and, finally, the insertion point (used by the {\ps} [[show]] function) is shown as a red dot at the beggining of the label.}}
+\end{center}
+\end{figure}
+
+
+We need to set up the vertical and horizontal alignment for the strings that define group and feature labels, and that property depends on the angle, if we have to stick to an insertion point. Figure~\ref{fig:labelsaln} shows the values one can obtain for a given angle when it is passed to [[getXt]] and [[getYt]] functions.
+
+<<POSTSCRIPT layout: label string alignment for ttshw>>=
+%-%
+/getXt {          %-> angle getXt
+  dup sin 0 eq {  %-> angle (sin angle)==0
+    pop (ch)      %->   (horizontal_align)
+  } {             %->
+    90 sub        %-> angle'
+    cos 0 ge {    %-> (cos angle')>=0
+      (lh)        %->   (horizontal_align)
+    } {           %->
+      (rh)        %->   (horizontal_align)
+    } ie          %->
+  } ie            %-> (horizontal_align)
+} B               %->
+%-%
+/getYt {          %-> angle getYt
+  dup cos 0 eq {  %-> angle (cos angle)==0
+    pop (cv)      %->   (vertical_align)
+  } {             %->
+    90 sub        %-> angle'
+    sin 0 ge {    %-> (sin angle')>=0
+      (tv)        %->   (vertical_align)
+    } {	          %->
+      (bv)        %->   (vertical_align)
+    } ie          %->
+  } ie            %-> (vertical_align)
+} B               %:%
+@ %def getXt getYt
 
 After that we look how much width the alignment plot may have:
 
 <<POSTSCRIPT layout: aplot box area>>=
+%-%
 /ATX             %-> x-sequence total annotation width
   GPXh GPp add   %-%  add X-seq group label height and spacer
   FTXh FTp add   %-%  add X-seq feature label height and spacer
@@ -10535,6 +11430,7 @@ After that we look how much width the alignment plot may have:
   DRh add        %-%  add source tier height
   Blw add        %-%  correction factor for aplot box outline line-width
 D                %-%
+%-%
 /ATY             %-> y-sequence total annotation width
   GPYh GPp add   %-%  add Y-seq group label height and spacer
   FTYh FTp add   %-%  add Y-seq feature label height and spacer
@@ -10545,6 +11441,7 @@ D                %:%
 @ %def ATX ATY
 
 <<POSTSCRIPT layout: aplot box area>>=
+%-%
 /AXL             %-> left starting position for aplot
   YSLz YSLp add  %-%  add Y-sequence label height and spacer
   ATY add        %-%  add annotation width 
@@ -10570,6 +11467,7 @@ D                %-%
 And we have to calculate how much height the alignment plot has:
 
 <<POSTSCRIPT layout: aplot box area>>=
+%-%
 /AYT             %-> top starting position for aplot-box
   TTLz TTLp add  %-%  add title area  
   TTlz TTlp add  %-% 
@@ -10590,6 +11488,7 @@ D                %-%
 We re-scale the X and Y axes for the alignment plot:
 
 <<POSTSCRIPT layout: aplot box area>>=
+%-%
 XYR 0 le {  %-%
   /XYR 1 D  %-% reseting XYR if not defined as 1:1 x/y-ratio
 } if        %-%
@@ -10608,7 +11507,7 @@ axesb not {      %-%
     /AX          %-%
       AX XYR mul %-% we set AX = AX / (1 / XYR) = AX * XYR
     D            %-%
-  } ifelse       %-%
+  } ie           %-%
 } if             %:%
 @
 % tflg { mark (XYR:) XYR ( AX:) AX ( AY:) AY (*>*>*>) msc } if
@@ -10624,10 +11523,10 @@ Here, we set up all the Y coords for the percent box:
       KLh     %-%   when tickmark labels are shown, 
     } {       %-%        then keep enough room for them
       KHt     %-%   else just leave space for tick lines.
-    } ifelse  %-% 
+    } ie      %-% 
   } {         %-% else we only keep the spacer length 
     KLp       %-%   (spacer betwen tickmarks and box of course)
-  } ifelse    %-%
+  } ie        %-%
   add         %-% 
 D             %:%
 @ %def PYT
@@ -10642,10 +11541,10 @@ D             %:%
         KLh     %-%    keep full tickmark space
       } {       %-%   else
         KHt     %-%    keep only tickmark lines height
-      } ifelse  %-%  
+      } ie      %-%  
     } {         %-%  else
       KLp       %-%    keep only tickmark/next-box spacing
-    } ifelse    %-%  
+    } ie        %-%  
     sub         %-% 
   } if          %-%
   Qb {          %-% if show_extra_box
@@ -10655,7 +11554,7 @@ D             %:%
         KLp sub %-%    we have to remove spacer height (there is no next box) 
       } {       %-%   else
         KHt     %-%    keep only tickmark lines height
-      } ifelse  %-% 
+      } ie      %-% 
     } if        %-%
     sub         %-%
   } if          %-% so we finally get the remaining bottom free space
@@ -10675,10 +11574,10 @@ D               %:%
       clim       %-%     returning a value within the interval
     } {          %-%   else !defined
       2.0 cm     %-%     default value is defined as 2.0 cm
-    } ifelse     %-%  
+    } ie         %-%  
   } {            %-%   else !show
     0            %-%     setting to zero (we do not need later)
-  } ifelse       %-%  
+  } ie           %-%  
 D                %-%
 %-%
 /PYB          %-> setting percent-box bottom coord
@@ -10701,10 +11600,10 @@ Now, we focus on the Y coords for the extra box:
         KLh     %-%     keep full tickmark space
       } {       %-%   else 
         KHt     %-%     keep only tickmark lines height
-      } ifelse  %-%
+      } ie      %-%
     } {         %-%  else
       KLp       %-%    keep only tickmark/next-box spacing
-    } ifelse    %-%
+    } ie        %-%
     add         %-%
   } if          %-%
 D               %-%
@@ -10723,7 +11622,7 @@ D               %-%
     } if       %-%
   } {          %-%   else !show
     0          %-%     setting to zero (we do not need later)
-  } ifelse     %-%
+  } ie         %-%
 D              %-%
 %-%
 /QYB          %-> setting extra-box bottom coord
@@ -10777,6 +11676,7 @@ tflg { (%%% Setting aplot dictionary %%%) msg } if
   <<PSFunctions - common tick functions>>
   <<PSFunctions - htick>>
   <<PSFunctions - vtick>>
+  <<PSFunctions - pvtick>>
   <<PSFunctions - nucltick>>
   <<POSTSCRIPT shapes definition>>
   <<POSTSCRIPT main functions>>
@@ -10814,7 +11714,7 @@ end % aplotdict
     Xscm     %->   then scale X-sequence
   } {        %->
     Yscm     %->   else scale Y-sequence
-  } ifelse   %->
+  } ie       %->
 } B          %:%
 %-% getting current scale factor, return the inverse scale factor
 %-%   (thus avoiding division by zero errors)
@@ -10855,26 +11755,14 @@ end % aplotdict
   S              %->
     4 -2 roll    %-> r s X Y
     m            %->         moving corner to its origin
-    0 0 0 0      %-> r s 0 0 0 0
-    6 4 roll     %-> 0 0 0 0 r s
-    dup neg      %-> 0 0 0 0 r s -s
-    5 1 roll     %-> 0 0 -s 0 0 r s
-    6 1 roll     %-> 0 s 0 -s 0 0 r
-    dup neg      %-> 0 s 0 -s 0 0 r -r
-    4 1 roll     %-> 0 s 0 -s -r 0 0 r
-    exch         %-> 0 s 0 -s -r 0 r 0
+    0 0          %-> r s 0 0
+    4 1 roll     %-> 0 r s 0
     2 {          %->
-      rl         %-> going out from (X,Y)
       S          %->
-        bg cmyk  %->
-        Blw 6 div slw %->
-        K        %->
-      R          %->
-      rl         %-> returning to (X,Y)
-      S          %->
+        rl       %-> going out from (X,Y)
         fg cmyk  %->
         Blw slw  %->
-        [1 3] 0 setdash %->
+        [Blw 3] 0 setdash %-> (now setting dot width same as line width)
         K        %->
       R          %->
     } repeat     %->
@@ -10890,10 +11778,10 @@ end % aplotdict
   3 1 roll                %-> LLx LLy URx URy LLx URy LLy URx
   exch                    %-> LLx LLy URx URy LLx URy URx LLy
   %-% drawing corner marks
-  ATX     ATY     corner  %-> corner on URx LLy
-  ATX neg ATY neg corner  %-> corner on LLx URy
-  ATX     ATY neg corner  %-> corner on URx URy
-  ATX neg ATY     corner  %-> corner on LLx LLy
+  ATX neg ATY     corner  %-> corner on URx LLy
+  ATX     ATY neg corner  %-> corner on LLx URy
+  ATX     ATY     corner  %-> corner on URx URy
+  ATX neg ATY neg corner  %-> corner on LLx LLy
 } D                       %:%
 @ %def zoomtk
 
@@ -10949,14 +11837,18 @@ end % aplotdict
           FTXa    %-> string 'X-seq feature label angle'
         } {       %->
           FTYa    %-> string 'Y-seq feature label angle'
-        } ifelse  %->
+        } ie      %->
         s_m       %-> string angle x
         DRFTlh    %-> string angle x y
         4 -2 roll %-> x y string angle
         exch      %-> x y angle string
-        (bv) (ch) %->
-        FTf       %->
-        fg        %->
+        H {       %->
+          FTXt    %-> x y angle string X_v_align X_h_align
+        } {       %->
+          FTYt    %-> x y angle string Y_v_align Y_h_align 
+        } ie      %-> %% (bv) (ch)
+        FTf       %-> x y angle string v_align h_align font_size font
+        fg        %-> x y angle string v_align h_align font_size font color
         ttshw     %->
       } if        %-> /shape color c_flg w_flg
       %-% do shape
@@ -10969,7 +11861,7 @@ end % aplotdict
           DRhb add %-% plus min feat height (so that, min-scores are 'visible')
         } {        %-% else height is not score dependent
           DRh      %-> 
-        } ifelse   %-> /shape color c_flg y-scale-factor
+        } ie       %-> /shape color c_flg y-scale-factor
         /f_y X    %-% get vertical   scale-factor
         f_x       %-% set horizontal scale-factor
         f_y       %-% set vertical   scale-factor
@@ -11010,12 +11902,12 @@ end % aplotdict
 /rbx {        %-> ori end color  rbx
   %-% vflg { (rbx) msg } if
   S           %->
-    cmyk      %-> ori end
+    rbxcol    %-> ori end
     H {       %->
       YH neg    %-> if horizontal (X-seq) then ribbon height is box height
     } {       %->
       AX neg    %-> if vertical (Y-seq) then ribbon height is box width
-    } ifelse  %->
+    } ie      %->
     3 1 roll  %-> h1 ori end
     Hscm      %-> h1 ori end!
     3 1 roll  %-> end! h1 ori
@@ -11036,7 +11928,7 @@ end % aplotdict
       YH neg  %-> if horizontal (X-seq) then ribbon height is box height
     } {       %->
       AX neg  %-> if vertical (Y-seq) then ribbon height is box width
-    } ifelse  %->
+    } ie      %->
     0         %-> pos! h1 h0
     3 -1 roll %-> h1 h0 pos!
     dup       %-> h1 h0 pos! pos!
@@ -11088,12 +11980,16 @@ end % aplotdict
           GPXa    %-> string 'X-seq group label angle'
         } {       %->
           GPYa    %-> string 'Y-seq group label angle'
-        } ifelse  %->
+        } ie      %->
         s_m       %-> string angle x
         DRGPlh    %-> string angle x y
         4 -2 roll %-> x y string angle
         exch      %-> x y angle string
-        (bv) (ch) %->
+        H {       %->
+          GPXt    %-> x y angle string X_v_align X_h_align
+        } {       %->
+          GPYt    %-> x y angle string Y_v_align Y_h_align 
+        } ie      %-> %% (bv) (ch)
         GPf       %->
         fg        %->
         ttshw     %->
@@ -11118,7 +12014,7 @@ end % aplotdict
           -1  1 F        %-%    and mirror horizontal coords
         } {              %->
           s_o DRGPlnh T  %-% else translating to group starting point
-        } ifelse         %->
+        } ie             %->
         %-% giving length
         %-%  (shapes here are defined with relative displacements)
         f_x       %-> /shape len
@@ -11152,13 +12048,13 @@ end % aplotdict
     } {        %-> else lw = Alw
       pop      %->
       Alw slw  %-> 
-    } ifelse   %-> x0 y0 x1 y1 color score colorflg
+    } ie       %-> x0 y0 x1 y1 color score colorflg
     %-%		   
     {          %-> if scale_color calculate gradient color
       gradcol  %->    for current score
     } {        %-> else solid color for next stroked path
       pop      %->
-    } ifelse   %-> x0 y0 x1 y1 color
+    } ie       %-> x0 y0 x1 y1 color
       cmyk     %->
     Fm         %-> scaling x1 and y1 to nucleotide coords and moveto
     Fl         %-> scaling x0 and y0 to nucleotide coords and lineto
@@ -11249,6 +12145,10 @@ end % aplotdict
     pop        %-% removing mark     
   R            %->
 } B            %:%
+@ %def xtxt
+
+<<HIDE: PSFunctions - xtxt>>=
+%-%
 /kkdevaka {         %->
   S                 %->
     cmyk            %->
@@ -11278,8 +12178,8 @@ end % aplotdict
           hs 2 div  %->
         } {         %->
           0         %->
-        } ifelse    %->
-      } ifelse      %->
+        } ie        %->
+      } ie          %->
       neg           %->
       v (tv) eq {   %->
         vs          %->
@@ -11288,8 +12188,8 @@ end % aplotdict
           vs 2 div  %->
         } {         %->
           0         %->
-        } ifelse    %->
-      } ifelse      %->
+        } ie        %->
+      } ie          %->
       neg           %->
       m             %->
       lbl show      %->
@@ -11298,7 +12198,7 @@ end % aplotdict
     pop        %-% removing mark     
   R            %->
 } B            %:%
-@ %def xtxt
+@ %def
 
 
 We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be defined before using it).
@@ -11423,7 +12323,7 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
       mod         %-> so modulus can return another integer 
       ff div      %-> which we can use to recover the real modulus
     end           %-> of the original two decimal numbers
-  } ifelse        %->
+  } ie            %->
 } B               %-% returns the a/b modulus via the stack
 %-%
 %-%
@@ -11452,7 +12352,7 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
     } {        %-> else minor tickmark
       ldotted  %->
       KWn slw  %-> linewidth for minor tickmarks grid lines
-    } ifelse   %-> setting dotted line style
+    } ie       %-> setting dotted line style
     K          %-> stroke tickmark grid line
   R            %->
 } B            %-%
@@ -11465,7 +12365,7 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
       0 KHx neg  %-> horizontal axes
 	} {          %->
       KHx 0      %-> vertical axes
-    } ifelse     %->
+    } ie         %->
     rl           %-> make a line of major tickmark heigth
     KWx slw      %-> linewidth for major tickmarks
     fg cmyk      %-> 
@@ -11481,7 +12381,7 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
       0 KHn neg  %-> horizontal axes
 	} {          %->
       KHn 0      %-> vertical axes
-    } ifelse     %->
+    } ie         %->
     rl           %-> make a line of minor tickmark heigth
     KWn slw      %-> linewidth for minor tickmarks
     fg cmyk      %-> 
@@ -11517,17 +12417,17 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
     3 -1 roll     %-> string v-align bool
     ZM {          %->
       {           %-% if bool -> left
-        (rh)      %->   string v-align h-align
-        KHn neg   %->   string v-align h-align x
-      } {         %-% else -> rigth
         (lh)      %->   string v-align h-align
         KHn       %->   string v-align h-align x
-      } ifelse    %->
+      } {         %-% else -> right
+        (rh)      %->   string v-align h-align
+        KHn neg   %->   string v-align h-align x
+      } ie        %->
     } {           %->
       pop         %-% removing bool
       (ch)        %->   string v-align h-align
       0           %->   string v-align h-align x
-    } ifelse      %->
+    } ie          %->
     KHt neg       %-> string v-align h-align x y
     0             %-> string v-align h-align x y angle
     6 -3 roll     %-> x y angle string v-align h-align
@@ -11690,7 +12590,7 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
       KHn         %->
     } {           %->
       0           %->
-    } ifelse      %-> bool string x y
+    } ie          %-> bool string x y
     0             %-> bool string x y angle
     5 -1 roll     %-> string x y angle bool
     ZM {          %->
@@ -11698,11 +12598,11 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
         (bv)      %->   string x y angle v-align    %%%before(tv)
       } {         %-% else -> bottom  tickmarck
         (bv)      %->   string x y angle v-align
-      } ifelse    %->
+      } ie        %->
     } {           %->
       pop         %-% removing bool
       (cv)        %->   string x y angle v-align
-    } ifelse      %->
+    } ie          %->
     5 -1 roll     %-> x y angle v-align string
     exch          %-> x y angle string v-align
     (lh)          %-> x y angle string v-align h-align
@@ -11827,6 +12727,65 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
     end                  %-> closing tckdict
   R                      %->
 } B                      %:%
+@ %def vtick
+
+The following function produces the vertical major tickmarks for the percent box panel, emulating the old {\prog} version (in which those lines were drawn over the projection ribbons).
+
+<<PSFunctions - pvtick>>=
+%-% No parameters required as they are taken from
+%-% beginmatches variables definition (KPSm, PE, PO and AX).
+/pvtick {                 %-> pvtick
+  %-% vflg { (pvtick) msg } if
+  S                       %->
+    6 dict begin          %->
+      /tmx KPSm D         %-> get major tickmark nucleotide length
+      /te PE D            %-> get tickmarks end
+      /to PO D            %-> get tickmarks start
+      /xt AX D            %-> get width
+      /lxo                %-> major tickmarks start
+        to                %->
+        to tmx mymod      %->
+        sub               %->
+      D                   %->
+      %-% as we assume that current point is (LLx,LLy) for the current box
+      %-% we must translate coords origin to (LLx,LRy)
+      xt 0 T              %->
+      %-% Making major tickmarks
+      S                   %->
+        /cnt lxo D        %->
+        0 to neg Yscm T   %-> translating to sequence absolute start
+        {                 %-> begin loop
+          cnt te ge {     %->
+            exit          %-> if current tick greater than last tick
+          } if            %->   then exit from tickmarks loop
+          cnt to gt       %->
+          cnt te lt       %->
+          and {           %-> draw major tickmark if it is within limits
+            cnt Yscm      %->
+            S             %->
+              0 exch T    %-> move to (0,current_coord)
+              _t xt neg 0 %->
+                   mkgrid %-> draw major tick line (true==horizontal)
+            R             %->
+          } if            %->
+          /cnt            %->
+            cnt tmx add   %-> adding new tickmark to counter
+          D               %->
+        } loop            %-> end loop
+      R                   %->
+    end                   %-> closing tckdict
+  R                       %->
+} B                       %:%
+%-% ...example of usage bottom... (at beginmatches)
+%-% ...
+%-% endseq
+%-% %
+%-% pvtick
+%-% %
+%-% %%%% DATA ---> Alignment
+%-% %
+%-% beginaln
+%-% ...
 @ %def vtick
 
 
@@ -12339,7 +13298,7 @@ Group lines functions will be placed to a fixed height that will be provided by 
     -2.5  1 l  %->
     0 0 m      %->
     -2.5 -1 l  %->
-  } ifelse     %->
+  } ie         %->
   K            %->
 } B            %-%
 %-% half arrows
@@ -12366,7 +13325,7 @@ Group lines functions will be placed to a fixed height that will be provided by 
   } {          %-% else just stroke arrow head lines
     0 0 m      %->
     -2.5  1 l  %->
-  } ifelse     %->
+  } ie         %->
   K            %->
 } B            %:%
 @ %def garw garh
@@ -12558,7 +13517,7 @@ Group lines functions will be placed to a fixed height that will be provided by 
  The most recent version is freely                %-% \042 == doublequotes
  available at                                     %-% \057 == slash (/)
 \042http:\057\057www1.imim.es\057software\057gfftools\057GFF2APLOT.html\042. %-% 
-Copyright\040\0401999                             %-% \040 == white space
+Copyright\040\0401999-2003                        %-% \040 == white space
 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       (bv)          %-> x y x y angle string v-align
       (rh)          %-> x y x y angle string v-align h-align
@@ -12568,7 +13527,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       exch          %-> y x ::
       S             %-> y x ::
         Cf sfnt     %-> y x :: cred_font
-(\0401999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) %-%
+(\0401999-2003 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) %-%
         stringwidth %-> y x :: substring_length_x substring_length_y  
         pop         %-> y x :: substring_length
         sub         %-> y, x = x - substring_length
@@ -12753,8 +13712,8 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
 /beginaln {          %-> setting aplot origin and clip path
   %-% vflg { (beginaln) msg } if
   S                  %->
-    0  0             %->
-    AX YH            %->
+    0  Alw 2 div neg %-> Setting correction to allow display of the whole
+    AX YH Alw add    %-> alignment projection line width
     bbox             %->
     clip             %->
     newpath          %->
@@ -12781,10 +13740,10 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
     PYB neg       %->
     T             %->
     %-% percent box
-    S             %->
-      0 0         %->
-      AX PY       %->
-      4 copy      %->
+    S         %-> To be able to show the whole line width 
+      0 0     %-> of the score projections in the percent box, we must set
+      AX PY   %-> beginaln clipbox to:  0  (0 - Alw/2) AX  (PY + Alw/2 )
+      4 copy  %-> 
       %-% percent box BG color
       bbox        %->
       PBc cmyk    %->
@@ -13032,7 +13991,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       0 -0.1 cm  %->
     } {          %->
       0.1 cm 0   %->
-    } ifelse     %->
+    } ie         %->
     rl           %->
     K            %->
   R              %->
@@ -13042,7 +14001,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       0 -0.1 cm  %->
     } {          %->
       0.1 cm 0   %->
-    } ifelse     %->
+    } ie         %->
     rl           %->
     K            %->
   R              %->
@@ -13087,7 +14046,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       3 1 roll  %->
       X1 Xscme  %->
       bbox  %->
-    } ifelse  %->
+    } ie      %->
     S  %->
       cmyk  %->
       fill   %->
@@ -13186,7 +14145,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       5 1 roll  %->
       6 1 roll  %->
       exch  %->
-    } ifelse  %->
+    } ie      %->
     3 {  %->
       Yscme  %->
       Xscme  %->
@@ -13226,7 +14185,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
     sub  %->
     Xscme  %->
     bbox  %->
-  } ifelse  %->
+  } ie      %->
   S  %->
     cmyk  %->
     fill  %->
@@ -13245,14 +14204,14 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       (bv) (ch)  %->
     } {  %->
       (cv) (lh)  %->
-    } ifelse  %->
+    } ie      %->
   } {  %->
     FTYangle 0 eq {  %->
       (cv) (rh)  %->
     } {  %->
       (bv) (rh)  %->
-    } ifelse  %->
-  } ifelse  %->
+    } ie      %->
+  } ie      %->
 } B  %:%
 @ %def FTalgn
 
@@ -13264,14 +14223,14 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       (bv) (ch)  %->
     } {  %->
       (cv) (lh)  %->
-    } ifelse  %->
+    } ie      %->
   } {  %->
     GPYangle 0 eq {  %->
       (cv) (rh)  %->
     } {  %->
       (bv) (rh)  %->
-    } ifelse  %->
-  } ifelse  %->
+    } ie      %->
+  } ie      %->
 } B  %:%
 @ %def GPalgn
 
@@ -13303,7 +14262,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       TxWB sub  %->
       Xscme  %->
       bbox  %->
-    } ifelse  %->
+    } ie      %->
     S  %->
       cmyk  %->
       fill  %->
@@ -13325,7 +14284,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       sub  %->
       Xscme  %->
       FTYangle  %->
-    } ifelse  %->
+    } ie      %->
     6 -1 roll  %->
     FTalgn  %->
     8 -2 roll  %->
@@ -13349,7 +14308,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
     FTXangle sin  %->
   } {  %->
     FTYangle cos  %->
-  } ifelse  %->
+  } ie      %->
   abs  %->
   mul  %->
   ivcm  %->
@@ -13371,7 +14330,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
     GPXangle sin  %->
   } {  %->
     GPYangle cos  %->
-  } ifelse  %->
+  } ie      %->
   abs  %->
   mul  %->
   ivcm  %->
@@ -13406,7 +14365,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
         Xscme  %->
         4 1 roll  %->
         exch  %->
-      } ifelse  %->
+      } ie      %->
       0.5 fg uline  %->
     } if  %->
     2 copy  %->
@@ -13428,7 +14387,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       sub  %->
       Xscme  %->
       GPYangle  %->
-    } ifelse  %->
+    } ie      %->
     6 -1 roll  %->
     GPalgn  %->
     8 -2 roll  %->
@@ -13539,7 +14498,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       X1 X0 sub  %->
       div  %->
     } D  %->
-  } ifelse  %->
+  } ie      %->
 } B  %:%
 @ %def getXscale
 
@@ -13783,6 +14742,9 @@ chmod a+x $BIN/parameter2tex.pl ;
 
 <<tangling complementary LaTeX files for manual>>=
 # Preparing variables and options descriptions for User's manual #'
+echo "Extracting defs for MANUAL..." 1>&2 ;
+no tangle -R"HIDE: new LaTeX definitions" $WORK/$nwfile.nw | \
+         cpif $DOCS/mandefs.tex ;
 echo "Extracting VARS/OPTIONS definitions for LaTeX files..." 1>&2 ;
 no tangle -R"parameter2tex - LaTeX" $WORK/$nwfile.nw | \
          cpif $DOCS/tabledefs.tex ;
@@ -13904,9 +14866,9 @@ sub parseinput() {
     my $c = 0;
     my $extra = 1000;
     foreach my $fl (@files) {
-        my ($a,$b,$lstelm,$order);
+        my ($a,$b,$lstelm,$srtelm,$order);
         open(IFILE,"< $fl");
-        $lstelm = 0;
+        $lstelm = $srtelm = 0;
         $order = undef;
         while (<IFILE>) {
             next if /^\s*$/o;
@@ -13925,27 +14887,36 @@ sub parseinput() {
 @ 
 
 <<parameter2tex - loading Long DEscription>>=
-$lstelm && do {
-    $_ =~ /^\#\#\#EOR\#\#\#/o && do {
-        $lstelm = 0;
-        $order = undef;
-        print STDERR "\#\n";
-        $char = ''; # $char = '#';
-        next;
-    }; # ###EOR###
-    $_ =~ s/^\s*//o;
-    $char = ':'; 
-    $VARS{$order}{LDE} .= " $_";
+$_ =~ /^\#\#\#EOR\#\#\#/o && do {
+    $lstelm = $srtelm = 0;
+    $order = undef;
+    print STDERR "\#\n";
+    $char = ''; # $char = '#';
     next;
-};
+}; # ###EOR###
 $_ =~ /^LDE/o && do {
     $_ =~ /JOIN-NEXT\s*$/o && ($VARS{$order}{JOIN} = 1);
+    $_ =~ s/^LDE:(\s+JOIN-NEXT\s+)?//o;
     $lstelm = 1;
-    next;
+    $srtelm = 0;
 }; # LDE
+$lstelm && do {
+    $_ =~ s/^\s*//o;
+    $char = ':'; 
+    $VARS{$order}{LDE} .= " $_" unless $_ eq "";
+    next;
+};
 $_ =~ /^SDE/o && do {
     $_ =~ /JOIN-NEXT\s*$/o && ($VARS{$order}{JOIN_SHORT} = 1);
+    $_ =~ s/^SDE:(\s+JOIN-NEXT\s+)?//o;
+    $srtelm = 1;
 }; # SDE
+$srtelm && do {
+    $_ =~ s/^\s*//o;
+    $char = '+'; 
+    $VARS{$order}{SDE} .= " $_" unless $_ eq "";
+    next;
+};
 @ 
 
 [[$VARS{$order}{JOIN}]] takes care if the program must concatenate variable/option items that share a common description.
@@ -13998,22 +14969,49 @@ sub repq_value() { $_[0] =~ s/\|(.+?)\|/\\vp\{$1\}/og;     return $_[0]; }
 sub rep_chars()  { 
     $_[0] =~ s/\%\{/\[/og;  # to recover LaTeX []
     $_[0] =~ s/\%\}/\]/og;  # 
-    $_[0] =~ s/\\n\\/\n/og; # to recover LaTeX newline
+    $_[0] =~ s/\\n\\/\\\\\n/og; # to recover LaTeX newline
     return $_[0];
 } # rep_chars
 @
+
+See table~\ref{tbl:noweblatexcodes} in page~\pageref{tbl:noweblatexcodes} to see the equivalence among the embeeded codes, the resulting {\LaTeX} command and the final output, once we have processed the variables definition noweb chunks with the previous [[parameter2tex.pl]] functions.
+
+<<HIDE: parameter2tex tags for latex commands>>=
+%\fbox{
+\begin{tabular}{|p{0.3\linewidth}@{\qquad}p{0.3\linewidth}@{\qquad}p{0.3\linewidth}|} %\renewcommand{\arraystretch}{1.5}
+\hline
+\textbf{Shortcut in Description} &
+\textbf{{\LaTeX} Command} &
+\textbf{{\LaTeX} Output} \\ \hline
+\Verb|[option-string]|   & \Verb|\op{option-string}|   & \op{option-string}   \\
+\Verb|<variable-string>| & \Verb|\pp{variable-string}| & \pp{variable-string} \\
+\Verb+|value-string|+    & \Verb|\vp{value-string}|    & \vp{value-string}    \\
+\Verb|%{|                & \Verb|[|                    & [                    \\
+\Verb|%}|                & \Verb|]|                    & ]                    \\
+\Verb|_|                 & \Verb|\_|                   & \_                   \\
+\Verb|$p%-0$|            & \Verb|$p_0$|                & $p_0$                \\
+\hline
+\end{tabular}
+%} %fbox
+\vskip 1ex
+\parbox{0.85\linewidth}{
+\caption[Shortcuts for {\LaTeX} commands on variable definition chunks.]{\label{tbl:noweblatexcodes} Shortcuts for {\LaTeX} commands on variable definition chunks. They are replaced by the real commands with \texttt{parameter2tex.pl}. The final result after document processing is shown in the third column of the table.}
+} % parbox
+@ 
+
 
 <<parameter2tex - functions>>=
 sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
 
 \subsubsctn{Parsing descriptions for customization variables}
+\label{sec:customizationVARSparser}
 
 Record tags available for customization vars definition file are: [[ORD]], [[SEC]], [[SUB]], [[OPT]], [[DEF]], [[PAR]], [[SDE]] and [[LDE]]. Here is a short description of each:
 
@@ -14110,7 +15108,7 @@ sub parseVars() {
 Here we define the available values for the '[[SEC]]'/'[[SUB]]' fields:
 
 <<parameter2tex - global vars>>=
-local (*LAYa,*LAYb,*LAYc,*LAYd,*LAYe,*LAYf,*LAYg,
+local (*LAYa,*LAYb,*LAYc,*LAYd,*LAYe,*LAYf,*LAYg,*LAYh,
        *SEQa,*SEQb,*SRCa,*SRCb,*STRa,*STRb,*GRPa,*GRPb,*FEAa,*FEAb,
        *XTRa,*XTRb);
 my %varO = (
@@ -14118,10 +15116,11 @@ my %varO = (
     LAYOUT            => [ \*LAYa, 'Layout'                             ],
     LAYOUTPageLayout  => [ \*LAYb, 'playout', 'Page Layout'             ],
     LAYOUTZoom        => [ \*LAYc, 'zoom',    'Zoom Options'            ],
-    LAYOUTLabels      => [ \*LAYd, 'label',   'Labels'                  ],
-    LAYOUTTickmarks   => [ \*LAYe, 'ticks',   'Tick Marks'              ],
-    LAYOUTAplot       => [ \*LAYf, 'aplot',   'Aplot Layout'            ],
-    LAYOUTGeneral     => [ \*LAYg, 'general', 'General Definitions'     ],
+    LAYOUTLabelsA     => [ \*LAYd, 'labela',  'Labels'                  ],
+    LAYOUTLabelsB     => [ \*LAYe, 'labelb',  'Labels (Continued)'      ],
+    LAYOUTTickmarks   => [ \*LAYf, 'ticks',   'Tick Marks'              ],
+    LAYOUTAplot       => [ \*LAYg, 'aplot',   'Aplot Layout'            ],
+    LAYOUTGeneral     => [ \*LAYh, 'general', 'General Definitions'     ],
     #
     SEQUENCE          => [ \*SEQa, 'Sequence'                           ],
     SEQUENCESequences => [ \*SEQb, 'seq',     'GFF-Sequence Attributes' ],
@@ -14143,7 +15142,8 @@ my %varO = (
     );
 my @varMain = qw / LAYOUT SEQUENCE SOURCE STRAND GROUP FEATURE EXTRA /;
 my @varSub  = qw /
-                   LAYOUTPageLayout  LAYOUTZoom      LAYOUTLabels 
+                   LAYOUTPageLayout  LAYOUTZoom
+                   LAYOUTLabelsA     LAYOUTLabelsB
                    LAYOUTTickmarks   LAYOUTAplot     LAYOUTGeneral
                    SEQUENCESequences SOURCESources   STRANDStrands
                    GROUPGroups       FEATUREFeatures EXTRAExtra
@@ -14192,6 +15192,7 @@ sub close_varfiles() {
 @ 
 
 \subsubsctn{Parsing descriptions for command-line options}
+\label{sec:customizationCMDLNparser}
 
 Record tags available for command-line options definition file are: [[ORD]], [[OPT]], [[LNG]], [[PAR]], [[EQV]], [[SDE]] and [[LDE]]. Here is a short description of each:
 
@@ -14332,14 +15333,25 @@ no tangle -R"colors2tex.pl" $WORK/$nwfile.nw | cpif $BIN/colors2tex.pl ;
 chmod a+x $BIN/colors2tex.pl ;
 @ 
 
-<<tangling complementary LaTeX files for manual>>=
-# extracting color tables for the User's Manual #'
+<<tangling complementary LaTeX files>>=
+# extracting complementary material 
 echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
 no tangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
     $BIN/colors2tex.pl -d - | cpif $DOCS/tables/AplotColorDefs.tex ;
+@ 
+
+<<tangling complementary LaTeX files for manual>>=
+# extracting color tables for the User's Manual #'
 echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." 1>&2 ;
 no tangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
-    $BIN/colors2tex.pl -t "seagreen" - | cpif $DOCS/tables/AplotColorTbl.tex ;
+    egrep -v 'green|yellow|orange|red|brown' - | \
+    $BIN/colors2tex.pl -t "violet" - | \
+    cpif $DOCS/tables/AplotColorTbl.tex ;
+echo "Extracting \"$DOCS/AplotColorTblCont.tex\"..." 1>&2 ;
+no tangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
+    egrep    'green|yellow|orange|red|brown' - | \
+    $BIN/colors2tex.pl -t "yellow" - | \
+    cpif $DOCS/tables/AplotColorTblCont.tex ;
 @ 
 
 \subsubsctn{[[colors2tex.pl]] implementation}
@@ -14364,6 +15376,7 @@ exit(0);
 #
 # SUBS
 <<colors2tex - functions>>
+<<Common Routines: min-max>>
 @
 
 Input records have always the same format, but we need to produce two output files formatted differently, one of them will contain a set of colors definitions ([[-d]] option) and the other one will make a {\LaTeX} table to show the colors that were defined in the ``User's Manual''. %'
@@ -14387,12 +15400,14 @@ my $USAGE = << "+++EOU+++";
 ###                In this mode, a color name (defined on input)
 ###                is required to choose which color starts 
 ###                a new column in final LaTeX table.
+###                "color" builds a regexp like "/^(color)$/"
 ###
 ################################################################################
 +++EOU+++
 #
 my $tblflg = 0;
 my $splitcolor = '';
+my $splitcolornum = 1;
 @
 
 We use [[Getopt::Std]] because we only need to set a boolean and a single parameter variables (with such parameter being optional), having any of those will set the output function, by deafult set to [[&output_defs]].
@@ -14406,8 +15421,12 @@ sub getcmdlineopts() {
         exit(1);
     }; # $opt_h
     $opt_d && ($tblflg = 0);
-    defined($opt_t)
-           && ($splitcolor = $opt_t, $tblflg = 1);
+    defined($opt_t) && do {
+        $splitcolor = $opt_t;
+        $splitcolornum = &max($splitcolornum,
+                              scalar (split /\|/og, $splitcolor) );
+        $tblflg = 1;
+    };
 } # getcmdlineopts
 @
 
@@ -14447,6 +15466,9 @@ sub print_prologue() {
     print STDOUT << '+++EOP+++';
 <<colors2tex - LaTeX colors table: open>>
 +++EOP+++
+    $splitcolornum = 'c'.('@{\quad}c' x $splitcolornum);
+    print STDOUT '\begin{tabular}{'.$splitcolornum.'}'."\n".
+                 '  \begin{tabular}{|c|c|cccc|} \hline'."\n";
     return;
 } # print_prologue
 @ 
@@ -14548,30 +15570,15 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\label{sec:colortable}
-\newcommand{\clrow}[1]{
-  \fcolorbox{black}{#1}{
-    \textcolor{#1}{\rule[-.3ex]{1cm}{1.8ex}}
-    } % fcolorbox
-  & #1
-  } % newcommand
-%
-\newcommand{\clspc}{&&&&&\\}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\vfill
-\begin{table}[!ht]
-%\setlength{\parindent}{-0.5cm}
-\begin{center}
-\begin{scriptsize}
-\begin{tabular}{c@{\quad}c}
-    \begin{tabular}{|c|c|cccc|} \hline
+\begin{footnotesize}
 @
 
 <<colors2tex - LaTeX colors table: name>>=
-$name eq $splitcolor && &print_new_col;
+$name =~ /^($splitcolor)$/ && &print_new_col;
 print STDOUT '% '."$name\n".'\clspc'."\n";
 @
+
+Now, as can be seen above, there can be a regular expression to build multiple columns (depending on many colors).
 
 <<colors2tex - LaTeX colors table: row>>=
 print STDOUT '\clrow{'.$name.'}'.(" " x (24 - length($name))).
@@ -14592,18 +15599,7 @@ print STDOUT '\clrow{'.$name.'}'.(" " x (24 - length($name))).
     \end{tabular}
    \\
   \end{tabular}
-\end{scriptsize}
-%\begin{center}
-  \caption{\label{tbl:CMYKcolor}
-    {\prog} CMYK color definition table and Color Names.
-    } % caption
-  %\refstepcounter{table}
-  %\addcontentsline{lot}{section}{
-  %   \thetable\hspace{1em}{\prog}\ CMYK color definition table.
-  %   }
-\end{center}
-\end{table}
-\vfill
+\end{footnotesize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @
 
@@ -15303,13 +16299,13 @@ BEGIN { ($NULL,$T,$F) = ("+@+NULL+@+",1,0); }
                        "\"$b\" DOES NOT MATCH !\/$results[3]\/ ")."\n\n";
 sub find_regexp() {
     my $string = $_[0];
-    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid);
+    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid,$isRE_flg);
     $isOK_flg = $T;
     $not_flg = $F;
     $id_flg = undef;
     $string =~ s{^!}{}o && ($not_flg = $T); # not_regexp is true
     $string =~ s{(\\@)$}{@@}o;
-    $string = &escape_input($string);
+    ($string,$isRE_flg) = &escape_input($string);
     ($tmpstr, $tmpid) = (undef, undef);
     ( reverse($string) =~ m{^([^\/@]*?)(?:@){1}(.*)$}o ) && do {
         $tmpstr = reverse($2);
@@ -15330,7 +16326,7 @@ sub find_regexp() {
           ($string, $isOK_flg) = &eval_regexp($1);
           last REGEXPS;
       }; # $tmpstr is a regexp
-      $string = '^'.(quotemeta($tmpstr)).'$';
+      $string = '^'.($isRE_flg ? $tmpstr : quotemeta($tmpstr)).'$';
     }; # REGEXPS
     return ($isOK_flg, $not_flg, $id_flg, $string);
 } # find_regexp
@@ -15343,8 +16339,10 @@ sub eval_regexp() {
     return ($str, $flag);
 } # eval_regexp
 sub escape_input() {
-  $_[0] =~ s{([;<>&!{}'`"])}{\\$1}og; # "`'
-  return $_[0];
+    my $var = $_[0];
+    my $c;
+    $c = ($var =~ s{([;,<>&!\{\}`'"])}{\\$1}g) || 0; #"'`
+    return $var, ($c > 0) ? $T : $F;
 } # escape_input
 @
 
@@ -15622,7 +16620,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $
+# $Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -15634,9 +16632,9 @@ This document is under Revision Control System (RCS). The version you are curren
 # 
 #    Converting alignments in GFF format to PostScript dotplots.
 # 
-#     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
-#                                  Thomas WIEHE                   
-#                                 Roderic GUIGO SERRA       
+#     Copyright (C) 1999-2003 - Josep Francesc ABRIL FERRANDO  
+#                                       Thomas WIEHE                   
+#                                      Roderic GUIGO SERRA       
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15662,9 +16660,9 @@ This document is under Revision Control System (RCS). The version you are curren
 % 
 %    Converting alignments in GFF format to PostScript dotplots.
 % 
-%     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
-%                                  Thomas WIEHE                   
-%                                 Roderic GUIGO SERRA       
+%     Copyright (C) 1999-2003 - Josep Francesc ABRIL FERRANDO  
+%                                       Thomas WIEHE                   
+%                                      Roderic GUIGO SERRA       
 %
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -15692,7 +16690,7 @@ documentation. The following instructions are needed:
 
 \subsctn{Extracting Script code chunks from the [[noweb]] file} % \\[-0.5ex]
 
-<<tangling>>=
+<<HIDE: tangling>>=
 # showing line numbering comments in program
 no tangle -L -R"APLOT" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' - | cpif $BIN/gff2aplot.pl ;
@@ -15715,7 +16713,7 @@ chmod a+x $BIN/gff2aplot.pl ;
 @
 We use {\perltidy} to reformat final versions of perl scripts (without line numbering comments, correct indentations, etc...) and to pretty-print in html format.
 
-<<tangling>>=
+<<HIDE: tangling>>=
 # reformating program with perltidy
 no tangle -R"APLOT" $WORK/$nwfile.nw | \
     perltidy - | cpif $BIN/$nwfile.pl ;
@@ -15724,6 +16722,8 @@ no tangle -R"APLOT" $WORK/$nwfile.nw | \
     perltidy -html - | cpif $DOCS/html/gff2aplot_code/$nwfile.html ;
 #
 @
+
+The way we have set the comments in the {\ps} code forces us to use the following commands to extract the perl code for {\prog}.
 
 <<tangling>>=
 ############################
@@ -15756,8 +16756,28 @@ no tangle -R"APLOT" \
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
-<<tangling>>=
+<<tangling complementary LaTeX files>>=
+#
+echo "Extracting PROGRAM VERSION..." 1>&2 ;
+no tangle -R"Print Version" $WORK/$nwfile.nw | \
+          cpif $BIN/getversion.pl ;
+perl $BIN/getversion.pl | cpif $WORK/current_version ;
+perl $BIN/getversion.pl -tex | cpif $DOCS/current_version.tex ;
+echo "##### PROGRAM VERSION is "`cat $WORK/current_version` 1>&2 ;
 @
+
+<<Print Version>>=
+<<Global Constants: Version>>
+$tex = (scalar(@ARGV) > 0) ? 1 : 0; # pretty simple...take care
+if ($tex) {
+    print '\def\PROGname{'.$PROGRAM.'}'.
+          '\def\PROGversion{'.$VERSION.'}%'."\n";
+} else {
+    print "$PROGRAM $VERSION\n";
+};
+exit(0);
+@
+
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
@@ -15772,7 +16792,7 @@ no tangle -R"The Manual" $WORK/$nwfile.nw | cpif $WORK/mkdoc ;
 [[cpif]] is an auxiliary tool for use with [[no tangle]] and [[make]]. [[cpif]] compares its standard input to each of the named files, overwriting the file if the comparison succeeds or if the named file does not exist.
 
 <<tangling complementary LaTeX files>>=
-# extracting complementary material 
+#
 echo "Extracting \"$DOCS/defs.tex\"..." 1>&2 ;
 no tangle -R"HIDE: LaTeX aplot new definitions" $WORK/$nwfile.nw | \
          no weave -v -t4 -delay - | cpif $DOCS/defs.tex ;
@@ -15796,6 +16816,9 @@ no tangle -R"HIDE: GFF parser codes" $WORK/$nwfile.nw | \
 echo "Extracting \"$DOCS/tables/missing_strands_substitution.tex\"..." 1>&2 ;
 no tangle -R"HIDE: Missing strands substitution" $WORK/$nwfile.nw | \
       no weave -v -delay - | cpif $DOCS/tables/missing_strands_substitution.tex ;
+echo "Extracting \"$DOCS/tables/variable_definition_codes.tex\"..." 1>&2 ;
+no tangle -R"HIDE: parameter2tex tags for latex commands" $WORK/$nwfile.nw | \
+      no weave -v -delay - | cpif $DOCS/tables/variable_definition_codes.tex ;
 #
 @ 
 
@@ -15856,7 +16879,9 @@ dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 # ps2pdf $nwfile.ps $nwfile.pdf ;
 #
 # echo "### 2 PAGES x PAGE SMALL NWDOC: $nwfile" 1>&2 ;
-# ps2ps $nwfile.ps $nwfile.eps; mpage -vkT2 -bA4 -t $nwfile.eps > $nwfile.small.ps
+# ps2ps -sPAPERSIZE=a4 $nwfile.ps $nwfile.eps; mpage -vkT2 -bA4 -t $nwfile.eps > $nwfile.small.ps~; ps2ps -sPAPERSIZE=a4 $nwfile.small.ps~ $nwfile.small.ps
+echo "### RUNNING psnup on $nwfile.ps -> $nwfile.small.ps" 1>&2 ;
+psnup -pa4 -Pa4 -d -2 -m0.25cm $nwfile.ps $nwfile.small.ps
 #
 popd ;
 <<BASH script closure>>
@@ -15885,7 +16910,9 @@ dvips $MANUAL.dvi -o $MANUAL.ps -t a4 ;
 #
 #
 # echo "### 2 PAGES x PAGE SMALL MANUAL: $MANUAL" 1>&2 ;
-# ps2ps $MANUAL.ps $MANUAL.eps; mpage -vkT2 -bA4 -t $MANUAL.eps > $MANUAL.small.ps
+# ps2ps -sPAPERSIZE=a4 $MANUAL.ps $MANUAL.eps; mpage -vkT2 -bA4 -t $MANUAL.eps > $MANUAL.small.ps~; ps2ps -sPAPERSIZE=a4 $MANUAL.small.ps~ $MANUAL.small.ps
+echo "### RUNNING psnup on $MANUAL.ps -> $MANUAL.small.ps" 1>&2 ;
+psnup -pa4 -Pa4 -d -2 -m0.25cm $MANUAL.ps $MANUAL.small.ps
 popd ;
 <<BASH script closure>>
 @ %$
@@ -15918,6 +16945,47 @@ no tangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
 source $WORK/.bash_VARS ;
 #
 @
+
+\subsctn{A [[Makefile]] approach to the tangling/weaving process}
+
+<<Makefile>>=
+#
+PROG = gff2aplot
+WORK = /home/ug/jabril/development/softjabril/gfftools/gff2aplot
+MAKEFILE = $(WORK)/Makefile
+NOWEB = $(WORK)/$(PROG).nw
+#
+<<makefile dependencies>>
+@ 
+
+% diff options: 
+%   -b  Ignore changes in amount of white space.
+%   -q  Report only whether the files differ, not the
+%       details of the differences. 
+ 
+<<makefile dependencies>>=
+all: $(NOWEB)
+
+$(MAKEFILE) : $(NOWEB)
+	no tangle -R'Makefile' $< > $@~; \
+    DIF=`diff -bq $@ $@~`; \
+    if [ -z "$DIF" ]; \
+      then \
+        echo "### NO DIFERENCES IN MAKE !!!"; \
+      else \
+        echo "### UPDATING MAKEFILE !!!"; \
+        mv -v $@~ $@; \
+        touch $(NOWEB); \
+        make all; \
+        exit; \
+	  fi
+@ 
+
+<<tangling>>=
+#
+# Test on Makefile
+no tangle -R'Makefile' $WORK/$nwfile.nw | cpif $WORK/Makefile ; 
+@ 
 
 \newpage
 

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: nw2tex,v 1.4 2002-12-24 13:53:58 jabril Exp $
+# $Id: nw2tex,v 1.5 2003-03-04 18:05:34 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -22,6 +22,17 @@ TEST="$WORK/tests" ;
 nwfile="gff2aplot" ;
 export BIN PARAM DOCS DATA TEST nwfile ;
 # extracting complementary material 
+echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
+no tangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
+    $BIN/colors2tex.pl -d - | cpif $DOCS/tables/AplotColorDefs.tex ;
+#
+echo "Extracting PROGRAM VERSION..." 1>&2 ;
+no tangle -R"Print Version" $WORK/$nwfile.nw | \
+          cpif $BIN/getversion.pl ;
+perl $BIN/getversion.pl | cpif $WORK/current_version ;
+perl $BIN/getversion.pl -tex | cpif $DOCS/current_version.tex ;
+echo "##### PROGRAM VERSION is "`cat $WORK/current_version` 1>&2 ;
+#
 echo "Extracting \"$DOCS/defs.tex\"..." 1>&2 ;
 no tangle -R"HIDE: LaTeX aplot new definitions" $WORK/$nwfile.nw | \
          no weave -v -t4 -delay - | cpif $DOCS/defs.tex ;
@@ -45,6 +56,9 @@ no tangle -R"HIDE: GFF parser codes" $WORK/$nwfile.nw | \
 echo "Extracting \"$DOCS/tables/missing_strands_substitution.tex\"..." 1>&2 ;
 no tangle -R"HIDE: Missing strands substitution" $WORK/$nwfile.nw | \
       no weave -v -delay - | cpif $DOCS/tables/missing_strands_substitution.tex ;
+echo "Extracting \"$DOCS/tables/variable_definition_codes.tex\"..." 1>&2 ;
+no tangle -R"HIDE: parameter2tex tags for latex commands" $WORK/$nwfile.nw | \
+      no weave -v -delay - | cpif $DOCS/tables/variable_definition_codes.tex ;
 #
 # extracting main documentation
 echo "Weaving \"$DOCS/$nwfile.tex\"..." ;

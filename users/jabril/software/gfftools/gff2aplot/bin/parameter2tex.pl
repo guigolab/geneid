@@ -2,19 +2,19 @@
 # This is perl, v5.6.1 built for i686-linux
 # /usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
-#line 13793 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14127 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 # 
 # parameter2tex.pl
 #
-#line 15612 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
-# $Id: parameter2tex.pl,v 1.1 2002-12-24 13:07:36 jabril Exp $
-#line 13797 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 15952 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+# $Id: parameter2tex.pl,v 1.2 2003-03-04 18:05:40 jabril Exp $
+#line 14131 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 #
 use strict;
 use Getopt::Std;
 use File::Basename;
 #
-#line 13817 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14151 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 my $USAGE = << "+++EOU+++";
 ################################################################################
 ###
@@ -37,10 +37,10 @@ my $USAGE = << "+++EOU+++";
 my %VARS = ();
 my ($base_dir,$base_file,$base_ext) = ('./','out','.tex');
 my $parseinput = \&parseVars;
-#line 13880 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14214 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 my @files;
-#line 14100 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
-local (*LAYa,*LAYb,*LAYc,*LAYd,*LAYe,*LAYf,*LAYg,
+#line 14443 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+local (*LAYa,*LAYb,*LAYc,*LAYd,*LAYe,*LAYf,*LAYg,*LAYh,
        *SEQa,*SEQb,*SRCa,*SRCb,*STRa,*STRb,*GRPa,*GRPb,*FEAa,*FEAb,
        *XTRa,*XTRb);
 my %varO = (
@@ -48,10 +48,11 @@ my %varO = (
     LAYOUT            => [ \*LAYa, 'Layout'                             ],
     LAYOUTPageLayout  => [ \*LAYb, 'playout', 'Page Layout'             ],
     LAYOUTZoom        => [ \*LAYc, 'zoom',    'Zoom Options'            ],
-    LAYOUTLabels      => [ \*LAYd, 'label',   'Labels'                  ],
-    LAYOUTTickmarks   => [ \*LAYe, 'ticks',   'Tick Marks'              ],
-    LAYOUTAplot       => [ \*LAYf, 'aplot',   'Aplot Layout'            ],
-    LAYOUTGeneral     => [ \*LAYg, 'general', 'General Definitions'     ],
+    LAYOUTLabelsA     => [ \*LAYd, 'labela',  'Labels'                  ],
+    LAYOUTLabelsB     => [ \*LAYe, 'labelb',  'Labels (Continued)'      ],
+    LAYOUTTickmarks   => [ \*LAYf, 'ticks',   'Tick Marks'              ],
+    LAYOUTAplot       => [ \*LAYg, 'aplot',   'Aplot Layout'            ],
+    LAYOUTGeneral     => [ \*LAYh, 'general', 'General Definitions'     ],
     #
     SEQUENCE          => [ \*SEQa, 'Sequence'                           ],
     SEQUENCESequences => [ \*SEQb, 'seq',     'GFF-Sequence Attributes' ],
@@ -73,12 +74,13 @@ my %varO = (
     );
 my @varMain = qw / LAYOUT SEQUENCE SOURCE STRAND GROUP FEATURE EXTRA /;
 my @varSub  = qw /
-                   LAYOUTPageLayout  LAYOUTZoom      LAYOUTLabels 
+                   LAYOUTPageLayout  LAYOUTZoom
+                   LAYOUTLabelsA     LAYOUTLabelsB
                    LAYOUTTickmarks   LAYOUTAplot     LAYOUTGeneral
                    SEQUENCESequences SOURCESources   STRANDStrands
                    GROUPGroups       FEATUREFeatures EXTRAExtra
                  /;
-#line 13803 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14137 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 #
 # MAIN
 &getcmdlineopts;
@@ -86,7 +88,7 @@ my @varSub  = qw /
 exit(0);
 #
 # SUBS
-#line 13844 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14178 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub getcmdlineopts() {
     our($opt_v,$opt_c,$opt_o,$opt_h);
     getopts('vco:h');
@@ -120,16 +122,16 @@ sub getcmdlineopts() {
     }; # scalar(@ARGV) > 0
     push @files, "-";
 } # getcmdlineopts
-#line 13888 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14222 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub parseinput() {
     print STDERR "### Parsing input records...\n";
     my $char;
     my $c = 0;
     my $extra = 1000;
     foreach my $fl (@files) {
-        my ($a,$b,$lstelm,$order);
+        my ($a,$b,$lstelm,$srtelm,$order);
         open(IFILE,"< $fl");
-        $lstelm = 0;
+        $lstelm = $srtelm = 0;
         $order = undef;
         while (<IFILE>) {
             next if /^\s*$/o;
@@ -137,31 +139,40 @@ sub parseinput() {
             $_ =~ s/\s*$//o;
             $char = '.';
             
-#line 13915 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
-$lstelm && do {
-    $_ =~ /^\#\#\#EOR\#\#\#/o && do {
-        $lstelm = 0;
-        $order = undef;
-        print STDERR "\#\n";
-        $char = ''; # $char = '#';
-        next;
-    }; # ###EOR###
-    $_ =~ s/^\s*//o;
-    $char = ':'; 
-    $VARS{$order}{LDE} .= " $_";
+#line 14249 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+$_ =~ /^\#\#\#EOR\#\#\#/o && do {
+    $lstelm = $srtelm = 0;
+    $order = undef;
+    print STDERR "\#\n";
+    $char = ''; # $char = '#';
     next;
-};
+}; # ###EOR###
 $_ =~ /^LDE/o && do {
     $_ =~ /JOIN-NEXT\s*$/o && ($VARS{$order}{JOIN} = 1);
+    $_ =~ s/^LDE:(\s+JOIN-NEXT\s+)?//o;
     $lstelm = 1;
-    next;
+    $srtelm = 0;
 }; # LDE
+$lstelm && do {
+    $_ =~ s/^\s*//o;
+    $char = ':'; 
+    $VARS{$order}{LDE} .= " $_" unless $_ eq "";
+    next;
+};
 $_ =~ /^SDE/o && do {
     $_ =~ /JOIN-NEXT\s*$/o && ($VARS{$order}{JOIN_SHORT} = 1);
+    $_ =~ s/^SDE:(\s+JOIN-NEXT\s+)?//o;
+    $srtelm = 1;
 }; # SDE
-#line 13904 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+$srtelm && do {
+    $_ =~ s/^\s*//o;
+    $char = '+'; 
+    $VARS{$order}{SDE} .= " $_" unless $_ eq "";
+    next;
+};
+#line 14238 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
             
-#line 13941 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14284 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 ($a,$b) = split /:\s*/o, $_, 2;
 defined($order) || do {
     CHECK: {
@@ -183,7 +194,7 @@ defined($order) || do {
 (defined($b) && $b ne '') && do {
     $VARS{$order}{$a} = $b;
 }; # $b
-#line 13905 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14239 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 		} continue {
             print STDERR $char; # &counter(++$c,$char);
         }; # while read $fl
@@ -191,34 +202,34 @@ defined($order) || do {
     }; # foreach $fl
     print STDERR "\#\n";        # &counter_end($c,$char);
 } # parseinput
-#line 13967 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14310 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub rep_varop()  { $_[0] =~ s/\[(.+?)\]/\\op\{$1\}/og;     return $_[0]; } 
 # sub repq_varop() { $_[0] =~ s/\[(.+?)\]/\'\\op\{$1\}\'/og; return $_[0]; } 
 sub repq_varop() { $_[0] =~ s/\[(.+?)\]/\\op\{$1\}/og;     return $_[0]; } 
-#line 13973 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14316 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub rep_param()  { $_[0] =~ s/<(.+?)>/\\pp\{$1\}/og;     return $_[0]; }
 # sub repq_param() { $_[0] =~ s/<(.+?)>/\'\\pp\{$1\}\'/og; return $_[0]; }
 sub repq_param() { $_[0] =~ s/<(.+?)>/\\pp\{$1\}/og;     return $_[0]; }
-#line 13979 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14322 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub rep_value()  { $_[0] =~ s/\|(.+?)\|/\\vp\{$1\}/og;     return $_[0]; }
 # sub repq_value() { $_[0] =~ s/\|(.+?)\|/\'\\vp\{$1\}\'/og; return $_[0]; }
 sub repq_value() { $_[0] =~ s/\|(.+?)\|/\\vp\{$1\}/og;     return $_[0]; }
-#line 13985 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14328 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub rep_chars()  { 
     $_[0] =~ s/\%\{/\[/og;  # to recover LaTeX []
     $_[0] =~ s/\%\}/\]/og;  # 
     $_[0] =~ s/\\n\\/\n/og; # to recover LaTeX newline
     return $_[0];
 } # rep_chars
-#line 13994 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14337 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: parameter2tex.pl,v 1.1 2002-12-24 13:07:36 jabril Exp $ '.
+           ' $Id: parameter2tex.pl,v 1.2 2003-03-04 18:05:40 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
-#line 14022 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14365 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub parseVars() {
     my ($k,$c);
     print STDERR "###\n### PARSING CUSTOM-FILE VARS DEFINITIONS\n###\n";
@@ -292,7 +303,7 @@ sub parseVars() {
     print STDERR "\#\#\#\n";
     &close_varfiles;
 } # parseVars
-#line 14150 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14495 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub open_varfiles() {
     my ($flh,$vlh,$mf);
     foreach $flh (@varMain) {
@@ -322,7 +333,7 @@ sub close_varfiles() {
         close($varO{$flh}[0]);
 	}; # foreach $flh
 } # close_varfiles
-#line 14199 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 14544 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 sub parseOpts() {
     my ($k,$c);
     print STDERR "###\n### PARSING CMD-LINE OPTIONS DEFINITIONS\n###\n";
@@ -390,7 +401,7 @@ sub parseOpts() {
     close(FDSC);
     close(FTBL);
 } # parseOpts
-#line 15572 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 15912 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 #
 sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
 sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }

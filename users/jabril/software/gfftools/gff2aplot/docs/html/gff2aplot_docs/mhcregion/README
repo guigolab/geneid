@@ -1,0 +1,204 @@
+#
+# README for two colors alignment gff2aplot example
+# 
+#
+# $Id: README,v 1.1 2003-03-04 18:06:17 jabril Exp $
+#
+
+#
+# Original Commands:
+#
+# 1/ producing the left panel with genbank annotation, using tblastx alignment:
+#
+# gff2aplot19 -v -L Identity% -l "LNMP" -T "GenBank Annotation" h.tag.gff m.tag.gff h.fasta_m.fasta.tblastx h.fast_m.fasta.lnmp.gff > h_m.t.tblastx.ps
+#
+# 2/ producing the left panel with genbank annotation, using sim alignment:
+#
+# gff2aplot19 -v -L Identity% -T GenBank_Annotation h.tag.gff m.tag.gff h_m.sim.gf > h_m.t.ps
+#
+# producing the right panel with genbank annotation+prediction, using sim alignment:
+# gff2aplot19 -v -l ESTs -L Identity% -X Human -Y Mouse -Z -E 6500 -e 6500 -T "Comparison of prediction and annotation" h.tag.gff m.tag.gff h_m.sim.gff h_m.pred.gff h_est.gff > h_m.z.ps
+
+#
+# Fixing GFF input files
+#
+# gawk '{$2="genbank"; print $0}' hs.gff.tmp > hs.gff
+# gawk '{$2="genbank"; print $0}' mm.gff.tmp > mm.gff
+
+#
+# Getting score limits
+#
+# gawk 'BEGIN {min=max="kk"} $3~/fragment/ { if (min=="kk") { min=max=$6 } else { if (min>$6) { min=$6; next }; if (max<$6) max=$6}} END { print "MIN "min" : MAX "max}' hs-mm.sim.gff
+# MIN 0.380 : MAX 1.000
+#
+# gawk 'BEGIN {min=max="kk"} $3~/alignment/ { if (min=="kk") { min=max=$6 } else { if (min>$6) { min=$6; next }; if (max<$6) max=$6}} END { print "MIN "min" : MAX "max}' hs-mm.sim.gff
+# MIN 208.000 : MAX 18340.000
+
+# Running gff2aplot: GFF -> PS
+BIN="$HOME/development/softjabril/gfftools/gff2aplot/bin"
+# DEFAULTS
+$BIN/gff2aplot.pl -v -L "Identity%" \
+                  -T "Human/Mouse MHCII Region" \
+                  -t "" \
+                  -- hs.gff \
+                     mm.gff \
+                     hs-mm.sim.gff \
+                   > hs-mm.sim.ps \
+                  2> hs-mm.sim.log;
+#
+$BIN/gff2aplot.pl -v -L "Identity%" --show-percent-box \
+                  -T "Human/Mouse MHCII Region" \
+                  -t "" \
+                  --feature-var "seqbounds::alignment_color=grey" \
+                  --feature-var "alignment::alignment_color=red" \
+                  --feature-var "fragment::alignment_color=green" \
+                  --strand-var "..::strand_layer=0" \
+                  --strand-var "++::strand_layer=2" \
+                  -- hs.gff \
+                     mm.gff \
+                     hs-mm.sim.gff \
+                   > hs-mm.sim2.ps \
+                  2> hs-mm.sim2.log;
+# 
+# in case the strand for seqbounds was same as the other features:
+# 
+# --feature-var "seqbounds::alignment_color=grey" \
+# --feature-var "seqbounds::feature_layer=0" \
+# --feature-var "alignment::alignment_color=red" \
+# --feature-var "alignment::feature_layer=1" \
+# --feature-var "fragment::alignment_color=green" \
+# --feature-var "fragment::feature_layer=2" \
+# 
+
+# Extra customization
+cat > mhc2.rc <<'+++EOF+++'
+#
+# L #
+show_percent_box=on
+aplot_score_range=0..1
+# percent_box_score_range=0..1
+major_tickmark_score=0.25
+minor_tickmark_score=0.05
+zoom_area_mark_color=violet
+zoom_area_fill_color=paleviolet
+#
+# G #
+*::group_shape=arrow
+/.*polyA.*/::group_shape=none
+/.*polyA.*/::show_group_label=off
+#
+# F #
+*::ribbon_style=ribbons
+seqbounds::hide=on
+alignment::hide=on
+fragment::alignment_scale_color=on
+fragment::feature_color=black
+3'-utr::feature_color=grey
+3'-utr::show_ribbons=off
+polya::feature_color=grey
+polya::show_ribbons=off
+First::feature_color=lightgreen
+First::show_ribbons=on
+First::ribbon_color=palegreen
+Internal::feature_color=lightgreen
+Internal::show_ribbons=on
+Internal::ribbon_color=palegreen
+Terminal::feature_color=lightgreen
+Terminal::show_ribbons=on
+Terminal::ribbon_color=palegreen
++++EOF+++
+#
+cat > mhc2spc.rc <<'+++EOF+++'
+#
+# L #
+alignment::hide=off
+alignment::feature_color=lightorange
++++EOF+++
+#
+$BIN/gff2aplot.pl -v -L "Identity%" \
+                  -T "Human/Mouse MHCII Region" \
+                  -t "" \
+                  --x-label Human --y-label Mouse \
+                  --custom-filename mhc2.rc \
+                  --custom-filename mhc2spc.rc \
+                  -- hs.gff \
+                     mm.gff \
+                     hs-mm.sim.gff \
+                   > hs-mm.sim.ini.ps \
+                  2> hs-mm.sim.ini.log;
+#
+cat > mhc2labels.rc <<'+++EOF+++'
+#
+# L #
+group_x_label_angle=45
+group_y_label_angle=315
++++EOF+++
+#
+# MARKING ZOOM BOX
+$BIN/gff2aplot.pl -v -L "Identity%" \
+                  -T "Human/Mouse MHCII Region" \
+                  -t "Zooming into the LMP2 gene region" \
+                  -z -E 6500 -e 6500 \
+                  --x-label "Human X87344" \
+                  --y-label "Mouse AF100956+AF027865" \
+                  --custom-filename mhc2.rc \
+                  --custom-filename mhc2labels.rc \
+                  -- hs.gff \
+                     mm.gff \
+                     hs-mm.sim.gff \
+                   > hs-mm.sim.zbox.ps \
+                  2> hs-mm.sim.zbox.log;
+# ZOOMED
+cat > mhc2+sgp1.rc <<'+++EOF+++'
+#
+# L #
+zoom_marks=on
+aplot_box_bgcolor=verypaleviolet
+percent_box_bgcolor=verypaleviolet
+percent_box_score_range=0.2..1.0
+major_tickmark_score=0.2
+minor_tickmark_score=0.05
+#
+# S #
+sgp::source_layer=1
+genbank::source_layer=2
+#
+# G #
+/.*polyA.*/::show_group_label=on
+/.*polyA.*/::group_shape=bracket
+/.*polyA.*/::show_group_limits=on
+/.*Gene.*/::show_group_label=off
+/.*Gene.*/::group_shape=none
+#
+# F #
+/^p(First|Internal|Terminal)$/::feature_color=red
+/^p(First|Internal|Terminal)$/::feature_shape=box
+/^p(First|Internal|Terminal)$/::show_ribbons=on
+/^p(First|Internal|Terminal)$/::ribbon_color=verylightred
+/^(First|Internal|Terminal)$/::feature_color=lightgreen
+/^(polya|3'-utr|First|Internal|Terminal)$/::feature_shape=half_box
+/^(First|Internal|Terminal)$/::ribbon_color=limegreen
+3'-utr::show_ribbons=on
+3'-utr::ribbon_color=grey
+polya::show_ribbons=on
+polya::ribbon_color=grey
++++EOF+++
+#
+$BIN/gff2aplot.pl -v -L "Identity%" \
+                  -T "Human/Mouse MHCII Region" \
+                  -t "Zooming into the LMP2 gene region" \
+                  -Z -E 6500 -e 6500 \
+                  --x-label Human --y-label Mouse \
+                  --custom-filename mhc2.rc \
+                  --custom-filename mhc2labels.rc \
+                  --custom-filename mhc2+sgp1.rc \
+                  -- hs.gff \
+                     mm.gff \
+                     hs-mm.sgp1.gff \
+                     hs-mm.sim.gff \
+                   > hs-mm.sim.zoom.ps \
+                  2> hs-mm.sim.zoom.log;
+
+#
+#
+# perl -e '$x="X87344"; $y="AF100956+AF027865"; $a="X87344:AF100956+AF027865"; $x = &escape_input($x); $y = &escape_input($y); $a = &escape_input($a); @b=split /:/o, $a,2; print "$b[0] : $b[1] ::: $b[0] =~ $x -> ".($b[0] =~ /^$x$/)." ::: $b[0] eq $x -> ".($b[0] eq $x)." ::: \"$b[0]\" eq \"$x\" -> ".("$b[0]" eq "$x")."\n";  print "$b[0] : $b[1] ::: $b[1] =~ $y -> ".($b[1] =~ /^$y$/)." ::: $b[1] eq $y -> ".($b[1] eq $y)." ::: \"$b[1]\" eq \"$y\" -> ".("$b[1]" eq "$y")."\n"; sub escape_input() { my $var = $_[0]; $var =~ s{([+*;,<>&!\{\}`'\''"])}{\\$1}g; return $var;}'

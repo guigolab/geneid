@@ -9,7 +9,7 @@
 #   "Color Tests for GFF2APLOT HOWTO"
 #      Showing and playing with available colors and gradients.
 #
-# $Id: README_colortests,v 1.1 2003-02-07 19:03:26 jabril Exp $
+# $Id: README_colortests,v 1.2 2003-03-04 18:06:14 jabril Exp $
 #
 ##################################################
 #
@@ -164,6 +164,8 @@ $BIN/gff2aplot.pl                         \
 
 #
 echo "#  -> Multiple Alignment Colors Example..." ;
+echo "#  -> Color gradients examples on boxes/circles..." ;
+echo "#  -> Color gradients examples on alignments..." ;
 #
 
 

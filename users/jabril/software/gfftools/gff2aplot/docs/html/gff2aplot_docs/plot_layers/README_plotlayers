@@ -9,7 +9,7 @@
 #   "Plot layers for GFF2APLOT HOWTO"
 #      Checking to which layer each plot element is drawn.
 #
-# $Id: README_plotlayers,v 1.4 2002-12-24 13:44:32 jabril Exp $
+# $Id: README_plotlayers,v 1.5 2003-03-04 18:06:40 jabril Exp $
 #
 ##################################################
 #
@@ -96,7 +96,7 @@ cat <<'EOF' > plot_layers_feat.rc ;
 #
 # plot_layers_feat.rc
 #
-# $Id: README_plotlayers,v 1.4 2002-12-24 13:44:32 jabril Exp $
+# $Id: README_plotlayers,v 1.5 2003-03-04 18:06:40 jabril Exp $
 #
 # L #
 show_percent_box=on
@@ -162,7 +162,7 @@ cat <<'EOF' > plot_layers_feat2.rc ;
 #
 # plot_layers_feat2.rc
 #
-# $Id: README_plotlayers,v 1.4 2002-12-24 13:44:32 jabril Exp $
+# $Id: README_plotlayers,v 1.5 2003-03-04 18:06:40 jabril Exp $
 #
 
 # L #
@@ -193,7 +193,7 @@ cat <<'EOF' > plot_layers_pre.rc ;
 #
 # plot_layers_pre.rc
 #
-# $Id: README_plotlayers,v 1.4 2002-12-24 13:44:32 jabril Exp $
+# $Id: README_plotlayers,v 1.5 2003-03-04 18:06:40 jabril Exp $
 #
 # X #
 
@@ -241,6 +241,25 @@ $BIN/gff2aplot.pl                          \
     2> plot_layers_aln.err                 ;
 #
 #
+echo "#  -> Pseudo color merge" ; # Original color at the overlapping region...
+#
+$BIN/gff2aplot.pl                          \
+    --logs-filename plot_layers_alncol.log \
+    --custom-filename plot_layers_feat.rc  \
+    --custom-filename plot_layers_feat2.rc \
+    --title 'Alignment Features Layer'     \
+    --subtitle 'Enabling ribbon colors pseudo-merge.' \
+    --x-sequence-zoom  100..400            \
+    --y-sequence-zoom  600..900            \
+    --custom-filename plot_layers_pre.rc   \
+    --zoom-area                            \
+    --layout-var 'ribbon_color_merge=true' \
+    --feature-var '*::alignment_color=darkblue' \
+    -- plot_layers.gff                     \
+     > plot_layers_alncol.ps               \
+    2> plot_layers_alncol.err              ;
+#
+#
 # echo "#  -> SWAPPING Alignment Layers" ;
 #
 # > plot_layers_swpaln.ps
@@ -252,7 +271,7 @@ cat <<'EOF' > plot_layers_post.rc ;
 #
 # plot_layers_post.rc
 #
-# $Id: README_plotlayers,v 1.4 2002-12-24 13:44:32 jabril Exp $
+# $Id: README_plotlayers,v 1.5 2003-03-04 18:06:40 jabril Exp $
 #
 # X #
 
@@ -305,6 +324,7 @@ plot_layers_featribln
 plot_layers_prezm
 plot_layers_pre
 plot_layers_aln
+plot_layers_alncol
 plot_layers_post
 EOF
 };
@@ -312,21 +332,23 @@ EOF
 # echo "# Using \"ghostscript\" to obtain JPEG images from PS files" ;
 echo "# Using \"ghostscript\" to obtain PNG images from PS files" ;
 #
+GS="/usr/local/bin/gs";
+#
 filenames | while read n ;
   do { 
     echo "# -> $n" ;
-    ghostscript -dBATCH -dNOPAUSE -r300 \
-         -sPAPERSIZE=a4 -sDEVICE=png16m \
-         -sOutputFile=$n.png $n.ps      ;
+    $GS -dBATCH -dNOPAUSE -r300        \
+        -sPAPERSIZE=a4 -sDEVICE=png16m \
+        -sOutputFile=$n.png $n.ps      ;
     cp -v $n.png $n.s.png ;
     # mogrify is a ImageMagick tool that allow us to transform images on batch,
     # large high-resolution jpeg files are scaled down to thumbnail resolution (2479x3508=>123x175)
     # it overwrites original file (so that we previously get a renamed copy for each jpeg to process). 
     mogrify -verbose -geometry 5% $n.s.png ;
     #
-    # ghostscript -dBATCH -dNOPAUSE -r300 \
-    #      -sPAPERSIZE=a4 -sDEVICE=jpeg   \
-    #      -sOutputFile=$n.jpg $n.ps      ;
+    # $GS -dBATCH -dNOPAUSE -r300      \
+    #     -sPAPERSIZE=a4 -sDEVICE=jpeg \
+    #     -sOutputFile=$n.jpg $n.ps    ;
     # png large version is pretty smaller than jpeg
     # cp -v $n.jpg $n.s.jpg ;
     # mogrify -verbose -geometry 5% $n.s.jpg ;
@@ -339,9 +361,9 @@ echo "# Using \"ghostscript\" to obtain PDF documents from PS files" ;
 filenames | while read n ;
   do { 
     echo "# -> $n" ;
-    ghostscript -dBATCH -dNOPAUSE -r300   \
-         -sPAPERSIZE=a4 -sDEVICE=pdfwrite \
-         -sOutputFile=$n.pdf $n.ps        ;
+    $GS -dBATCH -dNOPAUSE -r300          \
+        -sPAPERSIZE=a4 -sDEVICE=pdfwrite \
+        -sOutputFile=$n.pdf $n.ps        ;
     };
   done ;
 #

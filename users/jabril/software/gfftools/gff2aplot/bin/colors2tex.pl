@@ -5,7 +5,7 @@
 # 
 # colors2tex.pl
 #
-# $Id: colors2tex.pl,v 1.1 2002-12-24 13:07:36 jabril Exp $
+# $Id: colors2tex.pl,v 1.2 2003-03-04 18:05:36 jabril Exp $
 #
 use strict;
 use Getopt::Std;
@@ -27,12 +27,14 @@ my $USAGE = << "+++EOU+++";
 ###                In this mode, a color name (defined on input)
 ###                is required to choose which color starts 
 ###                a new column in final LaTeX table.
+###                "color" builds a regexp like "/^(color)$/"
 ###
 ################################################################################
 +++EOU+++
 #
 my $tblflg = 0;
 my $splitcolor = '';
+my $splitcolornum = 1;
 #
 # MAIN
 &getcmdlineopts;
@@ -49,8 +51,12 @@ sub getcmdlineopts() {
         exit(1);
     }; # $opt_h
     $opt_d && ($tblflg = 0);
-    defined($opt_t)
-           && ($splitcolor = $opt_t, $tblflg = 1);
+    defined($opt_t) && do {
+        $splitcolor = $opt_t;
+        $splitcolornum = &max($splitcolornum,
+                              scalar (split /\|/og, $splitcolor) );
+        $tblflg = 1;
+    };
 } # getcmdlineopts
 sub parseinput() {
     my @rec;
@@ -81,7 +87,7 @@ sub print_prologue() {
 %
 % Color CMYK definition used in "gff2aplot".
 %
-% # $Id: colors2tex.pl,v 1.1 2002-12-24 13:07:36 jabril Exp $
+% # $Id: colors2tex.pl,v 1.2 2003-03-04 18:05:36 jabril Exp $
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 +++EOP+++
@@ -96,25 +102,11 @@ sub print_prologue() {
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\label{sec:colortable}
-\newcommand{\clrow}[1]{
-  \fcolorbox{black}{#1}{
-    \textcolor{#1}{\rule[-.3ex]{1cm}{1.8ex}}
-    } % fcolorbox
-  & #1
-  } % newcommand
-%
-\newcommand{\clspc}{&&&&&\\}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\vfill
-\begin{table}[!ht]
-%\setlength{\parindent}{-0.5cm}
-\begin{center}
-\begin{scriptsize}
-\begin{tabular}{c@{\quad}c}
-    \begin{tabular}{|c|c|cccc|} \hline
+\begin{footnotesize}
 +++EOP+++
+    $splitcolornum = 'c'.('@{\quad}c' x $splitcolornum);
+    print STDOUT '\begin{tabular}{'.$splitcolornum.'}'."\n".
+                 '  \begin{tabular}{|c|c|cccc|} \hline'."\n";
     return;
 } # print_prologue
 sub print_color_name() {
@@ -123,7 +115,7 @@ sub print_color_name() {
         print STDOUT '% '."$name\n";
         return;
     }; # !$flg
-    $name eq $splitcolor && &print_new_col;
+    $name =~ /^($splitcolor)$/ && &print_new_col;
     print STDOUT '% '."$name\n".'\clspc'."\n";
     return;
 } # print_color_name
@@ -161,19 +153,19 @@ sub print_trailer() {
     \end{tabular}
    \\
   \end{tabular}
-\end{scriptsize}
-%\begin{center}
-  \caption{\label{tbl:CMYKcolor}
-    {\prog} CMYK color definition table and Color Names.
-    } % caption
-  %\refstepcounter{table}
-  %\addcontentsline{lot}{section}{
-  %   \thetable\hspace{1em}{\prog}\ CMYK color definition table.
-  %   }
-\end{center}
-\end{table}
-\vfill
+\end{footnotesize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 +++EOP+++
     return;
 } # print_trailer
+#
+sub max() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: ltx,v 1.4 2002-12-24 13:53:58 jabril Exp $
+# $Id: ltx,v 1.5 2003-03-04 18:05:32 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -33,7 +33,9 @@ dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 # ps2pdf $nwfile.ps $nwfile.pdf ;
 #
 # echo "### 2 PAGES x PAGE SMALL NWDOC: $nwfile" 1>&2 ;
-# ps2ps $nwfile.ps $nwfile.eps; mpage -vkT2 -bA4 -t $nwfile.eps > $nwfile.small.ps
+# ps2ps -sPAPERSIZE=a4 $nwfile.ps $nwfile.eps; mpage -vkT2 -bA4 -t $nwfile.eps > $nwfile.small.ps~; ps2ps -sPAPERSIZE=a4 $nwfile.small.ps~ $nwfile.small.ps
+echo "### RUNNING psnup on $nwfile.ps -> $nwfile.small.ps" 1>&2 ;
+psnup -pa4 -Pa4 -d -2 -m0.25cm $nwfile.ps $nwfile.small.ps
 #
 popd ;
 { echo "###"; echo "### Execution time for [$0] : $SECONDS secs";

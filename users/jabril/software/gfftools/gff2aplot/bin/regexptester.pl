@@ -1,4 +1,4 @@
-#line 1187 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
+#line 16191 "/home/ug/jabril/development/softjabril/gfftools/gff2aplot/gff2aplot.nw"
 BEGIN { ($NULL,$T,$F) = ("+@+NULL+@+",1,0); }
     chomp;
     s{^:::\s+}{}o;
@@ -25,13 +25,13 @@ BEGIN { ($NULL,$T,$F) = ("+@+NULL+@+",1,0); }
                        "\"$b\" DOES NOT MATCH !\/$results[3]\/ ")."\n\n";
 sub find_regexp() {
     my $string = $_[0];
-    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid);
+    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid,$isRE_flg);
     $isOK_flg = $T;
     $not_flg = $F;
     $id_flg = undef;
     $string =~ s{^!}{}o && ($not_flg = $T); # not_regexp is true
     $string =~ s{(\\@)$}{@@}o;
-    $string = &escape_input($string);
+    ($string,$isRE_flg) = &escape_input($string);
     ($tmpstr, $tmpid) = (undef, undef);
     ( reverse($string) =~ m{^([^\/@]*?)(?:@){1}(.*)$}o ) && do {
         $tmpstr = reverse($2);
@@ -52,7 +52,7 @@ sub find_regexp() {
           ($string, $isOK_flg) = &eval_regexp($1);
           last REGEXPS;
       }; # $tmpstr is a regexp
-      $string = '^'.(quotemeta($tmpstr)).'$';
+      $string = '^'.($isRE_flg ? $tmpstr : quotemeta($tmpstr)).'$';
     }; # REGEXPS
     return ($isOK_flg, $not_flg, $id_flg, $string);
 } # find_regexp
@@ -65,6 +65,8 @@ sub eval_regexp() {
     return ($str, $flag);
 } # eval_regexp
 sub escape_input() {
-  $_[0] =~ s{([;<>&!{}'`"])}{\\$1}og;
-  return $_[0];
+    my $var = $_[0];
+    my $c;
+    $c = ($var =~ s{(;,<>&!`'")}{\\$1}g) || 0; #"'`
+    return $var, ($c > 0) ? $T : $F;
 } # escape_input

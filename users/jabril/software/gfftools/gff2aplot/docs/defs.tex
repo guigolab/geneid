@@ -1,11 +1,11 @@
-%%%%% Colors for gff2ps
+%%%%% Colors for gff2ps% ===> this file was generated automatically by noweave --- better not edit it
 \input tables/AplotColorDefs.tex
 
 %%%%% New Commands are defined here
-\newcommand{\sctn}[1]{\section{#1}}
-\newcommand{\subsctn}[1]{\subsection{#1}}
-\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
-\newcommand{\subsubsubsctn}[1]{\paragraph{#1}}
+\newcommand{\sctn}[1]{\chapter{#1}} % \section{#1}}
+\newcommand{\subsctn}[1]{\section{#1}} % \subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsection{#1}} % \subsubsection{#1}}
+\newcommand{\subsubsubsctn}[1]{\subsubsection{#1}} % \paragraph{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 \newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
 \newcommand{\todo}[1]{
@@ -34,9 +34,11 @@
 %%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
 \newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newcommand{\clns}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{0.75cm}{1ex}}}}
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
 % \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
-
+\newcommand{\clrtbl}[9]{\vskip -2.95ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}\cln{#6}\cln{#7}\cln{#8}\cln{#9}}
+\newcommand{\clrtblg}[9]{\vskip -2.95ex \noindent\hrulefill\clns{black}\clns{#1}\clns{#2}\clns{#3}\clns{#4}\clns{#5}\clns{#6}\clns{#7}\clns{#8}\clns{#9}\clns{white}}
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
@@ -47,19 +49,20 @@
  } % def perltidy
 
 %%%%% defs
-\def\prog{\textsc{\textbf{gff2aplot}}}
+\def\prog{\textsc{\textbf{\PROGname}}}
 \def\gps{\textsc{\textbf{gff2ps}}}
 \def\gft{\textsc{\textbf{gfftools}}}
 \def\noweb{\textsc{noweb}}
+\def\gv{\textsc{ghostview}}
+\def\gs{\textsc{ghostscript}}
 \def\ps{\textsc{PostScript}}
 \def\eoline{$\backslash\backslash$}
-\def\ver{2.0}
-
+\def\ver{\PROGversion}
+\def\lastyear{2003}
 
 %%%%% TODO defs
 \def\todoAAZ{Cite here Vista, PiP-maker, Dotter and other dotplot tools.} % todoAAZ
-\def\todoAAA{Flow diagram (Serial/Filter mode) for figure~\ref{fig:filtermode}.} % todoAAA
-\def\todoAAB{Flow diagram here (Interactive, Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.} % todoAAB
+\def\todoAAB{Flow diagram here (Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.} % todoAAB
 \def\todoBBG{
 Remember to check for some of the strings values such: '++none++', '++sequence++', and so on.
 } % todoBBG
@@ -67,30 +70,27 @@ Remember to check for some of the strings values such: '++none++', '++sequence++
 Set the final options/variables/parameters for the whole section.
 } % todoDDB
 \def\todoEEB{
-Move this section to a perl package: \\ suggesting {\tt{}gfftools::parser}.
+Move this section to a perl package: \\ suggesting {\Tt{}gfftools::parser}.
 } % todoEEB
 \def\todoELA{
-DATA STRUCTURE for {\tt{}{\char37}ALN{\char95}DATA} was defined:
-Include a figure if differs from {\tt{}{\char37}GFF{\char95}DATA} definition (table~\ref{tbl:alndata}).
+DATA STRUCTURE for {\Tt{}{\%}ALN{\_}DATA} was defined:
+Include a figure if differs from {\Tt{}{\%}GFF{\_}DATA} definition (table~\ref{tbl:alndata}).
 } % todoELA
 \def\todoELB{
-DATA STRUCTURE for vectors within {\tt{}{\char37}GFF{\char95}DATA} at elements level.
+DATA STRUCTURE for vectors within {\Tt{}{\%}GFF{\_}DATA} at elements level.
 } % todoELB
 \def\todoIAA{
 Description of Document Structuring Convention (DSC) and sketch PS file structure on figure~\ref{fig:PSdsc}.
 } % todoIAA
 \def\todoJAA{
-Move this section to a perl package: \\ suggesting {\tt{}gfftools::PostScript::colors}.
+Move this section to a perl package: \\ suggesting {\Tt{}gfftools::PostScript::colors}.
 } % todoJAA
-\def\todoJAB{
-Re-define the color palette, including verypale/pale/.../deep/verydeep (four extra color intensities). Look for new color gradients: khaki, pink, ...
-} % todoJAB
 \def\todoJBB{
-Move this section to a perl package: \\ suggesting {\tt{}gfftools::PostScript::formats}.
+Move this section to a perl package: \\ suggesting {\Tt{}gfftools::PostScript::formats}.
 } % todoJBB
 \def\todoIAD{Plotting data into extra box (lower panel).} % todoIAD
 \def\todoYAA{
-Write tests to check functions, to build the examples. Maybe {\tt{}configure} or {\tt{}Makefile} scripts.
+Write tests to check functions, to build the examples. Maybe {\Tt{}configure} or {\Tt{}Makefile} scripts.
 } % todoYAA
 \def\todoTAA{
 Implement a perl script to test {\prog} functions.
@@ -99,7 +99,7 @@ Implement a perl script to test {\prog} functions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \def\genomelab{\textbf{Genome BioInformatics Lab}}
-\def\progname{gff2aplot.pl}
+\def\progname{{\PROGname}.pl}
 \def\tit{\textsc{\progname}}
 %
 \def\mtjabril{
