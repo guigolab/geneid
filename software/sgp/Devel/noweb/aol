@@ -2,7 +2,7 @@
 #
 # Literate Programming for "sgp2.nw"
 #
-# $Id: aol,v 1.3 2000-10-10 20:07:52 jabril Exp $
+# $Id: aol,v 1.4 2000-10-16 17:55:10 jabril Exp $
 
 # defining variables
 NWdir="."
@@ -12,6 +12,9 @@ DOCdir="../docs"
 # extracting program lines 
 notangle -L -Rsgp2.pl $NWdir/sgp2.nw > $BINdir/sgp2.tmp
 perl -ne '($. > 2) && do { print; next }; $. == 1 && do { split / /, $_, 3; $n = "$_[0] ".(++$_[1])." $_[2]"}; $. == 2 && ( print "$_$n" );' $BINdir/sgp2.tmp > $BINdir/sgp2.pl
+
+# extracting program lines 
+notangle -Rrunsgp2-a.sh $NWdir/sgp2.nw > $BINdir/runsgp2-a.sh
 
 # extracting program documentation
 noweave -delay -index $NWdir/sgp2.nw > $DOCdir/sgp2.tex

@@ -13,7 +13,7 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.nw,v 1.7 2000-10-16 14:33:57 jabril Exp $
+% $Id: sgp2.nw,v 1.8 2000-10-16 17:55:10 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
@@ -35,6 +35,7 @@
 
 \def\sgp{[[sgp2]]} % PROGRAM alias
 \def\tbx{[[tblastx]]}
+\def\bl{[[blast]]}
 \def\gn{[[genscan]]}
 \def\gi{[[geneid]]}
 \def\sgpt{[[sgp-2]]}
@@ -45,7 +46,7 @@
  
 % TITLE
 \title{Sintenic Gene Prediction Tool}
-\author{Josep F. Abril\\Roderic Guig\'o} %'
+\author{Roderic Guig\'o\\Josep F. Abril} %'
 
 \begin{document}
 
@@ -53,7 +54,7 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.nw,v 1.7 2000-10-16 14:33:57 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.nw,v 1.8 2000-10-16 17:55:10 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
@@ -195,7 +196,7 @@ contains program starting time (seconds since \textsc{Unix} ``epoch''), which wi
 
 <<version control>>=
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.7 2000-10-16 14:33:57 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.8 2000-10-16 17:55:10 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 @ %def $PROGRAM $VERSION @tmp_ver
 
@@ -475,14 +476,13 @@ sub clean_tmp() {
     closedir(DIR);
     $#files and 
         ( unlink(@files)
-          and die "********* Temporary files were deleted *********\n"
-          or die "********* Can't unlink @files : $! *********"
-        );
-    die "********* There are no temporary files in $TMP *********";
-    die "********* There are temporary files in $TMP *********";
+          and warn "********* Temporary files were deleted *********\n"
+          or warn "********* Can't unlink @files : $! *********"
+        ) or 
+          warn "********* There are no temporary files in $TMP *********";
 }
 # writing die messages to STDERR and clean_tmp before exit.
-sub go_to_die() { (print STDERR "@_") && &clean_tmp() }
+sub go_to_die() { (print STDERR "@_") && &clean_tmp(); exit(1) }
 @ %def &clean_tmp &go_to_die
 %$
 
@@ -741,12 +741,14 @@ sub Run_geneid() {
       copy("$SGPtmp2.sgp", "$ofn$Loc2.sgp");
     } if $savefiles_flg;
   ECHOFILES: do {
-      system "cat $SGPtmp1.sgp $SGPtmp2.sgp 1>&2"; 
+      system "cat $SGPtmp1.sgp $SGPtmp2.sgp"; 
     } if $verbose_flg;
 } # END_SUB: Run_geneid
 @ %def &Run_geneid $geneid
 
 \subsctn{Obtaining figures}
+
+We provide a PostScript output for {\gi} predictions and {\bl} SRs for both locus of a given sequence. This is achieved by two child [[gff2ps]], one for each locus. Also, we provide the alignment view once '[.aln]' file is converted to a proper input file for [[gff2aplot]].
 
 <<declare variables>>=
 # gff2ps and aplot
@@ -778,24 +780,57 @@ sub Make_Plots() {
 # run aplot
 &prt_Header("Running APLOT program on $Loc1:$Loc2") if $verbose_flg;
 $aplot = "$AplotProgram ";
-$status = system $aplot;
-&go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull APLOT command : $aplot \n")
-    unless $status == 0;
+# $status = system $aplot;
+# &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull APLOT command : $aplot \n")
+#    unless $status == 0;
 @ %def $aplot
 
 \newpage
 
 \sctn{Testing {\sgp}}
 
-<<testsgp2.sh>>=
-setenv SCIMOG /home1/rguigo/research/humus/data/scimog
-setenv SGP /home3/jabril/development/sgp/Devel/bin
+<<runsgp2-a.sh>>=
+#
+# $Id: sgp2.nw,v 1.8 2000-10-16 17:55:10 jabril Exp $
+#
 
-sh ../bin/runsgp2-a.sh $SCIMOG/fasta sgp-2 sgp-2.int < $SCIMOG/scimog
-cat sgp-2/* | evalua-1.sh $SCIMOG/scimog.length+ccds $SCIMOG/scimog.locus geneid_v1.0
+ISEQ=$1;
+ODIR=$2;
+
+IFILE=$3;
+
+SGP2=$SGP/bin/sgp2.pl;
+while read gene locus1 locus2;
+do
+    echo $gene $locus1 $locus2;
+    $SGP2 -v -1 "$ISEQ/$locus1" -2 "$ISEQ/$locus2"\
+          -k "$IFILE/$gene." -p "$IFILE/$gene." > "$ODIR/$gene.sgp";
+done;
+
+exit 0;
 @ 
 
-Results Rode: [[ 512  477  403  0.96  0.97  0.96  0.96  0.79  0.84  0.82  0.08  0.01 ]]
+This short script was written to test {\sgp} on Sanger Center data-set. Below are shown the steps we followed to do that test.
+
+<<testsgp2.sh>>=
+setenv SCIMOG /home1/rguigo/research/humus/data/scimog
+setenv SGP /home3/jabril/development/sgp/Devel
+
+cd $SGP/test-sets
+
+sh $SGP/bin/runsgp2-a.sh $SCIMOG/fasta sgp-2 sgp-2/tmp < $SCIMOG/scimog
+cat $SGP/test-sets/sgp-2/*.sgp | ~/bin/evalua/evalua-1.sh $SCIMOG/scimog.length+ccds $SCIMOG/scimog.locus geneid_v1.0
+@ 
+%$
+
+Results Rode:
+
+  [[ 512  477  403  0.96  0.97  0.96  0.96  0.79  0.84  0.82  0.08  0.01 ]]
+
+Results {\sgp}:
+
+  [[ 512  474  402  0.95  0.97  0.96  0.96  0.79  0.85  0.82  0.08  0.01 ]]
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%APPENDIX

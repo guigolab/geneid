@@ -13,7 +13,7 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.tex,v 1.8 2000-10-16 14:33:56 jabril Exp $
+% $Id: sgp2.tex,v 1.9 2000-10-16 17:56:25 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
@@ -35,6 +35,7 @@
 
 \def\sgp{{\Tt{}sgp2}} % PROGRAM alias
 \def\tbx{{\Tt{}tblastx}}
+\def\bl{{\Tt{}blast}}
 \def\gn{{\Tt{}genscan}}
 \def\gi{{\Tt{}geneid}}
 \def\sgpt{{\Tt{}sgp-2}}
@@ -45,7 +46,7 @@
  
 % TITLE
 \title{Sintenic Gene Prediction Tool}
-\author{Josep F. Abril\\Roderic Guig\'o} %'
+\author{Roderic Guig\'o\\Josep F. Abril} %'
 
 \begin{document}
 
@@ -53,7 +54,7 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.tex,v 1.8 2000-10-16 14:33:56 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.tex,v 1.9 2000-10-16 17:56:25 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
@@ -195,7 +196,7 @@ contains program starting time (seconds since \textsc{Unix} ``epoch''), which wi
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NWsgp9-verF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-verF-1}}}\moddef{version control~{\nwtagstyle{}\subpageref{NWsgp9-verF-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.tex,v 1.8 2000-10-16 14:33:56 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.tex,v 1.9 2000-10-16 17:56:25 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 \nwindexdefn{\nwixident{{\$}PROGRAM}}{:doPROGRAM}{NWsgp9-verF-1}\nwindexdefn{\nwixident{{\$}VERSION}}{:doVERSION}{NWsgp9-verF-1}\nwindexdefn{\nwixident{@tmp{\_}ver}}{@tmp:unver}{NWsgp9-verF-1}\eatline
 \nwused{\\{NWsgp9-sgp7-1}}\nwidentdefs{\\{{\nwixident{{\$}PROGRAM}}{:doPROGRAM}}\\{{\nwixident{@tmp{\_}ver}}{@tmp:unver}}\\{{\nwixident{{\$}VERSION}}{:doVERSION}}}\nwendcode{}\nwbegindocs{6}\nwdocspar
@@ -475,14 +476,13 @@ sub clean_tmp() \{
     closedir(DIR);
     $#files and 
         ( unlink(@files)
-          and die "********* Temporary files were deleted *********\\n"
-          or die "********* Can't unlink @files : $! *********"
-        );
-    die "********* There are no temporary files in $TMP *********";
-    die "********* There are temporary files in $TMP *********";
+          and warn "********* Temporary files were deleted *********\\n"
+          or warn "********* Can't unlink @files : $! *********"
+        ) or 
+          warn "********* There are no temporary files in $TMP *********";
 \}
 # writing die messages to STDERR and clean_tmp before exit.
-sub go_to_die() \{ (print STDERR "@_") && &clean_tmp() \}
+sub go_to_die() \{ (print STDERR "@_") && &clean_tmp(); exit(1) \}
 \nwindexdefn{\nwixident{{\&}clean{\_}tmp}}{:amclean:untmp}{NWsgp9-gloI-3}\nwindexdefn{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}{NWsgp9-gloI-3}\eatline
 \nwused{\\{NWsgp9-sgp7-1}}\nwidentdefs{\\{{\nwixident{{\&}clean{\_}tmp}}{:amclean:untmp}}\\{{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}}}\nwidentuses{\\{{\nwixident{{\$}TMP}}{:doTMP}}\\{{\nwixident{{\$}TMPROOT}}{:doTMPROOT}}}\nwindexuse{\nwixident{{\$}TMP}}{:doTMP}{NWsgp9-gloI-3}\nwindexuse{\nwixident{{\$}TMPROOT}}{:doTMPROOT}{NWsgp9-gloI-3}\nwendcode{}\nwbegindocs{44}%$
 
@@ -741,12 +741,14 @@ sub Run_geneid() \{
       copy("$SGPtmp2.sgp", "$ofn$Loc2.sgp");
     \} if $savefiles_flg;
   ECHOFILES: do \{
-      system "cat $SGPtmp1.sgp $SGPtmp2.sgp 1>&2"; 
+      system "cat $SGPtmp1.sgp $SGPtmp2.sgp"; 
     \} if $verbose_flg;
 \} # END_SUB: Run_geneid
 \nwindexdefn{\nwixident{{\&}Run{\_}geneid}}{:amRun:ungeneid}{NWsgp9-runA-1}\nwindexdefn{\nwixident{{\$}geneid}}{:dogeneid}{NWsgp9-runA-1}\eatline
 \nwused{\\{NWsgp9-sgp7-1}}\nwidentdefs{\\{{\nwixident{{\$}geneid}}{:dogeneid}}\\{{\nwixident{{\&}Run{\_}geneid}}{:amRun:ungeneid}}}\nwidentuses{\\{{\nwixident{{\$}GeneidOptions}}{:doGeneidOptions}}\\{{\nwixident{{\$}GeneidParam}}{:doGeneidParam}}\\{{\nwixident{{\$}GeneidProgram}}{:doGeneidProgram}}\\{{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}}\\{{\nwixident{{\$}Loc1}}{:doLoc1}}\\{{\nwixident{{\$}Loc2}}{:doLoc2}}\\{{\nwixident{{\$}ofn}}{:doofn}}\\{{\nwixident{{\$}savefiles{\_}flg}}{:dosavefiles:unflg}}\\{{\nwixident{{\$}Seq1}}{:doSeq1}}\\{{\nwixident{{\$}Seq2}}{:doSeq2}}\\{{\nwixident{{\$}SGPtmp1}}{:doSGPtmp1}}\\{{\nwixident{{\$}SGPtmp2}}{:doSGPtmp2}}\\{{\nwixident{{\$}status}}{:dostatus}}\\{{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}}}\nwindexuse{\nwixident{{\$}GeneidOptions}}{:doGeneidOptions}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}GeneidParam}}{:doGeneidParam}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}GeneidProgram}}{:doGeneidProgram}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}Loc1}}{:doLoc1}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}Loc2}}{:doLoc2}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}ofn}}{:doofn}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}savefiles{\_}flg}}{:dosavefiles:unflg}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}Seq1}}{:doSeq1}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}Seq2}}{:doSeq2}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}SGPtmp1}}{:doSGPtmp1}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}SGPtmp2}}{:doSGPtmp2}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}status}}{:dostatus}{NWsgp9-runA-1}\nwindexuse{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}{NWsgp9-runA-1}\nwendcode{}\nwbegindocs{62}\nwdocspar
 \subsctn{Obtaining figures}
+
+We provide a PostScript output for {\gi} predictions and {\bl} SRs for both locus of a given sequence. This is achieved by two child {\Tt{}gff2ps}, one for each locus. Also, we provide the alignment view once '[.aln]' file is converted to a proper input file for {\Tt{}gff2aplot}.
 
 \nwenddocs{}\nwbegincode{63}\sublabel{NWsgp9-decH-7}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decH-7}}}\moddef{declare variables~{\nwtagstyle{}\subpageref{NWsgp9-decH-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{NWsgp9-decH-6}{\relax}\nwenddeflinemarkup
 # gff2ps and aplot
@@ -778,24 +780,57 @@ sub Make_Plots() \{
 # run aplot
 &prt_Header("Running APLOT program on $Loc1:$Loc2") if $verbose_flg;
 $aplot = "$AplotProgram ";
-$status = system $aplot;
-&go_to_die("FATAL ERROR !!! $? $!\\nUnsuccessfull APLOT command : $aplot \\n")
-    unless $status == 0;
+# $status = system $aplot;
+# &go_to_die("FATAL ERROR !!! $? $!\\nUnsuccessfull APLOT command : $aplot \\n")
+#    unless $status == 0;
 \nwindexdefn{\nwixident{{\$}aplot}}{:doaplot}{NWsgp9-run9.2-1}\eatline
 \nwused{\\{NWsgp9-graG-1}}\nwidentdefs{\\{{\nwixident{{\$}aplot}}{:doaplot}}}\nwidentuses{\\{{\nwixident{{\$}AplotProgram}}{:doAplotProgram}}\\{{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}}\\{{\nwixident{{\$}Loc1}}{:doLoc1}}\\{{\nwixident{{\$}Loc2}}{:doLoc2}}\\{{\nwixident{{\$}status}}{:dostatus}}\\{{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}}}\nwindexuse{\nwixident{{\$}AplotProgram}}{:doAplotProgram}{NWsgp9-run9.2-1}\nwindexuse{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}{NWsgp9-run9.2-1}\nwindexuse{\nwixident{{\$}Loc1}}{:doLoc1}{NWsgp9-run9.2-1}\nwindexuse{\nwixident{{\$}Loc2}}{:doLoc2}{NWsgp9-run9.2-1}\nwindexuse{\nwixident{{\$}status}}{:dostatus}{NWsgp9-run9.2-1}\nwindexuse{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}{NWsgp9-run9.2-1}\nwendcode{}\nwbegindocs{67}\nwdocspar
 \newpage
 
 \sctn{Testing {\sgp}}
 
-\nwenddocs{}\nwbegincode{68}\sublabel{NWsgp9-tesB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-tesB-1}}}\moddef{testsgp2.sh~{\nwtagstyle{}\subpageref{NWsgp9-tesB-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{68}\sublabel{NWsgp9-runC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-runC-1}}}\moddef{runsgp2-a.sh~{\nwtagstyle{}\subpageref{NWsgp9-runC-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#
+# $Id: sgp2.tex,v 1.9 2000-10-16 17:56:25 jabril Exp $
+#
+
+ISEQ=$1;
+ODIR=$2;
+
+IFILE=$3;
+
+SGP2=$SGP/bin/sgp2.pl;
+while read gene locus1 locus2;
+do
+    echo $gene $locus1 $locus2;
+    $SGP2 -v -1 "$ISEQ/$locus1" -2 "$ISEQ/$locus2"\\
+          -k "$IFILE/$gene." -p "$IFILE/$gene." > "$ODIR/$gene.sgp";
+done;
+
+exit 0;
+\nwnotused{runsgp2-a.sh}\nwidentuses{\\{{\nwixident{{\$}SGP2}}{:doSGP2}}}\nwindexuse{\nwixident{{\$}SGP2}}{:doSGP2}{NWsgp9-runC-1}\nwendcode{}\nwbegindocs{69}\nwdocspar
+
+This short script was written to test {\sgp} on Sanger Center data-set. Below are shown the steps we followed to do that test.
+
+\nwenddocs{}\nwbegincode{70}\sublabel{NWsgp9-tesB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-tesB-1}}}\moddef{testsgp2.sh~{\nwtagstyle{}\subpageref{NWsgp9-tesB-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 setenv SCIMOG /home1/rguigo/research/humus/data/scimog
-setenv SGP /home3/jabril/development/sgp/Devel/bin
+setenv SGP /home3/jabril/development/sgp/Devel
 
-sh ../bin/runsgp2-a.sh $SCIMOG/fasta sgp-2 sgp-2.int < $SCIMOG/scimog
-cat sgp-2/* | evalua-1.sh $SCIMOG/scimog.length+ccds $SCIMOG/scimog.locus geneid_v1.0
-\nwnotused{testsgp2.sh}\nwendcode{}\nwbegindocs{69}\nwdocspar
+cd $SGP/test-sets
 
-Results Rode: {\Tt{}\ 512\ \ 477\ \ 403\ \ 0.96\ \ 0.97\ \ 0.96\ \ 0.96\ \ 0.79\ \ 0.84\ \ 0.82\ \ 0.08\ \ 0.01\ }
+sh $SGP/bin/runsgp2-a.sh $SCIMOG/fasta sgp-2 sgp-2/tmp < $SCIMOG/scimog
+cat $SGP/test-sets/sgp-2/*.sgp | ~/bin/evalua/evalua-1.sh $SCIMOG/scimog.length+ccds $SCIMOG/scimog.locus geneid_v1.0
+\nwnotused{testsgp2.sh}\nwendcode{}\nwbegindocs{71}\nwdocspar
+%$
+
+Results Rode:
+
+  {\Tt{}\ 512\ \ 477\ \ 403\ \ 0.96\ \ 0.97\ \ 0.96\ \ 0.96\ \ 0.79\ \ 0.84\ \ 0.82\ \ 0.08\ \ 0.01\ }
+
+Results {\sgp}:
+
+  {\Tt{}\ 512\ \ 474\ \ 402\ \ 0.95\ \ 0.97\ \ 0.96\ \ 0.96\ \ 0.79\ \ 0.85\ \ 0.82\ \ 0.08\ \ 0.01\ }
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%APPENDIX
@@ -888,7 +923,7 @@ program--- (Wow!!!). What {\Tt{}aol} does is:
 
 This program is distributed under GNU General Public License as described below:\\[2ex]
 
-\nwenddocs{}\nwbegincode{70}\sublabel{NWsgp9-cop8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-cop8-1}}}\moddef{copyleft~{\nwtagstyle{}\subpageref{NWsgp9-cop8-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-she7-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{72}\sublabel{NWsgp9-cop8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-cop8-1}}}\moddef{copyleft~{\nwtagstyle{}\subpageref{NWsgp9-cop8-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-she7-1}}\nwenddeflinemarkup
 ######################################################################
 #                               sgp2                                 #
 ######################################################################
@@ -914,7 +949,7 @@ This program is distributed under GNU General Public License as described below:
 #
 ######################################################################
 #
-\nwused{\\{NWsgp9-she7-1}}\nwendcode{}\nwbegindocs{71}\nwdocspar
+\nwused{\\{NWsgp9-she7-1}}\nwendcode{}\nwbegindocs{73}\nwdocspar
 
 \newpage
 
@@ -925,7 +960,7 @@ The documentation for {\Tt{}perl} programs is written in a simple markup languag
 The idea is to have the online documentation included with the source. That is possible with {\Tt{}{\_}{\_}DATA{\_}{\_}} tag, which defines a chunk of data within the same file.
 %% TODO: define POD tags and which style was used for building up this man. 
 
-\nwenddocs{}\nwbegincode{72}\sublabel{NWsgp9-PODK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-PODK-1}}}\moddef{POD man page trailer~{\nwtagstyle{}\subpageref{NWsgp9-PODK-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{74}\sublabel{NWsgp9-PODK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-PODK-1}}}\moddef{POD man page trailer~{\nwtagstyle{}\subpageref{NWsgp9-PODK-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
 __DATA__
 =head1 NAME
 
@@ -1037,6 +1072,7 @@ B<$PROGRAM> is under GNU-GPL (C) 2000
 \nwixlogsorted{c}{{run aplot}{NWsgp9-run9.2-1}{\nwixu{NWsgp9-graG-1}\nwixd{NWsgp9-run9.2-1}}}%
 \nwixlogsorted{c}{{run blast}{NWsgp9-run9-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-run9-1}}}%
 \nwixlogsorted{c}{{run geneid}{NWsgp9-runA-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-runA-1}}}%
+\nwixlogsorted{c}{{runsgp2-a.sh}{NWsgp9-runC-1}{\nwixd{NWsgp9-runC-1}}}%
 \nwixlogsorted{c}{{set flags-vars}{NWsgp9-setE-1}{\nwixu{NWsgp9-getB-1}\nwixd{NWsgp9-setE-1}\nwixd{NWsgp9-setE-2}}}%
 \nwixlogsorted{c}{{sgp2.pl}{NWsgp9-sgp7-1}{\nwixd{NWsgp9-sgp7-1}}}%
 \nwixlogsorted{c}{{shebang}{NWsgp9-she7-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-she7-1}}}%
@@ -1116,7 +1152,7 @@ B<$PROGRAM> is under GNU-GPL (C) 2000
 \nwixlogsorted{i}{{\nwixident{{\$}VERSION}}{:doVERSION}}%
 \nwixlogsorted{i}{{\nwixident{{\&}Which{\_}Options}}{:amWhich:unOptions}}%
 \nwixlogsorted{i}{{\nwixident{{\&}write{\_}HSP{\_}files}}{:amwrite:unHSP:unfiles}}%
-\nwbegindocs{73}%$
+\nwbegindocs{75}%$
 
 \end{document}
 
