@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.34 2002-05-05 21:08:29 jabril Exp $ 
+% # $Id: humus.nw,v 1.35 2002-05-06 01:13:06 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.34 2002-05-05 21:08:29 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.35 2002-05-06 01:13:06 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1404,9 +1404,9 @@ gawk '
            t, chr, b["+"], b["-"], b["."];
     for (i in c) {
       printf "#\t%s : %6s\t\|\t%s : %6s\t|\t%s : %6s\n", 
-             "+"i, a["+",c[i]] ? a["+",i] : 0,
-             "-"i, a["-",c[i]] ? a["-",i] : 0,
-             "."i, a[".",c[i]] ? a[".",i] : 0;
+             "+"i, a["+",i] ? a["+",i] : 0,
+             "-"i, a["-",i] ? a["-",i] : 0,
+             "."i, a[".",i] ? a[".",i] : 0;
     };
   }
 ' $SEQ $ODIR/$SEQ.gff > $EDIR/$SEQ.report || TheEnd GAWKKO ;
@@ -1949,9 +1949,9 @@ gawk '
            t, chr, b["+"], b["-"], b["."];
     for (i in c) {
       printf "#\t%s : %6s\t\|\t%s : %6s\t|\t%s : %6s\n", 
-             "+"i, a["+",c[i]] ? a["+",i] : 0,
-             "-"i, a["-",c[i]] ? a["-",i] : 0,
-             "."i, a[".",c[i]] ? a[".",i] : 0;
+             "+"i, a["+",i] ? a["+",i] : 0,
+             "-"i, a["-",i] ? a["-",i] : 0,
+             "."i, a[".",i] ? a[".",i] : 0;
     };
   }
 ' $SEQ $ODIR/$SEQ.gff > $EDIR/$SEQ.report || TheEnd GAWKKO ;
@@ -2390,9 +2390,9 @@ gawk '
            t, chr, b["+"], b["-"], b["."];
     for (i in c) {
       printf "#\t%s : %6s\t\|\t%s : %6s\t|\t%s : %6s\n", 
-             "+"i, a["+",c[i]] ? a["+",i] : 0,
-             "-"i, a["-",c[i]] ? a["-",i] : 0,
-             "."i, a[".",c[i]] ? a[".",i] : 0;
+             "+"i, a["+",i] ? a["+",i] : 0,
+             "-"i, a["-",i] ? a["-",i] : 0,
+             "."i, a[".",i] ? a[".",i] : 0;
     };
   }
 ' $SEQ $ODIR/$SEQ.gff > $EDIR/$SEQ.report || TheEnd GAWKKO ;
@@ -3359,9 +3359,9 @@ gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
                  t, chr, b["+"], b["-"], b["."];
           for (i in c) {
             printf "#\t%s : %6s\t\|\t%s : %6s\t|\t%s : %6s\n", 
-                   "+"i, a["+",c[i]] ? a["+",i] : 0,
-                   "-"i, a["-",c[i]] ? a["-",i] : 0,
-                   "."i, a[".",c[i]] ? a[".",i] : 0;
+                   "+"i, a["+",i] ? a["+",i] : 0,
+                   "-"i, a["-",i] ? a["-",i] : 0,
+                   "."i, a[".",i] ? a[".",i] : 0;
           };
         }
       ' $SEQ $TDIR/inv-sr/$SEQ.gff > $TDIR/inv-sr/$SEQ.report ;
@@ -5030,7 +5030,7 @@ is_exec $BIN/process_eval.pl ;
 <<PERL shebang>>
 # Running evaluation by chromosome.
 #
-# USAGE: process_eval.pl [-t] eval_summary_file [ ... eval_summary_file ]
+# USAGE: process_eval.pl [options] eval_summary_file [ ... eval_summary_file ]
 # by default it prints output sorted by program, '-t' prints sorted by testset
 #
 use strict;
@@ -5046,10 +5046,11 @@ $PRGVER = '0.9alpha';
 #
 # VARS
 my %data = ();
-my @vars       = qw( CHR REL SEQ LEN TST STR PROG PVER NOTES );
-my @base_level = qw( NuR NuP TP TN FP FN SN SP AC CC );
-my @exon_level = qw( ExR ExP TPe ME WE raME raWE SNe SPe SNSP );
-my @gene_level = qw( GeR GeP TPg MG WG raMG raWG SNg SPg SNSPg raJG raSG );
+my @vars        = qw( CHR REL SEQ LEN TST STR PROG PVER NOTES );
+my @base_level  = qw( NuR NuP TP TN FP FN SN SP AC CC );
+my @exon_level  = qw( ExR ExP TPe ME WE raME raWE SNe SPe SNSP );
+my @gene_level  = qw( GeR GeP TPg MG WG raMG raWG SNg SPg SNSPg raJG raSG );
+my @stats_level = qw( LEN NuR NuP TP TN FP FN  ExR ExP TPe ME WE  GeR GeP TPg MG WG );
 my @sel = ( @base_level[0,1,6,7,9],
             @exon_level[0,1,2,3,4,5,6,7,8,9],
             @gene_level[0,1,2,3,4,5,6,7,8,9,10,11] ),
@@ -5061,7 +5062,8 @@ my @sel = ( @base_level[0,1,6,7,9],
 # use Data::Dumper;
 &program_started($PROG);
 &parsing_input_files();
-&get_var_means();
+&compute_stats();
+&compute_totals() if $totals_flg;
 &print_output();
 # print STDERR Data::Dumper->Dump([ \%data ],[ qw/ *data / ]);
 &program_finished($PROG);
@@ -5069,6 +5071,12 @@ exit(0);
 #
 ## SUBS
 <<processeval.pl: getoptions help sub>>
+<<processeval.pl: parsing summaries from input files>>
+<<processeval.pl: computing means and/or stats>>
+<<processeval.pl: handling output>>
+@ 
+
+<<processeval.pl: parsing summaries from input files>>=
 sub parsing_input_files() {
     foreach my $ifile (@files) {
         open(EVAL,"< $ifile") || do {
@@ -5099,23 +5107,125 @@ sub parsing_input_files() {
         close(EVAL);
     }; # foreach $ifile
 } # parsing_input_files
-sub get_var_means() {
+@ 
+
+<<processeval.pl: computing means and/or stats>>=
+sub compute_stats() {
     foreach my $q (@seqs) {
         defined($data{$q}) || next;
         foreach my $p (@progs) {
             defined($data{$q}{$p}) || next;
             foreach my $t (@tests) {
+                my ($ref,$tot);
                 defined($data{$q}{$p}{$t}) || next;
-                my $ref = \%{ $data{$q}{$p}{$t} };
-                %{ $ref->{MEAN} } = ();
-                foreach my $v (@base_level,@exon_level,@gene_level) {
-                    $ref->{MEAN}{$v} = ( $ref->{FWD}{$v} + $ref->{REV}{$v} ) / 2;
-                    $maxlen{$v} = &max($maxlen{$v},length($ref->{MEAN}{$v}));
-                }; # foreach $v
+                $ref = \%{ $data{$q}{$p}{$t} };
+                $tot = \%{ $data{TOTAL}{$p}{$t} };
+                &vars_average($ref,$tot) if $average_flg;
+                &vars_stats($ref,$tot)   if $compute_flg;
             }; # foreach $t
         }; # foreach $p
     }; # foreach $q
-} # get_var_means
+} # compute_stats
+sub compute_totals() {
+    foreach my $p (@progs) {
+        defined($data{TOTAL}{$p}) || next;
+        foreach my $t (@tests) {
+            defined($data{TOTAL}{$p}{$t}) || next;
+            my $tref = \%{ $data{TOTAL}{$p}{$t} };
+            $average_flg && do { # GET TOTALS FOR MEAN
+                foreach my $v (@base_level,@exon_level,@gene_level) {
+                    $tref->{MEAN}{$v} = &average(\@{ $tref->{MEAN}{$v} });
+                }; # foreach $v
+            }; # $average_flg
+            $compute_flg && do { # GET TOTALS FOR GP-STATS
+                &genepred_stats($tref);
+            }; # $compute_flg
+        }; # foreach $t
+    }; # foreach $p
+} # compute_totals
+sub average() {
+    my $ary = shift;
+    my ($tnum,$ttot) = (scalar(@{$ary}),0);
+    ($tnum == 1) && return $ary->[0];
+    for (my $y = 0; $y < $tnum; $y++) { $ttot += $ary->[$y] };
+    return ($ttot/$tnum);
+} # average
+sub vars_average() {
+    my ($ref,$tot) = @_;
+    %{ $ref->{MEAN} } = ();
+    foreach my $v (@base_level,@exon_level,@gene_level) {
+        if ( $ref->{FWD}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o 
+             && $ref->{REV}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o ) {
+            $ref->{MEAN}{$v} = ( $ref->{FWD}{$v} + $ref->{REV}{$v} ) / 2;
+        } else { # not a number
+            $ref->{MEAN}{$v} = "$ref->{FWD}{$v}/$ref->{REV}{$v}";
+        };
+        $totals_flg && do {
+            defined(@{ $tot->{MEAN}{$v} }) || do {
+                @{ $tot->{MEAN}{$v} } = ();
+            };
+            if ( $ref->{FWD}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o) {
+                push @{ $tot->{MEAN}{$v} }, $ref->{FWD}{$v};
+            };
+            if ( $ref->{REV}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o) {
+                push @{ $tot->{MEAN}{$v} }, $ref->{REV}{$v};
+            };
+        };
+        $maxlen{$v} = &max($maxlen{$v},length($ref->{MEAN}{$v}));
+    }; # foreach $v
+} # vars_average
+sub vars_stats() {
+    my ($ref,$tot) = @_;
+    %{ $ref->{STATS} } = ();
+    foreach my $v (@stats_level) {
+        $ref->{STATS}{$v} = ($ref->{FWD}{$v} + $ref->{REV}{$v});
+        $totals_flg && do {
+            $tot->{STATS}{$v} += $ref->{STATS}{$v};
+        };
+        $maxlen{$v} = &max($maxlen{$v},length($ref->{STATS}{$v}));
+    }; # foreach $v
+    &genepred_stats($ref);
+} # get_var_stats
+sub genepred_stats() {
+    my $ref = shift;
+    my ($CDSreal,$CDSpred,$RN,$PN,$d1,$d2);
+    my ($JG_DEFAULT,$SG_DEFAULT) = (1,1);
+#     LEN NuR NuP TP TN FP FN ExR ExP TPe ME WE  GeR GeP TPg MG WG # @stats_level = qw( );
+    # nucleotide level
+    $CDSreal = $ref->{STATS}{FN} + $ref->{STATS}{TP};
+    $CDSpred = $ref->{STATS}{FP} + $ref->{STATS}{TP};
+    $RN = $ref->{STATS}{LEN} - $CDSreal;
+    $PN = $ref->{STATS}{LEN} - $CDSpred;
+    $ref->{STATS}{SN} = $ref->{STATS}{TP} / $CDSreal;
+    $ref->{STATS}{SP} = $ref->{STATS}{TP} / $CDSpred;
+    $ref->{STATS}{AC} = ((( $ref->{STATS}{SN} + $ref->{STATS}{SP}
+                        + ( $ref->{STATS}{TN} / $ref->{STATS}{RN} )
+                        + ( $ref->{STATS}{TN} / $PN ) ) / 4 ) - 0.5 ) * 2;
+
+    $ref->{STATS}{CC} = (( $ref->{STATS}{TP} * $ref->{STATS}{TN} ) - 
+                         ( $ref->{STATS}{FN} * $ref->{STATS}{FP} )
+                         ) / sqrt($CDSreal * $RN * $CDSpred * $PN);
+    # exon level
+    $ref->{STATS}{raME} = $ref->{STATS}{ME} / $ref->{STATS}{ExR};
+    $ref->{STATS}{raWE} = $ref->{STATS}{WE} / $ref->{STATS}{ExP};
+    $ref->{STATS}{SNe}  = $ref->{STATS}{TPe} / $ref->{STATS}{ExR};
+    $ref->{STATS}{SPe}  = $ref->{STATS}{TPe} / $ref->{STATS}{ExP};
+    $ref->{STATS}{SNSP} = ($ref->{STATS}{SNe} + $ref->{STATS}{SPe})/2;
+    # gene level
+    $ref->{STATS}{raMG}  = $ref->{STATS}{MG} / $ref->{STATS}{GeR};
+    $ref->{STATS}{raWG}  = $ref->{STATS}{WG} / $ref->{STATS}{GeP};
+    $ref->{STATS}{SNg}   = $ref->{STATS}{TPg} / $ref->{STATS}{GeR};
+    $ref->{STATS}{SPg}   = $ref->{STATS}{TPg} / $ref->{STATS}{GeP};
+    $ref->{STATS}{SNSPg} = ($ref->{STATS}{SNg} + $ref->{STATS}{SPg}) / 2;
+    $d1 = $ref->{STATS}{GeR} - $ref->{STATS}{MG};
+    $d2 = $ref->{STATS}{GeP} - $ref->{STATS}{WG};
+    my ($JG,$SG) = (1,1); # how can I retrieve these two numbers from what I already have
+    $ref->{STATS}{raJG}  = ($d2 == 0) ? $JG_DEFAULT : ($JG / $d2);
+    $ref->{STATS}{raSG}  = ($d1 == 0) ? $SG_DEFAULT : ($SG / $d1);
+} # genepred_stats
+@ 
+
+<<processeval.pl: handling output>>=
 sub print_output() {
     my $prt_function;
     $prt_function = ($opts{t}) ? \&print_sorted_by_test : \&print_sorted_by_prog ;
@@ -5123,11 +5233,12 @@ sub print_output() {
     foreach my $k (keys %maxlen) {
         $maxlen{$k} = '%'.sprintf("%d", ($maxlen{$k} + 1)).'s';
     }; # foreach $k
+    push @seqs, "TOTAL" if $totals_flg;
     foreach my $q (@seqs) {
         defined($data{$q}) || next;
         printf STDOUT "### CHR$maxlen{CHR} : $maxlen{SEQ} ".
                       "# Length$maxlen{LEN} bp ".('#'x25)."\n",
-                      (split /$;/o, $q), $seqlen{$q};
+                      ($q ne 'TOTAL' ? (split /$;/o, $q) : ('s','TOTALS')), $seqlen{$q};
         &print_tbl_header();
         $prt_function->(\%{ $data{$q} });
         print STDOUT "###\n";
@@ -5168,7 +5279,8 @@ sub print_fields() {
     printf STDOUT $str, $p, $t;
     foreach my $v (@sel) {
         $str = "$maxlen{$v} ";
-        printf STDOUT $str, $rref->{MEAN}{$v};
+        printf STDOUT $str, $rref->{MEAN}{$v}  if $average_flg;
+        printf STDOUT $str, $rref->{STATS}{$v} if $compute_flg;
     }; # foreach $v
     print STDOUT "\n";
 } # sub print_fields
@@ -5228,6 +5340,14 @@ defined($opts{P}) && do {
     @tmp = split /\s+/og, $opts{P};
     (scalar(@tmp) > 0) && (@progs = @tmp);
 }; # defined($opts{})
+defined($opts{c}) && do {
+    $average_flg = 0; # if '-a' is not given when passing '-c' then average is disabled
+    $compute_flg = 1;
+}; # defined($opts{c})
+defined($opts{a}) && do {
+    $average_flg = 1; # if '-a' is given when passing '-c' then average must be enabled again
+}; # defined($opts{a})
+defined($opts{s}) && ($totals_flg = 1);
 @
 
 <<HIDE: >>=
@@ -9055,7 +9175,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.34 2002-05-05 21:08:29 jabril Exp $
+# $Id: humus.nw,v 1.35 2002-05-06 01:13:06 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9403,8 +9523,8 @@ $WORK/nw2tex ; $WORK/ltx ;
 pushd $TMP;
 RM $TMP/.[eo]*/*;
 $BIN/stepper.pl --debug 2> $TMP/.err/_ALL.err 1> $TMP/.out/_ALL.out
-# ( $BIN/stepper.pl --debug --seq 22:chr22 --job HSAPgp_MMUScDNA_WUTBLASTX,SGP_HSAPgpa_RKNcDNA_TBX,SGP_HSAPgpa_MGSC+RKN_TBX --step SGP_HSAPgpa_MGSCv3_TBX:SGP_EVALUATION > $TMP/.out/_ALL_chr22.out ) 2>&1 | tee $TMP/.err/_ALL_chr22.err
-# ( $BIN/stepper.pl --debug --seq 22:chr22 --job SGP_HSAPgpa_MGSC+RKN_TBX > $TMP/.out/_ALL_chr22.out ) 2>&1 | tee -a $TMP/.err/_ALL_chr22.err
+# ( $BIN/stepper.pl --debug --seq 22:chr22 --job HSAPgp_MMUScDNA_WUTBLASTX,SGP_HSAPgpa_RKNcDNA_TBX,SGP_HSAPgpa_MGSC+RKN_TBX --step SGP_HSAPgpa_MGSCv3_TBX:SGP_EVALUATION >> $TMP/.out/_ALL_chr22.out ) 2>&1 | tee $TMP/.err/_ALL_chr22.err
+# ( $BIN/stepper.pl --debug --seq 22:chr22 --job SGP_HSAPgpa_MGSC+RKN_TBX >> $TMP/.out/_ALL_chr22.out ) 2>&1 | tee -a $TMP/.err/_ALL_chr22.err
 #
 ipcs -s | grep jabril | gawk '{print $2}' | while read n; do ipcrm sem $n; done;
 ipcs -m | grep jabril | gawk '{print $2}' | while read n; do ipcrm shm $n; done;
