@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.26 1999-07-13 18:06:18 jabril Exp $	
+#         $Id: gff2ps,v 1.27 1999-07-14 16:48:50 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -46,8 +46,8 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps"
   VERSION="v1.0"
-  REVISION='$Revision: 1.26 $'
-  DATERELEASE='$Date: 1999-07-13 18:06:18 $'
+  REVISION='$Revision: 1.27 $'
+  DATERELEASE='$Date: 1999-07-14 16:48:50 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -265,7 +265,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.26 1999-07-13 18:06:18 jabril Exp $
+%    $Id: gff2ps,v 1.27 1999-07-14 16:48:50 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -789,7 +789,7 @@ gawk 'BEGIN{
   source   = 2;   gpstart    = 2;
   feature  = 3;   gpend      = 3;
   start    = 4;   is_grouped = 4;
-  end      = 5;
+  end      = 5;   gplabel    = 5;
   score    = 6;
   strand   = 7;
   frame    = 8;
@@ -940,11 +940,6 @@ gawk 'BEGIN{
  if (!is_EOF) {
 # Printing Input Lines
   if (Var["print_report"]) { printf "%10s : %s\n", NR, $0 | "cat 1>&2" };
-# getting source order from file...
-  if (($strand=="+" || $strand=="-") && !($source in sources)) {
-    order["strand",ordcnt]=$source; ordcnt++ } # order for sources input.
-  else if ($strand=="." && !($source in sources)) {
-    order["none",nordcnt]=$source; nordcnt++ };
 # Reading gff-line elements.
   ReadElements()
 # place gff element in sort array by acceptor position
@@ -1015,30 +1010,41 @@ function ChkInput() { # some changes will be made on input line if some defaults
  flg_grp=1
  f=split($0,ln,/ \#/);$0="";
  $0=ln[1];for (s=1;s<=f;s++) { delete ln[s] };
- if (!($0~/^(\#)+/ || NF<8) && ($start<$end)) { 
+ if ($0~/^[^\#]+[ \t]+.+[ \t]+.+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]*[.]?[0-9]*[ \t]+[+-.][ \t]+[.012][ \t]+.*/ && $start<$end && NF>=8) { 
    if (!($frame in Frames)) { 
-     printf ">>>WARNING<<< Unknown frame %s (replaced by \".\") in : %s\n",$frame,$0 | "cat 1>&2"
+     printf ">>>WARNING<<< Unknown frame %s (replaced by \".\") in : %s\n",$frame,$0 | "cat 1>&2";
      $frame="." }
    if (!($strand in strands)) {
-     printf ">>>WARNING<<< Unknown strand %s (replaced by \".\") in : %s\n",$strand,$0 | "cat 1>&2"
+     printf ">>>WARNING<<< Unknown strand %s (replaced by \".\") in : %s\n",$strand,$0 | "cat 1>&2";
      $strand="." }
    if ($group=="" || $group==".") {
-     if (!OnOff(PLOT_FT["unfold_ungrouped_line"])) $group="#" $source $strand $seqname "#";
-     else $group="#" NR "#" $source $strand $seqname "#";    # empty group defined as default (none==".")
+     $group="#" NR "#" $seqname $source $strand "#";    # empty group defined as default (none==".")
      # CP_PLOT_FT[$group]=$source   # source from which lines are defined.
-     flg_grp=0
-     } 
+     label_group[$group]="";
+     flg_grp=0;
+     }
+   else {
+     lbgp_tmp=$group;
+     $group=$seqname $source $strand $group;
+     label_group[$group]=lbgp_tmp }
    $feature=lcase($feature);
-   }
- if ($0~/^[^\#]+[ \t]+.+[ \t]+.+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]*[.]?[0-9]*[ \t]+[+-.][ \t]+[.012][ \t]+.*/) return 1;
+   # getting source order from file...
+   if (($strand=="+" || $strand=="-") && !($source in sources)) {
+     order["strand",ordcnt]=$source; ordcnt++ } # order for sources input.
+   else if ($strand=="." && !($source in sources)) {
+     order["none",nordcnt]=$source; nordcnt++ };
+   return 1;
+   } # if gff-line OK
  else {
    if ($0~/^(\#)+.*/ || NF==0) printf ">>>Comment Line: %s\n", $0 | "cat 1>&2"
    else {
      if (NF<8) printf ">>>WARNING<<< Non-standard gff-formatted input line: %s\n\t\tThere are %s fields left: Standard gff lines need a minimum of 8 fields.\n", 8-NF,$0 | "cat 1>&2"
-     else if ($start>$end) printf ">>>WARNING<<< Non-standard gff-formatted input line: %s\n\t\t START(%s) must be lower than END(%s)\n", $0,$start,$end | "cat 1>&2"
-     else printf ">>>WARNING<<< Non-standard gff-formatted input line: %s\n", $0 | "cat 1>&2"
-     }
-   return 0 }
+     else { 
+       if ($start>$end) printf ">>>WARNING<<< Non-standard gff-formatted input line: %s\n\t\t START(%s) must be lower than END(%s)\n", $0,$start,$end | "cat 1>&2"
+       else printf ">>>WARNING<<< GARBAGE\!: Non-standard gff-formatted input line: %s\n", $0 | "cat 1>&2"
+       } # else if NF>8
+     } # if comment
+   return 0 } # else gff-line WRONG
  } # End function ChkInput
 function ChkLimits(o,O,e,E) { if (e<=O || o>=E) return 0; else return 1 } # start_,BORI,end_,BEND
 function OnOff(v) { if (lcase(v)~/^1$|^on$|^y(es)?$|^t(rue)?$/) return 1; else return 0 }
@@ -1054,7 +1060,8 @@ function ChkColor(ncolor) {
 function checklbl(chain) {   gsub(/[\(]/,"\\050",chain); gsub(/[\)]/,"\\051",chain);
  gsub(/[\<]/,"\\074",chain); gsub(/[\>]/,"\\076",chain); gsub(/[\/]/,"\\057",chain);
  gsub(/[\%]/,"\\045",chain); gsub(/[\[]/,"\\133",chain); gsub(/[\]]/,"\\135",chain);
- gsub(/[\{]/,"\\173",chain); gsub(/[\}]/,"\\175",chain); return chain } # checklbl
+ gsub(/[\{]/,"\\173",chain); gsub(/[\}]/,"\\175",chain); 
+ if (chain=="") return " "; else return chain } # checklbl
 function chkpo(v) { if (v=="Portrait") return "false"; else return "true" }
 function chkps(v,    vv) {
  vv=lcase(v)
@@ -1089,11 +1096,15 @@ function Nuc_round(nm,flg,    sign,nmp,i,mlt,smm,t) { # flg=0 then floor; flg=1 
    else t=0 }
  else { if (nm>0) t=nm>=100?sign*((int(nmp*10^(mlt-1)))*10^(i-mlt)):0; else t=0 }
  return t } # End of Nuc_round
-function Plot_Lbl(gff_feat,    fl_gp,s,lbl,vn) {
+function Plot_Lbl(gff_feat,    fl_gp,s,sc,lbl,vn) {
  vn=PLOT_FT[gff_feat,":","label"]
  if (vn=="none") lbl=" ";
- else if (vn=="default") { lbl=gff_feat; if (gff_feat in sources) lbl=lbl"("fl_gp""s")" }
- else lbl=vn;
+ else {
+   if (vn=="default") { 
+     lbl=gff_feat;
+     if (gff_feat in sources) lbl=lbl"("fl_gp""s")";
+     if (gff_feat in GP_ary) lbl=gp[sc,s,gp_cnt[gff_feat],gplabel] }
+   else lbl=vn }
  return checklbl(lbl) } # End of Plot_Lbl
 function Set_feat_Clr(gff_feat,gp,sc,    clrmode,color1,color2,vn,clm) { # remaining to add vector definition colors.
  clrmode=0; color1=""; color2=""; # "none" or not defined
@@ -1137,9 +1148,11 @@ function ReadElements() { # read gff element within source, strand, and group
   if (!(tmp in N)) {
     G[$source,$strand]++;
     gp[$source,$strand,G[$source,$strand],gpname]=$group;
+    gp[$source,$strand,G[$source,$strand],gplabel]=label_group[$group];
     gp[$source,$strand,G[$source,$strand],gpstart]=$start;
     gp[$source,$strand,G[$source,$strand],gpend]=$end;
     gp[$source,$strand,G[$source,$strand],is_grouped]=flg_grp;
+    gp_cnt[$group]=G[$source,$strand]
     if (Var["print_report"]) printf "********* Creating Group DataSet : {%s} %s %s %s ( %s %s ) : is_grouped? %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend],TxtBool(gp[$source,$strand,G[$source,$strand],is_grouped]) | "cat 1>&2"
     } # if N
   N[$source,$strand,$group]++;
@@ -1150,7 +1163,7 @@ function ReadElements() { # read gff element within source, strand, and group
    element[$source,$strand,$group,N[$source,$strand,$group],end]     = $end;
    element[$source,$strand,$group,N[$source,$strand,$group],frame]   = $frame;  
    element[$source,$strand,$group,N[$source,$strand,$group],score]   = $score;  
-   element[$source,$strand,$group,N[$source,$strand,$group],group]   = $group; 
+   # element[$source,$strand,$group,N[$source,$strand,$group],group]   = $group; 
    if (NF>group) {
      for (i=(group+1);i<=NF;i++) {
        if ($i~"Label") { element[$source,$strand,$group,N[$source,$strand,$group],label]= $(i+1); i++ }  
@@ -1165,9 +1178,9 @@ function ReadElements() { # read gff element within source, strand, and group
   if (FIRST_POS>$start) FIRST_POS=$start;
   if (LAST_POS<$end) LAST_POS=$end;
 # start-end for each group-sc-strand  
-  gp[$source,$strand,G[$source,$strand],gpstart]=min(gp[$source,$strand,G[$source,$strand],gpstart],$start) 
-  gp[$source,$strand,G[$source,$strand],gpend]  =max(gp[$source,$strand,G[$source,$strand],gpend],$end)
-  if (Var["print_report"]) printf "*** Checking group boundaries : {%s} %s %s %s %s %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend] | "cat 1>&2"
+  gp[$source,$strand,gp_cnt[$group],gpstart] = min(gp[$source,$strand,gp_cnt[$group],gpstart],$start);
+  gp[$source,$strand,gp_cnt[$group],gpend]   = max(gp[$source,$strand,gp_cnt[$group],gpend],$end);
+  if (Var["print_report"]) printf "*** Checking group boundaries : {%s} %s %s %s %s %s\n",gp_cnt[$group],$source,$strand,$group,gp[$source,$strand,gp_cnt[$group],gpstart],gp[$source,$strand,gp_cnt[$group],gpend] | "cat 1>&2"
 # getting score - boundaries 
     if ($score < MINSCORE) {
       element[$source,$strand,$group,N[$source,$strand,$group],score]=MINSCORE }
@@ -1185,7 +1198,7 @@ function SortGroups() {
           if (Var["print_report"]) printf "------- %s : (%s) %s\n",t,gp[sc,s,t,gpname],gpstrt_  | "cat 1>&2"
           while (gpstrt_ < gp[sc,s,SG[sc,s,gs],gpstart]) {
            if (Var["print_report"]) printf "------- %s < %s\n",gp[sc,s,t,gpstart],gp[sc,s,SG[sc,s,gs],gpstart]  | "cat 1>&2"
-           SG[sc,s,gs+1]=t; gs--
+           SG[sc,s,gs+1]=SG[sc,s,gs]; gs--
            } # while
           SG[sc,s,gs+1]=t;
          } # for t 
@@ -1253,7 +1266,7 @@ function PrtSorted() {
              printf "%s %s : is_grouped %s : Line %s \>\n",sc,s,TxtBool(pd),h | "cat 1>&2"
              for (t=1;t<=LE[sc,s,pd,h];t++) {
                elm_=LNelem[sc,s,pd,h,t];
-               printf "\tgpd_%s:line_%s:le_%s:LNel_%s (%s:%s-%s)\n",TxtBool(pd),h,t,elm_,gp[sc,s,elm_,gpname],gp[sc,s,elm_,gpstart],gp[sc,s,elm_,gpend] | "cat 1>&2"
+               printf "\tgpd_%s:line_%s:le_%s:LNel_%s (%s:%s-%s) Label(%s)\n",TxtBool(pd),h,t,elm_,gp[sc,s,elm_,gpname],gp[sc,s,elm_,gpstart],gp[sc,s,elm_,gpend],gp[sc,s,elm_,gplabel] | "cat 1>&2"
                } # for t
              } # if LE
             } # for h
@@ -1393,8 +1406,9 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
       if (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) ungp=grouped_; else ungp=ungrouped_; 
       for (pd=grouped_;pd>=ungp;pd--) {
        if (s=="-" && OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) i=!pd; else i=pd
-        for (pl=1;pl<=lines[sc,s,i];pl++) {
-          if (s=="-") l=lines[sc,s,i]-pl+1; else l=pl
+        if (s!=".") m_lines=max(lines[sc,"+",i],lines[sc,"-",i]); else m_lines=lines[sc,".",i]
+        for (pl=1;pl<=m_lines;pl++) {
+          if (s=="-") l=lines[sc,"-",i]-pl+1; else l=pl
           printf "GP------ Source: %10s Strand: %s Counter: %s\n", sc, s, srcord | "cat 1>&2" 
           if (DoUnFoldMixed(sc) || (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) && !OnOff(PLOT_FT[sc,":","unfold_grouped_line"]) && !OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) fl_gp="M";
           else { if (i) fl_gp="G"; else fl_gp="U" }
@@ -1410,7 +1424,7 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
                 printf "GROUP : %-15s : line_%s order_%s %10d %10d (%s)\n", ng_, l, gl, sg_, eg_, N[sc,s,ng_] | "cat 1>&2";
               if (PLOT_FT[ng_,":","group_line"]=="none") gplt=0         # group without lines
               else if (PLOT_FT[ng_,":","group_line"]=="default") gplt=1 # group red-line
-              printf "(%s) %s %s %s %s %s gp \n", Plot_Lbl(ng_), gplt, sg_, eg_, TxtBool(OnOff(PLOT_FT[ng_,":","label_show"])),TxtBool(OnOff(PLOT_FT[ng_,":","group_line_show"]))
+              printf "(%s) %s %s %s %s %s gp \n", Plot_Lbl(ng_,"N",s,sc), gplt, sg_, eg_, TxtBool(OnOff(PLOT_FT[ng_,":","label_show"])),TxtBool(OnOff(PLOT_FT[ng_,":","group_line_show"]))
               for (el=1;el<=N[sc,s,ng_];el++) {
                 sel=S[sc,s,ng_,el];
                 start_=element[sc,s,ng_,sel,start];
