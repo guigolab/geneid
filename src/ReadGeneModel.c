@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadGeneModel.c,v 1.1 2000-07-05 08:22:42 eblanco Exp $  */
+/*  $Id: ReadGeneModel.c,v 1.2 2001-06-25 15:48:26 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -49,57 +49,72 @@ long ReadGeneModel (FILE *file, dict *d, int nc[], int ne[],
       /* For each line extract the features (upstream/downstream), */
       /* the minMax distances and the (optional) blocks */
       if (line[0] !='#')
-	{
-	  /* Split line in four parts: UC DE Dist block */
-	  line1 = (char *) strtok(line," ");
-	  line2 = (char *) strtok(NULL," ");
-	  line3 = (char *) strtok(NULL," "); 
-	  line4 = (char *) strtok(NULL," ");
-
-	  if (line1 == NULL || line2 == NULL || line3 == NULL)
-	    printError("Bad format: GeneModel rule");
-
-	  /* For each feature in this upstream set */
-	  for ( t1 =(char *) strtok(line1,":");
-		t1 != NULL;
-		t1 = (char *) strtok(NULL, ":") )
-	    { 
-	      a = setkeyDict(d,t1);
-	      UC[a][nc[a]++] = nlines;
-	    }
-	  
-	  /* For each feature in this downstream set */
-	  for ( t1 =(char *) strtok(line2,":");
-		t1 != NULL;
-		t1 = (char *) strtok(NULL, ":") )
-	    { 
-	      a = setkeyDict(d,t1); 
-	      DE[a][ne[a]++]=nlines;
-	    } 
-	  
-	  /* Read the distances */
-	  t1 =(char *) strtok(line3,":");
-	  
-	  if (t1 == NULL)
-	    printError("Bad format: distances rule");
-
-	  md[nlines] = atol(t1); 
-	  t1 = (char *) strtok(NULL, ":");
-
-	  if (t1 == NULL)
-	    printError("Bad format: distances rule");
-
-	  Md[nlines] = atol(t1); 
-	  
-	  /* Read the block ... if exists */
-	  if (line4 != NULL) 
-	    {
-         block[nlines] = BLOCK;
-	    }
-	  else 
-	    block[nlines] = NONBLOCK;
-	  nlines++;
-	}
+		{
+		  /* Split line in four parts: UC DE Dist block */
+		  line1 = (char *) strtok(line," ");
+		  line2 = (char *) strtok(NULL," ");
+		  line3 = (char *) strtok(NULL," "); 
+		  line4 = (char *) strtok(NULL," ");
+		  
+		  if (line1 == NULL || line2 == NULL || line3 == NULL)
+			printError("Bad format: GeneModel rule");
+		  
+		  /* For each feature in this upstream set */
+		  for ( t1 =(char *) strtok(line1,":");
+				t1 != NULL;
+				t1 = (char *) strtok(NULL, ":") )
+			{ 
+			  a = setkeyDict(d,t1);
+			  UC[a][nc[a]++] = nlines;
+			}
+		  
+		  /* For each feature in this downstream set */
+		  for ( t1 =(char *) strtok(line2,":");
+				t1 != NULL;
+				t1 = (char *) strtok(NULL, ":") )
+			{ 
+			  a = setkeyDict(d,t1); 
+			  DE[a][ne[a]++]=nlines;
+			} 
+		  
+		  /* Read the distances xx:yy [block] */
+		  /* a) minimum distance */
+		  t1 =(char *) strtok(line3,":");
+		  
+		  if (t1 == NULL)
+			printError("Bad format: distances rule");
+		  
+		  md[nlines] = atol(t1); 
+		  
+		  /* b) maximum distance */
+		  t1 = (char *) strtok(NULL, ":");
+		  
+		  if (t1 == NULL)
+			printError("Bad format: distances rule");
+		  
+		  /* DEFINE NOT TO VERIFY DMax by using this string SINFI */
+		  /* Extracting \n in case there aren't block words */
+		  if (t1[strlen(t1)-1] == '\n') 
+			{
+			  t1[strlen(t1)-1] = '\0';
+			}
+		  
+		  if (!(strcmp(t1,SINFI)))
+			{
+			  Md[nlines] = INFI;
+			}
+		  else
+			Md[nlines] = atol(t1); 
+		  
+		  /* Read the block ... if exists */
+		  if (line4 != NULL) 
+			{
+			  block[nlines] = BLOCK;
+			}
+		  else 
+			block[nlines] = NONBLOCK;
+		  nlines++;
+		}
     }
   return(nlines);
 }
