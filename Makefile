@@ -12,7 +12,7 @@ BIN = ./bin
 HEADERS = $(INCLUDE)/geneid.h 
 PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
-CC=gcc 
+CC=gcc
 OPTS=-I$(INCLUDE) -Wall -O3
 
 #######
