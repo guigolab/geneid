@@ -42,10 +42,16 @@
 %%%%% defs
 \def\noweb{\textsc{noweb}}
 \def\ps{\textsc{PostScript}}
-
+\def\RptM{\htmladdnormallinkfoot{\textsc{RepeatMasker}}{http://www.genome.washington.edu/UWGC/analysistools/repeatmask.htm}}
+\def\biop{\textsc{BioPerl}}
+\def\biopORG{\htmladdnormallinkfoot{\biop}{http://bioperl.org/}}
+\def\biopCPAN{\htmladdnormallinkfoot{{\biop} is also available from CPAN}{http://search.cpan.org/search?dist=bioperl}}
+\def\bioseq{\htmladdnormallinkfoot{\texttt{Bio::Seq}}{http://bioperl.org/Core/POD/Bio/Seq.html}}
+\def\bioseqIO{\htmladdnormallinkfoot{\texttt{Bio::SeqIO}}{http://bioperl.org/Core/POD/Bio/SeqIO.html}}
 
 %%%%% TODO defs
 \def\todoAAA{This is a first draft of the {\progname}.} % todoAAA
+\def\todoCCC{We can define mask checking as three different subroutines that will be called by reference, so that a variable name (called for instance \texttt{\$test}) will be set depending on command-line options.} % todoCCC
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -61,7 +67,7 @@
 \def\license{GNU General Public License (GNU-GPL)}
 \def\description{
  Retrieving positions for masked regions of masked sequences in fasta format.
- } % def description 
+Program can also output those coords in GFF format, where you can define several fields from command-line. } % def description 
 \def\showaffiliation{
 \scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
