@@ -6,11 +6,11 @@
 # Here you can find the commands
 # we used to produce all the figures for:
 #
-#   ""
+#   " Comparative Analysis of Orthologous Splice Sites"
 #
 # USAGE: bash README > .log 2>&1
 #
-# $Id: README,v 1.3 2003-06-05 18:15:29 jabril Exp $
+# $Id: README,v 1.4 2003-06-10 10:31:40 jabril Exp $
 #
 ##################################################
 #
@@ -40,31 +40,37 @@ echo "# Getting the PostScripts with GFF2APLOT" ;
 #
 echo "#  ->  GT - DONORS" ;
 # GT - DONORS
-$BIN/gff2aplot.pl -v -t "DONOR SITES" \
-                  -- KCRB.hs.gff \
-                     KCRB.mm.gff \
-                     KCRB.GT.hs-mm.gff \
-                   > KCRB.GT.hs-mm.ps \
-                  2> KCRB.GT.hs-mm.log;
+$BIN/gff2aplot.pl              \
+         --verbose             \
+         --title "DONOR SITES" \
+         -- KCRB.hs.gff        \
+            KCRB.mm.gff        \
+            KCRB.GT.hs-mm.gff  \
+          > KCRB.GT.hs-mm.ps   \
+         2> KCRB.GT.hs-mm.log ;
 #
 echo "#  ->  AG - ACCEPTORS" ;
 # AG - ACCEPTORS
-$BIN/gff2aplot.pl -v -t "ACCEPTOR SITES" \
-                  -- KCRB.hs.gff \
-                     KCRB.mm.gff \
-                     KCRB.AG.hs-mm.gff \
-                   > KCRB.AG.hs-mm.ps \
-                  2> KCRB.AG.hs-mm.log;
+$BIN/gff2aplot.pl                 \
+         --verbose                \
+         --title "ACCEPTOR SITES" \
+         -- KCRB.hs.gff           \
+            KCRB.mm.gff           \
+            KCRB.AG.hs-mm.gff     \
+          > KCRB.AG.hs-mm.ps      \
+         2> KCRB.AG.hs-mm.log ;
 #
 echo "#  ->  GT + AG" ;
 # GT + AG
-$BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES" \
-                  -- KCRB.hs.gff \
-                     KCRB.mm.gff \
-                     KCRB.GT.hs-mm.gff \
-                     KCRB.AG.hs-mm.gff \
-                   > KCRB.GT-AG.hs-mm.ps \
-                  2> KCRB.GT-AG.hs-mm.log;
+$BIN/gff2aplot.pl                                \
+         --verbose                               \
+         --title "DONOR + ACCEPTOR SPLICE SITES" \
+         -- KCRB.hs.gff                          \
+            KCRB.mm.gff                          \
+            KCRB.GT.hs-mm.gff                    \
+            KCRB.AG.hs-mm.gff                    \
+          > KCRB.GT-AG.hs-mm.ps                  \
+         2> KCRB.GT-AG.hs-mm.log ;
 
 # Extra customization
 cat > GT-AG.rc <<'+++EOF+++'
@@ -80,8 +86,7 @@ x_label=Homo sapiens
 x_label_font=helvetica-boldoblique
 y_label=Mus musculus
 y_label_font=helvetica-boldoblique
-ribbon_color_merge=on
-color_merge_factor=0.5
+ribbon_color_merge=off
 aplot_score_range=0..1
 #
 # G #
@@ -105,42 +110,82 @@ alignAG::alignment_color=darkblue
 #
 echo "#  -> GT + AG ... CUSTOMIZED" ;
 # GT + AG
-$BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES (Color Version)" \
-                  --x-sequence-coords 0..4200 \
-                  --y-sequence-coords 0..4600 \
-                  --custom-filename GT-AG.rc \
-                  -- KCRB.hs.gff \
-                     KCRB.mm.gff \
-                     KCRB.GT.hs-mm.gff \
-                     KCRB.AG.hs-mm.gff \
-                   > KCRB.GT-AG.hs-mm.color.ps \
-                  2> KCRB.GT-AG.hs-mm.color.log;
+$BIN/gff2aplot.pl                                        \
+         --verbose                                       \
+         --title "DONOR + ACCEPTOR SPLICE SITES"         \
+         --subtitle                                      \
+           "DONORs (GT) in RED - ACCEPTORs (AG) in BLUE" \
+         --x-sequence-coords 0..4200                     \
+         --y-sequence-coords 0..4600                     \
+         --custom-filename GT-AG.rc                      \
+         -- KCRB.hs.gff                                  \
+            KCRB.mm.gff                                  \
+            KCRB.GT.hs-mm.gff                            \
+            KCRB.AG.hs-mm.gff                            \
+          > KCRB.GT-AG.hs-mm.color.ps                    \
+         2> KCRB.GT-AG.hs-mm.color.log ;
+
+# Extra customization
+cat > GT-AG_blend.rc <<'+++EOF+++'
+# L #
+ribbon_color_merge=on
+color_merge_factor=0.5
++++EOF+++
+#
+echo "#  -> GT + AG ... MORE CUSTOMIZED" ;
+# GT + AG
+$BIN/gff2aplot.pl                                        \
+         --verbose                                       \
+         --title "DONOR + ACCEPTOR SPLICE SITES (II)"    \
+         --subtitle                                      \
+           "DONORs (GT) in RED - ACCEPTORs (AG) in BLUE" \
+         --x-sequence-coords 0..4200                     \
+         --y-sequence-coords 0..4600                     \
+         --custom-filename GT-AG.rc                      \
+         --custom-filename GT-AG_blend.rc                \
+         -- KCRB.hs.gff                                  \
+            KCRB.mm.gff                                  \
+            KCRB.GT.hs-mm.gff                            \
+            KCRB.AG.hs-mm.gff                            \
+          > KCRB.GT-AG.hs-mm.color_blend.ps              \
+         2> KCRB.GT-AG.hs-mm.color_blend.log ;
 
 # Extra customization
 cat > GT-AG_sm.rc <<'+++EOF+++'
 # L #
+ribbon_color_merge=on
 color_merge_factor=1
 +++EOF+++
 #
 echo "#  -> GT + AG ... MORE CUSTOMIZED" ;
 # GT + AG
-$BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES (Color Version)" \
-                  --x-sequence-coords 0..4200 \
-                  --y-sequence-coords 0..4600 \
-                  --custom-filename GT-AG.rc \
-                  --custom-filename GT-AG_sm.rc \
-                  -- KCRB.hs.gff \
-                     KCRB.mm.gff \
-                     KCRB.GT.hs-mm.gff \
-                     KCRB.AG.hs-mm.gff \
-                   > KCRB.GT-AG.hs-mm.color_small.ps \
-                  2> KCRB.GT-AG.hs-mm.color_small.log;
+$BIN/gff2aplot.pl                                        \
+         --verbose                                       \
+         --title "DONOR + ACCEPTOR SPLICE SITES (III)"   \
+         --subtitle                                      \
+           "DONORs (GT) in RED - ACCEPTORs (AG) in BLUE" \
+         --x-sequence-coords 0..4200                     \
+         --y-sequence-coords 0..4600                     \
+         --custom-filename GT-AG.rc                      \
+         --custom-filename GT-AG_sm.rc                   \
+         -- KCRB.hs.gff                                  \
+            KCRB.mm.gff                                  \
+            KCRB.GT.hs-mm.gff                            \
+            KCRB.AG.hs-mm.gff                            \
+          > KCRB.GT-AG.hs-mm.color_small.ps              \
+         2> KCRB.GT-AG.hs-mm.color_small.log ;
 
 #
 # Preparing web images
 #
 filenames () {
   cat << 'EOF';
+KCRB.GT.hs-mm
+KCRB.AG.hs-mm
+KCRB.GT-AG.hs-mm
+KCRB.GT-AG.hs-mm.color
+KCRB.GT-AG.hs-mm.color_blend
+KCRB.GT-AG.hs-mm.color_small
 EOF
 };
 #

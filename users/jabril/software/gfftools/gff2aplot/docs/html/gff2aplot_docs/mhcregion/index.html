@@ -4,7 +4,7 @@
  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
  <META NAME="Generator" CONTENT="Hacker Hands">
  <META NAME="author" CONTENT="Josep F. Abril">
-  <!-- $Id: index.html,v 1.1 2003-06-05 17:50:04 jabril Exp $ -->
+  <!-- $Id: index.html,v 1.2 2003-06-10 10:31:40 jabril Exp $ -->
   <META NAME="keywords"    CONTENT="GFF2APLOT HOWTOs, tutorials, GFF, gff-format, Genomic Pairwise Alignments PostScript Plots, Genomic Analysis, Homology, Sinteny, Bioinformatics, SIM">
   <META NAME="description" CONTENT="GFF2APLOT HOWTOs: Analyzing SIM output for a syntenic sequences pair.">
  <TITLE>GFF2APLOT HOWTOs: SIM output for a syntenic sequences pair.</TITLE>
@@ -168,15 +168,74 @@ Bitmaps for the examples were generated as PNGs (Portable Network Graphics). If 
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+For illustrating this example we are going to visualize the alignment produced by the SIM program (<a href="index.html#huang:1991">Huang and Miller, 1991</a>) on the syntenic MHCII genomic regions between human (<a href="hs.fa">hs.fa</a>) and mouse (<a href="mm.fa">mm.fa</a>). The sequences being analized contain four human genes (LMP2, TAP1, LMP7 and TAP2) and their counterpart ones in mouse (<I>lmp</I>2, <I>tap</I>1, <I>lmp</I>7 and <I>tap</I>2). The following is an excerpt from that program output, when applied to our data set: <BR>
+</P>
+<P><CENTER><TABLE class="userspace" border=2 cellpadding=0 cellspacing=0>
+<TR><TD class="ytbl">&nbsp;&nbsp;</TD><TD class="ytbl" ALIGN=LEFT>&nbsp;<BR class="hh"><B><PRE class="codefg" style="font-size: 10px;">
+d {
+  "sim96 <a href="hs.fa">hs.fa</a> <a href="mm.fa">mm.fa</a>
+   M = 10, I = -10, V = -10, O = 60, E = 2"
+}
+s {
+  <a href="hs.fa">"hs.fa"</a> 1 32000
+  <a href="mm.fa">"mm.fa"</a> 1 35000
+}
+h {
+   ">X87344"
+   ">AF100956+AF027865"
+}
+a {
+  s 18340
+  b 863 804
+  e 19762 20115
+  l 863 804 890 831 79
+  &#183;&#183;&#183; 
+  l 19715 20068 19762 20115 85
+}
+  &#183;&#183;&#183; 
+a {
+  s 208
+  b 8426 33675
+  e 8541 33734
+  l 8426 33675 8449 33698 92
+  l 8506 33699 8541 33734 75
+} <BR class="hh">
+</PRE></B></TD><TD class="ytbl">&nbsp;&nbsp;</TD></TR>
+</TABLE></CENTER></P>
+<P>
+Header fields contain information regarding program execution parameters, input fasta files provided and also the length of those sequences. Then you can find all the alignments and the locally aligned fragments that define each alignment. <BR>
+That file can be translated into GFF records by using <code>ali2gff</code>, a C program which is also included in the <code>gff2aplot</code> distribution tarball. Here is an example of such a command-line: <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
-$BIN/ali2gff -x "X87344"             \
-             -y "AF100956+AF027865"  \
-                <a href="hs-mm.sim">hs-mm.sim</a>            \
-              > <a href="hs-mm.sim.gff">hs-mm.sim.gff</a> <BR class="hh">
+ali2gff -x "X87344"             \
+        -y "AF100956+AF027865"  \
+           <a href="hs-mm.sim">hs-mm.sim</a>            \
+         > <a href="hs-mm.sim.gff">hs-mm.sim.gff</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+Roughly speaking, "<code>s</code>" field defines the contents of the "<code>seqbounds</code>" GFF record. "<code>s</code>", "<code>b</code>" and "<code>e</code>"  subfields within each alignment set ("<code>a</code>") define the contents of the "<code>alignment</code>" GFF records, while the "<code>l</code>" subfield corresponds to each "<code>fragment</code>" GFF records. <BR>
+</P>
+<P><CENTER><TABLE class="userspace" border=2 cellpadding=0 cellspacing=0>
+<TR><TD class="ytbl">&nbsp;&nbsp;</TD><TD class="ytbl" ALIGN=LEFT>&nbsp;<BR class="hh"><B><PRE class="codefg" style="font-size: 10px;">
+X87344:AF100956+AF027865 sim96 seqbounds    1:1     32000:35000      .     .   .
+X87344:AF100956+AF027865 sim96 alignment  863:804   19762:20115 18340.000 +:+ .:.
+X87344:AF100956+AF027865 sim96 fragment   863:804     890:831       0.790 +:+ .:. ## cumulative nmp: 0.001
+  &#183;&#183;&#183; 
+X87344:AF100956+AF027865 sim96 fragment 19715:20068 19762:20115     0.850 +:+ .:. ## cumulative nmp: 0.562
+  &#183;&#183;&#183; 
+X87344:AF100956+AF027865 sim96 alignment 8426:33675  8541:33734   208.000 +:+ .:.
+X87344:AF100956+AF027865 sim96 fragment  8426:33675  8449:33698     0.920 +:+ .:. ## cumulative nmp: 0.251
+X87344:AF100956+AF027865 sim96 fragment  8506:33699  8541:33734     0.750 +:+ .:. ## cumulative nmp: 0.558 <BR class="hh">
+</PRE></B></TD><TD class="ytbl">&nbsp;&nbsp;</TD></TR>
+</TABLE><CENTER></P>
+<P>
+On the other hand, we already have the axes annotation records from GenBank, we filtered them and saved into two GFF files, one for human (<a href="hs.gff">hs.gff</a>) and one for mouse (<a href="mm.gff">mm.gff</a>). <BR>
+</P>
+<center><HR width="80%" class="rtbl"></center>
+<P>
+<A NAME="huang:1991"><B>X. Huang and W. Miller</B></A> <BR class="kk">
+&nbsp;&nbsp;&nbsp;&nbsp;"A time-efficient, linear-space local similarity algorithm." <BR class="kk">
+&nbsp;&nbsp;&nbsp;&nbsp;<I>Adv. Appl. Math.</I>, 12:337-357, 1991. <BR class="kk">
 </P>
 
 
@@ -192,7 +251,7 @@ $BIN/ali2gff -x "X87344"             \
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+Putting together the human and mouse annotations with the alignment is an easy step. We are running <code>gff2aplot</code> with the default settings, just adding few labels to the figure via command-line switches ("<code>--title</code>", "<code>--subtitle</code>" and "<code>--percent-box-label</code>"). <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="hs-mm.sim.png"><IMG SRC="hs-mm.sim.s.png" ALT="Default SIM plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="hs-mm.sim.png">PNG</a>]&nbsp;[<a href="hs-mm.sim.ps">PS</a>]&nbsp;[<a href="hs-mm.sim.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -208,6 +267,9 @@ gff2aplot.pl                           \
     2> <a href="hs-mm.sim.log">hs-mm.sim.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+It is an extrange plot, isn't it ? We got an alignment diagonal which is an artifact product of the GFF input file we have used, although that file is well formated. It follows the APLOT pseudo-GFF format instead of the standard GFF one, but that must not alter the resulting plot. <br>
+Perhaps you already found what is wrong with that picture. Yes, we have included as an alignment the "<code>seqbounds</code>", the <code>gff2aplot</code> does not have a "fixed" definition of alignment records. The program takes all the records for two sequences that are in APLOT format as they code for alignment data to be drawn in the alignment panel. The same occurs with the GFF-version2 records having a pre-defined grouping tag, '<code>target "group-id"</code>' (unless you have changed the alignment tag string via "<code>align_tag</code>" layout customization variable). <br>
+We are going to set different colors to the three GFF-features found in the "<code>hs-mm.sim.gff</code>" file ("<code>seqbounds</code>", "<code>alignment</code>" and "<code>fragment</code>"). We are also going to force that all those records without a defined strand, as "<code>seqbounds</code>" in this example, will be drawn in the bottomest layer. In the next plot we are setting both parameters from command-line (the "<code>--feature-var</code>" and "<code>--strand-var</code>" switches, respectively). We are switching on the percent bottom panel too (with "<code>--show-percent-box</code>"). <br>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="hs-mm.sim2.png"><IMG SRC="hs-mm.sim2.s.png" ALT="Command-line Customization" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="hs-mm.sim2.png">PNG</a>]&nbsp;[<a href="hs-mm.sim2.ps">PS</a>]&nbsp;[<a href="hs-mm.sim2.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -244,7 +306,7 @@ gff2aplot.pl                                         \
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+To make the last figure we have changed few customization options to highlight an artifact, the "<code>seqbounds</code>" GFF record on the input file. We can remove those fields that are not related with the alignment after generating the GFF file, or we can hide those features that are not relevant for the final picture. We do not want to show the "<code>seqbounds</code>" records although they may be useful for other programs using the same GFF file, maybe in such cases we do not want to remove those records from the file. There is an alternative solution, just hide all the records containing such features. The following picture only shows the alignment fragments. We have defined that "<code>seqbounds</code>" and "<code>alignment</code>" features must be hidden, in this case by setting the correpsonding variable in the customization file (see <a href="mhc2.rc">mhc2.rc</a>).
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="hs-mm.sim.ini.png"><IMG SRC="hs-mm.sim.ini.s.png" ALT="Empty Plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="hs-mm.sim.ini.png">PNG</a>]&nbsp;[<a href="hs-mm.sim.ini.ps">PS</a>]&nbsp;[<a href="hs-mm.sim.ini.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -264,6 +326,8 @@ gff2aplot.pl                            \
     2> <a href="hs-mm.sim.ini.log">hs-mm.sim.ini.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+We have said that we were going to hide the "<code>alignment</code>" GFF-features from the plot and we just changed its color. What's happening here ? <BR>
+We simply provided an extra customization file (see <a href="mhc2.rc">mhc2spc.rc</a>). That file contains two variable settings which override the ones defined in the previous customization file (<a href="mhc2.rc">mhc2.rc</a>). It is a must to notice here that the order of the customization files (as for the GFF input records) is very important. We do not get the same results if we swap the command-line switches and we provide "<a href="mhc2.rc">mhc2spc.rc</a>" before "<a href="mhc2.rc">mhc2.rc</a>". The example also illustrates the advantatges of having a main customization file upon which we can change paramters of the figure (mainly via command-line switches, but via extra customization files too).
 </P>
 
 
@@ -279,7 +343,7 @@ gff2aplot.pl                            \
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+In this tutorial we would like to introduce the "zoom" feature too. When working with large datasets we can take two approaches: making larger plots (I mean using larger paper sizes) or zooming into interesting plot regions. There are two command-line switches that make that option possible without modifying the GFF input records (for instance, by filtering those records outside the zoomed region boundaries). "<code>--zoom-area</code>" allows user to show where is the area being expanded and "<code>--zoom</code>" which performs the real zoom into that area. Both can take up to four optional parameters, set from command-line or customization files, that define the X and Y nucleotide coords of the enlarged plot region. In this case, we are assuming that the zoom area will start on both sequences origins, otherwise you can define that with "<code>--start-x-sequence</code>" and "<code>--start-y-sequence</code>" command-line options. "<code>--end-x-sequence</code>" and "<code>--end-y-sequence</code>" define the final coords for the zoomed area. <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="hs-mm.sim.zbox.png"><IMG SRC="hs-mm.sim.zbox.s.png" ALT="Marking area to be zoomed" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="hs-mm.sim.zbox.png">PNG</a>]&nbsp;[<a href="hs-mm.sim.zbox.ps">PS</a>]&nbsp;[<a href="hs-mm.sim.zbox.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -303,6 +367,7 @@ gff2aplot.pl                                       \
     2> <a href="hs-mm.sim.zbox.log">hs-mm.sim.zbox.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+Above picture highlights the area being enlarged in the plot below. We defined the fill color of the highlighted area (set to violet in <a href="mhc2.rc">mhc2.rc</a>) to be the same for the bottom figure (set to violet in <a href="mhc2+sgp1.rc">mhc2+sgp1.rc</a>). We are including gene predictions obtained by SGP1 program (<a href="index.html#wiehe:2001">Wiehe et al, 2001</a>). In both plots, the group (say here "genes") labels angle is set on "<a href="mhc2labels.rc">mhc2labels.rc</a>" customization file.
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="hs-mm.sim.zoom.png"><IMG SRC="hs-mm.sim.zoom.s.png" ALT="Zooming into LMP2 region" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="hs-mm.sim.zoom.png">PNG</a>]&nbsp;[<a href="hs-mm.sim.zoom.ps">PS</a>]&nbsp;[<a href="hs-mm.sim.zoom.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -327,7 +392,11 @@ gff2aplot.pl                                       \
      > <a href="hs-mm.sim.zoom.ps">hs-mm.sim.zoom.ps</a>                           \
     2> <a href="hs-mm.sim.zoom.log">hs-mm.sim.zoom.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
+<center><HR width="80%" class="rtbl"></center>
 <P>
+<A NAME="wiehe:2001"><B>T. Wiehe, S. Gebauer-Jung, T. Mitchell-Olds and R. Guig&oacute;</B></A> <BR class="kk">
+&nbsp;&nbsp;&nbsp;&nbsp;"SGP-1: prediction and validation of homologous genes based on sequence alignments." <BR class="kk">
+&nbsp;&nbsp;&nbsp;&nbsp;<I>Genome Research</I>, 11(9):1574-1583, 2001. <BR class="kk">
 </P>
 
 </td>

@@ -3,8 +3,8 @@
 ###                            RUNNING gff2aplot                             ###
 ###                                                                          ###
 ###                               User: lopep                                ###
-###                      Date: Thu Feb 27 17:19:48 2003                      ###
-###                               Perl: v5.6.1                               ###
+###                      Date: Fri Jun  6 18:28:38 2003                      ###
+###                               Perl: v5.8.0                               ###
 ################################################################################
 ################################################################################
 ###                             SETTING DEFAULTS                             ###
@@ -31,7 +31,7 @@
 ###
 ################################################################################
 ###                       COMMAND-LINE OPTIONS CHECKED                       ###
-###           0 wallclock secs ( 0.05 usr +  0.00 sys =  0.05 CPU)           ###
+###           0 wallclock secs ( 0.02 usr +  0.01 sys =  0.03 CPU)           ###
 ################################################################################
 ###
 ################################################################################
@@ -147,7 +147,7 @@ OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003600]
 OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003639]
 ################################################################################
 ###                               DATA LOADED                                ###
-###           3 wallclock secs ( 2.74 usr +  0.09 sys =  2.83 CPU)           ###
+###           3 wallclock secs ( 3.45 usr +  0.21 sys =  3.66 CPU)           ###
 ################################################################################
 ###
 ################################################################################
@@ -178,32 +178,32 @@ OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003639]
 |  *- Sequence: HSCKBG:MMCRKNB
 |  |  *- Source: ssitesim
 |  |  |  *- Strand: ++
-|  |  |  |  *- Group: 0.64
-|  |  |  |  |         Sorted 10 elements.
-|  |  |  |  *- Group: 0.73
-|  |  |  |  |         Sorted 4 elements.
-|  |  |  |  *- Group: 0.82
-|  |  |  |  |         Sorted 4 elements.
 |  |  |  |  *- Group: 0.91
 |  |  |  |  |         Sorted 11 elements.
-|  |  |  |  *- Group: 1.00
-|  |  |  |  |         Sorted 2 elements.
-|  |  |  |  *- Group: 0.09
-|  |  |  |  |         Sorted 1450 elements.
-|  |  |  |  *- Group: 0.18
-|  |  |  |  |         Sorted 1123 elements.
+|  |  |  |  *- Group: 0.64
+|  |  |  |  |         Sorted 10 elements.
 |  |  |  |  *- Group: 0.27
 |  |  |  |  |         Sorted 601 elements.
-|  |  |  |  *- Group: 0.36
-|  |  |  |  |         Sorted 291 elements.
+|  |  |  |  *- Group: 0.09
+|  |  |  |  |         Sorted 1450 elements.
+|  |  |  |  *- Group: 0.82
+|  |  |  |  |         Sorted 4 elements.
+|  |  |  |  *- Group: 0.73
+|  |  |  |  |         Sorted 4 elements.
 |  |  |  |  *- Group: 0.45
 |  |  |  |  |         Sorted 115 elements.
+|  |  |  |  *- Group: 1.00
+|  |  |  |  |         Sorted 2 elements.
+|  |  |  |  *- Group: 0.36
+|  |  |  |  |         Sorted 291 elements.
+|  |  |  |  *- Group: 0.18
+|  |  |  |  |         Sorted 1123 elements.
 |  |  |  |  *- Group: 0.55
 |  |  |  |  |         Sorted 28 elements.
 |  |  |  |  `Sorted 11 groups.
 ################################################################################
 ###                             ELEMENTS SORTED                              ###
-###           0 wallclock secs ( 0.56 usr +  0.00 sys =  0.56 CPU)           ###
+###           1 wallclock secs ( 0.52 usr +  0.01 sys =  0.53 CPU)           ###
 ################################################################################
 ###
 ################################################################################
@@ -230,7 +230,7 @@ OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003639]
 ###     Are X/Y axes going to have same length ?  YES 
 ################################################################################
 ###                     PAGE LAYOUT SET for CURRENT PLOT                     ###
-###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+###           0 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)           ###
 ################################################################################
 ###
 ################################################################################
@@ -250,10 +250,10 @@ OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003639]
 ###---> PostScript Page FINISHED...
 ################################################################################
 ###                       WRITING POSTSCRIPT FINISHED                        ###
-###           2 wallclock secs ( 1.52 usr +  0.00 sys =  1.52 CPU)           ###
+###           2 wallclock secs ( 1.67 usr +  0.00 sys =  1.67 CPU)           ###
 ################################################################################
 ###
 ################################################################################
 ###                          gff2aplot HAS FINISHED                          ###
-###        [  5 wallclock secs ( 4.87 usr +  0.09 sys =  4.96 CPU) ]         ###
+###        [  6 wallclock secs ( 5.67 usr +  0.23 sys =  5.90 CPU) ]         ###
 ################################################################################

@@ -1,4 +1,4 @@
 #
-# L #
+# F #
 alignment::hide=off
-alignment::feature_color=lightorange
+alignment::alignment_color=lightorange

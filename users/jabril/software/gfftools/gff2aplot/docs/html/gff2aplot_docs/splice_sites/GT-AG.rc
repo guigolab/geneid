@@ -10,8 +10,7 @@ x_label=Homo sapiens
 x_label_font=helvetica-boldoblique
 y_label=Mus musculus
 y_label_font=helvetica-boldoblique
-ribbon_color_merge=on
-color_merge_factor=0.5
+ribbon_color_merge=off
 aplot_score_range=0..1
 #
 # G #

@@ -4,7 +4,7 @@
  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
  <META NAME="Generator" CONTENT="Hacker Hands">
  <META NAME="author" CONTENT="Josep F. Abril">
-  <!-- $Id: index.html,v 1.1 2003-06-05 18:18:22 jabril Exp $ -->
+  <!-- $Id: index.html,v 1.2 2003-06-10 10:31:39 jabril Exp $ -->
   <META NAME="keywords"    CONTENT="GFF2APLOT HOWTOs, tutorials, GFF, gff-format, Genomic Pairwise Alignments PostScript Plots, Genomic Analysis, Homology, Sinteny, Bioinformatics, WUBLAST">
   <META NAME="description" CONTENT="GFF2APLOT HOWTOs: Analizing data from WU-BLAST alignment output.">
  <TITLE>GFF2APLOT HOWTOs: Plotting WU-BLAST Results.</TITLE>
@@ -167,40 +167,53 @@ Bitmaps for the examples were generated as PNGs (Portable Network Graphics). If 
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+As we have seen in <A HREF="../first_contact/index.html#GFF" onMouseover="window.status='GFF2APLOT HOWTOs: First Contact';">"Introduction to <code>gff2aplot</code>"</A> tutorial, there are three basic formats in which we can provide alignment input data to  the program. When visualizing data obtained with NCBI-BLAST (<a href="index.html#altschul:1997">Altschul et al, 1997</a>) or WU-BLAST (<a href="index.html#gish:2003">Gish, 1996-2003</a>), we have to transform that output into GFF records. We can use <code>parseblast</code>, included within the <code>gff2aplot</code> distribution tarball. It can parse BLAST files into any of the three alignment formats described above. <BR>
+The "<code>--aplot</code>" command-line switch forces the output to APLOT pseudo-GFF format (<A HREF="../first_contact/index.html#GFF" onMouseover="window.status='GFF2APLOT HOWTOs: First Contact';">see "E" case from the introductory tutorial</A>). Input file was obtained using WU-BLAST BLASTN, TAF6 genomic region from human and maouse was compared (mouse <CODE>NM_009315</CODE> as query and human <CODE>NM_005641</CODE> as target sequences respectively): <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
-$BIN/parseblast.pl --verbose --no-frame --aplot             \
-                   -- <a href="taf6.mmhs.genomic.blastn">taf6.mmhs.genomic.blastn</a>              \
-                    > <a href="taf6.mmhs.genomic.blastn.aplot.gff">taf6.mmhs.genomic.blastn.aplot.gff</a>    \
-                   2> <a href="taf6.mmhs.genomic.blastn.aplotgff.log">taf6.mmhs.genomic.blastn.aplotgff.log</a> <BR class="hh">
+parseblast.pl --verbose --no-frame --aplot             \
+              -- <a href="taf6.mmhs.genomic.blastn">taf6.mmhs.genomic.blastn</a>              \
+               > <a href="taf6.mmhs.genomic.blastn.aplot.gff">taf6.mmhs.genomic.blastn.aplot.gff</a>    \
+              2> <a href="taf6.mmhs.genomic.blastn.aplotgff.log">taf6.mmhs.genomic.blastn.aplotgff.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+Here, we process the same BLASTN input file, but we are going to produce GFF pseudo-version2 (<A HREF="../first_contact/index.html#GFF" onMouseover="window.status='GFF2APLOT HOWTOs: First Contact';">see "D" case from the introductory tutorial</A>). In that case a set of extra attibutes follows the grouping tag but do not conform to the tag-value model of attributes from GFF-version2. This can be achieved by simultaneously passing the "<code>--fullgff</code>" and "<code>--compact-tags</code>" command-line switches: <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
-$BIN/parseblast.pl --verbose --no-frame            \
-                   --fullgff --compact-tags        \
-                   -- <a href="taf6.mmhs.genomic.blastn">taf6.mmhs.genomic.blastn</a>     \
-                    > <a href="taf6.mmhs.genomic.blastn.gff">taf6.mmhs.genomic.blastn.gff</a> \
-                   2> <a href="taf6.mmhs.genomic.blastn.log">taf6.mmhs.genomic.blastn.log</a> <BR class="hh">
+parseblast.pl --verbose --no-frame            \
+              --fullgff --compact-tags        \
+              -- <a href="taf6.mmhs.genomic.blastn">taf6.mmhs.genomic.blastn</a>     \
+               > <a href="taf6.mmhs.genomic.blastn.gff">taf6.mmhs.genomic.blastn.gff</a> \
+              2> <a href="taf6.mmhs.genomic.blastn.log">taf6.mmhs.genomic.blastn.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+Still working with the same BLASTN file, if we want to get tight to GFF format version 2 (<A HREF="../first_contact/index.html#GFF" onMouseover="window.status='GFF2APLOT HOWTOs: First Contact';">see "C" case from the introductory tutorial</A>), to encode the alignment records, then "<code>--fullgff</code>" alone suffices, as shown below: <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
-$BIN/parseblast.pl --verbose --no-frame --fullgff       \
-                   -- <a href="taf6.mmhs.genomic.blastn">taf6.mmhs.genomic.blastn</a>          \
-                    > <a href="taf6.mmhs.genomic.blastn.full.gff">taf6.mmhs.genomic.blastn.full.gff</a> \
-                   2> <a href="taf6.mmhs.genomic.blastn.full.log">taf6.mmhs.genomic.blastn.full.log</a> <BR class="hh">
+parseblast.pl --verbose --no-frame --fullgff       \
+              -- <a href="taf6.mmhs.genomic.blastn">taf6.mmhs.genomic.blastn</a>          \
+               > <a href="taf6.mmhs.genomic.blastn.full.gff">taf6.mmhs.genomic.blastn.full.gff</a> \
+              2> <a href="taf6.mmhs.genomic.blastn.full.log">taf6.mmhs.genomic.blastn.full.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+The following example takes input alignment from a WU-BLAST TBLASTX alignment (on the same sequences as for the BLASTN results), outputing APLOT records: <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
-$BIN/parseblast.pl --verbose --no-frame --aplot              \
-                   -- <a href="taf6.mmhs.genomic.tblastx">taf6.mmhs.genomic.tblastx</a>              \
-                    > <a href="taf6.mmhs.genomic.tblastx.aplot.gff">taf6.mmhs.genomic.tblastx.aplot.gff</a>    \
-                   2> <a href="taf6.mmhs.genomic.tblastx.aplotgff.log">taf6.mmhs.genomic.tblastx.aplotgff.log</a> <BR class="hh">
+parseblast.pl --verbose --no-frame --aplot              \
+              -- <a href="taf6.mmhs.genomic.tblastx">taf6.mmhs.genomic.tblastx</a>              \
+               > <a href="taf6.mmhs.genomic.tblastx.aplot.gff">taf6.mmhs.genomic.tblastx.aplot.gff</a>    \
+              2> <a href="taf6.mmhs.genomic.tblastx.aplotgff.log">taf6.mmhs.genomic.tblastx.aplotgff.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+In all the examples, we have disabled to parse the frame from the BLAST input file. BLAST programs encode the frame as [ 1, 2, 3 ], but GFF standard requires it to be coded as [ 0, 1, 2 ]. <code>parseblast</code> is not able to recalculate the frame for reverse strand hits, as it will require the length of the corresponding sequence from the database (also known as targets). The output from BLAST tools only provides the length of the query sequence and the total length of the database. If you really need to obtain the frames for all the hits, you might require another program, not provided here, to recalculate them on the <code>parseblast</code> GFF output.
+</P>
+<center><HR width="80%" class="rtbl"></center>
+<P>
+<A NAME="altschul:1997"><B>S. F. Altschul, T. Madden, A. Schaffer, J. Zhang, Z. Zhang, W. Miller and D. Lipman</B></A> <BR class="kk">
+&nbsp;&nbsp;&nbsp;&nbsp;"Gapped BLAST and PSI-BLAST: a new generation of protein database search programs." <BR class="kk">
+&nbsp;&nbsp;&nbsp;&nbsp;<I>Nucleic Acids Research</I>, 25(17):3389-3402, 1997. <BR class="kk"><BR>
+<A NAME="gish:2003"><B>W. Gish</B></A> <BR class="kk">
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>WU-BLAST</CODE>: <a href="http://blast.wustl.edu"><code>http://blast.wustl.edu</code></a> (1996-2003). <BR class="kk">
 </P>
 
 
@@ -216,7 +229,7 @@ $BIN/parseblast.pl --verbose --no-frame --aplot              \
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+We run <code>gff2aplot</code> with the default settings on the WU-BLAST BLASTN results after being parsed with <code>parseblast</code>. The next two commands must produce the same plots, as the alignment data is the same (in compact GFF2 format and in APLOT pseudo-GFF respectively): <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="taf6.mmhs.genomic.blastn.png"><IMG SRC="taf6.mmhs.genomic.blastn.s.png" ALT="Empty Plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="taf6.mmhs.genomic.blastn.png">PNG</a>]&nbsp;[<a href="taf6.mmhs.genomic.blastn.ps">PS</a>]&nbsp;[<a href="taf6.mmhs.genomic.blastn.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -239,7 +252,8 @@ gff2aplot.pl                              \
     2> <a href="taf6.mmhs.genomic.blastn.aplot.log">taf6.mmhs.genomic.blastn.aplot.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
-</P>
+We do the same for the WU-BLAST TBLASTX alignment: <BR>
+</P> 
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="taf6.mmhs.genomic.tblastx.aplot.png"><IMG SRC="taf6.mmhs.genomic.tblastx.aplot.s.png" ALT="Empty Plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="taf6.mmhs.genomic.tblastx.aplot.png">PNG</a>]&nbsp;[<a href="taf6.mmhs.genomic.tblastx.aplot.ps">PS</a>]&nbsp;[<a href="taf6.mmhs.genomic.tblastx.aplot.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
 gff2aplot.pl                               \
@@ -267,7 +281,7 @@ gff2aplot.pl                               \
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+We are going to add some customization to the last plots, both the BLASTN and the TBLASTX one. We enable the axes annotation projections on the alignment panels. See the <a href="taf6.tblastx.rc">taf6.tblastx.rc</a> customization file to see what we have changed. <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="taf6.mmhs.genomic.blastn.aplot_conf.png"><IMG SRC="taf6.mmhs.genomic.blastn.aplot_conf.s.png" ALT="Empty Plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="taf6.mmhs.genomic.blastn.aplot_conf.png">PNG</a>]&nbsp;[<a href="taf6.mmhs.genomic.blastn.aplot_conf.ps">PS</a>]&nbsp;[<a href="taf6.mmhs.genomic.blastn.aplot_conf.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -284,8 +298,6 @@ gff2aplot.pl                                                    \
      > <a href="taf6.mmhs.genomic.blastn.aplot_conf.ps">taf6.mmhs.genomic.blastn.aplot_conf.ps</a>                   \
     2> <a href="taf6.mmhs.genomic.blastn.aplot_conf.log">taf6.mmhs.genomic.blastn.aplot_conf.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
-<P>
-</P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="taf6.mmhs.genomic.tblastx.aplot_conf.png"><IMG SRC="taf6.mmhs.genomic.tblastx.aplot_conf.s.png" ALT="Empty Plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="taf6.mmhs.genomic.tblastx.aplot_conf.png">PNG</a>]&nbsp;[<a href="taf6.mmhs.genomic.tblastx.aplot_conf.ps">PS</a>]&nbsp;[<a href="taf6.mmhs.genomic.tblastx.aplot_conf.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
 gff2aplot.pl                                                     \
@@ -317,7 +329,7 @@ gff2aplot.pl                                                     \
 </TD></TR>
 </TABLE>
 <P> <BR class="hh">
-
+As <code>gff2aplot</code> does not depend on an underlying alignment algorithm, we can do things other tools cannot do, as merging results from different analyses. Here we are going to combine the BLATN and the TBLASTX alignments: <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="taf6.mmhs.genomic.blast.merge.png"><IMG SRC="taf6.mmhs.genomic.blast.merge.s.png" ALT="Empty Plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="taf6.mmhs.genomic.blast.merge.png">PNG</a>]&nbsp;[<a href="taf6.mmhs.genomic.blast.merge.ps">PS</a>]&nbsp;[<a href="taf6.mmhs.genomic.blast.merge.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
@@ -336,6 +348,7 @@ gff2aplot.pl                                   \
     2> <a href="taf6.mmhs.genomic.blast.merge.log">taf6.mmhs.genomic.blast.merge.log</a> <BR class="hh">
 </PRE></TD><TD class="codebg">&nbsp;&nbsp;</TD></TR></TABLE></CENTER></P>
 <P>
+Showing all the alignment features with the same color does not provide us much information when merging datasets. We set different colors to distinguish between BLASTN and TBLASTX data, darkgreen and drakblue respectively, via command-line switches, as you can see in the next command-line: <BR>
 </P>
 <P><CENTER><TABLE class="userspace" border=0 cellpadding=0 cellspacing=0><TR><TD class="userspace" ALIGN=CENTER VALIGN=MIDDLE><CENTER><a href="taf6.mmhs.genomic.blast.merge_conf.png"><IMG SRC="taf6.mmhs.genomic.blast.merge_conf.s.png" ALT="Empty Plot" HEIGHT=150 WIDTH=120 BORDER=1></a> <BR> &nbsp;[<a href="taf6.mmhs.genomic.blast.merge_conf.png">PNG</a>]&nbsp;[<a href="taf6.mmhs.genomic.blast.merge_conf.ps">PS</a>]&nbsp;[<a href="taf6.mmhs.genomic.blast.merge_conf.pdf">PDF</a>]&nbsp; <BR>
 </CENTER></TD><TD class="codebg">&nbsp;&nbsp;</TD><TD class="codebg" ALIGN=LEFT>&nbsp; <BR class="hh"><PRE class="codefg">
