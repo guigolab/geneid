@@ -1,9 +1,5 @@
 % -*- mode: Noweb; noweb-code-mode: perl-mode -*-
 \documentclass[10pt]{article}
-%
-% I believe that the time is ripe for significantly better documentation of programs, and that we can best achieve this by considering programs to be works of literature. Hence, my title: "Literate Programming." Let us change our traditional attitude to the construction of programs: Instead of imagining that our main task is to instruct a *computer* what to do, let us concentrate rather on explaining to *human beings* what we want a computer to do. ---Donald Knuth
-%
-% Without wanting to be elitist, the thing that will prevent literate programming from becoming a mainstream method is that it requires thought and discipline. The mainstream is established by people who want fast results while using roughly the same methods that everyone else seems to be using, and literate programming is never going to have that kind of appeal. This doesn't take away from its usefulness as an approach.  ---Patrick TJ McPhee
 % 
 % I'm trying to learn Literate Programming. I will use sgp2 as an LP exercise.
 %
@@ -17,7 +13,7 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.nw,v 1.1 2000-10-09 17:59:59 jabril Exp $
+% $Id: sgp2.nw,v 1.2 2000-10-10 20:07:52 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
@@ -38,7 +34,7 @@
 
 % TITLE
 \title{Sintenic Gene Prediction Tool}
-\author{Josep F. Abril\\Roderic Guig\'o}
+\author{Josep F. Abril\\Roderic Guig\'o} %'
 
 \begin{document}
 
@@ -46,87 +42,124 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.nw,v 1.1 2000-10-09 17:59:59 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.nw,v 1.2 2000-10-10 20:07:52 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
-The initial goal for Josep F. Abril will be to implement a \cd{perl} version of \sgp{}, which works as the current shell implementation.
+The initial goal for Josep F. Abril will be to implement a \cd{perl} version of \sgp{}, which works like the current shell implementation. Secondary goals are to introduce myself into CVS (Concurrent Version Control) project management and Literate Programming (this document will serve as example).
 \end{abstract}
 
 \sctn{Program Basic Outline}
 
-We shall call our program \sgp{}, we are developing a parallel branch for Sintenic Gene-Prediction, the other branch is developed by Thomas Wiehe. Our new version is written as a [[noweb]] file named [[sgp2.nw]]. From that file we can obtain both the code and the documentation. A short script named [[aol]] converts the '[[.nw]]' to '[[.tex]]' ---the \LaTeX{} documentation--- and '[[.pl]]' ---the real program--- (Wow!!!). What [[aol]] does is:
-
-\begin{enumerate}
-\item Extracts program code from the [[noweb]] file:\\
-\centerline{[[notangle -L -Rsgp2.pl sgp2.nw > sgp2.pl]]}
-\item Extracts program documentation and \LaTeX{}ing it:\\[1ex]
-\centerline{\shortstack{
-[[noweave -x sgp2.nw > sgp2.tex]]\\
-[[latex sgp2.tex ; dvips sgp2.dvi -o sgp2.ps]]
-}}
-\end{enumerate}
-
-Our initial program outline (our root chunk) looks like:
+Our initial program outline (our root chunk) looks like:\\[1ex]
 
 <<sgp2.pl>>=
-#!/usr/bin/perl -w
-use strict;
-
-my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.1 2000-10-09 17:59:59 jabril Exp $ ';
-my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
-my $Start = time;
-
+<<shebang>>
+<<version control>>
 <<declare uses>>
+
+### VARS ###
+
 <<declare variables>>
 <<define defaults>>
+
+### SUBS ###
+
 <<global subroutines>>
 <<get options>>
+
+### MAIN SUBS ###
+
 <<run blast>>
-<<process HSPs>>
+<<extract HSPs>>
 <<run geneid>>
 <<graphical output>>
-<<Main Loop>>
 
-exit(1);
+### MAIN LOOP ###
+
+<<Main Loop>>
 
 ### EOF ###
 
 <<POD man page trailer>>
-@ %def $PROGRAM $VERSION $Start
+@ % 
 
-\begin{description}
-\desc{\cd{perl -w}} Prints all sorts of useful and interesting warning messages at compile time. 
+<<shebang>>=
+#!/usr/bin/perl -w
+my $Start = time;
+@  %def $Start
 
-\desc{\cd{use strict;}} Restrict unsafe constructs, like attempting to use missed symbolic references ('\cv{refs}'), undeclared variables ('\cv{vars}') or not predeclared subroutine ('\cv{subs}').
-\end{description}
+'\cd{perl -w}' prints all sorts of useful and interesting warning messages at compile time.
+
+[[$Start]] %$
+contains program starting time (seconds since \textsc{Unix} ``epoch''), which will be used by timing function to calculate for how long was running our program.
+
+<<version control>>=
+my $PROGRAM = "sgp2";
+my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.2 2000-10-10 20:07:52 jabril Exp $ ';
+my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
+@ %def $PROGRAM $VERSION @tmp_ver
+
+Take into account that here is shown [[sgp2.nw]] versions, but once the perl script is extracted and commited then it follows [[sgp2.pl]] version numbering.
+
+<<declare uses>>=
+use strict;
+@
+
+'\cd{use strict;}' restricts unsafe constructs, like attempting to use missed symbolic references ('\cv{refs}'), undeclared variables ('\cv{vars}') or not predeclared subroutine ('\cv{subs}').
 
 \sctn{Main Program Loop}
 
 <<Main Loop>>=
 &Which_Options();
 
+&Run_Blast()   if $blast_flg;
+
+&Extract_HSP() if $hsps_flg;
+
+&Run_geneid()  if $geneid_flg;
+
+&Make_Plots()  if $plots_flg; 
 
 &get_exec_time(time);
-@
+
+exit(1);
+@ 
 
 \subsctn{Default values setting}
 
 <<define defaults>>=
+my $NF = 0; # number of input files
+my $SGP2 = ''; # main path to SGP2 binaries, scripts and params
 
+@ %def $NF $SGP2
 
-@
-
-\sctn{Parsing Command-line Options}
+\subsctn{Parsing Command-line Options}
 
 <<declare uses>>=
 use Getopt::Long;
 Getopt::Long::Configure qw/ bundling pass_through /;
+@ 
+
+\begin{description}
+\desc{\cd{use Getopt::Long;}} This module implements an extended getopt function called \cd{GetOptions()}. This function adheres to the POSIX syntax for command line options, with GNU extensions. In general, this means that options having long names instead of single letters are introduced with a double dash "\-\-". 
+
+\desc{\cd{Getopt::Long::Configure qw(} \cv{bundling} \cv{pass\_through} \cd{);}} \cd{GetOptions} can be configured by calling subroutine \cd{Getopt::Long::Configure}. This subroutine takes a list of quoted strings, each specifying a configuration option to be set. Options can be reset by prefixing with \cv{no\_}. 
+
+ \begin{description}
+ \desc{\cv{bundling}} Support for bundling of command line options, as was the case with the more traditional single-letter approach (introduced with a single dash "-"), is provided but not enabled by default. 
+
+ \desc{\cv{pass\_through}} Unknown options are passed through in \cd{@ARGV} instead of being flagged as errors. This makes it possible to write wrapper scripts that process only part of the user supplied options, and passes the remaining options to some other program.
+ \end{description}
+\end{description}
+
 <<declare variables>>=
 # GetOptions Variables
 my ( $seq1,$seq2,$geneid_opt,$geneid_param,$blast_opt,$score_cutoff,
      $shrink,$tbx,$hsp,$ofn,$ps_output,$verbose_flg,$help_flg );
+@ %def $seq1 $seq2 $geneid_opt $geneid_param $blast_opt $score_cutoff $shrink $tbx $hsp $ofn $ps_output $verbose_flg $help_flg
+%$
+
 <<get options>>=
 sub Which_Options() {
     GetOptions( 
@@ -146,25 +179,17 @@ sub Which_Options() {
                 );
     &prt_Help if $help_flg;
 }; # sub Which_Options
-@ %def $seq1 $seq2 $geneid_opt $geneid_param $blast_opt $score_cutoff $shrink $tbx $hsp $ofn $ps_output $verbose_flg $help_flg
-
-\begin{description}
-\desc{\cd{use Getopt::Long;}} This module implements an extended getopt function called \cd{GetOptions()}. This function adheres to the POSIX syntax for command line options, with GNU extensions. In general, this means that options having long names instead of single letters are introduced with a double dash "\-\-". 
-
-\desc{\cd{Getopt::Long::Configure qw(} \cv{bundling} \cv{pass\_through} \cd{);}} \cd{GetOptions} can be configured by calling subroutine \cd{Getopt::Long::Configure}. This subroutine takes a list of quoted strings, each specifying a configuration option to be set. Options can be reset by prefixing with \cv{no\_}. 
-
- \begin{description}
- \desc{\cv{bundling}} Support for bundling of command line options, as was the case with the more traditional single-letter approach (introduced with a single dash "-"), is provided but not enabled by default. 
-
- \desc{\cv{pass\_through}} Unknown options are passed through in \cd{@ARGV} instead of being flagged as errors. This makes it possible to write wrapper scripts that process only part of the user supplied options, and passes the remaining options to some other program.
- \end{description}
-\end{description}
+@ %def &Which_Options 
+%$
 
 \subsctn{Printing help: [[prt_Help()]]}
 
 <<declare uses>>=
 use Pod::Text;
-<<declare variables>>=
+@
+
+\cd{use Pod::Text;} This module converts POD data to formatted ASCII text. This defines the single function \cd{pod2text([\cv{-a},] [\cv{-width}\cp{N},] \cp{inputfile})}, that can take the following options: '\cv{-a}' for an alternative output format, '\cv{-width}' to set max terminal width. '\cp{inputfile}' must have POD format.
+
 <<global subroutines>>=
 # Prints help 
 sub prt_Help() {
@@ -180,13 +205,10 @@ sub prt_Help() {
     unlink($tmp_pod_file) or die "Can't delete $tmp_pod_file: $!\n";
     exit(1);
 } # sub prt_Help
-@ %$
+@ %def &prt_Help
+%$
 
-\begin{description}
-\desc{\cd{use Pod::Text;}} This module converts POD data to formatted ASCII text. The single function \cd{pod2text([\cv{-a},] [\cv{-width}\cp{N},] \cp{inputfile})} can take the following options: '\cv{-a}' for an alternative output format, '\cv{-width}' to set max terminal width. '\cp{inputfile}' must have POD format.
-\desc{\cd{unlink()}} This command deletes a list of files. Returns the number of files successfully deleted.
-
-\end{description}
+\cd{unlink()} This command deletes a list of files. Returns the number of files successfully deleted.
 
 \subsctn{Some general subroutines}
 
@@ -194,26 +216,34 @@ sub prt_Help() {
 <<declare variables>>=
 <<global subroutines>>=
 # Reporting IN/OUT progress.
-sub prt_progress {
+sub prt_progress() {
     $verbose_flg && do {
         print STDERR ".";
         (($_[0] % 50) == 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n";
     };
 } # END_SUB: prt_progress
 #
-sub prt_foeprg {
+sub prt_foeprg() {
     $verbose_flg && ((($_[0] % 50) != 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n" );
 } # END_SUB: prt_foeprg
-
 # Get a fixed length string from a given string and filling char/s.
-sub fill_right { $_[0].($_[2] x ($_[1] - length($_[0]))) }
-sub fill_left  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
-
+sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
 # returns the max value from input array
-sub max { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z; } 
+sub max() { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z; } 
+@ %def &prt_progress &prt_foeprg &fill_right &fill_left &max
 
+\begin{description}
+\desc{\cv{prt\_progress()}}
+\desc{\cv{prt\_foeprg()}}
+\desc{\cv{fill\_right()}}
+\desc{\cv{fill\_left()}}
+\desc{\cv{max()}}
+\end{description}
+
+<<global subroutines>>=
 # Timing.
-sub get_exec_time {
+sub get_exec_time() {
     $verbose_flg && do {
         my $End = $_[0];
         my ($c,$s,$m,$h,$r);
@@ -232,39 +262,134 @@ print STDERR <<EOF;
 EOF
     };
 } # END_SUB: get_exec_time
-@ %$
+@ %def &get_exec_time
+%$
+
+\cv{get\_exec\_time()}
 
 \sctn{Running [[blast]] on sequences}
 
 <<run blast>>=
-
-@
+# Runnig blast
+sub Run_Blast() {
+} # END_SUB: Run_Blast
+@ %def &Run_Blast
 
 \sctn{Processing HSPs from [[blast]]}
 
-<<process HSPs>>=
-
-@
+<<extract HSPs>>=
+# Extracting HSPs
+sub Extract_HSP() {
+} # END_SUB: Extract_HSP
+@ %def &Extract_HSP
 
 \sctn{Running [[geneid]] on SRs}
 
 <<run geneid>>=
-
-@
+# Running geneid
+sub Run_geneid() {
+} # END_SUB: Run_geneid
+@ %def &Run_geneid
 
 \sctn{Obtaining figures}
 
 <<graphical output>>=
-
-@
+# Running gff2ps and aplot
+sub Make_Plots() {
+} # END_SUB: Make_Plots
+@ %def &Make_Plots
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%APPENDIX
 
-\newpage\appendix
+\newpage
+\appendix
+
+\sctn{Literate Programming}\vspace{2ex}
+
+\begin{small}
+\begin{quote}\slshape
+I believe that the time is ripe for significantly better documentation
+of programs, and that we can best achieve this by considering programs
+to be works of literature. Hence, my title: "Literate Programming."
+Let us change our traditional attitude to the construction of
+programs: Instead of imagining that our main task is to instruct a
+*computer* what to do, let us concentrate rather on explaining to
+*human beings* what we want a computer to do.
+\upshape\flushright --- \textbf{Donald Knuth}
+\end{quote}\vspace{2ex}
+
+\begin{quote}\slshape
+Without wanting to be elitist, the thing that will prevent Literate
+Programming from becoming a mainstream method is that it requires
+thought and discipline. The mainstream is established by people who
+want fast results while using roughly the same methods that everyone
+else seems to be using, and Literate Programming is never going to
+have that kind of appeal. This doesn't take away from its usefulness
+as an approach.
+\upshape\flushright --- \textbf{Patrick TJ McPhee}
+\end{quote}\vspace{2ex}
+
+\begin{quote}\slshape
+A basic principle of data processing teaches the folly of trying to
+maintain independent files in synchronism. It is far better to combine
+them into one file with each record containing all the information
+both files held concerning a given key.  Yet our practice in
+programming documentation violates our own teaching. We typically
+attempt to maintain a machine-readable form of a program and an
+independent set of human-readable documents, consisting of prose and
+flow charts. The results in fact confirm our teachings about the folly
+of separate files.  Program documentation is notoriously poor, and its
+maintenance is worse.  Changes made in the program do not promptly,
+accurately, and invariably appear in the paper. The solution, I think,
+is to merge the files, to incorporate the documentation in the source
+program. This is at once a powerful incentive toward proper
+maintenance, and an insurance that the documentation will always be
+handy to the program user. Such programs are called
+self-documenting...  
+\upshape\flushright --- \textbf{Frederick Brooks}
+\end{quote}\vspace{2ex}
+
+\begin{quote}\slshape
+Top-down design and successive refinement attack a programming task by
+specifying it in the most general terms, then expanding these into
+more and more specific and detailed actions, until the whole program
+is complete. Structured design is the process of controlling the
+overall design of a system or program so the pieces fit together
+neatly, yet remain sufficiently decoupled that they may be
+independently modified.  ... Each of these disciplines can materially
+improve programmer productivity and the quality of code produced.
+\upshape\flushright --- \textbf{Kernighan and Plauger}
+\end{quote}\vspace{4ex}
+\end{small}
+
+We shall call our program \sgp{}, we are developing a parallel branch
+for Sintenic Gene-Prediction, the other branch is developed by Thomas
+Wiehe. Our new version is written as a [[noweb]] file named
+[[sgp2.nw]]. From that file we can obtain both the code and the
+documentation. A short script named [[aol]] converts the '[[.nw]]' to
+'[[.tex]]' ---the \LaTeX{} documentation--- and '[[.pl]]' ---the real
+program--- (Wow!!!). What [[aol]] does is:
+
+\begin{enumerate}
+\item Extracts program code from the [[noweb]] file:\\[1ex]
+[[notangle -L -Rsgp2.pl sgp2.nw > sgp2.tmp]]
+\item Swaps first line ([[#line]]) with second ([[#!/]]\ldots) to make it runnable:\\[1ex]
+[[perl -ne '$. > 2  && do { print; next }; 
+          $. == 1 && do { split / /, $_, 3; $n = "$_[0] ".(++$_[1])." $_[2]"};
+          $. == 2 && ( print "$_$n" );
+         ' sgp2.tmp > sgp2.pl]]
+\item Extracts program documentation and \LaTeX{}'ing it:\\[1ex]
+[[noweave -x sgp2.nw > sgp2.tex]]\\[1ex]
+[[latex sgp2.tex ; dvips sgp2.dvi -o sgp2.ps]]
+\end{enumerate}
+
+\newpage
 
 \sctn{Man Pages}
 
-The documentation for [[perl]] programs is written in a simple markup language called POD (Plain Old Documentation). Translators exist for [[pod2man]], [[pod2text]], [[pod2html]], [[pod2latex]], and [[pod2fm]]. The idea is to have the online documentation included with the source.
+The documentation for [[perl]] programs is written in a simple markup language called POD (Plain Old Documentation). Translators exist for [[pod2man]], [[pod2text]], [[pod2html]], [[pod2latex]], and [[pod2fm]]. 
+
+The idea is to have the online documentation included with the source. That is possible with [[__DATA__]] tag, which defines a chunk of data within the same file.
 %% TODO: define POD tags and which style was used for building up this man. 
 
 <<POD man page trailer>>=
@@ -277,9 +402,9 @@ $PROGRAM ($VERSION) - Improving Gene Prediction with Sinteny.
 =head1 SYNOPSIS
 
     
-    $PROGRAM [-hv] [-o \'options\'] [-g \'options\'] \
-             [-P filename] [-p filename] [-k filename] \
-             [-c value] [-s value] -1 seqfile_1 -2 seqfile_2
+    $PROGRAM [-hv] [-o 'options'] [-g 'options'] \
+      [-P filename] [-p filename] [-k filename] \
+      [-c value] [-s value] -1 seqfile_1 -2 seqfile_2
 
 =head1 DESCRIPTION
 
@@ -357,11 +482,11 @@ Report any problem to: B<jabril@imim.es>
 =head1 AUTHOR
 
     
-Roderic Guigo  B<rguigo@imim.es>
+Roderic Guigo   : B<rguigo@imim.es>
 
-Josep F. Abril B<jabril@imim.es>
+Josep F. Abril  : B<jabril@imim.es>
 
-$PROGRAM is under GNU-GPL (C) 2000
+B<$PROGRAM> is under GNU-GPL (C) 2000
 @ %$
 
 \end{document}

@@ -2,7 +2,7 @@
 #
 # Literate Programming for "sgp2.nw"
 #
-# $Id: aol,v 1.2 2000-10-09 18:25:22 jabril Exp $
+# $Id: aol,v 1.3 2000-10-10 20:07:52 jabril Exp $
 
 # defining variables
 NWdir="."
@@ -16,4 +16,4 @@ perl -ne '($. > 2) && do { print; next }; $. == 1 && do { split / /, $_, 3; $n =
 # extracting program documentation
 noweave -delay -index $NWdir/sgp2.nw > $DOCdir/sgp2.tex
 cd $DOCdir
-latex sgp2.tex ; dvips sgp2.dvi -o sgp2.ps
+latex sgp2.tex ; latex sgp2.tex ; latex sgp2.tex ; dvips sgp2.dvi -o sgp2.ps
