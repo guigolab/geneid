@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.1 2000-05-23 16:48:52 jabril Exp $
+# $Id: parseblast.pl,v 1.2 2000-07-18 16:51:38 jabril Exp $
 #
 
 use strict;
@@ -9,11 +9,12 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling");
 
 my $PROGRAM = " parseblast.pl ";
-my $VERSION = ' $Id: parseblast.pl,v 1.1 2000-05-23 16:48:52 jabril Exp $ ';
+my $VERSION = ' $Id: parseblast.pl,v 1.2 2000-07-18 16:51:38 jabril Exp $ ';
 
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, 
-	$comment_flg, $split_flg, $help_flg, $err_flg
-	) = (0, 0, 0, 0, 0, 0, 0, 0);
+	$comment_flg, $split_flg, $help_flg, $err_flg,
+    $default_flg, $aln_flg, $bit_flg, $ids_flg
+	) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param
 	) = (0, 0, 0, 0, 0, 0);
 my ($prog_params, $program, $version, $seqname);
@@ -27,20 +28,32 @@ my (@seqlist, %prgseq, %dbase, %query, %cnt,
 ## Getting command-line options.
 ###################################################
 
-GetOptions( "h|hsp"          => \$hsp_flg     ,
-			"v|verbose"      => \$err_flg     ,
-			"g|gff"          => \$gff_flg     ,
-			"f|fullgff"      => \$fullgff_flg ,
-			"a|aplot"        => \$aplot_flg   ,
-			"c|comments"     => \$comment_flg ,
-			"help|?"         => \$help_flg     );
-#			"s|split-output" => \$split_flg   ,
+GetOptions( "H|hsp"            => \$hsp_flg     ,
+			"G|gff"            => \$gff_flg     ,
+			"F|fullgff"        => \$fullgff_flg ,
+			"A|aplot"          => \$aplot_flg   ,
+			"b|bit-score"      => \$bit_flg     ,
+			"i|identity-score" => \$ids_flg     ,
+			"c|comments"       => \$comment_flg ,
+			"v|verbose"        => \$err_flg     ,
+			"h|help|\?"        => \$help_flg     );
+#			"a|align-score "   => \$aln_flg     ,
+#			"s|split-output"   => \$split_flg   ,
+#   -a, --align-score    : set <score> field to Alignment Score.
+#	-s, --split-output : output each sequence match in a separate file in the current directory.
 
-{
-	($hsp_flg)     && ($gff_flg = 0, $fullgff_flg = 0, $aplot_flg = 0, last);
-	($fullgff_flg) && ($hsp_flg = 0, $gff_flg     = 0, $aplot_flg = 0, last);
-	($gff_flg)     && ($hsp_flg = 0, $fullgff_flg = 0, $aplot_flg = 0, last);
-	($aplot_flg)   && ($hsp_flg = 0, $fullgff_flg = 0, $gff_flg   = 0, last);
+{   # first choose disables any other command-line option.
+	$hsp_flg     && ($gff_flg = 0, $fullgff_flg = 0, $aplot_flg = 0, last);
+	$fullgff_flg && ($hsp_flg = 0, $gff_flg     = 0, $aplot_flg = 0, last);
+	$gff_flg     && ($hsp_flg = 0, $fullgff_flg = 0, $aplot_flg = 0, last);
+	$aplot_flg   && ($hsp_flg = 0, $fullgff_flg = 0, $gff_flg   = 0, last);
+	$default_flg = 1;
+};
+
+{   # first choose disables any other command-line option.  
+    $bit_flg && ( $aln_flg = 0, $ids_flg = 0, last);
+    $ids_flg && ( $aln_flg = 0, $bit_flg = 0, last);
+	$aln_flg = 1;
 };
 
 ($help_flg) && &prt_help;
@@ -63,14 +76,15 @@ USAGE:	parseblast.pl [options] <blast.results>
 
 COMMAND-LINE OPTIONS:
 
-	-h, --hsp          : prints output in HSP format.
-	-v, --verbose      : warnings sent to Standard Error.
-	-g, --gff          : prints output in GFF format.
-	-f, --fullgff      : prints output in GFF "alignment" format.
-	-a, --aplot        : prints output in APLOT "GFF" format.
-	-c, --comments     : include parameters from blast program as comments.
-#	-s, --split-output : output each sequence match in a separate file in the current directory.
-	-h, --help         : shows this help pages.
+	-H, --hsp            : prints output in HSP format.
+	-G, --gff            : prints output in GFF format.
+	-F, --fullgff        : prints output in GFF "alignment" format.
+	-A, --aplot          : prints output in APLOT "GFF" format.
+	-b, --bit-score      : set <score> field to Bit Score (default Alignment Score).
+	-i, --identity-score : set <score> field to Identity Score (default Alignment).
+	-c, --comments       : include parameters from blast program as comments.
+	-v, --verbose        : warnings sent to Standard Error.
+	-h, --help           : shows this help pages.
 
 OUTPUT FORMATS:
 
@@ -78,25 +92,27 @@ OUTPUT FORMATS:
 	<Program> name is taken from input blast file.
 	<Strands> are calculated from <start> and <end> positions on original blast file.
 	<Frame> is obtained from the blast file if is present else is set to ".".
+    <SCORE> is set to Alignment Score by default, you can change it with "-b" and "-i".
 
 [GFF]
- <Q_Name> <Program> hsp <Q_Start> <Q_End> <IdentityScore> <Q_Strand> <Q_Frame> <S_Name>
+ <Q_Name> <Program> hsp <Q_Start> <Q_End> <SCORE> <Q_Strand> <Q_Frame> <S_Name>
 
 [FULL GFF] (Alignment)
- <Q_Name> <Program> hsp <Q_Start> <Q_End> <IdentityScore> <Q_Strand> <Q_Frame> ...
+ <Q_Name> <Program> hsp <Q_Start> <Q_End> <SCORE> <Q_Strand> <Q_Frame> ...
    ... Target "<S_Name>" <S_Start> <S_End> E_value <E_Value> Strand <S_Strand> Frame <S_Frame>
 
 [APLOT] (Alignment)
- <Q_Name>:<S_Name> <Program> hsp <Q_Start>:<S_Start> <Q_End>:<S_End> <IdentityScore> ...
-   ... <Q_Strand>:<S_Strand> <Q_Frame>:<S_Frame> <BitScore>:<HSP_Number> # E_value <E_Value>
+ <Q_Name>:<S_Name> <Program> hsp <Q_Start>:<S_Start> <Q_End>:<S_End> <SCORE> ...
+   ... <Q_Strand>:<S_Strand> <Q_Frame>:<S_Frame> <BitScore>:<HSP_Number> \# E_value <E_Value>
 
 [HSP]
- <Program> <DataBase> : <IdentityMatches> <Min_Length> <IdentityScore> <E_Value> <P_Sum> : ...
+ <Program> <DataBase> : ...
+   ... <IdentityMatches> <Min_Length> <IdentityScore> <AlignmentScore> <BitScore> <E_Value> <P_Sum> : ...
    ... <Q_Name> <Q_Start> <Q_End> <Q_Strand> <Q_Frame> : ...
    ... <S_Name> <S_Start> <S_End> <S_Strand> <S_Frame> : <S_FullDescription>
 
 [DEFAULT]
- SCORE(<HSP_Number>): <GlobalAlignmentScore>
+ SCORE(<HSP_Number>): <AlignmentScore>
  BITSC(<HSP_Number>): <BitScore>
  EXPEC(<HSP_Number>): <E_Value> Psum(<P_Sum>)
  IDENT(<HSP_Number>): <IdentityMatches>/<Min_Length> : <IdentityScore> \%
@@ -183,7 +199,7 @@ sub prt_out {
 		$lnq, $lns, $lnmin, $lnmax,    # LeNgthQuery, LeNgthSubject, LeNgthMINqueyxsubject, LeNgthMAXqueyxsubject
 		$lnmx, $gpq, $gps, $gpt        # LeNgthMaXhspseq, GaPQuery, GaPSubject, GaPTotal
 		);
-	if ($comment_flg)  { 
+	if $comment_flg  { 
 		print STDOUT $prog_params."\n"."#\n"; 
 	} else {
 		print STDOUT "#\n# $program $version\n";
@@ -199,38 +215,43 @@ sub prt_out {
 				($hsq, $heq, $qst) = &chk_strand($hsp_start{$tq}, $hsp_end{$tq});
 				($hss, $hes, $sst) = &chk_strand($hsp_start{$ts}, $hsp_end{$ts});
 				$lnq = $heq - $hsq + 1 ;
-				($scQ) && ($lnq = $lnq / 3) ;
+				$scQ && ($lnq = $lnq / 3) ;
 				$lns = $hes - $hss + 1 ; 
-				($scS) && ($lns = $lns / 3) ;
+				$scS && ($lns = $lns / 3) ;
 				$lnmin = ($lnq>$lns) ? $lns : $lnq;
 				$lnmax = ($lnq<$lns) ? $lns : $lnq;
 				$lnmx = length($hsp_seq{$tq});
 				{ my $hh = $hsp_seq{$tq}; $gpq = ($hh =~ s/-/ /g) || 0; };
 				{ my $hh = $hsp_seq{$ts}; $gps = ($hh =~ s/-/ /g) || 0; };
 				$gpt = $gpq + $gps;
-				($gsc) = eval(($id/$lnmin)*100) =~ /^(\d+(\.\d{0,3})?)/; # score is Identities divided by minlength
+				{
+					($ids_flg || $default_flg || $hsp_flg) && # score is Identities divided by minlength
+						(($gsc) = eval(($id/$lnmin)*100) =~ /^(\d+(\.\d{0,3})?)/, last);
+					$bit_flg && ($gsc = $bt, last);
+					$gsc = $sc;
+				};
 				($prg) = $prgseq{$nm} =~ /^([^\s]+)\s/;
-				($gff_flg) && do { 
+				$gff_flg && do { 
 					print STDOUT <<"EndOfGFF";
 $query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$qst\t$qfr\t$nm\t\# E_value $ex : P_sum $pv
 EndOfGFF
 }; # gff_flg
-				($fullgff_flg) && do { 
+				$fullgff_flg && do { 
 					print STDOUT <<"EndOfFullGFF";
 $query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$qst\t$qfr\tTarget \"$nm\"\t$hss\t$hes\tE_value $ex\tStrand $sst\tFrame $sfr
 EndOfFullGFF
 }; # fullgff_flg
-				($aplot_flg) && do { 
+				$aplot_flg && do { 
 					print STDOUT <<"EndOfAPLOT";
 $query{$nm}:$nm\t$prg\thsp\t$hsq:$hss\t$heq:$hes\t$gsc\t$qst:$sst\t$qfr:$sfr\t$bt:$n\t\# E_value $ex : P_sum $pv
 EndOfAPLOT
 }; # gff_flg
-				($hsp_flg) && do {
+				$hsp_flg && do {
 					print STDOUT <<"EndOfHSPs";
-$prg $dbase{$nm} : $id $lnmin $gsc $ex $pv : $query{$nm} $hsq $heq $qst $qfr : $nm $hss $hes $sst $sfr : $desc{$nm}
+$prg $dbase{$nm} : $id $lnmin $gsc $sc $bt $ex $pv : $query{$nm} $hsq $heq $qst $qfr : $nm $hss $hes $sst $sfr : $desc{$nm}
 EndOfHSPs
 };
-				!($gff_flg || $fullgff_flg || $aplot_flg || $hsp_flg) && do {
+				$default_flg && do {
 					print STDOUT <<"EndOfPlain";
 SCORE($n): $sc\nBITSC($n): $bt\nEXPEC($n): $ex Psum($pv)
 IDENT($n): $id/$lnmin : $gsc \%
@@ -265,7 +286,7 @@ while (<>) {
   CHECK: {
 	  /^\s*T?BLAST[PNX]?/        && do { # Starts with "T?BLAST[PNX]?" ?
 		  # print STDERR "$_\n";
-		  ($prt) && &prt_out;
+		  $prt && &prt_out;
 		  ($program, $version) = split;
 		  # typeQ/typeS: 0 for proteins - 1 for nucleic acids.
 		  ($program =~ /^BLASTP$/ ) && ( $scQ = 0, $scS = 0); # Amino Acids vs Amino Acids
@@ -318,7 +339,7 @@ while (<>) {
   } # CHECK Block
 	# print STDOUT "$. : MAIN=$main SEQFLG=$seqflg HSP=$hsp FRAGMENT=$fragment => SEQNAME=$seqname\n";
   LOAD: {
-	  ($fragment) && do { # We are within a fragment.
+	  $fragment && do { # We are within a fragment.
 		  $txt = '';
 		  $tt = $cnt{$seqname};
 		  ($txt,$ori,$seq,$end) = split;
@@ -337,7 +358,7 @@ while (<>) {
 		  } # elsif ($txt =~ /Sbjct/)
 		  else { last LOAD; };
 	  }; # ($fragment)
-	  ($main) && do { # We are within the blast file header.
+	  $main && do { # We are within the blast file header.
 		  /^\s*Query= +(.*)\s*$/ && do {
 			  # print STDERR "$_\n";
 			  ($query_name = $1) =~ s/:|\|/_/g ;
@@ -356,7 +377,7 @@ while (<>) {
 		  }; # /^\s*Database: +(.*)\s*$/
 		  last LOAD;
 	  }; # ($main)
-	  ($param) && do { # We are within the blast file trailer.
+	  $param && do { # We are within the blast file trailer.
 		  if (/^\s*[^\[\<\-]/) {
 			  # print STDERR "$_\n";
 			  chop;
@@ -371,6 +392,6 @@ while (<>) {
 
 print STDERR ".[$pt]\n" if $err_flg;
 
-($prt) && &prt_out;
+$prt && &prt_out;
 
 exit(0);
