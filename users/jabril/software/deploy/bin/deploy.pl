@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
 #
-#line 1592 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# %                             DEPLOY                               %
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#line 1635 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+# #----------------------------------------------------------------#
+# #                             DEPLOY                             #
+# #----------------------------------------------------------------#
 # 
 # Creates basic file set to work with noweb literate programming tool.
 # 
@@ -24,15 +24,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#line 1424 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+# #----------------------------------------------------------------#
+#line 1467 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
-#line 1586 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
-# $Id: deploy.pl,v 1.2 2001-09-03 15:09:53 jabril Exp $
-#line 1426 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 1629 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+# $Id: deploy.pl,v 1.3 2001-09-03 18:23:46 jabril Exp $
+#line 1469 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 use strict;
-#line 239 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 249 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 # MODULES
 #
@@ -40,7 +40,7 @@ use strict;
 #
 # VARIABLES
 #
-#line 261 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 271 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 my $PROGRAM = 'deploy.pl';
 my $VERSION = '1.0_alpha';
 my $DATE = localtime;
@@ -50,7 +50,6 @@ chomp($host);
 my $USAGE = "\nUSAGE:\n\tdeploy.pl <projectname> <template>\n".
             "(It asumes that you are in the right directory)\n\n";
 my @working_dirs = qw(
-                       RCS
                        bin  bin/param
                        data
                        docs docs/psfigures docs/tables docs/html
@@ -62,11 +61,11 @@ my $CWD  = `pwd`;
 chomp($CWD);
 my $PATH = $CWD;
 # $PATH =~ s%^$HOME/%%o;
-#line 247 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 257 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 # MAIN LOOP
 #
-#line 285 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 294 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 &parse_argvs();
 
 print STDERR "###\n### RUNNING $PROGRAM..........\n###\n".
@@ -83,11 +82,11 @@ print STDERR "###\n### RUNNING $PROGRAM..........\n###\n".
 print STDERR "###\n### RUNNING deploy.pl............ DONE\n###\n";
 
 exit(0);
-#line 251 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 261 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 # FUNCTIONS
 #
-#line 304 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 313 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub parse_argvs() {
     scalar(@ARGV) == 2 || do {
         print STDERR $USAGE;
@@ -96,7 +95,7 @@ sub parse_argvs() {
     $PROJECT = shift @ARGV;
     $TEMPLATE = shift @ARGV;
 } # 
-#line 315 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 324 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub make_dirs() {
     print STDERR "###\n### Creating Project Subdirectories...\n###\n";
     foreach my $d (@working_dirs) {
@@ -105,7 +104,7 @@ sub make_dirs() {
 	};
     print STDERR "###\n### Project Subdirectories............ DONE\n###\n";
 } # make_dirs
-#line 326 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 335 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub new_noweb_doc() {
     my $file = "$PROJECT.nw";
     (-e $file && -f _) && do {
@@ -132,7 +131,7 @@ sub new_noweb_doc() {
 	close(NOWEB);
     print STDERR "###\n### NOWEB file........................ DONE\n###\n";
 } # new_noweb_doc
-#line 355 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 364 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub extract_files() {
     print STDERR "###\n### Extracting Files from NOWEB file...\n###\n";
     # my $WORK = '$HOME/'.$PATH;
@@ -140,7 +139,6 @@ sub extract_files() {
     my $nwfile = "$PROJECT.nw";
     system << "+++EOS+++" ;
 notangle -R\'BASH Environment Variables\' $WORK/$nwfile > $WORK/.bash_VARS ; 
-notangle -R\'CSH Environment Variables\'  $WORK/$nwfile > $WORK/.csh_VARS ; 
 notangle -Rweaving  $WORK/$nwfile > $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile > $WORK/ltx ;
 chmod a+x $WORK/nw2tex ;

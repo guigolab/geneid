@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $
+% $Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -208,7 +208,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -277,7 +277,6 @@ chomp($host);
 my $USAGE = "\nUSAGE:\n\tdeploy.pl <projectname> <template>\n".
             "(It asumes that you are in the right directory)\n\n";
 my @working_dirs = qw(
-                       RCS
                        bin  bin/param
                        data
                        docs docs/psfigures docs/tables docs/html
@@ -369,7 +368,6 @@ sub extract_files() {
     my $nwfile = "$PROJECT.nw";
     system << "+++EOS+++" ;
 notangle -R\'BASH Environment Variables\' $WORK/$nwfile > $WORK/.bash_VARS ; 
-notangle -R\'CSH Environment Variables\'  $WORK/$nwfile > $WORK/.csh_VARS ; 
 notangle -Rweaving  $WORK/$nwfile > $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile > $WORK/ltx ;
 chmod a+x $WORK/nw2tex ;
@@ -934,7 +932,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $$>$ }
 \end{center}
 
 @
@@ -1279,7 +1277,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 @<<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $
+# $Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $
 @@ 
 
 @ 
@@ -1373,8 +1371,10 @@ noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
         $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 # noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
+#
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+#
 popd;
 @<<BASH script end>>
 @@ 
@@ -1385,12 +1385,14 @@ popd;
 @<<BASH Environment Variables>>
 pushd $DOCS/ ;
 #
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 #
 # pdflatex $nwfile.tex ;
+echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
 ps2pdf $nwfile.ps $nwfile.pdf ;
 #
 popd ;
@@ -1624,7 +1626,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $
+# $Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
