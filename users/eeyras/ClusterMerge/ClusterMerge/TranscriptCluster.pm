@@ -28,6 +28,7 @@ eae@sanger.ac.uk
 
 package ClusterMerge::TranscriptCluster;
 use ClusterMerge::Transcript;
+use ClusterMerge::ExonUtils;
 use vars qw(@ISA);
 use strict;
 
@@ -362,44 +363,44 @@ sub put_Transcripts {
   foreach my $transcript (@new_transcripts) {
     my ($start, $end) = $self->_get_start_end($transcript);
     if (!defined($min_start) || $start < $min_start) {
-      $min_start = $start;
+	$min_start = $start;
     }
     if (!defined($max_end) || $end > $max_end) {
-      $max_end = $end;
+	$max_end = $end;
     }
-  }
-
+}
+  
   # check strand consistency among transcripts
   foreach my $transcript (@new_transcripts){
-    my @exons = @{$transcript->get_all_Exons};
-    unless ( $self->strand ){
-      $self->strand( $exons[0]->strand );
-    }
-    if ( $self->strand != $exons[0]->strand ){
-      $self->warn( "You're trying to put $transcript in a cluster of opposite strand");
-    }
+      my @exons = @{$transcript->get_all_Exons};
+      unless ( $self->strand ){
+	  $self->strand( $exons[0]->strand );
+      }
+      if ( $self->strand != $exons[0]->strand ){
+	  $self->warn( "You're trying to put $transcript in a cluster of opposite strand");
+      }
   }
-
+  
   # if start is not defined, set it
   unless ( $self->start ){
-    $self->start( $min_start );
+      $self->start( $min_start );
   }
-
+  
   # if end is not defined, set it
   unless ( $self->end ){
-    $self->end( $max_end);
+      $self->end( $max_end);
   }
   
   # extend start and end if necessary as we include more transcripts
   if ($min_start < $self->start ){
-    $self->start( $min_start );
+      $self->start( $min_start );
   }
   if ( $max_end > $self->end ){
-    $self->end( $max_end );
+      $self->end( $max_end );
   }
-
+  
   push ( @{ $self->{'_transcript_array'} }, @new_transcripts );
-
+  
 }
 
 #########################################################################
@@ -479,5 +480,64 @@ sub _get_start_end {
   return ($start, $end, $exons[0]->strand);
 }
 
+############################################################
+
+sub print_Cluster{
+    my ($self,$type) = @_;
+    my @transcripts = @{$self->get_Transcripts};
+    foreach my $t (@transcripts){
+	my $id = $t->dbID;
+	print "$id ";
+	if ($type){
+	    print $type->{$t}." ";
+	}
+	foreach my $e (@{$t->get_all_Exons}){
+	    print $e->start."-".$e->end." ";
+	}
+	print "\n";
+    }
+}
+
+############################################################
+
+sub print_aligned_Cluster{
+    my ($self,$type) = @_;
+
+    my @transcripts = @{$self->get_Transcripts};
+    my @exons;
+    my %exon2transcript;
+    my $line = '';
+    foreach my $t (@transcripts){
+	push (@exons, @{$t->get_all_Exons} );
+    }
+    my ($clusters,$exon2cluster)= ClusterMerge::ExonUtils->_cluster_Exons(@exons);
+    
+    print "--------------------------------------------------------------------------------\n";
+    foreach my $t (@transcripts){
+	$line .= sprintf("%-45s", $t->dbID);
+	
+	my @exons = sort {$a->start <=> $b->start} @{$t->get_all_Exons};
+	my $start = 0;
+	foreach my $cluster (@$clusters){
+	    my $found = 0;
+	    for (my $i = $start; $i< scalar(@exons); $i++ ){
+		if ( $exon2cluster->{$exons[$i]} == $cluster ){
+		    $line .= sprintf("%-19s", $exons[$i]->start."-".$exons[$i]->end );
+		    $found=1;
+		}
+	    }
+	    if ($found==1){
+		$start++;
+	    }
+	    else{
+		$line .= sprintf("%-19s", "");
+	    }
+	}
+	print $line."\n";
+	$line ='';
+    }
+    print "--------------------------------------------------------------------------------\n";
+}
+						
 
 1;
