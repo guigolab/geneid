@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.13 2001-11-06 18:11:28 jabril Exp $
+% $Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.13 2001-11-06 18:11:28 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -439,12 +439,10 @@ use strict;
 my (*T,*F) = (\1,\0); # for 'T'rue and 'F'alse
 @
 
-Those are the main variables containing customization parameters and input data from GFF records. We split customization variables on three input classes: [[%DefaultVars]] to set default values and their type (what makes easy to check if a variable exists or not and if its given value has the expected format), [[%CmdLineVars]] for those parameters passed on command-line and [[%CustomVars]] which collects vaiables customization from external parameter files. Two temporary variables ([[%Defaults]] to initialize element variables and [[%Vars]] to provide the customization from command-line and parameter files to those element variables) allow us to merge all the information from these three variables and transfer to each GFF element in the GFF data variables ([[%GFF_DATA]] for annotations and [[%ALN_DATA]] for alignments).
+Those are the main variables containing customization parameters and input data from GFF records. We split customization variables on three input classes: [[%DefaultVars]] to set default values and their type (what makes easy to check if a variable exists or not and if its given value has the expected format), [[%CmdLineVars]] for those parameters passed on command-line and [[%CustomVars]] which collects vaiables customization from external parameter files. Two temporary variables ([[%Defaults]] to initialize element variables and [[%Vars]] to provide the customization from command-line and parameter files to those element variables) allow us to merge all the information from these three variables and transfer to each GFF element in the GFF data variables ([[%GFF_DATA]] for annotations and [[%ALN_DATA]] for alignments). \label{sec:APLOT-DS}\label{sec:GFF-DS}
 
 <<Global Vars>>=
-my (%DefaultVars,%CmdLineVars,%CustomVars,
-    %Defaults,%Vars,
-    %GFF_DATA,%ALN_DATA);
+my (%DefaultVars,%CmdLineVars,%CustomVars,%Defaults,%Vars,%GFF_DATA,%ALN_DATA);
 @ 
 
 Some info about the program itself.
@@ -452,9 +450,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.13 $', #'
-     '$Date: 2001-11-06 18:11:28 $', #'
-     '$Id: gff2aplot.nw,v 1.13 2001-11-06 18:11:28 jabril Exp $', #'
+     '$Revision: 1.14 $', #'
+     '$Date: 2001-11-06 20:13:29 $', #'
+     '$Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -508,7 +506,6 @@ ENVIRONMENT VARIABLES:
 
 COMMAND-LINE OPTIONS:
 
-    <<command-line help prog>>
     <<command-line help>>
     <<command-line help custom>>
 
@@ -518,7 +515,14 @@ COMMAND-LINE OPTIONS:
 
 BUGS:    Report any problem to 'jabril\@imim.es'.
 
-AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
+AUTHORS:
+
+            $PROGRAM is under GNU-GPL
+         Josep Francesc ABRIL FERRANDO  
+                 Thomas WIEHE                   
+                Roderic GUIGO SERRA       
+
+            Copyright (C) 1999-2001
 
 +++EndOfHelp+++
     close(HELP);
@@ -543,6 +547,7 @@ and start of file names (if present). You can use a single
 dash "-" as STDIN placeholder. Available options and a
 short description are listed here:
 
+<<command-line help prog>>
 @
 
 
@@ -763,7 +768,7 @@ Getopt::Long::Configure qw/ bundling /;
 See '[[man Getopt::Long]]' for further info about this package.
 
 <<Global Vars>>=
-my ($Debug,$Verbose,$Quiet,$LogFile,$logs_filename) = (0,0,0,0,undef);
+my ($Debug,$Verbose,$Quiet,$LogFile,$logs_filename) = ($F,$F,$F,$F,undef);
 @ 
 
 <<warnings - parsing command-line options>>=
@@ -927,7 +932,7 @@ sub command_line_for_vars() {
     $n = 0;   
     foreach my $calias ( qw/ L Q S T G F / ) {
         my ($cvar,$cflg);
-        $cvar = $varkeys{$calias};
+        $cvar = $VarKeys{$calias};
         $cflg = ($calias ne 'L') ? $T : $F;
         defined($CmdLineVars{VARS}{$cvar}) && do {
             foreach my $ccv (@{ $CmdLineVars{VARS}{$cvar} }) {
@@ -1102,7 +1107,7 @@ sub parse_custom_files() {
                 /^\# ([LQSTGF]) \#/o && do { 
                      $_c = $1; $c = '*';
                      $v_flag = ($_c ne 'L') ? $T : $F;
-                     $_v = $varkeys{$_c};
+                     $_v = $VarKeys{$_c};
                      next;
                 };
 				$c = '.'; next;
@@ -1161,7 +1166,7 @@ Unknown                 & ? \\
 
 <<Global Constants>>=
 my $noCV = '?';
-my %varkeys = (
+my %VarKeys = (
     L => 'LAYOUT',
     Q => 'SEQUENCE',
     S => 'SOURCE',
@@ -1235,9 +1240,11 @@ will be simplest.
 sub checkvarvalues() {
 	my ($_test,$_val,$_var) = @_;
     my $_t = lc($$_val);
-    <<variable value checking>>
-    &warn('VARTYPE_NOT_DEFINED',$T,$_test,$_var);
-    return $F;
+    defined($TESTS->{$_test}) || do {
+        &warn('VARTYPE_NOT_DEFINED',$T,$_test,$_var);
+        return $F;
+    }; # !defined($TESTS->{$_test})
+    return &{$TESTS->{$_test}}($_val,$_var,$_t);
 } # checkvarvalues
 @ %def &checkvarvalues
 
@@ -1246,6 +1253,14 @@ VARTYPE_NOT_DEFINED =>
   $Error."Variable type \"\%s\" not defined,\n".
   $spw."  could not check value for \"\%s\".\n",
 @
+
+The following hash keys serve as references to annonymous functions, each one defining a single test for the variable value passed by reference and modifying it if needed.
+
+<<Global Vars>>=
+my %TESTS = (
+             <<variable value checking>>
+             );
+@ 
 
 \subsctn{Deciphering element fields}
 
@@ -1555,7 +1570,7 @@ Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.
 
 We define as 'BOOLEAN' those variables used as flags or switches, which can hold only a binary value such ON/OFF. Booleans are NOT case sensitive.
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'BOOLEAN' && do {
     $_t =~ /^(1|on|t(rue)|y(es))$/o && ($$_val = $T, return $T);
     $_t =~ /^(0|off|f(alse)|n(o))$/o && ($$_val = $F, return $T);
@@ -1574,7 +1589,7 @@ NOT_A_BOOLEAN =>
 
 Having a 'STRING' implies to replace/protect those characters that will produce indesirable effects in {\ps} code (such unbalanced parentheses). No error is reported for strings because they are assumed to be free text.
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'STRING' && do {
     $$_val =~ s{[\\]}{\\134}og;
     $$_val =~ s{[\(]}{\\050}og;
@@ -1599,7 +1614,7 @@ Remember to check for some of the strings values such: '++none++', '++sequence++
 
 The following tests look for four different number types.
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'DIGIT' && do {
     $$_val =~ /^\d+$/o && (return $T);
     &warn('NOT_A_DIGIT',$F,$_var);
@@ -1638,7 +1653,7 @@ NOT_A_REAL =>
 
 Available colors are shown in section~\ref{sec:CMYKcolordef}, page~\pageref{sec:CMYKcolordef}. Here we check that customization input colors match those defined colors, including 'background' and 'foreground' colors. Color names are NOT case sensitive.
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'COLOR' && do { # lc
 	$_t =~ /^(b(ack)?|f(ore)?)g(round)?(color)?/o &&
 		($$_val = $_t, return $T);
@@ -1665,11 +1680,31 @@ NOT_A_COLOR =>
 @
 
 
-\subsubsctn{Verifying named page-sizes}
+\subsubsctn{Verifying page-sizes}
+
+A new page bounding-box can be passed through command-line or customization file, we process that case here.
+
+<<variable value checking>>=
+BBOX => sub { # Value, varName, Lowercase
+            my ($_v,$_n,$_l) = @_;
+            my @it = ();
+            @it = split /,/og, $_l;
+            &{$TESTS->{ALPHA}}(\$it[0],$_n,$it[0]) || do {
+                return $F;
+            }; # bbox name !ALPHA
+            &{$TESTS->{PS_UNIT}}(\$it[1],$_n,$it[1]) || do {
+                return $F;
+            }; # bbox width !PS_UNIT
+            &{$TESTS->{PS_UNIT}}(\$it[2],$_n,$it[2]) || do {
+                return $F;
+            }; # bbox height !PS_UNIT
+            return $T;
+        },
+@ 
 
 Available page sizes are shown in section~\ref{sec:PAGEdef}, page~\pageref{sec:PAGEdef}.
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'PAGE' && do { # lc
 	defined($FORMATS{$_t}) && ($$_val = $_t, return $T);
     &warn('NOT_A_PAGE',$F,$_t,$_var);
@@ -1687,7 +1722,7 @@ NOT_A_PAGE =>
 Those numbers relative to DNA positions may be given in bases, kilobases, megabases or gigabases, being last three ones a way to avoid any mistake when a big coord with lots of zeroes is provided. If no units are provided, then we asume bases.
 
 \label{sec:DNABASE}
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'DNABASE' && do { # lc
     $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)([gmk]?b(ases)?)?$/o && 
         ($$_val = $_t, return $T);
@@ -1717,7 +1752,7 @@ Here we must check something like '*..*'
 @
 \todo{ \item \todoBBI } % todo
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'RANGE' && do {
 
     return $T;
@@ -1728,7 +1763,7 @@ $_test eq 'RANGE' && do {
 
 Font names must be in first capital letter format for {\ps}. 
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'FONT' && do { # lc
     defined($Fonts{$_t}) && 
         ($$_val = $Fonts{$_t}, return $T);
@@ -1772,7 +1807,7 @@ NOT_A_FONT =>
 
 Font sizes can be given in points, centimeters or inches. If no units are provided, then we asume points, but always must be possitive values.
 
-<<variable value checking>>=
+<<variable value checking - old>>=
 $_test eq 'FONT_SZ' && do {
     $_t =~ /^(?:\d+(?:\.\d*)?|\.\d+)
             (pt|cm|mm|in(ches)?|points|(centi|mili)meters)?$/ox && 
@@ -4164,7 +4199,7 @@ FRAME_MISMATCH =>
 
 \subsctn{Parsing APLOT format}\label{sec:parseAPLOT}
 
-'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOT-DS}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
+'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOT-DS}, page~\pageref{sec:APLOT-DS}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
 
 <<Parsing Input Data>>=
 sub load_aplot() { # if errors found > return $noGFF
@@ -4246,7 +4281,7 @@ sub remove_colon() {
 
 \subsubsctn{Checking fields and accepting APLOT records}
 
-If records are OK, then we can append a new record to the variable defined for APLOT records (so called later in this section as '[[%ALN_DATA]]').
+If records are OK, then we can append a new record to the variable defined for APLOT records (so called in section~\ref{sec:APLOT-DS} as '[[%ALN_DATA]]', see page~\pageref{sec:APLOT-DS}).
 
 <<Parsing Input Data>>=
 sub check_aplot_fields() {
@@ -4276,15 +4311,10 @@ sub add_aplot_record() {
 @ %def &add_aplot_record
 %$
 
-\label{sec:APLOT-DS}
-
-<<Global Vars>>=
-my (%ALN_DATA);
-@
 
 \subsctn{Parsing standard GFF format}\label{sec:parseGFF}
 
-'[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFF-DS}). The first parameter for '[[&load_grouping]]' function is set to 'True' for GFF grouping definition ('False' is for APLOT grouping definition, see section~\ref{sec:parseAPLOT}). 
+'[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFF-DS}, page~\pageref{sec:GFF-DS}). The first parameter for '[[&load_grouping]]' function is set to 'True' for GFF grouping definition ('False' is for APLOT grouping definition, see section~\ref{sec:parseAPLOT}). 
 
 <<Parsing Input Data>>=
 sub load_gff() { # if errors found > return $noGFF
@@ -4471,10 +4501,10 @@ $_gff eq $ALIGN && do {
 };
 @ 
 
-We declare here the main variable containing all the GFF data, and auxiliary variables containing the array indexes used in the anonymous arrays defined within that variable.\label{sec:GFF-DS}
+We declare here auxiliary variables containing the array indexes used in the anonymous arrays defined within the main variable containing all the GFF data [[%GFF_DATA]], that was declared in section~\ref{sec:GFF-DS}, page~\pageref{sec:GFF-DS}.
 
 <<Global Vars>>=
-my (%GFF_DATA,$seq_COUNT);
+my $seq_COUNT;
 my ($_counter,$_prop,$_element) = (0..2);
 my ($_order,$_elemNum,$_ori,$_end) = (0..3);
 my ($_fttype,$_ftprop,$_ftname,$_ftid,$_ftori,$_ftend,$_ftsco,$_ftfrm) = (0..7);
@@ -5162,8 +5192,11 @@ sub set_page_vars() {
 sub set_page_size() {
     my ($vrf) = @_;
 
-    $vrf->{page_bbox};
-    $vrf->{page_size};
+    $vrf->{"page_bbox"};
+    $vrf->{"page_size"};
+
+    $FORMATS{$vrf->{"page_bbox"}[0]} = 
+        [ ++$formats, @$vrf->{"page_bbox"}[1,2] ];
 
 } # set_page_size
 @ %def &set_page_size 
@@ -7118,7 +7151,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.13 2001-11-06 18:11:28 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -7544,7 +7577,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.13 2001-11-06 18:11:28 jabril Exp $
+# $Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
