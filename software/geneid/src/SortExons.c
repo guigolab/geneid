@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.7 2004-01-27 16:25:08 eblanco Exp $  */
+/*  $Id: SortExons.c,v 1.8 2004-02-03 09:54:36 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -66,9 +66,9 @@ void InsertBeginExon(exonGFF* Exons)
   Exons[0].Frame = 0;
   Exons[0].Strand = '+';
   Exons[0].Score = MAXSCORE;
-  Exons[0].PartialScore = 0;
-  Exons[0].HSPScore = 0;
-  Exons[0].GeneScore = 0; 
+  Exons[0].PartialScore = 0.0;
+  Exons[0].HSPScore = 0.0;
+  Exons[0].GeneScore = 0.0; 
   Exons[0].Remainder = 0;
   strcpy(Exons[0].Group,NOGROUP);
   Exons[0].evidence = 0;
@@ -102,9 +102,9 @@ void InsertBeginExon(exonGFF* Exons)
   Exons[1].Frame = 0;
   Exons[1].Strand = '-';
   Exons[1].Score = MAXSCORE;
-  Exons[1].PartialScore = 0;
-  Exons[1].HSPScore = 0;
-  Exons[1].GeneScore = 0; 
+  Exons[1].PartialScore = 0.0;
+  Exons[1].HSPScore = 0.0;
+  Exons[1].GeneScore = 0.0; 
   Exons[1].Remainder = 0;
   strcpy(Exons[1].Group,NOGROUP);
   Exons[1].evidence = 0;
@@ -146,9 +146,9 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n].Frame = 0;
   Exons[n].Strand = '+';
   Exons[n].Score = MAXSCORE;
-  Exons[n].PartialScore = 0;
-  Exons[n].HSPScore = 0;
-  Exons[n].GeneScore = 0; 
+  Exons[n].PartialScore = 0.0;
+  Exons[n].HSPScore = 0.0;
+  Exons[n].GeneScore = 0.0; 
   Exons[n].Remainder = 0;
   strcpy(Exons[n].Group,NOGROUP);
   Exons[n].evidence = 0;
@@ -183,9 +183,9 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n+1].Frame = 0;
   Exons[n+1].Strand = '-';
   Exons[n+1].Score = MAXSCORE;
-  Exons[n+1].PartialScore = 0;
-  Exons[n+1].HSPScore = 0;
-  Exons[n+1].GeneScore = 0; 
+  Exons[n+1].PartialScore = 0.0;
+  Exons[n+1].HSPScore = 0.0;
+  Exons[n+1].GeneScore = 0.0; 
   Exons[n+1].Remainder = 0;
   strcpy(Exons[n+1].Group,NOGROUP);
   Exons[n+1].evidence = 0;
@@ -431,7 +431,7 @@ void SortExons(packExons* allExons,
 		  Exons[n].Score = q->Exon->Score;
 		  Exons[n].PartialScore = q->Exon->PartialScore;
 		  Exons[n].HSPScore = q->Exon->HSPScore;
-		  Exons[n].GeneScore = 0; 
+		  Exons[n].GeneScore = 0.0; 
 		  Exons[n].Remainder = q->Exon->Remainder;
 		  strcpy(Exons[n].Group,q->Exon->Group);
 		  Exons[n].evidence = q->Exon->evidence;
