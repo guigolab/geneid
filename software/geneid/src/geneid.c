@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.3 2001-02-07 17:36:34 eblanco Exp $ */
+/* $Id: geneid.c,v 1.4 2001-02-14 16:00:07 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -464,6 +464,12 @@ int main (int argc, char *argv[])
 		  printMess("Searching evidence exons");
 		  currVExons = SearchEvidenceExons(evidence, 
 				      (lastSplit)?l2:l2-OVERLAP);
+		  if (lastSplit && (evidence->i2vExons < evidence->nvExons))
+		    {
+		      sprintf(mess,"Skipped last %ld evidences (range)",
+			      evidence->nvExons - evidence->i2vExons);
+		      printMess(mess);
+		    }
 		}
 	      
 	      nExons = allExons->nExons + allExons_r->nExons + currVExons;
