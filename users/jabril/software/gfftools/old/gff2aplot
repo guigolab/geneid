@@ -1,0 +1,1718 @@
+#!/bin/sh
+######################################################################
+#                              GFF2APLOT                             #
+######################################################################
+#
+#    Converting GFF files for an alignment to PostScript.
+#
+#     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+#                                  Thomas WIEHE                   
+#                                 Roderic GUIGO SERRA       
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+######################################################################
+#
+# Creation Date: 10.01.1999
+#
+# Last Update:  
+#
+# $Id: gff2aplot,v 1.1 1999-04-24 12:04:07 jabril Exp $	
+#
+# Autor : Josep Francesc ABRIL FERRANDO
+# e-mail: jabril@imim.es
+#
+#
+
+##############################################################
+#################### PROGRAM DEFINITIONS #####################
+
+# 
+# Defining Default Values...
+#
+Defaults () {
+ # 
+ # Constants: 
+  PROGRAM="gff2aplot"
+  VERSION="v1.3"
+  SHCREATION="10.01.1999"
+  SHREVISION="20.04.1999"
+  PSPROGRAM="NewDotPlot.ps"
+  PSVERSION="v1.5"
+  PSCREATION="05.11.1998"
+  PSREVISION="20.04.1999"
+  AUTHOR="Josep Francesc ABRIL FERRANDO"
+  EMAIL="jabril@imim.es"
+  MAIL="%%                  Dept. Informatica Medica
+%%          Institut Municipal d'Investigacio Medica
+%%                   C./ Doctor Aiguader 80
+%%                  08003 - BARCELONA (SPAIN)"
+  USAGE=$PROGRAM" [-h][-H <option>] 
+         [-S <Seq1Ori>][-E <Seq1End>][-s <Seq2Ori>][-e <Seq2End>] 
+         [-Z [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ] ]
+         [-z [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ] ]
+         [-A <SeqXName:SeqYName>] [-N <SeqXName>] [-n <SeqYName>]
+         [-T <MainTitle>][-t <SubTitle>][-X <X-AxesLabel>][-Y <Y-AxesLabel>] 
+         [-L <PercentBoxLabel>][-l <ExtraBoxLabel>] 
+         [-B <BGcolor>][-b <FGcolor>][-D <APLOTBGcolor>] 
+         [-C <PercentBoxBGcolor>][-c <ExtraBoxBGcolor>][-F <FunctionColor>]
+         [GgPpQqRrfMmWwv] gff_file"
+  COLORS="    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white 
+       verydarkgreen | darkgreen | green | lightgreen | verylightgreen 
+   verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue 
+          verydarkblue | darkblue | blue | lightblue | verylightblue 
+         verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan 
+     verydarkviolet | darkviolet | violet | lightviolet | verylightviolet 
+            verydarkred | darkred | red | lightred | verylightred 
+     verydarkorange | darkorange | orange | lightorange | verylightorange 
+     verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow 
+        verydarkbrown | darkbrown | brown | lightbrown | verylightbrown"
+ # 
+ # Default User-Defined Options: 
+  bgcolor="white"
+  fgcolor="black"
+  v01="##dflt##";n01="SEQUENCE1_ORIGIN"
+  v02="##dflt##";n02="SEQUENCE1_END"
+  v03="##dflt##";n03="SEQUENCE2_ORIGIN"
+  v04="##dflt##";n04="SEQUENCE2_END"
+  v05="##dflt##";n05="ZOOM_Zoom"
+      v25="##dflt##";n25="Zoom_Marks"
+      v28="##dflt##";n28="Zoom_SEQUENCE1_ORIGIN"
+      v29="##dflt##";n29="Zoom_SEQUENCE1_END"
+      v30="##dflt##";n30="Zoom_SEQUENCE2_ORIGIN"
+      v31="##dflt##";n31="Zoom_SEQUENCE2_END"
+  v06="##dflt##";n06="ZOOM_Area"
+  v07="##dflt##";n07="Display_GRID"
+  v08="##dflt##";n08="Display_PERCENT-BOX"
+  v09="##dflt##";n09="Display_EXTRA-BOX"
+  v10="##dflt##";n10="TITLE"
+      v39="##dflt##";n39="Display_TITLE"
+  v11="##dflt##";n11="SUBTITLE"
+      v40="##dflt##";n40="Display_SUBTITLE"
+  v12="##dflt##";n12="X-Axis_LABEL"
+  v13="##dflt##";n13="Y-Axis_LABEL"
+  v14="##dflt##";n14="Percent-Box_LABEL"
+  v15="##dflt##";n15="Extra-Box_LABEL"
+  v16="##dflt##";n16="XY_AXES_Same-SIZE"
+  v17="##dflt##";n17="Display_FUNCTION"
+      v35="##dflt##";n35="Function_COLOR"
+  v18="##dflt##";n18="APlotLine_ScaleWidth"
+      v26="##dflt##";n26="APlotLine_GroupScore"
+  v19="##dflt##";n19="APlotLine_ScaleGrey"
+      v27="##dflt##";n27="APlotLine_GroupScore"
+  v20="##dflt##";n20="BACKGROUND_COLOR"
+  v21="##dflt##";n21="FOREGROUND_COLOR"
+  v22="##dflt##";n22="APlotBox_BGCOLOR"
+  v23="##dflt##";n23="PercentBox_BGCOLOR"
+  v24="##dflt##";n24="ExtraBox_BGCOLOR"
+  v32=0;n32="Print_Report"
+  v33="##dflt##";n33="Display_GFF"
+  v34="##dflt##";n34="Display_GFF-ReverseOrder"
+  v36="##dflt##";n36="Align_NAME"
+  v37="##dflt##";n37="X-Sequence_NAME"
+  v38="##dflt##";n38="Y-Sequence_NAME"
+  APLOToptions="";P=""
+  getzoom=0
+  xtron=1
+}
+
+#
+# Defining Help...
+#
+Help () {
+#  echo ""
+#  echo "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
+#  echo "         1         2         3         4         5         6         7         8"
+  echo ""
+  echo "NAME           $PROGRAM"
+  echo "VERSION        $VERSION"
+  echo ""
+  echo "Creation DATE: $SHCREATION"
+  echo "Last REVISION: $SHREVISION"
+  echo ""
+  echo "SYNOPSIS"
+  echo ""
+  echo "      $USAGE"
+  echo ""
+  echo "DESCRIPTION"
+  echo ""
+  echo "       This program draws color-filled DotPlots"
+  echo "       from files with gff-formatted data fields."
+  echo "   "
+  echo ""
+  echo "OPTIONS"
+  echo ""
+  echo "     -S <pos>   Sets X-axes first nucleotide (for SEQUENCE1_ORIGIN)."
+  echo "     -E <pos>   Sets X-axes last  nucleotide (for SEQUENCE1_END)." 
+  echo "     -s <pos>   Sets Y-axes first nucleotide (for SEQUENCE2_ORIGIN)."
+  echo "     -e <pos>   Sets Y-axes last  nucleotide (for SEQUENCE2_END)."
+  echo "        -S -E -s -e are optionals, if you do not specify any of them, <pos> are taken from gff files." 
+  echo "     -Z [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ] "
+  echo "        -Z makes a zoom of the area you have selected with -S,-E,-s,-e (all 4 are optional)."
+  echo "        [-S <pos>]   Sets X-axes first nucleotide (for -Z SEQUENCE1_ORIGIN)."
+  echo "        [-E <pos>]   Sets X-axes last  nucleotide (for -Z SEQUENCE1_END)."
+  echo "        [-s <pos>]   Sets Y-axes first nucleotide (for -Z SEQUENCE2_ORIGIN)."
+  echo "        [-e <pos>]   Sets Y-axes last  nucleotide (for -Z SEQUENCE2_END)."
+  echo "     -z [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ] "
+  echo "        -z remarks a zoom area on your plot, but does not make a zoom."
+  echo "        [-S <pos>]   Sets X-axes first nucleotide (for -z SEQUENCE1_ORIGIN)."
+  echo "        [-E <pos>]   Sets X-axes last  nucleotide (for -z SEQUENCE1_END)."
+  echo "        [-s <pos>]   Sets Y-axes first nucleotide (for -z SEQUENCE2_ORIGIN)."
+  echo "        [-e <pos>]   Sets Y-axes last  nucleotide (for -z SEQUENCE2_END)."
+  echo "     -G   Switches on Grid (if it is disabled on your custom file)."
+  echo "     -g   Switches off Grid (if it is enabled on your custom file)."
+  echo "     -P   Switches on Percent Box (if it is disabled on your custom file)."
+  echo "     -p   Switches off Percent Box (if it is enabled on your custom file)."
+  echo "     -Q   Switches on Extra Box (if it is disabled on your custom file)."
+  echo "     -q   Switches off Extra Box (if it is enabled on your custom file)."
+  echo "     -A <SeqXName:SeqYName>   Defining which alignment is going to be plotted if you have more than one alignment in your gff files."
+  echo "     -N <SeqXName>   Defining which sequence is going to be plotted at X-axes."
+  echo "     -n <SeqYName>   Defining which sequence is going to be plotted at Y-axes."
+  echo "     -T <Title>   Definning Plot Title."
+  echo "     -t <Subtitle>   Definning Plot SubTitle."
+  echo "     -X <X-Label>   Definning X-Axis Label."
+  echo "     -Y <Y-Label>   Definning Y-Axis Label."
+  echo "     -L <PBox-Label>   Definning Percent-Box Label."
+  echo "     -l <XBox-Label>   Definning Extra-Box Label."
+  echo "     -R   X and Y axes having same plot lenght (if XY_AXES_Same-SIZE disabled on your custom file)."
+  echo "     -r   X and Y axes having same scale factor (if XY_AXES_Same-SIZE enabled on your custom file)."
+  echo "     -F <color>   Displays FUNCTION at Extra-Box with <color> line."
+  echo "     -f   Displays FUNCTION at Extra-Box."
+  echo "     -M   Displays GFF features assigned to Extra-Box (down to up)." 
+  echo "     -m   Displays GFF features assigned to Extra-Box on reverse order (up to down)."
+  echo "     -W   Scaling score on width for Aplot Line."
+  echo "     -w   Scaling score on grey-scale color for Aplot Line."
+  echo "     -B <color>   BackGround Color."
+  echo "     -b <color>   ForeGround Color."
+  echo "     -D <color>   APlot Main-Box BackGround Color."
+  echo "     -C <color>   Percent Box BackGround Color."
+  echo "     -c <color>   Extra Box BackGround Color."
+  echo "     -v  Verbose mode: print variable report (useful when debugging)."
+  echo "     -h  Show this help."
+  echo "     -H <option> Show only help for the especified option."
+  echo ""
+  echo "COMMENTS"
+  echo ""
+  echo "  * Colors Defined are:"
+  echo ""
+  echo "$COLORS"
+  echo ""
+  echo "AUTHOR"
+  echo "       $AUTHOR"
+  echo "       e-mail: $EMAIL"
+  echo "       Mail  : "
+  gawk 'BEGIN{tt=ARGV[1];ARGV[1]="";gsub("\%\%","",tt);printf tt;print}' "$MAIL"
+  echo ""
+  return
+}
+
+ShowHelpLine () {
+ Help | gawk 'BEGIN{
+  IGNORECASE=1; flg=0; srch=ARGV[1]; ARGV[1]=""
+  gsub("-","",srch); srch="\ -"srch"\ " }
+  { if ($0~srch) { print $0; flg=1 } }
+  END{ if (!flg) printf "\n\tERROR: Option %s is not defined,\n\t\tmake sure which option you need help.\n",srch }' $1 
+ echo ""
+ return
+}
+
+#
+# Testing parameters passed by User.
+#
+CheckColor () {
+  gawk 'BEGIN{
+    color=ARGV[1]
+    if (color!~/^BG$|^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/) {
+      printf "\n<<<<ERROR>>>> \" %s \" is not a defined color.\n", color | "cat 1>&2"
+      printf "              Default \" black \" is asigned to option.\n" | "cat 1>&2"
+      printf "              You can choose one of this colors:\n" | "cat 1>&2"
+      print ARGV[3] | "cat 1>&2"
+      print "" | "cat 1>&2"
+      color=ARGV[2]
+      }
+    print color
+    ARGV[1]=ARGV[2]=ARGV[3]=""
+    }' $1 $2 "$COLORS"
+  return 0
+}
+
+CheckInt () {
+  if [ `expr $1 : '[0-9]*'` -eq `expr $1 : '.*'` ]
+    then echo "1"; return 0
+    else 
+      echo "<<<<ERROR>>>> \" $1 \" is not an integer value." 1>&2
+      echo "              You must especify an integer value to -$W_OPTION" 1>&2
+      echo "              Program will take value from defaults..." 1>&2
+      echo "" 1>&2
+      echo "0";return 1
+    fi
+  return 1
+}
+
+#
+# Defining Custom File...
+#
+CustomExist () {
+cat <<'@@@Custom@@@' > $CFDIR/.gff2aplot.rc
+## ########################################################################## ##
+##                                                                            ##
+##                  USER CUSTOMIZATION FILE FOR GFF2APLOT                     ##
+##                                                                            ##
+## ########################################################################## ##
+##
+## This is the file in which you can define
+##   the OPTIONS and FEATURES required by gff2aplot program.
+## 
+## If you want to modify this file, please, do not
+##   forget to make a backup copy of your old file 
+##   (like .gff2aplot.rc.old or .gff2aplot.rc.bck).
+##
+## Creation Date: 27.01.99
+## Last Revision: 20.04.99
+##
+## Creator: Josep Francesc ABRIL FERRANDO
+##
+##  e-mail:        jabril@imim.es
+##
+## ########################################################################## ##
+## #################### OPTIONS for gff2aplot PROGRAM ##################### ##
+## ########################################################################## ##
+##
+FL ########################################################################## ##
+## #################################### FLAGs ############################### ##
+##
+## You could set FLAG variables to:
+##       0/OFF/NO/N/FALSE/F - Switch OFF
+##       1/ON/YES/Y/TRUE/T  - Switch ON
+##
+## Variable ############# Switch ############
+##
+Display_TITLE             : Y
+Display_SUBTITLE          : Y
+Display_X-Axis_LABEL      : Y
+Display_Y-Axis_LABEL      : Y
+Display_Percent-Box_LABEL : Y
+Display_Extra-Box_LABEL   : Y
+Display_PERCENT-BOX       : N
+Display_EXTRA-BOX         : N
+Display_GENE_LABEL        : Y
+Display_GENE_RULE         : Y
+Display_HalfHeightBOX     : Y
+Display_FullHeightBOX     : Y
+Display_BOX_LABEL         : Y
+Display_UserDef_BOX_LABEL : Y
+Display_ARROW             : Y
+Display_JOINS             : Y
+Display_RIBBON            : Y
+Display_SELECTION-BOX     : Y
+Display_GFF               : N
+Display_GFF-ReverseOrder  : N
+Display_FUNCTION          : N
+APlotLine_GroupScore      : N
+APlotLine_ScaleWidth      : N
+APlotLine_ScaleGrey       : N
+XY_AXES_Same-SIZE         : N
+Display_TickMark-LABEL    : Y
+Display_APlot_X-Ticks     : Y
+Display_Percent_X-Ticks   : Y
+Display_ExtraBox_X-Ticks  : Y
+Display_APlot_Y-Ticks     : Y
+Display_Percent_Y-Ticks   : Y
+Display_ExtraBox_Y-Ticks  : Y
+Display_OnlyLower_X-Ticks : N
+Display_GRID              : N
+ZOOM_Zoom                 : N
+ZOOM_Area                 : N
+Zoom_Marks                : N
+Print_Report              : N
+##
+DF ########################################################################## ##
+## ############################# DEFAULT VALUES ############################# ##
+##
+## Some Default Values...
+##
+## Variable ######## Definition ######## 
+##
+BACKGROUND_COLOR     : white
+FOREGROUND_COLOR     : black
+APlotBox_BGCOLOR     :  BG
+PercentBox_BGCOLOR   :  BG
+ExtraBox_BGCOLOR     :  BG
+Strand-Arrows_COLOR  :  FG
+Join-Lines_COLOR     :  FG
+SelectionBox_BGCOLOR : grey
+Function_COLOR       : red
+Zoom_Area_Mark_COLOR : lightred
+PERCENT_ORIGIN       :  50
+PERCENT_END          : 100
+ScaleMajorTICKMARK   :   2    # major tickmarks per axis.
+ScaleMinorTICKMARK   :   5    # minor tickmarks per each major.
+PercentMajorTICKMARK :   5    # major tickmarks per axis.
+PercentMinorTICKMARK :   5    # minor tickmarks per each major.
+ExtraMajorTICKMARK   :   2    # major tickmarks per axis.
+ExtraMinorTICKMARK   :   5    # minor tickmarks per each major.
+##
+OP ########################################################################## ##
+## #################################### OPTIONs ############################# ##
+##
+## Changing default values overrides any other definition you made for features.
+##
+##   ##DEFAULT##  means that program uses for these options
+##                those values you have defined in feature table.
+##         FG    the option is defined with FOREGROUND_COLOR.
+##         BG    the option is defined with BACKGROUND_COLOR.
+##
+## Variable ######## Definition ######## 
+##
+Align_NAME            : ##DEFAULT##
+X-Sequence_NAME       : ##DEFAULT##
+Y-Sequence_NAME       : ##DEFAULT##
+TITLE                 : ##DEFAULT##
+SUBTITLE              : ##DEFAULT##
+X-Axis_LABEL          : ##DEFAULT##
+Y-Axis_LABEL          : ##DEFAULT##
+Percent-Box_LABEL     : ##DEFAULT##
+Extra-Box_LABEL       : ##DEFAULT##
+HalfSizeBox_BGCOLOR   : ##DEFAULT##
+FullSizeBox_BGCOLOR   : ##DEFAULT##
+Ribbon_BGCOLOR        : ##DEFAULT##
+SEQUENCE1_ORIGIN      : ##DEFAULT##
+SEQUENCE1_END         : ##DEFAULT##
+SEQUENCE2_ORIGIN      : ##DEFAULT##
+SEQUENCE2_END         : ##DEFAULT##
+Zoom_SEQUENCE1_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE1_END    : ##DEFAULT##
+Zoom_SEQUENCE2_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE2_END    : ##DEFAULT##
+TICKMARK              : ##DEFAULT##
+SMALLTICKMARK         : ##DEFAULT##
+##
+FT ########################################################################## ##
+## #################################### GFF FEATUREs DEFINITION ############# ##
+## 
+## ########### Description of each element of the Features Array. ########### ##
+##
+## (str) means a string of chars (in a string numbers are treated as chars).
+## (bin) means you only could define variable as
+##       0/OFF/NO/N/FALSE/F = Switch OFF the element.
+##       1/ON/YES/Y/TRUE/T  = Switch ON  the element.
+## (FHN) means you can choose between "(F)ull" or "(H)alf" size Boxes,
+##       also you can define "(N)one", then the feature is without a box.
+## (NLR) means you can choose among "(N)o lines", "draw (L)ines at <feature>
+##       boundaries" or "(R)ibbons".
+## (HND) means "(H)alfSize", "(N)ormalSize" or "(D)oubleSize" LineWidth.
+##
+## (clr) means that you can choose among the following color names:
+##
+##    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white
+##       verydarkgreen | darkgreen | green | lightgreen | verylightgreen
+##   verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue
+##          verydarkblue | darkblue | blue | lightblue | verylightblue
+##         verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan
+##     verydarkviolet | darkviolet | violet | lightviolet | verylightviolet
+##            verydarkred | darkred | red | lightred | verylightred
+##     verydarkorange | darkorange | orange | lightorange | verylightorange
+##     verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow
+##        verydarkbrown | darkbrown | brown | lightbrown | verylightbrown 
+##
+##       If you do not want to define a color, you can enter
+##        BG (background color) or FG (foreground color), 
+##        but you must choose one of the above definitions.
+## 
+## ## 
+## Feature (str): A feature name. Only <features> defined below
+##    will be recognized in your .gff file.
+## ## 
+## XTR (bin): Force those <features> for which XTR is switched ON
+##   to be displayed in the third panel, if the Plot Option 
+##   "Display_EXTRA-BOX" is switched ON.
+## ## 
+## Box (FHN): Define the box size (FHN) for <feature>.
+## ##
+## Line (NLR): Draw lines across all panels for the <feature>.
+## ##
+## Join (bin): Switch ON to connect elements of one group with splice symbols.
+## ##
+## Arrw (bin): Swicth ON to display an arrow that shows the <feature>'s strand.
+## ##
+## Lbl (bin): Swicth ON to display the <feature>'s label
+##   (if it's defined in the .gff file).
+## ##
+## Color (clr): Fill <Box> with this color.
+## ##
+## CLine (clr): Fill Line <Ribbons> with this color.
+## ##
+## Wdth (HND): You can choose among three predefined LineWidths.
+## ##
+## Layr : Layer where is drawed each feature.
+##   You must pass an integer for feature ordering (1..n),
+##   put 0 to print the feature always on top. 
+## ##
+##  
+## ########################## Features Definition ################################ ##
+## Feature  #XTR #Box #Line#Join#Arrw#Lbl #Wdth#Layr#Color ###########CLine #########
+##
+intron        N    H    N    N    N    N    H    4    lightgrey        BG           
+exon          N    F    R    Y    Y    Y    H    0    red              lightgrey    
+#altexon       N    F    R    Y    Y    Y    H    1    orange           lightgrey     ## alternative splice-exon.
+cdexon        N    F    L    Y    Y    Y    H    1    darkred          BG           
+ncdexon       N    F    L    Y    Y    Y    H    1    lightred         BG           
+utr           N    F    L    Y    N    Y    H    3    lightred         BG           
+3'-utr        N    F    L    Y    N    Y    H    3    lightred         BG           
+5'-utr        N    F    L    Y    N    Y    H    3    lightred         BG           
+est           Y    H    N    Y    N    N    H    4    darkgreen        BG           
+3'-est        Y    H    N    Y    N    N    H    4    orange           BG           
+5'-est        Y    H    N    Y    N    N    H    4    orange           BG           
+gap           N    N    L    N    N    N    D    6    black            BG           
+cpg           N    N    R    N    N    Y    H    6    yellow           lightyellow  
+sine          N    N    R    N    N    N    H    6    BG               verylightgreen
+line          N    N    R    N    N    N    H    6    BG               verylightgreen
+alu           N    N    R    N    N    N    H    6    BG               lightgreen   
+repeat        N    N    R    N    N    N    H    6    BG               verylightgreen
+## ######1#########2#########3#########4#########5#########6#########7#########8#####
+##  
+SP ########################## Special gff Features ############################### ##
+##
+GENELIMITS : genebounds
+PLOTLIMITS : seqbounds                                             
+APLOT      : align
+HIGHLIGHT  : boxit
+RECTANGLE  : rectangle
+CIRCLE     : circle
+TEXT       : text
+FUNCTION   : function
+EXTRABOX   : est
+## ######1#########2#########3#########4#########5#########6#########7#########8#####
+@@@Custom@@@
+}
+
+###################################################################
+################# Choosing Options for GFF2APLOT ##################
+
+#
+# Resetting default program variables.
+#
+Defaults
+
+#
+# Checking if custom file exist
+#  else it is created.
+#
+CFDIR=`pwd`
+
+if [ ! -f $CFDIR/.gff2aplot.rc ]
+  then 
+    echo ">>> Your .gff2aplot.rc file was not defined on current directory..." 1>&2
+    CustomExist
+    echo ">>> Your custom file is at :"$CFDIR"/.gff2aplot.rc" 1>&2
+  fi
+
+#
+# When no options, no parameters and 
+#  no inputstream are given, print USAGE.
+#
+if [ $# -eq 0 ] 
+  then
+    echo; echo $USAGE; echo; exit 1
+  fi
+
+#
+# Asking for Help, output it to screen. 
+#
+case $1 in
+  -h) Help; exit 2;;
+  -H) echo; echo $PROGRAM" : Option Definition Help."; echo;
+      if [ $# -gt 1 ]; 
+        then shift; fi;
+      for temp in $@;
+        do ShowHelpLine $temp; done;
+      exit 2;;
+  esac
+
+#
+# Processing all options and parameters passed to program.
+#
+while getopts :S:E:s:e:ZzGgPpQqT:t:X:Y:L:l:RrF:fA:N:n:MmWwB:b:D:C:c:vHh W_OPTION
+  do
+    case $W_OPTION in
+      H|h) Help; exit 2;;
+       S) if [ `CheckInt $OPTARG` -eq 1 ];
+           then
+            if [ $getzoom -eq 0 ];
+             then v01=$OPTARG;     # SEQUENCE1_ORIGIN
+             else v28=$OPTARG;     # Zoom_SEQUENCE1_ORIGIN
+             fi;
+           fi;;
+       E) if [ `CheckInt $OPTARG` -eq 1 ];
+           then
+            if [ $getzoom -eq 0 ];
+             then v02=$OPTARG;     # SEQUENCE1_END
+             else v29=$OPTARG;     # Zoom_SEQUENCE1_END
+             fi;
+           fi;;
+       s) if [ `CheckInt $OPTARG` -eq 1 ];
+           then
+            if [ $getzoom -eq 0 ];
+             then v03=$OPTARG;     # SEQUENCE2_ORIGIN
+             else v30=$OPTARG;     # Zoom_SEQUENCE2_ORIGIN
+             fi;
+           fi;;
+       e) if [ `CheckInt $OPTARG` -eq 1 ];
+           then
+            if [ $getzoom -eq 0 ];
+             then v04=$OPTARG;     # SEQUENCE2_END
+             else v31=$OPTARG;     # Zoom_SEQUENCE2_END
+             fi;
+           fi;;
+       Z) v05="1";v25="1";getzoom=1;; # ZOOM_Zoom; Zoom_Marks
+       z) v06="1";getzoom=1;;         # ZOOM_Area
+       G) v07="1";;         # Display_GRID
+       g) v07="0";;         # Display_GRID
+       P) v08="1";;         # Display_PERCENT-BOX
+       p) v08="0";;         # Display_PERCENT-BOX
+       Q) v09="1";xtron=1;; # Display_EXTRA-BOX
+       q) v09="0";xtron=0;; # Display_EXTRA-BOX
+       T) v10=$OPTARG;v39="1";; # TITLE
+       t) v11=$OPTARG;v40="1";; # SUBTITLE
+       X) v12=$OPTARG;;     # X-Axis_LABEL
+       Y) v13=$OPTARG;;     # Y-Axis_LABEL
+       L) v14=$OPTARG;;     # Percent-Box_LABEL
+       l) v15=$OPTARG;;     # Extra-Box_LABEL
+       R) v16="1";;         # XY_AXES_Same-SIZE
+       r) v16="0";;         # XY_AXES_Same-SIZE
+       F) v35=`CheckColor $OPTARG $fgcolor`;
+          v17="1";v09="1";; # Function_COLOR;Display_FUNCTION; Display_EXTRA-BOX
+       f) v17="1";v09="1";; # Display_FUNCTION; Display_EXTRA-BOX
+       M) v33="1";v09="1";; # Display_GFF; Display_EXTRA-BOX
+       m) v33="1";v34="1";v09="1";; # Display_GFF-ReverseOrder; Display_EXTRA-BOX
+       W) v18="1";v26="1";; # APlotLine_ScaleWidth; APlotLine_GroupScore
+       w) v19="1";v27="1";; # APlotLine_ScaleGrey; APlotLine_GroupScore
+       B) v20=`CheckColor $OPTARG $bgcolor`;;     # BACKGROUND_COLOR
+       b) v21=`CheckColor $OPTARG $fgcolor`;;     # FOREGROUND_COLOR
+       D) v22=`CheckColor $OPTARG $bgcolor`;;     # APlotBox_BqGCOLOR
+       C) v23=`CheckColor $OPTARG $bgcolor`;;     # PercentBox_BGCOLOR
+       c) v24=`CheckColor $OPTARG $bgcolor`;;     # ExtraBox_BGCOLOR
+       A) v36=$OPTARG;;     # Align_NAME
+       N) v37=$OPTARG;;     # X-Sequence_NAME
+       n) v38=$OPTARG;;     # Y-Sequence_NAME
+       v) v32="1";;         # Print_Report
+       :)  ShowHelpLine $1; exit 2;;
+      \?)  ShowHelpLine $1; exit 2;;
+    esac 
+  done
+
+#
+# Defining APLOToptions STRING for GNU awk programs.
+#
+   P=$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05"::"
+ P=$P$n06":="$v06"::"$n07":="$v07"::"$n08":="$v08"::"$n09":="$v09"::"$n10":="$v10"::"
+ P=$P$n11":="$v11"::"$n12":="$v12"::"$n13":="$v13"::"$n14":="$v14"::"$n15":="$v15"::"
+ P=$P$n16":="$v16"::"$n17":="$v17"::"$n18":="$v18"::"$n19":="$v19"::"$n20":="$v20"::"
+ P=$P$n21":="$v21"::"$n22":="$v22"::"$n23":="$v23"::"$n24":="$v24"::"$n25":="$v25"::"
+ P=$P$n26":="$v26"::"$n27":="$v27"::"$n28":="$v28"::"$n29":="$v29"::"$n30":="$v30"::"
+ P=$P$n31":="$v31"::"$n32":="$v32"::"$n33":="$v33"::"$n34":="$v34"::"$n35":="$v35"::"
+ P=$P$n36":="$v36"::"$n37":="$v37"::"$n38":="$v38"::"$n39":="$v39"::"$n40":="$v40
+ APLOToptions=$P
+ if [ $v32 -eq 1 ]
+   then
+     echo "********************************************" 1>&2
+     echo ">>>>> Option String Passed to Program <<<<<<" 1>&2
+     echo "" 1>&2
+     echo $APLOToptions 1>&2
+     echo "" 1>&2
+     echo "*****************************************" 1>&2
+     echo ">>>>> Options Processed by Program <<<<<<" 1>&2
+     echo "" 1>&2
+   fi
+#
+# Shifting all options tested before,
+# without removing files passed to shell...
+#
+incr=1
+while [ $OPTIND -gt $incr ]
+ do shift; incr=`expr $incr + 1`; done
+
+#
+# Printing PostScript Header...
+#
+gawk 'BEGIN{ 
+ # Find actual date...
+ "date" | getline d
+ split(d,dt," ")
+ date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
+ # Finding logged user...
+ "whoami" | getline usr
+ # Printing PostScript Header...
+ bigchain=        "%%\!PS-Adobe-2.0\n"
+ bigchain=bigchain"%%%%Title: %s\n"
+ bigchain=bigchain"%%\n%%%%User: %s\n"
+ bigchain=bigchain"%%%%Date: %s\n"
+ bigchain=bigchain"%%\n%%%%Program: %s\n"
+ bigchain=bigchain"%%%%Version: %s\n"
+ bigchain=bigchain"%%%%CreationDate: %s\n"
+ bigchain=bigchain"%%%%LastRevision: %s\n"
+ bigchain=bigchain"%%%%Author : %s\n"
+ bigchain=bigchain"%%%%e-mail : %s\n"
+ bigchain=bigchain"%%%%Mail Adress:\n%s\n%%\n"
+ if (ARGV[1]!~"##dflt##") title=ARGV[1]
+ else title="Seq1 x Seq2"
+ printf bigchain, title, usr, date, ARGV[2], ARGV[3], ARGV[4], ARGV[5], ARGV[6], ARGV[7], ARGV[8]
+ printf "%%\n%% ------------------------------------------------------------------------\n"
+ printf "%%                           %s - %s\n",ARGV[2], ARGV[3]
+ printf "%% ------------------------------------------------------------------------\n"
+  for (i=1;i<=8;i++) ARGV[i]=""
+}' "$v10" "$PSPROGRAM" "$PSVERSION" "$PSCREATION" "$PSREVISION" "$AUTHOR" "$EMAIL" "$MAIL"
+
+#
+# Printing %%Prolog Constant Definitions...
+#
+cat <<'@@@EndProlog@@@'
+%
+%         Converting GFF files for an alignment to PostScript.
+%
+%          Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+%                                       Thomas WIEHE                   
+%                                      Roderic GUIGO SERRA       
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+% ------------------------------------------------------------------------
+%
+%%Orientation: Portrait
+%%BoundingBox:  0  0  595  842 
+%%BeginProlog
+% /pgA4 { 595 842 } def
+/cm { 28.35 mul } def
+/TitleFont    { 24 /Times-Bold  } def
+/SubTtFont    { 16 /Times-Roman } def
+/TagFont      { 14 /Times-Roman } def
+/TagLabelFont { 16 /Times-Bold  } def
+/TickFont     { 12 /Times-Roman } def
+%
+% Valid color name:
+%    black verydarkgrey darkgrey grey lightgrey verylightgrey white
+%       verydarkgreen darkgreen green lightgreen verylightgreen
+%   verydarkskyblue darkskyblue skyblue lightskyblue verylightskyblue
+%          verydarkblue darkblue blue lightblue verylightblue
+%          verydarkcyan darkcyan cyan lightcyan verylightcyan
+%     verydarkviolet darkviolet violet lightviolet verylightviolet
+%            verydarkred darkred red lightred verylightred
+%     verydarkorange darkorange orange lightorange verylightorange
+%     verydarkyellow darkyellow yellow lightyellow verylightyellow
+%        verydarkbrown darkbrown brown lightbrown verylightbrown 
+/black             { 0.00 0.00 0.00 1.00 } def
+/verydarkgrey      { 0.00 0.00 0.00 0.90 } def
+/darkgrey          { 0.00 0.00 0.00 0.75 } def
+/grey              { 0.00 0.00 0.00 0.50 } def
+/lightgrey         { 0.00 0.00 0.00 0.25 } def
+/verylightgrey     { 0.00 0.00 0.00 0.10 } def
+/white             { 0.00 0.00 0.00 0.00 } def
+/verydarkgreen     { 0.65 0.00 0.95 0.40 } def
+/darkgreen         { 0.90 0.00 0.90 0.10 } def
+/green             { 1.00 0.00 1.00 0.00 } def
+/lightgreen        { 0.50 0.00 1.00 0.00 } def
+/verylightgreen    { 0.25 0.00 0.75 0.00 } def
+/verydarkskyblue   { 0.95 0.15 0.00 0.40 } def
+/darkskyblue       { 1.00 0.25 0.00 0.15 } def
+/skyblue           { 1.00 0.25 0.00 0.00 } def
+/lightskyblue      { 0.80 0.20 0.10 0.00 } def
+/verylightskyblue  { 0.60 0.15 0.15 0.00 } def
+/verydarkblue      { 1.00 1.00 0.00 0.40 } def
+/darkblue          { 1.00 1.00 0.00 0.10 } def
+/blue              { 1.00 1.00 0.00 0.00 } def
+/lightblue         { 0.80 0.80 0.00 0.00 } def
+/verylightblue     { 0.50 0.50 0.00 0.00 } def
+/verydarkcyan      { 0.65 0.15 0.00 0.25 } def
+/darkcyan          { 0.65 0.15 0.00 0.00 } def
+/cyan              { 1.00 0.00 0.00 0.00 } def
+/lightcyan         { 0.50 0.00 0.00 0.00 } def
+/verylightcyan     { 0.25 0.00 0.00 0.00 } def
+/verydarkviolet    { 0.40 0.80 0.20 0.00 } def
+/darkviolet        { 0.45 0.85 0.00 0.00 } def
+/violet            { 0.30 0.60 0.00 0.00 } def
+/lightviolet       { 0.15 0.55 0.00 0.00 } def
+/verylightviolet   { 0.05 0.45 0.00 0.00 } def
+/verydarkred       { 0.00 0.90 0.90 0.30 } def
+/darkred           { 0.00 0.80 0.90 0.10 } def
+/red               { 0.00 1.00 1.00 0.00 } def
+/lightred          { 0.05 0.80 0.90 0.00 } def
+/verylightred      { 0.15 0.40 0.60 0.00 } def
+/verydarkorange    { 0.00 0.60 1.00 0.00 } def
+/darkorange        { 0.00 0.55 0.90 0.00 } def
+/orange            { 0.00 0.50 0.70 0.00 } def
+/lightorange       { 0.00 0.30 0.85 0.00 } def
+/verylightorange   { 0.00 0.30 0.55 0.00 } def
+/verydarkyellow    { 0.00 0.10 0.85 0.25 } def
+/darkyellow        { 0.00 0.10 0.85 0.00 } def
+/yellow            { 0.00 0.00 1.00 0.00 } def
+/lightyellow       { 0.00 0.00 0.50 0.00 } def
+/verylightyellow   { 0.00 0.00 0.25 0.00 } def
+/verydarkbrown     { 0.00 0.85 1.00 0.70 } def
+/darkbrown         { 0.00 0.75 1.00 0.60 } def
+/brown             { 0.00 0.70 1.00 0.40 } def
+/lightbrown        { 0.30 0.60 0.70 0.00 } def
+/verylightbrown    { 0.15 0.45 0.55 0.00 } def
+% true setpacking
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%%EndProlog
+%%BeginSetup
+/htag   0 def
+/Xmarg  4.0 cm def       % Starting Point (upper left corner)
+/Ymarg  842 2 cm sub def
+/Y Ymarg def
+/PlotWidth  14 cm def    % Blocks Size
+/Spacer   1.00 cm def    % BBox relative to dotplot
+/BBoxX  PlotWidth def    % SBox relative to percent box
+/BBoxY   14.00 cm def    % XBox relative to extra box
+/SBoxX  PlotWidth def
+/SBoxY    2.25 cm def
+/XBoxX  PlotWidth def
+/XBoxY    3.00 cm def
+/WBox     0.50 cm def    % TagBox Size
+/HWBox WBox 2 div    def
+/Warw  WBox 0.75 mul def
+/HWarw Warw 2 div    def
+@@@EndProlog@@@
+
+#
+# Printing %%Prolog User-Defined Variables...
+#
+gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -v PARAMETERS="$APLOToptions" 'BEGIN{
+ IGNORECASE=1
+ defaultBGC="white"
+ defaultFGC="black"
+ prtrep=ARGV[1]; ARGV[1]=""
+ do {
+   while ($0~/^( )*$|^(\#)+/) {
+     if ((getline < CUSTOMFILE)<=0) break }
+   if ($1~/^FL$/) mode=0
+   else if ($1~/^DF$|^OP$/) mode=1
+   if (mode) {
+     if ($1~/^BACKGROUND_COLOR$/ && $3~/^BG$|(##DEFAULT##)/) $3=defaultBGC
+     else if ($1~/^FOREGROUND_COLOR$/ && $3~/^FG$|(##DEFAULT##)/) $3=defaultFGC
+     else if ($1~/COLOR$/ && $3~/^BG$|(##DEFAULT##)/) $3=Pre["BACKGROUND_COLOR"]
+     else if ($1~/COLOR$/ && $3~/^FG$/) $3=Pre["FOREGROUND_COLOR"]
+     else if ($1~/^Percent-Box_LABEL$|^Extra-Box_LABEL$/ && $3~/(##DEFAULT##)/) $3=""
+     else if ($1~/^PercentSMALLTICKMARK$/ && $3~/(##DEFAULT##)/) $3="5"
+     else if ($1~/^PercentTICKMARK$/ && $3~/(##DEFAULT##)/) $3="25"
+#     else if ($1~/^SMALLTICKMARK$/ && $3~/(##DEFAULT##)/) $3="500"
+#     else if ($1~/^TICKMARK$/ && $3~/(##DEFAULT##)/) $3="2500"
+     Pre[$1]=$3
+     }
+   else Pre[$1]=OnOff($3)
+   } while ($1!~/^FT$/ && ((getline < CUSTOMFILE )>0))
+ close(CUSTOMFILE)
+ #
+ # Redefining variables by CommandLine. 
+ npar=split(PARAMETERS,parm,"::") 
+ for (r=1;r<=npar;r++) {
+   split(parm[r],elem,":=")
+   if (prtrep) {
+     printf "\n#### Redefining variables by CommandLine...\n>>>%25s = %s\n", elem[1], elem[2] | "cat 1>&2" }
+   if (elem[2]!="##dflt##") {
+     if (elem[1]~/COLOR$/) {
+       ecolor=elem[2]
+       if (ChkColor(ecolor)) {
+         if (ecolor~/^BG$|(##DEFAULT##)/) { elem[2]=Pre["BACKGROUND_COLOR"] }
+         else if (ecolor~/^FG$/) { elem[2]=Pre["FOREGROUND_COLOR"] }
+         }
+       else { elem[2]=Pre["BACKGROUND_COLOR"] }
+       }
+     Pre[elem[1]]=elem[2]
+     }
+   }
+ #
+ # Redefining Other Flags 
+ if (Pre["Display_OnlyLower_X-Ticks"]) {
+   if (Pre["Display_Extra-Box_LABEL"]) {
+     Pre["Display_APlot_X-Ticks"]=0
+     Pre["Display_Percent_X-Ticks"]=0
+     Pre["Display_ExtraBox_X-Ticks"]=1
+     }
+   else if (Pre["Display_Percent-Box_LABEL"]) {
+     Pre["Display_APlot_X-Ticks"]=0
+     Pre["Display_Percent_X-Ticks"]=1
+     Pre["Display_ExtraBox_X-Ticks"]=0
+     } 
+   else {
+     Pre["Display_APlot_X-Ticks"]=1
+     Pre["Display_Percent_X-Ticks"]=0
+     Pre["Display_ExtraBox_X-Ticks"]=0
+     } 
+   }
+ if (Pre["Display_FullHeightBOX"] || Pre["Display_HalfHeightBOX"] || Pre["Display_ARROW"]) tmpflag=1
+ else tmpflag=0
+ #
+ # Printing PostScript Variables from Setup
+ printf "%% Defining background-color for objects.\n"
+ printf "/BGcolor { %s } def\n", Pre["BACKGROUND_COLOR"]
+ printf "/FGcolor { %s } def\n", Pre["FOREGROUND_COLOR"]
+ printf "/BBoxcol { %s } def\n", Pre["APlotBox_BGCOLOR"]
+ printf "/SBoxcol { %s } def\n", Pre["PercentBox_BGCOLOR"]
+ printf "/XBoxcol { %s } def\n", Pre["ExtraBox_BGCOLOR"]
+ printf "/BBXtickflg %s def  %% Blocks TickFlags\n", Pre["Display_APlot_X-Ticks"]
+ printf "/SBXtickflg %s def  %% 0:no tickscale\n", Pre["Display_Percent_X-Ticks"]
+ printf "/XBXtickflg %s def  %% 1:put tickscale\n", Pre["Display_ExtraBox_X-Ticks"]
+ printf "/BBYtickflg %s def\n", Pre["Display_APlot_Y-Ticks"]
+ printf "/SBYtickflg %s def\n", Pre["Display_Percent_Y-Ticks"]
+ printf "/XBYtickflg %s def\n", Pre["Display_ExtraBox_Y-Ticks"]
+ printf "/ShowTicks %s def\n", Pre["Display_TickMark-LABEL"]
+ printf "/axesp  %s def %% axesp 0 => Y==X : 1 => X=14 Y=14\n", Pre["XY_AXES_Same-SIZE"]
+ printf "/ZoomON %s def %% 0 Switch off zoom-marks - 1 Switch on zoom-marks\n", Pre["Zoom_Marks"]
+ printf "/GridON %s def %% 0 Switch off grid - 1 Switch on grid\n", Pre["Display_GRID"]
+ if (Pre["TICKMARK"]!~"##DEFAULT##") mtck=Pre["TICKMARK"]
+ else mtck=-1
+ if (Pre["SMALLTICKMARK"]!~"##DEFAULT##" && mtck>0) ntck=Pre["SMALLTICKMARK"]
+ else ntck=-1
+ printf "/tickmx %s def   %% tickmarks\n", mtck
+ printf "/tickmn %s def\n", ntck
+ if (Pre["ScaleMajorTICKMARK"]!~"##DEFAULT##" && Pre["ScaleMajorTICKMARK"]>0)
+   mtck=Pre["ScaleMajorTICKMARK"]
+ else mtck=2
+ if (Pre["ScaleMinorTICKMARK"]!~"##DEFAULT##" && Pre["ScaleMinorTICKMARK"]>0)
+   ntck=Pre["ScaleMinorTICKMARK"]
+ else ntck=5
+ printf "/maxtck %s def\n", mtck
+ printf "/mintck %s def\n", ntck
+ if (Pre["PercentMajorTICKMARK"]!~"##DEFAULT##" && Pre["PercentMajorTICKMARK"]>0)
+   mtck=Pre["PercentMajorTICKMARK"]
+ else mtck=2
+ if (Pre["PercentMinorTICKMARK"]!~"##DEFAULT##" && Pre["PercentMinorTICKMARK"]>0)
+   ntck=Pre["PercentMinorTICKMARK"]
+ else ntck=5
+ printf "/pctmxt %s def\n", mtck
+ printf "/pctmnt %s def\n", ntck
+ if (Pre["ExtraMajorTICKMARK"]!~"##DEFAULT##" && Pre["ExtraMajorTICKMARK"]>0)
+   mtck=Pre["ExtraMajorTICKMARK"]
+ else mtck=2
+ if (Pre["ExtraMinorTICKMARK"]!~"##DEFAULT##" && Pre["ExtraMinorTICKMARK"]>0)
+   ntck=Pre["ExtraMinorTICKMARK"]
+ else ntck=5
+ printf "/xtrmxt %s def\n", mtck
+ printf "/xtrmnt %s def\n", ntck
+ if (Pre["Display_Percent-Box_LABEL"]) {
+   printf "/SBoxLab (%s) def\n", Pre["Percent-Box_LABEL"] }
+ if (Pre["Display_Extra-Box_LABEL"]) { 
+   printf "/XBoxLab (%s) def\n", Pre["Extra-Box_LABEL"] }
+ printf "/putExon  %s def\n", tmpflag
+ printf "/putExLbl %s def\n", Pre["Display_BOX_LABEL"]
+ printf "/putGnLbl %s def\n", Pre["Display_GENE_LABEL"]
+ for (allvar in Pre) { Delete Pre[allvar] }
+ }
+function OnOff(value) { if (value~/^1$|^ON$|^Y(ES)?$|^T(RUE)?$/) return 1; else return 0 }
+function ChkColor(ncolor) {
+ if (ncolor~/^BG$|^FG$|(##DEFAULT##)|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/)
+      return 1
+ else return 0
+}' $v32
+
+#
+# Printing Main PostScript Routines...
+
+cat <<'@@@EndProcs@@@'
+/BDspl  1.25 putExon add putExLbl add putGnLbl add def
+/GLDspl 0.85 putExon add putExLbl add def
+/GDspl  0.75 putExon add putExLbl add def
+/FBDspl 0.60 def % For example, for mRNA.
+/vertical   { /htag 0 def } bind def
+/horizontal { /htag 1 def } bind def
+% End of user-defined variables...
+% Start APlot Procedures definition.
+/min { 2 copy gt { exch } if pop } bind def 
+/max { 2 copy lt { exch } if pop } bind def
+/Xscm { Xscale mul } bind def /Xscme { Xscm exch } bind def
+/Yscm { Yscale mul } bind def /Yscme { Yscm exch } bind def
+/fmt { Yscme Xscme moveto } bind def /flt { Yscme Xscme lineto } bind def
+/sfont { findfont exch scalefont setfont } bind def
+/tshow { gsave setcmykcolor sfont moveto rotate show grestore } bind def
+/ctshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll gsave sfont stringwidth pop grestore 2 div htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bind def
+/ltshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll gsave sfont stringwidth pop grestore htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bind def
+/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll moveto lineto lineto lineto closepath } bind def
+/line { setcmykcolor setlinewidth moveto lineto stroke } bind def
+/uline { setcmykcolor setlinewidth moveto gsave htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rlineto stroke grestore lineto gsave htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rlineto stroke grestore stroke } bind def
+/ZoomTicks { /zmdict 3 dict def zmdict begin /r { TxWB BDspl mul Xscm } def /s { TyWB BDspl mul Yscm } def /corner { gsave 10 -2 roll moveto 2 { rlineto gsave BGcolor setcmykcolor .4 setlinewidth stroke grestore rlineto gsave FGcolor setcmykcolor 2 setlinewidth [1 3] 0 setdash stroke grestore } repeat grestore } def 4 copy 3 1 roll exch 0 s 0 s neg r neg 0 r 0 corner 0 s neg 0 s r 0 r neg 0 corner 0 s neg 0 s r neg 0 r 0 corner 0 s 0 s neg r 0 r neg 0 corner end } def
+/Line { gsave 9 5 roll 2 { Yscm 4 1 roll Xscm 4 1 roll } repeat 9 4 roll line grestore } bind def
+/Xline { gsave 3 1 roll Xscme Xscme 3 -1 roll Yscm xwdt sub dup 3 1 roll xwdt 9 -4 roll line grestore } bind def
+/Bline { gsave htag 1 eq { Xscme Xscme y0 Yscme y1 Yscm bbox } { Yscme Yscme x0 Xscm 3 1 roll x1 Xscme bbox } ifelse gsave setcmykcolor fill grestore setcmykcolor setlinewidth stroke grestore } bind def
+/Bsquare { gsave Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox gsave setcmykcolor fill grestore setcmykcolor setlinewidth stroke grestore } bind def
+/Msquare { gsave Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox setcmykcolor setlinewidth stroke grestore } bind def
+/Mcircle { gsave Yscme Xscme 3 -1 roll Xscm 0 360 arc closepath setcmykcolor setlinewidth stroke grestore } bind def
+/Join { gsave 2 copy 2 copy pop sub 2 div add exch htag 1 eq { y1 TyWB add dup dup TyWB 0.75 mul add 4 1 roll 5 1 roll } { x0 TxWB sub dup dup TxWB 0.75 mul sub 5 1 roll 6 1 roll exch } ifelse 3 { Yscme Xscme 6 2 roll } repeat moveto lineto lineto 0.25 setlinewidth setcmykcolor stroke grestore } bind def
+/Arrow { /acol [ 9 -4 roll ] def /acolor { acol aload pop } def gsave dup (err) ne { dup (rvs) eq { pop exch /sn { 1 mul } def } { (fwd) eq { /sn { 1 neg mul } def } { /sn { 0 mul } def } ifelse } ifelse htag 1 eq { Xscm dup y1 Yscm HWBox add moveto HWarw sn HWarw rlineto 0 Warw neg rlineto HWarw neg sn HWarw rlineto closepath gsave acolor setcmykcolor fill grestore y1 Yscm HWBox add moveto Xscm y1 Yscm HWBox add lineto acolor setcmykcolor 1 setlinewidth stroke } { Yscm dup x0 Xscm HWBox sub exch moveto HWarw neg HWarw sn rlineto Warw 0 rlineto HWarw neg HWarw neg sn rlineto closepath gsave acolor setcmykcolor fill grestore x0 Xscm HWBox sub exch moveto Yscm x0 Xscm HWBox sub exch lineto acolor setcmykcolor 1 setlinewidth stroke } ifelse } { pop pop pop } ifelse grestore } bind def
+/FBox { htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB FBDspl mul add Yscm bbox } { Yscme Yscme x0 Xscm 3 1 roll x0 TxWB FBDspl mul sub Xscme bbox } ifelse gsave setcmykcolor fill grestore FGcolor setcmykcolor 1 setlinewidth stroke } bind def
+/Box { 2 copy 2 copy pop sub 2 div add 7 1 roll gsave htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB add Yscm bbox } { Yscme Yscme x0 Xscm 3 1 roll x0 TxWB sub Xscme bbox } ifelse gsave setcmykcolor fill grestore FGcolor setcmykcolor 1 setlinewidth stroke htag 1 eq { Xscm y1 TyWB 1.75 mul add Yscm 0 } { Yscm x0 TxWB 1.75 mul sub Xscme 90 } ifelse 3 1 roll 5 -2 roll FGcolor ctshow grestore } bind def
+/GnBanner{ gsave 1 eq { 2 copy htag 1 eq { Xscme Xscme y1 TyWB GDspl mul add dup Yscme Yscm 3 1 roll } { Yscme Yscme x0 TxWB GDspl mul sub dup Xscme Xscme 4 1 roll exch } ifelse 0.5 FGcolor uline } if 2 copy pop sub 2 div add htag 1 eq { Xscm y1 TyWB GLDspl mul add Yscm 0 } { Yscm x0 TxWB GLDspl mul sub Xscme 90 } ifelse 3 1 roll 5 -2 roll FGcolor ctshow grestore } bind def
+/Banner { gsave htag 1 eq { 0 x0 x1 x0 sub 2 div add Xscm y1 TyWB BDspl mul add Yscm } { 90 x0 TxWB BDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm } ifelse 5 -2 roll FGcolor ctshow grestore } bind def
+/Title { gsave 0 Xmarg Y TitleFont FGcolor tshow grestore /Y Y 0.75 cm sub def } bind def 
+/SubTitle { gsave 0 Xmarg Y SubTtFont FGcolor tshow grestore /Y Y 2 cm sub def } bind def 
+% mxt mnt xp yp ori end htick
+/tckdict 15 dict def tckdict begin /mkmxt { dup 0 lt { neg } if dup 10 lt { 10 mul log round 10 exch exp cvi } { log round 10 exch exp cvi } ifelse } def /nwmod { dup 1 le { 100 mul cvi exch 100 mul cvi exch mod 100 div } { exch dup 1 le { 100 mul cvi exch 100 mul cvi mod 100 div } { cvi exch cvi mod } ifelse } ifelse } def /isltone { dup 1 lt { 100 mul cvi 100 div } if } def end
+/htick { gsave tckdict begin horizontal /yp exch Yscm def /xp exch Xscm def /xend exch def /xori exch def /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp translate lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Xscm 0 moveto dup dup Xscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse neg lineto 1 setlinewidth FGcolor setcmykcolor stroke GridON 1 eq { gsave 0 y0 Yscm neg translate dup Xscm dup y0 Yscm moveto y1 Yscm lineto 0.1 setlinewidth verylightgrey setcmykcolor stroke grestore } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 3 -1 roll Xscm -18 TickFont FGcolor ctshow } if } { pop } ifelse } if } for xori Xscm dup 0 moveto 7.5 neg lineto 2 setlinewidth FGcolor setcmykcolor stroke xori 10 string cvs 0 xori Xscm ZoomON 1 eq { 4 sub } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { ltshow } ifelse xend Xscm dup 0 moveto 7.5 neg lineto 2 setlinewidth FGcolor setcmykcolor stroke xend 10 string cvs 0 xend Xscm ZoomON 1 eq { 4 add } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { tshow } ifelse end grestore } def
+/vtick { gsave tckdict begin vertical /yp exch Yscm def /xp exch Xscm def /xend exch def /xori exch def /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp translate lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Yscm 0 exch moveto dup dup Yscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse exch lineto 1 setlinewidth FGcolor setcmykcolor stroke GridON 1 eq { gsave x0 Xscm 0 translate dup Yscm dup x0 neg Xscme moveto x1 neg Xscme lineto 0.1 setlinewidth verylightgrey setcmykcolor stroke grestore } if dup 0 eq { gsave dup dup x0 Xscme Yscm moveto x1 neg Xscme Yscm lineto 0.1 setlinewidth FGcolor setcmykcolor stroke grestore } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 10 4 -1 roll Yscm 2.5 sub TickFont FGcolor tshow } if } { pop } ifelse } if } for 7.5 xori Yscm dup 0 exch moveto lineto 2 setlinewidth FGcolor setcmykcolor stroke xori 10 string cvs 0 10 xori Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow 7.5 xend Yscm dup 0 exch moveto lineto 2 setlinewidth FGcolor setcmykcolor stroke xend 10 string cvs 0 10 xend Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow end grestore } def
+/nucltick { tickmn tickmx maxtck mintck x0 x1 x0 y0 htick } def
+/pctmarks { gsave y0 10 y1 { Yscm dup x0 Xscm x1 Xscm 3 1 roll 4 1 roll 0.5 FGcolor line } for grestore } bind def
+/begindata { gsave /y1 exch def /y0 exch def /x1 exch def /x0 exch def /Y Y Spacer sub BBoxY sub def Xmarg Y translate axesp 0 eq { /Xscale { BBoxX x1 x0 sub y1 y0 sub max div } def /Yscale Xscale def } { /Xscale { BBoxX x1 x0 sub div } def /Yscale { BBoxY y1 y0 sub div } def } ifelse /TxWB { WBox Xscale div } def /TyWB { WBox Yscale div } def x0 Xscm neg y0 Yscm neg translate gsave x0 Xscm y0 Yscm x1 Xscm y1 Yscm bbox BBoxcol setcmykcolor fill grestore gsave x0 Xscm y0 Yscm x1 Xscm y1 Yscm ZoomON 1 eq { 4 copy ZoomTicks } if bbox 2 setlinewidth FGcolor setcmykcolor stroke grestore gsave BBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse BBYtickflg 1 eq { tickmn tickmx maxtck mintck y0 y1 x1 y0 vtick } if grestore newpath } def /enddata { grestore } def
+/beginmatches { /ZoomON 0 def gsave /y1 exch def /y0 exch def /x1 exch def /x0 exch def /Y Y Spacer sub SBoxY sub def Xmarg Y translate /Yscale SBoxY y1 y0 sub div def x0 Xscm neg y0 Yscm neg translate gsave x0 Xscm y0 Yscm x1 Xscm y1 Yscm bbox gsave gsave SBoxcol setcmykcolor fill grestore gsave SBoxLab TagLabelFont Banner SBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse grestore gsave SBYtickflg 1 eq { -1 -1 pctmxt pctmnt y0 y1 x1 0 vtick } if grestore gsave x0 Xscm y0 Yscm x1 Xscm y1 Yscm bbox 2 setlinewidth FGcolor setcmykcolor stroke grestore grestore clip newpath } def /endmatches { grestore grestore } def
+/beginextra { gsave /nlines exch def /y0 0 def /x1 exch def /x0 exch def /Y Y Spacer sub XBoxY sub def Xmarg Y translate /Yscale XBoxY nlines 1 add div def /Xlwdt Yscale 0.75 mul def /xwdt Yscale 2 div def /y1 XBoxY Yscale div def x0 Xscm neg 0 translate gsave x0 Xscm y0 Yscm x1 Xscm y1 Yscm bbox gsave XBoxcol setcmykcolor fill grestore gsave XBoxLab TagLabelFont Banner XBXtickflg 1 eq { nucltick } if grestore newpath } def /endextra { /Yscale XBoxY nlines 1 add div def x0 Xscm y0 Yscm x1 Xscm y1 Yscm bbox 2 setlinewidth FGcolor setcmykcolor stroke grestore } def
+/beginfunct { grestore gsave /fndict 3 dict def fndict begin /maxx exch ceiling def /minx exch floor def /Yscale XBoxY maxx minx sub div def minx 0 lt { 0 minx neg Yscm translate } if gsave XBYtickflg 1 eq { -1 -1 xtrmxt xtrmnt minx maxx x1 0 vtick } if grestore } def /endfunct { end grestore } def
+%%EndSetup
+%%Page: 1 1
+%%BeginPageSetup
+/pgsave save def
+ 0 0 595 842 bbox BGcolor setcmykcolor fill newpath
+%%EndPageSetup
+%
+@@@EndProcs@@@
+
+##############################################################
+############## Main GFF2APLOT GNU awk Program... #############
+#
+# gawk -v CUSTOMFILE=$CFDIR"/.gff2aplot.rc" -v PARAMETERS="$APLOToptions" 'BEGIN{
+# echo $APLOToptions |
+(cat <<@@@EndPROGRAM@@@) |
+BEGIN{
+ ############## INITIALITATION ############ 
+ IGNORECASE=1
+ FTFunction="##DEFAULT##"
+ FTText="##DEFAULT##"; FTCircle="##DEFAULT##"; FTRectangle="##DEFAULT##"
+ FTHighLight="##DEFAULT##"; FTAPlot="##DEFAULT##"; FTLimits="##DEFAULT##"
+ defaultBGC="white"; defaultFGC="black"
+ doproc=0; FTcounter=0
+ while ((getline < CUSTOMFILE )>0) {
+   while (\$0~/^( )*\$|^(\#)+/) {
+     if ((getline < CUSTOMFILE)<=0) break }
+   if (\$1~/^FL/) doproc=1 
+   else if (\$1~/^DF/) doproc=2
+   else if (\$1~/^OP/) doproc=3
+   else if (\$1~/^FT/) doproc=4
+   else if (\$1~/^SP/) doproc=5
+   else if (doproc==5) LoadEspecial()
+   else if (doproc==4) AddtoFeatures()
+   else if (doproc==3) {
+     split(\$0,tt," : ")
+     Var[\$1]=tt[2]
+     }
+   else if (doproc==2) {
+     if (\$1~/^BACKGROUND_COLOR\$/ && \$3~/^BG\$|(##DEFAULT##)/) \$3=defaultBGC
+     else if (\$1~/^FOREGROUND_COLOR\$/ && \$3~/^FG\$|(##DEFAULT##)/) \$3=defaultFGC
+     else if (\$1~/COLOR\$/ && \$3~/^BG\$/) \$3=Var["BACKGROUND_COLOR"]
+     else if (\$1~/COLOR\$/ && \$3~/^FG\$/) \$3=Var["FOREGROUND_COLOR"]
+     Var[\$1]=\$3
+     }
+   else if (doproc==1) Var[\$1]=OnOff(\$3)
+   }  
+ close(CUSTOMFILE)
+ ############## Redefining variables by CommandLine ############ 
+ "echo \$APLOToptions" | getline d
+# getline d < ARGV[1]
+# close("-")
+# print d | "cat 1>&2"
+ npar=split(d,parm,"::") 
+# npar=split(PARAMETERS,parm,"::") 
+ for (r=1;r<=npar;r++) {
+   split(parm[r],elem,":=")
+   if (elem[2]!="##dflt##") {
+     if (elem[1]~/COLOR\$/) {
+       ecolor=elem[2]
+       if (ChkColor(ecolor)) {
+         if (ecolor~/^BG\$|(##DEFAULT##)/) { elem[2]=Var["BACKGROUND_COLOR"] }
+         else if (ecolor~/^FG\$/) { elem[2]=Var["FOREGROUND_COLOR"] }
+         }
+       else { elem[2]=Var["BACKGROUND_COLOR"] }
+       }
+     Var[elem[1]]=elem[2]
+     }
+   }
+ ############## Program Constants ############ 
+ fseq1=0; fseq2=0; falign=0;
+ DefLimits=0; hlcnt=0; NGROUPS=0
+ MinF=10000; MaxF=0 # MXend=1; MYend=1
+} ############ INITIALITATION DONE ############
+{ ############ READING .GFF FILES  ############
+ while (\$0~/^( )*\$|^(\#)+/) { 
+   if (getline<=0) break }
+ if (!(\$1 in SEQNAME)) { 
+   SEQNAME[\$1]=\$1; MSend[\$1]=1
+   if (\$3~FTAPlot) alcnt=1; else cnt=1
+   }
+ else {
+   if (\$3~FTAPlot) alcnt=LAST[\$1]+1; else cnt=LAST[\$1]+1 }
+ if (\$3~FTAPlot) {
+   prterr=0
+   if (!falign) { 
+     falign=1; ALIGNname=\$1;
+     split(\$1,sqn,":")
+     ALIGNseq1=sqn[1]; ALIGNseq2=sqn[2]
+     MXend[\$1]=MYend[\$1]=1
+     }
+   nx=split(\$4,xpos,":"); ny=split(\$5,ypos,":"); done=0
+   if (nx==1) { xpos[2]=xpos[1]; prterr=1 }
+   else if (ny==1) { ypos[2]=ypos[1]; prterr=1 }
+   if (prterr && !done) {
+     done=1
+     printf "<<< ERROR >>> Your aligment gff-file only defined one sequence positions...\n" | "cat 1>&2"
+     printf "\tPlease check your aligment gff-file.\n" | "cat 1>&2"
+     printf "\tPlot is made with one sequence positions against two axes...\n" | "cat 1>&2"
+     }
+   ns=split(\$9,gsco,":");
+   if (ns==1) gsco[2]=1
+   LAST[\$1]=alcnt
+   FEATURE[\$1,"-",alcnt]=\$3
+   ALIGNxori[\$1,"-",alcnt]=xpos[1]
+   ALIGNxend[\$1,"-",alcnt]=ypos[1]
+     MXend[\$1]=max(MXend[\$1],ypos[1])
+   ALIGNyori[\$1,"-",alcnt]=xpos[2]
+   ALIGNyend[\$1,"-",alcnt]=ypos[2] 
+     MYend[\$1]=max(MYend[\$1],ypos[2])
+   ALIGNscore[\$1,"-",alcnt]=\$6
+   ALIGNgroup[\$1,"-",alcnt]=gsco[1]
+   ALIGNscgroup[\$1,"-",alcnt]=gsco[2]
+   }
+ else if (\$3~FTLimits) {
+   nx=split(\$4,xpos,":"); ny=split(\$5,ypos,":"); done=0
+   if (nx==1) { xpos[2]=xpos[1]; prterr=1 }
+   else if (ny==1) { ypos[2]=ypos[1]; prterr=1 }
+   if (prterr && !done) {
+     done=1
+     printf "<<< ERROR >>> Your aligment gff-file only defined one sequence positions...\n" | "cat 1>&2"
+     printf "\tPlease check your aligment gff-file.\n" | "cat 1>&2"
+     printf "\tPlot is made with one sequence positions against two axes...\n" | "cat 1>&2"
+     }
+   OSQ1=xpos[1]; ESQ1=ypos[1]; OSQ2=xpos[2]; ESQ2=ypos[2]; DefLimits=1
+   }
+ else if (\$3~FTExtraFunction) { 
+   funcname=\$1 SUBSEP "-" SUBSEP \$9
+   FunctionXaxis[funcname,"-",\$4]=\$6; FunctionFlg[funcname,"-",\$4]=1
+   MinF=min(MinF,\$6); MaxF=max(MaxF,\$6)
+   if (!(\$9 in FnctSEQ)) {
+     FnctSEQ[\$9]=\$1
+     if (\$10~"Color") {
+       if (ChkColor(\$11)) FunctionColor[funcname]=\$11
+       else FunctionColor[funcname]=Var["Function_COLOR"]
+       }
+     }
+   } 
+ else {
+   if (!fseq1) { fseq1=1; SEQ1name=\$1 }
+   if (!fseq2 && fseq1) { fseq2=1; SEQ2name=\$1 }
+   LAST[\$1]=cnt
+   SOURCE[\$1,"-",cnt]=\$2
+   FEATURE[\$1,"-",cnt]=\$3
+   SQ_ORI[\$1,"-",cnt]=\$4
+   SQ_END[\$1,"-",cnt]=\$5
+     MSend[\$1]=max(MSend[\$1],\$5)
+   SCORE[\$1,"-",cnt]=\$6
+   STRAND[\$1,"-",cnt]=ChkStr(\$7)
+   FRAME[\$1,"-",cnt]=\$8
+   gn=split(\$9,bgroup,":")
+   GROUP[\$1,"-",cnt]=bgroup[1]
+   if (gn==2) {  LABEL[\$1,"-",cnt]=bgroup[2]; ApLED[\$1,"-",cnt]=FTputLabel[\$3]; ngrp=bgroup[2] }
+   else { LABEL[\$1,"-",cnt]=bgroup[1]; ApLED[\$1,"-",cnt]=FTputLabel[\$3]; ngrp=bgroup[1] }
+   if (\$3~FTExtraDisplay) {
+     if (!(ngrp in BigGROUP)) BigGROUP[ngrp]=NGROUPS++;
+     NGROUP[\$1,"-",cnt]=BigGROUP[ngrp] }
+ }
+} ############ .GFF FILES ARE READ ############
+END{ ######### PRINTING POSTSCRIPT FILE #######
+ if (Var["Align_NAME"] in SEQNAME) { 
+   ALIGNname=Var["Align_NAME"]
+   split(Var["Align_NAME"],sqn,":")
+   ALIGNseq1=sqn[1]; ALIGNseq2=sqn[2]
+   }
+ if (Var["X-Sequence_NAME"] in SEQNAME) { SEQ1LABEL=Var["X-Sequence_NAME"] }
+ else {
+   if (falign) { SEQ1LABEL=ALIGNseq1 }
+   else { SEQ1LABEL=SEQ1name }
+   }
+ if (Var["Y-Sequence_NAME"] in SEQNAME) { SEQ2LABEL=Var["Y-Sequence_NAME"] }
+ else {
+   if (falign) { SEQ2LABEL=ALIGNseq2 }
+   else { SEQ2LABEL=SEQ2name }
+   }
+ if (!DefLimits) {         # Default Limits ( nor "seqlimits" given neither user-defined).
+   OSQ1=1; ESQ1=(int(max(MXend[ALIGNname],MSend[SEQ1LABEL])/100)+1)*100
+   OSQ2=1; ESQ2=(int(max(MYend[ALIGNname],MSend[SEQ2LABEL])/100)+1)*100
+   }                       # Else Limits are defined with "seqlimits" gff record
+ if (Var["ZOOM_Zoom"]) {  # Zoom active, then checklimits.
+   if (Var["Zoom_SEQUENCE1_ORIGIN"]!~"##DEFAULT##") OSQ1=Var["Zoom_SEQUENCE1_ORIGIN"]
+   if (Var["Zoom_SEQUENCE1_END"]!~"##DEFAULT##")    ESQ1=Var["Zoom_SEQUENCE1_END"]
+   if (Var["Zoom_SEQUENCE2_ORIGIN"]!~"##DEFAULT##") OSQ2=Var["Zoom_SEQUENCE2_ORIGIN"]
+   if (Var["Zoom_SEQUENCE2_END"]!~"##DEFAULT##")    ESQ2=Var["Zoom_SEQUENCE2_END"]
+   }
+ else {                   # User-defined Limits.
+   if (Var["SEQUENCE1_ORIGIN"]!~"##DEFAULT##") OSQ1=Var["SEQUENCE1_ORIGIN"]
+   if (Var["SEQUENCE1_END"]!~"##DEFAULT##")    ESQ1=Var["SEQUENCE1_END"]
+   if (Var["SEQUENCE2_ORIGIN"]!~"##DEFAULT##") OSQ2=Var["SEQUENCE2_ORIGIN"]
+   if (Var["SEQUENCE2_END"]!~"##DEFAULT##")    ESQ2=Var["SEQUENCE2_END"]
+   }
+# if (Var["TICKMARK"]~"##DEFAULT##") { j=Var["ScaleMajorTICKMARK"]; TCK=tick(j) }
+#   else TCK=Var["TICKMARK"]
+# printf "/maxtickscale %s def\n", TCK
+# printf "/mintickscale %s def\n", TCK/Var["MajorMinor_TickRatio"]
+ printf "%%\n%% New BLOCK ---> LABELS\n%%\n"
+ if (!Var["Display_TITLE"]) T=" "
+ else {
+   if (Var["TITLE"]~"##DEFAULT##") { 
+     if (SEQ1LABEL!="" && SEQ2LABEL!="") T=SEQ1LABEL" x "SEQ2LABEL
+     else T=" "
+     }
+   else T=Var["TITLE"]
+   }
+ if (!Var["Display_SUBTITLE"]) ST=" "
+ else {
+   if (Var["SUBTITLE"]~"##DEFAULT##") ST=" "
+   else ST=Var["SUBTITLE"]
+   }
+ printf "%% (label) Title\n(%s) Title\n", T
+ printf "%% (label) SubTitle\n(%s) SubTitle\n", ST
+ ######### Printing APLOT BLOCK #######
+ printf "%%\n%% New BLOCK ---> APLOT\n%%\n"
+ printf "%% xori xend yori yend\n %s %s %s %s\n", OSQ1, ESQ1, OSQ2, ESQ2
+ printf "%%\nbegindata\n"
+ printf "%%\nhorizontal\n%%\n"
+ printf "%% lwidth lcolor bcol ori end Bline\n"
+ printf "%% x0 y0 x1 y1 lwidth lcolor Line\n"
+ if (Var["Display_RIBBON"]) PLOTRibbons(SEQ1LABEL,1)
+ print "% tag definitions: Box,Join,Arrow,Banner"
+ PLOTFEATURES(SEQ1LABEL,1)
+ if (Var["X-Axis_LABEL"]~"##DEFAULT##") s1lbl=SEQ1LABEL
+   else s1lbl=Var["X-Axis_LABEL"]
+ if (Var["Display_X-Axis_LABEL"]) { 
+   printf "%% (label) TagLabelFont Banner\n(%s) TagLabelFont Banner \n", s1lbl }
+ printf "%%\nvertical\n%%\n"
+ printf "%% lwidth lcolor bcol ori end Bline\n"
+ printf "%% x0 y0 x1 y1 lwidth lcolor Line\n"
+ if (Var["Display_RIBBON"]) {
+   PLOTRibbons(SEQ2LABEL,0)
+   PLOTLINES()
+   }
+ print "%%\n% tag definitions: Box,Join,Arrow,Banner"
+ PLOTFEATURES(SEQ2LABEL,0)
+ if (Var["Y-Axis_LABEL"]~"##DEFAULT##") s2lbl=SEQ2LABEL
+   else s2lbl=Var["Y-Axis_LABEL"]
+ if (Var["Display_Y-Axis_LABEL"]) { 
+   printf "%% (label) TagLabelFont Banner\n(%s) TagLabelFont Banner \n", s2lbl }
+ printf "%%\n%% Extra Features: Nice Band Lines Finishing for Seq1lines, Bsquare\n"
+ printf "%%\n%% lwidth lcolor bcolor Hori Hend Vori Vend Bsquare\n"
+ if (Var["Display_SELECTION-BOX"]) {
+   for (i=1;i<=LAST[ALIGNname];i++) {
+     if (FEATURE[ALIGNname,"-",i]~FTHighLight) {
+       split(SQ_ORI[ALIGNname,"-",i],Oori,":")
+       split(SQ_END[ALIGNname,"-",i],Eend,":")
+       if (ChkXlim(Oori[1],Eend[1]) && ChkYlim(Oori[2],Eend[2])) {
+         Oori[1]=max(Oori[1],OSQ1);Eend[1]=min(Eend[1],ESQ1)
+         Oori[2]=max(Oori[2],OSQ2);Eend[2]=min(Eend[2],ESQ2)
+         printf "%s %s %s %s %s %s %s Bsquare\n", GetLW("N"), Var["FOREGROUND_COLOR"], Var["SelectionBox_BGCOLOR"], Oori[1], Eend[1], Oori[2], Eend[2]
+         }
+       }
+     }
+   }
+ printf "%%\n%%\n%% DATA ---> Alignment...\n%%\n"
+ for (i=1;i<=LAST[ALIGNname];i++) {
+   alname=ALIGNname SUBSEP "-" SUBSEP i
+   if (Var["APlotLine_GroupScore"]) {
+     if (Var["APlotLine_ScaleWidth"]) wdth=ALIGNscgroup[alname]*10; else wdth=2
+     if (Var["APlotLine_ScaleGrey"]) color="0 0 0 "ALIGNscgroup[alname]
+       else color=Var["FOREGROUND_COLOR"]
+     }
+   else {
+     if (Var["APlotLine_ScaleWidth"]) wdth=ALIGNscore[alname]*10; else wdth=2
+     if (Var["APlotLine_ScaleGrey"]) color="0 0 0 "ALIGNscore[alname]
+       else color=Var["FOREGROUND_COLOR"]
+     }
+   if (FEATURE[alname]~FTAPlot) {
+     if (ChkXlim(ALIGNxori[alname],ALIGNxend[alname]) && ChkYlim(ALIGNyori[alname],ALIGNyend[alname])) {
+       ALIGNxori[alname]=max(ALIGNxori[alname],OSQ1)
+       ALIGNxend[alname]=min(ALIGNxend[alname],ESQ1)
+       ALIGNyori[alname]=max(ALIGNyori[alname],OSQ2)
+       ALIGNyend[alname]=min(ALIGNyend[alname],ESQ2)
+       printf "%s %s %s %s %s %s Line\n", ALIGNxori[alname], ALIGNyori[alname], ALIGNxend[alname], ALIGNyend[alname], wdth, color
+       }
+     }
+   }
+ printf "%%\n%%\n%% Plot - Remarks...\n%%\n"
+ PLOTREMARKS(SEQ1LABEL,1)
+ PLOTREMARKS(SEQ2LABEL,0)
+ if (!Var["ZOOM_Zoom"] && Var["ZOOM_Area"]) {
+   if (ChkXlim(Var["Zoom_SEQUENCE1_ORIGIN"],Var["Zoom_SEQUENCE1_END"]) && ChkYlim(Var["Zoom_SEQUENCE2_ORIGIN"],Var["Zoom_SEQUENCE2_END"])) {
+     Var["Zoom_SEQUENCE1_ORIGIN"]=max(Var["Zoom_SEQUENCE1_ORIGIN"],OSQ1)
+     Var["Zoom_SEQUENCE1_END"]=min(Var["Zoom_SEQUENCE1_END"],ESQ1)
+     Var["Zoom_SEQUENCE2_ORIGIN"]=max(Var["Zoom_SEQUENCE2_ORIGIN"],OSQ2)
+     Var["Zoom_SEQUENCE2_END"]=min(Var["Zoom_SEQUENCE2_END"],ESQ2)
+     printf "%s %s %s %s %s %s Msquare\n", 2, Var["Zoom_Area_Mark_COLOR"], Var["Zoom_SEQUENCE1_ORIGIN"], Var["Zoom_SEQUENCE1_END"], Var["Zoom_SEQUENCE2_ORIGIN"], Var["Zoom_SEQUENCE2_END"]
+     }
+   }    
+ printf "%%\nenddata\n%%\n"
+ ######### Printing PERCENT-BOX BLOCK #######
+ if (Var["Display_PERCENT-BOX"]) {
+   printf "%%\n%% New BLOCK ---> MATCHES\n%%\n"
+   printf "%% xori xend xpct ypct\n %s %s %s %s\n", OSQ1, ESQ1, Var["PERCENT_ORIGIN"], Var["PERCENT_END"]
+   printf "%%\nbeginmatches\n"
+   printf "%%\nhorizontal\n"
+   printf "%% lwidth lcolor bcol ori end Bline\n"
+   printf "%% x0 y0 x1 y1 lwidth lcolor Line\n"
+   if (Var["Display_RIBBON"]) { 
+     PLOTRibbons(SEQ1LABEL,1)
+     PLOTLINES()
+     }
+   printf "%%\nvertical\n%%\npctmarks\n"
+   printf "%%\n%%\n%% DATA ---> Alignment...\n%%\n"
+   for (i=1;i<=LAST[ALIGNname];i++) {
+     pcname=ALIGNname SUBSEP "-" SUBSEP i
+     if (Var["APlotLine_GroupScore"]) {
+#       if (Var["APlotLine_ScaleWidth"]) wdth=ALIGNscgroup[pcname]*10; else wdth=2
+       if (Var["APlotLine_ScaleGrey"]) color="0 0 0 "ALIGNscgroup[pcname]
+         else color=Var["FOREGROUND_COLOR"]
+       }
+     else {
+#     if (Var["APlotLine_ScaleWidth"]) wdth=ALIGNscore[pcname]*10; else wdth=2
+       if (Var["APlotLine_ScaleGrey"]) color="0 0 0 "ALIGNscore[pcname]
+         else color=Var["FOREGROUND_COLOR"]
+       }
+     wdth=2
+     nscore=ALIGNscore[pcname]*100
+     if (FEATURE[pcname]~FTAPlot) {
+       if (ChkXlim(ALIGNxori[pcname],ALIGNxend[pcname])) {
+         ALIGNxori[pcname]=max(ALIGNxori[pcname],OSQ1)
+         ALIGNxend[pcname]=min(ALIGNxend[pcname],ESQ1)
+         printf "%s %s %s %s %s %s Line\n", ALIGNxori[pcname], nscore, ALIGNxend[pcname], nscore, wdth, color
+         }
+       }
+     }
+   printf "%%\nendmatches\n%%\n"
+   }
+ ######### Printing EXTRA-BOX BLOCK #######
+ if (Var["Display_EXTRA-BOX"]) {
+   printf "%%\n%% New BLOCK ---> EXTRA-BOX\n%%\n"
+   printf "%% xori xend numlines\n %s %s %s\n", OSQ1, ESQ1, NGROUPS 
+   printf "%%\nbeginextra\n"
+   printf "%%\nhorizontal\n"
+   printf "%% lwidth lcolor bcol ori end Bline\n"
+   printf "%% x0 y0 x1 y1 lwidth lcolor Line\n"
+   if (Var["Display_RIBBON"]) {
+     PLOTRibbons(SEQ1LABEL,1)
+     PLOTLINES()
+     }
+   printf "%%\nvertical\n"
+   if (Var["Display_GFF"]) {
+     for (i=1;i<=LAST[SEQ1LABEL];i++) {
+       slbl=SEQ1LABEL SUBSEP "-" SUBSEP i
+       if (FEATURE[slbl]~FTExtraDisplay) {
+         if (!ChkColor(FTColor[FEATURE[slbl]])) xcolor=Var["FOREGROUND_COLOR"]
+           else xcolor=FTColor[FEATURE[slbl]]
+         if (Var["Display_GFF-ReverseOrder"]) gffpos=NGROUPS-NGROUP[slbl]
+           else gffpos=NGROUP[slbl]+1
+         if (ChkXlim(SQ_ORI[slbl],SQ_END[slbl])) {
+           SQ_ORI[slbl]=max(SQ_ORI[slbl],OSQ1)
+           SQ_END[slbl]=min(SQ_END[slbl],ESQ1)
+           printf "%s %s %s %s %s %s Line\n", SQ_ORI[slbl], gffpos, SQ_END[slbl], gffpos, "Xlwdt", xcolor
+           }
+         }
+       }
+     }
+   if (Var["Display_FUNCTION"]) {
+     printf "%%\n%s %s\nbeginfunct\n",MinF,MaxF
+     for (fnc in FnctSEQ) {
+       if (FnctSEQ[fnc]==SEQ1LABEL) {
+         fori=0; thefnc=SEQ1LABEL SUBSEP "-" SUBSEP fnc
+         for (i=OSQ1;i<=ESQ1;i++) {
+           if (fori) { 
+             if (FunctionFlg[thefnc,"-",i])
+               printf "%s %s flt\n", i, FunctionXaxis[thefnc,"-",i]
+             }
+           else if (!fori) { 
+             if (FunctionFlg[thefnc,"-",i]) {
+               printf "gsave\n%s %s fmt\n", i, FunctionXaxis[thefnc,"-",i]; fori=1 }
+             }
+           }
+         if (fori) {
+           printf "2 setlinewidth %s setcmykcolor stroke grestore\n",FunctionColor[thefnc] }
+         }
+       }
+       printf "%%\nendfunct\n%%\n"
+     }
+   printf "%%\nendextra\n%%\n"
+   }
+ if (Var["Print_Report"]) prtReport()
+ }
+ ######### FUNCTIONS DEFINITION #######
+function min(a,b) { if (a<=b) return a; else return b }
+function max(a,b) { if (a>=b) return a; else return b }
+function OnOff(value) { if (value~/^1\$|^ON\$|^Y(ES)?\$|^T(RUE)?\$/) return 1; else return 0 }
+function ChkXlim(o,e) { if (o>=ESQ1 || e<=OSQ1) return 0; else return 1 }
+function ChkYlim(o,e) { if (o>=ESQ2 || e<=OSQ2) return 0; else return 1 }
+function ChkColor(ncolor) {
+ if (ncolor~/^FG\$|^black\$|^white\$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)\$/)
+   return 1
+ else return 0 # also when ncolor == ^BG\$|(##DEFAULT##)
+ }
+function ChkFT(feat) {
+ if (feat~FTExtraDisplay || feat~FTText || feat~FTCircle || feat~FTRectangle || feat~FTExtraFunction || feat~FTGeneBounds || feat~FTLimits || feat~FTHighLight || feat~FTAPlot)
+   return 1
+ else return 0
+ }
+function ChkStr(char) {
+ if (char~/^0\$|^\+\$/)      return "(fwd)"
+ else if (char~/^1\$|^\-\$/) return "(rvs)"
+ else if (char~/^\.\$/)     return "(nst)"
+ else return "(err)"
+ }
+function tick(nm) {
+ end1=ESQ1-OSQ1; if (end1==0) end1=10000
+ end2=ESQ2-OSQ2; if (end2==0) end2=10000
+ wy=max(end1,end2);
+ y=wy/nm;
+ ylog=(log(y)/log(10));
+ yfloor=int(ylog);
+ y1=y/(10^yfloor);
+ y2=int(y1);
+ t=y2*(10^yfloor);
+ return t
+ }
+function LoadEspecial() {
+ if (\$1~/^(EXTRABOX)\$/) FTExtraDisplay=\$3
+ else if (\$1~/^(FUNCTION)\$/) FTExtraFunction=\$3
+ else if (\$1~/^(TEXT)\$/) FTText=\$3
+ else if (\$1~/^(CIRCLE)\$/) FTCircle=\$3
+ else if (\$1~/^(RECTANGLE)\$/) FTRectangle=\$3
+ else if (\$1~/^(HIGHLIGHT)\$/) FTHighLight=\$3
+ else if (\$1~/^(APLOT)\$/) FTAPlot=\$3
+ else if (\$1~/^(PLOTLIMITS)\$/) FTLimits=\$3
+ else if (\$1~/^(GENELIMITS)\$/) FTGeneBounds=\$3
+}
+function AddtoFeatures() {
+ FTindex[\$1]=\$1
+ FTcounter++
+ FTputEXTRA[\$1]=OnOff(\$2)
+ FTBoxType[\$1]=\$3
+ FTLineType[\$1]=\$4
+ FTputJoin[\$1]=OnOff(\$5)
+ FTputArrow[\$1]=OnOff(\$6)
+ FTputLabel[\$1]=OnOff(\$7)
+ FTLineWidth[\$1]=\$8
+ FTLayer[\$1]=\$9 
+ maxlayer=max(maxlayer,\$9)
+ if (ChkColor(\$10)) {
+   if (\$10~/^FG\$/) FTColor[\$1]=Var["FOREGROUND_COLOR"]
+   else FTColor[\$1]=\$10
+   }
+ else FTColor[\$1]=Var["BACKGROUND_COLOR"]
+ if (ChkColor(\$11)) {
+   if (\$11~/^FG\$/) FTRbnColor[\$1]=Var["FOREGROUND_COLOR"]
+   else FTRbnColor[\$1]=\$11
+   }
+ else FTRbnColor[\$1]=Var["BACKGROUND_COLOR"]
+}
+function GetLW(type) {
+ if (type~/H|h/) return 0.25
+ else if (type~/N|n/) return 0.5
+ else if (type~/D|d/) return 1
+ }
+function PLOTRibbons(SEQ,ish) {
+ for (l=maxlayer;l>=0;l--) {          ### Plotting features by layers...  
+   for (i=1;i<=LAST[SEQ];i++) {
+     name=SEQ SUBSEP "-" SUBSEP i
+     feat=FEATURE[name]
+    if (feat in FTindex) {
+     if (FTLayer[feat]==l) {
+       bori=SQ_ORI[name]; bend=SQ_END[name]
+       featln=FTLineType[feat]
+       lnw=GetLW(FTLineWidth[feat])
+       if (Var["Ribbon_BGCOLOR"]~"##DEFAULT##") rbbncol=FTRbnColor[feat]
+       else rbbncol=Var["Ribbon_BGCOLOR"]
+       if (featln~/R|r/) {
+         goprt=0
+         if (ish) {
+           if (ChkXlim(bori,bend)) {
+             bori=max(bori,OSQ1); bend=min(bend,ESQ1); goprt=1 }
+           HLary[hlcnt]=bori; HLWary[hlcnt]=lnw; hlcnt++
+           HLary[hlcnt]=bend; HLWary[hlcnt]=lnw; hlcnt++
+           }
+         else { 
+           if (ChkYlim(bori,bend)) {
+             bori=max(bori,OSQ2); bend=min(bend,ESQ2); goprt=1 }
+           }
+         if (goprt) {
+           printf "%s %s %s %s %s Bline\n", lnw, Var["FOREGROUND_COLOR"], rbbncol, bori, bend }
+         } 
+       else if (featln~/L|l/) {
+         if (ish) { 
+           PRTLine(bori, bori, lnw, Var["FOREGROUND_COLOR"])
+           PRTLine(bend, bend, lnw, Var["FOREGROUND_COLOR"])
+           HLary[hlcnt]=bori; HLWary[hlcnt]=lnw; hlcnt++
+           HLary[hlcnt]=bend; HLWary[hlcnt]=lnw; hlcnt++
+           }
+         else { 
+           PRTLineV(bori, bori, lnw, Var["FOREGROUND_COLOR"])
+           PRTLineV(bend, bend, lnw, Var["FOREGROUND_COLOR"])
+           }
+         } 
+       }  # if FTLayer
+      }  # if feat in FTindex
+     }  # for i 
+   }  # for l
+ }  # function
+function PLOTFEATURES(SEQ,isq) {
+ printf "%% (label) TagFont bcol ori end Box\n"
+ printf "%% color ori end dir Arrow %% dir: 0=left 1=rigth\n"
+ printf "%% jcol ori end Join\n"
+ for (l=maxlayer;l>=0;l--) {          ### Plotting features by layers...  
+   for (i=1;i<=LAST[SEQ];i++) {
+     name=SEQ SUBSEP "-" SUBSEP i
+     feat=FEATURE[name]
+    if (feat in FTindex) {
+     if (FTLayer[feat]==l) {
+       bori=SQ_ORI[name]; bend=SQ_END[name];
+       grpcnt[SEQ,"-",GROUP[name]]++
+       if (Var["FullSizeBox_BGCOLOR"]~"##DEFAULT##") fboxcol=FTColor[FEATURE[name]]
+         else boxcol=Var["FullSizeBox_BGCOLOR"]
+       if (Var["HalfSizeBox_BGCOLOR"]~"##DEFAULT##") hboxcol=FTColor[FEATURE[name]]
+         else boxcol=Var["HalfSizeBox_BGCOLOR"]
+       if (FEATURE[name]!~FTExtraDisplay) {
+         if (FTputLabel[FEATURE[name]]) {
+           if (ApLED[name]) {
+             if (Var["Display_UserDef_BOX_LABEL"]) tlabel=LABEL[name]
+             else if (Var["Display_BOX_LABEL"]) tlabel=grpcnt[SEQ,"-",GROUP[name]]
+             }
+           }
+         else tlabel=""
+         goprt=0
+         if (isq) { 
+           if (ChkXlim(bori,bend)) {
+             bori=max(bori,OSQ1); bend=min(bend,ESQ1); goprt=1 } }
+         else {
+           if (ChkYlim(bori,bend)) {
+             bori=max(bori,OSQ2); bend=min(bend,ESQ2); goprt=1 } }
+         if (goprt) {
+           if (FTBoxType[FEATURE[name]]~/F|f/) {
+             if (Var["Display_FullHeightBOX"]) {
+               printf"(%s) TagFont %s %s %s Box\n", tlabel, fboxcol, bori, bend }
+             if (Var["Display_ARROW"] && FTputArrow[FEATURE[name]]) {
+               printf"%s %s %s %s Arrow\n", Var["Strand-Arrows_COLOR"], bori, bend, STRAND[name] }
+             }
+           else if (FTBoxType[FEATURE[name]]~/H|h/ && Var["Display_HalfHeightBOX"]) {
+             printf"%s %s %s FBox\n", hboxcol, bori, bend }
+           }
+         }  # if FTExtraDisplay
+       }  # if FTLayer
+     }  # if feat in FTindex
+   }  # for i
+ }  # for l
+  if (Var["Display_JOINS"] && Var["Display_FullHeightBOX"]) {
+    G_ORI[GROUP[SEQ,"-",1]]=SQ_ORI[SEQ,"-",1]
+    for (i=1;i<LAST[SEQ];i++) {
+     name=SEQ SUBSEP "-" SUBSEP i
+     nxtn=SEQ SUBSEP "-" SUBSEP (i+1)
+     gname=GROUP[name]
+     feat=FEATURE[name]
+     if (!(gname in glist) && (feat in FTindex) && feat~FTGeneBounds) {
+       glist[gname]=gname; G_ORI[gname]=SQ_ORI[name]; G_END[gname]=SQ_END[name] }
+     if (FTputJoin[feat] && feat!~FTExtraDisplay) {
+       if (G_ORI[gname]>SQ_ORI[name]) G_ORI[gname]=SQ_ORI[name]
+       if (G_END[gname]<SQ_END[name]) G_END[gname]=SQ_END[name]
+       if (FEATURE[nxtn]~feat) {
+         if (gname==GROUP[nxtn]) {
+           bori=SQ_END[name]; bend=SQ_ORI[nxtn]; jprt=0
+           if (isq) {
+             if (ChkXlim(bori,bend)) {
+               bori=max(bori,OSQ1); bend=min(bend,ESQ1); jprt=1 }
+             }
+           else { 
+             if (ChkYlim(bori,bend)) {
+               bori=max(bori,OSQ2); bend=min(bend,ESQ2); jprt=1 }
+             }  
+           if (jprt) printf "%s %s %s Join\n", Var["Join-Lines_COLOR"], bori, bend
+           }
+         else G_ORI[GROUP[nxtn]]=SQ_ORI[nxtn]
+         }
+       }
+     }
+     if ((G_END[gname]<SQ_END[SEQ,"-",LAST[SEQ]]) && FEATURE[SEQ,"-",LAST[SEQ]]==feat) {
+       G_END[gname]=SQ_END[SEQ,"-",LAST[SEQ]] }
+   }  # if Joins & FullBoxes 
+ if (Var["Display_GENE_LABEL"]) {
+   printf "%% (label) TagFont ori end GnBanner\n"
+   for ( glbname in glist ) {
+     gori=G_ORI[glbname]; gend=G_END[glbname]
+     goprt=0
+     if (isq) {
+       if (ChkXlim(gori,gend)) { gori=max(gori,OSQ1); gend=min(gend,ESQ1); goprt=1 } }
+     else {
+       if (ChkYlim(gori,gend)) { gori=max(gori,OSQ2); gend=min(gend,ESQ2); goprt=1 } }
+     if (goprt) printf "(%s) TagFont %s %s %s GnBanner\n", glist[glbname], gori, gend, Var["Display_GENE_RULE"]
+     }
+   }  # if GENE_LABEL
+   for (glbname in glist) { 
+     delete glist[glbname]; delete G_ORI[glbname]; delete G_END[glbname] }
+}  # function
+function PLOTREMARKS(SEQ,isr) {
+ for (h=1;h<=LAST[SEQ];h++) {
+   xtname=SEQ SUBSEP "-" SUBSEP h
+   bori=SQ_ORI[xtname]; bend=SQ_END[xtname];
+   grpcnt[SEQ,"-",GROUP[xtname]]++
+   if (FEATURE[xtname]~FTRectangle || FEATURE[xtname]~FTCircle || FEATURE[xtname]~FTText) {
+     if (ChkColor(SOURCE[xtname])) xtcolor=SOURCE[xtname]
+     else xtcolor=Var["FOREGROUND_COLOR"]
+     xto=split(SQ_ORI[xtname],o,":")
+     if (xto==1) o[2]=0
+     xte=split(SQ_END[xtname],e,":")
+     if (xte==1) e[2]=0
+     }
+   goprt=0
+   toprt=0
+   if (FTRectangle!~"##DEFAULT##" && FEATURE[xtname]~FTRectangle) {
+     if (isr) {
+       if (ChkXlim(o[1],e[1])) {
+         o[1]=max(o[1],OSQ1); e[1]=min(e[1],ESQ1); goprt=1 }
+       if (ChkYlim(o[2],e[2])) {
+         o[2]=max(o[2],OSQ2); e[2]=min(e[2],ESQ2); toprt=1 }
+       }
+     else {
+       if (ChkXlim(o[2],e[2])) {
+         o[2]=max(o[2],OSQ1); e[2]=min(e[2],ESQ1); goprt=1 }
+       if (ChkYlim(o[1],e[1])) {
+         o[1]=max(o[1],OSQ2); e[1]=min(e[1],ESQ2); toprt=1 }
+       }
+     if (goprt && toprt) {
+       printf "%s %s %s %s %s %s Msquare\n",SCORE[xtname],xtcolor,o[1],e[1],o[2],e[2] }
+     }
+   if (FTCircle!~"##DEFAULT##" && FEATURE[xtname]~FTCircle) {
+     if (ChkXlim(o[1],o[1])) { goprt=1 }
+     if (ChkYlim(e[1],e[1])) { toprt=1 }
+     if (goprt && toprt) printf "%s %s %s %s %s Mcircle\n",SCORE[xtname],xtcolor,o[2],o[1],e[1]
+     }
+   if (FTText!~"##DEFAULT##" && FEATURE[xtname]~FTText) {
+     if (ChkXlim(o[1],o[1])) { goprt=1 }
+     if (ChkYlim(e[1],e[1])) { toprt=1 }
+     if (goprt && toprt) printf "(%s) %s %s Xscm %s Yscm %s %s tshow\n",GROUP[xtname],SCORE[xtname],o[1]+o[2],e[1]+e[2],"TagFont",xtcolor
+     }
+   }
+ }
+function PLOTLINES() {
+ if (hlcnt>0 && Var["Display_RIBBON"]) {
+   for (h=0;h<hlcnt;h++) { 
+     PRTLine(HLary[h], HLary[h], HLWary[h], Var["FOREGROUND_COLOR"]) }
+   }
+ }
+function PRTLine(ori,end,pct,col) {
+ if (ChkXlim(ori,end)) {
+   ori=max(ori,OSQ1); end=min(end,ESQ1)
+   printf "%s y0 %s y1 %s %s Line\n", ori, end, pct, col
+   }
+ }
+function PRTLineV(ori,end,pct,col) {
+  if (ChkYlim(ori,end)) {
+   ori=max(ori,OSQ2); end=min(end,ESQ2)
+   printf "x0 %s x1 %s %s %s Line\n", ori, end, pct, col
+   }
+ }
+function prtReport() {
+  printf "\n**************************************\n" | "cat 1>&2"
+  printf ">>>>>>>> VARIABLE DEFINITIONS <<<<<<<<\n" | "cat 1>&2"
+  printf "\nPlot X-Limits: %s %s - Plot Y-Limits: %s %s\n",OSQ1,ESQ1,OSQ2,ESQ2 | "cat 1>&2"
+  for (names in Def) {
+    printf "%-25s : %8s <<\n", names, Var[names] | "sort 1>&2"
+    }
+  close("sort 1>&2")
+  printf "\n**************************************\n" | "cat 1>&2"
+  printf ">>>>>>>> FEATURES DEFINITIONS <<<<<<<<\n" | "cat 1>&2"
+  for (names in FTindex) { 
+    printf ">>> %-14s - %s - %s - %s - %s - %s - %s - %s - %-10s - %-10s\n", 
+      FTindex[names],FTputEXTRA[names],FTBoxType[names],FTLineType[names], 
+      FTputJoin[names],FTputArrow[names],FTputLabel[names],FTLineWidth[names], 
+      FTColor[names],FTRbnColor[names] | "cat 1>&2" 
+    }
+  print "There are : "FTcounter" features..." | "cat 1>&2"
+  printf "\n************************************************\n" | "cat 1>&2"
+  printf ">>>>>>>> Sequences Defined on gff Files <<<<<<<<\n" | "cat 1>&2"
+  inc=0
+  for (names in SEQNAME) printf "Sequence %s : %s\n",inc++,SEQNAME[names] | "cat 1>&2"
+  printf "\n**********************************\n" | "cat 1>&2"
+  printf ">>>>>>>> Genomic Data Set <<<<<<<<\n" | "cat 1>&2"
+  for (seq in SEQNAME) {
+    if (seq==SEQ1LABEL || seq==SEQ2LABEL || seq==ALIGNname)
+         printf "\nSequence: %s ### USED on PLOT.\n", seq | "cat 1>&2"
+    else printf "\nSequence: %s ### NOT USED on PLOT.\n", seq | "cat 1>&2"
+    for (i=1;i<=LAST[seq];i++) {
+      name=seq SUBSEP "-" SUBSEP i
+      if (!ChkFT(FEATURE[name])) {
+        printf "%-10s - %-10s - %-10s - %8s - %8s - %4s - %3s - %3s - %-10s - %-10s\n",   
+        name, SOURCE[name], FEATURE[name], SQ_ORI[name], SQ_END[name], 
+        SCORE[name], STRAND[name], FRAME[name], GROUP[name], LABEL[name] | "cat 1>&2"
+        }
+      }
+    }
+  printf "\n*****************************************\n" | "cat 1>&2"
+  printf ">>>>>>>> EXTRA Features Data Set <<<<<<<<\n" | "cat 1>&2"
+  for (seq in SEQNAME) {
+    if (seq==SEQ1LABEL || seq==SEQ2LABEL || seq==ALIGNname)
+         printf "\nSequence: %s ### USED on PLOT.\n", seq | "cat 1>&2"
+    else printf "\nSequence: %s ### NOT USED on PLOT.\n", seq | "cat 1>&2"
+    for (i=1;i<=LAST[seq];i++) {
+      name=seq SUBSEP "-" SUBSEP i
+      if (ChkFT(FEATURE[name])) {
+        printf "%s: %-10s - %-10s - %-10s - %8s - %8s - %4s - %3s - %3s - %-10s - %-10s\n",  
+        i, name, SOURCE[name], FEATURE[name], SQ_ORI[name], SQ_END[name], 
+        SCORE[name], STRAND[name], FRAME[name], GROUP[name], LABEL[name] | "cat 1>&2"
+        }
+      }
+    }
+ }
+@@@EndPROGRAM@@@
+gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -f - "$@"
+
+#
+############ Main GFF2APLOT GNU awk Program DONE. #############
+#
+
+#
+# PostScript end of page...
+# 
+cat <<'@@@EndTrailer@@@'
+%
+%
+pgsave restore
+showpage
+%
+%%PageTrailer
+%
+%%Orientation: Portrait
+%%BoundingBox:  0  0  595  842 
+%
+%%Trailer
+%
+%%EOF
+@@@EndTrailer@@@
+
+#
+##################### EOF #####################
+#
+exit 0
+
