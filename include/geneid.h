@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.13 2003-11-05 11:48:38 eblanco Exp $ */
+/* $Id: geneid.h,v 1.14 2004-01-27 16:29:37 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -69,7 +69,7 @@ A. DEFINITIONS
 #define RSINGL 3 
 #define RORF   3
 
-/* Total number ox exons/fragment (factor)  */
+/* Total number of exons/fragment (factor)  */
 #define FSORT 8                  
 
 /* Number of exons to save every fragment   */ 
@@ -86,7 +86,7 @@ A. DEFINITIONS
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 50000             
+#define MAXHSP 150000             
 
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 20         
@@ -123,6 +123,10 @@ A. DEFINITIONS
 
 /* Region around exon to measure G+C        */
 #define ISOCONTEXT 1000          
+
+/* Number of nucloetides to scan for PPTs   */
+/* or Branch Points before the Acceptor site*/
+#define ACCEPTOR_CONTEXT 40
 
 /* Markov score penalty for unknown symbols */
 #define NULL_OLIGO_SCORE  -4     
@@ -207,6 +211,13 @@ A. DEFINITIONS
 #define sDON "Donor"
 #define sSTA "Start"
 #define sSTO "Stop"
+#define sPPT "PolyPyrimidineTract"
+#define sBP  "BranchPoint"
+
+/* Header profiles                          */
+#define sprofilePPT "Poly_Pyrimidine_Tract_profile"
+#define sprofileBP  "Branch_point_profile"
+#define sprofileACC "Acceptor_profile"
 
 /* Exons                                    */
 #define FIRST    0               
@@ -222,9 +233,13 @@ A. DEFINITIONS
 #define sORF      "ORF"
 #define sEXON     "Exon"
 #define sPROMOTER "Promoter"              
-#define sGHOST    "^"
-#define sGHOSTFWD "^+"
-#define sGHOSTRVS "^-"
+
+#define sBEGIN    "Begin"
+#define sBEGINFWD "Begin+"
+#define sBEGINRVS "Begin-"
+#define sEND      "End"
+#define sENDFWD   "End+"
+#define sENDRVS   "End-"
 
 /* Infinity: positions in sequence          */
 #define INFI 999999999           
@@ -289,6 +304,8 @@ typedef struct s_site
 {
   long Position;                       
   float Score;                        
+  float ScoreBP;
+  float ScorePPT;
 } site;
 
 typedef struct s_packSites             
@@ -375,9 +392,9 @@ typedef struct s_HSP
 
 typedef struct s_packHSP
 {
-  HSP** sPairs;
-  int* nSegments;
-  int nTotalSegments;
+  HSP*** sPairs;
+  long* nSegments;
+  long nTotalSegments;
   int visited;
 } packHSP;
 
@@ -396,7 +413,7 @@ typedef struct s_packExternalInformation
   long i2vExons;
   long ivExons;
   
-  int* iSegments;
+  long* iSegments;
   float** sr;
 } packExternalInformation;
 
@@ -477,6 +494,8 @@ typedef struct s_gparam
 
   profile* StartProfile;               
   profile* AcceptorProfile;
+  profile* PolyPTractProfile;
+  profile* BranchPointProfile;
   profile* DonorProfile;
   profile* StopProfile;
 
@@ -640,9 +659,22 @@ void cleanAcc(account* m);
 
 void PrintProfile (profile *p, char* signal);
 
-long ReadGeneModel (FILE *file, dict *d, int nc[], int ne[], 
-                    int UC[][MAXENTRY], int DE[][MAXENTRY], 
-		    long md[], long Md[], int block[]);
+long ReadGeneModel (FILE *file, 
+					dict *d, 
+					int nc[], 
+					int ne[], 
+                    int UC[][MAXENTRY], 
+					int DE[][MAXENTRY], 
+					long md[], 
+					long Md[], 
+					int block[]);
+
+long ForceGeneModel (dict* d,
+                    int nc[], int ne[],
+                    int UC[][MAXENTRY],
+                    int DE[][MAXENTRY],
+                    long md[], long Md[],
+					 int block[]);
 
 void PrintSites (site *s, long ns,int type,
                  char Name[], int Strand,
@@ -777,3 +809,15 @@ packHSP* SelectHSP(packExternalInformation* external,
 
 packEvidence* SelectEvidence(packExternalInformation* external,
 							 char* Locus);
+
+void SortHSPs(packHSP* p);
+
+HSP* RequestNewHSP();
+
+long  BuildAcceptors(char* s,
+					 profile* p,
+					 profile* ppt,
+					 profile* bp,
+					 site* st, 
+					 long l1, 
+					 long l2);
