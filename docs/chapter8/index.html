@@ -119,36 +119,39 @@ genes:
 <table border=1 cellpadding=10 width=600>
 <tr>
 <td align=left bgcolor="skyblue">
-<font size=1>
+<font size=2>
 <pre>
 #Intergenic connections
-Promoter-:First-:Terminal+     Promoter+:Terminal-:First+    2000:Infinity
-Promoter+                      First+                        50:4000
-First-                         Promoter-                     50:4000
+Terminal+       First+:Terminal-        500:Infinity
+First-          First+:Terminal-        500:Infinity
 </pre>
 </font>
 </td>
 </table>
 </center>
 <br><p>
-The first line describes the relationship between the end of a gene
-and the beginning of another one both in the forward as well as the
-beginning of one gene and the end of another one in the reverse sense.
-Moreover, hybrids are also defined (e.g. end of a reverse gene with beginning of
-a forward gene). The second and third line define the right place to put a
-promoter related to one gene in the same strand. To specify no maximum distance constrains,
-the keyword Infinity must be used.
+First line describes the relationship between the end of a gene
+in the forward strand  and the beginning of another one in the positive
+strand or the end of a gene in the reverse strand.
+Secod rule defines the connections between the beginning of a gene
+in the reverse strand and the beginning of a gene in the forward strand
+or the end of another gene in reverse strand. To specify no maximum 
+distance constrains, the keyword Infinity must be used.
 <br><p>
 The present version of <tt>geneid</tt> predicts elements with types
 <tt>First, Internal, Terminal and Single</tt>. Other elements in the
 additional files provided externally (O/R options) are ignored when they
 are not defined in any rule of the gene model.
 <br><p>
-The gene model dos not specify which elements terminate genes (which are
+The gene model does not specify which elements terminate genes (which are
 assumed to be represented by the group field of the gff file). Gene
 termination is coded within the program with the features
 <tt>First+/Terminal-</tt> (start) and <tt>First-/Terminal+</tt> (end) while
 <tt>Single+/Single-</tt> are both start and end from genes.
+<br><p>
+Option -F forces <tt>geneid</tt> to predict a complete gene structure in the
+input sequence. That is, either First-(Internal)*-Terminal or 
+Terminal-(Internal)*-First.
 </font>
 </div>
 </td>
