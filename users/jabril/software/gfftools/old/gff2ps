@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.54 2000-02-21 21:04:54 jabril Exp $	
+#         $Id: gff2ps,v 1.55 2000-02-22 13:18:02 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.54 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-02-21 21:04:54 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.55 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-02-22 13:18:02 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -380,7 +380,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.54 2000-02-21 21:04:54 jabril Exp $
+%    $Id: gff2ps,v 1.55 2000-02-22 13:18:02 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -2743,7 +2743,8 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
       PrintRPT("***:"$0":***:"first":***:"second":***:"nwfeat[2]":***REGEXP:"exp_reg"\n");
 	  if (ft_type=="F") { # F
 		gffirst=tolower(first);
-		for (feat in FT_ary) { 
+		if (second in FT_PROP) {
+		 for (feat in FT_ary) { 
 		  go_on=chkGlobal(feat,gffirst,exp_reg,neg_ptrn);
 		  if (go_on) {
 			PLOT_FT[feat,":",second]=nwfeat[2];
@@ -2752,8 +2753,8 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 			# PrintRPT(sprintf(MATCH_T,ft_type,feat,feat,first,(feat":"second),nwfeat[2]));
 		  } # if go_on
 		  # else PrintRPT("+++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
-		}
-		if (!exp_reg && !(gffirst in FT_ary)) {
+		 }
+		 if (!exp_reg && !(gffirst in FT_ary)) {
 		  for (pro_ in FT_PROP) {
 			PLOT_FT[gffirst,":",pro_]=FT_PROP[pro_];
 			# PrintRPT("********* PLOT_FT["gffirst":"pro_"]="PLOT_FT[gffirst,":",pro_]"\n");
@@ -2761,12 +2762,15 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 		  FT_ary[gffirst]++;
 		  PLOT_FT[gffirst,":",second]=nwfeat[2];
 		  # PrintRPT(sprintf(MATCH_F,gffirst,(gffirst":"second),nwfeat[2]));
-		} # if !go_on
+		 } # if !go_on
+        } # if varname exist
+	    else PrintWRN(sprintf("*** VAR NAME NOT DEFINED *** "MATCH_F,first,first,nwfeat[2]));
       } # if type="F"
 	  else { 
 		if (ft_type=="G") { # G
 		  gffirst=first;
-		  for (feat in GP_ary) { 
+		  if (second in GP_PROP) {
+		   for (feat in GP_ary) { 
 			go_on=chkGlobal(feat,gffirst,exp_reg,neg_ptrn);
 			if (go_on) {
 			  PLOT_FT[feat,":",second]=nwfeat[2];
@@ -2775,8 +2779,8 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 			  # PrintRPT(sprintf(MATCH_T,ft_type,feat,feat,first,(feat":"second),nwfeat[2]));
 			} # if go_on
 			# else PrintRPT("+++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
-		  }
-		  if (!exp_reg && !(gffirst in GP_ary)) {
+		   }
+		   if (!exp_reg && !(gffirst in GP_ary)) {
 			for (pro_ in GP_PROP) {
 			  PLOT_FT[gffirst,":",pro_]=GP_PROP[pro_];
 			  # PrintRPT("********* PLOT_FT["gffirst":"pro_"]="PLOT_FT[gffirst,":",pro_]"\n");
@@ -2784,12 +2788,15 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 			GP_ary[gffirst]++;
 			PLOT_FT[gffirst,":",second]=nwfeat[2];
 			# PrintRPT(sprintf(MATCH_F,gffirst,(gffirst":"second),nwfeat[2]));
-		  } # if !go_on
+		   } # if !go_on
+          } # if varname exist
+		  else PrintWRN(sprintf("*** VAR NAME NOT DEFINED *** "MATCH_F,first,first,nwfeat[2]));
 		} # if type="G"
 		else { 
 		  if (ft_type=="S") { # S
 			gffirst=first;
-			for (feat in sources) { 
+			if (second in SO_PROP) {
+			 for (feat in sources) { 
 			  go_on=chkGlobal(feat,gffirst,exp_reg,neg_ptrn);
 			  if (go_on) {
 				PLOT_FT[feat,":",second]=nwfeat[2];
@@ -2798,8 +2805,8 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 				# PrintRPT(sprintf(MATCH_T,ft_type,feat,feat,first,(feat":"second),nwfeat[2]));
 			  } # if go_on
 			  # else PrintRPT("+++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
-			}
-			if (!exp_reg && !(gffirst in sources)) {
+			 }
+			 if (!exp_reg && !(gffirst in sources)) {
 			  for (pro_ in SO_PROP) {
 				PLOT_FT[gffirst,":",pro_]=SO_PROP[pro_];
 				# PrintRPT("********* PLOT_FT["gffirst":"pro_"]="PLOT_FT[gffirst,":",pro_]"\n");
@@ -2807,7 +2814,9 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 			  sources[gffirst]++;
 			  PLOT_FT[gffirst,":",second]=nwfeat[2];
 			  # PrintRPT(sprintf(MATCH_F,gffirst,(gffirst":"second),nwfeat[2]));
-			} # if !go_on
+			 } # if !go_on
+            } # if varname exist
+			else PrintWRN(sprintf("*** VAR NAME NOT DEFINED *** "MATCH_F,first,first,nwfeat[2]));
 		  } # if type="S"
 		  else { # L
 			if (ft_type=="L") {
