@@ -12,6 +12,7 @@
 # si el directori de fitxers nous no existeix, el creo; es de suposar
 # que s'ha eliminat perque tot allo que era nou ja ho he dut a casa
 
+# PER EXECUTAR-LO:
 # el fitxer amb la llista i el directori amb el mirror han d'estar al
 # directori actual i han de tenir el mateix nom, pero el fitxer te
 # extensio ".txt". el directori amb fitxers nous tambe te el mateix
@@ -156,8 +157,8 @@ echo
 mv $tmp $txt
 
 # esborrem els directoris buits
-cd $nou
-find . -type d | perl -e '@lst=<STDIN>;print reverse @lst;' | while read nom
+find $nou -type d | perl -e '@lst=<STDIN>;print reverse @lst;' | while read nom
 do
    rmdir $nom 2>/dev/null
 done
+

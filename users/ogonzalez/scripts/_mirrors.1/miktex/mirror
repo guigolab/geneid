@@ -57,7 +57,7 @@ EOF
 else
    echo -n " "
 fi
-echo d\'un total de $nous
+echo "d'un total de $nous"
 rm llista.new tmp.txt tmp2.txt
 
 echo
@@ -65,3 +65,4 @@ echo $resum1
 echo $resum2
 echo
 
+/home/ug/ogonzalez/scripts/_mirrors.1/miktex/nouamirror miktex

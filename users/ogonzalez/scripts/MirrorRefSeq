@@ -130,7 +130,7 @@ rm $MAIL
 NOM=mrs-`date +%Y%m%d-%H%M`
 mv $LOG $LOGDIR/$NOM
 cd $LOGDIR
-chown oscar:users $NOM
+chown ogonzalez:users $NOM
 gzip $NOM
 
 ls -t1 mrs* | tee $OUT | head -10 >$LOG

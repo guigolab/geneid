@@ -40,15 +40,14 @@ numero() {
 }
 
 quotes() {
-   touch /tmp/quota1 /tmp/quota2
-   rm /tmp/quota1 /tmp/quota2
+   rm -f /tmp/quota1 /tmp/quota2 2>/dev/null
    if [ $# = 0 ]
    then
       llista="/home/ug/* /home/um/*"
    else
       llista=""
-      siug=0 # poso aixo a 1 si accepto usuaris ug
-      sium=0 # poso aixo a 1 si accepto usuaris um
+      siug=0 # posare aixo a 1 si accepto usuaris ug
+      sium=0 # posare aixo a 1 si accepto usuaris um
       for i in $*
       do
          if [ $i = ug ]
@@ -94,14 +93,18 @@ quotes() {
       cd $usuari/..
       du -k $usuari >/tmp/quota
       total=`tail -1 /tmp/quota | awk '{ print $1 }'`
-      nobackup=`awk '
+      nobackuptmp=`awk '
          BEGIN { tot=0 }
          /\/no_backup$/ { tot=tot+$1 }
-         END { print tot }' /tmp/quota`
+         /\/home\/u[gm]\/[^\/]+\/no_backup$/ { arrel=$1 }
+         END { print tot"-"arrel }' /tmp/quota`
+      nobackup=${nobackuptmp%-*}
+      nobackuparrel=${nobackuptmp#*-}
       let resta=total-nobackup
       if [ `grep -c no_backup$ /tmp/quota` = 0 ]
       then
          numero $resta >>/tmp/quota1
+         printf '          - ' >>/tmp/quota1
          printf '          - ' >>/tmp/quota1
          numero $total >>/tmp/quota1
          echo "$grup   $nom" >>/tmp/quota1
@@ -109,6 +112,7 @@ quotes() {
       else
          numero $resta >>/tmp/quota1
          numero $nobackup >>/tmp/quota1
+         numero $nobackuparrel >>/tmp/quota1
          numero $total >>/tmp/quota1
          echo "$grup   $nom" >>/tmp/quota1
          echo $resta $nobackup $total $grup>>/tmp/quota2
@@ -127,16 +131,24 @@ else
    quotes $*
 fi
 
-echo '     backup   no_backup       total grup usuari' >/tmp/quota
-echo '----------- ----------- ----------- ---- ---------' >>/tmp/quota
+echo 'backup:    allo de que es fara backup' >/tmp/quota
+echo 'no_backup: allo de que no es fara backup' >>/tmp/quota
+echo 'arrel:     el no_backup de $HOME (allo que es pot moure al disc' >>/tmp/quota
+echo '           local sense desorganitzar res)' >>/tmp/quota
+echo 'total:     espai total ocupat al disc: backup+no_backup' >>/tmp/quota
+echo
+
+echo '     backup   no_backup       arrel       total grup usuari' >>/tmp/quota
+echo '----------- ----------- ----------- ----------- ---- ---------' >>/tmp/quota
 sort -r /tmp/quota1 >>/tmp/quota
 
-echo '----------- ----------- ----------- ---- ---------' >>/tmp/quota
+echo '----------- ----------- ----------- ----------- ---- ---------' >>/tmp/quota
 restat=`awk 'BEGIN { tot=0 } / ug$/ { tot=tot+$1 } END { print tot }' </tmp/quota2`
 nobackupt=`awk 'BEGIN { tot=0 } / ug$/ { tot=tot+$2 } END { print tot }' </tmp/quota2`
 totalt=`awk 'BEGIN { tot=0 } / ug$/ { tot=tot+$3 } END { print tot }' </tmp/quota2`
 numero $restat >>/tmp/quota
 numero $nobackupt >>/tmp/quota
+printf '          - ' >>/tmp/quota
 numero $totalt >>/tmp/quota
 echo "total ug" >>/tmp/quota
 
@@ -145,22 +157,24 @@ nobackupt=`awk 'BEGIN { tot=0 } / um$/ { tot=tot+$2 } END { print tot }' </tmp/q
 totalt=`awk 'BEGIN { tot=0 } / um$/ { tot=tot+$3 } END { print tot }' </tmp/quota2`
 numero $restat >>/tmp/quota
 numero $nobackupt >>/tmp/quota
+printf '          - ' >>/tmp/quota
 numero $totalt >>/tmp/quota
 echo "total um" >>/tmp/quota
 
-echo '----------- ----------- ----------- ---- ---------' >>/tmp/quota
+echo '----------- ----------- ----------- ----------- ---- ---------' >>/tmp/quota
 restat=`awk 'BEGIN { tot=0 } { tot=tot+$1 } END { print tot }' </tmp/quota2`
 nobackupt=`awk 'BEGIN { tot=0 } { tot=tot+$2 } END { print tot }' </tmp/quota2`
 totalt=`awk 'BEGIN { tot=0 } { tot=tot+$3 } END { print tot }' </tmp/quota2`
 numero $restat >>/tmp/quota
 numero $nobackupt >>/tmp/quota
+printf '          - ' >>/tmp/quota
 numero $totalt >>/tmp/quota
 echo TOTAL >>/tmp/quota
 
 let restat=restat/1048576
 let nobackupt=nobackupt/1048576
 let totalt=totalt/1048576
-printf "%8d Gb %8d Gb %8d Gb aprox\n" $restat $nobackupt $totalt >>/tmp/quota
+printf "%8d Gb %8d Gb             %8d Gb aprox\n" $restat $nobackupt $totalt >>/tmp/quota
 
 chown 2014:20 /tmp/quota
 ara=`date +%Y%m%d-%H%M`

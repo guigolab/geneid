@@ -8,6 +8,7 @@
 # el proper mirror
 
 $total=0;
+$trobats=0;
 $revisats=0;
 $busca=0;
 while ( $lin=<STDIN> ) {
@@ -25,11 +26,13 @@ while ( $lin=<STDIN> ) {
    } elsif ( $lin =~ /^\d\d:\d\d:\d\d / && $busca == 4 ) {
       if ( $lin =~ m# - `($nom|.+/$nom)' saved \[[\d/]+\]$# ) {
          $nom=$1;
-         $revisats++;
+         $trobats++;
          $error=0;
          if ( $nom =~ /\.zip$/i ) {
+            $revisats++;
             $error=system("unzip -t $nom >/dev/null 2>&1");
          } elsif ( $nom =~ /\.gz$/ || $nom =~ /\.Z$/ ) {
+            $revisats++;
             $error=system("gzip -t $nom >/dev/null 2>&1");
          }
          if ( $error != 0 ) {
@@ -44,7 +47,7 @@ while ( $lin=<STDIN> ) {
    }
 }
 
-if ( $revisats == 0 ) {
+if ( $trobats == 0 ) {
    print "No hi ha res a revisar\n";
 } else {
    print "$revisats fitxers revisats, $total errors";

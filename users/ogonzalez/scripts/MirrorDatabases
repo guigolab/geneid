@@ -14,9 +14,11 @@ filtre() {
    echo
    grep ^Downloaded $OUT
    echo
+   echo -n 'Revisant comprimits - '
    date +"%d %b %Y - %H:%M"
    /home/ug/ogonzalez/scripts/comprimits <$OUT
    echo
+   echo -n 'Revisant eliminats - '
    date +"%d %b %Y - %H:%M"
    if [ "$1" != -norm ]
    then
@@ -205,6 +207,18 @@ else
 
       URL=$FTPSITE/databases/Pfam
       local=/seq/databases/pfam
+
+      cd $local
+      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
+
+      filtre
+
+   ##########
+   # HSSP
+   ##########
+
+      URL=$FTPSITE/databases/hssp
+      local=/seq/databases/hssp
 
       cd $local
       wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT

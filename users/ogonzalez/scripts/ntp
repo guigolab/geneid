@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# una entrada al crontab de cada maquina ha de revisar si l'ntp corre, i
+# l'arrenca si ha mort (perque peta o perque s'ha desconectat per perdua
+# de sincronia)
+#
+# tambe fa ntpq -p per controlar la sincronia de cada maquina
+#
+# m1 a les 3 de la matinada, abans que ningu altre, perque es el principal
+#    i ningu no xuta si ell no xuta
+#
+# m234 a les 3:15, abans que la resta perque son els secundaris
+#
+# la resta excepte eidolon a les 3:30
+#
+# eidolon a les 3:45, i ajunta tots els resultats en un sol fitxer
+
+cd /home/ug/ogonzalez/scripts/_LOGS
+
+maquina=`hostname -s`
+
+echo >ntp.$maquina
+
+if [ $maquina = monstre1 ]
+then
+   # aprofito per revisar l'estat dels RAID de monstre1
+   cat /proc/mdstat >>ntp.$maquina
+   echo >>ntp.$maquina
+fi
+
+error=0
+if ! /sbin/service ntpd status >/dev/null 2>&1
+then
+   # el servidor no esta corrent. l'arrenco
+   if ! /sbin/service ntpd start
+   then
+      echo ERROR. ntpd NO ESTA CORRENT >> ntp.$maquina
+      error=1
+   else
+      echo ntpd REARRENCAT >> ntp.$maquina
+      sleep 5 # perque m'he trobat que de vegades l'ntpq de mes avall
+              # no ha donat temps a l'ntp a obrir-se
+   fi
+fi
+
+if [ $error = 0 ]
+then
+   /usr/sbin/ntpq -p >> ntp.$maquina
+fi
+
+echo >> ntp.$maquina
+
+if [ $maquina = eidolon ]
+then
+   log=ntp-`date +%Y%m%d-%H%M`
+   for busca in monstre1 monstre2 monstre3 monstre4 nautilus eidolon xinxan \
+                tro rantanplan cel basileia tmatik zapiron kalamos icarus \
+                mar
+   do
+      if [ -s ntp.$busca ]
+      then
+         echo $busca: | paste - ntp.$busca >> $log
+         rm ntp.$busca
+      else
+         echo $busca: >> $log
+         echo '	N/A' >> $log
+         echo >> $log
+      fi
+   done
+   chown ogonzalez:users $log
+   data=`date +"%d %b %Y - %H:%M"`
+   mail -s"ntp $data" ogonzalez@imim.es <$log
+   # ara hauria d'esborrar els fitxers antics
+fi
+

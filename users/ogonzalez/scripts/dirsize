@@ -1,3 +1,5 @@
+#!/bin/ksh
+
 # calcula en bytes la grandaria d'un direc (per assegurar-me que en
 # copiar d'una maquina a una altra no falta res)
 
@@ -21,12 +23,12 @@ then
    while [ $# != 0 ]
    do
       echo $1
-      find $1 -exec ls -ld {} \; | awk '
+      ls -lRUA $1 | awk '
                BEGIN { bytes=0; dir=0; fit=0; tot=0 }
                /^d/ { dir=dir+1 }
                /^-/ { fit=fit+1; bytes=bytes+$5 }
-               { tot=tot+1 }
-               END { printf "%9.0f bytes\n %i direc\n %i fitxers\n %i total\n",bytes,dir,fit,tot }
+               $3 { tot=tot+1 } # nomes si $3 existeix (perque la porqueria de ls -R no afecti)
+               END { printf "%9.0f bytes\n %i direcs\n %i fitxers\n %i total\n",bytes,dir,fit,tot }
       ' | while read num txt
       do
          grandaria $num
@@ -36,12 +38,12 @@ then
    done
 else
    pwd
-   find . -exec ls -ld {} \; | awk '
+   ls -lRUA | awk '
             BEGIN { bytes=0; dir=0; fit=0; tot=0 }
             /^d/ { dir=dir+1 }
             /^-/ { fit=fit+1; bytes=bytes+$5 }
-            { tot=tot+1 }
-            END { printf "%9.0f bytes\n %i direc\n %i fitxers\n %i total\n",bytes,dir,fit,tot }
+            $3 { tot=tot+1 }
+            END { printf "%9.0f bytes\n %i direcs\n %i fitxers\n %i total\n",bytes,dir,fit,tot }
    ' | while read num txt
    do
       grandaria $num

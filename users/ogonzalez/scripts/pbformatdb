@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# la idea es passar a format blast a la blastmachine de manera
+# comoda
+
+# recrea l'estructura de /seq/genomes a /disk2/scratch/ogonzalez,
+# i llavors ho has de moure a /genomes (compte: tot es relatiu
+# a /paracel/paracel/pbroot)
+
+# per ara, es manual per E.cuniculi
+
+for i in *.fa
+do
+   pb formatdb -p F -i $i -n /genomes/E.cuniculi/Genbank_genome/$i
+   mv formatdb.log formatdb.$i.log
+done
