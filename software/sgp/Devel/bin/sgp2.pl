@@ -1,165 +1,204 @@
 #!/usr/bin/perl -w
-#
-
-=head1 B<sgp2> : $Id: sgp2.pl,v 1.2 2000-10-06 17:59:25 jabril Exp $
-
-=cut Back to the compiler...
+#line 73 "./sgp2.nw"
+use strict;
 
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.pl,v 1.2 2000-10-06 17:59:25 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.pl,v 1.3 2000-10-09 17:59:59 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 my $Start = time;
 
-=head1 Development Options
-
-=over 4
-
-=item C<perl -w> 
-
-Prints all sorts of useful and interesting warning messages at compile time. 
-
-=item C<use strict;>
-
-Restrict unsafe constructs, like attempting to use missed symbolic references ('I<refs>'), undeclared variables ('I<vars>') or not predeclared subroutine ('I<subs>').
-
-=back
-
-=cut Back to the compiler...
-
-use strict;
-
-=head1 Self Documenting
-
-
-
-=cut Back to the compiler...
-
-use Pod::Text;
-
-=head1 Reading Command Line Options
-
-=over 4
-
-=item C<use Getopt::Long;>
-
-The C<Getopt::Long> module implements an extended getopt function called C<GetOptions()>. This function adheres to the POSIX syntax for command line options, with GNU extensions. In general, this means that options having long names instead of single letters are introduced with a double dash "--". 
-
-=item C<Getopt::Long::Configure qw(> I<bundling> I<pass_through> C<);>
-
-C<GetOptions> can be configured by calling subroutine C<Getopt::Long::Configure>. This subroutine takes a list of quoted strings, each specifying a configuration option to be set. Options can be reset by prefixing with C<no_>. 
-
-=over 4
-
-=item I<bundling>
-
-Support for bundling of command line options, as was the case with the more traditional single-letter approach (introduced with a single dash "-"), is provided but not enabled by default. 
-
-=item I<pass_through>
-
-Unknown options are passed through in @ARGV instead of being flagged as errors. This makes it possible to write wrapper scripts that process only part of the user supplied options, and passes the remaining options to some other program.
-
-=back
-
-=back
-
-=cut Back to the compiler...
-
+#line 124 "./sgp2.nw"
 use Getopt::Long;
 Getopt::Long::Configure qw/ bundling pass_through /;
+#line 166 "./sgp2.nw"
+use Pod::Text;
+#line 127 "./sgp2.nw"
+# GetOptions Variables
+my ( $seq1,$seq2,$geneid_opt,$geneid_param,$blast_opt,$score_cutoff,
+     $shrink,$tbx,$hsp,$ofn,$ps_output,$verbose_flg,$help_flg );
 
-=head2 C<Which_Options()>
 
-This function parses input options, checking whether files exist, 
+#line 169 "./sgp2.nw"
+# Prints help 
+sub prt_Help() {
+    my $tmp_pod_file = "/tmp/sgp.pod";
+    open(KI, "> $tmp_pod_file");
+    while (<DATA>) {
+        s/\$PROGRAM/$PROGRAM/g ;
+        s/\$VERSION/$tmp_ver[3]/g ;
+        print KI $_ ;
+    };
+    close(KI);
+    pod2text($tmp_pod_file);
+    unlink($tmp_pod_file) or die "Can't delete $tmp_pod_file: $!\n";
+    exit(1);
+} # sub prt_Help
+#line 196 "./sgp2.nw"
+# Reporting IN/OUT progress.
+sub prt_progress {
+    $verbose_flg && do {
+        print STDERR ".";
+        (($_[0] % 50) == 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n";
+    };
+} # END_SUB: prt_progress
+#
+sub prt_foeprg {
+    $verbose_flg && ((($_[0] % 50) != 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n" );
+} # END_SUB: prt_foeprg
 
+# Get a fixed length string from a given string and filling char/s.
+sub fill_right { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
 
-=cut Back to the compiler...
+# returns the max value from input array
+sub max { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z; } 
 
+# Timing.
+sub get_exec_time {
+    $verbose_flg && do {
+        my $End = $_[0];
+        my ($c,$s,$m,$h,$r);
+        $r = $End - $Start;
+        $s = $r % 60;
+        $r = ($r - $s) / 60;
+        $m = $r % 60;
+        $r = ($r - $m) / 60;
+        $h = $r % 24;
+        ($s,$m,$h) = (&fill_left($s,2,"0"),&fill_left($m,2,"0"),&fill_left($h,2,"0"));
+print STDERR <<EOF;
+##
+##########################################################
+## \"$PROGRAM\"  Execution Time:  $h:$m:$s
+##########################################################
+EOF
+    };
+} # END_SUB: get_exec_time
+#line 131 "./sgp2.nw"
 sub Which_Options() {
-
-	my ($help_flg);
-	
-	GetOptions( 
-				"1"        => \$seq1         , # seqfile_1
-				"2"        => \$seq2         , # seqfile_2
-				"g"        => \$geneid_opt   , # geneid options      
-				"P"        => \$geneid_param , # geneid parameter file 
-				"o"        => \$blast_opt    , # tblastx options 
-				"c"        => \$score_cutoff , # tblastx score cutoff 
-				"s"        => \$ , # shrink hsp's by
-				"t"        => \$ , # read tblastx from file
-				"f"        => \$ , # read HSP files in directory
-				"k"        => \$ , # intermediate filename
-				"p"        => \$ps_output    , # postscript output 
-				"v"        => \$verbose_flg  , # verbose    
-				"h|help|?" => \$help_flg     , 
-				);
-	
-	&prt_Help if $help_flg;
-
+    GetOptions( 
+                "1"        => \$seq1         , # seqfile_1
+                "2"        => \$seq2         , # seqfile_2
+                "g"        => \$geneid_opt   , # geneid options      
+                "P"        => \$geneid_param , # geneid parameter file 
+                "o"        => \$blast_opt    , # tblastx options 
+                "c"        => \$score_cutoff , # tblastx score cutoff 
+                "s"        => \$shrink       , # shrink hsp's by
+                "t"        => \$tbx          , # read tblastx from file
+                "f"        => \$hsp          , # read HSP files in directory
+                "k"        => \$ofn          , # intermediate filename
+                "p"        => \$ps_output    , # postscript output 
+                "v"        => \$verbose_flg  , # verbose    
+                "h|help|?" => \$help_flg     , # print help
+                );
+    &prt_Help if $help_flg;
 }; # sub Which_Options
 
-=head2 C<prt_Help()>
 
 
 
-=cut Back to the compiler...
+#line 108 "./sgp2.nw"
+&Which_Options();
 
-sub prt_Help() {
-	open(HELP, "| more");
-	print HELP <<"EndOfHelp";
-PROGRAM:  $PROGRAM $VERSION
 
-NAME:
-    $PROGRAM - Improving Gene Prediction with Sinteny.
+&get_exec_time(time);
 
-SYNOPSIS:
+#line 92 "./sgp2.nw"
+exit(1);
+
+### EOF ###
+
+#line 271 "./sgp2.nw"
+__DATA__
+=head1 NAME
+
+    
+$PROGRAM ($VERSION) - Improving Gene Prediction with Sinteny.
+
+=head1 SYNOPSIS
+
+    
     $PROGRAM [-hv] [-o \'options\'] [-g \'options\'] \
              [-P filename] [-p filename] [-k filename] \
              [-c value] [-s value] -1 seqfile_1 -2 seqfile_2
 
-DESCRIPTION:
+=head1 DESCRIPTION
 
-OPTIONS:
- 
-  -1 seqfile_1   : input file for first species.
-  -2 seqfile_2   : input file for second species.
-  -g             : geneid options
-  -o             : tblastx options
-  -c value       : tblastx score cuttof
-  -s value       : shrink hsp\'s by value
-  -t filename    : read tblastx file
-     -f prefix   : read hsp gff files with in directory
-                   prefix and extension .hsp-rs
-  -k prefix      : keep intermediate files with prefix
-  -p filename    : ps output in filename file 
-  -P filename    : geneid parameter file
-  -v             : verbose mode
-  -h             : produces this message
+=head1 OPTIONS
 
-FILES:
+    
 
-DIAGNOSTICS:
+=over 4
 
-REQUIRES:
+=item B<-1> I<seqfile_1>
 
-BUGS:
-    Report any problem to: <jabril\@imim.es>
+input file for first species.
 
-AUTHORS:
-    Roderic Guigo  <rguigo\@imim.es>
-    Josep F. Abril <jabril\@imim.es>
+=item B<-2> I<seqfile_2>
 
-    $PROGRAM is under GNU-GPL (C) 2000
+input file for second species.
 
-EndOfHelp
-	close(HELP);
-	exit(1);
-} # sub prt_Help
+=item B<-g>
 
-=head1 Main Loop
+geneid options
 
+=item B<-o>
 
+tblastx options
 
-=cut Back to the compiler...
+=item B<-c> I<value>
 
-	&Which_Options();
+tblastx score cuttof
+
+=item B<-s> I<value>
+
+shrink hsp\'s by value
+
+=item B<-t> I<filename>
+
+read tblastx file
+
+=item B<-f> I<prefix>
+
+read hsp gff files with in directory prefix and extension .hsp-rs
+
+=item B<-k> I<prefix>
+
+keep intermediate files with prefix
+
+=item B<-p> I<filename>
+
+ps output in filename file 
+
+=item B<-P> I<filename>
+
+geneid parameter file
+
+=item B<-v>
+
+verbose mode
+
+=item B<-h>
+
+produces this message
+
+=back
+
+=head1 FILES
+
+=head1 DIAGNOSTICS
+
+=head1 REQUIRES
+
+=head1 BUGS
+
+    
+Report any problem to: B<jabril@imim.es>
+
+=head1 AUTHOR
+
+    
+Roderic Guigo  B<rguigo@imim.es>
+
+Josep F. Abril B<jabril@imim.es>
+
+$PROGRAM is under GNU-GPL (C) 2000

@@ -1,5 +1,10 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode -*-% ===> this file was generated automatically by noweave --- better not edit it
 \documentclass[10pt]{article}
 %
+% I believe that the time is ripe for significantly better documentation of programs, and that we can best achieve this by considering programs to be works of literature. Hence, my title: "Literate Programming." Let us change our traditional attitude to the construction of programs: Instead of imagining that our main task is to instruct a *computer* what to do, let us concentrate rather on explaining to *human beings* what we want a computer to do. ---Donald Knuth
+%
+% Without wanting to be elitist, the thing that will prevent literate programming from becoming a mainstream method is that it requires thought and discipline. The mainstream is established by people who want fast results while using roughly the same methods that everyone else seems to be using, and literate programming is never going to have that kind of appeal. This doesn't take away from its usefulness as an approach.  ---Patrick TJ McPhee
+% 
 % I'm trying to learn Literate Programming. I will use sgp2 as an LP exercise.
 %
 % The same document contains the code which will be generated with the proper filter:
@@ -12,28 +17,384 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.tex,v 1.1 2000-10-07 14:57:04 jabril Exp $
+% $Id: sgp2.tex,v 1.2 2000-10-09 17:59:59 jabril Exp $
 %  
 \usepackage{noweb,multicol}
+\usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
 \noweboptions{smallcode}
 % relax page breaking scheme
 \def\nwendcode{\endtrivlist \endgroup}
 \let\nwdocspar=\par
 
-\newcommand{\sgp}{\texttt{\textbf{sgp2}}}
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+\newcommand{\cd}[1]{\texttt{\textbf{#1}}} % program<code> font style definition
+\newcommand{\cv}[1]{\texttt{\textsl{#1}}} % program<vars> font style definition
+\newcommand{\cp}[1]{\textit{#1}} % program<vars> font style definition
+
+\newcommand{\sgp}{{\Tt{}sgp2}} % PROGRAM alias
 
 % TITLE
-\title{Sintenic Gene Prediction Tool {\sgp}}
+\title{Sintenic Gene Prediction Tool}
 \author{Josep F. Abril\\Roderic Guig\'o}
 
 \begin{document}
 
 \maketitle
 
+\begin{center}
+{\Large\sgp}\\[1ex]
+{\large\verb+$Id: sgp2.tex,v 1.2 2000-10-09 17:59:59 jabril Exp $+}\\[2ex]
+\end{center}
+
 \begin{abstract}
-The initial goal for Josep F. Abril will be to implement a \textt{perl} version of {\sgp}, which works as the current shell implementation.
+The initial goal for Josep F. Abril will be to implement a \cd{perl} version of \sgp{}, which works as the current shell implementation.
 \end{abstract}
 
-{\Large {\sgp} - \verb+$Id: sgp2.tex,v 1.1 2000-10-07 14:57:04 jabril Exp $+}
+\sctn{Program Basic Outline}
+
+We shall call our program \sgp{}, we are developing a parallel branch for Sintenic Gene-Prediction, the other branch is developed by Thomas Wiehe. Our new version is written as a {\Tt{}noweb} file named {\Tt{}sgp2.nw}. From that file we can obtain both the code and the documentation. A short script named {\Tt{}aol} converts the '{\Tt{}.nw}' to '{\Tt{}.tex}' ---the \LaTeX{} documentation--- and '{\Tt{}.pl}' ---the real program--- (Wow!!!). What {\Tt{}aol} does is:
+
+\begin{enumerate}
+\item Extracts program code from the {\Tt{}noweb} file:\\
+\centerline{{\Tt{}notangle\ -L\ -Rsgp2.pl\ sgp2.nw\ >\ sgp2.pl}}
+\item Extracts program documentation and \LaTeX{}ing it:\\[1ex]
+\centerline{\shortstack{
+{\Tt{}noweave\ -x\ sgp2.nw\ >\ sgp2.tex}\\
+{\Tt{}latex\ sgp2.tex\ ;\ dvips\ sgp2.dvi\ -o\ sgp2.ps}
+}}
+\end{enumerate}
+
+Our initial program outline (our root chunk) looks like:
+
+\nwfilename{./sgp2.nw}\nwbegincode{1}\sublabel{NWsgp9-sgp7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-sgp7-1}}}\moddef{sgp2.pl~{\nwtagstyle{}\subpageref{NWsgp9-sgp7-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#!/usr/bin/perl -w
+use strict;
+
+my $PROGRAM = "sgp2";
+my @tmp_ver = split / +/, ' $Id: sgp2.tex,v 1.2 2000-10-09 17:59:59 jabril Exp $ ';
+my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
+my $Start = time;
+
+\LA{}declare uses~{\nwtagstyle{}\subpageref{NWsgp9-decC-1}}\RA{}
+\LA{}declare variables~{\nwtagstyle{}\subpageref{NWsgp9-decH-1}}\RA{}
+\LA{}define defaults~{\nwtagstyle{}\subpageref{NWsgp9-defF-1}}\RA{}
+\LA{}global subroutines~{\nwtagstyle{}\subpageref{NWsgp9-gloI-1}}\RA{}
+\LA{}get options~{\nwtagstyle{}\subpageref{NWsgp9-getB-1}}\RA{}
+\LA{}run blast~{\nwtagstyle{}\subpageref{NWsgp9-run9-1}}\RA{}
+\LA{}process HSPs~{\nwtagstyle{}\subpageref{NWsgp9-proC-1}}\RA{}
+\LA{}run geneid~{\nwtagstyle{}\subpageref{NWsgp9-runA-1}}\RA{}
+\LA{}graphical output~{\nwtagstyle{}\subpageref{NWsgp9-graG-1}}\RA{}
+\LA{}Main Loop~{\nwtagstyle{}\subpageref{NWsgp9-Mai9-1}}\RA{}
+
+exit(1);
+
+### EOF ###
+
+\LA{}POD man page trailer~{\nwtagstyle{}\subpageref{NWsgp9-PODK-1}}\RA{}
+\nwindexdefn{\nwixident{{\$}PROGRAM}}{:doPROGRAM}{NWsgp9-sgp7-1}\nwindexdefn{\nwixident{{\$}VERSION}}{:doVERSION}{NWsgp9-sgp7-1}\nwindexdefn{\nwixident{{\$}Start}}{:doStart}{NWsgp9-sgp7-1}\eatline
+\nwnotused{sgp2.pl}\nwidentdefs{\\{{\nwixident{{\$}PROGRAM}}{:doPROGRAM}}\\{{\nwixident{{\$}Start}}{:doStart}}\\{{\nwixident{{\$}VERSION}}{:doVERSION}}}\nwendcode{}\nwbegindocs{2}\nwdocspar
+\begin{description}
+\desc{\cd{perl -w}} Prints all sorts of useful and interesting warning messages at compile time. 
+
+\desc{\cd{use strict;}} Restrict unsafe constructs, like attempting to use missed symbolic references ('\cv{refs}'), undeclared variables ('\cv{vars}') or not predeclared subroutine ('\cv{subs}').
+\end{description}
+
+\sctn{Main Program Loop}
+
+\nwenddocs{}\nwbegincode{3}\sublabel{NWsgp9-Mai9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-Mai9-1}}}\moddef{Main Loop~{\nwtagstyle{}\subpageref{NWsgp9-Mai9-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+&Which_Options();
+
+
+&get_exec_time(time);
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
+
+\subsctn{Default values setting}
+
+\nwenddocs{}\nwbegincode{5}\sublabel{NWsgp9-defF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-defF-1}}}\moddef{define defaults~{\nwtagstyle{}\subpageref{NWsgp9-defF-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+
+
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+\sctn{Parsing Command-line Options}
+
+\nwenddocs{}\nwbegincode{7}\sublabel{NWsgp9-decC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decC-1}}}\moddef{declare uses~{\nwtagstyle{}\subpageref{NWsgp9-decC-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{\relax}{NWsgp9-decC-2}\nwenddeflinemarkup
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling pass_through /;
+\nwalsodefined{\\{NWsgp9-decC-2}\\{NWsgp9-decC-3}}\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegincode{8}\sublabel{NWsgp9-decH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decH-1}}}\moddef{declare variables~{\nwtagstyle{}\subpageref{NWsgp9-decH-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{\relax}{NWsgp9-decH-2}\nwenddeflinemarkup
+# GetOptions Variables
+my ( $seq1,$seq2,$geneid_opt,$geneid_param,$blast_opt,$score_cutoff,
+     $shrink,$tbx,$hsp,$ofn,$ps_output,$verbose_flg,$help_flg );
+\nwalsodefined{\\{NWsgp9-decH-2}\\{NWsgp9-decH-3}}\nwused{\\{NWsgp9-sgp7-1}}\nwidentuses{\\{{\nwixident{{\$}blast{\_}opt}}{:doblast:unopt}}\\{{\nwixident{{\$}geneid{\_}opt}}{:dogeneid:unopt}}\\{{\nwixident{{\$}geneid{\_}param}}{:dogeneid:unparam}}\\{{\nwixident{{\$}help{\_}flg}}{:dohelp:unflg}}\\{{\nwixident{{\$}hsp}}{:dohsp}}\\{{\nwixident{{\$}ofn}}{:doofn}}\\{{\nwixident{{\$}ps{\_}output}}{:dops:unoutput}}\\{{\nwixident{{\$}score{\_}cutoff}}{:doscore:uncutoff}}\\{{\nwixident{{\$}seq1}}{:doseq1}}\\{{\nwixident{{\$}seq2}}{:doseq2}}\\{{\nwixident{{\$}shrink}}{:doshrink}}\\{{\nwixident{{\$}tbx}}{:dotbx}}\\{{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}}}\nwindexuse{\nwixident{{\$}blast{\_}opt}}{:doblast:unopt}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}geneid{\_}opt}}{:dogeneid:unopt}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}geneid{\_}param}}{:dogeneid:unparam}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}help{\_}flg}}{:dohelp:unflg}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}hsp}}{:dohsp}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}ofn}}{:doofn}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}ps{\_}output}}{:dops:unoutput}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}score{\_}cutoff}}{:doscore:uncutoff}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}seq1}}{:doseq1}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}seq2}}{:doseq2}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}shrink}}{:doshrink}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}tbx}}{:dotbx}{NWsgp9-decH-1}\nwindexuse{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}{NWsgp9-decH-1}\nwendcode{}\nwbegincode{9}\sublabel{NWsgp9-getB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-getB-1}}}\moddef{get options~{\nwtagstyle{}\subpageref{NWsgp9-getB-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+sub Which_Options() \{
+    GetOptions( 
+                "1"        => \\$seq1         , # seqfile_1
+                "2"        => \\$seq2         , # seqfile_2
+                "g"        => \\$geneid_opt   , # geneid options      
+                "P"        => \\$geneid_param , # geneid parameter file 
+                "o"        => \\$blast_opt    , # tblastx options 
+                "c"        => \\$score_cutoff , # tblastx score cutoff 
+                "s"        => \\$shrink       , # shrink hsp's by
+                "t"        => \\$tbx          , # read tblastx from file
+                "f"        => \\$hsp          , # read HSP files in directory
+                "k"        => \\$ofn          , # intermediate filename
+                "p"        => \\$ps_output    , # postscript output 
+                "v"        => \\$verbose_flg  , # verbose    
+                "h|help|?" => \\$help_flg     , # print help
+                );
+    &prt_Help if $help_flg;
+\}; # sub Which_Options
+\nwindexdefn{\nwixident{{\$}seq1}}{:doseq1}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}seq2}}{:doseq2}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}geneid{\_}opt}}{:dogeneid:unopt}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}geneid{\_}param}}{:dogeneid:unparam}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}blast{\_}opt}}{:doblast:unopt}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}score{\_}cutoff}}{:doscore:uncutoff}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}shrink}}{:doshrink}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}tbx}}{:dotbx}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}hsp}}{:dohsp}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}ofn}}{:doofn}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}ps{\_}output}}{:dops:unoutput}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}{NWsgp9-getB-1}\nwindexdefn{\nwixident{{\$}help{\_}flg}}{:dohelp:unflg}{NWsgp9-getB-1}\eatline
+\nwused{\\{NWsgp9-sgp7-1}}\nwidentdefs{\\{{\nwixident{{\$}blast{\_}opt}}{:doblast:unopt}}\\{{\nwixident{{\$}geneid{\_}opt}}{:dogeneid:unopt}}\\{{\nwixident{{\$}geneid{\_}param}}{:dogeneid:unparam}}\\{{\nwixident{{\$}help{\_}flg}}{:dohelp:unflg}}\\{{\nwixident{{\$}hsp}}{:dohsp}}\\{{\nwixident{{\$}ofn}}{:doofn}}\\{{\nwixident{{\$}ps{\_}output}}{:dops:unoutput}}\\{{\nwixident{{\$}score{\_}cutoff}}{:doscore:uncutoff}}\\{{\nwixident{{\$}seq1}}{:doseq1}}\\{{\nwixident{{\$}seq2}}{:doseq2}}\\{{\nwixident{{\$}shrink}}{:doshrink}}\\{{\nwixident{{\$}tbx}}{:dotbx}}\\{{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\begin{description}
+\desc{\cd{use Getopt::Long;}} This module implements an extended getopt function called \cd{GetOptions()}. This function adheres to the POSIX syntax for command line options, with GNU extensions. In general, this means that options having long names instead of single letters are introduced with a double dash "\-\-". 
+
+\desc{\cd{Getopt::Long::Configure qw(} \cv{bundling} \cv{pass\_through} \cd{);}} \cd{GetOptions} can be configured by calling subroutine \cd{Getopt::Long::Configure}. This subroutine takes a list of quoted strings, each specifying a configuration option to be set. Options can be reset by prefixing with \cv{no\_}. 
+
+ \begin{description}
+ \desc{\cv{bundling}} Support for bundling of command line options, as was the case with the more traditional single-letter approach (introduced with a single dash "-"), is provided but not enabled by default. 
+
+ \desc{\cv{pass\_through}} Unknown options are passed through in \cd{@ARGV} instead of being flagged as errors. This makes it possible to write wrapper scripts that process only part of the user supplied options, and passes the remaining options to some other program.
+ \end{description}
+\end{description}
+
+\subsctn{Printing help: {\Tt{}prt{\_}Help()}}
+
+\nwenddocs{}\nwbegincode{11}\sublabel{NWsgp9-decC-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decC-2}}}\moddef{declare uses~{\nwtagstyle{}\subpageref{NWsgp9-decC-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{NWsgp9-decC-1}{NWsgp9-decC-3}\nwenddeflinemarkup
+use Pod::Text;
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegincode{12}\sublabel{NWsgp9-decH-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decH-2}}}\moddef{declare variables~{\nwtagstyle{}\subpageref{NWsgp9-decH-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{NWsgp9-decH-1}{NWsgp9-decH-3}\nwenddeflinemarkup
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegincode{13}\sublabel{NWsgp9-gloI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-gloI-1}}}\moddef{global subroutines~{\nwtagstyle{}\subpageref{NWsgp9-gloI-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{\relax}{NWsgp9-gloI-2}\nwenddeflinemarkup
+# Prints help 
+sub prt_Help() \{
+    my $tmp_pod_file = "/tmp/sgp.pod";
+    open(KI, "> $tmp_pod_file");
+    while (<DATA>) \{
+        s/\\$PROGRAM/$PROGRAM/g ;
+        s/\\$VERSION/$tmp_ver[3]/g ;
+        print KI $_ ;
+    \};
+    close(KI);
+    pod2text($tmp_pod_file);
+    unlink($tmp_pod_file) or die "Can't delete $tmp_pod_file: $!\\n";
+    exit(1);
+\} # sub prt_Help
+\nwalsodefined{\\{NWsgp9-gloI-2}}\nwused{\\{NWsgp9-sgp7-1}}\nwidentuses{\\{{\nwixident{{\$}PROGRAM}}{:doPROGRAM}}\\{{\nwixident{{\$}VERSION}}{:doVERSION}}}\nwindexuse{\nwixident{{\$}PROGRAM}}{:doPROGRAM}{NWsgp9-gloI-1}\nwindexuse{\nwixident{{\$}VERSION}}{:doVERSION}{NWsgp9-gloI-1}\nwendcode{}\nwbegindocs{14}%$
+
+\begin{description}
+\desc{\cd{use Pod::Text;}} This module converts POD data to formatted ASCII text. The single function \cd{pod2text([\cv{-a},] [\cv{-width}\cp{N},] \cp{inputfile})} can take the following options: '\cv{-a}' for an alternative output format, '\cv{-width}' to set max terminal width. '\cp{inputfile}' must have POD format.
+\desc{\cd{unlink()}} This command deletes a list of files. Returns the number of files successfully deleted.
+
+\end{description}
+
+\subsctn{Some general subroutines}
+
+\nwenddocs{}\nwbegincode{15}\sublabel{NWsgp9-decC-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decC-3}}}\moddef{declare uses~{\nwtagstyle{}\subpageref{NWsgp9-decC-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{NWsgp9-decC-2}{\relax}\nwenddeflinemarkup
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegincode{16}\sublabel{NWsgp9-decH-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decH-3}}}\moddef{declare variables~{\nwtagstyle{}\subpageref{NWsgp9-decH-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{NWsgp9-decH-2}{\relax}\nwenddeflinemarkup
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegincode{17}\sublabel{NWsgp9-gloI-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-gloI-2}}}\moddef{global subroutines~{\nwtagstyle{}\subpageref{NWsgp9-gloI-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{NWsgp9-gloI-1}{\relax}\nwenddeflinemarkup
+# Reporting IN/OUT progress.
+sub prt_progress \{
+    $verbose_flg && do \{
+        print STDERR ".";
+        (($_[0] % 50) == 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\\n";
+    \};
+\} # END_SUB: prt_progress
+#
+sub prt_foeprg \{
+    $verbose_flg && ((($_[0] % 50) != 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\\n" );
+\} # END_SUB: prt_foeprg
+
+# Get a fixed length string from a given string and filling char/s.
+sub fill_right \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
+sub fill_left  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
+
+# returns the max value from input array
+sub max \{ my ($z) = shift @_; my $l; foreach $l (@_) \{ $z = $l if $l > $z ; \}; $z; \} 
+
+# Timing.
+sub get_exec_time \{
+    $verbose_flg && do \{
+        my $End = $_[0];
+        my ($c,$s,$m,$h,$r);
+        $r = $End - $Start;
+        $s = $r % 60;
+        $r = ($r - $s) / 60;
+        $m = $r % 60;
+        $r = ($r - $m) / 60;
+        $h = $r % 24;
+        ($s,$m,$h) = (&fill_left($s,2,"0"),&fill_left($m,2,"0"),&fill_left($h,2,"0"));
+print STDERR <<EOF;
+##
+##########################################################
+## \\"$PROGRAM\\"  Execution Time:  $h:$m:$s
+##########################################################
+EOF
+    \};
+\} # END_SUB: get_exec_time
+\nwused{\\{NWsgp9-sgp7-1}}\nwidentuses{\\{{\nwixident{{\$}PROGRAM}}{:doPROGRAM}}\\{{\nwixident{{\$}Start}}{:doStart}}\\{{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}}}\nwindexuse{\nwixident{{\$}PROGRAM}}{:doPROGRAM}{NWsgp9-gloI-2}\nwindexuse{\nwixident{{\$}Start}}{:doStart}{NWsgp9-gloI-2}\nwindexuse{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}{NWsgp9-gloI-2}\nwendcode{}\nwbegindocs{18}%$
+
+\sctn{Running {\Tt{}blast} on sequences}
+
+\nwenddocs{}\nwbegincode{19}\sublabel{NWsgp9-run9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-run9-1}}}\moddef{run blast~{\nwtagstyle{}\subpageref{NWsgp9-run9-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegindocs{20}\nwdocspar
+
+\sctn{Processing HSPs from {\Tt{}blast}}
+
+\nwenddocs{}\nwbegincode{21}\sublabel{NWsgp9-proC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-proC-1}}}\moddef{process HSPs~{\nwtagstyle{}\subpageref{NWsgp9-proC-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegindocs{22}\nwdocspar
+
+\sctn{Running {\Tt{}geneid} on SRs}
+
+\nwenddocs{}\nwbegincode{23}\sublabel{NWsgp9-runA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-runA-1}}}\moddef{run geneid~{\nwtagstyle{}\subpageref{NWsgp9-runA-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+
+\sctn{Obtaining figures}
+
+\nwenddocs{}\nwbegincode{25}\sublabel{NWsgp9-graG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-graG-1}}}\moddef{graphical output~{\nwtagstyle{}\subpageref{NWsgp9-graG-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+
+\nwused{\\{NWsgp9-sgp7-1}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%APPENDIX
+
+\newpage\appendix
+
+\sctn{Man Pages}
+
+The documentation for {\Tt{}perl} programs is written in a simple markup language called POD (Plain Old Documentation). Translators exist for {\Tt{}pod2man}, {\Tt{}pod2text}, {\Tt{}pod2html}, {\Tt{}pod2latex}, and {\Tt{}pod2fm}. The idea is to have the online documentation included with the source.
+%% TODO: define POD tags and which style was used for building up this man. 
+
+\nwenddocs{}\nwbegincode{27}\sublabel{NWsgp9-PODK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-PODK-1}}}\moddef{POD man page trailer~{\nwtagstyle{}\subpageref{NWsgp9-PODK-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
+__DATA__
+=head1 NAME
+
+    
+$PROGRAM ($VERSION) - Improving Gene Prediction with Sinteny.
+
+=head1 SYNOPSIS
+
+    
+    $PROGRAM [-hv] [-o \\'options\\'] [-g \\'options\\'] \\
+             [-P filename] [-p filename] [-k filename] \\
+             [-c value] [-s value] -1 seqfile_1 -2 seqfile_2
+
+=head1 DESCRIPTION
+
+=head1 OPTIONS
+
+    
+
+=over 4
+
+=item B<-1> I<seqfile_1>
+
+input file for first species.
+
+=item B<-2> I<seqfile_2>
+
+input file for second species.
+
+=item B<-g>
+
+geneid options
+
+=item B<-o>
+
+tblastx options
+
+=item B<-c> I<value>
+
+tblastx score cuttof
+
+=item B<-s> I<value>
+
+shrink hsp\\'s by value
+
+=item B<-t> I<filename>
+
+read tblastx file
+
+=item B<-f> I<prefix>
+
+read hsp gff files with in directory prefix and extension .hsp-rs
+
+=item B<-k> I<prefix>
+
+keep intermediate files with prefix
+
+=item B<-p> I<filename>
+
+ps output in filename file 
+
+=item B<-P> I<filename>
+
+geneid parameter file
+
+=item B<-v>
+
+verbose mode
+
+=item B<-h>
+
+produces this message
+
+=back
+
+=head1 FILES
+
+=head1 DIAGNOSTICS
+
+=head1 REQUIRES
+
+=head1 BUGS
+
+    
+Report any problem to: B<jabril@imim.es>
+
+=head1 AUTHOR
+
+    
+Roderic Guigo  B<rguigo@imim.es>
+
+Josep F. Abril B<jabril@imim.es>
+
+$PROGRAM is under GNU-GPL (C) 2000
+\nwused{\\{NWsgp9-sgp7-1}}\nwidentuses{\\{{\nwixident{{\$}PROGRAM}}{:doPROGRAM}}\\{{\nwixident{{\$}VERSION}}{:doVERSION}}}\nwindexuse{\nwixident{{\$}PROGRAM}}{:doPROGRAM}{NWsgp9-PODK-1}\nwindexuse{\nwixident{{\$}VERSION}}{:doVERSION}{NWsgp9-PODK-1}\nwendcode{}
+
+\nwixlogsorted{c}{{declare uses}{NWsgp9-decC-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-decC-1}\nwixd{NWsgp9-decC-2}\nwixd{NWsgp9-decC-3}}}%
+\nwixlogsorted{c}{{declare variables}{NWsgp9-decH-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-decH-1}\nwixd{NWsgp9-decH-2}\nwixd{NWsgp9-decH-3}}}%
+\nwixlogsorted{c}{{define defaults}{NWsgp9-defF-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-defF-1}}}%
+\nwixlogsorted{c}{{get options}{NWsgp9-getB-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-getB-1}}}%
+\nwixlogsorted{c}{{global subroutines}{NWsgp9-gloI-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-gloI-1}\nwixd{NWsgp9-gloI-2}}}%
+\nwixlogsorted{c}{{graphical output}{NWsgp9-graG-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-graG-1}}}%
+\nwixlogsorted{c}{{Main Loop}{NWsgp9-Mai9-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-Mai9-1}}}%
+\nwixlogsorted{c}{{POD man page trailer}{NWsgp9-PODK-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-PODK-1}}}%
+\nwixlogsorted{c}{{process HSPs}{NWsgp9-proC-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-proC-1}}}%
+\nwixlogsorted{c}{{run blast}{NWsgp9-run9-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-run9-1}}}%
+\nwixlogsorted{c}{{run geneid}{NWsgp9-runA-1}{\nwixu{NWsgp9-sgp7-1}\nwixd{NWsgp9-runA-1}}}%
+\nwixlogsorted{c}{{sgp2.pl}{NWsgp9-sgp7-1}{\nwixd{NWsgp9-sgp7-1}}}%
+\nwixlogsorted{i}{{\nwixident{{\$}blast{\_}opt}}{:doblast:unopt}}%
+\nwixlogsorted{i}{{\nwixident{{\$}geneid{\_}opt}}{:dogeneid:unopt}}%
+\nwixlogsorted{i}{{\nwixident{{\$}geneid{\_}param}}{:dogeneid:unparam}}%
+\nwixlogsorted{i}{{\nwixident{{\$}help{\_}flg}}{:dohelp:unflg}}%
+\nwixlogsorted{i}{{\nwixident{{\$}hsp}}{:dohsp}}%
+\nwixlogsorted{i}{{\nwixident{{\$}ofn}}{:doofn}}%
+\nwixlogsorted{i}{{\nwixident{{\$}PROGRAM}}{:doPROGRAM}}%
+\nwixlogsorted{i}{{\nwixident{{\$}ps{\_}output}}{:dops:unoutput}}%
+\nwixlogsorted{i}{{\nwixident{{\$}score{\_}cutoff}}{:doscore:uncutoff}}%
+\nwixlogsorted{i}{{\nwixident{{\$}seq1}}{:doseq1}}%
+\nwixlogsorted{i}{{\nwixident{{\$}seq2}}{:doseq2}}%
+\nwixlogsorted{i}{{\nwixident{{\$}shrink}}{:doshrink}}%
+\nwixlogsorted{i}{{\nwixident{{\$}Start}}{:doStart}}%
+\nwixlogsorted{i}{{\nwixident{{\$}tbx}}{:dotbx}}%
+\nwixlogsorted{i}{{\nwixident{{\$}verbose{\_}flg}}{:doverbose:unflg}}%
+\nwixlogsorted{i}{{\nwixident{{\$}VERSION}}{:doVERSION}}%
+\nwbegindocs{28}%$
 
 \end{document}
+
+
+\nwenddocs{}

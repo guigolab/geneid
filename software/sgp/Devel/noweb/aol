@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Literate Programming for "sgp2.nw"
+#
+# $Id: aol,v 1.1 2000-10-09 17:59:59 jabril Exp $
+
+# defining variables
+NWdir="."
+BINdir="../bin"
+DOCdir="../docs"
+
+# extracting program lines 
+notangle -L -Rsgp2.pl $NWdir/sgp2.nw > $BINdir/sgp2.tmp
+perl -ne '($. > 2) && do { print; next }; $. == 1 && ( $n = "$_" ); $. == 2 && ( print "$_$n" );' $BINdir/sgp2.tmp > $BINdir/sgp2.pl
+
+# extracting program documentation
+noweave -delay -index $NWdir/sgp2.nw > $DOCdir/sgp2.tex
+cd $DOCdir
+latex sgp2.tex ; dvips sgp2.dvi -o sgp2.ps
