@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.17 2002-04-28 00:43:16 jabril Exp $ 
+% # $Id: humus.nw,v 1.18 2002-04-28 01:24:53 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.17 2002-04-28 00:43:16 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.18 2002-04-28 01:24:53 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -479,7 +479,7 @@ $MySQLPAR/admin_db_Hsapiens.pl ;
 #>#        :  Ensembl), genscan predicted genes and so on.
 #>#        :  Last UCSC-GP version being analyzed is August, 2001.
 #># JOB_PATH  annotation
-#># JOB_XID   20010806
+#># JOB_XID   $HSAPID
 #># JOB_FILE  ${LIBSTEP}/annotation.job
 #># END_OF_JOB ##################################################################
 @ 
@@ -1133,7 +1133,7 @@ warnings  cpus=4  ctxfactor=36.0
 #>#        :  (TBLASTX results obtained by Pankaj Agarwal,  
 #>#        :   last update was jan 11, 2002, downladed from GSBP).
 #># JOB_PATH  tblastx
-#># JOB_XID   20020111
+#># JOB_XID   $FTPTBXID
 #># JOB_FILE  ${LIBSTEP}/tblastx.job
 #># END_OF_JOB ##################################################################
 @ 
@@ -1156,11 +1156,12 @@ warnings  cpus=4  ctxfactor=36.0
 #>#         : (Hsapiens GP assembly against Mmusculus Phusion assembly).
 #># STEP_PATH ori
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/.ftp/PankajAgarwal/$<JOB{.}{JOB_XID}>.tbxPhusion
+#># STEP_IDIR $FTPTBX
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
 #
+#<# IDIR="$HUMUS/.ftp/PankajAgarwal/20020111.tbxPhusion" ;
 #<# IDIR="$HUMUS/.ftp/PankajAgarwal/20020111.tbxPhusion" ;
 #<# ODIR="$HUMUS/$NCHR/tblastx/$XID/ori" ;
 #<# MkDirs $ODIR ;
@@ -1339,7 +1340,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff             \
 #># JOB_DESC  Running "geneid" on unmasked H.sapiens UCSC Golden Path 
 #>#        :  assembly sequences.
 #># JOB_PATH  geneid
-#># JOB_XID   20020225
+#># JOB_XID   $HSAPID
 #># JOB_FILE  ${LIBSTEP}/geneid.job
 #># END_OF_JOB ##################################################################
 @ 
@@ -1521,7 +1522,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                  \
 #>#        :  assembly sequences, using TBLASTX homology results as
 #>#        :  homology evidences once they have been projected into SRs.
 #># JOB_PATH  sgp
-#># JOB_XID   20020225
+#># JOB_XID   ${HSAPSTR}-${MMUSSTR}
 #># JOB_FILE  ${LIBSTEP}/sgp.job
 #># END_OF_JOB ##################################################################
 @ 
@@ -7364,7 +7365,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.17 2002-04-28 00:43:16 jabril Exp $
+# $Id: humus.nw,v 1.18 2002-04-28 01:24:53 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7505,7 +7506,13 @@ HSEQ="$HSAP/chromFa" ;
 MMUS="/seq/genomes/M.musculus/MGSC_V3_20020411" ; # 
 MMUSID="20020411" ; MMUSSTR="20020411.MGSCv3" ;
 MSEQ="$MMUS/golden_path_200202MM/bigZips/unmasked" ; 
-export HSAP HSAPID HSAPSTR HSEQ MMUS MMUSID MMUSSTR MSEQ ;
+# 
+# FTPTBX="$HUMUS/.ftp/PankajAgarwal/20020111.tbx-20010806UCSCgp-20011109SCphusion" ;
+# FTPTBXID="20020111" ;
+FTPTBX="$HUMUS/.ftp/PankajAgarwal/20020425.tbx-20011222UCSCgp-20020411MGSCv3" ;
+FTPTBXID="20020425" ;
+#
+export HSAP HSAPID HSAPSTR HSEQ MMUS MMUSID MMUSSTR MSEQ FTPTBX FTPTBXID ;
 #
 BASE="/projects" ;
 HUMUS="$BASE/H.sapiens/$HSAPSTR" ;
@@ -7526,7 +7533,7 @@ export BASE HUMUS MUSHU BBIN BIN MySQLPAR LIBPERL LIBSTEP SRC TMP ;
 <<BASH Functions: Handling large directories>>
 <<BASH Functions: Get Gene Number from GENEID Output>>
 #
-MkDirs $BASE/H.sapiens $HUMUS $BASE/M.musculus $MUSHU ;
+MkDirs $BASE/H.sapiens $HUMUS $TMP $BASE/M.musculus $MUSHU ;
 #
 @ 
 
