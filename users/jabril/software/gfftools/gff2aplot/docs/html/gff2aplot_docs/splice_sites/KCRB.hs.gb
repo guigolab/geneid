@@ -1,0 +1,164 @@
+LOCUS       HSCKBG                  4200 bp    DNA     linear   PRI 24-APR-1993
+DEFINITION  Human gene for creatine kinase B (EC 2.7.3.2).
+ACCESSION   X15334
+VERSION     X15334.1  GI:29962
+KEYWORDS    creatine kinase; creatine kinase B.
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Primates; Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 4200)
+  AUTHORS   Mariman,E.C., Schepens,J.T. and Wieringa,B.
+  TITLE     Complete nucleotide sequence of the human creatine kinase B gene
+  JOURNAL   Nucleic Acids Res. 17 (15), 6385 (1989)
+  MEDLINE   89366665
+PUBMED   2771648
+REFERENCE   2  (bases 1 to 4200)
+  AUTHORS   Mariman,E. and Wieringa,B.
+  TITLE     Expression of the gene encoding human brain creatine kinase depends
+            on sequences immediately following the transcription start point
+  JOURNAL   Gene 102 (2), 205-212 (1991)
+  MEDLINE   91340154
+PUBMED   1840537
+REFERENCE   3  (bases 1 to 4200)
+  AUTHORS   Mariman,E.C.M.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (23-MAY-1989) Mariman E.C.M., University of Nijmegen,
+            Dept of Human Genetics, Geert Grooteplein Z18, 6525 GA Nijmegen,
+            Netherlands
+COMMENT     The sequence overlaps with that reported by Mariman et. al. in
+            Genomics 1:126-137(1987)J03036 and by Daouk et. al. in J. Biol.
+            Chem. 263:2442-2446(1988)J03531.
+            Data kindly reviewed (13-NOV-1989) by Mariman E.C.M.
+FEATURES             Location/Qualifiers
+     source          1..4200
+                     /organism="Homo sapiens"
+                     /db_xref="taxon:9606"
+                     /map="chromosome 14q32.3"
+                     /clone="CK3-1"
+                     /tissue_type="brain"
+                     /clone_lib="EMBL3"
+     CAAT_signal 724..728
+     TATA_signal 742..749
+     CAAT_signal 754..758
+     mRNA join(808..875,1136..1340,1464..1618,1691..1823,2208..2379,
+                     3050..3173,3331..3520,3600..4075)
+     exon 808..875
+                     /number=1
+     intron 876..1135
+                     /number=1
+     exon 1136..1340
+                     /number=2
+     CDS join(1148..1340,1464..1618,1691..1823,2208..2379,
+                     3050..3173,3331..3520,3600..3778)
+                     /EC_number="2.7.3.2"
+                     /codon_start=1
+                     /product="creatine kinase B"
+                     /protein_id="CAA33389.1"
+                     /db_xref="GI:29963"
+                     /db_xref="SWISS-PROT:P12277"
+                     /translation="MPFSNSHNALKLRFPAEDEFPDLSAHNNHMAKVLTPELYAELRA
+                     KSTPSGFTLDDVIQTGVDNPGHPYIMTVGCVAGDEESYEVFKDLFDPIIEDRHGGYKP
+                     SDEHKTDLNPDNLQGGDDLDPNYVLSSRVRTGRSIRGFCLPPHCSRGERRAIEKLAVE
+                     ALSSLDGDLAGRYYALKSMTEAEQQQLIDDHFLFDKPVSPLLLASGMARDWPDARGIW
+                     HNDNKTFLVWVNEEDHLRVISMQKGGNMKEVFTRFCTGLTQIETLFKSKDYEFMWNPH
+                     LGYILTCPSNLGTGLRAGVHIKLPNLGKHEKFSEVLKRLRLQKRGTGGVDTAAVGGVF
+                     DVSNADRLGFSEVELVQMVVDGVKLLIEMEQRLEQGQAIDDLMPAQK"
+     intron 1341..1463
+                     /number=2
+     exon 1464..1618
+                     /number=3
+     intron 1619..1690
+                     /number=3
+     exon 1691..1823
+                     /number=4
+     intron 1824..2207
+                     /number=4
+     exon 2208..2379
+                     /number=5
+     intron 2380..3049
+                     /number=5
+     exon 3050..3173
+                     /number=6
+     intron 3174..3330
+                     /number=6
+     exon 3331..3520
+                     /number=7
+     intron 3521..3599
+                     /number=7
+     exon 3600..4075
+                     /number=8
+     polyA_signal 3952..3957
+BASE COUNT      586 a   1443 c   1477 g    694 t
+ORIGIN      
+        1 gatcagtttt tttttttaat cgcacttatg cttattgttt attagcgttt cctcccatct
+       61 ttgcctgaag tctccgggga ctgcctttgg gggtcgggta aacttgtccc ctgcgaagag
+      121 ggcccagggt tggggtctgg aaactccgag gctgcacttg ccagcggcct cttaaggcca
+      181 cagcgtcccc gtggtttctg gctcgcagcc ccccgagacc caggacttgt ccaaggtcag
+      241 ggcaccgcgg gtgcccccgg gctgggccgc agcagactgc gcttcccgcg cgccttcgct
+      301 ttgcaccagg atcgcccagg aaatgcctgc gggcaccttg aggaaggtcg gcggctccgg
+      361 gccagctcgc actggccggg gtggggcggg ggccgtacct gctgcggaag ccccgaaagc
+      421 tttcgcccgg cccctcgccg ccgccgcggg ggctggctgg actaggcggg caggctcgag
+      481 gatgcggatg aacccaagcg tcctcgagtg cccggaggct ctccgcctca gtttcccgcc
+      541 cagaggcaag ggcgtgcgag gggatccaga tatccaagga cctgaggttt cggcctcgag
+      601 gtcttgggcg ggggactggg caggctgcgc ggggtcccag cgaggggaca gctcgggtgg
+      661 gcggccaggg tgttgggggc tgcgggcggc ggacaaagcg gcggcaccac cccgcggcgc
+      721 gggccaatgg aatgaatggg ctataaatag ccgccaatgg gcggcccgcg ttgtgcccct
+      781 taagagccgc gggagcgcgg agcggccgct gttcgcctgc gtcgctccgg gagctgccga
+      841 cggacggagc gcccccgccc ccgcccggcc gcccggtgag tgggcccggg ggccgggggc
+      901 gtccgcgccc gggctagggg cgctgcgagc aaagggggcg cgtcgcctgg agcgcgcgcc
+      961 ggaccggccg ggggtccccg gcgatgatgg cgctccccgc gcgcgctgcg gaccccgctg
+     1021 accttggccg cgtcccgggg ggcgccgggg ggcccggcgg cgggggcctg agtggtacgc
+     1081 gggagcccgg gaaccccggc gtgccggtcc cctctgaccc cgcgtctccc cgcagcccgc
+     1141 cgccgccatg cccttctcca acagccacaa cgcactgaag ctgcgcttcc cggccgagga
+     1201 cgagttcccc gacctgagcg cccacaacaa ccacatggcc aaggtgctga cccccgagct
+     1261 gtacgcggag ctgcgcgcca agagcacgcc gagcggcttc acgctggacg acgtcatcca
+     1321 gacaggcgtg gacaacccgg gtacgcgacc cctcggggcc ggggtcccgg ccccccctcc
+     1381 ccccgcgcag ccgcagggtc ctcagcagcg cgctcgggcc cggcagtgac gtcactgtcc
+     1441 ccgtcccgcg ccccctcccc caggccaccc gtacatcatg accgtgggct gcgtggcggg
+     1501 cgacgaggag tcctacgaag tgttcaagga tctcttcgac cccatcatcg aggaccggca
+     1561 cggcggctac aagcccagcg atgagcacaa gaccgacctc aaccccgaca acctgcaggt
+     1621 gcggggctgc gggcgggccg ggcgggcggg gccggggtct tcgggcgctc actcccgtct
+     1681 cgcctcccag ggcggcgacg acctggaccc caactacgtg ctgagctcgc gggtgcgcac
+     1741 gggccgcagc atccgtggct tctgcctccc cccgcactgc agccgcgggg agcgccgagc
+     1801 catcgagaag ctcgcggtgg aaggtagggg ccgggcgggc cgaggggcgg cggcggccgc
+     1861 gtccccctcc cggcgcggtc cccgcccgct tttgtttacg tcgcccggga gcggcagccg
+     1921 ccgtcgcgct cttatctgcg cgcgcccggg ttcagtttcc cggacccacc gagggacgga
+     1981 ggcccagccc ccgcgcccac agcggcctgg ggcccaggga gggcgggtcc tggcgcgggg
+     2041 tcaccgcctg ggaccgtcgc ccgggccgtg aggactggac gcccgcagat ccgggcgggt
+     2101 ggggccctct gacgtccccc gaggtggggc acgggggcgg gcgggtccgc gctgcgggct
+     2161 ggaggggcgg gcgcgggagc ccagcgtcct gagcgcaccc ctcgcagccc tgtccagcct
+     2221 ggacggcgac ctggcgggcc gatactacgc gctcaagagc atgacggagg cggagcagca
+     2281 gcagctcatc gacgaccact tcctcttcga caagcccgtg tcgcccctgc tgctggcctc
+     2341 gggcatggcc cgcgactggc ccgacgcccg cggtatctgg tgcgtgtccc tctgcgccct
+     2401 ctcgcggcgt cctccctccc cgctacctcc gctttccctc tcgcccccct cgcgggggtg
+     2461 gggcccctcg cggcgaggag gaggaggagg aggagggagg ggccggccgc gctccgggtc
+     2521 tgggttccgt gccgcgcctc ctcctgcgcc ggtgaccttg gccgagcagg tgcgttaagg
+     2581 gactgggccc cggcccgtgg gggctcagga ctcagcaaca cctccccacc ccgagacgtg
+     2641 aggtgggggc ggggctctct ggcgcctctc cccgacggcc ctgggagctg gagctctttg
+     2701 ttttcttttc tcactcctcc gccgctggga ttctaccagg ggctggtgac gccaaagctt
+     2761 ctccaggggc agggctccta cccccactgt ggggggcggg tcgggctgtc ctggcggtcc
+     2821 ctggccccgc cccacctcgg gccacagcgc atgatggcag ctggggttct cctgctgtga
+     2881 ggcgtcccgg ttcccccgcc cgccccgtgt tggcgggtgg agtcttggca gcagcctcca
+     2941 ctcctgggca tggcagggag cagcacctca gggacttggg aagttccttt ggtctggggg
+     3001 cggcctgggg cttttttctg ggtatgccct gagaccagcc ctcccgcagg cacaatgaca
+     3061 ataagacctt cctggtgtgg gtcaacgagg aggaccacct gcgggtcatc tccatgcaga
+     3121 aggggggcaa catgaaggag gtgttcaccc gcttctgcac cggcctcacc caggtgccag
+     3181 ggacggggca ggcccagacc ccagggcccc agcagggatg tgggtgcccc agcatcagtc
+     3241 cccccggggg atttccggca ctggggagtc tcagggcctg taggggtttc aggcaggcct
+     3301 tctccctcat accctcttct ccgtctgcag attgaaactc tcttcaagtc taaggactat
+     3361 gagttcatgt ggaaccctca cctgggctac atcctcacct gcccatccaa cctgggcacc
+     3421 gggctgcggg caggtgtgca tatcaagctg cccaacctgg gcaagcatga gaagttctcg
+     3481 gaggtgctta agcggctgcg acttcagaag cgaggcacag gtgagcaggg caggtgctgc
+     3541 ggcttcccgt ggcctttggg cagccctgtt tcctccgccc tgacttgctg tctccccagg
+     3601 cggtgtggac acggctgcgg tgggcggggt cttcgacgtc tccaacgctg accgcctggg
+     3661 cttctcagag gtggagctgg tgcagatggt ggtggacgga gtgaagctgc tcatcgagat
+     3721 ggaacagcgg ctggagcagg gccaggccat cgacgacctc atgcctgccc agaaatgaag
+     3781 cccggcccac acccgacacc agccctgctg cttcctaact tattgcctgg gcagtgccca
+     3841 ccatgcaccc ctgatgttcg ccgtctggcg agcccttagc cttgctgtag agacttccgt
+     3901 cacccttggt agagtttatt tttttgatgg ctaagatact gctgatgctg aaataaacta
+     3961 gggttttggc ctgcctgcgt ctgagtggtg cctctccttt cccagggggg agggggaagg
+     4021 gcagcagcca ggccccagga gtcttgagtc ctgggcctgc tgtgggcctc gccttctgtg
+     4081 agatgggaca agagccagga ggtggccact ctgttctgcc tgccctacct agtccatggg
+     4141 ccccttccct cgtgtctatc gggctgtgca ggcaggaaca tgggagagag cgagggagga
+//
