@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.10 2001-12-18 17:20:59 eblanco Exp $ */
+/* $Id: geneid.h,v 1.11 2002-01-16 08:11:42 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdio.h>
@@ -66,8 +66,8 @@
 
 #define BASEVALUESITES_SHORT 1000
 #define BASEVALUEEXONS_SHORT 500
-#define BASEVALUESITES_LARGE 70000
-#define BASEVALUEEXONS_LARGE 35000
+#define BASEVALUESITES_LARGE 100000
+#define BASEVALUEEXONS_LARGE 50000
 
 #define MAXEVIDENCES 10000       /* Maximum number of annotations        */
 #define MAXSR 10000              /* Maximum number of SR (strand/frame)  */
