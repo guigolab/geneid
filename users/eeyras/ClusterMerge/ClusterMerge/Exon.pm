@@ -434,7 +434,7 @@ sub gff_string {
    $str .= (defined $self->score)       ?   $self->score."\t"        :  ".\t";
    $str .= (defined $self->strand)      ?   $strand."\t"             :  ".\t";
    $str .= (defined $self->phase)       ?   $self->phase."\t"        :  ".\t";
-   $str .= (defined $self->group_tag)   ?   $self->group_tag."\t"        :  ".";
+   $str .= (defined $self->transcript_tag)   ?   $self->transcript_tag         :  ".";
    return $str;
 }
 
@@ -456,13 +456,48 @@ sub group_tag{
     my ($self,$arg) = @_;
 
     if (defined($arg)) {
-        $self->{_group_tag} = $arg;
+        $self->{_transcript_tag} = $arg;
     }
     
-    return $self->{_group_tag};
+    return $self->{_transcript_tag};
 }
 
 ############################################################
+
+sub gene_tag{
+    my ($self,$arg) = @_;
+
+    if (defined($arg)) {
+        $self->{_gene_tag} = $arg;
+    }
+
+    return $self->{_gene_tag};
+
+###################################
+
+
+sub transcript_tag{
+    my ($self,$arg) = @_;
+
+    if (defined($arg)) {
+        $self->{_transcript_tag} = $arg;
+    }
+
+    return $self->{_transcript_tag};
+
+########################################
+
+sub exon_tag{
+    my ($self,$arg) = @_;
+
+    if (defined($arg)) {
+        $self->{_exon_tag} = $arg;
+    }
+
+    return $self->{_exon_tag};
+
+########################################
+
 
 =head2 source_tag
 
@@ -706,6 +741,8 @@ sub intersection{
     my ($start1,$end1) = ( $exon1->start, $exon1->end );
     my ($start2,$end2) = ( $exon2->start, $exon2->end );
     
+    
+
     my $end   = $exon1->min( $end1,  $end2 );
     my $start = $exon1->max( $start1, $start2);
 

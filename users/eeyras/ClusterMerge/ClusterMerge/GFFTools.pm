@@ -74,9 +74,16 @@ sub exon_from_gff {
     $exon->end($end);
     $exon->primary_tag($primary);
 
-    $frame = 0 unless( $frame =~ /^\d+$/);
-    $exon->phase($frame);
-
+    #$frame = "." unless( $frame =~ /^\d+$/);
+    
+    if ( $frame =~ /^\d+$/){
+	$exon->phase($frame);
+    }
+    else{
+	$exon->phase(0);
+    }
+    $exon->frame($exon->phase);
+    
     #my $phase = ( 3 - $frame )%3;
     #$exon->phase($phase);
     #$exon->end_phase( ( $exon->phase + $exon->length)%3 );
@@ -97,7 +104,7 @@ sub exon_from_gff {
     
     ############################################################
     # warning: it parses only the first element of the group
-    $exon->group_tag($group[0]);
+    $exon->transcript_tag($group[0]);
     
     #print "group-tag = $group[0]\n";
     return $exon;
@@ -105,4 +112,78 @@ sub exon_from_gff {
 
 ############################################################
 
+sub exon_from_gtf {
+    my ($self,$gtfstring) = @_;
+    
+    #print STDERR "gff_string: $gffstring\n";
+    
+    #1 cdna CDS 475556 475670 . + 0 gene_id "853"; transcript_id "1048"; exon_number "14"; 
+    #1 cdna CDS 480393 480532 . + 0 gene_id "853"; transcript_id "1048"; exon_number "15"; 
+    #1 cdna CDS 482243 482345 . + 0 gene_id "853"; transcript_id "1048"; exon_number "16"; 
+    my ($seqname, 
+	$source, 
+	$primary, 
+	$start, 
+	$end, 
+	$score, 
+	$strand, 
+	$frame, 
+	$gene_field,
+	$gene_tag,
+	$transcript_field,
+	$transcript_tag,
+	$exon_field,
+	$exon_tag)
+	= split(/\s+/, $gtfstring);
+    
+    my $exon = ClusterMerge::Exon->new();
+    $exon->seqname($seqname);
+    $exon->source_tag($source);
+    $exon->start($start);
+    $exon->end($end);
+    $exon->primary_tag($primary);
+
+    #$frame = "." unless( $frame =~ /^\d+$/);
+    
+    if ( $frame =~ /^\d+$/){
+	$exon->phase($frame);
+    }
+    else{
+	$exon->phase(0);
+    }
+    $exon->frame($exon->phase);
+    
+    #my $phase = ( 3 - $frame )%3;
+    #$exon->phase($phase);
+    #$exon->end_phase( ( $exon->phase + $exon->length)%3 );
+    
+    if ($score eq '.'){
+	$exon->score(0);
+    }
+    elsif ( defined($score) ){
+	$exon->score( $score );
+    }
+    else{
+	$exon->score(0);
+    }
+    
+    if ( $strand eq '-' ) { $exon->strand(-1); }
+    elsif ( $strand eq '+' ) { $exon->strand(1); }
+    elsif ( $strand eq '.' ) { $exon->strand(0); }
+    
+    $gene_tag =~/\"(.*)\"\;/;
+    $exon->gene_tag($1);
+
+    $transcript_tag =~/\"(.*)\"\;/;
+    $exon->transcript_tag($1);
+    
+    $exon_tag=~/\"(.*)\"\;/;
+    $exon->exon_tag($1);
+
+    return $exon;
+}
+
+############################################################
+
 1;
+
