@@ -1,0 +1,62 @@
+\documentclass[a4paper,10pt]{article}
+%\usepackage[spanish,activeacute]{babel}
+%
+% Adapted from eblanco
+%
+% $Id: exons_in_dna.tex,v 1.1 2002-03-14 10:06:45 jabril Exp $
+%
+% latex exons_in_dna.tex; dvips exons_in_dna.dvi -o exons_in_dna.ps
+%
+\usepackage[dvips]{pstcol}
+\usepackage[dvips]{graphicx}
+\usepackage{amssymb}
+\usepackage{pstricks}
+\usepackage{pst-node,pst-tree,pst-grad,pst-plot,bar}
+% \usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+\usepackage{xcomment} % activate \begin{notes} ... \end{notes}. Put \noxcommentat preamble.
+\usepackage{times}\fontfamily{ptm}\selectfont
+
+\input ColorDefs.tex %%%%% Colors for gff2ps
+
+\psset{unit=0.5cm}
+\newcommand{\maq}{\texttt}
+\newcommand{\negr}{\textbf}
+\newcommand{\atg}[1]{{\color{darkgreen}#1}}
+\newcommand{\don}[1]{{\color{skyblue}#1}}
+\newcommand{\acc}[1]{{\color{verydarkgreen}#1}}
+\newcommand{\stp}[1]{{\color{darkred}#1}}
+
+\newlength{\dnastring}
+\settowidth{\dnastring}{\maq{GAAATCTCTTTGAACAAGACAGATATTTTGGTTCAGTCGCTGAACAAATCTGTTTACTGT}}
+% \addtolength{\dnastring}{2ex}
+
+\begin{document}
+\pagestyle{empty}
+\begin{center}
+\psframebox[fillstyle=solid,fillcolor=lightorange,framesep=2.5ex]{
+  \begin{minipage}[l]{\dnastring}
+\maq{>SequenceID}\\
+\maq{\ldots}\\
+\maq{GAAATCTCTTTGAACAAGACAGATATTTTGGTTCAGTCGCTGAACAAATCTGTTTACTGT}\\
+\maq{TCACGTACTGTGGTCGTCCCTTGTTTATGGGCAGGCATCCCTCGTGCGTTGGACTGCTCG}\\
+\maq{TAC\psframebox[fillstyle=solid,fillcolor=red]{\atg{ATG}TGGGCGAGGTTCCGTAAAC}\don{GT}CGGCATGTTGTCCACTGAGACAAACTTGTAAA}\\
+\maq{CCCGTTCCCGAACCAGCTGTATCAGAGATCCGTATTGTGTGGCCGTGGGGAGACCCTTCT}\\
+\maq{CGCTTAGCATCGAAAAGTAACCTGCGGGAAAAAGAAAAAATACAAATGTTAAAATTGTCC}\\
+\maq{TTGTATCTTATGTTGTATGCGTATCTCTTCTATTAAAGTGGGTTCATCTAACCATTATAC}\\
+\maq{ATTTCATAAATAAAT\acc{AG}\psframebox[fillstyle=solid,fillcolor=red]{ATTACAATTGGGTCAAAATAAATGTTCA}\don{GT}GAAGCTTCCCTT}\\
+\maq{CTCAAGGTCATAAAAGCATTTAAAAAAAATAGCACAAATCAATAATTAAAAACTAATTTT}\\
+\maq{GAAATCTCTTTGAACAAGACAGATATTTTGGTTCAGTCGCTGAACAAATCTGTTTACTGT}\\
+\maq{CTAAAATCTGAAAACCATTTTTCCGACAGCTGACAGCTTCGAACAGAATATAGTACACAA}\\
+\maq{AAATGCAAAACCGACAAGTTTGATGATATATGTATTTAATTTTCTTAAAATAATGGAGGG}\\
+\maq{TTTGC\acc{AG}\psframebox[fillstyle=solid,fillcolor=red]{TCCAAAAATGAGTACAAAAAACAAAACAAATAA}\stp{TGA}CGACGCGACTGGGCAT}\\
+\maq{CTCTTAGTATTGAGATATATGTATTTAATTTTCTTAAAATAAAAGCATTTTTTGTCAATT}\\
+\maq{AAATGCAAAACCGACAAGTTTGATTGGAGGGTTTGTAAAAAATAAAATTCGAATGTAAAA}\\
+\maq{AGAGTTTCAGTTAGCGCAGGTGGATTTTACAGAAAAAAATGCAATGCAATTAAACATTAC}\\
+\maq{ATGTATCGATGAGTCCATTAATCATTTCATTTGGTTCAATTCGCGCCACTGAGCTTAAAT}\\
+\maq{TATAATGATACAATAAAAAAAATTGATGATAAAGAGAGACTAAAATGCAATGCAATTAAA}\\
+\maq{\ldots}
+  \end{minipage}
+} % psframebox
+\end{center}
+
+\end{document}
