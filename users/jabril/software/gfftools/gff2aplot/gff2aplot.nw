@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $
+% $Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -495,9 +495,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.32 $', #'
-     '$Date: 2002-01-11 20:05:15 $', #'
-     '$Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $', #'
+     '$Revision: 1.33 $', #'
+     '$Date: 2002-02-01 18:26:50 $', #'
+     '$Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -719,7 +719,7 @@ sub parse_command_line() {
 
     <<open LOGFILE>>
 
-    &header('',"RUNNING $PROGRAM",'',"User: $USER","Date: $DATE");
+    &header('',"RUNNING $PROGRAM",'',"User: $USER","Date: $DATE","Perl: $PVER");
 
     &header("SETTING DEFAULTS");
     %DefaultVars = ();
@@ -13580,6 +13580,7 @@ We also set here the date when the script is running and who is the user running
 my $total_time = 0;
 my $DATE = localtime;
 my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
+my $PVER = sprintf("v%vd",$^V);
 @ 
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
@@ -13836,7 +13837,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -15430,7 +15431,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $
+# $Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
