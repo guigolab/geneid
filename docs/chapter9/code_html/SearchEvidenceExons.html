@@ -22,7 +22,7 @@ ALINK="black">
 <font face=courier size=5 color=red>SearchEvidenceExons.c</font>
 </td>
 <td align=right>
-<font face=courier size=3>geneid v 1.1</font>
+<font face=courier size=3>geneid v 1.2</font>
 <font face=arial black size=3>source documentation</font>
 </td>
 </table>
@@ -45,23 +45,25 @@ positions (range l1,l2).
 <tr>
 <td><font face=courier size=4 color=red>
 <pre>
-void SearchEvidenceExons(packEvidence* pv, long l2)
+void SearchEvidenceExons(packExternalInformation* p, 
+                         packEvidence* evidence,
+                         long l2)
 </pre>
 </font>
 </td>
 <tr>
 <td bgcolor=skyblue>
 <div class="bulk"><font face="arial black" size=2>
-Extracting the block (list) of annotations useful to include in the current fragment
-with the ab initio predictions. This block is defined by the counters
-i1vExons and i2vExons.
+Extracting the block (list) of annotations useful to 
+integrate in the current fragment with the ab initio predictions. 
+This block is defined by the counters i1vExons and i2vExons.
 </font>
 </div>
 </td>
 <tr>
 <td><font face=courier size=4 color=red>
 <pre>
-void SwitchCounters(packEvidence* pv)
+void SwitchCounters(packExternalInformation* p)
 </pre>
 </font>
 </td>
@@ -76,7 +78,7 @@ in the following fragment of sequence.
 <tr>
 <td><font face=courier size=4 color=red>
 <pre>
-void resetEvidenceCounters(packEvidence* pv)
+void resetEvidenceCounters(packExternalInformation* p)
 </pre>
 </font>
 </td>
@@ -103,7 +105,7 @@ var modifieddate=document.lastModified
 </table>
 
 <br><p>
-Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+Enrique Blanco Garcia &copy; 2003<br><p><br><p>
 </center>
 </body>
 </html>
