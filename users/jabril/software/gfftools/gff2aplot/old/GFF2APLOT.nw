@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $
+% $Id: GFF2APLOT.nw,v 1.2 2001-04-10 08:36:45 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -74,6 +74,7 @@
 % defs
 \def\prog{\textsc{\textbf{gff2aplot}}}
 \def\ps{\textsc{PostScript}}
+\def\eoline{$\backslash\backslash$}
 
 % Setting text for footers and headers
 \fancyhead{} % clear all fields
@@ -107,7 +108,7 @@ I am trying to improve some aspects of the {\prog} utility that may be hard to s
 } % parbox
 \end{center}
 \end{abstract}\vskip 5ex
-{\large$<$\verb$Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $$>$ }
+{\large$<$ \verb$Id: GFF2APLOT.nw,v 1.2 2001-04-10 08:36:45 jabril Exp $$>$ }
 
 \vfill
 
@@ -235,13 +236,13 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.1 $',
-     '$Date: 2001-04-06 14:21:44 $',
-     '$Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $',
+     '$Revision: 1.2 $', #'
+     '$Date: 2001-04-10 08:36:45 $', #'
+     '$Id: GFF2APLOT.nw,v 1.2 2001-04-10 08:36:45 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
-@ 
+@  %$
 
 <<UNDEFINED VARS>>=
 @
@@ -300,7 +301,7 @@ AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
     close(HELP);
     exit(1);
 } # prt_help
-@ 
+@ %$
 
 <<perl requires help>>=
 $PROGRAM needs the following Perl modules installed in 
@@ -310,7 +311,7 @@ distribution are marked with an '(*)', in such cases
 make sure that you already have downloaded them from 
 CPAN (http://www.perl.com/CPAN) and installed.
 
-@ 
+@ %$
 
 <<command-line help>>=
 A double dash on itself "--" signals end of the options
@@ -519,10 +520,6 @@ SHOW_VERSION =>
 
 \subsubsctn{Testing command-line input filenames}
 
-<<Global Vars>>=
-my (@data_files,$file);
-@ 
-
 <<Parsing Command-Line Options>>=
 sub set_input_file() {
     my $stdin_flg = $F;
@@ -547,6 +544,10 @@ sub set_input_file() {
     };
     $stdin_flg && &report('READING_STDIN');
 }
+@ 
+
+<<Global Vars>>=
+my (@data_files,$file);
 @ 
 
 <<warnings - input/output>>=
@@ -583,12 +584,341 @@ defined($chk_stdin) && do {
 
 \subsctn{Setting customization parameters from files} 
 
+Customization parameters cannot be set from '[[STDIN]]'.
+
+Layout variables are defined as two fields, variable name and value, while the other variables require three fields, a feature to which is set the variable to the given value. To validate input records, '[[$var_flag]]' boolean will determine whether a two fields or a three fields record we currently are going to process.
+
 <<Parsing Custom Files>>=
 sub parse_custom_files() {
     &header("READING CUSTOM FILES");
+  LOAD: foreach $file (@custom_files) {
+      open(THIS,"< $file") ||
+          ( &warn('FILE_NO_OPEN',$T,$file), next LOAD);
+      &report('READ_CUSTOM_FILE',$file);
+      ($n,$c) = (0,undef);
+      while (<THIS>) {
+          my (@line,$main,$_c,$_v,$v_flag);
+		  /^\#/o && do {
+              /^\# ([LQSTGF]) \#/o && do { 
+                   $_c = $1; $c = '*';
+                   $v_flag = ($_c ne 'L') ? $T : $F;
+                   $_v = $varkeys{$_c};
+                   next;
+              };
+			  $c = '.'; next;
+          };
+          ($c = '.', next) if /^\s*$/o;
+          chomp;
+          ($main,undef) = split /\b\s+\#/o;
+        TWOTHREE: {
+            $v_flag && do {
+				$main =~ /^(.*?):{2}(.*?)={1}(.*?)$/o &&
+                    (@line = ($1,$2,$3));
+				last TWOTHREE;
+			};
+            $main =~ /^(.*?)={1}(.*?)$/o &&
+                (@line = ($_v,$1,$2));
+		}; # TWOTHREE
+          $c = &varscheck($v_flag,$_v,\@line) ? $_c : $noCV;
+      } continue {
+          &counter(++$n,$c) if ($Verbose && !$Quiet);
+      }; # WHILE
+      &counter_end($n,$c) if ($Verbose && !$Quiet);
+      close(THIS);
+  }; # LOAD
+    % print LOGFILE Dumper(\%GFF_DATA) if ($LogFile && $Debug);
     &footer("CUSTOM FILES LOADED");
 } # parse_custom_files
 @ 
+
+\begin{table}[!t]
+\begin{center}
+\begin{tabular}{cc}
+\fbox{
+\begin{tabular}[b]{c>{\bfseries}c}
+\textbf{Record TYPE} & \textbf{Symbol} \\
+Empty record            & . \\
+Comment                 & . \\
+Header (\# [LQSTGF] \#) & * \\
+Layout Vars             & L \\
+Sequence Vars           & Q \\
+Source Vars             & S \\
+Strand Vars             & T \\
+Group Vars              & G \\
+Feature Vars            & F \\
+Unknown                 & ? \\
+\end{tabular}
+} %fbox
+&
+\parbox[b]{0.4\linewidth}{
+\caption[Symbols used to report record type from custom files]{\label{tbl:CFkeysXreport} Symbols used to report record type when parsing customization files (and [[STDERR]] verbose mode is enabled with '[[-v]]' switch).}
+} % parbox
+\\
+\end{tabular}
+\end{center}
+\end{table}
+
+<<Global Constants>>=
+my $noCV = '?';
+my %varkeys = (
+    L => 'LAYOUT',
+    Q => 'SEQUENCE',
+    S => 'SOURCE',
+    T => 'STRAND',
+    G => 'GROUP',
+    F => 'FEATURE',
+    );
+@ 
+
+<<messages - parsing custom files>>=
+READ_CUSTOM_FILE => 
+  $sp."### Reading Customization Parameters from \"\%s\"\n".$sp,
+@
+
+'[[$rec]]' is a reference to an array that contains three elements: feature, variable and value. First we check if variable name is defined in , then we check if the given value matches the variable type. After that we analyse the feature element, testing if it is a regular expression or not.
+
+<<Parsing Custom Files>>=
+sub varscheck() {
+    my ($flag,$class,$rec) = @_;
+	my $_var = \%{$DefaultVars{$class}};
+    defined($_var->{$$rec[1]}) || 
+        (&warn('VAR_NOT_DEFINED',$F,$class,$$rec[1]),return $F);
+    &checkvarvalues($_var->{$$rec[1]}{'TYPE'},\$$rec[2],$$rec[1]) || return $F;
+    $$rec[0]
+} # varscheck
+@ 
+
+<<warnings - parsing custom files>>=
+VAR_NOT_DEFINED =>
+  $Warn."\%s variable not defined in current custom file: \"\%s\"",
+@
+
+Different data requires different value tests, another function of those tests is to normalize when needed variable values to fixed internal values, so this will avoid later checkings or functions for reformating them and writing functions
+will be simplest.
+
+<<Parsing Custom Files>>=
+sub checkvarvalues() {
+	my ($_test,$_val,$_var) = @_;
+  VALUES: {
+    <<variable value checking>>
+    &warn('VARTYPE_NOT_DEFINED',$T,$_test,$_var);
+    return $F;
+  }; # VALUES
+    return $T;
+} # checkvarvalues
+@
+
+<<warnings - parsing custom files>>=
+VARTYPE_NOT_DEFINED =>
+  $Error."Variable type \"\%s\" not defined, ".
+         "could not check value for \"\%s\".",
+@
+
+We define as 'BOOLEAN' those variables used as flags or switches, which can hold only a binary value such ON/OFF. Booleans are NOT case sensitive.
+
+<<variable value checking>>=
+$_test eq 'BOOLEAN' && do {
+    lc($$_val) =~ /^(1|on|t(rue)|y(es))$/o && ($$_val = $T, last VALUES);
+    lc($$_val) =~ /^(0|off|f(alse)|n(o))$/o && ($$_val = $F, last VALUES);
+    &warn('NOT_A_BOOLEAN',$F,$_var);
+    return $F;
+};
+@
+
+<<warnings - parsing custom files>>=
+NOT_A_BOOLEAN =>
+  $Warn."\"\%s\" variable requires a boolean value: ".
+        "ON/OFF, 1/0, TRUE/FALSE, YES/NO",
+@
+
+Having a 'STRING' implies to replace/protect those characters that will produce indesirable effects in PostScript code (such unbalanced parentheses).
+
+<<variable value checking>>=
+$_test eq 'STRING' && do {
+    $$_val =~ s{\}{\134}og;
+    $$_val =~ s{\(}{\050}og;
+    $$_val =~ s{\)}{\051}og;
+    last VALUES;
+};
+@
+
+The following tests look for four different number types.
+
+<<variable value checking>>=
+$_test eq 'DIGIT' && do {
+    $$_val =~ /^\d+$/o && (last VALUES);
+    &warn('NOT_A_DIGIT',$F,$_var);
+    return $F;
+};
+$_test eq 'INTEGER' && do {
+    $$_val =~ /^[+-]?\d+$/o && (last VALUES);
+    &warn('NOT_AN_INTEGER',$F,$_var);
+    return $F;
+};
+$_test eq 'DECIMAL' && do {
+    $$_val =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o && (last VALUES);
+    &warn('NOT_A_DECIMAL',$F,$_var);
+    return $F;
+};
+$_test eq 'REALNUM' && do {
+    $$_val =~ /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/0 &&
+        (last VALUES);
+    &warn('NOT_A_REAL',$F,$_var);
+    return $F;
+};
+@ %$
+
+<<warnings - parsing custom files>>=
+NOT_A_DIGIT =>
+  $Warn."\"\%s\" variable requires a digit (natural number).",
+NOT_AN_INTEGER =>
+  $Warn."\"\%s\" variable requires an integer.",
+NOT_A_DECIMAL =>
+  $Warn."\"\%s\" variable requires a decimal number.",
+NOT_A_REAL =>
+  $Warn."\"\%s\" variable requires a real number (with exponent).",
+@ %$
+
+Available colors are shown in section~\ref{sec:CMYKcolordef}, page~\pageref{sec:CMYKcolordef}. Here we check that customization input colors match those defined colors, including 'background' and 'foreground' colors. Color names are NOT case sensitive.
+
+<<variable value checking>>=
+$_test eq 'COLOR' && do {
+    my $_t = lc($$_val);
+    $_t =~ /^(
+      (b|f)g(color)?|
+         black|white|
+ (very)?(light|dark)?
+                    (
+                     grey|
+                  magenta|
+                   violet|
+               (sky)?blue|
+                     cyan|
+         (sea|lime)?green|
+                   yellow|
+                   orange|
+                      red|
+                    brown
+                     )
+              )$/ox && ($$_val = $_t, last VALUES);
+    &warn('NOT_A_COLOR',$F,$_t,$_var);
+    return $F;
+};
+@
+
+<<warnings - parsing custom files>>=
+NOT_A_COLOR =>
+  $Warn."\"\%s\" color not defined in \"\%s\" variable.",
+@
+
+Available page sizes are shown in section~\ref{sec:PAGEdef}, page~\pageref{sec:PAGEdef}.
+
+<<variable value checking>>=
+$_test eq 'PAGE' && do {
+    my $_t = lc($$_val);
+    $_t =~ /^(
+       (a|b)([0-9]|10)|
+                 10x14|
+                      (
+                 executive|
+                     folio|
+              le(tter|gal)|
+                    quarto|
+                 statement|
+                   tabloid|
+               userdefined
+                       )
+              )$/ox && ($$_val = $_t, last VALUES);
+    &warn('NOT_A_PAGE',$F,$_t,$_var);
+    return $F;
+};
+@
+
+<<warnings - parsing custom files>>=
+NOT_A_PAGE =>
+  $Warn."\"\%s\" page-size is not defined for \"\%s\" variable.",
+@
+
+Those numbers relative to DNA positions may be given in bases, kilobases, megabases or gigabases, being last three ones a way to avoid any mistake when a big coord with lots of zeroes is provided. If no unit is provided, then we asume bases.
+
+<<variable value checking>>=
+$_test eq 'DNABASE' && do {
+    my $_t = lc($$_val);
+    $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)([gmk]?b)?$/o && 
+        ($$_val = $_t, last VALUES);
+    &warn('NOT_A_DNABASE',$F,$_var,$_t);
+    return $F;
+};
+@
+
+<<warnings - parsing custom files>>=
+NOT_A_DNABASE =>
+  $Warn."\"\%s\" variable requires nucleotide units.".
+        " \"\%s\" is not valid (units in Gb, Mb, Kb, or bases).",
+@
+
+A range is a lower/upper limits pair for a given variable. One of the limits, or both, can be an asterisk ('*'), which means that the default value must be used.
+
+<<variable value checking>>=
+$_test eq 'RANGE' && do {
+
+    last VALUES;
+};
+@
+
+Font names must be in first capital letter format for {\ps}. 
+
+<<variable value checking>>=
+$_test eq 'FONT' && do {
+    my $_t = lc($$_val);
+    defined($Fonts{$_t}) && 
+        ($$_val = $Fonts{$_t}, last VALUES);
+    &warn('NOT_A_FONT',$F,$_t,$_var);
+    return $F;
+};
+@
+
+<<warnings - parsing custom files>>=
+NOT_A_FONT =>
+  $Warn."Sorry, \"\%s\" font is not defined for \"\%s\" variable.",
+@
+
+We provide three basic fonts that are standard in most {\ps} devices (a serif, a sans-serif and a monospaced font), and four series for each one (an upright ``normal'', an italic/oblique, a bold, and a bold italic/oblique series). 
+
+<<Global Vars>>=
+my %Fonts = (
+    # serif
+    times                 => 'Times-Roman',
+    times-roman           => 'Times-Roman',
+    times-italic          => 'Times-Italic',
+    times-bold            => 'Times-Bold',
+    times-bolditalic      => 'Times-BoldItalic',
+    # sans serif
+    helvetica             => 'Helvetica',
+    helvetica-oblique     => 'Helvetica-Oblique',
+    helvetica-bold        => 'Helvetica-Bold',
+    helvetica-boldoblique => 'Helvetica-BoldOblique',
+    # monospaced
+    courier               => 'Courier',
+    courier-oblique       => 'Courier-Oblique',
+    courier-bold          => 'Courier-Bold',
+    courier-boldoblique   => 'Courier-BoldOblique',
+    );
+@ 
+
+<<warnings - parsing custom files>>=
+NOT_A_FONT =>
+  $Warn."\"\%s\" font is not available for \"\%s\" variable.",
+@
+
+Font sizes can be given in points, centimeters or inches. If no unit is provided, then we asume points.
+
+<<variable value checking>>=
+$_test eq 'FONT_SZ' && do {
+
+    last VALUES;
+};
+@
 
 \sctn{Customization Variables Description} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1171,15 +1501,15 @@ group_labels_fontsize      => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
 @
 
 <<default sequence vars values>>=
-NIL => { TYPE => 'NIL', VALUE => "empty array" },
+NIL => { TYPE => 'BOOLEAN', VALUE => $F },
 @
 
 <<default source vars values>>=
-NIL => { TYPE => 'NIL', VALUE => "empty array" },
+NIL => { TYPE => 'BOOLEAN', VALUE => $F },
 @
 
 <<default strand vars values>>=
-NIL => { TYPE => 'NIL', VALUE => "empty array" },
+NIL => { TYPE => 'BOOLEAN', VALUE => $F },
 @
 
 <<default group vars values>>=
@@ -1211,6 +1541,33 @@ SelectionBox_BGCOLOR       => { TYPE => 'COLOR'  , VALUE => 'grey' },
 Function_COLOR             => { TYPE => 'COLOR'  , VALUE => 'red'  },
 @
 
+\begin{comment}
+## ## 
+## XTR (bin): Force those <features> for which XTR is switched ON
+##   to be displayed in the third panel, if the Plot Option 
+##   "Display_EXTRA-BOX" is switched ON.
+## ## 
+## Box (FHN): Define the box size (FHN) for <feature>.
+## ##
+## Line (NLRB): Draw lines across all panels for the <feature>.
+## ##
+## Join (bin): Switch ON to connect elements of one group with splice symbols.
+## ##
+## Arrw (bin): Swicth ON to display an arrow that shows the <feature>'s strand.
+## ##
+## Lbl (bin): Swicth ON to display the <feature>'s label
+##   (if it's defined in the .gff file).
+## ##
+## Color (clr): Fill <Box> with this color.
+## ##
+## CLine (clr): Fill Line <Ribbons> with this color.
+## ##
+## Wdth (HND): You can choose among three predefined LineWidths.
+## ##
+## Layr : Layer where is drawed each feature.
+##   You must pass an integer for feature ordering (1..n),
+##   put 0 to print the feature always on top. 
+\end{comment}
 
 <<Changes in custom Vars>>=
 # PERCENT_ORIGIN => "50",
@@ -1303,7 +1660,7 @@ We have to deal with two basic formats, the \textsl{standard} General Feature Fo
 \end{center}
 \end{minipage}
 } %fbox
-\caption{\label{fig:formats} Input records format definition for {\prog}.}
+\caption{\label{tbl:formats} Input records format definition for {\prog}.}
 \end{center}
 \end{table}
 
@@ -1315,7 +1672,7 @@ sub parse_GFF_files() {
     &header("PARSING INPUT GFF RECORDS");
   LOAD: foreach $file (@data_files) {
       open(THIS,"< $file") ||
-          ( &warn('FILE_NO_OPEN',$T,$file), next LOAD);
+          (&warn('FILE_NO_OPEN',$T,$file), next LOAD);
       $file eq '-' && ($file = 'STANDARD INPUT');
       &report('READ_GFF_FILE',$file);
       ($n,$c) = (0,undef);
@@ -1324,7 +1681,7 @@ sub parse_GFF_files() {
           ($c = '.', next) if /^\#/o;
           ($c = '.', next) if /^\s*$/o;
           chomp;
-          $c = $noGFF;
+          # $c = $noGFF;
           ($main,undef) = split /\s+\#/o;
           @line = split /\s+/o, $main, 9;        
           scalar(@line) < 8 &&
@@ -1332,7 +1689,7 @@ sub parse_GFF_files() {
           $c = &GFF_format(&fieldscheck(\@line));
       } continue {
           &counter(++$n,$c) if ($Verbose && !$Quiet);
-      };
+      }; # WHILE
       &counter_end($n,$c) if ($Verbose && !$Quiet);
       close(THIS);
   }; # LOAD
@@ -1341,7 +1698,7 @@ sub parse_GFF_files() {
 } # sub parse_GFF
 @ %$
 
-We define the following constants, used to report which format was found in the current read record (See table~\ref{tbl:keysXreport}).
+We define the following constants, used to report which format was found in the current read record (See table~\ref{tbl:DTkeysXreport}).
 
 \begin{table}[!t]
 \begin{center}
@@ -1362,7 +1719,7 @@ Unknown             & ? \\
 } %fbox
 &
 \parbox[b]{0.4\linewidth}{
-\caption[Symbols used to report record type]{\label{tbl:keysXreport} Symbols used to report record type when parsing input GFF files (and [[STDERR]] verbose mode is enabled with '[[-v]]' switch).}
+\caption[Symbols used to report record type from data files]{\label{tbl:DTkeysXreport} Symbols used to report record type when parsing input GFF files (and [[STDERR]] verbose mode is enabled with '[[-v]]' switch).}
 } % parbox
 \\
 \end{tabular}
@@ -1418,7 +1775,7 @@ sub fieldscheck() {
 } # fieldscheck
 @
 
-For historical reasons the program can work with APLOT format (see Table~\ref{fig:formats}). Initial field checking determines whether the record being processed is under that alignment GFF-like format, by determining that first, fourth and fifth fields contain a colon char. Then we assume we are under APLOT format.
+For historical reasons the program can work with APLOT format (see Table~\ref{tbl:formats}). Initial field checking determines whether the record being processed is under that alignment GFF-like format, by determining that first, fourth and fifth fields contain a colon char. Then we assume we are under APLOT format.
 
 <<Parsing Input Data>>=
 sub fcolon() { return ($_[0] =~ /.+:.+/o ? $T : $F) }
@@ -1486,19 +1843,19 @@ FRAME_MISMATCH =>
   $Warn." Frame mismatch definition \"\%s\" in file \"\%s\" line \"\%s\".\n",
 @ 
 
-\subsctn{Parsing APLOT format}
+\subsctn{Parsing APLOT format}\label{sec:parseAPLOT}
 
-'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOT-DS}).
+'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOT-DS}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
 
 <<Parsing Input Data>>=
 sub load_aplot() { # if errors found > return $noGFF
     my ($list) = @_;
     my $w_gff;
-    $w_gff = &load_aplot_grouping($list->[8]);
     ($seqname_1,$seqname_2,$source_1,$source_2,$feature_1,$feature_2,
      $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
      $strand_1,$strand_2,$frame_1,$frame_2) = 
      &remove_colon(@$list[0,1,2,3,4,5,6,7]);
+    $w_gff = &load_grouping($F,$list->[8]);
     &check_aplot_fields || ($w_gff=$noGFF);
     return $w_gff;
 } # load_aplot
@@ -1509,10 +1866,9 @@ my ($seqname_1,$seqname_2,
     $source_1,$source_2,$feature_1,$feature_2,
     $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
     $strand_1,$strand_2,$frame_1,$frame_2); # APLOT temporary vars
-my ($tag,$group,$group_id,$id,$group_counter,$label); # GROUPING temporary vars
+my ($tag,$group,$group_id,$label,
+    $group_gff_counter,$group_aplot_counter); # GROUPING temporary vars
 @ 
-
-'[[$group_counter]]' must be replaced by '[[scalar(@group_ary)]]' when defined. %$
 
 \begin{table}[!t]
 \begin{center}
@@ -1581,36 +1937,6 @@ sub check_aplot_fields() {
 } # check_aplot_fields
 @
 
-\begin{comment}
-%<DEBUG - aplot format fields>>
-<<DEBUG - aplot format fields>>=
-    print STDOUT <<"EOL";
-*----------------------------------------
-Sq1: \"$seqname_1\"
-Sq2: \"$seqname_2\"
-Sr1: \"$source_1\"
-Sr2: \"$source_2\"
-Ft1: \"$feature_1\"
-Ft2: \"$feature_2\"
-Or1: \"$start_1\"
-Or2: \"$start_2\"
-En1: \"$end_1\"
-En2: \"$end_2\"
-Sc1: \"$score_1\"
-Sc2: \"$score_2\"
-St1: \"$strand_1\"
-St2: \"$strand_2\"
-Fr1: \"$frame_1\"
-Fr2: \"$frame_2\"
-Tag: \"$tag\"
-Grp: \"$group\"
-Id:  \"$group_id\"
-Mbr: \"$label\"
------------------------------------------
-EOL
-@ 
-\end{comment}
-
 <<Parsing Input Data>>=
 sub add_aplot_record() {
     return;
@@ -1623,92 +1949,17 @@ sub add_aplot_record() {
 my (%ALN_DATA);
 @
 
-\subsubsctn{Parsing APLOT groups}
+\subsctn{Parsing standard GFF format}\label{sec:parseGFF}
 
-Once we have the attribute string from the GFF record, we first check if it is empty, then we split by semicolons which will have or not white spaces or tabs before and/or after, as shown in this regular expression:\\
-\centerline{'[[/\b\s*;\s*\b/]]'}\\
-This will define tag-value pairs (and maybe some extra fields).  
-
-<<Parsing Input Data>>=
-sub load_aplot_grouping() {
-    my $attributes = $_[0];
-    defined($attributes) || do {
-		$group_id = ++$group_counter;
-        $group = "$seqname_1\_$seqname_2\_$source_1\_$group_id";
-        $label = $id;
-	    return $APLOT_NOGP;
-    };
-    my @grouping_list = ();
-    @grouping_list = split /\s*;\s*/o, $attributes;
-	<<parse aplot grouping>>
-	<<parse aplot other>>
-    return $APLOT;
-}
-@ 
-
-%% my $groupregexp = '^([^\"]*)(?:[\"]([^\"]+)[\"](?:\s+\b(.*))?)?$'; #'
-<<Global Vars>>=
-my $groupregexp = '^(.*?)(?:"(.+?)"(?:\s+\b(.*))?)?$'; #'
-@ 
-
-We may find four basic grouping field structures (detailed in Table~\ref{fig:formats}) within the first element of '[[@grouping_list]]'. We check first for double-quotes in the first or second field within that element. If second field is double-quoted, the first field is set as 'Tag' and the quoted as 'Value', else 'Tag' is set to default value ('target'). Then looking for extra fields defining start, end, strand and frame (all related to the second sequence); in {\prog} GFF-like format, those values are deprecated (they must be defined in the first eight fields following the first sequence values and a colon). 
-
-<<parse aplot grouping>>=
-my @new_group = ();
-my $aplot_grouping = 0;
-my $group_string = shift @grouping_list;
-($group_string =~ /$groupregexp/o) && 
-    (@new_group = ($1,$2,$3));
-$new_group[0] =~ s/\b\s*$//o;
-$new_group[0] || do {  # type 2 attributes
-    $aplot_grouping = 1;
-    $new_group[0] = $SOURCE{"align_tag"}; # %SOURCE temporary defined
-};
-$new_group[1] || do {  # type 1 attributes
-    $aplot_grouping = 1;
-    $new_group[1] = $new_group[0];
-    $new_group[0] = $SOURCE{"align_tag"};
-};
-# In aplot-format $new_group[2] values are deprecated.
-($tag,$group,$label,$group_id) = 
-    (lc($new_group[0]),@new_group[1,1],++$group_counter);
-# Here looking for colon field separator in aplot GFF-like grouping
-($aplot_grouping && $group !~ /\s+/o) && do {
-    if ($group =~ /^(.*?):(.*?)$/o) { 
-        (($group,$label) = ($1,$2));
-	} else {
-		$label = $group_id;
-	};
-};
-@
-
-Here we look for other fields, in principle we are only interested in finding 'id' tag, that defines the label for a single record.
-
-<<parse aplot other>>=
-scalar(@grouping_list) > 0 && do{
-    foreach my $element (@grouping_list) {
-        ($element =~ /$groupregexp/o) && (@new_group = ($1,$2,$3));
-        lc($new_group[0]) =~ $SOURCE{"label_tag"} && do {
-            $label = $new_group[1];
-            $label eq "" && do {
-                (undef,$label,undef) = split /\s+/og, $new_group[0];
-            };
-        };
-    };
-};
-@
-
-\subsctn{Parsing standard GFF format}
-
-'[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFF-DS}).
+'[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFF-DS}). The first parameter for '[[&load_grouping]]' function is set to 'True' for GFF grouping definition ('False' is for APLOT grouping definition, see section~\ref{sec:parseAPLOT}). 
 
 <<Parsing Input Data>>=
 sub load_gff() { # if errors found > return $noGFF
     my ($list) = @_ ;
     my $w_gff;
-    $w_gff = &load_grouping($list->[8]);
     ($seqname,$source,$feature,$start,$end,
      $score,$strand,$frame) = @$list[0,1,2,3,4,5,6,7];
+    $w_gff = &load_grouping($T,$list->[8]);
     &check_gff_fields($w_gff) || ($w_gff=$noGFF);
     return $w_gff;
 } # load_gff
@@ -1893,7 +2144,7 @@ sub load_gff_var() {
 	};
 	return;
 } # load_gff_var
-@
+@ %$
 
 We initialize properties for each new element as references to '[[%DefaultVars]]' given level corresponding values. 
 
@@ -1907,38 +2158,137 @@ sub set_var_defaults() {
 } # load_gff_var
 @
 
-\subsubsctn{Parsing GFF groups}
+\subsctn{Parsing grouping attributes}
+
+'[[GFF_CHOICE]]' block sets some variables depending on the record format, standard GFF or APLOT GFF-like. Once we have the attribute string from the GFF/APLOT record, we first check if it is empty, then we split by semicolons which will have or not white spaces or tabs before and/or after, as shown in this regular expression:\\
+\centerline{'[[/\b\s*;\s*\b/]]'}\\
+This will define tag-value pairs (and maybe some extra fields).  
 
 <<Parsing Input Data>>=
 sub load_grouping() {
-    my $attributes = $_[0];
+    my ($_type,$attributes) = @_;
+    my ($grp_string,$grp_counter,$grp_GP,$grp_NOGP,$grp_tag);
+  GFF_CHOICE: {
+    $_type && do { 
+        $grp_string = "$seqname\_$source\_$strand";
+        $grp_counter = ++$group_gff_counter;
+        $grp_GP = $GFF;
+        $grp_NOGP = $GFF_NOGP;
+        $grp_tag = '';
+        last GFF_CHOICE;
+    };
+    $grp_string = "$seqname_1\_$seqname_2\_$source_1\_$strand_1$strand_2";
+    $grp_counter = ++$group_aplot_counter;
+    $grp_GP = $APLOT;
+    $grp_NOGP = $APLOT_NOGP;
+    $grp_tag = $SOURCE{'align_tag'}; # %SOURCE is a temporary hash name
+  };
+    $label = $group_id = $grp_counter;
     defined($attributes) || do {
-		$group_id = ++$group_counter;
-        $group = "$seqname\_$source\_$strand\_$group_id";
-        $label = $id;
-        return $GFF_NOGP;
+        $group = "$grp_string\_$group_id";
+	    return $grp_NOGP;
     };
     my @grouping_list = ();
-    @grouping_list = split /\s*;\s*/o, $attributes;
-    my @new_group = ();
-    my $group_string = shift @grouping_list;
-    ($group_string =~ /$groupregexp/o) && 
-         (@new_group = ($1,$2,$3));
-    my $group_tag = '';
-    ($group_tag = lc $new_group[0]) =~ s/\b\s*$//o;
-    $group_tag =~ /$SOURCE{"align_tag"}/ && do { # %SOURCE is a temporary hash name
+    @grouping_list = split /\b\s*;\s*\b/o, $attributes;
+	<<parse grouping attributes>>
+	<<parse other attributes>>
+    return $grp_GP;
+}
+@ 
+
+We may find four basic grouping field structures (detailed in Table~\ref{tbl:formats}) within the first element of '[[@grouping_list]]'. We check first for double-quotes in the first or second field within that element. If second field is double-quoted, the first field is set as 'Tag' and the quoted as 'Value', else 'Tag' is set to default value (empty string for GFF records and 'target' for APLOT GFF-like ones) and 'Value' is set with the first field. Then we are looking in GFF grouping attributes for extra fields defining start, end, strand and frame (all related to the second sequence); in APLOT GFF-like format, those values are deprecated (because they must be defined in the first eight fields following the first sequence values and a colon as shown in table~\ref{tbl:formats}). 
+
+<<parse grouping attributes>>=
+my $grp_flag = 0;
+my @new_group = ();
+my $groupregexp = '^(.*?)(?:"(.+?)"(?:\s+\b(.*))?)?$'; #'
+my $group_string = shift @grouping_list;
+($group_string =~ /$groupregexp/o) && 
+    (@new_group = ($1,$2,$3));
+$new_group[0] =~ s/\b\s*$//o;
+$new_group[0] || do {  # type 2 attributes
+    $grp_flag = 1;
+    $new_group[0] = $grp_tag;
+};
+$new_group[1] || do {  # type 1 attributes
+    $grp_flag = 1;
+    $new_group[1] = $new_group[0];
+    $new_group[0] = $grp_tag;
+};
+($tag,$group) = (lc($new_group[0]),$new_group[1]);
+# Here looking for colon field separator in aplot GFF-like grouping
+($grp_flag && $group =~ /^(.*?):(.*?)$/o) && (($group,$label) = ($1,$2));
+@ %$
+
+Here we look for other attribute fields, those defining coords for the target sequence match in standard GFF format and those defining a scoring vector, both formats are explained more in detail in the following two subsections.
+
+<<parse other attributes>>=
+$_type && do { # GFF grouping
+    $tag =~ /$SOURCE{'align_tag'}/ && do {
         &load_GFF_align;
         return $ALIGN;
     }; 
-    $group_tag =~ /$SOURCE{"vector_tag"}/ && do {
+    $tag =~ /$SOURCE{'vector_tag'}/ && do {
         &load_GFF_vector;
         return $VECTOR;
 	};
-	<<parse gff grouping>>
-	#<parse aplot other>>
-    return $GFF;
-} # load_grouping
+};
+@ 
+
+We are interested in finding 'id' tag, that defines the label for a single record, this is implemented in the '[[&load_GFF_align]]' and '[[&load_GFF_vector]]'functions but has to be parsed in plain GFF records.
+
+<<parse other attributes>>=
+scalar(@grouping_list) > 0 && do{ 
+    foreach my $element (@grouping_list) {
+        ($element =~ /$groupregexp/o) && (@new_group = ($1,$2,$3));
+        lc($new_group[0]) =~ $SOURCE{'label_tag'} && do {
+            $label = $new_group[1];
+            $label eq "" && do {
+                (undef,$label,undef) = split /\s+/og, $new_group[0];
+            };
+        };
+    };
+};
 @
+
+<<default layout vars values>>=
+align_tag                  => { TYPE => 'STRING' , VALUE => 'target' },
+@ 
+\begin{comment}
+<<custom-vars latex short>>=
+@ 
+<<custom-vars latex>>=
+\vnlitem{align\_tag}{string}{Target} \tp{align\_tag} holds the specific tag (for a grouping Tag-Value pair) to detect those GFF records coding for alignment data and having the following group structure:\\[1ex]
+\centerline{\shortstack[r]{align\_tag "group\_name" \pr{seq2\_start} \pr{seq2\_end} [ ; Strand \pr{seq2\_strand} \eoline\\\,[ ; Frame \pr{seq2\_frame} [ ; E\_value \pr{score} ]\,]\,]\hspace{3ex}}}\\[0.75ex]
+so the program can recover the coords for the target sequence from the grouping fields. Remember that tags are not case-sensitive. 
+@
+\end{comment}
+
+<<default layout vars values>>=
+vector_tag                 => { TYPE => 'STRING' , VALUE => 'vector' },
+@ 
+\begin{comment}
+<<custom-vars latex short>>=
+@ 
+<<custom-vars latex>>=
+\vnlitem{vector\_tag}{string}{Vector} \tp{vector\_tag} sets the specific tag (for a grouping Tag-Value pair) to detect scoring vector GFF records, which have the following group structure:\\[1ex]
+\centerline{\shortstack[r]{vector\_tag "group\_name" \pr{vector\_type} [ ; Window \pr{window\_length} \eoline\\\, [ ; Step \pr{step\_length} ]\,] ; Scores \pr{score$_0$} ... \pr{score$_n$}\hspace{3ex}}}\\[0.75ex]
+so the program can parse the list of single scores from the grouping fields. Remember that tags are not case-sensitive.
+@
+\end{comment}
+
+<<default layout vars values>>=
+label_tag                  => { TYPE => 'STRING' , VALUE => 'id'   },
+@ 
+\begin{comment}
+<<custom-vars latex short>>=
+@ 
+<<custom-vars latex>>=
+\vnlitem{label\_tag}{string}{Id} \tp{label\_tag} sets the specific tag (for a grouping Tag-Value pair) that allows to identify a single record. The program looks for the grouping Tag-Value pair for which the tag matches \tp{label\_tag} and takes \tp{value} as the specific record label. You must have an attribute like this within the grouping attribute list:\\[0.75ex]
+\centerline{\ldots ; label\_tag "element\_label" [ ; \ldots }\\[0.5ex]
+Using this attribute makes easy to set specific properties for one or more elements. Remember that tags are not case-sensitive.
+@
+\end{comment}
 
 <<Global Vars>>=
 my %SOURCE = ( # this is a temporary hash name (to implement later)
@@ -1948,29 +2298,9 @@ my %SOURCE = ( # this is a temporary hash name (to implement later)
                );
 @ 
 
-<<parse gff grouping>>=
-my $gff_grouping = 0;
-$new_group[0] || do {  # type 2 attributes
-    $gff_grouping = 1;
-    $new_group[0] = $SOURCE{"align_tag"}; # %SOURCE temporary defined
-};
-$new_group[1] || do {  # type 1 attributes
-    $gff_grouping = 1;
-    $new_group[1] = $new_group[0];
-    $new_group[0] = $SOURCE{"align_tag"};
-};
-# In aplot-format $new_group[2] values are deprecated.
-($tag,$group,$label,$group_id) = 
-    (lc($new_group[0]),@new_group[1,1],++$group_counter);
-# Here looking for colon field separator in aplot GFF-like grouping
-($gff_grouping && $group !~ /\s+/o) && do {
-    if ($group =~ /^(.*?):(.*?)$/o) { 
-        (($group,$label) = ($1,$2));
-	} else {
-		$label = $group_id;
-	};
-};
-@
+% \subsctn{Parsing extended GFF format}\label{sec:parseXTRA}
+
+The following record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing data that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be defined by users with the variable '[[%SOURCE]]' \textbf{(provisional varname)}.
 
 \subsubsctn{Parsing alignment records}
 
@@ -2174,6 +2504,8 @@ true setstrokeadjust
 
 \subsctn{{\ps} code chunks}
 
+\subsubsctn{Page boundaries}
+
 <<Postscript OPEN PAGE>>=
 sub ps_open_page() {
     print STDOUT << '+++OPEN+++';
@@ -2207,6 +2539,8 @@ showpage
 } # ps_close_page
 @
 
+\subsubsctn{PostScript end of file}
+
 <<Postscript TRAILER>>=
 sub ps_trailer() {
     print STDOUT << "+++EOF+++";
@@ -2221,6 +2555,7 @@ sub ps_trailer() {
 @
 
 \sctn{CMYK color definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:CMYKcolordef}
 
 To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, their {\LaTeX} definition ('[[AplotColorDefs.tex]]') and the table sumarizing them for the manual ('[[AplotColorTbl.tex]]'). % outlined in page~\pageref{sec:cmykfiles}.
 
@@ -2638,6 +2973,9 @@ Those are the colors defined in $PROGRAM:
 @
 
 \sctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:PAGEdef}
+
+\subsctn{ISO standard page sizes: A series}
 
 <<page sizes perl definition>>=
   a0        => [ ++$formats, 2384, 3370 ],
@@ -2665,6 +3003,8 @@ a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
 a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
 a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
 @
+
+\subsctn{ISO standard page sizes: B series}
 
 <<page sizes perl definition>>=
   b0        => [ ++$formats, 2920, 4127 ],
@@ -2694,6 +3034,8 @@ b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
 b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
 @
 
+\subsctn{US standard page sizes}
+
 <<page sizes perl definition>>=
   executive => [ ++$formats,  540,  720 ],
   folio     => [ ++$formats,  612,  936 ],
@@ -2718,6 +3060,8 @@ ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
 tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
 @
 
+\subsctn{Page sizes help}
+
 <<pages help>>=
 The following page sizes are available: from A0 to A10, 
 from B0 to B10, 10x14, executive, folio, ledger, legal, 
@@ -2725,6 +3069,8 @@ letter, quarto, statement and tabloid.
 @
 
 \sctn{{\ps} main program and routines} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsctn{Abbreviated function names}
 
 <<POSTSCRIPT shortnames>>=
 %%BeginProcSet: Short_names 1.0 0
@@ -2752,6 +3098,8 @@ letter, quarto, statement and tabloid.
 %%EndProcSet:   Short_names 1.0 0
 %
 @
+
+\subsctn{Defining PS constants}
 
 <<POSTSCRIPT constants>>=
 %%BeginProcSet: Constants 1.0 0
@@ -2781,6 +3129,8 @@ letter, quarto, statement and tabloid.
 %%EndProcSet:   Constants 1.0 0
 %
 @
+
+\subsctn{Page layout}
 
 <<POSTSCRIPT layout>>=
 %%BeginProcSet: Page_Layout 1.0 0
@@ -2825,6 +3175,8 @@ flglscape {
 %
 @
 
+\subsctn{Text related functions}
+
 <<POSTSCRIPT text functions>>=
 %%BeginProcSet: text_functions 1.0 0
 %
@@ -2846,6 +3198,8 @@ flglscape {
 %%EndProcSet:   text_functions 1.0 0
 %
 @
+
+\subsctn{The APLOT dictionary}
 
 <<POSTSCRIPT aplotdict>>=
 %%BeginProcSet: aplotdict 1.0 0
@@ -2892,6 +3246,8 @@ end % aplot dict
 %%EndProcSet:   aplotdict 1.0 0
 %
 @
+
+\subsctn{Main functions definition}
 
 <<POSTSCRIPT main function calls>>=
 %%BeginProcSet: main_function_calls 1.0 0
@@ -2992,6 +3348,7 @@ my $spw   = "\<\<\<         \>\>\> ";
 my %ErrorList = (
                  <<warnings - input/output>>
                  <<warnings - parsing command-line options>>
+                 <<warnings - parsing custom files>>
                  <<warnings - parsing GFF files>>
                  );
 @
@@ -3024,6 +3381,7 @@ my $sp = "###\n";
 my %MessageList = (
                    <<messages - input/output>>
                    <<messages - parsing command-line options>>
+                   <<messages - parsing custom files>>
                    <<messages - parsing GFF files>>
                    );
 @
@@ -3488,7 +3846,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: GFF2APLOT.nw,v 1.1 2001-04-06 14:21:44 jabril Exp $
+# $Id: GFF2APLOT.nw,v 1.2 2001-04-10 08:36:45 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
