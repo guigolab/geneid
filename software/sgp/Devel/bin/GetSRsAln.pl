@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.2 2000-08-10 02:15:35 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.3 2000-08-10 17:59:40 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln.pl";
@@ -20,31 +20,35 @@ use Getopt::Long;
 
 Getopt::Long::Configure("bundling","pass_through");
 
-my ( $verbose_flg, $aln_flg, $bit_flg, $ids_flg,
-	 $only_Q_flg, $only_S_flg, $to_file,
+my ( $verbose_flg, $aln_flg, $bit_flg, $ids_flg,  # GETOPTs FLAGS
+	 $only_Q_flg, $only_S_flg, $to_file, $to_file_flg,
 	 $help_flg, $prt_aln_flg, $debug_flg, $stdin_flg
-	 ) = (0,0,0,0,0,0,0,0,0,0,1);
+	 ) = (0,0,0,0,0,0,0,0,0,0,0,1);
 
-GetOptions( "Q|query-only"     => \$only_Q_flg  ,
-			"S|subject-only"   => \$only_S_flg  ,
-			"A|alignment"      => \$prt_aln_flg , # show only alignment not GFF
-			"b|bit-score"      => \$bit_flg     ,
-			"i|identity-score" => \$ids_flg     ,
-			"W|write-to-file"  => \$to_file     ,
-			"v|verbose"        => \$verbose_flg ,
-			"D|debugging"      => \$debug_flg   ,
- 			"h|help|\?"        => \$help_flg    ,
+GetOptions( "Q|query-only"      => \$only_Q_flg  ,
+			"S|subject-only"    => \$only_S_flg  ,
+			"A|alignment"       => \$prt_aln_flg , # show only alignment not GFF
+			"b|bit-score"       => \$bit_flg     ,
+			"i|identity-score"  => \$ids_flg     ,
+			"W|write-to-file:s" => \$to_file     ,
+			"v|verbose"         => \$verbose_flg ,
+			"D|debugging"       => \$debug_flg   ,
+ 			"h|help|\?"         => \$help_flg    ,
 			);
 
-my $ARGV = my $scoreopt = my $vrbopt = "";
+my $ARGV = my $scoreopt = my $vrbopt = ""; 
 $verbose_flg = 1 if $debug_flg;
 $vrbopt = " -v" if $verbose_flg;
 # $aln_flg = 0 if ($bit_flg || $ids_flg);
-$scoreopt = " -i" if $ids_flg;
-$scoreopt = " -b" if $bit_flg;
+$scoreopt = " -i" if $ids_flg; # 'identity' score from BLAST
+$scoreopt = " -b" if $bit_flg; # 'bit' score from BLAST
+$only_S_flg = 0 if $only_Q_flg;
+# $only_Q_flg = 0 if $only_S_flg;
+$to_file = 1 if $to_file eq "";
+$to_file_flg = 1 if ($to_file!=0 || $to_file ne "");
 $VERSION =~ s/\$//og;
 
-$help_flg && &prt_help; 
+&prt_help if $help_flg; 
 
 
 ##############################################################################
@@ -52,21 +56,21 @@ $help_flg && &prt_help;
 ##############################################################################
 
 my $parseblast = "parseblast"; # $blastgff = "blast2gff -g"
-my $pb_QUERY   = "$parseblast$vrbopt$scoreopt -nFQ";
-                 # 'n'o comments.
-                 # 'F'ullgff better then 'G'ff.
-                 # Append se'Q'uence to GFF.
-                 # 'bit' score from BLAST .
-# my $pb_SUBJECT = "$parseblast$vrbopt$scoreopt -nGbS";
-# my $pb_ALN     = "$parseblast$vrbopt$scoreopt -nPW";
-my ( $blast_file, $blast_alnQ, $blast_alnS, @data );
+my $pb_PROG   = "$parseblast$vrbopt$scoreopt -nFQ";
+   # 'n'o comments # 'F'ullgff better then 'G'ff # Append se'Q'uence to GFF
+   # only SUBJECT "-nGbS" # only ALN "-nPW"
+my ( $blast_file, $blast_alnQ, $blast_alnS, @data, $FH);
 
-my ( %hsp, %sr, @project_query, @project_subject, $rcd, $last_rcd,
+my ( %hsp, %sr, @project_query, @project_subject, # HSPs RECORDS
      @stack, %opened, $coord, $score, $index,
-	 $current_coord, $last_coord, $current_score, $last_score,
-	 $current_index, $last_index, $index, $sr_count, # $stack_index,
-	 $op, $n, $c, $stv, $t_score, $t_index,
-	 %tfxs, $s, $e, $dif, $sQ, $sS, 
+	 );
+my ( $sr_count, $ori, $end, $sco, $idx, $rec, $dif, # SRs RECORDS
+	 $which_proj, $prj_flg, $Q_ori, $Q_end,
+	 $S_ori, $S_end, $Q_seq, $S_seq,
+	 );
+my ( $current_coord, $last_coord, $current_score, $last_score, # Building SRs
+	 $current_index, $last_index, $rcd, $w_sr, $lines, # $stack_index,
+	 $op, $n, $c, $stv, $t_score, $t_index, %tfxs, 
 	 );
 my %STR = ( "+" => 0,
 			"-" => 3 );
@@ -98,7 +102,7 @@ USAGE:  $PROGRAM [options] <results.from.blast>
 REQUIRES:
 
 	This program needs to find "parseblast" in the path.
-  (Don't you have your ~/bin dir in the path?)............ ;^) 
+  (Don\'t you have your ~/bin dir in the path?)............ ;^) 
   
 COMMAND-LINE OPTIONS:
 
@@ -186,20 +190,36 @@ sub define_files {
 		$blast_file = $ARGV;
 		$stdin_flg = 0;
 		-e $blast_file || die "Can't open the file '$blast_file' : $!\n";
-	}
-	$blast_alnQ = "$blast_file.alnQ"; 
-	$blast_alnS = "$blast_file.alnS";
+	};
+
+	$blast_alnQ = $blast_alnS = "STDOUT";
+	$to_file_flg && do {
+		if ($to_file==1) {
+			$blast_alnQ = "$blast_file.alnQ"; 
+			$blast_alnS = "$blast_file.alnS";
+		} else {
+			$blast_alnQ = "$to_file.alnQ"; 
+			$blast_alnS = "$to_file.alnS";	
+		};
+	};
+
+	my $qstr = "Alignment from QUERY   SRs: $blast_alnQ";
+	$qstr = "Writing for QUERY has been disabled (\"-S\" option)." if $only_S_flg; 
+	my $sstr = "Alignment from SUBJECT SRs: $blast_alnS";
+	$sstr = "Writing for SUBJECT has been disabled (\"-Q\" option)." if $only_Q_flg; 
 
 print STDERR <<EOF if $verbose_flg;
 ##########################################################
 ##
-## $PROGRAM
+## $PROGRAM - $VERSION
 ##
 ## Reading Input from: $blast_file
 ##
 ## Writing Results to following files.
-##   Alignment from QUERY    SRs: $blast_alnQ
-##   Alignment from SUBJECTS SRs: $blast_alnS
+##
+##     $qstr
+##
+##     $sstr
 ##
 ##########################################################
 ##
@@ -258,15 +278,15 @@ sub read_HSPs {
 
   READING: {
 	  $stdin_flg && do {
-		  open2(*QUERY,*INPUT,"$pb_QUERY");
+		  open2(*QUERY,*INPUT,"$pb_PROG");
 		  print INPUT <ARGV>;
 		  close(INPUT);
 		  last READING;
 	  };
-	  open(QUERY, "$pb_QUERY $blast_file |");
+	  open(QUERY, "$pb_PROG $blast_file |");
   }
 
-    my ( $codeQ, $codeS, $id, $rec); # , @tsq, @teq, @tss, @tes);
+    my ( $codeQ, $codeS, $id); # , @tsq, @teq, @tss, @tes);
 	$index = 0;
 	while (<QUERY>){ 
 		next if /^\#|^\s*$/;
@@ -287,24 +307,26 @@ sub read_HSPs {
 			INDEX    => $id,
 		};
 		
-		$rec = \%{ $hsp{$id} };
-		push @{ $project_query[$codeQ] },   [ $hsp{$id}{START_Q}, 
-											  $hsp{$id}{START_S}, 
-											  $hsp{$id}{SCORE},
-											  $id, $rec ] ;
-		push @{ $project_query[$codeQ] },   [ $hsp{$id}{END_Q},
-											  $hsp{$id}{END_S},
-											  $hsp{$id}{SCORE},
-											  $id, $rec ] ;
-		push @{ $project_subject[$codeS] }, [ $hsp{$id}{START_S},
-											  $hsp{$id}{START_Q},
-											  $hsp{$id}{SCORE},
-											  $id, $rec ] ;
-		push @{ $project_subject[$codeS] }, [ $hsp{$id}{END_S},
-											  $hsp{$id}{END_Q},
-											  $hsp{$id}{SCORE},
-											  $id, $rec ] ;
-
+		!$only_S_flg && do {
+			push @{ $project_query[$codeQ] },   [ $hsp{$id}{START_Q}, 
+												  $hsp{$id}{START_S}, 
+												  $hsp{$id}{SCORE},
+												  $id ] ;
+			push @{ $project_query[$codeQ] },   [ $hsp{$id}{END_Q},
+												  $hsp{$id}{END_S},
+												  $hsp{$id}{SCORE},
+												  $id ] ;
+		};
+		!$only_Q_flg && do {
+			push @{ $project_subject[$codeS] }, [ $hsp{$id}{START_S},
+												  $hsp{$id}{START_Q},
+												  $hsp{$id}{SCORE},
+												  $id ] ;
+			push @{ $project_subject[$codeS] }, [ $hsp{$id}{END_S},
+												  $hsp{$id}{END_Q},
+												  $hsp{$id}{SCORE},
+												  $id ] ;
+		};
 		$index++;
 	}; 
 
@@ -333,7 +355,7 @@ EndOfPrt
 			foreach my $n (0..$nx) {
 				$rcd = \@{ $array->[$c][$n] };
 print STDERR <<EndOfPrt;
-Position: $rcd->[0]  At$m_sr: $rcd->[1]  Score: $rcd->[2]  Index: $rcd->[3]  HSP: ${$rcd->[4]}{INDEX} ${$rcd->[4]}{QUERY}_x_${$rcd->[4]}{SUBJECT}
+Position: $rcd->[0]  At$m_sr: $rcd->[1]  Score: $rcd->[2]  Index: $rcd->[3]  HSP: $hsp{$rcd->[3]}{INDEX} $hsp{$rcd->[3]}{QUERY}_x_$hsp{$rcd->[3]}{SUBJECT}
 EndOfPrt
             };
             $nxt += $nx + 1;
@@ -343,9 +365,9 @@ EndOfPrt
 } # END_SUB: print_proj_records
 #
 sub print_project { 
-
-	my $tfxsq = &print_proj_records(" QUERY ", \@project_query);
-	my $tfxss = &print_proj_records("SUBJECT", \@project_subject);
+	my ($tfxsq,$tfxss) = (0,0); 
+	!$only_S_flg && ( $tfxsq = &print_proj_records(" QUERY ", \@project_query) );
+	!$only_Q_flg && ( $tfxss = &print_proj_records("SUBJECT", \@project_subject) );
 
 print STDERR <<EndOfPrt;
 ##########################################################
@@ -380,7 +402,7 @@ sub sort_by_fields {
 } # END_SUB: sort_by_fields
 #
 sub sort_projections {
-print STDERR <<EndOfPrt;
+print STDERR <<EndOfPrt if $verbose_flg;
 ##
 ##########################################################
 ## SORTING LISTs of PROJECTED HSPs COORDs by POSITION
@@ -388,8 +410,8 @@ print STDERR <<EndOfPrt;
 ##
 EndOfPrt
 
-	&sort_by_fields(" QUERY ", \@project_query);
-    &sort_by_fields("SUBJECT", \@project_subject);
+	!$only_S_flg && &sort_by_fields(" QUERY ", \@project_query);
+    !$only_Q_flg && &sort_by_fields("SUBJECT", \@project_subject);
 
     &print_project if $verbose_flg;
 } # END_SUB: sort_projections
@@ -397,6 +419,7 @@ EndOfPrt
 # Printing SR records
 #
 sub print_SRs {
+	my $record;
 print STDERR <<EndOfPrt;
 ##
 ##########################################################
@@ -405,24 +428,28 @@ print STDERR <<EndOfPrt;
 EndOfPrt
 
 	foreach my $k (sort { $a <=> $b } keys %sr) {
+		$record = \%{ $sr{$k} };
 print STDERR <<EndOfSRs
 #
-# SR_INDEX: $k
-# SCORE   : $sr{$k}{SCORE}
+#   SR_INDEX: $k 
+#
+# PROJECTION: $record->{PROJECTION}
+#  HSP_INDEX: $record->{INDEX_HSP}
+#      SCORE: $record->{SCORE}
 
-  QUERY    : $sr{$k}{QUERY}    
-  START_Q  : $sr{$k}{START_Q}  
-  END_Q    : $sr{$k}{END_Q}    
-  STRAND_Q : $sr{$k}{STRAND_Q} 
-  FRAME_Q  : $sr{$k}{FRAME_Q}  
-  SEQ_Q    : $sr{$k}{SEQ_Q}
+  QUERY    : $record->{QUERY}    
+  START_Q  : $record->{START_Q}  
+  END_Q    : $record->{END_Q}    
+  STRAND_Q : $record->{STRAND_Q} 
+  FRAME_Q  : $record->{FRAME_Q}  
+  SEQ_Q    : $record->{SEQ_Q}
 
-  |  SUBJECT  : $sr{$k}{SUBJECT}
-  |  START_S  : $sr{$k}{START_S}
-  |  END_S    : $sr{$k}{END_S}
-  |  STRAND_S : $sr{$k}{STRAND_S}
-  |  FRAME_S  : $sr{$k}{FRAME_S}
-  |  SEQ_S    : $sr{$k}{SEQ_S}
+  |  SUBJECT  : $record->{SUBJECT}
+  |  START_S  : $record->{START_S}
+  |  END_S    : $record->{END_S}
+  |  STRAND_S : $record->{STRAND_S}
+  |  FRAME_S  : $record->{FRAME_S}
+  |  SEQ_S    : $record->{SEQ_S}
 
 #
 EndOfSRs
@@ -432,33 +459,55 @@ EndOfSRs
 # Defining NEW SR records
 #
 sub new_SR {
-	my @lstrcd = @_;
-	$sr_count++;
-	$sr{$last_index} = {
-		QUERY    => $lstrcd[4]{QUERY},    SUBJECT  => $lstrcd[4]{SUBJECT},
-		START_Q  => $s,                   START_S  => $lstrcd[4]{START_S}-$dif+1,
-		END_Q    => $e,                   END_S    => $lstrcd[4]{START_S}+$dif-1,
-		STRAND_Q => $lstrcd[4]{STRAND_Q}, STRAND_S => $lstrcd[4]{STRAND_S},
-		FRAME_Q  => $lstrcd[4]{FRAME_Q},  FRAME_S  => $lstrcd[4]{FRAME_S},
-		SEQ_Q    => $sQ,                  SEQ_S    => $sS,
-		SCORE    => $last_score,
-		INDEX    => $last_index,
+	$sr{$sr_count} = {
+		PROJECTION => $which_proj,
+		QUERY     => $rec->{QUERY},    SUBJECT  => $rec->{SUBJECT},
+		START_Q   => $Q_ori,           START_S  => $S_ori,
+		END_Q     => $Q_end,           END_S    => $S_end,
+		STRAND_Q  => $rec->{STRAND_Q}, STRAND_S => $rec->{STRAND_S},
+		FRAME_Q   => $rec->{FRAME_Q},  FRAME_S  => $rec->{FRAME_S},
+		SEQ_Q     => $Q_seq,           SEQ_S    => $S_seq,
+		SCORE     => $sco,
+		INDEX_HSP => $idx,
+		INDEX_SR  => $sr_count,
 	};
+	$sr_count++;
 } # END_SUB: new_SR
-sub prt_sr {
-	print STDOUT "@_ :: $stv\n";
-	print STDERR "\n********************* @_ :: $stv ## COORD:$last_coord/$current_coord ## SCORE:$last_score/$current_score ## INDEX:$last_index/$current_index\n";
+#
+sub prt_sr { # GETS SRstart SRend HSPscore HSPindex # $prt_aln_flg!$only_S_flg!$only_Q_flg
+	my $seq_ori;
+	($ori,$end,$sco,$idx) = @_;
+	$rec = \%{ $hsp{$idx} };
+	($which_proj = $w_sr) =~ s/\s//og; #QUERY/SUBJECT
+	print STDERR "\n********************* @_ :: $stv ## COORD:$last_coord/$current_coord ## SCORE:$last_score/$current_score ## INDEX:$last_index/$current_index\n" if $debug_flg;
+
+  MKVARS: {
+	  $which_proj eq "QUERY" && do {
+		  ($Q_ori,$Q_end) = ($ori,$end);
+		  $seq_ori = $Q_ori   - $rec->{START_Q};
+		  $S_ori   = $seq_ori + $rec->{START_S};
+		  $dif     = $end - $ori + 1;
+		  $S_end   = $dif - 1 + $rec->{START_S};
+		  last MKVARS;
+	  }; # else $which_proj eq "SUBJECT" 
+	  ($S_ori,$S_end) = ($ori,$end);
+	  $seq_ori = $S_ori   - $rec->{START_S};
+	  $Q_ori   = $seq_ori + $rec->{START_Q};
+	  $dif     = $end - $ori + 1;
+	  $Q_end   = $dif - 1 + $rec->{START_Q};
+  };
+	$Q_seq = substr($rec->{SEQ_Q},$seq_ori,$dif);
+	$S_seq = substr($rec->{SEQ_S},$seq_ori,$dif);
+	&new_SR($rec);
+
+	print { $FH } "@_ :: $stv\n";
+
 }
-#							  ($s, $e) = ($last_coord, ($current_coord - 1));
-#							  $dif = ($e-$s)+1;
-#							  $sQ = substr($last_rcd[4]{SEQ_Q}, ($last_rcd[4]{START_Q}), $dif );
-#							  $sS = substr($last_rcd[4]{SEQ_S}, ($last_rcd[4]{START_Q}), $dif );
-#							  &new_SR(@rcd);
 
 # Building SRs for each Coord on HSPs.
 #
 sub chkvars {
-	print STDERR "@_";
+	print STDERR "@_" if $debug_flg;
 }
 #
 sub get_from_stack {
@@ -483,7 +532,7 @@ sub check_GT_closed_score {
   CLSC: {
 	  # $current_coord>$last_coord && !opened{$current_index} && $current_score>$last_score
 	  $current_score>$last_score && do { 
-		  &chkvars("#11($op,".@stack.")");
+		  &chkvars("#11($op,".@stack.")"); 
 		  &prt_sr($last_coord, $current_coord-1, $last_score, $last_index);
 		  ($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
 		  last CLSC;
@@ -558,7 +607,7 @@ sub check_coords {
 	}; # $current_coord>$last_coord
 	# ELSE $current_coord==$last_coord
 	&chkvars("#06($op,".@stack.")");
-	($current_score==$last_score && $current_index eq $last_index) &&  do { ### replace eq by ==
+	($current_score==$last_score && $current_index == $last_index) &&  do { ### replace eq by ==
 		&chkvars("#07($op,".@stack.")");
 		&prt_sr($last_coord, $current_coord, $last_score, $last_index);
 	};
@@ -579,7 +628,7 @@ sub check_coords {
 #
 sub test_projection {
 # 	$tfxs{$w_sr} = $#{ $lines->[$c] };
-	my ($w_sr, $lines) = @_;
+	($w_sr, $lines) = @_;
 	my $lnc;
   MAIN: foreach $c (1..$max_frame_num) {
 	  my $yc = 0;
@@ -589,7 +638,7 @@ sub test_projection {
 		  print STDERR "\n*** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n" if $verbose_flg;
 		  $op = 0;
 		LINES: for $n (0..$lnc) {
-			# &prt_progress(++$yc);
+			&prt_progress(++$yc) if ($verbose_flg && !$debug_flg);
 			$rcd = \@{ $lines->[$c][$n] };
 			$current_coord = $rcd->[0];
 			$current_score = $rcd->[2];
@@ -614,7 +663,7 @@ sub test_projection {
 
 		} # for :LINES: $n (0..$lnc) 
 		  &chkvars("\n");
-		  # &prt_foeprg($yc);
+		  &prt_foeprg($yc) if ($verbose_flg && !$debug_flg);
 		  next MAIN;
 	  }; # defined(@{ $lines[$c] })
 	  print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $verbose_flg;	
@@ -623,8 +672,19 @@ sub test_projection {
 
 # Computing SRs from projected HSP coords.
 #
+sub open_file_handle {
+	$to_file_flg && do {
+		open(HF,"> @_");
+		$FH=*HF;
+		return 1;
+	};
+	$FH=*STDOUT;
+	return 0;
+}
+#
 sub obtain_SRs {
-print STDERR <<EndOfPrt;
+	my $no_stdout;
+print STDERR <<EndOfPrt if $verbose_flg;
 ##
 ##########################################################
 ## OBTAINING SRs from PROJECTED HSPs COORDs
@@ -633,10 +693,19 @@ print STDERR <<EndOfPrt;
 EndOfPrt
 	
     $sr_count = 0;
-    &test_projection( " QUERY ", \@project_query );
-    &test_projection( "SUBJECT", \@project_subject );
+    !$only_S_flg && do {
+		$no_stdout = &open_file_handle($blast_alnQ);
+		&test_projection( " QUERY ", \@project_query );
+		close($FH) if $no_stdout;
+	};
 	
-#	&print_SRs if $verbose_flg;	
+    !$only_Q_flg && do {
+		$no_stdout = &open_file_handle($blast_alnS);
+		!$only_Q_flg && &test_projection( "SUBJECT", \@project_subject );
+		close($FH) if $no_stdout;
+	};
+	
+	&print_SRs if $verbose_flg;	
 } # END_SUB: obtain_SRs
 
 
