@@ -24,11 +24,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.6 2003-11-05 14:54:29 eblanco Exp $  */
-
-extern float NO_SCORE;
+/*  $Id: readparam.c,v 1.7 2004-01-27 16:18:12 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern float NO_SCORE;
+extern int PPT;
+extern int BP;
+extern int SGE;
 
 /* Numeric values: read one line skipping comments and empty lines */
 void readLine(FILE *File, char* line)
@@ -267,14 +270,17 @@ void SetProfile(profile* p, FILE* RootFile, char* signal)
 	}
 }
 
-/* Read information useful to predict signals */
-void ReadProfile(FILE* RootFile, profile* p, char* signal)
+/* Read information useful to predict Start codons, donors, stop codons */
+/* H parameter: 0 for not reading header, 1 for reading the header */
+void ReadProfile(FILE* RootFile, profile* p, char* signal, int H)
 {
   char line[MAXLINE];
   char mess[MAXSTRING];
   
   /* Definition parameters: Length, offset, cutoff and order (Markov chain) */
-  readHeader(RootFile,line);
+  if (H==1)
+	readHeader(RootFile,line);
+
   readLine(RootFile,line);
   if ((sscanf(line,"%d %d %f %d", 
 			  &(p->dimension),
@@ -288,12 +294,72 @@ void ReadProfile(FILE* RootFile, profile* p, char* signal)
   
   /* Memory to allocate the data with these fixed dimensions */
   RequestMemoryProfile(p);
-
+  
   /* Useful to check everything is OK */
   PrintProfile(p,signal);
-
+  
   /* Prepare and read values */
   SetProfile(p,RootFile,signal);
+}
+
+/* Read information useful to predict Acceptor splice sites */
+void ReadProfileAcceptors(FILE* RootFile, gparam* gp)
+{
+  char line[MAXLINE];
+  char mess[MAXSTRING];
+  char header[MAXSTRING];
+  profile* p;
+
+  /* A. Optional profiles: branch point or Poly Pyrimidine Tract */
+  readHeader(RootFile,line);
+  if ((sscanf(line,"%s",header))!=1)
+	{
+	  sprintf(mess,"Wrong format: header in optional profile for acceptor sites");
+	  printError(mess);
+	}
+
+  while(strcmp(header,sprofileACC))
+	{ 
+	  if (!strcmp(header,sprofilePPT))
+		{
+		  /* Switch on the acceptor prediction using PPTs */
+		  PPT++;
+
+		  /* Reading the Poly Pyrimidine Tract profile */
+		  p = gp->PolyPTractProfile;
+		  ReadProfile(RootFile, p, sPPT, 0);
+		}
+	  else
+		{
+		  if (!strcmp(header,sprofileBP))
+			{
+			  /* Switch on the acceptor prediction using BPs */
+			  BP++;
+			  
+			  /* Reading the Branch Point profile */
+			  p = gp->BranchPointProfile;
+			  ReadProfile(RootFile, p, sBP, 0);
+			}
+		  else
+			{
+			  sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for acceptors [only %s, %s or %s]",
+					  header, sprofileACC, sprofilePPT, sprofileBP);
+			  printError(mess);
+			}
+		}
+	  
+	  /* Next profile for acceptor site */
+	  readHeader(RootFile,line);
+	  if ((sscanf(line,"%s",header))!=1)
+		{
+		  sprintf(mess,"Wrong format: header in optional profile for acceptor sites");
+		  printError(mess);
+		}
+	}
+
+  /* Reading the Acceptor site profile */
+  p = gp->AcceptorProfile;
+  ReadProfile(RootFile, p, sACC, 0);
 }
 
 /* Read information about signal and exon prediction in one isochore */
@@ -426,20 +492,20 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 
   /* 8. Read splice site profiles */
   /* (a).start codon profile */
-  ReadProfile(RootFile, gp->StartProfile , sSTA);
+  ReadProfile(RootFile, gp->StartProfile , sSTA,1);
 
   /* (b).acceptor site profile */
-  ReadProfile(RootFile, gp->AcceptorProfile , sACC);
+  ReadProfileAcceptors(RootFile, gp);
 
   /* (c).donor site profile */
-  ReadProfile(RootFile, gp->DonorProfile , sDON);
+  ReadProfile(RootFile, gp->DonorProfile , sDON,1);
 
   /* (d).stop codon profile */
-  ReadProfile(RootFile, gp->StopProfile , sSTO);
+  ReadProfile(RootFile, gp->StopProfile , sSTO,1);
   
   /* 9. read coding potential log-likelihood values (Markov chains) */
-  readHeader(RootFile,line);
-  readLine(RootFile,line); 
+  readHeader(RootFile,line); 
+  readLine(RootFile,line);
 
   if ((sscanf(line,"%d", &(gp->OligoLength)))!=1)
     printError("Wrong format: oligonucleotide length");
@@ -581,21 +647,40 @@ int readparam (char* name, gparam** isochores)
   /* Ready to update dictionary of exon types */
   resetDict(isochores[0]->D);
   printMess("Dictionary ready to acquire information");
-  
-  printMess("Reading Gene Model rules");
-  isochores[0]->nclass = ReadGeneModel(RootFile,
-									   isochores[0]->D,
-									   isochores[0]->nc,
-									   isochores[0]->ne,
-									   isochores[0]->UC,
-									   isochores[0]->DE,
-									   isochores[0]->md,
-									   isochores[0]->Md,
-									   isochores[0]->block);
-
-  sprintf(mess,"%d Gene Model rules have been read and saved\n",
-		  isochores[0]->nclass);
-  printMess(mess);   
+   
+  if (SGE)
+	{
+	  printMess("Using an internal Gene Model");
+	  isochores[0]->nclass = ForceGeneModel(isochores[0]->D,
+											isochores[0]->nc,
+											isochores[0]->ne,
+											isochores[0]->UC,
+											isochores[0]->DE,
+											isochores[0]->md,
+											isochores[0]->Md,
+											isochores[0]->block);
+	  
+	  sprintf(mess,"%d Gene Model rules have been read and saved\n",
+			  isochores[0]->nclass);
+	  printMess(mess);   
+	}
+  else
+	{
+	  printMess("Reading Gene Model rules");
+	  isochores[0]->nclass = ReadGeneModel(RootFile,
+										   isochores[0]->D,
+										   isochores[0]->nc,
+										   isochores[0]->ne,
+										   isochores[0]->UC,
+										   isochores[0]->DE,
+										   isochores[0]->md,
+										   isochores[0]->Md,
+										   isochores[0]->block);
+	  
+	  sprintf(mess,"%d Gene Model rules have been read and saved\n",
+			  isochores[0]->nclass);
+	  printMess(mess);   
+	}
 
   /* Replication of gene model information for each isochore */
   shareGeneModel(isochores, nIsochores);
