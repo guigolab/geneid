@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.3 2001-03-08 15:18:59 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.4 2001-03-08 15:33:45 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -84,13 +84,12 @@ void printHelp()
 
 void printDTD()
 {
-  printf("
-   <?xml version=\"1.0\" ?>
+  printf("<?xml version=\"1.0\" ?>
    <!-- DTD for XML format in geneid output -->
 
    <!-- Element declarations -->
    <!ELEMENT prediction (gene*)>
-   <!ELEMENT gene ((exon+),protein>
+   <!ELEMENT gene ((exon+),protein)>
    <!ELEMENT exon (site,site)>
    <!ELEMENT protein (#PCDATA)>
 
@@ -105,7 +104,7 @@ void printDTD()
 
    <!ATTLIST gene
         idGene   ID      #REQUIRED
-        strand   (+|-)   #IMPLIED
+        strand   (fwd|rvs)   #IMPLIED
         nExons   CDATA   #IMPLIED
         score    CDATA   #REQUIRED>
 
