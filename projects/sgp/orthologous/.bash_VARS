@@ -23,6 +23,8 @@ export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
 #
 SPLICING="/projects/splicing/chr22" ;
 export SPLICING ;
+# Allowing for users and group file permisions
+umask 002;
 #
 # BASIC Shell Functions
 #
@@ -91,7 +93,8 @@ MergeGFF ()
          let c=c+1 ;
          [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
          [ $flag -eq 1 ] &&
-             cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
+             cat $DATASETS/annotation/20010723.Pipeline/length/$locus \
+               >> $1/all.$2 ;
          gawk 'BEGIN{OFS="\t"}
              ($1 !~ /^#/ && $3 != "Gene") {
                  print $0;

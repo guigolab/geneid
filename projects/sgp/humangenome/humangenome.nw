@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humangenome.nw,v 1.1 2001-10-02 19:44:56 jabril Exp $ 
+% # $Id: humangenome.nw,v 1.2 2001-10-17 18:53:43 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -204,7 +204,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humangenome.nw,v 1.1 2001-10-02 19:44:56 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humangenome.nw,v 1.2 2001-10-17 18:53:43 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -215,6 +215,11 @@ Universitat Pompeu Fabra\\[2ex]
 \setcounter{page}{1}
 
 \sctn{Introduction}
+
+We downloaded {\blat} results on human genome sequences against mouse (WGS3X) and Tetraodon (random reads only), from \url|http://genome.ucsc.edu/index.html|.
+
+The BLAT parameters were
+  [[ -q=dnax -t=dnax -tileSize=8 -oneOff -minMatch=1 ]]
 
 \sctn{Working on data}
 
@@ -425,7 +430,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humangenome.nw,v 1.1 2001-10-02 19:44:56 jabril Exp $
+# $Id: humangenome.nw,v 1.2 2001-10-17 18:53:43 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
