@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: Human_Chromosome_21.nw,v 1.7 2001-10-23 16:45:47 gparra Exp $ 
+% # $Id: Human_Chromosome_21.nw,v 1.8 2001-12-24 12:17:12 gparra Exp $ 
 %
 % THIS FILE WAS GENERATED WITH THE FOLOWING COMMAND:
 % ~jabril/bin/deploy Human_Chromosome_21  /home/ug/jabril/development/softjabril/deploy/data/report.nw
@@ -236,7 +236,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.7 2001-10-23 16:45:47 gparra Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.8 2001-12-24 12:17:12 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1029,25 +1029,20 @@ parseval ()
 echo "\begin{sidewaystable}\begin{center}" > $WORK/docs/tables/summary_eval.tex
 echo "\begin{tabular}{l|cccccccccccccccc}"   >> $WORK/docs/tables/summary_eval.tex 
 echo "  &  SN   &   SP  &    CC  &   SNe  &   SPe  &  SNSP  &  raME  &  raWE  &   SNg  &    SPg  &  SNSPg   &    raMG  &  raWG  &  raJG  &  raSG \\\\" >> $WORK/docs/tables/summary_eval.tex 
+#Raw CDS Refseq
+echo "\hline"  >> $WORK/docs/tables/summary_eval.tex
+echo "Raw Sequence   \\\\ \hline" >> $WORK/docs/tables/summary_eval.tex
+
+parseval geneid $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr21_CDSsr.ref  >> $WORK/docs/tables/summary_eval.tex 
+parseval genscan $ANALYSIS/genscan/Hsap.goldenpath/eval_genscan_brief.Hsap.goldenpath.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
+parseval sgp $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp_brief.Hsap.raw.3X+.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
+parseval sgp+2-2 $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/eval_sgp_brief.Hsap.raw.3X+.ew-2+2.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
 # Masked CDS Refseq
 echo "\hline"  >> $WORK/docs/tables/summary_eval.tex
-echo "Masked Refseq\\\\ \hline " >> $WORK/docs/tables/summary_eval.tex
+echo "Masked Sequence\\\\ \hline " >> $WORK/docs/tables/summary_eval.tex
 parseval geneid $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
 parseval sgp $ANALYSIS/sgp/Hsap.masked.3X+/eval_sgp_brief.Hsap.masked.3X+.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
 
-#Raw CDS Refseq
-echo "\hline"  >> $WORK/docs/tables/summary_eval.tex
-echo "Raw Refseq  \\\\ \hline" >> $WORK/docs/tables/summary_eval.tex
-
-parseval genscan $ANALYSIS/genscan/Hsap.goldenpath/eval_genscan_brief.Hsap.goldenpath.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
-parseval geneid $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr21_CDSsr.ref  >> $WORK/docs/tables/summary_eval.tex 
-parseval sgp $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp_brief.Hsap.raw.3X+.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
-parseval sgp+2-2 $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/eval_sgp_brief.Hsap.raw.3X+.ew-2+2.chr21_CDSsr.ref >> $WORK/docs/tables/summary_eval.tex 
-# Masked CDS ENSEMBL
-echo "\hline \hline"  >> $WORK/docs/tables/summary_eval.tex
-echo "Masked Ensembl\\\\ \hline " >> $WORK/docs/tables/summary_eval.tex
-parseval geneid $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr21_CDSsr >> $WORK/docs/tables/summary_eval.tex 
-parseval sgp $ANALYSIS/sgp/Hsap.masked.3X+/eval_sgp_brief.Hsap.masked.3X+.chr21_CDSsr >> $WORK/docs/tables/summary_eval.tex 
 
 # Raw CDS ENSEMBL
 echo "\hline"  >> $WORK/docs/tables/summary_eval.tex
@@ -1056,6 +1051,11 @@ parseval genscan $ANALYSIS/genscan/Hsap.goldenpath/eval_genscan_brief.Hsap.golde
 parseval geneid $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr21_CDSsr  >> $WORK/docs/tables/summary_eval.tex 
 parseval sgp $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp_brief.Hsap.raw.3X+.chr21_CDSsr >> $WORK/docs/tables/summary_eval.tex 
 parseval sgp+2-2 $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/eval_sgp_brief.Hsap.raw.3X+.ew-2+2.chr21_CDSsr >> $WORK/docs/tables/summary_eval.tex 
+# Masked CDS ENSEMBL
+echo "\hline \hline"  >> $WORK/docs/tables/summary_eval.tex
+echo "Masked Ensembl\\\\ \hline " >> $WORK/docs/tables/summary_eval.tex
+parseval geneid $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr21_CDSsr >> $WORK/docs/tables/summary_eval.tex 
+parseval sgp $ANALYSIS/sgp/Hsap.masked.3X+/eval_sgp_brief.Hsap.masked.3X+.chr21_CDSsr >> $WORK/docs/tables/summary_eval.tex 
 
 echo "\end{tabular} \caption{Evaluation summary table} \end{center} \end{sidewaystable}"   >> $WORK/docs/tables/summary_eval.tex 
 
@@ -1321,7 +1321,145 @@ cat $BASE/chr21_est.gff $BASE/chr21_genscan.gff \
     > $BASE/all_chr21.gff ;
 @ 
 %$
-\subsctn{Summary of the evaluation results}
+\sctn{Running sgp using different mouse assemblies}
+\subsctn{NCBI assembly from 11/2001}
+
+The first step was to run parseblat to the tblastx files given by pankaj( [[<<BASH commands ANALYSIS>>]])
+Then run SGP on the unmasked sequence an evaluate the results. AManzingly the results were better than the obtained with the shotgun data.
+
+\begin{verbatim}
+# LocusName                SN      SP      CC     SNe     SPe    SNSP    raME    raWE     SNg     SPg    SNSPg   raMG   raWG    raJG    raSG
+      chr22.shotgun      0.82    0.66    0.72    0.63    0.54    0.58    0.20    0.31    0.09    0.07    0.08    0.16   0.36    1.17    1.13
+      chr22.assembly     0.87    0.65    0.75    0.69    0.54    0.62    0.14    0.33    0.11    0.08    0.10    0.15   0.39    1.15    1.13
+      chr22.Arachne      0.85    0.66    0.73    0.67    0.55    0.61    0.17    0.32    0.11    0.09    0.10    0.16   0.36    1.16    1.11     
+      chr22.Phusion      0.84    0.66    0.73    0.67    0.55    0.61    0.17    0.32    0.11    0.09    0.10    0.16   0.36    1.15    1.12
+\end{verbatim}
+
+The chr22.assembly had 3,306,313 bp covered by sr, and the chr22.shotgun had 2,508,127bp covered by sr. 
+
+Pankaj parameters for the assembly:
+
+  B=10000
+  V=10000
+  hspmax=999
+  topcomboN=10
+  S2=80
+  W=5
+  E=0.01
+  Z=3000000000
+  nogaps
+  filter=xnu
+  matrix=blosum62mod
+  warnings
+  cpus=4
+
+\subsctn{Arachne assembly 12/2001}
+
+The parameters used for this assembly were different to the previous one.:
+  B=9000
+  V=9000
+  hspmax=500
+  topcomboN=100
+  W=5
+  E=0.01
+  E2=0.01
+  Z=3000000000
+  nogaps
+  filter=xnu+seg
+  S2=80
+  matrix=blosum62mod
+  warnings
+  cpus=4
+
+
+\subsctn{Phusion assembly 12/2001}
+
+Have the same parameters used in the Arachne assembly.
+
+<<Shell commands: Runnig sgp on Arachne and Phusion>>=
+#############
+## ARACHNE ##
+# Filtering HSPs from tblastx output (Pankaj)
+IDIR="$ANALYSIS/_tmp/Pankaj/tbxArachne/" ;
+ODIR="$ANALYSIS/blast/wublast.tblastx/tbx_Arachne";
+ChckDirs $ODIR $ODIR/out $ODIR/gff $ODIR/aplot $ODIR/ps $ODIR/logs ;
+max=44800000;
+counter=0 ;
+while [ $counter -le $max ] ;
+  do {
+    echo "### COUNTER: $counter" 1>&2 ;
+    if [ -e "$IDIR/chr21_"$counter"_201000" ] ;
+      then
+        echo "### RUNNING PARSEBLAST on $IDIR/chr21_"$counter"_201000" 1>&2 ;
+        gawk '$1~/^>/ { $1=$1":"$2; gsub(/[\|]/,":",$1); }
+                      { print $0; }' $IDIR/chr21_$counter"_201000" | \
+        parseblast --fullgff --full-scores --comments --verbose --bit-score - \
+                   2> $ODIR/logs/parseblast.chr21_$counter"_201000" | \
+        gawk 'BEGIN{ OFS="\t";
+                     c=ARGV[1]; SEQlen=ARGV[2]; ARGV[1]=ARGV[2]="";
+                     frame[0]=3; frame[1]=1; frame[2]=2; }
+              $0 !~ /^[ \t]*$/ {
+                  $1="chr21"; $4+=c; $5+=c;
+                  if ($7=="-") { $8=frame[((SEQlen - $5 + 1) % 3)] }
+                  else { $8=frame[($4 % 3)] };
+                  print $0;
+              }' $counter 44907570 - ;
+      fi;
+    counter=`expr $counter + 200000` ;
+    } ;
+  done | gawk '$3 =="hsp" {print}' | sort +3n -6 +6 -7 > $ODIR/gff/chr21 ; 
+#
+# Running sgp on raw chr22 using tblastx from the ARACNHE assembly 
+run_mod_SGP Hsap.raw.Arachne.gnid_fix $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/tbx_Arachne/gff chr21 44907570 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.Arachne.gnid_fix" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
+sort +3n +4n -5 $IDIR/gff/chr21_* \
+              > $IDIR/gff/chr21 ;
+run_evaluation 21 sgp Hsap.raw.Arachne.gnid_fix $ANALYSIS/sgp \
+      $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570 ;
+#############
+## PHUSION ##
+# Filtering HSPs from tblastx output (Pankaj)
+IDIR="$ANALYSIS/_tmp/Pankaj/tbxPhusion/" ;
+ODIR="$ANALYSIS/blast/wublast.tblastx/tbx_Phusion";
+ChckDirs $ODIR $ODIR/out $ODIR/gff $ODIR/aplot $ODIR/ps $ODIR/logs ;
+max=44800000;
+counter=0 ;
+while [ $counter -le $max ] ;
+  do {
+    echo "### COUNTER: $counter" 1>&2 ;
+    if [ -e "$IDIR/chr21_"$counter"_201000" ] ;
+      then
+        echo "### RUNNING PARSEBLAST on $IDIR/chr21_"$counter"_201000" 1>&2 ;
+        gawk '$1~/^>/ { $1=$1":"$2; gsub(/[\|]/,":",$1); }
+                      { print $0; }' $IDIR/chr21_$counter"_201000" | \
+        parseblast --fullgff --full-scores --comments --verbose --bit-score - \
+                   2> $ODIR/logs/parseblast.chr21_$counter"_201000" | \
+        gawk 'BEGIN{ OFS="\t";
+                     c=ARGV[1]; SEQlen=ARGV[2]; ARGV[1]=ARGV[2]="";
+                     frame[0]=3; frame[1]=1; frame[2]=2; }
+              $0 !~ /^[ \t]*$/ {
+                  $1="chr21"; $4+=c; $5+=c;
+                  if ($7=="-") { $8=frame[((SEQlen - $5 + 1) % 3)] }
+                  else { $8=frame[($4 % 3)] };
+                  print $0;
+              }' $counter 44907570 - ;
+      fi;
+    counter=`expr $counter + 200000` ;
+    } ;
+  done | gawk '$3 =="hsp" {print}' | sort +3n -6 +6 -7 > $ODIR/gff/chr21 ; 
+# Running sgp on raw chr22 using tblastx from the ARACNHE assembly 
+run_mod_SGP Hsap.raw.Phusion.gnid_fix $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/tbx_Phusion/gff chr21 44907570 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.Phusion.gnid_fix" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
+sort +3n +4n -5 $IDIR/gff/chr21_* \
+              > $IDIR/gff/chr21 ;
+run_evaluation 21 sgp Hsap.raw.Phusion.gnid_fix $ANALYSIS/sgp \
+     $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570 ;
+
+@ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
@@ -1467,7 +1605,7 @@ run_mod_SGP ()
   SGP2="/projects/sgp/src/geneid_v1.1-sgp" ;
        # binaries, scripts and params in SGP2
   GENEID="$SGP2/bin/geneid" ; # geneid v1.1-sgp
-  PARAM="$SGP2/param/human3iso.param.sgp.-2" ;
+  PARAM="$SGP2/param/human3iso.param.sgp" ;
   EW=0 ; # add to exon weigth
   S_CUTOFF=26 ;
   SCF=0 ;    # substract to tblastx scores S_CUTOFF - SCF;
@@ -1772,7 +1910,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_21.nw,v 1.7 2001-10-23 16:45:47 gparra Exp $
+# $Id: Human_Chromosome_21.nw,v 1.8 2001-12-24 12:17:12 gparra Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

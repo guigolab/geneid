@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.9 2001-10-24 11:05:59 gparra Exp $
+% $Id: Human_Chromosome_22.nw,v 0.10 2001-12-24 12:18:14 gparra Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -159,7 +159,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.9 2001-10-24 11:05:59 gparra Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.10 2001-12-24 12:18:14 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -856,9 +856,12 @@ ChckDirs $ANALYSIS/blast $ANALYSIS/blast/wublast.tblastx \
          $ANALYSIS/blast/wublast.tblastx/masked3X+ ;
 #
 # Filtering HSPs from tblastx output (Pankaj)
-IDIR="$DATASETS/_tmp/Pankaj/tbx" ;
+#IDIR="$DATASETS/_tmp/Pankaj/tbx" ;
+IDIR="$DATASETS/_tmp/Pankaj/tbx_assembly/tbx" ;
 # ODIR="$ANALYSIS/blast/wublast.tblastx/masked3X";
-ODIR="$ANALYSIS/blast/wublast.tblastx/masked3X+";
+# ODIR="$ANALYSIS/blast/wublast.tblastx/masked3X+";
+ODIR="$ANALYSIS/blast/wublast.tblastx/tbx_assembly";
+####   TO DO FROM HERE
 ChckDirs $ODIR $ODIR/out $ODIR/gff $ODIR/aplot $ODIR/ps $ODIR/logs ;
 #
 max=47600000 ;
@@ -1557,7 +1560,7 @@ run_mod2_SGP ()
   #
   # Checking if DIRS does EXIST
   ChckDirs $MAIN $BASE ;
-  for c in hsp sr hsp-rs tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
+  for c in hsp sr hsp-rs tbx gff gtf2 cds prot logs tmp ps ps/_tmp geneid_format;
     do { ChckDirs $BASE/$c ; } ; done ;
   #
   # Running SGP TOOL ############################### Excerpt from 
@@ -1599,7 +1602,7 @@ run_mod2_SGP ()
   echo "### Running geneid" ;
   { $GENEID -v -DE $EW -P $PARAM -S $BASE/hsp-rs/$locus \
           -R $BASE/tmp/$locus.termini $ISEQ/$locus | grep -v evidence \
-          > $BASE/geneid/$locus ;
+          > $BASE/geneid_format/$locus ;
     } 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
   # Running SGP TOOL ############################### 
   { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
@@ -1675,8 +1678,14 @@ geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
 sort +3n +4n -5 $IDIR/gff/chr22_* \
               > $IDIR/gff/chr22 ; 
 run_evaluation 22 sgp Hsap.raw.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds;
-
-
+# Running sgp on raw chr22 using tblastx from the assembly 
+run_mod2_SGP Hsap.raw.assembly.gnid_fix $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/tbx_assembly/gff chr22 47662662 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.assembly.gnid_fix" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
+sort +3n +4n -5 $IDIR/gff/chr22_* \
+              > $IDIR/gff/chr22 ;
+run_evaluation 22 sgp Hsap.raw.assembly.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds 47662662 ;
 
 @ 
 
@@ -2193,8 +2202,8 @@ gawk 'BEGIN{printf "%15s %8s %8s %8s %8s %8s %8s %8s %8s %8s  \n","Exon","HSP","
 We sent to Pankaj the predicted genes without using Victoria annotations, but removing predictions overlapping them.
 Therefore from the 660 predicted genes we substract 443 genes overllaping the Victoria cds set. Finally, there were 217 sgp predicted genes. Using the whole set of exons plus pseudogenes we there were 106 genes not overlapped. 
 
-/projects/sgp/chr22/sgp/Hsap.masked.3X+.fix.gnid_fix
 <<bash commands>>=
+#/projects/sgp/chr22/sgp/Hsap.masked.3X+.fix.gnid_fix
 # Support exons was used to knwon with exons have common regions with 
 # Victoria cds annotations set. It takes in account the strand of the 
 # annotation.
@@ -2718,6 +2727,182 @@ gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
 
 @
 
+\sctn{Summarizing results}
+
+This table summarize all the results obtained in this report:
+
+<<Making summary table>>=
+parseval ()
+{
+   TITLE=$1
+   FILE=$2
+   gawk 'BEGIN{tittle=ARGV[1];ARGV[1]="";OFS=" & ";}\
+         {if (bol==1) {$NF=$NF" \\\\";print tittle, $0;} bol=0 ; \
+         if ($1=="#Total:") bol=1; }' $TITLE $FILE
+}
+
+#Refseq
+echo "\begin{sidewaystable}\begin{center}" > $WORK/docs/tables/summary_eval.tex
+echo "\begin{tabular}{l|cccccccccccccccc}"   >> $WORK/docs/tables/summary_eval.tex 
+echo "  &  SN   &   SP  &    CC  &   SNe  &   SPe  &  SNSP  &  raME  &  raWE  &   SNg  &    SPg  &  SNSPg   &    raMG  &  raWG  &  raJG  &  raSG \\\\" >> $WORK/docs/tables/summary_eval.tex 
+# Raw  Victoria CDS
+echo "\hline"  >> $WORK/docs/tables/summary_eval.tex
+echo "Masked Sequence\\\\ \hline " >> $WORK/docs/tables/summary_eval.tex
+parseval geneid $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_cds >> $WORK/docs/tables/summary_eval.tex 
+parseval genscan $ANALYSIS/genscan/Hsap.goldenpath/eval_genscan_brief.Hsap.goldenpath.chr22_VH_cds >> $WORK/docs/tables/summary_eval.tex 
+parseval sgp $ANALYSIS/sgp/Hsap.raw.3X+.fix.gnid_fix/eval_sgp_brief.Hsap.raw.3X+.fix.gnid_fix.chr22_VH_cds >> $WORK/docs/tables/summary_eval.tex 
+# Masked Victoria CDS
+echo "\hline "  >> $WORK/docs/tables/summary_eval.tex
+echo "Masked Sequence\\\\ \hline " >> $WORK/docs/tables/summary_eval.tex
+parseval geneid $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_cds >> $WORK/docs/tables/summary_eval.tex 
+
+parseval sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix/eval_sgp_brief.Hsap.masked.3X+.fix.gnid_fix.chr22_VH_cds >> $WORK/docs/tables/summary_eval.tex 
+echo "\end{tabular} \caption{Evaluation summary table} \end{center} \end{sidewaystable}"   >> $WORK/docs/tables/summary_eval.tex 
+
+@ 
+%$
+\begin{center}
+\input $WORK/docs/tables/summary_eval.tex
+%$
+\end{center}
+
+\sctn{Running sgp using different mouse assemblies}
+\subsctn{NCBI assembly from 11/2001}
+
+The first step was to run parseblat to the tblastx files given by pankaj( [[<<BASH commands ANALYSIS>>]])
+Then run SGP on the unmasked sequence an evaluate the results. AManzingly the results were better than the obtained with the shotgun data.
+
+\begin{verbatim}
+# LocusName                SN      SP      CC     SNe     SPe    SNSP    raME    raWE     SNg     SPg    SNSPg   raMG   raWG    raJG    raSG
+      chr22.shotgun      0.82    0.66    0.72    0.63    0.54    0.58    0.20    0.31    0.09    0.07    0.08    0.16   0.36    1.17    1.13
+      chr22.assembly     0.87    0.65    0.75    0.69    0.54    0.62    0.14    0.33    0.11    0.08    0.10    0.15   0.39    1.15    1.13
+      chr22.Arachne      0.85    0.66    0.73    0.67    0.55    0.61    0.17    0.32    0.11    0.09    0.10    0.16   0.36    1.16    1.11     
+      chr22.Phusion      0.84    0.66    0.73    0.67    0.55    0.61    0.17    0.32    0.11    0.09    0.10    0.16    0.36    1.15    1.12
+\end{verbatim}
+
+The chr22.assembly had 3,306,313 bp covered by sr, and the chr22.shotgun had 2,508,127bp covered by sr. 
+
+Pankaj parameters for the assembly:
+
+  B=10000
+  V=10000
+  hspmax=999
+  topcomboN=10
+  S2=80
+  W=5
+  E=0.01
+  Z=3000000000
+  nogaps
+  filter=xnu
+  matrix=blosum62mod
+  warnings
+  cpus=4
+
+\subsctn{Arachne assembly 12/2001}
+
+The parameters used for this assembly were different to the previous one.:
+  B=9000
+  V=9000
+  hspmax=500
+  topcomboN=100
+  W=5
+  E=0.01
+  E2=0.01
+  Z=3000000000
+  nogaps
+  filter=xnu+seg
+  S2=80
+  matrix=blosum62mod
+  warnings
+  cpus=4
+
+
+\subsctn{Phusion assembly 12/2001}
+
+Have the same parameters used in the Arachne assembly.
+
+<<Shell commands: Runnig sgp on Arachne and Phusion>>=
+#############
+## ARACHNE ##
+# Filtering HSPs from tblastx output (Pankaj)
+IDIR="$DATASETS/_tmp/Pankaj/tbxArachne/" ;
+ODIR="$ANALYSIS/blast/wublast.tblastx/tbx_Arachne";
+ChckDirs $ODIR $ODIR/out $ODIR/gff $ODIR/aplot $ODIR/ps $ODIR/logs ;
+max=47600000 ;
+counter=0 ;
+while [ $counter -le $max ] ;
+  do {
+    echo "### COUNTER: $counter" 1>&2 ;
+    if [ -e "$IDIR/chr22_$counter" ] ;
+      then
+        echo "### RUNNING PARSEBLAST on $IDIR/chr22_$counter" 1>&2 ;
+        gawk '$1~/^>/ { $1=$1":"$2; gsub(/[\|]/,":",$1); }
+                      { print $0; }' $IDIR/chr22_$counter | \
+        parseblast --fullgff --full-scores --comments --verbose --bit-score - \
+                   2> $ODIR/logs/parseblast.chr22_$counter | \
+        gawk 'BEGIN{ OFS="\t";
+                     c=ARGV[1]; SEQlen=ARGV[2]; ARGV[1]=ARGV[2]="";
+                     frame[0]=3; frame[1]=1; frame[2]=2; }
+              $0 !~ /^[ \t]*$/ {
+                  $1="chr22"; $4+=c; $5+=c;
+                  if ($7=="-") { $8=frame[((SEQlen - $5 + 1) % 3)] }
+                  else { $8=frame[($4 % 3)] };
+                  print $0;
+              }' $counter 47662662 - ;
+      fi;
+    counter=`expr $counter + 100000` ;
+    } ;
+  done | gawk '$3 =="hsp" {print}' | sort +3n -6 +6 -7 > $ODIR/gff/chr22 ; 
+# Running sgp on raw chr22 using tblastx from the ARACNHE assembly 
+run_mod2_SGP Hsap.raw.Arachne.gnid_fix $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/tbx_Arachne/gff chr22 47662662 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.Arachne.gnid_fix" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
+sort +3n +4n -5 $IDIR/gff/chr22_* \
+              > $IDIR/gff/chr22 ;
+run_evaluation 22 sgp Hsap.raw.Arachne.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds 47662662 ;
+#############
+## PHUSION ##
+# Filtering HSPs from tblastx output (Pankaj)
+IDIR="$DATASETS/_tmp/Pankaj/tbxPhusion/" ;
+ODIR="$ANALYSIS/blast/wublast.tblastx/tbx_Phusion";
+ChckDirs $ODIR $ODIR/out $ODIR/gff $ODIR/aplot $ODIR/ps $ODIR/logs ;
+max=47600000 ;
+counter=0 ;
+while [ $counter -le $max ] ;
+  do {
+    echo "### COUNTER: $counter" 1>&2 ;
+    if [ -e "$IDIR/chr22_$counter" ] ;
+      then
+        echo "### RUNNING PARSEBLAST on $IDIR/chr22_$counter" 1>&2 ;
+        gawk '$1~/^>/ { $1=$1":"$2; gsub(/[\|]/,":",$1); }
+                      { print $0; }' $IDIR/chr22_$counter | \
+        parseblast --fullgff --full-scores --comments --verbose --bit-score - \
+                   2> $ODIR/logs/parseblast.chr22_$counter | \
+        gawk 'BEGIN{ OFS="\t";
+                     c=ARGV[1]; SEQlen=ARGV[2]; ARGV[1]=ARGV[2]="";
+                     frame[0]=3; frame[1]=1; frame[2]=2; }
+              $0 !~ /^[ \t]*$/ {
+                  $1="chr22"; $4+=c; $5+=c;
+                  if ($7=="-") { $8=frame[((SEQlen - $5 + 1) % 3)] }
+                  else { $8=frame[($4 % 3)] };
+                  print $0;
+              }' $counter 47662662 - ;
+      fi;
+    counter=`expr $counter + 100000` ;
+    } ;
+  done | gawk '$3 =="hsp" {print}' | sort +3n -6 +6 -7 > $ODIR/gff/chr22 ; 
+# Running sgp on raw chr22 using tblastx from the ARACNHE assembly 
+run_mod2_SGP Hsap.raw.Phusion.gnid_fix $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/tbx_Phusion/gff chr22 47662662 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.Phusion.gnid_fix" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
+sort +3n +4n -5 $IDIR/gff/chr22_* \
+              > $IDIR/gff/chr22 ;
+run_evaluation 22 sgp Hsap.raw.Phusion.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds 47662662 ;
+
+
+@ 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Making plots for {\sgp} with {\gps}}
@@ -3965,7 +4150,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.9 2001-10-24 11:05:59 gparra Exp $
+# $Id: Human_Chromosome_22.nw,v 0.10 2001-12-24 12:18:14 gparra Exp $
 @ 
 
 \newpage
