@@ -24,12 +24,15 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.2 2000-08-08 14:24:29 eblanco Exp $  */
+/*  $Id: SortExons.c,v 1.3 2001-02-08 09:58:18 eblanco Exp $  */
 
 #include "geneid.h"
 
 extern long NUMEXONS; 
 extern int EVD;
+extern int FWD,RVS;
+extern int scanORF;
+
 
 struct exonitem 
 {
@@ -76,6 +79,7 @@ void SortExons(packExons* allExons,
   long l;
   long left;
   long right;
+  char mess[MAXSTRING]; 
 
   /* Boundaries of sorting-array */
   left = l1 + COFFSET - LENGTHCODON;
@@ -90,6 +94,7 @@ void SortExons(packExons* allExons,
   for (i=0;i<l;i++)
     ExonList[i]=NULL;
 
+  /* Adding forward exons ... */
   for (i=0; i<allExons->nInitialExons; i++) 
     {
       acceptor=(allExons->InitialExons+i)->Acceptor->Position - left;
@@ -126,6 +131,17 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons->Singles+i); 
     }
   
+  if (scanORF)
+    for (i=0;i<allExons->nORFs;i++) 
+      {
+	acceptor=(allExons->ORFs+i)->Acceptor->Position - left;
+	(allExons->ORFs+i)->Strand = '+';
+	CorrectORF(allExons->ORFs+i);
+	offset = (allExons->ORFs+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->ORFs+i); 
+      }
+
+  /* Adding reverse exons ... */
   for (i=0;i<allExons_r->nInitialExons;i++) 
     {
       acceptor=(allExons_r->InitialExons+i)->Acceptor->Position - left;
@@ -162,12 +178,50 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons_r->Singles+i); 
     }
 
-  /* Putting evidence exons */
+  if (scanORF)
+    for (i=0;i<allExons_r->nORFs;i++) 
+      {
+	acceptor=(allExons_r->ORFs+i)->Acceptor->Position - left;
+	(allExons_r->ORFs+i)->Strand = '-';
+	CorrectORF(allExons_r->ORFs+i);
+	offset = (allExons_r->ORFs+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->ORFs+i); 
+      }
+
+  /* Adding evidence exons */
   if (EVD)
     for (i = pv->i1vExons; i < pv->i2vExons ; i++) 
       {  
 	acceptor=(pv->vExons + i)->Acceptor->Position - left;
-	UpdateList(&(ExonList[acceptor]), pv->vExons+i);
+
+	/* Requirement 1: range of values */
+	if (acceptor < 0 || acceptor > (l2 + LENGTHCODON))
+	  {
+	    /* Skip wrong exon (A) */
+	    sprintf(mess,"Skipped evidence (range): %ld %ld %c %hd",
+		    (pv->vExons + i)->Acceptor->Position,
+		    (pv->vExons + i)->Donor->Position,
+		    (pv->vExons + i)->Strand,
+		    (pv->vExons + i)->Frame);
+	    printMess(mess);
+	  }
+	else
+	  {
+	    /* Requirement 2: forced strand prediction */
+	    if ( (!FWD && (pv->vExons + i)->Strand == '+') ||
+		 (!RVS && (pv->vExons + i)->Strand == '-'))
+	      {
+		/* Skip wrong exon (B) */
+		sprintf(mess,"Skipped evidence (strand): %ld %ld %c %hd",
+			(pv->vExons + i)->Acceptor->Position,
+			(pv->vExons + i)->Donor->Position,
+			(pv->vExons + i)->Strand,
+			(pv->vExons + i)->Frame);
+		printMess(mess);
+	      }
+	    else
+	      UpdateList(&(ExonList[acceptor]), pv->vExons+i);
+	  }
       }
 
   /* Scanning all the table searching the exons(sorted by acceptor) */
