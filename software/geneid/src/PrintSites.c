@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.4 2001-12-18 15:47:46 eblanco Exp $  */
+/*  $Id: PrintSites.c,v 1.5 2003-02-26 11:03:01 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -64,6 +64,12 @@ void PrintSite(site* s, int type,
       k = 0;
       offset = 2;
       break;
+	default:
+	  /* It will be supposed to be an acceptor splice site */
+	  strcpy(Type,sACC);
+      k = -1;
+      offset = 1;
+      break;
     }
   
   /* Depending on the strand: exchange k and offset */
@@ -77,14 +83,23 @@ void PrintSite(site* s, int type,
 		else
 		  sAux[i] = '*';
       sAux[i] = '\0';
-      break;
-	  
+      break; 
     case REVERSE: strand = '-';
       k = -k;
       offset = -offset;
       ReverseSubSequence(s->Position - (p->dimension - p->offset - 1), 
 						 s->Position + (p->offset), seq, sAux);    
       sAux[p->dimension] = '\0'; 
+      break;
+	default: 
+	  /* It will supposed to be forward */
+	  strand = '+';
+      for(i=0; i < p->dimension; i++)
+		if (s->Position - p->offset + i >= 0)
+		  sAux[i] = seq[s->Position - p->offset + i];
+		else
+		  sAux[i] = '*';
+      sAux[i] = '\0';
       break;
     }
   
