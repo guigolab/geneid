@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $
+% $Id: gff2aplot.nw,v 1.12 2001-10-31 20:59:37 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.12 2001-10-31 20:59:37 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -86,7 +86,7 @@
 
 \begin{document}
 
-<<HIDE: LaTeX deploy new definitions>>=
+<<HIDE: LaTeX aplot new definitions>>=
 %%%%% Colors for gff2ps
 \input tables/AplotColorDefs.tex
 
@@ -164,9 +164,9 @@
 %
 \def\license{GNU General Public License (GNU-GPL)}
 %
-\def\description{
+\def\progdesc{
 {\prog} is a tool to visualize the alignment of two genomic sequences together with their annotations. Input to the program are single or multiple files in General Feature Format (GFF). Output is in PostScript format so the program serves to generate scalable print-quality images for comparative genomics sequence analysis.
- } % def description 
+ } % def progdesc 
 %
 \def\showaffiliation{
 \scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
@@ -221,7 +221,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
  Last Update: & {\today}                               \\[2ex]
  Description: & {\large\mdseries
                  \begin{minipage}[t]{0.95\rttbl}
-                 \description
+                 \progdesc
                  \end{minipage}}                       \\[2ex]
 \\
 \multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
@@ -452,9 +452,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.11 $', #'
-     '$Date: 2001-10-23 18:22:24 $', #'
-     '$Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $', #'
+     '$Revision: 1.12 $', #'
+     '$Date: 2001-10-31 20:59:37 $', #'
+     '$Id: gff2aplot.nw,v 1.12 2001-10-31 20:59:37 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -508,7 +508,9 @@ ENVIRONMENT VARIABLES:
 
 COMMAND-LINE OPTIONS:
 
+    <<command-line help prog>>
     <<command-line help>>
+    <<command-line help custom>>
 
     <<colors help>>
 
@@ -654,7 +656,9 @@ sub parse_command_line() {
 
     $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$T,$_[0]) };
     GetOptions(
+               <<command-line options prog>>
                <<command-line options>>
+               <<command-line options custom>>
                <<command-line options with exit>>
                ) || (&warn('CMD_LINE_ERROR',$T), exit(1));
     $SIG{__WARN__} = 'DEFAULT';
@@ -778,18 +782,26 @@ The first command-line checking looks for those options exiting the program: '[[
 "version"   => \&prt_version, 
 "h|help|?"  => \&prt_help,
 @ 
-<<command-line help>>=
--h, --help    Shows this help.
---version     Shows current version and exits.
+<<command-line help prog>>=
+-h, --help   Shows this help.
+--version    Shows current version and exits.
 @
-<<HIDE: command-line latex short>>=
-\rw{-h{\x}-\/-help}{Shows this help.}
-\rw{-\/-version}{Shows current version and exits.}
+<<DESC command-line options>>=
+ORD: 1
+OPT: h
+LNG: help
+SDE: Shows this help.
+LDE:
+Shows command-line help.
+###EOR###
+ORD: 2
+LNG: version
+SDE: Shows current version and exits.
+LDE:
+Shows current program version and exits.
+###EOR###
 @ 
-%<command-line latex>>=
-%\clritem{-h{\x}-\/-help}
-%\clritem{-\/-version}
-%@
+
 
 <<Parsing Command-Line Options>>=
 sub prt_version() {
@@ -878,7 +890,7 @@ sub check_command_line_vars() {
     &command_line_for_layout();
     defined($CmdLineVars{VARS}) &&
         &command_line_for_vars();
-    &footer("COMMAND-LINE OPTONS CHECKED");
+    &footer("COMMAND-LINE OPTIONS CHECKED");
 } # check_command_line_vars
 @ %def &check_command_line_vars
 
@@ -939,20 +951,20 @@ sub command_line_for_vars() {
 @ %def &command_line_for_vars
 
 <<command-line options custom>>=
-"feature-var=s@"  => \@{ $CmdLineVars{VARS}{FEATURE} },
-"group-var=s@"    => \@{ $CmdLineVars{VARS}{GROUP} },
-"strand-var=s@"   => \@{ $CmdLineVars{VARS}{STRAND} },
-"source-var=s@"   => \@{ $CmdLineVars{VARS}{SOURCE} },
-"sequence-var=s@" => \@{ $CmdLineVars{VARS}{SEQUENCE} },
 "layout-var=s@"   => \@{ $CmdLineVars{VARS}{LAYOUT} },
+"sequence-var=s@" => \@{ $CmdLineVars{VARS}{SEQUENCE} },
+"source-var=s@"   => \@{ $CmdLineVars{VARS}{SOURCE} },
+"strand-var=s@"   => \@{ $CmdLineVars{VARS}{STRAND} },
+"group-var=s@"    => \@{ $CmdLineVars{VARS}{GROUP} },
+"feature-var=s@"  => \@{ $CmdLineVars{VARS}{FEATURE} },
 @ 
 <<command-line help custom>>=
- --feature-var '<feature::variable=value>'
-   --group-var '<group::variable=value>'
-  --strand-var '<strand::variable=value>' 
-  --source-var '<source::variable=value>'
---sequence-var '<sequence::variable=value>'
   --layout-var '<variable=value>'
+--sequence-var '<sequence::variable=value>'
+  --source-var '<source::variable=value>'
+  --strand-var '<strand::variable=value>' 
+   --group-var '<group::variable=value>'
+ --feature-var '<feature::variable=value>'
          Loading a feature/group/strand/source/sequence/layout
          customization variable from command-line. You can set
          several variables by repeating any of these options, 
@@ -991,27 +1003,37 @@ Loading a customization variable for page layout from command-line. % '\pr{custo
 
 \subsctn{Setting customization parameters from files} 
 
-Here we define the command-line option for loading customization files. Setting '[[O|custom-filename=s@]]' allows us to pass more than one custom file within the same command-line. Must be noted that latest file customization variables will override the previous ones.
+Here we define the command-line option for loading customization files. Setting '[[C|custom-filename=s@]]' allows us to pass more than one custom file within the same command-line. Must be noted that latest file customization variables will override the previous ones.
 
 <<command-line options custom>>=
-"O|custom-filename=s@"  => \@custom_files,
+"C|custom-filename=s@"  => \@custom_files, # [ -O >-> -C ]
 @ 
 <<command-line help custom>>=
--O, --custom-filename <custom_filename> Load a configuration file 
-         (if default \".gff2aplotrc\" exists is loaded before it).
+-C, --custom-filename <custom_filename>
+      Loading customization parameters from a given file (if 
+      default \".gff2aplotrc\" exists is loaded before it).
 @
-<<HIDE: command-line latex short custom>>=
-\rw{-O{\x}-\/-custom-filename \pr{file}}
-  {Read customization parameters from file.}
+% If ORD is not defined then description is placed at the end of the description files.
+<<DESC command-line options>>=
+ORD: 
+OPT: C
+LNG: custom-filename
+PAR: <custom_filename>
+SDE: Read customization parameters from file.
+LDE:
+Loading customization parameters from <custom_filename>. Now you can load 
+several customization files by passing this option several times. The 
+precedence is the input order in the command-line, so, for the common 
+definitions, the last <custom_file> will override previous <custom_files> 
+settings. If default customization file "\texttt{.gff2aplotrc}" does exist,
+it is the first customization that is loaded by the program.
+###EOR###
 @ 
-<<HIDE: command-line latex custom>>=
-\clmitem{-O \pr{custom\_filename}\\-\/-custom-filename \pr{custom\_filename}}
-Loading customization parameters from '\pr{custom\_file}'. Now you can load several customization files by passing this option several times. The precedence is the input order in the command-line, so, for the common definitions, the last '\pr{custom\_file}' will override previous '\pr{custom\_files}' settings.
-@
+
 
 \subsubsctn{Testing whether custom-files exist}
 
-Customization parameters cannot be set from '[[STDIN]]'. What program does first of all, is to look whether default custom file does exist or not. But we are taking advantage of the fact that we also have to check existence of the command-line custom files (if given), so we insert as first element of the array the default custom file to the variable '[[@custom_files]]' and then we check all its elements with the same function. We look for these files in current path and if they are not found in '[[$Custom_path]]'.
+Customization parameters cannot be set from '[[STDIN]]'. What program does first of all, is to look whether default custom file does exist or not ([[$Custom_file]] was set from environment variable if [[GFF2APLOT_CUSTOMFILE]] was defined on the current shell). But we are taking advantage of the fact that we also have to check existence of the command-line custom files (if given), so we insert as first element of the array the default custom file to the variable '[[@custom_files]]' and then we check all its elements with the same function. We look for these files in current path and if they are not found in '[[$Custom_path]]'.
 
 <<Parsing Custom Files>>=
 sub set_custom_files() {
@@ -1431,7 +1453,7 @@ sub eval_regexp() {
     return ($str, $flag);
 } # eval_regexp
 sub escape_input() {
-  $_[0] =~ s{([;<>&!{}'`"])}{\\$1}og;
+  $_[0] =~ s{([;<>&!{}'`"])}{\\$1}og; # "`'
   return $_[0];
 } # escape_input
 @
@@ -1791,85 +1813,455 @@ NOT_A_FONTSIZE =>
 	\label{sec:customvardesc}
 % \subsctn{Command-line options}
 
-
-\label{todo:DDA}\label{todo:DDB}
-<<HIDE: new defs TODO>>=
-\def\todoDDA{
+<<HIDE: DONE>>=
+\doneitem{20011031}{
 Write a script to produce easier the appendix/descriptions tables for the manual from the options code chunks. Transforming to a fixed record formats like:\\
 \shortstack[l]{ORDER: ....\\OPTION: ....\\DEFAULTS: ....\\PARAMS: ....\\ SHORT DESC: .... (for the appendix table)\\ LONG DESC: .... (for the description table)}
-} % todoDDA
+}
+@ 
+\label{todo:DDB}
+<<HIDE: new defs TODO>>=
 \def\todoDDB{
 Set the final options/variables/parameters for the whole section.
 } % todoDDB
 @
 <<HIDE: TODO>>=
-\todoitem{\todoDDA}{todo:DDA}
 \todoitem{\todoDDB}{todo:DDB}
 @
-\todo{
- \item \todoDDA
- \item \todoDDB
- } % todo
+\todo{ \item \todoDDB } % todo
+
+\subsctn{Reporting program execution}
 
 Two options are used for reporting how program is running. By default no messages are shown to standard error, only errors. One reports to a log file defined by user and the other shows the messages to standard error, both can be activated at the same time. A third one is needed to disable STDERR warnings.
 
-<<command-line options>>=
-"v|verbose"   => \$Verbose, # Print_Report
+<<command-line options prog>>=
+"v|verbose"   => \$Verbose,  # [ -V >-> -v ] Print_Report
 @ 
-<<command-line help>>=
--v, --verbose    Verbose mode, a full report is sent to standard error 
-                 (default is set to showing only WARNINGS).
+<<command-line help prog>>=
+-v, --verbose
+      Verbose mode, a full report is sent to standard error 
+      (default is set to showing only WARNINGS).
 @
-<<HIDE: command-line latex short>>=
-\rw{-v{\x}-\/-verbose}
-  {Verbose mode, a full report is sent to standard error.}
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{-v\\-\/-verbose}
+<<DESC command-line options>>=
+ORD: 3
+OPT: v
+LNG: verbose
+SDE: Verbose mode, a full report is sent to standard error.
+LDE:
 By default, warnings and errors are sent to standard error. This option 
 switches on process reporting messages to appear on standard error too.
-@
+###EOR###
+@ 
 
 
-<<command-line options>>=
-"V|logs-filename=s"  => \$logs_filename, # Print_Report -> LogFile
+<<command-line options prog>>=
+"V|logs-filename=s"  => \$logs_filename,  # Print_Report -> LogFile
 @ 
-<<command-line help>>=
--V, --logs-filename <logs_filename>    Report is written to a log file.
+<<command-line help prog>>=
+-V, --logs-filename  <logs_filename>
+      Report is written to a log file.
 @
-<<HIDE: command-line latex short>>=
-\rw{-V{\x}-\/-logs-filename \pr{file}}
-  {Report is written to a log file.}
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{-V \pr{logs\_filename}\\-\/-logs-filename \pr{logs\_filename}}
-If is possible to open '\pr{logs\_filename}' then such file will contain 
+<<DESC command-line options>>=
+ORD: 4
+OPT: V
+LNG: logs-filename
+PAR: <logs_filename>
+SDE: Report is written to a log file.
+LDE:
+If is possible to open <logs_filename> then such file will contain 
 all the messages and warnings produced by the program even though they 
-will be disabled from standard error with \tp{-\/-quiet} option.
-@
-
-<<command-line options>>=
-"q|quiet"   => \$Quiet, # Quiet_Mode
-<<command-line options custom>>
-@
-<<command-line help>>=
--q, --quiet    Quiet mode, do not show any message/warning
-               to standard error (only ERRORS are reported).
-<<command-line help custom>>
-@
-<<HIDE: command-line latex short>>=
-\rw{-q{\x}-\/-quiet}
-  {Quiet mode, messages/warnings disabled (only ERRORS are reported)}
-<<HIDE: command-line latex short custom>>
+were disabled from standard error with [quiet] option.
+###EOR###
 @ 
-<<HIDE: command-line latex>>=
-\clmitem{-q\\-\/-quiet}
+
+<<command-line options prog>>=
+"q|quiet"   => \$Quiet,  # [ -v >-> -q ] Quiet_Mode
+@
+<<command-line help prog>>=
+-q, --quiet
+      Quiet mode, do not show any message/warning
+      to standard error (only ERRORS are reported).
+@
+<<DESC command-line options>>=
+ORD: 5
+OPT: q
+LNG: quiet
+SDE: Quiet mode, messages/warnings disabled (only ERRORS are reported).
+LDE:
 This option disables any message or warning from standard error. It does not 
 disable error report because such errors are pointing a problem which can 
 make {\prog} produce unexpected results. Solve the cause of such problems 
 before continuing to run the program in a silent mode. 
-<<HIDE: command-line latex custom>>
+###EOR###
+@ 
+
+
+\subsctn{Layout variables}
+
+\subsubsctn{Page definition}
+
+<<default layout vars values>>=
+# PAGE definition
+page_bbox                  => { TYPE => 'BBOX'   , VALUE => undef   },
+@ %def {page_bbox}
+<<command-line options>>=
+"P|page-bbox"   => \$CmdLineVars{LAYOUT}{"page_bbox"},
+@ 
+<<command-line help>>=
+-P, --page-bbox  <format_name,page_width,page_height>
+      Setting a user-defined page size, <page_width> and
+      <page_height> are set to points if no unit is given,
+      you can use pt, mm, cm or in. This option overrides ANY
+      'page-size' definition (from command-line or custom file).
 @
+<<DESC command-line options>>=
+ORD: 6
+OPT: P
+LNG: page-bbox
+PAR: <format_name,page_width,page_height>
+EQV: [page_bbox]=<name,width,height>
+SDE: Defining arbitrary page formats.
+LDE: 
+This option allows users to define an arbitrary page format, by
+defining a name for such format and the width and height for that
+page. See [page_bbox] customization variable on page~\pageref{sec:pagebbox} 
+(section~\ref{sec:pagebbox}) for further info on this command-line option.
+It overrides any [page-size] command-line option (and any related variable 
+passed through custom files).
+###EOR###
+@
+<<DESC custom file variables>>=
+ORD: 1
+SEC: LAYOUT
+SUB: PageLayout
+OPT: page_bbox
+PAR: <format_name,page_width,page_height>
+SDE: Defining arbitrary page formats. Overrides any setting for [page_size].
+LDE:
+\label{sec:pagebbox}
+This variable allows users to define an arbitrary page format, by
+defining a name for such format and the width and height for that
+page. Do not include this variable in your custom files if you are
+using standard page sizes which can be set using [page_size], because
+[page_bbox] overrides any further page definition by that variable. If
+the variable is not set, default value forces the use of any settings
+given for [page_size]. <format_name> defines a name for the new page
+format. <page_width> and <page_height> are set to points if no unit is
+given, you can use points, milimeters, centimeters or inches (pt, mm,
+cm or in, respectively). See table~\ref{tbl:PageSizes} for a reference
+on already defined page sizes and their dimensions.
+###EOR###
+@ 
+
+<<default layout vars values>>=
+page_size                  => { TYPE => 'PAGE'   , VALUE => 'a4'    },
+@ %def {page_size}
+<<command-line options>>=
+"p|page-size"   => \$CmdLineVars{LAYOUT}{"page_size"},
+@ 
+<<command-line help>>=
+-p, --page-size  <format_name>
+      Setting a page size among pre-defined ones
+      (see below for a list of available page formats).
+@
+<<DESC command-line options>>=
+ORD: 7
+OPT: p
+LNG: page-size
+PAR: <format_name>
+EQV: [page_size]=<format_name>
+SDE: Setting a page size (see table~\ref{tbl:PageSizes}).
+LDE:
+<format_name> is a pre-defined page format from table~\ref{tbl:PageSizes}. 
+By default is set to |a4|.
+###EOR###
+@ 
+<<DESC custom file variables>>=
+ORD: 2
+SEC: LAYOUT
+SUB: PageLayout
+OPT: page_size
+DEF: |a4|
+PAR: <format_name>
+SDE: Sets a standard page size, available format names are listed in table~\ref{tbl:PageSizes}.
+LDE:
+Setting a standard page size, available values for <format_name> are 
+listed in table~\ref{tbl:PageSizes}. Page width and height values are 
+coded for most common paper formats.
+###EOR###
+@ 
+
+\subsubsctn{Page margins}
+
+<<default layout vars values>>=
+# Page MARGINS
+margin_left                => { TYPE => 'LENGTH'  , VALUE => '1cm' },
+margin_right               => { TYPE => 'LENGTH'  , VALUE => '1cm' },
+margin_top                 => { TYPE => 'LENGTH'  , VALUE => '1cm' },
+margin_bottom              => { TYPE => 'LENGTH'  , VALUE => '1cm' },
+@ %def {margin_left} {margin_right} {margin_top} {margin_bottom}
+<<command-line options>>=
+"margin-left=s"         => \$CmdLineVars{LAYOUT}{"margin_left"},
+"margin-right=s"        => \$CmdLineVars{LAYOUT}{"margin_right"},
+"margin-top=s"          => \$CmdLineVars{LAYOUT}{"margin_top"},
+"margin-bottom=s"       => \$CmdLineVars{LAYOUT}{"margin_bottom"},
+@ 
+<<command-line help>>=
+--margin-left   <length>
+--margin-right  <length>
+--margin-top    <length>
+--margin-bottom <length>
+      Setting each page margin to <length>. If no units are provided,
+      points are assumed, you can use points, milimeters, centimeters
+      or inches (pt, mm, cm or in, respectively).
+@
+<<DESC command-line options>>=
+ORD: 8
+LNG: margin-left
+PAR: <length>
+EQV: [margin_left]=<length>
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+@ 
+<<DESC custom file variables>>=
+ORD: 3
+SEC: LAYOUT
+SUB: PageLayout
+OPT: margin_left
+DEF: |1cm|
+PAR: <length>
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+@ 
+<<DESC command-line options>>=
+ORD: 9
+LNG: margin-right
+PAR: <length>
+EQV: [margin_right]=<length>
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+@ 
+<<DESC custom file variables>>=
+ORD: 4
+SEC: LAYOUT
+SUB: PageLayout
+OPT: margin_right
+DEF: |1cm|
+PAR: <length>
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+@ 
+<<DESC command-line options>>=
+ORD: 10
+LNG: margin-top
+PAR: <length>
+EQV: [margin_top]=<length>
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+@ 
+<<DESC custom file variables>>=
+ORD: 5
+SEC: LAYOUT
+SUB: PageLayout
+OPT: margin_top
+DEF: |1cm|
+PAR: <length>
+SDE: JOIN-NEXT
+LDE: JOIN-NEXT
+###EOR###
+@ 
+<<DESC command-line options>>=
+ORD: 11
+LNG: margin-bottom
+PAR: <length>
+EQV: [margin_bottom]=<length>
+SDE: Setting page margins (default is 1cm each).
+LDE: 
+
+###EOR###
+@ 
+<<DESC custom file variables>>=
+ORD: 6
+SEC: LAYOUT
+SUB: PageLayout
+OPT: margin_bottom
+DEF: |1cm|
+PAR: <length>
+SDE: Setting page margins (default is 1cm each).
+LDE: 
+You can set page margin with those four variables. <length> can be given in 
+points, milimeters, centimeters or inches (pt, mm, cm or in, respectively),
+but is set to points if no units are provided.
+###EOR###
+@ 
+
+\subsubsctn{Page colors}
+
+<<default layout vars values>>=
+# Page COLORS			  
+background_color           => { TYPE => 'COLOR'  , VALUE => 'white' },
+@ %def {background_color}
+<<command-line options>>=
+"B|background-color=s"  => \$CmdLineVars{LAYOUT}{"background_color"}, # BACKGROUND_COLOR
+@ 
+<<command-line help>>=
+-B, --background-color  <color>    Background color.
+@
+<<DESC command-line options>>=
+ORD: 12
+OPT: B
+LNG: background-color
+PAR: <color>
+EQV: [background_color]=<color>
+SDE: Setting background color for the page (default is |white|).
+LDE: 
+This option sets background color for the page ---say here filling color 
+for whole page---. Available colors are listed on table~\ref{tbl:CMYKcolor},
+default value is |white|.
+###EOR###
+@ 
+<<DESC custom file variables>>=
+ORD: 7
+SEC: LAYOUT
+SUB: PageLayout
+OPT: background_color
+DEF: |white|
+PAR: <color>
+SDE: Setting background color for the page. Available colors are listed on table~\ref{tbl:CMYKcolor}.
+LDE: JOIN-NEXT
+###EOR###
+@ 
+
+<<default layout vars values>>=
+foreground_color           => { TYPE => 'COLOR'  , VALUE => 'black' },
+@ %def {foreground_color}
+<<command-line options>>=
+"F|foreground-color=s"  => \$CmdLineVars{LAYOUT}{"foreground_color"}, # FOREGROUND_COLOR
+@ 
+<<command-line help>>=
+-F, --foreground-color  <color>    Foreground color.
+@
+<<DESC command-line options>>=
+ORD: 13
+OPT: F
+LNG: foreground-color
+PAR: <color>
+EQV: [foreground_color]=<color>
+SDE: Setting foreground color for the page (default is |black|).
+LDE:
+You can change foreground color for the page ---say here text, outlines and 
+tickmarks---. Available colors are defined on table~\ref{tbl:CMYKcolor},
+default value is |black|.
+###EOR###
+@ 
+<<DESC custom file variables>>=
+ORD: 8
+SEC: LAYOUT
+SUB: PageLayout
+OPT: foreground_color
+DEF: |black|
+PAR: <color>
+SDE: Setting foreground color for the page. Find available colors on table~\ref{tbl:CMYKcolor}.
+LDE:
+These two customization variables accept any <color> from those listed on 
+table~\ref{tbl:CMYKcolor}. Default values are |white| and |black| for 
+[background_color] and [foreground_color] respectively. These two variables 
+also set the aliases [BGcolor] and [FGcolor], so that you can use |bgcolor| and
+|bg|, or |fgcolor| and |fg|, to set any other color-related variable with the
+same colors you are defining as background/foreground colors.
+###EOR###
+@ 
+
+\subsubsctn{Figure labels}
+
+<<default layout vars values>>=
+# GLOBAL Labels			  
+show_title                 => { TYPE => 'BOOLEAN', VALUE => $T     },
+title                      => { TYPE => 'STRING' , VALUE => undef  },
+@ %def {show_title} {title}
+<<command-line options>>=
+"T|title=s"  => \$CmdLineVars{LAYOUT}{"title"}, # TITLE
+@ 
+<<command-line help>>=
+-T, --title <Title>   Definning Plot Title.
+@
+
+<<HIDE: custom-vars latex>>=
+\vnlitem{title}{string}{align\_name} \tp{title} sets the main title
+for the figure, by default showing \pr{align\_name} in the form of
+'sequence1\_name x sequence2\_name'.
+@
+
+<<default layout vars values>>=
+show_subtitle              => { TYPE => 'BOOLEAN', VALUE => $T     },
+subtitle                   => { TYPE => 'STRING' , VALUE => undef  },
+@ %def {show_subtitle} {subtitle}
+<<command-line options>>=
+"t|subtitle=s"  => \$CmdLineVars{LAYOUT}{"subtitle"}, # SUBTITLE
+@ 
+<<command-line help>>=
+-t, --subtitle <Subtitle>   Definning Plot SubTitle.
+@
+
+<<default layout vars values>>=
+show_x_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
+x_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
+@ %def {show_x_sequence_label} {x_sequence_label}
+<<command-line options>>=
+"X|x-label=s"  => \$CmdLineVars{LAYOUT}{"x-axis_label"}, # X-Axis_LABEL
+@ 
+<<command-line help>>=
+-X, --x-label <X-Label>   Definning X-Axis Label.
+@
+
+<<default layout vars values>>=
+show_y_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
+y_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
+@ %def {show_y_sequence_label} {y_sequence_label}
+<<command-line options>>=
+"Y|y-label=s"  => \$CmdLineVars{LAYOUT}{"y-axis_label"}, # Y-Axis_LABEL
+@ 
+<<command-line help>>=
+-Y, --y-label <Y-Label>   Defining Y-Axis Label.
+@
+
+<<default layout vars values>>=
+show_percent_box_label     => { TYPE => 'BOOLEAN', VALUE => $T     },
+percent_box_label          => { TYPE => 'STRING' , VALUE => undef  },
+percent_box_sublabel       => { TYPE => 'STRING' , VALUE => undef  },
+@
+
+<<default layout vars values>>=
+show_extra_box_label       => { TYPE => 'BOOLEAN', VALUE => $T     },
+extra_box_label            => { TYPE => 'STRING' , VALUE => undef  },
+extra_box_sublabel         => { TYPE => 'STRING' , VALUE => undef  },
+@
+
+<<default layout vars values>>=
+show_feature_label         => { TYPE => 'BOOLEAN', VALUE => $T     }, 
+feature_x_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+feature_label_length       => { TYPE => 'INTEGER', VALUE => 0      },
+feature_labels_font        => { TYPE => 'FONT'   , VALUE => 'helvetica' },
+feature_labels_fontsize    => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+@
+
+<<default layout vars values>>=
+show_group_label           => { TYPE => 'BOOLEAN', VALUE => $T     }, 
+group_x_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
+group_y_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
+group_label_length         => { TYPE => 'INTEGER', VALUE => 0      },
+group_labels_font          => { TYPE => 'FONT'   , VALUE => 'helvetica' },
+group_labels_fontsize      => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+@
+
+
+\subsctn{Zoom in, zoom out}
 
 The following variables define the boundary/clipping coordinates for each sequence, so you can select a region to be displayed in the {\ps} output.
 
@@ -1879,22 +2271,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -S, --sequence1-start <pos>   Sets X-sequence first nucleotide.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "E|sequence1_end=i"  => \$CmdLineVars{LAYOUT}{"sequence1_end"}, # SEQUENCE1_END    # Zoom_SEQUENCE1_END
 @ 
 <<command-line help>>=
 -E, --sequence1-end <pos>     Sets X-sequence last nucleotide.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -1903,22 +2285,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -s, --sequence2-start <pos>   Sets Y-sequence first nucleotide.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "e|sequence2_end=i"  => \$CmdLineVars{LAYOUT}{"sequence2_end"}, # SEQUENCE2_END    # Zoom_SEQUENCE2_END
 @ 
 <<command-line help>>=
 -e, --sequence2-end <pos>     Sets Y-sequence last nucleotide.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -1929,11 +2301,6 @@ The following variables define the boundary/clipping coordinates for each sequen
                This option zooms an area you have selected
                with -S,-E,-s,-e (all 4 are optional).
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "z|zoom-area"   => \$CmdLineVars{LAYOUT}{"zoom_area"}, # ZOOM_Area
@@ -1943,11 +2310,6 @@ The following variables define the boundary/clipping coordinates for each sequen
                This option marks a zoom area on your plot,
                but does not make a zoom.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "G|display-grid"   => \$CmdLineVars{LAYOUT}{"display_grid"}, # Display_GRID
@@ -1955,11 +2317,6 @@ The following variables define the boundary/clipping coordinates for each sequen
 @ 
 <<command-line help>>=
 -G, --display-grid   Switches 'on' grid (default is 'off').
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -1969,11 +2326,6 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -P, --display-percent-box   Switches 'on' Percent box (default is 'off').
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "Q|display-extra-box"   => \$CmdLineVars{LAYOUT}{"display_extra_box"}, # Display_EXTRA-BOX
@@ -1982,60 +2334,6 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -Q, --display-extra-box   Switches 'on' Extra box (default is 'off').
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
-
-<<command-line options>>=
-"T|title=s"  => \$CmdLineVars{LAYOUT}{"title"}, # TITLE
-@ 
-<<command-line help>>=
--T, --title <Title>   Definning Plot Title.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
-
-<<command-line options>>=
-"t|subtitle=s"  => \$CmdLineVars{LAYOUT}{"subtitle"}, # SUBTITLE
-@ 
-<<command-line help>>=
--t, --subtitle <Subtitle>   Definning Plot SubTitle.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
-
-<<command-line options>>=
-"X|x-label=s"  => \$CmdLineVars{LAYOUT}{"x-axis_label"}, # X-Axis_LABEL
-@ 
-<<command-line help>>=
--X, --x-label <X-Label>   Definning X-Axis Label.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
-
-<<command-line options>>=
-"Y|y-label=s"  => \$CmdLineVars{LAYOUT}{"y-axis_label"}, # Y-Axis_LABEL
-@ 
-<<command-line help>>=
--Y, --y-label <Y-Label>   Defining Y-Axis Label.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
-
 
 <<command-line options>>=
 "L|percent-box-label=s"  => \$CmdLineVars{LAYOUT}{"percent_box_label"}, # Percent-Box_LABEL
@@ -2043,22 +2341,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -L, --percent-box-label <PBox-Label>   Definning Percent-Box Label.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "l|extra-box-label=s"  => \$CmdLineVars{LAYOUT}{"extra_box_label"}, # Extra-Box_LABEL
 @ 
 <<command-line help>>=
 -l, --extra-box-label <XBox-Label>   Definning Extra-Box Label.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -2068,22 +2356,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -R, --xy-axes-scale   X and Y axes having same scale (default is 'off').
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "W|aln-scale-width"    => \$CmdLineVars{LAYOUT}{"alignment_scale_width"}, # APlotLine_ScaleWidth; APlotLine_GroupScore
 @ 
 <<command-line help>>=
 -W, --aln-scale-width   Scaling score on width for Aplot line.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -2092,46 +2370,13 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -w, --aln-scale-color   Scaling score on color for Aplot line.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
-<<command-line options>>=
-"B|background-color=s"  => \$CmdLineVars{LAYOUT}{"background_color"}, # BACKGROUND_COLOR
-@ 
-<<command-line help>>=
--B, --background-color <color>   Background color.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
-
-<<command-line options>>=
-"F|foreground-color=s"  => \$CmdLineVars{LAYOUT}{"foreground_color"}, # FOREGROUND_COLOR
-@ 
-<<command-line help>>=
--F, --foreground-color <color>   Foreground color.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "D|aplot-box-color=s"  => \$CmdLineVars{LAYOUT}{"aplot_box_color"}, # APlotBox_BqGCOLOR
 @ 
 <<command-line help>>=
 -D, --aplot-box-color <color>   Aplot main box background color.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -2140,22 +2385,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -C, --percent-box-color <color>   Percent box background color.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "c|extra-box-color=s"  => \$CmdLineVars{LAYOUT}{"extra_box_color"}, # ExtraBox_BGCOLOR
 @ 
 <<command-line help>>=
 -c, --extra-box-color <color>   Extra box background color.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -2165,11 +2400,6 @@ The following variables define the boundary/clipping coordinates for each sequen
 -A, --alignment-name <SeqXName:SeqYName>   Defining which alignment is going to be plotted 
                   if you have more than one alignment in your gff files.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "N|x-sequence-name=s"  => \$CmdLineVars{LAYOUT}{"x-sequence_name"}, # X-Sequence_NAME
@@ -2177,22 +2407,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -N, --x-sequence-name <SeqXName>   Defining which sequence is going to be plotted at X-axes.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "n|y-sequence-name=s"  => \$CmdLineVars{LAYOUT}{"y-sequence_name"}, # Y-Sequence_NAME
 @ 
 <<command-line help>>=
 -n, --y-sequence-name <SeqYName>   Defining which sequence is going to be plotted at Y-axes.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<command-line options>>=
@@ -2202,11 +2422,6 @@ The following variables define the boundary/clipping coordinates for each sequen
 -K, --show-ribbons <ribbon_type> Force Ribbons for all features on axes:
                  (N)one, (L)ines, (R)ibbons, (B)oth.
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "I|page-size=s"  => \$CmdLineVars{LAYOUT}{"page_size"}, # PAGE_SIZE
@@ -2214,22 +2429,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -I, --page-size <page_size> Set page size for plot (default is a4).
 @
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
-@
 
 <<command-line options>>=
 "a|show-credits"   => \$CmdLineVars{LAYOUT}{"show_credits"}, # Show_Credits
 @ 
 <<command-line help>>=
 -a, --show-credits  Switch off $PROGRAM CopyRight line on plot.
-@
-<<HIDE: command-line latex short>>=
-@ 
-<<HIDE: command-line latex>>=
-\clmitem{}
 @
 
 <<Changes in command-line options>>=
@@ -2241,20 +2446,6 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<default layout vars values>>=
-#						  
-page_bbox                  => { TYPE => 'BBOX'   , VALUE => undef   },
-page_size                  => { TYPE => 'PAGE'   , VALUE => 'a4'    },
-background_color           => { TYPE => 'COLOR'  , VALUE => 'white' },
-foreground_color           => { TYPE => 'COLOR'  , VALUE => 'black' },
-# GLOBAL Labels			  
-show_title                 => { TYPE => 'BOOLEAN', VALUE => $T     },
-title                      => { TYPE => 'STRING' , VALUE => undef  },
-show_subtitle              => { TYPE => 'BOOLEAN', VALUE => $T     },
-subtitle                   => { TYPE => 'STRING' , VALUE => undef  },
-show_x_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
-x_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
-show_y_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
-x_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
 # TICKMARK features		  										 
 show_tickmark_label        => { TYPE => 'BOOLEAN', VALUE => $T     },
 show_aplot_x_ticks         => { TYPE => 'BOOLEAN', VALUE => $T     },
@@ -2294,26 +2485,10 @@ zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
 # PERCENT box features	  
 show_percent_box           => { TYPE => 'BOOLEAN', VALUE => $F     },
 percent_box_bgcolor        => { TYPE => 'COLOR'  , VALUE => 'bg'   },
-show_percent_box_label     => { TYPE => 'BOOLEAN', VALUE => $T     },
-percent_box_label          => { TYPE => 'STRING' , VALUE => undef  },
-percent_box_sublabel       => { TYPE => 'STRING' , VALUE => undef  },
 # EXTRA box features	  
 show_extra_box             => { TYPE => 'BOOLEAN', VALUE => $F     },
 extra_box_bgcolor          => { TYPE => 'COLOR'  , VALUE => 'bg'   },
-show_extra_box_label       => { TYPE => 'BOOLEAN', VALUE => $T     },
-extra_box_label            => { TYPE => 'STRING' , VALUE => undef  },
-extra_box_sublabel         => { TYPE => 'STRING' , VALUE => undef  },
 #						  
-feature_x_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
-feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
-feature_label_length       => { TYPE => 'INTEGER', VALUE => 0      },
-feature_labels_font        => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-feature_labels_fontsize    => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
-group_x_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
-group_y_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
-group_label_length         => { TYPE => 'INTEGER', VALUE => 0      },
-group_labels_font          => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-group_labels_fontsize      => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
 @
 
 <<default sequence vars values>>=
@@ -2419,14 +2594,6 @@ Y_Sequence_NAME  /
   FTExtraDisplay="est",
 @
  
-<<HIDE: custom-vars latex short>>=
-@ 
-<<HIDE: custom-vars latex>>=
-\vnlitem{title}{string}{align\_name} \tp{title} sets the main title
-for the figure, by default showing \pr{align\_name} in the form of
-'sequence1\_name x sequence2\_name'.
-@
-
 
 \newpage
 
@@ -3676,8 +3843,8 @@ sub set_page_vars() {
 sub set_page_size() {
     my ($vrf) = @_;
 
-    $vrf->{page_bbox}
-    $vrf->{page_size}
+    $vrf->{page_bbox};
+    $vrf->{page_size};
 
 } # set_page_size
 @ %def &set_page_size 
@@ -3958,7 +4125,7 @@ sub ps_trailer() {
 \label{todo:JAA}
 <<HIDE: new defs TODO>>=
 \def\todoJAA{
-Move this section and the following (colors and page formats definition) to perl package: \\ suggesting [[gfftools::PostScript]].
+Move this section to a perl package: \\ suggesting [[gfftools::PostScript]].
 } % todoJAA
 @
 <<HIDE: TODO>>=
@@ -4386,6 +4553,17 @@ Those are the colors defined in $PROGRAM:
 
 \sctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:PAGEdef}
+
+\label{todo:JAB}
+<<HIDE: new defs TODO>>=
+\def\todoJAB{
+Move this section to a perl package: \\ suggesting [[gfftools::PageSizes]].
+} % todoJAB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoJAB}{todo:JAB}
+@
+\todo{ \item \todoJAB } % todo
 
 \subsctn{ISO standard page sizes: A series}
 
@@ -5267,174 +5445,26 @@ my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
 
 \appendix
 
-<<HIDE: new LaTeX commands>>=
-\newcommand{\op}[1]{{\bfseries\sffamily #1}}
-\newcommand{\tp}[1]{{'{\bfseries\sffamily #1}'}}
-\newcommand{\pr}[1]{{\mdseries\sffamily\slshape $<$#1$>$}}
-\newcommand{\x}{\textmd{\,,\,}}
-@
-
 \newpage
 
 \sctn{\LaTeX{} wrappers} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsctn{Customization parameters}
-
-Summarizing command-line options for their description in the {\prog} manual:
-
-<<LATEX command-line>>=
-%
-% AplotCLoptions.tex
-%
-% Command-Line Options for "gff2aplot".
-%
-% <<Version Control Id Tag>>
-%
-<<latex wrappers code>>
-%
-\newcommand{\cltitem}[4]{
-  \item[\op{#1 \pr{#2}}]\hfill\op{#3}=\op{#4}\\[1ex]
-  }
-\newcommand{\clpitem}[3]{
-  \item[\op{#1 \pr{#3}}]\hfill\op{#2}=\pr{#3}\\[1ex]
-  }
-\newcommand{\clsitem}[3]{
-  \item[\op{#1}]\hfill\op{#2}=\op{#3}\\[1ex]
-  }
-\newcommand{\clritem}[1]{
-  \item[\op{#1}]\ \\[1ex]
-  }
-\newcommand{\clmitem}[1]{
-  \item[\op{\shortstack[l]{\ #1}}]\ \\[1ex]
-  }
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{description}
-<<HIDE: command-line latex>>
-\end{description}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@ 
-
-We build the command-line table:
-
-<<LATEX command-line table>>=
-%
-% AplotCLoptionsTbl.tex
-%
-% Command-Line Options for "gff2aplot".
-%
-% <<Version Control Id Tag>>
-%
-<<latex wrappers code>>
-%
-\label{sec:CLoptions}
-\newcommand{\rw}[2]{ \op{ #1 } & #2 \\}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\vfill 
-%\setlength{\intextsep}{0ex}
-%\setlength{\textfloatsep}{0ex}
-%\setlength{\floatsep}{0ex}
-\begin{table}[!ht]
-\begin{center}
-\label{tbl:CLopt}
-% \refstepcounter{section}\refstepcounter{table}
-% \addcontentsline{lot}{section}{
-%   \thesection\hspace{1em}Shell command-line options for \prog.}
-% \addcontentsline{toc}{section}{
-%   \thesection\hspace{1em}Shell command-line options for \prog.}
-\setlength{\fboxsep}{10pt}
-\footnotesize
-\fbox{
-  \begin{tabular}{rl}
-<<HIDE: command-line latex short>>
-  \end{tabular}
-} % fbox
-\vspace{0.5cm}
-
-%\vfill
-\fbox{
-\begin{tabular}{rl}
-\pa{int}       &
-  An integer value. \\
-\pa{float}     &
-  A float value. \\
-\pa{string}    &
-  A free text string, single or double-quoted \\[-0.5ex]
- &  if special chars or white-spaces/tabs are present respectively. \\
-\pa{format}    &
-  Page format, see available values on Appendix~\ref{tbl:PageSztbl} table. \\
-\pa{color}     &
-  A color name chosen from table on Appendix~\ref{tbl:CMYKcolortbl}. \\
-\pa{file}      &
-  A valid file name (including path if necessary). \\
-NOTE:          &
-  When a parameter is required, it applies for both short and long options. \\
-\end{tabular}
-} % fbox
-%
-\end{center}
-\end{table}
-\vfill
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{todo:LAA}
+<<HIDE: new defs TODO>>=
+\def\todoLAA{
+Automatize color table and definition file, and page sizes table, using a script which include the perl code for those colors and page sizes and a '\_\_\_DATA\_\_\_' trailer. This approach will allow to synchronize definitions with the manual without manual revision.
+} % todoLAA
 @
-
-We collect all customization variables for the manual too:
-
-<<LATEX custom-vars>>=
-%
-% AplotCustomVars.tex
-%
-% Customization Variables for "gff2aplot".
-%
-% <<Version Control Id Tag>>
-%
-<<latex wrappers code>>
-%
-\newcommand{\vnlitem}[3]{
-  \item[\op{#1=\pr{#2}}]\hfill\textbf{Default\quad=\quad}\op{#3}\ \\[1ex]
-  }
-\newcommand{\vnfitem}[4]{
-  \item[\pa{#1}\op{::#2=\pr{#3}}]\hfill\textbf{Default\quad=\quad}\op{#4}\ \\[1ex]
-  }
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{description}
-<<HIDE: custom-vars latex>>
-\end{description}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@ 
-
-Generating the custom variables table:
-
-<<LATEX custom-vars table>>=
-%
-% AplotCustomVarsTbl.tex
-%
-% Customization Variables for "gff2aplot".
-%
-% <<Version Control Id Tag>>
-%
-<<latex wrappers code>>
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<HIDE: custom-vars latex short>>
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@ 
-
-And here the common code for those files:
-
-<<latex wrappers code>>=
-% \newcommand{\op}[1]{\bfseries\sffamily #1}
-% \newcommand{\tp}[1]{'{\bfseries\sffamily #1}'}
-% \newcommand{\pr}[1]{\mdseries\sffamily\slshape $<$#1$>$}
-% \newcommand{\x}{\textmd{\,,\,}}
+<<HIDE: TODO>>=
+\todoitem{\todoLAA}{todo:LAA}
 @
+\todo{ \item \todoLAA } % todo
+
 
 \subsctn{CMYK color palette}
 
 Building the color definition file used by this file to produce the CMYK color definitions used in this document and the ``{\prog} User's Manual''.
-% Table~\ref{tbl:CMYKcolortbl}.
+% Table~\ref{tbl:CMYKcolor}.
 \label{sec:cmykfiles}
 
 <<LATEX cmyk colors>>=
@@ -5451,7 +5481,7 @@ Building the color definition file used by this file to produce the CMYK color d
 @
 
 Building the CMYK color table for the ``{\prog} User's Manual''.
-% Table~\ref{tbl:CMYKcolortbl} \LaTeX{} file.
+% Table~\ref{tbl:CMYKcolor} \LaTeX{} file.
 
 <<LATEX colors table>>=
 %
@@ -5490,7 +5520,7 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
   \end{tabular}
 \end{scriptsize}
 %\begin{center}
-  \caption{\label{tbl:CMYKcolortbl}
+  \caption{\label{tbl:CMYKcolor}
     {\prog} CMYK color definition table and Color Names.
     } % caption
   %\refstepcounter{table}
@@ -5531,7 +5561,7 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
   <<page sizes latex definition>>
  \end{tabular}
 } % fbox
-\caption{\label{tbl:PageSztbl}Page Sizes defined in {\prog}.}\hspace{1cm}
+\caption{\label{tbl:PageSizes}Page Sizes defined in {\prog}.}\hspace{1cm}
   %\refstepcounter{table}
   %\addcontentsline{lot}{section}{
   %   \thetable\hspace{1em}Page Sizes available at {\prog}.}
@@ -5543,12 +5573,533 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
 
 \newpage
 
-\sctn{Common code blocks} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\sctn{Supplementary scripts} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsctn{[[parameter2tex.pl]]: formatting variable definitions for manual.}
+
+The main reason for writing this script was the idea to keep sincronized any changes in the program with the \textbf{``User's Manual''}. The main problem we had to face was to keep updated any change or include any new definition of customization variables and command-line options. The way we are trying to solve is to have each variable description in a code chunk that follows each variable definition on the program in a structured record format that will be easy to parse later and to convert it into {\LaTeX} files. Those {\LaTeX} files are going to be read by the main document of the manual. This solution also reduces redundancy and keeps variable definition free of formatting changes that can be applied here, when translating those definitions into {\LaTeX}. Automatizing the whole process avoids not only to miss features in the manual but also human errors when updating and formatting that information (by keeping all the relevant information close to the related code).%'
+
+\subsubsctn{Extracting and running [[parameter2tex.pl]]}
+
+<<tangling>>=
+# showing line numbering comments in program
+notangle -L -R"parameter2tex.pl" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' - | cpif $BIN/parameter2tex.pl ;
+chmod a+x $BIN/parameter2tex.pl ;
+#
+@ 
+
+<<tangling complementary LaTeX files>>=
+# Preparing variables and options descriptions for User's manual #'
+echo "Extracting VARS/OPTIONS definitions for LaTeX files..." 1>&2 ;
+notangle -R"parameter2tex - LaTeX" $WORK/$nwfile.nw | \
+         cpif $DOCS/tabledefs.tex ;
+echo "Extracting COMMAND-LINE options for LaTeX files..." 1>&2 ;
+notangle -R"DESC command-line options" $WORK/$nwfile.nw | \
+         $BIN/parameter2tex.pl -c -o $DOCS/tables/AplotCLopts.tex -- - ;
+echo "Extracting CUSTOM-FILE variables for LaTeX files..." 1>&2 ;
+notangle -R"DESC custom file variables" $WORK/$nwfile.nw | \
+         $BIN/parameter2tex.pl -v -o $DOCS/tables/AplotCFvars.tex -- - ;
+#
+@ 
+
+<<HIDE: new LaTeX commands>>=
+\input tabledefs.tex
+@
+
+<<HIDE: tangling complementary LaTeX files - OLD>>=
+echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." 1>&2 ;
+notangle -R"LATEX command-line" $WORK/$nwfile.nw | \
+         cpif $DOCS/tables/AplotCLoptions.tex ;
+echo "Extracting \"$DOCS/AplotCLoptionsTbl.tex\"..." ;
+notangle -R"LATEX command-line table" $WORK/$nwfile.nw | \
+         cpif $DOCS/tables/AplotCLoptionsTbl.tex ;
+echo "Extracting \"$DOCS/AplotCustomVars.tex\"..." 1>&2 ;
+notangle -R"LATEX custom-vars" $WORK/$nwfile.nw  | \
+         cpif $DOCS/tables/AplotCustomVars.tex ;
+echo "Extracting \"$DOCS/AplotCustomVarsTbl.tex\"..." 1>&2 ;
+notangle -R"LATEX custom-vars table" $WORK/$nwfile.nw  | \
+         cpif $DOCS/tables/AplotCustomVarsTbl.tex ;
+@
+
+\subsubsctn{[[parameter2tex.pl]] implementation}
+
+<<parameter2tex.pl>>=
+<<PERL shebang>>
+# 
+# parameter2tex.pl
+#
+<<Version Control Id Tag>>
+#
+use strict;
+use Getopt::Std;
+use File::Basename;
+#
+<<parameter2tex - global vars>>
+#
+# MAIN
+&getcmdlineopts;
+&$parseinput;
+exit(0);
+#
+# SUBS
+<<parameter2tex - functions>>
+<<Common Routines: text fill>>
+@
+ 
+By default, if no command-line option is given, input records must be in custom-file vars record format:
+
+<<parameter2tex - global vars>>=
+my %VARS = ();
+my ($base_dir,$base_file,$base_ext) = ('./','out','.tex');
+my $parseinput = \&parseVars;
+@
+
+We use [[Getopt::Std]] because we only need to set two boolean variables that define which main parsing function must be applied to input records (remember that [[fileparse]] function returns file name, leading path and file extension, in that order):
+
+<<parameter2tex - functions>>=
+sub getcmdlineopts() {
+    our($opt_v,$opt_c,$opt_o);
+    getopts('vco:');
+      # v - process custom-file vars input
+      # c - process command-line options input
+      # o <path+file> - output base name for the whole path/file.
+    $opt_v && ($parseinput = \&parseVars);
+    $opt_c && ($parseinput = \&parseOpts);
+    ($base_file,$base_dir,$base_ext) = fileparse($opt_o, '\..*');
+    # print STDERR "::$base_dir\::$base_file\::$base_ext\::\n";
+    (-d $base_dir) ||
+        die("##\n## ERROR ## OUTPUT DIRECTORY DOES NOT EXIST... $!\n##\n"); 
+    $base_file eq '' && ($base_file = 'out');
+	$base_ext eq '' && ($base_ext = '.tex');
+    #
+    @files = ();
+    scalar(@ARGV) > 0 && do {
+        foreach my $fl (@ARGV) {
+            $fl eq '-' && do {
+                push @files, "-";
+                next;
+            };
+            -e $fl || do {
+                print STDERR "### FILE $fl DOES NOT EXIST, SKIPPING... $!\n";
+                next;
+            };
+            push @files, $fl;
+		}; # foreach $fl
+        return;
+    }; # scalar(@ARGV) > 0
+    push @files, "-";
+} # getcmdlineopts
+@
+
+<<parameter2tex - global vars>>=
+my @files;
+@ 
+
+\subsubsctn{Common functions between variable and option processing}
+
+This function is common for both, customization variables and command-line options definitions, because record structure is similar. Record separator is '[[###EOR###]]' and field separator is '[[\n]]' (except for last field which starts when '[[LDE:]]' tag appears and ends when the record does). '[[ORD:]]' must be the first field on each record, 
+
+<<parameter2tex - functions>>=
+sub parseinput() {
+    print STDERR "### Parsing input records...\n";
+    my $char;
+    my $c = 0;
+    my $extra = 1000;
+    foreach my $fl (@files) {
+        my ($a,$b,$lstelm,$order);
+        open(IFILE,"< $fl");
+        $lstelm = 0;
+        $order = undef;
+        while (<IFILE>) {
+            next if /^\s*$/o;
+            chomp;
+            $_ =~ s/\s*$//o;
+            $char = '.';
+            <<parameter2tex - loading Long DEscription>>
+            <<parameter2tex - loading other fields>>
+		} continue {
+            print STDERR $char; # &counter(++$c,$char);
+        }; # while read $fl
+        close(IFILE);
+    }; # foreach $fl
+    print STDERR "\#\n";        # &counter_end($c,$char);
+} # parseinput
+@ 
+
+<<parameter2tex - loading Long DEscription>>=
+$lstelm && do {
+    $_ =~ /^\#\#\#EOR\#\#\#/o && do {
+        $lstelm = 0;
+        $order = undef;
+        print STDERR "\#\n";
+        $char = ''; # $char = '#';
+        next;
+    }; # ###EOR###
+    $_ =~ s/^\s*//o;
+    $char = ':'; 
+    $VARS{$order}{LDE} .= " $_";
+    next;
+};
+$_ =~ /^LDE/o && do {
+    $_ =~ /JOIN-NEXT\s*$/o && ($VARS{$order}{JOIN} = 1);
+    $lstelm = 1;
+    next;
+}; # LDE
+@ 
+
+[[$VARS{$order}{JOIN}]] takes care if the program must concatenate variable/option items that share a common description.
+
+<<parameter2tex - loading other fields>>=
+($a,$b) = split /:\s*/o, $_, 2;
+defined($order) || do {
+    CHECK: {
+      $a =~ /^ORD/o && do {
+          $order = (defined($b) && $b ne '') ? $b : ++$extra;
+          $char = 'O';
+          last CHECK;
+      }; # ORD
+      $order = ++$extra;
+      $char = 'X';
+    }; # CHECK
+    $order = &fill_left($order,4,'0');
+    %{ $VARS{$order} } = ();        
+    $VARS{$order}{JOIN} = 0;
+    print STDERR &fill_left(++$c,3,'0')." ";
+    next; 
+}; # $order
+(defined($b) && $b ne '') && do {
+    $VARS{$order}{$a} = $b;
+}; # $b
+@
+
+The following functions replace the special tags we use in the description fields to homogenize formats among option names, parameters and values.
+
+<<parameter2tex - functions>>=
+sub rep_varop()  { $_[0] =~ s/\[(.+?)\]/\\op\{$1\}/og;     return $_[0]; } 
+sub repq_varop() { $_[0] =~ s/\[(.+?)\]/\'\\op\{$1\}\'/og; return $_[0]; } 
+@
+
+<<parameter2tex - functions>>=
+sub rep_param()  { $_[0] =~ s/<(.+?)>/\\pp\{$1\}/og;     return $_[0]; }
+sub repq_param() { $_[0] =~ s/<(.+?)>/\'\\pp\{$1\}\'/og; return $_[0]; }
+@
+
+<<parameter2tex - functions>>=
+sub rep_value()  { $_[0] =~ s/\|(.+?)\|/\\vp\{$1\}/og;     return $_[0]; }
+sub repq_value() { $_[0] =~ s/\|(.+?)\|/\'\\vp\{$1\}\'/og; return $_[0]; }
+@
+
+<<parameter2tex - functions>>=
+sub tex_header() {
+    my ($a,$b) = @_;
+    $a =~ m{/([^/]*)$}o && ($a = $1);
+    return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
+           ' $Id: gff2aplot.nw,v 1.12 2001-10-31 20:59:37 jabril Exp $ '.
+           "\n\%\n"; 
+} # tex_header
+@
+
+\subsubsctn{Parsing descriptions for customization variables}
+
+Record tags available for customization vars definition file are: [[ORD]], [[SEC]], [[SUB]], [[OPT]], [[DEF]], [[PAR]], [[SDE]] and [[LDE]]. Here is a short description of each:
+
+\hfill\parbox{0.95\linewidth}{
+\begin{description}\small\setlength{\itemsep}{0ex}\setlength{\parsep}{0ex}
+\item[ [[ORD]] ] Order when printing it out, if this variable is not defined then description is moved to end of output.
+\item[ [[SEC]] ] To which section file has to be saved current variable description.
+\item[ [[SUB]] ] Subsection on customization variables table.
+\item[ [[OPT]] ] Customization variable name.
+\item[ [[DEF]] ] Default value, if not defined it is not used by the program unless the variable is set to a valid parameter.
+\item[ [[PAR]] ] Parameters required (optional).
+\item[ [[SDE]] ] Short description for customization variables table. '[[JOIN-NEXT]]' enforces the current variable to be joined with the following because both they share a description.
+\item[ [[LDE]] ] Long description for the corresponding manual section. '[[JOIN-NEXT]]' behaves here as in the previous item.
+\end{description}
+} %parbox
+\hfill
+
+<<parameter2tex - functions>>=
+sub parseVars() {
+    my ($k,$c);
+    print STDERR "###\n### PARSING CUSTOM-FILE VARS DEFINITIONS\n###\n";
+    &parseinput;
+    print STDERR "### Opening Files ${base_dir}${base_file}\_\*${base_ext}\n";
+    &open_varfiles;
+    $c = 0;
+    foreach $k (sort keys %VARS) {
+        print STDERR "$k".((++$c % 10) ? ".." : "\n");
+        ((defined($VARS{$k}{SEC}) && $VARS{$k}{SEC} ne '')
+                                  &&
+         (defined($VARS{$k}{SUB}) && $VARS{$k}{SUB} ne '')) || do {
+             print STDERR "\n##\n## ERROR ## SECTION/SUBSECTION ".
+                          "NOT DEFINED ON INPUT for $k ... $!\n##\n";
+             next;
+         }; # SEC/SUB NOT DEFINED ON INPUT
+        my ($sec,$subsec, 
+            $tmpdsc,$strdsc,$tmptbl,$strtbl,$par,$vareq,$vareqj);
+        ($sec,$subsec) = ($VARS{$k}{SEC}, "$VARS{$k}{SEC}$VARS{$k}{SUB}");
+        (defined($varO{$sec}) && defined($varO{$subsec})) || do {
+             print STDERR "\n##\n## ERROR ## SECTION/SUBSECTION ".
+                          "NOT DEFINED ON PROGRAM for $k ... $!\n##\n";
+             next;
+         }; # SEC/SUB NOT DEFINED ON PROGRAM
+        if (defined($VARS{$k}{PAR}) && $VARS{$k}{PAR} ne '') {
+            $par = &rep_param($VARS{$k}{PAR});
+        } else {
+            $par = '';
+        }; # PAR
+        (defined($VARS{$k}{OPT}) && $VARS{$k}{OPT} ne '') || do {
+             print STDERR "\n##\n## ERROR ## VARIABLE NAME ".
+                          "NOT DEFINED for $k ... $!\n##\n";
+             next;         
+        }; # DEFINED OPT
+        #
+        $tmpdsc = $tmptbl = '\op{'.$VARS{$k}{OPT}.'} $\,=\,$ '.$par;
+        #
+        $vareqj = ' \hfill ';
+        if (defined($VARS{$k}{DEF})) {
+            $vareq  = (&rep_varop(&rep_param(&rep_value($VARS{$k}{DEF}))));
+        } else {
+            $vareq  = '\bydef';
+        }; # DEF
+        defined($VARS{$k}{SDE}) || ($VARS{$k}{SDE} = '{\tbdef}');
+        defined($VARS{$k}{LDE}) || ($VARS{$k}{LDE} = ' {\tbdef}');
+        if ($VARS{$k}{JOIN}) {
+            $strdsc = '\ijoin{'.$tmptbl.$vareqj.'[ '.$vareq.' ]}'."\n\%\n";
+            $strtbl = '\rvjoin{'.$tmptbl.'}{'.$vareq.'}'."\n\%\n";
+        } else {
+            $strdsc = '\idesc{'.$tmptbl.$vareqj.'[ '.$vareq.' ]}'."\n".'   {'.
+                (&repq_varop(&repq_param(&repq_value($VARS{$k}{LDE})))).' }'.
+                "\n\%\n";
+            $strtbl = '\rvdesc{'.$tmptbl.'}{'.$vareq.'}'."\n".'   { '.
+                (&repq_varop(&repq_param(&repq_value($VARS{$k}{SDE})))).' }'.
+                "\n\%\n";
+        };
+        #
+        $strdsc =~ s/_/\\_/og;
+        $strtbl =~ s/_/\\_/og;
+        print { $varO{$sec}[0] }    $strdsc;
+        print { $varO{$subsec}[0] } $strtbl;
+    }; # foreach keys %VARS
+    ($c % 10) && print STDERR "\#\#\#\#\n";
+    print STDERR "\#\#\#\n";
+    &close_varfiles;
+} # parseVars
+@
+
+Here we define the available values for the '[[SEC]]'/'[[SUB]]' fields:
+
+<<parameter2tex - global vars>>=
+my %varO = (
+    #                    [ HANDLE, EXTENSION, LABEL                     ]
+    LAYOUT            => [ \*LAYa, 'Layout'                             ],
+    LAYOUTPageLayout  => [ \*LAYb, 'playout', 'Page Layout'             ],
+    LAYOUTZoom        => [ \*LAYc, 'zoom',    'Zoom Options'            ],
+    LAYOUTLabels      => [ \*LAYd, 'label',   'Labels'                  ],
+    LAYOUTTickmarks   => [ \*LAYe, 'ticks',   'Tick Marks'              ],
+    LAYOUTAplot       => [ \*LAYf, 'aplot',   'Aplot Layout'            ],
+    LAYOUTGeneral     => [ \*LAYg, 'general', 'General Definitions'     ],
+    #
+    SEQUENCE          => [ \*SEQa, 'Sequence'                           ],
+    SEQUENCESequences => [ \*SEQb, 'seq',     'GFF-Sequence Attributes' ],
+    #
+    SOURCE            => [ \*SRCa, 'Source'                             ],
+    SOURCESources     => [ \*SRCb, 'src',     'GFF-Source Attributes'   ],
+    #
+    STRAND            => [ \*STRa, 'Strand'                             ],
+    STRANDStrands     => [ \*STRb, 'str',     'GFF-Strand Attributes'   ],
+    #
+    GROUP             => [ \*GRPa, 'Group'                              ],
+    GROUPGroups       => [ \*GRPb, 'grp',     'GFF-Group Attributes'    ],
+    #
+    FEATURE           => [ \*FEAa, 'Feature'                            ],
+    FEATUREFeatures   => [ \*FEAb, 'feat',    'GFF-Feature Attributes'  ],
+    );
+my @varMain = qw / LAYOUT SEQUENCE SOURCE STRAND GROUP FEATURE /;
+my @varSub  = qw /
+                   LAYOUTPageLayout  LAYOUTZoom      LAYOUTLabels 
+                   LAYOUTTickmarks   LAYOUTAplot     LAYOUTGeneral
+                   SEQUENCESequences SOURCESources   STRANDStrands
+                   GROUPGroups       FEATUREFeatures
+                 /;
+@
+
+<<HIDE: testing variables set as FILEHANDLES>>=
+perl -e '$a="SEC";open(*{$a},"> kkkk"); print $a "HEYYYY"; close(*{$a})' 
+perl -e 'use strict;
+         my $a=\*SEC;
+         open($a,"> kkkk");
+         print { $a } "HEYYYY";
+         close($a)'  # Works OK with USE STRICT pragma...
+@ 
+
+<<parameter2tex - functions>>=
+sub open_varfiles() {
+    my ($flh,$vlh,$mf);
+    foreach $flh (@varMain) {
+        $vlh = "_dsc".$varO{$flh}[1];
+        $mf = "${base_dir}${base_file}${vlh}${base_ext}";
+        open($varO{$flh}[0],"> $mf");
+        print { $varO{$flh}[0] } 
+              &tex_header($mf,"Description items for $flh");
+	}; # foreach $flh
+    foreach $flh (@varSub) {
+        $vlh = "_tbl".$varO{$flh}[1];
+        $mf = "${base_dir}${base_file}${vlh}${base_ext}";
+        open($varO{$flh}[0],"> $mf");
+        print { $varO{$flh}[0] } 
+              &tex_header($mf,"Summary table for $flh: $varO{$flh}[2]");
+        print { $varO{$flh}[0] } "\%\n".'\rvdef{'.$varO{$flh}[2].'}'."\n\%\n";
+        print { $varO{$flh}[0] } '\begin{tabular}{p{6cm}p{4cm}p{15cm}}'."\n\%\n";
+	}; # foreach $flh
+} # open_varfiles
+sub close_varfiles() {
+    my $flh;
+    foreach $flh (@varMain) {
+        close($varO{$flh}[0]);
+	}; # foreach $flh
+    foreach $flh (@varSub) {
+        print { $varO{$flh}[0] } '\end{tabular}'."\n";
+        close($varO{$flh}[0]);
+	}; # foreach $flh
+} # close_varfiles
+@ 
+
+\subsubsctn{Parsing descriptions for command-line options}
+
+Record tags available for command-line options definition file are: [[ORD]], [[OPT]], [[LNG]], [[PAR]], [[EQV]], [[SDE]] and [[LDE]]. Here is a short description of each:
+
+\hfill\parbox{0.95\linewidth}{
+\begin{description}\small\setlength{\itemsep}{0ex}\setlength{\parsep}{0ex}
+\item[ [[ORD]] ] Order when printing it out, if this variable is not defined then description is moved to end of output.
+\item[ [[OPT]] ] Short command-line option, a single char (optional).
+\item[ [[LNG]] ] Long command-line option (words are ALWAYS joined with hypens, '-'). This field is mandatory (all command-line options has a long name while the opposite is not true).
+\item[ [[PAR]] ] Parameters required (optional).
+\item[ [[EQV]] ] Customization variable equivalence if it is appropriate and does exist (optional).
+\item[ [[SDE]] ] Short description for command-line options table. '[[JOIN-NEXT]]' senforces the current option to be joined with the following because both they share a description.
+\item[ [[LDE]] ] Long description for the corresponding manual section. '[[JOIN-NEXT]]' behaves here as in the previous item.
+\end{description}
+} %parbox
+\hfill
+
+<<parameter2tex - functions>>=
+sub parseOpts() {
+    my ($k,$c);
+    print STDERR "###\n### PARSING CMD-LINE OPTIONS DEFINITIONS\n###\n";
+    &parseinput;
+    print STDERR "### Writing to ${base_dir}${base_file}\_\*${base_ext}\n";
+    open(FDSC,"> ${base_dir}${base_file}\_dsc${base_ext}");
+    open(FTBL,"> ${base_dir}${base_file}\_tbl${base_ext}");
+    $c = 0;
+    print FTBL '\begin{tabular}{rl}'."\n\%\n";
+    foreach $k (sort keys %VARS) {
+        print STDERR "$k".((++$c % 10) ? ".." : "\n");
+        my ($tmpdsc,$strdsc,$tmptbl,$strtbl,$par,$varlng,$varsht,$vareq);
+        if (defined($VARS{$k}{PAR}) && $VARS{$k}{PAR} ne '') {
+            $par = &rep_param($VARS{$k}{PAR});
+        } else {
+            $par = '';
+        }; # PAR
+        (defined($VARS{$k}{LNG}) && $VARS{$k}{LNG} ne '') || do { 
+             print STDERR "\n##\n## ERROR ## LONG OPTION NAME ".
+                          "NOT DEFINED for $k ... $!\n##\n";
+             next;
+        }; # LONG OPTION NOT DEFINED
+        $varlng = '\op{-\/-'.$VARS{$k}{LNG}.'} '.$par;
+        if (defined($VARS{$k}{OPT}) && $VARS{$k}{OPT} ne '') { 
+            $varsht = '\op{-'.$VARS{$k}{OPT}.'} '.$par;
+            $tmpdsc = '\shortstack[l]{\ '.$varsht.'\\'.$varlng.'}';
+            $tmptbl = $varsht.'{\x}'.$varlng;
+        } else {
+            $tmpdsc = $varlng;
+            $tmptbl = $varlng;
+        }; # OPT
+        $vareq = ' \hfill ';
+        (defined($VARS{$k}{EQV})) && 
+            ( $vareq .= (&rep_varop(&rep_param(&rep_value($VARS{$k}{EQV})))) );
+        defined($VARS{$k}{SDE}) ||
+            ($VARS{$k}{SDE} = '{\tbdef}');
+        defined($VARS{$k}{LDE}) ||
+            ($VARS{$k}{LDE} = ' {\tbdef}');
+        if ($VARS{$k}{JOIN}) {
+            $strdsc = '\ijoin{'.$tmptbl.$vareq.'}'."\n\%\n";
+            $strtbl = '\rjoin{'.$tmptbl.'}'."\n\%\n";
+        } else {
+            $strdsc = '\idesc{'.$tmptbl.$vareq.'}'."\n".'   {'.
+                (&repq_varop(&repq_param(&repq_value($VARS{$k}{LDE})))).' }'.
+                "\n\%\n";
+            $strtbl = '\rdesc{'.$tmptbl.'}'."\n".'   { '.
+                (&repq_varop(&repq_param(&repq_value($VARS{$k}{SDE})))).' }'.
+                "\n\%\n";
+        }; # JOIN
+        #
+        $strdsc =~ s/_/\\_/og;
+        $strtbl =~ s/_/\\_/og;
+        print FDSC $strdsc;
+        print FTBL $strtbl;
+    }; # foreach keys %VARS
+    ($c % 10) && print STDERR "\#\#\#\#\n";
+    print STDERR "\#\#\#\n";
+    print FTBL '\end{tabular}'."\n";
+    close(FDSC);
+    close(FTBL);
+} # parseOpts
+@
+
+\subsubsctn{{\LaTeX} definitions}
+
+<<parameter2tex - LaTeX>>=
+%
+% Definitions for variables and options description
+%
+\newcommand{\x}{\textmd{\,,\,}}
+\newcommand{\hd}{\textbf{\textsf{\textsc{Default}} $\,=\,$}}
+\newcommand{\bydef}{\textbf{\textsl{\textsf{undef}}}}
+\newcommand{\tbdef}{\textbf{\large TO BE DEFINED !!!}}
+%
+\newcommand{\op}[1]{\textbf{\textsf{#1}}}
+\newcommand{\pp}[1]{\textmd{\textsf{{\footnotesize$<$}#1{\footnotesize$>$}}}}
+\newcommand{\vp}[1]{\textbf{\textsf{\small #1}}}
+%
+\newcommand{\idesc}[2]{\item[] #1 \\ #2 }
+\newcommand{\ijoin}[1]{\item[] #1 \\[-5ex]}
+%
+\newcommand{\rdesc}[2]{ #1 & #2 \\}
+\newcommand{\rjoin}[1]{ #1 &    \\[-1.5ex]}
+%
+\newcommand{\rvdef}[1]{
+ \vspace{2ex}
+ \begin{flushright}
+  \hrulefill
+  \raisebox{-0.5ex}[0pt]{
+    \psframebox[framearc=1,framesep=0.75ex,linestyle=solid,
+                linecolor=black,fillcolor=white,fillstyle=solid]{
+                   \textbf{\textsc{#1}}
+                } % psframebox
+    } % raisebox
+ \end{flushright}
+} % rvdef
+\newcommand{\rvdesc}[3]{ #1 & #2 & #3 \\}
+\newcommand{\rvjoin}[2]{ #1 & #2 &    \\[-1.5ex]}
+%
+@ 
+
+\newpage
+
+\sctn{Making tests} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\newpage
+
+\sctn{Common code blocks} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsctn{PERL scripts}
 
 <<PERL shebang>>=
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
+# This is perl, v5.6.1 built for i686-linux
+# /usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
 @ 
 
@@ -5587,6 +6138,12 @@ chomp;
 @
 
 <<Common Routines>>=
+<<Common Routines: min-max>>
+<<Common Routines: text fill>>
+<<Common Routines: counter>>
+@
+
+<<Common Routines: min-max>>=
 #
 sub max() {
     my $z = shift @_;
@@ -5598,6 +6155,9 @@ sub min() {
     foreach my $l (@_) { $z = $l if $l < $z };
     return $z;
 } # min
+@
+
+<<Common Routines: text fill>>=
 #
 sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
 sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
@@ -5606,6 +6166,9 @@ sub fill_mid()   {
     my $k = int(($_[1] - $l)/2);
     ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
 } # fill_mid
+@
+
+<<Common Routines: counter>>=
 #
 sub counter { # $_[0]~current_pos++ $_[1]~char
     print STDERR "$_[1]";
@@ -5646,7 +6209,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.11 2001-10-23 18:22:24 jabril Exp $
+# $Id: gff2aplot.nw,v 1.12 2001-10-31 20:59:37 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -5762,27 +6325,15 @@ notangle -R"The Manual" $WORK/$nwfile.nw | cpif $WORK/mkdoc ;
 <<tangling complementary LaTeX files>>=
 # extracting complementary material 
 echo "Extracting \"$DOCS/defs.tex\"..." 1>&2 ;
-notangle -R"HIDE: LaTeX deploy new definitions" $WORK/$nwfile.nw | \
-         cpif $DOCS/defs.tmp  ;
-noweave -v -t4 -delay $DOCS/defs.tmp | cpif $DOCS/defs.tex ;
+notangle -R"HIDE: LaTeX aplot new definitions" $WORK/$nwfile.nw | \
+         noweave -v -t4 -delay - | cpif $DOCS/defs.tex ;
 echo "Extracting \"$DOCS/todo.tex\"..." 1>&2 ;
-notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tmp ; 
-noweave -v -t4 -delay $DOCS/todo.tmp | cpif $DOCS/todo.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw | \
+         noweave -v -t4 -delay - | cpif $DOCS/todo.tex ;
 echo "Extracting \"$DOCS/localrefs.bib\"..." 1>&2 ;
 notangle -R"HIDE: BiBTeX references" $WORK/$nwfile.nw | \
          cpif $DOCS/localrefs.bib ;
-echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." 1>&2 ;
-notangle -R"LATEX command-line" $WORK/$nwfile.nw | \
-         cpif $DOCS/tables/AplotCLoptions.tex ;
-echo "Extracting \"$DOCS/AplotCLoptionsTbl.tex\"..." ;
-notangle -R"LATEX command-line table" $WORK/$nwfile.nw | \
-         cpif $DOCS/tables/AplotCLoptionsTbl.tex ;
-echo "Extracting \"$DOCS/AplotCustomVars.tex\"..." 1>&2 ;
-notangle -R"LATEX custom-vars" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotCustomVars.tex ;
-echo "Extracting \"$DOCS/AplotCustomVarsTbl.tex\"..." 1>&2 ;
-notangle -R"LATEX custom-vars table" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotCustomVarsTbl.tex ;
+# extracting tables for the User's Manual #'
 echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
 notangle -R"LATEX cmyk colors" $WORK/$nwfile.nw  | \
          cpif $DOCS/tables/AplotColorDefs.tex ;
