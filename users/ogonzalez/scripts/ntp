@@ -55,7 +55,7 @@ then
    log=ntp-`date +%Y%m%d-%H%M`
    for busca in monstre1 monstre2 monstre3 monstre4 nautilus eidolon xinxan \
                 tro rantanplan cel basileia tmatik zapiron kalamos icarus \
-                mar
+                mar drac nit
    do
       if [ -s ntp.$busca ]
       then
@@ -71,5 +71,7 @@ then
    data=`date +"%d %b %Y - %H:%M"`
    mail -s"ntp $data" ogonzalez@imim.es <$log
    # ara hauria d'esborrar els fitxers antics
+   ls -t1 ntp* | tee /tmp/ntp.1 | head -10 >/tmp/ntp.2
+   rm -f `diff /tmp/ntp.[12] | grep '^<' | cut -c3-` /tmp/ntp.[12]
 fi
 

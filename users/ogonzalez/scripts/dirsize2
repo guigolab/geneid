@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+
+# calcula grandaria i nombre de fitxers d'un direc i els seus subdirectoris
+
+system("tree -as $ARGV[0] >/tmp/TREE.$ARGV[0]");
+
+

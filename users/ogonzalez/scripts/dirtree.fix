@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+# la idea es agafar la sortida d'un "tree -as", incompleta per a la part
+# de "neteja" de "dirtree", i posar una "/" al final de totes les entrades
+# que aparentin ser directoris: aquelles que tinguin "|" o "`" a sota de
+# "[" (es a dir, tenen una estructura que "penja" d'elles
+
+# no tracta be els directoris buits (perque res no penja d'ells en fer
+# "tree", pero es un problema menyspreable
+
+# el primer parametre es el fitxer a llegir. si no el dono, es stdin
+
+if ( $#ARGV == -1 || ! -e $ARGV[0] ) {
+   @arbre=<STDIN>;
+} else {
+   open (fit,"$ARGV[0]");
+   @arbre=<fit>;
+   close(fit);
+}
+
+for ( $i=0;$i<$#arbre;$i++ ) {
+   chop($arbre[$i]);
+   $corxet=index($arbre[$i],"[");
+   $seguent=substr($arbre[$i+1],$corxet,1);
+   if ( $arbre[$i] eq "." || $seguent eq "|" || $seguent eq "`" ) {
+      $arbre[$i].="/";
+   }
+   print "$arbre[$i]\n";
+}
+
+print $arbre[$#arbre]; # perque el bucle anterior nomes arriba a la
+                       # penultima entrada de @arbre
