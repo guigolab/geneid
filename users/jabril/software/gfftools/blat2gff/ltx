@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: ltx,v 1.1 2001-10-22 14:44:13 jabril Exp $
+# $Id: ltx,v 1.2 2003-02-28 17:50:02 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -12,7 +12,7 @@ L="####################"
 # only LaTeXing
 #
 # Setting Global Variables
-WORK="/home/ug/jabril/development/softjabril/blat2gff" ;
+# WORK is now set via setcwd
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;

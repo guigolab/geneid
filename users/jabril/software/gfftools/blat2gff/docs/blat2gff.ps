@@ -10,7 +10,7 @@
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips blat2gff.dvi -o blat2gff.ps -t a4
 %DVIPSParameters: dpi=600, compressed
-%DVIPSSource:  TeX output 2001.10.05:1846
+%DVIPSSource:  TeX output 2003.02.28:1721
 %%BeginProcSet: texc.pro
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -412,11 +412,13 @@ end
 % @@psencodingfile@{
 %   author = "S. Rahtz, P. MacKay, Alan Jeffrey, B. Horn, K. Berry",
 %   version = "0.6",
-%   date = "1 July 1998",
+%   date = "22 June 1996",
 %   filename = "8r.enc",
-%   email = "tex-fonts@@tug.org",
-%   docstring = "Encoding for TrueType or Type 1 fonts
-%                to be used with TeX."
+%   email = "kb@@mail.tug.org",
+%   address = "135 Center Hill Rd. // Plymouth, MA 02360",
+%   codetable = "ISO/ASCII",
+%   checksum = "119     662    4424",
+%   docstring = "Encoding for TrueType or Type 1 fonts to be used with TeX."
 % @}
 % 
 % Idea is to have all the characters normally included in Type 1 fonts
@@ -444,8 +446,7 @@ end
 % upward-compatible revisions, if someday more characters are generally
 % available.
 % 
-% (5) hyphen appears twice for compatibility with both 
-% ASCII and Windows.
+% (5) hyphen appears twice for compatibility with both ASCII and Windows.
 % 
 /TeXBase1Encoding [
 % 0x00 (encoded characters from Adobe Standard not in Windows 3.1)
@@ -463,7 +464,7 @@ end
  /.notdef /.notdef /.notdef /.notdef
  /.notdef /.notdef /.notdef /.notdef
  % very contentious; it's so painful not having quoteleft and quoteright
- % at 96 and 145 that we move the things normally found there to here.
+ % at 96 and 145 that we move the things normally found there down to here.
  /grave /quotesingle 
 % 0x20 (ASCII begins)
  /space /exclam /quotedbl /numbersign
@@ -665,28 +666,39 @@ B447>43 D E
 /Fd 136[66 45 45 25 35 30 1[45 45 45 71 25 45 25 25 45
 45 30 40 1[40 45 40 13[51 61 1[51 3[56 3[66 2[56 66 1[61
 66 62[51 2[{.167 SlantFont TeXBase1Encoding ReEncodeFont}31
-90.9091 /Times-Roman rf /Fe 139[25 3[45 45 45 4[25 1[45
+90.9091 /Times-Roman rf
+%DVIPSBitmapFont: Fe cmmi9 9 2
+/Fe 2 48 df<126012F812FE7E13C013F0EAF3FCEAF1FE38F07F80EB1FE0EB07F0EB03FC
+EB00FFEC3FC06E7EEC07F8EC01FEEC007FED3F80A2ED7F00EC01FEEC07F8EC1FE04A5A02
+FFC7FCEB03FCEB07F0EB1FE0EB7F80D8F1FEC8FCEAF3FCEAFFF013C090C9FC5A12F81260
+21267EA526>46 D<1503ED0F80153F157FEC01FF1407EC1FE7EC3FC7ECFF07EB03FCEB07
+F0EB1FE0EB7F803801FE00485AEA0FF0EA3FC048C7FC12FEA2127FEA3FC0EA0FF0EA03FC
+6C7E38007F80EB1FE0EB07F0EB03FCEB00FFEC3FC7EC1FE7EC07FF1401EC007F153F150F
+ED030021267EA526>I E
+%EndDVIPSBitmapFont
+/Ff 104[75 87[33 13[37 37 6[25 25 40[{TeXBase1Encoding ReEncodeFont}6
+74.7198 /Times-Roman rf /Fg 139[25 3[45 45 45 4[25 1[45
 1[40 1[40 1[45 13[45 83[{TeXBase1Encoding ReEncodeFont}10
 90.9091 /Times-Italic rf
-%DVIPSBitmapFont: Ff cmmi10 10.95 1
-/Ff 1 47 df<126012F812FE7E13C013F0EAF3FCEAF1FE38F07F80EB1FE0EB07F0EB03FC
+%DVIPSBitmapFont: Fh cmmi10 10.95 1
+/Fh 1 47 df<126012F812FE7E13C013F0EAF3FCEAF1FE38F07F80EB1FE0EB07F0EB03FC
 EB00FFEC3F80EC1FE0EC07F8EC01FE6E7EED3FC0ED0FF0ED03F8ED01FCA2ED03F8ED0FF0
 ED3FC0EDFF004A5AEC07F8EC1FE0EC3F8002FFC7FCEB03FCEB07F0EB1FE0EB7F80D8F1FE
 C8FCEAF3FCEAFFF013C090C9FC5A12F81260262C7DAC2D>46 D E
 %EndDVIPSBitmapFont
-%DVIPSBitmapFont: Fg cmsy10 10.95 2
-/Fg 2 18 df<EB0FFCEB3FFF90B512C0000314F04880488048804880A2481580A3B712C0
+%DVIPSBitmapFont: Fi cmsy10 10.95 2
+/Fi 2 18 df<EB0FFCEB3FFF90B512C0000314F04880488048804880A2481580A3B712C0
 AA6C1580A36C1500A26C5C6C5C6C5C6C5CC614C0013F90C7FCEB0FFC22227BA72D>15
 D<007FB912E0BA12F0A26C18E0CDFCAE007FB912E0BA12F0A26C18E0CDFCAE007FB912E0
 BA12F0A26C18E03C287BAA47>17 D E
 %EndDVIPSBitmapFont
-/Fh 134[37 37 55 37 42 23 32 32 1[42 42 42 60 23 37 1[23
+/Fj 134[37 37 55 37 42 23 32 32 1[42 42 42 60 23 37 1[23
 42 42 23 37 42 37 42 42 8[51 1[51 60 46 42 51 1[51 60
 55 69 46 2[28 60 60 51 51 60 55 51 51 14[42 4[28 42[42
 2[{TeXBase1Encoding ReEncodeFont}46 83.022 /Times-Italic
 rf
-%DVIPSBitmapFont: Fi cmsy10 10 2
-/Fi 2 106 df<14C0EB01E01303A214C01307A21480130FA2EB1F00A2131E133EA25BA2
+%DVIPSBitmapFont: Fk cmsy10 10 2
+/Fk 2 106 df<14C0EB01E01303A214C01307A21480130FA2EB1F00A2131E133EA25BA2
 137813F8A2485AA25B1203A25B1207A2485AA290C7FC5AA2123EA2123C127CA2127812F8
 A41278127CA2123C123EA27EA27E7FA26C7EA212037FA212017FA26C7EA21378137CA27F
 A2131E131FA2EB0F80A2130714C0A2130314E0A21301EB00C0135278BD20>104
@@ -695,16 +707,15 @@ D<126012F07EA21278127CA2123C123EA27EA27E7FA26C7EA212037FA26C7EA212007FA2
 EB1F00A2131E133EA25BA2137813F8A25B1201A2485AA25B1207A2485AA290C7FC5AA212
 3EA2123C127CA2127812F8A25A126013527CBD20>I E
 %EndDVIPSBitmapFont
-/Fj 152[37 25 33 37 33 37 33 39[37 37 37 37 1[37 37 37
-37 37 48[{TeXBase1Encoding ReEncodeFont}16 74.7198 /Times-Roman
-rf /Fk 141[28 5[23 2[23 6[42 23[32 3[46 4[60 20[21 44[{
-.167 SlantFont TeXBase1Encoding ReEncodeFont}8 83.022
-/Times-Roman rf /Fl 139[28 32 37 2[42 46 69 3[23 46 1[28
-37 1[37 46 42 14[60 2[65 2[55 2[32 1[65 17[42 2[42 42
-42 3[21 44[{TeXBase1Encoding ReEncodeFont}23 83.022 /Times-Bold
-rf
-%DVIPSBitmapFont: Fm cmmi10 10 2
-/Fm 2 63 df<EF0380EF0FC0173FEFFF80933803FE00EE0FF8EE3FE0EEFF80DB03FEC7FC
+/Fl 192[37 63[{TeXBase1Encoding ReEncodeFont}1 74.7198
+/Times-Bold rf /Fm 141[28 5[23 2[23 6[42 23[32 3[46 4[60
+20[21 44[{.167 SlantFont TeXBase1Encoding ReEncodeFont}8
+83.022 /Times-Roman rf /Fn 134[42 3[46 28 32 37 2[42
+46 69 3[23 46 1[28 37 1[37 46 42 14[60 5[55 2[32 1[65
+51 13[42 4[42 42 1[42 3[21 44[{TeXBase1Encoding ReEncodeFont}25
+83.022 /Times-Bold rf
+%DVIPSBitmapFont: Fo cmmi10 10 2
+/Fo 2 63 df<EF0380EF0FC0173FEFFF80933803FE00EE0FF8EE3FE0EEFF80DB03FEC7FC
 ED0FF8ED3FE0EDFF80DA03FEC8FCEC0FF8EC3FE0ECFF80D903FEC9FCEB0FF8EB3FE0EBFF
 80D803FECAFCEA0FF8EA3FE0EA7F8000FECBFCA2EA7F80EA3FE0EA0FF8EA03FEC66C7EEB
 3FE0EB0FF8EB03FE903800FF80EC3FE0EC0FF8EC03FE913800FF80ED3FE0ED0FF8ED03FE
@@ -715,43 +726,43 @@ C0EC1FF0EC07FCEC01FF9138007FC0ED1FF0ED07FCED01FF9238007FC0EE1FF0EE07FCEE
 1FF0ED7FC04A48C8FCEC07FCEC1FF0EC7FC04948C9FCEB07FCEB1FF0EB7FC04848CAFCEA
 07FCEA3FF0EA7FC048CBFC12FC1270323279AD41>62 D E
 %EndDVIPSBitmapFont
-/Fn 190[48 65[{TeXBase1Encoding ReEncodeFont}1 66.4176
-/Times-Roman rf /Fo 134[45 45 2[51 30 35 40 1[51 45 51
+/Fp 190[48 65[{TeXBase1Encoding ReEncodeFont}1 66.4176
+/Times-Roman rf /Fq 134[45 45 2[51 30 35 40 1[51 45 51
 76 25 51 1[25 51 45 30 40 51 40 51 45 12[61 51 2[56 71
-5[35 3[61 66 66 61 66 7[45 2[45 45 45 45 45 45 2[23 46[{
-TeXBase1Encoding ReEncodeFont}39 90.9091 /Times-Bold
-rf /Fp 168[69 2[44 3[40 53 53 1[44 4[53 40 44 2[49 53
+5[35 3[61 66 66 61 66 1[45 5[45 2[45 45 45 45 45 45 2[23
+46[{TeXBase1Encoding ReEncodeFont}40 90.9091 /Times-Bold
+rf /Fr 168[69 2[44 3[40 53 53 1[44 4[53 40 44 2[49 53
 65[{TeXBase1Encoding ReEncodeFont}11 72.7272 /Times-Roman
-rf /Fq 12[45 10[40 7[40 102[45 45 66 45 45 25 35 30 45
-45 45 45 71 25 45 25 25 45 45 30 40 45 40 45 40 3[30
-1[30 2[66 86 66 66 56 51 61 1[51 66 66 81 56 2[30 66
-66 51 56 66 61 61 66 6[25 45 45 45 45 45 45 45 45 45
-45 1[23 30 23 2[30 30 30 36[51 2[{TeXBase1Encoding ReEncodeFont}69
-90.9091 /Times-Roman rf /Fr 139[40 47 53 2[60 66 100
+rf /Fs 12[45 10[40 7[40 75[40 40 25[45 45 66 45 45 25
+35 30 45 45 45 45 71 25 45 25 25 45 45 30 40 45 40 45
+40 3[30 1[30 2[66 86 66 66 56 51 61 1[51 66 66 81 56
+2[30 66 66 51 56 66 61 61 66 6[25 45 45 45 45 45 45 45
+45 45 45 1[23 30 23 2[30 30 30 36[51 2[{TeXBase1Encoding ReEncodeFont}
+71 90.9091 /Times-Roman rf /Ft 139[40 47 53 2[60 66 100
 3[33 66 1[40 53 1[53 66 60 14[86 5[80 2[47 1[93 71[{
 .167 SlantFont TeXBase1Encoding ReEncodeFont}17 119.552
-/Times-Bold rf /Fs 137[50 50 28 1[33 1[50 50 50 4[28
+/Times-Bold rf /Fu 137[50 50 28 1[33 1[50 50 50 4[28
 1[50 1[44 16[61 7[61 4[72 55 2[66 66 72 65[{
 TeXBase1Encoding ReEncodeFont}17 99.6264 /Times-Roman
-rf /Ft 129[50 50 50 50 50 50 50 50 50 50 50 50 50 50
+rf /Fv 129[50 50 50 50 50 50 50 50 50 50 50 50 50 50
 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50
 50 50 50 50 1[50 50 50 50 50 50 50 50 50 50 50 50 50
 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50
 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50 50
 50 50 50 50 50 50 50 50 33[{TeXBase1Encoding ReEncodeFont}93
-83.022 /Courier rf /Fu 209[21 46[{TeXBase1Encoding ReEncodeFont}1
-83.022 /Times-Roman rf /Fv 134[60 60 2[66 40 47 53 1[66
+83.022 /Courier rf /Fw 209[21 46[{TeXBase1Encoding ReEncodeFont}1
+83.022 /Times-Roman rf /Fx 134[60 60 2[66 40 47 53 1[66
 60 66 100 33 66 1[33 66 60 40 53 66 53 66 60 12[80 7[80
 1[60 47 2[73 80 1[86 80 86 14[60 60 2[30 46[{
 TeXBase1Encoding ReEncodeFont}33 119.552 /Times-Bold
-rf /Fw 139[69 3[115 3[57 4[103 69 3[115 103 46[103 3[52
+rf /Fy 139[69 3[115 3[57 4[103 69 3[115 103 46[103 3[52
 46[{TeXBase1Encoding ReEncodeFont}9 206.559 /Times-Bold
-rf /Fx 134[50 50 72 50 55 33 39 44 1[55 50 55 83 28 55
+rf /Fz 134[50 50 72 50 55 33 39 44 1[55 50 55 83 28 55
 33 28 55 50 33 44 55 44 55 50 8[72 1[72 72 66 55 72 1[61
-78 72 1[66 2[39 78 78 61 66 72 72 66 72 6[33 4[50 50
+78 72 1[66 2[39 78 78 61 66 72 72 66 72 6[33 1[50 3[50
 50 50 50 50 1[25 33 25 2[33 33 33 36[55 2[{
 TeXBase1Encoding ReEncodeFont}57 99.6264 /Times-Bold
-rf /Fy 168[80 1[58 53 44 58 1[49 62 58 75 3[31 62 62
+rf /FA 168[80 1[58 53 44 58 1[49 62 58 75 3[31 62 62
 1[53 58 58 53 58 65[{TeXBase1Encoding ReEncodeFont}17
 79.701 /Times-Bold rf end
 %%EndProlog
@@ -765,32 +776,33 @@ a4
 %%EndSetup
 %%Page: 1 1
 1 0 bop Black Black Black Black -27 1848 3815 17 v -27
-1890 V 125 2205 a Fx(P)t Fy(R)r(O)t(G)t(R)t(A)t(M)34
-b Fx(N)r Fy(A)t(M)t(E)t Fx(:)107 b Fw(blat2gff)m(.pl)p
--27 2436 V 501 2668 a Fx(A)p Fy(U)t(T)t(H)t(O)t(R)t Fx(:)h
-Fv(J)n(osep)29 b(F)-13 b(.)30 b(Abril)53 b Fu(.)15 b(.)h(.)f(.)h(.)f(.)
+1890 V 125 2205 a Fz(P)t FA(R)r(O)t(G)t(R)t(A)t(M)34
+b Fz(N)r FA(A)t(M)t(E)t Fz(:)107 b Fy(blat2gff)m(.pl)p
+-27 2436 V 501 2668 a Fz(A)p FA(U)t(T)t(H)t(O)t(R)t Fz(:)h
+Fx(J)n(osep)29 b(F)-13 b(.)30 b(Abril)53 b Fw(.)15 b(.)h(.)f(.)h(.)f(.)
 h(.)f(.)h(.)f(.)h(.)g(.)f(.)h(.)f(.)h(.)f(.)h(.)f(.)h(.)f(.)h(.)f(.)h
-(.)f(.)h(.)f(.)h(.)g(.)f(.)h(.)f(.)42 b Ft(jabril@imim.es)493
-2899 y Fx(L)t Fy(I)t(C)t(E)t(N)t(S)t(E)5 b Fx(:)109 b(GNU)24
+(.)f(.)h(.)f(.)h(.)g(.)f(.)h(.)f(.)42 b Fv(jabril@imim.es)493
+2899 y Fz(L)t FA(I)t(C)t(E)t(N)t(S)t(E)5 b Fz(:)109 b(GNU)24
 b(General)h(Public)g(License)h(\(GNU-GPL\))263 3107 y(L)t
-Fy(A)t(S)t(T)33 b Fx(U)t Fy(P)t(D)q(A)l(T)t(E)t Fx(:)109
-b(October)25 b(5,)g(2001)269 3315 y(D)t Fy(E)t(S)t(C)t(R)t(I)t(P)t(T)5
-b(I)g(O)g(N)t Fx(:)109 b Fs(Con)l(v)o(erting)23 b(BLA)-11
-b(T)25 b(output)f(to)g(GFF)p -27 3574 V -27 3616 V 2270
-5490 a
+FA(A)t(S)t(T)33 b Fz(U)t FA(P)t(D)q(A)l(T)t(E)t Fz(:)109
+b(F)n(ebruary)25 b(28,)f(2003)269 3315 y(D)t FA(E)t(S)t(C)t(R)t(I)t(P)t
+(T)5 b(I)g(O)g(N)t Fz(:)109 b Fu(Con)l(v)o(erting)23
+b(BLA)-11 b(T)25 b(output)f(to)g(GFF)p -27 3574 V -27
+3616 V 2270 5490 a
  tx@Dict begin CP CP translate 0.9  1.  scale NET  end
- 2270 5490 a Fr(Genome)30 b(Inf)m(ormatics)e(Resear)n(ch)j(Lab)
-2270 5490 y
+ 2270 5490 a Ft(Genome)30 b(Inf)m(ormatics)e(Resear)n
+(ch)j(Lab)2270 5490 y
  tx@Dict begin CP CP translate 1 0.9 div 1 1. div scale NET  end
- 2270 5490 a 2336 5603 a Fq(Grup)23 b(de)h(Recerca)g(en)g
-(Infom\340tica)h(Biom\350dica)2401 5716 y(Institut)h(Municipal)f(d'In)l
-(v)o(estigaci\363)j(M\350dica)2939 5829 y(Uni)n(v)o(ersitat)d(Pompeu)f
-(F)o(abra)p Black Black eop
+ 2270 5490 a 2336 5603 a Fs(Grup)23
+b(de)h(Recerca)g(en)g(Infom\340tica)h(Biom\350dica)2401
+5716 y(Institut)h(Municipal)f(d'In)l(v)o(estigaci\363)j(M\350dica)2939
+5829 y(Uni)n(v)o(ersitat)d(Pompeu)f(F)o(abra)p Black
+Black eop
 %%Page: 1 2
-1 1 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(CONTENTS)2909 b(i)p -128 -243
-4016 9 v Black -128 35 a Fv(Contents)-128 242 y Fo(1)92
-b(Intr)n(oduction)3342 b(1)9 355 y Fq(1.1)96 b(Program)24
+1 1 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(CONTENTS)2909 b(i)p -128 -243
+4016 9 v Black -128 35 a Fx(Contents)-128 242 y Fq(1)92
+b(Intr)n(oduction)3342 b(1)9 355 y Fs(1.1)96 b(Program)24
 b(description)32 b(.)45 b(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g
 (.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)
 g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)p Black 175 w(1)p
@@ -805,17 +817,17 @@ Black 175 w(1)p Black 9 693 a(1.4)96 b(T)-7 b(o)22 b(Do)64
 b(.)45 b(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)
 g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g
 (.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)p
-Black 175 w(1)p Black -128 897 a Fo(2)92 b(Implementation)3214
-b(2)9 1010 y Fq(2.1)96 b(Program)24 b(outline)46 b(.)f(.)g(.)g(.)g(.)h
+Black 175 w(1)p Black -128 897 a Fq(2)92 b(Implementation)3214
+b(2)9 1010 y Fs(2.1)96 b(Program)24 b(outline)46 b(.)f(.)g(.)g(.)g(.)h
 (.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)
 f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g
-(.)g(.)p Black 175 w(2)p Black -128 1214 a Fo(A)71 b(empty)23
-b(appendix)f(section)2922 b(5)9 1327 y Fq(A.1)75 b(empty)24
+(.)g(.)p Black 175 w(2)p Black -128 1214 a Fq(A)71 b(empty)23
+b(appendix)f(section)2922 b(5)9 1327 y Fs(A.1)75 b(empty)24
 b(appendix)i(subsection)55 b(.)45 b(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h
 (.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)
 f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)p Black 175 w(5)p Black
--128 1531 a Fo(B)76 b(Common)22 b(code)i(blocks)3006
-b(6)9 1644 y Fq(B.1)80 b(PERL)21 b(scripts)84 b(.)45
+-128 1531 a Fq(B)76 b(Common)22 b(code)i(blocks)3006
+b(6)9 1644 y Fs(B.1)80 b(PERL)21 b(scripts)84 b(.)45
 b(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f
 (.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)
 g(.)g(.)g(.)h(.)f(.)g(.)g(.)p Black 175 w(6)p Black 218
@@ -842,38 +854,38 @@ g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)p
 Black 175 w(8)p Black 9 2434 a(B.4)80 b(GNU)22 b(General)i(Public)g
 (License)43 b(.)i(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g
 (.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)
-f(.)g(.)g(.)p Black 175 w(8)p Black -128 2638 a Fo(C)71
+f(.)g(.)g(.)p Black 175 w(8)p Black -128 2638 a Fq(C)71
 b(Extracting)25 b(code)e(blocks)g(fr)n(om)h(this)f(document)2167
-b(9)9 2751 y Fq(C.1)80 b(Extracts)25 b(Script)e(code)i(chunks)g(from)f
-(the)h Fp(N)t(O)r(W)t(E)t(B)h Fq(\002le)65 b(.)45 b(.)g(.)g(.)h(.)f(.)g
+b(9)9 2751 y Fs(C.1)80 b(Extracts)25 b(Script)e(code)i(chunks)g(from)f
+(the)h Fr(N)t(O)r(W)t(E)t(B)h Fs(\002le)65 b(.)45 b(.)g(.)g(.)h(.)f(.)g
 (.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)
 p Black 175 w(9)p Black 9 2864 a(C.2)80 b(Extracting)25
 b(dif)n(ferent)h(Con\002g)d(Files)64 b(.)46 b(.)f(.)g(.)g(.)g(.)g(.)h
 (.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)
 f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)p Black 175 w(9)p Black
 9 2976 a(C.3)80 b(Extracting)25 b(documentation)i(and)d(L)1359
-2962 y Fn(A)1394 2976 y Fq(T)1435 2997 y(E)1478 2976
+2962 y Fp(A)1394 2976 y Fs(T)1435 2997 y(E)1478 2976
 y(X'ing)g(it)41 b(.)k(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h
 (.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)p
 Black 175 w(9)p Black 9 3089 a(C.4)80 b(De\002ning)24
 b(w)o(orking)h(shell)f(v)n(ariables)i(for)d(the)h(current)h(project)62
 b(.)46 b(.)f(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)g(.)h(.)f(.)g(.)g(.)g(.)
 h(.)f(.)g(.)g(.)p Black 129 w(10)p Black -128 3382 a
-Fv(List)30 b(of)f(T)-11 b(ables)-128 3675 y(List)30 b(of)f(Figur)n(es)p
-Black Black 436 5818 a Fm(<)20 b Ft(Id:)49 b(perlscript.nw,v)e(1.5)i
-(2001/10/03)f(11:21:02)h(jabril)f(Exp)i Fm(>)p Black
--128 6076 V -128 6180 a Fl(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g
-(Lab)616 b Fk(Abril,)20 b(JF)1305 b Fl(October)19 b(5,)h(2001)p
-Black eop
+Fx(List)30 b(of)f(T)-11 b(ables)-128 3675 y(List)30 b(of)f(Figur)n(es)p
+Black Black 485 5818 a Fo(<)21 b Fv(Id:)49 b(blat2gff.nw,v)e(1.1)j
+(2001/10/22)d(14:44:13)i(jabril)f(Exp)i Fo(>)p Black
+-128 6076 V -128 6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g
+(Lab)616 b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20
+b(28,)f(2003)p Black eop
 %%Page: 1 3
-1 2 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(1.)23 b(Introduction)2831 b(1)p
--128 -243 4016 9 v Black -128 35 a Fv(1)120 b(Intr)n(oduction)-128
-245 y Fx(1.1)100 b(Pr)n(ogram)24 b(description)-128 423
-y(1.2)100 b(Input)p Black Black -345 584 a Fj(1)180 b
-Fi(h)p Fh(BLA)m(T)21 b(output)e(e)n(xample)h Fj(1)p Fi(i)q
-Fg(\021)-45 683 y Ft(39)100 b(9)149 b(0)g(0)g(0)h(0)f(0)g(0)g(++)100
-b(Hsap_BTK)197 b(78931)149 b(61871)g(61919)f
+1 2 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(1.)23 b(Introduction)2831 b(1)p
+-128 -243 4016 9 v Black -128 35 a Fx(1)120 b(Intr)n(oduction)-128
+245 y Fz(1.1)100 b(Pr)n(ogram)24 b(description)-128 423
+y(1.2)100 b(Input)p Black Black -382 584 a Fl(??)180
+b Fk(h)p Fj(BLA)m(T)21 b(output)e(e)n(xample)h Fl(??)q
+Fk(i)p Fi(\021)-45 683 y Fv(39)100 b(9)149 b(0)g(0)g(0)h(0)f(0)g(0)g
+(++)100 b(Hsap_BTK)197 b(78931)149 b(61871)g(61919)f
 (~/Research/HomologyProgs/wublast-)-45 783 y
 (blat/tests/homologydb/blat/raw/Mmus_BT)o(K.nib)193 b(88871)148
 b(64087)h(64135)f(1)h(48,)50 b(61871,)98 b(64087,)-45
@@ -912,73 +924,80 @@ b(Hsap_BTK)198 b(78931)148 b(22081)h(22114)f
 (~/Research/HomologyProgs/wublast-)-45 2178 y
 (blat/tests/homologydb/blat/raw/Mmus_BT)o(K.nib)193 b(88871)148
 b(75111)h(75144)f(1)h(33,)50 b(56817,)98 b(13727,)-128
-2477 y Fx(1.3)i(Output)-128 2654 y(1.4)g(T)-9 b(o)25
-b(Do)p Black 9 2829 a Ff(.)p Black 46 w Fq([)p Fe(Section)g
-Fq(2.1,)e Fe(pa)o(g)o(e)i Fq(4])100 2941 y(This)e(is)g(a)h(\002rst)f
+2477 y Fz(1.3)i(Output)-128 2654 y(1.4)g(T)-9 b(o)25
+b(Do)p Black 9 2829 a Fh(.)p Black 46 w Fs([)p Fg(Section)g
+Fs(2.1,)e Fg(pa)o(g)o(e)i Fs(4])100 2941 y(This)e(is)g(a)h(\002rst)f
 (draft)h(of)g(the)f(blat2gf)n(f.pl.)p Black 9 3129 a
-Ff(.)p Black 46 w Fq([)p Fe(Section)i Fq(2.1,)e Fe(pa)o(g)o(e)i
-Fq(4])100 3242 y(Include)g(GetOPTs)d(to)i(check)g(comand-line)j
-(options.)p Black -128 6076 V -128 6180 a Fl(Genome)20
-b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616 b Fk(Abril,)20
-b(JF)1305 b Fl(October)19 b(5,)h(2001)p Black eop
+Fh(.)p Black 46 w Fs([)p Fg(Section)i Fs(2.1,)e Fg(pa)o(g)o(e)i
+Fs(4])100 3242 y(Include)g(GetOPTs)d(to)i(check)g(comand-line)j
+(options.)p Black 9 3430 a Fh(.)p Black 46 w Fs([)p Fg(Section)e
+Fq(??)q Fs(,)e Fg(pa)o(g)o(e)h Fq(??)q Fs(])100 3543
+y(Mak)o(e)g(group)g(labeling)i(optional)g(\(\223T)-7
+b(ar)n(get.Group.Number\224\).)p Black -128 6076 V -128
+6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
+b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20 b(28,)f(2003)p
+Black eop
 %%Page: 2 4
-2 3 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(2.)23 b(Implementation)2704 b(2)p
--128 -243 4016 9 v Black -128 35 a Fv(2)120 b(Implementation)p
-Black Black -378 228 a Fj(2a)180 b Fi(h)p Fh(Pr)l(o)o(gr)o(am)20
-b(Info)g Fj(2a)p Fi(i)q Fg(\021)-45 328 y Ft(my)50 b($PROGRAM)e(=)i
-('blat2gff.pl';)-45 428 y(my)g($VERSION)e(=)i('0.1_alpha';)p
-Black Black -382 627 a Fj(2b)180 b Fi(h)p Fh(Pr)l(o)o(gr)o(am)20
-b(Description)g Fj(2b)p Fi(i)q Fg(\021)-45 727 y Ft(#)50
-b(#-----------------------------------)o(-----)o(---#)-45
+2 3 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(2.)23 b(Implementation)2704 b(2)p
+-128 -243 4016 9 v Black -128 35 a Fx(2)120 b(Implementation)p
+Black Black -382 228 a Fl(??)180 b Fk(h)p Fj(Pr)l(o)o(gr)o(am)20
+b(Info)g Fl(??)q Fk(i)p Fi(\021)2058 b Ff(\(?)19 b(0\2271\))-45
+328 y Fv(my)50 b($PROGRAM)e(=)i('blat2gff.pl';)-45 428
+y(my)g($VERSION)e(=)i('0.1_alpha';)p Black Black -382
+627 a Fl(??)180 b Fk(h)p Fj(Pr)l(o)o(gr)o(am)20 b(Description)g
+Fl(??)q Fk(i)p Fi(\021)1800 b Ff(\(?)19 b(0\2271\))-45
+727 y Fv(#)50 b(#-----------------------------------)o(-----)o(---#)-45
 826 y(#)g(#)1295 b(blat2gff.pl)1343 b(#)-45 926 y(#)50
 b(#-----------------------------------)o(-----)o(---#)-45
-1025 y(#)-45 1125 y(#)200 b(blat2gff.pl)47 b([options])h(<files>)-45
-1225 y(#)-45 1324 y(#)200 b(Remember)48 b(to)h(put)h(a)f(short)g
-(description)f(of)h(your)g(script)g(here...)-45 1424
-y(#)-45 1524 y(#)249 b(Copyright)48 b(\(C\))i(2001)f(-)g(Josep)g
-(Francesc)g(ABRIL)f(FERRANDO)-128 1823 y Fx(2.1)100 b(Pr)n(ogram)24
-b(outline)p Black Black -378 1984 a Fj(2c)180 b Fi(h)p
-Fh(blat2gf)o(f)19 b Fj(2c)p Fi(i)q Fg(\021)-45 2083 y
-Fi(h)p Fh(PERL)i(shebang)d Fj(6a)p Fi(i)-45 2183 y Ft(#)-45
-2282 y(#)50 b(MODULES)-45 2382 y(#)-45 2482 y Fi(h)p
-Fh(Use)22 b(Modules)d Fj(2d)p Fi(i)-45 2581 y Ft(#)-45
-2681 y(#)50 b(VARIABLES)-45 2781 y(#)-45 2880 y Fi(h)p
-Fh(Global)20 b(V)-9 b(ar)o(s)21 b Fj(2e)p Fi(i)-45 2980
-y Ft(#)-45 3079 y(#)50 b(MAIN)f(LOOP)-45 3179 y(#)-45
-3279 y Fi(h)p Fh(Main)21 b(Loop)e Fj(3a)p Fi(i)-45 3378
-y Ft(#)-45 3478 y(#)50 b(FUNCTIONS)-45 3578 y(#)-45 3677
-y Fi(h)p Fh(Functions)20 b Fj(3b)p Fi(i)p Black Black
--382 3876 a Fj(2d)180 b Fi(h)p Fh(Use)22 b(Modules)d
-Fj(2d)p Fi(i)q Fg(\021)p Black Black -378 4076 a Fj(2e)180
-b Fi(h)p Fh(Global)20 b(V)-9 b(ar)o(s)21 b Fj(2e)p Fi(i)p
-Fg(\021)-45 4175 y Ft(my)50 b(@frame)f(=)g(\(3,1,2\);)-45
-4275 y(my)h(\045blat)f(=)g(\()155 4375 y(STRAND)f(=>)100
-b(8,)155 4474 y(Q_NAME)48 b(=>)100 b(9,)155 4574 y(Q_LEN)e(=>)50
-b(10,)155 4673 y(Q_ORI)98 b(=>)50 b(11,)155 4773 y(Q_END)98
-b(=>)50 b(12,)155 4873 y(T_NAME)e(=>)i(13,)155 4972 y(T_LEN)98
-b(=>)50 b(14,)155 5072 y(T_ORI)98 b(=>)50 b(15,)155 5172
-y(T_END)98 b(=>)50 b(16,)155 5271 y(B_NUM)98 b(=>)50
-b(17,)155 5371 y(B_LEN)98 b(=>)50 b(18,)155 5470 y(B_QPOS)e(=>)i(19,)
-155 5570 y(B_TPOS)e(=>)i(20,)155 5670 y(\);)-45 5769
-y(my)g(\045gff)f(=)h(\(\);)-45 5869 y(my)g($maxfields)e(=)h(21;)p
-Black -128 6076 V -128 6180 a Fl(Genome)20 b(Inf)n(ormatics)g(Resear)o
-(ch)g(Lab)616 b Fk(Abril,)20 b(JF)1305 b Fl(October)19
-b(5,)h(2001)p Black eop
+1025 y(#)-45 1125 y(#)449 b(blat2gff.pl)47 b([options])h(<)i(inputfile)
+e(>)i(outputfile)-45 1225 y(#)-45 1324 y(#)349 b(Converts)48
+b(BLAT)h(output)g(files)g(to)g(GFF)h(formatted)e(files.)-45
+1424 y(#)-45 1524 y(#)249 b(Copyright)48 b(\(C\))i(2001-2003)e(-)h
+(Josep)g(Francesc)g(ABRIL)g(FERRANDO)-128 1823 y Fz(2.1)100
+b(Pr)n(ogram)24 b(outline)p Black Black -382 1984 a Fl(??)180
+b Fk(h)p Fj(blat2gf)o(f)19 b Fl(??)q Fk(i)p Fi(\021)-45
+2083 y Fk(h)p Fj(PERL)i(shebang)d Fl(??)q Fk(i)-45 2183
+y Fv(#)-45 2282 y(#)50 b(MODULES)-45 2382 y(#)-45 2482
+y Fk(h)p Fj(Use)22 b(Modules)d Fl(??)q Fk(i)-45 2581
+y Fv(#)-45 2681 y(#)50 b(VARIABLES)-45 2781 y(#)-45 2880
+y Fk(h)p Fj(Global)20 b(V)-9 b(ar)o(s)21 b Fl(??)p Fk(i)-45
+2980 y Fv(#)-45 3079 y(#)50 b(MAIN)f(LOOP)-45 3179 y(#)-45
+3279 y Fk(h)p Fj(Main)21 b(Loop)e Fl(??)q Fk(i)-45 3378
+y Fv(#)-45 3478 y(#)50 b(FUNCTIONS)-45 3578 y(#)-45 3677
+y Fk(h)p Fj(Functions)20 b Fl(??)p Fk(i)p Black Black
+-382 3876 a Fl(??)180 b Fk(h)p Fj(Use)22 b(Modules)d
+Fl(??)q Fk(i)p Fi(\021)2071 b Ff(\(?)19 b(0\2271\))p
+Black Black -382 4076 a Fl(??)180 b Fk(h)p Fj(Global)20
+b(V)-9 b(ar)o(s)21 b Fl(??)p Fk(i)q Fi(\021)1945 b Ff(\(?)19
+b(0\2271\))37 b Fl(??)14 b Fe(.)-45 4175 y Fv(my)50 b(@frame)f(=)g
+(\(3,1,2\);)-45 4275 y(my)h(\045blat)f(=)g(\()155 4375
+y(STRAND)f(=>)100 b(8,)155 4474 y(Q_NAME)48 b(=>)100
+b(9,)155 4574 y(Q_LEN)e(=>)50 b(10,)155 4673 y(Q_ORI)98
+b(=>)50 b(11,)155 4773 y(Q_END)98 b(=>)50 b(12,)155 4873
+y(T_NAME)e(=>)i(13,)155 4972 y(T_LEN)98 b(=>)50 b(14,)155
+5072 y(T_ORI)98 b(=>)50 b(15,)155 5172 y(T_END)98 b(=>)50
+b(16,)155 5271 y(B_NUM)98 b(=>)50 b(17,)155 5371 y(B_LEN)98
+b(=>)50 b(18,)155 5470 y(B_QPOS)e(=>)i(19,)155 5570 y(B_TPOS)e(=>)i
+(20,)155 5670 y(\);)-45 5769 y(my)g(\045gff)f(=)h(\(\);)-45
+5869 y(my)g($maxfields)e(=)h(21;)p Black -128 6076 V
+-128 6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
+b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20 b(28,)f(2003)p
+Black eop
 %%Page: 3 5
-3 4 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(2.1.)24 b Fd(Program)f(outline)2622
-b Fq(3)p -128 -243 4016 9 v Black -45 35 a Ft(my)50 b(\045group)f(=)g
+3 4 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(2.1.)24 b Fd(Program)f(outline)2622
+b Fs(3)p -128 -243 4016 9 v Black -45 35 a Fv(my)50 b(\045group)f(=)g
 (\(\);)-45 134 y(my)h(\($group_cnt,)d($rec_cnt\))i(=)g(\(0\))g(x)h(2;)p
-Black Black -378 334 a Fj(3a)180 b Fi(h)p Fh(Main)21
-b(Loop)e Fj(3a)p Fi(i)q Fg(\021)-45 433 y Ft(while)49
-b(\(<STDIN>\))f({)155 533 y(my)h(@f)h(=)f(\(\);)155 632
-y(next)g(unless)f(/^\\d/o;)155 732 y(chomp;)155 832 y(@f)h(=)h(split)f
-(/\\s+/og,)f($_;)155 931 y(do)h({)h(#)f(ensure)g(that)g(there)g(are)g
-(21)h(fields)354 1031 y(print)f(STDERR)g("###)g(NOT)g(enough)g(fields)f
-(for)h(this)h(record:\\n#####)d(@f)i(\\n";)354 1131 y(next;)155
-1230 y(})g(unless)g(scalar\(@f\))f(==)h($maxfields;)155
-1330 y(\045gff)g(=)g(\(\);)155 1429 y(++$rec_cnt;)155
+Black Black -382 334 a Fl(??)180 b Fk(h)p Fj(Main)21
+b(Loop)e Fl(??)q Fk(i)p Fi(\021)2140 b Ff(\(?)19 b(0\2271\))-45
+433 y Fv(while)49 b(\(<STDIN>\))f({)155 533 y(my)h(@f)h(=)f(\(\);)155
+632 y(next)g(unless)f(/^\\d/o;)155 732 y(chomp;)155 832
+y(@f)h(=)h(split)f(/\\s+/og,)f($_;)155 931 y(do)h({)h(#)f(ensure)g
+(that)g(there)g(are)g(21)h(fields)354 1031 y(print)f(STDERR)g("###)g
+(NOT)g(enough)g(fields)f(for)h(this)h(record:\\n#####)d(@f)i(\\n";)354
+1131 y(next;)155 1230 y(})g(unless)g(scalar\(@f\))f(==)h($maxfields;)
+155 1330 y(\045gff)g(=)g(\(\);)155 1429 y(++$rec_cnt;)155
 1529 y($f[$blat{STRAND}])d(=~)k(/\(.\)\(.\)/og)e(&&)354
 1629 y(\($gff{Q_STRAND})f(=)j($1,)f($gff{T_STRAND})e(=)j($2\);)155
 1728 y(do)f({)h(#)f(ensure)g(that)g(strands)g(are)g(+/-)354
@@ -1013,29 +1032,31 @@ y($gff{Q_NAME},)d("BLAT","$gff{Q_LEN}:$gff{T_LEN}",)553
 4418 y($gff{T_ORI},)h($gff{T_END},)f($gff{T_STRAND},)g($gff{T_FRAME};)
 155 4518 y(&loop_HSPs\($rec_cnt\);)-45 4618 y(};)j(#)g(while)e(read)h
 (input)-45 4817 y(exit\(0\);)p Black Black -382 5016
-a Fj(3b)180 b Fi(h)p Fh(Functions)20 b Fj(3b)p Fi(i)q
-Fg(\021)-45 5116 y Ft(sub)50 b(get_frame\(\))d({)155
-5215 y(my)i(\($strand,$len,$ori,$end\))c(=)50 b(@_;)155
-5315 y(if)f(\($strand)f(eq)i('-'\))f({)304 5415 y(return)g
-($frame[\(\($len)e(-)j($end)f(+)h(1\))f(\045)h(3\)];)155
-5514 y(})f(else)g({)304 5614 y(return)g($frame[\($ori)e(\045)j(3\)];)
-155 5713 y(})-45 5813 y(})g(#)g(get_frame)-45 5913 y(sub)g(get_hsp\(\))
-e({)p Black -128 6076 V -128 6180 a Fl(Genome)20 b(Inf)n(ormatics)g
-(Resear)o(ch)g(Lab)616 b Fk(Abril,)20 b(JF)1305 b Fl(October)19
-b(5,)h(2001)p Black eop
+a Fl(??)180 b Fk(h)p Fj(Functions)20 b Fl(??)p Fk(i)q
+Fi(\021)2011 b Ff(\(?)19 b(0\2271\))37 b Fl(??)14 b Fe(.)-45
+5116 y Fv(sub)50 b(get_frame\(\))d({)155 5215 y(my)i
+(\($strand,$len,$ori,$end\))c(=)50 b(@_;)155 5315 y(if)f(\($strand)f
+(eq)i('-'\))f({)304 5415 y(return)g($frame[\(\($len)e(-)j($end)f(+)h
+(1\))f(\045)h(3\)];)155 5514 y(})f(else)g({)304 5614
+y(return)g($frame[\($ori)e(\045)j(3\)];)155 5713 y(})-45
+5813 y(})g(#)g(get_frame)-45 5913 y(sub)g(get_hsp\(\))e({)p
+Black -128 6076 V -128 6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o
+(ch)g(Lab)616 b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20
+b(28,)f(2003)p Black eop
 %%Page: 4 6
-4 5 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(2.1.)24 b Fd(Program)f(outline)2622
-b Fq(4)p -128 -243 4016 9 v Black 155 35 a Ft(my)49 b(\($s,$L,$l,$n\))f
+4 5 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(2.1.)24 b Fd(Program)f(outline)2622
+b Fs(4)p -128 -243 4016 9 v Black 155 35 a Fv(my)49 b(\($s,$L,$l,$n\))f
 (=)h(@_;)155 134 y(my)g(\($o,$e\);)155 234 y(if)g(\($s)g(eq)h('-'\))f
 ({)354 334 y($e)g(=)h($L)f(-)h($n;)354 433 y($o)f(=)h($e)f(-)h($l)155
 533 y(})f(else)g({)354 632 y($o)g(=)h($n;)354 732 y($e)f(=)h($o)f(+)h
 ($l;)155 832 y(};)155 931 y($o++;)f($e++;)f(#)i(HSP)f(coords)g(start)g
 (at)g(0,)h(not)f(at)g(1)155 1031 y(return)f(\($o,)h($e,)h
 (&get_frame\($s,$L,$o,$e\)\);)-45 1131 y(})g(#)g(get_hsp)p
-Black Black -378 1330 a Fj(4a)180 b Fi(h)p Fh(Global)20
-b(V)-9 b(ar)o(s)21 b Fj(2e)p Fi(i)p Fc(+)p Fg(\021)-45
-1429 y Ft(#)50 b(GetSRsAln.pl)e(like:)-45 1529 y
+Black Black -382 1330 a Fl(??)180 b Fk(h)p Fj(Global)20
+b(V)-9 b(ar)o(s)21 b Fl(??)p Fk(i)q Fc(+)o Fi(\021)1875
+b Ff(\(?)19 b(0\2271\))37 b Fe(/)14 b Fl(??)-45 1429
+y Fv(#)50 b(GetSRsAln.pl)e(like:)-45 1529 y
 (#$srs->{QUERY}\\t$blst_prg\\tsr\\t$srs->{)o(START)o(_Q}\\t)o($srs->)o
 ({END_)o(Q})-45 1629 y(#\\t$srs->{SCORE}\\t$srs->{STRAND_Q}\\t$s)o
 (rs->{)o(FRAME)o(_Q})-45 1728 y(#\\tTarget)h
@@ -1045,9 +1066,10 @@ b(V)-9 b(ar)o(s)21 b Fj(2e)p Fi(i)p Fc(+)p Fg(\021)-45
 b($srs->{PROJECTION})-45 2027 y(my)50 b($GFFstring)e(=)h
 (\("\\\045s\\t")g(x)g(8\).'Target)f("\045s"'.)304 2127
 y("\\t\\\045s\\t\\\045s\\tE_Value)e(.\\tStrand)i(\\\045s\\tFrame)g
-(\\\045s\\n";)p Black Black -382 2326 a Fj(4b)180 b Fi(h)p
-Fh(Functions)20 b Fj(3b)p Fi(i)q Fc(+)o Fg(\021)-45 2426
-y Ft(sub)50 b(loop_HSPs\(\))d({)155 2525 y(my)i(\($num\))g(=)g(@_;)155
+(\\\045s\\n";)p Black Black -382 2326 a Fl(??)180 b Fk(h)p
+Fj(Functions)20 b Fl(??)p Fk(i)q Fc(+)o Fi(\021)1941
+b Ff(\(?)19 b(0\2271\))37 b Fe(/)14 b Fl(??)-45 2426
+y Fv(sub)50 b(loop_HSPs\(\))d({)155 2525 y(my)i(\($num\))g(=)g(@_;)155
 2625 y(my)g(\($c,$l,$q,$t,$qo,$qe,$qf,$to,$te,$tf)o(\);)155
 2725 y(for)g(\($c)g(=)h(0;)f($c)h(<)f($gff{B_NUM};)f($c++\))h({)354
 2824 y($l)g(=)h($gff{B_LEN}[$c];)354 2924 y($q)f(=)h($gff{B_QPOS}[$c];)
@@ -1060,7 +1082,7 @@ y Ft(sub)50 b(loop_HSPs\(\))d({)155 2525 y(my)i(\($num\))g(=)g(@_;)155
 ($to,)49 b($te,)g($gff{T_STRAND},)e($tf;)155 3621 y(};)i(#)h(for)-45
 3721 y(})g(#)g(loop_HSPs)-51 4006 y @beginspecial @setspecial
  tx@Dict begin STP newpath 1.0 SLW 0.00 0.80 0.80 0.00  setcmykcolor
- 0.2 true 10.85498 neg 43.05605 neg 471.57404 10.85498 .5 Frame  gsave
+ 0.2 true 10.85498 neg 58.6923 neg 471.57404 10.85498 .5 Frame  gsave
 0.00 0.00 0.25 0.00  setcmykcolor fill grestore gsave 1.0 SLW 0.00
 0.80 0.80 0.00  setcmykcolor 0 setlinecap stroke  grestore end
 
@@ -1072,96 +1094,100 @@ y Ft(sub)50 b(loop_HSPs\(\))d({)155 2525 y(my)i(\($num\))g(=)g(@_;)155
 0.80 0.00  setcmykcolor 0 setlinecap stroke  grestore end
  
 @endspecial
-0.00 0.80 0.80 0.00 TeXcolorcmyk 107 w Fo(T)n(O)22 b(DO)p
-Black Black 108 4124 a Fg(\017)p Black 46 w Fq(This)i(is)f(a)g(\002rst)
+0.00 0.80 0.80 0.00 TeXcolorcmyk 107 w Fq(T)n(O)22 b(DO)p
+Black Black 108 4124 a Fi(\017)p Black 46 w Fs(This)i(is)f(a)g(\002rst)
 g(draft)i(of)e(the)h(blat2gf)n(f.pl.)p Black 108 4254
-a Fg(\017)p Black 46 w Fq(Include)i(GetOPTs)c(to)h(check)i(comand-line)
-h(options.)p Black -128 6076 V -128 6180 a Fl(Genome)20
-b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616 b Fk(Abril,)20
-b(JF)1305 b Fl(October)19 b(5,)h(2001)p Black eop
+a Fi(\017)p Black 46 w Fs(Include)i(GetOPTs)c(to)h(check)i(comand-line)
+h(options.)p Black 108 4384 a Fi(\017)p Black 46 w Fs(Mak)o(e)e(group)h
+(labeling)h(optional)f(\(\223T)-7 b(ar)n(get.Group.Number\224\).)p
+Black -128 6076 V -128 6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o
+(ch)g(Lab)616 b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20
+b(28,)f(2003)p Black eop
 %%Page: 5 7
-5 6 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(A.)23 b(empty)h(appendix)i(section)2394
-b(5)p -128 -243 4016 9 v Black -128 35 a Fv(A)120 b(empty)30
-b(appendix)i(section)-128 245 y Fx(A.1)100 b(empty)25
+5 6 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(A.)23 b(empty)h(appendix)i(section)2394
+b(5)p -128 -243 4016 9 v Black -128 35 a Fx(A)120 b(empty)30
+b(appendix)i(section)-128 245 y Fz(A.1)100 b(empty)25
 b(appendix)h(subsection)p Black -128 6076 V -128 6180
-a Fl(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
-b Fk(Abril,)20 b(JF)1305 b Fl(October)19 b(5,)h(2001)p
+a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
+b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20 b(28,)f(2003)p
 Black eop
 %%Page: 6 8
-6 7 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(B.)23 b(Common)g(code)h(blocks)2470
-b(6)p -128 -243 4016 9 v Black -128 35 a Fv(B)120 b(Common)29
-b(code)h(blocks)-128 245 y Fx(B.1)100 b(PERL)26 b(scripts)p
-Black Black -378 406 a Fj(6a)180 b Fi(h)p Fh(PERL)21
-b(shebang)d Fj(6a)p Fi(i)q Fg(\021)-45 506 y Ft(#!/usr/bin/perl)47
-b(-w)-45 605 y(#)j(This)f(is)h(perl,)e(version)h(5.005_03)f(built)h
-(for)g(i386-linux)-45 705 y(#)-45 805 y Fi(h)p Fh(Pr)l(o)o(gr)o(am)20
-b(Description)g Fj(2b)p Fi(i)-45 904 y Ft(#)-45 1004
-y Fi(h)p Fh(GNU)i(License)e Fj(8d)p Fi(i)-45 1103 y Ft(#)-45
-1203 y Fi(h)p Fh(V)-9 b(er)o(sion)21 b(Contr)l(ol)f(Id)g(T)-8
-b(a)o(g)21 b Fj(8c)p Fi(i)-45 1303 y Ft(#)-45 1402 y(use)50
-b(strict;)-45 1502 y(#)-45 1602 y Fi(h)p Fh(Pr)l(o)o(gr)o(am)20
-b(Info)g Fj(2a)p Fi(i)-45 1701 y Ft(my)50 b($DATE)f(=)g(localtime;)-45
+6 7 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(B.)23 b(Common)g(code)h(blocks)2470
+b(6)p -128 -243 4016 9 v Black -128 35 a Fx(B)120 b(Common)29
+b(code)h(blocks)-128 245 y Fz(B.1)100 b(PERL)26 b(scripts)p
+Black Black -382 406 a Fl(??)180 b Fk(h)p Fj(PERL)21
+b(shebang)d Fl(??)q Fk(i)p Fi(\021)2011 b Ff(\(?)19 b(0\2271\))-45
+506 y Fv(#!/usr/bin/perl)47 b(-w)-45 605 y(#)j(This)f(is)h(perl,)e
+(version)h(5.005_03)f(built)h(for)g(i386-linux)-45 705
+y(#)-45 805 y Fk(h)p Fj(Pr)l(o)o(gr)o(am)20 b(Description)g
+Fl(??)q Fk(i)-45 904 y Fv(#)-45 1004 y Fk(h)p Fj(GNU)i(License)e
+Fl(??)q Fk(i)-45 1103 y Fv(#)-45 1203 y Fk(h)p Fj(V)-9
+b(er)o(sion)21 b(Contr)l(ol)f(Id)g(T)-8 b(a)o(g)21 b
+Fl(??)p Fk(i)-45 1303 y Fv(#)-45 1402 y(use)50 b(strict;)-45
+1502 y(#)-45 1602 y Fk(h)p Fj(Pr)l(o)o(gr)o(am)20 b(Info)g
+Fl(??)q Fk(i)-45 1701 y Fv(my)50 b($DATE)f(=)g(localtime;)-45
 1801 y(my)h($USER)f(=)g(defined\($ENV{USER}\))e(?)i($ENV{USER})f(:)i
 ('Child)f(Process';)-45 1900 y(my)h($host)f(=)g(`hostname`;)-45
 2000 y(chomp\($host\);)-45 2100 y(#)p Black Black -382
-2299 a Fj(6b)180 b Fi(h)p Fh(Global)20 b(Constants)g(-)g(Boolean)f
-Fj(6b)p Fi(i)q Fg(\021)-45 2399 y Ft(my)50 b(\($T,$F\))e(=)i(\(1,0\);)f
-(#)g(for)h('T'rue)e(and)i('F'alse)-128 2694 y Fo(B.1.1)91
-b(T)n(iming)23 b(our)g(scripts)-128 2869 y Fq(The)f(')p
-Fb(Benchmark)p Fq(')17 b(module)23 b(encapsulates)j(a)21
+2299 a Fl(??)180 b Fk(h)p Fj(Global)20 b(Constants)g(-)g(Boolean)f
+Fl(??)q Fk(i)p Fi(\021)-45 2399 y Fv(my)50 b(\($T,$F\))e(=)i(\(1,0\);)f
+(#)g(for)h('T'rue)e(and)i('F'alse)-128 2694 y Fq(B.1.1)91
+b(T)n(iming)23 b(our)g(scripts)-128 2869 y Fs(The)f(')p
+Fb(Benchmark)p Fs(')17 b(module)23 b(encapsulates)j(a)21
 b(number)i(of)f(routines)i(to)e(help)g(to)g(\002gure)g(out)h(ho)n(w)e
 (long)i(it)e(tak)o(es)i(to)f(e)o(x)o(ecute)-128 2981
 y(a)i(piece)g(of)g(code)g(and)g(the)g(whole)g(script.)p
-Black Black -378 3131 a Fj(6c)180 b Fi(h)p Fh(Use)22
-b(Modules)d(-)i(Benc)o(hmark)d Fj(6c)p Fi(i)q Fg(\021)-45
-3230 y Ft(use)50 b(Benchmark;)55 3330 y Fi(h)p Fh(T)-5
-b(imer)22 b(ON)f Fj(6d)p Fi(i)14 3493 y Fq(See)k(')p
-Fb(man)53 b(Benchmark)p Fq(')21 b(for)26 b(further)i(info)e(about)h
+Black Black -382 3131 a Fl(??)180 b Fk(h)p Fj(Use)22
+b(Modules)d(-)i(Benc)o(hmark)d Fl(??)q Fk(i)p Fi(\021)-45
+3230 y Fv(use)50 b(Benchmark;)55 3330 y Fk(h)p Fj(T)-5
+b(imer)22 b(ON)f Fl(??)q Fk(i)14 3493 y Fs(See)k(')p
+Fb(man)53 b(Benchmark)p Fs(')21 b(for)26 b(further)i(info)e(about)h
 (this)g(package.)37 b(W)-7 b(e)25 b(set)h(an)g(array)g(to)g(k)o(eep)h
 (record)g(of)f(timing)g(for)-128 3606 y(each)f(section.)p
-Black Black -382 3755 a Fj(6d)180 b Fi(h)p Fh(T)-5 b(imer)22
-b(ON)f Fj(6d)p Fi(i)q Fg(\021)-45 3855 y Ft(my)50 b(@Timer)f(=)g(\(new)
-g(Benchmark\);)p Black Black -378 4054 a Fj(6e)180 b
-Fi(h)p Fh(Common)20 b(PERL)g(subs)h(-)f(Benc)o(hmark)f
-Fj(6e)p Fi(i)q Fg(\021)-45 4154 y Ft(sub)50 b(timing\(\))e({)155
-4253 y(push)h(@Timer,)f(\(new)h(Benchmark\);)155 4353
-y(#)g(partial)g(time)155 4453 y($_[0])g(||)354 4552 y(\(return)f
+Black Black -382 3755 a Fl(??)180 b Fk(h)p Fj(T)-5 b(imer)22
+b(ON)f Fl(??)q Fk(i)p Fi(\021)2177 b Ff(\(?)19 b(0\2271\))-45
+3855 y Fv(my)50 b(@Timer)f(=)g(\(new)g(Benchmark\);)p
+Black Black -382 4054 a Fl(??)180 b Fk(h)p Fj(Common)20
+b(PERL)g(subs)h(-)f(Benc)o(hmark)f Fl(??)p Fk(i)q Fi(\021)-45
+4154 y Fv(sub)50 b(timing\(\))e({)155 4253 y(push)h(@Timer,)f(\(new)h
+(Benchmark\);)155 4353 y(#)g(partial)g(time)155 4453
+y($_[0])g(||)354 4552 y(\(return)f
 (timestr\(timediff\($Timer[$#Timer],$Time)o(r[\($#)o(Timer)43
 b(-)50 b(1\)]\)\)\);)155 4652 y(#)f(total)g(time)155
 4751 y(return)f(timestr\(timediff\($Timer[$#Timer],$Tim)o(er[0]\))o
-(\);)-45 4851 y(})i(#)g(timing)-128 5147 y Fo(B.1.2)91
+(\);)-45 4851 y(})i(#)g(timing)-128 5147 y Fq(B.1.2)91
 b(Printing)23 b(complex)h(Data)g(Structur)n(es)-128 5321
-y Fq(W)l(ith)g(')p Fb(Data::Dumper)p Fq(')18 b(we)23
+y Fs(W)l(ith)g(')p Fb(Data::Dumper)p Fs(')18 b(we)23
 b(are)h(able)g(to)f(pretty)i(print)g(comple)o(x)f(data)g(structures)i
-(for)e(deb)n(ugging)j(them.)p Black Black -370 5470 a
-Fj(6f)180 b Fi(h)p Fh(Use)22 b(Modules)d(-)i(Dumper)e
-Fj(6f)p Fi(i)q Fg(\021)-45 5570 y Ft(use)50 b(Data::Dumper;)-45
+(for)e(deb)n(ugging)j(them.)p Black Black -382 5470 a
+Fl(??)180 b Fk(h)p Fj(Use)22 b(Modules)d(-)i(Dumper)e
+Fl(??)q Fk(i)p Fi(\021)-45 5570 y Fv(use)50 b(Data::Dumper;)-45
 5670 y(local)f($Data::Dumper::Purity)d(=)k(0;)-45 5769
 y(local)f($Data::Dumper::Deepcopy)d(=)j(1;)p Black -128
-6076 V -128 6180 a Fl(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)
-616 b Fk(Abril,)20 b(JF)1305 b Fl(October)19 b(5,)h(2001)p
+6076 V -128 6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)
+616 b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20 b(28,)f(2003)p
 Black eop
 %%Page: 7 9
-7 8 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(B.1.)23 b Fd(PERL)e(scripts)2712
-b Fq(7)p -128 -243 4016 9 v Black -128 35 a Fo(B.1.3)91
-b(Common)23 b(functions)p Black Black -378 196 a Fj(7a)180
-b Fi(h)p Fh(Skip)20 b(comments)g(and)f(empty)i(r)m(ecor)m(ds)f
-Fj(7a)p Fi(i)q Fg(\021)-45 295 y Ft(next)50 b(if)f(/^\\#/o;)-45
+7 8 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(B.1.)23 b Fd(PERL)e(scripts)2712
+b Fs(7)p -128 -243 4016 9 v Black -128 35 a Fq(B.1.3)91
+b(Common)23 b(functions)p Black Black -382 196 a Fl(??)180
+b Fk(h)p Fj(Skip)20 b(comments)g(and)f(empty)i(r)m(ecor)m(ds)f
+Fl(??)p Fk(i)q Fi(\021)-45 295 y Fv(next)50 b(if)f(/^\\#/o;)-45
 395 y(next)h(if)f(/^\\s*$/o;)-45 495 y(chomp;)p Black
-Black -382 684 a Fj(7b)180 b Fi(h)p Fh(Common)20 b(PERL)g(subs)h(-)f
-(Min)h(Max)f Fj(7b)p Fi(i)q Fg(\021)-45 784 y Ft(#)-45
+Black -382 684 a Fl(??)180 b Fk(h)p Fj(Common)20 b(PERL)g(subs)h(-)f
+(Min)h(Max)f Fl(??)q Fk(i)p Fi(\021)-45 784 y Fv(#)-45
 884 y(sub)50 b(max\(\))f({)155 983 y(my)g($z)h(=)f(shift)g(@_;)155
 1083 y(foreach)f(my)i($l)f(\(@_\))g({)h($z)f(=)h($l)f(if)h($l)f(>)h($z)
 f(};)155 1183 y(return)f($z;)-45 1282 y(})i(#)g(max)-45
 1382 y(sub)g(min\(\))f({)155 1481 y(my)g($z)h(=)f(shift)g(@_;)155
 1581 y(foreach)f(my)i($l)f(\(@_\))g({)h($z)f(=)h($l)f(if)h($l)f(<)h($z)
 f(};)155 1681 y(return)f($z;)-45 1780 y(})i(#)g(min)p
-Black Black -378 1970 a Fj(7c)180 b Fi(h)p Fh(Common)20
-b(PERL)g(subs)h(-)f(T)-8 b(e)n(xt)22 b(\002ll)e Fj(7c)p
-Fi(i)q Fg(\021)-45 2070 y Ft(#)-45 2169 y(sub)50 b(fill_right\(\))d({)j
+Black Black -382 1970 a Fl(??)180 b Fk(h)p Fj(Common)20
+b(PERL)g(subs)h(-)f(T)-8 b(e)n(xt)22 b(\002ll)e Fl(??)q
+Fk(i)p Fi(\021)-45 2070 y Fv(#)-45 2169 y(sub)50 b(fill_right\(\))d({)j
 ($_[0].\($_[2])d(x)j(\($_[1])f(-)g(length\($_[0]\)\)\))e(})-45
 2269 y(sub)j(fill_left\(\))97 b({)50 b(\($_[2])f(x)g(\($_[1])g(-)h
 (length\($_[0]\)\)\).$_[0])45 b(})-45 2369 y(sub)50 b(fill_mid\(\))147
@@ -1169,11 +1195,11 @@ b({)155 2468 y(my)49 b($l)h(=)f(length\($_[0]\);)155
 2568 y(my)g($k)h(=)f(int\(\($_[1])f(-)i($l\)/2\);)155
 2668 y(\($_[2])e(x)i($k\).$_[0].\($_[2])d(x)i(\($_[1])g(-)h
 (\($l+$k\)\)\);)-45 2767 y(})g(#)g(fill_mid)14 2925 y
-Fq(These)22 b(functions)j(are)e(used)g(to)f(report)h(to)g(STDERR)c(a)j
+Fs(These)22 b(functions)j(are)e(used)g(to)f(report)h(to)g(STDERR)c(a)j
 (single)h(char)g(for)g(each)g(record)h(processed)g(\(useful)g(for)f
 (reporting)-128 3038 y(parsed)i(records\).)p Black Black
--382 3183 a Fj(7d)180 b Fi(h)p Fh(Common)20 b(PERL)g(subs)h(-)f
-(Counter)g Fj(7d)p Fi(i)q Fg(\021)-45 3283 y Ft(#)-45
+-382 3183 a Fl(??)180 b Fk(h)p Fj(Common)20 b(PERL)g(subs)h(-)f
+(Counter)g Fl(??)q Fk(i)p Fi(\021)-45 3283 y Fv(#)-45
 3382 y(sub)50 b(counter)e({)i(#)f($_[0]~current_pos++)e($_[1]~char)155
 3482 y(print)i(STDERR)f("$_[1]";)155 3581 y(\(\($_[0])g(\045)i(50\))f
 (==)h(0\))f(&&)g(\(print)g(STDERR)g
@@ -1182,159 +1208,165 @@ y(})h(#)g(counter)-45 3781 y(#)-45 3880 y(sub)g(counter_end)d({)j(#)g
 ($_[0]~current_pos)146 b($_[1]~char)155 3980 y(\(\($_[0])48
 b(\045)i(50\))f(!=)h(0\))f(&&)g(\(print)g(STDERR)g
 ("[".&fill_left\($_[0],6,"0"\)."]\\n"\))o(;)-45 4080
-y(})h(#)g(counter_end)p Black Black -378 4269 a Fj(7e)180
-b Fi(h)p Fh(Global)20 b(V)-9 b(ar)o(s)21 b(-)f(Counter)g
-Fj(7e)p Fi(i)q Fg(\021)-45 4369 y Ft(my)50 b(\($n,$c\);)e(#)i(counter)e
+y(})h(#)g(counter_end)p Black Black -382 4269 a Fl(??)180
+b Fk(h)p Fj(Global)20 b(V)-9 b(ar)o(s)21 b(-)f(Counter)g
+Fl(??)q Fk(i)p Fi(\021)-45 4369 y Fv(my)50 b(\($n,$c\);)e(#)i(counter)e
 (and)i(char)f(\(for)g(&counter)f(function\))-128 4658
-y Fo(B.1.4)91 b(Common)23 b(functions)g(f)n(or)h(r)n(eporting)g(pr)n
-(ogram)h(pr)n(ocesses)-128 4832 y Fq(Function)38 b(')p
-Fb(report)p Fq(')33 b(requires)39 b(that)d(a)g(hash)h(v)n(ariable)h(')p
-Fb(\045MessageList)p Fq(')31 b(has)36 b(been)h(set,)j(such)d(hash)g
+y Fq(B.1.4)91 b(Common)23 b(functions)g(f)n(or)h(r)n(eporting)g(pr)n
+(ogram)h(pr)n(ocesses)-128 4832 y Fs(Function)38 b(')p
+Fb(report)p Fs(')33 b(requires)39 b(that)d(a)g(hash)h(v)n(ariable)h(')p
+Fb(\045MessageList)p Fs(')31 b(has)36 b(been)h(set,)j(such)d(hash)g
 (contains)h(the)-128 4945 y(strings)26 b(for)e(each)h(report)g(message)
 g(we)e(will)h(need.)31 b(The)23 b(\002rst)h(parameter)i(for)e(')p
-Fb(report)p Fq(')d(is)j(a)f(k)o(e)o(y)h(for)g(that)h(hash,)f(in)g
+Fb(report)p Fs(')d(is)j(a)f(k)o(e)o(y)h(for)g(that)h(hash,)f(in)g
 (order)-128 5058 y(to)32 b(retrie)n(v)o(e)h(the)g(message)g(string,)i
 (the)d(other)h(parameters)h(passed)f(are)f(processed)j(by)d(the)g
-Fb(sprintf)c Fq(function)34 b(on)e(that)-128 5171 y(string.)p
-Black Black -370 5316 a Fj(7f)180 b Fi(h)p Fh(Common)20
-b(PERL)g(subs)h(-)f(STDERR)g Fj(7f)p Fi(i)p Fg(\021)-45
-5415 y Ft(sub)50 b(report\(\))e({)i(print)f(STDERR)f
-(sprintf\($MessageList{)e(shift)j(@_)g(},@_\))g(})14
-5573 y Fq(The)24 b(same)h(happens)i(to)d(')p Fb(warn)p
-Fq(')f(function)k(which)e(also)h(requires)h(a)d(hash)i(v)n(ariable)g(')
-p Fb(\045ErrorList)p Fq(')20 b(containing)28 b(the)-128
-5686 y(error)d(messages.)p Black Black -382 5831 a Fj(7g)180
-b Fi(h)p Fh(Common)20 b(PERL)g(subs)h(-)f(STDERR)g Fj(7f)p
-Fi(i)p Fc(+)p Fg(\021)-45 5930 y Ft(sub)50 b(warn\(\))e({)i(print)f
-(STDERR)g(sprintf\($ErrorList{)d(shift)j(@_)g(},)h(@_\))f(})p
-Black -128 6076 V -128 6180 a Fl(Genome)20 b(Inf)n(ormatics)g(Resear)o
-(ch)g(Lab)616 b Fk(Abril,)20 b(JF)1305 b Fl(October)19
-b(5,)h(2001)p Black eop
+Fb(sprintf)c Fs(function)34 b(on)e(that)-128 5171 y(string.)p
+Black Black -382 5316 a Fl(??)180 b Fk(h)p Fj(Common)20
+b(PERL)g(subs)h(-)f(STDERR)g Fl(??)p Fk(i)q Fi(\021)1575
+b Fl(??)14 b Fe(.)-45 5415 y Fv(sub)50 b(report\(\))e({)i(print)f
+(STDERR)f(sprintf\($MessageList{)e(shift)j(@_)g(},@_\))g(})14
+5573 y Fs(The)24 b(same)h(happens)i(to)d(')p Fb(warn)p
+Fs(')f(function)k(which)e(also)h(requires)h(a)d(hash)i(v)n(ariable)g(')
+p Fb(\045ErrorList)p Fs(')20 b(containing)28 b(the)-128
+5686 y(error)d(messages.)p Black Black -382 5831 a Fl(??)180
+b Fk(h)p Fj(Common)20 b(PERL)g(subs)h(-)f(STDERR)g Fl(??)p
+Fk(i)q Fc(+)o Fi(\021)1505 b Fe(/)14 b Fl(??)-45 5930
+y Fv(sub)50 b(warn\(\))e({)i(print)f(STDERR)g(sprintf\($ErrorList{)d
+(shift)j(@_)g(},)h(@_\))f(})p Black -128 6076 V -128
+6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
+b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20 b(28,)f(2003)p
+Black eop
 %%Page: 8 10
-8 9 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t Fp(G)t(FF)t
-Fq(.)t Fp(P)t(L)99 b Fq(B.2.)23 b Fd(B)m(ASH)e(scripts)2695
-b Fq(8)p -128 -243 4016 9 v Black -128 35 a Fx(B.2)100
-b(B)m(ASH)25 b(scripts)p Black Black -378 196 a Fj(8a)180
-b Fi(h)p Fh(B)n(ASH)20 b(shebang)f Fj(8a)p Fi(i)q Fg(\021)-45
-295 y Ft(#!/usr/bin/bash)-45 395 y(#)50 b(GNU)f(bash,)g(version)g
-(2.03.6\(1\)-release)d(\(i386-redhat-linux-gnu\))-45
-495 y Fi(h)p Fh(V)-9 b(er)o(sion)21 b(Contr)l(ol)f(Id)g(T)-8
-b(a)o(g)21 b Fj(8c)p Fi(i)-45 594 y Ft(#)-45 694 y(SECONDS=0)49
-b(#)g(Reset)g(Timing)-45 793 y(#)h(Which)f(script)g(are)g(we)g
-(running...)-45 893 y(L="####################")-45 993
-y({)h(echo)f("$L$L$L$L";)55 1092 y(echo)g("###)g(RUNNING)g([$0]";)55
-1192 y(echo)g("###)g(Current)g(date:`date`";)55 1292
-y(echo)g("###";)g(})g(1>&2;)p Black Black -382 1491 a
-Fj(8b)180 b Fi(h)p Fh(B)n(ASH)20 b(script)h(end)f Fj(8b)p
-Fi(i)q Fg(\021)-45 1590 y Ft({)50 b(echo)f("###";)g(echo)g("###)g
+8 9 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t Fr(G)t(FF)t
+Fs(.)t Fr(P)t(L)99 b Fs(B.2.)23 b Fd(B)m(ASH)e(scripts)2695
+b Fs(8)p -128 -243 4016 9 v Black -128 35 a Fz(B.2)100
+b(B)m(ASH)25 b(scripts)p Black Black -382 196 a Fl(??)180
+b Fk(h)p Fj(B)n(ASH)20 b(shebang)f Fl(??)p Fk(i)q Fi(\021)1956
+b Ff(\(?)19 b(?)g(0\2271\))-45 295 y Fv(#!/usr/bin/bash)-45
+395 y(#)50 b(GNU)f(bash,)g(version)g(2.03.6\(1\)-release)d
+(\(i386-redhat-linux-gnu\))-45 495 y Fk(h)p Fj(V)-9 b(er)o(sion)21
+b(Contr)l(ol)f(Id)g(T)-8 b(a)o(g)21 b Fl(??)p Fk(i)-45
+594 y Fv(#)-45 694 y(SECONDS=0)49 b(#)g(Reset)g(Timing)-45
+793 y(#)h(Which)f(script)g(are)g(we)g(running...)-45
+893 y(L="####################")-45 993 y({)h(echo)f("$L$L$L$L";)55
+1092 y(echo)g("###)g(RUNNING)g([$0]";)55 1192 y(echo)g("###)g(Current)g
+(date:`date`";)55 1292 y(echo)g("###";)g(})g(1>&2;)p
+Black Black -382 1491 a Fl(??)180 b Fk(h)p Fj(B)n(ASH)20
+b(script)h(end)f Fl(??)q Fk(i)p Fi(\021)1903 b Ff(\(?)19
+b(?)g(0\2271\))-45 1590 y Fv({)50 b(echo)f("###";)g(echo)g("###)g
 (Execution)f(time)h(for)g([$0])g(:)h($SECONDS)e(secs";)55
 1690 y(echo)h("$L$L$L$L";)55 1790 y(echo)g("";)g(})h(1>&2;)-45
-1889 y(#)-45 1989 y(exit)g(0)-128 2288 y Fx(B.3)100 b(V)-10
-b(ersion)25 b(contr)n(ol)h(tags)-128 2462 y Fq(This)20
+1889 y(#)-45 1989 y(exit)g(0)-128 2288 y Fz(B.3)100 b(V)-10
+b(ersion)25 b(contr)n(ol)h(tags)-128 2462 y Fs(This)20
 b(document)h(is)f(under)h(Re)n(vision)g(Control)f(System)g(\(RCS\).)e
 (The)h(v)o(ersion)i(you)g(are)f(currently)i(reading)f(is)f(the)g(follo)
-n(wing:)p Black Black -378 2612 a Fj(8c)180 b Fi(h)p
-Fh(V)-9 b(er)o(sion)21 b(Contr)l(ol)f(Id)g(T)-8 b(a)o(g)20
-b Fj(8c)p Fi(i)q Fg(\021)-45 2711 y Ft(#)50 b($Id:)f(perlscript.nw,v)e
-(1.5)i(2001/10/03)f(11:21:02)h(jabril)f(Exp)i($)-128
-3010 y Fx(B.4)100 b(GNU)25 b(General)g(Public)g(License)p
-Black Black -382 3171 a Fj(8d)180 b Fi(h)p Fh(GNU)22
-b(License)e Fj(8d)p Fi(i)q Fg(\021)-45 3271 y Ft(#)50
-b(This)f(program)g(is)g(free)g(software;)f(you)i(can)f(redistribute)e
-(it)j(and/or)f(modify)-45 3371 y(#)h(it)g(under)e(the)i(terms)f(of)g
-(the)g(GNU)g(General)g(Public)g(License)f(as)i(published)e(by)-45
-3470 y(#)i(the)f(Free)g(Software)g(Foundation;)e(either)i(version)g(2)g
-(of)h(the)f(License,)f(or)-45 3570 y(#)i(\(at)f(your)g(option\))g(any)g
-(later)g(version.)-45 3669 y(#)-45 3769 y(#)h(This)f(program)g(is)g
-(distributed)f(in)h(the)h(hope)f(that)g(it)g(will)g(be)h(useful,)-45
-3869 y(#)g(but)f(WITHOUT)g(ANY)g(WARRANTY;)f(without)h(even)g(the)g
-(implied)g(warranty)f(of)-45 3968 y(#)i(MERCHANTABILITY)d(or)j(FITNESS)
-e(FOR)h(A)h(PARTICULAR)e(PURPOSE.)98 b(See)49 b(the)-45
-4068 y(#)h(GNU)f(General)g(Public)g(License)f(for)h(more)g(details.)-45
-4168 y(#)-45 4267 y(#)h(You)f(should)g(have)g(received)f(a)i(copy)f(of)
-h(the)f(GNU)g(General)g(Public)f(License)-45 4367 y(#)i(along)f(with)g
-(this)g(program;)f(if)i(not,)f(write)g(to)g(the)g(Free)h(Software)-45
+n(wing:)p Black Black -382 2612 a Fl(??)180 b Fk(h)p
+Fj(V)-9 b(er)o(sion)21 b(Contr)l(ol)f(Id)g(T)-8 b(a)o(g)20
+b Fl(??)q Fk(i)p Fi(\021)1700 b Ff(\(?)19 b(?)g(0\2271\))-45
+2711 y Fv(#)50 b($Id:)f(blat2gff.nw,v)f(1.1)h(2001/10/22)f(14:44:13)g
+(jabril)h(Exp)g($)-128 3010 y Fz(B.4)100 b(GNU)25 b(General)g(Public)g
+(License)p Black Black -382 3171 a Fl(??)180 b Fk(h)p
+Fj(GNU)22 b(License)e Fl(??)q Fk(i)p Fi(\021)2057 b Ff(\(?)19
+b(0\2271\))-45 3271 y Fv(#)50 b(This)f(program)g(is)g(free)g(software;)
+f(you)i(can)f(redistribute)e(it)j(and/or)f(modify)-45
+3371 y(#)h(it)g(under)e(the)i(terms)f(of)g(the)g(GNU)g(General)g
+(Public)g(License)f(as)i(published)e(by)-45 3470 y(#)i(the)f(Free)g
+(Software)g(Foundation;)e(either)i(version)g(2)g(of)h(the)f(License,)f
+(or)-45 3570 y(#)i(\(at)f(your)g(option\))g(any)g(later)g(version.)-45
+3669 y(#)-45 3769 y(#)h(This)f(program)g(is)g(distributed)f(in)h(the)h
+(hope)f(that)g(it)g(will)g(be)h(useful,)-45 3869 y(#)g(but)f(WITHOUT)g
+(ANY)g(WARRANTY;)f(without)h(even)g(the)g(implied)g(warranty)f(of)-45
+3968 y(#)i(MERCHANTABILITY)d(or)j(FITNESS)e(FOR)h(A)h(PARTICULAR)e
+(PURPOSE.)98 b(See)49 b(the)-45 4068 y(#)h(GNU)f(General)g(Public)g
+(License)f(for)h(more)g(details.)-45 4168 y(#)-45 4267
+y(#)h(You)f(should)g(have)g(received)f(a)i(copy)f(of)h(the)f(GNU)g
+(General)g(Public)f(License)-45 4367 y(#)i(along)f(with)g(this)g
+(program;)f(if)i(not,)f(write)g(to)g(the)g(Free)h(Software)-45
 4466 y(#)g(Foundation,)e(Inc.,)h(675)g(Mass)g(Ave,)g(Cambridge,)f(MA)h
 (02139,)g(USA.)-45 4566 y(#)-45 4666 y(#)h
 (#-----------------------------------)o(-----)o(---#)p
-Black -128 6076 V -128 6180 a Fl(Genome)20 b(Inf)n(ormatics)g(Resear)o
-(ch)g(Lab)616 b Fk(Abril,)20 b(JF)1305 b Fl(October)19
-b(5,)h(2001)p Black eop
+Black -128 6076 V -128 6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o
+(ch)g(Lab)616 b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20
+b(28,)f(2003)p Black eop
 %%Page: 9 11
-9 10 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t
-Fp(G)t(FF)t Fq(.)t Fp(P)t(L)99 b Fq(C.)23 b(Extracting)i(code)f(blocks)
+9 10 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t
+Fr(G)t(FF)t Fs(.)t Fr(P)t(L)99 b Fs(C.)23 b(Extracting)i(code)f(blocks)
 h(from)f(this)g(document)1695 b(9)p -128 -243 4016 9
-v Black -128 35 a Fv(C)120 b(Extracting)30 b(code)g(blocks)g(fr)n(om)f
-(this)h(document)-128 242 y Fq(From)23 b(this)h(\002le)f(we)g(can)h
+v Black -128 35 a Fx(C)120 b(Extracting)30 b(code)g(blocks)g(fr)n(om)f
+(this)h(document)-128 242 y Fs(From)23 b(this)h(\002le)f(we)g(can)h
 (obtain)h(both)f(the)g(code)g(and)g(the)g(documentation.)32
 b(The)24 b(follo)n(wing)h(instructions)h(are)e(needed:)-128
-491 y Fx(C.1)100 b(Extracts)25 b(Script)h(code)g(chunks)g(fr)n(om)g
-(the)h Fy(N)t(OW)t(E)t(B)32 b Fx(\002le)-128 665 y Fq(Remember)f(when)f
+491 y Fz(C.1)100 b(Extracts)25 b(Script)h(code)g(chunks)g(fr)n(om)g
+(the)h FA(N)t(OW)t(E)t(B)32 b Fz(\002le)-128 665 y Fs(Remember)f(when)f
 (tangling)j(that)e('-L)-8 b(')30 b(option)i(allo)n(ws)e(you)h(to)g
 (include)h(program)f(line-numbering)j(relati)n(v)o(e)e(to)e(original)
--126 778 y Fp(N)t(O)r(W)t(E)t(B)h Fq(\002le.)43 b(Then)28
+-126 778 y Fr(N)t(O)r(W)t(E)t(B)h Fs(\002le.)43 b(Then)28
 b(the)h(\002rst)f(line)h(of)f(the)h(e)o(x)o(ecutable)i(\002les)d(is)g
 (a)g(comment,)i(not)f(a)f(shebang,)k(and)d(must)f(be)g(remo)o(v)o(ed)h
 (to)-128 891 y(mak)o(e)24 b(scripts)h(runnable.)p Black
-Black -378 1040 a Fj(9a)180 b Fi(h)p Fh(tangling)19 b
-Fj(9a)p Fi(i)q Fg(\021)-45 1140 y Ft(#)50 b(showing)f(line)g(numbering)
-f(comments)g(in)i(program)-45 1240 y(notangle)f(-L)g(-R"blat2gff")f
-($WORK/$nwfile.nw)f(|)i(\\)155 1339 y(perl)g(-ne)g('$.>1)g(&&)g(print')
-g(|)h(cpif)f($BIN/blat2gff.pl)e(;)-45 1439 y(chmod)i(a+x)h
-($BIN/blat2gff.pl)c(;)p Black Black -382 1638 a Fj(9b)180
-b Fi(h)p Fh(tangling)19 b Fj(9a)p Fi(i)q Fc(+)p Fg(\021)-45
-1738 y Ft(#)50 b(reformating)e(program)g(with)h(perltidy)-45
-1837 y(notangle)g(-R"blat2gff")e($WORK/$nwfile.nw)g(|)j(\\)155
-1937 y(perltidy)e(-)i(|)f(cpif)g($BIN/blat2gff.pl)e(;)-45
+Black -382 1040 a Fl(??)180 b Fk(h)p Fj(tangling)19 b
+Fl(??)q Fk(i)p Fi(\021)2355 b Fl(??)14 b Fe(.)-45 1140
+y Fv(#)50 b(showing)f(line)g(numbering)f(comments)g(in)i(program)-45
+1240 y(notangle)f(-L)g(-R"blat2gff")f($WORK/$nwfile.nw)f(|)i(\\)155
+1339 y(perl)g(-ne)g('$.>1)g(&&)g(print')g(|)h(cpif)f($BIN/blat2gff.pl)e
+(;)-45 1439 y(chmod)i(a+x)h($BIN/blat2gff.pl)c(;)p Black
+Black -382 1638 a Fl(??)180 b Fk(h)p Fj(tangling)19 b
+Fl(??)q Fk(i)p Fc(+)p Fi(\021)2121 b Fe(/)13 b Fl(??)38
+b(??)14 b Fe(.)-45 1738 y Fv(#)50 b(reformating)e(program)g(with)h
+(perltidy)-45 1837 y(notangle)g(-R"blat2gff")e($WORK/$nwfile.nw)g(|)j
+(\\)155 1937 y(perltidy)e(-)i(|)f(cpif)g($BIN/blat2gff.pl)e(;)-45
 2037 y(#)j(html)f(pretty-printing)e(program)i(with)g(perltidy)-45
 2136 y(notangle)g(-R"blat2gff")e($WORK/$nwfile.nw)g(|)j(\\)155
 2236 y(perltidy)e(-html)h(-)h(|)f(cpif)g($DOCS/html/blat2gff.html)d(;)
--45 2336 y(#)-128 2635 y Fx(C.2)100 b(Extracting)25 b(differ)n(ent)i
-(Con\002g)e(Files)p Black Black -378 2796 a Fj(9c)180
-b Fi(h)p Fh(tangling)19 b Fj(9a)p Fi(i)q Fc(+)p Fg(\021)-45
-2895 y Ft(notangle)49 b(-R"BLAT)f(output)h(example")f($WORK/$nwfile.nw)
-f(|)j(\\)404 2995 y(cpif)f($DATA/output.blat)d(;)-128
-3294 y Fx(C.3)100 b(Extracting)25 b(documentation)i(and)e(L)1474
-3271 y Fa(A)1507 3294 y Fx(T)1556 3317 y(E)1612 3294
-y(X'ing)g(it)p Black Black -382 3455 a Fj(9d)180 b Fi(h)p
-Fh(tangling)19 b Fj(9a)p Fi(i)q Fc(+)p Fg(\021)-45 3554
-y Ft(notangle)49 b(-Rweaving)98 b($WORK/$nwfile.nw)47
-b(|)i(cpif)g($WORK/nw2tex)f(;)-45 3654 y(notangle)h(-RLaTeXing)f
-($WORK/$nwfile.nw)f(|)i(cpif)g($WORK/ltx)f(;)-45 3754
-y(chmod)h(a+x)h($WORK/nw2tex)d($WORK/ltx;)p Black Black
--378 3953 a Fj(9e)180 b Fi(h)p Fh(tangling)19 b(complementary)g(LaT)-8
-b(eX)20 b(\002les)h Fj(9e)p Fi(i)q Fg(\021)-45 4053 y
-Ft(notangle)49 b(-R"HIDE:)f(LaTeX)h(new)g(definitions")f
+-45 2336 y(#)-128 2635 y Fz(C.2)100 b(Extracting)25 b(differ)n(ent)i
+(Con\002g)e(Files)p Black Black -382 2796 a Fl(??)180
+b Fk(h)p Fj(tangling)19 b Fl(??)q Fk(i)p Fc(+)p Fi(\021)2121
+b Fe(/)13 b Fl(??)38 b(??)14 b Fe(.)-45 2895 y Fv(notangle)49
+b(-R"BLAT)f(output)h(example")f($WORK/$nwfile.nw)f(|)j(\\)404
+2995 y(cpif)f($DATA/output.blat)d(;)-128 3294 y Fz(C.3)100
+b(Extracting)25 b(documentation)i(and)e(L)1474 3271 y
+Fa(A)1507 3294 y Fz(T)1556 3317 y(E)1612 3294 y(X'ing)g(it)p
+Black Black -382 3455 a Fl(??)180 b Fk(h)p Fj(tangling)19
+b Fl(??)q Fk(i)p Fc(+)p Fi(\021)2121 b Fe(/)13 b Fl(??)38
+b(??)14 b Fe(.)-45 3554 y Fv(notangle)49 b(-Rweaving)98
+b($WORK/$nwfile.nw)47 b(|)i(cpif)g($WORK/nw2tex)f(;)-45
+3654 y(notangle)h(-RLaTeXing)f($WORK/$nwfile.nw)f(|)i(cpif)g($WORK/ltx)
+f(;)-45 3754 y(chmod)h(a+x)h($WORK/nw2tex)d($WORK/ltx;)p
+Black Black -382 3953 a Fl(??)180 b Fk(h)p Fj(tangling)19
+b(complementary)g(LaT)-8 b(eX)20 b(\002les)h Fl(??)q
+Fk(i)p Fi(\021)1308 b Ff(\(?)19 b(0\2271\))-45 4053 y
+Fv(notangle)49 b(-R"HIDE:)f(LaTeX)h(new)g(definitions")f
 ($WORK/$nwfile.nw)f(|)i(cpif)g($DOCS/defs.tex)f(;)-45
 4152 y(notangle)h(-R"HIDE:)f(TODO")h($WORK/$nwfile.nw)e(|)i(cpif)g
-($DOCS/todo.tex)f(;)p Black Black -370 4351 a Fj(9f)180
-b Fi(h)p Fh(weaving)20 b Fj(9f)p Fi(i)q Fg(\021)-45 4451
-y Fi(h)p Fh(B)n(ASH)g(shebang)f Fj(8a)p Fi(i)-45 4551
-y Ft(#)50 b(weaving)f(and)g(LaTeXing)-45 4650 y Fi(h)p
-Fh(B)n(ASH)20 b(En)m(vir)l(onment)f(V)-9 b(ariables)19
-b Fj(10b)p Fi(i)-45 4750 y(h)p Fh(tangling)g(complementary)g(LaT)-8
-b(eX)20 b(\002les)h Fj(9e)p Fi(i)-45 4850 y Ft(noweave)49
+($DOCS/todo.tex)f(;)p Black Black -382 4351 a Fl(??)180
+b Fk(h)p Fj(weaving)20 b Fl(??)q Fk(i)p Fi(\021)-45 4451
+y Fk(h)p Fj(B)n(ASH)g(shebang)f Fl(??)q Fk(i)-45 4551
+y Fv(#)50 b(weaving)f(and)g(LaTeXing)-45 4650 y Fk(h)p
+Fj(B)n(ASH)20 b(En)m(vir)l(onment)f(V)-9 b(ariables)19
+b Fl(??)q Fk(i)-45 4750 y(h)p Fj(tangling)g(complementary)g(LaT)-8
+b(eX)20 b(\002les)h Fl(??)q Fk(i)-45 4850 y Fv(noweave)49
 b(-v)g(-t4)h(-delay)e(-x)i(-filter)e('elide)h("HIDE:)g(*"')g(\\)354
 4949 y($WORK/$nwfile.nw)e(|)i(cpif)g($DOCS/$nwfile.tex)e(;)-45
 5049 y(#)j(noweave)f(-t4)g(-delay)g(-index)f($WORK/$nwfile.nw)f(>)j
 ($DOCS/$nwfile.tex)-45 5148 y(pushd)f($DOCS/)g(;)-45
 5248 y(#)-45 5348 y(latex)g($nwfile.tex)f(;)-45 5447
 y(dvips)h($nwfile.dvi)f(-o)i($nwfile.ps)d(-t)j(a4)f(;)-45
-5547 y(#)-45 5647 y(popd;)-45 5746 y Fi(h)p Fh(B)n(ASH)20
-b(script)h(end)f Fj(8b)p Fi(i)p Black -128 6076 V -128
-6180 a Fl(Genome)g(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
-b Fk(Abril,)20 b(JF)1305 b Fl(October)19 b(5,)h(2001)p
+5547 y(#)-45 5647 y(popd;)-45 5746 y Fk(h)p Fj(B)n(ASH)20
+b(script)h(end)f Fl(??)q Fk(i)p Black -128 6076 V -128
+6180 a Fn(Genome)g(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
+b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20 b(28,)f(2003)p
 Black eop
 %%Page: 10 12
-10 11 bop Black -126 -285 a Fp(B)t(L)t(A)l(T)t Fq(2)t
-Fp(G)t(FF)t Fq(.)t Fp(P)t(L)99 b Fq(C.4.)23 b Fd(De\002ning)h(w)o
+10 11 bop Black -126 -285 a Fr(B)t(L)t(A)l(T)t Fs(2)t
+Fr(G)t(FF)t Fs(.)t Fr(P)t(L)99 b Fs(C.4.)23 b Fd(De\002ning)h(w)o
 (orking)g(shell)h(v)n(ariables)h(for)d(the)h(current)h(project)1145
-b Fq(10)p -128 -243 4016 9 v Black Black Black -415 35
-a Fj(10a)180 b Fi(h)p Fh(LaT)-8 b(eXing)20 b Fj(10a)p
-Fi(i)r Fg(\021)-45 134 y Fi(h)p Fh(B)n(ASH)g(shebang)f
-Fj(8a)p Fi(i)-45 234 y Ft(#)50 b(only)f(LaTeXing)-45
-334 y Fi(h)p Fh(B)n(ASH)20 b(En)m(vir)l(onment)f(V)-9
-b(ariables)19 b Fj(10b)p Fi(i)-45 433 y Ft(pushd)49 b($DOCS/)g(;)-45
+b Fs(10)p -128 -243 4016 9 v Black Black Black -382 35
+a Fl(??)180 b Fk(h)p Fj(LaT)-8 b(eXing)20 b Fl(??)q Fk(i)p
+Fi(\021)-45 134 y Fk(h)p Fj(B)n(ASH)g(shebang)f Fl(??)q
+Fk(i)-45 234 y Fv(#)50 b(only)f(LaTeXing)-45 334 y Fk(h)p
+Fj(B)n(ASH)20 b(En)m(vir)l(onment)f(V)-9 b(ariables)19
+b Fl(??)q Fk(i)-45 433 y Fv(pushd)49 b($DOCS/)g(;)-45
 533 y(#)-45 632 y(echo)h("###)f(RUNNING)f(LaTeX)h(on)g($nwfile.tex")f
 (1>&2)h(;)-45 732 y(latex)g($nwfile.tex)f(;)-45 832 y(latex)h
 ($nwfile.tex)f(;)-45 931 y(latex)h($nwfile.tex)f(;)-45
@@ -1342,27 +1374,27 @@ b(ariables)19 b Fj(10b)p Fi(i)-45 433 y Ft(pushd)49 b($DOCS/)g(;)-45
 1131 y(#)-45 1230 y(#)h(pdflatex)e($nwfile.tex)g(;)-45
 1330 y(echo)i("###)f(CONVERTING)f(PS)h(to)g(PDF:)g($nwfile")g(1>&2)g(;)
 -45 1429 y(ps2pdf)g($nwfile.ps)f($nwfile.pdf)g(;)-45
-1529 y(#)-45 1629 y(popd)i(;)-45 1728 y Fi(h)p Fh(B)n(ASH)20
-b(script)h(end)f Fj(8b)p Fi(i)-128 2027 y Fx(C.4)100
+1529 y(#)-45 1629 y(popd)i(;)-45 1728 y Fk(h)p Fj(B)n(ASH)20
+b(script)h(end)f Fl(??)q Fk(i)-128 2027 y Fz(C.4)100
 b(De\002ning)25 b(w)o(orking)h(shell)e(v)o(ariables)h(f)n(or)f(the)i
-(curr)n(ent)h(pr)n(oject)p Black Black -420 2188 a Fj(10b)181
-b Fi(h)p Fh(B)n(ASH)20 b(En)m(vir)l(onment)f(V)-9 b(ariables)19
-b Fj(10b)p Fi(i)r Fg(\021)-45 2288 y Ft(#)-45 2388 y(#)50
-b(Setting)f(Global)f(Variables)-45 2487 y
-(WORK="/home/ug/jabril/development/soft)o(jabri)o(l/bla)o(t2gff")43
-b(;)-45 2587 y(BIN="$WORK/bin")k(;)-45 2686 y(PARAM="$BIN/param")g(;)
--45 2786 y(DOCS="$WORK/docs")g(;)-45 2886 y(DATA="$WORK/data")g(;)-45
+(curr)n(ent)h(pr)n(oject)p Black Black -382 2188 a Fl(??)180
+b Fk(h)p Fj(B)n(ASH)20 b(En)m(vir)l(onment)f(V)-9 b(ariables)19
+b Fl(??)q Fk(i)p Fi(\021)1477 b Ff(\(?)19 b(?)g(0\2271\))-45
+2288 y Fv(#)-45 2388 y(#)50 b(Setting)f(Global)f(Variables)-45
+2487 y(#)i(WORK)f(is)h(now)f(set)g(via)g(setcwd)-45 2587
+y(BIN="$WORK/bin")e(;)-45 2686 y(PARAM="$BIN/param")g(;)-45
+2786 y(DOCS="$WORK/docs")g(;)-45 2886 y(DATA="$WORK/data")g(;)-45
 2985 y(nwfile="blat2gff")g(;)-45 3085 y(export)i(WORK)g(BIN)g(PARAM)g
 (DOCS)g(DATA)g(nwfile)g(;)-45 3185 y(#)p Black Black
--415 3384 a Fj(10c)180 b Fi(h)p Fh(tangling)19 b Fj(9a)p
-Fi(i)q Fc(+)p Fg(\021)-45 3484 y Ft(#)-45 3583 y(#)50
-b(BASH)f(Environment)f(Variables)-45 3683 y(notangle)h(-R'BASH)f
-(Environment)g(Variables')g($WORK/$nwfile.nw)f(|)i(\\)404
-3782 y(cpif)g($WORK/.bash_VARS)e(;)-45 3882 y(source)i
-($WORK/.bash_VARS)e(;)-45 3982 y(#)p Black -128 6076
-V -128 6180 a Fl(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g(Lab)616
-b Fk(Abril,)20 b(JF)1305 b Fl(October)19 b(5,)h(2001)p
-Black eop
+-382 3384 a Fl(??)180 b Fk(h)p Fj(tangling)19 b Fl(??)q
+Fk(i)p Fc(+)p Fi(\021)2284 b Fe(/)14 b Fl(??)-45 3484
+y Fv(#)-45 3583 y(#)50 b(BASH)f(Environment)f(Variables)-45
+3683 y(notangle)h(-R'BASH)f(Environment)g(Variables')g
+($WORK/$nwfile.nw)f(|)i(\\)404 3782 y(cpif)g($WORK/.bash_VARS)e(;)-45
+3882 y(source)i($WORK/.bash_VARS)e(;)-45 3982 y(#)p Black
+-128 6076 V -128 6180 a Fn(Genome)20 b(Inf)n(ormatics)g(Resear)o(ch)g
+(Lab)616 b Fm(Abril,)20 b(JF)1219 b Fn(F)n(ebruary)20
+b(28,)f(2003)p Black eop
 %%Trailer
 end
 userdict /end-hook known{end-hook}if
