@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.3 2001-12-18 15:03:59 eblanco Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.4 2003-02-26 10:55:18 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -82,7 +82,8 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
       /* Reset the best local exons array */
       nLocalExons = 0;
       LowestLocalScore = DBL_MAX;
-      
+      LowestLocalExon = 0;
+
       /* Skip previous Stops to current Acceptor */
       while ((j < nStops) && ((Stop+j)->Position+1 < (Acceptor+i)->Position))
 		j++;
