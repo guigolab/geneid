@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $
+% $Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -462,9 +462,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.15 $', #'
-     '$Date: 2001-11-07 18:11:18 $', #'
-     '$Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $', #'
+     '$Revision: 1.16 $', #'
+     '$Date: 2001-11-07 18:56:49 $', #'
+     '$Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -1546,22 +1546,22 @@ This section is dedicated to those test we need to ensure that customization var
 \begin{center}
 \fbox{
 \begin{tabular}{cl}
-BOOLEAN  & A true/false variable.\\
-ALPHA    & A string set as '[[ [a-zA-Z][a-zA-Z_0-9]* ]]'.\\
-STRING   & A free text character string.\\
-NATURAL  & A positive integer (nor decimals neither sign).\\
-INTEGER  & Positive or negative integers.\\
-FLOAT    & Numbers with decimal values (subset of reals).\\
-REAL     & Any real number (including scientific notation).\\
-COLOR    & Available colors are defined in '[[%COLORS]]' hash.\\
-FONT     & A {\ps} font from those defined in '[[%Fonts]]' hash.\\
-BBOX     & '[[<width>,<height>]]' pair (in PS_UNIT units).\\
-PAGE     & Page sizes are set in '[[%FORMATS]]' variable.\\
-SEQ_UNIT & A numeric value with nucleotide units (Gb, Mb, Kb or bases).\\
-PS_UNIT  & A numeric value with {\ps} units (pt, cm, mm or in).\\
-RANGE    & A '[[lower-limit..upper-limit]]' numeric pair.\\
-PSRANGE  & A '[[lower-limit..upper-limit]]' {\ps} lengths pair.\\
-SEQRANGE & A '[[lower-limit..upper-limit]]' sequence coords pair.\\
+[[BOOLEAN]]  & A true/false variable.\\
+[[ALPHA]]    & A string set as '[[ [a-zA-Z][a-zA-Z_0-9]* ]]'.\\
+[[STRING]]   & A free text character string.\\
+[[NATURAL]]  & A positive integer (nor decimals neither sign).\\
+[[INTEGER]]  & Positive or negative integers.\\
+[[FLOAT]]    & Numbers with decimal values (subset of reals).\\
+[[REAL]]     & Any real number (including scientific notation).\\
+[[COLOR]]    & Available colors are defined in '[[%COLORS]]' hash.\\
+[[FONT]]     & A {\ps} font from those defined in '[[%Fonts]]' hash.\\
+[[BBOX]]     & '[[<width>,<height>]]' pair (in [[PS_UNIT]] units).\\
+[[PAGE]]     & Page sizes are set in '[[%FORMATS]]' variable.\\
+[[SEQ_UNIT]] & A numeric value with nucleotide units (Gb, Mb, Kb or bases).\\
+[[PS_UNIT]]  & A numeric value with {\ps} units (pt, cm, mm or in).\\
+[[RANGE]]    & A '[[lower-limit..upper-limit]]' numeric pair.\\
+[[PSRANGE]]  & A '[[lower-limit..upper-limit]]' {\ps} lengths pair.\\
+[[SEQRANGE]] & A '[[lower-limit..upper-limit]]' sequence coords pair.\\
 \end{tabular}
 } % fbox
 \caption[Customization parameters available formats]{\label{tbl:varformats} Parameter available formats we are going to use for customization variables checking.}
@@ -1761,16 +1761,9 @@ $_test eq 'COLOR' && do { # lc
 };
 @
 
-\label{todo:BBH}
-<<HIDE: new defs TODO>>=
-\def\todoBBH{
-Set fg/bg multiple strings to a single color name such fgcolor/bgcolor for later use in the whole program (PS code too).
-} % todoBBH
+<<HIDE: DONE>>=
+\doneitem{20011107}{Set fg/bg multiple strings to a single color name such fgcolor/bgcolor for later use in the whole program (PS code too).}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoBBH}{todo:BBH}
-@
-\todo{ \item \todoBBH } % todo
 
 <<warnings - parsing custom files>>=
 NOT_A_COLOR =>
@@ -5206,8 +5199,8 @@ We have to set the properties hash corresponding to the GFF elements present in 
 
 <<set reference to GFF data>>=
 foreach my $seq (keys %GFF_DATA) {
+    my $seq_ref = \@{ $GFF_DATA{$seq} };
     $v_sec eq 'SEQUENCE' && do {
-        my $seq_ref = \@{ $GFF_DATA{$seq} };
         &does_feat_match($seq,$reg_exp,$seq_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
@@ -5218,8 +5211,8 @@ foreach my $seq (keys %GFF_DATA) {
 
 <<set reference to GFF data: SOURCES>>=
 foreach my $src (keys %{ $seq_ref->[$_element] }) {
+    my $src_ref = \@{ $seq_ref->[$_element]{$src} };
     $v_sec eq 'SOURCE' && do {
-        my $src_ref = \@{ $seq_ref->[$_element]{$src} };
         &does_feat_match($src,$reg_exp,$src_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
@@ -5230,8 +5223,8 @@ foreach my $src (keys %{ $seq_ref->[$_element] }) {
 
 <<set reference to GFF data: STRANDS>>=
 foreach my $str (keys %{ $src_ref->[$_element] }) {
+    my $str_ref = \@{ $src_ref->[$_element]{$str} };
     $v_sec eq 'STRAND' && do {
-        my $str_ref = \@{ $src_ref->[$_element]{$str} };
         &does_feat_match($str,$reg_exp,$str_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
@@ -5242,8 +5235,8 @@ foreach my $str (keys %{ $src_ref->[$_element] }) {
 
 <<set reference to GFF data: GROUPS>>=
 foreach my $grp (keys %{ $str_ref->[$_element] }) {
+    my $grp_ref = \@{ $str_ref->[$_element]{$grp} };
     $v_sec eq 'GROUP' && do {
-        my $grp_ref = \@{ $str_ref->[$_element]{$grp} };
         &does_feat_match($grp,$reg_exp,$grp_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
@@ -7513,7 +7506,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -7939,7 +7932,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $
+# $Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -8016,7 +8009,7 @@ notangle -L -R"APLOT" $WORK/$nwfile.nw | \
 # we remove here the comments within "use vars qw/ ... /",
 # numbers may change if noweb doc is changed
 notangle -L -R"APLOT" $WORK/$nwfile.nw | \
-    perl -ne '($.>1 && $_ !~ /^\#line (442|453|460|1180|1275|4458|432)/o) &&
+    perl -ne '($.>1 && $_ !~ /^\#line (442|453|460|1180|1275|4431|432)/o) &&
                print' - | cpif $BIN/gff2aplot.pl ;
 chmod a+x $BIN/gff2aplot.pl ;
 #
