@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.64 2000-03-28 16:28:19 jabril Exp $	
+#         $Id: gff2ps,v 1.65 2000-03-28 17:22:38 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.64 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-28 16:28:19 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.65 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-28 17:22:38 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.64 2000-03-28 16:28:19 jabril Exp $
+%    $Id: gff2ps,v 1.65 2000-03-28 17:22:38 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -1890,9 +1890,9 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
         seso_rd=seq_order["strand",Q] SUBSEP src_order["strand",S];
 		if ((seso_rd in Nss) && !(seso_rd in CHKs)) {
 		  order["strand",ordcnt++]=seso_rd;
-          CHKs[seso_rd]++;
           PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S], CHKs[seso_rd]));
         } # if seso_rd
+        CHKs[seso_rd]++;
 	  } # for S
 	} # for Q
 	lseq=seq_nordcnt; lsrc=src_nordcnt; # no-strand counter
@@ -1901,9 +1901,9 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
         seso_rd=seq_order["none",Q] SUBSEP src_order["none",S];
 		if ((seso_rd in Nsn) && !(seso_rd in CHKn)) {
 		  order["none",nordcnt++]=seso_rd;
-          CHKn[seso_rd]++;
 		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S], CHKn[seso_rd]));
         } # if seso_rd
+        CHKn[seso_rd]++;
 	  } # for S
 	} # for Q
   } # if sort by sequence
@@ -1915,9 +1915,9 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
         seso_rd=seq_order["strand",Q] SUBSEP src_order["strand",S];
 		if ((seso_rd in Nss) && !(seso_rd in CHKs)) {
 		  order["strand",ordcnt++]=seso_rd;
-          CHKs[seso_rd]++;
 		  PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S], CHKs[seso_rd]));
         } # if seso_rd
+        CHKs[seso_rd]++;
 	  } # for Q
 	} # for S
 	lseq=seq_nordcnt; lsrc=src_nordcnt; # no-strand counter
@@ -1926,9 +1926,9 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
         seso_rd=seq_order["none",Q] SUBSEP src_order["none",S];
 		if ((seso_rd in Nsn) && !(seso_rd in CHKn)) {
           order["none",nordcnt++]=seso_rd;
-          CHKn[seso_rd]++;
 		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S], CHKn[seso_rd]));
         } # if seso_rd
+        CHKn[seso_rd]++;
 	  } # for Q	
 	} # for S
   } # else sort by source
