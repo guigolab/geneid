@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.57 2002-06-19 18:54:19 jabril Exp $ 
+% # $Id: humus.nw,v 1.58 2002-06-19 23:36:30 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.57 2002-06-19 18:54:19 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.58 2002-06-19 23:36:30 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1009,6 +1009,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                     \
 
 
 <<>>=
+#
   for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
     do { 
       N=`echo $n | tr [:lower:] [:upper:]`; 
@@ -1019,14 +1020,41 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                     \
       MkDirs $HD $HD/gtf $HD/gff $HD/eval ;
       cp -v $OD/chr$n.gtf $HD/gtf/ ;
       } ;
-   done ;   
+    done ;   
+#
+( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      HD="$HUMUS/chr$N/twinscan/20020613" ;
+      $BIN/gtf2gff.pl $HD/gtf/chr$n.gtf         > $HD/gff/chr$n.gff;
+      $BIN/gtf2gff.pl $HD/gtf/chr$n\_random.gtf > $HD/gff/chr$n\_random.gff;
+      } ;
+    done ) 2>&1 | tee $TMP/.err/twinscan.rpt ;
+#
   for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
     do { 
       N=`echo $n | tr [:lower:] [:upper:]`; 
       HD="$HUMUS/chr$N/twinscan/20020613" ;
-      $BIN/gtf2gff.pl $HD/gtf/chr$n.gtf >  $HD/gff/chr$n.gff;
+      get_geneid_genes $HD/gff/chr$n.gff | \
+          sort +1n +2n -3 - > $HD/chr$n.gene_list ;     
+      get_geneid_genes $HD/gff/chr$n\_random.gff | \
+          sort +1n +2n -3 - > $HD/chr$n\_random.gene_list ;     
       } ;
-   done ;   
+    done ;
+#
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      WDIR="$HUMUS/chr$N/twinscan/20020613" ;
+      echo "# PREPARING TWINSCAN on $N:chr$n" 1>&2 ;
+      ln -vs $WDIR/gff/chr$n.gff $WDIR/eval/chr$n.eval.gff ;
+      $BIN/gffsplitstrand.pl $WDIR/eval/chr$n.eval.gff ;
+      echo "# PREPARING TWINSCAN on $N:chr$n\_random" 1>&2 ;
+      ln -vs $WDIR/gff/chr$n\_random.gff $WDIR/eval/chr$n\_random.eval.gff ;
+      $BIN/gffsplitstrand.pl $WDIR/eval/chr$n\_random.eval.gff ;
+      } ;
+    done ;
+#
 @ 
 
 
@@ -5055,7 +5083,7 @@ sub sort_gff_records() {
                  sort { $a->[0] <=> $b->[0]
                                 ||
                         $a->[1] <=> $b->[1] }
-                 map  { $_->[3], $_->[4], $_ } @{$rf};
+                 map  { [ $_->[3], $_->[4], $_ ] } @{$rf};
     }; # foreach $gnm
     print $ERRFH "## $PROG ## SORTING GFF RECORDS... GROUPS\n";
     @geneslst = map  { $_->[2] }
@@ -5084,7 +5112,7 @@ sub print_gff_records() {
                     next;
                 };
                 ($str eq '+') && do {
-                    ${$out[$#out]}->[4] = $rf->[$q][4];
+                    $out[$#out][4] = $rf->[$q][4];
                 };
             };
         }; # for $q
@@ -6678,17 +6706,21 @@ sub genepred_stats() {
     $CDSpred = $ref->{STATS}{FP} + $ref->{STATS}{TP};
     $RN = $ref->{STATS}{LEN} - $CDSreal;
     $PN = $ref->{STATS}{LEN} - $CDSpred;
-    $ref->{STATS}{SN} = &decnum($ref->{STATS}{TP} / $CDSreal);
-    $ref->{STATS}{SP} = &decnum($ref->{STATS}{TP} / $CDSpred);
-    $ref->{STATS}{AC} = &decnum(
+    $ref->{STATS}{SN} = ($CDSreal != 0) ?
+                            &decnum($ref->{STATS}{TP} / $CDSreal) : 'nan';
+    $ref->{STATS}{SP} = ($CDSpred != 0) ?
+                            &decnum($ref->{STATS}{TP} / $CDSpred) : 'nan';
+    $ref->{STATS}{AC} = ($RN != 0 && $PN != 0) ? &decnum(
           ((( $ref->{STATS}{SN} + $ref->{STATS}{SP}
           + ( $ref->{STATS}{TN} / $RN )
-          + ( $ref->{STATS}{TN} / $PN ) ) / 4 ) - 0.5 ) * 2 );
+          + ( $ref->{STATS}{TN} / $PN ) ) / 4 ) - 0.5 ) * 2 ) : 'nan';
 
-    $ref->{STATS}{CC} = &decnum(
-          (( $ref->{STATS}{TP} * $ref->{STATS}{TN} ) - 
-           ( $ref->{STATS}{FN} * $ref->{STATS}{FP} )
-             ) / sqrt($CDSreal * $RN * $CDSpred * $PN) );
+    $ref->{STATS}{CC} =
+          ($CDSreal != 0 && $CDSpred != 0 && $RN != 0 && $PN != 0) ?
+              &decnum(
+                  (( $ref->{STATS}{TP} * $ref->{STATS}{TN} ) - 
+                   ( $ref->{STATS}{FN} * $ref->{STATS}{FP} )
+                     ) / sqrt($CDSreal * $RN * $CDSpred * $PN) ) : 'nan';
     # exon level
     $ref->{STATS}{raME} = &decnum($ref->{STATS}{ME} / $ref->{STATS}{ExR});
     $ref->{STATS}{raWE} = &decnum($ref->{STATS}{WE} / $ref->{STATS}{ExP});
@@ -10801,7 +10833,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.57 2002-06-19 18:54:19 jabril Exp $
+# $Id: humus.nw,v 1.58 2002-06-19 23:36:30 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
