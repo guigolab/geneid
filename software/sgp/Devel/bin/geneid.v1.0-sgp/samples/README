@@ -1,0 +1,50 @@
+Examples:
+
+
+* Command One. (output1)
+
+Predict genes (default format):
+> bin/geneid -vP paramFiles/dros.param samples/Test.fasta > samples/output1
+
+
+* Command Two. (output2)
+
+Predict genes (GFF format):
+> bin/geneid -vG -P paramFiles/dros.param samples/Test.fasta > samples/output2
+
+
+* Command Three. (output3)
+
+Predict genes (GFF eXtended format):
+> bin/geneid -vGX -P paramFiles/dros.param samples/Test.fasta > samples/output3
+
+
+* Command Four. (output4)
+
+Predict Start Codons (default format):
+> bin/geneid -vob -P paramFiles/dros.param samples/Test.fasta > samples/output4
+
+
+* Command Five. (output5)
+
+Predict Start Codons (GFF format):
+> bin/geneid -vobG -P paramFiles/dros.param samples/Test.fasta > samples/output5
+
+
+* Command Six. (output6)
+
+Predict all exons (default format):
+> bin/geneid -vox -P paramFiles/dros.param samples/Test.fasta > samples/output6
+
+
+* Command Seven. (output7)
+
+Predict all exons (GFF format):
+> bin/geneid -voGx -P paramFiles/dros.param samples/Test.fasta > samples/output7
+
+
+* Command Eight. (output8)
+
+Assembling genes using exons from file <output7>:
+> bin/geneid -vP paramFiles/dros.param -O samples/output7 samples/Test.fasta > samples/output8 
+

@@ -1,0 +1,15 @@
+## gff-version 2
+## source-version: GeneId v 3.0 EvoI -- geneid@imim.es
+## date Tue Jun 13 10:38:23 2000
+# Optimal Gene Structure. 3 genes. Score = 140.109665 
+# Gene 1(Forward). 2 exons. 155 aa. Score = 36.870944 
+10	GeneId	First	6090	6155	1.404	+	0	gene_1	# AA-0	AA-22
+10	GeneId	Terminal	6881	7276	35.467	+	0	gene_1	# AA-23	AA-155
+# Gene 2(Reverse). 5 exons. 401 aa. Score = 70.179051 
+10	GeneId	Terminal	9100	9217	5.488	-	1	gene_2	# AA-362	AA-401
+10	GeneId	Internal	9294	9387	0.610	-	2	gene_2	# AA-331	AA-362
+10	GeneId	Internal	9479	10085	46.129	-	0	gene_2	# AA-128	AA-331
+10	GeneId	Internal	10140	10273	6.478	-	2	gene_2	# AA-83	AA-127
+10	GeneId	First	10334	10580	11.475	-	0	gene_2	# AA-0	AA-83
+# Gene 3(Reverse). 1 exons. 187 aa. Score = 33.059670 
+10	GeneId	Single	20955	21515	33.060	-	0	gene_3	# AA-0	AA-187
