@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.33 2002-05-05 19:20:41 jabril Exp $ 
+% # $Id: humus.nw,v 1.34 2002-05-05 21:08:29 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.33 2002-05-05 19:20:41 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.34 2002-05-05 21:08:29 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2377,8 +2377,8 @@ RKN="$IDIR/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgp_MMUScDNA_WUT
 #
 CheckFile R $MGSC/$SEQ.gff $RKN/$SEQ.gff ;
 #
-( sort +3n -6 +6 -7 $MGSC/$SEQ.gff $RKN/$SEQ.gff \
-                    > $ODIR/$SEQ.merged.gff ) || TheEnd CMDKO ;
+( gawk '($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { $9="1"; print $0 }' \
+  $MGSC/$SEQ.gff $RKN/$SEQ.gff | sort +3n -6 +6 -7 > $ODIR/$SEQ.merged.gff ) || TheEnd CMDKO ;
 #
 $BIN/blast2gff -vg $ODIR/$SEQ.merged.gff > $ODIR/$SEQ.gff || TheEnd CKO ;
 #
@@ -9055,7 +9055,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.33 2002-05-05 19:20:41 jabril Exp $
+# $Id: humus.nw,v 1.34 2002-05-05 21:08:29 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9404,6 +9404,7 @@ pushd $TMP;
 RM $TMP/.[eo]*/*;
 $BIN/stepper.pl --debug 2> $TMP/.err/_ALL.err 1> $TMP/.out/_ALL.out
 # ( $BIN/stepper.pl --debug --seq 22:chr22 --job HSAPgp_MMUScDNA_WUTBLASTX,SGP_HSAPgpa_RKNcDNA_TBX,SGP_HSAPgpa_MGSC+RKN_TBX --step SGP_HSAPgpa_MGSCv3_TBX:SGP_EVALUATION > $TMP/.out/_ALL_chr22.out ) 2>&1 | tee $TMP/.err/_ALL_chr22.err
+# ( $BIN/stepper.pl --debug --seq 22:chr22 --job SGP_HSAPgpa_MGSC+RKN_TBX > $TMP/.out/_ALL_chr22.out ) 2>&1 | tee -a $TMP/.err/_ALL_chr22.err
 #
 ipcs -s | grep jabril | gawk '{print $2}' | while read n; do ipcrm sem $n; done;
 ipcs -m | grep jabril | gawk '{print $2}' | while read n; do ipcrm shm $n; done;
