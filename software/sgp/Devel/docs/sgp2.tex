@@ -13,7 +13,7 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.tex,v 1.6 2000-10-13 19:56:06 jabril Exp $
+% $Id: sgp2.tex,v 1.7 2000-10-16 08:27:49 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
@@ -42,7 +42,7 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.tex,v 1.6 2000-10-13 19:56:06 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.tex,v 1.7 2000-10-16 08:27:49 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
@@ -104,7 +104,7 @@ contains program starting time (seconds since \textsc{Unix} ``epoch''), which wi
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NWsgp9-verF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-verF-1}}}\moddef{version control~{\nwtagstyle{}\subpageref{NWsgp9-verF-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwenddeflinemarkup
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.tex,v 1.6 2000-10-13 19:56:06 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.tex,v 1.7 2000-10-16 08:27:49 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 \nwindexdefn{\nwixident{{\$}PROGRAM}}{:doPROGRAM}{NWsgp9-verF-1}\nwindexdefn{\nwixident{{\$}VERSION}}{:doVERSION}{NWsgp9-verF-1}\nwindexdefn{\nwixident{@tmp{\_}ver}}{@tmp:unver}{NWsgp9-verF-1}\eatline
 \nwused{\\{NWsgp9-sgp7-1}}\nwidentdefs{\\{{\nwixident{{\$}PROGRAM}}{:doPROGRAM}}\\{{\nwixident{@tmp{\_}ver}}{@tmp:unver}}\\{{\nwixident{{\$}VERSION}}{:doVERSION}}}\nwendcode{}\nwbegindocs{6}\nwdocspar
@@ -132,7 +132,7 @@ DOBLAST: do \{
 &clean_tmp();
 # timing and exit
 &get_exec_time(time);
-exit(1);
+exit(0);
 \nwused{\\{NWsgp9-sgp7-1}}\nwidentuses{\\{{\nwixident{{\$}blast{\_}flg}}{:doblast:unflg}}\\{{\nwixident{{\&}clean{\_}tmp}}{:amclean:untmp}}\\{{\nwixident{{\&}Extract{\_}HSP}}{:amExtract:unHSP}}\\{{\nwixident{{\$}geneid{\_}flg}}{:dogeneid:unflg}}\\{{\nwixident{{\&}get{\_}exec{\_}time}}{:amget:unexec:untime}}\\{{\nwixident{{\$}hsps{\_}flg}}{:dohsps:unflg}}\\{{\nwixident{{\&}Make{\_}Plots}}{:amMake:unPlots}}\\{{\nwixident{{\$}plots{\_}flg}}{:doplots:unflg}}\\{{\nwixident{{\&}Run{\_}Blast}}{:amRun:unBlast}}\\{{\nwixident{{\&}Run{\_}geneid}}{:amRun:ungeneid}}\\{{\nwixident{{\&}Which{\_}Options}}{:amWhich:unOptions}}}\nwindexuse{\nwixident{{\$}blast{\_}flg}}{:doblast:unflg}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\&}clean{\_}tmp}}{:amclean:untmp}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\&}Extract{\_}HSP}}{:amExtract:unHSP}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\$}geneid{\_}flg}}{:dogeneid:unflg}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\&}get{\_}exec{\_}time}}{:amget:unexec:untime}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\$}hsps{\_}flg}}{:dohsps:unflg}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\&}Make{\_}Plots}}{:amMake:unPlots}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\$}plots{\_}flg}}{:doplots:unflg}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\&}Run{\_}Blast}}{:amRun:unBlast}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\&}Run{\_}geneid}}{:amRun:ungeneid}{NWsgp9-Mai9-1}\nwindexuse{\nwixident{{\&}Which{\_}Options}}{:amWhich:unOptions}{NWsgp9-Mai9-1}\nwendcode{}\nwbegindocs{10}\nwdocspar
 
 \subsctn{Default values setting}
@@ -300,9 +300,9 @@ $Loc2 = &check_fasta_format($Seq2);
 &go_to_die("FATAL ERROR!!! Locus1($Loc1) have the same name as Locus2($Loc2).\\n  Sequences '$Seq1_Name' and '$Seq2_Name' must have different locus names.\\n")
     if $Loc1 eq $Loc2;
 # tmpfiles prefix
-$SGPtmp1 = $SGPTMP.$Seq1_Name;
-$SGPtmp2 = $SGPTMP.$Seq2_Name;
-$SGPtmpG = "$\{SGPTMP\}$\{Loc1\}_$\{Loc2\}"; 
+$SGPtmp1 = "$SGPTMP.$Seq1_Name";
+$SGPtmp2 = "$SGPTMP.$Seq2_Name";
+$SGPtmpG = "$SGPTMP.$\{Loc1\}_$\{Loc2\}"; 
 \nwalsodefined{\\{NWsgp9-setE-2}}\nwused{\\{NWsgp9-getB-1}}\nwidentuses{\\{{\nwixident{{\&}check{\_}fasta{\_}format}}{:amcheck:unfasta:unformat}}\\{{\nwixident{{\&}exists{\_}file}}{:amexists:unfile}}\\{{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}}\\{{\nwixident{{\$}Loc1}}{:doLoc1}}\\{{\nwixident{{\$}Loc2}}{:doLoc2}}\\{{\nwixident{{\$}Seq1}}{:doSeq1}}\\{{\nwixident{{\$}Seq2}}{:doSeq2}}\\{{\nwixident{{\$}Seq1{\_}Name}}{:doSeq1:unName}}\\{{\nwixident{{\$}Seq2{\_}Name}}{:doSeq2:unName}}\\{{\nwixident{{\$}SGPTMP}}{:doSGPTMP}}\\{{\nwixident{{\$}SGPtmp1}}{:doSGPtmp1}}\\{{\nwixident{{\$}SGPtmp2}}{:doSGPtmp2}}\\{{\nwixident{{\$}SGPtmpG}}{:doSGPtmpG}}}\nwindexuse{\nwixident{{\&}check{\_}fasta{\_}format}}{:amcheck:unfasta:unformat}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\&}exists{\_}file}}{:amexists:unfile}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\&}go{\_}to{\_}die}}{:amgo:unto:undie}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}Loc1}}{:doLoc1}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}Loc2}}{:doLoc2}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}Seq1}}{:doSeq1}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}Seq2}}{:doSeq2}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}Seq1{\_}Name}}{:doSeq1:unName}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}Seq2{\_}Name}}{:doSeq2:unName}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}SGPTMP}}{:doSGPTMP}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}SGPtmp1}}{:doSGPtmp1}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}SGPtmp2}}{:doSGPtmp2}{NWsgp9-setE-1}\nwindexuse{\nwixident{{\$}SGPtmpG}}{:doSGPtmpG}{NWsgp9-setE-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
 
 We check here whether the user provided two sequences or not, either they are given in fasta format. We extract locus names and build some base filenames from which we can derive, when needed, several temporary output filenames.
@@ -339,9 +339,9 @@ defined($tbx) and do \{
 defined($ofn) and ($savefiles_flg = 1);
 defined($ps_output) or ($plots_flg = 0);
 \nwused{\\{NWsgp9-getB-1}}\nwidentuses{\\{{\nwixident{{\$}blast{\_}flg}}{:doblast:unflg}}\\{{\nwixident{{\&}copy{\_}files}}{:amcopy:unfiles}}\\{{\nwixident{{\$}geneid{\_}flg}}{:dogeneid:unflg}}\\{{\nwixident{{\$}hsp}}{:dohsp}}\\{{\nwixident{{\$}hsps{\_}flg}}{:dohsps:unflg}}\\{{\nwixident{{\$}ofn}}{:doofn}}\\{{\nwixident{{\$}plots{\_}flg}}{:doplots:unflg}}\\{{\nwixident{{\$}ps{\_}output}}{:dops:unoutput}}\\{{\nwixident{{\$}savefiles{\_}flg}}{:dosavefiles:unflg}}\\{{\nwixident{{\$}SGPTMP}}{:doSGPTMP}}\\{{\nwixident{{\$}SGPtmpG}}{:doSGPtmpG}}\\{{\nwixident{{\$}tbx}}{:dotbx}}}\nwindexuse{\nwixident{{\$}blast{\_}flg}}{:doblast:unflg}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\&}copy{\_}files}}{:amcopy:unfiles}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}geneid{\_}flg}}{:dogeneid:unflg}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}hsp}}{:dohsp}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}hsps{\_}flg}}{:dohsps:unflg}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}ofn}}{:doofn}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}plots{\_}flg}}{:doplots:unflg}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}ps{\_}output}}{:dops:unoutput}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}savefiles{\_}flg}}{:dosavefiles:unflg}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}SGPTMP}}{:doSGPTMP}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}SGPtmpG}}{:doSGPtmpG}{NWsgp9-setE-2}\nwindexuse{\nwixident{{\$}tbx}}{:dotbx}{NWsgp9-setE-2}\nwendcode{}\nwbegindocs{36}\nwdocspar
+%$
 
-
-\subsctn{Printing help: {\Tt{}prt{\_}Help()}}
+\subsctn{Printing help}
 
 \nwenddocs{}\nwbegincode{37}\sublabel{NWsgp9-decC-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWsgp9-decC-4}}}\moddef{declare uses~{\nwtagstyle{}\subpageref{NWsgp9-decC-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWsgp9-sgp7-1}}\nwprevnextdefs{NWsgp9-decC-3}{NWsgp9-decC-5}\nwenddeflinemarkup
 use Pod::Text;
@@ -383,13 +383,14 @@ The {\Tt{}File::Copy} module provides {\Tt{}copy} and {\Tt{}move} functions ({\T
 sub clean_tmp() \{
     opendir(DIR,"$TMP");
     my @files = map \{ "$TMP/$_" \} grep \{ /^$TMPROOT/ \} readdir(DIR);
-    closedir(DIR);
-    $#files and 
-        ( unlink(@files)
-          and die "********* Temporary files were deleted *********\\n"
-          or die "********* Can't unlink @files : $! *********"
-        );
-    die "********* There are no temporary files in $TMP *********";
+#    closedir(DIR);
+#    $#files and 
+#        ( unlink(@files)
+#          and die "********* Temporary files were deleted *********\\n"
+#          or die "********* Can't unlink @files : $! *********"
+#        );
+#    die "********* There are no temporary files in $TMP *********";
+    die "********* There are temporary files in $TMP *********";
 \}
 # writing die messages to STDERR and clean_tmp before exit.
 sub go_to_die() \{ (print STDERR "@_") && &clean_tmp() \}
@@ -463,7 +464,7 @@ my $status;
 my $BlastProgram = "tblastx";
 my $PressdbProgram = "pressdb";
 my $BlastMatrix = "$SGP2param/blosum62mod"; 
-my $BlastOptions = "-warnings -hspmax 10000 -nogap";
+my $BlastOptions = "-hspmax 10000 -nogap";
 \nwindexdefn{\nwixident{{\$}status}}{:dostatus}{NWsgp9-decH-4}\nwindexdefn{\nwixident{{\$}BlastProgram}}{:doBlastProgram}{NWsgp9-decH-4}\nwindexdefn{\nwixident{{\$}PressdbProgram}}{:doPressdbProgram}{NWsgp9-decH-4}\nwindexdefn{\nwixident{{\$}BlastMatrix}}{:doBlastMatrix}{NWsgp9-decH-4}\nwindexdefn{\nwixident{{\$}BlastOptions}}{:doBlastOptions}{NWsgp9-decH-4}\eatline
 \nwused{\\{NWsgp9-sgp7-1}}\nwidentdefs{\\{{\nwixident{{\$}BlastMatrix}}{:doBlastMatrix}}\\{{\nwixident{{\$}BlastOptions}}{:doBlastOptions}}\\{{\nwixident{{\$}BlastProgram}}{:doBlastProgram}}\\{{\nwixident{{\$}PressdbProgram}}{:doPressdbProgram}}\\{{\nwixident{{\$}status}}{:dostatus}}}\nwidentuses{\\{{\nwixident{{\$}SGP2param}}{:doSGP2param}}}\nwindexuse{\nwixident{{\$}SGP2param}}{:doSGP2param}{NWsgp9-decH-4}\nwendcode{}\nwbegindocs{50}%$
 
@@ -489,7 +490,7 @@ sub Run_Blast() \{
     my $Seq1DB = "$SGPTMP.$Seq1_Name.DB";   #temporal name for database
     copy("$Seq1", "$Seq1DB")
         or &go_to_die("FATAL ERROR !!! Could not copy file '$Seq1' to '$Seq1DB' : $!\\n");
-    my $pressdb = "$PressdbProgram $Seq1DB";
+    my $pressdb = "$PressdbProgram $Seq1DB 1>&2";
     $status = system $pressdb;
     &go_to_die("FATAL ERROR !!! $? $!\\n  Unsuccessful PRESSDB command :\\n  $pressdb \\n")
         unless $status == 0;
@@ -575,11 +576,11 @@ sub write_HSP_files() \{
         next if /^[ \\t]*$/;
         chomp;
         my @ln = split;
-        $ln[10] =~ s/\\"//go;
-        print S1 "$ln[1] $ln[2] $ln[3] ".($ln[4]+$SHSP)." ".($ln[5]-$SHSP)." ".($ln[6]-$DSC)." $ln[7] $ln[8]\\n";
-        print S2 "$ln[10] $ln[2] $ln[3] ".($ln[11]+$SHSP)." ".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[16] $ln[18]\\n"
+        $ln[9] =~ s/\\"//go;
+        print S1 "$ln[0] $ln[1] $ln[2] ".($ln[3] + $SHSP)." ".($ln[4] - $SHSP)." ".($ln[5] - $DSC)." $ln[6] $ln[7]\\n";
+        print S2 "$ln[9] $ln[1] $ln[2] ".($ln[10] + $SHSP)." ".($ln[11] - $SHSP)." ".($ln[5] - $DSC)." $ln[15] $ln[17]\\n"
             if $scnd;
-        print S3 "$ln[1]:$ln[10] $ln[2] hsp:hsp ".($ln[4]+$SHSP).":".($ln[11]+$SHSP)." ".($ln[5]-$SHSP).":".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[7]:$ln[16] $ln[8]:$ln[18]\\n"
+        print S3 "$ln[0]:$ln[9] $ln[1] hsp:hsp ".($ln[3] + $SHSP).":".($ln[10] + $SHSP)." ".($ln[4] - $SHSP).":".($ln[11] - $SHSP)." ".($ln[5] - $DSC)." $ln[6]:$ln[15] $ln[7]:$ln[17]\\n"
             if $thrd;
     \};
     close(S3) if $thrd;
@@ -638,12 +639,12 @@ sub Run_geneid() \{
         my $geneid;
     # running geneid in $Seq1 with tblastx output
     &prt_Header("Running GENEID program on $Loc1") if $verbose_flg;
-    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp1.hsp-sr $Seq1 >  $SGPtmp1.sgp";
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp1.hsp-sr $Seq1 > $SGPtmp1.sgp";
     $status = system $geneid;
     &go_to_die("FATAL ERROR !!! $? $!\\nUnsuccessfull GENEID command on '$Loc1':\\n  $geneid \\n") unless $status == 0;
     # running geneid in $Seq2 with tblastx output
     &prt_Header("Running GENEID program on $Loc2") if $verbose_flg;
-    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp2.hsp-sr $Seq2 >  $SGPtmp2.sgp";
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp2.hsp-sr $Seq2 > $SGPtmp2.sgp";
     $status = system $geneid;
     &go_to_die("FATAL ERROR !!! $? $!\\nUnsuccessfull GENEID command on '$Loc2':\\n  $geneid \\n") unless $status == 0;
   SAVEFILES: do \{
@@ -671,13 +672,13 @@ sub Make_Plots() \{
     &prt_Header("Running GFF2PS program on $Loc1") if $verbose_flg;
     $gff2ps = "$Gff2psProgram $SGPtmp1.sgp $SGPtmp1.hsp-sr > $ps_output$Loc1.ps";
     $status = system $gff2ps;
-    &go_to_die("FATAL ERROR !!! $? $!\\nUnsuccessfull GFF2PS command : $gff2ps \\n")
+    &go_to_die("FATAL ERROR !!! $? : $!\\nUnsuccessfull GFF2PS command : $gff2ps \\n")
         unless $status == 0;
     # predicted genes separately -- gff2ps on Loc2
     &prt_Header("Running GFF2PS program on $Loc2") if $verbose_flg;
     $gff2ps = "$Gff2psProgram $SGPtmp2.sgp $SGPtmp2.hsp-sr > $ps_output$Loc2.ps";
     $status = system $gff2ps;
-    &go_to_die("FATAL ERROR !!! $? $!\\nUnsuccessfull GFF2PS command : $gff2ps \\n")
+    &go_to_die("FATAL ERROR !!! $? : $!\\nUnsuccessfull GFF2PS command : $gff2ps \\n")
         unless $status == 0;
     \LA{}run aplot~{\nwtagstyle{}\subpageref{NWsgp9-run9.2-1}}\RA{}
 \} # END_SUB: Make_Plots

@@ -13,7 +13,7 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.nw,v 1.5 2000-10-13 19:56:06 jabril Exp $
+% $Id: sgp2.nw,v 1.6 2000-10-16 08:27:41 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
@@ -42,7 +42,7 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.nw,v 1.5 2000-10-13 19:56:06 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.nw,v 1.6 2000-10-16 08:27:41 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
@@ -104,7 +104,7 @@ contains program starting time (seconds since \textsc{Unix} ``epoch''), which wi
 
 <<version control>>=
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.5 2000-10-13 19:56:06 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.6 2000-10-16 08:27:41 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 @ %def $PROGRAM $VERSION @tmp_ver
 
@@ -132,7 +132,7 @@ DOBLAST: do {
 &clean_tmp();
 # timing and exit
 &get_exec_time(time);
-exit(1);
+exit(0);
 @
 
 \subsctn{Default values setting}
@@ -300,9 +300,9 @@ $Loc2 = &check_fasta_format($Seq2);
 &go_to_die("FATAL ERROR!!! Locus1($Loc1) have the same name as Locus2($Loc2).\n  Sequences '$Seq1_Name' and '$Seq2_Name' must have different locus names.\n")
     if $Loc1 eq $Loc2;
 # tmpfiles prefix
-$SGPtmp1 = $SGPTMP.$Seq1_Name;
-$SGPtmp2 = $SGPTMP.$Seq2_Name;
-$SGPtmpG = "${SGPTMP}${Loc1}_${Loc2}"; 
+$SGPtmp1 = "$SGPTMP.$Seq1_Name";
+$SGPtmp2 = "$SGPTMP.$Seq2_Name";
+$SGPtmpG = "$SGPTMP.${Loc1}_${Loc2}"; 
 @
 
 We check here whether the user provided two sequences or not, either they are given in fasta format. We extract locus names and build some base filenames from which we can derive, when needed, several temporary output filenames.
@@ -339,9 +339,9 @@ defined($tbx) and do {
 defined($ofn) and ($savefiles_flg = 1);
 defined($ps_output) or ($plots_flg = 0);
 @
+%$
 
-
-\subsctn{Printing help: [[prt_Help()]]}
+\subsctn{Printing help}
 
 <<declare uses>>=
 use Pod::Text;
@@ -383,13 +383,14 @@ The [[File::Copy]] module provides [[copy]] and [[move]] functions ([[move]] wor
 sub clean_tmp() {
     opendir(DIR,"$TMP");
     my @files = map { "$TMP/$_" } grep { /^$TMPROOT/ } readdir(DIR);
-    closedir(DIR);
-    $#files and 
-        ( unlink(@files)
-          and die "********* Temporary files were deleted *********\n"
-          or die "********* Can't unlink @files : $! *********"
-        );
-    die "********* There are no temporary files in $TMP *********";
+#    closedir(DIR);
+#    $#files and 
+#        ( unlink(@files)
+#          and die "********* Temporary files were deleted *********\n"
+#          or die "********* Can't unlink @files : $! *********"
+#        );
+#    die "********* There are no temporary files in $TMP *********";
+    die "********* There are temporary files in $TMP *********";
 }
 # writing die messages to STDERR and clean_tmp before exit.
 sub go_to_die() { (print STDERR "@_") && &clean_tmp() }
@@ -463,7 +464,7 @@ my $status;
 my $BlastProgram = "tblastx";
 my $PressdbProgram = "pressdb";
 my $BlastMatrix = "$SGP2param/blosum62mod"; 
-my $BlastOptions = "-warnings -hspmax 10000 -nogap";
+my $BlastOptions = "-hspmax 10000 -nogap";
 @ %def $status $BlastProgram $PressdbProgram $BlastMatrix $BlastOptions
 %$
 
@@ -489,7 +490,7 @@ sub Run_Blast() {
     my $Seq1DB = "$SGPTMP.$Seq1_Name.DB";   #temporal name for database
     copy("$Seq1", "$Seq1DB")
         or &go_to_die("FATAL ERROR !!! Could not copy file '$Seq1' to '$Seq1DB' : $!\n");
-    my $pressdb = "$PressdbProgram $Seq1DB";
+    my $pressdb = "$PressdbProgram $Seq1DB 1>&2";
     $status = system $pressdb;
     &go_to_die("FATAL ERROR !!! $? $!\n  Unsuccessful PRESSDB command :\n  $pressdb \n")
         unless $status == 0;
@@ -575,11 +576,11 @@ sub write_HSP_files() {
         next if /^[ \t]*$/;
         chomp;
         my @ln = split;
-        $ln[10] =~ s/\"//go;
-        print S1 "$ln[1] $ln[2] $ln[3] ".($ln[4]+$SHSP)." ".($ln[5]-$SHSP)." ".($ln[6]-$DSC)." $ln[7] $ln[8]\n";
-        print S2 "$ln[10] $ln[2] $ln[3] ".($ln[11]+$SHSP)." ".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[16] $ln[18]\n"
+        $ln[9] =~ s/\"//go;
+        print S1 "$ln[0] $ln[1] $ln[2] ".($ln[3] + $SHSP)." ".($ln[4] - $SHSP)." ".($ln[5] - $DSC)." $ln[6] $ln[7]\n";
+        print S2 "$ln[9] $ln[1] $ln[2] ".($ln[10] + $SHSP)." ".($ln[11] - $SHSP)." ".($ln[5] - $DSC)." $ln[15] $ln[17]\n"
             if $scnd;
-        print S3 "$ln[1]:$ln[10] $ln[2] hsp:hsp ".($ln[4]+$SHSP).":".($ln[11]+$SHSP)." ".($ln[5]-$SHSP).":".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[7]:$ln[16] $ln[8]:$ln[18]\n"
+        print S3 "$ln[0]:$ln[9] $ln[1] hsp:hsp ".($ln[3] + $SHSP).":".($ln[10] + $SHSP)." ".($ln[4] - $SHSP).":".($ln[11] - $SHSP)." ".($ln[5] - $DSC)." $ln[6]:$ln[15] $ln[7]:$ln[17]\n"
             if $thrd;
     };
     close(S3) if $thrd;
@@ -638,12 +639,12 @@ sub Run_geneid() {
 	my $geneid;
     # running geneid in $Seq1 with tblastx output
     &prt_Header("Running GENEID program on $Loc1") if $verbose_flg;
-    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp1.hsp-sr $Seq1 >  $SGPtmp1.sgp";
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp1.hsp-sr $Seq1 > $SGPtmp1.sgp";
     $status = system $geneid;
     &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GENEID command on '$Loc1':\n  $geneid \n") unless $status == 0;
     # running geneid in $Seq2 with tblastx output
     &prt_Header("Running GENEID program on $Loc2") if $verbose_flg;
-    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp2.hsp-sr $Seq2 >  $SGPtmp2.sgp";
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp2.hsp-sr $Seq2 > $SGPtmp2.sgp";
     $status = system $geneid;
     &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GENEID command on '$Loc2':\n  $geneid \n") unless $status == 0;
   SAVEFILES: do {
@@ -671,13 +672,13 @@ sub Make_Plots() {
     &prt_Header("Running GFF2PS program on $Loc1") if $verbose_flg;
     $gff2ps = "$Gff2psProgram $SGPtmp1.sgp $SGPtmp1.hsp-sr > $ps_output$Loc1.ps";
     $status = system $gff2ps;
-    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
+    &go_to_die("FATAL ERROR !!! $? : $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
         unless $status == 0;
     # predicted genes separately -- gff2ps on Loc2
     &prt_Header("Running GFF2PS program on $Loc2") if $verbose_flg;
     $gff2ps = "$Gff2psProgram $SGPtmp2.sgp $SGPtmp2.hsp-sr > $ps_output$Loc2.ps";
     $status = system $gff2ps;
-    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
+    &go_to_die("FATAL ERROR !!! $? : $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
         unless $status == 0;
     <<run aplot>>
 } # END_SUB: Make_Plots

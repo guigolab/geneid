@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #line 96 "./sgp2.nw"
-#line 785 "./sgp2.nw"
+#line 786 "./sgp2.nw"
 ######################################################################
 #                               sgp2                                 #
 ######################################################################
@@ -30,7 +30,7 @@
 my $Start = time;
 #line 106 "./sgp2.nw"
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.pl,v 1.7 2000-10-13 19:56:06 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.pl,v 1.8 2000-10-16 08:27:49 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 #line 114 "./sgp2.nw"
 use strict;
@@ -83,23 +83,23 @@ my ($Seq1_Name, $Seq2_Name, $Loc1, $Loc2, $SGPtmp1, $SGPtmp2, $SGPtmpG);
 #line 311 "./sgp2.nw"
 # file flags
 my ($blast_flg, $hsps_flg, $geneid_flg, $plots_flg) = (1, 1, 1, 1);
-#line 460 "./sgp2.nw"
+#line 461 "./sgp2.nw"
 # Processes
 my $status;
 # Blast 
 my $BlastProgram = "tblastx";
 my $PressdbProgram = "pressdb";
 my $BlastMatrix = "$SGP2param/blosum62mod"; 
-my $BlastOptions = "-warnings -hspmax 10000 -nogap";
-#line 524 "./sgp2.nw"
+my $BlastOptions = "-hspmax 10000 -nogap";
+#line 525 "./sgp2.nw"
 # Extract HSPs
 my $GetSRsProgram = "$SGP2bin/GetSRsAln.pl";
-#line 619 "./sgp2.nw"
+#line 620 "./sgp2.nw"
 # geneid
 my $GeneidProgram = "$SGP2bin/geneid.v1.0-sgp/bin/geneid";
 my $GeneidParam   = "$SGP2bin/geneid.v1.0-sgp/param/human3iso.param";
 my $GeneidOptions = "-G";
-#line 662 "./sgp2.nw"
+#line 663 "./sgp2.nw"
 # gff2ps and aplot
 my $Gff2psProgram = "$SGP2bin/gff2ps";
 my $AplotProgram  = "$SGP2bin/gff2aplot";
@@ -135,17 +135,18 @@ sub prt_Help() {
 sub clean_tmp() {
     opendir(DIR,"$TMP");
     my @files = map { "$TMP/$_" } grep { /^$TMPROOT/ } readdir(DIR);
-    closedir(DIR);
-    $#files and 
-        ( unlink(@files)
-          and die "********* Temporary files were deleted *********\n"
-          or die "********* Can't unlink @files : $! *********"
-        );
-    die "********* There are no temporary files in $TMP *********";
+#    closedir(DIR);
+#    $#files and 
+#        ( unlink(@files)
+#          and die "********* Temporary files were deleted *********\n"
+#          or die "********* Can't unlink @files : $! *********"
+#        );
+#    die "********* There are no temporary files in $TMP *********";
+    die "********* There are temporary files in $TMP *********";
 }
 # writing die messages to STDERR and clean_tmp before exit.
 sub go_to_die() { (print STDERR "@_") && &clean_tmp() }
-#line 402 "./sgp2.nw"
+#line 403 "./sgp2.nw"
 # Reporting IN/OUT progress.
 sub prt_progress() {
     $verbose_flg && do {
@@ -165,7 +166,7 @@ sub fill_mid()   { my $l = length($_[0]); my $k = int(($_[1] - $l)/2); ($_[2] x 
 sub max() { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z } 
 # section headers to STDERR
 sub prt_Header() { print STDERR ("*" x 80)."\n** ".&fill_mid("@_",74," ")." **\n".("*" x 80)."\n" }
-#line 432 "./sgp2.nw"
+#line 433 "./sgp2.nw"
 # Timing.
 sub get_exec_time() {
     $verbose_flg && do {
@@ -248,9 +249,9 @@ $Loc2 = &check_fasta_format($Seq2);
 &go_to_die("FATAL ERROR!!! Locus1($Loc1) have the same name as Locus2($Loc2).\n  Sequences '$Seq1_Name' and '$Seq2_Name' must have different locus names.\n")
     if $Loc1 eq $Loc2;
 # tmpfiles prefix
-$SGPtmp1 = $SGPTMP.$Seq1_Name;
-$SGPtmp2 = $SGPTMP.$Seq2_Name;
-$SGPtmpG = "${SGPTMP}${Loc1}_${Loc2}"; 
+$SGPtmp1 = "$SGPTMP.$Seq1_Name";
+$SGPtmp2 = "$SGPTMP.$Seq2_Name";
+$SGPtmpG = "$SGPTMP.${Loc1}_${Loc2}"; 
 #line 328 "./sgp2.nw"
 defined($hsp) and do {
     &copy_files("$hsp${Loc1}_${Loc2}.srQ", "$SGPtmpG.srQ");
@@ -271,7 +272,7 @@ defined($ps_output) or ($plots_flg = 0);
 #line 75 "./sgp2.nw"
 ### MAIN SUBS ###
 
-#line 484 "./sgp2.nw"
+#line 485 "./sgp2.nw"
 # Runnig blast
 sub Run_Blast() {
     # building DB on SEQ1
@@ -280,7 +281,7 @@ sub Run_Blast() {
     my $Seq1DB = "$SGPTMP.$Seq1_Name.DB";   #temporal name for database
     copy("$Seq1", "$Seq1DB")
         or &go_to_die("FATAL ERROR !!! Could not copy file '$Seq1' to '$Seq1DB' : $!\n");
-    my $pressdb = "$PressdbProgram $Seq1DB";
+    my $pressdb = "$PressdbProgram $Seq1DB 1>&2";
     $status = system $pressdb;
     &go_to_die("FATAL ERROR !!! $? $!\n  Unsuccessful PRESSDB command :\n  $pressdb \n")
         unless $status == 0;
@@ -298,9 +299,9 @@ sub Run_Blast() {
     # saving files
     copy("$SGPTMP.tbx", "$ofn${Loc1}_${Loc2}.tbx") if $savefiles_flg;
 } # END_SUB: Run_Blast
-#line 537 "./sgp2.nw"
+#line 538 "./sgp2.nw"
 # Extracting and processing HSPs
-#line 566 "./sgp2.nw"
+#line 567 "./sgp2.nw"
 sub write_HSP_files() {
     my @names = @_;
     my ($DSC, $SHSP, $scnd, $thrd) = (38, 0, 0, 0);
@@ -313,11 +314,11 @@ sub write_HSP_files() {
         next if /^[ \t]*$/;
         chomp;
         my @ln = split;
-        $ln[10] =~ s/\"//go;
-        print S1 "$ln[1] $ln[2] $ln[3] ".($ln[4]+$SHSP)." ".($ln[5]-$SHSP)." ".($ln[6]-$DSC)." $ln[7] $ln[8]\n";
-        print S2 "$ln[10] $ln[2] $ln[3] ".($ln[11]+$SHSP)." ".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[16] $ln[18]\n"
+        $ln[9] =~ s/\"//go;
+        print S1 "$ln[0] $ln[1] $ln[2] ".($ln[3] + $SHSP)." ".($ln[4] - $SHSP)." ".($ln[5] - $DSC)." $ln[6] $ln[7]\n";
+        print S2 "$ln[9] $ln[1] $ln[2] ".($ln[10] + $SHSP)." ".($ln[11] - $SHSP)." ".($ln[5] - $DSC)." $ln[15] $ln[17]\n"
             if $scnd;
-        print S3 "$ln[1]:$ln[10] $ln[2] hsp:hsp ".($ln[4]+$SHSP).":".($ln[11]+$SHSP)." ".($ln[5]-$SHSP).":".($ln[12]-$SHSP)." ".($ln[6]-$DSC)." $ln[7]:$ln[16] $ln[8]:$ln[18]\n"
+        print S3 "$ln[0]:$ln[9] $ln[1] hsp:hsp ".($ln[3] + $SHSP).":".($ln[10] + $SHSP)." ".($ln[4] - $SHSP).":".($ln[11] - $SHSP)." ".($ln[5] - $DSC)." $ln[6]:$ln[15] $ln[7]:$ln[17]\n"
             if $thrd;
     };
     close(S3) if $thrd;
@@ -325,7 +326,7 @@ sub write_HSP_files() {
     close(S1);
     close(SR);
 }
-#line 539 "./sgp2.nw"
+#line 540 "./sgp2.nw"
 sub Extract_HSP() {
     &prt_Header("Extracting SRs from BLAST output") if $verbose_flg;
     #
@@ -349,18 +350,18 @@ sub Extract_HSP() {
       copy("$SGPTMP.aln",     "$ofn${Loc1}_$Loc2.aln");
     } if $savefiles_flg;
 } # END_SUB: Extract_HSP
-#line 636 "./sgp2.nw"
+#line 637 "./sgp2.nw"
 # Running geneid
 sub Run_geneid() {
 	my $geneid;
     # running geneid in $Seq1 with tblastx output
     &prt_Header("Running GENEID program on $Loc1") if $verbose_flg;
-    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp1.hsp-sr $Seq1 >  $SGPtmp1.sgp";
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp1.hsp-sr $Seq1 > $SGPtmp1.sgp";
     $status = system $geneid;
     &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GENEID command on '$Loc1':\n  $geneid \n") unless $status == 0;
     # running geneid in $Seq2 with tblastx output
     &prt_Header("Running GENEID program on $Loc2") if $verbose_flg;
-    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp2.hsp-sr $Seq2 >  $SGPtmp2.sgp";
+    $geneid = "$GeneidProgram $GeneidOptions -P $GeneidParam -S  $SGPtmp2.hsp-sr $Seq2 > $SGPtmp2.sgp";
     $status = system $geneid;
     &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GENEID command on '$Loc2':\n  $geneid \n") unless $status == 0;
   SAVEFILES: do {
@@ -371,7 +372,7 @@ sub Run_geneid() {
       system "cat $SGPtmp1.sgp $SGPtmp2.sgp 1>&2"; 
     } if $verbose_flg;
 } # END_SUB: Run_geneid
-#line 667 "./sgp2.nw"
+#line 668 "./sgp2.nw"
 # Running gff2ps and aplot
 sub Make_Plots() {
     my ($gff2ps, $aplot);
@@ -379,23 +380,23 @@ sub Make_Plots() {
     &prt_Header("Running GFF2PS program on $Loc1") if $verbose_flg;
     $gff2ps = "$Gff2psProgram $SGPtmp1.sgp $SGPtmp1.hsp-sr > $ps_output$Loc1.ps";
     $status = system $gff2ps;
-    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
+    &go_to_die("FATAL ERROR !!! $? : $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
         unless $status == 0;
     # predicted genes separately -- gff2ps on Loc2
     &prt_Header("Running GFF2PS program on $Loc2") if $verbose_flg;
     $gff2ps = "$Gff2psProgram $SGPtmp2.sgp $SGPtmp2.hsp-sr > $ps_output$Loc2.ps";
     $status = system $gff2ps;
-    &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
+    &go_to_die("FATAL ERROR !!! $? : $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
         unless $status == 0;
     
-#line 686 "./sgp2.nw"
+#line 687 "./sgp2.nw"
 # run aplot
 &prt_Header("Running APLOT program on $Loc1:$Loc2") if $verbose_flg;
 $aplot = "$AplotProgram ";
 $status = system $aplot;
 &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull APLOT command : $aplot \n")
     unless $status == 0;
-#line 683 "./sgp2.nw"
+#line 684 "./sgp2.nw"
 } # END_SUB: Make_Plots
 
 #line 82 "./sgp2.nw"
@@ -415,12 +416,12 @@ DOBLAST: do {
 &clean_tmp();
 # timing and exit
 &get_exec_time(time);
-exit(1);
+exit(0);
 
 #line 86 "./sgp2.nw"
 ### EOF ###
 
-#line 822 "./sgp2.nw"
+#line 823 "./sgp2.nw"
 __DATA__
 =head1 NAME
 
