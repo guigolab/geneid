@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $
+% $Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -447,9 +447,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.9 $', #'
-     '$Date: 2001-10-22 18:27:32 $', #'
-     '$Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $', #'
+     '$Revision: 1.10 $', #'
+     '$Date: 2001-10-23 08:46:19 $', #'
+     '$Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -892,7 +892,7 @@ sub command_line_for_layout() {
     $n = 0;
     foreach my $cvar (keys %{ $CmdLineVars{LAYOUT} }) {
         my @cary = ('LAYOUT',$cvar,$CmdLineVars{LAYOUT}{$cvar});
-        $c = &varscheck($F,'LAYOUT',\@cary) ? '.' : $noCV;
+        $c = &varscheck($F,'LAYOUT',\@cary,\%CmdLineVars) ? '.' : $noCV;
         &counter(++$n,$c);
 	}; # foreach $cvar
     &counter_end($n,$c);
@@ -916,13 +916,22 @@ Parsing and loading command-line options having structure like:\\
 <<Parsing Command-Line Options>>=
 sub command_line_for_vars() {
     $n = 0;   
-    foreach my $calias qw/ L Q S T G F / {
+    foreach my $calias ( qw/ L Q S T G F / ) {
         my ($cvar,$cflg);
         $cvar = $varkeys{$calias};
         $cflg = ($calias ne 'L') ? $T : $F;
         defined($CmdLineVars{VARS}{$cvar}) && do {
-            foreach my $ccv (keys $CmdLineVars{VARS}{$cvar}) {
-                $c = &varscheck($cflg,$ccv,$CmdLineVars{VARS}{$cvar}{$ccv})
+            foreach my $ccv (@{ $CmdLineVars{VARS}{$cvar} }) {
+                my @clin = ();
+              TWOTHREE: {
+                  $cflg && do {
+			      	  $ccv =~ /^(.*?):{2}(.*?)={1}(.*?)$/o &&
+                              (@clin = ($1,$2,$3));
+			      	  last TWOTHREE;
+			      };
+                  $ccv =~ /^(.*?)={1}(.*?)$/o && (@clin = ($cvar,$1,$2));
+		        }; # TWOTHREE
+                $c = &varscheck($cflg,$cvar,\@clin,\%CmdLineVars)
                      ? $calias : $noCV;
                 &counter(++$n,$c);
             }; # foreach $ccv
@@ -951,7 +960,8 @@ sub command_line_for_vars() {
          customization variable from command-line. You can set
          several variables by repeating any of these options, 
          i.e.:
-... --feature-var cds::shape=box --feature-var cds::feature_color=blue ... 
+               ... --feature-var cds::shape=box \
+                   --feature-var cds::feature_color=blue ... 
 @
 <<HIDE: command-line latex short custom>>=
 \rw{-\/-feature-var '\pr{feature::variable=value}'}
@@ -1084,13 +1094,12 @@ sub parse_custom_files() {
           TWOTHREE: {
               $v_flag && do {
 				  $main =~ /^(.*?):{2}(.*?)={1}(.*?)$/o &&
-                      (@line = ($1,$2,$3));
+                           (@line = ($1,$2,$3));
 				  last TWOTHREE;
 			  };
-              $main =~ /^(.*?)={1}(.*?)$/o &&
-                  (@line = ($_v,$1,$2));
+              $main =~ /^(.*?)={1}(.*?)$/o && (@line = ($_v,$1,$2));
 		  }; # TWOTHREE
-            $c = &varscheck($v_flag,$_v,\@line) ? $_c : $noCV;
+            $c = &varscheck($v_flag,$_v,\@line,\%CustomVars) ? $_c : $noCV;
         } continue {
             &counter(++$n,$c) if ($Verbose && !$Quiet);
         }; # WHILE
@@ -1163,11 +1172,11 @@ NO_CUSTOM_FOUND =>
 \subsubsctn{Validating customization parameters} 
 \label{sec:paramvalid}
 
-'[[$rec]]' is a reference to an array that contains three elements: feature, variable and value. First we check if variable name is defined in , then we check if the given value matches the variable type. After that we analyse the feature element, testing if it is a regular expression or not.
+'[[$rec]]' is a reference to an array that contains three elements: feature, variable and value. First we check if variable name is defined in , then we check if the given value matches the variable type. After that we analyse the feature element, testing if it is a regular expression or not. We have slightly modified ths function to be able to process input from [[&parse_custom_files]] and [[&check_command_line_vars]], we pass by reference the main hash variable that must be loaded with the data being parsed ([[%CustomVars]] and [[%CmdLineVars]] respectively).
 
 <<Parsing Custom Files>>=
 sub varscheck() {
-    my ($flag,$class,$rec) = @_;
+    my ($flag,$class,$rec,$varec) = @_;
     defined($DefaultVars{$class}) || 
         (&warn('SECTION_NOT_DEF',$F),return $F);
 	my $_var = \%{$DefaultVars{$class}};
@@ -1176,16 +1185,16 @@ sub varscheck() {
     &checkvarvalues($_var->{$$rec[1]}{'TYPE'},\$$rec[2],$$rec[1]) || return $F;
     $flag && do {
         my @tmpary = ();
-        defined(@{ $CustomVars{$class}{$$rec[1]} }) || do {
-            @{ $CustomVars{$class}{$$rec[1]} } = ();
+        defined(@{ $varec->{$class}{$$rec[1]} }) || do {
+            @{ $varec->{$class}{$$rec[1]} } = ();
         };
         @tmpary = &find_regexp($$rec[0]);
         (shift @tmpary) || return $F;
-        push @{ $CustomVars{$class}{$$rec[1]} }, 
+        push @{ $varec->{$class}{$$rec[1]} }, 
              ( @tmpary, $$rec[2] );
         return $T;
 	};
-    $CustomVars{$class}{$$rec[1]} = $$rec[2];
+    $varec->{$class}{$$rec[1]} = $$rec[2];
     return $T;
 } # varscheck
 @ 
@@ -3351,7 +3360,7 @@ foreach my $str (keys $src_ref->[$_element]) {
         next;
     };
     <<set reference to GFF data: GROUPS>>
-}; # foreach my $src
+}; # foreach my $str
 @ 
 
 <<set reference to GFF data: GROUPS>>=
@@ -3363,7 +3372,7 @@ foreach my $grp (keys $str_ref->[$_element]) {
         next;
     };
     <<set reference to GFF data: FEATURES>>
-}; # foreach my $src
+}; # foreach my $grp
 @ 
 
 <<set reference to GFF data: FEATURES>>=
@@ -3382,7 +3391,7 @@ foreach my $feat (0..$#{ $grp_ref->[$_element] }) {
     # check regexp
     &does_feat_match($ft_name,$reg_exp,$feat_ref,
                      $_ftprop,$v_sec,$v_var,$the_value);
-}; # foreach my $src
+}; # foreach my $feat
 @
 
 <<Features Setting>>=
@@ -5605,7 +5614,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $
+# $Id: gff2aplot.nw,v 1.10 2001-10-23 08:46:19 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
