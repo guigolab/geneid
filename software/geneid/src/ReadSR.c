@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadSR.c,v 1.3 2001-12-18 15:58:18 eblanco Exp $  */
+/*  $Id: ReadSR.c,v 1.4 2002-04-11 14:34:02 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -224,7 +224,7 @@ long ReadSR (char* FileName, packSR* sr, long LengthSequence)
 		  i = (three)? i + 3: i + 1;
 		  three = 0;
 
-		  if ((i + FRAMES) > MAXEVIDENCES)
+		  if ((i + FRAMES) > MAXSR)
 			printError("Too many SRs: increase MAXSR definition");
 
 		} /* end of if-comment */
