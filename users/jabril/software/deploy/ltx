@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: ltx,v 1.2 2001-08-21 13:15:04 jabril Exp $
+# $Id: ltx,v 1.3 2001-09-03 15:09:53 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -12,7 +12,7 @@ L="####################"
 # only LaTeXing
 #
 # Setting Global Variables
-WORK="/home/ug/jabril/development/jabril/software/deploy" ;
+WORK="$HOME/development/softjabril/deploy" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
@@ -21,11 +21,15 @@ nwfile="deploy" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
 #
 pushd $DOCS/ ;
+#
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
-pdflatex $nwfile.tex ;
+#
+# pdflatex $nwfile.tex ;
+ps2pdf $nwfile.ps $nwfile.pdf ;
+#
 popd ;
 { echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
   echo "$L$L$L$L";

@@ -1,6 +1,6 @@
 #
 # Setting Global Variables
-WORK="/home/ug/jabril/development/jabril/software/deploy" ;
+WORK="$HOME/development/softjabril/deploy" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;

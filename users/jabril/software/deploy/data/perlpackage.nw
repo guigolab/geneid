@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: perlpackage.nw,v 1.1 2001-08-21 13:15:04 jabril Exp $ 
+% # $Id: perlpackage.nw,v 1.2 2001-09-03 15:09:53 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -23,11 +23,11 @@
 \usepackage{html}     
 \usepackage{htmllist} 
 %% tables    
+\usepackage{dcolumn}
 %\usepackage{colortbl}
 %\usepackage{multirow}
 %\usepackage{hhline}
 %\usepackage{tabularx}
-%\usepackage{dcolumn}
 %% seminar
 %\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
 %% draft watermark
@@ -50,8 +50,12 @@
 
 \input defs.tex % from <LaTeX new definitions> chunk
 
-\begin{comment}
-<<LaTeX new definitions>>=
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{document}
+%
+<<HIDE: LaTeX new definitions>>=
 %%%%% Colors for gff2ps
 \input ColorDefs.tex
 
@@ -60,20 +64,46 @@
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\todo}[1]{
+  \vskip 3ex
+  \hspace{-0.75cm}
+   \psframebox[framearc=0.2,linecolor=darkred,linewidth=1pt,
+              fillstyle=solid,fillcolor=verylightyellow,framesep=2ex]{
+     \begin{minipage}[t]{16cm}
+     \vskip -4.75ex
+     \hspace{-1.25cm}
+       \psframebox[framearc=1,linecolor=darkred,linewidth=1.25pt,
+               fillstyle=solid,fillcolor=verylightorange,framesep=5pt]{
+               \textcolor{darkred}{\textbf{\hspace{2ex}TO DO\hspace{2ex}}}
+         } % psframebox
+      \begin{itemize}\setlength{\itemsep}{-0.5ex} #1 \end{itemize}
+     \end{minipage}
+     } % psframebox
+  \vskip 1.5ex
+} % newcommand todo
+\newcommand{\todoitem}[2]{
+\item {#1}\dotfill[\textit{Section}~\ref{#2}, \textit{page}~\pageref{#2}]
+} % newcommand todoitem
+<<HIDE: new LaTeX commands>>
 
 %%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
 \newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
 % \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+<<HIDE: new LaTeX pstricks>>
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+<<HIDE: new LaTeX urls>>
 
 %%%%% defs
 \def\noweb{\textsc{noweb}}
 \def\ps{\textsc{PostScript}}
+<<HIDE: new LaTeX definitions>>
+
+%%%%% TODO defs
+<<HIDE: new defs TODO>>
 
 %%%%% Setting text for footers and headers
 \def\tit{\textsc{Project Title Here.- }}
@@ -91,7 +121,7 @@
 \def\progname{@@@PROJECT@@@}
 \def\mtauthor{
  \htmladdnormallink{\texttt{author@imim.es}}
-                   {MAILTO:author@imim.es?subject=[deploy.pl]}
+                   {MAILTO:author@imim.es?subject=[@@@PROJECT@@@]}
  } % def mtjabril
 \def\authorslist{
  The Author/s {\mdseries\small\dotfill \mtauthor } \\
@@ -109,7 +139,6 @@ Universitat Pompeu Fabra\\[2ex]
  } % def showaffiliation
 %
 @
-\end{comment}
 \thispagestyle{empty}
 
 \begin{titlepage}
@@ -121,11 +150,13 @@ Universitat Pompeu Fabra\\[2ex]
 \newlength{\lttbl}\setlength{\lttbl}{0.25\linewidth}
 \newlength{\rttbl}\setlength{\rttbl}{0.70\linewidth}
 %\fbox{
-\rule[0.5ex]{0.95\linewidth}{0.5ex}
 %\vskip 2ex
 \begin{tabular}{>{\scshape}r@{\quad}l}
 \rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
-Program Name: & {\Huge\progname}                       \\[2ex]
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+Program Name: & {\Huge\progname}                       \\[3ex]
+\multicolumn{2}{c}{\rule[0.5ex]{0.95\linewidth}{2pt}}\\[2ex]
       Author: & {\Large
                  \begin{minipage}[t]{0.95\rttbl}
                  \authorslist
@@ -137,26 +168,22 @@ Program Name: & {\Huge\progname}                       \\[2ex]
                  \description
                  \end{minipage}}                       \\[2ex]
 \\
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
 \end{tabular}
-\vskip 2ex
-\rule[0.5ex]{0.95\linewidth}{0.5ex}
 %} % fbox
 \end{large}
 \end{bfseries}
+\end{center}
 
 \vfill
 
 \begin{raggedleft}
 \showaffiliation
 \end{raggedleft}
-\end{center}
 
 \end{titlepage} %'
 
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\begin{document}
 %
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
@@ -175,7 +202,7 @@ Program Name: & {\Huge\progname}                       \\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: perlpackage.nw,v 1.1 2001-08-21 13:15:04 jabril Exp $$>$ }
+{\small$<$ \verb$Id: perlpackage.nw,v 1.2 2001-09-03 15:09:53 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -543,17 +570,17 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: perlpackage.nw,v 1.1 2001-08-21 13:15:04 jabril Exp $
+# $Id: perlpackage.nw,v 1.2 2001-09-03 15:09:53 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
 
 <<GNU License>>=
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# %                             DEPLOY                               %
+# %                          @@@PROJECT@@@                           %
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # 
-#    .
+#    Remember to put a short description of your script here...
 # 
 #     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
 #
@@ -611,7 +638,8 @@ chmod a+x $WORK/nw2tex $WORK/ltx;
 @ 
 
 <<tangling complementary LaTeX files>>=
-notangle -R"LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
+notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw > $DOCS/todo.tex ; 
 @ 
 
 <<weaving>>=
@@ -619,7 +647,9 @@ notangle -R"LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
 # weaving and LaTeXing
 <<BASH Environment Variables>>
 <<tangling complementary LaTeX files>>
-noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+        $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+# noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
@@ -632,10 +662,15 @@ popd;
 # only LaTeXing
 <<BASH Environment Variables>>
 pushd $DOCS/ ;
+#
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+#
+# pdflatex $nwfile.tex ;
+ps2pdf $nwfile.ps $nwfile.pdf ;
+#
 popd ;
 <<BASH script end>>
 @ %$
