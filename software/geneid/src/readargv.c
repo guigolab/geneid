@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.13 2003-11-05 14:46:54 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.14 2004-01-27 16:27:57 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -73,7 +73,7 @@ void printHelp()
   
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
-  printf("\t-F: Force 1 gene prediction\n");
+  printf("\t-F: Force the prediction of one gene structure\n");
   printf("\t-o: Only running exon prediction (disable gene prediction)\n");
   printf("\t-O  <exons_filename>: Only running gene prediction (not exon prediction)\n");
   printf("\t-Z: Activate Open Reading Frames searching\n\n");
