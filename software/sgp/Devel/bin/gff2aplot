@@ -30,7 +30,7 @@
 #
 # Last Update:  
 #
-# $Id: gff2aplot,v 1.4 2000-01-26 19:55:33 jabril Exp $	
+# $Id: gff2aplot,v 1.5 2000-01-26 19:56:53 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   PROGRAM="aplot";
   VERSION="v1.9";
   CREATIONDATE="1999/01/10"; # PSCREATION="1998/11/05"
-  REVISION=`echo '$Revision: 1.4 $' | gawk '{print $2}'`
-  DATERELEASE=`echo '$Date: 2000-01-26 19:55:33 $' | gawk '{print $2,$3}'`
+  REVISION=`echo '$Revision: 1.5 $' | gawk '{print $2}'`
+  DATERELEASE=`echo '$Date: 2000-01-26 19:56:53 $' | gawk '{print $2,$3}'`
   PSPROGRAM="PostScript Output from GFF2APLOT";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -1446,7 +1446,7 @@ function  MAKE_VAR_ARY() {
   # FTColor[""]=Var["BACKGROUND_COLOR"];
   # FTRbnColor[""]=Var["BACKGROUND_COLOR"];
 ### SP ## Special gff Features ##
-  # FTGeneBounds="genebounds";
+  # FTGeneBounds="genebounds"; NOT NEEDED NOW !!!
   FTLimits="seqbounds";
   FTAPlot="align";
   FTHighLight="boxit";
