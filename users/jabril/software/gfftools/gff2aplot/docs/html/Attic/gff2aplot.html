@@ -3,7 +3,7 @@
  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
  <META NAME="Generator" CONTENT="Hacker Hands">
  <META NAME="author" CONTENT="Josep F. Abril">
- <!-- $Id: gff2aplot.html,v 1.2 2001-05-18 19:57:56 gmaster Exp $ -->
+ <!-- $Id: gff2aplot.html,v 1.3 2001-07-16 14:21:44 gmaster Exp $ -->
   <META NAME="keywords"    CONTENT="APLOT, GFF, gff-format, Genomic Pairwise Alignments PostScript Plots, Genomic Analysis, Sinteny, Bioinformatics">
   <META NAME="description" CONTENT="APLOT MAIN PAGE: Pair-wise Alignments in PostScript.">
  <TITLE>APLOT MAIN PAGE: Pair-wise Alignments in PostScript.</TITLE>
@@ -333,29 +333,10 @@ Once you have downloaded files, you can extract them with:<BR><BR class="hh">
 <IMG class="pnt" SRC="http://www1.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
 </TD></TR>
 </TABLE>
-<BR>
-<TABLE class="userspace" BORDER=0 cellpadding=0 cellspacing=0 WIDTH=100%>
- <TR>
-  <TD WIDTH=10></TD>
-  <TD ALIGN=CENTER VALIGN=CENTER>
-   <IMG SRC="icons/atwork_signaling.gif" HEIGHT=50 VSPACE=0 ALIGN=MIDDLE ALIGN=LEFT ALT="UC">
-  </TD>
-  <TD WIDTH=20></TD>
-  <TD class="userspace" ALIGN=LEFT>
-   <TT>aplot</TT> server is under construction.<BR><BR>
-   Thanks to <A HREF="MAILTO:vadim@imb-jena.de" onMouseover="window.status='MAIL TO V. Goremykin';">Vadim Goremykin</A> from IMB at Jena (Germany), who is writing the scripts for the <TT>aplot</TT> web server. When it will be finished we should install a mirror in our server...
-  </TD>
-  <TD WIDTH=10></TD>
- </TR>
-<!--
- <TR>
-  <TD>
-We have implemented a simple <A href="ftp://www1.imim.es/..." onMouseover="window.status='';">web-server</A> which allows you from dealing with program custom files or its installation. You provide the alignment data and the annotation in GFF for two sequences and it returns a temporary draft gif. Once you have finished to set your plot attributes you can obtain a PostScript file of your final plot version which have much better quality than the gif images. Current version of the server could be improved in a future but <TT>aplot</TT> can work in your system without it.
-  </TD>
- </TR>
--->
-</TABLE>
-<BR>
+<P>
+<IMG SRC="icons/atwork_moving.gif" VSPACE=0 ALIGN=MIDDLE ALT="UnderConstruction">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>aplot</TT> server is under construction.<BR>
+<!--   Thanks to <A HREF="MAILTO:vadim@imb-jena.de" onMouseover="window.status='MAIL TO V. Goremykin';">Vadim Goremykin</A> from IMB at Jena (Germany), who is writing the scripts for the <TT>aplot</TT> web server. When it will be finished we should install a mirror in our server... -->
+</P>
 
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
 <TR>
@@ -407,6 +388,7 @@ Here is a short list:<BR><BR class="hh">
   <LI class="lst"> <TT>gff2ps</TT> shape dictionary will be imported to <TT>aplot</TT>.
   <LI class="lst"> Crossing ribbons will mix their colors.
 </MENU><BR>
+But first of all we are going to translate the code to <TT>Perl</TT>.<BR><BR class="hh">
 We thanks any helpful suggestion for improving our program. Message should contain <A HREF="MAILTO:jabril@imim.es" onMouseover="window.status='SEND SUGESTIONS to AUTHORs';">"APLOT - SUGGESTION"</A> as subject string.<BR>
 </P>
 
