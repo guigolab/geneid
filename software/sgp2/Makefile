@@ -132,6 +132,7 @@ cleanall : header cleanbin trailer
 
 cleanbin :
 	-@$(RM) -f $(wildcard $(BIN)/*);
+	rmdir $(BIN);
 	@echo "### Cleaning GENEID..."
 	@cd $(GENEIDD); \
 	 $(MAKE) clean;
@@ -140,7 +141,7 @@ cleanbin :
 	 $(MAKE) clean;
 
 
-main : $(BINCODE)
+main : $(BIN) $(BINCODE)
 	@$(CHM) 755 $^;
 
 installbin : $(BINCODE)
@@ -149,6 +150,9 @@ installbin : $(BINCODE)
 
 #
 ### FINISHING CODE
+
+$(BIN) :
+	mkdir $(BIN);
 
 $(addprefix $(BIN)/, $(GENEID)-sgp) : $(addprefix $(GENEIDD)/bin/, $(GENEID))
 	@${CP} $(addprefix $(GENEIDD)/bin/, $(GENEID)) \
@@ -159,11 +163,11 @@ $(addprefix $(GENEIDD)/bin/, $(GENEID)) : $(GENEIDSRC)
 	@cd $(GENEIDD); \
 	 $(MAKE) -f ./Makefile;
 
-$(addprefix $(BIN)/, $(HSP2SR)) : $(addprefix $(HSP2SRD)/, $(HSP2SR))
-	@${CP} $(addprefix $(HSP2SRD)/, $(HSP2SR)) \
+$(addprefix $(BIN)/, $(HSP2SR)) : $(addprefix $(HSP2SRD)/bin/, $(HSP2SR))
+	@${CP} $(addprefix $(HSP2SRD)/bin/, $(HSP2SR)) \
            $(addprefix $(BIN)/, $(HSP2SR))
 
-$(addprefix $(HSP2SRD)/, $(HSP2SR)) : $(HSP2SRSRC)
+$(addprefix $(HSP2SRD)/bin/, $(HSP2SR)) : $(HSP2SRSRC)
 	@echo "### Making HSP2SR..."
 	@cd $(HSP2SRD); \
 	 $(MAKE) -f ./Makefile;
