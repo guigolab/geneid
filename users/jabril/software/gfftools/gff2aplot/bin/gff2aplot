@@ -1,0 +1,1212 @@
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+#
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %                          GFF2APLOT                               %
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 
+#    Converting alignments in GFF format to PostScript dotplots.
+# 
+#     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+#                                  Thomas WIEHE                   
+#                                 Roderic GUIGO SERRA       
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+# $Id: gff2aplot,v 1.1 2001-08-21 15:04:18 jabril Exp $
+#
+#
+# MODULES
+#
+use strict;
+#
+$SIG{HUP}  = \&trap_signals_prog;
+$SIG{ABRT} = \&trap_signals;
+$SIG{INT}  = \&trap_signals;
+$SIG{QUIT} = \&trap_signals;
+$SIG{TERM} = \&trap_signals;
+$SIG{KILL} = \&trap_signals;
+$SIG{CHLD} = 'IGNORE';
+#
+use Data::Dumper;
+local $Data::Dumper::Purity = 1;
+# local $Data::Dumper::Deepcopy = 1;
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling /;
+use Benchmark;
+  my @Timer = (new Benchmark);
+#
+# CONSTANTS
+#
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
+   ( 'gff2aplot','v2.0',
+     '$Revision: 1.1 $',
+     '$Date: 2001-08-21 15:04:18 $',
+     '$Id: gff2aplot,v 1.1 2001-08-21 15:04:18 jabril Exp $',
+    );
+$REVISION =~ s/\$//og;
+$REVISION_DATE =~ s/\$//og;
+my ($GFF,$GFF_NOGP,$VECTOR,$ALIGN,
+    $APLOT,$APLOT_NOGP,$noGFF) =
+    qw/ X x V A O o ? /;
+my $Error = "\<\<\<  ERROR  \>\>\> ";
+my $Warn  = "\<\<\< WARNING \>\>\> ";
+my $spl   = "\<\<\<\-\-\-\-\-\-\-\-\-\>\>\>\n";
+my $spw   = "\<\<\<         \>\>\> ";
+my $line = ("#" x 80)."\n";
+my $sp = "###\n";
+#
+# VARIABLES
+#
+my (%DefaultVars,%CmdLineVars,%CustomVars,%gff_data,%aplot_data);
+my ($Debug,$Verbose,$Quiet,$LogFile,$logs_filename) = (0,0,0,0,undef);
+my (@data_files,$file);
+my ($n,$c);
+my ($seqname_1,$seqname_2,
+    $source_1,$source_2,$feature_1,$feature_2,
+    $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
+    $strand_1,$strand_2,$frame_1,$frame_2); # APLOT temporary vars
+my ($tag,$group,$group_id,$id,$group_counter,$label); # GROUPING temporary vars
+my ($seqname,$source,$feature,$start,
+    $end,$score,$strand,$frame); # GFF temporary vars
+my %SOURCE = ( # this is a temporary hash name (to implement later)
+               align_tag  => 'target',
+               vector_tag => 'vector',
+               label_tag  => 'id',
+               );
+my $colors = 0;
+my %COLORS = (    # [ ColorNUMBER, qw/ CYAN MAGENTA YELLOW BLACK / ]
+  # black+grey+white
+  black              => [ ++$colors, qw/ 0.00 0.00 0.00 1.00 / ],
+  verydarkgrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.80 / ],
+  darkgrey           => [ ++$colors, qw/ 0.00 0.00 0.00 0.60 / ],
+  grey               => [ ++$colors, qw/ 0.00 0.00 0.00 0.40 / ],
+  lightgrey          => [ ++$colors, qw/ 0.00 0.00 0.00 0.20 / ],
+  verylightgrey      => [ ++$colors, qw/ 0.00 0.00 0.00 0.10 / ],
+  white              => [ ++$colors, qw/ 0.00 0.00 0.00 0.00 / ],
+  # magenta                                 
+  verydarkmagenta    => [ ++$colors, qw/ 0.00 1.00 0.00 0.30 / ],
+  darkmagenta        => [ ++$colors, qw/ 0.00 0.80 0.00 0.05 / ],
+  magenta            => [ ++$colors, qw/ 0.00 0.60 0.00 0.00 / ],
+  lightmagenta       => [ ++$colors, qw/ 0.00 0.40 0.00 0.00 / ],
+  verylightmagenta   => [ ++$colors, qw/ 0.00 0.20 0.00 0.00 / ],
+  # violet                                  
+  verydarkviolet     => [ ++$colors, qw/ 0.45 0.85 0.00 0.00 / ],
+  darkviolet         => [ ++$colors, qw/ 0.30 0.65 0.00 0.00 / ],
+  violet             => [ ++$colors, qw/ 0.22 0.55 0.00 0.00 / ],
+  lightviolet        => [ ++$colors, qw/ 0.15 0.40 0.00 0.00 / ],
+  verylightviolet    => [ ++$colors, qw/ 0.10 0.20 0.00 0.00 / ],
+  # blue                            
+  verydarkblue       => [ ++$colors, qw/ 1.00 1.00 0.00 0.20 / ],
+  darkblue           => [ ++$colors, qw/ 0.90 0.90 0.00 0.00 / ],
+  blue               => [ ++$colors, qw/ 0.75 0.75 0.00 0.00 / ],
+  lightblue          => [ ++$colors, qw/ 0.50 0.50 0.00 0.00 / ],
+  verylightblue      => [ ++$colors, qw/ 0.30 0.30 0.00 0.00 / ],
+  # skyblue                                 
+  verydarkskyblue    => [ ++$colors, qw/ 0.90 0.50 0.00 0.15 / ],
+  darkskyblue        => [ ++$colors, qw/ 0.75 0.45 0.00 0.00 / ],
+  skyblue            => [ ++$colors, qw/ 0.60 0.38 0.00 0.00 / ],
+  lightskyblue       => [ ++$colors, qw/ 0.45 0.25 0.00 0.00 / ],
+  verylightskyblue   => [ ++$colors, qw/ 0.30 0.15 0.00 0.00 / ],
+  # cyan                            
+  verydarkcyan       => [ ++$colors, qw/ 1.00 0.00 0.00 0.10 / ],
+  darkcyan           => [ ++$colors, qw/ 0.80 0.00 0.00 0.00 / ],
+  cyan               => [ ++$colors, qw/ 0.60 0.00 0.00 0.00 / ],
+  lightcyan          => [ ++$colors, qw/ 0.40 0.00 0.00 0.00 / ],
+  verylightcyan      => [ ++$colors, qw/ 0.20 0.00 0.00 0.00 / ],
+  # seagreen                        
+  verydarkseagreen   => [ ++$colors, qw/ 0.75 0.00 0.45 0.00 / ],
+  darkseagreen       => [ ++$colors, qw/ 0.62 0.00 0.38 0.00 / ],
+  seagreen           => [ ++$colors, qw/ 0.50 0.00 0.30 0.00 / ],
+  lightseagreen      => [ ++$colors, qw/ 0.38 0.00 0.22 0.00 / ],
+  verylightseagreen  => [ ++$colors, qw/ 0.25 0.00 0.15 0.00 / ],
+  # green                           
+  verydarkgreen      => [ ++$colors, qw/ 1.00 0.00 1.00 0.25 / ],
+  darkgreen          => [ ++$colors, qw/ 0.80 0.00 0.80 0.00 / ],
+  green              => [ ++$colors, qw/ 0.60 0.00 0.60 0.00 / ],
+  lightgreen         => [ ++$colors, qw/ 0.40 0.00 0.40 0.00 / ],
+  verylightgreen     => [ ++$colors, qw/ 0.20 0.00 0.20 0.00 / ],
+  # limegreen                       
+  verydarklimegreen  => [ ++$colors, qw/ 0.50 0.00 1.00 0.10 / ],
+  darklimegreen      => [ ++$colors, qw/ 0.40 0.00 0.95 0.00 / ],
+  limegreen          => [ ++$colors, qw/ 0.30 0.00 0.80 0.00 / ],
+  lightlimegreen     => [ ++$colors, qw/ 0.20 0.00 0.65 0.00 / ],
+  verylightlimegreen => [ ++$colors, qw/ 0.10 0.00 0.50 0.00 / ],
+  # yellow                                  
+  verydarkyellow     => [ ++$colors, qw/ 0.00 0.00 1.00 0.25 / ],
+  darkyellow         => [ ++$colors, qw/ 0.00 0.00 1.00 0.10 / ],
+  yellow             => [ ++$colors, qw/ 0.00 0.00 1.00 0.00 / ],
+  lightyellow        => [ ++$colors, qw/ 0.00 0.00 0.50 0.00 / ],
+  verylightyellow    => [ ++$colors, qw/ 0.00 0.00 0.25 0.00 / ],
+  # orange                                  
+  verydarkorange     => [ ++$colors, qw/ 0.00 0.50 0.80 0.10 / ],
+  darkorange         => [ ++$colors, qw/ 0.00 0.40 0.80 0.00 / ],
+  orange             => [ ++$colors, qw/ 0.00 0.30 0.80 0.00 / ],
+  lightorange        => [ ++$colors, qw/ 0.00 0.20 0.75 0.00 / ],
+  verylightorange    => [ ++$colors, qw/ 0.00 0.15 0.70 0.00 / ],
+  # red                                     
+  verydarkred        => [ ++$colors, qw/ 0.00 1.00 1.00 0.15 / ],
+  darkred            => [ ++$colors, qw/ 0.00 0.80 0.80 0.00 / ],
+  red                => [ ++$colors, qw/ 0.00 0.60 0.60 0.00 / ],
+  lightred           => [ ++$colors, qw/ 0.00 0.40 0.40 0.00 / ],
+  verylightred       => [ ++$colors, qw/ 0.00 0.20 0.20 0.00 / ],
+  # brown                           
+  verydarkbrown      => [ ++$colors, qw/ 0.35 0.85 1.00 0.40 / ],
+  darkbrown          => [ ++$colors, qw/ 0.30 0.70 1.00 0.35 / ],
+  brown              => [ ++$colors, qw/ 0.25 0.75 1.00 0.25 / ],
+  lightbrown         => [ ++$colors, qw/ 0.20 0.60 0.70 0.15 / ],
+  verylightbrown     => [ ++$colors, qw/ 0.15 0.45 0.55 0.00 / ],
+  ); # %COLORS
+my $formats = 0;
+my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
+    a0        => [ ++$formats, 2384, 3370 ],
+    a1        => [ ++$formats, 1684, 2384 ],
+    a2        => [ ++$formats, 1190, 1684 ],
+    a3        => [ ++$formats,  842, 1190 ],
+    a4        => [ ++$formats,  595,  842 ],
+    a5        => [ ++$formats,  420,  595 ],
+    a6        => [ ++$formats,  297,  420 ],
+    a7        => [ ++$formats,  210,  297 ],
+    a8        => [ ++$formats,  148,  210 ],
+    a9        => [ ++$formats,  105,  148 ],
+    a10       => [ ++$formats,   73,  105 ],
+    b0        => [ ++$formats, 2920, 4127 ],
+    b1        => [ ++$formats, 2064, 2920 ],
+    b2        => [ ++$formats, 1460, 2064 ],
+    b3        => [ ++$formats, 1032, 1460 ],
+    b4        => [ ++$formats,  729, 1032 ],
+    b5        => [ ++$formats,  516,  729 ],
+    b6        => [ ++$formats,  363,  516 ],
+    b7        => [ ++$formats,  258,  363 ],
+    b8        => [ ++$formats,  181,  258 ],
+    b9        => [ ++$formats,  127,  181 ],
+    b10       => [ ++$formats,   91,  127 ],
+    executive => [ ++$formats,  540,  720 ],
+    folio     => [ ++$formats,  612,  936 ],
+    legal     => [ ++$formats,  612, 1008 ],
+    letter    => [ ++$formats,  612,  792 ],
+    quarto    => [ ++$formats,  610,  780 ],
+    statement => [ ++$formats,  396,  612 ],
+   '10x14'    => [ ++$formats,  720, 1008 ],
+    ledger    => [ ++$formats, 1224,  792 ],
+    tabloid   => [ ++$formats,  792, 1224 ],
+  );
+#
+# Error/Warning Message List
+my %ErrorList = (
+                 USER_HALT =>
+                   $spl.$Warn."$PROGRAM has been stopped by user !!!\n".
+                   $spl.$Warn."---------- Exiting NOW !!! ----------\n".$spl,
+                 PROCESS_HALT =>
+                   $spl.$Warn."------- $PROGRAM is down !!! -------\n".
+                   $spl.$Warn."---------- Exiting NOW !!! ----------\n".$spl,
+                 FILE_NO_OPEN =>
+                   $spl.$Warn."Cannot Open Current file \"\%s\" . Not used !!!\n".$spl,
+                 UNKNOWN_CL_OPTION =>
+                   $Warn."Error trapped while processing command-line:\n".(" "x16)."\%s",
+                 CMD_LINE_ERROR =>
+                   $spl.$spw." Please, check your command-line options!!!\n".$Error."\n".
+                   $spw." ".("."x12)." Type \"gff2aplot -h\" for help.\n".$spl,
+                 NOT_ENOUGH_FIELDS =>
+                   $Warn."Not enough fields in file \"\%s\", line \%s :\n\t\%s\n",
+                 ORI_GREATER_END =>
+                   $Warn."Start greater than end \"\%s > \%s\" in file \"\%s\" line \"\%s\".\n", 
+                 STRAND_MISMATCH =>
+                   $Warn." Strand mismatch definition \"\%s\" in file \"\%s\" line \"\%s\".\n",
+                 FRAME_MISMATCH =>
+                   $Warn." Frame mismatch definition \"\%s\" in file \"\%s\" line \"\%s\".\n",
+                 );
+#
+# Verbose Message List
+my %MessageList = (
+                   CHECKING_FILENAMES =>
+                     $sp."### Validating INPUT FILENAMES\n".$sp,
+                   READING_FILE =>
+                     "###---> \"\%s\" exists, including as Input File.\n",
+                   READING_STDIN =>
+                     "###---> Including GFF records from standard input.\n",  
+                   SHOW_VERSION =>
+                     $sp."### \%s -- \%s\n".$sp,
+                   READ_GFF_FILE => 
+                     $sp."### Reading GFF records from \"\%s\"\n".$sp,
+                   );
+my $total_time = 0;
+my $DATE = localtime;
+my $USER = $ENV{USER};
+
+#
+# MAIN PROGRAM LOOP
+#
+
+  # &set_default_vars;
+
+  %CmdLineVars = ();            # Reseting Command-Line OPTIONS
+  &parse_command_line;
+
+  %CustomVars = ();             # Reseting Customization OPTIONS
+  &parse_custom_files;
+  %gff_data = %aplot_data = (); # Reseting DATA
+  &parse_GFF_files;
+
+  &map_vars_data;
+
+  &sort_elements;
+  &make_plot;
+
+  $total_time = &timing($T);
+  &header("$PROGRAM HAS FINISHED","Timing: $total_time secs");
+  
+  &close_logfile();
+  exit(0);
+#
+# MAIN FUNCTIONS
+#
+sub set_default_vars() {
+    %DefaultVars = (
+        LAYOUT  => {           ## '# L #'
+            #                                                 
+            page_size                  => { TYPE => 'PAGE'   , VALUE => 'a4'   },
+            background_color           => { TYPE => 'COLOR'  , VALUE => 'white' },
+            foreground_color           => { TYPE => 'COLOR'  , VALUE => 'black' },
+            # GLOBAL Labels                   
+            show_title                 => { TYPE => 'BOOLEAN', VALUE => $T     },
+            title                      => { TYPE => 'STRING' , VALUE => undef  },
+            show_subtitle              => { TYPE => 'BOOLEAN', VALUE => $T     },
+            subtitle                   => { TYPE => 'STRING' , VALUE => undef  },
+            show_x_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
+            x_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
+            show_y_sequence_label      => { TYPE => 'BOOLEAN', VALUE => $T     },
+            x_sequence_label           => { TYPE => 'STRING' , VALUE => undef  },
+            # TICKMARK features                                                                                              
+            show_tickmark_label        => { TYPE => 'BOOLEAN', VALUE => $T     },
+            show_aplot_x_ticks         => { TYPE => 'BOOLEAN', VALUE => $T     },
+            show_percent_x_ticks       => { TYPE => 'BOOLEAN', VALUE => $T     },
+            show_extrabox_x_ticks      => { TYPE => 'BOOLEAN', VALUE => $T     },
+            show_aplot_y_ticks         => { TYPE => 'BOOLEAN', VALUE => $T     },
+            show_percent_y_ticks       => { TYPE => 'BOOLEAN', VALUE => $T     },
+            show_extrabox_y_ticks      => { TYPE => 'BOOLEAN', VALUE => $T     },
+            show_onlylower_x_ticks     => { TYPE => 'BOOLEAN', VALUE => $F     },
+            aplot_major_tickmark       => { TYPE => 'INTEGER', VALUE => 2      },
+            aplot_minor_tickmark       => { TYPE => 'INTEGER', VALUE => 5      },
+            percent_major_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
+            percent_minor_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
+            extra_major_tickmark       => { TYPE => 'INTEGER', VALUE => 2      },
+            extra_minor_tickmark       => { TYPE => 'INTEGER', VALUE => 5      },
+            major_tickmark_nucleotide  => { TYPE => 'DNABASE', VALUE => undef  },
+            minor_tickmark_nucleotide  => { TYPE => 'DNABASE', VALUE => undef  },
+            percent_box_score_range    => { TYPE => 'RANGE'  , VALUE => '50..100' },
+            show_grid                  => { TYPE => 'BOOLEAN', VALUE => $F     },
+            # APLOT box features      
+            aplot_axes_same_scale      => { TYPE => 'BOOLEAN', VALUE => $F     },
+            aplot_box_bgcolor          => { TYPE => 'COLOR'  , VALUE => 'bg'   },
+            #                                                 
+            sequence1_start            => { TYPE => 'DNABASE', VALUE => undef  },
+            sequence1_end              => { TYPE => 'DNABASE', VALUE => undef  },
+            sequence2_start            => { TYPE => 'DNABASE', VALUE => undef  },
+            sequence2_end              => { TYPE => 'DNABASE', VALUE => undef  },
+            #                                                 
+            sequence1_zoom_start       => { TYPE => 'DNABASE', VALUE => undef  },
+            sequence1_zoom_end         => { TYPE => 'DNABASE', VALUE => undef  },
+            sequence2_zoom_start       => { TYPE => 'DNABASE', VALUE => undef  },
+            sequence2_zoom_end         => { TYPE => 'DNABASE', VALUE => undef  },
+            zoom                       => { TYPE => 'BOOLEAN', VALUE => $F     },
+            zoom_area                  => { TYPE => 'BOOLEAN', VALUE => $F     },
+            zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F     },
+            zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
+            # PERCENT box features    
+            show_percent_box           => { TYPE => 'BOOLEAN', VALUE => $F     },
+            percent_box_bgcolor        => { TYPE => 'COLOR'  , VALUE => 'bg'   },
+            show_percent_box_label     => { TYPE => 'BOOLEAN', VALUE => $T     },
+            percent_box_label          => { TYPE => 'STRING' , VALUE => undef  },
+            percent_box_sublabel       => { TYPE => 'STRING' , VALUE => undef  },
+            # EXTRA box features      
+            show_extra_box             => { TYPE => 'BOOLEAN', VALUE => $F     },
+            extra_box_bgcolor          => { TYPE => 'COLOR'  , VALUE => 'bg'   },
+            show_extra_box_label       => { TYPE => 'BOOLEAN', VALUE => $T     },
+            extra_box_label            => { TYPE => 'STRING' , VALUE => undef  },
+            extra_box_sublabel         => { TYPE => 'STRING' , VALUE => undef  },
+            #                                                 
+            feature_x_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+            feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+            feature_label_length       => { TYPE => 'INTEGER', VALUE => 0      },
+            feature_labels_font        => { TYPE => 'FONT'   , VALUE => 'helvetica' },
+            feature_labels_fontsize    => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+            group_x_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
+            group_y_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
+            group_label_length         => { TYPE => 'INTEGER', VALUE => 0      },
+            group_labels_font          => { TYPE => 'FONT'   , VALUE => 'helvetica' },
+            group_labels_fontsize      => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+        },                                        
+        SOURCE  => {           ## '# S #'
+            
+        },                                        
+        GROUP   => {           ## '# G #'
+            show_group_label           => $T, 
+            show_group_rule            => $T,
+            show_group_arrow           => $T,
+            feature_arrows_color       => "FG",
+            Show_JOINS                 => $T,
+            Join_Lines_COLOR           => "FG",
+        },                                        
+        FEATURE => {           ## '# F #'
+            Show_HalfHeightBOX         => $T,
+            HalfSizeBox_BGCOLOR        => "##DEFAULT##",
+            Show_FullHeightBOX         => $T,
+            FullSizeBox_BGCOLOR        => "##DEFAULT##",
+            Show_BOX_LABEL             => $T,
+            Show_UserDef_BOX_LABEL     => $T,
+            Show_RIBBON                => $T,
+            Ribbon_BGCOLOR             => "##DEFAULT##",
+            Show_GFF                   => $F,
+            Show_GFF_ReverseOrder      => $F,
+            Show_FUNCTION              => $F,
+            APlotLine_GroupScore       => $F,
+            APlotLine_ScaleWidth       => $F,
+            APlotLine_ScaleGrey        => $F,
+            Show_SELECTION_BOX         => $T,
+            SelectionBox_BGCOLOR       => "grey",
+            Function_COLOR             => "red",
+        },
+    ); # %DefaultVars
+    print LOGFILE Dumper(\%DefaultVars) if ($LogFile && $Debug);
+} # set_default_vars
+sub parse_command_line() {
+    my $tmp_stdin = undef;
+    $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$T,$_[0]) };
+    GetOptions(
+               "debug"  => \$Debug, # Dumps Vars -> LogFile
+               "h|help|?"  => \&prt_help,
+               "version"   => \&prt_version, 
+               "v|verbose"   => \$Verbose, # Print_Report
+               "V|logs-filename=s"  => \$logs_filename, # Print_Report -> LogFile
+               "q|quiet"   => \$Quiet, # Quiet_Mode
+               "S|sequence1-start=i"  => \$CmdLineVars{"sequence1_start"}, # SEQUENCE1_ORIGIN # Zoom_SEQUENCE1_ORIGIN
+               "E|sequence1_end=i"  => \$CmdLineVars{"sequence1_end"}, # SEQUENCE1_END    # Zoom_SEQUENCE1_END
+               "s|sequence2_start=i"  => \$CmdLineVars{"sequence2_start"}, # SEQUENCE2_ORIGIN # Zoom_SEQUENCE2_ORIGIN
+               "e|sequence2_end=i"  => \$CmdLineVars{"sequence2_end"}, # SEQUENCE2_END    # Zoom_SEQUENCE2_END
+               "Z|zoom"   => \$CmdLineVars{"zoom"}, # ZOOM_Zoom; Zoom_Marks
+               "z|zoom-area"   => \$CmdLineVars{"zoom_area"}, # ZOOM_Area
+               "G|display-grid"   => \$CmdLineVars{"display_grid"}, # Display_GRID
+               # "g"    => \$CmdLineVars{""}, # Display_GRID
+               "P|display-percent-box"   => \$CmdLineVars{"display_percent_box"}, # Display_PERCENT-BOX
+               # "p"    => \$CmdLineVars{""}, # Display_PERCENT-BOX
+               "Q|display-extra-box"   => \$CmdLineVars{"display_extra_box"}, # Display_EXTRA-BOX
+               # "q"    => \$CmdLineVars{""}, # Display_EXTRA-BOX
+               "T|title=s"  => \$CmdLineVars{"title"}, # TITLE
+               "t|subtitle=s"  => \$CmdLineVars{"subtitle"}, # SUBTITLE
+               "X|x-label=s"  => \$CmdLineVars{"x-axis_label"}, # X-Axis_LABEL
+               "Y|y-label=s"  => \$CmdLineVars{"y-axis_label"}, # Y-Axis_LABEL
+               "L|percent-box-label=s"  => \$CmdLineVars{"percent_box_label"}, # Percent-Box_LABEL
+               "l|extra-box-label=s"  => \$CmdLineVars{"extra_box_label"}, # Extra-Box_LABEL
+               "R|xy-axes-scale"   => \$CmdLineVars{"xy_axes_scale"}, # XY_AXES_Same-SIZE
+               # "r"    => \$CmdLineVars{""}, # XY_AXES_Same-SIZE
+               "W|aln-scale-width"    => \$CmdLineVars{"alignment_scale_width"}, # APlotLine_ScaleWidth; APlotLine_GroupScore
+               "w|aln-scale-color"    => \$CmdLineVars{"alignment_scale_color"}, # APlotLine_ScaleGrey; APlotLine_GroupScore
+               "B|background-color=s"  => \$CmdLineVars{"background_color"}, # BACKGROUND_COLOR
+               "F|foreground-color=s"  => \$CmdLineVars{"foreground_color"}, # FOREGROUND_COLOR
+               "D|aplot-box-color=s"  => \$CmdLineVars{"aplot_box_color"}, # APlotBox_BqGCOLOR
+               "C|percent-box-color=s"  => \$CmdLineVars{"percent_box_color"}, # PercentBox_BGCOLOR
+               "c|extra-box-color=s"  => \$CmdLineVars{"extra_box_color"}, # ExtraBox_BGCOLOR
+               "A|alignment-name=s"  => \$CmdLineVars{"alignment_name"}, # Align_NAME
+               "N|x-sequence-name=s"  => \$CmdLineVars{"x-sequence_name"}, # X-Sequence_NAME
+               "n|y-sequence-name=s"  => \$CmdLineVars{"y-sequence_name"}, # Y-Sequence_NAME
+               "K|show-ribbons=s"   => \$CmdLineVars{"show_ribbons"}, # Show_Ribbons (NLRB)
+               "I|page-size=s"  => \$CmdLineVars{"page_size"}, # PAGE_SIZE
+               "O|custom-filename=s"  => \$CmdLineVars{"custom_filename"}, # CustomFile_Name
+               "a|show-credits"   => \$CmdLineVars{"show_credits"}, # Show_Credits
+               ) || (&warn('CMD_LINE_ERROR',$T), exit(1));
+    $SIG{__WARN__} = 'DEFAULT';
+
+    CHKLOG:
+      (defined($logs_filename)) && do {
+          open(LOGFILE,"> ".$logs_filename) ||
+              (&warn('FILE_NO_OPEN',$T,$logs_filename),last CHKLOG);
+          $LogFile = 1;
+      };
+
+    &header('',"RUNNING $PROGRAM",'',"User: $USER","Date: $DATE");
+
+    &header("SETTING DEFAULTS");
+    %DefaultVars = ();
+    &set_default_vars;
+
+    &header("CHECKING COMMAND-LINE OPTIONS");
+    @data_files = ();
+    &set_input_file;
+    @ARGV = (); # ensuring that command-line ARGVs array is empty
+    
+
+    &footer("COMMAND-LINE CHECKED");
+} # parse_command_line
+sub prt_version() {
+    my $comment = $MessageList{'SHOW_VERSION'};
+    $comment = sprintf($comment,$PROGRAM,$VERSION);
+    &prt_to_stderr($comment);
+    exit(1);
+}
+sub set_input_file() {
+    my $stdin_flg = $F;
+    &report("CHECKING_FILENAMES");
+  FILECHK: foreach my $test_file (@ARGV) {
+        $test_file ne '-' && do {
+            -e $test_file || do {
+                &warn('FILE_NO_OPEN',$T,$test_file);
+                next FILECHK;
+            };
+            &report('READING_FILE',$test_file);
+            push @data_files, $test_file;
+            next FILECHK;
+        };
+        $stdin_flg = $T;
+        push @data_files, '-';
+        }; # foreach
+    scalar(@data_files) == 0 && do {
+        push @data_files, '-';
+        $stdin_flg = $T;
+    };
+    $stdin_flg && &report('READING_STDIN');
+}
+sub parse_custom_files() {
+    &header("READING CUSTOM FILES");
+    &footer("CUSTOM FILES LOADED");
+} # parse_custom_files
+sub parse_GFF_files() {
+    &header("PARSING INPUT GFF RECORDS");
+  LOAD: foreach $file (@data_files) {
+      open(THIS,"< $file") ||
+          ( &warn('FILE_NO_OPEN',$T,$file), next LOAD);
+      $file eq '-' && ($file = 'STANDARD INPUT');
+      &report('READ_GFF_FILE',$file);
+      ($n,$c) = (0,undef);
+      while (<THIS>) {
+          my (@line,$main);
+          ($c = '.', next) if /^\#/o;
+          ($c = '.', next) if /^\s*$/o;
+          chomp;
+          $c = $noGFF;
+          ($main,undef) = split /\s+\#/o;
+          @line = split /\s+/o, $main, 9;        
+          scalar(@line) < 8 &&
+              (&warn('NOT_ENOUGH_FIELDS',$F,$file,$n,join(" ",@line)), next);
+          $c = &GFF_format(&fieldscheck(\@line));
+      } continue {
+          &counter(++$n,$c) if ($Verbose && !$Quiet);
+      };
+      &counter_end($n,$c) if ($Verbose && !$Quiet);
+      close(THIS);
+  }; # LOAD
+    &footer("DATA LOADED");
+} # sub parse_GFF
+sub GFF_format() {
+    my $gff = $_[0];
+    # return "x" if $GFF == $version1;
+    return $GFF        if $gff eq $GFF; # $version2;
+    return $GFF_NOGP   if $gff eq $GFF_NOGP; # $version2 (ungrouped);
+    return $VECTOR     if $gff eq $VECTOR; # VECTORS are GFFv2 particular case 
+    return $APLOT      if $gff eq $APLOT;
+    return $APLOT_NOGP if $gff eq $APLOT_NOGP;
+    return $noGFF;
+} # GFF_format
+sub fieldscheck() {
+    my ($list) = @_;
+    my ($seqname,$start,$end) = @$list[0,3,4]; # ($list->[0],$list->[3],$list->[4]);
+    (&fcolon($seqname) && &fcolon($start) && &fcolon($end)) && do {
+        return &load_aplot(\@$list);
+    };
+    return &load_gff(\@$list);
+} # fieldscheck
+sub fcolon() { return ($_[0] =~ /.+:.+/o ? $T : $F) }
+sub check_coords() { # ((ori,end)_1,...,(ori,end)_n)
+    my @ary = @_;
+    for (my $j=0; $j<=$#ary; $j+=2) {
+        $ary[$j] > $ary[$j+1] && do {
+            &warn('ORI_GREATER_END',$F,$ary[$j],$ary[$j+1],$file,$n+1);
+            return $F;
+        };
+    }; # foreach
+    return $T;
+} # check_coords
+sub check_strand() { # (str_1,...,srt_n)
+    foreach my $str (@_) {
+        $str !~ /[+-.]/o && do {
+            &warn('STRAND_MISMATCH',$F,$str,$file,$n+1);
+            return $F;
+        };
+    }; # foreach
+    return $T;
+} # check_strand
+sub check_frame() { # (frm_1,...,frm_n)
+    foreach my $frm (@_) {
+        $frm !~ /[.012]/o && do {
+            &warn('FRAME_MISMATCH',$F,$frm,$file,$n+1);
+            return $F;
+        };
+    }; # foreach
+    return $T;
+} # check_frame
+sub load_aplot() { # if errors found > return $noGFF
+    my ($list) = @_;
+    my $w_gff;
+    $w_gff = &load_aplot_grouping($list->[8]);
+    ($seqname_1,$seqname_2,$source_1,$source_2,$feature_1,$feature_2,
+     $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
+     $strand_1,$strand_2,$frame_1,$frame_2) = 
+     &remove_colon(@$list[0,1,2,3,4,5,6,7]);
+    $w_gff eq $APLOT_NOGP && do {
+                $group_id = ++$group_counter;
+        $group = "$seqname_1\_$seqname_2\_$source_1\_$group_id";
+        $label = $id;
+    };
+    (&check_aplot_fields && &add_aplot_record) || ($w_gff=$noGFF);
+    return $w_gff;
+} # load_aplot
+sub remove_colon() {
+    my @ary_out = ();
+    my ($a,$b) = (undef,undef);
+        foreach my $fld (@_) {
+                ($a,$b) = split /:/o, $fld, 2;
+        $a = '.' unless defined($a);
+        $b = $a  unless defined($b);
+                push @ary_out, $a, $b;
+        };
+        return @ary_out;
+} # remove_colon
+sub check_aplot_fields() {
+    &check_coords($start_1,$end_1,$start_2,$end_2) || (return $F);
+    &check_strand($strand_1,$strand_2) || (return $F);
+    &check_frame($frame_1,$frame_2) || (return $F);
+    return $T; 
+} # check_aplot_fields
+sub add_aplot_record() {
+    
+} # add_aplot_record
+sub load_aplot_grouping() {
+    my $attributes = $_[0];
+        return $APLOT_NOGP unless (defined($attributes));
+    my $groupregexp = '^([^\"]*)(?:[\"]([^\"]+)[\"](?:\s+\b(.*))?)?$'; #'
+    my @grouping_list = ();
+    @grouping_list = split /\s*;\s*/o, $attributes;
+        my @new_group = ();
+        my $aplot_grouping = 0;
+        my $group_string = shift @grouping_list;
+        ($group_string =~ /$groupregexp/o) && 
+            (@new_group = ($1,$2,$3));
+        $new_group[0] =~ s/\b\s*$//o;
+        $new_group[0] || do {  # type 2 attributes
+            $aplot_grouping = 1;
+            $new_group[0] = $SOURCE{"align_tag"}; # %SOURCE temporary defined
+        };
+        $new_group[1] || do {  # type 1 attributes
+            $aplot_grouping = 1;
+            $new_group[1] = $new_group[0];
+            $new_group[0] = $SOURCE{"align_tag"};
+        };
+        # In aplot-format $new_group[2] values are deprecated.
+        ($tag,$group,$label,$group_id) = 
+            (lc($new_group[0]),@new_group[1,1],++$group_counter);
+        # Here looking for colon field separator in aplot GFF-like grouping
+        ($aplot_grouping && $group !~ /\s+/o) && do {
+            if ($group =~ /^([^:]*):([^:]*)$/o) { 
+                (($group,$label) = ($1,$2));
+                } else {
+                        $label = $group_id;
+                };
+        };
+        scalar(@grouping_list) > 0 && do{
+            foreach my $element (@grouping_list) {
+                ($element =~ /$groupregexp/o) && (@new_group = ($1,$2,$3));
+                lc($new_group[0]) =~ $SOURCE{"label_tag"} && do {
+                    $label = $new_group[1];
+                    $label eq "" && do {
+                        (undef,$label,undef) = split /\s+/og, $new_group[0];
+                    };
+                };
+            };
+        };
+    return $APLOT;
+}
+sub load_gff() { # if errors found > return $noGFF
+    my ($list) = @_ ;
+    my $w_gff;
+    $w_gff = &load_grouping($list->[8]);
+    ($seqname,$source,$feature,$start,$end,
+     $score,$strand,$frame) = @$list[0,1,2,3,4,5,6,7];
+    $w_gff eq $GFF_NOGP && do {
+                $group_id = ++$group_counter;
+        $group = "$seqname\_$source\_$group_id";
+        $label = $id;
+    };
+    (&check_gff_fields && &add_gff_record) || ($w_gff=$noGFF);
+    return $w_gff;
+} # load_gff
+sub check_gff_fields() {
+    &check_coords($start,$end) || (return $F);
+    &check_strand($strand) || (return $F);
+    &check_frame($frame) || (return $F);
+    return $T; 
+} # check_gff_fields
+sub add_gff_record() {
+    
+} # add_gff_record
+sub load_grouping() {
+    my $attributes = $_[0];
+    return $GFF_NOGP unless (defined($attributes));
+    my $group_tag = '';
+    ($group_tag,undef) = split /\s+/,$attributes,2 ; # temporary
+    $group_tag = lc $group_tag; # to lower case
+    $group_tag =~ /$SOURCE{"align_tag"}/ && do { # %SOURCE is a temporary hash name
+        &load_GFF_align;
+        return $ALIGN;
+    }; 
+    $group_tag =~ /$SOURCE{"vector_tag"}/ && do {
+        &load_GFF_vector;
+        return $VECTOR;
+        };
+    return $GFF;
+} # load_grouping
+sub load_GFF_align() {
+
+} # load_GFF_align
+sub load_GFF_vector() {
+
+} # load_GFF_vector
+sub sort_elements() {
+    &header("SORTING ELEMENTS BY ACCEPTOR (START)");
+
+    &footer("ELEMENTS SORTED");
+} # sort_elements
+sub map_vars_data() {
+    &header("SETTING CUSTOM VALUES TO GFF ELEMENTS");
+
+    &footer("VALUES SET");
+} # customize_options
+sub make_plot() {
+    &header("WRITING POSTSCRIPT TO STDOUT");
+
+    &ps_header;
+    &ps_colors;
+    &ps_page_formats;
+    &ps_variables;
+    &ps_main;
+
+    &ps_plot; 
+
+    &ps_trailer;
+
+    &footer("WRITING POSTSCRIPT FINISHED");
+} # make_plot
+sub prt_help() {
+    open(HELP, "| more") ;
+    print HELP <<"+++EndOfHelp+++";
+PROGRAM:
+                        $PROGRAM - $VERSION
+
+    Converting GFF files for pairwise alignments to PostScript.
+
+USAGE:        $PROGRAM [options] <GFF_files|STDIN>
+
+DESCRIPTION:
+
+    This program draws color-filled alignment plots from GFF
+    files for that alignment and two sequences annotations.
+
+REQUIRES:
+
+    $PROGRAM needs the following Perl modules installed in 
+    your system, we used those available from the standard 
+    Perl distribution. Those that are not in the standard 
+    distribution are marked with an '(*)', in such cases 
+    make sure that you already have downloaded them from 
+    CPAN (http://www.perl.com/CPAN) and installed.
+
+    "Data::Dumper" - pretty printing data structures for debugging (*).
+    "Getopt::Long" - processing command-line options.
+    "Benchmark" - checking and comparing running times of code.
+
+COMMAND-LINE OPTIONS:
+
+    A double dash on itself "--" signals end of the options
+    and start of file names (if present). Due to "Getopt::Long"
+    you may have problems trying to define STDIN as a single 
+    dash "-", because the module considers that as an option 
+    name defined with an empty string (POSIX syntax for 
+    command-line options, with GNU extensions). 
+
+    Available options and a short description are listed here:
+
+    -debug    Reporting variable contents when testing the program.
+    -h, --help    Shows this help.
+    --version     Shows current version and exits.
+    -v, --verbose    Verbose mode, a full report is sent to standard error 
+                     (default is set to showing only WARNINGS).
+    -V, --logs-filename <logs_filename>    Report is written to a log file.
+    -q, --quiet    Quiet mode, do not show any message/warning
+                   to standard error (only ERRORS are reported).
+    -S, --sequence1-start <pos>   Sets X-sequence first nucleotide.
+    -E, --sequence1-end <pos>     Sets X-sequence last nucleotide.
+    -s, --sequence2-start <pos>   Sets Y-sequence first nucleotide.
+    -e, --sequence2-end <pos>     Sets Y-sequence last nucleotide.
+    -Z, --zoom [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
+                   This option zooms an area you have selected
+                   with -S,-E,-s,-e (all 4 are optional).
+    -z, --zoom-area [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
+                   This option marks a zoom area on your plot,
+                   but does not make a zoom.
+    -G, --display-grid   Switches 'on' grid (default is 'off').
+    -P, --display-percent-box   Switches 'on' Percent box (default is 'off').
+    -Q, --display-extra-box   Switches 'on' Extra box (default is 'off').
+    -T, --title <Title>   Definning Plot Title.
+    -t, --subtitle <Subtitle>   Definning Plot SubTitle.
+    -X, --x-label <X-Label>   Definning X-Axis Label.
+    -Y, --y-label <Y-Label>   Defining Y-Axis Label.
+    -L, --percent-box-label <PBox-Label>   Definning Percent-Box Label.
+    -l, --extra-box-label <XBox-Label>   Definning Extra-Box Label.
+    -R, --xy-axes-scale   X and Y axes having same scale (default is 'off').
+    -W, --aln-scale-width   Scaling score on width for Aplot line.
+    -w, --aln-scale-color   Scaling score on color for Aplot line.
+    -B, --background-color <color>   Background color.
+    -F, --foreground-color <color>   Foreground color.
+    -D, --aplot-box-color <color>   Aplot main box background color.
+    -C, --percent-box-color <color>   Percent box background color.
+    -c, --extra-box-color <color>   Extra box background color.
+    -A, --alignment-name <SeqXName:SeqYName>   Defining which alignment is going to be plotted 
+                      if you have more than one alignment in your gff files.
+    -N, --x-sequence-name <SeqXName>   Defining which sequence is going to be plotted at X-axes.
+    -n, --y-sequence-name <SeqYName>   Defining which sequence is going to be plotted at Y-axes.
+    -K, --show-ribbons <ribbon_type> Force Ribbons for all features on axes:
+                     (N)one, (L)ines, (R)ibbons, (B)oth.
+    -I, --page-size <page_size> Set page size for plot (default is a4).
+    -O, --custom-filename <Config_filename> Define configuration file name (default is \".gff2aplotrc\").
+    -a, --show-credits  Switch off $PROGRAM CopyRight line on plot.
+
+    Those are the colors defined in $PROGRAM:
+    + Basic Colors: black white.
+    + Variable Colors: 
+          grey magenta violet blue skyblue cyan seagreen
+             green limegreen yellow orange red brown
+      You can get five color shades from Variable Colors with
+      \"verydark\", \"dark\", \"light\" and \"verylight\" prefixes,
+      as example: 
+        verydarkblue, darkblue, blue, lightblue and verylightblue.
+
+    The following page sizes are available: from A0 to A10, 
+    from B0 to B10, 10x14, executive, folio, ledger, legal, 
+    letter, quarto, statement and tabloid.
+
+BUGS:    Report any problem to 'jabril\@imim.es'.
+
+AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
+
++++EndOfHelp+++
+    close(HELP);
+    exit(1);
+} # prt_help
+#
+# GENERAL FUNCTIONS
+#
+sub trap_signals() {
+    &prt_to_logfile($ErrorList{'USER_HALT'});
+    &close_logfile();
+    die($ErrorList{'USER_HALT'});
+}
+sub trap_signals_prog() {
+    &prt_to_logfile($ErrorList{'PROCESS_HALT'});
+    &close_logfile();
+    die($ErrorList{'PROCESS_HALT'});
+}
+sub close_logfile() { close(LOGFILE) if $LogFile };
+sub warn() {
+    my $type = shift @_;
+    my $screen_flg = shift @_;
+    my $comment = sprintf($ErrorList{$type}, @_);
+    # ALWAYS to STDERR if $screen_flg==$T unless $Quiet==$T
+    $screen_flg && ($Quiet || print STDERR $comment); 
+    &prt_to_logfile($comment);
+} # warn
+sub prt_to_logfile() { $LogFile && (print LOGFILE $_[0]) }
+sub prt_to_stderr()  { $Verbose && ($Quiet || print STDERR $_[0]) }
+sub report() {
+    my $type = shift @_;
+    my $comment = sprintf($MessageList{$type},@_);
+    &prt_to_stderr($comment);
+    &prt_to_logfile($comment);
+} # report
+sub header() {
+    my $comment = $line;
+    foreach my $ln (@_) { 
+        $comment .= "### ".&fill_mid("$ln",72," ")." ###\n";
+        };
+    $comment .= $line;
+    &prt_to_stderr($comment);
+    &prt_to_logfile($comment);
+} # header
+sub footer() {
+    $total_time = &timing($F);
+    &header(@_,$total_time);
+    &prt_to_stderr("###\n");
+    &prt_to_logfile("###\n");
+}
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+}
+#
+sub max() {
+    my ($z) = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my ($z) = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min
+#
+sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+} # fill_mid
+#
+sub counter { # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter
+#
+sub counter_end { # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter_end
+#
+# POSTSCRIPT CODE
+#
+sub ps_plot(){
+} # ps_plot
+sub ps_header() {
+    print STDOUT << "+++HEADER+++";
+%!PS-Adobe-3.0
+%%Title: title
+%%Creator: $PROGRAM
+%%Version: $VERSION
+%%CreationDate: $DATE
+%%For: $USER
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EndComments
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                          GFF2APLOT                               %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%    Converting alignments in GFF format to PostScript dotplots.
+% 
+%     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+%                                  Thomas WIEHE                   
+%                                 Roderic GUIGO SERRA       
+%
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% $LAST_UPDATE
+%
+% Report BUGS to: jabril@\imim.es 
+%
+%%BeginProlog
+%
+%%BeginProcSet: Short_names 1.0 0
+%
+/tflg false def % test flag
+/bdf { bind def } bind def
+/xdf { exch def } bdf
+/cm { 28.35 mul } bdf
+/ivcm { 28.35 div } bdf
+/in { 72    mul } bdf
+/F { scale } bdf
+/T { translate } bdf
+/S { gsave } bdf
+/R { grestore } bdf
+/m { moveto } bdf
+/rm { rmoveto } bdf
+/l { lineto } bdf
+/rl { rlineto } bdf
+/K { stroke } bdf
+/scmyk { setcmykcolor } bdf
+/slw { setlinewidth } bdf
+/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll m l l l closepath } bdf
+/dotted { [ 1 ] 0 setdash } def
+%
+%%EndProcSet:   Short_names 1.0 0
+%
+%%BeginProcSet: Constants 1.0 0
+%
+% Printing Offset
+/VUpOS 0.25 cm def  % offset defines non printable
+/VDnOS 0.25 cm def  % paper area for pages (printer outlimits).
+/HLtOS 0.25 cm def
+/HRtOS 0.25 cm def
+/htag   0 def
+/Xmarg  5.0 cm def       % Starting Point (upper left corner)
+/Ymarg  842 2 cm sub def
+/Y Ymarg def
+/PlotWidth  14 cm def    % Blocks Size
+/Spacer   1.00 cm def    % BBox relative to dotplot
+/BBoxX  PlotWidth def    % SBox relative to percent box
+/BBoxY   14.00 cm def    % XBox relative to extra box
+/SBoxX  PlotWidth def
+/SBoxY    2.25 cm def
+/XBoxX  PlotWidth def
+/XBoxY    3.00 cm def
+/WBox     0.50 cm def    % TagBox Size
+/HWBox WBox 2 div    def
+/Warw  WBox 0.75 mul def
+/HWarw Warw 2 div    def
+%
+%%EndProcSet:   Constants 1.0 0
+%
++++HEADER+++
+} # ps_header
+sub ps_colors() {
+  my %tmp = ();
+  print STDOUT "%% Fixed Color Variables (CMYK)\n";
+  print STDOUT "/colordict ".($colors + 28)." dict def colordict begin %% ".
+               $colors." colors + 28 definitions\n";
+  foreach my $key (keys %COLORS) { $tmp{$COLORS{$key}->[0]} = $key };
+  for (my $j = 1; $j <= $colors; $j++) { 
+      my $name = $tmp{$j};
+      my $ref = \$COLORS{$name};
+      my $cmyk = "$$ref->[1] $$ref->[2] $$ref->[3] $$ref->[4]";
+      print STDOUT "/".(&fill_right($name,20," "))."{ $cmyk } def\n";
+      };
+  print STDOUT "end %% colordict\n";
+} # ps_colors
+sub ps_page_formats() {
+  my %tmp = ();
+  print STDOUT "%% Paper Sizes (in points)\n";
+  print STDOUT "/pagedict ".($formats + 2)." dict def pagedict begin %% ".
+               $formats." formats + 2 definitions\n";
+  foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
+  for (my $j = 1; $j <= $formats; $j++) { 
+      my $name = $tmp{$j};
+      my $ref = \$FORMATS{$name};
+      my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
+      print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } def\n";
+      };
+  print STDOUT "end %% pagedict\n";}
+sub ps_variables() {
+    print STDOUT << '+++PSVARS+++';
+%%BeginProcSet: Setting_Vars 1.0 0
+%
+%%EndProcSet:   Setting_Vars 1.0 0
+%
++++PSVARS+++
+} # ps_variables
+sub ps_main() {
+    print STDOUT << '+++MAINProcs+++';
+%%BeginProcSet: Page_Layout 1.0 0
+%
+/TitleFont    { 24 /Times-Bold  } def
+/SubTtFont    { 16 /Times-Roman } def
+/ElmFont      { 12 FTLbsc mul /Times-Roman } def
+/TagFont      { 14 GPLbsc mul /Times-Roman } def
+/TagLabelFont { 16 /Times-Bold  } def
+/TickFont     { 10 /Helvetica } def
+%
+/xBDspl  1.8 putExon add putExLbl add putGnLbl add def % 1.25
+/xGLDspl 1.0 putExon add putExLbl add def              % 0.85
+/xGDspl  0.75 putExon add putExLbl add def
+/FBDspl 0.60 def % For example, for mRNA.
+%
+/vertical   { /htag 0 def } bdf
+/horizontal { /htag 1 def } bdf
+%
+/FSF 4 def % Point size for Credits for A4
+/CSF { pagedict begin pga4 pop end Dpage pop exch div mul } bdf
+%
+% checking if margins are within the defined offset
+flglscape {
+ UpM HLtOS lt { /UpM HLtOS def } if % Checking margins for flglscape mode
+ DnM HRtOS lt { /DnM HRtOS def } if
+ LtM VDnOS lt { /LtM VDnOS def } if
+ RtM VUpOS lt { /RtM VUpOS def } if
+ } {
+  UpM VUpOS lt { /UpM VUpOS def } if % Checking margins for portrait mode
+  DnM VDnOS lt { /DnM VDnOS def } if
+  LtM HLtOS lt { /LtM HLtOS def } if
+  RtM HRtOS lt { /RtM HRtOS def } if
+  } ifelse
+% defining pagelimits and X - Y scales (Xlim Ylim)
+/pglim { Dpage pop LtM RtM add sub Dpage exch pop UpM DnM add sub } def
+% Defining starting point on page.
+/XORI LtM def
+/YORI UpM def
+%
+%%EndProcSet:   Page_Layout 1.0 0
+%
+%%BeginProcSet: text_functions 1.0 0
+%
+/sfont { findfont exch scalefont setfont } bdf
+/tshow { S scmyk sfont m rotate show R } bdf
+/ctshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfont stringwidth pop R 2 div htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bdf
+/ltshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfont stringwidth pop R htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bdf
+%
+% X Y angle string valign halign fnt color ttxt
+ % valign : tv (top)  cv (middle) bv (bottom)
+ % halign : lh (left) ch (center) rh (right)
+/chrh { S newpath 0 0 m false charpath flattenpath pathbbox exch pop 3 -1 roll pop R } bdf
+/strh { 2 dict begin /lly 0.0 def /ury 0.0 def { ( ) dup 0 4 -1 roll put chrh dup ury gt { /ury xdf } { pop } ifelse dup lly lt { /lly xdf } { pop } ifelse } forall ury end } bdf
+/ttxt { S scmyk sfont 8 dict begin /h xdf /v xdf /lbl xdf /angle xdf /y xdf /x xdf /hs lbl stringwidth pop neg def /vs lbl strh neg def x y T angle rotate h (rh) eq { hs } { h (ch) eq { hs 2 div } { 0 } ifelse } ifelse v (tv) eq { vs } { v (cv) eq { vs 2 div } { 0 } ifelse } ifelse m lbl show end R } bdf
+%
+/Title { S 0 Xmarg Y TitleFont FGcolor tshow R /Y Y 0.75 cm sub def } bdf 
+/SubTitle { S 0 Xmarg Y SubTtFont FGcolor tshow R /Y Y 2.5 cm sub def } bdf 
+%
+%%EndProcSet:   text_functions 1.0 0
+%
+%%BeginProcSet: aplotdict 1.0 0
+%
+/aplot 120 dict def aplot begin
+/min { 2 copy gt { exch } if pop } bdf 
+/max { 2 copy lt { exch } if pop } bdf
+/Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
+/Yscm { Yscale mul } bdf /Yscme { Yscm exch } bdf
+/fmt { Yscme Xscme m } bdf /flt { Yscme Xscme l } bdf
+/line { scmyk slw m l K } bdf
+/uline { scmyk slw m S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rl K R l S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rl K R K } bdf
+/ZoomTicks { /zmdict 3 dict def zmdict begin /r { TxWB BDspl mul Xscm } def /s { TyWB BDspl mul Yscm } def /corner { S 10 -2 roll m 2 { rl S BGcolor scmyk .4 slw K R rl S FGcolor scmyk 2 slw [1 3] 0 setdash K R } repeat R } def 4 copy 3 1 roll exch 0 s 0 s neg r neg 0 r 0 corner 0 s neg 0 s r 0 r neg 0 corner 0 s neg 0 s r neg 0 r 0 corner 0 s 0 s neg r 0 r neg 0 corner end } def
+/Line { S 9 5 roll 2 { Yscm 4 1 roll Xscm 4 1 roll } repeat 9 4 roll line R } bdf
+/Xline { S 3 1 roll Xscme Xscme 3 -1 roll Yscm xwdt sub dup 3 1 roll xwdt 9 -4 roll line R } bdf
+/Bline { S htag 1 eq { Xscme Xscme y0 Yscme y1 Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X1 Xscme bbox } ifelse S scmyk fill R scmyk slw K R } bdf
+/Bsquare { S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox S scmyk fill R scmyk slw K R } bdf
+/Msquare { S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox scmyk slw K R } bdf
+/Mcircle { S Yscme Xscme 3 -1 roll Xscm 0 360 arc closepath scmyk slw K R } bdf
+/Join { S 2 copy 2 copy pop sub 2 div add exch htag 1 eq { y1 TyWB add dup dup TyWB 0.75 mul add 4 1 roll 5 1 roll } { X0 TxWB sub dup dup TxWB 0.75 mul sub 5 1 roll 6 1 roll exch } ifelse 3 { Yscme Xscme 6 2 roll } repeat m l l 0.25 slw scmyk K R } bdf
+/Arrow { /acol [ 9 -4 roll ] def /acolor { acol aload pop } def S 1 eq { exch /sn { 1 mul } def } { /sn { 1 neg mul } def } ifelse htag 1 eq { Xscm dup y1 Yscm HWBox add m HWarw sn HWarw rl 0 Warw neg rl HWarw neg sn HWarw rl closepath S acolor scmyk fill R y1 Yscm HWBox add m Xscm y1 Yscm HWBox add l acolor scmyk 1 slw K } { Yscm dup X0 Xscm HWBox sub exch m HWarw neg HWarw sn rl Warw 0 rl HWarw neg HWarw neg sn rl closepath S acolor scmyk fill R X0 Xscm HWBox sub exch m Yscm X0 Xscm HWBox sub exch l acolor scmyk 1 slw K } ifelse R } bdf
+/FBox { htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB FBDspl mul add Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X0 TxWB FBDspl mul sub Xscme bbox } ifelse S scmyk fill R FGcolor scmyk 1 slw K } bdf
+/FTalgn { htag 1 eq { FTXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse } { FTYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse } ifelse } bdf
+/GPalgn { htag 1 eq { GPXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse } { GPYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse } ifelse } bdf
+/Box { 2 copy 2 copy pop sub 2 div add 7 1 roll S htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB add Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X0 TxWB sub Xscme bbox } ifelse S scmyk fill R FGcolor scmyk 1 slw K htag 1 eq { Xscm y1 TyWB 1.75 mul add Yscm FTXangle } { Yscm X0 TxWB 1.75 mul sub Xscme FTYangle } ifelse 6 -1 roll FTalgn 8 -2 roll FGcolor ttxt R } bdf
+%
+/GDmore { MxFtLBL S ElmFont sfont (M) stringwidth pop R mul htag 1 eq { FTXangle sin } { FTYangle cos } ifelse abs mul ivcm add } bdf
+/BDmore { MxGpLBL S TagFont sfont (M) stringwidth pop R mul htag 1 eq { GPXangle sin } { GPYangle cos } ifelse abs mul ivcm add } bdf
+%
+/GnBanner{ S 1 eq { 2 copy htag 1 eq { Xscme Xscme y1 TyWB GDspl mul add dup Yscme Yscm 3 1 roll } { Yscme Yscme X0 TxWB GDspl mul sub dup Xscme Xscme 4 1 roll exch } ifelse 0.5 FGcolor uline } if 2 copy pop sub 2 div add htag 1 eq { Xscm y1 TyWB GLDspl mul add Yscm GPXangle } { Yscm X0 TxWB GLDspl mul sub Xscme GPYangle } ifelse 6 -1 roll GPalgn 8 -2 roll FGcolor ttxt R } bdf
+/SbBanner { S htag 1 eq { 0 X0 X1 X0 sub 2 div add Xscm y1 TyWB GDspl mul add Yscm } { 90 X0 TxWB GDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm } ifelse 5 -2 roll FGcolor ctshow R } bdf
+/Banner { S htag 1 eq { 0 X0 X1 X0 sub 2 div add Xscm y1 TyWB BDspl mul add Yscm } { 90 X0 TxWB BDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm } ifelse 5 -2 roll FGcolor ctshow R } bdf
+%
+% mxt mnt xp yp ori end htick
+/tckdict 15 dict def tckdict begin /mkmxt { dup 0 lt { neg } if dup 10 lt { 10 mul log round 10 exch exp cvi } { log round 10 exch exp cvi } ifelse } def /nwmod { dup 1 le { 100 mul cvi exch 100 mul cvi exch mod 100 div } { exch dup 1 le { 100 mul cvi exch 100 mul cvi mod 100 div } { cvi exch cvi mod } ifelse } ifelse } def /isltone { dup 1 lt { 100 mul cvi 100 div } if } def end
+/htick { S tckdict begin horizontal /yp exch Yscm def /xp exch Xscm def /xend xdf /xori xdf /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp T lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Xscm 0 m dup dup Xscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse neg l 1 slw FGcolor scmyk K GridON 1 eq { S 0 y0 Yscm neg T dup Xscm dup y0 Yscm m y1 Yscm l 0.1 slw verylightgrey scmyk K R } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 3 -1 roll Xscm -18 TickFont FGcolor ctshow } if } { pop } ifelse } if } for xori Xscm dup 0 m 7.5 neg l 2 slw FGcolor scmyk K xori 10 string cvs 0 xori Xscm ZoomON 1 eq { 4 sub } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { ltshow } ifelse xend Xscm dup 0 m 7.5 neg l 2 slw FGcolor scmyk K xend 10 string cvs 0 xend Xscm ZoomON 1 eq { 4 add } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { tshow } ifelse end R } def
+/vtick { S tckdict begin vertical /yp exch Yscm def /xp exch Xscm def /xend xdf /xori xdf /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp T lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Yscm 0 exch m dup dup Yscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse exch l 1 slw FGcolor scmyk K GridON 1 eq { S X0 Xscm 0 T dup Yscm dup X0 neg Xscme m X1 neg Xscme l 0.1 slw verylightgrey scmyk K R } if dup 0 eq { S dup dup X0 Xscme Yscm m X1 neg Xscme Yscm l 0.1 slw FGcolor scmyk K R } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 10 4 -1 roll Yscm 2.5 sub TickFont FGcolor tshow } if } { pop } ifelse } if } for 7.5 xori Yscm dup 0 exch m l 2 slw FGcolor scmyk K xori 10 string cvs 0 10 xori Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow 7.5 xend Yscm dup 0 exch m l 2 slw FGcolor scmyk K xend 10 string cvs 0 10 xend Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow end R } def
+/nucltick { tickmn tickmx maxtck mintck X0 X1 0 y0 htick } def
+/pctmarks { S y0 10 y1 { Yscm dup X0 Xscm X1 Xscm 3 1 roll 4 1 roll 0.5 FGcolor line } for R } bdf
+%
+/beginfunct { R S 3 dict begin /maxx exch ceiling def /minx exch floor def /Yscale XBoxY maxx minx sub div def minx 0 lt { 0 minx neg Yscm T } if S XBYtickflg 1 eq { -1 -1 xtrmxt xtrmnt minx maxx X1 0 vtick S X0 Xscm 0 m X1 Xscm 0 l dotted FGcolor scmyk K R } if R } def /endfunct { end R } def
+end % aplot dict
+%
+%%EndProcSet:   aplotdict 1.0 0
+%
+%%BeginProcSet: main_function_calls 1.0 0
+%
+/s_credits { S 1 dict begin /fs_cd FSF def pagedict begin pga4 pop end 1 cm sub DnM T 0 0 0 (This plot has been obtained using GFF2APLOT. The most recent version of GFF2APLOT is freely available at \042http:\/\/www1.imim.es/software/gfftools/APLOT.html\042. Copyright      1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) (cv) (rh) fs_cd /Times-Roman FGcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol FGcolor ttxt end R } bdf
+%
+/estlbl { S 3 dict begin /lbl xdf /ypos xdf /xpos xdf horizontal 0 Xlwdt 4 div neg T lbl 0 xpos Xscm ypos Yscm 5 /Helvetica black ctshow vertical end R } bdf
+%
+/GsclonX { /Y exch Y Spacer sub exch sub def Xmarg Y T axesp 0 eq { /Xscale { BBoxX X1 X0 sub Y1 Y0 sub max div } def } { /Xscale { BBoxX X1 X0 sub div } def } ifelse } bdf
+%
+% DOTPLOT BOX
+/begindata { aplot begin S /y1 Y1 def /y0 Y0 def BBoxY GsclonX axesp 0 eq { /Yscale Xscale def } { /Yscale { BBoxY y1 y0 sub div } def } ifelse /TxWB { WBox Xscale div } def /TyWB { WBox Yscale div } def /GDspl { xGDspl GDmore } def /GLDspl { xGLDspl GDmore } def /BDspl { xBDspl GDmore BDmore } def X0 Xscm neg y0 Yscm neg T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox BBoxcol scmyk fill R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm ZoomON 1 eq { 4 copy ZoomTicks } if bbox 2 slw FGcolor scmyk K R S BBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse BBYtickflg 1 eq { tickmn tickmx maxtck mintck y0 y1 X1 0 vtick } if R newpath } def /enddata { R /GDspl xGDspl def /GLDspl xGLDspl def /BDspl xBDspl def end } def
+%
+% PERCENT BOX
+/beginmatches { aplot begin /ZoomON 0 def S /y1 xdf /y0 xdf SBoxY GsclonX /Yscale SBoxY y1 y0 sub div def X0 Xscm neg y0 Yscm neg T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox S S SBoxcol scmyk fill R S SBoxLab TagLabelFont Banner SBoxSLab TagFont SbBanner SBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse R S SBYtickflg 1 eq { -1 -1 pctmxt pctmnt y0 y1 X1 0 vtick } if R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R R clip newpath } def /endmatches { R R end } def
+%
+% EXTRA BOX
+/beginextra { aplot begin S /nlines xdf /y0 0 def XBoxY GsclonX /Yscale XBoxY nlines 1 add div def /Xlwdt Yscale 0.75 mul def /xwdt Yscale 2 div def /y1 XBoxY Yscale div def X0 Xscm neg 0 T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox S XBoxcol scmyk fill R S XBoxLab TagLabelFont Banner XBoxSLab TagFont SbBanner XBXtickflg 1 eq { nucltick } if R newpath } def /endextra { /Yscale XBoxY nlines 1 add div def X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R  R end } def
+%
+%%EndProcSet:   main_function_calls 1.0 0
+%
+%
+%%EndProlog
+%
+%%BeginSetup
+%
+% initgraphics
+% true setpacking
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%
+%%EndSetup
+%
++++MAINProcs+++
+} # ps_main
+sub ps_open_page() {
+    print STDOUT << '+++OPEN+++';
+%%Page: 1 1
+%%BeginPageSetup
+%
+% Saving current page settings
+/pgsave save def
+% Setting BGcolor for sheet
+Dpage 0 0 bbox S BGcolor scmyk fill R clip newpath
+% Setting page-size scale
+1 CSF dup F
+%%EndPageSetup
+%
++++OPEN+++
+} # ps_open_page
+sub ps_close_page() {
+    print STDOUT << '+++CLOSE+++';
+%
+flgcrd { s_credits } if
+grestoreall
+pgsave restore
+showpage
+%
+%%PageEND: 1 1
+%
++++CLOSE+++
+} # ps_close_page
+sub ps_trailer() {
+    print STDOUT << "+++EOF+++";
+%%Trailer
+%
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EOF
++++EOF+++
+} # ps_trailer
