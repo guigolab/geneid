@@ -54,8 +54,7 @@ ALINK="blue">
 <div class="bulk"><font face="arial black" size=2>
 <tt>geneid</tt> depends on a parameter file to build the predictions. The parameter file contains
 mostly the description of the probabilistic model on which the predictions
-are based. It also contains the so-called gene model at the end of the
-parameter file, the set of rules describing how to chain gene elements
+are based. It also contains the so-called gene model at the end, the set of rules describing how to chain gene elements
 (such as exons) into gene predictions. Through the usage of the gene model
 and the options <tt>O/R</tt>, <tt>geneid</tt> offers support for the
 integration of predictions from multiple sources.
@@ -122,7 +121,7 @@ genes:
 <td align=left bgcolor="skyblue">
 <font size=1>
 <pre>
-#Intragenic connections (reverse)
+#Intergenic connections
 Promoter-:First-:Terminal+     Promoter+:Terminal-:First+    2000:Infinity
 Promoter+                      First+                        50:4000
 First-                         Promoter-                     50:4000
@@ -170,15 +169,33 @@ termination is coded within the program with the features
 <td bgcolor="white">
 <b>(1)</b>
 This the general structure in geneid parameter files:
-information model to predict genomic elements according to the G+C content
+<tt>NO_SCORE</tt> parameter, information model to predict genomic elements 
+according to the G+C content
 of every sequence fragment, and gene model to assemble the predictions
 following series of rules.</td>
+
+<tr>
+<td>
+<font size=1>
+<tt>NO_SCORE</tt> is the value that will be used to score exon positions that
+do not overlap with any input HSP. By default, its value is zero, but it can be
+modified to enhance the appearance of predictions supported by homology 
+information (option -S).
+</font>
+</td>
+
 <tr>
 <td bgcolor="lightblue">
 <font size=2 color="black">
 <b>
 <pre>
-<font color=red>#1. ISOCHORE DEPENDENT INFORMATION</font>
+<font color=red>
+# 0. Non-homology penalty</font>
+NO_SCORE
+0
+
+<font color=red>
+#1. ISOCHORE DEPENDENT INFORMATION</font>
 number_of_isochores
 3
 
@@ -235,11 +252,12 @@ maximum_number_of_donors_per_acceptor_site
 <b>(3)</b>
 Parameters for filtering exons depending on their coding potential score:
 cutoff on the final exon score, cutoff on the protein coding potential
-score, weighted value for coding potential against signals score and
-exon weight parameter (value added to exons which have overcome all of the
-previous filters: penalty to avoid predicting long genes with too many genes
-due to the additive schema under gene assembling model). There are always
-4 values for each of exon types: First, Internal, Terminal and Single.
+score, factors for weighting site score, coding potential score and 
+homology score and finally exon weight parameter (value added to exons 
+which have overcome all of the previous filters: penalty to avoid predicting 
+long genes with too many exons due to the additive schema under gene 
+assembling model). There are always 4 values for each of exon types: First, 
+Internal, Terminal and Single.
 </td>
 <tr>
 <td bgcolor="lightblue">
@@ -254,8 +272,14 @@ due to the additive schema under gene assembling model). There are always
 <font color="red">Coding_potential_score_cutoff</font>
 -10 -15 -15 -15
 
-<font color="red">Weight_of_coding_potential_score_in_exons</font>
+<font color="red">Site_factor</font>
+0.6 0.6 0.6 0.6
+
+<font color="red">Exon_factor</font>
 0.4 0.4 0.4 0.4
+
+<font color="red">HSP_factor</font>
+1.0 1.0 1.0 1.0
 
 <font color="red">Exon_weight_values</font>
 -7 -7 -7 -7
@@ -394,7 +418,7 @@ var modifieddate=document.lastModified
 </table>
 
 <br><p>
-Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+Enrique Blanco Garcia &copy; 2003<br><p><br><p>
 </center>
 </body>
 </html>
