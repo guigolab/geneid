@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.12 2000-08-12 01:36:24 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.13 2000-08-12 19:59:06 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln";
@@ -114,7 +114,7 @@ COMMAND-LINE OPTIONS:
   its output to <STDOUT>, so user can redirect to a file but
   he also could use the program as a filter within a pipe. It also 
   can write to files with the "-W" option. The output then is splited
-  onto two files with the ".alnQ" and ".alnS" extensions. By default
+  onto two files with the ".srQ" and ".srS" extensions. By default
   SRs for both Query and Subject are generated, you can change this
   with "-Q" and "-S" options, see below. The basic output is in GFF, 
   you can switch to pairwise alignment output not in GFF.
@@ -130,11 +130,11 @@ COMMAND-LINE OPTIONS:
     -i, --identity-score : set <score> field to Identities (default Alignment).
     -C <f>, --cutoff <f> : <f> is a real number for lower HSP score cutoff.
     -W, --write-to-file  : write output to separate files
-                                 + for QUERY:   "<file_name>.alnQ"
-                                 + for SUBJECT: "<file_name>.alnS"
+                                 + for QUERY:   "<file_name>.srQ"
+                                 + for SUBJECT: "<file_name>.srS"
                            you can provide "<file_name>" as parameter for
                            this option, as example, if you provide "-W results"
-                           you send output to "results.alnQ" and "results.alnS".
+                           you send output to "results.srQ" and "results.srS".
                            If "<file_name>" is not provided, input filename is
                            set by default as "<file_name>".
     -v, --verbose        : warnings sent to <STDERR>.
@@ -222,11 +222,11 @@ sub set_output_files {
 	$blast_alnQ = $blast_alnS = "STDOUT";
 	$to_file_flg && do {
 		if ($to_file == 1) {
-			$blast_alnQ = "$blast_file.alnQ"; 
-			$blast_alnS = "$blast_file.alnS";
+			$blast_alnQ = "$blast_file.srQ"; 
+			$blast_alnS = "$blast_file.srS";
 		} else {
-			$blast_alnQ = "$to_file.alnQ"; 
-			$blast_alnS = "$to_file.alnS";	
+			$blast_alnQ = "$to_file.srQ"; 
+			$blast_alnS = "$to_file.srS";	
 		};
 	};
 }
