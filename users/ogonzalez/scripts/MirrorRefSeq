@@ -104,7 +104,7 @@ else
             cd $local/database
             nom=`basename $local`
             remot=`grep $nom /home/ug/ogonzalez/scripts/MirrorGP.dat | awk '{print $1 }'`
-            for fitxer in ensGene ensLink ensPep refGene refLink refPep
+            for fitxer in ensGene ensLink ensPep ensMrna refGene refLink refPep refMrna
             do
                echo "$URL/$remot/database/$fitxer.txt.gz" >>/tmp/gp
             done

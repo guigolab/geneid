@@ -12,6 +12,9 @@
 # per assegurar-nos que una execucio "erronea" del /sbin/lilo no ens deixa
 # un sistema no botable
 
+echo NO CAL FER AIXO PERQUE POSAR boot=/dev/md0 ES MILLOR!!!
+exit
+
 touch lilo.log.tmp1
 
 for i in sda sdb

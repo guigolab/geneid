@@ -146,6 +146,18 @@ do
    let actual=actual-1
    printf "pas 2: %s \r" $actual
 done <$txt
+# compte: tal i com esta per ara, els fitxers nous compten en calcular el
+# valor de "$actual" pero no son a la llista. el while read acaba abans que
+# $actual sigui 0. De fet, el valor final de $actual es igual al nombre de
+# fitxers nous trobats
 
 echo
+
 mv $tmp $txt
+
+# esborrem els directoris buits
+cd $nou
+find . -type d | perl -e '@lst=<STDIN>;print reverse @lst;' | while read nom
+do
+   rmdir $nom 2>/dev/null
+done
