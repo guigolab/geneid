@@ -26,16 +26,16 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.6 1999-04-30 18:15:59 jabril Exp $	
+#         $Id: gff2ps,v 1.7 1999-05-03 04:11:18 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
 #
-# ( ./gff2ps samples/mmtag.gff > samples/11.ps ) > & samples/report
+# ( ./gff2ps -v samples/mmtag.gff > samples/11.ps ) > & samples/report
+#
 
 ##############################################################
 #################### PROGRAM DEFINITIONS #####################
-
 # 
 # Defining Default Values...
 #
@@ -69,8 +69,14 @@ Defaults () {
         verydarkbrown | darkbrown | brown | lightbrown | verylightbrown"
  # 
  # Default User-Defined Options: 
+  CFDIR=`pwd`
   bgcolor="white"
   fgcolor="black"
+  v01="0"; n01="Load_CustomFile"
+  v02=" "; n02="CustomFile_Name"
+  v03="$CFDIR/.gff2psrc"; n03="Default_CustomFile_Name"
+  v04="0"; n04="Exist_Default_CustomFile"
+  v05="0"; n05="Print_Report"
 }
 
 #
@@ -129,110 +135,12 @@ ShowHelpLine () {
  return
 }
 
-#
-# Testing parameters passed by User.
-#
-CheckColor () {
-  gawk 'BEGIN{
-    color=ARGV[1]
-    if (color!~/^BG$|^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/) {
-      printf "\n<<<<ERROR>>>> \" %s \" is not a defined color.\n", color | "cat 1>&2"
-      printf "              Default \" black \" is asigned to option.\n" | "cat 1>&2"
-      printf "              You can choose one of this colors:\n" | "cat 1>&2"
-      print ARGV[3] | "cat 1>&2"
-      print "" | "cat 1>&2"
-      color=ARGV[2]
-      }
-    print color
-    ARGV[1]=ARGV[2]=ARGV[3]=""
-    }' $1 $2 "$COLORS"
-  return 0
-}
-
-CheckInt () {
-  if [ `expr $1 : '[0-9]*'` -eq `expr $1 : '.*'` ]
-    then echo "1"; return 0
-    else 
-      echo "<<<<ERROR>>>> \" $1 \" is not an integer value." 1>&2
-      echo "              You must especify an integer value to -$W_OPTION" 1>&2
-      echo "              Program will take value from defaults..." 1>&2
-      echo "" 1>&2
-      echo "0";return 1
-    fi
-  return 1
-}
-###################################################################
-################## Choosing Options for GFF2PS ####################
-
-#
-# Resetting default program variables.
-#
-Defaults
-
-#
-# When no options, no parameters and 
-#  no inputstream are given, print USAGE.
-#
-if [ $# -eq 0 ] 
-  then
-    echo; echo $USAGE; echo; exit 1
-  fi
-
-#
-# Asking for Help, output it to screen. 
-#
-case $1 in
-  -h) Help; exit 2;;
-  -H) echo; echo $PROGRAM" : Option Definition Help."; echo;
-      if [ $# -gt 1 ]; 
-        then shift; fi;
-      for temp in $@;
-        do ShowHelpLine $temp; done;
-      exit 2;;
-  esac
-
-#
-# Processing all options and parameters passed to program.
-#
-## while getopts
-
-###################################################################
-################### Converting to PostScript ######################
-
-#
-# Printing PostScript Header...
-#
-gawk 'BEGIN{ 
- # Find actual date...
- "date" | getline d
- split(d,dt," ")
- date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
- # Finding logged user...
- "whoami" | getline usr
- # Printing PostScript Header...
- bigchain=        "%%\!PS-Adobe-2.0\n"
- bigchain=bigchain"%%%%Title: %s\n"
- bigchain=bigchain"%%\n%%%%User: %s\n"
- bigchain=bigchain"%%%%Date: %s\n"
- bigchain=bigchain"%%\n%%%%Program: %s\n"
- bigchain=bigchain"%%%%Version: %s\n"
- bigchain=bigchain"%%%%CreationDate: %s\n"
- bigchain=bigchain"%%%%LastRevision: %s\n"
- bigchain=bigchain"%%%%Author : %s\n"
- bigchain=bigchain"%%%%e-mail : %s\n"
- bigchain=bigchain"%%%%Mail Adress:\n%s\n%%\n"
- if (ARGV[1]!~"##dflt##") title=ARGV[1]
- else title="GFF to PostScript"
- printf bigchain, title, usr, date, ARGV[2], ARGV[3], ARGV[4], ARGV[5], ARGV[6], ARGV[7], ARGV[8]
- printf "%%\n%% ------------------------------------------------------------------------\n"
- printf "%%                           %s - %s\n",ARGV[2], ARGV[3]
- printf "%% ------------------------------------------------------------------------\n"
-  for (i=1;i<=8;i++) ARGV[i]=""
-}' "##dflt##" "$PSPROGRAM" "$PSVERSION" "$PSCREATION" "$PSREVISION" "$AUTHOR" "$EMAIL" "$MAIL"
-
+##############################################################
+################# POSTSCRIPT MAIN FUNCTIONS ##################
 #
 # Printing %%Prolog Constant Definitions...
 #
+MAINPSPROLOG () {
 cat <<'@@@EndProlog@@@'
 %
 %          Converting GFF files to PostScript plots.
@@ -352,19 +260,6 @@ true setstrokeadjust
 0 setlinecap
 %%EndProlog
 %%BeginSetup
-@@@EndProlog@@@
-
-#
-# Printing %%Prolog User-Defined Variables...
-#
-# gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -v PARAMETERS="$APLOToptions" 'BEGIN{
-#
-# printf "colordict begin /BGcolor colordict /%s get def /FGcolor colordict /%s get def end\n",BGcolorname,FGcolorname
-
-#
-# Printing Main PostScript Routines...
-
-cat <<'@@@EndProcs@@@'
 /cm { 28.35 mul } bind def
 %%%% test flag
 /tflg true def
@@ -426,9 +321,18 @@ flglscape {
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
 /XOriPlot XOriBlck XLftLbl add def
 %%%% defining groups and lines
-/LnFwd 3 def % groups for each strand
-/LnBth 3 def
-/LnRvs 3 def
+%/LnFwd 3 def % groups for each strand
+%/LnBth 3 def
+%/LnRvs 3 def
+@@@EndProlog@@@
+}
+#### End of MAINPSPROLOG function
+
+#
+# Printing Main PostScript Routines...
+#
+MAINPSPROCS () { 
+cat <<'@@@MAINProcs@@@'
 /LnTot LnFwd LnBth LnRvs add add def
 /YSLine YSBlck LnTot div def
 /YSFwd LnFwd LnTot div YSBlck mul def
@@ -457,7 +361,6 @@ flglscape {
 % /Xscm { Xscale mul } bind def /Xscme { Xscm exch } bind def
 % /Yscm { Yscale mul } bind def /Yscme { Yscm exch } bind def
 % /fmt { Yscme Xscme moveto } bind def /flt { Yscme Xscme lineto } bind def
-
 %
 %  Global Drawing Procedures
 % ---------------------------------
@@ -480,8 +383,7 @@ flglscape {
 % <--- width height xori yori .box
 /box { moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath } bind def
 % <--- .TB % Printing bounding boxes for all page elements.
-/TB { tflg {
-              pglim 0 0 box /FGcolor 2 tbbox /BGcolor scolor fill                              %%%% pglimit box
+/TB { pglim 0 0 box /FGcolor 2 tbbox /BGcolor scolor fill  %%%% pglimit box
     FlgTitl { XSTitl  YSTitl XOriTitl            YOriTitl box /green  1.0  tbbox newpath } if  %%%% title box
               XSBlck  YSBlck XOriBlck            YOriBlck box /violet 2.0  tbbox newpath       %%%% block box
     FLftLbl { XLftLbl YSBlck XOriBlck            YOriBlck box /red    0.5  tbbox newpath } if  %%%% left labels box
@@ -493,8 +395,7 @@ flglscape {
  LnTot 0 gt {
   1 1 LnTot { 1 sub YSLine mul YOriBlck add
               XSPlot  YSLine XOriPlot           4 -1 roll box /black  0.125 tbbox newpath      %%%% Lines box
-              } for } if
-              } if } bind def
+              } for } if } bind def
 %
 %  Text Procedures
 % ---------------------------------
@@ -538,39 +439,193 @@ flglscape {
 %
 %%EndSetup
 %
-%%Page: 1 1
-%%BeginPageSetup
+@@@MAINProcs@@@
+} 
+#### End of MAINPSPROCS function
+
+#
+# PostScript end of page... 
+# 
+MAINPSTRAILER () {
+cat <<'@@@EndTrailer@@@'
+%%Trailer
 %
-%%%% Saving current page settings
-/pgsave save def
-%%%% Defining pagenumber
-/PageNumber (Page 1/1) def
-%%%% Setting BGcolor for sheet 
-Dpage flglscape { exch } if 0 0 box /FGcolor 1 tbbox /BGcolor scolor fill
-%%%% setting coordinate axes for page orientation
-flglscape 
- { 90 rotate 1 -1 scale XORI YORI translate }                  % (0,0) - Ori for landscape pages
- { XORI Dpage exch pop YORI sub translate 1 -1 scale } ifelse  % (0,0) - Ori for portrait pages
-%%%% If testing output print bounding_boxes for page elements
-TB
-%
-% /FGcolor scolor
-%
-%%EndPageSetup
-%
-pgsave restore
-showpage
-% header
-%
-@@@EndProcs@@@
+%%EOF
+@@@EndTrailer@@@
+} 
+#### End of MAINPSTRAILER function
 
 ##############################################################
-############### Main GFF2PS GNU awk Program... ###############
+####################### PROGRAM FUNCTIONS ####################
+#
+# Testing parameters passed by User: Colors.
+#
+CheckColor () {
+  gawk 'BEGIN{
+    color=ARGV[1]
+    if (color!~/^BG$|^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/) {
+      printf "\n<<<<ERROR>>>> \" %s \" is not a defined color.\n", color | "cat 1>&2"
+      printf "              Default \" black \" is asigned to option.\n" | "cat 1>&2"
+      printf "              You can choose one of this colors:\n" | "cat 1>&2"
+      print ARGV[3] | "cat 1>&2"
+      print "" | "cat 1>&2"
+      color=ARGV[2]
+      }
+    print color
+    ARGV[1]=ARGV[2]=ARGV[3]=""
+    }' $1 $2 "$COLORS"
+  return 0
+}
+
+#
+# Testing parameters passed by User: Integer Numbers.
+#
+CheckInt () {
+  if [ `expr $1 : '[0-9]*'` -eq `expr $1 : '.*'` ]
+    then echo "1"; return 0
+    else 
+      echo "<<<<ERROR>>>> \" $1 \" is not an integer value." 1>&2
+      echo "              You must especify an integer value to -$W_OPTION" 1>&2
+      echo "              Program will take value from defaults..." 1>&2
+      echo "" 1>&2
+      echo "0";return 1
+    fi
+  return 1
+}
+
+###################################################################
+################## MAIN GFF2PS SHELL SCRIPT #######################
+#
+###################################################################
+################## Choosing Options for GFF2PS ####################
+#
+# Resetting default program variables.
+#
+Defaults
+
+#
+# Checking if default custom file exists
+#  else switch on flag to create.
+#
+if [ ! -f $CFDIR/.gff2psrc ]
+  then v04="0"
+       echo "Warning: Default Custom File does not exist." 1>&2 
+       echo "         Program is going to write a Local Custom File." 1>&2 
+  else v04="1" # Exist_Default_CustomFile
+       echo "Report: Using Default Custom File ($CFDIR/.gff2psrc)." 1>&2 
+  fi
+
+#
+# When no options, no parameters and 
+#  no inputstream are given, print USAGE.
+#
+if [ $# -eq 0 ] 
+  then
+    echo; echo $USAGE; echo; exit 1
+  fi
+
+#
+# Asking for Help, output it to screen. 
+#
+case $1 in
+  -h) Help; exit 2;;
+  -H) echo; echo $PROGRAM" : Option Definition Help."; echo;
+      if [ $# -gt 1 ]; 
+        then shift; fi;
+      for temp in $@;
+        do ShowHelpLine $temp; done;
+      exit 2;;
+  esac
+
+#
+# Processing all options and parameters passed to program.
+#
+while getopts :C:vHh W_OPTION
+  do
+    case $W_OPTION in
+      H|h) Help; exit 2;;
+      C) if [ ! -f $CFDIR/$OPTARG ];    # Load_CustomFile CustomFile_Name
+           then v01="0";
+                echo "Error: Custom File $OPTARG does not exist...Not Loaded." 1>&2 ;
+           else v01="1";
+	        echo "Report: Adding $OPTARG Custom File to Default (.gff2psrc)." 1>&2 ;
+                v02="$CFDIR/$OPTARG";
+         fi;;
+      v) v05="1";;                      # Print_Report
+       :) ShowHelpLine $1; exit 2;;
+      \?) ShowHelpLine $1; exit 2;;
+    esac # case $W_OPTION
+  done   # while getopts
+
+#
+# Shifting all options tested before,
+# without removing files passed to shell...
+#
+ incr=1
+ while [ $OPTIND -gt $incr ]
+   do shift; incr=`expr $incr + 1`; done
+
+#
+# Defining PLOToptions STRING for GNU awk programs.
+#
+   P=$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05
+ PLOToptions=$P
+ if [ $v05 -eq 1 ]
+   then
+     echo "********************************************" 1>&2
+     echo ">>>>> Option String Passed to Program <<<<<<" 1>&2
+     echo "*****************************************" 1>&2
+     echo "" 1>&2
+     echo $PLOToptions 1>&2
+     echo "" 1>&2
+   fi
+
+###################################################################
+############### CONVERTING GFF TO POSTSCRIPT ######################
+#
+# Printing PostScript Header...
+#
+gawk 'BEGIN{ 
+ # Find actual date...
+ "date" | getline d
+ split(d,dt," ")
+ date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
+ # Finding logged user...
+ "whoami" | getline usr
+ # Printing PostScript Header...
+ bigchain=        "%%\!PS-Adobe-2.0\n"
+ bigchain=bigchain"%%%%Title: %s\n"
+ bigchain=bigchain"%%\n%%%%User: %s\n"
+ bigchain=bigchain"%%%%Date: %s\n"
+ bigchain=bigchain"%%\n%%%%Program: %s\n"
+ bigchain=bigchain"%%%%Version: %s\n"
+ bigchain=bigchain"%%%%CreationDate: %s\n"
+ bigchain=bigchain"%%%%LastRevision: %s\n"
+ bigchain=bigchain"%%%%Author : %s\n"
+ bigchain=bigchain"%%%%e-mail : %s\n"
+ bigchain=bigchain"%%%%Mail Adress:\n%s\n%%\n"
+ if (ARGV[1]!~"##dflt##") title=ARGV[1]
+ else title="GFF to PostScript"
+ printf bigchain, title, usr, date, ARGV[2], ARGV[3], ARGV[4], ARGV[5], ARGV[6], ARGV[7], ARGV[8]
+ printf "%%\n%% ------------------------------------------------------------------------\n"
+ printf "%%                           %s - %s\n",ARGV[2], ARGV[3]
+ printf "%% ------------------------------------------------------------------------\n"
+  for (i=1;i<=8;i++) ARGV[i]=""
+}' "##dflt##" "$PSPROGRAM" "$PSVERSION" "$PSCREATION" "$PSREVISION" "$AUTHOR" "$EMAIL" "$MAIL"
+
+#
+# Printing PostScript Prolog...
+#
+  MAINPSPROLOG
+
+#
+# Main GFF2PS GNU awk Program...
 #
 # (cat <<'@@@EndPROGRAM@@@') |
 # @@@EndPROGRAM@@@
 # gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -f - "$@"
-
+#
+MAINPSPROCS |
 gawk 'BEGIN{
   ############ INITIALITATION ############
 
@@ -597,16 +652,34 @@ gawk 'BEGIN{
   "date" | getline d
   split(d,dt," ")
   date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
-
   # Finding logged user...
   "whoami" | getline usr
-
   # Finding current process...
   "echo $$" | getline IDP
 
-# Option Definitions
-  Var["PrintReport"]=1
-  Var["LoadCustomFile"]=0
+  # Loading PSMainProgram
+  psline=1
+  while ((getline < ARGV[1])>0) PSMAIN[psline++]=$0;
+  ARGV[1]=""
+
+ ############## Defining pre-variables by CommandLine ############ 
+ "echo $PLOToptions" | getline d
+ npar=split(d,parm,"::") 
+ for (r=1;r<=npar;r++) {
+   split(parm[r],elem,":=")
+   if (elem[2]!="##dflt##") {
+     if (elem[1]~/COLOR\$/) {
+       ecolor=elem[2]
+       if (ChkColor(ecolor)) {
+         if (ecolor~/^BG\$|(##DEFAULT##)/) { elem[2]=Pre["BACKGROUND_COLOR"] }
+         else if (ecolor~/^FG\$/) { elem[2]=Pre["FOREGROUND_COLOR"] }
+         }
+       else { elem[2]=Pre["BACKGROUND_COLOR"] }
+       }
+     Pre[elem[1]]=elem[2]
+     }
+   }
+  for (v in Pre) Var[v]=Pre[v]
 
 # Layout Properties
   Default["page_size"]="a4"
@@ -633,7 +706,7 @@ gawk 'BEGIN{
   FT_PROP["show"]="on"
 # Group Properties
   GR_PROP["label"]="default" # none , default , "user-def"
-  GR_PROP["rank"]="0:1"
+  GR_PROP["rank"]="0:1" # rank of lower-upper scores
   GR_PROP["join_align"]="center"
   GR_PROP["join_color"]=Default["foreground_color"]
   GR_PROP["join_linetype"]="solid"
@@ -646,7 +719,7 @@ gawk 'BEGIN{
   SO_PROP["baseline_show"]="off"
   SO_PROP["bbox_color"]=Default["foreground_color"]
   SO_PROP["bbox_show"]="off"
-  SO_PROP["scale"]=1
+  SO_PROP["scale"]=2
   SO_PROP["rule_scale"]="nucleotide"
   SO_PROP["rule_rel"]="none"
   SO_PROP["rule_abs"]="none"
@@ -660,7 +733,7 @@ gawk 'BEGIN{
  CM["U"]="u";CM["V"]="v";CM["W"]="w";CM["X"]="x";CM["Y"]="y";
  CM["Z"]="z";CM["Ñ"]="ñ";CM["Ç"]="ç"
 
- if (Var["PrintReport"]) 
+ if (Var["Print_Report"]) 
    printf "\n%s\nInput File...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
  }
 { ############ READING .GFF FILES  ############
@@ -668,14 +741,14 @@ gawk 'BEGIN{
   # skips those empty lines or comments "#"
   #
   while ($0~/^( )*$|^(\#)+/) { 
-    if (Var["PrintReport"]) 
+    if (Var["Print_Report"]) 
       printf "%10s :: Not Read :: %s\n", NR, $0 | "cat 1>&2"
     if (getline<=0) break
     }
 
   # Printing Input Lines
   #
-  if (Var["PrintReport"]) 
+  if (Var["Print_Report"]) 
    printf "%10s : %s\n", NR, $0 | "cat 1>&2"
 
   # read gff element within source and strand
@@ -684,12 +757,12 @@ gawk 'BEGIN{
   n[$source,$strand]++;
   $feature=lcase($feature);
   element[$source,$strand,n[$source,$strand],feature] = $feature; 
-  if (!($feature in FT_ary) && $feature!~/\./) FT_ary[$feature]=$feature;
+  if (!($feature in FT_ary) && $feature!~/\./) FT_ary[$feature]++;
   element[$source,$strand,n[$source,$strand],start]   = $start;
   element[$source,$strand,n[$source,$strand],end]     = $end;
   element[$source,$strand,n[$source,$strand],frame]   = $frame;  
   element[$source,$strand,n[$source,$strand],group]   = $group; 
-  if (!($group in GP_ary) && $group!~/\./) GP_ary[$group]=$group;
+  if (!($group in GP_ary) && $group!~/\./) GP_ary[$group]++;
   if ($NF>group) {
     for (i=(group+1);i<=$NF;i++) {
       if ($i~"Label")
@@ -718,7 +791,7 @@ END{
 
   # Printing elements sorted
   #
-  if (Var["PrintReport"]) {
+  if (Var["Print_Report"]) {
    printf "\n%s\ngff elements are sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
    for (sc in sources) 
     for (s in strands) 
@@ -730,11 +803,12 @@ END{
   # Defining Object Properties
   #
   CreateProps(0)
-  if (Var["LoadCustomFile"]) RCFile(CFILE)
+  if (Var["Load_CustomFile"]) RCFile(CFILE)
 
   # make groups. assumes elements sorted by increasing acceptor position
   #
-  if (Var["PrintReport"]) printf "\n%s\nMaking Groups...............\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+  if (Var["Print_Report"]) printf "\n%s\nMaking Groups...............\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+  cntstr_fwd=cntstr_bth=cntstr_rvs=0
   for (sc in sources) {
     for (s in strands) {
       for (i=1;i<=n[sc,s];i++) {
@@ -767,7 +841,7 @@ END{
 	  grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
           }
 #################
-   if (Var["PrintReport"]) {
+   if (Var["Print_Report"]) {
     print grouping[sc,s,tgr,start]," :",sc,s,tgr,start, showelem(sc,s) | "cat 1>&2"
     print grouping[sc,s,tgr,end]," :",sc,s,tgr,end, showelem(sc,s) | "cat 1>&2"
     for (prop in FT_PROP) {
@@ -775,13 +849,27 @@ END{
       }
     }
 #################
-      }
-    }
-  }
+      } # for i
+    }   # for s
+    # Percent of plot area for each strand
+    if (ng[sc,"+"]>0) cntstr_fwd+=PLOT_FT[sc,":","scale"]
+    if (ng[sc,"."]>0) cntstr_bth+=PLOT_FT[sc,":","scale"]
+    if (ng[sc,"-"]>0) cntstr_rvs+=PLOT_FT[sc,":","scale"]
+  }     # for sc
+  cntstr_TOT=cntstr_fwd+cntstr_bth+cntstr_rvs
+  printf "/LnFwd %s def %% groups for each strand\n/LnBth %s def\n/LnRvs %s def\n", cntstr_fwd/cntstr_TOT, cntstr_bth/cntstr_TOT, cntstr_rvs/cntstr_TOT
+
+  # PostSCript Main Procs.
+  #
+  for (i=1;i<psline;i++) print PSMAIN[i]; 
+
+  # PostSCript PageSetup.
+  #
+  startPSpage(1,1)
 
   # make plotlines. Put non-overlapping groups into the same plotting line.
   #
-  if (Var["PrintReport"]) printf "\n%s\nPrinting Lines...............\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+  if (Var["Print_Report"]) printf "\n%s\nPrinting Lines...............\n%s\n",BigLINE,BigLINE | "cat 1>&2"
   for (sc in sources) {
     for (s in strands) {
       for (i=1;i<=ng[sc,s];i++) {
@@ -790,20 +878,50 @@ END{
 	nl[sc,s] = j==nl[sc,s]+1 ? j : nl[sc,s];
         endline[sc,s,j]=grouping[sc,s,g,end];
 	# plot group in file
-	if (Var["PrintReport"]) printf "GROUP : %-10s : %s %10d %10d \n", g, s, grouping[sc,s,g,start], grouping[sc,s,g,end] | " sort +6 | cat 1>&2";
+	if (Var["Print_Report"]) printf "GROUP : %-10s : %s %10d %10d \n", g, s, grouping[sc,s,g,start], grouping[sc,s,g,end] | " sort +6 | cat 1>&2";
         }
      }
   }
-  if (Var["PrintReport"]) close(" sort +6 | cat 1>&2")
+  if (Var["Print_Report"]) close(" sort +6 | cat 1>&2")
+
+  # PostSCript Page Trailer.
+  #
+  endPSpage()
 
   # Object Properties Report...
   #
-  if (Var["PrintReport"]) {
+  if (Var["Print_Report"]) {
     printf "\n%s\nDefining Object Properties..........\n%s\n",BigLINE,BigLINE | "cat 1>&2"
-    CreateProps(1)
+    CreateProps(1) | "cat 1>&2"
     }
 
+  # If not exist, create custom file (.gff2psrc)
+  #
+  if (!Var["Exist_Default_CustomFile"]) CreateProps(1) > Var["Default_CustomFile_Name"]
+
 }
+function min(a,b) { if (a<=b) return a; else return b }
+function max(a,b) { if (a>=b) return a; else return b }
+function ChkXlim(o,e) { if (o>=ESQ1 || e<=OSQ1) return 0; else return 1 } # Still not adapted.
+function ChkYlim(o,e) { if (o>=ESQ2 || e<=OSQ2) return 0; else return 1 } # Still not adapted.
+function OnOff(value) { if (value~/^1\$|^ON\$|^Y(ES)?\$|^T(RUE)?\$/) return 1; else return 0 }
+function ChkColor(ncolor) {
+ if (ncolor~/^FG\$|^black\$|^white\$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)\$/)
+   return 1
+ else return 0 # also when ncolor == ^BG\$|(##DEFAULT##)
+ }
+function tick(nm) { # Still not adapted.
+ end1=ESQ1-OSQ1; if (end1==0) end1=10000
+ end2=ESQ2-OSQ2; if (end2==0) end2=10000
+ wy=max(end1,end2);
+ y=wy/nm;
+ ylog=(log(y)/log(10));
+ yfloor=int(ylog);
+ y1=y/(10^yfloor);
+ y2=int(y1);
+ t=y2*(10^yfloor);
+ return t
+ }
 function lcase(string) {
   for (chr in CM) gsub(chr,CM[chr],string)
   return string
@@ -811,47 +929,47 @@ function lcase(string) {
 function CreateProps(flag) {
   ############ Create Properties Index for Objects ############
   if (flag) { 
-    printf "#\n# L ############PAGE LAYOUT############\n#\n" | "cat 1>&2"
-    for (feat in Default) printf "%s=%s\n", feat, Default[feat] | "sort | cat 1>&2"
+    printf "#\n# L ############PAGE LAYOUT############\n#\n"
+    for (feat in Default) printf "%s=%s\n", feat, Default[feat] | "sort"
     }
   if (flag) {
-    close("sort | cat 1>&2")
-    printf "#\n# F ############GENOMIC FEATURES############\n#\n" | "cat 1>&2"
+    close("sort")
+    printf "#\n# F ############GENOMIC FEATURES############\n#\n"
     }
   for (feat in FT_ary) {
     for (prop in FT_PROP) {
       if (flag)
-	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] | "sort | cat 1>&2"
+	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] | "sort"
       else PLOT_FT[feat,":",prop]=FT_PROP[prop]
       }
     }
   if (flag) { 
-    close("sort | cat 1>&2")
-    printf "#\n# G ############GROUP FEATURES############\n#\n" | "cat 1>&2"
+    close("sort")
+    printf "#\n# G ############GROUP FEATURES############\n#\n"
     }
   for (feat in GP_ary) {
     for (prop in GR_PROP) {
       if (flag)
-	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] | "sort | cat 1>&2"
+	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] | "sort"
       else PLOT_FT[feat,":",prop]=GR_PROP[prop]
       }
     if (flag)
-      printf "# %s:%s=%s\n#\n", feat, "feature_number", Nfeat[feat,":","feature_number"] | "cat 1>&2"
+      printf "# %s:%s=%s\n#\n", feat, "feature_number", FT_ary[feat]
     }
   if (flag) { 
     close("sort | cat 1>&2")
-    printf "#\n# S ############SOURCE FEATURES############\n#\n" | "cat 1>&2"
+    printf "#\n# S ############SOURCE FEATURES############\n#\n"
     }
   for (feat in sources) {
     for (prop in SO_PROP) {
       if (flag)
-	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] | "sort | cat 1>&2"
+	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] | "sort"
       else PLOT_FT[feat,":",prop]=SO_PROP[prop]
       }
     if (flag)
-      printf "# %s:%s=%s\n#\n", feat, "group_number", Ngroup[feat,":","group_number"] | "cat 1>&2"
+      printf "# %s:%s=%s\n#\n", feat, "group_number", GP_ary[feat]
     }
-    if (flag) close("sort | cat 1>&2")
+    if (flag) close("sort")
 }
 function RCFile(file) { ############ Read CustomFile
   while ((getline < file) > 0 ) {
@@ -865,7 +983,7 @@ function RCFile(file) { ############ Read CustomFile
     second=nwfeat[2]
     for (feat in FT_ary) {
       if (match(feat,gffirst)) {
-        if (Var["PrintReport"]) print "Feature Match between: " feat " & " first | "cat 1>&2"
+        if (Var["Print_Report"]) print "Feature Match between: " feat " & " first | "cat 1>&2"
 	if ((feat,":",second) in PLOT_FT) {
           PLOT_FT[feat,":",second]=defs[2]
      	  nothere=1
@@ -874,7 +992,7 @@ function RCFile(file) { ############ Read CustomFile
     }
     for (feat in GP_ary) { 
       if (match(feat,first)) {
-        if (Var["PrintReport"]) print "Group Match between: " feat " & " first | "cat 1>&2"
+        if (Var["Print_Report"]) print "Group Match between: " feat " & " first | "cat 1>&2"
 	if ((feat,":",second) in PLOT_FT) {
           PLOT_FT[feat,":",second]=defs[2]
 	  nothere=1
@@ -883,7 +1001,7 @@ function RCFile(file) { ############ Read CustomFile
     }
     for (feat in sources) {
       if (match(feat,first)) {
-        if (Var["PrintReport"]) print "Source Match between: " feat " & " first | "cat 1>&2"
+        if (Var["Print_Report"]) print "Source Match between: " feat " & " first | "cat 1>&2"
 	if ((feat,":",second) in PLOT_FT) { 
           PLOT_FT[feat,":",second]=defs[2]
 	  nothere=1
@@ -892,7 +1010,7 @@ function RCFile(file) { ############ Read CustomFile
     }
     # print ">>>New Feature>>>" $0
     if (nothere==0) {
-      if (Var["PrintReport"]) print "No Match found: " first | "cat 1>&2"   
+      if (Var["Print_Report"]) print "No Match found: " first | "cat 1>&2"   
       FT_ary[gffirst]=gffirst
       PLOT_FT[gffirst,":",second]=defs[2]
     }
@@ -917,20 +1035,34 @@ function showelem(a,b){
   string=string" "element[a,b,n[a,b],group]
   return string
  }
-' "$@"
+function startPSpage(num,tot){
+ printf "%%%%Page: %s %s\n",num,num
+ printf "%%%%BeginPageSetup\n%%\n"
+ printf "%% Saving current page settings\n"
+ printf "/pgsave save def\n"
+ printf "%% Defining pagenumber\n"
+ printf "/PageNumber (Page %s/%s) def\n",num,tot
+ printf "%% Setting BGcolor for sheet \n"
+ printf "Dpage flglscape { exch } if 0 0 box /FGcolor 1 tbbox /BGcolor scolor fill\n"
+ printf "%% setting coordinate axes for page orientation\n"
+ printf "flglscape\n"
+ printf " { 90 rotate 1 -1 scale XORI YORI translate }                  %% (0,0) - Ori for landscape pages\n"
+ printf " { XORI Dpage exch pop YORI sub translate 1 -1 scale } ifelse  %% (0,0) - Ori for portrait pages\n"
+ printf "%% If testing output print bounding_boxes for page elements\n"
+ printf "tflg { TB } if\n%%\n%% /FGcolor scolor\n%%\n"
+ printf "%% Header\n%%\n"
+ printf "%%%%EndPageSetup\n%%\n"
+ }
+function endPSpage(){
+ printf "%%\npgsave restore\nshowpage\n%%\n"
+ }
+' - "$@"
+#### Main GFF2APLOT GNU awk Program DONE.
 
-##############################################################
-############ Main GFF2APLOT GNU awk Program DONE. ############
 #
-
-#
-# PostScript end of page...
+# PostScript end of page (Trailer)
 # 
-cat <<'@@@EndTrailer@@@'
-%%Trailer
-%
-%%EOF
-@@@EndTrailer@@@
+  MAINPSTRAILER
 
 #
 ##################### EOF #####################
