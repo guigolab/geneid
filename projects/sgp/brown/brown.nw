@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
+% $Id: brown.nw,v 0.3 2001-07-17 16:53:21 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -76,7 +76,7 @@
 \def\ps{\textsc{PostScript}}
 \def\gnid{\texttt{geneid}}
 \def\gff{\texttt{gff2ps}}
-
+\def\tbx{\textsc{tblastx}}
 % Setting text for footers and headers
 
 \def\tit{\textsc{Running SGP on Brown Dataset}}
@@ -144,7 +144,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $$>$ }
+{\small$<$ \verb$Id: brown.nw,v 0.3 2001-07-17 16:53:21 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1075,6 +1075,128 @@ tar -zcvf HomologyHSP_3X.tar.gz  Hsap_*.hsp
 tar -zcvf HomologyTBX_3X.tar.gz  Hsap_*.tbx 
 @ 
 
+We found several problems with the tblastx output, problems arise due to the fact that the free version is not working as well as the licensed one (WU-blast 2.0). Another extrange result was that we miss few {\tbx} hits in the 'coding' strand (the one with an annotated gene) when comparing against 3X contigs database. The point here is that when comparing with homologous sequences databases, we found matches in both strands and that the 'non-coding' strand (the opposite to the strand which contains the annotated gene) hits were similar for the 3X and the homologous sequences. The question is then, to find what happened with those missing hits that are suppossed to appear in the reverse strand of the 3X contigs.
+
++ Checking for those HSPs that are appearing in the opposite strand with 3X and in both strands with homologous sequences:
+
+<<BASH commands>>=
+cd $WORK/tblastx/_tmp ;
+cat /seq/genomes/M.musculus/WGS/fasta/Mm.WGS0*/*mfa | \
+  perl -e 'use lib qw( /usr/lib/perl5/site_perl/5.005 );
+      use FileHandle;
+      use Bio::Seq;
+      use Bio::SeqIO;
+      STDOUT->autoflush;
+      $ifile = shift @ARGV;
+      @id_list = map { $_->[1] } map { [ s/\|/\\\|/og, $_ ] } @ARGV;
+      print STDERR "@id_list\n";
+      @ARGV = ();
+      $in = Bio::SeqIO->new(-file => "$ifile" , '-format' => 'Fasta');
+      $out = Bio::SeqIO->new(-fh => \*STDOUT, '-format' => 'Fasta');
+      while (my $seq = $in->next_seq()) {
+          $char=".";
+          $myid = $seq->display_id();
+          (grep { $myid =~ /^$_$/ } @id_list) && do {
+              $out->write_seq($seq);
+              $char="X";
+          };
+          print STDERR $char;
+      }; ' - "gnl|ti|8536845" "gnl|ti|19586499" > filtered.mfa
+@ 
+
+\begin{verbatim}
+####################################################################
+
+############################# Homolog
+
+ Score = 134 (64.3 bits), Expect = 0.0, Sum P(44) = 0.0, Group = 2
+ Identities = 25/31 (80%), Positives = 29/31 (93%), Frame = +3 / -1
+
+Query: 81111 GKMKKPHSPGQAEIRYFNNSLIVYQTVSSCL 81203
+             G+MKK HSP QA++RYF+NSLIVYQTVSSCL
+Sbjct: 75674 GEMKKAHSPRQAKVRYFHNSLIVYQTVSSCL 75582
+
+ Score = 111 (53.8 bits), Expect = 0.0, Sum P(49) = 0.0, Group = 1
+ Identities = 22/22 (100%), Positives = 22/22 (100%), Frame = -3 / +3
+
+Query: 81200 AARNCLVNDQGVVKVSDFGLSR 81135
+             AARNCLVNDQGVVKVSDFGLSR
+Sbjct: 75585 AARNCLVNDQGVVKVSDFGLSR 75650
+
+
+############################# 3X
+
+>gnl|ti|8536845_53_705 jhj64c02.b1
+        Length = 653
+
+  Plus Strand HSPs:
+
+ Score = 134 (64.3 bits), Expect = 3.7e-05, P = 3.7e-05, Group = 1
+ Identities = 25/31 (80%), Positives = 29/31 (93%), Frame = +3 / +1
+
+Query: 81111 GKMKKPHSPGQAEIRYFNNSLIVYQTVSSCL 81203
+             G+MKK HSP QA++RYF+NSLIVYQTVSSCL
+Sbjct:   289 GEMKKAHSPRQAKVRYFHNSLIVYQTVSSCL 381
+
+
+####################################################################
+
+############################# Homolog
+
+ Score = 140 (67.0 bits), Expect = 7.2e-181, Sum P(18) = 7.2e-181, Group = 3
+ Identities = 28/43 (65%), Positives = 31/43 (72%), Frame = +1 / -2
+
+Query: 127147 LDSGLTISPFERATYKEATHRSTQCFCQSYSGPRTCAYNLYEK 127275
+              LDSG T SP+ER + K ATHRS QCF  S S PR C YNLYE+
+Sbjct:  29545 LDSGPTSSPYERVSNKVATHRSIQCFGLSCSRPRPCTYNLYEE 29417
+
+ Score = 174 (82.6 bits), Expect = 0.0, Sum P(44) = 0.0, Group = 2
+ Identities = 33/42 (78%), Positives = 37/42 (88%), Frame = +2 / -3
+
+Query: 127151 ILGSLSHLLKGPHIKRPLTGVHNASASPIQGQGHVLITCMRK 127276
+              ILG L+HL+KG  IK PLTGV+NASA P+QGQGHVLITCMRK
+Sbjct:  29541 ILGPLAHLMKGSQIKWPLTGVYNASACPVQGQGHVLITCMRK 29416
+
+ Score = 167 (79.4 bits), Expect = 0.0, Sum P(49) = 0.0, Group = 1
+ Identities = 32/48 (66%), Positives = 35/48 (72%), Frame = -1 / +1
+
+Query: 127312 LEIXXXXXXXXXXSHTGYKHMSLALNRTGRSIVYSCEWPLYMWPFQKV 127169
+              LEI           HTGYK+M+LALNRTGRSIVYSCEWPLY+ PF KV
+Sbjct:  29380 LEIACFPLFTYYFPHTGYKYMALALNRTGRSIVYSCEWPLYLRPFHKV 29523
+
+############################# 3X
+
+>gnl|ti|19586499_56_607 G10P643367RC12.T0
+        Length = 552
+
+  Minus Strand HSPs:
+
+ Score = 174 (82.6 bits), Expect = 5.5e-11, P = 5.5e-11, Group = 1
+ Identities = 33/42 (78%), Positives = 37/42 (88%), Frame = +2 / -3
+
+Query: 127151 ILGSLSHLLKGPHIKRPLTGVHNASASPIQGQGHVLITCMRK 127276
+              ILG L+HL+KG  IK PLTGV+NASA P+QGQGHVLITCMRK
+Sbjct:    478 ILGPLAHLMKGSQIKWPLTGVYNASACPVQGQGHVLITCMRK 353
+
+
+####################################################################
+\end{verbatim}
+
+<<BASH commands>>=
+pressdb /projects/sgp/datasets/brown/fasta/fastamasked/Hsap_BTK \
+        -o $WORK/tblastx/_tmp/Hsap_BTK ;
+#
+for contig in gnl_ti_8536845 gnl_ti_19586499 ; 
+  do
+    {
+      tblastx $WORK/tblastx/_tmp/Hsap_BTK \
+              $WORK/tblastx/_tmp/$contig.mfa \
+              -matrix blosum62mod -hspmax 10000 -nogap \
+               > $WORK/tblastx/_tmp/$contig.tbx \
+              2> $WORK/tblastx/_tmp/$contig.log ;
+    } ;
+  done ;
+@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
@@ -1100,7 +1222,7 @@ tar -zcvf HomologyTBX_3X.tar.gz  Hsap_*.tbx
 ##   DEFAULT CUSTOM FILE FOR GFF2PS   ##
 ########################################
 #
-# $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
+# $Id: brown.nw,v 0.3 2001-07-17 16:53:21 jabril Exp $
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
@@ -1176,7 +1298,7 @@ RepeatMasker::left_label=REPEATS
 ##   DEFAULT CUSTOM FILE FOR GFF2PS   ##
 ########################################
 #
-# $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
+# $Id: brown.nw,v 0.3 2001-07-17 16:53:21 jabril Exp $
 #
 # L ######PAGE LAYOUT & PROGRAM OPTIONS######
 #
@@ -1965,7 +2087,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
+# $Id: brown.nw,v 0.3 2001-07-17 16:53:21 jabril Exp $
 @ 
 
 \newpage
