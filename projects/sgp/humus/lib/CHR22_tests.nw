@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: CHR22_tests.nw,v 1.2 2002-05-20 09:29:00 jabril Exp $ 
+% # $Id: CHR22_tests.nw,v 1.3 2002-05-20 20:11:58 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: CHR22_tests.nw,v 1.2 2002-05-20 09:29:00 jabril Exp $$>$ }
+{\small$<$ \verb$Id: CHR22_tests.nw,v 1.3 2002-05-20 20:11:58 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -517,15 +517,15 @@ for c in out gff gtf2 cds prot hsp-sr logs tmp eval evids ;
 ################################################## BUILDING 'SINGLETONS'
 #
 # Get gene start-end
-get_geneid_genes $EVIDIR/$SEQ.gff > $EVIDIR/$SEQ.genes ;
+get_geneid_genes $EVIDIR/$SEQ.fullgff > $EVIDIR/$SEQ.genes.full ;
 #
 # Map to single strand and save in GFF format
 gawk 'BEGIN{ OFS="\t";
              chr=ARGV[1]; ARGV[1]="";
-             source="refseq"; feat="single"; sco="1"; strand="+"; frame="3" }
+             source="refseq"; feat="single"; sco="1"; frame="3" } # strand=".";
   ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) {
-      print chr,source,feat,$2,$3,sco,strand,frame,$1;
-  }' $SEQ $EVIDIR/$SEQ.genes | sort +3n -4 > $EVIDIR/$SEQ.genes.gff ;
+      print chr,source,feat,$2,$3,sco,$4,frame,$1; # strand
+  }' $SEQ $EVIDIR/$SEQ.genes.full | sort +3n -4 > $EVIDIR/$SEQ.genes.gff ;
 # 
 # Project "singletons"
 $BIN/blast2gff -vg $EVIDIR/$SEQ.genes.gff > $ODIR/evids/$SEQ.genes.gff ;
@@ -535,63 +535,71 @@ perl -e 'use strict;
   use Data::Dumper;
   local $Data::Dumper::Purity = 0;
   local $Data::Dumper::Deepcopy = 1;
+  my %dnarts = ( "+" => "FWD", "-" => "REV", "." => "NAN" );
+  my %strand = ( FWD => "+",   REV => "-"  , NAN => "."  );
   my %genes = ();
   my %neges = ();
   my ($interlen,$ifile) = @ARGV;
+  my $gncnt = 0;
   #
   &parse_genes();
   # print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
   foreach my $seq (keys %genes) {
-      &sort_genes($seq);
+    foreach my $str (keys %{$genes{$seq}}) {
+      &sort_genes($seq,$str);
       # print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
-      &check_intergenic($seq);
+      &check_intergenic($seq,$str);
       # print STDERR Data::Dumper->Dump([ \%neges ],[ qw/ *neges / ]);
-      &check_length($seq);
+      &check_length($seq,$str);
       # print STDERR Data::Dumper->Dump([ \%neges ],[ qw/ *neges / ]);
-      &print_evidences($seq);
+      &print_evidences($seq,$str);
+    }; # foreach $str
   }; # foreach $seq
   exit(0);
   #
   sub parse_genes() {
       open(IFILE,"< $ifile");
       while (<IFILE>) {
-          my @f;
+          my (@f,$str);
           next if /^\s*$/o;
           next if /^\#/o;
           chomp;
           @f = split /\s+/og, $_;
-          defined($genes{$f[0]}) || do { @{$genes{$f[0]}} = (); };
-          push @{ $genes{$f[0]} }, [ @f[3,4] ];
+          $str = $dnarts{$f[6]};
+          defined($genes{$f[0]}) || do { %{$genes{$f[0]}} = (); };
+          defined($genes{$f[0]}{$str}) || do { @{$genes{$f[0]}{$str}} = (); };
+          push @{ $genes{$f[0]}{$str} }, [ @f[3,4] ];
       }; # while IFILE
       close(IFILE);
   } # parse_genes
   sub sort_genes() {
-      my $seq = shift;
-      @{ $genes{$seq} } = sort { $a->[0] <=> $b->[0]
+      my ($seq,$str) = @_;
+      @{ $genes{$seq}{$str} } = sort { $a->[0] <=> $b->[0]
                                          ||
-                                 $a->[1] <=> $b->[1] } @{ $genes{$seq} };
+                                 $a->[1] <=> $b->[1] } @{ $genes{$seq}{$str}  };
   } # sort_genes
   sub check_intergenic() {
-      my $seq = shift;
+      my ($seq,$str) = @_;
       my ($oc,$ec,$ol,$el) = (undef,undef,undef,undef);
-      my $nel = scalar(@{ $genes{$seq} });
-      defined($neges{$seq}) || do { @{ $neges{$seq} } = (); };
+      my $nel = scalar(@{ $genes{$seq}{$str} });
+      defined($neges{$seq}) || do { %{ $neges{$seq} } = (); };
+      defined($neges{$seq}{$str}) || do { @{ $neges{$seq}{$str} } = (); };
       for (my $p = 0 ; $p < $nel; $p++) {
-          ($oc,$ec) = @{ $genes{$seq}[$p] }[0,1];
+          ($oc,$ec) = @{ $genes{$seq}{$str}[$p] }[0,1];
           defined($ol) || do { ($ol,$el) = ($oc,$ec); next; };
           ($oc - $el > 500) && do {
-              push @{ $neges{$seq} }, [ $ol, $el ];
+              push @{ $neges{$seq}{$str} }, [ $ol, $el ];
               ($ol,$el) = ($oc,$ec); next; 
           };
           $el = $ec;
       }; # for $p
-      push @{ $neges{$seq} }, [ $ol, $el ]; # to save the last element...
+      push @{ $neges{$seq}{$str} }, [ $ol, $el ]; # to save the last element...
   } # check_intergenic
   sub check_length() {
-      my $seq = shift;
-      for (my $p = 0 ; $p < scalar(@{ $neges{$seq} }); $p++) {
+      my ($seq,$str) = @_;
+      for (my $p = 0 ; $p < scalar(@{ $neges{$seq}{$str} }); $p++) {
           my ($ref,$len,$md);
-          $ref = \@{ $neges{$seq}[$p] };
+          $ref = \@{ $neges{$seq}{$str}[$p] };
           $len = $ref->[1] - $ref->[0] + 1;
           $md = $len % 3;
           next if ($md == 0);
@@ -599,13 +607,13 @@ perl -e 'use strict;
       }; # for $p
   } # check_length
   sub print_evidences() {
-      my $seq= shift;
-      my $fmt = "$seq\trefseq\tAnnotation\t\%s\t\%s\t.\t+\t0\t\%s\n";
-      for (my $p = 0 ; $p < scalar(@{ $neges{$seq} }); $p++) {
-          printf STDOUT $fmt, @{ $neges{$seq}[$p] }, ($p + 1);
+      my ($seq,$str) = @_;
+      my $fmt = "$seq\trefseq\tAnnotation\t\%s\t\%s\t.\t$strand{$str}\t0\t\%s\n";
+      for (my $p = 0 ; $p < scalar(@{ $neges{$seq}{$str} }); $p++) {
+          printf STDOUT $fmt, @{ $neges{$seq}{$str}[$p] }, ++$gncnt;
       }; # for $p
   } # print_evidences
-  ' 500 $ODIR/evids/$SEQ.genes.gff > $ODIR/evids/$SEQ.evids.gff ;
+  ' 500 $ODIR/evids/$SEQ.genes.gff | sort +3n -4 > $ODIR/evids/$SEQ.evids.gff ;
 ##################################################
 #  349    3141   18846  $EVIDIR/chr22.genes.gff
 #  282    2249   14046  $ODIR/evids/chr22.genes.gff
@@ -678,8 +686,8 @@ if [ -f "$EVIDENCE" ] ;
 CheckFile R $PARAM $ISEQ $HOMOLOGY $EVIDENCE ;
 #
 GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $EVIDENCE_PAR $ISEQ" ;
-echo "$GENEID $GENEID_CMDLN 2> $ODIR/$SEQ.sgp" 1>&2 ;
-$GENEID $GENEID_CMDLN 2> $ODIR/logs/$SEQ.sgp > $ODIR/out/$SEQ.all ;
+echo "$GENEID $GENEID_CMDLN > $ODIR/out/$SEQ.all 2> $ODIR/$SEQ.sgp" 1>&2 ;
+$GENEID $GENEID_CMDLN > $ODIR/out/$SEQ.all 2> $ODIR/logs/$SEQ.sgp  ;
 egrep -v '^Annotation' $ODIR/out/$SEQ.all > $ODIR/out/$SEQ ;
 $BIN/geneid_raw2GFF.pl $SEQ $ODIR $ODIR/out/$SEQ ;
 #
