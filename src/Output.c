@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.7 2001-03-07 23:00:44 eblanco Exp $  */
+/*  $Id: Output.c,v 1.8 2001-03-08 15:42:11 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -88,7 +88,7 @@ void OutputHeader(char* locus, long l)
   if (XML)
     {
       printf("<?xml version=\"1.0\" ?>\n");  
-      printf("<!DOCTYPE prediction SYSTEM =\"geneid.dtd\">\n");
+      printf("<!DOCTYPE prediction SYSTEM \"geneid.dtd\">\n");
       s[strlen(s)-1] = '\0';  
       printf("<prediction locus=\"%s\" length=\"%ld\" source=\"%s\" date=\"%s\"",
 	     locus,l,VERSION,s);
