@@ -24,11 +24,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.2 2000-09-01 15:53:17 eblanco Exp $  */
+/*  $Id: PrintExons.c,v 1.3 2001-02-14 14:52:51 eblanco Exp $  */
 
 #include "geneid.h"
 
 extern int GFF;
+
 
 /* Print a predicted exon without gene prediction */
 void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
@@ -119,6 +120,10 @@ void PrintExons (exonGFF *e, long ne, int type, char Name[],
       break;
     case TERMINAL:strcpy(Type,"Terminal exon");
       break;
+    case SINGLE:strcpy(Type,"Single gene");
+      break;  
+    case ORF:strcpy(Type,"ORF");
+      break;  
     default: strcpy(Type,"Exon");
       strand = 'x'; 
       break;
