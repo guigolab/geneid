@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -157,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -719,14 +719,86 @@ do
         $SGPBIN/gff2cds  source="IKORF" | \
         gawk '{$1=$1" 1";print}' | sort +3n | \
         $SGPBIN/cds2gff | \
-        gawk 'BEGIN{OFS="\t"}{gsub ("HS","Hsap");$2="Annotation";print}' | \
+        gawk 'BEGIN{OFS="\t"}{gsub ("HS","Hsap");$2="Annotation";\
+        gsub("ELASTIN","ELN");print}' | \
         sort +3n \
         > $DATASETS/annotation/20010911.IanKorf/gff/Hsap_$seq 
 done 
+# MHC was not in this set therefore we include this annotation by hand \
+# from the first annotation.
+gawk '$3!="Gene" && $1!="#"{gsub("annotation","Annotation");print}'  \
+   $DATASETS/annotation/20010723.Pipeline/gff/Hsap_MHC \
+   > $DATASETS/annotation/20010911.IanKorf/gff/Hsap_MHC
 # Now we have to gather all the annotation files in one common file to \
-# run evaluation.
- MergeGFF $DATASETS/annotation/20010911.IanKorf/gff Hsap 0 ;
-#
+# run evaluation. This function exclude CD4 annotations but by the moment \
+# it is useful to us because we do not have blast results for CD4
+MergeGFF $DATASETS/annotation/20010911.IanKorf/gff Hsap 1 ;
+# Evaluation of the results
+# For geneid
+  PROG=geneid;
+  TSET=$DATASETS/annotation/20010911.IanKorf/gff/all.Hsap
+  IDIR=$ANALYSIS/$PROG/Hsap.masked/gff;
+  BASE=$ANALYSIS/$PROG/Hsap.masked;
+
+  $SGPBIN/evaluation -ta  $IDIR/all.Hsap $TSET \
+      > $BASE/eval_$PROG.Hsap.masked_IK;
+  $SGPBIN/evaluation -tsa $IDIR/all.Hsap $TSET \
+      > $BASE/eval_${PROG}_brief.Hsap.masked_IK;
+# For genscan
+  PROG=genscan 
+  IDIR=$ANALYSIS/$PROG/Hsap.masked/gff;
+  BASE=$ANALYSIS/$PROG/Hsap.masked;
+  $SGPBIN/evaluation -ta  $IDIR/all.Hsap $TSET \
+      > $BASE/eval_$PROG.Hsap.masked_IK;
+  $SGPBIN/evaluation -tsa $IDIR/all.Hsap $TSET \
+      > $BASE/eval_${PROG}_brief.Hsap.masked_IK;
+# For sgp orthologous
+  PROG=sgp;
+  IDIR=$ANALYSIS/$PROG/rguigo.orimasked/gff;
+  BASE=$ANALYSIS/$PROG/rguigo.orimasked/;
+  $SGPBIN/evaluation -ta  $IDIR/all.Hsap $TSET \
+      > $BASE/eval_$PROG.rguigo.orimasked_IK;
+  $SGPBIN/evaluation -tsa $IDIR/all.Hsap $TSET \
+      > $BASE/eval_${PROG}_brief.rguigo.orimasked_IK;
+# For sgp 3X+
+  PROG=sgp;
+  IDIR=$ANALYSIS/$PROG/rguigo.masked3X_pankaj_W5/gff;
+  BASE=$ANALYSIS/$PROG/rguigo.masked3X_pankaj_W5/;
+  $SGPBIN/evaluation -ta  $IDIR/all.Hsap $TSET \
+      > $BASE/eval_$PROG.rguigo.masked3X_pankaj_W5_IK;
+  $SGPBIN/evaluation -tsa $IDIR/all.Hsap $TSET \
+      > $BASE/eval_${PROG}_brief.rguigo.masked3X_pankaj_W5_IK;
+# For twinscan
+  PROG=twinscan
+  IDIR=$ANALYSIS/$PROG/Hsap.20010803/gff;
+  BASE=$ANALYSIS/$PROG/Hsap.20010803;
+  $SGPBIN/evaluation -ta  $IDIR/all.Hsap $TSET \
+      > $BASE/eval_$PROG.Hsap.20010803_IK;
+  $SGPBIN/evaluation -tsa $IDIR/all.Hsap $TSET \
+      > $BASE/eval_${PROG}_brief.Hsap.20010803_IK;
+# We also colapse the annotation to build evidences for geneid 
+for seq in BTK CD4 CFTR DFNA5 ELN HOXA KVLQT1 MHC SIL
+do 
+    echo "Working with " $seq " sequence" 
+ # There are three step to recover intermediate files if it is necessary
+ # 1st : Obtaining the begining and the end of each gene.
+ # 2nd : Check if there are overlapping (+500bp UTR) regions and colapse them.
+ # 3rd : Substract 0, 1 or 2 to the evidences block to make it multiple of 3.
+    gawk '($1 != "#"){ if (START[$9]==0 || $4 < START[$9]) {START[$9]=$4; \
+      STRAND[$9]=$7}; if ($5>STOP[$9]) STOP[$9]=$5} \
+      END{for (locus in START) \
+        print $1,"IanKorf","Annotation", START[locus], STOP[locus], ".",\
+        STRAND[locus], ".", locus}' \
+      $DATASETS/annotation/20010911.IanKorf/gff/Hsap_$seq  | sort +3n | \
+    gawk 'BEGIN{OFS="\t";STOPant=-500}{if ($4 < STOPant+500 ) {if ($5>STOPant) \
+       STOPant=$5; print $1,$2,$3, STARTant,  STOPant, ".", STRAND, ".",\
+       gene_ant ":" $9; getline} else if (NR!=1) {print  $1,$2,$3, STARTant,\
+       STOPant, ".", STRAND, ".", gene_ant;}; STARTant=$4;STOPant=$5; \
+       gene_ant=$9;STRAND=$7} \
+       END{print $1,$2,$3, STARTant, STOPant, ".", STRAND, ".", gene_ant}' | \
+     gawk '{OFS="\t"; $5-=($5-$4+1)%3; $8=0; $9=NR;print}' \
+    >  $DATASETS/annotation/20010911.IanKorf/evidences/Hsap_$seq
+done 
 @
 
 \subsctn{Other auxiliary files}
@@ -1290,8 +1362,10 @@ run_GENEID ()
   # 'IDfile' is a file listing the IDs of sequences to be processed
   #
   PROG="GENEID" ; prog="geneid" ;
-  GENEID="/projects/sgp/param/geneid/human3iso.param" ;
-  CMD="/projects/sgp/bin/geneid -vG" ;
+  #GENEID="/projects/sgp/param/geneid/human3iso.param" ;
+  GENEID="/projects/sgp/src/geneid_v1.1/param/human3iso.param" ;
+  #CMD="/projects/sgp/bin/geneid -vG" ;
+  CMD="/projects/sgp/src/geneid_v1.1/bin/geneid -vG" ;
       # GENEID tool command-line options:
       #  '-v' be verbose
       #  '-G' GFF output
@@ -1359,6 +1433,7 @@ run_GENEID Hsap.raw $DATASETS/fasta/raw \
 export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \
                           $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
+
 #
 @
  
@@ -1370,6 +1445,20 @@ run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \
 export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.masked $DATASETS/fasta/masked \
                     $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
+export GENEIDVERSION="------------------------- <geneid v1.1> -------------------------" ;
+run_GENEID Hsap.masked.gnid_fix $DATASETS/fasta/masked \
+                    $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
+
+# Evaluation with the new IK annotations
+  PROG=geneid;
+  TSET=$DATASETS/annotation/20010911.IanKorf/gff/all.Hsap
+  BASE=$ANALYSIS/$PROG/Hsap.masked.gnid_fix;
+  $SGPBIN/evaluation -ta  $BASE/gff/all.Hsap $TSET \
+      > $BASE/eval_$PROG.Hsap.masked.gnid_fix_IK;
+  $SGPBIN/evaluation -tsa $BASE/gff/all.Hsap $TSET \
+      > $BASE/eval_${PROG}_brief.Hsap.masked.gnid_fix_IK;
+
+
 #
 @ 
 
@@ -1678,6 +1767,101 @@ run_SGP ()
     done < $IDS ;
 } 
 #
+#
+run_mod_SGPevidences () 
+{
+  #
+  # run_mod_SGPevidences - Running SGP for a given sequence set
+  #
+  # USAGE: run_mod_SGPevidences testname sequence hspdata evidences chr
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'blastdata' is path to the HSPs for homology evidences
+  #
+  SECONDS=0;
+  PROG="SGP" ; prog="sgp" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/sgp" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  HSPs="$3" ;
+  EVIDENCES="$4" ;
+  locus="$5";
+  HSP_SR="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in hsp sr hsp-rs geneid_format tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  #
+  # Running SGP TOOL ############################### Excerpt from 
+  # export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
+  # export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
+  PROBIN="/projects/bin" ;
+  SGP2="/projects/sgp/src/geneid_v1.1-sgp" ;
+       # binaries, scripts and params in SGP2
+  GENEID="$SGP2/bin/geneid" ; # geneid v1.1-sgp
+  PARAM="$SGP2/param/human3iso.param.sgp" ;
+  EW=0 ; # add to exon weigth
+  S_CUTOFF=26 ;
+  SCF=0 ;    # substract to tblastx scores S_CUTOFF - SCF;
+  DSC=`expr $S_CUTOFF - $SCF` ;
+  SHSP=0 ;   # SHSP=6         # shrink hsp by $SHSP
+  WTBX=0.19 ;  # weigth of tblastx score
+  WTBXF=0.30 ; # weigth of tblastx score
+  WTBXI=0.20 ; # weigth of tblastx score
+  WTBXT=0.30 ; # weigth of tblastx score
+  echo "### Running blast2gff" ;
+  $PROBIN/blast2gff -g $HSPs/$locus > $BASE/sr/$locus \
+          2> $BASE/logs/geneid_sgp.$locus ;
+  gawk "\$6 > $S_CUTOFF {
+          \$6 = (\$6-$DSC)*$WTBX; \$4=\$4+$SHSP; \$5=\$5-$SHSP; print \$0;
+        }" < $BASE/sr/$locus > $BASE/hsp-rs/$locus ;
+  echo "### Running geneid" ;
+  { $GENEID -v -D -E $EW -P $PARAM -S $BASE/hsp-rs/$locus \
+          -R $EVIDENCES $ISEQ/$locus \
+          > $BASE/geneid_format/$locus ;
+    } 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
+  # Running SGP TOOL ############################### 
+  { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
+    echo "###"; } 1>&2;
+}
+# 
+# Script from gparra to retrieve GFF annotation from geneid big output
+geneid_raw2GFF ()
+{
+  # USAGE:  geneid_raw2GFF output_dir geneid_file
+  # filtering geneid output (obtained with "-D" option -> default output+cDNA)
+  PD=$1 ;
+  #/bin/rm -vf $PD/gff/* $PD/prot/* $PD/cds/* ;
+  gawk 'BEGIN{ OFS="\t"; odir=ARGV[1]; ARGV[1]="" }
+    { if ($2=="Sequence") seqname=$3;
+      if ($2=="Gene") gene=$3;
+      if (NF>8 && substr($1,1,1)!="#" && $1!="Annotation")
+        print seqname,"geneid_v1.1",$1,$2,$3,$4,$5,$6,seqname"_"gene \
+              > odir "/gff/" seqname"_"gene;
+      if (substr($1,1,1)==">") {
+        if (substr($1,length($1)-1,2)=="NN") {
+          print ">"seqname"_"gene > odir "/cds/" seqname"_"gene;
+          bol=1;
+        } else if (substr($1,length($1)-1,2)=="AA") {
+          print ">"seqname"_"gene > odir "/prot/" seqname"_"gene;
+          bol=2;
+        };
+      } else {
+        if (bol==1 && NF==1 && substr($1,1,1)!=">" ) 
+          print $0 > odir "/cds/" seqname"_"gene;
+      };
+      if (bol==2 && NF==1 && substr($1,1,1)!=">" )
+        print $0 > odir "/prot/" seqname"_"gene;
+    }' $PD $2 ;
+}
+
+#
 @ 
 
 <<BASH commands ANALYSIS>>=
@@ -1728,7 +1912,7 @@ run_SGP rguigo_new.masked3X_pankaj_W5 $DATASETS/fasta/masked \
 export HOME='/home/ug/jabril' ;
 #
 # SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
-export HOME='/home/ug/gparra' ; # to avoid modifying Roderic's scripts
+export HOME='/home/ug/gparra' ; # to avoid modifying Roderic's scripts 
 export SGP="/home/ug/gparra/no_backup/SGP/sgp_1.1" ;
 export GENEIDVERSION="------------------------- <geneid v1.1 - GENIS> -------------------------" ;
 run_SGP rguigo_new_genis.masked3X_pankaj_W5 $DATASETS/fasta/masked \
@@ -1736,6 +1920,52 @@ run_SGP rguigo_new_genis.masked3X_pankaj_W5 $DATASETS/fasta/masked \
                $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 export HOME='/home/ug/jabril' ;
+#
+# SGP on TBX results from Pankaj (W=5) using geneid 1.1 fixed version
+export HOME='/home/ug/gparra' ; # to avoid modifying Roderic's scripts 
+export SGP="/home/ug/gparra/no_backup/SGP/sgp_1.1" ;
+export GENEIDVERSION="------------------------- <geneid v1.1 > -------------------------" ;
+run_SGP rguigo.masked3X_pankaj_W5.gnid_fix $DATASETS/fasta/masked \
+               $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
+
+# Evaluation with the new IK annotations
+  PROG=sgp;
+  TSET=$DATASETS/annotation/20010911.IanKorf/gff/all.Hsap
+  BASE=$ANALYSIS/$PROG/rguigo.masked3X_pankaj_W5.gnid_fix;
+  $SGPBIN/evaluation -ta  $BASE/gff/all.Hsap $TSET \
+      > $BASE/eval_$PROG.rguigo.masked3X_pankaj_W5.gnid_fix_IK;
+  $SGPBIN/evaluation -tsa $BASE/gff/all.Hsap $TSET \
+      > $BASE/eval_${PROG}_brief.rguigo.masked3X_pankaj_W5.gnid_fix_IK;
+##
+# Using modified SGP to include evidences easily
+# First we checked again if the results obtained with this scripts are equal \
+# to the previous 
+
+# empty evidence must be equal to rguigo.orimasked
+for seq in BTK
+do
+     run_mod_SGPevidences rguigo.orimasked.evid_IK/ \
+        $DATASETS/fasta/orimasked \
+        $ANALYSIS/sgp/rguigo.orimasked/hsp/ \
+        /tmp/dummy.evid Hsap_$seq ;
+done
+
+# including evidences for each sequence
+for seq in BTK CFTR DFNA5 ELN HOXA KVLQT1 MHC SIL
+do
+     # run sgp with evidences
+     run_mod_SGPevidences rguigo.orimasked.evid_IK/ \
+        $DATASETS/fasta/orimasked \
+        $ANALYSIS/sgp/rguigo.orimasked/hsp/ \
+        $DATASETS/annotation/20010911.IanKorf/evidences/Hsap_$seq Hsap_$seq ;
+      # Extract the information of the geneid file
+      IDIR="$ANALYSIS/sgp/rguigo.orimasked.evid_IK/" ;
+      geneid_raw2GFF $IDIR $IDIR/geneid_format/Hsap_$seq ;
+      # join the gff files
+      cat $IDIR/gff/Hsap_$seq* > $IDIR/gff/Hsap_$seq
+done
+#
 #
 @ 
 
@@ -1794,6 +2024,8 @@ $ENSCRIPT $ANALYSIS/geneid/Hsap.orimasked/eval_geneid.Hsap.orimasked ;
 $ENSCRIPT -r $ANALYSIS/geneid/Hsap.orimasked/eval_geneid_brief.Hsap.orimasked ;
 $ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked ;
 $ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked_IK ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked_IK ;
 #
 # GENSCAN evaluation
 $ENSCRIPT $ANALYSIS/genscan/Hsap.raw/eval_genscan.Hsap.raw ;
@@ -1802,6 +2034,8 @@ $ENSCRIPT $ANALYSIS/genscan/Hsap.orimasked/eval_genscan.Hsap.orimasked ;
 $ENSCRIPT -r $ANALYSIS/genscan/Hsap.orimasked/eval_genscan_brief.Hsap.orimasked ;
 $ENSCRIPT $ANALYSIS/genscan/Hsap.masked/eval_genscan.Hsap.masked ;
 $ENSCRIPT -r $ANALYSIS/genscan/Hsap.masked/eval_genscan_brief.Hsap.masked ;
+$ENSCRIPT $ANALYSIS/genscan/Hsap.masked/eval_genscan.Hsap.masked_IK ;
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.masked/eval_genscan_brief.Hsap.masked_IK ;
 #
 # SLAM evaluation
 #
@@ -1810,6 +2044,8 @@ $ENSCRIPT $ANALYSIS/twinscan/Hsap.20010722/eval_twinscan.Hsap.20010722 ;
 $ENSCRIPT -r $ANALYSIS/twinscan/Hsap.20010722/eval_twinscan_brief.Hsap.20010722 ;
 $ENSCRIPT $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan.Hsap.20010803 ;
 $ENSCRIPT -r $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan_brief.Hsap.20010803 ;
+$ENSCRIPT $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan.Hsap.20010803_IK ;
+$ENSCRIPT -r $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan_brief.Hsap.20010803_IK ;
 #
 # SGP evaluation
 $ENSCRIPT $ANALYSIS/sgp/Hsap.raw/eval_sgp.Hsap.raw ;
@@ -1821,10 +2057,14 @@ $ENSCRIPT $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO ;
 $ENSCRIPT $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO.2 ;
 $ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked/eval_sgp.rguigo.orimasked ;
 $ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked/eval_sgp_brief.rguigo.orimasked ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked/eval_sgp.rguigo.orimasked_IK ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked/eval_sgp_brief.rguigo.orimasked_IK ;
 $ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp.rguigo.orimasked3X_pankaj_W5 ;
 $ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp_brief.rguigo.orimasked3X_pankaj_W5 ;
 $ENSCRIPT $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp.rguigo.masked3X_pankaj_W5 ;
 $ENSCRIPT -r $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp_brief.rguigo.masked3X_pankaj_W5 ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp.rguigo.masked3X_pankaj_W5_IK ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp_brief.rguigo.masked3X_pankaj_W5_IK ;
 #
 $ENSCRIPT $ANALYSIS/sgp/rguigo_new.masked3X_pankaj_W5/eval_sgp.rguigo_new.masked3X_pankaj_W5 ;
 $ENSCRIPT -r $ANALYSIS/sgp/rguigo_new.masked3X_pankaj_W5/eval_sgp_brief.rguigo_new.masked3X_pankaj_W5 ;
@@ -1933,6 +2173,30 @@ while read locus ;
     } ;
   done < $HSAP ; 
 #
+# FullOrthologous against sequences (+evidences)
+while read locus ;
+  do {
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo.orimasked.evid_IK" ;
+    ODIR="$IDIR/ps/_tmp/sgp" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.homol+evid" };
+            print $0;
+            }' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo.orimasked.evid_IK" ;
+    ODIR="$IDIR/ps/_tmp/tblastx" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="tblastx.homol"; $8="." };
+            print $0;
+            }' $IDIR/hsp-rs/$locus > $ODIR/$locus ;
+    } ;
+  done < $HSAP ; 
+#
+
 @
 
 \subsctn{Making plots with {\gps}}
@@ -2002,6 +2266,23 @@ GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
 # GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
 GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
 run_GFF2PS $IDIR "$GFFIN" ;
+
+#
+# Ploting results with evidences
+#
+IDIR="$ANALYSIS/sgp/rguigo.orimasked.evid_IK/ps" ;
+GFFIN="$DATASETS/annotation/20010911.IanKorf/gff" ;
+GFFIN="$GFFIN $DATASETS/annotation/20010911.IanKorf/evidences"
+GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
+GFFIN="$GFFIN $ANALYSIS/sgp/rguigo/ps/_tmp/sgp";
+GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
+GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
+GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
+# GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
+#GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
+run_GFF2PS $IDIR "$GFFIN" ;
+
 #
 @ 
 
@@ -3195,7 +3476,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
 @ 
 
 \newpage
@@ -3315,6 +3596,8 @@ export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
 #
 SPLICING="/projects/splicing/chr22" ;
 export SPLICING ;
+# Allowing for users and group file permisions
+umask 002;
 #
 # BASIC Shell Functions
 #
@@ -3545,7 +3828,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -3889,7 +4172,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
