@@ -1,0 +1,92 @@
+#! /usr/local/bin/gawk -f
+# rgs, imim, march 1997
+#      sb, july 1998
+# sr2csr.awk identifies contiguos similarity regions within frame
+# gawk -f sr2csr.awk 'offset' 'file.sr'
+# file.sr MUST be sorted by increasing start position
+
+BEGIN {
+  # defines
+  OFS_2=";"; # secondary output separator
+
+  # data structure
+  # fields (FS)
+  n_ffields = 9; # number of fixed fields;
+  program =  1;  
+  db      =  2;
+  start   =  3; # hsp start in query
+  end     =  4; # hsp end in query
+  strand  =  5; # query strand
+  frame   =  6; # query frame
+  score   =  7; # hsp score
+  prob    =  8; # probability score
+  iden    =  9; # sim score
+
+  locus   = 10; # first field for locus names
+
+ # mandatory arguments. 
+  offset=ARGV[1];  # distance between regions included in the same block
+  ARGV[1]="";
+}
+
+{ 
+  programs[$program]=1;
+  databases[$db]=1;
+  frames[$frame]=1;
+  strands[$strand]=1;
+
+  if ($start>1 && $start<=block[$program,$db,$strand,$frame,end]+offset+1) {
+    block[$program,$db,$strand,end]=max( block[$program,$db,$strand,end],$end);
+    block[$program,$db,$strand,$frame,score]= max(block[$program,$db,$strand,$frame,score], $score);
+    block[$program,$db,$strand,$frame,iden] = max(block[$program,$db,$strand,$frame,iden],  $iden);
+    block[$program,$db,$strand,$frame,prob] = min(block[$program,$db,$strand,$frame,prob],  $prob);
+    block[$program,$db,$strand,$frame,sr] = block[$program,$db,$strand,$frame,sr] " " $start " " $end " " $strand " " $frame " " $score " " $prob " " $iden;
+    for (i=locus;i<=NF;i++)
+      block[$program,$db,$strand,$frame,locus]=cat(block[$program,$db,$strand,$frame,locus], $i);
+  }
+  else {
+    if (block[$program,$db,$strand,$frame,end]> 0) {
+      print  $program, $db, OFS_2, block[$program,$db,$strand,$frame,start], block[$program,$db,$strand,$frame,end], $strand, $frame, block[$program,$db,$strand,$frame,score], block[$program,$db,$strand,$frame,prob], block[$program,$db,$strand,$frame,iden], OFS_2, block[$program,$db,$strand,$frame,sr], OFS_2, block[$program,$db,$strand,$frame,locus];
+    }
+
+    block[$program,$db,$strand,$frame,start] = $start; 
+    block[$program,$db,$strand,$frame,end] = $end; 
+    block[$program,$db,$strand,$frame,score]=$score;
+    block[$program,$db,$strand,$frame,iden]=$iden;
+    block[$program,$db,$strand,$frame,prob]=$prob;
+    block[$program,$db,$strand,$frame,sr] = $start " " $end " " $strand " " $frame " " $score " " $prob " " $iden;
+    block[$program,$db,$strand,$frame,locus]=$locus;
+    for (i=locus+1;i<=NF;i++)
+      block[$program,$db,$strand,$frame,locus]=cat(block[$program,$db,$strand,$frame,locus], $i);
+
+  }
+}
+END {
+  for (p in programs)
+    for (d in databases)
+      for (s in strands)
+	for (f in frames)
+	  if ( block[p,d,s,f,end] > 0)
+	    print  p, d, OFS_2, block[p,d,s,f,start], block[p,d,s,f,end], s, f, block[p,d,s,f,score], block[p,d,s,f,prob], block[p,d,s,f,iden], OFS_2, block[p,d,s,f,sr], OFS_2, block[p,d,s,f,locus];
+}
+
+function cat(s,r) { # concatenates r to s if r is not in s
+  return index(s,r) > 0 ? s : s " " r;
+}
+
+function max(a,b){
+  return a+0 > b+0 ? a : b; #to coerce it into an integer
+}
+
+function min(a,b){
+  return a+0 < b+0 ? a : b; #to coerce it into an integer
+}
+
+function merge(bs,br) { # union of sequences of strings bs and br
+  split (bs,x);
+  for (l in x)
+    br=cat(br,x[l]);
+  return br
+}
+
+

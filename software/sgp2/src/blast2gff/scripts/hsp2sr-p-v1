@@ -1,0 +1,202 @@
+#! /usr/local/bin/gawk -f
+# rgs, sb, july 1998
+# compacts an hsp  file. generates a set of non-overlapping equally and
+# with minimum probability (over cuttof) similarity regions, 
+# within frame and strand.
+# hsp file MUST be sorted by increasing start position.
+# The algorithm needs to be greatly improved.
+
+BEGIN{
+  #defines
+  # field separators
+  FS_2=";";
+  # data structure
+  # fields (FS)
+  n_ffields =  18; # number of fixed fields;
+  program =  1;  
+  db      =  2;
+  start   =  3; # hsp start in query
+  end     =  4; # hsp end in query
+  strand  =  5; # query strand
+  frame   =  6; # query frame
+  score   =  7; # hsp scores
+  bits    =  8; 
+  expect  =  9;
+  prob    = 10; 
+  sim     = 11;
+  iden    = 12; # sim score
+  locus   = 13; # locus name hit
+  start_s = 14; # hsp start in query
+  end_s   = 15; # hsp end in query
+  strand_s= 16; # query strand
+  frame_s = 17; # query frame
+  lseq_s  = 18;
+
+  defintion = 19; # first field of free defintion
+ 
+  # FS_2 separator
+
+  f_addids = 1;  # first field after FS_2 separtor holding additional id's
+}
+
+
+{
+  programs[$program]=1;
+  databases[$db]= 1;
+  strands[$strand]=1;
+  frames[$frame]=1;
+
+  # get additional id's for locus
+
+  split($0,addids_,FS_2);
+  n_addids=split(addids_[2],addids);
+  for (i=f_addids;i<=n_addids;i++) 
+    $locus = $locus " " addids[i];
+
+  
+  for (i=nr0[$program,$db,$strand,$frame];sr[$program,$db,$strand,$frame,i,end]<$start && i<=nr[$program,$db,$strand,$frame];i++);
+  nr0[$program,$db,$strand,$frame]=i-1;
+  nw=1;
+
+
+  if (i == nr[$program,$db,$strand,$frame]+1) {
+    nwsr[$program,$db,$strand,$frame,nw,start]=$start;
+    nwsr[$program,$db,$strand,$frame,nw,end]  =$end;
+    nwsr[$program,$db,$strand,$frame,nw,score]=$score;
+    nwsr[$program,$db,$strand,$frame,nw,iden]=$iden;
+    nwsr[$program,$db,$strand,$frame,nw,prob]=$prob;
+    nwsr[$program,$db,$strand,$frame,nw,locus]=$locus;
+  }
+ 
+  else {
+    nwsr[$program,$db,$strand,$frame,nw,start]=sr[$program,$db,$strand,$frame,i,start];
+    nwsr[$program,$db,$strand,$frame,nw,end]  =$start-1;
+    nwsr[$program,$db,$strand,$frame,nw,score]=sr[$program,$db,$strand,$frame,i,score];
+    nwsr[$program,$db,$strand,$frame,nw,iden]=sr[$program,$db,$strand,$frame,i,iden];
+    nwsr[$program,$db,$strand,$frame,nw,prob]=sr[$program,$db,$strand,$frame,i,prob];
+    nwsr[$program,$db,$strand,$frame,nw,locus]=sr[$program,$db,$strand,$frame,i,locus];
+
+    nw++;
+    nwsr[$program,$db,$strand,$frame,nw,start]=$start;
+
+    while ($end > sr[$program,$db,$strand,$frame,i,end] && i < nr[$program,$db,$strand,$frame]) {
+
+      nwsr[$program,$db,$strand,$frame,nw,end]  =sr[$program,$db,$strand,$frame,i,end];
+      nwsr[$program,$db,$strand,$frame,nw,score]=max(sr[$program,$db,$strand,$frame,i,score],$score);
+      nwsr[$program,$db,$strand,$frame,nw,iden]=max(sr[$program,$db,$strand,$frame,i,iden],$iden);
+      nwsr[$program,$db,$strand,$frame,nw,prob]=min(sr[$program,$db,$strand,$frame,i,prob],$prob);
+      nwsr[$program,$db,$strand,$frame,nw,locus]=merge(sr[$program,$db,$strand,$frame,i,locus],$locus);
+
+      i++;
+      nw++;
+      nwsr[$program,$db,$strand,$frame,nw,start]=sr[$program,$db,$strand,$frame,i,start];
+    }
+
+    if ($end > sr[$program,$db,$strand,$frame,i,end]) {
+      nwsr[$program,$db,$strand,$frame,nw,end]  =sr[$program,$db,$strand,$frame,i,end];
+      nwsr[$program,$db,$strand,$frame,nw,score]=max(sr[$program,$db,$strand,$frame,i,score],$score);
+      nwsr[$program,$db,$strand,$frame,nw,iden]=max(sr[$program,$db,$strand,$frame,i,iden],$iden);
+      nwsr[$program,$db,$strand,$frame,nw,prob]=min(sr[$program,$db,$strand,$frame,i,prob],$prob);
+      nwsr[$program,$db,$strand,$frame,nw,locus]=merge(sr[$program,$db,$strand,$frame,i,locus],$locus);
+
+      nw++;
+      nwsr[$program,$db,$strand,$frame,nw,start]=sr[$program,$db,$strand,$frame,i,end]+1;
+      nwsr[$program,$db,$strand,$frame,nw,end]  =$end;
+      nwsr[$program,$db,$strand,$frame,nw,score]=$score;
+      nwsr[$program,$db,$strand,$frame,nw,iden]=$iden;
+      nwsr[$program,$db,$strand,$frame,nw,prob]=$prob;
+      nwsr[$program,$db,$strand,$frame,nw,locus]=$locus;
+    }
+    else {
+      nwsr[$program,$db,$strand,$frame,nw,end]  =$end;
+      nwsr[$program,$db,$strand,$frame,nw,score]=max(sr[$program,$db,$strand,$frame,i,score],$score);
+      nwsr[$program,$db,$strand,$frame,nw,iden]=max(sr[$program,$db,$strand,$frame,i,iden],$iden);
+      nwsr[$program,$db,$strand,$frame,nw,prob]=min(sr[$program,$db,$strand,$frame,i,prob],$prob);
+      nwsr[$program,$db,$strand,$frame,nw,locus]=merge(sr[$program,$db,$strand,$frame,i,locus],$locus);
+
+      nw++;
+      nwsr[$program,$db,$strand,$frame,nw,start]=$end+1;
+      nwsr[$program,$db,$strand,$frame,nw,end]  =sr[$program,$db,$strand,$frame,i,end];
+      nwsr[$program,$db,$strand,$frame,nw,score]=sr[$program,$db,$strand,$frame,i,score];
+      nwsr[$program,$db,$strand,$frame,nw,iden]=sr[$program,$db,$strand,$frame,i,iden];
+      nwsr[$program,$db,$strand,$frame,nw,prob]=sr[$program,$db,$strand,$frame,i,prob];
+      nwsr[$program,$db,$strand,$frame,nw,locus]=sr[$program,$db,$strand,$frame,i,locus];
+    }
+
+    for (j=i+1;j<=nr[$program,$db,$strand,$frame];j++) {
+      nw++;
+      nwsr[$program,$db,$strand,$frame,nw,start]=sr[$program,$db,$strand,$frame,j,start];
+      nwsr[$program,$db,$strand,$frame,nw,end]  =sr[$program,$db,$strand,$frame,j,end];
+      nwsr[$program,$db,$strand,$frame,nw,score]=sr[$program,$db,$strand,$frame,j,score];
+      nwsr[$program,$db,$strand,$frame,nw,iden]=sr[$program,$db,$strand,$frame,j,iden];
+      nwsr[$program,$db,$strand,$frame,nw,prob]=sr[$program,$db,$strand,$frame,j,prob];
+      nwsr[$program,$db,$strand,$frame,nw,locus]=sr[$program,$db,$strand,$frame,j,locus];
+    }
+  }
+
+  nr[$program,$db,$strand,$frame]=nr0[$program,$db,$strand,$frame];
+  for (i=1;i<=nw;i++) {
+# stupid condition
+    if (nwsr[$program,$db,$strand,$frame,i,start] <= nwsr[$program,$db,$strand,$frame,i,end]) {
+      nr[$program,$db,$strand,$frame]++;
+      sr[$program,$db,$strand,$frame,nr[$program,$db,$strand,$frame],start]=nwsr[$program,$db,$strand,$frame,i,start];
+      sr[$program,$db,$strand,$frame,nr[$program,$db,$strand,$frame],end]  =nwsr[$program,$db,$strand,$frame,i,end];
+      sr[$program,$db,$strand,$frame,nr[$program,$db,$strand,$frame],score]=nwsr[$program,$db,$strand,$frame,i,score];
+      sr[$program,$db,$strand,$frame,nr[$program,$db,$strand,$frame],iden]=nwsr[$program,$db,$strand,$frame,i,iden];
+      sr[$program,$db,$strand,$frame,nr[$program,$db,$strand,$frame],prob]=nwsr[$program,$db,$strand,$frame,i,prob];
+      sr[$program,$db,$strand,$frame,nr[$program,$db,$strand,$frame],locus]=nwsr[$program,$db,$strand,$frame,i,locus];
+    }
+  }
+}
+END {
+  # final collapsing 
+  for (p in programs)
+    for (d in databases)
+      for (s in strands)
+	for (f in frames)
+	  for (i=1;i<=nr[p,d,s,f];i++) {
+	    if (srf[p,d,s,f,nrf[p,d,s,f],prob]==sr[p,d,s,f,i,prob] && srf[p,d,s,f,nrf[p,d,s,f],end]+1==sr[p,d,s,f,i,start]) {
+	      srf[p,d,s,f,nrf[p,d,s,f],end]=sr[p,d,s,f,i,end];
+	      srf[p,d,s,f,nrf[p,d,s,f],score]=max(srf[p,d,s,f,nrf[p,d,s,f],score],sr[p,d,s,f,i,score]);
+	      srf[p,d,s,f,nrf[p,d,s,f],iden]=max(srf[p,d,s,f,nrf[p,d,s,f],iden],sr[p,d,s,f,i,iden]);
+	      srf[p,d,s,f,nrf[p,d,s,f],locus]=merge(srf[p,d,s,f,nrf[p,d,s,f],locus],sr[p,d,s,f,i,locus]);
+	    }
+	    else {
+	      nrf[p,d,s,f]++;
+	      srf[p,d,s,f,nrf[p,d,s,f],start]=sr[p,d,s,f,i,start];
+	      srf[p,d,s,f,nrf[p,d,s,f],end]=  sr[p,d,s,f,i,end];
+	      srf[p,d,s,f,nrf[p,d,s,f],score]=sr[p,d,s,f,i,score];
+	      srf[p,d,s,f,nrf[p,d,s,f],iden]= sr[p,d,s,f,i,iden];
+	      srf[p,d,s,f,nrf[p,d,s,f],prob]= sr[p,d,s,f,i,prob];
+	      srf[p,d,s,f,nrf[p,d,s,f],locus]=sr[p,d,s,f,i,locus];
+	    }
+	  }
+  for (p in programs)
+    for (d in databases)
+      for (s in strands)
+	for (f in frames)
+	  for (i=1;i<=nrf[p,d,s,f];i++)
+	    print p,d,srf[p,d,s,f,i,start], srf[p,d,s,f,i,end], s,f, srf[p,d,s,f,i,score],srf[p,d,s,f,i,prob],srf[p,d,s,f,i,iden],srf[p,d,s,f,i,locus];
+}
+
+function max(a,b){
+  return a+0 > b+0 ? a : b; #to coerce it into an integer
+}
+function min(a,b){
+#  return a+0 < b+0 ? a : b; #to coerce it into an integer
+#  changed, apparently a bug in gawk in digitals 
+  if (a<b)
+   return a;
+  else
+   return b;
+}
+
+function cat(s,r) { # concatenates r to s if r is not in s
+  return index(s,r) > 0 ? s : s " " r;
+}
+function merge(bs,br) { # union of sequences of strings bs and br
+  split (bs,x);
+  for (l in x)
+    br=cat(br,x[l]);
+  return br
+}

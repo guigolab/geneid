@@ -1,0 +1,88 @@
+#! /usr/local/bin/gawk -f 
+# rgs, sb 1998 
+# ccsr2gff converts a ccsr file to a gff file
+
+
+BEGIN{
+  # default sequence name, override by geneid2ff seqname="seqname"
+  seqname="NONAME";
+  
+  # default source name
+  feature="sr"; #overriden by feature="feature"
+
+  # defulat group name prefix
+  gprefix="ccsr";
+
+  
+  # --- data structure -------------------------------------------------
+  #separators
+  FS="#";
+  FS_2=";";
+  FS_3=" ";
+
+  #fields (FS)
+  dbpr   = 1;
+  ccsr   = 2; # 
+  csrs   = 3; # 
+  aka    = 4;
+
+  #subfields (FS_2)
+  #dbpr
+  dbpr_program =  1;
+  dbpr_database = 2;
+
+  #ccsr
+  ccsr_start  = 1;
+  ccsr_end    = 2;
+  ccsr_strand = 3;
+
+  #csrs (any number of units)
+  csrs_fields = 2;  #number of fields per unit
+  csr  = 0;
+  srs  = 1;
+
+  #subsubfields (FS_3)
+  #csr
+  csr_start = 1;
+  csr_end   = 2;
+  csr_strand  = 3;
+  csr_frame  = 4;
+  
+  #srs (any number of units)
+  srs_fields=  7; #number of fields per unit
+  sr_start =  0; # hsp start in query
+  sr_end   =  1; # hsp end in query
+  sr_strand = 2;
+  sr_frame  = 3;
+  sr_score =  4; # hsp score
+  sr_prob  =  5; # sim score
+  sr_iden  =  6; # probability score
+
+  # --- end data structure ----------------------------------------------
+
+  # gff formatted output
+  gff_format="%-10s %-10s %-10s %9d %9d %8.3f  %1s  %1d  %s\n";
+}
+{
+  split($1,dbpr_,FS_3);
+  split($2,ccsr_,FS_3);
+
+  strand  = ccsr_[ccsr_strand];
+  program = dbpr_[dbpr_program];
+  database= dbpr_[dbpr_database];
+
+  source = program "." database;
+  group = gprefix "_" NR;
+
+  # get csrs
+  ncsr=split($3,csrs_,FS_2);
+  for (i=1;i<=ncsr;i+=csrs_fields) {
+    split(csrs_[i+csr],csr_, FS_3);
+    # get srs
+    nsrs=split(csrs_[i+srs],srs_,FS_3);
+    for (j=1;j<=nsrs;j+=srs_fields) 
+      printf gff_format, seqname, source, feature,  srs_[j+sr_start],srs_[j+sr_end],  srs_[j+sr_iden]/100, strand, srs_[j+sr_frame], group;
+  }
+}
+
+

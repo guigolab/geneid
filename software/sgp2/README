@@ -1,0 +1,172 @@
+******************** SGP2 v.1.0. README File ********************
+
+Summary:
+A. What's SGP2 ?
+B. Installing SGP2
+C. File Listing
+D. Compiling SGP2
+E. To run SGP2
+F. Authors and help
+
+***************************************
+
+A. What's SGP2 ?
+------------------
+
+SGP2 is a program to predict genes by comparing anonymous genomic
+sequences from two different species. It combines tblastx, a sequence
+similarity search program, with geneid, an "ab initio" gene prediction
+program. In "assymetric" mode, genes are predicted in one sequence
+from one species (the target sequence), using a set of sequences
+(maybe only one) from the other species (the reference set).
+Essentially, geneid is used to predict all potential exons along the
+target sequence. Scores of exons are computed as log-likelihood
+ratios, function of the splice sites defining the exon, the coding
+bias in composition of the exon sequence as measured by a Markov Model
+of order five, and of the optimal alignment at the amino acid level
+between the target exon sequence and the counterpart homologous
+sequence in the reference set. From the set of predicted exons, the
+gene structure is assembled (eventually multiple genes in both
+strands) maximizing the sum of the scores of the assembled exons.
+
+Installation, setup and usage of SGP2 is very easy, and there is a 
+range of options to configure output predictions and program behaviour.
+
+SGP2 source code, compiled binaries and documentation are available 
+under the GNU GENERAL PUBLIC LICENSE.
+
+Comments and questions are welcome.      
+
+***************************************
+
+B. Installing SGP2
+--------------------
+
+The SGP2 distribution contains several directories and files. Source 
+code and documentation files are included in the distribution.
+
+The distribution is archived and compressed in a single file using the
+command tar -zcvf. The compressed file name is SGP2.tar.gz (or something
+similar depending on compiled binaries included). The SGP2 files can 
+be extracted following these instructions:
+
+Type: 
+>tar -zxvf SGP2.tar.gz
+
+After executing these commands, the directory SGP2 will be created 
+in your working directory. 
+
+***************************************
+
+C. File Listing
+---------------
+
+The SGP2 distribution contains the following files and directories:
+
+** bin/
+compiled binaries
+
+** docs/
+documentation: a short handbook.
+
+** param/
+Parameter files.
+
+** samples/
+A test sequence and results. 
+
+** src/ 
+Source code of SGP2 and parseblast perl programs and source of
+genied and blast2gff C programs.
+
+** GNULicense
+This software is registered under GNU license.
+
+** Makefile
+This file is required to build SGP2 executable files.
+
+** README
+This file.
+
+The SGP2 distribution contains a set of independent programs that are
+used by SGP2.pl:
+
+* parseblast.pl - a complete parser far any of the blast versions and
+outputs.  
+* blast2gff     - this program creates non overlapping similarity
+regions (SR) from a set of hsp in gff format.
+* geneid-sgp    - a modified version of geneid.
+
+
+***************************************
+
+D. Compiling SGP2
+-------------------
+
+Move into the SGP2 directory.
+
+Type:
+>make 
+to compile SGP2.
+
+This will generate the SGP2 executable files within the bin/ subdirectory. 
+
+Type:
+>SGP2 -h 
+
+to test the executable file has been correctly created.
+
+***************************************
+
+E. To run SGP2
+-----------------
+
+There are three environmental variables that can be set by users to their preferences:
+
+   + You must specify the path where SGP2 can find the default files
+   with the shell variable "SGP2". 
+
+   + SGP2 needs to write few temporary files in a directory with
+   permissions for current user to read and write. Default temporary
+   directory path is set to "/tmp/" but you can assign a different
+   temporary directory path using the variable "SGP2TMP".
+
+Setting those vars in Bourne-shell and C-shell:
+
+     o Using a Bourne-Shell (e.g. bash):
+           export SGP2="path"
+           export SGP2TMP="path"
+
+     o Using a C-Shell:
+           setenv SGP2 "path"
+           setenv SGP2TMP "path"
+
+To run SGP2 type:
+>sgp2 [-vhq][-g option] <[-1|-2] fasta_sequence> <-t tblastx_aligment>
+
+For example,
+>bin/sgp2  -1 samples/Hsap_BTK.msk.fa  -t samples/Hsap_BTK.tbx 
+
+and to predict genes in the other species,
+
+>bin/sgp2  -2 samples/Mmus_BTK.msk.fa  -t samples/Hsap_BTK.tbx 
+
+
+TESTING SGP2:
+
+-- The output must contain the same predictions as files 
+in samples/Hsap_BTK.sgp2  and samples/Mmus_BTK.sgp2 --
+
+***************************************
+
+F. Authors and help
+-------------------
+
+SGP2 has been written by Genis Parra, Josep Francesc Abril and Roderic
+Guigó (IMIM-UPF-CRG).
+
+SGP2 home page is "http://www1.imim.es/software/SGP2/index.html" and 
+SGP2 distributions can be obtained through anonymous ftp to 
+"ftp.imim.es" in the directory "/pub/software/SGP2/".
+
+If you need help, send a message to "SGP2@imim.es".

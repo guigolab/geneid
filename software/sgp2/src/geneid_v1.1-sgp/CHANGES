@@ -1,0 +1,34 @@
+CHANGES
+
+#	$Id: CHANGES,v 1.1 2003-09-10 14:53:33 gparra Exp $	
+
+
+>20010905< gparra
+
+This version of geneid have some modifications to the original geneid_v1.1. 
+
+Source Modifications: 
+
+- CG Isocontext is not modified by the number of Ns 
+ modification in : ScoreExons.c
+
+- "Annotation" evidences are not printed in the default output
+ modification in : CookingGenes.c
+
+Include file Modifications:
+
+- NULL_OLIGO_SCORE changed from -4 to -1
+
+- NUMEEVIDENCES changed from 10000 to 15000
+
+- gene model includes "Anntation" genes connections.
+
+SGP modifications:
+
+- Exon scoring procedure : ScoreExons.c
+
+- "include file" exon weihgt
+  iso1    -11.5 -12.5 -12.5 -12.5
+  iso2      -11 -12 -12 -12
+  iso3   -10.5 -11.5 -11.5 -11.5 
+
