@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20020411.MGSCv3.nw,v 1.9 2002-06-19 16:24:48 jabril Exp $ 
+% # $Id: 20020411.MGSCv3.nw,v 1.10 2002-06-20 14:04:47 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.9 2002-06-19 16:24:48 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.10 2002-06-20 14:04:47 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -373,13 +373,39 @@ gawk '$1!~/^\#/ {print $1, $2 }' $MUSHU/seqid_list | \
        cp -v $OD/$SEQ.gtf $MD/gtf/ ;
        } ;
     done ;
-gawk '$1!~/^\#/ {print $1, $2 }' $MUSHU/seqid_list | \
+#
+$MTMP="$MUSHU/tmp";
+( gawk '$1!~/^\#/ {print $1, $2 }' $MUSHU/seqid_list | \
+   while read CHR SEQ ;
+     do {
+       MD="$MUSHU/chr$CHR/twinscan/20020613" ;
+       $BIN/gtf2gff.pl $MD/gtf/$SEQ.gtf > $MD/gff/$SEQ.gff ;
+       } ;
+     done
+  ) 2>&1 | tee $MTMP/.err/twinscan.rpt ;
+#
+ gawk '$1!~/^\#/ {print $1, $2 }' $MUSHU/seqid_list | \
+   while read CHR SEQ ;
+     do {
+       MD="$MUSHU/chr$CHR/twinscan/20020613" ;
+       get_geneid_genes $MD/gff/$SEQ.gff | \
+           sort +1n +2n -3 - > $MD/$SEQ.gene_list ;     
+       } ;
+     done ;
+#
+# Preparing evaluation files for Twinscan
+# 
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
-       MD="$MUSHU/chr$CHR/twinscan/20020613" ;
-       $BIN/gtf2gff.pl $MD/gtf/$SEQ.gtf > $MD/gff/$SEQ.gff;
-       } ;
+      WDIR="$MUSHU/chr$CHR/twinscan/20020613" ;
+      ### TwinScan
+      echo "# PREPARING TWINSCAN on $CHR" 1>&2 ;
+      ln -vs $WDIR/gff/$SEQ.gff $WDIR/eval/$SEQ.eval.gff ;
+      $BIN/gffsplitstrand.pl $WDIR/eval/$SEQ.eval.gff ;
+      } ;
     done ;
+#
 @ 
 
 <<runallmouseGENEID.sh>>=
@@ -505,7 +531,7 @@ gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
 
 
 <<Version Control Id Tag>>=
-# $Id: 20020411.MGSCv3.nw,v 1.9 2002-06-19 16:24:48 jabril Exp $
+# $Id: 20020411.MGSCv3.nw,v 1.10 2002-06-20 14:04:47 jabril Exp $
 @ 
 <<BASH shebang>>=
 #!/usr/bin/bash
@@ -994,6 +1020,10 @@ DDIR="$WDIR/CHR22_tests.docs" ;
 localnw="20020411.MGSCv3" ;
 export WDIR DDIR localnw ;
 #
+notangle -R'BASH Project Variables' $WDIR/$localnw.nw | \
+                       cpif $MUSHU/bin/.bash_VARS ;
+#
+#
 notangle -R'runallmouseGENEID.sh' $WDIR/$localnw.nw | \
                        cpif $MUSHU/bin/runallmouseGENEID.sh ;
 is_exec $MUSHU/bin/runallmouseGENEID.sh ;
@@ -1058,6 +1088,20 @@ rsh monstre1.imim.es "( $MUSBIN/$MUSPRG $MUSBIN/seqid_d 2> $MUSBIN/seqid_d$MUSLO
 egrep '^# (PROCESSING TBLASTX|RUNNING SGP)' bin/seqid_*.log
 @ 
 
+<<HIDE: >>=
+mkdir tmp/Mmus-sgpmskrefseq_20020619 \
+      tmp/Mmus-sgpmskrefseq_20020619/cds \
+      tmp/Mmus-sgpmskrefseq_20020619/prot ;
+gawk '$1!~/^\#/ {print $1, $2 }' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      MD="$MUSHU/chr$CHR/sgp/20020411.MGSCv3msk-20011222.UCSCgp+RefSeqEvids";
+      OD="$MUSHU/tmp/Mmus-sgpmskrefseq_20020619";
+      cp -vapudfr $MD/cds/$SEQ.sg $OD/cds/$SEQ;
+      cp -vapudfr $MD/prot/$SEQ.sg $OD/prot/$SEQ;
+    } ; done
+@  
+
 \subsctn{Evaluation of predicted genes}
 
 <<EVALUATIONS: Golden Path files>>=
@@ -1109,6 +1153,7 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
       $BIN/gffsplitstrand.pl $WDIR/$SEQ.eval.gff ;
       } ;
     done ;
+#
 @
 
 <<EVALUATIONS: INV-TBX files>>=
@@ -1168,6 +1213,7 @@ EOT
       } ;
     done ;
 #
+###GENSCAN
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
@@ -1196,6 +1242,32 @@ EOT
       } ;
     done ;
 #
+###TWINSCAN
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      ODIR="$MUSHU/chr$CHR" ;
+      A_REFSEQ="$ODIR/annotation/refseq/$SEQ.eval" ;
+      ###
+      echo "# EVALUATING TWINSCAN on $CHR" 1>&2 ;
+      GDIR="$ODIR/twinscan/20020613/eval" ;
+      #
+      cat > $GDIR/$SEQ.summary <<EOT ;
+#
+# Evaluation summary results for TWINSCAN on SEQ[$SEQ]
+# --> Mmus MGSCv3
+#
+EOT
+      $BIN/runeval.pl $A_REFSEQ.fwd.gff $GDIR/$SEQ.eval.fwd.gff \
+            "${SEQ}::MmusTWINSCAN::REFSEQ::FWD::TWINSCAN::Twinscan-1.0::." \
+            >> $GDIR/$SEQ.summary 2> $GDIR/$SEQ.sr_refseq.fwd ;
+      $BIN/runeval.pl $A_REFSEQ.rev.gff $GDIR/$SEQ.eval.rev.gff \
+            "${SEQ}::MmusTWINSCAN::REFSEQ::REV::TWINSCAN::Twinscan-1.0::." \
+            >> $GDIR/$SEQ.summary 2> $GDIR/$SEQ.sr_refseq.rev ;
+      } ;
+    done ;
+#
+###FGENES
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
@@ -1224,6 +1296,7 @@ EOT
       } ;
     done ;
 #
+###GENEID
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
@@ -1252,6 +1325,36 @@ EOT
       } ;
     done ;
 #
+###GENEID MASKED
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      ODIR="$MUSHU/chr$CHR" ;
+      A_REFSEQ="$ODIR/annotation/refseq/$SEQ.eval" ;
+      ###
+      echo "# EVALUATING GENEID on $CHR" 1>&2 ;
+      GDIR="$ODIR/geneid/${FTPTBXID}msk" ;
+      #
+      gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+               $GDIR/gff/$SEQ > $GDIR/eval/$SEQ.eval.gff ;
+      $BIN/gffsplitstrand.pl $GDIR/eval/$SEQ.eval.gff ;
+      #
+      cat > $GDIR/eval/$SEQ.summary <<EOT ;
+#
+# Evaluation summary results for GENEID on MASKED SEQ[$SEQ]
+# --> Mmus MGSCv3
+#
+EOT
+      $BIN/runeval.pl $A_REFSEQ.fwd.gff $GDIR/eval/$SEQ.eval.fwd.gff \
+                "${SEQ}::maskedMmusGENEID::REFSEQ::FWD::GENEIDmsk::1.1::." \
+                >> $GDIR/eval/$SEQ.summary 2> $GDIR/eval/$SEQ.sr_refseq.fwd ;
+      $BIN/runeval.pl $A_REFSEQ.rev.gff $GDIR/eval/$SEQ.eval.rev.gff \
+                "${SEQ}::maskedMmusGENEID::REFSEQ::REV::GENEIDmsk::1.1::." \
+                >> $GDIR/eval/$SEQ.summary 2> $GDIR/eval/$SEQ.sr_refseq.rev ;
+      } ;
+    done ;
+#
+###SGP
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
@@ -1280,6 +1383,7 @@ EOT
       } ;
     done ;
 #
+###SGP MASKED
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
@@ -1308,7 +1412,7 @@ EOT
       } ;
     done ;
 #
-# SGP + RefSeq
+###SGP + RefSeq
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
@@ -1326,7 +1430,7 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
    #         > $ODIR/$SEQ.sgp+refseq.eval.gff ;
    #   $BIN/gffsplitstrand.pl $ODIR/$SEQ.sgp+refseq.eval.gff ;
       #
-      cat > $ODIR/$SEQ.sgp+refseq.summary <<EOT ;
+      cat > $ODIR/$SEQ.summary <<EOT ;
 #
 # Evaluation summary results for SGP on SEQ[$SEQ]
 # --> Mmus MGSCv3 x Hsap GP20011222 homology (invTBX) + Mmus RefSeq evidences
@@ -1334,52 +1438,88 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
 EOT
       $BIN/runeval.pl $A_REFSEQ.fwd.gff $ODIR/$SEQ.sgp+refseq.eval.fwd.gff \
           "${SEQ}::MmusSGP+invTBX[HsapSQ-MmusDB]+RefSeq::REFSEQ::FWD::SGPrefseq::1.1::." \
-        >> $ODIR/$SEQ.sgp+refseq.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.fwd ;
+        >> $ODIR/$SEQ.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.fwd ;
       $BIN/runeval.pl $A_REFSEQ.rev.gff $ODIR/$SEQ.sgp+refseq.eval.rev.gff \
           "${SEQ}::MmusSGP+invTBX[HsapSQ-MmusDB]+RefSeq::REFSEQ::REV::SGPrefseq::1.1::." \
-        >> $ODIR/$SEQ.sgp+refseq.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.rev ;
+        >> $ODIR/$SEQ.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.rev ;
+      } ;
+    done ;
+#
+###SGP MASKED + RefSeq
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      MMmskHS_REFSEQ="${MMUSSTR}msk-${HSAPSTR}+${REFSEQID}" ;
+      ADIR="$MUSHU/chr$CHR" ;
+      A_REFSEQ="$ADIR/annotation/refseq/$SEQ.eval" ;
+      ###
+      echo "# EVALUATING SGP+RefSeq on MASKED $CHR" 1>&2 ;
+      SDIR="$ADIR/sgp/$MMmskHS_REFSEQ" ;
+      EVIDS="$SDIR/evids" ;
+      ODIR="$SDIR/eval" ;
+      #
+      cat > $ODIR/$SEQ.summary <<EOT ;
+#
+# Evaluation summary results for SGP on MASKED SEQ[$SEQ]
+# --> MASKED Mmus MGSCv3 x Hsap GP20011222 homology (invTBX) + Mmus RefSeq evidences
+#
+EOT
+      $BIN/runeval.pl $A_REFSEQ.fwd.gff $ODIR/$SEQ.sgp+refseq.eval.fwd.gff \
+          "${SEQ}::MmusSGPmsk+invTBX[HsapSQ-MmusDB]+RefSeq::REFSEQ::FWD::SGPmskrefseq::1.1::." \
+        >> $ODIR/$SEQ.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.fwd ;
+      $BIN/runeval.pl $A_REFSEQ.rev.gff $ODIR/$SEQ.sgp+refseq.eval.rev.gff \
+          "${SEQ}::MmusSGPmsk+invTBX[HsapSQ-MmusDB]+RefSeq::REFSEQ::REV::SGPmskrefseq::1.1::." \
+        >> $ODIR/$SEQ.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.rev ;
       } ;
     done ;
 #
 # WHOLE SUMMARY (MOUSE)
+MMEVAL="$MUSHU/evaluations/ALL" ;
+MkDirs $MMEVAL ;
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
     do {
+      MMmskHS_REFSEQ="${MMUSSTR}msk-${HSAPSTR}+${REFSEQID}" ;
       ODIR="$MUSHU/chr$CHR" ;
       echo "### WORKING ON $SEQ : MOUSE" ;
       # fDIR="$ODIR/annotation/fgenes" ;
-      nDIR="$ODIR/annotation/genscan" ;
-      GDIR="$ODIR/geneid/$FTPTBXID" ;
-      TDIR="$ODIR/tblastx/$FTPTBXID/inv-sr" ;
+      GSDIR="$ODIR/annotation/genscan" ;
+      TSDIR="$ODIR/twinscan/20020613" ;
+      # GNDIR="$ODIR/geneid/$FTPTBXID" ;
+      GNMDIR="$ODIR/geneid/${FTPTBXID}msk" ;
+      TXDIR="$ODIR/tblastx/$FTPTBXID/inv-sr" ;
       SDIR="$ODIR/sgp/$FTPTBXID" ;
-      SSDIR="$ODIR/sgp/$FTPTBXID.msk" ;
+      SMDIR="$ODIR/sgp/$FTPTBXID.msk" ;
       SRDIR="$ODIR/sgp/$MMHS_REFSEQ" ;
+      SMRDIR="$ODIR/sgp/$MMmskHS_REFSEQ" ;
       #
-      # cat $fDIR/eval/$SEQ.summary \
-      #     $nDIR/eval/$SEQ.summary \
-      cat $nDIR/eval/$SEQ.summary  \
-          $GDIR/eval/$SEQ.summary  \
-          $TDIR/$SEQ.summary       \
-          $SDIR/eval/$SEQ.summary  \
-          $SSDIR/eval/$SEQ.summary \
-          $SRDIR/eval/$SEQ.sgp+refseq.summary ; 
+      # cat $fDIR/eval/$SEQ.summary  \
+      #     $GNDIR/eval/$SEQ.summary \
+      cat $GSDIR/eval/$SEQ.summary  \
+          $TSDIR/eval/$SEQ.summary  \
+          $GNMDIR/eval/$SEQ.summary \
+          $TXDIR/$SEQ.summary       \
+          $SDIR/eval/$SEQ.summary   \
+          $SMDIR/eval/$SEQ.summary  \
+          $SRDIR/eval/$SEQ.summary  \
+          $SMRDIR/eval/$SEQ.summary ; 
     };
-  done > $MUSHU/evaluations/evaluation.sgp+refseq.summary ;
+  done > $MMEVAL/Mmus_eval.summary ;
 #
-enscript -1rGjf Courier5 -M A4 $MUSHU/evaluations/evaluation.sgp+refseq.summary ;
+enscript -1rGjf Courier5 -M A4 $MMEVAL/Mmus_eval.summary ;
 # $BIN/process_eval.pl -T "REFSEQ ENSEMBL" \
 #                      -P "FGENES GENSCAN GENEID invMmusSRs SGP" \
 $BIN/process_eval.pl -T "REFSEQ" \
-                     -P "GENSCAN GENEID invMmusSRs SGP SGPmsk SGPrefseq" \
-                     -as $MUSHU/evaluations/evaluation.sgp+refseq.summary \
-                       > $MUSHU/evaluations/evaluation.sgp+refseq_prog.summary ;
+  -P "GENSCAN TWINSCAN GENEIDmsk invMmusSRs SGP SGPmsk SGPrefseq SGPmskrefseq" \
+  -as $MMEVAL/Mmus_eval.summary \
+    > $MMEVAL/Mmus_eval_prog.summary ;
 $BIN/process_eval.pl -T "REFSEQ" \
-                     -P "GENSCAN GENEID invMmusSRs SGP SGPmsk SGPrefseq" \
-                     -tas $MUSHU/evaluations/evaluation.sgp+refseq.summary \
-                        > $MUSHU/evaluations/evaluation.sgp+refseq_test.summary ;
+  -P "GENSCAN TWINSCAN GENEIDmsk invMmusSRs SGP SGPmsk SGPrefseq SGPmskrefseq" \
+  -tas $MMEVAL/Mmus_eval.summary \
+     > $MMEVAL/Mmus_eval_test.summary ;
 #
-enscript -1rGjf Courier5 -M A4 $MUSHU/evaluations/evaluation.sgp+refseq.summary ;
-enscript -1rGjf Courier5 -M A4 $MUSHU/evaluations/evaluation.sgp+refseq_test.summary ;
+enscript -1rGjf Courier5 -M A4 $MMEVAL/Mmus_eval_prog.summary ;
+enscript -1rGjf Courier5 -M A4 $MMEVAL/Mmus_eval_test.summary ;
 @ 
 
 <<>>=
@@ -1387,36 +1527,51 @@ enscript -1rGjf Courier5 -M A4 $MUSHU/evaluations/evaluation.sgp+refseq_test.sum
 #
 ### GENE NUMBER
 MUSHU="/projects/M.musculus/20020411.MGSCv3"
+MMEVAL="$MUSHU/evaluations/ALL" ;
+MMGENES="$MMEVAL/genes_by_seq" ;
+mkDirs $MMGENES ;
 # refseq
-gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/refseq/$SEQ.eval.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq ;
-( echo "### NUMBER OF REAL GENES ###"; echo "###-> REFSEQ from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq.report ;
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/refseq/$SEQ.eval.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MMGENES/Mmus_refseq_MGSCv3 ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> REFSEQ from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MMGENES/Mmus_refseq_MGSCv3; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MMGENES/Mmus_refseq_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MMGENES/Mmus_refseq_MGSCv3.report ;
 # ensembl
-gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/ensembl/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq ;
-( echo "### NUMBER OF REAL GENES ###"; echo "###-> ENSEMBL from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq.report ;
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/ensembl/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MMGENES/Mmus_ensembl_MGSCv3 ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> ENSEMBL from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MMGENES/Mmus_ensembl_MGSCv3; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MMGENES/Mmus_ensembl_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MMGENES/Mmus_ensembl_MGSCv3.report ;
 # genscan
-gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/genscan/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq ;
-( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENSCAN from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq.report ;
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/genscan/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MMGENES/Mmus_genscan_MGSCv3 ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENSCAN from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MMGENES/Mmus_genscan_MGSCv3; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MMGENES/Mmus_genscan_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MMGENES/Mmus_genscan_MGSCv3.report ;
+# twinscan
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { egrep -v '^#|^[ \t]*$' $MUSHU/chr$CHR/twinscan/20020613/$SEQ.gene_list | wc | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MMGENES/Mmus_twinscan_MGSCv3 ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> TWINSCAN from WUSTL"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MMGENES/Mmus_twinscan_MGSCv3; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MMGENES/Mmus_twinscan_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MMGENES/Mmus_twinscan_MGSCv3.report ;
 # geneid
-gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/geneid/20020425/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq ;
-( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENEID on Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq.report ;
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/geneid/20020425/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MMGENES/Mmus_geneid_MGSCv3 ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENEID on Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_geneid_MGSCv3; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_geneid_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MMGENES/Mmus_geneid_MGSCv3.report ;
+# geneid-masked
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/geneid/20020425msk/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MMGENES/Mmus_geneidmsk_MGSCv3 ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENEID-MASKED Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_geneidmsk_MGSCv3; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_geneidmsk_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MMGENES/Mmus_geneidmsk_MGSCv3.report ;
 # sgp
-gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/sgp/20020425/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq ;
-( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq.report ;
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/sgp/20020425/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MMGENES/Mmus_sgp_MGSCv3 ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_sgp_MGSCv3; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_sgp_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MMGENES/Mmus_sgp_MGSCv3.report ;
 # sgp-masked
-gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/sgp/20020425.msk/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MUSHU/evaluations/Mmus_sgp-msk_MGSCv3.genes_by_seq ;
-( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on MASKED Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp-msk_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp-msk_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_sgp-msk_MGSCv3.genes_by_seq.report ;
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/sgp/20020425.msk/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MMGENES/Mmus_sgp-msk_MGSCv3 ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP-MASKED Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_sgp-msk_MGSCv3; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MMGENES/Mmus_sgp-msk_MGSCv3 ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MMGENES/Mmus_sgp-msk_MGSCv3.report ;
 # sgp+refseq
-gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { MD="$MUSHU/chr$CHR/sgp/20020411.MGSCv3-20011222.UCSCgp+RefSeqEvids"; evis=`grep 'Annotation' $MD/evids/$SEQ.evids.gff | wc | gawk '{print $1}' `; head -4 $MD/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; evid=ARGV[2]; ARGV[1]=ARGV[2]=""; }{ printf "%12s %8d %12.3f\n", chr,$5 - evid,$9; }' "$SEQ" $evis - ; }; done > $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq ;
-( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; echo "###       + RefSeq Mmus annotations"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq.report ;
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do {
+ MD="$MUSHU/chr$CHR/sgp/20020411.MGSCv3-20011222.UCSCgp+RefSeqEvids"; evis=`grep 'Annotation' $MD/evids/$SEQ.evids.gff | wc | gawk '{print $1}' `; head -4 $MD/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; evid=ARGV[2]; ARGV[1]=ARGV[2]=""; }{ printf "%12s %8d %8d %12.3f\n", chr,$5 - evid,$5,$9; }' "$SEQ" $evis - ; }; done > $MMGENES/Mmus_sgp_MGSCv3+RefSeq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP+RefSeq on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; echo "###       + RefSeq Mmus annotations"; gawk 'BEGIN{ printf "\n%12s %8s %8s %12s\n\n", "CHR_SEQNAME","#Gen-RS","#Gen+RS","Score" }'; gawk '$1!~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }END{ printf "%12s %8d %8d %12.3f  CHRs TOTAL\n\n", "",g,G,s; }' $MMGENES/Mmus_sgp_MGSCv3+RefSeq; gawk '$1~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }END{ printf "%12s %8d %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,G,s; }' $MMGENES/Mmus_sgp_MGSCv3+RefSeq ) | gawk '$0~/TOTAL$/ { g+=$1; G+=$2; s+=$3 } { print $0 } END{ printf "%12s %8d %8d %12.3f  GRAND TOTAL\n", "",g,G,s; }' > $MMGENES/Mmus_sgp_MGSCv3+RefSeq.report ;
+# sgp-masked+refseq
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { MD="$MUSHU/chr$CHR/sgp/20020411.MGSCv3msk-20011222.UCSCgp+RefSeqEvids"; evis=`grep 'Annotation' $MD/evids/$SEQ.evids.gff | wc | gawk '{print $1}' `; head -4 $MD/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; evid=ARGV[2]; ARGV[1]=ARGV[2]=""; }{ printf "%12s %8d %8d %12.3f\n", chr,$5 - evid,$5,$9; }' "$SEQ" $evis - ; }; done > $MMGENES/Mmus_sgp-msk_MGSCv3+RefSeq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP-MASKED+RefSeq on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; echo "###       + RefSeq Mmus annotations"; gawk 'BEGIN{ printf "\n%12s %8s %8s %12s\n\n", "CHR_SEQNAME","#Gen-RS","#Gen+RS","Score" }'; gawk '$1!~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }END{ printf "%12s %8d %8d %12.3f  CHRs TOTAL\n\n", "",g,G,s; }' $MMGENES/Mmus_sgp-msk_MGSCv3+RefSeq; gawk '$1~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }END{ printf "%12s %8d %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,G,s; }' $MMGENES/Mmus_sgp-msk_MGSCv3+RefSeq ) | gawk '$0~/TOTAL$/ { g+=$1; G+=$2; s+=$3 } { print $0 } END{ printf "%12s %8d %8d %12.3f  GRAND TOTAL\n", "",g,G,s; }' > $MMGENES/Mmus_sgp-msk_MGSCv3+RefSeq.report ;
 # summarizing
-( cat $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq.report; echo ""; echo "";  cat $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq.report ; echo ""; echo "";  cat $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq.report ; echo ""; echo "";  cat $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq.report; echo "";  echo "";  cat $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq.report; echo "";  echo "";  cat $MUSHU/evaluations/Mmus_sgp-msk_MGSCv3.genes_by_seq.report; echo "";  echo "";  cat $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq.report ) > $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report ;
+( cat $MMGENES/Mmus_refseq_MGSCv3.report; echo ""; echo "";  cat $MMGENES/Mmus_ensembl_MGSCv3.report ; echo ""; echo "";  cat $MMGENES/Mmus_genscan_MGSCv3.report ; echo ""; echo "";  cat $MMGENES/Mmus_twinscan_MGSCv3.report ; echo ""; echo "";  cat $MMGENES/Mmus_geneid_MGSCv3.report; echo "";  echo ""; cat $MMGENES/Mmus_geneidmsk_MGSCv3.report; echo "";  echo "";   cat $MMGENES/Mmus_sgp_MGSCv3.report; echo "";  echo ""; cat $MMGENES/Mmus_sgp-msk_MGSCv3.report; echo "";  echo "";  cat $MMGENES/Mmus_sgp_MGSCv3+RefSeq.report; echo "";  echo "";  cat $MMGENES/Mmus_sgp-msk_MGSCv3+RefSeq.report ) > $MMEVAL/Mmus_MGSCv3.genes_by_seq.report ;
 #
-enscript --columns=3 -Gjf Courier5 -M A4 $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report ;
+enscript --columns=3 -Gjf Courier5 -M A4 $MMEVAL/Mmus_MGSCv3.genes_by_seq.report ;
 #
-perl -ne 'BEGIN{ $prog="???"; print STDOUT "PROG CLASS SEQ GENES\n"; } next if /^\s+$/o; /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next); next if /^\#/o; next unless /^\s*chr/; chomp; $_ =~ s/^\s+//o; @f=split /\s+/og; $type="ASSEMBLED"; $f[0] =~ s/_random$//o && ($type="RANDOM"); printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];' $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report > $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl # | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }'
+##############################################3
 #
-$BIN/splittbls.pl "ASSEMBLED" $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl > $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq_ASM.tbl 
-# $BIN/splittbls.pl "RANDOM" $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl > $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq_RND.tbl 
+perl -ne 'BEGIN{ $prog="???"; print STDOUT "PROG CLASS SEQ GENES\n"; } next if /^\s+$/o; /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next); next if /^\#/o; next unless /^\s*chr/; chomp; $_ =~ s/^\s+//o; @f=split /\s+/og; $type="ASSEMBLED"; $f[0] =~ s/_random$//o && ($type="RANDOM"); printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];' $MMEVAL/Mmus_ALL_MGSCv3.genes_by_seq.report > $MMEVAL/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl # | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }'
+#
+$BIN/splittbls.pl "ASSEMBLED" $MMEVAL/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl > $MMEVAL/r-plots/Mmus_ALL_MGSCv3.genes_by_seq_ASM.tbl 
+# $BIN/splittbls.pl "RANDOM" $MMEVAL/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl > $MMEVAL/r-plots/Mmus_ALL_MGSCv3.genes_by_seq_RND.tbl 
 #
 # drawing histograms with R
 def.par <- par()# save default, for resetting...
