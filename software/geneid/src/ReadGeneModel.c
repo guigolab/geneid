@@ -24,11 +24,9 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadGeneModel.c,v 1.5 2003-11-13 15:07:09 eblanco Exp $  */
+/*  $Id: ReadGeneModel.c,v 1.6 2004-01-27 16:23:18 eblanco Exp $  */
 
 #include "geneid.h"
-
-extern int SGE;
 
 /* Replicating the gene model rules for every isochore */
 void shareGeneModel(gparam** isochores, int nIsochores)
@@ -178,52 +176,100 @@ long ReadGeneModel (FILE* file, dict* d,
 		  nlines++;
 		} /* End of if-comment */
     } /* Next rule to read */
-
-  /* Adding internal rules to force 1 gene prediction */
-  if (SGE)
-	{
-	  printMess("Force one gene prediction");
-	  printMess("Adding internal rules in the Gene Model");
-
-	  /* ^+:^-      First+:Terminal-:Single+:Single-     0:Infinity */
-	  a = setkeyDict(d,sGHOSTFWD);
-	  UC[a][nc[a]++] = nlines;
-	  a = setkeyDict(d,sGHOSTRVS);
-	  UC[a][nc[a]++] = nlines;
-	  
-	  a = setkeyDict(d,"First+");
-	  DE[a][ne[a]++]=nlines;
-	  a = setkeyDict(d,"Terminal-");
-	  DE[a][ne[a]++]=nlines;
-	  a = setkeyDict(d,"Single+");
-	  DE[a][ne[a]++]=nlines;
-	  a = setkeyDict(d,"Single-");
-	  DE[a][ne[a]++]=nlines;
-	  
-	  md[nlines] = 0;
-	  Md[nlines] = INFI;
-	  nlines++;
-
-	  /* Terminal+:First-:Single+:Single-     ^+:^-      0:Infinity*/
-	  a = setkeyDict(d,"Terminal+");
-	  UC[a][nc[a]++] = nlines;
-	  a = setkeyDict(d,"First-");
-	  UC[a][nc[a]++] = nlines;
-	  a = setkeyDict(d,"Single+");
-	  UC[a][nc[a]++] = nlines;
-	  a = setkeyDict(d,"Single-");
-	  UC[a][nc[a]++] = nlines;
-	  
-	  a = setkeyDict(d,sGHOSTFWD);
-	  DE[a][ne[a]++]=nlines;
-	  a = setkeyDict(d,sGHOSTRVS);
-	  DE[a][ne[a]++]=nlines;
-	  
-	  md[nlines] = 0;
-	  Md[nlines] = INFI;
-	  nlines++;
-	}
   
+  return(nlines);
+}
+
+/* Fill in the Gene Model with artificial lines to build only one gene */
+/* Every rule is identified by the gm line where it has been found */
+/* Returns how many rules have been loaded right */
+long ForceGeneModel (dict* d,
+                    int nc[], int ne[],
+                    int UC[][MAXENTRY],
+                    int DE[][MAXENTRY],
+                    long md[], long Md[],
+                    int block[])
+{
+  /* Identifier for feature (from dictionary) */
+  int a;
+  
+  /* Identifier for class (assembling rule) */
+  int nlines;
+  
+  printMess("Force one gene prediction");
+
+  nlines = 0;
+ 
+  /* 1. First+:Internal+     Internal+:Terminal+       20:40000 block */
+  a = setkeyDict(d,"First+");
+  UC[a][nc[a]++] = nlines;
+  a = setkeyDict(d,"Internal+");
+  UC[a][nc[a]++] = nlines;
+
+  a = setkeyDict(d,"Internal+");
+  DE[a][ne[a]++]=nlines;
+  a = setkeyDict(d,"Terminal+");
+  DE[a][ne[a]++]=nlines;
+
+  md[nlines] = 20;
+  Md[nlines] = 40000;
+  block[nlines] = BLOCK;
+  nlines++;
+
+  /* 2. Terminal-:Internal-  First-:Internal-          20:40000 blockr */
+  a = setkeyDict(d,"Terminal-");
+  UC[a][nc[a]++] = nlines;
+  a = setkeyDict(d,"Internal-");
+  UC[a][nc[a]++] = nlines;
+
+  a = setkeyDict(d,"First-");
+  DE[a][ne[a]++]=nlines;
+  a = setkeyDict(d,"Internal-");
+  DE[a][ne[a]++]=nlines;
+
+  md[nlines] = 20;
+  Md[nlines] = 40000;
+  block[nlines] = BLOCK;
+  nlines++;
+  
+  /* 3. BEGIN+:BEGIN-      First+:Terminal-:Single+:Single-     0:Infinity */
+  a = setkeyDict(d,sBEGINFWD);
+  UC[a][nc[a]++] = nlines;
+  a = setkeyDict(d,sBEGINRVS);
+  UC[a][nc[a]++] = nlines;
+  
+  a = setkeyDict(d,"First+");
+  DE[a][ne[a]++]=nlines;
+  a = setkeyDict(d,"Terminal-");
+  DE[a][ne[a]++]=nlines;
+  a = setkeyDict(d,"Single+");
+  DE[a][ne[a]++]=nlines;
+  a = setkeyDict(d,"Single-");
+  DE[a][ne[a]++]=nlines;
+  
+  md[nlines] = 0;
+  Md[nlines] = INFI;
+  nlines++;
+  
+  /* 4. Terminal+:First-:Single+:Single-     END+:END-      0:Infinity*/
+  a = setkeyDict(d,"Terminal+");
+  UC[a][nc[a]++] = nlines;
+  a = setkeyDict(d,"First-");
+  UC[a][nc[a]++] = nlines;
+  a = setkeyDict(d,"Single+");
+  UC[a][nc[a]++] = nlines;
+  a = setkeyDict(d,"Single-");
+  UC[a][nc[a]++] = nlines;
+  
+  a = setkeyDict(d,sENDFWD);
+  DE[a][ne[a]++]=nlines;
+  a = setkeyDict(d,sENDRVS);
+  DE[a][ne[a]++]=nlines;
+  
+  md[nlines] = 0;
+  Md[nlines] = INFI;
+  nlines++;
+ 
   return(nlines);
 }
 
