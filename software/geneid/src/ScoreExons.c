@@ -345,6 +345,9 @@ long Score(exonGFF *Exons,
       OligoLength = gp->OligoLength;
       OligoLength_1 = OligoLength+1;
 
+	  /* Default selection of params: First exons */
+	  p = gp->Initial;
+
       /* Selecting parameters according to exon type */
       if (!(strcmp((Exons+i)->Type,sFIRST)))
 		p = gp->Initial;
