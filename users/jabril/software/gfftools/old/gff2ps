@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.60 2000-03-06 12:18:02 jabril Exp $	
+#         $Id: gff2ps,v 1.61 2000-03-06 18:28:50 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.60 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-06 12:18:02 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.61 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-06 18:28:50 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.60 2000-03-06 12:18:02 jabril Exp $
+%    $Id: gff2ps,v 1.61 2000-03-06 18:28:50 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -547,8 +547,8 @@ end
  /TkFont { TkMrkHW /Helvetica } def
  /MaxWidthT { S MaxNuclPage 10 string cvs TkFont sfont stringwidth pop 2 mul R } bdf
  /CheckCloser { 3 copy pop MaxWidthT sub 3 1 roll MaxWidthT add 3 1 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or 4 1 roll 3 copy dup 3 1 roll ne 3 1 roll ne and 5 -1 roll and { pop false } { true } ifelse } bdf
- /ctextick { S TkFont sfont dup stringheight 2 div exch stringwidth pop 2 Xscm div neg Xscm exch 2 copy neg T 2 mul exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 0.125 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
- /bltextick { S TkFont sfont dup stringwidth pop 2 Xscm div neg Xscm TkMrkHW 2 copy flgup { TkMrkDW add T } { 2 mul T 1 -1 F } ifelse exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 0.125 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
+ /ctextick { S TkFont sfont dup stringheight 2 div exch stringwidth pop 2 Xscm div neg Xscm exch 2 copy neg T 2 mul exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 0.75 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
+ /bltextick { S TkFont sfont dup stringwidth pop 2 Xscm div neg Xscm TkMrkHW 2 copy flgup { TkMrkDW add T } { 2 mul T 1 -1 F } ifelse exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 0.75 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
  /tonormtick { 0 eq { 2 { dup dup 0 ne { MinTick mod } if sub exch } repeat } { 2 { dup dup 0 ne { MaxTick mod } if sub exch } repeat } ifelse } bdf
  /Mkg { 0 0 m l fgcolor scmyk dotted K } bdf
  /Mklb { S 3 dict begin TS 3 eq { 1000000 div /q exch 20 string cvs def /y q length def /h y 2 add string def h 0 q putinterval h y (Mb) putinterval h } { TS 2 eq { 1000 div cvi /q exch 20 string cvs def /y q length def /h y 2 add string def h 0 q putinterval h y (Kb) putinterval h } { 10 string cvs } ifelse } ifelse end R } bdf  
@@ -598,7 +598,7 @@ end % tmdct
  /rnbfill { 1 dict begin S /incr sqdif 100 div def 0 incr sqdif { dup dup incr add 0 exch 0 m l dup 0 gt { sqdif div } if rainbow Yscl slw K } for R end } bdf 
  /setcolmod { cmod cvx exec dup 1 eq { pop scmyk fill } { dup 2 eq { pop lnfill } { dup 5 eq { 5 { pop } repeat frmfill } { dup 4 eq { 5 { pop } repeat rnbfill } { pop } ifelse } ifelse } ifelse } ifelse } bdf
  %/ShFsz { TkMrkW dup GpFsz 2 div gt { pop GpFsz 4 div } { 2 div } ifelse } bdf
- /ShFsz { GpFsz 2 div } bdf
+ /ShFsz { GpFsz 2 div pslbSC mul } bdf
  /ShFont { ShFsz /Helvetica } bdf 
  /postk { S 0 0 m 0 LY ScV 0 eq { 0.65 } { 1.15 } ifelse mul rl longdotted fgcolor scmyk 0.125 slw K R } bdf
  /shwpos { S Flgspos { seqori LY neg ScV 0 eq { 0.65 mul T } { 1 -1 F 1.15 mul T } ifelse sqend sqdif sqori 0 2 { S 0 T postk 10 string cvs 0 0 S ScV 1 eq { 1 -1 F } if strnd (-) eq { 1 -1 F 45 } { -45 } ifelse ScV 1 eq { neg } if 4 -1 roll strnd (-) eq { ScV 1 ne { (bv) } { (tv) } ifelse } { ScV 1 ne { (tv) } { (bv) } ifelse } ifelse (lh) ShFont fgcolor ttxt R R } repeat } if R } bdf
@@ -618,7 +618,7 @@ end % tmdct
  /cptc { sqdif LY sc mul F arc closepath PMK KCFmod } bdf
  /lft { sqdif 0 T -1 1 F } bdf
  /no_shp { 4 { pop } repeat } bdf
- /line   { PMX sqdif LY sc mul F 0 0.5 m 1 0.5 l PMK 1 slw scmyk K } bdf 
+ /line   { PMX sqdif LY sc mul F 0 0.5 m 1 0.5 l PMK LY 0.25 mul slw scmyk K } bdf % 1 slw
  /scline { PMX sqdif LY sc mul F 0 0.5 m 1 0.5 l PMK LY sc mul slw scmyk K } bdf 
  /box    { 1.0 0.0 1.0 1.0 0.0 1.0 3 0.0 0.0 cpt } bdf
  /hbox   { ScV 0 ne { 1.0 0.0 1.0 1.0 0.0 1.0 3 0.0 0.0 } { 1.0 0.5 1.0 1.0 0.0 1.0 3 0.0 0.5 } ifelse cpt } bdf
@@ -663,7 +663,7 @@ end % tmdct
 % Group functions...
 % /ctr { S 0 T sfont scmyk dup stringwidth pop 2 div neg stringheight strnd (-) eq { 2 div } { 1.25 mul neg } ifelse m show R } bdf
  /g_score 1.1 def % /g_score 0.5 def
- /GpFsz { Yscl 0.15 mul dup 8 gt { pop 8 } if } def
+ /GpFsz { Yscl 0.15 mul dup 8 gt { pop 8 } if gplbSC mul } def
  /GpFont { GpFsz /Helvetica } bdf
  /gshp { S 0 gp_st gp_nd 0 0 g_score gcmod g_shape GpV Flgrpspos Flgglbl grlbl p R } bdf
  /gp_no { 4 { pop } repeat } bdf
@@ -672,8 +672,8 @@ end % tmdct
  /gp_lt { longdotted  gp_ln } bdf
  /gp_sh { shortdashed gp_ln } bdf
  /gp_lh { longdashed  gp_ln } bdf
- /gp_bk { scmyk 0.125 slw 2 dict begin /tl grdif 2 div def /ol GpFsz 0.05 mul def 0 0 m S 0 ol neg rl K R tl 0 rl S 0 ol rl K R tl 0 rl S 0 ol neg rl K R K end } bdf
- /gp_raw { scmyk 0.125 slw strnd (-) eq { grdif 0 T -1 1 F } if 2 dict begin /tl grdif 0.05 mul def /ol GpFsz 0.1 mul def tl 0 m tl neg dup S ol rl K R S ol neg rl K R grdif 0 l S tl neg ol rl 0 -2 ol mul rl tl ol rl S fill R K R K end } bdf
+ /gp_bk { scmyk 0.125 slw 2 dict begin /tl GpFsz 0.05 mul def /ol GpFsz 0.05 mul def 0 0 m S 0 ol neg rl K R tl 0 rl S 0 ol rl K R tl 0 rl S 0 ol neg rl K R K end } bdf
+ /gp_raw { scmyk 0.125 slw strnd (-) eq { grdif 0 T -1 1 F } if 2 dict begin /tl GpFsz 0.05 mul def /ol GpFsz 0.1 mul def tl 0 m tl neg dup S ol rl K R S ol neg rl K R grdif 0 l S tl neg ol rl 0 -2 ol mul rl tl ol rl S fill R K R K end } bdf
  /gp_law { grdif 0 T -1 1 F gp_raw } bdf
  /CkGPL { dup GpFsz 2 div lt { pop GpFsz 0.55 mul } if } bdf
  /gln { S colordict begin g_line cvx exec end R } bdf
@@ -1313,6 +1313,8 @@ function ARY_VARIABLES() {
   Default["frame1_color"]="red";          #
   Default["frame2_color"]="green";        #
   Default["show_positions"]="false";      #
+  Default["group_label_scale"]=1;
+  Default["position_label_scale"]=1;
   Default["min_group_separation"]=10;     # minimum nucleotide distance between two groups to avoid overlapping.
   #
   ############################################## GFF-FEATURES
@@ -3180,6 +3182,8 @@ function defPSvars(    flgst,subtitle,shbx,fixed,dfgc,dbgc) {
   printf " /Stime (%s) def\n", checklbl(time);
   printf " /Shwp_num %s def\n", TxtBool(OnOff(Default["show_page_numbers"]));
   printf "end%%\n";
+  printf "/gplbSC %s def\n", Default["group_label_scale"];
+  printf "/pslbSC %s def\n", Default["position_label_scale"];
   printf "%%\n";
   #
   # PostScript Main Procs.
