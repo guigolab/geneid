@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildTerminalExons.c,v 1.1 2000-07-07 08:22:11 eblanco Exp $  */
+/*  $Id: BuildTerminalExons.c,v 1.2 2000-08-08 14:16:16 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern long NUMEXONS;
 
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
 		         site *Stop, long nStops,
@@ -51,7 +53,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
     j++;
   
   /* main loop, for each Acceptor next Stop in every Frame defines an exon */
-  for (i=iA;(i<nAcceptors) && (nExon<NUMEXONS);i++) 
+  for (i=iA;(i<nAcceptors) && (nExon<(int)(NUMEXONS/RTERMI));i++) 
     {
       /* Open the windows... */
       for (f=0;f<3;f++)
@@ -64,8 +66,8 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
       
       /* Find Stops in Frame still open */
       while ((Frame[0]==1 || Frame[1]==1 || Frame[2]==1)
-               && (js < nStops)
-               && (nExon<NUMEXONS))
+	     && (js < nStops)
+	     && (nExon<(int)(NUMEXONS/RTERMI)))
 	{
 	  if (Frame[f=((Stop+js)->Position - (Acceptor+i)->Position + 1) % 3])
 	    {
@@ -87,8 +89,8 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
 	}     
     }    
 
-  if (nExon==NUMEXONS)
-    printError("Too many predicted exons: Change NUMEXONS parameter");
+  if (nExon >=(int)(NUMEXONS/RTERMI))
+    printError("Too many predicted exons: Change RTERMI parameter");
   
   return(nExon);
 }
