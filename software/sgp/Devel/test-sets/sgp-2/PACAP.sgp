@@ -1,0 +1,22 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X60435 - Length = 17041 bps
+## date Wed Oct 18 21:44:03 2000
+# Optimal Gene Structure. 1 genes. Score = 85.382233 
+# Gene 1(Forward). 5 exons. 240 aa. Score = 85.382233 
+X60435	geneid_v1.0	Internal	7026	7213	0.278	+	0	gene_1	# AA-1	AA-63
+X60435	geneid_v1.0	Internal	7539	7649	8.605	+	1	gene_1	# AA-63	AA-100
+X60435	geneid_v1.0	Internal	9813	9944	8.846	+	1	gene_1	# AA-100	AA-144
+X60435	geneid_v1.0	Internal	10420	10518	19.660	+	1	gene_1	# AA-144	AA-177
+X60435	geneid_v1.0	Terminal	11601	11790	47.993	+	1	gene_1	# AA-177	AA-240
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence AB010149 - Length = 7686 bps
+## date Wed Oct 18 21:44:05 2000
+# Optimal Gene Structure. 1 genes. Score = 97.075954 
+# Gene 1(Forward). 5 exons. 262 aa. Score = 97.075954 
+AB010149	geneid_v1.0	Internal	1686	1793	7.119	+	1	gene_1	# AA-1	AA-37
+AB010149	geneid_v1.0	Internal	3905	4093	20.794	+	1	gene_1	# AA-37	AA-100
+AB010149	geneid_v1.0	Internal	4460	4558	20.614	+	1	gene_1	# AA-100	AA-133
+AB010149	geneid_v1.0	Internal	5613	5798	43.607	+	1	gene_1	# AA-133	AA-195
+AB010149	geneid_v1.0	Terminal	6435	6636	4.942	+	1	gene_1	# AA-195	AA-262

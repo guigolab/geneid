@@ -1,0 +1,26 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M27903 - Length = 6113 bps
+## date Wed Oct 18 21:46:42 2000
+# Optimal Gene Structure. 1 genes. Score = 236.697372 
+# Gene 1(Forward). 6 exons. 442 aa. Score = 236.697372 
+M27903	geneid_v1.0	Internal	787	1251	18.514	+	2	gene_1	# AA-1	AA-156
+M27903	geneid_v1.0	Internal	1365	1471	31.553	+	2	gene_1	# AA-156	AA-191
+M27903	geneid_v1.0	Internal	1573	1623	3.612	+	0	gene_1	# AA-192	AA-208
+M27903	geneid_v1.0	Internal	1717	2083	132.257	+	0	gene_1	# AA-209	AA-331
+M27903	geneid_v1.0	Internal	3588	3764	38.658	+	2	gene_1	# AA-331	AA-390
+M27903	geneid_v1.0	Terminal	4526	4683	12.104	+	2	gene_1	# AA-390	AA-442
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M13945 - Length = 7981 bps
+## date Wed Oct 18 21:46:43 2000
+# Optimal Gene Structure. 2 genes. Score = 220.595390 
+# Gene 1(Reverse). 1 exons. 16 aa. Score = 2.482328 
+M13945	geneid_v1.0	   First	1057	1104	2.482	-	0	gene_1	# AA-1	AA-16
+# Gene 2(Forward). 6 exons. 314 aa. Score = 218.113062 
+M13945	geneid_v1.0	   First	2048	2129	3.886	+	0	gene_2	# AA-1	AA-28
+M13945	geneid_v1.0	Internal	2229	2335	25.989	+	2	gene_2	# AA-28	AA-63
+M13945	geneid_v1.0	Internal	2424	2474	3.266	+	0	gene_2	# AA-64	AA-80
+M13945	geneid_v1.0	Internal	2569	2935	124.210	+	0	gene_2	# AA-81	AA-203
+M13945	geneid_v1.0	Internal	4620	4796	46.540	+	2	gene_2	# AA-203	AA-262
+M13945	geneid_v1.0	Terminal	5488	5645	14.222	+	2	gene_2	# AA-262	AA-314

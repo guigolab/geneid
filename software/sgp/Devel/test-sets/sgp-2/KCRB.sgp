@@ -1,0 +1,26 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X15334 - Length = 4200 bps
+## date Wed Oct 18 21:42:46 2000
+# Optimal Gene Structure. 1 genes. Score = 381.541920 
+# Gene 1(Forward). 7 exons. 382 aa. Score = 381.541920 
+X15334	geneid_v1.0	   First	1148	1340	77.461	+	0	gene_1	# AA-1	AA-65
+X15334	geneid_v1.0	Internal	1464	1618	65.912	+	2	gene_1	# AA-65	AA-116
+X15334	geneid_v1.0	Internal	1691	1823	34.994	+	0	gene_1	# AA-117	AA-161
+X15334	geneid_v1.0	Internal	2208	2379	53.927	+	2	gene_1	# AA-161	AA-218
+X15334	geneid_v1.0	Internal	3050	3173	33.159	+	1	gene_1	# AA-218	AA-259
+X15334	geneid_v1.0	Internal	3331	3520	60.767	+	0	gene_1	# AA-260	AA-323
+X15334	geneid_v1.0	Terminal	3600	3778	55.322	+	2	gene_1	# AA-323	AA-382
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M74149 - Length = 4521 bps
+## date Wed Oct 18 21:42:47 2000
+# Optimal Gene Structure. 1 genes. Score = 318.900279 
+# Gene 1(Forward). 7 exons. 382 aa. Score = 318.900279 
+M74149	geneid_v1.0	   First	1711	1903	57.620	+	0	gene_1	# AA-1	AA-65
+M74149	geneid_v1.0	Internal	2090	2244	51.593	+	2	gene_1	# AA-65	AA-116
+M74149	geneid_v1.0	Internal	2322	2454	29.922	+	0	gene_1	# AA-117	AA-161
+M74149	geneid_v1.0	Internal	2624	2795	44.058	+	2	gene_1	# AA-161	AA-218
+M74149	geneid_v1.0	Internal	3381	3504	33.649	+	1	gene_1	# AA-218	AA-259
+M74149	geneid_v1.0	Internal	3652	3841	61.405	+	0	gene_1	# AA-260	AA-323
+M74149	geneid_v1.0	Terminal	3925	4103	40.653	+	2	gene_1	# AA-323	AA-382

@@ -1,0 +1,20 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence U20758 - Length = 3143 bps
+## date Wed Oct 18 21:43:55 2000
+# Optimal Gene Structure. 1 genes. Score = 143.865762 
+# Gene 1(Forward). 4 exons. 267 aa. Score = 143.865762 
+U20758	geneid_v1.0	Internal	537	575	3.300	+	0	gene_1	# AA-1	AA-13
+U20758	geneid_v1.0	Internal	1232	1273	4.712	+	0	gene_1	# AA-14	AA-27
+U20758	geneid_v1.0	Internal	1597	1920	56.220	+	0	gene_1	# AA-28	AA-135
+U20758	geneid_v1.0	Internal	2305	2700	79.634	+	0	gene_1	# AA-136	AA-267
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X51834 - Length = 5782 bps
+## date Wed Oct 18 21:43:57 2000
+# Optimal Gene Structure. 1 genes. Score = 122.050954 
+# Gene 1(Forward). 4 exons. 250 aa. Score = 122.050954 
+X51834	geneid_v1.0	Internal	1091	1126	4.943	+	0	gene_1	# AA-1	AA-12
+X51834	geneid_v1.0	Internal	2779	2820	4.133	+	0	gene_1	# AA-13	AA-26
+X51834	geneid_v1.0	Internal	3819	4100	49.487	+	0	gene_1	# AA-27	AA-120
+X51834	geneid_v1.0	Terminal	4788	5177	63.488	+	0	gene_1	# AA-121	AA-250

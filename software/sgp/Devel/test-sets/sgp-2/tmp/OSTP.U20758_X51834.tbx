@@ -1,0 +1,788 @@
+TBLASTX 2.0a19MP-WashU [14-Jul-1998] [Build linux-x86 18:51:47 30-Jul-1998]
+
+Reference:  Gish, Warren (1994-1997).  unpublished.
+Altschul, Stephen F., Warren Gish, Webb Miller, Eugene W. Myers, and David J.
+Lipman (1990).  Basic local alignment search tool.  J. Mol. Biol. 215:403-10.
+
+Notice:  statistical significance is estimated under the assumption that the
+equivalent of one entire reading frame of the query sequence and one entire
+reading frame of the database code for protein and that significant alignments
+will only involve coding reading frames.
+
+Query=  X51834
+        (5782 letters)
+
+  Translating both strands of query sequence in all 6 reading frames
+
+Database:  sgp2_26956.U20758.DB
+           1 sequences; 3143 total letters.
+Searching done
+
+                                                                     Smallest
+                                                                       Sum
+                                                     Reading  High  Probability
+Sequences producing High-scoring Segment Pairs:        Frame Score  P(N)      N
+
+U20758                                                    +1   237  1.8e-87  15
+
+
+
+>U20758
+       Length = 3143
+
+  Plus Strand HSPs:
+
+ Score = 237 (108.6 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 47/71 (66%), Positives = 57/71 (80%), Frame = +3 / +1
+
+Query:  4962 RLEHSKESQESADQSDVIDSQASSKASLEHQSHKFHSHKDKLVLDPKSKEDDRYLKFRIS 5141
+             RL   K + ES + SDVIDSQ  SK S E  SH+FHSH+D LV+DPKSKE+D++LKFRIS
+Sbjct:  2494 RLYKRKANDESNEHSDVIDSQELSKVSREFHSHEFHSHEDMLVVDPKSKEEDKHLKFRIS 2673
+
+Query:  5142 HELESSSSEVN 5174
+             HEL+S+SSEVN
+Sbjct:  2674 HELDSASSEVN 2706
+
+ Score = 229 (104.9 bits), Expect = 8.0e-86, Sum P(14) = 8.0e-86
+ Identities = 49/105 (46%), Positives = 64/105 (60%), Frame = +3 / +1
+
+Query:  4764 FFNLFLIQYPDATDEDLTSHMKSGESKESLDVIPVAQLLSMPSDQDNNGKGSHESSQLDE 4943
+             FF   +IQYPDATDED+TSHM+S E   +   IPVAQ L+ PSD D+ GK S+E+SQLD+
+Sbjct:  2281 FFICAVIQYPDATDEDITSHMESEELNGAYKAIPVAQDLNAPSDWDSRGKDSYETSQLDD 2460
+
+Query:  4944 PSLETHRLEHSKESQESADQSDVIDSQASSKASLEHQSHKFHSHK 5078
+              S ETH  + S+  +  A+      S       L   S +FHSH+
+Sbjct:  2461 QSAETHSHKQSRLYKRKANDESNEHSDVIDSQELSKVSREFHSHE 2595
+
+ Score = 143 (65.5 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 31/95 (32%), Positives = 45/95 (47%), Frame = +3 / +1
+
+Query:  3822 LPSNSNESHDHMDDDDDDDDDDGDHAESEDSVDSDESDESHHSDESDETFTASTQADTFT 4001
+             +    ++ H    D  D +D D      +     +        +   +  T     + FT
+Sbjct:  1642 MDDEDDDDHVDSQDSIDSNDSDDVDDTDDSHQSDESHHSDESDELVTDFPTDLPATEVFT 1821
+
+Query:  4002 PIVPTVDVPNGRGDSLAYGLRSKSRSFQVSDEQVN 4106
+             P+VPTVD  +GRGDS+ YGLRSKS+ F+  D QVN
+Sbjct:  1822 PVVPTVDTYDGRGDSVVYGLRSKSKKFRRPDIQVN 1926
+
+ Score = 121 (55.4 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 22/28 (78%), Positives = 25/28 (89%), Frame = +3 / +2
+
+Query:  2202 LYSLHPDPIATWLVPDPSQKQNLLAPQV 2285
+             LY+ +PD +ATWL PDPSQKQNLLAPQV
+Sbjct:   884 LYNKYPDAVATWLNPDPSQKQNLLAPQV 967
+
+ Score = 117 (53.6 bits), Expect = 1.4e-83, Sum P(14) = 1.4e-83
+ Identities = 24/66 (36%), Positives = 33/66 (50%), Frame = +3 / +1
+
+Query:  3819 TLPSNSNESHDHMDDDDDDDDDDGDHAESEDSVDSDESDESHHSDESDETFTASTQADTF 3998
+             TLPS SNESHDHMDD DD+DDDD   ++     +  +  +        +    S ++D  
+Sbjct:  1597 TLPSKSNESHDHMDDMDDEDDDDHVDSQDSIDSNDSDDVDDTDDSHQSDESHHSDESDEL 1776
+
+Query:  3999 TPIVPT 4016
+                 PT
+Sbjct:  1777 VTDFPT 1794
+
+ Score = 113 (51.8 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 21/34 (61%), Positives = 25/34 (73%), Frame = +3 / +2
+
+Query:   909 IKYVAGLTTTMRLAVICFCLFGIASSLPVGTAES 1010
+             +KY AG  TTMR+AVICFCL GI  ++PV T  S
+Sbjct:   344 LKYFAGKLTTMRIAVICFCLLGITCAIPVSTVAS 445
+
+ Score = 109 (49.9 bits), Expect = 1.5e-82, Sum P(14) = 1.5e-82
+ Identities = 23/59 (38%), Positives = 32/59 (54%), Frame = +3 / +1
+
+Query:  3849 DHMDDDDDDDDDDGDHAESEDSVDSDESDESHHSDESDETFTASTQADTFTPIVPTVDV 4025
+             D  D+DDDD  D  D  +S DS D D++D+SH SDES  +  +      F   +P  +V
+Sbjct:  1639 DMDDEDDDDHVDSQDSIDSNDSDDVDDTDDSHQSDESHHSDESDELVTDFPTDLPATEV 1815
+
+ Score = 99 (45.4 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 20/25 (80%), Positives = 22/25 (88%), Frame = +1 / +2
+
+Query:  2758 YVTFLFQNAVSSEEKDDFKQEVSSH 2832
+             +V FL QNAVSSEE +DFKQEVSSH
+Sbjct:  1211 HVPFLLQNAVSSEETNDFKQEVSSH 1285
+
+ Score = 90 (41.2 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 18/26 (69%), Positives = 19/26 (73%), Frame = +1 / +3
+
+Query:  5365 KASALCFCSSCTRNANGHCILMIVIL 5442
+             KAS LC CS   RNAN HCIL+ VIL
+Sbjct:  2901 KASGLCLCSFYRRNANYHCILIFVIL 2978
+
+ Score = 83 (38.0 bits), Expect = 3.7e-79, Sum P(14) = 3.7e-79
+ Identities = 20/56 (35%), Positives = 28/56 (50%), Frame = +3 / +1
+
+Query:  3837 NESHDHMDDDDDDDDDDGDHAESEDSVDSDESDESHHSDESDETFTASTQADTFTP 4004
+             ++  D  DDD  D  D  D  +S+D  D+D+S +S  S  SDE+    T   T  P
+Sbjct:  1636 DDMDDEDDDDHVDSQDSIDSNDSDDVDDTDDSHQSDESHHSDESDELVTDFPTDLP 1803
+
+ Score = 72 (33.0 bits), Expect = 1.3e-84, Sum P(14) = 1.3e-84
+ Identities = 15/45 (33%), Positives = 23/45 (51%), Frame = +3 / +2
+
+Query:  5400 KKCKRPLHFNDCYSFMNKMYVETSKFTETSRIKRETVTVYITIPF 5534
+             KKCK  L+FN CYS MN+    + + T T   +   +  +  + F
+Sbjct:  2936 KKCKLSLYFNICYSLMNRNLCRSKQNTFTHLKREYNILCHYNLLF 3070
+
+ Score = 68 (31.2 bits), Expect = 3.3e-77, Sum P(14) = 3.3e-77
+ Identities = 14/23 (60%), Positives = 14/23 (60%), Frame = +1 / +2
+
+Query:  3814 FRLFQAIPMKAMTTWTTMMTMMM 3882
+             FR FQ  P KAMTTW   M  MM
+Sbjct:  1592 FRPFQVSPTKAMTTWMIWMMKMM 1660
+
+ Score = 63 (28.9 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 14/17 (82%), Positives = 14/17 (82%), Frame = +2 / +3
+
+Query:  1076 FSVLKVKVTDSGSSEEK 1126
+             FSV KVK  DSGSSEEK
+Sbjct:   522 FSVSKVKQADSGSSEEK 572
+
+ Score = 56 (25.7 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 10/17 (58%), Positives = 14/17 (82%), Frame = +3 / +2
+
+Query:  5178 RRGKNTVPYFAFSKNKK 5228
+             +R KNT+ +FAFS+ KK
+Sbjct:  2708 KRRKNTISHFAFSQKKK 2758
+
+ Score = 55 (25.2 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 14/30 (46%), Positives = 17/30 (56%), Frame = +2 / +3
+
+Query:    92 SPLSLSLLSHTHCKVLCIFGTNVCIILKWL 181
+             S  S SLLS T  KV   F T +CI L ++
+Sbjct:   171 SQASCSLLSQTPTKVQLQFATGLCIQLNFM 260
+
+ Score = 55 (25.2 bits), Expect = 2.1e-82, Sum P(14) = 2.1e-82
+ Identities = 11/23 (47%), Positives = 14/23 (60%), Frame = +2 / +1
+
+Query:  5357 CNQKLLHFASVLPVQEMQTATAF 5425
+             C QKL  +  V  ++EMQT T F
+Sbjct:  2893 CKQKLQGYVYVHSIEEMQTITVF 2961
+
+ Score = 53 (24.3 bits), Expect = 3.2e-79, Sum P(15) = 3.2e-79
+ Identities = 11/13 (84%), Positives = 11/13 (84%), Frame = +2 / +1
+
+Query:  2249 PISEAESPCATGI 2287
+             PISEAESP  TGI
+Sbjct:   931 PISEAESPSPTGI 969
+
+ Score = 52 (23.8 bits), Expect = 5.8e-87, Sum P(15) = 5.8e-87
+ Identities = 10/16 (62%), Positives = 13/16 (81%), Frame = +1 / +3
+
+Query:  5188 KTQFLTLHLVKTRKSV 5235
+             K QFLTLHLVK + ++
+Sbjct:  2718 KIQFLTLHLVKRKNAL 2765
+
+ Score = 49 (22.5 bits), Expect = 1.9e-80, Sum P(14) = 1.9e-80
+ Identities = 9/15 (60%), Positives = 10/15 (66%), Frame = +3 / +1
+
+Query:  2748 CVLICDLPFSECCVL 2792
+             C L   +P SECCVL
+Sbjct:  1201 CALTRAIPSSECCVL 1245
+
+ Score = 47 (21.5 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 9/17 (52%), Positives = 11/17 (64%), Frame = +2 / +2
+
+Query:  3692 SLKTIECNVNTKTLKFN 3742
+             +LK + C VN K LK N
+Sbjct:  1454 NLKAMVCTVNAKILKLN 1504
+
+ Score = 45 (20.6 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 8/10 (80%), Positives = 10/10 (100%), Frame = +1 / +1
+
+Query:  5545 ISIYFVVIIF 5574
+             +S+YFVVIIF
+Sbjct:  3076 VSVYFVVIIF 3105
+
+ Score = 45 (20.6 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 8/11 (72%), Positives = 10/11 (90%), Frame = +1 / +1
+
+Query:  5323 LSLVCCFMQTP 5355
+             +SLVC FM+TP
+Sbjct:  2860 ISLVCGFMETP 2892
+
+ Score = 43 (19.7 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 9/16 (56%), Positives = 10/16 (62%), Frame = +2 / +3
+
+Query:  2678 RLKYDTCIRLKRVTLE 2725
+             RLK   C  LKR+T E
+Sbjct:  1131 RLKNKNCFGLKRLTFE 1178
+
+ Score = 42 (19.2 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 9/12 (75%), Positives = 9/12 (75%), Frame = +2 / +1
+
+Query:  4142 SLLGNQSLQIHS 4177
+             S LGN SL IHS
+Sbjct:  1963 SSLGNHSLHIHS 1998
+
+ Score = 42 (19.2 bits), Expect = 4.9e-61, Sum P(14) = 4.9e-61
+ Identities = 8/26 (30%), Positives = 15/26 (57%), Frame = +3 / +1
+
+Query:  5037 ASLEHQSHKFHSHKDKLVLDPKSKED 5114
+             + L+ QS + HSHK   +   K+ ++
+Sbjct:  2446 SQLDDQSAETHSHKQSRLYKRKANDE 2523
+
+ Score = 41 (18.8 bits), Expect = 3.2e-79, Sum P(15) = 3.2e-79
+ Identities = 9/16 (56%), Positives = 10/16 (62%), Frame = +2 / +1
+
+Query:  2192 FELALQPAPRSYSHMA 2239
+             F +ALQ  PR   HMA
+Sbjct:   874 FFVALQQIPRCCGHMA 921
+
+ Score = 40 (18.3 bits), Expect = 8.9e-61, Sum P(14) = 8.9e-61
+ Identities = 15/61 (24%), Positives = 25/61 (40%), Frame = +3 / +1
+
+Query:  4926 SSQLDEPSLETHRLEHSKESQESADQSDVIDSQASSKASLEHQSHKFHSHKDKLVLDPKS 5105
+             +  L+ PS    R + S E+ +  DQS    S   S+      + + + H D +     S
+Sbjct:  2386 AQDLNAPSDWDSRGKDSYETSQLDDQSAETHSHKQSRLYKRKANDESNEHSDVIDSQELS 2565
+
+Query:  5106 K 5108
+             K
+Sbjct:  2566 K 2568
+
+ Score = 38 (17.4 bits), Expect = 3.8e-72, Sum P(13) = 3.8e-72
+ Identities = 9/21 (42%), Positives = 12/21 (57%), Frame = +3 / +1
+
+Query:  4794 DATDEDLTSHMKSGESKESLD 4856
+             D  DED   H+ S +S +S D
+Sbjct:  1639 DMDDEDDDDHVDSQDSIDSND 1701
+
+ Score = 38 (17.4 bits), Expect = 1.6e-60, Sum P(14) = 1.6e-60
+ Identities = 11/37 (29%), Positives = 18/37 (48%), Frame = +3 / +1
+
+Query:  4836 ESKESLDVIPVAQLLSMPSDQDNNGKGSHESSQLDEP 4946
+             ES E  DVI   +L  +  +  ++   SHE   + +P
+Sbjct:  2521 ESNEHSDVIDSQELSKVSREFHSHEFHSHEDMLVVDP 2631
+
+ Score = 37 (17.0 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 7/12 (58%), Positives = 8/12 (66%), Frame = +2 / +2
+
+Query:  2150 VSFFNNSKCILF 2185
+             +SFFNN K   F
+Sbjct:   842 ISFFNNDKHATF 877
+
+ Score = 37 (17.0 bits), Expect = 1.8e-87, Sum P(15) = 1.8e-87
+ Identities = 8/13 (61%), Positives = 8/13 (61%), Frame = +2 / +2
+
+Query:  5498 KRNCNSLYHYTLL 5536
+             KR  N L HY LL
+Sbjct:  3029 KREYNILCHYNLL 3067
+
+ Score = 37 (17.0 bits), Expect = 5.8e-87, Sum P(15) = 5.8e-87
+ Identities = 8/13 (61%), Positives = 8/13 (61%), Frame = +1 / +2
+
+Query:  5155 VHLLRSTKEEAKT 5193
+             VHLLRS K    T
+Sbjct:  2687 VHLLRSIKRRKNT 2725
+
+ Score = 37 (17.0 bits), Expect = 1.7e-49, Sum P(13) = 1.7e-49
+ Identities = 8/27 (29%), Positives = 14/27 (51%), Frame = +3 / +1
+
+Query:  4980 ESQESADQSDVIDSQASSKASLEHQSH 5060
+             +SQ+S D +D  D   +  +    +SH
+Sbjct:  1672 DSQDSIDSNDSDDVDDTDDSHQSDESH 1752
+
+ Score = 37 (17.0 bits), Expect = 4.5e-45, Sum P(12) = 4.5e-45
+ Identities = 12/48 (25%), Positives = 17/48 (35%), Frame = +3 / +1
+
+Query:  3822 LPSNSNESHDHMDDDDDDDDDDGDHAESEDSVDSDESDESHHSDESDE 3965
+             L   S E+H H          + +  E  D +DS E  +      S E
+Sbjct:  2452 LDDQSAETHSHKQSRLYKRKANDESNEHSDVIDSQELSKVSREFHSHE 2595
+
+ Score = 37 (17.0 bits), Expect = 4.2e-36, Sum P(7) = 4.2e-36
+ Identities = 7/11 (63%), Positives = 8/11 (72%), Frame = +3 / +2
+
+Query:   702 RRKVWMNRVLK 734
+             +R  WM RVLK
+Sbjct:  2441 KRVSWMTRVLK 2473
+
+ Score = 36 (16.5 bits), Expect = 2.4e-87, Sum P(15) = 2.4e-87
+ Identities = 6/10 (60%), Positives = 8/10 (80%), Frame = +3 / +1
+
+Query:  4212 YCMTFEYRAF 4241
+             Y MT EY++F
+Sbjct:  2047 YFMTIEYKSF 2076
+
+ Score = 36 (16.5 bits), Expect = 3.8e-86, Sum P(14) = 3.8e-86
+ Identities = 7/10 (70%), Positives = 7/10 (70%), Frame = +3 / +2
+
+Query:  4152 ETRVCRFTHS 4181
+             ET VC F HS
+Sbjct:  1973 ETTVCIFIHS 2002
+
+ Score = 36 (16.5 bits), Expect = 2.2e-49, Sum P(13) = 2.2e-49
+ Identities = 8/29 (27%), Positives = 12/29 (41%), Frame = +3 / +1
+
+Query:  4977 KESQESADQSDVIDSQASSKASLEHQSHK 5063
+             ++  +  D  D IDS  S        SH+
+Sbjct:  1651 EDDDDHVDSQDSIDSNDSDDVDDTDDSHQ 1737
+
+ Score = 35 (16.0 bits), Expect = 3.2e-87, Sum P(15) = 3.2e-87
+ Identities = 8/19 (42%), Positives = 12/19 (63%), Frame = +3 / +2
+
+Query:  2862 EEATTSFSSDCQSLRKYPS 2918
+             ++A   FSSD  SL  +P+
+Sbjct:  1322 KKALPGFSSDEISLASFPA 1378
+
+ Score = 35 (16.0 bits), Expect = 3.2e-87, Sum P(15) = 3.2e-87
+ Identities = 7/9 (77%), Positives = 9/9 (100%), Frame = +1 / +3
+
+Query:   997 VQLNLRENS 1023
+             VQL+L+ENS
+Sbjct:   432 VQLHLKENS 458
+
+ Score = 35 (16.0 bits), Expect = 9.3e-72, Sum P(13) = 9.3e-72
+ Identities = 7/15 (46%), Positives = 9/15 (60%), Frame = +3 / +1
+
+Query:  3867 DDDDDDDGDHAESED 3911
+             D  D+D   H ESE+
+Sbjct:  2311 DATDEDITSHMESEE 2355
+
+  Minus Strand HSPs:
+
+ Score = 105 (48.1 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 21/33 (63%), Positives = 24/33 (72%), Frame = -2 / -2
+
+Query:  2838 VNVRTYFLLKVILFFRGHSILKKEGHISVHNIH 2740
+             + +RTY L KVI FFRGHSILKKE H+ V   H
+Sbjct:  1291 LKMRTYLLFKVIGFFRGHSILKKEWHVLVRITH 1193
+
+ Score = 102 (46.7 bits), Expect = 2.6e-81, Sum P(21) = 2.6e-81
+ Identities = 21/23 (91%), Positives = 22/23 (95%), Frame = -1 / -1
+
+Query:  3886 SSSSSSSSSSMWSWLSLELLGRV 3818
+             SSSSSSS SSMWSWLSL+LLGRV
+Sbjct:  1664 SSSSSSSISSMWSWLSLDLLGRV 1596
+
+ Score = 100 (45.8 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 19/40 (47%), Positives = 23/40 (57%), Frame = -2 / -2
+
+Query:  4980 LWNAQVCVFPDLVHPADLTHGCPFRCCPDQRACSEAGQQG 4861
+             +W A  C F    HPAD  H CP   CP+Q+A S  GQ+G
+Sbjct:  2497 IWTACGCGFQHSGHPADSFHNCPSHGCPNQKARSGPGQRG 2378
+
+ Score = 97 (44.4 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 21/33 (63%), Positives = 23/33 (69%), Frame = -1 / -3
+
+Query:  1009 DSAVPTGREEAMPNRQKQITANLMVVVSPATYF 911
+             D+ V TG  + MP RQKQITA LMVV  PA YF
+Sbjct:   444 DATVLTGMAQVMPRRQKQITAILMVVSFPAKYF 346
+
+ Score = 94 (43.1 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 20/24 (83%), Positives = 21/24 (87%), Frame = -1 / -1
+
+Query:  5140 EIRNFRYLSSSLLLGSRTSLSLWL 5069
+             EIRNFR LSSSLLLGS TS+S WL
+Sbjct:  2672 EIRNFRCLSSSLLLGSTTSISSWL 2601
+
+ Score = 83 (38.0 bits), Expect = 6.5e-79, Sum P(21) = 6.5e-79
+ Identities = 21/34 (61%), Positives = 22/34 (64%), Frame = -1 / -1
+
+Query:  3937 SSDSSESTESSLSAWSPSSSSSSSSSSMWSWLSL 3836
+             SS+S ES ES LS WS SSSSS SS   W  L L
+Sbjct:  1709 SSESFESMESWLSTWSSSSSSSISSMWSWLSLDL 1608
+
+ Score = 81 (37.1 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 13/24 (54%), Positives = 15/24 (62%), Frame = -2 / -2
+
+Query:  3882 HHHRHHRRPCGHGFHWNCLEESKS 3811
+             HH  H   PCGHGF W  LE S++
+Sbjct:  1660 HHLHHPYHPCGHGFRWTYLEGSEN 1589
+
+ Score = 79 (36.2 bits), Expect = 7.6e-85, Sum P(23) = 7.6e-85
+ Identities = 17/37 (45%), Positives = 24/37 (64%), Frame = -3 / -2
+
+Query:  1082 QKSDKEMRVSVLKLKFIYFQEFSLRFSCTHREGGGNA 972
+             +K  K + ++    +F YFQEFSLR +CTH  G G+A
+Sbjct:   517 KKDYKNVLLAHGSTQFSYFQEFSLRCNCTHWYGTGDA 407
+
+ Score = 77 (35.3 bits), Expect = 4.7e-80, Sum P(21) = 4.7e-80
+ Identities = 15/22 (68%), Positives = 17/22 (77%), Frame = -2 / -2
+
+Query:  5169 PQKMNSLIHEKFGISDTYHLPY 5104
+             PQKM+ LIHEK+ IS  Y LPY
+Sbjct:  2701 PQKMHYLIHEKYEISGVYLLPY 2636
+
+ Score = 75 (34.4 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 15/19 (78%), Positives = 15/19 (78%), Frame = -2 / -1
+
+Query:  2286 IPVAQGDSASEMGQAPAMW 2230
+             IPV  GDSASEMGQ  AMW
+Sbjct:   968 IPVGLGDSASEMGQGLAMW 912
+
+ Score = 71 (32.5 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 15/38 (39%), Positives = 25/38 (65%), Frame = -3 / -3
+
+Query:  5081 VLVAVKLVALMFQAGFGTCLTIDHIRLIGTLLALFGML 4968
+             + +AVK +A+ F A FG  LTI+HI ++  L+  F ++
+Sbjct:  2613 IFMAVKFMAVEFTADFGKFLTINHIGMLIALIIGFPLI 2500
+
+ Score = 70 (32.1 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 13/21 (61%), Positives = 15/21 (71%), Frame = -2 / -3
+
+Query:  5589 FTPTKKNNHNKIYANYKTKRV 5527
+             F  T K+NHNKIY N K KR+
+Sbjct:  3120 FIHTTKDNHNKIYTNLKNKRL 3058
+
+ Score = 69 (31.6 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 18/32 (56%), Positives = 19/32 (59%), Frame = -1 / -1
+
+Query:  4045 LSPRPLGTSTVGTIGVKVSACVLAVKVSSDSS 3950
+             LSPRP   STVGT GVK S    +V  S  SS
+Sbjct:  1865 LSPRPSYVSTVGTTGVKTSVAGRSVGKSVTSS 1770
+
+ Score = 69 (31.6 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 16/34 (47%), Positives = 23/34 (67%), Frame = -3 / -3
+
+Query:  3965 LIRLIRMVRFVRFIRVHRILALCMVSIVIIIVII 3864
+             LIRL+R++  +  IRV R+  +  V +VIII II
+Sbjct:  1746 LIRLVRIISVIYIIRVVRVNGVLAVHMVIIIFII 1645
+
+ Score = 69 (31.6 bits), Expect = 2.4e-81, Sum P(22) = 2.4e-81
+ Identities = 13/24 (54%), Positives = 18/24 (75%), Frame = -3 / -3
+
+Query:  4064 PQSISQAITSAVGDIDCRDDWSES 3993
+             PQSI+  ITSA+  + C D+WSE+
+Sbjct:  1884 PQSINHTITSAIICVYCGDNWSEN 1813
+
+ Score = 65 (29.8 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 10/15 (66%), Positives = 13/15 (86%), Frame = -3 / -2
+
+Query:  5228 FLVFTKCKVRNCVFA 5184
+             F + TKCKVRNC+F+
+Sbjct:  2758 FFLLTKCKVRNCIFS 2714
+
+ Score = 61 (28.0 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 11/12 (91%), Positives = 11/12 (91%), Frame = -2 / -2
+
+Query:  4068 LTSVHKPSYHLG 4033
+             LTSVHKP YHLG
+Sbjct:  1888 LTSVHKPHYHLG 1853
+
+ Score = 61 (28.0 bits), Expect = 7.3e-82, Sum P(22) = 7.3e-82
+ Identities = 10/10 (100%), Positives = 10/10 (100%), Frame = -1 / -3
+
+Query:  2287 NTCGARRFCF 2258
+             NTCGARRFCF
+Sbjct:   969 NTCGARRFCF 940
+
+ Score = 59 (27.0 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 12/17 (70%), Positives = 13/17 (76%), Frame = -2 / -2
+
+Query:  1125 FSSELPESVTFTFKTEK 1075
+             FSSELPES   T +TEK
+Sbjct:   571 FSSELPESACLTLETEK 521
+
+ Score = 58 (26.6 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 15/29 (51%), Positives = 15/29 (51%), Frame = -1 / -3
+
+Query:  5434 QSLKCSGRLHFLYRKNRSKVQKLLVTTVF 5348
+             Q LK S  LHF YR N     KLL T  F
+Sbjct:  2970 QILKYSDSLHFFYRMNIDITLKLLFTGSF 2884
+
+ Score = 58 (26.6 bits), Expect = 2.5e-78, Sum P(22) = 2.5e-78
+ Identities = 13/24 (54%), Positives = 14/24 (58%), Frame = -1 / -1
+
+Query:  4894 SEGMLRSWATGMTSRDSLDSPLFM 4823
+             SEG  RSWATGM      +S L M
+Sbjct:  2411 SEGAFRSWATGMALYAPFNSSLSM 2340
+
+ Score = 56 (25.7 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 8/16 (50%), Positives = 14/16 (87%), Frame = -2 / -3
+
+Query:  3738 NFKVFVFTLHSMVFKL 3691
+             +F++F FT+H+M F+L
+Sbjct:  1500 SFRIFAFTVHTMAFRL 1453
+
+ Score = 56 (25.7 bits), Expect = 1.7e-75, Sum P(21) = 1.7e-75
+ Identities = 18/27 (66%), Positives = 18/27 (66%), Frame = -1 / -1
+
+Query:  3937 SSDSSESTESSLSAWSPSSSSSSSSSS 3857
+             SS SSES ES  S  S  SSSSSSS S
+Sbjct:  1718 SSTSSESFESMESWLSTWSSSSSSSIS 1638
+
+ Score = 55 (25.2 bits), Expect = 1.0e-78, Sum P(22) = 1.0e-78
+ Identities = 11/18 (61%), Positives = 14/18 (77%), Frame = -3 / -3
+
+Query:  5147 FMRNSEFQIPIIFLTLRV 5094
+             FMRN++FQ+ I FLT  V
+Sbjct:  2679 FMRNTKFQVFIFFLTFGV 2626
+
+ Score = 55 (25.2 bits), Expect = 2.2e-75, Sum P(21) = 2.2e-75
+ Identities = 14/35 (40%), Positives = 19/35 (54%), Frame = -1 / -1
+
+Query:  3934 SDSSESTESSLSAWSPSSSSSSSSSSMWSWLSLEL 3830
+             S +S  +  S+ +W  + SSSSSSS    W  L L
+Sbjct:  1718 SSTSSESFESMESWLSTWSSSSSSSISSMWSWLSL 1614
+
+ Score = 54 (24.7 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 10/18 (55%), Positives = 13/18 (72%), Frame = -3 / -3
+
+Query:  4817 GEVLICGIRILNQEQIEE 4764
+             G+VL+C IR+LN    EE
+Sbjct:  2334 GDVLVCSIRVLNHGTNEE 2281
+
+ Score = 52 (23.8 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 9/13 (69%), Positives = 10/13 (76%), Frame = -3 / -2
+
+Query:  2237 PCGYRIWVQAVKL 2199
+             PCG+ IWV  VKL
+Sbjct:   919 PCGHSIWVFVVKL 881
+
+ Score = 52 (23.8 bits), Expect = 5.3e-75, Sum P(21) = 5.3e-75
+ Identities = 11/31 (35%), Positives = 15/31 (48%), Frame = -2 / -2
+
+Query:  3966 SHQTHPNGEIRQIHPSPQNPRSLHGLHRHHH 3874
+             +HQ H + + R    SP  P   H LH  +H
+Sbjct:  1729 NHQCHLHHQSRSSQWSPGCPHGHHHLHHPYH 1637
+
+ Score = 51 (23.4 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 8/10 (80%), Positives = 9/10 (90%), Frame = -2 / -1
+
+Query:  4170 ICRLWFPRSE 4141
+             IC+LWFPR E
+Sbjct:  1991 ICKLWFPRLE 1962
+
+ Score = 49 (22.5 bits), Expect = 1.8e-81, Sum P(22) = 1.8e-81
+ Identities = 10/13 (76%), Positives = 10/13 (76%), Frame = -1 / -3
+
+Query:  2254 DGSGTSHVAIGSG 2216
+             DGSG SHVA  SG
+Sbjct:   936 DGSGFSHVATASG 898
+
+ Score = 46 (21.1 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 11/19 (57%), Positives = 12/19 (63%), Frame = -2 / -2
+
+Query:  2733 LLNSKVTLFNLMQVSYFSL 2677
+             L  SKV LFN  Q  +FSL
+Sbjct:  1186 LFYSKVNLFNPKQFLFFSL 1130
+
+ Score = 45 (20.6 bits), Expect = 1.7e-82, Sum P(22) = 1.7e-82
+ Identities = 10/11 (90%), Positives = 10/11 (90%), Frame = -1 / -1
+
+Query:  4819 EVRSSSVASGY 4787
+             EV SSSVASGY
+Sbjct:  2336 EVMSSSVASGY 2304
+
+ Score = 44 (20.2 bits), Expect = 4.6e-81, Sum P(23) = 4.6e-81
+ Identities = 8/11 (72%), Positives = 8/11 (72%), Frame = -3 / -1
+
+Query:  5540 KLKGYSDIDCY 5508
+             K K YSDI CY
+Sbjct:  3071 KTKDYSDIKCY 3039
+
+ Score = 43 (19.7 bits), Expect = 5.9e-83, Sum P(23) = 5.9e-83
+ Identities = 10/21 (47%), Positives = 14/21 (66%), Frame = -3 / -1
+
+Query:  5369 AFGYNGVCMKQQTKLRAQNIT 5307
+             +F   GV MK QTKL  ++I+
+Sbjct:  2906 SFCLQGVSMKPQTKLIIKHIS 2844
+
+ Score = 43 (19.7 bits), Expect = 2.4e-81, Sum P(22) = 2.4e-81
+ Identities = 10/17 (58%), Positives = 10/17 (58%), Frame = -1 / -1
+
+Query:  4105 FTCSSETWKLLDFDLSP 4055
+             FT  S     LDFDLSP
+Sbjct:  1925 FTWMSGLRNFLDFDLSP 1875
+
+ Score = 42 (19.2 bits), Expect = 5.1e-32, Sum P(12) = 5.1e-32
+ Identities = 8/13 (61%), Positives = 10/13 (76%), Frame = -1 / -1
+
+Query:  2566 LISSCSLISSLGF 2528
+             + S CSL+SSL F
+Sbjct:  2546 ITSECSLLSSLAF 2508
+
+ Score = 41 (18.8 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 9/10 (90%), Positives = 9/10 (90%), Frame = -1 / -1
+
+Query:  5173 LTSEDELSNS 5144
+             LTSED LSNS
+Sbjct:  2705 LTSEDALSNS 2676
+
+ Score = 40 (18.3 bits), Expect = 4.0e-85, Sum P(21) = 4.0e-85
+ Identities = 9/15 (60%), Positives = 10/15 (66%), Frame = -1 / -2
+
+Query:  2194 KKKKKYAFAIIKKRN 2150
+             K +K   F IIKKRN
+Sbjct:   886 KLQKSCMFIIIKKRN 842
+
+ Score = 40 (18.3 bits), Expect = 2.4e-80, Sum P(22) = 2.4e-80
+ Identities = 8/11 (72%), Positives = 9/11 (81%), Frame = -1 / -1
+
+Query:  3976 AVKVSSDSSEW 3944
+             +V  SSDSSEW
+Sbjct:  1784 SVTSSSDSSEW 1752
+
+ Score = 40 (18.3 bits), Expect = 1.5e-49, Sum P(15) = 1.5e-49
+ Identities = 6/11 (54%), Positives = 6/11 (54%), Frame = -1 / -2
+
+Query:  1813 HHQLTHSVHKC 1781
+             HH L H  H C
+Sbjct:  1663 HHHLHHPYHPC 1631
+
+ Score = 39 (17.9 bits), Expect = 7.6e-85, Sum P(23) = 7.6e-85
+ Identities = 6/8 (75%), Positives = 7/8 (87%), Frame = -3 / -1
+
+Query:  5474 FACFYIHF 5451
+             F CFYI+F
+Sbjct:  3011 FVCFYINF 2988
+
+ Score = 39 (17.9 bits), Expect = 5.9e-83, Sum P(23) = 5.9e-83
+ Identities = 8/11 (72%), Positives = 10/11 (90%), Frame = -3 / -2
+
+Query:  5450 IHKRITIIKMQ 5418
+             IH+RIT IK+Q
+Sbjct:  2986 IHERITNIKIQ 2954
+
+ Score = 38 (17.4 bits), Expect = 1.2e-39, Sum P(12) = 1.2e-39
+ Identities = 8/17 (47%), Positives = 13/17 (76%), Frame = -1 / -3
+
+Query:   451 GLIIIIIIIIIIIITII 401
+             G++ + ++III II II
+Sbjct:  1686 GVLAVHMVIIIFIIHII 1636
+
+ Score = 37 (17.0 bits), Expect = 1.4e-84, Sum P(23) = 1.4e-84
+ Identities = 7/10 (70%), Positives = 9/10 (90%), Frame = -2 / -2
+
+Query:  4248 KKKKLCIQRS 4219
+             K+KK+CIQ S
+Sbjct:  2083 KQKKICIQWS 2054
+
+ Score = 37 (17.0 bits), Expect = 1.3e-74, Sum P(21) = 1.3e-74
+ Identities = 8/20 (40%), Positives = 10/20 (50%), Frame = -3 / -3
+
+Query:  1142 TRRCLPSPLSCQNQSLSPLK 1083
+             T   LP P +  NQ+L   K
+Sbjct:   156 TMLSLPPPAAADNQALPEFK 97
+
+ Score = 37 (17.0 bits), Expect = 1.6e-34, Sum P(13) = 1.6e-34
+ Identities = 7/16 (43%), Positives = 10/16 (62%), Frame = -3 / -3
+
+Query:  3077 TSFRIFIFYKRLKVSN 3030
+             T F++FIF+    V N
+Sbjct:  2667 TKFQVFIFFLTFGVYN 2620
+
+ Score = 37 (17.0 bits), Expect = 3.2e-29, Sum P(11) = 3.2e-29
+ Identities = 6/20 (30%), Positives = 11/20 (55%), Frame = -3 / -1
+
+Query:  5510 YSFSFNSACFSKFACFYIHF 5451
+             Y F F+ + +S    +Y+ F
+Sbjct:  1565 YGFLFSLSLYSTLVFYYLSF 1506
+
+ Score = 36 (16.5 bits), Expect = 7.6e-85, Sum P(23) = 7.6e-85
+ Identities = 6/17 (35%), Positives = 9/17 (52%), Frame = -3 / -3
+
+Query:   989 EGGGNAKQAKANHCQSH 939
+             +GGG    +   HC +H
+Sbjct:    69 QGGGEIVSSGFCHCPAH 19
+
+ Score = 36 (16.5 bits), Expect = 1.8e-84, Sum P(23) = 1.8e-84
+ Identities = 6/13 (46%), Positives = 9/13 (69%), Frame = -3 / -3
+
+Query:  4244 KKSSVFKGHTVDF 4206
+             +K  VF GH V++
+Sbjct:  2079 RKRFVFNGHKVEY 2041
+
+ Score = 36 (16.5 bits), Expect = 1.7e-74, Sum P(21) = 1.7e-74
+ Identities = 8/19 (42%), Positives = 10/19 (52%), Frame = -2 / -1
+
+Query:  1293 WPIWYCLCLKYIVSTLKYS 1237
+             W    CLCL  ++ T K S
+Sbjct:   164 WSRRCCLCLLLLLLTTKPS 108
+
+ Score = 36 (16.5 bits), Expect = 6.4e-36, Sum P(11) = 6.4e-36
+ Identities = 5/8 (62%), Positives = 6/8 (75%), Frame = -1 / -2
+
+Query:  1510 GWYCKYHS 1487
+             GW C +HS
+Sbjct:  2380 GWPCMHHS 2357
+
+ Score = 36 (16.5 bits), Expect = 7.0e-30, Sum P(10) = 7.0e-30
+ Identities = 7/16 (43%), Positives = 9/16 (56%), Frame = -2 / -2
+
+Query:   981 RQCQTGKSKSLPISWS 934
+             R  +T K K + I WS
+Sbjct:  2101 RLTKTAKQKKICIQWS 2054
+
+ Score = 36 (16.5 bits), Expect = 2.4e-29, Sum P(11) = 2.4e-29
+ Identities = 7/15 (46%), Positives = 11/15 (73%), Frame = -2 / -1
+
+Query:  3582 VKLKSKTFILITHIS 3538
+             V +K +T ++I HIS
+Sbjct:  2888 VSMKPQTKLIIKHIS 2844
+
+ Score = 35 (16.0 bits), Expect = 4.6e-81, Sum P(23) = 4.6e-81
+ Identities = 6/9 (66%), Positives = 8/9 (88%), Frame = -2 / -1
+
+Query:  5601 LQDLFTPTK 5575
+             ++DLFTP K
+Sbjct:  3128 IKDLFTPQK 3102
+
+ Score = 35 (16.0 bits), Expect = 6.7e-60, Sum P(17) = 6.7e-60
+ Identities = 6/18 (33%), Positives = 11/18 (61%), Frame = -2 / -1
+
+Query:  1356 SRTCFYYIKNLIIRESVY 1303
+             S   FYY+   ++ ES++
+Sbjct:  1535 STLVFYYLSFYLVSESLH 1482
+
+ Score = 35 (16.0 bits), Expect = 3.8e-35, Sum P(12) = 3.8e-35
+ Identities = 5/8 (62%), Positives = 5/8 (62%), Frame = -3 / -1
+
+Query:  4004 WSESVCLC 3981
+             WS   CLC
+Sbjct:   164 WSRRCCLC 141
+
+ Score = 35 (16.0 bits), Expect = 2.2e-31, Sum P(10) = 2.2e-31
+ Identities = 5/7 (71%), Positives = 7/7 (100%), Frame = -2 / -3
+
+Query:   138 RTLQCVC 118
+             RT++CVC
+Sbjct:  1953 RTIRCVC 1933
+
+
+Parameters:
+  matrix=blosum62mod
+  hspmax=10000
+  nogaps
+
+  ctxfactor=36.0
+  E=10
+
+  Query                        -----  As Used  -----    -----  Computed  ----
+  Frame  MatID Matrix name     Lambda    K       H      Lambda    K       H
+   Std.    0   blosum62mod                              0.318   0.135   0.401  
+   +3      0   blosum62mod     0.318   0.135   0.401    0.363   0.171   0.609  
+   +2      0   blosum62mod     0.318   0.135   0.401    0.374   0.180   0.682  
+   +1      0   blosum62mod     0.318   0.135   0.401    0.367   0.173   0.643  
+   -1      0   blosum62mod     0.318   0.135   0.401    0.370   0.176   0.639  
+   -2      0   blosum62mod     0.318   0.135   0.401    0.370   0.176   0.689  
+   -3      0   blosum62mod     0.318   0.135   0.401    0.364   0.172   0.614  
+
+  Query
+  Frame  MatID  Length  Eff.Length     E    S W   T  X   E2     S2
+   +3      0     1926      1926       10.  35 3  13 22  0.15    35
+   +2      0     1927      1927       10.  35 3  13 22  0.15    35
+   +1      0     1927      1927       10.  35 3  13 22  0.15    35
+   -1      0     1927      1927       10.  35 3  13 22  0.15    35
+   -2      0     1927      1927       10.  35 3  13 22  0.15    35
+   -3      0     1926      1926       10.  35 3  13 22  0.15    35
+
+
+Statistics:
+
+  Database:  /tmp//sgp2_26956.U20758.DB
+    Title:  sgp2_26956.U20758.DB
+    Release date:  unknown
+    Posted date:  9:43 PM CEST Oct 18, 2000
+    Format:  BLAST
+  # of letters in database:  3143
+  # of sequences in database:  1
+  # of database sequences satisfying E:  1
+  No. of states in DFA:  552 (59 KB)
+  Total size of DFA:  817 KB (832 KB)
+  Time to generate neighborhood:  0.06u 0.01s 0.07t  Elapsed: 00:00:00
+  No. of threads or processors used:  1
+  Search cpu time:  0.12u 0.01s 0.13t  Elapsed: 00:00:00
+  Total cpu time:  1.06u 0.03s 1.09t  Elapsed: 00:00:01
+  Start:  Wed Oct 18 21:43:53 2000   End:  Wed Oct 18 21:43:54 2000

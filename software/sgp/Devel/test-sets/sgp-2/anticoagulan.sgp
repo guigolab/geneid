@@ -1,0 +1,27 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M11228 - Length = 11725 bps
+## date Wed Oct 18 21:45:03 2000
+# Optimal Gene Structure. 1 genes. Score = 250.327333 
+# Gene 1(Forward). 7 exons. 439 aa. Score = 250.327333 
+M11228	geneid_v1.0	Internal	3464	3630	27.146	+	2	gene_1	# AA-1	AA-56
+M11228	geneid_v1.0	Internal	5093	5117	4.410	+	0	gene_1	# AA-57	AA-65
+M11228	geneid_v1.0	Internal	5210	5347	26.672	+	2	gene_1	# AA-65	AA-111
+M11228	geneid_v1.0	Internal	5450	5584	23.899	+	2	gene_1	# AA-111	AA-156
+M11228	geneid_v1.0	Internal	8253	8395	-4.724	+	2	gene_1	# AA-156	AA-203
+M11228	geneid_v1.0	Internal	9269	9386	15.476	+	0	gene_1	# AA-204	AA-243
+M11228	geneid_v1.0	Terminal	10516	11105	157.449	+	2	gene_1	# AA-243	AA-439
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence AF034569 - Length = 15160 bps
+## date Wed Oct 18 21:45:05 2000
+# Optimal Gene Structure. 1 genes. Score = 234.978540 
+# Gene 1(Forward). 8 exons. 530 aa. Score = 234.978540 
+AF034569	geneid_v1.0	Internal	2985	3148	21.576	+	2	gene_1	# AA-1	AA-55
+AF034569	geneid_v1.0	Internal	4342	4366	3.233	+	0	gene_1	# AA-56	AA-64
+AF034569	geneid_v1.0	Internal	4486	4650	20.259	+	2	gene_1	# AA-64	AA-119
+AF034569	geneid_v1.0	Internal	4718	4852	33.628	+	2	gene_1	# AA-119	AA-164
+AF034569	geneid_v1.0	Internal	9745	10021	29.612	+	2	gene_1	# AA-164	AA-256
+AF034569	geneid_v1.0	Internal	10485	10602	-5.922	+	1	gene_1	# AA-256	AA-295
+AF034569	geneid_v1.0	Internal	12786	12903	16.688	+	0	gene_1	# AA-296	AA-335
+AF034569	geneid_v1.0	Terminal	14184	14770	115.905	+	2	gene_1	# AA-335	AA-530

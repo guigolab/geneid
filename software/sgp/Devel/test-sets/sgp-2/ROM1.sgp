@@ -1,0 +1,18 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M96759 - Length = 2841 bps
+## date Wed Oct 18 21:44:27 2000
+# Optimal Gene Structure. 1 genes. Score = 160.917598 
+# Gene 1(Forward). 3 exons. 352 aa. Score = 160.917598 
+M96759	geneid_v1.0	   First	652	1241	92.155	+	0	gene_1	# AA-1	AA-197
+M96759	geneid_v1.0	Internal	1629	1875	49.110	+	1	gene_1	# AA-197	AA-279
+M96759	geneid_v1.0	Terminal	1992	2210	19.653	+	0	gene_1	# AA-280	AA-352
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M96760 - Length = 2787 bps
+## date Wed Oct 18 21:44:28 2000
+# Optimal Gene Structure. 1 genes. Score = 134.273183 
+# Gene 1(Forward). 3 exons. 352 aa. Score = 134.273183 
+M96760	geneid_v1.0	   First	652	1241	64.206	+	0	gene_1	# AA-1	AA-197
+M96760	geneid_v1.0	Internal	1601	1847	42.997	+	1	gene_1	# AA-197	AA-279
+M96760	geneid_v1.0	Terminal	1938	2156	27.070	+	0	gene_1	# AA-280	AA-352

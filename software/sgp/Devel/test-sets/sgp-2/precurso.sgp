@@ -1,0 +1,34 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X15377 - Length = 14638 bps
+## date Wed Oct 18 21:46:51 2000
+# Optimal Gene Structure. 1 genes. Score = 501.993329 
+# Gene 1(Forward). 11 exons. 695 aa. Score = 501.993329 
+X15377	geneid_v1.0	Internal	2984	3077	20.868	+	2	gene_1	# AA-1	AA-32
+X15377	geneid_v1.0	Internal	3444	3619	25.075	+	1	gene_1	# AA-32	AA-91
+X15377	geneid_v1.0	Internal	3806	3929	32.996	+	2	gene_1	# AA-91	AA-132
+X15377	geneid_v1.0	Internal	4026	4155	31.649	+	1	gene_1	# AA-132	AA-175
+X15377	geneid_v1.0	Internal	4238	4444	46.985	+	0	gene_1	# AA-176	AA-244
+X15377	geneid_v1.0	Internal	5305	5623	110.172	+	0	gene_1	# AA-245	AA-351
+X15377	geneid_v1.0	Internal	7740	7900	29.116	+	2	gene_1	# AA-351	AA-404
+X15377	geneid_v1.0	Internal	9767	10022	74.676	+	0	gene_1	# AA-405	AA-490
+X15377	geneid_v1.0	Internal	10517	10687	38.138	+	2	gene_1	# AA-490	AA-547
+X15377	geneid_v1.0	Internal	11541	11778	56.159	+	2	gene_1	# AA-547	AA-626
+X15377	geneid_v1.0	Terminal	12566	12773	36.161	+	1	gene_1	# AA-626	AA-695
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X15378 - Length = 11913 bps
+## date Wed Oct 18 21:46:53 2000
+# Optimal Gene Structure. 1 genes. Score = 426.558373 
+# Gene 1(Forward). 11 exons. 709 aa. Score = 426.558373 
+X15378	geneid_v1.0	Internal	2352	2445	12.672	+	2	gene_1	# AA-1	AA-32
+X15378	geneid_v1.0	Internal	2772	2947	24.767	+	1	gene_1	# AA-32	AA-91
+X15378	geneid_v1.0	Internal	3379	3502	15.543	+	2	gene_1	# AA-91	AA-132
+X15378	geneid_v1.0	Internal	3598	3727	27.146	+	1	gene_1	# AA-132	AA-175
+X15378	geneid_v1.0	Internal	3811	4017	37.733	+	0	gene_1	# AA-176	AA-244
+X15378	geneid_v1.0	Internal	4450	4768	86.332	+	0	gene_1	# AA-245	AA-351
+X15378	geneid_v1.0	Internal	6961	7166	40.123	+	2	gene_1	# AA-351	AA-419
+X15378	geneid_v1.0	Internal	8184	8439	70.352	+	0	gene_1	# AA-420	AA-505
+X15378	geneid_v1.0	Internal	8736	8906	36.309	+	2	gene_1	# AA-505	AA-562
+X15378	geneid_v1.0	Internal	9665	9902	43.819	+	2	gene_1	# AA-562	AA-641
+X15378	geneid_v1.0	Terminal	10544	10748	31.761	+	1	gene_1	# AA-641	AA-709

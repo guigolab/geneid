@@ -1,0 +1,21 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence D79206 - Length = 23822 bps
+## date Wed Oct 18 21:47:02 2000
+# Optimal Gene Structure. 1 genes. Score = 99.664740 
+# Gene 1(Forward). 4 exons. 182 aa. Score = 99.664740 
+D79206	geneid_v1.0	Internal	12753	12900	23.225	+	0	gene_1	# AA-1	AA-50
+D79206	geneid_v1.0	Internal	15607	15653	0.082	+	2	gene_1	# AA-50	AA-65
+D79206	geneid_v1.0	Internal	18112	18310	32.015	+	0	gene_1	# AA-66	AA-132
+D79206	geneid_v1.0	Terminal	21260	21411	44.342	+	2	gene_1	# AA-132	AA-182
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence D89572 - Length = 19730 bps
+## date Wed Oct 18 21:47:05 2000
+# Optimal Gene Structure. 1 genes. Score = 92.266145 
+# Gene 1(Forward). 5 exons. 199 aa. Score = 92.266145 
+D89572	geneid_v1.0	   First	713	787	1.640	+	0	gene_1	# AA-1	AA-25
+D89572	geneid_v1.0	Internal	12531	12657	21.894	+	0	gene_1	# AA-26	AA-68
+D89572	geneid_v1.0	Internal	14117	14163	-0.710	+	2	gene_1	# AA-68	AA-83
+D89572	geneid_v1.0	Internal	14753	14948	32.043	+	0	gene_1	# AA-84	AA-149
+D89572	geneid_v1.0	Terminal	17605	17756	37.399	+	2	gene_1	# AA-149	AA-199

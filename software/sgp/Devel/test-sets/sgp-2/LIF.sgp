@@ -1,0 +1,16 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M63420 - Length = 7614 bps
+## date Wed Oct 18 21:43:08 2000
+# Optimal Gene Structure. 1 genes. Score = 154.916217 
+# Gene 1(Forward). 2 exons. 197 aa. Score = 154.916217 
+M63420	geneid_v1.0	Internal	2471	2649	27.543	+	2	gene_1	# AA-1	AA-60
+M63420	geneid_v1.0	Terminal	3343	3753	127.374	+	0	gene_1	# AA-61	AA-197
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M63419 - Length = 8757 bps
+## date Wed Oct 18 21:43:09 2000
+# Optimal Gene Structure. 1 genes. Score = 115.288606 
+# Gene 1(Forward). 2 exons. 198 aa. Score = 115.288606 
+M63419	geneid_v1.0	Internal	2541	2722	35.605	+	2	gene_1	# AA-1	AA-61
+M63419	geneid_v1.0	Terminal	3280	3690	79.683	+	0	gene_1	# AA-62	AA-198

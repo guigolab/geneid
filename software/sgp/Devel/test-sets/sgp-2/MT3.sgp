@@ -1,0 +1,16 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence S72043 - Length = 2015 bps
+## date Wed Oct 18 21:43:39 2000
+# Optimal Gene Structure. 1 genes. Score = 16.765264 
+# Gene 1(Forward). 2 exons. 59 aa. Score = 16.765264 
+S72043	geneid_v1.0	Internal	759	824	8.457	+	2	gene_1	# AA-1	AA-23
+S72043	geneid_v1.0	Terminal	1730	1839	8.308	+	2	gene_1	# AA-23	AA-59
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence S72046 - Length = 1845 bps
+## date Wed Oct 18 21:43:40 2000
+# Optimal Gene Structure. 1 genes. Score = 20.809725 
+# Gene 1(Forward). 2 exons. 57 aa. Score = 20.809725 
+S72046	geneid_v1.0	Internal	721	786	11.559	+	2	gene_1	# AA-1	AA-23
+S72046	geneid_v1.0	Internal	1601	1706	9.251	+	2	gene_1	# AA-23	AA-57

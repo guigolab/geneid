@@ -1,0 +1,20 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence Y00081 - Length = 5961 bps
+## date Wed Oct 18 21:46:05 2000
+# Optimal Gene Structure. 1 genes. Score = 28.993017 
+# Gene 1(Forward). 4 exons. 240 aa. Score = 28.993017 
+Y00081	geneid_v1.0	Internal	1396	1586	5.416	+	2	gene_1	# AA-1	AA-64
+Y00081	geneid_v1.0	Internal	2634	2846	4.783	+	0	gene_1	# AA-65	AA-135
+Y00081	geneid_v1.0	Internal	3454	3600	3.824	+	0	gene_1	# AA-136	AA-184
+Y00081	geneid_v1.0	Terminal	5342	5509	14.970	+	0	gene_1	# AA-185	AA-240
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M20572 - Length = 8258 bps
+## date Wed Oct 18 21:46:06 2000
+# Optimal Gene Structure. 1 genes. Score = 25.015540 
+# Gene 1(Forward). 4 exons. 206 aa. Score = 25.015540 
+M20572	geneid_v1.0	Internal	1509	1693	1.518	+	2	gene_1	# AA-1	AA-62
+M20572	geneid_v1.0	Internal	2947	3060	9.576	+	0	gene_1	# AA-63	AA-100
+M20572	geneid_v1.0	Internal	6042	6191	6.671	+	0	gene_1	# AA-101	AA-150
+M20572	geneid_v1.0	Terminal	7453	7620	7.252	+	0	gene_1	# AA-151	AA-206

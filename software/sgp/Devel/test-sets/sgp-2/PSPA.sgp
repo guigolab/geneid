@@ -1,0 +1,20 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M68519 - Length = 4732 bps
+## date Wed Oct 18 21:44:18 2000
+# Optimal Gene Structure. 1 genes. Score = 96.695291 
+# Gene 1(Forward). 4 exons. 249 aa. Score = 96.695291 
+M68519	geneid_v1.0	   First	1073	1244	7.659	+	0	gene_1	# AA-1	AA-58
+M68519	geneid_v1.0	Internal	1551	1670	9.345	+	2	gene_1	# AA-58	AA-98
+M68519	geneid_v1.0	Internal	2425	2502	5.955	+	2	gene_1	# AA-98	AA-124
+M68519	geneid_v1.0	Terminal	2969	3345	73.737	+	2	gene_1	# AA-124	AA-249
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence S48768 - Length = 4942 bps
+## date Wed Oct 18 21:44:20 2000
+# Optimal Gene Structure. 1 genes. Score = 109.600700 
+# Gene 1(Forward). 4 exons. 257 aa. Score = 109.600700 
+S48768	geneid_v1.0	Internal	2056	2250	15.555	+	2	gene_1	# AA-1	AA-66
+S48768	geneid_v1.0	Internal	2443	2562	8.550	+	2	gene_1	# AA-66	AA-106
+S48768	geneid_v1.0	Internal	3256	3333	12.749	+	2	gene_1	# AA-106	AA-132
+S48768	geneid_v1.0	Terminal	3686	4062	72.747	+	2	gene_1	# AA-132	AA-257

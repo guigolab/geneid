@@ -1,0 +1,19 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence L15533 - Length = 4497 bps
+## date Wed Oct 18 21:44:12 2000
+# Optimal Gene Structure. 1 genes. Score = 49.357063 
+# Gene 1(Forward). 3 exons. 128 aa. Score = 49.357063 
+L15533	geneid_v1.0	Internal	1970	2088	18.027	+	2	gene_1	# AA-1	AA-40
+L15533	geneid_v1.0	Internal	2276	2413	17.021	+	0	gene_1	# AA-41	AA-86
+L15533	geneid_v1.0	Internal	3040	3166	14.308	+	0	gene_1	# AA-87	AA-128
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence D63360 - Length = 4292 bps
+## date Wed Oct 18 21:44:13 2000
+# Optimal Gene Structure. 1 genes. Score = 40.854504 
+# Gene 1(Forward). 4 exons. 155 aa. Score = 40.854504 
+D63360	geneid_v1.0	Internal	1953	2033	3.570	+	2	gene_1	# AA-1	AA-28
+D63360	geneid_v1.0	Internal	2552	2670	13.532	+	2	gene_1	# AA-28	AA-67
+D63360	geneid_v1.0	Internal	2841	2978	7.563	+	0	gene_1	# AA-68	AA-113
+D63360	geneid_v1.0	Internal	3565	3691	16.190	+	0	gene_1	# AA-114	AA-155

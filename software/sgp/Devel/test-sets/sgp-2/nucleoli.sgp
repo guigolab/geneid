@@ -1,0 +1,40 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence M60858 - Length = 10942 bps
+## date Wed Oct 18 21:46:23 2000
+# Optimal Gene Structure. 1 genes. Score = 449.835770 
+# Gene 1(Forward). 14 exons. 708 aa. Score = 449.835770 
+M60858	geneid_v1.0	   First	1181	1198	1.027	+	0	gene_1	# AA-1	AA-6
+M60858	geneid_v1.0	Internal	2159	2275	29.574	+	0	gene_1	# AA-7	AA-45
+M60858	geneid_v1.0	Internal	3439	3916	135.226	+	0	gene_1	# AA-46	AA-205
+M60858	geneid_v1.0	Internal	4587	4784	86.721	+	2	gene_1	# AA-205	AA-271
+M60858	geneid_v1.0	Internal	4889	4975	15.210	+	2	gene_1	# AA-271	AA-300
+M60858	geneid_v1.0	Internal	5160	5301	16.816	+	2	gene_1	# AA-300	AA-347
+M60858	geneid_v1.0	Internal	6307	6431	31.729	+	1	gene_1	# AA-347	AA-389
+M60858	geneid_v1.0	Internal	7037	7160	19.279	+	2	gene_1	# AA-389	AA-430
+M60858	geneid_v1.0	Internal	7620	7777	19.943	+	1	gene_1	# AA-430	AA-483
+M60858	geneid_v1.0	Internal	8292	8415	15.521	+	2	gene_1	# AA-483	AA-524
+M60858	geneid_v1.0	Internal	8652	8785	5.569	+	1	gene_1	# AA-524	AA-569
+M60858	geneid_v1.0	Internal	9279	9405	27.603	+	2	gene_1	# AA-569	AA-611
+M60858	geneid_v1.0	Internal	9792	10006	40.533	+	1	gene_1	# AA-611	AA-683
+M60858	geneid_v1.0	Terminal	10140	10216	5.082	+	2	gene_1	# AA-683	AA-708
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X07699 - Length = 11478 bps
+## date Wed Oct 18 21:46:24 2000
+# Optimal Gene Structure. 1 genes. Score = 454.110087 
+# Gene 1(Forward). 14 exons. 708 aa. Score = 454.110087 
+X07699	geneid_v1.0	   First	2024	2041	2.524	+	0	gene_1	# AA-1	AA-6
+X07699	geneid_v1.0	Internal	3024	3140	31.736	+	0	gene_1	# AA-7	AA-45
+X07699	geneid_v1.0	Internal	3797	4292	144.762	+	0	gene_1	# AA-46	AA-211
+X07699	geneid_v1.0	Internal	4508	4693	60.441	+	2	gene_1	# AA-211	AA-273
+X07699	geneid_v1.0	Internal	4792	4878	15.976	+	2	gene_1	# AA-273	AA-302
+X07699	geneid_v1.0	Internal	5056	5197	23.053	+	2	gene_1	# AA-302	AA-349
+X07699	geneid_v1.0	Internal	6105	6229	29.993	+	1	gene_1	# AA-349	AA-391
+X07699	geneid_v1.0	Internal	7393	7516	15.187	+	2	gene_1	# AA-391	AA-432
+X07699	geneid_v1.0	Internal	7967	8121	27.622	+	1	gene_1	# AA-432	AA-484
+X07699	geneid_v1.0	Internal	8614	8737	16.576	+	2	gene_1	# AA-484	AA-525
+X07699	geneid_v1.0	Internal	8928	9049	7.104	+	1	gene_1	# AA-525	AA-566
+X07699	geneid_v1.0	Internal	9754	9880	23.838	+	2	gene_1	# AA-566	AA-608
+X07699	geneid_v1.0	Internal	10212	10435	48.292	+	1	gene_1	# AA-608	AA-683
+X07699	geneid_v1.0	Terminal	10551	10627	7.008	+	2	gene_1	# AA-683	AA-708

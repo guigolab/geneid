@@ -1,0 +1,24 @@
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X57152 - Length = 5917 bps
+## date Wed Oct 18 21:45:43 2000
+# Optimal Gene Structure. 1 genes. Score = 147.908608 
+# Gene 1(Forward). 6 exons. 220 aa. Score = 147.908608 
+X57152	geneid_v1.0	Internal	1623	1705	17.138	+	2	gene_1	# AA-1	AA-28
+X57152	geneid_v1.0	Internal	2672	2774	28.885	+	0	gene_1	# AA-29	AA-63
+X57152	geneid_v1.0	Internal	3344	3459	27.092	+	2	gene_1	# AA-63	AA-101
+X57152	geneid_v1.0	Internal	3906	3981	11.537	+	0	gene_1	# AA-102	AA-127
+X57152	geneid_v1.0	Internal	4128	4317	45.593	+	2	gene_1	# AA-127	AA-190
+X57152	geneid_v1.0	Terminal	4645	4735	17.664	+	1	gene_1	# AA-190	AA-220
+## gff-version 2
+## source-version: geneid v 1.0 -- imim.es
+## Sequence X80685 - Length = 7874 bps
+## date Wed Oct 18 21:45:46 2000
+# Optimal Gene Structure. 1 genes. Score = 141.281434 
+# Gene 1(Forward). 6 exons. 220 aa. Score = 141.281434 
+X80685	geneid_v1.0	Internal	2158	2240	13.949	+	2	gene_1	# AA-1	AA-28
+X80685	geneid_v1.0	Internal	2829	2931	28.861	+	0	gene_1	# AA-29	AA-63
+X80685	geneid_v1.0	Internal	4112	4227	27.881	+	2	gene_1	# AA-63	AA-101
+X80685	geneid_v1.0	Internal	4615	4690	10.699	+	0	gene_1	# AA-102	AA-127
+X80685	geneid_v1.0	Internal	4801	4990	44.152	+	2	gene_1	# AA-127	AA-190
+X80685	geneid_v1.0	Terminal	6262	6352	15.739	+	1	gene_1	# AA-190	AA-220
