@@ -1,8 +1,8 @@
 # 
-#   this file is part of the geneid distribution
-#   (c) by Roderic Guigo and Enrique Blanco, 2000
+#   This file is part of the geneid distribution
+#   (c) by Roderic Guigo and Enrique Blanco, 2003
 #
-#   makefile for geneid
+#   Makefile for geneid
 #
 
 INCLUDE= ./include
@@ -12,7 +12,7 @@ BIN = ./bin
 HEADERS = $(INCLUDE)/geneid.h 
 PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
-CC= gcc 
+CC= /home/ug/eblanco/no_backup/gcc-3.3.1/objects/salida/bin/gcc 
 OPTS=-I$(INCLUDE) -Wall -O3
 
 #######
@@ -23,7 +23,7 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalEx
 	$(OBJ)/Dictionary.o $(OBJ)/DumpHash.o $(OBJ)/FetchSequence.o \
 	$(OBJ)/GetSitesWithProfile.o $(OBJ)/GetStopCodons.o $(OBJ)/Output.o \
 	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o \
-	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadSR.o $(OBJ)/RecomputePositions.o\
+	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o\
 	$(OBJ)/RequestMemory.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
 	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SwitchFrames.o $(OBJ)/SwitchPositions.o \
 	$(OBJ)/Translate.o \
@@ -125,8 +125,8 @@ $(OBJ)/ReadExonsGFF.o : $(CDIR)/ReadExonsGFF.c $(HEADERS)
 $(OBJ)/ReadSequence.o : $(CDIR)/ReadSequence.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/ReadSequence.c -o $(OBJ)/ReadSequence.o
 
-$(OBJ)/ReadSR.o : $(CDIR)/ReadSR.c $(HEADERS)
-	$(CC) -c $(OPTS) $(CDIR)/ReadSR.c -o $(OBJ)/ReadSR.o
+$(OBJ)/ReadHSP.o : $(CDIR)/ReadHSP.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/ReadHSP.c -o $(OBJ)/ReadHSP.o
 
 $(OBJ)/RecomputePositions.o : $(CDIR)/RecomputePositions.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/RecomputePositions.c -o $(OBJ)/RecomputePositions.o
