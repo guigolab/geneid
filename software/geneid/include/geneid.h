@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.14 2004-01-27 16:29:37 eblanco Exp $ */
+/* $Id: geneid.h,v 1.15 2004-02-03 10:24:43 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -161,6 +161,7 @@ A. DEFINITIONS
 #define MAXTYPE 50               
 #define MAXINFO 100
 #define NOTFOUND -1
+#define UNKNOWNAA 'X'
 
 /* Dumpster hash table size (factor)        */ 
 #define HASHFACTOR 3             
@@ -336,7 +337,7 @@ typedef struct s_exonGFF
   float HSPScore;
   float Score;
   pexonGFF PreviousExon;
-  float GeneScore;
+  double GeneScore;
   char Group[MAXSTRING];
   int offset1;
   int offset2;
