@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.7 2001-04-23 08:58:46 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.8 2001-04-23 13:56:56 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -243,6 +243,9 @@ void readargv (int argc,char* argv[],
 
   if (XML && (GFF || X10))
     printError("Incompatible options(-M|-X,-G)");
+
+  if (cDNA && GFF)
+    printError("Incompatible options(-D|-G)");
   
   if (error)
     printError(USAGE);
