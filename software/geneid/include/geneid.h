@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.7 2000-09-08 10:39:55 eblanco Exp $ */
+/* $Id: geneid.h,v 1.8 2001-02-07 17:45:17 eblanco Exp $ */
 
 /* Include libraries */
 #include <stdio.h>
@@ -41,7 +41,16 @@
 #include <math.h>
 #include <sys/stat.h>
 
-/* Memory definitions used in GeneId */
+/* Parameters for chromosome-size predictions 
+#define RSITES 5
+
+#define RSINGL 3                       
+#define RFIRST 1
+#define RINTER 0.5
+#define RTERMI 1   
+End of comment */
+
+/* Memory definitions used in geneid */
 
 #define RSITES 10                      /* maximum number of sites         */
 #define REXONS 3                       /* maximum number of exons         */
@@ -53,10 +62,11 @@
 #define RFIRST 2 
 #define RINTER 1
 #define RTERMI 1.9
+#define RORF   10   
 
 #define RSORTE 3                       /* Total number ox exons/split     */
 
-#define NUMEEVIDENCES 50000            /* maximum number of evidences     */
+#define NUMEEVIDENCES 500              /* maximum number of evidences     */
 #define NUMSEVIDENCES 2*NUMEEVIDENCES          
 
 #define MAXGENE 10000                  /* Max number of genes(multigenes) */
@@ -82,9 +92,9 @@
                                        /* and terminal)                   */
 #define NULL_OLIGO_SCORE  -4           /* temporal hack to recompute */
 
-#define VERSION   "geneid_v1.0"        /* The name of the game            */
-#define SITES     "geneid_v1.0"        /* The name of the sites           */
-#define EXONS     "geneid_v1.0"        /* The name of the exons           */
+#define VERSION   "geneid_v1.1"        /* The name of the game            */
+#define SITES     "geneid_v1.1"        /* The name of the sites           */
+#define EXONS     "geneid_v1.1"        /* The name of the exons           */
 #define EVIDENCE  "evidence"           /* The name of evidence exons      */
 
 #define FRAMES 3                       /* 3 possible reading frames       */
@@ -102,6 +112,7 @@
 #define INTERNAL 1
 #define TERMINAL 2
 #define SINGLE   3
+#define ORF      4
 
 #define sACC "Acceptor"                /* Define site types               */
 #define sDON "Donor"
@@ -112,6 +123,7 @@
 #define sINTERNAL "Internal"
 #define sTERMINAL "Terminal"
 #define sSINGLE   "Single"
+#define sORF      "ORF"
 
 #define BLOCK 1                        /* define a block rule             */
 #define NONBLOCK 0                     /* define a non/block rule         */
@@ -137,7 +149,7 @@
 #define FILENAMELENGTH 200             /* maximum length of filenames     */
 #define INF 1.7976931348623157E+308    /* maximal decimal value of double */
                                        /* from limits.h                   */
-#define INFI 9999999                   /* the biggest number of the world */
+#define INFI 999999999                 /* the biggest number in the geneid world */
 #define MAXSCORE 10000.0               /* Infinity score (evidence exons) */
 
 #define MINUTE 60                      /* 1 minute = 60 seconds           */
@@ -217,11 +229,13 @@ typedef struct s_packExons             /* Pack of exons                   */
   exonGFF* InternalExons;
   exonGFF* TerminalExons;
   exonGFF* Singles;
+  exonGFF* ORFs;
 
   long nInitialExons;                  /* Counters of exons               */
   long nInternalExons;
   long nTerminalExons;
   long nSingles;
+  long nORFs;
 
   long nExons;                         /* Counter of the total number     */
 } packExons;
@@ -299,14 +313,15 @@ typedef struct s_packDump
 typedef struct s_account               /* Accounting                      */
 {
   long starts, starts_r,
-       stops, stops_r,
-       acc, acc_r,
-       don, don_r;
+    stops, stops_r,
+    acc, acc_r,
+    don, don_r;
 
   long first, first_r,
-       internal, internal_r,
-       terminal, terminal_r,
-       single, single_r;
+    internal, internal_r,
+    terminal, terminal_r,
+    single, single_r,
+    orf, orf_r;
 
   long totalExons;
   
@@ -416,6 +431,11 @@ long BuildSingles(site *Start, long nStarts,
                   long cutPoint,
                   exonGFF *Exon);
 
+long BuildORFs(site *Start, long nStarts, 
+                  site *Stop, long nStops,
+                  long cutPoint,
+                  exonGFF *Exon);
+
 packSites* RequestMemorySites();
 packExons* RequestMemoryExons();
 exonGFF* RequestMemorySortExons();
@@ -515,6 +535,8 @@ int Translate(long p1, long p2, short fra, short rmd,
 void ReverseSubSequence(long p1, long p2, char* s, char* r);
 
 void CorrectExon(exonGFF *e);
+
+void CorrectORF(exonGFF *e);
 
 void SwitchFrames(exonGFF *e, long n, int when);
 
