@@ -4,9 +4,9 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $
+% $Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $
 %
-\usepackage{noweb}
+\usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
 \usepackage{graphics}
 \usepackage[dvips]{graphicx}
@@ -54,8 +54,39 @@
  
 \input defs.tex
 
-\begin{comment}
-<<LaTeX deploy new definitions>>=
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\ \vfill
+%%\begin{center}
+%%\textbf{\Huge A perl development for {\prog}}\\[5ex]
+%%
+%%\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
+%%
+%%\textbf{\large --- \today ---}\\[10ex]
+%%
+%%\begin{abstract}
+%%\begin{center}
+%%\parbox{0.75\linewidth}{
+%%I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old [[GNUawk]] format. Taking advantage of some capabilities of [[Perl]], such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using [[noweb]] I pretend to improve the overall design and to open the code to other developers.
+%%} % parbox
+%%\end{center}
+%%\end{abstract}\vskip 5ex
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $$>$ }
+%%
+%%\vfill
+%%
+%%\begin{flushright}
+%%\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+%%Grup de Recerca en Infom\`atica Biom\`edica\\
+%%Institut Municipal d'Investigaci\'o M\`edica\\
+%%Universitat Pompeu Fabra\\[2ex]
+%%\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+%%\end{flushright}
+%%\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+<<HIDE: LaTeX deploy new definitions>>=
 %%%%% Colors for gff2ps
 \input tables/AplotColorDefs.tex
 
@@ -65,25 +96,46 @@
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 \newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
-
+\newcommand{\todo}[1]{
+  \vskip 3ex
+  \hspace{-0.75cm}
+   \psframebox[framearc=0.2,linecolor=darkred,linewidth=1pt,
+              fillstyle=solid,fillcolor=verylightyellow,framesep=2ex]{
+     \begin{minipage}[t]{16cm}
+     \vskip -4.75ex
+     \hspace{-1.25cm}
+       \psframebox[framearc=1,linecolor=darkred,linewidth=1.25pt,
+               fillstyle=solid,fillcolor=verylightorange,framesep=5pt]{
+               \textcolor{darkred}{\textbf{\hspace{2ex}TO DO\hspace{2ex}}}
+         } % psframebox
+      \begin{itemize}\setlength{\itemsep}{-0.5ex} #1 \end{itemize}
+     \end{minipage}
+     } % psframebox
+  \vskip 1.5ex
+} % newcommand
+<<HIDE: new LaTeX commands>>
+ 
 %%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
 \newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
 % \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+<<HIDE: new LaTeX pstricks>>
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
 \def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
-<<new LaTeX urls>>
+<<HIDE: new LaTeX urls>>
 
 %%%%% defs
 % \def\tit{\textsc{[[gff2aplot.pl]] }}
 \def\prog{\textsc{\textbf{gff2aplot}}}
+\def\gps{\textsc{\textbf{gff2ps}}}
+\def\gft{\textsc{\textbf{gfftools}}}
 \def\noweb{\textsc{noweb}}
 \def\ps{\textsc{PostScript}}
 \def\eoline{$\backslash\backslash$}
-<<new LaTeX definitions>>
+<<HIDE: new LaTeX definitions>>
 
 %%%%% Setting text for footers and headers
 \fancyhead{} % clear all fields
@@ -108,7 +160,7 @@
  } % def authorslist
 \def\license{GNU General Public License (GNU-GPL)}
 \def\description{
-I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using {\noweb} I pretend to improve the overall design and to open the code to other developers.
+{\prog} is a tool to visualize the alignment of two genomic sequences together with their annotations. Input to the program are single or multiple files in General Feature Format (GFF). Output is in PostScript format so the program serves to generate scalable print-quality images for comparative genomics sequence analysis.
  } % def description 
 \def\showaffiliation{
 \scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
@@ -118,39 +170,7 @@ Universitat Pompeu Fabra\\[2ex]
  } % def showaffiliation
 %
 @
-\end{comment}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%\ \vfill
-%%\begin{center}
-%%\textbf{\Huge A perl development for {\prog}}\\[5ex]
-%%
-%%\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
-%%
-%%\textbf{\large --- \today ---}\\[10ex]
-%%
-%%\begin{abstract}
-%%\begin{center}
-%%\parbox{0.75\linewidth}{
-%%I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old [[GNUawk]] format. Taking advantage of some capabilities of [[Perl]], such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using [[noweb]] I pretend to improve the overall design and to open the code to other developers.
-%%} % parbox
-%%\end{center}
-%%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $$>$ }
-%%
-%%\vfill
-%%
-%%\begin{flushright}
-%%\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
-%%Grup de Recerca en Infom\`atica Biom\`edica\\
-%%Institut Municipal d'Investigaci\'o M\`edica\\
-%%Universitat Pompeu Fabra\\[2ex]
-%%\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
-%%\end{flushright}
-%%\end{center}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{document}
 \thispagestyle{empty}
 
 \begin{titlepage}
@@ -199,6 +219,13 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 %'%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
 \newpage
+
+\thispagestyle{empty}
+
+\ % \vfill
+% \hrulefill
+
+\newpage
 \pagenumbering{roman}
 \setcounter{page}{1}
 \pagestyle{fancy}
@@ -220,6 +247,53 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \newpage
 \pagenumbering{arabic}
 \setcounter{page}{1}
+
+\sctn{Introduction}
+
+*** Cite here pip-plot, dotter and other dotplot tools
+
+<<HIDE: BiBTeX references>>=
+@ 
+
+\subsctn{Project description}
+
+At the first stage of the new {\prog} implementation, we are going to define a simple main loop that performs a serial process, such in the old [[GNUawk]] version. So that, the program will read the input files and parameters defined by user and perform the plots, finishing the job. Once the new version will be operative, we will try to implement an iterative mode and/or a GUI in [[perlTK]].  
+
+\todo{
+\item Flow diagram here (Serial/Filter mode) for figure~\ref{fig:filtermode}.
+} % todo
+\begin{figure}[!ht]
+\begin{center}
+\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
+% \includegraphics[]{}
+\caption[``Filter'' mode of {\prog}.]{\label{fig:filtermode} Input, output and main code blocks are represented in this flowchart for the ``Filter'' mode of {\prog}.}
+\end{center}
+\end{figure}
+
+\subsctn{Basic goals}
+
+\begin{itemize}
+\item I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain, it will be more portable too. 
+
+\item Using {\noweb} I pretend to improve the overall design and to open the code to other developers.
+
+\item \ldots 
+\end{itemize}
+
+\subsctn{TO DO: unfinished stuff and projects}
+
+% \input todo.tex
+
+\todo{
+\item Flow diagram here (Interactive, Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.
+} % todo
+\begin{figure}[!ht]
+\begin{center}
+\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
+% \includegraphics[]{}
+\caption[Future modes of {\prog}.]{\label{fig:othermodes} Input, output and main code blocks are represented in this flowchart for the ``Interactive'', ``Graphic'' and ``Web/CGI'' versions of {\prog}.}
+\end{center}
+\end{figure}
 
 \sctn{Main program definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -261,7 +335,7 @@ This is the {\prog} program outline:
 
 \subsctn{The main loop}
 
-At the first stage of the new {\prog} implementation, we are going to define a simple main loop that performs a serial process, such in the old [[GNUawk]] version. So that, the program will read the input files and parameters defined by user and perform the plots, finishing the job. Once the new version will be operative, we will try to implement an iterative mode and/or a GUI in [[perlTK]].  
+This is the main loop for the {\prog} ``Filter'' mode: 
 
 <<Main Loop>>=
 
@@ -270,14 +344,7 @@ At the first stage of the new {\prog} implementation, we are going to define a s
   %CmdLineVars = ();            # Reseting Command-Line OPTIONS
   &parse_command_line;
 
-  %CustomVars = ();             # Reseting Customization OPTIONS
-  &parse_custom_files;
-  %gff_data = %aplot_data = (); # Reseting DATA
-  &parse_GFF_files;
-
-  &map_vars_data;
-
-  &sort_elements;
+  <<Basic common block for gfftools>>
   &make_plot;
 
   $total_time = &timing($T);
@@ -286,6 +353,23 @@ At the first stage of the new {\prog} implementation, we are going to define a s
   &close_logfile();
   exit(0);
 @ 
+
+{\gft}, say here {\prog} and {\gps}, share many of the basic procedures, both must parse same format input files, must map the read fields to the customization variables and sort groups and their elements by acceptor site coord. That is the main reason for developing a module containing the definitions of such common functions.
+
+<<Basic common block for gfftools>>=
+%CustomVars = ();             # Reseting Customization OPTIONS
+&parse_custom_files;
+
+%Vars = ();
+&map_vars_layout;
+
+%gff_data = %aplot_data = (); # Reseting DATA
+&parse_GFF_files;
+
+&map_vars_data;
+
+&sort_elements;
+@
 
 We force that all the variables must be declared before using them and restrict unsafe constructs with'[[use strict]]'. After that we switch on signal trapping.
 
@@ -303,7 +387,7 @@ my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
 Those are the main variables containing customization parameters and input data from GFF records.
 
 <<Global Vars>>=
-my (%DefaultVars,%CmdLineVars,%CustomVars,%gff_data,%aplot_data);
+my (%DefaultVars,%CmdLineVars,%CustomVars,%Vars,%gff_data,%aplot_data);
 @ 
 
 Some info about the program itself.
@@ -311,9 +395,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.1 $', #'
-     '$Date: 2001-08-21 14:54:21 $', #'
-     '$Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $', #'
+     '$Revision: 1.2 $', #'
+     '$Date: 2001-08-22 19:15:53 $', #'
+     '$Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -480,6 +564,7 @@ sub parse_command_line() {
     $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$T,$_[0]) };
     GetOptions(
                <<command-line options>>
+               <<command-line options with exit>>
                ) || (&warn('CMD_LINE_ERROR',$T), exit(1));
     $SIG{__WARN__} = 'DEFAULT';
 
@@ -598,16 +683,15 @@ CMD_LINE_ERROR =>
 
 The first command-line checking looks for those options exiting the program: '[[help]]' and '[[version]]'. Both need to output to screen without any other message/warning being displayed at the same time.
 
-<<command-line options>>=
-"h|help|?"  => \&prt_help,
+<<command-line options with exit>>=
 "version"   => \&prt_version, 
+"h|help|?"  => \&prt_help,
 @ 
 <<command-line help>>=
 -h, --help    Shows this help.
 --version     Shows current version and exits.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 \rw{-h{\x}-\/-help}{Shows this help.}
 \rw{-\/-version}{Shows current version and exits.}
 @ 
@@ -615,11 +699,10 @@ The first command-line checking looks for those options exiting the program: '[[
 %\clritem{-h{\x}-\/-help}
 %\clritem{-\/-version}
 %@
-\end{comment}
 
 <<Parsing Command-Line Options>>=
 sub prt_version() {
-    my $comment = $MessageList{'SHOW_VERSION'};
+    my $comment = $Messages{'SHOW_VERSION'};
     $comment = sprintf($comment,$PROGRAM,$VERSION);
     &prt_to_stderr($comment);
     exit(1);
@@ -692,12 +775,15 @@ defined($chk_stdin) && do {
 
 \subsubsctn{Verifying command-line settings}
 
+\todo{
+\item \  \\
 <<Check command-line options>>=
 @
+} % todo
 
 \subsctn{Setting customization parameters from files} 
 
-Here we define the command-line option for loading customization files.
+Here we define the command-line option for loading customization files. Setting '[[O|custom-filename=s@]]' allows us to pass more than one custom file within the same command-line. Must be noted that latest file customization variables will override the previous ones.
 
 <<command-line options custom>>=
 "O|custom-filename=s@"  => \@custom_files,
@@ -706,16 +792,14 @@ Here we define the command-line option for loading customization files.
 -O, --custom-filename <custom_filename> Load a configuration file 
          (if default \".gff2aplotrc\" exists is loaded before it).
 @
-\begin{comment}
-<<command-line latex short custom>>=
+<<HIDE: command-line latex short custom>>=
 \rw{-O{\x}-\/-custom-filename \pr{file}}
   {Read customization parameters from file.}
 @ 
-<<command-line latex custom>>=
+<<HIDE: command-line latex custom>>=
 \clmitem{-O \pr{custom\_filename}\\-\/-custom-filename \pr{custom\_filename}}
 Loading customization parameters from '\pr{custom\_file}'. Now you can load several customization files by passing this option several times. The precedence is the input order in the command-line, so, for the common definitions, the last '\pr{custom\_file}' will override previous '\pr{custom\_files}' settings.
 @
-\end{comment}
 
 \subsubsctn{Testing whether custom-files exist}
 
@@ -939,6 +1023,11 @@ FONT\_SZ & A numeric value with font-size units (cm, mm, in or pt ---points---).
 } % fbox
 \caption[Customization parameters available formats]{\label{tbl:varformats} Parameter available formats we are going to use for customization variables checking.}
 \end{center}
+
+\todo{
+\item More format variables need to be defined, such as: SHAPES from a shapes array, LINES/LINESTYLES (none, dotted, dashed, solid/default), GROUP-BRACKETS (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--)
+} % todo
+
 \end{table}
 
 \subsubsctn{Checking boolean variables}
@@ -972,6 +1061,10 @@ $_test eq 'STRING' && do {
     return $T;
 };
 @
+
+\todo{
+\item Remember to check for some of the strings values such: '++none++', '++sequence++', and so on.
+} % todo
 
 \subsubsctn{Validating numbers}
 
@@ -1026,6 +1119,10 @@ $_test eq 'COLOR' && do { # lc
 };
 @
 
+\todo{
+\item Set fg/bg multiple strings to a single color name such fgcolor/bgcolor for later use in the whole program (PS code too).
+} % todo
+
 <<warnings - parsing custom files>>=
 NOT_A_COLOR =>
   $Warn."\"\%s\" color not defined in \"\%s\" variable.\n",
@@ -1071,6 +1168,9 @@ NOT_A_DNABASE =>
 
 A range is a lower/upper limits pair for a given variable. One of the limits, or both, can be an asterisk ('*'), which means that the default value must be used.
 
+\todo{
+\item Here we must check something like '*..*'
+} % todo
 <<variable value checking>>=
 $_test eq 'RANGE' && do {
 
@@ -1124,17 +1224,21 @@ NOT_A_FONT =>
   $Warn."\"\%s\" font is not available for \"\%s\" variable.\n",
 @
 
-Font sizes can be given in points, centimeters or inches. If no units are provided, then we asume points.
+Font sizes can be given in points, centimeters or inches. If no units are provided, then we asume points, but always must be possitive values.
 
 <<variable value checking>>=
 $_test eq 'FONT_SZ' && do {
-    $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)
+    $_t =~ /^(?:\d+(?:\.\d*)?|\.\d+)
             (pt|cm|mm|in(ches)?|points|(centi|mili)meters)?$/ox && 
         ($$_val = $_t, return $T);
     &warn('NOT_A_FONTSIZE',$F,$_t,$_var);
     return $F;
 };
 @
+
+\todo{
+\item Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
+} % todo
 
 <<warnings - parsing custom files>>=
 NOT_A_FONTSIZE =>
@@ -1145,6 +1249,11 @@ NOT_A_FONTSIZE =>
 	\label{sec:customvardesc}
 % \subsctn{Command-line options}
 
+\todo{
+\item Set the final options/variables/parameters for the whole section.
+} % todo
+
+
 Two options are used for reporting how program is running. By default no messages are shown to standard error, only errors. One reports to a log file defined by user and the other shows the messages to standard error, both can be activated at the same time. A third one is needed to disable STDERR warnings.
 
 <<command-line options>>=
@@ -1154,17 +1263,16 @@ Two options are used for reporting how program is running. By default no message
 -v, --verbose    Verbose mode, a full report is sent to standard error 
                  (default is set to showing only WARNINGS).
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 \rw{-v{\x}-\/-verbose}
   {Verbose mode, a full report is sent to standard error.}
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{-v\\-\/-verbose}
 By default, warnings and errors are sent to standard error. This option 
 switches on process reporting messages to appear on standard error too.
 @
-\end{comment}
+
 
 <<command-line options>>=
 "V|logs-filename=s"  => \$logs_filename, # Print_Report -> LogFile
@@ -1172,18 +1280,16 @@ switches on process reporting messages to appear on standard error too.
 <<command-line help>>=
 -V, --logs-filename <logs_filename>    Report is written to a log file.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 \rw{-V{\x}-\/-logs-filename \pr{file}}
   {Report is written to a log file.}
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{-V \pr{logs\_filename}\\-\/-logs-filename \pr{logs\_filename}}
 If is possible to open '\pr{logs\_filename}' then such file will contain 
 all the messages and warnings produced by the program even though they 
 will be disabled from standard error with \tp{-\/-quiet} option.
 @
-\end{comment}
 
 <<command-line options>>=
 "q|quiet"   => \$Quiet, # Quiet_Mode
@@ -1194,21 +1300,19 @@ will be disabled from standard error with \tp{-\/-quiet} option.
                to standard error (only ERRORS are reported).
 <<command-line help custom>>
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 \rw{-q{\x}-\/-quiet}
   {Quiet mode, messages/warnings disabled (only ERRORS are reported)}
-<<command-line latex short custom>>
+<<HIDE: command-line latex short custom>>
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{-q\\-\/-quiet}
 This option disables any message or warning from standard error. It does not 
 disable error report because such errors are pointing a problem which can 
 make {\prog} produce unexpected results. Solve the cause of such problems 
 before continuing to run the program in a silent mode. 
-<<command-line latex custom>>
+<<HIDE: command-line latex custom>>
 @
-\end{comment}
 
 The following variables define the boundary/clipping coordinates for each sequence, so you can select a region to be displayed in the {\ps} output.
 
@@ -1218,13 +1322,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -S, --sequence1-start <pos>   Sets X-sequence first nucleotide.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "E|sequence1_end=i"  => \$CmdLineVars{"sequence1_end"}, # SEQUENCE1_END    # Zoom_SEQUENCE1_END
@@ -1232,13 +1334,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -E, --sequence1-end <pos>     Sets X-sequence last nucleotide.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "s|sequence2_start=i"  => \$CmdLineVars{"sequence2_start"}, # SEQUENCE2_ORIGIN # Zoom_SEQUENCE2_ORIGIN
@@ -1246,13 +1346,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -s, --sequence2-start <pos>   Sets Y-sequence first nucleotide.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "e|sequence2_end=i"  => \$CmdLineVars{"sequence2_end"}, # SEQUENCE2_END    # Zoom_SEQUENCE2_END
@@ -1260,13 +1358,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -e, --sequence2-end <pos>     Sets Y-sequence last nucleotide.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "Z|zoom"   => \$CmdLineVars{"zoom"}, # ZOOM_Zoom; Zoom_Marks
@@ -1276,13 +1372,11 @@ The following variables define the boundary/clipping coordinates for each sequen
                This option zooms an area you have selected
                with -S,-E,-s,-e (all 4 are optional).
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "z|zoom-area"   => \$CmdLineVars{"zoom_area"}, # ZOOM_Area
@@ -1292,13 +1386,11 @@ The following variables define the boundary/clipping coordinates for each sequen
                This option marks a zoom area on your plot,
                but does not make a zoom.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "G|display-grid"   => \$CmdLineVars{"display_grid"}, # Display_GRID
@@ -1307,13 +1399,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -G, --display-grid   Switches 'on' grid (default is 'off').
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "P|display-percent-box"   => \$CmdLineVars{"display_percent_box"}, # Display_PERCENT-BOX
@@ -1322,13 +1412,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -P, --display-percent-box   Switches 'on' Percent box (default is 'off').
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "Q|display-extra-box"   => \$CmdLineVars{"display_extra_box"}, # Display_EXTRA-BOX
@@ -1337,13 +1425,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -Q, --display-extra-box   Switches 'on' Extra box (default is 'off').
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "T|title=s"  => \$CmdLineVars{"title"}, # TITLE
@@ -1351,13 +1437,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -T, --title <Title>   Definning Plot Title.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "t|subtitle=s"  => \$CmdLineVars{"subtitle"}, # SUBTITLE
@@ -1365,13 +1449,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -t, --subtitle <Subtitle>   Definning Plot SubTitle.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "X|x-label=s"  => \$CmdLineVars{"x-axis_label"}, # X-Axis_LABEL
@@ -1379,13 +1461,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -X, --x-label <X-Label>   Definning X-Axis Label.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "Y|y-label=s"  => \$CmdLineVars{"y-axis_label"}, # Y-Axis_LABEL
@@ -1393,13 +1473,12 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -Y, --y-label <Y-Label>   Defining Y-Axis Label.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
+
 
 <<command-line options>>=
 "L|percent-box-label=s"  => \$CmdLineVars{"percent_box_label"}, # Percent-Box_LABEL
@@ -1407,13 +1486,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -L, --percent-box-label <PBox-Label>   Definning Percent-Box Label.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "l|extra-box-label=s"  => \$CmdLineVars{"extra_box_label"}, # Extra-Box_LABEL
@@ -1421,13 +1498,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -l, --extra-box-label <XBox-Label>   Definning Extra-Box Label.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "R|xy-axes-scale"   => \$CmdLineVars{"xy_axes_scale"}, # XY_AXES_Same-SIZE
@@ -1436,13 +1511,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -R, --xy-axes-scale   X and Y axes having same scale (default is 'off').
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "W|aln-scale-width"    => \$CmdLineVars{"alignment_scale_width"}, # APlotLine_ScaleWidth; APlotLine_GroupScore
@@ -1450,13 +1523,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -W, --aln-scale-width   Scaling score on width for Aplot line.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "w|aln-scale-color"    => \$CmdLineVars{"alignment_scale_color"}, # APlotLine_ScaleGrey; APlotLine_GroupScore
@@ -1464,13 +1535,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -w, --aln-scale-color   Scaling score on color for Aplot line.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "B|background-color=s"  => \$CmdLineVars{"background_color"}, # BACKGROUND_COLOR
@@ -1478,13 +1547,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -B, --background-color <color>   Background color.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "F|foreground-color=s"  => \$CmdLineVars{"foreground_color"}, # FOREGROUND_COLOR
@@ -1492,13 +1559,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -F, --foreground-color <color>   Foreground color.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "D|aplot-box-color=s"  => \$CmdLineVars{"aplot_box_color"}, # APlotBox_BqGCOLOR
@@ -1506,13 +1571,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -D, --aplot-box-color <color>   Aplot main box background color.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "C|percent-box-color=s"  => \$CmdLineVars{"percent_box_color"}, # PercentBox_BGCOLOR
@@ -1520,13 +1583,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -C, --percent-box-color <color>   Percent box background color.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "c|extra-box-color=s"  => \$CmdLineVars{"extra_box_color"}, # ExtraBox_BGCOLOR
@@ -1534,13 +1595,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -c, --extra-box-color <color>   Extra box background color.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "A|alignment-name=s"  => \$CmdLineVars{"alignment_name"}, # Align_NAME
@@ -1549,13 +1608,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 -A, --alignment-name <SeqXName:SeqYName>   Defining which alignment is going to be plotted 
                   if you have more than one alignment in your gff files.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "N|x-sequence-name=s"  => \$CmdLineVars{"x-sequence_name"}, # X-Sequence_NAME
@@ -1563,13 +1620,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -N, --x-sequence-name <SeqXName>   Defining which sequence is going to be plotted at X-axes.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "n|y-sequence-name=s"  => \$CmdLineVars{"y-sequence_name"}, # Y-Sequence_NAME
@@ -1577,13 +1632,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -n, --y-sequence-name <SeqYName>   Defining which sequence is going to be plotted at Y-axes.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "K|show-ribbons=s"   => \$CmdLineVars{"show_ribbons"}, # Show_Ribbons (NLRB)
@@ -1592,13 +1645,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 -K, --show-ribbons <ribbon_type> Force Ribbons for all features on axes:
                  (N)one, (L)ines, (R)ibbons, (B)oth.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "I|page-size=s"  => \$CmdLineVars{"page_size"}, # PAGE_SIZE
@@ -1606,13 +1657,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -I, --page-size <page_size> Set page size for plot (default is a4).
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<command-line options>>=
 "a|show-credits"   => \$CmdLineVars{"show_credits"}, # Show_Credits
@@ -1620,13 +1669,11 @@ The following variables define the boundary/clipping coordinates for each sequen
 <<command-line help>>=
 -a, --show-credits  Switch off $PROGRAM CopyRight line on plot.
 @
-\begin{comment}
-<<command-line latex short>>=
+<<HIDE: command-line latex short>>=
 @ 
-<<command-line latex>>=
+<<HIDE: command-line latex>>=
 \clmitem{}
 @
-\end{comment}
 
 <<Changes in command-line options>>=
 # "i"  => # Page_Orientation
@@ -1814,20 +1861,21 @@ Y_Sequence_NAME  /
   FTExtraDisplay="est",
 @
  
-\begin{comment}
-<<custom-vars latex short>>=
+<<HIDE: custom-vars latex short>>=
 @ 
-<<custom-vars latex>>=
+<<HIDE: custom-vars latex>>=
 \vnlitem{title}{string}{align\_name} \tp{title} sets the main title
 for the figure, by default showing \pr{align\_name} in the form of
 'sequence1\_name x sequence2\_name'.
 @
-\end{comment}
 
 \sctn{Reading GFF records} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 We have to deal with two basic formats, the \textsl{standard} General Feature Format (GFF) and the derived \textsl{aplot} format, the former having two versions with some minor differences at field level. We are going to asume the record formats shown in the table~\ref{fig:formats} for the input files.
 
+\todo{
+\item A flow chart of the GFF record parsing process.\\[6cm]
+} % todo
 
 \begin{table}[!t]
 % \newcommand{\m}[1]{\multicolumn{2}{@{}c@{}}{#1}}
@@ -1998,6 +2046,7 @@ The following functions checks whether some of the input GFF fields are well def
 
 Here we test that '\pa{start}' field must be lower or equal than '\pa{end}':
 
+\label{func:checkcoords}
 <<Parsing Input Data>>=
 sub check_coords() { # ((ori,end)_1,...,(ori,end)_n)
     my @ary = @_;
@@ -2148,6 +2197,9 @@ sub check_aplot_fields() {
 } # check_aplot_fields
 @
 
+\todo{
+\item Append a new record to the variable defined for APLOT records
+} % todo
 <<Parsing Input Data>>=
 sub add_aplot_record() {
     return;
@@ -2203,8 +2255,12 @@ The outline of the inner structure of that variable is shown in table~\ref{tbl:g
 \end{center}
 \end{table}
 
-\begin{comment}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<GFF DATA STRUCTURE>>= 
+\todo{
+\item Define DATA STRUCTURE for [[%ALN_DATA]].
+} % todo
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<HIDE: GFF DATA STRUCTURE>>= 
 % DataStructure_GFF.tex
  \newcommand{\arry}[1]{@[\:#1\:]}
  \newcommand{\hash}[1]{\%\{\:#1\:\}}
@@ -2275,7 +2331,7 @@ $ \begin{array}{r@{\quad=\quad}l}
 \end{minipage}
 } % fbox
 @ 
-\end{comment}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 <<Parsing Input Data>>=
 sub add_gff_record() {
@@ -2462,44 +2518,40 @@ scalar(@grouping_list) > 0 && do{
 };
 @
 
+\subsubsctn{Layout variables involved in grouping tags}
+
 <<default layout vars values>>=
 align_tag                  => { TYPE => 'STRING' , VALUE => 'target' },
 @ 
-\begin{comment}
-<<custom-vars latex short>>=
+<<HIDE: custom-vars latex short>>=
 @ 
-<<custom-vars latex>>=
+<<HIDE: custom-vars latex>>=
 \vnlitem{align\_tag}{string}{Target} \tp{align\_tag} holds the specific tag (for a grouping Tag-Value pair) to detect those GFF records coding for alignment data and having the following group structure:\\[1ex]
 \centerline{\shortstack[r]{align\_tag "group\_name" \pr{seq2\_start} \pr{seq2\_end} [ ; Strand \pr{seq2\_strand} \eoline\\\,[ ; Frame \pr{seq2\_frame} [ ; E\_value \pr{score} ]\,]\,]\hspace{3ex}}}\\[0.75ex]
 so the program can recover the coords for the target sequence from the grouping fields. Remember that tags are not case-sensitive. 
 @
-\end{comment}
 
 <<default layout vars values>>=
 vector_tag                 => { TYPE => 'STRING' , VALUE => 'vector' },
 @ 
-\begin{comment}
-<<custom-vars latex short>>=
+<<HIDE: custom-vars latex short>>=
 @ 
-<<custom-vars latex>>=
+<<HIDE: custom-vars latex>>=
 \vnlitem{vector\_tag}{string}{Vector} \tp{vector\_tag} sets the specific tag (for a grouping Tag-Value pair) to detect scoring vector GFF records, which have the following group structure:\\[1ex]
 \centerline{\shortstack[r]{vector\_tag "group\_name" \pr{vector\_type} [ ; Window \pr{window\_length} \eoline\\\, [ ; Step \pr{step\_length} ]\,] ; Scores \pr{score$_0$} ... \pr{score$_n$}\hspace{3ex}}}\\[0.75ex]
 so the program can parse the list of single scores from the grouping fields. Remember that tags are not case-sensitive.
 @
-\end{comment}
 
 <<default layout vars values>>=
 label_tag                  => { TYPE => 'STRING' , VALUE => 'id'   },
 @ 
-\begin{comment}
-<<custom-vars latex short>>=
+<<HIDE: custom-vars latex short>>=
 @ 
-<<custom-vars latex>>=
+<<HIDE: custom-vars latex>>=
 \vnlitem{label\_tag}{string}{Id} \tp{label\_tag} sets the specific tag (for a grouping Tag-Value pair) that allows to identify a single record. The program looks for the grouping Tag-Value pair for which the tag matches \tp{label\_tag} and takes \tp{value} as the specific record label. You must have an attribute like this within the grouping attribute list:\\[0.75ex]
 \centerline{\ldots ; label\_tag "element\_label" [ ; \ldots }\\[0.5ex]
 Using this attribute makes easy to set specific properties for one or more elements. Remember that tags are not case-sensitive.
 @
-\end{comment}
 
 <<Global Vars>>=
 my %SOURCE = ( # this is a temporary hash name (to implement later)
@@ -2511,10 +2563,18 @@ my %SOURCE = ( # this is a temporary hash name (to implement later)
 
 % \subsctn{Parsing extended GFF format}\label{sec:parseXTRA}
 
-The following record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing data that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be defined by users with the variable '[[%SOURCE]]' \textbf{(provisional varname)}.
+The following record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing data that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be defined by users with the variable '[[%SOURCE]]'. .
+
+\todo{
+\item [[%SOURCE]] is a \textbf{provisional varname} that must be replaced by the corresponding [[$DefaultVars{LAYOUT}]], [[$CustomVars{LAYOUT}]] or [[$CmdLineVars{LAYOUT}]]. Those 'LAYOUT' variables must be set before reading GFF input files because some settings are used by parser functions.
+} % todo
 
 \subsubsctn{Parsing alignment records}
 
+\todo{
+\item Parsing alignment records:\\
+\centerline{[[aln_tag "value" target_ori target_end target_frame target_strand (...)]]}
+} % todo
 <<Parsing Input Data>>=
 sub load_GFF_align() {
 
@@ -2523,6 +2583,10 @@ sub load_GFF_align() {
 
 \subsubsctn{Parsing scoring vectors} \label{sec:loadvector}
 
+\todo{
+\item Parsing scoring vectors:\\
+\centerline{[[vector_tag "value" vector_type; step value; window value; scores sco ... sco]]}
+} % todo
 <<Parsing Input Data>>=
 sub load_GFF_vector() {
 	@vect_ary = ();
@@ -2533,27 +2597,139 @@ sub load_GFF_vector() {
 my @vect_ary;
 @ 
 
-\sctn{Setting custom features to figure elements} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\sctn{Mapping custom features to figure elements} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\subsctn{Mapping customization to Layout features}
+
+We define here [[&map_vars_layout]] to combine LAYOUT parameters from [[%DefaultVars]], [[%CmdLineVars]] and [[%CustomVars]] before start parsing GFF input files. 
+
+\todo{
+\item Planning: 2001/08/23
+} % todo
+<<Features Setting>>=
+sub map_vars_layout() {
+    &header("SETTING CUSTOM VALUES TO LAYOUT ELEMENTS");
+
+    &footer("VALUES SET for LAYOUT ELEMENTS");
+} # map_vars_layout
+@ 
+
+\subsctn{Mapping customization to GFF elements}
+
+\todo{
+\item Planning: 2001/08/23
+} % todo
 <<Features Setting>>=
 sub map_vars_data() {
     &header("SETTING CUSTOM VALUES TO GFF ELEMENTS");
 
-    &footer("VALUES SET");
-} # customize_options
+    &footer("VALUES SET for GFF ELEMENTS");
+} # map_vars_data
 @ 
 
 \sctn{Sorting elements by acceptor} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\todo{
+\item Planning: 2001/08/22
+} % todo
 <<Sorting Features>>=
 sub sort_elements() {
     &header("SORTING ELEMENTS BY ACCEPTOR (START)");
-
+    # sorting %GFF_DATA contents 
+    scalar(%GFF_DATA) && do {
+        &report('SORT_GFF','*- ','ANNOTATION DATA');
+        my $s_ref = \%GFF_DATA;
+        foreach my $s_seq (keys %{ $s_ref }) {
+            &report('SORT_SEQ','|  *- ',$s_seq);
+            my $ss_ref = \%{ $s_ref->{$s_seq}[$_element] };
+            foreach my $s_src (keys %{ $ss_ref }) {
+                &report('SORT_SRC',(('|  ' x 2).'*- '),$s_src);
+                my $sc_ref = \%{ $ss_ref->{$s_src}[$_element] };
+                foreach my $s_str (keys %{ $sc_ref }) {
+                    <<sorting groups>>
+                }; # foreach $s_str
+            }; # foreach $s_src
+        }; # foreach $s_seq
+    }; # scalar(%GFF_DATA) > 0
+    # sorting %ALN_DATA contents 
+    scalar(%ALN_DATA) && do {
+        my $s_ref = \%ALN_DATA;
+        &report('SORT_GFF','*- ','ALIGNMENT DATA');
+    }; # scalar(%ALN_DATA) > 0
     &footer("ELEMENTS SORTED");
 } # sort_elements
 @ 
 
+<<sorting groups>>=
+&report('SORT_STR',(('|  ' x 3).'*- '),$s_str);
+my $s_elem;
+my $sr_ref = \%{ $sc_ref->{$s_str}[$_element] };
+my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
+#
+foreach my $s_grp (keys %{ $sr_ref }) {
+    &report('SORT_GRP',(('|  ' x 4).'*- '),$s_grp);
+    <<sorting group elements>>
+}; # foreach $s_grp
+#
+$s_elem = $sc_ref->{$s_str}[$_counter][$_elemNum];
+$s_elem > 1 && do {
+    @{ $sr_ref } = map { $_->[2] }
+                   sort { &$sortfunct }
+                   map { [ $_->[$_counter][$_ori], 
+                           $_->[$_counter][$_end],
+                           $_ ] } @{ $sr_ref }; # maps 'start 'end 'arrayelement
+}; # $s_elem > 1
+print LOGFILE Dumper(\@{ $sr_ref }) if ($LogFile && $Debug);
+&report('SORT_GPN',('|  ' x 4),$s_elem);
+@ 
+
+<<sorting group elements>>=
+my $sg_ref = \@{ $sr_ref->{$s_grp}[$_element] };
+$s_elem = $sr_ref->{$s_grp}[$_counter][$_elemNum];
+$s_elem > 1 && do {
+    @{ $sg_ref } = map { $_->[2] }
+                   sort { &$sortfunct }
+                   map { [ $_->[4],
+                           $_->[5],
+                           $_ ] } @{ $sg_ref }; # maps 'start 'end 'arrayelement
+}; # $s_elem > 1
+print LOGFILE Dumper(\@{ $sg_ref }) if ($LogFile && $Debug);
+&report('SORT_FTR',('|  ' x 5),$s_elem);
+@ 
+
+As we are saving feature boundaries always in forward coords (meaning that feature start is always smaller than feature end, this was already checked by [[&check_coords]] which is defined in page~\pageref{func:checkcoords}).
+
+<<Sorting Features>>=
+sub sort_forward {
+    $a->[0] <=> $b->[0]  # sorting by start
+             or
+    $b->[1] <=> $a->[1]; # reverse sorting by end if same start
+} # sort_forward
+#
+sub sort_reverse {
+    $b->[1] <=> $a->[1] # reverse sorting by end
+             or
+    $a->[0] <=> $b->[0];  # sorting by start if same end
+} # sort_forward
+@
+
+
+
+<<messages - sorting GFF data>>=
+SORT_GFF => "\%sSorting \%s\n",
+SORT_SEQ => "\%sSequence: \%s\n",
+SORT_SRC => "\%sSource: \%s\n",
+SORT_STR => "\%sStrand: \%s\n",
+SORT_GRP => "\%sGroup: \%s\n",
+SORT_FTR => "\%s       Sorted \%s elements.\n",
+SORT_GPN => "\%s\`Sorted \%s groups.\n",
+@ 
+
 \sctn{Obtaining {\ps} output} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\todo{
+\item Description of Document Structuring Convention (DSC) and plot PS file structure.
+} % todo
 
 <<Making PS Figures>>=
 sub make_plot() {
@@ -2583,13 +2759,6 @@ sub make_plot() {
 <<Postscript OPEN PAGE>>
 <<Postscript CLOSE PAGE>>
 <<Postscript TRAILER>>
-@
-
-\subsctn{Header comments and constants definition}
- 
-<<PostScript PLOT>>=
-sub ps_plot(){
-} # ps_plot
 @
 
 \subsctn{Header comments and constants definition}
@@ -2675,6 +2844,9 @@ my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
 
 \subsctn{Setting up {\ps} variables}
 
+\todo{
+\item Planning: 2001/08/24
+} % todo
 <<PostScript VARS>>=
 sub ps_variables() {
     print STDOUT << '+++PSVARS+++';
@@ -2687,6 +2859,10 @@ sub ps_variables() {
 @
 
 \subsctn{Main {\ps} functions}
+
+\todo{
+\item Page layout must be redefined (taking into account page size too).\\[6cm]
+} % todo
 
 <<PostScript MAIN>>=
 sub ps_main() {
@@ -2711,6 +2887,16 @@ true setstrokeadjust
 %
 +++MAINProcs+++
 } # ps_main
+@
+
+\subsctn{Plotting data into the figure}
+
+\todo{
+\item Planning: 2001/08/25
+} % todo
+<<PostScript PLOT>>=
+sub ps_plot(){
+} # ps_plot
 @
 
 \subsctn{{\ps} code chunks}
@@ -2767,6 +2953,11 @@ sub ps_trailer() {
 
 \sctn{CMYK color definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:CMYKcolordef}
+
+\todo{
+\item \ Planning: 2001/08/26 \\
+Move this section and the following (colors and page formats definition) to perl package [[gfftools::PostScript]].
+} % todo
 
 To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, their {\LaTeX} definition ('[[AplotColorDefs.tex]]') and the table sumarizing them for the manual ('[[AplotColorTbl.tex]]'). % outlined in page~\pageref{sec:cmykfiles}.
 
@@ -3878,17 +4069,17 @@ $SIG{CHLD} = 'IGNORE';
 
 <<Common Routines>>=
 sub trap_signals() {
-    &prt_to_logfile($ErrorList{'USER_HALT'});
+    &prt_to_logfile($Messages{'USER_HALT'});
     &close_logfile();
-    die($ErrorList{'USER_HALT'});
+    die($Messages{'USER_HALT'});
 }
 @ 
 
 <<Common Routines>>=
 sub trap_signals_prog() {
-    &prt_to_logfile($ErrorList{'PROCESS_HALT'});
+    &prt_to_logfile($Messages{'PROCESS_HALT'});
     &close_logfile();
-    die($ErrorList{'PROCESS_HALT'});
+    die($Messages{'PROCESS_HALT'});
 }
 @
 
@@ -3919,10 +4110,29 @@ local $Data::Dumper::Deepcopy = 1;
 "debug"  => \$Debug, # Dumps Vars -> LogFile
 @ 
 <<command-line help>>=
--debug    Reporting variable contents when testing the program.
+--debug    Reporting variable contents when testing the program.
 @
 
-\subsctn{Reporting errors and warnings}
+\subsctn{Reporting program status}
+
+<<Global Vars>>=
+# Program status strings.
+my %Messages = (
+    # ERROR MESSAGES
+    <<warnings - input/output>>
+    <<warnings - parsing command-line options>>
+    <<warnings - parsing custom files>>
+    <<warnings - parsing GFF files>>
+    # WORKING MESSAGES
+    <<messages - input/output>>
+    <<messages - parsing command-line options>>
+    <<messages - parsing custom files>>
+    <<messages - parsing GFF files>>
+    <<messages - sorting GFF data>>
+   ); # %Messages
+@
+
+\subsubsctn{Reporting errors and warnings}
 
 <<Global Constants>>=
 my $Error = "\<\<\<  ERROR  \>\>\> ";
@@ -3931,22 +4141,11 @@ my $spl   = "\<\<\<\-\-\-\-\-\-\-\-\-\>\>\>\n";
 my $spw   = "\<\<\<         \>\>\> ";
 @ 
 
-<<Global Vars>>=
-#
-# Error/Warning Message List
-my %ErrorList = (
-                 <<warnings - input/output>>
-                 <<warnings - parsing command-line options>>
-                 <<warnings - parsing custom files>>
-                 <<warnings - parsing GFF files>>
-                 );
-@
-
 <<Common Routines>>=
 sub warn() {
     my $type = shift @_;
     my $screen_flg = shift @_;
-    my $comment = sprintf($ErrorList{$type}, @_);
+    my $comment = sprintf($Messages{$type}, @_);
     # ALWAYS to STDERR if $screen_flg==$T unless $Quiet==$T
     $screen_flg && ($Quiet || print STDERR $comment); 
     &prt_to_logfile($comment);
@@ -3964,21 +4163,11 @@ sub prt_to_stderr()  { $Verbose && ($Quiet || print STDERR $_[0]) }
 my $line = ("#" x 80)."\n";
 my $sp = "###\n";
 @ 
-<<Global Vars>>=
-#
-# Verbose Message List
-my %MessageList = (
-                   <<messages - input/output>>
-                   <<messages - parsing command-line options>>
-                   <<messages - parsing custom files>>
-                   <<messages - parsing GFF files>>
-                   );
-@
 
 <<Common Routines>>=
 sub report() {
     my $type = shift @_;
-    my $comment = sprintf($MessageList{$type},@_);
+    my $comment = sprintf($Messages{$type},@_);
     &prt_to_stderr($comment);
     &prt_to_logfile($comment);
 } # report
@@ -4038,7 +4227,7 @@ We also set here the date when the script is running and who is the user running
 <<Global Vars>>=
 my $total_time = 0;
 my $DATE = localtime;
-my $USER = $ENV{USER};
+my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
 @ 
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
@@ -4050,10 +4239,12 @@ my $USER = $ENV{USER};
 
 \appendix
 
+<<HIDE: new LaTeX commands>>=
 \newcommand{\op}[1]{{\bfseries\sffamily #1}}
 \newcommand{\tp}[1]{{'{\bfseries\sffamily #1}'}}
 \newcommand{\pr}[1]{{\mdseries\sffamily\slshape $<$#1$>$}}
 \newcommand{\x}{\textmd{\,,\,}}
+@
 
 \newpage
 
@@ -4091,7 +4282,7 @@ Summarizing command-line options for their description in the {\prog} manual:
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{description}
-<<command-line latex>>
+<<HIDE: command-line latex>>
 \end{description}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @ 
@@ -4128,7 +4319,7 @@ We build the command-line table:
 \footnotesize
 \fbox{
   \begin{tabular}{rl}
-<<command-line latex short>>
+<<HIDE: command-line latex short>>
   \end{tabular}
 } % fbox
 \vspace{0.5cm}
@@ -4181,7 +4372,7 @@ We collect all customization variables for the manual too:
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{description}
-<<custom-vars latex>>
+<<HIDE: custom-vars latex>>
 \end{description}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @ 
@@ -4199,7 +4390,7 @@ Generating the custom variables table:
 <<latex wrappers code>>
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<custom-vars latex short>>
+<<HIDE: custom-vars latex short>>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @ 
 
@@ -4427,7 +4618,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $
+# $Id: gff2aplot.nw,v 1.2 2001-08-22 19:15:53 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -4505,21 +4696,19 @@ chmod a+x $BIN/gff2aplot.pl ;
 #
 @ 
  
-\begin{comment}
-<<new LaTeX urls>>=
+<<HIDE: new LaTeX urls>>=
 \def\perltidy{
  \htmladdnormallinkfoot{\texttt{perltidy}}
                    {\url|http://perltidy.sourceforge.net/|}
  } % def perltidy
 @
-\end{comment}
 We use {\perltidy} to reformat final versions of perl scripts (without line numbering comments, correct indentations, etc...) and to pretty-print in html format.
 
 <<tangling>>=
 # reformating program with perltidy
 notangle -R"APLOT" $WORK/$nwfile.nw | \
     perltidy - > $BIN/$nwfile.pl ;
-# pretty-printing program with perltidy
+# html pretty-printing program with perltidy
 notangle -R"APLOT" $WORK/$nwfile.nw | \
     perltidy -html - > $DOCS/html/$nwfile.html ;
 #
@@ -4534,42 +4723,59 @@ notangle -R"APLOT" $WORK/$nwfile.nw | \
 
 <<tangling>>=
 # extracting main document processors
-notangle -R"weaving"    $WORK/$nwfile.nw > $WORK/nw2tex ;
-notangle -R"LaTeXing"   $WORK/$nwfile.nw > $WORK/ltx ;
-notangle -R"The Manual" $WORK/$nwfile.nw > $WORK/mkdoc ;
+notangle -R"weaving"    $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
+notangle -R"LaTeXing"   $WORK/$nwfile.nw | cpif $WORK/ltx ;
+notangle -R"The Manual" $WORK/$nwfile.nw | cpif $WORK/mkdoc ;
 #
-@ 
+@
+
+[[cpif]] is an auxiliary tool for use with [[notangle]] and [[make]]. [[cpif]] compares its standard input to each of the named files, overwriting the file if the comparison succeeds or if the named file does not exist.
 
 <<tangling complementary LaTeX files>>=
 # extracting complementary material 
 echo "Extracting \"$DOCS/defs.tex\"..." ;
-notangle -R"LaTeX deploy new definitions" $WORK/$nwfile.nw \
-         > $DOCS/defs.tex ;
+notangle -R"HIDE: LaTeX deploy new definitions" $WORK/$nwfile.nw | \
+         cpif $DOCS/defs.tex  ;
+echo "Extracting \"$DOCS/localrefs.bib\"..." ;
+notangle -R"HIDE: BiBTeX references" $WORK/$nwfile.nw | \
+         cpif $DOCS/localrefs.bib ;
 echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." ;
-notangle -R"LATEX command-line" $WORK/$nwfile.nw \
-         > $DOCS/tables/AplotCLoptions.tex ;
+notangle -R"LATEX command-line" $WORK/$nwfile.nw | \
+         cpif $DOCS/tables/AplotCLoptions.tex ;
 echo "Extracting \"$DOCS/AplotCLoptionsTbl.tex\"..." ;
-notangle -R"LATEX command-line table" $WORK/$nwfile.nw \
-         > $DOCS/tables/AplotCLoptionsTbl.tex ;
+notangle -R"LATEX command-line table" $WORK/$nwfile.nw | \
+         cpif $DOCS/tables/AplotCLoptionsTbl.tex ;
 echo "Extracting \"$DOCS/AplotCustomVars.tex\"..." ;
-notangle -R"LATEX custom-vars" $WORK/$nwfile.nw  \
-         > $DOCS/tables/AplotCustomVars.tex ;
+notangle -R"LATEX custom-vars" $WORK/$nwfile.nw  | \
+         cpif $DOCS/tables/AplotCustomVars.tex ;
 echo "Extracting \"$DOCS/AplotCustomVarsTbl.tex\"..." ;
-notangle -R"LATEX custom-vars table" $WORK/$nwfile.nw  \
-         > $DOCS/tables/AplotCustomVarsTbl.tex ;
+notangle -R"LATEX custom-vars table" $WORK/$nwfile.nw  | \
+         cpif $DOCS/tables/AplotCustomVarsTbl.tex ;
 echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." ;
-notangle -R"LATEX cmyk colors" $WORK/$nwfile.nw  \
-         > $DOCS/tables/AplotColorDefs.tex ;
+notangle -R"LATEX cmyk colors" $WORK/$nwfile.nw  | \
+         cpif $DOCS/tables/AplotColorDefs.tex ;
 echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." ;
-notangle -R"LATEX colors table" $WORK/$nwfile.nw  \
-         > $DOCS/tables/AplotColorTbl.tex ;
+notangle -R"LATEX colors table" $WORK/$nwfile.nw  | \
+         cpif $DOCS/tables/AplotColorTbl.tex ;
 echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." ;
-notangle -R"LATEX page format table" $WORK/$nwfile.nw \
-         > $DOCS/tables/AplotPageSizeTbl.tex ;
+notangle -R"LATEX page format table" $WORK/$nwfile.nw | \
+         cpif $DOCS/tables/AplotPageSizeTbl.tex ;
 echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." ;
-notangle -R"GFF DATA STRUCTURE" $WORK/$nwfile.nw \
-         > $DOCS/tables/DataStructure_GFF.tex ;
+notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
+         cpif $DOCS/tables/DataStructure_GFF.tex ;
+#
 @ 
+
+[[noweave]] options:
+
+\begin{tabular}{>{\bfseries}rp{14cm}}\hline
+[[-v]] & be verbose. \\
+[[-t4]] & tabs are made of 4 spaces. \\
+[[-delay]] & putting file-name and other information into the output before the first chunk of the  program, enabling a user to put a specialized \LaTeX [[\documentclass]] command and other preamble material in the first documentation chunk. It also forces trailing cross-referencing information to be emitted just before the final chunk, instead of at the end of the document; the final chunk is expected to contain [[\end{document}]]. Also implies [[-n]] option, meanning not to wrap the output with a \LaTeX header/trailer. \\
+\multicolumn{2}{l}{[[-filter 'elide "HIDE: *"']]} \\
+ & this filter removes those code chunks we define in the pattern, in this case those starting with `[[HIDE: *]]'. \\
+[[-index]] & \\\hline
+\end{tabular}
 
 <<weaving>>=
 <<BASH shebang>>
@@ -4578,7 +4784,8 @@ notangle -R"GFF DATA STRUCTURE" $WORK/$nwfile.nw \
 <<tangling complementary LaTeX files>>
 # extracting main documentation
 echo "Weaving \"$DOCS/$nwfile.tex\"..." ;
-noweave -t4 -delay -x $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+        $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
 # LaTeXing 
 echo "LaTeXing \"$DOCS/$nwfile.tex\"..." ;
 pushd $DOCS/ ;
