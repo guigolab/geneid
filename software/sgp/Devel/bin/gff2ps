@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.22 1999-06-28 17:05:18 jabril Exp $	
+#         $Id: gff2ps,v 1.23 1999-06-30 14:23:05 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -46,8 +46,8 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps"
   VERSION="v1.0"
-  REVISION='$Revision: 1.22 $'
-  DATERELEASE='$Date: 1999-06-28 17:05:18 $'
+  REVISION='$Revision: 1.23 $'
+  DATERELEASE='$Date: 1999-06-30 14:23:05 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -265,7 +265,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.22 1999-06-28 17:05:18 jabril Exp $
+%    $Id: gff2ps,v 1.23 1999-06-30 14:23:05 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -884,9 +884,9 @@ gawk 'BEGIN{
   SO_PROP["rule_scale"]="nucleotide";
   SO_PROP["rule_rel"]="none";
   SO_PROP["rule_abs"]="none";
-  SO_PROP["unfold_grouped_ungrouped"]="off";
-  SO_PROP["unfold_grouped_line"]="off";
-  SO_PROP["unfold_ungrouped_line"]="off";
+  SO_PROP["unfold_grouped_ungrouped"]="on";
+  SO_PROP["unfold_grouped_line"]="on";
+  SO_PROP["unfold_ungrouped_line"]="on";
 # Data for upper-case to lower-case function #lcase()#
  CM["A"]="a";CM["B"]="b";CM["C"]="c";CM["D"]="d";CM["E"]="e";
  CM["F"]="f";CM["G"]="g";CM["H"]="h";CM["I"]="i";CM["J"]="j";
@@ -922,84 +922,77 @@ gawk 'BEGIN{
     order["strand",ordcnt]=$source; ordcnt++ } # order for sources input.
   else if ($strand=="." && !($source in sources)) {
     order["none",nordcnt]=$source; nordcnt++ };
-# read gff element within source and strand
-  sources[$source]++;                       # field 2 (source) counter
-  tmp=$source SUBSEP $strand SUBSEP $group;
-  if (!(tmp in N)) {
-    N[$source,$strand,$group]++;
-    G[$source,$strand]++;
-    gp[$source,$strand,G[$source,$strand],gpname]=$group
-    gp[$source,$strand,G[$source,$strand],gpstart]=$start
-    gp[$source,$strand,G[$source,$strand],gpend]=$end
-    gp[$source,$strand,G[$source,$strand],is_grouped]=flg_ungrp
-    printf "********* Creating Group DataSet : {%s} %s %s %s ( %s %s )  is_grouped:%s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend],gp[$source,$strand,G[$source,$strand],is_grouped] | "cat 1>&2"
-    }
-# ( ./gff2ps -vC customs/HS1185.Tim -K 1000 -- samples/nogroups.gff > samples/nogroups.ps ) > & samples/report.nogroups
-  GP_ary[$group]++;                         # field 9 (group) counter
-  $feature=lcase($feature);
-  FT_ary[$feature]++ ;                       # field 3 (gff-feature) counter
-  n[$source,$strand]++ ;                     # elements per source and strand
-  element[$source,$strand,n[$source,$strand],feature] = $feature; 
-  element[$source,$strand,n[$source,$strand],start]   = $start;
-  element[$source,$strand,n[$source,$strand],end]     = $end;
-  element[$source,$strand,n[$source,$strand],frame]   = $frame;  
-  element[$source,$strand,n[$source,$strand],score]   = $score;  
-  element[$source,$strand,n[$source,$strand],group]   = $group; 
-  if (NF>group) {
-    for (i=(group+1);i<=NF;i++) {
-      if ($i~"Label") { element[$source,$strand,n[$source,$strand],label]= $(i+1); i++ }  
-      if ($i~"Color") { element[$source,$strand,n[$source,$strand],color]= $(i+1); i++ }  
-      if ($i~"Vector") {
-        element[$source,$strand,n[$source,$strand],pos_score]= $(i+1); i++;
-        while (i<=NF) {
-          element[$source,$strand,n[$source,$strand],pos_score]=element[$source,$strand,n[$source,$strand],pos_score]":"$(i++)"-"$(i++) } # while
-        }  # if $i==Vector
-      } # for i
-    } # if NF
-  if (FIRST_POS>$start) FIRST_POS=$start;
-  if (LAST_POS<$end) LAST_POS=$end;
-# start-end for each group-sc-strand  
-  gp[$source,$strand,G[$source,$strand],gpstart]=min(gp[$source,$strand,G[$source,$strand],gpstart],$start) 
-  gp[$source,$strand,G[$source,$strand],gpend]  =max(gp[$source,$strand,G[$source,$strand],gpend],$end)
-  printf "*** Checking boundaries : {%s} %s %s %s %s %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend] | "cat 1>&2"
-  if ($score < MINSCORE) {
-    element[$source,$strand,n[$source,$strand],score]=MINSCORE }
-  else {
-    if ($score > MAXSCORE) element[$source,$strand,n[$source,$strand],score]=MAXSCORE }
+# Reading gff-line elements.
+  ReadElements()
 # place gff element in sort array by acceptor position
-  ns=n[$source,$strand]-1;
-  while ($start < element[$source,$strand,S[$source,$strand,ns],start]) {
-    S[$source,$strand,ns+1]=S[$source,$strand,ns]; ns-- } # while
-  S[$source,$strand,ns+1]=n[$source,$strand]
+  if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
+   NS=N[$source,$strand,$group]-1;
+   while ($start < element[$source,$strand,S[$source,$strand,$group,NS],start]) {
+     S[$source,$strand,$group,NS+1]=S[$source,$strand,$group,NS]; NS-- } # while
+   S[$source,$strand,$group,NS+1]=N[$source,$strand,$group]
+   } else {
+   ns=n[$source,$strand]-1;
+   while ($start < element[$source,$strand,S[$source,$strand,ns],start]) {
+     S[$source,$strand,ns+1]=S[$source,$strand,ns]; ns-- } # while
+   S[$source,$strand,ns+1]=n[$source,$strand]
+   } # if SO_PROP
   } # if (!is_EOF)
  }  # Main Loop END
 END{
+  #
+  # Defining Object Properties.
+  SET_VARS()
   # Sorting groups
   SortGroups()
   #
   # Making Lines...
+  if (Var["print_report"]) printf "\n%s\nPlacing groups on lines...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+  grouped_=1;ungrouped_=0;
   for (stp=1;stp<=3;stp++) { # for s in strand
     s=wstr[stp]
-    for (sc in sources) {
+    for (sc in sources) { 
       if (G[sc,s]>0) {
-        for (t=1;t<=G[sc,s];t++) {
-          for (g=1;g<=SG[sc,s,t],g++) {
+         lastpos[sc,s,grouped_,1]=lastpos[sc,s,ungrouped_,1]=PORI;
+#        for (t=1;t<=G[sc,s];t++) {
+          for (g=1;g<=SG[sc,s,G[sc,s]];g++) {
+            # g=SG[sc,s,t]
             gp_nm =gp[sc,s,g,gpname];
             gp_ori=gp[sc,s,g,gpstart];
             gp_end=gp[sc,s,g,gpend];
-            gp_gpd=gp[sc,s,g,is_grouped];
-            
+            gp_gpd= OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) ? gp[sc,s,g,is_grouped] : 1; # 1 (grouped_) or 0 (ungrouped_)
+            LN[sc,s,grouped_]=LN[sc,s,ungrouped_]=1;
+            if ((gp_gpd==1 && OnOff(PLOT_FT[sc,":","unfold_grouped_line"])) || (gp_gpd==0 && OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) {
+             while (lastpos[sc,s,gp_gpd,LN[sc,s,gp_gpd]] >= gp_ori) {
+              LN[sc,s,gp_gpd]++;
+              ttt=sc SUBSEP s SUBSEP gp_gpd SUBSEP LN[sc,s,gp_gpd]
+              if (!(ttt in lastpos)) lastpos[sc,s,gp_gpd,LN[sc,s,gp_gpd]]=PORI;
+              }
+             lastpos[sc,s,gp_gpd,LN[sc,s,gp_gpd]]=gp_end;
+             } # if checking
+            lines[sc,s,gp_gpd]=max(lines[sc,s,gp_gpd],LN[sc,s,gp_gpd]);
+            LE[sc,s,gp_gpd,LN[sc,s,gp_gpd]]++
+            LNelem[sc,s,gp_gpd,LE[sc,s,gp_gpd,LN[sc,s,gp_gpd]]]=g
             } # for g(SG)
-          } for t(G)
+#         } # for t(G)
         } # if G>0
+      for (pd=1;pd>=0;pd--) {
+        for (h=1;h<=lines[sc,s,pd];h++) {
+          printf "%s %s : is_grouped %s : Line %s \>",sc,s,TxtBool(pd),h | "cat 1>&2"
+          for (t=1;t<=LE[sc,s,pd,h];t++) {
+            elm_=LNelem[sc,s,pd,t]
+            printf " %s(%s:%s-%s)",elm_,gp[sc,s,elm_,gpname],gp[sc,s,elm_,gpstart],gp[sc,s,elm_,gpend] | "cat 1>&2"
+            } # for t
+          printf "\n" | "cat 1>&2"
+          } # for h
+        } # for pd
       } # for sources
     } # for strands
   #
   # Printing groups and elements sorted
   PrtSorted()
   #
-  # Defining Object Properties.
-  SET_VARS()
+  # Defining Page variables.
+  SET_PAGE_VARS()
   #
   # PostScript Variables Setup.
   defPSvars()
@@ -1044,7 +1037,7 @@ function lcase(string,    chr) { for (chr in CM) gsub(chr,CM[chr],string); retur
 function min(a,b) { if (a<=b) return a; else return b }
 function max(a,b) { if (a>=b) return a; else return b }
 function ChkInput() { # some changes will be made on input line if some defaults were present.
- flg_ungrp=0
+ flg_grp=1
  f=split($0,ln,/ \#/);$0="";
  $0=ln[1];for (s=1;s<=f;s++) { delete ln[s] };
  if (!($0~/^(\#)+/ || NF==0)) { 
@@ -1058,12 +1051,13 @@ function ChkInput() { # some changes will be made on input line if some defaults
      if (!OnOff(PLOT_FT["unfold_ungrouped_line"])) $group="#" $source $strand $seqname "#";
      else $group="#" NR "#" $source $strand $seqname "#";    # empty group defined as default (none==".")
      # CP_PLOT_FT[$group]=$source   # source from which lines are defined.
-     flg_ungrp=1
+     flg_grp=0
      } 
+   $feature=lcase($feature);
    }
  if ($0~/^[^\#]+[ \t]+.+[ \t]+.+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]*[.]?[0-9]*[ \t]+[+-.][ \t]+[.012][ \t]+.*/) return 1;
  else {
-   if ($0~/^(\#)+.*/ || NF==0) printf ">>>Comment Line: %s", $0 | "cat 1>&2"
+   if ($0~/^(\#)+.*/ || NF==0) printf ">>>Comment Line: %s\n", $0 | "cat 1>&2"
    else printf ">>>WARNING<<< Non-standard gff-formatted input line: %s\n", $0 | "cat 1>&2"
    return 0 }
  } # End function ChkInput
@@ -1162,16 +1156,92 @@ function showelemS(s,p,q,  string){
   string=string" "element[s,p,q,group];
   return string } # End of showelemS
 function showelem(a,b,     c,string){ c=n[a,b]; string=showelemS(s,p,q); return string }
+function ReadElements() { # read gff element within source, strand, and group 
+  sources[$source]++;                       # field 2 (source) counter
+  tmp=$source SUBSEP $strand SUBSEP $group;
+  if (!(tmp in N)) {
+    G[$source,$strand]++;
+    gp[$source,$strand,G[$source,$strand],gpname]=$group;
+    gp[$source,$strand,G[$source,$strand],gpstart]=$start;
+    gp[$source,$strand,G[$source,$strand],gpend]=$end;
+    gp[$source,$strand,G[$source,$strand],is_grouped]=flg_grp;
+    printf "********* Creating Group DataSet : {%s} %s %s %s ( %s %s ) : is_grouped? %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend],TxtBool(gp[$source,$strand,G[$source,$strand],is_grouped]) | "cat 1>&2"
+    } # if N
+  N[$source,$strand,$group]++;
+  GP_ary[$group]++;                         # field 9 (group) counter
+  FT_ary[$feature]++ ;                       # field 3 (gff-feature) counter
+  if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
+   element[$source,$strand,N[$source,$strand,$group],feature] = $feature; 
+   element[$source,$strand,N[$source,$strand,$group],start]   = $start;
+   element[$source,$strand,N[$source,$strand,$group],end]     = $end;
+   element[$source,$strand,N[$source,$strand,$group],frame]   = $frame;  
+   element[$source,$strand,N[$source,$strand,$group],score]   = $score;  
+   element[$source,$strand,N[$source,$strand,$group],group]   = $group; 
+   if (NF>group) {
+     for (i=(group+1);i<=NF;i++) {
+       if ($i~"Label") { element[$source,$strand,N[$source,$strand,$group],label]= $(i+1); i++ }  
+       if ($i~"Color") { element[$source,$strand,N[$source,$strand,$group],color]= $(i+1); i++ }  
+       if ($i~"Vector") {
+         element[$source,$strand,N[$source,$strand,$group],pos_score]= $(i+1); i++;
+         while (i<=NF) {
+           element[$source,$strand,N[$source,$strand,$group],pos_score]=element[$source,$strand,N[$source,$strand,$group],pos_score]":"$(i++)"-"$(i++) } # while
+         }  # if $i==Vector
+       } # for i
+     } # if NF
+   } else {
+    n[$source,$strand]++ ;                     # elements per source and strand
+    element[$source,$strand,n[$source,$strand],feature] = $feature; 
+    element[$source,$strand,n[$source,$strand],start]   = $start;
+    element[$source,$strand,n[$source,$strand],end]     = $end;
+    element[$source,$strand,n[$source,$strand],frame]   = $frame;  
+    element[$source,$strand,n[$source,$strand],score]   = $score;  
+    element[$source,$strand,n[$source,$strand],group]   = $group; 
+    if (NF>group) {
+      for (i=(group+1);i<=NF;i++) {
+        if ($i~"Label") { element[$source,$strand,n[$source,$strand],label]= $(i+1); i++ }  
+        if ($i~"Color") { element[$source,$strand,n[$source,$strand],color]= $(i+1); i++ }  
+        if ($i~"Vector") {
+          element[$source,$strand,n[$source,$strand],pos_score]= $(i+1); i++;
+          while (i<=NF) {
+            element[$source,$strand,n[$source,$strand],pos_score]=element[$source,$strand,n[$source,$strand],pos_score]":"$(i++)"-"$(i++) } # while
+          }  # if $i==Vector
+        } # for i
+      } # if NF
+   } # if SO_PROP
+  if (FIRST_POS>$start) FIRST_POS=$start;
+  if (LAST_POS<$end) LAST_POS=$end;
+# start-end for each group-sc-strand  
+  gp[$source,$strand,G[$source,$strand],gpstart]=min(gp[$source,$strand,G[$source,$strand],gpstart],$start) 
+  gp[$source,$strand,G[$source,$strand],gpend]  =max(gp[$source,$strand,G[$source,$strand],gpend],$end)
+  printf "*** Checking group boundaries : {%s} %s %s %s %s %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend] | "cat 1>&2"
+# getting score - boundaries 
+  if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
+    if ($score < MINSCORE) {
+      element[$source,$strand,N[$source,$strand,$group],score]=MINSCORE }
+    else {
+      if ($score > MAXSCORE) element[$source,$strand,N[$source,$strand,$group],score]=MAXSCORE }
+    } else {
+    if ($score < MINSCORE) {
+      element[$source,$strand,n[$source,$strand],score]=MINSCORE }
+    else {
+      if ($score > MAXSCORE) element[$source,$strand,n[$source,$strand],score]=MAXSCORE }
+    }
+ } # End of ReadElements
 function SortGroups() {
   if (Var["print_report"]) printf "\n%s\nReordering groups...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
   for (sc in sources) {
     for (s in strands) {
       if (G[sc,s]>0) {
         for (t=1;t<=G[sc,s];t++) {
-         if (t==1) SG[sc,s,t]=t;
-         for (k=t;k<G[sc,s];k++) {
-          if (gp[sc,s,k+1,gpstart] < gp[sc,s,t,gpstart]) { SG[sc,s,k+1]=t; SG[sc,s,t]=k+1 }
-          } # if
+          gs=t-1
+          gpstrt_=gp[sc,s,t,gpstart]
+           printf "------- %s : (%s) %s\n",t,gp[sc,s,t,gpname],gpstrt_  | "cat 1>&2"
+          while (gpstrt_ < gp[sc,s,SG[sc,s,gs],gpstart]) {
+           printf "------- %s < %s\n",gp[sc,s,t,gpstart],gp[sc,s,SG[sc,s,gs],gpstart]  | "cat 1>&2"
+           SG[sc,s,gs+1]=t; gs-- } # while
+          SG[sc,s,gs+1]=t;
+         } # for t 
+        for (t=1;t<=G[sc,s];t++) {
           if (Var["print_report"]) printf "*** Reordering groups : {%s} %s %s %s ( %s %s )\n",t,sc,s,gp[sc,s,SG[sc,s,t],gpname],gp[sc,s,SG[sc,s,t],gpstart],gp[sc,s,SG[sc,s,t],gpend] | "cat 1>&2"
          } # for t 
         } # if 
@@ -1205,7 +1275,7 @@ function PrtSorted() {
         printf "%10s This block is empty ##\n", "##" | "cat 1>&2"
       }
    close("cat 1>&2")
-   } if print_report
+   } # if print_report
  } # End of PrtSorted
 function SET_VARS() {
   # Variable definition hierarchy:
@@ -1236,6 +1306,8 @@ function SET_VARS() {
   # Zoom must be defined here
   if (PORI!=0) PDIF=PEND-PORI+1
   else PDIF=PEND
+ } # End of function SET_VARS
+function SET_PAGE_VARS() {
   P=Default["page_number"]
   B=Default["blocks_x_page"]
   if (Default["nucleotides_x_line"]==0) {
@@ -1277,7 +1349,7 @@ function SET_VARS() {
     Default["major_tickmarks_nucleotides"]=Nuc_round((PDIF/Default["major_tickmarks_num"]),0) }
   if (Default["minor_tickmarks_nucleotides"]==-1) {
     Default["minor_tickmarks_nucleotides"]=Default["major_tickmarks_nucleotides"]/Default["minor_tickmarks_num"] }
- } # End of function SET_VARS
+ } # End of function SET_PAGE_VARS
 function MAKEGROUPS() {
   printf "\n%s\nPostScript Code...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
   for (sc in sources) {
