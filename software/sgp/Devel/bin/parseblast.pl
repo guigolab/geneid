@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.5 2000-07-28 00:47:34 jabril Exp $
+# $Id: parseblast.pl,v 1.6 2000-07-29 16:29:33 jabril Exp $
 #
 
 my $Start = time;
@@ -11,7 +11,7 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling");
 
 my $PROGRAM = "parseblast.pl";
-my $VERSION = '$Id: parseblast.pl,v 1.5 2000-07-28 00:47:34 jabril Exp $ ';
+my $VERSION = '$Id: parseblast.pl,v 1.6 2000-07-29 16:29:33 jabril Exp $ ';
 
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg, $subject_flg,
 	$comment_flg, $nocmmnt_flg, $split_flg, $help_flg, $err_flg,
@@ -339,8 +339,8 @@ last PRINT;
 sub prt_pairwise {
 	$prt_pos_flg && do {
 		$ml = &max(length($hsq),length($heq),length($hss),length($hes));
-		($x,$y) = (" ".&fill_left($hsq,$ml," ")." ".&fill_left($heq,$ml," ")." ",
-				   " ".&fill_left($hss,$ml," ")." ".&fill_left($hes,$ml," ")." ");
+		($x,$y) = (" ".&fill_left($hsq,$ml," ")." ".&fill_left($heq,$ml," ")." $stq $frq ",
+				   " ".&fill_left($hss,$ml," ")." ".&fill_left($hes,$ml," ")." $sts $frs ");
 	};
 	print "#\n" if $aln_split;
 	$aln_split = 1;
@@ -469,7 +469,8 @@ sub prt_out {
 				  #
 				  &prt_ext       if $expanded_flg;
 				  #
-				  ($qm, $sm, $x, $y) = ("$query{$nm}\_\#$n", "$nm\_\#$n", " ", " ");
+				  # ($qm, $sm, $x, $y) = ("$query{$nm}\_\#$n", "$nm\_\#$n", " ", " ");
+				  ($qm, $sm, $x, $y) = ("$query{$nm}", "$nm", " ", " ");
 				  $ml = &max(length($qm),length($sm));
 				  ($a,$b) = (&fill_right($qm,$ml," "),&fill_right($sm,$ml," "));
 				  &prt_pairwise  if $pairwise_flg;
