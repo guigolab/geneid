@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.8 2001-04-23 13:56:56 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.9 2001-07-05 07:53:26 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -46,7 +46,7 @@ char *USAGE="Incorrect usage:\nNAME\n\tgeneid - a program to predict genes\nSYNO
 
 void printHelp()
 {
-  printf("Short Manual for geneid:\n");
+  printf("Short help for geneid:\n");
   printf("------------------------\n\n");
   printf("Setup Options:\n\n");
  
@@ -71,8 +71,8 @@ void printHelp()
 
   printf("\t-W: Only Forward Prediction(Watson)\n");
   printf("\t-C: Only Reverse Prediction(Crick)\n");
-  printf("\t-o: Only runs exon prediction(not gen prediction)\n");
-  printf("\t-O: Only runs gen prediction(not exon prediction)\n\n");
+  printf("\t-o: Only runs exon prediction(not gene prediction)\n");
+  printf("\t-O: Only runs gene prediction(not exon prediction)\n\n");
   printf("\t-R: Runs geneid predictions with evidences-file\n\n");
   printf("\t-S: Runs geneid predictions with similarity regions file\n\n");
 
@@ -80,7 +80,7 @@ void printHelp()
 
   printf("\t-P: Change the name of the Parameter File\n");
   printf("\t-v: Verbose. Print all messages\n");
-  printf("\t-h: Show this Short Manual\n");
+  printf("\t-h: Show this help\n");
 }
 
 void printDTD()
