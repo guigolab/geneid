@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: ltx,v 1.3 2002-02-01 19:13:50 jabril Exp $
+# $Id: ltx,v 1.4 2002-12-24 13:53:58 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -13,14 +13,14 @@ L="####################"
 ### only LaTeXing
 #
 # Global Variables
-WORK="$HOME/development/softjabril/gfftools/gff2aplot" ;
+# WORK is defined with "setcwd"...
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
 TEST="$WORK/tests" ;
 nwfile="gff2aplot" ;
-export WORK BIN PARAM DOCS DATA TEST nwfile ;
+export BIN PARAM DOCS DATA TEST nwfile ;
 pushd $DOCS/ ;
 #
 echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
@@ -31,6 +31,9 @@ dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 #
 # echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
 # ps2pdf $nwfile.ps $nwfile.pdf ;
+#
+# echo "### 2 PAGES x PAGE SMALL NWDOC: $nwfile" 1>&2 ;
+# ps2ps $nwfile.ps $nwfile.eps; mpage -vkT2 -bA4 -t $nwfile.eps > $nwfile.small.ps
 #
 popd ;
 { echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
