@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.37 1999-12-31 13:25:31 jabril Exp $	
+#         $Id: gff2ps,v 1.38 2000-01-05 08:58:03 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -69,10 +69,10 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps";
   GAWK_PROG="gff2ps.awk";
-  VERSION="v0.93";
+  VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.37 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 1999-12-31 13:25:31 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.38 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-05 08:58:03 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.37 1999-12-31 13:25:31 jabril Exp $
+%    $Id: gff2ps,v 1.38 2000-01-05 08:58:03 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -1134,7 +1134,7 @@ BEGIN{ ######### INITIALITATION ###############
   src_nordcnt=src_ordcnt=0;
   seq_nordcnt=seq_ordcnt=0;
   grouped_=1;ungrouped_=0;
-  gff_NR=0; SGLVCT=0;
+  gff_NR=0;
   TITLE_FN="";
   #
   # Color REGEXP
@@ -1161,11 +1161,8 @@ BEGIN{ ######### INITIALITATION ###############
   if (!is_EOF) {
     #
     # Printing Input Lines
-	if (!SGLVCT) PrintRPT(sprintf("OK: %10s :: GFF v.%s  :: <%s>\n", NR, GFF_V, $0));
-    else { 
-      SGLVCT=0;
-      PrintRPT(sprintf("OK: %10s :: GFF v.%s  :: <%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s>\n", NR, GFF_V, $1,$2,$3,$4,$5,$6,$7,$8));
-      }
+    if (NF>10) PrintRPT(sprintf("OK: %10s :: GFF v.%s  :: <%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s (...)>\n", NR, GFF_V, $1,$2,$3,$4,$5,$6,$7,$8,$9,$10));
+	else PrintRPT(sprintf("OK: %10s :: GFF v.%s  :: <%s>\n", NR, GFF_V, $0));
     #
     # Reading gff-line elements.
 	ReadElements();
@@ -1640,7 +1637,6 @@ function LOAD_Groups(    pnt,lbgp_tmp) {
 #
 function LOAD_Vectors(     v_nm,K,k,W,w,vs,vv,va,v_,stp,lsco,usco,nsc,vtsc) {
   if (NF==Vscn) {  # Loading multi-record vectors.
-    SGLVCT=0;
 	v_nm=vct_element[$feature,iG2];
     # loading VECTOR elements.
 	element[iG2,v_nm,start]    = min(element[iG2,N[iG2],start],$start);
@@ -1666,7 +1662,6 @@ function LOAD_Vectors(     v_nm,K,k,W,w,vs,vv,va,v_,stp,lsco,usco,nsc,vtsc) {
 	}
   } # if multi-record vectors.
   else { # Loading single-record vectors.
-    SGLVCT=1;
 	v_nm=N[iG2];
 	element[iG2,v_nm,v_window] = 0; # if none then paired data.
 	element[iG2,v_nm,v_step]   = 0; # if none then paired data.
@@ -1742,28 +1737,31 @@ function ReadElements() { # read gff element within source, strand, and group
   # Defining some indexes.
   iS=$source;  # iS=$seqname SUBSEP $source;
   iF=$feature; # iF=$seqname SUBSEP $feature;
+  II=$seqname SUBSEP iS;
   # getting sequence order from file...
-  if (($strand=="+" || $strand=="-") && !($seqname in seqs)) {
-    seq_order["strand",seq_ordcnt++]=$seqname }
-  else {
-    if ($strand=="." && !($seqname in seqs)) {
-      seq_order["none",seq_nordcnt++]=$seqname }
+  if (!($seqname in seqs)) {
+    TITLE_FN=TITLE_FN""$seqname" ";
   }
-  if (!($seqname in seqs)) TITLE_FN=TITLE_FN""$seqname" ";
+  if ($strand~/[+-]/) STR_PMT=1; else STR_PMT=0;
+  if (SQ_ORD[$seqname,STR_PMT]!="Y") {
+    if (STR_PMT) seq_order["strand",seq_ordcnt++]=$seqname;
+    else seq_order["none",seq_nordcnt++]=$seqname;
+    SQ_ORD[$seqname,STR_PMT]="Y";
+  }
   # getting source order from file...
-  if (($strand=="+" || $strand=="-") && !(iS in sources)) {
-    src_order["strand",src_ordcnt++]=$source }
-  else {
-    if ($strand=="." && !($source in sources)) {
-      src_order["none",src_nordcnt++]=$source }
-  }
   if (!(iS in sources)) {
     sc_score["MIN",iS] = 0; # $score;
     sc_score["MAX",iS] = $score;
-  } # if $source
+  }
+  if (SC_ORD[$seqname,iS,STR_PMT]!="Y") {
+    if (STR_PMT) src_order["strand",src_ordcnt++]=$source;
+    else src_order["none",src_nordcnt++]=$source;
+    SC_ORD[$seqname,iS,STR_PMT]="Y";
+  }
   # Defining some counters.
+  Nss[II]++; # Valid Sequence-Source Combinations
   seqs[$seqname]++;
-  sources[iS]++;              # field 2 (source) record-counter
+  sources[iS]++;   # field 2 (source) record-counter (Nsources for no-strand)
   FT_ary[iF]++ ;              # field 3 (gff-feature) record-counter
   # Defining groups.
   LOAD_Groups();
@@ -1881,42 +1879,52 @@ function SET_VARS() {
   MGS=Default["min_group_separation"];
 } # End of function SET_VARS
 #
-function SET_ORDER(    Q,S,lseq,lsrc) { # for swapping order for seqs or srcs.
+function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or srcs.
   PrintWRN(sprintf("\n%s\n*  SORTING TRACKS and SEQUENCES\n*\n",BigLINE));
   #
   if (OnOff(Default["sort_tracks_by_sequence"])) {
+    PrintWRN("*  Sorting by SEQUENCES then by SOURCES (Comparing Sources)\n*\n");
 	lseq=seq_ordcnt; lsrc=src_ordcnt;   # strand(+/-) counter
 	for (Q=0;Q<lseq;Q++) {   # sequence ordering ary loop
 	  for (S=0;S<lsrc;S++) { # source ordering ary loop
-		# PrintRPT(sprintf("***+++***WS::%s::***wsb1::%s::***wsb2::%s\n", "strand" SUBSEP ordcnt, "strand", ordcnt));
-		# PrintRPT(sprintf("***+++***Order[ws]::%s::***K1::%s::***K2::%s\n", order["strand",ordcnt], seq_order["strand",Q], src_order["strand",S]));
-		order["strand",ordcnt++]=seq_order["strand",Q] SUBSEP src_order["strand",S];
+        seso_rd=seq_order["strand",Q] SUBSEP src_order["strand",S];
+		if (seso_rd in Nss) {
+		  order["strand",ordcnt++]=seso_rd;
+          PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S]));
+        } # if seso_rd
 	  } # for S
 	} # for Q
 	lseq=seq_nordcnt; lsrc=src_nordcnt; # no-strand counter
 	for (Q=0;Q<lseq;Q++) {   # sequence ordering ary loop
 	  for (S=0;S<lsrc;S++) { # source ordering ary loop
-		# PrintRPT(sprintf("***+++***WS::%s::***wsb1::%s::***wsb2::%s\n", "none" SUBSEP ordcnt, "none", ordcnt));
-		# PrintRPT(sprintf("***+++***Order[ws]::%s::***K1::%s::***K2::%s\n", order["none",ordcnt], seq_order["none",Q], src_order["strand",S]));
-		order["none",nordcnt++]=seq_order["none",Q] SUBSEP src_order["none",S];
+        seso_rd=seq_order["none",Q] SUBSEP src_order["none",S];
+		if (seso_rd in Nss) {
+		  order["none",nordcnt++]=seso_rd;
+		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S]));
+        } # if seso_rd
 	  } # for S
 	} # for Q
   } # if sort by sequence
-  else { 
+  else {
+    PrintWRN("*  Sorting by SOURCES then by SEQUENCES (Comparing Sequences)\n*\n");
 	lseq=seq_ordcnt; lsrc=src_ordcnt;   # strand(+/-) counter
 	for (S=0;S<lsrc;S++) {   # source ordering ary loop
 	  for (Q=0;Q<lseq;Q++) { # sequence ordering ary loop
-		# PrintRPT(sprintf("***+++***WS::%s::***wsb1::%s::***wsb2::%s\n", "strand" SUBSEP ordcnt, "strand", ordcnt));
-		# PrintRPT(sprintf("***+++***Order[ws]::%s::***K1::%s::***K2::%s\n", order["strand",ordcnt], seq_order["strand",Q], src_order["strand",S]));
-		order["strand",ordcnt++]=seq_order["strand",Q] SUBSEP src_order["strand",S];
+        seso_rd=seq_order["strand",Q] SUBSEP src_order["strand",S];
+		if (seso_rd in Nss) {
+		  order["strand",ordcnt++]=seso_rd;
+		  PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S]));
+        } # if seso_rd
 	  } # for Q
 	} # for S
 	lseq=seq_nordcnt; lsrc=src_nordcnt; # no-strand counter
 	for (S=0;S<lsrc;S++) {   # source ordering ary loop
 	  for (Q=0;Q<lseq;Q++) { # sequence ordering ary loop
-		# PrintRPT(sprintf("***+++***WS::%s::***wsb1::%s::***wsb2::%s\n", "none" SUBSEP ordcnt, "none", ordcnt));
-		# PrintRPT(sprintf("***+++***Order[ws]::%s::***K1::%s::***K2::%s\n", order["none",ordcnt], seq_order["none",Q], src_order["strand",S]));
-		order["none",nordcnt++]=seq_order["none",Q] SUBSEP src_order["none",S];
+        seso_rd=seq_order["none",Q] SUBSEP src_order["none",S];
+		if (seso_rd in Nss) {
+          order["none",nordcnt++]=seso_rd;
+		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S]));
+        } # if seso_rd
 	  } # for Q	
 	} # for S
   } # else sort by source
@@ -2366,7 +2374,7 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
   for (stp=1;stp<=3;stp++) { # for s in strand
     s=wstr[stp];
 	if ((s=="+" && OnOff(Default["strand_show_forward"])) || (s=="." && OnOff(Default["strand_show_independent"])) || (s=="-" && OnOff(Default["strand_show_reverse"]))) {
-	  if (s=="+" || s=="-") lastcnt=ordcnt;
+	  if (s~/[+-]/) lastcnt=ordcnt;
 	  else lastcnt=nordcnt; 
 	  # PrintRPT(sprintf("GP------ Source: --- Strand: %s Counter: %s\n", s, lastcnt)); 
 	  if (laststrand=="." && NStSize>0) printf "ChangeStrand\n";
