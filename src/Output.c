@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.3 2000-08-08 14:18:29 eblanco Exp $  */
+/*  $Id: Output.c,v 1.4 2000-09-08 10:07:37 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -82,7 +82,7 @@ void OutputHeader(char* locus, long l)
   if (GFF)
     printf("## gff-version 2\n");
   
-  printf("## source-version: geneid v 1.0 -- imim.es\n");
+  printf("## source-version: geneid v 1.0 -- geneid@imim.es\n");
 
   printf("## Sequence %s - Length = %ld bps\n",locus,l);
 
