@@ -46,7 +46,8 @@ any HSP will be enhancered and better predictions will be obtained.
 <li> If blastn (DNA vs DNA) is used to obtain the homologous regions, their frame is unknown, so a dot (".") can be used to make three copies from every one.
 </ul>
 
-<center><font size=2 color="red"> -- HSPs records need to be ordered by first position -- </font></center>
+<center><font size=2 color="red"> -- It is NOT necessary to provide the 
+HSPs records ordered by any position -- </font></center>
 
 </font>
 </div>
@@ -66,7 +67,8 @@ packHSP* SelectHSP(packExternalInformation* external,
 <td bgcolor=skyblue>
 <div class="bulk"><font face="arial black" size=2>
 Select the group of HSPs to be integrated into the predictions according 
-to current Locus name (using a hash table - dictionary of locus). 
+to current Locus name (using a hash table - dictionary of locus). Both FWD and
+RVS HSPs will be sorted using a quicksort routine.
 </font>
 </div>
 </td>
