@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.48 2002-06-17 14:05:08 jabril Exp $ 
+% # $Id: humus.nw,v 1.49 2002-06-17 14:20:34 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.48 2002-06-17 14:05:08 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.49 2002-06-17 14:20:34 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3328,10 +3328,11 @@ $BIN/blast2gff -vg $IDIR/$SEQ.genes.gff > $ODIR/$SEQ.genes.gff || TheEnd CKO ;
 #>#         : RefSeq annotation evidences.
 #># STEP_PATH out
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>/$<STEP{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/logs
 #># STEP_CODE   --------------------------------------------------------------#<#
+#<# STEP_IDIR $HUMUS/$NCHR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>/$<STEP{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>
 #
 GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
 PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
@@ -10613,7 +10614,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.48 2002-06-17 14:05:08 jabril Exp $
+# $Id: humus.nw,v 1.49 2002-06-17 14:20:34 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
