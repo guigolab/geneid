@@ -25,30 +25,37 @@
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
 #
-# software CVS
+######### software CVS #########
 #
 geneid        software/geneid
 sgp           software/sgp
 sggp          software/sggp
 #
-gfftools      software/gfftools
-gff2ps        software/gfftools/gff2ps
-gff2aplot     software/gfftools/gff2aplot
 #
-# users CVS
+########### users CVS ###########
 #
 rguigo        users/rguigo
 #
+#
 jabril        users/jabril
+softjabril    users/jabril/software
+gfftools      users/jabril/software/gfftools
+gff2ps        users/jabril/software/gfftools/gff2ps
+gff2aplot     users/jabril/software/gfftools/gff2aplot
 webjabril     users/jabril/webs/HOMEjabril
 homejabril    users/jabril/webs/HOMEjabril/public_html
 webprecarios  users/jabril/webs/PRECARIOS
 homeprecarios users/jabril/webs/PRECARIOS/public_html
 #
+#
 gparra        users/gparra
+#
 #
 scaste        users/scaste
 #
+#
 eblanco       users/eblanco
 #
+#
 xfustero      users/xfustero
+#
