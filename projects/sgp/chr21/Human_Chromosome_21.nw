@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: Human_Chromosome_21.nw,v 1.5 2001-10-18 08:39:07 jabril Exp $ 
+% # $Id: Human_Chromosome_21.nw,v 1.6 2001-10-22 10:39:57 gparra Exp $ 
 %
 % THIS FILE WAS GENERATED WITH THE FOLOWING COMMAND:
 % ~jabril/bin/deploy Human_Chromosome_21  /home/ug/jabril/development/softjabril/deploy/data/report.nw
@@ -236,7 +236,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.5 2001-10-18 08:39:07 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.6 2001-10-22 10:39:57 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -247,7 +247,7 @@ Universitat Pompeu Fabra\\[2ex]
 \setcounter{page}{1}
 
 \sctn{Introduction}
-The goal of this project is to generate as fast as posible {\sgp} predictions of chromosome 21. geneid and SGP using hsp must be run, evaluated, and analized in three days.
+The goal of this project is to generate as fast as posible {\sgp} predictions of chromosome 21. {\geneid} and {\sgp} using hsp must be run, evaluated, and analized in three days.
 \sctn{Precition on chr21}
 
 \subsctn{Working on data}
@@ -271,24 +271,68 @@ grep chr21 \
    /seq/genomes/H.sapiens/releases/golden_path-01apr2001/database/ensGene.txt \
    > $DATASETS/annotation/ensembl/ensGene.chr21.txt
 # Parsing the annotations
+# Exons
 sed 's/,/ /g' $DATASETS/annotation/ensembl/ensGene.chr21.txt | \
     gawk 'BEGIN{OFS="\t"}{num_exons=$8;for (cont=1;cont<=num_exons;cont++) \
      print $2,"ensembl","CDS",$(9+cont-1),$(9+cont+num_exons-1),".",$3,".",$1;}'\
-     | sort +3n > $DATASETS/annotation/ensembl/chr21
+     | sort +3n > $DATASETS/annotation/ensembl/exons/chr21
+# CDS
+sed 's/,/ /g' $DATASETS/annotation/ensembl/ensGene.chr21.txt | \
+    gawk 'BEGIN{OFS="\t"}{num_exons=$8;for (cont=1;cont<=num_exons;cont++) { \
+     if ($(9+cont-1) < $7 && $(9+cont+num_exons-1) > $6)
+     print $2,"ensembl","CDS",(cont==1) ? $6 : $(9+cont-1),\
+     (cont==num_exons) ? $7 :$(9+cont+num_exons-1),".",$3,".",$1;}}'\
+      > $DATASETS/annotation/ensembl/cds/chr21
 # To avoid overlapped annotations we colapse the exons
+# Exons
     gawk '{OFS="\t";$6="1";$8="1";print}' \
-    $DATASETS/annotation/ensembl/chr21 > /tmp/tmp
+    $DATASETS/annotation/ensembl/exons/chr21 > /tmp/tmp
     blast2gff -g /tmp/tmp | gawk '{OFS="\t";$4++;$9="1";print}' \
-     > $DATASETS/annotation/ensembl/chr21.sr
+     > $DATASETS/annotation/ensembl/exons/chr21.sr
+# CDS
+    gawk '{OFS="\t";$6="1";$8="1";$9="1";print}' \
+    $DATASETS/annotation/ensembl/cds/chr21 > /tmp/tmp
+    blast2gff -g /tmp/tmp | gawk '{OFS="\t";$4++;$9="1";print}' \
+    > $DATASETS/annotation/ensembl/cds/chr21.sr
+# Refseq
+grep chr21 \
+   /seq/genomes/H.sapiens/releases/golden_path-01apr2001/database/refGene.txt \
+   > $DATASETS/annotation/refseq/refGene.chr21.txt
+# Parsing the annotations (Refseq genes)
+# Exons
+sed 's/,/ /g' $DATASETS/annotation/refseq/refGene.chr21.txt | \
+    gawk 'BEGIN{OFS="\t"}{num_exons=$8;for (cont=1;cont<=num_exons;cont++) \
+     print $2,"ensembl","CDS",$(9+cont-1),$(9+cont+num_exons-1),".",$3,".",$1;}'\
+     | sort +3n > $DATASETS/annotation/refseq/exons/chr21
+# CDS
+sed 's/,/ /g' $DATASETS/annotation/refseq/refGene.chr21.txt | \
+    gawk 'BEGIN{OFS="\t"}{num_exons=$8;for (cont=1;cont<=num_exons;cont++) { \
+     if ($(9+cont-1) < $7 && $(9+cont+num_exons-1) > $6)
+     print $2,"ensembl","CDS",(cont==1) ? $6 : $(9+cont-1),\
+     (cont==num_exons) ? $7 :$(9+cont+num_exons-1),".",$3,".",$1;}}'\
+      > $DATASETS/annotation/refseq/cds/chr21
+# To avoid overlapped annotations we colapse the exons
+# Exons
+    gawk '{OFS="\t";$6="1";$8="1";print}' \
+    $DATASETS/annotation/refseq/exons/chr21 > /tmp/tmp
+    blast2gff -g /tmp/tmp | gawk '{OFS="\t";$4++;$9="1";print}' \
+     > $DATASETS/annotation/refseq/exons/chr21.sr
+# CDS
+    gawk '{OFS="\t";$6="1";$8="1";$9="1";print}' \
+    $DATASETS/annotation/refseq/cds/chr21 > /tmp/tmp
+    blast2gff -g /tmp/tmp | gawk '{OFS="\t";$4++;$9="1";print}' \
+    > $DATASETS/annotation/refseq/cds/chr21.sr
+
 # Sequence 
 # Pankaj has sent us the splitted sequence of hte chr21, only the fragment he 
 # ran tblastx with. /projects/datasets/chr21/fasta/pankaj_fragments/
 # Therefore we copy the original masked sequence obtained from the goldenpath
 cp /seq/genomes/H.sapiens/releases/golden_path-01apr2001/chromFaMasked/21/chr21.fa.masked \
   $DATASETS/fasta/masked/chr21
+cp /seq/genomes/H.sapiens/releases/golden_path-01apr2001/chromFa/chr21.fa \
+  $DATASETS/fasta/raw/chr21
 # At this point we also cp the blast result sent by pankaj.
 mkdir $ANALYSIS/blast $ANALYSIS/blast/wublast.tblastx 
-
 cp ~pagarwal/tbx.tar.gz $ANALYSIS/_tmp/Pankaj/
 #
 #
@@ -348,11 +392,60 @@ while [ $counter -le $max ] ;
 # Running geneid on chr21.
 run_GENEID Hsap.masked $DATASETS/fasta/masked  chr21 1.1 ;
 # Evaluating the results.
+# CDS
 run_evaluation 21 geneid Hsap.masked $ANALYSIS/geneid \
-    $DATASETS/annotation/ensembl chr21.sr ;
-@ 
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr21_CDSsr 
+# EXON
+run_evaluation 21 geneid Hsap.masked $ANALYSIS/geneid \
+    $DATASETS/annotation/ensembl/exons/sr EXONsr 44907570;
+$ENSCRIPT  $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked.chr21_EXONsr 
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr21_EXONsr 
 
-\subsctn{Running sgp}
+# Running geneid on raw chr21.
+run_GENEID Hsap.raw $DATASETS/fasta/raw  chr21 1.1 ;
+# Evaluating the results.
+# Ensembl CDS
+run_evaluation 21 geneid Hsap.raw $ANALYSIS/geneid \
+    $DATASETS/annotation/ensembl/cds/sr ref_sr 44907570;
+$ENSCRIPT  $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr21_CDSsr 
+# Refseq CDS
+run_evaluation 21 geneid Hsap.raw $ANALYSIS/geneid \
+    $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570;
+$ENSCRIPT  $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw.chr21_CDSsr.ref 
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr21_CDSsr.ref 
+
+
+@ 
+%$
+\subsctn{Evaluating genscan}
+Genscan predictions were obtained from Goldenpath resources.
+<<BASH commands ANALYSIS>>=
+# Generating gff file for genscan predictions of chromosome 21
+sed 's/,/ /g' $ANALYSIS/genscan/Hsap.masked/chr21.goldenpath |  \
+   gawk 'BEGIN{OFS="\t"}{num_exons=$8;for (cont=1;cont<=num_exons;cont++) \
+   print $2,"genscan","CDS",$(9+cont-1)+1,$(9+cont+num_exons-1),".",$3,".",$1;}'\
+     | sort +3n > $ANALYSIS/genscan/Hsap.masked/gff/chr21
+# Evaluatio the results
+# ensembl
+run_evaluation 21 genscan Hsap.masked $ANALYSIS/genscan \
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/genscan/Hsap.masked/eval_genscan.Hsap.masked.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.masked/eval_genscan_brief.Hsap.masked.chr21_CDSsr 
+# refseq
+run_evaluation 21 genscan Hsap.masked $ANALYSIS/genscan \
+    $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570;
+$ENSCRIPT  $ANALYSIS/genscan/Hsap.masked/eval_genscan.Hsap.masked.chr21_CDSsr.ref 
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.masked/eval_genscan_brief.Hsap.masked.chr21_CDSsr.ref 
+
+@
+
+\subsctn{Running {\sgp}}
+
+{\sgp} was run with default parameters in the first approach. We realized than the predictions weren't as goods as in chr22. The specificity and the sensitivity of {\geneid} was very low in this sequences, lower than {\genscan}. The reason could be that the C+G content of chr21 is lower than chr22. It seems than {\genscan} can deal with low C+G content more efficiently than {\geneid}. Therefore, it was decided to decrease exon weight(-2) of the first isochore (0-45 C+G\%) to increase the sensitivity and to increase exon weight(+2) of the isochores 2 and 3. The final result seems to be better.
+%'
 
 <<BASH commands ANALYSIS>>=
 ## Running sgp
@@ -363,16 +456,892 @@ IDIR="$ANALYSIS/sgp/Hsap.masked.3X+" ;
 geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
 sort +3n +4n -5 $IDIR/gff/chr21_* \
               > $IDIR/gff/chr21 ; 
-gawk '{print $9}' $IDIR/gff/chr21 | sort | uniq -c | \
-     sort -nr > $IDIR/gff/chr21.gene_list ;
+gawk '{
+      genes[$9]++;
+      if (genes[$9]>1) {
+        min[$9] = $4<min[$9] ? $4 : min[$9] ;
+        max[$9] = $5>max[$9] ? $5 : max[$9] ;
+      } else {
+        min[$9] = $4 ;
+        max[$9] = $5 ;
+        strand[$9] = $7;
+      };
+      len[$9]+=$5-$4+1
+    }
+    END {
+      for (n in genes) {
+        print n, min[n], max[n], strand[n], len[n],genes[n];
+      };
+    }' $IDIR/gff/chr21 | sort +1n +2n -3 > $IDIR/gff/chr21.gene_list ;
 
 # Evaluation 
- 
-run_evaluation 21 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/all all ;
+# CDS
+run_evaluation 21 sgp Hsap.masked.3X+ $ANALYSIS/sgp \
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.masked.3X+/eval_sgp.Hsap.masked.3X+.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked.3X+/eval_sgp_brief.Hsap.masked.3X+.chr21_CDSsr 
+# EXON
+run_evaluation 21 sgp Hsap.masked.3X+ $ANALYSIS/sgp \
+    $DATASETS/annotation/ensembl/exons/sr EXONsr 44907570;
+$ENSCRIPT $ANALYSIS/sgp/Hsap.masked.3X+/eval_sgp.Hsap.masked.3X+.chr21_EXONsr
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked.3X+/eval_sgp_brief.Hsap.masked.3X+.chr21_EXONsr 
+
+## Running sgp on raw sequences
+# USAGE: run_mod_SGP testname sequence hspdata chr seqlength
+run_mod_SGP Hsap.raw.3X+ $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr21 44907570 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.3X+" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
+sort +3n +4n -5 $IDIR/gff/chr21_* \
+              > $IDIR/gff/chr21 ; 
+gawk '{
+      genes[$9]++;
+      if (genes[$9]>1) {
+        min[$9] = $4<min[$9] ? $4 : min[$9] ;
+        max[$9] = $5>max[$9] ? $5 : max[$9] ;
+      } else {
+        min[$9] = $4 ;
+        max[$9] = $5 ;
+        strand[$9] = $7;
+      };
+      len[$9]+=$5-$4+1
+    }
+    END {
+      for (n in genes) {
+        print n, min[n], max[n], strand[n], len[n],genes[n];
+      };
+    }' $IDIR/gff/chr21 | sort +1n +2n -3 > $IDIR/gff/chr21.gene_list ;
+
+# Evaluation 
+# CDS
+run_evaluation 21 sgp Hsap.raw.3X+ $ANALYSIS/sgp \
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp.Hsap.raw.3X+.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp_brief.Hsap.raw.3X+.chr21_CDSsr 
+run_evaluation 21 sgp Hsap.raw.3X+ $ANALYSIS/sgp \
+    $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp.Hsap.raw.3X+.chr21_CDSsr.ref 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp_brief.Hsap.raw.3X+.chr21_CDSsr.ref 
+
+## Running sgp on raw sequences with an exonweihgt of +1
+# USAGE: run_mod_SGP testname sequence hspdata chr seqlength
+run_mod_SGP Hsap.raw.3X+.ew-1 $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr21 44907570 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.3X+.ew-1" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
+sort +3n +4n -5 $IDIR/gff/chr21_* \
+              > $IDIR/gff/chr21 ; 
+gawk '{
+      genes[$9]++;
+      if (genes[$9]>1) {
+        min[$9] = $4<min[$9] ? $4 : min[$9] ;
+        max[$9] = $5>max[$9] ? $5 : max[$9] ;
+      } else {
+        min[$9] = $4 ;
+        max[$9] = $5 ;
+        strand[$9] = $7;
+      };
+      len[$9]+=$5-$4+1
+    }
+    END {
+      for (n in genes) {
+        print n, min[n], max[n], strand[n], len[n],genes[n];
+      };
+    }' $IDIR/gff/chr21 | sort +1n +2n -3 > $IDIR/gff/chr21.gene_list ;
+# Evaluation 
+# ensembl CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew-1 $ANALYSIS/sgp \
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp.Hsap.raw.3X+.ew-1.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+/eval_sgp_brief.Hsap.ew-1.raw.3X+.chr21_CDSsr 
+# refseq CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew-1 $ANALYSIS/sgp \
+    $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+.ew-1/eval_sgp.Hsap.raw.3X+.ew-1.chr21_CDSsr.ref 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+.ew-1/eval_sgp_brief.Hsap.ew-1.raw.3X+.chr21_CDSsr.ref 
+
+
+## Running sgp on raw sequences with an exonweihgt of +2
+# USAGE: run_mod_SGP testname sequence hspdata chr seqlength
+run_mod_SGP Hsap.raw.3X+.ew-2 $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr21 44907570 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.3X+.ew-2" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
+sort +3n +4n -5 $IDIR/gff/chr21_* \
+              > $IDIR/gff/chr21 ; 
+gawk '{
+      genes[$9]++;
+      if (genes[$9]>1) {
+        min[$9] = $4<min[$9] ? $4 : min[$9] ;
+        max[$9] = $5>max[$9] ? $5 : max[$9] ;
+      } else {
+        min[$9] = $4 ;
+        max[$9] = $5 ;
+        strand[$9] = $7;
+      };
+      len[$9]+=$5-$4+1
+    }
+    END {
+      for (n in genes) {
+        print n, min[n], max[n], strand[n], len[n],genes[n];
+      };
+    }' $IDIR/gff/chr21 | sort +1n +2n -3 > $IDIR/gff/chr21.gene_list ;
+# Evaluation 
+# CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew-2 $ANALYSIS/sgp \
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2/eval_sgp.Hsap.raw.3X+.ew-2.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+.ew-2/eval_sgp_brief.Hsap.ew-2.raw.3X+.chr21_CDSsr 
+# refseq CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew-2 $ANALYSIS/sgp \
+    $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2/eval_sgp.Hsap.raw.3X+.ew-2.chr21_CDSsr.ref 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+.ew-2/eval_sgp_brief.Hsap.raw.ew-2.raw.3X+.chr21_CDSsr.ref 
+## Running sgp on raw sequences with an exonweihgt of -2 in isochore 1
+# USAGE: run_mod_SGP testname sequence hspdata chr seqlength
+run_mod_SGP Hsap.raw.3X+.ew--2 $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr21 44907570 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.3X+.ew--2" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
+sort +3n +4n -5 $IDIR/gff/chr21_* \
+              > $IDIR/gff/chr21 ; 
+gawk '{
+      genes[$9]++;
+      if (genes[$9]>1) {
+        min[$9] = $4<min[$9] ? $4 : min[$9] ;
+        max[$9] = $5>max[$9] ? $5 : max[$9] ;
+      } else {
+        min[$9] = $4 ;
+        max[$9] = $5 ;
+        strand[$9] = $7;
+      };
+      len[$9]+=$5-$4+1
+    }
+    END {
+      for (n in genes) {
+        print n, min[n], max[n], strand[n], len[n],genes[n];
+      };
+    }' $IDIR/gff/chr21 | sort +1n +2n -3 > $IDIR/gff/chr21.gene_list ;
+# Evaluation 
+# CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew--2 $ANALYSIS/sgp \
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+.ew--2/eval_sgp.Hsap.raw.3X+.ew-2.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+.ew--2/eval_sgp_brief.Hsap.ew-2.raw.3X+.chr21_CDSsr 
+# refseq CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew--2 $ANALYSIS/sgp \
+    $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+.ew--2/eval_sgp.Hsap.raw.3X+.ew-2.chr21_CDSsr.ref 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+.ew--2/eval_sgp_brief.Hsap.raw.ew-2.raw.3X+.chr21_CDSsr.ref 
+## Running sgp on raw sequences with an exonweihgt of -2 in isochore 1 +2 in the other
+# USAGE: run_mod_SGP testname sequence hspdata chr seqlength
+run_mod_SGP Hsap.raw.3X+.ew-2+2 $DATASETS/fasta/raw \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr21 44907570 ;
+IDIR="$ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr21 ;
+sort +3n +4n -5 $IDIR/gff/chr21_* \
+              > $IDIR/gff/chr21 ; 
+gawk '{
+      genes[$9]++;
+      if (genes[$9]>1) {
+        min[$9] = $4<min[$9] ? $4 : min[$9] ;
+        max[$9] = $5>max[$9] ? $5 : max[$9] ;
+      } else {
+        min[$9] = $4 ;
+        max[$9] = $5 ;
+        strand[$9] = $7;
+      };
+      len[$9]+=$5-$4+1
+    }
+    END {
+      for (n in genes) {
+        print n, min[n], max[n], strand[n], len[n],genes[n];
+      };
+    }' $IDIR/gff/chr21 | sort +1n +2n -3 > $IDIR/gff/chr21.gene_list ;
+# Evaluation 
+# CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew-2+2 $ANALYSIS/sgp \
+    $DATASETS/annotation/ensembl/cds/sr CDSsr 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/eval_sgp.Hsap.raw.3X+.ew-2+2.chr21_CDSsr 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/eval_sgp_brief.Hsap.ew-2+2.raw.3X+.chr21_CDSsr 
+# refseq CDS
+run_evaluation 21 sgp Hsap.raw.3X+.ew-2+2 $ANALYSIS/sgp \
+    $DATASETS/annotation/refseq/cds/sr CDSsr.ref 44907570;
+$ENSCRIPT  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/eval_sgp.Hsap.raw.3X+.ew-2+2.chr21_CDSsr.ref 
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/eval_sgp_brief.Hsap.raw.ew-2+2.raw.3X+.chr21_CDSsr.ref 
 
 @
 %$
 
+<<bash commands>>=
+# Low complexity masking proteins
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/seg $ANALYSIS/sgp/Hsap.masked.3X+/xnu
+ls -1 $ANALYSIS/sgp/Hsap.masked.3X+/prot/ | while read locus
+do
+    echo $locus 
+    /usr/local/molbio/Install/wublast/filter/seg \
+         $ANALYSIS/sgp/Hsap.masked.3X+/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.masked.3X+/seg/$locus
+    /usr/local/molbio/Install/wublast/filter/xnu \
+    $ANALYSIS/sgp/Hsap.masked.3X+/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.masked.3X+/xnu/$locus
+done
+# This gawk line compute the number of aa masked by seg.
+gawk '{if (substr($1,1,1)==">") \
+   {if (NR!=1) printf mask/(tot+mask)"\n";printf substr($1,2)" ";tot=mask=0}\
+   else {mask+=gsub(/[a-z]/,/0/); tot+=gsub(/[A-Z]/,/0/)}}\
+   END{printf mask/(tot+mask) "\n";}' seg | gawk '$2>=0.50' 
+# This gawk line compute the number of aa masked by xnu.
+	FastaToTbl xnu.fa | gawk '{print $1,gsub(/X/,/X/)/(length($2)-1)}' \
+    | gawk '$2>=0.50'
+# script that convert the raw bingo result in a tbl file
+gawk 'NF>0 \
+      {if (substr($1,1,5)=="chr21" || (substr($1,1,5)=="=====")) \
+          {printf "\n";printf $0" ";} \
+       else {for (c=1;c<NF-1;c++) printf $c"_"; printf $(NF-1)" "$NF" "} }'\
+       $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo \
+       | sed 's/_/ /' | sort +1n | sed 's/ /_/;/^$/d;/^====/d' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.tbl
+# Now we want to parse all the sequences and select some databases
+gawk '{CDNA=HUMEST=GBHUM=MUSEST=RATEST=NR=PUF=DOM=0; for (i=2;i<=NF;i+=2){ \
+        CDNA += ($i == "rejected")? 1 : 0;
+        HUMEST += ($i ~ /NCBI_Ests/)? $(i+1) : 0;
+        GBHUM  += ($i == "GenBank_Human")? $(i+1) : 0;
+        MUSEST  += ($i ~ /Mouse_EST_Assemblies/)? $(i+1) : 0;
+        RATEST  += ($i ~ /Rat_EST_Assemblies/)? $(i+1) : 0;
+        NR += ($i == "nr")? $(i+1) : 0;
+        PUF += ($i == "Pufferfish_Genomic")? $(i+1) : 0;
+        DOM += ($i == "Conserved_Domain_Database_(NCBI)")? $(i+1) : 0;}
+      print $1,"CDNA",CDNA,"GBHUM",GBHUM,"HUMEST",HUMEST,"MUSEST",MUSEST,"RATEST",RATEST,"NR",NR,"PUF",PUF,"DOM",DOM}' \
+     $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.tbl \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.select.tbl 
+# Now we also want to obtain the genes suported by hsp and compute the
+# coverage on them
+   $SGPBIN/supportexons \
+      $ANALYSIS/sgp/Hsap.masked.3X+/hsp-rs/chr21 \
+      $ANALYSIS/geneid/Hsap.masked.gnid_fix/gff/c1.geneid \
+       $ANALYSIS/genscan/Hsap.masked/gff/chr21 \
+       < $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support
+# ensembl support 
+   $SGPBIN/supportexons $DATASETS/annotation/ensembl/cds/gff/chr21 nul nul \
+       < $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 \
+     | sed 's/TBXMATCH/ENSEMBL/g' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e_ensembl-support
+# compute the percentage of coverage
+    gawk '{min=0;max=0;for (i=10;i<NF && $i=="TBXMATCH";i+=4) {\
+            max=(i==10) ? $12 : max;
+            min=(i==10) ? $11 : min;
+            min=($(i+1) < min) ?  $(i+1) : min ;
+            max=($(i+2) > max) ?  $(i+2) : max }
+          if (i==10)
+             print $9,0,$5-$4+1; 
+          else {if (min<$4) 
+                   if (max<$5) cov=max-$4+1;
+                   else cov=$5-$4+1;
+               else if (max<$5) cov=max-min;
+                   else  cov=$5-min+1;
+               print $9, cov, $5-$4+1;}}' \
+          $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support | \
+          gawk '{cov[$1]+=$2;len[$1]+=$3}\
+                END{for (loc in len) print loc, cov[loc]/len[loc]}' \
+      > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support_percent
+# We need the coverage of each exons with the hsp
+gawk '{min=0;max=0;for (i=10;i<NF && $i=="TBXMATCH";i+=4) {\
+            max=(i==10) ? $12 : max;
+            min=(i==10) ? $11 : min;
+            min=($(i+1) < min) ?  $(i+1) : min ;
+            max=($(i+2) > max) ?  $(i+2) : max }
+          if (i==10)
+             print $9"."++ct[$9],0; 
+          else {if (min<$4) 
+                   if (max<$5) cov=max-$4+1;
+                   else cov=$5-$4+1;
+               else if (max<$5) cov=max-min;
+                   else  cov=$5-min+1;
+               print $9"."++ct[$9], cov/($5-$4+1);}}' \
+            $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support\
+ > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx.e-support_percent
+ 
+# Generating the other supported files
+# We want to obtain the number of exons with TBX and GSN for each prediction
+  grep TBXMATCH $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support \
+      | gawk '{print $1, $9}' | sort | uniq -c | gawk '{print  $3,$1}' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support
+  grep GNSMATCH $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support \
+      | gawk '{print $1, $9}' | sort | uniq -c | gawk '{print  $3,$1}' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.gscn-support
+# join all the files toghether
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support \
+      $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21.gene_list | \
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support_percent \
+       -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/chr21.gscn-support \
+      -   | 
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/exonerate/chr21.exonerate \
+      -   | 
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/blastz/chr21.blastzMouse-support \
+      -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/blatmouse/chr21.blatMouse-support \
+      -   | 
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/mystery/looseMystery/chr21.mystery \
+      -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.select.tbl \
+      - \
+      > $ANALYSIS/sgp/Hsap.masked.3X+/table.tbl
+#####################
+## We build the html database with the prevoius dataset.
+
+# Building the html table
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/tmp/table
+# The file neede are :
+# geneid output in geneid format
+# gff file of the prediction
+# gff file of the hsps
+#########
+# The hsp file need to have group field:
+gawk '{OFS="\t";$9=1;print}' \
+   $ANALYSIS/sgp/Hsap.masked.3X+/sr/chr21 \
+   > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/table/chr21.sr.gff
+# In this gawk commad line we join the information of the homology stored in\
+# table file and the output of geneid nneed by geneid2html
+gawk 'BEGIN{while (getline<ARGV[1]>0){gsub ("_"," ");\
+data[$2]="# Gene " $1 "_" $2 " (). " $6" nt. " $7 " exons. " $8 " exons_sup. " substr ($9,1,4)*100 " %cov. " $10 " genscan. " $11 " Exonerate. " $12 " Blastz. " $13 " Blat. "  $14 " Mystery. " $16 " CDNA. " $18 " GB_HUM. " $20 " EST_HUM. " $22 " EST_MUS. " $24  " EST_RAT. " $26 " NR. " $28 " PUF. " $30 " CDD." }; ARGV[1]="";}{if ($2=="Gene" && $7!=0 && data[$3]) print data[$3]; else print}' \
+  $ANALYSIS/sgp/Hsap.masked.3X+/table.tbl \
+  $ANALYSIS/sgp/Hsap.masked.3X+/geneid_format/chr21 \
+  > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/table/chr21.geneid
+#We devided the information of the chr21.geneid into the four cathegories
+TABLE="$ANALYSIS/sgp/Hsap.masked.3X+/tmp/table"
+# Genes with ensembl hits
+gawk '{if (NR<5) print;if ($2=="Gene") \
+   if ($7!=0 && $23>0) {bol=1;} else {bol=0} if (bol==1) print $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.ensembl_cdna.gnid
+# Genes without genscan hits
+gawk '{if (NR<5) print;if ($2=="Gene") \
+   if ($7!=0 && $13==0 && $23==0 && $9!=0) {bol=1;} else {bol=0} \
+   if (bol==1) print  $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.no_genscan.gnid
+# Genes without HSP support
+gawk '{if (NR<5) print;if ($2=="Gene") \
+   if ($7!=0  && $23==0 && $9==0) {bol=1;} else {bol=0} \
+   if (bol==1) print  $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.no_supported.gnid
+# Genes remaining
+gawk '{if (NR<5) print; if ($2=="Gene") \
+   if ($7!=0 && $13!=0 && $23==0 && $9!=0) {bol=1;} else {bol=0} \
+   if (bol==1) print  $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.supported.gnid
+# A file with the titles of each group was done
+cat > titles
+ensembl_cdna SGP predictions identical to ensembl cDNA (95% identity over 100bp)
+supported  SGP predictions overlapping genscan predictions
+no_genscan  SGP predictions NOT overlapping genscan predictions
+no_supported SGP predictions WITHOUT homology support of Mouse genome shotgun
+# We asure that no old file were in the directory
+rm -f $TABLE/table_chr21A.html \
+      $TABLE/geneid_chr21.ensembl_cdna.html \
+      $TABLE/geneid_chr21.no_genscan.html \
+      $TABLE/geneid_chr21.supported.html \
+      $TABLE/geneid_chr21.no_supported.html
+# The following script execute geneid2html.pl
+while read file title
+do
+  $SGPBIN/geneid2html.pl \
+     $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 \
+     $TABLE/chr21.sr.gff  \
+     $TABLE/chr21.$file.gnid 
+  sed "s/geneid_chr21.html/geneid_chr21.$file.html/g" \
+    $TABLE/table_chr21.html | \
+  gawk "{if (NR==8){print;print \"<h2> $title <h2>\"} else print}"\
+     >> $TABLE/table_chr21A.html  
+  mv $TABLE/geneid_chr21.html $TABLE/geneid_chr21.$file.html
+done < $TABLE/titles
+
+gawk '$15==0 && $17==0 && $19==0 && $5>100' | \
+
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/cds_coord
+ODIR="$ANALYSIS/sgp/Hsap.masked.3X+/cds_coord/";
+/home/ug/jabril/development/softjabril/fullgffcoords/bin/fullgffcoords.pl -c\
+  $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 | 
+  gawk "{OFS=\"\t\";\$1=\$9;\$7=\"+\";\$9=\$9\".\"++ct[\$9];print  > \"$ODIR/\" \$1}" 
+ls -1 $ODIR | while read locus
+do
+   sort +3n -o $ODIR/$locus $ODIR/$locus
+done
+@
+
+<<Working with the exons>>=
+# First we need the coordenates for each exon in the cDNA sequence
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/cds_coord
+ODIR="$ANALYSIS/sgp/Hsap.masked.3X+/cds_coord/";
+/home/ug/jabril/development/softjabril/fullgffcoords/bin/fullgffcoords.pl -c\
+  $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 | 
+  gawk "{OFS=\"\t\";\$1=\$9;\$7=\"+\";\$9=\$9\".\"++ct[\$9];print  > \"$ODIR/\" \$1}" 
+ls -1 $ODIR | while read locus
+do
+   sort +3n -o $locus $locus
+done
+@ 
+
+<<Filtering new predictions>>=
+# Analizing the final results obtained by modifying the exon weight 
+#(isochore 1: -2; isochore 2 3:+2)  
+# Finding the coordinates of the exons inside the cds 
+mkdir $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/cds_coord
+ODIR="$ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/cds_coord/";
+/home/ug/jabril/development/softjabril/fullgffcoords/bin/fullgffcoords.pl -c\
+  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21 | 
+  gawk "{OFS=\"\t\";\$1=\$9;\$7=\"+\";\$9=\$9\".\"++ct[\$9];print  > \"$ODIR/\" \$1}" 
+ls -1 $ODIR | while read locus
+do
+   sort +3n -o $ODIR/$locus $ODIR/$locus
+done
+# Low complexity masking proteins : seg and xnu
+mkdir $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/seg $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/xnu
+ls -1 $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/prot/ | while read locus
+do
+    echo $locus 
+    /usr/local/molbio/Install/wublast/filter/seg \
+         $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/seg/$locus
+    /usr/local/molbio/Install/wublast/filter/xnu \
+    $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/xnu/$locus
+done
+# This gawk line compute the %  of aa masked by seg.
+gawk '{if (substr($1,1,1)==">") \
+   {if (NR!=1) printf mask/(tot+mask)"\n";printf substr($1,2)" ";tot=mask=0}\
+   else {mask+=gsub(/[a-z]/,/0/); tot+=gsub(/[A-Z]/,/0/)}}\
+   END{printf mask/(tot+mask) "\n";}' $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/seg/* \
+   >  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.seg.support_percent 
+# This gawk line compute the % of aa masked by xnu.
+FastaToTbl $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/xnu/* \
+   | gawk '{print $1,gsub(/X/,/X/)/(length($2)-1)}' \
+   >  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.xnu.support_percent
+# coverage on the predicted exons by the hsp-rs
+   $SGPBIN/supportexons \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/hsp-rs/chr21 nul nul \
+       < $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21 \
+     > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.e-support
+    grep TBXMATCH $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.e-support \
+      | gawk '{print $1, $9}' | sort | uniq -c | gawk '{print  $3,$1}' \
+     > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support
+# compute the percentage of coverage for exons
+    gawk '{min=0;max=0;for (i=10;i<NF && $i=="TBXMATCH";i+=4) {\
+            max=(i==10) ? $12 : max;
+            min=(i==10) ? $11 : min;
+            min=($(i+1) < min) ?  $(i+1) : min ;
+            max=($(i+2) > max) ?  $(i+2) : max }
+          if (i==10)
+             print $9,0,$5-$4+1; 
+          else {if (min<$4) 
+                   if (max<$5) cov=max-$4+1;
+                   else cov=$5-$4+1;
+               else if (max<$5) cov=max-min;
+                   else  cov=$5-min+1;
+               print $9, cov, $5-$4+1;}}' \
+          $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.e-support | \
+          gawk '{cov[$1]+=$2;len[$1]+=$3}\
+                END{for (loc in len) print loc, cov[loc]/len[loc]}' \
+      > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support_percent
+# join all the files toghether
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21.gene_list | \
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support_percent \
+       -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.seg.support_percent \
+       -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.xnu.support_percent \
+       -   | \
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/tmp/bingo/sgp.reject  \
+      -  > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/table.tbl
+# $1= locus name
+# $2= first gene  position
+# $3= last gene position
+# $4= strand
+# $5= lenght nt
+# $6= # exons
+# $7= # supported exons (hsp)
+# $8= %cov (hsp)
+# $9= xnu masked %
+# $10= seg masked %
+# $11= 0=novel (sprot|ensembl_cdna|Hs_spliced_ESTs|nonHs_tx|refseq_human)=rejected 
+# $12..$NF Other pankaj information about rejected genes
+@ 
+
+<<bash commands>>=
+# Low complexity masking proteins
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/seg $ANALYSIS/sgp/Hsap.masked.3X+/xnu
+ls -1 $ANALYSIS/sgp/Hsap.masked.3X+/prot/ | while read locus
+do
+    echo $locus 
+    /usr/local/molbio/Install/wublast/filter/seg \
+         $ANALYSIS/sgp/Hsap.masked.3X+/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.masked.3X+/seg/$locus
+    /usr/local/molbio/Install/wublast/filter/xnu \
+    $ANALYSIS/sgp/Hsap.masked.3X+/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.masked.3X+/xnu/$locus
+done
+# This gawk line compute the number of aa masked by seg.
+gawk '{if (substr($1,1,1)==">") \
+   {if (NR!=1) printf mask/(tot+mask)"\n";printf substr($1,2)" ";tot=mask=0}\
+   else {mask+=gsub(/[a-z]/,/0/); tot+=gsub(/[A-Z]/,/0/)}}\
+   END{printf mask/(tot+mask) "\n";}' seg | gawk '$2>=0.50' 
+# This gawk line compute the number of aa masked by xnu.
+	FastaToTbl xnu.fa | gawk '{print $1,gsub(/X/,/X/)/(length($2)-1)}' \
+    | gawk '$2>=0.50'
+# script that convert the raw bingo result in a tbl file
+gawk 'NF>0 \
+      {if (substr($1,1,5)=="chr21" || (substr($1,1,5)=="=====")) \
+          {printf "\n";printf $0" ";} \
+       else {for (c=1;c<NF-1;c++) printf $c"_"; printf $(NF-1)" "$NF" "} }'\
+       $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo \
+       | sed 's/_/ /' | sort +1n | sed 's/ /_/;/^$/d;/^====/d' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.tbl
+# Now we want to parse all the sequences and select some databases
+gawk '{CDNA=HUMEST=GBHUM=MUSEST=RATEST=NR=PUF=DOM=0; for (i=2;i<=NF;i+=2){ \
+        CDNA += ($i == "rejected")? 1 : 0;
+        HUMEST += ($i ~ /NCBI_Ests/)? $(i+1) : 0;
+        GBHUM  += ($i == "GenBank_Human")? $(i+1) : 0;
+        MUSEST  += ($i ~ /Mouse_EST_Assemblies/)? $(i+1) : 0;
+        RATEST  += ($i ~ /Rat_EST_Assemblies/)? $(i+1) : 0;
+        NR += ($i == "nr")? $(i+1) : 0;
+        PUF += ($i == "Pufferfish_Genomic")? $(i+1) : 0;
+        DOM += ($i == "Conserved_Domain_Database_(NCBI)")? $(i+1) : 0;}
+      print $1,"CDNA",CDNA,"GBHUM",GBHUM,"HUMEST",HUMEST,"MUSEST",MUSEST,"RATEST",RATEST,"NR",NR,"PUF",PUF,"DOM",DOM}' \
+     $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.tbl \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.select.tbl 
+# Now we also want to obtain the genes suported by hsp and compute the
+# coverage on them
+   $SGPBIN/supportexons \
+      $ANALYSIS/sgp/Hsap.masked.3X+/hsp-rs/chr21 \
+      $ANALYSIS/geneid/Hsap.masked.gnid_fix/gff/c1.geneid \
+       $ANALYSIS/genscan/Hsap.masked/gff/chr21 \
+       < $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support
+# ensembl support 
+   $SGPBIN/supportexons $DATASETS/annotation/ensembl/cds/gff/chr21 nul nul \
+       < $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 \
+     | sed 's/TBXMATCH/ENSEMBL/g' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e_ensembl-support
+# compute the percentage of coverage
+    gawk '{min=0;max=0;for (i=10;i<NF && $i=="TBXMATCH";i+=4) {\
+            max=(i==10) ? $12 : max;
+            min=(i==10) ? $11 : min;
+            min=($(i+1) < min) ?  $(i+1) : min ;
+            max=($(i+2) > max) ?  $(i+2) : max }
+          if (i==10)
+             print $9,0,$5-$4+1; 
+          else {if (min<$4) 
+                   if (max<$5) cov=max-$4+1;
+                   else cov=$5-$4+1;
+               else if (max<$5) cov=max-min;
+                   else  cov=$5-min+1;
+               print $9, cov, $5-$4+1;}}' \
+          $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support | \
+          gawk '{cov[$1]+=$2;len[$1]+=$3}\
+                END{for (loc in len) print loc, cov[loc]/len[loc]}' \
+      > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support_percent
+# We need the coverage of each exons with the hsp
+gawk '{min=0;max=0;for (i=10;i<NF && $i=="TBXMATCH";i+=4) {\
+            max=(i==10) ? $12 : max;
+            min=(i==10) ? $11 : min;
+            min=($(i+1) < min) ?  $(i+1) : min ;
+            max=($(i+2) > max) ?  $(i+2) : max }
+          if (i==10)
+             print $9"."++ct[$9],0; 
+          else {if (min<$4) 
+                   if (max<$5) cov=max-$4+1;
+                   else cov=$5-$4+1;
+               else if (max<$5) cov=max-min;
+                   else  cov=$5-min+1;
+               print $9"."++ct[$9], cov/($5-$4+1);}}' \
+            $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support\
+ > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx.e-support_percent
+ 
+# Generating the other supported files
+# We want to obtain the number of exons with TBX and GSN for each prediction
+  grep TBXMATCH $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support \
+      | gawk '{print $1, $9}' | sort | uniq -c | gawk '{print  $3,$1}' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support
+  grep GNSMATCH $ANALYSIS/sgp/Hsap.masked.3X+/chr21.e-support \
+      | gawk '{print $1, $9}' | sort | uniq -c | gawk '{print  $3,$1}' \
+     > $ANALYSIS/sgp/Hsap.masked.3X+/chr21.gscn-support
+# join all the files toghether
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support \
+      $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21.gene_list | \
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/chr21.tbx-support_percent \
+       -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/chr21.gscn-support \
+      -   | 
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/exonerate/chr21.exonerate \
+      -   | 
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/blastz/chr21.blastzMouse-support \
+      -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/blatmouse/chr21.blatMouse-support \
+      -   | 
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+         ARGV[1]="";} \
+       { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/mystery/looseMystery/chr21.mystery \
+      -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.masked.3X+/tmp/bingo/bingo.select.tbl \
+      - \
+      > $ANALYSIS/sgp/Hsap.masked.3X+/table.tbl
+#####################
+## We build the html database with the prevoius dataset.
+
+# Building the html table
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/tmp/table
+# The file neede are :
+# geneid output in geneid format
+# gff file of the prediction
+# gff file of the hsps
+#########
+# The hsp file need to have group field:
+gawk '{OFS="\t";$9=1;print}' \
+   $ANALYSIS/sgp/Hsap.masked.3X+/sr/chr21 \
+   > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/table/chr21.sr.gff
+# In this gawk commad line we join the information of the homology stored in\
+# table file and the output of geneid nneed by geneid2html
+gawk 'BEGIN{while (getline<ARGV[1]>0){gsub ("_"," ");\
+data[$2]="# Gene " $1 "_" $2 " (). " $6" nt. " $7 " exons. " $8 " exons_sup. " substr ($9,1,4)*100 " %cov. " $10 " genscan. " $11 " Exonerate. " $12 " Blastz. " $13 " Blat. "  $14 " Mystery. " $16 " CDNA. " $18 " GB_HUM. " $20 " EST_HUM. " $22 " EST_MUS. " $24  " EST_RAT. " $26 " NR. " $28 " PUF. " $30 " CDD." }; ARGV[1]="";}{if ($2=="Gene" && $7!=0 && data[$3]) print data[$3]; else print}' \
+  $ANALYSIS/sgp/Hsap.masked.3X+/table.tbl \
+  $ANALYSIS/sgp/Hsap.masked.3X+/geneid_format/chr21 \
+  > $ANALYSIS/sgp/Hsap.masked.3X+/tmp/table/chr21.geneid
+#We devided the information of the chr21.geneid into the four cathegories
+TABLE="$ANALYSIS/sgp/Hsap.masked.3X+/tmp/table"
+# Genes with ensembl hits
+gawk '{if (NR<5) print;if ($2=="Gene") \
+   if ($7!=0 && $23>0) {bol=1;} else {bol=0} if (bol==1) print $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.ensembl_cdna.gnid
+# Genes without genscan hits
+gawk '{if (NR<5) print;if ($2=="Gene") \
+   if ($7!=0 && $13==0 && $23==0 && $9!=0) {bol=1;} else {bol=0} \
+   if (bol==1) print  $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.no_genscan.gnid
+# Genes without HSP support
+gawk '{if (NR<5) print;if ($2=="Gene") \
+   if ($7!=0  && $23==0 && $9==0) {bol=1;} else {bol=0} \
+   if (bol==1) print  $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.no_supported.gnid
+# Genes remaining
+gawk '{if (NR<5) print; if ($2=="Gene") \
+   if ($7!=0 && $13!=0 && $23==0 && $9!=0) {bol=1;} else {bol=0} \
+   if (bol==1) print  $0 }' \
+   $TABLE/chr21.geneid > $TABLE/chr21.supported.gnid
+# A file with the titles of each group was done
+cat > titles
+ensembl_cdna SGP predictions identical to ensembl cDNA (95% identity over 100bp)
+supported  SGP predictions overlapping genscan predictions
+no_genscan  SGP predictions NOT overlapping genscan predictions
+no_supported SGP predictions WITHOUT homology support of Mouse genome shotgun
+# We asure that no old file were in the directory
+rm -f $TABLE/table_chr21A.html \
+      $TABLE/geneid_chr21.ensembl_cdna.html \
+      $TABLE/geneid_chr21.no_genscan.html \
+      $TABLE/geneid_chr21.supported.html \
+      $TABLE/geneid_chr21.no_supported.html
+# The following script execute geneid2html.pl
+while read file title
+do
+  $SGPBIN/geneid2html.pl \
+     $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 \
+     $TABLE/chr21.sr.gff  \
+     $TABLE/chr21.$file.gnid 
+  sed "s/geneid_chr21.html/geneid_chr21.$file.html/g" \
+    $TABLE/table_chr21.html | \
+  gawk "{if (NR==8){print;print \"<h2> $title <h2>\"} else print}"\
+     >> $TABLE/table_chr21A.html  
+  mv $TABLE/geneid_chr21.html $TABLE/geneid_chr21.$file.html
+done < $TABLE/titles
+
+gawk '$15==0 && $17==0 && $19==0 && $5>100' | \
+
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/cds_coord
+ODIR="$ANALYSIS/sgp/Hsap.masked.3X+/cds_coord/";
+/home/ug/jabril/development/softjabril/fullgffcoords/bin/fullgffcoords.pl -c\
+  $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 | 
+  gawk "{OFS=\"\t\";\$1=\$9;\$7=\"+\";\$9=\$9\".\"++ct[\$9];print  > \"$ODIR/\" \$1}" 
+ls -1 $ODIR | while read locus
+do
+   sort +3n -o $ODIR/$locus $ODIR/$locus
+done
+@
+
+<<Working with the exons>>=
+# First we need the coordenates for each exon in the cDNA sequence
+mkdir $ANALYSIS/sgp/Hsap.masked.3X+/cds_coord
+ODIR="$ANALYSIS/sgp/Hsap.masked.3X+/cds_coord/";
+/home/ug/jabril/development/softjabril/fullgffcoords/bin/fullgffcoords.pl -c\
+  $ANALYSIS/sgp/Hsap.masked.3X+/gff/chr21 | 
+  gawk "{OFS=\"\t\";\$1=\$9;\$7=\"+\";\$9=\$9\".\"++ct[\$9];print  > \"$ODIR/\" \$1}" 
+ls -1 $ODIR | while read locus
+do
+   sort +3n -o $locus $locus
+done
+@ 
+
+<<Filtering new predictions>>=
+# Analizing the final results obtained by modifying the exon weight 
+#(isochore 1: -2; isochore 2 3:+2)  
+# Finding the coordinates of the exons inside the cds 
+mkdir $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/cds_coord
+ODIR="$ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/cds_coord/";
+/home/ug/jabril/development/softjabril/fullgffcoords/bin/fullgffcoords.pl -c\
+  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21 | 
+  gawk "{OFS=\"\t\";\$1=\$9;\$7=\"+\";\$9=\$9\".\"++ct[\$9];print  > \"$ODIR/\" \$1}" 
+ls -1 $ODIR | while read locus
+do
+   sort +3n -o $ODIR/$locus $ODIR/$locus
+done
+# Low complexity masking proteins : seg and xnu
+mkdir $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/seg $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/xnu
+ls -1 $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/prot/ | while read locus
+do
+    echo $locus 
+    /usr/local/molbio/Install/wublast/filter/seg \
+         $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/seg/$locus
+    /usr/local/molbio/Install/wublast/filter/xnu \
+    $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/prot/$locus \
+         > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/xnu/$locus
+done
+# This gawk line compute the %  of aa masked by seg.
+gawk '{if (substr($1,1,1)==">") \
+   {if (NR!=1) printf mask/(tot+mask)"\n";printf substr($1,2)" ";tot=mask=0}\
+   else {mask+=gsub(/[a-z]/,/0/); tot+=gsub(/[A-Z]/,/0/)}}\
+   END{printf mask/(tot+mask) "\n";}' $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/seg/* \
+   >  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.seg.support_percent 
+# This gawk line compute the % of aa masked by xnu.
+FastaToTbl $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/xnu/* \
+   | gawk '{print $1,gsub(/X/,/X/)/(length($2)-1)}' \
+   >  $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.xnu.support_percent
+# coverage on the predicted exons by the hsp-rs
+   $SGPBIN/supportexons \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/hsp-rs/chr21 nul nul \
+       < $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21 \
+     > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.e-support
+    grep TBXMATCH $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.e-support \
+      | gawk '{print $1, $9}' | sort | uniq -c | gawk '{print  $3,$1}' \
+     > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support
+# compute the percentage of coverage for exons
+    gawk '{min=0;max=0;for (i=10;i<NF && $i=="TBXMATCH";i+=4) {\
+            max=(i==10) ? $12 : max;
+            min=(i==10) ? $11 : min;
+            min=($(i+1) < min) ?  $(i+1) : min ;
+            max=($(i+2) > max) ?  $(i+2) : max }
+          if (i==10)
+             print $9,0,$5-$4+1; 
+          else {if (min<$4) 
+                   if (max<$5) cov=max-$4+1;
+                   else cov=$5-$4+1;
+               else if (max<$5) cov=max-min;
+                   else  cov=$5-min+1;
+               print $9, cov, $5-$4+1;}}' \
+          $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.e-support | \
+          gawk '{cov[$1]+=$2;len[$1]+=$3}\
+                END{for (loc in len) print loc, cov[loc]/len[loc]}' \
+      > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support_percent
+# join all the files toghether
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21.gene_list | \
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.tbx-support_percent \
+       -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.seg.support_percent \
+       -   |
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/chr21.xnu.support_percent \
+       -   | \
+gawk 'BEGIN{ while (getline<ARGV[1]>0) {locus=$1;$1="";data[locus]=$0;}; \
+        ARGV[1]="";} \
+      { print $0 ,(data[$1]) ? data[$1] : 0  }' \
+      $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/tmp/bingo/sgp.reject  \
+      -  > $ANALYSIS/sgp/Hsap.raw.3X+.ew-2+2/table.tbl
+# $1= locus name
+# $2= first gene  position
+# $3= last gene position
+# $4= strand
+# $5= lenght nt
+# $6= # exons
+# $7= # supported exons (hsp)
+# $8= %cov (hsp)
+# $9= xnu masked %
+# $10= seg masked %
+# $11= 0=novel (sprot|ensembl_cdna|Hs_spliced_ESTs|nonHs_tx|refseq_human)=rejected 
+# $12..$NF Other pankaj information about rejected genes
+@ 
 
 \sctn{Running {\gps}}
 
@@ -772,7 +1741,7 @@ run_mod_SGP ()
   SGP2="/projects/sgp/src/geneid_v1.1-sgp" ;
        # binaries, scripts and params in SGP2
   GENEID="$SGP2/bin/geneid" ; # geneid v1.1-sgp
-  PARAM="$SGP2/param/human3iso.param.sgp" ;
+  PARAM="$SGP2/param/human3iso.param.sgp.-2" ;
   EW=0 ; # add to exon weigth
   S_CUTOFF=26 ;
   SCF=0 ;    # substract to tblastx scores S_CUTOFF - SCF;
@@ -816,7 +1785,7 @@ run_evaluation ()
 {
   #
   # USAGE:
-  #     run_evaluation #chrom program param prog_results_dir annotation_dir testset
+  #     run_evaluation #chrom program param prog_results_dir annotation_dir testset lenght_sequence
   # run_evaluation 21 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/all all ;
   #
   CHR="$1" ;
@@ -827,6 +1796,8 @@ run_evaluation ()
   RESULTS="$BASE/gff/chr$CHR" ;
   SUBSET="$6" ;
   TESTSET="$5/chr$CHR" ;
+  FINALTESTSET="/tmp/tmp$$" ;
+  LENSEQ="$7" ;
   LONG_OUTPUT="$BASE/eval_$prog.$RUN.chr${CHR}_$SUBSET" ;
   SHORT_OUTPUT="$BASE/eval_${prog}_brief.$RUN.chr${CHR}_$SUBSET" ;
   GVER="------------------------- <${GENEIDVERSION}> -------------------------";
@@ -835,16 +1806,21 @@ run_evaluation ()
   #  -a: Average. Print average stats (more than 1 sequence)
   #  -t: Total. Print total stats (more than 1 sequence)
   #  -s: Short. Print a short output
+  # TEMPORAL FILE ADDING A RECORD WITH THE LENGHT OF THE SEQUENCE
+  gawk "BEGIN{OFS=\"\t\";\
+        print \"chr\"$CHR,1,\"Sequences\",1,$LENSEQ,\".\",\".\",\".\",1}\
+        {print}" $TESTSET > /tmp/tmp$$;
+  # /tmp/tmp$$ temporaal file containing lenght+annotation gff records
   { echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
     echo "### $LONG_OUTPUT" ; echo "###" ;
     echo "### "`whoami`" - "`date` ; echo "###" ;
     echo "### $GVER" ; echo "###" ; } > $LONG_OUTPUT ;
-  $SGPBIN/evaluation -ta $RESULTS $TESTSET >> $LONG_OUTPUT ;
+  $SGPBIN/evaluation -ta $RESULTS $FINALTESTSET >> $LONG_OUTPUT ;
   { echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
     echo "### $SHORT_OUTPUT" ; echo "###" ;
     echo "### "`whoami`" - "`date` ; echo "###" ;
     echo "### $GVER" ; echo "###" ; } > $SHORT_OUTPUT ;
-  $SGPBIN/evaluation -tsa $RESULTS $TESTSET >> $SHORT_OUTPUT ;
+  $SGPBIN/evaluation -tsa $RESULTS $FINALTESTSET >> $SHORT_OUTPUT ;
 }
 #
 @ 
@@ -1020,7 +1996,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_21.nw,v 1.5 2001-10-18 08:39:07 jabril Exp $
+# $Id: Human_Chromosome_21.nw,v 1.6 2001-10-22 10:39:57 gparra Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1244,7 +2220,10 @@ SGPPARAM="$SGPBIN/param" ;
 ID="$DATASETS/id" ;
 HSAP="$DATASETS/id.Hsap" ;
 MMUS="$DATASETS/id.Mmus" ;
-export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
+#
+ENSCRIPT="enscript -1C -Gjf Courier7 -M A4" ;
+#
+export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ENSCRIPT ;
 #
 SPLICING="/projects/splicing/chr21" ;
 export SPLICING ;
