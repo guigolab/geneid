@@ -22,7 +22,7 @@ ALINK="black">
 <font face=courier size=5 color=red>ScoreExons.c</font>
 </td>
 <td align=right>
-<font face=courier size=3>geneid v 1.1</font>
+<font face=courier size=3>geneid v 1.2</font>
 <font face=arial black size=3>source documentation</font>
 </td>
 </table>
@@ -156,7 +156,50 @@ a constant cost instead of scanning the whole exon (linear), for every exon
 <tr>
 <td><font face=courier size=4 color=red>
 <pre>
-double ScoreSRexon(exonGFF* exon, int Strand, packSR* sr)
+void HSPScan(packExternalInformation* external,
+             packHSP* hsp, 
+             int Strand, 
+             long l1, long l2)
+</pre>
+</font>
+</td>
+<tr>
+<td bgcolor=skyblue>
+<div class="bulk"><font face="arial black" size=2>
+[Optional]. If homology information about the input sequence is provided,
+projection of HSPs overlapping current fragment of DNA is performed into
+an array of l2 - l1 +1 positions.
+</font>
+</font>
+</div>
+</td>
+<tr>
+<td><font face=courier size=4 color=red>
+<pre>
+void HSPScan2(packExternalInformation* external,
+              packHSP* hsp, 
+              int Strand, 
+              long l1, long l2)
+</pre>
+</font>
+</td>
+<tr>
+<td bgcolor=skyblue>
+<div class="bulk"><font face="arial black" size=2>
+[Optional]. If homology information about the input sequence is provided,
+the array containing HSP projection is preprocessed to save precomputed
+sums of every subset of positions in the current sequence fragment.
+</font>
+</font>
+</div>
+</td>
+<tr>
+<td><font face=courier size=4 color=red>
+<pre>
+float ScoreHSPexon(exonGFF* exon, 
+                   int Strand, 
+                   packExternalInformation* external, 
+                   long l1, long l2)
 </pre>
 </font>
 </td>
@@ -165,12 +208,10 @@ double ScoreSRexon(exonGFF* exon, int Strand, packSR* sr)
 <div class="bulk"><font face="arial black" size=2>
 [Optional]. If homology information about the input sequence is provided,
 exons supported (total or partial intersection) by homology regions increase their
-score proportionally. SR are similarity to protein regions (projections
+score proportionally. HSPs are similarity to protein regions (projections
 over the sequence of blast High-scoring Segment Pairs in which, the
-best score for every position is recorded, building a SR). <font color="red">
-HSPs might also be used but could be dangerous because, regions with many HSPs with very
-low scores would be more important than regions with few HSPs but supported
-with a higher score.</font>
+best score for every position is recorded). <font color="red">.
+</font>
 </font>
 </div>
 </td>
@@ -182,7 +223,8 @@ long Score(exonGFF *Exons,
            long l1,
            long l2,
            int Strand,
-           packSR* sr,
+           packExternalInformation* external,
+           packHSP* hsp,
            gparam** isochores,
            packGC* GCInfo)
 </pre>
@@ -194,10 +236,11 @@ long Score(exonGFF *Exons,
 Score exons: computing step. For every exon from the input, computing the
 coding potential score (Markov chain) by using a specific isochore
 according to its G+C content. Homology to protein score is computed from
-a provided list of SRs as well. The final exon score result of a weighted
-combination between coding potential score and score from both signals,
-plus SR score. There are cutoff points for the coding potential and
-final scores. It returns the number of survivor exons.
+a provided list of HSPs. The final exon score result of a weighted
+combination (site, exon and homology factors) between coding potential 
+score and score from both signals, plus homology score. There are 
+cutoff points for the coding potential and final scores. It returns 
+the number of exons overcoming the filter.
 </font>
 </div>
 </td>
@@ -209,7 +252,8 @@ void ScoreExons(char *Sequence,
                 long l1,
                 long l2,
                 int Strand,
-                packSR* sr,
+                packExternalInformation* external,
+                packHSP* hsp,
                 gparam** isochores,
                 int nIsochores,
                 packGC* GCInfo)
@@ -239,7 +283,7 @@ var modifieddate=document.lastModified
 </table>
 
 <br><p>
-Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+Enrique Blanco Garcia &copy; 2003<br><p><br><p>
 </center>
 </body>
 </html>
