@@ -1,0 +1,660 @@
+%!PS-Adobe-3.0
+%%Title: 
+%%Creator: aplot
+%%Version: v1.9
+%%CreationDate: 2000/04/15 20:16:15
+%%For: jabril
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EndComments
+%
+%
+% $Id: algo2.ps,v 1.1 2000-10-16 14:33:56 jabril Exp $
+%
+%    Author : Josep Francesc ABRIL FERRANDO
+%    e-mail :        jabril@imim.es
+%
+% ------------------------------------------------------------------------
+%                     PostScript Output from GFF2APLOT
+% ------------------------------------------------------------------------
+%
+%         Converting GFF files for an alignment to PostScript.
+%
+%          Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+%                                       Thomas WIEHE                   
+%                                      Roderic GUIGO SERRA       
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+% ------------------------------------------------------------------------
+%
+%
+%%BeginProlog
+%
+%%BeginProcSet: ShortNames 1.0 0
+/tflg false def % test flag
+/bdf { bind def } bind def
+/xdf { exch def } bdf
+/cm { 28.35 mul } bdf
+/ivcm { 28.35 div } bdf
+/in { 72    mul } bdf
+%%EndProcSet:   ShortNames 1.0 0
+%
+%%BeginProcSet: Constants 1.0 0
+% Printing Offset
+/VUpOS 0.25 cm def  % offset defines non printable
+/VDnOS 0.25 cm def  % paper area for pages (printer outlimits).
+/HLtOS 0.25 cm def
+/HRtOS 0.25 cm def
+% /pgA4 { 595 842 } def
+% Fixed Color Variables (CMYK)
+/black                { 0.00 0.00 0.00 1.00 } def
+/verydarkgrey         { 0.00 0.00 0.00 0.80 } def
+/darkgrey             { 0.00 0.00 0.00 0.60 } def
+/grey                 { 0.00 0.00 0.00 0.40 } def
+/lightgrey            { 0.00 0.00 0.00 0.20 } def
+/verylightgrey        { 0.00 0.00 0.00 0.10 } def
+/white                { 0.00 0.00 0.00 0.00 } def
+/verydarkmagenta      { 0.00 1.00 0.00 0.30 } def
+/darkmagenta          { 0.00 0.80 0.00 0.05 } def
+/magenta              { 0.00 0.60 0.00 0.00 } def
+/lightmagenta         { 0.00 0.40 0.00 0.00 } def
+/verylightmagenta     { 0.00 0.20 0.00 0.00 } def
+/verydarkviolet       { 0.45 0.85 0.00 0.00 } def
+/darkviolet           { 0.30 0.65 0.00 0.00 } def
+/violet               { 0.22 0.55 0.00 0.00 } def
+/lightviolet          { 0.15 0.40 0.00 0.00 } def
+/verylightviolet      { 0.10 0.20 0.00 0.00 } def
+/verydarkblue         { 1.00 1.00 0.00 0.20 } def
+/darkblue             { 0.90 0.90 0.00 0.00 } def
+/blue                 { 0.75 0.75 0.00 0.00 } def
+/lightblue            { 0.50 0.50 0.00 0.00 } def
+/verylightblue        { 0.30 0.30 0.00 0.00 } def
+/verydarkskyblue      { 0.90 0.50 0.00 0.15 } def
+/darkskyblue          { 0.75 0.45 0.00 0.00 } def
+/skyblue              { 0.60 0.38 0.00 0.00 } def
+/lightskyblue         { 0.45 0.25 0.00 0.00 } def
+/verylightskyblue     { 0.30 0.15 0.00 0.00 } def
+/verydarkcyan         { 1.00 0.00 0.00 0.10 } def
+/darkcyan             { 0.80 0.00 0.00 0.00 } def
+/cyan                 { 0.60 0.00 0.00 0.00 } def
+/lightcyan            { 0.40 0.00 0.00 0.00 } def
+/verylightcyan        { 0.20 0.00 0.00 0.00 } def
+/verydarkseagreen     { 0.75 0.00 0.45 0.00 } def
+/darkseagreen         { 0.62 0.00 0.38 0.00 } def
+/seagreen             { 0.50 0.00 0.30 0.00 } def
+/lightseagreen        { 0.38 0.00 0.22 0.00 } def
+/verylightseagreen    { 0.25 0.00 0.15 0.00 } def
+/verydarkgreen        { 1.00 0.00 1.00 0.25 } def
+/darkgreen            { 0.80 0.00 0.80 0.10 } def
+/green                { 0.60 0.00 0.60 0.00 } def
+/lightgreen           { 0.40 0.00 0.40 0.00 } def
+/verylightgreen       { 0.20 0.00 0.20 0.00 } def
+/verydarklimegreen    { 0.50 0.00 1.00 0.10 } def
+/darklimegreen        { 0.40 0.00 0.95 0.00 } def
+/limegreen            { 0.30 0.00 0.80 0.00 } def
+/lightlimegreen       { 0.20 0.00 0.65 0.00 } def
+/verylightlimegreen   { 0.10 0.00 0.50 0.00 } def
+/verydarkyellow       { 0.00 0.00 1.00 0.25 } def
+/darkyellow           { 0.00 0.00 1.00 0.10 } def
+/yellow               { 0.00 0.00 1.00 0.00 } def
+/lightyellow          { 0.00 0.00 0.50 0.00 } def
+/verylightyellow      { 0.00 0.00 0.25 0.00 } def
+/verydarkorange       { 0.00 0.50 0.80 0.10 } def
+/darkorange           { 0.00 0.40 0.80 0.00 } def
+/orange               { 0.00 0.30 0.80 0.00 } def
+/lightorange          { 0.00 0.20 0.75 0.00 } def
+/verylightorange      { 0.00 0.15 0.70 0.00 } def
+/verydarkred          { 0.00 1.00 1.00 0.15 } def
+/darkred              { 0.00 0.80 0.80 0.00 } def
+/red                  { 0.00 0.60 0.60 0.00 } def
+/lightred             { 0.00 0.40 0.40 0.00 } def
+/verylightred         { 0.00 0.20 0.20 0.00 } def
+/verydarkbrown        { 0.35 0.85 1.00 0.40 } def
+/darkbrown            { 0.30 0.70 1.00 0.35 } def
+/brown                { 0.25 0.75 1.00 0.25 } def
+/lightbrown           { 0.20 0.60 0.70 0.15 } def
+/verylightbrown       { 0.15 0.45 0.55 0.00 } def
+/htag   0 def
+/Xmarg  4.0 cm def       % Starting Point (upper left corner)
+/Ymarg  842 2 cm sub def
+/Y Ymarg def
+/PlotWidth  14 cm def    % Blocks Size
+/Spacer   1.00 cm def    % BBox relative to dotplot
+/BBoxX  PlotWidth def    % SBox relative to percent box
+/BBoxY   14.00 cm def    % XBox relative to extra box
+/SBoxX  PlotWidth def
+/SBoxY    2.25 cm def
+/XBoxX  PlotWidth def
+/XBoxY    5.50 cm def
+/WBox     0.50 cm def    % TagBox Size
+/HWBox WBox 2 div    def
+/Warw  WBox 0.75 mul def
+/HWarw Warw 2 div    def
+%  Paper Sizes  (in points)
+/pagedict 34 dict def pagedict begin % 32+2 sizes defined
+/pg10x14        {  720 1008 } def
+/pga0           { 2384 3370 } def
+/pga1           { 1684 2384 } def
+/pga10          {   73  105 } def
+/pga2           { 1190 1684 } def
+/pga3           {  842 1190 } def
+/pga4           {  595  842 } def
+/pga5           {  420  595 } def
+/pga6           {  297  420 } def
+/pga7           {  210  297 } def
+/pga8           {  148  210 } def
+/pga9           {  105  148 } def
+/pgb0           { 2920 4127 } def
+/pgb1           { 2064 2920 } def
+/pgb10          {   91  127 } def
+/pgb2           { 1460 2064 } def
+/pgb3           { 1032 1460 } def
+/pgb4           {  729 1032 } def
+/pgb5           {  516  729 } def
+/pgb6           {  363  516 } def
+/pgb7           {  258  363 } def
+/pgb8           {  181  258 } def
+/pgb9           {  127  181 } def
+/pgexecutive    {  540  720 } def
+/pgfolio        {  612  936 } def
+/pglegal        {  612 1008 } def
+/pgletter       {  612  792 } def
+/pgquarto       {  610  780 } def
+/pgstatement    {  396  612 } def
+/pgtabloid      {  792 1224 } def
+/pguserdefined  {  595 2384 } def
+end % pagedict
+%%EndProcSet:   Constants 1.0 0
+/flglscape false def
+/flgcrd false def
+%% page size in points used for plot % pgA4 == 595  842
+/Dpage { pagedict begin pga4 flglscape { exch } if end } bdf
+% margins (1 cm) (Up Down Left Right - margins are XY independent)
+/UpM 1 cm def
+/DnM 1 cm def
+/LtM 1 cm def
+/RtM 1 cm def
+%
+% Defining background-color for objects.
+/BGcolor { white } def
+/FGcolor { black } def
+/BBoxcol { white } def
+/SBoxcol { white } def
+/XBoxcol { white } def
+/BBXtickflg 1 def  % Blocks TickFlags
+/SBXtickflg 1 def  % 0:no tickscale
+/XBXtickflg 0 def  % 1:put tickscale
+/BBYtickflg 1 def
+/SBYtickflg 1 def
+/XBYtickflg 1 def
+/ShowTicks 1 def
+/axesp  1 def % axesp 0 => Y==X : 1 => X=14 Y=14
+/ZoomON 0 def % 0 Switch off zoom-marks - 1 Switch on zoom-marks
+/GridON 0 def % 0 Switch off grid - 1 Switch on grid
+/tickmx -1 def   % tickmarks
+/tickmn -1 def
+/maxtck 2 def
+/mintck 5 def
+/pctmxt 5 def
+/pctmnt 10 def
+/xtrmxt 2 def
+/xtrmnt 5 def
+/SBoxLab () def
+/XBoxLab () def
+/SBoxSLab ( ) def
+/XBoxSLab ( ) def
+%
+/FTXangle 0 def
+/GPXangle 0 def
+/FTYangle 0 def
+/GPYangle 90 def
+/FTLbsc  1 def
+/GPLbsc  1 def
+/MxFtLBL 1 def
+/MxGpLBL 9 def
+/putExon  1 def
+/putExLbl 1 def
+/putGnLbl 1 def
+%%EndProcSet:   Setting_Vars 1.0 0
+%
+/TitleFont    { 24 /Times-Bold  } def
+/SubTtFont    { 16 /Times-Roman } def
+/ElmFont      { 12 FTLbsc mul /Times-Roman } def
+/TagFont      { 14 GPLbsc mul /Times-Roman } def
+/TagLabelFont { 16 /Times-Bold  } def
+/TickFont     { 10 /Helvetica } def
+%
+/xBDspl  1.8 putExon add putExLbl add putGnLbl add def % 1.25
+/xGLDspl 1.0 putExon add putExLbl add def              % 0.85
+/xGDspl  0.75 putExon add putExLbl add def
+/FBDspl 0.60 def % For example, for mRNA.
+%
+/vertical   { /htag 0 def } bdf
+/horizontal { /htag 1 def } bdf
+%
+/FSF 4 def % Point size for Credits for A4
+/CSF { pagedict begin pga4 pop end Dpage pop exch div mul } bdf
+% End of user-defined variables...
+%
+%%BeginProcSet: Page_Layout 1.0 0
+% checking if margins are within the defined offset
+flglscape {
+ UpM HLtOS lt { /UpM HLtOS def } if % Checking margins for flglscape mode
+ DnM HRtOS lt { /DnM HRtOS def } if
+ LtM VDnOS lt { /LtM VDnOS def } if
+ RtM VUpOS lt { /RtM VUpOS def } if
+ } {
+  UpM VUpOS lt { /UpM VUpOS def } if % Checking margins for portrait mode
+  DnM VDnOS lt { /DnM VDnOS def } if
+  LtM HLtOS lt { /LtM HLtOS def } if
+  RtM HRtOS lt { /RtM HRtOS def } if
+  } ifelse
+% defining pagelimits and X - Y scales (Xlim Ylim)
+/pglim { Dpage pop LtM RtM add sub Dpage exch pop UpM DnM add sub } def
+% Defining starting point on page.
+/XORI LtM def
+/YORI UpM def
+%%EndProcSet:   Page_Layout 1.0 0
+%
+%%BeginProcSet: functions 1.0 0
+/F { scale } bdf
+/T { translate } bdf
+/S { gsave } bdf
+/R { grestore } bdf
+/m { moveto } bdf
+/rm { rmoveto } bdf
+/l { lineto } bdf
+/rl { rlineto } bdf
+/K { stroke } bdf
+/scmyk { setcmykcolor } bdf
+/slw { setlinewidth } bdf
+/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll m l l l closepath } bdf
+/dotted { [ 1 ] 0 setdash } def
+%%EndProcSet:   functions 1.0 0
+%
+%%BeginProcSet: text_functions 1.0 0
+/sfont { findfont exch scalefont setfont } bdf
+/tshow { S scmyk sfont m rotate show R } bdf
+/ctshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfont stringwidth pop R 2 div htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bdf
+/ltshow { 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfont stringwidth pop R htag 1 eq { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse tshow } bdf
+%
+% X Y angle string valign halign fnt color ttxt
+ % valign : tv (top)  cv (middle) bv (bottom)
+ % halign : lh (left) ch (center) rh (right)
+/chrh { S newpath 0 0 m false charpath flattenpath pathbbox exch pop 3 -1 roll pop R } bdf
+/strh { 2 dict begin /lly 0.0 def /ury 0.0 def { ( ) dup 0 4 -1 roll put chrh dup ury gt { /ury xdf } { pop } ifelse dup lly lt { /lly xdf } { pop } ifelse } forall ury end } bdf
+/ttxt { S scmyk sfont 8 dict begin /h xdf /v xdf /lbl xdf /angle xdf /y xdf /x xdf /hs lbl stringwidth pop neg def /vs lbl strh neg def x y T angle rotate h (rh) eq { hs } { h (ch) eq { hs 2 div } { 0 } ifelse } ifelse v (tv) eq { vs } { v (cv) eq { vs 2 div } { 0 } ifelse } ifelse m lbl show end R } bdf
+%
+/Title { S 0 Xmarg Y TitleFont FGcolor tshow R /Y Y 0.75 cm sub def } bdf 
+/SubTitle { S 0 Xmarg Y SubTtFont FGcolor tshow R /Y Y 2.5 cm sub def } bdf 
+%%EndProcSet:   text_functions 1.0 0
+%
+%%BeginProcSet: aplotdict 1.0 0
+/aplot 120 dict def aplot begin
+/min { 2 copy gt { exch } if pop } bdf 
+/max { 2 copy lt { exch } if pop } bdf
+/Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
+/Yscm { Yscale mul } bdf /Yscme { Yscm exch } bdf
+/fmt { Yscme Xscme m } bdf /flt { Yscme Xscme l } bdf
+/line { scmyk slw m l K } bdf
+/uline { scmyk slw m S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rl K R l S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse rl K R K } bdf
+/ZoomTicks { /zmdict 3 dict def zmdict begin /r { TxWB BDspl mul Xscm } def /s { TyWB BDspl mul Yscm } def /corner { S 10 -2 roll m 2 { rl S BGcolor scmyk .4 slw K R rl S FGcolor scmyk 2 slw [1 3] 0 setdash K R } repeat R } def 4 copy 3 1 roll exch 0 s 0 s neg r neg 0 r 0 corner 0 s neg 0 s r 0 r neg 0 corner 0 s neg 0 s r neg 0 r 0 corner 0 s 0 s neg r 0 r neg 0 corner end } def
+/Line { S 9 5 roll 2 { Yscm 4 1 roll Xscm 4 1 roll } repeat 9 4 roll line R } bdf
+/Xline { S 3 1 roll Xscme Xscme 3 -1 roll Yscm xwdt sub dup 3 1 roll xwdt 9 -4 roll line R } bdf
+/Bline { S htag 1 eq { Xscme Xscme y0 Yscme y1 Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X1 Xscme bbox } ifelse S scmyk fill R scmyk slw K R } bdf
+/Bsquare { S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox S scmyk fill R scmyk slw K R } bdf
+/Msquare { S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox scmyk slw K R } bdf
+/Mcircle { S Yscme Xscme 3 -1 roll Xscm 0 360 arc closepath scmyk slw K R } bdf
+/Join { S 2 copy 2 copy pop sub 2 div add exch htag 1 eq { y1 TyWB add dup dup TyWB 0.75 mul add 4 1 roll 5 1 roll } { X0 TxWB sub dup dup TxWB 0.75 mul sub 5 1 roll 6 1 roll exch } ifelse 3 { Yscme Xscme 6 2 roll } repeat m l l 0.25 slw scmyk K R } bdf
+/Arrow { /acol [ 9 -4 roll ] def /acolor { acol aload pop } def S 1 eq { exch /sn { 1 mul } def } { /sn { 1 neg mul } def } ifelse htag 1 eq { Xscm dup y1 Yscm HWBox add m HWarw sn HWarw rl 0 Warw neg rl HWarw neg sn HWarw rl closepath S acolor scmyk fill R y1 Yscm HWBox add m Xscm y1 Yscm HWBox add l acolor scmyk 1 slw K } { Yscm dup X0 Xscm HWBox sub exch m HWarw neg HWarw sn rl Warw 0 rl HWarw neg HWarw neg sn rl closepath S acolor scmyk fill R X0 Xscm HWBox sub exch m Yscm X0 Xscm HWBox sub exch l acolor scmyk 1 slw K } ifelse R } bdf
+/FBox { htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB FBDspl mul add Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X0 TxWB FBDspl mul sub Xscme bbox } ifelse S scmyk fill R FGcolor scmyk 1 slw K } bdf
+%
+%
+/FTalgn { htag 1 eq { FTXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse } { FTYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse } ifelse } bdf
+/GPalgn { htag 1 eq { GPXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse } { GPYangle 90 ne { (cv) (rh) } { (bv) (ch) } ifelse } ifelse } bdf
+%
+%
+/Box { 2 copy 2 copy pop sub 2 div add 7 1 roll S htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB add Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X0 TxWB sub Xscme bbox } ifelse S scmyk fill R FGcolor scmyk 1 slw K htag 1 eq { Xscm y1 TyWB 1.75 mul add Yscm FTXangle } { Yscm X0 TxWB 1.75 mul sub Xscme FTYangle } ifelse 6 -1 roll FTalgn 8 -2 roll FGcolor ttxt R } bdf
+%
+/GDmore { MxFtLBL S ElmFont sfont (M) stringwidth pop R mul htag 1 eq { FTXangle sin } { FTYangle cos } ifelse abs mul ivcm add } bdf
+/BDmore { MxGpLBL S TagFont sfont (M) stringwidth pop R mul htag 1 eq { GPXangle sin } { GPYangle cos } ifelse abs mul ivcm add } bdf
+%
+/GnBanner{ S 1 eq { 2 copy htag 1 eq { Xscme Xscme y1 TyWB GDspl mul add dup Yscme Yscm 3 1 roll } { Yscme Yscme X0 TxWB GDspl mul sub dup Xscme Xscme 4 1 roll exch } ifelse 0.5 FGcolor uline } if 2 copy pop sub 2 div add htag 1 eq { Xscm y1 TyWB GLDspl mul add Yscm GPXangle } { Yscm X0 TxWB GLDspl mul sub Xscme GPYangle } ifelse 6 -1 roll GPalgn 8 -2 roll FGcolor ttxt R } bdf
+/SbBanner { S htag 1 eq { 0 X0 X1 X0 sub 2 div add Xscm y1 TyWB GDspl mul add Yscm } { 90 X0 TxWB GDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm } ifelse 5 -2 roll FGcolor ctshow R } bdf
+/Banner { S htag 1 eq { 0 X0 X1 X0 sub 2 div add Xscm y1 TyWB BDspl mul add Yscm } { 90 X0 TxWB BDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm } ifelse 5 -2 roll FGcolor ctshow R } bdf
+%
+% mxt mnt xp yp ori end htick
+/tckdict 15 dict def tckdict begin /mkmxt { dup 0 lt { neg } if dup 10 lt { 10 mul log round 10 exch exp cvi } { log round 10 exch exp cvi } ifelse } def /nwmod { dup 1 le { 100 mul cvi exch 100 mul cvi exch mod 100 div } { exch dup 1 le { 100 mul cvi exch 100 mul cvi mod 100 div } { cvi exch cvi mod } ifelse } ifelse } def /isltone { dup 1 lt { 100 mul cvi 100 div } if } def end
+/htick { S tckdict begin horizontal /yp exch Yscm def /xp exch Xscm def /xend xdf /xori xdf /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp T lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Xscm 0 m dup dup Xscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse neg l 1 slw FGcolor scmyk K GridON 1 eq { S 0 y0 Yscm neg T dup Xscm dup y0 Yscm m y1 Yscm l 0.1 slw verylightgrey scmyk K R } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 3 -1 roll Xscm -18 TickFont FGcolor ctshow } if } { pop } ifelse } if } for xori Xscm dup 0 m 7.5 neg l 2 slw FGcolor scmyk K xori 10 string cvs 0 xori Xscm ZoomON 1 eq { 4 sub } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { ltshow } ifelse xend Xscm dup 0 m 7.5 neg l 2 slw FGcolor scmyk K xend 10 string cvs 0 xend Xscm ZoomON 1 eq { 4 add } if -18 TickFont FGcolor ZoomON 0 eq { ctshow } { tshow } ifelse end R } def
+/vtick { S tckdict begin vertical /yp exch Yscm def /xp exch Xscm def /xend xdf /xori xdf /nmnt exch cvi def /nmxt exch cvi def /mxt exch dup 0 lt { pop xend xori sub mkmxt } if def /mnt exch dup 0 lt { pop mxt nmnt div } if def /lori xori dup mnt nwmod sub mnt add def /lend xend dup mnt nwmod sub mnt sub def xp yp T lori mnt lend { isltone dup dup xori gt exch xend lt and { dup Yscm 0 exch m dup dup Yscme mxt nwmod 0 eq { 7.5 } { 4 } ifelse exch l 1 slw FGcolor scmyk K GridON 1 eq { S X0 Xscm 0 T dup Yscm dup X0 neg Xscme m X1 neg Xscme l 0.1 slw verylightgrey scmyk K R } if dup 0 eq { S dup dup X0 Xscme Yscm m X1 neg Xscme Yscm l 0.1 slw FGcolor scmyk K R } if dup mxt nwmod 0 eq { dup xend mnt sub exch ge { dup dup 1 ge { cvi } if 10 string cvs 0 10 4 -1 roll Yscm 2.5 sub TickFont FGcolor tshow } if } { pop } ifelse } if } for 7.5 xori Yscm dup 0 exch m l 2 slw FGcolor scmyk K xori 10 string cvs 0 10 xori Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow 7.5 xend Yscm dup 0 exch m l 2 slw FGcolor scmyk K xend 10 string cvs 0 10 xend Yscm ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse TickFont FGcolor tshow end R } def
+/nucltick { tickmn tickmx maxtck mintck X0 X1 0 y0 htick } def
+/pctmarks { S y0 10 y1 { Yscm dup X0 Xscm X1 Xscm 3 1 roll 4 1 roll 0.5 FGcolor line } for R } bdf
+%
+/beginfunct { R S 3 dict begin /maxx exch ceiling def /minx exch floor def /Yscale XBoxY maxx minx sub div def minx 0 lt { 0 minx neg Yscm T } if S XBYtickflg 1 eq { -1 -1 xtrmxt xtrmnt minx maxx X1 0 vtick S X0 Xscm 0 m X1 Xscm 0 l dotted FGcolor scmyk K R } if R } def /endfunct { end R } def
+end % aplot dict
+%%EndProcSet:   aplotdict 1.0 0
+%
+%%BeginProcSet: main_function_calls 1.0 0
+%
+/s_credits { S 1 dict begin /fs_cd FSF def pagedict begin pga4 pop end 1 cm sub DnM T 0 0 0 (This plot has been obtained using GFF2APLOT. The most recent version of GFF2APLOT is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) (cv) (rh) fs_cd /Times-Roman FGcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol FGcolor ttxt end R } bdf
+%
+/estlbl { S 3 dict begin /lbl xdf /ypos xdf /xpos xdf horizontal 0 Xlwdt 4 div neg T lbl 0 xpos Xscm ypos Yscm 10 /Helvetica black ctshow vertical end R } bdf
+%
+/GsclonX { /Y exch Y Spacer sub exch sub def Xmarg Y T axesp 0 eq { /Xscale { BBoxX X1 X0 sub Y1 Y0 sub max div } def } { /Xscale { BBoxX X1 X0 sub div } def } ifelse } bdf
+%
+% DOTPLOT BOX
+/begindata { aplot begin S /y1 Y1 def /y0 Y0 def BBoxY GsclonX axesp 0 eq { /Yscale Xscale def } { /Yscale { BBoxY y1 y0 sub div } def } ifelse /TxWB { WBox Xscale div } def /TyWB { WBox Yscale div } def /GDspl { xGDspl GDmore } def /GLDspl { xGLDspl GDmore } def /BDspl { xBDspl GDmore BDmore } def X0 Xscm neg y0 Yscm neg T S S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox BBoxcol scmyk fill R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm ZoomON 1 eq { 4 copy ZoomTicks } if bbox 2 slw FGcolor scmyk K R S BBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse BBYtickflg 1 eq { tickmn tickmx maxtck mintck y0 y1 X1 0 vtick } if R newpath } def /enddata { R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R R /GDspl xGDspl def /GLDspl xGLDspl def /BDspl xBDspl def end } def
+%
+% PERCENT BOX
+/beginmatches { aplot begin /ZoomON 0 def S /y1 xdf /y0 xdf SBoxY GsclonX /Yscale SBoxY y1 y0 sub div def X0 Xscm neg y0 Yscm neg T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox S S SBoxcol scmyk fill R S SBoxLab TagLabelFont Banner SBoxSLab TagFont SbBanner SBXtickflg 1 eq { nucltick /Spacer 1 cm def } { /Spacer 0.5 cm def } ifelse R S SBYtickflg 1 eq { -1 -1 pctmxt pctmnt y0 y1 X1 0 vtick } if R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R R clip newpath } def /endmatches { R S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R R R end } def
+%
+% EXTRA BOX
+/beginextra { aplot begin S /nlines xdf /y0 0 def XBoxY GsclonX /Yscale XBoxY nlines 1 add div def /Xlwdt Yscale 0.75 mul def /xwdt Yscale 2 div def /y1 XBoxY Yscale div def X0 Xscm neg 0 T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox S XBoxcol scmyk fill R S XBoxLab TagLabelFont Banner XBoxSLab TagFont SbBanner XBXtickflg 1 eq { nucltick } if R newpath } def /endextra { /Yscale XBoxY nlines 1 add div def X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K R  R end } def
+%
+%%EndProcSet:   main_function_calls 1.0 0
+%
+%%EndProlog
+%
+%%BeginSetup
+%
+% initgraphics
+% true setpacking
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%
+%%EndSetup
+%
+%%Page: 1 1
+%%BeginPageSetup
+%
+% Saving current page settings
+/pgsave save def
+% Setting BGcolor for sheet 
+Dpage 0 0 bbox S BGcolor scmyk fill R clip newpath
+% Setting page-size scale
+1 CSF dup F
+%%EndPageSetup
+%
+%
+% New BLOCK ---> LABELS
+%
+% (label) Title
+%( ) Title
+% (label) SubTitle
+%( ) SubTitle
+%
+% New BLOCK ---> APLOT
+%
+% xori xend yori yend
+/X0 1 def
+/X1 2000 def
+/Y0 1 def
+/Y1 2000 def
+%
+begindata
+%
+horizontal
+%
+% lwidth lcolor bcol ori end Bline
+% x0 y0 x1 y1 lwidth lcolor Line
+0.25 lightgrey lightgrey 600 800 Bline
+0.25 lightgrey lightgrey 1000 1200 Bline
+0.25 lightgrey lightgrey 1600 1900 Bline
+% tag definitions: Box,Join,Arrow,Banner
+% (label) ElmFont bcol ori end Box
+% color ori end dir Arrow % dir: 0=left 1=rigth
+% jcol ori end Join
+(a) ElmFont red 600 800 Box
+black 600 800 0 Arrow
+(b) ElmFont red 1000 1200 Box
+black 1000 1200 0 Arrow
+(c) ElmFont red 1600 1900 Box
+black 1600 1900 0 Arrow
+black 800 1000 Join
+black 1200 1600 Join
+% (label) TagFont ori end GnBanner
+(REAL GENE) TagFont 600 1900 1 GnBanner
+%
+vertical
+%
+% lwidth lcolor bcol ori end Bline
+% x0 y0 x1 y1 lwidth lcolor Line
+0.25 lightgrey lightgrey 300 500 Bline
+0.25 lightgrey lightgrey 900 1200 Bline
+0.25 lightgrey lightgrey 1500 1600 Bline
+0.25 lightgrey lightgrey 1700 1800 Bline
+%%
+% tag definitions: Box,Join,Arrow,Banner
+% (label) ElmFont bcol ori end Box
+% color ori end dir Arrow % dir: 0=left 1=rigth
+% jcol ori end Join
+(a) ElmFont red 300 500 Box
+black 300 500 0 Arrow
+(b) ElmFont red 900 1200 Box
+black 900 1200 0 Arrow
+(c) ElmFont red 1500 1600 Box
+black 1500 1600 0 Arrow
+(d) ElmFont red 1700 1800 Box
+black 1700 1800 0 Arrow
+black 500 900 Join
+black 1200 1500 Join
+black 1600 1700 Join
+% (label) TagFont ori end GnBanner
+(REAL GENE) TagFont 300 1800 1 GnBanner
+%
+% Extra Features: Nice Band Lines Finishing for Seq1lines, Bsquare
+%
+% lwidth lcolor bcolor Hori Hend Vori Vend Bsquare
+%
+%
+% DATA ---> Alignment...
+%
+50 50 150 150 2 0 0 0 0.5 Line
+600 300 800 500 2 0 0 0 1 Line
+850 600 950 700 2 0 0 0 0.35 Line
+1000 900 1200 1100 2 0 0 0 1 Line
+1600 1100 1700 1200 2 0 0 0 1 Line
+1700 1500 1800 1600 2 0 0 0 1 Line
+1800 1700 1900 1800 2 0 0 0 1 Line
+%
+%
+% Plot - Remarks...
+%
+%
+enddata
+%
+%
+% New BLOCK ---> MATCHES
+%
+% xpct ypct
+ 50 100 beginmatches
+%
+horizontal
+% lwidth lcolor bcol ori end Bline
+% x0 y0 x1 y1 lwidth lcolor Line
+0.25 lightgrey lightgrey 600 800 Bline
+0.25 lightgrey lightgrey 1000 1200 Bline
+0.25 lightgrey lightgrey 1600 1900 Bline
+
+%
+vertical
+%
+pctmarks
+%
+%
+% DATA ---> Alignment...
+%
+/Pbox { S 3 dict begin /s xdf /h2 xdf /h1 xdf h1 Xscm 50 Yscm h2 Xscm s Yscm bbox lightblue scmyk fill end R } bdf
+%
+50 150 60 Pbox
+50 60 150 60 2 0 0 0 0.5 Line
+600 800 85 Pbox
+600 85 800 85 2 0 0 0 1 Line
+850 950 55 Pbox
+850 55  950 55 2 0 0 0 0.35 Line
+1000 1200 97 Pbox
+1000 97 1200 97 2 0 0 0 1 Line	 
+1600 1700 92 Pbox
+1600 92 1700 92 2 0 0 0 1 Line	 
+1700 1800 87 Pbox
+1700 87 1800 87 2 0 0 0 1 Line	 
+1800 1900 80 Pbox
+1800 80 1900 80 2 0 0 0 1 Line	 
+%
+endmatches
+%
+%
+% New BLOCK ---> EXTRA-BOX
+%
+% numlines
+ 7 beginextra
+%
+horizontal
+% lwidth lcolor bcol ori end Bline
+% x0 y0 x1 y1 lwidth lcolor Line
+0.25 lightgrey lightgrey 600 800 Bline
+0.25 lightgrey lightgrey 1000 1200 Bline
+0.25 lightgrey lightgrey 1600 1900 Bline
+%
+vertical
+/dbl { 15 mul } bdf
+%
+S dotted 0 7 2020 7 0.5 black Line R
+300 7 500 7 0.82 dbl darkgreen Line
+400 7 (1) estlbl
+800 7 975 7 0.80 dbl darkgreen Line
+887.5 7 (2) estlbl
+1000 7 1200 7 0.90 dbl lightred Line
+1100 7 (3) estlbl
+1500 7 1700 7 0.85 dbl darkgreen Line
+1600 7 (4) estlbl
+S dotted 0 6 2020 6 0.5 black Line R
+600 6 800 6 0.65 dbl lightred Line
+700 6 (5) estlbl
+1225 6 1350 6 0.75 dbl darkgreen Line
+1287.5 6 (6) estlbl
+1450 6 1550 6 0.60 dbl darkgreen Line
+1500 6 (7) estlbl
+S dotted 0 5 2020 5 0.5 black Line R
+775 5 900 5 0.45 dbl darkgreen Line
+837.5 5 (8) estlbl
+1600 5 1900 5 0.55 dbl lightred Line
+1750 5 (9) estlbl
+%
+0 4 2000 4 2 black Line
+%
+S dotted 0 3 2020 3 0.5 black Line R
+300 3 500 3 0.80 dbl orange Line
+400 3 (1) estlbl
+600 3 800 3 0.90 dbl lightred Line
+700 3 (5) estlbl
+1000 3 1200 3 0.95 dbl lightred Line
+1100 3 (3) estlbl
+1500 3 1700 3 0.76 dbl orange Line
+1600 3 (4) estlbl
+S dotted 0 2 2020 2 0.5 black Line R
+800 2 975 2 0.57 dbl orange Line
+887.5 2 (2) estlbl
+1225 2 1350 2 0.60 dbl orange Line
+1287.5 2 (6) estlbl
+1600 2 1900 2 0.74 dbl lightred Line
+1750 2 (9) estlbl
+S dotted 0 1 2020 1 0.5 black Line R
+1450 1 1550 1 0.25 dbl orange Line
+1500 1 (7) estlbl
+775 1 900 1 0.35 dbl orange Line
+837.5 1 (8) estlbl
+%
+endextra
+%
+S
+ aplot begin 
+ horizontal
+S 2 cm 4.25 cm T (%) TagLabelFont 0 100 0 GnBanner R
+S 2 cm 3.75 cm T (Similarity) TagLabelFont 0 100 0 GnBanner R
+%
+S 2 cm 0.75 cm T (Predicted) TagLabelFont 0 100 0 GnBanner R
+S 2 cm 0.25 cm T (Exons) TagLabelFont 0 100 0 GnBanner R
+S 18.40 cm -0.75 cm T (Weak) ElmFont 0 100 0 GnBanner R
+S 18.65 cm -0.05 cm T (Medium) ElmFont 0 100 0 GnBanner R
+S 18.51 cm  0.65 cm T (Strong) ElmFont 0 100 0 GnBanner R
+%
+0 -2.75 cm T
+S 2 cm 0.75 cm T (Re-Scored) TagLabelFont 0 100 0 GnBanner R
+S 2 cm 0.25 cm T (Exons) TagLabelFont 0 100 0 GnBanner R
+S 18.40 cm -0.75 cm T (Weak) ElmFont 0 100 0 GnBanner R
+S 18.65 cm -0.05 cm T (Medium) ElmFont 0 100 0 GnBanner R
+S 18.51 cm  0.65 cm T (Strong) ElmFont 0 100 0 GnBanner R
+ end
+R
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+grestoreall
+% xori xend yori yend
+/X0 1 def
+/X1 2000 def
+/Y0 1 def
+/Y1 0 def
+/rodettxt { S scmyk sfont 8 dict begin /h xdf /v xdf /lbl xdf /angle xdf /y xdf /x xdf /hs lbl stringwidth pop neg def /vs lbl strh neg def x y T 
+1 -1 scale
+angle rotate h (rh) eq { hs } { h (ch) eq { hs 2 div } { 0 } ifelse } ifelse v (bv) eq { vs } { v (cv) eq { vs 2 div } { 0 } ifelse } ifelse m lbl show end R } bdf
+/rodeBox { 2 copy 2 copy pop sub 2 div add 7 1 roll S htag 1 eq { Xscme Xscme y1 Yscme y1 TyWB add Yscm bbox } { Yscme Yscme X0 Xscm 3 1 roll X0 TxWB sub Xscme bbox } ifelse S scmyk fill R FGcolor scmyk 1 slw K htag 1 eq { Xscm y1 TyWB 1.75 mul add Yscm FTXangle } { Yscm X0 TxWB 1.75 mul sub Xscme FTYangle } ifelse 6 -1 roll FTalgn 8 -2 roll FGcolor rodettxt R } bdf
+/rodeGnBanner{ S 1 eq { 2 copy htag 1 eq { Xscme Xscme y1 TyWB GDspl mul add dup Yscme Yscm 3 1 roll } { Yscme Yscme X0 TxWB GDspl mul sub dup Xscme Xscme 4 1 roll exch } ifelse 0.5 FGcolor uline } if 2 copy pop sub 2 div add htag 1 eq { Xscm y1 TyWB GLDspl mul add Yscm GPXangle } { Yscm X0 TxWB GLDspl mul sub Xscme GPYangle } ifelse 6 -1 roll GPalgn 8 -2 roll FGcolor rodettxt R } bdf
+aplot begin
+S /y1 Y1 def /y0 Y0 def BBoxY GsclonX axesp 0 eq { /Yscale Xscale def } { /Yscale { BBoxY y1 y0 sub div } def } ifelse /TxWB { WBox Xscale div } def /TyWB { WBox Yscale div } def /GDspl { xGDspl GDmore } def /GLDspl { xGLDspl GDmore } def /BDspl { xBDspl GDmore BDmore } def newpath
+X0 Xscm neg 15 cm T
+horizontal
+%
+%
+1 -1 scale 
+%
+%
+% tag definitions: Box,Join,Arrow,Banner
+% (label) ElmFont bcol ori end Box
+% color ori end dir Arrow % dir: 0=left 1=rigth
+% jcol ori end Join
+(5) ElmFont red 600 800 rodeBox
+black 600 800 0 Arrow
+(3) ElmFont red 1000 1200 rodeBox
+black 1000 1200 0 Arrow
+(9) ElmFont red 1600 1900 rodeBox
+black 1600 1900 0 Arrow
+black 800 1000 Join
+black 1200 1600 Join
+% (label) TagFont ori end GnBanner
+(PREDICTED GENE) TagFont 600 1900 1 rodeGnBanner
+enddata
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+flgcrd { s_credits } if
+grestoreall
+pgsave restore
+showpage
+%
+% PageEND: 1 1
+%
+%%Trailer
+%
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EOF

@@ -13,10 +13,12 @@
 %
 %   pdflatex sgp2.tex;                         # to obtain the PS version
 %
-% $Id: sgp2.nw,v 1.6 2000-10-16 08:27:41 jabril Exp $
+% $Id: sgp2.nw,v 1.7 2000-10-16 14:33:57 jabril Exp $
 %  
 \usepackage{noweb,multicol}
 \usepackage[offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={1cm,0.25cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
 \noweboptions{smallcode}
 % relax page breaking scheme
 \def\nwendcode{\endtrivlist \endgroup}
@@ -24,14 +26,23 @@
 
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 
 \newcommand{\cd}[1]{\texttt{\textbf{#1}}} % program<code> font style definition
 \newcommand{\cv}[1]{\texttt{\textsl{#1}}} % program<vars> font style definition
 \newcommand{\cp}[1]{\textit{#1}} % program<vars> font style definition
 
-\newcommand{\sgp}{[[sgp2]]} % PROGRAM alias
-
+\def\sgp{[[sgp2]]} % PROGRAM alias
+\def\tbx{[[tblastx]]}
+\def\gn{[[genscan]]}
+\def\gi{[[geneid]]}
+\def\sgpt{[[sgp-2]]}
+\def\sgpo{[[sgp-1]]}
+\def\scm{[[scimog]]}
+\def\mit{[[mit]]}
+\def\bi{[[bi]]}
+ 
 % TITLE
 \title{Sintenic Gene Prediction Tool}
 \author{Josep F. Abril\\Roderic Guig\'o} %'
@@ -42,7 +53,7 @@
 
 \begin{center}
 {\Large\sgp}\\[1ex]
-{\large\verb+$Id: sgp2.nw,v 1.6 2000-10-16 08:27:41 jabril Exp $+}\\[2ex]
+{\large\verb+$Id: sgp2.nw,v 1.7 2000-10-16 14:33:57 jabril Exp $+}\\[2ex]
 \end{center}
 
 \begin{abstract}
@@ -53,7 +64,87 @@ The initial goal for Josep F. Abril will be to implement a \cd{perl} version of 
 
 \newpage
 
-\sctn{Program Basic Outline}
+\sctn{Introduction}
+
+\subsctn{On using comparative genomics to improve gene precition at genomic scale.}
+
+Conservation in the genomic sequence of species at the appropiate
+phylogenetic  distance may be indicative of conservation of sequence
+function. We investigate here how sequence conservation may be
+indicative of coding function, and develop program, SGP-2, which
+integrates the results from \gi\ and \tbx\ to produce gene predictions
+when comparing human/mouse sintenynic regions.
+We set up a number benchmark data sets,
+in which we test SGP-2 against ``ab initio'' programs, sequence
+similarity based programs, and other hibrid programs. 
+
+\subsctn{Data Sets}
+So far, we used three different human/mouse data sets.
+\begin{description}
+\item[scimog] 39 pairs of single gene homologous sequences. Obtained by
+merging the set by \cite{jarborg:1999a} and the set obtained by us at IMIM.
+\item[mit] 110 pairs of single gene homologous sequences. Obtained
+from the 117 pairs in \cite{batzoglou:2000a}
+\item[bi] 3 pairs of genomic pairs encoding multiple genes. Obtained
+by Webb Miller/Thomas Wiehe.
+\end{description}
+
+\subsctn{Programs}
+\begin{description}
+\item[genscan] default parameters
+\item[geneid] new released version. default parameters
+\item[tblastx] WU (see summer 1999 report)
+\item[rosseta] {\tt www.theory.lcs.mit.edu/crossspecies}
+\end{description}
+ 
+\subsctn{SGP-2}
+Figure \ref{fig:algo2} describes the approach in algo2.  Given two
+genomic sequences
+
+\begin{enumerate}
+\item mask the sequences using RepeatMasker.
+\item run \tbx\ of one sequence agains the other. We run \tbx\
+with the option {\tt nogap}, and using blosum62 and with score for
+aligning to stop codon set to -500
+\item ``project'' the similarity regions onto each sequence
+\item  run \gi\ on each sequence with the projected similarity regions
+given with the {\tt -S} option
+\end{enumerate}
+
+A prototype of {\sgp} already exists.
+
+\begin{figure}
+\begin{center}
+\framebox{
+\includegraphics[width=0.85\linewidth, trim= 10 10 20 10, clip]{../docs/figs/algo2.ps}
+}
+\end{center}
+\caption{ }
+\label{fig:algo2}
+\end{figure}
+
+\subsctn{Results}
+
+\subsubsctn{scimog}
+
+\input ../docs/tables/Table-scimog.tex
+
+
+\subsubsctn{mit}
+
+\input ../docs/tables/Table-mit.tex
+
+\subsubsctn{bi}
+Only one sequence from each pair is used to report accuracy, because
+doubts on the annnotation of the other in the pair
+
+\input ../docs/tables/Table-bi.tex
+ 
+\newpage
+
+\sctn{Perl Implementation}
+
+\subsctn{Program Basic Outline}
 
 Our initial program outline (our root chunk) looks like:\\[1ex]
 
@@ -104,7 +195,7 @@ contains program starting time (seconds since \textsc{Unix} ``epoch''), which wi
 
 <<version control>>=
 my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.6 2000-10-16 08:27:41 jabril Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.nw,v 1.7 2000-10-16 14:33:57 jabril Exp $ ';
 my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 @ %def $PROGRAM $VERSION @tmp_ver
 
@@ -116,7 +207,7 @@ use strict;
 
 ``\cd{use strict;}'' restricts unsafe constructs, like attempting to use missed symbolic references ('\cv{refs}'), undeclared variables ('\cv{vars}') or not predeclared subroutine ('\cv{subs}').
 
-\sctn{Main Program Loop}
+\subsctn{Main Program Loop}
 
 <<Main Loop>>=
 # get options
@@ -135,7 +226,7 @@ DOBLAST: do {
 exit(0);
 @
 
-\subsctn{Default values setting}
+\subsubsctn{Default values setting}
 
 <<define defaults>>=
 # some defaults
@@ -147,7 +238,7 @@ my $SCF = 12; # substract to tblastx scores S_CUTOFF - SCF;
 
 <<define defaults>>=
 # setting paths
-my $SGP2   = '/home3/jabril/development/sgp/Devel';
+my $SGP2   = $ENV{'SGP'};
 my $SGP2bin = "$SGP2/bin";
 my $SGP2param = "$SGP2bin/param";
 my $TMP    = '/tmp';
@@ -157,8 +248,6 @@ my $SGPTMP = "$TMP/$TMPROOT";
 @ %def $SGP2 $SGP2bin $SGP2param $TMP $TMPROOT $SGPTMP
 %$
 
-[[$NF]] %$ 
-is the number of input files.
 [[$SGP2]] %$
 defines main path to {\sgp} binaries, scripts and params.
 [[$TMP]] %$ 
@@ -185,7 +274,7 @@ The following signals are trapped by our signal handler routine:
 \item [[SIGTERM]] is sent by [[kill]] shell command when no signal name is explicitly given (think of it as a polite request for a process to die). 
 \end{itemize}
 
-\subsctn{Parsing Command-line Options}
+\subsubsctn{Parsing Command-line Options}
 
 <<declare uses>>=
 use Getopt::Long;
@@ -341,7 +430,7 @@ defined($ps_output) or ($plots_flg = 0);
 @
 %$
 
-\subsctn{Printing help}
+\subsubsctn{Printing help}
 
 <<declare uses>>=
 use Pod::Text;
@@ -369,7 +458,7 @@ sub prt_Help() {
 
 \cd{unlink()} This command deletes a list of files. Returns the number of files successfully deleted.
 
-\subsctn{Some general subroutines}
+\subsubsctn{Some general subroutines}
 
 <<declare uses>>=
 use File::Copy;
@@ -383,13 +472,13 @@ The [[File::Copy]] module provides [[copy]] and [[move]] functions ([[move]] wor
 sub clean_tmp() {
     opendir(DIR,"$TMP");
     my @files = map { "$TMP/$_" } grep { /^$TMPROOT/ } readdir(DIR);
-#    closedir(DIR);
-#    $#files and 
-#        ( unlink(@files)
-#          and die "********* Temporary files were deleted *********\n"
-#          or die "********* Can't unlink @files : $! *********"
-#        );
-#    die "********* There are no temporary files in $TMP *********";
+    closedir(DIR);
+    $#files and 
+        ( unlink(@files)
+          and die "********* Temporary files were deleted *********\n"
+          or die "********* Can't unlink @files : $! *********"
+        );
+    die "********* There are no temporary files in $TMP *********";
     die "********* There are temporary files in $TMP *********";
 }
 # writing die messages to STDERR and clean_tmp before exit.
@@ -455,7 +544,7 @@ EOF
 
 [[get_exec_time()]]
 
-\sctn{Running [[blast]] on sequences}
+\subsctn{Running [[blast]] on sequences}
 
 <<declare variables>>=
 # Processes
@@ -519,7 +608,7 @@ We redefine the environment variables [[BLASTDB]] and [[BLASTMAT]] as follows:
 \item [[BLASTMAT]] to the path in which [[blast]] program can find the given scoring matrix (by default [[BLASTMAT]] is set to '/usr/local/molbio/Install/wublast/matrix' in our system).
 \end{itemize}
 
-\sctn{Processing HSPs from [[blast]]}
+\subsctn{Processing HSPs from [[blast]]}
 
 <<declare variables>>=
 # Extract HSPs
@@ -546,7 +635,7 @@ sub Extract_HSP() {
         unless $status == 0;
     #
     &write_HSP_files("$SGPtmpG.srS", "$SGPtmp1.hsp-sr"); # I suposse that $SGPtmp1 is Subject
-    &write_HSP_files("$SGPtmpG.srS", "$SGPtmp2.hsp-sr"); # and $SGPtmp2 is query, else modify this lines.
+    &write_HSP_files("$SGPtmpG.srQ", "$SGPtmp2.hsp-sr"); # and $SGPtmp2 is query, else modify this lines.
     &write_HSP_files("$SGPtmpG.hsp", "$SGPtmp2.hsp", "$SGPtmp1.hsp", "$SGPTMP.aln"); 
     # 
   SAVEFILES: do {
@@ -593,7 +682,7 @@ sub write_HSP_files() {
 
 [[write_HSP_files()]] can receive a list, using the first element as input file, and the others (from one up to three) as output files. First output file is 
 
-\sctn{Running [[geneid]] on SRs}
+\subsctn{Running [[geneid]] on SRs}
 
 A number of modifications need to be made to the standard
 geneid. Modifications need to be kept to a  mininmum; the
@@ -657,7 +746,7 @@ sub Run_geneid() {
 } # END_SUB: Run_geneid
 @ %def &Run_geneid $geneid
 
-\sctn{Obtaining figures}
+\subsctn{Obtaining figures}
 
 <<declare variables>>=
 # gff2ps and aplot
@@ -673,16 +762,18 @@ sub Make_Plots() {
     $gff2ps = "$Gff2psProgram $SGPtmp1.sgp $SGPtmp1.hsp-sr > $ps_output$Loc1.ps";
     $status = system $gff2ps;
     &go_to_die("FATAL ERROR !!! $? : $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
-        unless $status == 0;
+        unless $status == 256;
     # predicted genes separately -- gff2ps on Loc2
     &prt_Header("Running GFF2PS program on $Loc2") if $verbose_flg;
     $gff2ps = "$Gff2psProgram $SGPtmp2.sgp $SGPtmp2.hsp-sr > $ps_output$Loc2.ps";
     $status = system $gff2ps;
     &go_to_die("FATAL ERROR !!! $? : $!\nUnsuccessfull GFF2PS command : $gff2ps \n")
-        unless $status == 0;
+        unless $status == 256;
     <<run aplot>>
 } # END_SUB: Make_Plots
 @ %def &Make_Plots $gff2ps
+
+
 <<run aplot>>=
 # run aplot
 &prt_Header("Running APLOT program on $Loc1:$Loc2") if $verbose_flg;
@@ -691,6 +782,21 @@ $status = system $aplot;
 &go_to_die("FATAL ERROR !!! $? $!\nUnsuccessfull APLOT command : $aplot \n")
     unless $status == 0;
 @ %def $aplot
+
+\newpage
+
+\sctn{Testing {\sgp}}
+
+<<testsgp2.sh>>=
+setenv SCIMOG /home1/rguigo/research/humus/data/scimog
+setenv SGP /home3/jabril/development/sgp/Devel/bin
+
+sh ../bin/runsgp2-a.sh $SCIMOG/fasta sgp-2 sgp-2.int < $SCIMOG/scimog
+cat sgp-2/* | evalua-1.sh $SCIMOG/scimog.length+ccds $SCIMOG/scimog.locus geneid_v1.0
+@ 
+
+Results Rode: [[ 512  477  403  0.96  0.97  0.96  0.96  0.79  0.84  0.82  0.08  0.01 ]]
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%APPENDIX
 

@@ -3,7 +3,7 @@ ODIR=$2
 
 IFILE=$3
 
-SGP2=sgp2
+SGP2=$SGP/sgp2.pl
 while read gene locus1 locus2
 do
       echo $gene $locus1 $locus2
