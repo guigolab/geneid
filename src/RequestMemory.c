@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: RequestMemory                                                *
 *                                                                        *
-*   Request memory to System to store geneid data structures             *
+*   Asking operating system for memory for geneid data structures        *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,50 +24,37 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.3 2000-08-08 14:22:32 eblanco Exp $  */
+/*  $Id: RequestMemory.c,v 1.4 2001-12-18 16:02:35 eblanco Exp $  */
 
 #include "geneid.h"
 
+/* Predicted amount of sites and exons found in one split */
 extern long NUMSITES, NUMEXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
+extern int scanORF;
 
-void shareGeneModel(gparam** isochores, int n)
-{ 
-  int i,j,k;
- 
-  /* Sharing global parameters */
-  for(i=1; i<n; i++)
-    {
-      isochores[i]->D      = isochores[0]->D; 
-      isochores[i]->nc     = isochores[0]->nc; 
-      isochores[i]->ne     = isochores[0]->ne; 
-      isochores[i]->md     = isochores[0]->md;
-      isochores[i]->Md     = isochores[0]->Md;
-      isochores[i]->nclass = isochores[0]->nclass;
+/* Allocating accounting data structure in memory */
+account* RequestMemoryAccounting()
+{
+  account* m; 
 
-      /* Copy class info */
-      for(j=0; j<isochores[i]->nclass; j++)
-	{
-	  for(k=0; k< isochores[i]->nc[j]; k++)
-	    isochores[i]->UC[j][k] = isochores[0]->UC[j][k];
-      
-	  for(k=0; k< isochores[i]->ne[j]; k++)
-	    isochores[i]->DE[j][k] = isochores[0]->DE[j][k];
+  if ((m = (account *) malloc(sizeof(account))) == NULL)
+	printError("Not enough memory: account");
 
-	  isochores[i]->block[j]  = isochores[0]->block[j];
-	}
-    }
+  return(m);
 }
 
+/* Allocating input sequence in memory */
 char* RequestMemorySequence(long L)
 {
   char* s;
 
   if ((s = (char*) calloc(L,sizeof(char))) == NULL)
-    printError("Not enough space to hold ADN sequence"); 
+    printError("Not enough memory: DNA input sequence"); 
 
   return(s);
 }
 
+/* Allocating pack of sites (only in one sense) in memory */
 packSites* RequestMemorySites()
 {
   packSites* allSites;
@@ -75,32 +62,32 @@ packSites* RequestMemorySites()
   /* Allocating memory for sites */
   if ((allSites = 
        (struct s_packSites *) malloc(sizeof(struct s_packSites))) == NULL)
-    printError("Not enough space to hold pack of sites");  
+    printError("Not enough memory: pack of sites");  
   
-  /* Starts */
+  /* Start codons */
   if ((allSites->StartCodons = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough space to hold start codons");
+    printError("Not enough memory: start codons");
   
-  /* AcceptorSites */
+  /* Acceptor sites */
   if ((allSites->AcceptorSites = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough space to hold acceptor sites");
+    printError("Not enough memory: acceptor sites");
 	      	      
-  /* DonorSites */
+  /* Donor sites */
   if ((allSites->DonorSites = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough space to hold donor sites");
+    printError("Not enough memory: donor sites");
 	      
-  /* Stop Codons */
+  /* Stop codons */
   if ((allSites->StopCodons = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough space to hold stop codons");
-  /* end memory-sites allocation */
+    printError("Not enough memory: stop codons");
 
   return(allSites);
 }
 
+/* Allocating pack of exons (only in one sense) in memory */
 packExons* RequestMemoryExons()
 {
   packExons* allExons;
@@ -109,64 +96,60 @@ packExons* RequestMemoryExons()
   /* Allocating memory for exons */
   if ((allExons = 
        (struct s_packExons *) malloc(sizeof(struct s_packExons))) == NULL)
-    printError("Not enough space to hold pack of exons");  
+    printError("Not enough memory: pack of exons");  
 
   /* InitialExons */
-  if (MAXBACKUPSITES)
-    HowMany = (int)(NUMEXONS/RFIRST);
-  else
-    HowMany = NUMEXONS;
-
+  HowMany = (long)(NUMEXONS/RFIRST);
   if ((allExons->InitialExons = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough space to hold initial exons");
+    printError("Not enough memory: first exons");
       
   /* InternalExons */
-  if (MAXBACKUPSITES)
-    HowMany = (int)(NUMEXONS/RINTER);
-  else
-    HowMany = NUMEXONS;
-  
+  HowMany = (long)(NUMEXONS/RINTER); 
   if ((allExons->InternalExons = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough space to hold internal exons");
+    printError("Not enough memory: internal exons");
       
   /* TerminalExons */
-  if (MAXBACKUPSITES)
-    HowMany = (int)(NUMEXONS/RTERMI);
-  else
-    HowMany = NUMEXONS;
-
+  HowMany = (long)(NUMEXONS/RTERMI);
   if ((allExons->TerminalExons = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough space to hold terminal exons");
+    printError("Not enough memory: terminal exons");
   
   /* SingleExons */
-  if (MAXBACKUPSITES)
-    HowMany = (int)(NUMEXONS/RSINGL);
-  else
-    HowMany = NUMEXONS;
-
+  HowMany = (long)(NUMEXONS/RSINGL);
   if ((allExons->Singles = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough space to hold single genes");
-  /* end memory-exons allocation */
+    printError("Not enough memory: single genes");
+
+  /* IF Scan ORF is switched on... */
+  if (scanORF)
+    {
+	  HowMany = (long)(NUMEXONS/RORF);
+	  if ((allExons->ORFs = 
+		   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+        printError("Not enough memory: Open Reading Frames");
+    }
 
   return(allExons);
 }
 
+/* Allocating memory for sorting the set of predicted exons */
 exonGFF* RequestMemorySortExons()
 {
   exonGFF *exons;
+  long HowMany;
 
   /* Sorting Exons */
+  HowMany = NUMEXONS * FSORT;
   if ((exons =
-       (exonGFF*) calloc(RSORTE*NUMEXONS, sizeof(exonGFF)))  == NULL)
-    printError("Not enough space to hold all exons(sorting)");
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF)))  == NULL)
+    printError("Not enough memory: table to sort exons");
 
   return(exons);
 }
 
+/* Allocating memory for input evidences (annotations) */
 packEvidence* RequestMemoryEvidence()
 {
   packEvidence* p;
@@ -174,146 +157,172 @@ packEvidence* RequestMemoryEvidence()
   /* Allocating memory for structure */
   if ((p = 
        (struct s_packEvidence *) malloc(sizeof(struct s_packEvidence))) == NULL)
-    printError("Not enough space to hold pack of evidence exons");    
+    printError("Not enough memory: pack of evidences");    
 
-  /* Evidence sites */
+  /* Evidences sites */
   if ((p->vSites = 
-       (struct s_site *) calloc(NUMSEVIDENCES, sizeof(struct s_site))) == NULL)
-    printError("Not enough space to hold evidence sites");
+       (struct s_site *) calloc(3*MAXEVIDENCES, sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: evidences sites");
 
-  /* Evidence exons */
+  /* Evidences exons (records) */
   if ((p->vExons =
-       (exonGFF*) calloc(NUMEEVIDENCES, sizeof(exonGFF)))  == NULL)
-    printError("Not enough space to hold evidence exons");
+       (exonGFF*) calloc(MAXEVIDENCES, sizeof(exonGFF)))  == NULL)
+    printError("Not enough memory: evidences exons");
 
-
-  /* Reset counters */
+  /* Set counters */
   p->nvSites = 0;
   p->nvExons = 0;
   p->i1vExons = 0;
   p->i2vExons = 0;
+  p->ivExons = 0;
 
   return(p);
 }
 
+/* Allocating memory for input similarity regions (homology information) */
 packSR* RequestMemorySimilarityRegions()
 {
   packSR* p;
   int i;
+  long HowMany;
 
-  /* Allocating memory for structure */
+  /* TWO senses plus THREE reading frames */
+  HowMany = STRANDS*FRAMES;
+
+  /* Allocating memory for similarity regions structure */
   if ((p = 
        (struct s_packSR *) malloc(sizeof(struct s_packSR))) == NULL)
-    printError("Not enough space to hold pack of similarity regions");    
+    printError("Not enough memory: pack of similarity regions");    
 
-  /* Similarity regions */
+  /* For each (strand,frame) a list of Similarity Regions will be used */
   if ((p->sRegions = 
-       (SR **) calloc(STRANDS*FRAMES, sizeof(SR*))) == NULL)
-    printError("Not enough space to hold similarity regions array");
+       (SR **) calloc(HowMany, sizeof(SR*))) == NULL)
+    printError("Not enough memory: similarity regions array");
 
-  for(i=0;i<STRANDS*FRAMES;i++)
+  for(i=0; i<HowMany; i++)
     if ((p->sRegions[i] = 
-	 (SR *) calloc(MAXSR, sizeof(SR))) == NULL)
-      printError("Not enough space to hold similarity regions array");  
+		 (SR *) calloc(MAXSR, sizeof(SR))) == NULL)
+      printError("Not enough space: similarity regions lists");  
   
   /* Counters */
   if ((p->nRegions =
-       (int*) calloc(STRANDS*FRAMES, sizeof(int)))  == NULL)
-    printError("Not enough space to hold similarity regions counters");
-  if ((p->iRegions =
-       (int*) calloc(STRANDS*FRAMES, sizeof(int)))  == NULL)
-    printError("Not enough space to hold similarity regions counters");
+       (int*) calloc(HowMany, sizeof(int)))  == NULL)
+    printError("Not enough memory: SR total number counter");
 
-
-  /* Reset counters */
-  for(i=0;i<STRANDS*FRAMES;i++)
-    {
-      p->nRegions[i] = 0;
-      p->iRegions[i] = 0;
-    }
-
+  /* Set counters */
+  for(i=0;i<HowMany;i++)
+	p->nRegions[i] = 0;
+    
   return(p);
 }
 
+/* Allocating memory for GCinfo */
+packGC* RequestMemoryGC()
+{
+  packGC*  p;
+
+  /* Allocating memory for GC structure */
+  if ((p = 
+       (struct s_packGC *) malloc(sizeof(struct s_packGC))) == NULL)
+    printError("Not enough memory: GC information");    
+
+  /* GC content array */
+  if ((p->GC = (long *) calloc(LENGTHSi, sizeof(long))) == NULL)
+    printError("Not enough memory: packGC (GC array)");
+
+  /* N's content array */
+  if ((p->N = (long *) calloc(LENGTHSi, sizeof(long))) == NULL)
+    printError("Not enough memory: packGC (N array)");
+
+  return (p);
+}
+
+/* Allocating memory for statistical model parameters of one isochore */
 gparam* RequestMemoryParams()
 {
   gparam* gp;
   long OligoDim;
 
-  gp =(gparam *) malloc(sizeof(gparam));
+  /* 0. Main structure: gparam */
+  if ((gp = (gparam*) malloc(sizeof(gparam)))  == NULL)
+    printError("Not enough memory: isochore model");
 
-  /* Profiles */
+  /* 1. Profiles for signals */
   if ((gp->StartProfile = (profile *) malloc(sizeof(profile))) == NULL)  
-    printError("Not enough space to hold profiles");
-  if ((gp->AcceptorProfile = (profile *) malloc(sizeof(profile))) == NULL)  
-    printError("Not enough space to hold profiles");
-  if ((gp->DonorProfile = (profile *) malloc(sizeof(profile))) == NULL)  
-    printError("Not enough space to hold profiles");
-  if ((gp->StopProfile = (profile *) malloc(sizeof(profile))) == NULL)  
-    printError("Not enough space to hold profiles");
+    printError("Not enough memory: start profile");
 
-  /* Oligo arrays (Markov models) */
+  if ((gp->AcceptorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: acceptor profile");
+
+  if ((gp->DonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: donor profile");
+
+  if ((gp->StopProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: stop profile");
+
+  /* 2. Markov model: initial and transition values */
   OligoDim = (int)pow((float)4,(float)OLIGOLENGTH);
   
   if ((gp->OligoLogsIni[0]=(float *) calloc(OligoDim, sizeof(float))) == NULL)
-    printError("Not enough space to hold Markov pentamers");
+    printError("Not enough memory: Markov initial pentanucleotides (0)");
 
   if ((gp->OligoLogsIni[1]=(float *) calloc(OligoDim, sizeof(float))) == NULL)
-    printError("Not enough space to hold Markov pentamers");
+    printError("Not enough memory: Markov initial pentanucleotides (1)");
 
   if ((gp->OligoLogsIni[2]=(float *) calloc(OligoDim, sizeof(float))) == NULL)
-    printError("Not enough space to hold Markov pentamers");
+    printError("Not enough memory: Markov initial pentanucleotides (2)");
 
   if ((gp->OligoLogsTran[0]=(float *) calloc(OligoDim, sizeof(float))) == NULL)
-    printError("Not enough space to hold Markov hexamers");
+    printError("Not enough memory: Markov chains - hexanucleotides (0)");
 
   if ((gp->OligoLogsTran[1]=(float *) calloc(OligoDim, sizeof(float))) == NULL)
-    printError("Not enough space to hold Markov hexamers");
+    printError("Not enough memory: Markov chains - hexanucleotides (1)");
 
   if ((gp->OligoLogsTran[2]=(float *) calloc(OligoDim, sizeof(float))) == NULL)
-    printError("Not enough space to hold Markov hexamers");
+    printError("Not enough memory: Markov chains - hexanucleotides (2)"); 
 
-  /* Markov Scan arrays */
+  /* 3. Markov temporary data structures to compute every split: LENGTHSi */
   if ((gp->OligoDistIni[0] = 
        (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
-    printError("Not enough space to hold oligo log scores");
+    printError("Not enough memory: temp. initial pentanucleotides sum (0)");
   
   if ((gp->OligoDistIni[1] = 
        (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
-    printError("Not enough space to hold oligo log scores");
+    printError("Not enough memory: temp. initial pentanucleotides sum (1)");
   
   if ((gp->OligoDistIni[2] = 
        (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
-    printError("Not enough space to hold oligo log scores");
+    printError("Not enough memory: temp. initial pentanucleotides sum (2)");
   
   if ((gp->OligoDistTran[0] = 
        (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
-    printError("Not enough space to hold oligo log scores");
+    printError("Not enough memory: temp. Markov hexanucleotides sum (0)");    
   
   if ((gp->OligoDistTran[1] = 
        (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
-    printError("Not enough space to hold oligo log scores");
+    printError("Not enough memory: temp. Markov hexanucleotides sum (1)");    
   
   if ((gp->OligoDistTran[2] = 
        (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
-    printError("Not enough space to hold oligo log scores");
+    printError("Not enough memory: temp. Markov hexanucleotides sum (2)");    
 
-  /* Score parameters */
+  /* 4. Exons score parameters */
   if ((gp->Initial = (paramexons *)malloc(sizeof(paramexons))) == NULL)  
-    printError("Not enough space to hold scoring parameters");
+    printError("Not enough memory: exons scoring parameters (first)");
 
   if ((gp->Internal = (paramexons *)malloc(sizeof(paramexons))) == NULL)  
-    printError("Not enough space to hold scoring parameters");
+    printError("Not enough memory: exons scoring parameters (internal)");
  
   if ((gp->Terminal = (paramexons *)malloc(sizeof(paramexons))) == NULL)  
-    printError("Not enough space to hold scoring parameters");
+    printError("Not enough memory: exons scoring parameters (terminal)");
 
   if ((gp->Single = (paramexons *)malloc(sizeof(paramexons))) == NULL)  
-    printError("Not enough space to hold scoring parameters");
+    printError("Not enough memory: exons scoring parameters (single)");
 
   return(gp);
 }
 
+/* Allocating memory (all of the isochores) */
 gparam ** RequestMemoryIsochoresParams()
 {
   gparam** isochores;
@@ -321,62 +330,68 @@ gparam ** RequestMemoryIsochoresParams()
 
   /* Allocating the array of isochores */
   if ((isochores = (gparam **) calloc(MAXISOCHORES, sizeof(gparam *))) == NULL)
-    printError("Not enough space to hold isochores array");
+    printError("Not enough memory: isochores array");
 
-  /* Allocating each position */
+  /* Allocating every separate isochore */
   for(i=0; i<MAXISOCHORES; i++)
     isochores[i] = (gparam *) RequestMemoryParams();
   
-  /* Allocating space for global parameters */
+  /* Allocating space for global parameters (gene model) */
   if ((isochores[0]->D = (dict *)malloc(sizeof(dict))) == NULL)
-    printError("Not enough space to hold ExonType-Dictionary");
+    printError("Not enough memory: dictionary of exon types");
 
   if ((isochores[0]->nc = (int *) calloc(MAXENTRY, sizeof(int))) == NULL)
-    printError("Not enough space to hold nc-array");
+    printError("Not enough memory: nc-array (gene model)");
 
   if ((isochores[0]->ne = (int *) calloc(MAXENTRY, sizeof(int))) == NULL)
-    printError("Not enough space to hold ne-array");
+    printError("Not enough memory: ne-array (gene model)");
 
   if ((isochores[0]->md = (long *) calloc(MAXENTRY, sizeof(long))) == NULL)
-    printError("Not enough space to hold minDist-array");
+    printError("Not enough memory: minDist (gene model)");
 
   if ((isochores[0]->Md = (long *) calloc(MAXENTRY, sizeof(long))) == NULL)
-    printError("Not enough space to hold max-Dist-array");
+    printError("Not enough memory: maxDist (gene model)");
 
   return(isochores);
 }
 
-
+/* Allocating memory for Markov chain in every position of the profile */
+/* This function is called from readparams.c when dimension is known */
 void RequestMemoryProfile(profile* p)
 {
   int i;
   
-  /* Transition probabilities */
-  p->dimensionTrans = (int)pow((float)4,(float)(p->order+1));   
-  for(i=0; i<PROFILEDIM; i++)
+  /* Transition probabilities in every position of the PWA */
+  p->dimensionTrans = (int)pow((float)5,(float)(p->order+1));   
+
+  for(i=0; i < p->dimension; i++)
     if ((p->transitionValues[i] = 
-	 (float *) calloc(p->dimensionTrans, sizeof(float))) == NULL)
-      printError("Not enough space to hold this profile");
+		 (float *) calloc(p->dimensionTrans, sizeof(float))) == NULL)
+      printError("Not enough memory: signal profile transition values");
 }
 
+/* Allocating memory for the best set of predicted genes and extra info */
 packGenes* RequestMemoryGenes()
 {
   packGenes* pg;
   int aux, aux2;
 
-  /* Allocating memory for packGenes */
+  /* 0. Allocating memory for pack of genes (main structure) */
   if ((pg = 
        (struct s_packGenes *) malloc(sizeof(struct s_packGenes))) == NULL)
-    printError("Not enough space to hold pack of genes");  
+    printError("Not enough memory: pack of genes");  
 
-  /* Allocating memory space for Ghost Exon */
+  /* 1. Allocating memory space for Ghost Exon */
   if (( pg->Ghost = (exonGFF *) malloc(sizeof(exonGFF))) == NULL)
-    printError("Not enough space to hold Ghost Exon");
+    printError("Not enough memory: Ghost Exon");
 
-  pg->Ghost->Acceptor = (site*)calloc(1,sizeof(site));
-  pg->Ghost->Donor = (site*)calloc(1,sizeof(site));
+  if ((pg->Ghost->Acceptor = (site *) malloc(sizeof(site))) == NULL)
+    printError("Not enough memory: Ghost Exon acceptor");
 
-  /* Mark exon as Ghost Exon */
+  if ((pg->Ghost->Donor = (site *) malloc(sizeof(site))) == NULL)
+    printError("Not enough memory: Ghost Exon donor");
+
+  /* Mark this exon as Ghost Exon */
   pg->Ghost -> Strand = '*';
   pg->Ghost -> GeneScore = 0.0;
   pg->Ghost -> Donor -> Position = 0;
@@ -384,66 +399,75 @@ packGenes* RequestMemoryGenes()
   pg->Ghost -> offset2 = 0;
   pg->GOptim = pg->Ghost;
   
+  /* 2. Allocating memory space for Ga */
+  /* Ga is the array of best predicted genes (in every gene class) */ 
   if ((pg->Ga = (exonGFF* **)calloc(MAXENTRY, sizeof(exonGFF* *))) == NULL)
-    printError("Not enough space to hold Ga-Exons");
+    printError("Not enough memory: Ga array of genes");
 
-  /* Initialize Ga-exons: All look at the Ghost exon */
-  for(aux=0; aux<MAXENTRY; aux++) 
+  /* Initialize Ga-exons: everybody looking at the Ghost exon */
+  /* MAXENTRY represents the maximum number of gene classes */
+  for(aux=0; aux<MAXENTRY; aux++)
     {
       if ((pg->Ga[aux] = (exonGFF* *)calloc(FRAMES, sizeof(exonGFF*))) == NULL)
-	printError("Not enough space to hold frame of Ga-Exons");
+        printError("Not enough memory: 6 frames in Ga array of genes");
 
       for(aux2=0; aux2 < FRAMES; aux2++)
       	pg->Ga[aux][aux2] = pg->Ghost;
     }
 
-  /* Alloc memory space for the set of arrays */
-  /* Memory for the array of sorting functions */
+  /* 3. Allocate memory space for the set of auxiliary arrays */
+  /* Memory for the array of sorting by donor functions (one per class) */
   if ((pg->d = (exonGFF* **)calloc(MAXENTRY, sizeof(exonGFF* *))) == NULL)
-    printError("Not enough space to hold set of arrays");
+    printError("Not enough memory: set of d-arrays (sort by donor)");
   
-  /* Memory for each sorting function */
+  /* Memory for every sorting function (alone) */
   for(aux=0; aux < MAXENTRY; aux++) 
     if ((pg->d[aux] = (exonGFF* *)calloc(2 * NUMEXONS, sizeof(exonGFF*))) == NULL)
-      printError("Not enough space to hold sorted array of pointer to exons");
+      printError("Not enough memory: sort-by-donor functions");
   
   if ((pg->km = (long *)calloc(MAXENTRY, sizeof(long))) == NULL)
-    printError("Not enough space to hold counters of sorting functions");
+    printError("Not enough memory: total counters of sort-by-donor functions");
 
   if ((pg->je = (long *)calloc(MAXENTRY, sizeof(long))) == NULL)
-    printError("Not enough space to hold j-counter of each class");
+    printError("Not enough memory: partial counters of sort-by-donor functions");
 
   return(pg);
 }
 
+/* Allocating memory for temporary but necessary backup information */
+/* This information is required to continue the process between 2 splits */
 packDump* RequestMemoryDumpster()
 {
   packDump* d;
+  long HowMany;
 
-  /* Allocating memory for dumpster */
+  /* 0. Allocating memory for dumpster */
   if ((d = 
        (struct s_packDump *) malloc(sizeof(struct s_packDump))) == NULL)
-    printError("Not enough space to hold dumpster");  
+    printError("Not enough memory: dumpster");  
 
-  /* Dumpster Sites(bestgenes) */
+  /* 1. Temporary dumpster Sites */
   if ((d->dumpSites = 
        (struct s_site *) calloc(MAXBACKUPSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough space to hold dumpster sites");
+    printError("Not enough memory: backup sites");
 
-  /* Dumpster exons(bestgenes) */
+  /* 2. Temporary dumpster exons */
   if ((d->dumpExons = 
        (exonGFF*) calloc(MAXBACKUPEXONS, sizeof(struct s_exonGFF))) == NULL)
-    printError("Not enough space to hold dumpster exons");  
+    printError("Not enough memory: backup exons");  
 
-  /* Dumpster hash */
+  /* 3. Dumpster hash to find backup exons quickly */
   if ((d->h = 
        (dumpHash*) malloc(sizeof(struct s_dumpHash))) == NULL)
-    printError("Not enough space to hold dumpster hash table");  
+    printError("Not enough memory: dumpster hash table structure");  
   
-  if ((d->h->T = 
-       (dumpNode**) calloc(MAXBACKUPEXONS,sizeof(dumpNode*))) == NULL)
-    printError("Not enough space to hold dumpster hash table");   
+  HowMany = (long) (MAXBACKUPEXONS / HASHFACTOR);
 
+  if ((d->h->T =
+       (dumpNode**) calloc(HowMany, sizeof(dumpNode*))) == NULL)
+    printError("Not enough memory: dumpster hash table");   
+
+  /* 4. Set counters */
   d->ndumpSites = 0;
   d->ndumpExons = 0;
   resetDumpHash(d->h);
@@ -451,18 +475,19 @@ packDump* RequestMemoryDumpster()
   return(d);
 }
 
+/* Allocate the genetic code to translate from genes into proteins */
 dict* RequestMemoryAaDictionary()
 {
-   dict* dAA;
+  dict* dAA;
 
   /* 1. Allocating memory for aminoacid dictionary */
   if ((dAA = (dict *)malloc(sizeof(dict))) == NULL)
-    printError("Not enough space to hold Aa-Dictionary");
+    printError("Not enough memory: aa-dictionary");
 
   /* 2. Reset dictionary */
   resetDict(dAA);
 
-  /* 3. Filling it with the aminoacids and the codons */
+  /* 3. Filling it in: amino acids and codons */
   setAADict(dAA,"GCA",'A');
   setAADict(dAA,"GCC",'A');
   setAADict(dAA,"GCG",'A');

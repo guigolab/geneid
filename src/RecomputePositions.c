@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: RecomputePositions                                           *
 *                                                                        *
-*   Compute new positions of reverse strand exons.                       *
+*   Predicted signals in RVS: translation into FWD sense positions       *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,10 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RecomputePositions.c,v 1.1 2000-07-05 08:25:14 eblanco Exp $  */
+/*  $Id: RecomputePositions.c,v 1.2 2001-12-18 16:00:49 eblanco Exp $  */
 
 #include "geneid.h"
 
+/* Normalising positions on the reverse (and complemented) sequence */
 void RecomputePositions(packSites* allSites, long l)
 {
   long i;
