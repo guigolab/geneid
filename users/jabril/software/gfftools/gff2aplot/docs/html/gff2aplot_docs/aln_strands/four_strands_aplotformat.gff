@@ -1,0 +1,48 @@
+##################################################
+#
+# four_strands_aplotformat.gff
+#
+#  "Representing Strand on Alignment Features"
+#    Checking strand orientation for
+#    alignment features in aplot old format.
+#
+# $Id: four_strands_aplotformat.gff,v 1.1 2002-01-11 19:28:39 jabril Exp $
+#
+##################################################
+#
+## Axes showing forward-reverse 
+#
+KoKo 4strands fwd 1700 2500 . + .
+KoKo 4strands rev  500 1300 . - .
+LaLa 4strands fwd 1700 2500 . + .
+LaLa 4strands rev  500 1300 . - .
+#
+## Checking forward-forward alignments
+#
+KoKo:LaLa 4strands fwdfwd  250:250   750:750  0.25 +:+ .
+KoKo:LaLa 4strands fwdfwd  750:750  1250:1250 0.75  +  .
+KoKo:LaLa 4strands unknwn  400:1000  800:1400 0.65 +:. .
+KoKo:LaLa 4strands unknwn 1000:400  1200:600  0.35 .:. .
+KoKo:LaLa 4strands unknwn 1300:700  1500:900  0.65  .  .
+#
+## Checking forward-reverse alignments
+#
+KoKo:LaLa 4strands fwdrev 250:2250  750:2750 0.50 +:- .
+KoKo:LaLa 4strands fwdrev 750:1750 1250:2250 1.00 +:- .
+KoKo:LaLa 4strands unknwn 400:1600  800:2000 0.85 .:- .
+#
+## Checking reverse-forward alignments
+#
+KoKo:LaLa 4strands revfwd 2250:250  2750:750  0.50 -:+ .
+KoKo:LaLa 4strands revfwd 1750:750  2250:1250 1.00 -:+ .
+KoKo:LaLa 4strands unknwn 2200:1000 2600:1400 0.85 -:. .
+#
+## Checking reverse-reverse alignments
+#
+KoKo:LaLa 4strands revrev 2250:2250 2750:2750 0.25 -:- .
+KoKo:LaLa 4strands revrev 1750:1750 2250:2250 0.75  -  .
+KoKo:LaLa 4strands unknwn 2200:1600 2600:2000 0.65 .:+ .
+
+
+
+

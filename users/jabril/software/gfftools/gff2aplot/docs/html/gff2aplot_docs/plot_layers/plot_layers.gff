@@ -1,0 +1,48 @@
+##################################################
+#
+# four_strands.gff
+#
+#  "Representing Strand on Alignment Features"
+#    Checking strand orientation for
+#    alignment features in aplot old format.
+#
+# $Id: plot_layers.gff,v 1.1 2002-01-11 19:28:39 jabril Exp $
+#
+##################################################
+#
+## Axes showing forward-reverse 
+#
+KoKo	4strands	fwd	1700	2500	.	+	.
+KoKo	4strands	rev	500	1300	.	-	.
+LaLa	4strands	fwd	1700	2500	.	+	.
+LaLa	4strands	rev	500	1300	.	-	.
+#
+## Checking forward-forward alignments
+#
+KoKo	4strands	fwdfwd	250	750	0.25	+	.	Target "LaLa" 250 750 +
+KoKo	4strands	fwdfwd	750	1250	0.75	+	.	Target "LaLa" 750 1250
+KoKo	4strands	unknwn	400	800	0.65	+	.	Target "LaLa" 1000 1400 .
+KoKo	4strands	unknwn	1000	1200	0.35	.	.	Target "LaLa" 400 600 .
+KoKo	4strands	unknwn	1300	1500	0.65	.	.	Target "LaLa" 700 900
+#
+## Checking forward-reverse alignments
+#
+KoKo	4strands	fwdrev	250	750	0.50	+	.	Target "LaLa" 2250 2750 -
+KoKo	4strands	fwdrev	750	1250	1.00	+	.	Target "LaLa" 1750 2250 -
+KoKo	4strands	unknwn	400	800	0.85	.	.	Target "LaLa" 1600 2000 -
+#
+## Checking reverse-forward alignments
+#
+KoKo	4strands	revfwd	2250	2750	0.50	-	.	Target "LaLa" 250 750 +
+KoKo	4strands	revfwd	1750	2250	1.00	-	.	Target "LaLa" 750 1250 +
+KoKo	4strands	unknwn	2200	2600	0.85	-	.	Target "LaLa" 1000 1400 .
+#
+## Checking reverse-reverse alignments
+#
+KoKo	4strands	revrev	2250	2750	0.25	-	.	Target "LaLa" 2250 2750 -
+KoKo	4strands	revrev	1750	2250	0.75	-	.	Target "LaLa" 1750 2250
+KoKo	4strands	unknwn	2200	2600	0.65	.	.	Target "LaLa" 1600 2000 +
+
+
+
+

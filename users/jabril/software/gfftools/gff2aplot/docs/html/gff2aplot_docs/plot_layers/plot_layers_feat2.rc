@@ -1,0 +1,14 @@
+#
+# plot_layers_feat2.rc
+#
+# $Id: plot_layers_feat2.rc,v 1.1 2002-01-11 19:28:39 jabril Exp $
+#
+
+# L #
+
+x_label=X Sequence
+y_label=Y Sequence
+show_ribbons=on
+ribbon_style=both
+ribbon_color=verylightred
+

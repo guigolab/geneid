@@ -1,0 +1,23 @@
+#
+# plot_layers_post.rc
+#
+# $Id: plot_layers_post.rc,v 1.1 2002-01-11 19:28:39 jabril Exp $
+#
+# X #
+
+# arrow  <Cx> <Cy> <length>
+#       [ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] 
+#       [ N:<font_name> ] [ Z:<font_size> ]
+#       [ H:<horizontal_align> ] [ V:<vertical_align> ] [ T:<text_color> ] [ "<string>" ]
+arrow 450 400 1cm A:0   N:helvetica Z:10pt T:red "0deg"   W:1.5pt
+arrow 450 400 2cm A:-75 N:helvetica Z:10pt T:red "-75deg" W:1.5pt
+arrow 450 400 2cm A:45  N:helvetica Z:10pt T:red "95deg"  W:1.5pt
+arrow 450 400 2cm A:165 N:helvetica Z:10pt T:red "165deg" W:1.5pt
+arrow 450 400 3cm A:235 N:helvetica Z:10pt T:red "235deg" W:1.5pt
+
+# text  <Cx> <Cy> "<string>"
+#       [ A:<angle> ] [ N:<font_name> ] [ Z:<font_size> ]
+#       [ H:<horizontal_align> ] [ V:<vertical_align> ] [ T:<text_color> ]
+text 750 750 H:center V:center Z:12pt N:helvetica-bold "A free-text string example!!!"
+
+###########################################
