@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.8 2001-02-07 17:45:17 eblanco Exp $ */
+/* $Id: geneid.h,v 1.9 2001-06-25 13:56:34 eblanco Exp $ */
 
 /* Include libraries */
 #include <stdio.h>
@@ -41,42 +41,52 @@
 #include <math.h>
 #include <sys/stat.h>
 
+/* Parameters for standard-size predictions 
+#define RSITES 10  
+#define RSINGL 10                       
+#define RFIRST 2 
+#define RINTER 1
+#define RTERMI 1.9
+#define RORF   10
+End of comment */
+
 /* Parameters for chromosome-size predictions 
 #define RSITES 5
 
 #define RSINGL 3                       
 #define RFIRST 1
 #define RINTER 0.5
-#define RTERMI 1   
+#define RTERMI 1
+#define RORF   3   
 End of comment */
 
 /* Memory definitions used in geneid */
 
-#define RSITES 10                      /* maximum number of sites         */
+#define RSITES 5                       /* maximum number of sites         */
 #define REXONS 3                       /* maximum number of exons         */
 
 #define RBSITES 250                    /* Backup Information sizes         */
 #define RBEXONS 500      
 
-#define RSINGL 10                       /* ratios for exon types            */
-#define RFIRST 2 
-#define RINTER 1
-#define RTERMI 1.9
-#define RORF   10   
+#define RSINGL 3                       /* ratios for exon types            */
+#define RFIRST 1 
+#define RINTER 0.5
+#define RTERMI 1
+#define RORF   3   
 
 #define RSORTE 3                       /* Total number ox exons/split     */
 
-#define NUMEEVIDENCES 500              /* maximum number of evidences     */
+#define NUMEEVIDENCES 10000              /* maximum number of evidences     */
 #define NUMSEVIDENCES 2*NUMEEVIDENCES          
 
 #define MAXGENE 10000                  /* Max number of genes(multigenes) */
-#define MAXEXONGEN 50000               /* Max number of exon per gene     */
+#define MAXEXONGENE 10000               /* Max number of exon per gene     */
 #define LENGTHSi 100000                /* Max length of each split of S   */ 
 #define OVERLAP 10000                  /* Max length of a exon(overlap)   */
 
 /* Other definitions */
 
-#define MAXAA 10000                    /* Max lenght (aminoacids/protein) */
+#define MAXAA 1000000                    /* Max lenght (aminoacids/protein) */
 
 #define LOCUSLENGTH 50                 /* maximum number of chars (locus) */
 
@@ -87,6 +97,7 @@ End of comment */
 #define EXONLENGTH 18                  /* minimum exon length (internal   */
                                        
 #define SINGLEGENELENGTH 60            /* minimum single gene length      */ 
+#define ORFLENGTH 60                   /* minimum ORF length              */
 
 #define INTRONLENGTH 50                /* minimum exon length (internal   */
                                        /* and terminal)                   */
@@ -102,6 +113,12 @@ End of comment */
 
 #define FORWARD 0                      /* DNA - Strands                   */
 #define REVERSE 1
+
+#define sFORWARD "Forward"
+#define sREVERSE "Reverse"
+
+#define xmlFORWARD "fwd"
+#define xmlREVERSE "rvs"
 
 #define ACC 0                          /* Define site types               */
 #define DON 1
@@ -150,14 +167,16 @@ End of comment */
 #define INF 1.7976931348623157E+308    /* maximal decimal value of double */
                                        /* from limits.h                   */
 #define INFI 999999999                 /* the biggest number in the geneid world */
-#define MAXSCORE 10000.0               /* Infinity score (evidence exons) */
+#define SINFI "Infinity"               /* string to represent infinitum */
+
+#define MAXSCORE 10000.0               /* Maximum score (evidence exons) */
 
 #define MINUTE 60                      /* 1 minute = 60 seconds           */
 
 #define MIN(a,b) (a<b)?a:b;
 #define MAX(a,b) (a>b)?a:b;
 
-#define MAXSR 1000                     /* Maximum number of sr per frame  */
+#define MAXSR 10000                     /* Maximum number of sr per frame  */
 #define MAXISOCHORES 4                 /* Maximum number of isochores */
 #define PERCENT 100   
 
@@ -165,6 +184,10 @@ End of comment */
 #define NOGROUP -13
 
 #define ISOCONTEXT 1000
+
+#define MAXCDNA 300000                 /* Maximum nucleotides per gene (cDNA) */
+#define PROT 0
+#define DNA  1
 
 /****************************************************************************/
 
@@ -556,8 +579,13 @@ void PrintSite(site *s, int type, char Name[], int Strand,
 void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA, 
                long ngen, int AA1, int AA2, int nAA);
 
+void PrintXMLExon(exonGFF *e, char Name[], 
+		  long ngen, long nExon, 
+		  int type1, int type2, 
+		  int nExons);
+
 void TranslateGen(exonGFF* e, char* s,dict* dAA, long nExons, 
-                  int tAA[MAXEXONGEN][2], char* prot, int* nAA);
+                  int** tAA, char* prot, long* nAA);
 
 void resetDumpHash(dumpHash* h);
 
@@ -591,3 +619,5 @@ void ScoreExons(char *Sequence,
 		packExons* allExons, 
 		long l1, long l2, int Strand, packSR* sr,
 		gparam** isochores, int nIsochores);
+
+void GetcDNA(exonGFF* e, char* s, long nExons, char* cDNA, long* nNN);
