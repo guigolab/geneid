@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 #
 
-=head1 B<sgp2> : $Id: sgp2.pl,v 1.1 2000-10-05 16:05:33 jabril Exp $
+=head1 B<sgp2> : $Id: sgp2.pl,v 1.2 2000-10-06 17:59:25 jabril Exp $
 
 =cut Back to the compiler...
 
 my $PROGRAM = "sgp2";
-my $VERSION = ' $Revision: 1.1 $:$Date: 2000-10-05 16:05:33 $:$State: Exp $ ';
+my @tmp_ver = split / +/, ' $Id: sgp2.pl,v 1.2 2000-10-06 17:59:25 jabril Exp $ ';
+my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
 my $Start = time;
 
 =head1 Development Options
@@ -26,6 +27,14 @@ Restrict unsafe constructs, like attempting to use missed symbolic references ('
 =cut Back to the compiler...
 
 use strict;
+
+=head1 Self Documenting
+
+
+
+=cut Back to the compiler...
+
+use Pod::Text;
 
 =head1 Reading Command Line Options
 
@@ -56,23 +65,101 @@ Unknown options are passed through in @ARGV instead of being flagged as errors. 
 =cut Back to the compiler...
 
 use Getopt::Long;
-Getopt::Long::Configure qw( bundling pass_through );
+Getopt::Long::Configure qw/ bundling pass_through /;
 
 =head2 C<Which_Options()>
 
+This function parses input options, checking whether files exist, 
 
 
 =cut Back to the compiler...
 
 sub Which_Options() {
 
-	my ($ret,$help_flg);
+	my ($help_flg);
 	
-	$ret = GetOptions( 
-					   "h|help|?"         => \$help_flg    , 
-					   );
-
+	GetOptions( 
+				"1"        => \$seq1         , # seqfile_1
+				"2"        => \$seq2         , # seqfile_2
+				"g"        => \$geneid_opt   , # geneid options      
+				"P"        => \$geneid_param , # geneid parameter file 
+				"o"        => \$blast_opt    , # tblastx options 
+				"c"        => \$score_cutoff , # tblastx score cutoff 
+				"s"        => \$ , # shrink hsp's by
+				"t"        => \$ , # read tblastx from file
+				"f"        => \$ , # read HSP files in directory
+				"k"        => \$ , # intermediate filename
+				"p"        => \$ps_output    , # postscript output 
+				"v"        => \$verbose_flg  , # verbose    
+				"h|help|?" => \$help_flg     , 
+				);
 	
+	&prt_Help if $help_flg;
 
-};
+}; # sub Which_Options
 
+=head2 C<prt_Help()>
+
+
+
+=cut Back to the compiler...
+
+sub prt_Help() {
+	open(HELP, "| more");
+	print HELP <<"EndOfHelp";
+PROGRAM:  $PROGRAM $VERSION
+
+NAME:
+    $PROGRAM - Improving Gene Prediction with Sinteny.
+
+SYNOPSIS:
+    $PROGRAM [-hv] [-o \'options\'] [-g \'options\'] \
+             [-P filename] [-p filename] [-k filename] \
+             [-c value] [-s value] -1 seqfile_1 -2 seqfile_2
+
+DESCRIPTION:
+
+OPTIONS:
+ 
+  -1 seqfile_1   : input file for first species.
+  -2 seqfile_2   : input file for second species.
+  -g             : geneid options
+  -o             : tblastx options
+  -c value       : tblastx score cuttof
+  -s value       : shrink hsp\'s by value
+  -t filename    : read tblastx file
+     -f prefix   : read hsp gff files with in directory
+                   prefix and extension .hsp-rs
+  -k prefix      : keep intermediate files with prefix
+  -p filename    : ps output in filename file 
+  -P filename    : geneid parameter file
+  -v             : verbose mode
+  -h             : produces this message
+
+FILES:
+
+DIAGNOSTICS:
+
+REQUIRES:
+
+BUGS:
+    Report any problem to: <jabril\@imim.es>
+
+AUTHORS:
+    Roderic Guigo  <rguigo\@imim.es>
+    Josep F. Abril <jabril\@imim.es>
+
+    $PROGRAM is under GNU-GPL (C) 2000
+
+EndOfHelp
+	close(HELP);
+	exit(1);
+} # sub prt_Help
+
+=head1 Main Loop
+
+
+
+=cut Back to the compiler...
+
+	&Which_Options();
