@@ -1,0 +1,75 @@
+USING THE EXON ALIGNMENT within SGP
+
+rgs, sb, aug 2000
+setenv SCIMOG /home/guigor00/research/humus/data/scimog
+
+
+1. Install jabril scripts
+OK
+
+2. Attempt to reproduce previous results
+
+sh runsgp2-a.sh $SCIMOG/fasta sgp-2 sgp-2.int < $SCIMOG/scimog
+cat sgp-2/* | evalua-1.sh $SCIMOG/scimog.length+ccds $SCIMOG/scimog.locus geneid_v1.0
+512  477  403  0.96  0.97  0.96  0.96  0.79  0.84  0.82  0.08  0.01
+     
+
+OK. It appears to be working fine.
+
+---------------------- INCLUDE ALIGNMENT. COXD -------------------------
+
+From the U34801_U66875.srQ file attempt to recover the alignments on U66875
+From the U34801_U66875.srS file attempt to recover the alignments on U34801
+
+gawk '$7=="+"' U34801_U66875.srS | gawk -f GetExonAlignment.awk U34801.tbl U34801_r.tbl U66875.tbl U66875_r.tbl
+
+gawk -f GetExonAlignment.awk  COXD/U66875.tbl COXD/U66875_r.tbl COXD/U34801.tbl COXD/U34801_r.tbl  sgp-2.int/U66875_U34801.srS
+
+it appears to be working. Try with another sequence
+
+> cp $SCIMOG/tbl/M13792 M13792.tbl
+> cp $SCIMOG/tbl/U73107 U73107.tbl
+> ReverseSequence < M13792.tbl > M13792_r.tbl
+> ReverseSequence < U73107.tbl > U73107_r.tbl
+
+
+>gawk -f GetExonAlignment.awk ADA/M13792.tbl ADA/M13792_r.tbl ADA/U73107.tbl ADA/U73107_r.tbl sgp-2.int/M13792_U73107.srS
+
+
+Attempt to recompute scores blosum62mod
+
+gawk -f ConvertMatrix.awk blos62tmp | sort | more > blosum62-wk
+
+
+----------------------  RESCORE EXONS ---------------
+
+sgp2dir/bin/geneid -P sgp2dir/bin/human3iso.param COXD/U66875.fasta
+
+
+
+First try to reproduce ScoreExons.c
+
+change ScoreExons.c
+
+  float TMPW=1;
+  float TMPWMAR=1;
+  float TMPWTBX=1;
+
+1. predict exons without sr
+sgp2dir/bin/geneid -xoGP human3iso.param  COXD/U66875.fasta > COXD/U66875.exons
+
+2. predict exons with sr 
+
+sgp2dir/bin/geneid -xoP human3iso.param -S COXD/U66875.hsp-rs COXD/U66875.fasta > COXD/U66875.exons-rs
+
+
+3. rescore exons
+
+gawk -f GetExonAlignment.awk COXD/U66875.tbl COXD/U66875_r.tbl COXD/U34801.tbl COXD/U34801_r.tbl blosum62-wk sgp-2.int/U66875_U34801.srS COXD/U66875.exons > U66875.rexons
+
+
+
+
+
+
+
