@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildSingles.c,v 1.1 2000-07-07 08:22:28 eblanco Exp $  */
+/*  $Id: BuildSingles.c,v 1.2 2000-10-03 10:50:15 jabril Exp $  */
 
 #include "geneid.h"
+
+extern long NUMEXONS;
 
 long BuildSingles(site *Start, long nStarts, 
 		  site *Stop, long nStops,
