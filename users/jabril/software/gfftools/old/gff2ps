@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.13 1999-06-09 19:48:54 jabril Exp $	
+#         $Id: gff2ps,v 1.14 1999-06-10 19:36:39 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,12 @@ Defaults () {
   v03="$CFDIR/.gff2psrc"; n03="Default_CustomFile_Name"
   v04="0"; n04="Exist_Default_CustomFile"
   v05="0"; n05="Print_Report"
-  v06="Landscape"; n06="page_orientation"
-  v07="0,0"; n07=""
+  v06="Landscape"; n06="Page_Orientation"
+  v07="a4"; n07="Page_Size"
+  v08="1"; n08="Page_Number"
+  v09="1"; n09="Blocks_x_Page"
+  v10="0"; n10="Nucleotides_x_Line"
+  v11="1"; n11="Blocks_Top-Bottom"
 }
 
 #
@@ -152,7 +156,7 @@ ShowHelpLine () {
 MAINPSCPR () {
 cat <<'@@@EndCopyRight@@@'
 % 
-% $Id: gff2ps,v 1.13 1999-06-09 19:48:54 jabril Exp $
+% $Id: gff2ps,v 1.14 1999-06-10 19:36:39 jabril Exp $
 % 
 %          Converting GFF files to PostScript plots.
 %
@@ -188,6 +192,12 @@ true setstrokeadjust
 0 setlinejoin
 0 setlinecap
 %
+%   1 cm   = 28.35 points
+%   1 inch = 72.00 points
+/bdf { bind def } bind def
+/xdf { exch def } bdf
+/cm { 28.35 mul } bdf
+%
 % Fixed Color Variables (CMYK)
 % -----------------------------
 /colordict 80 dict def colordict begin % 52 colors + 28 definitions
@@ -219,7 +229,15 @@ true setstrokeadjust
 /lightbrown       { 0.30 0.60 0.70 0.00 } def /verylightbrown   { 0.15 0.45 0.55 0.00 } def
 end % colordict
 %
-%  Paper Sizes  (in points) 
+%  Defining CONSTANTS
+% --------------------
+/TkMrkW 0.25 cm def                  % Defining tickmark-width.
+/tflg false def                      % test flag
+%
+%  Defining VARIABLES
+% --------------------
+%
+%  Paper Sizes  (in points)  <--- Probably it is better to generate each time.
 % --------------------------
 /pagedict 14 dict def pagedict begin % Portrait { minor-axes:X major-axes:Y }
 /pgA2          { 1190 1684 } def /pgA3          {  842 1190 } def
@@ -229,20 +247,6 @@ end % colordict
 /pgLegal       {  612 1008 } def /pgLetter      {  612  792 } def
 /pgTabloid     {  792 1224 } def /pgUserDefined {  595 2448 } def
 end % pagedict
-%
-%   1 cm   = 28.35 points
-%   1 inch = 72.00 points
-/bdf { bind def } bind def
-/xdf { exch def } bdf
-/cm { 28.35 mul } bdf
-%
-%  Defining CONSTANTS
-% --------------------
-/TkMrkW 0.25 cm def                  % Defining tickmark-width.
-/tflg false def                      % test flag
-%
-%  Defining VARIABLES
-% --------------------
 %
 %  Page Layout
 %%%% BG & FG colors
@@ -437,10 +441,10 @@ end % tmdct
  /frmfill { frm getfrcol rmd getfrcol lnfill } bdf
  /rnbfill { 1 dict begin gsave /incr sqdif 100 div def 0 incr sqdif { dup dup incr add 0 exch 0 moveto lineto dup 0 gt { sqdif div } if rainbow RWTS setlinewidth stroke } for grestore end } bdf 
 % /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf strnd (-) eq { exch } if 2 copy exch sub /sqdif exch Xscm def /sqdsc sqdif Xscale div def /seqend exch Xscm def /seqori exch Xscm def /cmod xdf } bdf
- /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf nucdif /sqdif exch Xscm def /sqend exch def /sqori exch def /seqend sqend Xscm def /seqori sqori Xscm def /cmod xdf } bdf
+ /getvar { /ftlbl xdf /cmod xdf /sc xdf /rmd xdf /frm xdf nucdif /sqdif exch Xscm def /sqend exch def /sqori exch def /seqend sqend Xscm def /seqori sqori Xscm def } bdf
  /setcolmod { colordict begin cmod cvx exec dup 1 eq { pop scmyk fill } { dup 2 eq { pop lnfill } { dup 3 eq { pop frmfill } { dup 4 eq { pop rnbfill } { 0 eq { BGcolor scmyk fill } if } ifelse } ifelse } ifelse } ifelse end } bdf
  /shwpos { flpos { sqend sqori strnd (-) eq { exch } if sqdif exch 0 2 { gsave tracksize 0.75 mul moveto 10 string cvs gsave strnd (-) eq { -1 -1 scale -45 } { 45 } ifelse rotate ShFont sfont FGcolor scmyk show grestore grestore } repeat } if } bdf
- /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def LY sc mul sqdif flglscape { exch } if scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos } bdf
+ /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def LY sc mul sqdif flglscape { exch } if scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos pop } bdf
  /f { gsave getvar strnd (-) eq { seqend } { seqori } ifelse 0 translate frshared grestore } bdf
  /gpuline { gsave 0 0 moveto grdif 0 rlineto /red scolor 1 setlinewidth stroke grestore } bdf
  /shgplbl { FgpLbl { gsave grori tracksize 0.75 mul strnd (-) ne { neg } if translate gpuline grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
@@ -582,7 +586,7 @@ case $1 in
 #
 # Processing all options and parameters passed to program.
 #
-while getopts :C:vpHh W_OPTION
+while getopts :C:vpP:B:N:bHh W_OPTION
   do
     case $W_OPTION in
       H|h) Help; exit 2;;
@@ -594,7 +598,11 @@ while getopts :C:vpHh W_OPTION
                 v02="$CFDIR/$OPTARG";
          fi;;
       v) v05="1";;                      # Print_Report
-      p) v06="Portrait";;               # page_orientation
+      p) v06="Portrait";;               # Page_Orientation
+      P) v08=$OPTARG;;                  # Page_Number
+      B) v09=$OPTARG;;                  # Blocks_x_Page
+      N) v10=$OPTARG;;                  # Nucleotides_x_Line
+      b) v11="0";;                      # Blocks_Top-Bottom
        :) ShowHelpLine $1; exit 2;;
       \?) ShowHelpLine $1; exit 2;;
     esac # case $W_OPTION
@@ -611,7 +619,10 @@ while getopts :C:vpHh W_OPTION
 #
 # Defining PLOToptions STRING for GNU awk programs.
 #
-   P=$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05
+   P="BACKGROUND_COLOR:="$bgcolor"::FOREGROUND_COLOR:="$fgcolor"::"
+ P=$P$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05"::"
+ P=$P$n06":="$v06"::"$n07":="$v07"::"$n08":="$v08"::"$n09":="$v09"::"$n10":="$v10"::"
+ P=$P$n11":="$v11
  PLOToptions=$P
  if [ $v05 -eq 1 ]
    then
@@ -679,7 +690,9 @@ gawk 'BEGIN{
   # defaults
   MINSCORE=0.25;
   MAXSCORE=1.00;
-  BigLINE="########################################"
+  BigLINE="########################################";
+  FIRST_POS=0;
+  LAST_POS=0;
 
   # gff data structure
   seqname  = 1;
@@ -718,27 +731,33 @@ gawk 'BEGIN{
      if (elem[1]~/COLOR\$/) {
        ecolor=elem[2]
        if (ChkColor(ecolor)) {
-         if (ecolor~/^BG\$|(##DEFAULT##)/) { elem[2]=Pre["BACKGROUND_COLOR"] }
-         else if (ecolor~/^FG\$/) { elem[2]=Pre["FOREGROUND_COLOR"] }
+         if (ecolor~/^BG\$|(##DEFAULT##)/) { elem[2]=Var["BACKGROUND_COLOR"] }
+         else if (ecolor~/^FG\$/) { elem[2]=Var["FOREGROUND_COLOR"] }
          }
-       else { elem[2]=Pre["BACKGROUND_COLOR"] }
+       else { elem[2]=Var["BACKGROUND_COLOR"] }
        }
-     Pre[elem[1]]=elem[2]
+     # Pre[elem[1]]=elem[2]
+     Var[elem[1]]=elem[2]
      }
    }
-  for (v in Pre) Var[v]=Pre[v]
+  # for (v in Pre) Var[v]=Pre[v]
   for (v in Var) printf "VAR: %-25s :: Value: %s\n", v, Var[v] | "cat 1>&2" 
 
 # Layout Properties
-  Default["page_size"]="a4"
-  Default["page_orientation"]=Var["page_orientation"]
+  Default["page_size"]=Var["Page_Size"]
+  Default["page_orientation"]=Var["Page_Orientation"] # Landscape (default), Portrait.
   Default["margin_left"]="1cm"
   Default["margin_right"]="1cm"
   Default["margin_upper"]="1cm"
   Default["margin_bottom"]="1cm"
   Default["foreground_color"]="FGcolor"
   Default["background_color"]="BGcolor"
-  Default["block_number"]=1
+  Default["nucleotides_x_line"]=Var["Nucleotides_x_Line"]
+    # Default=0 -> gets the seqlenght from data
+  Default["blocks_x_page"]=Var["Blocks_x_Page"] # Default=1
+  Default["max_blocks_x_page"]=5 # You can change on .gff2psrc file.
+  Default["show_blocks_top-bottom"]=Var["Blocks_Top-Bottom"]
+  Default["page_number"]=Var["Page_Number"] # Default=1
   Default["strand_show_forward"]="on"
   Default["strand_show_reverse"]="on"
   Default["strand_show_independent"]="on"
@@ -747,7 +766,7 @@ gawk 'BEGIN{
   Default["label"]="none"
 # Features Properties
   FT_PROP["fill_shape_mode"]="default" # none(BGcolor), default(FGcolor 1color), 1_color, 2_color, frame-remainder, rainbow
-  FT_PROP["fill_vector_mode"]="default" # default(0 black grad), rainbow(1), 1_color(BGcolor color 2), 2_color(color1 color2 2), 3_color(col1 col2 col3 2)
+  FT_PROP["fill_vector_mode"]="default" # none(0 BGcolor grad), default(0 black grad), rainbow(1), 1_color(BGcolor color 2), 2_color(color1 color2 2), 3_color(col1 col2 col3 2)
   FT_PROP["label"]="default" # none , default , "user-def"
   FT_PROP["color"]=Default["foreground_color"] # 1color(color),2color(color..color),3color(color..color..color)
   FT_PROP["shape"]="box" #box, arrow, end_arrow, circle, vector, spike, block
@@ -831,6 +850,9 @@ gawk 'BEGIN{
     }
   }
 
+  if (FIRST_POS>$start) FIRST_POS=$start;
+  if (LAST_POS<$end) LAST_POS=$end;
+
   # recompute scores between MINSCORE and MAXSCORE
   #
   if ($score < MINSCORE)
@@ -870,13 +892,56 @@ END{
    close("cat 1>&2")
    }
 
-  # Defining Object Properties
+  # Calculating Page Number, Blocks and NucxLine
+  #
+  PORI=Nuc_round(FIRST_POS,0) # floor
+  PEND=Nuc_round(LAST_POS,1)  # ceiling
+  # Zoom must be defined here
+  if (PORI!=0) PDIF=PEND-PORI+1
+  else PDIF=PEND-PORI
+
+  P=Default["page_number"]
+  B=Default["blocks_x_page"]
+
+  if (Default["nucleotides_x_line"]==0) {
+    POFFSET=PDIF
+    if (B>1) B=1
+    }
+  else POFFSET=Default["nucleotides_x_line"]
+  if (POFFSET>PDIF) POFFSET=PDIF # necessary if it is defined a Zoom.
+
+  MNB=Default["max_blocks_x_page"]
+  B1= PDIF%POFFSET!=0 ? ((PDIF-(PDIF%POFFSET))/POFFSET)+1 : ((PDIF-(PDIF%POFFSET))/POFFSET)
+  if (B<B1) { B=B1 }
+  P1= B%MNB!=0 ? ((B-(B%MNB))/MNB)+1 : ((B-(B%MNB))/MNB)
+  if (P<P1) { B=MNB; P=P1 }
+
+  if (Default["show_blocks_top-bottom"]) BOFFSET=POFFSET
+  else BOFFSET=POFFSET*P
+
+  printf "\n%s\nPostScript Page Definitions...\n%s\n",BigLINE,BigLINE | "cat 1>&2"  
+  printf "\npage_number %s\nblocks_x_page %s\nnucleotides_x_line %s\nmax_blocks_x_page %s\nshow_blocks_top-bottom %s\n",Default["page_number"],Default["blocks_x_page"],Default["nucleotides_x_line"],Default["max_blocks_x_page"],Default["show_blocks_top-bottom"] | "cat 1>&2"  
+  printf "\nPORI %s\nPEND %s\nP %s\nB %s\nPOFFSET %s\nBOFFSET %s\n\n",PORI,PEND,P,B,POFFSET,BOFFSET | "cat 1>&2"  
+
+  ########## Defining Object Properties ##########
   #
   CreateProps(0)
   if (Var["Print_Report"]) printf "\n%s\nReading Default Custom File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
   if (Var["Exist_Default_CustomFile"]) RCFile(Var["Default_CustomFile_Name"])
   if (Var["Print_Report"]) printf "\n%s\nReading Custom File...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
   if (Var["Load_CustomFile"]) RCFile(Var["CustomFile_Name"])
+
+  # PostScript Main Procs.
+  #
+  for (i=1;i<psline;i++) print PSMAIN[i]; 
+
+  # Pages MAIN LOOP.
+  #
+  for (pages=1;pages<=P;pages++) {
+    BORI=PORI
+    startPSpage(pages,pages)  # PostSCript PageSetup.
+
+    for (blocks=1;blocks<=B;blocks++) {
 
   # make groups. assumes elements sorted by increasing acceptor position
   #
@@ -885,6 +950,13 @@ END{
   for (sc in sources) {
     for (s in strands) {
       for (i=1;i<=n[sc,s];i++) {
+        start_=element[sc,s,S[sc,s,i],start];
+        end_=element[sc,s,S[sc,s,i],end];
+
+       if (ChkLimits(start_,BORI,end_,(BORI+OFFSET))) {
+        feature_=element[sc,s,S[sc,s,i],feature];
+        score_=element[sc,s,S[sc,s,i],score];
+
 	    tgr=element[sc,s,S[sc,s,i],group];
 	    if (!grouping[sc,s,tgr,start]) {
 	      grouping[sc,s,tgr,start]=element[sc,s,S[sc,s,i],start];
@@ -896,11 +968,6 @@ END{
           grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
 
         # for gene mode. try to recompute relative frame and remainder
-        start_=element[sc,s,S[sc,s,i],start];
-        end_=element[sc,s,S[sc,s,i],end];
-        feature_=element[sc,s,S[sc,s,i],feature];
-        score_=element[sc,s,S[sc,s,i],score];
-
         frame_[sc,s,tgr]= element[sc,s,S[sc,s,i],frame];
 
         if (feature_=="First" || feature_=="Single") 
@@ -909,35 +976,28 @@ END{
           frame_[sc,s,tgr]=remainder_[sc,s,tgr];
 
         remainder_[sc,s,tgr]=(3-(end_-(start_+frame_[sc,s,tgr])+1)%3)%3;
-mylbl=Plot_Lbl(feature_)
-        printf "%s %s %s : \/%s (%s) %d %d %d %d %4.2f (%s) f\n", sc,s,i, Set_feat_Shape(feature_,sc), Set_feat_Clr(feature_), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Plot_Lbl(feature_) | "cat 1>&2"
-        grouping[sc,s,tgr,group] = sprintf("%s\/%s (%s) %d %d %d %d %4.2f (%s) f\n", grouping[sc,s,tgr,group], Set_feat_Shape(feature_,sc), Set_feat_Clr(feature_), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Plot_Lbl(feature_))
-      } # for i
+
+        printf "%s %s %s : %s \/%s %d %d %d %d %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_), Plot_Lbl(feature_) | "cat 1>&2"
+        grouping[sc,s,tgr,group,blocks] = sprintf("%s%s \/%s %d %d %d %d %4.2f (%s) (%s) f\n", grouping[sc,s,tgr,group,blocks], PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_), Plot_Lbl(feature_))
+        plot_group[tgr,blocks]=1
+       } # if ChkLimits
+      }  # for i
         printf "\n" | "cat 1>&2"
-    }   # for s
+    }    # for s
     # Percent of plot area for each strand
     if (ng[sc,"+"]>0) cntstr_fwd+=PLOT_FT[sc,":","scale"]
     if (ng[sc,"."]>0) cntstr_bth+=PLOT_FT[sc,":","scale"]
     if (ng[sc,"-"]>0) cntstr_rvs+=PLOT_FT[sc,":","scale"]
-  }     # for sc
+  }      # for sc
   cntstr_TOT=cntstr_fwd+cntstr_bth+cntstr_rvs
-  printf "/LnFwd %s def %% groups for each strand\n/LnBth %s def\n/LnRvs %s def\n", cntstr_fwd/cntstr_TOT, cntstr_bth/cntstr_TOT, cntstr_rvs/cntstr_TOT
-
-  # PostScript Main Procs.
-  #
-  for (i=1;i<psline;i++) print PSMAIN[i]; 
-
-  # PostSCript PageSetup.
-  #
-  startPSpage(1,1)
+#  printf "/LnFwd %s def %% groups for each strand\n/LnBth %s def\n/LnRvs %s def\n", cntstr_fwd/cntstr_TOT, cntstr_bth/cntstr_TOT, cntstr_rvs/cntstr_TOT
 
   # PostScript Drawing strands, sources, groups, features
   #
   # make plotlines. Put non-overlapping groups into the same plotting line.
   #
-  if (Var["Print_Report"]) printf "\n%s\nPrinting Lines...............\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
+  if (Var["Print_Report"]) printf "\n%s\nPrinting Lines......Page: %s Block: %s\n%s\n\n",BigLINE,pages,blocks,BigLINE | "cat 1>&2"
   for (s in strands) {
-#    printf "(%s) setstrand\n", s
     for (sc in sources) {
       if (n[sc,s]>0) printf "(%s) %s %s source\n", sc, PLOT_FT[sc,":","scale"], PLOT_FT[sc,":","spacing_scale"]
       for (i=1;i<=ng[sc,s];i++) {
@@ -950,17 +1010,25 @@ mylbl=Plot_Lbl(feature_)
           printf "GROUP : %-10s : %s %10d %10d \n", g, s, grouping[sc,s,g,start], grouping[sc,s,g,end] | " sort +6 | cat 1>&2";
         if (PLOT_FT[g,":","label"]=="default") labl=g
         else labl=PLOT_FT[g,":","label"]
-        printf "(%s) %s %s (%s) gp \n%sg_end\n", checklbl(labl), grouping[sc,s,g,start], grouping[sc,s,g,end], s, grouping[sc,s,g,group]
+        if (plot_group[g,blocks]==1) {
+          printf "(%s) %s %s (%s) gp \n", checklbl(labl), grouping[sc,s,g,start], grouping[sc,s,g,end], s
+          printf "%s", grouping[sc,s,g,group,blocks] | "sort +0nr +6n +2n +3nr"
+          close("sort +0nr +6n +2n +3nr") # | sort +2n | sort +3nr")
+          printf "g_end\n"
+          } # if plot_group
         } # for ng[]
         if (n[sc,s]>0) printf "endsource\n"
       }   # for sources
-#    printf "clrstrand\n", s
     }     # for strands
   if (Var["Print_Report"]) close(" sort +6 | cat 1>&2")
 
-  # PostSCript Page Trailer.
+  # Closing Pages MAIN LOOP.
   #
-  endPSpage()
+    BORI+=BOFFSET
+    } # for blocks
+  endPSpage(pages,pages)     # PostSCript Page Trailer.
+  PORI+=POFFSET
+  } # for pages
 
   # If not exist, create custom file (.gff2psrc)
   #
@@ -976,17 +1044,36 @@ mylbl=Plot_Lbl(feature_)
 }
 function min(a,b) { if (a<=b) return a; else return b }
 function max(a,b) { if (a>=b) return a; else return b }
-function ChkXlim(o,e) { if (o>=ESQ1 || e<=OSQ1) return 0; else return 1 } # Still not adapted.
-function ChkYlim(o,e) { if (o>=ESQ2 || e<=OSQ2) return 0; else return 1 } # Still not adapted.
+function ChkLimits(o,O,e,E) { if (e<=O || o>=E) return 0; else return 1 }
+  # start_,BORI,end_,BEND
 function OnOff(value) { if (value~/^1$|^ON$|^Y(ES)?$|^T(RUE)?$/) return 1; else return 0 }
 function ChkColor(ncolor) {
  if (ncolor~/^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/)
    return 1
  else return 0 # also when ncolor == ^BG$|(##DEFAULT##)
  }
+function Nuc_round(nm,flg, i) { # flg=0 then floor; flg=1 then ceiling.
+ sign=nm<0?-1:1;
+ if (sign==-1) { nm=-nm; flg=!(flg) }
+ nmp=nm; for (i=1;nmp>10;i++) { nmp=nmp/10 };
+ if (nm>=1000) mlt=2; else mlt=1;
+ if (flg) {
+   if (nm>0) {
+	 if (nm%10^(i-mlt)==0) smm=0;
+	   else smm=1;
+	 t=nm>=100?sign*((int(nmp*10^(mlt-1))+smm)*10^(i-mlt)):sign*100;
+	 }
+   else t=0;
+   }
+ else {
+   if (nm>0) t=nm>=100?sign*((int(nmp*10^(mlt-1)))*10^(i-mlt)):0;
+     else t=0;
+   }
+ return t;
+ }
 function tick(nm) { # Still not adapted.
  end1=ESQ1-OSQ1; if (end1==0) end1=10000
- end2=ESQ2-OSQ2; if (end2==0) end2=10000
+ # end2=ESQ2-OSQ2; if (end2==0) end2=10000
  wy=max(end1,end2);
  y=wy/nm;
  ylog=(log(y)/log(10));
@@ -1159,7 +1246,7 @@ function RCFile(file) { ############ Read CustomFile
         FT_ary[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
         if (Var["Print_Report"])
-          printf "No Match found: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
+          printf "No Match found - New Feature: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
         }
       }
     else if (ft_type=="G") {
@@ -1178,7 +1265,7 @@ function RCFile(file) { ############ Read CustomFile
         GP_ary[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
         if (Var["Print_Report"])
-          printf "No Match found: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
+          printf "No Match found - New Feature: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
         }
       }
     else if (ft_type=="S") {
@@ -1197,14 +1284,14 @@ function RCFile(file) { ############ Read CustomFile
         sources[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
         if (Var["Print_Report"])
-          printf "No Match found: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
+          printf "No Match found - New Feature: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
         }
       }
     else if (ft_type=="L") {
-      if (defs[1] in PLOT_FT) {
-        PLOT_FT[defs[1]]=defs[2]
+      if (defs[1] in Default) {
+        Default[defs[1]]=defs[2]
         if (Var["Print_Report"])
-            printf "Layout "STRING,def[1],first,(defs[1]":"second),defs[2] | "cat 1>&2"
+            printf "Layout "STRING,defs[1],first,(defs[1]":"second),defs[2] | "cat 1>&2"
         }
       }
    }# if not empty or comment line 
@@ -1251,8 +1338,8 @@ function startPSpage(num,tot){
  printf "%%%%EndPageSetup\n%%\n"
  printf "0 1000 XOriPlot Y {s} 3 tm\n"
  }
-function endPSpage(){
- printf "%%\n%%pgsave restore\ngrestoreall\nshowpage\n%%\n"
+function endPSpage(num,tot){
+ printf "%%\ngrestoreall\nshowpage\n%%\n%% PageEND: %s %s\n%%\n",num,tot
  }
 ' - "$@"
 #### Main GFF2APLOT GNU awk Program DONE.
