@@ -32,6 +32,14 @@ sgp           software/sgp
 sggp          software/sggp
 #
 #
+######### projects CVS #########
+#
+scimit        projects/sgp/scimit
+orthologous   projects/sgp/orthologous
+chr22         projects/sgp/chr22
+humangenome   projects/sgp/humangenome
+#
+#
 ########### users CVS ###########
 #
 rguigo        users/rguigo
