@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.11 2002-03-28 13:52:14 jabril Exp $ 
+% # $Id: humus.nw,v 1.12 2002-04-04 12:35:57 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.11 2002-03-28 13:52:14 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.12 2002-04-04 12:35:57 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2071,6 +2071,7 @@ cat $ODIR/${CHR}_gaps.gff    \
 <<tangling: perl scripts>>=
 echo "# --> \$BIN/getfastadesc.pl" 1>&2 ;
 notangle -R"getfastadesc.pl" $WORK/$nwfile.nw | cpif $BIN/getfastadesc.pl ;
+perl -c $BIN/getfastadesc.pl ;
 is_exec $BIN/getfastadesc.pl ;
 @ 
 
@@ -2295,6 +2296,7 @@ sub output_results() {
 <<tangling: perl scripts>>=
 echo "# --> \$BIN/gp2gff.pl" 1>&2 ;
 notangle -R"gp2gff.pl" $WORK/$nwfile.nw | cpif $BIN/gp2gff.pl ;
+perl -c $BIN/gp2gff.pl ;
 is_exec $BIN/gp2gff.pl ;
 @ 
 <<gp2gff.pl>>=
@@ -2471,6 +2473,7 @@ sub swap_items() {
 echo "# --> \$BIN/sbp-checkblastout.pl" 1>&2 ;
 notangle -R"sbp-checkblastout.pl" $WORK/$nwfile.nw | \
      cpif $BIN/sbp_checkblastout.pl ;
+perl -c $BIN/sbp_checkblastout.pl ;
 is_exec $BIN/sbp_checkblastout.pl ;
 @ 
 <<sbp-checkblastout.pl>>=
@@ -2528,6 +2531,7 @@ exit(0);
 echo "# --> \$BIN/sbp-blast2gff.pl" 1>&2 ;
 notangle -R"sbp-blast2gff.pl" $WORK/$nwfile.nw | \
      cpif $BIN/sbp_blast2gff.pl ;
+perl -c $BIN/sbp_blast2gff.pl ;
 is_exec $BIN/sbp_blast2gff.pl ;
 @ 
 <<sbp-blast2gff.pl>>=
@@ -2630,6 +2634,7 @@ exit(0);
 <<tangling: perl scripts>>=
 echo "# --> \$BIN/runeval.pl" 1>&2 ;
 notangle -R"runeval.pl" $WORK/$nwfile.nw | cpif $BIN/runeval.pl ;
+perl -c $BIN/runeval.pl ;
 is_exec $BIN/runeval.pl ;
 @ 
 <<runeval.pl>>=
@@ -2676,6 +2681,7 @@ EOTXT
 <<tangling: perl scripts>>=
 echo "# --> \$BIN/getHSPSR.pl" 1>&2 ;
 notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
+perl -c $BIN/getHSPSR.pl ;
 is_exec $BIN/getHSPSR.pl ;
 @ 
 <<getHSPSR.pl>>=
@@ -3069,6 +3075,7 @@ echo "# --> \$MySQLPAR/seqs.tbl" 1>&2 ;
 echo "# --> \$LIBPERL/db_Hsapiens.pm" 1>&2 ;
 notangle -R'MySQL: perl DB interface' \
     $WORK/$nwfile.nw | cpif $LIBPERL/db_Hsapiens.pm ;
+perl -c $LIBPERL/db_Hsapiens.pm ;
 is_exec $LIBPERL/db_Hsapiens.pm ;
 #
 @ 
@@ -3476,6 +3483,7 @@ sub put_row_fields() {
 echo "# --> \$MySQLPAR/admin_db_Hsapiens.pl" 1>&2 ;
 notangle -R'MySQL: Initialize administrative tables' \
     $WORK/$nwfile.nw | cpif $MySQLPAR/admin_db_Hsapiens.pl ;
+perl -c $MySQLPAR/admin_db_Hsapiens.pl ;
 is_exec $MySQLPAR/admin_db_Hsapiens.pl ;
 #
 @ 
@@ -3807,6 +3815,7 @@ sub load_job_steps_tbl() {
 echo "# --> \$BIN/stepper.pl" 1>&2 ;
 notangle -R'Step Execution Script' \
     $WORK/$nwfile.nw | cpif $BIN/stepper.pl ;
+perl -c $BIN/stepper.pl ;
 is_exec $BIN/stepper.pl ;
 #
 @ 
@@ -3831,7 +3840,8 @@ is_exec $BIN/stepper.pl ;
 use strict;
 #
 <<Use Modules - Dumper>>
-<<stepper.pl: Use modules>>
+<<stepper.pl: Use module IPC>>
+#<stepper.pl: Use module POSIX>>
 #
 use db_Hsapiens;
 #
@@ -3879,7 +3889,7 @@ if (!defined($paramfile)) {
 
 #
 ## MAIN
-&my_init_signals();
+&init_signals(); # &my_init_signals();
 &parse_cmdline();
 &program_started($PROG);
 
@@ -3896,12 +3906,13 @@ my $stepfls = shift @ARGV;
 
 &close_DB();
 
+IPC::Shareable->clean_up;
 &program_finished($PROG);
 exit(0);
 
 #
 ## SUBS
-<<stepper.pl: trapping signals>>
+#<stepper.pl: trapping signals>>
 <<stepper.pl: subs>>
 <<stepper.pl: job scheduling functions>>
 @
@@ -3937,11 +3948,11 @@ sub get_steps() {
 
 \subsubsctn{Trapping system signals}
 
-<<stepper.pl: Use modules>>=
+<<HIDE: stepper.pl: Use module POSIX>>=
 <<global.pm: use POSIX>>
 @ 
 
-<<stepper.pl: trapping signals>>=
+<<HIDE: stepper.pl: trapping signals>>=
 #
 # Trapping signals
 sub my_init_signals() {
@@ -3951,18 +3962,18 @@ sub my_init_signals() {
     $SIG{QUIT} = \&trap_signals;
     $SIG{TERM} = \&trap_signals;
     $SIG{KILL} = \&trap_signals;
-    $SIG{CHLD} = \&my_child_reaper;
-    @skip_next = ($F, undef);
+    $SIG{CHLD} = \&child_reaper; # \&my_child_reaper;
+    @skip_next = ($F, $F, $F);
 } # my_init_signals
 @ 
 
 We require the status checking function from the POSIX module we used in [[<<global.pm: trapping signals>>]] code chunk to reap zombie child processes, removing their process execution id from [[@semaphore]]. But we must redefine the child exit signal handler function to take care of the semaphore variable.
 
-<<stepper.pl: trapping signals>>=
+<<HIDE: stepper.pl: trapping signals>>=
 # redefining child-exit signal handler (already defined in global.pm)
 sub my_child_reaper() {
     $handle->shlock();
-    for (my $v = 0; $v <= $maxjobs; $v++) {
+    for (my $v = 0; $v < $maxjobs; $v++) {
         my ($spid,$cpid,$ecod);
         ($semaphore[$v][0] != 0) && do {
             $semaphore[$v][0] =~ m/^(.*?)\./o && ($spid = $1);
@@ -3985,7 +3996,7 @@ sub my_child_reaper() {
 
 The [[&brown_dispatcher]] function requires a semaphore variable that controls how many childs were forked, so we can fork a new one once any of the current childs job has finished (no matter where...). We require the following package, just to have such variable shared among the running child processes.
 
-<<stepper.pl: Use modules>>=
+<<stepper.pl: Use module IPC>>=
 use IPC::Shareable; 
 @ 
 
@@ -4003,14 +4014,20 @@ sub brown_dispatcher() {
     $seqnum = scalar(@seqs);
     while ($seqs_done < $seqnum) { # loop through sequences
         for ($sem = 0; $sem < $maxjobs; $sem++) {
+$handle->shlock();
+print STDERR "#@# PRE:  \$semaphore[\$sem][0] = $sem -> $semaphore[$sem][0]\n";
+$handle->shunlock();
            $semaphore[$sem][0] || do {
-               next if (! &is_host_there($hosts[$sem]));
                next if $seqs_done == $seqnum; 
+               next if (&no_host_there($hosts[$sem]));
                @tmpsq = @{ $seqs[$seqs_done] };
                &breed_crows(@tmpsq, $sem);
                @{ $pids{$pid} } = @tmpsq;
                $seqs_done++;
            }; # if job semaphore == 0 then fork child
+$handle->shlock();
+print STDERR "#@# POST: \$semaphore[\$sem][0] = $sem -> $semaphore[$sem][0] : \$pid = $pid\n";
+$handle->shunlock();
            &do_wait();
         }; # for semaphores...
     }; # while
@@ -4028,10 +4045,10 @@ sub do_wait() {
 } # do_wait
 sub show_curr_pids() {
     my $gd = shift;
-#    $handle->shlock();
+    $handle->shlock();
     print $ERRFH "### MAIN $gd ### SEMAPHORE: ".
-          (join(" ", ( map { $semaphore[$_][0] } (0..$maxjobs) )))."\n";
-#    $handle->shunlock();
+          (join(" ", ( sub { my ($kk,@lk); foreach $kk (@_) { push @lk, $semaphore[$kk][0]; }; return @lk; }->(0..($maxjobs-1)) )))."\n";
+    $handle->shunlock();
 } # show_curr_pids
 sub not_all_done() {
     my $sum = 0;
@@ -4042,31 +4059,37 @@ sub not_all_done() {
     $handle->shunlock();
     return ($sum>0) ? $T : $F;
 } # not_all_done
-sub is_host_there() {
+sub no_host_there() {
       my $host = shift;
+      print $ERRFH "### MAIN $gid ### CHECKING $host CONECTION...\n";
       ($skip_next[0]) && do {
-         print $ERRFH "### MAIN $gid ### STOPPING PROGRAM: \"$host\" NOT CHECKED !!!\n";
-         return $T;
+          print $ERRFH "### MAIN $gid ### STOPPING PROGRAM: \"$host\" NOT CHECKED !!!\n";
+          return $F;
+      };
+      ($host eq $HOST) && do { # running locally
+          print $ERRFH "### MAIN $gid ### Local execution on $host...\n";
+          return $F;
       };
       my $err;
       (undef,undef,$err) = 
           &check_syscall_exit(system("rsh $host.imim.es exit 0"));
       ($err == 0) && do {
           print $ERRFH "### MAIN $gid ### Connection to $host available...\n";
-          return $T;
+          return $F;
       };
-      print $ERRFH "### MAIN $gid ### UNREACHEABLE \"$host\", SKIPPING !!!\n";
-      return $F;
-} # is_host_there
+      print $ERRFH "### MAIN $gid ### UNREACHEABLE \"$host\", SKIPPING HOST !!!\n";
+      return $T;
+} # no_host_there
 sub breed_crows() {
     my ($chrseq_code,$jobstep_code,$run_at,
         $script,$scriptx,$script_stat,$script_err,
-        $pre_job,$chldpid,$syserr);
+        $pre_job,$chldpid,$chpid,$syserr);
     my ($thechr,$theseq,$pos) = @_;
     return if $pid = fork(); # return to parent, follows child code
     local *TMP;
     $chrseq_code = $chrs{$thechr}{seqs}{$theseq}{code};
-    $chldpid = "$$.$gid";
+    $chpid = "$$";
+    $chldpid = "$chpid.$gid";
     if ($skip_next[0]) {
         print $ERRFH "## $chldpid ## Skipping ALL JOBS".
                      " for sequence \"$theseq($thechr)\".\n";
@@ -4085,7 +4108,7 @@ sub breed_crows() {
         $jobstep_code = $jobs{$thejob}{steps}{$thestep}{code};
         # &mod_semaphore($pos,$chldpid,$chrseq_code,$jobstep_code);
         $handle->shlock();
-        @{ $semaphore[$pos] } = ($chldpid,$chrseq_code,$jobstep_code);
+        @{ $semaphore[$pos] } = ($chpid,$chrseq_code,$jobstep_code);
         $handle->shunlock();
         ($stdin,$stdout,$stderr) = ( $jobs{$thejob}{steps}{$thestep}{idir},
                                      $jobs{$thejob}{steps}{$thestep}{odir},
@@ -4143,8 +4166,8 @@ CheckDirs \$CHRDIR \$CJBDIR \$JOBDIR \$ODIR ;
                 $run_at = <<"+++EOSCRIPT+++";
 # Run script remotely
 #
-{ rsh $hosts[$pos].imim.es $script > $script.out 2> $script.err } || exit 10 ;
-# cat $script ;
+# { rsh $hosts[$pos].imim.es $script > $script.out 2> $script.err } || exit 10 ;
+cat $script ;
                                       # exit_code==10 if RSH fails
 #
 +++EOSCRIPT+++
@@ -4152,7 +4175,8 @@ CheckDirs \$CHRDIR \$CJBDIR \$JOBDIR \$ODIR ;
                 $run_at = <<"+++EOSCRIPT+++";
 # Run script locally
 #
-$script > $script.out 2> $script.err ; # cat $script ;
+# $script > $script.out 2> $script.err ;
+cat $script ;
 #
 +++EOSCRIPT+++
             }; # if ($hosts[$pos] ne $HOST)
@@ -4235,10 +4259,12 @@ sub update_DB_exec_tbl() { # to db_Hsapiens.pm
     defined($sout) || ($sout = 'NULL');
     defined($serr) || ($serr = 'NULL');
     if ($stat != $status{'SKIPPED'}{'code'} && $skip_next[0]) {
-        if (defined($skip_next[1])) {
+        if ($skip_next[2]) {
+            $stat = $status{'DIED'}{'code'}; # Something happened to child
+        } else {
             $stat = ($skip_next[1]) ? $status{'DIED'}{'code'}
-                                        : $status{'KILLED'}{'code'};
-        } else { $stat = $status{'DIED'}{'code'} };
+                                    : $status{'KILLED'}{'code'};
+        };
     };
     ($tbl, @fld) = qw( tb_exec 0 1 ); # we do not tae care of execution PID (2)
     @sel_fields =  qw( chr_seq job_step exec_pid
@@ -4273,8 +4299,11 @@ $hc = 0;
          keys %hosts_list;
 $maxjobs = scalar(@hosts);
 $gid = $$;
+IPC::Shareable->clean_up_all();
 $handle = tie @semaphore, 'IPC::Shareable', undef, { destroy => 1 };
-@@semaphore = ( [ 0, 0, 0 ] ) x $maxjobs;
+for (my $z = 0; $z < $maxjobs; $z++) {
+    push @semaphore, [ 0, 0, 0 ];
+};
 @
 
 \subsubsctn{Sequence and jobs related vars}
@@ -4299,6 +4328,7 @@ $BASE = "/home/ug/jabril/development/projects/sgp/humus/tests/childs";
 echo "# --> \$BIN/viewstatustbl.pl" 1>&2 ;
 notangle -R'viewstatustbl.pl' \
     $WORK/$nwfile.nw | cpif $BIN/viewstatustbl.pl ;
+perl -c $BIN/viewstatustbl.pl ;
 is_exec $BIN/viewstatustbl.pl ;
 #
 @ 
@@ -4359,6 +4389,7 @@ sub view_exec_tbl() {
 echo "# --> \$LIBPERL/global.pm" 1>&2 ;
 notangle -R'shared functions and settings' \
     $WORK/$nwfile.nw | cpif $LIBPERL/global.pm ;
+perl -c $LIBPERL/global.pm ;
 is_exec $LIBPERL/global.pm ;
 #
 @ 
@@ -4493,7 +4524,7 @@ sub init_signals() {
     $SIG{QUIT} = \&trap_signals;
     $SIG{TERM} = \&trap_signals;
     $SIG{KILL} = \&trap_signals;
-    $SIG{CHLD} = \&child_reaper;
+    $SIG{CHLD} = 'IGNORE'; # \&child_reaper;
     @skip_next = ($F, undef);
 } # init_signals
 sub trap_signals() {
@@ -4509,14 +4540,15 @@ sub trap_signals_prog() {
 Just to avoid zombie child processes we are now trying the following code\footnote{The code has been adapted from recipe 16.19, pp592, of ``Perl CookBook''} instead of setting [[$SIG{CHLD}]] to [[IGNORE]] (causing child processed to be automatically reaped), because that approach does not work reliably in our case. 
  
 % $SIG{CHLD} = 'IGNORE' child processes are automatically reaped, or not ???
-<<global.pm: trapping signals>>=
+<<HIDE: global.pm: trapping signals>>=
 sub child_reaper() {
     my $cpid;
     $cpid = waitpid(-1, &WNOHANG);
     if (($cpid != -1) && WIFEXITED($?)) {
+        # $skip_next[2] = $T;
         print $ERRFH $Messages{'CHILD_EXIT'}->($PROG, $cpid);
     };
-    $SIG{CHLD} = \&child_reaper;
+    # $SIG{CHLD} = \&child_reaper;
 } # child_reaper
 @
 
@@ -5343,10 +5375,14 @@ exit(0);
 echo "# --> \$BIN/exit.pl" 1>&2 ;
 notangle -R'exit.pl: retrieving status codes' \
     $WORK/$nwfile.nw | cpif $BIN/exit.pl ;
+perl -c $BIN/exit.pl ;
+is_exec $BIN/exit.pl ;
+#
 echo "# --> \$BIN/getremoteinfo.pl" 1>&2 ;
 notangle -R'getremoteinfo.pl: checking remote hosts shared params' \
     $WORK/$nwfile.nw | cpif $BIN/getremoteinfo.pl ;
-is_exec $BIN/exit.pl $BIN/getremoteinfo.pl ;
+perl -c $BIN/getremoteinfo.pl ;
+is_exec $BIN/getremoteinfo.pl ;
 #
 for n in monstre1 monstre2 monstre3 monstre4 ik12 ik13 i8 i10 i26 aleph ;
   do {
@@ -5413,6 +5449,7 @@ sub prespc() { return ( map { " $_" } @_ ); }
 # Tk perl scripts
 echo "# --> \$BIN/stv" 1>&2 ;
 notangle -R'stv: Status Table Viewer' $WORK/$nwfile.nw | cpif $BIN/stv ;
+perl -c $BIN/stv ;
 is_exec $BIN/stv ;
 #
 @ 
@@ -6036,7 +6073,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.11 2002-03-28 13:52:14 jabril Exp $
+# $Id: humus.nw,v 1.12 2002-04-04 12:35:57 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
