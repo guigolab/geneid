@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.6 2001-04-23 08:46:00 eblanco Exp $ */
+/* $Id: geneid.c,v 1.7 2001-04-25 08:28:34 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -370,13 +370,13 @@ int main (int argc, char *argv[])
   if (GENEID)
     {
       /* a. Predicting splice sites, exons and genes of DNA sequences */
-      
       /* a.0. Reading DNA sequence */
       if ((seqfile = fopen(SequenceFile, "rb"))==NULL) 
         printError("The Sequence file can not be open for read");
 
       /* reading first sequence (in Fasta format) */
       reading = IniReadSequence(seqfile,Locus);
+
       while (reading!=EOF)
 	{
 	  printMess("Reading DNA sequence");
