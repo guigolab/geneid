@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.4 2000-09-08 10:10:47 eblanco Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.5 2000-09-08 10:11:36 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -175,8 +175,6 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 	      /* Skip this exon */
 	      sprintf(mess, "Skipping exon %ld(unknown type %s)\n",i,saux);
 	      printMess(mess); 
-	      
-	      
 	    }
 	  else
 	    {
