@@ -1,10 +1,10 @@
-% -*- mode: Noweb; noweb-code-mode: html-mode; tab-width: 4 -*-
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
 \documentclass[11pt]{article}
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: D-recerca_web.tex,v 1.1 2001-07-15 02:07:48 jabril Exp $
+% $Id: D-recerca_web.tex,v 1.2 2001-07-27 13:45:56 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -138,7 +138,7 @@ This is the formal development of the {\d} new web page, implementing it with Ca
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: D-recerca_web.tex,v 1.1 2001-07-15 02:07:48 jabril Exp $$>$ }
+{\small$<$ \verb$Id: D-recerca_web.tex,v 1.2 2001-07-27 13:45:56 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -149,52 +149,132 @@ This is the formal development of the {\d} new web page, implementing it with Ca
 
 \sctn{Defining Style Sheets}
 
+Cascading Style Sheets (CSS) make possible to simply and rapidly adjust the look of a web site, making changes to the overall colour scheme and formating of that web page. They allow developers to separate graphical elements from program code. In this section we are going to define the elements of the CSS file that will set the look of the {\d} web page.
+
 \subsctn{}
 
 \nwenddocs{}\nwbegincode{2}\sublabel{NWD*rs-DreP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-DreP-1}}}\moddef{Drecerca Main Style Sheet~{\nwtagstyle{}\subpageref{NWD*rs-DreP-1}}}\endmoddef
+/*      D-RECERCA       */
+/*  Global Style Sheet  */
+
+/*$Id: D-recerca_web.tex,v 1.2 2001-07-27 13:45:56 jabril Exp $*/
+
+/* Main Blocks Definition */
 \nwnotused{Drecerca\ Main\ Style\ Sheet}\nwendcode{}\nwbegindocs{3}\nwdocspar
 
+\sctn{Record structure for web-pages definition}
 
-\sctn{Common {\h} chunks: templates}
+The URLs defined in this section must finish with slash or a filename, we are setting the relationships between parental and child nodes, so we can automate in some extent the navigation pathway:
 
-\subsctn{{\h} header}
+\nwenddocs{}\nwbegincode{4}\sublabel{NWD*rs-WEBI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBI-1}}}\moddef{WEB HIERARCHY FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBI-1}}}\endmoddef
+###
+### NAVIGATION PATHS for D-RECERCA WEB
+###
+##\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}\RA{}
+###
+### MAIN VARIABLES
+###
+>#< ROOT       ./
+>#< CSS        \{$ROOT\}precarios.css
+>#< WEBMASTER  jabril@imim.es
+###
+### NODE DEFINITION and RELATIONSHIPS
+###
+### NAME "child  node NAME"
+### PREV "parent node NAME"
+### BASE_HREF \{$ROOT\}path
+#
+### NAME                 ### PREV                 ### BASE_HREF
+#
+\nwalsodefined{\\{NWD*rs-WEBI-2}\\{NWD*rs-WEBI-3}\\{NWD*rs-WEBI-4}}\nwnotused{WEB\ HIERARCHY\ FILE}\nwendcode{}\nwbegindocs{5}\nwdocspar
 
-\nwenddocs{}\nwbegincode{4}\sublabel{NWD*rs-HTMB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMB-1}}}\moddef{HTML header~{\nwtagstyle{}\subpageref{NWD*rs-HTMB-1}}}\endmoddef
+This should be the definition of the {\h} sections for each page, in the documents file:
 
-\nwnotused{HTML\ header}\nwendcode{}\nwbegindocs{5}\nwdocspar
-
-\subsctn{JavaScripts}
-
-\nwenddocs{}\nwbegincode{6}\sublabel{NWD*rs-javD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-javD-1}}}\moddef{javascripts: ~{\nwtagstyle{}\subpageref{NWD*rs-javD-1}}}\endmoddef
-
-\nwnotused{javascripts:\ }\nwendcode{}\nwbegindocs{7}\nwdocspar
-
-\subsctn{{\h} trailer}
-
-\nwenddocs{}\nwbegincode{8}\sublabel{NWD*rs-HTMC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMC-1}}}\moddef{HTML trailer~{\nwtagstyle{}\subpageref{NWD*rs-HTMC-1}}}\endmoddef
-
-\nwnotused{HTML\ trailer}\nwendcode{}\nwbegindocs{9}\nwdocspar
-
-\subsctn{Main Menu bar}
-
-\nwenddocs{}\nwbegincode{10}\sublabel{NWD*rs-HTME-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTME-1}}}\moddef{HTML main menu~{\nwtagstyle{}\subpageref{NWD*rs-HTME-1}}}\endmoddef
-
-\nwnotused{HTML\ main\ menu}\nwendcode{}\nwbegindocs{11}\nwdocspar
-
-\subsctn{Navigation bar}
-
-\nwenddocs{}\nwbegincode{12}\sublabel{NWD*rs-HTMJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMJ-1}}}\moddef{HTML navigation bar~{\nwtagstyle{}\subpageref{NWD*rs-HTMJ-1}}}\endmoddef
-
-\nwnotused{HTML\ navigation\ bar}\nwendcode{}\nwbegindocs{13}\nwdocspar
-
-\subsctn{Title area}
-
-\nwenddocs{}\nwbegincode{14}\sublabel{NWD*rs-HTMA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMA-1}}}\moddef{HTML title~{\nwtagstyle{}\subpageref{NWD*rs-HTMA-1}}}\endmoddef
-\nwnotused{HTML\ title}\nwendcode{}\nwbegindocs{15}\nwdocspar
+\nwenddocs{}\nwbegincode{6}\sublabel{NWD*rs-WEBH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBH-1}}}\moddef{WEB CONTENTS FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBH-1}}}\endmoddef
+###
+### WEB PAGE DEFINITION 
+###
+### NAME        "unique identifier"
+### FILENAME    "where to save this record (no path)"
+### TITLE 
+### WIN_TITLE      
+### KEYWORDS    "keywords for internet search engines" 
+### DESCRIPTION "description for internet search engines"
+### DESC        "short description"
+### HREF        \{$ROOT\}path
+### ICON        icons_path
+### USER_SPACE  your web page contents
+### >--EOR--<   (End of Record)
+#
+\nwalsodefined{\\{NWD*rs-WEBH-2}\\{NWD*rs-WEBH-3}\\{NWD*rs-WEBH-4}}\nwnotused{WEB\ CONTENTS\ FILE}\nwendcode{}\nwbegindocs{7}\nwdocspar
 
 \sctn{{\d} web pages definition}
 
-\subsctn{}
+\subsctn{D-Recerca Home Page}
+
+\nwenddocs{}\nwbegincode{8}\sublabel{NWD*rs-WEBI-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBI-2}}}\moddef{WEB HIERARCHY FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBI-1}}}\plusendmoddef
+DRECERCA-HOMEPAGE        ROOT                     \{$ROOT\}
+\nwendcode{}\nwbegindocs{9}\nwdocspar
+
+\nwenddocs{}\nwbegincode{10}\sublabel{NWD*rs-WEBH-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBH-2}}}\moddef{WEB CONTENTS FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBH-1}}}\plusendmoddef
+>#< NAME        DRECERCA-HOMEPAGE
+>#< FILENAME    index.html
+>#< TITLE       D-Recerca Homepage
+>#< WIN_TITLE   D-Recerca Homepage
+>#< KEYWORDS    D-Recerca, Precarios
+>#< DESCRIPTION Aquesta es la pagina dels estudiants de doctorat de Catalunya...
+>#< BASE_HREF   \{$ROOT\}
+>#< DESC        D-Recerca Home Page
+>#< HREF        \{$ROOT\}
+>#< ICON        \{$ROOT\}
+>#< USER_SPACE
+
+>--EOR--<   (End of Record)
+\nwendcode{}\nwbegindocs{11}\nwdocspar
+
+\subsctn{D-Recerca News page}
+
+\nwenddocs{}\nwbegincode{12}\sublabel{NWD*rs-WEBI-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBI-3}}}\moddef{WEB HIERARCHY FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBI-1}}}\plusendmoddef
+DRECERCA-NEWS            DRECERCA-HOMEPAGE        \{$ROOT\}
+\nwendcode{}\nwbegindocs{13}\nwdocspar
+
+\nwenddocs{}\nwbegincode{14}\sublabel{NWD*rs-WEBH-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBH-3}}}\moddef{WEB CONTENTS FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBH-1}}}\plusendmoddef
+>#< NAME        DRECERCA-NEWS
+>#< FILENAME    news.html
+>#< TITLE       News
+>#< WIN_TITLE   D-Recerca News
+>#< KEYWORDS    D-Recerca, Precarios, News
+>#< DESCRIPTION Aquesta es la pagina dels estudiants de doctorat de Catalunya...
+>#< BASE_HREF   \{$ROOT\}
+>#< DESC        D-Recerca News
+>#< HREF        \{$ROOT\}
+>#< ICON        \{$ROOT\}
+>#< USER_SPACE
+
+>--EOR--<   (End of Record)
+\nwendcode{}\nwbegindocs{15}\nwdocspar
+
+\subsctn{D-Recerca Documents page}
+
+\nwenddocs{}\nwbegincode{16}\sublabel{NWD*rs-WEBI-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBI-4}}}\moddef{WEB HIERARCHY FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBI-1}}}\plusendmoddef
+DRECERCA-DOCS            DRECERCA-HOMEPAGE        \{$ROOT\}
+\nwendcode{}\nwbegindocs{17}\nwdocspar
+
+\nwenddocs{}\nwbegincode{18}\sublabel{NWD*rs-WEBH-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-WEBH-4}}}\moddef{WEB CONTENTS FILE~{\nwtagstyle{}\subpageref{NWD*rs-WEBH-1}}}\plusendmoddef
+>#< NAME        DRECERCA-DOCS
+>#< FILENAME    docs.html
+>#< TITLE       Documents
+>#< WIN_TITLE   D-Recerca Documents
+>#< KEYWORDS    D-Recerca, Precarios, Documents
+>#< DESCRIPTION Aquesta es la pagina dels estudiants de doctorat de Catalunya...
+>#< BASE_HREF   \{$ROOT\}
+>#< DESC        D-Recerca Docs
+>#< HREF        \{$ROOT\}
+>#< ICON        \{$ROOT\}
+>#< USER_SPACE
+
+>--EOR--<   (End of Record)
+\nwendcode{}\nwbegindocs{19}\nwdocspar
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -212,6 +292,372 @@ This is the formal development of the {\d} new web page, implementing it with Ca
 \newpage
 \appendix
 
+\sctn{Main Perl web-page generator}
+
+\nwenddocs{}\nwbegincode{20}\sublabel{NWD*rs-BuiG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BuiG-1}}}\moddef{Build HTML pages~{\nwtagstyle{}\subpageref{NWD*rs-BuiG-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWD*rs-PERC-1}}\RA{}
+#
+# HtmlSiteBuilder.pl
+#
+#     Building web pages sharing the same page layout,
+#     global paths to pages can be defined separately from HTML code. 
+#
+# Usage:
+# 
+#     HtmlSiteBuilder.pl <OutputPath> <HierarchyFile> <ContentsFile> \\
+#                                               [ ... <ContentsFile> ]
+#
+#<Use Modules - HSB>>
+#<Use Modules - Dumper>>
+#
+\LA{}Global Vars - HSB~{\nwtagstyle{}\subpageref{NWD*rs-GloH-1}}\RA{}
+#
+\LA{}Main Loop - HSB~{\nwtagstyle{}\subpageref{NWD*rs-MaiF-1}}\RA{}
+#
+\LA{}Main Subs - HSB~{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-1}}\RA{}
+\nwnotused{Build\ HTML\ pages}\nwendcode{}\nwbegindocs{21}\nwdocspar
+
+\nwenddocs{}\nwbegincode{22}\sublabel{NWD*rs-GloH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloH-1}}}\moddef{Global Vars - HSB~{\nwtagstyle{}\subpageref{NWD*rs-GloH-1}}}\endmoddef
+my $PROGRAM = 'HtmlSiteBuilder.pl';
+my $USAGE = '<OutputPath> <HierarchyFile> <ContentsFile> [ ... <ContentsFile> ]';
+\nwalsodefined{\\{NWD*rs-GloH-2}\\{NWD*rs-GloH-3}}\nwused{\\{NWD*rs-BuiG-1}}\nwendcode{}\nwbegindocs{23}\nwdocspar
+
+\nwenddocs{}\nwbegincode{24}\sublabel{NWD*rs-MaiF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-MaiF-1}}}\moddef{Main Loop - HSB~{\nwtagstyle{}\subpageref{NWD*rs-MaiF-1}}}\endmoddef
+print STDERR "###\\n### RUNNING $PROGRAM\\n###\\n".
+             "### $ENV\{USER\} - ".(`date`)."###\\n#\\n";
+&parse_args();
+&read_hierarchy($hierarchy_file);
+foreach my $file (@contents_file) \{
+    &read_contents($file);
+\}; # foreach
+exit(0);
+\nwused{\\{NWD*rs-BuiG-1}}\nwendcode{}\nwbegindocs{25}\nwdocspar
+
+\nwenddocs{}\nwbegincode{26}\sublabel{NWD*rs-GloH-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloH-2}}}\moddef{Global Vars - HSB~{\nwtagstyle{}\subpageref{NWD*rs-GloH-1}}}\plusendmoddef
+my ($output_dir,$hierarchy_file,@contents_file);
+\nwendcode{}\nwbegindocs{27}\nwdocspar
+
+\nwenddocs{}\nwbegincode{28}\sublabel{NWD*rs-MaiF.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-1}}}\moddef{Main Subs - HSB~{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-1}}}\endmoddef
+sub parse_args() \{
+    scalar(@ARGV) < 3 && do \{
+        print "\\nUSAGE: \\n    $PROGRAM $USAGE\\n\\n";
+        die("!!! ERROR - NOT ENOUGH COMMAND-LINE PARAMETERS. $!\\n");
+    \};
+    $output_dir = shift @ARGV;
+    $output_dir =~ s%/$%%o;
+    ( -e $output_dir && -d _ ) ||
+        die("!!! $output_dir DOES NOT EXIST...\\n");
+    $hierarchy_file = shift @ARGV;
+    ( -e $hierarchy_file ) ||
+        die("!!! $hierarchy_file DOES NOT EXIST...\\n");
+    foreach my $file (@ARGV) \{
+        ( -e $file ) ||
+            print STDERR "!!! $file DOES NOT EXIST...\\n";
+        push @contents_file, $file;
+    \}; # foreach
+    scalar(@contents_file) == 0 && do \{
+        print "\\nUSAGE: \\n    $PROGRAM $USAGE\\n\\n";
+        die("!!! No content files were given...\\n\\n");
+    \};
+    @ARGV = ();
+\} # parse_args
+\nwalsodefined{\\{NWD*rs-MaiF.2-2}\\{NWD*rs-MaiF.2-3}\\{NWD*rs-MaiF.2-4}}\nwused{\\{NWD*rs-BuiG-1}}\nwendcode{}\nwbegindocs{29}\nwdocspar
+
+\nwenddocs{}\nwbegincode{30}\sublabel{NWD*rs-GloH-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloH-3}}}\moddef{Global Vars - HSB~{\nwtagstyle{}\subpageref{NWD*rs-GloH-1}}}\plusendmoddef
+my (%HTMLvar,%HTMLtree);
+\nwendcode{}\nwbegindocs{31}\nwdocspar
+
+\nwenddocs{}\nwbegincode{32}\sublabel{NWD*rs-MaiF.2-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-2}}}\moddef{Main Subs - HSB~{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-1}}}\plusendmoddef
+sub read_hierarchy() \{
+    my $infile = $_[0];
+    print STDERR "### READING WEB HIERARCHY FROM: $infile\\n";
+    open(HFILE,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<HFILE>) \{
+        my @f;
+        \LA{}Skip comments and empty records~{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}\RA{}
+        @f = split /\\s+/og;
+        $f[0] =~ m/^>#</ && do \{  # HTML main variables definition
+            scalar(@f) < 3 && (next);
+            $HTMLvar\{$f[1]\} = $f[2];
+            next;
+        \}; #             # HTML main variables definition
+        scalar(@f) < 3 && do \{
+            
+        \};
+        $HTMLtree\{$f[0]\}\{PARENT\} = $f[1];
+        $HTMLtree\{$f[0]\}\{BASEHREF\} = $f[2];
+        push @\{ $HTMLtree\{$f[1]\}\{CHILD\} \}, $f[0];
+    \}; # while
+    close(HFILE);
+    print STDERR "### READING WEB HIERARCHY... DONE!!!\\n";
+    &show_hierarchy('ROOT',1);
+\} # read_hierarchy
+\nwendcode{}\nwbegindocs{33}\nwdocspar
+
+\nwenddocs{}\nwbegincode{34}\sublabel{NWD*rs-MaiF.2-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-3}}}\moddef{Main Subs - HSB~{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-1}}}\plusendmoddef
+sub show_hierarchy() \{
+    my ($node,$tab) = @_;
+    print STDERR ('   |' x $tab)."-- $node\\n";
+    return unless defined($HTMLtree\{$node\});
+    foreach my $child (@\{ $HTMLtree\{$node\}\{CHILD\} \}) \{
+        &show_hierarchy($child,($tab + 1));
+    \}; # foreach
+\} # show_hierarchy
+\nwendcode{}\nwbegindocs{35}\nwdocspar
+
+\nwenddocs{}\nwbegincode{36}\sublabel{NWD*rs-MaiF.2-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-4}}}\moddef{Main Subs - HSB~{\nwtagstyle{}\subpageref{NWD*rs-MaiF.2-1}}}\plusendmoddef
+sub read_contents() \{
+    my $infile = $_[0];
+    print STDERR "### PROCESSING WEB CONTENTS FROM: $infile\\n";
+    open(CFILE,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<CFILE>) \{
+        my @f;
+        \LA{}Skip comments and empty records~{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}\RA{}
+    \}; # while
+    close(CFILE);
+    print STDERR "### PROCESSING WEB CONTENTS... DONE!!!\\n";
+\} # read_contents
+\nwendcode{}\nwbegindocs{37}\nwdocspar
+
+\sctn{Common {\h} chunks: templates}
+
+\subsctn{{\h} header}
+
+\nwenddocs{}\nwbegincode{38}\sublabel{NWD*rs-HTMB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMB-1}}}\moddef{HTML header~{\nwtagstyle{}\subpageref{NWD*rs-HTMB-1}}}\endmoddef
+<html>
+<head>
+ <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+ <META NAME="Generator" CONTENT="Hacker Hands">
+ <META NAME="author" CONTENT="Josep F. Abril">
+ \LA{}Version Control Id Tag - HTML~{\nwtagstyle{}\subpageref{NWD*rs-VerT-1}}\RA{}
+ \LA{}javascripts: ~{\nwtagstyle{}\subpageref{NWD*rs-javD-1}}\RA{}
+</head>
+
+<body onResize="window.location.href = 'index.html';" MARGINWIDTH="2" MARGINHEIGHT="0">
+<A NAME="TOP"></A>
+\nwnotused{HTML\ header}\nwendcode{}\nwbegindocs{39}\nwdocspar
+
+\nwenddocs{}\nwbegincode{40}\sublabel{NWD*rs-PAGC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-PAGC-1}}}\moddef{PAGE header:~{\nwtagstyle{}\subpageref{NWD*rs-PAGC-1}}}\endmoddef
+ <!-- KEYWORDS and DESCRIPTION for INTERNET SEARCH ENGINES -->
+  <META NAME="keywords"    CONTENT="">
+  <META NAME="description" CONTENT="">
+ <!-- KEYWORDS and DESCRIPTION for INTERNET SEARCH ENGINES -->
+ <TITLE>DATASETS: "Visualizing SGP results with gff2ps."</TITLE>
+ <BASE HREF="http://www1.imim.es/datasets/humanmouse/gff2ps/">
+ <link rel=stylesheet type="text/css" href="http://www1.imim.es/Genome.css" title="Genome">
+\nwnotused{PAGE\ header:}\nwendcode{}\nwbegindocs{41}\nwdocspar
+
+\subsctn{JavaScripts}
+
+\nwenddocs{}\nwbegincode{42}\sublabel{NWD*rs-javD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-javD-1}}}\moddef{javascripts: ~{\nwtagstyle{}\subpageref{NWD*rs-javD-1}}}\endmoddef
+<SCRIPT LANGUAGE="JavaScript">
+<!-- Begin
+ if (window != top) top.location.href = location.href;
+
+ var theDate = "";
+ theDate = document.lastModified;
+
+ function LastUpdate() \{
+  document.write("<B>Last Updated:</B>  <I>"+theDate+"</I><BR>&copy;&nbsp;<B>D-recerca</B>");
+ \}
+
+ function NewItem(todate) \{
+  exp = new Date(todate);
+  cur = new Date();
+  // document.write("HHH::"+exp+"::"+cur+"::HHH");
+  if (cur.getTime() < exp.getTime())
+   document.write("&nbsp;&nbsp;<IMG SRC='http://www1.imim.es/g_icons/new_rotating.gif' WIDTH=30 HEIGHT=15 BORDER=0 ALIGN='TOP' ALT='NEW'>");
+ \}
+// End -->
+</SCRIPT>
+\nwused{\\{NWD*rs-HTMB-1}}\nwendcode{}\nwbegindocs{43}\nwdocspar
+
+\subsctn{{\h} trailer}
+
+\nwenddocs{}\nwbegincode{44}\sublabel{NWD*rs-HTMC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMC-1}}}\moddef{HTML trailer~{\nwtagstyle{}\subpageref{NWD*rs-HTMC-1}}}\endmoddef
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+
+<!-- ############### USERS AREA ############### -->
+
+### USERS AREA....???
+
+<!-- ############### TRAILER AREA ############### -->
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class="default" colspan=2>
+
+<table class="trailer" border=0 cellpadding=0 cellspacing=0 width=100%>
+<tr class="default">
+<td id="traila">
+<A HREF="http://www1.imim.es/main/disclaimer.html"
+ onMouseover="window.status='Data Release Policy and Software License';">Disclaimer</A>
+</td>
+
+<td id="trailb">
+<B>Last Updated:</B>  <I>Mon 16 Jul 2001 02:48:30 PM CEST</I><BR> Genome Informatics Research Laboratory
+</TD>
+
+<TD id="trailc">
+<TABLE border=0 cellpadding=0 cellspacing=0>
+<TR>
+<TD id="trailc" VALIGN=MIDDLE>
+<A HREF="MAILTO:gmaster@imim.es"
+ onMouseover="window.status='Contact with our webmaster';">
+ webmaster
+</A>
+</TD>
+<TD VALIGN=MIDDLE>
+<A HREF="MAILTO:gmaster@imim.es"
+ onMouseover="window.status='Contact with our webmaster';">
+<IMG class="mid" SRC="http://www1.imim.es/g_icons/mini-mail.gif" border=0>
+</A>
+</TD>
+</TR>
+</TABLE>
+</TD>
+</TR>
+</TABLE>
+
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>
+\nwnotused{HTML\ trailer}\nwendcode{}\nwbegindocs{45}\nwdocspar
+
+\subsctn{Main Menu bar}
+
+\nwenddocs{}\nwbegincode{46}\sublabel{NWD*rs-HTME-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTME-1}}}\moddef{HTML main menu~{\nwtagstyle{}\subpageref{NWD*rs-HTME-1}}}\endmoddef
+<!-- ############### MENU AREA ############### -->
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class="menu" VALIGN=TOP>
+
+<table class="default">
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/news.html"
+  onMouseover="window.status='News';">News</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/research.html"
+  onMouseover="window.status='Research at our Group';">Research</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/people.html"
+  onMouseover="window.status='Who is who in Genome Informatics Research Laboratory';">People</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/software.html"
+  onMouseover="window.status='Software developed by our Group';">Software</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/databases.html"
+  onMouseover="window.status='Databases created/curated by our Group';" class="hh">Resources<BR>&amp;Datasets</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/publications.html"
+  onMouseover="window.status='Publications by our Group';">Publications</a>
+</td>
+</tr>
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class ="links">
+ <a href="http://www1.imim.es/main/seminars.html"
+  onMouseover="window.status='Seminars, Courses and Group Sessions';" class="hh">Seminars<BR>&amp; Courses</a>
+</td>
+</tr>
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class ="links">
+ <a href="http://www1.imim.es/main/links.html"
+  onMouseover="window.status='Interesting Links';">Links</a>
+</td>
+</tr>
+
+</table>
+</td>
+\nwnotused{HTML\ main\ menu}\nwendcode{}\nwbegindocs{47}\nwdocspar
+
+\subsctn{Navigation bar}
+
+\nwenddocs{}\nwbegincode{48}\sublabel{NWD*rs-HTMJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMJ-1}}}\moddef{HTML navigation bar~{\nwtagstyle{}\subpageref{NWD*rs-HTMJ-1}}}\endmoddef
+<!-- ############### PATH AREA ############### -->
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td colspan=2>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+<TR>
+<TD class="path" width=75% ALIGN=LEFT>
+<a href="http://www.upf.es/"
+ onMouseover="window.status='Universitat Pompeu Fabra';">UPF</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www.imim.es/"
+ onMouseover="window.status='Institut Municipal d\\'Investigaci Mdica';">IMIM</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www.imim.es/imim/unitats/grim/english/index.htm"
+ onMouseover="window.status='Grup de Recerca en Informtica Biomdica';">GRIB</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www1.imim.es/index.html"
+ onMouseover="window.status='Genome Informatics Research Laboratory HOME PAGE: You are Welcome!!!';">HOME</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www1.imim.es/main/databases.html"
+ onMouseover="window.status='DataSets';">DATASETS</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www1.imim.es/datasets/humanmouse/index.html"
+ onMouseover="window.status='Gene prediction in the human genome using the mouse genome';">Hsap/Mmus SGP</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="index.html#TOP"
+ onMouseover="window.status='Visualizing SGP predictions with gff2ps';">gff2ps</a>
+
+</TD>
+<TD class="path" width=25% ALIGN=RIGHT>
+<A HREF="javascript:history.go(-1)" onMouseover="window.status='PREVIOUS VISITED PAGE'"><IMG SRC="http://www1.imim.es/g_icons/left.gif" HEIGHT=15 WIDTH=15 BORDER=0></A>
+<A HREF="http://www1.imim.es/index.html" onMouseover="window.status='HOME'"><IMG SRC="http://www1.imim.es/g_icons/home.gif" HEIGHT=15 WIDTH=15 BORDER=0></A>
+<A HREF="javascript:history.go(1)" onMouseover="window.status='NEXT VISITED PAGE'"><IMG SRC="http://www1.imim.es/g_icons/right.gif" HEIGHT=15 WIDTH=15 BORDER=0></A>
+</TD>
+</TABLE>
+
+</td>
+</tr>
+\nwnotused{HTML\ navigation\ bar}\nwendcode{}\nwbegindocs{49}\nwdocspar
+
+\subsctn{Title area}
+
+\nwenddocs{}\nwbegincode{50}\sublabel{NWD*rs-HTMA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMA-1}}}\moddef{HTML title~{\nwtagstyle{}\subpageref{NWD*rs-HTMA-1}}}\endmoddef
+<!-- ############### TITLE AREA ############### -->
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class="title" VALIGN=TOP WIDTH=84 HEIGHT=50>
+<IMG SRC="http://www1.imim.es/g_icons/LOGO.gif" ALT="HOME" BORDER=2 WIDTH=80 HEIGHT=50 ALIGN=MIDDLE>
+</td>
+<td class="title" VALIGN=TOP>
+
+<CENTER><FONT size=7 class="T">Visualizing SGP results</FONT></CENTER>
+
+</td>
+</tr>
+\nwnotused{HTML\ title}\nwendcode{}\nwbegindocs{51}\nwdocspar
+
 \sctn{empty appendix section}
 
 \subsctn{empty appendix subsection}
@@ -227,43 +673,43 @@ This is the formal development of the {\d} new web page, implementing it with Ca
 
 \subsctn{PERL scripts}
 
-\nwenddocs{}\nwbegincode{16}\sublabel{NWD*rs-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWD*rs-PERC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{52}\sublabel{NWD*rs-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWD*rs-PERC-1}}}\endmoddef
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
 \LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}\RA{}
 #
 use strict;
-\nwnotused{PERL\ shebang}\nwendcode{}\nwbegindocs{17}\nwdocspar
+\nwused{\\{NWD*rs-BuiG-1}}\nwendcode{}\nwbegindocs{53}\nwdocspar
 
-\nwenddocs{}\nwbegincode{18}\sublabel{NWD*rs-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWD*rs-GloQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{54}\sublabel{NWD*rs-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWD*rs-GloQ-1}}}\endmoddef
 my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
 \nwindexdefn{{\char36}T}{:doT}{NWD*rs-GloQ-1}\nwindexdefn{{\char36}F}{:doF}{NWD*rs-GloQ-1}\eatline
-\nwidentdefs{\\{{{\char36}F}{:doF}}\\{{{\char36}T}{:doT}}}\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{19}\nwdocspar
+\nwidentdefs{\\{{{\char36}F}{:doF}}\\{{{\char36}T}{:doT}}}\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{55}\nwdocspar
 We also set here the date when the script is running and who is the user running it.
 
-\nwenddocs{}\nwbegincode{20}\sublabel{NWD*rs-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWD*rs-GloR-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{56}\sublabel{NWD*rs-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWD*rs-GloR-1}}}\endmoddef
 my $DATE = localtime;
 my $USER = $ENV\{USER\};
 \nwindexdefn{{\char36}DATE}{:doDATE}{NWD*rs-GloR-1}\nwindexdefn{{\char36}USER}{:doUSER}{NWD*rs-GloR-1}\eatline
-\nwidentdefs{\\{{{\char36}DATE}{:doDATE}}\\{{{\char36}USER}{:doUSER}}}\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{21}\nwdocspar
+\nwidentdefs{\\{{{\char36}DATE}{:doDATE}}\\{{{\char36}USER}{:doUSER}}}\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{57}\nwdocspar
 
 \subsubsctn{Timing our scripts}
 
 The '{\tt{}Benchmark}' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
 
-\nwenddocs{}\nwbegincode{22}\sublabel{NWD*rs-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWD*rs-UseN-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{58}\sublabel{NWD*rs-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWD*rs-UseN-1}}}\endmoddef
 use Benchmark;
   \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}\RA{}
-\nwnotused{Use\ Modules\ -\ Benchmark}\nwendcode{}\nwbegindocs{23}\nwdocspar
+\nwnotused{Use\ Modules\ -\ Benchmark}\nwendcode{}\nwbegindocs{59}\nwdocspar
 
 See '{\tt{}man\ Benchmark}' for further info about this package. 
 We set an array to keep record of timing for each section.
 
-\nwenddocs{}\nwbegincode{24}\sublabel{NWD*rs-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{60}\sublabel{NWD*rs-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}}\endmoddef
 my @Timer = (new Benchmark);
-\nwused{\\{NWD*rs-UseN-1}}\nwendcode{}\nwbegindocs{25}\nwdocspar
+\nwused{\\{NWD*rs-UseN-1}}\nwendcode{}\nwbegindocs{61}\nwdocspar
 
-\nwenddocs{}\nwbegincode{26}\sublabel{NWD*rs-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWD*rs-ComS-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{62}\sublabel{NWD*rs-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWD*rs-ComS-1}}}\endmoddef
 sub timing() \{
     push @Timer, (new Benchmark);
     # partial time 
@@ -272,7 +718,7 @@ sub timing() \{
     # total time
     return timestr(timediff($Timer[$#Timer],$Timer[0]));
 \} # timing
-\nwnotused{Common\ PERL\ subs\ -\ Benchmark}\nwendcode{}\nwbegindocs{27}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Benchmark}\nwendcode{}\nwbegindocs{63}\nwdocspar
 
 
 \subsubsctn{Printing complex Data Structures}
@@ -280,22 +726,22 @@ sub timing() \{
 With '{\tt{}Data::Dumper}' we are able to pretty print complex data structures for debugging them.
 
 
-\nwenddocs{}\nwbegincode{28}\sublabel{NWD*rs-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWD*rs-UseK-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{64}\sublabel{NWD*rs-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWD*rs-UseK-1}}}\endmoddef
 use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
-\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{29}\nwdocspar
+\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{65}\nwdocspar
 
 
 \subsubsctn{Common functions}
 
-\nwenddocs{}\nwbegincode{30}\sublabel{NWD*rs-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{66}\sublabel{NWD*rs-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}}\endmoddef
 next if /^\\#/o;
 next if /^\\s*$/o;
 chomp;
-\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{31}\nwdocspar
+\nwused{\\{NWD*rs-MaiF.2-2}\\{NWD*rs-MaiF.2-4}}\nwendcode{}\nwbegindocs{67}\nwdocspar
 
-\nwenddocs{}\nwbegincode{32}\sublabel{NWD*rs-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWD*rs-ComQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{68}\sublabel{NWD*rs-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWD*rs-ComQ-1}}}\endmoddef
 #
 sub max() \{
     my $z = shift @_;
@@ -307,9 +753,9 @@ sub min() \{
     foreach my $l (@_) \{ $z = $l if $l < $z \};
     return $z;
 \} # min
-\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{33}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{69}\nwdocspar
 
-\nwenddocs{}\nwbegincode{34}\sublabel{NWD*rs-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWD*rs-ComS.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{70}\sublabel{NWD*rs-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWD*rs-ComS.2-1}}}\endmoddef
 #
 sub fill_right() \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
 sub fill_left()  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
@@ -318,11 +764,11 @@ sub fill_mid()   \{
     my $k = int(($_[1] - $l)/2);
     ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
 \} # fill_mid
-\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{35}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{71}\nwdocspar
 
 These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
 
-\nwenddocs{}\nwbegincode{36}\sublabel{NWD*rs-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWD*rs-ComQ.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{72}\sublabel{NWD*rs-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWD*rs-ComQ.2-1}}}\endmoddef
 #
 sub counter \{ # $_[0]~current_pos++ $_[1]~char
     print STDERR "$_[1]";
@@ -332,39 +778,39 @@ sub counter \{ # $_[0]~current_pos++ $_[1]~char
 sub counter_end \{ # $_[0]~current_pos   $_[1]~char
     (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
 \} # counter_end
-\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{37}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{73}\nwdocspar
 
-\nwenddocs{}\nwbegincode{38}\sublabel{NWD*rs-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWD*rs-GloL-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{74}\sublabel{NWD*rs-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWD*rs-GloL-1}}}\endmoddef
 my ($n,$c); # counter and char (for &counter function)
 \nwindexdefn{{\char36}n}{:don}{NWD*rs-GloL-1}\nwindexdefn{{\char36}c}{:doc}{NWD*rs-GloL-1}\eatline
-\nwidentdefs{\\{{{\char36}c}{:doc}}\\{{{\char36}n}{:don}}}\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{39}\nwdocspar
+\nwidentdefs{\\{{{\char36}c}{:doc}}\\{{{\char36}n}{:don}}}\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{75}\nwdocspar
 
 \subsubsctn{Common functions for reporting program processes}
 \label{sec:messagerpt}
 
 Function '{\tt{}report}' requires that a hash variable '{\tt{}{\char37}MessageList}' has been set, such hash contains the strings for each report message we will need. The first parameter for '{\tt{}report}' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the {\tt{}sprintf} function on that string.
 
-\nwenddocs{}\nwbegincode{40}\sublabel{NWD*rs-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{76}\sublabel{NWD*rs-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\endmoddef
 sub report() \{ print STDERR sprintf($MessageList\{ shift @_ \},@_) \}
-\nwalsodefined{\\{NWD*rs-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{41}\nwdocspar
+\nwalsodefined{\\{NWD*rs-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{77}\nwdocspar
 
 The same happens to '{\tt{}warn}' function which also requires a hash variable '{\tt{}{\char37}ErrorList}' containing the error messages.
 
-\nwenddocs{}\nwbegincode{42}\sublabel{NWD*rs-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{78}\sublabel{NWD*rs-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\plusendmoddef
 sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
-\nwendcode{}\nwbegindocs{43}\nwdocspar
+\nwendcode{}\nwbegindocs{79}\nwdocspar
 
 \subsctn{AWK scripts}
 
-\nwenddocs{}\nwbegincode{44}\sublabel{NWD*rs-GAWC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GAWC-1}}}\moddef{GAWK shebang~{\nwtagstyle{}\subpageref{NWD*rs-GAWC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{80}\sublabel{NWD*rs-GAWC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GAWC-1}}}\moddef{GAWK shebang~{\nwtagstyle{}\subpageref{NWD*rs-GAWC-1}}}\endmoddef
 #!/usr/bin/gawk -f
 # GNU Awk 3.0.4
 \LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}\RA{}
-\nwnotused{GAWK\ shebang}\nwendcode{}\nwbegindocs{45}\nwdocspar
+\nwnotused{GAWK\ shebang}\nwendcode{}\nwbegindocs{81}\nwdocspar
 
 \subsctn{BASH scripts}
 
-\nwenddocs{}\nwbegincode{46}\sublabel{NWD*rs-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{82}\sublabel{NWD*rs-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}}\endmoddef
 #!/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
 \LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}\RA{}
@@ -376,23 +822,27 @@ L="####################"
   echo "### RUNNING [$0]";
   echo "### Current date:`date`";
   echo "###"; \} 1>&2;
-\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{47}\nwdocspar
+\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{83}\nwdocspar
 
-\nwenddocs{}\nwbegincode{48}\sublabel{NWD*rs-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{84}\sublabel{NWD*rs-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}}\endmoddef
 \{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
   echo "$L$L$L$L";
   echo ""; \} 1>&2;
 #
 exit 0
-\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{49}\nwdocspar
+\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{85}\nwdocspar
 
 \subsctn{Version control tags}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
-\nwenddocs{}\nwbegincode{50}\sublabel{NWD*rs-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}}\endmoddef
-# $Id: D-recerca_web.tex,v 1.1 2001-07-15 02:07:48 jabril Exp $
-\nwused{\\{NWD*rs-PERC-1}\\{NWD*rs-GAWC-1}\\{NWD*rs-BASC-1}}\nwendcode{}\nwbegindocs{51}\nwdocspar
+\nwenddocs{}\nwbegincode{86}\sublabel{NWD*rs-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}}\endmoddef
+# $Id: D-recerca_web.tex,v 1.2 2001-07-27 13:45:56 jabril Exp $
+\nwused{\\{NWD*rs-WEBI-1}\\{NWD*rs-PERC-1}\\{NWD*rs-GAWC-1}\\{NWD*rs-BASC-1}}\nwendcode{}\nwbegindocs{87}\nwdocspar
+
+\nwenddocs{}\nwbegincode{88}\sublabel{NWD*rs-VerT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-VerT-1}}}\moddef{Version Control Id Tag - HTML~{\nwtagstyle{}\subpageref{NWD*rs-VerT-1}}}\endmoddef
+<!-- $Id: D-recerca_web.tex,v 1.2 2001-07-27 13:45:56 jabril Exp $ -->
+\nwused{\\{NWD*rs-HTMB-1}}\nwendcode{}\nwbegindocs{89}\nwdocspar
 
 \newpage
 
@@ -404,42 +854,43 @@ Remember when tangling that '-L' option allows you to include program line-numbe
 
 \subsctn{Extracting {\h} pages to public www} % \\[-0.5ex]
 
-\nwenddocs{}\nwbegincode{52}\sublabel{NWD*rs-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\endmoddef
-notangle -R"root" $WORK/$nwfile.nw \\
-    > $DATA/root_config ;
-\nwalsodefined{\\{NWD*rs-tan8-2}\\{NWD*rs-tan8-3}\\{NWD*rs-tan8-4}\\{NWD*rs-tan8-5}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{53}%$
+\nwenddocs{}\nwbegincode{90}\sublabel{NWD*rs-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\endmoddef
+notangle -R"WEB HIERARCHY FILE" $WORK/$nwfile.nw \\
+    > $DATA/DRecerca.hierarchy ;
+notangle -R"WEB CONTENTS FILE" $WORK/$nwfile.nw \\
+    > $DATA/DRecerca.contents ;
+\nwalsodefined{\\{NWD*rs-tan8-2}\\{NWD*rs-tan8-3}\\{NWD*rs-tan8-4}\\{NWD*rs-tan8-5}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{91}%$
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
-\nwenddocs{}\nwbegincode{54}\sublabel{NWD*rs-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{92}\sublabel{NWD*rs-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
 notangle -R"root" $WORK/$nwfile.nw \\
     > $PUBLIC/root_config ;
-\nwendcode{}\nwbegindocs{55}%$
+\nwendcode{}\nwbegindocs{93}%$
 
 
 \subsctn{Extracts Script code chunks from the {\tt{}noweb} file} % \\[-0.5ex]
 
-
-\nwenddocs{}\nwbegincode{56}\sublabel{NWD*rs-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{94}\sublabel{NWD*rs-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
 # showing line numbering comments in program
-notangle -L -R"root" $WORK/$nwfile.nw | \\
-    perl -ne '$.>1 && print' > $BIN/root_file ;
+notangle -L -R"Build HTML pages" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/HtmlSiteBuilder.pl ;
 # program without line numbering comments
-notangle -t4 -R"root" $WORK/$nwfile.nw \\
-    > $BIN/root_file ;
+notangle -t4 -R"Build HTML pages" $WORK/$nwfile.nw \\
+    > $BIN/HtmlSiteBuilder.pl ;
 # making them runnable
-chmod a+x $BIN/root_file ;
-\nwendcode{}\nwbegindocs{57}\nwdocspar
+chmod a+x $BIN/HtmlSiteBuilder.pl ;
+\nwendcode{}\nwbegindocs{95}\nwdocspar
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
-\nwenddocs{}\nwbegincode{58}\sublabel{NWD*rs-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{96}\sublabel{NWD*rs-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
 notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
-\nwendcode{}\nwbegindocs{59}\nwdocspar
+\nwendcode{}\nwbegindocs{97}\nwdocspar
 
-\nwenddocs{}\nwbegincode{60}\sublabel{NWD*rs-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWD*rs-wea7-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{98}\sublabel{NWD*rs-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWD*rs-wea7-1}}}\endmoddef
 \LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}\RA{}
 # weaving and LaTeXing
 \LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}\RA{}
@@ -449,9 +900,9 @@ latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 popd;
 \LA{}BASH script end~{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}\RA{}
-\nwnotused{weaving}\nwendcode{}\nwbegindocs{61}\nwdocspar
+\nwnotused{weaving}\nwendcode{}\nwbegindocs{99}\nwdocspar
 
-\nwenddocs{}\nwbegincode{62}\sublabel{NWD*rs-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWD*rs-LaT8-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{100}\sublabel{NWD*rs-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWD*rs-LaT8-1}}}\endmoddef
 \LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}\RA{}
 # only LaTeXing
 \LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}\RA{}
@@ -462,11 +913,11 @@ latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 popd ;
 \LA{}BASH script end~{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}\RA{}
-\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{63}%$
+\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{101}%$
 
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
-\nwenddocs{}\nwbegincode{64}\sublabel{NWD*rs-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{102}\sublabel{NWD*rs-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}}\endmoddef
 # Global Variables
 nwfile="D-recerca_web" ;
 WORK="$HOME/development/webprecarios" ;
@@ -475,9 +926,9 @@ DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
 PUBLIC="$WORK/public_html" ;
 export WORK BIN DOCS DATA nwfile PUBLIC ;
-\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{65}\nwdocspar
+\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{103}\nwdocspar
 
-\nwenddocs{}\nwbegincode{66}\sublabel{NWD*rs-tan8-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-5}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{104}\sublabel{NWD*rs-tan8-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-5}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
 # TO DO: add a test to check which shell is running
 # BASH shell
 notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \\
@@ -489,6 +940,7 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{BASH Environment Variables}{NWD*rs-BASQ-1}{\nwixu{NWD*rs-wea7-1}\nwixu{NWD*rs-LaT8-1}\nwixd{NWD*rs-BASQ-1}}}%
 \nwixlogsorted{c}{{BASH script end}{NWD*rs-BASF-1}{\nwixd{NWD*rs-BASF-1}\nwixu{NWD*rs-wea7-1}\nwixu{NWD*rs-LaT8-1}}}%
 \nwixlogsorted{c}{{BASH shebang}{NWD*rs-BASC-1}{\nwixd{NWD*rs-BASC-1}\nwixu{NWD*rs-wea7-1}\nwixu{NWD*rs-LaT8-1}}}%
+\nwixlogsorted{c}{{Build HTML pages}{NWD*rs-BuiG-1}{\nwixd{NWD*rs-BuiG-1}}}%
 \nwixlogsorted{c}{{Common PERL subs - Benchmark}{NWD*rs-ComS-1}{\nwixd{NWD*rs-ComS-1}}}%
 \nwixlogsorted{c}{{Common PERL subs - Counter}{NWD*rs-ComQ.2-1}{\nwixd{NWD*rs-ComQ.2-1}}}%
 \nwixlogsorted{c}{{Common PERL subs - Min Max}{NWD*rs-ComQ-1}{\nwixd{NWD*rs-ComQ-1}}}%
@@ -498,6 +950,7 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{GAWK shebang}{NWD*rs-GAWC-1}{\nwixd{NWD*rs-GAWC-1}}}%
 \nwixlogsorted{c}{{Global Constants - Boolean}{NWD*rs-GloQ-1}{\nwixd{NWD*rs-GloQ-1}}}%
 \nwixlogsorted{c}{{Global Vars - Counter}{NWD*rs-GloL-1}{\nwixd{NWD*rs-GloL-1}}}%
+\nwixlogsorted{c}{{Global Vars - HSB}{NWD*rs-GloH-1}{\nwixu{NWD*rs-BuiG-1}\nwixd{NWD*rs-GloH-1}\nwixd{NWD*rs-GloH-2}\nwixd{NWD*rs-GloH-3}}}%
 \nwixlogsorted{c}{{Global Vars - User and Date}{NWD*rs-GloR-1}{\nwixd{NWD*rs-GloR-1}}}%
 \nwixlogsorted{c}{{HTML header}{NWD*rs-HTMB-1}{\nwixd{NWD*rs-HTMB-1}}}%
 \nwixlogsorted{c}{{HTML main menu}{NWD*rs-HTME-1}{\nwixd{NWD*rs-HTME-1}}}%
@@ -505,13 +958,19 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{HTML title}{NWD*rs-HTMA-1}{\nwixd{NWD*rs-HTMA-1}}}%
 \nwixlogsorted{c}{{HTML trailer}{NWD*rs-HTMC-1}{\nwixd{NWD*rs-HTMC-1}}}%
 \nwixlogsorted{c}{{LaTeXing}{NWD*rs-LaT8-1}{\nwixd{NWD*rs-LaT8-1}}}%
-\nwixlogsorted{c}{{PERL shebang}{NWD*rs-PERC-1}{\nwixd{NWD*rs-PERC-1}}}%
-\nwixlogsorted{c}{{Skip comments and empty records}{NWD*rs-SkiV-1}{\nwixd{NWD*rs-SkiV-1}}}%
+\nwixlogsorted{c}{{Main Loop - HSB}{NWD*rs-MaiF-1}{\nwixu{NWD*rs-BuiG-1}\nwixd{NWD*rs-MaiF-1}}}%
+\nwixlogsorted{c}{{Main Subs - HSB}{NWD*rs-MaiF.2-1}{\nwixu{NWD*rs-BuiG-1}\nwixd{NWD*rs-MaiF.2-1}\nwixd{NWD*rs-MaiF.2-2}\nwixd{NWD*rs-MaiF.2-3}\nwixd{NWD*rs-MaiF.2-4}}}%
+\nwixlogsorted{c}{{PAGE header:}{NWD*rs-PAGC-1}{\nwixd{NWD*rs-PAGC-1}}}%
+\nwixlogsorted{c}{{PERL shebang}{NWD*rs-PERC-1}{\nwixu{NWD*rs-BuiG-1}\nwixd{NWD*rs-PERC-1}}}%
+\nwixlogsorted{c}{{Skip comments and empty records}{NWD*rs-SkiV-1}{\nwixu{NWD*rs-MaiF.2-2}\nwixu{NWD*rs-MaiF.2-4}\nwixd{NWD*rs-SkiV-1}}}%
 \nwixlogsorted{c}{{Timer ON}{NWD*rs-Tim8-1}{\nwixu{NWD*rs-UseN-1}\nwixd{NWD*rs-Tim8-1}}}%
 \nwixlogsorted{c}{{Use Modules - Benchmark}{NWD*rs-UseN-1}{\nwixd{NWD*rs-UseN-1}}}%
 \nwixlogsorted{c}{{Use Modules - Dumper}{NWD*rs-UseK-1}{\nwixd{NWD*rs-UseK-1}}}%
-\nwixlogsorted{c}{{Version Control Id Tag}{NWD*rs-VerM-1}{\nwixu{NWD*rs-PERC-1}\nwixu{NWD*rs-GAWC-1}\nwixu{NWD*rs-BASC-1}\nwixd{NWD*rs-VerM-1}}}%
-\nwixlogsorted{c}{{javascripts: }{NWD*rs-javD-1}{\nwixd{NWD*rs-javD-1}}}%
+\nwixlogsorted{c}{{Version Control Id Tag}{NWD*rs-VerM-1}{\nwixu{NWD*rs-WEBI-1}\nwixu{NWD*rs-PERC-1}\nwixu{NWD*rs-GAWC-1}\nwixu{NWD*rs-BASC-1}\nwixd{NWD*rs-VerM-1}}}%
+\nwixlogsorted{c}{{Version Control Id Tag - HTML}{NWD*rs-VerT-1}{\nwixu{NWD*rs-HTMB-1}\nwixd{NWD*rs-VerT-1}}}%
+\nwixlogsorted{c}{{WEB CONTENTS FILE}{NWD*rs-WEBH-1}{\nwixd{NWD*rs-WEBH-1}\nwixd{NWD*rs-WEBH-2}\nwixd{NWD*rs-WEBH-3}\nwixd{NWD*rs-WEBH-4}}}%
+\nwixlogsorted{c}{{WEB HIERARCHY FILE}{NWD*rs-WEBI-1}{\nwixd{NWD*rs-WEBI-1}\nwixd{NWD*rs-WEBI-2}\nwixd{NWD*rs-WEBI-3}\nwixd{NWD*rs-WEBI-4}}}%
+\nwixlogsorted{c}{{javascripts: }{NWD*rs-javD-1}{\nwixu{NWD*rs-HTMB-1}\nwixd{NWD*rs-javD-1}}}%
 \nwixlogsorted{c}{{tangling}{NWD*rs-tan8-1}{\nwixd{NWD*rs-tan8-1}\nwixd{NWD*rs-tan8-2}\nwixd{NWD*rs-tan8-3}\nwixd{NWD*rs-tan8-4}\nwixd{NWD*rs-tan8-5}}}%
 \nwixlogsorted{c}{{weaving}{NWD*rs-wea7-1}{\nwixd{NWD*rs-wea7-1}}}%
 \nwixlogsorted{i}{{{\char36}DATE}{:doDATE}}%
@@ -520,7 +979,7 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{i}{{{\char36}USER}{:doUSER}}%
 \nwixlogsorted{i}{{{\char36}c}{:doc}}%
 \nwixlogsorted{i}{{{\char36}n}{:don}}%
-\nwbegindocs{67}\nwdocspar
+\nwbegindocs{105}\nwdocspar
 
 \end{document}
 \nwenddocs{}
