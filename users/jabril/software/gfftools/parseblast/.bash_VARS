@@ -1,0 +1,10 @@
+#
+# Setting Global Variables
+WORK="/home/ug/jabril/development/softjabril/parseblast" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="parseblast" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#

@@ -1,0 +1,10 @@
+#
+# Setting Global Variables
+WORK="/home/ug/jabril/development/softjabril/maskedfastacoords" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="maskedfastacoords" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
