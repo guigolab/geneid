@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: CorrectExon                                                  *
 *                                                                        *
-*   Recompute splice sites positions according to its type               *
+*   Recompute exon limits according to its type                          *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,24 +24,35 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CorrectExon.c,v 1.1 2000-07-05 08:10:34 eblanco Exp $  */
+/*  $Id: CorrectExon.c,v 1.2 2001-12-18 15:29:00 eblanco Exp $  */
 
 #include "geneid.h"
 
-void CorrectExon(exonGFF *e) 
+/* Fixing positions in the input sequence for the input exon */
+void CorrectExon(exonGFF *e)
 {
-  /* Correct positions of Begin & End of this Exon */
-  /* Stop Codon included into the exon */
+  /* Correct positions of begin / end of the exon */
+  /* Stop codon included into the exon */
   e->offset1 =
     ((!strcmp(e->Type,"Terminal") || !strcmp(e->Type,"Single"))
-	     && e->Strand =='-') ? 
+	 && e->Strand =='-') ? 
     -LENGTHCODON + COFFSET : +COFFSET;
   
   e->offset2 = 
     ((!strcmp(e->Type,"Terminal") || !strcmp(e->Type,"Single"))
-	     && e->Strand =='+')? 
+	 && e->Strand =='+')? 
     LENGTHCODON + COFFSET : +COFFSET;
 }
 
-
+/* Fixing positions in the input sequence for the ORF */
+void CorrectORF(exonGFF* e) 
+{
+  /* Correct positions of begin / end of the ORF */
+  /* Stop codon included into the ORF */
+  e->offset1 = (e->Strand =='+') ? 
+    COFFSET + COFFSET : -LENGTHCODON + COFFSET;
+  
+  e->offset2 = (e->Strand =='+')? 
+    LENGTHCODON + COFFSET : COFFSET - COFFSET;
+}
 
