@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: BuildTerminalExons                                           *
 *                                                                        *
-*   Using lists of splice sites, it builds terminal exons                *
+*   From acceptor sites and stop codons, to build initial exons          *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,73 +24,84 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildTerminalExons.c,v 1.2 2000-08-08 14:16:16 eblanco Exp $  */
+/*  $Id: BuildTerminalExons.c,v 1.3 2001-12-18 15:23:25 eblanco Exp $  */
 
 #include "geneid.h"
 
+/* Maximum allowed number of generic exons (divided by RTERMI) */
 extern long NUMEXONS;
+extern long MAXBACKUPSITES;
 
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
-		         site *Stop, long nStops,
-			 long LengthSequence,
-			 exonGFF* Exon,
-			 long cutPoint)
+                         site *Stop, long nStops,
+                         long LengthSequence,
+                         long cutPoint,
+						 char* Sequence,
+						 exonGFF* Exon)
 {
-  int Frame[3];
-  long StartSearch;
-  long iA=0,
-       i, f,
-       j=0, js;
-
-  long nExon=0;
-
-  /* advance Acceptor */
-  StartSearch = 0;
-  while((Acceptor+iA)->Position < StartSearch)
-    iA++;
+  int Frame[FRAMES];
+  long i, f, j, js;
   
-  while((Stop+j)->Position+1 < StartSearch)
-    j++;
+  /* Final number of predicted terminal exons */
+  long nExon;
   
-  /* main loop, for each Acceptor next Stop in every Frame defines an exon */
-  for (i=iA;(i<nAcceptors) && (nExon<(int)(NUMEXONS/RTERMI));i++) 
+  /* Maximum allowed number of predicted initial exons per fragment */
+  long HowMany;
+  
+  
+  /* Main loop: forall Acceptor, first Stop in every Frame defines an exon */
+  /* There are therefore, 3 terminal exons starting by this Acceptor */
+  HowMany = (MAXBACKUPSITES)? (long)(NUMEXONS/RTERMI): NUMEXONS;
+  
+  for (i=0, j=0, js=0, nExon=0;
+       (i<nAcceptors) && (nExon<HowMany);
+       i++)
     {
-      /* Open the windows... */
-      for (f=0;f<3;f++)
-	Frame[f]=1;
-
-      /* advance Stops to Acceptor */
+      /* Open the 3 frames for current Acceptor */
+      for (f=0;f<FRAMES;f++)
+		Frame[f]=1;
+	  
+      /* Skip previous Stops to current Acceptor */
       while (((Stop+j)->Position+1 < (Acceptor+i)->Position) && (j < nStops))
-	j++;
+		j++;
+	  
+      /* Save counter j for the next iteration */
       js=j;
       
-      /* Find Stops in Frame still open */
+      /* Use current Stops if its frame is still opened */
       while ((Frame[0]==1 || Frame[1]==1 || Frame[2]==1)
-	     && (js < nStops)
-	     && (nExon<(int)(NUMEXONS/RTERMI)))
-	{
-	  if (Frame[f=((Stop+js)->Position - (Acceptor+i)->Position + 1) % 3])
-	    {
-	      if ((Stop+js)->Position >= (Acceptor+i)->Position &&
-		  (Stop+js)->Position >= cutPoint)
+			 && (js < nStops)
+			 && (nExon<HowMany))
 		{
-		  (Exon+nExon)->Acceptor=(Acceptor+i);
-		  (Exon+nExon)->Donor=(Stop+js);
-		  (Exon+nExon)->Frame = f;
-		  (Exon+nExon)->Remainder = 0; 
-		  strcpy((Exon+nExon)->Type,"Terminal");
-		  (Exon+nExon)->Group = NOGROUP;
-		  (Exon+nExon)->evidence = 0;
-		  nExon++;
-		}
-	      Frame[f]=0;
-	    } 
-	  js++;
-	}     
-    }    
+		  if (Frame[f=((Stop+js)->Position - (Acceptor+i)->Position + 1) % 3])
+			{
+			  /* Save the new exon for the current couple (Acceptor,Stop) */
+			  /* CutPoint: to preserve sorted exons between fragments */
+			  if ((Stop+js)->Position >= (Acceptor+i)->Position &&
+				  (Stop+js)->Position >= cutPoint)
+				{
+				  (Exon+nExon)->Acceptor=(Acceptor+i);
+				  (Exon+nExon)->Donor=(Stop+js);
+				  (Exon+nExon)->Frame = f;
+				  (Exon+nExon)->Remainder = 0; 
+				  strcpy((Exon+nExon)->Type,"Terminal");
+				  strcpy((Exon+nExon)->Group,NOGROUP);
+				  (Exon+nExon)->evidence = 0;
 
-  if (nExon >=(int)(NUMEXONS/RTERMI))
-    printError("Too many predicted exons: Change RTERMI parameter");
+				  /* Store info about frame and remainder nucleotides to avoid building stops in frame */
+				  ComputeStopInfo((Exon+nExon),Sequence);
+
+				  nExon++;
+				}
+			  /* Close this frame */
+			  Frame[f]=0;
+			} 
+		  js++;
+		} /* next stop */     
+    } /* next acceptor */   
+  
+  if (nExon >= HowMany)
+	printError("Too many terminal exons: decrease RTERMI parameter");
   
   return(nExon);
 }
