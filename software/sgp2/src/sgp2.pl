@@ -41,7 +41,7 @@ my $VERSION = "1.0";
 my $SGP2      = defined($ENV{'SGP2'}) ? $ENV{'SGP2'} : '.';
 my $BIN       = defined($ENV{'SGP2'}) ? "$SGP2/bin" : '.';
 my $SGP2param = defined($ENV{'SGP2'}) ? "$SGP2/param" : "../param";
-my $TMP       = defined($ENV{'SGPTMP'}) ? $ENV{'SGPTMP'} : '/tmp';
+my $TMP       = defined($ENV{'SGP2TMP'}) ? $ENV{'SGP2TMP'} : '/tmp';
 my $TMPROOT   = "sgp2_$$";
 my $SGPTMP    = "$TMP/$TMPROOT";
 
@@ -54,7 +54,7 @@ my $HSP2SR     = "blast2gff";
 my $S_CUTOFF = 26;          # hsp wiht lower score discarded
 my $SCF = 0;                # substract to tblastx scores S_CUTOFF - SCF
 my $DSC = $S_CUTOFF - $SCF; # this value is substracted from the hsp score
-my $SHSP  = 0;              # SHSP=6 # shrink hsp by $SHSP
+my $SHSP  = 0;              # shrink hsp by $SHSP
 my $WTBX  = 0.19;           # weigth of tblastx score
 
 my $GeneidParam   = "$SGP2param/human3iso.param.sgp";
@@ -79,8 +79,8 @@ my ( $Seq1, $Seq2, $geneid_opt, $geneid_param,
      ) = ( undef, undef, undef, undef, undef, undef,
            undef, undef, undef, undef, undef, 0, 0, 0, 0, 0 );
 
-# sequence files
-my ($Seq1_Name, $Seq2_Name, $Loc1, $Loc2, $SGPtmp1, $SGPtmp2, $SGPtmpG);
+# sequence identifiers
+my ($Id1, $Id2);
 
 # file flags
 my ($blast_flg, $hsps_flg, $geneid_flg, $plots_flg) = (1, 1, 1, 1);
@@ -118,51 +118,39 @@ my $status;
 
 ## Running parseblast
 &prt_Header("RUNNING $PARSEBLAST");
-my $parse = "$BIN/$PARSEBLAST --bit-score --gff $verbose_str $tbx | gawk '{OFS=\"\\t\"; 
-      print \$1,\$2,\$3,\$4,\$5,\$6,\$7,\$8,0}' > $TMP/$TMPROOT.hsp.gff;";
-   $status = system($parse);
-if ($status != 0) {
-      &go_to_die("FATAL ERROR !!! $? $!\n
-          Unsuccessful $PARSEBLAST command :\n  $parse")
-   };   
+
+&run_parseblast("$TMP/$TMPROOT.query.hsp.gff","")
+	if (defined($Seq1));
+
+&run_parseblast("$TMP/$TMPROOT.subjct.hsp.gff","--subject")
+	if (defined($Seq2));
 
 ## Running  blast2gff
 &prt_Header("RUNNING $HSP2SR");
-my $projection = "$BIN/$HSP2SR $verbose_str -g $TMP/$TMPROOT.hsp.gff | sort +3n > $TMP/$TMPROOT.sr.gff;";
-   $status = system $projection;
-if ($status != 0) {
-      &go_to_die("FATAL ERROR !!! $? $!\n
-          Unsuccessful $HSP2SR  command :\n  $projection")
-   };   
+
+&run_hsp2sr("$TMP/$TMPROOT.query.hsp.gff","$TMP/$TMPROOT.query.sr.gff")
+	if (defined($Seq1));
+
+&run_hsp2sr("$TMP/$TMPROOT.subjct.hsp.gff","$TMP/$TMPROOT.subjct.sr.gff")
+	if (defined($Seq2));
 
 ## Modifying the score of the SR hits 
 &prt_Header("FILTERING SR");
-if (!open(Srfile,"< $TMP/$TMPROOT.sr.gff")) {
-  &go_to_die ("SGP2.pl: $TMP/$TMPROOT.sr.gff : no such temporary file");
-}
 
-open(Srmodfile,"> $TMP/$TMPROOT.sr_mod.gff");
+&filter_sr("$TMP/$TMPROOT.query.sr.gff","$TMP/$TMPROOT.query.mod.sr.gff")
+	if (defined($Seq1));
 
-while (<Srfile>) {
-    next if /^\#/;
-    next if /^[ \t]*$/;
-    chomp;	
-    my @gff_record=split(/\s+/,$_);
-    $gff_record[5]=(($gff_record[5] - $DSC) * $WTBX);
-    print Srmodfile join("\t",@gff_record)."\n";
-};
-
-close(Srmodfile);
-close(Srfile);
+&filter_sr("$TMP/$TMPROOT.subjct.sr.gff","$TMP/$TMPROOT.subjct.mod.sr.gff")
+	if (defined($Seq2));
 
 ## Running geneid
 &prt_Header("RUNNING GENE PREDICTION");
-my $prediction = "$BIN/$GENEID $verbose_str  $GeneidOptions -P $GeneidParam  -S $TMP/$TMPROOT.sr_mod.gff $Seq1;";
-   $status = system $prediction;
-if ($status != 0) {
-      &go_to_die("FATAL ERROR !!! $? $!\n
-          Unsuccessful $GENEID command :\n  $prediction");
-   };   
+
+&run_geneid("$TMP/$TMPROOT.query.mod.sr.gff","$Seq1")
+	if (defined($Seq1));
+
+&run_geneid("$TMP/$TMPROOT.subjct.mod.sr.gff","$Seq2")
+	if (defined($Seq2));
 
 
 ##########################################################################
@@ -236,7 +224,7 @@ sub exists_file() {
 sub fill_mid() { 
    my $l = length($_[0]); 
    my $k = int(($_[1] - $l)/2); 
-   ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k))) 
+   return ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
 }
 
 # writing die messages to STDERR and clean_tmp before exit.
@@ -248,6 +236,73 @@ sub go_to_die() {
 # section headers to STDERR
 sub prt_Header() { 
    print STDERR ("*" x 80)."\n** ".&fill_mid("@_",74," ")." **\n".("*" x 80)."\n" unless $quiet_flg;
+}
+# print the command to be executed
+sub prt_Command() { 
+	print STDERR ("\n\n** ".&fill_mid("@_",74," ")." **\n\n");
+}
+
+# the following routines run parseblast,hsp2sr, filter the sr and run geneid 
+sub run_parseblast { 
+	my ($outputfile, $option) = @_;
+
+	my $parse = "$BIN/$PARSEBLAST --bit-score --gff $option $verbose_str $tbx | gawk '{OFS=\"\\t\"; 
+      print \$1,\$2,\$3,\$4,\$5,\$6,\$7,\$8,0}' > $outputfile;";
+    &prt_Command("$parse") if $verbose_flg;     
+
+	$status = system($parse);
+	if ($status != 0) {
+		&go_to_die("FATAL ERROR !!! $? $!\n
+          Unsuccessful $PARSEBLAST command :\n  $parse")
+	};   
+}
+
+sub run_hsp2sr() {
+	my ($inputfile,$outputfile) = @_;
+
+	my $projection = "$BIN/$HSP2SR $verbose_str -g $inputfile | sort +3n > $outputfile;";
+    &prt_Command($projection) if $verbose_flg;     
+
+	$status = system $projection;
+	if ($status != 0) {
+		&go_to_die("FATAL ERROR !!! $? $!\n
+          Unsuccessful $HSP2SR  command :\n  $projection")
+	};
+}   
+
+sub filter_sr(){
+	my ($inputfile,$outputfile) = @_;
+
+	if (!open(Srfile,"< $inputfile")) {
+		&go_to_die ("SGP2.pl: $inputfile: no such temporary file");
+	}
+
+	open(Srmodfile,"> $outputfile");
+
+	while (<Srfile>) {
+		next if /^\#/;
+		next if /^[ \t]*$/;
+		chomp;	
+		my @gff_record=split(/\s+/,$_);
+		$gff_record[5]=(($gff_record[5] - $DSC) * $WTBX);
+		print Srmodfile join("\t",@gff_record)."\n";
+	};
+
+	close(Srmodfile);
+	close(Srfile);
+}
+
+sub run_geneid(){
+	my ($srfile,$fastafile) = @_;
+
+	my $prediction = "$BIN/$GENEID $verbose_str  $GeneidOptions -P $GeneidParam  -S $srfile $fastafile;";
+    &prt_Command("$prediction") if $verbose_flg;     
+
+	$status = system $prediction;
+	if ($status != 0) {
+		&go_to_die("FATAL ERROR !!! $? $!\n
+          Unsuccessful $GENEID command :\n  $prediction");
+	};   
 }
 
 # get a fixed length string from a given string and filling char/s.
@@ -265,27 +320,27 @@ sub Which_Options() {
              "q|quiet"     => \$quiet_flg    , # quiet mode
              "tmp"         => \$temp_flg     , # keep temporary files
              "h|help|?"    => \$help_flg     , # print help
-                );
+                ) || &prt_Help();
     &prt_Help if $help_flg;
     &prt_Header("Processing Command-Line Options");
 
    # do seq files exists
-   &go_to_die("FATAL ERROR!!! -seq1 and -tblastx options are mandatory.") 
-	   unless (defined($Seq1) && defined($tbx));
+   &go_to_die("FATAL ERROR!!! --query or --sbjct and --tblastx options are mandatory.") 
+	   unless ((defined($Seq1) || defined($Seq2)) && defined($tbx));
    
-   my $file_number = &exists_file($Seq1, $tbx);
-   &go_to_die("FATAL ERROR!!! Two files are needed (-1 and -t options are mandatory).")
+   my $file_number = &exists_file(defined($Seq1) ? $Seq1 : $Seq2, $tbx);
+   &go_to_die("FATAL ERROR!!! Input files do not exist.")
 	   unless $file_number == 2; 
-    
+     
    # check if files are provided in fasta format and get locus names
-   $Loc1 = &check_fasta_format($Seq1);
-   $Loc2 = &check_fasta_format($Seq2) if defined($Seq2);
+   $Id1 = &check_fasta_format($Seq1) if defined($Seq1);
+   $Id2 = &check_fasta_format($Seq2) if defined($Seq2);
 
    #&go_to_die("FATAL ERROR!!! 
-   #    Locus1($Loc1) have the same name as Locus2($Loc2).\n  
-   #    Sequences \'$Seq1_Name\' and \'$Seq2_Name\' 
+   #    Identifier1($Id1) have the same name as Indentifier2($Id2).\n  
+   #    Sequences \'$Seq1\' and \'$Seq2\' 
    #    must have different locus names.\n")
-   # if $Loc1 eq $Loc2;
+   #   if $Id1 eq $Id2;
    # setting other variables
 
    &go_to_die("FATAL ERROR!!! --verbose and --quiet are incompatible options.")
@@ -310,7 +365,7 @@ PROGRAM:
 
 USAGE:
         
-    $PROGRAM [-vhq] [-g option] <-1 fasta_sequence> <-t tblastx_aligment>
+    $PROGRAM [-vhq][-g option] <[-1|-2] fasta_sequence> <-t tblastx_aligment>
 
 DESCRIPTION:
 
@@ -326,24 +381,31 @@ REQUIRES:
 ENVIRONMENT VARIABLES:
 
     You can specify the path where $PROGRAM can find the default files
-    with the shell variable \"$PROGRAM\". Default value is the path
-    where $PROGRAM have been installed.
+    with the shell variable \"$PROGRAM\". 
 
     You also can specify the path for the tempotary files with the
-    shell variable \"SGPTMP\". Default value is /tmp.
+    shell variable \"SGP2TMP\". Default value is /tmp.
+
+	Setting those vars in Bourne-shell and C-shell:
+
+     o Using a Bourne-Shell (e.g. bash):
+           export SGP2="path"
+           export SGP2TMP="path"
+
+     o Using a C-Shell:
+           setenv SGP2 "path"
+           setenv SGP2TMP "path"
 
  
 COMMAND-LINE OPTIONS:
 
-    A double dash on itself "--" signals end of the options and start
-    of file names (if present). You can use a single dash "-" as STDIN
-    placeholder. Available options and a short description are listed
-    here:
+	 Available options and a short description are listed here:
 
-     -1, --query     fasta sequence file.
+     -1, --query     fasta file of the query sequence in the tblastx.
+     -2, --sbjct     fasta file of the subject sequence in the tblastx.
      -t, --tblastx   tblastx results file.
-     -g, --geneid    geneid output options:
-
+     -g, --geneid <option>   
+                    geneid output options:
                      G - Use GFF format to print predictions. 
                      X - Use extended-format to print gene predictions 
                      D - Output genomic sequence of exons in predicted genes
