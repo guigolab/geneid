@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $
+% $Id: gff2aplot.nw,v 1.19 2001-11-13 19:24:27 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.19 2001-11-13 19:24:27 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -154,12 +154,23 @@
  \htmladdnormallink{\texttt{jabril@imim.es}}
                    {MAILTO:jabril@imim.es?subject=[gff2aplot]}
  } % def mtjabril
+\def\mttwiehe{
+ \htmladdnormallink{\texttt{twiehe@ice.mpg.de}}
+                   {MAILTO:twiehe@ice.mpg.de?subject=[gff2aplot]}
+ } % def mttwiehe
+\def\mtrguigo{
+ \htmladdnormallink{\texttt{rguigo@imim.es}}
+                   {MAILTO:rguigo@imim.es?subject=[gff2aplot]}
+ } % def mtrguigo
+%
 \def\authorslist{
- Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ Josep F. Abril   {\mdseries\small\dotfill \mtjabril } \\
+ Thomas   Wiehe   {\mdseries\small\dotfill \mttwiehe } \\
+ Roderic  Guig\'o {\mdseries\small\dotfill \mtrguigo } \\
  % Other authors here...\\
  } % def authorslist
 \def\authorshort{
- Abril, JF % Other authors here...
+ Abril, JF; Wiehe, T; Guig\'o, R % Other authors here...
  } % def authorshort
 %
 \def\license{GNU General Public License (GNU-GPL)}
@@ -213,7 +224,7 @@ Universitat Pompeu Fabra\\[2ex]
                                \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
 Program Name: & {\Huge\progname}                       \\[3ex]
 \multicolumn{2}{c}{\rule[0.5ex]{0.95\linewidth}{2pt}}\\[2ex]
-      Author: & {\Large
+     Authors: & {\Large
                  \begin{minipage}[t]{0.95\rttbl}
                  \authorslist
                  \end{minipage}}                       \\[2ex]
@@ -455,7 +466,7 @@ Those are the main variables containing customization parameters and input data 
 %GFF_DATA %ALN_DATA
 @ 
 
-[[%ALN_DATA]] is set on section~\ref{sec:APLOThsh} (see page~\pageref{sec:APLOThsh}), [[%GFF_DATA]] is set on section~\ref{sec:GFFhsh} (see page~\pageref{sec:APLOThsh}), and [[%Order]] is set on section~\ref{sec:ORDERhsh} (see page~\pageref{sec:ORDERhsh}). 
+[[%ALN_DATA]] is set on section~\ref{sec:APLOThsh} (see page~\pageref{sec:APLOThsh}), [[%GFF_DATA]] is set on section~\ref{sec:GFFhsh} (see page~\pageref{sec:GFFhsh}), and [[%Order]] is set on section~\ref{sec:ORDERhsh} (see page~\pageref{sec:ORDERhsh}). 
 
 Some info about the program itself.
 
@@ -465,9 +476,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.18 $', #'
-     '$Date: 2001-11-09 20:08:47 $', #'
-     '$Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $', #'
+     '$Revision: 1.19 $', #'
+     '$Date: 2001-11-13 19:24:27 $', #'
+     '$Id: gff2aplot.nw,v 1.19 2001-11-13 19:24:27 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -1476,7 +1487,7 @@ mbp => sub { return $_ * $mega },
 gbp => sub { return $_ * $giga },
 @
 
-As you can note, we have defined a function to convert from gigabases, but at this moment {\ps} can only handle numbers smaller than $2.1*10^9$ and {\prog} is not ready to workaround that. [[pt]] and [[bp]] have been introduced for consistency, so the functions using those units can be more general and avoid to check special cases and whole program code will be simpler.
+As you can note, we have defined a function to convert from gigabases, but at this moment {\ps} can only handle numbers smaller than $2.1*10^9$ and {\prog} is not ready to workaround that. [[pt]] and [[bp]] have been introduced for consistency, so the functions using those units can be more general and avoid to check special cases, then whole program code will be simpler.
 
 Finally, we need a simple function to recover the corresponding value for a given reference to an array which contain coords (as they are outputed by the test functions as a two elements array containing position and unit, in this order). This will simplify the code a little bit (as in section~\ref{sec:LAYOUTsec}). 
 
@@ -1512,6 +1523,13 @@ NOT_A_BOOLEAN =>
   $Warn."\"\%s\" variable requires a boolean value:\n".
   $spw."     (ON/OFF, 1/0, TRUE/FALSE, YES/NO)\n",
 @
+
+We also need a small function returning a 'true'/'false' string value to convert those booleans variables to {\ps} format.
+
+<<Common Routines>>=
+sub tobool() { return ( $_[0] ? 'true' : 'false' ); }
+@ %def &tobool
+
 
 \subsubsctn{Alphanumeric values}
 
@@ -1553,6 +1571,15 @@ $_test eq 'STRING' && do {
     return $T;
 };
 @
+
+<<Common Routines>>=
+sub tostring() {
+    (defined($_[0]) && $_[0] ne '') || return '()';
+    $_[0] =~ s{[\(]}{\\050}og;
+    $_[0] =~ s{[\)]}{\\051}og;
+    return '('.$_[0].')';
+}; # tostring
+@ %def &tostring
 
 \label{todo:BBG}
 <<HIDE: new defs TODO>>=
@@ -2369,7 +2396,7 @@ same colors you are defining as background/foreground colors.
 <<default layout vars values>>=
 # GLOBAL Labels			  
 show_title                 => { TYPE => 'BOOLEAN', VALUE => $T     },
-title                      => { TYPE => 'STRING' , VALUE => undef  },
+title                      => { TYPE => 'STRING' , VALUE => undef  }, # T
 @ %def {show_title} {title}
 <<command-line options>>=
 "T|title=s"  => \$CmdLineVars{LAYOUT}{"title"}, # TITLE
@@ -2451,7 +2478,7 @@ title area from plot, so no space is left for it.
 
 <<default layout vars values>>=
 show_subtitle              => { TYPE => 'BOOLEAN', VALUE => $T     },
-subtitle                   => { TYPE => 'STRING' , VALUE => undef  },
+subtitle                   => { TYPE => 'STRING' , VALUE => undef  }, # ST
 @ %def {show_subtitle} {subtitle}
 <<command-line options>>=
 "t|subtitle=s"  => \$CmdLineVars{LAYOUT}{"subtitle"}, # SUBTITLE
@@ -2691,7 +2718,7 @@ show_percent_box_label     => { TYPE => 'BOOLEAN', VALUE => $T     },
 percent_box_label          => { TYPE => 'STRING' , VALUE => undef  },
 @ %def {show_percent_box_label} {percent_box_label}
 <<command-line options>>=
-"L|percent-box-label=s"  => \$CmdLineVars{LAYOUT}{"percent_box_label"}, # Percent-Box_LABEL
+"L|percent-box-label=s"  => \$CmdLineVars{LAYOUT}{"percent_box_label"},
 @ 
 <<command-line help>>=
 -L, --percent-box-label <string>   Defining percent-box label.
@@ -2783,7 +2810,7 @@ LDE:
 ###EOR###
 @ 
 <<default layout vars values>>=
-percent_box_sublabel_font  => { TYPE => 'FONT'   , VALUE => 'helvetica' },
+percent_box_sublabel_font     => { TYPE => 'FONT'   , VALUE => 'helvetica' },
 percent_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => '9pt'  },
 @ %def {percent_box_sublabel_font} {percent_box_sublabel_fontsize}
 <<DESC custom file variables>>=
@@ -2815,7 +2842,7 @@ show_extra_box_label       => { TYPE => 'BOOLEAN', VALUE => $T     },
 extra_box_label            => { TYPE => 'STRING' , VALUE => undef  },
 @ %def {show_extra_box_label} {extra_box_label}
 <<command-line options>>=
-"l|extra-box-label=s"  => \$CmdLineVars{LAYOUT}{"extra_box_label"}, # Extra-Box_LABEL
+"l|extra-box-label=s"  => \$CmdLineVars{LAYOUT}{"extra_box_label"},
 @ 
 <<command-line help>>=
 -l, --extra-box-label <XBox-Label>   Definning Extra-Box Label.
@@ -3210,8 +3237,8 @@ zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F     },
 zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
 @ %def {zoom} {zoom_area} {zoom_marks} {zoom_area_mark_color}
 <<command-line options>>=
-"Z|zoom"                 => \$CmdLineVars{LAYOUT}{"zoom"}, # ZOOM_Zoom; Zoom_Marks
-"z|zoom-area"            => \$CmdLineVars{LAYOUT}{"zoom_area"}, # ZOOM_Area
+"Z|zoom"                 => \$CmdLineVars{LAYOUT}{"zoom"},
+"z|zoom-area"            => \$CmdLineVars{LAYOUT}{"zoom_area"},
 @ 
 <<command-line help>>=
 -Z, --zoom [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
@@ -3418,7 +3445,7 @@ aplot_xy_same_length       => { TYPE => 'BOOLEAN', VALUE => $T     },
 aplot_xy_scale             => { TYPE => 'FLOAT',   VALUE => 1      },
 @ %def {aplot_xy_same_length} {aplot_xy_scale}
 <<command-line options>>=
-"r|aplot-xy-noteq"     => sub { $CmdLineVars{LAYOUT}{"aplot_xy_same_length"} = $F }, # XY_AXES_Same-SIZE
+"r|aplot-xy-noteq"     => sub { $CmdLineVars{LAYOUT}{"aplot_xy_same_length"} = $F },
 "R|aplot-xy-scale=f"   => \$CmdLineVars{LAYOUT}{"aplot_xy_scale"}, 
 @ 
 <<command-line help>>=
@@ -3853,9 +3880,10 @@ LDE:
 @
 
 <<default layout vars values>>=
-aplot_major_tickmark       => { TYPE => 'INTEGER', VALUE => 2      },
+aplot_major_tickmark       => { TYPE => 'INTEGER', VALUE => undef  },
 aplot_minor_tickmark       => { TYPE => 'INTEGER', VALUE => 5      },
-@ %def {aplot_major_tickmark} {aplot_minor_tickmark}
+aplot_score_range          => { TYPE => 'RANGE'  , VALUE => undef  },
+@ %def {aplot_major_tickmark} {aplot_minor_tickmark} {aplot_score_range}
 <<DESC custom file variables>>=
 ORD: 108
 SEC: LAYOUT
@@ -3877,15 +3905,24 @@ SDE:
 LDE: 
 
 ###EOR###
+ORD: 110
+SEC: LAYOUT
+SUB: Tickmarks
+OPT: aplot_score_range
+PAR: <score..score>
+SDE: 
+LDE: 
+
+###EOR###
 @
 
 <<default layout vars values>>=
 percent_major_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
 percent_minor_tickmark     => { TYPE => 'INTEGER', VALUE => 5      },
-percent_box_score_range    => { TYPE => 'RANGE'  , VALUE => '50..100' },
+percent_box_score_range    => { TYPE => 'RANGE'  , VALUE => undef  },
 @ %def {percent_major_tickmark} {percent_minor_tickmark} {percent_box_score_range}
 <<DESC custom file variables>>=
-ORD: 110
+ORD: 111
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: percent_major_tickmark
@@ -3895,7 +3932,7 @@ SDE:
 LDE: 
 
 ###EOR###
-ORD: 111
+ORD: 112
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: percent_minor_tickmark
@@ -3905,11 +3942,10 @@ SDE:
 LDE: 
 
 ###EOR###
-ORD: 112
+ORD: 113
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: percent_box_score_range
-DEF: |50..100|
 PAR: <score..score>
 SDE: 
 LDE: 
@@ -3920,9 +3956,10 @@ LDE:
 <<default layout vars values>>=
 extra_major_tickmark       => { TYPE => 'INTEGER', VALUE => 2      },
 extra_minor_tickmark       => { TYPE => 'INTEGER', VALUE => 5      },
-@ %def {extra_major_tickmark} {extra_minor_tickmark}
+extra_box_score_range      => { TYPE => 'RANGE'  , VALUE => undef  },
+@ %def {extra_major_tickmark} {extra_minor_tickmark} {extra_box_score_range}
 <<DESC custom file variables>>=
-ORD: 113
+ORD: 114
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: extra_major_tickmark
@@ -3932,12 +3969,21 @@ SDE:
 LDE: 
 
 ###EOR###
-ORD: 114
+ORD: 115
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: extra_minor_tickmark
 DEF: |5|
 PAR: <integer>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 116
+SEC: LAYOUT
+SUB: Tickmarks
+OPT: extra_box_score_range
+PAR: <score..score>
 SDE: 
 LDE: 
 
@@ -3949,7 +3995,7 @@ major_tickmark_nucleotide  => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 minor_tickmark_nucleotide  => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {major_tickmark_nucleotide} {minor_tickmark_nucleotide}
 <<DESC custom file variables>>=
-ORD: 115
+ORD: 117
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: major_tickmark_nucleotide
@@ -3958,7 +4004,7 @@ SDE:
 LDE: 
 
 ###EOR###
-ORD: 116
+ORD: 118
 SEC: LAYOUT
 SUB: Tickmarks
 OPT: minor_tickmark_nucleotide
@@ -4006,7 +4052,7 @@ hide_credits               => { TYPE => 'BOOLEAN', VALUE => $F      },
       Switch off $PROGRAM credits line on plot.
 @
 <<DESC command-line options>>=
-ORD: 120
+ORD: 250
 OPT: a
 LNG: hide-credits
 EQV: [hide_credits]=|on|
@@ -4016,7 +4062,7 @@ LDE:
 ###EOR###
 @
 <<DESC custom file variables>>=
-ORD: 120
+ORD: 250
 SEC: LAYOUT
 SUB: General
 OPT: hide_credits
@@ -4142,6 +4188,9 @@ Y_Sequence_NAME  /
   # FTLayer[""]="",
   # FTColor[""]=Var["BACKGROUND_COLOR"],
   # FTRbnColor[""]=Var["BACKGROUND_COLOR"],
+@ 
+
+<<Changes in custom Vars>>=
 ### SP ## Special gff Features ##
   # FTGeneBounds="genebounds", NOT NEEDED NOW !!!
   FTLimits="seqbounds",
@@ -4172,6 +4221,14 @@ A flow chart of the GFF record parsing process.
 \todoitem{\todoEEA}{todo:EEA}
 @
 \todo{ \item \todoEEA } % todo
+
+\begin{figure}[!t]
+\begin{center}
+\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
+% \includegraphics[]{}
+\caption[Flow diagram of the input records parsing.]{\label{fig:parsingGFF} Flow diagram of the input records parsing showing the main function names involved in this process.}
+\end{center}
+\end{figure}
 
 \begin{table}[!t]
 % \newcommand{\m}[1]{\multicolumn{2}{@{}c@{}}{#1}}
@@ -4252,7 +4309,7 @@ sub parse_GFF_files() {
         if ($LogFile && $Debug);
     &footer("DATA LOADED");
 } # sub parse_GFF
-@ %def &sub parse_GFF
+@ %def &parse_GFF
 %$
 
 We define the following constants, used to report which format was found in the current read record (See table~\ref{tbl:DTkeysXreport}).
@@ -4402,122 +4459,9 @@ FRAME_MISMATCH =>
   $Warn." Frame mismatch definition \"\%s\" in file \"\%s\" line \"\%s\".\n",
 @ 
 
-\subsctn{Parsing APLOT format}\label{sec:parseAPLOT}
 
-'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
-
-<<Parsing Input Data>>=
-sub load_aplot() { # if errors found > return $noGFF
-    my ($list) = @_;
-    my $w_gff;
-    ($seqname_1,$seqname_2,$source_1,$source_2,$feature_1,$feature_2,
-     $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
-     $strand_1,$strand_2,$frame_1,$frame_2) = 
-     &remove_colon(@$list[0,1,2,3,4,5,6,7]);
-    $w_gff = &load_grouping($F,$list->[8]);
-    &check_aplot_fields || ($w_gff=$noGFF);
-    return $w_gff;
-} # load_aplot
-@ %def &load_aplot
-%$
-
-<<Global Vars>>=
-my ($seqname_1,$seqname_2,
-    $source_1,$source_2,$feature_1,$feature_2,
-    $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
-    $strand_1,$strand_2,$frame_1,$frame_2); # APLOT temporary vars
-my ($tag,$group,$group_id,$label,
-    $group_gff_counter,$group_aplot_counter); # GROUPING temporary vars
-@ 
-
-\begin{table}[!t]
-\begin{center}
-\fbox{
-\begin{tabular}{c@{\qquad}c}
-Strand
-\(
-\quad\Rightarrow\quad
-\left\{
-\begin{array}{c@{\quad\Rightarrow\quad}c}
-\mbox{[[+]]} & \mbox{[[+:+]]}\\
-\mbox{[[-]]} & \mbox{[[-:-]]}\\
-\mbox{[[.]]} & \mbox{[[.:.]]}\\
-\end{array}
-\right.
-\)
- &
-Frame
-\(
-\quad\Rightarrow\quad
-\left\{
-\begin{array}{c@{\quad\Rightarrow\quad}c}
-\mbox{[[2]]} & \mbox{[[2:2]]}\\
-\mbox{[[1]]} & \mbox{[[1:1]]}\\
-\mbox{[[0]]} & \mbox{[[0:0]]}\\
-\mbox{[[.]]} & \mbox{[[.:.]]}\\
-\end{array}
-\right.
-\)
- \\
-\end{tabular}
-} % fbox
-\parbox{0.75\linewidth}{
-\caption[Retrieving second element when missing in old APLOT format]{\label{tbl:missingfields} For {\prog} old format, when in a '\pa{element1}:\pa{element2}' field pair the second element is missing, second is set to first element.}
-} % parbox
-\end{center}
-\end{table}
-
-When checking for colons, we assume that any element defined without colons is equal to the same value repeated twice (see Table~\ref{tbl:missingfields}). 
-
-<<Parsing Input Data>>=
-sub remove_colon() {
-    my @ary_out = ();
-    my ($a,$b) = (undef,undef);
-	foreach my $fld (@_) {
-		($a,$b) = split /:/o, $fld, 2;
-        $a = '.' unless defined($a);
-        $b = $a  unless defined($b);
-		push @ary_out, $a, $b;
-	};
-	return @ary_out;
-} # remove_colon
-@ %def &remove_colon
-%$
-
-\subsubsctn{Checking fields and accepting APLOT records}
-
-If records are OK, then we can append a new record to the variable defined for APLOT records (so called in section~\ref{sec:APLOThsh} as '[[%ALN_DATA]]', see page~\pageref{sec:APLOThsh}).
-
-<<Parsing Input Data>>=
-sub check_aplot_fields() {
-    &check_coords($start_1,$end_1,$start_2,$end_2) || (return $F);
-    &check_strand($strand_1,$strand_2) || (return $F);
-    &check_frame($frame_1,$frame_2) || (return $F);
-    &add_aplot_record;
-    return $T; 
-} # check_aplot_fields
-@ %def &check_aplot_fields
-
-\label{todo:EHA}
-<<HIDE: new defs TODO>>=
-\def\todoEHA{
-Append a new record to the variable defined for APLOT records
-} % todoEHA
-@
-<<HIDE: TODO>>=
-\todoitem{\todoEHA}{todo:EHA}
-@
-\todo{ \item \todoEHA } % todo
-
-<<Parsing Input Data>>=
-sub add_aplot_record() {
-    return;
-} # add_aplot_record
-@ %def &add_aplot_record
-%$
-
-
-\subsctn{Parsing standard GFF format}\label{sec:parseGFF}
+\subsctn{Parsing standard GFF format}
+\label{sec:parseGFF}
 
 '[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFFhsh}, page~\pageref{sec:GFFhsh}). The first parameter for '[[&load_grouping]]' function is set to 'True' for GFF grouping definition ('False' is for APLOT grouping definition, see section~\ref{sec:parseAPLOT}). 
 
@@ -4553,23 +4497,12 @@ sub check_gff_fields() {
 Once fields checking is done, we proceed to load the data structure defined for the GFF records as '[[%GFF_DATA]]' hash. \label{sec:GFFhsh}
 The outline of the inner structure of that variable is shown in table~\ref{tbl:gffdata}.
 
-\begin{table}[!ht]
+\begin{table}[!t]
 \begin{center}
 \input tables/DataStructure_GFF.tex
 \caption[GFF internal data structure for {\prog}]{\label{tbl:gffdata} GFF internal data structure for {\prog}. The topmost hash corresponds to '[[%GFF_DATA]]', the others are anonymous lists/hashes expanding from it.}
 \end{center}
 \end{table}
-
-\label{todo:ELA}
-<<HIDE: new defs TODO>>=
-\def\todoELA{
-Define DATA STRUCTURE for [[%ALN_DATA]] and include a figure if differs from [[%GFF_DATA]] definition.
-} % todoELA
-@
-<<HIDE: TODO>>=
-\todoitem{\todoELA}{todo:ELA}
-@
-\todo{ \item \todoELA } % todo
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 <<HIDE: GFF DATA STRUCTURE>>= 
@@ -4649,27 +4582,28 @@ $ \begin{array}{r@{\quad=\quad}l}
 sub add_gff_record() {
     my $_gff = $_[0];
     <<add align records to aplot DS>>
-    my ($VarName,$Counter,$Type);
+    my ($VarName,$Counter,$Type,$first_fld,$t,$myfunc);
+    $myfunc = \&load_gff_var;
     ($VarName,$Counter,$Type) = (
         \%GFF_DATA,
         \$seq_COUNT,
         'SEQUENCE' );
-    &load_gff_var($seqname,$VarName,$Counter,$Type);
+    &load_var($seqname,$VarName,$Counter,$Type,$myfunc);
     ($VarName,$Counter,$Type) = (
         \%{$VarName->{$seqname}[$_element]},
         \$$VarName{$seqname}[$_counter][$_elemNum],
         'SOURCE' );
-    &load_gff_var($source,$VarName,$Counter,$Type);
+    &load_var($source,$VarName,$Counter,$Type,$myfunc);
     ($VarName,$Counter,$Type) = ( 
         \%{$VarName->{$source}[$_element]},
         \$$VarName{$source}[$_counter][$_elemNum],
         'STRAND' );
-    &load_gff_var($strand,$VarName,$Counter,$Type);
+    &load_var($strand,$VarName,$Counter,$Type,$myfunc);
     ($VarName,$Counter,$Type) = (
         \%{$VarName->{$strand}[$_element]},
         \$$VarName{$strand}[$_counter][$_elemNum],
         'GROUP' );
-    &load_gff_var($group,$VarName,$Counter,$Type);
+    &load_var($group,$VarName,$Counter,$Type,$myfunc);
     <<adding new feature elements>>
     return;
 } # add_gff_record
@@ -4678,18 +4612,16 @@ sub add_gff_record() {
 First we load the plain GFF attributes for a given record, when such record is defining a vector we add a new element to the feature anonymous array. That element is a list of the scores provided by the '[[&load_GFF_vector]]' function defined in section~\ref{sec:loadvector}, page~\pageref{sec:loadvector}.
 
 <<adding new feature elements>>=
+$first_fld = ($_gff eq $VECTOR) ? 'V' : 'G';
 push @{$VarName->{$group}[$_element]},
     [
-      'G',      # Type == plain GFF
-	  {},       # Properties hash, now empty
-      $feature, # GFF feature (3rd field)
-      $label,   # Record ID if exist, order# otherwise
-      $start,
-      $end,
-      $score,
-      $frame,
+      $first_fld,      # Type == plain GFF or vector
+	  {},              # Properties hash, now empty
+      $feature,        # GFF feature (3rd field)
+      $label,          # Record ID if exist, order# otherwise
+      $start, $end, $score, $frame,
     ];
-my $t = ++$VarName->{$group}[$_counter][$_elemNum];
+$t = ++$VarName->{$group}[$_counter][$_elemNum];
 &set_var_defaults('FEATURE',
                   \%{$VarName->{$group}[$_element][($t-1)][$_prop]});
 $_gff eq $VECTOR && do {
@@ -4697,7 +4629,7 @@ $_gff eq $VECTOR && do {
 };
 @ 
 
-If the standard GFF alignment format is found, we process them as if it was an aplot records, so that we have to set all the variables required to fill such data structure ('[[%ALN_DATA]]' in section~\ref{sec:APLOThsh} , page~\pageref{sec:APLOThsh}).
+If the standard GFF alignment format is found, we process those records as if they were aplot records, so that we have to set all the variables required to fill such data structure ('[[&add_aplot_record]]' is described in section~\ref{func:loadalnvar}, page~\pageref{func:loadalnvar}).
 
 <<add align records to aplot DS>>=
 $_gff eq $ALIGN && do {
@@ -4706,17 +4638,44 @@ $_gff eq $ALIGN && do {
 };
 @ 
 
-We declare here auxiliary variables containing the array indexes used in the anonymous arrays defined within the main variable containing all the GFF data [[%GFF_DATA]], that was declared in section~\ref{sec:GFFhsh}, page~\pageref{sec:GFFhsh}.
+We declare here auxiliary variables containing the array indexes used in the anonymous arrays defined within the main variables containing all the GFF data ([[%GFF_DATA]], that was declared in section~\ref{sec:GFFhsh}, page~\pageref{sec:GFFhsh}), and the alignment data ([[%ALN_DATA]], that was declared in section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}).
+
+<<Pre-Declared Vars>>=
+$aln_COUNT $seq_COUNT
+$_counter $_prop $_element
+$_order $_elemNum $_ori $_end $_nori $_nend
+$_fttype $_ftprop $_ftname $_ftid
+         $_ftori  $_ftend  $_ftsco  $_ftfrm
+         $_ftnori $_ftnend $_ftnsco $_ftnfrm
+@ 
 
 <<Global Vars>>=
-my $seq_COUNT;
-my ($_counter,$_prop,$_element) = (0..2);
-my ($_order,$_elemNum,$_ori,$_end) = (0..3);
-my ($_fttype,$_ftprop,$_ftname,$_ftid,$_ftori,$_ftend,$_ftsco,$_ftfrm) = (0..7);
+($_counter,$_prop,$_element) = (0..2);
+($_order,$_elemNum,$_ori,$_end,$_nori,$_nend) = (0..5);
+($_fttype,$_ftprop,$_ftname,$_ftid,
+ $_ftori, $_ftend, $_ftsco, $_ftfrm,
+ $_ftnori,$_ftnend,$_ftnsco,$_ftnfrm) = (0..11);
 @ 
 
 \label{func:loadgffvar}
 <<Parsing Input Data>>=
+sub load_var() {
+    my ($_value,$_var,$_cnt,$_type,$_frf) = @_;
+	defined($$_var{$_value}) || do {
+		$$_var{$_value}[$_counter] = &$_frf(++$$_cnt);
+		&set_var_defaults($_type,\%{$$_var{$_value}[$_prop]});
+	};
+	return;
+} # load_var
+@ %def &load_var
+%$
+
+<<Parsing Input Data>>=
+sub load_gff_var() { return [ $_[0], 0, 0, 0 ]; }
+sub load_aln_var() { return [ $_[0], 0, 0, 0, 0, 0 ]; }
+@ %def &load_gff_var &load_aln_var
+
+<<HIDE: Parsing Input Data>>=
 sub load_gff_var() {
     my ($_value,$_var,$_cnt,$_type) = @_;
 	defined($$_var{$_value}) || do {
@@ -4753,6 +4712,196 @@ foreach my $nm (keys %{$DefaultVars{$sect}}) {
 
 We choose the first approach, and we will replace the hash reference by the keys with references to defaults if needed when setting variables from custom parameters for a given GFF element (see section~\ref{sec:mapcustoms}, page~\pageref{sec:mapcustoms}). That choice will save memory used by the elements properties if user does not customize any of the element properties, but requires a temporary default variable (due to the special structure of the [[%DefaultVars]] hash which contains not only default variable values but also variable type), named [[%Defaults]] and defined in section~\ref{sec:tmpdefaults}, page~\pageref{sec:tmpdefaults}.
 
+
+\subsctn{Parsing APLOT format}
+\label{sec:parseAPLOT}
+
+'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
+
+<<Parsing Input Data>>=
+sub load_aplot() { # if errors found > return $noGFF
+    my ($list) = @_;
+    my $w_gff;
+    ($seqname_1,$seqname_2,$source_1,$source_2,$feature_1,$feature_2,
+     $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
+     $strand_1,$strand_2,$frame_1,$frame_2) = 
+     &remove_colon(@$list[0,1,2,3,4,5,6,7]);
+    $w_gff = &load_grouping($F,$list->[8]);
+    &check_aplot_fields($w_gff) || ($w_gff=$noGFF);
+    return $w_gff;
+} # load_aplot
+@ %def &load_aplot
+%$
+
+<<Global Vars>>=
+my ($seqname_1,$seqname_2,
+    $source_1,$source_2,$feature_1,$feature_2,
+    $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
+    $strand_1,$strand_2,$frame_1,$frame_2); # APLOT temporary vars
+my ($tag,$group,$group_id,$label,
+    $group_gff_counter,$group_aplot_counter); # GROUPING temporary vars
+@ 
+
+\begin{table}[!t]
+\begin{center}
+\fbox{
+\begin{tabular}{c@{\qquad}c}
+Strand
+\(
+\quad\Rightarrow\quad
+\left\{
+\begin{array}{c@{\quad\Rightarrow\quad}c}
+\mbox{[[+]]} & \mbox{[[+:+]]}\\
+\mbox{[[-]]} & \mbox{[[-:-]]}\\
+\mbox{[[.]]} & \mbox{[[.:.]]}\\
+\end{array}
+\right.
+\)
+ &
+Frame
+\(
+\quad\Rightarrow\quad
+\left\{
+\begin{array}{c@{\quad\Rightarrow\quad}c}
+\mbox{[[2]]} & \mbox{[[2:2]]}\\
+\mbox{[[1]]} & \mbox{[[1:1]]}\\
+\mbox{[[0]]} & \mbox{[[0:0]]}\\
+\mbox{[[.]]} & \mbox{[[.:.]]}\\
+\end{array}
+\right.
+\)
+ \\
+\end{tabular}
+} % fbox
+\parbox{0.75\linewidth}{
+\caption[Retrieving second element when missing in old APLOT format]{\label{tbl:missingfields} For {\prog} old format, when in a '\pa{element1}:\pa{element2}' field pair the second element is missing, second is set to first element.}
+} % parbox
+\end{center}
+\end{table}
+
+When checking for colons, we assume that any element defined without colons is equal to the same value repeated twice (see Table~\ref{tbl:missingfields}). 
+
+<<Parsing Input Data>>=
+sub remove_colon() {
+    my @ary_out = ();
+    my ($a,$b) = (undef,undef);
+	foreach my $fld (@_) {
+		($a,$b) = split /:/o, $fld, 2;
+        $a = '.' unless defined($a);
+        $b = $a  unless defined($b);
+		push @ary_out, $a, $b;
+	};
+	return @ary_out;
+} # remove_colon
+@ %def &remove_colon
+%$
+
+\subsubsctn{Checking fields and accepting APLOT records}
+
+If records are OK, then we can append a new record to the variable defined for APLOT records (so called as '[[%ALN_DATA]]' in table~\ref{tbl:alndata}, page~\pageref{tbl:alndata}). \label{sec:APLOThsh}
+
+<<Parsing Input Data>>=
+sub check_aplot_fields() {
+    &check_coords($start_1,$end_1,$start_2,$end_2) || (return $F);
+    &check_strand($strand_1,$strand_2) || (return $F);
+    &check_frame($frame_1,$frame_2) || (return $F);
+    &add_aplot_record($_[0]);
+    return $T; 
+} # check_aplot_fields
+@ %def &check_aplot_fields
+
+\begin{table}[!t]
+\begin{center}
+% \input tables/DataStructure_ALN.tex
+\caption[Internal data structure to store alignments]{\label{tbl:alndata} Alignment data structure, so called '[[%ALN_DATA]]', has same structure as '[[%GFF_DATA]]' shown in table~\ref{tbl:gffdata}. Here we only show the small differences between them.}
+\end{center}
+\end{table}
+
+\label{todo:ELA}
+<<HIDE: new defs TODO>>=
+\def\todoELA{
+Define DATA STRUCTURE for [[%ALN_DATA]] and include a figure if differs from [[%GFF_DATA]] definition.
+} % todoELA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoELA}{todo:ELA}
+@
+\todo{ \item \todoELA } % todo
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<HIDE: ALN DATA STRUCTURE>>= 
+% DataStructure_ALN.tex
+@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<HIDE: DONE>>=
+\doneitem{20011113}{Append a new record to the variable defined for APLOT records.}
+@
+
+<<Parsing Input Data>>=
+sub add_aplot_record() {
+    my ($VarName,$Counter,$Type,$t,$myfunc);
+    $myfunc = \&load_aln_var;
+    ($VarName,$Counter,$Type) = (
+        \%ALN_DATA,
+        \$aln_COUNT,
+        'SEQUENCE' );
+    $seqname = join($;, $seqname_1, $seqname_2);
+    $source  = join($;, $source_1,  $source_2 );
+    $strand  = join($;, $strand_1,  $strand_2 );
+    $feature = join($;, $feature_1, $feature_2);
+    &load_var($seqname,$VarName,$Counter,$Type,$myfunc);
+    ($VarName,$Counter,$Type) = (
+        \%{$VarName->{$seqname}[$_element]},
+        \$$VarName{$seqname}[$_counter][$_elemNum],
+        'SOURCE' );
+    &load_var($source,$VarName,$Counter,$Type,$myfunc);
+    ($VarName,$Counter,$Type) = ( 
+        \%{$VarName->{$source}[$_element]},
+        \$$VarName{$source}[$_counter][$_elemNum],
+        'STRAND' );
+    &load_var($strand,$VarName,$Counter,$Type,$myfunc);
+    ($VarName,$Counter,$Type) = (
+        \%{$VarName->{$strand}[$_element]},
+        \$$VarName{$strand}[$_counter][$_elemNum],
+        'GROUP' );
+    &load_var($group,$VarName,$Counter,$Type,$myfunc);
+    <<adding new alignment elements>>    
+    return;
+} # add_aplot_record
+@ %def &add_aplot_record
+%$
+
+<<adding new alignment elements>>=
+push @{$VarName->{$group}[$_element]},
+    [
+      'A',       # Type == plain GFF
+	  {},        # Properties hash, now empty
+      $feature, # GFF feature (3rd field)
+      $label,    # Record ID if exist, order# otherwise
+      $start_1, $end_1, $score_1, $frame_1,
+      $start_2, $end_2, $score_2, $frame_2,
+    ];
+$t = ++$VarName->{$group}[$_counter][$_elemNum];
+&set_var_defaults('FEATURE',
+                  \%{$VarName->{$group}[$_element][($t-1)][$_prop]});
+@ 
+
+\label{func:loadalnvar}
+
+<<HIDE: Parsing Input Data>>=
+sub load_aln_var() {
+    my ($_value,$_var,$_cnt,$_type) = @_;
+	defined($$_var{$_value}) || do {
+		$$_var{$_value}[$_counter] = [ ++$$_cnt, 0, 0, 0, 0, 0 ];
+		&set_var_defaults($_type,\%{$$_var{$_value}[$_prop]});
+	};
+	return;
+} # load_aln_var
+@ %def &load_aln_var
+%$
+
+
 \subsctn{Parsing grouping attributes}
 
 '[[GFF_CHOICE]]' block sets some variables depending on the record format, standard GFF or APLOT GFF-like. Once we have the attribute string from the GFF/APLOT record, we first check if it is empty, then we split by semicolons which will have or not white spaces or tabs before and/or after, as shown in this regular expression:\\
@@ -4776,7 +4925,7 @@ sub load_grouping() {
     $grp_counter = ++$group_aplot_counter;
     $grp_GP = $APLOT;
     $grp_NOGP = $APLOT_NOGP;
-    $grp_tag = $SOURCE{'align_tag'}; # %SOURCE is a temporary hash name
+    $grp_tag = $Vars{LAYOUT}{align_tag}; # %SOURCE is a temporary hash name
   };
     $label = $group_id = $grp_counter;
     defined($attributes) || do {
@@ -4819,11 +4968,11 @@ Here we look for other attribute fields, those defining coords for the target se
 
 <<parse other attributes>>=
 $_type && do { # GFF grouping
-    $tag =~ /$SOURCE{'align_tag'}/ && do {
+    $tag =~ /$Vars{LAYOUT}{align_tag}/ && do {
         &load_GFF_align;
         return $ALIGN;
     }; 
-    $tag =~ /$SOURCE{'vector_tag'}/ && do {
+    $tag =~ /$Vars{LAYOUT}{vector_tag}/ && do {
         &load_GFF_vector;
         return $VECTOR;
 	};
@@ -4836,7 +4985,7 @@ We are interested in finding 'id' tag, that defines the label for a single recor
 scalar(@grouping_list) > 0 && do{ 
     foreach my $element (@grouping_list) {
         ($element =~ /$groupregexp/o) && (@new_group = ($1,$2,$3));
-        lc($new_group[0]) =~ $SOURCE{'label_tag'} && do {
+        lc($new_group[0]) =~ /$Vars{LAYOUT}{label_tag}/ && do {
             $label = $new_group[1];
             $label eq "" && do {
                 (undef,$label,undef) = split /\s+/og, $new_group[0];
@@ -4849,47 +4998,78 @@ scalar(@grouping_list) > 0 && do{
 \subsubsctn{Layout variables involved in grouping tags}
 
 <<default layout vars values>>=
-align_tag                  => { TYPE => 'STRING' , VALUE => 'target' },
-@ 
-<<HIDE: custom-vars latex short>>=
-@ 
-<<HIDE: custom-vars latex>>=
-\vnlitem{align\_tag}{string}{Target} \tp{align\_tag} holds the specific tag (for a grouping Tag-Value pair) to detect those GFF records coding for alignment data and having the following group structure:\\[1ex]
-\centerline{\shortstack[r]{align\_tag "group\_name" \pr{seq2\_start} \pr{seq2\_end} [ ; Strand \pr{seq2\_strand} \eoline\\\,[ ; Frame \pr{seq2\_frame} [ ; E\_value \pr{score} ]\,]\,]\hspace{3ex}}}\\[0.75ex]
-so the program can recover the coords for the target sequence from the grouping fields. Remember that tags are not case-sensitive. 
+align_tag                  => { TYPE => 'ALPHA', VALUE => 'target'   },
+vector_tag                 => { TYPE => 'ALPHA', VALUE => 'vector'   },
+label_tag                  => { TYPE => 'ALPHA', VALUE => 'id'       },
+@ %def {align_tag} {vector_tag} {label_tag}
+<<DESC custom file variables>>=
+ORD: 240
+SEC: LAYOUT
+SUB: General
+OPT: align_tag
+DEF: |target|
+PAR: <tag>
+SDE: 
+LDE: 
+[align_tag] holds the specific tag (for a grouping Tag-Value pair) to detect 
+those GFF records coding for alignment data and having the following group 
+structure:\\%{1ex%} \n\
+\centerline{
+ \shortstack%{r%}{align_tag "group_name" <seq2_start> <seq2_end> 
+   %{ ; Strand <seq2_strand> \eoline\\\,%{ ; Frame <seq2_frame> %{ ; 
+        E_value <score> %}\,%}\,%}\hspace{3ex}
+  }
+ }\\%{0.75ex%} \n\
+so the program can recover the coords for the target sequence from the 
+grouping fields. Remember that tags are not case-sensitive. 
+###EOR###
+ORD: 241
+SEC: LAYOUT
+SUB: General
+OPT: vector_tag
+DEF: |vector|
+PAR: <tag>
+SDE: 
+LDE: 
+[vector_tag] sets the specific tag (for a grouping Tag-Value pair) to detect 
+scoring vector GFF records, which have the following group structure:
+\\%{1ex%} \n\
+\centerline{
+ \shortstack%{r%}{vector_tag "group_name" <vector_type> %{ ;
+   Window <window_length> \eoline\\\, %{ ; Step <step_length> %}\,%} ;
+   Scores <score$%-0$> ... <score$%-n$>\hspace{3ex}
+  }
+  }\\%{0.75ex%} \n\
+so the program can parse the list of single scores from the grouping fields. 
+Remember that tags are not case-sensitive.
+###EOR###
+ORD: 242
+SEC: LAYOUT
+SUB: General
+OPT: label_tag
+DEF: |id|
+PAR: <tag>
+SDE: 
+LDE: 
+[label_tag] sets the specific tag (for a grouping Tag-Value pair) that allows 
+to identify a single record. The program looks for the grouping Tag-Value pair 
+for which the tag matches [label_tag] and takes <value> as the specific record 
+label. You must have an attribute like this within the grouping attribute list:
+\\%{0.75ex%} \n\
+\centerline{
+  \ldots ; label_tag "element_label" %{ ; \ldots %}
+  }\\%{0.5ex%} \n\
+Using this attribute makes easy to set specific properties for one or more 
+elements. Remember that tags are not case-sensitive.
+###EOR###
 @
 
-<<default layout vars values>>=
-vector_tag                 => { TYPE => 'STRING' , VALUE => 'vector' },
-@ 
-<<HIDE: custom-vars latex short>>=
-@ 
-<<HIDE: custom-vars latex>>=
-\vnlitem{vector\_tag}{string}{Vector} \tp{vector\_tag} sets the specific tag (for a grouping Tag-Value pair) to detect scoring vector GFF records, which have the following group structure:\\[1ex]
-\centerline{\shortstack[r]{vector\_tag "group\_name" \pr{vector\_type} [ ; Window \pr{window\_length} \eoline\\\, [ ; Step \pr{step\_length} ]\,] ; Scores \pr{score$_0$} ... \pr{score$_n$}\hspace{3ex}}}\\[0.75ex]
-so the program can parse the list of single scores from the grouping fields. Remember that tags are not case-sensitive.
-@
-
-<<default layout vars values>>=
-label_tag                  => { TYPE => 'STRING' , VALUE => 'id'   },
-@ 
-<<HIDE: custom-vars latex short>>=
-@ 
-<<HIDE: custom-vars latex>>=
-\vnlitem{label\_tag}{string}{Id} \tp{label\_tag} sets the specific tag (for a grouping Tag-Value pair) that allows to identify a single record. The program looks for the grouping Tag-Value pair for which the tag matches \tp{label\_tag} and takes \tp{value} as the specific record label. You must have an attribute like this within the grouping attribute list:\\[0.75ex]
-\centerline{\ldots ; label\_tag "element\_label" [ ; \ldots }\\[0.5ex]
-Using this attribute makes easy to set specific properties for one or more elements. Remember that tags are not case-sensitive.
-@
-
-% \subsctn{Parsing extended GFF format}\label{sec:parseXTRA}
 
 The following record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing data that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be redefined by users from custom files.
 
-\begin{comment}
-\todo{
-\item [[%SOURCE]] is a \textbf{provisional varname} that must be replaced by the corresponding [[$DefaultVars{LAYOUT}]], [[$CustomVars{LAYOUT}]] or [[$CmdLineVars{LAYOUT}]]. Those 'LAYOUT' variables must be set before reading GFF input files because some settings are used by parser functions.
-} % todo
-\end{comment}
+<<HIDE: DONE>>=
+\doneitem{20011113}{[[%SOURCE]] is a \textbf{provisional varname} that must be replaced by the corresponding [[$DefaultVars{LAYOUT}]], [[$CustomVars{LAYOUT}]] or [[$CmdLineVars{LAYOUT}]]. Those 'LAYOUT' variables must be set before reading GFF input files because some settings are used by parser functions.}
+@
 
 \subsubsctn{Parsing alignment records}
 
@@ -5057,7 +5237,7 @@ We have to set the properties hash corresponding to the GFF elements present in 
 foreach my $seq (keys %GFF_DATA) {
     my $seq_ref = \@{ $GFF_DATA{$seq} };
     $v_sec eq 'SEQUENCE' && do {
-        &does_feat_match($seq,$reg_exp,$seq_ref,
+        &does_feat_match($name_test,$seq,$reg_exp,$seq_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
     };
@@ -5069,7 +5249,7 @@ foreach my $seq (keys %GFF_DATA) {
 foreach my $src (keys %{ $seq_ref->[$_element] }) {
     my $src_ref = \@{ $seq_ref->[$_element]{$src} };
     $v_sec eq 'SOURCE' && do {
-        &does_feat_match($src,$reg_exp,$src_ref,
+        &does_feat_match($name_test,$src,$reg_exp,$src_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
     };
@@ -5081,7 +5261,7 @@ foreach my $src (keys %{ $seq_ref->[$_element] }) {
 foreach my $str (keys %{ $src_ref->[$_element] }) {
     my $str_ref = \@{ $src_ref->[$_element]{$str} };
     $v_sec eq 'STRAND' && do {
-        &does_feat_match($str,$reg_exp,$str_ref,
+        &does_feat_match($name_test,$str,$reg_exp,$str_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
     };
@@ -5093,7 +5273,7 @@ foreach my $str (keys %{ $src_ref->[$_element] }) {
 foreach my $grp (keys %{ $str_ref->[$_element] }) {
     my $grp_ref = \@{ $str_ref->[$_element]{$grp} };
     $v_sec eq 'GROUP' && do {
-        &does_feat_match($grp,$reg_exp,$grp_ref,
+        &does_feat_match($name_test,$grp,$reg_exp,$grp_ref,
                          $_prop,$v_sec,$v_var,$the_value);
         next;
     };
@@ -5107,23 +5287,23 @@ foreach my $feat (0..$#{ $grp_ref->[$_element] }) {
     $feat_ref = \@{ $grp_ref->[$_element][$feat] };
     ($ft_name, $ft_id) = ($feat_ref->[$_ftname],$feat_ref->[$_ftid]);
     # check ID
-    $id_flg ne $NULL && do {
+    defined($id_flg) && do {
         $ft_id =~ /^$id_flg$/o && do {
-            &does_feat_match($ft_name,$reg_exp,$feat_ref,
+            &does_feat_match($name_test,$ft_name,$reg_exp,$feat_ref,
                              $_ftprop,$v_sec,$v_var,$the_value);
         }; # $ft_id =~ /^$id_flg$/o
         next;
     }; # $id_flg ne $NULL
     # check regexp
-    &does_feat_match($ft_name,$reg_exp,$feat_ref,
+    &does_feat_match($name_test,$ft_name,$reg_exp,$feat_ref,
                      $_ftprop,$v_sec,$v_var,$the_value);
 }; # foreach my $feat
 @
 
 <<Features Setting>>=
 sub does_feat_match() {
-    my ($name,$rexp,$gffref,$prop,$sct,$var,$value) = @_;
-    &$name_test($name,$rexp) && do {
+    my ($thetest,$name,$rexp,$gffref,$prop,$sct,$var,$value) = @_;
+    &$thetest($name,$rexp) && do {
         (ref($gffref->[$prop]) eq 'REF') &&
             &set_all_defaults($gffref, $sct);
         $gffref->[$prop]{$var} = $value;
@@ -5503,7 +5683,7 @@ sub set_page_axes() {
     <<setting axes - step 1>>
     <<setting axes - step 2>>
     <<setting axes - step 3>>
-    $vrf->{alignment_name} =~ s/$;/ : /o, $vrf->{_alignment_name};
+    ($vrf->{alignment_name} = $vrf->{_alignment_name}) =~ s/$;/ : /o;
     my ($yf,$nf) = ('was found. PLOTTING IT...','NOT found. NOT PLOTTED...');
     &report('SETPAGEAXES',
              ( "ALIGNMENT \"$vrf->{alignment_name}\" ".
@@ -5531,18 +5711,18 @@ We need two auxiliarly functions to grep alignment and sequences names on [[@{$O
 <<Layout Settings>>=
 sub search_alnname() {
     my ($_ra,$_ro) = @_;
-    my ($sq_a,$sq_b,@naln,$nm_a,$nm_b);
+    my ($sq_a,$sq_b,$naln,$nm_a,$nm_b);
     #
     ($sq_a,$sq_b) = @$_ra;
-    foreach @naln (@$_ro) {
-        ($nm_a,$nm_b) = split /$;/o, $naln[0]; 
+    foreach $naln (@$_ro) {
+        ($nm_a,$nm_b) = split /$;/o, $naln->[0]; 
         ($nm_a =~ /^$sq_a$/ && $nm_b =~ /^$sq_b$/) && do {
              return ($T, $F);
         };
     }; # foreach $naln
     # swapping
     foreach $naln (@$_ro) {
-        ($nm_a,$nm_b) = split /$;/o, $naln[0]; 
+        ($nm_a,$nm_b) = split /$;/o, $naln->[0]; 
         ($nm_a =~ /^$sq_b$/ && $nm_b =~ /^$sq_a$/) && do {
              @$_ra = reverse @$_ra;
              return ($T, $T);
@@ -5556,10 +5736,10 @@ sub search_alnname() {
 <<Layout Settings>>=
 sub search_seqname() {
     my ($sq_a,$sq_b,$_ro) = @_;
-    my ($a_found,@naln,$skip);
+    my ($a_found,$naln,$skip);
     $skip = $F;
-    foreach @naln (@$_ro) {
-        $naln[0] =~ /^$sq_a$/ && do {
+    foreach $naln (@$_ro) {
+        $naln->[0] =~ /^$sq_a$/ && do {
             ($sq_a eq '.+' && $sq_b eq '.+' && !$skip) && ($skip = $T, next);
             return $T;
         };
@@ -5681,7 +5861,7 @@ $vrf->{zoom_area} && do {
 }; # zoom_area
 @ %def {_x_zoomarea_start} {_x_zoomarea_end} {_y_zoomarea_start} {_y_zoomarea_end}
 
-Here we are looking for the zoom coordinates. If those coords are the same as sequence boundaries, the zoom is disabled.
+Here we are looking for the zoom coordinates. If those coords are the same as sequence boundaries the zoom is disabled, else current plot sequence boundaries are set to zoom ones.
 
 <<setting boundaries - is zoom ON>>=
 $vrf->{zoom} && do {
@@ -5691,6 +5871,12 @@ $vrf->{zoom} && do {
   $vrf->{_y_zoom_start} = &get_first_coord(\@{ $tcrds{ys} },\$cc);
   $vrf->{_y_zoom_end}   = &get_first_coord(\@{ $tcrds{ye} },\$cc);
   $cc == 4 && ($vrf->{zoom} = $F);
+  $vrf->{zoom} && do {
+      $vrf->{_x_start} = $vrf->{_x_zoom_start};
+      $vrf->{_x_end}   = $vrf->{_x_zoom_end};
+      $vrf->{_y_start} = $vrf->{_y_zoom_start};
+      $vrf->{_y_end}   = $vrf->{_y_zoom_end};
+  }; # zoom...
 }; # zoom
 @ %def {_x_zoom_start} {_x_zoom_end} {_y_zoom_start} {_y_zoom_end}
 
@@ -5702,8 +5888,8 @@ sub get_first_coord() {
     my ($thelast,$cur,$tht);
     $thelast = $#{ $ary };
     for ( $cur = 0; $cur < $thelast; $cur++ ) {
-        defined($ary[$cur]) && do {
-            ($tht, $ary[$cur]) = ($ary[$cur], undef);
+        defined($ary->[$cur]) && do {
+            ($tht, $ary->[$cur]) = ($ary->[$cur], undef);
             return &get_units(\@$tht);
         }; # defined($ary[$cur])
     }; # for $cur
@@ -5742,15 +5928,18 @@ sub set_seq_boundaries() {
 
 <<messages - input/output>>=
 PLOTLIMITS =>
-  "###---> \n",
+  "###---> SEQUENCE BOUNDARIES selected for this plot:\n".
+  "###      \%s\n###      \%s\n",
 ONZOOM =>
-  "###---> \n",
+  "###---> SEQUENCE ZOOM that has been choosen:\n".
+  "###      \%s\n###      \%s\n",
 NOZOOM =>
-  "###---> \n",
+  "###     SEQUENCE ZOOM is not enabled for this plot...\n",
 ONZOOMAREA =>
-  "###---> \n",
+  "###---> ZOOM AREA that is going to be highlighted:\n".
+  "###      \%s\n###      \%s\n",
 NOZOOMAREA =>
-  "###---> \n",
+  "###     NO ZOOM AREA was selected for this plot... \n",
 @
 
 
@@ -5759,19 +5948,118 @@ NOZOOMAREA =>
 <<Layout Settings>>=
 sub set_tickmark_vars() {
     my ($vrf) = @_;
+    my (@tary,$lx,$ly,$stplen);
+    <<set tickmarks - bottom one>>
+    <<set tickmarks - steps for shorter edge>>
+    &report('TICKDONE');
     return;
 } # set_tickmark_vars
 @ %def &set_tickmark_vars {}
 
+<<messages - input/output>>=
+TICKDONE =>
+  "###---> TICKMARKS were set: \n",
+@
+
+We have to switch on the bottomest scale that appears on plot (it depends on [[show_percent_box]] and [[show_extra_box]]) when [[show_only_bottom_ticks]] is on.
+
+<<set tickmarks - bottom one>>=
+$vrf->{show_only_bottom_ticks} && do {
+    WHATICK: {
+        $vrf->{show_extra_box}   && (@tary = ($F,$F,$T), last WHATICK);
+        $vrf->{show_percent_box} && (@tary = ($F,$T,$F), last WHATICK);
+        @tary = ($T,$F,$F);
+    }; # WHATICK
+    ( $vrf->{show_aplot_x_ticks},
+      $vrf->{show_percent_x_ticks},
+      $vrf->{show_extrabox_x_ticks} ) = @tary;
+};
+@ 
+
+Now we compute the tickmark steps for the nucleotide scale of the shortest edge (taken as the shortest sequence coords from alignment and or sequence annotations), it is required if user does not define a nucleotide scale (either if she sets major/minor tickmark steps). Major tickmarks steps are now calculated within the perl script, not by {\ps} code, using the following formula:
+
+\[
+\begin{array}{rcl}
+\mbox{step} & = &
+ \mbox{\Large 10}^{
+  \left[
+    \mathrm{int}( 
+      \log_{10}{( \min{ \Delta_{\mathrm{seqX}} , \Delta_{\mathrm{seqY}} )} }
+      \;-\; \lambda
+    )
+  \right]
+ } \;, \\[1ex]
+\mbox{where} & \quad &
+             \Delta_{\mathrm{seq}} = \mathrm{end}_{\mathrm{seq}}
+                                   - \mathrm{start}_{\mathrm{seq}} + 1 \;,\\
+             & \quad &
+             \min{ \Delta_{\mathrm{seqX}} , \Delta_{\mathrm{seqY}} } > 0 \;,\\
+             & \quad &
+             \mathrm{int}(x) \quad \mbox{is the integer part of} \quad x \;,\\
+\mbox{and}   & \quad & 0 < \lambda < 1 \;. \\
+\end{array}
+\]
+
+We explored several values of $\lambda$ and found that the most appropriate for the current implementation was $\lambda\,=\,0.175$ .
+
+<<set tickmarks - steps for shorter edge>>=
+$lx = $vrf->{_x_end} - $vrf->{_x_start};
+$ly = $vrf->{_y_end} - $vrf->{_y_start};
+if ( defined($vrf->{aplot_major_tickmark}) && 
+    !defined($vrf->{major_tickmark_nucleotide}) ) {
+    $stplen = 10**( int( &logdec( &min($lx,$ly) ) ) + 1 ) / 
+              $vrf->{aplot_major_tickmark};
+} else {
+    $stplen = 10**( int( &logdec( &min($lx,$ly) ) - 0.175 ) );
+};
+defined($vrf->{major_tickmark_nucleotide}) || do {
+    $vrf->{major_tickmark_nucleotide} = $stplen;
+}; # defined($vrf->{major_tickmark_nucleotide})
+defined($vrf->{minor_tickmark_nucleotide}) || do {
+    $vrf->{minor_tickmark_nucleotide} = 
+        $vrf->{major_tickmark_nucleotide} / $vrf->{aplot_minor_tickmark};
+}; # defined($vrf->{minor_tickmark_nucleotide})
+@
+
+We do not want to use the module [[POSIX]] just to have the logarithm in base 10 as a built-in function when it is so easy to implement with the default natural logarithm implemented in perl, as shown here:
+% log_10(x) = ( log_e(x)/log_e(10) );
+
+<<Common Routines>>=
+sub logdec() { return (log($_[0])/log(10)); }
+@ %def &logdec
 
 \subsctn{Setting whole figure labels}
+
+When setting some of the plot labels, we must check if they are defined or not, but also we use them as warning reporters if any of the main draw elements was not found, say here alignment and/or X/Y sequence annotations.
 
 <<Layout Settings>>=
 sub set_page_labels() {
     my ($vrf) = @_;
+    defined($vrf->{title})    || do {
+        ($vrf->{title} = $vrf->{_alignment_name}) =~ s/$;/ x /o;
+        $vrf->{_plot_aln} || 
+            ($vrf->{subtitle} = 
+              'This alignment sequence was not found on GFF input records.\n'.
+              '...Please, check your command-line and/or data...');
+    };
+    defined($vrf->{subtitle}) || ($vrf->{subtitle} = "");
+    defined($vrf->{x_label})  || do {
+        $vrf->{x_label} = $vrf->{_x_sequence_name};
+        $vrf->{_plot_x_sequence} ||
+            ($vrf->{x_label} .= " (Annotation NOT FOUND)");
+    };
+    defined($vrf->{y_label})  || do {
+        $vrf->{y_label} = $vrf->{_y_sequence_name};
+        $vrf->{_plot_y_sequence} ||
+            ($vrf->{y_label} .= " (Annotation NOT FOUND)");
+    };
+    defined($vrf->{percent_box_label})    || ($vrf->{percent_box_label} = '');
+    defined($vrf->{percent_box_sublabel}) || ($vrf->{percent_box_sublabel} = '');
+    defined($vrf->{extra_box_label})      || ($vrf->{extra_box_label} = '');
+    defined($vrf->{extra_box_sublabel})   || ($vrf->{extra_box_sublabel} = '');
     return;
 } # set_page_labels
-@ %def &set_page_labels {}
+@ %def &set_page_labels
 
 
 \newpage
@@ -5831,6 +6119,7 @@ sub make_plot() {
  
 <<PostScript HEADER>>=
 sub ps_header() {
+    my $vr = \%{ $Vars{LAYOUT} };
     print STDOUT << "+++HEADER+++";
 %!PS-Adobe-3.0
 %%Title: title
@@ -5840,7 +6129,7 @@ sub ps_header() {
 %%For: $USER
 %%Pages: 1
 %%Orientation: Portrait
-%%BoundingBox: 0 0 595 842
+%%BoundingBox: 0 0 $vr->{_page_width} $vr->{_page_height}
 %%EndComments
 %
 <<GNU License PostScript>>
@@ -6193,27 +6482,127 @@ letter, quarto, statement and tabloid.
 
 \subsctn{Setting up {\ps} variables}
 
-\label{todo:IAB}
-<<HIDE: new defs TODO>>=
-\def\todoIAB{
-Setting up PostScript variables
-} % todoIAB
+<<HIDE: DONE>>=
+\doneitem{20011113}{Setting up PostScript variables}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoIAB}{todo:IAB}
-@
-\todo{ \item \todoIAB } % todo
 
 <<PostScript VARS>>=
 sub ps_variables() {
+    my $vr = \%{ $Vars{LAYOUT} };
     print STDOUT << '+++PSVARS+++';
 %%BeginProcSet: Setting_Vars 1.0 0
 %
-%%EndProcSet:   Setting_Vars 1.0 0
+<<psvariables - layout>>
+<<psvariables - tickmarks>>
+<<psvariables - labels>>
 %
+%%EndProcSet:   Setting_Vars 1.0 0
 +++PSVARS+++
 } # ps_variables
 @ %def &ps_variables
+
+<<psvariables - layout>>=
+%% Layout
+/flglscape @{[ &tobool($F) ]} def
+/flgcrd @{[ &tobool($vr->{hide_credits}) ]} def
+/Dpage { pagedict begin pg$vr->{page_size} flglscape { exch } if end } bdf
+%% Margins (1 cm) (Up Down Left Right - margins are XY independent)
+/UpM @{ $vr->{margin_top} } def
+/DnM @{ $vr->{margin_bottom} } def
+/LtM @{ $vr->{margin_left} } def
+/RtM @{ $vr->{margin_right} } def
+%% Defining background-color for objects.
+/BGcolor { $vr->{background_color} } def
+/FGcolor { $vr->{foreground_color} } def
+/BBoxcol { $vr->{aplot_box_bgcolor} } def
+/SBoxcol { $vr->{percent_box_bgcolor} } def
+/XBoxcol { $vr->{extra_box_bgcolor} } def
+%% 
+/axesp @{[ &tobool($vr->{aplot_xy_same_length}) ]} def
+% /xyratio $vr->{aplot_xy_scale} def
+/ZoomON @{[ &tobool($vr->{zoom_marks}) ]} def
+@
+
+<<psvariables - tickmarks>>=
+%% Tickmarks
+/GridON @{[ &tobool($vr->{show_grid}) ]} def
+/ShowTicks @{[ &tobool($vr->{show_tickmark_label}) ]} def
+%
+/BBXtickflg @{[ &tobool($vr->{show_aplot_x_ticks}) ]} def
+/BBYtickflg @{[ &tobool($vr->{show_aplot_y_ticks}) ]} def
+/SBXtickflg @{[ &tobool($vr->{show_percent_x_ticks}) ]} def
+/SBYtickflg @{[ &tobool($vr->{show_percent_y_ticks}) ]} def
+/XBXtickflg @{[ &tobool($vr->{show_extrabox_x_ticks}) ]} def
+/XBYtickflg @{[ &tobool($vr->{show_extrabox_y_ticks}) ]} def
+%
+/tickmx $vr->{major_tickmark_nucleotide} def
+/tickmn $vr->{minor_tickmark_nucleotide} def
+% /maxtck $vr->{aplot_major_tickmark} def
+% /mintck $vr->{aplot_minor_tickmark} def
+/pctmxt $vr->{percent_major_tickmark} def
+/pctmnt $vr->{percent_minor_tickmark} def
+/xtrmxt $vr->{extra_major_tickmark} def
+/xtrmnt $vr->{extra_minor_tickmark} def
+@
+
+<<psvariables - labels>>=
+%% Labels
+/Ttflg @{[ &tobool($vr->{show_title}) ]} def
+/Tt @{[ &tostring($vr->{title}) ]} def
+/Ttfsz @{ $vr->{title_fontsize} } def
+/Ttfnt { Ttfsz $Fonts{$vr->{title_font}} } def
+%
+/STtflg @{[ &tobool($vr->{show_subtitle}) ]} def
+/STt @{[ &tostring($vr->{subtitle}) ]} def
+/STtfsz @{ $vr->{subtitle_fontsize} } def
+/STtfnt { STtfsz $Fonts{$vr->{subtitle_font}} } def
+%
+/XLflg @{[ &tobool($vr->{show_x_sequence_label}) ]} def
+/XL @{[ &tostring($vr->{x_sequence_label}) ]} def
+/XLfsz @{ $vr->{x_label_fontsize} } def
+/XLfnt { XLfsz $Fonts{$vr->{x_label_font}} } def
+%
+/YLflg @{[ &tobool($vr->{show_y_sequence_label}) ]} def
+/YL @{[ &tostring($vr->{y_sequence_label}) ]} def
+/YLfsz @{ $vr->{y_label_fontsize} } def
+/YLfnt { YLfsz $Fonts{$vr->{y_label_font}} } def
+%
+/SBoxLabflg @{[ &tobool($vr->{show_percent_box_sublabel}) ]} def
+/SBoxLab @{[ &tostring($vr->{percent_box_label}) ]} def
+/SBoxLabfsz @{ $vr->{percent_box_label_fontsize} } def
+/SBoxLabfnt { SBoxLabfsz $Fonts{$vr->{percent_box_label_font}} } def
+%
+/SBoxSLabflg @{[ &tobool($vr->{show_percent_box_sublabel}) ]} def
+/SBoxSLab @{[ &tostring($vr->{percent_box_sublabel}) ]} def
+/SBoxSLabfsz @{ $vr->{percent_box_sublabel_fontsize} } def
+/SBoxSLabfnt { SBoxSLabfsz $Fonts{$vr->{percent_box_sublabel_font}} } def
+%
+/XBoxLabflg @{[ &tobool($vr->{show_extra_box_label}) ]} def
+/XBoxLab @{[ &tostring($vr->{extra_box_label}) ]} def
+/XBoxLabfsz @{ $vr->{extra_box_label_fontsize} } def
+/XBoxLabfnt { XBoxLabfsz $Fonts{$vr->{extra_box_label_font}} } def
+%
+/XBoxSLabflg @{[ &tobool($vr->{show_extra_box_sublabel}) ]} def
+/XBoxSLab @{[ &tostring($vr->{extra_box_sublabel}) ]} def
+/XBoxSLabfsz @{ $vr->{extra_box_sublabel_fontsize} } def
+/XBoxSLabfnt { XBoxSLabfsz $Fonts{$vr->{extra_box_sublabel_font}} } def
+@
+
+<<psvariables - labels>>=
+%
+%  /FTXangle  def % Var["FEATURE_X-LABELS_ANGLE"];
+%  /GPXangle  def % Var["GROUP_X-LABELS_ANGLE"];
+%  /FTYangle  def % Var["FEATURE_Y-LABELS_ANGLE"];
+%  /GPYangle  def % Var["GROUP_Y-LABELS_ANGLE"];
+%  /FTLbsc    def % Var["FEATURE_LABELS_FONTSIZE"];
+%  /GPLbsc    def % Var["GROUP_LABELS_FONTSIZE"];
+%  /MxFtLBL   def % MxFtLBL;
+%  /MxGpLBL   def % MxGpLBL;
+%  /putExon   def % tmpflag;
+%  /putExLbl  def % OnOff(Var["Display_BOX_LABEL"]);
+%  /putGnLbl  def % OnOff(Var["Display_GENE_LABEL"]);
+@
+
 
 \subsctn{Main {\ps} functions}
 
@@ -6238,6 +6627,13 @@ sub ps_main() {
 %
 %%EndProlog
 %
+<<POSTSCRIPT setup>>
+%
++++MAINProcs+++
+} # ps_main
+@ %def &ps_main
+
+<<POSTSCRIPT setup>>=
 %%BeginSetup
 %
 % initgraphics
@@ -6248,10 +6644,8 @@ true setstrokeadjust
 0 setlinecap
 %
 %%EndSetup
-%
-+++MAINProcs+++
-} # ps_main
-@ %def &ps_main
+@
+
 
 \subsctn{Plotting data into the figure}
 
@@ -6312,12 +6706,13 @@ showpage
 
 <<Postscript TRAILER>>=
 sub ps_trailer() {
+    my $vr = \%{ $Vars{LAYOUT} };
     print STDOUT << "+++EOF+++";
 %%Trailer
 %
 %%Pages: 1
 %%Orientation: Portrait
-%%BoundingBox: 0 0 595 842
+%%BoundingBox: 0 0 $vr->{_page_width} $vr->{_page_height}
 %%EOF
 +++EOF+++
 } # ps_trailer
@@ -7446,17 +7841,29 @@ The following functions replace the special tags we use in the description field
 
 <<parameter2tex - functions>>=
 sub rep_varop()  { $_[0] =~ s/\[(.+?)\]/\\op\{$1\}/og;     return $_[0]; } 
-sub repq_varop() { $_[0] =~ s/\[(.+?)\]/\'\\op\{$1\}\'/og; return $_[0]; } 
+# sub repq_varop() { $_[0] =~ s/\[(.+?)\]/\'\\op\{$1\}\'/og; return $_[0]; } 
+sub repq_varop() { $_[0] =~ s/\[(.+?)\]/\\op\{$1\}/og;     return $_[0]; } 
 @
 
 <<parameter2tex - functions>>=
 sub rep_param()  { $_[0] =~ s/<(.+?)>/\\pp\{$1\}/og;     return $_[0]; }
-sub repq_param() { $_[0] =~ s/<(.+?)>/\'\\pp\{$1\}\'/og; return $_[0]; }
+# sub repq_param() { $_[0] =~ s/<(.+?)>/\'\\pp\{$1\}\'/og; return $_[0]; }
+sub repq_param() { $_[0] =~ s/<(.+?)>/\\pp\{$1\}/og;     return $_[0]; }
 @
 
 <<parameter2tex - functions>>=
 sub rep_value()  { $_[0] =~ s/\|(.+?)\|/\\vp\{$1\}/og;     return $_[0]; }
-sub repq_value() { $_[0] =~ s/\|(.+?)\|/\'\\vp\{$1\}\'/og; return $_[0]; }
+# sub repq_value() { $_[0] =~ s/\|(.+?)\|/\'\\vp\{$1\}\'/og; return $_[0]; }
+sub repq_value() { $_[0] =~ s/\|(.+?)\|/\\vp\{$1\}/og;     return $_[0]; }
+@
+
+<<parameter2tex - functions>>=
+sub rep_chars()  { 
+    $_[0] =~ s/\%\{/\[/og;  # to recover LaTeX []
+    $_[0] =~ s/\%\}/\]/og;  # 
+    $_[0] =~ s/\\n\\/\n/og; # to recover LaTeX newline
+    return $_[0];
+} # rep_chars
 @
 
 <<parameter2tex - functions>>=
@@ -7464,7 +7871,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.19 2001-11-13 19:24:27 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -7538,19 +7945,21 @@ sub parseVars() {
             $strtbl = '\rvjoin{'.$tmptbl.'}{'.$vareq.'}'."\n\%\n";
         } else {
             $strtbl = '\rvdesc{'.$tmptbl.'}{'.$vareq.'}'."\n".'   { '.
-                (&repq_varop(&repq_param(&repq_value($VARS{$k}{SDE})))).' }'.
+                (&rep_chars(&repq_varop(
+                     &repq_param(&repq_value($VARS{$k}{SDE}))))).' }'.
                 "\n\%\n";
         }; # JOIN_SHORT
         if ($VARS{$k}{JOIN}) {
-            $strdsc = '\ijoin{'.$tmptbl.$vareqj.'[ '.$vareq.' ]}'."\n\%\n";
+            $strdsc = '\ijoin{'.$tmpdsc.$vareqj.'[ '.$vareq.' ]}'."\n\%\n";
         } else {
-            $strdsc = '\idesc{'.$tmptbl.$vareqj.'[ '.$vareq.' ]}'."\n".'   {'.
-                (&repq_varop(&repq_param(&repq_value($VARS{$k}{LDE})))).' }'.
+            $strdsc = '\idesc{'.$tmpdsc.$vareqj.'[ '.$vareq.' ]}'."\n".'   {'.
+                (&rep_chars(&repq_varop(
+                     &repq_param(&repq_value($VARS{$k}{LDE}))))).' }'.
                 "\n\%\n";
         }; # JOIN
         #
-        $strdsc =~ s/_/\\_/og;
-        $strtbl =~ s/_/\\_/og;
+        $strdsc =~ s/(_|\%\-)/\\_/og;
+        $strtbl =~ s/(_|\%\-)/\\_/og;
         print { $varO{$sec}[0] }    $strdsc;
         print { $varO{$subsec}[0] } $strtbl;
     }; # foreach keys %VARS
@@ -7701,19 +8110,21 @@ sub parseOpts() {
             $strtbl = '\rjoin{'.$tmptbl.'}'."\n\%\n";
         } else {
             $strtbl = '\rdesc{'.$tmptbl.'}'."\n".'   { '.
-                (&repq_varop(&repq_param(&repq_value($VARS{$k}{SDE})))).' }'.
+                (&rep_chars(&repq_varop(
+                     &repq_param(&repq_value($VARS{$k}{SDE}))))).' }'.
                 "\n\%\n";
         }; # JOIN_SHORT
         if ($VARS{$k}{JOIN}) {
             $strdsc = '\ijoin{'.$tmpdsc.$vareq.'}'."\n\%\n";
         } else {
             $strdsc = '\idesc{'.$tmpdsc.$vareq.'}'."\n".'   {'.
-                (&repq_varop(&repq_param(&repq_value($VARS{$k}{LDE})))).' }'.
+                (&rep_chars(&repq_varop(
+                     &repq_param(&repq_value($VARS{$k}{LDE}))))).' }'.
                 "\n\%\n";
         }; # JOIN
         #
-        $strdsc =~ s/_/\\_/og;
-        $strtbl =~ s/_/\\_/og;
+        $strdsc =~ s/(_|\%\-)/\\_/og;
+        $strtbl =~ s/(_|\%\-)/\\_/og;
         print FDSC $strdsc;
         print FTBL $strtbl;
     }; # foreach keys %VARS
@@ -8553,7 +8964,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $
+# $Id: gff2aplot.nw,v 1.19 2001-11-13 19:24:27 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -8631,7 +9042,7 @@ notangle -L -R"APLOT" $WORK/$nwfile.nw | \
 # numbers may change if noweb doc is changed
 notangle -L -R"APLOT" $WORK/$nwfile.nw | \
     perl -ne '( $.>1 &&
-                $_ !~ /^\#line (444|454|461|1181|1276|1430|4201|432)/o
+                $_ !~ /^\#line (455|465|474|1194|1289|1463|4344|4644|443)/o
                ) && print' - | cpif $BIN/gff2aplot.pl ;
 chmod a+x $BIN/gff2aplot.pl ;
 #
