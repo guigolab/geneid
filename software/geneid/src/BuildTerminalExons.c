@@ -4,9 +4,9 @@
 *                                                                        *
 *   From acceptor sites and stop codons, to build initial exons          *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,11 +24,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildTerminalExons.c,v 1.3 2001-12-18 15:23:25 eblanco Exp $  */
+/*  $Id: BuildTerminalExons.c,v 1.4 2003-11-05 13:39:30 eblanco Exp $  */
 
 #include "geneid.h"
 
 /* Maximum allowed number of generic exons (divided by RTERMI) */
+/* Sequence is used to save information to prevent Stop codons in frame */
 extern long NUMEXONS;
 extern long MAXBACKUPSITES;
 

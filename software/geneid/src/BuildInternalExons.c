@@ -4,9 +4,9 @@
 *                                                                        *
 *   From acceptor/donor sites and stop codons, to build internal exons   *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,10 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.4 2003-02-26 10:55:18 eblanco Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.5 2003-11-05 13:32:39 eblanco Exp $  */
 
 #include "geneid.h"
 
+/* Sequence is used to save information to prevent Stop codons in frame */
 /* Maximum allowed number of generic exons (divided by RINTER) */
 extern long NUMEXONS;
 extern long MAXBACKUPSITES;
@@ -47,7 +48,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
     int Frame[FRAMES];
   } *LocalExon; 
   int nLocalExons, LowestLocalExon;
-  double LowestLocalScore;
+  float LowestLocalScore;
   
   /* Boolean array of windows: closed or opened */ 
   int Frame[FRAMES];
@@ -81,7 +82,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 
       /* Reset the best local exons array */
       nLocalExons = 0;
-      LowestLocalScore = DBL_MAX;
+      LowestLocalScore = INF;
       LowestLocalExon = 0;
 
       /* Skip previous Stops to current Acceptor */
@@ -241,7 +242,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 				strcpy((Exon+nExon)->Group,NOGROUP);
 				(Exon+nExon)->evidence = 0;
 				
-				/* Store info about frame and remainder nucleotides to avoid building stops in frame */
+				/* Save info (frame/remainder bases to avoid stops in frame */
 				ComputeStopInfo((Exon+nExon),Sequence);
 
 				nExon++;
