@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.5 2001-03-07 20:57:22 eblanco Exp $  */
+/*  $Id: Output.c,v 1.6 2001-03-07 21:07:05 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -77,7 +77,7 @@ void PrintProfile (profile *p, char* signal)
 
 void OutputHeader(char* locus, long l)
 {
-  char s[MAXSTRING];
+  char* s;
   
   if (GFF)
     printf("## gff-version 2\n");
