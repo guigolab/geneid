@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.59 2000-03-04 17:57:37 jabril Exp $	
+#         $Id: gff2ps,v 1.60 2000-03-06 12:18:02 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.59 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-04 17:57:37 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.60 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-06 12:18:02 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.59 2000-03-04 17:57:37 jabril Exp $
+%    $Id: gff2ps,v 1.60 2000-03-06 12:18:02 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -604,7 +604,7 @@ end % tmdct
  /shwpos { S Flgspos { seqori LY neg ScV 0 eq { 0.65 mul T } { 1 -1 F 1.15 mul T } ifelse sqend sqdif sqori 0 2 { S 0 T postk 10 string cvs 0 0 S ScV 1 eq { 1 -1 F } if strnd (-) eq { 1 -1 F 45 } { -45 } ifelse ScV 1 eq { neg } if 4 -1 roll strnd (-) eq { ScV 1 ne { (bv) } { (tv) } ifelse } { ScV 1 ne { (tv) } { (bv) } ifelse } ifelse (lh) ShFont fgcolor ttxt R R } repeat } if R } bdf
 % *V align:  0 center : 1 baseline : -1 reverse
  /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } if colordict begin p_s cvx exec newpath end R } bdf
- /GetVar { /ftlbl xdf /flblfg xdf /Flgspos xdf /FtV exch dup 2 eq { pop 0 /mrr true def } { /mrr false def } ifelse def /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def /fflbl ftlbl () eq { false } { flblfg } ifelse def /p_strk true def } bdf
+ /GetVar { /ftlbl xdf /flblfg xdf /Flgspos xdf /FtV exch dup 2 eq { pop 0 /mrr true def } { /mrr false def } ifelse def /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def /fflbl ftlbl () eq { false } { flblfg } ifelse def /p_strk true def pop } bdf
  /p { S GetVar shwpos strnd (-) eq { seqend } { seqori } ifelse 0 T frs R } bdf
 %
 % Shapes......
