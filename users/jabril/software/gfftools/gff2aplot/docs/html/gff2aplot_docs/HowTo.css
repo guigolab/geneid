@@ -1,0 +1,45 @@
+/*      GENOME INFORMATICS      */
+/*     RESEARCH  LABORATORY     */
+/*  GFFTOOLS HowTo Style Sheet  */
+
+/*$Id: HowTo.css,v 1.1 2002-01-09 09:58:32 jabril Exp $*/
+ 
+H3 {
+ display: inline-block;
+ line-height: 75%;
+ padding-bottom: 0px;
+ border-bottom: 0px;
+ margin-bottom: 0px;
+ margin-top: 8px;
+}
+.home {
+ line-height: 80%;
+ color: white;
+ font-family: "Arial", "Helvetica", sans-serif;
+ font-size: 18px;
+ font-weight: bold;
+ font-stretch: expanded;
+ text-align: center;
+ border: none;
+}
+.ytbl, .rtbl {
+ vertical-align: top;
+ font-family: "Arial", "Helvetica", sans-serif;
+ font-size: 12px;
+}
+.ytbl {
+ background: #FAFAD2; /* light yellow */
+}
+.rtbl {
+ background: #FFCCAA; /* light red */
+}
+.codebg { 
+ display: table-cell;
+ background: #CCFFCC;
+}
+.codefg {
+ font-family: "Monospaced", "Courier", sans-serif;
+ font-weight: normal;
+ font-size: 12px;
+ color: #000000;
+}
