@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.23 2002-05-01 15:52:21 jabril Exp $ 
+% # $Id: humus.nw,v 1.24 2002-05-01 20:05:10 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.23 2002-05-01 15:52:21 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.24 2002-05-01 20:05:10 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3220,7 +3220,7 @@ sub parse_gff() {
             print STDOUT (join("\t", (@t[$seq..$frm]))).
                          "\tTarget \"$l[$seq]\" $l[$ori] $l[$end] ;".
                          "\tStrand $l[$str] ;\tFrame $l[$frm] ;\t$t[$other]\n";
-            $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
+            $g{sum}[$g{"$t[$str]$t[$frm]"}]++;
         }; # while
         close(TBXFL);
         printf STDERR "  %8s %8s %8s  %s\n",($cf+$cr),$cf,$cr,$fl;
@@ -3732,7 +3732,11 @@ $PRGVER = '0.9alpha';
 # ARGVS
 use Getopt::Std;
 my %opts = ();
-getopts("t",\%opts);
+getopts("tS:T:P:",\%opts);
+       # -t sort output by test-set, else by program
+       # -S define a new strand strings set   : "str1 str2 ... strn"
+       # -T define a new test-set strings set : "set1 set2 ... setn"
+       # -P define a new program string set   : "prg1 prg2 ... prgn"
 my @files = @ARGV;
 #
 # VARS
@@ -3752,6 +3756,19 @@ my @seqs = ();
 my @strands = qw( FWD REV );
 my @tests   = qw( REFSEQ ENSEMBL );
 my @progs   = qw( GENSCAN SRs GENEID SGP );
+my @tmp = ();
+defined($opts{S}) && do {
+    @tmp = split /\s+/og, $opts{S};
+    (scalar(@tmp) > 0) && (@strands = @tmp);
+}; # defined($opts{})
+defined($opts{T}) && do {
+    @tmp = split /\s+/og, $opts{T};
+    (scalar(@tmp) > 0) && (@tests = @tmp);
+}; # defined($opts{})
+defined($opts{P}) && do {
+    @tmp = split /\s+/og, $opts{P};
+    (scalar(@tmp) > 0) && (@progs = @tmp);
+}; # defined($opts{})
 #
 ## MAIN
 # use Data::Dumper;
@@ -7599,7 +7616,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.23 2002-05-01 15:52:21 jabril Exp $
+# $Id: humus.nw,v 1.24 2002-05-01 20:05:10 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
