@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: account.c,v 1.1 2000-07-05 08:33:26 eblanco Exp $  */
+/*  $Id: account.c,v 1.2 2000-07-26 07:54:33 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -33,6 +33,10 @@ account* InitAcc()
 {
   account* m; 
   
+  /* Verifying geneid.h features */
+  if (LENGTHSi <= OVERLAP)
+    printError("LENGTHSi parameter must be greater than OVERLAP parameter");
+
   m = (account *) malloc(sizeof(account));
 
   /* Reset counters */
