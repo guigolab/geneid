@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: splitfasta.nw,v 1.2 2001-10-05 16:36:23 jabril Exp $ 
+% # $Id: splitfasta.nw,v 1.3 2001-10-10 17:53:07 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -225,7 +225,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: splitfasta.nw,v 1.2 2001-10-05 16:36:23 jabril Exp $$>$ }
+{\small$<$ \verb$Id: splitfasta.nw,v 1.3 2001-10-10 17:53:07 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -261,7 +261,7 @@ my $VERSION = '1.0_alpha';
 
 <<Program Description>>=
 # #----------------------------------------------------------------#
-# #                          splitfasta                            #
+# #                        splitfasta.pl                           #
 # #----------------------------------------------------------------#
 #
 #     splitfasta.pl  seqlength overlap < fastafile > output
@@ -587,7 +587,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: splitfasta.nw,v 1.2 2001-10-05 16:36:23 jabril Exp $
+# $Id: splitfasta.nw,v 1.3 2001-10-10 17:53:07 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}

@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: maskedfastacoords.nw,v 1.5 2001-10-03 11:23:38 jabril Exp $ 
+% # $Id: maskedfastacoords.nw,v 1.6 2001-10-10 17:53:07 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -107,21 +107,31 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{maskedfastacoords.pl}
+\def\tit{\textsc{\progname}}
+%
 \def\mtjabril{
  \htmladdnormallink{\texttt{jabril@imim.es}}
                    {MAILTO:jabril@imim.es?subject=[maskedfastacoords]}
  } % def mtjabril
+%
 \def\authorslist{
  Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Abril, JF % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
+%
 \def\description{
  Retrieving positions for masked regions of masked sequences in fasta format.
 Program can also output those coords in GFF format, where you can define several fields from command-line. } % def description 
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
@@ -130,12 +140,12 @@ Universitat Pompeu Fabra\\[2ex]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%% Setting text for footers and headers
-\def\tit{\textsc{\progname}}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\tit\quad\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -212,7 +222,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.5 2001-10-03 11:23:38 jabril Exp $$>$ }
+{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.6 2001-10-10 17:53:07 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -361,18 +371,22 @@ my $PROGRAM = 'maskedfastacoords.pl';
 my $VERSION = '0.1_alpha';
 @ 
 <<Prog USAGE>>=
-#$PROGRAM [options] < fasta_file > coords_file
+$PROGRAM [options] < fasta_file > coords_file
 @
 <<Prog DESC>>=
-#Retrieving masked regions coords from fasta files.
+Retrieving masked regions coords from fasta files.
 @
 
 <<Program Description>>=
+# #----------------------------------------------------------------#
+# #                     maskedfastacoords.pl                       #
+# #----------------------------------------------------------------#
 # 
-#  <<Prog USAGE>>
+#  maskedfastacoords.pl  [options] < fasta_file > coords_file
 #
-#  <<Prog DESC>>
-#
+#    Retrieving masked regions coords from fasta files.
+# 
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
 @ 
 
 <<Use Modules>>=
@@ -973,20 +987,12 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: maskedfastacoords.nw,v 1.5 2001-10-03 11:23:38 jabril Exp $
+# $Id: maskedfastacoords.nw,v 1.6 2001-10-10 17:53:07 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
 
 <<GNU License>>=
-# #----------------------------------------------------------------#
-# #                          maskedfastacoords                         #
-# #----------------------------------------------------------------#
-# 
-#    Remember to put a short description of your script here...
-# 
-#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
