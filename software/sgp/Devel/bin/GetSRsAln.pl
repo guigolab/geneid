@@ -2,10 +2,11 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.1 2000-08-10 01:25:10 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.2 2000-08-10 02:15:35 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln.pl";
+my $VERSION = '$Version:$ ';
 my $Start = time;
 
 use strict; # 'refs';
@@ -20,21 +21,30 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling","pass_through");
 
 my ( $verbose_flg, $aln_flg, $bit_flg, $ids_flg,
-	 $help_flg, $prt_aln_flg, $stdin_flg
-	 ) = (0,0,0,0,0,0,1);
+	 $only_Q_flg, $only_S_flg, $to_file,
+	 $help_flg, $prt_aln_flg, $debug_flg, $stdin_flg
+	 ) = (0,0,0,0,0,0,0,0,0,0,1);
 
-GetOptions( "A|alignment"      => \$prt_aln_flg , # show only alignment not GFF
+GetOptions( "Q|query-only"     => \$only_Q_flg  ,
+			"S|subject-only"   => \$only_S_flg  ,
+			"A|alignment"      => \$prt_aln_flg , # show only alignment not GFF
 			"b|bit-score"      => \$bit_flg     ,
 			"i|identity-score" => \$ids_flg     ,
+			"W|write-to-file"  => \$to_file     ,
 			"v|verbose"        => \$verbose_flg ,
+			"D|debugging"      => \$debug_flg   ,
  			"h|help|\?"        => \$help_flg    ,
 			);
 
 my $ARGV = my $scoreopt = my $vrbopt = "";
+$verbose_flg = 1 if $debug_flg;
 $vrbopt = " -v" if $verbose_flg;
 # $aln_flg = 0 if ($bit_flg || $ids_flg);
 $scoreopt = " -i" if $ids_flg;
 $scoreopt = " -b" if $bit_flg;
+$VERSION =~ s/\$//og;
+
+$help_flg && &prt_help; 
 
 
 ##############################################################################
@@ -74,6 +84,59 @@ my $max_frame_num = keys %FRxST ;
 ##                          Global Subroutines                              ##
 ##############################################################################
 
+# Print help to STDERR.
+#
+sub prt_help {
+        open(HELP, "| more") ;
+        print HELP <<EndOfHelp;
+PROGRAM:
+        $PROGRAM
+        $VERSION
+
+USAGE:  $PROGRAM [options] <results.from.blast>
+
+REQUIRES:
+
+	This program needs to find "parseblast" in the path.
+  (Don't you have your ~/bin dir in the path?)............ ;^) 
+  
+COMMAND-LINE OPTIONS:
+
+    "$PROGRAM" prints all the Similarity Regions (SRs) that finds 
+  from the HSPs given by the blast input (now works just with TBLASTX).
+  It takes input from <STDIN> or single/multiple files, and writes
+  its output to <STDOUT>, so user can redirect to a file but
+  he also could use the program as a filter within a pipe. It also 
+  can write to files with the "-W" option. The output then is splited
+  onto two files with the ".alnQ" and ".alnS" extensions. By default
+  SRs for both Query and Subject are generated, you can change this
+  with "-Q" and "-S" options, see below. The basic output is in GFF, 
+  you can switch to pairwise alignment output not in GFF.
+
+    -Q, --query-only     : just print QUERY SRs (default both).
+    -S, --subject-only   : just print SUBJECT SRs (default both).
+    -A, --alignment      : print pairwise alignment for each SR.
+    -b, --bit-score      : set <score> field to Bits (default Alignment Score).
+    -i, --identity-score : set <score> field to Identities (default Alignment).
+    -W, --write-to-file  : write output to separate files
+                                 + for QUERY:   "<input_name>.alnQ"
+                                 + for SUBJECT: "<input_name>.alnS"
+                           you can provide "<input_name>" as parameter for
+                           this option, as example, if you provide "-W results"
+                           you send output to "results.alnQ" and "results.alnS".
+    -v, --verbose        : warnings sent to <STDERR>.
+    -D, --debuggingv     : extended report for debugging sent to <STDERR>.
+    -h, --help           : show this help pages.
+
+BUGS:    Report any problem to: abril\@imim.es
+
+AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
+
+EndOfHelp
+        close(HELP);
+exit(1);
+}
+ 
 # Reporting IN/OUT progress.
 #
 sub prt_progress {
