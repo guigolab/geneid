@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.51 2000-01-31 13:21:34 jabril Exp $	
+#         $Id: gff2ps,v 1.52 2000-02-03 17:26:27 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.51 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-31 13:21:34 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.52 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-02-03 17:26:27 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.51 2000-01-31 13:21:34 jabril Exp $
+%    $Id: gff2ps,v 1.52 2000-02-03 17:26:27 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -875,7 +875,7 @@ XtrCustomExist () {
       v01=1;
       if [ -f "$1" ];
 	    then
-		  v02="$CFDIR/$1";
+		  v02="$1";
         else
           if [ -f "$CFDIR/$1" ];
             then 
