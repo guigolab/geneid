@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.1 2000-07-05 09:10:15 eblanco Exp $  */
+/*  $Id: RequestMemory.c,v 1.2 2000-07-26 07:59:10 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern long NUMSITES, NUMEXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
 
 void shareGeneModel(gparam** isochores, int n)
 { 
@@ -390,6 +392,10 @@ packDump* RequestMemoryDumpster()
   if ((d->h = 
        (dumpHash*) malloc(sizeof(struct s_dumpHash))) == NULL)
     printError("Not enough space to hold dumpster hash table");  
+  
+  if ((d->h->T = 
+       (dumpNode**) calloc(MAXBACKUPEXONS,sizeof(dumpNode*))) == NULL)
+    printError("Not enough space to hold dumpster hash table");   
 
   d->ndumpSites = 0;
   d->ndumpExons = 0;
