@@ -1,0 +1,35 @@
+# X #
+
+#
+# font  <font-alias> <PostScript-font-name>
+
+font arial Arial
+font symbol Symbol
+
+#
+# color  <color-alias> <cyan> <magenta> <yellow> <black>
+
+color koko 0.00 0.50 0.00 0.25
+
+#
+# box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> [ S:<line_style> [ W:<line_width> [ F:<fill_color> ] ] ] ]
+
+box 500 1000 3500 4000 L:verydarkcyan S:dotted W:2pt F:cyan
+
+#
+# circle  <Cx> <Cy> <Rx> <Ry> [ A:<angle> [ L:<line_color> [ S:<line_style> [ W:<line_width>
+#        [ F:<fill_color> ] ] ] ] ]
+
+circle 3500 500 400 250 A:35 S:dashed W:1 F:orange L:darkorange
+
+#
+# arrow  <Cx> <Cy> <length> [ A:<angle> [ L:<line_color> [ S:<line_style> [ W:<line_width> 
+#       [ F:<fill_color> [ N:<font_name> [ Z:<font_size> [ T:<text_color> [ "<string>" ] ] ] ] ] ] ] ] ]
+
+arrow 950 950 20pt A:125 N:my_arial Z:10pt T:red H:right V:bottom "alpha"
+
+#
+# text  <Cx> <Cy> [ N:<font_name> [ Z:<font_size> [ A:<angle> 
+#       [ H:<horizontal_align> [ V:<vertical_align> [ T:<text_color> ] ] ] ] ] ] "<string>"
+
+text 2800 2800 H:left V:top "Hello World!!"
