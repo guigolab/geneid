@@ -1,0 +1,761 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% # $Id: CHR22_tests.nw,v 1.1 2002-05-19 10:21:33 jabril Exp $ 
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+\usepackage{dcolumn}
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+\usepackage{verbatim}
+%\usepackage{version}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+
+\input defs.tex % from <LaTeX new definitions> chunk
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{document}
+
+<<HIDE: LaTeX new definitions>>=
+%%%%% Colors for gff2ps
+\input ColorDefs.tex
+
+%%%%% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\parsctn}[1]{\paragraph{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\todo}[1]{
+  \vskip 3ex
+  \hspace{-0.75cm}
+   \psframebox[framearc=0.2,linecolor=darkred,linewidth=1pt,
+              fillstyle=solid,fillcolor=verylightyellow,framesep=2ex]{
+     \begin{minipage}[t]{16cm}
+     \vskip -4.75ex
+     \hspace{-1.25cm}
+       \psframebox[framearc=1,linecolor=darkred,linewidth=1.25pt,
+               fillstyle=solid,fillcolor=verylightorange,framesep=5pt]{
+               \textcolor{darkred}{\textbf{\hspace{2ex}TO DO\hspace{2ex}}}
+         } % psframebox
+      \begin{itemize}\setlength{\itemsep}{-0.5ex} #1 \end{itemize}
+     \end{minipage}
+     } % psframebox
+  \vskip 1.5ex
+} % newcommand todo
+\newcommand{\todoitem}[2]{
+  \item[$\triangleright$] [\textit{Section}~\ref{#2}, 
+                           \textit{page}~\pageref{#2}]\\ {#1}
+} % newcommand todoitem
+<<HIDE: new LaTeX commands>>
+
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+<<HIDE: new LaTeX pstricks>>
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+<<HIDE: new LaTeX urls>>
+
+%%%%% defs
+\def\noweb{\textsc{noweb}}
+\def\ps{\textsc{PostScript}}
+<<HIDE: new LaTeX definitions>>
+
+%%%%% TODO defs
+<<HIDE: new defs TODO>>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
+\def\shorttit{\textbf{Human + Mouse}}
+\def\tit{\textsc{\shortstack{Human Genome Annotation\\using Mouse Homology}}}
+%
+\def\mtauthor{
+ \htmladdnormallink{\texttt{author@imim.es}}
+                   {MAILTO:author@imim.es?subject=[humus]}
+ } % def mtauthor
+%
+\def\authorslist{
+ The Author/s {\mdseries\small\dotfill \mtauthor } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\authorshort{
+ Abril, JF; Parra, G; Guig\'o, R
+ } % def authorshort
+%
+\def\license{GNU General Public License (GNU-GPL)}
+%
+\def\progdesc{
+We are going to scale up all the processes we have tested on {\lhsap} chromosomes 22 and 21, to the whole genome approach, in which we take advantage of the homology between {\hsap} and {\lmmus} genomes to increase gene prediction accuracy and producing a better genome annotation of the coding regions.
+ } % def progdesc
+%
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\shorttit\quad\rightmark}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%
+@
+
+<<HIDE: new LaTeX commands>>=
+\newcommand{\mylst}[2]{
+ \begin{center}
+% \fbox{
+  \begin{minipage}{0.95\linewidth}
+   \textbf{#1}
+   \begin{itemize}
+     #2
+   \end{itemize}
+  \end{minipage}
+% } % fbox
+ \end{center}
+} % newcommand->mylst
+\newcommand{\whtlst}[1]{\mylst{What to do here:}{#1}} % newcommand->chklst
+\newcommand{\chklst}[1]{\mylst{Check points:}{#1}} % newcommand->chklst
+@ 
+<<HIDE: new LaTeX pstricks>>=
+@ 
+<<HIDE: new LaTeX urls>>=
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[HuMus]}}
+\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es?subject=[HuMus]}}
+\def\mtrguigo{\htmladdnormallink{\textbf{rguigo@imim.es}}{MAILTO:rguigo@imim.es?subject=[HuMus]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[HuMus]}}
+@ 
+<<HIDE: new LaTeX definitions>>=
+\def\perl{\textsc{Perl}}
+\def\biop{\textsc{BioPerl}}
+\def\ps{\textsc{PostScript}}
+\def\rptm{\textsc{RepeatMasker}}
+\def\bl{\textsc{Blast}}
+\def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
+\def\sgp{\textsc{sgp}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{gff2aplot}}
+\def\apo{\textsl{Apollo}}
+\def\refseq{\textsc{RefSeq}}
+\def\ens{\textit{\texttt{emsembl}}}
+\def\hsap{\textit{H. sapiens}}
+\def\lhsap{\textit{Homo sapiens}}
+\def\mmus{\textit{M. musculus}}
+\def\lmmus{\textit{Mus musculus}}
+@ 
+<<HIDE: new defs TODO>>=
+@ 
+
+%
+
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textbf{\Huge \tit}\\[5ex]
+
+% \textbf{\Large Authors List Here}\\[1ex]
+\textbf{\Large Josep F. Abril}\\[1ex]
+\textbf{\Large Gen\'{\i}s Parra}\\[1ex]
+\textbf{\Large Roderic Guig\'o}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+\progdesc
+} % parbox
+\end{center}
+\end{abstract}
+
+\vfill
+
+\begin{raggedleft}
+\showaffiliation
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: {\mtjabril}, {\mtgparra} and {\mtrguigo}}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\thispagestyle{empty}
+
+\ \ \\
+% EMPTY PAGE
+
+%
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: CHR22_tests.nw,v 1.1 2002-05-19 10:21:33 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Tests on Chromosome 22}
+
+\subsctn{Adding evidences to SGP}
+
+<<Running CHR22: SGP HsapGP + MmusMGSC + RefSeq>>=
+OXID="20011222.UCSCgp-20020411.MGSCv3" ;
+NXID="20011222.UCSCgp-20020411.MGSCv3+RefSeq" ;
+CHR="22" ;
+NCHR="chr$CHR" ;
+SEQ="chr22" ;
+HOMOLOGY="$HUMUS/$NCHR/sgp/$OXID/hsp-sr/$SEQ.gff" ;
+# remember that geneid does not allow overlapping features... :^<
+EVIDENCE="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval.gff" ;
+ODIR="$HUMUS/$NCHR/sgp/$NXID" ;
+#
+MkDirs $ODIR ;
+for c in out gff gtf2 cds prot hsp-sr logs tmp eval ;
+  do { 
+    MkDirs $ODIR/$c ;
+    } ;
+  done ;
+#
+GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
+PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
+EW=0 ; # add to exon weigth
+#
+#--> we do not run geneid on masked sequences at this moment
+#--> we are using original un-masked fasta sequences from GP
+ISEQ="$HSEQ/$SEQ.fa" ;
+#
+if [ -f "$HOMOLOGY" ] ;
+  then
+    echo "### Using homology data from: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="-S $HOMOLOGY" ;
+  else
+    echo "### Homology file NOT found: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="" ;
+  fi ;
+#
+if [ -f "$EVIDENCE" ] ;
+  then
+    echo "### Using termini file: $EVIDENCE" 1>&2 ;
+    sort +3n -4 $EVIDENCE > $ODIR/tmp/$SEQ.gff ;
+    EVIDENCE_PAR="-R $ODIR/tmp/$SEQ.gff" ;
+  else
+    EVIDENCE_PAR="" ;
+  fi ;
+#
+CheckFile R $PARAM $ISEQ $HOMOLOGY $EVIDENCE ;
+#
+GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $EVIDENCE_PAR $ISEQ" ;
+echo "$GENEID $GENEID_CMDLN 2> $ODIR/$SEQ.sgp" 1>&2 ;
+$GENEID $GENEID_CMDLN 2> $ODIR/logs/$SEQ.sgp > $ODIR/out/$SEQ.all ;
+grep -v 'evidence' $ODIR/out/$SEQ.all > $ODIR/out/$SEQ ;
+$BIN/geneid_raw2GFF.pl $SEQ $ODIR $ODIR/out/$SEQ ;
+#
+ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
+  while read n;
+    do {
+      cat $ODIR/gff/$SEQ.sg/$n;
+      };
+    done | sort +3n +4n -5 - > $ODIR/gff/$SEQ ;
+#
+get_geneid_genes $ODIR/gff/$SEQ > $ODIR/$SEQ.gene_list ;
+#
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+               $ODIR/gff/$SEQ > $ODIR/eval/$SEQ.eval.gff ;
+#
+VDIR="$ODIR/eval" ;
+$BIN/gffsplitstrand.pl $VDIR/$SEQ.eval.gff ; # no sequence length record required here
+#
+A_REFSEQ="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval" ;
+A_ENSEMBL="$HUMUS/$NCHR/annotation/20011222/ensembl/$SEQ.eval" ;
+cat > $VDIR/${SEQ}.summary <<EOT ;
+#
+# Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
+#
+# --> Hsap GP20011222 x Mmus MGSCv3 homology + Hsap RefSeq GP20011222 evidences
+#
+EOT
+#
+CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
+            $A_ENSEMBL.fwd.gff $A_ENSEMBL.rev.gff ;
+#
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+#
+@ 
+
+\subsctn{Adding evidences to SGP (II)}
+
+In this case, we remove the frame information from the RefSeq features, just to test if {\gnid} incorporates evidences in a better way.
+
+<<Running CHR22: SGP HsapGP + MmusMGSC + noframe-RefSeq>>=
+OXID="20011222.UCSCgp-20020411.MGSCv3" ;
+NXID="20011222.UCSCgp-20020411.MGSCv3+RefSeq.NoFrame" ;
+CHR="22" ;
+NCHR="chr$CHR" ;
+SEQ="chr22" ;
+HOMOLOGY="$HUMUS/$NCHR/sgp/$OXID/hsp-sr/$SEQ.gff" ;
+# remember that geneid does not allow overlapping features... :^<
+EVIDENCE="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval.gff" ;
+ODIR="$HUMUS/$NCHR/sgp/$NXID" ;
+#
+MkDirs $ODIR ;
+for c in out gff gtf2 cds prot hsp-sr logs tmp eval ;
+  do { 
+    MkDirs $ODIR/$c ;
+    } ;
+  done ;
+#
+GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
+PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
+EW=0 ; # add to exon weigth
+#
+#--> we do not run geneid on masked sequences at this moment
+#--> we are using original un-masked fasta sequences from GP
+ISEQ="$HSEQ/$SEQ.fa" ;
+#
+if [ -f "$HOMOLOGY" ] ;
+  then
+    echo "### Using homology data from: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="-S $HOMOLOGY" ;
+  else
+    echo "### Homology file NOT found: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="" ;
+  fi ;
+#
+if [ -f "$EVIDENCE" ] ;
+  then
+    echo "### Using termini file: $EVIDENCE" 1>&2 ;
+    sort +3n -4 $EVIDENCE | \
+      gawk 'BEGIN{ OFS="\t" }
+         ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { 
+             $8="."; print $0 }' > $ODIR/tmp/$SEQ.gff ;
+    EVIDENCE_PAR="-R $ODIR/tmp/$SEQ.gff" ;
+  else
+    EVIDENCE_PAR="" ;
+  fi ;
+#
+CheckFile R $PARAM $ISEQ $HOMOLOGY $EVIDENCE ;
+#
+GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $EVIDENCE_PAR $ISEQ" ;
+echo "$GENEID $GENEID_CMDLN 2> $ODIR/$SEQ.sgp" 1>&2 ;
+$GENEID $GENEID_CMDLN 2> $ODIR/logs/$SEQ.sgp > $ODIR/out/$SEQ.all ;
+grep -v 'evidence' $ODIR/out/$SEQ.all > $ODIR/out/$SEQ ;
+$BIN/geneid_raw2GFF.pl $SEQ $ODIR $ODIR/out/$SEQ ;
+#
+ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
+  while read n;
+    do {
+      cat $ODIR/gff/$SEQ.sg/$n;
+      };
+    done | sort +3n +4n -5 - > $ODIR/gff/$SEQ ;
+#
+get_geneid_genes $ODIR/gff/$SEQ > $ODIR/$SEQ.gene_list ;
+#
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+               $ODIR/gff/$SEQ > $ODIR/eval/$SEQ.eval.gff ;
+#
+VDIR="$ODIR/eval" ;
+$BIN/gffsplitstrand.pl $VDIR/$SEQ.eval.gff ; # no sequence length record required here
+#
+A_REFSEQ="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval" ;
+A_ENSEMBL="$HUMUS/$NCHR/annotation/20011222/ensembl/$SEQ.eval" ;
+cat > $VDIR/${SEQ}.summary <<EOT ;
+#
+# Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
+#
+# --> Hsap GP20011222 x Mmus MGSCv3 homology + Hsap RefSeq GP20011222 evidences (Without Frame info, set as '.')
+#
+EOT
+#
+CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
+            $A_ENSEMBL.fwd.gff $A_ENSEMBL.rev.gff ;
+#
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+#
+@ 
+
+
+\subsctn{Adding evidences to SGP (III)}
+
+Now, we are ``hiding'' the refseq genes by projecting them as single exons, as the previous approach did not work very well. We lost almost all the predictions not matching already annotated genes (due to the way {\gnid} incorporates evidences with no frame having lengths that are not multiple of 3). We follow these steps:
+
+\begin{itemize}
+\item Retrieve start and end for all the annotated genes ([[get_geneid_genes]] bash function).
+\item Map all genes to a single strand (FWD).
+\item Project them as if they were SRs ([[blast2gff]] program).
+\item Join those projections having less than 500 nucleotides of intergenic space between them.
+\item Check the final ``singletons'' to have $(\mbox{gene}_\mbox{length} \bmod 3 == 0$ and correct length for those not acomplishing that condition (by adding the corresponding $3 - (\mbox{gene}_\mbox{length} \bmod 3$)).
+\end{itemize}
+
+<<Running CHR22: SGP HsapGP + MmusMGSC + noframe-RefSeq>>=
+OXID="20011222.UCSCgp-20020411.MGSCv3" ;
+NXID="20011222.UCSCgp-20020411.MGSCv3+RefSeq.Singles" ;
+CHR="22" ;
+NCHR="chr$CHR" ;
+SEQ="chr22" ;
+HOMOLOGY="$HUMUS/$NCHR/sgp/$OXID/hsp-sr/$SEQ.gff" ;
+# remember that geneid does not allow overlapping features... :^<
+EVIDIR="$HUMUS/$NCHR/annotation/20011222/refseq" ;
+EVIDENCE="$EVIDIR/$SEQ.eval.gff" ;
+ODIR="$HUMUS/$NCHR/sgp/$NXID" ;
+#
+MkDirs $ODIR ;
+for c in out gff gtf2 cds prot hsp-sr logs tmp eval evids ;
+  do { 
+    MkDirs $ODIR/$c ;
+    } ;
+  done ;
+#
+################################################## BUILDING 'SINGLETONS'
+#
+# Get gene start-end
+get_geneid_genes $EVIDIR/$SEQ.gff > $EVIDIR/$SEQ.genes ;
+#
+# Map to single strand and save in GFF format
+gawk 'BEGIN{ OFS="\t";
+             chr=ARGV[1]; ARGV[1]="";
+             source="refseq"; feat="single"; sco="1"; strand="+"; frame="3" }
+  ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) {
+      print chr,source,feat,$2,$3,sco,strand,frame,$1;
+  }' $SEQ $EVIDIR/$SEQ.genes | sort +3n -4 > $EVIDIR/$SEQ.genes.gff ;
+# 
+# Project "singletons"
+$BIN/blast2gff -vg $EVIDIR/$SEQ.genes.gff > $ODIR/evids/$SEQ.genes.gff ;
+#
+# Check for intergenic less than 500bp and for gene length multiple of 3
+perl -e 'use strict;
+  use Data::Dumper;
+  local $Data::Dumper::Purity = 0;
+  local $Data::Dumper::Deepcopy = 1;
+  my %genes = ();
+  my %neges = ();
+  my ($interlen,$ifile) = @ARGV;
+  #
+  &parse_genes();
+  # print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
+  foreach my $seq (keys %genes) {
+      &sort_genes($seq);
+      # print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
+      &check_intergenic($seq);
+      # print STDERR Data::Dumper->Dump([ \%neges ],[ qw/ *neges / ]);
+      &check_length($seq);
+      # print STDERR Data::Dumper->Dump([ \%neges ],[ qw/ *neges / ]);
+      &print_evidences($seq);
+  }; # foreach $seq
+  exit(0);
+  #
+  sub parse_genes() {
+      open(IFILE,"< $ifile");
+      while (<IFILE>) {
+          my @f;
+          next if /^\s*$/o;
+          next if /^\#/o;
+          chomp;
+          @f = split /\s+/og, $_;
+          defined($genes{$f[0]}) || do { @{$genes{$f[0]}} = (); };
+          push @{ $genes{$f[0]} }, [ @f[3,4] ];
+      }; # while IFILE
+      close(IFILE);
+  } # parse_genes
+  sub sort_genes() {
+      my $seq = shift;
+      @{ $genes{$seq} } = sort { $a->[0] <=> $b->[0]
+                                         ||
+                                 $a->[1] <=> $b->[1] } @{ $genes{$seq} };
+  } # sort_genes
+  sub check_intergenic() {
+      my $seq = shift;
+      my ($oc,$ec,$ol,$el) = (undef,undef,undef,undef);
+      my $nel = scalar(@{ $genes{$seq} });
+      defined($neges{$seq}) || do { @{ $neges{$seq} } = (); };
+      for (my $p = 0 ; $p < $nel; $p++) {
+          ($oc,$ec) = @{ $genes{$seq}[$p] }[0,1];
+          defined($ol) || do { ($ol,$el) = ($oc,$ec); next; };
+          ($oc - $el > 500) && do {
+              push @{ $neges{$seq} }, [ $ol, $el ];
+              ($ol,$el) = ($oc,$ec); next; 
+          };
+          $el = $ec;
+      }; # for $p
+      push @{ $neges{$seq} }, [ $ol, $el ]; # to save the last element...
+  } # check_intergenic
+  sub check_length() {
+      my $seq = shift;
+      for (my $p = 0 ; $p < scalar(@{ $neges{$seq} }); $p++) {
+          my ($ref,$len,$md);
+          $ref = \@{ $neges{$seq}[$p] };
+          $len = $ref->[1] - $ref->[0] + 1;
+          $md = $len % 3;
+          next if ($md == 0);
+          $ref->[1] += (3 - $md);
+      }; # for $p
+  } # check_length
+  sub print_evidences() {
+      my $seq= shift;
+      my $fmt = "$seq\trefseq\tAnnotation\t\%s\t\%s\t.\t+\t0\t\%s\n";
+      for (my $p = 0 ; $p < scalar(@{ $neges{$seq} }); $p++) {
+          printf STDOUT $fmt, @{ $neges{$seq}[$p] }, ($p + 1);
+      }; # for $p
+  } # print_evidences
+  ' 500 $ODIR/evids/$SEQ.genes.gff > $ODIR/evids/$SEQ.evids.gff ;
+##################################################
+#  349    3141   18846  $EVIDIR/chr22.genes.gff
+#  282    2249   14046  $ODIR/evids/chr22.genes.gff
+#  279    2511   14400  $ODIR/evids/chr22.evids.gff
+#  910    7901   47292  total 
+@ 
+
+<<>>=
+## Test file for the previous singleton-maker script
+#
+chr22	test	SR	116171	584367	1.0	+	3 #
+chr22	test	SR	584667	585246	1.0	+	3 # ig 299bp -> join
+#									   
+chr22	test	SR	610377	644175	1.0	+	3 #
+chr22	test	SR	644676	646412	1.0	+	3 # ig 501bp -> split
+#									   
+chr22	test	SR	663306	684226	1.0	+	3
+#									   
+chr22	test	SR	706458	734631	1.0	+	3 #
+chr22	test	SR	735131	775934	1.0	+	3 # ig 500bp -> join
+#
+# "$neges{chr22}" must contain:
+#
+#  [            [            [             [             [
+#   '116171',    '610377',    '644676',     '663306',     '706458',
+#   '585246'     '644175'     '646412'      '684226'      '775934'
+#  ],           ],           ],            ],            ]
+#
+# and it must output the following GFF records:
+#
+# chr22   refseq  Annotation      116171  585247  .       +       0       1
+# chr22   refseq  Annotation      610377  644177  .       +       0       2
+# chr22   refseq  Annotation      644676  646412  .       +       0       3
+# chr22   refseq  Annotation      663306  684227  .       +       0       4
+# chr22   refseq  Annotation      706458  775934  .       +       0       5
+@ 
+
+<<>>=
+#
+GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
+PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
+EW=0 ; # add to exon weigth
+#
+#--> we do not run geneid on masked sequences at this moment
+#--> we are using original un-masked fasta sequences from GP
+ISEQ="$HSEQ/$SEQ.fa" ;
+#
+if [ -f "$HOMOLOGY" ] ;
+  then
+    echo "### Using homology data from: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="-S $HOMOLOGY" ;
+  else
+    echo "### Homology file NOT found: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="" ;
+  fi ;
+#
+if [ -f "$EVIDENCE" ] ;
+  then
+    echo "### Using termini file: $EVIDENCE" 1>&2 ;
+    sort +3n -4 $EVIDENCE | \
+      gawk 'BEGIN{ OFS="\t" }
+         ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { 
+             $8="."; print $0 }' > $ODIR/tmp/$SEQ.gff ;
+    EVIDENCE_PAR="-R $ODIR/tmp/$SEQ.gff" ;
+  else
+    EVIDENCE_PAR="" ;
+  fi ;
+#
+CheckFile R $PARAM $ISEQ $HOMOLOGY $EVIDENCE ;
+#
+GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $EVIDENCE_PAR $ISEQ" ;
+echo "$GENEID $GENEID_CMDLN 2> $ODIR/$SEQ.sgp" 1>&2 ;
+$GENEID $GENEID_CMDLN 2> $ODIR/logs/$SEQ.sgp > $ODIR/out/$SEQ.all ;
+grep -v 'evidence' $ODIR/out/$SEQ.all > $ODIR/out/$SEQ ;
+$BIN/geneid_raw2GFF.pl $SEQ $ODIR $ODIR/out/$SEQ ;
+#
+ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
+  while read n;
+    do {
+      cat $ODIR/gff/$SEQ.sg/$n;
+      };
+    done | sort +3n +4n -5 - > $ODIR/gff/$SEQ ;
+#
+get_geneid_genes $ODIR/gff/$SEQ > $ODIR/$SEQ.gene_list ;
+#
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+               $ODIR/gff/$SEQ > $ODIR/eval/$SEQ.eval.gff ;
+#
+VDIR="$ODIR/eval" ;
+$BIN/gffsplitstrand.pl $VDIR/$SEQ.eval.gff ; # no sequence length record required here
+#
+A_REFSEQ="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval" ;
+A_ENSEMBL="$HUMUS/$NCHR/annotation/20011222/ensembl/$SEQ.eval" ;
+cat > $VDIR/${SEQ}.summary <<EOT ;
+#
+# Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
+#
+# --> Hsap GP20011222 x Mmus MGSCv3 homology + Hsap RefSeq GP20011222 evidences (Without Frame info, set as '.')
+#
+EOT
+#
+CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
+            $A_ENSEMBL.fwd.gff $A_ENSEMBL.rev.gff ;
+#
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
+    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+#
+@ 
+
+
+
+\subsctn{}
+
+<<>>=
+( echo "###";echo "### 20011222.UCSCgp-20020411.MGSCv3 "; cat sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr22.report; echo "###"; echo "### 20011222.UCSCgp-20020504.RIKEN "; cat sgp/20011222.UCSCgp-20020504.RIKEN/hsp-sr/chr22.report; echo "###"; echo "### 20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN (merged HSP-SRs)"; cat sgp/20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN/hsp-sr/chr22.merged.report; echo "###"; echo "### 20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN (HSP-SRs after projection of merged HSP-SRs)"; cat sgp/20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN/hsp-sr/chr22.report ) > chr22.eval.HSP-SRs
+@ 
+<<chr22.eval.HSP-SRs>>=
+###
+### 20011222.UCSCgp-20020411.MGSCv3
+# TOTAL 25013 HSP-SRs on chr22: 12635 forward, 12378 reverse, 0 without strand.
+#       +1 :   4182     |       -1 :   4175     |       .1 :      0
+#       +2 :   4136     |       -2 :   4082     |       .2 :      0
+#       +3 :   4317     |       -3 :   4121     |       .3 :      0
+###
+### 20011222.UCSCgp-20020504.RIKEN
+# TOTAL 10584 HSP-SRs on chr22: 5285 forward, 5299 reverse, 0 without strand.
+#       +1 :   1752     |       -1 :   1724     |       .1 :      0
+#       +2 :   1716     |       -2 :   1771     |       .2 :      0
+#       +3 :   1817     |       -3 :   1804     |       .3 :      0
+###
+### 20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN (merged HSP-SRs)
+# TOTAL 35597 SRs on chr22: 17920 forward, 17677 reverse, 0 without strand.
+#       +1 :   5934     |       -1 :   5899     |       .1 :      0
+#       +2 :   5852     |       -2 :   5853     |       .2 :      0
+#       +3 :   6134     |       -3 :   5925     |       .3 :      0
+###
+### 20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN (HSP-SRs after projection of merged HSP-SRs)
+# TOTAL 26396 SRs on chr22: 13274 forward, 13122 reverse, 0 without strand.
+#       +1 :   4411     |       -1 :   4398     |       .1 :      0
+#       +2 :   4343     |       -2 :   4331     |       .2 :      0
+#       +3 :   4520     |       -3 :   4393     |       .3 :      0
+@ 
+
+\end{document}
