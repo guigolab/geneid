@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.11 2002-01-16 08:11:42 eblanco Exp $ */
+/* $Id: geneid.h,v 1.12 2002-03-20 10:18:34 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdio.h>
@@ -52,22 +52,22 @@
 #define RSITES 5                 /* One signal per L / RSITES bp         */
 #define REXONS 3                 /* One exon per L / REXONS bp           */
 
-#define RBSITES 250              /* Estimated amount of backup signals   */
-#define RBEXONS 500              /* Estimated amount of backup exons     */
+#define RBSITES 75               /* Estimated amount of backup signals   */
+#define RBEXONS 125              /* Estimated amount of backup exons     */
 
 #define RFIRST 1                 /* Ratios according to every exon type  */
-#define RINTER 0.5
+#define RINTER 0.25
 #define RTERMI 1
 #define RSINGL 3 
 #define RORF   3
 
-#define FSORT 3                  /* Total number ox exons/split (factor) */
+#define FSORT 8                  /* Total number ox exons/split (factor) */
+#define FDARRAY 5                /* Number of exons to save every  split */ 
 
-
-#define BASEVALUESITES_SHORT 1000
-#define BASEVALUEEXONS_SHORT 500
-#define BASEVALUESITES_LARGE 100000
-#define BASEVALUEEXONS_LARGE 50000
+#define BASEVALUESITES_SHORT 10000
+#define BASEVALUEEXONS_SHORT 5000
+#define BASEVALUESITES_LARGE 600000
+#define BASEVALUEEXONS_LARGE 300000
 
 #define MAXEVIDENCES 10000       /* Maximum number of annotations        */
 #define MAXSR 10000              /* Maximum number of SR (strand/frame)  */
