@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.9 2000-08-11 21:04:28 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.10 2000-08-11 21:21:29 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln";
@@ -40,6 +40,8 @@ GetOptions( "Q|query-only"      => \$only_Q_flg  ,
  			"h|help|\?"         => \$help_flg    ,
 			);
 
+&prt_help if $help_flg; 
+
 my $ARGV = my $scoreopt = my $vrbopt = ""; 
 $verbose_flg = 1 if $debug_flg;
 $vrbopt = " -v" if $verbose_flg;
@@ -51,8 +53,6 @@ $hsp_flg = 1 if $hsp_flg eq ""; # Print also HSPs from input
 $hsp_too_flg = 1 if $hsp_flg;
 $to_file = 1 if $to_file eq ""; # Write output to file
 $to_file_flg = 1 if $to_file;
-
-&prt_help if $help_flg; 
 
 
 ##############################################################################
@@ -156,9 +156,9 @@ exit(1);
 #
 sub prt_progress {
     $verbose_flg && do {
-                print STDERR ".";
-                (($_[0] % 50) == 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n";
-        };
+		print STDERR ".";
+		(($_[0] % 50) == 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n";
+	};
 } # END_SUB: prt_progress
 #
 sub prt_foeprg {
@@ -856,7 +856,7 @@ EndOfPrt
 		print STDERR "\#\#    ------------ SUBTOTAL: ".&fill_left($hc,$f," ")."  SRs for $r.\n";
 		$hd += $hc;
 	};
-		print STDERR "\#\#\n\#\#  TOTAL SRs: $hd.\n";
+		print STDERR "\#\#\n\#\#".&fill_left(" TOTAL SRs: $hd #",56,"\#")."\n";
 } # END_SUB: sumary_of_SRs
 
 # Computing SRs from projected HSP coords.
