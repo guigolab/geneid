@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.3 2003-02-21 18:48:46 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.4 2003-02-21 19:34:44 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.3 2003-02-21 18:48:46 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.4 2003-02-21 19:34:44 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -345,7 +345,7 @@ if (defined($ENV{HOSTNAME})) {
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg,
     $subject_flg, $sequence_flg, $full_scores, $comment_flg, $nocmmnt_flg,
     $split_flg, $help_flg, $err_flg, $expanded_flg,
-    $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg);
+    $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg, $noframe_flg);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param, $aln_split, $prt_pos_flg
 	) = (0, 0, 0, 0, 0, 0, 0, 0);
 #
@@ -405,6 +405,7 @@ sub get_commandline_opts(){
                 "b|bit-score"      => \$bit_flg      ,
                 "i|identity-score" => \$ids_flg      ,
                 "s|full-scores"    => \$full_scores  ,
+                "u|no-frame"       => \$noframe_flg  ,
                 "c|comments"       => \$comment_flg  ,
                 "n|no-comments"    => \$nocmmnt_flg  ,
                 "v|verbose"        => \$err_flg      ,
@@ -559,6 +560,16 @@ DESCRIPTION:
       contains BLASTN HSP records. So that, ensure that you feed
       the $PROGRAM script with a well formatted BLAST file.
 
+  WARNING.- Frame fields from GFF records generated with $PROGRAM
+      contain BLAST frame (".","1","2","3") instead of the GFF standard
+      values (".","0","1","2"). As the frame for reverse strand must be
+      recalculated from the original sequence length, we suggest
+      users to post-process the GFF output from this script with
+      a suitable filter that fix the frames (in case that the program
+      that is going to use the GFF records will not work with 
+      the original BLAST frames). We provide the command-line option
+      "--no-frame" to set frames to "." (meaning that there is no frame).
+
 COMMAND-LINE OPTIONS:
 
     "$PROGRAM" prints output in "HSP" format by default (see below).
@@ -570,7 +581,6 @@ COMMAND-LINE OPTIONS:
   precedence order is shown above.
 
   GFF OPTIONS:
-
     -G, --gff            : prints output in GFFv1 format.
     -F, --fullgff        : prints output in GFFv2 "alignment" format ("target").
     -A, --aplot          : prints output in pseudo-GFF APLOT "alignment" format.
@@ -579,21 +589,20 @@ COMMAND-LINE OPTIONS:
     -b, --bit-score      : set <score> field to Bits (default Alignment Score).
     -i, --identity-score : set <score> field to Identities (default Alignment).
     -s, --full-scores    : include all scores for each HSP in each GFF record.
+    -u, --no-frame       : set all frames to "." (GFF for not available frames).
 
   ALIGNMENT OPTIONS:
-
     -P, --pairwise       : prints pairwise alignment for each HSP in TBL format.
     -M, --msf            : prints pairwise alignment for each HSP in MSF format.
     -N, --aln            : prints pairwise alignment for each HSP in ALN format.
     -W, --show-coords    : adds start/end positions to alignment output.
 
   GENERAL OPTIONS:
-
     -X, --expanded       : expanded output (producing multiline output records).
     -c, --comments       : include parameters from blast program as comments.
     -n, --no-comments    : do not print "#" lines (raw output without comments).
     -v, --verbose        : warnings sent to <STDERR>.
-    -h, --help           : shows this help pages.
+    -h, --help           : shows this help.
 
 OUTPUT FORMATS:
 
@@ -606,7 +615,7 @@ OUTPUT FORMATS:
   SUBJECT and SUBJECT fields are relative to QUERY (this only available for GFF
   output records).
     Dots ("...") mean that record description continues in the following line,
-  but such record is printed as a single line by "$PROGRAM".
+  but such record is printed as a single line record by $PROGRAM.
 
 [HSP]  <- (This is the DEFAULT OUTPUT FORMAT)
  <Program> <DataBase> : ...
@@ -685,16 +694,22 @@ sub get_scores {
 	($t =~ /Sum[^\s]*\s+\bP[^\s]*\s+=\s+([+-]?([Ee][+-]?\d+|(\d+\.?\d*|\.\d+)([Ee][+-]?\d+)?))\s*,/o) ?
 		($pv = $1) : ($pv = "."); # $pv not defined then $pv="."
 	($t =~ /Identities[^\s]*\s+=\s+(\d+)\/(\d+)\s+/o) && ($id = $1);
-	( $scQ && !$scS) && do {   # BLASTX (translated nucleotides vs protein)
-		($t =~ /Frame[^\s]*\s+=\s+(\+|\-)(\d)\b/o) && ($qfr = $2);
-	};
-	(!$scQ &&  $scS) && do {   # TBLASTN (protein vs translated nucleotides)
-		($t =~ /Frame[^\s]*\s+=\s+(\+|\-)(\d)\b/o) && ($sfr = $2);
-	};
-	( $scQ &&  $scS) && do {   # TBLASTX (translated nucleotides vs translated nucleotides)
-		($t =~ /Frame[^\s]*\s+=\s+(\+|\-)(\d)\s*\/\s*(\+|\-)(\d)\b/o) && ($qfr = $2, $sfr = $4);
-	};
-	$sc, $bt, $ex, $pv, $id, $qfr, $sfr;
+    $noframe_flg || do {
+        # BLASTX (translated nucleotides vs protein)
+    	( $scQ && !$scS) && do {
+    		($t =~ /Frame[^\s]*\s+=\s+(\+|\-)(\d)\b/o) && ($qfr = $2);
+    	};
+        # TBLASTN (protein vs translated nucleotides)
+    	(!$scQ &&  $scS) && do {
+    		($t =~ /Frame[^\s]*\s+=\s+(\+|\-)(\d)\b/o) && ($sfr = $2);
+    	};
+        # TBLASTX (translated nucleotides vs translated nucleotides)
+    	( $scQ &&  $scS) && do {
+    		($t =~ /Frame[^\s]*\s+=\s+(\+|\-)(\d)\s*\/\s*(\+|\-)(\d)\b/o) &&
+                ($qfr = $2, $sfr = $4);
+    	};
+    }; # $noframe_flg
+	return ($sc, $bt, $ex, $pv, $id, $qfr, $sfr);
 } # get_scores
 
 #
@@ -703,7 +718,7 @@ sub chk_strand {
 	my ($first, $last) = @_ ;
     my $st = "+";
 	($first >= $last) && (($first, $last) = ($last, $first), $st = "-");
-	$first, $last, $st;
+	return ($first, $last, $st);
 } # chk_strand
 
 #
@@ -896,11 +911,11 @@ sub prt_out {
                           " (Q:$gpq|S:$gps) ;\tLengths Q:$lnq|S:$lns|T:$lnmx"
                           if $full_scores;
 					  $subject_flg && do {
-						  $sq = " #-S: $hsp_seq{$ts} #-Q: $hsp_seq{$tq}" if $sequence_flg;
+						  $sq = ";\tSubject_seq $hsp_seq{$ts} ;\tQuery_seq $hsp_seq{$tq}" if $sequence_flg;
 						  $prt_funct->();
                           last PRINT;
 					  }; # $subject_flg
-					  $sq = " #-Q: $hsp_seq{$tq} #-S: $hsp_seq{$ts}" if $sequence_flg;
+					  $sq = ";\tQuery_seq $hsp_seq{$tq} ;\tSubject_seq $hsp_seq{$ts}" if $sequence_flg;
 					  $prt_funct->();
                       last PRINT;
 				  } unless $nogff_flg;
@@ -912,10 +927,10 @@ sub prt_out {
 				  $ml = &max(length($qm),length($sm));
 				  ($a,$b) = (&fill_right($qm,$ml," "),&fill_right($sm,$ml," "));
 			      $prt_funct->();
-			  } # PRINT
-			} # for $cnt{$nm}
-		} # do if $cnt{$nm}>0
-	} # foreach
+			  }; # PRINT
+			}; # for $cnt{$nm}
+		}; # do if $cnt{$nm}>0
+	}; # foreach
 	&prt_foeprg($ht);
 }
 
@@ -939,6 +954,7 @@ sub check_blastprogname() {
 	$main = 1;
 	$seqflg = $hsp = $fragment = $param = 0;
 } # check_blastprogname
+#
 sub check_seqids() {
     my $str = shift;
 	# print STDERR "$_\n";
@@ -964,6 +980,7 @@ sub check_seqids() {
 	$seqflg = 1;
 	$main = $hsp = $fragment = 0;
 } # check_seqids
+#
 sub parseblast() {
     $err_flg && print STDERR &header("PARSING STDIN FROM BLAST");
     $program = undef; # default program name
@@ -1010,7 +1027,7 @@ sub parseblast() {
 	    	  $seqflg = $hsp = $fragment = 0;
 	    	  last CHECK;
 	      }; # (/^\s*(?:Database|Parameters)/ && ($hsp))
-      } # CHECK Block
+      }; # CHECK Block
 	  # print STDOUT "$. : MAIN=$main SEQFLG=$seqflg ".
       #              "HSP=$hsp FRAGMENT=$fragment => SEQNAME=$seqname\n";
       LOAD: {
@@ -1074,9 +1091,9 @@ sub parseblast() {
 		      } else { $param = 0; }
 		      last LOAD;
 	      }; # ($param)
-      } # LOAD Block
+      }; # LOAD Block
 	    close(ARGV) if (eof);
-    } # while
+    }; # while
     &prt_foeprg($pt);
 } # parseblast
 @ 
@@ -1288,7 +1305,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.3 2003-02-21 18:48:46 jabril Exp $
+# $Id: parseblast.nw,v 1.4 2003-02-21 19:34:44 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
