@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#              $Id: gff2ps,v 1.1 1999-04-24 10:59:53 jabril Exp $	
+#         $Id: gff2ps,v 1.2 1999-04-24 13:41:01 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -162,7 +162,7 @@ CheckInt () {
   return 1
 }
 ###################################################################
-################# Choosing Options for GFF2APLOT ##################
+################## Choosing Options for GFF2PS ####################
 
 #
 # Resetting default program variables.
@@ -195,6 +195,180 @@ case $1 in
 # Processing all options and parameters passed to program.
 #
 ## while getopts
+
+###################################################################
+################### Converting to PostScript ######################
+
+#
+# Printing PostScript Header...
+#
+gawk 'BEGIN{ 
+ # Find actual date...
+ "date" | getline d
+ split(d,dt," ")
+ date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
+ # Finding logged user...
+ "whoami" | getline usr
+ # Printing PostScript Header...
+ bigchain=        "%%\!PS-Adobe-2.0\n"
+ bigchain=bigchain"%%%%Title: %s\n"
+ bigchain=bigchain"%%\n%%%%User: %s\n"
+ bigchain=bigchain"%%%%Date: %s\n"
+ bigchain=bigchain"%%\n%%%%Program: %s\n"
+ bigchain=bigchain"%%%%Version: %s\n"
+ bigchain=bigchain"%%%%CreationDate: %s\n"
+ bigchain=bigchain"%%%%LastRevision: %s\n"
+ bigchain=bigchain"%%%%Author : %s\n"
+ bigchain=bigchain"%%%%e-mail : %s\n"
+ bigchain=bigchain"%%%%Mail Adress:\n%s\n%%\n"
+ if (ARGV[1]!~"##dflt##") title=ARGV[1]
+ else title="GFF to PostScript"
+ printf bigchain, title, usr, date, ARGV[2], ARGV[3], ARGV[4], ARGV[5], ARGV[6], ARGV[7], ARGV[8]
+ printf "%%\n%% ------------------------------------------------------------------------\n"
+ printf "%%                           %s - %s\n",ARGV[2], ARGV[3]
+ printf "%% ------------------------------------------------------------------------\n"
+  for (i=1;i<=8;i++) ARGV[i]=""
+}' "##dflt##" "$PSPROGRAM" "$PSVERSION" "$PSCREATION" "$PSREVISION" "$AUTHOR" "$EMAIL" "$MAIL"
+
+#
+# Printing %%Prolog Constant Definitions...
+#
+cat <<'@@@EndProlog@@@'
+%
+%          Converting GFF files to PostScript plots.
+%
+%          Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+%                                      Roderic GUIGO SERRA       
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+% ------------------------------------------------------------------------
+%
+%%Orientation: Portrait
+%%BoundingBox:  0  0  595  842 
+%%BeginProlog
+%
+%   1 cm   = 28.35 points
+%   1 inch = 72.00 points
+%
+%  Paper Sizes  (in points)
+% --------------------------
+%
+/pgA2           { 1190 1684 } def
+/pgA3           {  842 1190 } def
+/pgA4           {  595  842 } def
+/pgA5           {  420  595 } def
+/pgB4           {  708 1003 } def
+/pgB5           {  516  729 } def
+/pgExecutive    {  540  720 } def
+/pgLedger       { 1224  792 } def
+/pgLegal        {  612 1008 } def
+/pgLetter       {  612  792 } def
+/pgTabloid      {  792 1224 } def
+/pgUserDefined  {  595  2448 } def
+%
+%  Fonts Used
+% ---------------------------------
+%
+/coboti   { 3.0 /Courier-Bold } def
+/cobost   { 2.0 /Courier-Bold } def
+/tickfont { 1.5 /Courier      } def
+/trackfont { 2.00 /Courier-Bold } def
+/gnlblsize { 2.00 /Courier      } def
+%
+%  Fixed Color Variables (CMYK)
+% ---------------------------------
+%
+/black             { 0.00 0.00 0.00 1.00 } def
+/verydarkgrey      { 0.00 0.00 0.00 0.90 } def
+/darkgrey          { 0.00 0.00 0.00 0.75 } def
+/grey              { 0.00 0.00 0.00 0.50 } def
+/lightgrey         { 0.00 0.00 0.00 0.25 } def
+/verylightgrey     { 0.00 0.00 0.00 0.10 } def
+/white             { 0.00 0.00 0.00 0.00 } def
+/verydarkgreen     { 0.65 0.00 0.95 0.40 } def
+/darkgreen         { 0.90 0.00 0.90 0.10 } def
+/green             { 1.00 0.00 1.00 0.00 } def
+/lightgreen        { 0.50 0.00 1.00 0.00 } def
+/verylightgreen    { 0.25 0.00 0.75 0.00 } def
+/verydarkskyblue   { 0.95 0.15 0.00 0.40 } def
+/darkskyblue       { 1.00 0.25 0.00 0.15 } def
+/skyblue           { 1.00 0.25 0.00 0.00 } def
+/lightskyblue      { 0.80 0.20 0.10 0.00 } def
+/verylightskyblue  { 0.60 0.15 0.15 0.00 } def
+/verydarkblue      { 1.00 1.00 0.00 0.40 } def
+/darkblue          { 1.00 1.00 0.00 0.10 } def
+/blue              { 1.00 1.00 0.00 0.00 } def
+/lightblue         { 0.80 0.80 0.00 0.00 } def
+/verylightblue     { 0.50 0.50 0.00 0.00 } def
+/verydarkcyan      { 0.65 0.15 0.00 0.25 } def
+/darkcyan          { 0.65 0.15 0.00 0.00 } def
+/cyan              { 1.00 0.00 0.00 0.00 } def
+/lightcyan         { 0.50 0.00 0.00 0.00 } def
+/verylightcyan     { 0.25 0.00 0.00 0.00 } def
+/verydarkviolet    { 0.40 0.80 0.20 0.00 } def
+/darkviolet        { 0.45 0.85 0.00 0.00 } def
+/violet            { 0.30 0.60 0.00 0.00 } def
+/lightviolet       { 0.15 0.55 0.00 0.00 } def
+/verylightviolet   { 0.05 0.45 0.00 0.00 } def
+/verydarkred       { 0.00 0.90 0.90 0.30 } def
+/darkred           { 0.00 0.80 0.90 0.10 } def
+/red               { 0.00 1.00 1.00 0.00 } def
+/lightred          { 0.05 0.80 0.90 0.00 } def
+/verylightred      { 0.15 0.40 0.60 0.00 } def
+/verydarkorange    { 0.00 0.60 1.00 0.00 } def
+/darkorange        { 0.00 0.55 0.90 0.00 } def
+/orange            { 0.00 0.50 0.70 0.00 } def
+/lightorange       { 0.00 0.30 0.85 0.00 } def
+/verylightorange   { 0.00 0.30 0.55 0.00 } def
+/verydarkyellow    { 0.00 0.10 0.85 0.25 } def
+/darkyellow        { 0.00 0.10 0.85 0.00 } def
+/yellow            { 0.00 0.00 1.00 0.00 } def
+/lightyellow       { 0.00 0.00 0.50 0.00 } def
+/verylightyellow   { 0.00 0.00 0.25 0.00 } def
+/verydarkbrown     { 0.00 0.85 1.00 0.70 } def
+/darkbrown         { 0.00 0.75 1.00 0.60 } def
+/brown             { 0.00 0.70 1.00 0.40 } def
+/lightbrown        { 0.30 0.60 0.70 0.00 } def
+/verylightbrown    { 0.15 0.45 0.55 0.00 } def
+% true setpacking
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%%EndProlog
+%%BeginSetup
+@@@EndProlog@@@
+
+#
+# Printing %%Prolog User-Defined Variables...
+#
+# gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -v PARAMETERS="$APLOToptions" 'BEGIN{
+
+#
+# Printing Main PostScript Routines...
+
+cat <<'@@@EndProcs@@@'
+@@@EndProcs@@@
+
+##############################################################
+############### Main GFF2PS GNU awk Program... ###############
+#
+# (cat <<'@@@EndPROGRAM@@@') |
+# @@@EndPROGRAM@@@
+# gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -f - "$@"
 
 gawk 'BEGIN{
   ############ INITIALITATION ############
@@ -503,3 +677,18 @@ function showelem(a,b){
   return string
  }
 ' "$@"
+
+##############################################################
+############ Main GFF2APLOT GNU awk Program DONE. ############
+#
+
+#
+# PostScript end of page...
+# 
+cat <<'@@@EndTrailer@@@'
+@@@EndTrailer@@@
+
+#
+##################### EOF #####################
+#
+exit 0
