@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.48 2000-01-29 01:44:40 jabril Exp $	
+#         $Id: gff2ps,v 1.49 2000-01-29 02:56:57 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.48 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-29 01:44:40 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.49 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-29 02:56:57 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.48 2000-01-29 01:44:40 jabril Exp $
+%    $Id: gff2ps,v 1.49 2000-01-29 02:56:57 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -1309,6 +1309,7 @@ function ARY_VARIABLES() {
   Default["show_outer_scale"]=1;             #
   Default["default_scale_width"]="0.25cm";   #
   # Blocks Layout
+  Default["strand_show_mixed"]="off";         #
   Default["strand_show_forward"]="on";         #
   Default["strand_show_reverse"]="on";         #
   Default["strand_show_independent"]="on";     #
@@ -2278,7 +2279,7 @@ function PlotElement(    shwpst) {
     # PrintRPT(sprintf("Element* %s : %s : %s - %s : %s %s %s/%s \n",el,sel,start_,end_,feature_, score_,frame_,remainder_));
     # PrintRPT(sprintf("%s %s %s : %s %d %d %s %s %4.2f (%s) (%s) %s %s (%s) p\n", sc,s,i,PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, Plot_Lbl(feature_)));
     printf "%s %d %d %s %s %4.2f (%s) (%s) %s %s (%s) p\n",
- PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, Plot_Lbl(feature_) | "sort -b +0nr -1 +1n -2 +2nr -3n +5nr -6";
+ PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, Plot_Lbl(feature_) | "sort -b +0n -1 +1n -2 +2nr -3n +5nr -6";
   } # if element checklimits
 } # End of function PlotElement
 #
@@ -2372,7 +2373,7 @@ function PRINT_ELEMENTS() {
 			  PlotVector() } # if vector
 		  } # if show feature
 		} # for elements in group
-        if (!IS_VECT) close("sort -b +0nr -1 +1n -2 +2nr -3n +5nr -6");           
+        if (!IS_VECT) close("sort -b +0n -1 +1n -2 +2nr -3n +5nr -6");           
 		printf "gx\n";
 	  } # if group checklimits
 	} # if show group
