@@ -1,0 +1,21 @@
+#
+# NOTES on CVS INSTALLATION
+# 
+# $Id: README,v 1.1 2001-08-09 15:46:43 adminmonstre Exp $
+
++ How to get a cvs user's password:
+
+/home/adminmonstrebin/cryptout.pl "guest"
+xHyT4TunSJpFg
+
+so that we have the passwd "guest" for user anonymous, that is encrypted to "xHyT4TunSJpFg", which is the string we must provide to the passwd file:
+
+anonymous:xHyT4TunSJpFg
+
++ We set a passwd for anonymous user (see previous item) because the CVS program was not working in case we did not provide a passwd for such user, throwing the following error:
+
+cvs login
+(Logging in to anonymous@monstre1.imim.es)
+CVS password:
+cvs [login aborted]: recv() from server monstre1.imim.es: EOF
+
