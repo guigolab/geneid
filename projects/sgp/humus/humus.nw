@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.1 2002-01-30 13:54:33 jabril Exp $ 
+% # $Id: humus.nw,v 1.2 2002-02-01 19:07:01 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -266,7 +266,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.1 2002-01-30 13:54:33 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.2 2002-02-01 19:07:01 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -321,11 +321,160 @@ for n in $CHRLIST;
      };
   done ;
 #
-CHRNUM="22" ;
+CHRNUM="22" ; # length -> 47748585
 CHR="chr$CHRNUM" ;
 XID="20020122";
 #
 @
+
+<<Global: >>=
+#
+# Retrieving Golden path sequence names
+#
+HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
+HSAPID="20010806";
+# 
+perl -e '
+  # USAGE: $0 chr_list.file fasta_files.dir > chr_seqs.list
+  # [chr_seqs.list] -> chr_id seq_id date_file description
+  use strict;
+  my ($chrlistfile,$ipath) = @ARGV;
+  $ipath =~ s%/$%%o;
+  my (@files,%seqs,@order);
+  %seqs = ();
+  @order = ();
+
+  open(CHR,"< $chrlistfile");
+  while (<CHR>) {
+      my $chr;
+      next if /^#/o;
+      next if /^\s*$/o;
+      next if /^>>\s/o;
+      chomp;
+      s/^\s*//o;
+      ($chr,undef) = split /\s+/og, $_, 2;
+      push @order, $chr;
+      @{ $seqs{$chr} } = ();
+  };
+  close(CHR);
+
+  opendir(FA, $ipath);
+  @files = grep { /\.fa$/ } readdir(FA);
+  closedir(FA);
+  # 
+  # we are going to assume that input filenames
+  # have the following "chr"$chr"(.*).fa" (so we can assign
+  # "automagically" which sequence correspond to each chromosome)
+  #
+  foreach my $fl (@files) {
+      my ($thechr,$modtime);
+      ($thechr) = uc($fl) =~ /^CHR([\d]+|[XY]|NA|UL)/o;
+      $fl = "$ipath/$fl";
+      open(FAF,"< $fl") || do {
+          print STDERR "### Cannot open file \"$fl\" for chr \"$thechr\"...\n";
+          next;
+      };
+      print STDERR "### Working on chr \"$thechr\" file: \"$fl\"\n";
+      $modtime = &get_fh_mod_date(\*FAF);
+      my ($ct,$cc) = (0,".");
+      while (<FAF>) {
+          my ($id,$desc);
+          next unless s/^>//o;
+          chomp;
+          ($id,$desc) = split /\s+/og, $_, 2;
+          defined($desc) || ($desc = ".");
+          push @{ $seqs{$thechr} }, [ $id, $modtime, $desc ];
+          print STDERR "X";
+      } continue {
+          $ct++;
+          ($ct%10 == 0) && (print STDERR "$cc");
+          ($ct%1000 == 0) && (print STDERR " [$ct]\n");
+      }; # while <FAF>
+      ($ct%1000 != 0) && (print STDERR " [$ct]\n");
+      close(FAF);
+  }; # foreach $fl
+
+  foreach my $cs (@order) {
+      defined($seqs{$cs}) || do {
+          print STDOUT "# No sequences found for chromosome $cs !!!";
+          next;
+      };
+      scalar(@{ $seqs{$cs} }) > 1 && do {
+          @{ $seqs{$cs} } = map { $_->[1] }
+                            sort { $a->[0] cmp $b->[0] } # ascending alpha sort
+                            map { [ $_->[0], $_ ] } @{ $seqs{$cs} };
+      };
+      foreach my $sq (@{ $seqs{$cs} }) {
+          print STDOUT "$cs @{$sq}\n";
+      };  # foreach $sq
+  }; # foreach $cs
+#  print STDOUT 
+
+#  print STDERR "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
+#             (sprintf("%12s %12s %8s %8s %10s  %s\n",
+#                      "begin","end","#seqs","#errors","rand","file"));
+  exit(0);
+
+sub get_fh_mod_date() {
+    my $fh = shift;
+    my ($year,$month,$day,$hour,$min,$sec);
+    ($year,$month,$day,$hour,$min,$sec) = 
+            (localtime((stat $fh)[9]))[5,4,3,2,1,0];
+    # stat ->  [8] is access date,
+    #          [9] is modif date and
+    #         [10] is inode change date
+    sprintf("%04d%02d%02d%02d%02d%02d",
+            $year + 1900,$month + 1,$day,$hour,$min,$sec);
+} # get_fh_mod_date
+' $BIN/mySQL/param/chrs.tbl $HSAP/chromosomes > $HUMUS/seqid_list ;
+#
+perl -e '
+  use strict;
+  my %chr = ();
+  my ($idir,$ifile) = @ARGV;
+  $idir =~ s%/$%%o;
+  open(FI,"< $ifile");
+  while (<FI>) {
+      my @l;
+      next if /^[#>]/o;
+      next if /^\s*$/o;
+      s/^\s*//o;
+      @l = split /\s+/o, $_, 2;
+      $chr{$l[0]} .= $l[1];
+  };
+  close(FI);
+
+  my @dirs = qw( annotation fasta masking tblastx geneid sgp );
+  foreach my $l (keys %chr) {
+      my $odir = "$idir/chr$l";
+      &check_dirs($odir,$l) || next;
+      foreach my $pd (@dirs) {
+          &check_dirs("$odir/$pd",$l);
+      };
+      open(FO,"> $odir/seqid_list");
+      print FO $chr{$l};
+      close(FO);
+  };
+
+  exit(0);
+
+  sub check_dirs() {
+      my ($odir,$chr) = @_;
+      ( -e $odir && -d _ ) || do {
+          print STDERR "# Making chr $chr directory: $odir\n";
+          (mkdir $odir) || do {
+              print STDERR "# Error making directory \"$odir\" ".
+                           "for chr $chr : SKIPPING !!!\n";
+              return 0;
+          };
+          return 1;
+      };
+      print STDERR "# Directory \"$odir\" for chr $chr ALREADY EXIST...\n".
+      return 1;
+  } # check_dirs
+' $HUMUS $HUMUS/seqid_list ;
+#
+@ 
 
 \subsubsctn{Scripts: Processing Golden Path annotation}
 
@@ -339,8 +488,27 @@ XID="20020122";
 <<PERL strict pragma + info>>
 my $PROGNAME = 'gp2gff.pl';
 #
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling /;
+
+my ($overlap,$exon_ori_fix,$exon_end_fix) = (0,0,0);
+$SIG{__WARN__} = sub {
+                       print STDERR "### UNKNOWN COMMAND-LINE OPTION: $_[0]\n";
+                     };
+GetOptions(
+           'no-overlap'        => \$overlap,
+           'exonori-nuclfix=i' => \$exon_ori_fix,
+           'exonend-nuclfix=i' => \$exon_end_fix,
+           ) || do {
+               print STDERR "### ERROR when PARSING ARGUMENTS\n";
+               exit(1);
+           };
+$SIG{__WARN__} = 'DEFAULT';
+
 my ($seqname,$source,$ifile) = @ARGV;
 my $c = 0;
+my @exary;
+my %laste = ();
 
 open(GPFILE,"< $ifile");
 while (<GPFILE>) {
@@ -363,12 +531,35 @@ sub process_gene() {
     ((scalar(@l) >= $maxrec) && ($l[$seq] eq $seqname)) || return 0;
     @o = split /,/og, $l[$exons_ori];
     @e = split /,/og, $l[$exons_end];
-    &prt_gene(@l[$mrna_ori,$mrna_end,$strand,$gene,$exons_num]);
-    $frame = 0;
+    # fixing displacement at exon coordinates (also at mrna and cds levels)
+    $exon_ori_fix == 0 || do {
+         $l[$mrna_ori] += $exon_ori_fix;
+         $l[$cds_ori]  += $exon_ori_fix;
+         @o = map { $_ += $exon_ori_fix } @o;
+    };
+    $exon_end_fix == 0 || do {
+         $l[$mrna_end] += $exon_end_fix;
+         $l[$cds_end]  += $exon_end_fix;
+         @e = map { $_ += $exon_end_fix } @e;
+    };
+    #
     ($cdso,$cdse) = @l[$cds_ori,$cds_end];
+    # checking if gene overlaps previous one...
+    #   (we assume they are sorted by acceptor)
+    $overlap && do {
+        defined($laste{$l[$strand]}) && do {
+            ($laste{$l[$strand]} > $cdso) && return 0;
+		};
+        $laste{$l[$strand]} = $cdse;
+    }; # $overlap
+    #
+    &prt_gene(@l[$mrna_ori,$mrna_end,$strand,$gene,$exons_num]);
+    @exary = ();
+    $frame = 0;
     for (my $j = 0; $j < $l[$exons_num]; $j++) {
-        my ($ori,$end);
-        ($ori,$end) = ($o[$j],$e[$j]);
+        my ($ori,$end,$p);
+        $p = ($l[$strand] eq '-') ? ($l[$exons_num] - ($j + 1)) : $j;
+        ($ori,$end) = ($o[$p],$e[$p]);
         ($end < $cdso || $ori > $cdse) && do {
             &prt_utr($ori,$end,@l[$strand,$gene]);
             next;
@@ -376,21 +567,26 @@ sub process_gene() {
         ($ori < $cdso  && $end <= $cdse) && do {
             &prt_utr($ori,($cdso - 1),@l[$strand,$gene]);
             $frame = &prt_exon($cdso,$end,$frame,@l[$strand,$gene],$cdso,$cdse);
+            &swap_items(0) if ($l[$strand] eq '-');
             next;
         };
         ($ori >= $cdso && $end > $cdse) && do {
             $frame = &prt_exon($ori,$cdse,$frame,@l[$strand,$gene],$cdso,$cdse);
             &prt_utr(($cdse + 1),$end,@l[$strand,$gene]);
+            &swap_items(0) if ($l[$strand] eq '-');
             next;
         };
         ($ori < $cdso  && $end > $cdse) && do {
             &prt_utr($ori,($cdso - 1),@l[$strand,$gene]);
             $frame = &prt_exon($cdso,$cdse,$frame,@l[$strand,$gene],$cdso,$cdse);
             &prt_utr(($cdse + 1),$end,@l[$strand,$gene]);
+            &swap_items(1) if ($l[$strand] eq '-');
             next;
         };
         $frame = &prt_exon($ori,$end,$frame,@l[$strand,$gene],$cdso,$cdse);
     };
+    ($l[$strand] eq '-') && (@exary = reverse @exary);
+    print STDOUT join('',@exary); # each line already has its own linefeed
     return 1;
 } # process_gene
 # GFF: seqname source feat start end score strand frame group
@@ -402,21 +598,23 @@ sub prt_gene() {
 } # prt_gene
 sub prt_utr() {
     my @data = @_;
-    print STDOUT join("\t",$seqname,$source,"utr",@data[0,1],
+    push @exary, join("\t",$seqname,$source,"utr",@data[0,1],
                       ".",$data[2],".",$data[3])."\n";
 } # prt_utr
 sub prt_exon() {
     my ($eo,$ee,$frm,$str,$grp,$co,$ce) = @_;
-    my ($myfrm,$feat);
+    my $feat;
+#     my ($myfrm,$feat);
     # remainder = ((exon_end - exon_ori + 1) + frame) mod 3;
     # nextframe = (3 - ((exon_end - exon_ori + 1) + frame) mod 3) mod3;
-    $myfrm = ($str eq '-') # exon frame is set to remainder for - strand
-             ? ( (($ee - $eo + 1) + $frm) % 3 )
-             : $frm;
+#   $myfrm = ($str eq '-') # exon frame is set to remainder for - strand
+#            ? ( (($ee - $eo + 1) + $frm) % 3 )
+#            : $frm;
     $feat = &get_feat($eo,$ee,$str,$co,$ce);
-    $feat =~ /Single/io && ($myfrm = 0); # single frame hack (specially for -)
-    print STDOUT join("\t",$seqname,$source,$feat,$eo,$ee,
-                           ".",$str,$myfrm,$grp)."\n";
+#   $feat =~ /Single/io && ($myfrm = 0); # single frame hack (specially for -)
+    push @exary, join("\t",$seqname,$source,$feat,$eo,$ee,
+                      ".",$str,$frm,$grp)."\n";
+#                       ".",$str,$myfrm,$grp)."\n";
     return ( (3 - (($ee - $eo + 1) + $frm) % 3 ) % 3 ); # return nextframe
 } # prt_exon
 # gene structure GFF-feature names
@@ -432,9 +630,19 @@ sub get_feat() {
     ($ee == $ce) && return $fte;
     return $fti;
 } # get_feat
+sub swap_items() {
+     shift || do {
+         ($exary[$#exary],$exary[$#exary-1]) =
+             ($exary[$#exary-1],$exary[$#exary]);
+         return;
+     };
+     ($exary[$#exary],$exary[$#exary-1],$exary[$#exary-2]) =
+         ($exary[$#exary-2],$exary[$#exary-1],$exary[$#exary]);
+     return;
+} # swap_items
 @ 
 <<tangling>>=
-# showing line numbering comments in program
+#
 notangle -R"gp2gff.pl" $WORK/$nwfile.nw | cpif $BIN/gp2gff.pl ;
 chmod a+x $BIN/gp2gff.pl ;
 @ 
@@ -442,25 +650,49 @@ chmod a+x $BIN/gp2gff.pl ;
 
 \subsctn{Sequence analysis: \textit{H.sapiens}}
 
+<<HIDE: >>=
+#
+# NOT filtering overlapping genes (gp2gff '--no-overlap' option)...
+#
+### 679 genes for chr22 were found in 
+    "/seq/genomes/H.sapiens/golden_path_20010806/database/ensGene.txt".
+### 816 genes for chr22 were found in 
+    "/seq/genomes/H.sapiens/golden_path_20010806/database/genscan.txt".
+### 343 genes for chr22 were found in 
+    "/seq/genomes/H.sapiens/golden_path_20010806/database/refGene.txt".
+#
+# Filtering overlapping genes (gp2gff '--no-overlap' option)...
+#
+### 575 genes for chr22 were found in 
+    "/seq/genomes/H.sapiens/golden_path_20010806/database/ensGene.txt".
+### 816 genes for chr22 were found in 
+    "/seq/genomes/H.sapiens/golden_path_20010806/database/genscan.txt".
+### 318 genes for chr22 were found in 
+    "/seq/genomes/H.sapiens/golden_path_20010806/database/refGene.txt".
+@ 
+
 <<Sequence: H.sapiens>>=
 #
 # 
-#
-HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
-HSAPID="20010806";
 #
 IDIR="$HSAP/database" ;
 ODIR="$HUMUS/$CHR/annotation/$HSAPID" ;
 #
 CheckDirs $ODIR $ODIR/refseq $ODIR/genscan $ODIR/ensembl $ODIR/gaps $ODIR/repeats ;
 #
-$BIN/gp2gff.pl $CHR refseq $IDIR/refGene.txt \
+$BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
+               $CHR refseq $IDIR/refGene.txt \
                  > $ODIR/refseq/$CHR.fullgff \
                 2> $ODIR/refseq.report       ;
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+     $ODIR/refseq/$CHR.fullgff > $ODIR/refseq/$CHR.gff ;
 #
-$BIN/gp2gff.pl $CHR ensembl $IDIR/ensGene.txt \
+$BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
+               $CHR ensembl $IDIR/ensGene.txt \
                  > $ODIR/ensembl/$CHR.fullgff \
                 2> $ODIR/ensembl.report       ;
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+     $ODIR/ensembl/$CHR.fullgff > $ODIR/ensembl/$CHR.gff ;
 #
 @ 
 
@@ -477,12 +709,12 @@ $BIN/gp2gff.pl $CHR ensembl $IDIR/ensGene.txt \
 IDIR="$HSAP/database" ;
 ODIR="$HUMUS/$CHR/annotation/$HSAPID/genscan" ;
 #
-$BIN/gp2gff.pl $CHR genscan $IDIR/genscan.txt \
+$BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
+       $CHR genscan $IDIR/genscan.txt \
                  > $ODIR/$CHR.fullgff \
                 2> $ODIR.report       ;
-#
-gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' $ODIR/$CHR.fullgff \
-                                                        > $ODIR/$CHR.gff ;
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+     $ODIR/$CHR.fullgff > $ODIR/$CHR.gff ;
 #
 @ 
 
@@ -647,7 +879,7 @@ print STDOUT "# $chr ran into ".(scalar @files).
 exit(0);
 @ 
 <<tangling>>=
-# showing line numbering comments in program
+#
 notangle -R"sbp-checkblastout.pl" $WORK/$nwfile.nw | \
      cpif $BIN/sbp_checkblastout.pl ;
 chmod a+x $BIN/sbp_checkblastout.pl ;
@@ -746,7 +978,7 @@ foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
 exit(0);
 @
 <<tangling>>=
-# showing line numbering comments in program
+#
 notangle -R"sbp-blast2gff.pl" $WORK/$nwfile.nw | \
      cpif $BIN/sbp_blast2gff.pl ;
 chmod a+x $BIN/sbp_blast2gff.pl ;
@@ -862,7 +1094,115 @@ ODIR="$HUMUS/$CHR/tblastx/$XID" ;
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\sctn{Gene Prediction: {\gnid}} %%%%%%%%%%%%%%%%%%%%%%
+\sctn{Gene Prediction} %%%%%%%%%%%%%%%%%%%%%%
+
+\subsctn{Initialization}
+
+\subsubsctn{Scripts: Running evaluation for gene-prediction}
+
+<<runeval.pl>>=
+<<PERL shebang>>
+# Running evaluation by chromosome.
+#
+# USAGE: runeval.pl chromosome 
+#
+<<PERL strict pragma + info>>
+my $PROGNAME = 'runeval.pl';
+#
+
+#
+## MAIN
+open(FSHRT,"> ");
+open(FLONG,"> ");
+
+&print_file_header(\*FSHRT,);
+&print_file_header(\*FLONG,);
+exit(0);
+
+#
+## SUBS
+sub print_file_header() {
+    my ($fh,$prog,$chr,$run,$outname,$gver) = ;
+    print $fh <<"EOTXT";
+### 
+### EVALUATION of $prog RESULTS on CHR $chr ($run)
+###
+### $outname
+###
+### $USER - $DATE 
+###
+### $gver
+###
+EOTXT
+} # print_file_header
+@ 
+<<tangling>>=
+#
+notangle -R"runeval.pl" $WORK/$nwfile.nw | cpif $BIN/runeval.pl ;
+chmod a+x $BIN/runeval.pl ;
+@ 
+
+
+\subsubsctn{Scripts: Re-scoring SRs}
+
+<<getHSPSR.pl>>=
+<<PERL shebang>>
+# Re-scoring SRs to produce HSP-SRs for SGP homology.
+#
+# USAGE: getHSPSR.pl "chrname" < SR_file.gff > HSP-SR_file.gff > stdout.report
+#
+<<PERL strict pragma + info>>
+my $PROGNAME = 'getHSPSR.pl';
+#
+my $chr = shift;
+my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
+my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
+          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
+                     "all" => 8,            "sum" => [ (0) x 9 ] );
+my $HSPminLEN = 1; # $ori + $HSPminLEN - 1 ==> minimum length is 1 nucleotide
+my $S_CUTOFF = 26;
+my $SCF = 0; # substract to tblastx scores S_CUTOFF - SCF
+my $DSC = $S_CUTOFF - $SCF;
+my $SHSP  = 0;    # SHSP=6 # shrink hsp by $SHSP
+my $WTBX  = 0.19; # weigth of tblastx score
+my $WTBXF = 0.30; # weigth of tblastx score
+my $WTBXI = 0.20; # weigth of tblastx score
+my $WTBXT = 0.30; # weigth of tblastx score
+while (<STDIN>) {
+    my @l;
+    next if /^#/o;
+    next if /^\s*$/o;
+    chomp;
+    @l = split /\s+/og, $_;
+    next unless $l[$sco] > $S_CUTOFF;
+    $l[$sco] = ($l[$sco] - $DSC) * $WTBX;
+    $l[$ori] += $SHSP;
+    $l[$end] -= $SHSP;
+    next if $l[$end] < ($l[$ori] + $HSPminLEN - 1);
+    print STDOUT join("\t",@l)."\n";
+    $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
+}; # while
+$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
+$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
+$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
+print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
+             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse.\n";
+foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
+   printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
+}; # foreach
+#
+exit(0);
+@
+<<tangling>>=
+#
+notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
+chmod a+x $BIN/getHSPSR.pl ;
+@ 
+
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsctn{Gene Prediction: {\gnid}} %%%%%%%%%%%%%%%%%%%%%%
 
 \whtlst{
 \item Run {\gnid} without homology, then evaluate results.
@@ -963,7 +1303,7 @@ run_evaluation   $CHR   geneid  $XID \
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\sctn{Gene Prediction: {\sgp}} %%%%%%%%%%%%%%%%%%%%%%
+\subsctn{Gene Prediction: {\sgp}} %%%%%%%%%%%%%%%%%%%%%%
 
 \whtlst{
 \item Re-score similarity regions: SRs to HSP-SRs.
@@ -983,62 +1323,6 @@ for c in hsp-sr out gff gtf2 cds prot logs tmp ;
     do { ChckDirs $ODIR/$c ; } ; done ;
 #
 @
-
-\subsubsctn{Scripts: Re-scoring SRs}
-
-<<getHSPSR.pl>>=
-<<PERL shebang>>
-# Re-scoring SRs to produce HSP-SRs for SGP homology.
-#
-# USAGE: getHSPSR.pl "chrname" < SR_file.gff > HSP-SR_file.gff > stdout.report
-#
-<<PERL strict pragma + info>>
-my $PROGNAME = 'getHSPSR.pl';
-#
-my $chr = shift;
-my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
-my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
-          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
-                     "all" => 8,            "sum" => [ (0) x 9 ] );
-my $HSPminLEN = 1; # $ori + $HSPminLEN - 1 ==> minimum length is 1 nucleotide
-my $S_CUTOFF = 26;
-my $SCF = 0; # substract to tblastx scores S_CUTOFF - SCF
-my $DSC = $S_CUTOFF - $SCF;
-my $SHSP  = 0;    # SHSP=6 # shrink hsp by $SHSP
-my $WTBX  = 0.19; # weigth of tblastx score
-my $WTBXF = 0.30; # weigth of tblastx score
-my $WTBXI = 0.20; # weigth of tblastx score
-my $WTBXT = 0.30; # weigth of tblastx score
-while (<STDIN>) {
-    my @l;
-    next if /^#/o;
-    next if /^\s*$/o;
-    chomp;
-    @l = split /\s+/og, $_;
-    next unless $l[$sco] > $S_CUTOFF;
-    $l[$sco] = ($l[$sco] - $DSC) * $WTBX;
-    $l[$ori] += $SHSP;
-    $l[$end] -= $SHSP;
-    next if $l[$end] < ($l[$ori] + $HSPminLEN - 1);
-    print STDOUT join("\t",@l)."\n";
-    $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
-}; # while
-$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
-$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
-$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
-print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
-             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse.\n";
-foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
-   printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
-}; # foreach
-#
-exit(0);
-@
-<<tangling>>=
-# showing line numbering comments in program
-notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
-chmod a+x $BIN/getHSPSR.pl ;
-@ 
 
 \subsubsctn{Re-scoring SRs}
 
@@ -1271,6 +1555,7 @@ CREATE TABLE tb_sequence
   id      VARCHAR(25)  NOT NULL,
   code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   chr     INT UNSIGNED NOT NULL,
+  version CHAR(14)     NOT NULL, /* YYYYMMDDhhmmss */
   descr   TEXT
 );
 
@@ -1372,6 +1657,42 @@ The following files will serve to load rows on different tables with [[admin_db_
 #
 <<Version Control Id Tag>>
 #
+# Setting global version (must start with '>> ')
+>> Golden Path 20010806
+#
+# Record Format:
+#   <chr_id> <version> <description>
+# where:
+#       <version> == . --> global version
+#   <description> == . --> undef
+ 1 . .
+ 2 . .
+ 3 . .
+ 4 . .
+ 5 . .
+ 6 . .
+ 7 . .
+ 8 . .
+ 9 . .
+10 . .
+11 . .
+12 . .
+13 . .
+14 . .
+15 . .
+16 . .
+17 . .
+18 . .
+19 . .
+20 . .
+21 . .
+22 . .
+ X . .
+ Y . .
+#
+NA . .
+UL . .
+#
 @
 <<MySQL: adm file - seqs>>=
 #
@@ -1381,6 +1702,12 @@ The following files will serve to load rows on different tables with [[admin_db_
 #
 <<Version Control Id Tag>>
 #
+# Record Format:
+#   <chr_id> <sequence_id> <file_modifying_date> <description>
+# where:
+#   <file_modifying_date> is in YYYYMMDDhhmmss format
+#   <description> == . --> undef
+# 
 @
 <<MySQL: adm file - jobs>>=
 #
@@ -1407,6 +1734,13 @@ The following files will serve to load rows on different tables with [[admin_db_
 #   program execution status table
 #
 <<Version Control Id Tag>>
+#
+# Record format:
+#   <process_ID>
+#   <description-line_0>
+#    ...
+#   <description-line_n>
+#   // # this is the new record separator
 #
 TODO
 Process was not started yet... 
@@ -1441,13 +1775,17 @@ Just wait to the next update round to see if connection problem persist...
 
 <<tangling>>=
 # 
-# mySQL perl auxiliarly files
-for n in chrs seqs jobs steps status;
+# mySQL perl auxiliarly files 
+for n in chrs jobs steps status;
   do { 
        notangle -R"MySQL: adm file - $n" \
            $WORK/$nwfile.nw | cpif $BIN/mySQL/param/$n.tbl ;
      }; 
   done;
+# seqs.tbl is produced by initialization script on sequence analysis section
+notangle -R"MySQL: adm file - seqs" \
+           $WORK/$nwfile.nw | cpif $BIN/mySQL/param/seqs.tbl ;
+cat $HUMUS/seqid_list >> $BIN/mySQL/param/seqs.tbl ;
 #
 @ 
 
@@ -1547,7 +1885,7 @@ sub show_tbl_desc() {
     print $fhref "\n";
 } # show_tbl_desc
 
-sub load_to_tbl_ifdef() {
+sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allow multiple fields select... ;^D
     my ($table, $field, $aryfld, $aryrow) = @_;
     my ($ssth,$isth);
     print STDERR "###\n### UPDATING FIELDS for TABLE \"$table\"\n";
@@ -2070,7 +2408,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.1 2002-01-30 13:54:33 jabril Exp $
+# $Id: humus.nw,v 1.2 2002-02-01 19:07:01 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
