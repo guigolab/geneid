@@ -1,0 +1,32 @@
++ First of all export from ADOBE ACROBAT to PS file (including fonts and as PostScript level 2) the pages one pretend to convert into a two pages eps.
+
++ Then join both PS files into a single document that was initialized with PageCombiner.ps.
+
++ Tests made with ghostscript where not convincent:
+
+ghostscript -dNOPAUSE -dBATCH \
+            -r600 -g595x842 -sDEVICE=epswrite \
+            -sOutputFile=GenomeResearch_2000_10_10_1631_pp1+2.eps \
+                         GenomeResearch_2000_10_10_1631_pp1+2.ps  ;
+ghostscript -dNOPAUSE -dBATCH \
+            -r300 -g595x842 -sDEVICE=epswrite \
+            -sOutputFile=GenomeResearch_2000_10_10_1631_pp1+2.eps \
+                         GenomeResearch_2000_10_10_1631_pp1+2.ps ;
+
++ But this is what really "works":
+
+convert -page A4 -density 300x300 \
+        Bioinformatics_2000_16_8_743_pp1+2.ps \
+        Bioinformatics_2000_16_8_743_pp1+2.eps ; # for gff2ps paper
+convert -page A4 -density 300x300 \
+        GenomeResearch_2000_10_4_483_pp1+2.ps \
+        GenomeResearch_2000_10_4_483_pp1+2.eps ; # for GASP
+convert -page A4 -density 300x300 \
+        Science_2000_287_5461_2185_pp1+2.ps \
+        Science_2000_287_5461_2185_pp1+2.eps ; # for drome genome
+convert -page A4 -density 300x300 \
+        Science_2001_291_5507_1304_pp1+2.ps \
+        Science_2001_291_5507_1304_pp1+2.eps ; # for human genome
+convert -page A4 -density 300x300 \
+        GenomeResearch_2000_10_10_1631_pp1+2.ps \
+        GenomeResearch_2000_10_10_1631_pp1+2.eps ; # for GP eval on large seqs
