@@ -67,7 +67,7 @@ comparison_level = INT ----------> There are currently 5 comparison levels:
                  #####-----#####-----#####
                  #####-----#####-----#####
 
-   2 --> allow edge exon mismatches. This one will use the parameter 'exon_match' if is defined
+   2 --> allow edge exon mismatches. This one will use the parameter 'exon_match' if defined
    
                  #####-----#####-----#######
        #####-----#####-----#####-----#####
@@ -163,12 +163,12 @@ sub new{
 #
 ############################################################
 
-sub  verbose{
-  my ($self,$boolean) = @_;
-  if (defined $boolean){
-    $self->{_verbose} = $boolean;
-  }
-  return $self->{_verbose};
+sub verbose{
+    my ($self,$boolean) = @_;
+    if (defined $boolean){
+	$self->{_verbose} = $boolean;
+    }
+    return $self->{_verbose};
 }
 
 sub comparison_level{
@@ -230,28 +230,28 @@ sub compare{
 
   # switch on comparison level
   if ( $self->comparison_level == 3 ){
-    ($merge, $overlaps) = $self->_test_for_merge( $tran1, $tran2 );
+      ($merge, $overlaps) = $self->_test_for_merge( $tran1, $tran2 );
   }
   elsif( $self->comparison_level == 2 ){
       $self->splice_mismatch(0);
       ($merge, $overlaps) = $self->_test_for_merge(  $tran1, $tran2 );
-    }
+  }
   elsif( $self->comparison_level == 4 ){
       # this calls _test_for_merge but after eliminating small introns
       ($merge, $overlaps) = $self->_test_for_Merge_allow_small_introns( $tran1, $tran2 );
       
   }
   elsif( $self->comparison_level == 1 ){
-    ($merge, $overlaps) = $self->_test_for_strict_merge( $tran1, $tran2 );
+      ($merge, $overlaps) = $self->_test_for_strict_merge( $tran1, $tran2 );
   }
   elsif( $self->comparison_level == 5 ){
-    # this will not check any differences in the splice sites
-    if ( defined $self->intron_mismatch ){
-      ($merge, $overlaps) = $self->_test_for_Merge_allow_small_introns( $tran1, $tran2 );
-    }
-    else{
-      ($merge, $overlaps) = $self->_test_for_merge(     $tran1, $tran2 );
-    }
+      # this will not check any differences in the splice sites
+      if ( defined $self->intron_mismatch ){
+	  ($merge, $overlaps) = $self->_test_for_Merge_allow_small_introns( $tran1, $tran2 );
+      }
+      else{
+	  ($merge, $overlaps) = $self->_test_for_merge( $tran1, $tran2 );
+      }
   }
   
   return ($merge,$overlaps);
@@ -1178,4 +1178,312 @@ sub _check_simple_low_site{
 ############################################################
 
 
+############################################################
+# method to compare the extension of one transcript
+# against one or more reference ones
+# and recover the exons that are in the overlapping region and outside
+# the overlapping region for the transcript
+
+sub get_uncovered_Range{
+    my ($self,$t1,$t) = @_;
+
+    my $verbose = 1;
+    my $start = $self->transcript_low($t1);
+    my $end   = $self->transcript_high($t1);
+    
+    my @ref_transcripts = @$t;
+    my @ranges;
+    push ( @ranges, [$start,$end] );
+    while ( @ref_transcripts ){
+	
+	my $current_ref = shift @ref_transcripts;
+	my $ref_range = [ $self->transcript_low($current_ref), $self->transcript_high($current_ref) ];
+	
+	print "comparing with range @$ref_range\n" if $verbose;
+	my @new_ranges;
+	foreach my $range ( @ranges ){
+	    push( @new_ranges, $self->_get_free_Range($range,$ref_range) );
+	}
+	@ranges = @new_ranges;
+    }
+    return @ranges;
+}
+
+
+############################################################
+
+sub _get_free_Range{
+    my ($self,$range1,$range2) = @_;
+    
+    my ($s1,$e1) = @$range1;
+    my ($s2,$e2) = @$range2;
+
+    my @ranges;
+
+    if ( $s1 == $s2 ){
+
+	####################
+	#2   |------------|
+	#1   |--------|
+	####################
+	if ( $e1<= $e2 ){
+	    # coincident or covered!
+	}
+	####################
+	#2   |------|
+	#1   |-----------|
+	####################
+	elsif( $e1 > $e2 ){
+	    push( @ranges, [$e2+1,$e1] );
+	}	
+    }
+    elsif( $e1 == $e2 ){
+	####################
+	#2  |------------|
+	#1    |----------|
+	####################
+	if ( $s2 <= $s1 ){
+	    # coincident or covered!
+	}
+	####################
+	#2        |------|
+	#1   |-----------|
+	####################
+	elsif( $s1 < $s2 ){
+	    push( @ranges, [$s1, $s2-1] );
+	}
+    }
+    elsif ( $s2 > $s1 && $s2 <= $e1 ){
+
+	####################
+	#2        |------------| OR  #2       |----|
+	#1   |-----------|           #1   |---|
+	####################
+	if ( $e2 >= $e1 ){
+	    push ( @ranges, [$s1, $s2 -1] );
+	}
+	####################
+	#2      |------| 
+	#1   |-----------|
+	####################
+	if ( $e2 < $e1 ){
+	    push ( @ranges, [$s1,$s2-1] );
+	    push ( @ranges, [$e2+1,$e1] );
+	}
+    }
+    elsif( $s2 < $s1 && $e2 >= $s1 ){
+	
+	####################
+	#2  |---------|      OR   #2  |---|
+	#1      |--------|        #1      |---|
+	####################
+	if ( $e2 <= $e1 ){
+	    push ( @ranges, [$e2 + 1, $e1] );
+	}
+	####################
+	#2  |-----------|
+	#1      |----|
+	####################
+	if ( $e2 > $e1 ){
+	    # 1 is totally covered
+	}
+    }
+    return @ranges;
+}
+
+
+
+
+
+############################################################
+# Description: it returns the highest coordinate of a transcript
+
+sub transcript_high{
+    my ($self,$tran) = @_;
+    my @exons = sort { $a->start <=> $b->start } @{$tran->get_all_Exons};
+    return $exons[-1]->end;
+}
+
+############################################################
+# Description: it returns the lowest coordinate of a transcript
+
+sub transcript_low{
+    my ($self,$tran) = @_;
+    my @exons = sort { $a->start <=> $b->start } @{$tran->get_all_Exons};
+    return $exons[0]->start;
+}
+############################################################
+
+
+
+############################################################
+# this method compares two transcripts and calculates
+# the number of overlapping exons
+# and the extent (bp) of the overlap
+
+sub calculate_overlap {         
+    my ($self,$tran1, $tran2) = @_;
+    my @exons1   = @{ $tran1->get_all_Exons };
+    my @exons2   = @{ $tran2->get_all_Exons };
+    my $overlaps = 0;
+    my $overlap_length = 0;
+    foreach my $exon1 (@exons1){
+	foreach my $exon2 (@exons2){
+	    if ( $exon1->overlaps($exon2) && ( $exon1->strand == $exon2->strand ) ){
+		$overlaps++;
+		
+		# calculate the extent of the overlap
+		if ( $exon1->start > $exon2->start && $exon1->start <= $exon2->end ){
+		    if ( $exon1->end < $exon2->end ){
+			$overlap_length += ( $exon1->end - $exon1->start + 1);
+		    }
+		    elsif ( $exon1->end >= $exon2->end ){
+			$overlap_length += ( $exon2->end - $exon1->start + 1);
+		    }
+		}
+		elsif( $exon1->start <= $exon2->start && $exon2->start <= $exon1->end ){
+		    if ( $exon1->end < $exon2->end ){
+			$overlap_length += ( $exon1->end - $exon2->start + 1);
+		    }
+		    elsif ( $exon1->end >= $exon2->end ){
+			$overlap_length += ( $exon2->end - $exon2->start + 1);
+		    }
+		}
+	    }
+	}
+    }
+    
+    return ($overlaps,$overlap_length);
+			
+} 
+	
+############################################################
+#
+# this method returns the exon-assemblies of the first transcript
+# that overlap with exons in the second transcript
+# it returns them as a listref of exon lists
+
+#       ###---###---###
+#  ###--###---###---##
+#
+#       ###--------###----###
+#  ###--###---###--###----###
+#
+
+sub find_intersecting_exon_assemblies{
+    my ($self, $prediction, $annotation) = @_;
+    my @assemblies;
+
+    my @pred_exons = @{$prediction->get_all_Exons};
+    my @ann_exons  = @{$annotation->get_all_Exons};
+    
+    #print "Comparing:\n";
+    #ClusterMerge::TranscriptUtils->_print_SimpleTranscript($prediction);
+    #ClusterMerge::TranscriptUtils->_print_SimpleTranscript($annotation);
+    
+    
+    my %exon2transcript;
+    foreach my $e (@pred_exons){
+	$exon2transcript{$e} = $prediction;
+    }
+    foreach my $e (@ann_exons){
+	$exon2transcript{$e} = $annotation;
+    }
+    my @all_exons;
+    push (@all_exons, (@pred_exons,@ann_exons));
+
+    my ($clusters,$exon2cluster)= ClusterMerge::ExonUtils->_cluster_Exons(@all_exons);
+    @all_exons = ();
+    my $assembly;
+
+    foreach my $c ( sort {$a->start <=> $b->start} @$clusters ){
+	my @p_exons = grep { $exon2transcript{$_} == $prediction } @{$c->get_Exons};
+	my @a_exons = grep { $exon2transcript{$_} == $annotation } @{$c->get_Exons};
+
+	if ( @p_exons && @a_exons ){
+	    push( @$assembly, @p_exons );
+	}
+	elsif( $assembly && @$assembly ){
+	    if ( $self->verbose){
+		print "found assembly:";
+		ClusterMerge::ExonUtils->print_Exons($assembly);
+	    }
+	    push( @assemblies, $assembly );
+	    $assembly = [];
+	}
+    }
+    if( $assembly && @$assembly ){
+	if ( $self->verbose ){
+	    print "found assembly:";
+	    ClusterMerge::ExonUtils->print_Exons($assembly);
+	}
+	push( @assemblies, $assembly );
+	$assembly = [];
+    }
+    
+    return @assemblies;
+}    
+
+############################################################
+
+
+
+
+############################################################
+# Description: this method reads two transcripts
+# and returns a new transcripts which exons
+# include the intersections of the exons from the input.
+# This is supposed to be reasonable when
+# we know the input is wholly CDS and there has been
+# some previous processing to make sure
+# the two transcripts overlap and their exons overlap.
+
+sub get_intersecting_CDS{
+    my ($self, $t1, $t2 ) = @_;
+
+    my @exons1 = sort { $a->start <=> $b->start } @{$t1->get_all_Exons};
+    my @exons2 = sort { $a->start <=> $b->start } @{$t2->get_all_Exons};
+
+    my $start = 0;
+
+    my @ranges;
+    for (my $i=0; $i<scalar(@exons1); $i++ ){
+
+	for ( my $j=0; $j<scalar(@exons2); $j++  ){
+
+	    if ( $exons1[$i]->overlaps($exons2[$j]) ){
+		my ($start,$end) = $exons1[$i]->intersection($exons2[$j]);
+		
+		my $exon = ClusterMerge::Exon->new;
+		$exon->start($start);
+		$exon->end($end);
+		$exon->strand( $exons1[$i]->strand );
+		$exon->seqname($exons1[$i]->seqname);
+		$exon->source_tag("intersecting_CDS");
+		$exon->primary_tag("exon");
+		
+		if ($start == $exons1[$i]->start ){
+		    $exon->phase($exons1[$i]->phase);
+		}
+		elsif( $start == $exons2[$j]->start ){
+		    $exon->phase($exons2[$j]->phase);
+		}
+		else{
+		    $exon->phase(".");
+		}
+		push( @ranges,$exon );
+	    }
+	}
+    }
+    my $transcript = ClusterMerge::Transcript->new();
+    $transcript->dbID( $t1->dbID."x".$t2->dbID );
+    foreach my $exon ( @ranges ){
+	$transcript->add_Exon($exon);
+    }
+    return $transcript;
+}
+	
+		 
+		
 1;
+    
