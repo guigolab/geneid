@@ -3,7 +3,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: GFF2APLOT_MANUAL.tex,v 1.5 2002-01-17 12:14:59 jabril Exp $
+% $Id: GFF2APLOT_MANUAL.tex,v 1.6 2002-12-24 13:41:33 jabril Exp $
 %
 % latex GFF2APLOT_MANUAL.tex ; dvips GFF2APLOT_MANUAL.dvi -o GFF2APLOT_MANUAL.ps -t a4 ;
 %
@@ -55,9 +55,33 @@
 \input ./tabledefs.tex
 
 \newcommand{\sctn}[1]{\section{#1}}
+% \newcommand{\sctnsp}[1]{\section*{#1}\addcontentsline{}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
+\renewcommand{\appendix}{%
+  \renewcommand{\section}{%
+    \newpage\thispagestyle{fancy}%
+    \secdef\Appendix\sAppendix}%
+  \setcounter{section}{0}%
+  \renewcommand{\thesection}{\Alph{section}}%
+%  \setcounter{figure}{0}%
+%  \renewcommand{\thefigure}{\Alph{figure}}%
+%  \setcounter{table}{0}%
+%  \renewcommand{\thetable}{\Alph{table}}%
+}% \appendix
+\newcommand{\Appendix}[2][?]{ % complex form
+  \refstepcounter{section}%
+  \addcontentsline{toc}{appendix}%
+    {\protect\numberline{\thesection}#1}%
+    %nothing to show
+  %  {\protect\numberline{\appendixname~\thesection} #1}%
+  %{\flushright\large\bfseries\appendixname\ \thesection\par
+  % \nohyphens\centering\#2\par} % format the corresponding section header
+  \sectionmark{#1}%
+  %\vspace{\baselineskip}% formatting
+}% \Appendix
+\newcommand{\sAppendix}[1]{}%nothing to show
 
 \newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
 % \newcommand{\op}[1]{{\bfseries\sffamily #1}}
@@ -128,7 +152,7 @@
 
 \vskip 5ex
 
-{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.5 2002-01-17 12:14:59 jabril Exp $$>$ }
+{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.6 2002-12-24 13:41:33 jabril Exp $$>$ }
 
 \vfill
 
@@ -258,6 +282,13 @@ Universitat Pompeu Fabra\\[2ex]
   \item 
  \end{itemize}
 
+\subsctn{Special Customization Features}
+
+ \begin{itemize}\setlist
+  \input tables/AplotCFvars_dscExtra.tex
+  \item 
+ \end{itemize}
+
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER: Bibliography, APPENDIXES, Index.
 
@@ -267,18 +298,21 @@ Universitat Pompeu Fabra\\[2ex]
 % \bibliography{/home1/rguigo/docs/biblio/References}
 
 \appendix
+\renewcommand{\sctn}[1]{\section{#1}}
 
 \newpage
-\fancyhead[RO,LE]{\thepage}
-\fancyhead[LO,RE]{}
-\fancyfoot[LO,LE]{}
-\fancyfoot[RO,RE]{}
-\renewcommand{\headrulewidth}{1pt}
-\renewcommand{\footrulewidth}{0pt}
-\geometry{noheadfoot}
-%\enlargethispage*{40cm}
+%\fancyhead[RO,LE]{\thepage}
+%\fancyhead[LO,RE]{}
+%\fancyfoot[LO,LE]{}
+%\fancyfoot[RO,RE]{}
+%\renewcommand{\headrulewidth}{1pt}
+%\renewcommand{\footrulewidth}{0pt}
+%\geometry{noheadfoot}
+%\addtocontents{toc}{\protect\vskip 4ex\protect\noindent\protect\textbf{\protect\Large Appendixes}\protect\vskip 0.25ex}
 
-\sctn{Command-Line Options Summary for \prog.}
+\enlargethispage*{2cm}
+
+\sctn{Command-Line Options Summary for \protect\prog.}
 %\vskip -0.25cm
 
 %\vfill
@@ -297,6 +331,7 @@ Universitat Pompeu Fabra\\[2ex]
 \vskip 0.25cm
 %
 \fbox{
+\tiny
 \begin{tabular}{rl}
 \textbf{NOTE:}  &
   \textbf{ When a parameter is required, it applies for both short and long options. }\\
@@ -323,7 +358,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \newpage
 
-\sctn{Customization Variables Sumary for \prog.}
+\sctn{Customization Variables Sumary for \protect\prog.}
 
 % tables/AplotCustomVarsTbl.tex
 
@@ -361,6 +396,9 @@ Universitat Pompeu Fabra\\[2ex]
   \vskip 1cm
 
   \input tables/AplotCFvars_tblseq.tex
+  \vskip 1cm
+
+  \input tables/AplotCFvars_tblextra.tex
 
 \end{footnotesize}
 \end{center}
