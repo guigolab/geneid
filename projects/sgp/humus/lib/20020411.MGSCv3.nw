@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20020411.MGSCv3.nw,v 1.7 2002-06-18 22:38:14 jabril Exp $ 
+% # $Id: 20020411.MGSCv3.nw,v 1.8 2002-06-18 23:12:51 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.7 2002-06-18 22:38:14 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.8 2002-06-18 23:12:51 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -356,8 +356,17 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/hsap.seqid_$ko | \
       } ;
     done ;
 #
-# RUN RAW GENEID on MASKED SEQUENCES
-gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+@ 
+
+<<runallmouseGENEID.sh>>=
+<<BASH shebang>>
+###
+### runallmouseGENEID.sh ### RUN RAW GENEID on RAW SEQUENCES
+###
+<<BASH Project Variables>>
+# $MUSHU/seqid_list
+SEQID="$1" ;
+gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
   while read CHR SEQ ;
     do {
       ODIR="$MUSHU/chr$CHR" ;
@@ -366,6 +375,67 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
       GDIR="$ODIR/geneid" ;
       MkDirs $GDIR $GDIR/$FTPTBXID ;
       GDIR="$ODIR/geneid/$FTPTBXID" ;
+      for c in out gff gtf2 cds prot logs tmp eval ;
+        do { MkDirs $GDIR/$c ; } ; done ;
+      GENEID="$SRC/geneid_v1.1/bin/geneid" ; # geneid v1.1
+      PARAM="$SRC/geneid_v1.1/param/human3iso.param" ;
+      EW=0 ; # add to exon weigth
+      ISEQ="$MSEQ/$SEQ.fa" ;
+      GENEID_CMDLN="-v -DE $EW -P $PARAM $ISEQ" ;
+      echo "$GENEID $GENEID_CMDLN" 1>&2 ;
+      $GENEID $GENEID_CMDLN 2> $GDIR/logs/$SEQ.geneid | \
+              grep -v 'evidence' > $GDIR/out/$SEQ ;
+      $BIN/geneid_raw2GFF.pl $SEQ $GDIR $GDIR/out/$SEQ ;
+      #
+      ls -1 $GDIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
+      while read n;
+        do {
+          cat $GDIR/gff/$SEQ.sg/$n;
+          };
+        done | sort +3n +4n -5 - > $GDIR/gff/$SEQ ;
+      #
+      gawk '($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { # get_geneid_genes 
+        genes[$9]++;
+        if (genes[$9]>1) {
+          min[$9] = $4<min[$9] ? $4 : min[$9] ;
+          max[$9] = $5>max[$9] ? $5 : max[$9] ;
+        } else {
+          min[$9] = $4 ;
+          max[$9] = $5 ;
+          strand[$9] = $7;
+        };
+        len[$9]+=$5-$4+1
+      }
+      END {
+        for (n in genes) {
+          print n, min[n], max[n], strand[n], len[n],genes[n];
+        };
+      }' $GDIR/gff/$SEQ | \
+         sort +1n +2n -3 - > $GDIR/$SEQ.gene_list ;
+      } ;
+    done ;
+### EOF ###
+@
+%%% runallmouseGENEID.sh
+
+<<runallmouseMSKGENEID.sh>>=
+<<BASH shebang>>
+###
+### runallmouseMSKGENEID.sh ### RUN RAW GENEID on MASKED SEQUENCES
+###
+<<BASH Project Variables>>
+# $MUSHU/seqid_list
+SEQID="$1" ;
+gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
+  while read CHR SEQ ;
+    do {
+      ODIR="$MUSHU/chr$CHR" ;
+      FTPTBXID2="${FTPTBXID}msk" ;
+      ###
+      echo "# RUNNING GENEID on MASKED $CHR" 1>&2 ;
+      GDIR="$ODIR/geneid" ;
+      MkDirs $GDIR $GDIR/$FTPTBXID2 ;
+      GDIR="$ODIR/geneid/$FTPTBXID2" ;
       for c in out gff gtf2 cds prot logs tmp eval ;
         do { MkDirs $GDIR/$c ; } ; done ;
       GENEID="$SRC/geneid_v1.1/bin/geneid" ; # geneid v1.1
@@ -405,11 +475,13 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
          sort +1n +2n -3 - > $GDIR/$SEQ.gene_list ;
       } ;
     done ;
-##
-@ 
+### EOF ###
+@
+%%% runallmouseMSKGENEID.sh
+
 
 <<Version Control Id Tag>>=
-# $Id: 20020411.MGSCv3.nw,v 1.7 2002-06-18 22:38:14 jabril Exp $
+# $Id: 20020411.MGSCv3.nw,v 1.8 2002-06-18 23:12:51 jabril Exp $
 @ 
 <<BASH shebang>>=
 #!/usr/bin/bash
@@ -561,10 +633,10 @@ function get_geneid_genes ()
 #
 @
 
-<<runallmouse.sh>>=
+<<runallmouseSGP.sh>>=
 <<BASH shebang>>
 ###
-### runallmouse.sh ### RUNNING ALMOST EVERYTHING ON MOUSE !!!
+### runallmouseSGP.sh ### RUNNING ALMOST EVERYTHING ON MOUSE !!!
 ###
 <<BASH Project Variables>>
 # $MUSHU/seqid_list
@@ -648,12 +720,13 @@ gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
     done ;
 ###EOF###
 @ 
+%%% runallmouseSGP.sh
 %'
 
-<<runallmouseMSK.sh>>=
+<<runallmouseMSKSGP.sh>>=
 <<BASH shebang>>
 ###
-### runallmouseMSK.sh ### RUNNING ALMOST EVERYTHING ON MOUSE !!!
+### runallmouseMSKSGP.sh ### RUNNING ALMOST EVERYTHING ON MOUSE !!!
 ###
 <<BASH Project Variables>>
 # $MUSHU/seqid_list
@@ -895,13 +968,21 @@ DDIR="$WDIR/CHR22_tests.docs" ;
 localnw="20020411.MGSCv3" ;
 export WDIR DDIR localnw ;
 #
-notangle -R'runallmouse.sh' $WDIR/$localnw.nw | \
-                       cpif $MUSHU/bin/runallmouse.sh ;
-is_exec $MUSHU/bin/runallmouse.sh ;
+notangle -R'runallmouseGENEID.sh' $WDIR/$localnw.nw | \
+                       cpif $MUSHU/bin/runallmouseGENEID.sh ;
+is_exec $MUSHU/bin/runallmouseGENEID.sh ;
 #
-notangle -R'runallmouseMSK.sh' $WDIR/$localnw.nw | \
-                       cpif $MUSHU/bin/runallmouseMSK.sh ;
-is_exec $MUSHU/bin/runallmouseMSK.sh ;
+notangle -R'runallmouseMSKGENEID.sh' $WDIR/$localnw.nw | \
+                       cpif $MUSHU/bin/runallmouseMSKGENEID.sh ;
+is_exec $MUSHU/bin/runallmouseMSKGENEID.sh ;
+#
+notangle -R'runallmouseSGP.sh' $WDIR/$localnw.nw | \
+                       cpif $MUSHU/bin/runallmouseSGP.sh ;
+is_exec $MUSHU/bin/runallmouseSGP.sh ;
+#
+notangle -R'runallmouseMSKSGP.sh' $WDIR/$localnw.nw | \
+                       cpif $MUSHU/bin/runallmouseMSKSGP.sh ;
+is_exec $MUSHU/bin/runallmouseMSKSGP.sh ;
 #
 notangle -R'runallmouseSGPrefseq.sh' $WDIR/$localnw.nw | \
                                 cpif $MUSHU/bin/runallmouseSGPrefseq.sh ;
@@ -931,9 +1012,11 @@ gawk 'BEGIN{ prt=0 }
 # ls -1 bin/seqid_* | while read n; do echo "$n ->"`gawk '{s+=$3}END{print s}' $n`; done
 #
 MUSBIN="$MUSHU/bin";
-# MUSPRG="runallmouse.sh"; MUSLOG="SGP.log";
-# MUSPRG="runallmouseMSK.sh"; MUSLOG=".SGPmsk.log";
-# MUSPRG="runallmouseSGPrefseq.sh"; MUSLOG="SGPrs.log";
+# MUSPRG="runallmouseGENEID.sh";       MUSLOG="GENEID.log";
+# MUSPRG="runallmouseMSKGENEID.sh";    MUSLOG="GENEIDmsk.log";
+# MUSPRG="runallmouseSGP.sh";          MUSLOG="SGP.log";
+# MUSPRG="runallmouseMSKSGP.sh";       MUSLOG=".SGPmsk.log";
+# MUSPRG="runallmouseSGPrefseq.sh";    MUSLOG="SGPrs.log";
 MUSPRG="runallmouseMSKSGPrefseq.sh"; MUSLOG=".SGPmsk-rs.log";
 # monstre4
 rsh monstre4.imim.es "( $MUSBIN/$MUSPRG $MUSBIN/seqid_a 2> $MUSBIN/seqid_a$MUSLOG 1>&2 )" &
