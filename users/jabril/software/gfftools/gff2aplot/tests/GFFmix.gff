@@ -30,12 +30,12 @@ MOUSE EMBL exon 3500 3600 0.5 - 0 genZ:e3 ##none
 MOUSE EMBL exon 3700 3900 0.5 - 0 genZ:e4 ##none
 MOUSE EMBL mrna   25 1890 0.5 + 0  genX   ##none
 MOUSE EMBL mrna 1900 2950 0.5 + 0  genY   ##none
-MOUSE EMBL mrna 2975 4100 0.5 - 0  genZ   ##none
+MOUSE EMBL mrna 2975 3950 0.5 - 0  genZ   ##none
 ## Seq3
 RAT   EMBL exon 2700 2900 0.5 - 0  RAT:e4 ##none
 ## Align
 ## Align
-HUMAN:MOUSE EMBL align   40:40    250:250  0.65 + 0 genA:.8 ##none
+HUMAN:MOUSE EMBL align    1:1     250:250  0.65 + 0 genA:.8 ##none
 HUMAN:MOUSE EMBL align  300:300   630:630  0.55 + 0 genA:.8 ##none
 HUMAN:MOUSE EMBL align  815:815   975:975  0.70 + 0 genA:.8 ##none
 HUMAN:MOUSE EMBL align 1123:1123 1486:1486 0.99 + 0 genA:.8 ##none
@@ -47,328 +47,48 @@ HUMAN:MOUSE EMBL align 2700:2700 2900:2900 0.75 - 0 genB:.6 ##none
 HUMAN:MOUSE EMBL align 3000:3000 3054:3054 0.50 - 0 genC:.4 ##none
 HUMAN:MOUSE EMBL align 3236:3236 3422:3422 0.45 - 0 genC:.4 ##none
 HUMAN:MOUSE EMBL align 3500:3500 3600:3600 0.35 - 0 genC:.4 ##none
-HUMAN:MOUSE EMBL align 3700:3700 3900:3900 0.25 - 0 genC:.4 ##none
-## Boxit
+HUMAN:MOUSE EMBL align 3800:3650 4100:3950 0.25 - 0 genC:.4 ##none
+#
 HUMAN:MOUSE EMBL boxit  300:300   630:630  0.55 + 0 genA:.8 ##none
 HUMAN:MOUSE EMBL boxit 1123:1123 1486:1486 1.00 + 0 genA:.8 ##none
 HUMAN:MOUSE EMBL boxit 1667:1667 1794:1794 0.80 + 0 genA:.8 ##none
 HUMAN:MOUSE EMBL boxit 2500:2500 2600:2600 0.30 - 0 genB:.6 ##none
-## Boxit
 HUMAN:RAT EMBL boxit 2500:2500 2600:2600 0.30 - 0 genB  ##none
-
-
-
-
-#
-# GFF_sample.2.gff
 #
 #
-
-# FORWARD STRAND
-
 ShapesTOP     TOP     shp01   100   200  1.0  +  .  Target "ONE"
 ShapesTOP     TOP     shp02   300   400  1.0  +  .  Target "ONE"
 ShapesTOP     TOP     shp03   500   600  1.0  +  .  Target "ONE"
 ShapesTOP     TOP     shp04   700   800  1.0  +  .  Target "ONE"
 ShapesTOP     TOP     shp05   900  1000  1.0  +  .  Target "ONE"
-ShapesTOP     TOP     shp06  1100  1200  1.0  +  .  Target "ONE"
-ShapesTOP     TOP     shp07  1300  1400  1.0  +  .  Target "ONE"
-ShapesTOP     TOP     shp08  1500  1600  1.0  +  .  Target "ONE"
-ShapesTOP     TOP     shp09  1700  1800  1.0  +  .  Target "ONE"
-ShapesTOP     TOP     shp10  1900  2000  1.0  +  .  Target "ONE"
-ShapesTOP     TOP     shp11  2100  2200  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp12  2300  2400  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp13  2500  2600  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp14  2700  2800  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp15  2900  3000  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp16  3100  3200  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp17  3300  3400  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp18  3500  3600  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp19  3700  3800  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp20  3900  4000  1.0  +  .  Target "TWO"
-ShapesTOP     TOP     shp21  4100  4200  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp22  4300  4400  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp23  4500  4600  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp24  4700  4800  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp25  4900  5000  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp26  5100  5200  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp27  5300  5400  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp28  5500  5600  1.0  +  .  Target "THREE"
-ShapesTOP     TOP     shp29  5700  5800  1.0  +  .  Target "THREE"
-# ShapesTOP     TOP     shp30  5900  6000  1.0  +  .  .
-	        	        
-ShapesCENTER  CENTER  shp01   100   200  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp02   300   400  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp03   500   600  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp04   700   800  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp05   900  1000  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp06  1100  1200  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp07  1300  1400  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp08  1500  1600  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp09  1700  1800  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp10  1900  2000  1.0  +  .  Target "ONE"  
-ShapesCENTER  CENTER  shp11  2100  2200  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp12  2300  2400  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp13  2500  2600  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp14  2700  2800  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp15  2900  3000  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp16  3100  3200  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp17  3300  3400  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp18  3500  3600  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp19  3700  3800  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp20  3900  4000  1.0  +  .  Target "TWO"  
-ShapesCENTER  CENTER  shp21  4100  4200  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp22  4300  4400  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp23  4500  4600  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp24  4700  4800  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp25  4900  5000  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp26  5100  5200  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp27  5300  5400  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp28  5500  5600  1.0  +  .  Target "THREE"
-ShapesCENTER  CENTER  shp29  5700  5800  1.0  +  .  Target "THREE"
-# ShapesCENTER  CENTER  shp30  5900  6000  1.0  +  .  .
-	        	        
-ShapesMIRROR  MIRROR  shp01   100   200  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp02   300   400  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp03   500   600  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp04   700   800  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp05   900  1000  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp06  1100  1200  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp07  1300  1400  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp08  1500  1600  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp09  1700  1800  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp10  1900  2000  1.0  +  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp11  2100  2200  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp12  2300  2400  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp13  2500  2600  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp14  2700  2800  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp15  2900  3000  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp16  3100  3200  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp17  3300  3400  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp18  3500  3600  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp19  3700  3800  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp20  3900  4000  1.0  +  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp21  4100  4200  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp22  4300  4400  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp23  4500  4600  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp24  4700  4800  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp25  4900  5000  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp26  5100  5200  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp27  5300  5400  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp28  5500  5600  1.0  +  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp29  5700  5800  1.0  +  .  Target "THREE"
-# ShapesMIRROR  MIRROR  shp30  5900  6000  1.0  +  .  .
-	        	        
-ShapesBOTTOM  BOTTOM  shp01   100   200  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp02   300   400  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp03   500   600  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp04   700   800  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp05   900  1000  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp06  1100  1200  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp07  1300  1400  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp08  1500  1600  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp09  1700  1800  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp10  1900  2000  1.0  +  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp11  2100  2200  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp12  2300  2400  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp13  2500  2600  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp14  2700  2800  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp15  2900  3000  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp16  3100  3200  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp17  3300  3400  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp18  3500  3600  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp19  3700  3800  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp20  3900  4000  1.0  +  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp21  4100  4200  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp22  4300  4400  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp23  4500  4600  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp24  4700  4800  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp25  4900  5000  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp26  5100  5200  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp27  5300  5400  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp28  5500  5600  1.0  +  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp29  5700  5800  1.0  +  .  Target "THREE"
-# ShapesBOTTOM  BOTTOM  shp30  5900  6000  1.0  +  .  .
-
-# Now in REVERSE STRAND
-
-ShapesTOP     TOP     shp01   100   200  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp02   300   400  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp03   500   600  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp04   700   800  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp05   900  1000  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp06  1100  1200  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp07  1300  1400  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp08  1500  1600  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp09  1700  1800  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp10  1900  2000  1.0  -  .  Target "ONE"  
-ShapesTOP     TOP     shp11  2100  2200  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp12  2300  2400  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp13  2500  2600  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp14  2700  2800  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp15  2900  3000  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp16  3100  3200  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp17  3300  3400  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp18  3500  3600  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp19  3700  3800  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp20  3900  4000  1.0  -  .  Target "TWO"  
-ShapesTOP     TOP     shp21  4100  4200  1.0  -  .  Target "THREE"
-ShapesTOP     TOP     shp22  4300  4400  1.0  -  .  Target "THREE"
-ShapesTOP     TOP     shp23  4500  4600  1.0  -  .  Target "THREE"
-ShapesTOP     TOP     shp24  4700  4800  1.0  -  .  Target "THREE"
-ShapesTOP     TOP     shp25  4900  5000  1.0  -  .  Target "THREE"
+ShapesTOP     TOP     shp17  3300  3400  1.0  .  .  Target "TWO"
+ShapesTOP     TOP     shp18  3500  3600  1.0  .  .  Target "TWO"
+ShapesTOP     TOP     shp19  3700  3800  1.0  .  .  Target "TWO"
+ShapesTOP     TOP     shp20  3900  4000  1.0  .  .  Target "TWO"
 ShapesTOP     TOP     shp26  5100  5200  1.0  -  .  Target "THREE"
 ShapesTOP     TOP     shp27  5300  5400  1.0  -  .  Target "THREE"
 ShapesTOP     TOP     shp28  5500  5600  1.0  -  .  Target "THREE"
 ShapesTOP     TOP     shp29  5700  5800  1.0  -  .  Target "THREE"
-# ShapesTOP     TOP     shp30  5900  6000  1.0  -  .  .
-	        	        
-ShapesCENTER  CENTER  shp01   100   200  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp02   300   400  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp03   500   600  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp04   700   800  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp05   900  1000  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp06  1100  1200  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp07  1300  1400  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp08  1500  1600  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp09  1700  1800  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp10  1900  2000  1.0  -  .  Target "ONE"  
-ShapesCENTER  CENTER  shp11  2100  2200  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp12  2300  2400  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp13  2500  2600  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp14  2700  2800  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp15  2900  3000  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp16  3100  3200  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp17  3300  3400  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp18  3500  3600  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp19  3700  3800  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp20  3900  4000  1.0  -  .  Target "TWO"  
-ShapesCENTER  CENTER  shp21  4100  4200  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp22  4300  4400  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp23  4500  4600  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp24  4700  4800  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp25  4900  5000  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp26  5100  5200  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp27  5300  5400  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp28  5500  5600  1.0  -  .  Target "THREE"
-ShapesCENTER  CENTER  shp29  5700  5800  1.0  -  .  Target "THREE"
-# ShapesCENTER  CENTER  shp30  5900  6000  1.0  -  .  .
-	        	        
-ShapesMIRROR  MIRROR  shp01   100   200  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp02   300   400  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp03   500   600  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp04   700   800  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp05   900  1000  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp06  1100  1200  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp07  1300  1400  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp08  1500  1600  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp09  1700  1800  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp10  1900  2000  1.0  -  .  Target "ONE"  
-ShapesMIRROR  MIRROR  shp11  2100  2200  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp12  2300  2400  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp13  2500  2600  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp14  2700  2800  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp15  2900  3000  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp16  3100  3200  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp17  3300  3400  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp18  3500  3600  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp19  3700  3800  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp20  3900  4000  1.0  -  .  Target "TWO"  
-ShapesMIRROR  MIRROR  shp21  4100  4200  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp22  4300  4400  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp23  4500  4600  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp24  4700  4800  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp25  4900  5000  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp26  5100  5200  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp27  5300  5400  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp28  5500  5600  1.0  -  .  Target "THREE"
-ShapesMIRROR  MIRROR  shp29  5700  5800  1.0  -  .  Target "THREE"
-# ShapesMIRROR  MIRROR  shp30  5900  6000  1.0  -  .  .
-	        	        
-ShapesBOTTOM  BOTTOM  shp01   100   200  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp02   300   400  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp03   500   600  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp04   700   800  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp05   900  1000  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp06  1100  1200  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp07  1300  1400  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp08  1500  1600  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp09  1700  1800  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp10  1900  2000  1.0  -  .  Target "ONE"  
-ShapesBOTTOM  BOTTOM  shp11  2100  2200  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp12  2300  2400  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp13  2500  2600  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp14  2700  2800  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp15  2900  3000  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp16  3100  3200  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp17  3300  3400  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp18  3500  3600  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp19  3700  3800  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp20  3900  4000  1.0  -  .  Target "TWO"  
-ShapesBOTTOM  BOTTOM  shp21  4100  4200  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp22  4300  4400  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp23  4500  4600  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp24  4700  4800  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp25  4900  5000  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp26  5100  5200  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp27  5300  5400  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp28  5500  5600  1.0  -  .  Target "THREE"
-ShapesBOTTOM  BOTTOM  shp29  5700  5800  1.0  -  .  Target "THREE"
-# ShapesBOTTOM  BOTTOM  shp30  5900  6000  1.0  -  .  .
 #
-# GFF_sample.gff
 #
-# Elements taken from GFF_random_sample.txt, generated with following script:
+STOP TOP shp01   100   200  1.0  +  .  Target "BOTTOM" 150 200 + 0; frame 1
+STOP TOP shp02   300   400  1.0  +  .  Target "BOTTOM" 400 300 - 0; e-value 
+STOP TOP shp03   500   600  1.0  +  .  Target "BOTTOM" 500 600
+STOP TOP shp04   700   800  1.0  +  .  Target "BOTTOM" 700 800 -
+STOP TOP shp05   900  1000  1.0  +  .  Target "BOTTOM" 900 1000 - ; frame 0;
+STOP TOP shp17  3300  3400  1.0  .  .  Target "BOTTOM" ; START 3300 ; END 3400; FRAME 2 ; Strand +; id "group2" ; e-value 2e-20
 #
-# Random positions generation: 
-#   gawk 'BEGIN{source[1]="Experimental";source[2]="DB-Match";source[3]="Feature_Finder";source[4]="Genomic_Explorer";source[5]="HMM+";source[6]="PoSsearch";for (k=1;k<=1000;k++) {n=randint(1,10000);m=randint(n+100,n+1000);printf "Example\t%s\t%s\t%s\t%s\t\n",source[randint(1,6)],n,m,randint(0,100)}} function randint(i,e){return int((e-i)*rand())+i}' | sort -b +1 -2 +2n > GFF_random_sample.txt
-#
-# Calculating correct frames:
-#   gawk '{rmd=(3-($2-($1+$3)+1) % 3) % 3;printf "%s %s %s :: %s \n",$1,$2,$3,rmd}'
-#   gawk '{if ($1=="Example" && $3=="exon") { if (prev==0) {print $0"\t0 ("(3-($5-$4+1) % 3) % 3 ")*f";prev=1;lstfrm=0} else {print $0"\t"rmd,"("(3-($5-($4+rmd)+1) % 3) % 3")"}} else {print $0; prev=0}; rmd=(3-($5-($4+lstfrm)+1) % 3) % 3; lstfrm=rmd }' GFF_sample.gff  ( | mpage -1 -l -L50 | lpr )
-#
-# Making the plot:
-#   ../gff2ps -s a5 -- GFF_sample.gff > GFF_sample.ps
-#
-# $Id: GFFmix.gff,v 1.1 2001-09-06 18:33:36 jabril Exp $
 #
 Example	Experimental	5'utr	150	500	1	+	.	"bio gene"
 Example	Experimental	exon	300	500	1	+	0	"bio gene"
 Example	Experimental	exon	750	1000	1	+	0	"bio gene"
 Example	Experimental	exon	1250	1550	1	+	1	"bio gene"
 Example	Experimental	3'utr	1250	1800	1	+	.	"bio gene"
-
 Example	Experimental	5'utr	2600	2880	1	-	.	"rev gene"
 Example	Experimental	exon	2600	2775	1	-	0	"rev gene"
 Example	Experimental	exon	2350	2500	1	-	1	"rev gene"
 Example	Experimental	exon	2230	2250	1	-	0	"rev gene"
 Example	Experimental	3'utr	2000	2250	1	-	.	"rev gene"
-
-Example	Experimental	5'utr	3000	3400	1	+	.	"faq gene"
-Example	Experimental	exon	3350	3400	1	+	0	"faq gene"
-Example	Experimental	exon	3475	3525	1	+	0	"faq gene"
-Example	Experimental	exon	3600	3800	1	+	0	"faq gene"
-Example	Experimental	exon	3900	3975	1	+	0	"faq gene"
-Example	Experimental	exon	4100	4200	1	+	2	"faq gene"
-Example	Experimental	exon	4350	4400	1	+	0	"faq gene"
-Example	Experimental	exon	4570	4725	1	+	0	"faq gene"
-Example	Experimental	3'utr	4570	4900	1	+	.	"faq gene"
-
-Example	Experimental	5'utr	6300	6500	1	-	.	"inv gene"
-Example	Experimental	exon	6300	6335	1	-	0	"inv gene"
-Example	Experimental	exon	6050	6150	1	-	0	"inv gene"
-Example	Experimental	exon	5850	5900	1	-	1	"inv gene"
-Example	Experimental	exon	5750	5800	1	-	1	"inv gene"
-Example	Experimental	exon	5655	5700	1	-	1	"inv gene"
-Example	Experimental	3'utr	5500	5700	1	-	.	"inv gene"
-
-Example	Experimental	5'utr	7200	7500	1	+	.	"how gene"
-Example	Experimental	exon	7400	7500	1	+	0	"how gene"
-Example	Experimental	exon	7800	7925	1	+	1	"how gene"
-Example	Experimental	exon	8250	8400	1	+	1	"how gene"
-Example	Experimental	exon	8500	8650	1	+	0	"how gene"
-Example	Experimental	exon	8800	8855	1	+	2	"how gene"
-Example	Experimental	3'utr	8800	9000	1	+	.	"how gene"
 #
 #
 Example	DB-Match	similarity	175	875	22	+	.	K-Bio
@@ -376,27 +96,10 @@ Example	DB-Match	similarity	200	1150	43	+	.	K-Bio
 Example	DB-Match	similarity	225	650	83	+	.	K-Bio
 Example	DB-Match	similarity	900	1300	83	+	.	K-Bio
 Example	DB-Match	similarity	1400	1700	19	+	.	K-Bio
-
-Example	DB-Match	similarity	1975	2200	71	-	.	MM_rev
-Example	DB-Match	similarity	2150	2700	98	-	.	MM_rev
-Example	DB-Match	similarity	2350	2475	96	-	.	MM_rev
-
-Example	DB-Match	similarity	3058	3418	94	+	.	RN_faq.1a
-Example	DB-Match	similarity	3083	3230	20	+	.	RN_faq.1a
-Example	DB-Match	similarity	3375	3520	20	+	.	RN_faq.1a
-Example	DB-Match	similarity	3600	3750	58	+	.	RN_faq.1a
-Example	DB-Match	similarity	3950	4350	58	+	.	RN_faq.1a
-Example	DB-Match	similarity	4570	4875	59	+	.	RN_faq.1a
-
 Example	DB-Match	similarity	5610	5896	92	-	.	INV98002
 Example	DB-Match	similarity	5710	5900	22	-	.	INV98002
 Example	DB-Match	similarity	6120	6300	72	-	.	INV98002
 Example	DB-Match	similarity	6250	6627	63	-	.	INV98002
-
-Example	DB-Match	5'est	7150	7550	60	+	.	HOW_x_ESTs
-Example	DB-Match	5'est	7300	7670	60	+	.	HOW_x_ESTs
-Example	DB-Match	3'est	8500	8900	97	+	.	HOW_x_ESTs
-Example	DB-Match	3'est	8825	9050	25	+	.	HOW_x_ESTs
 #
 #
 Example	DNA_Scan	gene	300	1550	60	+	.	"Human BIO"
@@ -407,122 +110,15 @@ Example	DNA_Scan	cds	650	780	76	+	1	target "Human BIO"
 Example	DNA_Scan	cds	910	1055	65	+	2	target "Human BIO"
 Example	DNA_Scan	cds	1350	1550	55	+	0	target "Human BIO"
 Example	DNA_Scan	stop	1548	1550	100	+	.	target "Human BIO"
-
-Example	DNA_Scan	gene	3350	4250	55	+	.	"pfam faq_rqst"
-Example	DNA_Scan	start	3350	3352	100	+	.	target "pfam faq_rqst"
-Example	DNA_Scan	cds	3350	3425	65	+	0	target "pfam faq_rqst"
-Example	DNA_Scan	cds	3500	3575	35	+	2	target "pfam faq_rqst"
-Example	DNA_Scan	cds	3650	3725	67	+	1	target "pfam faq_rqst"
-Example	DNA_Scan	cds	3700	3775	56	+	0	target "pfam faq_rqst"
-Example	DNA_Scan	cds	3850	4000	87	+	2	target "pfam faq_rqst"
-Example	DNA_Scan	cds	4100	4250	75	+	1	target "pfam faq_rqst"
-Example	DNA_Scan	stop	4248	4250	100	+	.	target "pfam faq_rqst"
-
-Example	DNA_Scan	gene	3650	4250	55	+	.	"+ overlapping"
-Example	DNA_Scan	start	3650	3652	100	+	.	target "+ overlapping"
-Example	DNA_Scan	cds	3650	3725	67	+	1	target "+ overlapping"
-Example	DNA_Scan	cds	3700	3775	56	+	0	target "+ overlapping"
-Example	DNA_Scan	cds	3850	4000	87	+	2	target "+ overlapping"
-Example	DNA_Scan	cds	4100	4250	75	+	1	target "+ overlapping"
-Example	DNA_Scan	stop	4248	4250	100	+	.	target "+ overlapping"
-
-Example	DNA_Scan	gene	5450	6250	35	-	.	"sim 0.98% KdeV"
-Example	DNA_Scan	start	5450	5452	100	-	.	target "sim 0.98% KdeV"
-Example	DNA_Scan	cds	5450	5600	45	-	0	target "sim 0.98% KdeV"
-Example	DNA_Scan	cds	5680	5825	55	-	2	target "sim 0.98% KdeV"
-Example	DNA_Scan	cds	6026	6250	35	-	0	target "sim 0.98% KdeV"
-Example	DNA_Scan	stop	6248	6250	100	-	.	target "sim 0.98% KdeV"
-
-Example	DNA_Scan	gene	5950	6750	35	-	.	"- overlapping"
-Example	DNA_Scan	start	5950	5952	100	-	.	target "- overlapping"
-Example	DNA_Scan	cds	5950	6100	45	-	0	target "- overlapping"
-Example	DNA_Scan	cds	6180	6325	55	-	2	target "- overlapping"
-Example	DNA_Scan	cds	6526	6750	35	-	0	target "- overlapping"
-Example	DNA_Scan	stop	6748	6750	100	-	.	target "- overlapping"
-
-Example	DNA_Scan	gene	7625	9225	52	+	.	"TO-related"
-Example	DNA_Scan	start	7625	7627	100	+	.	target "TO-related"
-Example	DNA_Scan	cds	7625	7900	66	+	0	target "TO-related"
-Example	DNA_Scan	cds	8125	8350	50	+	0	target "TO-related"
-Example	DNA_Scan	cds	8500	8650	85	+	2	target "TO-related"
-Example	DNA_Scan	cds	8800	9025	70	+	1	target "TO-related"
-Example	DNA_Scan	cds	9100	9225	45	+	0	target "TO-related"
-Example	DNA_Scan	stop	9223	9225	100	+	.	target "TO-related"
 #
 #
-Example	Genomic_Explorer	pred_exon	49	340	14	+	.
-Example	Genomic_Explorer	pred_exon	108	976	2	-	.
-Example	Genomic_Explorer	pred_exon	119	298	31	+	.
-Example	Genomic_Explorer	pred_exon	588	827	87	-	.
-Example	Genomic_Explorer	pred_exon	697	1465	39	+	.
-Example	Genomic_Explorer	pred_exon	841	1356	78	-	.
-Example	Genomic_Explorer	pred_exon	896	1466	2	+	.
-Example	Genomic_Explorer	pred_exon	932	1403	55	-	.
-Example	Genomic_Explorer	pred_exon	940	1584	32	+	.
-Example	Genomic_Explorer	pred_exon	944	1425	53	-	.
-Example	Genomic_Explorer	pred_exon	1030	1960	10	+	.
-Example	Genomic_Explorer	pred_exon	1385	1509	84	-	.
-Example	Genomic_Explorer	pred_exon	1747	2222	40	+	.
-Example	Genomic_Explorer	pred_exon	1796	2359	15	-	.
-Example	Genomic_Explorer	pred_exon	2056	2612	26	+	.
-Example	Genomic_Explorer	pred_exon	2122	2724	24	-	.
-Example	Genomic_Explorer	pred_exon	2232	2692	52	+	.
-Example	Genomic_Explorer	pred_exon	2239	2845	65	-	.
-Example	Genomic_Explorer	pred_exon	2352	3169	33	+	.
-Example	Genomic_Explorer	pred_exon	2582	3385	53	-	.
-Example	Genomic_Explorer	pred_exon	2600	2897	78	+	.
-Example	Genomic_Explorer	pred_exon	2636	3240	51	-	.
-Example	Genomic_Explorer	pred_exon	2666	3046	9	+	.
-Example	Genomic_Explorer	pred_exon	2688	3371	66	-	.
-Example	Genomic_Explorer	pred_exon	2742	3188	47	+	.
-Example	Genomic_Explorer	pred_exon	2828	3571	87	+	.
-Example	Genomic_Explorer	pred_exon	2904	3291	81	-	.
-Example	Genomic_Explorer	pred_exon	2917	3488	15	+	.
-Example	Genomic_Explorer	pred_exon	3193	3827	68	-	.
-Example	Genomic_Explorer	pred_exon	3340	3453	99	+	.
-Example	Genomic_Explorer	pred_exon	3373	4136	16	-	.
-Example	Genomic_Explorer	pred_exon	3419	3935	8	+	.
-Example	Genomic_Explorer	pred_exon	3571	4369	71	-	.
-Example	Genomic_Explorer	pred_exon	3929	4644	61	+	.
-Example	Genomic_Explorer	pred_exon	4400	5122	56	-	.
-Example	Genomic_Explorer	pred_exon	4401	5151	56	+	.
-Example	Genomic_Explorer	pred_exon	4446	5221	66	-	.
-Example	Genomic_Explorer	pred_exon	4600	4719	39	+	.
-Example	Genomic_Explorer	pred_exon	4708	4852	20	-	.
-Example	Genomic_Explorer	pred_exon	4723	4833	9	+	.
-Example	Genomic_Explorer	pred_exon	4790	5425	79	-	.
-Example	Genomic_Explorer	pred_exon	5152	5596	8	+	.
-Example	Genomic_Explorer	pred_exon	5168	5865	35	-	.
-Example	Genomic_Explorer	pred_exon	5302	5765	70	+	.
-Example	Genomic_Explorer	pred_exon	5323	6122	13	-	.
-Example	Genomic_Explorer	pred_exon	5398	6220	30	+	.
-Example	Genomic_Explorer	pred_exon	5574	6012	65	-	.
-Example	Genomic_Explorer	pred_exon	5737	6128	94	+	.
-Example	Genomic_Explorer	pred_exon	5750	6506	79	-	.
-Example	Genomic_Explorer	pred_exon	5792	6153	77	+	.
-Example	Genomic_Explorer	pred_exon	5808	6010	85	-	.
-Example	Genomic_Explorer	pred_exon	5960	6610	66	+	.
-Example	Genomic_Explorer	pred_exon	5972	6920	8	-	.
-Example	Genomic_Explorer	pred_exon	6071	6613	31	+	.
-Example	Genomic_Explorer	pred_exon	6563	7401	87	+	.
-Example	Genomic_Explorer	pred_exon	6657	7650	24	-	.
-Example	Genomic_Explorer	pred_exon	6730	7142	28	+	.
-Example	Genomic_Explorer	pred_exon	6730	7679	59	-	.
-Example	Genomic_Explorer	pred_exon	6765	7693	40	+	.
-Example	Genomic_Explorer	pred_exon	6878	7308	97	-	.
-Example	Genomic_Explorer	pred_exon	6919	7409	71	+	.
-Example	Genomic_Explorer	pred_exon	6991	7444	65	-	.
-Example	Genomic_Explorer	pred_exon	7205	7827	14	+	.
-Example	Genomic_Explorer	pred_exon	7217	7428	81	-	.
-Example	Genomic_Explorer	pred_exon	7482	7924	46	+	.
-Example	Genomic_Explorer	pred_exon	7521	7797	21	-	.
-Example	Genomic_Explorer	pred_exon	7644	7943	99	+	.
-Example	Genomic_Explorer	pred_exon	7676	7830	69	-	.
-Example	Genomic_Explorer	pred_exon	7685	8193	49	+	.
-Example	Genomic_Explorer	pred_exon	8183	8750	87	-	.
-Example	Genomic_Explorer	pred_exon	8228	8713	99	+	.
-Example	Genomic_Explorer	pred_exon	8235	8925	19	-	.
-Example	Genomic_Explorer	pred_exon	8649	9277	17	+	.
-Example	Genomic_Explorer	pred_exon	8683	8812	29	-	.
-Example	Genomic_Explorer	pred_exon	8683	9171	69	+	.
-
+Example	GE	pred_exon	49	340	14	+	.
+Example	GE	pred_exon	108	976	2	-	.
+Example	GE	pred_exon	119	298	31	+	.
+Example	GE	pred_exon	588	827	87	-	.
+Example	GE	pred_exon	697	1465	39	+	.
+Example	GE	pred_exon	841	1356	78	-	.
+Example	GE	pred_exon	896	1466	2	+	.
+Example	GE	pred_exon	932	1403	55	-	.
+Example	GE	pred_exon	940	1584	32	+	.
+Example	GE	pred_exon	944	1425	53	-	.
