@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.15 1999-06-16 15:58:04 jabril Exp $	
+#         $Id: gff2ps,v 1.16 1999-06-18 20:44:05 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -56,10 +56,10 @@ Defaults () {
   PSREVISION="01.06.1999"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
-  MAIL="%%                  Dept. Informatica Medica
-%%          Institut Municipal d'Investigacio Medica
-%%                   C./ Doctor Aiguader 80
-%%                  08003 - BARCELONA (SPAIN)"
+  MAIL="%                  Dept. Informatica Medica
+%          Institut Municipal d'Investigacio Medica
+%                   C./ Doctor Aiguader 80
+%                  08003 - BARCELONA (SPAIN)"
   USAGE=$PROGRAM" [-h][-H <option>] gff_file"
   COLORS="    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white 
        verydarkgreen | darkgreen | green | lightgreen | verylightgreen 
@@ -83,7 +83,7 @@ Defaults () {
     fi
   bgcolor="white"
   fgcolor="black"
-  v01="0"; n01="load_customfile"
+  v01=0; n01="load_customfile"
   v02=""; n02="customfile_name"
   if [ $GFF_CUSTOM_FILE ]         ###### Environment variable for default custom file name.
     then
@@ -92,15 +92,15 @@ Defaults () {
       v03="$CFDIR/.gff2psrc"
     fi
     n03="default_customfile_name"
-  v04="0"; n04="exist_default_customfile"
-  v04_1="0"; n04_1="create_default_customfile"
-  v05="0"; n05="print_report"
+  v04=0; n04="exist_default_customfile"
+  v04_1=0; n04_1="create_default_customfile"
+  v05=0; n05="print_report"
   v06="Landscape"; n06="page_orientation"
   v07="a4"; n07="page_size"
-  v08="1"; n08="page_number"
-  v09="1"; n09="blocks_x_page"
-  v10="0"; n10="nucleotides_x_line"
-  v11="1"; n11="show_blocks_top-bottom"
+  v08=1; n08="page_number"
+  v09=1; n09="blocks_x_page"
+  v10=0; n10="nucleotides_x_line"
+  v11=1; n11="show_blocks_top-bottom"
 # Layout Properties
   c01="1cm"; m01="margin_left"
   c02="1cm"; m02="margin_right"
@@ -112,7 +112,7 @@ Defaults () {
   c08="on"; m08="strand_show_forward"
   c09="on"; m09="strand_show_reverse"
   c10="on"; m10="strand_show_independent"
-  c11=$c01; m11="text_color"
+  c11=$c05; m11="text_color"
   c12="none"; m12="label"
 }
 
@@ -143,10 +143,21 @@ Help () {
   echo "OPTIONS"
   echo ""
   echo "     -h  Shows this help."
-  echo "     -H <option> Show only help for the especified option."
-  echo "     -C <custom_filename>  Load given custom file and append to default custom file (.gff2psrc)."
+  echo "     -H <option> Shows only help for the especified option."
   echo "     -v Verbose mode, a report is sent to standard error."
-  echo "     -p Switch page orientation to Portrait (default is Landscape)."
+  echo "     -p Switches page orientation to Portrait (default is Landscape)."
+  echo "     -P <\#> Sets how many pages are needed to split your output (default is one)."
+  echo "     -B <\#> Sets blocks per page (default is one)."
+  echo "     -N <\#> Sets nucleotides per line (default is the largest sequence position from input gff-files)."
+  echo "     -b Blocks from left to right and from top to bottom (default is top to bottom first)."
+  echo "     -d Write (or rewrite if exist) default customfile \".gff2psrc\"."
+  echo "     -D <default_custom_filename> Create a new default customfile with the given filename."
+  echo "     -C <custom_filename>  Load given custom file and append to default custom file (.gff2psrc)."
+  echo ""
+  echo "ENVIRONMENT VARIABLES"
+  echo ""
+  echo "     You can specify the $PROGRAM path where it can find the default files with the shell variable GFFDIR."
+  echo "     You can also define the default custom filename you will like with the variable GFF_CUSTOM_FILE, program default filename for custom file is \".gff2psrc\"."
   echo ""
   echo "COMMENTS"
   echo ""
@@ -183,7 +194,7 @@ ShowHelpLine () {
 MAINPSCPR () {
 cat <<'@@@EndCopyRight@@@'
 % 
-% $Id: gff2ps,v 1.15 1999-06-16 15:58:04 jabril Exp $
+%    $Id: gff2ps,v 1.16 1999-06-18 20:44:05 jabril Exp $
 % 
 %          Converting GFF files to PostScript plots.
 %
@@ -219,14 +230,14 @@ true setstrokeadjust
 0 setlinejoin
 0 setlinecap
 %
-%   1 cm   = 28.35 points
-%   1 inch = 72.00 points
 /bdf { bind def } bind def
 /xdf { exch def } bdf
 /cm { 28.35 mul } bdf
+/in { 72    mul } bdf
 %
 % Fixed Color Variables (CMYK)
 % -----------------------------
+%
 /colordict 80 dict def colordict begin % 52 colors + 28 definitions
 /black            { 0.00 0.00 0.00 1.00 } def /verydarkgrey     { 0.00 0.00 0.00 0.90 } def
 /darkgrey         { 0.00 0.00 0.00 0.75 } def /grey             { 0.00 0.00 0.00 0.50 } def
@@ -256,44 +267,73 @@ true setstrokeadjust
 /lightbrown       { 0.30 0.60 0.70 0.00 } def /verylightbrown   { 0.15 0.45 0.55 0.00 } def
 end % colordict
 %
+%  Paper Sizes  (in points)  <--- Probably it is better to generate each time.
+% --------------------------
+%
+/pagedict 14 dict def pagedict begin % Portrait { minor-axes:X major-axes:Y }
+/pga2          { 1190 1684 } def /pga3          {  842 1190 } def
+/pga4          {  595  842 } def /pga5          {  420  595 } def
+/pgb4          {  708 1003 } def /pgb5          {  516  729 } def
+/pgexecutive   {  540  720 } def /pgledger      { 1224  792 } def
+/pglegal       {  612 1008 } def /pgletter      {  612  792 } def
+/pgtabloid     {  792 1224 } def /pguserdefined {  595 2448 } def
+end % pagedict
+%
 %  Defining CONSTANTS
 % --------------------
-/TkMrkW 0.25 cm def                  % Defining tickmark-width.
-/tflg false def                      % test flag
+%
+/tflg false def     % test flag
+%
+/VUpOS 0.25 cm def  % offset defines non printable
+/VDnOS 0.25 cm def  % paper area for pages (printer outlimits).
+/HLtOS 0.25 cm def
+/HRtOS 0.25 cm def
 %
 %  Defining VARIABLES
 % --------------------
 %
-%  Paper Sizes  (in points)  <--- Probably it is better to generate each time.
-% --------------------------
-/pagedict 14 dict def pagedict begin % Portrait { minor-axes:X major-axes:Y }
-/pgA2          { 1190 1684 } def /pgA3          {  842 1190 } def
-/pgA4          {  595  842 } def /pgA5          {  420  595 } def
-/pgB4          {  708 1003 } def /pgB5          {  516  729 } def
-/pgExecutive   {  540  720 } def /pgLedger      { 1224  792 } def
-/pgLegal       {  612 1008 } def /pgLetter      {  612  792 } def
-/pgTabloid     {  792 1224 } def /pgUserDefined {  595 2448 } def
-end % pagedict
+@@@EndProlog@@@
+}
+#### End of MAINPSSETUP function
+
+#
+# Printing Main PostScript Routines...
+#
+MAINPSPROCS () { 
+cat <<'@@@MAINProcs@@@'
+% /pgXsc { pglim pop 100 div } def
+% /pgYsc { pglim exch pop 100 div } def
 %
-%  Page Layout
-%%%% BG & FG colors
-/BGcolor { colordict begin white end } def
-/FGcolor { colordict begin black end } def 
-%%%% page orientation flag
-/flglscape true def
-%%%% page size in points used for plot % pgA4 == 595  842
-/Dpage { pagedict begin pgA4 flglscape { exch } if end } bdf
-%%%% offset defines non printable paper area on portrait pages
-/VUpOS 0.25 cm def
-/VDnOS 0.25 cm def
-/HLtOS 0.25 cm def
-/HRtOS 0.25 cm def
-%%%% margins (1 cm) (Up Down Left Right - margins are XY independent)
-/UpM 1 cm def
-/DnM 1 cm def
-/LtM 1 cm def
-/RtM 1 cm def
-%%%% checking if margins are within the defined offset
+%  Newer vars
+%
+/TkMrkW 0.25 cm def % Defining tickmark-width.
+/tracksize 10 def
+/spcrsize tracksize def
+/LnTot tracksize 8 mul def
+/vectoffset 10 def
+/flpos true def % flag for showing Seq Xpos for all elements.
+%
+/Fbline true def % flag for showing baseline for each method.
+/FgpLbl true def % flag for showing baseline for each group.
+%
+/XLftLbl 4 cm  def
+/FLftLbl true  def
+/XRgtLbl 4 cm  def
+/FRgtLbl true  def
+%
+/XOriTitl 1 cm def
+/YOriTitl 0 cm def
+/YSTitl 1 cm def
+/FlgTitl true def
+/BlckSp 0.25 cm def
+/NBlck  1 def
+%
+%%EndSetup
+%
+%%BeginProlog
+%
+%%BeginProcSet: Page_Layout 1.0 0
+% checking if margins are within the defined offset
 flglscape {
  UpM HLtOS lt { /UpM HLtOS def } if % Checking margins for flglscape mode
  DnM HRtOS lt { /DnM HRtOS def } if
@@ -305,78 +345,44 @@ flglscape {
   LtM HLtOS lt { /LtM HLtOS def } if
   RtM HRtOS lt { /RtM HRtOS def } if
   } ifelse
-%%%%  defining pagelimits and X - Y scales (Xlim Ylim)
+% defining pagelimits and X - Y scales (Xlim Ylim)
 /pglim { Dpage pop LtM RtM add sub Dpage exch pop UpM DnM add sub } def
-% /pgXsc { pglim pop 100 div } def
-% /pgYsc { pglim exch pop 100 div } def
-%%%% Defining starting point on page.
+%
+% Defining starting point on page.
 /XORI LtM def
 /YORI UpM def
-%%%% Defining page layout.
-/XOriTitl 1 cm def
-/YOriTitl 0 cm def
+% Defining page layout.
 /XSTitl pglim pop XOriTitl 2 mul sub def
-/YSTitl 1 cm def
-/FlgTitl true def
-/BlckSp 0.25 cm def
-/NBlck  1 def
 /XSBlck pglim pop def
 /YSBlck pglim exch pop YSTitl BlckSp NBlck mul add YOriTitl add sub NBlck div def
+%
 /XOriBlck 0 def
+/Nuc_Offset XOriBlck def
 /YOriBlck YOriTitl YSTitl BlckSp add add def
 /Y YOriBlck def
-/XLftLbl 4 cm  def
-/FLftLbl true  def
-/XRgtLbl 4 cm  def
-/FRgtLbl true  def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
 /XOriPlot { XOriBlck FLftLbl { XLftLbl add } if } def
-%
-%  Newer vars
-%
-/spcrsize 25 def
-/tracksize 25 def
-/vectoffset 10 def
-/flpos true def % flag for showing Seq Xpos for all elements.
-%
-/Fbline true def % flag for showing baseline for each method.
-/FgpLbl true def % flag for showing baseline for each group.
-/down YSBlck def
-/up   YSBlck def
-/MaxNuclPage 1000 def
 /Xscale XSPlot MaxNuclPage div def
 /Yscale tracksize def
-/MaxTick 100 def
-/MinTick  10 def
 %
-@@@EndProlog@@@
-}
-#### End of MAINPSSETUP function
-
-#
-# Printing Main PostScript Routines...
-#
-MAINPSPROCS () { 
-cat <<'@@@MAINProcs@@@'
+/down YSBlck def
+/up   YSBlck def
 %
-%  Calculating some variables
-% ----------------------------
-/LnTot LnFwd LnBth LnRvs add add def
-/is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and LnFwd 0 eq LnRvs 0 eq and or and def % true if must plot two tickmark lines
-/putuptck LnFwd 0 gt LnFwd LnRvs add 0 eq or def
-/putdntck LnBth 0 gt LnFwd LnBth add 0 eq or def
-/TmpYSB YSBlck TkMrkW is2tck { 2 mul } if sub def  % Adjusting plot area size with tickmarks.
+% /LnTot LnFwd LnBth LnRvs add add def
+% /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and LnFwd 0 eq LnRvs 0 eq and or and def % true if must plot two tickmark lines
+% /putuptck LnFwd 0 gt LnFwd LnRvs add 0 eq or def
+% /putdntck LnBth 0 gt LnFwd LnBth add 0 eq or def
+% /TmpYSB YSBlck TkMrkW is2tck { 2 mul } if sub def  % Adjusting plot area size with tickmarks.
+%
 /YSLine YSBlck LnTot div def
-/YSFwd LnFwd LnTot div TmpYSB mul def
-/YOriFwd YOriBlck def
-/YSBth LnBth LnTot div TmpYSB mul def
-/YOriBth YOriFwd YSFwd add putuptck { TkMrkW add } if def
-/YSRvs LnRvs LnTot div TmpYSB mul def
-/YOriRvs YOriBth YSBth add putdntck { TkMrkW add } if def
 %
-%%EndSetup
-%
-%%BeginProlog
+% /YSFwd LnFwd LnTot div TmpYSB mul def
+% /YOriFwd YOriBlck def
+% /YSBth LnBth LnTot div TmpYSB mul def
+% /YOriBth YOriFwd YSFwd add putuptck { TkMrkW add } if def
+% /YSRvs LnRvs LnTot div TmpYSB mul def
+% /YOriRvs YOriBth YSBth add putdntck { TkMrkW add } if def
+%%EndProcSet:   Page_Layout 1.0 0
 %
 %%BeginProcSet: functions 1.0 0
 /min { 2 copy gt { exch } if pop } bdf 
@@ -396,7 +402,11 @@ cat <<'@@@MAINProcs@@@'
 %
 %%BeginProcSet: painting_functions 1.0 0
 /scmyk { setcmykcolor } bdf
-/scolor { colordict exch get exec scmyk } bdf 
+/dotted { [ 1 ] 0 setdash } def
+/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll moveto lineto lineto lineto closepath } bdf
+/tbbox { tflg { gsave setlinewidth scmyk stroke grestore } { pop pop } ifelse } def
+/scolor { colordict exch get exec scmyk } bdf
+%
 colordict begin % adding definitions and functions
  /lup { /ku xdf /yu xdf /mu xdf /cu xdf } bdf
  /lmd { /km xdf /ym xdf /mm xdf /cm xdf } bdf
@@ -408,12 +418,6 @@ colordict begin % adding definitions and functions
  /rainbow { 1 dict begin /p xdf p 0.1 le { p 0.2 div 0.5 add 1 0 0 scmyk } { p 0.4 le { 1 1 p 0.1 sub 0.3 div sub 0 0 scmyk } { p 0.6 le { 1 0 p 0.4 sub 0.2 div 0 scmyk } { p 0.8 le { 1 p 0.6 sub 0.2 div sub 0 1 0  scmyk } { 0 p 0.8 sub 0.2 div 1 0 scmyk } ifelse } ifelse } ifelse } ifelse end } bdf
 end % colordict
 %%EndProcSet:   painting_functions 1.0 0
-%
-%%BeginProcSet: drawing_functions 1.0 0
-/dotted { [ 1 ] 0 setdash } def
-/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll moveto lineto lineto lineto closepath } bdf
-/tbbox { tflg { gsave setlinewidth scmyk stroke grestore } { pop pop } ifelse } def
-%%EndProcSet:   drawing_functions 1.0 0
 %
 %%BeginProcSet: tickmarks 1.4 0
 % Rule.ps ---> rules and scales
@@ -435,15 +439,15 @@ end % colordict
  /MkCtick { setlinewidth 0 0 moveto 0 TkMrkHW 3 -1 roll { TkMrkDW sub } if lineto FGcolor scmyk stroke } bdf
  /MkDtick { gsave dup Xscm 0 translate CheckCloser { 10 string cvs bltextick } if ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if false 1 MkCtick grestore } bdf
  /baseline { gsave Xscm TkMrkDW moveto Xscm TkMrkDW lineto TkMrkDW 2 mul setlinewidth FGcolor scmyk stroke grestore } bdf
- /r { /Gridup true def /Griddn true def /flgup true def gsave TkMrkHW add translate 1 -1 scale 5 { 2 copy } repeat pop neg Xscm 0 translate 0 tonormtick MinTick exch { ChkLimits { gsave Xscm 0 translate 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if grestore } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat grestore } bdf
+ /r { /Gridup true def /Griddn true def /flgup true def 0 exch TkMrkW add translate gsave 0 translate 1 -1 scale 5 { 2 copy } repeat pop neg Xscm 0 translate 0 tonormtick MinTick exch { ChkLimits { gsave Xscm 0 translate 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if grestore } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat grestore } bdf
  /x { 6 { 2 copy } repeat pop neg Xscm 0 translate baseline 0 tonormtick MinTick exch { ChkLimits { gsave Xscm 0 translate true 0.25 MkCtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if grestore } if } for 1 tonormtick MaxTick exch { ChkLimits { MkDtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkDtick } { pop } ifelse } repeat } bdf 
- /s { /Gridup false def /Griddn true def /flgup true def gsave translate 1 -1 scale x grestore } bdf
- /z { /Gridup true def /Griddn false def /flgup false def gsave TkMrkW add translate 1 1 scale x grestore } bdf
+ /s { /Gridup false def /Griddn true def /flgup true def 0 exch translate gsave 0 translate 1 -1 scale x grestore } bdf
+ /z { /Gridup true def /Griddn false def /flgup false def 0 exch TkMrkHW add translate gsave 0 translate 1 1 scale x grestore } bdf
 end % tmdct
 %%EndProcSet:   tickmarks 1.4 0
 %
-%%BeginProcSet: objects 1.0 0
-/shpdct 40 dict def shpdct begin
+%%BeginProcSet: objects 1.1 0
+/shpdct 46 dict def shpdct begin
  /LY { tracksize 1.5 mul } bdf
  /ShFont { TkMrkW 2 div /Helvetica } def
  /RWTS { LY 1.5 mul } bdf
@@ -470,40 +474,49 @@ end % tmdct
 % /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf strnd (-) eq { exch } if 2 copy exch sub /sqdif exch Xscm def /sqdsc sqdif Xscale div def /seqend exch Xscm def /seqori exch Xscm def /cmod xdf } bdf
  /getvar { /ftlbl xdf /cmod xdf /sc xdf /rmd xdf /frm xdf nucdif /sqdif exch Xscm def /sqend exch def /sqori exch def /seqend sqend Xscm def /seqori sqori Xscm def } bdf
  /setcolmod { colordict begin cmod cvx exec dup 1 eq { pop scmyk fill } { dup 2 eq { pop lnfill } { dup 3 eq { pop frmfill } { dup 4 eq { pop rnbfill } { 0 eq { BGcolor scmyk fill } if } ifelse } ifelse } ifelse } ifelse end } bdf
- /shwpos { flpos { sqend sqori strnd (-) eq { exch } if sqdif exch 0 2 { gsave tracksize 0.75 mul moveto 10 string cvs gsave strnd (-) eq { -1 -1 scale -45 } { 45 } ifelse rotate ShFont sfont FGcolor scmyk show grestore grestore } repeat } if } bdf
+ /shwpos { flpos { sqend sqori strnd (-) eq { exch } if sqdif exch 0 2 { gsave tracksize 1 mul moveto 10 string cvs gsave strnd (-) eq { -1 -1 scale -45 } { 45 } ifelse rotate ShFont sfont FGcolor scmyk show grestore grestore } repeat } if } bdf
  /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def LY sc mul sqdif flglscape { exch } if scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos pop } bdf
  /f { gsave getvar strnd (-) eq { seqend } { seqori } ifelse 0 translate frshared grestore } bdf
- /gpuline { gsave 0 0 moveto grdif 0 rlineto /red scolor 1 setlinewidth stroke grestore } bdf
- /shgplbl { FgpLbl { gsave grori tracksize 0.75 mul strnd (-) ne { neg } if translate gpuline grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
- /g_end { exit end } bdf 
-end % shpdct
-%%EndProcSet:   objects 1.0 0
+ /gpuline { gsave 0 0
+ moveto grdif 0 rlineto /red scolor 1 setlinewidth stroke grestore } bdf
+ /shgplbl { FgpLbl { gsave grori tracksize 1 mul strnd (-) ne { neg } if translate gpuline grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
+ /g_end { end exit } bdf 
 %
-%%BeginProcSet: vectors 1.6 0
-% Objects.ps ---> vectors
-/vctdct 6 dict def vctdct begin
+% functions for vectors-like data-sets
+%
  /resizetrack tracksize 0.95 mul def
  /vtoffset vectoffset 2 div Xscm def
  /clrselc { colordict begin dup 2 eq { pop load2col /clrproc { {col2} } def } { dup 3 eq { pop load3col /clrproc { {col3} } def } { dup 0 eq { pop white black load2col /clrproc { {col2} } def } { dup 4 eq { pop /clrproc { {rainbow} } def } { 1 eq { white 8 4 roll load2col /clrproc { {col2} } def } if } ifelse } ifelse } ifelse } ifelse } bdf % no end for closing dict because grdct must be closed by calling function
  /v { gsave Xscm dup vtoffset sub exch vtoffset add 0 moveto 0 lineto resizetrack setlinewidth clrproc exec stroke grestore } bdf
- /ovend { end exit } bdf   % end is for grdct dict
-end % vctdct
-%%EndProcSet:   vectors 1.5 0
+ /v_end { end exit } bdf   % end is for grdct dict
+end % shpdct
+%%EndProcSet:   objects 1.1 0
+%
+%%BeginProcSet: blocks 1.0 0
+%
+% /blckdct 16 dict def blckdct begin
+ /pbox { XOriBlck YOriBlck 10 sub XSBlck YSBlck 20 add bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
+ /bline { Fbline { gsave FGcolor scmyk 0 0 moveto XSPlot 0 lineto stroke grestore } if } bdf
+ /shsrclbl { FLftLbl { gsave srclbl FGcolor 10 /Courier XLftLbl 2 div neg ct grestore } if } bdf
+ /srcbndbox { tracksize spcrsize add 2 mul dup -5 exch neg XSPlot 10 add 4 -1 roll bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
+ /source { /strnd xdf /nxtspacer exch spcrsize mul def 2 dict begin /Yscl exch tracksize mul def /srclbl xdf /Y Y strnd (-) eq { nxtspacer add } { Yscl add } ifelse def 0 Y translate gsave XOriPlot 0 translate 1 -1 scale bline shsrclbl srcbndbox Nuc_Offset Xscm neg 0 translate } bdf
+ /s_end { grestore /Y Y strnd (-) eq { Yscl add } { nxtspacer add } ifelse def end } bdf
+%
+ /gp { gsave shpdct begin nucdif /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
+%
+ /ov { gsave vctdct begin exch Xscm exch translate { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
+%
+ /tm { /Y Y TkMrkW add def tmdct begin /ShowGrid xdf exec end } bdf
+%
+% /b_end { end grestore } bdf
+% end
+%%EndProcSet:   blocks 1.0 0
 %
 %%BeginProcSet: main_function_calls 1.0 0
 %
-/tm { tmdct begin /ShowGrid xdf exec end } bdf
-%
-% /objects
-/bline { Fbline { gsave FGcolor scmyk 0 0 moveto XSPlot 0 lineto stroke grestore } if } bdf
-/shsrclbl { FLftLbl { gsave srclbl FGcolor 10 /Courier XLftLbl 2 div neg ct grestore } if } bdf 
-/source { gsave 3 dict begin /nxtspacer exch spcrsize mul def /Yscl exch tracksize mul def /srclbl xdf /Y Y Yscl add def XOriPlot Y translate 1 -1 scale bline shsrclbl } bdf
-/endsource { end grestore /Y Y nxtspacer add def } bdf
-%
-% /gp { gsave shpdct begin /strnd xdf strnd (-) eq { exch } if 2 copy exch sub /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
- /gp { gsave shpdct begin /strnd xdf nucdif /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
-%
-/ov { gsave vctdct begin exch Xscm exch translate { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
+% /block { gsave blckdct begin /Y YOriBlck def /blcknum xdf pbox } bdf
+/block { gsave /Y YOriBlck def /blcknum xdf pbox } bdf
+/b_end { grestore } bdf
 %
 %%EndProcSet:   main_function_calls 1.0 0
 %%EndProlog
@@ -625,24 +638,22 @@ while getopts :dD:C:vpP:B:N:bHh W_OPTION
   do
     case $W_OPTION in
       H|h) Help; exit 2;;
-      d) v04_1="1";                     # create_default_customfile (.gff2psrc) & rename_it if exist
-         v04=`ExistCustomfile "$v03"`;;
-      D) v04_1="1";                     # create_default_customfile & rename_it if exist
-         v03="$CFDIR/$OPTARG";
-         v04=`ExistCustomfile "$v03"`;;
+      d) v04_1=1;;                    # create_default_customfile (.gff2psrc) or rewrite
+      D) v04_1=1;                     # create_default_customfile or rename_it if exist
+         v03="$CFDIR/$OPTARG";;
       C) if [ ! -f $CFDIR/$OPTARG ];    # load_customfile customfile_name
-           then v01="0";
+           then v01=0;
              echo "Error: Custom File $OPTARG does not exist...Not Loaded." 1>&2 ;
-           else v01="1";
+           else v01=1;
 	         echo "Report: Adding $OPTARG Custom File to Default Custom File." 1>&2 ;
              v02="$CFDIR/$OPTARG";
            fi;;
-      v) v05="1";;                      # print_report
+      v) v05=1;;                      # print_report
       p) v06="Portrait";;               # page_orientation
       P) v08=$OPTARG;;                  # page_number
       B) v09=$OPTARG;;                  # blocks_x_page
       N) v10=$OPTARG;;                  # nucleotides_x_line
-      b) v11="0";;                      # show_blocks_top-bottom
+      b) v11=0;;                      # show_blocks_top-bottom
        :) ShowHelpLine $1; exit 2;;
       \?) ShowHelpLine $1; exit 2;;
     esac # case $W_OPTION
@@ -659,6 +670,7 @@ while getopts :dD:C:vpP:B:N:bHh W_OPTION
 #
 # Defining PLOToptions STRING for GNU awk programs.
 #
+ v04=`ExistCustomfile "$v03"`
    P="BACKGROUND_COLOR:="$bgcolor"::FOREGROUND_COLOR:="$fgcolor"::"$n04_1":="$v04_1"::"
  P=$P$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05"::"
  P=$P$n06":="$v06"::"$n07":="$v07"::"$n08":="$v08"::"$n09":="$v09"::"$n10":="$v10"::"
@@ -730,13 +742,6 @@ gawk 'BEGIN{
 gawk 'BEGIN{
   ############ INITIALITATION ############
 
-  # defaults
-  MINSCORE=0.10;
-  MAXSCORE=1.00;
-  BigLINE="########################################";
-  FIRST_POS=0;
-  LAST_POS=0;
-
   # gff data structure
   seqname  = 1;
   source   = 2;
@@ -749,7 +754,8 @@ gawk 'BEGIN{
   group    = 9;
 
   # gff strand codification
-  strands["+"]=strands["-"]=strands["."]=1;
+  strands["+"]=strands["."]=strands["-"]=1;
+  wstr[1]="+";wstr[2]=".";wstr[3]="-";
 
   # Find actual date...
   "date" | getline d
@@ -836,7 +842,7 @@ gawk 'BEGIN{
   SO_PROP["baseline_show"]="off"
   SO_PROP["bbox_color"]=Default["foreground_color"]
   SO_PROP["bbox_show"]="off"
-  SO_PROP["scale"]=2
+  SO_PROP["scale"]=1
   SO_PROP["spacing_scale"]=0.5
   SO_PROP["rule_scale"]="nucleotide"
   SO_PROP["rule_rel"]="none"
@@ -850,6 +856,14 @@ gawk 'BEGIN{
  CM["P"]="p";CM["Q"]="q";CM["R"]="r";CM["S"]="s";CM["T"]="t";
  CM["U"]="u";CM["V"]="v";CM["W"]="w";CM["X"]="x";CM["Y"]="y";
  CM["Z"]="z";CM["Ñ"]="ñ";CM["Ç"]="ç"
+
+ # Initialization for some vars.
+ BigLINE="########################################";
+ MINSCORE=0.10;
+ MAXSCORE=1.00;
+ FIRST_POS=0;
+ LAST_POS=0;
+ nordcnt=ordcnt=0
 
  if (Var["print_report"]) 
    printf "\n%s\nInput File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
@@ -872,6 +886,13 @@ gawk 'BEGIN{
   if (Var["print_report"]) 
    printf "%10s : %s\n", NR, $0 | "cat 1>&2"
 
+  # getting source order from file...
+  #
+  if (($strand=="+" || $strand=="-") && !($source in sources)) {
+    order["strand",ordcnt]=$source; ordcnt++ } # order for sources input.
+  else if ($strand=="." && !($source in sources)) {
+    order["none",nordcnt]=$source; nordcnt++ }
+
   # read gff element within source and strand
   #
   sources[$source]++;                       # field 2 (source) counter
@@ -882,6 +903,7 @@ gawk 'BEGIN{
   FT_ary[$feature]++;                       # field 3 (gff-feature) counter
 #   FT_GP[$source,$strand,$group,$feature]++; # features per group, source and strand
   n[$source,$strand]++;                     # elements per source and strand
+
   $feature=lcase($feature);
   element[$source,$strand,n[$source,$strand],feature] = $feature; 
   element[$source,$strand,n[$source,$strand],start]   = $start;
@@ -957,11 +979,11 @@ END{
       Default["load_customfile"]=Var["load_customfile"]
       Default["customfile_name"]=Var["customfile_name"]
       }
-    if (Default["load_customfile"]) RCFile(Default["customfile_name"])
+    }
+  if (Default["load_customfile"]) {
+    RCFile(Default["customfile_name"])
     ECF=1
     }
-  else
-    if (Default["load_customfile"]) RCFile(Default["customfile_name"])
   if (Var["print_report"]) printf "\n%s\nChecking for Command-Line Modified options...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
   for (lytdef in Default) {
     dft=Default[lytdef]
@@ -1000,7 +1022,8 @@ END{
   printf "\nPORI %s\nPEND %s\nP %s\nB %s\nPOFFSET %s\nBOFFSET %s\n\n",PORI,PEND,P,B,POFFSET,BOFFSET | "cat 1>&2"  
 
   # PostScript Variables Setup.
-  #
+  # 
+  defPSvars(POFFSET,Var["BACKGROUND_COLOR"],Var["FOREGROUND_COLOR"],chkpo(Default["page_orientation"]),chkps(Default["page_size"]))
 
   # PostScript Main Procs.
   #
@@ -1010,11 +1033,12 @@ END{
   #
   for (pages=1;pages<=P;pages++) {
     BORI=PORI
-    startPSpage(pages,pages)  # PostSCript PageSetup.
+    startPSpage(pages,pages,BORI,POFFSET)  # PostSCript PageSetup.
 
     for (blocks=1;blocks<=B;blocks++) {
       printf "%%\n%% Block Num: %s Page: %s\n%%\n",blocks,pages
-
+      printf "%s block\n", blocks
+      BEND=BORI+POFFSET
   # make groups. assumes elements sorted by increasing acceptor position
   #
   cntstr_fwd=cntstr_bth=cntstr_rvs=0
@@ -1025,19 +1049,19 @@ END{
         start_=element[sc,s,S[sc,s,i],start];
         end_=element[sc,s,S[sc,s,i],end];
 
-       if (ChkLimits(start_,BORI,end_,(BORI+POFFSET))) {
-        feature_=element[sc,s,S[sc,s,i],feature];
-        score_=element[sc,s,S[sc,s,i],score];
-
 	    tgr=element[sc,s,S[sc,s,i],group];
 	    if (!grouping[sc,s,tgr,start]) {
 	      grouping[sc,s,tgr,start]=element[sc,s,S[sc,s,i],start];
 	      ng[sc,s]++;
 	      group_[sc,s,ng[sc,s]]=tgr
           }
-
         if (grouping[sc,s,tgr,end]<element[sc,s,S[sc,s,i],end])
           grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
+
+       # only goes on when features are inside page limits.
+       if (ChkLimits(start_,BORI,end_,(BEND))) {
+        feature_=element[sc,s,S[sc,s,i],feature];
+        score_=element[sc,s,S[sc,s,i],score];
 
         # for gene mode. try to recompute relative frame and remainder
         frame_[sc,s,tgr]= element[sc,s,S[sc,s,i],frame];
@@ -1068,11 +1092,27 @@ END{
   #
   # make plotlines. Put non-overlapping groups into the same plotting line.
   #
-  if (Var["print_report"]) printf "\n%s\nPrinting Lines......Page: %s Block: %s\n%s\n\n",BigLINE,pages,blocks,BigLINE | "cat 1>&2"
-  for (s in strands) {
-    for (sc in sources) {
-      if (n[sc,s]>0) printf "(%s) %s %s source\n", sc, PLOT_FT[sc,":","scale"], PLOT_FT[sc,":","spacing_scale"]
+  if (Var["print_report"]) printf "\n%s\nPrinting Lines......\nPage: %s Block: %s\nNuc_Ori: %s - Nuc_End: %s\n%s\n\n",BigLINE,pages,blocks,BORI,BEND,BigLINE | "cat 1>&2"
+  for (stp=1;stp<=3;stp++) { # for s in strand
+    prtrule=0
+    s=wstr[stp]
+    if (s=="+" || s=="-") lastcnt=ordcnt
+    else { lastcnt=nordcnt; prtrule=1 }
+    printf "------ Source: --- Strand: %s Counter: %s\n", s, lastcnt | "cat 1>&2" 
+    if (prtrule) printf "%s %s XOriPlot Y {r} 2 tm\n",BORI,BEND
+    printf "%% ------------------ Strand(%s) Begin\n",s
+    for (srcord=0;srcord<lastcnt;srcord++) { # for sc in sources
+      if (s=="-") { ngcnt=lastcnt-(srcord+1); sc=order["strand",ngcnt] }
+      else {
+        if (s=="+") sc=order["strand",srcord]
+        else sc=order["none",srcord]      # (s==".")
+        }
+      printf "------ Source: %10s Strand: %s Counter: %s\n", sc, s, srcord | "cat 1>&2" 
+      # if (n[sc,s]>0) 
+      printf "(%s) %s %s (%s) source\n", sc"("s")", PLOT_FT[sc,":","scale"], PLOT_FT[sc,":","spacing_scale"],s
+      scnt=0
       for (i=1;i<=ng[sc,s];i++) {
+        scnt++
         g=group_[sc,s,i];
         for (j=1;j<=nl[sc,s] && grouping[sc,s,g,start] < endline[sc,s,j];j++);
         nl[sc,s] = j==nl[sc,s]+1 ? j : nl[sc,s];
@@ -1083,19 +1123,23 @@ END{
         if (PLOT_FT[g,":","label"]=="default") labl=g
         else labl=PLOT_FT[g,":","label"]
         if (plot_group[g,blocks,pages]==1) {
-          printf "(%s) %s %s (%s) gp \n", checklbl(labl), grouping[sc,s,g,start], grouping[sc,s,g,end], s
+          printf "(%s) %s %s gp \n", checklbl(labl), grouping[sc,s,g,start], grouping[sc,s,g,end]
           printf "%s", grouping[sc,s,g,group,blocks,pages] | "sort +0nr +6nr +2n +3nr"
           close("sort +0nr +6nr +2n +3nr")
           printf "g_end\n"
           } # if plot_group
         } # for ng[]
-        if (n[sc,s]>0) printf "endsource\n"
+        # if (n[sc,s]>0) 
+        printf "s_end\n"
       }   # for sources
+      printf "%% ------------------ Strand(%s) End\n",s
+      if (prtrule && scnt>0) printf "%s %s XOriPlot Y {r} 2 tm\n",BORI,BEND
     }     # for strands
   if (Var["print_report"]) close(" sort +6 | cat 1>&2")
 
   # Closing Pages MAIN LOOP.
   #
+    printf "b_end\n"
     BORI+=BOFFSET
     } # for blocks
   endPSpage(pages,pages)     # PostSCript Page Trailer.
@@ -1128,7 +1172,14 @@ function min(a,b) { if (a<=b) return a; else return b }
 function max(a,b) { if (a>=b) return a; else return b }
 function ChkLimits(o,O,e,E) { if (e<=O || o>=E) return 0; else return 1 }
   # start_,BORI,end_,BEND
-function OnOff(value) { if (value~/^1$|^ON$|^Y(ES)?$|^T(RUE)?$/) return 1; else return 0 }
+function chkps(v) {
+ vv=lcase(v)
+ if (vv~/^(a)(2|3|4|5)$|^(b)(4|5)$|^executive$|^(le)(tter|gal|dger)$|^tabloid$|^userdefined$/)
+   return vv
+ else return "a4"
+ }
+function chkpo(v) { if (v=="Portrait") return "false"; else return "true" }
+function OnOff(v) { if (lcase(v)~/^1$|^(on)$|^(y)(es)?$|^(t)(rue)?$/) return 1; else return 0 }
 function ChkColor(ncolor) {
  if (ncolor~/^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/)
    return 1
@@ -1388,13 +1439,34 @@ function showelem(a,b){
   string=string" "element[a,b,n[a,b],group]
   return string
  }
-function startPSpage(num,tot){
+function defPSvars(nxp,bg,fg,ls,pg){
+ printf "%% BG \& FG colors\n"
+ printf "/BGcolor { colordict begin %s end } def\n", bg
+ printf "/FGcolor { colordict begin %s end } def\n", fg
+ printf "%% page orientation flag\n"
+ printf "/flglscape %s def\n", ls
+ printf "%%%% page size in points used for plot % pgA4 == 595  842\n"
+ printf "/Dpage { pagedict begin pg%s flglscape { exch } if end } bdf\n", pg
+ printf "%% margins (1 cm) (Up Down Left Right - margins are XY independent)\n"
+ printf "/UpM 1 cm def\n"
+ printf "/DnM 1 cm def\n"
+ printf "/LtM 1 cm def\n"
+ printf "/RtM 1 cm def\n"
+ printf "%%\n"
+ printf "/MaxNuclPage %s def\n", nxp
+ printf "/MaxTick 100 def\n"
+ printf "/MinTick  10 def\n"
+ }
+function startPSpage(num,tot,ns,ne){
  printf "%%%%Page: %s %s\n",num,num
  printf "%%%%BeginPageSetup\n%%\n"
  printf "%% Saving current page settings\n"
  printf "/pgsave save def\n"
  printf "%% Defining pagenumber\n"
  printf "/PageNumber (Page %s/%s) def\n",num,tot
+ printf "%% Defining page variables\n"
+ printf "/Y YOriBlck def\n"
+ printf "/Nuc_Offset %s def\n",ns
  printf "%% Setting BGcolor for sheet \n"
  printf "Dpage flglscape { exch } if 0 0 bbox FGcolor 1 tbbox BGcolor scmyk fill\n"
  printf "%% setting coordinate axes for page orientation\n"
@@ -1405,10 +1477,9 @@ function startPSpage(num,tot){
  printf "%%tflg { TB } if\n%%\n%% /FGcolor scolor\n%%\n"
  printf "%% Header\n%%\n"
  printf "%%%%EndPageSetup\n%%\n"
- printf "0 1000 XOriPlot Y {s} 3 tm\n"
  }
 function endPSpage(num,tot){
- printf "%%\ngrestoreall\nshowpage\n%%\n%% PageEND: %s %s\n%%\n",num,tot
+ printf "%%\ngrestoreall\npgsave restore\nshowpage\n%%\n%% PageEND: %s %s\n%%\n",num,tot
  }
 ' - "$@"
 #### Main GFF2APLOT GNU awk Program DONE.
