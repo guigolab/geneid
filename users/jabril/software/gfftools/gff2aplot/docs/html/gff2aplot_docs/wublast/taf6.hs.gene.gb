@@ -1,0 +1,173 @@
+LOCUS       TAF6                    2737 bp    mRNA    linear   PRI 15-JAN-2003
+DEFINITION  Homo sapiens TAF6 RNA polymerase II, TATA box binding protein
+            (TBP)-associated factor, 80kDa (TAF6), transcript variant 1, mRNA.
+ACCESSION   NM_005641
+VERSION     NM_005641.2  GI:21536360
+KEYWORDS    .
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Primates; Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 2737)
+  AUTHORS   Weinzierl,R.O., Ruppert,S., Dynlacht,B.D., Tanese,N. and Tjian,R.
+  TITLE     Cloning and expression of Drosophila TAFII60 and human TAFII70
+            reveal conserved interactions with other subunits of TFIID
+  JOURNAL   EMBO J. 12 (13), 5303-5309 (1993)
+  MEDLINE   94085406
+PUBMED   8262073
+REFERENCE   2  (bases 1 to 2737)
+  AUTHORS   Hisatake,K., Ohta,T., Takada,R., Guermah,M., Horikoshi,M.,
+            Nakatani,Y. and Roeder,R.G.
+  TITLE     Evolutionary conservation of human
+            TATA-binding-polypeptide-associated factors TAFII31 and TAFII80 and
+            interactions of TAFII80 with other TAFs and with general
+            transcription factors
+  JOURNAL   Proc. Natl. Acad. Sci. U.S.A. 92 (18), 8195-8199 (1995)
+  MEDLINE   95396764
+PUBMED   7667268
+REFERENCE   3  (bases 1 to 2737)
+  AUTHORS   Bell,B., Scheer,E. and Tora,L.
+  TITLE     Identification of hTAF(II)80 delta links apoptotic signaling
+            pathways to transcription factor TFIID function
+  JOURNAL   Mol. Cell 8 (3), 591-600 (2001)
+  MEDLINE   21468393
+PUBMED   11583621
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence was derived from L25444.1 and AU143362.1.
+            On Jun 21, 2002 this sequence version replaced gi:5032146.
+            Summary: Initiation of transcription by RNA polymerase II requires
+            the activities of more than 70 polypeptides. The protein that
+            coordinates these activities is transcription factor IID (TFIID),
+            which binds to the core promoter to position the polymerase
+            properly, serves as the scaffold for assembly of the remainder of
+            the transcription complex, and acts as a channel for regulatory
+            signals. TFIID is composed of the TATA-binding protein (TBP) and a
+            group of evolutionarily conserved proteins known as TBP-associated
+            factors or TAFs. TAFs may participate in basal transcription, serve
+            as coactivators, function in promoter recognition or modify general
+            transcription factors (GTFs) to facilitate complex assembly and
+            transcription initiation. This gene encodes one of the smaller
+            subunits of TFIID that binds weakly to TBP but strongly to TAF1,
+            the largest subunit of TFIID. Four isoforms have been identified
+            but complete transcripts have been determined for only three
+            isoforms. One of the isoforms has been shown to preclude binding of
+            one of the other TFIID subunits, thereby reducing transcription and
+            initiating signals that trigger apoptosis.
+            Transcript Variant: This variant (1) encodes the longest isoform
+            (alpha).
+            COMPLETENESS: complete on the 3' end.
+FEATURES             Location/Qualifiers
+     source          1..2737
+                     /organism="Homo sapiens"
+                     /db_xref="taxon:9606"
+                     /chromosome="7"
+                     /map="7q22.1"
+     gene 1..2737
+                     /gene="TAF6"
+                     /note="synonyms: TAF2E, TAFII70, TAFII80, TAFII85,
+                     MGC:8964"
+                     /db_xref="LocusID:6878"
+                     /db_xref="MIM:602955"
+     misc_feature 153..475
+                     /gene="TAF6"
+                     /note="Region: missing in transcript variants 2, 3 and 4"
+     CDS 537..2570
+                     /gene="TAF6"
+                     /note="TAF6 RNA polymerase II, TATA box binding protein
+                     (TBP)-associated factor, 80 kD; TATA box binding protein
+                     (TBP)-associated factor, RNA polymerase II, E, 70/85kD;
+                     transcription initiation factor TFIID 70 kD subunit"
+                     /codon_start=1
+                     /product="TBP-associated factor 6 isoform alpha"
+                     /protein_id="NP_005632.1"
+                     /db_xref="GI:5032147"
+                     /db_xref="LocusID:6878"
+                     /db_xref="MIM:602955"
+                     /translation="MAEEKKLKLSNTVLPSESMKVVAESMGIAQIQEETCQLLTDEVS
+                     YRIKEIAQDALKFMHMGKRQKLTTSDIDYALKLKNVEPLYGFHAQEFIPFRFASGGGR
+                     ELYFYEEKEVDLSDIINTPLPRVPLDVCLKAHWLSIEGCQPAIPENPPPAPKEQQKAE
+                     ATEPLKSAKPGQEEDGPLKGKGQGATTADGKGKEKKAPPLLEGAPLRLKPRSIHELSV
+                     EQQLYYKEITEACVGSCEAKRAEALQSIATDPGLYQMLPRFSTFISEGVRVNVVQNNL
+                     ALLIYLMRMVKALMDNPTLYLEKYVHELIPAVMTCIVSRQLCLRPDVDNHWALRDFAA
+                     RLVAQICKHFSTTTNNIQSRITKTFTKSWVDEKTPWTTRYGSIAGLAELGHDVIKTLI
+                     LPRLQQEGERIRSVLDGPVLSNIDRIGADHVQSLLLKHCAPVLAKLRPPPDNQDAYRA
+                     EFGSLGPLLCSQVVKARAQAALQAQQVNRTTLTITQPRPTLTLSQAPQPGPRTPGLLK
+                     VPGSIALPVQTLVSARAAAPPQPSPPPTKFIVMSSSSSAPSTQQVLSLSTSAPGSGST
+                     TTSPVTTTVPSVQPIVKLVSTATTAPPSTAPSGPGSVQKYIVVSLPPTGEGKGGPTSH
+                     PSPVPPPASSPSPLSGSALCGGKQEAGDSPPPAPGTPKANGSQPNSGSPQPAP"
+     misc_feature 561..1760
+                     /gene="TAF6"
+                     /note="Region: COG5095, TAF6, Transcription initiation
+                     factor TFIID, subunit TAF6 (also component of histone
+                     acetyltransferase SAGA) [Transcription]"
+                     /db_xref="CDD:COG5095"
+     misc_feature 564..764
+                     /gene="TAF6"
+                     /note="TAF; Region: TATA box binding protein associated
+                     factor (TAF). TAF proteins adopt a histone-like fold"
+                     /db_xref="CDD:pfam02969"
+     misc_feature 663..692
+                     /gene="TAF6"
+                     /note="Region: missing in transcript variant 4"
+     misc_feature 1965..1994
+                     /gene="TAF6"
+                     /note="Region: missing in transcript variant 3"
+     variation 2590
+                     /gene="TAF6"
+                     /allele="T"
+                     /allele="C"
+                     /db_xref="dbSNP:4134928"
+     polyA_signal 2720..2725
+                     /gene="TAF6"
+                     /evidence=experimental
+     polyA_site 2737
+                     /gene="TAF6"
+BASE COUNT      556 a    873 c    769 g    539 t
+ORIGIN      
+        1 gcggggccaa gatggcgccg agcgccgggt gagcagcgtc tcggctgccg ctagagtttt
+       61 cctgctcccc gcgctcgggt ggcgggggcg ggtctgagtg gtaccccgga ggagaccctt
+      121 tgaaggtccc ttgtggggac tggaaagagg acggttggtt gtgtgtctgt gctcgtgggg
+      181 accccgtgtg tgtgcctgca ttggagagat gttgcaggag atggggtggg ctctctgaac
+      241 ctcctttcgc gctgcccggg gatcttcgac ctgcttctct gctgggatct cgcttaagtt
+      301 aacccttccc tgggacgcct tcctgccgcc tccactgatc tgaggagatc ctgtgactgt
+      361 agcgtgtttt atgagccttt actggcagag ggtaccgccg ggtattgaag gattcgtagg
+      421 agttcgccag ggaagtggga cacgaccccc tcttgtaaac ccggcgccag gcacagaggt
+      481 ctccgtctct ccaccggggg cttcatcctt ccagggagga gaagagggac tccagaatgg
+      541 ctgaggagaa gaagctgaag cttagcaaca ctgtgctgcc ctcggagtcc atgaaggtgg
+      601 tggctgaatc catgggcatc gcccagattc aggaggagac ctgccagctg ctaacggatg
+      661 aggtcagcta ccgcatcaaa gagatcgcac aggatgcctt gaagttcatg cacatgggga
+      721 agcggcagaa gctcaccacc agtgacattg actacgcctt gaagctaaag aatgtcgagc
+      781 cactctatgg cttccacgcc caggagttca ttcctttccg cttcgcctct ggtgggggcc
+      841 gggagcttta cttctatgag gagaaggagg ttgatctgag cgacatcatc aatacccctc
+      901 tgccccgggt gcccctggac gtctgcctca aagctcattg gctgagcatc gagggctgcc
+      961 agccagctat ccccgagaac ccgcccccag ctcccaaaga gcaacagaag gctgaagcca
+     1021 cagaacccct gaagtcagcc aagccaggcc aggaggaaga cggacccctg aagggcaaag
+     1081 gtcaaggggc caccacagcc gacggcaaag ggaaagagaa gaaggcgccg cccttgctgg
+     1141 agggggcccc cttgcgactg aagccccgga gcatccacga gttgtctgtg gagcagcagc
+     1201 tctactacaa ggagatcacc gaggcctgcg tgggctcctg cgaggccaag agggcggaag
+     1261 ccctgcaaag cattgccacg gaccctggac tgtatcagat gctgccacgg ttcagtacct
+     1321 ttatctcgga gggggtccgt gtgaacgtgg ttcagaacaa cctggcccta ctcatctacc
+     1381 tgatgcgtat ggtgaaagcg ctgatggaca accccacgct ctatctagaa aaatacgtcc
+     1441 atgagctgat tccagctgtg atgacctgca tcgtgagcag acagttgtgc ctgcgaccag
+     1501 atgtggacaa tcactgggca ctccgagact ttgctgcccg cctggtggcc cagatctgca
+     1561 agcattttag cacaaccact aacaacatcc agtcccggat caccaagacc ttcaccaaga
+     1621 gctgggtgga cgagaagacg ccctggacga ctcgttatgg ctccatcgca ggcttggctg
+     1681 agctgggaca cgatgttatc aagactctga ttctgccccg gctgcagcag gaaggggagc
+     1741 ggatccgcag tgtgctggac ggccctgtgc tgagcaacat tgaccggatt ggagcagacc
+     1801 atgtgcagag cctcctgctg aaacactgtg ctcctgttct ggcaaagctg cgcccaccgc
+     1861 ctgacaatca ggacgcctat cgggcagaat tcgggtccct tgggcccctc ctctgctccc
+     1921 aggtggtcaa ggctcgggcc caggctgctc tgcaggctca gcaggtcaac aggaccactc
+     1981 tgaccatcac gcagccccgg cccacgctga ccctctcgca ggccccacag cctggccctc
+     2041 gcacccctgg cttgctgaag gttcctggct ccatcgcact tcctgtccag acactggtgt
+     2101 ctgcacgagc ggctgcccca ccacagcctt cccctcctcc aaccaagttt attgtaatgt
+     2161 catcgtcctc cagcgcccca tccacccagc aggtcctgtc cctcagcacc tcggcccccg
+     2221 gctcaggttc caccaccact tcgcccgtca ccaccaccgt ccccagcgtg cagcccatcg
+     2281 tcaagttggt ctccaccgcc accaccgcac cccccagcac tgctccctct ggtcctggga
+     2341 gtgtccagaa gtacatcgtg gtctcacttc ccccaacagg ggagggcaaa ggaggcccca
+     2401 cctcccatcc ttctccagtt cctcccccgg catcgtcccc gtccccactc agcggcagtg
+     2461 ccctttgtgg ggggaagcag gaggctgggg acagtccccc tccagctcca gggactccaa
+     2521 aagccaatgg ctcccagccc aactccggct cccctcagcc tgctccgtga tgctccacct
+     2581 gccagccccc ggattcccac acatgcagac atgtacacac gtgcacgtac acacatgcat
+     2641 gctcgctaag cggaaggaag ttgtagattg cttccttcat gtcactttct ttttagatat
+     2701 tgtacagcca gtttctcaga ataaaagttt ggtttgt
+//

@@ -129,8 +129,11 @@
 \idesc{\shortstack[l]{\ \op{-b} \pp{color} \\ \op{-\/-extra-box-color} \pp{color}} \hfill \op{extra\_box\_bgcolor}=\pp{color}}
    { {\tbdef} }
 %
+\idesc{\op{-\/-nopswarnings}  \hfill \op{show\_ps\_warnings}=\vp{off}}
+   { When input data is missing, regardless you do not provide X or Y sequence annotation, or even alignment records, {\prog} will include a warning message in the final {\ps} output. This will help to identify what is missing from such input data, but sometimes it must be ignored and you may need to switch those warnings off. You can switch off on a single figure from command-line, or disable from a default customization file variable. The last choice it is not recommended unless you already know what you are doing and you are sure that you will get annotations along only for one of the axes or there are sequence pairs that do not have the corresponding alignment data. }
+%
 \idesc{\shortstack[l]{\ \op{-a}  \\ \op{-\/-hide-credits} } \hfill \op{hide\_credits}=\vp{on}}
-   { {\tbdef} }
+   { {\prog} always displays a tiny copyright footer on the output {\ps} figures that users can remove using this command-line option for a single case, or the corresponding customization variable in a default customization file for all the figures. }
 %
 \ijoin{\op{-\/-layout-var} '\pp{variable=value}' \hfill \op{variable}=\vp{value}}
 %

@@ -3,7 +3,7 @@
 %
 % Summary table for LAYOUTAplot: Aplot Layout
 %
-% $Id: AplotCFvars_tblaplot.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $ 
+% $Id: AplotCFvars_tblaplot.tex,v 1.2 2003-03-04 18:55:39 jabril Exp $ 
 %
 %
 \begin{tabular}{p{5cm}p{3cm}p{15cm}}
@@ -11,13 +11,13 @@
 \rvdef{Aplot Layout}
 %
 \rvdesc{\op{alignment\_name}}{\bydef}
-   { Selects \pp{seqXname:seqYname} alignment (useful when input contain many alignments). }
+   {  Selects \pp{seqXname:seqYname} alignment (useful when input contain many alignments). }
 %
 \rvdesc{\op{x\_sequence\_name}}{\bydef}
-   { Selects which sequence annotation is going to be plotted on X-axis. }
+   {  Selects which sequence annotation is going to be plotted on X-axis. }
 %
 \rvdesc{\op{y\_sequence\_name}}{\bydef}
-   { Selects which sequence annotation is going to be plotted on Y-axis. }
+   {  Selects which sequence annotation is going to be plotted on Y-axis. }
 %
 \rvdesc{\op{aplot\_xy\_same\_length}}{\vp{on}}
    { {\tbdef} }
@@ -35,6 +35,9 @@
    { {\tbdef} }
 %
 \rvdesc{\op{show\_grid}}{\vp{off}}
+   { {\tbdef} }
+%
+\rvdesc{\op{show\_percent\_box\_grid}}{\vp{on}}
    { {\tbdef} }
 %
 \rvdesc{\op{show\_percent\_box}}{\vp{off}}
@@ -57,6 +60,12 @@
 %
 \rvdesc{\op{extra\_box\_height}}{\bydef}
    { {\tbdef} }
+%
+\rvdesc{\op{ribbon\_color\_merge}}{\bydef}
+   {  Enabling pattern color fill for projection ribbons to emulate color blending when horizontal and vertical ribbons overlap. }
+%
+\rvdesc{\op{color\_merge\_factor}}{\vp{0.5}}
+   {  Setting the pattern point size for the color blend emulation. }
 %
 \rvdesc{\op{ribbon\_style}}{\bydef}
    { {\tbdef} }

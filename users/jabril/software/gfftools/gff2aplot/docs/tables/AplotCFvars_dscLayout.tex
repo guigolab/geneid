@@ -3,7 +3,7 @@
 %
 % Description items for LAYOUT
 %
-% $Id: AplotCFvars_dscLayout.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $ 
+% $Id: AplotCFvars_dscLayout.tex,v 1.2 2003-03-04 18:55:34 jabril Exp $ 
 %
 \idesc{\op{page\_bbox} $\,=\,$ \pp{width,height} \hfill [ \bydef ]}
    { \label{sec:pagebbox} This variable allows users to define an arbitrary page format, by defining the width and height for that page ({\prog} assigns automatically a format name for this new page dimensions). Do not include this variable in your custom files if you are using standard page sizes which can be set using \op{page\_size}, because \op{page\_bbox} overrides any further page definition by that variable. If the variable is not set, default value forces the use of any settings given for \op{page\_size}. \pp{width} and \pp{height} are set to points if no unit is given, now you can also use points, milimeters, centimeters or inches (pt, mm, cm or in, respectively). See table~\ref{tbl:PageSizes} for a reference on already defined page sizes and their dimensions. }
@@ -205,6 +205,9 @@
 \idesc{\op{show\_grid} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
    { {\tbdef} }
 %
+\idesc{\op{show\_percent\_box\_grid} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
 \idesc{\op{show\_percent\_box} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
    { {\tbdef} }
 %
@@ -372,6 +375,12 @@
 %
 \idesc{\op{scoary\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{scores} ]}
    { {\tbdef} }
+%
+\idesc{\op{ribbon\_color\_merge} $\,=\,$ \pp{boolean} \hfill [ \bydef ]}
+   { This property is device dependant, lower resolution devices (such as screen) will not show properly the color blending. }
+%
+\idesc{\op{color\_merge\_factor} $\,=\,$ \pp{alpha\_factor} \hfill [ \vp{0.5} ]}
+   { \pp{alpha\_factor} ranges from \vp{0.07} up to \vp{2}, default is set to \vp{0.5}. If you plan to scale down your figures, it is advisable to increase it to \vp{1} or \vp{2}. }
 %
 \idesc{\op{ribbon\_style} $\,=\,$ \pp{ribbon-type} \hfill [ \bydef ]}
    { {\tbdef} }

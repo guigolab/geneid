@@ -1,0 +1,76 @@
+#
+# README for wublast gff2aplot example
+# 
+#
+# $Id: README,v 1.1 2003-03-04 18:55:02 jabril Exp $
+#
+
+#
+# Original Files
+#
+# ANNOTATION: taf6.hs.gene.gff  taf6.mm.gene.gff
+# ALIGNMENT:  taf6.mmhs.genomic.blastn  taf6.mmhs.genomic.tblastx
+#
+
+# Running parseblast: BLAST -> GFF
+BIN="$HOME/development/softjabril/parseblast/bin"
+# u command-line option removes frame
+$BIN/parseblast.pl -vuF taf6.mmhs.genomic.blastn    \
+                     > taf6.mmhs.genomic.blastn.gff \
+                    2> taf6.mmhs.genomic.blastn.log;
+$BIN/parseblast.pl -vuF taf6.mmhs.genomic.tblastx    \
+                     > taf6.mmhs.genomic.tblastx.gff \
+                    2> taf6.mmhs.genomic.tblastx.log;
+$BIN/parseblast.pl -vuA taf6.mmhs.genomic.blastn           \
+                     > taf6.mmhs.genomic.blastn.aplot.gff  \
+                    2> taf6.mmhs.genomic.blastn.aplotgff.log;
+
+# Running gff2aplot: GFF -> PS
+BIN="$HOME/development/softjabril/gfftools/gff2aplot/bin"
+$BIN/gff2aplot.pl -v \
+                  -- taf6.mmhs.genomic.blastn.gff \
+                     taf6.mm.gene.gff \
+                     taf6.hs.gene.gff \
+                   > taf6.mmhs.genomic.blastn.aplot.ps \
+                  2> taf6.mmhs.genomic.blastn.aplot.log;
+# $BIN/gff2aplot.pl -v --show-grid --show-percent-box \
+$BIN/gff2aplot.pl -v --show-percent-box \
+                  -- taf6.mmhs.genomic.tblastx.gff \
+                     taf6.mm.gene.gff \
+                     taf6.hs.gene.gff \
+                   > taf6.mmhs.genomic.tblastx.aplot.ps \
+                  2> taf6.mmhs.genomic.tblastx.aplot.log;
+
+# Extra customization
+cat > taf6.tblastx.rc <<'+++EOF+++'
+#
+# L #
+percent_box_label=SIMILARITY
+percent_box_label_fontsize=10pt
+percent_box_score_range=0..1000
+major_tickmark_score=250
+ribbon_color_merge=on
+color_merge_factor=2
+# group_y_label_angle=315
+#
+# G #
+/.*M.musculus.*/::group_label=taf6 (M.musculus)
+/.*H.sapiens.*/::group_label=taf6 (H.sapiens)
+#
+# F #
+/[it].*exon/::feature_color=darkred
+utrexon::feature_color=lightgrey
+initialexon::feature_shape=half_arrow_end
+terminalexon::feature_shape=half_arrow
+/.*exon/::show_ribbons=on
+/.*exon/::ribbon_style=ribbons
+/[it].*exon/::ribbon_color=verylightred
+utrexon::ribbon_color=verylightgrey
++++EOF+++
+$BIN/gff2aplot.pl -v --show-percent-box \
+                  -C taf6.tblastx.rc \
+                  -- taf6.mmhs.genomic.tblastx.gff \
+                     taf6.mm.gene.gff \
+                     taf6.hs.gene.gff \
+                   > taf6.mmhs.genomic.tblastx.aplot_conf.ps \
+                  2> taf6.mmhs.genomic.tblastx.aplot_conf.log;

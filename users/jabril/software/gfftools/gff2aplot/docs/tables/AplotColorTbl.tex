@@ -6,137 +6,97 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\label{sec:colortable}
-\newcommand{\clrow}[1]{
-  \fcolorbox{black}{#1}{
-    \textcolor{#1}{\rule[-.3ex]{1cm}{1.8ex}}
-    } % fcolorbox
-  & #1
-  } % newcommand
-%
-\newcommand{\clspc}{&&&&&\\}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\vfill
-\begin{table}[!ht]
-%\setlength{\parindent}{-0.5cm}
-\begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \begin{tabular}{c@{\quad}c}
-    \begin{tabular}{|c|c|cccc|} \hline
+  \begin{tabular}{|c|c|cccc|} \hline
 % black+grey+white
 \clspc
 \clrow{black}                   & 0.00 & 0.00 & 0.00 & 1.00 \\
-\clrow{verydarkgrey}            & 0.00 & 0.00 & 0.00 & 0.80 \\
+\clrow{verydeepgrey}            & 0.00 & 0.00 & 0.00 & 0.90 \\
+\clrow{deepgrey}                & 0.00 & 0.00 & 0.00 & 0.80 \\
+\clrow{verydarkgrey}            & 0.00 & 0.00 & 0.00 & 0.70 \\
 \clrow{darkgrey}                & 0.00 & 0.00 & 0.00 & 0.60 \\
-\clrow{grey}                    & 0.00 & 0.00 & 0.00 & 0.40 \\
-\clrow{lightgrey}               & 0.00 & 0.00 & 0.00 & 0.20 \\
-\clrow{verylightgrey}           & 0.00 & 0.00 & 0.00 & 0.10 \\
+\clrow{grey}                    & 0.00 & 0.00 & 0.00 & 0.50 \\
+\clrow{lightgrey}               & 0.00 & 0.00 & 0.00 & 0.40 \\
+\clrow{verylightgrey}           & 0.00 & 0.00 & 0.00 & 0.30 \\
+\clrow{palegrey}                & 0.00 & 0.00 & 0.00 & 0.20 \\
+\clrow{verypalegrey}            & 0.00 & 0.00 & 0.00 & 0.10 \\
 \clrow{white}                   & 0.00 & 0.00 & 0.00 & 0.00 \\
+% pink
+\clspc
+\clrow{verydeeppink}            & 0.00 & 0.60 & 0.15 & 0.35 \\
+\clrow{deeppink}                & 0.00 & 0.75 & 0.20 & 0.15 \\
+\clrow{verydarkpink}            & 0.00 & 0.90 & 0.25 & 0.00 \\
+\clrow{darkpink}                & 0.00 & 0.75 & 0.30 & 0.00 \\
+\clrow{pink}                    & 0.00 & 0.60 & 0.25 & 0.00 \\
+\clrow{lightpink}               & 0.00 & 0.45 & 0.20 & 0.00 \\
+\clrow{verylightpink}           & 0.00 & 0.30 & 0.15 & 0.00 \\
+\clrow{palepink}                & 0.00 & 0.20 & 0.10 & 0.00 \\
+\clrow{verypalepink}            & 0.00 & 0.10 & 0.05 & 0.00 \\
 % magenta
 \clspc
-\clrow{verydarkmagenta}         & 0.00 & 1.00 & 0.00 & 0.30 \\
-\clrow{darkmagenta}             & 0.00 & 0.80 & 0.00 & 0.05 \\
+\clrow{verydeepmagenta}         & 0.00 & 0.60 & 0.00 & 0.40 \\
+\clrow{deepmagenta}             & 0.00 & 0.75 & 0.00 & 0.20 \\
+\clrow{verydarkmagenta}         & 0.00 & 0.90 & 0.00 & 0.00 \\
+\clrow{darkmagenta}             & 0.00 & 0.75 & 0.00 & 0.00 \\
 \clrow{magenta}                 & 0.00 & 0.60 & 0.00 & 0.00 \\
-\clrow{lightmagenta}            & 0.00 & 0.40 & 0.00 & 0.00 \\
-\clrow{verylightmagenta}        & 0.00 & 0.20 & 0.00 & 0.00 \\
-% violet
-\clspc
-\clrow{verydarkviolet}          & 0.45 & 0.85 & 0.00 & 0.00 \\
-\clrow{darkviolet}              & 0.30 & 0.65 & 0.00 & 0.00 \\
-\clrow{violet}                  & 0.22 & 0.55 & 0.00 & 0.00 \\
-\clrow{lightviolet}             & 0.15 & 0.40 & 0.00 & 0.00 \\
-\clrow{verylightviolet}         & 0.10 & 0.20 & 0.00 & 0.00 \\
-% blue
-\clspc
-\clrow{verydarkblue}            & 1.00 & 1.00 & 0.00 & 0.20 \\
-\clrow{darkblue}                & 0.90 & 0.90 & 0.00 & 0.00 \\
-\clrow{blue}                    & 0.75 & 0.75 & 0.00 & 0.00 \\
-\clrow{lightblue}               & 0.50 & 0.50 & 0.00 & 0.00 \\
-\clrow{verylightblue}           & 0.30 & 0.30 & 0.00 & 0.00 \\
-% skyblue
-\clspc
-\clrow{verydarkskyblue}         & 0.90 & 0.50 & 0.00 & 0.15 \\
-\clrow{darkskyblue}             & 0.75 & 0.45 & 0.00 & 0.00 \\
-\clrow{skyblue}                 & 0.60 & 0.38 & 0.00 & 0.00 \\
-\clrow{lightskyblue}            & 0.45 & 0.25 & 0.00 & 0.00 \\
-\clrow{verylightskyblue}        & 0.30 & 0.15 & 0.00 & 0.00 \\
-% cyan
-\clspc
-\clrow{verydarkcyan}            & 1.00 & 0.00 & 0.00 & 0.10 \\
-\clrow{darkcyan}                & 0.80 & 0.00 & 0.00 & 0.00 \\
-\clrow{cyan}                    & 0.60 & 0.00 & 0.00 & 0.00 \\
-\clrow{lightcyan}               & 0.40 & 0.00 & 0.00 & 0.00 \\
-\clrow{verylightcyan}           & 0.20 & 0.00 & 0.00 & 0.00 \\
+\clrow{lightmagenta}            & 0.00 & 0.45 & 0.00 & 0.00 \\
+\clrow{verylightmagenta}        & 0.00 & 0.30 & 0.00 & 0.00 \\
+\clrow{palemagenta}             & 0.00 & 0.20 & 0.00 & 0.00 \\
+\clrow{verypalemagenta}         & 0.00 & 0.10 & 0.00 & 0.00 \\
       \clspc
       \hline
     \end{tabular} 
    &
     \begin{tabular}{|c|c|cccc|} \hline
-% seagreen
+% violet
 \clspc
-\clrow{verydarkseagreen}        & 0.75 & 0.00 & 0.45 & 0.00 \\
-\clrow{darkseagreen}            & 0.62 & 0.00 & 0.38 & 0.00 \\
-\clrow{seagreen}                & 0.50 & 0.00 & 0.30 & 0.00 \\
-\clrow{lightseagreen}           & 0.38 & 0.00 & 0.22 & 0.00 \\
-\clrow{verylightseagreen}       & 0.25 & 0.00 & 0.15 & 0.00 \\
-% green
+\clrow{verydeepviolet}          & 0.30 & 0.60 & 0.00 & 0.40 \\
+\clrow{deepviolet}              & 0.35 & 0.75 & 0.00 & 0.20 \\
+\clrow{verydarkviolet}          & 0.45 & 0.90 & 0.00 & 0.00 \\
+\clrow{darkviolet}              & 0.35 & 0.75 & 0.00 & 0.00 \\
+\clrow{violet}                  & 0.30 & 0.60 & 0.00 & 0.00 \\
+\clrow{lightviolet}             & 0.22 & 0.45 & 0.00 & 0.00 \\
+\clrow{verylightviolet}         & 0.15 & 0.30 & 0.00 & 0.00 \\
+\clrow{paleviolet}              & 0.10 & 0.20 & 0.00 & 0.00 \\
+\clrow{verypaleviolet}          & 0.05 & 0.10 & 0.00 & 0.00 \\
+% blue
 \clspc
-\clrow{verydarkgreen}           & 1.00 & 0.00 & 1.00 & 0.25 \\
-\clrow{darkgreen}               & 0.80 & 0.00 & 0.80 & 0.00 \\
-\clrow{green}                   & 0.60 & 0.00 & 0.60 & 0.00 \\
-\clrow{lightgreen}              & 0.40 & 0.00 & 0.40 & 0.00 \\
-\clrow{verylightgreen}          & 0.20 & 0.00 & 0.20 & 0.00 \\
-% limegreen
+\clrow{verydeepblue}            & 0.60 & 0.60 & 0.00 & 0.40 \\
+\clrow{deepblue}                & 0.75 & 0.75 & 0.00 & 0.20 \\
+\clrow{verydarkblue}            & 0.90 & 0.90 & 0.00 & 0.00 \\
+\clrow{darkblue}                & 0.75 & 0.75 & 0.00 & 0.00 \\
+\clrow{blue}                    & 0.60 & 0.60 & 0.00 & 0.00 \\
+\clrow{lightblue}               & 0.45 & 0.45 & 0.00 & 0.00 \\
+\clrow{verylightblue}           & 0.30 & 0.30 & 0.00 & 0.00 \\
+\clrow{paleblue}                & 0.20 & 0.20 & 0.00 & 0.00 \\
+\clrow{verypaleblue}            & 0.10 & 0.10 & 0.00 & 0.00 \\
+% skyblue
 \clspc
-\clrow{verydarklimegreen}       & 0.50 & 0.00 & 1.00 & 0.10 \\
-\clrow{darklimegreen}           & 0.40 & 0.00 & 0.95 & 0.00 \\
-\clrow{limegreen}               & 0.30 & 0.00 & 0.80 & 0.00 \\
-\clrow{lightlimegreen}          & 0.20 & 0.00 & 0.65 & 0.00 \\
-\clrow{verylightlimegreen}      & 0.10 & 0.00 & 0.50 & 0.00 \\
-% yellow
+\clrow{verydeepskyblue}         & 0.60 & 0.40 & 0.00 & 0.40 \\
+\clrow{deepskyblue}             & 0.75 & 0.50 & 0.00 & 0.20 \\
+\clrow{verydarkskyblue}         & 0.90 & 0.60 & 0.00 & 0.00 \\
+\clrow{darkskyblue}             & 0.75 & 0.50 & 0.00 & 0.00 \\
+\clrow{skyblue}                 & 0.60 & 0.40 & 0.00 & 0.00 \\
+\clrow{lightskyblue}            & 0.45 & 0.30 & 0.00 & 0.00 \\
+\clrow{verylightskyblue}        & 0.30 & 0.22 & 0.00 & 0.00 \\
+\clrow{paleskyblue}             & 0.20 & 0.14 & 0.00 & 0.00 \\
+\clrow{verypaleskyblue}         & 0.10 & 0.07 & 0.00 & 0.00 \\
+% cyan
 \clspc
-\clrow{verydarkyellow}          & 0.00 & 0.00 & 1.00 & 0.25 \\
-\clrow{darkyellow}              & 0.00 & 0.00 & 1.00 & 0.10 \\
-\clrow{yellow}                  & 0.00 & 0.00 & 1.00 & 0.00 \\
-\clrow{lightyellow}             & 0.00 & 0.00 & 0.50 & 0.00 \\
-\clrow{verylightyellow}         & 0.00 & 0.00 & 0.25 & 0.00 \\
-% orange
-\clspc
-\clrow{verydarkorange}          & 0.00 & 0.50 & 0.80 & 0.10 \\
-\clrow{darkorange}              & 0.00 & 0.40 & 0.80 & 0.00 \\
-\clrow{orange}                  & 0.00 & 0.30 & 0.80 & 0.00 \\
-\clrow{lightorange}             & 0.00 & 0.20 & 0.75 & 0.00 \\
-\clrow{verylightorange}         & 0.00 & 0.15 & 0.70 & 0.00 \\
-% red
-\clspc
-\clrow{verydarkred}             & 0.00 & 1.00 & 1.00 & 0.15 \\
-\clrow{darkred}                 & 0.00 & 0.80 & 0.80 & 0.00 \\
-\clrow{red}                     & 0.00 & 0.60 & 0.60 & 0.00 \\
-\clrow{lightred}                & 0.00 & 0.40 & 0.40 & 0.00 \\
-\clrow{verylightred}            & 0.00 & 0.20 & 0.20 & 0.00 \\
-% brown
-\clspc
-\clrow{verydarkbrown}           & 0.35 & 0.85 & 1.00 & 0.40 \\
-\clrow{darkbrown}               & 0.30 & 0.70 & 1.00 & 0.35 \\
-\clrow{brown}                   & 0.25 & 0.75 & 1.00 & 0.25 \\
-\clrow{lightbrown}              & 0.20 & 0.60 & 0.70 & 0.15 \\
-\clrow{verylightbrown}          & 0.15 & 0.45 & 0.55 & 0.00 \\
+\clrow{verydeepcyan}            & 0.60 & 0.00 & 0.00 & 0.40 \\
+\clrow{deepcyan}                & 0.75 & 0.00 & 0.00 & 0.20 \\
+\clrow{verydarkcyan}            & 0.90 & 0.00 & 0.00 & 0.00 \\
+\clrow{darkcyan}                & 0.75 & 0.00 & 0.00 & 0.00 \\
+\clrow{cyan}                    & 0.60 & 0.00 & 0.00 & 0.00 \\
+\clrow{lightcyan}               & 0.45 & 0.00 & 0.00 & 0.00 \\
+\clrow{verylightcyan}           & 0.30 & 0.00 & 0.00 & 0.00 \\
+\clrow{palecyan}                & 0.20 & 0.00 & 0.00 & 0.00 \\
+\clrow{verypalecyan}            & 0.10 & 0.00 & 0.00 & 0.00 \\
       \clspc
       \hline
     \end{tabular}
    \\
   \end{tabular}
-\end{scriptsize}
-%\begin{center}
-  \caption{\label{tbl:CMYKcolor}
-    {\prog} CMYK color definition table and Color Names.
-    } % caption
-  %\refstepcounter{table}
-  %\addcontentsline{lot}{section}{
-  %   \thetable\hspace{1em}{\prog}\ CMYK color definition table.
-  %   }
-\end{center}
-\end{table}
-\vfill
+\end{footnotesize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

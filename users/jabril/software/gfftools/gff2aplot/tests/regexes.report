@@ -50,33 +50,33 @@
 
 >>> /; system(" echo \"I have found your name: \$USER ... X.D\" "); / ::: any 
 >>> STRING() ID()
->>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::\; system(\" echo \\"I have found your name: \$USER ... X.D\\" \")\; ::
->>> "any" DOES NOT MATCH /\; system(\" echo \\"I have found your name: \$USER ... X.D\\" \")\; / 
+>>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::; system(" echo \"I have found your name: \$USER ... X.D\" "); ::
+>>> "any" DOES NOT MATCH /; system(" echo \"I have found your name: \$USER ... X.D\" "); / 
 
 >>> /; `echo "I have found your name: \$USER ... X.D"`; / ::: any 
 >>> STRING() ID()
->>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::\; \`echo \"I have found your name: \$USER ... X.D\"\`\; ::
->>> "any" DOES NOT MATCH /\; \`echo \"I have found your name: \$USER ... X.D\"\`\; / 
+>>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::; `echo "I have found your name: \$USER ... X.D"`; ::
+>>> "any" DOES NOT MATCH /; `echo "I have found your name: \$USER ... X.D"`; / 
 
 >>> / @{[ system("echo \"I have found your name: \$USER ... X.D\"") ]} / ::: any 
 >>> STRING() ID()
->>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @\{[ system(\"echo \\"I have found your name: \$USER ... X.D\\"\") ]\} ::
->>> "any" DOES NOT MATCH / @\{[ system(\"echo \\"I have found your name: \$USER ... X.D\\"\") ]\} / 
+>>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @{[ system("echo \"I have found your name: \$USER ... X.D\"") ]} ::
+>>> "any" DOES NOT MATCH / @{[ system("echo \"I have found your name: \$USER ... X.D\"") ]} / 
 
 >>> / @{[ system('echo "I have found your name: $USER ... X.D"') ]} / ::: any 
 >>> STRING() ID()
->>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @\{[ system(\'echo \"I have found your name: $USER ... X.D\"\') ]\} ::
->>> "any" DOES NOT MATCH / @\{[ system(\'echo \"I have found your name: $USER ... X.D\"\') ]\} / 
+>>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @{[ system('echo "I have found your name: $USER ... X.D"') ]} ::
+>>> "any" DOES NOT MATCH / @{[ system('echo "I have found your name: $USER ... X.D"') ]} / 
 
 >>> / @{ \( system("echo \"I have found your name: \$USER ... X.D\"") ) } / ::: any 
 >>> STRING() ID()
->>> IS_OK::FALSE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @\{ \( system(\"echo \\"I have found your name: \$USER ... X.D\\"\") ) \} ::
->>> "any" DOES NOT MATCH / @\{ \( system(\"echo \\"I have found your name: \$USER ... X.D\\"\") ) \} / 
+>>> IS_OK::FALSE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @{ \( system("echo \"I have found your name: \$USER ... X.D\"") ) } ::
+>>> "any" DOES NOT MATCH / @{ \( system("echo \"I have found your name: \$USER ... X.D\"") ) } / 
 
 >>> / @{ \( exec "echo \"I have found your name: \$USER ... X.D\"" ) } / ::: any 
 >>> STRING() ID()
->>> IS_OK::FALSE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @\{ \( exec \"echo \\"I have found your name: \$USER ... X.D\\"\" ) \} ::
->>> "any" DOES NOT MATCH / @\{ \( exec \"echo \\"I have found your name: \$USER ... X.D\\"\" ) \} / 
+>>> IS_OK::FALSE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING:: @{ \( exec "echo \"I have found your name: \$USER ... X.D\"" ) } ::
+>>> "any" DOES NOT MATCH / @{ \( exec "echo \"I have found your name: \$USER ... X.D\"" ) } / 
 
 >>> /(a)+ny/ ::: any 
 >>> STRING() ID()
@@ -135,13 +135,13 @@
 
 >>> 5'cds ::: 5'cds 
 >>> STRING() ID()
->>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::^5\\\'cds$::
->>> "5'cds" DOES NOT MATCH /^5\\\'cds$/ 
+>>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::^5\'cds$::
+>>> "5'cds" MATCHES /^5\'cds$/ 
 
 >>> /^5'.*$/ ::: 5'utr 
 >>> STRING() ID()
->>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::^5\'.*$::
->>> "5'utr" MATCHES /^5\'.*$/ 
+>>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::^5'.*$::
+>>> "5'utr" MATCHES /^5'.*$/ 
 
 >>> /^a.*?y$/ ::: annnnny 
 >>> STRING() ID()
@@ -175,6 +175,6 @@
 
 >>> /y{6}/ ::: ayyyyyy 
 >>> STRING() ID()
->>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::y\{6\}::
->>> "ayyyyyy" DOES NOT MATCH /y\{6\}/ 
+>>> IS_OK::TRUE::  IS_NEG::FALSE::  GET_ID::FALSE::  GET_STRING::y{6}::
+>>> "ayyyyyy" MATCHES /y{6}/ 
 

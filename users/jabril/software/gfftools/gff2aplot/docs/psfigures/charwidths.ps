@@ -1,8 +1,8 @@
 %!PS-Adobe-3.0
 %%Title: CHAR WIDTHS ANALYSIS
 %%Creator: $Author: jabril $ (Hacker Hands)
-%%Version: $Revision: 1.1 $
-%%CreationDate: $Date: 2003-02-27 14:50:50 $
+%%Version: $Revision: 1.2 $
+%%CreationDate: $Date: 2003-03-04 18:55:26 $
 %%For: GFF2APLOT USER's MANUAL
 %%Pages: 1
 %%Orientation: Portrait
@@ -35,7 +35,7 @@
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%    $Id: charwidths.ps,v 1.1 2003-02-27 14:50:50 jabril Exp $
+%    $Id: charwidths.ps,v 1.2 2003-03-04 18:55:26 jabril Exp $
 %
 %    Report BUGS to: jabril@imim.es
 %
@@ -161,7 +161,7 @@ counttomark {
 	curchar show ( : ) show curwdth 10 string cvs show	
 } repeat
 0 -20 m (MEAN : ) show ACwidth counter div 10 string cvs show
-0 625 m (FONT: Helvetica-Bold) show
+0 625 m (FONT: Helvetica-Bold @ 10pt) show
 R
 S
 initvars
@@ -179,7 +179,7 @@ counttomark {
 	curchar show ( : ) show curwdth 10 string cvs show	
 } repeat
 0 -20 m (MEAN : ) show ACwidth counter div 10 string cvs show
-0 625 m (FONT: Courier-Bold) show
+0 625 m (FONT: Courier-Bold @ 10pt) show
 R
 %
 end
