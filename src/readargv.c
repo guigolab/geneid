@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: readargv                                                     *
 *                                                                        *
-*   Get setup options and filenames of user input.                       *
+*   Read set up options and filenames from user input                    *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,62 +24,65 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.9 2001-07-05 07:53:26 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.10 2001-12-18 16:23:47 eblanco Exp $  */
 
 #include "geneid.h"
 
+/* geneid.c external vars */
 extern int 	SFP,SDP,SAP,STP,
-                EFP,EIP,ETP,EXP,ESP,EOP,
-                VRB,
-                FWD,RVS,
-                GENEID, GENAMIC,
-                GFF, X10,
-                EVD, SRP,
-                scanORF, XML, cDNA;
-
+            EFP,EIP,ETP,EXP,ESP,EOP,
+            VRB,
+            FWD,RVS,
+            GENEID, GENAMIC,
+            GFF, X10,
+            EVD, SRP, BEG,
+            scanORF, XML, cDNA;
 extern float EW;
 
+/* required by getopts */
 extern char* optarg;
 extern int optind;
 
-char *USAGE="Incorrect usage:\nNAME\n\tgeneid - a program to predict genes\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz]\n\t\t[-v] [-Z] [-W] [-C] [-D] [-M] [-m]\n\t\t[-P ParameterFile]\n\t\t[-h] [-X] [-G] [-o] \n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight]\n\t\t<locus_seq_in_fasta_format>\n\n";
+char* USAGE="Incorrect usage:\nNAME\n\tgeneid 1.1 - a program to predict genes in genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz] [-D] [-Z]\n\t\t[-G] [-X] [-M] [-m]\n\t\t[-WC] [-o]\n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight] [-P ParameterFile]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\n\n";
 
 void printHelp()
 {
-  printf("Short help for geneid:\n");
-  printf("------------------------\n\n");
-  printf("Setup Options:\n\n");
- 
-  printf("\t-b: Print Start Codons\n");
-  printf("\t-d: Print Donor Sites\n ");
-  printf("\t-a: Print Acceptor Sites\n");
-  printf("\t-e: Print Stop Codons\n");
-  printf("\t-f: Print Initial Exons\n");
-  printf("\t-i: Print Internal Exons\n");
-  printf("\t-t: Print Terminal Exons\n");
-  printf("\t-s: Print Single Genes\n");
-  printf("\t-z: Print ORFs\n");
-  printf("\t-x: Print All exons\n\n");
-
-  printf("\t-D: Print cDNA in predicted genes\n\n");
-  printf("\t-Z: Activate ORFs searching\n\n");
-
-  printf("\t-G: Print output predictions in GFF-format\n");
-  printf("\t-X: Print extended-format Output Gene Predicted \n\n");
-  printf("\t-M: Print XML-format Output for Gene Prediction \n\n");
-  printf("\t-m: Print XML-DTD for XML-format Output \n\n");
-
-  printf("\t-W: Only Forward Prediction(Watson)\n");
-  printf("\t-C: Only Reverse Prediction(Crick)\n");
-  printf("\t-o: Only runs exon prediction(not gene prediction)\n");
-  printf("\t-O: Only runs gene prediction(not exon prediction)\n\n");
-  printf("\t-R: Runs geneid predictions with evidences-file\n\n");
-  printf("\t-S: Runs geneid predictions with similarity regions file\n\n");
-
-  printf("\t-E: Exon Weight parameter\n\n");
-
-  printf("\t-P: Change the name of the Parameter File\n");
-  printf("\t-v: Verbose. Print all messages\n");
+  printf("\tgeneid 1.1: Setup options\n");
+  printf("\t------------------------\n\n");
+  
+  printf("\t-b: Output Start codons\n");
+  printf("\t-d: Output Donor splice sites\n");
+  printf("\t-a: Output Acceptor splice sites\n");
+  printf("\t-e: Output Stop codons\n");
+  
+  printf("\t-f: Output Initial exons\n");
+  printf("\t-i: Output Internal exons\n");
+  printf("\t-t: Output Terminal exons\n");
+  printf("\t-s: Output Single genes\n");
+  printf("\t-x: Output all predicted exons\n");
+  printf("\t-z: Output Open Reading Frames\n\n");
+  
+  printf("\t-D: Output genomic sequence of exons in predicted genes\n\n");
+  
+  printf("\t-G: Use GFF format to print predictions\n");
+  printf("\t-X: Use extended-format to print gene predictions\n");
+  printf("\t-M: Use XML format to print gene predictions\n");
+  printf("\t-m: Show DTD for XML-format output \n\n");
+  
+  printf("\t-W: Only Forward sense prediction (Watson)\n");
+  printf("\t-C: Only Reverse sense prediction (Crick)\n");
+  printf("\t-o: Only running exon prediction (disable gene prediction)\n");
+  printf("\t-O exons_filename: Only running gene prediction (not exon prediction)\n");
+  printf("\t-Z: Activate Open Reading Frames searching\n\n");
+  
+  printf("\t-R exons_filename: Provide annotations to improve predictions\n");
+  printf("\t-S SR_filename: Using information about sequence homology to improve predictions\n\n");
+  
+  printf("\t-E: Adding this value to the exon weight parameter (see parameter file)\n");
+  printf("\t-P parameter_file: Use other than default parameter file (human)\n\n");
+  
+  printf("\t-B: Display memory required to execute geneid given a sequence\n");
+  printf("\t-v: Verbose. Display info messages\n");
   printf("\t-h: Show this help\n");
 }
 
@@ -124,8 +127,8 @@ void printDTD()
 }
 
 void readargv (int argc,char* argv[],
-	       char* ParamFile, char* SequenceFile,
-	       char* ExonsFile, char* SRFile) 
+			   char* ParamFile, char* SequenceFile,
+			   char* ExonsFile, char* SRFile) 
 {
   int c;
   int error=0;
@@ -133,153 +136,145 @@ void readargv (int argc,char* argv[],
   int genamicOpts = 0;
   int printOptions =0;
   char mess[MAXSTRING];
-
+  
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitsxDzZXmMGvE:R:S:WCP:h")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitsxDzZXmMGBvE:R:S:WCP:h")) != -1)
     switch(c)
       {
       case 'Z': scanORF++;
-	geneidOpts++;
-	break;
+		geneidOpts++;
+		break;
       case 'o': GENAMIC--;
-	break;
+		break;
       case 'O': GENEID--;
-	strcpy (ExonsFile,optarg);
-	break;
+		strcpy (ExonsFile,optarg);
+		break;
       case 'R': EVD++;
-	strcpy (ExonsFile,optarg);
-	geneidOpts++;
-	break;
+		strcpy (ExonsFile,optarg);
+		geneidOpts++;
+		break;
       case 'S': SRP++;
-	strcpy (SRFile,optarg);
-	geneidOpts++;
-	break;
+		strcpy (SRFile,optarg);
+		geneidOpts++;
+		break;
       case 'E': EW = atof(optarg);
-	geneidOpts++;
-	break;	
+		geneidOpts++;
+		break;	
       case 'b': SFP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 'd': SDP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 'a': SAP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 'e': STP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 'f': EFP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 'i': EIP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 't': ETP++;
-	printOptions++;
-	geneidOpts++;
-	break;
+		printOptions++;
+		geneidOpts++;
+		break;
       case 'x': EXP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 's': ESP++;
-	geneidOpts++;
-	printOptions++;
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 'z': EOP++;
-	geneidOpts++;
-	printOptions++;
-	break;
-      case 'v': VRB++; 
-	break;
+		geneidOpts++;
+		printOptions++;
+		break;
+      case 'B': BEG++; 
+		break;
+      case 'v': VRB++;
+		break;
       case 'W': RVS--;
-	geneidOpts++;
-	break; 
+		geneidOpts++;
+		break; 
       case 'C': FWD--;
-	geneidOpts++;
-	break;
+		geneidOpts++;
+		break;
       case 'P': strcpy (ParamFile,optarg); 
-	break;
+		break;
       case 'G': GFF++;
-	break;
+		break;
       case 'D': cDNA++;
-	genamicOpts++;
-	break;
+		genamicOpts++;
+		break;
       case 'X': X10++;
-	genamicOpts++;
-	break;
+		genamicOpts++;
+		break;
       case 'M': XML++;
         genamicOpts++;
-	break;
+		break;
       case '?':error++;
-	break; 
+		break; 
       case 'm': printDTD();
-	exit(1);
-	break;
+		exit(1);
+		break;
       case 'h': printHelp();
-	exit(1);
-	break;
+		exit(1);
+		break;
       }
-
-  /* Setup Errors: Incompatible options selected */
+  
+  /* Setup Errors (a): Incompatible options selected */
   if (!GENEID && geneidOpts)
-    printError("Incompatible options(-O)");
+    printError("Incompatible options (with -O)");
   
   if (!GENAMIC && genamicOpts)
-    printError("Incompatible options(-o)");
-
+    printError("Incompatible options (with -o)");
+  
   if (!GENAMIC && !GENEID)
-    printError("Incompatible options(-o|-O)");
+    printError("Incompatible options (-o | -O)");
  
   if (XML && printOptions)
-    printError("Incompatible options(-M| print genic features)"); 
+    printError("Incompatible options (-M | print gene features)"); 
 
   if (XML && (GFF || X10))
-    printError("Incompatible options(-M|-X,-G)");
+    printError("Incompatible options (XML and other output formats)");
 
   if (cDNA && GFF)
-    printError("Incompatible options(-D|-G)");
+    printError("Incompatible options( -D | -G)");
   
   if (error)
     printError(USAGE);
-
-  /* Setup Errors: Wrong number of filenames */
-  /* Get the name of the file *.fasta */
+  
+  /* Setup Errors (b): Wrong number of filenames */
+  /* Read the name of the input fasta file */
   if (optind < argc)
     {
       strcpy(SequenceFile,argv[optind]);
       optind++;
       if (optind < argc)
-	{ 
-	  sprintf(mess,"Too many files. Only one filename needed\n%s",USAGE);
-	  printError(mess);
-	}
+		{ 
+          sprintf(mess,"Only one filename required but more than one presented\n%s",USAGE);
+		  printError(mess);
+		}
     }
   else
     if (GENEID)
       {
-	sprintf(mess,"Where is the fasta file(DNA Sequence)?\n%s",USAGE);
-	printError(mess);
+        sprintf(mess,"One filename is needed (DNA sequence, fasta format)\n%s",USAGE);
+		printError(mess);
       }
   
-  /* Default parameters file if option P not used */
+  /* Default parameter file selected if option -P not used */
   if (!strcmp(ParamFile,""))
     strcpy(ParamFile,PARAMETERFILE);
 }
-
-
-
-
-
-
-
-
-
-
