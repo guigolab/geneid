@@ -22,7 +22,7 @@ ALINK="blue">
 <font face=courier size=5 color=red><b>geneid documentation:</b></font>
 </td>
 <td align=right>
-<font face="arial black" size=3>7. Improving predictions by using sequence homology information</font>
+<font face="arial black" size=3>7. Using sequence homology information</font>
 </td>
 </table>
 
@@ -35,7 +35,7 @@ ALINK="blue">
 <div class="bulk"><font face="arial black" size=2>
 <ol>
 <li> <a href="#description">Description</a>
-<li> <a href="#srs">HSPs and SRs</a>
+<li> <a href="#srs">HSPs</a>
 <li> <a href="#frame">Frame definition in <tt>blast</tt> and <tt>geneid</tt></a>
 <li> <a href="./../index.html">INDEX</a>
 </ol>
@@ -58,12 +58,11 @@ information, either genomic homology (DNA - DNA) or protein homology
 between input sequence and others (well-annotated) can be used to improve
 the degree of accuracy obtained ab initio, increasing the final score on the
 set of predicted exons overlapping the shared regions in such alignment
-(High-score Segment Pairs).
+(High-scoring Segment Pairs).
 <br><p>
 The information from aligments is read from an additional file in
-<tt>gff</tt> format as a list of HSPs or SRs. <tt>geneid</tt>
-is instructed to read this file with the command line option <tt>-S filename</tt>.
-There is no need to sort the list of <tt>gff</tt> records.
+<tt>gff</tt> format as a list of HSPs. <tt>geneid</tt>
+is instructed to read this file with the command line option <tt>-S filename</tt>. HSPs must be provided ordered by first position in the sequence.
 <br><p>
 The frame can be either set in the column 8 of <tt>gff</tt> format or
 skipped by using the wildcar "." when is unknown. In the last case,
@@ -82,7 +81,7 @@ omitted when storing this information.
 
 <table border=0 width=700 cellpadding=10>
 <tr>
-<td bgcolor=orange><font face="arial black" size=3>HSPs and SRs:</font>
+<td bgcolor=orange><font face="arial black" size=3>HSPs:</font>
 <a name ="srs"></td>
 <tr>
 <td>
@@ -95,11 +94,9 @@ many causes such as containing an homologous gene (syntenic gene prediction).
 <br><p>
 <tt>geneid</tt> will increase proportionally the score of predicted exons
 which overlap the HSPs obtained by previous pairwise aligments. To sum up
-the information coming from several aligments, Similarity Regions (SRs) can
-be employed. SRs are the intersection (projection) of HSPs from several
-alignments which use the same original sequence and another one. SRs are
-computed taking always the highest score among the HSPs being in every
-position of the input sequence.
+the information coming from several aligments, a projection of HSPs over the
+sequence is performed, taking always the highest score among the HSPs 
+being in every position of the input sequence.
 <br><p>
 <center>
 <IMG SRC="../images/SR.jpg">
@@ -160,17 +157,17 @@ in the first COMPLETE codon translated from the genomic sequence
 <hr>
 <br><p>
 Obviously, it is necessary a method to convert <tt>geneid</tt> frames (exons)
-into <tt>blast</tt> frames (HSPs/SRs) to use this information properly. The
+into <tt>blast</tt> frames (HSPs) to use this information properly. The
 following formula makes both types of frame definitions compatible
 <br><p>
-  Given an exon and a SR (both in the same strand):
+  Given an exon and a HSP (both in the same strand):
 <center>
 <br><p>
-  blastFrame(SR) = (starting(exon) + geneidFrame(exon)) % 3;<br>
+  blastFrame(HSP) = (starting(exon) + geneidFrame(exon)) % 3;<br>
   (result 0 corresponding to blastFrame 3)
 </center>
 <br><p>
-  remembering blastFrame = [1,2,3] and geneidFrame = [0,1,2].
+  notice: blastFrame = [1,2,3] and geneidFrame = [0,1,2].
 </font>
 </div>
 </td>
