@@ -1,0 +1,14 @@
+#!/bin/bash
+# convert into a makefile
+
+BASE="main";
+TEX="$BASE.tex";
+DVI="$BASE.dvi";
+PS="$BASE.ps";
+PDF="$BASE.pdf";
+
+latex  $TEX;
+bibtex $TEX;
+latex  $TEX;
+latex  $TEX;
+dvips  $DVI -o $PS;

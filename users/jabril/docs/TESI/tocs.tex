@@ -1,0 +1,19 @@
+%
+% $Id: tocs.tex,v 1.1 2002-03-11 11:44:55 jabril Exp $
+%
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: tocs.tex,v 1.1 2002-03-11 11:44:55 jabril Exp $$>$ }
+\end{center}
