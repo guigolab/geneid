@@ -9,14 +9,14 @@
 #
 # modified by jabril - 2000/08/10
 #
-# $Id: sgp2,v 1.9 2000-08-12 23:53:40 jabril Exp $
+# $Id: sgp2,v 1.10 2000-10-03 09:00:40 jabril Exp $
 #
 
 # --------------------------------------------------
 # -. defaults
 # --------------------------------------------------
 NF=0;                # number of input files
-SGP2=$HOME/Research/DBgeneid/RODE_SB/sgp2/bin       # binaries, scripts and params in SGP2
+SGP2=$HOME/research/humus/SGP2-4/sgp2dir/bin       # binaries, scripts and params in SGP2
 TMP=/tmp              # temporal files
 SGPTMP=$TMP/sgp2_$$  # prefix for temporal files
 trap 'rm -f $SGPTMP; exit 1' 0 1 2 3 9 15 
@@ -37,7 +37,9 @@ PARAM=$SGP2/human3iso.param
 
 # parsing tblastx output defaults
 S_CUTOFF=50
-SCF=50 # substract to tblastx scores S_CUTOFF - SCF;
+SCF=12 # substract to tblastx scores S_CUTOFF - SCF;
+## ATTENTION!!! CHANGE THIS IN EXTRACT
+DSC=`expr $S_CUTOFF - $SCF`
 #SHSP=6         # shrink hsp by $SHSP
 SHSP=0
 
@@ -244,16 +246,18 @@ fi
 # fi
 #
   #####################
-  ## Added by jabril ##
+  ## Added by jabril, modified by rguigo ##
 EXTRACT () {
   gawk 'BEGIN{
+    DSC=38;
+    SHSP=0;
     s1=ARGV[1]; ARGV[1]="";
     if (ARGC>3) { s2=ARGV[2]; ARGV[2]=""; scnd=1; }
     else scnd=0;
   }
   { gsub(/\"/,"",$10);
-              print  $1, $2, $3,  $4,  $5, $6,  $7,  $8 > s1;
-    if (scnd) print $10, $2, $3, $11, $12, $6, $16, $18 > s2;
+              print  $1, $2, $3,  $4+SHSP,  $5-SHSP, $6-DSC,  $7,  $8 > s1;
+    if (scnd) print $10, $2, $3, $11+SHSP, $12-SHSP, $6-DSC, $16, $18 > s2;
     }' "$@"
 }
 
@@ -263,16 +267,17 @@ if [ $VRB ]
     MYVRB="-v"
  fi
 
-GetSRsAln $MYVRB -bC $S_CUTOFF -H $SGPTMPG -W $SGPTMPG -- $SGPTMP.tbx
+$SGP2/GetSRsAln $MYVRB -bC $S_CUTOFF -H $SGPTMPG -W $SGPTMPG -- $SGPTMP.tbx
 
 if [ $VRB ] 
  then
    echo "Processing HSP/SR files from BLAST" 1>&2
  fi
 
-EXTRACT $SGPTMP1.hsp-rs $SGPTMPG.srS  # I suposse that $SGPTMP1 is Subject
-EXTRACT $SGPTMP2.hsp-rs $SGPTMPG.srQ  # and $SGPTMP2 is query, else modify this lines.
+EXTRACT $SGPTMP1.hsp-rs $SGPTMPG.srS   # I suposse that $SGPTMP1 is Subject
+EXTRACT $SGPTMP2.hsp-rs $SGPTMPG.srQ   # and $SGPTMP2 is query, else modify this lines.
 EXTRACT $SGPTMP2.hsp $SGPTMP1.hsp $SGPTMPG.hsp
+
 gawk '{ 
   gsub(/\"/,"",$10); 
   print $1":"$10, $2, "hsp:hsp", $4":"$11, $5":"$12, $6, $7":"$16, $8":"$18 ;
