@@ -24,17 +24,17 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.4 2000-09-08 10:07:37 eblanco Exp $  */
+/*  $Id: Output.c,v 1.5 2001-03-07 20:57:22 eblanco Exp $  */
 
 #include "geneid.h"
 
 extern int VRB;
 
 extern int SFP, SDP, SAP, STP,
-           EFP, EIP, ETP, EXP, ESP,
-           FWD, RVS,EVD,
+           EFP, EIP, ETP, EXP, ESP,EOP,
+           FWD, RVS, EVD,
            GENAMIC, GENEID,
-           GFF;
+           GFF, XML;
 
 extern account *m;
         
@@ -77,17 +77,29 @@ void PrintProfile (profile *p, char* signal)
 
 void OutputHeader(char* locus, long l)
 {
-  char* s;
+  char s[MAXSTRING];
   
   if (GFF)
     printf("## gff-version 2\n");
   
-  printf("## source-version: geneid v 1.0 -- geneid@imim.es\n");
-
-  printf("## Sequence %s - Length = %ld bps\n",locus,l);
-
+  /* What time is it? */
   s = ctime(&m->tStart);
-  printf("## date %s",s);
+  
+  if (XML)
+    {
+      printf("<?xml version=\"1.0\" ?>\n");  
+      printf("<!DOCTYPE prediction SYSTEM =\"geneid.dtd\">\n");
+      s[strlen(s)-1] = '\0';  
+      printf("<prediction locus=\"%s\" length=\"%ld\" source=\"%s\" date=\"%s\"",
+	     locus,l,VERSION,s);
+    }   
+  else
+    {
+      s[strlen(s)-1] = '\n';
+      printf("## date %s",s);
+      printf("## source-version: geneid v 1.1 -- geneid@imim.es\n");
+      printf("## Sequence %s - Length = %ld bps\n",locus,l);
+    }
 }
 
 /* Print some predictions results according to the options selected */
@@ -129,6 +141,10 @@ void Output(packSites* allSites, packSites* allSites_r,
       if (ESP)
 	PrintExons(allExons->Singles,allExons->nSingles,
 		   SINGLE, Locus, l1, l2, Sequence, dAA);
+      
+      if (EOP)
+	PrintExons(allExons->ORFs,allExons->nORFs,
+		   ORF, Locus, l1, l2, Sequence, dAA);
     }
 
   /* 2. Printing Reverse */
@@ -166,6 +182,10 @@ void Output(packSites* allSites, packSites* allSites_r,
       if (ESP)
 	PrintExons(allExons_r->Singles,allExons_r->nSingles,
 		   SINGLE, Locus, l1, l2, Sequence, dAA);
+
+      if (EOP)
+	PrintExons(allExons_r->ORFs,allExons_r->nORFs,
+		   ORF, Locus, l1, l2, Sequence, dAA);
     }
   
   /* 3. Print all exons */
@@ -198,26 +218,28 @@ void OutputStats(char* Locus)
       sprintf(mess,"\n\tStats (Sequence %s)",Locus);
       printRes(mess);
       
-      printRes("_______________________________________________________________\n");
+      printRes("__________________________________________________________________________\n");
 
-      sprintf(mess,"%8s\t%8s\t%8s\t%8s",
-	      sFIRST,sINTERNAL,sTERMINAL,sSINGLE);
+      sprintf(mess,"%8s\t%8s\t%8s\t%8s\t%8s",
+	      sFIRST,sINTERNAL,sTERMINAL,sSINGLE,sORF);
       
       printRes(mess);
-      printRes("_______________________________________________________________\n");
+      printRes("__________________________________________________________________________\n");
 
-      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\n",      
+      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\t%8ld\n",      
 	      m->first, 
 	      m->internal, 
 	      m->terminal,
-	      m->single); 
+	      m->single,
+	      m->orf); 
       printRes(mess);
 
-      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\n",      
+      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\t%8ld\n",      
 	      m->first_r, 
 	      m->internal_r, 
 	      m->terminal_r,
-	      m->single_r);      
+	      m->single_r,
+	      m->orf_r);      
       printRes(mess);
 
 
@@ -244,7 +266,7 @@ void OutputTime()
   if (t < caux)
     t++;
 
-  printRes("_______________________________________________________________\n");
+  printRes("__________________________________________________________________________\n");
  
   sprintf(mess,"CPU time: \t%.3f secs",caux);
   printRes(mess);
