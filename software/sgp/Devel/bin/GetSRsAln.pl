@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.5 2000-08-10 22:46:07 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.6 2000-08-10 22:51:31 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln.pl";
@@ -609,14 +609,10 @@ sub chkvars {
 #
 sub get_from_stack {
 	@stack>0 && do {
-		&chkvars("#19($op,".@stack.")\n");
 		do { # Cleaning stack for all elements already closed.
 			($t_score, undef, $t_index) = @{ shift @stack };
-			&chkvars("#--->($op,".@stack.",$t_score,$t_index,".(exists($opened{$t_index})?"TRUE":"FALSE").")\n");
 		} until (exists($opened{$t_index}) || @stack==0);
-		&chkvars("#20($op,".@stack.",$t_score,$t_index,".(exists($opened{$t_index})?"TRUE":"FALSE").")");
 		exists($opened{$t_index}) && do { # must be exists($opened{$t_index}) from above do/until.
-			&chkvars("#21($op,".@stack.")");
 			($last_coord, $last_score, $last_index) = ($current_coord+1, $t_score, $t_index);
 			return;
 		};
@@ -629,21 +625,17 @@ sub check_GT_closed_score {
   CLSC: {
 	  # $current_coord>$last_coord && !opened{$current_index} && $current_score>$last_score
 	  $current_score>$last_score && do { 
-		  &chkvars("#11($op,".@stack.")"); 
 		  &get_sr($last_coord, $current_coord-1, $last_score, $last_index);
 		  ($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
 		  last CLSC;
 	  };
 	  # $current_coord>$last_coord && !opened{$current_index} && $current_score<$last_score
 	  $current_score<$last_score && do {
-		  &chkvars("#12($op,".@stack.")");
 		  last CLSC;
 	  };
 	  # $current_coord>$last_coord && !opened{$current_index} && $current_score==$last_score
-	  &chkvars("#13($op,".@stack.")");
 	  # &get_sr($last_coord, $current_coord, $last_score, $last_index);
 	  exists($opened{$last_index}) && do {
-		  &chkvars("#14($op,".@stack.")");
 		  &get_sr($last_coord, $current_coord, $last_score, $last_index);
 	  };
 	  ($last_coord,$last_index) = ($current_coord+1,$current_index);
@@ -659,16 +651,13 @@ sub check_GT_opened_score {
   OPSC: {
 	  # $current_coord>$last_coord && opened{$current_index} && $current_score==$last_score
 	  $current_score>$last_score && do { 
-		  &chkvars("#15($op,".@stack.")");
 		  &get_sr($last_coord, $current_coord-1, $last_score, $last_index);
 		  ($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
 		  last OPSC;
 	  };
 	  # $current_coord>$last_coord && opened{$current_index} && $current_score<$last_score
 	  $current_score<$last_score && do {
-		  &chkvars("#16($op,".@stack.")");
 		  !exists($opened{$last_index}) && do { 
-			  &chkvars("#17($op,".@stack.")");
 			  ($last_score,$last_index) = ($current_score,$current_index);
 			  &get_sr($last_coord+1, $current_coord, $last_score, $last_index);
 			  $last_coord = $current_coord;
@@ -677,7 +666,6 @@ sub check_GT_opened_score {
 		  last OPSC;
 	  };
 	  # $current_coord==$last_coord && opened{$current_index} && $current_score==$last_score
-	  &chkvars("#18($op,".@stack.")"); # $current_score>$last_score not possible if last_score is max.
 	  &get_sr($last_coord, $current_coord, $last_score, $last_index);
 	  delete($opened{$current_index}); $op--;
 	  ($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
@@ -690,36 +678,28 @@ sub check_coords {
 	# $current_coord>$last_coord
 	$current_coord>$last_coord && do {
 		# !exists($opened{$current_index}) && $current_coord>$last_coord
-		&chkvars("#03($op,".@stack.")");
 		!exists($opened{$current_index}) && do {
-			&chkvars("#04($op,".@stack.")");
 			&check_GT_closed_score;
 			$opened{$current_index} = $n; $op++;
 			return;
 		};
 		# ELSE exists($opened{$current_index}) && $current_coord>$last_coord
-		&chkvars("#05($op,".@stack.")");
 		&check_GT_opened_score;
 		return;
 	}; # $current_coord>$last_coord
 	# ELSE $current_coord==$last_coord
-	&chkvars("#06($op,".@stack.")");
 	($current_score==$last_score && $current_index == $last_index) &&  do { ### replace eq by ==
-		&chkvars("#07($op,".@stack.")");
 		&get_sr($last_coord, $current_coord, $last_score, $last_index);
 	};
 	$current_score>$last_score && do { 
-		&chkvars("#08($op,".@stack.")");
 		($last_score,$last_index) = ($current_score,$current_index);
 	};
 	# !exists($opened{$current_index}) && $current_coord==$last_coord
 	!exists($opened{$current_index}) && do {
-		&chkvars("#09($op,".@stack.")");
 	    $opened{$current_index} = $n; $op++;
 		return;
 	};
 	# ELSE exists($opened{$current_index}) && $current_coord==$last_coord
-	&chkvars("#10($op,".@stack.")");
 	delete($opened{$current_index}); $op--;
 } # END_SUB: check_coords
 #
@@ -735,32 +715,25 @@ sub test_projection {
 		  print STDERR "\n*** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n" if $verbose_flg;
 		  $op = 0;
 		LINES: for $n (0..$lnc) {
-			&prt_progress(++$yc) if ($verbose_flg && !$debug_flg);
+			&prt_progress(++$yc) if $verbose_flg;
 			$rcd = \@{ $lines->[$c][$n] };
 			$current_coord = $rcd->[0];
 			$current_score = $rcd->[2];
 			$current_index = $rcd->[3];
 
-			&chkvars("\n#00($op,".@stack.") Pos: $last_coord/$current_coord Sco:$last_score/$current_score Ind:$last_index/$current_index\n");
-	  
 			# $n>0 && $op>0 :: n_ary element to be checked && HSPs opened
 			($op>0) && do { 
-				&chkvars("#02($op,".@stack.")"); # %opened has 1 or more 
 				&check_coords;
-				&chkvars("\n");
-				# foreach $kk (0..$#stack) { print STDERR &fill_right("#####STACK",$kk+12,">").$stack[$kk][0]." ".$stack[$kk][1]." ".$stack[$kk][2]."\n"; };
 				next LINES;
 			};
 			# ELSE $n==0 || $op==0 :: First element to be checked || No HSPs opened
-			&chkvars("#01($op,".@stack.")"); # $op>0
 			$opened{$current_index} = $n; $op++;
 			@stack = ();
 			push @stack, [ $current_score, $current_coord, $current_index ];
 			($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
 
 		} # for :LINES: $n (0..$lnc) 
-		  &chkvars("\n");
-		  &prt_foeprg($yc) if ($verbose_flg && !$debug_flg);
+		  &prt_foeprg($yc) if $verbose_flg;
 		  next MAIN;
 	  }; # defined(@{ $lines[$c] })
 	  print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $verbose_flg;	
@@ -818,7 +791,3 @@ while ($ARGV = shift @ARGV){
 &get_exec_time;
 
 exit(0);
-
-# gawk '{printf "%10s %10s %4s %s\n", $4,$5,$6,$7$8}' tt3 | enscript -1f Courier9 
-# time ../GetSRsAln.pl -v TBLASTX.ex > tt 2> k 
-
