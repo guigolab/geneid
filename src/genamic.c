@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.2 2000-07-11 08:54:10 eblanco Exp $  */
+/*  $Id: genamic.c,v 1.3 2000-07-12 12:09:20 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -91,7 +91,8 @@ void genamic(exonGFF *E, long nExons, packGenes* pg, gparam* gp)
 	      MaxDist = gp->Md[etype];
 	      MinDist = gp->md[etype];
 	      
-	      if ((pg->Ga[etype][frame]->Donor->Position 
+	      if ((pg->Ga[etype][frame]->Strand !='*') &&
+		  (pg->Ga[etype][frame]->Donor->Position 
 		   + 
 		   pg->Ga[etype][frame]->offset2) 
 		  < 
@@ -114,7 +115,7 @@ void genamic(exonGFF *E, long nExons, packGenes* pg, gparam* gp)
 		      j2--;
 		    }
 		}
-	      
+
 	      /* Loop forward: One scan over each donor-sort array */
 	      while(j < pg->km[etype] && 
 		    ((pg->d[etype][j]->Donor->Position 
