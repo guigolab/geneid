@@ -1,0 +1,174 @@
+\documentclass[11pt]{report}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% # $Id: main.tex,v 1.1.1.1 2002-03-11 10:38:15 jabril Exp $ 
+%
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+\usepackage{dcolumn}
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+\usepackage{verbatim}
+%\usepackage{version}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+%%%%% Colors for gff2ps
+\input ColorDefs.tex
+
+%%%%% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
+\def\shorttit{\textbf{Human + Mouse}}
+\def\tit{\textsc{\shortstack{Human Genome Annotation\\using Mouse Homology}}}
+%
+\def\mtauthor{
+ \htmladdnormallink{\texttt{author@imim.es}}
+                   {MAILTO:author@imim.es?subject=[humus]}
+ } % def mtauthor
+%
+\def\authorslist{
+ The Author/s {\mdseries\small\dotfill \mtauthor } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\authorshort{
+ Abril, JF; Parra, G; Guig\'o, R
+ } % def authorshort
+%
+\def\license{GNU General Public License (GNU-GPL)}
+%
+\def\progdesc{
+We are going to scale up all the processes we have tested on {\lhsap} chromosomes 22 and 21, to the whole genome approach, in which we take advantage of the homology between {\hsap} and {\lmmus} genomes to increase gene prediction accuracy and producing a better genome annotation of the coding regions.
+ } % def progdesc
+%
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[HuMus]}}
+\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es?subject=[HuMus]}}
+\def\mtrguigo{\htmladdnormallink{\textbf{rguigo@imim.es}}{MAILTO:rguigo@imim.es?subject=[HuMus]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[HuMus]}}
+\def\perl{\textsc{Perl}}
+\def\biop{\textsc{BioPerl}}
+\def\ps{\textsc{PostScript}}
+\def\rptm{\textsc{RepeatMasker}}
+\def\bl{\textsc{Blast}}
+\def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
+\def\sgp{\textsc{sgp}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{gff2aplot}}
+\def\apo{\textsl{Apollo}}
+\def\refseq{\textsc{RefSeq}}
+\def\ens{\textit{\texttt{emsembl}}}
+\def\hsap{\textit{H. sapiens}}
+\def\lhsap{\textit{Homo sapiens}}
+\def\mmus{\textit{M. musculus}}
+\def\lmmus{\textit{Mus musculus}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\shorttit\quad\rightmark}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%
+
+\begin{document}
+
+\include title.tex
+
+%
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: main.tex,v 1.1.1.1 2002-03-11 10:38:15 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Introduction}
+
+\subsctn{Project protocol}
+
+%
+\end{document}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

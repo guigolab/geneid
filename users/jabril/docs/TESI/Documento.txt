@@ -1,0 +1,12 @@
+TREBALL DE RECERCA
+* Introducciò
+Desenvolupament de software per analitzar sequències a escala genòmica. Dues eines fonamentals per dur a terme aquesta tasca: predicció computacional de gens i visualització d'anotacions.
+Reanotació del genoma: utilitat del genoma de ratolí per millorar la anotació (a nivell d'estructures gèniques) del genoma humà de la que es disposa.
+* Materials i mètodes
+1. Validació dels resultats obtinguts pel programa de predicció de gens "geneid" sobre un conjunt de seqüències curtes de les que es disposa una anotació acurada de les estructures gèniques que contenen. (SCIMIT)
+2. Ajust dels paràmetres d'execució del programa "geneid" al aplicar-lo a seqüències llargues, que anomenem conjunt d'entrenament, i validació amb un segon conjunt de seqüències de mida similar. (8 ORTHOLOGOUS)
+3. Repetir el procès sobre un cromosoma humà per verificar si el mètode escala bé en seqüències genòmiques de mida cromosòmica. Es va triar el cromosoma 22 al ser un dels més curts, però també per ser el primer cromosoma del que es disposà la seva seqüència ensamblada acabada. Donat que el cromosoma 22 es va completar fa més d'un any, és el fragment del genoma humà del qual es té la anotació més acurada.
+4. Es va repetir el procés amb el cromosoma 21 com a seqüència problema.
+5. Escalar el procés d'anàlisi per a tot el genoma humà. Automatitzar el protocol per minimitzar les possibles errades humanes i poder executar tots els passos de manera fiable cada cop que s'actualitzin les dades a nivell de seqüència (per cada nou ensamblat del genoma humà o del de ratolí).
+* 
+* Appèndix
