@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.43 2002-05-24 18:57:56 jabril Exp $ 
+% # $Id: humus.nw,v 1.44 2002-06-14 23:24:44 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.43 2002-05-24 18:57:56 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.44 2002-06-14 23:24:44 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -454,6 +454,8 @@ notangle -R'JOBS: HsapGPa x MGSCv3 WUTBLASTX'             \
     $WORK/$nwfile.nw | egrep -v '^#<#' - | cpif $LIBSTEP/tblastx.job ;
 notangle -R'JOBS: SGP with HSAPgpa x MGSCv3 homology'     \
     $WORK/$nwfile.nw | egrep -v '^#<#' - | cpif $LIBSTEP/sgp.job ;
+notangle -R'JOBS: SGP with masked HSAPgpa x MGSCv3 homology'     \
+    $WORK/$nwfile.nw | egrep -v '^#<#' - | cpif $LIBSTEP/masked-sgp.job ;
 notangle -R'JOBS: HsapGPa x MmusRIKENcDNA WUTBLASTX' \
     $WORK/$nwfile.nw | egrep -v '^#<#' - | cpif $LIBSTEP/tblastx-riken.job ;
 notangle -R'JOBS: SGP with HSAPgpa x MmusRIKENcDNA homology'     \
@@ -1485,8 +1487,8 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff \
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\sctn{Gene Prediction: {\sgp} (I)} %%%%%%%%%%%%%%%%%%%%%%
-\label{sct:sgpI}
+\sctn{Gene Prediction: {\sgp} (Ia)} %%%%%%%%%%%%%%%%%%%%%%
+\label{sct:sgpIa}
 
 \subsctn{Homology taken from {\mmus} MGSCv3 assembly} %%%%%%%%%%%%%%%%%%%%%%
 
@@ -1755,6 +1757,290 @@ $BIN/runeval.pl $A_ENSEMBL.fwd.gff $ODIR/$SEQ.eval.fwd.gff                 \
 $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}::ENSEMBL::REV::SGP-MGSCv3::geneid_1.1::." \
     >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_ensembl.rev ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+
+\chklst{
+\item ...
+}
+
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Gene Prediction: {\sgp} (Ib)} %%%%%%%%%%%%%%%%%%%%%%
+\label{sct:sgpIb}
+
+\subsctn{Homology taken from {\mmus} MGSCv3 assembly} %%%%%%%%%%%%%%%%%%%%%%
+
+\whtlst{
+\item Take HSP-SRs already computed for the previous SGP run.
+\item Initialize any auxiliarly file (like those [[*.termini]]).
+\item Run {\sgp} with homology, then evaluate results.
+}
+
+<<JOBheader: SGP with masked HSAPgpa x MGSCv3 homology>>=
+####>#########>#######################<########################################<#
+#># JOB_ID    SGP_HSAPgpaMSK_MGSCv3_TBX
+#># JOB_DESC  Running "SGP" on masked H.sapiens UCSC Golden Path 
+#>#        :  assembly sequences, using TBLASTX homology results as
+#>#        :  homology evidences once they have been projected into SRs.
+#># JOB_PATH  sgp
+#># JOB_XID   ${HSAPSTR}msk-${MMUSSTR}
+#># JOB_FILE  ${LIBSTEP}/masked-sgp.job
+#># END_OF_JOB ##################################################################
+@ 
+
+<<JOBS: SGP with masked HSAPgpa x MGSCv3 homology>>=
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Initialization>>
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Auxiliarly files>>
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Running SGP>>
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Processing SGP results>>
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Evaluating SGP results>>
+@ 
+
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Initialization>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_INITIALIZE
+#># STEP_DESC Preparing subdirectories for sgp results.
+#># STEP_PATH .
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR .
+#># STEP_ODIR $JOBDIR
+#># STEP_EDIR $JOBDIR
+#># STEP_CODE   --------------------------------------------------------------#<
+#
+#<# ODIR="$HUMUS/$NCHR/sgp/$XID" ; MkDirs $ODIR ;
+#
+( for c in out gff gtf2 cds prot hsp-sr logs tmp ;
+    do { 
+      MkDirs $ODIR/$c ;
+      } ;
+    done ) || TheEnd BASHKO ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+
+\begin{comment}
+\subsubsctn{Re-scoring SRs}
+
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Re-scoring SRs>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   RE-SCORING_SRs
+#># STEP_DESC Re-scoring SRs to produce HSP-SRs
+#>#         : (Hsapiens GP assembly against MGSC v3 assembly).
+#># STEP_PATH hsp-sr
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# IDIR="$HUMUS/$NCHR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$XID/sr" ;
+#<# ODIR="$HUMUS/$NCHR/sgp/$XID/hsp-sr" ;
+#
+CheckFile R $IDIR/$SEQ.gff ;
+$BIN/getHSPSR.pl $SEQ < $IDIR/$SEQ.gff \
+                      > $ODIR/$SEQ.gff 2> $EDIR/$SEQ.report || TheEnd PERLKO ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+%$
+
+\chklst{
+\item ...
+}
+\end{comment}
+
+\subsubsctn{Preparing auxiliarly files}
+
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Auxiliarly files>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   AUX_FILES
+#># STEP_DESC Preparing auxiliarly files: CHR.termini
+#># STEP_PATH tmp
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR .
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# ODIR="$HUMUS/$NCHR/sgp/$XID/tmp" ;
+#<# LEN="$HUMUS/$NCHR/annotation/$HSAPID/length" ;
+LEN="$CHRDIR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/length" ;
+#
+CheckFile R $LEN ;
+#
+perl -e '
+  use strict;
+  my $chr = shift @ARGV;
+  my %SEQlen;
+  my $seqln = shift @ARGV;
+  open(FRGLEN, "< $seqln");
+  while (<FRGLEN>) {
+      next if /^#/o;
+      next if /^\s*$/o;
+      chomp;
+      my @l = split /\s+/og, $_;
+      $SEQlen{$l[0]} = $l[1];
+  }; # while
+  close(FRGLEN);
+  print STDOUT join("\t", $chr, qw/ force cap  -2  0 . + 0 / )."\n";
+  print STDOUT join("\t", $chr, qw/ force poly /,
+                        ($SEQlen{$chr} - 1) x 2, qw/ . + 0/ )."\n";
+' $SEQ $LEN > $ODIR/$SEQ.termini || TheEnd PERLKO ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+%$
+
+\chklst{
+\item ...
+}
+
+\subsubsctn{Running {\sgp} ({\gnid} with homology)}
+
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Running SGP>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_HSAPgpa_MGSCv3
+#># STEP_DESC Running geneid on Hsapiens sequences from Golden Path assembly
+#>#         : with homology evidences taken from MGSC v3 assembly.
+#># STEP_PATH out
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/logs
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# 
+#
+GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
+PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
+EW=0 ; # add to exon weigth
+#
+#<# ISEQ="$HSAP/chromFaMasked/$CHRNUM/$SEQ.fa.masked" ; 
+#<# IDIR="$HUMUS/$NCHR/sgp/$XID/" ;
+#<# ODIR="$HUMUS/$NCHR/sgp/$XID/out" ;
+#--> we are using original masked fasta sequences from GP !!!
+ISEQ="$HSEQMSK/$SEQ.fa" ;
+#
+#HOMOLOGY="$HUMUS/$NCHR/sgp/$XID/hsp-sr/$SEQ.gff" ;
+HOMOLOGY="$HUMUS/$NCHR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>" ;
+HOMOLOGY="$HOMOLOGY/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>" ;
+HOMOLOGY="$HOMOLOGY/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
+if [ -f "$HOMOLOGY" ] ;
+  then
+    echo "### Using homology data from: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="-S $HOMOLOGY" ;
+  else
+    echo "### Homology file NOT found: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="" ;
+  fi ;
+#
+TERMINI="$IDIR/tmp/$SEQ.termini" ;
+if [ -f "$TERMINI" ] ;
+  then
+    echo "### Using termini file: $TERMINI" 1>&2 ;
+    TERMINI_PAR="-R $TERMINI" ;
+  else
+    TERMINI_PAR="" ;
+  fi ;
+#
+CheckFile R $PARAM $ISEQ ;
+#
+GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $TERMINI_PAR $ISEQ" ;
+echo "$GENEID $GENEID_CMDLN 2> $EDIR/$SEQ.sgp" 1>&2 ;
+( $GENEID $GENEID_CMDLN 2> $EDIR/$SEQ.sgp || TheEnd CKO ) \
+           | grep -v 'evidence' > $ODIR/$SEQ ;
+#
+( cat $EDIR/$SEQ.sgp 1>&2 ) || TheEnd CMDKO ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@ 
+
+\chklst{
+\item ...
+}
+
+\subsubsctn{Processing output for {\sgp} (with homology)}
+
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Processing SGP results>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_OUTPUT
+#># STEP_DESC Processing geneid format from sgp output (with homology).
+#># STEP_PATH gff
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# IDIR="$HUMUS/$NCHR/sgp/$XID" ;
+#
+CheckFile R $IDIR/out/$SEQ ;
+#
+$BIN/geneid_raw2GFF.pl $SEQ $IDIR $IDIR/out/$SEQ ;
+#
+( ls -1 $IDIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
+    while read n;
+      do {
+        cat $IDIR/gff/$SEQ.sg/$n;
+        };
+      done | sort +3n +4n -5 - > $IDIR/gff/$SEQ ) || TheEnd BASHKO ;
+#
+get_geneid_genes $IDIR/gff/$SEQ > $IDIR/$SEQ.gene_list || TheEnd FUNCKO ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+%$
+
+\chklst{
+\item Number of genes, average length, average exon number, exon/intron length ratio...
+\item ...
+}
+
+\subsubsctn{Evaluation of {\sgp} predictions (with homology)}
+
+<<STEPS(SGP masked HSAPgpa x MGSCv3): Evaluating SGP results>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_EVALUATION
+#># STEP_DESC Evaluation of SGP predictions (geneid with homology).
+#># STEP_PATH eval
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $JOBDIR/$<STEP{.}{SGP_OUTPUT}{STEP_PATH}>
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# IDIR="$HUMUS/$NCHR/sgp/$XID" ;
+CheckFile R $IDIR/$SEQ ;
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+               $IDIR/$SEQ > $ODIR/$SEQ.eval.gff || TheEnd GAWKKO ;
+$BIN/gffsplitstrand.pl $ODIR/$SEQ.eval.gff ; # no sequence length record required here
+#
+A_REFSEQ="$CHRDIR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/$<STEP{HSAP_GP_ANNOTATION}{HSAP_GP_REFSEQ}{STEP_PATH}>/$SEQ.eval" ;
+A_ENSEMBL="$CHRDIR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/$<STEP{HSAP_GP_ANNOTATION}{HSAP_GP_ENSEMBL}{STEP_PATH}>/$SEQ.eval" ;
+cat > $ODIR/${SEQ}.summary <<EOT ;
+#
+# Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
+#
+EOT
+#
+CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
+            $A_ENSEMBL.fwd.gff $A_ENSEMBL.rev.gff ;
+#
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $ODIR/$SEQ.eval.fwd.gff                 \
+  "${CHR}::${HSAPID}mskx${MMUSID}::REFSEQ::FWD::SGPmsk-MGSCv3::geneid_1.1::." \
+  >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $ODIR/$SEQ.eval.rev.gff                 \
+  "${CHR}::${HSAPID}mskx${MMUSID}::REFSEQ::REV::SGPmsk-MGSCv3::geneid_1.1::." \
+  >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_refseq.rev ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $ODIR/$SEQ.eval.fwd.gff                 \
+  "${CHR}::${HSAPID}mskx${MMUSID}::ENSEMBL::FWD::SGPmsk-MGSCv3::geneid_1.1::." \
+  >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                 \
+  "${CHR}::${HSAPID}mskx${MMUSID}::ENSEMBL::REV::SGPmsk-MGSCv3::geneid_1.1::." \
+  >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_ensembl.rev ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -6518,6 +6804,7 @@ UN . .
 <<JOBheader: HsapGPa x MGSCv3 WUTBLASTX>>
 <<JOBheader: Running GENEID standard>>
 <<JOBheader: SGP with HSAPgpa x MGSCv3 homology>>
+<<JOBheader: SGP with masked HSAPgpa x MGSCv3 homology>>
 <<JOBheader: HsapGPa x MmusRIKENcDNA WUTBLASTX>>
 <<JOBheader: SGP with HSAPgpa x MmusRIKENcDNA homology>>
 <<JOBheader: SGP with HSAPgpa x MmusMGSCv3+RIKENcDNA homology>>
@@ -9898,6 +10185,7 @@ With '[[Data::Dumper]]' we are able to pretty print complex data structures for 
 use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
+# print STDERR Data::Dumper->Dump([ \%var, \@rav ],[ qw( *var *rav ) ]);
 @ 
 
 
@@ -10009,7 +10297,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.43 2002-05-24 18:57:56 jabril Exp $
+# $Id: humus.nw,v 1.44 2002-06-14 23:24:44 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
