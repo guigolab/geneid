@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.2 2001-03-07 21:05:43 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.3 2001-03-08 15:18:59 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -130,6 +130,7 @@ void readargv (int argc,char* argv[],
   int error=0;
   int geneidOpts = 0;
   int genamicOpts = 0;
+  int printOptions =0;
   char mess[MAXSTRING];
 
   /* Reading setup options */
@@ -157,33 +158,43 @@ void readargv (int argc,char* argv[],
 	break;	
       case 'b': SFP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 'd': SDP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 'a': SAP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 'e': STP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 'f': EFP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 'i': EIP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 't': ETP++;
+	printOptions++;
 	geneidOpts++;
 	break;
       case 'x': EXP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 's': ESP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 'z': EOP++;
 	geneidOpts++;
+	printOptions++;
 	break;
       case 'v': VRB++; 
 	break;
@@ -223,6 +234,9 @@ void readargv (int argc,char* argv[],
   if (!GENAMIC && !GENEID)
     printError("Incompatible options(-o|-O)");
  
+  if (XML && printOptions)
+    printError("Incompatible options(-M| print genic features)"); 
+
   if (XML && (GFF || X10))
     printError("Incompatible options(-M|-X,-G)");
   
