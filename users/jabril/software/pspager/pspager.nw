@@ -1,0 +1,1177 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+ 
+% Colors for gff2ps
+\input ColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\subsubsubsctn}[1]{\paragraph{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+
+% Setting text for footers and headers
+
+% \def\tit{\textsc{[[pspager.pl]] }}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\progname{pspager.pl}
+\def\ps{PostScript}
+\def\mtjabril{
+ \htmladdnormallink{\texttt{jabril@imim.es}}
+                   {MAILTO:jabril@imim.es?subject=[deploy.pl]}
+ } % def mtjabril
+\def\authorslist{
+ Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ } % def authorslist
+\def\license{GNU General Public License (GNU-GPL)}
+\def\description{
+Printing virtual pages on multiple real pages. This perl script inserts a {\ps} plot as Encapsulated {\ps} (EPS) in a {\ps} wrapper. The EPS plot is defined as a form in the wrapper to increase printing speed as it caches the rendered form and reuses it in every output page. The perl script loops through the pages required to print the whole figure while the wrapper sets the proper transformations (translation/rotation/scale) to print the plot in each page.
+ } % def description 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+@ 
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\begin{bfseries}
+\begin{large}
+\newlength{\lttbl}\setlength{\lttbl}{0.25\linewidth}
+\newlength{\rttbl}\setlength{\rttbl}{0.70\linewidth}
+%\fbox{
+%\vskip 2ex
+\begin{tabular}{>{\scshape}r@{\quad}l}
+\rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+Program Name: & {\Huge\progname}                       \\[3ex]
+\multicolumn{2}{c}{\rule[0.5ex]{0.95\linewidth}{2pt}}\\[2ex]
+      Author: & {\Large
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \authorslist
+                 \end{minipage}}                       \\[2ex]
+     License: & {\license}                             \\[2ex]
+ Last Update: & {\today}                               \\[2ex]
+ Description: & {\large\mdseries
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \description
+                 \end{minipage}}                       \\[2ex]
+\\
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+\end{tabular}
+%} % fbox
+\end{large}
+\end{bfseries}
+\end{center}
+
+\vfill
+
+\begin{raggedleft}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+\end{raggedleft}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{pspager.pl}
+
+\subsctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:PAGEdef}
+
+\subsubsctn{ISO standard page sizes: A series}
+
+<<page sizes perl definition>>=
+  a0        => [ ++$formats, 2384, 3370 ],
+  a1        => [ ++$formats, 1684, 2384 ],
+  a2        => [ ++$formats, 1190, 1684 ],
+  a3        => [ ++$formats,  842, 1190 ],
+  a4        => [ ++$formats,  595,  842 ],
+  a5        => [ ++$formats,  420,  595 ],
+  a6        => [ ++$formats,  297,  420 ],
+  a7        => [ ++$formats,  210,  297 ],
+  a8        => [ ++$formats,  148,  210 ],
+  a9        => [ ++$formats,  105,  148 ],
+  a10       => [ ++$formats,   73,  105 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+a0          & 2384 & 3370 &  84.1 & 118.9 &  33.1 &  46.8 \\
+a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
+a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
+a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
+a4          &  595 &  842 &  21.0 &  29.7 &   8.3 &  11.7 \\
+a5          &  420 &  595 &  14.8 &  21.0 &   5.8 &   8.3 \\
+a6          &  297 &  420 &  10.5 &  14.8 &   4.1 &   5.8 \\
+a7          &  210 &  297 &   7.4 &  10.5 &   2.9 &   4.1 \\
+a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
+a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
+a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
+@
+
+\subsubsctn{ISO standard page sizes: B series}
+
+<<page sizes perl definition>>=
+  b0        => [ ++$formats, 2920, 4127 ],
+  b1        => [ ++$formats, 2064, 2920 ],
+  b2        => [ ++$formats, 1460, 2064 ],
+  b3        => [ ++$formats, 1032, 1460 ],
+  b4        => [ ++$formats,  729, 1032 ],
+  b5        => [ ++$formats,  516,  729 ],
+  b6        => [ ++$formats,  363,  516 ],
+  b7        => [ ++$formats,  258,  363 ],
+  b8        => [ ++$formats,  181,  258 ],
+  b9        => [ ++$formats,  127,  181 ],
+  b10       => [ ++$formats,   91,  127 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+b0          & 2920 & 4127 & 103.0 & 145.6 &  40.6 &  57.3 \\
+b1          & 2064 & 2920 &  72.8 & 103.0 &  28.7 &  40.6 \\
+b2          & 1460 & 2064 &  51.5 &  72.8 &  20.3 &  28.7 \\
+b3          & 1032 & 1460 &  36.4 &  51.5 &  14.3 &  20.3 \\
+b4          &  729 & 1032 &  25.7 &  36.4 &  10.1 &  14.3 \\
+b5          &  516 &  729 &  18.2 &  25.7 &   7.2 &  10.1 \\
+b6          &  363 &  516 &  12.8 &  18.2 &   5.0 &   7.2 \\
+b7          &  258 &  363 &   9.1 &  12.8 &   3.6 &   5.0 \\
+b8          &  181 &  258 &   6.4 &   9.1 &   2.5 &   3.6 \\
+b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
+b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
+@
+
+\subsubsctn{US standard page sizes}
+
+<<page sizes perl definition>>=
+  executive => [ ++$formats,  540,  720 ],
+  folio     => [ ++$formats,  612,  936 ],
+  legal     => [ ++$formats,  612, 1008 ],
+  letter    => [ ++$formats,  612,  792 ],
+  quarto    => [ ++$formats,  610,  780 ],
+  statement => [ ++$formats,  396,  612 ],
+ '10x14'    => [ ++$formats,  720, 1008 ],
+  ledger    => [ ++$formats, 1224,  792 ],
+  tabloid   => [ ++$formats,  792, 1224 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+executive   &  540 &  720 &  19.0 &  25.4 &   7.5 &  10.0 \\
+folio       &  612 &  936 &  21.6 &  33.0 &   8.5 &  13.0 \\
+legal       &  612 & 1008 &  21.6 &  35.6 &   8.5 &  14.0 \\
+letter      &  612 &  792 &  21.6 &  27.9 &   8.5 &  11.0 \\
+quarto      &  610 &  780 &  21.5 &  27.5 &   8.5 &  10.8 \\
+statement   &  396 &  612 &  14.0 &  21.6 &   5.5 &   8.5 \\ \hline\hline
+10x14       &  720 & 1008 &  25.4 &  35.6 &  10.0 &  14.0 \\
+ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
+tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
+@
+
+\subsubsctn{Page sizes help}
+
+<<pages help>>=
+The following page sizes are available: from A0 to A10, 
+from B0 to B10, 10x14, executive, folio, ledger, legal, 
+letter, quarto, statement and tabloid.
+@
+
+\subsctn{The program}
+
+<<pspager.pl>>=
+<<PERL shebang>>
+#
+# pspager.pl : printing virtual pages into several physical ones.
+#
+# USAGE: pspager.pl [options] PSfile > PSfile_page 
+#
+# VARIABLES
+<<Global Vars - pspager>>
+#
+# MAIN LOOP
+<<Main Loop - pspager>>
+#
+# FUNCTIONS
+<<Functions - pspager>>
+@ 
+
+<<Main Loop - pspager>>=
+&parse_commandline();
+&parse_inputfile($PSinput);
+&setting_vars();
+&write_PS_output();
+
+exit(0);
+@ 
+
+<<Functions - pspager>>=
+sub parse_commandline() {
+    <<looking for STDIN>>
+
+    $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$T,$_[0]) };
+    GetOptions(
+               <<command-line options>>
+               ) || (&warn('CMD_LINE_ERROR',$T), exit(1));
+    $SIG{__WARN__} = 'DEFAULT';
+
+    <<open LOGFILE>>
+
+    &header('',"RUNNING $PROGRAM",'',"User: $USER","Date: $DATE");
+
+    &header("SETTING DEFAULTS");
+    %DefaultVars = ();
+    &set_default_vars;
+
+    &header("CHECKING COMMAND-LINE OPTIONS");
+    @data_files = ();
+    &set_input_file($cmdln_stdin);
+    @ARGV = (); # ensuring that command-line ARGVs array is empty
+
+    &set_custom_files();
+
+    <<Check command-line options>>
+
+    &footer("COMMAND-LINE CHECKED");
+} # parse_commandline
+@
+
+<<Functions - pspager>>=
+sub parse_inputfile() {
+} # parse_inputfile
+@
+
+<<Functions - pspager>>=
+sub setting_vars() {
+} # setting_vars
+@
+
+<<Functions - pspager>>=
+sub write_PS_output() {
+} # write_PS_output
+@
+
+<<pspager.pl>>=
+my ($ctx, $cty) = (0, 0);
+my ($x, $y);
+# my @page_OUT = (  792,  1224 ); # 11x17 (tabloid) page format
+my @page_OUT = (  612,  792 ); # letter page format
+# my @page_OUT = (  595,  842 ); # a4 page format
+my $margin = 20;
+my ($xdelta, $ydelta) = ($page_OUT[0]-($margin * 2), $page_OUT[1]-($margin * 2));
+
+my @page_IN;
+push @page_IN, shift @ARGV, shift @ARGV;
+
+my $orientation = shift @ARGV;
+my $orflg = $orientation eq "l" ? "true" : "false";
+
+my $file = $ARGV[0];
+
+print STDERR ("#"x40)."\n## RUNNING multipager ON: $file\n".("#"x40)."\n";
+print STDERR "## PAGE IN:  $page_IN[0] - $page_IN[1] (".($orientation eq "l" ? "Landscape" : "Portrait").")\n";
+print STDERR "## PAGE OUT: $page_OUT[0] - $page_OUT[1] (Portrait)\n".("#"x40)."\n";
+
+for ($x=0;$x<$page_IN[0];$x+=$xdelta) {
+        $ctx++; $cty = 0;
+        for ($y=0;$y<$page_IN[1];$y+=$ydelta) {
+                $cty++;
+                print STDERR "## Printing Page X($ctx) Y($cty)\n";
+                open(K,"< $file");
+                open(L,"> $file.MULTI.$ctx\_$cty");
+                while (<K>) {
+                        print L $_;
+                        /^%%BeginProlog/ && &pscode;
+                }
+                close(L);
+                close(K);
+        }
+}
+
+sub pscode {
+        print L << "EOF";
+%%
+/cutmrg $margin def
+/lndscp $orflg def
+/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll moveto lineto lineto lineto closepath } bind def 
+% 0 0 $page_OUT[0] $page_OUT[1] bbox 1 0 0 0 setcmykcolor fill newpath
+/cutmrk {
+  gsave 
+  translate scale
+  0 setgray 0.125 setlinewidth
+  gsave 0 -1 moveto 0 cutmrg neg lineto stroke grestore
+  gsave -1 0 moveto cutmrg neg 0 lineto stroke grestore
+  grestore
+  } bind def 
+/mkmrk {
+   gsave 0 0 translate cutmrg 12 add cutmrg 12 sub moveto /Helvetica-Bold findfont 9 scalefont setfont (Page $ctx/$cty - X($x):Y($y)) show grestore     
+    1  1 cutmrg                  cutmrg                   cutmrk
+   -1 -1 $page_OUT[0] cutmrg sub $page_OUT[1] cutmrg sub  cutmrk
+    1 -1 cutmrg                  $page_OUT[1] cutmrg sub  cutmrk
+   -1  1 $page_OUT[0] cutmrg sub cutmrg                   cutmrk
+   cutmrg cutmrg $page_OUT[0] cutmrg sub $page_OUT[1] cutmrg sub  bbox 
+  gsave 1 setgray fill grestore
+  % gsave stroke grestore
+  clip       
+  newpath    
+  } bind def 
+%%           
+2 dict dup /PageSize [ $page_OUT[0] $page_OUT[1] ] put dup /ImagingBBox null put setpagedevice
+mkmrk lndscp { cutmrg $x add neg cutmrg $y add neg translate } { cutmrg $x sub cutmrg $y sub translate } ifelse
+%%
+EOF
+}
+@ 
+
+<<pspager.pl>>=
+%!PS-Adobe-3.0 
+%%Title: (Using EPS file in Form in VM) 
+%%BoundingBox: 0 0 612 792 
+%%DocumentProcessColors: Black 
+%%Pages: 3 
+%%PageOrder: Special 
+%%EndComments 
+%%BeginProlog 
+%%BeginResource: procset helper_ops 1.0 0 
+%%Title: (Helper Operators) 
+%%Version: 1.0 
+userdict /helper_ops 10 dict dup begin put
+
+/L1? {
+    /languagelevel where {
+       pop languagelevel 2 lt
+    }{
+       true
+    } ifelse
+} bind def
+
+/StartDoc { 
+    userdict begin 
+    /PreForm save def 
+    /showpage {} def
+} bind def
+
+/EndDoc { 
+    PreForm restore 
+    end % userdict
+} bind def
+
+/rfill { % llx lly w h rfill --
+    gsave newpath 
+    4 -2 roll moveto % use x, y coordinates
+    2 copy 0.0 lt exch 0.0 lt xor { % check for one arg only being neg 
+        dup 0.0 exch rlineto % do height first 
+        exch 0.0 rlineto 
+        neg 0.0 exch rlineto
+    }{ 
+        exch dup 0.0 rlineto % do width first 
+        exch 0.0 exch rlineto
+        neg 0.0 rlineto
+    } ifelse
+    closepath
+    fill grestore
+} bind def
+
+/add_var_data { % procedure to add variable data to fill in form
+    /Times-Roman findfont 12 scalefont setfont 
+    L1? { % if Level 1, need to draw white boxes where data will be placed
+        gsave
+        1 setgray
+        87 360 350 20 rfill
+        190 430 350 20 rfill
+        190 535 350 20 rfill
+        190 600 350 20 rfill
+        grestore
+    } if
+    97 370 moveto show
+    200 440 moveto show
+    200 545 moveto show
+    200 610 moveto show
+} bind def
+
+/emitpage { 
+    L1? {
+       add_var_data copypage
+    }{
+       TestForm execform add_var_data showpage
+    } ifelse
+} bind def
+
+/emitlastpage {
+    L1? {
+       add_var_data showpage
+    }{
+       emitpage
+    } ifelse
+} bind def
+
+currentdict readonly pop end
+%%EndResource
+
+%%BeginResource: procset forms_procs 1.0 0 
+%%Title: (Forms Procs)
+%%Version: 1.0
+userdict /forms_procs 10 dict dup begin put
+
+/STRING_SIZE 16000 def
+/ARRAY_SIZE 5 def % UPDATE DEPENDING ON SIZE OF INCLUDED DOCUMENT
+                  % (leave room for initial counter and final empty string)
+
+/buffer STRING_SIZE string def 
+
+/readdata {
+  L1? { % readdata -- 
+      StartDoc
+  }{    % array readdata --
+      1 {                             % put counter on stack
+                                      % stack: array counter
+          2 copy                      % stack: array counter array counter
+          inputFile buffer readstring % read contents of currentfile into buffer
+                                      % stack: array counter array counter string boolean
+          4 1 roll                    % put boolean indicating EOF lower on stack
+          STRING_SIZE string copy     % copy buffer string into new string 
+                                      % stack: array counter boolean array counter newstring
+          put                         % put string into array
+          not {exit} if               % if EOF has been reached, exit loop.
+          1 add                       % increment counter
+        } loop
+      % increment counter and place empty string in next position 
+      1 add 2 copy () put pop
+      currentglobal true setglobal exch
+
+          0 1 array put % create an array for counter in global VM,
+                        % so as not to be affected by save/restore calls in EPS file.
+                        % place as first element of string array. 
+      setglobal  % restore previously set value
+  } ifelse
+} bind def
+currentdict readonly pop end
+%%EndResource
+
+%%EndProlog
+%%BeginSetup
+helper_ops begin
+forms_procs begin
+userdict begin
+
+L1? not {
+   % set MaxFormItem to be equivalent to MaxFormCache
+   1 dict begin
+        /MaxFormItem currentsystemparams /MaxFormCache get def
+   currentdict end
+   setuserparams
+}if
+
+% download form
+%%BeginResource: form TestForm 
+L1? not { % for > L1 case, define a form resource
+  /TestForm
+  10 dict begin
+     /FormType 1 def
+     /EPSArray ARRAY_SIZE array def
+     /AcquisitionProc {
+        EPSArray dup 0 get dup 0 get % array counter_array counter
+        dup 3 1 roll                 % array counter counter_array counter
+        1 add 0 exch put             % increment counter
+        get                          % use old counter as index into array, placing
+                                     % next string on operand stack.
+     } bind def
+     /PaintProc {
+       begin
+         StartDoc
+           EPSArray 0 get 0 1 put
+           /AcquisitionProc load 0 () /SubFileDecode filter
+           cvx exec
+       end % form dict
+     } bind def
+     /BBox [ 29 222 583 759] def % UPDATE FOR INCLUDED DOCUMENT
+     /Matrix [1 0 0 1 0 0] def
+  currentdict end def % TestForm
+  /inputFile currentfile 0 (% EOD_Marker_5882)
+  /SubFileDecode filter def
+  TestForm /EPSArray get 
+} if
+
+readdata
+%%BeginDocument: landscape_form % UPDATE TO NAME OF INCLUDED DOCUMENT
+
+%%EndDocument
+EndDoc % put this call after included EPS file. Followed by 
+% EOD_Marker_5882 % The % EOD_Marker_#### comment, which is needed so that 
+                  % SubFileDecode filter will reach end of data.
+%%EndResource
+%%EndSetup
+
+%%Page: 1 1
+%%BeginPageSetup
+/pgsave save def
+%%EndPageSetup
+(Joe Smith)                                  % parameters of example form
+(1281 Market Street, San Jose, CA 95053)     % parameters of example form
+(408-225-1818)                               % parameters of example form
+(Trim two pine trees in NE corner of lot.)   % parameters of example form
+emitpage                                     % calling example form
+%%PageTrailer
+pgsave restore
+
+%%Trailer
+end % userdict
+end % forms_procs
+end % helper_procs
+%%EOF
+@
+
+<<EPSbbox>>=
+%%
+% $Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $
+%
+% Place this after the "%% EndComments" tag for small snapshots of the figure.
+%
+% 2 dict dup /PageSize [ 595 842 ] put dup /ImagingBBox null put setpagedevice
+% 0.2 0.2 scale
+%                    [ 595 842 ] for a4     (0.2 0.2 scale)
+%                    [ 612 792 ] for letter (0.1925 0.1925 scale)
+%                    [ 297 420 ] for a6     (0.1 0.1 scale)
+%
+%%
+% S 2116 340 2910 400 bbox bgcolor scmyk fill R % 40"x57" - old margins
+S 2116 300 2910 370 bbox bgcolor scmyk fill R % 40"x57"
+%% S 108 108 T 0 0 2808 4032 bbox fgcolor scmyk 1 slw K R % 40"x57"
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% CROP MARKS
+%%
+/cutmrg 1 in def
+/cuturx 3024 def % 40"x57"
+/cutury 4248 def % 40"x57"
+/cutmrk { S fgcolor scmyk 1 slw T F S 0 -1 m 0 cutmrg neg l K newpath 1 0 m cutmrg 0 l K R R } bdf 
+S
+-1  1   cutmrg              cutmrg              cutmrk
+ 1 -1   cuturx cutmrg sub   cutury cutmrg sub   cutmrk
+-1 -1   cutmrg              cutury cutmrg sub   cutmrk
+ 1  1   cuturx cutmrg sub   cutmrg              cutmrk
+R
+%%
+%%% CROP MARKS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% EPS Functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+/EPSDict 10 dict def
+EPSDict begin
+  /N { def } def
+  /B { bind def } N
+  /S { exch } N
+  /X { S N } B
+  /A { dup } B
+  /TR { translate } N
+  /KDict 50 dict N 
+  KDict begin
+    /@SpecialDefaults{
+      /hs 612 N
+      /vs 792 N
+      /ho 0 N
+      /vo 0 N
+      /hsc 1 N
+      /vsc 1 N
+      /ang 0 N
+      /CLIP 0 N
+      /rwiSeen false N
+      /rhiSeen false N
+      /letter {} N
+      /note {} N
+      /a4 {} N
+      /a3 {} N
+      /legal {} N
+      }B
+    /@scaleunit 100 N
+    /@hscale { @scaleunit div /hsc X } B
+    /@vscale { @scaleunit div /vsc X } B
+    /@hsize { /hs X /CLIP 1 N } B
+    /@vsize { /vs X /CLIP 1 N } B
+    /@clip { /CLIP 2 N } B
+    /@hoffset { /ho X } B
+    /@voffset { /vo X } B
+    /@angle { /ang X } B
+    /@rwi { 10 div /rwi X /rwiSeen true N } B
+    /@rhi { 10 div /rhi X /rhiSeen true N } B
+    /@llx { /llx X } B
+    /@lly { /lly X } B
+    /@urx { /urx X } B
+    /@ury { /ury X } B
+    /magscale true def
+    end % KDict
+  /@beginspecial{
+    KDict begin % begin_KDict_@beginspecial
+      /EPSsave save N
+      gsave
+        @SpecialDefaults count /ocount X
+        /dcount countdictstack N
+    }N
+  /@setspecial{
+    CLIP 1 eq {
+      newpath 0 0 moveto hs 0 rlineto 0 vs rlineto hs neg 0 rlineto closepath clip
+      }if
+    ho vo TR hsc vsc scale ang rotate
+    rwiSeen {
+      rwi urx llx sub div
+      rhiSeen { rhi ury lly sub div }{ dup } ifelse
+      scale llx neg lly neg TR
+     }{
+      rhiSeen { rhi ury lly sub div dup scale llx neg lly neg TR }if
+      }ifelse
+    CLIP 2 eq{
+      newpath llx lly moveto urx lly lineto urx ury lineto llx ury lineto closepath clip
+      }if
+    /showpage {} N
+    /erasepage {} N
+    /copypage {} N
+    newpath
+    } N
+  /@endspecial {
+    count ocount sub { pop } repeat
+    countdictstack dcount sub { end } repeat grestore
+    EPSsave restore
+    end % begin_KDict_@beginspecial
+    } N
+end
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% LEGEND MAIN TITLE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+EPSDict begin
+ @beginspecial
+ 80 @hoffset 4400 @voffset  % 40"x57"
+ 270 @angle                          % OK
+ 235 @llx 35 @lly 375 @urx 2820 @ury % OK
+ % 2030 @rwi
+ @clip
+ @setspecial
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%BeginDocument: Legend_Title.ps
+%%
+%%% Insert PS file HERE for MAIN TITLE
+%%
+%%EndDocument: Legend_Title.ps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+ @endspecial % EPSDict
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% TEXT LEGEND
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+EPSDict begin
+ @beginspecial
+ % 120 @hoffset 255 @voffset % 39"x56"
+ 228 @hoffset 300 @voffset   % 40"x57"
+ 270 @angle                          % OK
+ 212 @llx 30 @lly 400 @urx 1407 @ury % OK
+ 2030 @rwi
+ @clip
+ @setspecial
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%BeginDocument: Legend_Text.ps
+%%
+%%% Insert PS file HERE for LEGEND TEXT
+%%
+%%EndDocument: Legend_Text.ps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+ @endspecial % EPSDict
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% KEY FIGURE LEGEND
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+EPSDict begin
+ @beginspecial
+ % 1690 @hoffset 255 @voffset % 39"x56"
+ 1798 @hoffset 300 @voffset   % 40"x57"
+ 270 @angle                         % OK
+ 212 @llx 30 @lly 400 @urx 944 @ury % OK
+ 2030 @rwi
+ @clip
+ @setspecial
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%BeginDocument: Legend_Key.ps
+%%
+%%% Insert PS file HERE for LEGEND KEY
+%%
+%%EndDocument: Legend_Key.ps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+ @endspecial % EPSDict
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% EPS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+
+@ 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage
+\appendix
+
+
+\sctn{Page formats definition}
+
+\input tables/PageSizeTbl.tex
+
+
+\subsctn{Available page sizes}
+
+<<LATEX page format table>>=
+%
+% PageSizeTbl.tex
+%
+% Page Sizes used in "pspager.pl".
+%
+% <<Version Control Id Tag>>
+%
+\label{sec:pagesizes}
+\def\prog{\texttt{pspager.pl}}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vfill
+\begin{table}[!ht]
+\begin{center}
+\setlength{\fboxsep}{2pt}
+%\setlength{\arrayrulewidth}{1pt}
+\fbox{
+ \begin{tabular}{|c||r|r||r|r||r|r|} \hline
+  \raisebox{-0.5ex}[0pt]{PAGE} &
+  \multicolumn{6}{c|}{PAGE SIZE}\\ \cline{2-7} \raisebox{0.25ex}[0pt]{FORMAT} &
+  \multicolumn{2}{c||}{(in points)} &
+  \multicolumn{2}{c||}{(in cms)} &
+  \multicolumn{2}{c|}{(in inches)}\\ \hline\hline
+  <<page sizes latex definition>>
+ \end{tabular}
+} % fbox
+\caption{\label{tbl:PageSztbl}Page Sizes defined in {\prog}.}\hspace{1cm}
+  %\refstepcounter{table}
+  %\addcontentsline{lot}{section}{
+  %   \thetable\hspace{1em}Page Sizes available at {\prog}.}
+\end{center}
+\end{table}
+\vfill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+<<tangling embeeded tables>>=
+#
+echo "Extracting \"$DOCS/PageSizeTbl.tex\"..." ;
+notangle -R"LATEX page format table" $WORK/$nwfile.nw \
+         > $DOCS/tables/PageSizeTbl.tex ;
+#
+@ 
+
+<<PostScript FORMATS>>=
+sub ps_page_formats() {
+  my %tmp = ();
+  print STDOUT "%% Paper Sizes (in points)\n";
+  print STDOUT "/pagedict ".($formats + 2)." dict def pagedict begin %% ".
+               $formats." formats + 2 definitions\n";
+  foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
+  for (my $j = 1; $j <= $formats; $j++) { 
+      my $name = $tmp{$j};
+      my $ref = \$FORMATS{$name};
+      my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
+      print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } def\n";
+      };
+  print STDOUT "end %% pagedict\n";}
+@
+
+<<Global Vars>>=
+my $formats = 0;
+my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
+  <<page sizes perl definition>>
+  );
+@ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+\sctn{Common code blocks}
+
+\subsctn{PERL scripts}
+
+<<PERL shebang>>=
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+<<Version Control Id Tag>>
+#
+use strict;
+@
+
+<<Global Constants - Boolean>>=
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+@ %def $T $F
+
+We also set here the date when the script is running and who is the user running it.
+
+<<Global Vars - User and Date>>=
+my $DATE = localtime;
+my $USER = $ENV{USER};
+@ %def $DATE $USER
+
+
+\subsubsctn{Timing our scripts}
+
+The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+<<Use Modules - Benchmark>>=
+use Benchmark;
+  <<Timer ON>>
+@ 
+
+See '[[man Benchmark]]' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+<<Timer ON>>=
+my @Timer = (new Benchmark);
+@ 
+
+<<Common PERL subs - Benchmark>>=
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+
+\subsubsctn{Printing complex Data Structures}
+
+With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them.
+
+
+<<Use Modules - Dumper>>=
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+@ 
+
+
+\subsubsctn{Common functions}
+
+<<Skip comments and empty records>>=
+next if /^\#/o;
+next if /^\s*$/o;
+chomp;
+@
+
+<<Common PERL subs - Min Max>>=
+#
+sub max() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min
+@
+
+<<Common PERL subs - Text fill>>=
+#
+sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+} # fill_mid
+@
+
+These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
+
+<<Common PERL subs - Counter>>=
+#
+sub counter { # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter
+#
+sub counter_end { # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter_end
+@
+
+<<Global Vars - Counter>>=
+my ($n,$c); # counter and char (for &counter function)
+@ %def $n $c
+
+
+\subsubsctn{Common functions for reporting program processes}
+\label{sec:messagerpt}
+
+Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
+
+<<Common PERL subs - STDERR>>=
+sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
+@
+
+The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
+
+<<Common PERL subs - STDERR>>=
+sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
+@
+
+\subsctn{AWK scripts}
+
+<<GAWK shebang>>=
+#!/usr/bin/gawk -f
+# GNU Awk 3.0.4
+<<Version Control Id Tag>>
+@
+
+\subsctn{BASH scripts}
+
+<<BASH shebang>>=
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+<<Version Control Id Tag>>
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+@
+
+<<BASH script end>>=
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
+@
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: pspager.nw,v 1.1 2001-08-18 19:21:29 jabril Exp $
+@ 
+
+\newpage
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+<<tangling>>=
+# showing line numbering comments in program
+notangle -L -R"root" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/root_file ;
+# program without line numbering comments
+notangle -t4 -R"root" $WORK/$nwfile.nw \
+    > $BIN/root_file ;
+# making them runnable
+chmod a+x $BIN/root_file ;
+@ 
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+<<tangling>>=
+notangle -R"root" $WORK/$nwfile.nw \
+    > $DATA/root_config ;
+@ %$
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+<<weaving>>=
+<<BASH shebang>>
+<<BASH Environment Variables>>
+# weaving and LaTeXing
+<<tangling embeeded tables>>
+noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+<<BASH script end>>
+@ 
+
+<<LaTeXing>>=
+<<BASH shebang>>
+<<BASH Environment Variables>>
+#
+# ONLY LaTeXing
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+<<BASH script end>>
+@ %$
+
+<<tangling>>=
+#
+# Extracting documentation
+notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+#
+@ 
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH Environment Variables>>=
+#
+# Setting Global Variables
+WORK="/home/ug/jabril/development/jabril/software/pspager" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="pspager" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
+@ 
+
+<<tangling>>=
+#
+# BASH Environment Variables
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
+         > $WORK/.bash_VARS ; 
+source $WORK/.bash_VARS ;
+#
+@
+
+\end{document}

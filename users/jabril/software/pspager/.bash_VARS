@@ -1,0 +1,8 @@
+# Global Variables
+WORK="/home/ug/jabril/development/jabril/software/pspager" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="pspager" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
