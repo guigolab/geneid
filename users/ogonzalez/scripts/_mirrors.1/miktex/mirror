@@ -1,0 +1,68 @@
+cd $HOME/no_backup/_mirrors/miktex
+
+data=`date +%Y%m%d-%H%M`
+URL=ftp://ctan.tug.org/tex-archive/systems/win32/miktex
+
+
+wget -m -nH --cut-dirs=3 $URL 2>&1 | tee tmp.txt
+/home/ug/ogonzalez/scripts/mirror miktex -n
+
+velltot=`ls mirror-*.txt`
+vell=${velltot#mirror}
+rm old-*.txt
+mv $velltot old$vell
+/home/ug/ogonzalez/scripts/filtre <tmp.txt >mirror-$data.txt
+resum1=`grep Downloaded mirror-$data.txt`
+
+rm tmp.txt
+echo
+
+if [ ! -s llista.txt ]
+then
+   touch llista.txt
+fi
+ls -l miktex/tm/packages | grep \.cab$ >llista.tmp
+diff llista.txt llista.tmp | grep '>' | awk '{ print $10 }' >llista.new
+nous=`wc -l <llista.new`
+
+cd miktex/tm/packages
+/home/ug/ogonzalez/scripts/_mirrors.1/miktex/revisamd5 | sort -k2 > tmp.txt
+if [ -s tmp.txt ]
+then
+   md5sum -c tmp.txt | tee tmp2.txt
+else
+   touch tmp2.txt
+fi
+
+resum2="Possible error en `grep -cv OK$ tmp2.txt` fitxers"
+num=`wc -l <tmp.txt`
+echo -n $num fitxers revisats
+if [ $num != 0 ]
+then
+   echo :
+   paste - tmp.txt <<EOF
+EOF
+fi
+mv tmp.txt ../../..
+rm tmp2.txt
+
+cd ../../..
+awk '{ print $2 }' <tmp.txt >tmp2.txt
+diff llista.new tmp2.txt | grep '<' | awk '{ print $2 }' >tmp.txt
+num=`wc -l <tmp.txt`
+echo -n \ i $num no revisats
+if [ $num != 0 ]
+then
+   echo :
+   paste - tmp.txt <<EOF
+EOF
+fi
+echo \ d\'un total de $nous
+mv llista.tmp llista.txt
+rm llista.new tmp.txt tmp2.txt
+
+echo
+echo $resum1
+echo $resum2
+echo
+

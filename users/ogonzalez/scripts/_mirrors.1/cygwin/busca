@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# fa un llistat del contingut de cada directori eliminant allo que
+# s'hauria d'esborrar, per veure si hi ha versions noves
+
+cd $HOME/no_backup/_mirrors/cygwin
+ls -1RF ftp.rediris.es | $HOME/scripts/_mirrors.1/cygwin/busca.1 | tee busca.txt
+

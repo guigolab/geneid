@@ -1,0 +1,22 @@
+#!/bin/ksh
+
+# intento trobar quan ocupen els genomes, d'una banda els fitxers
+# comprimits i d'altra els descomprimits (per veure com afectara
+# aixo a l'ocupacio del seu backup)
+
+if [ `hostname` != DARWIN ]
+then
+   echo Fes-ho des de darwin!!
+   exit
+fi
+if [ `whoami` != root ]
+then
+   echo Has de ser root!!
+   exit
+fi
+
+cd /aplicacions/seq/genomes
+ls -lAR | awk 'BEGIN { comp=0 ; nocomp=0 }
+               if ( /\.(Z|gz)$/ ) comp=comp+$5 else nocomp=nocomp+$5
+               END { print comp - nocomp }'
+

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+cd $HOME/no_backup/_mirrors/amstrad
+
+data=`date +%Y%m%d-%H%M`
+
+URL=ftp://andercheran.aiind.upv.es/pub/cpc
+wget -m $URL 2>&1 | tee tmp.ftp
+
+velltot=`echo mirror-*.ftp`
+vell=${velltot#mirror}
+rm old-*.ftp
+mv $velltot old$vell
+../filtre <tmp.ftp >mirror-$data.ftp
+
+URL=http://andercheran.aiind.upv.es/~amstrad
+wget -m $URL 2>&1 | tee tmp.http
+/home/ug/ogonzalez/scripts/mirror andercheran.aiind.upv.es -n
+
+
+velltot=`ls mirror-*.http`
+vell=${velltot#mirror}
+rm old-*.http
+mv $velltot old$vell
+/home/ug/ogonzalez/scripts/filtre <tmp.http >mirror-$data.http
+
+rm tmp.ftp tmp.http
+

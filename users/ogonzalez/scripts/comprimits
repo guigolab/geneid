@@ -1,0 +1,54 @@
+#!/usr/bin/perl
+
+# revisa els fitxers que han baixat (la resta ja van ser revisats en
+# baixar) buscant aquells que, havent baixat al 100%, no funcionin
+#
+# si un fitxer no ha baixat sencer, no dona "saved" al fitxer de logs.
+# per tant, els fitxers incomplets son ignorats i acabaran de baixar en
+# el proper mirror
+
+$total=0;
+$revisats=0;
+$busca=0;
+while ( $lin=<STDIN> ) {
+   if ( $lin =~ /^--\d\d:\d\d:\d\d--/ ) {
+      $lin =~ m#/([^/]+)$#;
+      $nom=$1;
+      chop($nom);
+      $busca=1 if ( $nom !~ /\?/ );
+   } elsif ( $lin =~ /^$/ && $busca == 1 ) {
+      $busca++;
+   } elsif ( $lin =~ /^\s+0K / && $busca == 2 ) {
+      $busca++;
+   } elsif ( $lin =~ /^$/ && $busca == 3 ) {
+      $busca++;
+   } elsif ( $lin =~ /^\d\d:\d\d:\d\d / && $busca == 4 ) {
+      if ( $lin =~ m# - `($nom|.+/$nom)' saved \[[\d/]+\]$# ) {
+         $nom=$1;
+         $revisats++;
+         $error=0;
+         if ( $nom =~ /.zip$/i ) {
+            $error=system("unzip -t $nom >/dev/null 2>&1");
+         } elsif ( $nom =~ /.gz$/ || $nom =~ /.Z$/ ) {
+            $error=system("gzip -t $nom >/dev/null 2>&1");
+         }
+         if ( $error != 0 ) {
+            print "Error a ";
+            $total++;
+         } else {
+            print "        ";
+         }
+         print "$nom\n";
+      }
+      $busca=0;
+   }
+}
+
+if ( $revisats == 0 ) {
+   print "No hi ha res a revisar\n";
+} else {
+   print "$revisats fitxers revisats, $total errors";
+   print " <============== ATENCIO!!!" if ( $total != 0 );
+   print "\n";
+}
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+nombretot=$1
+nombre=${nombretot%.iso}
+
+if [ ! -s /home/cd_images/$nombre.iso ]
+then
+   echo /home/cd_images/$nombre.iso no existe
+   exit
+fi
+
+if [ `hostname` = icarus ]
+then
+   veloc=4
+else
+   veloc=4 # per si de cas es un regrabable
+           # he de fer proves per veure que passa a 8x amb regrabables
+fi
+cdrw="1,0,0"
+
+cdrecord -v speed=$veloc dev=$cdrw /home/cd_images/$nombre.iso

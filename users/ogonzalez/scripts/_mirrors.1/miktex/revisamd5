@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+# revisa els md5sum dels cabs amb els del fitxer total.html
+
+# revisem nomes els que, fent un 'ls -l', no coincideixen amb els d'un
+# 'ls -l' anterior guardat al directori del mirror. si el fitxer no
+# existeix, es revisa tot; si existeix, nomes es revisara allo que canvii,
+# que es allo que ha baixat nou
+
+open(fit,"total.html");
+@lin=<fit>;
+close(fit);
+
+open(fit,"../../../llista.new");
+@nous=<fit>;
+close(fit);
+
+foreach $linia (@lin) {
+   $linia =~ s/<[^>]+>/ /g;
+   $linia =~ s/^\s+//;
+   if ( $linia =~ /([^\.]+\.cab)\s+[0-9]+\s+([a-z0-9]+)/i ) {
+      if ( grep(/$1/,@nous) ) {
+         print "$2  $1\n";
+      }
+   }
+}

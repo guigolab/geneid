@@ -1,0 +1,152 @@
+#!/bin/ksh
+
+# a darwin la comanda du no accepta --exclude, aixi que ho farem a ma
+#
+# fem du de cada directori, de tal manera que ens dona info de cada directori.
+# la darrera linia es el total, i hi haura una linia que contindra el
+# no_backup. restant-les, trobem el que es guarda
+
+numero() {
+   typeset -i num
+   num=1
+   valor=$1
+   str=""
+   str2=0
+   while (( num < 10 ))
+   do
+      davant=${valor%?}
+      digit=${valor#$davant}
+      if [ "$digit" != "" ]
+      then
+         nou=$digit
+      else
+         nou=" "
+         str2=1
+      fi
+      if [ $num = 4 -o $num = 7 ]
+      then
+         if [ $str2 = 0 ]
+         then
+            nou="$nou."
+         else
+            nou="  "
+         fi
+      fi
+      str="$nou$str"
+      valor=${valor%?}
+      let num=num+1
+   done
+   echo -n "$str "
+}
+
+quotes() {
+   touch /tmp/quota1 /tmp/quota2
+   rm /tmp/quota1 /tmp/quota2
+   if [ $# = 0 ]
+   then
+      llista="/home/ug/* /home/um/*"
+   else
+      llista=""
+      siug=0 # poso aixo a 1 si no accepto usuaris ug
+      sium=0 # poso aixo a 1 si no accepto usuaris um
+      for i in $*
+      do
+         if [ $i = ug ]
+         then
+            llista="$llista /home/ug/*"
+            siug=1
+         elif [ $i = um ]
+         then
+            llista="$llista /home/um/*"
+            sium=1
+         fi
+      done
+      while [ $# != 0 ]
+      do
+         if [ -d /home/ug/$1 ]
+         then
+            if [ $siug = 0 ]
+            then
+               llista="$llista /home/ug/$1"
+            fi
+         elif [ -d /home/um/$1 ]
+         then
+            if [ $sium = 0 ]
+            then
+               llista="$llista /home/um/$1"
+            fi
+         elif [ $1 != ug -a $1 != um ]
+         then
+            echo "Usuari $1 inexistent"
+         fi
+         shift
+      done
+   fi
+   typeset -i numact numtot
+   numact=1
+   numtot=`ls -ld $llista | wc -l`
+   for usuari in $llista
+   do
+      nom=${usuari##*/}
+      grup=${usuari#/*/}
+      grup=${grup%/$nom}
+      echo -n Revisant usuari $nom \($numact/$numtot\)...
+      cd $usuari/..
+      du -k $usuari >/tmp/quota
+      total=`tail -1 /tmp/quota | awk '{ print $1 }'`
+      nobackup=`awk '
+         BEGIN { tot=0 }
+         /\/no_backup$/ { tot=tot+$1 }
+         END { print tot }' /tmp/quota`
+      let resta=total-nobackup
+      if [ `grep -c no_backup$ /tmp/quota` = 0 ]
+      then
+         numero $resta >>/tmp/quota1
+         printf '          - ' >>/tmp/quota1
+         numero $total >>/tmp/quota1
+         echo "$grup   $nom" >>/tmp/quota1
+         echo $resta - $total >>/tmp/quota2
+      else
+         numero $resta >>/tmp/quota1
+         numero $nobackup >>/tmp/quota1
+         numero $total >>/tmp/quota1
+         echo "$grup   $nom" >>/tmp/quota1
+         echo $resta $nobackup $total >>/tmp/quota2
+      fi
+      echo " $total total, $resta backup"
+      let numact=numact+1
+   done
+}
+
+typeset -i total nobackup resta
+
+if [ $# = 0 ]
+then
+   quotes
+else
+   quotes $*
+fi
+
+echo '     backup   no_backup       total grup usuari' >/tmp/quota
+echo '----------- ----------- ----------- ---- ---------' >>/tmp/quota
+sort -r /tmp/quota1 >>/tmp/quota
+echo '----------- ----------- ----------- ---- ---------' >>/tmp/quota
+
+restat=`awk 'BEGIN { tot=0 } { tot=tot+$1 } END { print tot }' </tmp/quota2`
+nobackupt=`awk 'BEGIN { tot=0 } { tot=tot+$2 } END { print tot }' </tmp/quota2`
+totalt=`awk 'BEGIN { tot=0 } { tot=tot+$3 } END { print tot }' </tmp/quota2`
+numero $restat >>/tmp/quota
+numero $nobackupt >>/tmp/quota
+numero $totalt >>/tmp/quota
+echo TOTAL >>/tmp/quota
+
+let restat=restat/1048576
+let nobackupt=nobackupt/1048576
+let totalt=totalt/1048576
+printf "%9dGb %9dGb %9dGb aprox\n" $restat $nobackupt $totalt >>/tmp/quota
+
+chown 2014:20 /tmp/quota
+ara=`date +%Y%m%d-%H%M`
+mv /tmp/quota /home/ug/ogonzalez/scripts/_LOGS/quota-$ara.txt
+rm /tmp/quota?
+

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# puc baixar el correu des d'hpserv al compte local fent:
+#
+#   fetchmail -k -u ogonzalez -m "/usr/bin/procmail -d %T" hpserv.imim.es
+#
+# amb aixo deixo copia a hpserv (-k). s'ha de fer el '-m "..."' perque no
+# accepta enviar-los via SMTP
+#
+# fetchmail nomes es als linux
+
+typeset -i missatges
+
+usuari=`whoami`
+echo -n Password:
+password=`./pop3.1`
+echo
+
+read missatges grandaria <<EOF
+`( echo user \$usuari
+   echo pass \$password
+   echo quit
+   sleep 1 ) | telnet klingon.uab.es 110 2>/dev/null \
+   | grep 'visible messages' | awk '{ print $4" "$10 }'`
+EOF
+
+echo Hi ha $missatges missatges amb un total de $grandaria bytes
+exit
+
+while (( $missatges > 0 ))
+do
+   ( echo user $usuari
+     echo pass $password
+     echo top $missatges 0
+     echo quit
+     sleep 1 ) | telnet klingon.uab.es 110 2>/dev/null | grep "^Status: " 
+   let missatges=missatges-1
+done

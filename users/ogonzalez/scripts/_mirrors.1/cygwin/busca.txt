@@ -1,0 +1,24 @@
+               XFree86-nest:
+                  XFree86-nest-4.2.0-1.tar.bz2
+                  setup.hint~
+            cygwin:
+               cygwin-1.3.18-1-src.tar.bz2
+               cygwin-1.3.18-1.tar.bz2
+               cygwin-archive.tar.bz2
+            gperf:
+               gperf-2.7.2-1-src.tar.bz2
+               gperf-2.7.2-1.tar.bz2
+               gperf-src.tar.gz
+               gperf.tar.gz
+            m4:
+               m4-1.4-1-src.tar.bz2
+               m4-1.4-1.tar.bz2
+               m4-src.tar.gz
+               m4.tar.gz
+            tetex:
+               setup.hint.ORIG
+               tetex-20020911-1-src.tar.bz2
+               tetex-20020911-1.tar.bz2
+
+---
+

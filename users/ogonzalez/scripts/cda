@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# 2 possibilitats: especifiquem wavs o directoris. En el segon cas
+# agafo els wavs continguts en el directori NO RECURSIVAMENT!!
+#
+# COMPTE: especificant directori els fitxers s'ordenen alfabeticament!!
+
+llista=""
+while [ $# != 0 ]
+do
+   if [ -d $1 ]
+   then
+      if [ `ls -1 $1 | grep -c .wav$` != 0 ]
+      then
+         llista=$llista" "$1/*.wav
+      else
+         echo Ignorant $1: no conte fitxers .wav
+      fi
+   else
+      nomtot=$1
+      nom=${nomtot%.wav}
+      if [ -f $nom.wav ]
+      then
+         llista=$llista" "$nom.wav
+      else
+         echo Ignorant $1: fitxer incorrecte
+      fi
+   fi
+   shift
+done
+
+if [ "$llista" = "" ]
+then
+   echo No hi ha res a gravar...
+   exit
+fi
+
+if [ `hostname` = icarus ]
+then
+   veloc=4
+else
+   veloc=4 # per si de cas es un regrabable
+           # he de fer proves per veure que passa a 8x amb regrabables
+fi
+cdrw="1,0,0"
+
+cdrecord -v speed=$veloc dev=$cdrw -dao $llista

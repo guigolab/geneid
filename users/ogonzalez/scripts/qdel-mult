@@ -1,0 +1,12 @@
+#!/bin/bash
+
+typeset -i inici final
+
+inici=$1
+final=$2
+
+while (( inici != final+1 ))
+do
+   qdel $inici.aleph
+   let inici=inici+1
+done

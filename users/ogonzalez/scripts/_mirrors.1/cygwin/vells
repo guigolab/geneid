@@ -1,0 +1,80 @@
+#!/usr/bin/perl
+
+# La idea es esborrar allo que ja se que es antic i que ocupa massa
+#
+# Si executo amb -d, esborra fisicament; si no, nomes esborra del txt
+# (per no baixar repetidament les coses)
+#
+# Quan torni a fer 'wget -m ftp://ftp.rediris.es/mirror/cygwin/release'
+# tornara a baixar tot, pero es prou rapid com per no haver de preocupar-me
+#
+# Creo un fitxer de base de dades que conte el directori a revisar i allo
+# que no vull guardar: vells.lst
+#
+# Esborro de mirror.txt allo que correspon a fitxers que s'esborren, ja que
+# no m'importa que s'hagin tornat a baixar malament o jo que se
+
+$esborrar=$ARGV[0];
+
+# Llegeixo el fitxer de sortida filtrat de l'wget, que es a STDIN
+@mirror=<STDIN>;
+
+$pre="ftp.rediris.es/mirror/cygwin/release";
+
+open(fit,"vells.lst");
+@dades=<fit>;
+close(fit);
+
+$i=0;
+while ( $i <=$#dades ) {
+   chop($dades[$i]);
+   if ( $dades[$i] !~ /^--/ ) { # representa un direc
+      # abans de comencar a treballar amb el nou directori, esborrem
+      # l'anterior si va quedar buit
+      opendir(direc,"$pre/$path");
+      @direcs=readdir(direc); # recorda que . i .. estan inclosos
+      closedir(direc);
+      if ( $#direcs == 1 || ( $#direcs == 2 && -f "$pre/$path/.listing") ) {
+         print "esborrant directori buit $path...";
+         if ( -f "$pre/$path/.listing") {
+            unlink("$pre/$path/.listing");
+         }
+         if ( rmdir("$pre/$path") != 0 ) {
+            print "OK\n";
+         } else {
+            print "error\n";
+         }
+      }
+      $path=$dades[$i];
+   } else { # representa un fitxer que s'ha d'esborrar
+      $dades[$i] =~ s/^--//;
+      if ( -f "$pre/$path/$dades[$i]" ) {
+         print "\"$path/$dades[$i]\" ";
+         # aqui netejo @mirror
+         for ( $k=0;$k<=$#mirror;$k++ ) {
+            if ( $mirror[$k] =~ /--\d\d:\d\d:\d\d--.+$dades[$i]$/ ) {
+               for ( $j=$k+2;$j<=$#mirror;$j++) {
+                  if ( $mirror[$j] =~ / saved \[\d+\]$/ ) {
+                     last;
+                  }
+               }
+               splice(@mirror,$k,$j-$k+2);
+               last;
+            }
+         }
+         if ( $esborrar eq "-d" ) {
+            if ( unlink("$pre/$path/$dades[$i]") != 0 ) {
+               print "OK\n";
+            } else {
+               print "error\n";
+            }
+         } else {
+            print "esborrat de .txt\n";
+         }
+      }
+   }
+   $i++;
+}
+
+print "-"x50 . "\n";
+print @mirror;

@@ -1,0 +1,25 @@
+cd $HOME/no_backup/_mirrors/tetex
+
+data=`date +%Y%m%d-%H%M`
+URL=ftp://sunsite.informatik.rwth-aachen.de/pub/comp/tex/teTeX
+VERS=2.0
+
+wget -m $URL/$VERS/distrib 2>&1 | tee tmp.txt
+/home/ug/ogonzalez/scripts/mirror sunsite.informatik.rwth-aachen.de -n
+
+velltot=`echo mirror-*.txt`
+vell=${velltot#mirror}
+rm old-*.txt
+mv $velltot old$vell
+/home/ug/ogonzalez/scripts/filtre <tmp.txt >mirror-$data.txt
+
+rm tmp.txt
+
+URL=sunsite.informatik.rwth-aachen.de/pub/comp/tex/teTeX/current
+wget -m ftp://$URL >/dev/null 2>&1
+versio=`ls -l $URL | awk '{ print $11 }'`
+if [ $versio != $VERS ]
+then
+   echo LA VERSIO PODRIA HAVER CANVIAT!!!
+fi
+

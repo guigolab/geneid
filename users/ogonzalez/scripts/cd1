@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# COMPTE: els directoris especificats a mkisofs es converteixen en / del
+# CD creat, NO en directoris de primer nivell. El mes sensat es donar un
+# sol directori que contingui tot el que volem gravar. Per aixo per ara
+# nomes accepto un parametre
+
+# A icarus es grava a 4x, la gravadora es "1,1,0" i la lectora es "1,0,0"
+
+# A basileia es grava a 8x, la gravadora es "1,0,0" i la lectora es "1,1,0"
+
+# les imatges es creen a /home/cd_images
+
+# Crea la imatge amb el nom del directori que especifiquem. Aquest nom es
+# fara servir tambe con a etiqueta de volum. Si el nom ja existeix, no pot
+# continuar
+
+error=0
+if [ $# != 1 -o ! -s $1 ]
+then
+   echo Parametros incorrectos: el formato es \"cd1 <directorio>\"
+   exit
+fi
+
+imatge=/home/cd_images/$1.iso
+txt=/home/cd_images/$1.txt
+
+if [ -s $imatge ]
+then
+   echo Ja existe una imagen en /home/cd_images llamada $1.iso
+   exit
+fi
+
+# creem una etiqueta que nomes contingui "A-Z0-9_" i un maxim d'onze chars
+etiq=`echo $1 | tr a-z A-Z | tr -cd A-Z0-9_ | awk '{ print substr($0,0,11) }'`
+
+echo Creando $1.iso en /home/cd_images...
+
+mkisofs -V"$etiq" -R -J -L -l -o $imatge $1 >$txt 2>&1 &
+
+while [ `ps | grep -c mkisofs` != 1 ]
+do
+   sleep 1 # esperare fins que s'arrenqui el mkisofs
+done
+
+while [ `ps | grep -c mkisofs` = 1 ]
+do
+   while [ -s $txt -a `tail -1 $txt | grep -c 'estimate finish'` = 1 ]
+   do
+      echo -n `tail -1 $txt`
+   done
+done
+
+echo
+rm $txt

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# no esborro els fitxers antics pero els elimino del fitxer txt per poder
+# controlar que hi ha de nou
+#
+# quan vulgui endur-me aixo, he d'executar ./mirror -d per dir-li
+# que esborri els fitxers antics
+
+if [ $# != 0 ]
+then
+   if [ $1 != -d ]
+   then
+      echo ERROR!
+      exit
+   fi
+fi
+
+SCRIPT=/home/ug/ogonzalez/scripts
+
+cd $HOME/no_backup/_mirrors/cygwin
+
+data=`date +%Y%m%d-%H%M`
+URL=ftp://ftp.rediris.es/mirror/cygwin/release
+
+wget -m $URL 2>&1 | tee tmp.txt
+$SCRIPT/mirror ftp.rediris.es -n
+
+velltot=`echo mirror-*.txt`
+vell=${velltot#mirror}
+rm old-*.txt
+mv $velltot old$vell
+$SCRIPT/filtre <tmp.txt | $SCRIPT/vells $1 > mirror-$data.txt
+
+rm tmp.txt
