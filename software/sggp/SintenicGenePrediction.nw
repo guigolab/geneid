@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: SintenicGenePrediction.nw,v 1.1.1.1 2001-06-02 11:24:16 jabril Exp $
+% $Id: SintenicGenePrediction.nw,v 1.2 2001-06-05 13:25:16 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -152,7 +152,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: SintenicGenePrediction.nw,v 1.1.1.1 2001-06-02 11:24:16 jabril Exp $$>$ }
+{\small$<$ \verb$Id: SintenicGenePrediction.nw,v 1.2 2001-06-05 13:25:16 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -252,7 +252,7 @@ A short description, followed by authors list and the GNU-GPL is described here.
 #
 #     Sinteny based Gene Prediction tool.
 #
-#     Copyright (C) 2000 - Josep Francesc ABRIL FERRANDO
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO
 #                                   Genis PARRA FARRE
 #                                 Roderic GUIGO SERRA
 <<Copyleft>>
@@ -310,7 +310,7 @@ exit(0);
 
 \newpage
 
-\sctn{POD Pages}
+\subsctn{POD Pages}
 
 The documentation for [[perl]] programs is written in a simple markup language called POD (Plain Old Documentation). Translators exist for [[pod2man]], [[pod2text]], [[pod2html]], [[pod2latex]], and [[pod2fm]]. 
 The idea is to have the online documentation included with the source. That is possible with [[__DATA__]] tag, which defines a chunk of data within the same file.
@@ -447,7 +447,7 @@ The programs are distributed under GNU General Public License as described below
 This document is under Concurrent Version System (CVS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: SintenicGenePrediction.nw,v 1.1.1.1 2001-06-02 11:24:16 jabril Exp $
+# $Id: SintenicGenePrediction.nw,v 1.2 2001-06-05 13:25:16 jabril Exp $
 @ 
 
 The code tangled from this document will keep same tag until we check in the new versions.
@@ -634,9 +634,17 @@ Remember when tangling that '-L' option allows you to include program line-numbe
 # showing line numbering comments in program
 notangle -L -R"SGP TOOL" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' > $BIN/sgp.pl ;
+notangle -L -R"SGP::filters" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $LIB/sgpfilters/SGPfilters.pm ;
+notangle -L -R"SGP::filters - Makefile.PL" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $LIB/sgpfilters/Makefile.PL ;
 # program without line numbering comments
 notangle -t4 -R"SGP TOOL" $WORK/$nwfile.nw \
     > $BIN/sgp.pl ;
+notangle -t4 -R"SGP::filters" $WORK/$nwfile.nw \
+    > $LIB/sgpfilters/SGPfilters.pm ;
+notangle -t4 -R"SGP::filters - Makefile.pl" $WORK/$nwfile.nw \
+    > $LIB/sgpfilters/Makefile.PL ;
 # making them runnable
 chmod a+x $BIN/sgp.pl ;
 @ 
@@ -687,6 +695,7 @@ popd ;
 # Global Variables
 export WORK="$HOME/development/sggp" ;
 export BIN="$WORK/bin" ;
+export LIB="$WORK/lib" ;
 export DOCS="$WORK/docs" ;
 export DATA="$WORK/data" ;
 export nwfile="SintenicGenePrediction" ;
@@ -696,6 +705,7 @@ export nwfile="SintenicGenePrediction" ;
 # Global Variables
 setenv WORK "$HOME/development/sggp" ;
 setenv BIN  "$WORK/bin" ;
+setenv LIB  "$WORK/lib" ;
 setenv DOCS "$WORK/docs" ;
 setenv DATA "$WORK/data" ;
 setenv nwfile "SintenicGenePrediction" ;
