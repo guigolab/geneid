@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.11 1999-06-07 20:03:03 jabril Exp $	
+#         $Id: gff2ps,v 1.12 1999-06-08 12:24:28 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -145,7 +145,7 @@ ShowHelpLine () {
 MAINPSCPR () {
 cat <<'@@@EndCopyRight@@@'
 % 
-% $Id: gff2ps,v 1.11 1999-06-07 20:03:03 jabril Exp $
+% $Id: gff2ps,v 1.12 1999-06-08 12:24:28 jabril Exp $
 % 
 %          Converting GFF files to PostScript plots.
 %
@@ -296,10 +296,12 @@ flglscape {
 %
 %  Newer vars
 %
-/spcrsize 50 def
-/tracksize 100 def
+/spcrsize 5 def
+/tracksize 10 def
 /vectoffset 10 def
 %
+/Fbline true def % flag for showing baseline for each method.
+/FgpLbl true def % flag for showing baseline for each group.
 /down YSBlck def
 /up   YSBlck def
 /MaxNuclPage 1000 def
@@ -347,6 +349,7 @@ cat <<'@@@MAINProcs@@@'
 %%BeginProcSet: text_functions 1.0 0
 /sfont { findfont exch scalefont setfont } bdf
 /stringheight  { gsave newpath 0 0 moveto (0) false charpath flattenpath pathbbox exch pop exch sub exch pop 0.95 mul grestore } bdf
+/ct { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight 2 div moveto show grestore } bdf
 %%EndProcSet:   text_functions 1.0 0
 %
 %%BeginProcSet: painting_functions 1.0 0
@@ -398,7 +401,7 @@ end % tmdct
 %%EndProcSet:   tickmarks 1.4 0
 %
 %%BeginProcSet: objects 1.0 0
-/shpdct 36 dict def shpdct begin
+/shpdct 38 dict def shpdct begin
  /Line-Yscale 5 def
  /mtrx matrix def
  /cpt { moveto { lineto } repeat closepath } bdf
@@ -424,7 +427,9 @@ end % tmdct
 % /setcolmod { colordict begin aload pop dup 1 eq { pop scolor fill } { dup 2 eq { pop lnfill } { dup 3 eq { pop frmfill } { dup 4 eq { pop rnbfill } { 0 eq { BGcolor scmyk fill } if } ifelse } ifelse } ifelse } ifelse end } bdf
  /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf strnd (-) eq { exch } if 2 copy exch sub dup /sqdif exch Xscm def /sqdsc exch Xscale div def /seqend exch Xscm def /seqori exch Xscm def } bdf
  /frshared { /svmtrix mtrx currentmatrix def Xscale sqdsc div Line-Yscale scale exec svmtrix setmatrix gsave BGcolor scmyk 1 setlinewidth stroke grestore clip setcolmod } bdf
- /f { gsave getvar strnd (-) eq { seqend 0 translate -1 -1 scale } { seqori 0 translate 1 1 scale } ifelse frshared grestore } bdf
+ /f { gsave getvar strnd (-) eq { seqori 0 translate -1 -1 scale } { seqori 0 translate 1 1 scale } ifelse frshared grestore } bdf
+ /gpuline { gsave grori 0.5 moveto grend 0.5 lineto /red scolor stroke grestore } bdf
+ /shgplbl { FgpLbl { gsave gpuline grori 0.5 translate grlbl FGcolor 8 /Helvetica grdif 2 div ct grestore } if } bdf 
  /g_end { exit end } bdf 
 end % shpdct
 %%EndProcSet:   objects 1.0 0
@@ -445,10 +450,12 @@ end % vctdct
 /tm { tmdct begin /ShowGrid xdf exec end } bdf
 %
 % /objects
-/source { gsave 3 dict begin /nxtspacer exch spcrsize mul def /Yscl exch tracksize mul def /srclbl xdf /Y Y Yscl add def XOriPlot Y translate 1 -1 scale } bdf
+/bline { Fbline { gsave FGcolor scmyk 0 0 moveto XSPlot 0 lineto stroke grestore } if } bdf
+/shsrclbl { FLftLbl { gsave srclbl FGcolor 10 /Courier XLftLbl 2 div neg ct grestore } if } bdf 
+/source { gsave 3 dict begin /nxtspacer exch spcrsize mul def /Yscl exch tracksize mul def /srclbl xdf /Y Y Yscl add def XOriPlot Y translate 1 -1 scale bline shsrclbl } bdf
 /endsource { end grestore /Y Y nxtspacer add def } bdf
 %
-/gp { gsave shpdct begin /strnd xdf strnd (-) eq { exch } if /grend exch Xscm def /grori exch Xscm def /grlbl xdf colordict begin { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
+/gp { gsave shpdct begin /strnd xdf strnd (-) eq { exch } if 2 copy exch sub /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl colordict begin { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
 %
 /ov { gsave vctdct begin exch Xscm exch translate { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
 %
