@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $
+% $Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -428,6 +428,9 @@ We force that all the variables must be declared before using them and restrict 
 
 <<Use Modules>>=
 use strict;
+use vars qw/
+     <<Pre-Declared Vars>>        
+    /;
 #
 <<Trapping signals>>
 #
@@ -435,24 +438,33 @@ use strict;
 
 % Typeglobs set to a referenced scalar forces a constant value for all execution
 
+<<Pre-Declared Vars>>=
+$T $F $n $c
+@
+
+@ 
 <<Global Constants>>=
-my (*T,*F) = (\1,\0); # for 'T'rue and 'F'alse
+($T,$F) = (\1,\0); # for 'T'rue and 'F'alse
 @
 
 Those are the main variables containing customization parameters and input data from GFF records. We split customization variables on three input classes: [[%DefaultVars]] to set default values and their type (what makes easy to check if a variable exists or not and if its given value has the expected format), [[%CmdLineVars]] for those parameters passed on command-line and [[%CustomVars]] which collects vaiables customization from external parameter files. Two temporary variables ([[%Defaults]] to initialize element variables and [[%Vars]] to provide the customization from command-line and parameter files to those element variables) allow us to merge all the information from these three variables and transfer to each GFF element in the GFF data variables ([[%GFF_DATA]] for annotations and [[%ALN_DATA]] for alignments). \label{sec:APLOT-DS}\label{sec:GFF-DS}
 
-<<Global Vars>>=
-my (%DefaultVars,%CmdLineVars,%CustomVars,%Defaults,%Vars,%GFF_DATA,%ALN_DATA);
+<<Pre-Declared Vars>>=
+%DefaultVars %CmdLineVars %CustomVars %Defaults %Vars
+%GFF_DATA %ALN_DATA
 @ 
 
 Some info about the program itself.
 
+<<Pre-Declared Vars>>=
+$PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
+@ 
 <<Global Constants>>=
-my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
+($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.14 $', #'
-     '$Date: 2001-11-06 20:13:29 $', #'
-     '$Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $', #'
+     '$Revision: 1.15 $', #'
+     '$Date: 2001-11-07 18:11:18 $', #'
+     '$Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -619,10 +631,10 @@ foreach my $sct (keys %DefaultVars) {
 \subsubsctn{Default customization files}
 
 <<Global Vars>>=
-my $Custom_path = $ENV{GFF2APLOT_CUSTOMPATH};
-my $Custom_file = $ENV{GFF2APLOT_CUSTOMFILE};
-defined($Custom_path) || ($Custom_path = '.');
-defined($Custom_file) || ($Custom_file = '.gff2aplotrc');
+my $Custom_path = defined($ENV{GFF2APLOT_CUSTOMPATH})
+                  ? $ENV{GFF2APLOT_CUSTOMPATH} : '.';
+my $Custom_file = defined($ENV{GFF2APLOT_CUSTOMFILE})
+                  ? $ENV{GFF2APLOT_CUSTOMFILE} : '.gff2aplotrc';
 $Custom_path =~ s{/$}{}o; 
 @ 
 
@@ -1164,9 +1176,12 @@ Unknown                 & ? \\
 \end{center}
 \end{table}
 
+<<Pre-Declared Vars>>=
+%VarKeys $noCV
+@ 
 <<Global Constants>>=
-my $noCV = '?';
-my %VarKeys = (
+$noCV = '?';
+%VarKeys = (
     L => 'LAYOUT',
     Q => 'SEQUENCE',
     S => 'SOURCE',
@@ -1240,11 +1255,11 @@ will be simplest.
 sub checkvarvalues() {
 	my ($_test,$_val,$_var) = @_;
     my $_t = lc($$_val);
-    defined($TESTS->{$_test}) || do {
+    defined($TESTS{$_test}) || do {
         &warn('VARTYPE_NOT_DEFINED',$T,$_test,$_var);
         return $F;
     }; # !defined($TESTS->{$_test})
-    return &{$TESTS->{$_test}}($_val,$_var,$_t);
+    return $TESTS{$_test}->($_val,$_var,$_t);
 } # checkvarvalues
 @ %def &checkvarvalues
 
@@ -1254,12 +1269,15 @@ VARTYPE_NOT_DEFINED =>
   $spw."  could not check value for \"\%s\".\n",
 @
 
-The following hash keys serve as references to annonymous functions, each one defining a single test for the variable value passed by reference and modifying it if needed.
+The following hash keys serve as references to annonymous functions, each one defining a single test for the variable value passed by reference and modifying it if needed. [[%Fonts]] is set on section~\ref{sec:FontsHsh} (page~\pageref{sec:FontsHsh}), [[%COLORS]] is set on section~\ref{sec:ColorsHsh} (page~\pageref{sec:ColorsHsh}), [[%FORMATS]] is set on section~\ref{sec:FormatsHsh} (page~\pageref{sec:FormatsHsh}), [[%Messages]] is set on section~\ref{sec:MessagesHsh} (page~\pageref{sec:MessagesHsh})
 
+<<Pre-Declared Vars>>=
+%TESTS %Fonts %COLORS $colors %FORMATS $formats %Messages
+@ 
 <<Global Vars>>=
-my %TESTS = (
-             <<variable value checking>>
-             );
+%TESTS = (
+    <<variable value checking>>
+    );
 @ 
 
 \subsctn{Deciphering element fields}
@@ -1529,39 +1547,42 @@ This section is dedicated to those test we need to ensure that customization var
 \fbox{
 \begin{tabular}{cl}
 BOOLEAN  & A true/false variable.\\
+ALPHA    & A string set as '[[ [a-zA-Z][a-zA-Z_0-9]* ]]'.\\
 STRING   & A free text character string.\\
-DIGIT    & A natural number (nor decimals neither sign).\\
+NATURAL  & A positive integer (nor decimals neither sign).\\
 INTEGER  & Positive or negative integers.\\
-DECIMAL  & Numbers with decimal values.\\
-REALNUM  & Any number, including scientific notation.\\
+FLOAT    & Numbers with decimal values (subset of reals).\\
+REAL     & Any real number (including scientific notation).\\
 COLOR    & Available colors are defined in '[[%COLORS]]' hash.\\
+FONT     & A {\ps} font from those defined in '[[%Fonts]]' hash.\\
+BBOX     & '[[<width>,<height>]]' pair (in PS_UNIT units).\\
 PAGE     & Page sizes are set in '[[%FORMATS]]' variable.\\
-DNABASE  & A numeric value with nucleotide units (Gb, Mb, Kb or bases).\\
-RANGE    & A 'lower-limit..upper-limit' numeric pair.\\
-FONT     & A {\ps} from those defined in '[[%Fonts]]' hash.\\
-FONT\_SZ & A numeric value with font-size units (cm, mm, in or pt ---points---).\\
+SEQ_UNIT & A numeric value with nucleotide units (Gb, Mb, Kb or bases).\\
+PS_UNIT  & A numeric value with {\ps} units (pt, cm, mm or in).\\
+RANGE    & A '[[lower-limit..upper-limit]]' numeric pair.\\
+PSRANGE  & A '[[lower-limit..upper-limit]]' {\ps} lengths pair.\\
+SEQRANGE & A '[[lower-limit..upper-limit]]' sequence coords pair.\\
 \end{tabular}
 } % fbox
 \caption[Customization parameters available formats]{\label{tbl:varformats} Parameter available formats we are going to use for customization variables checking.}
 \end{center}
 
 
-\label{todo:BBE}\label{todo:BBF}
+<<HIDE: DONE>>=
+\doneitem{20011107}{Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.}
+@
+
+\label{todo:BBE}
 <<HIDE: new defs TODO>>=
 \def\todoBBE{
 More format variables need to be defined, such as: [[SHAPES]] from a shapes array, [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default), [[GROUP-BRACKETS]] (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--).
 } % todoBBE
-\def\todoBBF{
-Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.
-} % todoBBF
 @
 <<HIDE: TODO>>=
 \todoitem{\todoBBE}{todo:BBE}
-\todoitem{\todoBBF}{todo:BBF}
 @
 \todo{
  \item \todoBBE
- \item \todoBBF
  } % todo
 
 \end{table}
@@ -1570,7 +1591,17 @@ Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.
 
 We define as 'BOOLEAN' those variables used as flags or switches, which can hold only a binary value such ON/OFF. Booleans are NOT case sensitive.
 
-<<variable value checking - old>>=
+<<variable value checking>>=
+BOOLEAN => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      $_l =~ /^(1|on|t(rue)|y(es))$/o  && ($$_v = $T, return $T);
+      $_l =~ /^(0|off|f(alse)|n(o))$/o && ($$_v = $F, return $T);
+      &warn('NOT_A_BOOLEAN',$F,$_n);
+      return $F;
+  },
+@ %def {BOOLEAN}
+
+<<HIDE: variable value checking>>=
 $_test eq 'BOOLEAN' && do {
     $_t =~ /^(1|on|t(rue)|y(es))$/o && ($$_val = $T, return $T);
     $_t =~ /^(0|off|f(alse)|n(o))$/o && ($$_val = $F, return $T);
@@ -1585,11 +1616,39 @@ NOT_A_BOOLEAN =>
   $spw."     (ON/OFF, 1/0, TRUE/FALSE, YES/NO)\n",
 @
 
+\subsubsctn{Alphanumeric values}
+
+Although {\ps} allows object ``names'' consisting in any character, except delimiters and white space, string, we are going to restrict user-defined ``names'' to a string that must start with a letter and may contain letters, numbers and underscores.
+
+<<variable value checking>>=
+ALPHA => sub { # Value, varName
+      my ($_v,$_n,undef) = @_;
+      $$_v =~ /^[a-zA-Z][a-zA-Z_0-9]*$/o && return $T;
+      &warn('NOT_ALPHA',$F,$_n);
+      return $F;
+  },
+@ %def {ALPHA}
+
+<<warnings - parsing custom files>>=
+NOT_ALPHA =>
+  $Warn."\"\%s\" variable parameter must fit \"[a-zA-Z][a-zA-Z_0-9]*\"...\n",
+@
+
 \subsubsctn{Protecting reserved characters in strings}
 
-Having a 'STRING' implies to replace/protect those characters that will produce indesirable effects in {\ps} code (such unbalanced parentheses). No error is reported for strings because they are assumed to be free text.
+Having a 'STRING' implies to replace/protect those characters that will produce indesirable effects in {\ps} code (such unbalanced parentheses). No error is reported for strings because they are assumed to be free text. Line returns can be forced using '[[\n]]'.
 
-<<variable value checking - old>>=
+<<variable value checking>>=
+STRING => sub { # Value
+      my ($_v,undef,undef) = @_;
+      $$_v =~ s{[\\]}{\\134}og;
+      $$_v =~ s{[\(]}{\\050}og;
+      $$_v =~ s{[\)]}{\\051}og;
+      return $T;
+  },
+@ %def {STRING}
+
+<<HIDE: variable value checking>>=
 $_test eq 'STRING' && do {
     $$_val =~ s{[\\]}{\\134}og;
     $$_val =~ s{[\(]}{\\050}og;
@@ -1614,46 +1673,85 @@ Remember to check for some of the strings values such: '++none++', '++sequence++
 
 The following tests look for four different number types.
 
-<<variable value checking - old>>=
-$_test eq 'DIGIT' && do {
-    $$_val =~ /^\d+$/o && (return $T);
-    &warn('NOT_A_DIGIT',$F,$_var);
+<<variable value checking>>=
+NATURAL => sub { # Value, varName
+      my ($_v,$_n,undef) = @_;
+      $$_v =~ /^\d+$/o && return $T;
+      &warn('NOT_A_NATURAL',$F,$_n);
+      return $F;
+  },
+INTEGER => sub { # Value, varName
+      my ($_v,$_n,undef) = @_;
+      $$_v =~ /^[+-]?\d+$/o && return $T;
+      &warn('NOT_AN_INTEGER',$F,$_n);
+      return $F;
+  },
+FLOAT => sub { # Value, varName
+      my ($_v,$_n,undef) = @_;
+      $$_v =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o && return $T;
+      &warn('NOT_A_FLOAT',$F,$_n);
+      return $F;
+  },
+REAL => sub { # Value, varName
+      my ($_v,$_n,undef) = @_;
+      $$_v =~ /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/o && return $T;
+      &warn('NOT_A_REAL',$F,$_n);
+      return $F;
+  },
+@ %def {NATURAL} {INTEGER} {FLOAT} {REAL}
+
+<<HIDE: variable value checking>>=
+$_test eq 'NATURAL' && do {
+    $$_val =~ /^\d+$/o && return $T;
+    &warn('NOT_A_NATURAL',$F,$_var);
     return $F;
 };
 $_test eq 'INTEGER' && do {
-    $$_val =~ /^[+-]?\d+$/o && (return $T);
+    $$_val =~ /^[+-]?\d+$/o && return $T;
     &warn('NOT_AN_INTEGER',$F,$_var);
     return $F;
 };
-$_test eq 'DECIMAL' && do {
-    $$_val =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o && (return $T);
-    &warn('NOT_A_DECIMAL',$F,$_var);
+$_test eq 'FLOAT' && do {
+    $$_val =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o && return $T;
+    &warn('NOT_A_FLOAT',$F,$_var);
     return $F;
 };
-$_test eq 'REALNUM' && do {
-    $$_val =~ /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/o &&
-        (return $T);
+$_test eq 'REAL' && do {
+    $$_val =~ /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/o && return $T;
     &warn('NOT_A_REAL',$F,$_var);
     return $F;
 };
 @ %$
 
 <<warnings - parsing custom files>>=
-NOT_A_DIGIT =>
-  $Warn."\"\%s\" variable requires a digit (natural number).\n",
+NOT_A_NATURAL =>
+  $Warn."\"\%s\" variable is not a positive integer.\n",
 NOT_AN_INTEGER =>
-  $Warn."\"\%s\" variable requires an integer.\n",
-NOT_A_DECIMAL =>
-  $Warn."\"\%s\" variable requires a decimal number.\n",
+  $Warn."\"\%s\" variable is NOT an integer.\n",
+NOT_A_FLOAT =>
+  $Warn."\"\%s\" variable is NOT a decimal number.\n",
 NOT_A_REAL =>
-  $Warn."\"\%s\" variable requires a real number (with exponent).\n",
+  $Warn."\"\%s\" variable is NOT a real number (with exponent).\n",
 @ %$
 
 \subsubsctn{Looking for color names}
 
 Available colors are shown in section~\ref{sec:CMYKcolordef}, page~\pageref{sec:CMYKcolordef}. Here we check that customization input colors match those defined colors, including 'background' and 'foreground' colors. Color names are NOT case sensitive.
 
-<<variable value checking - old>>=
+<<variable value checking>>=
+COLOR => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      $_l =~ /^b(ack)?g(round)?(color)?/o &&
+          ($$_v = 'bg', return $T);
+      $_l =~ /^f(ore)?g(round)?(color)?/o &&
+          ($$_v = 'fg', return $T);
+      defined($COLORS{$_l}) && ($$_v = $_l, return $T);
+      &warn('NOT_A_COLOR',$F,$_l,$_n);
+      return $F;
+  },
+@ %def {COLOR}
+
+<<HIDE: variable value checking>>=
 $_test eq 'COLOR' && do { # lc
 	$_t =~ /^(b(ack)?|f(ore)?)g(round)?(color)?/o &&
 		($$_val = $_t, return $T);
@@ -1680,90 +1778,21 @@ NOT_A_COLOR =>
 @
 
 
-\subsubsctn{Verifying page-sizes}
-
-A new page bounding-box can be passed through command-line or customization file, we process that case here.
-
-<<variable value checking>>=
-BBOX => sub { # Value, varName, Lowercase
-            my ($_v,$_n,$_l) = @_;
-            my @it = ();
-            @it = split /,/og, $_l;
-            &{$TESTS->{ALPHA}}(\$it[0],$_n,$it[0]) || do {
-                return $F;
-            }; # bbox name !ALPHA
-            &{$TESTS->{PS_UNIT}}(\$it[1],$_n,$it[1]) || do {
-                return $F;
-            }; # bbox width !PS_UNIT
-            &{$TESTS->{PS_UNIT}}(\$it[2],$_n,$it[2]) || do {
-                return $F;
-            }; # bbox height !PS_UNIT
-            return $T;
-        },
-@ 
-
-Available page sizes are shown in section~\ref{sec:PAGEdef}, page~\pageref{sec:PAGEdef}.
-
-<<variable value checking - old>>=
-$_test eq 'PAGE' && do { # lc
-	defined($FORMATS{$_t}) && ($$_val = $_t, return $T);
-    &warn('NOT_A_PAGE',$F,$_t,$_var);
-    return $F;
-};
-@
-
-<<warnings - parsing custom files>>=
-NOT_A_PAGE =>
-  $Warn."\"\%s\" page-size is not defined for \"\%s\" variable.\n",
-@
-
-\subsubsctn{Nucleotide coords}
-
-Those numbers relative to DNA positions may be given in bases, kilobases, megabases or gigabases, being last three ones a way to avoid any mistake when a big coord with lots of zeroes is provided. If no units are provided, then we asume bases.
-
-\label{sec:DNABASE}
-<<variable value checking - old>>=
-$_test eq 'DNABASE' && do { # lc
-    $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)([gmk]?b(ases)?)?$/o && 
-        ($$_val = $_t, return $T);
-    &warn('NOT_A_DNABASE',$F,$_var,$_t);
-    return $F;
-};
-@
-
-<<warnings - parsing custom files>>=
-NOT_A_DNABASE =>
-  $Warn."\"\%s\" variable requires nucleotide units.\n".
-  $spw." \"\%s\" is not valid (units must be in Gb, Mb, Kb, or bases).\n",
-@
-
-\subsubsctn{Accepting numeric ranges}
-
-A range is a lower/upper limits pair for a given variable. One of the limits, or both, can be an asterisk ('*'), which means that the default value must be used.
-
-\label{todo:BBI}
-<<HIDE: new defs TODO>>=
-\def\todoBBI{
-Here we must check something like '*..*'
-} % todoBBI
-@
-<<HIDE: TODO>>=
-\todoitem{\todoBBI}{todo:BBI}
-@
-\todo{ \item \todoBBI } % todo
-
-<<variable value checking - old>>=
-$_test eq 'RANGE' && do {
-
-    return $T;
-};
-@
-
 \subsubsctn{Checking for available fonts and font-sizes}
 
 Font names must be in first capital letter format for {\ps}. 
 
-<<variable value checking - old>>=
+<<variable value checking>>=
+FONT => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      defined($Fonts{$_l}) && 
+          ($$_v = $Fonts{$_l}, return $T);
+      &warn('NOT_A_FONT',$F,$$_v,$_n);
+      return $F;
+  },
+@ %def {FONT}
+
+<<HIDE: variable value checking>>=
 $_test eq 'FONT' && do { # lc
     defined($Fonts{$_t}) && 
         ($$_val = $Fonts{$_t}, return $T);
@@ -1774,13 +1803,14 @@ $_test eq 'FONT' && do { # lc
 
 <<warnings - parsing custom files>>=
 NOT_A_FONT =>
-  $Warn."Sorry, \"\%s\" font is not defined for \"\%s\" variable.\n",
+  $Warn."Sorry, \"\%s\" font is not defined for \"\%s\".\n",
 @
 
 We provide three basic fonts that are standard in most {\ps} devices (a serif, a sans-serif and a monospaced font), and four series for each one (an upright ``normal'', an italic/oblique, a bold, and a bold italic/oblique series). 
+\label{sec:FontsHsh}
 
 <<Global Vars>>=
-my %Fonts = (
+%Fonts = (
     # serif
     times                   => 'Times-Roman',
     'times-roman'           => 'Times-Roman',
@@ -1807,8 +1837,8 @@ NOT_A_FONT =>
 
 Font sizes can be given in points, centimeters or inches. If no units are provided, then we asume points, but always must be possitive values.
 
-<<variable value checking - old>>=
-$_test eq 'FONT_SZ' && do {
+<<HIDE: variable value checking>>=
+$_test eq 'PS_UNIT' && do {
     $_t =~ /^(?:\d+(?:\.\d*)?|\.\d+)
             (pt|cm|mm|in(ches)?|points|(centi|mili)meters)?$/ox && 
         ($$_val = $_t, return $T);
@@ -1818,27 +1848,351 @@ $_test eq 'FONT_SZ' && do {
 @
 
 
-\label{todo:CCA}\label{todo:CCB}
-<<HIDE: new defs TODO>>=
-\def\todoCCA{
-Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
-} % todoCCA
-\def\todoCCB{
-Can we do the same for DNABASE ? (section~\ref{sec:DNABASE})
-} % todoCCB
+<<HIDE: DONE>>=
+\doneitem{20011107}{Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
+It has been solved by returning a two elements array having the numeric value and the corresponding unit (setting to some default if it is not given).}
+\doneitem{20011107}{Can we do the same for SEQ_UNIT ? (section~\ref{sec:DNABASE}).}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoCCA}{todo:CCA}
-\todoitem{\todoCCB}{todo:CCB}
-@
-\todo{
- \item \todoCCA
- \item \todoCCB
- } % todo
 
 <<warnings - parsing custom files>>=
 NOT_A_FONTSIZE =>
   $Warn."\"\%s\" is not a valid font-size for \"\%s\" variable.",
+@
+
+
+\subsubsctn{Verifying page-sizes}
+
+A new page bounding-box can be passed through command-line or customization file, we process that case here.
+
+<<variable value checking>>=
+BBOX => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      my @it = ();
+      @it = split /,/og, $_l;
+      scalar(@it) != 2 && do {
+          &warn('BBOX_NOTOK',$F,$_n,$_l,$_n);
+          return $F;
+      }; # not enough params
+      $TESTS{PS_UNIT}->(\$it[0],$_n,$it[0]) || return $F;
+      $TESTS{PS_UNIT}->(\$it[1],$_n,$it[1]) || return $F;
+      $$_v = [ 'userdef', @it ];
+      return $T;
+  },
+@ %def {BBOX}
+
+<<warnings - parsing custom files>>=
+BBOX_NOTOK =>
+  $Warn."CANNOT understand \"\%s\" set as \"\%s\" ...\n".
+  $spw." Format must be: \"\%s=<width>,<height>\" \n",
+@ 
+
+Available page sizes are shown in section~\ref{sec:PAGEdef}, page~\pageref{sec:PAGEdef}.
+
+<<variable value checking>>=
+PAGE => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;            
+	  defined($FORMATS{$_l}) && ($$_v = $_l, return $T);
+      &warn('NOT_A_PAGE',$F,$_l,$$_v);
+      return $F;
+  },
+@ %def {PAGE}
+
+<<HIDE: variable value checking>>=
+$_test eq 'PAGE' && do { # lc
+	defined($FORMATS{$_t}) && ($$_val = $_t, return $T);
+    &warn('NOT_A_PAGE',$F,$_t,$_var);
+    return $F;
+};
+@
+
+<<warnings - parsing custom files>>=
+NOT_A_PAGE =>
+  $Warn."\"\%s\" page-size is not defined for \"\%s\" variable.\n",
+@
+
+\subsubsctn{Nucleotide coords}
+
+Those numbers relative to DNA positions may be given in bases, kilobases, megabases or gigabases, being last three ones a way to avoid any mistake when a big coord with lots of zeroes is provided. If no units are provided, then we asume bases.
+
+\label{sec:DNABASE}
+<<variable value checking>>=
+SEQ_UNIT => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      my $q = undef;
+      $_l =~ /^\.$|^\s*$/o && do {
+          &warn('NOT_A_NUMBER',$F,$_n);
+          return $F;
+      };
+      $_l =~ s/(?:\.)?
+               (?:(g(?:iga)?|m(?:ega)?|k(?:ilo)?)?
+               b(?:ase)?
+               (?:p(?:air)?)?
+               (?:s)?)$
+              //ox && ($q = $1);
+      defined($q) || do {
+          $_l =~ /[^\d]+$/o && do {
+               &warn('NOT_A_DNAUNIT',$F,$_n,$$_v);
+               return $F;
+          };
+          $q = '';
+      };
+      $TESTS{FLOAT}->(\$_l,$_n,$_l) || return $F;
+      ($q,undef) = split //o,$q,2;
+      $q .= 'bp';
+      $$_v = [ $_l, $q ];
+      return $T;
+  },
+@ %def {SEQ_UNIT}
+
+<<warnings - parsing custom files>>=
+NOT_A_NUMBER =>
+  $Warn."\"\%s\" variable needs a number (with or without units).\n",
+NOT_A_DNAUNIT =>
+  $Warn."\"\%s\" variable requires nucleotide units.\n".
+  $spw." \"\%s\" is not valid (units must be in Gb, Mb, Kb, or bases).\n",
+@
+
+<<HIDE: testing regular expressions for SEQ_UNIT>>=
+perl -ne '$q = undef; chomp;
+          $a = $_;
+          ($_ =~ /^\.$|^\s*$/o) && do {
+               print "$a ::: Wrong VALUE... !!!\n";
+               next;
+          };
+          $_ =~ s/(?:\.)?
+                  (?:(g(?:iga)?|m(?:ega)?|k(?:ilo)?)?
+                  b(?:ase)?
+                  (?:p(?:air)?)?
+                  (?:s)?)$
+                 //ox && ($q = $1);
+          defined($q) || do {
+              $_ =~ /[^\d]+$/o && do {
+                   print "$a ::: Wrong UNITS !!!\n";
+                   next;
+              };
+          };
+          (defined($_) && $_ ne "") ||  do {
+               print "$a ::: Wrong VALUE !!!\n";
+               next;
+          };
+          ($q,undef) = split //o,$q,2;
+          $q .= 'bp';
+          print "$a ::: $_ $q\n"; ' << 'EOF'
+10kbp
+10kilobp
+10gigabp
+11.33kk
+-1kb
+0.5bp
+.
+
+0.bp
+0
+10+e15bp
+EOF
+
+The results are the following:
+
+10kbp ::: 10 kbp
+10kilobp ::: 10 kbp
+10gigabp ::: 10 gbp
+11.33kk ::: Wrong UNITS !!!
+-1kb ::: -1 kbp
+0.5bp ::: 0.5 bp
+. ::: Wrong VALUE... !!!
+ ::: Wrong VALUE !!!
+0.bp ::: 0 bp
+0 ::: 0 bp
+10+e15bp ::: 10+e15 bp
+@ 
+
+<<HIDE: variable value checking>>=
+$_test eq 'SEQ_UNIT' && do { # lc
+    $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)([gmk]?b(ases)?)?$/o && 
+        ($$_val = $_t, return $T);
+    &warn('NOT_A_DNAUNIT',$F,$_var,$_t);
+    return $F;
+};
+@
+
+
+\subsubsctn{{\ps} coords}
+
+Those numbers relative to plot positions and font sizes may be given in points, centimeters, milimeters or inches. If no units are provided, then we asume points.
+
+\label{sec:PSCOORDS}
+
+<<variable value checking>>=
+PS_UNIT => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      my $q = undef;
+      $_l =~ /^\.$|^\s*$/o && do {
+          &warn('NOT_A_NUMBER',$F,$_n);
+          return $F;
+      };
+      PSLEN: {
+          $_l =~ s/m(eter(s)?)?$//o && do {
+              $_l =~ s/(\.)?c(enti)?$//o   && ($q = 'cm', last PSLEN);
+              $_l =~ s/(\.)?m(ili)?$//o    && ($q = 'mm', last PSLEN);
+              last PSLEN;
+          };
+          $_l =~ s/(\.)?in(ch(es)?)?$//o   && ($q = 'in', last PSLEN);
+          $_l =~ s/(\.)?(pt|point(s)?)$//o && ($q = 'pt');
+      }; # PSLEN
+      defined($q) || do {
+          $_l =~ /[^\d]+$/o && do {
+               &warn('NOT_A_PSUNIT',$F,$_n,$$_v);
+               return $F;
+          };
+          $q = 'pt';
+      };
+      $TESTS{FLOAT}->(\$_l,$_n,$_l) || return $F;
+      $$_v = [ $_l, $q ];
+      return $T;
+  },
+@ %def {PS_UNIT}
+
+<<warnings - parsing custom files>>=
+NOT_A_PSUNIT =>
+  $Warn."\"\%s\" variable requires PostScript units.\n".
+  $spw." \"\%s\" is not valid (units must be in points, cm, mm, or inches).\n",
+@
+
+<<HIDE: testing regular expressions for SEQ_UNIT>>=
+perl -ne '$q = undef; chomp;
+          $a = $_;
+          ($_ =~ /^\.$|^\s*$/o) && do {
+               print "$a ::: Wrong VALUE... !!!\n";
+               next;
+          };
+          PSLEN: {
+              $_ =~ s/m(eter(s)?)?$//o && do {
+                  $_ =~ s/(\.)?c(enti)?$//o && ($q = "cm", last PSLEN);
+                  $_ =~ s/(\.)?m(ili)?$//o  && ($q = "mm", last PSLEN);
+                  last PSLEN;
+              };
+              $_ =~ s/(\.)?in(ch(es)?)?$//o && ($q = "in", last PSLEN);
+              $_ =~ s/(\.)?(pt|point(s)?)$//o    && ($q = "pt");
+          }; # PSLEN
+          defined($q) || do {
+              $_ =~ /[^\d]+$/o && do {
+                   print "$a ::: Wrong UNITS !!!\n";
+                   next;
+              };
+              $q = "pt";
+          };
+          (defined($_) && $_ ne "") ||  do {
+               print "$a ::: Wrong VALUE !!!\n";
+               next;
+          };
+          print "$a ::: $_ $q\n"; ' << 'EOF'
+10cm
+10centimeters
+10mmeters
+11.33kk
+-1in
+0.5pt
+100inches
+1inch
+.
+
+0.points
+0
+10+e15pts
+EOF
+
+The results are the following:
+
+10cm ::: 10 cm
+10centimeters ::: 10 cm
+10mmeters ::: 10 mm
+11.33kk ::: Wrong UNITS !!!
+-1in ::: -1 in
+0.5pt ::: 0.5 pt
+100inches ::: 100 in
+1inch ::: 1 in
+. ::: Wrong VALUE... !!!
+ ::: Wrong VALUE... !!!
+0.points ::: 0 pt
+0 ::: 0 pt
+10+e15pts ::: Wrong UNITS !!!
+@ 
+
+
+\subsubsctn{Accepting numeric ranges}
+
+A range is a lower/upper limits pair for a given variable. One of the limits, or both, can be an asterisk ('*'), which means that the default value must be used.
+
+<<HIDE: DONE>>=
+\doneitem{20011107}{Here we must check something like '*..*'.}
+@
+
+<<variable value checking>>=
+RANGE => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      <<splitting ranges - common code>>
+      $it[0] eq '*' || do {
+          $TESTS{FLOAT}->(\$it[0],$_n,$it[0]) || return $F;
+      }; # $it[0] -> lower-value
+      $it[1] eq '*' || do {
+          $TESTS{FLOAT}->(\$it[1],$_n,$it[1]) || return $F;
+      }; # $it[1] -> upper-value
+      <<splitting ranges result - common code>>
+  },
+@ %def {RANGE}
+
+<<variable value checking>>=
+PSRANGE => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      <<splitting ranges - common code>>
+      $it[0] eq '*' || do {
+          $TESTS{PS_UNIT}->(\$it[0],$_n,$it[0]) || return $F;
+      }; # $it[0] -> lower-value
+      $it[1] eq '*' || do {
+          $TESTS{PS_UNIT}->(\$it[1],$_n,$it[1]) || return $F;
+      }; # $it[1] -> upper-value
+      <<splitting ranges result - common code>>
+  },
+@ %def {PSRANGE}
+
+<<variable value checking>>=
+SEQRANGE => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      <<splitting ranges - common code>>
+      $it[0] eq '*' || do {
+          $TESTS{SEQ_UNIT}->(\$it[0],$_n,$it[0]) || return $F;
+      }; # $it[0] -> lower-value
+      $it[1] eq '*' || do {
+          $TESTS{SEQ_UNIT}->(\$it[1],$_n,$it[1]) || return $F;
+      }; # $it[1] -> upper-value
+      <<splitting ranges result - common code>>
+  },
+@ %def {SEQRANGE}
+
+<<splitting ranges - common code>>=
+my @it = ();
+@@it = split /\.\./og, $_l;
+scalar(@it) != 2 && do {
+    &warn('RANGE_NOTOK',$F,$_n,$$_v,$_n);
+    return $F;
+}; # not enough params
+@ 
+
+<<splitting ranges result - common code>>=
+$$_v = [ @{ $it[0] } , @{ $it[1] } ];
+return $T;
+@
+
+<<warnings - parsing custom files>>=
+RANGE_NOTOK =>
+  $Warn."CANNOT understand \"\%s\" set as \"\%s\" ...\n".
+  $spw." Format must be: \"\%s=<lower-value>..<upper-value>\" \n",
+@ 
+
+<<HIDE: variable value checking>>=
+$_test eq 'RANGE' && do {
+    return $T;
+};
 @
 
 
@@ -1935,6 +2289,8 @@ before continuing to run the program in a silent mode.
 
 \subsubsctn{Page definition}
 
+We do not provide a '[[format_name]]' parameter for [[page_bbox]] variable and related options because if users define a name that already was defined as a function name in the {\ps} code, plot will crash without an obvious error.
+
 <<default layout vars values>>=
 # PAGE definition
 page_bbox                  => { TYPE => 'BBOX'   , VALUE => undef   },
@@ -1943,7 +2299,7 @@ page_bbox                  => { TYPE => 'BBOX'   , VALUE => undef   },
 "P|page-bbox"   => \$CmdLineVars{LAYOUT}{"page_bbox"},
 @ 
 <<command-line help>>=
--P, --page-bbox  <name,width,height>
+-P, --page-bbox  <width,height>
       Setting a user-defined page size, <width> and
       <height> are set to points if no unit is given,
       you can use pt, mm, cm or in. This option overrides ANY
@@ -1953,13 +2309,14 @@ page_bbox                  => { TYPE => 'BBOX'   , VALUE => undef   },
 ORD: 6
 OPT: P
 LNG: page-bbox
-PAR: <name,width,height>
-EQV: [page_bbox]=<name,width,height>
+PAR: <width,height>
+EQV: [page_bbox]=<width,height>
 SDE: Defining arbitrary page formats.
 LDE: 
 This option allows users to define an arbitrary page format, by
-defining a name for such format and the width and height for that
-page. See [page_bbox] customization variable on page~\pageref{sec:pagebbox} 
+defining the width and height for that page ({\prog} assigns 
+automatically a format name for this new page dimensions). 
+See [page_bbox] customization variable on page~\pageref{sec:pagebbox} 
 (section~\ref{sec:pagebbox}) for further info on this command-line option.
 It overrides any [page-size] command-line option (and any related variable 
 passed through custom files).
@@ -1970,18 +2327,18 @@ ORD: 1
 SEC: LAYOUT
 SUB: PageLayout
 OPT: page_bbox
-PAR: <name,width,height>
+PAR: <width,height>
 SDE: Defining arbitrary page formats. Overrides any setting for [page_size].
 LDE:
 \label{sec:pagebbox}
 This variable allows users to define an arbitrary page format, by
-defining a name for such format and the width and height for that
-page. Do not include this variable in your custom files if you are
+defining the width and height for that page ({\prog} assigns 
+automatically a format name for this new page dimensions). 
+Do not include this variable in your custom files if you are
 using standard page sizes which can be set using [page_size], because
 [page_bbox] overrides any further page definition by that variable. If
 the variable is not set, default value forces the use of any settings
-given for [page_size]. <name> defines a name for the new page
-format. <width> and <height> are set to points if no unit is
+given for [page_size]. <width> and <height> are set to points if no unit is
 given, you can use points, milimeters, centimeters or inches (pt, mm,
 cm or in, respectively). See table~\ref{tbl:PageSizes} for a reference
 on already defined page sizes and their dimensions.
@@ -2030,10 +2387,10 @@ coded for most common paper formats.
 
 <<default layout vars values>>=
 # Page MARGINS
-margin_left                => { TYPE => 'LENGTH'  , VALUE => '1cm' },
-margin_right               => { TYPE => 'LENGTH'  , VALUE => '1cm' },
-margin_top                 => { TYPE => 'LENGTH'  , VALUE => '1cm' },
-margin_bottom              => { TYPE => 'LENGTH'  , VALUE => '1cm' },
+margin_left                => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
+margin_right               => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
+margin_top                 => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
+margin_bottom              => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
 @ %def {margin_left} {margin_right} {margin_top} {margin_bottom}
 <<command-line options>>=
 "margin-left=s"         => \$CmdLineVars{LAYOUT}{"margin_left"},
@@ -2273,7 +2630,7 @@ that area from plot).
 @ 
 <<default layout vars values>>=
 title_font                 => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-title_fontsize             => { TYPE => 'FONT_SZ', VALUE => '24pt'  },
+title_fontsize             => { TYPE => 'PS_UNIT', VALUE => '24pt'  },
 @ %def {title_font} {title_fontsize}
 <<DESC custom file variables>>=
 ORD: 11
@@ -2352,7 +2709,7 @@ want to remove that area from plot too).
 @ 
 <<default layout vars values>>=
 subtitle_font              => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-subtitle_fontsize          => { TYPE => 'FONT_SZ', VALUE => '16pt'  },
+subtitle_fontsize          => { TYPE => 'PS_UNIT', VALUE => '16pt'  },
 @ %def {subtitle_font} {subtitle_fontsize}
 <<DESC custom file variables>>=
 ORD: 15
@@ -2430,7 +2787,7 @@ want to remove that area from plot too).
 @ 
 <<default layout vars values>>=
 x_label_font               => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-x_label_fontsize           => { TYPE => 'FONT_SZ', VALUE => '12pt'  },
+x_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => '12pt'  },
 @ %def {x_label_font} {x_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 19
@@ -2509,7 +2866,7 @@ want to remove that area from plot too).
 @ 
 <<default layout vars values>>=
 y_label_font               => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-y_label_fontsize           => { TYPE => 'FONT_SZ', VALUE => '12pt'  },
+y_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => '12pt'  },
 @ %def {y_label_font} {y_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 23
@@ -2582,7 +2939,7 @@ LDE:
 @ 
 <<default layout vars values>>=
 percent_box_label_font     => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-percent_box_label_fontsize => { TYPE => 'FONT_SZ', VALUE => '12pt'  },
+percent_box_label_fontsize => { TYPE => 'PS_UNIT', VALUE => '12pt'  },
 @ %def {percent_box_label_font} {percent_box_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 27
@@ -2636,7 +2993,7 @@ LDE:
 @ 
 <<default layout vars values>>=
 percent_box_sublabel_font  => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-percent_box_sublabel_fontsize => { TYPE => 'FONT_SZ', VALUE => '9pt'  },
+percent_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => '9pt'  },
 @ %def {percent_box_sublabel_font} {percent_box_sublabel_fontsize}
 <<DESC custom file variables>>=
 ORD: 31
@@ -2706,7 +3063,7 @@ LDE:
 @ 
 <<default layout vars values>>=
 extra_box_label_font       => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-extra_box_label_fontsize   => { TYPE => 'FONT_SZ', VALUE => '9pt'  },
+extra_box_label_fontsize   => { TYPE => 'PS_UNIT', VALUE => '9pt'  },
 @ %def {extra_box_label_font} {extra_box_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 35
@@ -2759,7 +3116,7 @@ LDE:
 @ 
 <<default layout vars values>>=
 extra_box_sublabel_font    => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-extra_box_sublabel_fontsize => { TYPE => 'FONT_SZ', VALUE => '9pt'  },
+extra_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => '9pt'  },
 @ %def {extra_box_sublabel_font} {extra_box_sublabel_fontsize}
 <<DESC custom file variables>>=
 ORD: 39
@@ -2791,8 +3148,8 @@ The following variables define the boundary/clipping coordinates for each sequen
 
 <<default layout vars values>>=
 x_sequence_coords          => { TYPE => 'DNARANGE', VALUE => '*..*' },
-x_sequence_start           => { TYPE => 'DNABASE', VALUE => undef  },
-x_sequence_end             => { TYPE => 'DNABASE', VALUE => undef  },
+x_sequence_start           => { TYPE => 'SEQ_UNIT', VALUE => undef  },
+x_sequence_end             => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {x_sequence_coords} {x_sequence_start} {x_sequence_end}
 <<command-line options>>=
 "x|x-sequence-coords=s" => \$CmdLineVars{LAYOUT}{"x_sequence_coords"},
@@ -2867,8 +3224,8 @@ LDE:
 
 <<default layout vars values>>=
 y_sequence_coords          => { TYPE => 'DNARANGE', VALUE => '*..*' },
-y_sequence_start           => { TYPE => 'DNABASE', VALUE => undef  },
-y_sequence_end             => { TYPE => 'DNABASE', VALUE => undef  },
+y_sequence_start           => { TYPE => 'SEQ_UNIT', VALUE => undef  },
+y_sequence_end             => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {y_sequence_coords} {y_sequence_start} {y_sequence_end}
 <<command-line options>>=
 "y|y-sequence-coords=s" => \$CmdLineVars{LAYOUT}{"y_sequence_coords"},
@@ -2943,8 +3300,8 @@ LDE:
 
 <<default layout vars values>>=
 x_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => '*..*' },
-x_sequence_zoom_start      => { TYPE => 'DNABASE', VALUE => undef  },
-x_sequence_zoom_end        => { TYPE => 'DNABASE', VALUE => undef  },
+x_sequence_zoom_start      => { TYPE => 'SEQ_UNIT', VALUE => undef  },
+x_sequence_zoom_end        => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {x_sequence_zoom} {x_sequence_zoom_start} {x_sequence_zoom_end}
 <<command-line options>>=
 "x-sequence-zoom=s"         => \$CmdLineVars{LAYOUT}{"x_sequence_zoom"},
@@ -2996,8 +3353,8 @@ LDE:
 
 <<default layout vars values>>=
 y_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => '*..*' },
-y_sequence_zoom_start      => { TYPE => 'DNABASE', VALUE => undef  },
-y_sequence_zoom_end        => { TYPE => 'DNABASE', VALUE => undef  },
+y_sequence_zoom_start      => { TYPE => 'SEQ_UNIT', VALUE => undef  },
+y_sequence_zoom_end        => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {y_sequence_zoom} {y_sequence_zoom_start} {y_sequence_zoom_end}
 <<command-line options>>=
 "y-sequence-zoom=s"         => \$CmdLineVars{LAYOUT}{"y_sequence_zoom"},
@@ -3209,7 +3566,7 @@ LDE:
 
 <<default layout vars values>>=
 aplot_xy_same_length       => { TYPE => 'BOOLEAN', VALUE => $T     },
-aplot_xy_scale             => { TYPE => 'DECIMAL', VALUE => 1      },
+aplot_xy_scale             => { TYPE => 'FLOAT',   VALUE => 1      },
 @ %def {aplot_xy_same_length} {aplot_xy_scale}
 <<command-line options>>=
 "r|aplot-xy-noteq"     => sub { $CmdLineVars{LAYOUT}{"aplot_xy_same_length"} = $F }, # XY_AXES_Same-SIZE
@@ -3739,8 +4096,8 @@ LDE:
 @ 
 
 <<default layout vars values>>=
-major_tickmark_nucleotide  => { TYPE => 'DNABASE', VALUE => undef  },
-minor_tickmark_nucleotide  => { TYPE => 'DNABASE', VALUE => undef  },
+major_tickmark_nucleotide  => { TYPE => 'SEQ_UNIT', VALUE => undef  },
+minor_tickmark_nucleotide  => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {major_tickmark_nucleotide} {minor_tickmark_nucleotide}
 <<DESC custom file variables>>=
 ORD: 115
@@ -3776,7 +4133,7 @@ feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
 feature_label_length       => { TYPE => 'INTEGER', VALUE => 0      },
 feature_label_rotate       => { TYPE => 'BOOLEAN', VALUE => $F      },
 feature_label_font         => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-feature_label_fontsize     => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+feature_label_fontsize     => { TYPE => 'PS_UNIT', VALUE => '5pt'  },
 @ %def {show_feature_label}
 
 <<default layout vars values>>=
@@ -3786,7 +4143,7 @@ group_y_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
 group_label_length         => { TYPE => 'INTEGER', VALUE => 0      },
 group_label_rotate         => { TYPE => 'BOOLEAN', VALUE => $F      },
 group_label_font           => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-group_label_fontsize       => { TYPE => 'FONT_SZ', VALUE => '5pt'  },
+group_label_fontsize       => { TYPE => 'PS_UNIT', VALUE => '5pt'  },
 @ %def {show_group_label}
 
 <<default layout vars values>>=
@@ -4077,15 +4434,14 @@ Unknown             & ? \\
 \end{center}
 \end{table}
 
+<<Pre-Declared Vars>>=
+$GFF $GFF_NOGP $VECTOR $ALIGN $APLOT $APLOT_NOGP $noGFF
+@ 
 <<Global Constants>>=
-my ($GFF,$GFF_NOGP,$VECTOR,$ALIGN,
+($GFF,$GFF_NOGP,$VECTOR,$ALIGN,
     $APLOT,$APLOT_NOGP,$noGFF) =
     qw/ X x V A O o ? /;
 @ 
-
-<<Global Vars>>=
-my ($n,$c);
-@
 
 <<warnings - parsing GFF files>>=
 NOT_ENOUGH_FIELDS =>
@@ -4833,7 +5189,7 @@ sub map_vars_data() {
     foreach my $v_sec (keys %Vars) {
         $v_sec eq 'LAYOUT' && next; # skip layout variables
         foreach my $v_var (keys %{$Vars{$v_sec}}) {
-            my @v_values = @{ $Vars{$v_sec}{$v_var} }
+            my @v_values = @{ $Vars{$v_sec}{$v_var} };
             for (my $foo = 0; $foo < $#v_values; $foo+=4) {
                 my ($neg_flg, $id_flg, $reg_exp, $the_value, $name_test);
                 ($neg_flg, $id_flg, $reg_exp, $the_value) = @v_values[$foo..($foo + 3)];
@@ -4861,7 +5217,7 @@ foreach my $seq (keys %GFF_DATA) {
 @ 
 
 <<set reference to GFF data: SOURCES>>=
-foreach my $src (keys $seq_ref->[$_element]) {
+foreach my $src (keys %{ $seq_ref->[$_element] }) {
     $v_sec eq 'SOURCE' && do {
         my $src_ref = \@{ $seq_ref->[$_element]{$src} };
         &does_feat_match($src,$reg_exp,$src_ref,
@@ -4873,7 +5229,7 @@ foreach my $src (keys $seq_ref->[$_element]) {
 @ 
 
 <<set reference to GFF data: STRANDS>>=
-foreach my $str (keys $src_ref->[$_element]) {
+foreach my $str (keys %{ $src_ref->[$_element] }) {
     $v_sec eq 'STRAND' && do {
         my $str_ref = \@{ $src_ref->[$_element]{$str} };
         &does_feat_match($str,$reg_exp,$str_ref,
@@ -4885,7 +5241,7 @@ foreach my $str (keys $src_ref->[$_element]) {
 @ 
 
 <<set reference to GFF data: GROUPS>>=
-foreach my $grp (keys $str_ref->[$_element]) {
+foreach my $grp (keys %{ $str_ref->[$_element] }) {
     $v_sec eq 'GROUP' && do {
         my $grp_ref = \@{ $str_ref->[$_element]{$grp} };
         &does_feat_match($grp,$reg_exp,$grp_ref,
@@ -4902,11 +5258,11 @@ foreach my $feat (0..$#{ $grp_ref->[$_element] }) {
     $feat_ref = \@{ $grp_ref->[$_element][$feat] };
     ($ft_name, $ft_id) = ($feat_ref->[$_ftname],$feat_ref->[$_ftid]);
     # check ID
-    $id_flg ne $NULL && {
-        $ft_id ~ /^$id_flg$/o && do {
+    $id_flg ne $NULL && do {
+        $ft_id =~ /^$id_flg$/o && do {
             &does_feat_match($ft_name,$reg_exp,$feat_ref,
                              $_ftprop,$v_sec,$v_var,$the_value);
-        }; # $ft_id ~ /^$id_flg$/o
+        }; # $ft_id =~ /^$id_flg$/o
         next;
     }; # $id_flg ne $NULL
     # check regexp
@@ -4930,7 +5286,7 @@ The following two functions are checking if a GFF element match or not a given r
 
 <<Features Setting>>=
 sub match_regexp() {
-    $_[0]  ~ /$_[1]/o && return $T;
+    $_[0] =~ /$_[1]/o && return $T;
     return $F;
 } # match_regexp
 sub match_regexp_neg() {
@@ -5274,7 +5630,7 @@ sub ps_header() {
 %
 % $LAST_UPDATE
 %
-% Report BUGS to: jabril@\imim.es 
+% Report BUGS to: jabril\@imim.es 
 %
 %%BeginProlog
 %
@@ -5303,9 +5659,11 @@ sub ps_colors() {
 } # ps_colors
 @ %def &ps_colors
 
+\label{sec:ColorsHsh}
+
 <<Global Vars>>=
-my $colors = 0;
-my %COLORS = (    # [ ColorNUMBER, qw/ CYAN MAGENTA YELLOW BLACK / ]
+$colors = 0;
+%COLORS = (    # [ ColorNUMBER, qw/ CYAN MAGENTA YELLOW BLACK / ]
   <<cmyk colors perl definition>>
   ); # %COLORS
 @
@@ -5329,9 +5687,11 @@ sub ps_page_formats() {
 } # ps_page_formats
 @ %def &ps_page_formats
 
+\label{sec:FormatsHsh}
+
 <<Global Vars>>=
-my $formats = 0;
-my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
+$formats = 0;
+%FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
   <<page sizes perl definition>>
   );
 @ 
@@ -6673,9 +7033,11 @@ local $Data::Dumper::Deepcopy = 1;
 
 \subsctn{Reporting program status}
 
+\label{sec:MessagesHsh}
+
 <<Global Vars>>=
 # Program status strings.
-my %Messages = (
+%Messages = (
     # ERROR MESSAGES
     <<warnings - input/output>>
     <<warnings - parsing command-line options>>
@@ -7151,7 +7513,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -7577,7 +7939,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.14 2001-11-06 20:13:29 jabril Exp $
+# $Id: gff2aplot.nw,v 1.15 2001-11-07 18:11:18 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -7651,6 +8013,11 @@ documentation. The following instructions are needed:
 # showing line numbering comments in program
 notangle -L -R"APLOT" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' - | cpif $BIN/gff2aplot.pl ;
+# we remove here the comments within "use vars qw/ ... /",
+# numbers may change if noweb doc is changed
+notangle -L -R"APLOT" $WORK/$nwfile.nw | \
+    perl -ne '($.>1 && $_ !~ /^\#line (442|453|460|1180|1275|4458|432)/o) &&
+               print' - | cpif $BIN/gff2aplot.pl ;
 chmod a+x $BIN/gff2aplot.pl ;
 #
 @ 
