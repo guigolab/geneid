@@ -400,8 +400,8 @@ else{
 		
 		# we print out the exon-assemblies
 		
-		# intergenic:
-		# within a cluster but intergenic (w.r.t the annotation):
+		# bridge:
+		# within a cluster but 'bridging' (w.r.t the annotation):
 		#
 		#                          ###--###---### a  (annotations)
 		#  ###---###                              a
@@ -478,14 +478,14 @@ else{
 			
 			
 			############################################################
-			# is it actually intergenic?
+			# is it actually bridging?
 			# first check that there are previous and posterior exon clusters:
 			
 			############################################################
-			# 'intergenic' means that within the transcript cluster
+			# 'bridge' means that within the transcript cluster
 			# the prediction bridges across two different annotations
 			#
-			# 'intergenic_complete' means that there is bridging
+			# 'bridge_complete' means that there is bridging
 			# but although there is transcript-extension overlap
 			# there is no actual exon overlap, hence it can remain complete and novel:
 			# 
@@ -534,10 +534,10 @@ else{
 			    }
 			}
 			if ( !@common_transcripts ){
-			    $label .="\tintergenic";
+			    $label .="\tbridge";
 			}
 			else{
-			    #print "not intergenic as there are common transcripts:\n";
+			    #print "not bridge as there are common transcripts:\n";
 			    #foreach my $t ( @common_transcripts ){
 			    #	print $t->dbID.", ";
 			    #}
@@ -546,7 +546,7 @@ else{
 			}
 		    }
 		    ############################################################
-		    # 'external' means that it is not intergenic, neither intronic
+		    # 'external' means that it is not bridging, neither intronic
 		    #
 		    # 
 		    #                                ##----###--###   a  (annotations)
@@ -555,7 +555,7 @@ else{
 		    #
 		    # 'external complete' means that its extent overlaps the extent
 		    # of some annotation but there is no exon overlap, and moreover,
-		    # it is not intergenic (it does not bridge two annotations)
+		    # it is not bridging (it does not bridge two annotations)
 		    # and it is not intronic, it has exons that are outside
 		    # the introns of the annotation. eg:
 		    #
@@ -629,10 +629,10 @@ foreach my $seqname ( keys %novel_predictions ){
 #
 ############################################################
 #
-# 'intergenic' means that within the transcript cluster
+# 'bridging' means that within the transcript cluster
 # the prediction bridges across two different annotations
 #
-# 'intergenic_complete' means that there is bridging
+# 'bridging_complete' means that there is bridging
 # but although there is transcript-extension overlap
 # there is no actual exon overlap, hence it can remain complete and novel:
 # 
@@ -642,7 +642,7 @@ foreach my $seqname ( keys %novel_predictions ){
 #
 ############################################################
 #
-# 'external' means that it is not intergenic, neither intronic
+# 'external' means that it is not bridging, neither intronic
 #
 # 
 #                                ##----###--###   a  (annotations)
@@ -651,7 +651,7 @@ foreach my $seqname ( keys %novel_predictions ){
 #
 # 'external complete' means that its extent overlaps the extent
 # of some annotation but there is no exon overlap, and moreover,
-# it is not intergenic (it does not bridge two annotations)
+# it is not bridging (it does not bridge two annotations)
 # and it is not intronic, it has exons that are outside
 # the introns of the annotation. eg:
 #
