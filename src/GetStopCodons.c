@@ -24,11 +24,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetStopCodons.c,v 1.1 2000-07-05 08:16:41 eblanco Exp $  */
+/*  $Id: GetStopCodons.c,v 1.2 2000-08-08 14:17:54 eblanco Exp $  */
 
 #include "geneid.h"
 
 extern int TRANS[];
+extern long NUMSITES;
 
 long GetStopCodons(char *s, profile *p, 
 		   site *sc, 
