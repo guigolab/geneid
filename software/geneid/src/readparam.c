@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.1 2000-07-07 10:44:32 eblanco Exp $  */
+/*  $Id: readparam.c,v 1.2 2000-08-08 14:25:16 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -291,7 +291,7 @@ int readparam (char *name, gparam** isochores)
   sprintf(mess,"Number of isochores: %d", nIsochores);
   printMess(mess);
 
-  if (nIsochores >= MAXISOCHORES || !(nIsochores>0))
+  if (nIsochores > MAXISOCHORES || !(nIsochores>0))
     printError("Bad format: number of isochores(MAXISOCHORES)");
 
   /* Reading every one of the isochores */
