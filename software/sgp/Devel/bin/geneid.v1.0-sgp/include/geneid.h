@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.1 2000-07-18 18:00:20 eblanco Exp $ */
+/* $Id: geneid.h,v 1.2 2000-07-21 11:40:12 eblanco Exp $ */
 
 /* Include libraries */
 #include <stdio.h>
@@ -54,9 +54,9 @@
 #define LENGTHSi 100000                /* Max length of each split of S   */ 
 #define OVERLAP 15000                  /* Max length of a exon(overlap)   */
 
-#define MAXBACKUPSITES 100000          /* Backup Information sizes */
-#define MAXBACKUPEXONS 100000      
-#define MAXDUMPHASH 99997
+#define MAXBACKUPSITES 125000          /* Backup Information sizes */
+#define MAXBACKUPEXONS 125000      
+#define MAXDUMPHASH 124997
 
 #define MAXAA 10000                    /* Max lenght (aminoacids/protein) */
 
