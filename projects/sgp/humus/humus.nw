@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.16 2002-04-28 00:28:34 jabril Exp $ 
+% # $Id: humus.nw,v 1.17 2002-04-28 00:43:16 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.16 2002-04-28 00:28:34 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.17 2002-04-28 00:43:16 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2685,12 +2685,12 @@ sub main() {
         next if /^#/o;
         next if /^\s*$/o;
         chomp;
-        @l = split /\s+/og, $rec;
+        @l = split /\s+/og, $_;
         push @allgp, [ @l ];
     };
     close(GPFILE);
     # we must sort input as it can be provided unordered
-    @allgp = sort { $a->[3] <=> $b[3] || $a->[4] <=> $b[4] } @allgp;
+    @allgp = sort { $a->[3] <=> $b->[3] || $a->[4] <=> $b->[4] } @allgp;
     foreach my $gp (@allgp) {
         $c++ if &process_gene($gp);
     };
@@ -7364,7 +7364,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.16 2002-04-28 00:28:34 jabril Exp $
+# $Id: humus.nw,v 1.17 2002-04-28 00:43:16 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
