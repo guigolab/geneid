@@ -1,0 +1,39 @@
+%
+% $Id: papers.tex,v 1.1 2002-03-14 10:43:41 jabril Exp $
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+\chap{Publicacions}
+
+% \sctn{{\gps}: }
+
+\newcommand{\showpaper}[2]{
+  \begin{center}
+  \setlength{\fboxsep}{1pt}
+  \fbox{
+    \includegraphics[#1]
+                    {./psfigures/papers/#2}
+  } % fbox
+  \end{center}
+  \newpage
+} % showpaper
+
+% \newpage
+\showpaper{width=0.95\linewidth,angle=180}
+          {Bioinformatics_2000_16_8_734_pp1+2.eps}
+
+\showpaper{width=0.95\linewidth,angle=180}
+          {GenomeResearch_2000_10_10_1631_pp1+2.eps}
+\showpaper{height=\textheight,angle=0}
+          {GenomeResearch_2000_10_10_1631_figure}
+
+\showpaper{width=0.95\linewidth,angle=180}
+          {Science_2000_287_5461_2185_pp1+2.eps}
+\showpaper{height=\textheight,angle=0}
+          {Science_2000_287_5461_2185_figure}
+
+\showpaper{width=0.95\linewidth,angle=180}
+          {Science_2001_291_1304_pp1+2.eps}
+\showpaper{width=0.95\linewidth,angle=0}
+          {Science_2001_291_1304_figure}
