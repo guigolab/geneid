@@ -1,0 +1,404 @@
+<html>
+<head>
+<style type="text/css">
+div.bulk { text-align: justify }
+</style>
+<title>
+geneid docs
+</title>
+</head>
+
+<BODY 
+TEXT color ="blue"
+BGCOLOR="white"
+LINK="blue"
+VLINK="blue"
+ALINK="blue">
+
+<center>
+<table border=0 width=700>
+<tr>
+<td align=left>
+<font face=courier size=5 color=red><b>geneid documentation:</b></font>
+</td>
+<td align=right>
+<font face="arial black" size=3>8. <tt>geneid</tt> parameter file</font>
+</td>
+</table>
+
+<br><p><br><p>
+<table border=0 width=700 cellpadding=10>
+<tr>
+<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
+<tr>
+<td>
+<div class="bulk"><font face="arial black" size=2>
+<ol>
+<li> <a href="#description">Description</a>
+<li> <a href="#gm">The GENE MODEL</a>
+<li> <a href="#full">Full description</a>
+<li> <a href="./../index.html">INDEX</a>
+</ol>
+</font>
+</div>
+</td>
+</table>
+
+<br><p><br><p>
+<table border=0 width=700 cellpadding=10>
+<tr>
+<td bgcolor=orange><font face="arial black" size=3>Description:</font>
+<a name ="description"></td>
+<tr>
+<td>
+<div class="bulk"><font face="arial black" size=2>
+<tt>geneid</tt> depends on a parameter file to build the predictions. The parameter file contains
+mostly the description of the probabilistic model on which the predictions
+are based. It also contains the so-called gene model at the end of the
+parameter file, the set of rules describing how to chain gene elements
+(such as exons) into gene predictions. Through the usage of the gene model
+and the options <tt>O/R</tt>, <tt>geneid</tt> offers support for the
+integration of predictions from multiple sources.
+</font>
+</div>
+</td>
+</table>
+
+<br><p><br><p>
+<table border=0 width=700 cellpadding=10>
+<tr>
+<td bgcolor=orange><font face="arial black" size=3>The GENE MODEL</font>
+<a name ="gm"></td>
+<tr>
+<td>
+<div class="bulk"><font face="arial black" size=2>
+The gene model is the list of rules describing the constrains under which,
+predicted gene elements must be joined together in the final output. This
+constrains refer to the succession of elements in the gene structure and
+to the range of allowed distances among them.
+
+<br><p>
+<center>
+<table border=1 cellpadding=10 width=600>
+<tr>
+<td align=center bgcolor="skyblue">
+<font size=2>
+<pre>
+#Intragenic connections
+First+:Internal+     Internal+:Terminal+     40:11000
+</pre>
+</font>
+</td>
+</table>
+</center>
+<br><p>
+For instance, the rule above indicates that elements (exons) of type
+<tt>Internal</tt> or <tt>Terminal</tt>, must be chained immediately after
+elements of type <tt>First</tt> or <tt>Internal</tt> in the forward strand.
+The third column indicates the range at which they can be chained. In this
+rule, the predicted elements must be at least 40 bp and at most 11000, apart.
+The equivalent rule for the reverse sense is:
+<br><p>
+<center>
+<table border=1 cellpadding=10 width=600>
+<tr>
+<td align=center bgcolor="skyblue">
+<font size=2>
+<pre>
+#Intragenic connections (reverse)
+Terminal-:Internal-     Internal-:First-    40:11000
+</pre>
+</font>
+</td>
+</table>
+</center>
+<br><p>
+The following rule specifies the constrains governing connections between
+genes:
+<br><p>
+<center>
+<table border=1 cellpadding=10 width=600>
+<tr>
+<td align=left bgcolor="skyblue">
+<font size=1>
+<pre>
+#Intragenic connections (reverse)
+Promoter-:First-:Terminal+     Promoter+:Terminal-:First+    2000:Infinity
+Promoter+                      First+                        50:4000
+First-                         Promoter-                     50:4000
+</pre>
+</font>
+</td>
+</table>
+</center>
+<br><p>
+The first line describes the relationship between the end of a gene
+and the beginning of another one both in the forward as well as the
+beginning of one gene and the end of another one in the reverse sense.
+Moreover, hybrids are also defined (e.g. end of a reverse gene with beginning of
+a forward gene). The second and third line define the right place to put a
+promoter related to one gene in the same strand. To specify no maximum distance constrains,
+the keyword Infinity must be used.
+<br><p>
+The present version of <tt>geneid</tt> predicts elements with types
+<tt>First, Internal, Terminal and Single</tt>. Other elements in the
+additional files provided externally (O/R options) are ignored when they
+are not defined in any rule of the gene model.
+<br><p>
+The gene model dos not specify which elements terminate genes (which are
+assumed to be represented by the group field of the gff file). Gene
+termination is coded within the program with the features
+<tt>First+/Terminal-</tt> (start) and <tt>First-/Terminal+</tt> (end) while
+<tt>Single+/Single-</tt> are both start and end from genes.
+</font>
+</div>
+</td>
+</table>
+
+<br><p><br><p>
+<table border=0 width=700 cellpadding=10>
+<tr>
+<td bgcolor=orange><font face="arial black" size=3>Full description:</font>
+<a name ="full"></td>
+<tr>
+<td>
+<div class="bulk"><font face="arial black" size=2>
+
+<br><p>
+<table border=0 width=600 cellpadding=10>
+<tr>
+<td bgcolor="white">
+<b>(1)</b>
+This the general structure in geneid parameter files:
+information model to predict genomic elements according to the G+C content
+of every sequence fragment, and gene model to assemble the predictions
+following series of rules.</td>
+<tr>
+<td bgcolor="lightblue">
+<font size=2 color="black">
+<b>
+<pre>
+<font color=red>#1. ISOCHORE DEPENDENT INFORMATION</font>
+number_of_isochores
+3
+
+# SET OF PARAMETERS FOR ISOCHORE 1
+boundaries_of_isochore
+0  40
+<font color="white">...</font>
+# SET OF PARAMETERS FOR ISOCHORE 2
+boundaries_of_isochore
+40  70
+<font color="white">...</font>
+# SET OF PARAMETERS FOR ISOCHORE 3
+boundaries_of_isochore
+70  100
+<font color="white">...</font>
+
+<font color=red>#2. GENE ASSEMBLING RULES (gene model)</font>
+<font color="white">...</font>
+</pre></b></font>
+</td>
+<tr>
+<td bgcolor="white">
+<b>(2)</b>
+This the general structure for every isochore model: cutoff values to filter
+exons after scoring, profiles to discover genomic signals, Markov
+model matrices to measure coding potential property and maximum number
+of exons starting with the same starting signal.
+</td>
+<tr>
+<td bgcolor="lightblue">
+<font size=2 color="black">
+<b>
+<pre>
+# SET OF PARAMETERS FOR ISOCHORE 1
+boundaries_of_isochore
+0  40
+
+<font color=red>#1. SET OF PARAMETERS to filter exons</font>
+<font color="white">...</font>
+
+<font color=red>#2. PROFILES TO PREDICT SIGNALS</font>
+<font color="white">...</font>
+
+<font color=red>#3. MARKOV MODEL TO ESTIMATE CODING POTENTIAL</font>
+<font color="white">...</font>
+
+<font color=red>#4. Maximum amount of exons with every left signal</font>
+maximum_number_of_donors_per_acceptor_site
+5
+</pre></b></font>
+</td>
+<tr>
+<td bgcolor="white">
+<b>(3)</b>
+Parameters for filtering exons depending on their coding potential score:
+cutoff on the final exon score, cutoff on the protein coding potential
+score, weighted value for coding potential against signals score and
+exon weight parameter (value added to exons which have overcome all of the
+previous filters: penalty to avoid predicting long genes with too many genes
+due to the additive schema under gene assembling model). There are always
+4 values for each of exon types: First, Internal, Terminal and Single.
+</td>
+<tr>
+<td bgcolor="lightblue">
+<font size=2 color="black">
+<b>
+<pre>
+# SET OF PARAMETERS to filter exons
+
+<font color="red">Total_score_cutoff</font>
+-15 -15 -15 -15
+
+<font color="red">Coding_potential_score_cutoff</font>
+-10 -15 -15 -15
+
+<font color="red">Weight_of_coding_potential_score_in_exons</font>
+0.4 0.4 0.4 0.4
+
+<font color="red">Exon_weight_values</font>
+-7 -7 -7 -7
+</pre></b></font>
+</td>
+<tr>
+<td bgcolor="white">
+<b>(4)</b> This a generic profile to predict genomic signals: start / stop
+codons or acceptor / donor splice sites. This type of profile is called
+Position Weight Array: a matrix addressed by (nucleotide,position) in which
+every cell contains a loglikelihood ratio between a Markov model (order k)
+recognizing true sites and another one, matching false ones. Therefore,
+for every nucleotide in a candidate region, is scored the probability to
+find the oligonucleotide (length k) before that nucleotide whether the region
+contains a true site or not. PWA are well characterized by defining 4 parameters:
+<ul>
+<li>length of profile (region to be scanned)
+<li>offset: distance from the beginning of the profile to the characteristic
+or core element for that signal (i.e. ATG in start codons)
+<li>cutoff: score to filter false signals
+<li>order (Markov chains): length of oligonucleotides used to score every
+element in the candidate region
+</ul>
+</td>
+<tr>
+<td bgcolor="lightblue">
+<font size=2 color="black">
+<b>
+<pre>
+<font color="red">Start profile</font>
+20 14 -6 2
+
+<font color="red"># Position Weight Array</font>
+
+1 AAA -0.230297
+1 AAC 0.519562
+1 AAG 0.301505
+1 AAT -0.519705
+1 ACA -0.688891
+1 ACC 0.483538
+<font color="white">...</font>
+20 TGT -0.483268
+20 TTA -0.545436
+20 TTC 0.557414
+20 TTG -0.0335678
+20 TTT -0.172498
+
+# e.g. Given S=ATGAGC then
+# score(GAGC) = score(1,ATG) + score(2,TGA) + score(3,GAG) + score(4,AGC)
+</pre></b></font>
+</td>
+<tr>
+<td bgcolor="white">
+<b>(5)</b> Model to measure the protein coding potential of genomic regions.
+A Markov model (chains of order 5) are usually used, having 2 types of
+matrices: initial (for scoring the first pentanucleotide of an exon) and
+transition (for scoring the exon by taking 5+1 nucleotides until reaching
+the end of the exon). Initial matrix has been computed by measuring the
+ratio between frequency of pentanucleotides found in real exons and
+contained in intronic regions. Transition matrix has been computed by
+measuring the ratio between the probability to find a pentanucleotide X in
+codon position CP (translation) before a given nucleotide, in a real exon or
+in a false one (intronic region).
+</td>
+<tr>
+<td bgcolor="lightblue">
+<font size=2 color="black">
+<b>
+<pre>
+<font color="red"># Markov model (log likelihood ratio)</font>
+<font color="red">Markov_model_order</font>
+5
+
+<font color="red">Markov_initial_probability_matrix</font>
+AAAAA 0 0 -0.85727
+AAAAA 0 1 -1.48328
+AAAAA 0 2 -1.72858
+AAAAC 1 0 -0.377093
+AAAAC 1 1 -0.202228
+AAAAC 1 2 -0.961698
+<font color="white">...</font>
+
+<font color="red">Markov_transition_probability_matrix</font>
+AAAAAA 0 0 -1.10797
+AAAAAA 0 1 -0.736771
+AAAAAA 0 2 -0.570196
+AAAAAC 1 0 0.961644
+AAAAAC 1 1 0.516564
+AAAAAC 1 2 0.646909
+</pre></b></font>
+</td>
+<tr>
+<td bgcolor="white">
+<b>(6)</b> Gene model rules. Rules defining which exon types are allowed
+to join to others, respecting minimum and maximum distance requirement.
+First column of rule are features which will be assembled before features
+in the second one, respecting the distances (third column). The word
+"block" is used to preserve connections between exons sharing the same
+identifier (group), as annotated genes (evidences) without mixing them
+with ab initio predictions. Minimum distance is the smallest allowed
+distance between the end and start of both connected exons while maximum
+distance is the highest allowed distance to connect two exons (the reserved
+word "Infinity" is used to disable the maximum restriction to save time
+consuming). Connection between exons, depending on their type, are sometimes
+actual gene connections (i.e. a Terminal exon with a First exon means joining
+the end of a gene with the beginning of another one).
+</td>
+<tr>
+<td bgcolor="lightblue">
+<font size=2 color="black">
+<b>
+<pre>
+<font color="red">#Intronic connections</font>
+First+:Internal+       Internal+:Terminal+      20:25000 block
+Terminal-:Internal-    First-:Internal-         20:25000 block
+</pre></b></font>
+</td>
+</table>
+
+</font>
+</div>
+</td>
+</table>
+
+<br><p><br><p><br><p>
+
+<table border=0>
+<tr>
+<td align=left bgcolor=darkgreen>
+<script>
+var modifieddate=document.lastModified
+    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
+                   "Last modified: " + modifieddate)
+</script>
+</td>
+</table>
+
+<br><p>
+Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+</center>
+</body>
+</html>
+
+
+
+
