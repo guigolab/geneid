@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.8 2003-02-25 14:42:25 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.9 2003-03-07 16:56:25 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.8 2003-02-25 14:42:25 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.9 2003-03-07 16:56:25 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -342,7 +342,7 @@ if (defined($ENV{HOSTNAME})) {
 # FLAGS
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg,
     $subject_flg, $sequence_flg, $full_scores, $comment_flg, $nocmmnt_flg,
-    $split_flg, $help_flg, $err_flg, $expanded_flg, $short_tgt_flg,
+    $split_flg, $help_flg, $ver_flg, $err_flg, $expanded_flg, $short_tgt_flg,
     $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg, $noframe_flg);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param, $aln_split, $prt_pos_flg
 	) = (0, 0, 0, 0, 0, 0, 0, 0);
@@ -406,8 +406,10 @@ sub get_commandline_opts(){
                 "c|comments"       => \$comment_flg  ,
                 "n|no-comments"    => \$nocmmnt_flg  ,
                 "v|verbose"        => \$err_flg      ,
+                "version"          => \$ver_flg      ,
                 "h|help|\?"        => \$help_flg      );
     #
+    ($ver_flg) && &prt_version;
     ($help_flg) && &prt_help;
     #
   FLGS: {   # first choose disables any other command-line option.
@@ -539,7 +541,11 @@ sub get_date() {
 	
 #
 # Print help to STDERR.
-sub prt_help {
+sub prt_version() {
+    print STDERR "#\n# $PROGRAM $VERSION \n#\n";
+    exit(2);
+} # prt_version
+sub prt_help() {
 	open(HELP, "| more") ;
 	print HELP <<EndOfHelp;
 PROGRAM:
@@ -610,7 +616,8 @@ COMMAND-LINE OPTIONS:
     -c, --comments       : include parameters from blast program as comments.
     -n, --no-comments    : do not print "#" lines (raw output without comments).
     -v, --verbose        : warnings sent to <STDERR>.
-    -h, --help           : shows this help.
+        --version        : prints program version and exits.
+    -h, --help           : shows this help and exits.
 
 OUTPUT FORMATS:
 
@@ -666,7 +673,7 @@ AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000-2003, Josep F. Abril
 
 EndOfHelp
 	close(HELP);
-exit(1);
+exit(2);
 } # prt_help
 # print STDOUT "HSP:$hsp_flg GFF:$gff_flg COM:$comment_flg SPL:$split_flg HLP:$help_flg\n";
 
@@ -1358,7 +1365,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.8 2003-02-25 14:42:25 jabril Exp $
+# $Id: parseblast.nw,v 1.9 2003-03-07 16:56:25 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
