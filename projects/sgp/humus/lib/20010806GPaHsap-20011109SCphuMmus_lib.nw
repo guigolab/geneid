@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.3 2002-05-09 12:49:58 jabril Exp $ 
+% # $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.4 2002-05-17 19:28:37 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.3 2002-05-09 12:49:58 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.4 2002-05-17 19:28:37 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -992,8 +992,9 @@ gawk '
 #<# ODIR="$HUMUS/$NCHR/tblastx/$XID/eval" ;
 CheckFile R $IDIR/$SEQ.gff ;
 gawk 'BEGIN{ OFS="\t"; }
-      ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/ && $3 ~ "SR") { print $0,"1" }' \
-               $IDIR/$SEQ.gff > $ODIR/$SEQ.eval.gff || TheEnd GAWKKO ;
+      ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/ && $3 ~ "SR") { $8=3; print $0,"1" }' \
+               $IDIR/$SEQ.gff > $ODIR/$SEQ.noframe.gff || TheEnd GAWKKO ;
+$BIN/blast2gff -vg $IDIR/$SEQ.noframe.gff > $ODIR/$SEQ.eval.gff || TheEnd CKO ;
 $BIN/gffsplitstrand.pl $ODIR/$SEQ.eval.gff ; # no sequence length record required here
 #
 A_REFSEQ="$CHRDIR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/$<STEP{HSAP_GP_ANNOTATION}{HSAP_GP_REFSEQ}{STEP_PATH}>/$SEQ.eval" ;
@@ -2167,7 +2168,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.3 2002-05-09 12:49:58 jabril Exp $
+# $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.4 2002-05-17 19:28:37 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2604,16 +2605,4 @@ enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_test.summary ;
 %
 \end{document}
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  n <- 10
-%  g <- gl(n, 100, n * 100)
-%  x <- rnorm(n * 100) + sqrt(codes(g)) 
-%  boxplot(split(x, g), col = "lavender", notch = TRUE)
-%  title(main = "Notched Boxplots", xlab = "Group", font.main = 4,
-%    font.lab = 1)
-%  par(bg = "white")
-%  n <- 100
-%  x <- c(0, cumsum(rnorm(n)))
-%  y <- c(0, cumsum(rnorm(n)))
-%  xx <- c(0:n, n:0)
-%  yy <- c(x, rev(y))
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
