@@ -46,6 +46,9 @@ use ClusterMerge::Exon;
 sub _print_SimpleTranscript{
     my ($self,$transcript,$chr_coord) = @_;
     my @exons = sort { $a->start <=> $b->start } @{$transcript->get_all_Exons};
+    
+    my $strand = $exons[0]->strand;
+
     my $id;
     if ($transcript->stable_id){
 	$id = $transcript->stable_id;
@@ -54,23 +57,23 @@ sub _print_SimpleTranscript{
 	$id = $transcript->dbID;
     }
     else{
-      $id = "no id";
+	$id = "no id";
     }
     if ( defined( $transcript->type ) ){
-      $id .= " ".$transcript->type;
+	$id .= " ".$transcript->type;
     }
-    print STDERR "transcript ".$id.": ";
+    print "transcript ".$id.": ".$strand." ";
     
 
     
     my $shift = 0;
     if ( $chr_coord ){
-      $shift = $exons[0]->contig->chr_start - 1;
+	$shift = $exons[0]->contig->chr_start - 1;
     }
     foreach my $exon ( @exons){
-      print STDERR ($exon->start + $shift)."-".( $exon->end + $shift )." ";
+	print "".($exon->start + $shift)."-".( $exon->end + $shift )." ";
     }
-    print STDERR "\n";
+    print "\n";
   }
 
 ############################################################
@@ -143,8 +146,10 @@ sub is_spliced{
 
 sub _difuse_small_introns{
   my ($self,$tran, $intron_mismatch) = @_;
+
+    my $verbose  = 0;
+
   my $modified = 0;
-  my $verbose  = 1;
   
  DIFUSE:
   if ( $intron_mismatch ){
@@ -193,8 +198,105 @@ sub _difuse_small_introns{
   }
 }
 
+############################################################
 
+sub transcript_length{
+    my ($self, $t) = @_;
+    my $length = 0;
+    foreach my $e ( @{$t->get_all_Exons} ){
+	$length += ($e->end - $e->start + 1 );
+    }
+    return $length;
+}
+
+############################################################
+
+# this method aliminates redundat transcripts from a list
+# according to consecutive exon overlap
+# it is simplified version of the ClusterMerge idea:
+# it returns a list of the transcripts that overlap with the
+# rejecte ones and are at least as big as the rejected ones.
+
+sub eliminate_redundant_transcripts{
+    my ($self,$trans) =  @_;
+    my @trans = sort { 
+	my $result = ( scalar(@{$b->get_all_Exons}) <=> scalar(@{$a->get_all_Exons}) );
+	if ($result){
+	    return $result;
+	}
+	else{
+	    return ( ClusterMerge::TranscriptUtils->transcript_length($b) <=> ClusterMerge::TranscriptUtils->transcript_length($a) );
+	}
+    } @$trans;
+    
+    my $comparator = ClusterMerge::TranscriptComparator->new(
+							     -comparison_level                 => 5,
+							     -intron_mismatch                  => 20,
+							     );
+    my @accepted_trans;
+  TRANS:
+    while ( @trans ){
+	my $trans = shift @trans;
+	my $found_embedding = 0;
+	
+      ACCEPTED_TRANS:
+	foreach my $accepted_trans ( @accepted_trans ){
+	    
+	    if ( $comparator->compare( $trans, $accepted_trans ) ){
+		next TRANS;
+	    }
+	}
+	
+	# if we get to this point, it means that this trans is genuine
+	push( @accepted_trans, $trans );
+    }
+    
+    return @accepted_trans;
+}
 
 
 ############################################################
+
+# it sorts an arrayref of ClusterMerge::Transcript objects
+# ascending by their lowered coordinate and descending by their
+# higher coordinate. 
+
+# It returns an array of ClusterMerge::Transcript objects
+
+sub sort_transcripts{
+    my ($self,$transcripts) = @_;
+    my @transcripts = sort { my $result = ( $self->transcript_low($a) <=> $self->transcript_low($b) );
+			     if ($result){
+				 return $result;
+			     }
+			     else{
+				 return ( $self->transcript_high($b) <=> $self->transcript_high($a) );
+			     }
+			 } @$transcripts;
+    
+    return @transcripts;
+    
+}
+
+############################################################
+# Description: it returns the highest coordinate of a transcript
+
+sub transcript_high{
+    my ($self,$tran) = @_;
+    my @exons = sort { $a->start <=> $b->start } @{$tran->get_all_Exons};
+    return $exons[-1]->end;
+}
+
+############################################################
+# Description: it returns the lowest coordinate of a transcript
+
+sub transcript_low{
+    my ($self,$tran) = @_;
+    my @exons = sort { $a->start <=> $b->start } @{$tran->get_all_Exons};
+    return $exons[0]->start;
+}
+
+############################################################
+
+
 1;
