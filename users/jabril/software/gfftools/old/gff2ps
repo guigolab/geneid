@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.47 2000-01-29 00:30:38 jabril Exp $	
+#         $Id: gff2ps,v 1.48 2000-01-29 01:44:40 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.47 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-29 00:30:38 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.48 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-29 01:44:40 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.47 2000-01-29 00:30:38 jabril Exp $
+%    $Id: gff2ps,v 1.48 2000-01-29 01:44:40 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -736,7 +736,7 @@ end % shpdct
  /kbb { XOriBlck 5 sub -2 XSBlck 10 add YSBlck 2 add bbox FlgBkBx { 1 slw fgcolor scmyk K } { newpath } ifelse } bdf
  /tm { S tmdct begin /ShowGrid xdf exec end R } bdf
 % /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 3 } { 2 } ifelse mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 5 } { 4 } ifelse mul YSFwd add YSBth add {r} 0 tm } if } bdf
- /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 3 } { 2 } ifelse mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} FlgOS { 0 } { 2 } ifelse tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 5 } { 4 } ifelse mul YSFwd add YSBth add {r} FlgOS { 0 } { 1 } ifelse  tm } if } bdf
+ /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgIS not YSBth 0 gt and { YSFwd 0 gt { /down down YSBth TkMrkW 2 mul add add def } { YSRvs 0 gt { /up up YSBth TkMrkW 2 mul add add def } if } ifelse } if FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 3 } { 2 } ifelse mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} FlgOS { 0 } { 2 } ifelse tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 5 } { 4 } ifelse mul YSFwd add YSBth add {r} FlgOS { 0 } { 1 } ifelse  tm } if } bdf
  /ChangeStrand { FlgIS { /Y Y TkMrkW 2 mul add def } if } bdf
  /uptck { FlgOS { blckori blckend XOriPlot 0 {s} 0 tm } if } bdf
  /dntck { FlgOS { blckori blckend XOriPlot Y TkMrkW add {z} 0 tm } if } bdf
