@@ -4,6 +4,9 @@
 # $CVSROOT.  If a match is found, then the remainder of the line is a filter
 # program that should expect log information on its standard input.
 #
+# A commit in any project whose name matches a regexp, would run the associated command,
+# unless the commit had already matched a previous regexp !!!
+#
 # If the repository name does not match any of the regular expressions in this
 # file, the "DEFAULT" line is used, if it is specified.
 #
@@ -20,10 +23,6 @@
 #   V = old version number (pre-checkin)
 #   v = new version number (post-checkin)
 #
-# For example:
-#DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
-# or
-#DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog
 CVSROOT  (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog.CVSROOT
 CVSROOT  /usr/bin/Mail -s "CVS update report: CVSROOT has been updated" gmaster@imim.es
 #
@@ -40,6 +39,7 @@ orthologous /usr/bin/Mail -s "CVS update report: ORTHOLOGOUS"  jabril@imim.es gp
 chr22       /usr/bin/Mail -s "CVS update report: CHR22"        jabril@imim.es gparra@imim.es
 humangenome /usr/bin/Mail -s "CVS update report: HUMAN GENOME" jabril@imim.es gparra@imim.es
 #
+#
 rguigo      (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog.users_rguigo
 jabril      (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog.users_jabril
 gparra      (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog.users_gparra
@@ -47,3 +47,5 @@ scaste      (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog.
 eblanco     (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog.users_eblanco
 xfustero    (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog.users_xfustero
 #
+#
+DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSLOGS/commitlog
