@@ -50,7 +50,6 @@ humangenome   projects/sgp/humangenome
 rguigo        users/rguigo
 #
 #
-users/jabril/docs/DEA/psfigures  -o  users/jabril/docs/TESI/biblio/papers
 jabril        users/jabril
 docsjabril    users/jabril/docs
 softjabril    users/jabril/software
