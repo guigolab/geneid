@@ -1,0 +1,96 @@
+%
+% $Id: defs.tex,v 1.1 2002-03-14 21:20:05 jabril Exp $
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% New Commands are defined here
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% THIS WORK definitions
+%
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
+\def\shorttit{\textbf{Treball de Recerca -- DEA}}
+\def\tit{\shortstack[c]{Treball de Recerca\\[1ex]{\large per optar al}\\[1ex]Diploma d'Estudis Avançats\\[1ex](DEA)}}
+%
+\def\mtauthor{\mtjabril} % def mtauthor
+%
+\def\authorslist{
+  \textbf{\Large Josep Francesc \textsc{Abril Ferrando}}\raisebox{0.9ex}{\tiny$\;\dag$} \\[1ex]
+  % \raisebox{0.85ex}{\footnotesize$\,\dag$ The Author/s {\mdseries\small\dotfill \mtauthor } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\authorshort{
+ Abril, JF
+ } % def authorshort
+\def\showemails{
+ \raisebox{0.85ex}{\footnotesize$\dag\;$}{\large e-mail: {\mtjabril} \\ }
+}
+%
+\def\license{GNU General Public License (GNU-GPL)}
+%
+\def\progdesc{
+
+... the abstract here ...
+
+ } % def progdesc
+%
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% ALIASES
+\def\perl{\textsc{Perl}}
+\def\biop{\textsc{BioPerl}}
+%
+\def\ps{\textsc{PostScript}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{gff2aplot}}
+\def\apo{\textsl{Apollo}}
+%
+\def\rptm{\textsc{RepeatMasker}}
+%
+\def\bl{\textsc{Blast}}
+\def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
+%
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
+\def\sgp{\textsc{sgp-2}}
+\def\stp{\texttt{stepper}}
+%
+\def\refseq{\textsc{RefSeq}}
+\def\ens{\textit{\texttt{emsembl}}}
+%
+\def\hsap{\textit{H. sapiens}}
+\def\lhsap{\textit{Homo sapiens}}
+\def\mmus{\textit{M. musculus}}
+\def\lmmus{\textit{Mus musculus}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% E-MAILS
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[HuMus]}}
+\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es?subject=[HuMus]}}
+\def\mtrguigo{\htmladdnormallink{\textbf{rguigo@imim.es}}{MAILTO:rguigo@imim.es?subject=[HuMus]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[HuMus]}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% URLS
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   

@@ -1,0 +1,140 @@
+%
+% $Id: description.tex,v 1.1 2002-03-14 21:20:05 jabril Exp $
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+%\def\kk{$\bullet$}
+\def\kk{\ding{79}}
+\newcommand{\sctn}[1]{
+  \large\textsc{\textbf{#1}}\hrulefill\\[1ex]
+  \addcontentsline{toc}{section}{#1}
+  \noindent  
+  }
+\newcommand{\subsctn}[1]{\vskip 2ex \textbf{#1}}
+\newcommand{\myitem}[3]{
+  \subsctn{
+     \hspace{-3ex}\kk\hspace{1ex}#2 [\textbf{pàgina~\pageref{#1}]}
+  } \\[1ex]
+  \bibentry{#3} \\[1ex]
+  \addcontentsline{toc}{subsection}{#2}  
+  \noindent  
+} % myitem
+\newcommand{\mylst}[1]{
+  \subsctn{\hspace{-3ex}\kk\hspace{1ex}\textbf{#1}} \\[1ex]
+  \addcontentsline{toc}{subsection}{#1}
+  \noindent  
+} % myitem
+
+\sctn{Artícles Publicats}
+
+A continuació es presenta una llista dels articles publicats en els que entre els autors hi figura el doctorand. Primerament s'indica la pàgina d'aquest document on es poden veure inclosses les dues primeres pàgines de cada artícle, ja que donat l'extensió d'alguns d'ells s'ha cregut convenient que es poden obtenir a través de la seva referència bibliogràfica; ara bé, el doctorand pot entregar una separata dels mateixos si fòra necessari. S'han inclòs també les figures principals corresponents a algun dels artícles per destacar la feina en la que es va participar, aquestes figures estan escalades a la mida de la pàgina amb el que no es pot apreciar el detall de les mateixes, encara que es poden recuperar a través de la referència bibliogràfica corresponent.\\[1ex]
+
+%\hspace{-1.25cm}
+%\begin{minipage}[t]{\linewidth}
+%\begin{description}
+%\setlength{\labelwidth}{0pt}
+%\setlength{\labelsep}{0pt}
+%\setlength{\itemindent}{-2ex}
+%\setlength{\itemsep}{3ex}
+\newcommand{\moreinfo}[1]{
+ \vskip 1.5ex
+ \textbf{Informació complementària:} \\ %[0.5ex]
+
+ \hspace{-2ex}\begin{minipage}[c]{1.2\linewidth}
+  \begin{itemize}
+   \renewcommand{\labelitemi}{\ding{226}}
+   \setlength{\itemindent}{0cm}
+   \setlength{\labelwidth}{1ex}
+   \setlength{\labelsep}{1ex}
+   \setlength{\itemsep}{0ex}
+   \setlength{\parsep}{0.5ex}
+   #1
+  \end{itemize}
+ \end{minipage}
+}
+
+\myitem{pag:gff2ps}
+       {Visualitzant anotacions genòmiques amb el {\gps}}
+       {abril:2000a}
+...
+\moreinfo{
+ \item Adreça a internet del programa: \\
+       {\small\url|http://www1.imim.es/software/gfftools/GFF2PS.html|}
+ \item Manual de l'usuari: \\
+       {\small\url|http://www1.imim.es/software/gfftools/gff2ps_docs/manual/MANUAL_GFF2PS_v0.96.ps.gz|}
+} % moreinfo
+
+\myitem{pag:gasp}
+       {Evaluant la anotació de la regió de 3Mbp \textit{Adh} a \textit{Drosophila melanogaster}}
+       {reese:2000a}
+...
+\moreinfo{
+ \item Versió electrònica del pòster, ``\textit{Drosophila} Genome Annotation Assessment Project''.\\
+       {\small\url|http://www.genome.org/content/vol10/issue4/images/data/483/DC1/GR10n4_poster.zip|}
+} % moreinfo
+
+\myitem{pag:drome}
+       {Anàlisi del genoma de \textit{Drosophila melanogaster}}
+       {adams:2000a}
+...
+\moreinfo{
+ \item Versió electrònica de la figura 4, ``Coding content of the fly genome''.\\
+       {\small\url|http://www.sciencemag.org/feature/data/genomes/2000/drosophila.shl|}
+} % moreinfo
+
+\myitem{pag:human}
+       {Anàlisi del genoma humà}
+       {venter:2001a}
+...
+\moreinfo{
+ \item Versió electrònica de la figura 1, ``Annotation of the Celera Human Genome Assembly''.\\
+       {\small\url|http://www.sciencemag.org/cgi/content/full/291/5507/1304/DC2|}
+} % moreinfo
+
+
+\myitem{pag:lseqs}
+       {Fiabilitat dels programes de predicció computacional de gens en seqüències genòmiques}
+       {guigo:2000c}
+...
+\moreinfo{
+ \item El conjunt de seqüències de proba està disponible a: \\
+       {\small\url|http://www1.imim.es/databases/gpeval2000/index.html|}
+} % moreinfo
+
+%\end{description}
+%\end{itemize}
+%\end{minipage}
+
+% \vskip 4ex
+\newpage
+
+\sctn{Perspectives de Recerca}
+\setlength{\parindent}{0pt}
+
+%\hspace{-1.25cm}
+%\begin{minipage}[t]{\linewidth}
+%\begin{itemize}
+%\setlength{\labelwidth}{1ex}
+%\setlength{\labelsep}{1ex}
+%\setlength{\itemindent}{0pt}
+%\setlength{\itemsep}{3ex}
+
+\mylst{Predicció computacional de gens basada en la homologia a nivell de seqüència}
+ L'anàlisi comparativa de genomes permetrà una millora de les predicions computacionals dels gens codificats en els mateixos. Emprant la informació que ens aporta la homologia a nivell de seqüència entre espècies filogenèticament properes es poden abordar dos problemes que avui en dia encara no s'han resolt i que estan força interrel.lacionats: per una banda, completar el catàleg de gens per a una espècie en concret ---en el nostre cas aplicant les tècniques per determinar les regions codificants del genoma humà---, i per l'altra, poder acostar-nos a la determinació del patrò de processat alternatiu dels exons que conformen l'estructura d'un gen (el que s'anomena \textit{alternative splicing}). La nostra aproximació es basa en utilitzar les dades de seqüència del genoma de ratolí (\textit{Mus musculus}), tant dels contigs provinents del procés de seqüenciació per \textit{shotgun} com de les seqüències genòmiques ensamblades dels seus cromosomes ---col.laborant estretament amb el consorci públic del genoma del ratolí---, per reanotar el genoma humà.
+
+\mylst{Anàlisi automatitzada del genoma humà.}
+Per poder fer front als requeriments que sorgeixen de l'apartat anterior, ens cal desenvolupar una sèrie de programes que s'executin de manera automàtica cada cop que vagin sortint noves versions tant a nivell de dades de seqüència com de les anotacions disponibles. Això ens permetrà adaptar-nos a uns conjunts de dades que van canviant al llarg del temps i, a la vegada, incrementar la fiabilitat dels nostres resultats al minimitzar les errades humanes que poden apareixer en escalar les aplicacions a un problema tan complexe com la reanotació d'un genoma.
+
+\mylst{Artícles en preparació.}
+La feina que s'està duent a terme actualment es centra en la implementació de diferents programes per fer manipular i analitzar les dades d'origen genòmic, en concret:
+ \begin{itemize} \renewcommand{\labelitemi}{\ding{227}}
+  \item {\aps}: visualitzant anotacions sobre alineaments de parells de seqüències (\textit{pairwise alignments}). A partir d'un o més fitxers en format GFF \footnote{\url|http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml|}, que contenen informació tant de la homologia entre parells de seqüències com de les anotacions per cadascuna de les seqüències, es genera un fitxer en {\ps}. Els principals avantatges respecte altres aplicacions actualment disponibles per visualitzar alineaments, sòn: que pot ser fàcilment incorporat en els programes que emprem per automatitzar tasques ---donat que treballem amb el format GFF per intercanviar dades entre diferents tasques---, que pot incorporar molta informació sobre les anotacions de les seqüències analitzades i per la gran qualitat que ens proporcionen els gràfics vectorials amb format {\ps}.
+  \item {\sgp}: de \textit{Syntenic Gene Prediction tool}, aquesta eina combina la informació de la homologia entre seqüències de dues espècies que s'obté amb el programa {\tbx} ---que forma part de la aplicació {\bl} desenvolupada a Washington University\footnote{\bibentry{altschul:1990a}}---, amb els algoritmes de predicció computacional de gens que implementa el programa {\gnid}\footnote{\bibentry{guigo:1992a}}\raisebox{0.85ex}{\footnotesize ,}\footnote{\bibentry{parra:2000a}}. La seva potència es basa en millorar la puntuació dels exons predits que solapen regions conservades (els anomenats HSPs o \textit{High-scoring Segment Pairs}), tot i projectant la puntuació d'aquestes per aprofitar la seva informació, afegir aquestes puntuacions a les calculades pel {\gnid} per cada exò abans d'agrupar-los dintre d'estructures gèniques.
+ \end{itemize}
+Un cop tinguem versions plenament operatives de tots dos programes, s'enviarà per la seva publicació un artícle per cadascun d'ells. Tots dos artícles estan en aquests moments en fase de preparació; en el cas del {\sgp} l'artícle corresponent detallarà els algoritmes i els paràmetres amb els que haurem treballat sobre els conjunts de seqüències de proba. 
+%\end{itemize}
+%\end{minipage}
+
+
+
