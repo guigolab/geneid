@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.1 2000-07-18 18:03:35 eblanco Exp $ */
+/* $Id: geneid.c,v 1.2 2000-08-08 14:24:49 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -40,6 +40,9 @@ int   SFP=0, SDP=0, SAP=0, STP=0,
       EVD = 0, SRP = 0;
 
 float EW = NOVALUE;
+
+long NUMSITES,NUMEXONS,MAXBACKUPSITES,MAXBACKUPEXONS;
+
 
 /* Accounting time and results */
 account *m;
@@ -59,7 +62,28 @@ long analizeFile(char* SequenceFile)
   if (size == 0)
     printError("Empty sequence file!");
 
+  free(buf);
+
   return(size);
+}
+
+void SetRatios(long* NUMSITES,long* NUMEXONS,long* MAXBACKUPSITES,long* MAXBACKUPEXONS, long L)
+{
+  if (L < LENGTHSi)
+    {
+      *MAXBACKUPSITES = 0;
+      *MAXBACKUPEXONS = 0;
+      *NUMSITES = L / RSITES;
+      *NUMEXONS = L / REXONS;
+    }
+  else
+    {
+      *NUMSITES = LENGTHSi / RSITES;
+      *NUMEXONS = LENGTHSi / REXONS;
+
+      *MAXBACKUPSITES = L / RBSITES + 70000; 
+      *MAXBACKUPEXONS = L / RBEXONS + 35000; 
+    }
 }
 
 int SelectIsochore(float percent, gparam** isochores)
@@ -288,13 +312,20 @@ int main (int argc, char *argv[])
 
   int reading;
 
+  /* initializing stats... */
+  m = (account*)InitAcc();  
+
   /* 0. Read setup options */
   readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,SRFile);
 
   LengthSequence = analizeFile(SequenceFile);
-  sprintf(mess,"ADN sequence file size = %ld bytes",LengthSequence);
+  sprintf(mess,"DNA sequence file size = %ld bytes",LengthSequence);
   printMess(mess);
 
+  printMess("Computing Ratios");
+
+  SetRatios(&NUMSITES,&NUMEXONS,&MAXBACKUPSITES,&MAXBACKUPEXONS,LengthSequence);
+  
   /* 1. Alloc main memory structures */
   printMess("Request Memory to System");
   Sequence   = (char*)         RequestMemorySequence(LengthSequence);
@@ -304,26 +335,30 @@ int main (int argc, char *argv[])
   allExons   = (packExons*)    RequestMemoryExons();
   allExons_r = (packExons*)    RequestMemoryExons();
   exons      = (exonGFF*)      RequestMemorySortExons();
-  evidence   = (packEvidence*) RequestMemoryEvidence();
   genes      = (packGenes*)    RequestMemoryGenes();
-  dumpster   = (packDump*)     RequestMemoryDumpster();
+  isochores  = (gparam**)      RequestMemoryIsochoresParams(); 
+
+  if (EVD || !GENEID)
+    evidence   = (packEvidence*) RequestMemoryEvidence();
+  
+  if (LengthSequence > LENGTHSi)
+    dumpster   = (packDump*)     RequestMemoryDumpster();
+
   dAA        = (dict*)         RequestMemoryAaDictionary();
-  sr         = (packSR*)       RequestMemorySimilarityRegions();
-  isochores  = (gparam**)      RequestMemoryIsochoresParams();
+  
+  if (SRP)
+    sr         = (packSR*)       RequestMemorySimilarityRegions();
 
   /* 2. Read prediction parameters file */
   printMess("Reading parameters..."); 
   nIsochores = readparam(ParamFile, isochores);
-
-  /* initializing stats... */
-  m = (account*)InitAcc();  
 
   /* 3. Predict Gene or Predict Exons? */
   if (GENEID)
     {
       /* a. Predicting splice sites, exons and genes of DNA sequences */
       
-      /* a.0. Reading ADN sequence */
+      /* a.0. Reading DNA sequence */
       if ((seqfile = fopen(SequenceFile, "rb"))==NULL) 
         printError("The Sequence file can not be open for read");
 
@@ -331,11 +366,11 @@ int main (int argc, char *argv[])
       reading = IniReadSequence(seqfile,Locus);
       while (reading!=EOF)
 	{
-	  printMess("Reading ADN sequence");
+	  printMess("Reading DNA sequence");
 	  reading = ReadSequence(seqfile, Sequence, nextLocus);
 	  
 	  /* a.1. Processing sequence: Reverse and complement */
-	  printMess("Processing ADN sequence");
+	  printMess("Processing DNA sequence");
 	  LengthSequence = FetchSequence(Sequence, RSequence);
 
 	  if (!LengthSequence)
@@ -441,8 +476,11 @@ int main (int argc, char *argv[])
 		  genamic(exons, nExons, genes, gp);
 		  printMess("Ending GenAmic...");
 		  
-		  /* clean hash table of exons */
-		  cleanDumpHash(dumpster->h);
+		  if (LengthSequence > LENGTHSi)
+		    {
+		      /* clean hash table of exons */
+		      cleanDumpHash(dumpster->h);
+		    }
 
 		  /* a.8. Backup operations of genes to next split */
 		  if (!lastSplit)
@@ -467,15 +505,16 @@ int main (int argc, char *argv[])
 	    {	      
 	      /* a.10. Printing gene predictions */
 	      OutputGene(genes,m->totalExons, Locus, Sequence, gp, dAA);
-	      
+
 	      /* reset backup genes data structures to the next DNA sequence */
 	      printMess("Cleanning genes");
 	      cleanGenes(genes,gp->nclass,dumpster);
 	    }
 	  
 	  /* showing global stats about last sequence predicted */
-	  OutputStats(Locus, evidence->nvExons);
-	  cleanAcc(m);
+	  OutputStats(Locus);
+
+	  cleanAcc(m); 
 	  strcpy(Locus,nextLocus);
 	} /* endwhile(reading) */
       
@@ -485,13 +524,13 @@ int main (int argc, char *argv[])
       /* b. Predicting gens of the exonsGFF using blocks */
       /* It's necessary to increase NUMSITES and NUMEXONS */
 
-      /* b.0. Reading ADN sequence */
+      /* b.0. Reading DNA sequence */
       /* open the Sequence File */
       if ((seqfile = fopen(SequenceFile, "rb"))==NULL) 
         printError("The Sequence file can not be open for read");
       
       /* read the sequence (because of translation to proteins) */
-      printMess("Reading ADN sequence");
+      printMess("Reading DNA sequence");
       reading = IniReadSequence(seqfile,Locus);
       if (reading != EOF)
 	{
@@ -522,7 +561,7 @@ int main (int argc, char *argv[])
     } /* endGenamic */
 
   /* 4. The End */
-  OutputTime(); 
+  OutputTime();  
   exit(0);
   return(0);
 }
