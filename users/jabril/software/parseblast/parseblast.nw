@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.4 2003-02-21 19:34:44 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.5 2003-02-21 20:36:53 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.4 2003-02-21 19:34:44 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.5 2003-02-21 20:36:53 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -344,14 +344,13 @@ if (defined($ENV{HOSTNAME})) {
 # FLAGS
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg,
     $subject_flg, $sequence_flg, $full_scores, $comment_flg, $nocmmnt_flg,
-    $split_flg, $help_flg, $err_flg, $expanded_flg,
+    $split_flg, $help_flg, $err_flg, $expanded_flg, $short_tgt_flg,
     $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg, $noframe_flg);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param, $aln_split, $prt_pos_flg
 	) = (0, 0, 0, 0, 0, 0, 0, 0);
 #
 # Parser Vars
-my $GFF1fmt = (("\%s ")x8)."\%s"."\n";
-my $GFF2fmt = (("\%s\t")x8)."\%s"."\n";
+my ($fs,$GFFfmt,$GFFtgs,$GFFtgl,$GFFtg);
 my ($prt_funct, $prog_params, $program, $version, $seqname);
 my ($scQ, $scS);   # reSCale_Query/Subject : 1 to re-scalate lengths.
 my ($query_name, $db_name, $score, $descr,
@@ -406,6 +405,7 @@ sub get_commandline_opts(){
                 "i|identity-score" => \$ids_flg      ,
                 "s|full-scores"    => \$full_scores  ,
                 "u|no-frame"       => \$noframe_flg  ,
+                "t|compact-tags"   => \$short_tgt_flg,
                 "c|comments"       => \$comment_flg  ,
                 "n|no-comments"    => \$nocmmnt_flg  ,
                 "v|verbose"        => \$err_flg      ,
@@ -443,6 +443,12 @@ sub get_commandline_opts(){
         $ids_flg && ($bit_flg=0);
     };
     #    
+    $fs = $fullgff_flg ? "\t" : " ";
+    $GFFfmt = (("\%s${fs}")x8)."\%s"."\n";
+    $GFFtgs = " \%s \%s \%s \%s;${fs}";
+    $GFFtgl = ";${fs}Start \%s;${fs}End \%s;${fs}Strand \%s;${fs}Frame \%s;${fs}";
+    $GFFtg  = $short_tgt_flg ? $GFFtgs : $GFFtgl;
+    #
     $nocmmnt_flg && ($comment_flg = 0);
 } # get_commandline_opts
 
@@ -590,6 +596,7 @@ COMMAND-LINE OPTIONS:
     -i, --identity-score : set <score> field to Identities (default Alignment).
     -s, --full-scores    : include all scores for each HSP in each GFF record.
     -u, --no-frame       : set all frames to "." (GFF for not available frames).
+    -t, --compact-tags   : target coords+strand+frame in short form (NO GFFv2!).
 
   ALIGNMENT OPTIONS:
     -P, --pairwise       : prints pairwise alignment for each HSP in TBL format.
@@ -691,8 +698,10 @@ sub get_scores {
 	($t =~ /Expect[^\s]*\s+=\s+([+-]?([Ee][+-]?\d+|(\d+\.?\d*|\.\d+)([Ee][+-]?\d+)?))\s*,/o) && 
 		($ex = $1);
 	($ex =~ /^[Ee]/o) && ($ex = "1".$ex);
+	($ex =~ /^(.*\.)$/o) && ($ex = $1."0");
 	($t =~ /Sum[^\s]*\s+\bP[^\s]*\s+=\s+([+-]?([Ee][+-]?\d+|(\d+\.?\d*|\.\d+)([Ee][+-]?\d+)?))\s*,/o) ?
 		($pv = $1) : ($pv = "."); # $pv not defined then $pv="."
+	($pv =~ /^(.*\.)$/o) && ($pv = $1."0");
 	($t =~ /Identities[^\s]*\s+=\s+(\d+)\/(\d+)\s+/o) && ($id = $1);
     $noframe_flg || do {
         # BLASTX (translated nucleotides vs protein)
@@ -741,23 +750,23 @@ SBJCT($n): length $lns : gaps $gps : $hss $hes : $sts : $frs : $hsp_seq{$ts}
 EndOfPlain
 } # prt_ext
 #
-sub prt_Q_gff {
-    printf STDOUT $GFF1fmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"$wnm \# E_value $ex$scores$sq";
+sub prt_Q_gff { # $hss $hes;\tStrand $sts;\tFrame $frs;\t
+    printf STDOUT $GFFfmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"$wnm".(sprintf($GFFtg,$hss,$hes,$sts,$frs))."E_value $ex$scores$sq";
 }
-sub prt_S_gff {
-    printf STDOUT $GFF1fmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"$query{$nm} \# E_value $ex$scores$sq";
+sub prt_S_gff { # $hsq $heq;\tStrand $stq;\tFrame $frq;\t
+    printf STDOUT $GFFfmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"$query{$nm}".(sprintf($GFFtg,$hsq,$heq,$stq,$frq))."E_value $ex$scores$sq";
 }
-sub prt_Q_fullgff {
-    printf STDOUT $GFF2fmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"Target \"$wnm\" $hss $hes;\tStrand $sts;\tFrame $frs;\tE_value $ex$scores$sq";
+sub prt_Q_fullgff { # $hss $hes;\tStrand $sts;\tFrame $frs;\t
+    printf STDOUT $GFFfmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"Target \"$wnm\"".(sprintf($GFFtg,$hss,$hes,$sts,$frs))."E_value $ex$scores$sq";
 }
-sub prt_S_fullgff {
-    printf STDOUT $GFF2fmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"Target \"$query{$nm}\" $hsq $heq;\tStrand $stq;\tFrame $frq;\tE_value $ex$scores$sq";
+sub prt_S_fullgff { # $hsq $heq;\tStrand $stq;\tFrame $frq;\t
+    printf STDOUT $GFFfmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"Target \"$query{$nm}\"".(sprintf($GFFtg,$hsq,$heq,$stq,$frq))."E_value $ex$scores$sq";
 }
 sub prt_Q_aplot {
-    printf STDOUT $GFF1fmt, "$query{$nm}:$wnm",$prg,'hsp',"$hsq:$hss","$heq:$hes",$gsc,"$stq:$sts","$frq:$frs","$bt:$n \# E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, "$query{$nm}:$wnm",$prg,'hsp',"$hsq:$hss","$heq:$hes",$gsc,"$stq:$sts","$frq:$frs","$bt:$n # E_value $ex$scores$sq";
 }
 sub prt_S_aplot {
-    printf STDOUT $GFF1fmt, "$wnm:$query{$nm}",$prg,'hsp',"$hss:$hsq","$hes:$heq",$gsc,"$sts:$stq","$frs:$frq","$bt:$n \# E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, "$wnm:$query{$nm}",$prg,'hsp',"$hss:$hsq","$hes:$heq",$gsc,"$sts:$stq","$frs:$frq","$bt:$n # E_value $ex$scores$sq";
 }
 sub prt_pairwise {
 	$prt_pos_flg && do {
@@ -905,17 +914,17 @@ sub prt_out {
 				  #
 				  do {
 					  $sq = $scores = "";
-                      $scores = " ;\tP_sum $pv ;\tAln_Score $sc ;\tBit_Score $bt ;\tIdn_Score ".
-                          sprintf("%6.2f",($id/$lnmin) * 100)." ($id/$lnmin) ;\tGaps ".
+                      $scores = ";${fs}P_sum $pv;${fs}Aln_Score $sc;${fs}Bit_Score $bt;${fs}Idn_Score ".
+                          sprintf("%6.2f",($id/$lnmin) * 100)." ($id/$lnmin);${fs}Gaps ".
                           sprintf("%4.2f",($gpt/$lnmx) * 100).
-                          " (Q:$gpq|S:$gps) ;\tLengths Q:$lnq|S:$lns|T:$lnmx"
+                          " (Q:$gpq|S:$gps);${fs}Lengths Q:$lnq|S:$lns|T:$lnmx"
                           if $full_scores;
 					  $subject_flg && do {
-						  $sq = ";\tSubject_seq $hsp_seq{$ts} ;\tQuery_seq $hsp_seq{$tq}" if $sequence_flg;
+						  $sq = ";${fs}Subject_seq $hsp_seq{$ts} ;${fs}Query_seq $hsp_seq{$tq}" if $sequence_flg;
 						  $prt_funct->();
                           last PRINT;
 					  }; # $subject_flg
-					  $sq = ";\tQuery_seq $hsp_seq{$tq} ;\tSubject_seq $hsp_seq{$ts}" if $sequence_flg;
+					  $sq = ";${fs}Query_seq $hsp_seq{$tq} ;${fs}Subject_seq $hsp_seq{$ts}" if $sequence_flg;
 					  $prt_funct->();
                       last PRINT;
 				  } unless $nogff_flg;
@@ -1305,7 +1314,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.4 2003-02-21 19:34:44 jabril Exp $
+# $Id: parseblast.nw,v 1.5 2003-02-21 20:36:53 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
