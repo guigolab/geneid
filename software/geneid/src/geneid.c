@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.7 2001-04-25 08:28:34 eblanco Exp $ */
+/* $Id: geneid.c,v 1.8 2001-10-01 14:44:48 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -206,7 +206,7 @@ void  PredictExons(char *Sequence, long LengthSequence,
 		      gp->MaxDonors,allExons->InitialExons);
   sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
   printRes(mess); 
-  
+
   allExons->nInternalExons =
   BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 		     allSites->DonorSites,allSites->nDonorSites,
@@ -215,7 +215,7 @@ void  PredictExons(char *Sequence, long LengthSequence,
 
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
-  
+
   allExons->nTerminalExons =
     BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
              allSites->StopCodons,allSites->nStopCodons,
