@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.4 1999-04-27 17:02:34 jabril Exp $	
+#         $Id: gff2ps,v 1.5 1999-04-28 17:54:19 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -263,10 +263,10 @@ cat <<'@@@EndProlog@@@'
 %   1 cm   = 28.35 points
 %   1 inch = 72.00 points
 %
-%  Paper Sizes  (in points)
+%  Paper Sizes  (in points) 
 % --------------------------
 %
-/pgA2           { 1190 1684 } def
+/pgA2           { 1190 1684 } def % Portrait { minor-axes:X major-axes:Y }
 /pgA3           {  842 1190 } def
 /pgA4           {  595  842 } def
 /pgA5           {  420  595 } def
@@ -277,7 +277,7 @@ cat <<'@@@EndProlog@@@'
 /pgLegal        {  612 1008 } def
 /pgLetter       {  612  792 } def
 /pgTabloid      {  792 1224 } def
-/pgUserDefined  {  595  2448 } def
+/pgUserDefined  {  595 2448 } def
 %
 %  Fonts Used
 % ---------------------------------
@@ -365,6 +365,41 @@ true setstrokeadjust
 # Printing Main PostScript Routines...
 
 cat <<'@@@EndProcs@@@'
+/cm { 28.35 mul } bind def
+%%%% page orientation flag
+/flglscape true def
+%/flglscape false def
+%%%% page size in points used for plot % pgA4 == 595  842
+/Dpage { pgA4 flglscape { exch } if } bind def
+%%%% offset defines non printable paper area on portrait pages
+/VUpOS 0.25 cm def
+/VDnOS 0.25 cm def
+/HLtOS 0.25 cm def
+/HRtOS 0.25 cm def
+%%%% margins (1 cm) (Up Down Left Right - margins are XY independent)
+/UpM 1 cm def
+/DnM 1 cm def
+/LtM 1 cm def
+/RtM 1 cm def
+%%%% checking if margins are within the defined offset
+flglscape {
+UpM HLtOS lt { /UpM HLtOS def } if % Checking margins for flglscape mode
+DnM HRtOS lt { /DnM HRtOS def } if
+LtM VDnOS lt { /LtM VDnOS def } if
+RtM VUpOS lt { /RtM VUpOS def } if
+} {
+UpM VUpOS lt { /UpM VUpOS def } if % Checking margins for portrait mode
+DnM VDnOS lt { /DnM VDnOS def } if
+LtM HLtOS lt { /LtM HLtOS def } if
+RtM HRtOS lt { /RtM HRtOS def } if
+} ifelse
+%%%%  defining pagelimits and X - Y scales (Xlim Ylim)
+/pglim { Dpage pop LtM RtM add sub Dpage exch pop UpM DnM add sub } def
+% /pgXsc { pglim pop 100 div } def
+% /pgYsc { pglim exch pop 100 div } def
+%%%% Defining starting point on page.
+/XORI LtM def
+/YORI UpM def
 %
 % ---------------------------------
 %     EndVariableDefinitions
@@ -382,9 +417,9 @@ cat <<'@@@EndProcs@@@'
 % <--- num num .max
 /max { 2 copy lt { exch } if pop } bind def
 % <--- num .function
-/Xscm { Xscale mul } bind def /Xscme { Xscm exch } bind def
-/Yscm { Yscale mul } bind def /Yscme { Yscm exch } bind def
-/fmt { Yscme Xscme moveto } bind def /flt { Yscme Xscme lineto } bind def
+% /Xscm { Xscale mul } bind def /Xscme { Xscm exch } bind def
+% /Yscm { Yscale mul } bind def /Yscme { Yscm exch } bind def
+% /fmt { Yscme Xscme moveto } bind def /flt { Yscme Xscme lineto } bind def
 
 %
 %  Global Drawing Procedures
@@ -399,9 +434,12 @@ cat <<'@@@EndProcs@@@'
 % /defgradsets { gradsets begin /mnsc def /mxsc def /ecol def /scol def /sdif mxsc mnsc sub def end } def
 % /gcolor { gradsets begin /sc exch mnsc sub def ecol scol 4 { 5 -1 roll sub abs sdif div sc mul 4 1 roll } repeat setcmykcolor end } def
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% <--- x1 y1 x2 y2 bbox
+% <--- x1 y1 x2 y2 .bbox
 /bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll moveto lineto lineto lineto closepath } bind def
-
+% <--- (x2-x1) score x1 y1 .DB
+% /db { matrix currentmatrix 5 1 roll XS YS scale moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath setmatrix } bind def
+% <--- width height xori yori .box
+/box { moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath } bind def
 %
 %  Text Procedures
 % ---------------------------------
@@ -418,27 +456,27 @@ cat <<'@@@EndProcs@@@'
 %  Page Structuring Procedures
 % ---------------------------------
 %
-/header
-{ 5 0 translate
-  1 0 0 100 -5 box
-  -1.5  2.5 PageTitle coboti FGcolor 0 textshow
-  putpage 1 eq
-  { -3 97.5 PageNumber cobost FGcolor 2 textshow
-    } if
-  putdate 1 eq
-  { -1 97.5 PageDate cobost FGcolor 2 textshow
-    } if
-  blockYscale 1 scale
-  Reverse 1 ne Forward 1 ne or
-  { 2 1 scale 
-    Forward 0 eq
-    { HlfWdth neg 10 translate
-      } { % Reverse==0
-          0 10 translate 
-          } ifelse
-    } { HlfWdth neg 10 translate
-        } ifelse
-  } bind def
+% /header
+% { 5 0 translate
+%   1 0 0 100 -5 box
+%   -1.5  2.5 PageTitle coboti FGcolor 0 textshow
+%   putpage 1 eq
+%   { -3 97.5 PageNumber cobost FGcolor 2 textshow
+%     } if
+%   putdate 1 eq
+%   { -1 97.5 PageDate cobost FGcolor 2 textshow
+%     } if
+%   blockYscale 1 scale
+%   Reverse 1 ne Forward 1 ne or
+%   { 2 1 scale 
+%     Forward 0 eq
+%     { HlfWdth neg 10 translate
+%       } { % Reverse==0
+%           0 10 translate 
+%           } ifelse
+%     } { HlfWdth neg 10 translate
+%         } ifelse
+%   } bind def
 %
 %  Gene Drawing Procedures
 % ---------------------------------
@@ -447,27 +485,27 @@ cat <<'@@@EndProcs@@@'
 %
 %%Page: 1 1
 %%BeginPageSetup
+/PageNumber (Page 1/1) def
 /pgsave save def
 %%EndPageSetup
 %
-/PageNumber (Page 1/1) def
-flglandscape 0 eq 
-{ 0 pgdefault exch pop translate
-  -90 rotate
-  YUpMargin XDnMargin translate
-  pgXscale pgYscale div pgYscale pgXscale div scale
-  } { XUpMargin YUpMargin translate
-      } ifelse
+% filling for BGcolor page
+% colordict begin /BGcolor colordict /blue get def /FGcolor colordict /yellow get def end
+Dpage flglscape { exch } if 0 0 box gsave stroke grestore /BGcolor scolor fill
+%%%% setting coordinate axes for page orientation
+flglscape 
+ { 90 rotate 1 -1 scale XORI YORI translate }                  % CTM for landscape pages
+ { XORI Dpage exch pop YORI sub translate 1 -1 scale } ifelse  % CTM for portrait pages
+%%%%
+% pglim 0 0 box gsave stroke grestore /BGcolor scolor fill
 %
-% If last instructions does not setted then horitzontal pages.
-%
-  putboxes 0 0 pglimits exch box
-  BGcolor setcmykcolor
-  fill
-black setcmykcolor
-0.125 setlinewidth 
-pgYscale pgXscale scale
-header
+/FGcolor scolor
+% 0.125 setlinewidth 
+2 setlinewidth 
+pglim 0 0 box gsave stroke grestore /lightskyblue scolor fill
+pgsave restore
+showpage
+% header
 %
 @@@EndProcs@@@
 
