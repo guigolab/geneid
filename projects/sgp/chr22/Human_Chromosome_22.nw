@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.3 2001-09-14 14:05:10 jabril Exp $
+% $Id: Human_Chromosome_22.nw,v 0.4 2001-09-28 15:33:37 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -157,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.3 2001-09-14 14:05:10 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.4 2001-09-28 15:33:37 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1741,6 +1741,8 @@ geneid_raw2GFF ()
 {
   # USAGE:  geneid_raw2GFF output_dir geneid_file
   # filtering geneid output (obtained with "-D" option -> default output+cDNA)
+  PD=$1 ;
+  /bin/rm -vf $PD/gff/* $PD/prot/* $PD/cds/* ;
   gawk 'BEGIN{ OFS="\t"; odir=ARGV[1]; ARGV[1]="" }
     { if ($2=="Sequence") seqname=$3;
       if ($2=="Gene") gene=$3;
@@ -1761,7 +1763,7 @@ geneid_raw2GFF ()
       };
       if (bol==2 && NF==1 && substr($1,1,1)!=">" )
         print $0 > odir "/prot/" seqname"_"gene;
-    }' $1 $2 ;
+    }' $PD $2 ;
 }
 #
 @ 
@@ -1809,9 +1811,11 @@ wc $ANALYSIS/geneid/Hsap.masked.evid_VH/gff/chr22.gene_list ;
 # Preparing files for Michael Brent
 IDIR="$ANALYSIS/sgp" ;
 # EXP="Hsap.masked.3X" ;
-EXP="Hsap.masked.3X+.fix" ;
+# EXP="Hsap.masked.3X+.fix" ;
+EXP="Hsap.masked.3X+.fix.gnid_fix" ;
 # ODIR="$IDIR/sgp_chr22_3X" ;
-ODIR="$IDIR/sgp_chr22_3X+" ;
+# ODIR="$IDIR/sgp_chr22_3X+" ;
+ODIR="$IDIR/sgp_chr22_3X+_VH" ;
 #
 ChckDirs $ODIR ;
 #
@@ -2572,7 +2576,8 @@ ODIR="/usr/local/apache/htdocs/datasets/humanmouse/HsapCHROMOSOMES" ;
 <<BASH commands>>=
 #
 # EXP="sgp_chr22_3X" ;
-EXP="sgp_chr22_3X+" ;
+# EXP="sgp_chr22_3X+" ;
+EXP="sgp_chr22_3X+_VH" ;
 # TBXP="tbx-chr22" ;
 TBXP="tbx_chr22_3X+" ;
 #
@@ -2955,7 +2960,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.3 2001-09-14 14:05:10 jabril Exp $
+# $Id: Human_Chromosome_22.nw,v 0.4 2001-09-28 15:33:37 jabril Exp $
 @ 
 
 \newpage
