@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: maskedfastacoords.nw,v 1.2 2001-09-19 19:45:27 jabril Exp $ 
+% # $Id: maskedfastacoords.nw,v 1.3 2001-09-25 17:24:54 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -212,7 +212,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.2 2001-09-19 19:45:27 jabril Exp $$>$ }
+{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.3 2001-09-25 17:24:54 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -225,9 +225,81 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \subsctn{Program description}
 
+\description
+
+
 \subsctn{Input}
 
+<<HIDE: new LaTeX definitions>>=
+\def\RptM{\htmladdnormallinkfoot{\textsc{RepeatMasker}}{http://www.genome.washington.edu/UWGC/analysistools/repeatmask.htm}}
+@
+
+The following example illustrates both, ``classical'' (using 'N') and soft (using lowercase letters), masking of fasta sequences as they can be obtained from a program such {\RptM}. Sequence is splitted into 50 chararacter-length lines.
+
+\begin{center}
+\begin{minipage}[c]{0.75\linewidth}
+<<masked fasta input file>>=
+>Masked_fasta_sequence
+TATCCATGCCCTCACTAATGTCTCAGTTTTTAGAAATTTTACAGTGCTTA
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+TAAACTTTCTTCTGATGTTGTCTAACCtgtatgttctttgaggacaagga
+gagtacacagtaggaactcaatgaatacttgctgatgaNNNNNNNNNNNN
+CTCTTAACACTcctcgactcagaatgttcccgtgttctcctctagTGTGA
+CCTCTTTTGTGTCTTGAAaggaannnnnatcgctCATCAATCACCAAATA
+TCAGTCCCTGTTGGGTGTAGGTCTG
+@ 
+\end{minipage}
+\end{center}
+
+The sequence '[[Masked_fasta_sequence]]' is 325 nucleotides long. Masking is distributed in the following coords:
+
+\begin{center}
+\begin{tabular}{rrl}
+  51 & 100 & N-masking \\
+ 128 & 188 & soft-masking \\
+ 189 & 200 & N-masking \\
+ 212 & 245 & soft-masking \\
+ 269 & 284 & soft-masking \\
+ 274 & 278 & n-masking (soft) \\
+\end{tabular}
+\end{center}
+
+
 \subsctn{Output}
+
+The program can produce three different outputs returning the coords of the sequence masked segments: only ``classical'' masking ('N' or 'n'), only soft-masking ('[a-z]'), both. From the previous example we must obtain the following results:
+
+\begin{center}
+\renewcommand{\arraystretch}{0.75}
+\begin{tabular}{c@{\qquad}c@{\qquad}c}
+ \begin{tabular}[t]{rrl}
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Basic-masking} \hrulefill } \\
+  51 & 100 & N-masking \\
+ 189 & 200 & N-masking \\
+ 274 & 278 & n-masking \\[2ex]
+ \end{tabular}
+&
+ \begin{tabular}[t]{rrl}
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Soft-masking} \hrulefill } \\
+ 128 & 188 & soft-masking \\
+ 212 & 245 & soft-masking \\
+ 269 & 284 & soft-masking \\[2ex]
+ \end{tabular}
+&
+ \begin{tabular}[t]{rrl}
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Merged-masking} \hrulefill } \\
+  51 & 100 & N-masking \\
+ 128 & 188 & soft-masking \\
+ 189 & 200 & N-masking \\
+ 212 & 245 & soft-masking \\
+ 269 & 273 & soft-masking \\
+ 274 & 278 & n-masking (soft) \\
+ 279 & 284 & soft-masking \\
+ \end{tabular}
+\\
+\end{tabular}
+\end{center}
+
 
 % \subsctn{Comments}
 
@@ -556,6 +628,15 @@ $len  = $sequence->length();
 $seq  = $sequence->seq();
 @ 
 
+\label{todo:CCC}
+<<HIDE: new defs TODO>>=
+\def\todoCCC{We can define mask checking as three different subroutines that will be called by reference, so that a variable name (called for instance \texttt{\$test}) will be set depending on command-line options.} % todoCCC
+@
+<<HIDE: TODO>>=
+\todoitem{\todoCCC}{todo:CCC}
+@
+\todo{ \item \todoCCC } % todo
+
 <<Finding masked regions coords>>=
 print STDERR "###         PARSING SEQUENCE: $sid ($len bp)\n";
 @nuc = split //og, $seq;
@@ -800,7 +881,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: maskedfastacoords.nw,v 1.2 2001-09-19 19:45:27 jabril Exp $
+# $Id: maskedfastacoords.nw,v 1.3 2001-09-25 17:24:54 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
