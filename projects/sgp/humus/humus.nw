@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.18 2002-04-28 01:24:53 jabril Exp $ 
+% # $Id: humus.nw,v 1.19 2002-04-28 01:32:42 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.18 2002-04-28 01:24:53 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.19 2002-04-28 01:32:42 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -7365,7 +7365,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.18 2002-04-28 01:24:53 jabril Exp $
+# $Id: humus.nw,v 1.19 2002-04-28 01:32:42 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7494,6 +7494,10 @@ source $WORK/.project_VARS ;
 #
 umask 002 ;
 #
+BASE="/projects" ;
+HUMUS="$BASE/H.sapiens/$HSAPSTR" ;
+MUSHU="$BASE/M.musculus/$MMUSSTR" ;
+#
 # Make these "six" vars independent from script (maybe join them with %HOSTS)
 # HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
 # HSAPID="20010806" ; HSAPSTR="20010806.UCSCgp" ; 
@@ -7509,14 +7513,11 @@ MSEQ="$MMUS/golden_path_200202MM/bigZips/unmasked" ;
 # 
 # FTPTBX="$HUMUS/.ftp/PankajAgarwal/20020111.tbx-20010806UCSCgp-20011109SCphusion" ;
 # FTPTBXID="20020111" ;
-FTPTBX="$HUMUS/.ftp/PankajAgarwal/20020425.tbx-20011222UCSCgp-20020411MGSCv3" ;
+FTPTBX="$BASE/H.sapiens/.ftp/PankajAgarwal/20020425.tbx-20011222UCSCgp-20020411MGSCv3" ;
 FTPTBXID="20020425" ;
 #
 export HSAP HSAPID HSAPSTR HSEQ MMUS MMUSID MMUSSTR MSEQ FTPTBX FTPTBXID ;
 #
-BASE="/projects" ;
-HUMUS="$BASE/H.sapiens/$HSAPSTR" ;
-MUSHU="$BASE/M.musculus/$MMUSSTR" ;
 BBIN="/usr/local/molbio/share/sgp" ;
 BIN="$BBIN/bin" ;
 MySQLPAR="$BBIN/mySQL" ;
@@ -7533,7 +7534,7 @@ export BASE HUMUS MUSHU BBIN BIN MySQLPAR LIBPERL LIBSTEP SRC TMP ;
 <<BASH Functions: Handling large directories>>
 <<BASH Functions: Get Gene Number from GENEID Output>>
 #
-MkDirs $BASE/H.sapiens $HUMUS $TMP $BASE/M.musculus $MUSHU ;
+MkDirs $BASE/H.sapiens $HUMUS $HUMUS/bin $TMP $BASE/M.musculus $MUSHU ;
 #
 @ 
 
@@ -7681,7 +7682,7 @@ Remember to set WORK variable at the very beggining, moving into the correspondi
 # tangling all .*_VARS
 notangle -R'tangling shell variables' $WORK/$nwfile.nw | bash ;
 source $WORK/.bash_VARS ;
-cp -v $WORK/.project_VARS $HUMUS/.project_VARS;
+cp -v $WORK/.project_VARS $HUMUS/bin/.project_VARS;
 #
 notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
