@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.nw,v 1.10 2001-10-03 11:21:02 jabril Exp $
+% $Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -107,37 +107,49 @@
 %%%%% TODO defs
 <<HIDE: new defs TODO>>
 
-%%%%% Setting text for footers and headers
-\fancyhead{} % clear all fields
-\fancyfoot{} % clear all fields
-\fancyhead[RO,LE]{\thepage}
-\fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
-\fancyfoot[RO,RE]{\small\textbf{\today}}
-\renewcommand{\headrulewidth}{1pt}
-\renewcommand{\footrulewidth}{1pt}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{deploy.pl}
+\def\tit{\textsc{\progname}}
+%
 \def\mtjabril{
  \htmladdnormallink{\texttt{jabril@imim.es}}
                    {MAILTO:jabril@imim.es?subject=[deploy.pl]}
  } % def mtjabril
+%
 \def\authorslist{
  Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Abril, JF % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
-\def\description{
+%
+\def\progdesc{
 This perl script creates all the files we need to start a project report or to describe a program implementation under the {\noweb} Literate Programming tool. It will produce the main {\noweb} file, from which we can tangle the sources or weabe the \LaTeX documentation.
- } % def description 
+ } % def progdesc
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
  } % def showaffiliation
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\tit\quad\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
 %
 @
 
@@ -167,7 +179,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
  Last Update: & {\today}                               \\[2ex]
  Description: & {\large\mdseries
                  \begin{minipage}[t]{0.95\rttbl}
-                 \description
+                 \progdesc
                  \end{minipage}}                       \\[2ex]
 \\
 \multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
@@ -209,7 +221,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.10 2001-10-03 11:21:02 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -229,15 +241,6 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \begin{itemize}
  \input todo.tex
 \end{itemize}
-
-\label{todo:AAA}
-<<HIDE: new defs TODO>>=
-\def\todoAAA{This is a first draft of the {\progname}.} % todoAAA
-@
-<<HIDE: TODO>>=
-\todoitem{\todoAAA}{todo:AAA}
-@
-\todo{ \item \todoAAA } % todo
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -326,6 +329,32 @@ sub parse_argvs() {
 } # 
 @
 
+\label{todo:AAA}
+<<HIDE: new defs TODO>>=
+\def\todoAAA{
+Using GetOPTS. New options:
+
+\begin{minipage}[c]{\linewidth}
+\begin{center}
+\begin{description}
+\setlength{\parsep}{0ex}
+\setlength{\itemsep}{-0.5ex}
+ \item[ -r --rcs :] project is under RCS, so checkin.
+ \item[ -c --cvs :] project is under RCS, so checkin if logged in.
+ \item[ -p --perl:] add .pl to project name (and PERL shebang).
+ \item[ -g --gawk:] add .awk to project name (and GAWK shebang).
+ \item[ -b --bash:] add .sh to project name (and BASH shebang).
+\end{description}
+\end{center}
+\end{minipage}
+} % todoAAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoAAA}{todo:AAA}
+@
+\todo{ \item \todoAAA } % todo
+
+
 <<Functions>>=
 sub make_dirs() {
     print STDERR "###\n### Creating Project Subdirectories...\n###\n";
@@ -411,6 +440,20 @@ $WORK/ltx ;
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Template definitions}
+
+\label{todo:BAA}\label{todo:BAB}
+<<HIDE: new defs TODO>>=
+\def\todoBAA{Template for C programs (including Header/Module/Makefile sections).} % todoBAA
+\def\todoBAB{Re-structure templates.} % todoBAB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBAA}{todo:BAA}
+\todoitem{\todoBAB}{todo:BAB}
+@
+\todo{ 
+ \item \todoBAA
+ \item \todoBAB
+ } % todo
 
 \subsctn{Perl scripts} %%%%SCTN
 
@@ -858,21 +901,31 @@ This line tells emacs to highlight code chunks with perl language highlight synt
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{@@@QUOTED@@@}
+\def\tit{\textsc{\progname}}
+%
 \def\mtauthor{
  \htmladdnormallink{\texttt{author@imim.es}}
                    {MAILTO:author@imim.es?subject=[@@@PROJECT@@@]}
  } % def mtauthor
+%
 \def\authorslist{
  The Author/s {\mdseries\small\dotfill \mtauthor } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Authors list here % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
-\def\description{
+%
+\def\progdesc{
 Short description of your program here !!!
- } % def description 
+ } % def progdesc
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
@@ -881,12 +934,12 @@ Universitat Pompeu Fabra\\[2ex]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%% Setting text for footers and headers
-\def\tit{\textsc{\progname}}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\tit\quad\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -924,7 +977,7 @@ Universitat Pompeu Fabra\\[2ex]
 \begin{abstract}
 \begin{center}
 \parbox{0.75\linewidth}{
-\description
+\progdesc
 } % parbox
 \end{center}
 \end{abstract}
@@ -959,7 +1012,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.10 2001-10-03 11:21:02 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $$>$ }
 \end{center}
 
 @
@@ -1045,11 +1098,24 @@ Universitat Pompeu Fabra\\[2ex]
 my $PROGRAM = '@@@PROJECT@@@';
 my $VERSION = '0.1_alpha';
 @@ 
+@<<Prog USAGE>>=
+$PROGRAM [options] < input_files > output_files
+@@
+@<<Prog DESC>>=
+A short description of what your program does.
+@@
 
 @<<Program Description>>=
-# @@@PROJECT@@@ [options] <files>
+# #----------------------------------------------------------------#
+# #                          @@@PROJECT@@@                         #
+# #----------------------------------------------------------------#
+# 
+#  $PROGRAM [options] < input_files > output_files
 #
-#     Short description (single line).
+#  Remember to put a short description of what your program does here...
+#
+#
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
 @@ 
 
 @<<Use Modules>>=
@@ -1319,7 +1385,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 @<<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.10 2001-10-03 11:21:02 jabril Exp $
+# $Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $
 @@ 
 
 @ 
@@ -1328,14 +1394,6 @@ This document is under Revision Control System (RCS). The version you are curren
 \subsctn{GNU General Public License}
 
 @<<GNU License>>=
-# #----------------------------------------------------------------#
-# #                          @@@PROJECT@@@                         #
-# #----------------------------------------------------------------#
-# 
-#    Remember to put a short description of your script here...
-# 
-#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -1449,8 +1507,10 @@ popd ;
 WORK="@@@PATH@@@" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
+SRC="$WORK/src" ; # where to put the distributable files
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
 nwfile="@@@PROJECT@@@" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
 #
@@ -1670,7 +1730,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.10 2001-10-03 11:21:02 jabril Exp $
+# $Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -1812,6 +1872,7 @@ BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
 nwfile="deploy" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
 #
