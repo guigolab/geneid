@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# farem un backup total un cop al mes, el primer dissabte
+# farem un backup incremental diari, excepte el dia que toqui total
+#
+# el backup total esborra el fitxer de referencia; aixi l'incremental
+# torna a comencar de zero des de la data del total. guardo la
+# referencia al mateix disc on guardo el backup, per si peta un disc
+# i s'ha de continuar des d'un punt anterior o jo que se
+#
+# els backups s'arrencaran a la 1 de la matinada 
+#
+# els backups es faran als discos sdb, sdc i sdd, tots de 17 Gb
+# HE DE MIRAR LA MANERA DE DISTRIBUIR ELS FITXERS ENTRE ELS DISCOS!!!!-----------------------------------------------
+# si hi caben be (ara son unes 12 Gb no comprimides), puc fer un mes en
+# cada disc i aixi hi ha un historic d'entre 2 i 3 mesos
+#
+# parametres:
+#   -h: ajuda
+#   -i: fer incremental
+#   -t: fer total. te preferencia sobre -i
+
+estrategia=incremental # per omisio fem incremental
+opcio_i=0
+
+while [ $# != 0 ]
+do
+   case $1 in
+      -i ) opcio_i=1
+           ;;
+      -t ) estrategia=total
+           ;;
+      *  ) echo "-h: ajuda"
+           echo "-i: fer incremental"
+           echo "-t: fer total. te preferencia sobre -i"
+           exit
+           ;;
+   esac
+   shift
+done
+
+# trobem si avui es el primer dissabte del mes per fer
+# backup total (si no hem especifitat -i)
+diames=`date +%e`
+diasetmana=`date +%a`
+
+if (( diames < 8 )) && [ $diasetmana = Sat -a $opcio_i = 0 ]
+then
+   estrategia=total
+fi
+
+# fem backup de /usr/local i /mnt/MD2_RAID (ftp i prediccions) de m1...
+mount -t nfs -o ro monstre1:/usr/local usr/local
+mount -t nfs -o ro monstre1:/mnt/MD2_RAID mnt/MD2_RAID
+
+# ...a la particio sdb1 local
+#mount /dev/sdb1 backup
+
+# comencem!
+NOM=`date +%Y%m%d-%H%M`-$estrategia
+if [ $estrategia = total ]
+then
+   rm backup/referencia
+fi
+tar -vcz -g backup/referencia -f backup/$NOM.tgz --exclude lost+found usr mnt
+
+# desmuntem allo que hem muntat
+umount usr/local mnt/MD2_RAID
+#umount backup
