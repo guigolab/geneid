@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.2 2001-08-30 10:40:08 jabril Exp $
+% $Id: Human_Chromosome_22.nw,v 0.3 2001-09-14 14:05:10 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -37,7 +37,8 @@
 %% layout
 \usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
 %\usepackage{lscape}
-%\usepackage{rotating}
+\usepackage{rotating}
+\usepackage{moreverb}
 %\usepackage{multicol}
 %% fonts
 \usepackage{times}\fontfamily{ptm}\selectfont
@@ -156,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.2 2001-08-30 10:40:08 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.3 2001-09-14 14:05:10 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -180,7 +181,8 @@ This document contains the procedures we followed to test our gene-prediction to
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [Ref DUNHAM99]
 
-``The DNA sequence of human chromosome 22'' Nature 402, 489 - 495 (dec 2, 1999)
+``The DNA sequence of human chromosome 22''
+  Nature 402, 489 - 495 (dec 2, 1999)
      
 I. DUNHAM, A. R. HUNT, J. E. COLLINS, R. BRUSKIEWICH, D. M. BEARE,
 M. CLAMP, L. J. SMINK, R. AINSCOUGH, J. P. ALMEIDA, A. BABBAGE,
@@ -248,7 +250,8 @@ Abstract URL: \url|http://www.nature.com/cgi-taf/DynaPage.taf?file=/nature/journ
 
 [Ref HATTORI00]
 
-``The DNA sequence of human chromosome 21'' Nature 405, 311 - 319 (may 18, 2000)
+``The DNA sequence of human chromosome 21''
+  Nature 405, 311 - 319 (may 18, 2000)
 
 M. HATTORI, A. FUJIYAMA, T. D. TAYLOR, H. WATANABE, T. YADA,
 H.-S. PARK, A. TOYODA, K. ISHII, Y. TOTOKI, D.-K. CHOI, E. SOEDA,
@@ -288,17 +291,36 @@ Abstract URL: \url|http://www.nature.com/cgi-taf/DynaPage.taf?file=/nature/journ
 \end{comment}
 
 <<BASH Commands>>=
-gawk '{print $2}' chr22.tbl | fold -1 | sort | uniq -c
- 2504453 A
- 2262438 C
- 2258158 G
-13876897   N
- 2484855 T
- 6332938 a
- 5819310 c
- 5817180 g
-      16   n
- 6306417 t
+grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \
+  fold -1 | sort | uniq -c | sort -nr | \
+  perl -ane 'BEGIN{$cnt=0}
+             print "@F\n"; $cnt+=$F[0];
+             END{print "$cnt TOTAL BP\n"}' ;
+     13876897 N
+      6332938 a
+      6306417 t
+      5819310 c
+      5817180 g
+      2504453 A
+      2484855 T
+      2262438 C
+      2258158 G
+           16 n
+     47662662 TOTAL BP
+grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \
+  fold -1 | tr 'a-z' 'A-Z' | sort | uniq -c | sort -nr | \
+  perl -ane 'BEGIN{$cnt=0}
+             print "@F\n"; $cnt+=$F[0];
+             END{print "$cnt TOTAL BP\n"}' ;
+     13876913 N
+      8837391 A
+      8791272 T
+      8081748 C
+      8075338 G
+     47662662 TOTAL BP
+grep -v "^>" /projects/datasets/chr22/_tmp/MichaelBrent/chr22.fa | \
+  fold -1 | perl -ne 'chomp; $_ !~ "N" && print "$.\n"' | head -1 ; 
+     13000001
 @ %$
 
 \begin{comment}
@@ -355,6 +377,8 @@ Washington University in St. Louis --School of Medicine--
        \url|http://genes.cs.wustl.edu/8-orthologs/|
    Twinscan server
        \url|http://genes.cs.wustl.edu/|
+   Chr22
+       \url|http://genes.cs.wustl.edu/data/|
 %
 Columbia University, Columbia Genome Center, Department of Computer Science
        \url|http://www.cs.columbia.edu/home/|
@@ -437,6 +461,60 @@ Here we are drawing the main steps we followed
 
  \item[Homology Search]
  \item[Gene-Finding]
+
+\begin{comment}
+% SCIMIT references
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
++ SC (Sanger Center) 
+
+  N. Jareborg, E. Birney, and R. Durbin 
+  ``Comparative Analysis of Noncoding Regions of 77 Orthologous Mouse and Human Gene Pairs.''
+  Genome Research (1999) Vol. 9, No. 9, pp 815-824.
+
+  ABSTRACT: A data set of 77 genomic mouse/human gene pairs has been
+  compiled from the EMBL nucleotide database, and their corresponding
+  features determined. This set was used to analyze the degree of
+  conservation of noncoding sequences between mouse and human. A new
+  alignment algorithm was developed to cope with the fact that large
+  parts of noncoding sequences are not alignable in a meaningful way
+  because of genetic drift. This new algorithm, DNA Block Aligner (DBA),
+  finds colinear-conserved blocks that are flanked by nonconserved
+  sequences of varying lengths. The noncoding regions of the data set
+  were aligned with DBA. The proportion of the noncoding regions covered
+  by blocks >60% identical was 36% for upstream regions, 50% for 5'
+  UTRs, 23% for introns, and 56% for 3' UTRs. These blocks of high
+  identity were more or less evenly distributed across the length of the
+  features, except for upstream regions in which the first 100 bp
+  upstream of the transcription start site was covered in up to 70% of
+  the gene pairs. This data set complements earlier sets on the basis of
+  cDNA sequences and will be useful for further comparative studies.
+
+  Abstract URL: \url|http://www.genome.org/cgi/content/abstract/9/9/815|
+
++ MIT
+
+  S. Batzoglou, L. Pachter, J. P. Mesirov, B. Berger, and E. S. Lander
+  ``Human and Mouse Gene Structure: Comparative Analysis and Application to Exon Prediction.''
+  Genome Research (2000) Vol. 10, No 7, pp 950-958 
+
+  ABSTRACT: We describe a novel analytical approach to gene
+  recognition based on cross-species comparison. We first undertook a
+  comparison of orthologous genomic loci from human and mouse, studying
+  the extent of similarity in the number, size and sequence of exons and
+  introns. We then developed an approach for recognizing genes within
+  such orthologous regions by first aligning the regions using an
+  iterative global alignment system and then identifying genes based on
+  conservation of exonic features at aligned positions in both
+  species. The alignment and gene recognition are performed by new
+  programs called GLASS and ROSETTA, respectively. ROSETTA performed
+  well at exact identification of coding exons in 117 orthologous pairs
+  tested.
+
+  Abstract URL: \url|http://www.genome.org/cgi/content/abstract/10/7/950|
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{comment} % Masking references
+
  \item[Syntenic Gene-Prediction]
  \item[Sequence Analysis] \ \\
    \begin{description}
@@ -465,15 +543,22 @@ ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \
          $DATASETS/annotation $DATASETS/annotation/desc ;
 #
 # MOVING and RENAMING fasta files
-IDIR="$DATASETS/_tmp/Pankaj/seq";
+IDIR="$DATASETS/_tmp/Pankaj/seq" ;
 #
 # Merging raw sequences
-ODIR="$DATASETS/fasta/raw";
-counter=0 ;
-while [ -e "$IDIR/chr22_$counter" ];
+ODIR="$DATASETS/fasta/raw" ;
+counter=0 ; # fix for missing counter values on file names...(i.e. line674)
+while [ -e "$IDIR/chr22_$counter" ] ;
   do {
     echo "### Processing $IDIR/chr22_$counter" 1>&2 ;
-    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter ;
+    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter | \
+        perl -e ' # Removing "N"bp from overlapping sequences
+            $seq=""; $count= shift @ARGV; $bases= shift @ARGV;
+            while (<>) { chomp; $seq.=$_; };
+            $count > 0 && ($out=substr($seq,$bases)) || ($out=$seq);
+            ($i,$e) = (1, length($out));
+            while ($i<=$e) { print substr($out,$i-1,60)."\n"; $i += 60; };
+          ' $counter 1000 - ;
     counter=`expr $counter + 100000` ;
     } ;
   done | (echo ">chr22"; cat -) > $ODIR/chr22.tmp ;
@@ -491,34 +576,185 @@ perl -e ' # Reformatting fasta sequence
   gawk '($0 !~/^>|^[ \t]*$/ || NR==1) {print $0}' - > $ODIR/chr22 ;
 # looking for errors... 
 wc $ODIR/chr22* ;
-  802630  802630 48941298 fasta/raw/chr22.tmp
-  802313  802313 48940981 fasta/raw/chr22
+  953256  953255 48615924 _tmp/MichaelBrent/chr22.fa
+  794538  794538 48457206 chr22/fasta/raw/chr22.tmp
+  794379  794379 48457047 chr22/fasta/raw/chr22
 gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22.tmp | wc ;
-     478     956   13303
+     478     956   22823
 gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22 | wc ;
-       2       4      19
+       2       4      59
     :: 000001 >chr22
-    :: 802313 TT
+    :: 794379 GGTATGGCGGGAAGGAGGCTGGTGCCAGAGTGGATTCGGATT
 perl -ne 'chomp; /^\s*$/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
 perl -ne 'chomp;    /^>/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
-grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr ;
-    14013913 N
-     8925945 A
-     8880101 T
-     8162358 C
-     8156345 G
+grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr | \
+  perl -ane 'BEGIN{$cnt=0}
+             print "@F\n"; $cnt+=$F[0];
+             END{print "$cnt TOTAL BP\n"}' ;
+     13876913 N
+      8837391 A
+      8791272 T
+      8081748 C
+      8075338 G
+     47662662 TOTAL BP
+grep -v "^>" $DATASETS/fasta/raw/chr22 | fold -1 | \
+  perl -ne 'chomp; $_ !~ "N" && print "$.\n"' | head -1 ;
+     13000001
+TblToFasta /projects/datasets/chr22/_tmp/MichaelBrent/chr22.tbl | \
+           tr  a-z A-Z | diff - $DATASETS/fasta/raw/chr22 | more ;
+     1c1
+     < >CHR22
+     ---
+     > >chr22
+## Raw sequences
 #
 @ 
 
+\subsctn{Getting annotations}
+
+As the annotations are provided in GTF, we need to filter to GFF files.
+
+<<BASH Functions: GTF to GFF>>=
+#
+# Processing GTF annotation files
+get_annotation ()
+{
+  # USAGE:  get_annotation GFFfeature input_file
+  perl -ne 'BEGIN{ $feat = shift @ARGV; }
+      chomp;
+      if ($_ =~ m/^\#/o) {
+          print STDERR "$_\n";
+      } else {
+          @fields = split /\s+/og, $_;
+          ($fields[2] eq $feat) && do {
+              $fields[0] = "chr22";
+              ($fields[8] = $fields[9]) =~ s/[";]//og; 
+              print STDOUT join("\t",@fields[0 .. 8])."\n";
+          };
+      } ' $1 $2 | sort +0 -1 +3n +4n ;
+}
+#
+@
+
+We obtained the chromosome annotaions from \url|http://genes.cs.wustl.edu/data/|, we have to reformat into GFF due to redundant data contained in the GTF original file.
+
 <<BASH commands DATASETS>>=
 #
+IDIR="$DATASETS/_tmp/MichaelBrent" ;
+ODIR="$DATASETS/annotation" ;
+ChckDirs $ODIR/all $ODIR/fixed ;
+get_annotation CDS $IDIR/All_genes_plus.gene+cds.frameV2.noPseudogenes.GBD.gtf \
+       > $ODIR/all/chr22 ;
+# We remove "dJ437M21.C22.1b" because it has same coords as "dJ437M21.C22.1"
+get_annotation CDS $IDIR/chr22-fixed.gtf | \
+       grep -v "dJ437M21.C22.1b" > $ODIR/fixed/chr22 ;
+#
+# Checking GFF files for annotations 
+grep -v "^#" all/chr22 | wc
+   3627   32643  223781
+ grep -v "^#" all/chr22 | gawk '{print $9}' | sort | uniq -c | sort -nr | wc
+    538    1076   15275
+# so there are 538 genes in all/chr22
+grep -v "^#" fixed/chr22 | wc
+   3766   33894  214107 
+grep -v "^#" fixed/chr22 | gawk '{print $9}' | sort | uniq -c | sort -nr | wc
+    553    1106   13253 
+# so there are 553 genes in fixed/chr22 ?????
+@ 
+
+We also downloaded Victoria Haghighi's annotation dataset from \url|http://www.cs.columbia.edu/~vic/sanger2gbd/| %'
+(\url|vic@cs.columbia.edu|).
+
+<<BASH commands DATASETS>>=
+#
+IDIR="$DATASETS/_tmp/VictoriaHaghighi" ;
+ODIR="$DATASETS/annotation/set" ;
+ChckDirs $ODIR $ODIR/cds $ODIR/exons $ODIR/pseudo $ODIR/evidences ;
+# Only CDS (554genes - 1)
+# We remove "dJ437M21.C22.1b" because it has same coords as "dJ437M21.C22.1"
+perl -pne 's/^\s+//o' $IDIR/Chr22.2.x.cds.frameV1.GBD.gtf.txt | \
+       get_annotation CDS - | \
+       grep -v "dJ437M21.C22.1b" > $ODIR/cds/chr22 ;
+# Only exons (722genes - 1)
+# We remove "bK250D10.C22.6c.mRNA" because it has same coords as "bK250D10.C22.6.mRNA"
+# there were 9 CDS genes in $IDIR/All_genes_plus.gene+cds.frameV1.noPseudogenes.GBD.gtf.txt
+# gparra fixed it taking missing CDS from $IDIR/Chr22.2.x.cds.frameV1.GBD.gtf.txt
+# (without "dJ437M21.C22.1b") and joining into 
+# $IDIR/All_genes_plus.gene+cds.frameV1.noPseudogenes.fixed.gtf
+# then, we get 730 genes in this file.
+perl -pne 's/^\s+//o' $IDIR/All_genes_plus.gene+cds.frameV1.noPseudogenes.fixed.gtf | \
+       get_annotation exon - | \
+       egrep -v 'dJ(437M21.C22.1b|402G11.C22.8.1)|(bK(250D10.C22.6c|125H2.C22.1b|216E10.C22.2b)|Em:AP000354.C22.3).mRNA' \
+     > $ODIR/exons/chr22 ;
+# Pseudogenes - only exons (157pseudogenes)
+perl -pne 's/^\s+//o' $IDIR/All_genes_plus.gene.GBD.gtf.txt > $IDIR/All_genes_plus.gene.GBD.gtf.tmp ;
+grep "Pseudogene" $IDIR/All_genes_plus.gene.GBD.gtf.tmp | \
+     gawk '{print $2}' > PseudoGene.list ;
+gawk 'BEGIN{ while (getline < ARGV[1] >0) { pseudo[$1] = $1 };
+             ARGV[1]=""; }
+      $1!~/^#/{ n=$10; gsub(/\"/,"",n);
+             if (n in pseudo) {$3="exon_pseudo";print $0}
+           }' $IDIR/PseudoGene.list \
+      $IDIR/All_genes_plus.gene.GBD.gtf.tmp > $IDIR/PseudoGene.gff ;
+get_annotation exon_pseudo $IDIR/PseudoGene.gff > $ODIR/pseudo/chr22 ;
+#
+gawk '{print $9}' $ODIR/cds/chr22 | sort | uniq -c | wc ;
+    553    1106   13253
+gawk '{print $9}' $ODIR/exons/chr22 | sort | uniq -c | wc ;
+    726    1452   20464
+#   721    1442   20358 # All_genes_plus.gene+cds.frameV1.noPseudogenes.GBD.gtf.txt
+gawk '{print $9}' $ODIR/pseudo/chr22 | sort | uniq -c | wc ;
+    157     314    3920 
+#
+cat  $ODIR/exons/chr22 $ODIR/pseudo/chr22 | sort +3n | \
+gawk '($1 != "#") {
+        if (START[$9]==0 || $4 < START[$9]) {
+           START[$9]=$4; STRAND[$9]=$7};
+           if ($5>STOP[$9]) STOP[$9]=$5;
+        }
+      END{
+        for (locus in START) 
+          print "chr22\tsanger\tGENE\t" START[locus] "\t" STOP[locus] "\t.\t" STRAND[locus] "\t.\t"locus;
+      }' | sort +3n | \
+gawk 'BEGIN{OFS="\t"}
+      {if ($4 < STOPant+500 ) {
+           $4=STARTant;
+           $9=gene_ant"_"$9;
+           if ($5<STOPant){
+             $5=STOPant;}
+       } else if (NR!=1)
+           print "chr22\tsanger\tGENE\t" STARTant "\t" STOPant "\t.\t" STRAND "\t.\t" gene_ant;
+       STARTant=$4;STOPant=$5; gene_ant=$9;STRAND=$7;
+       }
+       END{
+         print "chr22\tsanger\tGENE\t" STARTant "\t" STOPant "\t.\t" STRAND "\t.\t" gene_ant;
+       }' | \
+gawk 'BEGIN{OFS="\t"}{$3="Annotation";$9=NR;print;}' > $ODIR/evidences/chr22 ;
+# (726evidences)
+@
+
+\subsctn{Preparing masked sequences}
+
+<<BASH commands DATASETS>>=
+#
+# perl -ne 'BEGIN{ print ">bigseq\n"; } 
+#           $_ !~ /^>|^\s*$/o && print ;
+#          ' $INDIR/*.fa
+#
 # Merging masked sequences
-ODIR="$DATASETS/fasta/masked";
-counter=0 ;
-while [ -e "$IDIR/chr22_$counter.masked" ];
+ODIR="$DATASETS/fasta/masked" ;
+counter=0 ; # fix for missing counter values on file names...(i.e. line674)
+while [ -e "$IDIR/chr22_$counter.masked" ] ;
   do {
     echo "### Processing $IDIR/chr22_$counter.masked" 1>&2 ;
-    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter.masked ;
+    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter.masked | \
+        perl -e ' # Removing "N"bp from overlapping sequences
+            $seq=""; $count= shift @ARGV; $bases= shift @ARGV;
+            while (<>) { chomp; $seq.=$_; };
+            $count > 0 && ($out=substr($seq,$bases)) || ($out=$seq);
+            ($i,$e) = (1, length($out));
+            while ($i<=$e) { print substr($out,$i-1,60)."\n"; $i += 60; };
+          ' $counter 1000 - ;
     counter=`expr $counter + 100000` ;
     } ;
   done |  (echo ">chr22"; cat -) > $ODIR/chr22.tmp ;
@@ -536,18 +772,28 @@ perl -e ' # Reformatting fasta sequence
   gawk '($0 !~/^>|^[ \t]*$/ || NR==1) {print $0}' - > $ODIR/chr22 ;
 # looking for errors...
 wc $ODIR/chr22* ;
-   962775  962775 49101443 /projects/datasets/chr22/fasta/masked/chr22.tmp
-   802313  802313 48940981 /projects/datasets/chr22/fasta/masked/chr22
+   953256  953255 48615924 _tmp/MichaelBrent/chr22.fa
+   794538  794538 48457206 chr22/fasta/masked/chr22.tmp
+   794379  794379 48457047 chr22/fasta/masked/chr22
 gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22.tmp | wc ;
-   962775 1925550 55729763
+      478     956   22823
 gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22 | wc ;
-       2       4      19
+       2       4      59
     :: 000001 >chr22
-    :: 802313 TT
+    :: 794379 GGTATGGCGGGAAGGAGGCTGGTGCCAGAGTGGATTCGGATT
 perl -ne 'chomp; /^\s*$/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
 perl -ne 'chomp;    /^>/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
-grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr ;
-
+grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr | \
+  perl -ane 'BEGIN{$cnt=0}
+             print "@F\n"; $cnt+=$F[0];
+             END{print "$cnt TOTAL BP\n"}' ;
+     27534498 N
+      5144849 A
+      5124474 T
+      4931681 C
+      4927160 G
+     47662662 TOTAL BP
+## Masked sequences
 #
 @ 
 
@@ -557,22 +803,30 @@ grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr ;
 ChckDirs $DATASETS/masking ;
 #
 # Merging results from RepeatBlaster (Pankaj)
-IDIR="$DATASETS/_tmp/Pankaj/out";
+IDIR="$DATASETS/_tmp/Pankaj/out" ;
 ODIR="$DATASETS/masking/default" ;
 ChckDirs $ODIR $ODIR/gff $ODIR/gff-projection $ODIR/logs ;
+#
+max=48000000 ; # it is 47600000 but just to ensure...
 counter=0 ;
-while [ -e "$IDIR/chr22_$counter.out" ] ;
+while [ $counter -le $max ] ;
   do {
-    echo "### Processing $IDIR/chr22_$counter.out" 1>&2 ;
-    gawk 'BEGIN{ OFS="\t" }
-      {
-        str = ($9!="C") ? "+" : "-";
-        if ($1~/^[0-9]+$/) {
-          print "chr22\tRepeatMasker",$11,$6,$7,$1,str,".",$10"."NR-3,"# "$5;
-        } else {
-          print $0 | "cat 1>&2";
-        };
-      }' $IDIR/chr22_$counter.out ;
+    echo "### COUNTER: $counter" 1>&2 ;
+    if [ -e "$IDIR/chr22_$counter.out" ] ;
+      then
+        echo "### Processing $IDIR/chr22_$counter.out" 1>&2 ;
+        gawk 'BEGIN{ OFS="\t"; cnt=ARGV[1]; ARGV[1]=""; }
+          {
+            str = ($9!="C") ? "+" : "-";
+            $6+=cnt; $7+=cnt;
+            if ($1~/^[0-9]+$/) {
+              print "chr22\tRepeatMasker",
+                    $11,$6,$7,$1,str,".",$10"."NR-3,"# "$5;
+            } else {
+              print $0 | "cat 1>&2";
+            };
+          }' $counter $IDIR/chr22_$counter.out ;
+      fi;
     counter=`expr $counter + 100000` ;
     } ;
   done > $ODIR/gff/chr22 ;
@@ -590,25 +844,346 @@ There are 65307 masked regions in the whole {\chr} sequence.
 
 \subsctn{Processing {\tbx} results from Pankaj}
 
+{\tbx} results provided by Pankaj must be parsed and mapped to the corresponding coords in the {\chr} sequence. The reason for such mapping is that we have multiple 100Kbp fragments from the original chromosomic sequence, which were used to run {\tbx} against mouse WGS-3X database. We had to deal with the frame issue of the HSPs fragments; once the HSP coords were mapped to the chromosome, frames also must be recomputed taking into account if HSP was in forward or in reverse strand (see figure~\ref{fig:blastframes}).
+
 <<BASH commands ANALYSIS>>=
 #
+# RUNNING TBLASTX
+ChckDirs $ANALYSIS/blast $ANALYSIS/blast/wublast.tblastx \
+         $ANALYSIS/blast/wublast.tblastx/masked3X \
+         $ANALYSIS/blast/wublast.tblastx/masked3X+ ;
+#
 # Filtering HSPs from tblastx output (Pankaj)
-INFILE="$DATASETS/_tmp/Pankaj/chr22.hsps" ;
+IDIR="$DATASETS/_tmp/Pankaj/tbx" ;
+# ODIR="$ANALYSIS/blast/wublast.tblastx/masked3X";
+ODIR="$ANALYSIS/blast/wublast.tblastx/masked3X+";
+ChckDirs $ODIR $ODIR/out $ODIR/gff $ODIR/aplot $ODIR/ps $ODIR/logs ;
+#
+max=47600000 ;
+counter=0 ;
+while [ $counter -le $max ] ;
+  do {
+    echo "### COUNTER: $counter" 1>&2 ;
+    if [ -e "$IDIR/chr22_$counter" ] ;
+      then
+        echo "### RUNNING PARSEBLAST on $IDIR/chr22_$counter" 1>&2 ;
+        gawk '$1~/^>/ { $1=$1":"$2; gsub(/[\|]/,":",$1); }
+                      { print $0; }' $IDIR/chr22_$counter | \
+        parseblast --fullgff --full-scores --comments --verbose --bit-score - \
+                   2> $ODIR/logs/parseblast.chr22_$counter | \
+        gawk 'BEGIN{ OFS="\t";
+                     c=ARGV[1]; SEQlen=ARGV[2]; ARGV[1]=ARGV[2]="";
+                     frame[0]=3; frame[1]=1; frame[2]=2; }
+              $0 !~ /^[ \t]*$/ {
+                  $1="chr22"; $4+=c; $5+=c;
+                  if ($7=="-") { $8=frame[((SEQlen - $5 + 1) % 3)] }
+                  else { $8=frame[($4 % 3)] };
+                  print $0;
+              }' $counter 47662662 - ;
+      fi;
+    counter=`expr $counter + 100000` ;
+    } ;
+  done | gawk '$3 =="hsp" {print}' | sort +3n -6 +6 -7 > $ODIR/gff/chr22 ; 
+                                                       # $ODIR/gff/chr22.frame
+#
+diff chr22.old chr22 | grep "<" | wc
+  43281 1817802 10984908
+wc chr22*
+ 192721 7901561 48561489 chr22
+# There were 43281 HSPs with wrong frame
+@
 
-**Problem**
+\newcommand{\tss}[1]{\textsf{\scriptsize #1}}
+\newcommand{\msf}[1]{\mbox{\textsf{\footnotesize #1}}}
+\newcommand{\tofrm}[4]{#1 \:\Rightarrow\: ( #1 - #2 + 1 ) \: mod \: 3 = #3 \:\Rightarrow\: #4}
+\newcommand{\torfrm}[5]{#1 \:\Rightarrow\: \msf{rev\_comp(#1,#3)} = #2 \:\Rightarrow\: ( #3 - #2 + 1 ) \: mod \: 3 = #4 \:\Rightarrow\: #5}
+\begin{figure}[!ht] 
+\begin{center}
+\small
+\setlength{\unitlength}{1cm}
+\fbox{
+\begin{minipage}{16.5cm}
+\begin{tabular}{cc}
+\rule[-5mm]{0pt}{25mm}
+\begin{minipage}[b]{5cm}
+\fbox{\begin{picture}(5,1.5)
+% figure
+\linethickness{1.5pt}
+\put(0.5,0.5){\line(1,0){2}}
+\put(3.5,0.5){\line(1,0){1}}
+\put(0.5,0.45){\line(0,1){0.1}}
+\put(4.5,0.45){\line(0,1){0.1}}
+\put(2.520,0.35){\framebox(0.97,0.3){\tss{feature}}}
+% dotted lines
+\linethickness{0.25pt}
+\put(0.5,0.55){\qbezier[20](0,0)(0,0.2)(0,0.4)}
+\put(2.5,0.65){\qbezier[15](0,0)(0,0.15)(0,0.3)}
+\put(3.5,0.65){\qbezier[15](0,0)(0,0.15)(0,0.3)}
+\put(4.5,0.55){\qbezier[20](0,0)(0,0.2)(0,0.4)}
+% labels
+\put(1.25,0.40){\makebox(0,0)[t]{\tss{sequence}}}
+\put(0.5,1.05){\makebox(0,0)[b]{\tss{FIRST}}}
+\put(2.5,1.05){\makebox(0,0)[b]{\tss{start}}}
+\put(3.5,1.05){\makebox(0,0)[b]{\tss{end}}}
+\put(4.5,1.05){\makebox(0,0)[b]{\tss{LAST}}}
+\end{picture}}
+\end{minipage}
+&
+\raisebox{9mm}{
+\begin{minipage}[b][0cm][c]{10cm}
+\[
+\left.
+\begin{array}{r@{}c@{}l}
+\multicolumn{3}{l}{\mbox{\textbf{Forward strand}:}} \\[0.25ex] 
+\:\:\:\:\msf{frame} & \:\:=\: & (\msf{start} - \msf{FIRST} + 1) \: mod \: 3
+ \\[0.75ex] 
+\multicolumn{3}{l}{\mbox{\textbf{Reverse strand}:}} \\[0.25ex]  
+\:\:\:\:\msf{frame} & \:\:=\: & (\msf{LAST} - \msf{end} + 1) \: mod \: 3
+ \\
+\end{array}
+\:\:\right|\:\:
+\mbox{\textbf{frame}} \left\{
+\begin{array}{c@{\:\Rightarrow\:}c}
+0 & 3 \\
+1 & 1 \\
+2 & 2 \\
+\end{array}
+\right\} \mbox{\raisebox{-1ex}{\textbf{\shortstack{{\bl}\\frame}}}}
+\]
+\end{minipage}
+} % raisebox
+\\
+\end{tabular}
+\vskip 1ex
+\hrulefill
+\vskip 0.5ex
+\[
+\begin{array}{r@{\:=\:}r}
+\msf{FIRST} & 1 \\
+\msf{LAST}  & 40 \\
+\end{array}
+\:\left|\:
+\begin{array}{cl}
+\mbox{\raisebox{-1ex}{\textbf{\shortstack{Forward\\Strand}}}} &
+\msf{start} = \left\{ 
+\begin{array}{l}
+\tofrm{21}{1}{0}{3} \\
+\tofrm{22}{1}{1}{1} \\
+\tofrm{22}{1}{2}{2} \\
+\end{array}
+\right.
+\\[3.5ex]
+\mbox{\raisebox{-1ex}{\textbf{\shortstack{Reverse\\Strand}}}} &
+\msf{start} = \left\{ 
+\begin{array}{l}
+\torfrm{21}{20}{40}{0}{3} \\
+\torfrm{22}{19}{40}{1}{1} \\
+\torfrm{22}{18}{40}{2}{2} \\[1ex]
+where \:\:\: \msf{rev\_comp(pos,LAST)} = \msf{LAST} - \msf{pos} + 1\\
+\end{array}
+\right.
+\\
+\end{array}
+\right.
+\]
+\vskip 0.8ex
+\end{minipage}
+} % fbox
+\caption[Mapping frames of HSPs from {\tbx} results]{\label{fig:blastframes} Mapping frames of HSPs from {\tbx} results from chromosome fragments when we mapped their coords to the original chromosomic coords. If we make a reverse complement of the sequence (so coords are swapped) we must obtain the same frames in forward and the reversed ``forward'' strand for the same position (we found that {\bl} programs compute frame for reverse strand counting from sequence last position, so we verify the formulas in such way).}
+\end{center}
+\end{figure}
 
-From this record:
-
-chr22_13000000 gnl|ti|9493919_44_700 101 13025701 13025621 168 248 27 18 20 3 657 3.8e-11
-
-which is the bit-score ?
-does the strand/frame pair correspond to query or to sequence ?
-
-we have to convert to:
-
-Hsap_BTK   TBLASTX HSP  66384 67763 1031.0 + 3 0 
+\begin{comment}
+<<BASH commands ANALYSIS>>=
+#
+# Preparing files for Jim Kent
+ODIR="$ANALYSIS/blast/wublast.tblastx" ;
+# EXP="tbx_chr22" ; # < $ANALYSIS/blast/wublast.tblastx/masked3X+/gff/chr22.hsp.old
+EXP="tbx_chr22_3X+" ;
+ChckDirs $ODIR/$EXP ;
+perl -ane '($F[8]=$F[9])=~ s/[";]//og; 
+           print STDOUT (join("\t",@F[0 .. 8]))."\n";
+          ' $ANALYSIS/blast/wublast.tblastx/masked3X+/gff/chr22 \
+          > $ODIR/$EXP/chr22.hsp ;
+# cp $ANALYSIS/sgp/Hsap.masked.3X+/sr/chr22 $ODIR/chr22.sr ;
+cp $ANALYSIS/sgp/Hsap.masked.3X+.fix/sr/chr22 $ODIR/$EXP/chr22.sr ;
+gawk 'BEGIN{n="#\n## Filtered from chr22.sr - Score Cutoff: <26\n#"}
+      $6>=26 {print $0}
+      $0 ~ /^#/ {
+         if ($2=="Created") {$0=$0"\n"n};
+         print $0;
+      }' $ODIR/$EXP/chr22.sr > $ODIR/$EXP/chr22.sr-rs ;
+pushd $ODIR ;
+star $EXP.tar.gz $EXP ; # move to ftp dir...
+popd ;
 #
 @
+\end{comment}
+
+\begin{description}
+\item[tblastx parameters] \ \\ % chr22 x WGS3X+
+\begin{verbatim}
+    -nogap
+    Z=3000000000
+    E=0.01
+    W=5
+    B=10000
+    V=10000
+    -hspmax=4
+    -topcomboN=4
+    -filter=xnu
+    -matrix=blosum62mod
+\end{verbatim}
+<<HIDE: BASH commands>>=
+#
+ls -1 chr22_* | while read n ;
+  do {
+    perl -ne 'BEGIN{$prt=0};
+      $_ =~ s/^(Parameters):/$1/o && ($prt=1);
+      s/:\s+/= /o;
+      $prt && print $_' $n;
+    } ; 
+  done | perl -ne '$follow=0;
+      $_ =~ /^\s+([^\s].*?)=(.*)$/ && ($v=$1,$c=$2,$follow=1);
+      $follow || next;
+      defined($vars{$v}) || do {
+          push @{ $vars{$v} }, $c;
+      };
+      (grep (/^$c$/, @{ $vars{$v} })>0) || do {
+          push @{ $vars{$v} }, $c;
+      };
+      END{
+        foreach $n (keys %vars) {
+            print "$n :: ".(join(" * ", @{ $vars{$n} }))."\n";
+        };
+      }' - > kk
+#
+@
+
+\item[From Pankaj:]
+In addition to the topcombon=4, another difference between the 2 analysis, we use the masked WGS from NCBI and removed all mouse sequences that did not have at leat 50 bp contiguous of unmasked mosue sequence. Thus, the effective mouse WGS database size was 10,513,154 sequences; 6,054,167,851 total letters. But presumably this is a more enriched source (slightly more X coverage), so sensitivity should be slightly higher as observed.
+\end{description}
+
+\begin{comment}
+**Problem** (from HSPs filtered by Pankaj)
+From this record:
+chr22_13000000 gnl|ti|9493919_44_700 101 13025701 13025621 168 248 27 18 20 3 657 3.8e-11
+which is the bit-score ?
+does the strand/frame pair correspond to query or to sequence ?
+we have to convert to:
+Hsap_BTK   TBLASTX HSP  66384 67763 1031.0 + 3 0 
+\end{comment}
+
+We check if we did right mapping to the chromosome coords the HSPs filtered from the multiple blast-output files (computed on 100Kbp length subsequences from the {\chr}).
+
+<<BASH commands ANALYSIS>>=
+#
+# Checking filtered blast results
+#
+# excerpt from HSPs GFF file chr22/blast/wublast.tblastx/masked3X/gff/chr22
+chr22 TBLASTX hsp 13393381 13393968 159.1 - 1 Target "gnl_ti_6891896_47_706_G10P675981FG7.T0" 19 606; Strand -; Frame 1; E_value 1.5e-37; P_sum 1.5e-37; Aln_Score 341; Bit_Score 159.1; Idn_Score 37.76 (74/196); Gaps 0.00 (Q:0|S:0); Lengths Q:196|S:196|T:196
+chr22 TBLASTX hsp 13393966 13394019 22.6 - 1 Target  "gnl_ti_6891896_47_706_G10P675981FG7.T0" 605 658; Strand -; Frame 3; E_value 1.5e-37; P_sum 1.5e-37; Aln_Score 43; Bit_Score 22.6; Idn_Score 44.44 (8/18); Gaps 0.00 (Q:0|S:0); Lengths Q:18|S:18|T:18
+#
+# excerpt from blast file chr22/_tmp/Pankaj/tbx/chr22_13300000
+...
+ Score = 341 (159.1 bits), Expect = 1.5e-37, Sum P(3) = 1.5e-37, Group = 1
+ Identities = 74/196 (37%), Positives = 108/196 (55%), Frame = -1 / -1
+Query: 93968 PMYMFLGNFSFLEIWYVSSTVPKMLVNFLSEKKNISFAGCFLQXXXXXSLGTSECLLLTV 93789
+             P    L   S +++ Y+S+TVPKM  NFLS +K+ISF GC +Q     ++  SE LLL
+Sbjct:   606 PHDFLLSQLSLMDLMYISTTVPKMAFNFLSGQKSISFLGCGVQSFFFLTMACSEGLLLAS 427
+Query: 93788 MAFDQYLAICRPLLYPNIMTGHLYAKLVILCWVCGFLWFLIPIVLISQMPFCGPNIIDHV 93609
+             MA+D+++AIC PL YP  M+  +  K++I  W+ G +  L   V    +P+C    I+H
+Sbjct:   426 MAYDRFVAICHPLHYPIRMSKIMCLKMIIGSWILGSINSLAHTVYALHIPYCHSRSINHF 247
+Query: 93608 VCDPGPRFALDCVSAPRIQLFCYTLSSLVIFGNFLFIIGSYTLVLKAMLGMPSSTGRHKA 93429
+              CD      L C+     +   +  +SL +   FL I  SY  VL A+  M S  G+ KA
+Sbjct:   246 FCDVPAMLPLACMDTWVYEYMVFVSTSLFLLLPFLGITASYGRVLFAVFHMRSKEGKKKA 67
+Query: 93428 FSTCGSHLAVVSLCYS 93381
+             F+TC +HL VV+  Y+
+Sbjct:    66 FTTCSTHLTVVTFYYA 19
+...
+ Score = 43 (22.6 bits), Expect = 1.5e-37, Sum P(3) = 1.5e-37, Group = 1
+ Identities = 8/18 (44%), Positives = 11/18 (61%), Frame = -1 / -3
+Query: 94019 GNGAIAFVLWCDRRLHTP 93966
+             GN  +  ++  D RLHTP
+Sbjct:   658 GNSGMIHLIRVDPRLHTP 605
+...
+#
+# Extracting subfragments of chr22 seq
+perl -e ' # geting fragments of large fasta sequence
+    use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+    use Bio::Seq;
+    use Bio::SeqIO;
+    @coord_pairs = ( 13393381, 13393968,
+                     13393966, 13394019 );
+    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDIN );
+    my $seqout = Bio::SeqIO->new(-format => "fasta", -fh => \*STDOUT);
+    while (my $sequence = $seqin->next_seq()) {
+        for (my $p = 0; $p <= $#coord_pairs; $p+=2) {
+            my ($o,$e,$subseq);
+            $subseq = Bio::Seq->new();
+            ($o,$e) = @coord_pairs[$p..($p + 1)];
+            $subseq = $sequence->trunc($o,$e); # ($o,($e - $o + 1)));
+            $subseq->display_id("chr22\_$o\_$e");
+            $subseq = $subseq->revcom();
+            $seqout->write_seq($subseq);
+            $subseq = $subseq->translate;
+            $seqout->write_seq($subseq);
+        }; # for
+    }; # while
+    exit(0);
+  ' < $DATASETS/fasta/masked/chr22 ;
+#
+-------------------- WARNING ---------------------
+MSG: Sequence is not dna or rna, but []. Attempting to revcom, but unsure if this is right
+---------------------------------------------------
+>chr22_13393381_13393968
+CCCATGTACATGTTCCTGGGAAATTTCTCCTTTTTAGAGATATGGTATGTCTCTTCTACA
+GTTCCCAAGATGTTGGTCAACTTCCTTTCAGAGAAAAAAAACATCTCCTTTGCTGGATGT
+TTTCTCCAGTTTTATTTCTTCTTCTCTTTGGGTACATCAGAATGCTTGCTTTTGACTGTG
+ATGGCCTTTGATCAGTACCTTGCTATCTGCCGTCCCTTGCTCTATCCTAATATCATGACT
+GGGCATCTCTATGCCAAACTGGTCATACTGTGCTGGGTTTGTGGATTTCTGTGGTTCCTG
+ATCCCCATTGTTCTCATCTCTCAGATGCCCTTCTGTGGCCCAAACATTATTGACCATGTT
+GTGTGTGACCCAGGGCCACGATTTGCATTGGATTGTGTTTCTGCCCCAAGAATCCAACTG
+TTTTGCTACACTCTAAGCTCATTAGTTATTTTTGGTAACTTCCTCTTTATTATTGGATCC
+TATACTCTTGTCCTGAAAGCTATGTTGGGTATGCCTTCAAGCACTGGGAGACATAAGGCC
+TTCTCTACCTGTGGGTCTCATTTGGCTGTGGTATCACTGTGCTATAGC
+>chr22_13393381_13393968
+PMYMFLGNFSFLEIWYVSSTVPKMLVNFLSEKKNISFAGCFLQFYFFFSLGTSECLLLTV
+MAFDQYLAICRPLLYPNIMTGHLYAKLVILCWVCGFLWFLIPIVLISQMPFCGPNIIDHV
+VCDPGPRFALDCVSAPRIQLFCYTLSSLVIFGNFLFIIGSYTLVLKAMLGMPSSTGRHKA
+FSTCGSHLAVVSLCYS
+-------------------- WARNING ---------------------
+MSG: Sequence is not dna or rna, but []. Attempting to revcom, but unsure if this is right
+---------------------------------------------------
+>chr22_13393966_13394019
+GGGAATGGAGCCATTGCTTTTGTCCTGTGGTGTGACCGGCGACTTCACACTCCC
+>chr22_13393966_13394019
+GNGAIAFVLWCDRRLHTP
+-------------------- EXCEPTION --------------------
+MSG: Attempting to get a subseq out of range 13393381:13393968 vs
+STACK Bio::Seq::LargePrimarySeq::subseq /usr/lib/perl5/site_perl/5.005//Bio/Seq/LargePrimarySeq.pm:156
+STACK Bio::PrimarySeqI::trunc /usr/lib/perl5/site_perl/5.005//Bio/PrimarySeqI.pm:467
+STACK Bio::Seq::LargeSeq::trunc /usr/lib/perl5/site_perl/5.005//Bio/Seq/LargeSeq.pm:110
+STACK toplevel -e:14
+-------------------------------------------
+#
+Subject: Re: [Bioperl-l] Processing large fasta sequences throught SeqIO
+   Date: Sat, 1 Sep 2001 16:41:09 -0400 (EDT)
+   From: Jason Stajich <jason@chg.mc.duke.edu>
+
+Tracked down the bug - it is in Bio::SeqIO::largefasta.pm
+
+You can do the following to fix your code w/o upgrading your bioperl
+code locally ( since it is only checked in to the bioperl CVS repository).
+
+where you have a loop getting all the sequences from the seqio stream -
+> while ( $seq = $seqio->next_seq ) 
+change it to
+> while ( $seq = $seqio->next_seq && $seq->length() > 0 )
+
+This is of course a workaround, but should take care of things.  
+#
+@ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -618,20 +1193,77 @@ We analyzed the {\data} sequence dataset with different gene-prediction tools an
 
 .........PUT HERE a LIST of them.....
 
+\subsctn{Gene-prediction evaluation}
+
+<<BASH Functions: Gene-Prediction Evaluation>>=
+#
+# PREPARING EVALUATION STUFF
+export GENEIDVERSION="geneid v1.1" ;
+#
+run_evaluation ()
+{
+  #
+  # USAGE:
+  #     run_evaluation #chrom program param prog_results_dir annotation_dir testset
+  # run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/all all ;
+  #
+  CHR="$1" ;
+  prog="$2" ;
+  PROG=`echo $prog | tr a-z A-Z` ;
+  RUN="$3" ;
+  BASE="$4/$RUN" ;
+  RESULTS="$BASE/gff/chr$CHR" ;
+  SUBSET="$6" ;
+  TESTSET="$5/chr$CHR" ;
+  LONG_OUTPUT="$BASE/eval_$prog.$RUN.chr${CHR}_$SUBSET" ;
+  SHORT_OUTPUT="$BASE/eval_${prog}_brief.$RUN.chr${CHR}_$SUBSET" ;
+  GVER="------------------------- <${GENEIDVERSION}> -------------------------";
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
+    echo "### $LONG_OUTPUT" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GVER" ; echo "###" ; } > $LONG_OUTPUT ;
+  $SGPBIN/evaluation -ta $RESULTS $TESTSET >> $LONG_OUTPUT ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
+    echo "### $SHORT_OUTPUT" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GVER" ; echo "###" ; } > $SHORT_OUTPUT ;
+  $SGPBIN/evaluation -tsa $RESULTS $TESTSET >> $SHORT_OUTPUT ;
+}
+#
+@ 
+
 \subsctn{Running {\gnid}} 
 
-<<BASH commands ANALYSIS>>=
+<<BASH Functions: Running GENEID>>=
+#
+# RUNNING GENEID
 run_GENEID () 
 {
   #
   # run_GENEID - Running GENEID on a chromosome
   #
-  # USAGE: run_GENEID testname sequence chr
+  # USAGE: run_GENEID testname sequence chr geneidversion
   #
   SECONDS=0;
   PROG="GENEID" ; prog="geneid" ;
-  GENEID="/projects/sgp/param/geneid/human3iso.param" ;
-  CMD="/projects/sgp/bin/geneid -vG" ;
+##  GENEID="/projects/sgp/param/geneid/human3iso.param" ;
+##  CMD="/projects/sgp/bin/geneid -vG" ;
+  version=$4 ;
+  [ "$version" ] || { 
+      echo "### Running version 1.0 by default"; version="1.0"; };
+  if [ "$version" == "1.0" ] ;
+    then 
+      GENEID="/usr/local/molbio/Install/geneid_v1.0/param/human3iso.param" ;
+      CMD="/usr/local/molbio/bin/geneid -vG" ;
+    else
+      GENEID="/home/ug/gparra/Research/selfgenome/src/geneid_v1.1/param/human3iso.param" ;
+      CMD="/home/ug/gparra/Research/selfgenome/bin/geneid -vG" ;
+  fi ;
       # GENEID tool command-line options:
       #  '-v' be verbose
       #  '-G' GFF output
@@ -652,6 +1284,7 @@ run_GENEID ()
   # Run program
   echo "### Running $PROG on $locus ..." 1>&2 ;
   $CMD $ISEQ/$locus > $ODIR/$locus 2> $EDIR/$locus ;
+  cp $ODIR/$locus $ODIR/$locus.${prog}_v$version ;
   #
   { echo "###"; echo "### Execution time for [$0] : $SECONDS secs"; 
     echo "###"; } 1>&2;
@@ -659,12 +1292,32 @@ run_GENEID ()
 #
 @
 
+<<BASH commands ANALYSIS>>=
+#
+# Testing on Hsap_BTK
+run_GENEID test /projects/datasets/orthologous/fasta/masked Hsap_BTK 1.0 ;
+enscript -1C -Gjf Courier7 -M A4 gff/Hsap_BTK.geneid_v1.0 ;
+#
+run_GENEID test /projects/datasets/orthologous/fasta/masked Hsap_BTK 1.1 ;
+enscript -1C -Gjf Courier7 -M A4 gff/Hsap_BTK.geneid_v1.1 ;
+#
+@ 
+
 \subsubsctn{{\gnid} on raw sequences} 
 
 <<BASH commands ANALYSIS>>=
 #
 # Raw sequences
-run_GENEID Hsap.raw $DATASETS/fasta/raw chr22 ;
+run_GENEID Hsap.raw $DATASETS/fasta/raw chr22 1.0 ;
+           ### Segmentation fault
+#
+run_GENEID Hsap.raw $DATASETS/fasta/raw chr22 1.1 ;
+           ### Execution time for [bash] : 1425 secs
+run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/all all ;
+run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/fixed fixed ;
+run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/set/cds VH_cds ;
+run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/set/exons VH_exons ;
+run_evaluation 22 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo ;
 #
 @ 
  
@@ -673,10 +1326,1271 @@ run_GENEID Hsap.raw $DATASETS/fasta/raw chr22 ;
 <<BASH commands ANALYSIS>>=
 #
 # Masked sequences
-run_GENEID Hsap.masked $DATASETS/fasta/masked chr22 ;
+run_GENEID Hsap.masked $DATASETS/fasta/masked chr22 1.0 ;
+           ### Segmentation fault
+#
+run_GENEID Hsap.masked $DATASETS/fasta/masked chr22 1.1 ;
+           ### Execution time for [bash] : 1125 secs
+run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/all all ;
+run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/fixed fixed ;
+run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/set/cds VH_cds ;
+run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/set/exons VH_exons ;
+run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo ;
 #
 @ 
 
+\subsctn{Running {\gnid} with annotation evidences}
+
+<<BASH Functions: Running GENEID + Evidences>>=
+#
+# RUNNING SGP
+run_GENEIDevidences () 
+{
+  #
+  # run_GENEIDevidences - Running geneid for a given sequence set
+  #
+  # USAGE: run_GENEIDevidences testname sequence evidence_file chr
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'blastdata' is path to the HSPs for homology evidences
+  #
+  SECONDS=0;
+  PROG="GENEID" ; prog="geneid" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/geneid" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  EVIDENCES="$3" ;
+  locus="$4" ;
+  HSP_SR="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in hsp sr hsp-rs geneid_format tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  #
+  # Running SGP TOOL ############################### Excerpt from 
+  # export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
+  # export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
+  GNDBIN="/home/ug/gparra/Research/selfgenome" ;
+  GENEID="$GNDBIN/bin/geneid" ;
+  PARAM="$GNDBIN/src/geneid_v1.1/param/human3iso.param" ;
+  echo "### Running geneid" ;
+  $GENEID -v -D -E $EW -P $PARAM \
+          -R $EVIDENCES $ISEQ/$locus \
+          2>&1 > $BASE/geneid_format/$locus | tee $BASE/logs/geneid.$locus ;
+  # Running SGP TOOL ############################### 
+  { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
+    echo "###"; } 1>&2;
+}
+#
+@ 
+
+<<BASH commands ANALYSIS>>=
+#
+# running geneid with evidences
+run_GENEIDevidences Hsap.masked.evid $DATASETS/fasta/masked \
+           $DATASETS/annotation/fixed/chr22.evidences chr22 ;
+#
+run_GENEIDevidences Hsap.masked.evid_VH $DATASETS/fasta/masked \
+           $DATASETS/annotation/set/evidences/chr22 chr22 ;
+#
+# IDIR="$ANALYSIS/geneid/Hsap.masked.evid" ;
+IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
+sort +3n +4n -5 $IDIR/gff/chr22_* \
+              > $IDIR/gff/chr22 ; 
+gawk '{print $9}' $IDIR/gff/chr22 | sort | uniq -c | \
+     sort -nr > $IDIR/gff/chr22.gene_list ;
+# 
+@
+
+
+\subsctn{Running {\sgp}}
+
+<<BASH Functions: Running SGP>>=
+#
+# RUNNING SGP
+run_mod_SGP () 
+{
+  #
+  # run_mod_SGP - Running SGP for a given sequence set
+  #
+  # USAGE: run_mod_SGP testname sequence hspdata chr seqlength
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'blastdata' is path to the HSPs for homology evidences
+  #
+  SECONDS=0;
+  PROG="SGP" ; prog="sgp" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/sgp" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  HSPs="$3" ;
+  locus="$4";
+  HSP_SR="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in hsp sr hsp-rs tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  #
+  # Running SGP TOOL ############################### Excerpt from 
+  # export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
+  # export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
+  PROBIN="/projects/bin" ;
+  SGP2="/projects/sgp/src/geneid_v1.1-sgp" ;
+       # binaries, scripts and params in SGP2
+  GENEID="$SGP2/bin/geneid" ; # geneid v1.1-sgp
+  PARAM="$SGP2/param/human3iso.param.sgp" ;
+  # SGP2="/home/ug/rguigo/research/humus/SGP2-2/sggp2/bin" ;
+  # GENEID="$SGP2/geneid" ; # geneid v1.0
+  # PARAM="$SGP2/human3iso.param" ;
+  # # GENEID="/home/ug/gparra/Research/selfgenome/bin/geneid" ; # geneid v1.1
+  # # PARAM="/home/ug/gparra/Research/selfgenome/src/geneid_v1.1/param/human3iso.param.sgp" ;
+  EW=0 ; # add to exon weigth
+  S_CUTOFF=26 ;
+  SCF=0 ;    # substract to tblastx scores S_CUTOFF - SCF;
+  DSC=`expr $S_CUTOFF - $SCF` ;
+  SHSP=0 ;   # SHSP=6         # shrink hsp by $SHSP
+  WTBX=0.19 ;  # weigth of tblastx score
+  WTBXF=0.30 ; # weigth of tblastx score
+  WTBXI=0.20 ; # weigth of tblastx score
+  WTBXT=0.30 ; # weigth of tblastx score
+  LSEQ=$5 ;
+  echo "### Building $BASE/tmp/$locus.termini file" ;
+  gawk "BEGIN{ printf \"%s\t%s\t%s\t%d\t%d\t%s\t%1s\t%1d\\n\", 
+              \"$locus\", \"force\", \"cap\", -2, 0, \".\",  
+              \"+\", 0}" > $BASE/tmp/$locus.termini ;
+  gawk "BEGIN{ printf \"%s\t%s\t%s\t%d\t%d\t%s\t%1s\t%1d\\n\", 
+              \"$locus\", \"force\", \"poly\", $LSEQ - 1, $LSEQ - 1,
+              \".\", \"+\", 0}" >> $BASE/tmp/$locus.termini ;
+  echo "### Running blast2gff" ;
+  $PROBIN/blast2gff -g $HSPs/$locus > $BASE/sr/$locus \
+          2> $BASE/logs/geneid_sgp.$locus ;
+  gawk "\$6 > $S_CUTOFF {
+          \$6 = (\$6-$DSC)*$WTBX; \$4=\$4+$SHSP; \$5=\$5-$SHSP; print \$0;
+        }" < $BASE/sr/$locus > $BASE/hsp-rs/$locus ;
+  echo "### Running geneid" ;
+  { $GENEID -v -E $EW -GP $PARAM -S $BASE/hsp-rs/$locus \
+          -R $BASE/tmp/$locus.termini $ISEQ/$locus | grep -v evidence \
+          > $BASE/gff/$locus ;
+    } 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
+  # Running SGP TOOL ############################### 
+  { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
+    echo "###"; } 1>&2;
+} 
+#
+# Geneid compiled on ik13 but when running on monstre we got this:
+#
+#  /home/ug/gparra/Research/selfgenome/bin/geneid: 
+#    /lib/libc.so.6: version 'GLIBC_2.1.3' not found 
+#    (required by /home/ug/gparra/Research/selfgenome/bin/geneid)
+#
+@ 
+
+<<BASH commands ANALYSIS>>=
+#
+####
+#### Roderic's TESTS on a SGP variant #'
+#
+# testing on Hsap_BTK
+run_mod_SGP Hsap.masked /projects/datasets/orthologous/fasta/masked \
+        /projects/sgp/orthologous/sgp/rguigo.masked3X_pankaj_W5/hsp \
+        Hsap_BTK 78931 ;
+enscript -1C -Gjf Courier7 -M A4 $ANALYSIS/sgp/Hsap.masked/gff/Hsap_BTK ;
+#
+# SGP on Masked chr22 sequence
+run_mod_SGP Hsap.masked $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X/gff chr22 47662662 ;
+run_evaluation 22 sgp Hsap.masked $ANALYSIS/sgp $DATASETS/annotation/all all ;
+run_evaluation 22 sgp Hsap.masked $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
+#
+run_mod_SGP Hsap.masked.frame $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X/gff chr22 47662662 ;
+run_evaluation 22 sgp Hsap.masked.frame $ANALYSIS/sgp $DATASETS/annotation/all all ;
+run_evaluation 22 sgp Hsap.masked.frame $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
+#
+export GENEIDVERSION="geneid v1.1" ;
+#
+# We have fixed frames and run on 19Mreads
+run_mod_SGP Hsap.masked.3X+ $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr22 47662662 ;
+run_evaluation 22 sgp Hsap.masked.3X+ $ANALYSIS/sgp $DATASETS/annotation/all all ;
+run_evaluation 22 sgp Hsap.masked.3X+ $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
+#
+# We have fixed frames for reverse strand too
+run_mod_SGP Hsap.masked.3X+.fix $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr22 47662662 ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set/exons VH_exons ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set/pseudo VH_pseudo ;
+#
+@ 
+
+\subsctn{Gene-prediction statistics}
+
+See table~\ref{tbl:genepredresults} on page~\pageref{tbl:genepredresults}, for a summary of gene prediction statistics.
+
+<<BASH Gene Prediction Stats>>=
+#
+echo "### BUILDING GENE PREDICTION STATS LaTeX TABLE..." ;
+perl -ne '
+      BEGIN{
+        @header = qw/ Test SN SP CC SNe SPe SNSP raME raWE
+                           SNg SPg SNSPg raMG raWG raJG raSG / ;
+        for ($j=0; $j<=$#header; $j++) {
+          $header{$j} = "\\textbf\{$header{$j}\}";
+        };
+        print STDOUT "\\begin{tabular}{|c*{15}{|r}|}\\hline\n".
+                     join("\&", @header)."\\\\\\hline\n";
+        $n = 0;
+      }
+      chomp;
+      $_ =~ m%^### /projects%o && do {
+        $_ =~ s/(_)/\\$1/og;
+        @file = split /\//og, $_;
+        $file = "\\parbox\[c\]\[6ex\]\[c\]\{7cm\}\{\\centering".
+                "\\shortstack\{\\texttt\{\\bfseries $file[($#file-2)]\} ".
+                "\$\\rightarrow\$ $file[($#file-1)]\\\\\[-0.25ex\]($file[$#file])\}\}\n";
+      }; 
+      $_ =~ s%^\s+chr22\s+%%o    && do {
+        ($n%3==0) && print STDOUT "\\hline\n";
+        $n++;
+        @field = split /\s+/og, $_;
+        print STDOUT "$file \& ".join(" \& ",@field)."\\\\\[2ex\]\n" ;
+      }; 
+      END{
+        print STDOUT "\\hline\n\\end{tabular}\n";
+      }' \
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_fixed \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_fixed \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_fixed \
+\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_cds \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_cds \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_cds \
+\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_exons \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_exons \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_exons \
+\
+  $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_VH_pseudo \
+  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_VH_pseudo \
+  $ANALYSIS/sgp/Hsap.masked.3X+.fix/eval_sgp_brief.Hsap.masked.3X+.fix.chr22_VH_pseudo \
+\
+  | cpif $DOCS/tables/gene-pred.tex ;
+#
+@  
+\begin{table}[!ht]
+\begin{center}
+\begin{sideways}
+\begin{minipage}[c][15cm][c]{24cm}
+\begin{center}
+\scriptsize
+  \input tables/gene-pred.tex
+\caption{\label{tbl:genepredresults} Gene prediction statistics on chromosome 22.}
+\end{center}
+\end{minipage}
+\end{sideways}
+\end{center}
+\end{table}
+
+<<HIDE: BASH commands ANALYSIS>>=
+#
+### PRINTING GENE-PREDICTION EVALUATIONS
+ENSCRIPT="enscript -1C -Gjf Courier7 -M A4" ;
+#
+# GENEID evaluation
+$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw.chr22_all ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_all ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw.chr22_fixed ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw.chr22_fixed ;
+#
+$ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked.chr22_all ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_all ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked.chr22_fixed ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked.chr22_fixed ;
+#
+$ENSCRIPT $ANALYSIS/geneid/Hsap.masked.evid/eval_geneid.Hsap.masked.evid.chr22_fixed ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked.evid/eval_geneid_brief.Hsap.masked.evid.chr22_fixed ;
+#
+# SGP evaluation
+$ENSCRIPT $ANALYSIS/sgp/Hsap.masked/eval_sgp.Hsap.masked.chr22_all ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked/eval_sgp_brief.Hsap.masked.chr22_all ;
+$ENSCRIPT $ANALYSIS/sgp/Hsap.masked/eval_sgp.Hsap.masked.chr22_fixed ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked/eval_sgp_brief.Hsap.masked.chr22_fixed ;
+#
+$ENSCRIPT $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp.Hsap.masked.frame.chr22_all ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp_brief.Hsap.masked.frame.chr22_all ;
+$ENSCRIPT $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp.Hsap.masked.frame.chr22_fixed ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.masked.frame/eval_sgp_brief.Hsap.masked.frame.chr22_fixed ;
+#
+@
+
+\subsctn{Running {\sgp} with annotation evidences}
+
+<<BASH Functions: SGP + Evidences>>=
+#
+# RUNNING SGP + Evidences
+#
+run_mod_SGPevidences () 
+{
+  #
+  # run_mod_SGPevidences - Running SGP for a given sequence set
+  #
+  # USAGE: run_mod_SGPevidences testname sequence hspdata evidences chr seqlength
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'blastdata' is path to the HSPs for homology evidences
+  #
+  SECONDS=0;
+  PROG="SGP" ; prog="sgp" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/sgp" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  HSPs="$3" ;
+  EVIDENCES="$4" ;
+  locus="$5";
+  HSP_SR="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  LSEQ=$6 ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in hsp sr hsp-rs geneid_format tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  #
+  # Running SGP TOOL ############################### Excerpt from 
+  # export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
+  # export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
+  PROBIN="/projects/bin" ;
+  SGP2="/projects/sgp/src/geneid_v1.1-sgp" ;
+       # binaries, scripts and params in SGP2
+  GENEID="$SGP2/bin/geneid" ; # geneid v1.1-sgp
+  PARAM="$SGP2/param/human3iso.param.sgp" ;
+  EW=0 ; # add to exon weigth
+  S_CUTOFF=26 ;
+  SCF=0 ;    # substract to tblastx scores S_CUTOFF - SCF;
+  DSC=`expr $S_CUTOFF - $SCF` ;
+  SHSP=0 ;   # SHSP=6         # shrink hsp by $SHSP
+  WTBX=0.19 ;  # weigth of tblastx score
+  WTBXF=0.30 ; # weigth of tblastx score
+  WTBXI=0.20 ; # weigth of tblastx score
+  WTBXT=0.30 ; # weigth of tblastx score
+  echo "### Running blast2gff" ;
+  $PROBIN/blast2gff -g $HSPs/$locus > $BASE/sr/$locus \
+          2> $BASE/logs/geneid_sgp.$locus ;
+  gawk "\$6 > $S_CUTOFF {
+          \$6 = (\$6-$DSC)*$WTBX; \$4=\$4+$SHSP; \$5=\$5-$SHSP; print \$0;
+        }" < $BASE/sr/$locus > $BASE/hsp-rs/$locus ;
+  echo "### Running geneid" ;
+  { $GENEID -v -D -E $EW -P $PARAM -S $BASE/hsp-rs/$locus \
+          -R $EVIDENCES $ISEQ/$locus \
+          > $BASE/geneid_format/$locus ;
+    } 2>&1 | tee $BASE/logs/geneid_sgp.$locus ;
+  # Running SGP TOOL ############################### 
+  { echo "###"; echo "### Execution time for $PROG : $SECONDS secs"; 
+    echo "###"; } 1>&2;
+}
+# 
+@
+
+<<BASH commands ANALYSIS>>=
+#
+####
+#### SGP plus evidences
+#
+# SGP on Masked chr22 sequence
+run_mod_SGPevidences Hsap.masked.evidences $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X/gff \
+        $DATASETS/annotation/fixed/chr22.evidences chr22 47662662 ;
+#
+run_mod_SGPevidences Hsap.masked.3X+.evid $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+        $DATASETS/annotation/fixed/chr22.evidences chr22 47662662 ;
+#
+run_mod_SGPevidences Hsap.masked.3X+.fix.evid $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+        $DATASETS/annotation/fixed/chr22.evidences chr22 47662662 ;
+#
+run_mod_SGPevidences Hsap.masked.3X+.fix.evid_VH $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+        $DATASETS/annotation/set/evidences/chr22 chr22 47662662 ;
+#
+@ 
+
+<<BASH Functions: Filtering GENEID RAW Output>>=
+#
+# Script from gparra to retrieve GFF annotation from geneid big output
+geneid_raw2GFF ()
+{
+  # USAGE:  geneid_raw2GFF output_dir geneid_file
+  # filtering geneid output (obtained with "-D" option -> default output+cDNA)
+  gawk 'BEGIN{ OFS="\t"; odir=ARGV[1]; ARGV[1]="" }
+    { if ($2=="Sequence") seqname=$3;
+      if ($2=="Gene") gene=$3;
+      if (NF>8 && substr($1,1,1)!="#" && $1!="Annotation")
+        print seqname,"geneid_v1.1",$1,$2,$3,$4,$5,$6,seqname"_"gene \
+              > odir "/gff/" seqname"_"gene;
+      if (substr($1,1,1)==">") {
+        if (substr($1,length($1)-1,2)=="NN") {
+          print ">"seqname"_"gene > odir "/cds/" seqname"_"gene;
+          bol=1;
+        } else if (substr($1,length($1)-1,2)=="AA") {
+          print ">"seqname"_"gene > odir "/prot/" seqname"_"gene;
+          bol=2;
+        };
+      } else {
+        if (bol==1 && NF==1 && substr($1,1,1)!=">" ) 
+          print $0 > odir "/cds/" seqname"_"gene;
+      };
+      if (bol==2 && NF==1 && substr($1,1,1)!=">" )
+        print $0 > odir "/prot/" seqname"_"gene;
+    }' $1 $2 ;
+}
+#
+@ 
+
+<<BASH commands ANALYSIS>>=
+#
+# IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.evid" ;
+# IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid" ;
+IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH" ;
+geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
+sort +3n +4n -5 $IDIR/gff/chr22_* > $IDIR/gff/chr22 ;
+gawk '{
+      genes[$9]++;
+      if (genes[$9]>1) {
+        min[$9] = $4<min[$9] ? $4 : min[$9] ;
+        max[$9] = $5>max[$9] ? $5 : max[$9] ;
+      } else {
+        min[$9] = $4 ;
+        max[$9] = $5 ;
+        strand[$9] = $7;
+      };
+    }
+    END {
+      for (n in genes) {
+        print n, min[n], max[n], strand[n], genes[n];
+      };
+    }' $IDIR/gff/chr22 | sort +1n +2n -3 > $IDIR/gff/chr22.gene_list ;
+# gawk '{print $9}' $IDIR/gff/chr22 | sort | uniq -c | \
+#      sort -nr > $IDIR/gff/chr22.gene_list ;
+#
+wc $ANALYSIS/sgp/Hsap.masked.3X+.evid/gff/chr22.gene_list ;
+    162     810    5155
+wc $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid/gff/chr22.gene_list ;
+    181     905    5765
+wc $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH/gff/chr22.gene_list ;
+    104     520    3321
+wc $ANALYSIS/geneid/Hsap.masked.evid_VH/gff/chr22.gene_list ;
+    147     735    4692
+# we got more genes once we fixed frame from HSPS for both strands.
+@
+
+<<HIDE: BASH commands ANALYSIS>>=
+#
+# Preparing files for Michael Brent
+IDIR="$ANALYSIS/sgp" ;
+# EXP="Hsap.masked.3X" ;
+EXP="Hsap.masked.3X+.fix" ;
+# ODIR="$IDIR/sgp_chr22_3X" ;
+ODIR="$IDIR/sgp_chr22_3X+" ;
+#
+ChckDirs $ODIR ;
+#
+cp $ANALYSIS/geneid/Hsap.masked/gff/chr22 $ODIR/chr22_geneid.gff ;
+$SGPBIN/gff2gtf.pl < $ODIR/chr22_geneid.gff \
+                   > $ODIR/chr22_geneid.gtf2 ;
+cp $ODIR/chr22_geneid.gtf2 $ANALYSIS/geneid/Hsap.masked/gtf2/chr22 ;
+#
+cp $IDIR/$EXP/gff/chr22 $ODIR/chr22_all.gff ;
+$SGPBIN/gff2gtf.pl < $ODIR/chr22_all.gff \
+                   > $ODIR/chr22_all.gtf2 ;
+cp $ODIR/chr22_all.gtf2 $IDIR/$EXP/gtf2/chr22 ;
+#
+perl -ne '
+  chomp;
+  $_ !~ /^#/o && do {
+     @F = split /\s+/og, $_;
+     $F[8] =~ s/.*?_//o;
+     print STDOUT join("\t",@F)."\n";
+     next;
+  };
+  print STDOUT "$_\n";
+  ' $IDIR/$EXP.evid/gff/chr22 > $ODIR/chr22_evid.gff ;
+$SGPBIN/gff2gtf.pl < $ODIR/chr22_evid.gff \
+                   > $ODIR/chr22_evid.gtf2 ;
+cp $ODIR/chr22_evid.gtf2 $IDIR/$EXP.evid/gtf2/chr22 ;
+#
+pushd $IDIR ;
+# star sgp_chr22_3X.tgz sgp_chr22_3X ;
+star sgp_chr22_3X+.tar.gz sgp_chr22_3X+ ;
+popd ;
+#
+@ 
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Making plots for {\sgp} with {\gps}}
+
+\subsctn{Preparing GFF files}
+
+<<BASH commands ANALYSIS>>=
+#
+# MAKING PLOTS with GFF2PS
+#
+# There are no results for genscan/twinscan/slam
+#
+export CHR="chr22";
+#
+# Preparing annotaton and repeats
+# gawk '$0!~/^#/ {$2="annotation";print $0}'\
+#          $DATASETS/annotation/fixed/chr22 \
+#        > $DATASETS/annotation/fixed/chr22.gff2ps ;
+gawk '$0!~/^#/ {$2="annotation";print $0}' \
+      $DATASETS/annotation/set/cds/chr22   \
+      $DATASETS/annotation/set/exons/chr22 \
+      $DATASETS/annotation/set/pseudo/chr22 | \
+      sort +3n +4n -5 +2 -3 \
+      > $DATASETS/annotation/set/gff2ps/chr22_annot.all ;
+gawk 'BEGIN{ori=end=0}
+      { if ($3=="CDS") {
+          ori=$4; end=$5;
+        };
+        if ($3=="exon") {
+          gsub(/\.mRNA$/,"",$9);
+          if (!($4==ori && $5==end)) print $0;
+        } else print $0;
+      }' $DATASETS/annotation/set/gff2ps/chr22_annot.all \
+       > $DATASETS/annotation/set/gff2ps/chr22_annot ;
+#
+gawk '$0!~/^#/ {$2=$3="evidence";print $0}'    \
+      $DATASETS/annotation/set/evidences/chr22 \
+    > $DATASETS/annotation/set/gff2ps/chr22_evid ;
+#
+gawk '{
+    if ($9 in names) names[$9]++; 
+    else names[$9]=1;
+    gp = $9"-"names[$9];
+    print $1,$2,$3,$4,$5,$6,$7,$8,gp;
+    }' $DATASETS/masking/default/gff/chr22 \
+     > $DATASETS/masking/default/gff/chr22.gff2ps ;
+#
+@ 
+
+<<BASH commands ANALYSIS>>=
+#
+# Preparing geneid files
+IDIR="$ANALYSIS/geneid/Hsap.masked" ;
+ODIR="$IDIR/ps/_tmp/geneid" ;
+[ -e $ODIR ] || ChckDirs $ODIR ;
+gawk 'BEGIN{OFS="\t"}
+      $1!~/^#|^[ \t]*$/ {
+          $2="geneid";
+          print $0;
+      }' $IDIR/gff/$CHR.geneid_v1.1 > $ODIR/$CHR ;
+# IDIR="$ANALYSIS/geneid/Hsap.masked.evid" ;
+IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+ODIR="$IDIR/ps/_tmp/geneid" ;
+[ -e $ODIR ] || ChckDirs $ODIR ;
+gawk 'BEGIN{OFS="\t"}
+      $1!~/^#|^[ \t]*$/ {
+          $2="geneid";
+          print $0;
+      }' $IDIR/gff/$CHR > $ODIR/$CHR ;
+#
+@ 
+
+<<BASH Functions: Preparing SGP Output>>=
+#
+# Preparing SGP files
+set_feats_sgp ()
+{
+  # USAGE:  set_feats_sgp input_dir
+  IDIR="$1";
+  #
+  # set tblastx GFF files from last SGP run
+  ODIR="$IDIR/ps/_tmp/sr" ;
+  [ -e $ODIR ] || ChckDirs $ODIR ;
+  gawk 'BEGIN{ OFS="\t" }
+        { if ($1 !~ /^#|^[ \t]*$/) { $2="SR.3X"; $8="." };
+          print $0;
+          }' $IDIR/sr/$CHR > $ODIR/$CHR ;
+  ODIR="$IDIR/ps/_tmp/sr-rs" ;
+  [ -e $ODIR ] || ChckDirs $ODIR ;
+  gawk 'BEGIN{ OFS="\t" }
+        { if ($1 !~ /^#|^[ \t]*$/) { $2="SR-RS.3X"; $8="." };
+          print $0;
+          }' $IDIR/hsp-rs/$CHR > $ODIR/$CHR ;
+  #
+  # set SGP GFF files from SGP run
+  ODIR="$IDIR/ps/_tmp/sgp" ;
+  [ -e $ODIR ] || ChckDirs $ODIR ;
+  gawk 'BEGIN{ OFS="\t" }
+        { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.3X" };
+          print $0;
+          }' $IDIR/gff/$CHR > $ODIR/$CHR ;
+}
+#
+@ 
+
+<<BASH commands ANALYSIS>>=
+#
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked ;
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.frame ;
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+ ;
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.evid ;
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix ;
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid ;
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH ;
+#
+@ 
+
+<<BASH Functions: Predicted Genes Boundaries>>=
+#
+# Extracting list of coords for predicted genes
+get_gene_boundaries ()
+{
+  # USAGE:  get_gene_boundaries input_dir
+  IDIR="$1" ;
+  ODIR="$IDIR/ps/_tmp" ;
+  [ -e $ODIR ] || ChckDirs $ODIR ;
+  
+}
+#
+@ 
+
+<<BASH commands ANALYSIS>>=
+#
+get_gene_boundaries $ANALYSIS/sgp/Hsap.masked.3X+.fix ;
+get_gene_boundaries $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH ;
+#
+@
+
+\subsctn{Making plots with {\gps}}
+
+<<BASH Functions: Running GFF2PS>>=
+#
+run_GFF2PS ()
+{
+  # 
+  # run_GFF2PS - Making plots with gff2ps (a4+a3+wide formats)
+  #
+  # USAGE: run_GFF2PS working_dir "GFF_files_list" custom_file_root [ps_tail]
+  #
+  # 'working_dir' where to save plots
+  # "GFF_files_list" a list of GFF files (with full path) to be plotted
+  #
+  ODIR="$1/gff2ps" ;
+  GFFfiles="$2" ;
+  PARM="$BIN/param/gff2ps/$3" ;
+  [ "$4" ] && XTR="$4" || XTR="";
+  #
+  ChckDirs $ODIR \
+           $ODIR/a3      $ODIR/a4      $ODIR/wide \
+           $ODIR/a3/logs $ODIR/a4/logs $ODIR/wide/logs ;
+  #
+  CHR="chr22" ;
+  START="-S 13000000" ;
+  #
+  gff2ps -VC ${PARM}_wide.rc $START -- $GFFfiles \
+          2>&1 > $ODIR/wide/${CHR}${XTR} | tee $ODIR/wide/logs/${CHR}${XTR} ;
+#  gff2ps -VC ${PARM}_a4.rc   $START -- $GFFfiles \
+#          2>&1 > $ODIR/a4/${CHR}${XTR}   | tee $ODIR/a4/logs/${CHR}${XTR}   ;
+#  gff2ps -VC ${PARM}_a3.rc   $START -- $GFFfiles \
+#          2>&1 > $ODIR/a3/${CHR}${XTR}   | tee $ODIR/a3/logs/${CHR}${XTR}   ;
+}
+#
+@
+ 
+<<BASH commands ANALYSIS>>=
+#
+# Running GFF2PS on CHR22 Hsap masked against Mmus WGS-3X
+IDIR="$ANALYSIS/sgp/Hsap.masked/ps" ;
+#
+GFFIN="$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/chr22" ;    # geneid
+GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                          # sgp
+GFFIN="$GFFIN $IDIR/_tmp/sr-rs/chr22" ;                        # sr-rs
+GFFIN="$GFFIN $IDIR/_tmp/sr/chr22" ;                           # sr
+GFFIN="$GFFIN $DATASETS/annotation/fixed/chr22.gff2ps" ;       # annotation
+GFFIN="$GFFIN $DATASETS/masking/default/gff/chr22.gff2ps" ;    # repeats
+#
+run_GFF2PS $IDIR "$GFFIN" chr22_masked ;
+#
+#
+# Running GFF2PS on CHR22 Hsap masked against Mmus WGS-3X
+# (fixing frame when assembling tblastx HSPs from chr22 fragments)
+# IDIR="$ANALYSIS/sgp/Hsap.masked.3X+/ps" ;
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix/ps" ;
+#
+GFFIN="$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/chr22" ;    # geneid
+GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                          # sgp
+GFFIN="$GFFIN $IDIR/_tmp/sr-rs/chr22" ;                        # sr-rs
+GFFIN="$GFFIN $IDIR/_tmp/sr/chr22" ;                           # sr
+GFFIN="$GFFIN $DATASETS/annotation/fixed/chr22.gff2ps" ;       # annotation
+GFFIN="$GFFIN $DATASETS/masking/default/gff/chr22.gff2ps" ;    # repeats
+#
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked ; # no XTR
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked "_20010908" ;
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked "_20010910" ;
+run_GFF2PS $IDIR "$GFFIN" chr22_masked "_20010910b" ;
+#
+#
+# running without Repeats
+# IDIR="$ANALYSIS/sgp/Hsap.masked.3X+/ps" ;
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix/ps" ;
+#
+GFFIN="$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/chr22" ;    # geneid
+GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                          # sgp
+GFFIN="$GFFIN $IDIR/_tmp/sr-rs/chr22" ;                        # sr-rs
+GFFIN="$GFFIN $IDIR/_tmp/sr/chr22" ;                           # sr
+GFFIN="$GFFIN $DATASETS/annotation/fixed/chr22.gff2ps" ;       # annotation
+# GFFIN="$GFFIN $DATASETS/masking/default/gff/chr22.gff2ps" ;    # repeats
+#
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked "_noRPTs" ;
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked "_20010908_noRPTs" ;
+run_GFF2PS $IDIR "$GFFIN" chr22_masked "_20010910_noRPTs" ;
+#
+#
+# Running GFF2PS on CHR22 Hsap masked against Mmus WGS-3X + evidences
+# (fixing frame when assembling tblastx HSPs from chr22 fragments)
+# IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.evid/ps" ;
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid/ps" ;
+#
+# GFFIN="$ANALYSIS/geneid/Hsap.masked.evid/ps/_tmp/geneid/chr22";# geneid+evid
+# GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                          # \sgp+evid_/
+GFFIN="$IDIR/_tmp/sgp/chr22" ;                                   # sgp + evid
+GFFIN="$GFFIN $IDIR/_tmp/sr-rs/chr22" ;                          # sr-rs
+# GFFIN="$GFFIN $IDIR/_tmp/sr/chr22" ;                           # sr
+GFFIN="$GFFIN $DATASETS/annotation/fixed/chr22.gff2ps" ;         # annotation
+# GFFIN="$GFFIN $DATASETS/masking/default/gff/chr22.gff2ps" ;    # repeats
+#
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_evid" ;
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_evid_new" ; # after changing custom files
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010908_evid" ;
+run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010910_evid" ;
+#
+#
+# Running GFF2PS on CHR22 Hsap masked against Mmus WGS-3X + annotation + evidences (VH)
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH/ps" ;
+#
+GFFIN="$ANALYSIS/geneid/Hsap.masked.evid_VH/ps/_tmp/geneid/chr22" ; # geneid + evid
+GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                              # sgp + evid
+GFFIN="$GFFIN $IDIR/_tmp/sr-rs/chr22" ;                            # sr-rs
+GFFIN="$GFFIN $DATASETS/annotation/set/gff2ps/chr22_annot" ;       # annotation
+GFFIN="$GFFIN $DATASETS/annotation/set/gff2ps/chr22_evid" ;        # evidences
+#
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010914_noRPT" ;
+run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010914_noRPT_geneid+sgp" ;
+#
+@ 
+
+\subsctn{Customization files for {\gps}}
+
+\subsubsctn{LAYOUT SETTINGS}
+
+<<Common Layout Settings>>=
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=5000
+minor_tickmarks_nucleotides=500
+nucleotide_scale=kb
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=on
+#
+group_label_scale=2.25
+#
+@
+
+<<Settings for a3 paper size>>=
+page_size=a3
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=4
+nucleotides_x_line=50000
+#
+@ 
+
+<<Settings for a3 paper size (evid)>>=
+page_size=a3
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=10
+nucleotides_x_line=50000
+#
+@ 
+
+<<Settings for a4 paper size>>=
+page_size=a4
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=3
+nucleotides_x_line=50000
+#
+@ 
+
+<<Settings for a4 paper size (evid)>>=
+page_size=a4
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=6
+nucleotides_x_line=50000
+#
+@ 
+
+<<Settings for wide display>>=
+page_bbox=wide,16000,800 # 564.37 x 28.22 cm
+page_orientation=Portrait
+# page_number=1
+blocks_x_page=4
+nucleotides_x_line=250000
+#
+@ 
+
+<<Common Layout Settings for wide display>>=
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=5000
+minor_tickmarks_nucleotides=500
+nucleotide_scale=kb
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=on
+#
+group_label_scale=2.25
+#
+@
+
+<<Settings for wide display (evid)>>=
+page_bbox=wide,16000,800 # 564.37 x 28.22 cm
+page_orientation=Portrait
+# page_number=1
+blocks_x_page=5
+nucleotides_x_line=200000
+#
+@ 
+
+<<Common Layout Settings for wide display (evid)>>=
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=2500
+minor_tickmarks_nucleotides=250
+nucleotide_scale=kb
+#
+show_inner_scale=none
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=on
+#
+group_label_scale=2.25
+#
+@
+
+\subsubsctn{FEATURES SETTINGS}
+
+<<Common Features Settings>>=
+*::fill_shape_mode=1_color
+gene::shape=none
+cds::layer=1
+cds::feature_color=darkgreen
+exon::feature_color=verylightgreen
+exon_pseudo::feature_color=lightblue
+@
+
+<<HIDE: BASH commands>>=
+gawk '{print $3}' $DATASETS/masking/default/gff/chr22 | \
+    sort | uniq -c | sort -nr | prtcode 
+@ 
+
+<<Repeats Features Settings>>=
+sine/alu::feature_color=verydarkgreen
+sine/mir::feature_color=verydarkbrown
+line/l1::feature_color=lightred
+line/l2::feature_color=verydarkred
+ltr/erv1::feature_color=verydarkblue
+simple_repeat::feature_color=verydarkorange
+low_complexity::feature_color=verydarkyellow
+#
+@
+
+\subsubsctn{GROUPS SETTINGS}
+
+<<Common Group Settings>>=
+*::group_line=none
+*::group_shape=thick_line
+@
+
+\subsubsctn{SOURCES SETTINGS}
+
+<<Common Source Settings>>=
+*::unfold_grouped_ungrouped=off
+*::unfold_ungrouped_line=off
+*::unfold_grouped_line=off
+*::range=none
+*::source_line_color=black
+*::source_line=long_dotted
+#
+@
+
+<<Common Source Settings for wide display>>=
+*::unfold_grouped_ungrouped=off
+*::unfold_ungrouped_line=off
+*::unfold_grouped_line=off
+*::range=none
+# *::source_line_color=black
+*::source_line=none
+#
+@
+ 
+<<annotation source settings>>=
+# annotation::feature_color=darkgreen
+annotation::group_color=verydarkgreen
+annotation::left_label=SANGER
+annotation::track_spacing_scale=0
+@ 
+
+<<annotation source settings (evid)>>=
+# annotation::vert_align=bottom
+# annotation::feature_color=darkgreen
+annotation::group_color=verydarkgreen
+annotation::left_label=SANGER
+annotation::track_spacing_scale=0
+@ 
+
+<<evidence source settings>>=
+evidence::source_line_color=black
+evidence::source_line=dotted
+evidence::left_label=++none++
+evidence::vert_align=top
+evidence::track_scale=0.5
+@ 
+
+<<evidence source settings (evid)>>=
+evidence::source_line_color=black
+evidence::source_line=dotted
+evidence::left_label=++none++
+evidence::vert_align=bottom
+evidence::track_scale=0.25
+evidence::track_spacing_scale=0
+@ 
+
+<<sgp source settings>>=
+SGP.3X::feature_color=lightred
+SGP.3X::group_color=red
+SGP.3X::left_label=SGP 3X
+SGP.homol::feature_color=red
+SGP.homol::group_color=darkred
+SGP.homol::left_label=SGP
+@ 
+
+<<geneid source settings>>=
+geneid::feature_color=lightviolet
+geneid::group_color=darkviolet
+geneid::left_label=GENEID v1.1
+@ 
+
+<<twinscan source settings>>=
+Twinscan-1.0::feature_color=verylightbrown
+Twinscan-1.0::group_color=brown
+Twinscan-1.0::left_label=TWINSCAN
+@ 
+
+<<genscan source settings>>=
+genscan::feature_color=blue
+genscan::group_color=verydarkblue
+genscan::left_label=GENSCAN
+@ 
+
+<<tblastx source settings>>=
+SR.3X::feature_color=red
+SR.3X::group_color=verydarkred
+SR.3X::left_label=SRs 3X
+SR-RS.3X::feature_color=orange
+SR-RS.3X::group_color=verydarkred
+SR-RS.3X::left_label=SR-RSs 3X
+@ 
+
+<<repeatmasker source settings>>=
+# RepeatMasker::feature_color=####
+# RepeatMasker::group_color=####
+RepeatMasker::left_label=REPEATS
+@ 
+
+<<orimasked source settings>>=
+# masked::feature_color=####
+# masked::group_color=####
+masked::left_label=MASKED
+@ 
+
+\subsubsctn{Assembling CUSTOM FILES: {\sgp} + Homology}
+
+<<GFF2PS customization: chr22 masked a4>>=
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A4 PAGE   ##
+##########################################
+#
+# chr22_masked_a4.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for a4 paper size>>
+<<Common Layout Settings>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+<<Repeats Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings>>
+<<annotation source settings>>
+<<evidence source settings>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+<<repeatmasker source settings>>
+@ 
+
+<<GFF2PS customization: chr22 masked a3>>=
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A3 PAGE   ##
+##########################################
+#
+# chr22_masked_a3.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for a3 paper size>>
+<<Common Layout Settings>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+<<Repeats Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings>>
+<<annotation source settings>>
+<<evidence source settings>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+<<repeatmasker source settings>>
+@ 
+
+<<GFF2PS customization: chr22 masked wide>>=
+############################################
+##   CUSTOM FILE FOR GFF2PS - WIDE PAGE   ##
+############################################
+#
+# chr22_masked_wide.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for wide display>>
+<<Common Layout Settings for wide display>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+<<Repeats Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings for wide display>>
+<<annotation source settings>>
+<<evidence source settings>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+<<repeatmasker source settings>>
+@ 
+
+\subsubsctn{Assembling CUSTOM FILES: {\sgp} + Homology + Evidences}
+
+<<GFF2PS customization: chr22 masked a4 (evid)>>=
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A4 PAGE   ##
+##########################################
+#
+# chr22_masked_evid_a4.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for a4 paper size (evid)>>
+<<Common Layout Settings>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+<<Repeats Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings>>
+<<annotation source settings (evid)>>
+<<evidence source settings (evid)>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+@ 
+
+<<GFF2PS customization: chr22 masked a3 (evid)>>=
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A3 PAGE   ##
+##########################################
+#
+# chr22_masked_evid_a3.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for a3 paper size (evid)>>
+<<Common Layout Settings>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+<<Repeats Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings>>
+<<annotation source settings (evid)>>
+<<evidence source settings (evid)>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+@ 
+
+<<GFF2PS customization: chr22 masked wide (evid)>>=
+############################################
+##   CUSTOM FILE FOR GFF2PS - WIDE PAGE   ##
+############################################
+#
+# chr22_masked_evid_wide.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for wide display (evid)>>
+<<Common Layout Settings for wide display (evid)>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+<<Repeats Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings for wide display>>
+<<annotation source settings (evid)>>
+<<evidence source settings (evid)>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+@ 
+
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Preparing files for the web}
+
+\begin{comment}
+IDIR="/projects/sgp/chr22" ;
+ODIR="/usr/local/apache/htdocs/datasets/humanmouse/HsapCHROMOSOMES" ;
+\end{comment}
+<<BASH commands>>=
+#
+# EXP="sgp_chr22_3X" ;
+EXP="sgp_chr22_3X+" ;
+# TBXP="tbx-chr22" ;
+TBXP="tbx_chr22_3X+" ;
+#
+# tblastx results
+cp /projects/datasets/chr22/_tmp/Pankaj/tars/tbx.tar.gz      $ODIR/Hsap_chr22.tbx.tar.gz ;
+cp $IDIR/blast/wublast.tblastx/$TBXP/chr22.hsp $ODIR/Hsap_chr22.hsp ;
+cp $IDIR/blast/wublast.tblastx/$TBXP/chr22.sr  $ODIR/Hsap_chr22.sr ;
+gzip $ODIR/Hsap_chr22.hsp $ODIR/Hsap_chr22.sr ;
+#
+# sgp results
+cp $IDIR/sgp/$EXP/chr22_geneid.gff   $ODIR/Hsap_chr22_geneid.gff ;
+cp $IDIR/sgp/$EXP/chr22_geneid.gtf2  $ODIR/Hsap_chr22_geneid.gtf ;
+cp $IDIR/sgp/$EXP/chr22_all.gff      $ODIR/Hsap_chr22_homol.gff ;
+cp $IDIR/sgp/$EXP/chr22_all.gtf2     $ODIR/Hsap_chr22_homol.gtf ;
+cp $IDIR/sgp/$EXP/chr22_evid.gff     $ODIR/Hsap_chr22_evid.gff ;
+cp $IDIR/sgp/$EXP/chr22_evid.gtf2    $ODIR/Hsap_chr22_evid.gtf ;
+#
+@ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -686,8 +2600,7 @@ run_GENEID Hsap.masked $DATASETS/fasta/masked chr22 ;
 
 \subsctn{Annotated Human Genes for Homologous Sequences Set}
 
-\begin{comment}
-<<BASH commands>>=
+<<HIDE: BASH commands>>=
 gawk 'BEGIN{ 
         lncnt=0;
         ROWS=47;
@@ -723,7 +2636,6 @@ gawk 'BEGIN{
         }' $DATASETS/genes.Hsap > $DOCS/tables/genelist.tex ;
 @ 
 %$
-\end{comment}
 
 \begin{table}[!h]
 \hspace{-0.5cm}
@@ -774,19 +2686,28 @@ Here we provide the basic skeleton for the [[README]] files we will generate on 
 #
 <<Version Control Id Tag>>
 #
-# EXPORTING GLOBAL VARS and DEFINING BASIC SHELL FUNCTIONS
+################################################################################
 #
+### EXPORTING GLOBAL VARS
 <<BASH Environment Variables>>
 #
+################################################################################
+#
+### DEFINING BASIC SHELL FUNCTIONS 
+<<BASH Functions Block>>
+#
+################################################################################
 @ 
 
 <<tangling - READMEs>>=
-notangle -R"DATASETS README" $WORK/$nwfile.nw \
-    > $DATASETS/README ;
-notangle -R"SGP README" $WORK/$nwfile.nw \
-    > $ANALYSIS/README ;
-notangle -R"SPLICING README" $WORK/$nwfile.nw \
-    > $SPLICING/README ;
+#
+notangle -R"DATASETS README" $WORK/$nwfile.nw | \
+    cpif $DATASETS/README ;
+notangle -R"SGP README" $WORK/$nwfile.nw | \
+    cpif $ANALYSIS/README ;
+# notangle -R"SPLICING README" $WORK/$nwfile.nw | \
+#     cpif $SPLICING/README ;
+#
 @
 
 % \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -850,425 +2771,6 @@ while (my $sequence = $seqin->next_seq()) {
 close(DESC);
 exit(0);
 @
-
-\newpage
-
-\subsctn{[[coords2gff.pl]]: converting coords files into GFF}
-
-<<Raw coords to GFF>>=
-<<PERL shebang>>
-#
-# coords2gff.pl seqname < coords_file > GFF_file
-#
-#     Converting raw coords files to GFF
-#
-# use Data::Dumper;
-# local $Data::Dumper::Purity = 0;
-# local $Data::Dumper::Deepcopy = 1;
-
-my ($seqname,%gff,$string);
-$seqname = shift @ARGV;
-%gff = ();
-$string = ("\%s\t" x 8)."\%s\n";
-
-my $c = 0;
-while (<STDIN>) {
-    next if /^\s*$/o;
-    my ($l,$a,$b,$s,$r);
-    chomp;
-    $l = $_;
-	# print STDERR "$. (X): $l\n";
-    $l =~ /^[><]/o && do {
-	    # print STDERR "$. (A): $l\n";
-        $l =~ s/^([><])\s*//o && ($s = $1);
-        $r = \%{ $gff{++$c} };
-        ($r->{gn_start},$r->{gn_end},$r->{gn_name}) = split /\s+/og, $l, 3;
-        $r->{gn_name} =~ s/\s+$//og;
-        $r->{gn_name} =~ s/\s+/_/og;
-        $r->{strand} = ($s eq '>') ? '+' : (($s eq '<') ? '-' : '.');
-        # $r->{exons} = ();
-        next;
-	}; # $newgene ?
-	# print STDERR "$. (B): $l\n";
-    ($a,$b,undef) = split /\s+/og, $l, 3;
-    push @{ $gff{$c}{exons} }, [ $a, $b ];
-}; # while
-# print STDERR Dumper(\%gff);
-
-foreach my $i (1..$c) {
-    my $r = \%{ $gff{$i} };
-    my $exnum = scalar(@{ $r->{exons} });
-    print STDOUT "\# $seqname - $r->{gn_name}: ".
-        ($exnum)." exons\n";
-    printf STDOUT $string, 
-        $seqname,'annotation','Gene',$r->{gn_start},$r->{gn_end},
-        '.',$r->{strand},'.',$r->{gn_name};
-    $r->{strand} eq '-' && (@{ $r->{exons} } = reverse @{ $r->{exons} });
-    my ($lastori,$lastend,$lastfrm) = (0,0,0);
-    foreach my $j (0..$#{ $r->{exons} }) {
-        my ($feat,$ori,$end,$frm);
-        ($ori,$end) = @{ ${ $r->{exons} }[$j] };
-	  THIS: {
-        ($j == 0) && do {
-            $feat = 'First';
-            $exnum == 1 && ($feat = 'Single');
-            $frm = 0;
-            last THIS;
-        }; # $d == 0
-        $frm = (($lastend - $lastori + 1) + $lastfrm) % 3;
-        ($j == $#{ $r->{exons} }) && do {
-            $feat = 'Terminal';
-            last THIS;
-        }; # $d == $#{ $r->{exons} }
-        $feat = 'Internal';
-      }; # THIS
-        # print STDERR "$r->{gn_name} ($j): $ori $end $frm : ".
-        #              "$lastori $lastend $lastfrm\n";
-        ($lastori,$lastend,$lastfrm) = ($ori,$end,$frm);
-        printf STDOUT $string, 
-            $seqname,'annotation',$feat,$ori,$end,
-            '.',$r->{strand},$frm,$r->{gn_name};
-    }; # foreach @j
-}; # foreach $i
-
-exit(0);
-@ 
-
-\newpage
-
-\subsctn{[[getfastamasked.pl]]: retrieve masked from fasta sequences}
-
-<<Masked from fasta sequences>>=
-<<PERL shebang>>
-#
-# getfastamasked.pl < fastafile > GFFfile
-#
-#     Retrieving masked regions coords from fasta files
-#
-use Bio::Seq;
-use Bio::SeqIO;
-<<Use Modules - Benchmark>>
-my $PROGRAM = 'getfastamasked.pl';
-my ($T,$F) = (1,0);
-my $DATE = localtime;
-my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
-my $host = `hostname`;
-chomp($host);
-my $line = ('#' x 80)."\n";
-my $s = '### ';
-#
-my ($id,$seq) = ('','');
-my ($total_time);
-
-print STDERR << "+++EOR+++";
-$line$s\n$s Running $PROGRAM\n$s
-$s HOST: $host
-$s USER: $USER
-$s DATE: $DATE\n$s\n$line$s
-+++EOR+++
-
-&main();
-
-$total_time = &timing($T);
-print STDERR << "+++EOR+++";
-$s\n$line$s\n$s $PROGRAM FINISHED\n$s
-$s TOTAL TIME: $total_time\n$line
-+++EOR+++
-
-exit(0);
-
-sub main() {
-    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
-    while (my $sequence = $seqin->next_seq()) {
-        my ($sid,$len,$seq,@nuc,@coords,$masked_flg,$match,$msk_num);
-        @coords = ();
-        <<Setting sequence variables from fasta record>>
-        <<Finding masked regions coords>>
-        <<Writing masked regions coords in GFF>>
-    }; # while 
-} # main
-<<Common PERL subs - Benchmark>>
-@ 
-
-<<Setting sequence variables from fasta record>>=
-print STDERR "### READING FASTA............\n";
-$sid  = $sequence->display_id();
-$len  = $sequence->length();
-$seq  = $sequence->seq();
-@ 
-
-<<Finding masked regions coords>>=
-print STDERR "###         PARSING SEQUENCE: $sid ($len bp)\n";
-@nuc = split //og, $seq;
-($masked_flg,$match) = ($F,$F) ;
-for (my $n = 0; $n <= $#nuc; $n++) {
-    $match = ( $nuc[$n] =~ /[NnXx]/o ) ? $T : $F;
-    ( !$masked_flg && $match ) && do {
-        $masked_flg = $T ;
-        # $n contains the last non-masked nucleotide
-        push @coords, ($n + 1);
-        next;
-    };
-    $masked_flg && do {
-        $match && (next);
-        $masked_flg = $F ;
-        # $n contains the last masked nucleotide now
-        push @coords, $n;
-    };
-}; # for nuc in $seq
-# if last nucleotide is masked, previous loop not includes its coord. 
-$masked_flg &&( push @coords, $len);
-@ 
-
-<<Writing masked regions coords in GFF>>=
-$msk_num = scalar(@coords) / 2;
-print STDERR "###         WRITING GFF COORDS: $msk_num masked regions found.\n";
-for (my $n = 0; $n <= $#coords; $n+=2) {
-    my $GFFstring = ("\%s\t" x 5).(".\t" x 3).".\n";
-    printf STDOUT $GFFstring, $sid, "masked", "masked", @coords[$n..($n + 1)];
-}; # for coords in @coords
-@ 
-
-\newpage
-
-\subsctn{[[splitfastaseq.pl]]: split large fasta sequences}
-
-<<Breaking fasta sequences>>=
-<<PERL shebang>>
-#
-# splitfastaseq.pl \
-#     seqlength overlap < fastafile > output
-#
-#     Breaking large fasta sequences to build 
-#     databases for running tblastx faster
-# 
-use lib qw( /usr/lib/perl5/site_perl/5.005/ );
-use Bio::Seq;
-use Bio::SeqIO;
-use Benchmark;
-my ($T,$F) = (1,0);
-my @Timer = (new Benchmark);
-my $PROGRAM = 'splitfastaseq.pl';
-my $DATE = localtime;
-my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
-my $host = `hostname`;
-chomp($host);
-my $line = ('#' x 80)."\n";
-my $s = '### ';
-#
-my ($id,$ln,$sq) = ('',0,'');
-my ($total_time,$seq);
-my ($maxlen,$overlap) = @ARGV;
-
-print STDERR << "+++EOR+++";
-$line$s\n$s Running $PROGRAM\n$s
-$s HOST: $host
-$s USER: $USER
-$s DATE: $DATE\n$s\n$line$s
-+++EOR+++
-
-&getseq();
-&splitseq();
-
-$total_time = &timing($T);
-print STDERR << "+++EOR+++";
-$s\n$line$s\n$s $PROGRAM FINISHED\n$s
-$s TOTAL TIME: $total_time\n$line
-+++EOR+++
-
-exit(0);
-
-sub getseq() { # assuming here single sequence input fasta files
-    print STDERR "$s Processing fasta file.\n";
-    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
-    while (my $iseq = $seqin->next_seq()) {
-        $id = $iseq->display_id();
-        $ln = $iseq->length();
-        $sq = $iseq->seq();
-        last; # to make sure that we only catch a single fasta sequence
-    }; # while next_seq
-    $seq = Bio::Seq->new( -seq => $sq , -id => $id );
-    print STDERR "$s Processing DONE: ".(&timing($F))."\n$s\n";
-} # getseq
-#
-sub splitseq() {
-    my ($e,$sid,$ssq,$nseq,$wseq);
-    my ($t,$sqlen) = (1,($maxlen + $overlap - 1));
-    print STDERR "$s Creating splitted-sequence fasta file ($ln nt).\n";
-    my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
-    while ($t < $ln) {
-         $e = $t + $sqlen;
-         ($e > $ln) && ($e = $ln);
-         $sid = "$id\_$t\_$e";
-         print STDERR "$s --> $id : from $t to $e (".($e - $t + 1)." nt)\n";
-         $ssq = $seq->subseq($t,$e);
-         $t += $maxlen;
-         #
-         $wseq = Bio::Seq->new( -seq => $ssq , -id => $sid );
-         $seqout->write_seq($wseq);
-    }; # while  
-    print STDERR "$s Splitting DONE: ".(&timing($F))."\n$s\n";
-} # splitseq
-#
-sub timing() {
-    push @Timer, (new Benchmark);
-    # partial time
-    $_[0] ||
-        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
-    # total time
-    return timestr(timediff($Timer[$#Timer],$Timer[0]));
-} # timing
-@ 
-
-\newpage
-
-\subsctn{[[gff2gtf.pl]]: translating GFF to GTF2}
-
-<<GFF to GTF>>=
-<<PERL shebang>>
-#
-# gff2gtf.pl < infile > outfile
-#
-#     Converting GFF formated records into GTF
-#
-# use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
-use Benchmark;
-# use Data::Dumper;
-# local $Data::Dumper::Purity = 0;
-# local $Data::Dumper::Deepcopy = 1;
-my ($T,$F) = (1,0);
-my @Timer = (new Benchmark);
-my $PROGRAM = 'gff2gtf.pl';
-my $DATE = localtime;
-my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
-my $host = `hostname`;
-chomp($host);
-my $line = ('#' x 80)."\n";
-my $s = '### ';
-#
-print STDERR << "+++EOR+++";
-$line$s\n$s Running $PROGRAM\n$s
-$s HOST: $host
-$s USER: $USER
-$s DATE: $DATE\n$s\n$line$s
-+++EOR+++
-
-my %genes;
-my @f = ();
-my $gcnt = 0;
-while (<>) {
-    /^\# Gene/o && do {
-        $gcnt++;
-        $genes{$gcnt}{COMMENT} = $_;
-        next;
-    };
-    next if /^\#/o;
-    next if /^\s*$/o;
-    chomp;
-    @f = split /\s+/og, $_;
-    push @{ $genes{$gcnt}{FEATURES} }, [ @f[0..8] ];
-}; # while
-
-# print STDERR Dumper(\%genes);
-
-my $GTFrec = ("\%s\t" x 8)."\%s\n";
-foreach my $i (1..$gcnt) {
-    print STDOUT $genes{$i}{COMMENT};
-    my ($main,$tail_O,$tail_E,$groupflg,$gtfgroup) = ('','','',$T,'');
-    foreach my $j (0..$#{ $genes{$i}{FEATURES} }) {
-        my ($seq,$source,$feat,$start,$end,
-            $score,$strand,$frame,$group,
-            $cdsfeat,$cdsori,$cdsend,$t);
-        ($seq,$source,$feat,$start,$end,
-            $score,$strand,$frame,$group) =
-                @{ $genes{$i}{FEATURES}[$j] };
-        $score = '.';
-        $groupflg && do {
-            $group =~ s/gene_//o;
-            $t = &fill_left($group,3,"0");
-            $gtfgroup = "gene_id $t; transcript_id $t.1";
-            $groupflg = $F;
-        }; # $groupflg
-      FEATS: {
-          $feat eq 'Single' && do {
-              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
-              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
-                                $score,$strand,'0',$gtfgroup);
-              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
-              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
-                                $score,$strand,'0',$gtfgroup);
-              last FEATS;
-          }; # Single
-          $feat eq 'First' && do {
-              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
-              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
-                                $score,$strand,'0',$gtfgroup);              
-              last FEATS;
-          }; # First
-          $feat eq 'Terminal' && do {
-              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
-              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
-                                $score,$strand,'0',$gtfgroup);
-                  # only if nucleotides of stop codon not included
-                  #     $strand eq '+' && ($end = $end + 3);
-                  #     $strand eq '-' && ($start = $start - 3);
-              # last FEATS;
-          }; # Terminal
-        }; # FEATS
-        $feat = 'CDS';
-        $main .= sprintf($GTFrec,$seq,$source,$feat,$start,$end,
-                         $score,$strand,$frame,$gtfgroup); 
-    }; # foreach $j
-    print STDOUT "$main$tail_O$tail_E";
-}; # foreach $i
-
-my $total_time = &timing($T);
-print STDERR << "+++EOR+++";
-$s\n$line$s\n$s $PROGRAM FINISHED\n$s
-$s TOTAL TIME: $total_time\n$line
-+++EOR+++
-
-exit(0);
-
-sub get_start() {
-    my ($o,$e,$s) = @_;
-    my $str = "start_codon";
-    $s eq '+' && do {
-       return $str, $o, ($o + 2);
-    }; # forward
-    $s eq '-' && do {
-       return $str, ($e - 2), $e;
-    }; # reverse
-    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
-} # 
-#
-sub get_final() {
-    my ($o,$e,$s) = @_;
-    my $str = "stop_codon";
-    $s eq '+' && do {
-        return $str, ($e - 2), $e;
-           # only if nucleotides of stop codon not included
-           #     return $str, ($e + 1), ($e + 3);
-    }; # forward
-    $s eq '-' && do {
-        return $str, $o, ($o + 2);
-           # only if nucleotides of stop codon not included
-           #     return $str, ($o - 3), ($o -1);
-    }; # reverse
-    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
-} # 
-#
-sub fill_left() { ($_[2] x ($_[1] - length($_[0]))).$_[0] } 
-#
-sub timing() {
-    push @Timer, (new Benchmark);
-    # partial time
-    $_[0] ||
-        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
-    # total time
-    return timestr(timediff($Timer[$#Timer],$Timer[0]));
-} # timing
-@ 
 
 \newpage
 
@@ -1453,7 +2955,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.2 2001-08-30 10:40:08 jabril Exp $
+# $Id: Human_Chromosome_22.nw,v 0.3 2001-09-14 14:05:10 jabril Exp $
 @ 
 
 \newpage
@@ -1469,26 +2971,14 @@ Remember when tangling that '-L' option allows you to include program line-numbe
 
 <<tangling>>=
 # PBS
-notangle -R"PBS tblastx shell" $WORK/$nwfile.nw \
-    > /home/ug/jabril/no_backup/PBS/PBS.sh ;
+notangle -R"PBS tblastx shell" $WORK/$nwfile.nw | \
+    cpif /home/ug/jabril/no_backup/PBS/PBS.sh ;
 chmod a+x /home/ug/jabril/no_backup/PBS/PBS.sh ;
 # showing line numbering comments in program (DEVEL VERSIONS)
 notangle -L -R"Renaming fasta sequence IDs" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/fasta_renamer.pl ;
-notangle -L -R"Raw coords to GFF" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/coords2gff.pl ;
-notangle -L -R"Masked from fasta sequences" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/getfastamasked.pl ;
-notangle -L -R"Breaking fasta sequences" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/splitfastaseq.pl ;
-notangle -L -R"GFF to GTF" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/gff2gtf.pl ;
+    perl -ne '$.>1 && print' | cpif $BIN/fasta_renamer.pl ;
 # making them runnable
 chmod a+x $BIN/fasta_renamer.pl ;
-chmod a+x $BIN/coords2gff.pl ;
-chmod a+x $BIN/getfastamasked.pl ;
-chmod a+x $BIN/splitfastaseq.pl ;
-chmod a+x $BIN/gff2gtf.pl ;
 #
 @ 
 
@@ -1497,16 +2987,20 @@ chmod a+x $BIN/gff2gtf.pl ;
 <<tangling>>=
 #
 ChckDirs $PARAM/gff2ps $PARAM/gff2aplot ;
-#
-notangle -R"GFF2APLOT customization: ortho masked" $WORK/$nwfile.nw \
-         > $PARAM/gff2aplot/ortho_masked_a4.rc ;
-#
-notangle -R"GFF2PS customization: ortho orimasked a4" $WORK/$nwfile.nw \
-         > $PARAM/gff2ps/ortho_orimasked_a4.rc ;
-notangle -R"GFF2PS customization: ortho orimasked a3" $WORK/$nwfile.nw \
-         > $PARAM/gff2ps/ortho_orimasked_a3.rc ;
-notangle -R"GFF2PS customization: ortho orimasked wide" $WORK/$nwfile.nw \
-         > $PARAM/gff2ps/ortho_orimasked_wide.rc ;
+# GENEID SGP SRs HSPs ANNOTATED REPEATS -> SGP homology
+notangle -R"GFF2PS customization: chr22 masked a4" $WORK/$nwfile.nw | \
+         cpif $PARAM/gff2ps/chr22_masked_a4.rc ;
+notangle -R"GFF2PS customization: chr22 masked a3" $WORK/$nwfile.nw | \
+         cpif $PARAM/gff2ps/chr22_masked_a3.rc ;
+notangle -R"GFF2PS customization: chr22 masked wide" $WORK/$nwfile.nw | \
+         cpif $PARAM/gff2ps/chr22_masked_wide.rc ;
+# GENEID SGP SRs HSPs ANNOTATED -> SGP homology + evidences
+notangle -R"GFF2PS customization: chr22 masked a4 (evid)" $WORK/$nwfile.nw | \
+         cpif $PARAM/gff2ps/chr22_masked_evid_a4.rc ;
+notangle -R"GFF2PS customization: chr22 masked a3 (evid)" $WORK/$nwfile.nw | \
+         cpif $PARAM/gff2ps/chr22_masked_evid_a3.rc ;
+notangle -R"GFF2PS customization: chr22 masked wide (evid)" $WORK/$nwfile.nw | \
+         cpif $PARAM/gff2ps/chr22_masked_evid_wide.rc ;
 #
 @ %$
 
@@ -1514,8 +3008,8 @@ notangle -R"GFF2PS customization: ortho orimasked wide" $WORK/$nwfile.nw \
 
 <<tangling>>=
 #
-notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
-notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
 #
 @ 
@@ -1524,11 +3018,18 @@ chmod a+x $WORK/nw2tex $WORK/ltx;
 <<BASH shebang>>
 # weaving and LaTeXing
 <<BASH Environment Variables>>
-noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+<<BASH Gene Prediction Stats>>
+#
+echo "### WEAVING LaTeX MAIN DOCUMENT..." ;
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+        $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
+#
+echo "### LaTeXING MAIN DOCUMENT..." ;
 pushd $DOCS/ ;
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 popd;
+#
 <<BASH script end>>
 @ 
 
@@ -1536,43 +3037,35 @@ popd;
 <<BASH shebang>>
 # only LaTeXing
 <<BASH Environment Variables>>
+#
+echo "### LaTeXING MAIN DOCUMENT..." ;
 pushd $DOCS/ ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 popd ;
+#
 <<BASH script end>>
 @ %$
 
-\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+\subsctn{Defining shell functions for the current project} % \\[-0.5ex]
 
-<<BASH Environment Variables>>=
-#
-# CHR22 Dataset Variables
-# 
-DATASETS="/projects/datasets/chr22" ;
-WORK="$DATASETS/_docs" ;
-BIN="$WORK/bin" ;
-PARAM="$BIN/param" ;
-DOCS="$WORK/docs" ;
-DATA="$WORK/data" ;
-nwfile="Human_Chromosome_22" ;
-export DATASETS WORK BIN PARAM DOCS DATA nwfile ;
-#
-SGPBIN="/projects/sgp/bin" ;
-export SGPBIN ;
-#
-# ORTHOLOGOUS Dataset Variables
-#
-ANALYSIS="/projects/sgp/chr22" ;
-ID="$DATASETS/id" ;
-HSAP="$DATASETS/id.Hsap" ;
-MMUS="$DATASETS/id.Mmus" ;
-export ANALYSIS ID HSAP MMUS ;
-#
-SPLICING="/projects/splicing/chr22" ;
-export SPLICING ;
+<<BASH Functions Block>>=
+<<BASH Basic Shell Functions>>
+<<BASH Functions: GTF to GFF>>
+<<BASH Functions: Gene-Prediction Evaluation>>
+<<BASH Functions: Running GENEID>>
+<<BASH Functions: Running GENEID + Evidences>>
+<<BASH Functions: Filtering GENEID RAW Output>>
+<<BASH Functions: Running SGP>>
+<<BASH Functions: SGP + Evidences>>
+<<BASH Functions: Preparing SGP Output>>
+<<BASH Functions: Predicted Genes Boundaries>>
+<<BASH Functions: Running GFF2PS>>
+@ 
+
+<<BASH Basic Shell Functions>>=
 #
 # BASIC Shell Functions
 #
@@ -1664,10 +3157,45 @@ MergeALLGFF ()
 }
 @ 
 
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH Environment Variables>>=
+#
+# CHR22 Dataset Variables
+# 
+DATASETS="/projects/datasets/chr22" ;
+WORK="$DATASETS/_docs" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="Human_Chromosome_22" ;
+export DATASETS WORK BIN PARAM DOCS DATA nwfile ;
+#
+SGPBIN="/projects/sgp/bin" ;
+export SGPBIN ;
+#
+# ORTHOLOGOUS Dataset Variables
+#
+ANALYSIS="/projects/sgp/chr22" ;
+ID="$DATASETS/id" ;
+HSAP="$DATASETS/id.Hsap" ;
+MMUS="$DATASETS/id.Mmus" ;
+export ANALYSIS ID HSAP MMUS ;
+#
+SPLICING="/projects/splicing/chr22" ;
+export SPLICING ;
+@ 
+
+<<BASH RC FILE>>=
+<<BASH Environment Variables>>
+<<BASH Functions Block>>
+@ 
+
 <<tangling>>=
 #
 # BASH shell
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+notangle -R'BASH RC FILE' $WORK/$nwfile.nw | \
          cpif $WORK/.bash_VARS ; 
 # sourcing
 source $WORK/.bash_VARS ;
