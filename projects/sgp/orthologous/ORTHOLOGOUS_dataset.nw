@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -157,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -376,6 +376,20 @@ wget -b --no-parent --mirror --tries=0      \
 
 \subsctn{Preparing files for the analysis}
 
+<<BASH commands DATASETS>>=
+#
+# BASE DIRS
+ChckDirs $DATASETS/annotation \
+         $DATASETS/fasta      \
+         $DATASETS/masking    \
+         $DATASETS/blastdb ;
+#
+ODIR="$DATASETS/annotation/20010723.Pipeline" ;
+ODIR="$DATASETS/annotation/20010911.IanKorf" ;
+ODIR="$DATASETS/annotation/20010928.Pipeline" ;
+ChckDirs $ODIR $ODIR/desc ;
+@ 
+
 \subsubsctn{Writing files for sequence IDs}
 
 Here, we assign human and mouse locus names to each sequence in the test set, the locus names will serve as file names either as indexes in some scripts.\\
@@ -426,12 +440,12 @@ We move fasta files from the download directories to the corresponding ones. Fur
 <<BASH commands DATASETS>>=
 #
 # MOVING and RENAMING fasta files
-ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \
-         $DATASETS/fasta/orimasked $DATASETS/fasta/softmasked \
-         $DATASETS/annotation $DATASETS/annotation/desc ;
+ODIR="$DATASETS/fasta" ;
+ChckDirs $ODIR/raw $ODIR/masked \
+         $ODIR/orimasked $ODIR/softmasked ;
 #
 # Preparing fasta files
-IDIR="$DATASETS/_tmp/InitialSET" ;
+IDIR="$DATASETS/_tmp/20010723.Pipeline" ;
 ODIR="$DATASETS/fasta/raw" ;
 while read locus human mouse ;
   do {
@@ -3181,7 +3195,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
 @ 
 
 \newpage
@@ -3531,7 +3545,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -3875,7 +3889,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.10 2001-10-01 19:23:38 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
