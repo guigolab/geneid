@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.4 2001-03-08 15:33:45 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.5 2001-04-23 08:45:45 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -35,14 +35,14 @@ extern int 	SFP,SDP,SAP,STP,
                 GENEID, GENAMIC,
                 GFF, X10,
                 EVD, SRP,
-                scanORF, XML;
+                scanORF, XML cDNA;
 
 extern float EW;
 
 extern char* optarg;
 extern int optind;
 
-char *USAGE="Incorrect usage:\nNAME\n\tgeneid - a program to predict genes\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz]\n\t\t[-v] [-Z] [-W] [-C] [-M] [-m]\n\t\t[-P ParameterFile]\n\t\t[-h] [-X] [-G] [-o] \n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight]\n\t\t<locus_seq_in_fasta_format>\n\n";
+char *USAGE="Incorrect usage:\nNAME\n\tgeneid - a program to predict genes\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz]\n\t\t[-v] [-Z] [-W] [-C] [-D] [-M] [-m]\n\t\t[-P ParameterFile]\n\t\t[-h] [-X] [-G] [-o] \n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight]\n\t\t<locus_seq_in_fasta_format>\n\n";
 
 void printHelp()
 {
@@ -61,6 +61,7 @@ void printHelp()
   printf("\t-z: Print ORFs\n");
   printf("\t-x: Print All exons\n\n");
 
+  printf("\t-D: Print cDNA in predicted genes\n\n");
   printf("\t-Z: Activate ORFs searching\n\n");
 
   printf("\t-G: Print output predictions in GFF-format\n");
@@ -133,7 +134,7 @@ void readargv (int argc,char* argv[],
   char mess[MAXSTRING];
 
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitsxzZXmMGvE:R:S:WCP:h")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitsxDzZXmMGvE:R:S:WCP:h")) != -1)
     switch(c)
       {
       case 'Z': scanORF++;
@@ -206,6 +207,9 @@ void readargv (int argc,char* argv[],
       case 'P': strcpy (ParamFile,optarg); 
 	break;
       case 'G': GFF++;
+	break;
+      case 'D': cDNA++;
+	genamicOpts++;
 	break;
       case 'X': X10++;
 	genamicOpts++;
