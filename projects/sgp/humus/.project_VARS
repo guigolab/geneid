@@ -2,19 +2,24 @@
 umask 002 ;
 #
 BASE="/projects" ;
-BIN="$BASE/sgp/bin" ;
 HUMUS="$BASE/H.sapiens" ;
-export BASE BIN HUMUS ;
+BBIN="/usr/local/molbio/share/sgp" ;
+BIN="$BBIN/bin" ;
+MySQLPAR="$BBIN/mySQL" ;
+LIBPERL="$BBIN/libperl" ;
+LIBSTEP="$BBIN/libstep" ;
+SRC="$BBIN/src" ;
+export BASE HUMUS BBIN BIN MySQLPAR LIBPERL LIBSTEP SRC ;
 #
 #
-export PERL5OPT="-I/projects/sgp/bin/mySQL -I/projects/sgp/bin/mySQL/param" ;
+PERL5OPT="-I$BBIN/libperl" ;
+export PERL5OPT;
 #
 #
 #
 # BASIC Shell Functions
 #
-CheckDirs ()
-{
+function CheckDirs () {
   #
   # USAGE: ChckDirs <path_list>
   #
@@ -25,6 +30,11 @@ CheckDirs ()
              mkdir --verbose $name ;
       } ;
     done ;
+}
+#
+function is_exec () {
+  # USAGE: is_exec <filename_0>...<filename_N>
+  for file in $@; do { [ -x $file ] || chmod a+x $file ; }; done
 }
 #
 # Script from gparra to retrieve GFF annotation from geneid big output
@@ -92,14 +102,16 @@ run_evaluation ()
 {
   #
   # USAGE:
-  #     run_evaluation #chrom program param prog_results_dir annotation_dir testset lenght
-  # run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/all all ;
+  #     run_evaluation #chrom program param       prog_results_dir \
+  #                    annotation_dir           testset  lenght
+  # Ex: run_evaluation 22     geneid  Hsap.masked $ANALYSIS/geneid \
+  #                    $DATASETS/annotation/all all ;
   #
   CHR="$1" ;
   prog="$2" ;
   PROG=`echo $prog | tr a-z A-Z` ;
   RUN="$3" ;
-  BASE="$4/$RUN" ;
+  BASE="$4" ;
   RESULTS="$BASE/gff/chr$CHR" ;
   SUBSET="$6" ;
   TESTSET="$5/chr$CHR" ;

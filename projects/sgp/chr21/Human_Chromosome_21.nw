@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: Human_Chromosome_21.nw,v 1.8 2001-12-24 12:17:12 gparra Exp $ 
+% # $Id: Human_Chromosome_21.nw,v 1.9 2002-03-11 11:52:09 jabril Exp $ 
 %
 % THIS FILE WAS GENERATED WITH THE FOLOWING COMMAND:
 % ~jabril/bin/deploy Human_Chromosome_21  /home/ug/jabril/development/softjabril/deploy/data/report.nw
@@ -236,7 +236,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.8 2001-12-24 12:17:12 gparra Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.9 2002-03-11 11:52:09 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1313,11 +1313,19 @@ gawk 'BEGIN{OFS="\t"}
         split($9,n,"_"); $9=n[2]; print $0;
         }' /projects/sgp/chr21/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21 \
         > $BASE/chr21_sgp_ew.gff ;
+gawk 'BEGIN{ OFS="\t";
+             while (getline<ARGV[1]>0) { split($0,m,"_"); gene[m[2]]++; };
+             ARGV[1]="";
+             }
+      $1 !~ /^\#|^[ \t]*$/ {
+          if ($9 in gene) { $2="sgp-rtpcr"; print $0; }
+      }' $BASE/rtpcr_genes $BASE/chr21_sgp_ew.gff > $BASE/chr21_sgp_rtpcr.gff
 #
 cat $BASE/chr21_est.gff $BASE/chr21_genscan.gff \
     $BASE/chr21_geneid_masked.gff $BASE/chr21_geneid_raw.gff \
-    $BASE/chr21_sgp_ew.gff $BASE/chr21_sgp_masked.gff $BASE/chr21_sgp_raw.gff \
-    $BASE/chr21_hsp-sr.gff $BASE/chr21_local-annot.gff $BASE/chr21_annot.gff \
+    $BASE/chr21_sgp_masked.gff $BASE/chr21_sgp_raw.gff \
+    $BASE/chr21_sgp_ew.gff $BASE/chr21_sgp_rtpcr.gff $BASE/chr21_hsp-sr.gff \
+    $BASE/chr21_local-annot.gff $BASE/chr21_annot.gff \
     > $BASE/all_chr21.gff ;
 @ 
 %$
@@ -1910,7 +1918,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_21.nw,v 1.8 2001-12-24 12:17:12 gparra Exp $
+# $Id: Human_Chromosome_21.nw,v 1.9 2002-03-11 11:52:09 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

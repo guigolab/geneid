@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.10 2001-12-24 12:18:14 gparra Exp $
+% $Id: Human_Chromosome_22.nw,v 0.11 2002-03-11 11:52:11 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -159,7 +159,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.10 2001-12-24 12:18:14 gparra Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.11 2002-03-11 11:52:11 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1252,7 +1252,7 @@ run_evaluation ()
   # TEMPORAL FILE ADDING A RECORD WITH THE LENGHT OF THE SEQUENCE
   gawk "BEGIN{OFS=\"\t\";\
         print \"chr\"$CHR,1,\"Sequences\",1,$LENSEQ,\".\",\".\",\".\",1}\
-        {print}" $TESTSET > /tmp/tmp$$;
+        {print}" $TESTSET > $FINALTESTSET;
   # /tmp/tmp$$ temporaal file containing lenght+annotation gff records
   { echo "###" ; echo "### EVALUATION of $PROG RESULTS on CHR $CHR ($RUN)" ; echo "###" ;
     echo "### $LONG_OUTPUT" ; echo "###" ;
@@ -3779,10 +3779,20 @@ gawk 'BEGIN{OFS="\t"}
         print $0;
         }' /projects/sgp/chr22/sgp/Hsap.raw.3X+.fix.gnid_fix.ew-2+2/gff/chr22 \
         > $BASE/chr22_sgp_ew.gff ;
+gawk 'BEGIN{ OFS="\t";
+             while (getline<ARGV[1]>0) { 
+                gene[$1]++; # split($0,m,"_"); gene[m[2]]++;
+             };
+             ARGV[1]="";
+             }
+      $1 !~ /^\#|^[ \t]*$/ {
+          if ($9 in gene) { $2="sgp-rtpcr"; print $0; }
+      }' $BASE/rtpcr_genes $BASE/chr22_sgp_ew.gff > $BASE/chr22_sgp_rtpcr.gff
 #
 cat $BASE/chr22_est.gff $BASE/chr22_genscan.gff \
     $BASE/chr22_geneid_masked.gff $BASE/chr22_geneid_raw.gff \
-    $BASE/chr22_sgp_ew.gff $BASE/chr22_sgp_masked.gff $BASE/chr22_sgp_raw.gff \
+    $BASE/chr22_sgp_masked.gff $BASE/chr22_sgp_raw.gff \
+    $BASE/chr22_sgp_ew.gff $BASE/chr22_sgp_rtpcr.gff \
     $BASE/chr22_hsp-sr.gff $BASE/chr22_local-annot.gff $BASE/chr22_annot.gff \
     > $BASE/all_chr22.gff ;
 @ 
@@ -4150,7 +4160,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.10 2001-12-24 12:18:14 gparra Exp $
+# $Id: Human_Chromosome_22.nw,v 0.11 2002-03-11 11:52:11 jabril Exp $
 @ 
 
 \newpage

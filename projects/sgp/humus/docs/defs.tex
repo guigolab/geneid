@@ -1,0 +1,135 @@
+%%%%% Colors for gff2ps
+\input ColorDefs.tex
+
+%%%%% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\todo}[1]{
+  \vskip 3ex
+  \hspace{-0.75cm}
+   \psframebox[framearc=0.2,linecolor=darkred,linewidth=1pt,
+              fillstyle=solid,fillcolor=verylightyellow,framesep=2ex]{
+     \begin{minipage}[t]{16cm}
+     \vskip -4.75ex
+     \hspace{-1.25cm}
+       \psframebox[framearc=1,linecolor=darkred,linewidth=1.25pt,
+               fillstyle=solid,fillcolor=verylightorange,framesep=5pt]{
+               \textcolor{darkred}{\textbf{\hspace{2ex}TO DO\hspace{2ex}}}
+         } % psframebox
+      \begin{itemize}\setlength{\itemsep}{-0.5ex} #1 \end{itemize}
+     \end{minipage}
+     } % psframebox
+  \vskip 1.5ex
+} % newcommand todo
+\newcommand{\todoitem}[2]{
+  \item[$\triangleright$] [\textit{Section}~\ref{#2}, 
+                           \textit{page}~\pageref{#2}]\\ {#1}
+} % newcommand todoitem
+\newcommand{\mylst}[2]{
+ \begin{center}
+% \fbox{
+  \begin{minipage}{0.95\linewidth}
+   \textbf{#1}
+   \begin{itemize}
+     #2
+   \end{itemize}
+  \end{minipage}
+% } % fbox
+ \end{center}
+} % newcommand->mylst
+\newcommand{\whtlst}[1]{\mylst{What to do here:}{#1}} % newcommand->chklst
+\newcommand{\chklst}[1]{\mylst{Check points:}{#1}} % newcommand->chklst
+
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[HuMus]}}
+\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es?subject=[HuMus]}}
+\def\mtrguigo{\htmladdnormallink{\textbf{rguigo@imim.es}}{MAILTO:rguigo@imim.es?subject=[HuMus]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[HuMus]}}
+
+%%%%% defs
+\def\noweb{\textsc{noweb}}
+\def\ps{\textsc{PostScript}}
+\def\perl{\textsc{Perl}}
+\def\biop{\textsc{BioPerl}}
+\def\ps{\textsc{PostScript}}
+\def\rptm{\textsc{RepeatMasker}}
+\def\bl{\textsc{Blast}}
+\def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
+\def\sgp{\textsc{sgp}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{gff2aplot}}
+\def\apo{\textsl{Apollo}}
+\def\refseq{\textsc{RefSeq}}
+\def\ens{\textit{\texttt{emsembl}}}
+\def\hsap{\textit{H. sapiens}}
+\def\lhsap{\textit{Homo sapiens}}
+\def\mmus{\textit{M. musculus}}
+\def\lmmus{\textit{Mus musculus}}
+
+%%%%% TODO defs
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
+\def\shorttit{\textbf{Human + Mouse}}
+\def\tit{\textsc{\shortstack{Human Genome Annotation\\using Mouse Homology}}}
+%
+\def\mtauthor{
+ \htmladdnormallink{\texttt{author@imim.es}}
+                   {MAILTO:author@imim.es?subject=[humus]}
+ } % def mtauthor
+%
+\def\authorslist{
+ The Author/s {\mdseries\small\dotfill \mtauthor } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\authorshort{
+ Abril, JF; Parra, G; Guig\'o, R
+ } % def authorshort
+%
+\def\license{GNU General Public License (GNU-GPL)}
+%
+\def\progdesc{
+We are going to scale up all the processes we have tested on {\lhsap} chromosomes 22 and 21, to the whole genome approach, in which we take advantage of the homology between {\hsap} and {\lmmus} genomes to increase gene prediction accuracy and producing a better genome annotation of the coding regions.
+ } % def progdesc
+%
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\shorttit\quad\rightmark}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%

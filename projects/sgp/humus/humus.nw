@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.4 2002-02-15 17:29:05 jabril Exp $ 
+% # $Id: humus.nw,v 1.5 2002-03-11 11:52:18 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -56,7 +56,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \begin{document}
-%
+
 <<HIDE: LaTeX new definitions>>=
 %%%%% Colors for gff2ps
 \input ColorDefs.tex
@@ -198,6 +198,7 @@ Universitat Pompeu Fabra\\[2ex]
 \def\sgp{\textsc{sgp}}
 \def\gps{\texttt{gff2ps}}
 \def\aps{\texttt{gff2aplot}}
+\def\apo{\textsl{Apollo}}
 \def\refseq{\textsc{RefSeq}}
 \def\ens{\textit{\texttt{emsembl}}}
 \def\hsap{\textit{H. sapiens}}
@@ -207,6 +208,8 @@ Universitat Pompeu Fabra\\[2ex]
 @ 
 <<HIDE: new defs TODO>>=
 @ 
+
+%
 
 \thispagestyle{empty}
 
@@ -266,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.4 2002-02-15 17:29:05 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.5 2002-03-11 11:52:18 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -291,6 +294,170 @@ Universitat Pompeu Fabra\\[2ex]
  \item ...
 \end{itemize}
 
+
+\subsctn{Making up the jobs list}
+
+Here we are going to define which will be the fields structure for the jobs file. That file will contain a set of jobs to be executed, each step within a job must have an input/output directories pair from where to read/write, and that depends on the execution date of the main job. Jobs must also be sequence oriented, where sequences are grouped within chromosomes (which will work the same way as job/steps), but this will be handled by the step-runner program (see [[stepper.pl]] definition on corresponding apendix section).\\
+
+\noindent\hspace{-1cm}
+\begin{tabular}{|@{\hspace{2ex}}c@{\hspace{2ex}}|@{\hspace{2ex}}c@{\hspace{2ex}}|}\hline
+& \\
+\begin{minipage}[t]{8cm}
+\textbf{JOBS FILE DEFINITION}
+\scriptsize
+\begin{verbatim}
+...
+  ...
+JOB_j
+  * Job ID
+  * Job description
+  * Job main path
+  * Job execution JOBXID (to set subpath)
+  * STEP list:
+    ...
+      ...
+    STEP_s
+      + Step ID
+      + Step description
+      + Step main path
+      + Step execution SXID (to set subpath) ?
+      + Input dir:  IDIR
+      + Output dir: ODIR
+      + Error dir:  EDIR (also logs)
+      + Step shell commands:
+        #># STEP_CODE ----...
+        ... commands ...
+        #># END_OF_STEP --...
+    end-of-STEP_s
+    ...
+      ...
+end-of-JOB_j
+...
+  ...
+
+\end{verbatim}
+\end{minipage}
+&
+\begin{minipage}[t]{10cm}
+\textbf{LOOPING JOBS THROUGH DATA}
+\scriptsize
+\begin{verbatim}
+...
+  ...
+CHR_c
+  * Set chromosome directory
+  * Get sequences associated to chromosome "c"
+  * SEQ list:
+    ...
+      ...
+    SEQ_q
+      + Output file is set to sequence "q" name
+      + For each selected step:
+        - Combine into $$ script (saving into a tmp dir)
+           > common bash exports from '.project_VARS':
+             HUMUS, BIN, SRC,
+             LIBPERL, LIBSTEP, MySQLPAR, ...
+           > current sequence definitions:
+             CHR, SEQ, JOB, STEP, XID,
+             CHRDIR ($HUMUS/$CHR),
+             JOBDIR ($CHRDIR/$JOB/$XID),
+             IDIR, ODIR, EDIR, ...
+           > build directories: 
+             CheckDirs ODIR;
+             [EDIR != ODIR] && CheckDirs EDIR
+           > current step (use STEP_ID ?)
+        - Report start status to DB execution table 
+        - Launch $$ script to local/remote machine
+        - Report termination status to DB execution table 
+      + ...
+    end-of-SEQ_q
+    ...
+      ...
+end-of-CHR_c
+...
+  ...
+
+\end{verbatim}
+\end{minipage}
+\\\hline
+\multicolumn{2}{|c|}{\shortstack{
+\ \\[1ex]
+\textbf{PATH CONSTRUCTOR}\\[1ex]
+\texttt{/projects/H.sapiens/\textbf{CHR\_c}/\textbf{JOB\_j}/\textbf{JOBXID}/\textbf{STEP\_s}/\textbf{SEQ\_q}.files}\\[1ex]
+}}
+\\\hline
+\end{tabular}
+
+
+\subsctn{Basic squetch of job and step records }
+
+<<Empty JOB Definition Record>>=
+             #.........................(max ID length: 25chars)
+####>#########>#######################<########################################<#
+#># JOB_ID    ...
+#># JOB_DESC  ...
+#>#        :  ...
+#>#        :  ...
+#># JOB_PATH  ...
+#># JOB_XID   ...
+#># JOB_FILE  $LIBSTEP/...
+#># END_OF_JOB ##################################################################
+@ 
+
+
+<<Empty STEP Definition Record>>=
+             #.........................(max ID length: 25chars)
+####>#########>#######################<########################################<#
+#># STEP_ID   ...
+#># STEP_DESC ...
+#>#         : ...
+#>#         : ...
+#># STEP_PATH ...
+#># STEP_XID  $<JOB_ID>
+#># STEP_IDIR ...
+#># STEP_ODIR ...
+#># STEP_EDIR ...
+#># STEP_CODE   --------------------------------------------------------------#<#
+...
+#<# Remove this line from code when tangling
+#<#   (commands used when testing script)...
+...
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+
+<<Empty STEP Definition FILE>>=
+<<Empty STEP Definition Record>>
+<<Empty STEP Definition Record>>
+...
+<<Empty STEP Definition Record>>
+@
+
+\subsctn{Main job collector}
+
+<<JOB COLLECTOR>>=
+####>#########>################################################################<#
+### 
+### Collecting step records for each pipeline job
+###
+####>#########>################################################################<#
+{ cat $WORK/.bash_VARS ;
+  notangle -R'tangling: mySQL param' $WORK/$nwfile.nw ; } | bash ;
+#
+notangle -R'JOBS: Sequence Analysis'                   $WORK/$nwfile.nw | \
+    egrep -v '^#<#' - | cpif $LIBSTEP/annotation.job ;
+notangle -R'JOBS: HsapGPa x MmusPHa WUTBLASTX'         $WORK/$nwfile.nw | \
+    egrep -v '^#<#' - | cpif $LIBSTEP/tblastx.job ;
+notangle -R'JOBS: Running GENEID standard'             $WORK/$nwfile.nw | \
+    egrep -v '^#<#' - | cpif $LIBSTEP/geneid.job ;
+notangle -R'JOBS: SGP with HSAPgpa x MMUSpha homology' $WORK/$nwfile.nw | \
+    egrep -v '^#<#' - | cpif $LIBSTEP/sgp.job ;
+notangle -R'JOBS: Visualizing Results with Apollo'     $WORK/$nwfile.nw | \
+    egrep -v '^#<#' - | cpif $LIBSTEP/apollo.job ;
+#
+$MySQLPAR/admin_db_Hsapiens.pl ;
+#
+@ 
+
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Sequence Analysis}
@@ -302,6 +469,29 @@ Universitat Pompeu Fabra\\[2ex]
 \item Get G+C content.
 }
 
+<<JOBheader: Sequence Analysis>>=
+####>#########>#######################<########################################<#
+#># JOB_ID    HSAP_GP_ANNOTATION
+#># JOB_DESC  Homo sapiens Golden Path annotation.
+#>#        :  Processing files downloaded from Golden-Path server
+#>#        :  ( URL: http://genome.ucsc.edu/ ).
+#>#        :  We retrieve fasta sequences, gaps, annotation (RefSeq and 
+#>#        :  Ensembl), genscan predicted genes and so on.
+#>#        :  Last UCSC-GP version being analyzed is August, 2001.
+#># JOB_PATH  annotation
+#># JOB_XID   20010806
+#># JOB_FILE  ${LIBSTEP}/annotation.job
+#># END_OF_JOB ##################################################################
+@ 
+
+<<JOBS: Sequence Analysis>>=
+<<STEPS(Sequence Analysis): ASSEMBLY GAPS>>
+<<STEPS(Sequence Analysis): ORIGINAL MASKING>>
+<<STEPS(Sequence Analysis): REFSEQ>>
+<<STEPS(Sequence Analysis): ENSEMBL>>
+<<STEPS(Sequence Analysis): GENSCAN>>
+@
+
 \subsctn{Initialization} %%%%%%%%%%%%%%%%%%%%%%
 
 <<Global: >>=
@@ -311,6 +501,24 @@ Universitat Pompeu Fabra\\[2ex]
 #
 CheckDirs $HUMUS/.ftp $HUMUS/.ftp/PankajAgarwal
 #
+@
+ 
+<<Global: >>=
+#
+# Retrieving Golden path sequence names and length
+#
+HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
+HSAPID="20010806";
+# 
+# getfastadesc.pl must be executed after table update
+#   on mySQL database (after admin_db_Hsapiens.pl)
+#
+$BIN/getfastadesc.pl $MySQLPAR/chrs.tbl $HSAP/chromosomes \
+                     > $HUMUS/seqid_list 2> $HUMUS/seqid_list.rpt ;
+#
+@
+
+<<HIDE: STEPS(Sequence Analysis): >>=
 CHRLIST="22" ;
 #
 for n in $CHRLIST;
@@ -326,9 +534,13 @@ CHRNUM="22" ; # length -> 47748585
 CHR="chr$CHRNUM" ;
 XID="20020122";
 #
+IDIR="$HSAP/database" ;
+ODIR="$HUMUS/$CHR/annotation/$HSAPID" ;
+CheckDirs $ODIR $ODIR/refseq $ODIR/genscan $ODIR/ensembl $ODIR/gaps $ODIR/repeats ;
+#
 @
 
-<<Global: >>=
+<<HIDE: Global: >>=
 #
 # Retrieving Golden path sequence names
 #
@@ -339,6 +551,7 @@ $BIN/getfastadesc.pl $MySQLPAR/chrs.tbl $HSAP/chromosomes > $HUMUS/seqid_list ;
 #
 perl -e '
   use strict;
+  use global qw( :ExitStatus );
   my %chr = ();
   my ($idir,$ifile) = @ARGV;
   $idir =~ s%/$%%o;
@@ -385,280 +598,6 @@ perl -e '
 #
 @ 
 
-
-\subsubsctn{Scripts: retrieving sequence names and nucleotide composition}
-
-<<tangling: perl scripts>>=
-notangle -R"getfastadesc.pl" $WORK/$nwfile.nw | cpif $BIN/getfastadesc.pl ;
-is_exec $BIN/getfastadesc.pl ;
-@ 
-
-<<getfastadesc.pl>>=
-<<PERL shebang>>
-# USAGE: $0 chr_list.file fasta_files.dir > chr_seqs.list
-# [chr_seqs.list] -> chr_id seq_id date_file description
-use strict;
-my ($chrlistfile,$ipath) = @ARGV;
-$ipath =~ s%/$%%o;
-my (@files,%seqs,@order);
-%seqs = ();
-@order = ();
- #
-open(CHR,"< $chrlistfile");
-while (<CHR>) {
-    my $chr;
-    next if /^#/o;
-    next if /^\s*$/o;
-    next if /^>>\s/o;
-    chomp;
-    s/^\s*//o;
-    ($chr,undef) = split /\s+/og, $_, 2;
-    push @order, $chr;
-    @{ $seqs{$chr} } = ();
-};
-close(CHR);
-
-opendir(FA, $ipath);
-@files = grep { /\.fa$/ } readdir(FA);
-closedir(FA);
-# 
-# we are going to assume that input filenames
-# have the following "chr"$chr"(.*).fa" (so we can assign
-# "automagically" which sequence correspond to each chromosome)
-#
-foreach my $fl (@files) {
-    my ($thechr,$modtime);
-    ($thechr) = uc($fl) =~ /^CHR([\d]+|[XY]|NA|UL)/o;
-    $fl = "$ipath/$fl";
-    open(FAF,"< $fl") || do {
-        print STDERR "### Cannot open file \"$fl\" for chr \"$thechr\"...\n";
-        next;
-    };
-    print STDERR "### Working on chr \"$thechr\" file: \"$fl\"\n";
-    $modtime = &get_fh_mod_date(\*FAF);
-    my ($ct,$cc) = (0,".");
-    while (<FAF>) {
-        my ($id,$desc);
-        next unless s/^>//o;
-        chomp;
-        ($id,$desc) = split /\s+/og, $_, 2;
-        defined($desc) || ($desc = ".");
-        push @{ $seqs{$thechr} }, [ $id, $modtime, $desc ];
-        print STDERR "X";
-    } continue {
-        $ct++;
-        ($ct%10 == 0) && (print STDERR "$cc");
-        ($ct%1000 == 0) && (print STDERR " [$ct]\n");
-    }; # while <FAF>
-    ($ct%1000 != 0) && (print STDERR " [$ct]\n");
-    close(FAF);
-}; # foreach $fl
-
-foreach my $cs (@order) {
-    defined($seqs{$cs}) || do {
-        print STDOUT "# No sequences found for chromosome $cs !!!";
-        next;
-    };
-    scalar(@{ $seqs{$cs} }) > 1 && do {
-        @{ $seqs{$cs} } = map { $_->[1] }
-                          sort { $a->[0] cmp $b->[0] } # ascending alpha sort
-                          map { [ $_->[0], $_ ] } @{ $seqs{$cs} };
-    };
-    foreach my $sq (@{ $seqs{$cs} }) {
-        print STDOUT "$cs @{$sq}\n";
-    };  # foreach $sq
-}; # foreach $cs
-#  print STDOUT 
-
-#  print STDERR "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
-#             (sprintf("%12s %12s %8s %8s %10s  %s\n",
-#                      "begin","end","#seqs","#errors","rand","file"));
-exit(0);
-
-sub get_fh_mod_date() {
-    my $fh = shift;
-    my ($year,$month,$day,$hour,$min,$sec);
-    ($year,$month,$day,$hour,$min,$sec) = 
-            (localtime((stat $fh)[9]))[5,4,3,2,1,0];
-    # stat ->  [8] is access date,
-    #          [9] is modif date and
-    #         [10] is inode change date
-    return sprintf("%04d%02d%02d%02d%02d%02d",
-                   $year + 1900,$month + 1,$day,$hour,$min,$sec);
-} # get_fh_mod_date
-@ 
-
-\subsubsctn{Scripts: Processing Golden Path annotation}
-
-<<tangling: perl scripts>>=
-notangle -R"gp2gff.pl" $WORK/$nwfile.nw | cpif $BIN/gp2gff.pl ;
-is_exec $BIN/gp2gff.pl ;
-@ 
-<<gp2gff.pl>>=
-<<PERL shebang>>
-# Transforms the goldenpath format to gff file
-#   retrieving gene(mrna)/utr/cds coordinates.
-#
-# USAGE: gp2gff.pl "chrname" "source" goldenpath_file > stdout
-#
-<<PERL strict pragma + info>>
-my $PROG = 'gp2gff.pl';
-#
-use Getopt::Long;
-Getopt::Long::Configure qw/ bundling /;
-
-my ($overlap,$exon_ori_fix,$exon_end_fix) = (0,0,0);
-$SIG{__WARN__} = sub {
-                       print STDERR "### UNKNOWN COMMAND-LINE OPTION: $_[0]\n";
-                     };
-GetOptions(
-           'no-overlap'        => \$overlap,
-           'exonori-nuclfix=i' => \$exon_ori_fix,
-           'exonend-nuclfix=i' => \$exon_end_fix,
-           ) || do {
-               print STDERR "### ERROR when PARSING ARGUMENTS\n";
-               exit(1);
-           };
-$SIG{__WARN__} = 'DEFAULT';
-
-my ($seqname,$source,$ifile) = @ARGV;
-my $c = 0;
-my @exary;
-my %laste = ();
-
-open(GPFILE,"< $ifile");
-while (<GPFILE>) {
-    next if /^#/o;
-    next if /^\s*$/o;
-    chomp;
-    $c++ if &process_gene($_);
-};
-close(GPFILE);
-print STDERR "### $c genes for $seqname were found in \"$ifile\".\n";
-exit(0);
-
-sub process_gene() {
-    my $rec = shift;
-    my $maxrec = 10; # refseq record structure
-    my ($gene,$seq,$strand,$mrna_ori,$mrna_end,
-        $cds_ori,$cds_end,$exons_num,$exons_ori,$exons_end) = (0..($maxrec - 1));
-    my (@l,@o,@e,$frame,$cdso,$cdse);
-    @l = split /\s+/og, $rec;
-    ((scalar(@l) >= $maxrec) && ($l[$seq] eq $seqname)) || return 0;
-    @o = split /,/og, $l[$exons_ori];
-    @e = split /,/og, $l[$exons_end];
-    # fixing displacement at exon coordinates (also at mrna and cds levels)
-    $exon_ori_fix == 0 || do {
-         $l[$mrna_ori] += $exon_ori_fix;
-         $l[$cds_ori]  += $exon_ori_fix;
-         @o = map { $_ += $exon_ori_fix } @o;
-    };
-    $exon_end_fix == 0 || do {
-         $l[$mrna_end] += $exon_end_fix;
-         $l[$cds_end]  += $exon_end_fix;
-         @e = map { $_ += $exon_end_fix } @e;
-    };
-    #
-    ($cdso,$cdse) = @l[$cds_ori,$cds_end];
-    # checking if gene overlaps previous one...
-    #   (we assume they are sorted by acceptor)
-    $overlap && do {
-        defined($laste{$l[$strand]}) && do {
-            ($laste{$l[$strand]} > $cdso) && return 0;
-		};
-        $laste{$l[$strand]} = $cdse;
-    }; # $overlap
-    #
-    &prt_gene(@l[$mrna_ori,$mrna_end,$strand,$gene,$exons_num]);
-    @exary = ();
-    $frame = 0;
-    for (my $j = 0; $j < $l[$exons_num]; $j++) {
-        my ($ori,$end,$p);
-        $p = ($l[$strand] eq '-') ? ($l[$exons_num] - ($j + 1)) : $j;
-        ($ori,$end) = ($o[$p],$e[$p]);
-        ($end < $cdso || $ori > $cdse) && do {
-            &prt_utr($ori,$end,@l[$strand,$gene]);
-            next;
-        };
-        ($ori < $cdso  && $end <= $cdse) && do {
-            &prt_utr($ori,($cdso - 1),@l[$strand,$gene]);
-            $frame = &prt_exon($cdso,$end,$frame,@l[$strand,$gene],$cdso,$cdse);
-            &swap_items(0) if ($l[$strand] eq '-');
-            next;
-        };
-        ($ori >= $cdso && $end > $cdse) && do {
-            $frame = &prt_exon($ori,$cdse,$frame,@l[$strand,$gene],$cdso,$cdse);
-            &prt_utr(($cdse + 1),$end,@l[$strand,$gene]);
-            &swap_items(0) if ($l[$strand] eq '-');
-            next;
-        };
-        ($ori < $cdso  && $end > $cdse) && do {
-            &prt_utr($ori,($cdso - 1),@l[$strand,$gene]);
-            $frame = &prt_exon($cdso,$cdse,$frame,@l[$strand,$gene],$cdso,$cdse);
-            &prt_utr(($cdse + 1),$end,@l[$strand,$gene]);
-            &swap_items(1) if ($l[$strand] eq '-');
-            next;
-        };
-        $frame = &prt_exon($ori,$end,$frame,@l[$strand,$gene],$cdso,$cdse);
-    };
-    ($l[$strand] eq '-') && (@exary = reverse @exary);
-    print STDOUT join('',@exary); # each line already has its own linefeed
-    return 1;
-} # process_gene
-# GFF: seqname source feat start end score strand frame group
-sub prt_gene() {
-    my @data = @_;
-    print STDOUT "# Gene: $data[3]   Strand: $data[2]   Exons: $data[4]\n";
-    print STDOUT join("\t",$seqname,$source,"mrna",@data[0,1],
-                      ".",$data[2],".",$data[3])."\n";
-} # prt_gene
-sub prt_utr() {
-    my @data = @_;
-    push @exary, join("\t",$seqname,$source,"utr",@data[0,1],
-                      ".",$data[2],".",$data[3])."\n";
-} # prt_utr
-sub prt_exon() {
-    my ($eo,$ee,$frm,$str,$grp,$co,$ce) = @_;
-    my $feat;
-#     my ($myfrm,$feat);
-    # remainder = ((exon_end - exon_ori + 1) + frame) mod 3;
-    # nextframe = (3 - ((exon_end - exon_ori + 1) + frame) mod 3) mod3;
-#   $myfrm = ($str eq '-') # exon frame is set to remainder for - strand
-#            ? ( (($ee - $eo + 1) + $frm) % 3 )
-#            : $frm;
-    $feat = &get_feat($eo,$ee,$str,$co,$ce);
-#   $feat =~ /Single/io && ($myfrm = 0); # single frame hack (specially for -)
-    push @exary, join("\t",$seqname,$source,$feat,$eo,$ee,
-                      ".",$str,$frm,$grp)."\n";
-#                       ".",$str,$myfrm,$grp)."\n";
-    return ( (3 - (($ee - $eo + 1) + $frm) % 3 ) % 3 ); # return nextframe
-} # prt_exon
-# gene structure GFF-feature names
-sub get_feat() {
-    my ($eo,$ee,$str,$co,$ce) = @_;
-    my ($fts,$fto,$fti,$fte);
-    ($fts,$fto,$fti,$fte) = ("Single","First","Internal","Terminal");
-    $str eq "-" && do {
-        ($fto,$fte) = ($fte,$fto);
-    };
-    ($eo == $co && $ee == $ce) && return $fts;
-    ($eo == $co) && return $fto;
-    ($ee == $ce) && return $fte;
-    return $fti;
-} # get_feat
-sub swap_items() {
-     shift || do {
-         ($exary[$#exary],$exary[$#exary-1]) =
-             ($exary[$#exary-1],$exary[$#exary]);
-         return;
-     };
-     ($exary[$#exary],$exary[$#exary-1],$exary[$#exary-2]) =
-         ($exary[$#exary-2],$exary[$#exary-1],$exary[$#exary]);
-     return;
-} # swap_items
-@ 
-
-
 \subsctn{Sequence analysis: \textit{H.sapiens}}
 
 <<HIDE: >>=
@@ -684,29 +623,55 @@ sub swap_items() {
 
 \subsubsctn{Retrieving annotations from Golden Path}
 
-<<Sequence: H.sapiens>>=
+<<STEPS(Sequence Analysis): REFSEQ>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   HSAP_GP_REFSEQ
+#># STEP_DESC Retrieving RefSeq annotated genes for current 
+#>#         : H. sapiens Golden Path sequence.
+#># STEP_PATH refseq
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HSAP/database
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# 
-#
-IDIR="$HSAP/database" ;
-ODIR="$HUMUS/$CHR/annotation/$HSAPID" ;
-#
-CheckDirs $ODIR $ODIR/refseq $ODIR/genscan $ODIR/ensembl $ODIR/gaps $ODIR/repeats ;
-#
+#<# IDIR="$HSAP/database" ;
+#<# ODIR="$HUMUS/$CHR/annotation/$HSAPID/refseq" ;
+#<# CheckDirs $ODIR $EDIR ;
 $BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
                $CHR refseq $IDIR/refGene.txt \
-                 > $ODIR/refseq/$CHR.fullgff \
-                2> $ODIR/refseq.report       ;
+             > $ODIR/$CHR.fullgff \
+            2> $EDIR.report       ;
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
-     $ODIR/refseq/$CHR.fullgff > $ODIR/refseq/$CHR.gff ;
+               $ODIR/$CHR.fullgff > $ODIR/$CHR.gff ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
+@ 
+
+<<STEPS(Sequence Analysis): ENSEMBL>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   HSAP_GP_ENSEMBL
+#># STEP_DESC Retrieving Ensembl annotated genes for current 
+#>#         : H. sapiens Golden Path sequence.
+#># STEP_PATH ensembl
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HSAP/database
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# IDIR="$HSAP/database" ;
+#<# ODIR="$HUMUS/$CHR/annotation/$HSAPID" ;
+#<# CheckDirs $ODIR $EDIR ;
 $BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
                $CHR ensembl $IDIR/ensGene.txt \
-                 > $ODIR/ensembl/$CHR.fullgff \
-                2> $ODIR/ensembl.report       ;
-gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
-     $ODIR/ensembl/$CHR.fullgff > $ODIR/ensembl/$CHR.gff ;
+             > $ODIR/$CHR.fullgff \
+            2> $EDIR.report       ;
 #
+gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+               $ODIR/$CHR.fullgff > $ODIR/$CHR.gff ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
 @ 
 
 \chklst{
@@ -741,22 +706,100 @@ function pre_eval {
 }
 
 
+\subsubsctn{Retrieving gaps and masked regions from annotated sequences}
+
+<<STEPS(Sequence Analysis): ASSEMBLY GAPS>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   HSAP_GP_ASSEMBLY_GAPS
+#># STEP_DESC Retrieving assembly gaps coords for current 
+#>#         : H. sapiens Golden Path sequence (masked with N's).
+#># STEP_PATH gaps
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HSAP/database
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# IDIR="$HSAP/database" ;
+#<# ODIR="$HUMUS/$CHR/annotation/$HSAPID/gaps" ;
+#<# CheckDirs $ODIR ;
+perl -e '
+  ($seq,$ori,$end,$char,$size,$type) = (1,2,3,5,6,7);
+  $n = 1;
+  while (<STDIN>) {
+      next if /^#/o;
+      next if /^\s*$/o;
+      chomp;
+      @l = split /\s+/og, $_;
+      defined($l[$type]) || ($l[$type] = "gap");
+      print STDOUT join("\t", $l[$seq],"sequence","gap",
+                              @l[$ori,$end],".",".",".",
+            $l[$type].".".($n++)." # $l[$type]\: $l[$size]bp ($l[$char])\n");
+  }; # while   
+  ' < $IDIR/${CHR}_gap.txt \
+    > $ODIR/${CHR}.gff ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+
+<<STEPS(Sequence Analysis): ORIGINAL MASKING>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   HSAP_GP_ORI_MASKED
+#># STEP_DESC Retrieving masked regions coords for current H. sapiens Golden
+#>#         : Path sequence (original masking of repetitive regions).
+#># STEP_PATH repeats
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HSAP/database
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
+#
+#<# IDIR="$HSAP/database" ;
+#<# ODIR="$HUMUS/$CHR/annotation/$HSAPID/repeats" ;
+#<# CheckDirs $ODIR ;
+perl -e '
+  ($sco,$seq,$ori,$end,$str,$name,$class,$fam) = (1,5,6,7,9,10,11,12);
+  $n = 1;
+  while (<STDIN>) {
+      next if /^#/o;
+      next if /^\s*$/o;
+      chomp;
+      @l = split /\s+/og, $_;
+      print STDOUT join("\t", $l[$seq],"repeatmasker","repeat",
+                              @l[$ori,$end,$sco,$str],".",
+                              $l[$class].".".($n++))." # @l[$name,$fam]\n";
+  }; # while 
+  ' < $IDIR/${CHR}_rmsk.txt \
+    > $ODIR/${CHR}.gff ;
+#
+#># END_OF_STEP --------------------------------------------------------------#<#
+@
+
 \subsubsctn{Retrieving gene prediction results from Golden Path ({\gnsc})}
 
-<<Sequence: H.sapiens>>=
+<<STEPS(Sequence Analysis): GENSCAN>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   HSAP_GP_GENSCAN
+#># STEP_DESC Retrieving genscan predicted genes for current 
+#>#         : H. sapiens Golden Path sequence.
+#># STEP_PATH genscan
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HSAP/database
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# 
-#
-IDIR="$HSAP/database" ;
-ODIR="$HUMUS/$CHR/annotation/$HSAPID/genscan" ;
-#
+#<# IDIR="$HSAP/database" ;
+#<# ODIR="$HUMUS/$CHR/annotation/$HSAPID/genscan" ;
+#<# CheckDirs $ODIR ;
 $BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
-       $CHR genscan $IDIR/genscan.txt \
-                 > $ODIR/$CHR.fullgff \
-                2> $ODIR.report       ;
+               $CHR genscan $IDIR/genscan.txt \
+             > $ODIR/$CHR.fullgff \
+            2> $EDIR.report       ;
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
-     $ODIR/$CHR.fullgff > $ODIR/$CHR.gff ;
+               $ODIR/$CHR.fullgff > $ODIR/$CHR.gff ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @ 
 
 \chklst{
@@ -833,6 +876,14 @@ is faster version of RM that uses Blast instead of crossmatch.
 
 \sctn{Processing {\tbx} results} %%%%%%%%%%%%%%%%%%%%%%
 
+\begin{comment}
+Ensembl:
+	http://www.ensembl.org/Homo_sapiens/
+	http://www.ensembl.org/Mus_musculus/
+Ensembl mouse assembly v1.0
+Sanger Institute Phusion Nov 6 Assembly
+Whitehead Arachne Oct 26 Assembly
+\end{comment}
 \begin{center}
 % \fbox{
   \begin{minipage}{0.95\linewidth}
@@ -841,7 +892,7 @@ is faster version of RM that uses Blast instead of crossmatch.
  \item Process {\tbx} results from Pankaj:
   \begin{itemize}
    \item Human genome assembly from UCSC Golden Path August release (20010806).
-   \item Mouse genome assembly from Sanger Center Phusion assembly (20011109).\\[-3ex]
+   \item Mouse genome assembly from Sanger Center Phusion assembly (20011106).\\[-3ex]
 \begin{verbatim}
 # Database:  /bioinfo/gapdb/blastdb/MusPhusion
 # Title:  MusPhusion
@@ -872,176 +923,50 @@ warnings  cpus=4  ctxfactor=36.0
  \end{center}
 
 
+<<JOBheader: HsapGPa x MmusPHa WUTBLASTX>>=
+####>#########>#######################<########################################<#
+#># JOB_ID    HSAPgpa_MMUSpha_WUTBLASTX
+#># JOB_DESC  Homology search by WU-TBLASTX for H.sapiens UCSC Golden Path 
+#>#        :  assembly against M.musculus Sanger Center Phusion assembly 
+#>#        :  (TBLASTX results obtained by Pankaj Agarwal,  
+#>#        :   last update was jan 11, 2002, downladed from GSBP).
+#># JOB_PATH  tblastx
+#># JOB_XID   20020111
+#># JOB_FILE  ${LIBSTEP}/tblastx.job
+#># END_OF_JOB ##################################################################
+@ 
+
+<<JOBS: HsapGPa x MmusPHa WUTBLASTX>>=
+<<STEPS(HsGPa*MmPHa WUTBLASTX): retrieve blast output>>
+<<STEPS(HsGPa*MmPHa WUTBLASTX): parsing blast output>>
+<<STEPS(HsGPa*MmPHa WUTBLASTX): project HSPs into SRs>>
+<<STEPS(HsGPa*MmPHa WUTBLASTX): evaluating SRs>>
+@ 
+
 \subsctn{Initialization} %%%%%%%%%%%%%%%%%%%%%%
-
-\subsubsctn{Scripts: Verifying SBP {\tbx} output for chromosome fragments}
-
-<<tangling: perl scripts>>=
-notangle -R"sbp-checkblastout.pl" $WORK/$nwfile.nw | \
-     cpif $BIN/sbp_checkblastout.pl ;
-is_exec $BIN/sbp_checkblastout.pl ;
-@ 
-<<sbp-checkblastout.pl>>=
-<<PERL shebang>>
-# Parsing tblastx files from SBP to check blast output
-#   contents for each fragment of the broken chromosomic sequence
-#
-# USAGE: sbp_checkblastout.pl "chrname" input_dir > stdout.report
-#
-<<PERL strict pragma + info>>
-my $PROG = 'sbp_checkblastout.pl';
-#
-my $chr = shift @ARGV;
-my $path = shift @ARGV;
-my @files = ();
-my ($c,$e,$z);
-opendir(TBX, $path);
-@files = map { [ $_ ,
-                 /^.*_(\d+)_(\d+)(?:\..*)?$/o,
-                 (/^.*_(\D+)_.*$/o || "-"),
-               ] } 
-         grep { /^[^\.]/ } readdir(TBX);
-closedir(TBX);
-@files = map { $_->[1] }
-         sort { $a->[0] <=> $b->[0] }
-         map { [ $_[0], $_ ] } @files;
-print STDOUT "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
-             (sprintf("%12s %12s %8s %8s %10s  %s\n",
-                      "begin","end","#seqs","#errors","rand","file"));
-$z = 0;
-foreach my $fl (@files) {
-    ($c,$e) = (0,0);
-    my $fname = "$path/$fl->[0]";
-    print STDERR "# Working on $fname\n";
-    open(TBXFL,"< $fname");
-    while (<TBXFL>) {
-        /^>/o   && ($c++,next);
-        /EXIT/o && ($e++);
-    }; # while
-    $c == 0 && ($z++);
-    close(TBXFL);
-    printf STDOUT "  %12s %12s %8s %8s %10s  %s\n",
-           ($fl->[1] + 1),($fl->[1] + $fl->[2]),$c,$e,$fl->[3],$fl->[0];
-}; # foreach
-print STDOUT "# $chr ran into ".(scalar @files).
-             " fragments, $z of which having NO HSPs.\n";
-#
-exit(0);
-@ 
-
-\subsubsctn{Scripts: Parsing SBP {\tbx} output to GFF}
-
-<<tangling: perl scripts>>=
-notangle -R"sbp-blast2gff.pl" $WORK/$nwfile.nw | \
-     cpif $BIN/sbp_blast2gff.pl ;
-is_exec $BIN/sbp_blast2gff.pl ;
-@ 
-<<sbp-blast2gff.pl>>=
-<<PERL shebang>>
-# Parsing tblastx files from SBP to get HSPs in GFF format
-#
-# USAGE: sbp_blast2gff.pl "chrname" length_file input_dir \
-#                          > gff_output  2> stdout.report
-#
-<<PERL strict pragma + info>>
-my $PROG = 'sbp_blast2gff.pl';
-#
-my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
-my @frame = ( 3, 1, 2 ); # frm 0 -> blastfrm 3
-                         # frm 1 -> blastfrm 1
-                         # frm 2 -> blastfrm 2
-my %SEQlen;
-my ($chr, $seqln, $input) = @ARGV;
-my @files = ();
-my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
-          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
-                     "all" => 8,            "sum" => [ (0) x 9 ] );
-my ($cf,$cr);
-open(FRGLEN, "< $seqln");
-while (<FRGLEN>) {
-    next if /^#/o;
-    next if /^\s*$/o;
-    chomp;
-    my @l = split /\s+/og, $_;
-    $SEQlen{$l[0]} = $l[1];
-}; # while
-close(FRGLEN);
-open(FRGLST, "< $input.report");
-while (<FRGLST>) {
-    next if /^#/o;
-    next if /^\s*$/o;
-    chomp;
-    s/^\s*//o;
-    my @l = split /\s+/og, $_;
-    ($l[2] > 0) && do {
-        push @files, [ $l[$#l], ($l[0] - 1) ];
-    };
-    # skipping fragments without HSPs
-}; # while
-close(FRGLST);
-#
-print STDERR "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
-             (sprintf("%8s %8s %8s  %s\n","#hsp","#hsp(+)","#hsp(-)","file"));
-system("/bin/rm","$input.parseblast.err");
-foreach my $fl (@files) {
-    $cf = $cr = 0;
-    my ($fname,$offset) = ("$input/$fl->[0]", $fl->[1]);
-    open(TBXFL, "parseblast --fullgff --full-scores --comments".
-                " --verbose --bit-score $fname 2>> $input.parseblast.err |");
-    my @l;
-    while (<TBXFL>) {
-        next if /^\s*$/o;
-        /^#/o && do {
-            print STDOUT $_;
-            next;
-        };
-        chomp;
-        @l = split /\s+/og, $_, 9;
-        $l[$seq] = $chr;
-        $l[$src] = "tblastx";
-        $l[$ftr] = "hsp";
-        $l[$ori] += $offset;
-        $l[$end] += $offset;
-        if ($l[$str] eq "-") {
-            $l[$frm] = $frame[(($SEQlen{$chr} - $l[$end] + 1) % 3)];
-            $cr++;
-        } else {
-            $l[$frm] = $frame[($l[$ori] % 3)];
-            $cf++;
-        };
-        print STDOUT join("\t", @l)."\n";
-        $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
-    }; # while
-    close(TBXFL);
-    printf STDERR "  %8s %8s %8s  %s\n",($cf+$cr),$cf,$cr,$fl->[0];
-}; # foreach
-$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
-$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
-$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
-print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
-             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse.\n";
-foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
-   printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
-}; # foreach
-#
-exit(0);
-@
 
 \subsctn{Unpacking {\tbx} results obtained by Pankaj}
 
-<<Homology: >>=
+<<STEPS(HsGPa*MmPHa WUTBLASTX): retrieve blast output>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   TBLASTX_OUTPUT
+#># STEP_DESC Unpacking TBLASTX results obtained by Pankaj Agarwal
+#>#         : (Hsapiens GP assembly against Mmusculus Phusion assembly).
+#># STEP_PATH ori
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/.ftp/PankajAgarwal/$<JOB{.}{JOB_XID}>.tbxPhusion
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Unpacking TBLASTX results obtained by Pankaj
+#<# IDIR="$HUMUS/.ftp/PankajAgarwal/20020111.tbxPhusion" ;
+#<# ODIR="$HUMUS/$CHR/tblastx/$XID/ori" ;
+#<# CheckDirs $ODIR ;
+mega "cp -v" $IDIR "^${CHR}_" $ODIR ;
 #
-IDIR="$HUMUS/.ftp/PankajAgarwal/20020111.tbxPhusion" ;
-ODIR="$HUMUS/$CHR/tblastx/$XID" ;
+$BIN/sbp_checkblastout.pl $CHR $ODIR > $ODIR/ori.report ;
 #
-CheckDirs $ODIR $ODIR/ori ;
-#
-mv -v $IDIR/${CHR}* $ODIR/ori ;
-#
-$BIN/sbp_checkblastout.pl $CHR $ODIR/ori > $ODIR/ori.report ;
-#
+#># END_OF_STEP --------------------------------------------------------------#<#
 @ 
 
 \chklst{
@@ -1059,26 +984,36 @@ $BIN/sbp_checkblastout.pl $CHR $ODIR/ori > $ODIR/ori.report ;
 
 We had to deal with the frame issue of the HSPs fragments; once the HSP coords were mapped to the chromosome, frames also must be recomputed taking into account if HSP was in forward or in reverse strand (see figure~\ref{fig:blastframes}).
 
-<<Homology: >>=
+<<STEPS(HsGPa*MmPHa WUTBLASTX): parsing blast output>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   PARSING_TBLASTX
+#># STEP_DESC Retrieving HSPs from raw TBLASTX output
+#>#         : (Hsapiens GP assembly against Mmusculus Phusion assembly).
+#># STEP_PATH hsp
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $JOBDIR/$<STEP{.}{TBLASTX_OUTPUT}{STEP_PATH}>
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Retrieving TBLASTX results by chromosome
+#<# IDIR="$HUMUS/$CHR/tblastx/$XID/ori" ;
+#<# ODIR="$HUMUS/$CHR/tblastx/$XID/hsp" ;
+#<# CheckDirs $ODIR ;
+#<# LEN="$HUMUS/$CHR/annotation/$HSAPID/length" ;
+LEN="$CHRDIR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/length" ;
 #
-IDIR="$HUMUS/$CHR/tblastx/$XID/ori" ;
-ODIR="$HUMUS/$CHR/tblastx/$XID/hsp" ;
-SDIR="$HUMUS/$CHR/annotation" ;
-#
-CheckDirs $ODIR ;
-#
-$BIN/sbp_blast2gff.pl $CHR $SDIR/$HSAPID/length $IDIR \
+$BIN/sbp_blast2gff.pl $CHR $LEN $IDIR \
          > $ODIR/$CHR.fullgff 2> $ODIR.report ;
 #
-perl -ne '/^#/o && next; /^\s+$/o && next; 
+perl -ne '/^#/o && next;
+          /^\s+$/o && next; 
           $_ =~ s/;\s+Strand//o; 
           $_ =~ s/;\s+Frame//o; 
           $_ =~ s/;\s+E_value.*$//o;
           print STDOUT $_;' $ODIR/$CHR.fullgff | \
           sort +3n -6 +6 -7 - > $ODIR/$CHR.gff ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @ 
 
 \chklst{
@@ -1087,17 +1022,22 @@ perl -ne '/^#/o && next; /^\s+$/o && next;
 
 \subsubsctn{Projecting HSPs into SRs}
 
-<<Homology: >>=
+<<STEPS(HsGPa*MmPHa WUTBLASTX): project HSPs into SRs>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   PROJECTING_HSPs
+#># STEP_DESC Projecting HSPs into SRs
+#>#         : (Hsapiens GP assembly against Mmusculus Phusion assembly).
+#># STEP_PATH sr
+#># STEP_XID  $<STEP{.}{PARSING_TBLASTX}{STEP_XID}>
+#># STEP_IDIR $JOBDIR/$<STEP{.}{PARSING_TBLASTX}{STEP_PATH}>
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Projecting HSPs into SRs
-#
-IDIR="$HUMUS/$CHR/tblastx/$XID/hsp" ;
-ODIR="$HUMUS/$CHR/tblastx/$XID/sr" ;
-#
-CheckDirs $ODIR ;
-#
-BLAST2GFF="/projects/bin/blast2gff";
-$BLAST2GFF -g $IDIR/$CHR.gff > $ODIR/$CHR.gff ;
+#<# IDIR="$HUMUS/$CHR/tblastx/$XID/hsp" ;
+#<# ODIR="$HUMUS/$CHR/tblastx/$XID/sr" ;
+#<# CheckDirs $ODIR ;
+$BIN/blast2gff -g $IDIR/$CHR.gff > $ODIR/$CHR.gff ;
 #
 gawk '
   BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
@@ -1111,6 +1051,7 @@ gawk '
   }
 ' $CHR $ODIR/$CHR.gff > $ODIR.report ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 
 \chklst{
@@ -1120,13 +1061,22 @@ gawk '
 
 \subsubsctn{Evaluating SRs versus annotation}
 
-<<Homology: >>=
+<<STEPS(HsGPa*MmPHa WUTBLASTX): evaluating SRs>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   EVALUATING_SRs
+#># STEP_DESC Evaluating SRs versus different annotations
+#>#         : (Hsapiens GP assembly against Mmusculus Phusion assembly).
+#># STEP_PATH eval
+#># STEP_XID  $<STEP{.}{PARSING_TBLASTX}{STEP_XID}>
+#># STEP_IDIR $JOBDIR/$<STEP{.}{PROJECTING_HSPs}{STEP_PATH}>
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Evaluation of SRs
+#<# IDIR="$HUMUS/$CHR/tblastx/$XID/sr" ;
+#<# ODIR="$HUMUS/$CHR/tblastx/$XID/eval" ;
 #
-IDIR="$HUMUS/$CHR/tblastx/$XID/sr" ;
-ODIR="$HUMUS/$CHR/tblastx/$XID" ;
-#
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 
 \chklst{
@@ -1141,108 +1091,6 @@ ODIR="$HUMUS/$CHR/tblastx/$XID" ;
 
 \subsctn{Initialization}
 
-\subsubsctn{Scripts: Running evaluation for gene-prediction}
-
-<<tangling: perl scripts>>=
-notangle -R"runeval.pl" $WORK/$nwfile.nw | cpif $BIN/runeval.pl ;
-is_exec $BIN/runeval.pl ;
-@ 
-<<runeval.pl>>=
-<<PERL shebang>>
-# Running evaluation by chromosome.
-#
-# USAGE: runeval.pl chromosome 
-#
-<<PERL strict pragma + info>>
-my $PROG = 'runeval.pl';
-#
-
-#
-## MAIN
-open(FSHRT,"> ");
-open(FLONG,"> ");
-
-&print_file_header(\*FSHRT,);
-&print_file_header(\*FLONG,);
-exit(0);
-
-#
-## SUBS
-sub print_file_header() {
-    my ($fh,$prog,$chr,$run,$outname,$gver) = ;
-    print $fh <<"EOTXT";
-### 
-### EVALUATION of $prog RESULTS on CHR $chr ($run)
-###
-### $outname
-###
-### $USER - $DATE 
-###
-### $gver
-###
-EOTXT
-} # print_file_header
-@ 
-
-
-\subsubsctn{Scripts: Re-scoring SRs}
-
-<<tangling: perl scripts>>=
-notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
-is_exec $BIN/getHSPSR.pl ;
-@ 
-<<getHSPSR.pl>>=
-<<PERL shebang>>
-# Re-scoring SRs to produce HSP-SRs for SGP homology.
-#
-# USAGE: getHSPSR.pl "chrname" < SR_file.gff > HSP-SR_file.gff > stdout.report
-#
-<<PERL strict pragma + info>>
-my $PROG = 'getHSPSR.pl';
-#
-my $chr = shift;
-my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
-my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
-          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
-                     "all" => 8,            "sum" => [ (0) x 9 ] );
-my $HSPminLEN = 1; # $ori + $HSPminLEN - 1 ==> minimum length is 1 nucleotide
-my $S_CUTOFF = 26;
-my $SCF = 0; # substract to tblastx scores S_CUTOFF - SCF
-my $DSC = $S_CUTOFF - $SCF;
-my $SHSP  = 0;    # SHSP=6 # shrink hsp by $SHSP
-my $WTBX  = 0.19; # weigth of tblastx score
-my $WTBXF = 0.30; # weigth of tblastx score
-my $WTBXI = 0.20; # weigth of tblastx score
-my $WTBXT = 0.30; # weigth of tblastx score
-while (<STDIN>) {
-    my @l;
-    next if /^#/o;
-    next if /^\s*$/o;
-    chomp;
-    @l = split /\s+/og, $_;
-    next unless $l[$sco] > $S_CUTOFF;
-    $l[$sco] = ($l[$sco] - $DSC) * $WTBX;
-    $l[$ori] += $SHSP;
-    $l[$end] -= $SHSP;
-    next if $l[$end] < ($l[$ori] + $HSPminLEN - 1);
-    print STDOUT join("\t",@l)."\n";
-    $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
-}; # while
-$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
-$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
-$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
-print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
-             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse.\n";
-foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
-   printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
-}; # foreach
-#
-exit(0);
-@
-
-
-\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \subsctn{Gene Prediction: {\gnid}} %%%%%%%%%%%%%%%%%%%%%%
 
 \whtlst{
@@ -1250,6 +1098,23 @@ exit(0);
 \item Remember to run [[/projects/sgp/src/geneid_v1.1]] 
 \item ...
 }
+
+<<JOBheader: Running GENEID standard>>=
+####>#########>#######################<########################################<#
+#># JOB_ID    GENEID_STD
+#># JOB_DESC  Running "geneid" on unmasked H.sapiens UCSC Golden Path 
+#>#        :  assembly sequences.
+#># JOB_PATH  geneid
+#># JOB_XID   20020225
+#># JOB_FILE  ${LIBSTEP}/geneid.job
+#># END_OF_JOB ##################################################################
+@ 
+
+<<JOBS: Running GENEID standard>>=
+<<STEPS(geneid std): Running geneid on raw sequences>>
+<<STEPS(geneid std): Processing geneid output>>
+<<STEPS(geneid std): Evaluating geneid results>>
+@ 
 
 <<GENEID: >>=
 #
@@ -1266,14 +1131,21 @@ for c in hsp-sr out gff gtf2 cds prot logs tmp ;
 \subsubsctn{Running {\gnid} (without homology)}
 
 
-<<GENEID: >>=
+<<STEPS(geneid std): Running geneid on raw sequences>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   RUNNING_GENEID
+#># STEP_DESC Running geneid (without homology) on Hsapiens sequences from
+#>#         : Golden Path assembly.
+#># STEP_PATH out
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/geneid/$XID
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Running geneid without homology
-#
-GNID="/projects/sgp/src/geneid_v1.1" ;
-     # binaries, scripts and params in SGP2
-GENEID="$GNID/bin/geneid" ; # geneid v1.1
-PARAM="$GNID/param/human3iso.param" ;
+#<# 
+GENEID="$SRC/geneid_v1.1/bin/geneid" ; # geneid v1.1
+PARAM="$SRC/geneid_v1.1/param/human3iso.param" ;
 EW=0 ; # add to exon weigth
 #
 # ISEQ="$HSAP/chromFaMasked/$CHRNUM/$CHR.fa.masked" ; 
@@ -1289,6 +1161,7 @@ IDIR="$HUMUS/$CHR/geneid/$XID/" ;
   } 2> $IDIR/logs/$CHR ;
 #   } 2>&1 | tee $HUMUS/logs/geneid_sgp.$locus ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @ 
 
 \chklst{
@@ -1297,11 +1170,18 @@ IDIR="$HUMUS/$CHR/geneid/$XID/" ;
 
 \subsubsctn{Processing output for {\gnid} (without homology)}
 
-<<GENEID: >>=
+<<STEPS(geneid std): Processing geneid output>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   GENEID_OUTPUT
+#># STEP_DESC Processing geneid format from geneid output (without homology).
+#># STEP_PATH gff
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/geneid/$XID
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Processing geneid format from geneid output (without homology)
-#
-IDIR="$HUMUS/$CHR/geneid/$XID" ;
+#<# IDIR="$HUMUS/$CHR/geneid/$XID" ;
 #
 geneid_raw2GFF $IDIR $IDIR/out/$CHR ;
 #
@@ -1314,6 +1194,7 @@ ls -1 $IDIR/gff/ | egrep "^$CHR" | \
 #
 get_geneid_genes $IDIR/gff/$CHR > $IDIR/out.gene_list ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 %$
 
@@ -1324,17 +1205,25 @@ get_geneid_genes $IDIR/gff/$CHR > $IDIR/out.gene_list ;
 
 \subsubsctn{Evaluation of {\gnid} predictions (without homology)}
 
-<<GENEID: >>=
+<<STEPS(geneid std): Evaluating geneid results>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   GENEID_EVALUATION
+#># STEP_DESC Evaluation of geneid predictions (without homology).
+#># STEP_PATH evaluation
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/geneid/$XID
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Evaluation of geneid predictions (without homology)
-#
-IDIR="$HUMUS/$CHR/geneid/$XID" ;
+#<# IDIR="$HUMUS/$CHR/geneid/$XID" ;
 #
 # run_evaluation #chrom program param       prog_results_dir \
 #                annotation_dir           testset  lenght
 run_evaluation   $CHR   geneid  $XID \
    $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo 47662662;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 
 \chklst{
@@ -1353,6 +1242,26 @@ run_evaluation   $CHR   geneid  $XID \
 \item Run {\sgp} with homology plus evidences, then evaluate results.
 }
 
+<<JOBheader: SGP with HSAPgpa x MMUSpha homology>>=
+####>#########>#######################<########################################<#
+#># JOB_ID    SGP_HSAPgpa_MMUSpha_TBX
+#># JOB_DESC  Running "SGP" on unmasked H.sapiens UCSC Golden Path 
+#>#        :  assembly sequences, using TBLASTX homology results as
+#>#        :  homology evidences once they have been projected into SRs.
+#># JOB_PATH  sgp
+#># JOB_XID   20020225
+#># JOB_FILE  ${LIBSTEP}/sgp.job
+#># END_OF_JOB ##################################################################
+@ 
+
+<<JOBS: SGP with HSAPgpa x MMUSpha homology>>=
+<<STEPS(SGP HSAPgpa x MMUSpha): Re-scoring SRs>>
+<<STEPS(SGP HSAPgpa x MMUSpha): Auxiliarly files>>
+<<STEPS(SGP HSAPgpa x MMUSpha): Running SGP>>
+<<STEPS(SGP HSAPgpa x MMUSpha): Processing SGP results>>
+<<STEPS(SGP HSAPgpa x MMUSpha): Evaluating SGP results>>
+@ 
+
 <<SGP: >>=
 #
 # Initialization
@@ -1367,15 +1276,24 @@ for c in hsp-sr out gff gtf2 cds prot logs tmp ;
 
 \subsubsctn{Re-scoring SRs}
 
-<<SGP: >>=
+<<STEPS(SGP HSAPgpa x MMUSpha): Re-scoring SRs>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   RE-SCORING_SRs
+#># STEP_DESC Re-scoring SRs to produce HSP-SRs
+#>#         : (Hsapiens GP assembly against Mmusculus Phusion assembly).
+#># STEP_PATH hsp-sr
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/tblastx/$XID/sr
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Re-scoring SRs to produce HSP-SRs
-#
-IDIR="$HUMUS/$CHR/tblastx/$XID/sr" ;
-ODIR="$HUMUS/$CHR/sgp/$XID/hsp-sr" ;
+#<# IDIR="$HUMUS/$CHR/tblastx/$XID/sr" ;
+#<# ODIR="$HUMUS/$CHR/sgp/$XID/hsp-sr" ;
 #
 $BIN/getHSPSR.pl $CHR < $IDIR/$CHR.gff > $ODIR/$CHR.gff 2> $ODIR.report ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 %$
 
@@ -1385,12 +1303,19 @@ $BIN/getHSPSR.pl $CHR < $IDIR/$CHR.gff > $ODIR/$CHR.gff 2> $ODIR.report ;
 
 \subsubsctn{Preparing auxiliarly files}
 
-<<SGP: >>=
+<<STEPS(SGP HSAPgpa x MMUSpha): Auxiliarly files>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   AUX_FILES
+#># STEP_DESC Preparing auxiliarly files: CHR.termini
+#># STEP_PATH tmp
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/tblastx/$XID/sr
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Preparing auxiliarly files: CHR.termini
-#
-ODIR="$HUMUS/$CHR/sgp/$XID/tmp" ;
-SDIR="$HUMUS/$CHR/annotation/$HSAPID" ;
+#<# ODIR="$HUMUS/$CHR/sgp/$XID/tmp" ;
+LEN="$HUMUS/$CHR/annotation/$HSAPID/length" ;
 #
 perl -e '
   use strict;
@@ -1409,8 +1334,9 @@ perl -e '
   print STDOUT join("\t", $chr, qw/ force cap  -2  0 . + 0 / )."\n";
   print STDOUT join("\t", $chr, qw/ force poly /,
                         ($SEQlen{$chr} - 1) x 2, qw/ . + 0/ )."\n";
-' $CHR $SDIR/length > $ODIR/$CHR.termini ;
+' $CHR $LEN > $ODIR/$CHR.termini ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 %$
 
@@ -1420,14 +1346,22 @@ perl -e '
 
 \subsubsctn{Running {\sgp} ({\gnid} with homology)}
 
-<<SGP: >>=
+<<STEPS(SGP HSAPgpa x MMUSpha): Running SGP>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_HSAPgpa_MMUSpha
+#># STEP_DESC Running geneid on Hsapiens sequences from Golden Path assembly
+#>#         : with homology evidences taken from Mmusculus Phusion assembly.
+#># STEP_PATH out
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/sgp/$XID/
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Running geneid with homology
+#<# 
 #
-SGP2="/projects/sgp/src/geneid_v1.1-sgp" ;
-     # binaries, scripts and params in SGP2
-GENEID="$SGP2/bin/geneid" ; # geneid v1.1-sgp
-PARAM="$SGP2/param/human3iso.param.sgp" ;
+GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
+PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
 EW=0 ; # add to exon weigth
 #
 # ISEQ="$HSAP/chromFaMasked/$CHRNUM/$CHR.fa.masked" ; 
@@ -1445,6 +1379,7 @@ HOMOLOGY="$HUMUS/$CHR/sgp/$XID/hsp-sr/$CHR.gff" ;
   } 2> $IDIR/logs/$CHR ;
 #   } 2>&1 | tee $HUMUS/logs/geneid_sgp.$locus ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @ 
 
 \chklst{
@@ -1453,11 +1388,18 @@ HOMOLOGY="$HUMUS/$CHR/sgp/$XID/hsp-sr/$CHR.gff" ;
 
 \subsubsctn{Processing output for {\sgp} (with homology)}
 
-<<SGP: >>=
+<<STEPS(SGP HSAPgpa x MMUSpha): Processing SGP results>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_OUTPUT
+#># STEP_DESC Processing geneid format from sgp output (with homology).
+#># STEP_PATH gff
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/geneid/$XID
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Processing geneid format from sgp output (with homology)
-#
-IDIR="$HUMUS/$CHR/sgp/$XID" ;
+#<# IDIR="$HUMUS/$CHR/sgp/$XID" ;
 #
 geneid_raw2GFF $IDIR $IDIR/out/$CHR ;
 #
@@ -1470,6 +1412,7 @@ ls -1 $IDIR/gff/ | egrep "^$CHR" | \
 #
 get_geneid_genes $IDIR/gff/$CHR > $IDIR/out.gene_list ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 %$
 
@@ -1480,13 +1423,21 @@ get_geneid_genes $IDIR/gff/$CHR > $IDIR/out.gene_list ;
 
 \subsubsctn{Evaluation of {\sgp} predictions (with homology)}
 
-<<SGP: >>=
+<<STEPS(SGP HSAPgpa x MMUSpha): Evaluating SGP results>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_EVALUATION
+#># STEP_DESC Evaluation of SGP predictions (geneid with homology).
+#># STEP_PATH evaluation
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR $HUMUS/$CHR/geneid/$XID
+#># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_CODE   --------------------------------------------------------------#<#
 #
-# Evaluation of SGP predictions (with homology)
-#
-IDIR="$HUMUS/$CHR/sgp/$XID" ;
+#<# IDIR="$HUMUS/$CHR/sgp/$XID" ;
 #
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 
 \chklst{
@@ -1936,6 +1887,145 @@ IDIR="$HUMUS/$CHR/sgp+/$XID" ;
 #
 @
 
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Visualizing results}
+
+<<JOBheader: Visualizing Results with Apollo>>=
+####>#########>#######################<########################################<#
+#># JOB_ID    APOLLO_VIEWER
+#># JOB_DESC  Preparing all the files required to show the results on the Apollo
+#>#        :  genomic annotations browser. Apollo is a collaborative project 
+#>#        :  between the Berkeley Drosophila Genome Project (www.bdgp.org) and 
+#>#        :  Ensembl (www.ensembl.org). 
+#>#        :  URL: http://www.ensembl.org/apollo/
+#># JOB_PATH  apollo
+#># JOB_XID   20020225
+#># JOB_FILE  ${LIBSTEP}/apollo.job
+#># END_OF_JOB ##################################################################
+@ 
+
+<<JOBS: Visualizing Results with Apollo>>=
+<<STEPS(Apollo Browser): >>
+@ 
+
+\subsctn{Visualizing annotations with {\apo}}
+
+\subsubsctn{Preparing GFF files for {\apo}}
+
+<<STEPS(Apollo Browser): >>=
+@ 
+<<Visualizing: >>=
+#
+IDIR="$HUMUS/$CHR" ;
+ODIR="$IDIR/apollo" ;
+#
+CheckDirs $ODIR $ODIR/$XID ;
+#
+ODIR="$ODIR/$XID" ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $6=1; 
+          print $1,$2,$3,$4,$5,$6,$7,$8,$9;
+      }
+     ' $IDIR/annotation/$HSAPID/gaps/${CHR}.gff \
+     > $ODIR/${CHR}_gaps.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          print $1,$2,$3,$4,$5,$6,$7,$8,$9;
+      }
+     ' $IDIR/annotation/$HSAPID/repeats/${CHR}.gff \
+     > $ODIR/${CHR}_repeats.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $3="exon"; $6=1; print $0;
+      }
+     ' $IDIR/annotation/$HSAPID/refseq/${CHR}.gff \
+     > $ODIR/${CHR}_refseq.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $3="exon";
+          $6=1;
+          gsub(/ENST0+/,"ENST",$9);
+          print $0;
+      }
+     ' $IDIR/annotation/$HSAPID/ensembl/${CHR}.gff \
+     > $ODIR/${CHR}_ensembl.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $3="exon"; $6=1; print $0;
+      }
+     ' $IDIR/annotation/$HSAPID/genscan/${CHR}.gff \
+     > $ODIR/${CHR}_genscan.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $2="geneid";
+          $3="exon"; 
+          gsub(/chr.*_/,"",$9);
+          print $0;
+      }
+     ' $IDIR/geneid/$XID/gff/${CHR} \
+     > $ODIR/${CHR}_geneid.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $2="homology";
+          $3="hsp-sr";
+          $8=".";
+          print $0;
+      }
+     ' $IDIR/sgp/20020122/hsp-sr/${CHR}.gff \
+     > $ODIR/${CHR}_hsp-sr.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $2="sgp";
+          $3="exon"; 
+          gsub(/chr.*_/,"",$9);
+          print $0;
+      }
+     ' $IDIR/sgp/20020122/gff/${CHR} \
+     > $ODIR/${CHR}_sgp.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $2="homology+";
+          $3="hsp-sr"; 
+          $8=".";
+          print $0;
+      }
+     ' $IDIR/sgp+/20020212/hsp-sr/${CHR}.gff \
+     > $ODIR/${CHR}_hsp-sr+.gff ;
+#
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+          $2="sgp+";
+          $3="exon"; 
+          gsub(/chr.*_/,"",$9);
+          print $0;
+      }
+     ' $IDIR/sgp+/20020212/gff/${CHR} \
+     > $ODIR/${CHR}_sgp+.gff ;
+#
+cat $ODIR/${CHR}_gaps.gff    \
+    $ODIR/${CHR}_repeats.gff \
+    $ODIR/${CHR}_refseq.gff  \
+    $ODIR/${CHR}_ensembl.gff \
+    $ODIR/${CHR}_genscan.gff \
+    $ODIR/${CHR}_geneid.gff  \
+    $ODIR/${CHR}_hsp-sr.gff  \
+    $ODIR/${CHR}_sgp.gff     \
+    $ODIR/${CHR}_hsp-sr+.gff \
+    $ODIR/${CHR}_sgp+.gff    \
+  > $ODIR/all_${CHR}.gff
+#
+@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
@@ -1952,13 +2042,670 @@ IDIR="$HUMUS/$CHR/sgp+/$XID" ;
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
-\sctn{Auxiliarly Code}
+\sctn{Auxiliarly Perl Scripts}
+
+\subsctn{Annotation phase}
+
+\subsubsctn{Scripts: retrieving sequence names and nucleotide composition}
+
+<<tangling: perl scripts>>=
+notangle -R"getfastadesc.pl" $WORK/$nwfile.nw | cpif $BIN/getfastadesc.pl ;
+is_exec $BIN/getfastadesc.pl ;
+@ 
+
+<<getfastadesc.pl>>=
+<<PERL shebang>>
+# getfastadesc.pl
+#
+# USAGE:
+#   getfastadesc.pl chr_list.file fasta_files.dir > chr_seqs.list
+#
+# [chr_seqs.list] -> chr_id seq_id length date_file description
+#
+use strict;
+#
+use global;
+#
+# VARS
+$PROG = 'getfastadesc.pl';
+my ($chrlistfile,$ipath) = @ARGV;
+$ipath =~ s%/$%%o;
+my (@files,%seqs,@order);
+@@files = ();
+%seqs = ();
+@@order = ();
+#
+# MAIN
+&program_started($PROG);
+
+&load_chr_tbl();
+&get_file_names();
+&parse_fasta_seqs();
+&output_results();
+
+&program_finished($PROG);
+exit(0);
+
+#
+# SUBS
+sub load_chr_tbl() {
+    open(CHR,"< $chrlistfile");
+    while (<CHR>) {
+        my $chr;
+        next if /^#/o;
+        next if /^\s*$/o;
+        chomp;
+        s/^\s+//o;
+        s/\s+$//o;
+        ($chr,undef) = split /\s+/og, $_, 2;
+        push @order, $chr;
+        @{ $seqs{$chr} } = ();
+    }; # while 
+    close(CHR);
+} # load_chr_tbl
+
+sub get_file_names() {
+    opendir(FA, $ipath);
+    @files = grep { /\.fa$/ } readdir(FA);
+    closedir(FA);
+} # get_file_names
+
+# 
+# we are going to assume that input filenames
+# have the following "chr"$chr"(.*).fa" (so we can assign
+# "automagically" which sequence correspond to each chromosome)
+# without having to set a table with the files corresponding to each chromosome
+#
+sub parse_fasta_seqs() {
+    foreach my $fl (@files) {
+        my ($thechr,$modtime,$ct,$cc,$go,@lengths);
+        ($thechr) = uc($fl) =~ /^CHR([\d]+|[XY]|NA|UL)/o;
+        $fl = "$ipath/$fl";
+        open(FAF,"< $fl") || do {
+            print STDERR "### Cannot open file \"$fl\" for chr \"$thechr\"...\n";
+            next;
+        };
+        print STDERR "### Working on chr \"$thechr\" file: \"$fl\"\n";
+        $modtime = &get_fh_mod_date(\*FAF);
+        $ct = 0;
+        $cc = ".";
+        $go = $F;
+        @lengths = ();
+        while (<FAF>) {
+            my ($id,$desc);
+            next if /^\s*$/o;
+            chomp;
+            m/^>/o && do {
+                $go = $T;
+                print STDERR "X";
+                &add_lengths_to_hash(\@lengths,\@{ $seqs{$thechr} });
+                ($id,$desc) = split /\s+/og, $_, 2;
+                $id =~ s/^>//o;
+                defined($desc) || ($desc = ".");
+                push @{ $seqs{$thechr} }, [ $id, undef, $modtime, $desc ];
+                next;
+            };
+            $go && do { &add_to_seq_length($_,\@lengths); };
+        } continue {
+            $ct++;
+            ($ct%10 == 0) && (print STDERR "$cc");
+            ($ct%1000 == 0) && (print STDERR " [$ct]\n");
+        }; # while <FAF>
+        ($ct%1000 != 0) && (print STDERR " [$ct]\n");
+        &add_lengths_to_hash(\@lengths,\@{ $seqs{$thechr} });
+        close(FAF);
+    }; # foreach $fl
+} # parse_fasta_seqs
+#  print STDERR "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
+#             (sprintf("%12s %12s %8s %8s %10s  %s\n",
+#                      "begin","end","#seqs","#errors","rand","file"));
+
+sub get_fh_mod_date() {
+    my $fh = shift;
+    my ($year,$month,$day,$hour,$min,$sec);
+    ($year,$month,$day,$hour,$min,$sec) = 
+            (localtime((stat $fh)[9]))[5,4,3,2,1,0];
+    # stat ->  [8] is access date,
+    #          [9] is modif date and
+    #         [10] is inode change date
+    return sprintf("%04d%02d%02d%02d%02d%02d",
+                   $year + 1900,$month + 1,$day,$hour,$min,$sec);
+} # get_fh_mod_date
+
+sub add_lengths_to_hash() {
+    my ($ref,$hsh) = @_;
+    (scalar(@{$ref}) == 7) && do {
+        $hsh->[$#{$hsh}][1] = $ref->[0];
+        $hsh->[$#{$hsh}][3] = sprintf("A:%d T:%d G:%d C:%d N:%d ?:%d Desc: ",
+                                      @{$ref}[1..6]).$hsh->[$#{$hsh}][3];
+        @{$ref} = ();
+    };
+} # add_lengths_to_hash
+
+sub add_to_seq_length() {
+    my ($l,$a,$t,$g,$c,$n,$x) = (0..6);
+    my ($str,$ary) = @_;
+    (scalar(@{$ary}) == 7) || do { @{$ary} = (0) x 7; };
+    $str = uc($str);
+    $str =~ s/^\s+//o;
+    $str =~ s/\s+$//o;
+	$ary->[$l] += length($str);
+    $ary->[$a] += scalar($str =~ s/A//og);
+    $ary->[$t] += scalar($str =~ s/T//og);
+    $ary->[$g] += scalar($str =~ s/G//og);
+    $ary->[$c] += scalar($str =~ s/C//og);
+    $ary->[$n] += scalar($str =~ s/N//og);
+    $ary->[$x] += length($str) > 0 ? length($str) : 0;
+} # add_to_seq_length
+   
+sub output_results() {
+    foreach my $cs (@order) {
+        defined($seqs{$cs}) || do {
+            print STDERR "## No sequences found for chromosome $cs !!!\n";
+            next;
+        };
+        scalar(@{ $seqs{$cs} }) > 1 && do {
+            @{ $seqs{$cs} } = map { $_->[1] }
+                              sort { $a->[0] cmp $b->[0] } # ascending alpha sort
+                              map { [ $_->[0], $_ ] } @{ $seqs{$cs} };
+        };
+        foreach my $sq (@{ $seqs{$cs} }) {
+            scalar(@{ $sq }) != 4 && do { 
+                # why must be only 4 elements there? -> see &add_lengths_to_hash
+                print STDERR "## Chromosome $cs: ".
+                             "Sequence $sq->[0] data set incomplete !!!\n";
+                next;
+            };
+            (defined($sq->[2]) && $sq->[2] > 0) || do {
+                print STDERR "## Chromosome $cs: ".
+                             "Sequence $sq->[0] has zero length !!!\n";
+                next;
+            };
+            print STDOUT "$cs @{$sq}\n";
+        }; # foreach $sq
+    }; # foreach $cs
+} # output_results
+@
+
+<<HIDE: >>=
+use db_Hsapiens;
+#
+################## MAIN
+&open_DB();
+&output_results();
+&close_DB();
+################## SUBS
+sub output_results() {
+    my ($ctbl,$cscode,@coflds,@cqflds,$stbl,@sfld,@soflds,@sqflds);
+    ($ctbl,$stbl) = qw( tb_chromosome tb_sequence );
+    @sfld = qw( 0 2 );
+    @coflds = qw( code );
+    @cqflds = qw( id );    
+    @soflds = qw( id chr length version descr );
+    foreach my $cs (@order) {
+        defined($seqs{$cs}) || do {
+            print STDERR "# No sequences found for chromosome $cs !!!";
+            next;
+        };
+        scalar(@{ $seqs{$cs} }) > 1 && do {
+            @{ $seqs{$cs} } = map { $_->[1] }
+                              sort { $a->[0] cmp $b->[0] } # ascending alpha sort
+                              map { [ $_->[0], $_ ] } @{ $seqs{$cs} };
+        };
+        foreach my $sq (@{ $seqs{$cs} }) {
+            print STDOUT "$cs @{$sq}\n";
+        }; # foreach $sq
+        $isDBon && do {
+            ($cscode) = &get_row_fields($ctbl, \@coflds, \@cqflds, [ $cs ]);
+            foreach my $sq (@{ $seqs{$cs} }) {
+                @sqflds = ( $sq->[0], $cscode, @{$sq}[1..3] );
+                &put_row_fields($stbl, \@sfld, \@soflds, \@sqflds);
+                print STDERR "$cs($cscode) @{$sq}[0,1,3]\n";
+            }; # foreach $sq
+        }; # $isDBon
+    }; # foreach $cs
+} # output_results
+@ 
+
+\subsubsctn{Scripts: Processing Golden Path annotation}
+
+<<tangling: perl scripts>>=
+notangle -R"gp2gff.pl" $WORK/$nwfile.nw | cpif $BIN/gp2gff.pl ;
+is_exec $BIN/gp2gff.pl ;
+@ 
+<<gp2gff.pl>>=
+<<PERL shebang>>
+# Transforms the goldenpath format to gff file
+#   retrieving gene(mrna)/utr/cds coordinates.
+#
+# USAGE: gp2gff.pl "chrname" "source" goldenpath_file > stdout
+#
+<<PERL strict pragma + info>>
+my $PROG = 'gp2gff.pl';
+#
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling /;
+
+my ($overlap,$exon_ori_fix,$exon_end_fix) = (0,0,0);
+$SIG{__WARN__} = sub {
+                       print STDERR "### UNKNOWN COMMAND-LINE OPTION: $_[0]\n";
+                     };
+GetOptions(
+           'no-overlap'        => \$overlap,
+           'exonori-nuclfix=i' => \$exon_ori_fix,
+           'exonend-nuclfix=i' => \$exon_end_fix,
+           ) || do {
+               print STDERR "### ERROR when PARSING ARGUMENTS\n";
+               exit(1);
+           };
+$SIG{__WARN__} = 'DEFAULT';
+
+my ($seqname,$source,$ifile) = @ARGV;
+my $c = 0;
+my @exary;
+my %laste = ();
+
+open(GPFILE,"< $ifile");
+while (<GPFILE>) {
+    next if /^#/o;
+    next if /^\s*$/o;
+    chomp;
+    $c++ if &process_gene($_);
+};
+close(GPFILE);
+print STDERR "### $c genes for $seqname were found in \"$ifile\".\n";
+exit(0);
+
+sub process_gene() {
+    my $rec = shift;
+    my $maxrec = 10; # refseq record structure
+    my ($gene,$seq,$strand,$mrna_ori,$mrna_end,
+        $cds_ori,$cds_end,$exons_num,$exons_ori,$exons_end) = (0..($maxrec - 1));
+    my (@l,@o,@e,$frame,$cdso,$cdse);
+    @l = split /\s+/og, $rec;
+    ((scalar(@l) >= $maxrec) && ($l[$seq] eq $seqname)) || return 0;
+    @o = split /,/og, $l[$exons_ori];
+    @e = split /,/og, $l[$exons_end];
+    # fixing displacement at exon coordinates (also at mrna and cds levels)
+    $exon_ori_fix == 0 || do {
+         $l[$mrna_ori] += $exon_ori_fix;
+         $l[$cds_ori]  += $exon_ori_fix;
+         @o = map { $_ += $exon_ori_fix } @o;
+    };
+    $exon_end_fix == 0 || do {
+         $l[$mrna_end] += $exon_end_fix;
+         $l[$cds_end]  += $exon_end_fix;
+         @e = map { $_ += $exon_end_fix } @e;
+    };
+    #
+    ($cdso,$cdse) = @l[$cds_ori,$cds_end];
+    # checking if gene overlaps previous one...
+    #   (we assume they are sorted by acceptor)
+    $overlap && do {
+        defined($laste{$l[$strand]}) && do {
+            ($laste{$l[$strand]} > $cdso) && return 0;
+		};
+        $laste{$l[$strand]} = $cdse;
+    }; # $overlap
+    #
+    &prt_gene(@l[$mrna_ori,$mrna_end,$strand,$gene,$exons_num]);
+    @exary = ();
+    $frame = 0;
+    for (my $j = 0; $j < $l[$exons_num]; $j++) {
+        my ($ori,$end,$p);
+        $p = ($l[$strand] eq '-') ? ($l[$exons_num] - ($j + 1)) : $j;
+        ($ori,$end) = ($o[$p],$e[$p]);
+        ($end < $cdso || $ori > $cdse) && do {
+            &prt_utr($ori,$end,@l[$strand,$gene]);
+            next;
+        };
+        ($ori < $cdso  && $end <= $cdse) && do {
+            &prt_utr($ori,($cdso - 1),@l[$strand,$gene]);
+            $frame = &prt_exon($cdso,$end,$frame,@l[$strand,$gene],$cdso,$cdse);
+            &swap_items(0) if ($l[$strand] eq '-');
+            next;
+        };
+        ($ori >= $cdso && $end > $cdse) && do {
+            $frame = &prt_exon($ori,$cdse,$frame,@l[$strand,$gene],$cdso,$cdse);
+            &prt_utr(($cdse + 1),$end,@l[$strand,$gene]);
+            &swap_items(0) if ($l[$strand] eq '-');
+            next;
+        };
+        ($ori < $cdso  && $end > $cdse) && do {
+            &prt_utr($ori,($cdso - 1),@l[$strand,$gene]);
+            $frame = &prt_exon($cdso,$cdse,$frame,@l[$strand,$gene],$cdso,$cdse);
+            &prt_utr(($cdse + 1),$end,@l[$strand,$gene]);
+            &swap_items(1) if ($l[$strand] eq '-');
+            next;
+        };
+        $frame = &prt_exon($ori,$end,$frame,@l[$strand,$gene],$cdso,$cdse);
+    };
+    ($l[$strand] eq '-') && (@exary = reverse @exary);
+    print STDOUT join('',@exary); # each line already has its own linefeed
+    return 1;
+} # process_gene
+# GFF: seqname source feat start end score strand frame group
+sub prt_gene() {
+    my @data = @_;
+    print STDOUT "# Gene: $data[3]   Strand: $data[2]   Exons: $data[4]\n";
+    print STDOUT join("\t",$seqname,$source,"mrna",@data[0,1],
+                      ".",$data[2],".",$data[3])."\n";
+} # prt_gene
+sub prt_utr() {
+    my @data = @_;
+    push @exary, join("\t",$seqname,$source,"utr",@data[0,1],
+                      ".",$data[2],".",$data[3])."\n";
+} # prt_utr
+sub prt_exon() {
+    my ($eo,$ee,$frm,$str,$grp,$co,$ce) = @_;
+    my $feat;
+#     my ($myfrm,$feat);
+    # remainder = ((exon_end - exon_ori + 1) + frame) mod 3;
+    # nextframe = (3 - ((exon_end - exon_ori + 1) + frame) mod 3) mod3;
+#   $myfrm = ($str eq '-') # exon frame is set to remainder for - strand
+#            ? ( (($ee - $eo + 1) + $frm) % 3 )
+#            : $frm;
+    $feat = &get_feat($eo,$ee,$str,$co,$ce);
+#   $feat =~ /Single/io && ($myfrm = 0); # single frame hack (specially for -)
+    push @exary, join("\t",$seqname,$source,$feat,$eo,$ee,
+                      ".",$str,$frm,$grp)."\n";
+#                       ".",$str,$myfrm,$grp)."\n";
+    return ( (3 - (($ee - $eo + 1) + $frm) % 3 ) % 3 ); # return nextframe
+} # prt_exon
+# gene structure GFF-feature names
+sub get_feat() {
+    my ($eo,$ee,$str,$co,$ce) = @_;
+    my ($fts,$fto,$fti,$fte);
+    ($fts,$fto,$fti,$fte) = ("Single","First","Internal","Terminal");
+    $str eq "-" && do {
+        ($fto,$fte) = ($fte,$fto);
+    };
+    ($eo == $co && $ee == $ce) && return $fts;
+    ($eo == $co) && return $fto;
+    ($ee == $ce) && return $fte;
+    return $fti;
+} # get_feat
+sub swap_items() {
+     shift || do {
+         ($exary[$#exary],$exary[$#exary-1]) =
+             ($exary[$#exary-1],$exary[$#exary]);
+         return;
+     };
+     ($exary[$#exary],$exary[$#exary-1],$exary[$#exary-2]) =
+         ($exary[$#exary-2],$exary[$#exary-1],$exary[$#exary]);
+     return;
+} # swap_items
+@ 
+
+
+\subsctn{Homology search phase}
+
+\subsubsctn{Scripts: Verifying SBP {\tbx} output for chromosome fragments}
+
+<<tangling: perl scripts>>=
+notangle -R"sbp-checkblastout.pl" $WORK/$nwfile.nw | \
+     cpif $BIN/sbp_checkblastout.pl ;
+is_exec $BIN/sbp_checkblastout.pl ;
+@ 
+<<sbp-checkblastout.pl>>=
+<<PERL shebang>>
+# Parsing tblastx files from SBP to check blast output
+#   contents for each fragment of the broken chromosomic sequence
+#
+# USAGE: sbp_checkblastout.pl "chrname" input_dir > stdout.report
+#
+<<PERL strict pragma + info>>
+my $PROG = 'sbp_checkblastout.pl';
+#
+my $chr = shift @ARGV;
+my $path = shift @ARGV;
+my @files = ();
+my ($c,$e,$z);
+opendir(TBX, $path);
+@files = map { [ $_ ,
+                 /^.*_(\d+)_(\d+)(?:\..*)?$/o,
+                 (/^.*_(\D+)_.*$/o || "-"),
+               ] } 
+         grep { /^[^\.]/ } readdir(TBX);
+closedir(TBX);
+@files = map { $_->[1] }
+         sort { $a->[0] <=> $b->[0] }
+         map { [ $_[0], $_ ] } @files;
+print STDOUT "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
+             (sprintf("%12s %12s %8s %8s %10s  %s\n",
+                      "begin","end","#seqs","#errors","rand","file"));
+$z = 0;
+foreach my $fl (@files) {
+    ($c,$e) = (0,0);
+    my $fname = "$path/$fl->[0]";
+    print STDERR "# Working on $fname\n";
+    open(TBXFL,"< $fname");
+    while (<TBXFL>) {
+        /^>/o   && ($c++,next);
+        /EXIT/o && ($e++);
+    }; # while
+    $c == 0 && ($z++);
+    close(TBXFL);
+    printf STDOUT "  %12s %12s %8s %8s %10s  %s\n",
+           ($fl->[1] + 1),($fl->[1] + $fl->[2]),$c,$e,$fl->[3],$fl->[0];
+}; # foreach
+print STDOUT "# $chr ran into ".(scalar @files).
+             " fragments, $z of which having NO HSPs.\n";
+#
+exit(0);
+@ 
+
+\subsubsctn{Scripts: Parsing SBP {\tbx} output to GFF}
+
+<<tangling: perl scripts>>=
+notangle -R"sbp-blast2gff.pl" $WORK/$nwfile.nw | \
+     cpif $BIN/sbp_blast2gff.pl ;
+is_exec $BIN/sbp_blast2gff.pl ;
+@ 
+<<sbp-blast2gff.pl>>=
+<<PERL shebang>>
+# Parsing tblastx files from SBP to get HSPs in GFF format
+#
+# USAGE: sbp_blast2gff.pl "chrname" length_file input_dir \
+#                          > gff_output  2> stdout.report
+#
+<<PERL strict pragma + info>>
+my $PROG = 'sbp_blast2gff.pl';
+#
+my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
+my @frame = ( 3, 1, 2 ); # frm 0 -> blastfrm 3
+                         # frm 1 -> blastfrm 1
+                         # frm 2 -> blastfrm 2
+my %SEQlen;
+my ($chr, $seqln, $input) = @ARGV;
+my @files = ();
+my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
+          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
+                     "all" => 8,            "sum" => [ (0) x 9 ] );
+my ($cf,$cr);
+open(FRGLEN, "< $seqln");
+while (<FRGLEN>) {
+    next if /^#/o;
+    next if /^\s*$/o;
+    chomp;
+    my @l = split /\s+/og, $_;
+    $SEQlen{$l[0]} = $l[1];
+}; # while
+close(FRGLEN);
+open(FRGLST, "< $input.report");
+while (<FRGLST>) {
+    next if /^#/o;
+    next if /^\s*$/o;
+    chomp;
+    s/^\s*//o;
+    my @l = split /\s+/og, $_;
+    ($l[2] > 0) && do {
+        push @files, [ $l[$#l], ($l[0] - 1) ];
+    };
+    # skipping fragments without HSPs
+}; # while
+close(FRGLST);
+#
+print STDERR "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
+             (sprintf("%8s %8s %8s  %s\n","#hsp","#hsp(+)","#hsp(-)","file"));
+system("/bin/rm","$input.parseblast.err");
+foreach my $fl (@files) {
+    $cf = $cr = 0;
+    my ($fname,$offset) = ("$input/$fl->[0]", $fl->[1]);
+    open(TBXFL, "parseblast --fullgff --full-scores --comments".
+                " --verbose --bit-score $fname 2>> $input.parseblast.err |");
+    my @l;
+    while (<TBXFL>) {
+        next if /^\s*$/o;
+        /^#/o && do {
+            print STDOUT $_;
+            next;
+        };
+        chomp;
+        @l = split /\s+/og, $_, 9;
+        $l[$seq] = $chr;
+        $l[$src] = "tblastx";
+        $l[$ftr] = "hsp";
+        $l[$ori] += $offset;
+        $l[$end] += $offset;
+        if ($l[$str] eq "-") {
+            $l[$frm] = $frame[(($SEQlen{$chr} - $l[$end] + 1) % 3)];
+            $cr++;
+        } else {
+            $l[$frm] = $frame[($l[$ori] % 3)];
+            $cf++;
+        };
+        print STDOUT join("\t", @l)."\n";
+        $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
+    }; # while
+    close(TBXFL);
+    printf STDERR "  %8s %8s %8s  %s\n",($cf+$cr),$cf,$cr,$fl->[0];
+}; # foreach
+$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
+$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
+$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
+print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
+             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse.\n";
+foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
+   printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
+}; # foreach
+#
+exit(0);
+@
+
+
+\subsctn{Gene-prediction phase}
+
+\subsubsctn{Scripts: Running evaluation for gene-prediction}
+
+<<tangling: perl scripts>>=
+notangle -R"runeval.pl" $WORK/$nwfile.nw | cpif $BIN/runeval.pl ;
+is_exec $BIN/runeval.pl ;
+@ 
+<<runeval.pl>>=
+<<PERL shebang>>
+# Running evaluation by chromosome.
+#
+# USAGE: runeval.pl chromosome 
+#
+<<PERL strict pragma + info>>
+my $PROG = 'runeval.pl';
+#
+
+#
+## MAIN
+open(FSHRT,"> ");
+open(FLONG,"> ");
+
+&print_file_header(\*FSHRT,);
+&print_file_header(\*FLONG,);
+exit(0);
+
+#
+## SUBS
+sub print_file_header() {
+    my ($fh,$prog,$chr,$run,$outname,$gver) = ;
+    print $fh <<"EOTXT";
+### 
+### EVALUATION of $prog RESULTS on CHR $chr ($run)
+###
+### $outname
+###
+### $USER - $DATE 
+###
+### $gver
+###
+EOTXT
+} # print_file_header
+@ 
+
+
+\subsubsctn{Scripts: Re-scoring SRs}
+
+<<tangling: perl scripts>>=
+notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
+is_exec $BIN/getHSPSR.pl ;
+@ 
+<<getHSPSR.pl>>=
+<<PERL shebang>>
+# Re-scoring SRs to produce HSP-SRs for SGP homology.
+#
+# USAGE: getHSPSR.pl "chrname" < SR_file.gff > HSP-SR_file.gff > stdout.report
+#
+<<PERL strict pragma + info>>
+my $PROG = 'getHSPSR.pl';
+#
+my $chr = shift;
+my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
+my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
+          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
+                     "all" => 8,            "sum" => [ (0) x 9 ] );
+my $HSPminLEN = 1; # $ori + $HSPminLEN - 1 ==> minimum length is 1 nucleotide
+my $S_CUTOFF = 26;
+my $SCF = 0; # substract to tblastx scores S_CUTOFF - SCF
+my $DSC = $S_CUTOFF - $SCF;
+my $SHSP  = 0;    # SHSP=6 # shrink hsp by $SHSP
+my $WTBX  = 0.19; # weigth of tblastx score
+my $WTBXF = 0.30; # weigth of tblastx score
+my $WTBXI = 0.20; # weigth of tblastx score
+my $WTBXT = 0.30; # weigth of tblastx score
+while (<STDIN>) {
+    my @l;
+    next if /^#/o;
+    next if /^\s*$/o;
+    chomp;
+    @l = split /\s+/og, $_;
+    next unless $l[$sco] > $S_CUTOFF;
+    $l[$sco] = ($l[$sco] - $DSC) * $WTBX;
+    $l[$ori] += $SHSP;
+    $l[$end] -= $SHSP;
+    next if $l[$end] < ($l[$ori] + $HSPminLEN - 1);
+    print STDOUT join("\t",@l)."\n";
+    $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
+}; # while
+$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
+$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
+$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
+print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
+             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse.\n";
+foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
+   printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
+}; # foreach
+#
+exit(0);
+@
+
+
+\sctn{Job Control System}
 
 \subsctn{Interacting with MySQL} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsubsctn{Building database}
 
 <<MySQL: Creating Database Report>>=
+#
+# Creating mysql DataBase (root)
+#
 shell>  mysql -u root -p   (u:user, p:passwd)
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -1990,6 +2737,11 @@ mysql> show databases;
 
 mysql> GRANT ALL on db_Hsapiens.* TO genome@localhost IDENTIFIED BY "xxxx" ;
 Query OK, 0 rows affected (0.10 sec)
+#
+# Accessing to mysql DataBase (user)
+#
+shell>  mysql -u genome -p db_Hsapiens 
+#
 @ 
 
 
@@ -2000,18 +2752,20 @@ USE db_Hsapiens ;
 /* Sequence related tables */
 CREATE TABLE tb_chromosome
 (
-  id      CHAR(2)      NOT NULL,
-  code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  version VARCHAR(30),
-  descr   TEXT
+  id          CHAR(2)      NOT NULL,
+  code        INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  version     VARCHAR(50),
+  descr       TEXT
 );
 CREATE TABLE tb_sequence
 (
-  id      VARCHAR(25)  NOT NULL,
-  code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  chr     INT UNSIGNED NOT NULL,
-  version CHAR(14)     NOT NULL, /* YYYYMMDDhhmmss */
-  descr   TEXT
+  id          VARCHAR(25)  NOT NULL,
+  code        INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  chr         INT UNSIGNED NOT NULL,
+  length      INT UNSIGNED NOT NULL,
+  version     CHAR(14)     NOT NULL, /* YYYYMMDDhhmmss */
+  composition VARCHAR(150) NOT NULL,
+  descr       TEXT
 );
 
 /* Process related tables */
@@ -2019,7 +2773,9 @@ CREATE TABLE tb_job
 (
   id      VARCHAR(25)  NOT NULL,
   code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  descr   TEXT
+  descr   TEXT,
+  path    VARCHAR(100) NOT NULL,
+  jxid    VARCHAR(25)  NOT NULL
 );
 CREATE TABLE tb_step
 (
@@ -2027,7 +2783,13 @@ CREATE TABLE tb_step
   code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   job     INT UNSIGNED NOT NULL,
   version VARCHAR(40), /* which program and its version is being run */
-  descr   TEXT
+  descr   TEXT,
+  path    VARCHAR(100) NOT NULL,
+  sxid    VARCHAR(25)  NOT NULL,
+  idir    VARCHAR(200) NOT NULL,
+  odir    VARCHAR(200) NOT NULL,
+  edir    VARCHAR(200) NOT NULL,
+  script  TEXT         NOT NULL
 );
 
 /* Execution related tables */
@@ -2035,7 +2797,8 @@ CREATE TABLE tb_status
 (
   id      VARCHAR(10)  NOT NULL,
   code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  descr   TEXT  
+  descr   TEXT,
+  color   VARCHAR(30)  NOT NULL
 );
 CREATE TABLE tb_exec
 (
@@ -2120,8 +2883,9 @@ The following files will serve to load rows on different tables with [[admin_db_
 #
 <<Version Control Id Tag>>
 #
-# Setting global version (must start with '>> ')
->> Golden Path 20010806
+# Setting global version (must start with '#># ')
+#
+#># Golden Path 20010806
 #
 # Record Format:
 #   <chr_id> <version> <description>
@@ -2156,7 +2920,8 @@ The following files will serve to load rows on different tables with [[admin_db_
 NA . .
 UL . .
 #
-@
+@  %%% MySQL: adm file - chrs
+
 <<MySQL: adm file - seqs>>=
 #
 # seqs.tbl
@@ -2166,12 +2931,13 @@ UL . .
 <<Version Control Id Tag>>
 #
 # Record Format:
-#   <chr_id> <sequence_id> <file_modifying_date> <description>
+#   <chr_id> <sequence_id> <length> <file_modifying_date> <description>
 # where:
 #   <file_modifying_date> is in YYYYMMDDhhmmss format
 #   <description> == . --> undef
 # 
-@
+@  %%% MySQL: adm file - seqs
+
 <<MySQL: adm file - jobs>>=
 #
 # jobs.tbl
@@ -2180,7 +2946,13 @@ UL . .
 #
 <<Version Control Id Tag>>
 #
-@
+<<JOBheader: Sequence Analysis>>
+<<JOBheader: HsapGPa x MmusPHa WUTBLASTX>>
+<<JOBheader: Running GENEID standard>>
+<<JOBheader: SGP with HSAPgpa x MMUSpha homology>>
+<<JOBheader: Visualizing Results with Apollo>>
+@  %%% MySQL: adm file - jobs
+
 <<MySQL: adm file - steps>>=
 #
 # steps.tbl
@@ -2189,7 +2961,8 @@ UL . .
 #
 <<Version Control Id Tag>>
 #
-@
+@  %%% MySQL: adm file - steps
+ 
 <<MySQL: adm file - status>>=
 #
 # status.tbl
@@ -2199,42 +2972,42 @@ UL . .
 <<Version Control Id Tag>>
 #
 # Record format:
-#   <process_ID>
+#   <process_ID> <color_name>
 #   <description-line_0>
 #    ...
 #   <description-line_n>
 #   // # this is the new record separator
 #
-TODO
+TODO     lightblue
 Process was not started yet... 
 //
-RUNNING
+RUNNING  steelblue
 Current step is being executed at this moment...
 //
-DONE
+DONE     seagreen
 This step has finished without errors...
 //
-CHECK
+CHECK    orange
 Process reported warnings...
 Verify its execution log but following steps are going to be run...
 //
-KILLED
+KILLED   salmon
 Program execution was interrupted by user... 
 Following steps are being skipped...
 //
-DIED
+DIED     red
 An error ocurred when running this step...
 Please, check error report that has been produced...
 //
-SKIPPED
+SKIPPED  gold
 This step has been skipped due to a unfinished previous step... 
 Please, check previous steps of the current job...
 //
-N/A
+N/A      lightgrey
 Job status is Not Available at this moment...
 Just wait to the next update round to see if connection problem persist...
 //
-@
+@  %%% MySQL: adm file - status
 
 <<tangling: mySQL param>>=
 # 
@@ -2273,40 +3046,44 @@ use strict;
 #
 use vars qw(
            @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
-           $mySQL_db $mySQL_host $mySQL_user $bpath $dbh $sth
-           $_verbose %status %chrs 
+           $mySQL_db $mySQL_host $mySQL_user $MySQLPAR $dbh $sth
+           $_verbose $isDBon %status %chrs %jobs
            );
 
 use Exporter;
 $VERSION = 1.00;
 @@ISA = qw(Exporter);
 @@EXPORT = qw(
-    $mySQL_db $mySQL_host $mySQL_user $_verbose
-    &open_DB &close_DB $bpath $dbh $sth
-    &get_tbl_hash
-    &get_DB_codes %status %chrs
+    $mySQL_db $mySQL_host $mySQL_user $_verbose $isDBon
+    &open_DB &close_DB $MySQLPAR $dbh $sth
+    &get_tbl_hash &get_row_fields &put_row_fields
+    &get_DB_codes %status %chrs %jobs
   );
 @@EXPORT_OK = qw(
     &connection_details &load_to_tbl_ifdef
-    &list_tables &show_tbl_desc
+    &list_tables &show_tbl_desc &count_tbl_elements
   );
 %EXPORT_TAGS = (
     AdminFunc => [ qw( &connection_details &load_to_tbl_ifdef
-                       &list_tables &show_tbl_desc
+                       &list_tables &show_tbl_desc &count_tbl_elements
                        ) ],
     );
 
-# use lib "/projects/sgp/bin/mySQL/param";
-$bpath = "/projects/sgp/bin/mySQL/param";
+# use lib "$LIBPERL";
 use db_Hsapiens_in;
 my $dsn = "DBI:mysql:database=$mySQL_db;host=$mySQL_host";
-
+#
 use DBI;
 #
 use global;
 #
+$MySQLPAR = $ENV{MySQLPAR} || do {
+        print STDERR $Messages{'ENVNOTDEF'}->("MySQLPAR");
+        exit(1);
+    };
 
-$_verbose = 1;
+$_verbose = $T;
+$isDBon = $F;
 
 sub connection_details() {
     print STDERR $Messages{'DBIHEADER'}->("DBI: Available DBD Drivers");
@@ -2327,6 +3104,7 @@ sub open_DB() {
     # put here error processing...
     print STDERR $Messages{'DBIMSG'}->(
         "","mySQL connection to \'$mySQL_db\' DB succesfully established.","");
+    $isDBon = $T;
 } # open_DB
 
 sub close_DB() {
@@ -2334,6 +3112,7 @@ sub close_DB() {
     # put here error processing...
     print STDERR $Messages{'DBIHEADER'}->(
         "mySQL connection to \'$mySQL_db\' DB has been closed.");
+    $isDBon = $F;
 } # close_DB
 
 sub list_tables() {
@@ -2364,38 +3143,76 @@ sub show_tbl_desc() {
     print $fhref $Messages{'DBIMSG'}->("",@strdesc);
 } # show_tbl_desc
 
+sub count_tbl_elements() {
+    my ($fhref) = @_;
+    print $fhref $Messages{'DBIHEADER'}->(
+        "Counting elements number for tables on '$mySQL_db' DB...");
+    my %tbls = ();
+    foreach my $t (&list_tables()) {
+        my $str = qq{
+            SELECT COUNT(*) FROM $t /* Counting elements for mySQL table */
+            };
+        print $fhref $Messages{'DBICMD'}->("$str");
+        $sth = $dbh->prepare($str);
+        $sth->execute();
+        $tbls{$t} = $sth->fetchrow_array();
+        $sth->finish;
+    }; # foreach $t
+    print $fhref $Messages{'DBIMSG'}->("");
+    foreach my $k (keys %tbls) {
+        print $fhref $Messages{'DBIMSG'}->(
+                         sprintf("---> %-15s : %s",$k,$tbls{$k}));
+    }; # foreach $k
+    print $fhref $Messages{'DBIMSG'}->("");
+} # count_tbl_elements
+
 sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allow multiple fields select... ;^D
-    my ($table, $field, $aryfld, $aryrow) = @_;
-    my ($ssth,$isth);
+    my ($table, $fields, $aryfld, $aryrow, $delflg) = @_;
+    my ($fldstr,$valstr,$filter,$dsth,$dstr,$ssth,$sstr,$isth,$istr);
+    defined($delflg) || ($delflg = $F);
     print STDERR $Messages{'DBIHEADER'}->(
-        "UPDATING FIELDS for TABLE \"$table\"");
-    my $fldstr = "(".join(', ',@{$aryfld}).")"; 
-    my $valstr = "VALUES(".join(',',('?') x scalar(@{$aryfld})).")"; 
-    my $sstr = qq{
-        SELECT COUNT($aryfld->[$field])
-               FROM $table
-               WHERE $aryfld->[$field]=?
+        "REBUILDING FIELDS for TABLE \"$table\"");
+    $fldstr = "(".join(', ',@{$aryfld}).")"; 
+    $valstr = "VALUES(".join(',',('?') x scalar(@{$aryfld})).")"; 
+    $filter = join("\n                 AND ",
+                   ( map { $aryfld->[$_].'=?' } @{ $fields } ));
+    $dstr = qq{
+        DELETE FROM $table
 		};
-    my $istr = qq{
+    $sstr = qq{
+        SELECT COUNT(*)        /* COUNT(Saryfld->[Sfield]) */
+               FROM $table
+               WHERE $filter   /* Saryfld->[Sfield]=Q */
+		};
+    $istr = qq{
         INSERT $table
                $fldstr
                $valstr /* adding new records */
         };
+    $delflg && do {        
+        print STDERR $Messages{'DBICMD'}->("$dstr");
+        $dsth = $dbh->prepare($dstr);
+        $dsth->execute();
+        $dsth->finish();
+        print STDERR $Messages{'DBIMSG'}->(
+            "All rows in \"$table\" were deleted...");
+    };
     print STDERR $Messages{'DBICMD'}->("$sstr$istr");
     $ssth = $dbh->prepare($sstr);
     $isth = $dbh->prepare($istr);
     foreach my $row (@{$aryrow}) {
         my $count;
-        $ssth->execute($row->[$field]);
+        my @trow = (map { $row->[$_] } @{ $fields });
+        $ssth->execute(@trow);
         $count = $ssth->fetchrow_array();
         ($count == 0) && do {
             print STDERR $Messages{'DBIMSG'}->(
-                "\"$row->[$field]\" not found in \"$table\": INSERTING...");
+                "\"@trow\" NOT found in \"$table\": INSERTING...");
             $isth->execute(@{$row});
             next;
 		};
         print STDERR $Messages{'DBIMSG'}->(
-            "\"$row->[$field]\" already defined in \"$table\": SKIPPING...");
+            "\"@trow\" already defined in \"$table\": SKIPPING...");
     }; # foreach $row 
     print STDERR $Messages{'DBIMSG'}->(
         "",(scalar (@{$aryrow}))." records were checked...","");
@@ -2418,30 +3235,131 @@ sub get_tbl_hash() {
     $ssth = $dbh->prepare($sstr);
     $ssth->execute();
     while (@ary = $ssth->fetchrow_array()) {
-        $$href{$ary[0]} = [ @ary[1..$aryfld_len] ];
+        %{ $href->{$ary[0]} } = map { $aryfld->[$_] => $ary[$_]
+                                      } (1..$aryfld_len);
     }; # while @ary
     print STDERR $Messages{'DBIMSG'}->(
         "",(scalar (keys %{$href}))." records were retrieved...","");
     $ssth->finish();
 } # get_tbl_hash
 
+sub get_row_fields() {
+    my ($table, $outflds, $queryflds, $queryvals) = @_;
+    my ($ssth,$sstr,$fldstr,$valstr,$q_len,@out);
+    # ensure that both arys ($queryflds & $queryvals)
+    #   have same length in calling function/script, and that are paired too...
+    $q_len = &min($#{ $queryflds }, $#{ $queryvals });
+    $fldstr = join(', ',@{$outflds});
+    $valstr = "";
+    for (my $i = 0; $i <= $q_len; $i++) {
+       $valstr .= "$queryflds->[$i] = ".($dbh->quote($queryvals->[$i]))." \n";
+	};
+    chomp($valstr);
+    $valstr = join('\n               AND ', (split /\n/og, $valstr));
+    print STDERR $Messages{'DBIHEADER'}->(
+        "RETRIEVING \"$fldstr\" ROW(s) from TABLE \"$table\"");
+    $sstr = qq{
+        SELECT $fldstr
+               FROM $table
+               WHERE $valstr
+		};
+    print STDERR $Messages{'DBICMD'}->("$sstr");
+    $ssth = $dbh->prepare($sstr);
+    $ssth->execute();
+    @out = $ssth->fetchrow_array();
+    $ssth->finish();
+    scalar(@out) > 0 || do {
+        print STDERR $Messages{'DBIMSG'}->(
+            "","NONE rows were selected, NONE fields were retrieved...","");
+        return ( undef );
+    };
+    print STDERR $Messages{'DBIMSG'}->(
+        "",scalar(@out)." fields were retrieved...","");
+    return @out;
+} # get_row_fields
+
 sub get_DB_codes() {
     my @sel_fields = ();
     #
     # Loading Status tables
     %status = ();
-    @sel_fields =  qw( id code descr );
+    @sel_fields =  qw( id code descr color );
     &get_tbl_hash(\%status, 'tb_status', \@sel_fields);
-#    print STDOUT (Data::Dumper->Dump([ \%status ],
-#                                  [ qw( *status ) ]));
+    print STDOUT (Data::Dumper->Dump([ \%status ],
+                                  [ qw( *status ) ]));
     #
     # Loading Chromosome tables
     %chrs = ();
     @sel_fields =  qw( id code version descr );
     &get_tbl_hash(\%chrs, 'tb_chromosome', \@sel_fields);
-#    print STDOUT (Data::Dumper->Dump([ \%chrs ],
-#                                  [ qw( *chrs ) ]));
+#     foreach my $key (keys %chrs) {
+#         @sel_fields =  qw( id code length version composition descr );
+#         &get_tbl_hash(\%chrs, 'tb_sequence', \@sel_fields);        
+#     };
+   print STDOUT (Data::Dumper->Dump([ \%chrs ],
+                                 [ qw( *chrs ) ]));
+    #
+    # Loading Job tables
+    %jobs = ();
+    @sel_fields =  qw( id code descr );
+    &get_tbl_hash(\%jobs, 'tb_job', \@sel_fields);
+#    print STDOUT (Data::Dumper->Dump([ \%jobs ],
+#                                  [ qw( *jobs ) ]));
 } # get_DB_codes
+
+sub put_row_fields() {
+    my ($table, $fields, $aryfld, $aryrow) = @_;
+    my ($q_len,$filter,$fldstr,$valstr,$setstr,
+        $usth,$ustr,$ssth,$sstr,$isth,$istr,@trow,$count);
+    print STDERR $Messages{'DBIHEADER'}->(
+        "UPDATING FIELDS for TABLE \"$table\"");
+    $q_len = &min($#{ $aryfld }, $#{ $aryrow });
+#    my @setstr = ();
+#    for (my $i = 0; $i <= $q_len; $i++) {
+#        push @setstr, $aryfld->[$i].'='.($dbh->quote($aryrow->[$i]));
+#	 };
+    $filter = join("\n                 AND ",
+                   ( map { $aryfld->[$_].'=?' } @{ $fields } ));
+    $fldstr = "(".join(', ',@{$aryfld}).")"; 
+    $valstr = "VALUES(".join(',',('?') x scalar(@{ $aryfld })).")";
+    $setstr = join(",\n                   ",
+                   ( map { $_.'=?' } @{ $aryfld } ));
+#    $setstr = join(",\n                   ",@setstr);
+    $sstr = qq{
+        SELECT COUNT(*)        /* COUNT(Saryfld->[Sfield]) */
+               FROM $table
+               WHERE $filter   /* Saryfld->[Sfield]=Q */
+		};
+    $istr = qq{
+        INSERT $table
+               $fldstr
+               $valstr /* adding new records */
+        };
+    $ustr = qq{
+        UPDATE $table
+               SET $setstr
+               WHERE $filter   /* Saryfld->[Sfield]=Q */
+		};
+    print STDERR $Messages{'DBICMD'}->("$sstr$istr$ustr");
+    $ssth = $dbh->prepare($sstr);
+    @trow = (map { $aryrow->[$_] } @{ $fields });
+    $ssth->execute(@trow);
+    $count = $ssth->fetchrow_array();   
+    $ssth->finish();
+    if ($count) {
+        print STDERR $Messages{'DBIMSG'}->(
+            "","UPDATING fields on selected record from \"$table\"...","");
+        $usth = $dbh->prepare($ustr);
+        $usth->execute(@{ $aryrow },@trow);
+        $usth->finish();
+	} else {
+        print STDERR $Messages{'DBIMSG'}->(
+            "","INSERTING new field on selected record from \"$table\"...","");
+        $isth = $dbh->prepare($istr);
+        $isth->execute(@{ $aryrow });
+        $isth->finish();
+    };
+} # put_row_fields
 
 1;
 @ 
@@ -2463,13 +3381,18 @@ is_exec $MySQLPAR/admin_db_Hsapiens.pl ;
 # admin_db_Hsapiens.pl
 #
 use strict;
-# use lib "/usr/local/molbio/share/libperl";
+# use lib "$LIBPERL";
 use db_Hsapiens qw( :DEFAULT :AdminFunc );
-# $bpath/$admfiles[$i].tbl where $bpath eq "/usr/local/molbio/share/mySQL"
+# $MySQLPAR/$admfiles[$i].tbl
 # my @admfiles = qw/ chrs seqs jobs steps status /;
 #
 use global;
 $PROG = 'admin_db_Hsapiens.pl';
+my (%PARAM, %tjobs); 
+$PARAM{LIBSTEP} = $ENV{LIBSTEP} || do {
+        print STDERR $Messages{'ENVNOTDEF'}->("MySQLPAR");
+        exit(1);
+    };
 
 %CmdLineOpts = (
         "version" => sub {
@@ -2489,10 +3412,13 @@ $PROG = 'admin_db_Hsapiens.pl';
 
 &listing_tables();
 
-&load_status_tbl("$bpath/status.tbl");
-&load_chromosome_tbl("$bpath/chrs.tbl");
+&load_status_tbl("$MySQLPAR/status.tbl");
+&load_chromosome_tbl("$MySQLPAR/chrs.tbl");
+&load_sequences_tbl("$MySQLPAR/seqs.tbl");
+&load_jobs_tbl("$MySQLPAR/jobs.tbl");
 
 &get_DB_codes();
+&count_tbl_elements(*STDERR);
 
 &close_DB();
 
@@ -2521,15 +3447,18 @@ sub load_status_tbl() {
             next if $l =~ /^\s*$/o;
             $l =~ s/^\s+//o;
             $l =~ s/\s+$//o;
-            defined($r[0]) || ($r[0] = $l, next);
-            $r[1] .= "$l\n";
+            defined($r[0]) || do {
+                ($r[0],$r[1]) = (split /\s+/o, $l, 2);
+                next;
+            };
+            $r[2] .= "$l\n";
         };
         push @rows, [ @r ];
     };
     close(IFILE);
-	my @flds = qw( id descr );
-    my ($tbl, $fld) = qw( tb_status 0 );
-    &load_to_tbl_ifdef($tbl, $fld, \@flds, \@rows);
+	my @flds = qw( id color descr );
+    my ($tbl, @fld) = qw( tb_status 0 );
+    &load_to_tbl_ifdef($tbl, \@fld, \@flds, \@rows);
 } # load_status_tbl
 sub load_chromosome_tbl() {
     my $ifile = shift;
@@ -2538,21 +3467,237 @@ sub load_chromosome_tbl() {
     open(IFILE,"< $ifile");
     while (<IFILE>) {
         my @f;
-        next if /^#/o;
         next if /^\s*$/o;
+        /^#/o && do {
+            /^#>#\s+(.*?)\s*$/o && ($gpver = $1);
+            next;
+        };
         chomp;
         s/^\s+//o;
         s/\s+$//o;
-        /^>>\s+\b(.*)$/o && ($gpver = $1,next);
         @f = split /\s+/og, $_, 3;
         ($f[1] eq '.' && $gpver ne '') && ($f[1] = $gpver);
         push @rows, [ @f ];
     };
     close(IFILE);
 	my @flds = qw( id version descr );
-    my ($tbl, $fld) = qw( tb_chromosome 0 );
-    &load_to_tbl_ifdef($tbl, $fld, \@flds, \@rows);
+    my ($tbl, @fld) = qw( tb_chromosome 0 );
+    &load_to_tbl_ifdef($tbl, \@fld, \@flds, \@rows);
 } # load_chromosome_tbl
+sub load_sequences_tbl() {
+    my $ifile = shift;
+    my ($ctbl,$cscode,@coflds,@cqflds,$stbl,@sfld,@soflds,@sqflds);
+    ($ctbl,$stbl) = qw( tb_chromosome tb_sequence );
+    @coflds = qw( code );
+    @cqflds = qw( id );    
+    @sfld = qw( 0 1 );
+    @soflds = qw( id chr length version composition descr );
+    @sqflds = ();
+    open(IFILE,"< $ifile");
+    while (<IFILE>) {
+        my @f;
+        next if /^\s*$/o;
+        next if /^#/o;
+        chomp;
+        s/^\s+//o;
+        s/\s+$//o;
+        @f = split /\s+/og, $_, 5;
+        (@f[4,5]) = split /\s+Desc:\s+/o, $f[4], 2;
+        ($cscode) = &get_row_fields($ctbl, \@coflds, \@cqflds, [ $f[0] ]);
+        @f[0,1] = ($f[1],$cscode);
+        push @sqflds, [ @f ];
+        printf STDERR "%s(%d) %s %s %s\n",@f[0..2,4,5];
+    };
+    close(IFILE);
+    foreach my $row (@sqflds) {
+        &put_row_fields($stbl, \@sfld, \@soflds, \@{ $row });
+    };
+#    my @flds = qw( id version descr );
+#    my ($tbl, @fld) = qw( tb_chromosome 0 );
+#    &load_to_tbl_ifdef($tbl, \@fld, \@flds, \@rows);
+} # load_sequences_tbl
+sub load_jobs_tbl() {
+    my $ifile = shift;
+    my ($jobcnt,$skipflg,%thsh,$ljob);
+    open(JFILE,"< $ifile");
+    $jobcnt = 0;
+    %tjobs = ();
+    %thsh = ();
+    $ljob = '';
+    $skipflg = $F;
+    while (<JFILE>) {
+        my ($name,$desc);
+        next unless /^#>#/o;
+        chomp;
+        (undef,$name,$desc) = split /\s+/o, $_, 3;
+        $desc =~ s/\s*$//o;
+        ($name eq 'END_OF_JOB') && do {
+            $skipflg || do {
+                foreach my $k (keys %thsh) {
+                    $tjobs{$ljob}{$k} = $thsh{$k};
+                };
+                &replace_link_holders(\%{ $tjobs{$ljob} },$ljob,undef,'JOB_XID');
+                %{ $tjobs{$ljob}{'JOB_STEPS'} } = ();
+                $tjobs{$ljob}{'JOB_FILE'} =~ s{(\$\{(.+?)\})}
+                                              { defined($PARAM{$2})
+                                                ? $PARAM{$2}
+                                                : $1
+                                                }ogex;
+                &load_step_tbl($ljob,$tjobs{$ljob}{'JOB_FILE'},
+                                 \%{ $tjobs{$ljob}{'JOB_STEPS'} });
+            };
+            %thsh = ();
+            $skipflg = $F;
+            next;
+        };
+        next if $skipflg;
+        ($name eq 'JOB_ID') && do {
+            $ljob = $desc;
+            defined($tjobs{$ljob}) || do {
+                %{ $tjobs{$ljob} } = ();
+                $tjobs{$ljob}{'JOB_CNT'} = $jobcnt++;
+                next;
+            };
+            $skipflg = $T;
+            next;
+        }; 
+        ($name eq ':') && do {
+            $thsh{'JOB_DESC'} .= " $desc";
+            next;
+        };
+        $thsh{$name} = $desc;
+    };
+#    print STDOUT (Data::Dumper->Dump([ \%tjobs ],
+#                                  [ qw( *tjobs ) ]));
+    close(JFILE);
+    &load_job_steps_tbl(\%tjobs);
+} # load_jobs_tbl
+sub load_step_tbl() {
+    my ($sjob,$ifile,$href) = @_;
+    print STDERR ">>>>>>>>>>>>>> $ifile\n";
+    my ($stpcnt,$skipflg,$codeflg,%thsh,$lstep);
+    open(SFILE,"< $ifile");
+    $stpcnt = 0;
+    %thsh = ();
+    $lstep = '';
+    $skipflg = $codeflg = $F;
+    while (<SFILE>) {
+        my ($name,$desc,$go);
+        $go = /^#>#/o ? $T : $F;
+        next unless ($go || $codeflg);
+        ($codeflg && !$go) && do {
+            $href->{$lstep}{'STEP_CODE'} .= "$_";
+            next;
+        };
+        chomp;
+        (undef,$name,$desc) = split /\s+/o, $_, 3;
+        $desc =~ s/\s*$//o;
+        ($name eq 'END_OF_STEP') && do {
+            $skipflg || do {
+                foreach my $k (keys %thsh) {
+                    $href->{$lstep}{$k} = $thsh{$k};
+                };
+                &replace_link_holders(\%{ $href->{$lstep} },$sjob,$lstep,
+                    'STEP_XID','STEP_IDIR','STEP_ODIR','STEP_EDIR','STEP_CODE');
+#                print STDERR join("\n", 
+#                           ( map { '#>>> '.$_ }
+#                                 ( split /\n/o, $href->{$lstep}{'STEP_CODE'} )
+#                             ) )."\n".(':'x40)."\n"; 
+            };
+            %thsh = ();
+            $skipflg = $codeflg = $F;
+            next;
+        };
+        next if $skipflg;
+        ($name eq 'STEP_ID') && do {
+            $lstep = $desc;
+            defined($href->{$lstep}) || do {
+                %{ $href->{$lstep} } = ();
+                $href->{$lstep}{'STEP_CNT'} = $stpcnt++;
+                next;
+            };
+            $skipflg = $T;
+            next;
+        }; 
+        ($name eq ':') && do {
+            $thsh{'STEP_DESC'} .= " $desc";
+            next;
+        };
+        ($name eq 'STEP_CODE') && do {
+            $codeflg = $T;
+            next;
+        };
+        $thsh{$name} = $desc;
+    };
+    close(SFILE);
+} # load_step_tbl
+sub replace_link_holders() {
+    my ($href,$kjob,$kstp,@chk_keys) = @_;
+    foreach my $k (@chk_keys) {
+        $href->{$k} =~ s{\$\<(.*?){(.*?)}{(.*?)}(?:{(.*?)})?\>}
+            { &get_link_vals($kjob, $kstp, $1, $2,
+                             (defined($4) ? ($4, $3) : ($3, undef))); }gex;
+    };
+} # replace_link_holders
+sub get_link_vals() {
+    my ($j,$s,$v,$vj,$vv,$vs) = @_;
+    my $out;
+    $vj eq '.' && ($vj = $j);
+    defined($vs) && do {
+        $vs eq '.' && ($vs = $s);
+        $out = $tjobs{$vj}{'JOB_STEPS'}{$vs}{$vv};
+        print STDERR "---> $v : $out\n";
+        return $out;
+    };
+    $out = $tjobs{$vj}{$vv};
+    print STDERR "---> $v : $out\n";
+    return $out;
+} # get_link_vals
+sub load_job_steps_tbl() {
+    my $href = shift;
+    my (@rows,@flds,$tbl,@fld,@oflds,@qryflds,@qryvals);
+    # load jobs
+    @rows = map  { $_->[1] }
+            sort { $a->[0] <=> $b->[0] }
+            map  { [ $href->{$_}{'JOB_CNT'},
+                     [ $_, $href->{$_}{'JOB_XID'},
+                           $href->{$_}{'JOB_PATH'},
+                           $href->{$_}{'JOB_DESC'} ]
+                   ] }
+            (keys %{ $href });
+	@flds = qw( id jxid path descr );
+    ($tbl, @fld) = qw( tb_job 0 );
+    &load_to_tbl_ifdef($tbl, \@fld, \@flds, \@rows, $T);
+    # load steps
+    @rows = ();
+    @oflds = qw( code );
+    @qryflds = qw( id );
+    foreach my $k (keys %{ $href }) {
+        my (@trows,$jcode,$tref);
+        @qryvals = ( $k );
+        ($jcode) = &get_row_fields($tbl, \@oflds, \@qryflds, \@qryvals);
+        $tref = \%{ $href->{$k}{'JOB_STEPS'} };
+        @trows = map  { $_->[1] }
+                 sort { $a->[0] <=> $b->[0] }
+                 map  { [ $tref->{$_}{'STEP_CNT'},
+                          [ $_, $jcode,
+                            $tref->{$_}{'STEP_XID'},
+                            $tref->{$_}{'STEP_PATH'},
+                            $tref->{$_}{'STEP_IDIR'},
+                            $tref->{$_}{'STEP_ODIR'},
+                            $tref->{$_}{'STEP_EDIR'},
+                            $tref->{$_}{'STEP_DESC'},
+                            $tref->{$_}{'STEP_CODE'} ]
+                        ] }
+                 (keys %{ $tref });
+        push @rows, @trows;
+    }; # foreach my $k
+    @flds = qw( id job sxid path idir odir edir descr script );
+    ($tbl, @fld) = qw( tb_step 0 1 );    
+    &load_to_tbl_ifdef($tbl, \@fld, \@flds, \@rows, $T);
+#   print STDOUT (Data::Dumper->Dump([ \@rows ],
+#                                 [ qw( *rows ) ]));
+} # load_jobs_tbl
 @ 
 
 
@@ -2571,16 +3716,30 @@ is_exec $BIN/stepper.pl ;
 <<PERL shebang>>
 # stepper.pl
 #
-# USAGE: stepper param_file step_0 ... step_n
+# USAGE:
+#  stepper.pl [ --chr  chr_0,...,chr_c                --chr  chr_cc        ]
+#             [ --seq  chr_c:seq_0,...,chr_c:seq_q    --seq  chr_c:seq_qq  ]
+#             [ --job  job_0,...,job_j                --job  job_jj        ]
+#             [ --step job_j:step_0,...,job_j:step_s  --step job_j:step_ss ]
+#               --param <param_file> 
+#               -- <jobs_file> 
 #
+# if no chr or seq are given then job is done for all seqs on every chr.
+# if no job or step are given then all steps in all jobs are done for each seq.
+# <param_file> contains all shell definitions to make child shells 
+#   runnable anywhere (exported variables, shell functions, ...).
+# jobs file 
 use strict;
+#
+<<Use Modules - Dumper>>
+<<stepper.pl: Use modules>>
 #
 use db_Hsapiens;
 #
 use global;
 $PROG = 'stepper.pl';
 
-# $bpath/$admfiles[$i].tbl where $bpath eq "/usr/local/molbio/share/sgp/mySQL"
+# $MySQLPAR/$admfiles[$i].tbl
 # my @admfiles = qw/ chrs seqs jobs steps status /;
 
 &init_signals();
@@ -2588,29 +3747,56 @@ $PROG = 'stepper.pl';
 
 #
 ## VARS
+my ($pre_code,$post_code);
+$pre_code = <<'+++EOPre+++';
+<<BASH shebang>>
+#
+### SCRIPT HEADER
+#
++++EOPre+++
+$post_code = <<'+++EOPre+++';
+#
+### SCRIPT TRAILER
+#
+TheEnd OK;
++++EOPre+++
+
+my %filter = ( 'CHR' => [], 'SEQ' => [], 'JOB' => [], 'STP' => [] );
+my $paramfile = '';
+( defined($ENV{WORK}) && 
+  ( -e $ENV{WORK}/.project_VARS && -r _ )
+  ) && ($paramfile = "$ENV{WORK}/.project_VARS");
 %CmdLineOpts = (
-    "version" => sub { 
-        print STDERR "#### Hi, you are running $PROG version 0.9alpha ...\n";
+    "c|chr=s"  => \@{ $filter{CHR} },
+    "q|seq=s"  => \@{ $filter{SEQ} },
+    "j|job=s"  => \@{ $filter{JOB} },
+    "s|step=s" => \@{ $filter{STP} },
+    "p|param=s" => \$paramfile,
+    "version"  => sub { 
+            print STDERR "#### Hi, you are running $PROG version 0.9alpha ...\n";
             exit(1);
-        }     
+        },
     );
+<<stepper.pl: forked childs related vars>>
 <<stepper.pl: global vars>>
 
 #
 ## MAIN
 &parse_cmdline();
-my $parfile = shift @ARGV;
-my @stepfls = @ARGV;
 &program_started($PROG);
 
-&get_param($parfile);
-&get_steps(@stepfls);
+&get_param($paramfile);
+my $stepfls = shift @ARGV;
+&get_steps($stepfls);
+
+&set_filter(\%filter);
 
 &open_DB();
-&get_DB_codes();
-&loop_through_steps();
+&get_DB_codes(); # sets %chr, $chr{}{seqs}, %job, $job{}{steps}, @chrs, @jobs
 
-while (!$skip_next) {};
+while (!$skip_next) {
+    &brown_dispatcher();
+};
 
 &close_DB();
 
@@ -2620,23 +3806,259 @@ exit(0);
 #
 ## SUBS
 <<stepper.pl: subs>>
+<<stepper.pl: job scheduling functions>>
 @
 
 <<stepper.pl: subs>>=
 sub get_param() {
+    my $ifile = shift;
+    open(PFL,"< $ifile");
+    while (<PFL>) {
+        next if /^\s*$/o;
+        $pre_code .= $_;
+    }; # while PFL
+    close(PFL);
 } # get_param
 @ 
+
+<<stepper.pl: subs>>=
+sub set_filter() {
+    my $href = shift;
+    foreach my $k (keys %{$href}) {
+        @{ $href->{$k} } = split(/,/,join(',',@{ $href->{$k} }));
+    };
+    # print STDERR (Data::Dumper->Dump([ \%{$href} ],
+    #                               [ qw( *{$href} ) ]));
+} # set_filter
+@ 
+
 <<stepper.pl: subs>>=
 sub get_steps() {
 } # get_steps
 @ 
 
-<<stepper.pl: subs>>=
-sub loop_through_steps() {
-} # loop_through_steps
+\subsubsctn{Forking child processes to local/remote machines}
+
+The [[&brown_dispatcher]] function requires a semaphore variable that controls how many childs were forked, so we can fork a new one once any of the current childs job has finished (no matter where...). We require the following package, just to have such variable shared among the running child processes.
+
+<<stepper.pl: Use modules>>=
+use IPC::Shareable; 
 @ 
+
+<<stepper.pl: job scheduling functions>>=
+sub brown_dispatcher() {
+    open(FHERR, "> $BASE/run.rpt");
+    print FHERR "### MAIN $gid ### BEGIN MAIN LOOP\n".
+                "### MAIN $gid ### SEMAPHORE: @semaphore\n";
+    my $pending_seqs = scalar(@seqs);
+    while ($pending_seqs > 0) { # loop through sequences
+        for ($sem = 0; $sem < $maxjobs; $sem++) {
+           $semaphore[$sem] || do {
+               next if (! &is_host_there($hosts[$sem]));
+               next if $pending_seqs == 0; # next unless scalar(@seqs) > 0;
+               &breed_crows( shift @seqs, $sem);
+               push @pids, $pid;
+               --$pending_seqs;
+           }; # if job semaphore == 0 then fork child
+           &do_wait();
+        }; # for semaphores...
+    }; # while
+    while (&all_done(\@semaphore)) { &do_wait(); };
+    print FHERR "### MAIN $gid ### All Jobs ID: \n @pids \n".
+                "### MAIN $gid ### END MAIN LOOP\n";    
+    close(FHERR);
+} # brown_dispatcher
+#
+sub do_wait() {
+    sleep 1; # select(undef,undef,undef,1);
+    print FHERR "### MAIN $gid ### SEMAPHORE: @semaphore\n";
+} # do_wait
+sub all_done() {
+    my $aryref = shift;
+    my $sum = 0;
+    $handle->shlock();
+    for (my $s = 0; $s < $maxjobs; $s++) {
+        $sum += $semaphore[$s];
+    }; # for semaphores...
+    $handle->shunlock();
+    return ($sum>0) ? 1 : 0;
+} # all_done
+sub is_host_there() {
+      my $host = shift;
+      system("rsh $host exit 0") == 0  && do {
+          print FHERR "### MAIN $gid ### Connection to $host available...\n";
+          return 1;
+      };
+      print FHERR "### MAIN $gid ### UNREACHEABLE \"$host\", SKIPPING !!!\n";
+      return 0;
+} # is_host_there
+sub breed_crows() {
+    my ($run_at,$script,$scriptx,$script_stat,$pre_job,$clhpid,$syserr);
+    my ($seq,$pos) = @_;
+    return if $pid = fork(); # return to parent, follows child code
+    $clhpid = "$$.$gid";
+    &mod_semaphore($pos,$clhpid);
+    print FHERR "## $clhpid ## Running child process jobs on sequence \"$seq\".\n";
+    foreach my $jobs (@idjobs) {
+        &mark_DB_exec_todo($thejob);
+        my ($thejob,@thesteps) = @{ $jobs };
+        if ($skip_next[0]) {
+            $script_stat = $status{'SKIPPED'}{'code'};
+        } else {
+            $script_stat = $status{'RUNNING'}{'code'};
+            &update_DB_exec_tbl($script_stat,$chrseq_code,$jobstep_code,
+                                $clhpid,undef,undef);
+            $script  = "$BASE/tmp/$clhpid.$job";
+            $scriptx = "$script.exit";
+            ###
+            $pre_job = <<"+++EOPre+++";
+#
+### CURRENT PROCESS DEFS
+#
+CHR= $chr ;
+SEQ= $seq ;
+JOB= $job ;
+STEP= $step ;
+XID= ;
+MPID= $clhpid ;
+CHRDIR="\$HUMUS/\$CHR" ;
+JOBDIR="\$CHRDIR/\$JOB/\$XID" ;
+IDIR=  ;
+ODIR=  ;
+EDIR=  ;
+PSRF= $scriptx ; # Process Status Reporter File
+#
+export CHR SEQ JOB STEP XID MPID CHRDIR JOBDIR IDIR ODIR EDIR PSRF ;
+#
+# Making directories
+CheckDirs \$ODIR ;
+[ "\$EDIR" != "\$ODIR" ] && CheckDirs \$EDIR ;
+#
+### SCRIPT CODE
+#
++++EOPre+++
+            ###
+            if ($hosts[$pos] ne $HOST) {
+                $run_at = <<"+++EOSCRIPT+++";
+# Run script remotely
+{ rsh $hosts[$pos].imim.es $script } || exit 10 ;
+           # exit_code==10 if RSH fails
+# Returning exit status from executed script
+exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
+           # exit_code==3 if cannot open PSRF (UNAVAILABLE) 
++++EOSCRIPT+++
+            } else {
+                $run_at = <<"+++EOSCRIPT+++";
+# Run script locally
+$script ;
+# Returning exit status from executed script
+exit ;     # exit_code is taken from last executed command (script)
++++EOSCRIPT+++
+            }; # if ($hosts[$pos] ne $HOST)
+            ###
+            print FHERR "## $clhpid ## Running job \"$job\" on sequence \"$seq\".\n";
+            open(TMP,"> $script");
+            print TMP $pre_code.$pre_job.$jobscode{$job}.$post_code;
+            close(TMP);
+            ###
+            $syserr = system <<"+++EOFRSH+++"
+## LAUNCH JOB
+/bin/chmod a+x $script ;
+# Process Status Reporter File
+PSRF="$scriptx" ;
+##
+$run_at
+## END OF JOB
++++EOFRSH+++
+            unlink ($script, $scriptx);
+            ###
+          # print FHERR $mesg{};
+            $script_stat = &report_crow_status($syserr,$job,$seq,$clhpid);
+        }; # else if !$skip_next[0]
+        &update_DB_exec_tbl($script_stat,$chrseq_code,$jobstep_code,
+                            $clhpid,$stdout,$stderr);
+    }; # foreach job
+    &mod_semaphore($pos,0);
+    print FHERR "## $clhpid ## Child process is exiting now!!!\n";
+    exit(0); # child process exits when done
+} # breed_crows
+sub mod_semaphore() {
+    my ($p,$v) = @_;
+    $handle->shlock();
+    $semaphore[$p] = $v;
+    $handle->shunlock();
+} # mod_semaphore
+sub report_crow_status() {
+    my ($err,$job,$seq,$pid) = @_;
+    my ($okflg,$emsg,$whatever);
+    ($okflg,$emsg,$err) = &check_syscall_exit($err);
+    $err = $exit_codes{'CODES'}{$err};
+    $exit_codes{$err}{MSG}->($pid,$job,$seq);
+    $whatever = $skip_next[0]
+                ? ( $skip_next[1] ? $status{'DIED'}{'code'}
+                                  : $status{'KILLED'}{'code'} )
+                : ( $okflg        ? $status{'DONE'}{'code'}
+                                  : $status{'CHECK'}{'code'}  );
+    return $whatever;
+} # report_crow_status
+sub mark_DB_exec_todo() { # to db_Hsapiens.pm ?
+   # $CDATE,$HOST,$USER;
+   &update_DB_exec_tbl($status{'TODO'}{'code'},
+                       $chrseq_code,$jobstep_code,$clhpid,undef,undef);
+} # update_DB_exec_tbl
+sub update_DB_exec_tbl() { # to db_Hsapiens.pm
+    my ($stat,$cseq,$cstep,$ppid,$sout,$serr) = @_;
+    my (@sel_fields,@data_fields,$tbl,@fld);
+    defined($sout) || ($sout = 'NULL');
+    defined($serr) || ($serr = 'NULL');
+    ($tbl, @fld) = qw( tb_exec 0 1 2 );
+    @sel_fields =  qw( chr_seq job_step exec_pid
+                       status exec_date host user stdout stderr );
+    @data_fields = ( $stat, $cseq, $cstep,
+                     $ppid, $CDATE, $HOST, $USER, "$sout", "$serr" );
+    &put_row_fields($tbl, \@fld, \@sel_fields, \@data_fields);
+} # update_DB_exec_tbl
+@ 
+
+<<stepper.pl: forked childs related vars>>=
+my (%hosts_list,@hosts,$hc,$gid,@pids,$pid,$maxjobs,
+    $sem,$handle,@semaphore,$pending_seqs);
+@pids = ();
+$hc = 0;
+%hosts_list = (
+  # hostname => [ order   numjobs  pbsflg ]
+    monstre1 => [ $hc++,  1,       $F     ],
+    monstre2 => [ $hc++,  1,       $F     ],
+    monstre3 => [ $hc++,  1,       $F     ],
+    monstre4 => [ $hc++,  2,       $F     ],
+  # aleph    => [ $hc++,  1,       $T     ],
+    ik12     => [ $hc++,  1,       $F     ],
+    ik13     => [ $hc++,  1,       $F     ],
+    i8       => [ $hc++,  1,       $F     ],
+    i10      => [ $hc++,  1,       $F     ],
+    i26      => [ $hc++,  1,       $F     ],
+    );
+@hosts = map  { shift @$_; @$_ }
+         sort { $a->[0] <=> $b->[0] }
+         map  { [ $hosts_list{$_}[0], ($_) x $hosts_list{$_}[1] ] }
+         keys %hosts_list;
+$maxjobs = scalar(@hosts);
+$gid = $$;
+$handle = tie @semaphore, 'IPC::Shareable', undef, { destroy => 1 };
+@semaphore = ( 0 ) x $maxjobs;
+@
+
+\subsubsctn{Sequence and jobs related vars}
+
 <<stepper.pl: global vars>>=
+my ($BASE,@seqs,@jobs,%jobscode);
+$BASE = "/home/ug/jabril/development/projects/sgp/humus/tests/childs";
+@seqs = qw( seq1  seq2  seq3  seq4  seq5  seq6  seq7  seq8  seq9  seq10
+            seq11 seq12 seq13 seq14 seq15 seq16 seq17 seq18 seq19 seq20 );
+@jobs = qw( job1 job2 job3 job4 job5 );
+%jobscode = ();
 @ 
+
 
 \subsctn{Shared code: [[global.pm]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2657,9 +4079,9 @@ package global;
 use strict;
 use vars qw(
            @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
-           $PLVER $PROG $USAGE $DATE $USER $HOST
-           $T $F $skip_next @exectime
-           $ERRFH %Messages $_verbose $_color_report
+           $PLVER $PROG $USAGE $DATE $CDATE $USER $HOST
+           $T $F @skip_next @exectime $_verbose $_color_report
+           $ERRFH %Messages %exit_codes $EXIT_REPORT_FILE
            %CmdLineDefs %CmdLineOpts
            );
 
@@ -2667,13 +4089,14 @@ use Exporter;
 $VERSION = 1.00;
 @@ISA = qw(Exporter);
 @@EXPORT = qw(
-           $PLVER $PROG $USAGE $DATE $USER $HOST
-           $T $F $skip_next %Messages $_verbose $_color_report $ERRFH
+           $PLVER $PROG $USAGE $DATE $CDATE $USER $HOST
+           $T $F @skip_next %Messages $_verbose $_color_report $ERRFH
            &init_timer &timing @exectime
            &init_signals &trap_signals &trap_signals_prog
            &program_started &program_finished
            &parse_cmdline %CmdLineDefs %CmdLineOpts
-           &check_syscall_exit &check_file &check_dir
+           &check_syscall_exit &the_end %exit_codes $EXIT_REPORT_FILE
+           &check_file &check_dir
            &min &max
            );
 @@EXPORT_OK = qw(
@@ -2683,19 +4106,24 @@ $VERSION = 1.00;
 %EXPORT_TAGS = (
            # ParseCMDLN => [ qw( &parse_cmdline %CmdLineDefs %CmdLineOpts ) ],
            StringFill => [ qw( &fill_right &fill_left &fill_mid ) ],
+           ExitStatus => [ qw( &check_syscall_exit &the_end 
+                               %exit_codes $EXIT_REPORT_FILE ) ],
            );
     # AdminFunc => [ qw( &connection_details &load_to_tbl_ifdef ) ],
     # );
-# use lib "/projects/sgp/bin/";
+# use lib "$LIBPERL";
 
-#
-# Setting Default Variables
+###
+### Setting Default Variables
+###
 $ERRFH = \*STDERR;
 ($T,$F) = (1,0);
 $PLVER = sprintf("v%vd",$^V);
 $PROG  = 'UNDEF';
 $USAGE = 'WARNING: Program variable "$USAGE" was not defined yet...';
 $DATE  = localtime;
+$CDATE = sprintf("%04d%02d%02d%02d%02d%02d",
+    sub { $_[5] + 1900, $_[4] + 1, $_[3], $_[2], $_[1], $_[0] }->(localtime) );
 if (defined($ENV{USER})) {
     $USER = $ENV{USER};
 } else {
@@ -2706,16 +4134,29 @@ if (defined($ENV{HOSTNAME})) {
 } else {
     chomp($HOST = `hostname`);
 };
+$HOST =~ s/\.imim\.es$//o;
+if (defined($ENV{PSRF})) {
+    $EXIT_REPORT_FILE = $ENV{PSRF};
+} else {
+    $EXIT_REPORT_FILE = "/tmp/$$";
+};
 <<global.pm: messages>>
+<<global.pm: normalized exit codes>>
 
+###
+### Shareable functions
+###
 <<global.pm: timing>>
 <<global.pm: trapping signals>>
 <<global.pm: reporting messages>>
 <<global.pm: parsing command-line args>>
 <<global.pm: validate file/dir>>
 <<global.pm: check exit status for sys calls>>
+<<global.pm: normalized exit>>
 <<global.pm: general functions>>
 
+#
+# Exiting from "global" package
 1;
 @
 @ 
@@ -2759,15 +4200,15 @@ sub init_signals() {
     $SIG{TERM} = \&trap_signals;
     $SIG{KILL} = \&trap_signals;
     $SIG{CHLD} = 'IGNORE'; # child processes are automatically reaped
-    $skip_next = $F;
+    @skip_next = ($F, undef);
 } # init_signals
 sub trap_signals() {
     print $ERRFH $Messages{'USER_HALT'}->($PROG);
-    $skip_next = $T;
+    @skip_next = ($T, $F);
 } # trap_signals
 sub trap_signals_prog() {
     print $ERRFH $Messages{'PROCESS_HALT'}->($PROG);
-    $skip_next = $T;
+    @skip_next = ($T, $T);
 } # trap_signals_prog
 @
 
@@ -2917,6 +4358,7 @@ $mlin{'empty_dbi_line'} = sub { return (' ' x $mlin{'dbi_len'}->()) };
 #
 %Messages = (
     # ERROR MESSAGES
+    <<global: warnings - environment settings>>
     <<global: warnings - input/output>>
     <<global: warnings - parsing command-line options>>
     # WORKING MESSAGES
@@ -2994,6 +4436,20 @@ HEADER       => sub {
      },
 @
 
+<<global: warnings - environment settings>>=
+ENVNOTDEF    => sub {
+         my $mssg = shift;
+         return
+           &header(
+             $mlin{'error_len'}->(),$mlin{'error_base'}->(),
+             $mlin{'error_pre'}->(),$mlin{'error_post'}->(),
+             $mlin{'error_line'}->(),$mlin{'empty_error_line'}->(),
+             "Following environment variable is NOT defined: $mssg",
+             $mlin{'empty_error_line'}->(),$mlin{'error_line'}->(),           
+             );
+     },
+@
+
 \subsubsctn{Interacting with DB standard messages}
 
 <<global: messages - interacting with DB>>=
@@ -3057,6 +4513,7 @@ sub parse_cmdline() {
             print $ERRFH $Messages{'CMDLINE_OPT_ERR'}->($_[0]);
         };
     GetOptions(%CmdLineOpts) || do {
+            &program_started($PROG);
             print $ERRFH $Messages{'CMDLINE_ERROR'}->($PROG,"@ARGV");
             exit(1);
         };
@@ -3102,13 +4559,14 @@ CMDLINE_OPT_ERR => sub {
              );
      },
 CMDLINE_ERROR   => sub {
-         my ($name,$mssg) = @_;
+         my ($name,@mssg) = @_;
          return
            &right_header(
 	         $mlin{'error_len'}->(),$mlin{'error_base'}->(),
              $mlin{'error_pre'}->(),$mlin{'error_post'}->(),
              $mlin{'error_line'}->(),
-             &prespc("Please, check your command-line options!!!",
+             &prespc("??? @mssg", "",
+                     "Please, check your command-line options!!!",
                      (" "x8)."Type \"$name --help\" for help..."),
              $mlin{'error_line'}->(),
              );
@@ -3214,7 +4672,7 @@ sub check_syscall_exit() {
             };
         $exitstr .= "signal $prog_exit ...";
     };
-    return ($exitflg,$exitstr);
+    return ($exitflg,$exitstr,$prog_exit);
 } # check_syscall_exit
 @
 
@@ -3244,6 +4702,174 @@ perl -e '
   }; # foreach 
 ' 
 @ 
+
+\begin{table}[!t]
+\begin{center}
+\begin{tabular}{|lrl|}\hline
+\textbf{EXIT KEY}  & \textbf{EXIT CODE}  & \textbf{DESCRIPTION} \\ \hline\hline
+OK            &   0 & Everything was OK (as default) \\
+KO            &   1 & Errors found (standard)        \\
+UNDEF         &   2 & Unknown exit status (not defined)   \\
+UNAVAILABLE   &   3 & Could not find/create status file   \\ \hline\hline
+USERHALT      &   4 & Process halted by user ([[CTRL+C]]) \\
+PROGDOWN      &   6 & Process is down                \\
+NOFORK        &   8 & Could not fork child           \\
+RSH           &  10 & RSH command failed             \\
+PBS           &  12 & PBS command failed             \\ \hline\hline
+NOFILE        &  20 & File not found                 \\
+NOREADFILE    &  22 & Could not open file to read    \\
+NOWRITEFILE   &  24 & Could not open file to write   \\
+NOAPPENDFILE  &  26 & Could not open file to append  \\ \hline
+NODIR         &  30 & Dir not found                  \\
+NOREADDIR     &  32 & Could not open dir to read     \\
+NOWRITEDIR    &  34 & Could not open dir to write    \\
+NONEWDIR      &  36 & Could not create new dir       \\ \hline
+NOBASHPIPE    &  40 & Error found in bash pipe       \\
+NOREADPIPE    &  42 & Could not open pipe to read    \\
+NOWRITEPIPE   &  44 & Could not open pipe to write   \\ \hline\hline
+COMMANDLINE   &  60 & Error trapped when parsing commandline options \\
+BADCMDLINEOPT &  62 & Wrong command-line option forced program exit  \\
+ENVERROR      &  70 & Error trapped when setting shell environment   \\
+ENVUNDEFVAR   &  72 & Environment variable not defined    \\ \hline\hline
+DBCONNECT     & 100 & Could not connect to DataBase  \\
+NOTRANSACTION & 110 & Could not process transaction  \\ \hline\hline
+NOCMD         & 127 & Command not found              \\ \hline
+\end{tabular}
+\caption[Exit codes definition]{\label{tbl:exitcodes} \textbf{Exit codes definition.} When running external scripts will be interesting to retrieve the cause of abnormal exiting (given that OK exit is set to its default system exit code), so we set here a fixed code error description to be shared along different scripts. This enables us to distingish between remote shell execution errors and the errors generated by submitted scripts.}
+\end{center}
+\end{table}
+
+<<global.pm: normalized exit>>=
+# 
+# Return to program caller a "normalized" error code
+sub the_end() { 
+    my $k = shift || 'UNDEF';
+    defined($exit_codes{$k}) || ($k = 'UNDEF');
+    ($k eq 'OK' || $k eq 'KO') || do {
+        $exit_codes{$k}{MSG}->();
+    };
+    open(XRF,"> $EXIT_REPORT_FILE") || do {
+        exit($exit_codes{'UNAVAILABLE'}{CODE});
+    };
+    print XRF $exit_codes{$k}{CODE};
+    close(XRF);
+    exit($exit_codes{$k}{CODE});
+} # the_end
+@
+
+<<global.pm: normalized exit codes>>=
+%exit_codes = (
+    'OK'            => { CODE =>   0, MSG => sub {} },
+    'KO'            => { CODE =>   1, MSG => sub {} },
+    'UNDEF'         => { CODE =>   2, MSG => sub {} },
+    'UNAVAILABLE'   => { CODE =>   3, MSG => sub {} },
+    'USERHALT'      => { CODE =>   4, MSG => sub {} },
+    'PROGDOWN'      => { CODE =>   6, MSG => sub {} },
+    'NOFORK'        => { CODE =>   8, MSG => sub {} },
+    'RSH'           => { CODE =>  10, MSG => sub {} },
+    'PBS'           => { CODE =>  12, MSG => sub {} },
+    'NOFILE'        => { CODE =>  20, MSG => sub {} },
+    'NOREADFILE'    => { CODE =>  22, MSG => sub {} },
+    'NOWRITEFILE'   => { CODE =>  24, MSG => sub {} },
+    'NOAPPENDFILE'  => { CODE =>  26, MSG => sub {} },
+    'NODIR'         => { CODE =>  30, MSG => sub {} },
+    'NOREADDIR'     => { CODE =>  32, MSG => sub {} },
+    'NOWRITEDIR'    => { CODE =>  34, MSG => sub {} },
+    'NONEWDIR'      => { CODE =>  36, MSG => sub {} },
+    'NOBASHPIPE'    => { CODE =>  40, MSG => sub {} },
+    'NOREADPIPE'    => { CODE =>  42, MSG => sub {} },
+    'NOWRITEPIPE'   => { CODE =>  44, MSG => sub {} },
+    'COMMANDLINE'   => { CODE =>  60, MSG => sub {} },
+    'BADCMDLINEOPT' => { CODE =>  62, MSG => sub {} },
+    'ENVERROR'      => { CODE =>  70, MSG => sub {} },
+    'ENVUNDEFVAR'   => { CODE =>  72, MSG => sub {} },
+    'DBCONNECT'     => { CODE => 100, MSG => sub {} },
+    'NOTRANSACTION' => { CODE => 110, MSG => sub {} },
+    'NOCMD'         => { CODE => 127, MSG => sub {} },
+    );
+%{ $exit_codes{'CODES'} } = ( map { $exit_codes{$_}{'CODE'}, $_ }
+                              keys %exit_codes );
+@
+
+\subsubsctn{Execution status helper scripts: [[exit.pl]] and [[]]}
+
+<<exit.pl: retrieving status codes>>=
+<<PERL shebang>>
+# exit.pl
+#
+use strict;
+use global qw( :ExitStatus );
+my $key = shift @ARGV || 'UNDEF';
+printf STDOUT "%d", ( defined($exit_codes{$key})
+                        ? $exit_codes{$key}{CODE}
+                        : $exit_codes{UNDEF}{CODE} );
+exit(0);
+@ 
+
+The following short script informs us about few parameters we must check on remote machines that affect the execution of all the scripts we could launch via [[rsh]] from [[stepper.pl]]:
+
+<<getremoteinfo.pl: checking remote hosts shared params>>=
+<<PERL shebang>>
+# getremoteinfo.pl
+#
+# Get hostname
+if (defined($ENV{HOSTNAME})) {
+    $HOST = $ENV{HOSTNAME};
+} else {
+    chomp($HOST = `hostname`);
+};
+$HOST =~ s/\.imim\.es$//o;
+#
+# Directories that must exist in host
+if (-e "/usr/local/molbio" && -d _) { $DIRFLG="YES" }
+else { $DIRFLG="NO" };
+#
+# Output required info about host
+print STDOUT sprintf("--> %16s --> perl v%vd --> Is \"molbio\" there? %s \n",
+                     "$HOST.imim.es",$^V,$DIRFLG);
+#
+exit(0);
+@ 
+
+<<tangling: perl scripts>>=
+# 
+# Retrieve status codes from step scripts execution
+notangle -R'exit.pl: retrieving status codes' \
+    $WORK/$nwfile.nw | cpif $BIN/exit.pl ;
+notangle -R'getremoteinfo.pl: checking remote hosts shared params' \
+    $WORK/$nwfile.nw | cpif $BIN/getremoteinfo.pl ;
+is_exec $BIN/exit.pl $BIN/getremoteinfo.pl ;
+#
+for n in monstre1 monstre2 monstre3 monstre4 ik12 ik13 i8 i10 i26 aleph ;
+  do {
+       rsh $n.imim.es $BIN/getremoteinfo.pl ;
+    } ;
+  done ;
+#
+@ 
+
+<<HIDE: >>=
+perl -e '
+  use global;
+  foreach $h (keys %exit_codes) { $mesg{$exit_codes{$h}{CODE}} = $h; };
+  $kk=system("echo HOLA; exit 20;");
+  ($a,$b,$c)= &check_syscall_exit($kk);
+  printf "## EXEC %s (%s:%s) --- flg: %s > %s\n", $kk, $c, $mesg{$c}, $a, $b;
+  $ko=system <<'\''++++EOF++++'\'';
+function the_end () {
+  perl -e '\''use global qw( :ExitStatus );
+    $a = shift @ARGV;
+    printf STDOUT "%d", ( defined($exit_codes{$a})
+                          ? $exit_codes{$a}{CODE}
+                          : $exit_codes{UNDEF}{CODE} ); '\'' $1;
+}
+echo "HOLA";
+exit `the_end "UNDEF"` ;
+++++EOF++++
+  ($a,$b,$c)= &check_syscall_exit($ko);
+  printf "## EXEC %s (%s:%s) --- flg: %s > %s\n", $ko, $c, $mesg{$c}, $a, $b; '
+@ 
+
 
 \subsubsctn{General functions}
 
@@ -3289,12 +4915,13 @@ is_exec $BIN/stv ;
 use strict;
 use Tk;
 # database interface module
-# use lib "/projects/sgp/bin/mySQL";
+# use lib "$LIBPERL";
 use db_Hsapiens;
 #
 use global;
 $PROG = 'stv';
 
+<<RGB color codes hash>>
 my @chrom = qw/ 1 2 3 4 X Y /; # to load from DB
 my @jobs  = qw/ Masking Homology GenePred SGP /; # to load from DB
 my (%col,%row); 
@@ -3325,7 +4952,7 @@ sub Init_Window() {
     # Instatiating widgets
     $col{HEADER} = $main_window->Frame(
                     borderwidth => 2,
-                    foreground  => 'yellow',
+                    foreground  => $color{yellow},
                     )->pack(
                         side   => 'left',
                         fill   => 'y', 
@@ -3336,8 +4963,8 @@ sub Init_Window() {
                              # anchor      => 'n',
                                width       => 10,
                                height      => 2,
-                               foreground  => 'black',
-                               background  => 'lightgrey',
+                               foreground  => $color{black},
+                               background  => $color{lightgrey},
                                borderwidth => 2,
                                )->pack();
     foreach my $j (@jobs) {
@@ -3346,8 +4973,8 @@ sub Init_Window() {
                              # anchor      => 'n',
                                width       => 10,
                                height      => 2,
-                               foreground  => 'black',
-                               background  => 'lightblue',
+                               foreground  => $color{black},
+                               background  => $color{dodgerblue}, #'lightblue',
                                borderwidth => 2,
                                )->pack();
     }; # foreach @jobs
@@ -3355,7 +4982,7 @@ sub Init_Window() {
     foreach my $j (@chrom) {
         my $frame = $main_window->Frame(
                     borderwidth => 2,
-                    foreground  => 'yellow',
+                    foreground  => $color{yellow},
                     )->pack(
                         side   => 'left',
                         fill   => 'y', 
@@ -3368,8 +4995,8 @@ sub Init_Window() {
                              # anchor      => 'n',
                                width       => 6,
                                height      => 2,
-                               foreground  => 'black',
-                               background  => 'lightgrey',
+                               foreground  => $color{black},
+                               background  => $color{lightgrey},
                                borderwidth => 2,
                                )->pack();
         foreach my $i (@jobs) {
@@ -3378,8 +5005,8 @@ sub Init_Window() {
                              # anchor      => 'n',
                                width       => 6,
                                height      => 2,
-                               foreground  => 'black',
-                               background  => 'orange',
+                               foreground  => $color{black},
+                               background  => $color{orange},
                                borderwidth => 2,
                                )->pack();
         }; # foreach @jobs
@@ -3387,6 +5014,55 @@ sub Init_Window() {
 } # Init_Window
 @ 
 
+<<RGB color codes hash>>=
+my %color = (
+#
+        'white'        => '#FFFFFF',
+        'black'        => '#000000',
+        'slategrey'    => '#9FB6CD',
+        'grey'         => '#BEBEBE',
+        'lightgrey'    => '#D3D3D3',
+        'lightslategrey' => '#708090',
+#
+        'magenta'      => '#FF00FF',
+        'lightpink'    => '#FFB6C1',
+        'purple'       => '#9370DB',
+        'lavender'     => '#E6E6FA',
+#
+        'cyan'         => '#00FFFF',
+        'lightcyan'    => '#E0FFFF',
+        'skyblue'      => '#87CEEB',
+        'palecyan'     => '#AFEEEE',
+#
+        'blue'         => '#0000FF',
+        'lightblue'    => '#ADD8E6',
+        'steelblue'    => '#4682B4',
+        'dodgerblue'   => '#1C86EE',
+        'midnightblue' => '#191970',
+#
+        'green'        => '#00FF00',
+        'seagreen'     => '#2E8B57',
+        'forestgreen'  => '#228B22',
+        'darkgreen'    => '#006400',
+        'palegreen'    => '#98FB98',
+#
+        'yellow'       => '#FFFF00',
+        'orange'       => '#FFA500',
+        'gold'         => '#FFD700',
+        'khaki'        => '#F0E68C',
+#
+        'red'          => '#FF0000',
+        'salmon'       => '#FA8072',
+        'coral'        => '#FF7F50',
+        'firebrick'    => '#B22222',
+#
+        'brown'        => '#A52A2A',
+        'siena'        => '#A0522D',
+        'saddlebrown'  => '#8B4513',
+        'tan'          => '#D2B48C',
+        'burlywood'    => '#FFD39B',
+    );
+@
 
 \subsctn{Tests} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -3571,7 +5247,7 @@ open(FHERR, "> $BASE/run.rpt");
   while ($pending_seqs > 0) {
       for ($sem = 0; $sem < $maxjobs; $sem++) {
          $semaphore[$sem] || do {
-             next if (! &find_victim($hosts[$sem]));
+             next if (! &is_host_there($hosts[$sem]));
              next if $pending_seqs == 0; # next unless scalar(@seqs) > 0;
              &breed_crows( shift @seqs, $sem);
              push @pids, $pid;
@@ -3602,7 +5278,7 @@ close(FHERR);
       $handle->shunlock();
       return ($sum>0) ? 1 : 0;
   } # all_done
-  sub find_victim() {
+  sub is_host_there() {
       my $host = shift;
       system("rsh $host echo $host 2>/dev/null 1>&2; exit") == 0  && do {
           print FHERR "### MAIN $gid ### Connection to $host available...\n";
@@ -3610,7 +5286,7 @@ close(FHERR);
       };
       print FHERR "### MAIN $gid ### Connection to $host NOT available...\n";       
       return 0;
-  } # find_victim
+  } # is_host_there
   sub breed_crows() {
       my ($pre,$clhpid);
       my ($seq,$pos) = @_;
@@ -3823,6 +5499,10 @@ sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
 <<Version Control Id Tag>>
+@ 
+
+<<BASH script start>>=
+<<BASH shebang>>
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -3846,7 +5526,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.4 2002-02-15 17:29:05 jabril Exp $
+# $Id: humus.nw,v 1.5 2002-03-11 11:52:18 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3897,7 +5577,7 @@ notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tex ;
 @ 
 
 <<weaving>>=
-<<BASH shebang>>
+<<BASH script start>>
 # weaving and LaTeXing
 <<BASH Environment Variables>>
 <<tangling complementary LaTeX files>>
@@ -3914,7 +5594,7 @@ popd;
 @ 
 
 <<LaTeXing>>=
-<<BASH shebang>>
+<<BASH script start>>
 # only LaTeXing
 <<BASH Environment Variables>>
 pushd $DOCS/ ;
@@ -3982,6 +5662,7 @@ export BASE HUMUS BBIN BIN MySQLPAR LIBPERL LIBSTEP SRC ;
 <<BASH Variables: Perl>>
 #
 <<BASH Basic Shell Functions>>
+<<BASH Functions: Handling large directories>>
 <<BASH Functions: Filtering GENEID RAW Output>>
 <<BASH Functions: Get Gene Number from GENEID Output>>
 <<BASH Functions: Gene-Prediction Evaluation>>
@@ -3992,24 +5673,74 @@ export BASE HUMUS BBIN BIN MySQLPAR LIBPERL LIBSTEP SRC ;
 #
 # BASIC Shell Functions
 #
-function CheckDirs () {
+function TheEnd {
+  #
+  # USAGE: TheEnd <STATUS_KEY>
+  # PSRF is Process Status Reporter File
+  if [ "$PSRF" ] ;
+  then
+     SCODE=`( $BIN/exit.pl $1 | tee $PSRF ) 2> /dev/null` ;
+  else
+     SCODE=3 ; # UNAVAILABLE
+  fi ;
+  exit $SCODE ;
+}
+#
+function CheckDirs {
   #
   # USAGE: ChckDirs <path_list>
   #
   for name in "$@" ;
     do {
-         [ -d "$name" ] && 
-           echo "### Directory Already Exist: $name" ||
-             mkdir --verbose $name ;
+         if [ -d "$name" ] ;
+         then 
+           echo "### Directory Already Exist: $name" ;
+         elif mkdir $name 2> /dev/null ;
+           then
+             echo "### Making New Directory   : $name" ;
+         else
+           echo "### CANNOT Create Directory: $name" ; 
+           TheEnd NONEWDIR ; 
+         fi ;
       } ;
     done ;
 }
 #
 function is_exec () {
+  #
   # USAGE: is_exec <filename_0>...<filename_N>
-  for file in $@; do { [ -x $file ] || chmod a+x $file ; }; done
+  for file in $@;
+    do {
+         if [ -x $file ] ;
+         then
+            chmod a+x $file 2> /dev/null ;
+         fi ;
+      } ;
+    done ;
 }
 @
+
+<<BASH Functions: Handling large directories>>=
+#
+function mega () {
+  #
+  # USAGE: mega "<command> [<cmd_params>]" <input_dir> <pattern> [<output_dir>]
+  # EXAMPLES:
+  #           mega "mv -v" $IDIR "^chr2_" $ODIR/ori # moves all chr2_* files
+  #           mega "ls -a" $IDIR "^[^.]*"           # lists all files (not .*)
+  M_CMD="$1" ;
+  I_DIR=`echo $2 | sed 's/\/$//'` ;
+  X_PAT="$3" ;
+  [ "$4" ] && O_DIR=`echo $4 | sed 's/\/$//'` || O_DIR='' ;
+  ls -1 $I_DIR | egrep $X_PAT - | while read n ;
+    do {
+         [ "$O_DIR" ] && T_DIR="$O_DIR/$n" || T_DIR='' ;
+         $M_CMD $I_DIR/$n $T_DIR ;
+       } ;
+    done;
+}
+#
+@ 
 
 <<BASH Functions: Filtering GENEID RAW Output>>=
 #
@@ -4143,7 +5874,7 @@ is_exec $WORK/nw2tex $WORK/ltx;
 #
 # tangling all steps
 { cat $WORK/.bash_VARS ;
-  notangle -R'tangling steps'       $WORK/$nwfile.nw ; } | bash ;
+  notangle -R'JOB COLLECTOR'        $WORK/$nwfile.nw ; } | bash ;
 # tangling all scripts
 { cat $WORK/.bash_VARS ;
   notangle -R'tangling programs'    $WORK/$nwfile.nw ; } | bash ;

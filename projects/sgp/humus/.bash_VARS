@@ -3,11 +3,11 @@
 # WORK is set by "setcwd"
 WBIN="$WORK/bin" ;
 WPARAM="$BIN/param" ;
-SRC="$WORK/src" ; # where to put the distributable files
+WSRC="$WORK/src" ; # where to put the distributable files
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
 TEST="$WORK/tests" ;
 nwfile="humus" ;
-export WBIN WPARAM SRC DOCS DATA TEST nwfile ;
+export WBIN WPARAM WSRC DOCS DATA TEST nwfile ;
 #
-source .project_VARS ;
+source $WORK/.project_VARS ;
