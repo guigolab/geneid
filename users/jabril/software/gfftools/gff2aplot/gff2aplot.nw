@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $
+% $Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -363,7 +363,7 @@ This is the main loop for the {\prog} ``Filter'' mode:
 %Vars = ();
 &map_vars_layout;
 
-%gff_data = %aplot_data = (); # Reseting DATA
+%GFF_DATA = %ALN_DATA = (); # Reseting DATA
 &parse_GFF_files;
 
 &map_vars_data;
@@ -384,10 +384,12 @@ use strict;
 my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
 @
 
-Those are the main variables containing customization parameters and input data from GFF records.
+Those are the main variables containing customization parameters and input data from GFF records. We split customization variables on three input classes: [[%DefaultVars]] to set default values and their type (what makes easy to check if a variable exists or not and if its given value has the expected format), [[%CmdLineVars]] for those parameters passed on command-line and [[%CustomVars]] which collects vaiables customization from external parameter files. Two temporary variables ([[%Defaults]] to initialize element variables and [[%Vars]] to provide the customization from command-line and parameter files to those element variables) allow us to merge all the information from these three variables and transfer to each GFF element in the GFF data variables ([[%GFF_DATA]] for annotations and [[%ALN_DATA]] for alignments).
 
 <<Global Vars>>=
-my (%DefaultVars,%CmdLineVars,%CustomVars,%Vars,%gff_data,%aplot_data);
+my (%DefaultVars,%CmdLineVars,%CustomVars,
+    %Defaults,%Vars,
+    %GFF_DATA,%ALN_DATA);
 @ 
 
 Some info about the program itself.
@@ -395,9 +397,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.3 $', #'
-     '$Date: 2001-08-24 08:14:23 $', #'
-     '$Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $', #'
+     '$Revision: 1.4 $', #'
+     '$Date: 2001-08-25 13:58:56 $', #'
+     '$Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -488,6 +490,17 @@ short description are listed here:
 
 The functions described in this section process each GFF-record, each custom definition or each command-line options, not only loading the internal variables, also checking for the correctness of the user input in each case.
 
+\todo{
+\item Diagram here for figure~\ref{fig:customvarstruc}.
+} % todo
+\begin{figure}[!ht]
+\begin{center}
+\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
+% \includegraphics[]{}
+\caption[Structure of main customization variables]{\label{fig:customvarstruc} Structure of main customization variables: [[%DefaultVars]], [[%CmdLineVars]], [[%CustomVars]], [[%Defaults]], [[%Vars]]. Relationships among them and their interaction with [[%GFF_DATA]] and [[%ALN_DATA]] variables which contain data are also shown.}
+\end{center}
+\end{figure}
+
 \subsctn{Setting customization parameters from defaults} 
 
 The main difference from older versions, besides a cleaner hash structure than the GAWK one, is that we include some customization variables at sequence and strand levels. Almost all the variables are described in section~\ref{sec:customvardesc}, page~\pageref{sec:customvardesc}.
@@ -514,9 +527,22 @@ sub set_default_vars() {
             <<default feature vars values>>
         },
     ); # %DefaultVars
+    <<map default vars to defaults working copy>>
     print LOGFILE '>>> \%DefaultVars : '.(Dumper(\%DefaultVars)) if ($LogFile && $Debug);
 } # set_default_vars
 @
+
+We also build from this structure, making easier variable maintenance because default value and variable type are edited together in [[%DefaultVars]] (as [[TYPE]]/[[VALUE]] pairs), an auxiliary variable which allows us to load default values into GFF elements.
+
+\label{sec:tmpdefaults}
+<<map default vars to defaults working copy>>=
+%Defaults = ();
+foreach my $sct (keys %{$DefaultVars{$sct}}) {
+    foreach my $vnm (keys %{$DefaultVars{$sct}}) {
+        $Defaults{$sct}{$vnm} = $DefaultVars{$sct}{$vnm}{'VALUE'};
+	}; # foreach $vnm
+}; # foreach $sct
+@ 
 
 \subsubsctn{Default customization files}
 
@@ -776,10 +802,21 @@ defined($chk_stdin) && do {
 \subsubsctn{Verifying command-line settings}
 
 \todo{
-\item \  \\
-<<Check command-line options>>=
-@
+\item [[<<Check command-line options>>]]
 } % todo
+<<Check command-line options>>=
+#
+@
+
+\subsubsctn{Loading GFF elements custom variables from command-line}
+
+\todo{
+\item Parsing and loading command-line options having structure like:\\
+\centerline{[[--feature feature_name::variable_name=value]]}
+} % todo
+<<Check command-line options>>=
+#
+@
 
 \subsctn{Setting customization parameters from files} 
 
@@ -962,11 +999,8 @@ sub varscheck() {
     defined($_var->{$$rec[1]}) || 
         (&warn('VAR_NOT_DEFINED',$F,$class,$$rec[1]),return $F);
     &checkvarvalues($_var->{$$rec[1]}{'TYPE'},\$$rec[2],$$rec[1]) || return $F;
-#
-# Regexp checking for $$rec[0] left 
-#
     $flag && do {
-        push @{$CustomVars{$class}{$$rec[1]}}, [ $$rec[0], $$rec[2] ];
+        push @{$CustomVars{$class}{$$rec[1]}}, [ &find_regexp($$rec[0]), $$rec[2] ];
         return $T;
 	};
     $CustomVars{$class}{$$rec[1]} = $$rec[2];
@@ -1000,6 +1034,30 @@ VARTYPE_NOT_DEFINED =>
   $spw."  could not check value for \"\%s\".\n",
 @
 
+\subsctn{Deciphering element fields}
+
+\todo{
+\item Check [[ $$rec[0] ]] and determine its structure: [[element]], [[element@id]], [[/regexp/]], [[/regexp/@id]], [[!/regexp/]], [[!/regexp/@id]] and finally [[*]] and [[!*]] as special shorthands for [[/.*/]] and [[!/.*/]] respectively.
+}
+
+If an element appears not to be a regular expression we transform it to '[[^element$]]' before returning it.
+
+<<Parsing Custom Files>>=
+sub find_regexp() {
+    my $string = $_[0];
+    my ($not_flg, $regexp_flg, $new_string, $tmpstr);
+    $not_flg = $regexp_flg = $F;
+    $string =~ s/^!//o && ($not_flg = $T); # not_regexp is true
+    <<does string contain a regular expression>>
+    $regexp_flg || $new_string = '^'.$string.'$';
+    return ($not_flg, $new_string);
+} # find_regexp
+@ 
+
+<<does string contain a regular expression>>=
+#
+@ 
+
 \subsctn{Customization variable values validation}
 
 This section is dedicated to those test we need to ensure that customization variables contain acceptable values, so we do not need to check them later in the program. Table~\ref{tbl:varformats} summarizes the variable types defined for customization parameters.
@@ -1026,7 +1084,8 @@ FONT\_SZ & A numeric value with font-size units (cm, mm, in or pt ---points---).
 \end{center}
 
 \todo{
-\item More format variables need to be defined, such as: SHAPES from a shapes array, LINES/LINESTYLES (none, dotted, dashed, solid/default), GROUP-BRACKETS (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--)
+\item More format variables need to be defined, such as: [[SHAPES]] from a shapes array, [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default), [[GROUP-BRACKETS]] (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--).
+\item maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.
 } % todo
 
 \end{table}
@@ -1150,6 +1209,7 @@ NOT_A_PAGE =>
 
 Those numbers relative to DNA positions may be given in bases, kilobases, megabases or gigabases, being last three ones a way to avoid any mistake when a big coord with lots of zeroes is provided. If no units are provided, then we asume bases.
 
+\label{sec:DNABASE}
 <<variable value checking>>=
 $_test eq 'DNABASE' && do { # lc
     $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)([gmk]?b(ases)?)?$/o && 
@@ -1239,6 +1299,7 @@ $_test eq 'FONT_SZ' && do {
 
 \todo{
 \item Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
+\item Can we do the same for DNABASE ? (section~\ref{sec:DNABASE})
 } % todo
 
 <<warnings - parsing custom files>>=
@@ -1251,6 +1312,9 @@ NOT_A_FONTSIZE =>
 % \subsctn{Command-line options}
 
 \todo{
+\item Write a script to produce easier the appendix/descriptions tables for the manual from the options code chunks. Transforming to a fixed record formats like:\\
+\shortstack[l]{OPTION: ....\\DEFAULTS: ....\\PARAMS: ....\\ SHORT DESC: .... (for the appendix table)\\ LONG DESC: .... (for the description table)}
+
 \item Set the final options/variables/parameters for the whole section.
 } % todo
 
@@ -2023,7 +2087,7 @@ sub GFF_format() {
 } # GFF_format
 @
 
-Here we decide to parse records as they are in GFF or in APLOT format. '[[load_gff]]' and '[[load_aplot]]' do the field error checking and load the program variables '[[%gff_data]]' and '[[%aplot_data]]'. Those variables are reset in '[[<<Main Loop>>]]'.
+Here we decide to parse records as they are in GFF or in APLOT format. '[[load_gff]]' and '[[load_aplot]]' do the field error checking and load the program variables '[[%GFF_DATA]]' and '[[%ALN_DATA]]'. Those variables are reset in '[[<<Main Loop>>]]'.
 
 <<Parsing Input Data>>=
 sub fieldscheck() {
@@ -2421,12 +2485,24 @@ We initialize properties for each new element as references to '[[%DefaultVars]]
 <<Parsing Input Data>>=
 sub set_var_defaults() {
     my ($sect,$varhash) = @_;
-    foreach my $nm (keys %{$DefaultVars{$sect}}) {
-        $$varhash{$nm} = \$DefaultVars{$sect}{$nm}{'VALUE'};
-	};
+    <<P.I.D: set reference to all properties>>
 	return;
 } # load_gff_var
 @
+
+We can set default properties of GFF elements in two ways: making a reference to the default properties hash for that element, as shown in the [[<<P.I.D: set reference to all properties>>]], or reference each variable from the properties hash to a new key, as described in [[<<P.I.D: set reference for each property>>]].
+
+<<P.I.D: set reference to all properties>>=
+$$varhash = \%{$Defaults{$sect}};
+@
+
+<<P.I.D: set reference for each property>>=
+foreach my $nm (keys %{$DefaultVars{$sect}}) {
+    $$varhash{$nm} = \$DefaultVars{$sect}{$nm}{'VALUE'};
+	};
+@
+
+We choose the first approach, and we will replace the hash reference by the keys with references to defaults if needed when setting variables from custom parameters for a given GFF element (see section~\ref{sec:mapcustoms}, page~\pageref{sec:mapcustoms}). That choice will save memory used by the elements properties if user does not customize any of the element properties, but requires a temporary default variable (due to the special structure of the [[%DefaultVars]] hash which contains not only default variable values but also variable type), named [[%Defaults]] and defined in section~\ref{sec:tmpdefaults}, page~\pageref{sec:tmpdefaults}.
 
 \subsctn{Parsing grouping attributes}
 
@@ -2607,7 +2683,7 @@ my @vect_ary;
 We define here [[&map_vars_layout]] to combine LAYOUT parameters from [[%DefaultVars]], [[%CmdLineVars]] and [[%CustomVars]] before start parsing GFF input files. 
 
 \todo{
-\item Planning: 2001/08/23
+\item Planning: 2001/08/27
 } % todo
 <<Features Setting>>=
 sub map_vars_layout() {
@@ -2618,9 +2694,10 @@ sub map_vars_layout() {
 @ 
 
 \subsctn{Mapping customization to GFF elements}
+\label{sec:mapcustoms}
 
 \todo{
-\item Planning: 2001/08/23
+\item Planning: 2001/08/27
 } % todo
 <<Features Setting>>=
 sub map_vars_data() {
@@ -2962,7 +3039,7 @@ my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
 \subsctn{Setting up {\ps} variables}
 
 \todo{
-\item Planning: 2001/08/24
+\item Planning: 2001/08/28
 } % todo
 <<PostScript VARS>>=
 sub ps_variables() {
@@ -3009,7 +3086,7 @@ true setstrokeadjust
 \subsctn{Plotting data into the figure}
 
 \todo{
-\item Planning: 2001/08/25
+\item Planning: 2001/08/29
 } % todo
 <<PostScript PLOT>>=
 sub ps_plot(){
@@ -3072,8 +3149,7 @@ sub ps_trailer() {
 \label{sec:CMYKcolordef}
 
 \todo{
-\item \ Planning: 2001/08/26 \\
-Move this section and the following (colors and page formats definition) to perl package [[gfftools::PostScript]].
+\item Move this section and the following (colors and page formats definition) to perl package [[gfftools::PostScript]].
 } % todo
 
 To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, their {\LaTeX} definition ('[[AplotColorDefs.tex]]') and the table sumarizing them for the manual ('[[AplotColorTbl.tex]]'). % outlined in page~\pageref{sec:cmykfiles}.
@@ -3511,6 +3587,7 @@ Those are the colors defined in $PROGRAM:
 @
 <<page sizes latex definition>>=
 %               points    -  centimeters  -     inches
+a0          & 2384 & 3370 &  84.1 & 118.9 &  33.1 &  46.8 \\
 a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
 a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
 a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
@@ -4735,7 +4812,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.3 2001-08-24 08:14:23 jabril Exp $
+# $Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
