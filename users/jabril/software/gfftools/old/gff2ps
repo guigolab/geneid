@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.14 1999-06-10 19:36:39 jabril Exp $	
+#         $Id: gff2ps,v 1.15 1999-06-16 15:58:04 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -74,19 +74,46 @@ Defaults () {
  # 
  # Default User-Defined Options: 
   CFDIR=`pwd`
+  if [ $GFFDIR ]
+    then
+      if [ -d "$GFFDIR" ]                  ###### Environment variable for working directory.
+        then
+          CFDIR="$GFFDIR"
+        fi
+    fi
   bgcolor="white"
   fgcolor="black"
-  v01="0"; n01="Load_CustomFile"
-  v02=" "; n02="CustomFile_Name"
-  v03="$CFDIR/.gff2psrc"; n03="Default_CustomFile_Name"
-  v04="0"; n04="Exist_Default_CustomFile"
-  v05="0"; n05="Print_Report"
-  v06="Landscape"; n06="Page_Orientation"
-  v07="a4"; n07="Page_Size"
-  v08="1"; n08="Page_Number"
-  v09="1"; n09="Blocks_x_Page"
-  v10="0"; n10="Nucleotides_x_Line"
-  v11="1"; n11="Blocks_Top-Bottom"
+  v01="0"; n01="load_customfile"
+  v02=""; n02="customfile_name"
+  if [ $GFF_CUSTOM_FILE ]         ###### Environment variable for default custom file name.
+    then
+      v03="$CFDIR/$GFF_CUSTOM_FILE"
+    else
+      v03="$CFDIR/.gff2psrc"
+    fi
+    n03="default_customfile_name"
+  v04="0"; n04="exist_default_customfile"
+  v04_1="0"; n04_1="create_default_customfile"
+  v05="0"; n05="print_report"
+  v06="Landscape"; n06="page_orientation"
+  v07="a4"; n07="page_size"
+  v08="1"; n08="page_number"
+  v09="1"; n09="blocks_x_page"
+  v10="0"; n10="nucleotides_x_line"
+  v11="1"; n11="show_blocks_top-bottom"
+# Layout Properties
+  c01="1cm"; m01="margin_left"
+  c02="1cm"; m02="margin_right"
+  c03="1cm"; m03="margin_upper"
+  c04="1cm"; m04="margin_bottom"
+  c05="FGcolor"; m05="foreground_color"
+  c06="BGcolor"; m06="background_color"
+  c07=5; m07="max_blocks_x_page"
+  c08="on"; m08="strand_show_forward"
+  c09="on"; m09="strand_show_reverse"
+  c10="on"; m10="strand_show_independent"
+  c11=$c01; m11="text_color"
+  c12="none"; m12="label"
 }
 
 #
@@ -156,7 +183,7 @@ ShowHelpLine () {
 MAINPSCPR () {
 cat <<'@@@EndCopyRight@@@'
 % 
-% $Id: gff2ps,v 1.14 1999-06-10 19:36:39 jabril Exp $
+% $Id: gff2ps,v 1.15 1999-06-16 15:58:04 jabril Exp $
 % 
 %          Converting GFF files to PostScript plots.
 %
@@ -181,7 +208,7 @@ cat <<'@@@EndCopyRight@@@'
 @@@EndCopyRight@@@
 }
 
-MAINPSPROLOG () {
+MAINPSSETUP () {
 cat <<'@@@EndProlog@@@'
 %
 %%BeginSetup
@@ -324,7 +351,7 @@ flglscape {
 %
 @@@EndProlog@@@
 }
-#### End of MAINPSPROLOG function
+#### End of MAINPSSETUP function
 
 #
 # Printing Main PostScript Routines...
@@ -485,7 +512,7 @@ end % vctdct
 #### End of MAINPSPROCS function
 
 #
-# PostScript end of page... 
+# PostScript end of file... 
 # 
 MAINPSTRAILER () {
 cat <<'@@@EndTrailer@@@'
@@ -534,6 +561,21 @@ CheckInt () {
   return 1
 }
 
+#
+# Testing if exist Custom File.
+#
+ExistCustomfile () {
+  if [ ! -f "$1" ]
+    then echo "0"
+      echo "Report: Default Custom File does not exist." 1>&2
+      echo "        Program is going to write a Local Custom File." 1>&2 
+    else echo "1" # exist_default_customfile
+      echo "Warning: Default Custom File exist." 1>&2
+      echo "         Program is going to overwrite your Local Custom File." 1>&2
+    fi
+  echo "          Custom_Filename: $1" 1>&2
+  return 0
+}
 ###################################################################
 ################## MAIN GFF2PS SHELL SCRIPT #######################
 #
@@ -553,13 +595,6 @@ echo "Report: You have typed the following command line:" 1>&2
 echo "" 1>&2
 echo $CMDLine 1>&2
 echo "" 1>&2
-if [ ! -f "$CFDIR/.gff2psrc" ]
-  then v04="0"
-       echo "Warning: Default Custom File does not exist." 1>&2 
-       echo "         Program is going to write a Local Custom File." 1>&2 
-  else v04="1" # Exist_Default_CustomFile
-       echo "Report: Using Default Custom File ($CFDIR/.gff2psrc)." 1>&2 
-  fi
 
 #
 # When no options, no parameters and 
@@ -586,23 +621,28 @@ case $1 in
 #
 # Processing all options and parameters passed to program.
 #
-while getopts :C:vpP:B:N:bHh W_OPTION
+while getopts :dD:C:vpP:B:N:bHh W_OPTION
   do
     case $W_OPTION in
       H|h) Help; exit 2;;
-      C) if [ ! -f $CFDIR/$OPTARG ];    # Load_CustomFile CustomFile_Name
+      d) v04_1="1";                     # create_default_customfile (.gff2psrc) & rename_it if exist
+         v04=`ExistCustomfile "$v03"`;;
+      D) v04_1="1";                     # create_default_customfile & rename_it if exist
+         v03="$CFDIR/$OPTARG";
+         v04=`ExistCustomfile "$v03"`;;
+      C) if [ ! -f $CFDIR/$OPTARG ];    # load_customfile customfile_name
            then v01="0";
-                echo "Error: Custom File $OPTARG does not exist...Not Loaded." 1>&2 ;
+             echo "Error: Custom File $OPTARG does not exist...Not Loaded." 1>&2 ;
            else v01="1";
-	        echo "Report: Adding $OPTARG Custom File to Default (.gff2psrc)." 1>&2 ;
-                v02="$CFDIR/$OPTARG";
-         fi;;
-      v) v05="1";;                      # Print_Report
-      p) v06="Portrait";;               # Page_Orientation
-      P) v08=$OPTARG;;                  # Page_Number
-      B) v09=$OPTARG;;                  # Blocks_x_Page
-      N) v10=$OPTARG;;                  # Nucleotides_x_Line
-      b) v11="0";;                      # Blocks_Top-Bottom
+	         echo "Report: Adding $OPTARG Custom File to Default Custom File." 1>&2 ;
+             v02="$CFDIR/$OPTARG";
+           fi;;
+      v) v05="1";;                      # print_report
+      p) v06="Portrait";;               # page_orientation
+      P) v08=$OPTARG;;                  # page_number
+      B) v09=$OPTARG;;                  # blocks_x_page
+      N) v10=$OPTARG;;                  # nucleotides_x_line
+      b) v11="0";;                      # show_blocks_top-bottom
        :) ShowHelpLine $1; exit 2;;
       \?) ShowHelpLine $1; exit 2;;
     esac # case $W_OPTION
@@ -619,10 +659,13 @@ while getopts :C:vpP:B:N:bHh W_OPTION
 #
 # Defining PLOToptions STRING for GNU awk programs.
 #
-   P="BACKGROUND_COLOR:="$bgcolor"::FOREGROUND_COLOR:="$fgcolor"::"
+   P="BACKGROUND_COLOR:="$bgcolor"::FOREGROUND_COLOR:="$fgcolor"::"$n04_1":="$v04_1"::"
  P=$P$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05"::"
  P=$P$n06":="$v06"::"$n07":="$v07"::"$n08":="$v08"::"$n09":="$v09"::"$n10":="$v10"::"
- P=$P$n11":="$v11
+ P=$P$n11":="$v11"::"
+ P=$P$m01":="$c01"::"$m02":="$c02"::"$m03":="$c03"::"$m04":="$c04"::"$m05":="$c05"::"
+ P=$P$m06":="$c06"::"$m07":="$c07"::"$m08":="$c08"::"$m09":="$c09"::"$m10":="$c10"::"
+ P=$P$m11":="$c11"::"$m12":="$c12
  PLOToptions=$P
  if [ $v05 -eq 1 ]
    then
@@ -669,26 +712,26 @@ gawk 'BEGIN{
 }' "##dflt##" "$PSPROGRAM" "$PSVERSION" "$PSCREATION" "$PSREVISION" "$AUTHOR" "$EMAIL" "$MAIL"
 
 #
-# Printing PostScript Prolog...
+# Printing PostScript Setup Constants...
 #
   MAINPSCPR
   echo "%%Orientation: "$v06 # "page_orientation"
   echo "%%BoundingBox:  0  0  842   595"
-  MAINPSPROLOG
+  MAINPSSETUP
 
 #
 # Main GFF2PS GNU awk Program...
 #
 # (cat <<'@@@EndPROGRAM@@@') |
 # @@@EndPROGRAM@@@
-# gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -f - "$@"
+# gawk -v CUSTOMFILE=$v03 -f - "$@"
 #
-(echo $PLOToptions; MAINPSPROCS) |
+(echo $PLOToptions"::DCF:=$CFDIR/.gff2psrc"; MAINPSPROCS) |
 gawk 'BEGIN{
   ############ INITIALITATION ############
 
   # defaults
-  MINSCORE=0.25;
+  MINSCORE=0.10;
   MAXSCORE=1.00;
   BigLINE="########################################";
   FIRST_POS=0;
@@ -736,28 +779,31 @@ gawk 'BEGIN{
          }
        else { elem[2]=Var["BACKGROUND_COLOR"] }
        }
-     # Pre[elem[1]]=elem[2]
      Var[elem[1]]=elem[2]
      }
    }
-  # for (v in Pre) Var[v]=Pre[v]
   for (v in Var) printf "VAR: %-25s :: Value: %s\n", v, Var[v] | "cat 1>&2" 
 
 # Layout Properties
-  Default["page_size"]=Var["Page_Size"]
-  Default["page_orientation"]=Var["Page_Orientation"] # Landscape (default), Portrait.
+  Default["load_customfile"]=0            # Var["load_customfile"]
+  Default["customfile_name"]=""           # Var["customfile_name"]
+  Default["default_customfile_name"]=Var["DCF"]  # DCF="$CFDIR/.gff2psrc"
+#  Default["exist_default_customfile"]="0"  # only as a Var
+#  Default["create_default_customfile"]="0" # only as a Var
+#  Default["print_report"]="0"              # only as a Var
+  Default["page_size"]="a4"               # Var["page_size"]
+  Default["page_orientation"]="Landscape" # Var["page_orientation"] : Landscape (default), Portrait.
   Default["margin_left"]="1cm"
   Default["margin_right"]="1cm"
   Default["margin_upper"]="1cm"
   Default["margin_bottom"]="1cm"
   Default["foreground_color"]="FGcolor"
   Default["background_color"]="BGcolor"
-  Default["nucleotides_x_line"]=Var["Nucleotides_x_Line"]
-    # Default=0 -> gets the seqlenght from data
-  Default["blocks_x_page"]=Var["Blocks_x_Page"] # Default=1
-  Default["max_blocks_x_page"]=5 # You can change on .gff2psrc file.
-  Default["show_blocks_top-bottom"]=Var["Blocks_Top-Bottom"]
-  Default["page_number"]=Var["Page_Number"] # Default=1
+  Default["nucleotides_x_line"]=0 # Var["nucleotides_x_line"] : Default=0,gets the seqlenght from data
+  Default["blocks_x_page"]=1      # Var["blocks_x_page"] : Default=1
+  # Default["max_blocks_x_page"]=5  # You can change on .gff2psrc file.
+  Default["show_blocks_top-bottom"]=1 # Var["show_blocks_top-bottom"] : 1->TopBottom, 2->LeftRight.
+  Default["page_number"]=1        # Var["page_number"] : Default=1
   Default["strand_show_forward"]="on"
   Default["strand_show_reverse"]="on"
   Default["strand_show_independent"]="on"
@@ -774,15 +820,15 @@ gawk 'BEGIN{
   FT_PROP["layer"]=0
   FT_PROP["show"]="on"
 # Group Properties
-  GR_PROP["label"]="default" # none , default , "user-def"
-  GR_PROP["rank"]="0:1" # rank of lower-upper scores
+  GR_PROP["label"]="default"        # none , default , "user-def"
+  GR_PROP["rank"]="0:1"             # rank of lower-upper scores
   #  GR_PROP["vert_align"]="center" # center or baseline
   GR_PROP["join_align"]="center"
   GR_PROP["join_color"]=Default["foreground_color"]
   GR_PROP["join_linetype"]="solid"
   GR_PROP["join_show"]="off"
 # Lines (Method-Source) Properties
-  SO_PROP["label"]="default" # none , default , "user-def"
+  SO_PROP["label"]="default"     # none , default , "user-def"
   SO_PROP["vert_align"]="center" # center or baseline
   SO_PROP["baseline_align"]="center"
   SO_PROP["baseline_color"]=Default["foreground_color"]
@@ -803,9 +849,9 @@ gawk 'BEGIN{
  CM["K"]="k";CM["L"]="l";CM["M"]="m";CM["N"]="n";CM["O"]="o";
  CM["P"]="p";CM["Q"]="q";CM["R"]="r";CM["S"]="s";CM["T"]="t";
  CM["U"]="u";CM["V"]="v";CM["W"]="w";CM["X"]="x";CM["Y"]="y";
- CM["Z"]="z";CM["Ñ"]="ñ";CM["Ç"]="ç"
+ CM["Z"]="z";CM["Ñ"]="ñ";CM["Ç"]="ç"
 
- if (Var["Print_Report"]) 
+ if (Var["print_report"]) 
    printf "\n%s\nInput File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
  }
 { ############ READING .GFF FILES  ############
@@ -814,7 +860,7 @@ gawk 'BEGIN{
   #
   is_EOF=0
   while ($0~/^(\#)+/ || NF==0 ) { 
-    if (Var["Print_Report"]) 
+    if (Var["print_report"]) 
       printf "%10s :: Not Read :: %s\n", NR, $0 | "cat 1>&2"
     if (getline<=0) { is_EOF=1; break }
     }
@@ -823,7 +869,7 @@ gawk 'BEGIN{
 
   # Printing Input Lines
   #
-  if (Var["Print_Report"]) 
+  if (Var["print_report"]) 
    printf "%10s : %s\n", NR, $0 | "cat 1>&2"
 
   # read gff element within source and strand
@@ -876,7 +922,7 @@ END{
 
   # Printing elements sorted
   #
-  if (Var["Print_Report"]) {
+  if (Var["print_report"]) {
    printf "\n%s\ngff elements are sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
    for (sc in sources) 
     for (s in strands) {
@@ -892,6 +938,39 @@ END{
    close("cat 1>&2")
    }
 
+  ########## Defining Object Properties ##########
+  #
+  # Variable definition hierarchy:
+  # Program Defaults < Default Custom File < Custom File < Command Line.
+  #
+  CreateProps(0)
+  ECF=0
+  if (Var["exist_default_customfile"]) {
+    if (Var["print_report"]) printf "\n%s\nReading Default Custom File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
+    RCFile(Var["default_customfile_name"])
+    if (Var["print_report"]) printf "\n%s\nReading Custom File...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
+    if (Default["load_customfile"]==Var["load_customfile"]) {
+      Default["load_customfile"]=PLOT_LY["load_customfile"]
+      Default["customfile_name"]=PLOT_LY["customfile_name"]
+      }
+    else {
+      Default["load_customfile"]=Var["load_customfile"]
+      Default["customfile_name"]=Var["customfile_name"]
+      }
+    if (Default["load_customfile"]) RCFile(Default["customfile_name"])
+    ECF=1
+    }
+  else
+    if (Default["load_customfile"]) RCFile(Default["customfile_name"])
+  if (Var["print_report"]) printf "\n%s\nChecking for Command-Line Modified options...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
+  for (lytdef in Default) {
+    dft=Default[lytdef]
+    if (dft==Var[lytdef] && ECF==1) Default[lytdef]=PLOT_LY[lytdef]
+      else Default[lytdef]=Var[lytdef]
+    if (Var["print_report"]) printf "%s : Default Value=%s Custom File=%s Command-Line=%s : Using=%s\n", lytdef,dft,PLOT_LY[lytdef],Var[lytdef],Default[lytdef] | "sort | cat 1>&2"
+    }
+  close("sort | cat 1>&2")
+
   # Calculating Page Number, Blocks and NucxLine
   #
   PORI=Nuc_round(FIRST_POS,0) # floor
@@ -904,18 +983,15 @@ END{
   B=Default["blocks_x_page"]
 
   if (Default["nucleotides_x_line"]==0) {
-    POFFSET=PDIF
-    if (B>1) B=1
+    if (B>1 || P>1) POFFSET=Nuc_round((PDIF/(B*P)),1)
+    else POFFSET=PDIF
     }
   else POFFSET=Default["nucleotides_x_line"]
   if (POFFSET>PDIF) POFFSET=PDIF # necessary if it is defined a Zoom.
 
-  MNB=Default["max_blocks_x_page"]
   B1= PDIF%POFFSET!=0 ? ((PDIF-(PDIF%POFFSET))/POFFSET)+1 : ((PDIF-(PDIF%POFFSET))/POFFSET)
-  if (B<B1) { B=B1 }
-  P1= B%MNB!=0 ? ((B-(B%MNB))/MNB)+1 : ((B-(B%MNB))/MNB)
-  if (P<P1) { B=MNB; P=P1 }
-
+  P = B1%B!=0 ? ((B1-(B1%B))/B)+1 : ((B1-(B1%B))/B)
+  
   if (Default["show_blocks_top-bottom"]) BOFFSET=POFFSET
   else BOFFSET=POFFSET*P
 
@@ -923,13 +999,8 @@ END{
   printf "\npage_number %s\nblocks_x_page %s\nnucleotides_x_line %s\nmax_blocks_x_page %s\nshow_blocks_top-bottom %s\n",Default["page_number"],Default["blocks_x_page"],Default["nucleotides_x_line"],Default["max_blocks_x_page"],Default["show_blocks_top-bottom"] | "cat 1>&2"  
   printf "\nPORI %s\nPEND %s\nP %s\nB %s\nPOFFSET %s\nBOFFSET %s\n\n",PORI,PEND,P,B,POFFSET,BOFFSET | "cat 1>&2"  
 
-  ########## Defining Object Properties ##########
+  # PostScript Variables Setup.
   #
-  CreateProps(0)
-  if (Var["Print_Report"]) printf "\n%s\nReading Default Custom File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
-  if (Var["Exist_Default_CustomFile"]) RCFile(Var["Default_CustomFile_Name"])
-  if (Var["Print_Report"]) printf "\n%s\nReading Custom File...........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
-  if (Var["Load_CustomFile"]) RCFile(Var["CustomFile_Name"])
 
   # PostScript Main Procs.
   #
@@ -942,6 +1013,7 @@ END{
     startPSpage(pages,pages)  # PostSCript PageSetup.
 
     for (blocks=1;blocks<=B;blocks++) {
+      printf "%%\n%% Block Num: %s Page: %s\n%%\n",blocks,pages
 
   # make groups. assumes elements sorted by increasing acceptor position
   #
@@ -953,7 +1025,7 @@ END{
         start_=element[sc,s,S[sc,s,i],start];
         end_=element[sc,s,S[sc,s,i],end];
 
-       if (ChkLimits(start_,BORI,end_,(BORI+OFFSET))) {
+       if (ChkLimits(start_,BORI,end_,(BORI+POFFSET))) {
         feature_=element[sc,s,S[sc,s,i],feature];
         score_=element[sc,s,S[sc,s,i],score];
 
@@ -978,8 +1050,8 @@ END{
         remainder_[sc,s,tgr]=(3-(end_-(start_+frame_[sc,s,tgr])+1)%3)%3;
 
         printf "%s %s %s : %s \/%s %d %d %d %d %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_), Plot_Lbl(feature_) | "cat 1>&2"
-        grouping[sc,s,tgr,group,blocks] = sprintf("%s%s \/%s %d %d %d %d %4.2f (%s) (%s) f\n", grouping[sc,s,tgr,group,blocks], PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_), Plot_Lbl(feature_))
-        plot_group[tgr,blocks]=1
+        grouping[sc,s,tgr,group,blocks,pages] = sprintf("%s%s \/%s %d %d %d %d %4.2f (%s) (%s) f\n", grouping[sc,s,tgr,group,blocks,pages], PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_), Plot_Lbl(feature_))
+        plot_group[tgr,blocks,pages]=1
        } # if ChkLimits
       }  # for i
         printf "\n" | "cat 1>&2"
@@ -996,7 +1068,7 @@ END{
   #
   # make plotlines. Put non-overlapping groups into the same plotting line.
   #
-  if (Var["Print_Report"]) printf "\n%s\nPrinting Lines......Page: %s Block: %s\n%s\n\n",BigLINE,pages,blocks,BigLINE | "cat 1>&2"
+  if (Var["print_report"]) printf "\n%s\nPrinting Lines......Page: %s Block: %s\n%s\n\n",BigLINE,pages,blocks,BigLINE | "cat 1>&2"
   for (s in strands) {
     for (sc in sources) {
       if (n[sc,s]>0) printf "(%s) %s %s source\n", sc, PLOT_FT[sc,":","scale"], PLOT_FT[sc,":","spacing_scale"]
@@ -1006,21 +1078,21 @@ END{
         nl[sc,s] = j==nl[sc,s]+1 ? j : nl[sc,s];
         endline[sc,s,j]=grouping[sc,s,g,end];
 	    # plot group in file
-        if (Var["Print_Report"])
+        if (Var["print_report"])
           printf "GROUP : %-10s : %s %10d %10d \n", g, s, grouping[sc,s,g,start], grouping[sc,s,g,end] | " sort +6 | cat 1>&2";
         if (PLOT_FT[g,":","label"]=="default") labl=g
         else labl=PLOT_FT[g,":","label"]
-        if (plot_group[g,blocks]==1) {
+        if (plot_group[g,blocks,pages]==1) {
           printf "(%s) %s %s (%s) gp \n", checklbl(labl), grouping[sc,s,g,start], grouping[sc,s,g,end], s
-          printf "%s", grouping[sc,s,g,group,blocks] | "sort +0nr +6n +2n +3nr"
-          close("sort +0nr +6n +2n +3nr") # | sort +2n | sort +3nr")
+          printf "%s", grouping[sc,s,g,group,blocks,pages] | "sort +0nr +6nr +2n +3nr"
+          close("sort +0nr +6nr +2n +3nr")
           printf "g_end\n"
           } # if plot_group
         } # for ng[]
         if (n[sc,s]>0) printf "endsource\n"
       }   # for sources
     }     # for strands
-  if (Var["Print_Report"]) close(" sort +6 | cat 1>&2")
+  if (Var["print_report"]) close(" sort +6 | cat 1>&2")
 
   # Closing Pages MAIN LOOP.
   #
@@ -1032,12 +1104,22 @@ END{
 
   # If not exist, create custom file (.gff2psrc)
   #
-  printf "\n%s\nCustom File:\n%s\n\n%s\n\n", BigLINE,BigLINE, Var["Default_CustomFile_Name"] | "cat 1>&2"
-  if (!Var["Exist_Default_CustomFile"]) CreateProps(2)
+  printf "\n%s\nCustom File:\n%s\n\n%s\n\n", BigLINE,BigLINE, Default["default_customfile_name"] | "cat 1>&2"
+  if (Var["create_default_customfile"]) { 
+    if (Var["exist_default_customfile"]) {
+      printf "Warning: I am going to rewrite your Default Custom File.\n" | "cat 1>&2"
+      printf "         Moving last Default Custom File to %s.old\n",Default["default_customfile_name"] | "cat 1>&2"
+      system("cp -v " Default["default_customfile_name"] " " Default["default_customfile_name"] ".old")
+      }
+    else {
+      printf "Warning: Writing Default Custom File %s.\n",Default["default_customfile_name"] | "cat 1>&2"
+      }
+    CreateProps(2)
+    }
 
   # Object Properties Report...
   #
-  if (Var["Print_Report"]) {
+  if (Var["print_report"]) {
     printf "\n%s\nDefining Object Properties..........\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
     CreateProps(1)    }
 
@@ -1088,11 +1170,11 @@ function lcase(string) {
   return string
 }
 function checklbl(chain) {
- gsub(/[\(]/,"\\050",chain)
- gsub(/[\)]/,"\\051",chain)
- gsub(/[\<]/,"\\074",chain)
- gsub(/[\>]/,"\\076",chain)
- gsub(/[\_]/," ",chain)             
+ gsub(/[\(]/,"\\050",chain); gsub(/[\)]/,"\\051",chain)
+ gsub(/[\<]/,"\\074",chain); gsub(/[\>]/,"\\076",chain)
+ gsub(/[\/]/,"\\057",chain); gsub(/[\%]/,"\\045",chain)
+ gsub(/[\[]/,"\\133",chain); gsub(/[\]]/,"\\135",chain)
+ gsub(/[\{]/,"\\173",chain); gsub(/[\}]/,"\\175",chain)  
  return chain
 }
 function Plot_Lbl(gff_feat) {
@@ -1124,19 +1206,6 @@ function Set_feat_Shape(gff_feat,src) {
  tmp=pos""shp
  return tmp
 }
-#function Plot_Feature(gff_feat) {
-#  if (PLOT_FT[gff_feat,":","label"]=="default") lbl=gff_feat
-#  else lbl=PLOT_FT[gff_feat,":","label"]
-#  return sprintf("(%s) /%s /%s pf", checklbl(lbl), PLOT_FT[gff_feat,":","color"], PLOT_FT[gff_feat,":","shape"])
-#  PLOT_FT[feat,":","layer"]
-#  PLOT_FT[feat,":","show"]
-#}
-# function PRT_strand(st) {  # Plotting all elements of each strand.
-#   printf "%s setstrand\n", st
-#   for (sc in sources) {
-#     printf "%s %s setsource\n", nl[sc,st],PLOT_FT[sc,":","scale"]
-#     }
-# }
 function CreateProps(flag) {
   ############ Create Properties Index for Objects ############ 
   STRING="#\n# L ############PAGE LAYOUT############\n#\n"
@@ -1146,9 +1215,9 @@ function CreateProps(flag) {
       printf "%s=%s\n", dffeat, Default[dffeat] | "sort 1>&2"
     }
   else if (flag==2) { 
-    printf STRING > Var["Default_CustomFile_Name"]
+    printf STRING > Default["default_customfile_name"]
     for (dffeat in Default)
-      printf "%s=%s\n", dffeat, Default[dffeat] > Var["Default_CustomFile_Name"]
+      printf "%s=%s\n", dffeat, Default[dffeat] > Default["default_customfile_name"]
     }
   STRING="#\n# F ############GENOMIC FEATURES############\n#\n"
   if (flag==1) {
@@ -1156,8 +1225,8 @@ function CreateProps(flag) {
     printf STRING | "cat 1>&2"
     }
   else if (flag==2) {
-    close(Var["Default_CustomFile_Name"])
-    printf STRING >> Var["Default_CustomFile_Name"]
+    close(Var["default_customfile_name"])
+    printf STRING >> Default["default_customfile_name"]
     }
   for (feat in FT_ary) {
     for (prop in FT_PROP) {
@@ -1165,12 +1234,12 @@ function CreateProps(flag) {
       else if (flag==1)
 	    printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] | "sort 1>&2"
       else if (flag==2)
-	    printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] >> Var["Default_CustomFile_Name"]
+	    printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] >> Default["default_customfile_name"]
       }
     if (flag==1)
       printf "# %s:%s=%s\n#\n", feat, "feature_number", FT_ary[feat] | "cat 1>&2"
     # else if (flag==2)
-    #   printf "# %s:%s=%s\n#\n", feat, "feature_number", FT_ary[feat] >> Var["Default_CustomFile_Name"]
+    #   printf "# %s:%s=%s\n#\n", feat, "feature_number", FT_ary[feat] >> Default["default_customfile_name"]
     }
   STRING="#\n# G ############GROUP FEATURES############\n#\n"
   if (flag==1) { 
@@ -1178,8 +1247,8 @@ function CreateProps(flag) {
     printf STRING | "cat 1>&2"
     }
   else if (flag==2) {
-    close(Var["Default_CustomFile_Name"])
-    printf STRING >> Var["Default_CustomFile_Name"]
+    close(Var["default_customfile_name"])
+    printf STRING >> Default["default_customfile_name"]
     }
   for (gpfeat in GP_ary) {
     for (prop in GR_PROP) {
@@ -1187,12 +1256,12 @@ function CreateProps(flag) {
       else if (flag==1)
 	    printf "%s:%s=%s\n", gpfeat, prop, PLOT_FT[gpfeat,":",prop] | "sort 1>&2"
       else if (flag==2)
-	    printf "%s:%s=%s\n", gpfeat, prop, PLOT_FT[gpfeat,":",prop] >> Var["Default_CustomFile_Name"] 
+	    printf "%s:%s=%s\n", gpfeat, prop, PLOT_FT[gpfeat,":",prop] >> Default["default_customfile_name"] 
       }
     if (flag==1)
       printf "# %s:%s=%s\n#\n", gpfeat, "feature_number", GP_ary[gpfeat] | "cat 1>&2"
     # else if (flag==2)
-    #   printf "# %s:%s=%s\n#\n", gpfeat, "feature_number", GP_ary[gpfeat] >> Var["Default_CustomFile_Name"]
+    #   printf "# %s:%s=%s\n#\n", gpfeat, "feature_number", GP_ary[gpfeat] >> Default["default_customfile_name"]
     }
   STRING="#\n# S ############SOURCE FEATURES############\n#\n"
   if (flag==1) { 
@@ -1200,8 +1269,8 @@ function CreateProps(flag) {
     printf STRING | "cat 1>&2"
     }
   else if (flag==2) {
-    close(Var["Default_CustomFile_Name"])
-    printf STRING >> Var["Default_CustomFile_Name"]
+    close(Var["default_customfile_name"])
+    printf STRING >> Default["default_customfile_name"]
     }
   for (sofeat in sources) {
     for (prop in SO_PROP) {
@@ -1209,15 +1278,15 @@ function CreateProps(flag) {
       else if (flag==1)
 	    printf "%s:%s=%s\n", sofeat, prop, PLOT_FT[sofeat,":",prop] | "sort 1>&2"
       else if (flag==2)
-	    printf "%s:%s=%s\n", sofeat, prop, PLOT_FT[sofeat,":",prop] >> Var["Default_CustomFile_Name"]
+	    printf "%s:%s=%s\n", sofeat, prop, PLOT_FT[sofeat,":",prop] >> Default["default_customfile_name"]
       }
     if (flag==1)
       printf "# %s:%s=%s\n#\n", sofeat, "group_number", sources[sofeat] | "cat 1>&2"
     # else if (flag==2)
-    #  printf "# %s:%s=%s\n#\n", sofeat, "group_number", sources[sofeat] >> Var["Default_CustomFile_Name"]
+    #  printf "# %s:%s=%s\n#\n", sofeat, "group_number", sources[sofeat] >> Default["default_customfile_name"]
     }
     if (flag==1) { close("sort 1>&2"); close("cat 1>&2") }
-    else if (flag==2) close(Var["Default_CustomFile_Name"])
+    else if (flag==2) close(Default["default_customfile_name"])
 }
 function RCFile(file) { ############ Read CustomFile
   STRING="Match between: %s & %s : %s=%s\n"
@@ -1237,7 +1306,7 @@ function RCFile(file) { ############ Read CustomFile
             PLOT_FT[feat,":",second]=defs[2]
             nothere=1
             }
-          if (Var["Print_Report"])
+          if (Var["print_report"])
             printf "Feature "STRING,feat,first,(feat":"second),defs[2] | "cat 1>&2"
           }
         }
@@ -1245,7 +1314,7 @@ function RCFile(file) { ############ Read CustomFile
       if (nothere==0) {
         FT_ary[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
-        if (Var["Print_Report"])
+        if (Var["print_report"])
           printf "No Match found - New Feature: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
         }
       }
@@ -1256,7 +1325,7 @@ function RCFile(file) { ############ Read CustomFile
             PLOT_FT[feat,":",second]=defs[2]
             nothere=1
             }
-          if (Var["Print_Report"])
+          if (Var["print_report"])
             printf "Group "STRING,feat,first,(feat":"second),defs[2] | "cat 1>&2"
           }
         }
@@ -1264,7 +1333,7 @@ function RCFile(file) { ############ Read CustomFile
       if (nothere==0) {
         GP_ary[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
-        if (Var["Print_Report"])
+        if (Var["print_report"])
           printf "No Match found - New Feature: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
         }
       }
@@ -1275,7 +1344,7 @@ function RCFile(file) { ############ Read CustomFile
             PLOT_FT[feat,":",second]=defs[2]
 	        nothere=1
             }
-          if (Var["Print_Report"])
+          if (Var["print_report"])
             printf "Source "STRING,feat,first,(feat":"second),defs[2] | "cat 1>&2"
           }
         }
@@ -1283,15 +1352,15 @@ function RCFile(file) { ############ Read CustomFile
       if (nothere==0) {
         sources[gffirst]++
         PLOT_FT[gffirst,":",second]=defs[2]
-        if (Var["Print_Report"])
+        if (Var["print_report"])
           printf "No Match found - New Feature: %s : %s=%s\n",first,(feat":"second),defs[2] | "cat 1>&2"   
         }
       }
     else if (ft_type=="L") {
       if (defs[1] in Default) {
-        Default[defs[1]]=defs[2]
-        if (Var["Print_Report"])
-            printf "Layout "STRING,defs[1],first,(defs[1]":"second),defs[2] | "cat 1>&2"
+        PLOT_LY[defs[1]]=defs[2]
+        if (Var["print_report"])
+            printf "Layout "STRING,defs[1],first,defs[1],defs[2] | "cat 1>&2"
         }
       }
    }# if not empty or comment line 
