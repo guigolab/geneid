@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: maskedfastacoords.nw,v 1.4 2001-09-26 09:13:12 jabril Exp $ 
+% # $Id: maskedfastacoords.nw,v 1.5 2001-10-03 11:23:38 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -212,7 +212,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.4 2001-09-26 09:13:12 jabril Exp $$>$ }
+{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.5 2001-10-03 11:23:38 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -395,6 +395,8 @@ my %CmdLineVar = (
 <<Main Loop>>=
 &parse_cmdline(); # PROG-START
 
+&function_chooser();
+
 &main();
 
 &report('PROG-FINISH',&timing($T));
@@ -413,7 +415,8 @@ exit(0);
 
 <<Functions>>=
 <<Parsing command line options>>
-<<Main program function>>
+<<Main program functions>>
+<<Referenced functions>>
 <<Common PERL subs - Benchmark>>
 <<Common PERL subs - STDERR>>
 @
@@ -445,13 +448,16 @@ use Bio::SeqIO;
 
 For sequences larger than 50~Kbp it is recommended to use the [[largefasta]] file format, defined in {\bioseqlarge} module, if you run off memory. It slows down the program because it is using temporary files to access the sequence. The module must be accessed through [[Bio::SeqIO]].
 
-<<Opening sequence object>>=
+<<Global Vars>>=
 my ($seqin,$sequence);
-if ($CmdLineVar{LARGE}) {
-    $seqin = Bio::SeqIO->new(-format => 'largefasta', -fh => \*STDIN);
-} else {
+@ 
+<<Referenced functions>>=
+sub open_seq() {
     $seqin = Bio::SeqIO->new(-format => 'fasta', -fh => \*STDIN);
-};
+}
+sub open_seq_large() {
+    $seqin = Bio::SeqIO->new(-format => 'largefasta', -fh => \*STDIN);
+}
 @ 
 
 \sctn{Program functions}
@@ -652,11 +658,47 @@ group    => '',
 --group  <string>      Sets group GFF field (default none).
 @
 
-\subsctn{Main program function}
+\subsctn{Main program functions}
 
-<<Main program function>>=
+\subsubsctn{Referencing functions}
+
+We set references to functions that are going to be used with same identifier name in main loop.
+
+<<Main program functions>>=
+sub function_chooser() {
+    if ($CmdLineVar{LARGE}) {
+        $open_seq = \&open_seq_large ;
+    } else {
+        $open_seq = \&open_seq ;        
+    };
+    $CmdLineVar{MASKING} == 0 && do {
+        $char_check = \& ;
+        return;
+    };
+    $CmdLineVar{MASKING} == 2 && do {
+        
+        return;
+    };
+
+    $CmdLineVar{MASKING} == 4 && do {
+        
+        return;
+    };
+    $CmdLineVar{MASKING} == 8 && do {
+        
+    };
+} # function_chooser
+@ 
+
+<<Global Vars>>=
+my ($open_seq,$char_check);
+@ 
+
+\subsubsctn{Main processing loop}
+
+<<Main program functions>>=
 sub main() {
-    <<Opening sequence object>>
+    &$open_seq;
     while ($sequence = $seqin->next_seq()) {
         my ($sid,$len,$seq,@nuc,@coords,$masked_flg,$match,$msk_num);
         @coords = ();
@@ -665,9 +707,6 @@ sub main() {
         <<Writing masked regions coords in GFF>>
     }; # while 
 } # main
-@ 
-
-<<Global Vars>>=
 @ 
 
 <<Setting sequence variables from fasta record>>=
@@ -934,7 +973,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: maskedfastacoords.nw,v 1.4 2001-09-26 09:13:12 jabril Exp $
+# $Id: maskedfastacoords.nw,v 1.5 2001-10-03 11:23:38 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}

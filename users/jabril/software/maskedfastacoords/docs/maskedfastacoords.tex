@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: maskedfastacoords.tex,v 1.2 2001-09-25 17:34:08 jabril Exp $ 
+% # $Id: maskedfastacoords.tex,v 1.3 2001-10-03 11:23:38 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -212,7 +212,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: maskedfastacoords.tex,v 1.2 2001-09-25 17:34:08 jabril Exp $$>$ }
+{\small$<$ \verb$Id: maskedfastacoords.tex,v 1.3 2001-10-03 11:23:38 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -254,6 +254,7 @@ TCAGTCCCTGTTGGGTGTAGGTCTG
 The sequence '{\tt{}Masked{\char95}fasta{\char95}sequence}' is 325 nucleotides long. Masking is distributed in the following coords:
 
 \begin{center}
+\renewcommand{\arraystretch}{0.85}
 \begin{tabular}{rrl}
   51 & 100 & N-masking \\
  128 & 188 & soft-masking \\
@@ -267,27 +268,30 @@ The sequence '{\tt{}Masked{\char95}fasta{\char95}sequence}' is 325 nucleotides l
 
 \subsctn{Output}
 
-The program can produce three different outputs returning the coords of the sequence masked segments: only ``classical'' masking ('N' or 'n'), only soft-masking ('[a-z]'), both. From the previous example we must obtain the following results:
+The program can produce four different outputs returning the coords of the sequence masked segments: only ``classical'' masking ('N' or 'n'), only soft-masking ('[a-z]'), both or merge contiguous masked segments as if there were only one class. From the previous example we must obtain the following results:
 
 \begin{center}
-\renewcommand{\arraystretch}{0.75}
+\renewcommand{\arraystretch}{0.8}
 \begin{tabular}{c@{\qquad}c@{\qquad}c}
+\begin{tabular}[t]{l}
  \begin{tabular}[t]{rrl}
-\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Basic-masking} \hrulefill } \\
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Default-masking} \hrulefill } \\
   51 & 100 & N-masking \\
  189 & 200 & N-masking \\
- 274 & 278 & n-masking \\[2ex]
+ 274 & 278 & n-masking \\
  \end{tabular}
-&
+\\[3ex]
  \begin{tabular}[t]{rrl}
 \multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Soft-masking} \hrulefill } \\
  128 & 188 & soft-masking \\
  212 & 245 & soft-masking \\
- 269 & 284 & soft-masking \\[2ex]
+ 269 & 284 & soft-masking \\
  \end{tabular}
+\\
+\end{tabular}
 &
  \begin{tabular}[t]{rrl}
-\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Merged-masking} \hrulefill } \\
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{All-masking} \hrulefill } \\
   51 & 100 & N-masking \\
  128 & 188 & soft-masking \\
  189 & 200 & N-masking \\
@@ -295,6 +299,14 @@ The program can produce three different outputs returning the coords of the sequ
  269 & 273 & soft-masking \\
  274 & 278 & n-masking (soft) \\
  279 & 284 & soft-masking \\
+ \end{tabular}
+&
+ \begin{tabular}[t]{rrl}
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Merged-masking} \hrulefill } \\
+  51 & 100 & N-masking \\
+ 128 & 200 & merged-masking \\
+ 212 & 245 & soft-masking \\
+ 269 & 284 & merged-masking \\
  \end{tabular}
 \\
 \end{tabular}
@@ -345,7 +357,7 @@ The program can produce three different outputs returning the coords of the sequ
 \nwnotused{maskedfastacoords}\nwendcode{}\nwbegindocs{18}\nwdocspar
 
 \nwenddocs{}\nwbegincode{19}\sublabel{NWmas1F-ProC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ProC-1}}}\moddef{Program Info~{\nwtagstyle{}\subpageref{NWmas1F-ProC-1}}}\endmoddef
-my $PROGRAM = 'getfastamasked.pl';
+my $PROGRAM = 'maskedfastacoords.pl';
 my $VERSION = '0.1_alpha';
 \nwused{\\{NWmas1F-PERC-1}}\nwendcode{}\nwbegindocs{20}\nwdocspar
 \nwenddocs{}\nwbegincode{21}\sublabel{NWmas1F-ProA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ProA-1}}}\moddef{Prog USAGE~{\nwtagstyle{}\subpageref{NWmas1F-ProA-1}}}\endmoddef
@@ -373,10 +385,17 @@ my $VERSION = '0.1_alpha';
 \LA{}Boolean~{\nwtagstyle{}\subpageref{NWmas1F-Boo7-1}}\RA{}
 \LA{}Stderr subs vars~{\nwtagstyle{}\subpageref{NWmas1F-StdG-1}}\RA{}
 my ($id,$seq) = ('','');
-\nwused{\\{NWmas1F-masH-1}}\nwendcode{}\nwbegindocs{30}\nwdocspar
+my %CmdLineVar = (
+                 \LA{}cmdline defaults - masking~{\nwtagstyle{}\subpageref{NWmas1F-cmdQ-1}}\RA{}
+                 \LA{}cmdline defaults - fasta~{\nwtagstyle{}\subpageref{NWmas1F-cmdO-1}}\RA{}
+                 \LA{}cmdline defaults - GFF~{\nwtagstyle{}\subpageref{NWmas1F-cmdM-1}}\RA{}
+                 );
+\nwalsodefined{\\{NWmas1F-GloB-2}\\{NWmas1F-GloB-3}}\nwused{\\{NWmas1F-masH-1}}\nwendcode{}\nwbegindocs{30}\nwdocspar
 
 \nwenddocs{}\nwbegincode{31}\sublabel{NWmas1F-Mai9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Mai9-1}}}\moddef{Main Loop~{\nwtagstyle{}\subpageref{NWmas1F-Mai9-1}}}\endmoddef
 &parse_cmdline(); # PROG-START
+
+&function_chooser();
 
 &main();
 
@@ -396,7 +415,8 @@ exit(0);
 
 \nwenddocs{}\nwbegincode{35}\sublabel{NWmas1F-Fun9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Fun9-1}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWmas1F-Fun9-1}}}\endmoddef
 \LA{}Parsing command line options~{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}\RA{}
-\LA{}Main program function~{\nwtagstyle{}\subpageref{NWmas1F-MaiL-1}}\RA{}
+\LA{}Main program functions~{\nwtagstyle{}\subpageref{NWmas1F-MaiM-1}}\RA{}
+\LA{}Referenced functions~{\nwtagstyle{}\subpageref{NWmas1F-RefK-1}}\RA{}
 \LA{}Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-ComS-1}}\RA{}
 \LA{}Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWmas1F-ComP-1}}\RA{}
 \nwused{\\{NWmas1F-masH-1}}\nwendcode{}\nwbegindocs{36}\nwdocspar
@@ -404,6 +424,7 @@ exit(0);
 \subsctn{{\biop} modules}
 
 \nwenddocs{}%
+%
 %
 %
 %
@@ -425,22 +446,36 @@ use Bio::SeqIO;
                from BioPerl web site at "http://bioperl.org/".
 \nwused{\\{NWmas1F-perI-1}}\nwendcode{}\nwbegindocs{42}\nwdocspar
 
+For sequences larger than 50~Kbp it is recommended to use the {\tt{}largefasta} file format, defined in {\bioseqlarge} module, if you run off memory. It slows down the program because it is using temporary files to access the sequence. The module must be accessed through {\tt{}Bio::SeqIO}.
+
+\nwenddocs{}\nwbegincode{43}\sublabel{NWmas1F-GloB-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-GloB-2}}}\moddef{Global Vars~{\nwtagstyle{}\subpageref{NWmas1F-GloB-1}}}\plusendmoddef
+my ($seqin,$sequence);
+\nwendcode{}\nwbegindocs{44}\nwdocspar
+\nwenddocs{}\nwbegincode{45}\sublabel{NWmas1F-RefK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-RefK-1}}}\moddef{Referenced functions~{\nwtagstyle{}\subpageref{NWmas1F-RefK-1}}}\endmoddef
+sub open_seq() \{
+    $seqin = Bio::SeqIO->new(-format => 'fasta', -fh => \\*STDIN);
+\}
+sub open_seq_large() \{
+    $seqin = Bio::SeqIO->new(-format => 'largefasta', -fh => \\*STDIN);
+\}
+\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{46}\nwdocspar
+
 \sctn{Program functions}
 
 \subsctn{Processing command-line options}
 
-\nwenddocs{}\nwbegincode{43}\sublabel{NWmas1F-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-UseK-1}}}\moddef{Use Modules - Getopt~{\nwtagstyle{}\subpageref{NWmas1F-UseK-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{47}\sublabel{NWmas1F-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-UseK-1}}}\moddef{Use Modules - Getopt~{\nwtagstyle{}\subpageref{NWmas1F-UseK-1}}}\endmoddef
 use Getopt::Long;
 Getopt::Long::Configure qw/ bundling /;
-\nwused{\\{NWmas1F-UseB-1}}\nwendcode{}\nwbegindocs{44}\nwdocspar
+\nwused{\\{NWmas1F-UseB-1}}\nwendcode{}\nwbegindocs{48}\nwdocspar
 
-\nwenddocs{}\nwbegincode{45}\sublabel{NWmas1F-perM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-perM-1}}}\moddef{perl requires - Getopt~{\nwtagstyle{}\subpageref{NWmas1F-perM-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{49}\sublabel{NWmas1F-perM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-perM-1}}}\moddef{perl requires - Getopt~{\nwtagstyle{}\subpageref{NWmas1F-perM-1}}}\endmoddef
 "Getopt::Long" - processing command-line options.
-\nwused{\\{NWmas1F-perI-1}}\nwendcode{}\nwbegindocs{46}\nwdocspar
+\nwused{\\{NWmas1F-perI-1}}\nwendcode{}\nwbegindocs{50}\nwdocspar
 
 See '{\tt{}man\ Getopt::Long}' for further info about this package.
 
-\nwenddocs{}\nwbegincode{47}\sublabel{NWmas1F-ParS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\moddef{Parsing command line options~{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{51}\sublabel{NWmas1F-ParS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\moddef{Parsing command line options~{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\endmoddef
 sub parse_cmdline() \{
 
     $SIG\{__WARN__\} = sub \{ &warn('UNKNOWN_CL_OPTION',$T,$_[0]) \};
@@ -454,43 +489,44 @@ sub parse_cmdline() \{
 
     &report("PROG-START");
 \} # parse_cmdline
-\nwalsodefined{\\{NWmas1F-ParS-2}\\{NWmas1F-ParS-3}}\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwalsodefined{\\{NWmas1F-ParS-2}\\{NWmas1F-ParS-3}}\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{52}\nwdocspar
 
-\nwenddocs{}\nwbegincode{49}\sublabel{NWmas1F-warM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-warM-1}}}\moddef{warnings: command-line~{\nwtagstyle{}\subpageref{NWmas1F-warM-1}}}\endmoddef
+
+\nwenddocs{}\nwbegincode{53}\sublabel{NWmas1F-warM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-warM-1}}}\moddef{warnings: command-line~{\nwtagstyle{}\subpageref{NWmas1F-warM-1}}}\endmoddef
 'UNKNOWN_CL_OPTION' =>
   $Warn."Error trapped while processing command-line:\\n".(" "x16)."\\%s\\n",
 'CMD_LINE_ERROR' =>
   $spl.$spw." Please, check your command-line options!!!\\n".$Error."\\n".
   $spw." ".("."x12)." Type \\"maskedfastacoords.pl -h\\" for help.\\n".$spl,
-\nwused{\\{NWmas1F-StdG-2}}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwused{\\{NWmas1F-StdG-2}}\nwendcode{}\nwbegindocs{54}\nwdocspar
 
 \subsubsctn{Defining help and auxiliary code chunks}
 
 The following command-line checkings look for those options exiting the program: '{\tt{}help}' and '{\tt{}version}'. Both need to output to screen without any other message/warning being displayed at the same time.
 
-\nwenddocs{}\nwbegincode{51}\sublabel{NWmas1F-comU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comU-1}}}\moddef{command-line options with exit~{\nwtagstyle{}\subpageref{NWmas1F-comU-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{55}\sublabel{NWmas1F-comU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comU-1}}}\moddef{command-line options with exit~{\nwtagstyle{}\subpageref{NWmas1F-comU-1}}}\endmoddef
 "version"   => \\&prt_version, 
 "h|help|?"  => \\&prt_help,
-\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{52}\nwdocspar
-\nwenddocs{}\nwbegincode{53}\sublabel{NWmas1F-comO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comO-1}}}\moddef{command-line help - help~{\nwtagstyle{}\subpageref{NWmas1F-comO-1}}}\endmoddef
+\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{56}\nwdocspar
+\nwenddocs{}\nwbegincode{57}\sublabel{NWmas1F-comO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comO-1}}}\moddef{command-line help - help~{\nwtagstyle{}\subpageref{NWmas1F-comO-1}}}\endmoddef
 -h, --help            Shows this help.
 --version             Shows current version and exits.
-\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{54}\nwdocspar
+\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{58}\nwdocspar
 
-\nwenddocs{}\nwbegincode{55}\sublabel{NWmas1F-ParS-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ParS-2}}}\moddef{Parsing command line options~{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{59}\sublabel{NWmas1F-ParS-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ParS-2}}}\moddef{Parsing command line options~{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\plusendmoddef
 sub prt_version() \{
     &report('SHOW_VERSION',$PROGRAM,$VERSION);
     exit(1);
 \} # prt_version
-\nwendcode{}\nwbegindocs{56}\nwdocspar
+\nwendcode{}\nwbegindocs{60}\nwdocspar
 
-\nwenddocs{}\nwbegincode{57}\sublabel{NWmas1F-mesV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-mesV-1}}}\moddef{messages - parsing command-line~{\nwtagstyle{}\subpageref{NWmas1F-mesV-1}}}\endmoddef
-'SHOW_VERSION' => $sp."### \\%s -- \\%s\\n".$sp,
-\nwnotused{messages\ -\ parsing\ command-line}\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwenddocs{}\nwbegincode{61}\sublabel{NWmas1F-mesU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-mesU-1}}}\moddef{messages: parsing command-line~{\nwtagstyle{}\subpageref{NWmas1F-mesU-1}}}\endmoddef
+'SHOW_VERSION' => $sp."### \\%s -- Version: \\%s\\n".$sp,
+\nwused{\\{NWmas1F-StdG-2}}\nwendcode{}\nwbegindocs{62}\nwdocspar
 
 Printing command-line help to {\tt{}STDERR}:
 
-\nwenddocs{}\nwbegincode{59}\sublabel{NWmas1F-ParS-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ParS-3}}}\moddef{Parsing command line options~{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{63}\sublabel{NWmas1F-ParS-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ParS-3}}}\moddef{Parsing command line options~{\nwtagstyle{}\subpageref{NWmas1F-ParS-1}}}\plusendmoddef
 sub prt_help() \{
     print STDERR <<"+++EndOfHelp+++";
 PROGRAM:
@@ -525,9 +561,9 @@ AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000 - Josep F. Abril
 +++EndOfHelp+++
     exit(1);
 \} # prt_help
-\nwendcode{}\nwbegindocs{60}\nwdocspar
+\nwendcode{}\nwbegindocs{64}\nwdocspar
 
-\nwenddocs{}\nwbegincode{61}\sublabel{NWmas1F-perI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-perI-1}}}\moddef{perl requires help~{\nwtagstyle{}\subpageref{NWmas1F-perI-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{65}\sublabel{NWmas1F-perI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-perI-1}}}\moddef{perl requires help~{\nwtagstyle{}\subpageref{NWmas1F-perI-1}}}\endmoddef
 $PROGRAM needs the following Perl modules 
 installed in your system, we used those available 
 from the standard Perl distribution. Those that 
@@ -539,9 +575,9 @@ already have downloaded them from CPAN
   \LA{}perl requires - BioPerl~{\nwtagstyle{}\subpageref{NWmas1F-perN-1}}\RA{}
   \LA{}perl requires - Getopt~{\nwtagstyle{}\subpageref{NWmas1F-perM-1}}\RA{}
   \LA{}perl requires - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-perP-1}}\RA{}
-\nwused{\\{NWmas1F-ParS-3}}\nwendcode{}\nwbegindocs{62}%$
+\nwused{\\{NWmas1F-ParS-3}}\nwendcode{}\nwbegindocs{66}%$
 
-\nwenddocs{}\nwbegincode{63}\sublabel{NWmas1F-comH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comH-1}}}\moddef{command-line help~{\nwtagstyle{}\subpageref{NWmas1F-comH-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{67}\sublabel{NWmas1F-comH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comH-1}}}\moddef{command-line help~{\nwtagstyle{}\subpageref{NWmas1F-comH-1}}}\endmoddef
 A double dash on itself "--" signals end of the options
 and start of file names (if present). After double dash,
 you can use a single dash "-" as STDIN placeholder. 
@@ -558,45 +594,61 @@ Available options and a short description are listed here:
 + GFF output:
 
   \LA{}command-line help - GFF~{\nwtagstyle{}\subpageref{NWmas1F-comN-1}}\RA{}
-\nwused{\\{NWmas1F-ParS-3}}\nwendcode{}\nwbegindocs{64}\nwdocspar
+\nwused{\\{NWmas1F-ParS-3}}\nwendcode{}\nwbegindocs{68}\nwdocspar
 
 \subsubsctn{Defining command-line options}
 
-\nwenddocs{}\nwbegincode{65}\sublabel{NWmas1F-comU.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comU.2-1}}}\moddef{command-line options - masking~{\nwtagstyle{}\subpageref{NWmas1F-comU.2-1}}}\endmoddef
-"s|soft-masked"  => ,
-"m|merge-masked" => ,
-\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{66}\nwdocspar
-\nwenddocs{}\nwbegincode{67}\sublabel{NWmas1F-comR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comR-1}}}\moddef{command-line help - masking~{\nwtagstyle{}\subpageref{NWmas1F-comR-1}}}\endmoddef
--s, --soft-masked      Default is looking for "N" masked sequence
+\nwenddocs{}\nwbegincode{69}\sublabel{NWmas1F-comU.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comU.2-1}}}\moddef{command-line options - masking~{\nwtagstyle{}\subpageref{NWmas1F-comU.2-1}}}\endmoddef
+"a|all-masked"   => sub \{ $CmdLineVar\{MASKING\} = 2 \},
+"s|soft-masked"  => sub \{ $CmdLineVar\{MASKING\} = 4 \},
+"m|merge-masked" => sub \{ $CmdLineVar\{MASKING\} = 8 \},
+\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{70}\nwdocspar
+\nwenddocs{}\nwbegincode{71}\sublabel{NWmas1F-cmdQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-cmdQ-1}}}\moddef{cmdline defaults - masking~{\nwtagstyle{}\subpageref{NWmas1F-cmdQ-1}}}\endmoddef
+MASKING  => 0,
+\nwused{\\{NWmas1F-GloB-1}}\nwendcode{}\nwbegindocs{72}\nwdocspar
+\nwenddocs{}\nwbegincode{73}\sublabel{NWmas1F-comR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comR-1}}}\moddef{command-line help - masking~{\nwtagstyle{}\subpageref{NWmas1F-comR-1}}}\endmoddef
+-a, --all-masked       Default is looking for "N" masked sequence
                        segments. This option distinguish between 
                        upper/lower-case and assumes lower-case to 
                        define masked regions too (so called soft-masking).
--m, --merge-masked     Default is differentiating classical-masking
+-s, --soft-masked      Only outputs soft-masked sequence segments.
+-m, --merge-masked     Previous options differentiate classical-masking
                        (with "N"s) from soft-masking. This option merges
                        both as if they were the same masking type
                        (it also enables soft-masking search so previous 
-                       option is not required when passing this one).
-\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{68}\nwdocspar
+                       options are not required when passing this one).
+\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{74}\nwdocspar
  
-\nwenddocs{}\nwbegincode{69}\sublabel{NWmas1F-comS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comS-1}}}\moddef{command-line options - fasta~{\nwtagstyle{}\subpageref{NWmas1F-comS-1}}}\endmoddef
-"l|large-fasta"  => ,
-\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{70}\nwdocspar
-\nwenddocs{}\nwbegincode{71}\sublabel{NWmas1F-comP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comP-1}}}\moddef{command-line help - fasta~{\nwtagstyle{}\subpageref{NWmas1F-comP-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{75}\sublabel{NWmas1F-comS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comS-1}}}\moddef{command-line options - fasta~{\nwtagstyle{}\subpageref{NWmas1F-comS-1}}}\endmoddef
+"l|large-fasta"  => \\$CmdLineVar\{LARGE\},
+\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{76}\nwdocspar
+\nwenddocs{}\nwbegincode{77}\sublabel{NWmas1F-cmdO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-cmdO-1}}}\moddef{cmdline defaults - fasta~{\nwtagstyle{}\subpageref{NWmas1F-cmdO-1}}}\endmoddef
+LARGE    => 0,
+\nwused{\\{NWmas1F-GloB-1}}\nwendcode{}\nwbegindocs{78}\nwdocspar
+\nwenddocs{}\nwbegincode{79}\sublabel{NWmas1F-comP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comP-1}}}\moddef{command-line help - fasta~{\nwtagstyle{}\subpageref{NWmas1F-comP-1}}}\endmoddef
 -l, --large-fasta      For large genomic sequence you can enable
                        Bio::SeqIO to work with temporary files
                        avoiding memory overload (though it makes
                        the script to run slowly).
-\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{72}\nwdocspar
+\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{80}\nwdocspar
 
-\nwenddocs{}\nwbegincode{73}\sublabel{NWmas1F-comQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comQ-1}}}\moddef{command-line options - GFF~{\nwtagstyle{}\subpageref{NWmas1F-comQ-1}}}\endmoddef
-"g|gff"        => ,
-"seq-name=s"   => ,
-"source=s"     => ,
-"f|feature=s"  => ,
-"strand=s"     => ,
-"group=s"      => ,
-\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{74}\nwdocspar
-\nwenddocs{}\nwbegincode{75}\sublabel{NWmas1F-comN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comN-1}}}\moddef{command-line help - GFF~{\nwtagstyle{}\subpageref{NWmas1F-comN-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{81}\sublabel{NWmas1F-comQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comQ-1}}}\moddef{command-line options - GFF~{\nwtagstyle{}\subpageref{NWmas1F-comQ-1}}}\endmoddef
+"g|gff"        => \\$CmdLineVar\{GFF\},
+"seq-name=s"   => \\$CmdLineVar\{sequence\},
+"source=s"     => \\$CmdLineVar\{source\},
+"f|feature=s"  => \\$CmdLineVar\{feature\},
+"strand=s"     => \\$CmdLineVar\{strand\},
+"group=s"      => \\$CmdLineVar\{group\},
+\nwused{\\{NWmas1F-ParS-1}}\nwendcode{}\nwbegindocs{82}\nwdocspar
+\nwenddocs{}\nwbegincode{83}\sublabel{NWmas1F-cmdM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-cmdM-1}}}\moddef{cmdline defaults - GFF~{\nwtagstyle{}\subpageref{NWmas1F-cmdM-1}}}\endmoddef
+GFF      => 0,
+sequence => 'noname',
+source   => 'masked',
+feature  => 'masked',
+strand   => '.',
+group    => '',
+\nwused{\\{NWmas1F-GloB-1}}\nwendcode{}\nwbegindocs{84}\nwdocspar
+\nwenddocs{}\nwbegincode{85}\sublabel{NWmas1F-comN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-comN-1}}}\moddef{command-line help - GFF~{\nwtagstyle{}\subpageref{NWmas1F-comN-1}}}\endmoddef
 -g, --gff              Output in GFF format (default coords).
 
 --seq-name <string>    Sets sequence GFF field (default "noname").
@@ -604,14 +656,50 @@ Available options and a short description are listed here:
 -f, --feature <string> Sets feature GFF field (default "masked").
 --strand <string>      Sets strand GFF field (default ".").
 --group  <string>      Sets group GFF field (default none).
-\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{76}\nwdocspar
+\nwused{\\{NWmas1F-comH-1}}\nwendcode{}\nwbegindocs{86}\nwdocspar
 
-\subsctn{Main program function}
+\subsctn{Main program functions}
 
-\nwenddocs{}\nwbegincode{77}\sublabel{NWmas1F-MaiL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-MaiL-1}}}\moddef{Main program function~{\nwtagstyle{}\subpageref{NWmas1F-MaiL-1}}}\endmoddef
+\subsubsctn{Referencing functions}
+
+We set references to functions that are going to be used with same identifier name in main loop.
+
+\nwenddocs{}\nwbegincode{87}\sublabel{NWmas1F-MaiM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-MaiM-1}}}\moddef{Main program functions~{\nwtagstyle{}\subpageref{NWmas1F-MaiM-1}}}\endmoddef
+sub function_chooser() \{
+    if ($CmdLineVar\{LARGE\}) \{
+        $open_seq = \\&open_seq_large ;
+    \} else \{
+        $open_seq = \\&open_seq ;        
+    \};
+    $CmdLineVar\{MASKING\} == 0 && do \{
+        $char_check = \\& ;
+        return;
+    \};
+    $CmdLineVar\{MASKING\} == 2 && do \{
+        
+        return;
+    \};
+
+    $CmdLineVar\{MASKING\} == 4 && do \{
+        
+        return;
+    \};
+    $CmdLineVar\{MASKING\} == 8 && do \{
+        
+    \};
+\} # function_chooser
+\nwalsodefined{\\{NWmas1F-MaiM-2}}\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{88}\nwdocspar
+
+\nwenddocs{}\nwbegincode{89}\sublabel{NWmas1F-GloB-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-GloB-3}}}\moddef{Global Vars~{\nwtagstyle{}\subpageref{NWmas1F-GloB-1}}}\plusendmoddef
+my ($open_seq,$char_check);
+\nwendcode{}\nwbegindocs{90}\nwdocspar
+
+\subsubsctn{Main processing loop}
+
+\nwenddocs{}\nwbegincode{91}\sublabel{NWmas1F-MaiM-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-MaiM-2}}}\moddef{Main program functions~{\nwtagstyle{}\subpageref{NWmas1F-MaiM-1}}}\plusendmoddef
 sub main() \{
-    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \\*STDIN);
-    while (my $sequence = $seqin->next_seq()) \{
+    &$open_seq;
+    while ($sequence = $seqin->next_seq()) \{
         my ($sid,$len,$seq,@nuc,@coords,$masked_flg,$match,$msk_num);
         @coords = ();
         \LA{}Setting sequence variables from fasta record~{\nwtagstyle{}\subpageref{NWmas1F-Seti-1}}\RA{}
@@ -619,25 +707,28 @@ sub main() \{
         \LA{}Writing masked regions coords in GFF~{\nwtagstyle{}\subpageref{NWmas1F-Wria-1}}\RA{}
     \}; # while 
 \} # main
-\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{78}\nwdocspar
+\nwendcode{}\nwbegindocs{92}\nwdocspar
 
-\nwenddocs{}\nwbegincode{79}\sublabel{NWmas1F-Seti-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Seti-1}}}\moddef{Setting sequence variables from fasta record~{\nwtagstyle{}\subpageref{NWmas1F-Seti-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{93}\sublabel{NWmas1F-Seti-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Seti-1}}}\moddef{Setting sequence variables from fasta record~{\nwtagstyle{}\subpageref{NWmas1F-Seti-1}}}\endmoddef
 print STDERR "### READING FASTA............\\n";
 $sid  = $sequence->display_id();
 $len  = $sequence->length();
 $seq  = $sequence->seq();
-\nwused{\\{NWmas1F-MaiL-1}}\nwendcode{}\nwbegindocs{80}\nwdocspar
+\nwused{\\{NWmas1F-MaiM-2}}\nwendcode{}\nwbegindocs{94}\nwdocspar
 
-\label{todo:CCC}
+\label{todo:CCC}\label{todo:CCD}
 \nwenddocs{}%
 %
-\nwbegindocs{82}\nwdocspar
+%
+\nwbegindocs{96}\nwdocspar
 \nwenddocs{}%
 %
-\nwbegindocs{84}\nwdocspar
-\todo{ \item \todoCCC } % todo
+%
+\nwbegindocs{98}\nwdocspar
+\todo{ \item \todoCCC 
+       \item \todoCCD } % todo
 
-\nwenddocs{}\nwbegincode{85}\sublabel{NWmas1F-FinT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-FinT-1}}}\moddef{Finding masked regions coords~{\nwtagstyle{}\subpageref{NWmas1F-FinT-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{99}\sublabel{NWmas1F-FinT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-FinT-1}}}\moddef{Finding masked regions coords~{\nwtagstyle{}\subpageref{NWmas1F-FinT-1}}}\endmoddef
 print STDERR "###         PARSING SEQUENCE: $sid ($len bp)\\n";
 @nuc = split //og, $seq;
 ($masked_flg,$match) = ($F,$F) ;
@@ -658,16 +749,16 @@ for (my $n = 0; $n <= $#nuc; $n++) \{
 \}; # for nuc in $seq
 # if last nucleotide is masked, previous loop not includes its coord. 
 $masked_flg &&( push @coords, $len);
-\nwused{\\{NWmas1F-MaiL-1}}\nwendcode{}\nwbegindocs{86}\nwdocspar
+\nwused{\\{NWmas1F-MaiM-2}}\nwendcode{}\nwbegindocs{100}\nwdocspar
 
-\nwenddocs{}\nwbegincode{87}\sublabel{NWmas1F-Wria-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Wria-1}}}\moddef{Writing masked regions coords in GFF~{\nwtagstyle{}\subpageref{NWmas1F-Wria-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{101}\sublabel{NWmas1F-Wria-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Wria-1}}}\moddef{Writing masked regions coords in GFF~{\nwtagstyle{}\subpageref{NWmas1F-Wria-1}}}\endmoddef
 $msk_num = scalar(@coords) / 2;
 print STDERR "###         WRITING GFF COORDS: $msk_num masked regions found.\\n";
 for (my $n = 0; $n <= $#coords; $n+=2) \{
     my $GFFstring = ("\\%s\\t" x 5).(".\\t" x 3).".\\n";
     printf STDOUT $GFFstring, $sid, "masked", "masked", @coords[$n..($n + 1)];
 \}; # for coords in @coords
-\nwused{\\{NWmas1F-MaiL-1}}\nwendcode{}\nwbegindocs{88}\nwdocspar
+\nwused{\\{NWmas1F-MaiM-2}}\nwendcode{}\nwbegindocs{102}\nwdocspar
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
 
@@ -695,7 +786,7 @@ for (my $n = 0; $n <= $#coords; $n+=2) \{
 
 \subsctn{PERL scripts}
 
-\nwenddocs{}\nwbegincode{89}\sublabel{NWmas1F-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWmas1F-PERC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{103}\sublabel{NWmas1F-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWmas1F-PERC-1}}}\endmoddef
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
 #
@@ -707,36 +798,35 @@ for (my $n = 0; $n <= $#coords; $n+=2) \{
 #
 use strict;
 #
-# BEGIN \{
-    \LA{}Program Info~{\nwtagstyle{}\subpageref{NWmas1F-ProC-1}}\RA{}
-    my $DATE = localtime;
-    my $USER = defined($ENV\{USER\}) ? $ENV\{USER\} : 'Child Process';
-    my $host = `hostname`;
-    chomp($host);
-# \} # BEGIN
-\nwused{\\{NWmas1F-masH-1}}\nwendcode{}\nwbegindocs{90}\nwdocspar
+\LA{}Program Info~{\nwtagstyle{}\subpageref{NWmas1F-ProC-1}}\RA{}
+my $DATE = localtime;
+my $USER = defined($ENV\{USER\}) ? $ENV\{USER\} : 'Child Process';
+my $host = `hostname`;
+chomp($host);
+#
+\nwused{\\{NWmas1F-masH-1}}\nwendcode{}\nwbegindocs{104}\nwdocspar
 
-\nwenddocs{}\nwbegincode{91}\sublabel{NWmas1F-Boo7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Boo7-1}}}\moddef{Boolean~{\nwtagstyle{}\subpageref{NWmas1F-Boo7-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{105}\sublabel{NWmas1F-Boo7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Boo7-1}}}\moddef{Boolean~{\nwtagstyle{}\subpageref{NWmas1F-Boo7-1}}}\endmoddef
 my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
-\nwused{\\{NWmas1F-GloB-1}}\nwendcode{}\nwbegindocs{92}\nwdocspar
+\nwused{\\{NWmas1F-GloB-1}}\nwendcode{}\nwbegindocs{106}\nwdocspar
 
 \subsubsctn{Timing our scripts}
 
 The '{\tt{}Benchmark}' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
 
-\nwenddocs{}\nwbegincode{93}\sublabel{NWmas1F-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-UseN-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{107}\sublabel{NWmas1F-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-UseN-1}}}\endmoddef
 use Benchmark;
   \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWmas1F-Tim8-1}}\RA{}
-\nwused{\\{NWmas1F-UseB-1}}\nwendcode{}\nwbegindocs{94}\nwdocspar
+\nwused{\\{NWmas1F-UseB-1}}\nwendcode{}\nwbegindocs{108}\nwdocspar
 
 See '{\tt{}man\ Benchmark}' for further info about this package. 
 We set an array to keep record of timing for each section.
 
-\nwenddocs{}\nwbegincode{95}\sublabel{NWmas1F-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWmas1F-Tim8-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{109}\sublabel{NWmas1F-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWmas1F-Tim8-1}}}\endmoddef
 my @Timer = (new Benchmark);
-\nwused{\\{NWmas1F-UseN-1}}\nwendcode{}\nwbegindocs{96}\nwdocspar
+\nwused{\\{NWmas1F-UseN-1}}\nwendcode{}\nwbegindocs{110}\nwdocspar
 
-\nwenddocs{}\nwbegincode{97}\sublabel{NWmas1F-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-ComS-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{111}\sublabel{NWmas1F-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-ComS-1}}}\endmoddef
 sub timing() \{
     push @Timer, (new Benchmark);
     # partial time 
@@ -745,33 +835,33 @@ sub timing() \{
     # total time
     return timestr(timediff($Timer[$#Timer],$Timer[0]));
 \} # timing
-\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{98}\nwdocspar
+\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{112}\nwdocspar
 
-\nwenddocs{}\nwbegincode{99}\sublabel{NWmas1F-perP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-perP-1}}}\moddef{perl requires - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-perP-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{113}\sublabel{NWmas1F-perP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-perP-1}}}\moddef{perl requires - Benchmark~{\nwtagstyle{}\subpageref{NWmas1F-perP-1}}}\endmoddef
 "Benchmark" - checking and comparing running times of code.
-\nwused{\\{NWmas1F-perI-1}}\nwendcode{}\nwbegindocs{100}\nwdocspar
+\nwused{\\{NWmas1F-perI-1}}\nwendcode{}\nwbegindocs{114}\nwdocspar
 
 \subsubsctn{Printing complex Data Structures}
 
 With '{\tt{}Data::Dumper}' we are able to pretty print complex data structures for debugging them.
 
 
-\nwenddocs{}\nwbegincode{101}\sublabel{NWmas1F-UseK.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-UseK.2-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWmas1F-UseK.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{115}\sublabel{NWmas1F-UseK.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-UseK.2-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWmas1F-UseK.2-1}}}\endmoddef
 use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
-\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{102}\nwdocspar
+\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{116}\nwdocspar
 
 
 \subsubsctn{Common functions}
 
-\nwenddocs{}\nwbegincode{103}\sublabel{NWmas1F-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWmas1F-SkiV-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{117}\sublabel{NWmas1F-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWmas1F-SkiV-1}}}\endmoddef
 next if /^\\#/o;
 next if /^\\s*$/o;
 chomp;
-\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{104}\nwdocspar
+\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{118}\nwdocspar
 
-\nwenddocs{}\nwbegincode{105}\sublabel{NWmas1F-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWmas1F-ComQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{119}\sublabel{NWmas1F-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWmas1F-ComQ-1}}}\endmoddef
 #
 sub max() \{
     my $z = shift @_;
@@ -783,9 +873,9 @@ sub min() \{
     foreach my $l (@_) \{ $z = $l if $l < $z \};
     return $z;
 \} # min
-\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{106}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{120}\nwdocspar
 
-\nwenddocs{}\nwbegincode{107}\sublabel{NWmas1F-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWmas1F-ComS.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{121}\sublabel{NWmas1F-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWmas1F-ComS.2-1}}}\endmoddef
 #
 sub fill_right() \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
 sub fill_left()  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
@@ -794,11 +884,11 @@ sub fill_mid()   \{
     my $k = int(($_[1] - $l)/2);
     ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
 \} # fill_mid
-\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{108}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{122}\nwdocspar
 
 These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
 
-\nwenddocs{}\nwbegincode{109}\sublabel{NWmas1F-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWmas1F-ComQ.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{123}\sublabel{NWmas1F-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWmas1F-ComQ.2-1}}}\endmoddef
 #
 sub counter \{ # $_[0]~current_pos++ $_[1]~char
     print STDERR "$_[1]";
@@ -808,53 +898,55 @@ sub counter \{ # $_[0]~current_pos++ $_[1]~char
 sub counter_end \{ # $_[0]~current_pos   $_[1]~char
     (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
 \} # counter_end
-\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{110}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{124}\nwdocspar
 
-\nwenddocs{}\nwbegincode{111}\sublabel{NWmas1F-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWmas1F-GloL-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{125}\sublabel{NWmas1F-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWmas1F-GloL-1}}}\endmoddef
 my ($n,$c); # counter and char (for &counter function)
 \eatline
-\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{112}\nwdocspar
+\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{126}\nwdocspar
 
 \subsubsctn{Common functions for reporting program processes}
 \label{sec:messagerpt}
 
 Function '{\tt{}report}' requires that a hash variable '{\tt{}{\char37}Messages}' has been set, such hash contains the strings for each report message we will need. The first parameter for '{\tt{}report}' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the {\tt{}sprintf} function on that string.
 
-\nwenddocs{}\nwbegincode{113}\sublabel{NWmas1F-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWmas1F-ComP-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{127}\sublabel{NWmas1F-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWmas1F-ComP-1}}}\endmoddef
 sub report() \{ print STDERR sprintf($Messages\{ shift @_ \},@_) \}
-\nwalsodefined{\\{NWmas1F-ComP-2}}\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{114}\nwdocspar
+\nwalsodefined{\\{NWmas1F-ComP-2}}\nwused{\\{NWmas1F-Fun9-1}}\nwendcode{}\nwbegindocs{128}\nwdocspar
 
 The same happens to '{\tt{}warn}' function which also uses the hash variable '{\tt{}{\char37}Messages}' containing the error messages.
 
-\nwenddocs{}\nwbegincode{115}\sublabel{NWmas1F-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWmas1F-ComP-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{129}\sublabel{NWmas1F-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWmas1F-ComP-1}}}\plusendmoddef
 sub warn() \{ print STDERR sprintf($Messages\{ shift @_ \}, @_) \}
-\nwendcode{}\nwbegindocs{116}\nwdocspar
+\nwendcode{}\nwbegindocs{130}\nwdocspar
 
 Those are accessory variables for the messages strings:
 
-\nwenddocs{}\nwbegincode{117}\sublabel{NWmas1F-StdG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-StdG-1}}}\moddef{Stderr subs vars~{\nwtagstyle{}\subpageref{NWmas1F-StdG-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{131}\sublabel{NWmas1F-StdG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-StdG-1}}}\moddef{Stderr subs vars~{\nwtagstyle{}\subpageref{NWmas1F-StdG-1}}}\endmoddef
 my $line = ('#' x 80)."\\n";
 my $s = '### ';
+my $sp = "###\\n";
 my $Error = "\\<\\<\\<  ERROR  \\>\\>\\> ";
 my $Warn  = "\\<\\<\\< WARNING \\>\\>\\> ";
 my $spl   = "\\<\\<\\<\\-\\-\\-\\-\\-\\-\\-\\-\\-\\>\\>\\>\\n";
 my $spw   = "\\<\\<\\<         \\>\\>\\> ";
-\nwalsodefined{\\{NWmas1F-StdG-2}}\nwused{\\{NWmas1F-GloB-1}}\nwendcode{}\nwbegindocs{118}\nwdocspar
+\nwalsodefined{\\{NWmas1F-StdG-2}}\nwused{\\{NWmas1F-GloB-1}}\nwendcode{}\nwbegindocs{132}\nwdocspar
 
 And here the main messages hash:
 
-\nwenddocs{}\nwbegincode{119}\sublabel{NWmas1F-StdG-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-StdG-2}}}\moddef{Stderr subs vars~{\nwtagstyle{}\subpageref{NWmas1F-StdG-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{133}\sublabel{NWmas1F-StdG-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-StdG-2}}}\moddef{Stderr subs vars~{\nwtagstyle{}\subpageref{NWmas1F-StdG-1}}}\plusendmoddef
 my %Messages = (
     # ERROR MESSAGES
     \LA{}warnings: command-line~{\nwtagstyle{}\subpageref{NWmas1F-warM-1}}\RA{}
     # WORKING MESSAGES
     \LA{}messages: program running~{\nwtagstyle{}\subpageref{NWmas1F-mesP-1}}\RA{}
+    \LA{}messages: parsing command-line~{\nwtagstyle{}\subpageref{NWmas1F-mesU-1}}\RA{}
    ); # %Messages 
-\nwendcode{}\nwbegindocs{120}\nwdocspar
+\nwendcode{}\nwbegindocs{134}\nwdocspar
 
 \subsctn{BASH scripts}
 
-\nwenddocs{}\nwbegincode{121}\sublabel{NWmas1F-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWmas1F-BASC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{135}\sublabel{NWmas1F-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWmas1F-BASC-1}}}\endmoddef
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
 \LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWmas1F-VerM-1}}\RA{}
@@ -866,27 +958,27 @@ L="####################"
   echo "### RUNNING [$0]";
   echo "### Current date:`date`";
   echo "###"; \} 1>&2;
-\nwused{\\{NWmas1F-wea7-1}\\{NWmas1F-LaT8-1}}\nwendcode{}\nwbegindocs{122}\nwdocspar
+\nwused{\\{NWmas1F-wea7-1}\\{NWmas1F-LaT8-1}}\nwendcode{}\nwbegindocs{136}\nwdocspar
 
-\nwenddocs{}\nwbegincode{123}\sublabel{NWmas1F-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWmas1F-BASF-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{137}\sublabel{NWmas1F-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWmas1F-BASF-1}}}\endmoddef
 \{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
   echo "$L$L$L$L";
   echo ""; \} 1>&2;
 #
 exit 0
-\nwused{\\{NWmas1F-wea7-1}\\{NWmas1F-LaT8-1}}\nwendcode{}\nwbegindocs{124}\nwdocspar
+\nwused{\\{NWmas1F-wea7-1}\\{NWmas1F-LaT8-1}}\nwendcode{}\nwbegindocs{138}\nwdocspar
 
 \subsctn{Version control tags}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
-\nwenddocs{}\nwbegincode{125}\sublabel{NWmas1F-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWmas1F-VerM-1}}}\endmoddef
-# $Id: maskedfastacoords.tex,v 1.2 2001-09-25 17:34:08 jabril Exp $
-\nwused{\\{NWmas1F-PERC-1}\\{NWmas1F-BASC-1}}\nwendcode{}\nwbegindocs{126}\nwdocspar
+\nwenddocs{}\nwbegincode{139}\sublabel{NWmas1F-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWmas1F-VerM-1}}}\endmoddef
+# $Id: maskedfastacoords.tex,v 1.3 2001-10-03 11:23:38 jabril Exp $
+\nwused{\\{NWmas1F-PERC-1}\\{NWmas1F-BASC-1}}\nwendcode{}\nwbegindocs{140}\nwdocspar
 
 \subsctn{GNU General Public License}
 
-\nwenddocs{}\nwbegincode{127}\sublabel{NWmas1F-GNUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-GNUB-1}}}\moddef{GNU License~{\nwtagstyle{}\subpageref{NWmas1F-GNUB-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{141}\sublabel{NWmas1F-GNUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-GNUB-1}}}\moddef{GNU License~{\nwtagstyle{}\subpageref{NWmas1F-GNUB-1}}}\endmoddef
 # #----------------------------------------------------------------#
 # #                          maskedfastacoords                         #
 # #----------------------------------------------------------------#
@@ -910,7 +1002,7 @@ This document is under Revision Control System (RCS). The version you are curren
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 # #----------------------------------------------------------------#
-\nwused{\\{NWmas1F-PERC-1}}\nwendcode{}\nwbegindocs{128}\nwdocspar
+\nwused{\\{NWmas1F-PERC-1}}\nwendcode{}\nwbegindocs{142}\nwdocspar
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -923,14 +1015,14 @@ documentation. The following instructions are needed:
 
 Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
-\nwenddocs{}\nwbegincode{129}\sublabel{NWmas1F-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{143}\sublabel{NWmas1F-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\endmoddef
 # showing line numbering comments in program
 notangle -L -R"maskedfastacoords" $WORK/$nwfile.nw | \\
     perl -ne '$.>1 && print' | cpif $BIN/maskedfastacoords.pl ;
 chmod a+x $BIN/maskedfastacoords.pl ;
-\nwalsodefined{\\{NWmas1F-tan8-2}\\{NWmas1F-tan8-3}\\{NWmas1F-tan8-4}\\{NWmas1F-tan8-5}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{130}\nwdocspar
+\nwalsodefined{\\{NWmas1F-tan8-2}\\{NWmas1F-tan8-3}\\{NWmas1F-tan8-4}\\{NWmas1F-tan8-5}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{144}\nwdocspar
 
-\nwenddocs{}\nwbegincode{131}\sublabel{NWmas1F-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{145}\sublabel{NWmas1F-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
 # reformating program with perltidy
 notangle -R"maskedfastacoords" $WORK/$nwfile.nw | \\
     perltidy - | cpif $BIN/maskedfastacoords.pl ;
@@ -938,29 +1030,29 @@ notangle -R"maskedfastacoords" $WORK/$nwfile.nw | \\
 notangle -R"maskedfastacoords" $WORK/$nwfile.nw | \\
     perltidy -html - | cpif $DOCS/html/maskedfastacoords.html ;
 #
-\nwendcode{}\nwbegindocs{132}\nwdocspar
+\nwendcode{}\nwbegindocs{146}\nwdocspar
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
-\nwenddocs{}\nwbegincode{133}\sublabel{NWmas1F-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{147}\sublabel{NWmas1F-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
 notangle -R"root" $WORK/$nwfile.nw | \\
          cpif $DATA/root_config ;
-\nwendcode{}\nwbegindocs{134}%$
+\nwendcode{}\nwbegindocs{148}%$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
-\nwenddocs{}\nwbegincode{135}\sublabel{NWmas1F-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{149}\sublabel{NWmas1F-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
 notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
-\nwendcode{}\nwbegindocs{136}\nwdocspar
+\nwendcode{}\nwbegindocs{150}\nwdocspar
 
-\nwenddocs{}\nwbegincode{137}\sublabel{NWmas1F-tanY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tanY-1}}}\moddef{tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWmas1F-tanY-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{151}\sublabel{NWmas1F-tanY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tanY-1}}}\moddef{tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWmas1F-tanY-1}}}\endmoddef
 notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw | cpif $DOCS/defs.tex ;
 notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tex ; 
-\nwused{\\{NWmas1F-wea7-1}}\nwendcode{}\nwbegindocs{138}\nwdocspar
+\nwused{\\{NWmas1F-wea7-1}}\nwendcode{}\nwbegindocs{152}\nwdocspar
 
-\nwenddocs{}\nwbegincode{139}\sublabel{NWmas1F-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWmas1F-wea7-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{153}\sublabel{NWmas1F-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWmas1F-wea7-1}}}\endmoddef
 \LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWmas1F-BASC-1}}\RA{}
 # weaving and LaTeXing
 \LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWmas1F-BASQ-1}}\RA{}
@@ -975,9 +1067,9 @@ dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 #
 popd;
 \LA{}BASH script end~{\nwtagstyle{}\subpageref{NWmas1F-BASF-1}}\RA{}
-\nwnotused{weaving}\nwendcode{}\nwbegindocs{140}\nwdocspar
+\nwnotused{weaving}\nwendcode{}\nwbegindocs{154}\nwdocspar
 
-\nwenddocs{}\nwbegincode{141}\sublabel{NWmas1F-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWmas1F-LaT8-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{155}\sublabel{NWmas1F-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWmas1F-LaT8-1}}}\endmoddef
 \LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWmas1F-BASC-1}}\RA{}
 # only LaTeXing
 \LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWmas1F-BASQ-1}}\RA{}
@@ -995,11 +1087,11 @@ ps2pdf $nwfile.ps $nwfile.pdf ;
 #
 popd ;
 \LA{}BASH script end~{\nwtagstyle{}\subpageref{NWmas1F-BASF-1}}\RA{}
-\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{142}%$
+\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{156}%$
 
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
-\nwenddocs{}\nwbegincode{143}\sublabel{NWmas1F-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWmas1F-BASQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{157}\sublabel{NWmas1F-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWmas1F-BASQ-1}}}\endmoddef
 #
 # Setting Global Variables
 WORK="/home/ug/jabril/development/softjabril/maskedfastacoords" ;
@@ -1010,9 +1102,9 @@ DATA="$WORK/data" ;
 nwfile="maskedfastacoords" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
 #
-\nwused{\\{NWmas1F-wea7-1}\\{NWmas1F-LaT8-1}}\nwendcode{}\nwbegindocs{144}\nwdocspar
+\nwused{\\{NWmas1F-wea7-1}\\{NWmas1F-LaT8-1}}\nwendcode{}\nwbegindocs{158}\nwdocspar
 
-\nwenddocs{}\nwbegincode{145}\sublabel{NWmas1F-tan8-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-5}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{159}\sublabel{NWmas1F-tan8-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWmas1F-tan8-5}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWmas1F-tan8-1}}}\plusendmoddef
 # 
 # BASH Environment Variables
 notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \\
@@ -1030,10 +1122,10 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{Common PERL subs - Min Max}{NWmas1F-ComQ-1}{\nwixd{NWmas1F-ComQ-1}}}%
 \nwixlogsorted{c}{{Common PERL subs - STDERR}{NWmas1F-ComP-1}{\nwixu{NWmas1F-Fun9-1}\nwixd{NWmas1F-ComP-1}\nwixd{NWmas1F-ComP-2}}}%
 \nwixlogsorted{c}{{Common PERL subs - Text fill}{NWmas1F-ComS.2-1}{\nwixd{NWmas1F-ComS.2-1}}}%
-\nwixlogsorted{c}{{Finding masked regions coords}{NWmas1F-FinT-1}{\nwixu{NWmas1F-MaiL-1}\nwixd{NWmas1F-FinT-1}}}%
+\nwixlogsorted{c}{{Finding masked regions coords}{NWmas1F-FinT-1}{\nwixu{NWmas1F-MaiM-2}\nwixd{NWmas1F-FinT-1}}}%
 \nwixlogsorted{c}{{Functions}{NWmas1F-Fun9-1}{\nwixu{NWmas1F-masH-1}\nwixd{NWmas1F-Fun9-1}}}%
 \nwixlogsorted{c}{{GNU License}{NWmas1F-GNUB-1}{\nwixu{NWmas1F-PERC-1}\nwixd{NWmas1F-GNUB-1}}}%
-\nwixlogsorted{c}{{Global Vars}{NWmas1F-GloB-1}{\nwixu{NWmas1F-masH-1}\nwixd{NWmas1F-GloB-1}}}%
+\nwixlogsorted{c}{{Global Vars}{NWmas1F-GloB-1}{\nwixu{NWmas1F-masH-1}\nwixd{NWmas1F-GloB-1}\nwixd{NWmas1F-GloB-2}\nwixd{NWmas1F-GloB-3}}}%
 \nwixlogsorted{c}{{Global Vars - Counter}{NWmas1F-GloL-1}{\nwixd{NWmas1F-GloL-1}}}%
 \nwixlogsorted{c}{{HIDE: LaTeX new definitions}{NWmas1F-HIDR-1}{\nwixd{NWmas1F-HIDR-1}}}%
 \nwixlogsorted{c}{{HIDE: TODO}{NWmas1F-HIDA-1}{\nwixd{NWmas1F-HIDA-1}\nwixd{NWmas1F-HIDA-2}}}%
@@ -1044,14 +1136,15 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{HIDE: new defs TODO}{NWmas1F-HIDJ-1}{\nwixu{NWmas1F-HIDR-1}\nwixd{NWmas1F-HIDJ-1}\nwixd{NWmas1F-HIDJ-2}}}%
 \nwixlogsorted{c}{{LaTeXing}{NWmas1F-LaT8-1}{\nwixd{NWmas1F-LaT8-1}}}%
 \nwixlogsorted{c}{{Main Loop}{NWmas1F-Mai9-1}{\nwixu{NWmas1F-masH-1}\nwixd{NWmas1F-Mai9-1}}}%
-\nwixlogsorted{c}{{Main program function}{NWmas1F-MaiL-1}{\nwixu{NWmas1F-Fun9-1}\nwixd{NWmas1F-MaiL-1}}}%
+\nwixlogsorted{c}{{Main program functions}{NWmas1F-MaiM-1}{\nwixu{NWmas1F-Fun9-1}\nwixd{NWmas1F-MaiM-1}\nwixd{NWmas1F-MaiM-2}}}%
 \nwixlogsorted{c}{{PERL shebang}{NWmas1F-PERC-1}{\nwixu{NWmas1F-masH-1}\nwixd{NWmas1F-PERC-1}}}%
 \nwixlogsorted{c}{{Parsing command line options}{NWmas1F-ParS-1}{\nwixu{NWmas1F-Fun9-1}\nwixd{NWmas1F-ParS-1}\nwixd{NWmas1F-ParS-2}\nwixd{NWmas1F-ParS-3}}}%
 \nwixlogsorted{c}{{Prog DESC}{NWmas1F-Pro9-1}{\nwixd{NWmas1F-Pro9-1}\nwixu{NWmas1F-ProJ-1}\nwixu{NWmas1F-ParS-3}}}%
 \nwixlogsorted{c}{{Prog USAGE}{NWmas1F-ProA-1}{\nwixd{NWmas1F-ProA-1}\nwixu{NWmas1F-ProJ-1}\nwixu{NWmas1F-ParS-3}}}%
 \nwixlogsorted{c}{{Program Description}{NWmas1F-ProJ-1}{\nwixd{NWmas1F-ProJ-1}\nwixu{NWmas1F-PERC-1}}}%
 \nwixlogsorted{c}{{Program Info}{NWmas1F-ProC-1}{\nwixd{NWmas1F-ProC-1}\nwixu{NWmas1F-PERC-1}}}%
-\nwixlogsorted{c}{{Setting sequence variables from fasta record}{NWmas1F-Seti-1}{\nwixu{NWmas1F-MaiL-1}\nwixd{NWmas1F-Seti-1}}}%
+\nwixlogsorted{c}{{Referenced functions}{NWmas1F-RefK-1}{\nwixu{NWmas1F-Fun9-1}\nwixd{NWmas1F-RefK-1}}}%
+\nwixlogsorted{c}{{Setting sequence variables from fasta record}{NWmas1F-Seti-1}{\nwixu{NWmas1F-MaiM-2}\nwixd{NWmas1F-Seti-1}}}%
 \nwixlogsorted{c}{{Skip comments and empty records}{NWmas1F-SkiV-1}{\nwixd{NWmas1F-SkiV-1}}}%
 \nwixlogsorted{c}{{Stderr subs vars}{NWmas1F-StdG-1}{\nwixu{NWmas1F-GloB-1}\nwixd{NWmas1F-StdG-1}\nwixd{NWmas1F-StdG-2}}}%
 \nwixlogsorted{c}{{Timer ON}{NWmas1F-Tim8-1}{\nwixu{NWmas1F-UseN-1}\nwixd{NWmas1F-Tim8-1}}}%
@@ -1061,7 +1154,10 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{Use Modules - Dumper}{NWmas1F-UseK.2-1}{\nwixd{NWmas1F-UseK.2-1}}}%
 \nwixlogsorted{c}{{Use Modules - Getopt}{NWmas1F-UseK-1}{\nwixu{NWmas1F-UseB-1}\nwixd{NWmas1F-UseK-1}}}%
 \nwixlogsorted{c}{{Version Control Id Tag}{NWmas1F-VerM-1}{\nwixu{NWmas1F-PERC-1}\nwixu{NWmas1F-BASC-1}\nwixd{NWmas1F-VerM-1}}}%
-\nwixlogsorted{c}{{Writing masked regions coords in GFF}{NWmas1F-Wria-1}{\nwixu{NWmas1F-MaiL-1}\nwixd{NWmas1F-Wria-1}}}%
+\nwixlogsorted{c}{{Writing masked regions coords in GFF}{NWmas1F-Wria-1}{\nwixu{NWmas1F-MaiM-2}\nwixd{NWmas1F-Wria-1}}}%
+\nwixlogsorted{c}{{cmdline defaults - GFF}{NWmas1F-cmdM-1}{\nwixu{NWmas1F-GloB-1}\nwixd{NWmas1F-cmdM-1}}}%
+\nwixlogsorted{c}{{cmdline defaults - fasta}{NWmas1F-cmdO-1}{\nwixu{NWmas1F-GloB-1}\nwixd{NWmas1F-cmdO-1}}}%
+\nwixlogsorted{c}{{cmdline defaults - masking}{NWmas1F-cmdQ-1}{\nwixu{NWmas1F-GloB-1}\nwixd{NWmas1F-cmdQ-1}}}%
 \nwixlogsorted{c}{{command-line help}{NWmas1F-comH-1}{\nwixu{NWmas1F-ParS-3}\nwixd{NWmas1F-comH-1}}}%
 \nwixlogsorted{c}{{command-line help - GFF}{NWmas1F-comN-1}{\nwixu{NWmas1F-comH-1}\nwixd{NWmas1F-comN-1}}}%
 \nwixlogsorted{c}{{command-line help - fasta}{NWmas1F-comP-1}{\nwixu{NWmas1F-comH-1}\nwixd{NWmas1F-comP-1}}}%
@@ -1073,7 +1169,7 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{command-line options with exit}{NWmas1F-comU-1}{\nwixu{NWmas1F-ParS-1}\nwixd{NWmas1F-comU-1}}}%
 \nwixlogsorted{c}{{masked fasta input file}{NWmas1F-masN-1}{\nwixd{NWmas1F-masN-1}}}%
 \nwixlogsorted{c}{{maskedfastacoords}{NWmas1F-masH-1}{\nwixd{NWmas1F-masH-1}}}%
-\nwixlogsorted{c}{{messages - parsing command-line}{NWmas1F-mesV-1}{\nwixd{NWmas1F-mesV-1}}}%
+\nwixlogsorted{c}{{messages: parsing command-line}{NWmas1F-mesU-1}{\nwixd{NWmas1F-mesU-1}\nwixu{NWmas1F-StdG-2}}}%
 \nwixlogsorted{c}{{messages: program running}{NWmas1F-mesP-1}{\nwixd{NWmas1F-mesP-1}\nwixu{NWmas1F-StdG-2}}}%
 \nwixlogsorted{c}{{perl requires - Benchmark}{NWmas1F-perP-1}{\nwixu{NWmas1F-perI-1}\nwixd{NWmas1F-perP-1}}}%
 \nwixlogsorted{c}{{perl requires - BioPerl}{NWmas1F-perN-1}{\nwixd{NWmas1F-perN-1}\nwixu{NWmas1F-perI-1}}}%
@@ -1083,7 +1179,7 @@ source $WORK/.bash_VARS ;
 \nwixlogsorted{c}{{tangling complementary LaTeX files}{NWmas1F-tanY-1}{\nwixd{NWmas1F-tanY-1}\nwixu{NWmas1F-wea7-1}}}%
 \nwixlogsorted{c}{{warnings: command-line}{NWmas1F-warM-1}{\nwixd{NWmas1F-warM-1}\nwixu{NWmas1F-StdG-2}}}%
 \nwixlogsorted{c}{{weaving}{NWmas1F-wea7-1}{\nwixd{NWmas1F-wea7-1}}}%
-\nwbegindocs{146}\nwdocspar
+\nwbegindocs{160}\nwdocspar
 
 %
 \end{document}
