@@ -1276,6 +1276,7 @@ sub run {
   ############################################################
   # find the lists of clusters that can be merged together according to consecutive exon overlap
   my @lists = $self->link_Transcripts( \@transcript_clusters );
+  $self->sub_clusters(@lists);
   print STDERR scalar(@lists)." lists returned from link_Transcripts\n";
 
   ############################################################
