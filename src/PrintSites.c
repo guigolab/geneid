@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.6 2003-11-05 14:45:55 eblanco Exp $  */
+/*  $Id: PrintSites.c,v 1.7 2004-01-27 16:15:26 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -125,21 +125,40 @@ void PrintSite(site* s, int type,
 	}
   else
 	{
-	  /* Print site: default format */
-	  printf("%8s %8ld %8ld\t%5.2f\t%c\t%s\n",
-			 Type,
-			 
-			 (offset>0)? 
-			 s->Position+k+COFFSET : 
-			 s->Position+k+offset+COFFSET,
-			 
-			 (offset>0)? 
-			 s->Position+k+offset+COFFSET : 
-			 s->Position+k+COFFSET,
-			 
-			 s->Score,
-			 strand,
-			 sAux);
+	  if (type != ACC)
+		/* Print site: default format */
+		printf("%8s %8ld %8ld\t%5.2f\t%c\t%s\n",
+			   Type,
+			   
+			   (offset>0)? 
+			   s->Position+k+COFFSET : 
+			   s->Position+k+offset+COFFSET,
+			   
+			   (offset>0)? 
+			   s->Position+k+offset+COFFSET : 
+			   s->Position+k+COFFSET,
+			   
+			   s->Score,
+			   strand,
+			   sAux);
+	  else
+		/* Print site: default format */
+		printf("%8s %8ld %8ld\t%5.2f\t%5.2f\t%5.2f\t%c\t%s\n",
+			   Type,
+			   
+			   (offset>0)? 
+			   s->Position+k+COFFSET : 
+			   s->Position+k+offset+COFFSET,
+			   
+			   (offset>0)? 
+			   s->Position+k+offset+COFFSET : 
+			   s->Position+k+COFFSET,
+			   
+			   s->Score,
+			   s->ScorePPT,
+			   s->ScoreBP,
+			   strand,
+			   sAux);
 	}
 }
 
