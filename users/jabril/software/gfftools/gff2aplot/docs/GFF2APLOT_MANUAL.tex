@@ -3,7 +3,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: GFF2APLOT_MANUAL.tex,v 1.4 2001-11-06 17:38:27 jabril Exp $
+% $Id: GFF2APLOT_MANUAL.tex,v 1.5 2002-01-17 12:14:59 jabril Exp $
 %
 % latex GFF2APLOT_MANUAL.tex ; dvips GFF2APLOT_MANUAL.dvi -o GFF2APLOT_MANUAL.ps -t a4 ;
 %
@@ -72,19 +72,39 @@
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
-
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
+\def\progname{gff2aplot.pl}
+\def\tit{\textsc{\progname}}
+%
+\def\mtjabril{
+ \htmladdnormallink{\texttt{jabril@imim.es}}
+                   {MAILTO:jabril@imim.es?subject=[gff2aplot]}
+ } % def mtjabril
+\def\mttwiehe{
+ \htmladdnormallink{\texttt{twiehe@ice.mpg.de}}
+                   {MAILTO:twiehe@ice.mpg.de?subject=[gff2aplot]}
+ } % def mttwiehe
+\def\mtrguigo{
+ \htmladdnormallink{\texttt{rguigo@imim.es}}
+                   {MAILTO:rguigo@imim.es?subject=[gff2aplot]}
+ } % def mtrguigo
+%
+\def\authorshort{
+ Abril, JF; Wiehe, T; Guig\'o, R % Other authors here...
+ } % def authorshort
 % defs
 \def\prog{\textsc{\textbf{gff2aplot}}}
 \def\ps{\textsc{PostScript}}
 \def\eoline{$\backslash\backslash$}
+\def\ver{2.0}
 
-% Setting text for footers and headers
+%%%%% Setting text for footers and headers
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -100,13 +120,15 @@
 \begin{center}
 \fbox{\parbox{0.6\linewidth}{\centering\textbf{\Huge \\[2ex]{\prog}\\[2ex]\textsc{User's Manual}\\[3ex]}}}\\[5ex]
 
-\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
-
+\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[1ex]
+\textbf{\Large Thomas   Wiehe} \\[1ex]
+\textbf{\Large Roderic  Guig\'o} \\[5ex]
+ 
 \textbf{\large --- \today ---}\\[10ex]
 
 \vskip 5ex
 
-{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.4 2001-11-06 17:38:27 jabril Exp $$>$ }
+{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.5 2002-01-17 12:14:59 jabril Exp $$>$ }
 
 \vfill
 
@@ -124,6 +146,7 @@ Universitat Pompeu Fabra\\[2ex]
 %%%%%%%%%%%%%%%%%%%%% FRONTMATTER: License, Acknowledgements, TOC, LOF, and LOT.
 
 \newpage
+
 \pagenumbering{roman}
 \setcounter{page}{1}
 \pagestyle{fancy}
@@ -133,9 +156,9 @@ Universitat Pompeu Fabra\\[2ex]
 \renewcommand{\subsectionmark}[1]{\markboth{}{\textbf{\prog}\hspace{4ex}\thesubsection.\ \textsl{#1}}}
 
 % %% Copyright Advice
-% \input GNU_GPL.tex
+\input manual/GNU_GPL.tex
 
-% \newpage
+\newpage
 
 % %% Acknowledgements
 % \sctm{Acknowledgements}
@@ -264,7 +287,7 @@ Universitat Pompeu Fabra\\[2ex]
 \centering
 % \begin{center}
  \label{tbl:CLopt} 
- \setlength{\fboxsep}{10pt}
+ \setlength{\fboxsep}{5pt}
  \footnotesize 
 %
 \fbox{
@@ -282,8 +305,8 @@ Universitat Pompeu Fabra\\[2ex]
 \pa{float}     &
   A float value. \\
 \pa{string}    &
-  A free text string, single or double-quoted \\[-0.5ex]
- &  if special chars or white-spaces/tabs are present respectively. \\
+  A free text string, single or double-quoted
+  if special chars or white-spaces/tabs are present respectively. \\
 \pa{format}    &
   Page format, see available values on Appendix~\ref{tbl:PageSztbl} table. \\
 \pa{color}     &
