@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: SwitchPositions                                              *
 *                                                                        *
-*   geneid needs donor position > acceptor position (reverse strand).    *
+*   Exchanging left and right signals in reverse sense exons             *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,11 +24,13 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchPositions.c,v 1.1 2000-07-05 08:29:40 eblanco Exp $  */
+/*  $Id: SwitchPositions.c,v 1.2 2001-12-18 16:14:28 eblanco Exp $  */
 
 #include "geneid.h"
 
-void SwitchPositions(packExons *allExons) 
+/* Move left and right signals to preserve the ordering: left < right */
+/* Exons are then pieces with special properties to be assembled */
+void SwitchPositions(packExons* allExons)
 {
   long i;
   site *c;
@@ -63,6 +65,14 @@ void SwitchPositions(packExons *allExons)
       (allExons->Singles+i)->Acceptor = 
 	(allExons->Singles+i)->Donor;
       (allExons->Singles+i)->Donor = c;
+    }
+
+  for (i=0;i<allExons->nORFs;i++) 
+    {
+      c = (allExons->ORFs+i)->Acceptor; 
+      (allExons->ORFs+i)->Acceptor = 
+	(allExons->ORFs+i)->Donor;
+      (allExons->ORFs+i)->Donor = c;
     }
 }
 

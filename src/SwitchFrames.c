@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: SwitchFrames                                                 *
 *                                                                        *
-*   GenAmic needs exchanged frame/remainder from reverse exons.          *
+*   Exchange frame and remainder from reverse exons                      *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,94 +24,92 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchFrames.c,v 1.1 2000-07-05 08:28:26 eblanco Exp $  */
+/*  $Id: SwitchFrames.c,v 1.2 2001-12-18 16:09:30 eblanco Exp $  */
 
 #include "geneid.h"
 
-void SwitchFrames(exonGFF *e, long n, int when) 
+/* Exchange frame and remainder in the input exons */
+void SwitchFrames(exonGFF* e, long n)
 {
   long i;
   int f;
 
-  switch(when)
-    {
-    case 0:
-      for (i=0;i<n;i++) 
-	{
-	  if ((e+i)->evidence)
-            (e+i)->selected = 1; 
-	  
-	  /* Exchange frame/rmd only once */
-	  if (((e+i)->Strand == '-') && !(e+i)->selected && !(e+i)->evidence)
-	    {
-	      f=(e+i)->Frame;
-	      (e+i)->Frame=(e+i)->Remainder;
-	      (e+i)->Remainder=f;
-	      (e+i)->selected = 1;
-	    }
+  /* Exchange frame/rmd in reverse exons and reset the selected flag */
+  for (i=0; i<n; i++)
+	{      
+	  if ((e+i)->Strand == '-')
+		{
+		  f=(e+i)->Frame;
+		  (e+i)->Frame=(e+i)->Remainder;
+		  (e+i)->Remainder=f;
+		}
+
+	  /* Mark exon as prediction in the current fragment */
+	  (e+i)->selected = 0;
 	}
-      break;
-    case 1:
-      for (i=0;i<n;i++) 
-	{
-	  /* Exchange frame/rmd only once */
-	  if (((e+i)->Strand == '-') && (e+i)->selected)
-	    {
-	      f=(e+i)->Frame;
-	      (e+i)->Frame=(e+i)->Remainder;
-	      (e+i)->Remainder=f;
-	      (e+i)->selected = 0;
-	    }
-	}
-      break;
-    }
 }
 
+/* Exchange frame and remainder in the sorted-by-donor exons only once */
+/* Right now, d-array only contain exons from last fragment processing */
 void SwitchFramesDa(packGenes* pg, int nclass)
 {
   long i;
   long j;
   int f;
 
+  /* Screening every class looking for exons... */
   for (i=0; i < nclass; i++) 
-  {
+	{
+      /* Traversing the list of exons in this class */
       for (j=0; j < pg->km[i]; j++)
-         if (pg->d[i][j]->Strand == '-')
-         {
-	   /* Exchange frame/rmd only once */
-	   if (!pg->d[i][j]->selected)
-            {
-	      f= pg->d[i][j]->Frame;
-	      pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
-	      pg->d[i][j]->Remainder = f;
-	      pg->d[i][j]->selected = 1;
-	    }
-	 }
-   }
+		if (pg->d[i][j]->Strand == '-')
+		  {
+            /* Exchange frame/rmd only once */
+            /* One exon might be in more than one list */
+            if (!pg->d[i][j]->selected)
+			  {
+				f= pg->d[i][j]->Frame;
+				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
+				pg->d[i][j]->Remainder = f;
+
+				/* Mark exon */
+				pg->d[i][j]->selected = 1;
+			  }
+		  }
+	}
 }   
 
+/* Restore original frame and remainder in exons from last fragment */
 void SwitchFramesDb(packGenes* pg, int nclass)
 {
   long i;
   long j;
   int f;
 
-  for (i=0; i < nclass; i++) 
-    for (j=0; j < pg->km[i]; j++)       
-      if (pg->d[i][j]->Strand == '-')
-	{
-	  /* Exchange frame/rmd only once */
-	  if (pg->d[i][j]->selected)
-	    {
-	      f= pg->d[i][j]->Frame;
-	      pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
-	      pg->d[i][j]->Remainder = f;
-	      pg->d[i][j]->selected = 0;
-	    }   
+  /* Screening every class looking for exons... */
+  for (i=0; i < nclass; i++)
+    {
+	  /* Traversing the list of exons in this class */
+	  for (j=0; j < pg->km[i]; j++)
+		if (pg->d[i][j]->Strand == '-')
+		  {
+			/* Exchange frame/rmd only once */
+			/* Only exons from last fragment will have selected = 1 */
+			if (pg->d[i][j]->selected)
+			  {
+				f = pg->d[i][j]->Frame;
+				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
+				pg->d[i][j]->Remainder = f;
+
+				/* Mark exon */
+				pg->d[i][j]->selected = 0;
+			  }   
+		  }
 	}
 }
 
-void UndoFrames(exonGFF *e, long n)
+/* Restore frame/remainder in reverse exons read from gff file */
+void UndoFrames(exonGFF* e, long n)
 {
   long i;
   int f;
@@ -120,8 +118,8 @@ void UndoFrames(exonGFF *e, long n)
   for (i=0;i<n;i++)  
     if ((e+i)->Strand == '-')
       {
-	f=(e+i)->Frame;
-	(e+i)->Frame=(e+i)->Remainder;
-	(e+i)->Remainder=f;
+		f=(e+i)->Frame;
+		(e+i)->Frame=(e+i)->Remainder;
+		(e+i)->Remainder=f;
       }
 }
