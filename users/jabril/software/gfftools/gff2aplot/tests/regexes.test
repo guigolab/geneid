@@ -1,0 +1,36 @@
+::: @ ::: @
+::: \@ ::: @
+::: @@ ::: @
+::: element ::: element
+::: element ::: any
+::: !element ::: element
+::: !element ::: any
+::: element@id ::: element
+::: !element@id ::: element
+::: /.*any.*/ ::: chooseanyfeat
+::: /; system(" echo \"I have found your name: \$USER ... X.D\" "); / ::: any
+::: /; `echo "I have found your name: \$USER ... X.D"`; / ::: any
+::: / @{[ system("echo \"I have found your name: \$USER ... X.D\"") ]} / ::: any
+::: / @{[ system('echo "I have found your name: $USER ... X.D"') ]} / ::: any
+::: / @{ \( system("echo \"I have found your name: \$USER ... X.D\"") ) } / ::: any
+::: / @{ \( exec "echo \"I have found your name: \$USER ... X.D\"" ) } / ::: any
+::: /(a)+ny/ ::: any
+::: /(a)+ny/ ::: aany
+::: /^(a)+ny/ ::: any
+::: /^a?ny/ ::: any
+::: /^a?ny/ ::: aany
+::: /^a?ny/@id ::: any
+::: /^a?ny/@id ::: onyony
+::: /^a?ny/@id ::: nyony
+::: !/^a?ny/ ::: any
+::: !/^a?ny/ ::: aany
+::: !/^a?ny/ ::: ony
+::: 5'cds ::: 5'cds
+::: /^5'.*$/ ::: 5'utr
+::: /^a.*?y$/ ::: annnnny
+::: /^a.*?y$/ ::: anyany
+::: /^a[^y]*y$/ ::: annnnny
+::: /^a[^y]*y$/ ::: anyany
+::: /a.+?y/ ::: annnnny
+::: /a.+?y/ ::: ayyyyyy
+::: /y{6}/ ::: ayyyyyy

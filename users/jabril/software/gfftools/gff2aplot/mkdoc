@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: mkdoc,v 1.1 2001-08-21 14:54:21 jabril Exp $
+# $Id: mkdoc,v 1.2 2001-09-06 18:33:35 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -21,10 +21,16 @@ nwfile="gff2aplot" ;
 export WORK BIN PARAM DOCS DATA TEST nwfile ;
 MANUAL="GFF2APLOT_MANUAL";
 pushd $DOCS/ ;
+#
+echo "### RUNNING LaTeX on $MANUAL.tex" 1>&2 ;
 latex $MANUAL.tex ; 
 latex $MANUAL.tex ; 
 latex $MANUAL.tex ;
 dvips $MANUAL.dvi -o $MANUAL.ps -t a4 ;
+#
+echo "### CONVERTING PS to PDF: $MANUAL" 1>&2 ;
+ps2pdf $MANUAL.ps $MANUAL.pdf ;
+#
 popd ;
 { echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
   echo "$L$L$L$L";

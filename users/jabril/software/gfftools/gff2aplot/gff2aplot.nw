@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $
+% $Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -94,6 +94,7 @@
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\subsubsubsctn}[1]{\paragraph{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 \newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
 \newcommand{\todo}[1]{
@@ -112,7 +113,11 @@
      \end{minipage}
      } % psframebox
   \vskip 1.5ex
-} % newcommand
+} % newcommand todo
+\newcommand{\todoitem}[2]{
+\item[$\triangleright$] [\textit{Section}~\ref{#2}, \textit{page}~\pageref{#2}]\\
+              #1
+} % newcommand todoitem
 <<HIDE: new LaTeX commands>>
  
 %%%%% PSTRICKs definitions
@@ -137,15 +142,8 @@
 \def\eoline{$\backslash\backslash$}
 <<HIDE: new LaTeX definitions>>
 
-%%%%% Setting text for footers and headers
-\fancyhead{} % clear all fields
-\fancyfoot{} % clear all fields
-\fancyhead[RO,LE]{\thepage}
-\fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
-\fancyfoot[RO,RE]{\small\textbf{\today}}
-\renewcommand{\headrulewidth}{1pt}
-\renewcommand{\footrulewidth}{1pt}
+%%%%% TODO defs
+<<HIDE: new defs TODO>>
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -169,7 +167,24 @@ Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
  } % def showaffiliation
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
 @
+
+<<HIDE: new LaTeX pstricks>>=
+@
+<<HIDE: new LaTeX definitions>>=
+@ 
 
 \thispagestyle{empty}
 
@@ -259,9 +274,14 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 At the first stage of the new {\prog} implementation, we are going to define a simple main loop that performs a serial process, such in the old [[GNUawk]] version. So that, the program will read the input files and parameters defined by user and perform the plots, finishing the job. Once the new version will be operative, we will try to implement an iterative mode and/or a GUI in [[perlTK]].  
 
-\todo{
-\item Flow diagram here (Serial/Filter mode) for figure~\ref{fig:filtermode}.
-} % todo
+\label{todo:AAA}
+<<HIDE: new defs TODO>>=
+\def\todoAAA{Flow diagram (Serial/Filter mode) for figure~\ref{fig:filtermode}.} % todoAAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoAAA}{todo:AAA}
+@
+\todo{ \item \todoAAA } % todo
 \begin{figure}[!ht]
 \begin{center}
 \fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
@@ -282,11 +302,19 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 
 \subsctn{TO DO: unfinished stuff and projects}
 
-% \input todo.tex
+\begin{itemize}
+ \input todo.tex
+\end{itemize}
 
-\todo{
-\item Flow diagram here (Interactive, Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.
-} % todo
+\label{todo:AAB}
+<<HIDE: new defs TODO>>=
+\def\todoAAB{Flow diagram here (Interactive, Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.} % todoAAB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoAAB}{todo:AAB}
+@
+\todo{ \item \todoAAB } % todo
+
 \begin{figure}[!ht]
 \begin{center}
 \fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
@@ -400,9 +428,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.6 $', #'
-     '$Date: 2001-08-29 15:12:07 $', #'
-     '$Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $', #'
+     '$Revision: 1.7 $', #'
+     '$Date: 2001-09-06 18:33:35 $', #'
+     '$Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -496,9 +524,14 @@ short description are listed here:
 
 The functions described in this section process each GFF-record, each custom definition or each command-line options, not only loading the internal variables, also checking for the correctness of the user input in each case.
 
-\todo{
-\item Diagram here for figure~\ref{fig:customvarstruc}.
-} % todo
+\label{todo:BBB}
+<<HIDE: new defs TODO>>=
+\def\todoBBB{Diagram for figure~\ref{fig:customvarstruc}.} % todoBBB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBB}{todo:BBB}
+@
+\todo{ \item \todoBBB } % todo
 \begin{figure}[!ht]
 \begin{center}
 \fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
@@ -807,9 +840,14 @@ defined($chk_stdin) && do {
 
 \subsubsctn{Verifying command-line settings}
 
-\todo{
-\item [[<<Check command-line options>>]]
-} % todo
+\label{todo:BBC}
+<<HIDE: new defs TODO>>=
+\def\todoBBC{Implement [[&check_command_line_vars]] to verify if settings from command-line are OK.} % todoBBC
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBC}{todo:BBC}
+@
+\todo{ \item \todoBBC } % todo
 <<Parsing Command-Line Options>>=
 sub check_command_line_vars() {
     &report("CHECKING_CMDLN_VARS");
@@ -823,10 +861,17 @@ CHECKING_CMDLN_VARS =>
 
 \subsubsctn{Loading GFF elements custom variables from command-line}
 
-\todo{
-\item Parsing and loading command-line options having structure like:\\
+\label{todo:BBD}
+<<HIDE: new defs TODO>>=
+\def\todoBBD{
+Parsing and loading command-line options having structure like:\\
 \centerline{[[--feature feature_name::variable_name=value]]}
-} % todo
+} % todoBBD
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBD}{todo:BBD}
+@
+\todo{ \item \todoBBD } % todo
 <<Parsing Command-Line Options>>=
 #
 @
@@ -1109,14 +1154,10 @@ VARTYPE_NOT_DEFINED =>
 
 \subsctn{Deciphering element fields}
 
-\todo{
-\item Check [[ $$rec[0] ]] and determine its structure: [[element]], [[element@id]], [[/regexp/]], [[/regexp/@id]], [[!/regexp/]], [[!/regexp/@id]] and finally [[*]] and [[!*]] as special shorthands for [[/.*/]] and [[!/.*/]] respectively.
-}
-
-If an element appears not to be a regular expression we transform it
+If an [[element]] appears not to be a regular expression we transform it
 to '[[^element$]]' before returning it. [[$not_flg]] and [[$id_flg]]
 will be set to a true value in case that input string contains a
-'[[!]]' as first character ([[!/regexp/]], [[!/regexp/@id]] and
+'[[!]]' as first character ([[!element]],[[!/regexp/]], [[!/regexp/@id]] and
 [[!*]]) and that an ID is given ([[element@id]], [[/regexp/@id]] and
 [[!/regexp/@id]]), respectively. Both flags will be helpful to
 determine what test we have to perform in order to know if we have to
@@ -1234,9 +1275,13 @@ sub eval_regexp() {
 } # eval_regexp
 @ 
 
-From a list of possible tainted shell metacharacters, [[ ; < > * | & $ ! ? # ( ) [ ] { } : ` ' " \ ]], % # @_ =~ s/([;<>\*\|`&\$!?#\(\)\[\]\{\}:'"\\])/\\$1/g;
-we quote those that are not going to be used as regular expression metacharacters, [[ ; < > & ! { } ` ' " ]], to avoid security issues. This will make a CGI developed on {\prog} a little bit more secure because the user cannot send something like:\\
-\centerline{\shortstack{[[//; `/bin/rm -rf`;//]]\ \ ,\\[[/ @{[ system('mail user@server /etc/passwd') ]} /]]\\or\\[[/ ${ \( exec('chmod -R 0777 /root') ) } /]]}} %$
+From a list of possible tainted shell metacharacters, \\[1ex]
+\centerline{[[ ; < > * | & $ ! ? # ( ) [ ] { } : ` ' " \ ]]}\vskip 0.5ex
+% # @_ =~ s/([;<>\*\|`&\$!?#\(\)\[\]\{\}:'"\\])/\\$1/g;
+we quote those that are not going to be used as regular expression metacharacters, \\[1ex]
+\centerline{[[ ; < > & ! { } ` ' " ]]}\vskip 0.5ex
+to avoid security issues. This will make a CGI developed on {\prog} a little bit more secure because the user cannot send something like:\\[1ex]
+\centerline{\shortstack{[[//; `/bin/rm -rf`;//]]\ \ \ ,\\[[/ @{[ system('mail user@server /etc/passwd') ]} /]]\ \ \ or\\[[/ ${ \( exec('chmod -R 0777 /root') ) } /]]}} %$
 
 <<Parsing Custom Files>>=
 sub escape_input() {
@@ -5318,7 +5363,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $
+# $Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -5391,7 +5436,7 @@ documentation. The following instructions are needed:
 <<tangling>>=
 # showing line numbering comments in program
 notangle -L -R"APLOT" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' - > $BIN/gff2aplot.pl ;
+    perl -ne '$.>1 && print' - | cpif $BIN/gff2aplot.pl ;
 chmod a+x $BIN/gff2aplot.pl ;
 #
 @ 
@@ -5407,10 +5452,10 @@ We use {\perltidy} to reformat final versions of perl scripts (without line numb
 <<tangling>>=
 # reformating program with perltidy
 notangle -R"APLOT" $WORK/$nwfile.nw | \
-    perltidy - > $BIN/$nwfile.pl ;
+    perltidy - | cpif $BIN/$nwfile.pl ;
 # html pretty-printing program with perltidy
 notangle -R"APLOT" $WORK/$nwfile.nw | \
-    perltidy -html - > $DOCS/html/$nwfile.html ;
+    perltidy -html - | cpif $DOCS/html/$nwfile.html ;
 #
 @
 
@@ -5433,34 +5478,38 @@ notangle -R"The Manual" $WORK/$nwfile.nw | cpif $WORK/mkdoc ;
 
 <<tangling complementary LaTeX files>>=
 # extracting complementary material 
-echo "Extracting \"$DOCS/defs.tex\"..." ;
+echo "Extracting \"$DOCS/defs.tex\"..." 1>&2 ;
 notangle -R"HIDE: LaTeX deploy new definitions" $WORK/$nwfile.nw | \
-         cpif $DOCS/defs.tex  ;
-echo "Extracting \"$DOCS/localrefs.bib\"..." ;
+         cpif $DOCS/defs.tmp  ;
+noweave -v -t4 -delay $DOCS/defs.tmp | cpif $DOCS/defs.tex ;
+echo "Extracting \"$DOCS/todo.tex\"..." 1>&2 ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tmp ; 
+noweave -v -t4 -delay $DOCS/todo.tmp | cpif $DOCS/todo.tex ;
+echo "Extracting \"$DOCS/localrefs.bib\"..." 1>&2 ;
 notangle -R"HIDE: BiBTeX references" $WORK/$nwfile.nw | \
          cpif $DOCS/localrefs.bib ;
-echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." ;
+echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." 1>&2 ;
 notangle -R"LATEX command-line" $WORK/$nwfile.nw | \
          cpif $DOCS/tables/AplotCLoptions.tex ;
 echo "Extracting \"$DOCS/AplotCLoptionsTbl.tex\"..." ;
 notangle -R"LATEX command-line table" $WORK/$nwfile.nw | \
          cpif $DOCS/tables/AplotCLoptionsTbl.tex ;
-echo "Extracting \"$DOCS/AplotCustomVars.tex\"..." ;
+echo "Extracting \"$DOCS/AplotCustomVars.tex\"..." 1>&2 ;
 notangle -R"LATEX custom-vars" $WORK/$nwfile.nw  | \
          cpif $DOCS/tables/AplotCustomVars.tex ;
-echo "Extracting \"$DOCS/AplotCustomVarsTbl.tex\"..." ;
+echo "Extracting \"$DOCS/AplotCustomVarsTbl.tex\"..." 1>&2 ;
 notangle -R"LATEX custom-vars table" $WORK/$nwfile.nw  | \
          cpif $DOCS/tables/AplotCustomVarsTbl.tex ;
-echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." ;
+echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
 notangle -R"LATEX cmyk colors" $WORK/$nwfile.nw  | \
          cpif $DOCS/tables/AplotColorDefs.tex ;
-echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." ;
+echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." 1>&2 ;
 notangle -R"LATEX colors table" $WORK/$nwfile.nw  | \
          cpif $DOCS/tables/AplotColorTbl.tex ;
-echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." ;
+echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." 1>&2 ;
 notangle -R"LATEX page format table" $WORK/$nwfile.nw | \
          cpif $DOCS/tables/AplotPageSizeTbl.tex ;
-echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." ;
+echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." 1>&2 ;
 notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
          cpif $DOCS/tables/DataStructure_GFF.tex ;
 #
@@ -5485,7 +5534,7 @@ notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
 # extracting main documentation
 echo "Weaving \"$DOCS/$nwfile.tex\"..." ;
 noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
-        $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+        $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 # LaTeXing 
 echo "LaTeXing \"$DOCS/$nwfile.tex\"..." ;
 pushd $DOCS/ ;
@@ -5500,11 +5549,16 @@ popd;
 # only LaTeXing
 <<BASH Environment Variables>>
 pushd $DOCS/ ;
+#
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
-pdflatex $nwfile.tex ;
+#
+echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
+ps2pdf $nwfile.ps $nwfile.pdf ;
+#
 popd ;
 <<BASH script closure>>
 @ %$
@@ -5515,10 +5569,16 @@ popd ;
 <<BASH Environment Variables>>
 MANUAL="GFF2APLOT_MANUAL";
 pushd $DOCS/ ;
+#
+echo "### RUNNING LaTeX on $MANUAL.tex" 1>&2 ;
 latex $MANUAL.tex ; 
 latex $MANUAL.tex ; 
 latex $MANUAL.tex ;
 dvips $MANUAL.dvi -o $MANUAL.ps -t a4 ;
+#
+echo "### CONVERTING PS to PDF: $MANUAL" 1>&2 ;
+ps2pdf $MANUAL.ps $MANUAL.pdf ;
+#
 popd ;
 <<BASH script closure>>
 @ %$
@@ -5540,8 +5600,8 @@ export WORK BIN PARAM DOCS DATA TEST nwfile ;
 <<tangling>>=
 #
 # BASH Environment Variables
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
-         > $WORK/.bash_VARS ; 
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+         cpif $WORK/.bash_VARS ; 
 source $WORK/.bash_VARS ;
 #
 @

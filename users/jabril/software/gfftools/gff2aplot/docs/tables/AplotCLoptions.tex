@@ -3,7 +3,7 @@
 %
 % Command-Line Options for "gff2aplot".
 %
-% # $Id: AplotCLoptions.tex,v 1.1 2001-08-21 14:54:21 jabril Exp $
+% # $Id: AplotCLoptions.tex,v 1.2 2001-09-06 18:33:36 jabril Exp $
 %
 % \newcommand{\op}[1]{\bfseries\sffamily #1}
 % \newcommand{\tp}[1]{'{\bfseries\sffamily #1}'}
@@ -40,6 +40,18 @@ This option disables any message or warning from standard error. It does not
 disable error report because such errors are pointing a problem which can 
 make {\prog} produce unexpected results. Solve the cause of such problems 
 before continuing to run the program in a silent mode. 
+\clmitem{-\/-feature-var '\pr{feature::variable=value}'}
+Loading a customization variable for a GFF feature element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-group-var '\pr{group::variable=value}'}
+Loading a customization variable for a GFF group element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-strand-var '\pr{strand::variable=value}'}
+Loading a customization variable for a GFF strand element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-source-var '\pr{source::variable=value}'}
+Loading a customization variable for a GFF source element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-sequence-var '\pr{sequence::variable=value}'}
+Loading a customization variable for a GFF sequence element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-layout-var '\pr{variable=value}'}
+Loading a customization variable for page layout from command-line. % '\pr{custom\_file}'. 
 \clmitem{-O \pr{custom\_filename}\\-\/-custom-filename \pr{custom\_filename}}
 Loading customization parameters from '\pr{custom\_file}'. Now you can load several customization files by passing this option several times. The precedence is the input order in the command-line, so, for the common definitions, the last '\pr{custom\_file}' will override previous '\pr{custom\_files}' settings.
 \clmitem{}

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: ltx,v 1.1 2001-08-21 14:54:21 jabril Exp $
+# $Id: ltx,v 1.2 2001-09-06 18:33:35 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -20,11 +20,16 @@ TEST="$WORK/tests" ;
 nwfile="gff2aplot" ;
 export WORK BIN PARAM DOCS DATA TEST nwfile ;
 pushd $DOCS/ ;
+#
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
-pdflatex $nwfile.tex ;
+#
+echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
+ps2pdf $nwfile.ps $nwfile.pdf ;
+#
 popd ;
 { echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
   echo "$L$L$L$L";
