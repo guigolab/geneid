@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: ReadExonsGFF                                                 *
 *                                                                        *
-*   GenAmic alone: It reads exons in GFF format.                         *
+*   Reading exons (GFF format) from file                                 *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,23 +24,25 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.6 2001-02-14 15:47:06 eblanco Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.7 2001-12-18 15:54:14 eblanco Exp $  */
 
 #include "geneid.h"
+#define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
+/* Read annotations (exons) to improve or fixed some gene prediction */
+/* GFF format: tab "\t" is the field separator and # for comments */
+/* Name  Source  Type  Begin  End  Score  Strand  Frame  [group] */
 long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 {
-  long i;
+  /* File handle */
   FILE *file;
+  
+  /* Final number of exons loaded from file (including copies) */
+  long i;
+  
+  /* Split every input line into several tokens (gff records) */
   char line[MAXLINE];
-  char saux[MAXTYPE+1];
-  short fraux;
-  char c;
-  int three;
-  long lastAcceptor;
-  long currAcceptor;
-  char mess[MAXSTRING];
- 
+  char lineCopy[MAXLINE];
   char *line1;
   char *line2;
   char *line3;
@@ -50,241 +52,254 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
   char *line7;
   char *line8;
   char *line9;
-  int slen;
-
-  if ((file=fopen(FileName, "r"))==NULL)
-    printError("The exonsGFF file cannot be open for read");
   
-  /* Coments: line begins with # */
-  /* gff format = "Name  Source  Type  Begin  End  Score  Strand  Frame [group] */
-  i = 0; 
+  /* Control of good sorting property: starting position, increasing */
+  long lastAcceptor;
+  long currAcceptor;
+
+  /* If frame = '.' then make three copies of current exon (3 frames) */
+  int three;
+
+  char saux[MAXTYPE];
+  char c;
+  int slen;
+  char mess[MAXSTRING];
+  
+
+  /* 0. Open exons file to read the information */
+  if ((file=fopen(FileName, "r"))==NULL)
+    printError("The exonsGFF file can not be opened to read");
+  
+  /* 1. Reset counters */
+  i = 0;
   three = 0; 
   lastAcceptor = -INFI;
-
-  pv->i1vExons = 0;
-  pv->i2vExons = 0;
-  pv->nvSites = 0;
-
+  
+  /* 2. Read while there are exons left in the input file */
   while(fgets(line,MAXLINE,file)!=NULL)
     {
-      if(line[0]=='#' || line[0]=='\n')
-	{
-	  /* Skip this line */
-	  printMess("Skipping comment line");
-	}
+      /* 2.a. Comment or empty line: forget it */
+      if (line[0]=='#' || line[0]=='\n')
+		printMess("Skipping comment line in evidences file");
       else
-	{
-	  /* For each line extract the features (GFF format) */
-	  /* Split line in four parts: UC DE Dist block */
-          line1 = (char *) strtok(line,"\t");
-          line2 = (char *) strtok(NULL,"\t");
-          line3 = (char *) strtok(NULL,"\t"); 
-          line4 = (char *) strtok(NULL,"\t");
+		{
+		  /* 2.b. Processing exon (annotation) */
+		  /* Backup copy of the line to show error messages */
+      strcpy(lineCopy,line);
+	  
+      /* Extracting GFF features */
+	  line1 = (char *) strtok(line,"\t");
+	  line2 = (char *) strtok(NULL,"\t");
+	  line3 = (char *) strtok(NULL,"\t"); 
+	  line4 = (char *) strtok(NULL,"\t");
 	  line5 = (char *) strtok(NULL,"\t");
 	  line6 = (char *) strtok(NULL,"\t");
-          line7 = (char *) strtok(NULL,"\t");
-          line8 = (char *) strtok(NULL,"\t");
-          line9 = (char *) strtok(NULL,"\n");
-
+	  line7 = (char *) strtok(NULL,"\t");
+	  line8 = (char *) strtok(NULL,"\t");
+	  line9 = (char *) strtok(NULL,"\n");
+	  
+	  /* There are 8 mandatory columns and the last one is optional */
 	  if (line1 == NULL || line2 == NULL || line3 == NULL ||
 	      line4 == NULL || line5 == NULL || line6 == NULL ||
 	      line7 == NULL || line8 == NULL)
 	    {
-	      sprintf(mess, "Bad format: Exon GFF %ld\n",i);
+		  sprintf(mess,"Wrong GFF format in annotations (number of records):\n-->%s\n",lineCopy);
 	      printError(mess);
 	    }
-
-	  /* 1/2. Sequence and Source not used */
 	  
-	  /* 3. Exon Type */
+	  /* 1/2. Sequence and Source records not used anymore (redundant) */
+	  
+	  /* 3. Exon feature: Single, First, Internal, Terminal, ... */
 	  if (sscanf(line3,"%s",(pv->vExons+i)->Type) != 1)
 	    {
-	      sprintf(mess, "Bad format Type: Exon %ld\n",i);
+		  sprintf(mess,"Wrong GFF format in annotations (feature):\n-->%s\n",lineCopy);
 	      printError(mess);
 	    }
 	  
-	  /* 4. Left position */
+	  /* 4. Starting position */
 	  if (sscanf(line4,"%ld",&((pv->vSites + pv->nvSites)->Position)) != 1)
 	    {
-	      sprintf(mess, "Bad format Acceptor: Exon %ld\n",i);
-	      printError(mess);
+		  sprintf(mess,"Wrong GFF format in annotations (starting position):\n-->%s\n",lineCopy);
+		  printError(mess);
 	    }
-
-	  /* 5. Right position */
+	  
+	  /* 5. Finishing position */
 	  if (sscanf(line5,"%ld",&((pv->vSites + pv->nvSites + 1)->Position)) != 1)
 	    {
-	      sprintf(mess, "Bad format Donor: Exon %ld\n",i);
-	      printError(mess);
-	    }
-
-	  /* 6. Score = '.' or float */
-	  if (sscanf(line6,"%lf",&((pv->vExons+i)->Score)) != 1)
-	    {
-	      if ((sscanf(line6,"%c",&c)!= 1) || (c!='.'))
-		{
-		  sprintf(mess, "Bad format Score: Exon %ld\n",i);
-		  printError(mess);
-		}
-	      (pv->vExons+i)->Score = MAXSCORE;
-	    }
-
-	  /* 7. Strand */
-	  if (sscanf(line7,"%c",&((pv->vExons+i)->Strand))!= 1)
-	    {
-	      sprintf(mess, "Bad format Strand: Exon %ld\n",i);
+		  sprintf(mess,"Wrong GFF format in annotations (finishing position):\n-->%s\n",lineCopy);
 	      printError(mess);
 	    }
 	  
-	  /* 8. Frame = '.' or integer */
+	  /* 6. Score = float value or '.'(infinitum) */
+	  if (sscanf(line6,"%lf",&((pv->vExons+i)->Score)) != 1)
+	    {
+		  if ((sscanf(line6,"%c",&c) != 1) || (c != '.'))
+			{
+			  sprintf(mess,"Wrong GFF format in annotations (score):\n-->%s\n",lineCopy);
+			  printError(mess);
+			}
+	      (pv->vExons+i)->Score = MAXSCORE;
+	    }
+	  
+	  /* 7. Strand (reading sense) [+|-] */
+	  if ((sscanf(line7,"%c",&((pv->vExons+i)->Strand))!= 1) ||
+		  (((pv->vExons+i)->Strand != '+') && ((pv->vExons+i)->Strand != '-')))
+	    {       
+		  sprintf(mess,"Wrong GFF format in annotations (strand):\n-->%s\n",lineCopy);
+	      printError(mess);
+	    }
+	  
+	  /* 8. Frame = integer or '.' */
 	  if (sscanf(line8,"%hd",&((pv->vExons+i)->Frame)) != 1)
 	    {
-	      if ((sscanf(line8,"%c",&c)!= 1) || (c!='.'))
-		{
-		  sprintf(mess, "Bad format Frame: Exon %ld\n",i);
-		  printError(mess);
-		}
-	      three = 1; 
-	    }	  
-
-	  /* 9. Group */
-	  if (line9 != NULL)
-	    {
-	      if (sscanf(line9,"%d",&((pv->vExons+i)->Group)) != 1)
-		{
-		  sprintf(mess, "Bad format Group: Exon %ld\n",i);
-		  printError(mess);
-		}
+		  /* Is it a dot? */
+		  if ((sscanf(line8,"%c",&c)!= 1) || (c!='.'))
+			{
+			  sprintf(mess,"Wrong GFF format in annotations (frame):\n-->%s\n",lineCopy);
+			  printError(mess);
+			}
+		  /* make three copies */
+		  three = 1;
 	    }
 	  else
-	      (pv->vExons+i)->Group = NOGROUP; 
-
-	  /* Process features from current exon */
-
-	  /* What is the type of this exon? */
+		{
+		  /* Checking input frame between 0..2 */
+		  if (((pv->vExons+i)->Frame < 0) || ((pv->vExons+i)->Frame > 2))
+			{
+			  sprintf(mess,"Wrong GFF value in annotations (frame not between 0..2):\n-->%s\n",lineCopy);
+			  printError(mess);
+			}
+		}
+	  
+	  /* 9. Group: optional, string */
+	  if (line9 != NULL)
+	    {
+		  if (sscanf(line9,"%s",(pv->vExons+i)->Group) != 1)
+			{
+			  sprintf(mess,"Wrong GFF value in annotations (group):\n-->%s\n",lineCopy);
+			  printError(mess);
+			}
+	    }
+	  else
+        {
+		  /* This exon will be allowed to join to ab initio predictions */
+		  strcpy((pv->vExons+i)->Group, NOGROUP);
+        }
+	  
+	  /* 2.c. Process current exon */
+	  /* (A). Checking exon feature (gene model) */
 	  saux[0]='\0';
 	  strcpy (saux, (pv->vExons+i)->Type);
-	  	  
-	  /* Concat the strand after the type */
 	  slen = strlen(saux);
 	  saux[slen++] = (pv->vExons+i)->Strand;
 	  saux[slen] = '\0';
 	  
 	  if (getkeyDict(d,saux) == NOTFOUND)
 	    {
-	      /* Type of this exon does not appear in GeneModel */
-	      /* Skip this exon */
-	      sprintf(mess, "Skipping exon %ld(unknown type %s)\n",i,saux);
+         /* Forget it: exon type is not in current gene model */
+		  sprintf(mess,"Wrong GFF feature in annotations (unknown):\n-->%s\n",lineCopy);
 	      printMess(mess); 
 	    }
 	  else
 	    {
+		  /* (B). Well-sorted (by start position) list of read exons */
 	      currAcceptor = (pv->vSites + pv->nvSites)->Position;
-	      /* File must be ordered by acceptor positions */
 	      if (lastAcceptor > currAcceptor)
-		{
-		  sprintf(mess,"Exons file bad ordered by acceptor position(line %ld)",i);
-		  printError(mess);  
-		}
-	      else
-		{
-		  lastAcceptor = (pv->vSites + pv->nvSites)->Position;
-		  
-		  /* Assign fool sites to this exon */
-		  (pv->vExons+i)->Acceptor = (pv->vSites + pv->nvSites);
-		  (pv->vExons+i)->Donor = (pv->vSites + pv->nvSites + 1); 
-
-		  /* Updating sites to the range 0..LengthSequence-1 */
-		  (pv->vExons+i)->offset1 = -COFFSET;
-		  (pv->vExons+i)->offset2 = -COFFSET;
-	      
-		  if (three)
-		    {
-		      /* Creating three exons(3 frames) */
-		      (pv->vExons+i+1)->Acceptor = (pv->vSites + pv->nvSites);
-		      (pv->vExons+i+1)->Donor = (pv->vSites + pv->nvSites + 1); 
-		      (pv->vExons+i+2)->Acceptor = (pv->vSites + pv->nvSites);
-		      (pv->vExons+i+2)->Donor = (pv->vSites + pv->nvSites + 1); 
-
-		      /* Updating sites to the range 0..LengthSequence-1 */
-		      (pv->vExons+i+1)->offset1 = -COFFSET;
-		      (pv->vExons+i+1)->offset2 = -COFFSET;
-		      (pv->vExons+i+2)->offset1 = -COFFSET;
-		      (pv->vExons+i+2)->offset2 = -COFFSET;
-		      
-		      (pv->vExons+i)->Frame = 0;
-		      (pv->vExons+i+1)->Frame = 1;
-		      (pv->vExons+i+2)->Frame = 2;
-		      
-		      strcpy((pv->vExons+i+1)->Type,(pv->vExons+i)->Type);
-		      strcpy((pv->vExons+i+2)->Type,(pv->vExons+i)->Type);
-		      (pv->vExons+i+1)->Score = (pv->vExons+i)->Score;
-		      (pv->vExons+i+2)->Score = (pv->vExons+i)->Score;
-		      (pv->vExons+i+1)->Strand = (pv->vExons+i)->Strand;
-		      (pv->vExons+i+2)->Strand = (pv->vExons+i)->Strand;
-		      
-		      /* Remainder is ... */
-		      (pv->vExons+i+1)->Remainder = 
-			((3 - (((pv->vExons+i+1)->Donor->Position - 
-				(pv->vExons+i+1)->Acceptor->Position - 
-				(pv->vExons+i+1)->Frame + 1)%3)) %3);
-		      
-		      /* Remainder is ... */
-		      (pv->vExons+i+2)->Remainder = 
-			((3 - (((pv->vExons+i+2)->Donor->Position - 
-				(pv->vExons+i+2)->Acceptor->Position - 
-				(pv->vExons+i+2)->Frame + 1)%3)) %3);
-		      
-		      /* The same group */
-		      (pv->vExons+i+1)->Group = (pv->vExons+i)->Group;
-		      (pv->vExons+i+2)->Group = (pv->vExons+i)->Group;  
-		      
-		      /* Evidence exons */
-		      (pv->vExons+i+1)->evidence = 1;
-		      (pv->vExons+i+2)->evidence = 1;
-		      
-		      /* If strand (-), frame and remainder must be exchanged */
-		      if ((pv->vExons+i)->Strand =='-')  
-			{ 
-			  fraux = (pv->vExons+i+1)->Frame; 
-			  (pv->vExons+i+1)->Frame = (pv->vExons+i+1)->Remainder;
-			  (pv->vExons+i+1)->Remainder = fraux;
-			  fraux = (pv->vExons+i+2)->Frame; 
-			  (pv->vExons+i+2)->Frame = (pv->vExons+i+2)->Remainder;
-			  (pv->vExons+i+2)->Remainder = fraux;
+			{
+			  sprintf(mess,"Wrong order in annotations (starting position %ld):\n-->%s\n",
+					  lastAcceptor,
+					  lineCopy);  
+			  printError(mess);  
 			}
-		    }      
-		  
-		  /* Remainder is ... */
-		  (pv->vExons+i)->Remainder = 
-		    ((3 - (((pv->vExons+i)->Donor->Position - 
-			    (pv->vExons+i)->Acceptor->Position - 
-			    (pv->vExons+i)->Frame + 1)%3)) %3);
-		  
-		  /* Evidence exon */
-		  (pv->vExons+i)->evidence = 1;
-		  
-		  /* If strand (-), frame and remainder must be exchanged */
-		  if ((pv->vExons+i)->Strand =='-')  
-		    { 
-		      fraux = (pv->vExons+i)->Frame; 
-		      (pv->vExons+i)->Frame = (pv->vExons+i)->Remainder;
-		      (pv->vExons+i)->Remainder = fraux;
-		    }
-		  
-		  i = (three)? i+3 : i+1;
-		  three = 0;
-		  
-		  pv->nvSites = pv->nvSites + 2;
-	    
-		  if (i > NUMEEVIDENCES)
-		    printError("Too many evidence exons: Change NUMEEVIDENCES parameter");
-		  
-		  if (pv->nvSites > NUMSEVIDENCES)
-		    printError("Too many evidence sites: Change NUMSEVIDENCES parameter");
-		}
-	    }
-	}
-    }
+	      else
+			{
+			  lastAcceptor = (pv->vSites + pv->nvSites)->Position;
+			  
+			  /* (C). Setting dummy sites to this exon */
+			  (pv->vExons+i)->Acceptor = (pv->vSites + pv->nvSites);
+			  (pv->vExons+i)->Donor = (pv->vSites + pv->nvSites + 1); 
+			  
+			  /* Updating information about sites to the range 0..L-1 */
+			  (pv->vExons+i)->offset1 = -COFFSET;
+			  (pv->vExons+i)->offset2 = -COFFSET;
+			  
+			  /* (D). Making three (two more) copies if needed */
+			  if (three)
+				{
+				  /* Creating three exons (3 frames): sharing sites */
+				  (pv->vExons+i+1)->Acceptor = (pv->vSites + pv->nvSites);
+				  (pv->vExons+i+1)->Donor = (pv->vSites + pv->nvSites + 1); 
+				  (pv->vExons+i+2)->Acceptor = (pv->vSites + pv->nvSites);
+				  (pv->vExons+i+2)->Donor = (pv->vSites + pv->nvSites + 1); 
+				  
+				  /* Updating information about sites to the range 0..L-1 */
+				  (pv->vExons+i+1)->offset1 = -COFFSET;
+				  (pv->vExons+i+1)->offset2 = -COFFSET;
+				  (pv->vExons+i+2)->offset1 = -COFFSET;
+				  (pv->vExons+i+2)->offset2 = -COFFSET;
+				  
+				  /* Setting frame values */
+				  (pv->vExons+i)->Frame = 0;
+				  (pv->vExons+i+1)->Frame = 1;
+				  (pv->vExons+i+2)->Frame = 2;
+				  
+				  /* Copy some exon attributes */
+				  strcpy((pv->vExons+i+1)->Type,(pv->vExons+i)->Type);
+				  strcpy((pv->vExons+i+2)->Type,(pv->vExons+i)->Type);
+				  (pv->vExons+i+1)->Score = (pv->vExons+i)->Score;
+				  (pv->vExons+i+2)->Score = (pv->vExons+i)->Score;
+				  (pv->vExons+i+1)->Strand = (pv->vExons+i)->Strand;
+				  (pv->vExons+i+2)->Strand = (pv->vExons+i)->Strand;
+		      
+				  /* Computing remainder from frame value for copies 1,2 */
+				  (pv->vExons+i+1)->Remainder = 
+					((3 - (((pv->vExons+i+1)->Donor->Position - 
+							(pv->vExons+i+1)->Acceptor->Position - 
+							(pv->vExons+i+1)->Frame + 1)%3)) %3);
+				  
+				  (pv->vExons+i+2)->Remainder = 
+					((3 - (((pv->vExons+i+2)->Donor->Position - 
+							(pv->vExons+i+2)->Acceptor->Position - 
+							(pv->vExons+i+2)->Frame + 1)%3)) %3);
+				  
+				  /* The same group */
+				  strcpy((pv->vExons+i+1)->Group,(pv->vExons+i)->Group);
+				  strcpy((pv->vExons+i+2)->Group,(pv->vExons+i)->Group);
+				  
+				  /* Evidence flag activated */
+				  (pv->vExons+i+1)->evidence = 1;
+				  (pv->vExons+i+2)->evidence = 1;
+				  
+				} /* End of if(three) */      
+			  
+			  /* (E). Doing the same for the original exon: */
+			  /* Computing remainder from frame value */
+			  (pv->vExons+i)->Remainder = 
+				((3 - (((pv->vExons+i)->Donor->Position - 
+						(pv->vExons+i)->Acceptor->Position - 
+						(pv->vExons+i)->Frame + 1)%3)) %3);
+			  
+			  /* Evidence flag activated */
+			  (pv->vExons+i)->evidence = 1;
+			  
+			  /* Updating and checking loop counters */
+			  i = (three)? i+3 : i+1;
+			  pv->nvSites = pv->nvSites + 2;
+			  three = 0;
+			  
+			  if ((i + FRAMES) > MAXEVIDENCES)
+				printError("Too many evidences: increase MAXEVIDENCES definition");
+			  
+			  if ((pv->nvSites + (2*FRAMES)) > MAXSITESEVIDENCES)
+				printError("Too many site evidences: increase MAXEVIDENCES definition");
+			  
+			} /* End of sorting checkpoint */
+		} /* End of feature_in_gene_model checkpoint */
+		} /* End of checkpoint for comments (#) */
+    } /* End of while (input exons) */
   fclose(file);
+  
+  /* Return the number of created exons (including replications) */
   return(i);
 }
+
