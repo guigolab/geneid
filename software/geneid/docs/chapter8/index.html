@@ -36,7 +36,10 @@ ALINK="blue">
 <ol>
 <li> <a href="#description">Description</a>
 <li> <a href="#gm">The GENE MODEL</a>
+<li> <a href="#acc">Acceptor splice sites: 
+Branch Points and  Poly Pyrimidine Tracts</a>
 <li> <a href="#full">Full description</a>
+
 <li> <a href="./../index.html">INDEX</a>
 </ol>
 </font>
@@ -52,7 +55,8 @@ ALINK="blue">
 <tr>
 <td>
 <div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> depends on a parameter file to build the predictions. The parameter file contains
+<tt>geneid</tt> relies on a parameter file to build the predictions. 
+The parameter file contains
 mostly the description of the probabilistic model on which the predictions
 are based. It also contains the so-called gene model at the end, the set of 
 rules describing how to chain gene elements (such as exons) into gene 
@@ -169,6 +173,203 @@ finish the prediction output. Option -F forces <tt>geneid</tt> to
 predict a complete gene structure in the input sequence. That is, 
 either First-(Internal)*-Terminal, Terminal-(Internal)*-First or a 
 single-exon gene.
+</font>
+</div>
+</td>
+</table>
+
+<br><p><br><p>
+<table border=0 width=700 cellpadding=10>
+<tr>
+<td bgcolor=orange><font face="arial black" size=3>Acceptor Splice sites:</font>
+<a name ="acc"></td>
+<tr>
+<td>
+<div class="bulk"><font face="arial black" size=2>
+<tt>geneid</tt> can predict both the putative branch point and 
+the putative Poly Pyrimidine Tract for each predicted acceptor. In order
+to obtain such predictions, separate optional profiles for one of them or 
+both additional signals must be provided in the parameter file. It is always 
+mandatory to have a very basic acceptor profile to detect the core of the 
+signal: <tt>AG</tt>.
+<br><p>
+Then, the structure
+of the parameter file in that section would be:
+<br><p>
+<center>
+<table border=1>
+<tr>
+<td bgcolor=lightblue>
+<pre>
+<b>
+Branch_point_profile
+20 0 0 1
+# Transition probabilities at every position
+1 AA -0.128982
+1 AC 0.401934
+1 AG -0.580466
+1 AT 0.293935
+1 CA -0.41815
+1 CC 0.0892966
+1 CG -0.350502
+1 CT 0.294759
+1 GA -0.103346
+1 GC 0.110032
+1 GG -0.345638
+1 GT 0.358765
+1 TA -0.111567
+...
+
+Poly_Pyrimidine_Tract_profile
+20 0 0 1
+# Transition probabilities at every position
+1 AA -0.128982
+1 AC 0.401934
+1 AG -0.580466
+1 AT 0.293935
+1 CA -0.41815
+1 CC 0.0892966
+1 CG -0.350502
+1 CT 0.294759
+1 GA -0.103346
+1 GC 0.110032
+1 GG -0.345638
+1 GT 0.358765
+1 TA -0.111567
+1 TC 0.0519978
+1 TG -0.300144
+1 TT 0.273584
+2 AA -0.082934
+2 AC 0.399051
+2 AG -0.606083
+2 AT 0.221358
+2 CA -0.320746
+2 CC 0.0964467
+2 CG 0.0141593
+2 CT 0.15082
+2 GA -0.00298645
+...
+
+Acceptor_profile
+7 4 -7 1
+# Transition probabilities at every position
+
+1 AA 0.489398
+1 AC 0.559547
+1 AG -1.62606
+1 AT -0.114812
+1 CA -0.0513558
+1 CC 0.240873
+1 CG 0.463496
+1 CT -0.413189
+1 GA -0.287557
+1 GC 0.250994
+1 GG 0.152369
+1 GT -0.255893
+1 TA -0.353906
+1 TC 0.166021
+1 TG -0.0541454
+1 TT 0.150306
+2 AA -1.45683
+2 AC 0.970558
+2 AG -4.94779
+2 AT 0.397884
+2 CA -1.93025
+2 CC 0.36421
+2 CG -3.01555
+2 CT 0.565917
+2 GA -1.98417
+2 GC 0.970977
+2 GG -4.5318
+2 GT 0.383942
+2 TA -1.24867
+2 TC 0.614448
+2 TG -5.14748
+2 TT 0.758865
+3 AA 0.000
+3 AC -9999
+3 AG -9999
+3 AT -9999
+3 CA 0.000
+3 CC -9999
+3 CG -9999
+3 CT -9999
+3 GA 0.000
+3 GC -9999
+3 GG -9999
+3 GT -9999
+3 TA 0.000
+3 TC -9999
+3 TG -9999
+3 TT -9999
+4 AA -9999
+4 AC -9999
+4 AG 0.000
+4 AT -9999
+4 CA -9999
+4 CC -9999
+4 CG -9999
+4 CT -9999
+4 GA -9999
+4 GC -9999
+4 GG -9999
+4 GT -9999
+4 TA -9999
+4 TC -9999
+4 TG -9999
+4 TT -9999
+5 AA -9999
+5 AC -9999
+5 AG -9999
+5 AT -9999
+5 CA -9999
+5 CC -9999
+5 CG -9999
+5 CT -9999
+5 GA -0.17512
+5 GC -0.456677
+5 GG 0.573456
+5 GT -0.627791
+5 TA -9999
+5 TC -9999
+5 TG -9999
+5 TT -9999
+6 AA -0.213185
+6 AC -0.085246
+6 AG -0.346927
+6 AT 0.573534
+6 CA -0.33339
+6 CC -0.154707
+6 CG 0.349989
+6 CT 0.305452
+6 GA -0.120601
+6 GC -0.354317
+6 GG -0.061412
+6 GT 0.491861
+6 TA -0.316615
+6 TC -0.244502
+6 TG 0.049206
+6 TT 0.276332
+7 AA 0.0223094
+7 AC 0.25836
+7 AG -0.361517
+7 AT 0.168915
+7 CA -0.238056
+7 CC 0.195423
+7 CG 0.184102
+7 CT -0.00295397
+7 GA -0.22978
+7 GC 0.203999
+7 GG -0.0720478
+7 GT 0.162323
+7 TA -0.111801
+7 TC 0.00204436
+7 TG 0.108514
+7 TT -0.0726444
+</b></pre>
+</td>
+</table>
+</center>
 </font>
 </div>
 </td>
@@ -424,6 +625,8 @@ Terminal-:Internal-    First-:Internal-         20:25000 block
 </div>
 </td>
 </table>
+
+
 
 <br><p><br><p><br><p>
 
