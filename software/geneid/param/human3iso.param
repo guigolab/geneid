@@ -1,5 +1,9 @@
-# Parameter file: geneid_human.
-# Comment lines must begin with '#'
+# geneid parameter file: human, 3 isochores
+# Comment lines must start with '#'
+
+# Non-homology penalty
+NO_SCORE
+0
 
 # Number of isochores
 number_of_isochores
@@ -7,26 +11,35 @@ number_of_isochores
 
 # PARAMETERS FROM ISOCHORE 1
 
+# %GC
 boundaries_of_isochore
 0  45
 
-# Exons score: Cutoffs and weights
-Cutoff_exons
+# Exons score: cutoffs
+Absolute_cutoff_exons
 -15 -15 -15 -15
 
-Cutoff_Oligos
+Coding_cutoff_oligos
 -10 -15 -15 -15
 
-Weight_of_oligos_in_exons
+# Exon score: factors
+Site_factor
+0.6 0.6 0.6 0.6
+
+Exon_factor
 0.4 0.4 0.4 0.4
+
+HSP_factor
+1.0 1.0 1.0 1.0
 
 Exon_weights
 -5.50 -5.50 -5.50 -5.50
 
-# Parameters to Predict Sites: Lenght, Offset, Cutoff and order (Markov chain)
-Start profile 
+# Site prediction: Position Weight Arrays
+# Lenght, Offset, Cutoff and order (Markov model)
+Start_profile 
 20 14 -6 2
-# These are the transition probabilities
+# Transition probabilities at every position
 1 AAA -0.230297
 1 AAC 0.519562
 1 AAG 0.301505
@@ -1308,9 +1321,9 @@ Start profile
 20 TTG -0.0335678
 20 TTT -0.172498
 
-AcceptorProfile
+Acceptor_profile
 27 24 -7 1
-# These are the transition probabilities
+# Transition probabilities at every position
 1 AA -0.128982
 1 AC 0.401934
 1 AG -0.580466
@@ -1710,7 +1723,7 @@ AcceptorProfile
 25 TA -9999
 25 TC -9999
 25 TG -9999
-25 TT -9999                                                                                        
+25 TT -9999
 26 AA -0.213185
 26 AC -0.085246
 26 AG -0.346927
@@ -1744,9 +1757,9 @@ AcceptorProfile
 27 TG 0.108514
 27 TT -0.0726444
 
-DonorProfile
+Donor_profile
 9 2 -7.5 0
-# These are the transition probabilities
+# Transition probabilities at every position
 1 A 0.302
 1 C 0.483
 1 G -0.305
@@ -1784,8 +1797,8 @@ DonorProfile
 9 G -0.136
 9 T 0.492
 
-StopProfile
-# These are the transition probabilities
+Stop_profile
+# Transition probabilities at every position
 4 0 -9999 0
 1 A 0
 1 C 0
@@ -1804,7 +1817,8 @@ StopProfile
 4 G 0.000
 4 T -9999
 
-# Parameters to Predict Exons: Markov chains(initial - transition)
+# Exon prediction: Markov model
+# Initial probabilities at every codon position
 Markov_oligo_logs_file
 5
 Markov_Initial_probability_matrix
@@ -4881,6 +4895,7 @@ TTTTT 1023 0 -1.57929
 TTTTT 1023 1 -1.39876
 TTTTT 1023 2 -2.04274
 
+# Transition probabilities at every codon position
 Markov_Transition_probability_matrix
 AAAAAA 0 0 -0.517615
 AAAAAA 0 1 -0.692431
@@ -17171,32 +17186,41 @@ TTTTTT 4095 0 -0.570309
 TTTTTT 4095 1 -1.39051
 TTTTTT 4095 2 -0.43369
 
-# How many donors per acceptor can we use to build exons?
+# Donors per acceptor to build exons
 maximum_number_of_donors_per_acceptor_site
 5
 
 # PARAMETERS FROM ISOCHORE 2
 
+# %GC
 boundaries_of_isochore
 45  55
 
-# Exons score: Cutoffs and weights
-Cutoff_exons
+# Exons score: cutoffs
+Absolute_cutoff_exons
 -15 -15 -15 -15
 
-Cutoff_Oligos
+Coding_cutoff_Oligos
 -10 -15 -15 -15
 
-Weight_of_oligos_in_exons
+# Exon score: factors
+Site_factor
+0.6 0.6 0.6 0.6
+
+Exon_factor
 0.4 0.4 0.4 0.4
+
+HSP_factor
+1.0 1.0 1.0 1.0
 
 Exon_weights
 -5 -5 -5 -5
 
-# Parameters to Predict Sites: Lenght, Offset, Cutoff and order (Markov chain)
-Start profile 
+# Site prediction: Position Weight Arrays
+# Lenght, Offset, Cutoff and order (Markov model)
+Start_profile 
 20 14 -6 2
-# These are the transition probabilities
+# Transition probabilities at every position 
 1 AAA -0.230297
 1 AAC 0.519562
 1 AAG 0.301505
@@ -18478,9 +18502,9 @@ Start profile
 20 TTG -0.0335678
 20 TTT -0.172498
 
-AcceptorProfile
+Acceptor_profile
 27 24 -7 1
-# These are the transition probabilities
+# Transition probabilities at every position
 1 AA -0.128982
 1 AC 0.401934
 1 AG -0.580466
@@ -18880,7 +18904,7 @@ AcceptorProfile
 25 TA -9999
 25 TC -9999
 25 TG -9999
-25 TT -9999                                                                                        
+25 TT -9999
 26 AA -0.213185
 26 AC -0.085246
 26 AG -0.346927
@@ -18914,9 +18938,9 @@ AcceptorProfile
 27 TG 0.108514
 27 TT -0.0726444
 
-DonorProfile
+Donor_profile
 9 2 -7.5 0
-# These are the transition probabilities
+# Transition probabilities at every position 
 1 A 0.302
 1 C 0.483
 1 G -0.305
@@ -18954,8 +18978,8 @@ DonorProfile
 9 G -0.136
 9 T 0.492
 
-StopProfile
-# These are the transition probabilities
+Stop_profile
+# Transition probabilities at every position 
 4 0 -9999 0
 1 A 0
 1 C 0
@@ -18974,7 +18998,8 @@ StopProfile
 4 G 0.000
 4 T -9999
 
-# Parameters to Predict Exons: Markov chains(initial - transition)
+# Exon prediction: Markov model
+# Initial probabilities at every codon position
 Markov_oligo_logs_file
 5
 Markov_Initial_probability_matrix
@@ -22051,6 +22076,7 @@ TTTTT 1023 0 -1.89326
 TTTTT 1023 1 -1.72656
 TTTTT 1023 2 -2.50441
 
+# Transition probabilities at every codon position
 Markov_Transition_probability_matrix
 AAAAAA 0 0 -1.03402
 AAAAAA 0 1 -0.895175
@@ -34341,32 +34367,41 @@ TTTTTT 4095 0 -0.635483
 TTTTTT 4095 1 -1.7069
 TTTTTT 4095 2 -0.693276
 
-# How many donors per acceptor can we use to build exons?
+# Donors per acceptor to build exons
 maximum_number_of_donors_per_acceptor_site
 5
 
 # PARAMETERS FROM ISOCHORE 3
 
+# %GC
 boundaries_of_isochore
 55  100
 
-# Exons score: Cutoffs and weights
-Cutoff_exons
+# Exons score: cutoffs
+Absolute_cutoff_exons
 -15 -15 -15 -15
 
-Cutoff_Oligos
+Coding_cutoff_Oligos
 -10 -15 -15 -15
 
-Weight_of_oligos_in_exons
+# Exon score: factors
+Site_factor
+0.6 0.6 0.6 0.6
+
+Exon_factor
 0.4 0.4 0.4 0.4
+
+HSP_factor
+1.0 1.0 1.0 1.0
 
 Exon_weights
 -5 -5 -5 -5
 
-# Parameters to Predict Sites: Lenght, Offset, Cutoff and order (Markov chain)
-Start profile 
+# Site prediction: Position Weight Arrays
+# Lenght, Offset, Cutoff and order (Markov model)
+Start_profile 
 20 14 -6 2
-# These are the transition probabilities
+# Transition probabilities at every position
 1 AAA -0.230297
 1 AAC 0.519562
 1 AAG 0.301505
@@ -35648,9 +35683,9 @@ Start profile
 20 TTG -0.0335678
 20 TTT -0.172498
 
-AcceptorProfile
+Acceptor_profile
 27 24 -7 1
-# These are the transition probabilities
+# Transition probabilities at every position
 1 AA -0.128982
 1 AC 0.401934
 1 AG -0.580466
@@ -36084,9 +36119,9 @@ AcceptorProfile
 27 TG 0.108514
 27 TT -0.0726444
 
-DonorProfile
+Donor_profile
 9 2 -7.5 0
-# These are the transition probabilities
+# Transition probabilities at every position
 1 A 0.302
 1 C 0.483
 1 G -0.305
@@ -36124,8 +36159,8 @@ DonorProfile
 9 G -0.136
 9 T 0.492
 
-StopProfile
-# These are the transition probabilities
+Stop_profile
+# Transition probabilities at every position
 4 0 -9999 0
 1 A 0
 1 C 0
@@ -36144,7 +36179,8 @@ StopProfile
 4 G 0.000
 4 T -9999
 
-# Parameters to Predict Exons: Markov chains(initial - transition)
+# Exon prediction: Markov model
+# Initial probabilities at every codon position
 Markov_oligo_logs_file
 5
 Markov_Initial_probability_matrix
@@ -39221,6 +39257,7 @@ TTTTT 1023 0 -1.71795
 TTTTT 1023 1 -1.93776
 TTTTT 1023 2 -2.8858
 
+# Transition probabilities at every codon position
 Markov_Transition_probability_matrix
 AAAAAA 0 0 -1.2277
 AAAAAA 0 1 -0.830941
@@ -51511,22 +51548,21 @@ TTTTTT 4095 0 -0.97062
 TTTTTT 4095 1 -1.82443
 TTTTTT 4095 2 -0.508665
 
-# How many donors per acceptor can we use to build exons?
+# Donors per acceptor to build exons
 maximum_number_of_donors_per_acceptor_site
 5
 
-# Global Parameters 
-# Rules about Gene construction(GenAmic)
+# GENE MODEL: Rules about gene assembling (GenAmic)
 General_Gene_Model
-#intronic connections
+# INTRAgenic connections
 First+:Internal+                Internal+:Terminal+             20:40000 block
 Terminal-:Internal-             First-:Internal-                20:40000 blockr
-#connections to regulatory elements
+# External features
 Promoter+                       First+:Single+                  50:4000
 Terminal+:Single+               aataaa+                         50:4000
 First-:Single-                  Promoter-                       50:4000
 aataaa-                         Single-:Terminal-               50:4000
-#intergenic conections
+# INTERgenic conections
 aataaa+:Terminal+:Single+       Single+:First+:Promoter+        500:Infinity
 aataaa+:Terminal+:Single+       Single-:Terminal-:aataaa-       500:Infinity
 Promoter-:First-:Single-        Single+:First+:Promoter+        500:Infinity

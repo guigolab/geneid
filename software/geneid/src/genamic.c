@@ -4,9 +4,9 @@
 *                                                                        *
 *   Assembling genes from the input set of exons                         *
 *                                                                        *
-*   This file is part of the geneid 1.1 Distribution                     *
+*   This file is part of the geneid 1.2 Distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.4 2001-12-18 16:22:03 eblanco Exp $  */
+/*  $Id: genamic.c,v 1.5 2003-11-05 14:25:27 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -58,6 +58,12 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       /* Exons from the last fragment of sequence */
       SwitchFramesDa(pg,gp->nclass);
     }
+  else
+	{
+	  /* GENAMIC processign only: option -O */
+	  /* Exons from the current fragment of sequence */
+      SwitchFrames(E,nExons);
+	}
   
   /* 1. Create a set of sorted by donor array of pointer to exons */
   printMess("Sorting exons by donor...");
@@ -203,9 +209,12 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       SwitchFramesDb(pg,gp->nclass);
     }
   else
-    UndoFrames(E,nExons);
+    {
+	  /* GENAMIC processing only: option -O */
+	  UndoFrames(E,nExons);
+	}
   
   /* Finishing process */
-  printMess("-- Finishing gene assembling (genamic) --");
+  printMess("-- Finishing gene assembling (genamic) --\n");
 }
 
