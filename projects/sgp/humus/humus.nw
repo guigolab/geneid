@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.2 2002-02-01 19:07:01 jabril Exp $ 
+% # $Id: humus.nw,v 1.3 2002-02-08 19:28:43 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -266,7 +266,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.2 2002-02-01 19:07:01 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.3 2002-02-08 19:28:43 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -990,7 +990,7 @@ chmod a+x $BIN/sbp_blast2gff.pl ;
 #
 # Unpacking TBLASTX results obtained by Pankaj
 #
-IDIR="$HUMUS/.ftp/PankajAgarwal/20010111.tbxPhusion" ;
+IDIR="$HUMUS/.ftp/PankajAgarwal/20020111.tbxPhusion" ;
 ODIR="$HUMUS/$CHR/tblastx/$XID" ;
 #
 CheckDirs $ODIR $ODIR/ori ;
@@ -1482,6 +1482,125 @@ EVIDENCES="/$CHR.gff" ;
 }
 
 
+\sctn{Masking gene-predictions along masked sequences}
+
+<<>>=
+# bash
+# CLEAR, RESET, CONCEALED,
+# BOLD, DARK, UNDERLINE, UNDERSCORE, BLINK, REVERSE,
+# BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, 
+# ON_BLACK, ON_RED, ON_GREEN, ON_YELLOW, ON_BLUE, ON_MAGENTA, ON_CYAN, and ON_WHITE 
+function show_masked {
+    perl -npe '
+        use Term::ANSIColor;
+        s/^(>.*?)(\s+.*)$/color("bold red").$1.color("reset").$2/oe;
+        # masked
+        s/(N+)/color("green").$1.color("reset")/oge;
+        s/(n+)/color("yellow").$1.color("reset")/oge;
+        # starts
+        s/(ATG)/color("black on_green").$1.color("reset")/oge; # forward
+        s/(CAT)/color("white on_green").$1.color("reset")/oge; # reverse
+        # stops
+        s/(TAA|TAG|TGA)/color("black on_red").$1.color("reset")/oge; # forward
+        s/(TTA|CTA|TCA)/color("white on_red").$1.color("reset")/oge; # reverse
+    ' "$@" | more
+}
+#
+perl -e '
+  use strict;
+  my ($base,$ipath,$opath,$gnlst,@files,
+      %offset,%cds,%genes,$n,$totgns,$totcds,$tgenes,$tcds);
+  my $chr = shift @ARGV;
+  $base = "/projects/H.sapiens";
+  $ipath = "$base/.ftp/PankajAgarwal/20020123.seq-masked";
+  $opath = "$base/.ftp/PankajAgarwal/20020208.seq-masked+genes-masked";
+  my $gff = "$base/$chr/sgp/20020122/gff/$chr";
+  # $gnlst = "$base/$chr/sgp/20020122/out.gene_list";
+  # getting input filenames
+  opendir(NA,$ipath);
+  @files = grep { /^$chr/ } readdir(NA);
+  closedir(NA);
+  print STDERR "## Found ".scalar(@files)." input files for $chr...\n";
+  # get sequence starting coord offset
+  foreach my $fl (@files) {
+      $fl =~ /_(\d+)_\d+$/o && ($offset{$1} = $fl);
+  };
+ #
+  # reading gene coords
+  # open(GF,"< $gnlst");
+  # $n = 0;
+  # while (<GF>) {
+  #     my @l;
+  #     next if /^#/o;
+  #     next if /^\s*$/o;
+  #     chomp;
+  #     @l = split /\s+/og, $_, 5;
+  #     $genes{$n++} = [ @l[1,2],"$l[0]$l[3]" ];
+  # };
+  # close(GF);
+  # $tgenes = $n;
+  # print STDERR "## Found $tgenes genes to mask on $chr...\n";
+ #
+  # reading from GFF
+  open(GFF,"< $gff");
+  $n = 0;
+  %genes = ();
+  while (<GFF>) {
+      my @l;
+      next if /^#/o;
+      next if /^\s*$/o;
+      chomp;
+      @l = split /\s+/og, $_;
+      $cds{$n++} = [ @l[3,4],"$l[8]$l[6]" ];
+      $genes{"$l[8]$l[6]"}++;
+  };  
+  close(GFF);
+  $tgenes = scalar (keys %genes);
+  $tcds   = $n;
+  print STDERR "## Found $tgenes genes ($tcds cds) to mask on $chr...\n";
+  # processing fastas
+  $totgns = $totcds = 0;
+  foreach my $fl (sort keys %offset) {
+      my ($sqn,$fstg,$fcds);
+      open(FI,"< $ipath/$offset{$fl}");
+      open(FO,"> $opath/$offset{$fl}.cds");
+      $sqn = $fl;
+      $n = $fstg = $fcds = 0;
+      %genes = ();
+      while ($cds{$n}[1] <= $fl) { $n++; }; # if gene ends before sequence ori
+      while (<FI>) {
+          my (@l,$ln);
+          next if /^\s*$/o;
+          /^>/o && do {
+              print FO $_;
+              next;
+          };
+          chomp;
+          s/\s*$//o; s/^\s*//o;
+          @l = split //, uc($_);
+          $ln = "";
+          for (my $i = 0; $i <= $#l; $i++) {
+              $sqn++;
+              $ln .= ($sqn >= $cds{$n}[0] && $sqn <= $cds{$n}[1]) 
+                     ? "n" : $l[$i] ;
+              ($sqn == $cds{$n}[0]) && ($fcds++);
+              ($sqn == $cds{$n}[1]) && ($n++, $genes{$cds{$n}[2]}++);
+          }; 
+          print FO "$ln\n";
+      };
+      close(FO);
+      close(FI);
+      $fstg = scalar (keys %genes);
+      print STDERR "### $fstg genes ($fcds cds) were masked on \"$offset{$fl}\"...\n";
+      # $totgns += $fstg;
+      $totgns += $fstg;
+      $totcds += $fcds;
+  };
+  print STDERR "### $totgns of $tgenes genes ($totcds of $tcds cds) were masked on $chr...\n";
+  # counter sums are not well done... but masking is ok
+' chr22 2> ./masking_cds.log ; # 2> ./masking_genes.log ;
+@ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
 \end{comment}
@@ -1630,7 +1749,10 @@ $mySQL_pswd = ''; # use vi to introduce the pswd for this user!!!
 @
 <<BASH Variables: Perl>>=
 #
-export PERL5OPT="-I/projects/sgp/bin/mySQL -I/projects/sgp/bin/mySQL/param" ;
+PERL5OPT="-I/projects/sgp/bin" ;
+PERL5OPT="$PERL5OPT -I/projects/sgp/bin/mySQL" ;
+PERL5OPT="$PERL5OPT -I/projects/sgp/bin/mySQL/param" ;
+export PERL5OPT;
 #
 @ 
 
@@ -1792,29 +1914,46 @@ cat $HUMUS/seqid_list >> $BIN/mySQL/param/seqs.tbl ;
 
 \subsubsctn{Perl interface to mySQL database}
 
+<<tangling>>=
+# 
+# mySQL perl scripts: interacting with mySQL DB
+notangle -R'MySQL: perl DB interface' \
+    $WORK/$nwfile.nw | cpif $BIN/mySQL/db_Hsapiens.pm ;
+chmod a+x $BIN/mySQL/db_Hsapiens.pm ;
+#
+@ 
+
 <<MySQL: perl DB interface>>=
 <<PERL shebang>>
 # db_Hsapiens.pm
 #
 package db_Hsapiens;
 use strict;
+<<Use Modules - Dumper>>
+#
 use vars qw(
            @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
            $mySQL_db $mySQL_host $mySQL_user $bpath $dbh $sth
-           $_verbose
+           $_verbose %status %chrs 
            );
 
 use Exporter;
 $VERSION = 1.00;
 @@ISA = qw(Exporter);
 @@EXPORT = qw(
-    $mySQL_db $mySQL_host $mySQL_user $bpath $dbh $sth
-    $_verbose
-    &open_DB &close_DB &list_tables &show_tbl_desc
+    $mySQL_db $mySQL_host $mySQL_user $_verbose
+    &open_DB &close_DB $bpath $dbh $sth
+    &get_tbl_hash
+    &get_DB_codes %status %chrs
   );
-@@EXPORT_OK = qw( &connection_details &load_to_tbl_ifdef );
+@@EXPORT_OK = qw(
+    &connection_details &load_to_tbl_ifdef
+    &list_tables &show_tbl_desc
+  );
 %EXPORT_TAGS = (
-    AdminFunc => [ qw( &connection_details &load_to_tbl_ifdef ) ],
+    AdminFunc => [ qw( &connection_details &load_to_tbl_ifdef
+                       &list_tables &show_tbl_desc
+                       ) ],
     );
 
 # use lib "/projects/sgp/bin/mySQL/param";
@@ -1823,45 +1962,44 @@ use db_Hsapiens_in;
 my $dsn = "DBI:mysql:database=$mySQL_db;host=$mySQL_host";
 
 use DBI;
+#
+use global;
+#
 
 $_verbose = 1;
 
 sub connection_details() {
-    print STDERR <<"EOF";
-###
-### DBI: Available DBD Drivers
-#
-#\t@{[ join("\n#\t",DBI->available_drivers) ]}
-#
-###
-### mySQL connection data:
-#
-#    DBname: $mySQL_db
-#      Host: $mySQL_host
-#      User: $mySQL_user
-#
-EOF
+    print STDERR $Messages{'DBIHEADER'}->("DBI: Available DBD Drivers");
+    print STDERR $Messages{'DBIMSG'}->(
+        "",(map { "\t$_" } DBI->available_drivers),"");
+    print STDERR $Messages{'DBIHEADER'}->("mySQL DataBase Connection Info:");
+    print STDERR $Messages{'DBIMSG'}->("","\tDBname: $mySQL_db",
+        "\t  Host: $mySQL_host","\t  User: $mySQL_user","");
 } # connection_details
 
 sub open_DB() {
     my $trace_level = shift || 0;
-    print STDERR "###\n### Openning mySQL connection to '$mySQL_db' DB...\n";
+    print STDERR $Messages{'DBIHEADER'}->(
+        "Openning mySQL connection to \'$mySQL_db\' DB...");
     DBI->trace($trace_level);
     $dbh = DBI->connect($dsn, $mySQL_user, $mySQL_pswd,
                         { RaiseError => 1, AutoCommit => 1 } );
     # put here error processing...
-    print STDERR "###\n### mySQL connection to '$mySQL_db' DB succesfully established.\n";
+    print STDERR $Messages{'DBIMSG'}->(
+        "","mySQL connection to \'$mySQL_db\' DB succesfully established.","");
 } # open_DB
 
 sub close_DB() {
     defined($dbh) && $dbh->disconnect();
     # put here error processing...
-    print STDERR "###\n### mySQL connection to '$mySQL_db' DB has been closed.\n###\n";
+    print STDERR $Messages{'DBIHEADER'}->(
+        "mySQL connection to \'$mySQL_db\' DB has been closed.");
 } # close_DB
 
 sub list_tables() {
     my @tbls;
-    print STDERR "###\n### Retrieving tables definition for '$mySQL_db' DB:\n#\n";
+    print STDERR $Messages{'DBIHEADER'}->(
+        "Retrieving tables definition for '$mySQL_db' DB...");
     @tbls = $dbh->func('_ListTables');
     # put here error processing...
     return @tbls;
@@ -1870,8 +2008,8 @@ sub list_tables() {
 sub show_tbl_desc() {
     my ($table, $fhref) = @_; 
     $sth = $dbh->prepare(qq{
-                             DESC $table /* Shows mySQL table description */
-                           });
+           DESC $table /* Shows mySQL table description */
+         });
     # put here error processing...
     $sth->execute;
     # put here error processing...
@@ -1888,17 +2026,21 @@ sub show_tbl_desc() {
 sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allow multiple fields select... ;^D
     my ($table, $field, $aryfld, $aryrow) = @_;
     my ($ssth,$isth);
-    print STDERR "###\n### UPDATING FIELDS for TABLE \"$table\"\n";
-    my $valstr = "(".join(', ',@{$aryfld}).") VALUES(".
-                 join(',',('?') x scalar(@{$aryfld})).")"; 
+    print STDERR $Messages{'DBIHEADER'}->(
+        "UPDATING FIELDS for TABLE \"$table\"");
+    my $fldstr = "(".join(', ',@{$aryfld}).")"; 
+    my $valstr = "VALUES(".join(',',('?') x scalar(@{$aryfld})).")"; 
     my $sstr = qq{
-            SELECT COUNT($aryfld->[$field]) FROM $table
-            WHERE $aryfld->[$field]=?
-		  };
+        SELECT COUNT($aryfld->[$field])
+               FROM $table
+               WHERE $aryfld->[$field]=?
+		};
     my $istr = qq{
-            INSERT $table $valstr /* adding new records */
-          };
-    print STDERR "###-->(SELECT) $sstr \n###-->(INSERT) $istr \n";
+        INSERT $table
+               $fldstr
+               $valstr /* adding new records */
+        };
+    print STDERR $Messages{'DBICMD'}->("$sstr$istr");
     $ssth = $dbh->prepare($sstr);
     $isth = $dbh->prepare($istr);
     foreach my $row (@{$aryrow}) {
@@ -1906,32 +2048,74 @@ sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allo
         $ssth->execute($row->[$field]);
         $count = $ssth->fetchrow_array();
         ($count == 0) && do {
-            print STDERR "### \"$row->[$field]\" not found in \"$table\":".
-                         " INSERTING...\n";
+            print STDERR $Messages{'DBIMSG'}->(
+                "\"$row->[$field]\" not found in \"$table\": INSERTING...");
             $isth->execute(@{$row});
             next;
 		};
-        print STDERR "### \"$row->[$field]\" already defined in \"$table\":".
-                     " SKIPPING...\n";
+        print STDERR $Messages{'DBIMSG'}->(
+            "\"$row->[$field]\" already defined in \"$table\": SKIPPING...");
     }; # foreach $row 
+    print STDERR $Messages{'DBIMSG'}->(
+        "",(scalar (@{$aryrow}))." records were checked...","");
     $ssth->finish();
     $isth->finish();
 } # load_to_tbl_ifdef
 
-1;
-@ 
+sub get_tbl_hash() {
+    # here we assume that the first element of $aryfld is a hash key
+    my ($href, $table, $aryfld) = @_;
+    print STDERR $Messages{'DBIHEADER'}->(
+        "RETRIEVING HASH from TABLE \"$table\"");
+    my ($ssth,@ary);
+    my $aryfld_len = $#{ $aryfld };
+    my $sstr = qq{
+        SELECT @{[ join(', ',@{$aryfld}) ]}
+               FROM $table
+        }; 
+    print STDERR $Messages{'DBICMD'}->("$sstr");
+    $ssth = $dbh->prepare($sstr);
+    $ssth->execute();
+    while (@ary = $ssth->fetchrow_array()) {
+        $$href{$ary[0]} = [ @ary[1..$aryfld_len] ];
+    }; # while @ary
+    print STDERR $Messages{'DBIMSG'}->(
+        "",(scalar (keys %{$href}))." records were retrieved...","");
+    $ssth->finish();
+} # get_tbl_hash
 
-<<tangling>>=
-# 
-# mySQL perl scripts: interacting with mySQL DB
-notangle -R'MySQL: perl DB interface' \
-    $WORK/$nwfile.nw | cpif $BIN/mySQL/db_Hsapiens.pm ;
-chmod a+x $BIN/mySQL/db_Hsapiens.pm ;
-#
+sub get_DB_codes() {
+    my @sel_fields = ();
+    #
+    # Loading Status tables
+    %status = ();
+    @sel_fields =  qw( id code descr );
+    &get_tbl_hash(\%status, 'tb_status', \@sel_fields);
+#    print STDOUT (Data::Dumper->Dump([ \%status ],
+#                                  [ qw( *status ) ]));
+    #
+    # Loading Chromosome tables
+    %chrs = ();
+    @sel_fields =  qw( id code version descr );
+    &get_tbl_hash(\%chrs, 'tb_chromosome', \@sel_fields);
+#    print STDOUT (Data::Dumper->Dump([ \%chrs ],
+#                                  [ qw( *chrs ) ]));
+} # get_DB_codes
+
+1;
 @ 
 
 
 \subsubsctn{Loading administrative tables}
+
+<<tangling>>=
+# 
+# mySQL perl scripts: loading mySQL admin tables
+notangle -R'MySQL: Initialize administrative tables' \
+    $WORK/$nwfile.nw | cpif $BIN/mySQL/admin_db_Hsapiens.pl ;
+chmod a+x $BIN/mySQL/admin_db_Hsapiens.pl ;
+#
+@ 
 
 <<MySQL: Initialize administrative tables>>=
 <<PERL shebang>>
@@ -1942,9 +2126,14 @@ use strict;
 use db_Hsapiens qw( :DEFAULT :AdminFunc );
 # $bpath/$admfiles[$i].tbl where $bpath eq "/projects/sgp/bin/mySQL"
 # my @admfiles = qw/ chrs seqs jobs steps status /;
+#
+use global;
+$PROG = 'admin_db_Hsapiens.pl';
 
 #
 ## MAIN
+&program_started($PROG);
+
 &connection_details();
 
 &open_DB();
@@ -1952,9 +2141,13 @@ use db_Hsapiens qw( :DEFAULT :AdminFunc );
 &listing_tables();
 
 &load_status_tbl("$bpath/status.tbl");
- 
+&load_chromosome_tbl("$bpath/chrs.tbl");
+
+&get_DB_codes();
+
 &close_DB();
 
+&program_finished($PROG);
 exit(0);
 
 #
@@ -1989,16 +2182,416 @@ sub load_status_tbl() {
     my ($tbl, $fld) = qw( tb_status 0 );
     &load_to_tbl_ifdef($tbl, $fld, \@flds, \@rows);
 } # load_status_tbl
+sub load_chromosome_tbl() {
+    my $ifile = shift;
+    my @rows = ();
+    my $gpver = '';
+    open(IFILE,"< $ifile");
+    while (<IFILE>) {
+        my @f;
+        next if /^#/o;
+        next if /^\s*$/o;
+        chomp;
+        s/^\s+//o;
+        s/\s+$//o;
+        /^>>\s+\b(.*)$/o && ($gpver = $1,next);
+        @f = split /\s+/og, $_, 3;
+        ($f[1] eq '.' && $gpver ne '') && ($f[1] = $gpver);
+        push @rows, [ @f ];
+    };
+    close(IFILE);
+	my @flds = qw( id version descr );
+    my ($tbl, $fld) = qw( tb_chromosome 0 );
+    &load_to_tbl_ifdef($tbl, $fld, \@flds, \@rows);
+} # load_chromosome_tbl
 @ 
+
+
+\subsctn{Step processing script: [[stepper.pl]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 <<tangling>>=
 # 
 # mySQL perl scripts: loading mySQL admin tables
-notangle -R'MySQL: Initialize administrative tables' \
-    $WORK/$nwfile.nw | cpif $BIN/mySQL/admin_db_Hsapiens.pl ;
-chmod a+x $BIN/mySQL/admin_db_Hsapiens.pl ;
+notangle -R'Step Execution Script' \
+    $WORK/$nwfile.nw | cpif $BIN/stepper.pl ;
+chmod a+x $BIN/stepper.pl ;
 #
 @ 
+
+<<Step Execution Script>>=
+<<PERL shebang>>
+# stepper.pl
+#
+# USAGE: stepper param_file step_0 ... step_n
+#
+use strict;
+<<Use Modules - Dumper>>
+#
+# use lib "/projects/sgp/bin/mySQL";
+use db_Hsapiens;
+#
+use global;
+$PROG = 'stepper.pl';
+# $bpath/$admfiles[$i].tbl where $bpath eq "/projects/sgp/bin/mySQL"
+# my @admfiles = qw/ chrs seqs jobs steps status /;
+
+&init_signals();
+&init_timer(\@exectime);
+my $parfile = shift @ARGV;
+my @stepfls = @ARGV;
+
+<<stepper.pl: global vars>>
+
+#
+## MAIN
+&program_started($PROG);
+
+&get_param($parfile);
+&get_steps(@stepfls);
+
+&open_DB();
+&get_DB_codes();
+&loop_through_steps();
+&close_DB();
+
+&program_finished($PROG);
+exit(0);
+
+#
+## SUBS
+<<stepper.pl: subs>>
+@
+
+<<stepper.pl: subs>>=
+sub get_param() {
+} # get_param
+@ 
+<<stepper.pl: subs>>=
+sub get_steps() {
+} # get_steps
+@ 
+
+<<stepper.pl: subs>>=
+sub loop_through_steps() {
+} # loop_through_steps
+@ 
+<<stepper.pl: global vars>>=
+@ 
+
+\subsctn{Shared code: [[global.pm]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<tangling>>=
+# 
+# mySQL perl scripts: interacting with mySQL DB
+notangle -R'shared functions and settings' \
+    $WORK/$nwfile.nw | cpif $BIN/global.pm ;
+chmod a+x $BIN/global.pm ;
+#
+@ 
+
+<<shared functions and settings>>=
+<<PERL shebang>>
+# global.pm
+#
+package global;
+use strict;
+use vars qw(
+           @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
+           $PLVER $PROG $DATE $USER $HOST
+           $T $F $skip_next %Messages @exectime
+           );
+
+use Exporter;
+$VERSION = 1.00;
+@@ISA = qw(Exporter);
+@@EXPORT = qw(
+           $PLVER $PROG $DATE $USER $HOST
+           $T $F $skip_next %Messages
+           &init_timer &timing @exectime
+           &init_signals &trap_signals &trap_signals_prog
+           &program_started &program_finished
+           &min &max
+           );
+@@EXPORT_OK = qw(
+           &comment_line &header &left_header &right_header
+           &fill_right &fill_left &fill_mid
+           );
+%EXPORT_TAGS = (
+           StringFill => [ qw( &fill_right &fill_left &fill_mid ) ],
+           );
+    # AdminFunc => [ qw( &connection_details &load_to_tbl_ifdef ) ],
+    # );
+# use lib "/projects/sgp/bin/";
+
+#
+# Setting Default Variables
+($T,$F) = (1,0);
+$PLVER = sprintf("v%vd",$^V);
+$PROG  = 'UNDEF';
+$DATE  = localtime;
+if (defined($ENV{USER})) {
+    $USER = $ENV{USER};
+} else {
+    chomp($USER = `whoami`);
+};
+if (defined($ENV{HOSTNAME})) {
+    $HOST = $ENV{HOSTNAME};
+} else {
+    chomp($HOST = `hostname`);
+};
+<<global.pm: messages>>
+
+<<global.pm: timing>>
+<<global.pm: trapping signals>>
+<<global.pm: reporting messages>>
+<<global.pm: general functions>>
+
+1;
+@
+@ 
+
+\subsubsctn{Timing processes}
+
+<<global.pm: timing>>= 
+#
+# Timing definitions
+use Benchmark;
+@exectime = ();
+sub init_timer() {
+    my $refary = shift;
+    @{ $refary } = (new Benchmark);
+    return;
+} # init_timer
+sub timing() {
+    my ($refary,$tmp) = @_;
+    my $flg = defined($tmp) || $F;
+    push @{ $refary } , (new Benchmark);
+    my $mx = $#{ $refary };
+    # partial time 
+    $flg || do {
+        return timestr(timediff($refary->[$mx],$refary->[($mx - 1)]));
+    };
+    # total time
+    return timestr(timediff($refary->[$mx],$refary->[0]));
+} # timing
+@ 
+
+\subsubsctn{Trapping system signals}
+
+<<global.pm: trapping signals>>=
+#
+# Trapping signals
+sub init_signals() {
+    $SIG{HUP}  = \&trap_signals_prog;
+    $SIG{ABRT} = \&trap_signals;
+    $SIG{INT}  = \&trap_signals;
+    $SIG{QUIT} = \&trap_signals;
+    $SIG{TERM} = \&trap_signals;
+    $SIG{KILL} = \&trap_signals;
+    $SIG{CHLD} = 'IGNORE';
+    $skip_next = $F;
+} # init_signals
+sub trap_signals() {
+    print STDERR $Messages{'USER_HALT'}->($PROG);
+    $skip_next = $T;
+} # trap_signals
+sub trap_signals_prog() {
+    print STDERR $Messages{'PROCESS_HALT'}->($PROG);
+    $skip_next = $T;
+} # trap_signals_prog
+@
+
+<<global: warnings - input/output>>=
+USER_HALT    => sub {
+         my $name = shift;
+         return
+           &header(
+             @mlin{'warn_len','warn_base','warn_pre','warn_post'},
+             @mlin{'warn_line','empty_warn_line'},
+             "$name has been stopped by user !!!",
+             "---------- Exiting NOW !!! ----------",
+             @mlin{'empty_warn_line','warn_line'},
+             );
+     },
+PROCESS_HALT => sub {
+         my $name = shift;
+         return
+           &header(
+             @mlin{'warn_len','warn_base','warn_pre','warn_post'},
+             @mlin{'warn_line','empty_warn_line'},
+             "------- $name is down !!! -------",
+             "---------- Exiting NOW !!! ----------",
+             @mlin{'empty_warn_line','warn_line'},
+             );
+     },
+@
+
+\subsubsctn{Processing messages}
+
+<<global.pm: messages>>=
+#
+# Program status strings.
+use Term::ANSIColor;
+my $_pre_flg = $F;
+my $term_width = 80;
+my %mlin = (
+    error_base     => color("yellow")."\<\<\< ".color("bold red")."ERROR".
+                      color("yellow")." \>\>\>".color("reset")." ",
+    error_pre      => color("yellow")."\<\<\<".color("reset"),
+    error_post     => color("yellow")."\>\>\>".color("reset"),
+    error_len      => ($term_width - ( 16 + 3 + 3 )),
+      # error_base + error_pre + error_post
+    warn_base      => color("yellow")."\<\<\< ".color("bold yellow")."WARNING".
+                      color("yellow")." \>\>\>".color("reset")." ",
+    warn_pre       => color("yellow")."\<\<\<".color("reset"),
+    warn_post      => color("yellow")."\>\>\>".color("reset"),
+    warn_len       => ($term_width - ( 16 + 3 + 3 )),
+      # error_base + error_pre + error_post
+    comment_base   => "",
+    comment_pre    => color("green")."###".color("reset"),
+    comment_post   => color("green")."###".color("reset"),
+    comment_len    => ($term_width - ( 0 + 3 + 3 )),
+      # comment_base + comment_pre + comment_post
+    dbi_base       => color("cyan")."### ".color("reset"),
+    dbi_pre        => color("cyan")."MySQL *".color("reset"),
+    dbi_post       => color("cyan")."*".color("reset"),
+    dbi_len        => ($term_width - ( 4 + 7 + 1 )),
+      # dbi_base + dbi_pre + dbi_post
+    spacer         => "###",
+    );
+#
+$mlin{'error_line'} = color("yellow").('-' x $mlin{'error_len'}).color("reset");
+$mlin{'empty_error_line'} = (' ' x $mlin{'error_len'});
+#
+$mlin{'warn_line'} = $mlin{'error_line'};
+$mlin{'empty_warn_line'} = $mlin{'empty_error_line'};
+#
+$mlin{'comment_line'} = color("green").("#" x $mlin{'comment_len'}).color("reset");
+$mlin{'empty_comment_line'} = (' ' x $mlin{'comment_len'});
+#
+$mlin{'dbi_line'} = color("cyan").("*" x $mlin{'dbi_len'}).color("reset");
+$mlin{'empty_dbi_line'} = (' ' x $mlin{'dbi_len'});
+#
+%Messages = (
+    # ERROR MESSAGES
+    <<global: warnings - input/output>>
+    # WORKING MESSAGES
+    <<global: messages - program start-stop>>
+    <<global: messages - interacting with DB>>
+   ); # %Messages
+@
+
+<<global.pm: reporting messages>>=
+#
+# Reporting program status and messages
+sub comment_line() {
+    my ($tlen,$base,$pre,@lns) = @_;
+    my ($comment,$ln);
+    foreach $ln (@lns) {
+        $ln =~ s/^$/ /o; 
+        $comment .= "$base$pre $ln\n";
+        };
+    return $comment;
+} # header
+sub header() {
+    my ($tlen,$base,$pre,$post,@lns) = @_;
+    my $comment = $_pre_flg ? "$mlin{'spacer'}\n" : '';
+    $_pre_flg || ($_pre_flg = $T); 
+    foreach my $ln (@lns) { 
+        $comment .= "$base$pre".
+                    (&fill_mid($ln,$tlen," "))."$post\n";
+        };
+    return $comment;
+} # header
+sub left_header() {
+    my ($tlen,$base,$pre,$post,@lns) = @_;
+    my $comment = $_pre_flg ? "$mlin{'spacer'}\n" : '';
+    $_pre_flg || ($_pre_flg = $T); 
+    foreach my $ln (@lns) { 
+        $comment .= "$base$pre".
+                    (&fill_left($ln,$tlen," "))."$post\n";
+        };
+    return $comment;
+} # left_header
+sub right_header() {
+    my ($tlen,$base,$pre,$post,@lns) = @_;
+    my $comment = $_pre_flg ? "$mlin{'spacer'}\n" : '';
+    $_pre_flg || ($_pre_flg = $T); 
+    foreach my $ln (@lns) { 
+        $comment .= "$base$pre".
+                    (&fill_right($ln,$tlen," "))."$post\n";
+        };
+    return $comment;
+} # right_header
+sub program_started() {
+    my $prog = shift;
+    print STDERR $Messages{'HEADER'}->("RUNNING $prog",'',
+        "Host: $HOST","User: $USER","Perl: $PLVER",'',"Date: $DATE");
+} # program_started
+sub program_finished() {
+    my $prog = shift;
+    print STDERR $Messages{'HEADER'}->("$prog HAS FINISHED",'',
+                                       &timing(\@exectime,$T));
+} # program_finished
+@
+
+<<global: messages - program start-stop>>=
+HEADER       => sub {
+         my @mssg = @_;
+         return
+           &header(
+	         @mlin{'comment_len','comment_base','comment_pre','comment_post'},
+             $mlin{'comment_line'},
+             "", @mssg, "",
+             $mlin{'comment_line'},
+             );
+     },
+@
+
+<<global: messages - interacting with DB>>=
+DBIHEADER    => sub {
+         my @mssg = @_;
+         return
+           &right_header(
+	         @mlin{'dbi_len','dbi_base','dbi_pre','dbi_post'},
+             $mlin{'dbi_line'},
+             ( map { " $_" } @mssg ),
+             $mlin{'dbi_line'},
+             );
+     },
+DBIMSG       => sub {
+         my @mssg = @_;
+         return &comment_line(@mlin{'dbi_len','dbi_base','dbi_pre'},@mssg);
+     },
+DBICMD       => sub {
+         my @mssg = (split /[\n]/o, $_[0]);
+         @mssg = map { s/^\s{6}//o; $_ } @mssg;
+         return &comment_line(@mlin{'dbi_len','dbi_base','dbi_pre'},@mssg);
+     },
+@
+
+<<global.pm: general functions>>=
+# 
+# General functions
+sub max() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min
+#
+sub fill_right() { return $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { return ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    return ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l + $k)));
+} # fill_mid
+@
 
 
 \subsctn{Implementing scripts with [[Tk]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2012,6 +2605,9 @@ use Tk;
 # database interface module
 # use lib "/projects/sgp/bin/mySQL";
 use db_Hsapiens;
+#
+use global;
+$PROG = 'stv';
 
 my @chrom = qw/ 1 2 3 4 X Y /; # to load from DB
 my @jobs  = qw/ Masking Homology GenePred SGP /; # to load from DB
@@ -2252,9 +2848,18 @@ use strict;
 #
 my $PVER = sprintf("v%vd",$^V);
 my $DATE = localtime;
-my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
-my $host = `hostname`;
-chomp($host);
+my ($USER,$HOST);
+if defined($ENV{USER}) {
+    $USER = $ENV{USER};
+} else {
+    chomp($USER = `whoami`);
+};
+if defined($ENV{HOSTNAME}) {
+    $HOST = $ENV{HOSTNAME};
+} else {
+    chomp($HOST = `hostname`);
+};
+my $host = $HOST; ###
 #
 @
 
@@ -2408,7 +3013,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.2 2002-02-01 19:07:01 jabril Exp $
+# $Id: humus.nw,v 1.3 2002-02-08 19:28:43 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
