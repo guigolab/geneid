@@ -16001,3 +16001,8 @@ aataaa+:Terminal+:Single+       Single+:First+:Promoter+        2000:Infinity
 aataaa+:Terminal+:Single+       Single-:Terminal-:aataaa-       2000:Infinity
 Promoter-:First-:Single-        Single+:First+:Promoter+        2000:Infinity
 Promoter-:First-:Single-        Single-:Terminal-:aataaa-       2000:Infinity
+# BEGINNING and END of prediction
+Begin+                          First+:Internal+:Terminal+:Single+ 0:Infinity
+Begin-                          First-:Internal-:Terminal-:Single- 0:Infinity
+First+:Internal+:Terminal+:Single+               End+              0:Infinity
+First-:Internal-:Terminal-:Single-               End-              0:Infinity

@@ -15613,3 +15613,8 @@ aataaa+:Terminal+:Single+       Single+:First+:Promoter+        50:9999999
 aataaa+:Terminal+:Single+       Single-:Terminal-:aataaa-       50:9999999
 Promoter-:First-:Single-        Single+:First+:Promoter+        50:9999999
 Promoter-:First-:Single-        Single-:Terminal-:aataaa-       50:9999999
+# BEGINNING and END of prediction
+Begin+                          First+:Internal+:Terminal+:Single+ 0:Infinity
+Begin-                          First-:Internal-:Terminal-:Single- 0:Infinity
+First+:Internal+:Terminal+:Single+               End+              0:Infinity
+First-:Internal-:Terminal-:Single-               End-              0:Infinity
