@@ -1,0 +1,308 @@
+##################################################
+#
+# README_alnstrands
+#
+# This README runs as a shell script.
+# Here you can find the commands
+# we used to produce all the figures for:
+#
+#   "Representing Strand on Alignment Features GFF2APLOT HOWTO"
+#      Checking strand orientation for
+#      alignment features in aplot old format
+#
+# $Id: README_alnstrands,v 1.1 2002-01-11 19:24:23 jabril Exp $
+#
+##################################################
+#
+SECONDS=0 ;
+#
+#
+echo "# Getting the PostScripts with GFF2APLOT" ;
+#
+echo "#  -> Raw output" ;
+#
+$BIN/gff2aplot.pl                        \
+    --logs-filename four_strands_raw.log \
+    --show-percent-box                   \
+    -- four_strands.gff                  \
+     > four_strands_raw.ps               \
+    2> four_strands_raw.err              ;
+#
+$BIN/gff2aplot.pl                                    \
+    --logs-filename four_strands_aplotformat_raw.log \
+    --show-percent-box                               \
+    -- four_strands_aplotformat.gff                  \
+     > four_strands_aplotformat_raw.ps               \
+    2> four_strands_aplotformat_raw.err              ;
+#
+echo "#  -> Getting customization from file" ;
+#
+$BIN/gff2aplot.pl                        \
+    --logs-filename four_strands_col.log \
+    --custom-filename four_strands.rc    \
+    --show-percent-box                   \
+    --title 'Checking Alignment Strands' \
+    --subtitle 'Working with four_strands.gff dataset.' \
+    -- four_strands.gff                  \
+     > four_strands_col.ps               \
+    2> four_strands_col.err              ;
+#
+$BIN/gff2aplot.pl                                    \
+    --logs-filename four_strands_aplotformat_col.log \
+    --custom-filename four_strands.rc                \
+    --show-percent-box                               \
+    --title 'Checking Alignment Strands'             \
+    --subtitle 'Working with four_strands_aplotformat.gff dataset.' \
+    -- four_strands_aplotformat.gff                  \
+     > four_strands_aplotformat_col.ps               \
+    2> four_strands_aplotformat_col.err              ;
+#
+echo "#  -> Centering figure" ;
+#
+$BIN/gff2aplot.pl                                  \
+    --logs-filename four_strands_lim.log           \
+    --custom-filename four_strands.rc              \
+    --show-percent-box                             \
+    --title 'Checking Alignment Strands'           \
+    --subtitle 'Working with four_strands.gff dataset.' \
+    --percent-box-label 'SCORES'                   \
+    --x-sequence-coords 0..3000                    \
+    --y-sequence-coords 0..3000                    \
+    --layout-var 'percent_box_score_range=0..1.25' \
+    -- four_strands.gff                            \
+     > four_strands_lim.ps                         \
+    2> four_strands_lim.err                        ;
+#
+$BIN/gff2aplot.pl                                    \
+    --logs-filename four_strands_aplotformat_lim.log \
+    --custom-filename four_strands.rc                \
+    --show-percent-box                               \
+    --title 'Checking Alignment Strands'             \
+    --subtitle 'Working with four_strands_aplotformat.gff dataset.' \
+    --percent-box-label 'SCORES'                     \
+    --x-sequence-coords 0..3000                      \
+    --y-sequence-coords 0..3000                      \
+    --layout-var 'percent_box_score_range=0..1.25'   \
+    -- four_strands_aplotformat.gff                  \
+     > four_strands_aplotformat_lim.ps               \
+    2> four_strands_aplotformat_lim.err              ;
+#
+echo "#  -> Adding arrow annotations" ;
+#
+$BIN/gff2aplot.pl                                  \
+    --logs-filename four_strands_arw.log           \
+    --custom-filename four_strands_extra.rc        \
+    --custom-filename four_strands.rc              \
+    --show-percent-box                             \
+    --title 'Checking Alignment Strands'           \
+    --subtitle 'Working with four_strands.gff dataset.' \
+    --percent-box-label 'SCORES'                   \
+    --x-sequence-coords 0..3000                    \
+    --y-sequence-coords 0..3000                    \
+    --layout-var 'percent_box_score_range=0..1.25' \
+    -- four_strands.gff                            \
+     > four_strands_arw.ps                         \
+    2> four_strands_arw.err                        ;
+#
+$BIN/gff2aplot.pl                                    \
+    --logs-filename four_strands_aplotformat_arw.log \
+    --custom-filename four_strands_extra.rc          \
+    --custom-filename four_strands.rc                \
+    --show-percent-box                               \
+    --title 'Checking Alignment Strands'             \
+    --subtitle 'Working with four_strands_aplotformat.gff dataset.' \
+    --percent-box-label 'SCORES'                     \
+    --x-sequence-coords 0..3000                      \
+    --y-sequence-coords 0..3000                      \
+    --layout-var 'percent_box_score_range=0..1.25'   \
+    -- four_strands_aplotformat.gff                  \
+     > four_strands_aplotformat_arw.ps               \
+    2> four_strands_aplotformat_arw.err              ;
+#
+echo "#  -> Swapping axes annotations" ;
+#
+$BIN/gff2aplot.pl                                  \
+    --logs-filename four_strands_swp.log           \
+    --custom-filename four_strands_extra_swp.rc    \
+    --custom-filename four_strands.rc              \
+    --alignment-name LaLa:KoKo                     \
+    --x-label 'Y sequence is now on X-axes'        \
+    --y-label 'X sequence is now on Y-axes'        \
+    --show-percent-box                             \
+    --title 'Checking Alignment Strands'           \
+    --subtitle 'Working with four_strands.gff dataset, axes were swapped.' \
+    --percent-box-label 'SCORES'                   \
+    --x-sequence-coords 0..3000                    \
+    --y-sequence-coords 0..3000                    \
+    --layout-var 'percent_box_score_range=0..1.25' \
+    -- four_strands.gff                            \
+     > four_strands_swp.ps                         \
+    2> four_strands_swp.err                        ;
+#
+$BIN/gff2aplot.pl                                    \
+    --logs-filename four_strands_aplotformat_swp.log \
+    --custom-filename four_strands_extra_swp.rc      \
+    --custom-filename four_strands.rc                \
+    --alignment-name LaLa:KoKo                       \
+    --x-label 'Y sequence is now on X-axes'          \
+    --y-label 'X sequence is now on Y-axes'          \
+    --show-percent-box                               \
+    --title 'Checking Alignment Strands'             \
+    --subtitle 'Working with four_strands_aplotformat.gff, axes were swapped.' \
+    --percent-box-label 'SCORES'                     \
+    --x-sequence-coords 0..3000                      \
+    --y-sequence-coords 0..3000                      \
+    --layout-var 'percent_box_score_range=0..1.25'   \
+    -- four_strands_aplotformat.gff                  \
+     > four_strands_aplotformat_swp.ps               \
+    2> four_strands_aplotformat_swp.err              ;
+#
+echo "#  -> Zooming in" ;
+#
+$BIN/gff2aplot.pl                                  \
+    --logs-filename four_strands_zmm.log           \
+    --custom-filename four_strands_extra.rc        \
+    --custom-filename four_strands.rc              \
+    --show-percent-box                             \
+    --title 'Checking Alignment Strands'           \
+    --subtitle 'Working with four_strands.gff dataset, zoom area higlighted.' \
+    --percent-box-label 'SCORES'                   \
+    --x-sequence-coords  0..3000                   \
+    --y-sequence-coords  0..3000                   \
+    --x-sequence-zoom  100..1500                   \
+    --y-sequence-zoom 1500..2900                   \
+    --zoom-area                                    \
+    --layout-var 'percent_box_score_range=0..1.25' \
+    -- four_strands.gff                            \
+     > four_strands_zmm.ps                         \
+    2> four_strands_zmm.err                        ;
+#
+$BIN/gff2aplot.pl                                  \
+    --logs-filename four_strands_zmy.log           \
+    --custom-filename four_strands_extra.rc        \
+    --custom-filename four_strands.rc              \
+    --show-percent-box                             \
+    --title 'Checking Alignment Strands'           \
+    --subtitle 'Working with four_strands.gff dataset, zooming into selection.' \
+    --percent-box-label 'SCORES'                   \
+    --x-sequence-coords  0..3000                   \
+    --y-sequence-coords  0..3000                   \
+    --x-sequence-zoom  100..1500                   \
+    --y-sequence-zoom 1500..2900                   \
+    --zoom --layout-var 'zoom_marks=on'            \
+    --layout-var 'percent_box_score_range=0..1.25' \
+    -- four_strands.gff                            \
+     > four_strands_zmy.ps                         \
+    2> four_strands_zmy.err                        ;
+#
+echo "#  -> Zoom in: Swapping axes annotations" ;
+#
+$BIN/gff2aplot.pl                                    \
+    --logs-filename four_strands_zmmswp.log \
+    --custom-filename four_strands_extra_swp.rc      \
+    --custom-filename four_strands.rc                \
+    --alignment-name LaLa:KoKo                       \
+    --x-label 'Y sequence is now on X-axes'          \
+    --y-label 'X sequence is now on Y-axes'          \
+    --show-percent-box                               \
+    --title 'Checking Alignment Strands'             \
+    --subtitle 'Working with four_strands.gff, zoom area selected, axes swapped.' \
+    --percent-box-label 'SCORES'                     \
+    --x-sequence-coords  0..3000                     \
+    --y-sequence-coords  0..3000                     \
+    --x-sequence-zoom  100..1500                     \
+    --y-sequence-zoom 1500..2900                     \
+    --zoom-area                                      \
+    --layout-var 'percent_box_score_range=0..1.25'   \
+    -- four_strands.gff                              \
+     > four_strands_zmmswp.ps                        \
+    2> four_strands_zmmswp.err                       ;
+#
+$BIN/gff2aplot.pl                                    \
+    --logs-filename four_strands_zmyswp.log \
+    --custom-filename four_strands_extra_swp.rc      \
+    --custom-filename four_strands.rc                \
+    --alignment-name LaLa:KoKo                       \
+    --x-label 'Y sequence is now on X-axes'          \
+    --y-label 'X sequence is now on Y-axes'          \
+    --show-percent-box                               \
+    --title 'Checking Alignment Strands'             \
+    --subtitle 'Working with four_strands.gff, zooming into selection, axes swapped.' \
+    --percent-box-label 'SCORES'                     \
+    --x-sequence-coords  0..3000                     \
+    --y-sequence-coords  0..3000                     \
+    --x-sequence-zoom  100..1500                     \
+    --y-sequence-zoom 1500..2900                     \
+    --zoom --layout-var 'zoom_marks=on'              \
+    --layout-var 'percent_box_score_range=0..1.25'   \
+    -- four_strands.gff                              \
+     > four_strands_zmyswp.ps                        \
+    2> four_strands_zmyswp.err                       ;
+#
+#
+# Preparing web images
+#
+filenames () {
+  cat << 'EOF';
+four_strands_raw
+four_strands_col
+four_strands_lim
+four_strands_arw
+four_strands_swp
+four_strands_zmm
+four_strands_zmmswp
+four_strands_zmy
+four_strands_zmyswp
+four_strands_aplotformat_raw
+four_strands_aplotformat_col
+four_strands_aplotformat_lim
+four_strands_aplotformat_arw
+four_strands_aplotformat_swp
+EOF
+};
+#
+# echo "# Using \"ghostscript\" to obtain JPEG images from PS files" ;
+echo "# Using \"ghostscript\" to obtain PNG images from PS files" ;
+#
+filenames | while read n ;
+  do { 
+    echo "# -> $n" ;
+    ghostscript -dBATCH -dNOPAUSE -r300 \
+         -sPAPERSIZE=a4 -sDEVICE=png16m \
+         -sOutputFile=$n.png $n.ps      ;
+    cp -v $n.png $n.s.png ;
+    # mogrify is a ImageMagick tool that allow us to transform images on batch,
+    # large high-resolution jpeg files are scaled down to thumbnail resolution (2479x3508=>123x175)
+    # it overwrites original file (so that we previously get a renamed copy for each jpeg to process). 
+    mogrify -verbose -geometry 5% $n.s.png ;
+    #
+    # ghostscript -dBATCH -dNOPAUSE -r300 \
+    #      -sPAPERSIZE=a4 -sDEVICE=jpeg   \
+    #      -sOutputFile=$n.jpg $n.ps      ;
+    # png large version is pretty smaller than jpeg
+    # cp -v $n.jpg $n.s.jpg ;
+    # mogrify -verbose -geometry 5% $n.s.jpg ;
+    };
+  done ;
+convert 'vid:*.s.png' four_strands.summary.png 
+#
+echo "# Using \"ghostscript\" to obtain PDF documents from PS files" ;
+#
+filenames | while read n ;
+  do { 
+    echo "# -> $n" ;
+    ghostscript -dBATCH -dNOPAUSE -r300   \
+         -sPAPERSIZE=a4 -sDEVICE=pdfwrite \
+         -sOutputFile=$n.pdf $n.ps        ;
+    };
+  done ;
+#
+#
+echo "###" ;
+echo "### TOTAL TIME: $SECONDS seconds..." ; 
+#
+#
+# That's all folks... ;^D
+#
+#        >> Copyleft (C) 2002 - Josep F. Abril <<
+#
