@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20020411.MGSCv3.nw,v 1.6 2002-06-16 22:17:52 jabril Exp $ 
+% # $Id: 20020411.MGSCv3.nw,v 1.7 2002-06-18 22:38:14 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.6 2002-06-16 22:17:52 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.7 2002-06-18 22:38:14 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -409,7 +409,7 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
 @ 
 
 <<Version Control Id Tag>>=
-# $Id: 20020411.MGSCv3.nw,v 1.6 2002-06-16 22:17:52 jabril Exp $
+# $Id: 20020411.MGSCv3.nw,v 1.7 2002-06-18 22:38:14 jabril Exp $
 @ 
 <<BASH shebang>>=
 #!/usr/bin/bash
@@ -804,6 +804,91 @@ gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
 @ 
 
 
+<<runallmouseMSKSGPrefseq.sh>>=
+<<BASH shebang>>
+###
+### runallmouseMSKSGPrefseq.sh ### RUNNING MASKED SGP + REFSEQ ON MOUSE !!!
+###
+<<BASH Project Variables>>
+# $MUSHU/seqid_list
+SEQID="$1" ;
+gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
+  while read CHR SEQ ;
+    do {
+      ADIR="$MUSHU/chr$CHR" ;
+      MMmskHS_REFSEQ="${MMUSSTR}msk-${HSAPSTR}+${REFSEQID}" ;
+      ###
+      echo "# RUNNING SGP on $CHR" 1>&2 ;
+      SDIR="$ADIR/sgp" ;
+      MkDirs $SDIR $SDIR/$MMmskHS_REFSEQ ;
+      SDIR="$ADIR/sgp/$MMmskHS_REFSEQ" ;
+      for c in out gff gtf2 cds prot hsp-sr logs tmp evids gff+evids ;
+        do { MkDirs $SDIR/$c ; } ; done ;
+      #
+      EVDIR="$ADIR/annotation/refseq" ;
+      ODIR="$SDIR/evids" ;
+      #
+      GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
+      PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
+      EW=0 ; # add to exon weigth
+      ISEQ="$MSEQMSK/$SEQ.fa.masked" ;
+      HOMOLOGY="$ADIR/sgp/$FTPTBXID/inv-hsp-sr/$SEQ.gff" ;
+      if [ -f "$HOMOLOGY" ] ;
+        then
+          echo "### Using homology data from: $HOMOLOGY" 1>&2 ;
+          HOMOLOGY_PAR="-S $HOMOLOGY" ;
+        else
+          echo "### Homology file NOT found: $HOMOLOGY" 1>&2 ;
+          HOMOLOGY_PAR="" ;
+        fi ;
+      EVIDENCE="$ODIR/$SEQ.evids.gff" ;
+      if [ -f "$EVIDENCE" ] ;
+        then
+          echo "### Using annotation evidences from: $EVIDENCE" 1>&2 ;
+          EVIDENCE_PAR="-R $EVIDENCE" ;
+        else
+          echo "### Evidences file NOT found: $EVIDENCE" 1>&2 ;
+          EVIDENCE_PAR="" ;
+        fi ;
+      #
+      ODIR="$SDIR/out" ; EDIR="$SDIR/logs" ;
+      GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $EVIDENCE_PAR $ISEQ" ;
+      echo "$GENEID $GENEID_CMDLN > $ODIR/$SEQ.all 2> $EDIR/$SEQ.sgp" 1>&2 ;
+      $GENEID $GENEID_CMDLN > $ODIR/$SEQ.all 2> $EDIR/$SEQ.sgp ;
+      egrep -v '^Annotation' $ODIR/$SEQ.all > $ODIR/$SEQ ;
+      $BIN/geneid_raw2GFF.pl $SEQ $SDIR $ODIR/$SEQ ;
+      #
+      ODIR="$SDIR/gff" ;
+      ls -1 $ODIR/$SEQ.sg/ | egrep "^$SEQ" | \
+        while read n;
+          do {
+            cat $ODIR/$SEQ.sg/$n;
+            };
+          done | sort +3n +4n -5 - > $ODIR/$SEQ ;
+      get_geneid_genes $ODIR/$SEQ > $SDIR/$SEQ.gene_list
+      #
+      EVIORI="$EVDIR" ;
+      EVIDS="$SDIR/evids" ;
+      EVIDGFF="$SDIR/gff+evids" ;
+      # All refseqs (to be submitted)
+      cat $EVIORI/$SEQ.fullgff $ODIR/$SEQ | egrep -v '^#' - | \
+        sort +3n -5 - > $EVIDGFF/$SEQ.sgp+refseq.gff ;
+      # Eval refseqs (for eval process)
+      cat $EVIORI/$SEQ.eval.gff $ODIR/$SEQ | egrep -v '^#' - | \
+        sort +3n -5 - > $EVIDS/$SEQ.sgp+refseq.eval.gff ;
+      #
+      ODIR="$SDIR/eval" ;
+      MkDirs $ODIR ;
+      gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+              $EVIDS/$SEQ.sgp+refseq.eval.gff \
+            > $ODIR/$SEQ.sgp+refseq.eval.gff ;
+      $BIN/gffsplitstrand.pl $ODIR/$SEQ.sgp+refseq.eval.gff ; # no sequence length record required here
+      } ;
+    done ;
+###EOF###
+@ 
+
+
 <<Mouse Fast Scripting>>=
 WDIR="$WORK/lib" ;
 DDIR="$WDIR/CHR22_tests.docs" ;
@@ -821,6 +906,10 @@ is_exec $MUSHU/bin/runallmouseMSK.sh ;
 notangle -R'runallmouseSGPrefseq.sh' $WDIR/$localnw.nw | \
                                 cpif $MUSHU/bin/runallmouseSGPrefseq.sh ;
 is_exec $MUSHU/bin/runallmouseSGPrefseq.sh ;
+#
+notangle -R'runallmouseMSKSGPrefseq.sh' $WDIR/$localnw.nw | \
+                                cpif $MUSHU/bin/runallmouseMSKSGPrefseq.sh ;
+is_exec $MUSHU/bin/runallmouseMSKSGPrefseq.sh ;
 ##
 ##
 gawk 'BEGIN{ prt=1 }
@@ -843,8 +932,9 @@ gawk 'BEGIN{ prt=0 }
 #
 MUSBIN="$MUSHU/bin";
 # MUSPRG="runallmouse.sh"; MUSLOG="SGP.log";
-MUSPRG="runallmouseMSK.sh"; MUSLOG=".SGPmsk.log";
+# MUSPRG="runallmouseMSK.sh"; MUSLOG=".SGPmsk.log";
 # MUSPRG="runallmouseSGPrefseq.sh"; MUSLOG="SGPrs.log";
+MUSPRG="runallmouseMSKSGPrefseq.sh"; MUSLOG=".SGPmsk-rs.log";
 # monstre4
 rsh monstre4.imim.es "( $MUSBIN/$MUSPRG $MUSBIN/seqid_a 2> $MUSBIN/seqid_a$MUSLOG 1>&2 )" &
 # monstre3
