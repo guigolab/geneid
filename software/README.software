@@ -1,0 +1,14 @@
+#
+# README.software
+#
+# $Id: README.software,v 1.1 2000-09-27 13:23:49 adminmonstre Exp $
+#
+
+The following projects are present in "CVSROOT/software":
+
+geneid    gene-prediction program developed by Genome Informatics
+
+gfftools  visualizing tools parsing GFF input format
+
+sgp       sintenic gene prediction software
+

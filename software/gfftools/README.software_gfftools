@@ -1,0 +1,9 @@
+#
+# README.software_gfftools
+#
+# $Id: README.software_gfftools,v 1.1 2000-09-27 13:23:49 adminmonstre Exp $
+#
+
+  gfftools  visualizing tools parsing GFF input format
+
+This directory will contain CVS repository for gfftools: programs, manuals, and so on...

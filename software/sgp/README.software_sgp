@@ -1,0 +1,9 @@
+#
+# README.software_sgp
+#
+# $Id: README.software_sgp,v 1.1 2000-09-27 13:23:49 adminmonstre Exp $
+#
+
+  sgp       sintenic gene prediction software
+
+This directory will contain CVS repository for sgp: programs, manuals, and so on...
