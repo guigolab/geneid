@@ -12,7 +12,7 @@ BIN = ./bin
 HEADERS = $(INCLUDE)/geneid.h 
 PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
-CC=/home/ug/eblanco/no_backup/gcc-3.3.1/objects/salida/bin/gcc 
+CC=gcc 
 OPTS=-I$(INCLUDE) -Wall -O3
 
 #######
