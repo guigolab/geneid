@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.10 2000-08-11 21:20:45 jabril Exp $
+# $Id: parseblast.pl,v 1.11 2000-08-12 00:47:18 jabril Exp $
 #
 
 my $PROGRAM = "parseblast";
@@ -115,7 +115,7 @@ sub max { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $
 
 sub get_exec_time {
 	$err_flg && do {
-		my $End = @_;
+		my $End = $_[0];
         my ($c,$s,$m,$h,$r);
         $r = $End - $Start;
         $s = $r % 60;
