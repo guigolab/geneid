@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.33 1999-08-02 19:42:49 jabril Exp $	
+#         $Id: gff2ps,v 1.34 1999-08-03 03:14:51 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -49,8 +49,8 @@ Defaults () {
   PROGRAM="gff2ps"
   GAWK_PROG="gff2ps.awk"
   VERSION="v0.9b"
-  REVISION='$Revision: 1.33 $'
-  DATERELEASE='$Date: 1999-08-02 19:42:49 $'
+  REVISION='$Revision: 1.34 $'
+  DATERELEASE='$Date: 1999-08-03 03:14:51 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -189,11 +189,11 @@ cyan                1.00 0.00 0.00 0.00
 lightcyan           0.50 0.00 0.00 0.00
 verylightcyan       0.25 0.00 0.00 0.00
 % seagreen
-verydarkseagreen    0.65 0.00 0.95 0.40
-darkseagreen        0.90 0.00 0.90 0.10
-seagreen            1.00 0.00 1.00 0.00
-lightseagreen       0.50 0.00 1.00 0.00
-verylightseagreen   0.25 0.00 0.75 0.00
+verydarkseagreen    1.00 0.00 0.50 0.40
+darkseagreen        1.00 0.00 0.50 0.10
+seagreen            1.00 0.00 0.50 0.00
+lightseagreen       1.00 0.00 0.25 0.00
+verylightseagreen   0.80 0.00 0.15 0.00
 % green
 verydarkgreen       0.65 0.00 0.95 0.40
 darkgreen           0.90 0.00 0.90 0.10
@@ -201,11 +201,11 @@ green               1.00 0.00 1.00 0.00
 lightgreen          0.50 0.00 1.00 0.00
 verylightgreen      0.25 0.00 0.75 0.00
 % limegreen
-verydarklimegreen   0.65 0.00 0.95 0.40
-darklimegreen       0.90 0.00 0.90 0.10
-limegreen           1.00 0.00 1.00 0.00
-lightlimegreen      0.50 0.00 1.00 0.00
-verylightlimegreen  0.25 0.00 0.75 0.00
+verydarklimegreen   0.50 0.00 1.00 0.40
+darklimegreen       0.50 0.00 1.00 0.15
+limegreen           0.50 0.00 1.00 0.00
+lightlimegreen      0.25 0.00 1.00 0.00
+verylightlimegreen  0.10 0.00 1.00 0.00
 % yellow
 verydarkyellow      0.00 0.00 1.00 0.30
 darkyellow          0.00 0.00 1.00 0.10
@@ -405,7 +405,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.33 1999-08-02 19:42:49 jabril Exp $
+%    $Id: gff2ps,v 1.34 1999-08-03 03:14:51 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -565,17 +565,17 @@ end % colordict
 %%BeginProcSet: header_functions 1.0 0
 %
 headerdict begin
- /ttfsz { YSTitl 0.65 mul } def
- /stfsz { YSTitl 0.35 mul } def
+ /ttfsz { YSTitl 0.50 mul } def
+ /stfsz { YSTitl 0.25 mul } def
  /xtfsz { YSTitl 0.25 mul } def
- /ttlong { Title stringwidth pop SubTitle stringwidth pop 2 copy gt { pop } { exch pop } ifelse 2 div } bdf
  % /xtpsz { xtfsz 2 div } def
- /ttfnt { ttfsz /Helvetica-Bold FGcolor } def
- /stfnt { stfsz /Helvetica      FGcolor } def
- /dtfnt { xtfsz /Times-Roman    FGcolor } def
- /tmfnt { xtfsz /Times-Roman    FGcolor } def
- /pgfnt { xtfsz /Times-Roman    FGcolor } def
- /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox FGcolor scmyk K R } if ShwTt Title () ne and { 0.25 cm ttlong add 0 0 Title (tv) (ch) ttfnt ttxt } if ShwST SubTitle () ne and { 0.25 cm ttlong add YSTitl 0 SubTitle (bv) (ch) stfnt ttxt } if ShwTime { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt ttxt } if ShwDate { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt ttxt } if R } bdf
+ /ttfnt { ttfsz /Helvetica-Bold } def
+ /stfnt { stfsz /Helvetica      } def
+ /dtfnt { xtfsz /Times-Roman    } def
+ /tmfnt { xtfsz /Times-Roman    } def
+ /pgfnt { xtfsz /Times-Roman    } def
+ /ttlong { S ttfnt sfont Title stringwidth pop stfnt sfont SubTitle stringwidth pop R 2 copy gt { pop } { exch pop } ifelse 2 div } bdf
+ /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox FGcolor scmyk K R } if ShwTt Title () ne and { 0.25 cm ttlong add YSTitl 12 sub 0 Title (tv) (ch) ttfnt FGcolor ttxt } if ShwST SubTitle () ne and { 0.25 cm ttlong add 12 0 SubTitle (bv) (ch) stfnt FGcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt FGcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt FGcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt FGcolor ttxt } if R } bdf
 end
 %
 /s_credits { S 1 dict begin /fs_cd 12 def pglim 1 cm add T 1 -1 F 0 0 0 (This poster has been obtained with gff2ps. You can get free last version at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman FGcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol FGcolor ttxt end R } bdf
@@ -602,7 +602,7 @@ end
  /MkCtick { slw 0 0 m 0 TkMrkHW 3 -1 roll { TkMrkDW sub } if l FGcolor scmyk K } bdf
  /MkDtick { S dup Xscm 0 T CheckCloser { 10 string cvs bltextick } if ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if false 1 MkCtick R } bdf
  /baseline { S Xscm TkMrkDW m Xscm TkMrkDW l TkMrkDW 2 mul slw FGcolor scmyk K R } bdf
- /r { /Gridup true def /Griddn true def /flgup true def 0 exch TkMrkHW add T S 0 T 1 -1 F 5 { 2 copy } repeat pop neg Xscm 0 T 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat R } bdf
+ /r { /Gridup true def /Griddn true def /flgup true def 0 exch T S 0 T 1 -1 F 5 { 2 copy } repeat pop neg Xscm 0 T 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat R } bdf
  /x { 6 { 2 copy } repeat pop neg Xscm 0 T baseline 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T true 0.25 MkCtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkDtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkDtick } { pop } ifelse } repeat } bdf 
  /s { /Gridup false def /Griddn true def /flgup true def 0 exch TkMrkW add T S 0 T 1 -1 F x R } bdf
  /z { /Gridup true def /Griddn false def /flgup false def 0 exch T S 0 T 1 1 F x R } bdf
@@ -640,7 +640,7 @@ end % tmdct
  /postk { S 0 0 m 0 LY 0.55 mul rl 0.75 setgray 0 slw K R } bdf
  /shwpos { S Flgspos { seqori LY ScV 0 eq { 0.55 mul neg } if T sqend sqdif sqori 0 2 { S 0 T postk 10 string cvs 0 0 S strnd (-) ne { 1 -1 F 45 } { -45 } ifelse 4 -1 roll strnd (-) eq { (tv) } { (bv) } ifelse (lh) ShFont FGcolor ttxt R R } repeat } if R } bdf
 % *V align:  0 center : 1 baseline : -1 reverse
- /frs { S 0.25 slw strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } { FtV -1 eq { 1 -1 F } if } ifelse colordict begin /svmtrix mtrx currentmatrix def { p_s cvx exec scmyk } stopped not { S K R clip setcolmod } if newpath end R } bdf % (Filling clipping path...) msg 
+ /frs { S 0.3 slw strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } { FtV -1 eq { 1 -1 F } if } ifelse colordict begin /svmtrix mtrx currentmatrix def { p_s cvx exec scmyk } stopped not { S K R clip setcolmod } if newpath end R } bdf % (Filling clipping path...) msg 
  /GetVar { /ftlbl xdf /FtV xdf /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def pop /fflbl ftlbl () eq { false } { true } ifelse def /p_strk true def } bdf
  /p { S GetVar shwpos strnd (-) eq { seqend } { seqori } ifelse 0 T frs R } bdf
 % Shapes......
@@ -684,7 +684,7 @@ end % tmdct
 %
 % Group functions...
 % /ctr { S 0 T sfont scmyk dup stringwidth pop 2 div neg stringheight strnd (-) eq { 2 div } { 1.25 mul neg } ifelse m show R } bdf
- /g_score 0.5 def
+ /g_score 1.1 def % /g_score 0.5 def
  /GpFsz { Yscl 0.5 mul 8 lt { Yscl 0.25 mul } { 8 } ifelse } def
  /GpFont { GpFsz /Helvetica } bdf
  /gshp { 0 gp_st gp_nd 0 0 g_score gcmod g_shape GpV grlbl p } bdf
@@ -721,8 +721,8 @@ end % shpdct
  /sln { S colordict begin s_line cvx exec end R } bdf
  /sbc { -10 Yscl 2 mul neg XSPlot 10 add Yscl 1.5 mul bbox clip newpath } bdf % S K R
  /sbb { S 0 0 XSPlot Yscl bbox FlgScBx { 1 slw FGcolor scmyk K } { newpath } ifelse R sbc } bdf
- /shsll { S XLftLbl 2 div neg Yscl 2 div T strnd (-) ne { 1 -1 F } if  FLftLbl { Flgslbl { 0 0 0 srclbl (cv) (ch) ScFont FGcolor ttxt } if } if R } bdf
- /shsrl { S XSPlot XRgtLbl 2 div add Yscl 2 div T strnd (-) ne { 1 -1 F } if  FRgtLbl { Flgslbl { 0 0 0 srclbl (cv) (ch) ScFont FGcolor ttxt } if } if R } bdf
+ /shsll { S FLftLbl Flgslbl and { XLftLbl 2 div neg Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srclbl (cv) (ch) ScFont FGcolor ttxt } if R } bdf
+ /shsrl { S FRgtLbl Flgslbl and { XSPlot XRgtLbl 2 div add Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srclbl (cv) (ch) ScFont FGcolor ttxt } if R } bdf
  /GetSVar { /srclbl xdf /s_line xdf /strnd xdf /FlgScBx xdf /spacer exch spcrsize mul def /Yscl exch tracksize mul def /ScV xdf /Flgslbl srclbl () eq { false } { true } ifelse def strnd (.) eq { /Y Y spacer 2 div add def } { strnd (-) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
  /source { S GetSVar XOriPlot Y T strnd (-) eq { 1 -1 F } if shsrl shsll sbb S ScV 0 eq { 0 Yscl 2 div T } { ScV 1 eq { 0 Yscl T 1 -1 F } if } ifelse sln S blckori Xscm neg 0 T } bdf
  /s_end { R R R strnd (.) eq { /Y Y Yscl add spacer 2 div add def } { strnd (+) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
