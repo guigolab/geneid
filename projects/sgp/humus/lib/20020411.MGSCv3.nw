@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20020411.MGSCv3.nw,v 1.2 2002-05-24 18:52:11 jabril Exp $ 
+% # $Id: 20020411.MGSCv3.nw,v 1.3 2002-05-25 14:07:01 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.2 2002-05-24 18:52:11 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.3 2002-05-25 14:07:01 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -409,7 +409,7 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
 @ 
 
 <<Version Control Id Tag>>=
-# $Id: 20020411.MGSCv3.nw,v 1.2 2002-05-24 18:52:11 jabril Exp $
+# $Id: 20020411.MGSCv3.nw,v 1.3 2002-05-25 14:07:01 jabril Exp $
 @ 
 <<BASH shebang>>=
 #!/usr/bin/bash
@@ -447,7 +447,8 @@ MMHS_REFSEQ="${MMUSSTR}-${HSAPSTR}+${REFSEQID}" ;
 #
 export HSAP HSAPID HSAPSTR HSEQ HSEQMSK \
        MMUS MMUSID MMUSSTR MSEQ MSEQMSK \
-       FTPTBX FTPTBXID RIKENTBX RIKENID MGSC_RKN REFSEQID HSMM_REFSEQ;
+       FTPTBX FTPTBXID RIKENTBX RIKENID MGSC_RKN \
+       REFSEQID HSMM_REFSEQ MMHS_REFSEQ ;
 #
 HUMUS="$HBASE/$HSAPSTR" ;
 MUSHU="$MBASE/$MMUSSTR" ;
@@ -736,9 +737,10 @@ gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
         sort +3n -5 - > $EVIDS/$SEQ.sgp+refseq.eval.gff ;
       #
       ODIR="$SDIR/eval" ;
+      MkDirs $ODIR ;
       gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
               $EVIDS/$SEQ.sgp+refseq.eval.gff \
-            > $ODIR/$SEQ.sgp+refseq.eval.gff
+            > $ODIR/$SEQ.sgp+refseq.eval.gff ;
       $BIN/gffsplitstrand.pl $ODIR/$SEQ.sgp+refseq.eval.gff ; # no sequence length record required here
       } ;
     done ;
@@ -1018,6 +1020,39 @@ EOT
       } ;
     done ;
 #
+# SGP + RefSeq
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      ADIR="$MUSHU/chr$CHR" ;
+      A_REFSEQ="$ADIR/annotation/refseq/$SEQ.eval" ;
+      ###
+      echo "# EVALUATING SGP+RefSeq on $CHR" 1>&2 ;
+      SDIR="$ADIR/sgp/$MMHS_REFSEQ" ;
+      EVIDS="$SDIR/evids" ;
+      ODIR="$SDIR/eval" ;
+      #
+   #   MkDirs $ODIR ;
+   #   gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
+   #           $EVIDS/$SEQ.sgp+refseq.eval.gff \
+   #         > $ODIR/$SEQ.sgp+refseq.eval.gff ;
+   #   $BIN/gffsplitstrand.pl $ODIR/$SEQ.sgp+refseq.eval.gff ;
+      #
+      cat > $ODIR/$SEQ.sgp+refseq.summary <<EOT ;
+#
+# Evaluation summary results for SGP on SEQ[$SEQ]
+# --> Mmus MGSCv3 x Hsap GP20011222 homology (invTBX) + Mmus RefSeq evidences
+#
+EOT
+      $BIN/runeval.pl $A_REFSEQ.fwd.gff $ODIR/$SEQ.sgp+refseq.eval.fwd.gff \
+          "${SEQ}::MmusSGP+invTBX[HsapSQ-MmusDB]+RefSeq::REFSEQ::FWD::SGPrefseq::1.1::." \
+        >> $ODIR/$SEQ.sgp+refseq.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.fwd ;
+      $BIN/runeval.pl $A_REFSEQ.rev.gff $ODIR/$SEQ.sgp+refseq.eval.rev.gff \
+          "${SEQ}::MmusSGP+invTBX[HsapSQ-MmusDB]+RefSeq::REFSEQ::REV::SGPrefseq::1.1::." \
+        >> $ODIR/$SEQ.sgp+refseq.summary 2> $ODIR/$SEQ.sgp+refseq.sr_refseq.rev ;
+      } ;
+    done ;
+#
 # WHOLE SUMMARY (MOUSE)
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
   while read CHR SEQ ;
@@ -1029,28 +1064,32 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
       GDIR="$ODIR/geneid/$FTPTBXID" ;
       TDIR="$ODIR/tblastx/$FTPTBXID/inv-sr" ;
       SDIR="$ODIR/sgp/$FTPTBXID" ;
+      SRDIR="$ODIR/sgp/$MMHS_REFSEQ" ;
       #
       # cat $fDIR/eval/$SEQ.summary \
       #     $nDIR/eval/$SEQ.summary \
       cat $nDIR/eval/$SEQ.summary \
           $GDIR/eval/$SEQ.summary \
           $TDIR/$SEQ.summary      \
-          $SDIR/eval/$SEQ.summary ; 
+          $SDIR/eval/$SEQ.summary \
+          $SRDIR/eval/$SEQ.sgp+refseq.summary ; 
     };
-  done > $MUSHU/evaluations/evaluation.summary ;
+  done > $MUSHU/evaluations/evaluation.sgp+refseq.summary ;
+#
+enscript -1rGjf Courier5 -M A4 $MUSHU/evaluations/evaluation.sgp+refseq.summary ;
 # $BIN/process_eval.pl -T "REFSEQ ENSEMBL" \
 #                      -P "FGENES GENSCAN GENEID invMmusSRs SGP" \
 $BIN/process_eval.pl -T "REFSEQ" \
-                     -P "GENSCAN GENEID invMmusSRs SGP" \
-                     -as $MUSHU/evaluations/evaluation.summary \
-                       > $MUSHU/evaluations/evaluation_prog.summary ;
+                     -P "GENSCAN GENEID invMmusSRs SGP SGPrefseq" \
+                     -as $MUSHU/evaluations/evaluation.sgp+refseq.summary \
+                       > $MUSHU/evaluations/evaluation.sgp+refseq_prog.summary ;
 $BIN/process_eval.pl -T "REFSEQ" \
-                     -P "GENSCAN GENEID invMmusSRs SGP" \
-                     -tas $MUSHU/evaluations/evaluation.summary \
-                        > $MUSHU/evaluations/evaluation_test.summary ;
+                     -P "GENSCAN GENEID invMmusSRs SGP SGPrefseq" \
+                     -tas $MUSHU/evaluations/evaluation.sgp+refseq.summary \
+                        > $MUSHU/evaluations/evaluation.sgp+refseq_test.summary ;
 #
-enscript -1rC -Gjf Courier5 -M A4 $MUSHU/evaluations/evaluation.summary ;
-enscript -1rC -Gjf Courier5 -M A4 $MUSHU/evaluations/evaluation_test.summary ;
+enscript -1rGjf Courier5 -M A4 $MUSHU/evaluations/evaluation.sgp+refseq.summary ;
+enscript -1rGjf Courier5 -M A4 $MUSHU/evaluations/evaluation.sgp+refseq_test.summary ;
 @ 
 
 <<>>=
