@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetStopCodons.c,v 1.4 2002-02-13 07:26:02 eblanco Exp $  */
+/*  $Id: GetStopCodons.c,v 1.5 2003-02-26 10:39:38 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -52,7 +52,7 @@ long GetStopCodons(char* s,
     "TGA"
   };
 
-  char codon[LENGTHCODON];
+  char codon[LENGTHCODON+1];
   long left,right;
   int index;
   
