@@ -1,10 +1,10 @@
-% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+% -*- mode: Noweb; noweb-code-mode: c-mode; tab-width: 4 -*-
 \documentclass[11pt]{article}
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: mixture.nw,v 1.1 2001-10-31 14:24:41 gparra Exp $
+% $Id: mixture.nw,v 1.2 2001-11-06 10:28:18 gparra Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -105,7 +105,7 @@
 
 \begin{abstract}
 \begin{center}
-\parbox{0.75\linewidth}{
+\parbox{0.75\linewidth}{ This program calculates de maximum likelyhood estimates of the parameters of a mixture of normal or exponential or poison or binomial distributions. These parameters are mixing proportions,  the means and (in the normal distribution case) standard deviations.  It also calculates the log-likelihood funtion and the number of  iterations taken to stisfy the tolerance value.
 } % parbox
 \end{center}
 \end{abstract}
@@ -140,7 +140,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: mixture.nw,v 1.1 2001-10-31 14:24:41 gparra Exp $$>$ }
+{\small$<$ \verb$Id: mixture.nw,v 1.2 2001-11-06 10:28:18 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -149,9 +149,10 @@ Universitat Pompeu Fabra\\[2ex]
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-\sctn{empty section}
+\sctn{Analysis of finite mixture of distributions}
 
-\subsctn{empty subsection}
+\subsctn{Introduction}
+The mixture of distributions are also known as compound distributions. The application of finite mixture of distributions  analysis arises mainly in situations where the number of categories in the population under study is known, but a variable  which splits the observations into discrete groups is either unknown or imposible to observe. Then, only the mixed observation can be studied. In some intances the method can be applied when the number of groups is not known accurately.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
@@ -164,18 +165,490 @@ Universitat Pompeu Fabra\\[2ex]
 % 
 % \bibliographystyle{apalike}
 % \bibliography{/home1/rguigo/docs/biblio/References}
+\subsctn{Input}
 
-\newpage
-\appendix
+The program can use standart input. The structure of the data is fixed. Here is an explanation of each field, in [[<<test1>>]] ther is a real example.
+\\
+\begin{itemize}
+\item First line (each input separated by a space):
+ \begin{itemize}
+  \item Type of the mixted distributions:
+                    1 normal, 
+                    2 exponential,
+                    3 poisson and
+                    4 binomial.
+	
+  \item Number of suspected distributions
+  \item Number of classes (intervals)
+  \item Lenght of the interval at which succesive approximations are printed; 0 supresses printing.
+ \end{itemize}
+\item The following lines must contain the class and the number of observations for all the classes. It must be sorted by classes.
+\item For each class the spected proportion, mean, and standard deviation (each input separated by a space).
+\item The convergence criterion, specified in terms of the maximum amount of changes between succesive G ststistic values (0.000001 is the most used convergence criterion).
+\end{itemize}
 
-\sctn{empty appendix section}
 
-\subsctn{empty appendix subsection}
+\sctn{Source}
+
+\subsctn{main block}
+
+<<EM.c>>=
+/* EM.c a program to compute the Maximun Likelihoos Estimation of Mixtures 
+   of distributions.
+   From Agha and Ibrahim,Appll. Stat., 33, 327-332 (1984).
+   Roderic Guigo and Genis Parra
+*/
+
+#include <stdio.h>
+#include <math.h>
+
+void mixture();
+
+main()
+{
+  /* Defining variables */
+
+  int a;        /* Type of distribution 
+                    a=1 normal
+                    a=2 exponential
+                    a=3 poisson
+                    a=4 binomial
+			     */
+  int k;         /* number of distributions in the mixture */
+
+  int m;         /* number of classes in the frequqency distribution */
+
+  int c;         /* lenght of the interval at which succesive
+					approximations are printed; c=0 supresses printing */
+  double *x;     /* the discrete variable of the mid-point in the 
+					continous case [1..m] */
+  int *n;        /* the frequencies corresponding to the x's [1..m] */
+  
+  double *alpha; /* initial estimates of the proportion of the
+				    different distributions ans final stimation [1..k] */
+	
+  double *mean;  /* initial estimates of the means and final 
+					estimation [1..k] */
+
+  double *sd;    /* initial estimates of the standard distributions
+					and final estimates [1..k] */
+  double tol;    /* the value of the absolute difference of two 
+					constitutive log-likelihoods required to
+					terminate iteration */
+
+  int nobvs=0;   /* the total frequency */
+
+  double logl;   /* the value of the log-likelihood function */
+
+  double G;      /* the value of the log-likelihood ratio */
+
+  int counter=0; /* the number of iterations taken to satisfy 
+					the tolerance value */
+  
+  int ifault;    /* a fault indicator, see Agha and Ibrahim (1984) 
+					for details */
+
+  void *calloc();
+
+  int i;
+
+  /* read input data */
+
+  scanf("%d %d %d %d", &a, &k, &m, &c);
+
+  x = (double *) calloc(m, sizeof(double));
+  n = (int *) calloc(m, sizeof(int));
+
+  for (i=0; i<m; i++){
+	scanf ("%lf %d", &x[i], &n[i]);
+	nobvs+=n[i];
+  }
+
+  alpha = (double *) calloc (k, sizeof(double));
+  mean = (double *) calloc (k, sizeof(double));
+  sd = (double *) calloc (k, sizeof(double));
+
+  for (i=0; i<k; i++)
+	scanf ("%lf %lf %lf", &alpha[i], &mean[i], &sd[i]);
+
+  scanf ("%lf", &tol);
+
+  /* Printing input data */
+  fprintf (stderr, "> Number of observations: %d\n", nobvs);
+  fprintf (stderr, "> Given estimations :\n");
+  for (i=0; i<k; i++)
+	fprintf (stderr, "> group %d : %lf %lf %lf\n", i, alpha[i], mean[i], sd[i]);
+  fprintf (stderr, "> %lf \n", tol);
+
+  /* calculate estimations */
+
+  mixture (a, k, m, c, x, n, alpha, mean, sd, tol, nobvs, 
+		   logl, G, counter, ifault);
+
+  /* end */
+  return(0);
+}
+@ 
+
+\subsctn{Mixture block}
+
+<<mixture.c>>=
+#include <stdio.h>
+#include <math.h>
+
+#define ERROR1 {fprintf(stderr, "a out of limits\n"); exit(1);}
+#define ERROR2 {fprintf(stderr, "alpha is outside the range [0,1]\n"); exit(2);}
+#define ERROR3 {fprintf(stderr, "mean out limits\n"); exit(3);}
+#define ERROR4 {fprintf(stderr, "standart deviation is 0 or negative\n"); exit(4);}
+#define ERROR5 {fprintf(stderr, "array x not sorted\n"); exit(5);}
+#define ERROR6 {fprintf(stderr, "negatives freqs. or sum less than 2m\n"); exit(6);}
+#define ERROR7 {fprintf(stderr, "negative x for a=2,3,4\n"); exit(7);}
+#define ERROR8 {fprintf(stderr, "equal means for a=2,3,4\n"); exit(8);}
+#define ERROR9 {fprintf(stderr, "equal means and standard deviations\n"); exit(9);}
+
+
+void mixture (a, k, m, c, x, n, alpha, mean, sd, 
+                       tol, nobvs, logl, G, counter, ifault)
+
+int a, k, m, c, n[], nobvs, counter, ifault;
+double x[], alpha[], mean[], sd[], tol, logl, G;
+
+{
+
+  enum boolean {NO, YES};
+  int test;
+  int i, j, l;
+  double aux;
+
+  double sumalpha, part, oldlogl, G0, G1;
+  double *newalpha, *newmean, *newsd, *dt, *nt, *vt;
+  double *g;
+  double **f;             /* array [m,k] */
+
+  newalpha = (double *) calloc(k, sizeof(double));
+  newmean = (double *) calloc(k, sizeof(double));
+  newsd = (double *) calloc(k, sizeof(double));
+  dt = (double *) calloc(k, sizeof(double));
+  nt = (double *) calloc(k, sizeof(double));
+  vt = (double *) calloc(k, sizeof(double));
+  g = (double *) calloc(m, sizeof(double));      
+  
+  f = (double **) malloc (m*sizeof (double *));
+  for (l=0; l<m; l++)
+	f[l] = (double *) calloc (k, sizeof (double));
+
+  /* printing initial values */
+
+  counter = 0;
+
+  printf ("iteration %d\n", counter);
+
+  for (i=0; i<k; i++)
+	printf ("%5.3f %5.3f %5.3f\n", alpha[i], mean[i], sd[i]);
+  
+  /* This program calculates de maximum likelyhood estimates of the 
+	 parameters of a mixture of normal or exponential or poison or 
+	 binomial distributions. These parameters are mixing proportions, 
+	 the means and (in the normal distribution case) standard deviations. 
+	 It also calculates the log-likelihood funtion and the number of 
+	 iterations taken to stisfy the tolerance value. 
+  */
+
+  /* cheking input errors */
+
+  if (a < 1 || a > 4)
+	ERROR1;
+
+  for (i=0; i<m-1; i++)
+	if (x[i] > x[i+1])
+	  ERROR5;
+
+  if (nobvs < (2 * m))
+	ERROR6;
+
+  for (i=0; i<m; i++){
+	if (n[i] < 0)
+	  ERROR6;
+
+	if (a > 1)
+	  if (x[i] < 0.0)
+		ERROR7;
+  }
+
+  /**/
+
+  ifault = 0;
+  oldlogl = 0.0;
+  test = YES;
+
+  while (test) {
+	counter ++;
+	
+	for (j=0; j < k; j++) {
+	  if (alpha[j] > 1.0 || alpha[j] <=0.0) 
+		ERROR2;
+
+	  if (mean[j] >= x[m-1] || mean[j] <= x[0])
+		ERROR3;
+
+	  if (a == 1)
+		if (sd[j] <= 0)
+		  ERROR4;
+	}
+
+	/**/
+
+	logl = 0.0;
+	G0 = 0.0;
+	for (i=0; i < m; i++) {
+	  g[i] = 0.0;
+	  
+	  for (j=0; j < k; j++) {
+		if (a == 1) {                              /* normal distribution*/
+		  aux = (x[i]-mean[j])/sd[j];
+		  aux = aux*aux;
+		   f[i][j] = exp(-aux/2.0)/sd[j];
+		  //		  f[i][j] = exp(-aux/2.0)/(sd[j] * sqrt(2*3.1416)); 
+		}
+
+		else if (a==2)                            /* exponential distribution */
+		  f[i][j] = exp(-x[i]/mean[j])/mean[j];
+		
+		else if (a==3) {                          /* binomial distribution */
+		  if (x[i] == x[0])
+			f[i][j] = exp(-mean[j])*pow(mean[j],x[i]);
+		  else
+			f[i][j] = f[i-1][j] * (mean[j]/(x[m]-mean[j]));
+		}
+		
+		else {                                    /* binomial distribution */
+		  if (x[i] == x[0])
+		f[i][j] = pow((1.0 -mean [j]) /x[m], x[m]) *
+			  pow(mean[j] / (x[m] - mean[j]), x[i]);
+		  else 
+			f[i][j] = f[i-1][j] * (mean[j] / (x[m] -mean[j]));
+		}
+		
+		g[i] = g[i] + (alpha[j] * f[i][j]);
+	  }
+
+      logl = logl + (n[i] * log(g[i]));
+	  //logl = logl + (n[i] * log(g[i] * nobvs * 50));
+	  G0 = G0 + (n[i] * log(g[i] * nobvs * 50));	  
+	}
+
+	/* Calculation of the probability densities of the subpopulations 
+	   which form the mixture, and the log-likelihoods function */
+
+	test = NO;
+	sumalpha = 0.0;
+	for (j=0; j<k; j++) {
+	  nt[j] = dt[j] = vt[j] = 0.0;
+	  
+	  for (i=0; i<m; i++) {
+		part = f[i][j] * n[i] /g[i];
+		dt[j] = dt[j] + part;
+		nt[j] = nt[j] +(part *x[i]);
+		if (a == 1) {
+		  aux = x[i] - mean[j];
+		  aux = aux * aux;
+		  vt[j] = vt[j] + (part * aux);
+		}
+	  }
+
+	  /* calculations of denominators and numertators and new estimates */
+
+	  newmean[j] = nt[j]/dt[j];
+	  if (j != k) {
+		newalpha[j] = alpha[j] * (dt[j]/nobvs);
+		sumalpha = sumalpha + newalpha[j];
+	  }
+	  else 
+		newalpha[k] = 1.0 - sumalpha;
+	  
+	  if (a == 1) 
+		newsd[j] = sqrt(vt[j] / dt[j]);
+      
+	  /* Computing the amount of change between succesive logl values 
+	     and compared against tol (usually 0.000001) */
+
+	  if (fabs(oldlogl - logl) > tol)
+		test = YES;
+
+	  oldlogl = logl;
+	  alpha[j] = newalpha[j];
+	  mean[j] =  newmean[j];
+	  
+	  if (a==1)
+		sd[j] = newsd[j];
+	}
+
+	/* Computation of the log likelihood ratio */
+
+	G1 = 0;
+	for (i=0; i<m ; i++)
+	  G1 = G1 + (n[i] * log(n[i]));
+	G = 2 * (G1 - G0);
+	
+
+	/* printing iteration results */
+
+	if (c > 0) {
+	  if ((counter % c)  == 0)  {
+		printf ("iteration %d\n", counter);
+		for (i=0; i<k; i++)
+		  printf("%5.3f %5.3f %5.3f\n", alpha[i], mean[i], sd[i]); 
+		printf ("%7.3f %7.3f\n", logl, G);
+	  }
+	     /* printing always first iteration result */
+	  else if (counter == 1) {
+		  printf ("iteration %d\n", counter);
+		  for (i=0; i<k; i++)
+			printf("%5.3f %5.3f %5.3f\n", alpha[i], mean[i], sd[i]); 
+		  printf ("%7.3f %7.3f\n", logl, G);
+		}
+	}
+  }
+
+  printf ("\niteration %d\n", counter);
+  for (i=0; i<k; i++)
+	printf ("%5.3f %5.3f %5.3f\n", alpha[i], mean[i], sd[i]);
+  printf ("%7.3f %7.3f\n", logl, G);
+
+}
+@ 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
 \end{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn {Compilation and execution}
+
+First we extract the code from the no web directory and then we compile it using gcc.
+
+
+<<compilation>>=
+# Extracting the code
+notangle -t4 -R"EM.c" $WORK/$nwfile.nw \
+    > $SRC/EM.c ;
+notangle -t4 -R"mixture.c" $WORK/$nwfile.nw \
+    > $SRC/mixture.c ;
+# Tests files 
+notangle -t4 -R"test1" $WORK/$nwfile.nw \
+    > $WORK/tests/test1 ;
+notangle -t4 -R"test2" $WORK/$nwfile.nw \
+    > $WORK/tests/test2 ;
+
+# Compiling
+gcc -Wall -lm -o $BIN/EM $SRC/EM.c $SRC/mixture.c 
+# TEST
+$BIN/EM < $WORK/tests/test1  
+@ 
+%$
+\newpage
+\appendix
+ 
+\sctn{Appendix section}
+ 
+\subsctn{Test file}
+\subsubsctn{Test 1}
+This test file is given to asure the correct implementation of EM.c. This result was obtained from the first version of implemented by Roderic Guigo in 1992.
+
+<<test1>>=
+1 2 21 5
+-2.13081 1
+-1.91961 2
+-1.70842 20
+-1.49723 98
+-1.28604 205
+-1.07484 293
+-0.863651 365
+-0.652458 313
+-0.441265 245
+-0.230072 194
+-0.0188795 149
+0.192313 99
+0.403506 69
+0.614699 59
+0.825892 61
+1.03708 70
+1.24828 67
+1.45947 65
+1.67066 58
+1.88186 21
+2.09305 2
+0.5 0.0 0.5
+0.5 1.0 0.5
+0.000001
+@ 
+
+The result obtained from test1 must equal to the following:
+\begin{verbatim}
+iteration 136
+0.791 -0.728 0.459
+0.209 0.971 0.544
+-426.571 2120764.269
+\end{verbatim}
+
+\subsubsctn{Test 2}
+
+Example given in the CABIOS paper:
+
+<<test2>>=
+1 3 23 1
+75 5
+125 11
+175 42
+225 85
+275 124
+325 169
+375 153
+425 143
+475 182
+525 155
+575 137
+625 105
+675 92
+725 55
+775 50
+825 23
+875 27
+925 14
+975 13
+1025 3
+1075 3
+1125 2
+1175 1
+0.2789 295.4660 81.0420
+0.5079 494.0828 117.5679
+0.19122 691.4070 167.4392
+0.000001
+@ 
+
+\subsubsctn{Test 3}
+
+Two normal distributions were generated using R.
+\begin{itemize}
+\item group 0 : normal p=0.2 mean=10 sd=1 [ R command: rnorm(200, mean=10, sd=1)] 
+\item group 1 : normal p=0.8 mean=15 sd=2 [ R command: rnorm(800, mean=15, sd=2)]
+\end{itemize}
+
+\begin{comment}
+
+den1 <- density(rnorm(200, mean=10, sd=1))
+den2 <- density(rnorm(800, mean=15, sd=2))
+
+% Plotting postcripts with r
+postscript("1.ps",family="AvantGarde",pointsize=15)
+pie.values <- c(46.2687,11.9403,10.4478,5.97015,5.97015,4.47761,4.47761,1.49254,1.49254,1.49254,1.49254,1.49254,1.49254,1.49254)
+names(pie.values) <- c("hydrolase","oxygen transporter","oxidoreductase","carrier","structural protein of peritrophic membrane (sensu Insecta)","phosphatase","transferase","ion transporter","ligase","microfilament motor","nucleotide binding","protein binding","yolk protein","EMPTY")
+piechart(pie.values,col=c("yellow3","tomato2","paleturquoise3","tomato1","yellow4","springgreen2","salmon","wheat4","plum4","palevioletred2","royalblue1","palevioletred4","papayawhip","springgreen1"))
+mtext("Over expressed genes (Molecular function 2)",side=3,cex=2)
+dev.print()
+dev.off()
+\end{comment}
 
 \newpage
 
@@ -184,8 +657,10 @@ Universitat Pompeu Fabra\\[2ex]
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
+
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
 <<Version Control Id Tag>>=
-# $Id: mixture.nw,v 1.1 2001-10-31 14:24:41 gparra Exp $
+# $Id: mixture.nw,v 1.2 2001-11-06 10:28:18 gparra Exp $
 @ 
 
 
@@ -194,28 +669,49 @@ This document is under Revision Control System (RCS). The version you are curren
 From this file we can obtain both the code and the
 documentation. The following instructions are needed:
 
+\subsctn{BASH scripts}
+
+<<BASH shebang>>=
+#!/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+<<Version Control Id Tag>>
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+@
+
+<<BASH script end>>=
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
+@
+
+
 \subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
 
 Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
 <<tangling>>=
 # showing line numbering comments in program
-notangle -L -R"root" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/root_file ;
+notangle -L -R"EM.c" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $SRC/EM.line_number ;
+notangle -L -R"mixture.c" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $SRC/mixture.line_number ;
 # program without line numbering comments
-notangle -t4 -R"root" $WORK/$nwfile.nw \
-    > $BIN/root_file ;
-# making them runnable
-chmod a+x $BIN/root_file ;
+notangle -t4 -R"EM.c" $WORK/$nwfile.nw \
+    > $SRC/EM.c ;
+notangle -t4 -R"mixture.c" $WORK/$nwfile.nw \
+    > $SRC/mixture.c ;
 @ 
 
-\subsctn{Extracting different Config Files} % \\[-0.5ex]
-
-<<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw \
-    > $DATA/root_config ;
-@ %$
-
+%$
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
 <<tangling>>=
@@ -256,7 +752,7 @@ popd ;
 export WORK="$HOME/development/softgparra/mixture" ;
 export BIN="$WORK/bin" ;
 export DOCS="$WORK/docs" ;
-export DATA="$WORK/data" ;
+export SRC="$WORK/src" ;
 export nwfile="mixture" ;
 @ 
 
