@@ -3,8 +3,8 @@
 data=`date +%Y%m%d-%H%M`
 URL=ftp://ctan.tug.org/tex-archive/systems/win32/miktex
 
-cd /home/ogonzalez/mirror/miktex
-wget -m -nH --cut-dirs=3 $URL 2>&1 | tee tmp.txt
+cd /home/mirror/miktex
+wget -m -nH --cut-dirs=3 --passive-ftp $URL 2>&1 | tee tmp.txt
 /home/ug/ogonzalez/scripts/mirror miktex -n
 
 velltot=`ls mirror-*.txt`

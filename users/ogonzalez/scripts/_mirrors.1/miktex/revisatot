@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/ogonzalez/mirror/miktex/miktex/tm/packages
+cd /home/mirror/miktex/miktex/tm/packages
 ls -1 *.cab >../../../llista.new
 nous=`wc -l <../../../llista.new`
 

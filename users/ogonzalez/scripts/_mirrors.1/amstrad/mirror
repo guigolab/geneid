@@ -6,12 +6,12 @@ then
    exit
 fi
 
-cd /home/ogonzalez/mirror/amstrad
+cd /home/mirror/amstrad
 
 data=`date +%Y%m%d-%H%M`
 
 URL=ftp://andercheran.aiind.upv.es/pub/cpc
-wget -m $URL 2>&1 | tee tmp.ftp
+wget -m --passive-ftp $URL 2>&1 | tee tmp.ftp
 
 velltot=`echo mirror-*.ftp`
 vell=${velltot#mirror}

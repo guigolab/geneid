@@ -23,12 +23,12 @@ fi
 
 SCRIPT=/home/ug/ogonzalez/scripts
 
-cd /home/ogonzalez/mirror/cygwin
+cd /home/mirror/cygwin
 
 data=`date +%Y%m%d-%H%M`
 URL=ftp://ftp.rediris.es/mirror/cygwin/release
 
-wget -m $URL 2>&1 | tee tmp.txt
+wget -m --passive-ftp $URL 2>&1 | tee tmp.txt
 $SCRIPT/mirror ftp.rediris.es -n
 
 velltot=`echo mirror-*.txt`

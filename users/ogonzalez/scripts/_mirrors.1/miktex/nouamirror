@@ -29,6 +29,7 @@ then
    # volem crear una llista inicial pero no volem crear el directori
    # de fitxers nous (ja que tots ho seran)
    nomestxt=1
+   shift
 fi
 
 if [ $# != 1 ]

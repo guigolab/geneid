@@ -6,13 +6,13 @@ then
    exit
 fi
 
-cd /home/ogonzalez/mirror/tetex
+cd /home/mirror/tetex
 
 data=`date +%Y%m%d-%H%M`
 URL=ftp://sunsite.informatik.rwth-aachen.de/pub/comp/tex/teTeX
 VERS=2.0
 
-wget -m $URL/$VERS/distrib 2>&1 | tee tmp.txt
+wget -m --passive-ftp $URL/$VERS/distrib 2>&1 | tee tmp.txt
 /home/ug/ogonzalez/scripts/mirror sunsite.informatik.rwth-aachen.de -n
 
 velltot=`echo mirror-*.txt`
@@ -24,7 +24,7 @@ mv $velltot old$vell
 rm tmp.txt
 
 URL=sunsite.informatik.rwth-aachen.de/pub/comp/tex/teTeX/current
-wget -m ftp://$URL >/dev/null 2>&1
+wget -m --passive-ftp ftp://$URL >/dev/null 2>&1
 versio=`ls -l $URL | awk '{ print $11 }'`
 if [ $versio != $VERS ]
 then
