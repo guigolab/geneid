@@ -4,9 +4,9 @@
 *                                                                        *
 *   Management: displaying results                                       *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.11 2002-02-04 09:13:57 eblanco Exp $  */
+/*  $Id: Output.c,v 1.12 2003-11-05 14:41:53 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -97,7 +97,7 @@ void OutputHeader(char* locus, long l)
      }
   else
 	{
-	  sprintf(mess,"%s: %ld nucleotides loaded\n",locus,l);     
+	  sprintf(mess,"%s: %ld nucleotides\n",locus,l);     
 	  printMess(mess);
 	}
   
@@ -122,7 +122,7 @@ void OutputHeader(char* locus, long l)
       /* gff and geneid formats */
       s[strlen(s)-1] = '\n';
       printf("## date %s",s);
-      printf("## source-version: geneid v 1.1 -- geneid@imim.es\n");
+      printf("## source-version: geneid v 1.2 -- geneid@imim.es\n");
       printf("# Sequence %s - Length = %ld bps\n",locus,l);
     }
 }
@@ -181,7 +181,7 @@ void Output(packSites* allSites,
   /* 2. Printing Reverse */
   if (RVS)
     {
-      printMess("Printing reverse selected elements");
+      printMess("Printing reverse selected elements\n");
 	  
       /* sites */ 
       if (SFP)
@@ -218,7 +218,7 @@ void Output(packSites* allSites,
   /* 3. Print all exons */
   if (EXP) 
     {
-      printMess("Printing all predicted Exons of current split");   
+      printMess("Printing all predicted Exons of current split\n");   
       PrintExons(exons, nExons, FIRST + INTERNAL + TERMINAL + SINGLE + ORF, 
 				 Locus, l1, l2, Sequence, dAA);
     }
