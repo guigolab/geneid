@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.12 2001-11-13 14:12:25 gparra Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -157,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.12 2001-11-13 14:12:25 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -308,9 +308,9 @@ Name   & Length  & GC     & Repeats & Genes & Annotations    & RefSeqs \\
        & 219 Kb  & 48.1\% & 21.2\%   & 13    & 11 (11 correct) & 11 (11 correct) \\
 \htmladdnormallink{KVLQT1}{http://sapiens.wustl.edu/~ikorf/annotation/KVLQT1.html}
       & 1279 Kb  & 55.1\% & 25.6\%   & 20    &  BBB           &  CCC   \\ % Hs_KvLQT1.9 is knowingly out of frame
-MHC   &  XXX Kb  &  YYY\% &  ZZZ\%   & AAA   &  BBB           &  CCC   \\ % too lazy for this one
 \htmladdnormallink{SIL}{http://sapiens.wustl.edu/~ikorf/annotation/SIL.html}
       &  306 Kb  & 43.2\% & 54.2\%   &  5     & 4 (3 correct)  & 3 (3 correct) \\
+MHC   &  XXX Kb  &  YYY\% &  ZZZ\%   & AAA   &  BBB           &  CCC   \\ % too lazy for this one
 \end{tabular}
 \vskip 1ex
 \begin{minipage}[c]{\linewidth}
@@ -1888,11 +1888,21 @@ run_SGP Hsap.orimasked $DATASETS/fasta/orimasked \
 export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
 export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
 #
+# SGP on Raw sequences
+run_SGP rguigo.raw  $DATASETS/fasta/raw \
+               $ANALYSIS/blast/wublast.tblastx/orimasked \
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
+
 # SGP on Masked sequences (already masked: orimasked)
 run_SGP rguigo.orimasked $DATASETS/fasta/orimasked \
                $ANALYSIS/blast/wublast.tblastx/orimasked \
                $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
-#
+##
+# SGP raw sequences using  TBX results from Pankaj (W=5) for ORI masked sequences
+run_SGP rguigo.raw3X_pankaj_W5 $DATASETS/fasta/raw \
+               $ANALYSIS/blast/wublast.tblastx/orimasked3X/pankaj_W5 \
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
+
 # SGP on TBX results from Pankaj (W=5) for ORI masked sequences
 run_SGP rguigo.orimasked3X_pankaj_W5 $DATASETS/fasta/orimasked \
                $ANALYSIS/blast/wublast.tblastx/orimasked3X/pankaj_W5 \
@@ -1931,12 +1941,18 @@ run_SGP rguigo.masked3X_pankaj_W5.gnid_fix $DATASETS/fasta/masked \
 
 # Evaluation with the new IK annotations
   PROG=sgp;
+  PROG=geneid;
+  PROG=genscan;
   TSET=$DATASETS/annotation/20010911.IanKorf/gff/all.Hsap
-  BASE=$ANALYSIS/$PROG/rguigo.masked3X_pankaj_W5.gnid_fix;
-  $SGPBIN/evaluation -ta  $BASE/gff/all.Hsap $TSET \
-      > $BASE/eval_$PROG.rguigo.masked3X_pankaj_W5.gnid_fix_IK;
-  $SGPBIN/evaluation -tsa $BASE/gff/all.Hsap $TSET \
-      > $BASE/eval_${PROG}_brief.rguigo.masked3X_pankaj_W5.gnid_fix_IK;
+#  BASE=rguigo.masked3X_pankaj_W5.gnid_fix;
+#    BASE=Hsap.raw
+#    BASE=rguigo.raw3X_pankaj_W5
+#    BASE=rguigo.orimasked
+BASE=rguigo.raw
+  $SGPBIN/evaluation -ta  $ANALYSIS/$PROG/$BASE/gff/all.Hsap $TSET \
+      > $ANALYSIS/$PROG/$BASE/eval_$PROG.${BASE}_IK;
+  $SGPBIN/evaluation -tsa $ANALYSIS/$PROG/$BASE/gff/all.Hsap $TSET \
+      > $ANALYSIS/$PROG/$BASE/eval_${PROG}_brief.${BASE}_IK;
 ##
 # Using modified SGP to include evidences easily
 # First we checked again if the results obtained with this scripts are equal \
@@ -2072,6 +2088,46 @@ $ENSCRIPT $ANALYSIS/sgp/rguigo_new_genis.masked3X_pankaj_W5/eval_sgp.rguigo_new_
 $ENSCRIPT -r $ANALYSIS/sgp/rguigo_new_genis.masked3X_pankaj_W5/eval_sgp_brief.rguigo_new_genis.masked3X_pankaj_W5 ;
 #
 @
+<<Making summary table>>=
+parseval ()
+{
+   TITLE=$1
+   FILE=$2
+   gawk 'BEGIN{tittle=ARGV[1];ARGV[1]="";OFS=" & ";}\
+         {if (bol==1) {$NF=$NF" \\\\";print tittle, $0;} bol=0 ; \
+         if ($1=="#Total:") bol=1; }' $TITLE $FILE
+}
+
+echo "\begin{sidewaystable}\begin{center}" > $WORK/docs/tables/summary_eval.tex
+echo "\begin{tabular}{l|cccccccccccccccc}"   >> $WORK/docs/tables/summary_eval.tex 
+echo "  &  SN   &   SP  &    CC  &   SNe  &   SPe  &  SNSP  &  raME  &  raWE  &   SNg  &    SPg  &  SNSPg   &    raMG  &  raWG  &  raJG  &  raSG \\\\" >> $WORK/docs/tables/summary_eval.tex 
+# Raw Sequence.
+echo "\hline"  >> $WORK/docs/tables/summary_eval.tex
+echo "Raw Sequence\\\\ \hline " >> $WORK/docs/tables/summary_eval.tex
+parseval geneid $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw_IK >> $WORK/docs/tables/summary_eval.tex 
+parseval genscan $ANALYSIS/genscan/Hsap.raw/eval_genscan_brief.Hsap.raw_IK >> $WORK/docs/tables/summary_eval.tex 
+parseval sgp-ortholog $ANALYSIS/sgp/rguigo.raw/eval_sgp_brief.rguigo.raw_IK >> $WORK/docs/tables/summary_eval.tex 
+parseval sgp-shotgun $ANALYSIS/sgp/rguigo.raw3X_pankaj_W5/eval_sgp_brief.rguigo.raw3X_pankaj_W5_IK >> $WORK/docs/tables/summary_eval.tex
+parseval twinscan $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan_brief.Hsap.20010803_IK >> $WORK/docs/tables/summary_eval.tex 
+
+
+# Masked Sequence
+echo "\hline"  >> $WORK/docs/tables/summary_eval.tex
+echo "Masked Sequence \\\\ \hline" >> $WORK/docs/tables/summary_eval.tex
+parseval geneid  $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked_IK >> $WORK/docs/tables/summary_eval.tex
+parseval genscan $ANALYSIS/genscan/Hsap.masked/eval_genscan_brief.Hsap.masked_IK  >> $WORK/docs/tables/summary_eval.tex
+parseval sgp-ortholog  $ANALYSIS/sgp/rguigo.orimasked/eval_sgp_brief.rguigo.orimasked_IK  >> $WORK/docs/tables/summary_eval.tex
+parseval sgp-shotgun $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5.gnid_fix/eval_sgp_brief.rguigo.masked3X_pankaj_W5.gnid_fix_IK>> $WORK/docs/tables/summary_eval.tex
+echo "\end{tabular} \caption{Evaluation summary table} \end{center} \end{sidewaystable}"   >> $WORK/docs/tables/summary_eval.tex 
+
+@ 
+
+\begin{center}
+\input $WORK/docs/tables/summary_eval.tex
+%$
+\end{center}
+
+
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2280,7 +2336,7 @@ GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
 GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
 GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
 # GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
-#GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
+GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
 run_GFF2PS $IDIR "$GFFIN" ;
 
 #
@@ -3476,7 +3532,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.12 2001-11-13 14:12:25 gparra Exp $
 @ 
 
 \newpage
@@ -3828,7 +3884,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.12 2001-11-13 14:12:25 gparra Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -4172,7 +4228,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.11 2001-10-02 18:19:32 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.12 2001-11-13 14:12:25 gparra Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
