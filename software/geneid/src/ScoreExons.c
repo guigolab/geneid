@@ -482,7 +482,7 @@ float ScoreHSPexon(exonGFF* exon,
     index = FRAMES;
   
   /* Frame blast definition: according to the sequence start */
-  trueFrame = (iniExon + exon->Frame) % 3;
+  trueFrame = (exon->Acceptor->Position + COFFSET + exon->Frame) % 3;
   trueFrame += index;
   
   /* Access the sr array to obtain the homology score for current score */
