@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.55 2002-06-19 11:24:43 jabril Exp $ 
+% # $Id: humus.nw,v 1.56 2002-06-19 11:35:39 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.55 2002-06-19 11:24:43 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.56 2002-06-19 11:35:39 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -4959,7 +4959,7 @@ use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
 #
-use global qw( :ExecReport :ExitStatus );
+use global qw( :ExecReport :ExitStatus :Counter );
 &init_timer(\@exectime);
 #
 $PROG = 'gtf2gff.pl';
@@ -4970,6 +4970,7 @@ $PRGVER = '0.9alpha';
 my $ifile = shift @ARGV;
 #
 # VARS
+my ($T,$F) = (1,0);
 my %genes = ();
 my @geneslst = ();
 #
@@ -4996,7 +4997,7 @@ sub load_gtf_records() {
     print $ERRFH "## $PROG ## READING GTF FILE: $fgff\n";
     ($n,$_cntN) = (0,50);
     while (<GTF>) {
-        my ($_cnt,$key,$grp);
+        my (@f,$_cnt,$key,$grp);
         $c = '.';
         next if /^\#/o;
         next if /^\s*$/o;
@@ -10760,7 +10761,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.55 2002-06-19 11:24:43 jabril Exp $
+# $Id: humus.nw,v 1.56 2002-06-19 11:35:39 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
