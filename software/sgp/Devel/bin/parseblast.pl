@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.7 2000-07-31 16:55:26 jabril Exp $
+# $Id: parseblast.pl,v 1.8 2000-08-02 17:58:29 jabril Exp $
 #
 
 my $Start = time;
@@ -11,7 +11,7 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling");
 
 my $PROGRAM = "parseblast.pl";
-my $VERSION = '$Id: parseblast.pl,v 1.7 2000-07-31 16:55:26 jabril Exp $ ';
+my $VERSION = '$Id: parseblast.pl,v 1.8 2000-08-02 17:58:29 jabril Exp $ ';
 
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg, $subject_flg,
 	$sequence_flg, $comment_flg, $nocmmnt_flg, $split_flg, $help_flg, $err_flg,
@@ -26,6 +26,7 @@ my (@seqlist, %prgseq, %dbase, %query, %cnt,
 	%desc, %sco, %hsp_start, %hsp_end, %hsp_seq);
 my ($qm, $sm, $x, $y, $ml, $a, $b, $aq, $as, $sql, $lq, $ls, $sq);
 my $foe = 0;
+my $index = 0; 
 my $chars_per_line = 50; # chars of sequences to show per line (in alignment modes)
 
 ###################################################
@@ -227,7 +228,7 @@ sub get_lines {
 	my $tmp;
 	# local($tmp);
 	while (<>) {
-		last if /^\s*$/o;
+		last if /^\s*$/;
 		# print STDERR "$_";
 		chop;
 		s/^\s*/$spc/;
@@ -523,6 +524,7 @@ while (<>) {
 		  ($seqname, $descr) = split(/\s+/, $_, 2);
 		  $seqname =~ s/^\s*>//o;
 		  $seqname =~ s/:|\|/_/og;
+		  $seqname .= "_".($index++);
 		  $prgseq{$seqname} = "$program ($version)";
 		  $query{$seqname} = $query_name;
 		  ($db_name =~ /([^\/]+)$/o) && ($dbase{$seqname} = $1);
