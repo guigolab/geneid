@@ -1,5 +1,9 @@
-# Parameter file: GeneID in Drosophila.
+# geneid parameter file: Drosophila melanogaster
 # Comment lines must begin with '#'
+
+# Non-homology penalty
+NO_SCORE
+0
 
 # Number of isochores
 number_of_isochores
@@ -7,26 +11,35 @@ number_of_isochores
 
 # PARAMETERS FROM ISOCHORE 1
 
+# %GC
 boundaries_of_isochore
 0  100
 
-# Exons score: Cutoffs and weights
-Cutoff_exons
+# Exons score: cutoffs
+Absolute_cutoff_exons
 -15 -15 -15 -15
 
-Cutoff_Oligos
+Coding_cutoff_oligos
 -10 -15 -15 -15
 
-Weight_of_oligos_in_exons
+# Exon score: factors
+Site_factor
+0.6 0.6 0.6 0.6
+
+Exon_factor
 0.4 0.4 0.4 0.4
+
+HSP_factor
+1.0 1.0 1.0 1.0
 
 Exon_weigths
 -7 -7 -7 -7
 
-# Parameters to Predict Sites: Lenght, Offset, Cutoff and order (Markov chain)
+# Site prediction: Position Weight Arrays
+# Lenght, Offset, Cutoff and order (Markov model)
 Start_profile 
 20 16 -5 0
-# These are the transition probabilities
+# Transition probabilities at every position
 1 A 0.353
 1 C 0.034
 1 G -0.524
@@ -108,9 +121,9 @@ Start_profile
 20 G 0.533
 20 T -0.190
 
-Acceptor_Profile
+Acceptor_profile
 24 22 -7 0
-# These are the transition probabilities
+# Transition probabilities at every position
 1 A 0.275
 1 C -0.315
 1 G -0.992
@@ -208,9 +221,9 @@ Acceptor_Profile
 24 G -0.2675
 24 T 0.402
 
-Donor_Profile
+Donor_profile
 10 2 -7.5 0
-# These are the transition probabilities
+# Transition probabilities at every position
 1 A 0.296
 1 C 0.248
 1 G -0.196
@@ -252,8 +265,8 @@ Donor_Profile
 10 G -0.309
 10 T 0.383
 
-Stop_Profile
-# These are the transition probabilities
+Stop_profile
+# Transition probabilities at every position
 9 4 -9999 0
 1 A 0.194
 1 C 0.029
@@ -292,10 +305,10 @@ Stop_Profile
 9 G 0.676
 9 T -0.390
 
-# Parameters to Predict Exons: Markov chains(initial - transition)
+# Exon prediction: Markov model
+# Initial probabilities at every codon position
 Markov_oligo_logs_file
 5
-
 Markov_Initial_probability_matrix
 AAAAA 0 0 -1.0889
 AAAAA 0 1 -1.78927
@@ -3370,6 +3383,7 @@ TTTTT 1023 0 -2.72854
 TTTTT 1023 1 -3.03275
 TTTTT 1023 2 -3.66137
 
+# Transition probabilities at every codon position
 Markov_Transition_probability_matrix
 AAAAAA 0 0 -1.18923
 AAAAAA 0 1 -1.22885
@@ -15660,22 +15674,21 @@ TTTTTT 4095 0 -1.22183
 TTTTTT 4095 1 -1.58091
 TTTTTT 4095 2 -0.41822       
 
-# How many donors per acceptor can we use to build exons?
+# Donors per acceptor to build exons
 maximum_number_of_donors_per_acceptor_site
 5
 
-# Global Parameters 
-# Rules about Gene construction(GenAmic)
+# GENE MODEL: Rules about gene assembling (GenAmic)
 General_Gene_Model
-#intronic connexions
+# INTRAgenic connections
 First+:Internal+                Internal+:Terminal+             40:11000 block
 Terminal-:Internal-             First-:Internal-                40:11000 blockr
-#connexions to regulatory elements
+# External features
 Promoter+                       First+:Single+                  50:4000
 Terminal+:Single+               aataaa+                         50:4000
 First-:Single-                  Promoter-                       50:4000
 aataaa-                         Single-:Terminal-               50:4000
-#intergeneic conexions
+# INTERgenic conections
 aataaa+:Terminal+:Single+       Single+:First+:Promoter+        300:Infinity
 aataaa+:Terminal+:Single+       Single-:Terminal-:aataaa-       300:Infinity
 Promoter-:First-:Single-        Single+:First+:Promoter+        300:Infinity

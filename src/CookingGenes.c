@@ -4,9 +4,9 @@
 *                                                                        *
 *   Processing best gene to print by using the selected format           *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.11 2003-02-26 10:56:35 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.12 2003-11-05 14:20:06 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -34,7 +34,7 @@ extern int XML;
 extern int cDNA;
 
 
-/* Data structure to record stats about every gene */
+/* Local data structure to record stats about every gene */
 typedef struct s_gene
 {
   long nexons;
@@ -106,28 +106,28 @@ void selectFeatures(char* exonType,
   if (exonStrand == '+')
 	{
 	  *strand = FORWARD;
-	  if (!strcmp(exonType,"First"))
+	  if (!strcmp(exonType,sFIRST))
 		{
 		  *type1 = STA;
 		  *type2 = DON;
 		  *p1 = gp->StartProfile;
 		  *p2 = gp->DonorProfile;
 		}
-	  if (!strcmp(exonType,"Internal"))
+	  if (!strcmp(exonType,sINTERNAL))
 		{
 		  *type1 = ACC;
 		  *type2 = DON;
 		  *p1 = gp->AcceptorProfile;
 		  *p2 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,"Terminal"))
+	  if (!strcmp(exonType,sTERMINAL))
 		{
 		  *type1 = ACC;
 		  *type2 = STO;
 		  *p1 = gp->AcceptorProfile;
 		  *p2 = gp->StopProfile;    
 		}
-	  if (!strcmp(exonType,"Single"))
+	  if (!strcmp(exonType,sSINGLE))
 		{
 		  *type1 = STA;
 		  *type2 = STO;
@@ -146,21 +146,21 @@ void selectFeatures(char* exonType,
 		  *p2 = gp->StartProfile;
 		  *p1 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,"Internal"))
+	  if (!strcmp(exonType,sINTERNAL))
 		{
 		  *type2 = ACC;
 		  *type1 = DON;
 		  *p2 = gp->AcceptorProfile;
 		  *p1 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,"Terminal"))
+	  if (!strcmp(exonType,sTERMINAL))
 		{
 		  *type2 = ACC;
 		  *type1 = STO;
 		  *p2 = gp->AcceptorProfile;
 		  *p1 = gp->StopProfile;    
 		}
-	  if (!strcmp(exonType,"Single"))
+	  if (!strcmp(exonType,sSINGLE))
 		{
 		  *type2 = STA;
 		  *type1 = STO;
@@ -197,105 +197,122 @@ long CookingInfo(exonGFF* eorig,
   stop = (e->Strand == '*');
   while (!stop)
     {
-      /* A. Single Genes: only one exon (don't care the strand) */
-      if (!strcmp(e->Type,"Single") || !strcmp(e->Type,"Promoter"))
+	  /* A. Force 1 gene prediction -> erase every record with sGHOST features */
+	  if (!strcmp(e->Type,sGHOST))
 		{
-		  info[igen].start = e;
-		  info[igen].end = e;
-		  info[igen].nexons = 1;
-		  /* Evidences (annotations) not sumed if infinitum score */
-		  if (e->Score==MAXSCORE)
-			(*nvExons)++;
-		  else
-			info[igen].score = e->Score;
-		  
+		  /* Skip this feature: substract the score from the total score */
+		  (*nvExons)++;
+
 		  /* JUMP! */
 		  e = (e-> PreviousExon);
 		  stop = (e->Strand == '*');
 		}
-      else
+	  else
 		{
-		  /* B. Reverse Genes: (BOTTOM) First->Internal->...->Terminal (TOP) */
-		  if (e->Strand == '-')
+		  /* B. Single Genes: only one exon (don't care the strand) */
+		  if (!strcmp(e->Type,sSINGLE) || !strcmp(e->Type,sPROMOTER))
 			{
 			  info[igen].start = e;
 			  info[igen].end = e;
-			  info[igen].nexons++;
+			  info[igen].nexons = 1;
 			  /* Evidences (annotations) not sumed if infinitum score */
 			  if (e->Score==MAXSCORE)
 				(*nvExons)++;
 			  else
-				info[igen].score += e->Score;
+				info[igen].score = e->Score;
 			  
 			  /* JUMP! */
-			  e = (e-> PreviousExon);       
-			  /* stop means end of processing */
+			  e = (e-> PreviousExon);
 			  stop = (e->Strand == '*');
-			  /* stop1 means change of gene: new gene found */
-			  stop1 = (!strcmp(e->Type,"First") || 
-					   !strcmp(e->Type,"Single") ||  
-					   !strcmp(e->Type,"Promoter") || 
-					   e->Strand == '+'); 
-			  while( !stop && !stop1 )
-				{  
+			}
+		  else
+			{
+			  /* C. Reverse Genes: (BOTTOM) First->Internal->...->Terminal (TOP) */
+			  if (e->Strand == '-')
+				{
+				  info[igen].start = e;
+				  info[igen].end = e;
 				  info[igen].nexons++;
-				  /* Evidences (annotations) not sumed if infinitum score */
+				  /* Evidences (annotations) not added if infinitum score */
 				  if (e->Score==MAXSCORE)
 					(*nvExons)++;
 				  else
 					info[igen].score += e->Score;
-				  info[igen].end = e;
 				  
-				  /* JUMP loop! */
-				  e = (e-> PreviousExon);
+				  /* JUMP! */
+				  e = (e-> PreviousExon);       
+				  /* stop means end of processing */
 				  stop = (e->Strand == '*');
-				  stop1 = (!strcmp(e->Type,"First") ||  
-						   !strcmp(e->Type,"Single") ||
-						   !strcmp(e->Type,"Promoter") || 
+				  /* stop1 means change of gene: new gene found */
+				  stop1 = (!strcmp(e->Type,sFIRST) || 
+						   !strcmp(e->Type,sSINGLE) ||  
+						   !strcmp(e->Type,sPROMOTER) || 
+						   !strcmp(e->Type,sGHOST) || 
 						   e->Strand == '+'); 
-				} 
-			}
-		  else
-			/* C. Forward Genes: (BOTTOM) Terminal->Internal->...->First (TOP) */
-			if (e->Strand == '+')
-			  {
-				info[igen].start = e;
-				info[igen].end = e;
-				info[igen].nexons++;
-				if (e->Score==MAXSCORE)
-				  (*nvExons)++;
-				else
-				  info[igen].score += e->Score;
-				
-				/* JUMP */
-				e = (e-> PreviousExon);  
-				stop = (e->Strand == '*');
-				/* stop1 means change of gene */
-				stop2 = (!strcmp(e->Type,"Terminal") ||  
-						 !strcmp(e->Type,"Single") ||
-						 !strcmp(e->Type,"Promoter") || 
-						 e->Strand == '-'); 
-				while( !stop && !stop2 )
-				  { 
+				  while( !stop && !stop1 )
+					{  
+					  info[igen].nexons++;
+					  /* Evidences (annotations) not sumed if infinitum score */
+					  if (e->Score==MAXSCORE)
+						(*nvExons)++;
+					  else
+						info[igen].score += e->Score;
+					  info[igen].end = e;
+					  
+					  /* JUMP loop! */
+					  e = (e-> PreviousExon);
+					  stop = (e->Strand == '*');
+					  stop1 = (!strcmp(e->Type,sFIRST) ||  
+							   !strcmp(e->Type,sSINGLE) ||
+							   !strcmp(e->Type,sPROMOTER) || 
+							   !strcmp(e->Type,sGHOST) || 
+							   e->Strand == '+'); 
+					} 
+				}
+			  else
+				/* D. Forward Genes: (BOTTOM) Terminal->Internal->...->First (TOP) */
+				if (e->Strand == '+')
+				  {
+					info[igen].start = e;
+					info[igen].end = e;
 					info[igen].nexons++;
-					/* Evidences (annotations) not sumed if infinitum score */
 					if (e->Score==MAXSCORE)
 					  (*nvExons)++;
 					else
 					  info[igen].score += e->Score;
-					info[igen].end = e;
-								
-					/* JUMP loop! */
-					e = (e-> PreviousExon);
+					
+					/* JUMP */
+					e = (e-> PreviousExon);  
 					stop = (e->Strand == '*');
-					stop2 = (!strcmp(e->Type,"Terminal") ||
-							 !strcmp(e->Type,"Single") ||
-							 !strcmp(e->Type,"Promoter") || 
+					/* stop2 means change of gene */
+					stop2 = (!strcmp(e->Type,sTERMINAL) ||  
+							 !strcmp(e->Type,sSINGLE) ||
+							 !strcmp(e->Type,sPROMOTER) ||
+							 !strcmp(e->Type,sGHOST) || 
 							 e->Strand == '-'); 
-				  }	
-			  }
+					while( !stop && !stop2 )
+					  { 
+						info[igen].nexons++;
+						/* Evidences (annotations) not added if infinitum score */
+						if (e->Score==MAXSCORE)
+						  (*nvExons)++;
+						else
+						  info[igen].score += e->Score;
+						info[igen].end = e;
+						
+						/* JUMP loop! */
+						e = (e-> PreviousExon);
+						stop = (e->Strand == '*');
+						stop2 = (!strcmp(e->Type,sTERMINAL) ||
+								 !strcmp(e->Type,sSINGLE) ||
+								 !strcmp(e->Type,sPROMOTER) || 
+								 !strcmp(e->Type,sGHOST) || 
+								 e->Strand == '-'); 
+					  }	
+				  }
+			}
+		  igen++;
 		}
-      igen++;
     } 
   
   return (igen);
@@ -408,7 +425,7 @@ void CookingGenes(exonGFF* e,
   
   /* Post-processing of genes */
   ngen = CookingInfo(e,info,&nvExons);
-  
+
   /* Protein space */
   if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
     printError("Not enough memory: protein product");
@@ -423,7 +440,7 @@ void CookingGenes(exonGFF* e,
     printf(" genes=\"%ld\" score =\"%.2f\">\n", 
 	   ngen,e -> GeneScore - nvExons*MAXSCORE); 
   else
-    printf("# Optimal Gene Structure. %ld genes. Score = %.6f \n", 
+    printf("# Optimal Gene Structure. %ld genes. Score = %.2f \n", 
 		   ngen,e -> GeneScore - nvExons*MAXSCORE); 
   
   /* Pretty-printing of every gene */
@@ -445,8 +462,8 @@ void CookingGenes(exonGFF* e,
 			   info[igen].nexons,
 			   info[igen].score);
       else     
-		if (strcmp(info[igen].start->Type,"Promoter"))
-		  printf("# Gene %ld (%s). %ld exons. %ld aa. Score = %f \n",
+		if (strcmp(info[igen].start->Type,sPROMOTER))
+		  printf("# Gene %ld (%s). %ld exons. %ld aa. Score = %.2f \n",
 				 ngen-igen,
 				 (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
 				 info[igen].nexons,
@@ -472,7 +489,7 @@ void CookingGenes(exonGFF* e,
 			  printf("      </cDNA>\n");
 			}
 	
-		  if (strcmp(info[igen].start->Type,"Promoter"))
+		  if (strcmp(info[igen].start->Type,sPROMOTER))
 			{
 			  printf("      <protein length=\"%ld\">\n",nAA);
 			  /* Protein in FASTA format */
@@ -489,7 +506,7 @@ void CookingGenes(exonGFF* e,
 			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
 			
 			/* Protein in FASTA format (except promoters) */
-			if (strcmp(info[igen].start->Type,"Promoter"))
+			if (strcmp(info[igen].start->Type,sPROMOTER))
 			  printProt(Name,ngen-igen,prot,nAA,PROT);
 			else
 			  if (!cDNA)

@@ -4,9 +4,9 @@
 *                                                                        *
 *   Implementation of a look-up table by using hash tables               *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Dictionary.c,v 1.4 2003-02-26 10:58:18 eblanco Exp $  */
+/*  $Id: Dictionary.c,v 1.5 2003-11-05 14:22:00 eblanco Exp $  */
 
 #include "geneid.h"
 
