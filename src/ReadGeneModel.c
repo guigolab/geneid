@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadGeneModel.c,v 1.4 2003-11-05 14:50:00 eblanco Exp $  */
+/*  $Id: ReadGeneModel.c,v 1.5 2003-11-13 15:07:09 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -185,7 +185,7 @@ long ReadGeneModel (FILE* file, dict* d,
 	  printMess("Force one gene prediction");
 	  printMess("Adding internal rules in the Gene Model");
 
-	  /* ^+:^-      First+:Terminal-     0:Infinity */
+	  /* ^+:^-      First+:Terminal-:Single+:Single-     0:Infinity */
 	  a = setkeyDict(d,sGHOSTFWD);
 	  UC[a][nc[a]++] = nlines;
 	  a = setkeyDict(d,sGHOSTRVS);
@@ -195,15 +195,23 @@ long ReadGeneModel (FILE* file, dict* d,
 	  DE[a][ne[a]++]=nlines;
 	  a = setkeyDict(d,"Terminal-");
 	  DE[a][ne[a]++]=nlines;
+	  a = setkeyDict(d,"Single+");
+	  DE[a][ne[a]++]=nlines;
+	  a = setkeyDict(d,"Single-");
+	  DE[a][ne[a]++]=nlines;
 	  
 	  md[nlines] = 0;
 	  Md[nlines] = INFI;
 	  nlines++;
 
-	  /* Terminal+:First-     ^+:^-      0:Infinity*/
+	  /* Terminal+:First-:Single+:Single-     ^+:^-      0:Infinity*/
 	  a = setkeyDict(d,"Terminal+");
 	  UC[a][nc[a]++] = nlines;
 	  a = setkeyDict(d,"First-");
+	  UC[a][nc[a]++] = nlines;
+	  a = setkeyDict(d,"Single+");
+	  UC[a][nc[a]++] = nlines;
+	  a = setkeyDict(d,"Single-");
 	  UC[a][nc[a]++] = nlines;
 	  
 	  a = setkeyDict(d,sGHOSTFWD);
