@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.3 2000-07-26 07:55:02 eblanco Exp $ */
+/* $Id: geneid.h,v 1.4 2000-08-08 14:14:31 eblanco Exp $ */
 
 /* Include libraries */
 #include <stdio.h>
@@ -43,19 +43,26 @@
 
 /* Memory definitions used in GeneId */
 
-#define RSITES 4                       /* maximum number of sites         */
-#define REXONS 2                       /* maximum number of exons         */
+#define RSITES 10                      /* maximum number of sites         */
+#define REXONS 3                       /* maximum number of exons         */
 
-#define RBSITES 250                    /* Backup Information sizes        */
-#define RBEXONS 250      
+#define RBSITES 250                    /* Backup Information sizes         */
+#define RBEXONS 500      
 
-#define NUMEEVIDENCES 10000            /* maximum number of evidences     */
+#define RSINGL 10                       /* ratios for exon types            */
+#define RFIRST 2 
+#define RINTER 1
+#define RTERMI 1.9
+
+#define RSORTE 3                       /* Total number ox exons/split     */
+
+#define NUMEEVIDENCES 0                /* maximum number of evidences     */
 #define NUMSEVIDENCES 2*NUMEEVIDENCES          
 
 #define MAXGENE 10000                  /* Max number of genes(multigenes) */
 #define MAXEXONGEN 50000               /* Max number of exon per gene     */
 #define LENGTHSi 100000                /* Max length of each split of S   */ 
-#define OVERLAP 15000                  /* Max length of a exon(overlap)   */
+#define OVERLAP 10000                  /* Max length of a exon(overlap)   */
 
 /* Other definitions */
 
@@ -353,6 +360,9 @@ typedef struct s_gparam                /* Data type of GeneId-params      */
   paramexons* Terminal;
   paramexons* Single;
                                                                             
+  float* OligoDistIni[FRAMES]; 
+  float* OligoDistTran[FRAMES];
+
   int MaxDonors;                       /* Max number of exons per acc     */
 
   dict* D;                             /* GeneModel configuration         */
