@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.1 2000-07-05 08:21:14 eblanco Exp $  */
+/*  $Id: PrintSites.c,v 1.2 2000-07-07 20:28:56 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -88,7 +88,7 @@ void PrintSite(site *s, int type, char Name[], int Strand,
    if (GFF)
      {
        /* Print site: gff format */
-       printf("%s\t%s\t%s\t%ld\t%ld\t%5.3f\t%c\t.\t0\t# %s\n",
+       printf("%s\t%s\t%s\t%ld\t%ld\t%5.3f\t%c\t.\t# %s\n",
 	      Name,
 	      SITES,
 	      Type,
