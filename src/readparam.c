@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.2 2000-08-08 14:25:16 eblanco Exp $  */
+/*  $Id: readparam.c,v 1.3 2000-08-16 07:45:00 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -251,7 +251,7 @@ int readparam (char *name, gparam** isochores)
   char mess[MAXSTRING];
   int nIsochores;
 
-  printRes("\n\n\t\t\t** Executing geneid 1.0 2000 imim.es **\n\n");
+  printRes("\n\n\t\t\t** Executing geneid 1.0 2000 geneid@imim.es **\n\n");
   Geneid=getenv("GENEID");
 
   /* 0. Select parameters filename for reading it */
