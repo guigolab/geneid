@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.2 2003-02-21 12:05:45 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.3 2003-02-21 18:48:46 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.2 2003-02-21 12:05:45 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.3 2003-02-21 18:48:46 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -310,85 +310,49 @@ sub {
 \todo{ \item \todoAAA } % todo
 
 <<whole script>>=
-my $PROGRAM = "parseblast";
-my $VERSION = "Version 1.0";
-my $Start = time;
-
+#
 use strict;
+#
 use Getopt::Long;
-
-
-##############################################################################
-##                       Getting Comand-line Options                        ##
-##############################################################################
-
 Getopt::Long::Configure("bundling");
+#
+use Benchmark;
+my @exectime = ();
+&init_timer(\@exectime);
 
-my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg, $subject_flg, $sequence_flg,
-	$full_scores, $comment_flg, $nocmmnt_flg, $split_flg, $help_flg, $err_flg,
-    $expanded_flg, $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg);
+##############################################################################
+##                              GLOBAL VARS                                 ##
+##############################################################################
+#
+my $PROGRAM = "parseblast";
+my $VERSION = "v2.0";
+my $PLVER = sprintf("v%vd",$^V);
+my $DATE  = localtime;
+my $CDATE = &get_date();
+my ($USER,$HOST);
+if (defined($ENV{USER})) {
+    $USER = $ENV{USER};
+} else {
+    chomp($USER = system("whoami"));
+};
+if (defined($ENV{HOSTNAME})) {
+    $HOST = $ENV{HOSTNAME};
+} else {
+    chomp($HOST = system("hostname"));
+};
+#
+# FLAGS
+my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg,
+    $subject_flg, $sequence_flg, $full_scores, $comment_flg, $nocmmnt_flg,
+    $split_flg, $help_flg, $err_flg, $expanded_flg,
+    $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param, $aln_split, $prt_pos_flg
 	) = (0, 0, 0, 0, 0, 0, 0, 0);
-
-GetOptions( "G|gff"            => \$gff_flg      ,
-			"F|fullgff"        => \$fullgff_flg  ,
-			"A|aplot"          => \$aplot_flg    ,
-            "S|subject"        => \$subject_flg  ,
-            "Q|sequence"       => \$sequence_flg ,
-            "X|extended"       => \$expanded_flg ,
-			"P|pairwise"       => \$pairwise_flg ,
-			"M|msf"            => \$msf_flg      ,
-			"N|aln"            => \$aln_flg      ,
-			"W|show-coords"    => \$prt_pos_flg  ,
-			"b|bit-score"      => \$bit_flg      ,
-			"i|identity-score" => \$ids_flg      ,
-			"s|full-scores"    => \$full_scores  ,
-			"c|comments"       => \$comment_flg  ,
-			"n|no-comments"    => \$nocmmnt_flg  ,
-			"v|verbose"        => \$err_flg      ,
-			"h|help|\?"        => \$help_flg      );
-
-($help_flg) && &prt_help;
-
-{   # first choose disables any other command-line option.
-    $aln_flg
-		&& ($expanded_flg=$msf_flg=$pairwise_flg=$hsp_flg=$comment_flg=0,
-			$nogff_flg=1, last);
-    $msf_flg
-		&& ($expanded_flg=$aln_flg=$pairwise_flg=$hsp_flg=$comment_flg=0,
-			$nogff_flg=1, last);
-	$pairwise_flg
-		&& ($expanded_flg=$aln_flg=$msf_flg=$hsp_flg=$comment_flg=0,
-			$nogff_flg=1, last);
-	$gff_flg
-		&& ($expanded_flg=$aln_flg=$msf_flg=$pairwise_flg=$fullgff_flg=$aplot_flg=$hsp_flg=0,
-			$nogff_flg=0, last);
-	$fullgff_flg
-		&& ($expanded_flg=$aln_flg=$msf_flg=$pairwise_flg=$gff_flg=$aplot_flg=$hsp_flg=0,
-			$nogff_flg=0, last);
-	$aplot_flg
-		&& ($expanded_flg=$aln_flg=$msf_flg=$pairwise_flg=$gff_flg=$fullgff_flg=$hsp_flg=0,
-			$nogff_flg=0, last);
-	$expanded_flg
-		&& ($aln_flg=$msf_flg=$pairwise_flg=$hsp_flg=0,
-			$nogff_flg=1, last);
-	$hsp_flg = 1; $nogff_flg = 1;
-};
-
-{   # first choose disables any other command-line option.  
-    $bit_flg && ($ids_flg=0, last);
-    $ids_flg && ($bit_flg=0, last);
-};
-
-$nocmmnt_flg && ($comment_flg = 0);
-
-
-##############################################################################
-##                          Global Variables                                ##
-##############################################################################
+#
+# Parser Vars
 my $GFF1fmt = (("\%s ")x8)."\%s"."\n";
 my $GFF2fmt = (("\%s\t")x8)."\%s"."\n";
-my ($prog_params, $program, $version, $seqname);
+my ($prt_funct, $prog_params, $program, $version, $seqname);
 my ($scQ, $scS);   # reSCale_Query/Subject : 1 to re-scalate lengths.
 my ($query_name, $db_name, $score, $descr,
 	$ori, $end, $seq, $txt, $tt, $pt, $ht);
@@ -398,58 +362,182 @@ my ($qm, $sm, $x, $y, $ml, $a, $b, $aq, $as, $sql, $lq, $ls, $sq);
 my $foe = 0;
 my $index = 0; 
 my $chars_per_line = 50; # chars of sequences to show per line (in alignment modes)
+my ($tlen,$clen) = (54,50);
+#
+# Formatting output as plain, HSPs, GFF, APLOT, ALN.
+my ($n, $nm, $wnm, $tq, $ts,   # couNter, NaMe, TagQuery, TagSubject
+	$sc, $bt, $ex, $pv, $id,   # SCore, BiTscore, EvalueX, IDentityscore
+    $scores,                   # showing all scores
+	$frq, $frs,                # QueryFRame, SubjectFRame
+	$stq, $sts,                # QuerySTrand, SubjectSTrand
+	$gsc, $prg,                # GroupSCore, PRoGram
+	$hsq, $hss, $heq, $hes,    # HspStartQuery, HspStartSubject, HspEndQuery, HspEndSubject
+	$lnq, $lns, $lnmin, $lnmax,# LeNgthQuery, LeNgthSubject, LeNgthMINqueyxsubject, LeNgthMAXqueyxsubject
+	$lnmx, $gpq, $gps, $gpt    # LeNgthMaXhspseq, GaPQuery, GaPSubject, GaPTotal
+	);
+
+##############################################################################
+##                              MAIN LOOP                                   ##
+##############################################################################
+#
+&program_started("$PROGRAM $VERSION");
+&get_commandline_opts();
+&parseblast();
+&prt_out(); # $prt && &prt_out;
+&program_finished("$PROGRAM $VERSION");
+exit(0);
+
+##############################################################################
+##                       Getting Comand-line Options                        ##
+##############################################################################
+#
+sub get_commandline_opts(){
+    GetOptions( "G|gff"            => \$gff_flg      ,
+                "F|fullgff"        => \$fullgff_flg  ,
+                "A|aplot"          => \$aplot_flg    ,
+                "S|subject"        => \$subject_flg  ,
+                "Q|sequence"       => \$sequence_flg ,
+                "X|extended"       => \$expanded_flg ,
+                "P|pairwise"       => \$pairwise_flg ,
+                "M|msf"            => \$msf_flg      ,
+                "N|aln"            => \$aln_flg      ,
+                "W|show-coords"    => \$prt_pos_flg  ,
+                "b|bit-score"      => \$bit_flg      ,
+                "i|identity-score" => \$ids_flg      ,
+                "s|full-scores"    => \$full_scores  ,
+                "c|comments"       => \$comment_flg  ,
+                "n|no-comments"    => \$nocmmnt_flg  ,
+                "v|verbose"        => \$err_flg      ,
+                "h|help|\?"        => \$help_flg      );
+    #
+    ($help_flg) && &prt_help;
+    #
+  FLGS: {   # first choose disables any other command-line option.
+        $aln_flg
+    		&& ($expanded_flg=$msf_flg=$pairwise_flg=$hsp_flg=$comment_flg=0,
+    			$nogff_flg=1, last FLGS);
+        $msf_flg
+    		&& ($expanded_flg=$aln_flg=$pairwise_flg=$hsp_flg=$comment_flg=0,
+    			$nogff_flg=1, last FLGS);
+    	$pairwise_flg
+    		&& ($expanded_flg=$aln_flg=$msf_flg=$hsp_flg=$comment_flg=0,
+    			$nogff_flg=1, last FLGS);
+    	$gff_flg
+    		&& ($expanded_flg=$aln_flg=$msf_flg=$pairwise_flg=$fullgff_flg=$aplot_flg=$hsp_flg=0,
+    			$nogff_flg=0, last FLGS);
+    	$fullgff_flg
+    		&& ($expanded_flg=$aln_flg=$msf_flg=$pairwise_flg=$gff_flg=$aplot_flg=$hsp_flg=0,
+    			$nogff_flg=0, last FLGS);
+    	$aplot_flg
+    		&& ($expanded_flg=$aln_flg=$msf_flg=$pairwise_flg=$gff_flg=$fullgff_flg=$hsp_flg=0,
+    			$nogff_flg=0, last FLGS);
+    	$expanded_flg
+    		&& ($aln_flg=$msf_flg=$pairwise_flg=$hsp_flg=0,
+    			$nogff_flg=1, last FLGS);
+    	$hsp_flg = 1; $nogff_flg = 1;
+    }; # FLGS
+    #
+  FLGS: {   # first choose disables any other command-line option.  
+        $bit_flg && ($ids_flg=0, last FLGS);
+        $ids_flg && ($bit_flg=0);
+    };
+    #    
+    $nocmmnt_flg && ($comment_flg = 0);
+} # get_commandline_opts
 
 
 ##############################################################################
 ##                          Global Subroutines                              ##
 ##############################################################################
-
+#
+sub program_started() {
+    my $prog = shift;
+    print STDERR &header("RUNNING $prog",'',"Host: $HOST","User: $USER",
+                         "Perl: $PLVER",'',"Date: $DATE");
+} # program_started
+sub program_finished() {
+    my $prog = shift;
+    my $txt = &timing(\@exectime,1);
+    $txt =~ s{^\s*(\d+)\s+wallclock\s+secs\s+(\()}{\n$2}o && do {
+        $txt = sprintf("Total Execution Time: %02d:%02d:%02d (%d secs)%s",
+                  sub { ($_[2]-1, $_[1], $_[0]) }->(localtime($1)),$1,$txt);
+    };
+    print STDERR &header("$prog HAS FINISHED",'',(split /\n/, $txt));
+} # program_finished
+#
+sub header() {
+    my @lns = @_;
+    my $str = ("#" x ($tlen + 4))."\n";
+    my $t = ("#" x 2);
+    my $comment = $str;
+    foreach my $ln (@lns) {
+        $comment .= "$t".(&fill_mid($ln,$tlen," "))."$t\n";
+        };
+    return $comment.$str;
+} # header
+#
+sub fill_right { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   {
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    return ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l + $k)));
+} # fill_mid
+#
 sub prt_progress {
     $err_flg && do {
 		print STDERR ".";
-		(($_[0] % 50) == 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n";
+		(($_[0] % $clen) == 0) &&
+            print STDERR "[".&fill_left($_[0],6,"0")."]\n";
 	};
-}
+} # prt_progress
 sub prt_foeprg {
-    $err_flg && ((($_[0] % 50) != 0) && print STDERR "[".&fill_left($_[0],6,"0")."]\n" );
-}
-
-sub fill_right { $_[0].($_[2] x ($_[1] - length($_[0]))) }
-sub fill_left  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
-
-sub max { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z; }
+    $err_flg && do {
+        (($_[0] % $clen) != 0) &&
+            print STDERR "[".&fill_left($_[0],6,"0")."]\n";
+    };
+} # prt_foeprg
+#
+sub max {
+    my ($z) = shift @_;
+    my $l;
+    foreach $l (@_) { $z = $l if $l > $z ; };
+    return $z;
+} # max
 
 #
 # Timing.
-
-sub get_exec_time {
-	$err_flg && do {
-		my $End = $_[0];
-        my ($c,$s,$m,$h,$r);
-        $r = $End - $Start;
-        $s = $r % 60;
-        $r = ($r - $s) / 60;
-        $m = $r % 60;
-        $r = ($r - $m) / 60;
-        $h = $r % 24;
-		($s,$m,$h) = (&fill_left($s,2,"0"),&fill_left($m,2,"0"),&fill_left($h,2,"0"));
-print STDERR <<EOF;
-##########################################################
-## \"$PROGRAM\"  Execution Time:  $h:$m:$s
-##########################################################
-EOF
+sub init_timer() {
+    my $refary = shift;
+    @{ $refary } = (new Benchmark);
+    return;
+} # init_timer
+sub timing() {
+    my ($refary,$tmp) = @_;
+    my $flg = defined($tmp) || 0;
+    push @{ $refary } , (new Benchmark);
+    my $mx = $#{ $refary };
+    # partial time
+    $flg || do {
+        return timestr(timediff($refary->[$mx],$refary->[($mx - 1)]));
     };
-} # END_SUB: get_exec_time
+    # total time
+    return timestr(timediff($refary->[$mx],$refary->[0]));
+} # timing
+sub get_date() {
+    return
+        sprintf("%04d%02d%02d%02d%02d%02d",
+                sub { $_[5] + 1900, $_[4] + 1, $_[3], $_[2], $_[1], $_[0]
+                      }->(localtime) );
+} # get_date
 	
 #
 # Print help to STDERR.
-
 sub prt_help {
 	open(HELP, "| more") ;
 	print HELP <<EndOfHelp;
 PROGRAM:
-        $PROGRAM
-        $VERSION
+        $PROGRAM $VERSION
 
 USAGE:	parseblast.pl [options] <results.from.blast>
 
@@ -562,12 +650,11 @@ AUTHOR:  $PROGRAM is under GNU-GPL (C) 2000-2003, Josep F. Abril
 EndOfHelp
 	close(HELP);
 exit(1);
+} # prt_help
 # print STDOUT "HSP:$hsp_flg GFF:$gff_flg COM:$comment_flg SPL:$split_flg HLP:$help_flg\n";
-}
 
 #
 # Get new lines while empty line is not found and append to last line.
-
 sub get_lines {
 	my $spc = $_[0];
 	my $tmp;
@@ -576,15 +663,14 @@ sub get_lines {
 		last if /^\s*$/;
 		# print STDERR "$_";
 		chomp;
-		s/^\s*/$spc/;
+		$_ =~ s/^\s*/$spc/og;
 		$tmp .= $_;
 	};
-	$tmp;
-}
+	return $tmp;
+} # get_lines
 
 #
 # Getting scores from scoring vector extracted from HSP record.
-
 sub get_scores {
 	my $t = $_[0]; 
 	my ($sc, $bt, $ex, $pv, $id);
@@ -609,34 +695,25 @@ sub get_scores {
 		($t =~ /Frame[^\s]*\s+=\s+(\+|\-)(\d)\s*\/\s*(\+|\-)(\d)\b/o) && ($qfr = $2, $sfr = $4);
 	};
 	$sc, $bt, $ex, $pv, $id, $qfr, $sfr;
-}
+} # get_scores
 
+#
+# Calculating strand from coords
 sub chk_strand {
 	my ($first, $last) = @_ ;
     my $st = "+";
 	($first >= $last) && (($first, $last) = ($last, $first), $st = "-");
 	$first, $last, $st;
-}
+} # chk_strand
 
 #
 # Formatting output as plain, HSPs, GFF, APLOT, ALN.
-my ($n, $nm, $wnm, $tq, $ts,       # couNter, NaMe, TagQuery, TagSubject
-	$sc, $bt, $ex, $pv, $id,       # SCore, BiTscore, EvalueX, IDentityscore
-    $scores,                       # showing all scores
-	$frq, $frs,                    # QueryFRame, SubjectFRame
-	$stq, $sts,                    # QuerySTrand, SubjectSTrand
-	$gsc, $prg,                    # GroupSCore, PRoGram
-	$hsq, $hss, $heq, $hes,        # HspStartQuery, HspStartSubject, HspEndQuery, HspEndSubject
-	$lnq, $lns, $lnmin, $lnmax,    # LeNgthQuery, LeNgthSubject, LeNgthMINqueyxsubject, LeNgthMAXqueyxsubject
-	$lnmx, $gpq, $gps, $gpt        # LeNgthMaXhspseq, GaPQuery, GaPSubject, GaPTotal
-	);
-
 sub prt_hsp {
 print STDOUT <<"EndOfHSPs";
 $prg $dbase{$nm} : $id $lnmin $gsc $sc $bt $ex $pv : $query{$nm} $hsq $heq $stq $frq : $wnm $hss $hes $sts $frs : $desc{$nm}
 EndOfHSPs
-last PRINT;
-}
+} # prt_hsp
+#
 sub prt_ext {
 print STDOUT <<"EndOfPlain";
 MATCH($n): $query{$nm} x $wnm
@@ -647,31 +724,25 @@ QUERY($n): length $lnq : gaps $gpq : $hsq $heq : $stq : $frq : $hsp_seq{$tq}
 SBJCT($n): length $lns : gaps $gps : $hss $hes : $sts : $frs : $hsp_seq{$ts}
 \#\#
 EndOfPlain
-last PRINT;
-}
+} # prt_ext
+#
 sub prt_Q_gff {
     printf STDOUT $GFF1fmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"$wnm \# E_value $ex$scores$sq";
-	last PRINT;
 }
 sub prt_S_gff {
     printf STDOUT $GFF1fmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"$query{$nm} \# E_value $ex$scores$sq";
-	last PRINT;
 }
 sub prt_Q_fullgff {
     printf STDOUT $GFF2fmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"Target \"$wnm\" $hss $hes;\tStrand $sts;\tFrame $frs;\tE_value $ex$scores$sq";
-	last PRINT;
 }
 sub prt_S_fullgff {
     printf STDOUT $GFF2fmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"Target \"$query{$nm}\" $hsq $heq;\tStrand $stq;\tFrame $frq;\tE_value $ex$scores$sq";
-	last PRINT;
 }
 sub prt_Q_aplot {
     printf STDOUT $GFF1fmt, "$query{$nm}:$wnm",$prg,'hsp',"$hsq:$hss","$heq:$hes",$gsc,"$stq:$sts","$frq:$frs","$bt:$n \# E_value $ex$scores$sq";
-	last PRINT;
 }
 sub prt_S_aplot {
     printf STDOUT $GFF1fmt, "$wnm:$query{$nm}",$prg,'hsp',"$hss:$hsq","$hes:$heq",$gsc,"$sts:$stq","$frs:$frq","$bt:$n \# E_value $ex$scores$sq";
-	last PRINT;
 }
 sub prt_pairwise {
 	$prt_pos_flg && do {
@@ -685,8 +756,8 @@ print STDOUT <<"EndOfALIGN";
 $a$x$hsp_seq{$tq}
 $b$y$hsp_seq{$ts}
 EndOfALIGN
-last PRINT;
-}
+} # prt_pairwise
+#
 sub prt_cmn_aln {
 print STDOUT <<"EndOfALN" if !$nocmmnt_flg;
 ################################################################################
@@ -698,7 +769,7 @@ print STDOUT <<"EndOfALN" if !$nocmmnt_flg;
 ##    DESCR: $desc{$nm}
 ##
 EndOfALN
-}
+} # prt_cmn_aln
 sub prt_msf {
     my ($i,$jq,$js,$vs,$ve,$chw);
     ($aq,$as,$sql) = ($hsp_seq{$tq},$hsp_seq{$ts},length($hsp_seq{$tq}));
@@ -728,8 +799,7 @@ $b $js
 EndOfALIGN
 	};
 	print STDOUT "\n\n";
-	last PRINT;
-}
+} # prt_msf
 sub prt_aln {
     my ($i,$jq,$js,$vs,$ve,$chw);
     ($aq,$as,$sql) = ($hsp_seq{$tq},$hsp_seq{$ts},length($hsp_seq{$tq}));
@@ -751,12 +821,36 @@ $b $js
 EndOfALIGN
 	};
 	print STDOUT "\n\n";
-	last PRINT;
-}
-
+} # prt_aln
+#
+sub setprtfunct() {
+  CHOOSE: {
+    if ($hsp_flg) {
+        $prt_funct = sub { &prt_hsp() };
+    } elsif (!$nogff_flg) {
+        if ($subject_flg) {
+            $gff_flg && ($prt_funct = sub { &prt_S_gff() }, last CHOOSE);
+            $fullgff_flg && ($prt_funct = sub { &prt_S_fullgff() }, last CHOOSE);
+            $aplot_flg && ($prt_funct = sub { &prt_S_aplot() }, last CHOOSE);
+        } else {
+            $gff_flg && ($prt_funct = sub { &prt_Q_gff() }, last CHOOSE);
+            $fullgff_flg && ($prt_funct = sub { &prt_Q_fullgff() }, last CHOOSE);
+            $aplot_flg && ($prt_funct = sub { &prt_Q_aplot() }, last CHOOSE);
+        };
+    } elsif ($expanded_flg) {
+        $prt_funct = sub { &prt_ext() };
+    } else {
+        $pairwise_flg && ($prt_funct = sub { &prt_pairwise() }, last CHOOSE);
+        $msf_flg && ($prt_funct = sub { &prt_msf() }, last CHOOSE);
+        $aln_flg && ($prt_funct = sub { &prt_aln() }, last CHOOSE);
+    };
+  }; # CHOOSE 
+} # setprtfunct
+#
 sub prt_out {
 	$prt = 0;
-	$err_flg && print STDERR ("#"x58)."\n## WRITING OUTPUT TO STDOUT ".("#"x30)."\n".("#"x58)."\n";
+	$err_flg && print STDERR &header("WRITING OUTPUT TO STDOUT");
+    &setprtfunct();
 	while (@seqlist) {
 		$nm = shift(@seqlist);
 		($wnm = $nm) =~ s/\_\d+$//o; 
@@ -792,7 +886,7 @@ sub prt_out {
 				($prg) = $prgseq{$nm} =~ /^([^\s]+)\s/o;
 				# GFF format
 			  PRINT: {
-				  &prt_hsp       if $hsp_flg; # default output
+				  $hsp_flg && do { $prt_funct->(); last PRINT; }; # default output
 				  #
 				  do {
 					  $sq = $scores = "";
@@ -803,25 +897,21 @@ sub prt_out {
                           if $full_scores;
 					  $subject_flg && do {
 						  $sq = " #-S: $hsp_seq{$ts} #-Q: $hsp_seq{$tq}" if $sequence_flg;
-						  &prt_S_gff     if $gff_flg;
-						  &prt_S_fullgff if $fullgff_flg;
-						  &prt_S_aplot   if $aplot_flg;
+						  $prt_funct->();
+                          last PRINT;
 					  }; # $subject_flg
 					  $sq = " #-Q: $hsp_seq{$tq} #-S: $hsp_seq{$ts}" if $sequence_flg;
-					  &prt_Q_gff     if $gff_flg;
-					  &prt_Q_fullgff if $fullgff_flg;
-					  &prt_Q_aplot   if $aplot_flg;
+					  $prt_funct->();
+                      last PRINT;
 				  } unless $nogff_flg;
 				  #
-				  &prt_ext       if $expanded_flg;
+				  $expanded_flg && do { $prt_funct->(); last PRINT; };
 				  #
 				  # ($qm, $sm, $x, $y) = ("$query{$nm}\_\#$n", "$nm\_\#$n", " ", " ");
 				  ($qm, $sm, $x, $y) = ("$query{$nm}", "$wnm", " ", " ");
 				  $ml = &max(length($qm),length($sm));
 				  ($a,$b) = (&fill_right($qm,$ml," "),&fill_right($sm,$ml," "));
-				  &prt_pairwise  if $pairwise_flg;
-				  &prt_msf       if $msf_flg;
-				  &prt_aln       if $aln_flg;
+			      $prt_funct->();
 			  } # PRINT
 			} # for $cnt{$nm}
 		} # do if $cnt{$nm}>0
@@ -829,154 +919,166 @@ sub prt_out {
 	&prt_foeprg($ht);
 }
 
-
 ###################################################
-## Main Loop
+## Main Loop function
 ###################################################
-
-$err_flg && print STDERR ("#"x58)."\n## PARSING STDIN FROM BLAST ".("#"x30)."\n".("#"x58)."\n";
-$program = undef; # default program name
-while (<>) {
-	# s/\r\n$/\n/; # if your input records finish with "\r\n" (like EMBL).
-	next if /^\s*$/;  # /^\s*$/ is similar to AWK /^[ \t]*$/
-    &prt_progress(++$pt);
-	my $tmpinput = $_;
-	chomp;
-    # print STDOUT "$. : $_ \n"; # "$." is record number && "$_" is whole record
-  CHECK: {
-	  /^\s*T?BLAST[PNX]?/o        && do { # Starts with "T?BLAST[PNX]?" ?
-		  # print STDERR "$_\n";
-		  $prt && &prt_out;
-		  ($program, $version) = split;
-		  # typeQ/typeS: 0 for proteins - 1 for nucleic acids.
-		  ($program =~ /^BLASTP$/o ) && ( $scQ = 0, $scS = 0); # Amino Acids vs Amino Acids
-		  ($program =~ /^BLASTN$/o ) && ( $scQ = 0, $scS = 0); # Nucleotides vs Nucleotides
-		  ($program =~ /^BLASTX$/o ) && ( $scQ = 1, $scS = 0); # Nucleotides vs Amino Acids 
-		  ($program =~ /^TBLASTN$/o) && ( $scQ = 0, $scS = 1); # Amino Acids vs Nucleotides
-		  ($program =~ /^TBLASTX$/o) && ( $scQ = 1, $scS = 1); # Nucleotides translated vs Nucleotides translated
-		  $prog_params = "#\n# $program $version\n#";
-		  $query_name = $db_name = '';
-		  $main = 1;
-		  $seqflg = $hsp = $fragment = $param = 0;
-		  last CHECK; 
-	  }; # /^\s*T?BLAST[PNX]?/
-	  /^>/o                    && do { # Starts with ">" ?: sequences.
-		  # print STDERR "$_\n";
-          defined($program) || do { # assuming to parse blastn???
-              $program = "BLASTN";
-              ($scQ,$scS) = (0,0);
-		      $prog_params = "#\n# $program $version\n#";
-		      $query_name = $db_name = '';
-		      $main = 1;
- 		      $seqflg = $hsp = $fragment = $param = 0;
-          };
-		  ($seqname, $descr) = split(/\s+/, $_, 2);
-		  $seqname =~ s/^\s*>//o;
-		  $seqname =~ s/\s|:|\|/_/og;
-		  $seqname .= "_".($index++);
-		  $prgseq{$seqname} = "$program ($version)";
-		  $query{$seqname} = $query_name;
-		  ($db_name =~ /([^\/]+)$/o) && ($dbase{$seqname} = $1);
-		  push(@seqlist,$seqname);
-		  $desc{$seqname} = join(' ', $descr, &get_lines(' '));
-#		  $cnt{$seqname} = 0;
-		  $seqflg = 1;
-		  $main = $hsp = $fragment = 0;
-		  last CHECK;
-	  }; # /^\s*>/
-	  (/^\s*Score/o && $seqflg) && do { # Starts with "Score" ?: HSPs.
+#
+sub check_blastprogname() {
+    my $str = shift;
+    # print STDERR "$_\n";
+    $prt && &prt_out;
+    ($program, $version) = split /\s+/og, $$str, 2;
+    # typeQ/typeS: 0 for proteins - 1 for nucleic acids.
+    ($program =~ /^BLASTP$/o ) && ( $scQ = 0, $scS = 0); # Amino Acids vs Amino Acids
+    ($program =~ /^BLASTN$/o ) && ( $scQ = 0, $scS = 0); # Nucleotides vs Nucleotides
+    ($program =~ /^BLASTX$/o ) && ( $scQ = 1, $scS = 0); # Nucleotides vs Amino Acids 
+	($program =~ /^TBLASTN$/o) && ( $scQ = 0, $scS = 1); # Amino Acids vs Nucleotides
+	($program =~ /^TBLASTX$/o) && ( $scQ = 1, $scS = 1); # Nucleotides translated vs Nucleotides translated
+	$prog_params = "#\n# $program $version\n#";
+	$query_name = $db_name = '';
+	$main = 1;
+	$seqflg = $hsp = $fragment = $param = 0;
+} # check_blastprogname
+sub check_seqids() {
+    my $str = shift;
+	# print STDERR "$_\n";
+    defined($program) || do { # assuming to parse blastn???
+        $program = "BLASTN";
+        ($scQ,$scS) = (0,0);
+	    $prog_params = "#\n# $program $version\n#";
+	    $query_name = $db_name = '';
+	    $main = 1;
+ 	    $seqflg = $hsp = $fragment = $param = 0;
+    };
+	($seqname, $descr) = split /\s+/og, $$str, 2;
+	$seqname =~ s/^\s*>//o;
+	$seqname =~ s/\s|:|\|/_/og;
+	$seqname .= "_".($index++);
+	$prgseq{$seqname} = "$program ($version)";
+	$query{$seqname} = $query_name;
+	($db_name =~ /([^\/]+)$/o) && ($dbase{$seqname} = $1);
+	push(@seqlist,$seqname);
+	$desc{$seqname} = defined($descr)
+                    ? join(' ', $descr, &get_lines(' ')) : '';
+#	$cnt{$seqname} = 0;
+	$seqflg = 1;
+	$main = $hsp = $fragment = 0;
+} # check_seqids
+sub parseblast() {
+    $err_flg && print STDERR &header("PARSING STDIN FROM BLAST");
+    $program = undef; # default program name
+    while (<>) {
+    	# s/\r\n$/\n/; # if your input records finish with "\r\n" (like EMBL).
+    	next if /^\s*$/;  # /^\s*$/ is similar to AWK /^[ \t]*$/
+        &prt_progress(++$pt);
+    	my $tmpinput = $_;
+    	chomp;
+        # print STDOUT "$. : $_ \n";
+                     # "$." is record number && "$_" is whole record
+      CHECK: {
+    	  # Starts with "T?BLAST[PNX]?" ?
+          /^\s*T?BLAST[PNX]?/o        && do {
+	    	  &check_blastprogname(\$_);
+              last CHECK; 
+	      }; # /^\s*T?BLAST[PNX]?/
+	      # Starts with ">" ?: sequences.
+          /^>/o                    && do {
+		      &check_seqids(\$_);
+              last CHECK;
+	      }; # /^\s*>/
+	      # Starts with "Score" ?: HSPs.
+          (/^\s*Score/o && $seqflg) && do {
 		  # print STDERR "$_\n";
 		  ( $score = $_ ) =~ s/^\s*//o;
-		  $cnt{$seqname}++;
-		  $sco{$seqname.$cnt{$seqname}} = join('', $score, &get_lines(', '));
-		  # print STDOUT $sco{$seqname.$cnt{$seqname}}."\n";
-		  $hsp = 1;
-		  $fragment = 0;
-		  last CHECK;
-	  }; # (/^\s*Score/ && ($seqflg))
-	  (/^Query:/o && $hsp)    && do { # Starts with "Query" ?: Fragments.
-		  # print STDERR "$_\n";
-		  $fragment = 1;          
-		  last CHECK;
-	  }; # (/^\s*Query/ && ($hsp))
-	  (/^\s*(?:Database|Parameters):/o && !$main) && do { # Parameters Section.
-		  # print STDERR "$_\n";
-		  $prt = $param = 1;
-		  $seqflg = $hsp = $fragment = 0;
-		  last CHECK;
-	  }; # (/^\s*(?:Database|Parameters)/ && ($hsp))
-  } # CHECK Block
-	# print STDOUT "$. : MAIN=$main SEQFLG=$seqflg HSP=$hsp FRAGMENT=$fragment => SEQNAME=$seqname\n";
-  LOAD: {
-	  $fragment && do { # We are within a fragment.
-		  $txt = '';
-		  $tt = $cnt{$seqname};
-		  ($txt,$ori,$seq,$end) = split;
-		  if ($txt =~ /^Query:/o) {
-			  # print STDERR "$_\n";
-			  ($hsp_start{$seqname."query".$tt}) || ($hsp_start{$seqname."query".$tt} = $ori);
-			  $hsp_end{$seqname."query".$tt} = $end;
-			  $hsp_seq{$seqname."query".$tt} .= $seq;
-		  } # if ($txt =~ /Query/)
-		  elsif ($txt =~ /^Su?bje?ct:/o) {
-			  # print STDERR "$_\n";
-			  ($hsp_start{$seqname."sbjct".$tt}) || ($hsp_start{$seqname."sbjct".$tt} = $ori);
-			  $hsp_end{$seqname."sbjct".$tt} = $end;
-			  $hsp_seq{$seqname."sbjct".$tt} .= $seq;
-			  $fragment = 0;
-		  } # elsif ($txt =~ /Sbjct/)
-		  else { last LOAD; };
-	  }; # ($fragment)
-	  $main && do { # We are within the blast file header.
-		  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
-			  # print STDERR "$_\n";
-			  ($query_name = $1) =~ s/\s|:|\|/_/g ;
-		  };
-		  /^\s*Database:\s+(.*?)(\s+([^\s]*)?)?$/o && do { 
-			  # print STDERR "$_\n";
-			  $db_name = $1;
-			  while (<>) {
-				  last if /^(?:.*\bletter.*|\s*)$/o;
-				  # print STDERR "$_\n";
-				  chomp;
-				  s/^\s*//o;
-				  s/\s*$//o;
-				  $db_name .= $_;
- 			  }; # while getline
-		  }; # /^\s*Database: +(.*)\s*$/
-		  last LOAD;
-	  }; # ($main)
-	  $param && do { # We are within the blast file trailer.
-		  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
-			  # print STDERR "$_\n";
-			  &prt_foeprg($pt);
-			  $prt && &prt_out;
-			  $err_flg && print STDERR ("#"x58)."\n## PARSING STDIN FROM BLAST (New BLAST Results) ".("#"x9)."\n".("#"x58)."\n";
-			  @seqlist = ();
-			  ($query_name = $1) =~ s/\s|:|\|/_/g ;
-			  $main = 1;
-			  $seqflg = $hsp = $fragment = $param = 0;
-			  last LOAD;
-		  };
-		  if (/^\s*[^\[\<\-]/o) {
-			  # print STDERR "$_\n";
-			  chomp;
-			  s/^/\n\# /o;
-			  $prog_params = join('', $prog_params, $_);
-		  } else { $param = 0; }
-		  last LOAD;
-	  }; # ($param)
-  } # LOAD Block
-	close(ARGV) if (eof);
-} # while
-&prt_foeprg($pt);
-
-# $prt && &prt_out;
-&prt_out;
-
-&get_exec_time(time);
-
-exit(0);
+	    	  $cnt{$seqname}++;
+	    	  $sco{$seqname.$cnt{$seqname}} = join('', $score, &get_lines(', '));
+	    	  # print STDOUT $sco{$seqname.$cnt{$seqname}}."\n";
+	    	  $hsp = 1;
+	    	  $fragment = 0;
+	    	  last CHECK;
+	      }; # (/^\s*Score/ && ($seqflg))
+          # Starts with "Query" ?: Fragments.
+	      (/^Query:/o && $hsp)    && do {
+	    	  # print STDERR "$_\n";
+	    	  $fragment = 1;          
+	    	  last CHECK;
+	      }; # (/^\s*Query/ && ($hsp))
+          # Parameters Section.
+	      (/^\s*(?:Database|Parameters):/o && !$main) && do {
+	    	  # print STDERR "$_\n";
+	    	  $prt = $param = 1;
+	    	  $seqflg = $hsp = $fragment = 0;
+	    	  last CHECK;
+	      }; # (/^\s*(?:Database|Parameters)/ && ($hsp))
+      } # CHECK Block
+	  # print STDOUT "$. : MAIN=$main SEQFLG=$seqflg ".
+      #              "HSP=$hsp FRAGMENT=$fragment => SEQNAME=$seqname\n";
+      LOAD: {
+    	  $fragment && do { # We are within a fragment.
+	    	  $txt = '';
+	    	  $tt = $cnt{$seqname};
+	    	  ($txt,$ori,$seq,$end) = split /\s+/og, $_;
+	    	  if ($txt =~ /^Query:/o) {
+	    		  # print STDERR "$_\n";
+	    		  ($hsp_start{$seqname."query".$tt}) ||
+                      ($hsp_start{$seqname."query".$tt} = $ori);
+		    	  $hsp_end{$seqname."query".$tt} = $end;
+		    	  $hsp_seq{$seqname."query".$tt} .= $seq;
+		      } # if ($txt =~ /Query/)
+		      elsif ($txt =~ /^Su?bje?ct:/o) {
+		    	  # print STDERR "$_\n";
+		    	  ($hsp_start{$seqname."sbjct".$tt}) ||
+                       ($hsp_start{$seqname."sbjct".$tt} = $ori);
+		    	  $hsp_end{$seqname."sbjct".$tt} = $end;
+		    	  $hsp_seq{$seqname."sbjct".$tt} .= $seq;
+			      $fragment = 0;
+		      } # elsif ($txt =~ /Sbjct/)
+		      else { last LOAD; };
+    	  }; # ($fragment)
+	      $main && do { # We are within the blast file header.
+	    	  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
+	    		  # print STDERR "$_\n";
+	    		  ($query_name = $1) =~ s/\s|:|\|/_/g ;
+	    	  };
+	    	  /^\s*Database:\s+(.*?)(\s+([^\s]*)?)?$/o && do { 
+	    		  # print STDERR "$_\n";
+	    		  $db_name = $1;
+	    		  while (<>) {
+	    			  last if /^(?:.*\bletter.*|\s*)$/o;
+	    			  # print STDERR "$_\n";
+		    		  chomp;
+		    		  $_ =~ s/^\s*//o;
+		    		  $_ =~ s/\s*$//o;
+		    		  $db_name .= $_;
+ 		    	  }; # while getline
+	    	  }; # /^\s*Database: +(.*)\s*$/
+		      last LOAD;
+	      }; # ($main)
+    	  $param && do { # We are within the blast file trailer.
+    		  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
+    			  # print STDERR "$_\n";
+    			  &prt_foeprg($pt);
+    			  $prt && &prt_out;
+    			  $err_flg && print STDERR &header("PARSING STDIN FROM BLAST (New BLAST Results)");
+			 	  @seqlist = ();
+			 	  ($query_name = $1) =~ s/\s|:|\|/_/g ;
+			 	  $main = 1;
+			 	  $seqflg = $hsp = $fragment = $param = 0;
+			 	  last LOAD;
+			  };
+			  if (/^\s*[^\[\<\-]/o) {
+		    	  # print STDERR "$_\n";
+			 	  chomp;
+			 	  $_ =~ s/^/\n\# /o;
+			 	  $prog_params = join('', $prog_params, $_);
+		      } else { $param = 0; }
+		      last LOAD;
+	      }; # ($param)
+      } # LOAD Block
+	    close(ARGV) if (eof);
+    } # while
+    &prt_foeprg($pt);
+} # parseblast
 @ 
 
 <<COMPILING PARSEBLAST AS BIN FILE>>=
@@ -1186,7 +1288,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.2 2003-02-21 12:05:45 jabril Exp $
+# $Id: parseblast.nw,v 1.3 2003-02-21 18:48:46 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
