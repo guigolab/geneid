@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.69 2000-10-12 16:08:35 jabril Exp $	
+#         $Id: gff2ps,v 1.70 2000-10-13 07:59:25 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.69 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-10-12 16:08:35 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.70 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-10-13 07:59:25 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.69 2000-10-12 16:08:35 jabril Exp $
+%    $Id: gff2ps,v 1.70 2000-10-13 07:59:25 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -700,7 +700,7 @@ end % shpdct
  /gp { S shpdct begin GetGVar shgl gshp { currentfile token pop exec } loop end R } bdf
 %
 % Source Functions.
- /ScFsz { Yscl 0.75 mul dup 10 gt { pop 10 } if } def
+ /ScFsz { Yscl 0.75 mul dup 10 gt { pop 10 } if sclbSC mul } def
  /ScFont { ScFsz /Courier } bdf 
  /sc_no { 4 { pop } repeat } bdf
  /sc_ln { scmyk 0.25 slw 0 0 m XSPlot 0 l K } bdf
@@ -713,7 +713,7 @@ end % shpdct
  /sbb { S 0 0 XSPlot Yscl bbox FlgScBx { 0.25 slw fgcolor scmyk K } { newpath } ifelse R sbc } bdf
  /shsll { S FLftLbl Flgslftlbl and { XLftLbl 2 div neg Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srclftlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
  /shsrl { S FRgtLbl Flgsrgtlbl and { XSPlot XRgtLbl 2 div add Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srcrgtlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
- /GetSVar { /srcrgtlbl xdf /srclftlbl xdf /srgtlblfg xdf /slftlblfg xdf /s_line xdf /strnd xdf /FlgScRM xdf /FlgScBx xdf /spacer exch spcrsize mul def /Yscl exch tracksize mul def /ScV exch dup 2 eq { pop 0 } if def /Flgsrgtlbl srcrgtlbl () eq { false } { srgtlblfg } ifelse def /Flgslftlbl srclftlbl () eq { false } { slftlblfg } ifelse def strnd (.) eq { /Y Y spacer 2 div add def } { strnd (-) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
+ /GetSVar { /sclbSC xdf /srcrgtlbl xdf /srclftlbl xdf /srgtlblfg xdf /slftlblfg xdf /s_line xdf /strnd xdf /FlgScRM xdf /FlgScBx xdf /spacer exch spcrsize mul def /Yscl exch tracksize mul def /ScV exch dup 2 eq { pop 0 } if def /Flgsrgtlbl srcrgtlbl () eq { false } { srgtlblfg } ifelse def /Flgslftlbl srclftlbl () eq { false } { slftlblfg } ifelse def strnd (.) eq { /Y Y spacer 2 div add def } { strnd (-) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
  /source { S GetSVar XOriPlot Y T strnd (-) eq { 1 -1 F } if shsrl shsll sbb S ScV 0 eq { 0 Yscl 2 div T 1 -1 F } { ScV 1 eq { 0 Yscl T 1 -1 F } if } ifelse sln S blckori Xscm neg 0 T } bdf
  /s_end { R R R strnd (.) eq { /Y Y Yscl add spacer 2 div add def } { strnd (+) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
 %
@@ -1356,6 +1356,7 @@ function ARY_VARIABLES() {
   SO_PROP["show_left_label"]="on";      #
   SO_PROP["right_label"]="++default++"; # ++none++ , ++default++ , ++sequence++, ++source++ , ++both++ , ++info++ , "user-def"
   SO_PROP["show_right_label"]="on";     #
+  SO_PROP["source_label_scale"]=1;
   SO_PROP["source_style"]="default";    # default, boxed
   SO_PROP["source_line"]="default";     # none , default (black line), line, dotted, longdotted, shortdashed, longdashed 
   SO_PROP["source_line_color"]="verydarkred"; #
@@ -2412,7 +2413,7 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
             if (PLOT_FT[sc,":","right_label"]=="++none++") rgtflb="false";
             if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftflb="false"; else lftflb="true";
             if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtflb="false"; else rgtflb="true";
-			printf "%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			printf "%s %s %s %s %s (%s) (%s) %s %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp),PLOT_FT[sc,":","source_label_scale"];  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
 			PRINT_ELEMENTS();
@@ -2487,7 +2488,7 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
             if (PLOT_FT[sc,":","right_label"]=="++none++") rgtflb="false";
             if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftflb="false"; else lftflb="true";
             if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtflb="false"; else rgtflb="true";
-			printf "%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			printf "%s %s %s %s %s (%s) (%s) %s %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp),PLOT_FT[sc,":","source_label_scale"];  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
 			PRINT_ELEMENTS();
@@ -3191,6 +3192,7 @@ function defPSvars(    flgst,subtitle,shbx,fixed,dfgc,dbgc) {
   printf "end%%\n";
   printf "/gplbSC %s def\n", Default["group_label_scale"];
   printf "/pslbSC %s def\n", Default["position_label_scale"];
+  printf "/sclbSC 1 def\n";
   printf "%%\n";
   #
   # PostScript Main Procs.
