@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.52 2002-06-17 18:45:03 jabril Exp $ 
+% # $Id: humus.nw,v 1.53 2002-06-17 18:57:08 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.52 2002-06-17 18:45:03 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.53 2002-06-17 18:57:08 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3415,8 +3415,8 @@ $BIN/geneid_raw2GFF.pl $SEQ $JOBDIR $IDIR/$SEQ ;
 #
 get_geneid_genes $ODIR/$SEQ > $JOBDIR/$SEQ.gene_list || TheEnd FUNCKO ;
 #
-EVIORI="$<STEP{.}{PROCESS_REFSEQ_EVID}{STEP_IDIR}>" ;
-EVIDS="$<STEP{.}{PROCESS_REFSEQ_EVID}{STEP_ODIR}>" ;
+EVIORI="$<STEP{SGP_HSAPgpa_MGSCv3+RefSeq}{PROCESS_REFSEQ_EVID}{STEP_IDIR}>" ;
+EVIDS="$<STEP{SGP_HSAPgpa_MGSCv3+RefSeq}{PROCESS_REFSEQ_EVID}{STEP_ODIR}>" ;
 EVIDGFF="$JOBDIR/gff+evids" ;
 #
 # All refseqs (to be submitted)
@@ -10615,7 +10615,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.52 2002-06-17 18:45:03 jabril Exp $
+# $Id: humus.nw,v 1.53 2002-06-17 18:57:08 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
