@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.58 2002-06-19 23:36:30 jabril Exp $ 
+% # $Id: humus.nw,v 1.59 2002-06-20 14:03:17 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.58 2002-06-19 23:36:30 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.59 2002-06-20 14:03:17 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1052,6 +1052,41 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                     \
       echo "# PREPARING TWINSCAN on $N:chr$n\_random" 1>&2 ;
       ln -vs $WDIR/gff/chr$n\_random.gff $WDIR/eval/chr$n\_random.eval.gff ;
       $BIN/gffsplitstrand.pl $WDIR/eval/chr$n\_random.eval.gff ;
+      } ;
+    done ;
+#
+###TWINSCAN
+  for SEQ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do {
+      CHR=`echo $SEQ | tr [:lower:] [:upper:]`; 
+      SEQ="chr$SEQ";
+      # SEQ="chr${SEQ}_random";
+      ODIR="$HUMUS/chr$CHR" ;
+      A_REFSEQ="$ODIR/annotation/20011222/refseq/$SEQ.eval" ;
+      A_ENSEMBL="$ODIR/annotation/20011222/ensembl/$SEQ.eval" ;
+      ###
+      echo "# EVALUATING TWINSCAN on $CHR" 1>&2 ;
+      GDIR="$ODIR/twinscan/20020613/eval" ;
+      #
+      cat > $GDIR/$SEQ.summary <<EOT ;
+#
+# Evaluation summary results for TWINSCAN on CHROM[$CHR] - SEQ[$SEQ]
+#
+# --> Hsap GP20011222
+#
+EOT
+      $BIN/runeval.pl $A_REFSEQ.fwd.gff $GDIR/$SEQ.eval.fwd.gff \
+         "${CHR}::${HSAPID}TWINSCAN::REFSEQ::FWD::TWINSCAN::Twinscan-1.0::." \
+         >> $GDIR/$SEQ.summary 2> $GDIR/$SEQ.twinscan_refseq.fwd ;
+      $BIN/runeval.pl $A_REFSEQ.rev.gff $GDIR/$SEQ.eval.rev.gff \
+         "${CHR}::${HSAPID}TWINSCAN::REFSEQ::REV::TWINSCAN::Twinscan-1.0::." \
+         >> $GDIR/$SEQ.summary 2> $GDIR/$SEQ.twinscan_refseq.rev ;
+      $BIN/runeval.pl $A_ENSEMBL.fwd.gff $GDIR/$SEQ.eval.fwd.gff      \
+         "${CHR}::${HSAPID}TWINSCAN::ENSEMBL::FWD::TWINSCAN::Twinscan-1.0::." \
+         >> $GDIR/${SEQ}.summary 2> $GDIR/$SEQ.twinscan_ensembl.fwd ;
+      $BIN/runeval.pl $A_ENSEMBL.rev.gff $GDIR/$SEQ.eval.rev.gff      \
+         "${CHR}::${HSAPID}TWINSCAN::ENSEMBL::REV::TWINSCAN::Twinscan-1.0::." \
+         >> $GDIR/${SEQ}.summary 2> $GDIR/$SEQ.twinscan_ensembl.rev ;
       } ;
     done ;
 #
@@ -3654,6 +3689,176 @@ prtcode $STATS/gene-prediction.summary ;
 #
 ### GENE NUMBER
 # sgp on masked Hsap
+STATS="$HUMUS/evaluations/ALL" ;
+HSGEN="$STATS/genes_by_seq" ;
+MkDirs $HSGEN ;
+# refseq
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ;
+    do {
+      MD="$HUMUS/chr$CHR/annotation/20011222/refseq" ;
+      grep -v '^#' $MD/$SEQ.report | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+              { printf "%12s %8d\n", chr, $1 }
+             ' "$SEQ" - ;
+      };
+    done > $HSGEN/refseq ;
+( echo "### NUMBER OF REAL GENES ###";
+  echo "###-> REFSEQ from Hsap UCSC-GoldenPath assembly (20010806)";
+  gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }';
+  gawk '$1!~/random$/ { g+=$2; print $0 }
+        END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }
+       ' $HSGEN/refseq ;
+  gawk '$1~/random$/ { g+=$2; print $0 }
+        END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }
+       ' $HSGEN/refseq ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 }
+            END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }
+           ' > $HSGEN/refseq.report ;
+# ensembl
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ;
+    do {
+      MD="$HUMUS/chr$CHR/annotation/20011222/ensembl" ;
+      grep -v '^#' $MD/$SEQ.report | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+              { printf "%12s %8d\n", chr, $1 }
+             ' "$SEQ" - ;
+      };
+    done > $HSGEN/ensembl ;
+( echo "### NUMBER OF REAL GENES ###";
+  echo "###-> ENSEMBL from Hsap UCSC-GoldenPath assembly (20010806)";
+  gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }';
+  gawk '$1!~/random$/ { g+=$2; print $0 }
+        END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }
+       ' $HSGEN/ensembl ;
+  gawk '$1~/random$/ { g+=$2; print $0 }
+        END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }
+       ' $HSGEN/ensembl ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 }
+            END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }
+           ' > $HSGEN/ensembl.report ;
+# genscan
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ;
+    do {
+      MD="$HUMUS/chr$CHR/annotation/20011222/genscan" ;
+      grep -v '^#' $MD/$SEQ.report | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+              { printf "%12s %8d\n", chr, $1 }
+             ' "$SEQ" - ;
+      };
+    done > $HSGEN/genscan ;
+( echo "### NUMBER OF PREDICTED GENES ###";
+  echo "###-> GENSCAN from Hsap UCSC-GoldenPath assembly (20010806)";
+  gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }';
+  gawk '$1!~/random$/ { g+=$2; print $0 }
+        END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }
+       ' $HSGEN/genscan ;
+  gawk '$1~/random$/ { g+=$2; print $0 }
+        END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }
+       ' $HSGEN/genscan ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 }
+            END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }
+           ' > $HSGEN/genscan.report ;
+# twinscan
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ;
+    do {
+      MD="$HUMUS/chr$CHR/twinscan/20020613" ;
+      egrep -v '^#|^[ \t]*$' $MD/$SEQ.gene_list | wc | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+                   { printf "%12s %8d\n", chr, $1; }
+             ' "$SEQ" - ;
+      };
+    done > $HSGEN/twinscan ;
+( echo "### NUMBER OF PREDICTED GENES ###";
+  echo "###-> TWINSCAN on Hsap UCSC-GoldenPath assembly (20011222-NCBI28)";
+  gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes" }' ;
+  gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g,s; }
+       ' $HSGEN/twinscan ;
+  gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }
+       ' $HSGEN/twinscan ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; }
+                        { print $0 }
+            END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }
+           ' > $HSGEN/twinscan.report ;
+# geneid
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ;
+    do {
+      MD="$HUMUS/chr$CHR/geneid/20011222" ;
+      head -4 $MD/out/$SEQ | tail -1 | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+                   { printf "%12s %8d %12.3f\n", chr, $5, $9; }
+             ' "$SEQ" - ;
+      };
+    done > $HSGEN/geneid ;
+( echo "### NUMBER OF PREDICTED GENES ###";
+  echo "###-> GENEID on Hsap UCSC-GoldenPath assembly (20011222-NCBI28)";
+  gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }' ;
+  gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }
+       ' $HSGEN/geneid ;
+  gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }
+       ' $HSGEN/geneid ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 }
+                        { print $0 }
+            END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }
+           ' > $HSGEN/geneid.report ;
+# geneid-masked
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ;
+    do {
+      MD="$HUMUS/chr$CHR/geneid/20011222msk" ;
+      head -4 $MD/out/$SEQ | tail -1 | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+                   { printf "%12s %8d %12.3f\n", chr, $5, $9; }
+             ' "$SEQ" - ;
+      };
+    done > $HSGEN/geneidmsk ;
+( echo "### NUMBER OF PREDICTED GENES ###";
+  echo "###-> GENEIDmasked on Hsap UCSC-GoldenPath assembly (20011222-NCBI28)";
+  gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }' ;
+  gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }
+       ' $HSGEN/geneidmsk ;
+  gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }
+       ' $HSGEN/geneidmsk ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 }
+                        { print $0 }
+            END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }
+           ' > $HSGEN/geneidmsk.report ;
+# sgp
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      MD="$HUMUS/chr$CHR/sgp/20011222.UCSCgp-20020411.MGSCv3" ;
+      head -4 $MD/out/$SEQ | tail -1 | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+                   { printf "%12s %8d %12.3f\n", chr, $5, $9; }
+             ' "$SEQ" - ;
+      };
+    done > $HSGEN/sgp ;
+( echo "### NUMBER OF PREDICTED GENES ###" ;
+  echo "###-> SGP Hsap UCSC-GoldenPath assembly (20011222-NCBI28)" ;
+  echo "###       + Mmus MGSCv3 assembly (20020411)" ;
+  gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }' ;
+  gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }
+       ' $HSGEN/sgp ;
+  gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }
+       ' $HSGEN/sgp ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 }
+                        { print $0 }
+            END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }
+           ' > $HSGEN/sgp.report ;
+# sgp-masked
 gawk '{print $1,$2}' $HUMUS/seqid_list | \
   while read CHR SEQ ;
     do {
@@ -3663,21 +3868,21 @@ gawk '{print $1,$2}' $HUMUS/seqid_list | \
                    { printf "%12s %8d %12.3f\n", chr, $5, $9; }
              ' "$SEQ" - ;
       };
-    done > $STATS/sgpmsk.genes_by_seq ;
+    done > $HSGEN/sgpmsk ;
 ( echo "### NUMBER OF PREDICTED GENES ###" ;
   echo "###-> SGPmasked Hsap UCSC-GoldenPath assembly (20011222-NCBI28)" ;
   echo "###       + Mmus MGSCv3 assembly (20020411)" ;
   gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }' ;
   gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
         END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }
-       ' $STATS/sgpmsk.genes_by_seq ;
+       ' $HSGEN/sgpmsk ;
   gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
         END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }
-       ' $STATS/sgpmsk.genes_by_seq ;
+       ' $HSGEN/sgpmsk ;
   ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 }
                         { print $0 }
             END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }
-           ' > $STATS/sgpmsk.genes_by_seq.report ;
+           ' > $HSGEN/sgpmsk.report ;
 # sgp+refseq
 gawk '{print $1,$2}' $HUMUS/seqid_list | \
   while read CHR SEQ ;
@@ -3686,42 +3891,78 @@ gawk '{print $1,$2}' $HUMUS/seqid_list | \
       evis=`grep 'Annotation' $MD/evids/$SEQ.evids.gff | wc | gawk '{print $1}' ` ;
       head -4 $MD/out/$SEQ | tail -1 | \
         gawk 'BEGIN{ chr=ARGV[1]; evid=ARGV[2]; ARGV[1]=ARGV[2]=""; }
-                   { printf "%12s %8d %12.3f\n", chr, $5 - evid, $9; }
+                   { printf "%12s %8d %8d %12.3f\n", chr, $5 - evid, $5, $9; }
              ' "$SEQ" $evis - ;
       };
-    done > $STATS/sgp.genes_by_seq ;
+    done > $HSGEN/sgp+refseq ;
 ( echo "### NUMBER OF PREDICTED GENES ###" ;
   echo "###-> SGPrefseq on Hsap UCSC-GoldenPath assembly (20011222-NCBI28)" ;
   echo "###       + Mmus MGSCv3 assembly (20020411)" ;
   echo "###       + RefSeq annotation as evidences (not included in #genes)" ;
-  gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }' ;
-  gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
-        END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }
-       ' $STATS/sgp.genes_by_seq ;
-  gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
-        END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }
-       ' $STATS/sgp.genes_by_seq ;
-  ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 }
+  gawk 'BEGIN{ printf "\n%12s %8s %8s %12s\n\n",
+                      "CHR_SEQNAME","#Gen-RS","#Gen+RS","Score" }' ;
+  gawk '$1!~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }
+        END{ printf "%12s %8d %8d %12.3f  CHRs TOTAL\n\n", "",g,G,s; }
+       ' $HSGEN/sgp+refseq ;
+  gawk '$1~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }
+        END{ printf "%12s %8d %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,G,s; }
+       ' $HSGEN/sgp+refseq ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; G+=$2; s+=$3 }
                         { print $0 }
-            END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }
-           ' > $STATS/sgp.genes_by_seq.report ;
+            END{ printf "%12s %8d %8d %12.3f  GRAND TOTAL\n", "",g,G,s; }
+           ' > $HSGEN/sgp+refseq.report ;
+# sgp-masked+refseq
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      MD="$HUMUS/chr$CHR/sgp/20011222.UCSCgpmsk-20020411.MGSCv3+RefSeqEvids" ;
+      nD="$HUMUS/chr$CHR/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids" ;
+      evis=`grep 'Annotation' $nD/evids/$SEQ.evids.gff | wc | gawk '{print $1}' ` ;
+      head -4 $MD/out/$SEQ | tail -1 | \
+        gawk 'BEGIN{ chr=ARGV[1]; evid=ARGV[2]; ARGV[1]=ARGV[2]=""; }
+                   { printf "%12s %8d %8d %12.3f\n", chr, $5 - evid, $5, $9; }
+             ' "$SEQ" $evis - ;
+      };
+    done > $HSGEN/sgpmsk+refseq ;
+( echo "### NUMBER OF PREDICTED GENES ###" ;
+  echo "###-> SGPmaskedrefseq - Hsap UCSC-GoldenPath assembly (20011222-NCBI28)" ;
+  echo "###       + Mmus MGSCv3 assembly (20020411)" ;
+  echo "###       + RefSeq annotation as evidences (not included in #genes)" ;
+  gawk 'BEGIN{ printf "\n%12s %8s %8s %12s\n\n",
+                      "CHR_SEQNAME","#Gen-RS","#Gen+RS","Score" }' ;
+  gawk '$1!~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }
+        END{ printf "%12s %8d %8d %12.3f  CHRs TOTAL\n\n", "",g,G,s; }
+       ' $HSGEN/sgpmsk+refseq ;
+  gawk '$1~/random$/ { g+=$2; G+=$3; s+=$4; print $0 }
+        END{ printf "%12s %8d %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,G,s; }
+       ' $HSGEN/sgpmsk+refseq ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; G+=$2; s+=$3 }
+                        { print $0 }
+            END{ printf "%12s %8d %8d %12.3f  GRAND TOTAL\n", "",g,G,s; }
+           ' > $HSGEN/sgpmsk+refseq.report ;
 # summarizing
-( cat $STATS/../old/refseq_MGSCv3.genes_by_seq.report ;
+( cat $HSGEN/refseq.report ;
   echo ""; echo "";
-  cat $STATS/../old/ensembl_MGSCv3.genes_by_seq.report ;
+  cat $HSGEN/ensembl.report ;
   echo ""; echo "";
-  cat $STATS/../old/genscan_MGSCv3.genes_by_seq.report ;
+  cat $HSGEN/genscan.report ;
   echo ""; echo "";
-  cat $STATS/../old/geneid_MGSCv3.genes_by_seq.report;
+  cat $HSGEN/twinscan.report ;
   echo ""; echo "";
-  cat $STATS/../old/sgp_MGSCv3.genes_by_seq.report;
+  cat $HSGEN/geneid.report ;
   echo ""; echo "";
-  cat $STATS/sgpmsk.genes_by_seq.report
+  cat $HSGEN/geneidmsk.report ;
   echo ""; echo "";
-  cat $STATS/sgp.genes_by_seq.report
-  ) > $STATS/ALL.genes_by_seq.report ;
+  cat $HSGEN/sgp.report ;
+  echo ""; echo "";
+  cat $HSGEN/sgpmsk.report ;
+  echo ""; echo "";
+  cat $HSGEN/sgp+refseq.report ;
+  echo ""; echo "";
+  cat $HSGEN/sgpmsk+refseq.report 
+  ) > $STATS/Hsap_genes_by_seq.report ;
 #
-enscript --columns=3 -Gjf Courier5 -M A4 $STATS/ALL.genes_by_seq.report ;
+enscript --columns=3 -Gjf Courier5 -M A4 $STATS/Hsap_genes_by_seq.report  ;
 #
 perl -ne 'BEGIN{
   $prog="???";
@@ -3902,8 +4143,12 @@ enscript -1rGjf Courier5 -M A4 $STATS/evid_check.report ;
       echo '################################################### CHR '$n' #####' ;
       echo "###" ; echo '### GENSCAN' ;
       cat $MD/annotation/20011222/genscan/eval/chr${n}.summary ;
+      echo "###" ; echo '### TWINSCAN' ;
+      cat $MD/twinscan/20020613/eval/chr${n}.summary ;
       echo "###" ; echo '### GENEID' ;
       cat $MD/geneid/20011222/eval/chr${n}.summary ;
+      echo "###" ; echo '### GENEID MASKED' ;
+      cat $MD/geneid/20011222msk/eval/chr${n}.summary ;
       echo "###" ; echo '### SRs' ;
       cat $MD/tblastx/20020425/eval/chr${n}.summary ;
       echo "###" ; echo '### SGP' ;
@@ -3912,36 +4157,47 @@ enscript -1rGjf Courier5 -M A4 $STATS/evid_check.report ;
       cat $MD/sgp/20011222.UCSCgpmsk-20020411.MGSCv3/eval/chr${n}.summary ;
       echo "###" ; echo '### SGP + RefSeq' ;
       cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr${n}.summary ;
+      echo "###" ; echo '### SGP MASKED HSAP + RefSeq' ;
+      cat $MD/sgp/20011222.UCSCgpmsk-20020411.MGSCv3+RefSeqEvids/eval/chr${n}.summary ;
       echo '';
       } ;
-    done ) > $STATS/eval.summary ;
+    done ) > $STATS/Hsap_eval.summary ;
 #
 ( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
     do { 
       N=`echo $n | tr [:lower:] [:upper:]`; 
       MD="$HUMUS/chr$N" ;
-      echo '################################################### CHR '$n' #####' ;
+      echo '################################################### CHR '$n'_random #####' ;
       echo "###" ; echo '### GENSCAN' ;
       cat $MD/annotation/20011222/genscan/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### TWINSCAN' ;
+      cat $MD/twinscan/20020613/eval/chr${n}_random.summary ;
       echo "###" ; echo '### GENEID' ;
       cat $MD/geneid/20011222/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### GENEID MASKED' ;
+      cat $MD/geneid/20011222msk/eval/chr${n}_random.summary ;
       echo "###" ; echo '### SRs' ;
       cat $MD/tblastx/20020425/eval/chr${n}_random.summary ;
       echo "###" ; echo '### SGP' ;
       cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### SGP MASKED HSAP' ;
+      cat $MD/sgp/20011222.UCSCgpmsk-20020411.MGSCv3/eval/chr${n}_random.summary ;
       echo "###" ; echo '### SGP + RefSeq' ;
       cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### SGP MASKED HSAP + RefSeq' ;
+      cat $MD/sgp/20011222.UCSCgpmsk-20020411.MGSCv3+RefSeqEvids/eval/chr${n}_random.summary ;
       echo '';
       } ;
-    done ) > $STATS/eval_random.summary ;
+    done ) > $STATS/Hsap_eval_random.summary ;
 #
-enscript -1rGjf Courier4 -M A4 $STATS/eval.summary ;
+enscript -1rGjf Courier4 -M A4 $STATS/Hsap_eval.summary ;
 #
+# -P "GENSCAN TWINSCAN GENEID GENEIDmsk SRs SGP-MGSCv3 SGPmsk-MGSCv3 SGP-MGSCv3+RefSeq" \
 $BIN/process_eval.pl -tas \
     -T "REFSEQ ENSEMBL"   \
-    -P "GENSCAN GENEID SRs SGP-MGSCv3 SGPmsk-MGSCv3 SGP-MGSCv3+RefSeq" \
-    $STATS/eval.summary > $STATS/eval.test_summary ;
-enscript -1rGjf Courier4 -M A4 $STATS/eval.test_summary ;
+    -P "GENSCAN TWINSCAN GENEID SRs SGP-MGSCv3 SGPmsk-MGSCv3 SGP-MGSCv3+RefSeq SGPmsk-MGSCv3+RefSeq" \
+    $STATS/Hsap_eval.summary > $STATS/Hsap_eval_test.summary ;
+enscript -1rGjf Courier4 -M A4 $STATS/Hsap_eval_test.summary ;
 #
 # filtering R tables from summary file
 $BIN/mkRtables.awk $STATS/eval.test_summary > $STATS/eval.test_summary.tbl ;
@@ -6722,17 +6978,27 @@ sub genepred_stats() {
                    ( $ref->{STATS}{FN} * $ref->{STATS}{FP} )
                      ) / sqrt($CDSreal * $RN * $CDSpred * $PN) ) : 'nan';
     # exon level
-    $ref->{STATS}{raME} = &decnum($ref->{STATS}{ME} / $ref->{STATS}{ExR});
-    $ref->{STATS}{raWE} = &decnum($ref->{STATS}{WE} / $ref->{STATS}{ExP});
-    $ref->{STATS}{SNe}  = &decnum($ref->{STATS}{TPe} / $ref->{STATS}{ExR});
-    $ref->{STATS}{SPe}  = &decnum($ref->{STATS}{TPe} / $ref->{STATS}{ExP});
-    $ref->{STATS}{SNSP} = &decnum(($ref->{STATS}{SNe} + $ref->{STATS}{SPe}) / 2);
+    $ref->{STATS}{raME} = ($ref->{STATS}{ExR} != 0) ?
+              &decnum($ref->{STATS}{ME} / $ref->{STATS}{ExR}) : 'nan';
+    $ref->{STATS}{raWE} = ($ref->{STATS}{ExP} != 0) ?
+              &decnum($ref->{STATS}{WE} / $ref->{STATS}{ExP}) : 'nan';
+    $ref->{STATS}{SNe}  = ($ref->{STATS}{ExR} != 0) ?
+              &decnum($ref->{STATS}{TPe} / $ref->{STATS}{ExR}) : 'nan';
+    $ref->{STATS}{SPe}  = ($ref->{STATS}{ExP} != 0) ?
+              &decnum($ref->{STATS}{TPe} / $ref->{STATS}{ExP}) : 'nan';
+    $ref->{STATS}{SNSP} = 
+              &decnum(($ref->{STATS}{SNe} + $ref->{STATS}{SPe}) / 2);
     # gene level
-    $ref->{STATS}{raMG}  = &decnum($ref->{STATS}{MG} / $ref->{STATS}{GeR});
-    $ref->{STATS}{raWG}  = &decnum($ref->{STATS}{WG} / $ref->{STATS}{GeP});
-    $ref->{STATS}{SNg}   = &decnum($ref->{STATS}{TPg} / $ref->{STATS}{GeR});
-    $ref->{STATS}{SPg}   = &decnum($ref->{STATS}{TPg} / $ref->{STATS}{GeP});
-    $ref->{STATS}{SNSPg} = &decnum(($ref->{STATS}{SNg} + $ref->{STATS}{SPg}) / 2);
+    $ref->{STATS}{raMG}  = ($ref->{STATS}{GeR} != 0) ?
+              &decnum($ref->{STATS}{MG} / $ref->{STATS}{GeR}) : 'nan';
+    $ref->{STATS}{raWG}  = ($ref->{STATS}{GeP} != 0) ?
+              &decnum($ref->{STATS}{WG} / $ref->{STATS}{GeP}) : 'nan';
+    $ref->{STATS}{SNg}   = ($ref->{STATS}{GeR} != 0) ?
+              &decnum($ref->{STATS}{TPg} / $ref->{STATS}{GeR}) : 'nan';
+    $ref->{STATS}{SPg}   = ($ref->{STATS}{GeP} != 0) ?
+              &decnum($ref->{STATS}{TPg} / $ref->{STATS}{GeP}) : 'nan';
+    $ref->{STATS}{SNSPg} = 
+              &decnum(($ref->{STATS}{SNg} + $ref->{STATS}{SPg}) / 2);
     # my ($JG_DEFAULT,$SG_DEFAULT,$d1,$d2) = (1,1,undef,undef);
     # $d1 = $ref->{STATS}{GeR} - $ref->{STATS}{MG};
     # $d2 = $ref->{STATS}{GeP} - $ref->{STATS}{WG};
@@ -10833,7 +11099,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.58 2002-06-19 23:36:30 jabril Exp $
+# $Id: humus.nw,v 1.59 2002-06-20 14:03:17 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
