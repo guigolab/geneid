@@ -189,7 +189,7 @@ double ScoreSRexon(exonGFF* exon, int Strand, packSR* sr)
 
   iniExon = exon->Acceptor->Position + COFFSET;
   endExon = exon->Donor->Position + COFFSET;
-  
+
   if (!strcmp(exon->Type,"Terminal"))
     endExon += LENGTHCODON;
 
@@ -201,27 +201,22 @@ double ScoreSRexon(exonGFF* exon, int Strand, packSR* sr)
   /* Frame about start of sequence */
   trueFrame = (iniExon + exon->Frame) % 3;
   trueFrame += index;
-
-  /* Forgetting sr-regions before this exon */
-  i = sr->iRegions[trueFrame];
-
-  while(i < sr->nRegions[trueFrame] && 
-	iniExon > sr->sRegions[trueFrame][i].Pos2)
-    i ++;
-  sr->iRegions[trueFrame] = i;
-
-  /* Getting sr-score for this exon */
+  
+  /* Scan all the SR's */
+  i = 0;
   Score = 0;
-  while(i < sr->nRegions[trueFrame] && 
-	endExon > sr->sRegions[trueFrame][i].Pos1)
+  while(i < sr->nRegions[trueFrame])
     {
       /* Scoring with current sr */
       a = MIN(endExon,sr->sRegions[trueFrame][i].Pos2);
       b = MAX(iniExon,sr->sRegions[trueFrame][i].Pos1);
       lIntersection = a - b + 1;
-      lSR = sr->sRegions[trueFrame][i].Pos2 - sr->sRegions[trueFrame][i].Pos1 + 1;
-      Score += sr->sRegions[trueFrame][i].Score * ((float)lIntersection / (float)lSR);
-
+      
+      if (lIntersection > 0)
+	{
+	  lSR = sr->sRegions[trueFrame][i].Pos2 - sr->sRegions[trueFrame][i].Pos1 + 1;
+	  Score += sr->sRegions[trueFrame][i].Score * ((float)lIntersection / (float)lSR);
+	}
       i++;
     }
 
