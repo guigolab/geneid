@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.4 2001-09-28 15:33:37 jabril Exp $
+% $Id: Human_Chromosome_22.nw,v 0.5 2001-09-28 17:09:21 gparra Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -157,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.4 2001-09-28 15:33:37 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.5 2001-09-28 17:09:21 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1337,6 +1337,12 @@ run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/set/c
 run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/set/exons VH_exons ;
 run_evaluation 22 geneid Hsap.masked $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo ;
 #
+# After modifications due a bug in geneid 1.1 we executed again it to detect if it works properly
+run_GENEID Hsap.masked.gnid_fix $DATASETS/fasta/masked chr22 1.1 ;
+run_evaluation 22 geneid Hsap.masked.gnid_fix $ANALYSIS/geneid $DATASETS/annotation/set/cds VH_cds ;
+run_evaluation 22 geneid Hsap.masked.gnid_fix $ANALYSIS/geneid $DATASETS/annotation/set/exons VH_exons ;
+run_evaluation 22 geneid Hsap.masked.gnid_fix $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo ;
+# The same resuls were obtained with the old and the new geneid.
 @ 
 
 \subsctn{Running {\gnid} with annotation evidences}
@@ -1399,8 +1405,14 @@ run_GENEIDevidences Hsap.masked.evid $DATASETS/fasta/masked \
 run_GENEIDevidences Hsap.masked.evid_VH $DATASETS/fasta/masked \
            $DATASETS/annotation/set/evidences/chr22 chr22 ;
 #
+# After modifications due a bug in geneid 1.1 we executed again it to detect if it works properly. 
+# The evidences were also modified, all the length evidences are multiple of 3, and we force the frame to 0 to avoid problems. Odl evidences were moved to  $DATASETS/annotation/set/evidences/chr22.old
+run_GENEIDevidences Hsap.masked.gnid_fix.evid $DATASETS/fasta/masked \
+           $DATASETS/annotation/set/evidences/chr22 chr22 ;
+
 # IDIR="$ANALYSIS/geneid/Hsap.masked.evid" ;
-IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+# IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+IDIR="$ANALYSIS/geneid/Hsap.masked.gnid_fix.evid" ;
 geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
 sort +3n +4n -5 $IDIR/gff/chr22_* \
               > $IDIR/gff/chr22 ; 
@@ -1536,6 +1548,15 @@ run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set
 run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set/exons VH_exons ;
 run_evaluation 22 sgp Hsap.masked.3X+.fix $ANALYSIS/sgp $DATASETS/annotation/set/pseudo VH_pseudo ;
 #
+# We have modified geneid 1.1 source (frame remainder problem)
+run_mod_SGP Hsap.masked.3X+.fix.gnid_fix $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff chr22 47662662 ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/fixed fixed ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/cds VH_cds ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/exons VH_exons ;
+run_evaluation 22 sgp Hsap.masked.3X+.fix.gnid_fix $ANALYSIS/sgp $DATASETS/annotation/set/pseudo VH_pseudo ;
+#
+
 @ 
 
 \subsctn{Gene-prediction statistics}
@@ -1732,6 +1753,11 @@ run_mod_SGPevidences Hsap.masked.3X+.fix.evid_VH $DATASETS/fasta/masked \
         $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
         $DATASETS/annotation/set/evidences/chr22 chr22 47662662 ;
 #
+# After the bug modification and the frame.
+run_mod_SGPevidences Hsap.masked.3X+.fix.gnid_fix.evid/ $DATASETS/fasta/masked \
+        $ANALYSIS/blast/wublast.tblastx/masked3X+/gff \
+        $DATASETS/annotation/set/evidences/chr22 chr22 47662662 ;
+
 @ 
 
 <<BASH Functions: Filtering GENEID RAW Output>>=
@@ -1772,8 +1798,9 @@ geneid_raw2GFF ()
 #
 # IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.evid" ;
 # IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid" ;
-IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
-IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH" ;
+# IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+# IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH" ;
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix.evid" ;
 geneid_raw2GFF $IDIR $IDIR/geneid_format/chr22 ;
 sort +3n +4n -5 $IDIR/gff/chr22_* > $IDIR/gff/chr22 ;
 gawk '{
@@ -1804,6 +1831,8 @@ wc $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH/gff/chr22.gene_list ;
 wc $ANALYSIS/geneid/Hsap.masked.evid_VH/gff/chr22.gene_list ;
     147     735    4692
 # we got more genes once we fixed frame from HSPS for both strands.
+wc $ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix.evid/gff/chr22.gene_list ; 
+     115     575    3667 
 @
 
 <<HIDE: BASH commands ANALYSIS>>=
@@ -1902,7 +1931,7 @@ gawk '{
 <<BASH commands ANALYSIS>>=
 #
 # Preparing geneid files
-IDIR="$ANALYSIS/geneid/Hsap.masked" ;
+#IDIR="$ANALYSIS/geneid/Hsap.masked" ;
 ODIR="$IDIR/ps/_tmp/geneid" ;
 [ -e $ODIR ] || ChckDirs $ODIR ;
 gawk 'BEGIN{OFS="\t"}
@@ -1911,7 +1940,8 @@ gawk 'BEGIN{OFS="\t"}
           print $0;
       }' $IDIR/gff/$CHR.geneid_v1.1 > $ODIR/$CHR ;
 # IDIR="$ANALYSIS/geneid/Hsap.masked.evid" ;
-IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+#IDIR="$ANALYSIS/geneid/Hsap.masked.evid_VH" ;
+IDIR="$ANALYSIS/geneid/Hsap.masked.gnid_fix.evid" 
 ODIR="$IDIR/ps/_tmp/geneid" ;
 [ -e $ODIR ] || ChckDirs $ODIR ;
 gawk 'BEGIN{OFS="\t"}
@@ -1964,6 +1994,8 @@ set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.evid ;
 set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix ;
 set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid ;
 set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH ;
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix ; 
+set_feats_sgp $ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix.evid ;
 #
 @ 
 
@@ -2093,7 +2125,8 @@ run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010910_evid" ;
 #
 #
 # Running GFF2PS on CHR22 Hsap masked against Mmus WGS-3X + annotation + evidences (VH)
-IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH/ps" ;
+# IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.evid_VH/ps" ;
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+.fix.gnid_fix.evid/ps" ; 
 #
 GFFIN="$ANALYSIS/geneid/Hsap.masked.evid_VH/ps/_tmp/geneid/chr22" ; # geneid + evid
 GFFIN="$GFFIN $IDIR/_tmp/sgp/chr22" ;                              # sgp + evid
@@ -2102,7 +2135,8 @@ GFFIN="$GFFIN $DATASETS/annotation/set/gff2ps/chr22_annot" ;       # annotation
 GFFIN="$GFFIN $DATASETS/annotation/set/gff2ps/chr22_evid" ;        # evidences
 #
 # run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010914_noRPT" ;
-run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010914_noRPT_geneid+sgp" ;
+# run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010914_noRPT_geneid+sgp" ;
+run_GFF2PS $IDIR "$GFFIN" chr22_masked_evid "_20010927_noRPT_geneid+sgp" ;
 #
 @ 
 
@@ -2960,7 +2994,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.4 2001-09-28 15:33:37 jabril Exp $
+# $Id: Human_Chromosome_22.nw,v 0.5 2001-09-28 17:09:21 gparra Exp $
 @ 
 
 \newpage
