@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: CHR22_tests.nw,v 1.3 2002-05-20 20:11:58 jabril Exp $ 
+% # $Id: CHR22_tests.nw,v 1.4 2002-05-22 14:04:40 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -37,7 +37,7 @@
 %% layout
 \usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
 %\usepackage{lscape}
-%\usepackage{rotating}
+\usepackage{rotating}
 %\usepackage{multicol}
 \usepackage{verbatim}
 %\usepackage{version}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: CHR22_tests.nw,v 1.3 2002-05-20 20:11:58 jabril Exp $$>$ }
+{\small$<$ \verb$Id: CHR22_tests.nw,v 1.4 2002-05-22 14:04:40 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -280,9 +280,86 @@ Universitat Pompeu Fabra\\[2ex]
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-\sctn{Tests on Chromosome 22}
+\sctn{Summary of results on Chromosome 22}
 
-\subsctn{Adding evidences to SGP}
+\subsctn{Adding evidences to SGP (I)}
+
+Here, we pass same evidences as they were defined for the evaluation process, without any further filtering/processing.
+
+\begin{comment}
+### CHR 22 :  chr22 # Length 47848585 bp #########################
+           PROGRAM  TESTSET         NuR         NuP     SN     SP     CC       ExR       ExP       TPe       ME        WE   raME   raWE    SNe    SPe   SNSP      GeR      GeP     TPg      MG       WG  raMG   raWG    SNg    SPg  SNSPg   raJG   raSG
+###
+           GENSCAN   REFSEQ      448782     1436803  0.922  0.288  0.512      2676      8080      2016      256      5662  0.096  0.701  0.753  0.250  0.502      327     1169      37      20      851 0.061  0.728  0.113  0.032  0.073  1.100  1.145
+            GENEID   REFSEQ      448782     1148454  0.884  0.346  0.550      2676      5843      1955      360      3536  0.135  0.605  0.731  0.335  0.533      327     1092      55      21      765 0.064  0.701  0.168  0.050  0.109  1.065  1.140
+        SGP-MGSCv3   REFSEQ      448782      792746  0.877  0.497  0.658      2676      4658      1986      288      2267  0.108  0.487  0.742  0.426  0.584      327      729      56      25      397 0.076  0.545  0.171  0.077  0.124  1.060  1.165
+ SGP-MGSCv3+RefSeq   REFSEQ      448782      603017  0.603  0.449  0.518      2676      3329      1157     1160      1817  0.433  0.546  0.432  0.348  0.390      327      766      72      45      373 0.138  0.487  0.220  0.094  0.157  1.020  1.400
+###
+           GENSCAN  ENSEMBL      639229     1436803  0.899  0.400  0.596      3633      8080      2329      370      4838  0.102  0.599  0.641  0.288  0.465      573     1169       2      53      680 0.092  0.582  0.003  0.002  0.003  1.175  1.110
+            GENEID  ENSEMBL      639229     1148454  0.833  0.464  0.618      3633      5843      2158      599      2836  0.165  0.485  0.594  0.369  0.481      573     1092       1      65      598 0.113  0.548  0.002  0.001  0.002  1.160  1.125
+        SGP-MGSCv3  ENSEMBL      639229      792746  0.808  0.651  0.723      3633      4658      2166      534      1569  0.147  0.337  0.596  0.465  0.530      573      729       1      81      242 0.141  0.332  0.002  0.001  0.002  1.150  1.135
+ SGP-MGSCv3+RefSeq  ENSEMBL      639229      603017  0.599  0.635  0.614      3633      3329      1309     1457      1162  0.401  0.349  0.360  0.393  0.377      573      766       1     130      224 0.227  0.292  0.002  0.001  0.002  1.070  1.300
+###
+\end{comment}
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{|r|*{5}{r}|*{8}{r}|*{8}{r}|rr|}
+\hline
+           PROGRAM &    NuR &     NuP &    SN &    SP &    CC &  ExR &  ExP &  TPe &  raME &  raWE &   SNe &   SPe &  SNSP & GeR &  GeP & TPg &  raMG &  raWG &   SNg &   SPg & SNSPg &  raJG &  raSG \\
+\hline\hline
+\multicolumn{24}{|l|}{REFSEQ}\\\hline
+           GENSCAN & 448782 & 1436803 & 0.922 & 0.288 & 0.512 & 2676 & 8080 & 2016 & 0.096 & 0.701 & 0.753 & 0.250 & 0.502 & 327 & 1169 &  37 & 0.061 & 0.728 & 0.113 & 0.032 & 0.073 & 1.100 & 1.145 \\
+            GENEID & 448782 & 1148454 & 0.884 & 0.346 & 0.550 & 2676 & 5843 & 1955 & 0.135 & 0.605 & 0.731 & 0.335 & 0.533 & 327 & 1092 &  55 & 0.064 & 0.701 & 0.168 & 0.050 & 0.109 & 1.065 & 1.140 \\
+        SGP-MGSCv3 & 448782 &  792746 & 0.877 & 0.497 & 0.658 & 2676 & 4658 & 1986 & 0.108 & 0.487 & 0.742 & 0.426 & 0.584 & 327 &  729 &  56 & 0.076 & 0.545 & 0.171 & 0.077 & 0.124 & 1.060 & 1.165 \\
+ SGP-MGSCv3+RefSeq & 448782 &  603017 & 0.603 & 0.449 & 0.518 & 2676 & 3329 & 1157 & 0.433 & 0.546 & 0.432 & 0.348 & 0.390 & 327 &  766 &  72 & 0.138 & 0.487 & 0.220 & 0.094 & 0.157 & 1.020 & 1.400 \\
+\hline
+\multicolumn{24}{|l|}{ENSEMBL}\\\hline
+           GENSCAN & 639229 & 1436803 & 0.899 & 0.400 & 0.596 & 3633 & 8080 & 2329 & 0.102 & 0.599 & 0.641 & 0.288 & 0.465 & 573 & 1169 &   2 & 0.092 & 0.582 & 0.003 & 0.002 & 0.003 & 1.175 & 1.110 \\
+            GENEID & 639229 & 1148454 & 0.833 & 0.464 & 0.618 & 3633 & 5843 & 2158 & 0.165 & 0.485 & 0.594 & 0.369 & 0.481 & 573 & 1092 &   1 & 0.113 & 0.548 & 0.002 & 0.001 & 0.002 & 1.160 & 1.125 \\
+        SGP-MGSCv3 & 639229 &  792746 & 0.808 & 0.651 & 0.723 & 3633 & 4658 & 2166 & 0.147 & 0.337 & 0.596 & 0.465 & 0.530 & 573 &  729 &   1 & 0.141 & 0.332 & 0.002 & 0.001 & 0.002 & 1.150 & 1.135 \\
+ SGP-MGSCv3+RefSeq & 639229 &  603017 & 0.599 & 0.635 & 0.614 & 3633 & 3329 & 1309 & 0.401 & 0.349 & 0.360 & 0.393 & 0.377 & 573 &  766 &   1 & 0.227 & 0.292 & 0.002 & 0.001 & 0.002 & 1.070 & 1.300 \\
+\hline
+\end{tabular}
+\end{center}
+\end{sidewaystable}
+
+\subsctn{Adding evidences to SGP (II)}
+
+In this case, we remove the frame information from the RefSeq features, just to test if {\gnid} incorporates evidences in a better way.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|r|*{5}{r}|*{8}{r}|*{8}{r}|rr|}
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsctn{Adding evidences to SGP (III)}
+
+Now, we are ``hiding'' the refseq genes by projecting them as single exons, as the previous approach did not work very well. We lost almost all the predictions not matching already annotated genes (due to the way {\gnid} incorporates evidences with no frame having lengths that are not multiple of 3). We follow these steps:
+
+\begin{itemize}
+\item Retrieve start and end for all the annotated genes ([[get_geneid_genes]] bash function).
+\item Map all genes to a single strand (FWD).
+\item Project them as if they were SRs ([[blast2gff]] program).
+\item Join those projections having less than 500 nucleotides of intergenic space between them.
+\item Check the final ``singletons'' to have $ (\mbox{gene}_{\mbox{length}} \bmod 3 == 0 $ and correct length for those not acomplishing that condition (by adding the corresponding $3 - (\mbox{gene}_\mbox{length} \bmod 3$)).
+\end{itemize}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|r|*{5}{r}|*{8}{r}|*{8}{r}|rr|}
+\end{tabular}
+\end{center}
+\end{table}
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Tests made on Chromosome 22}
+
+\subsctn{Adding evidences to SGP (I)}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsctn{Initialization}
 
 <<Running CHR22: SGP HsapGP + MmusMGSC + RefSeq>>=
 OXID="20011222.UCSCgp-20020411.MGSCv3" ;
@@ -301,6 +378,12 @@ for c in out gff gtf2 cds prot hsp-sr logs tmp eval ;
     MkDirs $ODIR/$c ;
     } ;
   done ;
+#
+@ 
+
+\subsubsctn{Running {\sgp}}
+
+<<>>=
 #
 GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
 PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
@@ -345,6 +428,12 @@ ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
 #
 get_geneid_genes $ODIR/gff/$SEQ > $ODIR/$SEQ.gene_list ;
 #
+@ 
+
+\subsubsctn{Evaluating predictions}
+
+<<>>=
+#
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
                $ODIR/gff/$SEQ > $ODIR/eval/$SEQ.eval.gff ;
 #
@@ -353,7 +442,12 @@ $BIN/gffsplitstrand.pl $VDIR/$SEQ.eval.gff ; # no sequence length record require
 #
 A_REFSEQ="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval" ;
 A_ENSEMBL="$HUMUS/$NCHR/annotation/20011222/ensembl/$SEQ.eval" ;
-cat > $VDIR/${SEQ}.summary <<EOT ;
+#
+A_GENEID="$HUMUS/$NCHR/geneid/20011222/eval/$SEQ.eval" ;
+A_GENSCAN="$HUMUS/$NCHR/annotation/20011222/genscan/eval/$SEQ.eval" ;
+A_SGP="$HUMUS/$NCHR/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/$SEQ.eval" ;
+#
+cat > $VDIR/${SEQ}.ALL.summary <<EOT ;
 #
 # Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
 #
@@ -363,25 +457,71 @@ EOT
 #
 CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
             $A_ENSEMBL.fwd.gff $A_ENSEMBL.rev.gff ;
-#
+####
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_GENSCAN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_GENEID.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_SGP.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
 $BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
+#
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_GENSCAN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_GENEID.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_SGP.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
 $BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
+####
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_GENSCAN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_GENEID.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_SGP.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
 $BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
+#
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_GENSCAN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_GENEID.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_SGP.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
 $BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+####
+enscript -1r -Gjf Courier5 -M A4 $VDIR/${SEQ}.ALL.summary ;
+# -tas
+$BIN/process_eval.pl -t -T "REFSEQ ENSEMBL" \
+   -P "GENSCAN GENEID SGP-MGSCv3 SGP-MGSCv3+RefSeq"  \
+   $VDIR/${SEQ}.ALL.summary > $VDIR/${SEQ}.ALL.test_summary ;
+enscript -1r -Gjf Courier5 -M A4 $VDIR/${SEQ}.ALL.test_summary ;
 #
 @ 
 
-\subsctn{Adding evidences to SGP (II)}
+\subsctn{Adding evidences to SGP (II)}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-In this case, we remove the frame information from the RefSeq features, just to test if {\gnid} incorporates evidences in a better way.
+\subsubsctn{Initialization}
 
 <<Running CHR22: SGP HsapGP + MmusMGSC + noframe-RefSeq>>=
 OXID="20011222.UCSCgp-20020411.MGSCv3" ;
@@ -400,6 +540,12 @@ for c in out gff gtf2 cds prot hsp-sr logs tmp eval ;
     MkDirs $ODIR/$c ;
     } ;
   done ;
+#
+@ 
+
+\subsubsctn{Running {\sgp}}
+
+<<>>=
 #
 GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
 PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
@@ -447,6 +593,12 @@ ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
 #
 get_geneid_genes $ODIR/gff/$SEQ > $ODIR/$SEQ.gene_list ;
 #
+@ 
+
+\subsubsctn{Evaluating predictions}
+
+<<>>=
+#
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
                $ODIR/gff/$SEQ > $ODIR/eval/$SEQ.eval.gff ;
 #
@@ -455,7 +607,7 @@ $BIN/gffsplitstrand.pl $VDIR/$SEQ.eval.gff ; # no sequence length record require
 #
 A_REFSEQ="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval" ;
 A_ENSEMBL="$HUMUS/$NCHR/annotation/20011222/ensembl/$SEQ.eval" ;
-cat > $VDIR/${SEQ}.summary <<EOT ;
+cat > $VDIR/${SEQ}.ALL.summary <<EOT ;
 #
 # Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
 #
@@ -468,31 +620,30 @@ CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
 #
 $BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
 $BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
 $BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
 $BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+#
+enscript -1r -Gjf Courier5 -M A4 $VDIR/${SEQ}.ALL.summary ;
+# -tas
+$BIN/process_eval.pl -t -T "REFSEQ ENSEMBL" \
+   -P "GENSCAN GENEID SGP-MGSCv3 SGP-MGSCv3+RefSeq"  \
+   $VDIR/${SEQ}.ALL.summary > $VDIR/${SEQ}.ALL.test_summary ;
+enscript -1r -Gjf Courier5 -M A4 $VDIR/${SEQ}.ALL.test_summary ;
 #
 @ 
 
 
-\subsctn{Adding evidences to SGP (III)}
+\subsctn{Adding evidences to SGP (III)}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Now, we are ``hiding'' the refseq genes by projecting them as single exons, as the previous approach did not work very well. We lost almost all the predictions not matching already annotated genes (due to the way {\gnid} incorporates evidences with no frame having lengths that are not multiple of 3). We follow these steps:
-
-\begin{itemize}
-\item Retrieve start and end for all the annotated genes ([[get_geneid_genes]] bash function).
-\item Map all genes to a single strand (FWD).
-\item Project them as if they were SRs ([[blast2gff]] program).
-\item Join those projections having less than 500 nucleotides of intergenic space between them.
-\item Check the final ``singletons'' to have $(\mbox{gene}_\mbox{length} \bmod 3 == 0$ and correct length for those not acomplishing that condition (by adding the corresponding $3 - (\mbox{gene}_\mbox{length} \bmod 3$)).
-\end{itemize}
+\subsubsctn{Initialization}
 
 <<Running CHR22: SGP HsapGP + MmusMGSC + noframe-RefSeq>>=
 OXID="20011222.UCSCgp-20020411.MGSCv3" ;
@@ -513,6 +664,11 @@ for c in out gff gtf2 cds prot hsp-sr logs tmp eval evids ;
     MkDirs $ODIR/$c ;
     } ;
   done ;
+@ 
+
+\subsubsctn{Processing evidences}
+
+<<>>=
 #
 ################################################## BUILDING 'SINGLETONS'
 #
@@ -522,98 +678,16 @@ get_geneid_genes $EVIDIR/$SEQ.fullgff > $EVIDIR/$SEQ.genes.full ;
 # Map to single strand and save in GFF format
 gawk 'BEGIN{ OFS="\t";
              chr=ARGV[1]; ARGV[1]="";
-             source="refseq"; feat="single"; sco="1"; frame="3" } # strand=".";
+             source="refseq"; feat="single"; sco="1"; strand="+"; frame="3" }
   ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) {
-      print chr,source,feat,$2,$3,sco,$4,frame,$1; # strand
+      print chr,source,feat,$2,$3,sco,strand,frame,$1; # strand->$4
   }' $SEQ $EVIDIR/$SEQ.genes.full | sort +3n -4 > $EVIDIR/$SEQ.genes.gff ;
 # 
 # Project "singletons"
 $BIN/blast2gff -vg $EVIDIR/$SEQ.genes.gff > $ODIR/evids/$SEQ.genes.gff ;
 #
 # Check for intergenic less than 500bp and for gene length multiple of 3
-perl -e 'use strict;
-  use Data::Dumper;
-  local $Data::Dumper::Purity = 0;
-  local $Data::Dumper::Deepcopy = 1;
-  my %dnarts = ( "+" => "FWD", "-" => "REV", "." => "NAN" );
-  my %strand = ( FWD => "+",   REV => "-"  , NAN => "."  );
-  my %genes = ();
-  my %neges = ();
-  my ($interlen,$ifile) = @ARGV;
-  my $gncnt = 0;
-  #
-  &parse_genes();
-  # print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
-  foreach my $seq (keys %genes) {
-    foreach my $str (keys %{$genes{$seq}}) {
-      &sort_genes($seq,$str);
-      # print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
-      &check_intergenic($seq,$str);
-      # print STDERR Data::Dumper->Dump([ \%neges ],[ qw/ *neges / ]);
-      &check_length($seq,$str);
-      # print STDERR Data::Dumper->Dump([ \%neges ],[ qw/ *neges / ]);
-      &print_evidences($seq,$str);
-    }; # foreach $str
-  }; # foreach $seq
-  exit(0);
-  #
-  sub parse_genes() {
-      open(IFILE,"< $ifile");
-      while (<IFILE>) {
-          my (@f,$str);
-          next if /^\s*$/o;
-          next if /^\#/o;
-          chomp;
-          @f = split /\s+/og, $_;
-          $str = $dnarts{$f[6]};
-          defined($genes{$f[0]}) || do { %{$genes{$f[0]}} = (); };
-          defined($genes{$f[0]}{$str}) || do { @{$genes{$f[0]}{$str}} = (); };
-          push @{ $genes{$f[0]}{$str} }, [ @f[3,4] ];
-      }; # while IFILE
-      close(IFILE);
-  } # parse_genes
-  sub sort_genes() {
-      my ($seq,$str) = @_;
-      @{ $genes{$seq}{$str} } = sort { $a->[0] <=> $b->[0]
-                                         ||
-                                 $a->[1] <=> $b->[1] } @{ $genes{$seq}{$str}  };
-  } # sort_genes
-  sub check_intergenic() {
-      my ($seq,$str) = @_;
-      my ($oc,$ec,$ol,$el) = (undef,undef,undef,undef);
-      my $nel = scalar(@{ $genes{$seq}{$str} });
-      defined($neges{$seq}) || do { %{ $neges{$seq} } = (); };
-      defined($neges{$seq}{$str}) || do { @{ $neges{$seq}{$str} } = (); };
-      for (my $p = 0 ; $p < $nel; $p++) {
-          ($oc,$ec) = @{ $genes{$seq}{$str}[$p] }[0,1];
-          defined($ol) || do { ($ol,$el) = ($oc,$ec); next; };
-          ($oc - $el > 500) && do {
-              push @{ $neges{$seq}{$str} }, [ $ol, $el ];
-              ($ol,$el) = ($oc,$ec); next; 
-          };
-          $el = $ec;
-      }; # for $p
-      push @{ $neges{$seq}{$str} }, [ $ol, $el ]; # to save the last element...
-  } # check_intergenic
-  sub check_length() {
-      my ($seq,$str) = @_;
-      for (my $p = 0 ; $p < scalar(@{ $neges{$seq}{$str} }); $p++) {
-          my ($ref,$len,$md);
-          $ref = \@{ $neges{$seq}{$str}[$p] };
-          $len = $ref->[1] - $ref->[0] + 1;
-          $md = $len % 3;
-          next if ($md == 0);
-          $ref->[1] += (3 - $md);
-      }; # for $p
-  } # check_length
-  sub print_evidences() {
-      my ($seq,$str) = @_;
-      my $fmt = "$seq\trefseq\tAnnotation\t\%s\t\%s\t.\t$strand{$str}\t0\t\%s\n";
-      for (my $p = 0 ; $p < scalar(@{ $neges{$seq}{$str} }); $p++) {
-          printf STDOUT $fmt, @{ $neges{$seq}{$str}[$p] }, ++$gncnt;
-      }; # for $p
-  } # print_evidences
-  ' 500 $ODIR/evids/$SEQ.genes.gff | sort +3n -4 > $ODIR/evids/$SEQ.evids.gff ;
+$BIN/prepevids.pl 500 $ODIR/evids/$SEQ.genes.gff | sort +3n -4 > $ODIR/evids/$SEQ.evids.gff ;
 ##################################################
 #  349    3141   18846  $EVIDIR/chr22.genes.gff
 #  282    2249   14046  $ODIR/evids/chr22.genes.gff
@@ -621,35 +695,7 @@ perl -e 'use strict;
 #  910    7901   47292  total 
 @ 
 
-<<>>=
-## Test file for the previous singleton-maker script
-#
-chr22	test	SR	116171	584367	1.0	+	3 #
-chr22	test	SR	584667	585246	1.0	+	3 # ig 299bp -> join
-#									   
-chr22	test	SR	610377	644175	1.0	+	3 #
-chr22	test	SR	644676	646412	1.0	+	3 # ig 501bp -> split
-#									   
-chr22	test	SR	663306	684226	1.0	+	3
-#									   
-chr22	test	SR	706458	734631	1.0	+	3 #
-chr22	test	SR	735131	775934	1.0	+	3 # ig 500bp -> join
-#
-# "$neges{chr22}" must contain:
-#
-#  [            [            [             [             [
-#   '116171',    '610377',    '644676',     '663306',     '706458',
-#   '585246'     '644175'     '646412'      '684226'      '775934'
-#  ],           ],           ],            ],            ]
-#
-# and it must output the following GFF records:
-#
-# chr22   refseq  Annotation      116171  585247  .       +       0       1
-# chr22   refseq  Annotation      610377  644177  .       +       0       2
-# chr22   refseq  Annotation      644676  646412  .       +       0       3
-# chr22   refseq  Annotation      663306  684227  .       +       0       4
-# chr22   refseq  Annotation      706458  775934  .       +       0       5
-@ 
+\subsubsctn{Running {\sgp}}
 
 <<>>=
 #
@@ -700,6 +746,12 @@ ls -1 $ODIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
 #
 get_geneid_genes $ODIR/gff/$SEQ > $ODIR/$SEQ.gene_list ;
 #
+@ 
+
+\subsubsctn{Evaluating predictions and comparing with previous results}
+
+<<>>=
+#
 gawk 'BEGIN{OFS="\t"} $1!~/^\#/ {$6=500; print $0}' $EVIDIR/$SEQ.eval.gff | \
     cat - $ODIR/gff/$SEQ | egrep -v '^#' - | \
     sort +3n -4 - > $ODIR/gff/$SEQ.geneid+refseq
@@ -709,15 +761,25 @@ gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
 #
 VDIR="$ODIR/eval" ;
 $BIN/gffsplitstrand.pl $VDIR/$SEQ.geneid+refseq.eval.gff ; # no sequence length record required here
-cp $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/vicky.cds.gff \
-   $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/chr22.eval.gff
+# cp $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/vicky.cds.gff \
+#    $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/chr22.eval.gff
 $BIN/gffsplitstrand.pl -l $HUMUS/$NCHR/annotation/20011222/length.$SEQ.gff \
     $HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/$SEQ.eval.gff
 #
 A_REFSEQ="$HUMUS/$NCHR/annotation/20011222/refseq/$SEQ.eval" ;
 A_ENSEMBL="$HUMUS/$NCHR/annotation/20011222/ensembl/$SEQ.eval" ;
 A_VICTORIA="$HUMUS/$NCHR/annotation/20011222/VictoriaHaghighi/$SEQ.eval" ;
-cat > $VDIR/${SEQ}.summary <<EOT ;
+#
+A_GENEID="$HUMUS/$NCHR/geneid/20011222/eval/$SEQ.eval" ;
+A_GENSCAN="$HUMUS/$NCHR/annotation/20011222/genscan/eval/$SEQ.eval" ;
+A_SGP="$HUMUS/$NCHR/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/$SEQ.eval" ;
+A_SGPRKN="$HUMUS/$NCHR/sgp/20011222.UCSCgp-20020504.RIKEN/eval/$SEQ.eval" ;
+A_SGPMGSCRKN="$HUMUS/$NCHR/sgp/20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN/eval/$SEQ.eval" ;
+A_SRs="$HUMUS/$NCHR/tblastx/20020425/eval/$SEQ.eval" ;
+A_SRsRKN="$HUMUS/$NCHR/tblastx/20020504.RIKEN/eval/$SEQ.eval" ;
+A_SRsMGSCRKN="$HUMUS/$NCHR/sgp/20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN/hsp-sr/eval/$SEQ.eval" ;
+#
+cat > $VDIR/${SEQ}.ALL.summary <<EOT ;
 #
 # Evaluation summary results for SGP on CHROM[$CHR] - SEQ[$SEQ]
 #
@@ -728,33 +790,185 @@ EOT
 CheckFile R $A_REFSEQ.fwd.gff   $A_REFSEQ.rev.gff   \
             $A_ENSEMBL.fwd.gff  $A_ENSEMBL.rev.gff  \
             $A_VICTORIA.fwd.gff $A_VICTORIA.rev.gff ;
-#
+####
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_GENSCAN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_GENEID.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_SGP.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_SGPRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_SGPMGSCRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
 $BIN/runeval.pl $A_REFSEQ.fwd.gff $VDIR/$SEQ.geneid+refseq.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.fwd ;
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_SRs.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SRs-MGSCv3::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_SRsRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SRs-RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+$BIN/runeval.pl $A_REFSEQ.fwd.gff $A_SRsMGSCRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::FWD::SRs-MGSCv3+RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.fwd ;
+#
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_GENSCAN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_GENEID.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_SGP.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_SGPRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_SGPMGSCRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
 $BIN/runeval.pl $A_REFSEQ.rev.gff $VDIR/$SEQ.geneid+refseq.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_refseq.rev ;
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_SRs.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SRs-MGSCv3::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_SRsRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SRs-RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+$BIN/runeval.pl $A_REFSEQ.rev.gff $A_SRsMGSCRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::REFSEQ::REV::SRs-MGSCv3+RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_refseq.rev ;
+####
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_GENSCAN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_GENEID.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_SGP.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_SGPRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_SGPMGSCRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
 $BIN/runeval.pl $A_ENSEMBL.fwd.gff $VDIR/$SEQ.geneid+refseq.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.fwd ;
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_SRs.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SRs-MGSCv3::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_SRsRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SRs-RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+$BIN/runeval.pl $A_ENSEMBL.fwd.gff $A_SRsMGSCRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::FWD::SRs-MGSCv3+RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.fwd ;
+#
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_GENSCAN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_GENEID.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_SGP.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_SGPRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_SGPMGSCRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
 $BIN/runeval.pl $A_ENSEMBL.rev.gff $VDIR/$SEQ.geneid+refseq.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_ensembl.rev ;
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_SRs.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SRs-MGSCv3::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_SRsRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SRs-RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+$BIN/runeval.pl $A_ENSEMBL.rev.gff $A_SRsMGSCRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::ENSEMBL::REV::SRs-MGSCv3+RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_ensembl.rev ;
+####
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_GENSCAN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_GENEID.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_SGP.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_SGPRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SGP-RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_SGPMGSCRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SGP-MGSCv3+RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
 $BIN/runeval.pl $A_VICTORIA.fwd.gff $VDIR/$SEQ.geneid+refseq.eval.fwd.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_victoria.fwd ;
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_SRs.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SRs-MGSCv3::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_SRsRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SRs-RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+$BIN/runeval.pl $A_VICTORIA.fwd.gff $A_SRsMGSCRKN.fwd.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::FWD::SRs-MGSCv3+RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.fwd ;
+#
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_GENSCAN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::GENSCAN::GP::." \
+    >> $VDIR/${SEQ}.ALL.summary 2> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_GENEID.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::GENEID::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_SGP.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SGP-MGSCv3::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_SGPRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SGP-RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_SGPMGSCRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SGP-MGSCv3+RIKEN::geneid_1.1::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
 $BIN/runeval.pl $A_VICTORIA.rev.gff $VDIR/$SEQ.geneid+refseq.eval.rev.gff                 \
     "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SGP-MGSCv3+RefSeq::geneid_1.1::." \
-    >> $VDIR/${SEQ}.summary 2> $VDIR/${SEQ}.sgp_victoria.rev ;
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_SRs.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SRs-MGSCv3::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_SRsRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SRs-RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+$BIN/runeval.pl $A_VICTORIA.rev.gff $A_SRsMGSCRKN.rev.gff                 \
+    "${CHR}::${HSAPID}x${MMUSID}+RefSeq::VICTORIA::REV::SRs-MGSCv3+RIKEN::tblastx::." \
+    >> $VDIR/${SEQ}.ALL.summary 2>> $VDIR/${SEQ}.ALL.sgp_victoria.rev ;
+#
+enscript -1r -Gjf Courier5 -M A4 $VDIR/${SEQ}.ALL.summary ;
+# -tas
+$BIN/process_eval.pl -t -T "REFSEQ ENSEMBL VICTORIA" \
+   -P "GENSCAN GENEID SGP-MGSCv3 SGP-RIKEN SGP-MGSCv3+RIKEN SGP-MGSCv3+RefSeq SRs-MGSCv3 SRs-RIKEN SRs-MGSCv3+RIKEN"  \
+   $VDIR/${SEQ}.ALL.summary > $VDIR/${SEQ}.ALL.test_summary ;
+enscript -1r -Gjf Courier5 -M A4 $VDIR/${SEQ}.ALL.test_summary ;
 #
 @ 
 
-<<>>=
-
-@ 
-
-\subsctn{}
+\subsubsctn{Checking HSP-SRs obtained on chr22}
 
 <<>>=
 ( echo "###";echo "### 20011222.UCSCgp-20020411.MGSCv3 "; cat sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr22.report; echo "###"; echo "### 20011222.UCSCgp-20020504.RIKEN "; cat sgp/20011222.UCSCgp-20020504.RIKEN/hsp-sr/chr22.report; echo "###"; echo "### 20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN (merged HSP-SRs)"; cat sgp/20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN/hsp-sr/chr22.merged.report; echo "###"; echo "### 20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN (HSP-SRs after projection of merged HSP-SRs)"; cat sgp/20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN/hsp-sr/chr22.report ) > chr22.eval.HSP-SRs
@@ -784,6 +998,136 @@ $BIN/runeval.pl $A_VICTORIA.rev.gff $VDIR/$SEQ.geneid+refseq.eval.rev.gff       
 #       +1 :   4411     |       -1 :   4398     |       .1 :      0
 #       +2 :   4343     |       -2 :   4331     |       .2 :      0
 #       +3 :   4520     |       -3 :   4393     |       .3 :      0
+@ 
+
+\sctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+\subsctn{BASH scripts}
+
+<<BASH shebang>>=
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+<<Version Control Id Tag>>
+@ 
+
+<<BASH script start>>=
+<<BASH shebang>>
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+@
+
+<<BASH script end>>=
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
+@
+
+\subsctn{Version control tags}
+
+This document is under Concurrent Versions System (CVS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: CHR22_tests.nw,v 1.4 2002-05-22 14:04:40 jabril Exp $
+@ 
+
+\subsctn{BASH variables}
+
+<<BASH Environment Variables>>=
+#
+umask 002 ;
+#
+# Setting Global Variables
+# WORK is set by "setcwd"
+EDITOR="emacs";
+WDIR="$WORK/lib" ;
+DDIR="$WDIR/CHR22_tests.docs" ;
+localnw="CHR22_tests" ;
+export EDITOR WDIR DDIR localnw ;
+#
+function MkDirs ()
+{
+  #
+  # USAGE: MkDirs <path_list>
+  #
+  for name in "$@" ;
+    do {
+         if [ -d "$name" ] ;
+         then 
+           echo "### Directory Already Exist: $name" 1>&2 ;
+         elif mkdir $name 2> /dev/null ;
+           then
+             echo "### Making New Directory   : $name" 1>&2 ;
+         else
+           echo "### CANNOT Create Directory: $name" 1>&2 ; 
+         fi ;
+      } ;
+    done ;
+}
+#
+function is_exec ()
+{
+  #
+  # USAGE: is_exec <filename_0>...<filename_N>
+  for file in $@ ;
+    do {
+         if [ -x $file ] ;
+         then
+           echo "#    Script $file has execute permissions ..." 1>&2 ;
+         else
+           echo "#    Setting execute permissions for $file ..." 1>&2 ;
+           chmod a+x $file 2> /dev/null ;
+         fi ;
+      } ;
+    done ;
+}
+#
+@
+
+\subsctn{Tangling and weaving}
+
+<<tangling complementary LaTeX files>>=
+notangle -R"HIDE: LaTeX new definitions" $WDIR/$localnw.nw | \
+    cpif $DDIR/defs.tex ;
+notangle -R"HIDE: TODO" $WDIR/$localnw.nw | cpif $DDIR/todo.tex ; 
+@ 
+
+<<weaving>>=
+<<BASH script start>>
+# weaving and LaTeXing
+<<BASH Environment Variables>>
+#
+MkDirs $WDIR $DDIR ;
+#
+<<tangling complementary LaTeX files>>
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+        $WDIR/$localnw.nw | cpif $DDIR/$localnw.tex ;
+# noweave -t4 -delay -index $WDIR/$localnw.nw > $DDIR/$localnw.tex 
+pushd $DDIR/ ;
+#
+echo "### RUNNING LaTeX on $localnw.tex" 1>&2 ;
+latex $localnw.tex ; 
+latex $localnw.tex ; 
+latex $localnw.tex ;
+dvips $localnw.dvi -o $localnw.ps -t a4 ;
+#
+# pdflatex $localnw.tex ;
+# echo "### CONVERTING PS to PDF: $localnw" 1>&2 ;
+# ps2pdf $localnw.ps $localnw.pdf ;
+#
+popd ;
+<<BASH script end>>
+@ %$
+
+<<Get current document>>=
+notangle -R'weaving' $WORK/lib/CHR22_tests.nw | bash
 @ 
 
 \end{document}
