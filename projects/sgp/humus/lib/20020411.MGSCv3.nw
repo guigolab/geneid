@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20020411.MGSCv3.nw,v 1.3 2002-05-25 14:07:01 jabril Exp $ 
+% # $Id: 20020411.MGSCv3.nw,v 1.4 2002-05-25 14:32:18 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.3 2002-05-25 14:07:01 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.4 2002-05-25 14:32:18 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -409,7 +409,7 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
 @ 
 
 <<Version Control Id Tag>>=
-# $Id: 20020411.MGSCv3.nw,v 1.3 2002-05-25 14:07:01 jabril Exp $
+# $Id: 20020411.MGSCv3.nw,v 1.4 2002-05-25 14:32:18 jabril Exp $
 @ 
 <<BASH shebang>>=
 #!/usr/bin/bash
@@ -1112,8 +1112,11 @@ gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU
 # sgp
 gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/sgp/20020425/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq ;
 ( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq.report ;
+# sgp+refseq
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { MD="$MUSHU/chr$CHR/sgp/20020411.MGSCv3-20011222.UCSCgp+RefSeqEvids"; evis=`grep 'Annotation' $MD/evids/$SEQ.evids.gff | wc | gawk '{print $1}' `; head -4 $MD/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; evid=ARGV[2]; ARGV[1]=ARGV[2]=""; }{ printf "%12s %8d %12.3f\n", chr,$5 - evid,$9; }' "$SEQ" $evis - ; }; done > $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; echo "###       + RefSeq Mmus annotations"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq.report ;
 # summarizing
-( cat $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq.report; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq.report; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq.report ) > $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report ;
+( cat $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq.report; echo ""; echo "";  cat $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq.report ; echo ""; echo "";  cat $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq.report ; echo ""; echo "";  cat $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq.report; echo "";  echo "";  cat $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq.report; echo "";  echo "";  cat $MUSHU/evaluations/Mmus_sgp_MGSCv3+RefSeq.genes_by_seq.report ) > $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report ;
 #
 enscript --columns=3 -Gjf Courier5 -M A4 $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report ;
 #
