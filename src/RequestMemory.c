@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.2 2000-07-26 07:59:10 eblanco Exp $  */
+/*  $Id: RequestMemory.c,v 1.3 2000-08-08 14:22:32 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -104,30 +104,51 @@ packSites* RequestMemorySites()
 packExons* RequestMemoryExons()
 {
   packExons* allExons;
-
+  long HowMany;
+  
   /* Allocating memory for exons */
   if ((allExons = 
        (struct s_packExons *) malloc(sizeof(struct s_packExons))) == NULL)
     printError("Not enough space to hold pack of exons");  
 
   /* InitialExons */
+  if (MAXBACKUPSITES)
+    HowMany = (int)(NUMEXONS/RFIRST);
+  else
+    HowMany = NUMEXONS;
+
   if ((allExons->InitialExons = 
-       (exonGFF*) calloc(NUMEXONS, sizeof(exonGFF))) == NULL)
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough space to hold initial exons");
       
   /* InternalExons */
+  if (MAXBACKUPSITES)
+    HowMany = (int)(NUMEXONS/RINTER);
+  else
+    HowMany = NUMEXONS;
+  
   if ((allExons->InternalExons = 
-       (exonGFF*) calloc(NUMEXONS, sizeof(exonGFF))) == NULL)
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough space to hold internal exons");
-          
+      
   /* TerminalExons */
-  if ((allExons->TerminalExons = 
-       (exonGFF*) calloc(NUMEXONS, sizeof(exonGFF))) == NULL)
-    printError("Not enough space to hold terminal exons");
+  if (MAXBACKUPSITES)
+    HowMany = (int)(NUMEXONS/RTERMI);
+  else
+    HowMany = NUMEXONS;
 
-  /* TerminalExons */
+  if ((allExons->TerminalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough space to hold terminal exons");
+  
+  /* SingleExons */
+  if (MAXBACKUPSITES)
+    HowMany = (int)(NUMEXONS/RSINGL);
+  else
+    HowMany = NUMEXONS;
+
   if ((allExons->Singles = 
-       (exonGFF*) calloc(NUMEXONS, sizeof(exonGFF))) == NULL)
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough space to hold single genes");
   /* end memory-exons allocation */
 
@@ -137,9 +158,10 @@ packExons* RequestMemoryExons()
 exonGFF* RequestMemorySortExons()
 {
   exonGFF *exons;
+
   /* Sorting Exons */
   if ((exons =
-       (exonGFF*) calloc(NUMEXONS * 4, sizeof(exonGFF)))  == NULL)
+       (exonGFF*) calloc(RSORTE*NUMEXONS, sizeof(exonGFF)))  == NULL)
     printError("Not enough space to hold all exons(sorting)");
 
   return(exons);
@@ -250,6 +272,31 @@ gparam* RequestMemoryParams()
 
   if ((gp->OligoLogsTran[2]=(float *) calloc(OligoDim, sizeof(float))) == NULL)
     printError("Not enough space to hold Markov hexamers");
+
+  /* Markov Scan arrays */
+  if ((gp->OligoDistIni[0] = 
+       (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough space to hold oligo log scores");
+  
+  if ((gp->OligoDistIni[1] = 
+       (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough space to hold oligo log scores");
+  
+  if ((gp->OligoDistIni[2] = 
+       (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough space to hold oligo log scores");
+  
+  if ((gp->OligoDistTran[0] = 
+       (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough space to hold oligo log scores");
+  
+  if ((gp->OligoDistTran[1] = 
+       (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough space to hold oligo log scores");
+  
+  if ((gp->OligoDistTran[2] = 
+       (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough space to hold oligo log scores");
 
   /* Score parameters */
   if ((gp->Initial = (paramexons *)malloc(sizeof(paramexons))) == NULL)  
