@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadSequence.c,v 1.3 2001-04-25 08:29:27 eblanco Exp $  */
+/*  $Id: ReadSequence.c,v 1.4 2001-04-25 12:49:07 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -41,12 +41,12 @@ int IniReadSequence(FILE* seqfile, char* line)
   res = fscanf(seqfile,"%c",&cAux);
 
   if ((res == -1) || cAux != '>')
-    printError("Bad format: FASTA sequence");
+    printError("IniRead: Bad format: FASTA sequence");
 
   /* Get locus name */
   res = fscanf(seqfile,"%s",sAux);
   if (res==-1)
-    printError("Bad format: FASTA sequence");
+    printError("IniRead: Bad format: FASTA sequence");
   else
     strcpy(line,sAux);
 
@@ -56,11 +56,11 @@ int IniReadSequence(FILE* seqfile, char* line)
     {
       res = fscanf(seqfile,"%c",&cAux);
       if (res==-1)
-	printError("Bad format: FASTA sequence");
+	printError("IniRead: Bad format: FASTA sequence");
     }
     
   if (res == EOF)
-    printError("Bad format DNA sequence\n");  
+    printError("IniRead: Bad format DNA sequence\n");  
   
   return(res);
 }
@@ -80,9 +80,7 @@ int ReadSequence (FILE* seqfile, char* Sequence, char* nextLocus)
     { 
       pos = pos + strlen(Sequence + pos);
       res = fscanf(seqfile,"%s",Sequence + pos);
-      if (res==-1)
-	printError("Bad format: FASTA sequence");
-
+      
       if ( VRB && !(pos % 100000) )
 	{
 	  sprintf(mess, "...%ld bp",pos);
