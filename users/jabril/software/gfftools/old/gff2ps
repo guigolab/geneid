@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.21 1999-06-25 20:14:44 jabril Exp $	
+#         $Id: gff2ps,v 1.22 1999-06-28 17:05:18 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -34,21 +34,20 @@
 # ( ./gff2ps -vC mygffcustomfile -- samples/data.gff > samples/.ps ) > & samples/report.
 #
 #
+
 ##############################################################
 #################### PROGRAM DEFINITIONS #####################
 # 
 CMDLine=$0" "$*
-
 # 
 # Defining Default Values...
-
 Defaults () {
  # 
  # Constants: 
   PROGRAM="gff2ps"
   VERSION="v1.0"
-  REVISION='$Revision: 1.21 $'
-  DATERELEASE='$Date: 1999-06-25 20:14:44 $'
+  REVISION='$Revision: 1.22 $'
+  DATERELEASE='$Date: 1999-06-28 17:05:18 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -127,6 +126,9 @@ Defaults () {
   c20="orange";m20="frame_unknown_color"
   c21=1; m21="show_inner_scale"
   c22=1; m22="show_outer_scale"
+  # c23="off"; m23="unfold_grouped_ungrouped";
+  # c24="off"; m24="unfold_grouped_line";
+  # c25="off"; m25="unfold_ungrouped_line";
 } # End of Defaults
 
 #  
@@ -263,7 +265,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.21 1999-06-25 20:14:44 jabril Exp $
+%    $Id: gff2ps,v 1.22 1999-06-28 17:05:18 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -770,10 +772,10 @@ MAINPSHEADER
 gawk 'BEGIN{
 ############ INITIALITATION ############
 # gff data structure
-  seqname  = 1;
-  source   = 2;
-  feature  = 3;
-  start    = 4;
+  seqname  = 1;   gpname     = 1;
+  source   = 2;   gpstart    = 2;
+  feature  = 3;   gpend      = 3;
+  start    = 4;   is_grouped = 4;
   end      = 5;
   score    = 6;
   strand   = 7;
@@ -882,6 +884,9 @@ gawk 'BEGIN{
   SO_PROP["rule_scale"]="nucleotide";
   SO_PROP["rule_rel"]="none";
   SO_PROP["rule_abs"]="none";
+  SO_PROP["unfold_grouped_ungrouped"]="off";
+  SO_PROP["unfold_grouped_line"]="off";
+  SO_PROP["unfold_ungrouped_line"]="off";
 # Data for upper-case to lower-case function #lcase()#
  CM["A"]="a";CM["B"]="b";CM["C"]="c";CM["D"]="d";CM["E"]="e";
  CM["F"]="f";CM["G"]="g";CM["H"]="h";CM["I"]="i";CM["J"]="j";
@@ -919,12 +924,17 @@ gawk 'BEGIN{
     order["none",nordcnt]=$source; nordcnt++ };
 # read gff element within source and strand
   sources[$source]++;                       # field 2 (source) counter
-  if (!($group in GP_ary)) {
-    scstgp[$source,$strand]++; 
-    gpname[$source,$strand,scstgp[$source,$strand]]=$group
-    gpori[$source,$strand,scstgp[$source,$strand]]=999999999999999999999999
-    gpend[$source,$strand,scstgp[$source,$strand]]=0
+  tmp=$source SUBSEP $strand SUBSEP $group;
+  if (!(tmp in N)) {
+    N[$source,$strand,$group]++;
+    G[$source,$strand]++;
+    gp[$source,$strand,G[$source,$strand],gpname]=$group
+    gp[$source,$strand,G[$source,$strand],gpstart]=$start
+    gp[$source,$strand,G[$source,$strand],gpend]=$end
+    gp[$source,$strand,G[$source,$strand],is_grouped]=flg_ungrp
+    printf "********* Creating Group DataSet : {%s} %s %s %s ( %s %s )  is_grouped:%s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend],gp[$source,$strand,G[$source,$strand],is_grouped] | "cat 1>&2"
     }
+# ( ./gff2ps -vC customs/HS1185.Tim -K 1000 -- samples/nogroups.gff > samples/nogroups.ps ) > & samples/report.nogroups
   GP_ary[$group]++;                         # field 9 (group) counter
   $feature=lcase($feature);
   FT_ary[$feature]++ ;                       # field 3 (gff-feature) counter
@@ -948,10 +958,10 @@ gawk 'BEGIN{
     } # if NF
   if (FIRST_POS>$start) FIRST_POS=$start;
   if (LAST_POS<$end) LAST_POS=$end;
-# start-end for each group-sc-strand
-  gpori[$source,$strand,scstgp[$source,$strand]] = min(gpori[$source,$strand,scstgp[$source,$strand]],$start) 
-  gpend[$source,$strand,scstgp[$source,$strand]] = max(gpend[$source,$strand,scstgp[$source,$strand]],$end) 
-# recompute scores between MINSCORE and MAXSCORE
+# start-end for each group-sc-strand  
+  gp[$source,$strand,G[$source,$strand],gpstart]=min(gp[$source,$strand,G[$source,$strand],gpstart],$start) 
+  gp[$source,$strand,G[$source,$strand],gpend]  =max(gp[$source,$strand,G[$source,$strand],gpend],$end)
+  printf "*** Checking boundaries : {%s} %s %s %s %s %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend] | "cat 1>&2"
   if ($score < MINSCORE) {
     element[$source,$strand,n[$source,$strand],score]=MINSCORE }
   else {
@@ -964,32 +974,29 @@ gawk 'BEGIN{
   } # if (!is_EOF)
  }  # Main Loop END
 END{
-# Sorting groups
-  printf "\n%s\nGroups defined...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
-  for (sc in sources) {
-    for (s in strands) {
-      if (scstgp[sc,s]>0) {
-      for (r=1;r<=scstgp[sc,s];r++) {
-        printf "*** Grup %s Strand %s Source %s have %s elements\n",gpname[sc,s,r],s,sc,GP_ary[gpname[sc,s,r]] | "cat 1>&2"
-        printf "*** Grup %s starts at %s and ends at %s\n",gpname[sc,s,r],gpori[sc,s,r],gpend[sc,s,r] | "cat 1>&2"
-        }}
-      }
-    }
-# Printing elements sorted
-  if (Var["print_report"]) {
-   printf "\n%s\ngff elements are sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
-   for (sc in sources) 
-    for (s in strands) {
-      printf "\nSOURCE: %s\nSTRAND: %s\n",sc,s | "cat 1>&2"
-      if (n[sc,s]>0) {
-        for (i=1;i<=n[sc,s];i++)
-          printf "%10s %s\n", S[sc,s,i],showelemS(sc,s,S[sc,s,i]) | "cat 1>&2"
-        }
-      else
-        printf "%10s This block is empty ##\n", "##" | "cat 1>&2"
-      }
-   close("cat 1>&2")
-   }
+  # Sorting groups
+  SortGroups()
+  #
+  # Making Lines...
+  for (stp=1;stp<=3;stp++) { # for s in strand
+    s=wstr[stp]
+    for (sc in sources) {
+      if (G[sc,s]>0) {
+        for (t=1;t<=G[sc,s];t++) {
+          for (g=1;g<=SG[sc,s,t],g++) {
+            gp_nm =gp[sc,s,g,gpname];
+            gp_ori=gp[sc,s,g,gpstart];
+            gp_end=gp[sc,s,g,gpend];
+            gp_gpd=gp[sc,s,g,is_grouped];
+            
+            } # for g(SG)
+          } for t(G)
+        } # if G>0
+      } # for sources
+    } # for strands
+  #
+  # Printing groups and elements sorted
+  PrtSorted()
   #
   # Defining Object Properties.
   SET_VARS()
@@ -1037,12 +1044,23 @@ function lcase(string,    chr) { for (chr in CM) gsub(chr,CM[chr],string); retur
 function min(a,b) { if (a<=b) return a; else return b }
 function max(a,b) { if (a>=b) return a; else return b }
 function ChkInput() { # some changes will be made on input line if some defaults were present.
+ flg_ungrp=0
  f=split($0,ln,/ \#/);$0="";
  $0=ln[1];for (s=1;s<=f;s++) { delete ln[s] };
- if (!($frame in Frames) && !($0~/^(\#)+/ || NF==0)) { 
-   printf ">>>WARNING<<< Unknown frame %s (replaced by \".\") in : %s\n",$frame,$0 | "cat 1>&2"
-   $frame="." }
- if ($group=="" || $group==".") $group="##" $source $strand $seqname "##";    # empty group defined as default (none==".")
+ if (!($0~/^(\#)+/ || NF==0)) { 
+   if (!($frame in Frames)) { 
+     printf ">>>WARNING<<< Unknown frame %s (replaced by \".\") in : %s\n",$frame,$0 | "cat 1>&2"
+     $frame="." }
+   if (!($strand in strands)) {
+     printf ">>>WARNING<<< Unknown strand %s (replaced by \".\") in : %s\n",$strand,$0 | "cat 1>&2"
+     $strand="." }
+   if ($group=="" || $group==".") {
+     if (!OnOff(PLOT_FT["unfold_ungrouped_line"])) $group="#" $source $strand $seqname "#";
+     else $group="#" NR "#" $source $strand $seqname "#";    # empty group defined as default (none==".")
+     # CP_PLOT_FT[$group]=$source   # source from which lines are defined.
+     flg_ungrp=1
+     } 
+   }
  if ($0~/^[^\#]+[ \t]+.+[ \t]+.+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]*[.]?[0-9]*[ \t]+[+-.][ \t]+[.012][ \t]+.*/) return 1;
  else {
    if ($0~/^(\#)+.*/ || NF==0) printf ">>>Comment Line: %s", $0 | "cat 1>&2"
@@ -1144,6 +1162,51 @@ function showelemS(s,p,q,  string){
   string=string" "element[s,p,q,group];
   return string } # End of showelemS
 function showelem(a,b,     c,string){ c=n[a,b]; string=showelemS(s,p,q); return string }
+function SortGroups() {
+  if (Var["print_report"]) printf "\n%s\nReordering groups...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+  for (sc in sources) {
+    for (s in strands) {
+      if (G[sc,s]>0) {
+        for (t=1;t<=G[sc,s];t++) {
+         if (t==1) SG[sc,s,t]=t;
+         for (k=t;k<G[sc,s];k++) {
+          if (gp[sc,s,k+1,gpstart] < gp[sc,s,t,gpstart]) { SG[sc,s,k+1]=t; SG[sc,s,t]=k+1 }
+          } # if
+          if (Var["print_report"]) printf "*** Reordering groups : {%s} %s %s %s ( %s %s )\n",t,sc,s,gp[sc,s,SG[sc,s,t],gpname],gp[sc,s,SG[sc,s,t],gpstart],gp[sc,s,SG[sc,s,t],gpend] | "cat 1>&2"
+         } # for t 
+        } # if 
+      } # for strands
+    } # for sources
+ } # End of SortGroups
+function PrtSorted() {
+  if (Var["print_report"]) {
+    printf "\n%s\nGroups were sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+    for (sc in sources) {
+      for (s in strands) {
+        for (t=1;t<=G[sc,s];t++) {
+          gnm=gp[sc,s,SG[sc,s,t],gpname]
+          printf "************* Group %s Strand %s Source %s have %s elements\n",gnm,s,sc,GP_ary[gnm] | "cat 1>&2"
+          printf "*** Order=%3s Group %s starts at %s and ends at %s\n",t,gnm,gp[sc,s,SG[sc,s,t],gpstart],gp[sc,s,SG[sc,s,t],gpend] | "cat 1>&2"
+          } # for t
+        } # for strands
+      } # for sources
+    close("cat 1>&2")
+    } # if print_report
+  if (Var["print_report"]) {
+   printf "\n%s\ngff elements were sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+   for (sc in sources) 
+    for (s in strands) {
+      printf "\nSOURCE: %s\nSTRAND: %s\n",sc,s | "cat 1>&2"
+      if (n[sc,s]>0) {
+        for (i=1;i<=n[sc,s];i++)
+          printf "%10s %s\n", S[sc,s,i],showelemS(sc,s,S[sc,s,i]) | "cat 1>&2"
+        }
+      else
+        printf "%10s This block is empty ##\n", "##" | "cat 1>&2"
+      }
+   close("cat 1>&2")
+   } if print_report
+ } # End of PrtSorted
 function SET_VARS() {
   # Variable definition hierarchy:
   # Program Defaults < Default Custom File < Custom File < Command Line.
