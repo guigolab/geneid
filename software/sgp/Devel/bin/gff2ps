@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.65 2000-03-28 17:22:38 jabril Exp $	
+#         $Id: gff2ps,v 1.66 2000-03-29 10:37:57 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.65 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-28 17:22:38 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.66 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-29 10:37:57 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.65 2000-03-28 17:22:38 jabril Exp $
+%    $Id: gff2ps,v 1.66 2000-03-29 10:37:57 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -726,7 +726,7 @@ end % shpdct
  /dntck { FlgOSD { blckori blckend XOriPlot Y TkMrkW 1 TkMspc add mul add {z} 0 tm } if } bdf
  % YSFwd 0 gt YSBth 0 gt or and exch YSFwd 0 gt and or % YSRvs 0 gt and exch YSRvs 0 gt YSBth 0 gt or and
  /nxtblck { dup dup (.) eq { pop YSFwd 0 gt { YSBth } { 0 } ifelse } { (-) eq { YSFwd 0 gt YSBth 0 gt or { YSRvs } { 0 } ifelse } { 0 } ifelse } ifelse } bdf
- /Strand { nxtblck 0 gt { /Y Y chgtst { TkMrkW 1 TkMspc add mul 2 div add } if def dup (.) eq { pop is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and { blckori blckend XOriPlot TkMrkW FlgOSU { 2 TkMspc 1.5 mul add mul } if YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if } { (-) eq { is2tck FlgISD and { blckori blckend XOriPlot TkMrkW FlgOSU { 3 TkMspc 2.5 mul add mul } if YSFwd add YSBth add {r} 0 tm } if } if } ifelse /Y Y chgtst { TkMrkW 1 TkMspc add mul 2 div add } if def } { pop } ifelse } bdf 
+ /Strand { nxtblck 0 gt { /Y Y chgtst { TkMrkW 1 TkMspc add mul 2 div add } if def dup (-) eq { pop is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and { blckori blckend XOriPlot TkMrkW FlgOSU { 2 TkMspc 1.5 mul add mul } { 1 TkMspc 0.5 mul add mul } ifelse YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if } { (.) eq { is2tck FlgISD and { blckori blckend XOriPlot TkMrkW FlgOSU { 3 TkMspc 2.5 mul add mul } { 2 TkMspc 1.5 mul add mul } ifelse YSFwd add YSBth add {r} 0 tm } if } if } ifelse /Y Y chgtst { TkMrkW 1 TkMspc add mul 2 div add } if def } { pop } ifelse } bdf 
  /b_end { R end } bdf
  /vb_end { dntck R end } bdf
 end
@@ -2810,7 +2810,7 @@ function checklbl(chain) {
 #
 function chktmk(tk,    t) {
   t=tolower(tk);
-  if (t~/both|top|bottom/) return t;
+  if (t~/both|top|bottom|none/) return t;
   else return "both";
 }
 #
