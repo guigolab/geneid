@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.22 2002-04-30 18:02:19 jabril Exp $ 
+% # $Id: humus.nw,v 1.23 2002-05-01 15:52:21 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.22 2002-04-30 18:02:19 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.23 2002-05-01 15:52:21 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3147,13 +3147,15 @@ my ($cf,$cr);
 #
 # ARGVS
 &match_argv_num(\@ARGV,3);
-my ($chr, $seqln, @input) = @ARGV;
-foreach (my $r = 0; $r < scalar(@input); $r++) {
-    $input[$r] =~ s%/$%%o;
+my ($chr, $seqln, @inputfiles) = @ARGV;
+foreach (my $r = 0; $r < scalar(@inputfiles); $r++) {
+    $inputfiles[$r] =~ s%/$%%o;
 };
 #
 # MAIN
 &program_started($PROG);
+print STDERR "### Getting sequence length from\n\t-> $seqln\n".
+             "### Processing the following files\n\t-> ".(join("\n\t->", @inputfiles))."\n";
 &read_lengths();
 &parse_gff();
 &program_finished($PROG);
@@ -3167,7 +3169,9 @@ exit(0);
 <<swapHSPcoords.pl: process records>>=
 sub parse_gff() {
     my %errcnt = ( FIELD => 0, STRAND => 0, FRAME => 0 , SKIPPED => 0 );
-    foreach my $fl (@files) {
+    print STDERR "#\n# Processing ".(scalar @inputfiles)." tblastx files\n#\n# ".
+             (sprintf("%8s %8s %8s  %s\n","#hsp","#hsp(+)","#hsp(-)","file"));
+    foreach my $fl (@inputfiles) {
         $cf = $cr = 0;
         open(TBXFL, "< $fl") || do {
             print STDERR "## $PROG ## SKIPPING: CANNOT READ from $fl\n";
@@ -3205,6 +3209,7 @@ sub parse_gff() {
             $t[$ftr] = "hsp";
             $t[$ori] += $offset;
             $t[$end] += $offset;
+            $t[$sco] = $l[$sco];
             if ($t[$str] eq "-") {
                 $t[$frm] = $frame[(($SEQlen{$chr} - $t[$end] + 1) % 3)];
                 $cr++;
@@ -3218,7 +3223,7 @@ sub parse_gff() {
             $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
         }; # while
         close(TBXFL);
-        printf STDERR "  %8s %8s %8s  %s\n",($cf+$cr),$cf,$cr,$fl->[0];
+        printf STDERR "  %8s %8s %8s  %s\n",($cf+$cr),$cf,$cr,$fl;
     }; # foreach
     $g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
     $g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
@@ -3236,20 +3241,21 @@ sub parse_gff() {
     print STDERR "# $errcnt{TOT} ERRORS FOUND: $errcnt{FIELD} in fields number,".
                  " $errcnt{STRAND} in strand, $errcnt{FRAME} in frame.\n";
 } # run_parseblast
+my %val = ();
 sub process_subject_fields() {
     my ($Sary,$Tary) = @_;
-    my %val = ( 'other' => [] );
+    %val = ( 'other' => [] );
     my %tag = (
         'target'  => sub {
                 my $str = shift;
-                $str =~ /^\"(.*?)\"            # subject sequence name
-                          (?:\s+(\d+)          # start (opt)
-                            (?:\s+(\d+)        # end (opt)
-                              (?:\s+([\+\-\.]) # strand (opt)
-                                (?:\s+([123])) # frame (opt)
-                              )
-                            )
-                          )$/ox;
+                $str =~ /^\"(.*?)\"             # subject sequence name
+                          (?:\s+(\d+)           # start (opt)
+                            (?:\s+(\d+)         # end (opt)
+                              (?:\s+([\+\-\.])  # strand (opt)
+                                (?:\s+([123]))? # frame (opt)
+                              )?
+                            )?
+                          )?$/ox;
                 defined($1) && ($val{'target'} = $1);
                 defined($2) && ($val{'start'}  = $2);
                 defined($3) && ($val{'end'}    = $3);
@@ -3279,9 +3285,10 @@ sub process_subject_fields() {
         );
     foreach my $elm (@{$Sary}) {
         my (@p,$curr);
-        @p = split /\s+/o, $_;
+        @p = split /\s+/o, $elm, 2;
         $curr = (lc($p[0]));
-        defined(tag{$curr}) && do { $tag{$curr}->($p[1]); next; };
+        # print STDERR "#@#--> $p[0] $p[1] --".&printvals(\%val)."\n";
+        defined($tag{$curr}) && do { $tag{$curr}->($p[1]); next; };
         push @{ $val{'other'} }, $elm;
     }; # foreach $elm
     defined($val{'strand'}) || do {
@@ -3296,12 +3303,20 @@ sub process_subject_fields() {
     scalar(keys %val) == 6 && do {
         @{ $Tary } = ( $val{'target'}, undef, undef, $val{'start'}, $val{'end'},
                        undef, $val{'strand'}, $val{'frame'}, 
-                       join(' ;\t', @{ $val{'other'} }) );
+                       join(" ;\t", @{ $val{'other'} }) );
         return 'OK';
     };
     print STDERR "## SUBJECT-FIELDS NUMBER ERROR ($.): @{$Sary} \n";
     return 'FIELD';
 } # process_subject_fields
+sub printvals() {
+    my $hsh = shift;
+    my $str = '';
+    foreach my $q (qw( target start end strand frame )) {
+        $str .= defined($hsh->{$q}) ? ">".$hsh->{$q}."<" : ">*???*<";
+    };
+    return $str;
+} # printvals
 @
 
 
@@ -7584,7 +7599,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.22 2002-04-30 18:02:19 jabril Exp $
+# $Id: humus.nw,v 1.23 2002-05-01 15:52:21 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7937,15 +7952,15 @@ ipcs -m | grep jabril | gawk '{print $2}' | while read n; do ipcrm shm $n; done;
 #
 $BIN/viewstatustbl.pl | enscript -1C -Gjf Courier5 -M A4
 # homology results quick summary
-for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '################################################### CHR '$n' #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}.report; }; { echo '########################################## CHR '$n'_random #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}_random.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}_random.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}_random.report; }; } ; done 2>&1 | prtcode ;
+( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}.report ); } ; done ; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '########################################## CHR '$n'_random #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}_random.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}_random.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}_random.report; }; } ; done ) 2>&1 | prtcode ;
 # gene-pred results quick summary
-for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '################################################### CHR '$n' #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n} ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n}; }; echo ''; { echo '########################################## CHR '$n'_random #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}_random.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n}_random ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}_random.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n}_random; }; echo ''; } ; done 2>&1 | prtcode ;
+( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n} ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n} ); }; echo ''; } ; done ; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '########################################## CHR '$n'_random #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}_random.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n}_random ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}_random.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n}_random; }; echo ''; } ; done ) 2>&1 | prtcode ;
 # gene-pred evaluation quick summary
 # source $WORK/.bash_VARS ; $BIN/stepper.pl --step HSAP_GP_ANNOTATION:HSAP_GP_REFSEQ,HSAP_GP_ENSEMBL,HSAP_GP_GENSCAN,HSAP_GP_GENSCAN_EVAL --step HSAPgpa_MMUSpha_WUTBLASTX:EVALUATING_SRs --step GENEID_STD:GENEID_EVALUATION --step SGP_HSAPgpa_MMUSpha_TBX:SGP_EVALUATION  > $HUMUS/tmp/.err/_ALL_eval_t.err  2>&1 ;
 #
 egrep 'Error:|segmentation fault' $HUMUS/chr*/annotation/20011222/genscan/eval/chr*.genscan_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/tblastx/20020425/eval/chr*.sr_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/geneid/20011222/eval/chr*.geneid_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr*.sgp_*.[fr]?? ;
 #
-for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENSCAN'; cat $HUMUS/chr${N}/annotation/20011222/genscan/eval/chr${n}.summary ; echo '### SRs'; cat $HUMUS/chr${N}/tblastx/20020425/eval/chr${n}.summary ; echo '### GENEID';  cat $HUMUS/chr${N}/geneid/20011222/eval/chr${n}.summary ; echo '### SGP';  cat $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}.summary ); };  echo ''; { echo '################################################### CHR '$n'_random #####'; echo '### GENSCAN'; cat $HUMUS/chr${N}/annotation/20011222/genscan/eval/chr${n}_random.summary ; echo '### SRs'; cat $HUMUS/chr${N}/tblastx/20020425/eval/chr${n}_random.summary ; echo '### GENEID';  cat $HUMUS/chr${N}/geneid/20011222/eval/chr${n}_random.summary ; echo '### SGP';  cat $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}_random.summary; };  echo ''; } ; done 2>&1  > $HUMUS/evaluations/EVAL.summary ;
+( for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENSCAN'; cat $HUMUS/chr${N}/annotation/20011222/genscan/eval/chr${n}.summary ; echo '### SRs'; cat $HUMUS/chr${N}/tblastx/20020425/eval/chr${n}.summary ; echo '### GENEID';  cat $HUMUS/chr${N}/geneid/20011222/eval/chr${n}.summary ; echo '### SGP';  cat $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}.summary ); };  echo ''; } ; done ; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '################################################### CHR '$n'_random #####'; echo '### GENSCAN'; cat $HUMUS/chr${N}/annotation/20011222/genscan/eval/chr${n}_random.summary ; echo '### SRs'; cat $HUMUS/chr${N}/tblastx/20020425/eval/chr${n}_random.summary ; echo '### GENEID';  cat $HUMUS/chr${N}/geneid/20011222/eval/chr${n}_random.summary ; echo '### SGP';  cat $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}_random.summary; };  echo ''; } ; done ) 2>&1  > $HUMUS/evaluations/EVAL.summary ;
 $BIN/process_eval.pl    $HUMUS/evaluations/EVAL.summary > $HUMUS/evaluations/EVAL_prog.summary ;
 $BIN/process_eval.pl -t $HUMUS/evaluations/EVAL.summary > $HUMUS/evaluations/EVAL_test.summary ;
 enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL.summary ;
