@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: chr15q.nw,v 1.3 2002-03-16 17:19:17 gparra Exp $ 
+% # $Id: chr15q.nw,v 1.4 2002-10-11 14:12:35 gparra Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -13,9 +13,6 @@
 %% pstricks
 \usepackage[dvips]{pstcol}
 \usepackage{pstricks}
-%\usepackage{pst-node}
-%\usepackage{pst-char}
-%\usepackage{pst-grad}
 %% bibliography
 \usepackage{natbib}
 %% latex2html
@@ -24,21 +21,8 @@
 \usepackage{htmllist} 
 %% tables    
 \usepackage{dcolumn}
-%\usepackage{colortbl}
-%\usepackage{multirow}
-%\usepackage{hhline}
-%\usepackage{tabularx}
-%% seminar
-%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
-%% draft watermark
-%\usepackage[all,dvips]{draftcopy}
-%\draftcopySetGrey{0.9}
-%\draftcopyName{CONFIDENTIAL}{100}
 %% layout
 \usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
-%\usepackage{lscape}
-%\usepackage{rotating}
-%\usepackage{multicol}
 %% fonts
 \usepackage{times}\fontfamily{ptm}\selectfont
 \usepackage{t1enc}
@@ -49,20 +33,17 @@
 \let\nwdocspar=\par                    %
 
 \input defs.tex % from <LaTeX new definitions> chunk
+\input ColorDefs.tex
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \begin{document}
 %
-<<HIDE: LaTeX new definitions>>=
+
 %%%%% Colors for gff2ps
-\input ColorDefs.tex
 
 %%%%% New Commands are defined here
-\newcommand{\sctn}[1]{\section{#1}}
-\newcommand{\subsctn}[1]{\subsection{#1}}
-\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 \newcommand{\todo}[1]{
   \vskip 3ex
@@ -85,26 +66,11 @@
   \item[$\triangleright$] [\textit{Section}~\ref{#2}, 
                            \textit{page}~\pageref{#2}]\\ {#1}
 } % newcommand todoitem
-<<HIDE: new LaTeX commands>>
-
-%%%%% PSTRICKs definitions
-\pslongbox{ExFrame}{\psframebox}
-\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
-\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
-% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
-<<HIDE: new LaTeX pstricks>>
-
-%%%%% global urls
-% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-<<HIDE: new LaTeX urls>>
 
 %%%%% defs
 \def\noweb{\textsc{noweb}}
 \def\ps{\textsc{PostScript}}
-<<HIDE: new LaTeX definitions>>
 
-%%%%% TODO defs
-<<HIDE: new defs TODO>>
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -141,6 +107,7 @@ Universitat Pompeu Fabra\\[2ex]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%% Setting text for footers and headers
+\begin{latexonly}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
@@ -151,18 +118,6 @@ Universitat Pompeu Fabra\\[2ex]
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
 %
-@
-
-<<HIDE: new LaTeX commands>>=
-@ 
-<<HIDE: new LaTeX pstricks>>=
-@ 
-<<HIDE: new LaTeX urls>>=
-@ 
-<<HIDE: new LaTeX definitions>>=
-@ 
-<<HIDE: new defs TODO>>=
-@ 
 
 \thispagestyle{empty}
 
@@ -197,6 +152,12 @@ Universitat Pompeu Fabra\\[2ex]
 \end{titlepage} %'
 
 %
+\end{latexonly}
+\begin{htmlonly}
+\textbf{\Huge  {Deep genomic analysis on chr15q}}\\ 
+\end{htmlonly}
+
+
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -209,192 +170,262 @@ Universitat Pompeu Fabra\\[2ex]
 \renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
 
 \tableofcontents
-\listoftables
-\listoffigures
+%\listoftables
+%\listoffigures
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: chr15q.nw,v 1.3 2002-03-16 17:19:17 gparra Exp $$>$ }
+{\small < \verb$Id: chr15q.nw,v 1.4 2002-10-11 14:12:35 gparra Exp $ > }
 \end{center}
 
-%%%%%%%%%%%%%%%%%%%% MAINMATTER
 
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment}
-
-\sctn{Schedule}
-\subsctn{Obtain all the available information and try to map them in the subsequence}
-\begin{itemize}
-\item Goldenpath: refseq and ensembl.
-\item Celera: celera genes.
-\end{itemize}
-
-All the annotations must have the same starting point (for example and STS, the end or the start site of a known gene). We should have the data in three different formats: gff, nucleodite CDS in fasta, and translatet amino acids in fasta.
-
-\subsctn{Compare genomic sequences from different sources (goldenpath, celera and ncbi)}
-\begin{itemize}
-\item Nucleotide level: Using Blat2seq to compare the genomic sequences.
-\item Gene order: Comparing the order of the annotated genes. Run blasp to find homologous annotations in different datasets and check the order.
-\end{itemize}
-From the results choose the most reliable sequence for the complete annotation analysis.
-
-\subsctn{Searching for other known genes not mapped in the sequence}
-Run blat or sshasa, comparing all celera, ensembl and refseq genes againts the genomic sequence  to find other known genes. Compare the CDS with a very restrictive parameters to avoid false positives.
-\subsctn{Plot all these results using gff2ps}
-\end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\sctn{Introduction}
-The goal of this project is to improve the public annotation of a concrete region of chromosome 15. We want to gather all the available information from different resources, and aplay new gene finding methods to obtain a good quality annotation of all the putative genes.
-
-The studied sequence is delimited by two known genes:
-\begin{itemize}
-%\item LOXL1. PubMed on Product: lysyl oxidase-like 1
-\item NEO1. PubMed on Product: neogenin homolog 1
-\begin{itemize}
-%\item RefSeq: NM\_005576 
-\item RefSeq:NM\_002499 
-\item Band: 15q24.1
-\end{itemize}
-\item BLM.  PubMed on Product: Bloom syndrome protein
-\begin{itemize}
-\item RefSeq: NM\_000057
-\item Band: 15q26.1
-\end{itemize}
-\end{itemize}
-
-These genes will be easy to locate between different human assemblies or different releases. Therefore we decided to analyze the sequence between 5000 bp upstream the transcription start site of LOXL1 and 5000 bp downstream of the BLM stop codon.
-
-\subsctn{Datasets}
-There are three different assemblies from the Human genome:
-\begin{itemize}
-\item golden path  from http://genome.cse.ucsc.edu/ \\
-August 2001 release from golden path. \\
-Mapped positions \\
-LOX1L primer 73858868  73858917\\
-BLM primer 95868873  95868922\\
-Subsequence length: 22,020,055 bp (number of N in the raw sequence: 4,352,983)
-
-\item Celera genomics \\
-Subsequence length: 17,764,320  bp (number of N in the raw sequence: 971,003)
-
-\item golden path  from http://genome.cse.ucsc.edu/ \\
-December 2001 release from USCS (build 28 NCBI). \\
-Mapped positions \\
-NEO1 primer\\
-BLM primer \\
-Subsequence length: bp (number of N in the raw sequence: )
-
-\end{itemize}
-
-\section{Analisys of goldenpath sequence}
-
-The goldenpath and the ensembl annotation over chr15 (August 2001 release) were extracted. We found 122 refseq mRNA entries mapped on this region (199 can be translated with out stop codons in frame). The ensembl annotation contains 262 ensembl transcripts. We have also extracted the 370 genscan predictions. 
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment}
 
-\end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction} 
+The goal of this project is to improve the public annotation of a
+concrete region of chromosome 15. We want to gather all the available
+information from different resources, and apply new gene finding
+methods to obtain a good quality annotation of all the putative genes.
+
+\section{Data structure}
+This projects is stored in the following directory:
+
+/projects/chr15q/
+\\
+
+\noindent The data is in four main directories:
+\\
+
+\begin{tabular}{l|l} 
+annotation/ & contains the data of all the features associated with the sequences\\
+fasta/ & contains the sequence (masked and unmasked) in fasta format.  \\
+gff2ps/ & contains the plot in \ps\ format.\\
+apollo/ & contains the features coordinates formatted for the apollo viewer\\
+\end{tabular}
+\\
+
+\noindent The previous directories contain subdirectories with the
+release of the sequence analyzed (for example cel for Celera genomics
+sequence or gp\_aug01 for goldenpath August 2001).
+
+\section{Sequence Analysis} 
+
+The human genome sequence is continuously improved: gaps are sequenced,
+problematic regions are reassembled and reorganized. Different releases
+have appeared since we began this project. We have moved from old releases
+to new releases to improve the quality of our annotations. The following
+sections describe the work done on each release.
+
+\subsection{Celera genomics} 
+
+In the first approach the Celera genomic sequence was obtained from
+the original DVD distributed by Science.  The sub-sequence between
+LOXL1 and BLM gene containing 17,764 Kb (971 Kb were Ns) were
+obtained. We tried to obtain all the available information through the
+Celera subscription, but we had several limitations. Celera web
+resources were too restrictive that we could not easily obtain the
+information of the entire region. Finally, we decided to work on the
+public available sequences that seemed to have a similar quality and
+there were a lot of data easily accessible.  We obtained and mapped ???
+Celera genes.
+
+
+\subsection{August 6, 2001 release from USCS.}
+
+The studied sequence is delimited by LOX1L (position 73,858,868) and
+BLM (position 95,868,922). It contains 22,020 kb (4,352 kb of gaps
+regions Ns)
+
+The golden path annotations were mapped by Jim Kent using BLAT. There
+were all the ensembl genes, refseq and genscan genes.  There were a
+problem with the mapped genes. Some genes are partially mapped and
+they can contain stop codons in frame.
+
+The golden path annotations over the chr15 were extracted. We found 122
+refseq mRNA entries mapped on this regions (99 can be translated
+without stop codons in frame). The ensembl annotations contains 262
+ensembl transcripts. 370 Genscan predictions were also extracted.
+  
+Apollo was used o visualize all the information.
+
+
+\subsection{December 22, 2001 release from USCS (build 28 NCBI).}
+
+This release was the first common release between USCS and NCBI.  All
+the genomic data coming from Ensembl was annotated on the same
+sequence. Ensembl is a software system which produces and maintains
+automatic annotation on eukaryotic genomes. Ensembl annotations are
+more reliable that goldenpath annotations.
+
+The studied sequence is delimited by ARI1 (NM\_002499, coordinate
+69,754,405) and BLM (NM\_000057, coordinate 88,310,534). It contains
+18,556 kp (1,304 kb of gaps regions Ns) The information was taken
+directly from the Ensembl server through the apollo interface. An
+extra advantage, is that the links to ensembl are accesible thougth
+the apollo interface. Therefore, clicking on the genes we can access to
+all the information of a gene.
+
+\subsubsection*{Data}
+Genomic data were obtained mainly from the Ensembl server. Celera genes and the IRO mRNAs were also mapped in the sequence using blast. Some gene predictions programs (geneid, SGP2 and genscan) were used to find new putative genes. 
+
+\begin{itemize}
+\item Ensembl:
+  \begin{itemize}
+	 \item \htmladdnormallink{Ensembl genes}{file:/projects/chr15q/annotation/gp_dec01/ensembl/all.gff}
+, 81 genes containing 89 transcripts not overlapping known genes.
+	 \item \htmladdnormallink{Known genes from Hugo and sptrembl}{file:/projects/chr15q/annotation/gp_dec01/hugo/all.gff}, 122  genes containing 180 transcripts.
+     \item \htmladdnormallink{RepeatMasker}{file:/projects/chr15q/annotation/gp_dec01/RepeatMasker/all.gff}
+     \item \htmladdnormallink{trace}{file:/projects/chr15q/annotation/gp_dec01/trace/all.gff}
+     \item \htmladdnormallink{mRNA}{file:/projects/chr15q/annotation/gp_dec01/human_mrna/all.gff}
+     \item \htmladdnormallink{EST}{file:/projects/chr15q/annotation/gp_dec01/est/all.gff}
+  \end{itemize}
+\item \htmladdnormallink{SGP2}{file:/projects/chr15q/annotation/gp_dec01/SGP/all.gff}, 354 predicted genes using mouse homology.
+\item \htmladdnormallink{geneid}{file:/projects/chr15q/annotation/gp_dec01/geneid/all.gff}, 277 ab initio predicted genes.
+\item \htmladdnormallink{celera genes}{file:/projects/chr15q/annotation/gp_dec01/celgenes/all.gff}, 56 partially mapped genes.
+\item \htmladdnormallink{cDNAs from IRO}{file:/projects/chr15q/annotation/gp_dec01/IRO/all.gff}, 64 partially mapped mRNA.
+\end{itemize}
+
+\subsubsection*{Evaluations}
+
+Some evaluations have been done using the known genes as reference.
+This evaluation has been done use as a reference (``real genes''), Hugo + sptrembl + Ensembl genes. Some of the genes have different overlapping transcripts. Evaluation programs can not deal this. Therefore a projection of all the transcripts have been done to make the evaluation. We compute the sensitivity: proportion of the actual coding nuleotides (projected Hugo + sptrembl + Ensembl transcripts) that have been  correctly predicted,  and the specificity: proportion of predicted coding sequences that are actually coding. To summarize both we compute the correlation coefficient (CC).
+\\
+\begin{center}
+\begin{tabular}{l|ccc}
+          &    SN  &    SP  &    CC   \\
+SGP2      &   0.61 &   0.68 &   0.64  \\
+geneid    &   0.56 &   0.66 &   0.61  \\
+genscan   &   0.68 &   0.52 &   0.59  \\  
+\end{tabular}
+\end{center}
+
+
+
+\noindent We also analyzed the non-overlapping features between different sets:
+\begin{itemize}
+\item 27  mapped IRO genes non overlapping known + ensembl genes
+\item 101 SGP2 predictions not overlapping known + ensembl genes
+\end{itemize}
+
+\noindent A fraction of these genes are good candidates to be novel genes and should be analyzed deeply.
+
+\begin{htmlonly}
+
+\subsubsection*{Visualization}
+The apollo parameter file need to see the file could be found in 
+\htmladdnormallink{this parameter}{./data/genome_tiers.dat} \\
+To configure apollo to use the visualization parameter you must modify the line containing ``Types'' in your ~/.apollo/unix.cfg. The path in ``Types'' description must follow the new parameter file.\\ 
+Different sets of predictions can be found to be visualized using apollo:
+\begin{tabular}{ll}
+\htmladdnormallink{set1}{set1} & known genes + Ensembl + Iro + human mRNA\\
+\htmladdnormallink{set2}{set2} & known genes + Ensembl + Iro + Celera + mRNA + SGP2 + geneid + genscan +celera \\
+\htmladdnormallink{set3}{file:/projects/chr15q/apollo/gp_dec01/all_data.gff} & All the available data\\
+\end{tabular}
+
+Plot in \ps\ can be found \htmladdnormallink{here}{/projects/chr15q/gff2ps/gp_dec01/plot.ps}.
+\end{htmlonly}
+
+
+\subsection{Jun. 28, 2002 (hg12):from USCS (build 30 NCBI).}
+To be done ...
+
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
-\sctn{Appendix section}
+\section{Appendix section}
+\subsection{CVS survival commands}
+How to download this document through the cvs server and modify the files you can use the following commands.
 
-\subsctn{Golden path annotation with stop codons in frame}
+\begin{itemize}
+\item login: Sign on to the CVS server so you have permission to check in and check out:\\
+cvs login
 
-Some of the annotated refseq genes could not be translatet into proteins because they contained stop codons in frame. 
+\item check out: Get the most recent version of a project and copy it IN a new subfolder containing all the file :\\
+    cvs co projects/chr15q
 
-<<Annation with stop codons>>=
-NM_000126
-NM_000745
-NM_001135
-NM_001150
-NM_003847
-NM_004213
-NM_004255
-NM_004383
-NM_004644
-NM_004809
-NM_005576
-NM_006165
-NM_006715
-NM_013227
-NM_014163
-NM_014272
-NM_014300
-NM_016073
-NM_018652
-NM_022163
-NM_024776
-NM_025084
-NM_032568
-@ 
+\item update: Adds any new file or version in your working copy:\\
+    cvs update
+
+\item commit :Send changes made to files in your working directory up to the cvs server:\\
+    cvs ci  -m ``message defining the changes'' FILE\\
+(if you use emacs just check in the control version menu)
+
+
+\item release: Sign out with the CVS server and remove the working directory:\\
+    cvs release -d /projects/chr15q
+\end{itemize}
+
+To obtain the current document, type the following commands:
+\begin{verbatim}
+    cvs login
+    cvs co projects/chr15q 
+\end{verbatim}
+Modify the variable WORK in the nw2tex file to the corresponding path
+of the chr15q.nw file in you tree directory. Then, execute nw2tex file. All
+the document files will be deployed in the \$WORK/doc/ directory and the web
+page will be generated in \$WORK/doc/chr15q/index.html.
+
+
+\subsection{Web references}
+\begin{itemize}
+\item Genomic data\\
+\htmladdnormallink{http://www.ensembl.org}{http://www.ensembl.org}\\
+\htmladdnormallink{http://genome.cse.ucsc.edu/}{http://genome.cse.ucsc.edu}\\
+\htmladdnormallink{http://www.ensembl.org/apollo/}{http://www.ensembl.org/apollo/}
+\item Latex\\
+\htmladdnormallink{http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/}{http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/}\\
+\htmladdnormallink{http://www.cs.stir.ac.uk/guides/latex/guide.html}{http://www.cs.stir.ac.uk/guides/latex/guide.html}\\
+\htmladdnormallink{http://cipres.cec.uchile.cl/~admcons/manuales/latex.html}{http://cipres.cec.uchile.cl/~admcons/manuales/latex.html}
+\item CVS\\
+\htmladdnormallink{http://cvsbook.red-bean.com/}{http://cvsbook.red-bean.com/}\\
+\htmladdnormallink{http://cvsbook.red-bean.com/cvsbook.ps}{http://cvsbook.red-bean.com/cvsbook.ps}
+\item noweb\\
+\htmladdnormallink{http://www.eecs.harvard.edu/~nr/noweb/}{http://www.eecs.harvard.edu/~nr/noweb/}\\
+\htmladdnormallink{http://www.eecs.harvard.edu/~nr/noweb/onepage}{http://www.eecs.harvard.edu/~nr/noweb/onepage}
+\end{itemize}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
 \end{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\sctn{BASH commad lines}
+\begin{latexonly}
+\section{BASH commad lines}
 
-<<BASH commands1 >>=
-# Build directory structure
-mkdir $ANALYSIS/fasta $ANALYSIS/annotations $ANALYSIS/data/ \
-  $ANALYSIS/data/  $ANALYSIS/data/boundary_genes \
-  $ANALYSIS/data/boundary_genes/LOXL1  $ANALYSIS/data/boundary_genes/BLM \
-# All the information about the boundary genes have been download.   
-# We generate two primers 50bp length from the begining and the end 
-# of  LOXL1 and BLM respectively
-#
-SS $ANALYSIS/data/boundary_genes/LOXL1/NM_005576.fa 306 355 \
-   > $ANALYSIS/data/boundary_genes/LOXL1/LOXL1_primer.fa 
-SS $ANALYSIS/data/boundary_genes/ARIH1/NM_005744.fa 315 364 \
-   > $ANALYSIS/data/boundary_genes/ARIH1/ARIH1_primer.fa 
-SS $ANALYSIS/data/boundary_genes/BLM/NM_000057.fa 4279 4328 \
-   > $ANALYSIS/data/boundary_genes/BLM/BLM.primer.fa 
-# we will substract the sequence betwwen 5000 bp upstream  LOXL1_primer.fa ATG
-# and 5000 bp downstream BLM.primer.fa TAA.
+<<CELERA sequence >>=
+# Obtaining the genomic sequences
+# In the first approach we use  LOXL1 and BLM genes to delimitate 
+# the boundaries of the sequence.
 
-###############
-# GOLDEN PATH #
-export GP="/seq/genomes/H.sapiens/golden_path_20010806";
-# Obtaining the positions of the primers in the golden path seq
-# ~/ssaha_v20_linux $ANALYSIS/data/boundary_genes/BLM/BLM.primer.fa \
-#    $GP/chromFaMasked/15/chr15.fa.masked \
-#    -sf fasta -sm 10 -wl 5 -qt protein -st protein
-LOX1L primer 73858868  73858917
-BLM primer 95868873  95868922
-# So, we need from 73858868 - 5000 to 95868922 + 5000 => 73853868 .. 95873922
-# the fragment length is 22,020,055 bp  
-SS $GP/chromFaMasked/15/chr15.fa.masked \
-  73853868 95873922 > $ANALYSIS/fasta/gp_aug01/msk/gp_aug01
-SS $GP/chromosomes/chr15.fa \
-  73853868 95873922 > $ANALYSIS/fasta/gp_aug01/raw/gp_aug01
-#To check the result: 
-# SS  fasta/gp_aug01/msk/gp_aug01 5001 5003
-# ATG OK!
-# SS  fasta/gp_aug01/msk/gp_aug01  22015053 22015055
-# TAA OK! 
-
-##########
-# CELERA #
+# SSAHA is a software tool for very fast matching and alignment of DNA sequences
+# It achieves its fast search speed by converting sequence information 
+# into a `hash table' data structure, which can then be searched very #
+# rapidly for matches.
+# http://www.sanger.ac.uk/Software/analysis/SSAHA/
+# The program was used in this initial aproach to map the two boundaries of 
+# the interesting region.
+ 
 ~/ssaha_v20_linux $ANALYSIS/data/boundary_genes/LOXL1/LOXL1_primer.fa  \
    $ANALYSIS/_tmp/celera_ini/cel_chr15.fa  -sf fasta -sm 10 -wl 5  \
     -qt protein -st protein
-LOXL1 primer 6653880 to 6653929
+# LOXL1 primer 6653880 to 6653929
+
 ~/ssaha_v20_linux $ANALYSIS/data/boundary_genes/BLM/BLM.primer.fa \
    $ANALYSIS/_tmp/celera_ini/cel_chr15.fa  -sf fasta -sm 10 -wl 5 \
    -qt protein -st protein
-BLM primer 24408150 to 24408199
+# BLM primer 24408150 to 24408199
+
 # So, we need from 6653880 - 5000 to 24408199 + 5000 => 6648880 .. 24413199
+# SS is a program to substract, given two coordinates, 
+# the subsequence of a fasta sequence.
 SS  $ANALYSIS/_tmp/celera_ini/cel_chr15.fa 6648880 24413199 \
     > $ANALYSIS/fasta/cel/raw/cel_chr15.fa
 #To check the result: 17764320
@@ -402,33 +433,82 @@ SS  $ANALYSIS/_tmp/celera_ini/cel_chr15.fa 6648880 24413199 \
 # ATG OK!
 # SS  $ANALYSIS/fasta/cel/raw/cel_chr15.fa  17759317 17759320
 # TAA OK! 
+# Parsing celera obtained from Lauro DVD
+sed 's/^[0-9]*,\(hCG.*\),.*\(hCT.*\),.*\(hCP[0-9]*\).*,*"\\(.*,[0-9][0-9][0-9],[0-9][0-9][0-9]\)".*[^0-9]\([0-9]*[0-9][.|,][0-9][0-9][0-9][.|,][0-9][0-9][0-9]\).*$/\1 \2 \3 \4 \5/' \
+    $ANALYSIS/Celera_Cr15.csv |  sed 's/\.//g;s/,//g'  \
+    | gawk '{xifra1=substr($4,1,1);xifra2=xifra1+1; 
+             if (substr($4,2,1)<=substr($5,1,1)) $5=xifra1$5; 
+             else $5=xifra2$5; print}' \
+    > $ANALYSIS/celGenes.tbl
 
-#####################
-# GOLDEN PATH dec01 #
-export GP="/seq/genomes/H.sapiens/golden_path_20011202";
-ARIH1  primer 69759405  69759454
-BLM primer 88305485  88305534
-# So, we need from 69759405 - 5000 to 88305534 + 5000 => 69754405 .. 88310534
-# the fragment length is 18,556,129 bp  
+gawk '{print $3}' $ANALYSIS/celGenes.tbl | sort  > tmp~
+
+FastaToTbl /seq/genomes/H.sapiens/celera_1.0_20010216/prs_protein.fasta \
+   | sed 's/prs_protein|//' | join - tmp~ | TblToFasta \
+   > $ANALYSIS/celGenes.fa
+
+gawk '{print $2}' $ANALYSIS/celGenes.tbl | sort  > tmp~
+
+FastaToTbl /seq/genomes/H.sapiens/celera_1.0_20010216/prs_transcript.fasta \
+   | sed 's/prs_transcript|//' | join - tmp~ | TblToFasta \
+   > $ANALYSIS/celGenes.fa
+
+## Proteins not found in the DVD data.
+# from the original 540 proteines only 347 were found
+# build a database with the ensPep.txt and refPep.txt
+# Filter the entries within the region for both datasets.
+
+@ 
+
+
+<<GOLDEN PATH August02, 2001>>=
+GP="/seq/genomes/H.sapiens/golden_path_20010806/database/";
+# Obtaining the positions of the primers in the golden path seq
+# ~/ssaha_v20_linux $ANALYSIS/data/boundary_genes/BLM/BLM.primer.fa \
+#    $GP/chromFaMasked/15/chr15.fa.masked \
+#    -sf fasta -sm 10 -wl 5 -qt protein -st protein
+LOX1L primer 73858868  73858917
+BLM primer 95868873  95868922
+# So, we need from 73858868 - 5000 to 95868922 + 5000 => 73853868 .. 95873922
+# the fragment length is 22,020,055 bp
 SS $GP/chromFaMasked/15/chr15.fa.masked \
-  69754405 88310534 > $ANALYSIS/fasta/gp_dec01/msk/gp_aug01
+  73853868 95873922 > $ANALYSIS/fasta/gp_aug01/msk/gp_aug01
 SS $GP/chromosomes/chr15.fa \
-  69754405  88310534 > $ANALYSIS/fasta/gp_dec01/raw/gp_aug01
-#To check the result: 
+  73853868 95873922 > $ANALYSIS/fasta/gp_aug01/raw/gp_aug01
+#To check the result:
 # SS  fasta/gp_aug01/msk/gp_aug01 5001 5003
 # ATG OK!
 # SS  fasta/gp_aug01/msk/gp_aug01  22015053 22015055
-# TAA OK! 
-# Ns=1,304,686 masked=8,120,364
-@ 
+# TAA OK!
 
-<<Goldenpath Annotations>>=
-################
-## GOLDENPATH ##
-# Annotations from golden path
+gawk '$2=="chr15" && $4>74000000 && $5<96000000{print $1}' $GP/ensGene.txt \
+       | join2 $GP/ensPep.txt | TblToFasta \
+   > $ANALYSIS/ensPep.fa
+# It's difficult to link the proteins with the mrna 
+gawk '$2=="chr15" && $4>74000000 && $5<96000000{gsub("NM","NP");print $1}' \
+    $GP/refGene.txt | join2 $GP/refPep.txt | wc 
+# Only 50 proteins were recovered therefore we will use our translated 
+# set of proteins containing 99 of the 129.
+FastaToTbl  $ANALYSIS/annotation/gp_aug01/refseq/prot/* | \
+     egrep -v "[A-Z]\*[A-Z]" | TblToFasta \
+   > $ANALYSIS/refPep.fa 
+
+# Running fasta with all the protein groups.
+pb --stats formatdb -i $ANALYSIS/refPep.fa  -o T -p T \
+    -n disk2/scratch/gparra/refPep
+pb --stats formatdb -i $ANALYSIS/ensPep.fa  -o T -p T \
+    -n disk2/scratch/gparra/ensPep
+
+pb blastall -p blastp -i $ANALYSIS/celGenes.fa -d disk2/scratch/gparra/ensPep \
+   -e 1e-10 -v 3 -b 3 -g F -F F > $ANALYSIS/cel_vs_ens.blasp
+parseblast $ANALYSIS/cel_vs_ens.blasp | gawk '$6>90{print $18}' | uniq | wc
+pb blastall -p blastp -i $ANALYSIS/celGenes.fa -d disk2/scratch/gparra/refPep \
+   -e 1e-10 -v 3 -b 3 -g F -F F > $ANALYSIS/cel_vs_ref.blasp
+parseblast $ANALYSIS/cel_vs_ref.blasp | gawk '$6>90{print $18}' | uniq | wc
+
 ##########
-# REFSEQ # 
-
+# REFSEQ #
+##########
 gawk '$2=="chr15" && $5 > 73853868 && $4 < 95873922'  \
     $GP/database/refGene.txt \
     > $ANALYSIS/annotation/gp_aug01/refseq/gp/gp_aug01
@@ -461,8 +541,9 @@ FastaToTbl $ANALYSIS/annotation/gp_aug01/refseq/cds/* \
 # From the 122 refseq 23 have stop codons
 
 ###########
-# ENSEMBL # not still available in galdenpath aug_01 
-#gawk '$2=="chr15" && $5 > 73853868 && $4 < 95873922'  $GP/database/ensGene.txt
+# ENSEMBL #
+###########
+gawk '$2=="chr15" && $5 > 73853868 && $4 < 95873922'  $GP/database/ensGene.txt 
 # From ensembl server: We have to download from the http export page
 gawk 'BEGIN{OFS="\t"}
       {print "chr15gp_aug01","ensembl","exon", $4+1, $5+1, $6,$7,$8,$10;}' \
@@ -477,117 +558,110 @@ gawk 'BEGIN{OFS="\t"}\
    > $ANALYSIS/_tmp/ensembl_data/exportview2.final
 
 cat  $ANALYSIS/_tmp/ensembl_data/exportview?.final | sort +3n \
-   > $ANALYSIS/annotation/gp_aug01/ensembl/gff/gp_aug01.cds 
-
- 
-###########
-# GENSCAN
-gawk '$2=="chr15" && $5 > 73853868 && $4 < 95873922'  $GP/database/genscan.txt \
-   | $BIN/gp2gff.awk |  \
-   gawk '{OFS="\t";$1="chr15gp_aug01";$2="genscan";$3="exon";\
-       $4=$4-73853868+1;$5=$5-73853868+1;print}' \
-    > $ANALYSIS/annotation/gp_aug01/other/gff/genscan
-
-#---### VISUALIZATION ###---#
-# Plotting all togheter
-GFFIN="$ANALYSIS/annotation/gp_aug01/refseq/gff/gp_aug01.exon" ;
-GFFIN="$GFFIN $ANALYSIS/annotation/gp_aug01/refseq/gff/gp_aug01.cds" ; 
-GFFIN="$GFFIN $ANALYSIS/annotation/gp_aug01/ensembl/gff/gp_aug01.cds" ; 
-GFFIN="$GFFIN $ANALYSIS/annotation/gp_aug01/other/gff/genscan" ; 
-run_GFF2PS gp_aug01 "$GFFIN"  chr15q
-# Apollo files
-cat $ANALYSIS/annotation/gp_aug01/refseq/gff/gp_aug01.exon \
-    $ANALYSIS/annotation/gp_aug01/ensembl/gff/gp_aug01.cds \
-    $ANALYSIS/annotation/gp_aug01/other/gff/genscan \
- > $ANALYSIS/apollo/gp_aug01/all.gff
-
-@
-%$
-
-<<Parsing celera genes>>=
-# Parsing celera obtained from Lauro DVD
-sed 's/^[0-9]*,\(hCG.*\),.*\(hCT.*\),.*\(hCP[0-9]*\).*,*"\(.*,[0-9][0-9][0-9],[0-9][0-9][0-9]\)".*[^0-9]\([0-9]*[0-9][.|,][0-9][0-9][0-9][.|,][0-9][0-9][0-9]\).*$/\1 \2 \3 \4 \5/' $ANALYSIS/Celera_Cr15.csv |  sed 's/\.//g;s/,//g'  | gawk '{xifra1=substr($4,1,1);xifra2=xifra1+1; if (substr($4,2,1)<=substr($5,1,1)) $5=xifra1$5; else $5=xifra2$5; print}' > $ANALYSIS/celGenes.tbl
-
-gawk '{print $3}' $ANALYSIS/celGenes.tbl | sort  > tmp~
-
-FastaToTbl /seq/genomes/H.sapiens/celera_1.0_20010216/prs_protein.fasta | sed 's/prs_protein|//' | join - tmp~ | TblToFasta > $ANALYSIS/celGenes.fa
-
-gawk '{print $2}' $ANALYSIS/celGenes.tbl | sort  > tmp~
-
-FastaToTbl /seq/genomes/H.sapiens/celera_1.0_20010216/prs_transcript.fasta | sed 's/prs_transcript|//' | join - tmp~ | TblToFasta > $ANALYSIS/celGenes.fa
-
-Proteins not found in the DVD data.
-# from the original 540 proteines only 347 were found
-# build a database with the ensPep.txt and refPep.txt
-# Filter the entries within the region for both datasets.
-GP="/seq/genomes/H.sapiens/golden_path_20010806/database/";
-
-gawk '$2=="chr15" && $4>74000000 && $5<96000000{print $1}' $GP/ensGene.txt \
-       | join2 $GP/ensPep.txt | TblToFasta \
-   > $ANALYSIS/ensPep.fa
-# It's difficult to link the proteins with the mrna 
-gawk '$2=="chr15" && $4>74000000 && $5<96000000{gsub("NM","NP");print $1}' \
-    $GP/refGene.txt | join2 $GP/refPep.txt | wc 
-# Only 50 proteins were recovered therefore we will use our translated 
-# set of proteins containing 99 of the 129.
-FastaToTbl  $ANALYSIS/annotation/gp_aug01/refseq/prot/* | \
-     egrep -v "[A-Z]\*[A-Z]" | TblToFasta \
-   > $ANALYSIS/refPep.fa 
-
-# Running fasta with all the protein groups.
-pb --stats formatdb -i $ANALYSIS/refPep.fa  -o T -p T \
-    -n disk2/scratch/gparra/refPep
-pb --stats formatdb -i $ANALYSIS/ensPep.fa  -o T -p T \
-    -n disk2/scratch/gparra/ensPep
-
-pb blastall -p blastp -i $ANALYSIS/celGenes.fa -d disk2/scratch/gparra/ensPep \
-   -e 1e-10 -v 3 -b 3 -g F -F F > $ANALYSIS/cel_vs_ens.blasp
-parseblast $ANALYSIS/cel_vs_ens.blasp | gawk '$6>90{print $18}' | uniq | wc
-pb blastall -p blastp -i $ANALYSIS/celGenes.fa -d disk2/scratch/gparra/refPep \
-   -e 1e-10 -v 3 -b 3 -g F -F F > $ANALYSIS/cel_vs_ref.blasp
-parseblast $ANALYSIS/cel_vs_ref.blasp | gawk '$6>90{print $18}' | uniq | wc
-
-celera 347
-ensembl 251
-refseq 99
-
-122 cel 151 ensembl from 251 
-77  cel 78 refseq from 99    
+   > $ANALYSIS/annotation/gp_aug01/ensembl/gff/gp_aug01.cds
 @ 
 
-<<Obtaining the data>>=
+<<GOLDEN PATH December02, 2001>>=
+export GP="/seq/genomes/H.sapiens/golden_path_20011202";
+# Using the genome browser we set both genes.
+ARIH1  primer 69759405  69759454
+BLM primer 88305485  88305534
+# So, we need from 69759405 - 5000 to 88305534 + 5000 => 69754405 .. 88310534
+# the fragment length is 18,556,129 bp  
+SS $GP/chromFaMasked/15/chr15.fa.masked \
+  69754405 88310534 > $ANALYSIS/fasta/gp_dec01/msk/gp_aug01
+SS $GP/chromosomes/chr15.fa \
+  69754405  88310534 > $ANALYSIS/fasta/gp_dec01/raw/gp_aug01
+
 # We need the following information for the sequence:
 # The idea is to download the information from the ensembl server
 # Then we want to add some extra features not included in ensembl
 #
 # Golden path annotations
-# ensembl/  refseq/
-# Predictions
-# geneid/ SGP/
-# Others
-# celgenes/
-# - ### Obtaining each piece of information ### - # 
-# refseq/
-refGene.txt
-# ensembl/
-NOT AVALIABLE YET
-# geneid/
+# We use apollo to download the ensembl data. We can not download all the data 
+# togheter. It must be download in fragments of 1000000 bp
+# Join all the data
+cat $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl? | \
+   gawk '{OFS="\t";if($2=="genscan") $NF=$NF"_"$1;$1="chr15";print}' \
+   > $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff
+# Split the different types of information from the ensembl
+mkdir $ANALYSIS/annotation/gp_dec01/RepeatMasker/ \
+      $ANALYSIS/annotation/gp_dec01/ensembl/  \
+      $ANALYSIS/annotation/gp_dec01/hugo/ \
+      $ANALYSIS/annotation/gp_dec01/contigs/ \
+      $ANALYSIS/annotation/gp_dec01/trace/ \
+      $ANALYSIS/annotation/gp_dec01/SNPs/ \
+      $ANALYSIS/annotation/gp_dec01/genscan/ \
+      $ANALYSIS/annotation/gp_dec01/human_mrna/ \
+      $ANALYSIS/annotation/gp_dec01/markers/ \
+      $ANALYSIS/annotation/gp_dec01/IRO
+# Markers
+grep  epcr \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/markers/all.gff
+# RepeatMasker
+grep  RepeatMasker \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/RepeatMasker/all.gff
+# ensembl
+grep  ensembl \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/ensembl/all.gff
+# hugo
+egrep  "hugo|sptrembl" \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/hugo/all.gff
+# sequence
+grep sequence \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/contigs/all.gff
+# trace
+grep trace \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/trace/all.gff
+# variation
+grep variation \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/SNPs/all.gff
+# genscan
+grep genscan \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/genscan/all.gff
+# Human-mrna est
+egrep "human_mrna" \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download1/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/human_mrna/all.gff
+# est
+egrep "est" \
+   $ANALYSIS/annotation/gp_dec01/_tmp/ensembl_download1/ensembl.gff \
+   > $ANALYSIS/annotation/gp_dec01/est/all.gff
+
+
+
+########
+## Data apart from ENSEMBL
+
+## geneid/
+# geneid was run twice to obtain the simple gff output and the complete output
 mkdir $ANALYSIS/annotation/gp_dec01/geneid/gff \
  $ANALYSIS/annotation/gp_dec01/geneid/geneid
-geneid -vG $ANALYSIS/fasta/gp_dec01/masked/gp_dec01 \
-   gawk '{if ($1=="chr15") {$3="exon";OFS="\t";} else OFS=" "; print}'	\
-   > $ANALYSIS/annotation/gp_dec01/geneid/gff/gp_dec01
+# gff output
+geneid -vG $ANALYSIS/fasta/gp_dec01/masked/gp_dec01 | \
+   gawk '{if ($1=="chr15") {$3="exon";
+              $4+=69754405; $5+=69754405; OFS="\t";} else OFS=" "; 
+          print}'	\
+   > $ANALYSIS/annotation/gp_dec01/geneid/all.gff
+# complete output
 geneid -v -D $ANALYSIS/fasta/gp_dec01/masked/gp_dec01 \
 	> $ANALYSIS/annotation/gp_dec01/geneid/geneid/gp_dec01
-gawk "{ if (\$2==\"Gene\") file=++c; 
-   print \$0 > \"$ANALYSIS/annotation/gp_dec01/geneid/geneid/gene_\"file }" \
+gawk "{ if (\$2 == \"Gene\") file=++c; 
+        if (NF > 11) {$2+=69754405 ; $3+=69754405 };
+   print \$0 > \"$ANALYSIS/annotation/gp_dec01/geneid/out/gene_\"file }" \
      $ANALYSIS/annotation/gp_dec01/geneid/geneid/gp_dec01
-
-# SGP/
-NOT AVALIABLE YET
-# celgenes/
+	
+## Celera genes celgenes/
 xdformat -o gp_dec01 -n gp_dec01
-ls  $ANALYSIS/data/blast_celPep-gpPep/fasta/ |   while read gene
+ls  $ANALYSIS/data/blast_celPep-gpPep/fasta/ | while read gene
 do
    echo $gene
    wu-tblastn $ANALYSIS/blastdb/gp_dec01 \
@@ -596,21 +670,161 @@ do
        > $ANALYSIS/data/blast_celPep-gpPep/blast/$gene
 done
 
+parseblast  $ANALYSIS/data/blast_celPep-gpPep/blast/* \
+   | gawk '{OFS="\t";
+     print $18,"celera","exon",$19+=69754405,$20+=69754405,$8,$21,".",$12}' \
+   | sort +3n > $ANALYSIS/annotation/gp_dec01/celgenes/celera.gff
+
+## SGP predictions:
+# 
+gawk '$4> 69754405 &&  $5<88310534 {OFS="\t";$3="exon";$2="SGP";print}' \
+  /projects/H.sapiens/20011222.UCSCgp/chr15/sgp/20011222.UCSCgp-20020411.MGSCv3/gff/chr15 \
+   > $ANALYSIS/annotation/gp_dec01/SGP/all.gff
+
+gawk "{ if (\$2 == \"Gene\") file=\$3;
+        if (file >= 915 && file <= 1474) 
+          print \$0 > \"$ANALYSIS/annotation/gp_dec01/SGP/out/gene_\"file }" \
+ /projects/H.sapiens/20011222.UCSCgp/chr15/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr15
+
+## IRO mRNA
+# The original file is stored in /projects/chr15q/annotation/gp_dec01/_tmp/tots.gff
+
+grep -v GA_ $ANALYSIS/annotation/gp_dec01/_tmp/tots.gff \
+    | gawk '{OFS="\t"; $1="chr15"; $2="IRO";$4+=69754405;$5+=69754405;print}' |
+    sort +3n \
+    >  $ANALYSIS/annotation/gp_dec01/IRO/all.gff
+
+# Llis remapped the IRO genes into de genomic sequence. 
+gawk '{OFS="\t"; $1="chr15";$4+=69754405;$5+=69754405;print}' test1.gff |
+    sort +3n \
+    >  $ANALYSIS/annotation/gp_dec01/IRO/all.gff
+@ 
+
+<<Visualization from december2001 data>>=
+#---### VISUALIZATION ###---#
+#
+# Generating files for apollo.
+# 
+cat $ANALYSIS/annotation/gp_dec01/ensembl/all.gff \
+    $ANALYSIS/annotation/gp_dec01/hugo/all.gff \
+    $ANALYSIS/annotation/gp_dec01/IRO/all.gff \
+    $ANALYSIS/annotation/gp_dec01/human_mrna/all.gff \
+   > $ANALYSIS/apollo/gp_dec01/genes.gff
+
+cat $ANALYSIS/annotation/gp_dec01/ensembl/all.gff \
+    $ANALYSIS/annotation/gp_dec01/hugo/all.gff \
+    $ANALYSIS/annotation/gp_dec01/contigs/all.gff \
+    $ANALYSIS/annotation/gp_dec01/genscan/all.gff  \
+    $ANALYSIS/annotation/gp_dec01/human_mrna/all.gff \
+    $ANALYSIS/annotation/gp_dec01/geneid/all.gff \
+    $ANALYSIS/annotation/gp_dec01/SGP/all.gff \
+    $ANALYSIS/annotation/gp_dec01/IRO/all.gff \
+    $ANALYSIS/annotation/gp_dec01/celgenes/celera.gff  \
+    $ANALYSIS/annotation/gp_dec01/est/all.gff  \
+   > $ANALYSIS/apollo/gp_dec01/genes_evidences.gff
+
+cat $ANALYSIS/annotation/gp_dec01/*/all.gff \
+   > $ANALYSIS/apollo/gp_dec01/all_data.gff
+
+#
+# Plotting all togheter using gff2ps
+#
+
+PARAMFILE=$ANALYSIS/bin/param/gff2ps/chr15q_wide.rc
+
+GFFIN="$ANALYSIS/annotation/gp_dec01/genscan/all.gff";
+GFFIN="$GFFIN $ANALYSIS/annotation/gp_dec01/geneid/all.gff";
+GFFIN="$GFFIN $ANALYSIS/annotation/gp_dec01/SGP/all.gff";
+GFFIN="$GFFIN $ANALYSIS/annotation/gp_dec01/celgenes/celera.gff";
+GFFIN="$GFFIN $ANALYSIS/annotation/gp_dec01/ensembl/all.gff" ; 
+GFFIN="$GFFIN $ANALYSIS/annotation/gp_dec01/hugo/all.gff";
+GFFIN="$GFFIN $ANALYSIS/annotation/gp_dec01/human_mrna/all.gff" ; 
+GFFIN="$GFFIN $ANALYSIS/annotation/gp_dec01/IRO/all.gff" ;
+
+gff2ps -S 69754405 -C $PARAMFILE  $GFFIN \
+   > $ANALYSIS/gff2ps/gp_dec01/plot.ps 
+
+@ 
+
+<<Statistic from december2001>>=
+#---### STATISTICS ###---#
+#
+# Generating evaluation files and files with complete features
+#
+##
+# GFF anotations sometimes contains overllaping genes from different isoforms of
+# the same gene. Evaluation programs can not deal with this data.
+# Another gff file is done filtering overllaping genes. (evaluation)
+
+for feature in ensembl hugo celgenes IRO
+do
+  echo $feature
+  non_overlap.pl < $ANALYSIS/annotation/gp_dec01/$feature/all.gff \
+     | gawk '$3!="gene"' | sort +3n \
+     > $ANALYSIS/annotation/gp_dec01/$feature/all.eval.gff
+done
+
+# We will need the coordinates of the begin and end of a gene from the first
+# exon to the last exon. (genes non overllaping)
+
+for feature in ensembl hugo celgenes SGP IRO
+do
+  echo $feature
+  non_overlap.pl < $ANALYSIS/annotation/gp_dec01/$feature/all.gff \
+     | gawk '$3=="gene"' \
+     > $ANALYSIS/annotation/gp_dec01/$feature/all.genes.gff
+done
+
+
+# The projection of all the exons. We miss the gene structure but we project
+# but we have all the projections,
+
+for feature in IRO celgenes ensembl hugo hugo+ensembl 
+do
+  echo $feature
+  gawk '{OFS="\t";$8="1";print}' $ANALYSIS/annotation/gp_dec01/$feature/all.gff\
+	> /tmp/tmp;   
+  blast2gff -g /tmp/tmp \
+    | gawk '{OFS="\t";$9=1;print}' \
+    > $ANALYSIS/annotation/gp_dec01/$feature/all.sr.gff
+done
+
+# Evaluation of SGP againts known + ensembl
+/projects/sgp/bin/evaluation -s $ANALYSIS/annotation/gp_dec01/SGP/all.gff \
+     $ANALYSIS/annotation/gp_dec01/hugo+ensembl/all.sr.gff 
+/projects/sgp/bin/evaluation -s $ANALYSIS/annotation/gp_dec01/geneid/all.gff \
+     $ANALYSIS/annotation/gp_dec01/hugo+ensembl/all.sr.gff 
+/projects/sgp/bin/evaluation -s $ANALYSIS/annotation/gp_dec01/genscan/all.gff \
+     $ANALYSIS/annotation/gp_dec01/hugo+ensembl/all.sr.gff 
+
+              SN      SP      CC
+SGP          0.61    0.68    0.64
+geneid       0.56    0.66    0.61
+genscan      0.68    0.52    0.59   
+
+# Obtaining IRO and SGP genes non overlapping known genes and ensembl
+# Joining hugo+ensembl and obtaining genes outside known genes.
+
+cat $ANALYSIS/annotation/gp_dec01/ensembl/all.genes.gff \
+    $ANALYSIS/annotation/gp_dec01/hugo/all.genes.gff | sort +3n \
+ | outGFF - /projects/chr15q/annotation/gp_dec01/IRO/all.genes.gff | wc
+
+cat $ANALYSIS/annotation/gp_dec01/ensembl/all.genes.gff \
+    $ANALYSIS/annotation/gp_dec01/hugo/all.genes.gff | sort +3n \
+ | outGFF - /projects/chr15q/annotation/gp_dec01/SGP/all.genes.gff | wc
+
+
+
+@ 
+
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
-
-% \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% \bibliographystyle{apalike}
-% \bibliography{/home1/rguigo/docs/biblio/References}
-
-
 %
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\sctn{Common code blocks}
+\section{Common code blocks}
 
-\subsctn{AWK scripts}
+\subsection{AWK scripts}
 
 <<GAWK shebang>>=
 #!/usr/bin/gawk -f
@@ -663,7 +877,7 @@ BEGIN{
 }
 @
 
-\subsctn{BASH scripts}
+\subsection{BASH scripts}
 
 <<BASH shebang>>=
 #!/usr/bin/bash
@@ -730,29 +944,28 @@ run_GFF2PS ()
   #
   gff2ps -VC ${PARM}_wide.rc  -- $GFFfiles \
           2>&1 > $ODIR/wide/${CHR}${XTR} | tee $ODIR/wide/logs/${CHR}${XTR} ;
-
 }
 #
 @
 
-\subsctn{Version control tags}
+\subsection{Version control tags}
 
-This document is under Revision Control System (RCS). The version you are currently reading is the following:
+This document is under CVS. The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: chr15q.nw,v 1.3 2002-03-16 17:19:17 gparra Exp $
+# $Id: chr15q.nw,v 1.4 2002-10-11 14:12:35 gparra Exp $
 @ 
 
-\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\sctn{Extracting code blocks from this document}
+\section{Extracting code blocks from this document}
 
 From this file we can obtain both the code and the
 documentation. The following instructions are needed:
 
-\subsctn{Extracts Script code chunks from the {\noweb} file} % \\[-0.5ex]
+\subsection{Extracts Script code chunks from the \textsc{noweb} file} % \\[-0.5ex]
 
-Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original \textsc{noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
 <<tangling>>=
 # showing line numbering comments in program
@@ -771,14 +984,7 @@ notangle -R"chr15q" $WORK/$nwfile.nw | \
 #
 @ 
 
-\subsctn{Extracting different Config Files} % \\[-0.5ex]
-
-<<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw | \
-         cpif $DATA/root_config ;
-@ %$
-
-\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+\subsection{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
 <<tangling>>=
 notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
@@ -828,7 +1034,7 @@ popd ;
 <<BASH script end>>
 @ %$
 
-\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+\subsection{Defining working shell variables for the current project} % \\[-0.5ex]
 
 <<BASH Environment Variables>>=
 #
@@ -858,7 +1064,8 @@ source $WORK/.bash_VARS ;
 #
 @
 
-%
+%$
+\end{latexonly}
 \end{document}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
