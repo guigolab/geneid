@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.3 2000-08-08 14:19:47 eblanco Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.4 2000-09-08 10:10:47 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -50,6 +50,7 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
   char *line7;
   char *line8;
   char *line9;
+  int slen;
 
   if ((file=fopen(FileName, "r"))==NULL)
     printError("The exonsGFF file cannot be open for read");
@@ -162,14 +163,20 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 	  /* What is the type of this exon? */
 	  saux[0]='\0';
 	  strcpy (saux, (pv->vExons+i)->Type);
-	  strcat (saux, &((pv->vExons+i)->Strand));
-
+	  	  
+	  /* Concat the strand after the type */
+	  slen = strlen(saux);
+	  saux[slen++] = (pv->vExons+i)->Strand;
+	  saux[slen] = '\0';
+	  
 	  if (getkeyDict(d,saux) == NOTFOUND)
 	    {
 	      /* Type of this exon does not appear in GeneModel */
 	      /* Skip this exon */
-	      sprintf(mess, "Skipping exon %ld(unknown type)\n",i);
+	      sprintf(mess, "Skipping exon %ld(unknown type %s)\n",i,saux);
 	      printMess(mess); 
+	      
+	      
 	    }
 	  else
 	    {
