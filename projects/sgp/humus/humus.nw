@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.39 2002-05-20 18:51:09 jabril Exp $ 
+% # $Id: humus.nw,v 1.40 2002-05-20 20:14:07 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.39 2002-05-20 18:51:09 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.40 2002-05-20 20:14:07 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -8906,7 +8906,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.39 2002-05-20 18:51:09 jabril Exp $
+# $Id: humus.nw,v 1.40 2002-05-20 20:14:07 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9202,15 +9202,19 @@ function get_geneid_genes ()
         min[$9] = $4<min[$9] ? $4 : min[$9] ;
         max[$9] = $5>max[$9] ? $5 : max[$9] ;
       } else {
+        exons[$9] = 0;
         min[$9] = $4 ;
         max[$9] = $5 ;
         strand[$9] = $7;
+      };
+      if (tolower($3) ~ /single|first|internal|terminal|cds/) {
+        exons[$9]++;
       };
       len[$9]+=$5-$4+1
     }
     END {
       for (n in genes) {
-        print n, min[n], max[n], strand[n], len[n],genes[n];
+        print n, min[n], max[n], strand[n], len[n], exons[n];
       };
     }
   ' $1 | sort +1n +2n -3 - ;
