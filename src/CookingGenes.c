@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.9 2002-01-29 09:48:50 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.10 2002-04-16 16:05:10 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -55,13 +55,16 @@ void printProt(char* Name,
   
   /* 1. Print the header(geneid format): protein or genomic sequence */
   if (mode == PROT)
-    sprintf(header,"\n>%s|%s_predicted_protein_%ld|%ld_AA\n",
+    sprintf(header,"\n>%s_%ld|%s_predicted_protein_%ld|%ld_AA\n",
 			Name,
+			ngen,
 			VERSION,
 			ngen,
 			nAA);
   else
-    sprintf(header,"\n>%s|%s_predicted_cDNA_%ld|%ld_NN\n",Name,
+    sprintf(header,"\n>%s_%ld|%s_predicted_cDNA_%ld|%ld_NN\n",
+			Name,
+			ngen,
 			VERSION,
 			ngen,
 			nAA);
