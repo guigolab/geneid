@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.3 2000-07-26 07:55:02 eblanco Exp $ */
+/* $Id: geneid.h,v 1.4 2000-10-03 09:23:13 jabril Exp $ */
 
 /* Include libraries */
 #include <stdio.h>
@@ -43,8 +43,8 @@
 
 /* Memory definitions used in GeneId */
 
-#define RSITES 4                       /* maximum number of sites         */
-#define REXONS 2                       /* maximum number of exons         */
+#define RSITES 3                       /* maximum number of sites         */
+#define REXONS 1                       /* maximum number of exons         */
 
 #define RBSITES 250                    /* Backup Information sizes        */
 #define RBEXONS 250      
