@@ -44,14 +44,15 @@ USAGE="sgp [-hv] [-o 'options'] [-g 'options] [-P filename] [-p filename] [-k fi
 -v \t\t  verbose mode\n 
 -g \t\t geneid options\n  
 -o \t\t tblastx options\n  
--k \t\t keep intermediate files with prefix\n  
 -c value \t\t tblastx score cuttof\n  
 -s value \t\t shrink hsp's by\n  
+-t filename \t\t read tblastx file\n  
+-k \t\t keep intermediate files with prefix\n  
 -p filename \t ps output in filename file \n
 -P filename\t\t geneid parameter file\n"
 
 # process parameters
-while getopts 1:2:a:g:i:k:p:fhlstv opt
+while getopts 1:2:a:g:i:k:t:p:fhlstv opt
 do
     case $opt in
         1) SEQ1=$OPTARG;NF=`expr $NF + 1`;;     # seq file 1
@@ -62,6 +63,7 @@ do
         c) GENEIDOPTIONS=$OPTARG;;              # tblastx score cutoff
 	s) GENEIDPARAM=$OPTARG;;                # shrink hsp's by
 	k) OFN=$OPTARG;;                        # intermediate filename
+	t) TBX=$OPTARG;;                        # read tblastx from file
         p) PSO=$OPTARG;;                        # postscript output
         v) VRB=1;;                              # verbose
         \? | h) echo $USAGE; exit 2;;
@@ -115,21 +117,28 @@ fi
 # 1. run tblastx 
 # --------------------------------------------------
 
-# temporal hack. not know how to do it better
-cp $SGP2/$BLMATRIX . # very dangerous
+if [ $TBX ]
+then 
+    # reading tblastx from file. 
+    # WARINING, it assumes tblastx SEQ1 SEQ2
+    # 
+    cp $TBX  $SGPTMP.tbx
+else  
+    if [ $VRB ] 
+    then
+	echo running tblastx $SEQ1 $SEQ2 1>&2
+    fi
 
-if [ $VRB ] 
-then
- echo running tblastx $SEQ1 $SEQ2 1>&2
+    # temporal hack. not know how to do it better
+    cp $SGP2/$BLMATRIX . # very dangerous
+    # convert the first fasta file to database
+    SEQ1DB=$SGPTMP.$SEQ1_NAME  #temporal name for database
+    cp $SEQ1 $SEQ1DB
+    $PRESSDB $SEQ1DB >/dev/null
+    $BLASTPROGRAM $SEQ1DB $SEQ2 $BLASTOPTIONS > $SGPTMP.tbx
+
+    rm $BLMATRIX
 fi
-
-# convert the first fasta file to database
-SEQ1DB=$SGPTMP.$SEQ1_NAME  #temporal name for database
-cp $SEQ1 $SEQ1DB
-$PRESSDB $SEQ1DB >/dev/null
-$BLASTPROGRAM $SEQ1DB $SEQ2 $BLASTOPTIONS > $SGPTMP.tbx
-
-rm $BLMATRIX
 
 if [ $OFN ]
 then
