@@ -22,7 +22,7 @@ ALINK="black">
 <font face=courier size=5 color=red>BuildInternalExons.c</font>
 </td>
 <td align=right>
-<font face=courier size=3>geneid v 1.1</font>
+<font face=courier size=3>geneid v 1.2</font>
 <font face=arial black size=3>source documentation</font>
 </td>
 </table>
@@ -54,6 +54,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
                         int MaxDonors,
+                        char* Sequence,
                         exonGFF* Exon)
 </pre>
 </font>
@@ -68,7 +69,7 @@ Acceptor. There is a limited maximum amount of exons to build, (parameter
 MaxDonors per frame), being allocated during the processing in a local array. Moreover, a limited
 minimum length required is provided (EXONLENGTH). If there is no room for
 more exons beginning by this Acceptor, the worst donor will be rejected. The
-output list of exons is sorted by Acceptor position.
+output list of exons is sorted by Acceptor position. According to the nucleotides at the end of the exon, some information is computed to detect possible Stop codons when assembling with other exons.
 </font>
 </div>
 </td>
@@ -88,7 +89,7 @@ var modifieddate=document.lastModified
 </table>
 
 <br><p>
-Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+Enrique Blanco Garcia &copy; 2003<br><p><br><p>
 </center>
 </body>
 </html>
