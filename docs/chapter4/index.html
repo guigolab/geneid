@@ -39,6 +39,7 @@ ALINK="blue">
 <li> <a href="#menu"><tt>geneid</tt> command line options</a>
 <li> <a href="#output"><tt>geneid</tt> output formats</a>
 <li> <a href="#samples">Samples</a>
+<li> <a href="#multi">Multi-fasta files</a>
 <li> <a href="./../index.html">INDEX</a>
 </ol>
 </font>
@@ -54,9 +55,9 @@ ALINK="blue">
 <tr>
 <td>
 <div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> is only able to read DNA sequences written in FASTA format:
+<tt>geneid</tt> input sequences must be in FASTA format:
 <br><p>
-Fasta sequence files show this structure:
+FASTA sequence files show this structure:
 <br><p>
 <center>
 <table border=2 cellpadding=10>
@@ -221,6 +222,9 @@ of sequence</td>
 <td width=650><font face="arial" size=3>Only signal and exon prediction (gene
 assembling disabled)</td>
 <tr>
+<td width=50><font face="arial" size=3>F</td>
+<td width=650><font face="arial" size=3>Force prediction of a complete gene</td>
+<tr>
 <td width=50><font face="arial" size=3>O</td>
 <td width=650><font face="arial" size=3>Only gene assembling (exons provided
 from file)</td>
@@ -274,6 +278,9 @@ Miscellanea
 <td width=650><font face="arial" size=3>Display information during geneid
 running</td>
 <tr>
+<td width=50><font face="arial" size=3>B</td>
+<td width=650><font face="arial" size=3>Show memory requirements</td>
+<tr>
 <td width=50><font face="arial" size=3>h</td>
 <td width=650><font face="arial" size=3>Show list of available options</td>
 </table>
@@ -314,14 +321,39 @@ Click over every example to see the corresponding output:
 <li> <a href="./samples_html/acceptors.html">Prediction of acceptor splice sites</a>
 <li> <a href="./samples_html/exons.html">Prediction of exons</a>
 <li> <a href="./samples_html/genes.html">Gene prediction</a>
-<li> <a href="./samples_html/evidences.html">Improving gene prediction by using re-annotation</a>
-<li> <a href="./samples_html/sr.html">Improving gene prediction by using homology information</a>
+<li> <a href="./samples_html/evidences.html">External information 1: annotations</a>
+<li> <a href="./samples_html/sr.html">External information 2: sequence homology</a>
 </ul>
 <font color="red">This the sequence used to generate these outputs: <a href="./sequence/test.fa">test.fa</a></font>
 </font>
 </div>
 </td>
 </table>
+
+<br><p><br><p>
+<table border=0 width=700 cellpadding=10>
+<tr>
+<td bgcolor=orange><font face="arial black" size=3>Multi-fasta files:</font>
+<a name ="multi"></td>
+<tr>
+<td>
+<div class="bulk"><font face="arial black" size=2>
+<tt>geneid</tt> can process files containing more than one FASTA sequence. 
+Moreover, external information as annotations and HSPs can be provided for 
+every sequence. <b>Requirement</b>: records belonging to the same Locus must be sorted 
+by first position.<br><p>
+
+Click over every example to see the corresponding output:
+<ul>
+<li> <a href="./sequence/5seqs.fa">Multi-fasta file</a>
+<li> <a href="./sequence/tmp.evi">Multi-fasta annotations</a>
+<li> <a href="./sequence/tmp.hsp">Multi-fasta homology information</a>
+</ul>
+</font>
+</div>
+</td>
+</table>
+
 
 
 <br><p><br><p><br><p>
@@ -338,7 +370,7 @@ var modifieddate=document.lastModified
 </table>
 
 <br><p>
-Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+Enrique Blanco Garcia &copy; 2003<br><p><br><p>
 </center>
 </body>
 </html>
