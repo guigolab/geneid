@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.49 2000-01-29 02:56:57 jabril Exp $	
+#         $Id: gff2ps,v 1.50 2000-01-29 20:58:13 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.49 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-29 02:56:57 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.50 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-29 20:58:13 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.49 2000-01-29 02:56:57 jabril Exp $
+%    $Id: gff2ps,v 1.50 2000-01-29 20:58:13 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -587,7 +587,7 @@ end % tmdct
 %%EndProcSet:   tickmarks 1.4 0
 %
 %%BeginProcSet: objects 1.1 0
-/shpdct 200 dict def shpdct begin
+/shpdct 225 dict def shpdct begin
  /nucdif { 2 copy exch sub } bdf
  /mtrx matrix def
  /mrr false def
@@ -672,6 +672,18 @@ end % tmdct
  /f2tgl { 1.0 0.0 0.0 1.0 1.0 1.0 3 0.0 0.0 cpt } bdf
  /fast  { scmyk PMX sqdif LY sc mul F 0.5 0.5 T 0.025 slw 10 { -0.5 0 m 0.5 0 l K 18 rotate } repeat PMK } bdf
  /fstar { PMX sqdif LY sc mul F 0 0.5 T 22.5 rotate 0 0 m 8 { 0.925 0 rlineto 225 rotate } repeat closepath PMK 0.75 slw scmyk S K R clip setcolmod } bdf 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+/gfnc { -0.05 -0.60 0.90 -0.60 1.0 0.5 0.95 0.5 1.05 1.60 0.1 1.60 0.0 0.5 7 0.05 0.5 m { l } repeat closepath } bdf
+%/gfnb { 0.0 0 0.95 0 1.0 0.45 0.94 0.45 1.0 1.0 0.05 1.0 0.0 0.55 7 0.06 0.55 m { l } repeat closepath } bdf
+/gfnb { 1.0 0.0 1.0 1.0 0.0 1.0 3 0.0 0.0 m { l } repeat closepath clip newpath gfnc } bdf
+/gbbx { 1.1 -0.5 1.1 1.5 -0.1 1.5 3 -0.1 -0.5 m { l } repeat closepath } bdf
+%/gap { PMX sqdif LY sc mul F gbbx clip newpath gfnc clip newpath 0.0 1.0 1.0 1.0 1.0 0.0 3 0.0 0.0 m { l } repeat closepath clip newpath PMK 0.025 slw setcolmod K newpath PMX sqdif LY sc mul F gbbx clip newpath gfnb PMK S scmyk 0.5 slw K R BGcolor scmyk 0.2 slw K } bdf
+/gap { PMX sqdif LY sc mul F gbbx clip newpath gfnc PMK S scmyk 0.5 slw K R S BGcolor scmyk 0.2 slw K R clip newpath PMX 0.25 0 T sqdif 0.5 sub LY sc mul F gfnb PMK clip setcolmod } bdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % /hstar { PMX ScV 0 ne { 1 2 F 0.0 0.5 } { 0.0 -0.5 } ifelse T sqdif LY sc mul F newpath -0.1 -0.1 1.1 0.5 bbox newpath 22.5 rotate 0 0 m 8 { 0.925 0 rlineto 225 rotate } repeat closepath PMK 0.75 slw scmyk S K R S eoclip setcolmod R newpath 0 0.5 m sqdif 0.5 l K } bdf
 %
 %
@@ -765,7 +777,7 @@ true setstrokeadjust
 0 setlinecap
 % 
 % Only for error-tracking purposes
-% mark
+ mark
 %
 %%EndSetup
 %
@@ -1438,6 +1450,7 @@ function ARY_VARIABLES() {
   shpnm["sand_clock"]="f2tgl";
   shpnm["asterisk"]="fast";
   shpnm["star"]="fstar";
+  shpnm["gap"]="gap";
   # shpnm["half_star"]="hstar";
   #
   # Coding baseline alignment
