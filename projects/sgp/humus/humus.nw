@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.13 2002-04-05 19:04:47 jabril Exp $ 
+% # $Id: humus.nw,v 1.14 2002-04-09 14:57:15 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.13 2002-04-05 19:04:47 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.14 2002-04-09 14:57:15 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1441,18 +1441,19 @@ TERMINI="$IDIR/tmp/$SEQ.termini" ;
 if [ -f "$TERMINI" ] ;
   then
     echo "### Using termini file: $TERMINI" 1>&2 ;
-    TERMINI_PAR="$TERMINI" ;
+    TERMINI_PAR="-R $TERMINI" ;
   else
     TERMINI_PAR="" ;
   fi ;
 #
 CheckFile R $PARAM $ISEQ ;
 #
-{ ( $GENEID -v -DE $EW -P $PARAM             \
-            $HOMOLOGY_PAR $TERMINI_PAR $ISEQ \
-            || TheEnd CKO ) |                \
-  grep -v 'evidence' > $ODIR/$SEQ ;
-  } 2>&1 | tee $EDIR/$SEQ.geneid 1>&2 ;
+( $GENEID -v -DE $EW -P $PARAM                  \
+           $HOMOLOGY_PAR $TERMINI_PAR $ISEQ     \ 
+           2> $EDIR/$SEQ.geneid ) || TheEnd CKO \
+           | grep -v 'evidence' > $ODIR/$SEQ ;
+#
+cat $EDIR/$SEQ.geneid 1>&2 ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -3580,7 +3581,7 @@ $PARAM{LIBSTEP} = $ENV{LIBSTEP} || do {
 &load_chromosome_tbl("$MySQLPAR/chrs.tbl");
 &load_sequences_tbl("$MySQLPAR/seqs.tbl");
 &load_jobs_tbl("$MySQLPAR/jobs.tbl");
-&del_all_from_tbl('tb_exec');
+# &del_all_from_tbl('tb_exec');
 
 &get_DB_codes();
 &count_tbl_elements(*STDERR);
@@ -4142,6 +4143,7 @@ sub breed_crows() {
     my ($thechr,$theseq,$pos) = @_;
     return if $pid = fork(); # return to parent, follows child code
     local *TMPFH;
+    $CDATE = &get_date();
     $chrseq_code = $chrs{$thechr}{seqs}{$theseq}{code};
     $chpid = "$$";
     $chldpid = "$chpid.$gid";
@@ -4254,7 +4256,9 @@ $script > $scripto 2> $scripte ;
             $handle->shunlock();
             ###
             $syscmd = <<"+++EOFRSH+++";
-## LAUNCH JOB ##
+### LAUNCHING JOB: $thejob -> $thestep" ;
+###   ON SEQUENCE: $thechr -> $theseq" ; 
+#
 /bin/chmod a+x $script ;
 # Process Status Reporter File
 export PSRF="$scriptx" ;
@@ -4270,7 +4274,7 @@ while [ \\( ! -e "\$PSRF" \\) -a \$c -lt 900 ] ; # 900sec == 15min
   done ;
 exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
                                # exit_code==3 if cannot open PSRF (UNAVAILABLE)
-## END OF JOB ##
+### END OF JOB ###
 +++EOFRSH+++
             print $ERRFH $syscmd if $_verbose{DEBUG};
             $syserr = system($syscmd);
@@ -4363,7 +4367,7 @@ $hc = 0;
     monstre1 => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
     monstre2 => [ $hc++,  2,       '/usr/bin/bash',  $F     ],
     monstre3 => [ $hc++,  2,       '/usr/bin/bash',  $F     ],
-  # monstre4 => [ $hc++,  2,       '/bin/bash',      $F     ],
+    monstre4 => [ $hc++,  2,       '/usr/bin/bash',  $F     ],
     ik12     => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
     ik13     => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
     i8       => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
@@ -4485,13 +4489,14 @@ exit(0);
 sub view_exec_tbl() {
     my $txt;
     $sth = $dbh->prepare(qq{
-      SELECT  c.id AS CHR,
+      SELECT  c.id AS C,
               s.id AS SEQNAME,
               m.id AS JOB,
               j.id AS STEP,
               t.id AS STATUS,
               x.host AS HOST,
               x.exec_pid AS PID,
+              x.exec_date AS EXECDATE,
               x.stderr AS ERRORMSG
          FROM tb_chromosome AS c,
               tb_sequence AS s,
@@ -4550,7 +4555,7 @@ $VERSION = 1.00;
 @@EXPORT = qw(
            $PLVER $PROG $PRGVER $USAGE $DATE $CDATE $USER $HOST
            $T $F @skip_next %Messages %_verbose $ERRFH
-           &init_timer &timing @exectime
+           &init_timer &timing @exectime &get_date
            &init_signals &trap_signals &trap_signals_prog
            &program_started &program_finished
            &parse_cmdline %CmdLineDefs %CmdLineOpts
@@ -4585,8 +4590,7 @@ $PROG  = 'UNDEF';
 $PRGVER = 'UNDEF';
 $USAGE = 'WARNING: Program variable "$USAGE" was not defined yet...';
 $DATE  = localtime;
-$CDATE = sprintf("%04d%02d%02d%02d%02d%02d",
-    sub { $_[5] + 1900, $_[4] + 1, $_[3], $_[2], $_[1], $_[0] }->(localtime) );
+$CDATE = &get_date();
 if (defined($ENV{USER})) {
     $USER = $ENV{USER};
 } else {
@@ -4648,6 +4652,12 @@ sub timing() {
     # total time
     return timestr(timediff($refary->[$mx],$refary->[0]));
 } # timing
+sub get_date() {
+    return
+        sprintf("%04d%02d%02d%02d%02d%02d",
+                sub { $_[5] + 1900, $_[4] + 1, $_[3], $_[2], $_[1], $_[0]
+                      }->(localtime) );
+} # get_date
 @ 
 
 \subsubsctn{Trapping system signals}
@@ -6245,7 +6255,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.13 2002-04-05 19:04:47 jabril Exp $
+# $Id: humus.nw,v 1.14 2002-04-09 14:57:15 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
