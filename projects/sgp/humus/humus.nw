@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.3 2002-02-08 19:28:43 jabril Exp $ 
+% # $Id: humus.nw,v 1.4 2002-02-15 17:29:05 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -266,7 +266,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.3 2002-02-08 19:28:43 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.4 2002-02-15 17:29:05 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -287,6 +287,7 @@ Universitat Pompeu Fabra\\[2ex]
  \item Unassembled sequences IDs (those ``random''). Loop through each sequence in chromosomes.
  \item Move all verified software to a global path, like [[/usr/local/molbio/share]], \\ instead of [[/projects/sgp/bin]].
  \item Make every protocol step runnable on any machine (so wrapper must handle PBS queues too).
+ \item Generate global report by chromosome.
  \item ...
 \end{itemize}
 
@@ -334,99 +335,7 @@ XID="20020122";
 HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
 HSAPID="20010806";
 # 
-perl -e '
-  # USAGE: $0 chr_list.file fasta_files.dir > chr_seqs.list
-  # [chr_seqs.list] -> chr_id seq_id date_file description
-  use strict;
-  my ($chrlistfile,$ipath) = @ARGV;
-  $ipath =~ s%/$%%o;
-  my (@files,%seqs,@order);
-  %seqs = ();
-  @order = ();
-
-  open(CHR,"< $chrlistfile");
-  while (<CHR>) {
-      my $chr;
-      next if /^#/o;
-      next if /^\s*$/o;
-      next if /^>>\s/o;
-      chomp;
-      s/^\s*//o;
-      ($chr,undef) = split /\s+/og, $_, 2;
-      push @order, $chr;
-      @{ $seqs{$chr} } = ();
-  };
-  close(CHR);
-
-  opendir(FA, $ipath);
-  @files = grep { /\.fa$/ } readdir(FA);
-  closedir(FA);
-  # 
-  # we are going to assume that input filenames
-  # have the following "chr"$chr"(.*).fa" (so we can assign
-  # "automagically" which sequence correspond to each chromosome)
-  #
-  foreach my $fl (@files) {
-      my ($thechr,$modtime);
-      ($thechr) = uc($fl) =~ /^CHR([\d]+|[XY]|NA|UL)/o;
-      $fl = "$ipath/$fl";
-      open(FAF,"< $fl") || do {
-          print STDERR "### Cannot open file \"$fl\" for chr \"$thechr\"...\n";
-          next;
-      };
-      print STDERR "### Working on chr \"$thechr\" file: \"$fl\"\n";
-      $modtime = &get_fh_mod_date(\*FAF);
-      my ($ct,$cc) = (0,".");
-      while (<FAF>) {
-          my ($id,$desc);
-          next unless s/^>//o;
-          chomp;
-          ($id,$desc) = split /\s+/og, $_, 2;
-          defined($desc) || ($desc = ".");
-          push @{ $seqs{$thechr} }, [ $id, $modtime, $desc ];
-          print STDERR "X";
-      } continue {
-          $ct++;
-          ($ct%10 == 0) && (print STDERR "$cc");
-          ($ct%1000 == 0) && (print STDERR " [$ct]\n");
-      }; # while <FAF>
-      ($ct%1000 != 0) && (print STDERR " [$ct]\n");
-      close(FAF);
-  }; # foreach $fl
-
-  foreach my $cs (@order) {
-      defined($seqs{$cs}) || do {
-          print STDOUT "# No sequences found for chromosome $cs !!!";
-          next;
-      };
-      scalar(@{ $seqs{$cs} }) > 1 && do {
-          @{ $seqs{$cs} } = map { $_->[1] }
-                            sort { $a->[0] cmp $b->[0] } # ascending alpha sort
-                            map { [ $_->[0], $_ ] } @{ $seqs{$cs} };
-      };
-      foreach my $sq (@{ $seqs{$cs} }) {
-          print STDOUT "$cs @{$sq}\n";
-      };  # foreach $sq
-  }; # foreach $cs
-#  print STDOUT 
-
-#  print STDERR "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
-#             (sprintf("%12s %12s %8s %8s %10s  %s\n",
-#                      "begin","end","#seqs","#errors","rand","file"));
-  exit(0);
-
-sub get_fh_mod_date() {
-    my $fh = shift;
-    my ($year,$month,$day,$hour,$min,$sec);
-    ($year,$month,$day,$hour,$min,$sec) = 
-            (localtime((stat $fh)[9]))[5,4,3,2,1,0];
-    # stat ->  [8] is access date,
-    #          [9] is modif date and
-    #         [10] is inode change date
-    sprintf("%04d%02d%02d%02d%02d%02d",
-            $year + 1900,$month + 1,$day,$hour,$min,$sec);
-} # get_fh_mod_date
-' $BIN/mySQL/param/chrs.tbl $HSAP/chromosomes > $HUMUS/seqid_list ;
+$BIN/getfastadesc.pl $MySQLPAR/chrs.tbl $HSAP/chromosomes > $HUMUS/seqid_list ;
 #
 perl -e '
   use strict;
@@ -476,8 +385,115 @@ perl -e '
 #
 @ 
 
+
+\subsubsctn{Scripts: retrieving sequence names and nucleotide composition}
+
+<<tangling: perl scripts>>=
+notangle -R"getfastadesc.pl" $WORK/$nwfile.nw | cpif $BIN/getfastadesc.pl ;
+is_exec $BIN/getfastadesc.pl ;
+@ 
+
+<<getfastadesc.pl>>=
+<<PERL shebang>>
+# USAGE: $0 chr_list.file fasta_files.dir > chr_seqs.list
+# [chr_seqs.list] -> chr_id seq_id date_file description
+use strict;
+my ($chrlistfile,$ipath) = @ARGV;
+$ipath =~ s%/$%%o;
+my (@files,%seqs,@order);
+%seqs = ();
+@order = ();
+ #
+open(CHR,"< $chrlistfile");
+while (<CHR>) {
+    my $chr;
+    next if /^#/o;
+    next if /^\s*$/o;
+    next if /^>>\s/o;
+    chomp;
+    s/^\s*//o;
+    ($chr,undef) = split /\s+/og, $_, 2;
+    push @order, $chr;
+    @{ $seqs{$chr} } = ();
+};
+close(CHR);
+
+opendir(FA, $ipath);
+@files = grep { /\.fa$/ } readdir(FA);
+closedir(FA);
+# 
+# we are going to assume that input filenames
+# have the following "chr"$chr"(.*).fa" (so we can assign
+# "automagically" which sequence correspond to each chromosome)
+#
+foreach my $fl (@files) {
+    my ($thechr,$modtime);
+    ($thechr) = uc($fl) =~ /^CHR([\d]+|[XY]|NA|UL)/o;
+    $fl = "$ipath/$fl";
+    open(FAF,"< $fl") || do {
+        print STDERR "### Cannot open file \"$fl\" for chr \"$thechr\"...\n";
+        next;
+    };
+    print STDERR "### Working on chr \"$thechr\" file: \"$fl\"\n";
+    $modtime = &get_fh_mod_date(\*FAF);
+    my ($ct,$cc) = (0,".");
+    while (<FAF>) {
+        my ($id,$desc);
+        next unless s/^>//o;
+        chomp;
+        ($id,$desc) = split /\s+/og, $_, 2;
+        defined($desc) || ($desc = ".");
+        push @{ $seqs{$thechr} }, [ $id, $modtime, $desc ];
+        print STDERR "X";
+    } continue {
+        $ct++;
+        ($ct%10 == 0) && (print STDERR "$cc");
+        ($ct%1000 == 0) && (print STDERR " [$ct]\n");
+    }; # while <FAF>
+    ($ct%1000 != 0) && (print STDERR " [$ct]\n");
+    close(FAF);
+}; # foreach $fl
+
+foreach my $cs (@order) {
+    defined($seqs{$cs}) || do {
+        print STDOUT "# No sequences found for chromosome $cs !!!";
+        next;
+    };
+    scalar(@{ $seqs{$cs} }) > 1 && do {
+        @{ $seqs{$cs} } = map { $_->[1] }
+                          sort { $a->[0] cmp $b->[0] } # ascending alpha sort
+                          map { [ $_->[0], $_ ] } @{ $seqs{$cs} };
+    };
+    foreach my $sq (@{ $seqs{$cs} }) {
+        print STDOUT "$cs @{$sq}\n";
+    };  # foreach $sq
+}; # foreach $cs
+#  print STDOUT 
+
+#  print STDERR "#\n# $chr has ".(scalar @files)." fragments (files)\n#\n# ".
+#             (sprintf("%12s %12s %8s %8s %10s  %s\n",
+#                      "begin","end","#seqs","#errors","rand","file"));
+exit(0);
+
+sub get_fh_mod_date() {
+    my $fh = shift;
+    my ($year,$month,$day,$hour,$min,$sec);
+    ($year,$month,$day,$hour,$min,$sec) = 
+            (localtime((stat $fh)[9]))[5,4,3,2,1,0];
+    # stat ->  [8] is access date,
+    #          [9] is modif date and
+    #         [10] is inode change date
+    return sprintf("%04d%02d%02d%02d%02d%02d",
+                   $year + 1900,$month + 1,$day,$hour,$min,$sec);
+} # get_fh_mod_date
+@ 
+
 \subsubsctn{Scripts: Processing Golden Path annotation}
 
+<<tangling: perl scripts>>=
+notangle -R"gp2gff.pl" $WORK/$nwfile.nw | cpif $BIN/gp2gff.pl ;
+is_exec $BIN/gp2gff.pl ;
+@ 
 <<gp2gff.pl>>=
 <<PERL shebang>>
 # Transforms the goldenpath format to gff file
@@ -486,7 +502,7 @@ perl -e '
 # USAGE: gp2gff.pl "chrname" "source" goldenpath_file > stdout
 #
 <<PERL strict pragma + info>>
-my $PROGNAME = 'gp2gff.pl';
+my $PROG = 'gp2gff.pl';
 #
 use Getopt::Long;
 Getopt::Long::Configure qw/ bundling /;
@@ -641,11 +657,6 @@ sub swap_items() {
      return;
 } # swap_items
 @ 
-<<tangling>>=
-#
-notangle -R"gp2gff.pl" $WORK/$nwfile.nw | cpif $BIN/gp2gff.pl ;
-chmod a+x $BIN/gp2gff.pl ;
-@ 
 
 
 \subsctn{Sequence analysis: \textit{H.sapiens}}
@@ -670,6 +681,8 @@ chmod a+x $BIN/gp2gff.pl ;
 ### 318 genes for chr22 were found in 
     "/seq/genomes/H.sapiens/golden_path_20010806/database/refGene.txt".
 @ 
+
+\subsubsctn{Retrieving annotations from Golden Path}
 
 <<Sequence: H.sapiens>>=
 #
@@ -697,10 +710,38 @@ gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
 @ 
 
 \chklst{
-\item Annotations for {\refseq}, {\gnsc}, {\ens}, ...  genes.
+\item Annotations for {\refseq} and {\ens} genes.
 }
 
-\subsubsctn{Retrieving gene prediction results from Golden Path}
+
+\subsubsctn{Preparing annotation files for evaluation}
+
+<<Sequence: >>=
+#
+# TO BE redefined................ include frame0-mapping too
+function pre_eval {
+  gawk 'BEGIN{
+          src = ARGV[1]; len = ARGV[2]; ARGV[1] = ARGV[2] = ""; 
+          print "chr22\t"src"\tsequence\t1\t"len"\t.\t.\t."
+       }' $n $lenaug > $TDIR/${HSAPIDaug}_seqlength.gff ;
+  sort +3n -5 $TDIR/${HSAPIDaug}_$n.gff > $TDIR/${HSAPIDaug}.tmp ;
+  cat $TDIR/${HSAPIDaug}_seqlength.gff > $TDIR/${HSAPIDaug}_${n}_fwd.gff ;
+  gawk '$7 == "+" {print $0}' $TDIR/${HSAPIDaug}.tmp \
+                           >> $TDIR/${HSAPIDaug}_${n}_fwd.gff ;
+  cat $TDIR/${HSAPIDaug}_seqlength.gff > $TDIR/${HSAPIDaug}_${n}_rev.gff ;
+  gawk '$7 == "-" {print $0}' $TDIR/${HSAPIDaug}.tmp \
+                           >> $TDIR/${HSAPIDaug}_${n}_rev.gff ;
+  /bin/rm -v $TDIR/${HSAPIDaug}.tmp ;
+} ;
+#
+@ 
+
+\chklst{
+\item Evaluation files for {\refseq} and {\ens} genes: SR projection of features when mapping all frames to 0, and forward/reverse selection of non-overlapping genes.
+}
+
+
+\subsubsctn{Retrieving gene prediction results from Golden Path ({\gnsc})}
 
 <<Sequence: H.sapiens>>=
 #
@@ -802,6 +843,7 @@ is faster version of RM that uses Blast instead of crossmatch.
    \item Human genome assembly from UCSC Golden Path August release (20010806).
    \item Mouse genome assembly from Sanger Center Phusion assembly (20011109).\\[-3ex]
 \begin{verbatim}
+# Database:  /bioinfo/gapdb/blastdb/MusPhusion
 # Title:  MusPhusion
 # # of letters in database:  2,374,690,634  (Z = 3000000000)
 # # of sequences in database:  431,480
@@ -834,6 +876,11 @@ warnings  cpus=4  ctxfactor=36.0
 
 \subsubsctn{Scripts: Verifying SBP {\tbx} output for chromosome fragments}
 
+<<tangling: perl scripts>>=
+notangle -R"sbp-checkblastout.pl" $WORK/$nwfile.nw | \
+     cpif $BIN/sbp_checkblastout.pl ;
+is_exec $BIN/sbp_checkblastout.pl ;
+@ 
 <<sbp-checkblastout.pl>>=
 <<PERL shebang>>
 # Parsing tblastx files from SBP to check blast output
@@ -842,14 +889,17 @@ warnings  cpus=4  ctxfactor=36.0
 # USAGE: sbp_checkblastout.pl "chrname" input_dir > stdout.report
 #
 <<PERL strict pragma + info>>
-my $PROGNAME = 'sbp_checkblastout.pl';
+my $PROG = 'sbp_checkblastout.pl';
 #
 my $chr = shift @ARGV;
 my $path = shift @ARGV;
 my @files = ();
 my ($c,$e,$z);
 opendir(TBX, $path);
-@files = map { [ $_ , /^.*_(\d+)_(\d+)$/o, (/^.*_(\D+)_.*$/o || "-") ] } 
+@files = map { [ $_ ,
+                 /^.*_(\d+)_(\d+)(?:\..*)?$/o,
+                 (/^.*_(\D+)_.*$/o || "-"),
+               ] } 
          grep { /^[^\.]/ } readdir(TBX);
 closedir(TBX);
 @files = map { $_->[1] }
@@ -878,15 +928,14 @@ print STDOUT "# $chr ran into ".(scalar @files).
 #
 exit(0);
 @ 
-<<tangling>>=
-#
-notangle -R"sbp-checkblastout.pl" $WORK/$nwfile.nw | \
-     cpif $BIN/sbp_checkblastout.pl ;
-chmod a+x $BIN/sbp_checkblastout.pl ;
-@ 
 
 \subsubsctn{Scripts: Parsing SBP {\tbx} output to GFF}
 
+<<tangling: perl scripts>>=
+notangle -R"sbp-blast2gff.pl" $WORK/$nwfile.nw | \
+     cpif $BIN/sbp_blast2gff.pl ;
+is_exec $BIN/sbp_blast2gff.pl ;
+@ 
 <<sbp-blast2gff.pl>>=
 <<PERL shebang>>
 # Parsing tblastx files from SBP to get HSPs in GFF format
@@ -895,7 +944,7 @@ chmod a+x $BIN/sbp_checkblastout.pl ;
 #                          > gff_output  2> stdout.report
 #
 <<PERL strict pragma + info>>
-my $PROGNAME = 'sbp_blast2gff.pl';
+my $PROG = 'sbp_blast2gff.pl';
 #
 my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
 my @frame = ( 3, 1, 2 ); # frm 0 -> blastfrm 3
@@ -977,12 +1026,6 @@ foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
 #
 exit(0);
 @
-<<tangling>>=
-#
-notangle -R"sbp-blast2gff.pl" $WORK/$nwfile.nw | \
-     cpif $BIN/sbp_blast2gff.pl ;
-chmod a+x $BIN/sbp_blast2gff.pl ;
-@ 
 
 \subsctn{Unpacking {\tbx} results obtained by Pankaj}
 
@@ -1026,7 +1069,7 @@ SDIR="$HUMUS/$CHR/annotation" ;
 #
 CheckDirs $ODIR ;
 #
-$BIN/sbp_blast2gff.pl $CHR $SDIR/length $IDIR \
+$BIN/sbp_blast2gff.pl $CHR $SDIR/$HSAPID/length $IDIR \
          > $ODIR/$CHR.fullgff 2> $ODIR.report ;
 #
 perl -ne '/^#/o && next; /^\s+$/o && next; 
@@ -1100,6 +1143,10 @@ ODIR="$HUMUS/$CHR/tblastx/$XID" ;
 
 \subsubsctn{Scripts: Running evaluation for gene-prediction}
 
+<<tangling: perl scripts>>=
+notangle -R"runeval.pl" $WORK/$nwfile.nw | cpif $BIN/runeval.pl ;
+is_exec $BIN/runeval.pl ;
+@ 
 <<runeval.pl>>=
 <<PERL shebang>>
 # Running evaluation by chromosome.
@@ -1107,7 +1154,7 @@ ODIR="$HUMUS/$CHR/tblastx/$XID" ;
 # USAGE: runeval.pl chromosome 
 #
 <<PERL strict pragma + info>>
-my $PROGNAME = 'runeval.pl';
+my $PROG = 'runeval.pl';
 #
 
 #
@@ -1136,15 +1183,14 @@ sub print_file_header() {
 EOTXT
 } # print_file_header
 @ 
-<<tangling>>=
-#
-notangle -R"runeval.pl" $WORK/$nwfile.nw | cpif $BIN/runeval.pl ;
-chmod a+x $BIN/runeval.pl ;
-@ 
 
 
 \subsubsctn{Scripts: Re-scoring SRs}
 
+<<tangling: perl scripts>>=
+notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
+is_exec $BIN/getHSPSR.pl ;
+@ 
 <<getHSPSR.pl>>=
 <<PERL shebang>>
 # Re-scoring SRs to produce HSP-SRs for SGP homology.
@@ -1152,7 +1198,7 @@ chmod a+x $BIN/runeval.pl ;
 # USAGE: getHSPSR.pl "chrname" < SR_file.gff > HSP-SR_file.gff > stdout.report
 #
 <<PERL strict pragma + info>>
-my $PROGNAME = 'getHSPSR.pl';
+my $PROG = 'getHSPSR.pl';
 #
 my $chr = shift;
 my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
@@ -1193,11 +1239,6 @@ foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
 #
 exit(0);
 @
-<<tangling>>=
-#
-notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
-chmod a+x $BIN/getHSPSR.pl ;
-@ 
 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1218,7 +1259,7 @@ ODIR="$HUMUS/$CHR/geneid/$XID" ;
 #
 CheckDirs $ODIR ;
 for c in hsp-sr out gff gtf2 cds prot logs tmp ;
-    do { ChckDirs $ODIR/$c ; } ; done ;
+    do { CheckDirs $ODIR/$c ; } ; done ;
 #
 @
 
@@ -1482,7 +1523,30 @@ EVIDENCES="/$CHR.gff" ;
 }
 
 
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \sctn{Masking gene-predictions along masked sequences}
+
+<<Global: >>=
+#
+#
+# HUMUS="$BASE/H.sapiens" -> .project_VARS
+#
+CHRLIST="22" ;
+#
+for n in $CHRLIST;
+  do {
+       chrdir="$HUMUS/chr$n" ;
+       CheckDirs $chrdir ;
+       CheckDirs $chrdir/tblastx+ $chrdir/sgp+ ;
+     };
+  done ;
+#
+CHRNUM="22" ; # length -> 47748585
+CHR="chr$CHRNUM" ;
+XID="20020212";
+#
+@
 
 <<>>=
 # bash
@@ -1490,6 +1554,7 @@ EVIDENCES="/$CHR.gff" ;
 # BOLD, DARK, UNDERLINE, UNDERSCORE, BLINK, REVERSE,
 # BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, 
 # ON_BLACK, ON_RED, ON_GREEN, ON_YELLOW, ON_BLUE, ON_MAGENTA, ON_CYAN, and ON_WHITE 
+#
 function show_masked {
     perl -npe '
         use Term::ANSIColor;
@@ -1506,6 +1571,22 @@ function show_masked {
     ' "$@" | more
 }
 #
+@ 
+
+\subsctn{Masking cds on Pankaj masked sequence fragments}
+
+\begin{center}
+% \fbox{
+  \begin{minipage}{0.95\linewidth}
+   \textbf{What to do here:}
+   \begin{itemize}
+    \item Mask CDSs predicted by {\sgp} on the sequence fragmetns already masked by Pankaj.
+   \end{itemize}
+  \end{minipage}
+% } % fbox
+\end{center}
+
+<<>>=
 perl -e '
   use strict;
   my ($base,$ipath,$opath,$gnlst,@files,
@@ -1600,6 +1681,261 @@ perl -e '
   # counter sums are not well done... but masking is ok
 ' chr22 2> ./masking_cds.log ; # 2> ./masking_genes.log ;
 @ 
+
+
+\subsctn{Processing Pankaj {\tbx} results}
+
+\begin{center}
+% \fbox{
+  \begin{minipage}{0.95\linewidth}
+   \textbf{What to do here:}
+   \begin{itemize}
+ \item Process {\tbx} results from Pankaj:
+  \begin{itemize}
+   \item Masked sequences plus {\sgp} predicted cds also masked (20020208).
+   \item Mouse genome assembly from Sanger Center Phusion assembly (20011109 ???).\\[-3ex]
+\begin{verbatim}
+# Database:  /bioinfo/gapdb/blastdb/MusPhusion
+# Title:  MusPhusion
+# # of letters in database:  2,374,690,634  (Z = 3000000000)
+# # of sequences in database:  431,480
+# Format:  XDF-1
+# Created:  5:32:13 PM EST Dec 10, 2001
+# Posted:  5:32:14 PM EST Dec 10, 2001
+\end{verbatim}
+   \item {\tbx} was run with the following parameters:\\[-3ex]
+%	   \begin{center}
+%	   \begin{minipage}[c]{0.75\linewidth}
+\begin{verbatim}
+W=5  Z=3000000000
+matrix=blosum62mod  filter=xnu+seg
+nogaps  hspmax=500  topcomboN=100
+B=9000  V=9000  E=0.01  E2=0.01  S2=80
+warnings  cpus=4  ctxfactor=36.0
+\end{verbatim}
+% tail -54 ori/chr22_* | sort | uniq -c | sort +0nr | more
+%	   \end{minipage}
+%	   \end{center}
+  \end{itemize}
+\item Get HSPs $\Rightarrow$ SRs $\Rightarrow$ HSP-SRs
+   \end{itemize}
+  \end{minipage}
+% } % fbox
+ \end{center}
+
+<<Homology: >>=
+#
+# Unpacking TBLASTX results obtained by Pankaj
+#
+IDIR="$HUMUS/.ftp/PankajAgarwal/20020212.genes-masked+tbxPhusion" ;
+ODIR="$HUMUS/$CHR/tblastx+/$XID" ;
+#
+CheckDirs $ODIR $ODIR/ori ;
+#
+mv -v $IDIR/${CHR}* $ODIR/ori ;
+#
+$BIN/sbp_checkblastout.pl $CHR $ODIR/ori > $ODIR/ori.report ;
+#
+@ 
+
+\subsctn{Retrieving {\tbx} results by chromosome}
+
+<<Homology: >>=
+#
+# Retrieving TBLASTX results by chromosome
+#
+IDIR="$HUMUS/$CHR/tblastx+/$XID/ori" ;
+ODIR="$HUMUS/$CHR/tblastx+/$XID/hsp" ;
+SDIR="$HUMUS/$CHR/annotation" ;
+#
+CheckDirs $ODIR ;
+#
+$BIN/sbp_blast2gff.pl $CHR $SDIR/$HSAPID/length $IDIR \
+         > $ODIR/$CHR.fullgff 2> $ODIR.report ;
+#
+perl -ne '/^#/o && next; /^\s+$/o && next; 
+          $_ =~ s/;\s+Strand//o; 
+          $_ =~ s/;\s+Frame//o; 
+          $_ =~ s/;\s+E_value.*$//o;
+          print STDOUT $_;' $ODIR/$CHR.fullgff | \
+          sort +3n -6 +6 -7 - > $ODIR/$CHR.gff ;
+#
+@ 
+
+\subsubsctn{Merging HSPs from first {\tbx} run and the new ones}
+
+<<Homology: >>=
+#
+# Merging TBLASTX results 
+PXID="20020122" ; # XID of the tblastx run we want to merge (default PXID==XID)
+IDIR="$HUMUS/$CHR/tblastx/$PXID/hsp" ;
+ODIR="$HUMUS/$CHR/tblastx+/$XID/hsp" ;
+#
+cat $IDIR/$CHR.gff $ODIR/$CHR.gff |  \
+          sort +3n -6 +6 -7 - > $ODIR/$CHR.merged.gff ;
+#
+@ 
+
+\subsubsctn{Projecting HSPs into SRs}
+
+<<Homology: >>=
+#
+# Projecting HSPs into SRs
+#
+IDIR="$HUMUS/$CHR/tblastx+/$XID/hsp" ;
+ODIR="$HUMUS/$CHR/tblastx+/$XID/sr" ;
+#
+CheckDirs $ODIR ;
+#
+BLAST2GFF="/projects/bin/blast2gff";
+$BLAST2GFF -g $IDIR/$CHR.gff > $ODIR/$CHR.gff ;
+$BLAST2GFF -g $IDIR/$CHR.merged.gff > $ODIR/$CHR.merged.gff ;
+#
+gawk '
+  BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+  $1 !~ /^#/ { a[$7.$8]++; b[$7]++ }
+  END{ 
+    printf "# TOTAL %s SRs on %s: %s forward, %s reverse.\n", 
+           b["+"]+b["-"], chr, b["+"], b["-"];
+    for (i in a) {
+      printf "#  \t%s : %s\n", i, a[i];
+    };
+  }
+' $CHR $ODIR/$CHR.gff > $ODIR.report ;
+#
+gawk '
+  BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+  $1 !~ /^#/ { a[$7.$8]++; b[$7]++ }
+  END{ 
+    printf "# TOTAL %s SRs on %s: %s forward, %s reverse.\n", 
+           b["+"]+b["-"], chr, b["+"], b["-"];
+    for (i in a) {
+      printf "#  \t%s : %s\n", i, a[i];
+    };
+  }
+' $CHR $ODIR/$CHR.merged.gff > $ODIR.merged.report ;
+#
+@
+
+\subsctn{Gene Prediction: {\sgp}} %%%%%%%%%%%%%%%%%%%%%%
+
+<<SGP: >>=
+#
+# Initialization
+# 
+ODIR="$HUMUS/$CHR/sgp+/$XID" ;
+#
+CheckDirs $ODIR ;
+for c in hsp-sr out gff gtf2 cds prot logs tmp ;
+    do { CheckDirs $ODIR/$c ; } ; done ;
+#
+@
+
+\subsubsctn{Re-scoring SRs}
+
+<<SGP: >>=
+#
+# Re-scoring SRs to produce HSP-SRs
+#
+IDIR="$HUMUS/$CHR/tblastx+/$XID/sr" ;
+ODIR="$HUMUS/$CHR/sgp+/$XID/hsp-sr" ;
+#
+$BIN/getHSPSR.pl $CHR < $IDIR/$CHR.merged.gff \
+                      > $ODIR/$CHR.gff 2> $ODIR.report ;
+#
+@
+
+\subsubsctn{Preparing auxiliarly files}
+
+<<SGP: >>=
+#
+# Preparing auxiliarly files: CHR.termini
+#
+ODIR="$HUMUS/$CHR/sgp+/$XID/tmp" ;
+SDIR="$HUMUS/$CHR/annotation/$HSAPID" ;
+#
+perl -e '
+  use strict;
+  my $chr = shift @ARGV;
+  my %SEQlen;
+  my $seqln = shift @ARGV;
+  open(FRGLEN, "< $seqln");
+  while (<FRGLEN>) {
+      next if /^#/o;
+      next if /^\s*$/o;
+      chomp;
+      my @l = split /\s+/og, $_;
+      $SEQlen{$l[0]} = $l[1];
+  }; # while
+  close(FRGLEN);
+  print STDOUT join("\t", $chr, qw/ force cap  -2  0 . + 0 / )."\n";
+  print STDOUT join("\t", $chr, qw/ force poly /,
+                        ($SEQlen{$chr} - 1) x 2, qw/ . + 0/ )."\n";
+' $CHR $SDIR/length > $ODIR/$CHR.termini ;
+#
+@
+
+\subsubsctn{Running {\sgp} ({\gnid} with homology)}
+
+<<SGP: >>=
+#
+# Running geneid with homology
+#
+SGP2="/projects/sgp/src/geneid_v1.1-sgp" ;
+     # binaries, scripts and params in SGP2
+GENEID="$SGP2/bin/geneid" ; # geneid v1.1-sgp
+PARAM="$SGP2/param/human3iso.param.sgp" ;
+EW=0 ; # add to exon weigth
+#
+# ISEQ="$HSAP/chromFaMasked/$CHRNUM/$CHR.fa.masked" ; 
+#--> we do not run geneid on masked sequences at this moment
+#--> we are using original un-masked fasta sequences from GP
+ISEQ="$HSAP/chromosomes/$CHR.fa" ;
+IDIR="$HUMUS/$CHR/sgp+/$XID/" ;
+# ODIR="$HUMUS/$CHR/sgp/$XID/out" ;
+HOMOLOGY="$HUMUS/$CHR/sgp+/$XID/hsp-sr/$CHR.gff" ;
+#
+# {
+  { $GENEID -v -DE $EW -P $PARAM -S $HOMOLOGY \
+        -R $IDIR/tmp/$CHR.termini $ISEQ | grep -v evidence \
+        > $IDIR/out/$CHR ;
+  } 2> $IDIR/logs/$CHR ;
+#   } 2>&1 | tee $HUMUS/logs/geneid_sgp.$locus ;
+#
+@ 
+
+\subsubsctn{Processing output for {\sgp} (with homology)}
+
+<<SGP: >>=
+#
+# Processing geneid format from sgp output (with homology)
+#
+IDIR="$HUMUS/$CHR/sgp+/$XID" ;
+#
+geneid_raw2GFF $IDIR $IDIR/out/$CHR ;
+#
+ls -1 $IDIR/gff/ | egrep "^$CHR" | \
+  while read n;
+    do {
+         cat $IDIR/gff/$n;
+       };
+    done | sort +3n +4n -5 - > $IDIR/gff/$CHR ;
+#
+get_geneid_genes $IDIR/gff/$CHR > $IDIR/out.gene_list ;
+#
+@
+
+\subsubsctn{Evaluation of {\sgp} predictions (with homology)}
+
+<<SGP: >>=
+#
+# Evaluation of SGP predictions (with homology)
+#
+IDIR="$HUMUS/$CHR/sgp+/$XID" ;
+#
+#
+@
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
@@ -1716,7 +2052,14 @@ CREATE TABLE tb_exec
 
 /* EOF */
 @
-
+<<tangling: mySQL scripts>>=
+#
+# MySQL tables description for db_Hsapiens
+notangle -R'MySQL: Setting up Tables' $WORK/$nwfile.nw | \
+    cpif $MySQLPAR/db_Hsapiens.sql;
+#
+@ 
+ 
 
 \subsubsctn{Initialitation files}
 
@@ -1749,9 +2092,7 @@ $mySQL_pswd = ''; # use vi to introduce the pswd for this user!!!
 @
 <<BASH Variables: Perl>>=
 #
-PERL5OPT="-I/projects/sgp/bin" ;
-PERL5OPT="$PERL5OPT -I/projects/sgp/bin/mySQL" ;
-PERL5OPT="$PERL5OPT -I/projects/sgp/bin/mySQL/param" ;
+PERL5OPT="-I$BBIN/libperl" ;
 export PERL5OPT;
 #
 @ 
@@ -1759,13 +2100,13 @@ export PERL5OPT;
 
 This file was tangled the first time, since then it is under version control and edited by hand...
 
-<<SKIP: tangling>>=
+<<tangling: mySQL param>>=
 # 
 # mySQL perl auxiliarly files
 # 
 # notangle -R'MySQL: initialization file for Perl scripts' \
-#     $WORK/$nwfile.nw | cpif $BIN/mySQL/param/db_Hsapiens_in.pm ;
-# chmod 660 $BIN/mySQL/param/db_Hsapiens_in.pm ;
+#     $WORK/$nwfile.nw | cpif $MySQLPAR/db_Hsapiens_in.pm ;
+# chmod 660 $MySQLPAR/db_Hsapiens_in.pm ;
 #
 @ 
 
@@ -1895,31 +2236,30 @@ Just wait to the next update round to see if connection problem persist...
 //
 @
 
-<<tangling>>=
+<<tangling: mySQL param>>=
 # 
 # mySQL perl auxiliarly files 
 for n in chrs jobs steps status;
   do { 
        notangle -R"MySQL: adm file - $n" \
-           $WORK/$nwfile.nw | cpif $BIN/mySQL/param/$n.tbl ;
+           $WORK/$nwfile.nw | cpif $MySQLPAR/$n.tbl ;
      }; 
   done;
 # seqs.tbl is produced by initialization script on sequence analysis section
-notangle -R"MySQL: adm file - seqs" \
-           $WORK/$nwfile.nw | cpif $BIN/mySQL/param/seqs.tbl ;
-cat $HUMUS/seqid_list >> $BIN/mySQL/param/seqs.tbl ;
+{ notangle -R'MySQL: adm file - seqs' $WORK/$nwfile.nw ; 
+  cat $HUMUS/seqid_list ; } | cpif $MySQLPAR/seqs.tbl ;
 #
 @ 
 
 
 \subsubsctn{Perl interface to mySQL database}
 
-<<tangling>>=
+<<tangling: mySQL perl scripts>>=
 # 
 # mySQL perl scripts: interacting with mySQL DB
 notangle -R'MySQL: perl DB interface' \
-    $WORK/$nwfile.nw | cpif $BIN/mySQL/db_Hsapiens.pm ;
-chmod a+x $BIN/mySQL/db_Hsapiens.pm ;
+    $WORK/$nwfile.nw | cpif $LIBPERL/db_Hsapiens.pm ;
+is_exec $LIBPERL/db_Hsapiens.pm ;
 #
 @ 
 
@@ -2006,21 +2346,22 @@ sub list_tables() {
 } # do_DB
 
 sub show_tbl_desc() {
-    my ($table, $fhref) = @_; 
+    my ($table, $fhref) = @_;
+    my @strdesc = ();
     $sth = $dbh->prepare(qq{
            DESC $table /* Shows mySQL table description */
          });
     # put here error processing...
     $sth->execute;
     # put here error processing...
-    print $fhref "\|-> $table\n";
+    push @strdesc, '|-> DESC '.$table;
     while (my @fld = $sth->fetchrow_array()) {
         # put here error processing...
-        printf $fhref "\t%-10s : %s\n",$fld[0],@fld[1..$#fld];
+        push @strdesc, sprintf("\t%-10s : %s",$fld[0],@fld[1..$#fld]);
     };
     $sth->finish;
     # put here error processing...
-    print $fhref "\n";
+    print $fhref $Messages{'DBIMSG'}->("",@strdesc);
 } # show_tbl_desc
 
 sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allow multiple fields select... ;^D
@@ -2108,12 +2449,12 @@ sub get_DB_codes() {
 
 \subsubsctn{Loading administrative tables}
 
-<<tangling>>=
+<<tangling: mySQL perl scripts>>=
 # 
 # mySQL perl scripts: loading mySQL admin tables
 notangle -R'MySQL: Initialize administrative tables' \
-    $WORK/$nwfile.nw | cpif $BIN/mySQL/admin_db_Hsapiens.pl ;
-chmod a+x $BIN/mySQL/admin_db_Hsapiens.pl ;
+    $WORK/$nwfile.nw | cpif $MySQLPAR/admin_db_Hsapiens.pl ;
+is_exec $MySQLPAR/admin_db_Hsapiens.pl ;
 #
 @ 
 
@@ -2122,16 +2463,24 @@ chmod a+x $BIN/mySQL/admin_db_Hsapiens.pl ;
 # admin_db_Hsapiens.pl
 #
 use strict;
-# use lib "/projects/sgp/bin/mySQL";
+# use lib "/usr/local/molbio/share/libperl";
 use db_Hsapiens qw( :DEFAULT :AdminFunc );
-# $bpath/$admfiles[$i].tbl where $bpath eq "/projects/sgp/bin/mySQL"
+# $bpath/$admfiles[$i].tbl where $bpath eq "/usr/local/molbio/share/mySQL"
 # my @admfiles = qw/ chrs seqs jobs steps status /;
 #
 use global;
 $PROG = 'admin_db_Hsapiens.pl';
 
+%CmdLineOpts = (
+        "version" => sub {
+            print STDERR "#### Hi, you are running $PROG version 0.9alpha ...\n";
+            exit(1);
+        }
+    );
+
 #
 ## MAIN
+&parse_cmdline();
 &program_started($PROG);
 
 &connection_details();
@@ -2155,7 +2504,7 @@ exit(0);
 sub listing_tables() {
     my @k = &list_tables();
     for (my $n=0; $n<=$#k; $n++) {
-        &show_tbl_desc($k[$n], *STDOUT);
+        &show_tbl_desc($k[$n], *STDERR);
     };
 } # listing_tables
 sub load_status_tbl() {
@@ -2209,12 +2558,12 @@ sub load_chromosome_tbl() {
 
 \subsctn{Step processing script: [[stepper.pl]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-<<tangling>>=
+<<tangling: perl scripts>>=
 # 
 # mySQL perl scripts: loading mySQL admin tables
 notangle -R'Step Execution Script' \
     $WORK/$nwfile.nw | cpif $BIN/stepper.pl ;
-chmod a+x $BIN/stepper.pl ;
+is_exec $BIN/stepper.pl ;
 #
 @ 
 
@@ -2225,25 +2574,33 @@ chmod a+x $BIN/stepper.pl ;
 # USAGE: stepper param_file step_0 ... step_n
 #
 use strict;
-<<Use Modules - Dumper>>
 #
-# use lib "/projects/sgp/bin/mySQL";
 use db_Hsapiens;
 #
 use global;
 $PROG = 'stepper.pl';
-# $bpath/$admfiles[$i].tbl where $bpath eq "/projects/sgp/bin/mySQL"
+
+# $bpath/$admfiles[$i].tbl where $bpath eq "/usr/local/molbio/share/sgp/mySQL"
 # my @admfiles = qw/ chrs seqs jobs steps status /;
 
 &init_signals();
 &init_timer(\@exectime);
-my $parfile = shift @ARGV;
-my @stepfls = @ARGV;
 
+#
+## VARS
+%CmdLineOpts = (
+    "version" => sub { 
+        print STDERR "#### Hi, you are running $PROG version 0.9alpha ...\n";
+            exit(1);
+        }     
+    );
 <<stepper.pl: global vars>>
 
 #
 ## MAIN
+&parse_cmdline();
+my $parfile = shift @ARGV;
+my @stepfls = @ARGV;
 &program_started($PROG);
 
 &get_param($parfile);
@@ -2252,6 +2609,9 @@ my @stepfls = @ARGV;
 &open_DB();
 &get_DB_codes();
 &loop_through_steps();
+
+while (!$skip_next) {};
+
 &close_DB();
 
 &program_finished($PROG);
@@ -2280,12 +2640,12 @@ sub loop_through_steps() {
 
 \subsctn{Shared code: [[global.pm]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-<<tangling>>=
+<<tangling: perl modules>>=
 # 
 # mySQL perl scripts: interacting with mySQL DB
 notangle -R'shared functions and settings' \
-    $WORK/$nwfile.nw | cpif $BIN/global.pm ;
-chmod a+x $BIN/global.pm ;
+    $WORK/$nwfile.nw | cpif $LIBPERL/global.pm ;
+is_exec $LIBPERL/global.pm ;
 #
 @ 
 
@@ -2297,19 +2657,23 @@ package global;
 use strict;
 use vars qw(
            @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
-           $PLVER $PROG $DATE $USER $HOST
-           $T $F $skip_next %Messages @exectime
+           $PLVER $PROG $USAGE $DATE $USER $HOST
+           $T $F $skip_next @exectime
+           $ERRFH %Messages $_verbose $_color_report
+           %CmdLineDefs %CmdLineOpts
            );
 
 use Exporter;
 $VERSION = 1.00;
 @@ISA = qw(Exporter);
 @@EXPORT = qw(
-           $PLVER $PROG $DATE $USER $HOST
-           $T $F $skip_next %Messages
+           $PLVER $PROG $USAGE $DATE $USER $HOST
+           $T $F $skip_next %Messages $_verbose $_color_report $ERRFH
            &init_timer &timing @exectime
            &init_signals &trap_signals &trap_signals_prog
            &program_started &program_finished
+           &parse_cmdline %CmdLineDefs %CmdLineOpts
+           &check_syscall_exit &check_file &check_dir
            &min &max
            );
 @@EXPORT_OK = qw(
@@ -2317,6 +2681,7 @@ $VERSION = 1.00;
            &fill_right &fill_left &fill_mid
            );
 %EXPORT_TAGS = (
+           # ParseCMDLN => [ qw( &parse_cmdline %CmdLineDefs %CmdLineOpts ) ],
            StringFill => [ qw( &fill_right &fill_left &fill_mid ) ],
            );
     # AdminFunc => [ qw( &connection_details &load_to_tbl_ifdef ) ],
@@ -2325,9 +2690,11 @@ $VERSION = 1.00;
 
 #
 # Setting Default Variables
+$ERRFH = \*STDERR;
 ($T,$F) = (1,0);
 $PLVER = sprintf("v%vd",$^V);
 $PROG  = 'UNDEF';
+$USAGE = 'WARNING: Program variable "$USAGE" was not defined yet...';
 $DATE  = localtime;
 if (defined($ENV{USER})) {
     $USER = $ENV{USER};
@@ -2344,6 +2711,9 @@ if (defined($ENV{HOSTNAME})) {
 <<global.pm: timing>>
 <<global.pm: trapping signals>>
 <<global.pm: reporting messages>>
+<<global.pm: parsing command-line args>>
+<<global.pm: validate file/dir>>
+<<global.pm: check exit status for sys calls>>
 <<global.pm: general functions>>
 
 1;
@@ -2388,15 +2758,15 @@ sub init_signals() {
     $SIG{QUIT} = \&trap_signals;
     $SIG{TERM} = \&trap_signals;
     $SIG{KILL} = \&trap_signals;
-    $SIG{CHLD} = 'IGNORE';
+    $SIG{CHLD} = 'IGNORE'; # child processes are automatically reaped
     $skip_next = $F;
 } # init_signals
 sub trap_signals() {
-    print STDERR $Messages{'USER_HALT'}->($PROG);
+    print $ERRFH $Messages{'USER_HALT'}->($PROG);
     $skip_next = $T;
 } # trap_signals
 sub trap_signals_prog() {
-    print STDERR $Messages{'PROCESS_HALT'}->($PROG);
+    print $ERRFH $Messages{'PROCESS_HALT'}->($PROG);
     $skip_next = $T;
 } # trap_signals_prog
 @
@@ -2406,22 +2776,24 @@ USER_HALT    => sub {
          my $name = shift;
          return
            &header(
-             @mlin{'warn_len','warn_base','warn_pre','warn_post'},
-             @mlin{'warn_line','empty_warn_line'},
+             $mlin{'warn_len'}->(),$mlin{'warn_base'}->(),
+             $mlin{'warn_pre'}->(),$mlin{'warn_post'}->(),
+             $mlin{'warn_line'}->(),$mlin{'empty_warn_line'}->(),
              "$name has been stopped by user !!!",
              "---------- Exiting NOW !!! ----------",
-             @mlin{'empty_warn_line','warn_line'},
+             $mlin{'empty_warn_line'}->(),$mlin{'warn_line'}->(),
              );
      },
 PROCESS_HALT => sub {
          my $name = shift;
          return
            &header(
-             @mlin{'warn_len','warn_base','warn_pre','warn_post'},
-             @mlin{'warn_line','empty_warn_line'},
+             $mlin{'warn_len'}->(),$mlin{'warn_base'}->(),
+             $mlin{'warn_pre'}->(),$mlin{'warn_post'}->(),
+             $mlin{'warn_line'}->(),$mlin{'empty_warn_line'}->(),
              "------- $name is down !!! -------",
              "---------- Exiting NOW !!! ----------",
-             @mlin{'empty_warn_line','warn_line'},
+             $mlin{'empty_warn_line'}->(),$mlin{'warn_line'}->(),
              );
      },
 @
@@ -2431,53 +2803,126 @@ PROCESS_HALT => sub {
 <<global.pm: messages>>=
 #
 # Program status strings.
+$_verbose = $F;
+$_color_report = $F;
+#
 use Term::ANSIColor;
 my $_pre_flg = $F;
 my $term_width = 80;
 my %mlin = (
-    error_base     => color("yellow")."\<\<\< ".color("bold red")."ERROR".
-                      color("yellow")." \>\>\>".color("reset")." ",
-    error_pre      => color("yellow")."\<\<\<".color("reset"),
-    error_post     => color("yellow")."\>\>\>".color("reset"),
-    error_len      => ($term_width - ( 16 + 3 + 3 )),
+    error_base     => sub {
+                        my $str = "\<\<\<\< ERROR \>\>\>\>";
+                        $_color_report && 
+                            ($str = color("bold red").$str.color("reset"));
+                        return $str." ";
+                      },
+    error_pre      => sub {
+                        my $str = "\<\<\<";
+                        $_color_report && 
+                            ($str = color("yellow").$str.color("reset"));
+                        return $str;
+                      },
+    error_post     => sub {
+                        my $str = "\>\>\>";
+                        $_color_report && 
+                            ($str = color("yellow").$str.color("reset"));
+                        return $str;
+                      },
+    error_len      => sub { return ($term_width - ( 16 + 3 + 3 )) },
       # error_base + error_pre + error_post
-    warn_base      => color("yellow")."\<\<\< ".color("bold yellow")."WARNING".
-                      color("yellow")." \>\>\>".color("reset")." ",
-    warn_pre       => color("yellow")."\<\<\<".color("reset"),
-    warn_post      => color("yellow")."\>\>\>".color("reset"),
-    warn_len       => ($term_width - ( 16 + 3 + 3 )),
+    warn_base      => sub {
+                        my $str = "\<\<\< WARNING \>\>\>";
+                        $_color_report && 
+                            ($str = color("bold yellow").$str.color("reset"));
+                        return $str." ";
+                      },
+    warn_pre       => sub {
+                        my $str = "\<\<\<";
+                        $_color_report && 
+                            ($str = color("yellow").$str.color("reset"));
+                        return $str;
+                      },
+    warn_post      => sub {
+                        my $str = "\>\>\>";
+                        $_color_report && 
+                            ($str = color("yellow").$str.color("reset"));
+                        return $str;
+                      },
+    warn_len       => sub { return ($term_width - ( 16 + 3 + 3 )) },
       # error_base + error_pre + error_post
-    comment_base   => "",
-    comment_pre    => color("green")."###".color("reset"),
-    comment_post   => color("green")."###".color("reset"),
-    comment_len    => ($term_width - ( 0 + 3 + 3 )),
+    comment_base   => sub { return "" },
+    comment_pre    => sub {
+                        my $str = "###";
+                        $_color_report && 
+                            ($str = color("green").$str.color("reset"));
+                        return $str;
+                      },
+    comment_post   => sub {
+                        my $str = "###";
+                        $_color_report && 
+                            ($str = color("green").$str.color("reset"));
+                        return $str;
+                      },
+    comment_len    => sub { return ($term_width - ( 0 + 3 + 3 )) },
       # comment_base + comment_pre + comment_post
-    dbi_base       => color("cyan")."### ".color("reset"),
-    dbi_pre        => color("cyan")."MySQL *".color("reset"),
-    dbi_post       => color("cyan")."*".color("reset"),
-    dbi_len        => ($term_width - ( 4 + 7 + 1 )),
+    dbi_base       => sub {
+                        my $str = "### ";
+                        $_color_report && 
+                            ($str = color("cyan").$str.color("reset"));
+                        return $str;
+                      },
+    dbi_pre        => sub {
+                        my $str = "MySQL *";
+                        $_color_report && 
+                            ($str = color("cyan").$str.color("reset"));
+                        return $str;
+                      },
+    dbi_post       => sub {
+                        my $str = "*";
+                        $_color_report && 
+                            ($str = color("cyan").$str.color("reset"));
+                        return $str;
+                      },
+    dbi_len        => sub { return ($term_width - ( 4 + 7 + 1 )) },
       # dbi_base + dbi_pre + dbi_post
-    spacer         => "###",
+    spacer         => sub { return "###" },
     );
 #
-$mlin{'error_line'} = color("yellow").('-' x $mlin{'error_len'}).color("reset");
-$mlin{'empty_error_line'} = (' ' x $mlin{'error_len'});
+$mlin{'error_line'} = sub {
+                        my $str = ('-' x $mlin{'error_len'}->());
+                        $_color_report && 
+                            ($str = color("yellow").$str.color("reset"));
+                        return $str;
+                      };
+$mlin{'empty_error_line'} = sub { return (' ' x $mlin{'error_len'}->()) };
 #
-$mlin{'warn_line'} = $mlin{'error_line'};
-$mlin{'empty_warn_line'} = $mlin{'empty_error_line'};
+$mlin{'warn_line'} = sub { return $mlin{'error_line'}->() };
+$mlin{'empty_warn_line'} = sub { return $mlin{'empty_error_line'}->() };
 #
-$mlin{'comment_line'} = color("green").("#" x $mlin{'comment_len'}).color("reset");
-$mlin{'empty_comment_line'} = (' ' x $mlin{'comment_len'});
+$mlin{'comment_line'} = sub {
+                        my $str = ("#" x $mlin{'comment_len'}->());
+                        $_color_report && 
+                            ($str = color("green").$str.color("reset"));
+                        return $str;
+                      };
+$mlin{'empty_comment_line'} = sub { return (' ' x $mlin{'comment_len'}->()) };
 #
-$mlin{'dbi_line'} = color("cyan").("*" x $mlin{'dbi_len'}).color("reset");
-$mlin{'empty_dbi_line'} = (' ' x $mlin{'dbi_len'});
+$mlin{'dbi_line'} = sub {
+                        my $str = ("*" x $mlin{'dbi_len'}->());
+                        $_color_report && 
+                            ($str = color("cyan").$str.color("reset"));
+                        return $str;
+                      };
+$mlin{'empty_dbi_line'} = sub { return (' ' x $mlin{'dbi_len'}->()) };
 #
 %Messages = (
     # ERROR MESSAGES
     <<global: warnings - input/output>>
+    <<global: warnings - parsing command-line options>>
     # WORKING MESSAGES
     <<global: messages - program start-stop>>
     <<global: messages - interacting with DB>>
+    <<global: messages - parsing command-line options>>
    ); # %Messages
 @
 
@@ -2495,7 +2940,7 @@ sub comment_line() {
 } # header
 sub header() {
     my ($tlen,$base,$pre,$post,@lns) = @_;
-    my $comment = $_pre_flg ? "$mlin{'spacer'}\n" : '';
+    my $comment = $_pre_flg ? $mlin{'spacer'}->()."\n" : '';
     $_pre_flg || ($_pre_flg = $T); 
     foreach my $ln (@lns) { 
         $comment .= "$base$pre".
@@ -2505,7 +2950,7 @@ sub header() {
 } # header
 sub left_header() {
     my ($tlen,$base,$pre,$post,@lns) = @_;
-    my $comment = $_pre_flg ? "$mlin{'spacer'}\n" : '';
+    my $comment = $_pre_flg ? $mlin{'spacer'}->()."\n" : '';
     $_pre_flg || ($_pre_flg = $T); 
     foreach my $ln (@lns) { 
         $comment .= "$base$pre".
@@ -2515,7 +2960,7 @@ sub left_header() {
 } # left_header
 sub right_header() {
     my ($tlen,$base,$pre,$post,@lns) = @_;
-    my $comment = $_pre_flg ? "$mlin{'spacer'}\n" : '';
+    my $comment = $_pre_flg ? $mlin{'spacer'}->()."\n" : '';
     $_pre_flg || ($_pre_flg = $T); 
     foreach my $ln (@lns) { 
         $comment .= "$base$pre".
@@ -2525,12 +2970,12 @@ sub right_header() {
 } # right_header
 sub program_started() {
     my $prog = shift;
-    print STDERR $Messages{'HEADER'}->("RUNNING $prog",'',
+    print $ERRFH $Messages{'HEADER'}->("RUNNING $prog",'',
         "Host: $HOST","User: $USER","Perl: $PLVER",'',"Date: $DATE");
 } # program_started
 sub program_finished() {
     my $prog = shift;
-    print STDERR $Messages{'HEADER'}->("$prog HAS FINISHED",'',
+    print $ERRFH $Messages{'HEADER'}->("$prog HAS FINISHED",'',
                                        &timing(\@exectime,$T));
 } # program_finished
 @
@@ -2540,35 +2985,267 @@ HEADER       => sub {
          my @mssg = @_;
          return
            &header(
-	         @mlin{'comment_len','comment_base','comment_pre','comment_post'},
-             $mlin{'comment_line'},
+	         $mlin{'comment_len'}->(),$mlin{'comment_base'}->(),
+             $mlin{'comment_pre'}->(),$mlin{'comment_post'}->(),
+             $mlin{'comment_line'}->(),
              "", @mssg, "",
-             $mlin{'comment_line'},
+             $mlin{'comment_line'}->(),
              );
      },
 @
+
+\subsubsctn{Interacting with DB standard messages}
 
 <<global: messages - interacting with DB>>=
 DBIHEADER    => sub {
          my @mssg = @_;
          return
            &right_header(
-	         @mlin{'dbi_len','dbi_base','dbi_pre','dbi_post'},
-             $mlin{'dbi_line'},
-             ( map { " $_" } @mssg ),
-             $mlin{'dbi_line'},
+	         $mlin{'dbi_len'}->(),$mlin{'dbi_base'}->(),
+             $mlin{'dbi_pre'}->(),$mlin{'dbi_post'}->(),
+             $mlin{'dbi_line'}->(),
+             &prespc(@mssg),
+             $mlin{'dbi_line'}->(),
              );
      },
 DBIMSG       => sub {
          my @mssg = @_;
-         return &comment_line(@mlin{'dbi_len','dbi_base','dbi_pre'},@mssg);
+         return &comment_line($mlin{'dbi_len'}->(),$mlin{'dbi_base'}->(),
+                              $mlin{'dbi_pre'}->(),@mssg);
      },
 DBICMD       => sub {
          my @mssg = (split /[\n]/o, $_[0]);
          @mssg = map { s/^\s{6}//o; $_ } @mssg;
-         return &comment_line(@mlin{'dbi_len','dbi_base','dbi_pre'},@mssg);
+         return &comment_line($mlin{'dbi_len'}->(),$mlin{'dbi_base'}->(),
+                              $mlin{'dbi_pre'}->(),@mssg);
      },
 @
+
+
+\subsubsctn{Parsing command-line}
+
+<<global.pm: parsing command-line args>>=
+#
+# Parsing command-line options
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling /;
+%CmdLineDefs = ();
+%CmdLineOpts = ();
+
+sub parse_cmdline() {
+    # we ensure here that options hash always exist 
+    # (and that it has a default option: 'help')
+    $CmdLineOpts{'v|verbose'} = sub {
+            $_verbose = $T;
+        };
+    $CmdLineOpts{'V|color-verbose'} = sub {
+            ($_verbose, $_color_report) = ($T, $T);
+        };
+    $CmdLineOpts{'h|help|?'} = sub {
+            print $ERRFH $Messages{'SHOW_HELP'}->($USAGE);
+            exit(1);
+        };
+    # looking for STDIN "-" to avoid problems with GetOptions
+    my $cmdln_stdin = undef;
+    for (my $a = 0; $a <= $#ARGV; $a++) { 
+        next unless $ARGV[$a] =~ /^-$/o;
+        $cmdln_stdin = $a - $#ARGV;
+        splice(@ARGV,$a,1);
+    };    
+    # parsing command-line
+    $SIG{__WARN__} = sub {
+            print $ERRFH $Messages{'CMDLINE_OPT_ERR'}->($_[0]);
+        };
+    GetOptions(%CmdLineOpts) || do {
+            print $ERRFH $Messages{'CMDLINE_ERROR'}->($PROG,"@ARGV");
+            exit(1);
+        };
+    $SIG{__WARN__} = 'DEFAULT';
+    # if "-" return to its position on cmd-line
+    my $t = scalar(@ARGV);
+    defined($cmdln_stdin) && do {
+        abs($cmdln_stdin) > $t && ($cmdln_stdin = -$t);
+	    $cmdln_stdin > 0  && ($cmdln_stdin = 0 );
+        $t += $cmdln_stdin;
+        splice(@ARGV,$t,0,'-');
+    };
+} # parse_cmdline
+@ 
+
+<<global: messages - parsing command-line options>>=
+SHOW_HELP    => sub {
+         my @mssg = split /[\n]/og, shift;
+         return 
+           &right_header(
+	         $mlin{'comment_len'}->(),$mlin{'comment_base'}->(),
+             $mlin{'comment_pre'}->(),$mlin{'comment_post'}->(),
+             $mlin{'comment_line'}->(),
+             &prespc(@mssg),
+             $mlin{'comment_line'}->(),
+             );
+     },
+@ 
+
+<<global: warnings - parsing command-line options>>=
+CMDLINE_OPT_ERR => sub {
+         my $mssg = shift;
+         $mssg =~ s/^\s*//o;
+         $mssg =~ s/\s*$//o;
+         return
+           &right_header(
+	         $mlin{'warn_len'}->(),$mlin{'warn_base'}->(),
+             $mlin{'warn_pre'}->(),$mlin{'warn_post'}->(),
+             $mlin{'warn_line'}->(),
+             &prespc("Error trapped while processing command-line:",
+                     (" "x8)."--> $mssg <--"),
+             $mlin{'warn_line'}->(),
+             );
+     },
+CMDLINE_ERROR   => sub {
+         my ($name,$mssg) = @_;
+         return
+           &right_header(
+	         $mlin{'error_len'}->(),$mlin{'error_base'}->(),
+             $mlin{'error_pre'}->(),$mlin{'error_post'}->(),
+             $mlin{'error_line'}->(),
+             &prespc("Please, check your command-line options!!!",
+                     (" "x8)."Type \"$name --help\" for help..."),
+             $mlin{'error_line'}->(),
+             );
+     },
+@
+
+
+\subsubsctn{Validating filenames and directories}
+
+<<HIDE: global.pm: validate file/dir>>=
+#
+# Filename and directories validation
+sub check_file() {
+    my $stdin_flg = $F;
+    &report("CHECKING_FILENAMES");
+  FILECHK: foreach my $test_file (@ARGV) {
+        $test_file ne '-' && do {
+            -e $test_file || do {
+                &warn('FILE_NO_OPEN',$T,$test_file);
+                next FILECHK;
+            };
+            &report('READING_FILE',$test_file);
+            push @data_files, $test_file;
+            next FILECHK;
+        };
+        $stdin_flg = $T;
+        push @data_files, '-';
+	}; # foreach
+    scalar(@data_files) == 0 && do {
+        push @data_files, '-';
+        $stdin_flg = $T;
+    };
+    $stdin_flg && &report('READING_STDIN');
+} # check_file
+@ 
+
+<<warnings - input/output>>=
+FILE_NO_OPEN =>
+  $spl.$Warn."Cannot Open Current file \"\%s\" . Not used !!!\n".$spl,
+@
+<<messages - input/output>>=
+CHECKING_FILENAMES =>
+  $sp."### Validating INPUT FILENAMES\n".$sp,
+READING_FILE =>
+  "###---> \"\%s\" exists, including as Input File.\n",
+READING_STDIN =>
+  "###---> Including GFF records from standard input.\n",  
+@
+
+<<global.pm: validate file/dir>>=
+#
+sub check_dir() {
+    my ($flg,@odir) = @_;
+    (scalar(@odir) == 0) && (return 0);
+    my @okdir = ();
+    foreach my $thisdir (@odir) {
+        ( -e $thisdir && -d _ ) || do {
+#            print $ERRFH "# Making chr $chr directory: $odir\n";
+            (mkdir $thisdir) || do {
+#                print $ERRFH "# Error making directory \"$odir\" ".
+#                             "for chr $chr : SKIPPING !!!\n";
+                push @okdir, $F;
+                next;
+            };
+            push @okdir, $T;
+            next;
+        };
+#        print $ERRFH "# Directory \"$odir\" for chr $chr ALREADY EXIST...\n".
+        push @okdir, $T; 
+    }; # foreach $d
+    return @okdir;
+} # check_dir
+@
+
+
+\subsubsctn{Checking exit status for system calls}
+
+We check for exit signals returned by system once it has run the command-line defined in [[$cmdline]] variable (we use the recipe shown in the O'Reilly book, ``Programming Perl'', 2$^n$ edition, page 230). %' 
+
+<<global.pm: check exit status for sys calls>>=
+# 
+# Checking exit status for sys calls
+sub check_syscall_exit() {
+    my $prog_exit = 0xffff & shift;
+    my ($exitflg,$exitstr) = ($F,'');
+    $exitstr = sprintf("Command returned %#04x : ", $prog_exit);
+    if ($prog_exit == 0) {
+        $exitflg = $T;
+        $exitstr .= "ran with normal exit ...";
+    }
+    elsif ($prog_exit == 0xff00) {
+        $exitstr .= "command failed: $! ...";
+    }
+    elsif (($prog_exit & 0xff) == 00) {
+        $prog_exit >>= 8;
+        $exitstr .= "ran with non-zero exit status $prog_exit ...";
+    }
+    else {
+        $exitstr .= "ran with ";
+        if ($prog_exit &   0x80) {
+            $prog_exit &= ~0x80;
+            $exitstr .= "coredump from ";
+            };
+        $exitstr .= "signal $prog_exit ...";
+    };
+    return ($exitflg,$exitstr);
+} # check_syscall_exit
+@
+
+<<HIDE: >>=
+perl -e '
+  use global;
+  @kmd = (
+           "echo $USER",
+           "echo $USER; exit;",
+           "echo $USER; exit 0;",
+           "echo $USER; exit 1;",
+           "ls echo",
+           "ls echo; exit",
+           "ls echo; exit 0",
+           "perl -e \"exit(0);\"",
+           "perl -e \"exit(1);\"",
+           "perl -e \"exit(2);\"",
+         ); 
+  foreach $cmd (@kmd) {
+      $kk = system($cmd);
+      ($f,$s) = &check_syscall_exit($kk);
+      print STDOUT ("#" x 60)."\n".
+                   "# Command line:\n".$cmd."\n".
+                   "# Program returned signal $kk\n".
+                   "# Did it run ? ".($f ? "Yes" : "No")."\n".
+                   "# Diagnostics:\n$s\n\n";
+  }; # foreach 
+' 
+@ 
+
+\subsubsctn{General functions}
 
 <<global.pm: general functions>>=
 # 
@@ -2591,10 +3268,19 @@ sub fill_mid()   {
     my $k = int(($_[1] - $l)/2);
     return ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l + $k)));
 } # fill_mid
+sub prespc() { return ( map { " $_" } @_ ); } 
 @
 
 
 \subsctn{Implementing scripts with [[Tk]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<tangling: perl Tk scripts>>=
+# 
+# Tk perl scripts
+notangle -R'stv: Status Table Viewer' $WORK/$nwfile.nw | cpif $BIN/stv ;
+is_exec $BIN/stv ;
+#
+@ 
 
 <<stv: Status Table Viewer>>=
 <<PERL shebang>>
@@ -2615,7 +3301,8 @@ my (%col,%row);
 
 #
 ## MAIN
-
+&parse_cmdline();
+&program_started($PROG);
 # Open mySQL DataBase conection
 &open_DB();
 # Initialize Tk table
@@ -2625,6 +3312,7 @@ MainLoop();
 # Disconecting from mySQL DB
 &close_DB();
 #
+&program_finished($PROG);
 exit(0);
 
 #
@@ -2699,13 +3387,6 @@ sub Init_Window() {
 } # Init_Window
 @ 
 
-<<tangling>>=
-# 
-# Tk perl scripts
-notangle -R'stv: Status Table Viewer' $WORK/$nwfile.nw | cpif $BIN/stv ;
-chmod a+x  $BIN/stv ;
-#
-@ 
 
 \subsctn{Tests} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2821,6 +3502,158 @@ sub main() {
 } # sub main
 ' $CHR $SDIR/$HSAPID/length $IDIR $ODIR 2> $ODIR.report ;
 #
+@
+ 
+<<Testing scripts: >>=
+#
+# cat > run_local_childs <<'###EOF###';
+cat > run_remote_childs <<'###EOF###';
+#!/usr/local/bin/perl -w
+  use strict;
+  use IPC::Shareable; # XAVI must install this !!!!!
+  my @seqs = qw( seq1  seq2  seq3  seq4  seq5  seq6  seq7  seq8  seq9  seq10
+                 seq11 seq12 seq13 seq14 seq15 seq16 seq17 seq18 seq19 seq20 );
+  my @jobs = qw( job1 job2 job3 job4 job5 );
+  my $BASE = "/home/ug/jabril/development/projects/sgp/humus/tests/childs";
+  my %jobscode = (
+      job1 => <<'$$$EOF$$$',
+#
+perl -e '
+  ($jn,$dr) = @ARGV;
+  print STDOUT "Running $jn on $ENV{CWD}: $ENV{USER} at $ENV{HOSTNAME}\n";
+  print STDERR "## Output was sent to $jn.out";
+  sleep(5);
+  print STDERR "## Sleep period has finished";
+  exit(0);
+  ' "job1($MPID)" $HOME > $SEQ.job1.out 2> $SEQ.job1.err;
+#
+$$$EOF$$$
+      job2 => <<'$$$EOF$$$',
+#
+STRING=`hostname`;
+#
+echo "HEY it is me: $USER @ $STRING" > $SEQ.job2.out 2> $SEQ.job2.err;
+#
+$$$EOF$$$
+      job3 => <<'$$$EOF$$$',
+#
+STRING=`hostname`;
+wc /seq/genomes/H.sapiens/golden_path_20010806/chromosomes/chr1.fa | \
+  perl -e '$h = shift;
+           $wc = <>;
+           print "# $ENV{USER} at $h \n# File length is: $wc\n";
+          ' $STRING - \
+          > $SEQ.job3.out \
+         2> $SEQ.job3.err ;
+#
+$$$EOF$$$
+      job4 => "",
+      job5 => "",
+  );
+#  $jobscode{job1} =~ s/(\n)/$1#--> /og ;
+#  print STDOUT "#--> ".$jobscode{job1}."\n" ;
+
+  my @pids = ();
+  my ($pid,$sem);
+  my @hosts = qw( monstre1 monstre2 monstre3 monstre4 ik12 ik13 i8 i10 i26 );
+  my $maxjobs = scalar(@hosts);
+  my @semaphore ;
+  my $gid = $$;
+
+  my $handle = tie @semaphore, 'IPC::Shareable', undef, { destroy => 1 };
+  @semaphore = ( 0 ) x $maxjobs;
+
+open(FHERR, "> $BASE/run.rpt");
+  # BEGIN brown_dispatcher
+  print FHERR "### MAIN $gid ### BEGIN MAIN LOOP\n".
+              "### MAIN $gid ### SEMAPHORE: @semaphore\n";
+  my $pending_seqs = scalar(@seqs);
+  while ($pending_seqs > 0) {
+      for ($sem = 0; $sem < $maxjobs; $sem++) {
+         $semaphore[$sem] || do {
+             next if (! &find_victim($hosts[$sem]));
+             next if $pending_seqs == 0; # next unless scalar(@seqs) > 0;
+             &breed_crows( shift @seqs, $sem);
+             push @pids, $pid;
+             --$pending_seqs;
+         }; # if job semaphore == 0 then fork child
+         &do_wait();
+      }; # for semaphores...
+  }; # while
+  while (&all_done(\@semaphore)) { &do_wait(); };
+  print FHERR "### MAIN $gid ### All Jobs ID: \n @pids \n".
+              "### MAIN $gid ### END MAIN LOOP\n";
+  # END brown_dispatcher
+
+close(FHERR);
+  exit(0);
+
+  sub do_wait() {
+      sleep 1; # select(undef,undef,undef,1);
+      print FHERR "### MAIN $gid ### SEMAPHORE: @semaphore\n";
+  } # do_wait
+  sub all_done() {
+      my $aryref = shift;
+      my $sum = 0;
+      $handle->shlock();
+      for (my $s = 0; $s < $maxjobs; $s++) {
+          $sum += $semaphore[$s];
+      }; # for semaphores...
+      $handle->shunlock();
+      return ($sum>0) ? 1 : 0;
+  } # all_done
+  sub find_victim() {
+      my $host = shift;
+      system("rsh $host echo $host 2>/dev/null 1>&2; exit") == 0  && do {
+          print FHERR "### MAIN $gid ### Connection to $host available...\n";
+          return 1;
+      };
+      print FHERR "### MAIN $gid ### Connection to $host NOT available...\n";       
+      return 0;
+  } # find_victim
+  sub breed_crows() {
+      my ($pre,$clhpid);
+      my ($seq,$pos) = @_;
+      return if $pid = fork(); # return to parent, follows child code
+      $clhpid = "$$.$gid";
+      $handle->shlock();
+      $semaphore[$pos] = $clhpid;
+      $handle->shunlock();
+      print FHERR "## $clhpid ## Running child \"$clhpid\" on sequence \"$seq\".\n";
+      $pre = sprintf("SEQ=$BASE/data/%s ;\nMPID=%s ;\n",$seq,$clhpid);
+      foreach my $job (qw( job1 job2 job3 )) {
+          print FHERR "## $clhpid ## Running job \"$job\" on sequence \"$seq\".\n";
+          open(TMP,"> $BASE/tmp/$clhpid");
+          print TMP $pre.$jobscode{$job};
+          close(TMP);
+          system <<"#@#EOF#@#"
+/bin/chmod a+x $BASE/tmp/$clhpid ;
+rsh $hosts[$pos].imim.es $BASE/tmp/$clhpid ;
+/bin/rm $BASE/tmp/$clhpid ;
+#@#EOF#@#
+      }; # foreach job
+      $handle->shlock();
+      $semaphore[$pos] = 0;
+      $handle->shunlock();
+      print FHERR "## $clhpid ## Child \"$clhpid\" is going to finish.\n";
+      exit(0); # child process exits when done
+  } # breed_crows
+###EOF###
+#
+@ 
+
+<<HIDE: >>=
+cat > getremoteinfo.pl <<'###EOF###';
+#!/usr/local/bin/perl -w
+print STDOUT sprintf("--> %s --> v%vd\n",$ENV{HOSTNAME},$^V);
+###EOF###
+chmod a+x getremoteinfo.pl ;
+#
+for n in monstre1 monstre2 monstre3 monstre4 ik12 ik13 i8 i10 i26;
+  do {
+     rsh $n /home/ug/jabril/development/projects/sgp/humus/tests/childs/getremoteinfo.pl;
+     };
+  done 
 @ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2849,12 +3682,12 @@ use strict;
 my $PVER = sprintf("v%vd",$^V);
 my $DATE = localtime;
 my ($USER,$HOST);
-if defined($ENV{USER}) {
+if (defined($ENV{USER})) {
     $USER = $ENV{USER};
 } else {
     chomp($USER = `whoami`);
 };
-if defined($ENV{HOSTNAME}) {
+if (defined($ENV{HOSTNAME})) {
     $HOST = $ENV{HOSTNAME};
 } else {
     chomp($HOST = `hostname`);
@@ -3013,7 +3846,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.3 2002-02-08 19:28:43 jabril Exp $
+# $Id: humus.nw,v 1.4 2002-02-15 17:29:05 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3027,14 +3860,18 @@ documentation. The following instructions are needed:
 
 Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
-<<tangling>>=
-# showing line numbering comments in program
-notangle -L -R"humus" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' | cpif $BIN/humus ;
-chmod a+x $BIN/humus ;
+<<tangling programs>>=
+<<tangling: perl modules>>
+<<tangling: mySQL perl scripts>>
+<<tangling: perl scripts>>
+<<tangling: perl Tk scripts>>
 @ 
 
-<<tangling>>=
+<<examples of tangling commands>>=
+# showing line numbering comments in program
+notangle -L -R"humus" $WORK/$nwfile.nw | \
+   perl -ne '$.>1 && print' | cpif $BIN/humus ;
+is_exec $BIN/humus ;
 # reformating program with perltidy
 notangle -R"humus" $WORK/$nwfile.nw | \
     perltidy - | cpif $BIN/humus ;
@@ -3046,21 +3883,16 @@ notangle -R"humus" $WORK/$nwfile.nw | \
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
-<<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw | \
-         cpif $DATA/root_config ;
+<<tangling param files>>=
+<<tangling: mySQL scripts>>
+<<tangling: mySQL param>>
 @ %$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
-<<tangling>>=
-notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
-notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
-chmod a+x $WORK/nw2tex $WORK/ltx;
-@ 
-
 <<tangling complementary LaTeX files>>=
-notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw | cpif $DOCS/defs.tex ;
+notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw | \
+    cpif $DOCS/defs.tex ;
 notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tex ; 
 @ 
 
@@ -3101,7 +3933,21 @@ popd ;
 <<BASH script end>>
 @ %$
 
+
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<tangling shell variables>>=
+# 
+# BASH Environment Variables
+echo "# Running notangle on $nwfile.nw: .bash_VARS";
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+         cpif $WORK/.bash_VARS ; 
+echo "# Running notangle on $nwfile.nw: .project_VARS";
+notangle -R'BASH Project Variables' $WORK/$nwfile.nw | \
+         cpif $WORK/.project_VARS ;
+# source $WORK/.bash_VARS ;
+#
+@
 
 <<BASH Environment Variables>>=
 #
@@ -3109,14 +3955,14 @@ popd ;
 # WORK is set by "setcwd"
 WBIN="$WORK/bin" ;
 WPARAM="$BIN/param" ;
-SRC="$WORK/src" ; # where to put the distributable files
+WSRC="$WORK/src" ; # where to put the distributable files
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
 TEST="$WORK/tests" ;
 nwfile="humus" ;
-export WBIN WPARAM SRC DOCS DATA TEST nwfile ;
+export WBIN WPARAM WSRC DOCS DATA TEST nwfile ;
 #
-source .project_VARS ;
+source $WORK/.project_VARS ;
 @ 
 
 <<BASH Project Variables>>=
@@ -3124,9 +3970,14 @@ source .project_VARS ;
 umask 002 ;
 #
 BASE="/projects" ;
-BIN="$BASE/sgp/bin" ;
 HUMUS="$BASE/H.sapiens" ;
-export BASE BIN HUMUS ;
+BBIN="/usr/local/molbio/share/sgp" ;
+BIN="$BBIN/bin" ;
+MySQLPAR="$BBIN/mySQL" ;
+LIBPERL="$BBIN/libperl" ;
+LIBSTEP="$BBIN/libstep" ;
+SRC="$BBIN/src" ;
+export BASE HUMUS BBIN BIN MySQLPAR LIBPERL LIBSTEP SRC ;
 #
 <<BASH Variables: Perl>>
 #
@@ -3141,8 +3992,7 @@ export BASE BIN HUMUS ;
 #
 # BASIC Shell Functions
 #
-CheckDirs ()
-{
+function CheckDirs () {
   #
   # USAGE: ChckDirs <path_list>
   #
@@ -3153,6 +4003,11 @@ CheckDirs ()
              mkdir --verbose $name ;
       } ;
     done ;
+}
+#
+function is_exec () {
+  # USAGE: is_exec <filename_0>...<filename_N>
+  for file in $@; do { [ -x $file ] || chmod a+x $file ; }; done
 }
 @
 
@@ -3272,16 +4127,30 @@ run_evaluation ()
 @ 
 
 
+\subsctn{Extracting code blocks for all the scripts}
+
+Remember to set WORK variable at the very beggining, moving into the corresponding "[[/WORK/PATH/.../]]" directory and executing [[setcwd]] (a shell function that sets [[$WORK]] and sources [[.bash_VARS]]).
+
 <<tangling>>=
-# 
-# BASH Environment Variables
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
-         cpif $WORK/.bash_VARS ; 
-notangle -R'BASH Project Variables' $WORK/$nwfile.nw | \
-         cpif $WORK/.project_VARS ; 
+#
+# tangling all .*_VARS
+notangle -R'tangling shell variables' $WORK/$nwfile.nw | bash ;
 source $WORK/.bash_VARS ;
 #
-@
+notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
+is_exec $WORK/nw2tex $WORK/ltx;
+#
+# tangling all steps
+{ cat $WORK/.bash_VARS ;
+  notangle -R'tangling steps'       $WORK/$nwfile.nw ; } | bash ;
+# tangling all scripts
+{ cat $WORK/.bash_VARS ;
+  notangle -R'tangling programs'    $WORK/$nwfile.nw ; } | bash ;
+# tangling all param files
+{ cat $WORK/.bash_VARS ;
+  notangle -R'tangling param files' $WORK/$nwfile.nw ; } | bash ;
+@ 
 
 %
 \end{document}
