@@ -1,0 +1,184 @@
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#                   INSTALLING GFF2APLOT FILES
+#
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#               The following Makefile was developed
+#     on a Red Hat Linux box running on GNU Make version 3.79.1 
+#
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#     Copyright (C) 1999-2003 - Josep Francesc ABRIL FERRANDO
+#                                       Thomas WIEHE
+#                                      Roderic GUIGO SERRA
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+# $Id: dist_Makefile,v 1.1 2003-03-17 17:58:46 jabril Exp $
+#
+### MAKE VARS
+
+.PHONY    : clean cleanall forceall
+.DEFAULT  : all
+.PRECIOUS : %.sh %.awk %.pl %.pm %.ps %.tgz %.gz \
+            %.rc %.gff %.gb %.fa README
+.SECONDARY :
+.SUFFIXES :
+
+#
+### PATHS
+
+       BBIN = /bin
+       UBIN = /usr/bin
+       LBIN = /usr/local/bin
+ INSTALLDIR = $(LBIN)
+
+#
+### INTERPRETERS
+
+       DATE = $(shell date)
+       USER = $(shell whoami)
+       GAWK = $(firstword $(shell which gawk))
+      GAWKV = $(shell $(GAWK) --version | \
+                $(GAWK) '$$0 ~ /^GNU Awk/ { print $$0; }')
+       BASH = $(firstword $(shell which bash))
+      BASHV = $(shell $(BASH) --version | \
+                $(GAWK) '$$0 ~ /^GNU bash/ { print $$0; }')
+       PERL = $(firstword $(shell which perl))
+      PERLV = $(shell $(PERL) --version | \
+                $(GAWK) '$$0 ~ /^This/ { \
+                           gsub(/^This is perl,[ \t]+/,"",$$0); \
+                           print $$0; \
+                         }') #'
+#
+### COMMANDS
+# You can update the following paths to your system settings
+
+          V = -v
+
+         RM = $(BBIN)/rm $(V)
+         RD = $(BBIN)/rmdir $(V)
+         CP = $(BBIN)/cp $(V)
+         MV = $(BBIN)/mv $(V)
+         LN = $(BBIN)/ln $(V)
+         MD = $(BBIN)/mkdir $(V)
+        CHM = $(BBIN)/chmod -c 
+        CHO = $(BBIN)/chown -c
+
+#
+### LOCAL PATHS
+
+       WORK = .
+        SRC = $(WORK)/src
+        BIN = $(WORK)/bin
+
+#
+### LOCAL VARS
+
+     BINEXT = .sh .awk .pl .pm
+
+  GFF2APLOT = gff2aplot.pl
+ PARSEBLAST = parseblast.pl
+   BLAT2GFF = blat2gff.pl
+    SIM2GFF = sim2gff.pl
+    ALI2GFF = ali2gff
+
+   ALI2GFFD = $(SRC)/ali2gff
+
+    SRCCODE = $(GFF2APLOT) $(PARSEBLAST) \
+              $(BLAT2GFF) $(SIM2GFF) $(ALI2GFF)
+    BINCODE = $(addprefix $(BIN)/, $(SRCCODE))
+
+#
+### MAKE RULES
+
+all: header main trailer
+
+test :
+	@echo "### SORRY !!! Tests were not implemented yet...";
+
+install : header installbin trailer
+
+forceall : header cleanbin main trailer
+
+clean : header cleanbin trailer
+
+cleanall : header cleanbin trailer
+
+cleanbin :
+	-@$(RM) -f $(wildcard $(BIN)/*);
+
+main : $(BINCODE)
+	@$(CHM) 755 $^;
+
+installbin : $(BINCODE)
+	@echo "### COPYING BIN FILES TO $(INSTALLDIR)...";
+	@$(CP) -p $^ $(INSTALLDIR)/;
+
+#
+### FINISHING CODE
+
+$(addprefix $(BIN)/, $(ALI2GFF)) : $(addprefix $(ALI2GFFD)/, $(ALI2GFF))
+	@${CP} $(addprefix $(ALI2GFFD)/, $(ALI2GFF)) \
+           $(addprefix $(BIN)/, $(ALI2GFF))
+
+$(addprefix $(ALI2GFFD)/, $(ALI2GFF)) : $(addprefix $(addprefix $(ALI2GFFD)/, $(ALI2GFF)), .h .c)
+	@echo "### Making ALI2GFF..."
+	@cd $(ALI2GFFD); \
+	 $(MAKE) -f ./Makefile;
+
+$(addprefix $(BIN)/, %.sh) : $(addprefix $(SRC)/, %.sh)
+	@echo "### Finishing BASH script from \"$<\" -> \"$@\"" ;
+	@( echo "#!$(BASH)"; cat $< ) > $@;
+
+$(addprefix $(BIN)/, %.awk) : $(addprefix $(SRC)/, %.awk)
+	@echo "### Finishing GAWK script from \"$<\" -> \"$@\"" ;
+	@( echo "#!$(GAWK) -f"; cat $< ) > $@;
+
+$(addprefix $(BIN)/, %.pl) : $(addprefix $(SRC)/, %.pl)
+	@echo "### Finishing PERL script from \"$<\" -> \"$@\"" ;
+	@( echo "#!$(PERL) -w"; cat $< ) > $@;
+
+$(addprefix $(BIN)/, %.pm) : $(addprefix $(SRC)/, %.pm)
+	@echo "### Finishing PERL module from \"$<\" -> \"$@\"" ;
+	@$(CP) -u $< $@ ;
+
+isexec : $(BINCODE)
+	@$(CHM) 755 $<;
+
+#
+### INFO RULES
+
+info : header getinfo trailer
+
+getinfo :
+	@echo "### BASH ###  $(BASH)  ###  $(BASHV)";
+	@echo "### GAWK ###  $(GAWK)  ###  $(GAWKV)";
+	@echo "### PERL ###  $(PERL)  ###  $(PERLV)";
+
+header :
+	@echo "###";
+	@echo "### RUNNING MAKEFILE";
+	@echo "###";
+	@echo "### $(DATE) -- $(USER)";
+	@echo "###";
+
+trailer :
+	@echo "###";
+	@echo "### MAKEFILE DONE...";
+	@echo "###";

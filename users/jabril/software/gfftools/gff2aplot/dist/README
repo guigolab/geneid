@@ -1,0 +1,163 @@
+##
+## README FOR ###PROGRAM### ###VERSION###
+##
+##
+## $Id: README,v 1.1 2003-03-17 17:58:46 jabril Exp $
+##
+
+  Dear User:
+
+    This file contains important program information. Please read
+  these tips through carefully, before beginning to work with ###PROGRAM###.
+  See INSTALL file for further tips on how to install the program
+  and related scripts on your system.
+
+
+-------------------------------------------------------------------------------
+  License Terms
+-------------------------------------------------------------------------------
+
+    ###PROGRAM### ###VERSION###
+
+    a program to visualize the alignment of two genomic sequences
+    together with their annotations. From GFF-format input files
+    it produces PostScript figures for that alignment.
+    
+
+      Copyright (C) 1999-2003 - Josep Francesc ABRIL FERRANDO
+                                        Thomas WIEHE
+                                       Roderic GUIGO SERRA
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version (http://www.gnu.org).
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+-------------------------------------------------------------------------------
+  Author's Address
+-------------------------------------------------------------------------------
+
+    Josep Francesc ABRIL FERRANDO
+
+      GENOME BIOINFORMATICS LAB
+      GRIB --- IMIM / UPF / CRG
+      Passeig Maritim de la Barceloneta, 37-49.
+      08003 - Barcelona, Catalonia, Spain.
+
+       Phone:  +34 93 2240302
+         Fax:  +34 93 2240875
+
+      e-mail:  jabril@imim.es
+         URL:  http://genome.imim.es/~jabril
+
+
+-------------------------------------------------------------------------------
+  Listing Files for Current Distribution
+-------------------------------------------------------------------------------
+
+  You can retrieve the latests files from the following FTP address:
+
+      ftp://genome.imim.es/pub/gff_tools/###program###/
+
+  The current distribution tarball contains the following files
+  and subdirectories:
+
+  README                 This file...
+
+  GNU-GPL                The GNU General Public License Version 2.
+
+  INSTALL                Instructions on how to prepare 
+                         the ###PROGRAM### scripts to run them
+                         in your system.
+
+  src/
+                         ###PROGRAM### and related scripts.
+
+    src/###program###.pl
+                         The main program, which converts GFF input
+                         into alignment PostScript plots.
+    src/parseblast.pl
+                         A parser for the standard output
+                         from most of the BLAST programs available
+                         (NCBI-Blast/WashU-Blast/WebBlast/MegaBlast).
+    src/blat2gff.pl
+                         Filtering BLAT output into GFF.
+    src/sim2gff.pl
+                         Converting SIM output into GFF.
+    src/ali2gff
+                         C program that parses SIM/Mummer output
+                         and produces GFF records for the alignment.
+
+  bin/
+                         It is empty until you make
+                         the executables for the distribution.
+
+  doc/
+                         Contains documentation for ###program###,
+                         initially the "User's Manual".
+
+  examples/              A set of three examples,
+                         in separate directories, each containing
+                         GFF data, customization files and
+                         PostScript output obtained with ###program###.
+                         See the corresponding README file to see
+                         how the figures were generated.
+    examples/wublast/
+    examples/mhcregion/
+    examples/splice_sites/
+
+
+-------------------------------------------------------------------------------
+  Reporting Bugs and Suggestions
+-------------------------------------------------------------------------------
+
+  + ###PROGRAM### author's e-mail adress: jabril@imim.es
+
+
+  + HELP:
+
+  If you need help after reading manual pages you are free to send an e-mail
+  to authors. It will help to filter your mail properly if you start your 
+  subject string with "[###PROGRAM###] HELP:".
+
+  You will get a reply as soon as possible.
+
+
+  + BUGS:
+
+  If you find any bug or something is not plotted properly, you can send a bug
+  report which subject string must start with "[###PROGRAM###] BUG:".
+
+
+  + SUGGESTIONS:
+
+  We thank any helpful suggestion for improving our program. Message
+  subject string will start with "[###PROGRAM###] SUGGEST:".
+
+
+-------------------------------------------------------------------------------
+  Acknowledgements
+-------------------------------------------------------------------------------
+
+  We would like to thank Matthias Platzer, at IMB, Jena, for helpful
+  comments while developing the program prototype. We would like to
+  thank the colleagues at Genome Bioinformatics Lab within the GRIB
+  for their extensive testing of ###PROGRAM###.
+
+  We would also thank users that will cite the paper on ###PROGRAM###, 
+  or at least it's web-site URL. Paper is currently submitted,
+  so you may cite ###PROGRAM### as:
+
+	  http://genome.imim.es/software/gfftools/###PROGRAM###.html
+
+-------------------------------------------------------------------------------
