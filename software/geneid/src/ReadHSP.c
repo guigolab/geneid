@@ -24,11 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadHSP.c,v 1.1 2003-11-05 14:52:44 eblanco Exp $  */
+/*  $Id: ReadHSP.c,v 1.2 2004-01-27 16:16:20 eblanco Exp $  */
 
 #include "geneid.h"
 
-/* According to Locusname, select a group of HSPs */
+/* According to Locusname, select a group of HSPs to be sorted */
 packHSP* SelectHSP(packExternalInformation* external,
 				   char* Locus,
 				   long LengthSequence)
@@ -47,27 +47,34 @@ packHSP* SelectHSP(packExternalInformation* external,
 	{
 	  p = external->homology[a];
   
+	  /* Recomputing positions in HSPs from reverse strand */
+	  /* The visited field prevents from repeating the sorting */
 	  if (!p->visited)
 		{
 		  p->visited = 1;
+		  
 		  /* 2. Recompute HSPs positions in reverse strand: frames 3, 4 and 5 */
 		  for (frame=FRAMES; frame < 2*FRAMES; frame++)
 			{
+			  /* Calcule new positions */
 			  for(i=0; i < p->nSegments[frame]; i++)
 				{
-				  pos1 = p->sPairs[frame][i].Pos1;
-				  pos2 = p->sPairs[frame][i].Pos2;
+				  pos1 = p->sPairs[frame][i]->Pos1;
+				  pos2 = p->sPairs[frame][i]->Pos2;
 				  
-				  p->sPairs[frame][i].Pos1 =
+				  p->sPairs[frame][i]->Pos1 =
 					LengthSequence - pos2 + 1;
 				  
-				  p->sPairs[frame][i].Pos2 =
+				  p->sPairs[frame][i]->Pos2 =
 					LengthSequence - pos1 + 1;
 				}
 			}
+
+		  /* 3. Quick-Sorting of FWD HSPs and RVS HSPs */
+		  SortHSPs(p);
 		}
 	  
-	  /* 3. Reset partial counter of used HSPs */
+	  /* 4. Reset partial counter of used HSPs */
 	  for(i=0; i < STRANDS*FRAMES; i++)
 		external->iSegments[i] = 0;
 	}
@@ -236,10 +243,14 @@ long ReadHSP (char* FileName, packExternalInformation* external)
 				  /* Replication: 3 SRs for the same coordinates */
 				  for (frame=0; frame < FRAMES; frame++)
 					{
+					  /* New item HSP */
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]
+						= (HSP*) RequestNewHSP();
+					  
 					  /* Setting SR data */
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos1 = pos1;
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos2 = pos2;
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Score = score;
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos1 = pos1;
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos2 = pos2;
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Score = score;
 					  external->homology[a]->nSegments[frame]++;
 					}
 				}
@@ -249,10 +260,14 @@ long ReadHSP (char* FileName, packExternalInformation* external)
 				  /* Convert blast frame 3 into frame 0 to store it */
 				  frame = (frame % 3);
 
+				  /* New item HSP */
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]
+					= (HSP*) RequestNewHSP();
+				  
 				  /* Setting HSP data */
-				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos1 = pos1;
-				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos2 = pos2;
-				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Score = score;
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos1 = pos1;
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos2 = pos2;
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Score = score;
 				  
 				  external->homology[a]->nSegments[frame]++;
 				}
@@ -267,12 +282,16 @@ long ReadHSP (char* FileName, packExternalInformation* external)
 				  /* Frames 3, 4 and 5 as in 0, 1 and 2 (reverse) */
 				  for (frame=FRAMES; frame < 2*FRAMES; frame++)
 					{
+					  /* New item HSP */
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]
+						= (HSP*) RequestNewHSP();
+
 					  /* Setting HSP data */
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos1 =
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos1 =
                         pos1;
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos2 =
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos2 =
                         pos2;
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Score = 
+					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Score = 
 						score;
 					  external->homology[a]->nSegments[frame]++;
 					}
@@ -285,14 +304,18 @@ long ReadHSP (char* FileName, packExternalInformation* external)
 				  frame = (frame % 3);
 				  frame = FRAMES + frame;
 
+				  /* New item HSP */
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]
+					= (HSP*) RequestNewHSP();
+				  
 				  /* Setting HSP data */
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos1 =
-                        pos1;
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Pos2 =
-                        pos2;
-					  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]].Score = 
-						score;
-					  external->homology[a]->nSegments[frame]++;
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos1 =
+					pos1;
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Pos2 =
+					pos2;
+				  external->homology[a]->sPairs[frame][external->homology[a]->nSegments[frame]]->Score = 
+					score;
+				  external->homology[a]->nSegments[frame]++;
 				}
 			} /* end RVS */
   
@@ -302,7 +325,7 @@ long ReadHSP (char* FileName, packExternalInformation* external)
 			external->homology[a]->nTotalSegments + 1;
 		  three = 0;
 
-		  if ((external->homology[a]->nTotalSegments + FRAMES) > MAXHSP)
+		  if ((external->homology[a]->nTotalSegments + FRAMES) >= MAXHSP)
 			printError("Too many HSPs: increase MAXHSP definition");
 
 		} /* end of if-comment */
@@ -313,7 +336,7 @@ long ReadHSP (char* FileName, packExternalInformation* external)
   /* Obtain the number of different sequences */
   external->nSequences = external->locusNames->nextFree;
 
-  /* Return the number of created exons (including replications) */
+  /* Return the number of created HSPs (including replications) */
   for(i=0,j=0; j < external->nSequences; j++) 
 	i = i + external->homology[j]->nTotalSegments;
 
