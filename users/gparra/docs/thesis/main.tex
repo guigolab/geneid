@@ -1,185 +1,2163 @@
-\documentclass[11pt]{article}
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: main.tex,v 1.1 2003-09-29 17:03:21 gparra Exp $
+% $Id: main.tex,v 1.2 2004-06-29 10:40:56 gparra Exp $
 %
 
-\usepackage[a4paper,offset={0pt,0pt},hmargin={3.5cm,3cm},vmargin={2.5cm,2.5cm}]{geometry}
-\usepackage{graphics}
-\usepackage[dvips]{graphicx}
-%% pstricks
-\usepackage[dvips]{pstcol}
-\usepackage{pstricks}
-%% bibliography
-\usepackage{natbib}
-%% latex2html
-\usepackage{url}
-\usepackage{html}     
-\usepackage{htmllist} 
-%% tables    
-%\usepackage{colortbl}
-%\usepackage{multirow}
-%\usepackage{hhline}
-%\usepackage{tabularx}
-%\usepackage{dcolumn}
 
-%% layout
-\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
-%\usepackage{lscape}
-\usepackage{rotating}
-%\usepackage{multicol}
-%% fonts
-%\usepackage{times}\fontfamily{ptm}\selectfont
-%\usepackage{t1enc}
+\input{preamble}
 
-% New Commands are defined here
-\newcommand{\sctn}[1]{\section{#1}}
-\newcommand{\subsctn}[1]{\subsection{#1}}
-\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
-\newcommand{\desc}[1]{\item[#1] \ \\}
 
-% PSTRICKs definitions
-\pslongbox{ExFrame}{\psframebox}
-\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
-\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
-
-%%%%% global urls
-% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es}}
-
-% defs
-\def\dicty{\textit{Dictyostelium discoideum}}
-\def\dic{\textit{D. discoideum}}
-\def\fugu{\textit{Fugu rubripes}}
-\def\fug{\textit{F. rubripes}}
-\def\drome{\textit{Drosophila melanogaster}}
-\def\dme{\textit{D. melanogaster}}
-\def\dro{\textit{Drosophila}}
-\def\tetra{\textit{Tetraodon nigroviridis}}
-\def\danio{\textit{Brachydanio rerio}}
-\def\homo{\textit{Homo sapiens}}
-\def\arab{\textit{Arabidopsis thaliana}}
-\def\wheat{\textit{Triticum aestivum}}
-\def\bn{\textsc{blastn}}
-\def\tbx{\textsc{tblastx}}
-\def\ps{\textsc{PostScript}}
-\def\geneid{\texttt{geneid}}
-\def\genscan{\texttt{genscan}}
-\def\sgp{\texttt{SGP2}}
-\def\genos{\textbf{Genoscope}}
-
-% Setting text for footers and headers
-
-\def\tit{\textsc{Computational identification of genes}}
-\fancyhead{} % clear all fields
-\fancyfoot{} % clear all fields
-\fancyhead[RO,LE]{\thepage}
-\fancyhead[LO,RE]{\tit}
-\fancyfoot[LO,LE]{\small\textsl{Gen\'{\i}s Parra}}
-\fancyfoot[RO,RE]{\small\textbf{\today}}
-\renewcommand{\headrulewidth}{1pt}
-\renewcommand{\footrulewidth}{1pt}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\input Colores
+%%%%%%%%%%%%%%%%%%%%%%
+%%% Begin Document %%%
+%%%%%%%%%%%%%%%%%%%%%% 
 
 \begin{document}
-\bodytext{text="#000000" bgcolor="#FFFF99"}
 
 \thispagestyle{empty}
 
-\begin{titlepage}
+%Title
 
-\begin{center}
-\vfill
-\begin{latexonly}
-\psframebox[framearc=0.5,fillstyle=solid,fillcolor=lightorange]{
-\parbox[b][2cm][c]{3.7cm}{
-{\textbf{\Large \shortstack[c]{Ph.D Thesis \\[1ex] Draft Version}}}}}\\[12ex]
-\end{latexonly}
+\title{{\Huge Computational identification of genes: \\[1ex] \textit{ab initio} and comparative approaches}\vspace{7.5cm}}
 
-\begin{rawhtml}
-<BR>
-\end{rawhtml}
+% Author
 
-\textbf{\huge Computational identification of genes}\\[12ex]
+\author{
+{\Large Gen\'{\i}s Parra Farr\'e}\\[1ex]
+{\large Ph.D. dissertation}\\[2ex]
+\textbf{Ph.D. Advisor: Roderic Guig\'o Serra}}
+
+%\\[5ex]\today}
 
 
-%\textbf{\Large Authors List Here}\\[1ex]
-\textbf{\Large Gen\'{\i}s Parra Farr\'e\raisebox{0.85ex}{\footnotesize$\dag\,$}}\\[2ex]
-\textbf{Ph.D. Advisor: Roderic Guig\'o Serra}\\[5ex]
+\maketitle                      % Print thesis title
 
- % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+\clearemptydoublepage
 
-\textbf{\large \today}\\[10ex]
-
-
-\begin{abstract}
-\begin{center}
-\parbox{0.75\linewidth}{
-
-
-} % parbox
-\end{center}
-\end{abstract}
- 
-\vfill
-
-
-\vfill
-
-\begin{raggedleft}
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
-Grup de Recerca en Infom\`atica Biom\`edica\\
-Institut Municipal d'Investigaci\'o M\`edica\\
-Centre de Regulaci\'o Gen\`omica \\
-Universitat Pompeu Fabra\\[2ex]
-\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtgparra}\\
-\end{raggedleft}
-\end{center}
-
-\end{titlepage} %'
 
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
 \newpage
 \pagenumbering{roman}
 \setcounter{page}{1}
+\newpage
+\nochapter{Motivation}
+
+It is clear to me, that we are living a really important period in the
+development and the knowledge of life sciences. 50 years after the
+description of the structure of the double helix, we have moved from
+the analysis of one single gene to the systematic mass sequencing of
+organisms. At the time of writing, whole genome sequences for more
+than 800 organisms (bacteria, archea and eukaryota, as well as many
+viruses and organelles) are either complete or being sequenced (a
+detailed picture of the current state of the sequencing projects can
+be found at the entrez genome,
+\url{http://www.ncbi.nlm.nih.gov/Genomes/index.html}). All the
+information we are gathering today, will probably modify the way we
+will understand life, science and medicine. But, before the best use
+of these data, the identification and the precise location of the
+functional regions of the genomic sequences must be determined. The
+most important thing to realize about the ``book of life'', is that we
+barely understand the language in which it is written and that raw
+genomic sequences are mainly useless for the scientific community. The
+challenge ahead is to extract relevant information encoded within the
+billions of nucleotides stored in our databases.
+
+In a very simplistic description, the first step in the functional
+annotation of a genome, would be to find the collection of genes
+encoded in the genomic sequences. The next step would be to assign a
+function to each possible protein, where the three dimensional
+structure of the proteins will play a key role. And finally, establish
+the network of interactions and regulations among all the proteins of
+a complete genome.
+
+The main focus research interest of our group is  the investigation
+of the signals involved in gene specification in genomic sequences
+(promoter elements, splice sites, translation initiation sites,
+...). We are interested both in the mechanism of their recognition and
+processing, and in their evolution. In addition, but related to this
+basic component of our research, our group is also involved in the
+development of software for gene prediction and annotation in genomic
+sequences. 
+
+The following work is focused on the first step of any genome
+analysis: to find where genes are. The motivation of this thesis,
+thus, is to give a little insight in how genes are encoded and
+recognized by the molecular machinery of the cell. The complexity of
+gene prediction differs substantially in prokaryotic than eukaryotic
+genomes. While prokaryotic genes are single continuous open reading
+frames, usually adjacent to each other, eukaryotic genes are separated
+by stretches of intergenic regions and their coding sequences, can be
+interrupted by large non coding sequences, called introns. This
+thesis is focused on eukaryotic gene prediction.
+
+This thesis addresses another significant open problem of this field,
+how the sequence of related genomes can contribute to the location of
+genes. The value of comparative genomics is illustrated by the
+sequencing of the mouse genome for the purpose of annotating the human
+genome. The availability of closely related genomes makes it possible
+to carry out genome-wise comparisons and analysis of syntenic regions.
+Recently comparative gene predictions programs exploit this data under
+the assumption that regions conserved in the sequence will tend to
+correspond to coding exons from homologous genes. Thus, the second
+part of this thesis, describes a gene prediction program that combines
+\textit{ab initio} gene prediction with comparative information
+between two genomes to improve the accuracy of the predictions.
+
+The work described is essentially interdisciplinary, this means that
+while the basic subject of matter is biological and the obtained
+results are of biological interest, techniques from other fields are
+used heavily including certain statistical models and computational
+programing to develop all the bioinformatic applications.
+
+\clearemptydoublepage
+
+
 \pagestyle{fancy}
 % Marks redefinition must go here because pagestyle 
 % resets the values to the default ones.
 \renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
 \renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
 
-\tableofcontents
+{\setlength{\parskip}{0.4ex plus0.2ex minus0.2ex} % For a more compact index layout
+
+\tableofcontents}
 
 \vfill
-\begin{center}
-{\tiny$<$ \verb$Id: main.tex,v 1.1 2003-09-29 17:03:21 gparra Exp $$>$ }
-\end{center}
+%\begin{center}
+%{\tiny$<$ \verb$Id: main.tex,v 1.2 2004-06-29 10:40:56 gparra Exp $$>$ }
+%\end{center}
 
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
+\clearemptydoublepage
+
 \newpage
 \pagenumbering{arabic}
 \setcounter{page}{1}
-\ \\
 
+\chapter{Introduction}
+
+\section{Biological background}
+
+\subsection[What is a gene?]{What is a gene? 
+\footnote{This subsection owes its overall structure to \cite{snyder:2003a}.}}
+
+Historically, the term gene, was coined by the Danish botanist Wilhelm
+Johannsen in the early 1900s as an abstract concept to explain the
+hereditary basis of traits. He also made the distinction between the
+outward appearance of an individual (phenotype) and its genetic traits
+(genotype).
+
+Four years earlier, William Bateson, an early geneticist and a
+proponent of Mendel's ideas, had used the word genetics in a letter;
+he felt the need for a new term to describe the study of heredity and
+inherited variations. But the term did not start spreading until
+Wilhelm Johannsen suggested the Mendelian factors of inheritance
+to be called genes.
+
+Phenotypic traits were associated to hereditary factors even though the
+physical basis of those factors were not known. Early genetic studies
+by Thomas Hunt Morgan and others associated heritable traits with
+specific chromosomal regions. Using fruit flies as a model organism,
+Thomas Hunt Morgan and his group at Columbia University showed that
+genes, located in the chromosomes, are the units of heredity.  In 1930s,
+George Beadle introduced the concept of ``one gene, one enzyme'',
+which later became ``one gene, one polypeptide''.
+
+With the development of recombinant techniques and gene cloning, it
+became possible to combine the assignment of a gene to a specific
+segment of a chromosome and the production of a gene product. Although
+it was originally presumed that the final product was a protein, the
+discovery that RNA have structural, catalytic, and even regulatory
+properties made it evident that the end product could be a nucleic
+acid. Thus, we can define a gene in molecular terms as ``a complete
+chromosomal segment responsible for making a functional
+product''. This definition has several logical components: the
+expression of a gene product, the requirement that it must be
+functional, and the inclusion of both coding and regulatory
+regions. According to this definition, it should be possible to use
+straightforward criteria to identify genes in the DNA sequence of a
+genome.
+
+But the complexity of the genomic information is even beyond these
+criteria, there are additional problems in gene identification:
+overlapping transcripts,  alternative splicing, fusion genes or 
+pseudogenes. 
+
+There are now examples of overlapping reading frames of protein coding
+genes, overlapping transcriptional units (for example where the exon
+of one gene is encoded within the intron of another) and even
+overlapping protein coding genes \citep{coelho:2002a,tycowski:1996a}.
+In all cases of gene overlap, each gene has a unique functional
+sequence that is different to the others.
+
+The production of several isoforms from the same transcription unit by
+various types of alternative splicing is a very common event. Because
+a single primary transcript can have several regions that can generate
+alternative splicing, the resulting combinatorial effects of selecting
+different splice sites can be very pronounced, and genes that code for
+tens to hundreds of different isoforms could be common
+\citep{graveley:2001a}. In the human genome, more than half genes
+have spliced isoforms and this is likely to be an underestimation
+because not all variant have been identified \citep{modrek:2002a}.
+Gene products from alternatively spliced messenger mRNAs have
+functionally a unique and distinct sequence.
+
+There are some evidences that, in some cases, two adjacent genes are
+transcribed together. But, fused transcripts is not a synonym for a
+fused protein. Distinct proteins in prokaryotic organisms are
+organized in operons, long transcripts encoding many proteins. Thus,
+an authentic gene fusion should possess a particular mechanism to
+override the nonsense codon used to stop translation of the N-terminal
+protein. Taking advantage of the more efficient splicing system in
+eukaryotes, the observed cases, employ alternative splicing to skip
+the exons containing the stop codon. Therefore, it have been described
+cases where genes from two adjacent loci are transcribed together,
+probably as a result of a weak terminating signal, and after splicing,
+a chimeric mature transcript is build skipping the stop signal and
+generating a new chimeric protein with exons from both pre-existing
+and independent genes \citep{thomson:2000a,poulin:2003a}.
+
+The definition of a gene is also linked with the definition of a
+pseudogene. Pseudogenes are similar in sequence to normal genes, but
+they usually contain obvious disablements such as frame shifts or stop
+codons in the middle of coding domains. This prevents them from
+producing a functional product or having a detectable effect on the
+organism's phenotype. The boundary between living and dead genes is
+often not so sharp. Pseudogenes can be transcribed; truncated proteins
+could still have some functionality, and regions with stop codons
+could be alternatively spliced. Conversely, there are some pseudogenes
+that have entire coding regions without obvious disablements but do
+not appear to be expressed; presumably they lack the regulatory
+elements required for the transcription. In these cases, is difficult,
+or almost impossible, to discard marginal transcription in some
+isolate tissue at any developmental time.
+
+As we have seen, gene has a broad and often diffuse definition, that
+could be convenient for the cell in order to generate a huge amount of
+different combinations of final mRNAs. For the rest of this thesis the
+term gene will refers to protein coding genes and we will simplified
+the problem not taking into account overlapped transcripts and
+alternative splicing isoforms. 
+
+%This is obviously a simplification ....
+
+\subsection{Molecular basis of genomic information}
+
+DNA (deoxyribonucleic acid) is a double-stranded molecule that is
+twisted into a helix like a spiral staircase. Each strand is composed
+of a sugar-phosphate backbone and numerous base chemicals attached in
+pairs. The four bases that make up the stairs in the spiraling
+staircase are adenine (A), thymine (T) (uracil, U, when we are
+referring to the RNA, ribonucleic acid), cytosine (C) and guanine
+(G). These stairs act as the "letters" in the genetic alphabet,
+combining into complex sequences to form the words, sentences and
+paragraphs that act as instructions to guide the formation and the
+functional nature of the host cell. Maybe even more appropriately, the
+A, T, C and G in the genetic code of the DNA molecule can be compared
+to the "0" and "1" in the binary code of computer software. Like
+software to a computer, the DNA code is a genetic language that
+communicates information to the organic cell. It was not until early
+90s, that the Human Genome Project and the scientific community did
+not deeply explore the nature and complexity of the digital code
+inherent in DNA.
+
+
+%But what kind of information is encoded in the DNA molecules ?  A
+%segment of DNA that contains the information to make a specific
+%protein (or part of a protein). Like DNA, proteins are synthesized
+%like "beads on a string" but with 20 different kinds of beads (amino
+%acids) rather than the 4 of DNA. Chemical properties that distinguish
+%different amino acids ultimately cause the protein chains to fold up
+%into specific three-dimensional structures. Although DNA are
+%information rich, they are chemically simple and
+%homogeneous. Proteins, by contrast, are chemically complex and
+%diverse, properties that enable them to do so many different
+%jobs. Proteins are "where the action is" in living systems (although
+%nowadays is clear that RNA molecules with catalytic activity are also
+%playing and important role in cells biochemistry). Proteins are
+%motors, pumps, chemical catalysts, detectors, signals and signalers,
+%structural units, gateway keepers, assemblers, and garbage
+%handlers. They regulate cell replication, survival, and even death.
+
+Thus, how do we move from DNA to proteins? This process, known as the
+central dogma of the biology, involves three main steps:
+transcription, RNA modifications (including capping, splicing and
+polyadenilation) and translation. The basic schema of the central
+dogma is shown in figure \ref{central dogma}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=14cm]{figures/genestruct}
+\caption[Schema of the central dogma of gene expression]{Schema of the
+central dogma of gene expression. In the typical process of eukaryotic
+expression, a gene is transcribed from DNA to pre-mRNA. mRNA is then
+produced from pre-RNA by RNA processing, which includes the capping,
+splicing and polyadenilation of the transcript. It is then transported
+from the nucleus to the cytoplasm for the translation. Adapted from
+\cite{zhang:2002a}} \label{central dogma}
+\end{center}
+\end{figure}
+
+\subsection*{Transcription}
+
+A gene is regulated by a sequence at the promoter or enhancer regions
+that are a recognized by a set of specific proteins. These proteins
+function as transcriptions factor needed for RNA polymerase to
+initiate transcription. Active proteins are available only under
+conditions when the gene is needed to be expressed; it absents means
+that the promoter is not activated by this particular case. The
+control region combines several different kinds of regulatory element,
+and suggests the principle that when a promoter is regulated in more
+than one way, each regulatory event depends on binding of its own
+protein to a particular sequence.  When the optimal combination of
+transcription factors are bind to their corresponding sequence
+elements, the continuous sequence of DNA corresponding to a single
+gene is copied to a RNA sequence by the RNA polymerase II.
+
+It is possible that termination by RNA polymerase II is only loosely
+specified. In some transcription units termination occurs beyond 1000
+bp downstream of the site corresponding to the mature 3' end of the
+primary transcript (which is generated by cleavage at a specific
+sequence). Instead of using specific terminator sequence, the enzyme
+stops RNA synthesis within multiple sites located in rather long
+``terminator regions'' \citep{lewis:1997a}. The nature of individual
+termination sites is not known.
+
+
+\subsection*{RNA modifications}
+
+There are three main RNA modifications: the capping reaction, splicing
+and the maturation of the 3' end by cleavage and polyadenilation.
+These three processes occur while the RNA is being sintesized. There
+are evidences that regulatori interactions among these processes and
+transcription (through the C-terminal domain of the RNA polimerase II)
+would be crucial to obtain the final mature RNA. Recent studies have
+shown that the ``mRNA factory'' is a dynammic complex whose
+composition changes as it moves along the transcribed sequence of genes
+\ref{zorio:2004a}. 
+
+\subsubsection{Capping}
+
+The 5' end of the RNA (which is the end synthesized first during
+transcription) is first capped by the addition of a methylated G
+nucleotide. Capping occurs almost immediately, after about 30
+nucleotides of RNA have been synthesized, and it involves condensation
+of the triphosphate group of a molecule of GTP with a diphosphate left
+at the 5' end of the initial transcript. The new G residue added to
+the end of the RNA is in reverse orientation from all the other
+nucleotides. This 5'cap will later play an important part in the
+initiation of protein synthesis and it also seems to protect the
+growing RNA transcript from degradation \citep{lewis:1997a}.
+
+\subsubsection{Polyadenilation}
+
+The 3' ends of mRNAs are generated by cleavage followed by
+polyadenilation. RNA polymerase transcribes past the site
+corresponding to the 3' end, and sequences in the RNA are recognized
+as targets for and endonucleolytic cut followed by polyadenilation. A
+common feature of the mature transcripts in higher eukaryotes (but not
+yeast) is the presence of the sequence AAUAAA in the region from 11-30
+nucleotides upstream of the site of poly(A) addition. The sequence is
+highly conserved and only occasionally is even a single base
+different. Deletion or mutation of the AAUAAA hexamer prevents
+generation of the polyadenylated 3' end. The signal is needed for both
+cleavage and polyadenylation \citep{lewis:1997a}. Generation of the
+proper 3' terminal structure requires an endonuclease (consisting of
+the components CFI and CFII) to cleave the RNA, a poly(A)polymerase
+(PAP) to synthesize the poly(A) tail, and a specificity component
+(CPSF) that recognizes the AAUAAA sequence and directs the other
+activities.
+
+The addition of poly(A) helps stabilize mRNA and seems to be related
+with efficiency of translation initiation. The average size of the
+poly(A) tail is over 70 adenosines in yeast, to over 240 adenosines in
+mammals for newly transcribed mRNA and pre-mRNA in the
+nucleus. Cytoplasmic enzymes may also cause the polyA to shorten with
+age, and occasionally lengthen. Not all transcripts are
+polyadenylated; some histone mRNA is poly(A) minus. For transcripts
+without poly(A) tail, the 3' end seems to be protected or sequestered
+by association with other factors.
+
+\subsubsection{splicing}
+
+The primary RNA transcript is spliced to remove intron sequences,
+producing a shorter RNA molecule. Introns are removed from the
+nuclear RNAs of higher eukaryotes by a system that recognizes short
+consensus sequences conserved at exon-intron boundaries and within the
+intron. The splicing of precursors to mRNAs occurs in two steps, both
+involving single transesterification reactions. The first step
+generates a 2'-5' bond at the branch site upstream of the 3' splice
+site and a free 3' hydroxyl group on the 5' exon generating a lariat
+RNA intermediated.  In the second step, attack of the 3' hydroxyl on
+the phosphodiester bond at the 3' hydroxyl group and result in joining
+of the two exons.
+
+
+This reaction requires a large splicing apparatus, which takes the
+form of an array of proteins and ribonucleoproteins that junctions as
+a large particulate complex (the spliceosome). There are two distinct
+types of spliceosome in most organisms. The major class or U2-type
+(also known as canonical or GT-AG splice sites) spliceosome is
+universal in eukaryotes, whereas the minor class or U12-type (also
+known as AT-AC) spliceosome may not be present in some organisms. The
+consensus sequences of U12-type introns are more highly conserved than
+those of vertebrate U2-type introns. Figure \ref{splice signals} shows
+the conservation of the U2-type involved signals.
+
+The spliciosome is composed of five small nuclear RNAs (snRNAs) called
+U1, U2, U4, U5, and U6 and numerous protein factors. Splice site
+recognition and spliceosomal assembly occur simultaneously according
+to a complex sequence of steps (see figure \ref{splicing process}).
+The first step appears to be the recognition of the donor (5') splice
+site at the exon-intron junction: a substantial amount of genetic and
+biochemical evidence has established that this occurs primarily
+through base pairing with the U1 snRNA over a stretch of approximately
+nine nucleotides, including the last three exonic nucleotides and the
+first six nucleotides of the intron. The second step in spliceosomal
+assembly involves binding of U2 auxiliary factor (U2AF) and possibly
+other proteins to the pyrimidine-rich region immediately upstream of
+the acceptor site, which directs U2 snRNA binding to the branch point
+sequence approximately 20 to 40 bp upstream of the intron-exon
+junction.  The U2 snRNA sequence 3' GGTG 5' has been show to base pair
+with the branch point signal, consensus 5' YYRAY 3', with the unpaired
+branch point adenosine bulged out of the RNA duplex.  Mutations or
+deletions of the branch site in yeast prevent splicing. In higher
+eukaryotes, the relaxed constraints in its sequence result in the
+ability to use related sequences in the vicinity when the authentic
+branch is deleted. Subsequently, a particle containing U4, U5, and U6
+is added, U5 snRNA possibly interacting with the acceptor site,
+leading eventually to formation of the mature spliceosome.
+
+%These signals, however, do not appear to carry the information
+%requeired for the recognition of exons in genomic sequences
+%\citep{burge:1998a}. For a more detailed review about the splicing
+%process \cite{burge:1999a}.
+\begin{figure}
+\begin{center}
+\includegraphics[width=14cm]{figures/splicing}
+\caption[Classical splicing signals]{Splicing signals for U2-type. The
+nearly invariant GU and AG dinucleotides at the intron ends, the
+polypyrimidine tract (Y)n preceding the 3'AG, and the A residue that
+serves as a branch point are shown in below. For each sequence motif,
+the size of nucleotide at a given position is proportional to the
+frequency of that nucleotide at that position in an alignment if
+conserved sequences. Nucleotides that are part of the classical
+consensus motifs are shown in blue, except for the branch point A,
+which is shown in orange. Adapted from \cite{cartegni:2002}.} 
+\label{splice signals}
+\end{center}
+\end{figure}
+
+Several examples of intronic and exonic cis-elements that are
+important for correct splice site identification and that are distinct
+from the classical splicing signals have been recently described.
+These elements can act stimulating (as do enhancers) or repressing (as
+do silencers) splicing, and they seem to be specially relevant for
+regulating alternative splicing. Exonic splicing enhancers (ESEs), in
+particular, appear to be very prevalent, and might be present in most,
+if not all, human exons, including constitutive ones
+\citep{cartegni:2002}.  The lack of a well-defined consensus sequence
+for these signals, indicates that they might consist of numerous,
+functionally different classes, and that the factors involved
+may recognize degenerate signal sequences \citep{cartegni:2002}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=14cm]{figures/MOOM0193-EtapesSpliceosoma}
+\caption[The spliciosome cycle]{The spliciosome cycle. The processing
+of the pre-mRNA containing two exons and one intron into the ligated
+exon product and lariat intron is shown, emphasizing the involvement
+of the small nuclear ribonucleoprotein (snRNP) particles at distinct
+steps in spliceosome formation and catalysis. Adapted from
+\cite{burge:1999a}.} \label{splicing process}
+\end{center}
+\end{figure}
+
+
+\subsection*{Translation}
+
+The mRNA sequence is translated into protein sequence, outside the
+nucleus, by a sub-cellular structure known as ribosome (a compact
+ribonucleo-protein consisting of two subunits). The ribosome binds to
+the mRNA, and scans the sequence synthesizing the amino acid sequence
+specified by consecutive non-overlapping codons. Scanning of the mRNA
+proceeds until the ribosome finds one of the three codons not
+specifying amino acids (the Stop Codons). At that point, elongation of
+the amino acid sequence ends, and the final protein product is
+released.
+
+Selection of the start codon sets the reading frame that is maintained
+normally throughout all subsequent steps in the translation
+process. What makes the start different from the addition of a
+methione internally in the polypeptide chain is that a special
+transfer RNA (tRNA), used just to read the start codon, is present,
+tRNAi. When this tRNAi is charged with Met to form Met-tRNAi, this
+compound binds into the P site of ribosomes. In eukaryotes, the small
+(40s) ribosomal subunit carrying met-tRNAi and other associates
+proteins recognizes the 5' end of the mRNA and then migrates through
+the 5' untranslated region (UTR) until it encounters the first AUG
+codon which is recognized by base pairing with the anticodon in
+met-tRNAi when a 60s ribosomal subunit joins the paused 40s subunit,
+selection of the start codon is fixed.
+
+Flanking sequences modulate the efficiency with which the AUG codon is
+recognized as a stop signal during the scanning phase of
+initiation. In vertebrates mRNAs, initiation sites usually conform to
+all or part of the so called translation (or Kozak) signal:
+GCCACCaugGCG \citep{kozak:1987a}.
+
+For maximum effectiveness, the upstream GCCACC motif must directly
+precede the AUG codon. If the motif is upstream or the sequence is not
+optimal the effectiveness in the translation is reduced and even other
+cryptic AUG can be used instead the real one \citep{kozak:1999a}. How
+the consensus sequence is recognized is not yet known. One possibility
+is that interaction with GCCACC might slow scanning, and thus,
+facilitate the recognition of the AUG codon by met-tRNAi.
+
+Although context effects on AUG codon recognition have been studied
+primarily in mammalian systems, a strong contribution of the motif
+have also been demonstrate in plants. In \Sc, however, the effects
+of context are slight \citep{kozak:1999a}.
+
+Proteins are assembled by the sequential addition of amino acids in
+the direction from the N-terminus to the C-terminus as a ribosome
+moves along the mRNA. Translation termination is initiated when one of
+the three stop codons is present in the ribosomal A site, resulting in
+binding of the Release Factor (RF). Then, the hydrolysis of the
+peptide bond results in a deacylated tRNA in the ribosomal P site. RF1
+is removed from the ribosome in a GTP-dependent reaction involving
+RF3, resulting in the dissociation of the 60S/mRNA complex.
+
+Chemical properties that distinguish different amino acids ultimately
+cause the protein chains to fold up into specific three-dimensional
+structures that enable them to do their specific function.
+
+\section{Gene prediction background}
+
+\subsection{Gene prediction methods}
+
+As we have seen in the previous section, a given protein sequence is
+not usually specified by a continuous DNA sequence, but genes are
+often split in a number (maybe large) of (small) coding fragments
+known as exons, separated by (larger) non-coding intervening fragments
+known as introns. Often, intronic and intergenic DNA makes most of the
+genome in high eukaryotic organisms. In the human genome, for
+instance, only a very small fraction of the DNA, which can be as low
+as 2\%, corresponds to protein coding exons.
+
+The aim in any gene prediction program is, given DNA sequence, to find
+the encoded gene structures and the corresponding amino acid
+sequence. Therefore, what we are trying to do, is model all this
+biological knowledge to be able to reproduce what the cell does in an
+anonymous DNA sequence. In deed, typical computational eukaryotic gene
+prediction involves the following tasks:
+
+\begin{itemize}
+\item identification of suitable signals
+\item prediction of candidate exons defined by the corresponding signals
+\item assembly of a subset of these exon candidates in a predicted gene structure
+\end{itemize}
+
+The particular implementation of these tasks varies considerably
+between programs. For the rest of dissertation, the term gene refers to
+protein coding genes and the term exons to the protein coding part of
+an exon, unless stated otherwise. We will briefly review them next.
+
+\subsubsection{Prediction of biological signals}
+
+Sequence signals are defined as short functional DNA elements that are
+recognized by the cellular machinery in the processes involved in the
+pathway leading from DNA to protein sequences. As we have seen in the
+previous sections there are many target signal sequences. However,
+there are four basic signals that defines the boundaries of the coding
+regions of the primary transcript: the translational start site (TSS), the
+5' splice site (donor site), the 3' splice site (acceptor site), and
+the translational stop codons.
+
+% Sequence are not 100\% conserved ... 
+
+The most common method to model sites has been position weight
+matrices. \cite{senapathy:1990a} presented the first quantitative
+frequency matrices where each matrix element $M_ij$ is the frequency
+of the base $i$ in the position $j$ from a set of aligned splice sites
+sequences. Figure \ref{frequency matrix} shows the frequency matrix
+derived from a set of human donor and acceptor sites.
+
+\input{figures/frequency_matrix}
+
+
+If $f_i$ as the background frequency of nucleotides $i$, then the
+popular log-odd scoring matrix (known as Position Weight Matrix PWM,
+Weight Matrix Model WMM, or Position Specific Scoring Matrix PSSM)
+$S_ij=log(f_ij/fi)$ scored the signal as the sum of the scores over
+the bases within the signal. If the resulting score gives positives
+score the sequence occurs in signal site more often than expected by
+chance, while if the score is negative the sequence occurs in the
+signal site less often than expected.
+
+PWMs assume that bases at different positions are independent. This is
+often an oversimplification.  Several authors have observed
+statistically significant dependencies between position within
+different signals. Certain observed dependencies between donor splice
+sites position can be interpreted in terms of the thermodynamics of
+RNA duplex formation between A1 snRNA and the 5' splicing region of
+the pre-mRNA. Of the dependencies observed in human acceptors sites,
+some appear to result simply from the compositional heterogeneity of
+the human genome, whereas others probably relate to specificity of
+pyrimidine tract binding proteins.
+
+There are many ways to incorporate base dependencies. One method is to
+assume that the probability of each base at a given position depends
+on the base occurring at the previous position or the positions (the
+so-called Markov dependence or Weight Array Model WAM,
+\cite{zhang:1993a}). More dependencies, however, result in more
+parameters to be estimated and it requires much more training
+data. Another method is to apply a decision tree (so-called Maximal
+Dependence Decomposition MDD, \cite{burge:1997a}) to partition total
+training data into subsets so that splice site bases within each
+subset are approximately independent and hence can be modeled by a
+separate PWM.
+
+New recent methods as multilayer neural networks \citep{reese:1997a}
+or inclusion-driven learned Bayesian Networks (idlBNs)
+\citep{castelo:2004a} methods have been developed. These more complex
+models typically yield significant, but not dramatic, improvements in
+splice sites discrimination over the simpler models which assume
+independence between positions. in isolation or in the contexts of an
+integrating gene finding method \citep{burge:1998a}.
+
+\subsubsection{Prediction of putative exons}
+
+Once all the putative signal are predicted, all the putative exons can
+be built. Only the coding fraction of the coding exons is predicted by
+gene finding methods. Typically, gene prediction programs redefine the
+term exons to refers only to the coding fraction of the exons, and
+classified them as: initial (limited by a TSS and a donor site),
+internal (limited by an acceptor and a donor site), terminal (limited
+by an acceptor and a stop codon) and single exon genes (limited by a
+TSS and stop codon). See \cite{zhang:2002a} for a more detailed
+description of all the possible types of exons.
+
+To discriminate coding regions from non coding regions a large number
+of content measures have been developed (\cite{fickett:1992a},
+\cite{gelfand:1995a} and \cite{guigo:1999a}). Such content measures --
+also known as coding statistics -- can be defined as functions that
+compute a real number related to the likelihood that a given DNA
+sequence codes for a protein. Protein coding regions exhibit
+characteristic DNA sequence composition which is absent on non-coding
+regions. This bias is mainly due coding restrictions: the specific amino
+acids usage to build proteins and the unequal usage of the
+synonymous codons.  \cite{fickett:1982a} also shows that coding
+regions have asymmetries and periodicities that help to distinguish
+them from non coding sequences.
+
+Among all the different coding measures, codon position dependent 5th
+order Markov model \citep{borodovsky:1993a} appear to offer the
+maximum discriminative power \citep{guigo:1998a} and are at the core
+of most popular gene finders today. In this model the conditional
+probability of the identity of the next nucleotide depends on the
+identities of previous five bases. This relatively complicated model
+incorporate a combination of biases related to amino acid usage, codon
+usage, di-amino acid and dicodon usage as well as other underlying
+factors.
+
+Coding content measures are usually combined with the scores of the
+exon defining signals to obtain a final exon score. There is a number
+of ways in which these scores can be combined. If computed as
+log-odds, they can be simply summed up under the assumption of
+independence(). Linear discriminant analysis \citep{solovyev:1995a}
+and artificial neural networks \citep{uberbacher:1991a} have also been
+used.
+
+\subsubsection{Assembly of putative exons}
+
+Predicted exons need to be assembled into genes. This assembly must
+conform to a number of intrinsic biological constraints such as
+non-overlap between assembled exons and the maintenance of an ORF
+among them.
+
+The main difficulty in exon assembly is the combinatorial explosion
+problem: the number of ways $N$ candidate exons may be combined grows
+exponentially with $N$. To address this problem a number of methods based
+on dynamic programming techniques have been developed. In dynamic
+programming \citep{bellman:1957a}, the solution to a general problem
+is obtained by the recursive solution of smaller versions of the
+problem. In the ``optimal exon assembly'' problem, dynamic programming
+allows to find the solution efficiently, without having to enumerate
+all exons assembly possibilities \citep{gelfand:1993a}. Algorithms
+running in quadratic time (in time proportional to the square of the
+number of predicted exons) were used in GeneParser
+\citep{snyder:1993a}, GrailII \citep{xu:1994a} and fgenesh
+\citep{solovyev:1995a}, among other programs. \cite{guigo:1998a}
+developed a more efficient algorithm running in linear time (that is
+in time proportional to the number of predicted exons). At the core of
+the recently developed GAZE system \citep{howe:2002a}, there is also a
+chaining algorithm that runs effectively in linear time.
+
+A novel advance in gene prediction methodologies was the application
+of generalized Hidden Markov Models (HMMs). This probability model
+were first developed in the speech-recognition field and later applied
+to protein and DNA sequence pattern recognition. Initially implemented
+in the gene prediction field in the GENIE algorithm
+\citep{kulp:1996a}.  In a HMM approach, different types of gene
+structure components (such as exon or intron) are characterized with
+states, and a gene model is thought to be generated by a state
+machine: starting from 5' to 3', each base-pair is generated by a
+``emission probability'' conditioned on the current state and
+surrounding sequences and transition from one state to another is
+governed by a ``transition probability'' which obeys all the
+constraints (such as an intron can only follow an exon, reading frames
+of two adjacent exons must be compatible, etc.). All the parameters of
+the ``emission probabilities'' and ``transition probabilities'' are
+learned (pre-computed) from some training data set. Since the states
+are unknown (``Hidden''), an efficient dynamic programming algorithm
+(called the Viterbi algorithm) may be used to select the best set of
+consecutive states (called a ``parse''), which has the highest overall
+probability compared with any other possible parse of the given
+genomic sequence (see \cite{rabinier:1989a} for a tutorial on HMMs). It
+is easy to add more states (such as intergenic regions, promoters,
+UTRs, etc.) and transitions into HMM-based models to allow partial
+genes, intronless genes, even multiple genes or genes on different
+strands to be incorporated.
+
+\subsection{Ab initio gene prediction}
+
+Computational gene finding is not a brand new field and a large body
+of literature has accumulated past 20 years or so. In this section we
+briefly resume the initial steps of gene prediction tools. Early
+studies by \cite{shepherd:1981a}, \cite{fickett:1982a} and
+\cite{staden:1982a} showed that statistical measures related to
+biases in amino acid and codon usage could be used to approximately
+identify protein coding regions in genomic sequences.  Based on these
+differences, the firsts generation of gene predictions programs,
+designed to identify approximate locations of coding regions in
+genomic DNA were developed. The most widely known such programs are
+probably Testcode (based on \cite{fickett:1982a}) and GRAIL
+\citep{uberbacher:1991a}.  These methods were able to identify coding
+regions of sufficient length (100-200bp length) with fairly high
+reliability, but do not accurately predict exon locations.
+
+In order to predict exon boundaries, a new generation of algorithms
+were developed. Second generation methods, such SORFIND
+\citep{xu:1994a}, GRAIL II \citep{hutchinson:1992a} and XPOUNd
+\citep{thomas:1994a}, use a combination of splice signal and coding region
+identification techniques to predict ``spliceable open reading
+frames'' (potential exons), but do not attempt to assemble predicted
+exons into complete genes. Third generations methods attempt the more
+difficult task of predicting complete gene structures, i.e. sets of
+exons which can be assembled into translatable mRNA sequences. The
+earliest examples of such integrated gene finding algorithms were
+probably the GeneModeler program \citep{fields:1990a} for prediction
+of genes in \Ce\ and the method of \citep{gelfand:1990a} for
+mammalian sequences. Subsequently, there has been a mini-boom of
+interest in development of such method, and a wide variety of programs
+have appeared, including (but not limited): \geneid\
+\citep{guigo:1992a}, which uses a hierarchical structure; Geneparser
+\citep{snyder:1993a}, which uses a combination of neural network and dynamic
+programing approaches; GeneMark \citep{borodovsky:1993a}; genlang
+\citep{dong:1994a}, which treats the problem by linguistic methods;
+fgenes \citep{solovyev:1994a} which uses a discriminant analysis and
+other statistical techniques.
+
+
+At the end of last decade, a next generation of programs appeared
+simultaneously with the completion of the first genome sequencing
+projects. Some of them were even used in the earlier stages of the
+annotation pipelines. As a new data and more powerful computers became
+more accessible, the gene fingers were able to deal with sequences
+containing more than one gene. Although the gain in accuracy was
+significant, it was still insufficient in general terms (see
+\cite{guigo:2000a} and \cite{rogic:2001a}). Some programs of this
+generation were GENIE \citep{kulp:1996a}, HMMGENE \citep{krogh:1997a}
+and GENSCAN \citep{burge:1997a}.
+
+
+\subsection{Genome comparison gene prediction}
+
+With the availability of genomes from different species a number of
+strategies have been developed to use genome comparisons to predict
+genes. The rationale behind comparative genomics methods is that
+functional regions, protein coding among them, are more conserved than
+non-coding ones between genome sequences from different organisms. This
+characteristic conservation can be used to identify protein coding
+exons in the sequences. The approach taken by the different programs to
+exploit this idea differ notably.
+
+In one such approach \citep{bayo:2002a, pedersen:2002a}, the problem
+is stated as a generalization of pairwise sequence alignment: given
+two genomic sequences coding for homologous genes, the goal is to
+obtain the predicted exonic structure in each sequence maximizing the
+score of the alignment of the resulting amino acid sequences. Both,
+\cite{bayo:2002a} and \cite{pedersen:2002a} solve the problem through
+a complex extension of the classical dynamic programming algorithm for
+sequence alignment. Although very appropriate for short sequences, in
+the practice, the time and memory requirements of this algorithm may
+limit its utility for very large genomic sequences.  Moreover,
+although the approach is theoretically sound, and it is guaranteed to
+produce the optimal amino acid sequence alignment, the fact that
+sequence conservation may occur in regions other than protein coding,
+could lead to over prediction of coding regions, in particular when
+comparing large genomic sequences from homologous sequences from
+closely related species.
+
+To overcome this limitation, the programs \slam\ \citep{pachter:2003a} and
+\doublescan\ \citep{meyer:2002a} rely on more sophisticated models of coding 
+and non-coding DNA and splice signals, in addition of sequence
+similarity. Because sequence alignment can be solved with Pair Hidden
+Markov Models\citetext{PHMMs, \citealp{durbin:1998a}}, and because
+Generalized HMMs (GHMMs) have been proved very useful to model the
+characteristics of eukaryotic genes \citep{burge:1997a}, \slam\ and
+\doublescan\ are built upon the so-called Generalized Pair HMMs. In these,
+gene prediction is not the result of the sequence alignment, as in the
+programs above, but both gene prediction and sequence alignment are
+obtained simultaneously.
+
+A third class of programs adopt a more heuristic approach, and
+separate clearly gene prediction from sequence alignment.  The
+programs \rosseta\ \citep{batzoglou:2000a}, \sgpo\ \citetext{from Syntenic
+Gene Prediction, \citealp{wiehe:2001a}}, and \cem\ (from the Conserved
+Exon Method, \citealp{bafna:2000a}) are representative of this
+approach.  All these programs start by aligning two syntenic regions
+(specifically human and mouse in \rosseta, and \cem; less species specific
+in \sgpo), using some alignment tool (the {\sc glass} program,
+specifically developed in the case of \rosseta\, or generic ones, such as
+\tbx, or \sim\ in the case of \cem\ and \sgp), and then predict gene
+structures in which the exons are compatible with the alignment. This
+compatibility often requires conservation of exonic structure of the
+homologous genes encoded in the anonymous syntenic regions. Although
+conservation of exonic structure is an almost universal feature of
+orthologous human/mouse genes \citep{mouse:2002a}, it does not
+necessarily occur when comparing genome sequences of homologous genes
+from other species.
+ 
+% The programs described so far rely on the comparison of fully
+%assembled (and when from different organisms, syntenic) genomic
+%regions. This limits their utility when analyzing complete large
+%eukariotic genomes, and in particular when the informant genome is in
+%non-assembled shotgun form. To overcome this limitation, the programs
+%\twinscan\ \citep{korf:2001a} and \sgp\ take still a different approach. 
+%The approach is reminiscent of that used in \genscan\ to incorporate
+%similarity to known proteins to modify the \geneid\ scoring schema.
+%Essentially, the query sequence from the target genome is compared
+%against a collection of sequences from the informant genome (which can
+%be a single homologous sequence to the query sequence, a whole
+%assembled genome, or a collection of shotgun reads), and the results
+%of the comparison are used to modify the scores of the exons produced
+%by \textit{ab initio} gene prediction programs. In \twinscan, the
+%genome sequences are compared using \bln\ and the results serve to
+%modify the underlying probability of the potential exons predicted by
+%\geneid. In \sgp, the genome sequences are compared using \tbx, and the
+%results used to modify the scores of the potential scores predicted by
+%\geneid.
+
+As the number of genomes sequenced at different evolutionary distances
+increases, methods to predict genes based on the comparative analysis
+of multiple species -- and not only of two species -- look
+promising. For instance, \cite{dewey:2004a} combine pairwise
+predictions from SLAM in the human, mouse and rat genomes to
+simultaneously predict genes with conserved exonic structure in all
+three species. In the so-called Phylogenetic Hidden Markov Models
+(phylo-HMMs) or Evolutionary Hidden Markov Models (EHMM), a gene
+prediction Hidden Markov Model is combined with a set of evolutionary
+models, based on a phylogenetic tree. Phylo-HMMs take into account
+that the rate (and type) of evolutionary events differs in
+protein-coding and non-coding regions. Recently, Phylo-HMMs have been
+applied to gene prediction with encouraging results
+\citep{pedersen:2003a, siepel:2004a}.
+
+Phylo-HMMs have been also used in the context of phylogenetic
+shadowing \citep{boffelli:2003a}. Phylogenetic shadowing examines
+sequences of closely related species and takes into account the
+phylogenetic relationship of the set of species analyzed. This
+approach enables the localization of regions of collective variation
+and complementary regions of conservation, facilitating the
+identification of coding as well as non-coding functional regions. The
+likelihood ratio under a fast- versus slow- mutation regime can be
+computed for each aligned nucleotide site across all the sequences
+being analyzed. This ratio represents the relative likelihood that any
+given nucleotide site was subjected to a faster or slower rate of
+accumulation of variation and is related to functional constraints
+imposed on each site. Exon containing sequences will display the least
+amount of cross species variation, in agreement with the constraint
+imposed by their functional role. Regions from different parts of the
+genome, in which a functional non-coding sequence will appear, may
+evolve at different rates \citep{eberseberger:2002a}, as reflected by
+differences in their absolute likelihoods. Despite that, functional
+non-coding regions can be retrieved from stretches of sequence having
+minimal variation similar to exonic ones.
+
+\subsection{Gene prediction accuracy}
+
+The sheer number of such algorithms raises the obvious question of
+whether the gene finding problem has perhaps already been solved by
+one or more of these programs. This question was repetitively answered
+in the negative by different systematic comparisons of available
+integrated gene finding methods.
+
+Of course, the answer to this question depends on a number of factors:
+the species under consideration, the sequence context, the existence
+of experimental evidence, etc. In general, a prediction supported by
+spliced ESTs or showing strong similarity to known coding sequences is
+more reliable than a prediction with no supporting evidence.
+Similarly, consistent predictions on a genomic region obtained by
+different programs should be more reliable than isolated predictions
+by just one program. In addition of having some clue on the accuracy
+of the predictions on particular cases, one would like to have an
+overall measure of the accuracy of the "ab initio" gene prediction
+programs. A number of attempts have been made to produce independent
+comparative estimates of the performance of gene finders.
+
+The accuracy of gene prediction programs is usually measured in
+controlled data sets. To evaluate the accuracy of a gene prediction
+program on a test sequence, the gene structure predicted by the
+program is compared with the actual gene structure of the
+sequence. The accuracy can be evaluated at different levels of
+resolution. Typically, these are the nucleotide, exon, and gene
+levels. These three levels offer complementary views of the accuracy
+of the program. At each level, there are two basic measures:
+Sensitivity and Specificity, which essentially measure prediction
+errors of the first and second kind. Briefly, Sensitivity is the
+proportion of real elements (coding nucleotides, exons or genes) that
+have been correctly predicted, while Specificity is the proportion of
+predicted elements that are correct. More specifically, if TP are the
+total number of coding elements correctly predicted, TN, the number of
+correctly predicted non-coding elements, FP the number of non-coding
+elements predicted coding, and FN the number of coding elements
+predicted non-coding, then, in the gene finding literature,
+Sensitivity is defined as Sn =TP/(TP+FN) and Specificity as Sp
+=TP/(TP+FP). Both, Sensitivity and Specificity, take values from 0 to
+1, with perfect prediction when both measures are equal to 1. Neither
+Sn nor Sp alone constitute good measures of global accuracy, since
+high sensitivity can be reached with little specificity and vice
+versa. It is desirable to use a single scalar value to summarize both
+of them. In the gene finding literature, the preferred such measure on
+the nucleotide level is the Correlation Coefficient defined as CC
+ranges from -1 to 1, with 1 corresponding to a perfect prediction, and
+-1 to a prediction in which each coding nucleotide is predicted as
+non-coding and vice versa.
+
+Table \ref{burset accuracy} reproduces the results from the benchmark
+by \cite{burset:1996a}, one of the first systematic evaluations
+of gene finders. These authors evaluated seven programs in a set of
+570 vertebrate single gene genomic sequences deposited in GenBank
+after January 1993. This was done to minimize the overlap between this
+test set and the sets of sequences which the programs had been trained
+on. Average CC for the programs analyzed ranged from 0.65 to 0.80 at
+the nucleotide level, while the average exon prediction accuracy
+((Sn+Sp)/2) ranged from 0.37 to 0.64.
+
+\cite{rogic:2001a} published recently a new independent comparative
+analysis of seven gene prediction programs. The programs were again
+tested in a set of 195 single gene sequences from human and rodent
+species. In order to avoid overlap with the training sets of the
+programs, only sequences were selected that had been entered in
+GenBank, after the programs were developed and trained. Table
+\ref{rogic accuracy} shows the accuracy measures averaged over the set
+of sequences effectively analyzed for each of the tested programs.
+
+The programs tested by \cite{rogic:2001a} showed substantially higher
+accuracy than the programs tested by \cite{burset:1996a}:
+average CC at the nucleotide level ranged from 0.66 to 0.91, while
+average exon prediction accuracy ranged from 0.43 to 0.76. This
+illustrates the significant advances in computational gene finding that
+occurred during the nineties.
+
+The evaluations by \cite{burset:1996a}, \cite{rogic:2001a}, and others
+suffered from the same limitation: gene finders were tested in
+controlled data sets made of short genomic sequences encoding a single
+gene with a simple gene structure. These data sets are not
+representative of the genome sequences being currently produced: large
+sequences of low coding density, encoding several genes and/or
+incomplete genes, with complex gene structure. 
+\input{tables/burset_accuracy}
+
+\input{tables/rogic_accuracy}
+
+
+\newpage
+\chapter{Objectives} 
+
+\geneid\ \citep{guigo:1992a} was one of the first programs to predict
+full exonic structures of vertebrate genes in anonymous DNA
+structures. However, since the original\geneid\ was released, there had
+been substantial developments in the field of computational gene
+identification, and it had become clearly inferior to the other
+existing tools.
+
+The goal of this Ph.D. thesis, was to develop an improve geneid
+prediction accuracy, and make it useful for the new genomes that were
+going to come. Therefore, the main goals were the followings:
+
+\begin{itemize}
+
+\item To develop and add new gene recognition techniques to the new \geneid\ 
+release. The parameter file structure should be explicit and have a
+simple and intuitive interpretation and be estimated from any
+available set of genes.
+
+\item To build parameter files for different species and to establish
+evolutionary relations between the differences found among different
+species.
+
+\item To develop a method to incorporate genomic comparative information
+to the \geneid\ prediction framework.
+
+\item To analyze the differences between the specification of 
+the splicing in different organism and to try to build a more
+realistic model of splicing.
+
+\item To provide both, predicted genes and the bioinformatic tools to
+the research community.
+
+\end{itemize}
+
+Many of the goals listed above have been achieved by the current
+implementation of \geneid\ and its extension \sgp. The parameter files
+incorporate several types of information. Depending on the amount of
+available data for each species and the nature of the signal every
+type of site could be represented with a position weight array of
+different order. As coding statistics \geneid\ allows the use of any
+order of Marko chain, depending again on the amount of available
+data. With the new parameter file, a complete set of initial and
+transition probabilities can be incorporated for different G+C content
+context.
+
+\geneid\ and \sgp\ accuracy have been tested in different set of
+sequences, showing an accuracy superior to the existing tools, being
+both specially more specific than the other programs. On the other
+hand, certain features remain difficult to predict including very
+small exons and the boundaries of independent genes. More general
+challenges in the gene prediction field are pointed out in the
+$Discussion$ section.
+
+Most of this work have been done in collaboration with international
+genome sequencing consortiums. These collaborations gave me the
+opportunity to meet and work with specialist of all over the wold, and
+made our work very relevant. However, these collaborations had put a
+lot of pressure on our group and sometimes I would have like to have
+more time to focus on some aspects of my research. For instance, the
+more biological analysis of the definition of the splice sites and the
+building of a more realistic model has been impossible to achieve
+during the realization of this thesis. On the other hand, the
+annotation of recently sequenced genome has been very fruitful,
+allowing us to test and adapt our gene prediction tools to the real
+needs of the genomic annotation projects.
+
+For the last objective, the dissemination of data, all the programs and
+sequence data have been made available with no restriction through our
+own web service.
+
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%  Chapter: geneid  %%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Ab initio gene finding method: geneid} 
+
+In this chapter, the implementation of the parameters that specify the
+information needed for \geneid\ to predict genes is described. The
+first parameters obtained for the new version of \geneid\ was obtained
+while the re-programing in C of the first version was still in
+process. This, was motivated by the announcement of the Berkeley
+Drosophila Genome Project to generate a state of the art of gene
+prediction tools in which any group could participate. Our group
+decided to take part in the assessment and to develop a parameter file
+for \DmL. The results of the assessment are briefly commented.
+After that, a short description of the the parameters obtained for
+other species is presented.
+
+\section{Genome Annotation Assessment Project - GASP1} 
+
+The GASP (\url{http://www.fruitfly.org/GASP1/}) experiment was
+organized by the Berkeley Drosophila Genome Project to formulate
+guidelines and accuracy standards for evaluating computational tools
+and to encourage the development of existing approaches through a
+careful assessment and comparison of the predictions made by programs
+at that time. The goal of the annotation process is to assign as much
+information as possible to the raw target sequence with an emphasis on
+the location and structure of the coding genes.
+
+The GASP experiment consisted on the following stages:
+\begin{itemize}
+\item Training data set of curated sequences and the $Adh$ region,
+including 2.9 Mb of \DmL\ genomic sequence was collected by the
+organizers and provided to the participants.
+\item A set of annotations based on experimental data was developed to
+evaluate submissions while the participating groups produced and
+submitted their annotations for the region.
+\item The participant group\'{ }s predictions were compared to the
+standards and the results were presented as a tutorial at the
+Intelligent Systems for Molecular Biology (ISMB, Heidelberg 1999).
+\end{itemize}
+
+The organization chose the 2.9 Mb $Adh$ contig because it was large
+enough to be challenging, contained genes with a variety of sizes and
+structures, and include regions of high and low gene density.
+
+The annotation used as standard, ideally, should contain the the
+correct structure of all the genes in the region without any
+error. Unfortunately, such a set was impossible to obtain because the
+underlying biology was incompletely understood. The built a two-part
+approximation to the perfect data set, taking advantage of data form
+the cDNA sequencing project and a \Droso\ community effort to build a
+set of curated annotations for this region \citep{Ashburner:1999a}.
+The first standard set, known as $std1$, used high quality sequence
+from a set of 80 full-length cDNA clones from the $Adh$ region to
+provide a set with annotations that are very likely to be correct but
+certainly are not exhaustive. The second standard set, known as
+$std3$, was built from the annotations being developed for
+\cite{Ashburner:1999a} to give a standard with more complete coverage
+of the region, although with less confidence about the accuracy and
+independence of the annotations.
+
+The organization also provided several \Droso-specific data sets to
+enable the participants to tune their tools. The curated sequences
+were extracted from the Flybase. The gene curated set contained
+genomic sequences from 275 multi- and 141 single exon non-redundant
+genes together with their start and stop codons an the splice sites
+coordinates.
+
+Participants were given the finished sequence for the $Adh$ region the
+available related training data, but they did not have access to the
+full-length cDNA sequenced that were sequenced for the paper by
+\cite{Ashburner:1999a} that describes the $Adh$ region in depth. The
+experiment was widely announced and open to any participants.
+
+\subsection{Training protocol for geneid}
+
+In most gene prediction programs, there is a clear separation between
+the gene model itself and the parameters of the model. Typically, the
+parameters of the gene model define the characteristic of the sequence
+signals involved in gene specification (i.e. PWMs for the splice
+sites), the codon bias characteristic of coding exons (i.e. hexamers
+counts or Markov Models for coding regions), and the relation between
+the exons when assembled into gene models (i.e. intron and exons
+lengths distributions, transition probabilities in HMMs, ...). These
+parameters are estimated from a set of annotated genomic sequence from
+the species of interest. 
+
+
+\subsubsection{Site definition}
+
+To determine which positions are relevant for the definition of a site
+in the training set, the relative entropy is calculated. The positions
+frequency of nucleotides in the surrounding bases of the canonical
+signals in both actual exon boundaries $P$ and non functional sites
+$Q$ is measured (30 base pairs upstream and downstream). Then, for
+each position $j$, the relative entropy $D_j$ (also known as the
+Kullback-Liebler distance) is defined as:
+
+\begin{equation}
+D^j (P,Q) =\sum_{i=A,C,G,T}\ P_{ij}\ log\ \frac{P_{ij}}{Q_{ij}}\,\,\,.
+\end{equation}
+
+The stretch of nucleotides crossing the coding exon boundary with the
+relative entropy above a threshold of 0.1 is accepted. After that,
+the log-likelihood ratio between the real and the non functional site 
+is computed as explained in the previous chapter.
+
+Depending on the amount of available data for each species and the
+nature of the signal every type of site could be represented with a
+PWA of different order. For acceptor sites in human, a first-order PWA
+is constructed based on some bias detected in dinucleotides around the
+canonical signal AG \cite{burge:1997a}. However, a second-order PWA is
+built for start codons to capture the appearance of a second ATG
+signal after the real one because a biological penalty is known to
+exist in order to avoid the activation of the second ATG
+\cite{kozak:1999a}. In contrast, PWAs of order zero are constructed in
+species with less accurate annotations.
+
+\subsubsection{Coding potential}
+
+First, the sequence of coding regions (CDS) and introns from the
+training set are extracted. Next, the initial and transition matrices
+for the Markov model are computed as log-likelihood ratio. The optimal
+order that reflects the dependencies between contiguous codons and
+dependencies between contiguous codons seems to be order five.  geneid
+allows the use of many order of Markov chain as a coding
+statistic. Different orders could be chosen depending on the amount of
+available CDS for the corresponding species.
+
+With geneid, a complete set of initial and transition probabilities
+can be incorporated for different G+C content contexts.Thus, signals
+and exons can be predicted using different scoring schemas according
+to their genomic context.  In human, three different initial and
+transition matrices have been constructed depending on the percentage
+of G+C content (from 0 to 45, from 45 to 55 and from 55 to 100).
+
+\subsubsection{Optimization}
+
+
+geneid constructs genes structures, which can contain multiple genes
+in both strands. The assembly algorithm try to optimize the sum of
+scores of the putative assembled exon, as is explained in more detail
+in the paper ``geneid in \Droso'' (presented in the next section). As
+all the exons are computed as log-likely hood ratios, this can be
+approximately interpreted as the log-likelyhood ratio of the
+probability of the defining sites and the hexamer composition (if a
+Markov of order five is computed). However, the simple sum of
+log-likelihoods does not produce genes with the correct number of
+exons. 
+
+To overcome this limitation, the score of the exons is corrected by
+adding a constant $EW$. A general process of optimization is needed in
+order to predict the number of real exons. Genes are predicted in the
+training set using different values of the parameter $EW$. Thus, the
+value that maximizes the coefficient of correlation between the actual
+and the predicted coding nucleotides is selected.
+
+
+\subsection{geneid in Drosophila}
+
+Additional papers in a special issue of the {\it Genome Research}
+magazine were written by the participants and describe their methods
+and the results in detail. Our paper was included in this special
+issue and explains how the parameters needed for \geneid\ to predict
+genes in \Dm\ were computed. The final \geneid\ predictions showed
+an accuracy comparable to the gene finding programs that exhibited the
+highest accuracy in the GASP results published in \cite{reese:2000a}.
+
+
+To evaluate the accuracy $std1$ and $std3$ sets were used. $std1$ was
+a rigorous annotation set but incomplete while $std3$ is as complete
+as possible but less reliable. Therefore, the organization decided to
+test all the statistic related with the sensitivity to be computed in
+the conservative set, and the specificity related statistics to be
+computed in the extended but less reliable $std3$ set. This could
+obviously bias the result to a over positive estimation of the
+statistics. Otherwise, the standard sets sufficiently represent the
+true nature of the region and conclusion based on them are
+interesting, and more realistic than benchmarks realized on single
+gene sequences.
+
+Table \ref{accuracy gasp} showed the results of the gene finding
+tools. Several gene prediction tools had a sensitivity (Sn) at
+nucleotide level superior than 95\%. There was a great deal of
+variability in the exon level accuracy. Several tools had Sensitivity
+at exon level(Sne) over 75\%. But their specifity (Spe) were generally
+much lower. The low missing exons (ME) combined with the high Sn
+suggest that several tools were successful at identifying exons but
+had trouble finding the correct exon boundaries. The wrong exons (WE)
+scores suggest either that the tools are over-predicting. All of the
+predictors had considerable difficulty in the correct assembly of
+complete genes. The best tools were able to achieve sensitivities
+between 0.33 and 0.44 (data not shown). The programs tent to
+incorrectly predict many genes. The major problem is the initial short
+coding exons that could be in some cases shorter than 10 bases, and
+hardly any gene finding tool without the use of homology searches at
+databases can predict them.
+
+
+The GASP project gave us some insights on the performance of gene
+prediction program in large scale genomic sequences. To summarize the 
+conclusions reached by the GASP organizers:
+
+\begin{itemize}
+\item 95\% of the coding nucleotides of the encode genes were
+correctly predicted.
+
+\item The correct structures were predicted for about 40\% of the
+genes. Base level predictions are easier, exon level predictions are
+harder.
+
+\item Major improvements in multiple gene regions.
+
+\item Gene finding including homology not always improves predictions.
+
+\item Programs with specific parameter files for the problem species
+performed better than the others.
+
+\item No program is perfect.
+
+\end{itemize}
+
+The two latest statements encourage us to continue developing \geneid\ an
+to try to obtain parameter files for the incoming sequenced genomes.
+
+The main conclusions from this experiment were that the methods of
+gene prediction at that time had improved and that they were very
+useful for genome scale annotations but that high quality annotations
+also depend on a solid understanding of the organism in question.
+
+
+Although \geneid\ was not used by the Drosophila Genome Project to
+annotate the \Dm\ genome, it had some usage through our web page
+and from people who had freely download the program. Some experimental
+papers have based their work on \geneid\ predictions
+\citep{dunlop:2000a,castellano:2001a,beltran:2003a}.
+
+\input{tables/gasp_accuracy}
+
+
+\includepdf[offset=.5cm .5cm,pages={1-5},scale=0.95]{papers/parra_GR_2000}
+\newpage
+\section{Training \geneid\ in other species}
+
+As we have seen in the previous section, parameter files derived from
+one species perform better than generic parameters files. It seems
+that each genome have its characteristic signatures for gene
+recognition. Under this assumption we decided to develop training
+sequence sets and \geneid\ parameters files for the genomes that were
+going to be sequenced. 
+
+A training set is defined as a set of genomic sequences satisfying a
+number of constraints:
+\begin{itemize}
+\item Coordinates of coding regions are exactly mapped on the
+corresponding genome.
+
+\item Annotations must be experimentally validated: the protein must 
+be known or the complete mRNA must have been sequenced.
+
+\item In every annotation, the presence of the minimal canonical signal
+for each site is checked (ATG for start sites, AG for the acceptors,
+GT for the donors and TGA, TAG and TAA for the stop codons).
+
+\item The maintenance of the open reading frame through the translation 
+of coding exons until the annotated stop codon.
+
+\item Redundancy in the training set is also filtered by comparing the 
+genomic sequences using blast. Those sequences sequences with 95\% of
+similarity over at least 200 nucleotides were removed
+
+\end{itemize}
+
+
+
+Nowadays, \geneid\ have parameters for more than twenty species. So
+far, we have developed parameter files for the following species:
+\AtL, \CeL, \DdL, \DmL, \HsL, \OsL, \PfL, \TnL\ and
+\TaL. Parameter sets for more species will be available soon. The
+datasets used to train \geneid\ are publicly available at the
+following web site: \url{http://genome.imim.es/datasets/geneid}.
+
+
+The first step for the development of a parameter file is to obtain a
+curated set of sequences, the training set. To elaborate the this
+training set we mostly get in contact with consortium that organize
+the sequencing project to gather in collaboration a reliable set of
+sequences. Then, after the checking protocol briefly described in the
+previous section, the corresponding models were generated and the
+parameter file built.
+
+As a result of these collaboration our group have participate in the
+annotation of several genomes. The annexed paper section includes two
+publications that have been partially based on the predicted genes
+obtained with \geneid\ using parameter files developed for each
+species. 
+
+The recompilation of this sets of curated sequence for different
+species is also extremely useful for the comparison of the structures
+and evolution of the signals that defines the location of genes.
+
+Unlike the process of mRNA translation by the ribosome, which seems
+follows a set of rules that is essentially invariant in all known
+organisms, the rules governing the RNA splicing clearly differ between
+different groups of eukaryotes.  
+
+
+This do not pretend to be a large scale study nor systematic, there is
+only to pin point some peculiarities we have found, that must be
+analyzed deeply.
+
+The splice signals in \Dd\ show the canonical GT-AG motif. However,
+in contrast with the other species, besides these common sites only
+weak preferences for nucleotides adjacent to the donor site could be
+detected. The further positions are slightly flavored by a (A/T)GT
+motif. This may be caused by the high mean A/T content in introns of
+87\%. The splice aparatus has therefore to be able to correctly detect
+and process this signal in spite of the relative weakness of the
+signals compared to other organisms. Possibly the difference in
+information content between intron sequences and coding sequences
+composition is used by the cell as additional signal.
+
+On the other hand, \Dm, seem to have a more conserved canonical
+acceptor an donor splice sites, with a clear polypyrimidine track
+upstream of the canonical AG. \Tn\ splice sites seem to be less
+conserved than in human but otherwise intron are also shorter.
+
+
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{lc}
+
+\DdL &\\
+\includegraphics[width=6.5cm, trim= 20 400 60 135 ,clip]{figures/dicty_donor} & 
+  \includegraphics[width=8.5cm, trim= 110 220 40 150,clip]{figures/dicty_acceptor}\\
+\DmL &\\
+\includegraphics[width=6.5cm, trim= 20 400 60 135 ,clip]{figures/dros_donor}  & 
+  \includegraphics[width=8.5cm,trim= 110 220 40 150,clip]{figures/dros_acceptor} \\
+\TnL & \\
+\includegraphics[width=6.5cm, trim= 20 400 60 135 ,clip]{figures/fugu_donor}  & 
+  \includegraphics[width=8.5cm,trim= 110 220 40 150,clip]{figures/fugu_acceptor} \\
+\HsL &\\
+\includegraphics[width=6.5cm, trim= 20 400 60 135 ,clip]{figures/hum_donor}   &  
+  \includegraphics[width=8.5cm,trim= 110 220 40 150,clip]{figures/hum_acceptor} \\
+
+\end{tabular}
+\caption{Splice signal motifs. Sequence motifs for 5' splice site (donor site) 
+and 3' splice site (acceptor) using the Pictogram program. The height
+of each letter is proportional to the frequency of the corresponding
+base at a given position, and bases are listed in descending order from
+top to bottom. The relative entropy (in bits) of the model relative to
+the background transcript base composition is also shown.} 
+\label{splice motifs}
+\end{center}
+\end{figure}
+
+
+
+\chapter{Genome comparison method: sgp2}
+\section{Syntenic Gene Prediction}
+The increasing number of available genomes has lead to the development
+of new computational gene finding methods that use sequence
+conservation to improve the accuracy of gene prediction methods
+\citep{miller:2001a,rinner:2002a}.  Anonymous genomic sequences are
+compared against anonymous genomic sequences from different organism,
+under the assumption that regions conserved in the sequence will tend
+to correspond to coding exons from homologous genes.
+
+As is it mentioned in the introduction there are different ways to
+exploit the comparative genomic information. The first version of sgp
+(Syntenic Gene Prediction) was developed mainly by Thomas Viehe and
+Roderic Guig\'o \citep{wiehe:2001a}. \sgpo separate clearly gene
+prediction from the alignment problem. It start by aligning two
+syntenic regions using an external alignment program (sim90 or
+blast), and then predict the final gene structures in which the exons
+are compatible with the alignment.
+
+A central strategy of \sgpo is to relay as little as possible on species
+specific DNA characterization, such as nucleotide composition,
+isochore distribution or codon bias. Therefore, the precandidates exons
+do not receive scores that depend on any of such sources of
+information. Rather, scoring at the initial step relies exclusively on
+splice site quality.
+
+After the alignment \sgpo generates a set of pairs of precandidates
+exons between the two species. A precandidate exon is a sequence
+stretch with a well defined reading frame, and junction signals. A
+filtering process checks whether begin and end position of any pair of
+pre-candidates are contained in the post processed alignment. If there
+is any discrepancy the pair is discarded. Optionally, the filter can
+be relaxed to allow for an offset between alignment and exon
+precandidate. There are two parameters: $x$, the number of vase pairs
+by which locally aligned segments are extended, and $d$, the maximal
+distance by which the ends of two paired precandidates may be separated
+(see Figure \ref{sgp1}).
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=14cm]{figures/sgp1}
+\caption{Relaxed filtering of precandidates (a) blunt end, but complete
+coverage by the alignment. (b) A blunt end and a partial coverage by
+the alignment. Setting parameters d and x to a value >0 retains
+precandidates with unaligned splice sites. Adapted from
+\cite{wiehe:2001a}}
+\end{center}
+
+\label{sgp1}
+
+\end{figure}
+
+
+Assembly of the exons that pass the filtering is performed
+independently for both species using the chaining algorithm described
+by \cite{guigo:1998a}. The assembly program attempts to build complete
+gene models consisting of either a single exon or one initial exon,
+an arbitrary number of internal exons, and one terminal exon. Multiple
+genes, on either strand, may be assembled.
+
+Given two sequences and their alignment as input, the program calls
+subroutines for the alignment post-processing, generating exons
+precandidates, filtering, rescoring and gene assembly and output. The
+subroutine with the highest time complexity is one that filters the
+precandidates exons. A very rough bound for its run time is given by
+$O(nm)$, quadratic cost, where $n$ and $m$ are the lengths of the
+input query sequences. This is due to the fact that the size of the
+two exon precandidates list depends linearly on $n$ and $m$,
+respectively, but pair of precandidates, one from each list, have to
+be processed. This is one of the major limitations of SGP1 for whole
+genomic predictions. The amount of comparisons of exons structures
+increases exponentially with the length of the sequences, thus, it
+makes computationally very expensive to approach comparative prediction
+of complete eukarytoic genomes.
+
+Another important limitation of SGP1 is that it relays to much on a
+full syntenic sequences. If any of the sequences is partially sequenced
+the accuracy of the method drops substantially. This limits, again, its
+utility when analyzing complete large eukaryotic genomes, and in
+particular when the informant genome is in non-assembled shotgun form.
+
+\section{sgp2: Comparative gene prediction in human and mouse}
+
+To overcome these limitations, \sgp\ take a different approach. The
+approach is reminiscent of that used in \genomescan\ to incorporate
+similarity to known proteins to modify the \genscan\ scoring
+schema. Essentially, the query sequence from the target genome is
+compared against a collection of sequences from the informant genome
+(which can be a single homologous sequence to the query sequence, a
+whole assembled genome, or a collection of shotgun reads), and the
+results of the comparison are used to modify the scores of the exons
+produced by \textit{ab initio} gene prediction programs.
+
+
+\sgp\ is a program to predict genes by comparing anonymous genomic
+sequences from two different species. It combines tblastx, a sequence
+similarity search program, with geneid, an "ab initio" gene prediction
+program. In "asymmetric" mode, genes are predicted in one sequence
+from one species (the target sequence), using a set of sequences
+(maybe only one) from the other species (the reference set).
+Essentially, \geneid\ is used to predict all potential exons along the
+target sequence. Scores of exons are computed as log-likelihood
+ratios, function of the splice sites defining the exon, the coding
+bias in composition of the exon sequence as measured by a Markov Model
+of order five, and of the optimal alignment at the amino acid level
+between the target exon sequence and the counterpart homologous
+sequence in the reference set. From the set of predicted exons, the
+gene structure is assembled (eventually multiple genes in both
+strands) maximizing the sum of the scores of the assembled exons.
+
+Some of the main features of \sgp\ are the following:
+
+\begin{itemize}
+
+\item  \sgp\ predictions are more accurate than those obtained by 
+pure "ab initio" gene finding programs.
+
+\item Gene prediction can be done in the target and the reference 
+genome using one single alignment file from tblastx.
+
+\item \sgp\ output can be customized to different formats as gff, 
+geneid format or XML are available. Allowing different amount of
+information associated to each output format.
+
+\item Shotgun data can be used at any level of coverage as the informant
+genome.
+
+\item  \sgp\ is very efficient in terms of speed and memory usage.
+\end{itemize}
+
+\sgp\ was extensively used in the annotation of the mouse and the human
+genome. In the annexed paper section is attached the paper of the Mouse
+Genome Consortium in which I participate obtaining and processing the
+set of \sgp\ predictions. 
+
+An important difference between sgp1 is that \sgp\ does not attempt to
+generate all the compatible exons of the two orthologous
+sequences. Finding compatible exons requires that the two sequences
+have the same exon-intron structure, Extending this strategy to
+multi-gene sequences would require the assumption that the two
+sequences have the same genes in the same order and orientation. In a
+large-scale comparison there are a lot of partial duplications and
+rearrangements.
+
+Using a global alignment or the compatible exons strategy requires
+informant sequences to be finished. Our conservation sequence
+approach, which is based on the highest scoring local alignments,
+allows one to use draft and shotgun sequences. The conservation
+sequence effectively rearranges the alignments into the correct order
+and orientation. In addition because the HSPs can be from any region
+of the informant genome it allows to take us, apart from the orthologies,
+to the paralogies or domain conservation occurring in non syntenic
+regions.
+
+The following paper give a more detailed description of the algorithm,
+specially to the maxim scoring projection of the HSPs obtained with
+the tblastx and the rescoring of the \geneid\ exons.  It also shows the
+evaluation of accuracy in different sets of sequences. Finally it
+analyze the obtained predictions in the entire human and mouse genome,
+and the potentiality of this results to generate a catalog of
+potential novel human-mouse genes.
+
+\includepdf[offset=.5cm .5cm,pages={1-10},scale=0.9]{papers/parra_GR_2003}
+
+\newpage
+\chapter{Toward the completion of the mammalian catalog of genes}
+
+The completion of the mouse genome allowed for the first time a
+comparative-base annotation of the human-mouse genome, and several
+methods were developed to take advantage to the conservation between
+genes in order to improve predictions. This section describes a
+procedure that reduces the false positive rate of predictions by
+exploiting the exonic conservation between human and mouse homologous
+genes. Using this protocol, we build a set of human-mouse new genes
+that were partially validated experimentally.
+
+\section{Expanding Human and Mouse standard annotation pipelines}
+
+The difficulty of accurate and precise annotations of the coding genes
+at genomic level has been broadly discussed in the previous
+sections. Although the improvements achived using comparative
+approaches, gene prediction methods still tend to predict many false
+positives. The Mouse Genome Sequencing Consortium relied mainly for
+the initial annotation of the mouse genome on the \ensembl\ gene build
+pipeline. The \ensembl\ automatic annotation pipeline basically
+follows these steps to obtain the set of predictions:
+
+\begin{itemize}
+\item Alignment of the known transcribed transcripts from the 
+corresponding species(inlcuding RefSeqs, complete cDNA datasets and
+Swissprot genes).
+
+\item Alignment of known proteins from related species.
+
+\item \textit{Ab initio} predictions that are supported by experimental 
+evidences (basically ESTs).
+\end{itemize}
+
+Therefore, \ensembl\ can not predict genes for which there is no
+preexisting evidence of transcription or a similarity to a close
+related protein. This limitation could lead to a bias against
+predicting genes that have a restricted expression pattern. The aim of
+the following work was to survey how many coding genes have been skip
+by the conservative \ensembl\ gene build pipeline. The goal of this
+approach is to generate a more reliable set of predicted genes and
+validate them experimentally to assess the efficiency of the
+enrichment protocol.
+
+
+For \sgp\ and \twinscan, the experiment, performed independently
+within each predictor, consist in:
+
+\begin{itemize}
+
+\item Prediction of the human and mouse genes using both comparative 
+gene predictors: \sgp\ and \twinscan
+
+\item Identify human mouse orthologous pairs and discard the 
+ones corresponding to the \ensembl\ annotations 
+
+\item With the previous set of pairs of orthologous predictions, 
+generate a set with conserved exonic structure
+
+\end{itemize}
+
+Once we had the different enriched sets of gene predictions an
+experimental validation of some subsamples have been obtained. The
+final results of the RT-PCR experiments showed that the comparative
+enrichment selection correlates with the ratio of amplification.
+
+My contribution to this project was to develop the filtering
+process that leads to the different subsets of gene predictions, and
+to develop, in collaboration with Robert Castelo, the software needed
+for the superimposition of the exon-intron boundaries over a protein
+alignment. In this section we describe the protocol to generate a set
+of \sgp\ and \twinscan mouse predictions to be tested by RT-PCR
+experiments.
+
+\section{Obtaining comparative gene predictions}
+
+\sgp\ is a program to predict genes by comparing anonymous genomic
+sequences from two different species. In this analysis, prediction have
+been done on the mouse genome (MGSCv3 assembly) using comparative
+information from the human genome (December,2001 GoldenPath equivalent
+to NCBI Build 28). To make the predictions, \sgp\ combines TBlastX, a
+sequence similarity search program, with geneid, an "ab initio" gene
+prediction program. The mouse sequences was cut into 100kb fragments
+to build the blast database. The masked human chromosomes were also
+cut in 100kb fragments which were run against the mouse database using
+TBlastX with the following parameters:
+
+\begin{verbatim}
+       B=9000   V=9000  hspmax=500  topcomboN=100 
+       W=5 matrix=blosum62mod  E=0.01  E2=0.01  
+       Z=3000000000  nogaps  filter=xnu+seg  S2=80
+\end{verbatim}
+
+
+Although these parameters increase the speed of the comparison, the
+whole computation took one week of CPU time using 100 Alpha
+processors. The resulting high-scoring segment pairs (HSPs) were
+processed to find the maximum scoring projection.  \sgp\ predictions
+were obtained in a mode in which RefSeqs coordinates (taken from
+Golden Path M. musculus February 2002 freeze) are given to \sgp, and
+the predictions are built on top of these RefSeqs. Chimeric
+predictions including RefSeqs genes are avoided, \sgp\ only predicted
+genes in the regions between known genes.  \geneid\ has essentially no
+limits to the length of the input query sequence, and deals well with
+chromosome sequences. Therefore, prediction were computed from the
+entire chromosomic sequences (no fragmentation was needed). The
+predictions were done on the unmasked sequences of the mouse genome
+(WGSCv3). The computation took one day in a MOSIX cluster containing
+four PCs (PentiumIII Dual 500Mhz processors).
+
+
+
+\section{Obtaining the homologous pairs of predictions}
+
+The enrichment procedure was applied separately to predictions of
+\twinscan\ and \sgp. The protein sequences predicted by each program in
+human and mouse were compared using \blp. For each predicted mouse
+protein, all predicted human protein with expected values lower than
+1x10-6 were called homologs. A global protein alignment was produced
+for the best scoring homologs (up to five) by using T-coffe with
+default parameters.
+
+Identify human mouse orthologous pairs.
+Mouse predicted amino acid sequences were compared with the human
+predicted amino acids using Blastp. Orthologous pairs were assigned
+where sequence pairs were aligned with Expect values lower than
+1x10e-6.
+
+To discard known genes mouse predictions overlapping \ensembl genes
+coordinates were considered not novel. We use the preliminary \ensembl
+annotation generated with cDNA RIKEN database. Moreover, to assure the
+novelty classification, mouse predictions were compared against RefSeq
+mRNA and \ensembl database using Blastn, and predictions sharing more
+than 95\% nucleotide identity over at least 100bp were rejected
+(considered not novel).
+
+
+A subset of random predictions was extracted from each set (\sgp\ and
+\twinscan), and two adjacent exons across an intron were chosen from
+the selected predictions for the RT-PCR test. The experimental setup
+required that the exons were at least 30bp long, and the introns were
+at least 1000bp long. Pairs of exons verifying these requirements are
+sorted by the sum of the scores of the exons, and the top scoring pair
+was selected for the RT-PCR test.
+
+\section{Conserved exonic structure}
+
+A global alignment was produced for every hypothetical orthologous
+pair. T-coffee was run with default parameters to align each pair of
+amino acid sequences.
+
+Exonic structure was added to the global pairwise alignments using
+\exstral\ (Exon Structural Alignment). This program computes the 
+relative position of the intron boundaries in aligned pairs of
+sequences.
+
+Exstral is a program that takes as input a global alignment of two
+proteins an a file with the genomic coordinates of the exonic
+structure of both genes and outputs the exon and intron junctions
+supper imposed over the protein alignment. In addition of the
+graphical output, \exstral\ also provides information of the exonic
+junctions that are compatible in both proteins. 
+%In figure \ref{exstral} shows the output of Exstral. 
+Superimposition of the exon-intron junction takes into account the
+corresponding position of the protein aligned as well as the condon
+position where the exon-intron occurs. For each coincident exon-intron
+junction the following information is given:
+
+\begin{itemize}
+
+\item the number of the aligned intron and the coordinates in
+the amino acid alignment.
+
+\item conservation (identity and  similarity)of the amino acids
+ around the corresponding splice site as well as the number of gaps.
+
+\item length of the two aligned exons in both species.
+
+\item score of the predicted exons if it is provided in the coordinates 
+file.
+
+\end{itemize}
+
+The main utility of this program is to compare the exonic structure of
+two pre-aligned homologous proteins, to easily locate homologous
+exon-intron junctions.
+
+We considered the intron to be aligned when the boundaries of the
+intron appears in the same coordinates of the alignment in both
+sequences and the alignment is at least 50\% conserved residues at
+both sides of the aligned intron.
+
+When both members of an aligned pair contained an intron in
+the same coordinate with at least 50\% identity over 15 amino acids
+both sides the corresponding mouse prediction was assigned to the
+``enriched'' pool. Predictions with homologs but no aligned intron
+were assigned to the ``similar'' pool.
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=12cm]{figures/RT-PCRgenes.jpg}
+\caption{Schema RT-PCR amplification process}
+\end{center}
+\end{figure}
+
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=18cm]{graphs/sgp2}
+\caption{Schema of the protocol to obtain human-mouse \sgp\ prediction 
+and filtering process}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=18cm,trim= 0 150 0 0 ,clip]{graphs/twinscan}
+\caption{Schema of the filtering process for twinscan comparative 
+human-mouse predictions}
+\end{center}
+\end{figure}
+
+%\input{figures/exstral} 
+
+\includepdf[offset=.5cm .5cm,pages={1-6},scale=0.9]{papers/Guigo_et_al_PNAS_100_3_1140_20030204}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% DISCUSSION
+%%%
+
+\chapter{Discussion}
+
+The rapid release of completed genomes, has driven significant
+developments in genome annotation and gene finding tools. There is no
+gene finding methods whose accuracy is clearly superior in comparison
+to others. In the short term future, the combination of different
+sources of predictions and evidences seems to be the most feasible
+solution to genome annotation. Comparative approaches will also be
+essential in order to build a more accurate catalog of genes for each
+organism. Previous chapters have described the development of
+different tools and protocols to obtain sets of gene finding
+predictions that outperforms the currently existing methods.  In what
+follows, I will discuss the utility of the \textit{ab initio} gene
+finding methods versus the comparative approaches, the utility of the
+generated datasets, how gene prediction can help the high throughput
+experimental approaches and some open problems in the field of
+computational gene prediction.
+
+\section{Ab initio vs. Comparative gene prediction}
+
+The exhaustive scrutiny to which the sequence of human chromosome 22
+\citep{dunham:1999a} has been subjected through the Vertebrate Genome
+Annotation (VEGA) database project at the Sanger Center offers, an
+excellent platform to obtain a more representative estimation of the
+accuracy of current gene finders. However, VEGA uses GENSCAN and
+FGENES in the annotation pipeline, and may be biased toward these
+programs. Table \ref{guigo accuracy} adapted from Guig\'o and Zhang
+(2004), shows the accuracy of a number of \textit{ab initio} and
+comparative gene finders in chromosome 22 when compared with the
+curated annotations from VEGA.  As it can be seen, accuracy suffers
+substantially when moving from single gene sequences (as we have seen
+in the $Introduction$) to whole chromosome sequences. For instance,
+GENSCAN CC drops from 0.91 in the evaluation by \cite{rogic:2001a} to
+0.64 for chromosome 22. But even more sophisticated annotation
+pipelines, such as \ensembl\ (based on GENEWISE) or FGENESH++, which use
+known cDNAs and RefSeq genes, respectively, are far from producing
+perfect predictions, with CCs around 0.75. These numbers strongly
+suggest that current mammalian gene counts are still of a highly
+hypothetical nature.
+
+\input{tables/guigo_accuracy}
+
+The analysis of the performance, also shows that comparative approaches
+methods outperforms standard \textit{ab initio} approaches. Although,
+sensitivity in comparative gene finders does not clearly improve, the
+specificity is superior (increasing from 0.60 to 0.70 in average).
+Thus, is there any reason to keep developing such \textit{ab initio}
+gene finding methods?
+
+To my point of view, the question is answered affirmative. First of
+all, because the core of all comparative gene finding programs relay,
+at least partially, on an \textit{ab initio} gene recognition
+methods. Although comparative methods have a higher accuracy, they are
+still far from being perfect. Therefore, is it clear, that if we
+improve the models underlying the recognition, for instance, of splice
+sites in \textit{ab initio} gene finding program, then they can be
+applied in a comparative approach. Another important reason for the
+developing of \textit{ab initio} gene prediction tools, is that
+although we have a lot of complete sequenced genomes, for some genomes
+will be difficult to obtain a reference genome at the correct
+evolutionary distance to apply comparative gene prediction. This, will
+specially be a problem for protozoa, parasitic metazoan and fungi,
+that can have very high evolution ratios.
+
+Even if we had had all the genes characterized and perfectly
+annotated, \textit{ab initio} approaches would be useful in the sense
+that they can help us to have a better understanding of how genes are
+encoded. This point of view elucidate that our current knowledge of
+the biological process is rather poor: we are not able to reproduce
+what the cell does to obtain the proteins encoded in any genome (even
+thought the unfair usage of some statistical properties, like coding
+statistics, that are unlikely to be used by the cell). Therefore, I
+believe that further \textit{ab initio} developments will tend to
+relay more in biological information and less in pure statistical
+data, trying to mimic the biolgical scenario, and helping to model
+actual underlying process.
+
+
+\section{Evolution of the signals that define genes}
+
+The fact that individual parameters files for each species perform
+better than general models can be explained because each genome seems
+to have its proprietary signatures for gene recognition which was
+shaped by environmental pressures during evolution. This implies that
+gene structures and the transcription and translation machinery in
+each species are adapted to each other enabling the cell appropriate
+transcription and translation for each genome.
+
+During the process of building different parameters files for geneid,
+a completed database of curated genes for different species have been
+generated.The study of the differences on the specification of genes
+can elucidate the evolution of the mechanism and help us to better
+understand the underling processes. Some of these variations seems to
+be related with the general G+C content of the genome.
+ 
+Analysis of gene signatures of a species genome provides not only
+tools for the most accurate prediction of gene structures but also may
+help to elucidate the common mechanisms underlying gene specification
+and its evolution. In addition, they may also be useful to resolve
+conflicting phylogenies and to pinpoint horizontal gene transfers,
+genetic drifts and other evolutionary events.
+
+The aim of another thesis, could be the analysis of the variation of
+the properties of each species.
+
+\section{Experimental validation of the predictions}
+
+The emergence of high-throughput techniques, characteristic of
+genomics research, has lead to the so-called data- or discovery- driven
+biology, in which data is obtained without the need for a hypothesis
+about the nature of any biological problem, in contra position to the
+classical hypothesis-driven approach in which experiments are
+performed (and data obtained) to test previously formulated hypothesis
+with in the framework of pre-existing theory.
+
+Genome projects are mostly high throughput biology, and they certainly
+produce a lot of valuable data. High throughput biology alone, however
+- either through indiscriminate sequencing of cDNA libraries, or
+through genome expression microarrays - appears to have reached a
+limit in its ability to annotate genes in the human genome. For
+instance, we now start to see regions of the genome that are
+transcribed but do not appear to be coding for proteins. It is
+therefore time to the computational biologist to generate gene models
+with the enough confidence to be worth trying to be validated with
+high throughput experimental approaches.
+
+Synergy between computational and experimental methods of gene
+identification will facilitate the full analysis of the currently
+sequenced genomes. As more genomes are sequenced, the need
+for experimentally validated high thought put annotation will continue
+to grow, as will the data available for such methods.
+
+Confirmation by RT-PCR and direct sequencing, seems to be a cost
+effective technique that will probably constitute the basis for the
+final curated annotation of many available genomes. The success of the
+pilot study we have shown suggest a new paradigma in high-through put
+genome annotation, in which gene predictions serve as the hypothesis
+that drive experimental determination of intron-exon structures.
+
+\section{Gene finding: open problems}
+
+Existing gene finding programs, although significantly advanced over
+those available a few years ago, still have several important
+limitations. Some key problems and future challenges in the
+gene prediction field could be:
+
+\begin{itemize}
+
+\item To identify non coding exons. 
+
+\item To achieve a better understanding of CpG islands, methilation 
+patterns and G+C variations across the genome, and to use it to
+improve the predictions.
+
+\item To identify promoter regions and the corresponding transcription 
+start site.
+
+\item To characterize promoter regions to be able to elucidate 
+the combination of transcription factors needed for the activation and
+inhibition as well as the tissue and developmental expression pattern.
+
+\item To predict genes that encode for functional RNAs.
+
+\item To have a better characterization of the splicing enhancers and 
+silencers that mediate alternative splicing, to allow models to
+predict alternative exons or aberrant splicing events.
+
+\item To predict insulators and boundary elements, and matrix-attachment 
+and scaffold-attachment regions that could play a key role in the
+accessibility of the transcription machinery to the chromatin.
+
+\item To predict non common features as overlapping genes, genes within 
+introns, genes with non canonical splice sites, mRNA editing or frame
+shifting. We assume these cases to be rare, but because these
+assumptions are implicit in our gene models, we may have been
+seriously underestimating their incidence.
+
+\end{itemize}
+
+At the root of these limitations lies our still incomplete knowledge
+of what defines an eukaryotic gene, and what are the mechanisms by
+which the sequence signals involved in gene identification are
+recognized and processed in the eukaryotic cell.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% CONCLUSIONS
+%%%
+
+\chapter{Conclusions} 
+
+This research work has mainly contribute to:
+
+\begin{enumerate}
+\item The development of a new structure of the parameter file for
+\geneid. Including some of the latest measures for gene prediction.
+
+\item The generation of a parameter files for different species. That
+have been specially useful for the annotation of recently sequenced
+genomes, accesible through: \url{http://genome.imim.es/software/geneid}
+
+\item The generation of a dataset of curated genes for different 
+species, that is freely accessible to the Internet through the web
+page: \url{http://genome.imim.es/datasets/geneid}
+
+\item The development and implementation of a new procedure to
+combine genome comparison information with \textit{ab initio} gene finding
+methods.
+
+\item The implementation of a web server freely accessible to 
+the Internet through the web page: 
+\url{http://genome.imim.es/software/sgp2/sgp2.html}
+
+\item The annotation of some genomes. The two above methods not only 
+introduce new theoretical concepts for comparative predicting protein
+coding genes, but have also been implemented into efficient computer
+programs so that they can be applied to realistic large scale
+problems.  \geneid\ has been used for the annotation of \Dd\ and
+\Tn , and is currently used for the annotation of many genomes. 
+SGP2 have been use for the annotation of the \Mm\ and \Rn\ genome
+and is currently used for the annotation of \GgL\ using the human
+genome as reference.
+
+\item The development of a filtering protocol based on exonic
+structure conservation between close related species. And the
+generation of a set of new genes based on the homology between human
+and mouse.
+
+\end{enumerate}
+
+\nochapter{Annexed Papers}
+
+In this section are gathered the other relevant papers I have
+collaborated in. In this cases my participation is less relevant than
+in the ones showed in the main block. What follows is a little
+description of my contribution to each work.
+
+
+\subsubsection{Sequence and Analysis of Chromosome 2 of \DdL}
+G. Gl\"okner, L. Eichinger, K. Szafranski, J.A. Pachebat,
+A.T. Bankier, P.H. Dear, R. Lehmann, C. Baumgart, G. Parra,
+J.F. Abril, R. Guig\'o, K. Kumpf, B. Tunggal, the Dictyostelium Genome
+Sequencing Consortium, E. Cox, M.A. Quail, M. Platzer, A. Rosenthal
+and A.A. Noegel.  ``Sequence and Analysis of Chromosome 2 of
+\DdL.''  Nature 418(6893):79-85 (2002)
+
+
+This paper was done in collaboration with the Dictyostelium Genome
+Sequencing Consortium, which is an international collaboration between
+the University of Cologne, the Institute of Molecular Biotechnology in
+Jena, the Baylor College of Medicine in Houston, Institut Pasteur in
+Paris, and the Sanger Center in Hinxton for the sequencing and the
+analysis of the genome of \Dd. 
+
+\Dd\ is a soil-living amoeba. The hereditary information is carried
+on six chromosomes with sizes ranging from 4 to 7 Mb resulting in a
+total of about 34 Mb of haploid DNA genome with a base composition of
+77\% [A+T]. This extreme base compositon biased to A+T nucleotides
+gave us the opportunity to discover how a high A+T content can
+influence the signals and the codon usage which are the landmarks for
+gene prediction.
+
+Obviously, with such a biased base composition the performance of
+current gene prediction programs were rather poor. Our group developed
+a parameter file for \geneid\ based on experimental annotated
+sequences from \Dd.
+
+In this paper it is not explained the training of \geneid\ that
+basically followed the same protocol that the training on \Dm\
+sequences, but there is a complete analysis of the \geneid\ predicted
+proteins. The annotation of the 2,799 genes of the chromosome 2 of
+\Dd\ was based on \geneid. The paper is focused on the analysis of
+the function and the structure of \geneid\ predicted genes. This
+analysis reinforce the view that the evolutionary position of \Dd\
+is located before the branching of metazoa and fungi but before the
+divergence of the plant kingdom.
+
+
+\subsubsection{Analysis of the draft sequence of \TnL}
+Tetraodon Genome Sequencing Consortium (including G. Parra and
+R. Guig\'o).  ``Analysis of the draft sequence of \TnL\ genome
+provides new insights into vertebrates evolution.'' Summited
+
+The fish \Tn\ lives in the rivers and estuaries of Indonesia,
+Malaysia and India. As a vertebrate, its gene pool is very similar to
+that of other vertebrates, including mammals such as humans and mice.
+It has been observed that the genome of Fugu rubripes, another puffer
+fish from the same family, has a remarkably low content of repetitive
+DNA, and this also applies to \Tn. Therefore, for geneticist s
+interested in studying genes, fishes of the Tetraodontiform family
+have a huge advantage over mammals: their gene pool is contained
+within approximately 8 times less DNA (i.e. the genome is 8 times Small
+ler). This feature allows us to rapidly target our studies on the
+interesting part: the genes.
+
+Genoscope has set out to perform a global analysis of this genome,
+by first determining the sequence of a large number of random DNA
+fragments. Because of the compactness of the genome, an important
+fraction of these sequences will carry a fragment of a gene. With
+several hundred thousand such sequences , we should be able to build a
+collection containing at least part of each gene. This should allow
+us, for the first time, to get the complete picture of the gene
+content of a vertebrate genome. This collection should also serve as a
+reference for comparisons with the human genome.
+
+\subsubsection{Initial sequencing and comparative analysis of the mouse genome}
+
+Mouse Genome Sequencing Consortium (including G. Parra and R. Guig\'o).
+``Initial sequencing and comparative analysis of the mouse genome.''
+Nature 420(6915):520-562 (2002) 
+
+In this paper, our group computed the predictions of the coding genes
+for the mouse genome using the human genome as reference using
+\sgp. We compared the \sgp\ predictions with the annotations given by
+\ensembl\ in order to guess how many putative new genes have been
+missed by the conservative \ensembl\ annotations.
+
+
+
+% Dicty
+\clearemptydoublepage
+\addcontentsline{toc}{section}{Sequence and Analysis of Chromosome 2 of \DdL}
+\includepdf[offset=.5cm .5cm,pages={1-7},scale=0.9]{papers/gernot_Nature_2002}
+
+% Tetra
+\clearemptydoublepage
+\addcontentsline{toc}{section}{Analysis of the draft sequence of \TnL\ genome
+provides new insights into vertebrates evolution}
+\includepdf[offset=.5cm .5cm,pages={1,2},scale=0.9]{papers/tetra_genome_sub1}
+\includepdf[offset=.5cm .5cm,pages={9-13,30,31},scale=0.9]{papers/SUPP_INFO_sub1.pdf}
+
+
+
+% Mouse
+\clearemptydoublepage
+\addcontentsline{toc}{section}{Initial sequencing and comparative analysis of the mouse genome}
+\includepdf[offset=.5cm .5cm,pages={1,20,21},scale=0.9]{papers/2002_Nature_v420_i6915_p520_MGSC}
+
+\newpage
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{apalike}
+\bibliography{main}
 
 \end{document}
 
 
-
-
-
-
-
-
-
-
-
-
+% You made it!!! look for a postdoc now!!!
 
