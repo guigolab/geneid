@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.4 2001-12-18 16:02:35 eblanco Exp $  */
+/*  $Id: RequestMemory.c,v 1.5 2002-02-20 17:22:51 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -422,7 +422,7 @@ packGenes* RequestMemoryGenes()
   
   /* Memory for every sorting function (alone) */
   for(aux=0; aux < MAXENTRY; aux++) 
-    if ((pg->d[aux] = (exonGFF* *)calloc(2 * NUMEXONS, sizeof(exonGFF*))) == NULL)
+    if ((pg->d[aux] = (exonGFF* *)calloc(FDARRAY * NUMEXONS, sizeof(exonGFF*))) == NULL)
       printError("Not enough memory: sort-by-donor functions");
   
   if ((pg->km = (long *)calloc(MAXENTRY, sizeof(long))) == NULL)
