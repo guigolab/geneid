@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.51 2002-06-17 18:32:47 jabril Exp $ 
+% # $Id: humus.nw,v 1.52 2002-06-17 18:45:03 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.51 2002-06-17 18:32:47 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.52 2002-06-17 18:45:03 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1552,7 +1552,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff \
 #>#         : (Hsapiens GP assembly against MGSC v3 assembly).
 #># STEP_PATH hsp-sr
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<STEP{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -1833,7 +1833,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                 \
 #>#         : (Hsapiens GP assembly against MGSC v3 assembly).
 #># STEP_PATH hsp-sr
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<STEP{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -1929,7 +1929,7 @@ ISEQ="$HSEQMSK/$SEQ.fa.msk" ;
 #HOMOLOGY="$HUMUS/$NCHR/sgp/$XID/hsp-sr/$SEQ.gff" ;
 HOMOLOGY="$HUMUS/$NCHR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>" ;
 HOMOLOGY="$HOMOLOGY/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>" ;
-HOMOLOGY="$HOMOLOGY/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
+HOMOLOGY="$HOMOLOGY/$<STEP{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
 HOMOLOGY="$HOMOLOGY/$SEQ.gff" ;
 if [ -f "$HOMOLOGY" ] ;
   then
@@ -2379,7 +2379,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                     \
 #>#         : (Hsapiens GP assembly against MGSC v3 assembly).
 #># STEP_PATH hsp-sr
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_XID}>/$<STEP{HSAPgp_MMUScDNA_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -2668,8 +2668,8 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                   \
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
 #
-MGSC="$IDIR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
-RKN="$IDIR/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{JOB_XID}>/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
+MGSC="$IDIR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>/$<STEP{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
+RKN="$IDIR/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{JOB_XID}>/$<STEP{SGP_HSAPgpa_RKNcDNA_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
 #
 CheckFile R $MGSC/$SEQ.gff $RKN/$SEQ.gff ;
 #
@@ -2695,8 +2695,8 @@ gawk '
 #
 # $BIN/getHSPSR.pl is not needed here as we are already taken HSP-SRs...
 ## If using SRs then variables for the path of the input files must be set to: 
-# MGSC="$IDIR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
-# RKN="$IDIR/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
+# MGSC="$IDIR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<STEP{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
+# RKN="$IDIR/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_XID}>/$<STEP{HSAPgp_MMUScDNA_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -3025,7 +3025,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                      
 #># STEP_DESC Preparing RefSeq files to be passed as evidences to geneid.
 #># STEP_PATH evids
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/$<JOB{HSAP_GP_ANNOTATION}{HSAP_GP_REFSEQ}{STEP_PATH}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/$<STEP{HSAP_GP_ANNOTATION}{HSAP_GP_REFSEQ}{STEP_PATH}>
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -3282,7 +3282,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.sgp+refseq.eval.rev.gff      \
 #># STEP_DESC Preparing RefSeq files to be passed as evidences to geneid.
 #># STEP_PATH evids
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/$<JOB{HSAP_GP_ANNOTATION}{HSAP_GP_REFSEQ}{STEP_PATH}>
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/$<STEP{HSAP_GP_ANNOTATION}{HSAP_GP_REFSEQ}{STEP_PATH}>
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -3345,7 +3345,7 @@ ISEQ="$HSEQMSK/$SEQ.fa.msk" ;
 #HOMOLOGY="$HUMUS/$NCHR/sgp/$XID/hsp-sr/$SEQ.gff" ; #HOMOLOGY="$IDIR/$SEQ.gff" ;
 HOMOLOGY="$HUMUS/$NCHR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>" ;
 HOMOLOGY="$HOMOLOGY/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>" ;
-HOMOLOGY="$HOMOLOGY/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
+HOMOLOGY="$HOMOLOGY/$<STEP{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
 HOMOLOGY="$HOMOLOGY/$SEQ.gff" ;
 if [ -f "$HOMOLOGY" ] ;
   then
@@ -3359,7 +3359,7 @@ if [ -f "$HOMOLOGY" ] ;
 # EVIDENCE="$JOBDIR/evids/$SEQ.evids.gff" ;
 EVIDENCE="$HUMUS/$NCHR/$<JOB{SGP_HSAPgpa_MGSCv3+RefSeq}{JOB_PATH}>" ;
 EVIDENCE="$EVIDENCE/$<JOB{SGP_HSAPgpa_MGSCv3+RefSeq}{JOB_XID}>" ;
-EVIDENCE="$EVIDENCE/$<JOB{SGP_HSAPgpa_MGSCv3+RefSeq}{PROCESS_REFSEQ_EVID}{STEP_PATH}>" ;
+EVIDENCE="$EVIDENCE/$<STEP{SGP_HSAPgpa_MGSCv3+RefSeq}{PROCESS_REFSEQ_EVID}{STEP_PATH}>" ;
 EVIDENCE="$EVIDENCE/$SEQ.evids.gff" ;
 if [ -f "$EVIDENCE" ] ;
   then
@@ -6944,7 +6944,7 @@ CREATE TABLE tb_job
   code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   descr   TEXT,
   path    VARCHAR(100) NOT NULL,
-  jxid    VARCHAR(50)  NOT NULL
+  jxid    VARCHAR(25)  NOT NULL
 );
 CREATE TABLE tb_step
 (
@@ -6954,7 +6954,7 @@ CREATE TABLE tb_step
   version VARCHAR(40), /* which program and its version is being run */
   descr   TEXT,
   path    VARCHAR(100) NOT NULL,
-  sxid    VARCHAR(50)  NOT NULL,
+  sxid    VARCHAR(25)  NOT NULL,
   idir    VARCHAR(200) NOT NULL,
   odir    VARCHAR(200) NOT NULL,
   edir    VARCHAR(200) NOT NULL,
@@ -10615,7 +10615,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.51 2002-06-17 18:32:47 jabril Exp $
+# $Id: humus.nw,v 1.52 2002-06-17 18:45:03 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
