@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.2 1999-04-24 13:41:01 jabril Exp $	
+#         $Id: gff2ps,v 1.3 1999-04-26 19:31:52 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -291,6 +291,7 @@ cat <<'@@@EndProlog@@@'
 %  Fixed Color Variables (CMYK)
 % ---------------------------------
 %
+/colordict 54 dict def colordict begin
 /black             { 0.00 0.00 0.00 1.00 } def
 /verydarkgrey      { 0.00 0.00 0.00 0.90 } def
 /darkgrey          { 0.00 0.00 0.00 0.75 } def
@@ -343,6 +344,7 @@ cat <<'@@@EndProlog@@@'
 /brown             { 0.00 0.70 1.00 0.40 } def
 /lightbrown        { 0.30 0.60 0.70 0.00 } def
 /verylightbrown    { 0.15 0.45 0.55 0.00 } def
+end
 % true setpacking
 true setstrokeadjust
 0.125 setlinewidth
@@ -356,11 +358,68 @@ true setstrokeadjust
 # Printing %%Prolog User-Defined Variables...
 #
 # gawk -v CUSTOMFILE=$CFDIR/.gff2aplot.rc -v PARAMETERS="$APLOToptions" 'BEGIN{
+#
+# printf "colordict begin /BGcolor colordict /%s get def /FGcolor colordict /%s get def end\n",BGcolorname,FGcolorname
 
 #
 # Printing Main PostScript Routines...
 
 cat <<'@@@EndProcs@@@'
+%
+% ---------------------------------
+%     EndVariableDefinitions
+% ---------------------------------
+%
+% ---------------------------------
+%     BeginProcedureDefinitions
+% ---------------------------------
+%
+%  Global Painting Procedures
+% ---------------------------------
+%
+/scolor { colordict exch get exec setcmykcolor } bind def 
+%
+%  Global Drawing Procedures
+% ---------------------------------
+%
+%
+%  Text Procedures
+% ---------------------------------
+%
+%
+%  Page Structuring Procedures
+% ---------------------------------
+%
+%
+%  Gene Drawing Procedures
+% ---------------------------------
+%
+%%EndSetup
+%
+%%Page: 1 1
+%%BeginPageSetup
+/pgsave save def
+%%EndPageSetup
+%
+/PageNumber (Page 1/1) def
+flglandscape 0 eq 
+{ 0 pgdefault exch pop translate
+  -90 rotate
+  YUpMargin XDnMargin translate
+  pgXscale pgYscale div pgYscale pgXscale div scale
+  } { XUpMargin YUpMargin translate
+      } ifelse
+%
+% If last instructions does not setted then horitzontal pages.
+%
+  putboxes 0 0 pglimits exch box
+  BGcolor setcmykcolor
+  fill
+black setcmykcolor
+0.125 setlinewidth 
+pgYscale pgXscale scale
+header
+%
 @@@EndProcs@@@
 
 ##############################################################
@@ -425,6 +484,7 @@ gawk 'BEGIN{
   FT_PROP["color"]=Default["foreground_color"]
   FT_PROP["shape"]="box"
   FT_PROP["layer"]=0
+  FT_PROP["show"]="on"
 # Group Properties
   GR_PROP["label"]="default" # none , default , "user-def"
   GR_PROP["rank"]="0:1"
@@ -432,7 +492,7 @@ gawk 'BEGIN{
   GR_PROP["join_color"]=Default["foreground_color"]
   GR_PROP["join_linetype"]="solid"
   GR_PROP["join_show"]="off"
-# Lines (Method) Properties
+# Lines (Method-Source) Properties
   SO_PROP["label"]="default" # none , default , "user-def"
   SO_PROP["baseline_align"]="center"
   SO_PROP["baseline_color"]=Default["foreground_color"]
@@ -686,6 +746,9 @@ function showelem(a,b){
 # PostScript end of page...
 # 
 cat <<'@@@EndTrailer@@@'
+%%Trailer
+%
+%%EOF
 @@@EndTrailer@@@
 
 #
