@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.17 2004-04-22 13:23:56 eblanco Exp $ */
+/* $Id: geneid.h,v 1.18 2004-04-22 13:51:29 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -86,7 +86,7 @@ A. DEFINITIONS
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 150000             
+#define MAXHSP 25000             
 
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 1000         
