@@ -30,7 +30,7 @@
 #
 # Last Update:  
 #
-# $Id: gff2aplot,v 1.5 2000-01-26 19:56:53 jabril Exp $	
+# $Id: gff2aplot,v 1.6 2000-01-26 20:35:33 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   PROGRAM="aplot";
   VERSION="v1.9";
   CREATIONDATE="1999/01/10"; # PSCREATION="1998/11/05"
-  REVISION=`echo '$Revision: 1.5 $' | gawk '{print $2}'`
-  DATERELEASE=`echo '$Date: 2000-01-26 19:56:53 $' | gawk '{print $2,$3}'`
+  REVISION=`echo '$Revision: 1.6 $' | gawk '{print $2}'`
+  DATERELEASE=`echo '$Date: 2000-01-26 20:35:33 $' | gawk '{print $2,$3}'`
   PSPROGRAM="PostScript Output from GFF2APLOT";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -1734,7 +1734,7 @@ function ReadElements() {
      FnctSEQ[$group]=$seqname;
      if ($10~"Color") {
        if (ChkColor($11)) FunctionColor[funcname]=$11;
-       else FunctionColor[funcname]=Var["Function_COLOR"];
+       else FunctionColor[funcname]=stcol(Var["Function_COLOR"]);
        }
      }
    } # if FTExtraFunctions
@@ -1941,7 +1941,7 @@ function APLOT_BLOCK() {
        if (ChkXlim(Oori[1],Eend[1]) && ChkYlim(Oori[2],Eend[2])) {
          Oori[1]=max(Oori[1],OSQ1);Eend[1]=min(Eend[1],ESQ1);
          Oori[2]=max(Oori[2],OSQ2);Eend[2]=min(Eend[2],ESQ2);
-         printf "%s %s %s %s %s %s %s Bsquare\n", GetLW("N"), Var["FOREGROUND_COLOR"], Var["SelectionBox_BGCOLOR"], Oori[1], Eend[1], Oori[2], Eend[2];
+         printf "%s %s %s %s %s %s %s Bsquare\n", GetLW("N"), Var["FOREGROUND_COLOR"], stcol(Var["SelectionBox_BGCOLOR"]), Oori[1], Eend[1], Oori[2], Eend[2];
          }
        }
      }
@@ -1992,7 +1992,7 @@ function APLOT_BLOCK() {
      Var["Zoom_SEQUENCE1_END"]=min(Var["Zoom_SEQUENCE1_END"],ESQ1);
      Var["Zoom_SEQUENCE2_ORIGIN"]=max(Var["Zoom_SEQUENCE2_ORIGIN"],OSQ2);
      Var["Zoom_SEQUENCE2_END"]=min(Var["Zoom_SEQUENCE2_END"],ESQ2);
-     printf "%s %s %s %s %s %s Msquare\n", 2, Var["Zoom_Area_Mark_COLOR"], Var["Zoom_SEQUENCE1_ORIGIN"], Var["Zoom_SEQUENCE1_END"], Var["Zoom_SEQUENCE2_ORIGIN"], Var["Zoom_SEQUENCE2_END"];
+     printf "%s %s %s %s %s %s Msquare\n", 2, stcol(Var["Zoom_Area_Mark_COLOR"]), Var["Zoom_SEQUENCE1_ORIGIN"], Var["Zoom_SEQUENCE1_END"], Var["Zoom_SEQUENCE2_ORIGIN"], Var["Zoom_SEQUENCE2_END"];
      }
    }    
  printf "%%\nenddata\n%%\n";
@@ -2120,6 +2120,15 @@ function ChkYlim(o,e) { if (o>=ESQ2 || e<=OSQ2) return 0; else return 1 }
 function ChkColor(ncolor) {
  if (tolower(ncolor)~V_COLORS) return 1;
  else return 0; # also when ncolor == ^BG$|(##DEFAULT##)
+ }
+function stcol(qcolor) {
+ if (ChkColor(qcolor)) {
+   if (tolower(qcolor)~/fg(color)?/) return Var["FOREGROUND_COLOR"];
+   else return qcolor;
+   }
+ else
+   if (tolower(qcolor)~/bg(color)?/) return Var["BACKGROUND_COLOR"];
+   else return Var["BACKGROUND_COLOR"];
  }
 #
 function checklbl(chain) {
@@ -2285,7 +2294,7 @@ function PLOTFEATURES(SEQ,isq) {
              if (OnOff(Var["Display_FullHeightBOX"])) {
                printf"(%s) ElmFont %s %s %s Box\n", checklbl(tlabel), fboxcol, bori, bend }
              if (OnOff(Var["Display_ARROW"]) && FTputArrow[FEATURE[name]] && STRAND[name]!="." ) {
-               printf"%s %s %s %s Arrow\n", Var["Strand-Arrows_COLOR"], bori, bend, STRAND[name] }
+               printf"%s %s %s %s Arrow\n", stcol(Var["Strand-Arrows_COLOR"]), bori, bend, STRAND[name] }
              }
            else if (FTBoxType[FEATURE[name]]~/H|h/ && OnOff(Var["Display_HalfHeightBOX"])) {
              printf"%s %s %s FBox\n", hboxcol, bori, bend }
@@ -2317,7 +2326,7 @@ function PLOTFEATURES(SEQ,isq) {
              if (ChkYlim(bori,bend)) {
                bori=max(bori,OSQ2); bend=min(bend,ESQ2); jprt=1 }
              }  
-           if (jprt) printf "%s %s %s Join\n", Var["Join-Lines_COLOR"], bori, bend
+           if (jprt) printf "%s %s %s Join\n", stcol(Var["Join-Lines_COLOR"]), bori, bend
            }
          else G_ORI[GROUP[nxtn]]=SQ_ORI[nxtn]
          }
@@ -2551,9 +2560,9 @@ function PSprologue() {
   printf "%% Defining background-color for objects.\n";
   printf "/BGcolor { %s } def\n", Var["BACKGROUND_COLOR"];
   printf "/FGcolor { %s } def\n", Var["FOREGROUND_COLOR"];
-  printf "/BBoxcol { %s } def\n", Var["APlotBox_BGCOLOR"];
-  printf "/SBoxcol { %s } def\n", Var["PercentBox_BGCOLOR"];
-  printf "/XBoxcol { %s } def\n", Var["ExtraBox_BGCOLOR"];
+  printf "/BBoxcol { %s } def\n", stcol(Var["APlotBox_BGCOLOR"]);
+  printf "/SBoxcol { %s } def\n", stcol(Var["PercentBox_BGCOLOR"]);
+  printf "/XBoxcol { %s } def\n", stcol(Var["ExtraBox_BGCOLOR"]);
   printf "/BBXtickflg %s def  %% Blocks TickFlags\n", OnOff(Var["Display_APlot_X-Ticks"]);
   printf "/SBXtickflg %s def  %% 0:no tickscale\n", OnOff(Var["Display_Percent_X-Ticks"]);
   printf "/XBXtickflg %s def  %% 1:put tickscale\n", OnOff(Var["Display_ExtraBox_X-Ticks"]);
