@@ -445,6 +445,20 @@ else{
 		    
 		    ############################################################
 		    # is it potentially intronic?
+		    #
+		    # 'intronic' means that the exon assembly are within the first and the last
+		    # exons of the annotations in this transcript cluster and moreover,
+		    # the assembly does not bridge non-intersecting annotations.
+		    # Accordingly,  exon assembly does not contain
+		    # the first and last exons from the original predicted transcripts,
+		    # or if it does, they do not belong to the first or last exon-cluster,
+		    # respectively.
+		    #
+		    # 'intronic_complete':
+		    #    ###---###-----------------###     a
+		    #              ###---###---###         p
+		    #
+		    ############################################################
 		    if( ( $exon_number{$ass->[0]} != 1 
 			  ||
 			  ( $exon_number{$ass->[0]} == 1 
@@ -466,6 +480,21 @@ else{
 			############################################################
 			# is it actually intergenic?
 			# first check that there are previous and posterior exon clusters:
+			
+			############################################################
+			# 'intergenic' means that within the transcript cluster
+			# the prediction bridges across two different annotations
+			#
+			# 'intergenic_complete' means that there is bridging
+			# but although there is transcript-extension overlap
+			# there is no actual exon overlap, hence it can remain complete and novel:
+			# 
+			#                              ##--- ###----### a  (annotations)
+			#  ###------###                                 a
+			#        ##-----###---###---###--###----###     p  (prediction)
+			#
+			############################################################
+
 			my @common_transcripts;
 			if ( $cluster_number{$exon2cluster{$ass->[0]}}  > 1
 			     &&
@@ -516,6 +545,24 @@ else{
 			    $label .="\tintronic";
 			}
 		    }
+		    ############################################################
+		    # 'external' means that it is not intergenic, neither intronic
+		    #
+		    # 
+		    #                                ##----###--###   a  (annotations)
+		    #  ###---###                                      a
+		    #        ###--###--###      ###----###------###   p  (predictions)
+		    #
+		    # 'external complete' means that its extent overlaps the extent
+		    # of some annotation but there is no exon overlap, and moreover,
+		    # it is not intergenic (it does not bridge two annotations)
+		    # and it is not intronic, it has exons that are outside
+		    # the introns of the annotation. eg:
+		    #
+		    #            ###-----###  a
+		    #        ###-----###      p
+		    #
+		    ############################################################
 		    else{
 			$label .= "\texternal";
 		    }
@@ -547,9 +594,71 @@ print "WHOLE NOVEL PREDICTIONS\n" if $verbose;
 foreach my $seqname ( keys %novel_predictions ){
     foreach my $t ( @{$novel_predictions{$seqname}} ){
 	#ClusterMerge::TranscriptUtils->_print_SimpleTranscript($t);
-	goldenpath_string($t,"complete");
+	my $label = '';
+	for(my $i=1; $i<=scalar(@{$t->get_all_Exons}); $i++ ){
+	    $label .= $i.":";
+	}
+	$label .= "\tcomplete";
+	goldenpath_string($t,$label);
     }
 }
+
+############################################################
+# Nomenclature
+############################################################
+# 
+# assemblies labelled as 'complete' only,
+# refer to whole predictions which genomic extension does not
+# overlap any annotation. Singletons from the point
+# of view of clustering
+#
+############################################################
+#
+# 'intronic' means that the exon assembly are within the first and the last
+# exons of the annotations in this transcript cluster and moreover,
+# the assembly does not bridge non-intersecting annotations.
+# Accordingly,  exon assembly does not contain
+# the first and last exons from the original predicted transcripts,
+# or if it does, they do not belong to the first or last exon-cluster,
+# respectively.
+#
+# 'intronic_complete':
+#
+#    ###---###-----------------###     a
+#              ###---###---###          p
+#
+############################################################
+#
+# 'intergenic' means that within the transcript cluster
+# the prediction bridges across two different annotations
+#
+# 'intergenic_complete' means that there is bridging
+# but although there is transcript-extension overlap
+# there is no actual exon overlap, hence it can remain complete and novel:
+# 
+#                              ##--- ###----### a  (annotations)
+#  ###------###                                 a
+#        ##-----###---###---###--###----###     p  (prediction)
+#
+############################################################
+#
+# 'external' means that it is not intergenic, neither intronic
+#
+# 
+#                                ##----###--###   a  (annotations)
+#  ###---###                                      a
+#        ###--###--###      ###----###------###   p  (predictions)
+#
+# 'external complete' means that its extent overlaps the extent
+# of some annotation but there is no exon overlap, and moreover,
+# it is not intergenic (it does not bridge two annotations)
+# and it is not intronic, it has exons that are outside
+# the introns of the annotation. eg:
+#
+#            ###-----###  a
+#        ###-----###      p
+#
+############################################################
 
 
 ############################################################
