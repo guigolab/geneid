@@ -23,10 +23,12 @@
 # i grandaria. em plantejo la opcio de ficar l'md5 per comparar el
 # que tinc a casa i el que tinc a la feina (fitxers mal gravats)
 
-# ATENCIO:
-# suposo que d'alguna manera haure d'avisar dels fitxers que han
-# desaparegut del mirror: fitxers que surten al fitxer de llista
-# pero ja no son al directori
+if [ "$1" = "-n" ]
+then
+   # volem crear una llista inicial pero no volem crear el directori
+   # de fitxers nous (ja que tots ho seran)
+   nomestxt=1
+fi
 
 if [ $# != 1 ]
 then
@@ -54,6 +56,11 @@ find . -exec ls -ld {} \; | \
    sort -k5 | grep -v " $vell$" > ../$tmp
 cd ..
 
+if [ "$nomestxt" = 1 ]
+then
+   exit
+fi
+
 # donada la situacio:
 #   1. si un fitxer te diferent grandaria i/o data, es considera nou.
 #      aixo pot ser mentida si he modificat per error el fitxer, pero
@@ -66,21 +73,29 @@ cd ..
 # directori en copiar un fitxer, ja que s'haura creat en revisar si
 # el directori mateix ha canviat
 
+typeset -i actual
+actual=`wc -l <$tmp`
+total=${actual#* }
+
 # Comencem amb els punts 1 i 2
 while read grand datam datad dataa nom
 do
    nomp=${nom#\./}
    hies=`grep -c " $nom$" $txt`
+   hiera=0
    if [ $hies = 0 ]
    then
       # no hi es ==> es nou
       if [ -d $vell/$nomp ]
       then
          mkdir -p $nou/$nomp
+         printf "dir nou  : "
+         hiera=1
       else
          cp -a $vell/$nomp $nou/$nomp
+         printf "fit nou  : "
+         hiera=1
       fi
-      printf "n  "
    elif [ $hies = 1 ]
    then
       # hi es ==> revisem grandaria i data per veure si es nou
@@ -89,20 +104,29 @@ do
          if [ -d $vell/$nomp ]
          then
             mkdir -p $nou/$nomp
+            printf "dir modif: "
+            hiera=1
          else
             cp -a $vell/$nomp $nou/$nomp
+            printf "fit modif: "
+            hiera=1
          fi
-         printf "n  "
-      else
-         printf "   "
       fi
    else
       # per si de cas, controlo si el grep dona coses extranyes
       echo GREP != 0, 1!!!
       exit
    fi
-   printf "%9.0f %4s %2i %5s %s\n" $grand $datam $datad $dataa $nom
+   if [ $hiera = 1 ]
+   then
+      printf "%9.0f %4s %2i %5s %s\n" $grand $datam $datad $dataa $nom
+   fi
+   let actual=actual-1
+   printf "pas 1: %s \r" $actual
 done <$tmp
+
+echo
+let actual=$total
 
 # I acabem amb el punt 3
 while read grand datam datad dataa nom
@@ -119,6 +143,9 @@ do
       echo GREP != 0, 1!!!
       exit
    fi
+   let actual=actual-1
+   printf "pas 2: %s \r" $actual
 done <$txt
 
+echo
 mv $tmp $txt
