@@ -286,15 +286,15 @@ sub intersection{
 
   my $inter_cluster = ClusterMerge::TranscriptCluster->new();
   my @inter_transcripts;
-
+  
   # see whether any transcript falls within this intersection
   foreach my $transcript ( @transcripts ){
-    my ($start,$end) = $self->_get_start_end($transcript);
-    if ($start >= $inter_start && $end <= $inter_end ){
-       $inter_cluster->put_Transcripts( $transcript );
-    }
+      my ($start,$end) = $self->_get_start_end($transcript);
+      if ($start >= $inter_start && $end <= $inter_end ){
+	  $inter_cluster->put_Transcripts( $transcript );
+      }
   }
-
+  
   if ( scalar( $inter_cluster->get_Transcripts ) == 0 ){
      $self->warn( "cluster $inter_cluster is empty, returning an empty TranscriptCluster");
      return $inter_cluster;
@@ -377,7 +377,7 @@ sub put_Transcripts {
 	  $self->strand( $exons[0]->strand );
       }
       if ( $self->strand != $exons[0]->strand ){
-	  $self->warn( "You're trying to put $transcript in a cluster of opposite strand");
+	  #$self->warn( "You're trying to put $transcript in a cluster of opposite strand");
       }
   }
   
