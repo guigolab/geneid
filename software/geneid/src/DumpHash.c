@@ -24,15 +24,21 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: DumpHash.c,v 1.1 2000-07-05 08:12:52 eblanco Exp $  */
+/*  $Id: DumpHash.c,v 1.2 2000-08-08 14:16:54 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern long MAXBACKUPEXONS;
+
+long MAXDUMPHASH;
 
 /* Initialize the hash table */
 void resetDumpHash(dumpHash* h)
 {
   int i;
-
+  
+  MAXDUMPHASH = MAXBACKUPEXONS;
+ 
   for(i=0; i<MAXDUMPHASH; i++)
     h->T[i] = NULL;
   h->total = 0;
@@ -92,7 +98,7 @@ void setExonDumpHash(exonGFF* E, dumpHash *h)
       n->next = p;
     }
   
-  /* How many exons do we have? */
+  /* How many exons do we have got? */
   h->total++;
 }
 
@@ -136,7 +142,7 @@ exonGFF* getExonDumpHash(exonGFF* E, dumpHash *h)
 
 void freeDumpNodes(dumpNode* node)
 {
-  if (node->next == NULL)
+  if (node == NULL)
     ;
   else
     {
@@ -152,12 +158,10 @@ void cleanDumpHash(dumpHash *h)
   /* free all the exons of the hash table */
   for(i=0; i<MAXDUMPHASH; i++)
     {
-      if(h->T[i]!=NULL)
-	{ 	
-	  freeDumpNodes(h->T[i]);
-	  h->T[i] = NULL;
-	}
+      freeDumpNodes(h->T[i]);
+      h->T[i] = NULL;
     }
+  
   h->total = 0; 
 }
 
