@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.8 2001-10-01 14:27:22 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -157,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.8 2001-10-01 14:27:22 gparra Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -287,7 +287,7 @@ wget -b --no-parent --mirror --tries=0            \
 	"http://sapiens.wustl.edu/~ikorf/annotation/blessed/" ;
 # find ./ '(' -name '\?*' -o -name 'index.html' ')' -exec /bin/rm -v {} ';' 
 @
-
+%$
 \begin{center}
 \begin{table}[!ht]
 \begin{center}
@@ -645,11 +645,11 @@ FastaMsk2GFF $WDIR/tmp $WDIR/gff $ID.all ;
 <<BASH commands DATASETS>>=
 #
 ChckDirs $DATASETS/annotation $DATASETS/annotation/coords \
-         $DATASETS/annotation/fullgff $DATASETS/annotation/gff \
-         $DATASETS/annotation/gtf2 $DATASETS/annotation/cds ;
+         $DATASETS/annotation/fullgff $DATASETS/annotation/20010723.Pipeline/gff \
+         $DATASETS/annotation/20010723.Pipeline/gtf2 $DATASETS/annotation/20010723.Pipeline/cds ;
 #
 IDIR="$DATASETS/_tmp" ;
-ODIR="$DATASETS/annotation" ;
+ODIR="$DATASETS/annotation/20010723.Pipeline" ;
 while read locus human mouse ;
   do {
     #
@@ -671,7 +671,47 @@ while read locus human mouse ;
   done < $ID ;
 #
 # Preparing GFF files for evaluation program:
-MergeGFF $DATASETS/annotation/gff Hsap 1 ;
+MergeGFF $DATASETS/annotation/20010723.Pipeline/gff Hsap 1 ;
+
+# Preparing Ian Korf new annotations on 8 orthologous sequences.
+# We have made a comparations between the old fastas and the fastas linked \
+# to the new annotations. 
+for seq in BTK CFTR DFNA5 ELN HOXA KVLQT1 SIL
+do
+  FastaToTbl $DATASETS/fasta/raw/Hsap_$seq | TblToFasta \
+     > /tmp/tmp1$$;
+  FastaToTbl $DATASETS/_tmp/20010911.IanKorf/Hs_$seq | TblToFasta \
+	 > /tmp/tmp2$$;
+  diff /tmp/tmp1$$ /tmp/tmp2$$ ; 
+  rm -f /tmp/tmp1$$ /tmp/tmp2$$ ; 
+done 
+# All the raw sequences were exactly equals.
+# We must convert the gff annotations provided by Ian Korf to our gff format.\
+# Checking if there are any overllapping or nested annotation by hand.
+# We found 
+#   Hs_CD4.8a and Hs_CD4.8b two differential splicing isoforms. 
+#        Hs_CD4.8b -> discarded
+#   Hs_KvLQT1.1 and Hs_KvLQT1.1a two differential splicing isoforms.
+#        Hs_KvLQT1.1a -> discarded 
+#   Hs_KvLQT1.17  single gene is overlapping gene Hs_KvLQT1.18
+#        Hs_KvLQT1.17 -> discarded
+for seq in BTK CD4 CFTR DFNA5 ELN HOXA KVLQT1 SIL
+do 
+    echo "Working with " $seq " sequence" 
+    # gff2cds and cds2gff are used because with the convination
+    # we obtain first, internal and terminal exons.
+    egrep -v "Hs_CD4.8a|Hs_KvLQT1.1a|Hs_KvLQT1.17"  \
+        $DATASETS/_tmp/20010911.IanKorf/Hs_$seq.gff | tr 'a-z' 'A-Z' | \
+        $SGPBIN/gff2cds  source="IKORF" | \
+        gawk '{$1=$1" 1";print}' | sort +3n | \
+        $SGPBIN/cds2gff | \
+        gawk 'BEGIN{OFS="\t"}{gsub ("HS","Hsap");$2="Annotation";print}' | \
+        sort +3n \
+        > $DATASETS/annotation/20010911.IanKorf/gff/Hsap_$seq 
+done 
+# Now we have to gather all the annotation files in one common file to \
+# run evaluation.
+ MergeGFF $DATASETS/annotation/20010911.IanKorf/gff Hsap 0 ;
 #
 @
 
@@ -679,12 +719,12 @@ MergeGFF $DATASETS/annotation/gff Hsap 1 ;
 
 <<BASH commands DATASETS>>=
 #
-gawk '$3 == "Gene" {print $1,$9,$4,$5,$7}' $DATASETS/annotation/gff/Hsap_* \
+gawk '$3 == "Gene" {print $1,$9,$4,$5,$7}' $DATASETS/annotation/20010723.Pipeline/gff/Hsap_* \
                                            > $DATASETS/genes.Hsap ;
-cat $DATASETS/annotation/desc/Hsap_*[^.msk] > $DATASETS/desc.Hsap ;
-cat $DATASETS/annotation/desc/Mmus_*[^.msk] > $DATASETS/desc.Mmus ;
+cat $DATASETS/annotation/20010723.Pipeline/desc/Hsap_*[^.msk] > $DATASETS/desc.Hsap ;
+cat $DATASETS/annotation/20010723.Pipeline/desc/Mmus_*[^.msk] > $DATASETS/desc.Mmus ;
 #
-ChckDirs $DATASETS/annotation/length ;
+ChckDirs $DATASETS/annotation/20010723.Pipeline/length ;
 gawk 'BEGIN{
     OFS="\t";
     opath=ARGV[1];
@@ -697,7 +737,7 @@ gawk 'BEGIN{
     name=$1;
     print "# Writing to ", file | "cat 1>&2";
     printf "%s\tannotation\tSequence\t1\t%s\t.\t.\t.\t.\n", name, $2 > file;
-  }' $DATASETS/annotation/length $DATASETS/length.Hsap $DATASETS/length.Mmus ;
+  }' $DATASETS/annotation/20010723.Pipeline/length $DATASETS/length.Hsap $DATASETS/length.Mmus ;
 #
 @
 
@@ -953,7 +993,7 @@ while read locus human mouse ;
     echo "### RUNNING PARSEBLAST on $locus" ;
     gff2aplot -PVO $PARAM/gff2aplot/ortho_masked_a4.rc -- \
                    $WDIR/gff/$human.$mouse \
-                   $DATASETS/annotation/gff/$human \
+                   $DATASETS/annotation/20010723.Pipeline/gff/$human \
                  > $WDIR/ps/$human.$mouse.ps \
                 2> $WDIR/logs/$human.$mouse.aplot ;
     } ;
@@ -966,7 +1006,7 @@ while read locus human mouse ;
     echo "### RUNNING PARSEBLAST on $locus" ;
     gff2aplot -PV -I a2 -O $PARAM/gff2aplot/ortho_masked_a4.rc -- \
                    $WDIR/gff/$human.$mouse \
-                   $DATASETS/annotation/gff/$human \
+                   $DATASETS/annotation/20010723.Pipeline/gff/$human \
                  > $WDIR/ps/$human.$mouse.a2.ps \
                 2> $WDIR/logs/$human.$mouse.aplot.a2 ;
     } ;
@@ -1293,7 +1333,7 @@ run_GENEID ()
 # Raw sequences
 export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.raw $DATASETS/fasta/raw \
-                    $DATASETS/annotation/gff/all.Hsap Hsap ;
+                    $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 @ 
 
@@ -1304,7 +1344,7 @@ run_GENEID Hsap.raw $DATASETS/fasta/raw \
 # Masked sequences (already masked: orimasked)
 export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \
-                          $DATASETS/annotation/gff/all.Hsap Hsap ;
+                          $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 @
  
@@ -1315,7 +1355,7 @@ run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \
 # Masked sequences
 export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.masked $DATASETS/fasta/masked \
-                       $DATASETS/annotation/gff/all.Hsap Hsap ;
+                    $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 @ 
 
@@ -1392,7 +1432,7 @@ run_GENSCAN ()
 #
 # Raw sequences
 run_GENSCAN Hsap.raw $DATASETS/fasta/raw \
-                     $DATASETS/annotation/gff/all.Hsap Hsap ;
+                  $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 @ 
 
@@ -1402,7 +1442,7 @@ run_GENSCAN Hsap.raw $DATASETS/fasta/raw \
 #
 # Masked sequences (already masked: orimasked)
 run_GENSCAN Hsap.orimasked $DATASETS/fasta/orimasked \
-                           $DATASETS/annotation/gff/all.Hsap Hsap ;
+                   $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 @
  
@@ -1412,7 +1452,7 @@ run_GENSCAN Hsap.orimasked $DATASETS/fasta/orimasked \
 #
 # Masked sequences
 run_GENSCAN Hsap.masked $DATASETS/fasta/masked \
-                        $DATASETS/annotation/gff/all.Hsap Hsap ;
+                   $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 @
 
@@ -1514,9 +1554,9 @@ popd ;
 \end{comment}
 <<BASH commands ANALYSIS>>=
 #
-process_TWINSCAN Hsap.20010722 $DATASETS/annotation/gff/all.Hsap Hsap ;
+process_TWINSCAN Hsap.20010722 $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
-process_TWINSCAN Hsap.20010803 $DATASETS/annotation/gff/all.Hsap Hsap ;
+process_TWINSCAN Hsap.20010803 $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 @
 
@@ -1637,12 +1677,12 @@ export SGP="/projects/sgp/bin/SGP2-2/sggp2" ;
 # SGP on Raw sequences
 run_SGP Hsap.raw $DATASETS/fasta/raw \
                $ANALYSIS/blast/wublast.tblastx/raw \
-               $DATASETS/annotation/gff/all.Hsap Hsap ;
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 # SGP on Masked sequences (already masked: orimasked)
 run_SGP Hsap.orimasked $DATASETS/fasta/orimasked \
                $ANALYSIS/blast/wublast.tblastx/orimasked \
-               $DATASETS/annotation/gff/all.Hsap Hsap ;
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 ####
 #### Roderic's TESTS on a SGP variant
@@ -1653,23 +1693,23 @@ export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
 # SGP on Masked sequences (already masked: orimasked)
 run_SGP rguigo.orimasked $DATASETS/fasta/orimasked \
                $ANALYSIS/blast/wublast.tblastx/orimasked \
-               $DATASETS/annotation/gff/all.Hsap Hsap ;
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 # SGP on TBX results from Pankaj (W=5) for ORI masked sequences
 run_SGP rguigo.orimasked3X_pankaj_W5 $DATASETS/fasta/orimasked \
                $ANALYSIS/blast/wublast.tblastx/orimasked3X/pankaj_W5 \
-               $DATASETS/annotation/gff/all.Hsap Hsap ;
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 # SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
 run_SGP rguigo.masked3X_pankaj_W5 $DATASETS/fasta/masked \
                $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
-               $DATASETS/annotation/gff/all.Hsap Hsap ;
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 # SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
 export GENEIDVERSION="------------------------- <geneid v1.1> -------------------------" ;
 run_SGP rguigo_new.masked3X_pankaj_W5 $DATASETS/fasta/masked \
                $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
-               $DATASETS/annotation/gff/all.Hsap Hsap ;
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 export HOME='/home/ug/jabril' ;
 #
@@ -1679,7 +1719,7 @@ export SGP="/home/ug/gparra/no_backup/SGP/sgp_1.1" ;
 export GENEIDVERSION="------------------------- <geneid v1.1 - GENIS> -------------------------" ;
 run_SGP rguigo_new_genis.masked3X_pankaj_W5 $DATASETS/fasta/masked \
                $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
-               $DATASETS/annotation/gff/all.Hsap Hsap ;
+               $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap Hsap ;
 #
 export HOME='/home/ug/jabril' ;
 #
@@ -1705,10 +1745,10 @@ for c in hsp sr hsp-rs tbx ;
 MergeGFF $ANALYSIS/sgp/rguigo/gff/$locus Hsap 0 ;
 #
 $SGPBIN/evaluation -tsa /home/ug/rguigo/research/humus/SGP2-2/11.2/ortho.sgp \
-                        $DATASETS/annotation/gff/all.Hsap                    \
+                        $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap                    \
                       > $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO ;
 $SGPBIN/evaluation -tsa $ANALYSIS/sgp/rguigo/gff/all.Hsap                    \
-                        $DATASETS/annotation/gff/all.Hsap                    \
+                        $DATASETS/annotation/20010723.Pipeline/gff/all.Hsap                    \
                       > $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO.2 ;
 #
 IDIR="/home/ug/rguigo/research/humus/SGP2-2/11.2/sgp" ;
@@ -1924,7 +1964,7 @@ run_GFF2PS ()
 We are going to display the following data: 
 
 \begin{tabular}{rl}
-annotation   & [[$DATASETS/annotation/gff/$locus]] \\
+annotation   & [[$DATASETS/annotation/20010723.Pipeline/gff/$locus]] \\
 sgp          & [[$ANALYSIS/sgp/rguigo/ps/_tmp/sgp/$locus]] \\
 geneid msk   & [[$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/$locus]] \\
 twinscan msk & [[$ANALYSIS/twinscan/Hsap.20010803/gff/$locus]] \\
@@ -1936,7 +1976,7 @@ repeats      & [[$DATASETS/masking/default/gff/$locus]] \\
 <<BASH commands ANALYSIS>>=
 #
 IDIR="$ANALYSIS/sgp/rguigo/ps" ;
-GFFIN="$DATASETS/annotation/gff" ;
+GFFIN="$DATASETS/annotation/20010723.Pipeline/gff" ;
 GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
 # GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid" ;
 GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
@@ -1956,7 +1996,7 @@ run_GFF2PS $IDIR "$GFFIN" ;
 We are going to display the following data: 
 
 \begin{tabular}{rl}
-annotation   & [[$DATASETS/annotation/gff/$locus]] \\
+annotation   & [[$DATASETS/annotation/20010723.Pipeline/gff/$locus]] \\
 sgp          & [[$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps/_tmp/sgp/$locus]] \\
 geneid msk   & [[$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/$locus]] \\
 % NOT YET: we do not know if we got twinscan results for 3XWGS
@@ -1970,7 +2010,7 @@ repeats      & [[$DATASETS/masking/default/gff/$locus]] \\
 #
 #### Human against Mouse 3X 
 IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps" ;
-GFFIN="$DATASETS/annotation/gff" ;
+GFFIN="$DATASETS/annotation/20010723.Pipeline/gff" ;
 GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
 # GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid" ;
 GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
@@ -3141,7 +3181,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.8 2001-10-01 14:27:22 gparra Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
 @ 
 
 \newpage
@@ -3329,7 +3369,8 @@ MergeGFF ()
          let c=c+1 ;
          [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
          [ $flag -eq 1 ] &&
-             cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
+             cat $DATASETS/annotation/20010723.Pipeline/length/$locus \
+               >> $1/all.$2 ;
          gawk 'BEGIN{OFS="\t"}
              ($1 !~ /^#/ && $3 != "Gene") {
                  print $0;
@@ -3490,7 +3531,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.8 2001-10-01 14:27:22 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -3834,7 +3875,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.8 2001-10-01 14:27:22 gparra Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.9 2001-10-01 19:08:58 gparra Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
