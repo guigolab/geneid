@@ -1,0 +1,255 @@
+#! /bin/sh 
+#
+# SGP-2, syntenic gene prediction
+#      gene prediction by phylogenetic footprinting
+#
+# (c) roderic guigo, imim,  and thomas wiehe, max plank, 
+#
+# 1999-2000
+#
+
+# --------------------------------------------------
+# -. defaults
+# --------------------------------------------------
+NF=0;                # number of input files
+SGP2=bin             # binaries, scripts and params in SGP2
+TMP=tmp              # temporal files
+SGPTMP=$TMP/sgp2_$$  # prefix for temporal files
+#trap 'rm -f $SGPTMP; exit 1' 0 1 2 3 9 15 
+
+
+# tblastx defaults
+BLASTPROGRAM=tblastx
+PRESSDB=pressdb 
+BLMATRIX=blosum62mod 
+BLASTOPTIONS="-matrix $BLMATRIX -hspmax=10000"
+
+
+# geneid defaults
+GENEID=$SGP2/geneid
+PARAM=$SGP2/param.hum.iso3.p3.op
+
+# parsing tblastx output defaults
+S_CUTOFF=100
+SHSP=6         # shring hsp by $SHSP
+
+
+# --------------------------------------------------
+# 0. pre-process
+# --------------------------------------------------
+
+
+USAGE="sgp [-hv] [-o 'options'] [-g 'options] [-P filename] [-p filename] [-c value] [-s value] -1 seqfile_1 -2 seqfile_2\n\n 
+-h \t\t produces this message\n 
+-v \t\t  verbose mode\n 
+-g \t\t geneid options\n  
+-o \t\t tblastx options\n  
+-c value \t\t tblastx score cuttof\n  
+-s value \t\t shrink hsp's by\n  
+-p filename \t ps output in filename file \n
+-P filename\t\t geneid parameter file\n"
+
+# process parameters
+while getopts 1:2:a:g:i:k:p:fhlstv opt
+do
+    case $opt in
+        1) SEQ1=$OPTARG;NF=`expr $NF + 1`;;     # seq file 1
+        2) SEQ2=$OPTARG;NF=`expr $NF + 1`;;     # seq file 2
+        o) BLASTOPTIONS=$OPTARG;;               # tblastx options
+        g) GENEIDOPTIONS=$OPTARG;;              # geneid options
+	P) GENEIDPARAM=$OPTARG;;                # geneid parameter file
+        c) GENEIDOPTIONS=$OPTARG;;              # tblastx score cutoff
+	s) GENEIDPARAM=$OPTARG;;                # shrink hsp's by
+        p) PSO=$OPTARG;;                        # postscript output
+        v) VRB=1;;                              # verbose
+        \? | h) echo $USAGE; exit 2;;
+    esac
+done
+shift `expr $OPTIND - 1`;
+
+
+# check if enough parameters
+if [ $NF -ne 2 ] 
+then   
+    echo "two input files required. USAGE:\n"  1>&2
+    echo $USAGE  1>&2 ; exit 2;
+fi
+
+# check if input files exit
+if [ ! -f $SEQ1 ]
+then 
+   echo $SEQ1: $ER_01 1>&2 ; exit 2;
+fi
+
+
+if [ ! -f $SEQ2 ]
+then 
+   echo $SEQ2: $ER_01 1>&2 ; exit 2;
+fi
+
+
+# preprocess input files
+# base name
+SEQ1_NAME=`basename $SEQ1`
+SEQ2_NAME=`basename $SEQ2`
+
+# tmpfiles prefix
+SGPTMP1=$SGPTMP.$SEQ1_NAME
+SGPTMP2=$SGPTMP.$SEQ2_NAME
+
+# check if files in the correct format.
+# to be done
+
+# get locus names. Assuming input files in fasta format
+LOC1=`gawk "NR==1{print substr(\\\$1,2); exit}"  $SEQ1`
+LOC2=`gawk "NR==1{print substr(\\\$1,2); exit}"  $SEQ2`
+
+if [ $LOC1 = $LOC2 ]
+then
+  echo ERROR: sequence $SEQ1 and sequence $SEQ2 must have different locus names 1>&2
+fi
+
+# --------------------------------------------------
+# 1. run tblastx 
+# --------------------------------------------------
+
+# temporal hack. not know how to do it better
+cp $SGP2/$BLMATRIX . # very dangerous
+
+if [ $VRB ] 
+then
+ echo running tblastx $SEQ1 $SEQ2 1>&2
+fi
+
+# convert the first fasta file to database
+SEQ1DB=$SGPTMP.$SEQ1_NAME  #temporal name for database
+cp $SEQ1 $SEQ1DB
+$PRESSDB $SEQ1DB >/dev/null
+$BLASTPROGRAM $SEQ1DB $SEQ2 $BLASTOPTIONS > $SGPTMP.tbx
+
+rm $BLMATRIX
+
+# --------------------------------------------------
+# 2. extract and process hsp's -- in development
+# --------------------------------------------------
+
+if [ $VRB ] 
+then
+ echo processing tblastx output
+fi
+
+# to aplot
+$SGP2/blast2aplot scropt=score $SGPTMP.tbx > $SGPTMP.aln
+if [ $VRB ] 
+then
+ echo `wc -l $SGPTMP.aln | gawk '{print $1}'` hsp alignments   1>&2
+fi
+
+# get the projected hsp's
+$SGP2/aln2gff $SGPTMP2.hsp $SGPTMP1.hsp $S_CUTOFF $SGPTMP.aln
+
+if [ $VRB ] 
+then
+    echo `wc $SGPTMP1.hsp | gawk '{print $1}'` projected hsps over $S_SCUTOFF in $SEQ1>&2
+    echo `wc $SGPTMP2.hsp | gawk '{print $1}'` projected hsps over $S_SCUTOFF in $SEQ2>&2
+fi
+
+# sort projected hsps by end position, cluster and shrink
+sort +4n $SGPTMP1.hsp | $SGP2/getregs | sort +3n | awk "{\$4+=$SHSP;\$5-=$SHSP; print \$0;}" > $SGPTMP1.hsp-rs
+
+sort +4n $SGPTMP2.hsp | $SGP2/getregs | sort +3n | awk "{\$4+=$SHSP;\$5-=$SHSP; print \$0;}" > $SGPTMP2.hsp-rs 
+
+if [ $VRB ] 
+then
+    echo `wc $SGPTMP1.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ1 1>&2
+    echo `wc $SGPTMP2.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ2 1>&2
+fi
+
+# --------------------------------------------------
+# 3. run geneid
+# --------------------------------------------------
+
+if [ $VRB ] 
+then
+ echo running geneid in $SEQ1 $SEQ2 with tblastx output 1>&2
+fi
+
+
+$GENEID -GP $PARAM -S  $SGPTMP1.hsp-rs $SEQ1
+$GENEID -GP $PARAM -S  $SGPTMP2.hsp-rs $SEQ2
+
+exit;
+# --------------------------------------------------
+# 4. graphical output
+# --------------------------------------------------
+
+
+# include seqlimits
+
+echo $LOC1:$LOC2 SOURCE seqbounds 1:1 $LSEQ1:$LSEQ2 0  . 0 0 >>  $ALNTFN.aplot
+
+# 9.1 predicted genes
+
+    gawk 'BEGIN{strand["+"]=0;strand["-"]=1;}substr($1,1,1)!="#" && NF>0 {print $1, $2, "exon", $4, $5, 1.00, strand[
+$7],$8, "gene" $9 ":"}'  $LOC1TFN.genes >> $ALNTFN.aplot
+    gawk 'BEGIN{strand["+"]=0;strand["-"]=1;}substr($1,1,1)!="#" && NF>0 {print $1, $2, "exon", $4, $5, 1.00, strand[
+$7],$8, "gene" $9 ":"}'  $LOC2TFN.genes >> $ALNTFN.aplot
+
+# 9.2 monotonic alignment
+    gawk 'BEGIN{
+  # defaults ----------------------------------------------------------
+  # input file data structure
+  # gff data structure
+    seqname  = 1;
+    source  = 2;
+    feature  = 3;
+    start    = 4;
+    end      = 5;
+    score    = 6;
+    strand   = 7;
+    frame    = 8;
+    group    = 9;
+}
+
+substr($1,1,1)!="#" && NF>0 {
+       split($start,start_,":");
+       split($end,end_,":");
+       split($strand,strand_,":");
+
+       if (strand_[1]=="-") {
+          aux=start_[1];
+          start_[1]=end_[1];
+          end_[1]=aux;
+        }
+
+
+       if (strand_[2]=="-") {
+          aux=start_[2];
+          start_[2]=end_[2];
+          end_[2]=aux;
+        }
+# here score is divided by 1000 to use the %box in gff2aplot. 
+# ideally, similarity instead of score should be use. 
+#    print $seqname, $source, "align", start_[1] ":" start_[2],  end_[1] ":" end_[2], $score, ".", ".";
+    print $seqname, $source, "align", start_[1] ":" start_[2],  end_[1] ":" end_[2], $score/1000, ".", ".";
+}' $ALNTFN.mondisj >> $ALNTFN.aplot
+
+if [ $OFN ]
+then
+      cp $ALNTFN.aplot $ALNOFN.aplot
+fi
+
+# 9.3 creating postscript
+    $BIN/gff2aplot $ALNTFN.aplot > $PSO
+fi
+
+
+
+
+
+
+
+
+
+
+
