@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: perlscript.nw,v 1.4 2001-09-06 18:30:44 jabril Exp $ 
+% # $Id: perlscript.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -82,7 +82,8 @@
   \vskip 1.5ex
 } % newcommand todo
 \newcommand{\todoitem}[2]{
-\item {#1}\dotfill[\textit{Section}~\ref{#2}, \textit{page}~\pageref{#2}]
+  \item[$\triangleright$] [\textit{Section}~\ref{#2}, 
+                           \textit{page}~\pageref{#2}]\\ {#1}
 } % newcommand todoitem
 <<HIDE: new LaTeX commands>>
 
@@ -107,11 +108,11 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\def\progname{@@@PROJECT@@@}
+\def\progname{@@@QUOTED@@@}
 \def\mtauthor{
  \htmladdnormallink{\texttt{author@imim.es}}
                    {MAILTO:author@imim.es?subject=[@@@PROJECT@@@]}
- } % def mtjabril
+ } % def mtauthor
 \def\authorslist{
  The Author/s {\mdseries\small\dotfill \mtauthor } \\
  % Other authors here...\\
@@ -149,6 +150,8 @@ Universitat Pompeu Fabra\\[2ex]
 <<HIDE: new LaTeX urls>>=
 @ 
 <<HIDE: new LaTeX definitions>>=
+@ 
+<<HIDE: new defs TODO>>=
 @ 
 
 \thispagestyle{empty}
@@ -214,7 +217,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: perlscript.nw,v 1.4 2001-09-06 18:30:44 jabril Exp $$>$ }
+{\small$<$ \verb$Id: perlscript.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -263,6 +266,17 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 # FUNCTIONS
 #
 <<Functions>>
+@ 
+
+<<Program Info>>=
+my $PROGRAM = '@@@PROJECT@@@';
+my $VERSION = '0.1_alpha';
+@ 
+
+<<Program Description>>=
+# @@@PROJECT@@@ [options] <files>
+#
+#     Short description (single line).
 @ 
 
 <<Use Modules>>=
@@ -324,22 +338,26 @@ sub {
 <<PERL shebang>>=
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
+#
+<<Program Description>>
+#
 <<GNU License>>
+#
 <<Version Control Id Tag>>
 #
 use strict;
+#
+<<Program Info>>
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
+my $host = `hostname`;
+chomp($host);
+#
 @
 
 <<Global Constants - Boolean>>=
 my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
 @ %def $T $F
-
-We also set here the date when the script is running and who is the user running it.
-
-<<Global Vars - User and Date>>=
-my $DATE = localtime;
-my $USER = $ENV{USER};
-@ %def $DATE $USER
 
 
 \subsubsctn{Timing our scripts}
@@ -478,7 +496,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: perlscript.nw,v 1.4 2001-09-06 18:30:44 jabril Exp $
+# $Id: perlscript.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}

@@ -1,7 +1,13 @@
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
 #
-#line 1646 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 277 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+# deploy.pl [options] project_name template_file
+#
+#     Preparing all files we need to work with noweb on a project.
+#line 1509 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#
+#line 1679 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 # #----------------------------------------------------------------#
 # #                             DEPLOY                             #
 # #----------------------------------------------------------------#
@@ -25,13 +31,23 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 # #----------------------------------------------------------------#
-#line 1478 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 1511 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
-#line 1640 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
-# $Id: deploy.pl,v 1.4 2001-09-06 18:30:44 jabril Exp $
-#line 1480 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 1673 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+# $Id: deploy.pl,v 1.5 2001-10-03 11:21:02 jabril Exp $
+#line 1513 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 use strict;
+#
+#line 272 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+my $PROGRAM = 'deploy.pl';
+my $VERSION = '1.0_alpha';
+#line 1517 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
+my $host = `hostname`;
+chomp($host);
+#
 #line 250 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 # MODULES
@@ -40,13 +56,7 @@ use strict;
 #
 # VARIABLES
 #
-#line 272 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
-my $PROGRAM = 'deploy.pl';
-my $VERSION = '1.0_alpha';
-my $DATE = localtime;
-my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
-my $host = `hostname`;
-chomp($host);
+#line 283 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 my $USAGE = "\nUSAGE:\n\tdeploy.pl <projectname> <template>\n".
             "(It asumes that you are in the right directory)\n\n";
 my @working_dirs = qw(
@@ -65,7 +75,7 @@ my $PATH = $CWD;
 #
 # MAIN LOOP
 #
-#line 295 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 300 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 &parse_argvs();
 
 print STDERR "###\n### RUNNING $PROGRAM..........\n###\n".
@@ -86,7 +96,7 @@ exit(0);
 #
 # FUNCTIONS
 #
-#line 314 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 319 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub parse_argvs() {
     scalar(@ARGV) == 2 || do {
         print STDERR $USAGE;
@@ -95,7 +105,7 @@ sub parse_argvs() {
     $PROJECT = shift @ARGV;
     $TEMPLATE = shift @ARGV;
 } # 
-#line 325 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 330 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub make_dirs() {
     print STDERR "###\n### Creating Project Subdirectories...\n###\n";
     foreach my $d (@working_dirs) {
@@ -104,7 +114,7 @@ sub make_dirs() {
 	};
     print STDERR "###\n### Project Subdirectories............ DONE\n###\n";
 } # make_dirs
-#line 336 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 341 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub new_noweb_doc() {
     my $file = "$PROJECT.nw";
     (-e $file && -f _) && do {
@@ -116,22 +126,31 @@ sub new_noweb_doc() {
 	open(NOWEB,"> $file");
 	open(DATA,"< $TEMPLATE") ||
         die ("#### ERROR #### Template File does not exists: $TEMPLATE . $!\n");
+    (my $FIXPROJ = $PROJECT) =~ s{([\W_])}{\\$1}og;
 	while (<DATA>) {
-        my ($FINDPATH,$FINDPROJECT) = ('@@@PATH@@@','@@@PROJECT@@@');
+        my ($FINDPATH,$FINDPROJECT,$FINDQUOTED) =
+           ('@@@PATH@@@','@@@PROJECT@@@','@@@QUOTED@@@');
         my $l = $_;
-        $l =~ /$FINDPATH/o && do {
-            $l =~ s/$FINDPATH/$PATH/o;
-		}; 
-		$l =~ /$FINDPROJECT/o && do {
-            $l =~ s/$FINDPROJECT/$PROJECT/o;
-		};
+      CURRENT: {
+          $l =~ /$FINDPATH/o && do {
+              $l =~ s/$FINDPATH/$PATH/o;
+              last CURRENT;
+          }; 
+		  $l =~ /$FINDPROJECT/o && do {
+              $l =~ s/$FINDPROJECT/$PROJECT/o;
+              last CURRENT;
+          };
+          $l =~ /$FINDQUOTED/o && do {
+              $l =~ s/$FINDQUOTED/$FIXPROJ/o;
+		  };
+	  }; # CURRENT
         print NOWEB $l;
     }; 
 	close(DATA);
 	close(NOWEB);
     print STDERR "###\n### NOWEB file........................ DONE\n###\n";
 } # new_noweb_doc
-#line 365 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 379 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub extract_files() {
     print STDERR "###\n### Extracting Files from NOWEB file...\n###\n";
     # my $WORK = '$HOME/'.$PATH;
