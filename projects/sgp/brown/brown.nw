@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: brown.nw,v 0.1 2001-06-25 15:37:25 jabril Exp $
+% $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -74,15 +74,17 @@
 \def\nowf{[[DromeRepeats.nw]]}
 \def\bn{\textsc{blastn}}
 \def\ps{\textsc{PostScript}}
+\def\gnid{\texttt{geneid}}
+\def\gff{\texttt{gff2ps}}
 
 % Setting text for footers and headers
 
-\def\tit{\textsc{Project Title Here.- }}
+\def\tit{\textsc{Running SGP on Brown Dataset}}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[LO,LE]{\small\textsl{Abril, Parra, Guig\'o}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -97,10 +99,11 @@
 
 \ \vfill
 \begin{center}
-\textbf{\Huge Project Title Here}\\[5ex]
+\textbf{\Huge Running SGP\\[-0.5ex]on\\[0.5ex]Brown Dataset}\\[5ex]
 
-\textbf{\Large Authors List Here}\\[1ex]
-\textbf{\Large Josep F. Abril}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+\textbf{\Large Josep F. Abril}\\[1ex]
+\textbf{\Large Gen\'{\i}s Parra}\\[1ex]
+\textbf{\Large Roderic Guig\'o}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
 
 \textbf{\large --- \today ---}\\[10ex]
 
@@ -141,7 +144,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: brown.nw,v 0.1 2001-06-25 15:37:25 jabril Exp $$>$ }
+{\small$<$ \verb$Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -150,9 +153,928 @@ Universitat Pompeu Fabra\\[2ex]
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-\sctn{empty section}
+\sctn{Building Brown Dataset}
 
-\subsctn{empty subsection}
++ Downloading (into '[[_tmp]]' dir):
+
+<<BASH commands>>=
+wget -b --no-parent --mirror --tries=0  \
+     --output-file=download8seqs.log    \
+     --no-host-directories --cut-dirs=2 \
+     'http://waldo.wi.mit.edu/~danb/HomologSeqs/' 
+@ 
+
++ HUMAN REGIONS:
+
+  a) A training set of regions:
+
+\begin{tabular}{p{4cm}p{4cm}p{4cm}p{4cm}}
+Region     & Mouse length & Human length & Comment     \\
+DFNA5      &   330 kb     &   200 kb     &             \\
+KvLQT      &   1.1 Mb     &   920 kb     &             \\
+HOXA       &   400 Kb     &   500 Kb     & repeat poor \\
+MHC        &   1.5 Mb     &   2.6 Mb     & repeat rich \\
+\end{tabular}
+
+  b) The "blind" test set:
+
+\begin{tabular}{p{4cm}p{4cm}p{4cm}p{4cm}}
+Region     & Mouse length & Human length & Comment     \\
+ELN        &   270 kb     &   380 kb     & (Elastin)   \\
+SIL        &   230 kb     &   193 kb     &             \\
+BTK        &   89 kb      &   200 kb     &             \\
+CFTR       &   360 kb     &   450 kb     & "Gene poor" \\
+\\
+Chrom 22   &   4 Mb       &              & Does anyone have a favorite region? \\
+\end{tabular}
+
+I have placed all of the sequences except for a region of Chr 22 in a web
+page for the time being, but there will be an ftp site early next week as
+well.  Until then, you can obtain them at \url{http://www-genome.wi.mit.edu/~danb/HomologSeqs}
+
+  c) Notes on CFTR Sequence:
+
+These sequences are from GenBank.  The human CFTR contig is [[NT_007935]]; I
+have clipped this sequence from position 450001 to position 900000.
+The mouse CFTR contig.  Well, that was fun.  The correct accession is
+AF162137.  It's 363 kb.  If you get the sequence from GenBank's list of top
+40 mouse contigs, there's something very wrong that happens.  But this is
+the correct sequence. %'
+
+
+\subsctn{Preparing files}
+
++ Moving and renaming fasta files:
+
+<<BASH commands>>=
+# for n in CFTR ELN MHC ;
+SEQSFROM="20010616.homologseqs.brown"
+for n in BTK CFTR DFNA5 ELN HOXa KvLQT1 MHC SIL ; 
+  do {
+    $BIN/fasta_renamer.pl $DATA/_tmp/$SEQSFROM/$n/Hsap_$n.fa Hsap_$n ;
+    $BIN/fasta_renamer.pl $DATA/_tmp/$SEQSFROM/$n/Mmus_$n.fa Mmus_$n ;
+    cp -v $DATA/_tmp/$SEQSFROM/$n/Hsap_$n.fa.new $FASTA/fasta/Hsap_$n ;
+    cp -v $DATA/_tmp/$SEQSFROM/$n/Mmus_$n.fa.new $FASTA/fasta/Mmus_$n ;
+    } ;
+  done ;
+
+# the same if masked files where provided
+for n in BTK CFTR DFNA5 ELN HOXa KvLQT1 MHC SIL ; 
+  do {
+    $BIN/fasta_renamer.pl $DATA/_tmp/$SEQSFROM/$n/Hsap_$n.fa.masked Hsap_$n ;
+    $BIN/fasta_renamer.pl $DATA/_tmp/$SEQSFROM/$n/Mmus_$n.fa.masked Mmus_$n ;
+    cp -v $DATA/_tmp/$SEQSFROM/$n/Hsap_$n.fa.masked.new $FASTA/fastamasked/Hsap_$n ;
+    cp -v $DATA/_tmp/$SEQSFROM/$n/Mmus_$n.fa.masked.new $FASTA/fastamasked/Mmus_$n ;
+    } ;
+  done ;
+@
+
++ Auxiliary files:
+
+<<BASH commands>>=
+cat $DATA/_tmp/$SEQSFROM/*/Hsap*.desc > desc.Hsap
+cat $DATA/_tmp/$SEQSFROM/*/Mmus*.desc > desc.Mmus
+
+cat > id << EOF
+BTK     Hsap_BTK     Mmus_BTK
+CFTR    Hsap_CFTR    Mmus_CFTR
+DFNA5   Hsap_DFNA5   Mmus_DFNA5
+ELN     Hsap_ELN     Mmus_ELN
+HOXa    Hsap_HOXa    Mmus_HOXa
+KvLQT1  Hsap_KvLQT1  Mmus_KvLQT1
+MHC     Hsap_MHC     Mmus_MHC
+SIL     Hsap_SIL     Mmus_SIL
+EOF
+
+perl -ane 'print "$F[1]\n"' id > id.Hsap
+perl -ane 'print "$F[2]\n"' id > id.Mmus  
+
+cat > id.Mmus_frag << EOF
+Mmus_CFTR
+Mmus_ELN
+Mmus_MHC
+EOF
+cat > id.Mmus_nofrag << EOF
+Mmus_BTK
+Mmus_DFNA5
+Mmus_HOXa
+Mmus_KvLQT1
+Mmus_SIL
+EOF
+@
+
++ Mapping annotations to GFF:
+
+<<BASH commands>>=
+ls -1 $DATA/_tmp/$SEQSFROM/*/*annotation | while read n;
+  do {
+    f=`basename $n | sed 's/\..*$//g'` ;
+    echo "### WORKING on $f" ;
+    $BIN/coords2gff.pl $f < $n > $DATA/gff/$f ;
+    } ;
+  done ;
+@
+
+  NOTE: Newer versions have more seqs annotated:
+    -version 20010609: CFTR DFNA5 HOXa 
+    -version 20010616: BTK CFTR DFNA5 ELN HOXa SIL
+ 
+
++ Fragmenting fasta seqs in brown dataset:
+
+<<BASH commands>>=
+# for n in Mmus_CFTR Mmus_ELN Mmus_MHC ;
+cat $MMUS | while read n ;
+  do {
+    echo "### WORKING ON $n " ;
+    $BIN/splitfastaseq.pl 10000 1000 < $FASTA/fasta/$n > $FASTA/fastafrag/$n ;
+    } ;
+  done ;
+@
+
+
+\subsctn{Standard}
+
++ Masking fasta sequences:
+
+<<BASH commands>>=
+# each sequence without any change
+cat $HSAP $MMUS | while read n ;
+  do {
+    WDIR="$WORK/RepeatMasker/fastamasked" ;
+    echo "### WORKING ON $n " ;
+    cp -v $FASTA/fasta/$n $WDIR/$n ;
+    # 8 procs at monstre
+    RepeatMasker -parallel 8 $WDIR/$n ;
+    /bin/rm -v $WDIR/$n ;
+    mv -v $WDIR/$n.masked $FASTA/fastamasked/$n;
+    } ;
+  done ;
+
+# only longest sequences (frag)
+# cat ${MMUS}_frag | while read n ;
+# cat $MMUS | while read n ;
+#   do {
+#     WDIR="$WORK/RepeatMasker/fastamaskedfrag" ;
+#     echo "### WORKING ON $n " ;
+#     cp -v $FASTA/fastafrag/$n $WDIR/$n ;
+#     # 8 procs at monstre
+#     RepeatMasker -parallel 8 $WDIR/$n ;
+#     /bin/rm -v $WDIR/$n ;
+#     mv -v $WDIR/$n.masked $FASTA/fastamaskedfrag/$n;
+#     } ;
+#   done ;
+# cat ${MMUS}_nofrag | while read n ;
+#   do {
+#     cp -v $FASTA/fasta/$n $FASTA/fastafrag/$n ;
+#     cp -v $FASTA/fasta/$n $FASTA/fastamaskedfrag/$n ;
+#     } ;
+#   done ;
+@
+
++ Fragmenting masked-fasta seqs in brown dataset (so there is no need to mask again the fragments):
+
+<<BASH commands>>=
+cat $MMUS | while read n ;
+  do {
+    echo "### WORKING ON $n " ;
+    $BIN/splitfastaseq.pl 10000 1000 < $FASTA/fastamasked/$n > $FASTA/fastamaskedfrag/$n ;
+    } ;
+  done ;
+@
+
++ Joining files into "all" (database only for mouse seqs): 
+
+<<BASH commands>>=
+for loc in Hsap Mmus; 
+  do {
+    echo "### Working on $loc" ;
+    [ -e $FASTA/fasta/all.$loc       ] && /bin/rm -v $FASTA/fasta/all.$loc ;
+    [ -e $FASTA/fastafrag/all.$loc   ] && /bin/rm -v $FASTA/fastafrag/all.$loc ;
+    [ -e $FASTA/fastamasked/all.$loc ] && /bin/rm -v $FASTA/fastamasked/all.$loc ;
+    [ -e $FASTA/fastamaskedfrag/all.$loc   ] && /bin/rm -v $FASTA/fastamaskedfrag/all.$loc ;
+    } ;
+  done ;
+cat $HSAP | while read n;
+  do {
+    echo "### Merging $n to \"all.Hsap\"" ;
+    cat $FASTA/fasta/$n           >> $FASTA/fasta/all.Hsap ;
+    # cat $FASTA/fastafrag/$n       >> $FASTA/fastafrag/all.Hsap ;
+    cat $FASTA/fastamasked/$n     >> $FASTA/fastamasked/all.Hsap ;
+    # cat $FASTA/fastamaskedfrag/$n >> $FASTA/fastamaskedfrag/all.Hsap ;
+    } ;
+  done ;
+cat $MMUS | while read n;
+  do {
+    echo "### Merging $n to \"all.Mmus\"" ;
+    cat $FASTA/fasta/$n           >> $FASTA/fasta/all.Mmus ;
+    cat $FASTA/fastafrag/$n       >> $FASTA/fastafrag/all.Mmus ;
+    cat $FASTA/fastamasked/$n     >> $FASTA/fastamasked/all.Mmus ;
+    cat $FASTA/fastamaskedfrag/$n >> $FASTA/fastamaskedfrag/all.Mmus ;
+    } ;
+  done ;
+
+# Making fasta sequences having the same format in the "all" files:
+while read i ;
+  do {
+    echo "### Reformating  \"$i\"" ;
+    perl -e ' use Bio::SeqIO;
+           ($infile,$outfile) = (shift @ARGV, shift @ARGV);
+           @ARGV = ();
+           $in  = Bio::SeqIO->newFh(-file => "$infile", -format => 'FASTA');
+           $out = Bio::SeqIO->newFh(-file => ">$outfile", -format => 'FASTA');
+           print $out $_ while <$in> ;
+         ' $i $i.tmp ;
+    mv -v $i.tmp $i ;
+    } ;
+  done <<EOF ;
+$FASTA/fasta/all.Hsap
+$FASTA/fasta/all.Mmus
+$FASTA/fastafrag/all.Mmus 
+$FASTA/fastamasked/all.Hsap
+$FASTA/fastamasked/all.Mmus
+$FASTA/fastamaskedfrag/all.Mmus
+EOF
+@
+
++ Building WU-BLAST databases (only for mouse seqs):
+
+<<BASH commands>>=
+{ cat $MMUS; echo "all.Mmus"; } | while read n ;
+  do {
+    echo "### WORKING ON $n " ;
+    pressdb $FASTA/fasta/$n           -o $BLASTDB/blastdb/$n ;
+    pressdb $FASTA/fastafrag/$n       -o $BLASTDB/blastdbfrag/$n ;
+    pressdb $FASTA/fastamasked/$n     -o $BLASTDB/blastdbmasked/$n ;
+    pressdb $FASTA/fastamaskedfrag/$n -o $BLASTDB/blastdbmaskedfrag/$n ;
+    } ;
+  done ;
+@
+
++ Preparing a GFF "all" file (suitable for evaluation and gfftools):
+
+<<BASH commands>>=
+ALLGFF () {
+  gawk 'BEGIN{
+    OFS="\t";
+    while (getline<ARGV[1]>0){ lenght[$1]=$3 };
+    ARGV[1]="";
+  }
+  $0 !~ /^#|^[\s\t]*$/ {
+    if ($1!=ant) {
+      if (++gff>1) { print "#$" };
+      ant=$1;
+      print $1,$2,"Sequence",1,lenght[ant],".",".",".",".";
+    };
+    print $0;
+  }' "$@"
+}
+#
+# 20010609: CFTR DFNA5 HOXa 
+# ALLGFF $DATA/desc.Hsap $DATA/gff/Hsap_CFTR      \
+#        $DATA/gff/Hsap_DFNA5 $DATA/gff/Hsap_HOXa \
+#        > $DATA/gff/all.Hsap
+# ALLGFF $DATA/desc.Mmus $DATA/gff/Mmus_CFTR      \
+#        $DATA/gff/Mmus_DFNA5 $DATA/gff/Mmus_HOXa \
+#        > $DATA/gff/all.Mmus
+#
+# BTK CFTR DFNA5 ELN HOXa SIL
+ALLGFF $DATA/desc.Hsap $DATA/gff/Hsap_BTK $DATA/gff/Hsap_CFTR      \
+       $DATA/gff/Hsap_DFNA5 $DATA/gff/Hsap_ELN $DATA/gff/Hsap_HOXa \
+       $DATA/gff/Hsap_SIL > $DATA/gff/all.Hsap
+ALLGFF $DATA/desc.Mmus $DATA/gff/Mmus_BTK $DATA/gff/Mmus_CFTR      \
+       $DATA/gff/Mmus_DFNA5 $DATA/gff/Mmus_ELN $DATA/gff/Mmus_HOXa \
+       $DATA/gff/Mmus_SIL > $DATA/gff/all.Mmus
+@
+
++ Converting GFF's to GTF2's:
+
+<<BASH commands>>=
+$BIN/gff2gtf.pl < infile > outfile
+@
+
+
+\subsctn{Low Complexity Repeats Ignored}
+
++ Masking fasta sequences:
+
+<<BASH commands>>=
+# masking for low complexity regions disabled
+cat $HSAP $MMUS | while read n ;
+  do {
+    WDIR="$WORK/RepeatMasker/fastamasked.nolow/" ;
+    echo "### WORKING ON $n " ;
+    cp -v $FASTA/fasta/$n $WDIR/$n ;
+    # 8 procs at monstre
+    RepeatMasker -parallel 8 -nolow $WDIR/$n ;
+    /bin/rm -v $WDIR/$n ;
+    mv -v $WDIR/$n.masked $FASTA/fastamasked.nolow/$n;
+    } ;
+  done ;
+
+# cat ${MMUS}_frag | while read n ;
+#   do {
+#     WDIR="$WORK/RepeatMasker/fastamaskedfrag.nolow/" ;
+#     echo "### WORKING ON $n " ;
+#     cp -v $FASTA/fastafrag/$n $WDIR/$n ;
+#     # 8 procs at monstre
+#     RepeatMasker -parallel 8 -nolow $WDIR/$n ;
+#     /bin/rm -v $WDIR/$n ;
+#     mv -v $WDIR/$n.masked $FASTA/fastamaskedfrag.nolow/$n;
+#     } ;
+#   done ;
+# cat ${MMUS}_nofrag | while read n ;
+#   do {
+#     cp -v $FASTA/fastamasked.nolow/$n $FASTA/fastamaskedfrag.nolow/$n ;
+#     cp -v $FASTA/fastamasked.nolow/$n $FASTA/fastamaskedfrag.nolow/$n ;
+#     } ;
+#   done ;
+@
+
++ Fragmenting masked-fasta seqs (no low repeats) in brown dataset (so there is no need to mask again the fragments):
+
+<<BASH commands>>=
+cat $MMUS | while read n ;
+  do {
+    echo "### WORKING ON $n " ;
+    $BIN/splitfastaseq.pl 10000 1000 < $FASTA/fastamasked.nolow/$n > $FASTA/fastamaskedfrag.nolow/$n ;
+    } ;
+  done ;
+@
+
++ Joining files into "all" (database only for mouse seqs): 
+
+<<BASH commands>>=
+for loc in Hsap Mmus; 
+  do {
+    echo "### Working on $loc" ;
+    [ -e $FASTA/fastamasked.nolow/all.$loc     ] && /bin/rm -v $FASTA/fastamasked.nolow/all.$loc ;
+    [ -e $FASTA/fastamaskedfrag.nolow/all.$loc ] && /bin/rm -v $FASTA/fastamaskedfrag.nolow/all.$loc ;
+    } ;
+  done ;
+cat $HSAP | while read n;
+  do {
+    echo "### Merging $n to \"all.Hsap\"" ;
+    cat $FASTA/fastamasked.nolow/$n     >> $FASTA/fastamasked.nolow/all.Hsap ;
+    # cat $FASTA/fastamaskedfrag.nolow/$n >> $FASTA/fastamaskedfrag.nolow/all.Hsap ;
+    } ;
+  done ;
+cat $MMUS | while read n;
+  do {
+    echo "### Merging $n to \"all.Mmus\"" ;
+    cat $FASTA/fastamasked.nolow/$n     >> $FASTA/fastamasked.nolow/all.Mmus ;
+    cat $FASTA/fastamaskedfrag.nolow/$n >> $FASTA/fastamaskedfrag.nolow/all.Mmus ;
+    } ;
+  done ;
+
+# Making fasta sequences having the same format in the "all" files:
+while read i ;
+  do {
+    echo "### Reformating  \"$i\"" ;
+    perl -e ' use Bio::SeqIO;
+           ($infile,$outfile) = (shift @ARGV, shift @ARGV);
+           @ARGV = ();
+           $in  = Bio::SeqIO->newFh(-file => "$infile", -format => 'FASTA');
+           $out = Bio::SeqIO->newFh(-file => ">$outfile", -format => 'FASTA');
+           print $out $_ while <$in> ;
+         ' $i $i.tmp ;
+    mv -v $i.tmp $i ;
+    } ;
+  done <<EOF ;
+$FASTA/fastamasked.nolow/all.Hsap
+$FASTA/fastamasked.nolow/all.Mmus
+$FASTA/fastamaskedfrag.nolow/all.Mmus
+EOF
+@
+
++ Building WU-BLAST databases (only for mouse seqs):
+
+<<BASH commands>>=
+{ cat $MMUS; echo "all.Mmus"; } | while read n ;
+  do {
+    echo "### WORKING ON $n " ;
+    pressdb $FASTA/fastamasked.nolow/$n     -o $BLASTDB/blastdbmasked.nolow/$n ;
+    pressdb $FASTA/fastamaskedfrag.nolow/$n -o $BLASTDB/blastdbmaskedfrag.nolow/$n ;
+    } ;
+  done ;
+@ 
+
++ ...
+
+<<BASH commands>>=
+gawk 'BEGIN{N=1;k=1} { if ($1 == "#$") { N++; k=1 } else { RECS[N] = RECS[N] $0 "\n" }; if (k == 1 && $1 !~ /^#/) {SN[N] = $1; k=0} } END{ for (j=1;j<N;j++) print RECS[j] > SN[j]".gff" }' wi-test.sgp.pan.msk
+
+cat $HSAP | while read n; do $BIN/gff2gtf.pl < $n.gff > $n.gtf ; done 
+@ 
+
+\sctn{Analyzing Brown Dataset}
+
++ Parsing RepeatMasker to get GFF records for the repeats found:
+
+<<BASH commands>>=
+while read locus ; # $HSAP
+  do {
+    echo "### WORKING ON $locus " ;
+    RptMskDir="$WORK/RepeatMasker/Hsap/out/fastamasked" ;
+#    [ -e $WORK/RepeatMasker/Hsap/out/fastamaskedfrag/$locus.out ] && \
+#       RptMskDir="$WORK/RepeatMasker/Hsap/out/fastamaskedfrag" ;
+    gawk 'BEGIN{ OFS="\t" }
+      NR>3{
+        str = ($9!="C") ? "+" : "-";
+        print $5,"RepeatMasker",$11,$6,$7,$1,str,".",$10"."NR-3;
+      }' $RptMskDir/$locus.out \
+         > $WORK/RepeatMasker/Hsap/gff/$locus ;
+    };
+  done < $HSAP ;
+
+while read locus ; # $MMUS
+  do {
+    echo "### WORKING ON $locus " ;
+    RptMskDir="$WORK/RepeatMasker/Mmus/out/fastamasked" ;
+#     [ -e $WORK/RepeatMasker/Mmus/out/fastamaskedfrag/$locus.out ] && \
+#        RptMskDir="$WORK/RepeatMasker/Hsap/out/fastamaskedfrag" ;
+    gawk 'BEGIN{ OFS="\t" }
+      NR>3{
+        str = ($9!="C") ? "+" : "-";
+        print $5,"RepeatMasker",$11,$6,$7,$1,str,".",$10"."NR-3;
+      }' $RptMskDir/$locus.out \
+         > $WORK/RepeatMasker/Mmus/gff/$locus ;
+    };
+  done < $MMUS ;
+@ 
+
++ Running blastn and blastx programs:
+
+<<BASH commands>>=
+ESTs=`echo /seq/blast/est_hum* | sed 's/\.nhr//g;s/\.nin//g;s/\.nsq//g;'` ;
+while read seqname human mouse;
+  do {
+    echo "### WORKING ON $seqname " ;
+    blastall -p blastn -d "$ESTs" -i $FASTA/fastamasked/$human -a 2 \
+              > $WORK/blastn/HsapEST.msk/blast/$human \
+             2> $WORK/blastn/HsapEST.msk/logs/$human ;
+    blastall -p blastx -d /seq/blast/nr -i $FASTA/fastamasked/$human -a 2 \
+              > $WORK/blastx/HsapNRprot.msk/logs/$human \
+             2> $WORK/blastx/HsapNRprot.msk/blast/$human ;
+    };
+  done < $ID & # while
+
+
+while read seqname human mouse;
+  do {
+    echo "### WORKING ON $seqname " ;
+    DBRAW="$BLASTDB/blastdb";
+    DBMSK="$BLASTDB/blastdbmasked";
+    [ $mouse = 'Mmus_CFTR' -o $mouse = 'Mmus_ELN' -o $mouse = 'Mmus_MHC' ] && { 
+        DBRAW="${DBRAW}frag";
+        DBMSK="${DBMSK}frag";
+    };
+    tblastx $DBRAW/$mouse $FASTA/fasta/$human \
+            -matrix blosum62mod -hspmax 10000 -nogap \
+             > $WORK/tblastx/HsapMmus.raw/blast/$human \
+            2> $WORK/tblastx/HsapMmus.raw/logs/$human ;
+    tblastx $DBMSK/$mouse $FASTA/fastamasked/$human \
+            -matrix blosum62mod -hspmax 10000 -nogap \
+             > $WORK/tblastx/HsapMmus.msk/blast/$human \
+            2> $WORK/tblastx/HsapMmus.msk/logs/$human ;
+    };
+  done < $ID & # while
+
+# running splitted subject seqs (database) 
+perl -ne '($. == 1 || $. == 2) && print $_' $ID | while read seqname human mouse;
+perl -ne '($. == 3 || $. == 4) && print $_' $ID | while read seqname human mouse;
+perl -ne '($. == 5 || $. == 6) && print $_' $ID | while read seqname human mouse;
+perl -ne '($. == 7 || $. == 8) && print $_' $ID | while read seqname human mouse;
+cat $ID | while read seqname human mouse ;
+  do {
+    # echo "### WORKING ON $seqname " ;
+    echo "tblastx $BLASTDB/blastdbmaskedfrag/$mouse       \\
+                  $FASTA/fastamasked/$human                \\
+                  -matrix blosum62mod -hspmax 10000 -nogap  \\
+                   > $WORK/tblastx/HsapMmus.msk/blast/$human \\
+                  2> $WORK/tblastx/HsapMmus.msk/logs/$human " ;
+    } ;
+  done ;
+@
+
+
++ Running tblastx programs:
+
+<<BASH commands>>=
+tblastx $DATA/blastdbmasked/Mmus_BTK    $DATA/fastamasked/Hsap_BTK    -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_BTK    2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_BTK &
+
+tblastx $DATA/blastdbmasked/Mmus_CFTR   $DATA/fastamasked/Hsap_CFTR   -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_CFTR   2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_CFTR & #### TBLASTX EXECUTION ERROR ####
+
+tblastx $DATA/blastdbmasked/Mmus_DFNA5  $DATA/fastamasked/Hsap_DFNA5  -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_DFNA5  2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_DFNA5 &
+
+tblastx $DATA/blastdbmasked/Mmus_ELN    $DATA/fastamasked/Hsap_ELN    -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_ELN    2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_ELN & #### TBLASTX EXECUTION ERROR ####
+
+tblastx $DATA/blastdbmasked/Mmus_HOXa   $DATA/fastamasked/Hsap_HOXa   -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_HOXa   2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_HOXa &
+
+tblastx $DATA/blastdbmasked/Mmus_KvLQT1 $DATA/fastamasked/Hsap_KvLQT1 -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_KvLQT1 2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_KvLQT1 &
+
+tblastx $DATA/blastdbmasked/Mmus_MHC    $DATA/fastamasked/Hsap_MHC    -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_MHC    2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_MHC & #### TBLASTX EXECUTION ERROR ####
+
+tblastx $DATA/blastdbmasked/Mmus_SIL    $DATA/fastamasked/Hsap_SIL    -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_SIL    2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_SIL &
+
+
+++ We have to rerun tblastx against the three sequences databases that produced an error. We have splitted the large single sequences into 21Kbp sequences, so we should expect to solve that problem but also to increase many folds the overall blast execution speed.
+
+tblastx $DATA/blastdbmaskedfrag/Mmus_CFTR   $DATA/fastamasked/Hsap_CFTR   -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_CFTR   2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_CFTR & #### TBLASTX EXECUTION ERROR ####
+
+tblastx $DATA/blastdbmaskedfrag/Mmus_ELN    $DATA/fastamasked/Hsap_ELN    -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_ELN    2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_ELN & #### TBLASTX EXECUTION ERROR ####
+
+tblastx $DATA/blastdbmaskedfrag/Mmus_MHC    $DATA/fastamasked/Hsap_MHC    -matrix blosum62mod -hspmax 10000 -nogap  > $WORK/tblastx/HsapMmus.msk/blast/Hsap_MHC    2> $WORK/tblastx/HsapMmus.msk/logs/Hsap_MHC & #### TBLASTX EXECUTION ERROR ####
+
+#
+# The following code does not work yet !!! --------------v
+#
+# largeseqs_blast.pl \
+#     prog database queryfasta "-matrix matrix blast-options" outputdir 2> logfile
+# cat $ID | while read seqname human mouse;
+#   do {
+#     echo "### WORKING ON $seqname " ;
+#    DBRAW="$BLASTDB/blastdbfrag";
+#    DBMSK="$BLASTDB/blastdbmaskedfrag";
+#    [ $mouse = 'Mmus_CFTR' -o $mouse = 'Mmus_ELN' -o $mouse = 'Mmus_MHC' ] && { 
+#        DBRAW="${DBRAW}frag";
+#        DBMSK="${DBMSK}frag";
+#    };
+cat $ID | while read seqname human mouse;
+  do {
+    echo "### WORKING ON $seqname : TBLASTX on FRAG DB" ;
+    $BIN/largeseqs_blast.pl tblastx \
+         $BLASTDB/blastdbfrag/$mouse $FASTA/fasta/$human \
+         "-matrix blosum62mod -hspmax 10000 -nogap" \
+         $WORK/tblastx/HsapMmus.raw/blast \
+         2> $WORK/tblastx/HsapMmus.raw/logs/$human ;
+    echo "### WORKING ON $seqname : TBLASTX on MASKED FRAG DB" ;
+    $BIN/largeseqs_blast.pl tblastx \
+         $BLASTDB/blastdbmaskedfrag/$mouse $FASTA/fastamasked/$human \
+         "-matrix blosum62mod -hspmax 10000 -nogap" \
+         $WORK/tblastx/HsapMmus.msk/blast \
+         2> $WORK/tblastx/HsapMmus.msk/logs/$human ;
+    };
+  done > $WORK/tblastx/loop_report; # while
+#
+#------------------------------------------------------
+#
+    $WORK/_docs/largeseqs_blast.pl blastn \
+              $BLASTDBMSK/$mouse $FASTAMSK/$human \
+              "-hspmax 10000 -nogap" \
+              $WORK/blastn/HsapMmus.msk/blast \
+              2> $WORK/blastn/HsapMmus.msk/logs/$human &
+    $WORK/_docs/largeseqs_blast.pl blastx \
+              nr $FASTAMSK/$human \
+              "-matrix blosum62mod -hspmax 10000 -nogap" \
+              $WORK/blastx/HsapMmus.msk/blast \
+              2> $WORK/blastx/HsapMmus.msk/logs/$human &
+#
+# The previous code does not work yet !!! _____________^
+#
+@
+
++ Extracting HSPs and SRs:
+
+<<BASH commands>>=
+cat $HSAP | while read locus ;
+  do {
+    echo "### WORKING ON $locus " ;
+    # F="$WORK/blastn/HsapMmus.msk" ;
+    # $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    F="$WORK/blastn/HsapEST.msk" ;
+    $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    # F="$WORK/blastx/HsapMmus.msk" ;
+    # $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    F="$WORK/blastx/HsapNRprot.msk" ;
+    $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    F="$WORK/tblastx/HsapMmus.msk" ;
+    $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    F="$WORK/tblastx/HsapMmus.raw" ;
+    $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    F="$WORK/tblastx/HsapMmus3X.msk" ;
+    # $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    F="$WORK/tblastx/HsapMmus3X.raw" ;
+    # $BIN/blast2hsp $F/blast/$locus > $F/hsp/$locus ;
+    };
+  done; # while
+
+cat $HSAP | while read locus ;
+  do {
+    echo "### WORKING ON $locus " ;
+    # F="$WORK/blastn/HsapMmus.msk" ;
+    # $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    F="$WORK/blastn/HsapEST.msk" ;
+    $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    # F="$WORK/blastx/HsapMmus.msk" ;
+    # $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    F="$WORK/blastx/HsapNRprot.msk" ;
+    $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    F="$WORK/tblastx/HsapMmus.msk" ;
+    $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    F="$WORK/tblastx/HsapMmus.raw" ;
+    $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    # F="$WORK/tblastx/HsapMmus3X.msk" ;
+    # $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    # F="$WORK/tblastx/HsapMmus3X.raw" ;
+    # $BIN/blast2gff $F/hsp/$locus > $F/sr/$locus ;
+    };
+  done; # while
+@
+
++ Running GENEID and GENSCAN:
+
+<<BASH commands>>=
+rm -f $WORK/geneid/Hsap.raw/gff/all.Hsap $WORK/geneid/Hsap.msk/gff/all.Hsap  $WORK/genscan/Hsap.raw/gff/all.Hsap  $WORK/genscan/Hsap.msk/gff/all.Hsap
+
+gawk '{print $1,$2,$3}'  $ID  | sort +1 | while read gene human mouse ;
+  do {
+    echo "### WORKING ON $gene " ;
+    # geneid raw
+    $BIN/geneid -vG $FASTARAW/$human        \
+         > $WORK/geneid/Hsap.raw/gff/$human \
+        2> $WORK/geneid/Hsap.raw/logs/$human ;
+    cat $WORK/geneid/Hsap.raw/gff/$human \
+        >> $WORK/geneid/Hsap.raw/gff/all.Hsap ;
+    echo "#$" >>  $WORK/geneid/Hsap.raw/gff/all.Hsap ;
+    # geneid mask
+    $BIN/geneid -vG $FASTAMSK/$human        \
+         > $WORK/geneid/Hsap.msk/gff/$human \
+        2> $WORK/geneid/Hsap.msk/logs/$human ;
+    cat $WORK/geneid/Hsap.msk/gff/$human \
+        >> $WORK/geneid/Hsap.msk/gff/all.Hsap ;
+    echo "#$" >> $WORK/geneid/Hsap.msk/gff/all.Hsap ;
+    # genscan raw
+    genscan $GENSCAN  $FASTARAW/$human |     \
+        $BIN/genscan2gff seqname=$human      \
+         > $WORK/genscan/Hsap.raw/gff/$human \
+        2> $WORK/genscan/Hsap.raw/logs/$human ;
+    cat $WORK/genscan/Hsap.raw/gff/$human \
+        >> $WORK/genscan/Hsap.raw/gff/all.Hsap ;
+    echo "#$" >> $WORK/genscan/Hsap.raw/gff/all.Hsap ;
+    # genscan msk
+    genscan $GENSCAN  $FASTAMSK/$human |     \
+        $BIN/genscan2gff seqname=$human      \
+         > $WORK/genscan/Hsap.msk/gff/$human \
+        2> $WORK/genscan/Hsap.msk/logs/$human ;
+    cat $WORK/genscan/Hsap.msk/gff/$human \
+        >> $WORK/genscan/Hsap.msk/gff/all.Hsap ;
+    echo "#$" >> $WORK/genscan/Hsap.msk/gff/all.Hsap ;
+    } ;
+  done ; 
+@
+
+
+\subsctn{Results on {\gnid}}
+
++ Making plots for GENEID:
+  (annotation, geneid raw and msk, genscan raw and msk, repeats, sr raw and masked)
+
+\begin{tabular}{ll}
+\hline
+[[$HSAP]]                              & locus                \\     
+\\[-0.5ex]
+[[$DATA/gff]]                          & Annotations          \\
+[[$WORK/geneid/Hsap.raw/gff]]          & geneid raw           \\
+[[$WORK/geneid/Hsap.msk/gff]]          & geneid msk           \\
+[[$WORK/genscan/Hsap.raw/gff]]         & genscan raw          \\
+[[$WORK/genscan/Hsap.msk/gff]]         & genscan msk          \\
+[[$WORK/RepeatMasker/Hsap/gff]]        & RepeatMasker         \\
+\\[-0.5ex]
+[[$WORK/ps/_tmp/geneid/Hsap.msk/gff]]  & masked seqs in       \\
+[[$WORK/ps/_tmp/genscan/Hsap.msk/gff]] &  another row         \\
+\\[-0.5ex]
+[[$WORK/ps/geneid]]                    & Outdir               \\
+\\[-0.5ex]
+[[$PARAM/gff2ps/sgp.gff2ps]]           & gff2ps customization \\
+\hline
+\end{tabular}
+
+<<BASH commands>>=
+# writing gff "empty" files for those seqs without annotation
+cat $HSAP $MMUS | while read locus ;
+  do {
+    GFF="$DATA/gff/$locus";
+    echo "### Checking $locus" ;
+    if [ ! -e "$GFF" ];
+      then
+        echo "### Writing a GFF empty file for $locus" ;
+        gawk 'END{printf "%s\tannotation\tnone\t0\t0\t.\t+\t.\n",S}' S=$locus > $GFF ;
+      fi;
+    } ;
+  done ;
+
+# masked seqs must appear into another row, not mixed with raw
+while read locus ;
+  do {
+    echo "### TMP GFFs FOR $locus" ;
+    gawk 'BEGIN{OFS="\t"}{$2=$2".msk";print}' $WORK/geneid/Hsap.msk/gff/$locus \
+         > $WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus ;
+    gawk 'BEGIN{OFS="\t"}{$2=$2".msk";print}' $WORK/genscan/Hsap.msk/gff/$locus \
+         > $WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus ;
+    #
+    # gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="BN.HsapMmus.msk";print}' $locus $WORK/blastn/HsapMmus.msk/sr/$locus \
+    #    > $WORK/ps/_tmp/blastn/HsapMmus.msk/sr/$locus ;
+    gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="BN.HsapEST.msk";print}' $locus $WORK/blastn/HsapEST.msk/sr/$locus \
+       > $WORK/ps/_tmp/blastn/HsapEST.msk/sr/$locus ;
+    # gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="BX.HsapMmus.msk";print}' $locus $WORK/blastx/HsapMmus.msk/sr/$locus \
+    #    > $WORK/ps/_tmp/blastx/HsapMmus.msk/sr/$locus ;
+    gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="BX.HsapNRprot.msk";print}' $locus $WORK/blastx/HsapNRprot.msk/sr/$locus \
+       > $WORK/ps/_tmp/blastx/HsapNRprot.msk/sr/$locus ;
+    gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="TBX.HsapMmus";print}' $locus $WORK/tblastx/HsapMmus.raw/sr/$locus \
+       > $WORK/ps/_tmp/tblastx/HsapMmus.raw/sr/$locus ;
+    gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="TBX.HsapMmus.msk";print}' $locus $WORK/tblastx/HsapMmus.msk/sr/$locus \
+       > $WORK/ps/_tmp/tblastx/HsapMmus.msk/sr/$locus ;
+    # gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="TBX.HsapMmus3X";print}' $locus $WORK/tblastx/HsapMmus3X.raw/sr/$locus \
+    #    > $WORK/ps/_tmp/tblastx/HsapMmus3X.raw/sr/$locus ;
+    # gawk 'BEGIN{OFS="\t";seq=ARGV[1];ARGV[1]=""}{$1=seq;$2="TBX.HsapMmus3X.msk";print}' $locus $WORK/tblastx/HsapMmus3X.msk/sr/$locus \
+    #    > $WORK/ps/_tmp/tblastx/HsapMmus3X.msk/sr/$locus ;
+    #
+    gawk 'BEGIN{OFS="\t"}{$2=$2".nolow";print}' $WORK/RepeatMasker/Hsap/gff.nolow/$locus \
+         > $WORK/ps/_tmp/RepeatMasker/Hsap/gff.nolow/$locus ;
+    } ;
+  done < $HSAP ;
+
+while read locus ;
+  do {
+    echo "### Plotting $locus" ;
+    #
+    GFFIN="$DATA/gff/$locus " ;
+    #
+    GFFIN="$GFFIN$WORK/geneid/Hsap.raw/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/geneid/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.raw/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
+    #
+    GFFIN="$GFFIN$WORK/RepeatMasker/Hsap/gff/$locus " ; #ps/_tmp/RepeatMasker/Hsap/gff/$locus
+    GFFIN="$GFFIN$WORK/ps/_tmp/RepeatMasker/Hsap/gff.nolow/$locus " ;
+    #
+    GFFIN="$GFFIN$WORK/ps/_tmp/blastn/HsapEST.msk/sr/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/blastx/HsapNRprot.msk/sr/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus.raw/sr/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus.msk/sr/$locus " ;
+    #
+    PSOUT="$WORK/ps/geneid/Hsap.all/$locus" ;
+    LOGFILE="$WORK/ps/geneid/Hsap.all/logs/$locus" ;
+    #
+    gff2ps -VC $PARAM/gff2ps/brown.rc -N 10000 -- $GFFIN > $PSOUT 2> $LOGFILE ;
+    #
+    } ;
+  done < $HSAP ; 
+@
+
+\subsctn{Results on Syntenic Gene Prediction Tool}
+
++ Running SGP:
+
+  *************** Roderic's stuff
+
+
++ Making plots for SGP:
+  (annotation, geneid msk, genscan msk, sgp, hsp-rs, repeats)
+
+<<BASH commands>>=
+  ######## Preparing GFF files
+
+while read locus ;
+  do {
+    gawk '$1 !~ /^#/ && $3 !~ "Gene"' $DATA/gff/$locus \
+         > $WORK/ps/_tmp/annotation/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="SGP.homol";print}' $WORK/sgp/20010618.sgp.wi-test/$locus.gff \
+         > $WORK/ps/_tmp/sgp/HsapMmusHomolog/gff/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="SGP.3X";print}' $WORK/sgp/HsapMmus3X.msk/gff/$locus \
+         > $WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {print}' $WORK/geneid/Hsap.msk/gff/$locus \
+         > $WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$9="gene_"$9; print}' $WORK/genscan/Hsap.msk/gff/$locus \
+         > $WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="tblastx.homol";$8=".";print}' $WORK/sgp/HsapMmus.msk/hsp-rs/$locus \
+         > $WORK/ps/_tmp/tblastx/HsapMmusHomolog/gff/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="tblastx.3X";$8=".";print}' $WORK/sgp/HsapMmus3X.msk/hsp-rs/$locus \
+         > $WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus ;
+    } ;
+  done < $HSAP ; 
+
+
+  ########### Human against Masked Mouse
+
+while read locus ;
+  do {
+    echo "### Plotting $locus" ;
+    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
+    PSOUT1="$WORK/ps/sgp/HsapMmusHomolog/$locus.a3" ;
+    PSOUT2="$WORK/ps/sgp/HsapMmusHomolog/$locus.a4" ;
+    LOGFILE1="$WORK/ps/sgp/HsapMmusHomolog/logs/$locus.a3" ;
+    LOGFILE2="$WORK/ps/sgp/HsapMmusHomolog/logs/$locus.a4" ;
+    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
+    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
+    } ;
+  done < $HSAP ; 
+
+
+   ########### Human against Mouse 3X
+
+while read locus ;
+  do {
+    echo "### Plotting $locus" ;
+    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
+    PSOUT1="$WORK/ps/sgp/HsapMmus3X/$locus.a3" ;
+    PSOUT2="$WORK/ps/sgp/HsapMmus3X/$locus.a4" ;
+    LOGFILE1="$WORK/ps/sgp/HsapMmus3X/logs/$locus.a3" ;
+    LOGFILE2="$WORK/ps/sgp/HsapMmus3X/logs/$locus.a4" ;
+    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
+    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
+    } ;
+  done < $HSAP ; 
+
+   ########### Human against Mouse 3X + Human against Mouse Homologous
+
+while read locus ;
+  do {
+    echo "### Plotting $locus" ;
+    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
+    PSOUT1="$WORK/ps/sgp/all/$locus.a3" ;
+    PSOUT2="$WORK/ps/sgp/all/$locus.a4" ;
+    LOGFILE1="$WORK/ps/sgp/all/logs/$locus.a3" ;
+    LOGFILE2="$WORK/ps/sgp/all/logs/$locus.a4" ;
+    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
+    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
+    } ;
+  done < $HSAP ; 
+@
+
++ Checking blast hits:
+
+<<BASH commands>>=
+while read locus ;
+  do {
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="HSP.homol";$8=".";$9="";print}' $WORK/tblastx/HsapMmus.msk/hsp/$locus \
+         > $WORK/ps/_tmp/tblastx/HsapMmusHomolog/hsp/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="HSP.3X";$8=".";$9="";print}' $WORK/tblastx/HsapMmus3X.msk/hsp/$locus \
+         > $WORK/ps/_tmp/tblastx/HsapMmus3X/hsp/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="SR.homol";$8=".";$9="";print}' $WORK/tblastx/HsapMmus.msk/sr/$locus \
+         > $WORK/ps/_tmp/tblastx/HsapMmusHomolog/sr/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="SR.3X";$8=".";$9="";print}' $WORK/tblastx/HsapMmus3X.msk/sr/$locus \
+         > $WORK/ps/_tmp/tblastx/HsapMmus3X/sr/$locus ;
+    } ;
+  done < $HSAP ; 
+
+while read locus ;
+  do {
+    echo "### Plotting $locus" ;
+    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/sr/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/hsp/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmusHomolog/sr/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmusHomolog/hsp/$locus " ;
+    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
+    PSOUT1="$WORK/ps/tbx_comparisons/$locus.a3" ;
+    LOGFILE1="$WORK/ps/tbx_comparisons/logs/$locus.a3" ;
+    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
+    } ;
+  done < $HSAP ; 
+#    PSOUT2="$WORK/ps/tbx_comparisons/$locus.a4" ;
+#    LOGFILE2="$WORK/ps/tbx_comparisons/logs/$locus.a4" ;
+#    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
+@
+
++ Preparing files at web site:
+
+<<BASH commands>>=
+cat *.gff > All.gff
+cat *.gtf > All.gtf
+cat *.hsp > All.hsp
+cat *.tbx > All.tbx
+
+tar -zcvf HomologyA3PS_3X.tar.gz *.a3.ps
+tar -zcvf HomologyA4PS_3X.tar.gz *.a4.ps
+tar -zcvf HomologyGFF_3X.tar.gz  Hsap_*.gff
+tar -zcvf HomologyGTF_3X.tar.gz  Hsap_*.gtf
+tar -zcvf HomologyHSP_3X.tar.gz  Hsap_*.hsp
+tar -zcvf HomologyTBX_3X.tar.gz  Hsap_*.tbx 
+@ 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
@@ -171,7 +1093,693 @@ Universitat Pompeu Fabra\\[2ex]
 
 \sctn{empty appendix section}
 
+\subsctn{Customization files for {\gff}}
+
+<<Settings for a3 paper size>>=
+########################################
+##   DEFAULT CUSTOM FILE FOR GFF2PS   ##
+########################################
+#
+# $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+page_size=a3
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=4
+nucleotides_x_line=30000
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=1000
+minor_tickmarks_nucleotides=250
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=off
+#
+group_label_scale=2
+#
+#
+# F ############GENOMIC FEATURES############
+#
+*::fill_shape_mode=1_color
+LINE/L2::feature_color=verydarkred
+SINE/Alu::feature_color=verydarkgreen
+SINE/MIR::feature_color=verydarkbrown
+LTR/ERV1::feature_color=verydarkblue
+Low_complexity::feature_color=verydarkyellow
+Simple_repeat::feature_color=verydarkorange
+#
+# G ############GROUP FEATURES##############
+#
+*::group_line=none
+*::group_shape=thick_line
+#
+# S ############SOURCE FEATURES#############
+#
+*::unfold_grouped_ungrouped=off
+*::unfold_ungrouped_line=off
+*::unfold_grouped_line=off
+*::range=none
+*::source_line_color=black
+*::source_line=long_dotted
+#
+annotation::feature_color=darkgreen
+annotation::group_color=verydarkgreen
+SGP.3X::feature_color=darkorange
+SGP.3X::group_color=verydarkorange
+SGP.homol::feature_color=darkorange
+SGP.homol::group_color=verydarkorange
+geneid_v1.0::feature_color=lightviolet
+geneid_v1.0::group_color=darkviolet
+genscan::feature_color=blue
+genscan::group_color=verydarkblue
+tblastx.3X::feature_color=red
+tblastx.3X::group_color=verydarkred
+tblastx.homol::feature_color=red
+tblastx.homol::group_color=verydarkred
+# RepeatMasker::feature_color=####
+#
+annotation::left_label=ANNOTATION
+SGP.3X::left_label=SGP 3X
+SGP.homol::left_label=SGP
+geneid_v1.0::left_label=GENEID
+genscan::left_label=GENSCAN
+tblastx.3X::left_label=TBLASTX 3X
+tblastx.homol::left_label=TBLASTX
+RepeatMasker::left_label=REPEATS
+@ 
+
+<<Settings for a4 paper size>>=
+########################################
+##   DEFAULT CUSTOM FILE FOR GFF2PS   ##
+########################################
+#
+# $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+page_size=a4
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=3
+nucleotides_x_line=10000
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=1000
+minor_tickmarks_nucleotides=250
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=off
+#
+group_label_scale=2
+#
+#
+# F ############GENOMIC FEATURES############
+#
+*::fill_shape_mode=1_color
+LINE/L2::feature_color=verydarkred
+SINE/Alu::feature_color=verydarkgreen
+SINE/MIR::feature_color=verydarkbrown
+LTR/ERV1::feature_color=verydarkblue
+Low_complexity::feature_color=verydarkyellow
+Simple_repeat::feature_color=verydarkorange
+#
+# G ############GROUP FEATURES##############
+#
+*::group_line=none
+*::group_shape=thick_line
+#
+# S ############SOURCE FEATURES#############
+#
+*::unfold_grouped_ungrouped=off
+*::unfold_ungrouped_line=off
+*::unfold_grouped_line=off
+*::range=none
+*::source_line_color=black
+*::source_line=long_dotted
+#
+annotation::feature_color=darkgreen
+annotation::group_color=verydarkgreen
+SGP.3X::feature_color=darkorange
+SGP.3X::group_color=verydarkorange
+SGP.homol::feature_color=darkorange
+SGP.homol::group_color=verydarkorange
+geneid_v1.0::feature_color=lightviolet
+geneid_v1.0::group_color=darkviolet
+genscan::feature_color=blue
+genscan::group_color=verydarkblue
+tblastx.3X::feature_color=red
+tblastx.3X::group_color=verydarkred
+tblastx.homol::feature_color=red
+tblastx.homol::group_color=verydarkred
+# RepeatMasker::feature_color=####
+#
+annotation::left_label=ANNOTATION
+SGP.3X::left_label=SGP 3X
+SGP.homol::left_label=SGP
+geneid_v1.0::left_label=GENEID
+genscan::left_label=GENSCAN
+tblastx.3X::left_label=TBLASTX 3X
+tblastx.homol::left_label=TBLASTX
+RepeatMasker::left_label=REPEATS
+@ 
+
 \subsctn{empty appendix subsection}
+
+<<Renaming fasta sequence IDs>>=
+#!/usr/local/bin/perl -w
+#
+# fasta_renamer.pl infile new_seq_id
+#
+#     Replacing sequence name 
+#     for single sequence fasta files
+#     and reformating sequence to 80 cols.
+#
+use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use strict;
+use Bio::Seq;
+use Bio::SeqIO;
+
+my ($infile,$newid) = @ARGV;
+
+my $seqin  = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
+my $seqout = Bio::SeqIO->new(-format => 'FASTA', -file => "> $infile.new");
+
+open(DESC,"> $infile.desc");
+while (my $sequence = $seqin->next_seq()) {
+    my ($sid,$len,$seq,$desc);
+    print STDERR "### READING FASTA... $newid\n";
+    $sid  = $sequence->display_id();
+    $desc = $sequence->desc();
+    $len  = $sequence->length();
+    $seq  = $sequence->seq();
+    $seq =~ tr/[a-z]/[A-Z]/;
+    print STDERR "### WRITING FASTA... $newid\n";
+    print DESC "$newid $sid $len $desc\n";
+    $sequence->display_id($newid);
+    $sequence->desc('');
+    $sequence->seq($seq);
+    $seqout->write_seq($sequence);
+}; # while 
+close(DESC);
+exit(0);
+@
+
+<<Raw coords to GFF>>=
+#!/usr/local/bin/perl -w
+#
+# coords2gff.pl seqname < coords_file > GFF_file
+#
+#     Converting raw coords files to GFF
+#
+use strict;
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+
+my ($seqname,%gff,$string);
+$seqname = shift @ARGV;
+%gff = ();
+$string = ("\%s\t" x 8)."\%s\n";
+
+my $c = 0;
+while (<STDIN>) {
+    next if /^\s*$/o;
+    my ($l,$a,$b,$s,$r);
+    chomp;
+    $l = $_;
+	# print STDERR "$. (X): $l\n";
+    $l =~ /^[><]/o && do {
+	    # print STDERR "$. (A): $l\n";
+        $l =~ s/^([><])\s*//o && ($s = $1);
+        $r = \%{ $gff{++$c} };
+        ($r->{gn_start},$r->{gn_end},$r->{gn_name}) = split /\s+/og, $l, 3;
+        $r->{gn_name} =~ s/\s+$//og;
+        $r->{gn_name} =~ s/\s+/_/og;
+        $r->{strand} = ($s eq '>') ? '+' : (($s eq '<') ? '-' : '.');
+        # $r->{exons} = ();
+        next;
+	}; # $newgene ?
+	# print STDERR "$. (B): $l\n";
+    ($a,$b,undef) = split /\s+/og, $l, 3;
+    push @{ $gff{$c}{exons} }, [ $a, $b ];
+}; # while
+# print STDERR Dumper(\%gff);
+
+foreach my $i (1..$c) {
+    my $r = \%{ $gff{$i} };
+    my $exnum = scalar(@{ $r->{exons} });
+    print STDOUT "\# $seqname - $r->{gn_name}: ".
+        ($exnum)." exons\n";
+    printf STDOUT $string, 
+        $seqname,'annotation','Gene',$r->{gn_start},$r->{gn_end},
+        '.',$r->{strand},'.',$r->{gn_name};
+    $r->{strand} eq '-' && (@{ $r->{exons} } = reverse @{ $r->{exons} });
+    my ($lastori,$lastend,$lastfrm) = (0,0,0);
+    foreach my $j (0..$#{ $r->{exons} }) {
+        my ($feat,$ori,$end,$frm);
+        ($ori,$end) = @{ ${ $r->{exons} }[$j] };
+	  THIS: {
+        ($j == 0) && do {
+            $feat = 'First';
+            $exnum == 1 && ($feat = 'Single');
+            $frm = 0;
+            last THIS;
+        }; # $d == 0
+        $frm = (($lastend - $lastori + 1) + $lastfrm) % 3;
+        ($j == $#{ $r->{exons} }) && do {
+            $feat = 'Terminal';
+            last THIS;
+        }; # $d == $#{ $r->{exons} }
+        $feat = 'Internal';
+      }; # THIS
+        # print STDERR "$r->{gn_name} ($j): $ori $end $frm : ".
+        #              "$lastori $lastend $lastfrm\n";
+        ($lastori,$lastend,$lastfrm) = ($ori,$end,$frm);
+        printf STDOUT $string, 
+            $seqname,'annotation',$feat,$ori,$end,
+            '.',$r->{strand},$frm,$r->{gn_name};
+    }; # foreach @j
+}; # foreach $i
+
+exit(0);
+@ 
+
+<<Breaking fasta sequences>>=
+#!/usr/local/bin/perl -w
+#
+# splitfastaseq.pl \
+#     seqlength overlap < fastafile > output
+#
+#     Breaking large fasta sequences to build 
+#     databases for running tblastx faster
+# 
+use strict;
+use lib qw( /usr/lib/perl5/site_perl/5.005/ );
+use Bio::Seq;
+use Bio::SeqIO;
+use Benchmark;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $DATE = localtime;
+my $USER = $ENV{USER};
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+my ($id,$ln,$sq) = ('',0,'');
+my ($total_time,$seq);
+my ($maxlen,$overlap) = @ARGV;
+
+print STDERR << "+++EOR+++";
+$line$s\n$s Running splitfastaseq.pl splitfastaseq.pl\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+&getseq();
+&splitseq();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s splitfastaseq.pl FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub getseq() { # assuming here single sequence input fasta files
+    print STDERR "$s Processing fasta file.\n";
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
+    while (my $iseq = $seqin->next_seq()) {
+        $id = $iseq->display_id();
+        $ln = $iseq->length();
+        $sq = $iseq->seq();
+        last; # to make sure that we only catch a single fasta sequence
+    }; # while next_seq
+    $seq = Bio::Seq->new( -seq => $sq , -id => $id );
+    print STDERR "$s Processing DONE: ".(&timing($F))."\n$s\n";
+} # getseq
+#
+sub splitseq() {
+    my ($e,$sid,$ssq,$nseq,$wseq);
+    my ($t,$sqlen) = (1,($maxlen + $overlap - 1));
+    print STDERR "$s Creating splitted-sequence fasta file ($ln nt).\n";
+    my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
+    while ($t < $ln) {
+         $e = $t + $sqlen;
+         ($e > $ln) && ($e = $ln);
+         $sid = "$id\_$t\_$e";
+         print STDERR "$s --> $id : from $t to $e (".($e - $t + 1)." nt)\n";
+         $ssq = $seq->subseq($t,$e);
+         $t += $maxlen;
+         #
+         $wseq = Bio::Seq->new( -seq => $ssq , -id => $sid );
+         $seqout->write_seq($wseq);
+    }; # while  
+    print STDERR "$s Splitting DONE: ".(&timing($F))."\n$s\n";
+} # splitseq
+#
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+<<GFF to GTF>>=
+#!/usr/local/bin/perl -w
+#
+# gff2gtf.pl < infile > outfile
+#
+#     Converting GFF formated records into GTF
+#
+# use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use strict;
+use Benchmark;
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $DATE = localtime;
+my $USER = $ENV{USER};
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+print STDERR << "+++EOR+++";
+$line$s\n$s Running splitfastaseq.pl splitfastaseq.pl\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+my %genes;
+my @f = ();
+my $gcnt = 0;
+while (<STDIN>) {
+    /^\# Gene/o && do {
+        $gcnt++;
+        $genes{$gcnt}{COMMENT} = $_;
+        next;
+    };
+    next if /^\#/o;
+    next if /^\s*$/o;
+    chomp;
+    @f = split /\s+/og, $_;
+    push @{ $genes{$gcnt}{FEATURES} }, [ @f[0..8] ];
+}; # while
+
+# print STDERR Dumper(\%genes);
+
+my $GTFrec = ("\%s\t" x 8)."\%s\n";
+foreach my $i (1..$gcnt) {
+    print STDOUT $genes{$i}{COMMENT};
+    my ($main,$tail_O,$tail_E,$groupflg,$gtfgroup) = ('','','',$T,'');
+    foreach my $j (0..$#{ $genes{$i}{FEATURES} }) {
+        my ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group,
+            $cdsfeat,$cdsori,$cdsend,$t);
+        ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group) =
+                @{ $genes{$i}{FEATURES}[$j] };
+        $score = '.';
+        $groupflg && do {
+            $group =~ s/gene_//o;
+            $t = &fill_left($group,3,"0");
+            $gtfgroup = "gene_id $t; transcript_id $t.1";
+            $groupflg = $F;
+        }; # $groupflg
+      FEATS: {
+          $feat eq 'Single' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              last FEATS;
+          }; # Single
+          $feat eq 'First' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);              
+              last FEATS;
+          }; # First
+          $feat eq 'Terminal' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+                  # only if nucleotides of stop codon not included
+                  #     $strand eq '+' && ($end = $end + 3);
+                  #     $strand eq '-' && ($start = $start - 3);
+              # last FEATS;
+          }; # Terminal
+        }; # FEATS
+        $feat = 'CDS';
+        $main .= sprintf($GTFrec,$seq,$source,$feat,$start,$end,
+                         $score,$strand,$frame,$gtfgroup); 
+    }; # foreach $j
+    print STDOUT "$main$tail_O$tail_E";
+}; # foreach $i
+
+my $total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s splitfastaseq.pl FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub get_start() {
+    my ($o,$e,$s) = @_;
+    my $str = "start_codon";
+    $s eq '+' && do {
+       return $str, $o, ($o + 2);
+    }; # forward
+    $s eq '-' && do {
+       return $str, ($e - 2), $e;
+    }; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+} # 
+#
+sub get_final() {
+    my ($o,$e,$s) = @_;
+    my $str = "stop_codon";
+    $s eq '+' && do {
+        return $str, ($e - 2), $e;
+           # only if nucleotides of stop codon not included
+           #     return $str, ($e + 1), ($e + 3);
+    }; # forward
+    $s eq '-' && do {
+        return $str, $o, ($o + 2);
+           # only if nucleotides of stop codon not included
+           #     return $str, ($o - 3), ($o -1);
+    }; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+} # 
+#
+sub fill_left() { ($_[2] x ($_[1] - length($_[0]))).$_[0] } 
+#
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+<<Running blast on long sequences>>=
+#!/usr/local/bin/perl -w
+#
+# largeseqs_blast.pl \
+#     prog database queryfasta "-matrix matrix blast-options" outputdir 2> logfile
+#
+#     Running blast on large sequences...
+#     (based on Pankaj Agarwal script)
+# 
+use strict;
+use lib qw( /usr/lib/perl5/site_perl/5.005/ );
+use File::Basename;
+use Bio::Seq;
+use Bio::SeqIO;
+use Benchmark;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $DATE = localtime;
+my $USER = $ENV{USER};
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+my $Chunk=50000;
+my $Overlap=200;
+my ($id,$ln,$sq,$filecnt) = ('',0,'',0); 
+my ($cmd, $blastprog, $query, $fastafile, $database, $blastopt, $outputdir,$total_time);
+
+scalar(@ARGV) < 5 && die("Not enough parameters... Check command-line... $!");
+
+($blastprog, $database, $fastafile, $blastopt, $outputdir) = @ARGV;
+$query = basename($fastafile); 
+
+print STDERR << "+++EOR+++";
+$line$s\n$s Running largeseqs_blast.pl on $query\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+&getseq($fastafile);
+&run_blast_cmd();
+&clean_files();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s largeseqs_blast.pl on $query FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub getseq() { # assuming here single sequence input fasta files
+    my ($infile) = @_;
+    print STDERR "$s Processing fasta file.\n";
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
+    while (my $seq = $seqin->next_seq()) {
+        $id = $seq->display_id();
+        $ln = $seq->length();
+    #   $sq = $seq->seq();   # not required
+    }; # while next_seq
+    print STDERR "$s Processing DONE: ".(&timing($F))."\n$s\n";
+} # getseq
+sub run_blast_cmd() {
+    my ($len,$k,$large,$crop,$cmdline,$start,$stop,$sys_rpt);
+    print STDERR "$s Running $blastprog for $query ($ln nt).\n$s\n";
+    $large = ($ln > $Chunk) ? $T : $F;
+    $len = $ln; 
+    $crop = '';
+    for($k = 1; $k < $ln ; $k += $Chunk) {
+        $large && do {
+            $len = $ln - $k + 1;
+            ($len < $Chunk) || ($len = $Chunk + $Overlap);
+            $crop = "-nwstart $k -nwlen $len";
+		}; # $large
+        $filecnt++;
+        $cmdline="$blastprog $database $fastafile $blastopt ".
+             "$crop > $outputdir/$query.$filecnt";
+        print STDERR "$s Running Command on fragment $k ($len nt):\n$s\t$cmdline\n";
+        $start = new Benchmark;
+        $sys_rpt = system("$cmdline");
+        $stop = new Benchmark;
+        &check_sys_result($sys_rpt);
+        print STDERR "$s Command Done: \n$s ".(timestr(timediff($stop,$start)))."\n$s\n";
+    }; # for
+    print STDERR "$s Blast DONE: ".(&timing($F))."\n$s\n";
+} # run_blast_cmd
+sub clean_files() {
+    my $j;
+    print STDERR "$s Joining temporary Output files.\n";
+    open(O, "> $outputdir/$query");
+    for ($j = 1; $j <= $filecnt; $j++) {
+        open(I,"< $outputdir/$query.$j");
+        print O <I>;
+        close(I);
+        unlink "$outputdir/$query.$j";
+    }; # for
+    close(O);
+    print STDERR "$s Joining DONE: ".(&timing($F))."\n";
+} # clean_files
+sub check_sys_result() {
+    my ($runOK,$msg) = ($F,'');
+    my $prog_exit = 0xffff & $_[0];
+    $msg = sprintf("Command returned %#04x : ", $prog_exit);
+    if ($prog_exit == 0) {
+        $msg .= "ran with normal exit ...";
+        $runOK = $T;
+    } elsif ($prog_exit == 0xff00) {
+        $msg .= "command failed: $! ...";
+    } elsif (($prog_exit & 0xff) == 00) {
+        $prog_exit >>= 8;
+        $msg .= "ran with non-zero exit status $prog_exit ...";
+    } else {
+        $msg .= "ran with ";
+        if ($prog_exit &   0x80) {
+            $prog_exit &= ~0x80;
+            $msg .= "coredump from ";
+        };
+        $msg .= "signal $prog_exit ...";
+    };
+    print STDERR "$s $msg\n";
+} # check_sys_result
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH VARS>>=
+#
+# .bash_VARS - Variables used on brown dataset
+#
+<<Version Control Id Tag>>
+#
+SET="brown" ;
+#
+BASE="/projects/sgp" ;
+ANALYSIS="$BASE/analysis" ;
+DATASETS="$BASE/datasets" ;
+WORK="$BASE/analysis/$SET" ;
+DATA="$BASE/datasets/$SET" ;
+BIN="$BASE/bin" ;
+PARAM="$BASE/param" ;
+#
+ID="$DATA/id" ;
+HSAP="$DATA/id.Hsap" ;
+MMUS="$DATA/id.Mmus" ;
+#
+FASTA="$DATA/fasta" ;
+BLASTDB="$DATA/blastdb" ;
+BLASTMAT="$PARAM/wublast" ;
+GENEID="$PARAM/geneid/human3iso.param" ;
+GENSCAN="/usr/local/molbio/Install/GENSCAN/param/HumanIso.smat" ;
+#
+export BASE ANALYSIS DATASETS WORK DATA BIN PARAM ID HSAP MMUS \
+       FASTA BLASTDB BLASTMAT GENEID GENSCAN ;
+#
+<<BASH Noweb Variables>>
+#
+echo "###";
+echo "### You have defined PROJECT VARIABLES for \"$SET\" dataset.";
+echo "###"; 
+@ 
+
+<<tangling>>=
+#
+notangle -R'BASH VARS' $NOWEB/$nwfile.nw \
+         > $BASE/.brown_bash_VARS ; 
+# sourcing
+source $BASE/.brown_bash_VARS ;
+@
+%$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
@@ -202,7 +1810,7 @@ We also set here the date when the script is running and who is the user running
 my $DATE = localtime;
 my $USER = $ENV{USER};
 @ %def $DATE $USER
-
+%$
 
 \subsubsctn{Timing our scripts}
 
@@ -251,6 +1859,7 @@ next if /^\#/o;
 next if /^\s*$/o;
 chomp;
 @
+%$
 
 <<Common PERL subs - Min Max>>=
 #
@@ -299,17 +1908,24 @@ my ($n,$c); # counter and char (for &counter function)
 \subsubsctn{Common functions for reporting program processes}
 \label{sec:messagerpt}
 
-Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
+Function '[[report]]' requires that a hash variable '[[%MessageList]]'
+has been set, such hash contains the strings for each report message
+we will need. The first parameter for '[[report]]' is a key for that
+hash, in order to retrieve the message string, the other parameters
+passed are processed by the [[sprintf]] function on that string.
 
 <<Common PERL subs - STDERR>>=
 sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
 @
+%$
 
-The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
+The same happens to '[[warn]]' function which also requires a hash
+variable '[[%ErrorList]]' containing the error messages.
 
 <<Common PERL subs - STDERR>>=
 sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
 @
+%$
 
 \subsctn{AWK scripts}
 
@@ -342,13 +1958,14 @@ L="####################"
 #
 exit 0
 @
+%$
 
 \subsctn{Version control tags}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: brown.nw,v 0.1 2001-06-25 15:37:25 jabril Exp $
+# $Id: brown.nw,v 0.2 2001-06-28 17:04:27 jabril Exp $
 @ 
 
 \newpage
@@ -356,7 +1973,18 @@ This document is under Revision Control System (RCS). The version you are curren
 \sctn{Extracting code blocks from this document}
 
 From this file we can obtain both the code and the
-documentation. The following instructions are needed:
+documentation. The following subsections show the instructions that are needed. Here we define the shell variables that we are using when extracting documents and code from this noweb file.
+
+<<BASH Noweb Variables>>=
+# Global Variables
+NOWEB="$BASE/_docs/brown" ;
+DOCS="$NOWEB/docs" ;
+NWBIN="$NOWEB/bin" ;
+nwfile="brown" ;
+export NOWEB NWBIN DOCS nwfile ;
+@ 
+%$
+
 
 \subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
 
@@ -364,35 +1992,45 @@ Remember when tangling that '-L' option allows you to include program line-numbe
 
 <<tangling>>=
 # showing line numbering comments in program
-notangle -L -R"root" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/root_file ;
+notangle -L -R"Renaming fasta sequence IDs" $NOWEB/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/fasta_renamer.pl
+notangle -L -R"Raw coords to GFF" $NOWEB/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/coords2gff.pl
+notangle -L -R"Breaking fasta sequences" $NOWEB/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/splitfastaseq.pl
+notangle -L -R"GFF to GTF" $NOWEB/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/gff2gtf.pl
+notangle -L -R"Running blast on long sequences" $NOWEB/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/largeseqs_blast.pl
 # program without line numbering comments
-notangle -t4 -R"root" $WORK/$nwfile.nw \
-    > $BIN/root_file ;
+notangle -t4 -R"root" $NOWEB/$nwfile.nw \
+    > $NWBIN/root_file ;
 # making them runnable
-chmod a+x $BIN/root_file ;
+chmod a+x $NWBIN/root_file ;
 @ 
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
 <<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw \
-    > $DATA/root_config ;
+notangle -R"Settings for a3 paper size" $NOWEB/$nwfile.nw \
+    > $PARAM/gff2ps/brown.a3.rc
+notangle -R"Settings for a4 paper size" $NOWEB/$nwfile.nw \
+    > $PARAM/gff2ps/brown.a4.rc
 @ %$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
 <<tangling>>=
-notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
-notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
-chmod a+x $WORK/nw2tex $WORK/ltx;
+notangle -Rweaving  $NOWEB/$nwfile.nw > $NOWEB/nw2tex ;
+notangle -RLaTeXing $NOWEB/$nwfile.nw > $NOWEB/ltx ;
+chmod a+x $NOWEB/nw2tex $NOWEB/ltx;
 @ 
 
 <<weaving>>=
 <<BASH shebang>>
 # weaving and LaTeXing
-<<BASH Environment Variables>>
-noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+<<BASH Noweb Variables>>
+noweave -t4 -delay -index $NOWEB/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
@@ -403,7 +2041,7 @@ popd;
 <<LaTeXing>>=
 <<BASH shebang>>
 # only LaTeXing
-<<BASH Environment Variables>>
+<<BASH Noweb Variables>>
 pushd $DOCS/ ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
@@ -412,38 +2050,5 @@ dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 popd ;
 <<BASH script end>>
 @ %$
-
-\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
-
-<<BASH Environment Variables>>=
-# Global Variables
-export WORK="/projects/sgp/_docs/brown" ;
-export BIN="$WORK/bin" ;
-export DOCS="$WORK/docs" ;
-export DATA="$WORK/data" ;
-export nwfile="brown" ;
-@ 
-
-<<CSH Environment Variables>>=
-# Global Variables
-setenv WORK "/projects/sgp/_docs/brown" ;
-setenv BIN  "$WORK/bin" ;
-setenv DOCS "$WORK/docs" ;
-setenv DATA "$WORK/data" ;
-setenv nwfile "brown" ;
-@ 
-
-<<tangling>>=
-# TO DO: add a test to check which shell is running
-# BASH shell
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
-         > $WORK/.bash_VARS ; 
-# CSH shell
-notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
-         > $WORK/.csh_VARS ; 
-# sourcing
-source $WORK/.bash_VARS ;
-source $WORK/.csh_VARS ;
-@
 
 \end{document}
