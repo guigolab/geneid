@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.9 2002-03-26 11:42:34 jabril Exp $ 
+% # $Id: humus.nw,v 1.10 2002-03-27 18:47:48 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.9 2002-03-26 11:42:34 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.10 2002-03-27 18:47:48 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2089,6 +2089,7 @@ use global;
 #
 # VARS
 $PROG = 'getfastadesc.pl';
+$PRGVER = '0.9alpha';
 my ($chrlistfile,$ipath) = @ARGV;
 $ipath =~ s%/$%%o;
 my (@files,%seqs,@order);
@@ -2305,6 +2306,7 @@ is_exec $BIN/gp2gff.pl ;
 #
 <<PERL strict pragma + info>>
 my $PROG = 'gp2gff.pl';
+my $PRGVER = '0.9alpha';
 #
 use Getopt::Long;
 Getopt::Long::Configure qw/ bundling /;
@@ -2480,6 +2482,7 @@ is_exec $BIN/sbp_checkblastout.pl ;
 #
 <<PERL strict pragma + info>>
 my $PROG = 'sbp_checkblastout.pl';
+my $PRGVER = '0.9alpha';
 #
 my $chr = shift @ARGV;
 my $path = shift @ARGV;
@@ -2536,6 +2539,7 @@ is_exec $BIN/sbp_blast2gff.pl ;
 #
 <<PERL strict pragma + info>>
 my $PROG = 'sbp_blast2gff.pl';
+my $PRGVER = '0.9alpha';
 #
 my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
 my @frame = ( 3, 1, 2 ); # frm 0 -> blastfrm 3
@@ -2636,6 +2640,7 @@ is_exec $BIN/runeval.pl ;
 #
 <<PERL strict pragma + info>>
 my $PROG = 'runeval.pl';
+my $PRGVER = '0.9alpha';
 #
 
 #
@@ -2681,6 +2686,7 @@ is_exec $BIN/getHSPSR.pl ;
 #
 <<PERL strict pragma + info>>
 my $PROG = 'getHSPSR.pl';
+my $PRGVER = '0.9alpha';
 #
 my $chr = shift;
 my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
@@ -3078,14 +3084,14 @@ use strict;
 use vars qw(
            @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
            $mySQL_db $mySQL_host $mySQL_user $MySQLPAR $dbh $sth
-           $_verbose $isDBon %status %chrs %jobs @seqs @steps
+           $isDBon %status %chrs %jobs @seqs @steps
            );
 
 use Exporter;
 $VERSION = 1.00;
 @@ISA = qw(Exporter);
 @@EXPORT = qw(
-    $mySQL_db $mySQL_host $mySQL_user $_verbose $isDBon
+    $mySQL_db $mySQL_host $mySQL_user $isDBon
     &open_DB &close_DB $MySQLPAR $dbh $sth
     &get_tbl_hash &get_row_fields &put_row_fields
     &get_DB_codes %status %chrs %jobs @seqs @steps
@@ -3114,8 +3120,16 @@ $MySQLPAR = $ENV{MySQLPAR} || do {
         exit(1);
     };
 
-$_verbose = $T;
+$global::_verbose{RAW} = $T;
+$global::_verbose{DBCMD} = $F;
+$global::_verbose{DB} = $F;
 $isDBon = $F;
+$global::CmdLineOpts{'DB-Verbose'} = sub {
+        $_verbose{DB} = $T;
+        $_verbose{DBCMD} = $T;
+    };
+$global::CmdLineOpts{'DB-verbose'} = sub { $_verbose{DB} = $T };
+$global::CmdLineOpts{'DBsc|DB-showcommands'} = sub { $_verbose{DBCMD} = $T };
 
 sub connection_details() {
     print STDERR $Messages{'DBIHEADER'}->("DBI: Available DBD Drivers");
@@ -3184,7 +3198,7 @@ sub count_tbl_elements() {
         my $str = qq{
             SELECT COUNT(*) FROM $t /* Counting elements for mySQL table */
             };
-        print $fhref $Messages{'DBICMD'}->("$str");
+        print $fhref $Messages{'DBICMD'}->("$str") if $_verbose{DBCMD};
         $sth = $dbh->prepare($str);
         $sth->execute();
         $tbls{$t} = $sth->fetchrow_array();
@@ -3204,7 +3218,7 @@ sub del_all_from_tbl() {
     $dstr = qq{
         DELETE FROM $table
 		};
-    print STDERR $Messages{'DBICMD'}->("$dstr");
+    print STDERR $Messages{'DBICMD'}->("$dstr") if $_verbose{DBCMD};
     $dsth = $dbh->prepare($dstr);
     $dsth->execute();
     $dsth->finish();
@@ -3216,7 +3230,7 @@ sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allo
     my ($fldstr,$valstr,$filter,$ssth,$sstr,$isth,$istr);
     defined($delflg) || ($delflg = $F);
     print STDERR $Messages{'DBIHEADER'}->(
-        "REBUILDING FIELDS for TABLE \"$table\"");
+        "REBUILDING FIELDS for TABLE \"$table\"") if $_verbose{DB};
     $fldstr = "(".join(', ',@{$aryfld}).")"; 
     $valstr = "VALUES(".join(',',('?') x scalar(@{$aryfld})).")"; 
     $filter = join("\n                 AND ",
@@ -3232,7 +3246,7 @@ sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allo
                $valstr /* adding new records */
         };
     &del_all_from_tbl($table) if $delflg;
-    print STDERR $Messages{'DBICMD'}->("$sstr$istr");
+    print STDERR $Messages{'DBICMD'}->("$sstr$istr") if $_verbose{DBCMD};
     $ssth = $dbh->prepare($sstr);
     $isth = $dbh->prepare($istr);
     foreach my $row (@{$aryrow}) {
@@ -3250,7 +3264,7 @@ sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allo
             "\"@trow\" already defined in \"$table\": SKIPPING...");
     }; # foreach $row 
     print STDERR $Messages{'DBIMSG'}->(
-        "",(scalar (@{$aryrow}))." records were checked...","");
+        "",(scalar (@{$aryrow}))." records were checked on \"$table\"...","");
     $ssth->finish();
     $isth->finish();
 } # load_to_tbl_ifdef
@@ -3259,7 +3273,7 @@ sub get_tbl_hash() {
     # here we assume that the first element of $aryfld is a hash key
     my ($href, $table, $aryflds, $queryflds, $queryvals) = @_;
     print STDERR $Messages{'DBIHEADER'}->(
-        "RETRIEVING HASH from TABLE \"$table\"");
+        "RETRIEVING HASH from TABLE \"$table\"") if $_verbose{DB};
     my ($ssth,$sstr,@ary,$aryfld_len,$fldstr,$valstr);
     $aryfld_len = $#{ $aryflds };
     $fldstr = join(', ',@{ $aryflds });
@@ -3268,7 +3282,7 @@ sub get_tbl_hash() {
         SELECT $fldstr
                FROM $table $valstr
         }; 
-    print STDERR $Messages{'DBICMD'}->("$sstr");
+    print STDERR $Messages{'DBICMD'}->("$sstr") if $_verbose{DBCMD};
     $ssth = $dbh->prepare($sstr);
     $ssth->execute();
     while (@ary = $ssth->fetchrow_array()) {
@@ -3276,7 +3290,7 @@ sub get_tbl_hash() {
                                       } (1..$aryfld_len);
     }; # while @ary
     print STDERR $Messages{'DBIMSG'}->(
-        "",(scalar (keys %{$href}))." records were retrieved...","");
+        "",(scalar (keys %{$href}))." records were retrieved from \"$table\"...","");
     $ssth->finish();
 } # get_tbl_hash
 sub build_where_clause() {
@@ -3303,36 +3317,39 @@ sub get_row_fields() {
     my ($ssth,$sstr,$fldstr,$valstr,$q_len,@out);
     $fldstr = join(', ',@{$outflds});
     print STDERR $Messages{'DBIHEADER'}->(
-        "RETRIEVING \"$fldstr\" ROW(s) from TABLE \"$table\"");
+        "RETRIEVING \"$fldstr\" ROW(s) from TABLE \"$table\"") if $_verbose{DB};
     $valstr = &build_where_clause($queryflds,$queryvals);
     $sstr = qq{
         SELECT $fldstr
                FROM $table $valstr
 		};
-    print STDERR $Messages{'DBICMD'}->("$sstr");
+    print STDERR $Messages{'DBICMD'}->("$sstr") if $_verbose{DBCMD};
     $ssth = $dbh->prepare($sstr);
     $ssth->execute();
     @out = $ssth->fetchrow_array();
     $ssth->finish();
     scalar(@out) > 0 || do {
         print STDERR $Messages{'DBIMSG'}->(
-            "","NONE rows were selected, NONE fields were retrieved...","");
+            "","NONE rows were selected from \"$table\"",
+               "NONE fields were retrieved...","");
         return ( undef );
     };
     print STDERR $Messages{'DBIMSG'}->(
-        "",scalar(@out)." fields were retrieved...","");
+        "",scalar(@out)." fields were retrieved from \"$table\"...","");
     return @out;
 } # get_row_fields
 
 sub get_DB_codes() {
     my (@sel_fields,@qry_fields,@qry_values);
+    print STDERR $Messages{'DBIHEADER'}->(
+        "LOADING MAIN TABLES into PROGRAM VARIABLES") if $_verbose{DB};
     #
     # Loading Status tables
     %status = ();
     @sel_fields =  qw( id code descr color );
     &get_tbl_hash(\%status, 'tb_status', \@sel_fields);
     print STDERR (Data::Dumper->Dump([ \%status ],
-                                  [ qw( *status ) ]));
+                                  [ qw( *status ) ])) if $_verbose{DEBUG};
     #
     # Loading Chromosome tables
     %chrs = ();
@@ -3347,7 +3364,7 @@ sub get_DB_codes() {
                       \@sel_fields, \@qry_fields, \@qry_values);        
     }; # foreach $key
     print STDERR (Data::Dumper->Dump([ \%chrs ],
-                                  [ qw( *chrs ) ]));
+                                  [ qw( *chrs ) ])) if $_verbose{DEBUG};
     #
     # Loading Job tables
     %jobs = ();
@@ -3363,16 +3380,18 @@ sub get_DB_codes() {
                       \@sel_fields, \@qry_fields, \@qry_values);        
     }; # foreach $key
     print STDERR (Data::Dumper->Dump([ \%jobs ],
-                                  [ qw( *jobs ) ]));
+                                  [ qw( *jobs ) ])) if $_verbose{DEBUG};
     #
     # Building order arrays for chromosome seqs and job steps
     &build_ordering_ary(\@seqs, \%chrs, 'code', 'seqs',  'code');
     &build_ordering_ary(\@steps, \%jobs, 'code', 'steps', 'code');
     print STDERR (Data::Dumper->Dump([ \@seqs, \@steps ],
-                                  [ qw( *seqs   *steps ) ]));
+                                  [ qw( *seqs   *steps ) ])) if $_verbose{DEBUG};
 } # get_DB_codes
 sub build_ordering_ary() {
     my ($arf,$hrf,$Skey,$sfeat,$skey) = @_;
+    print STDERR $Messages{'DBIMSG'}->(
+        "","SORTING \"$sfeat\" to build ordering array (\@$sfeat)...","");
     @{ $arf } = ();
     foreach my $key (keys %{ $hrf }) {
         my @order = ();
@@ -3394,7 +3413,7 @@ sub put_row_fields() {
     my ($q_len,$filter,$fldstr,$valstr,$setstr,
         $usth,$ustr,$ssth,$sstr,$isth,$istr,@trow,$count);
     print STDERR $Messages{'DBIHEADER'}->(
-        "UPDATING FIELDS for TABLE \"$table\"");
+        "UPDATING FIELDS for TABLE \"$table\"") if $_verbose{DB};
     $q_len = &min($#{ $aryfld }, $#{ $aryrow });
 #    my @setstr = ();
 #    for (my $i = 0; $i <= $q_len; $i++) {
@@ -3422,7 +3441,7 @@ sub put_row_fields() {
                SET $setstr
                WHERE $filter   /* Saryfld->[Sfield]=Q */
 		};
-    print STDERR $Messages{'DBICMD'}->("$sstr$istr$ustr");
+    print STDERR $Messages{'DBICMD'}->("$sstr$istr$ustr") if $_verbose{DBCMD};
     $ssth = $dbh->prepare($sstr);
     @trow = (map { $aryrow->[$_] } @{ $fields });
     $ssth->execute(@trow);
@@ -3430,13 +3449,15 @@ sub put_row_fields() {
     $ssth->finish();
     if ($count) {
         print STDERR $Messages{'DBIMSG'}->(
-            "","UPDATING fields on selected record from \"$table\"...","");
+            "","UPDATING fields on selected record from \"$table\"...","")
+            if $_verbose{DB};
         $usth = $dbh->prepare($ustr);
         $usth->execute(@{ $aryrow },@trow);
         $usth->finish();
 	} else {
         print STDERR $Messages{'DBIMSG'}->(
-            "","INSERTING new field on selected record from \"$table\"...","");
+            "","INSERTING new field on selected record from \"$table\"...","")
+            if $_verbose{DB};
         $isth = $dbh->prepare($istr);
         $isth->execute(@{ $aryrow });
         $isth->finish();
@@ -3471,18 +3492,13 @@ use db_Hsapiens qw( :DEFAULT :AdminFunc );
 #
 use global;
 $PROG = 'admin_db_Hsapiens.pl';
+$PRGVER = '0.9alpha';
+#
 my (%PARAM, %tjobs); 
 $PARAM{LIBSTEP} = $ENV{LIBSTEP} || do {
         print STDERR $Messages{'ENVNOTDEF'}->("MySQLPAR");
         exit(1);
     };
-
-%CmdLineOpts = (
-        "version" => sub {
-            print STDERR "#### Hi, you are running $PROG version 0.9alpha ...\n";
-            exit(1);
-        }
-    );
 
 #
 ## MAIN
@@ -3650,7 +3666,7 @@ sub load_jobs_tbl() {
         $thsh{$name} = $desc;
     };
 #    print STDOUT (Data::Dumper->Dump([ \%tjobs ],
-#                                  [ qw( *tjobs ) ]));
+#                                  [ qw( *tjobs ) ])) if $_verbose{DEBUG};
     close(JFILE);
     &load_job_steps_tbl(\%tjobs);
 } # load_jobs_tbl
@@ -3778,7 +3794,7 @@ sub load_job_steps_tbl() {
     ($tbl, @fld) = qw( tb_step 0 1 );    
     &load_to_tbl_ifdef($tbl, \@fld, \@flds, \@rows, $T);
 #   print STDOUT (Data::Dumper->Dump([ \@rows ],
-#                                 [ qw( *rows ) ]));
+#                                 [ qw( *rows ) ])) if $_verbose{DEBUG};
 } # load_jobs_tbl
 @ 
 
@@ -3822,6 +3838,7 @@ use db_Hsapiens;
 use global;
 #
 $PROG = 'stepper.pl';
+$PRGVER = '0.91alpha';
 # $MySQLPAR/$admfiles[$i].tbl
 # my @admfiles = qw/ chrs seqs jobs steps status /;
 
@@ -3847,17 +3864,12 @@ TheEnd OK;
 
 my %filter = ( 'CHR' => [], 'SEQ' => [], 'JOB' => [], 'STP' => [] );
 my $paramfile = undef;
-%CmdLineOpts = (
-    "c|chr=s"  => \@{ $filter{CHR} },
-    "q|seq=s"  => \@{ $filter{SEQ} },
-    "j|job=s"  => \@{ $filter{JOB} },
-    "s|step=s" => \@{ $filter{STP} },
-    "p|param=s" => \$paramfile,
-    "version"  => sub { 
-            print STDERR "#### Hi, you are running $PROG version 0.9alpha ...\n";
-            exit(1);
-        },
-    );
+$global::CmdLineOpts{'c|chr=s'}   = \@{ $filter{CHR} };
+$global::CmdLineOpts{'q|seq=s'}   = \@{ $filter{SEQ} };
+$global::CmdLineOpts{'j|job=s'}   = \@{ $filter{JOB} };
+$global::CmdLineOpts{'s|step=s'}  = \@{ $filter{STP} };
+$global::CmdLineOpts{'p|param=s'} = \$paramfile;
+
 if (!defined($paramfile)) {
     $paramfile = "./.project_VARS";
     (defined($ENV{WORK})) && ($paramfile = "$ENV{WORK}/.project_VARS");
@@ -3914,7 +3926,7 @@ sub set_filter() {
         @{ $href->{$k} } = split(/,/,join(',',@{ $href->{$k} }));
     };
     # print STDERR (Data::Dumper->Dump([ \%{$href} ],
-    #                               [ qw( *{$href} ) ]));
+    #                               [ qw( *{$href} ) ])) if $_verbose{DEBUG};
 } # set_filter
 @ 
 
@@ -3938,7 +3950,28 @@ We require the status checking function from the POSIX module we used in [[<<glo
 <<stepper.pl: new child reaper>>=
 # redefining child-exit signal handler (already defined in global.pm)
 sub new_child_reaper() {
-    # child hanged, removing pid from semaphore variable        
+    $handle->shlock();
+    my $maxval = $#semaphore;
+    for (my $v = 0; $v <= $maxval; $v++) {
+        my ($spid,$cpid,$ecod);
+        ($semaphore[$v][0] != 0) && do {
+            $semaphore[$v][0] =~ m/^(.*?)\./o && ($spid = $1);
+            $cpid = waitpid($spid, &WNOHANG);
+            if ($cpid > 0) {
+                # child died
+                print $ERRFH "## $spid ## CHILD EXIT STATUS:\n".
+                             "## $spid -> $?\n";
+            };
+        }; # ($semaphore[$v][0] != 0)
+    }; # for 
+    $handle->shunlock();
+    &show_curr_pids($gid);
+    $SIG{CHLD} = \&new_child_reaper;
+} # new_child_reaper
+@ 
+<<HIDE: stepper.pl: new child reaper>>=
+# redefining child-exit signal handler (already defined in global.pm)
+sub new_child_reaper() {
     $handle->shlock();
     my $maxval = $#semaphore;
     for (my $v = 0; $v <= $maxval; $v++) {
@@ -3946,17 +3979,29 @@ sub new_child_reaper() {
         ($semaphore[$v][0] != 0) && do {
 #            $semaphore[$v][0] =~ m/^(.*?)\./o && ($cpid = $1);
             $semaphore[$v][0] =~ m/^(.*?)\./o && ($spid = $1);
-            $cpid = &POSIX::waitpid($spid, &POSIX::WNOHANG);
-            $ecod = $?;
-            if ($cpid > 0 && &POSIX::WIFEXITED($ecod)) {
-                kill 9 => $cpid;
-                &reset_semaphore($v);
-                &update_DB_exec_tbl($status{'KILLED'}{'code'},
-                                    $semaphore[$v][1],$semaphore[$v][2],
-                                    $spid,undef,$ecod);
-                print $ERRFH $Messages{'CHILD_KILLED'}->($PROG, $cpid);
+            $cpid = waitpid($spid, &WNOHANG);
+            # $ecod = $?;
+            # if ($cpid == -1) {
+            #     # no childs waiting
+            #     next;
+            # } els
+            if ($cpid == 0) {
+                # (&POSIX::WIFEXITED($ecod))
+                # no childs died
+                $skip_next[0] && do { # check if main program halted
+                    kill 9 => $spid;
+                    $ecod = $exit_codes{'PROGHALT'}{SHORT};
+                    &update_DB_exec_tbl($status{'KILLED'}{'code'},
+                                        $semaphore[$v][1],$semaphore[$v][2],
+                                        $spid,undef,$ecod);
+                    &reset_semaphore($v);
+                    print $ERRFH $Messages{'CHILD_KILLED'}->($PROG, $spid);
+                };
             };
-        };
+            # } else {
+            #     # child died
+            # };
+        }; # ($semaphore[$v][0] != 0)
     }; # for 
     $handle->shunlock();
     &show_curr_pids($gid);
@@ -3985,27 +4030,26 @@ sub brown_dispatcher() {
 #    my $oldFHE = $ERRFH;
 #    open(FHERR, "> $TMP/run.rpt");
 #    $ERRFH = \*FHERR;
-    my ($pending_seqs,$seqnum,@tmpsq);
+    my ($seqs_done,$seqnum,@tmpsq);
     print $ERRFH "### MAIN $gid ### BEGIN MAIN LOOP\n";
     &show_curr_pids($gid);
-    $pending_seqs = 0;
+    $seqs_done = 0;
     $seqnum = scalar(@seqs);
-    while ($pending_seqs < $seqnum) { # loop through sequences
+    while ($seqs_done < $seqnum) { # loop through sequences
+        my $sem;
         for ($sem = 0; $sem < $maxjobs; $sem++) {
            $semaphore[$sem][0] || do {
                next if (! &is_host_there($hosts[$sem]));
-               next if $pending_seqs == $seqnum; # next unless scalar(@seqs) > 0;
-               @tmpsq = @{ $seqs[$pending_seqs] };
+               next if $seqs_done == $seqnum; 
+               @tmpsq = @{ $seqs[$seqs_done] };
                &breed_crows(@tmpsq, $sem);
                @{ $pids{$pid} } = @tmpsq;
-               $pending_seqs++;
+               $seqs_done++;
            }; # if job semaphore == 0 then fork child
            &do_wait();
         }; # for semaphores...
     }; # while
-    while (&all_done(\@semaphore)) { 
-        &do_wait();
-    };
+    while (&not_all_done()) { &do_wait(); };
     print $ERRFH "### MAIN $gid ### All Jobs ID: \n ".
                  join(" ",keys %pids)."\n".
                  "### MAIN $gid ### END MAIN LOOP\n";    
@@ -4014,36 +4058,33 @@ sub brown_dispatcher() {
 } # brown_dispatcher
 #
 sub do_wait() {
-    $skip_next[0] && do {
-        &new_child_reaper();
-        return;
-    };
-    sleep 1; # select(undef,undef,undef,1);
     &show_curr_pids($gid);
+#    $skip_next[0] && do {
+#        &new_child_reaper();
+#        return;
+#    };
+    sleep 1; # select(undef,undef,undef,1);
 } # do_wait
 sub show_curr_pids() {
     my $gid = shift;
+    $handle->shlock();
     print $ERRFH "### MAIN $gid ### SEMAPHORE: ".
                  join(" ", (map { $semaphore[$_][0] } (0..$#semaphore)))."\n";
+    $handle->shunlock();
 } # show_curr_pids
-sub reset_semaphore() {
-    my $qq = shift;
-    @{ $semaphore[$qq] } = ( 0, undef, undef );
-} # reset_semaphore
-sub all_done() {
-    my $aryref = shift;
+sub not_all_done() {
     my $sum = 0;
     $handle->shlock();
     for (my $s = 0; $s < $maxjobs; $s++) {
         $sum += $semaphore[$s][0];
     }; # for semaphores...
     $handle->shunlock();
-    return ($sum>0) ? 1 : 0;
-} # all_done
+    return ($sum>0) ? $T : $F;
+} # not_all_done
 sub is_host_there() {
       my $host = shift;
       ($skip_next[0]) && do {
-         print $ERRFH "### MAIN $gid ### USER HALT: \"$host\" NOT CHECKED !!!\n";
+         print $ERRFH "### MAIN $gid ### STOPPING PROGRAM: \"$host\" NOT CHECKED !!!\n";
          return $T;
       };
       my $err;
@@ -4059,30 +4100,44 @@ sub is_host_there() {
 sub breed_crows() {
     my ($chrseq_code,$jobstep_code,$run_at,
         $script,$scriptx,$script_stat,$script_err,
-        $pre_job,$clhpid,$syserr);
+        $pre_job,$chldpid,$syserr);
     my ($thechr,$theseq,$pos) = @_;
     return if $pid = fork(); # return to parent, follows child code
     local *TMP;
     $chrseq_code = $chrs{$thechr}{seqs}{$theseq}{code};
-    $clhpid = "$$.$gid";
-    print $ERRFH "## $clhpid ## Running child process jobs".
-                " on sequence \"$theseq\" (chr $thechr).\n";
-    &mark_DB_exec_todo($clhpid,$chrseq_code,\@steps);
+    $chldpid = "$$.$gid";
+    if ($skip_next[0]) {
+        print $ERRFH "## $chldpid ## Skipping ALL JOBS".
+                     " for sequence \"$theseq($thechr)\".\n";
+        &init_DB_exec_tbl($chldpid,$chrseq_code,$status{'SKIPPED'}{'code'},
+                          $exit_codes{'NOTRUN'}{SHORT},\@steps);
+        exit(0); # exiting child process if skipping
+    } else {
+        print $ERRFH "## $chldpid ## Running child process jobs".
+                     " on sequence \"$theseq\" (chr $thechr).\n";
+        &init_DB_exec_tbl($chldpid,$chrseq_code,$status{'TODO'}{'code'},
+                          "Job [$chldpid] has been scheduled...",\@steps);
+    };
     foreach my $jobary (@steps) {
         my ($stdin,$stdout,$stderr);
         my ($thejob,$thestep) = @{ $jobary };
         $jobstep_code = $jobs{$thejob}{steps}{$thestep}{code};
-        &mod_semaphore($pos,$clhpid,$chrseq_code,$jobstep_code);
+        &mod_semaphore($pos,$chldpid,$chrseq_code,$jobstep_code);
         ($stdin,$stdout,$stderr) = ( $jobs{$thejob}{steps}{$thestep}{idir},
                                      $jobs{$thejob}{steps}{$thestep}{odir},
                                      $jobs{$thejob}{steps}{$thestep}{edir} );
         if ($skip_next[0]) {
             $script_stat = $status{'SKIPPED'}{'code'};
+            $script_err = $exit_codes{'NOTRUN'}{SHORT};
+            print $ERRFH "## $chldpid ## Skipping job \"$thestep($thejob)\"".
+                         " for sequence \"$theseq($thechr)\".\n";
         } else {
             $script_stat = $status{'RUNNING'}{'code'};
+            $handle->shlock();
             &update_DB_exec_tbl($script_stat,$chrseq_code,$jobstep_code,
-                                $clhpid,undef,undef);
-            $script  = "$TMP/$thechr.$theseq.$thejob.$thestep.$clhpid";
+                                $chldpid,undef,"Job [$chldpid] is runnning...");
+            $handle->shunlock();
+            $script  = "$TMP/$thechr.$theseq.$thejob.$thestep.$chldpid";
             $scriptx = "$script.exit";
             ###
             $pre_job = <<"+++EOPre+++";
@@ -4100,7 +4155,7 @@ JOB="$thejob" ;
 JOBP="$jobs{$thejob}{path}" ;
 STEP="$thestep" ;
 XID="$jobs{$thejob}{steps}{$thestep}{sxid}" ;
-MPID="$clhpid" ;
+MPID="$chldpid" ;
 CHRDIR="\$HUMUS/\$NCHR" ;
 CJBDIR="\$CHRDIR/\$JOBP" ;
 JOBDIR="\$CJBDIR/\$XID" ;
@@ -4138,9 +4193,9 @@ $script > $script.out 2> $script.err ; # cat $script ;
 +++EOSCRIPT+++
             }; # if ($hosts[$pos] ne $HOST)
             ###
-            print $ERRFH "## $clhpid ## Running job \"$thestep($thejob)\"".
+            print $ERRFH "## $chldpid ## Running job \"$thestep($thejob)\"".
                          " on sequence \"$theseq($thechr)\".\n".
-                         "## $clhpid ## Writing script to \"$script\"...\n";
+                         "## $chldpid ## Writing script to \"$script\"...\n";
             $handle->shlock();
             open(TMP,"> $script");
             print TMP $pre_script.$pre_job.
@@ -4164,19 +4219,29 @@ exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
             ###
             # print $ERRFH $mesg{};
             ($script_stat,$script_err) =
-                 &report_crow_status($syserr,$thejob,$theseq,$clhpid);
+                 &report_crow_status($syserr,$thejob,$theseq,$chldpid);
         }; # else if !$skip_next[0]
+        $handle->shlock();
         &update_DB_exec_tbl($script_stat,$chrseq_code,$jobstep_code,
-                            $clhpid,$stdout,$script_err);
+                            $chldpid,$stdout,$script_err);
+        $handle->shunlock();
     }; # foreach job
+    $handle->shlock();
     &reset_semaphore($pos);
+    $handle->shunlock();
     # removing scripts once they have been run
-#    print $ERRFH "## $clhpid ## Removing scripts from tmp dir !!!\n";
-#    unlink glob("$TMP/$thechr.$theseq.\*.$clhpid\*");
+#    print $ERRFH "## $chldpid ## Removing scripts from tmp dir !!!\n";
+#    unlink glob("$TMP/$thechr.$theseq.\*.$chldpid\*");
     #
-    print $ERRFH "## $clhpid ## Child process is exiting now !!!\n";
+    print $ERRFH "## $chldpid ## Child process is exiting now !!!\n";
     exit(0); # child process exits when done
 } # breed_crows
+sub reset_semaphore() {
+    my $qq = shift;
+    $handle->shlock();
+    @{ $semaphore[$qq] } = ( 0, 0, 0 );
+    $handle->shunlock();
+} # reset_semaphore
 sub mod_semaphore() {
     my ($p,$v,$sq,$jb) = @_;
     $handle->shlock();
@@ -4184,29 +4249,33 @@ sub mod_semaphore() {
     $handle->shunlock();
 } # mod_semaphore
 sub report_crow_status() {
-    my ($err,$job,$seq,$pid) = @_;
+    my ($err,$job,$seq,$ppid) = @_;
     my ($okflg,$emsg,$whatever,$whatelse);
     ($okflg,$emsg,$err) = &check_syscall_exit($err);
     $err = $exit_codes{'CODES'}{$err};
-    print $ERRFH "## $pid ## ERROR: ".
-                 ($exit_codes{$err}{MSG}->($pid,$job,$seq,$emsg))."\n";
+    print $ERRFH "## $ppid ## ERROR: ".
+                 ($exit_codes{$err}{MSG}->($ppid,$job,$seq,$emsg))."\n";
     $whatelse = $exit_codes{$err}{SHORT};
     $whatever = $skip_next[0]
-                ? ( $skip_next[1] ? $status{'DIED'}{'code'}
-                                  : $status{'KILLED'}{'code'} )
-                : ( $okflg        ? $status{'DONE'}{'code'}
-                                  : $status{'CHECK'}{'code'}  );
+                ? ( defined($skip_next[1])
+                    ? ( $skip_next[1] ? $status{'DIED'}{'code'}
+                                      : $status{'KILLED'}{'code'} )
+                    : (                 $status{'DIED'}{'code'} )
+                    )
+                : ( $okflg            ? $status{'DONE'}{'code'}
+                                      : $status{'CHECK'}{'code'}  );
     return ($whatever, $whatelse);
 } # report_crow_status
-sub mark_DB_exec_todo() { # to db_Hsapiens.pm ?
-    my ($thepid,$seqcode,$stepary) = @_;
+sub init_DB_exec_tbl() { # to db_Hsapiens.pm ?
+    my ($thepid,$seqcode,$statcode,$statstr,$stepary) = @_;
+    $handle->shlock();
     foreach my $stpary (@{ $stepary }) {
         my ($j,$s) = @{ $stpary };
-        &update_DB_exec_tbl($status{'TODO'}{'code'},
-                            $seqcode,$jobs{$j}{steps}{$s}{code},
-                            $thepid,undef,undef);
+        &update_DB_exec_tbl($statcode,$seqcode,$jobs{$j}{steps}{$s}{code},
+                            $thepid,undef,$statstr);
     }; # foreach $stpary
-} # update_DB_exec_tbl
+    $handle->shunlock();
+} # init_DB_exec_tbl
 sub update_DB_exec_tbl() { # to db_Hsapiens.pm
     my ($stat,$cseq,$cstep,$ppid,$sout,$serr) = @_;
     my (@sel_fields,@data_fields,$tbl,@fld);
@@ -4217,15 +4286,13 @@ sub update_DB_exec_tbl() { # to db_Hsapiens.pm
                        status exec_date host user stdout stderr );
     @data_fields = ( $cseq, $cstep, $ppid,
                      $stat, $CDATE, $HOST, $USER, "$sout", "$serr" );
-    $handle->shlock();
     &put_row_fields($tbl, \@fld, \@sel_fields, \@data_fields);
-    $handle->shunlock();
 } # update_DB_exec_tbl
 @ 
 
 <<stepper.pl: forked childs related vars>>=
 my (%hosts_list,@hosts,$hc,$gid,%pids,$pid,$maxjobs,
-    $sem,$handle,@semaphore,$pending_seqs);
+    $handle,@semaphore,$seqs_done);
 %pids = ();
 $hc = 0;
 %hosts_list = (
@@ -4248,7 +4315,7 @@ $hc = 0;
 $maxjobs = scalar(@hosts);
 $gid = $$;
 $handle = tie @semaphore, 'IPC::Shareable', undef, { destroy => 1 };
-@semaphore = ( [ 0, undef, undef ] ) x $maxjobs;
+@semaphore = ( [ 0, 0, 0 ] ) x $maxjobs;
 @
 
 \subsubsctn{Sequence and jobs related vars}
@@ -4345,8 +4412,8 @@ package global;
 use strict;
 use vars qw(
            @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
-           $PLVER $PROG $USAGE $DATE $CDATE $USER $HOST
-           $T $F @skip_next @exectime $_verbose $_color_report
+           $PLVER $PROG $PRGVER $USAGE $DATE $CDATE $USER $HOST
+           $T $F @skip_next @exectime %_verbose
            $ERRFH %Messages %exit_codes $EXIT_REPORT_FILE
            %CmdLineDefs %CmdLineOpts
            );
@@ -4355,8 +4422,8 @@ use Exporter;
 $VERSION = 1.00;
 @@ISA = qw(Exporter);
 @@EXPORT = qw(
-           $PLVER $PROG $USAGE $DATE $CDATE $USER $HOST
-           $T $F @skip_next %Messages $_verbose $_color_report $ERRFH
+           $PLVER $PROG $PRGVER $USAGE $DATE $CDATE $USER $HOST
+           $T $F @skip_next %Messages %_verbose $ERRFH
            &init_timer &timing @exectime
            &init_signals &trap_signals &trap_signals_prog
            &program_started &program_finished
@@ -4386,6 +4453,7 @@ $ERRFH = \*STDERR;
 ($T,$F) = (1,0);
 $PLVER = sprintf("v%vd",$^V);
 $PROG  = 'UNDEF';
+$PRGVER = 'UNDEF';
 $USAGE = 'WARNING: Program variable "$USAGE" was not defined yet...';
 $DATE  = localtime;
 $CDATE = sprintf("%04d%02d%02d%02d%02d%02d",
@@ -4555,8 +4623,7 @@ CHILD_KILLED => sub {
 <<global.pm: messages>>=
 #
 # Program status strings.
-$_verbose = $F;
-$_color_report = $F;
+($_verbose{DEBUG}, $_verbose{RAW}, $_verbose{COLOR}) = ($F) x 3;
 #
 use Term::ANSIColor;
 my $_pre_flg = $F;
@@ -4564,19 +4631,19 @@ my $term_width = 80;
 my %mlin = (
     error_base     => sub {
                         my $str = "\<\<\<\< ERROR \>\>\>\>";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("bold red").$str.color("reset"));
                         return $str." ";
                       },
     error_pre      => sub {
                         my $str = "\<\<\<";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("yellow").$str.color("reset"));
                         return $str;
                       },
     error_post     => sub {
                         my $str = "\>\>\>";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("yellow").$str.color("reset"));
                         return $str;
                       },
@@ -4584,19 +4651,19 @@ my %mlin = (
       # error_base + error_pre + error_post
     warn_base      => sub {
                         my $str = "\<\<\< WARNING \>\>\>";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("bold yellow").$str.color("reset"));
                         return $str." ";
                       },
     warn_pre       => sub {
                         my $str = "\<\<\<";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("yellow").$str.color("reset"));
                         return $str;
                       },
     warn_post      => sub {
                         my $str = "\>\>\>";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("yellow").$str.color("reset"));
                         return $str;
                       },
@@ -4605,13 +4672,13 @@ my %mlin = (
     comment_base   => sub { return "" },
     comment_pre    => sub {
                         my $str = "###";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("green").$str.color("reset"));
                         return $str;
                       },
     comment_post   => sub {
                         my $str = "###";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("green").$str.color("reset"));
                         return $str;
                       },
@@ -4619,19 +4686,19 @@ my %mlin = (
       # comment_base + comment_pre + comment_post
     dbi_base       => sub {
                         my $str = "### ";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("cyan").$str.color("reset"));
                         return $str;
                       },
     dbi_pre        => sub {
                         my $str = "MySQL *";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("cyan").$str.color("reset"));
                         return $str;
                       },
     dbi_post       => sub {
                         my $str = "*";
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("cyan").$str.color("reset"));
                         return $str;
                       },
@@ -4642,7 +4709,7 @@ my %mlin = (
 #
 $mlin{'error_line'} = sub {
                         my $str = ('-' x $mlin{'error_len'}->());
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("yellow").$str.color("reset"));
                         return $str;
                       };
@@ -4653,7 +4720,7 @@ $mlin{'empty_warn_line'} = sub { return $mlin{'empty_error_line'}->() };
 #
 $mlin{'comment_line'} = sub {
                         my $str = ("#" x $mlin{'comment_len'}->());
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("green").$str.color("reset"));
                         return $str;
                       };
@@ -4661,7 +4728,7 @@ $mlin{'empty_comment_line'} = sub { return (' ' x $mlin{'comment_len'}->()) };
 #
 $mlin{'dbi_line'} = sub {
                         my $str = ("*" x $mlin{'dbi_len'}->());
-                        $_color_report && 
+                        $_verbose{COLOR} && 
                             ($str = color("cyan").$str.color("reset"));
                         return $str;
                       };
@@ -4728,8 +4795,10 @@ sub program_started() {
 } # program_started
 sub program_finished() {
     my $prog = shift;
+    my $txt = &timing(\@exectime,$T);
+    $txt =~ s/(secs)\s+(\()/$1\n$2/o;
     print $ERRFH $Messages{'HEADER'}->("$prog HAS FINISHED",'',
-                                       &timing(\@exectime,$T));
+                 (split /\n/, $txt));
 } # program_finished
 @
 
@@ -4802,11 +4871,18 @@ Getopt::Long::Configure qw/ bundling /;
 sub parse_cmdline() {
     # we ensure here that options hash always exist 
     # (and that it has a default option: 'help')
+    $CmdLineOpts{'version'} = sub { 
+            print STDERR "#### Hi, you are running $PROG version $PRGVER ...\n";
+            exit(1);
+        };
+    $CmdLineOpts{'debug'} = sub {
+            ($_verbose{DEBUG}, $_verbose{RAW}) = ($T, $T);
+        };
     $CmdLineOpts{'v|verbose'} = sub {
-            $_verbose = $T;
+            $_verbose{RAW} = $T;
         };
     $CmdLineOpts{'V|color-verbose'} = sub {
-            ($_verbose, $_color_report) = ($T, $T);
+            ($_verbose{RAW}, $_verbose{COLOR}) = ($T, $T);
         };
     $CmdLineOpts{'h|help|?'} = sub {
             print $ERRFH $Messages{'SHOW_HELP'}->($USAGE);
@@ -5023,10 +5099,12 @@ KO            &   1 & Errors found (standard)        \\
 UNDEF         &   2 & Unknown exit status (not defined)   \\
 UNAVAILABLE   &   3 & Could not find/create status file   \\ \hline\hline
 USERHALT      &   4 & Process halted by user ([[CTRL+C]]) \\
+PROGHALT      &   5 & Process halted by program (kill -9) \\
 PROGDOWN      &   6 & Process is down                \\
 NOFORK        &   8 & Could not fork child           \\
 RSH           &  10 & RSH command failed             \\
-PBS           &  12 & PBS command failed             \\ \hline\hline
+PBS           &  12 & PBS command failed             \\
+NOTRUN        &  15 & Program was not executed (skipping) \\ \hline\hline
 NOFILE        &  20 & File not found                 \\
 NOREADFILE    &  22 & Could not open file to read    \\
 NOWRITEFILE   &  24 & Could not open file to write   \\
@@ -5095,6 +5173,11 @@ sub the_end() {
          SHORT => "Process halted by user ([[CTRL+C]])",
          MSG   => sub { return $exit_codes{'USERHALT'}{SHORT} },
          },
+    'PROGHALT' => { 
+         CODE  =>   5,
+         SHORT => "Process halted by program (kill -9)",
+         MSG   => sub { return $exit_codes{'PROGHALT'}{SHORT} },
+         },
     'PROGDOWN' => { 
          CODE  =>   6,
          SHORT => "Process is down",
@@ -5114,6 +5197,11 @@ sub the_end() {
          CODE  =>  12,
          SHORT => "PBS command failed",
          MSG   => sub { return $exit_codes{'PBS'}{SHORT} },
+         },
+    'NOTRUN' => { 
+         CODE  =>  15,
+         SHORT => "Program was not executed",
+         MSG   => sub { return $exit_codes{'NOTRUN'}{SHORT} },
          },
     'NOFILE' => { 
          CODE  =>  20,
@@ -5382,6 +5470,7 @@ use db_Hsapiens;
 #
 use global;
 $PROG = 'stv';
+$PRGVER = '0.9alpha';
 
 <<RGB color codes hash>>
 my @chrom = qw/ 1 2 3 4 X Y /; # to load from DB
@@ -5988,7 +6077,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.9 2002-03-26 11:42:34 jabril Exp $
+# $Id: humus.nw,v 1.10 2002-03-27 18:47:48 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
