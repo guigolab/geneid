@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.3 2001-04-23 13:11:49 eblanco Exp $  */
+/*  $Id: Translate.c,v 1.4 2001-04-30 13:03:04 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -75,7 +75,7 @@ int Translate(long p1, long p2, short fra, short rmd,
 
 /* Translate a complete gene to protein */
 void TranslateGen(exonGFF* e, char* s, dict* dAA, long nExons, 
-		  int tAA[MAXEXONGEN][2], char* prot, long* nAA)
+		  int** tAA, char* prot, long* nAA)
 {  
   long i;
   short j;
