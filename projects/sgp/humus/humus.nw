@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.27 2002-05-03 00:00:48 jabril Exp $ 
+% # $Id: humus.nw,v 1.28 2002-05-03 00:39:08 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.27 2002-05-03 00:00:48 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.28 2002-05-03 00:39:08 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2410,30 +2410,39 @@ gawk '$1!~/^\#/ {print $1}' $MUSHU/seqid_list | \
 # RETRIEVE INVTBX HSPs FROM TBX[HsapSQ-MmusDB]
 # gawk '$1!~/^\#/ {print $1}' $MySQLPAR/Mmusculus_chrs.tbl | \
 MkDirs $MUSHU/invTBX $MUSHU/invTBX/$FTPTBXID ;
-# gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
-gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_a | \
-gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_b | \
-gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_c | \
-gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_d | \
-  while read CHR SEQ ;
+gawk 'BEGIN{ prt=1 }
+      $1~/^6$/ { prt=0 }
+      { if (prt) print $0 }
+      ' $HUMUS/seqid_list > $MUSHU/bin/hsap.seqid_a ;
+gawk 'BEGIN{ prt=0 }
+      $1~/^6$/ { prt=1 } $1~/^11$/ { prt=0 }
+      { if (prt) print $0 }
+      ' $HUMUS/seqid_list > $MUSHU/bin/hsap.seqid_b ;
+gawk 'BEGIN{ prt=0 }
+      $1~/^11$/ { prt=1 } $1~/^16$/ { prt=0 }
+      { if (prt) print $0 }
+      ' $HUMUS/seqid_list > $MUSHU/bin/hsap.seqid_c ;
+gawk 'BEGIN{ prt=0 }
+      $1~/^16$/ { prt=1 }
+      { if (prt) print $0 }
+      ' $HUMUS/seqid_list > $MUSHU/bin/hsap.seqid_d ;
+# ls -1 bin/hsap.seqid_* | while read n; do echo "$n ->"`gawk '{s+=$3}END{print s}' $n`; done
+cnt=0; ko="a"; 
+cnt=0; ko="b"; 
+cnt=0; ko="c"; 
+cnt=0; ko="d";
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/hsap.seqid_$ko | \
+    while read CH SQ;
+      do { # HUMUS=/projects/H.sapiens/20011222.UCSCgp
+        ls "-1" $HUMUS/chr$CH/tblastx/$FTPTBXID/hsp/$SQ.fullgff ; 
+      } ;
+    done | \
+  while read file ;
     do {
-      ODIR="$MUSHU/chr$CHR" ;
-      cnt=0 ;
-      export ODIR CHR SEQ cnt ;
-      gawk '$1!~/^\#/ {print $1, $2}' $HUMUS/seqid_list | \
-          while read CH SQ;
-            do { # HUMUS=/projects/H.sapiens/20011222.UCSCgp
-              ls "-1" $HUMUS/chr$CH/tblastx/$FTPTBXID/hsp/$SQ.fullgff ; 
-            } ;
-          done | \
-        while read file ;
-          do {
-            $BIN/swapHSPcoords.pl -o "-1" \
-                  -a $MUSHU/invTBX/$FTPTBXID/'_*_'.$cnt.fullgff \
-                  $MUSHU/all_length $file ;
-            cnt=`expr $cnt + 1` ;
-            } ;
-          done ;
+      $BIN/swapHSPcoords.pl -o "-1" \
+            -a $MUSHU/invTBX/$FTPTBXID/'_*_'.$ko\_$cnt.fullgff \
+            $MUSHU/all_length $file ;
+      cnt=`expr $cnt + 1` ;
       } ;
     done ;
 #
@@ -3454,6 +3463,7 @@ sub parse_gff() {
     my $summary = 
           "#\n# Processing ".(scalar @inputfiles)." tblastx files\n#\n# ".
           (sprintf("%8s %8s %8s  %s\n","#hsp","#hsp(+)","#hsp(-)","file"));
+    my $opencnt = 0;
     foreach my $fl (@inputfiles) {
         $cf = $cr = 0;
         open(TBXFL, "< $fl") || do {
@@ -3534,10 +3544,10 @@ sub parse_gff() {
             };
             if ($flg) {
                 unless (defined($opened{$seq})) {
-                    my $flnm;
+                    my ($flnm);
                     ($flnm = $ofile) =~ s/\_\*\_/$t[$seq]/;
-                    open(FH, "> $flnm");
-                    $opened{$seq} = *FH;
+                    open($opened{$seq}, "> $flnm");
+                    $opencnt++;
                 };
                 $FHOUT = $opened{$seq};
             } else {
@@ -3552,7 +3562,7 @@ sub parse_gff() {
         }; # while
         &counter_end($n,$c);
         close(TBXFL);
-        (scalar(keys %opened) > 0) && do {
+        ($opencnt > 0) && do {
             foreach my $k (keys %opened) {
                 close($opened{$seq});
             };
@@ -8035,7 +8045,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.27 2002-05-03 00:00:48 jabril Exp $
+# $Id: humus.nw,v 1.28 2002-05-03 00:39:08 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
