@@ -7,12 +7,16 @@
 #
 # 1999-2000
 #
+# modified by jabril - 2000/08/10
+#
+# $Id: sgp2,v 1.8 2000-08-12 23:26:24 jabril Exp $
+#
 
 # --------------------------------------------------
 # -. defaults
 # --------------------------------------------------
 NF=0;                # number of input files
-SGP2=/home/guigor00/research/humus/sgp2/bin       # binaries, scripts and params in SGP2
+SGP2=$HOME/Research/DBgeneid/RODE_SB/sgp2/bin       # binaries, scripts and params in SGP2
 TMP=/tmp              # temporal files
 SGPTMP=$TMP/sgp2_$$  # prefix for temporal files
 trap 'rm -f $SGPTMP; exit 1' 0 1 2 3 9 15 
@@ -27,12 +31,15 @@ BLASTOPTIONS="-matrix $BLMATRIX -hspmax=10000 -nogap"
 
 # geneid defaults
 #GENEID=$SGP2/geneid.sun
-GENEID=/home/guigor00/research/humus/SGP2-1/geneid.v1.0-sgp/bin/geneid
-PARAM=$SGP2/param.hum.iso3.p3.op
+GENEID=$SGP2/geneid
+
+PARAM=$SGP2/human3iso.param
 
 # parsing tblastx output defaults
-S_CUTOFF=100
-SHSP=6         # shring hsp by $SHSP
+S_CUTOFF=50
+SCF=50 # substract to tblastx scores S_CUTOFF - SCF;
+#SHSP=6         # shrink hsp by $SHSP
+SHSP=0
 
 
 # --------------------------------------------------
@@ -42,18 +49,19 @@ SHSP=6         # shring hsp by $SHSP
 
 USAGE="sgp [-hv] [-o 'options'] [-g 'options] [-P filename] [-p filename] [-k filename] [-c value] [-s value] -1 seqfile_1 -2 seqfile_2\n\n 
 -h \t\t produces this message\n 
--v \t\t  verbose mode\n 
+-v \t\t verbose mode\n 
 -g \t\t geneid options\n  
 -o \t\t tblastx options\n  
 -c value \t\t tblastx score cuttof\n  
--s value \t\t shrink hsp's by\n  
+-s value \t\t shrink hsp's by value\n  
 -t filename \t\t read tblastx file\n  
--k \t\t keep intermediate files with prefix\n  
+    -f prefix \t\t read hsp gff files with in directory prefix and extension .hsp-rs\n  
+-k prefix \t\t keep intermediate files with prefix\n  
 -p filename \t ps output in filename file \n
 -P filename\t\t geneid parameter file\n"
 
 # process parameters
-while getopts 1:2:a:g:i:k:t:p:fhlstv opt
+while getopts 1:2:a:g:f:i:k:p:t:fhlstv opt
 do
     case $opt in
         1) SEQ1=$OPTARG;NF=`expr $NF + 1`;;     # seq file 1
@@ -65,6 +73,7 @@ do
 	s) GENEIDPARAM=$OPTARG;;                # shrink hsp's by
 	k) OFN=$OPTARG;;                        # intermediate filename
 	t) TBX=$OPTARG;;                        # read tblastx from file
+	f) HSP=$OPTARG;;                        # read HSP files in directory
         p) PSO=$OPTARG;;                        # postscript output
         v) VRB=1;;                              # verbose
         \? | h) echo $USAGE; exit 2;;
@@ -108,11 +117,37 @@ SGPTMP2=$SGPTMP.$SEQ2_NAME
 # get locus names. Assuming input files in fasta format
 LOC1=`gawk "NR==1{print substr(\\\$1,2); exit}"  $SEQ1`
 LOC2=`gawk "NR==1{print substr(\\\$1,2); exit}"  $SEQ2`
+  #####################
+  ## Added by jabril ##
+SGPTMPG="${SGPTMP}.${LOC1}_${LOC2}"  
+  #####################
 
 if [ $LOC1 = $LOC2 ]
 then
   echo ERROR: sequence $SEQ1 and sequence $SEQ2 must have different locus names 1>&2
 fi
+
+
+# --------------------------------------------------
+# PROGRAM
+# --------------------------------------------------
+
+# goto geneid if hsps provided
+
+if [ $HSP ]
+ then
+  #######################
+  ## Removed by jabril ##
+#     cp $HSP$LOC1.hsp-rs $SGPTMP1.hsp-rs 
+#     cp $HSP$LOC2.hsp-rs $SGPTMP2.hsp-rs 
+#     cp $HSP$LOC1"_"$LOC2.aln $SGPTMP.aln
+  #####################
+  ## Added by jabril ##
+cp $HSP${LOC1}_${LOC2}.srQ $SGPTMPG.srQ
+cp $HSP${LOC1}_${LOC2}.srS $SGPTMPG.srS
+cp $HSP${LOC1}_${LOC2}.aln $SGPTMPG.aln
+  #####################
+ else 
 
 # --------------------------------------------------
 # 1. run tblastx 
@@ -151,58 +186,113 @@ fi
 # 2. extract and process hsp's -- in development
 # --------------------------------------------------
 
+  #######################
+  ## Removed by jabril ##
+  #######################
+# 
+# if [ $VRB ] 
+# then
+#  echo processing tblastx output  1>&2
+# fi
+# 
+# # to aplot
+# $SGP2/blast2aplot scropt="bits" $SGPTMP.tbx > $SGPTMP.aln
+# if [ $VRB ] 
+# then
+#  echo `wc -l $SGPTMP.aln | gawk '{print $1}'` hsp alignments   1>&2
+# fi
+# 
+# 
+# if [ $OFN ]
+# then
+#     cp $SGPTMP.aln $OFN$LOC1"_"$LOC2.aln
+# fi
+# 
+# 
+# # get the projected hsp's
+# touch  $SGPTMP2.hsp  $SGPTMP1.hsp
+# $SGP2/aln2gff $SGPTMP2.hsp $SGPTMP1.hsp $S_CUTOFF $SGPTMP.aln
+# 
+# if [ $VRB ] 
+# then
+#     echo `wc $SGPTMP1.hsp | gawk '{print $1}'` projected hsps over $S_CUTOFF in $SEQ1>&2
+#     echo `wc $SGPTMP2.hsp | gawk '{print $1}'` projected hsps over $S_CUTOFF in $SEQ2>&2
+# fi
+# 
+# if [ $OFN ]
+# then
+#     cp  $SGPTMP1.hsp $OFN$LOC1.hsp
+#     cp  $SGPTMP2.hsp $OFN$LOC2.hsp
+# fi
+# 
+# 
+# # sort projected hsps by end position, cluster and shrink
+# sort +4n $SGPTMP1.hsp | $SGP2/getregs | sort +3n | awk "{\$4+=$SHSP;\$5-=$SHSP; \$6+=-($S_CUTOFF - $SCF); print \$0;}" > $SGPTMP1.hsp-rs
+# 
+# sort +4n $SGPTMP2.hsp | $SGP2/getregs | sort +3n | awk "{\$4+=$SHSP;\$5-=$SHSP; print \$0;}" > $SGPTMP2.hsp-rs 
+# 
+# if [ $VRB ] 
+# then
+#     echo `wc $SGPTMP1.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ1 1>&2
+#     echo `wc $SGPTMP2.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ2 1>&2
+# fi
+# 
+# if [ $OFN ]
+# then
+#     cp  $SGPTMP1.hsp-rs $OFN$LOC1.hsp-rs
+#     cp  $SGPTMP2.hsp-rs $OFN$LOC2.hsp-rs
+# fi
+#
+  #####################
+  ## Added by jabril ##
+EXTRACT () {
+  gawk 'BEGIN{
+    s1=ARGV[1]; ARGV[1]="";
+    if (ARGC>3) { s2=ARGV[2]; ARGV[2]=""; scnd=1; }
+    else scnd=0;
+  }
+  { gsub(/\"/,"",$10);
+              print  $1, $2, $3,  $4,  $5, $6,  $7,  $8 > s1;
+    if (scnd) print $10, $2, $3, $11, $12, $6, $16, $18 > s2;
+    }' "$@"
+}
+
+MYVRB=""
 if [ $VRB ] 
-then
- echo processing tblastx output  1>&2
-fi
+ then
+    MYVRB="-v"
+ fi
 
-# to aplot
-$SGP2/blast2aplot scropt=score $SGPTMP.tbx > $SGPTMP.aln
+GetSRsAln $MYVRB -bC $S_CUTOFF -H $SGPTMPG -W $SGPTMPG -- $SGPTMP.tbx
+
 if [ $VRB ] 
-then
- echo `wc -l $SGPTMP.aln | gawk '{print $1}'` hsp alignments   1>&2
-fi
+ then
+   echo "Processing HSP/SR files from BLAST" 1>&2
+ fi
 
-
+EXTRACT $SGPTMP1.hsp-rs $SGPTMPG.srQ
+EXTRACT $SGPTMP2.hsp-rs $SGPTMPG.srS
+EXTRACT $SGPTMP1.hsp $SGPTMP2.hsp $SGPTMPG.hsp
+gawk '{ 
+  gsub(/\"/,"",$10); 
+  print $1":"$10, $2, "hsp:hsp", $4":"$11, $5":"$12, $6, $7":"$16, $8":"$18 ;
+}' $SGPTMPG.hsp > $SGPTMPG.aln
+#
 if [ $OFN ]
-then
-    cp $SGPTMP.aln $OFN$LOC1"_"$LOC2.aln
-fi
+ then
+     cp $SGPTMPG.srQ    $OFN$LOC1"_"$LOC2.srQ  
+     cp $SGPTMPG.srS    $OFN$LOC1"_"$LOC2.srS 
+     cp $SGPTMPG.hsp    $OFN$LOC1"_"$LOC2.hsp
+     cp $SGPTMP1.hsp-rs $OFN$LOC1.hsp-rs
+     cp $SGPTMP2.hsp-rs $OFN$LOC2.hsp-rs
+     cp $SGPTMP1.hsp    $OFN$LOC1.hsp
+     cp $SGPTMP2.hsp    $OFN$LOC2.hsp
+     cp $SGPTMPG.aln    $OFN$LOC1"_"$LOC2.aln
+ fi
+  ## Added by jabril ##
+  #####################
 
-
-# get the projected hsp's
-$SGP2/aln2gff $SGPTMP2.hsp $SGPTMP1.hsp $S_CUTOFF $SGPTMP.aln
-
-if [ $VRB ] 
-then
-    echo `wc $SGPTMP1.hsp | gawk '{print $1}'` projected hsps over $S_CUTOFF in $SEQ1>&2
-    echo `wc $SGPTMP2.hsp | gawk '{print $1}'` projected hsps over $S_CUTOFF in $SEQ2>&2
-fi
-
-if [ $OFN ]
-then
-    cp  $SGPTMP1.hsp $OFN$LOC1.hsp
-    cp  $SGPTMP2.hsp $OFN$LOC2.hsp
-fi
-
-
-# sort projected hsps by end position, cluster and shrink
-sort +4n $SGPTMP1.hsp | $SGP2/getregs | sort +3n | awk "{\$4+=$SHSP;\$5-=$SHSP; print \$0;}" > $SGPTMP1.hsp-rs
-
-sort +4n $SGPTMP2.hsp | $SGP2/getregs | sort +3n | awk "{\$4+=$SHSP;\$5-=$SHSP; print \$0;}" > $SGPTMP2.hsp-rs 
-
-if [ $VRB ] 
-then
-    echo `wc $SGPTMP1.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ1 1>&2
-    echo `wc $SGPTMP2.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ2 1>&2
-fi
-
-if [ $OFN ]
-then
-    cp  $SGPTMP1.hsp-rs $OFN$LOC1.hsp-rs
-    cp  $SGPTMP2.hsp-rs $OFN$LOC2.hsp-rs
-fi
-
+ fi
 
 # --------------------------------------------------
 # 3. run geneid
@@ -210,16 +300,22 @@ fi
 
 if [ $VRB ] 
 then
- echo running geneid in $SEQ1 $SEQ2 with tblastx output 1>&2
+ echo running geneid in $SEQ1 with tblastx output 1>&2
 fi
-
-
+#$GENEID -xXP $PARAM -S  $SGPTMP1.hsp-rs $SEQ1 >  $SGPTMP1.sgp
 $GENEID -GP $PARAM -S  $SGPTMP1.hsp-rs $SEQ1 >  $SGPTMP1.sgp
+
+if [ $VRB ] 
+then
+ echo running geneid in $SEQ2 with tblastx output 1>&2
+fi
+#$GENEID -xXP $PARAM -S  $SGPTMP2.hsp-rs $SEQ2 >  $SGPTMP2.sgp
 $GENEID -GP $PARAM -S  $SGPTMP2.hsp-rs $SEQ2 >  $SGPTMP2.sgp 
+
 if [ $OFN ]
 then
-    cp  $SGPTMP1.sgp $OFN$LOC1.sgp
-    cp  $SGPTMP2.sgp $OFN$LOC2.sgp
+    cp $SGPTMP1.sgp $OFN$LOC1.sgp
+    cp $SGPTMP2.sgp $OFN$LOC2.sgp
 fi
 
 cat $SGPTMP1.sgp $SGPTMP2.sgp
@@ -232,7 +328,7 @@ cat $SGPTMP1.sgp $SGPTMP2.sgp
 
 if [ $PSO ]
 then
- echo creating postscript output
+ echo creating postscript output  1>&2
 # 9.1 predicted genes separately -- gff2ps
 $SGP2/gff2ps $SGPTMP1.sgp $SGPTMP1.hsp-rs > $PSO$LOC1.ps  2> /dev/null
 $SGP2/gff2ps $SGPTMP2.sgp $SGPTMP2.hsp-rs > $PSO$LOC2.ps  2> /dev/null
@@ -289,9 +385,13 @@ then
 fi
 
 # 9.3 creating postscript
+echo "$SGP2/gff2aplot -vP -O $SGP2/gff2aplot.sgp.rc $OFN$LOC1"_"$LOC2.aplot > $PSO$LOC1"_"$LOC2.ps" 1>&2;
     $SGP2/gff2aplot -vP -O $SGP2/gff2aplot.sgp.rc $SGPTMP.aplot > $PSO$LOC1"_"$LOC2.ps
 fi
 
+# removing files
+rm -f $SGPTMP
+exit 1
 
 
 
