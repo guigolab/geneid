@@ -27,9 +27,9 @@ DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 CVSROOT  /usr/bin/Mail -s "CVS update report: CVSROOT has been updated" gmaster@imim.es
 #
 # 
-gfftools /usr/bin/Mail -s "CVS update report: GFFTOOLS project" jabril@imim.es
-sgp      /usr/bin/Mail -s "CVS update report: SGP project" jabril@imim.es
-sggp     /usr/bin/Mail -s "CVS update report: SGGP project" jabril@imim.es gparra@imim.es
+# gfftools /usr/bin/Mail -s "CVS update report: GFFTOOLS project" jabril@imim.es
+# sgp      /usr/bin/Mail -s "CVS update report: SGP project" jabril@imim.es
+# sggp     /usr/bin/Mail -s "CVS update report: SGGP project" jabril@imim.es gparra@imim.es
 #
 #
 scimit      /usr/bin/Mail -s "CVS update report: SCIMIT"       jabril@imim.es gparra@imim.es
