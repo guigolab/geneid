@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.32 2002-05-05 18:18:07 jabril Exp $ 
+% # $Id: humus.nw,v 1.33 2002-05-05 19:20:41 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.32 2002-05-05 18:18:07 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.33 2002-05-05 19:20:41 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2322,7 +2322,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                   \
 #>#        :  RIKEN cDNAs plus human versus mouse genomes) as evidences once 
 #>#        :  they have been projected into SRs.
 #># JOB_PATH  sgp
-#># JOB_XID   ${HSAPSTR}-${MMUSSTR}+${RIKENID}
+#># JOB_XID   ${HSAPSTR}-${MGSC_RKN}
 #># JOB_FILE  ${LIBSTEP}/sgp-mgsc+riken.job
 #># END_OF_JOB ##################################################################
 @ 
@@ -2584,16 +2584,16 @@ CheckFile R $A_REFSEQ.fwd.gff  $A_REFSEQ.rev.gff  \
             $A_ENSEMBL.fwd.gff $A_ENSEMBL.rev.gff ;
 #
 $BIN/runeval.pl $A_REFSEQ.fwd.gff $ODIR/$SEQ.eval.fwd.gff                                     \
-    "${CHR}::${HSAPID}x${MMUSSTR}+${RIKENID}::REFSEQ::FWD::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
+    "${CHR}::${HSAPID}x${MGSC_RKN}::REFSEQ::FWD::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
     >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_refseq.fwd ;
 $BIN/runeval.pl $A_REFSEQ.rev.gff $ODIR/$SEQ.eval.rev.gff                                     \
-    "${CHR}::${HSAPID}x${MMUSSTR}+${RIKENID}::REFSEQ::REV::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
+    "${CHR}::${HSAPID}x${MGSC_RKN}::REFSEQ::REV::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
     >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_refseq.rev ;
 $BIN/runeval.pl $A_ENSEMBL.fwd.gff $ODIR/$SEQ.eval.fwd.gff                                     \
-    "${CHR}::${HSAPID}x${MMUSSTR}+${RIKENID}::ENSEMBL::FWD::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
+    "${CHR}::${HSAPID}x${MGSC_RKN}::ENSEMBL::FWD::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
     >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_ensembl.fwd ;
 $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                                     \
-    "${CHR}::${HSAPID}x${MMUSSTR}+${RIKENID}::ENSEMBL::REV::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
+    "${CHR}::${HSAPID}x${MGSC_RKN}::ENSEMBL::REV::SGP-MGSCv3+RKNcDNA::geneid_1.1::." \
     >> $ODIR/${SEQ}.summary 2> $ODIR/${SEQ}.sgp_ensembl.rev ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
@@ -9055,7 +9055,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.32 2002-05-05 18:18:07 jabril Exp $
+# $Id: humus.nw,v 1.33 2002-05-05 19:20:41 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9204,9 +9204,11 @@ FTPTBX="$HBASE/.ftp/PankajAgarwal/20020425.tbx-20011222UCSCgp-20020411MGSCv3" ;
 FTPTBXID="20020425" ;
 RIKENTBX="$HBASE/.ftp/RIKEN/20020504.gparra/blast" ;
 RIKENID="20020504.RIKEN" ;
+MGSC_RKN="${MMUSSTR}+${RIKENID}" ;
 #
 export HSAP HSAPID HSAPSTR HSEQ HSEQMSK \
-       MMUS MMUSID MMUSSTR MSEQ MSEQMSK FTPTBX FTPTBXID ;
+       MMUS MMUSID MMUSSTR MSEQ MSEQMSK \
+       FTPTBX FTPTBXID RIKENTBX RIKENID MGSC_RKN ;
 #
 HUMUS="$HBASE/$HSAPSTR" ;
 MUSHU="$MBASE/$MMUSSTR" ;
@@ -9401,6 +9403,7 @@ $WORK/nw2tex ; $WORK/ltx ;
 pushd $TMP;
 RM $TMP/.[eo]*/*;
 $BIN/stepper.pl --debug 2> $TMP/.err/_ALL.err 1> $TMP/.out/_ALL.out
+# ( $BIN/stepper.pl --debug --seq 22:chr22 --job HSAPgp_MMUScDNA_WUTBLASTX,SGP_HSAPgpa_RKNcDNA_TBX,SGP_HSAPgpa_MGSC+RKN_TBX --step SGP_HSAPgpa_MGSCv3_TBX:SGP_EVALUATION > $TMP/.out/_ALL_chr22.out ) 2>&1 | tee $TMP/.err/_ALL_chr22.err
 #
 ipcs -s | grep jabril | gawk '{print $2}' | while read n; do ipcrm sem $n; done;
 ipcs -m | grep jabril | gawk '{print $2}' | while read n; do ipcrm shm $n; done;
