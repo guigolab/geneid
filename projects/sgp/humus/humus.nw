@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.36 2002-05-09 12:49:30 jabril Exp $ 
+% # $Id: humus.nw,v 1.37 2002-05-15 17:35:09 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.36 2002-05-09 12:49:30 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.37 2002-05-15 17:35:09 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1880,12 +1880,6 @@ $BIN/sbp_checkblastout.pl $SEQ $ODIR/$SEQ > $ODIR/$SEQ.report ;
 
 \subsctn{Retrieving {\tbx} results by chromosome}
 
-\begin{figure}[!t]
-\begin{center}
- \input psfigures/blast_frames.tex
-\end{center}
-\end{figure}
-
 We had to deal with the frame issue of the HSPs fragments; once the HSP coords were mapped to the chromosome, frames also must be recomputed taking into account if HSP was in forward or in reverse strand (see figure~\ref{fig:blastframes}).
 
 <<STEPS(HsGPa*MmRKNcDNA WUTBLASTX): parsing blast output>>=
@@ -2372,8 +2366,8 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                   \
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
 #
-MGSC="$IDIR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
-RKN="$IDIR/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
+MGSC="$IDIR/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{JOB_XID}>/$<JOB{SGP_HSAPgpa_MGSCv3_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
+RKN="$IDIR/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{JOB_PATH}>/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{JOB_XID}>/$<JOB{SGP_HSAPgpa_RKNcDNA_TBX}{RE-SCORING_SRs}{STEP_PATH}>" ;
 #
 CheckFile R $MGSC/$SEQ.gff $RKN/$SEQ.gff ;
 #
@@ -2398,6 +2392,9 @@ gawk '
 ' $SEQ $ODIR/$SEQ.gff > $EDIR/$SEQ.report || TheEnd GAWKKO ;
 #
 # $BIN/getHSPSR.pl is not needed here as we are already taken HSP-SRs...
+## If using SRs then variables for the path of the input files must be set to: 
+# MGSC="$IDIR/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgpa_MGSCv3_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
+# RKN="$IDIR/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgp_MMUScDNA_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>" ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -2603,6 +2600,8 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.eval.rev.gff                      
 \item ...
 }
 
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Visualizing results}
 
@@ -5288,7 +5287,7 @@ sub genepred_stats() {
     # $ref->{STATS}{raJG}  = ($d2 == 0) ? $JG_DEFAULT : ($JG / $d2);
     # $ref->{STATS}{raSG}  = ($d1 == 0) ? $SG_DEFAULT : ($SG / $d1);
     $ref->{STATS}{raJG} = &decnum($ref->{MEAN}{raJG}); # $average_flg ? $ref->{MEAN}{raJG} : 'nan';
-    $ref->{STATS}{raSG} = &decnum($ref->{MEAN}{raJG}); # $average_flg ? $ref->{MEAN}{raSG} : 'nan';
+    $ref->{STATS}{raSG} = &decnum($ref->{MEAN}{raSG}); # $average_flg ? $ref->{MEAN}{raSG} : 'nan';
     foreach my $v (@stats_level) {
         $maxlen{$v} = &max($maxlen{$v},length($ref->{STATS}{$v}));
     }; # foreach $v
@@ -9321,7 +9320,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.36 2002-05-09 12:49:30 jabril Exp $
+# $Id: humus.nw,v 1.37 2002-05-15 17:35:09 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9967,7 +9966,6 @@ dev.off()# closing PostScript device
 #
 # BY CHROMOSOMES
 #
-plot.new()
 W <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
 w <- split(W,W$TEST)
 wr <- split(w$REFSEQ,w$REFSEQ$PROGRAM)
@@ -9975,9 +9973,177 @@ we <- split(w$ENSEMBL,w$ENSEMBL$PROGRAM)
 T <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_TOT.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
 t <- split(T,T$TEST)
 fillcols <- rainbow(26);
+#
+plot.new()
 plot(w$REFSEQ$SN ~ c(w$REFSEQ$CHR), col = fillcols)
-points(wr$$GENEID$SN ~ c(wr$REFSEQ$CHR),  pch = 21, bg = "red", cex = 1.25)
-points(wr$REFSEQ$GENSCAN$SN ~ c(wr$REFSEQ$CHR), pch = 21, bg = "green", cex = 1.25)
+#########
+ifile <- "/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp.tbl"
+ofile <- paste(ifile,".ps",sep="") 
+#########
+fillcols<-list()
+fillcols["SRs-MGSCv3"]<-"dodgerblue3"
+fillcols["GENSCAN"]<-"green"
+fillcols["GENEID"]<-"firebrick3"
+fillcols["SGP-MGSCv3"]<-"darkorange"
+fillcolslgt<-list()
+fillcolslgt["SRs-MGSCv3"]<-"cornflowerblue"
+fillcolslgt["GENSCAN"]<-"chartreuse"
+fillcolslgt["GENEID"]<-"red"
+fillcolslgt["SGP-MGSCv3"]<-"gold"
+clr<-c()
+lgt<-c()
+l<-levels(w$REFSEQ$PROGRAM)
+for (i in l) { clr<-c(clr,fillcols[[i]]); lgt<-c(lgt,fillcolslgt[[i]]) }
+nms<-c("GENEID","GENSCAN","SGP","SRs")
+#
+W <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+w <- split(W,W$TEST)
+wr <- split(w$REFSEQ,w$REFSEQ$PROGRAM)
+we <- split(w$ENSEMBL,w$ENSEMBL$PROGRAM)
+T <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_TOT.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+t <- split(T,T$TEST)
+plot.new()
+postscript(file="/projects/H.sapiens/20011222.UCSCgp/tmp/chrs_test.ps", paper="a4", horizontal=FALSE) 
+# postscript(file="/projects/H.sapiens/20011222.UCSCgp/tmp/chrs_test.ps", paper="a4", horizontal=TRUE) 
+# nf <- layout(matrix(c(1,2),1,2,byrow=TRUE), widths=c(lcm(8),lcm(16)), heights=c(lcm(9)), respect=TRUE)# layout.show(nf)
+# par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 0.5, las = 1)
+nf <- layout(matrix(c(1,2,3,4,5,6),3,2,byrow=TRUE), widths=c(lcm(12),lcm(7)), heights=c(lcm(8),lcm(8),lcm(8),lcm(8),lcm(8),lcm(8)), respect=TRUE)# layout.show(nf)
+#
+par(ps = 8, bg = "white", bty = "o", font = 2, col.axis = "blue", font.axis = 1, cex.lab = 0.5, las = 1)
+#
+par(mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0)))
+plot(c(1, 24), c(0.0,1.1), type = "n", axes = FALSE, xlab = "", ylab = "", main = "") 
+abline(v = c(1:24), h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+for (i in 1:24) {
+ points(wr$SRs$CHR[i], wr$SRs$SN[i],  pch = 21, lwd = 0.01, bg = fillcols["SRs-MGSCv3"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$GENSCAN$SN[i], pch = 21, lwd = 0.01, bg = fillcols["GENSCAN"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$GENEID$SN[i],  pch = 21, lwd = 0.01, bg = fillcols["GENEID"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$SGP$SN[i], pch = 21, lwd = 0.01, bg = fillcols["SGP-MGSCv3"], cex = 1.25)
+ axis(1, at = i, as.character(wr$SGP$CHR[i]))
+}
+axis(2) 
+box() 
+#
+par(mar=c(cm(0.75),cm(0),cm(0.75),cm(0.75)))
+boxplot(w$REFSEQ$SN  ~ w$REFSEQ$PROGRAM, col = lgt, ylim = c(0, 1.1), border = "black", notch = TRUE, axes=FALSE, ann = FALSE)# , boxwex=0.65
+abline(v = c(1:4), h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+axis(1, at = 1:4, as.character(nms))
+axis(4) 
+text(0.5,1.05,"SN on REFSEQ",font = 2, adj = 0, cex=1.5)
+for (n in 1:length(w$REFSEQ$PROG)) { 
+  if (w$REFSEQ$PROG[n] %in% c("GENEID")) {
+    points(1,c(w$REFSEQ$SN[[n]]),pch=21, lwd = 0.01,bg=fillcols[["GENEID"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("GENSCAN")) {
+    points(2,c(w$REFSEQ$SN[[n]]),pch=21, lwd = 0.01,bg=fillcols[["GENSCAN"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("SGP-MGSCv3")) {
+    points(3,c(w$REFSEQ$SN[[n]]),pch=21, lwd = 0.01,bg=fillcols[["SGP-MGSCv3"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("SRs-MGSCv3")) {
+    points(4,c(w$REFSEQ$SN[[n]]),pch=21, lwd = 0.01,bg=fillcols[["SRs-MGSCv3"]],cex=1.25)
+  };
+} 
+points(t$REFSEQ$SN ~ t$REFSEQ$PROGRAM, pch = 21, lwd = 0.01, bg = "yellow1", cex = 1.25)
+box() 
+#
+# dev.off()# closing PostScript device
+#
+par(mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0)))
+plot(c(1, 24), c(0.0,1.1), type = "n", axes = FALSE, xlab = "", ylab = "", main = "") 
+abline(v = c(1:24), h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+for (i in 1:24) {
+ points(wr$SRs$CHR[i], wr$SRs$SP[i],  pch = 21, lwd = 0.01, bg = fillcols["SRs-MGSCv3"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$GENSCAN$SP[i], pch = 21, lwd = 0.01, bg = fillcols["GENSCAN"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$GENEID$SP[i],  pch = 21, lwd = 0.01, bg = fillcols["GENEID"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$SGP$SP[i], pch = 21, lwd = 0.01, bg = fillcols["SGP-MGSCv3"], cex = 1.25)
+ axis(1, at = i, as.character(wr$SGP$CHR[i]), col.axis = "blue")
+}
+axis(2) 
+box() 
+#
+par(mar=c(cm(0.75),cm(0),cm(0.75),cm(0.75)))
+boxplot(w$REFSEQ$SP  ~ w$REFSEQ$PROGRAM, col = lgt, ylim = c(0, 1.1), border = "black", notch = TRUE, axes=FALSE, ann = FALSE)# , boxwex=0.65
+abline(v = c(1:4), h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+axis(1, at = 1:4, as.character(nms))
+axis(4) 
+text(0.5,1.05,"SP on REFSEQ",font = 2, adj = 0, cex=1.5)
+for (n in 1:length(w$REFSEQ$PROG)) { 
+  if (w$REFSEQ$PROG[n] %in% c("GENEID")) {
+    points(1,c(w$REFSEQ$SP[[n]]),pch=21, lwd = 0.01,bg=fillcols[["GENEID"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("GENSCAN")) {
+    points(2,c(w$REFSEQ$SP[[n]]),pch=21, lwd = 0.01,bg=fillcols[["GENSCAN"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("SGP-MGSCv3")) {
+    points(3,c(w$REFSEQ$SP[[n]]),pch=21, lwd = 0.01,bg=fillcols[["SGP-MGSCv3"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("SRs-MGSCv3")) {
+    points(4,c(w$REFSEQ$SP[[n]]),pch=21, lwd = 0.01,bg=fillcols[["SRs-MGSCv3"]],cex=1.25)
+  };
+} 
+points(t$REFSEQ$SP ~ t$REFSEQ$PROGRAM, pch = 21, lwd = 0.01, bg = "yellow1", cex = 1.25)
+box() 
+#
+# dev.off()# closing PostScript device
+#
+par(mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0)))
+plot(c(1, 24), c(0.0,1.1), type = "n", axes = FALSE, xlab = "", ylab = "", main = "") 
+abline(v = c(1:24), h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+for (i in 1:24) {
+ points(wr$SRs$CHR[i], wr$SRs$CC[i],  pch = 21, lwd = 0.01, bg = fillcols["SRs-MGSCv3"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$GENSCAN$CC[i], pch = 21, lwd = 0.01, bg = fillcols["GENSCAN"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$GENEID$CC[i],  pch = 21, lwd = 0.01, bg = fillcols["GENEID"], cex = 1.25)
+ points(wr$SRs$CHR[i], wr$SGP$CC[i], pch = 21, lwd = 0.01, bg = fillcols["SGP-MGSCv3"], cex = 1.25)
+ axis(1, at = i, as.character(wr$SGP$CHR[i]), col.axis = "blue")
+}
+axis(2) 
+box() 
+#
+par(mar=c(cm(0.75),cm(0),cm(0.75),cm(0.75)))
+boxplot(w$REFSEQ$CC  ~ w$REFSEQ$PROGRAM, col = lgt, ylim = c(0, 1.1), border = "black", notch = TRUE, axes=FALSE, ann = FALSE)# , boxwex=0.65
+abline(v = c(1:4), h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+axis(1, at = 1:4, as.character(nms))
+axis(4) 
+text(0.5,1.05,"CC on REFSEQ",font = 2, adj = 0, cex=1.5)
+for (n in 1:length(w$REFSEQ$PROG)) { 
+  if (w$REFSEQ$PROG[n] %in% c("GENEID")) {
+    points(1,c(w$REFSEQ$CC[[n]]),pch=21, lwd = 0.01,bg=fillcols[["GENEID"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("GENSCAN")) {
+    points(2,c(w$REFSEQ$CC[[n]]),pch=21, lwd = 0.01,bg=fillcols[["GENSCAN"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("SGP-MGSCv3")) {
+    points(3,c(w$REFSEQ$CC[[n]]),pch=21, lwd = 0.01,bg=fillcols[["SGP-MGSCv3"]],cex=1.25)
+  };
+  if (w$REFSEQ$PROG[n] %in% c("SRs-MGSCv3")) {
+    points(4,c(w$REFSEQ$CC[[n]]),pch=21, lwd = 0.01,bg=fillcols[["SRs-MGSCv3"]],cex=1.25)
+  };
+} 
+points(t$REFSEQ$CC ~ t$REFSEQ$PROGRAM, lwd = 0.01, pch = 21, bg = "yellow1", cex = 1.25)
+box() 
+#
+dev.off()# closing PostScript device
+#
+#################
+plot(c(1, 4), c(0.0,1.1), type = "n", axes = F, xlab = "", ylab = "", main = "")
+abline(v = c(1:4), h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+str(bx.p <- boxplot(w$REFSEQ$SN  ~ w$REFSEQ$PROGRAM, plot=FALSE))
+plot.default(c(1, 4), c(0.0,1.1), type = "n", axes = F, xlab = "", ylab = "", main = "") 
+abline(v = 1, h = 0.1*c(0:11), col = "lightgray", lty = "dotted")
+bxp(bx.p["GENEID"])
+#
+##############################################
+#
+#
+points(wr$SRs$SN ~ c(wr$SRs$CHR),  pch = 21, bg = "blue", cex = 1.25)
+points(wr$GENSCAN$SN ~ c(wr$GENSCAN$CHR), pch = 21, bg = "green", cex = 1.25)
+points(wr$GENEID$SN ~ c(wr$GENEID$CHR),  pch = 21, bg = "red", cex = 1.25)
+points(wr$SGP$SN ~ c(wr$SGP$CHR), pch = 21, bg = "orange", cex = 1.25)
+axis(2, col.axis = "blue", las = 1) 
+axis(1, at = 1:24, lab = wr$SGP$CHR, col.axis = "blue")
+box()
+#
 title(main = "SN on REFSEQ", font.main = 4, font.lab = 4) 
 plot(w$REFSEQ$SP ~ c(w$REFSEQ$CHR), col = fillcols, notch = TRUE)
 title(main = "SP on REFSEQ", font.main = 4, font.lab = 4) 
