@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.40 2000-01-11 18:41:17 jabril Exp $	
+#         $Id: gff2ps,v 1.41 2000-01-11 21:12:11 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.40 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-11 18:41:17 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.41 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-11 21:12:11 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.40 2000-01-11 18:41:17 jabril Exp $
+%    $Id: gff2ps,v 1.41 2000-01-11 21:12:11 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -2210,6 +2210,7 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
 } # End of function SET_PAGE_VARS
 #
 function MAIN_PAGE_LOOP() { # MAIN LOOP: Start
+  if (OnOff(Default["show_inner_scale"])) VSw=2*Sw; else VSw=0; # for PRINTTRACKS function only
   for (pages=1;pages<=P;pages++) {
 	Vpages=1;
     BORI=PORI;
@@ -2420,7 +2421,7 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
   }     # for strands(stp)
 } # End of function PRINTSOURCES
 #
-function ChangePage(ttt) {
+function ChangePage(ttt,ooo) {
   if (ttt>=Tsize) {
 	printf "vb_end\n";
 	endPSpage(pages,Vpages);
@@ -2429,23 +2430,25 @@ function ChangePage(ttt) {
 	printf "%%\n%% Block Num: - Page: %s.%s\n%%\n",pages,Vpages;
 	printf "%s %s 1 vblock\n", BORI, BEND;
     PrintWRN(sprintf("*  Page: %sH.%sV\nNuc_Ori: %s - Nuc_End: %s\n",pages,Vpages,BORI,BEND));
-	return dflt_up;
+	return ooo;
   } # if up>Tsize
   else return ttt;
 } # End of function ChangePage
 #
-function PRINTTRACKS(    tmpup) {
-  if (OnOff(Default["show_inner_scale"])) Sw=2*Sw; else Sw=0;
-  laststrand="+"; notyet=1;
+function PRINTTRACKS(    up_,tmpup,dflt_up) {
   up_=0; # 4*Sw+crdt;
+  laststrand="+"; notyet=1;
   for (stp=1;stp<=3;stp++) { # for s in strand
     s=wstr[stp];
 	if ((s=="+" && OnOff(Default["strand_show_forward"])) || (s=="." && OnOff(Default["strand_show_independent"])) || (s=="-" && OnOff(Default["strand_show_reverse"]))) {
 	  if (s=="+" || s=="-") lastcnt=ordcnt;
 	  else lastcnt=nordcnt;
  	  if (laststrand=="." && NStSize>0) {
-	    printf "VChangeStrand\n";
-	    up_=ChangePage(up_+Sw);
+        dflt_up=VSw;
+        tmpup=up_+dflt_up;
+        printf "VChangeStrand\n";
+		up_=ChangePage(tmpup,dflt_up);
+	    # up_=ChangePage(up_+Sw);
 	  } # if changestrand
 	  # PrintRPT(sprintf("GP------ Source: --- Strand: %s Counter: %s\n", s, lastcnt)); 
 	  for (srcord=0;srcord<lastcnt;srcord++) { # for sc in sources
@@ -2468,7 +2471,7 @@ function PRINTTRACKS(    tmpup) {
 			# Computing if next line fits on current page
             dflt_up=(aS*PLOT_FT[sc,":","track_scale"])+(bS*PLOT_FT[sc,":","track_spacing_scale"]);
             tmpup=up_+dflt_up;
-			up_=ChangePage(tmpup);
+			up_=ChangePage(tmpup,dflt_up);
             #
 			if (s=="-") l=m_lines-pl+1; else l=pl;
 			# PrintRPT(sprintf("GP------ Sequence: %10s Source: %10s Strand: %s Counter: %s\n", sq, sc, s, srcord));
@@ -2492,8 +2495,11 @@ function PRINTTRACKS(    tmpup) {
 	printf "%% ------------------ Strand(%s) End\n",s;
 	if (laststrand=="+" && StrSizeFwd>0 && notyet ) { 
 	  notyet=0;
+      dflt_up=VSw;
+      tmpup=up_+dflt_up;
 	  printf "VChangeStrand\n";
-	  up_=ChangePage(up_+Sw);
+      up_=ChangePage(tmpup,dflt_up);
+	  # up_=ChangePage(up_+Sw);
 	} # if changestrand
 	laststrand=s;
   } # for stp
