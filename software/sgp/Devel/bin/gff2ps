@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.27 1999-07-14 16:48:50 jabril Exp $	
+#         $Id: gff2ps,v 1.28 1999-07-16 19:17:44 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -46,8 +46,8 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps"
   VERSION="v1.0"
-  REVISION='$Revision: 1.27 $'
-  DATERELEASE='$Date: 1999-07-14 16:48:50 $'
+  REVISION='$Revision: 1.28 $'
+  DATERELEASE='$Date: 1999-07-16 19:17:44 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -56,16 +56,19 @@ Defaults () {
 %                   C./ Doctor Aiguader 80
 %                  08003 - BARCELONA (SPAIN)"
   USAGE=$PROGRAM" [-h][-H <option>] gff_file"
-  COLORS="    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white 
-       verydarkgreen | darkgreen | green | lightgreen | verylightgreen 
-   verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue 
-          verydarkblue | darkblue | blue | lightblue | verylightblue 
-         verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan 
-     verydarkviolet | darkviolet | violet | lightviolet | verylightviolet 
-            verydarkred | darkred | red | lightred | verylightred 
-     verydarkorange | darkorange | orange | lightorange | verylightorange 
-     verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow 
-        verydarkbrown | darkbrown | brown | lightbrown | verylightbrown"
+  COLORS="       black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white 
+    verydarkseagreen | darkseagreen | seagreen | lightseagreen | verylightseagreen 
+          verydarkgreen | darkgreen | green | lightgreen | verylightgreen 
+ verydarklimegreen | darklimegreen | limegreen | lightlimegreen | verylightlimegreen 
+      verydarkmagenta | darkmagenta | magenta | lightmagenta | verylightmagenta 
+      verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue 
+             verydarkblue | darkblue | blue | lightblue | verylightblue 
+            verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan 
+        verydarkviolet | darkviolet | violet | lightviolet | verylightviolet 
+               verydarkred | darkred | red | lightred | verylightred 
+        verydarkorange | darkorange | orange | lightorange | verylightorange 
+        verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow 
+           verydarkbrown | darkbrown | brown | lightbrown | verylightbrown"
 
  # 
  # Default User-Defined Options: 
@@ -132,22 +135,130 @@ Defaults () {
 } # End of Defaults
 
 #  
+# Default ColorDefinition:
+#
+colorDef () { # still not defined seagreen and limegreen (now same as green)
+cat <<'@@@COLORS@@@'
+% black+grey+white
+black               0.00 0.00 0.00 1.00
+verydarkgrey        0.00 0.00 0.00 0.90
+darkgrey            0.00 0.00 0.00 0.75
+grey                0.00 0.00 0.00 0.50
+lightgrey           0.00 0.00 0.00 0.25
+verylightgrey       0.00 0.00 0.00 0.10
+white               0.00 0.00 0.00 0.00
+% magenta
+verydarkmagenta     0.00 1.00 0.00 0.50
+darkmagenta         0.00 1.00 0.00 0.25
+magenta             0.00 1.00 0.00 0.00
+lightmagenta        0.00 0.50 0.00 0.00
+verylightmagenta    0.00 0.25 0.00 0.00
+% violet
+verydarkviolet      0.40 0.80 0.20 0.00
+darkviolet          0.45 0.85 0.00 0.00
+violet              0.30 0.60 0.00 0.00
+lightviolet         0.15 0.55 0.00 0.00
+verylightviolet     0.05 0.45 0.00 0.00
+% blue
+verydarkblue        1.00 1.00 0.00 0.25
+darkblue            1.00 1.00 0.00 0.00
+blue                0.85 0.85 0.00 0.00
+lightblue           0.70 0.70 0.00 0.00
+verylightblue       0.50 0.50 0.00 0.00
+% skyblue
+verydarkskyblue     0.95 0.15 0.00 0.40
+darkskyblue         1.00 0.25 0.00 0.15
+skyblue             1.00 0.25 0.00 0.00
+lightskyblue        0.80 0.20 0.10 0.00
+verylightskyblue    0.60 0.15 0.15 0.00
+% cyan
+verydarkcyan        1.00 0.00 0.00 0.50
+darkcyan            1.00 0.00 0.00 0.25
+cyan                1.00 0.00 0.00 0.00
+lightcyan           0.50 0.00 0.00 0.00
+verylightcyan       0.25 0.00 0.00 0.00
+% seagreen
+verydarkseagreen    0.65 0.00 0.95 0.40
+darkseagreen        0.90 0.00 0.90 0.10
+seagreen            1.00 0.00 1.00 0.00
+lightseagreen       0.50 0.00 1.00 0.00
+verylightseagreen   0.25 0.00 0.75 0.00
+% green
+verydarkgreen       0.65 0.00 0.95 0.40
+darkgreen           0.90 0.00 0.90 0.10
+green               1.00 0.00 1.00 0.00
+lightgreen          0.50 0.00 1.00 0.00
+verylightgreen      0.25 0.00 0.75 0.00
+% limegreen
+verydarklimegreen  0.65 0.00 0.95 0.40
+darklimegreen      0.90 0.00 0.90 0.10
+limegreen          1.00 0.00 1.00 0.00
+lightlimegreen     0.50 0.00 1.00 0.00
+verylightlimegreen 0.25 0.00 0.75 0.00
+% yellow
+verydarkyellow      0.00 0.00 1.00 0.30
+darkyellow          0.00 0.00 1.00 0.10
+yellow              0.00 0.00 1.00 0.00
+lightyellow         0.00 0.00 0.50 0.00
+verylightyellow     0.00 0.00 0.25 0.00
+% orange
+verydarkorange      0.00 0.60 1.00 0.00
+darkorange          0.00 0.55 0.90 0.00
+orange              0.00 0.50 0.70 0.00
+lightorange         0.00 0.30 0.85 0.00
+verylightorange     0.00 0.30 0.55 0.00
+% red
+verydarkred         0.00 0.90 0.90 0.30
+darkred             0.00 0.80 0.90 0.10
+red                 0.00 1.00 1.00 0.00
+lightred            0.05 0.80 0.90 0.00
+verylightred        0.15 0.40 0.60 0.00
+% brown
+verydarkbrown       0.00 0.85 1.00 0.70
+darkbrown           0.00 0.75 1.00 0.60
+brown               0.00 0.70 1.00 0.40
+lightbrown          0.30 0.60 0.70 0.00
+verylightbrown      0.15 0.45 0.55 0.00
+@@@COLORS@@@
+} # End of colorDef
+
+#  
 # Default PageSizes:
 #
 pagesizes () {  # Size_name Portrait_minor-axes:X Portrait_major-axes:Y
 cat <<'@@@PAGESIZES@@@'
+a0         2384 3370
+a1         1684 2384
 a2         1190 1684
 a3          842 1190
 a4          595  842
 a5          420  595
-b4          708 1003
+a6          297  420
+a7          210  297
+a8          148  210
+a9          105  148
+a10          73  105
+b0         2920 4127
+b1         2064 2920
+b2         1460 2064
+b3         1032 1460
+b4          729 1032
 b5          516  729
+b6          363  516
+b7          258  363
+b8          181  258
+b9          127  181
+b10          91  127
+10x14       720 1008
 executive   540  720
+folio       612  936
 ledger     1224  792
 legal       612 1008
 letter      612  792
+quarto      610  780
+statement   396  612
 tabloid     792 1224
-userdefined 595 2448
+userdefined 595 2384
 @@@PAGESIZES@@@
 } # End of pagesizes
 
@@ -265,7 +376,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.27 1999-07-14 16:48:50 jabril Exp $
+%    $Id: gff2ps,v 1.28 1999-07-16 19:17:44 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -305,40 +416,21 @@ cat <<'@@@EndProlog@@@'
 /VDnOS 0.25 cm def  % paper area for pages (printer outlimits).
 /HLtOS 0.25 cm def
 /HRtOS 0.25 cm def
-% Fixed Color Variables (CMYK)
-/colordict 80 dict def colordict begin % 52 colors + 28 definitions
-/black            { 0.00 0.00 0.00 1.00 } def /verydarkgrey     { 0.00 0.00 0.00 0.90 } def
-/darkgrey         { 0.00 0.00 0.00 0.75 } def /grey             { 0.00 0.00 0.00 0.50 } def
-/lightgrey        { 0.00 0.00 0.00 0.25 } def /verylightgrey    { 0.00 0.00 0.00 0.10 } def
-/white            { 0.00 0.00 0.00 0.00 } def /verydarkgreen    { 0.65 0.00 0.95 0.40 } def
-/darkgreen        { 0.90 0.00 0.90 0.10 } def /green            { 1.00 0.00 1.00 0.00 } def
-/lightgreen       { 0.50 0.00 1.00 0.00 } def /verylightgreen   { 0.25 0.00 0.75 0.00 } def
-/verydarkskyblue  { 0.95 0.15 0.00 0.40 } def /darkskyblue      { 1.00 0.25 0.00 0.15 } def
-/skyblue          { 1.00 0.25 0.00 0.00 } def /lightskyblue     { 0.80 0.20 0.10 0.00 } def
-/verylightskyblue { 0.60 0.15 0.15 0.00 } def /verydarkblue     { 1.00 1.00 0.00 0.40 } def
-/darkblue         { 1.00 1.00 0.00 0.10 } def /blue             { 1.00 1.00 0.00 0.00 } def
-/lightblue        { 0.80 0.80 0.00 0.00 } def /verylightblue    { 0.50 0.50 0.00 0.00 } def
-/verydarkcyan     { 0.65 0.15 0.00 0.25 } def /darkcyan         { 0.65 0.15 0.00 0.00 } def
-/cyan             { 1.00 0.00 0.00 0.00 } def /lightcyan        { 0.50 0.00 0.00 0.00 } def
-/verylightcyan    { 0.25 0.00 0.00 0.00 } def /verydarkviolet   { 0.40 0.80 0.20 0.00 } def
-/darkviolet       { 0.45 0.85 0.00 0.00 } def /violet           { 0.30 0.60 0.00 0.00 } def
-/lightviolet      { 0.15 0.55 0.00 0.00 } def /verylightviolet  { 0.05 0.45 0.00 0.00 } def
-/verydarkred      { 0.00 0.90 0.90 0.30 } def /darkred          { 0.00 0.80 0.90 0.10 } def
-/red              { 0.00 1.00 1.00 0.00 } def /lightred         { 0.05 0.80 0.90 0.00 } def
-/verylightred     { 0.15 0.40 0.60 0.00 } def /verydarkorange   { 0.00 0.60 1.00 0.00 } def
-/darkorange       { 0.00 0.55 0.90 0.00 } def /orange           { 0.00 0.50 0.70 0.00 } def
-/lightorange      { 0.00 0.30 0.85 0.00 } def /verylightorange  { 0.00 0.30 0.55 0.00 } def
-/verydarkyellow   { 0.00 0.10 0.85 0.25 } def /darkyellow       { 0.00 0.10 0.85 0.00 } def
-/yellow           { 0.00 0.00 1.00 0.00 } def /lightyellow      { 0.00 0.00 0.50 0.00 } def
-/verylightyellow  { 0.00 0.00 0.25 0.00 } def /verydarkbrown    { 0.00 0.85 1.00 0.70 } def
-/darkbrown        { 0.00 0.75 1.00 0.60 } def /brown            { 0.00 0.70 1.00 0.40 } def
-/lightbrown       { 0.30 0.60 0.70 0.00 } def /verylightbrown   { 0.15 0.45 0.55 0.00 } def
-end % colordict
-%  Paper Sizes  (in points)
 @@@EndProlog@@@
 
-pagesizes | gawk 'BEGIN{ i=0 } { count[i++]=$1; X[$1]=$2; Y[$1]=$3 }
+colorDef | gawk 'BEGIN{ i=0 }
+ { if ($1!="%") { count[i++]=$1; C[$1]=$2; M[$1]=$3; Y[$1]=$4; K[$1]=$5 } }
+ END {
+  printf "%% Fixed Color Variables (CMYK)\n";
+  printf "/colordict %s dict def colordict begin % 52 colors + 28 definitions\n", (i+28);
+  for (j=0;j<i;j++) printf "/%-20s { %-4s %-4s %-4s %-4s } def\n", count[j],C[j],M[j],Y[j],K[j];
+  printf "end %% colordict\n
+ }' -
+ 
+pagesizes | gawk 'BEGIN{ i=0 }
+ { if ($1!="%") { count[i++]=$1; X[$1]=$2; Y[$1]=$3 } }
  END{ 
+  printf "%%  Paper Sizes  (in points)\n";
   printf "/pagedict %s dict def pagedict begin\n",(i+1);
   for (j=0;j<i;j++) printf "/pg%-12s { %4s %4s } def\n", count[j], X[count[j]], Y[count[j]];
   printf "end %% pagedict\n%%%%EndProcSet:   Constants 1.0 0\n"
@@ -572,7 +664,7 @@ true setstrokeadjust
 CheckColor () {
   gawk 'BEGIN{
     color=ARGV[1]
-    if (color!~/^BG$|^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/) {
+    if (color!~/^BG$|^FG$|^black$|^white$|^(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown)$/) {
       printf "\n<<<<ERROR>>>> \" %s \" is not a defined color.\n", color | "cat 1>&2"
       printf "              Default \" black \" is asigned to option.\n" | "cat 1>&2"
       printf "              You can choose one of this colors:\n" | "cat 1>&2"
@@ -851,12 +943,17 @@ gawk 'BEGIN{
   Default["strand_show_reverse"]="on";     #
   Default["strand_show_independent"]="on"; #
 # General Properties
-  Default["text_color"]=Default["foreground_color"];
+  Default["show_page_numbers"]="on";
+  Default["show_date"]="on";
+  Default["show_time"]="on";
+  Default["show_title"]="on";
+  Default["show_subtitle"]="on";
+  Default["title"]="on";
+  Default["subtitle"]="on";
   Default["default_scale_width"]="0.25cm";         #
   Default["default_track_width"]="1cm";            #
   Default["default_track_spacing_width"]="1cm";    #
   Default["default_block_spacing_width"]="0.25cm"; #
-  Default["label"]="none";
   Default["major_tickmarks_num"]=10;           #
   Default["major_tickmarks_nucleotides"]=-1;   #
   Default["minor_tickmarks_num"]=10;           #
@@ -865,8 +962,8 @@ gawk 'BEGIN{
   Default["frame0_color"]="blue";    #
   Default["frame1_color"]="red";     #
   Default["frame2_color"]="green";   #
-  Default["show_inner_scale"]=1;
-  Default["show_outer_scale"]=1;
+  Default["show_inner_scale"]=1;    #
+  Default["show_outer_scale"]=1;    #
   Default["show_positions"]="true"; #
 # Features Properties
   FT_PROP["fill_shape_mode"]="default"; # none(BGcolor), default(FGcolor 1color), 1_color, 2_color, frame-remainder, rainbow
@@ -876,39 +973,49 @@ gawk 'BEGIN{
   FT_PROP["shape"]="box";           # box, arrow, end_arrow, circle # still not implemented: vector, spike, block
   FT_PROP["vert_align"]="baseline"; # center,baseline # still not implemented: reverse
   FT_PROP["layer"]=0;               # now is implemented, first sorting for feature lines is made on FT_PROP["layer"]
-  FT_PROP["join"]="on";
-  FT_PROP["show"]="on";
+  FT_PROP["show_feature"]="on"; # 
 # Group Properties
   GR_PROP["color"]="default";        # 
   GR_PROP["label"]="default";        # none , default , "user-def"
-  GR_PROP["label_show"]="on";        # none , default , "user-def"
   GR_PROP["group_line_show"]="on";   #
   GR_PROP["group_line"]="default";   # none , default (red line) , ...
-  GR_PROP["range"]="0:1";            # range of lower-upper scores
   GR_PROP["vert_align"]="center";    # center or baseline
-  GR_PROP["join_align"]="center";
-  GR_PROP["join_color"]=Default["foreground_color"];
-  GR_PROP["join_linetype"]="solid";
-  GR_PROP["join_show"]="off";
+  GR_PROP["show_group"]="on"; # 
 # Lines (Method-Source) Properties
   SO_PROP["color"]="default";         # 
   SO_PROP["label"]="default";         # none , default , "user-def"
-  SO_PROP["label_show"]="on";    #
   SO_PROP["baseline_show"]="on"; #
   SO_PROP["vert_align"]="center";     # center,baseline(down), 
-  SO_PROP["baseline_align"]="center";
-  SO_PROP["baseline_color"]=Default["foreground_color"];
-  SO_PROP["baseline_linetype"]="dotted";
-  SO_PROP["bbox_color"]=Default["foreground_color"];
-  SO_PROP["bbox_show"]="off";
+  SO_PROP["range"]="0:1";            # range of lower-upper scores
   SO_PROP["track_scale"]=1;           #
-  SO_PROP["track_spacing_scale"]=0.5; #
-  SO_PROP["rule_scale"]="nucleotide";
-  SO_PROP["rule_rel"]="none";
-  SO_PROP["rule_abs"]="none";
-  SO_PROP["unfold_grouped_ungrouped"]="off";
-  SO_PROP["unfold_grouped_line"]="off";
-  SO_PROP["unfold_ungrouped_line"]="off";
+  SO_PROP["track_spacing_scale"]=1; #
+  SO_PROP["unfold_grouped_ungrouped"]="off"; # on/off
+  SO_PROP["unfold_grouped_line"]="off";      # on/off
+  SO_PROP["unfold_ungrouped_line"]="off";    # on/off
+#
+# Not defined yet:
+#
+#  Default["text_color"]=Default["foreground_color"]; 
+#  Default["label"]="none";
+#
+#  FT_PROP["join"]="on";
+#
+#  GR_PROP["join_align"]="center";
+#  GR_PROP["join_color"]=Default["foreground_color"];
+#  GR_PROP["join_linetype"]="solid";
+#  GR_PROP["join_show"]="off";
+#
+#  SO_PROP["show"]="on"; # 
+#  SO_PROP["baseline_align"]="center";
+#  SO_PROP["baseline_color"]=Default["foreground_color"];
+#  SO_PROP["baseline_linetype"]="dotted";
+#  SO_PROP["bbox_color"]=Default["foreground_color"];
+#  SO_PROP["bbox_show"]="off";
+#
+#  ?_PROP["rule_scale"]="nucleotide";
+#  ?_PROP["rule_rel"]="none";
+#  ?_PROP["rule_abs"]="none";
+#
 # Data for upper-case to lower-case function #lcase()#
  CM["A"]="a";CM["B"]="b";CM["C"]="c";CM["D"]="d";CM["E"]="e";
  CM["F"]="f";CM["G"]="g";CM["H"]="h";CM["I"]="i";CM["J"]="j";
@@ -1054,7 +1161,7 @@ function DoUnFoldMixed(SC) {
    return 1; 
  else return 0 } # end of DoUnFoldMixed
 function ChkColor(ncolor) {
- if (ncolor~/^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/)
+ if (ncolor~/^FG$|^black$|^white$|^(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown)$/)
    return 1
  else return 0 } # also when ncolor == ^BG$|(##DEFAULT##)
 function checklbl(chain) {   gsub(/[\(]/,"\\050",chain); gsub(/[\)]/,"\\051",chain);
@@ -1375,7 +1482,8 @@ function SET_PAGE_VARS() {
   if (OnOff(Default["strand_show_reverse"])) StrSizeRvs=StrSize; else StrSizeRvs=0
   if (!OnOff(Default["strand_show_independent"])) NStSize=0
   cpsc=calcpt(Default["default_scale_width"])
-  SclSize=2*cpsc # for scales...
+  SclSize=cpsc # for scales...
+  if (OnOff(Default["show_outer_scale"])) SclSize=SclSize+2*cpsc;
   if (OnOff(Default["show_inner_scale"])) {
    if (StrSizeFwd>0 && (NStSize>0 || StrSizeRvs>0)) SclSize=SclSize+cpsc
    if (NStSize>0 && StrSizeRvs>0) SclSize=SclSize+cpsc
@@ -1412,10 +1520,12 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
           printf "GP------ Source: %10s Strand: %s Counter: %s\n", sc, s, srcord | "cat 1>&2" 
           if (DoUnFoldMixed(sc) || (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) && !OnOff(PLOT_FT[sc,":","unfold_grouped_line"]) && !OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) fl_gp="M";
           else { if (i) fl_gp="G"; else fl_gp="U" }
-          printf "(%s) %s %s %s (%s) %s %s %s source\n", Plot_Lbl(sc,fl_gp,s), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],(lines[sc,s,grouped_]+lines[sc,s,ungrouped_]),s,TxtBool(OnOff(PLOT_FT[sc,":","label_show"])),TxtBool(OnOff(PLOT_FT[sc,":","baseline_show"])),VertPos(PLOT_FT[sc,":","vert_align"])
+          if (PLOT_FT[sc,":","label"]!="none") bln_lbl=1; else bln_lbl=0;
+          printf "(%s) %s %s %s (%s) %s %s %s source\n", Plot_Lbl(sc,fl_gp,s), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],(lines[sc,s,grouped_]+lines[sc,s,ungrouped_]),s,TxtBool(bln_lbl),TxtBool(OnOff(PLOT_FT[sc,":","baseline_show"])),VertPos(PLOT_FT[sc,":","vert_align"])
           for (gl=1;gl<=LE[sc,s,i,l];gl++) {
             g=LNelem[sc,s,i,l,gl];
             ng_=gp[sc,s,g,gpname];
+           if (OnOff(PLOT_FT[ng_,":","show_group"])) {
             sg_=gp[sc,s,g,gpstart];
             eg_=gp[sc,s,g,gpend];
             if (ChkLimits(sg_,BORI,eg_,BEND)) {
@@ -1424,15 +1534,17 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
                 printf "GROUP : %-15s : line_%s order_%s %10d %10d (%s)\n", ng_, l, gl, sg_, eg_, N[sc,s,ng_] | "cat 1>&2";
               if (PLOT_FT[ng_,":","group_line"]=="none") gplt=0         # group without lines
               else if (PLOT_FT[ng_,":","group_line"]=="default") gplt=1 # group red-line
-              printf "(%s) %s %s %s %s %s gp \n", Plot_Lbl(ng_,"N",s,sc), gplt, sg_, eg_, TxtBool(OnOff(PLOT_FT[ng_,":","label_show"])),TxtBool(OnOff(PLOT_FT[ng_,":","group_line_show"]))
+              if (PLOT_FT[ng_,":","label"]!="none") bln_lbl=1; else bln_lbl=0;
+              printf "(%s) %s %s %s %s %s gp \n", Plot_Lbl(ng_,"N",s,sc), gplt, sg_, eg_, TxtBool(bln_lbl),TxtBool(OnOff(PLOT_FT[ng_,":","group_line_show"]))
               for (el=1;el<=N[sc,s,ng_];el++) {
                 sel=S[sc,s,ng_,el];
+                feature_=element[sc,s,ng_,sel,feature];
+               if (OnOff(PLOT_FT[feature_,":","show_feature"])) {
                 start_=element[sc,s,ng_,sel,start];
                 end_=element[sc,s,ng_,sel,end];
                 if (Var["print_report"]) printf "Element %s : %s : %s - %s\n",el,sel,start_,end_ | "cat 1>&2";
                 if (Var["print_report"]) printf "Start %s - BORI %s : end %s - BEND %s\n",start_,BORI,end_,BEND | "cat 1>&2";
                 if (ChkLimits(start_,BORI,end_,BEND)) {
-                  feature_=element[sc,s,ng_,sel,feature];
                   score_=element[sc,s,ng_,sel,score];
                   # for gene mode. try to recompute relative frame and remainder
                   if (Var["print_report"]) printf "Element %s : %s : %s - %s : %s %s %s/%s \n",el,sel,start_,end_,feature_, score_,frame_,remainder_ | "cat 1>&2";
@@ -1445,10 +1557,12 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
                     printf "%s %s %s : %s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_) | "cat 1>&2"
                   printf "%s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_) # | "cat | sort +0nr -1 +6nr -7 +2n -3 +3nr -4"
                   } # if element checklimits
+                 } # if show feature
                 } # for elements in group             
               # close("cat | sort +0nr -1 +6nr -7 +2n -3 +3nr -4")
               printf "g_end\n"
               } # if group checklimits
+             } # if show group
             } # for LE
           printf "s_end\n"
           }   # for lines
