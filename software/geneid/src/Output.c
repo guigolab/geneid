@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.6 2001-03-07 21:07:05 eblanco Exp $  */
+/*  $Id: Output.c,v 1.7 2001-03-07 23:00:44 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -206,7 +206,12 @@ void OutputGene(packGenes* pg, long nExons, char* Locus,
     {
       printMess("Recovering gene-solution...");
       CookingGenes(pg->GOptim, Locus, Sequence, gp, dAA);
+      if (XML)
+         printf("</prediction>\n");
     }
+  else
+     if (XML)
+        printf(" genes=\"0\" score =\"0.00\">\n</prediction>\n");	
 }
 
 void OutputStats(char* Locus)
