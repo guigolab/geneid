@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.35 2002-05-06 01:13:06 jabril Exp $ 
+% # $Id: humus.nw,v 1.36 2002-05-09 12:49:30 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.35 2002-05-06 01:13:06 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.36 2002-05-09 12:49:30 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3459,6 +3459,8 @@ gawk 'BEGIN{ prt=0 }
 egrep '^# (PROCESSING TBLASTX|RUNNING SGP)' bin/seqid_*.log
 @ 
 
+\subsctn{Evaluation of predicted genes}
+
 <<>>=
 # EVALUATIONS 
 gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
@@ -3603,6 +3605,69 @@ $BIN/process_eval.pl -T "REFSEQ" \
 $BIN/process_eval.pl -T "REFSEQ" \
                      -P "GENEID invMmusSRs SGP" \
                      -t $MUSHU/evaluation.summary > $MUSHU/evaluation_test.summary ;
+@ 
+
+<<>>=
+# New Evaluation Format
+#
+### GENE NUMBER
+MUSHU="/projects/M.musculus/20020411.MGSCv3"
+# refseq
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/refseq/$SEQ.eval.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> REFSEQ from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq.report ;
+# ensembl
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/ensembl/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> ENSEMBL from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq.report ;
+# genscan
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { grep -v '^#' $MUSHU/chr$CHR/annotation/genscan/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENSCAN from Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq.report ;
+# geneid
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/geneid/20020425/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENEID on Mmus MGSC v3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq.report ;
+# sgp
+gawk '{print $1,$2}' $MUSHU/seqid_list | while read CHR SEQ; do { head -4 $MUSHU/chr$CHR/sgp/20020425/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Mmus MGSCv3 assembly (20020411)"; echo "###       + invTBX against Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq.report ;
+# summarizing
+( cat $MUSHU/evaluations/Mmus_refseq_MGSCv3.genes_by_seq.report; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_ensembl_MGSCv3.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_genscan_MGSCv3.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_geneid_MGSCv3.genes_by_seq.report; echo ""; echo "";  echo ""; cat $MUSHU/evaluations/Mmus_sgp_MGSCv3.genes_by_seq.report ) > $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report ;
+#
+enscript --columns=3 -Gjf Courier5 -M A4 $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report ;
+#
+perl -ne 'BEGIN{ $prog="???"; print STDOUT "PROG CLASS SEQ GENES\n"; } next if /^\s+$/o; /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next); next if /^\#/o; next unless /^\s*chr/; chomp; $_ =~ s/^\s+//o; @f=split /\s+/og; $type="ASSEMBLED"; $f[0] =~ s/_random$//o && ($type="RANDOM"); printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];' $MUSHU/evaluations/Mmus_ALL_MGSCv3.genes_by_seq.report > $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl # | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }'
+#
+function splittbls ()
+{
+perl -ne 'BEGIN{ $cls=shift @ARGV; } next unless $.>1; chomp; @f = split /\s+/o, $_; next unless ($f[1] eq $cls); $seq=$f[2]; $prg=$f[0]; defined($hprg{$prg}) || do { push @prog, $prg }; $hprg{$prg}++; defined($hseq{$seq}) || do { push @seqs, $seq }; $hseq{$seq}++; $genes{$seq}{$prg}=$f[3]; END{ $fmt=("\%-10s" x (scalar(@prog)+1))."\n"; printf STDOUT $fmt,"CHR",@prog; for ($n=0;$n<scalar(@seqs);$n++) { $s=$seqs[$n]; @tt=(); for ($p=0;$p<scalar(@prog);$p++) { push @tt, $genes{$s}{$prog[$p]}; }; printf STDOUT $fmt, $seqs[$n],@tt;} }' "$@"
+}
+splittbls "ASSEMBLED" $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl > $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq_ASM.tbl 
+# splittbls "RANDOM" $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.tbl > $MUSHU/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq_RND.tbl 
+#
+# drawing histograms with R
+def.par <- par()# save default, for resetting...
+plot.new()
+A <- read.table("/projects/M.musculus/20020411.MGSCv3/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq_ASM.tbl", header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+# R <- read.table("/projects/M.musculus/20020411.MGSCv3/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_RND.tbl", header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+
+postscript(file="/projects/M.musculus/20020411.MGSCv3/evaluations/r-plots/Mmus_ALL_MGSCv3.genes_by_seq.ps", paper="a4", horizontal=TRUE) 
+# op <- par(mfrow=c(2,1)) # another way to produce a table of figures
+nf <- layout(matrix(c(1,2),2,1,byrow=TRUE), widths=c(lcm(25),lcm(25)), heights=c(lcm(10.5),lcm(8.5)), respect=TRUE)
+# layout.show(nf)
+par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 0.5, las = 2, mar = c(cm(0.75),cm(0.75),cm(0.75),cm(0.75)), mgp = c(3.25,1.5,0), adj = 0.5)
+# mgp: The margin line for the axis title, axis labels and axis line. The default is c(3, 1, 0)
+barplot(t(A), beside = TRUE, col = rainbow(5), ylim = c(0, 5900))
+title(ylab="Number of Genes", adj = 0.5, font = 3, cex.lab = 1.75)
+text(65, 5600, "M.musculus MGSC Assembly", font = 2, adj = 0.5, cex = 2.5)
+text(65, 5100, "( 11 Apr, 2001 - Version 3 )", font = 2, adj = 0.5, cex = 1.75)
+text(65, 4500, "Assembled Chromosomes", font = 2, adj = 0.5, cex = 2)
+legend(110, 5800, colnames(A), col = rainbow(5), cex = 1, pch = 16)
+#
+# barplot(t(R), beside = TRUE, col = rainbow(5), ylim = c(0, 700))
+# title(ylab="Number of Genes", adj = 0.5, font = 3, cex.lab = 1.75)
+# text(65, 650, "Random Fragments", font = 2, adj = 0.5, cex = 2)
+# legend(120, 650, colnames(R), col = rainbow(5), cex = 1, pch = 16)
+# par(op) # another way to produce a table of figures
+dev.off()# closing PostScript device
+par(def.par)#- reset to default
+
 @ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -5120,8 +5185,8 @@ sub compute_stats() {
                 defined($data{$q}{$p}{$t}) || next;
                 $ref = \%{ $data{$q}{$p}{$t} };
                 $tot = \%{ $data{TOTAL}{$p}{$t} };
-                &vars_average($ref,$tot) if $average_flg;
-                &vars_stats($ref,$tot)   if $compute_flg;
+                &vars_average($ref,$tot,(@base_level,@exon_level,@gene_level));
+                &vars_stats($ref,$tot);
             }; # foreach $t
         }; # foreach $p
     }; # foreach $q
@@ -5132,14 +5197,13 @@ sub compute_totals() {
         foreach my $t (@tests) {
             defined($data{TOTAL}{$p}{$t}) || next;
             my $tref = \%{ $data{TOTAL}{$p}{$t} };
-            $average_flg && do { # GET TOTALS FOR MEAN
-                foreach my $v (@base_level,@exon_level,@gene_level) {
-                    $tref->{MEAN}{$v} = &average(\@{ $tref->{MEAN}{$v} });
-                }; # foreach $v
-            }; # $average_flg
-            $compute_flg && do { # GET TOTALS FOR GP-STATS
-                &genepred_stats($tref);
-            }; # $compute_flg
+            # GET TOTALS FOR MEAN
+            foreach my $v (@base_level,@exon_level,@gene_level) {
+                $tref->{MEAN}{$v} = &decnum(&average(\@{ $tref->{MEAN}{$v} }));
+                $maxlen{$v} = &max($maxlen{$v},length($tref->{MEAN}{$v}));
+            }; # foreach $v
+            # GET TOTALS FOR GP-STATS
+            &genepred_stats($tref);
         }; # foreach $t
     }; # foreach $p
 } # compute_totals
@@ -5151,12 +5215,12 @@ sub average() {
     return ($ttot/$tnum);
 } # average
 sub vars_average() {
-    my ($ref,$tot) = @_;
+    my ($ref,$tot,@colvals) = @_;
     %{ $ref->{MEAN} } = ();
-    foreach my $v (@base_level,@exon_level,@gene_level) {
+    foreach my $v (@colvals) {
         if ( $ref->{FWD}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o 
              && $ref->{REV}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o ) {
-            $ref->{MEAN}{$v} = ( $ref->{FWD}{$v} + $ref->{REV}{$v} ) / 2;
+            $ref->{MEAN}{$v} = &decnum(( $ref->{FWD}{$v} + $ref->{REV}{$v} )/2);
         } else { # not a number
             $ref->{MEAN}{$v} = "$ref->{FWD}{$v}/$ref->{REV}{$v}";
         };
@@ -5179,50 +5243,60 @@ sub vars_stats() {
     %{ $ref->{STATS} } = ();
     foreach my $v (@stats_level) {
         $ref->{STATS}{$v} = ($ref->{FWD}{$v} + $ref->{REV}{$v});
-        $totals_flg && do {
-            $tot->{STATS}{$v} += $ref->{STATS}{$v};
-        };
+        $tot->{STATS}{$v} += $ref->{STATS}{$v};
         $maxlen{$v} = &max($maxlen{$v},length($ref->{STATS}{$v}));
     }; # foreach $v
     &genepred_stats($ref);
 } # get_var_stats
 sub genepred_stats() {
     my $ref = shift;
-    my ($CDSreal,$CDSpred,$RN,$PN,$d1,$d2);
-    my ($JG_DEFAULT,$SG_DEFAULT) = (1,1);
-#     LEN NuR NuP TP TN FP FN ExR ExP TPe ME WE  GeR GeP TPg MG WG # @stats_level = qw( );
+    my ($CDSreal,$CDSpred,$RN,$PN);
+  # LEN NuR NuP TP TN FP FN ExR ExP TPe ME WE  GeR GeP TPg MG WG # @stats_level
+    $seqlen{TOTAL} = $ref->{STATS}{LEN};
     # nucleotide level
     $CDSreal = $ref->{STATS}{FN} + $ref->{STATS}{TP};
     $CDSpred = $ref->{STATS}{FP} + $ref->{STATS}{TP};
     $RN = $ref->{STATS}{LEN} - $CDSreal;
     $PN = $ref->{STATS}{LEN} - $CDSpred;
-    $ref->{STATS}{SN} = $ref->{STATS}{TP} / $CDSreal;
-    $ref->{STATS}{SP} = $ref->{STATS}{TP} / $CDSpred;
-    $ref->{STATS}{AC} = ((( $ref->{STATS}{SN} + $ref->{STATS}{SP}
-                        + ( $ref->{STATS}{TN} / $ref->{STATS}{RN} )
-                        + ( $ref->{STATS}{TN} / $PN ) ) / 4 ) - 0.5 ) * 2;
+    $ref->{STATS}{SN} = &decnum($ref->{STATS}{TP} / $CDSreal);
+    $ref->{STATS}{SP} = &decnum($ref->{STATS}{TP} / $CDSpred);
+    $ref->{STATS}{AC} = &decnum(
+          ((( $ref->{STATS}{SN} + $ref->{STATS}{SP}
+          + ( $ref->{STATS}{TN} / $RN )
+          + ( $ref->{STATS}{TN} / $PN ) ) / 4 ) - 0.5 ) * 2 );
 
-    $ref->{STATS}{CC} = (( $ref->{STATS}{TP} * $ref->{STATS}{TN} ) - 
-                         ( $ref->{STATS}{FN} * $ref->{STATS}{FP} )
-                         ) / sqrt($CDSreal * $RN * $CDSpred * $PN);
+    $ref->{STATS}{CC} = &decnum(
+          (( $ref->{STATS}{TP} * $ref->{STATS}{TN} ) - 
+           ( $ref->{STATS}{FN} * $ref->{STATS}{FP} )
+             ) / sqrt($CDSreal * $RN * $CDSpred * $PN) );
     # exon level
-    $ref->{STATS}{raME} = $ref->{STATS}{ME} / $ref->{STATS}{ExR};
-    $ref->{STATS}{raWE} = $ref->{STATS}{WE} / $ref->{STATS}{ExP};
-    $ref->{STATS}{SNe}  = $ref->{STATS}{TPe} / $ref->{STATS}{ExR};
-    $ref->{STATS}{SPe}  = $ref->{STATS}{TPe} / $ref->{STATS}{ExP};
-    $ref->{STATS}{SNSP} = ($ref->{STATS}{SNe} + $ref->{STATS}{SPe})/2;
+    $ref->{STATS}{raME} = &decnum($ref->{STATS}{ME} / $ref->{STATS}{ExR});
+    $ref->{STATS}{raWE} = &decnum($ref->{STATS}{WE} / $ref->{STATS}{ExP});
+    $ref->{STATS}{SNe}  = &decnum($ref->{STATS}{TPe} / $ref->{STATS}{ExR});
+    $ref->{STATS}{SPe}  = &decnum($ref->{STATS}{TPe} / $ref->{STATS}{ExP});
+    $ref->{STATS}{SNSP} = &decnum(($ref->{STATS}{SNe} + $ref->{STATS}{SPe}) / 2);
     # gene level
-    $ref->{STATS}{raMG}  = $ref->{STATS}{MG} / $ref->{STATS}{GeR};
-    $ref->{STATS}{raWG}  = $ref->{STATS}{WG} / $ref->{STATS}{GeP};
-    $ref->{STATS}{SNg}   = $ref->{STATS}{TPg} / $ref->{STATS}{GeR};
-    $ref->{STATS}{SPg}   = $ref->{STATS}{TPg} / $ref->{STATS}{GeP};
-    $ref->{STATS}{SNSPg} = ($ref->{STATS}{SNg} + $ref->{STATS}{SPg}) / 2;
-    $d1 = $ref->{STATS}{GeR} - $ref->{STATS}{MG};
-    $d2 = $ref->{STATS}{GeP} - $ref->{STATS}{WG};
-    my ($JG,$SG) = (1,1); # how can I retrieve these two numbers from what I already have
-    $ref->{STATS}{raJG}  = ($d2 == 0) ? $JG_DEFAULT : ($JG / $d2);
-    $ref->{STATS}{raSG}  = ($d1 == 0) ? $SG_DEFAULT : ($SG / $d1);
+    $ref->{STATS}{raMG}  = &decnum($ref->{STATS}{MG} / $ref->{STATS}{GeR});
+    $ref->{STATS}{raWG}  = &decnum($ref->{STATS}{WG} / $ref->{STATS}{GeP});
+    $ref->{STATS}{SNg}   = &decnum($ref->{STATS}{TPg} / $ref->{STATS}{GeR});
+    $ref->{STATS}{SPg}   = &decnum($ref->{STATS}{TPg} / $ref->{STATS}{GeP});
+    $ref->{STATS}{SNSPg} = &decnum(($ref->{STATS}{SNg} + $ref->{STATS}{SPg}) / 2);
+    # my ($JG_DEFAULT,$SG_DEFAULT,$d1,$d2) = (1,1,undef,undef);
+    # $d1 = $ref->{STATS}{GeR} - $ref->{STATS}{MG};
+    # $d2 = $ref->{STATS}{GeP} - $ref->{STATS}{WG};
+    # my ($JG,$SG) = (1,1); # how can I retrieve these two numbers from what I already have
+    # $ref->{STATS}{raJG}  = ($d2 == 0) ? $JG_DEFAULT : ($JG / $d2);
+    # $ref->{STATS}{raSG}  = ($d1 == 0) ? $SG_DEFAULT : ($SG / $d1);
+    $ref->{STATS}{raJG} = &decnum($ref->{MEAN}{raJG}); # $average_flg ? $ref->{MEAN}{raJG} : 'nan';
+    $ref->{STATS}{raSG} = &decnum($ref->{MEAN}{raJG}); # $average_flg ? $ref->{MEAN}{raSG} : 'nan';
+    foreach my $v (@stats_level) {
+        $maxlen{$v} = &max($maxlen{$v},length($ref->{STATS}{$v}));
+    }; # foreach $v
 } # genepred_stats
+sub decnum() {
+    my $n = shift;
+    return sprintf "%.3f", $n
+} # decnum
 @ 
 
 <<processeval.pl: handling output>>=
@@ -5233,16 +5307,33 @@ sub print_output() {
     foreach my $k (keys %maxlen) {
         $maxlen{$k} = '%'.sprintf("%d", ($maxlen{$k} + 1)).'s';
     }; # foreach $k
-    push @seqs, "TOTAL" if $totals_flg;
     foreach my $q (@seqs) {
         defined($data{$q}) || next;
         printf STDOUT "### CHR$maxlen{CHR} : $maxlen{SEQ} ".
                       "# Length$maxlen{LEN} bp ".('#'x25)."\n",
-                      ($q ne 'TOTAL' ? (split /$;/o, $q) : ('s','TOTALS')), $seqlen{$q};
+                      (split /$;/o, $q), $seqlen{$q};
         &print_tbl_header();
-        $prt_function->(\%{ $data{$q} });
+        if ($compute_flg) {
+            $prt_function->('STATS',\%{ $data{$q} });
+        } else { 
+            $prt_function->('MEAN', \%{ $data{$q} });
+        };
         print STDOUT "###\n";
     }; # foreach $q
+    $totals_flg && do {
+        $average_flg && do {
+            printf STDOUT "### SUMMARY : AVERAGE # Length $maxlen{LEN} bp ".
+                          ('#'x25)."\n", (($seqlen{TOTAL}/2) / scalar(@seqs));
+            &print_tbl_header();
+            $prt_function->('MEAN',\%{ $data{TOTAL} });
+            print STDOUT "###\n";        
+        }; # $average_flg
+        printf STDOUT "### SUMMARY : TOTALS # Length $maxlen{LEN} bp".
+                      " (all strands)".('#'x25)."\n", $seqlen{TOTAL};
+        &print_tbl_header();
+        $prt_function->('STATS',\%{ $data{TOTAL} });
+        print STDOUT "###\n";
+    }; # $totals_flg
 } # print_output
 sub print_tbl_header() {
     $str = "$maxlen{PROG} $maxlen{TST} ";
@@ -5254,33 +5345,32 @@ sub print_tbl_header() {
     print STDOUT "\n";
 } # print_tbl_header
 sub print_sorted_by_prog() {
-    my $ref = shift;
+    my ($choose,$ref) = @_;
     foreach my $p (@progs) {
         defined($ref->{$p}) || next;
         foreach my $t (@tests) {
-            defined($ref->{$p}{$t}) || next;
-            &print_fields($p, $t, \%{ $ref->{$p}{$t} });
+            (defined($ref->{$p}) && defined($ref->{$p}{$t})) || next;
+            &print_fields($choose, $p, $t, \%{ $ref->{$p}{$t} });
         }; # foreach $t
     }; # foreach $p
 } # print_sorted_by_prog
 sub print_sorted_by_test() {
-    my $ref = shift;
+    my ($choose,$ref) = @_;
     foreach my $t (@tests) {
         print STDOUT "###\n";
         foreach my $p (@progs) {
             (defined($ref->{$p}) && defined($ref->{$p}{$t})) || next;
-            &print_fields($p, $t, \%{ $ref->{$p}{$t} });
+            &print_fields($choose, $p, $t, \%{ $ref->{$p}{$t} });
         }; # foreach $p
     }; # foreach $t
 } # print_sorted_by_test
 sub print_fields() {
-    my ($p,$t,$rref) = @_;
+    my ($ch,$p,$t,$rref) = @_;
     $str = "$maxlen{PROG} $maxlen{TST} ";
     printf STDOUT $str, $p, $t;
     foreach my $v (@sel) {
         $str = "$maxlen{$v} ";
-        printf STDOUT $str, $rref->{MEAN}{$v}  if $average_flg;
-        printf STDOUT $str, $rref->{STATS}{$v} if $compute_flg;
+        printf STDOUT $str, $rref->{$ch}{$v};
     }; # foreach $v
     print STDOUT "\n";
 } # sub print_fields
@@ -5295,13 +5385,13 @@ sub print_help() {
 # $PROG [$PRGVER]
 #
 # Processing evaluation summaries generated by run_eval.pl
+#      instead of computing average, recompute stats (using formulas 
+#      taken from evaluation and Burset-Guigo'96), this is the default option.
 #
 #   -h print this help
-#   -a by default is on, you must pass it if you want to compare
-#      average against recomputed stats as '-c' option disables it.
-#   -c instead of computing average, recompute stats (using formulas 
-#      taken from evaluation and Burset-Guigo'96).
-#   -s also output the total results joining all stats from all sequences.
+#   -A show averages instead of recomputed stats.
+#   -a show total results averaging all stats from all sequences.
+#   -s show total results recomputing all stats from all sequences.
 #   -t sort output by test-set, else by program
 #   -S define a new strand strings set   : "str1 str2 ... strn"
 #   -T define a new test-set strings set : "set1 set2 ... setn"
@@ -5313,12 +5403,12 @@ sub print_help() {
 <<processeval.pl: getoptions>>=
 use Getopt::Std;
 my %opts = ();
-getopts("hacstS:T:P:",\%opts);
+getopts("hAastS:T:P:",\%opts);
 defined($opts{h}) && &print_help();
 my @files = @ARGV;
 @ 
 <<processeval.pl: getoptions - setting vars defaults>>=
-my ($str,$average_flg,$compute_flg,$totals_flg) = ('',1,0,0);
+my ($str,$average_flg,$compute_flg,$totals_flg) = ('',0,1,0);
 my %maxlen = ();
 my %seqlen = ();
 my @seqs = ();
@@ -5340,20 +5430,76 @@ defined($opts{P}) && do {
     @tmp = split /\s+/og, $opts{P};
     (scalar(@tmp) > 0) && (@progs = @tmp);
 }; # defined($opts{})
-defined($opts{c}) && do {
-    $average_flg = 0; # if '-a' is not given when passing '-c' then average is disabled
-    $compute_flg = 1;
-}; # defined($opts{c})
-defined($opts{a}) && do {
-    $average_flg = 1; # if '-a' is given when passing '-c' then average must be enabled again
-}; # defined($opts{a})
-defined($opts{s}) && ($totals_flg = 1);
+defined($opts{a}) && ($average_flg = 1);
+defined($opts{s}) && ($totals_flg  = 1);
+defined($opts{A}) && ($compute_flg = 0);
 @
 
 <<HIDE: >>=
-( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y NA UL ; do { { [ "$n" != "NA" -a "$n" != "UL" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENSCAN'; cat $HUMUS/chr${n}/annotation/20010806/genscan/eval/chr${n}.summary ; echo '### SRs'; cat $HUMUS/chr${n}/tblastx/20020111/eval/chr${n}.summary ; echo '### GENEID';  cat $HUMUS/chr${n}/geneid/20020225/eval/chr${n}.summary ; echo '### SGP';  cat $HUMUS/chr${n}/sgp/20020225/eval/chr${n}.summary ); };  echo ''; } ; done; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y NA UL ; do { { [ `perl -e '%h = ( 1 => 1, 3 => 1, 4 => 1, 5 => 1, 8 => 1, 9 => 1, 10 => 1, 15 => 1, 17 => 1, 18 => 1, 19 => 1, X => 1, NA => 1, UL => 1 ); $k = shift @ARGV; if (defined($h{$k})) { print 1; } else { print 0; };' $n` -eq 1 ] && ( echo '################################################### CHR '$n'_random #####'; echo '### GENSCAN'; cat $HUMUS/chr${n}/annotation/20010806/genscan/eval/chr${n}_random.summary ; echo '### SRs'; cat $HUMUS/chr${n}/tblastx/20020111/eval/chr${n}_random.summary ; echo '###GENEID';  cat $HUMUS/chr${n}/geneid/20020225/eval/chr${n}_random.summary ; echo '### SGP';  cat $HUMUS/chr${n}/sgp/20020225/eval/chr${n}_random.summary ); };  echo ''; } ; done ) 2>&1 > EVAL.summary ;
-$BIN/process_eval.pl    EVAL.summary > EVAL_prog.summary ;
-$BIN/process_eval.pl -t EVAL.summary > EVAL_test.summary ;
+for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
+  do {
+    N=`echo $n | tr [:lower:] [:upper:]`;
+    echo '################################################### CHR '$n' #####';
+    IDIR="/projects/H.sapiens/20010806.UCSCgp/chr$N";
+    echo '### GENSCAN';
+    cat $IDIR/annotation/20010806/genscan/eval/chr${n}.summary ;
+    echo '### GENEID';
+    cat $IDIR/geneid/20020225/eval/chr${n}.summary ;
+    echo '### SRs';
+    cat $IDIR/tblastx/20020111/eval/chr${n}.summary ;
+    echo '### SGP';
+    cat $IDIR/sgp/20020225/eval/chr${n}.summary;
+    };
+  done > $TMP/20010806.UCSCgp.eval.summary ;
+$BIN/process_eval.pl -tas -T "REFSEQ ENSEMBL" -P "GENSCAN GENEID SRs SGP" \
+   $TMP/20010806.UCSCgp.eval.summary > $TMP/20010806.UCSCgp.eval.test_summary ;
+enscript -1r -Gjf Courier5 -M A4 -p $TMP/20010806.UCSCgp.eval.test_summary.ps $TMP/20010806.UCSCgp.eval.test_summary ;
+#
+for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
+  do {
+    N=`echo $n | tr [:lower:] [:upper:]`;
+    echo '################################################### CHR '$n' #####';
+    IDIR="/projects/H.sapiens/20011222.UCSCgp/chr$N";
+    echo '### GENSCAN';
+    cat $IDIR/annotation/20011222/genscan/eval/chr${n}.summary ;
+    echo '### GENEID';
+    cat $IDIR/geneid/20011222/eval/chr${n}.summary ;
+    echo '### SRs';
+    sed 's/PROG:SRs PVER/PROG:SRs-MGSCv3 PVER/;' \
+        $IDIR/tblastx/20020425/eval/chr${n}.summary ;
+    echo '### SGP';
+    sed 's/PROG:SGP PVER/PROG:SGP-MGSCv3 PVER/;' \
+        $IDIR/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}.summary;
+    };
+  done > $TMP/20011222.UCSCgp.eval.summary ;
+$BIN/process_eval.pl -tas -T "REFSEQ ENSEMBL" \
+   -P "GENSCAN GENEID SRs-MGSCv3 SGP-MGSCv3"  \
+   $TMP/20011222.UCSCgp.eval.summary > $TMP/20011222.UCSCgp.eval.test_summary ;
+enscript -1r -Gjf Courier5 -M A4 -p $TMP/20011222.UCSCgp.eval.test_summary.ps $TMP/20011222.UCSCgp.eval.test_summary ;
+#
+IDIR="/projects/H.sapiens/20011222.UCSCgp/chr22";
+cat $IDIR/annotation/20011222/genscan/eval/chr22.summary \
+    $IDIR/geneid/20011222/eval/chr22.summary \
+    $IDIR/tblastx/20020425/eval/chr22.summary \
+    $IDIR/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr22.summary \
+    $IDIR/tblastx/20020504.RIKEN/eval/chr22.summary \
+    $IDIR/sgp/20011222.UCSCgp-20020504.RIKEN/eval/chr22.summary  \
+    $IDIR/sgp/20011222.UCSCgp-20020411.MGSCv3+20020504.RIKEN/eval/chr22.summary \
+  > $TMP/RIKEN_chr22.eval.summary ;
+$BIN/process_eval.pl -tas -T "REFSEQ ENSEMBL" \
+  -P "GENSCAN GENEID SRs SGP-MGSCv3 RIKEN-SRs SGP-RKNcDNA SGP-MGSCv3+RKNcDNA" \
+  $TMP/RIKEN_chr22.eval.summary > $TMP/RIKEN_chr22.eval.test+av_summary ;
+enscript -1r -Gjf Courier5 -M A4 -p $TMP/RIKEN_chr22.eval.test+av_summary.ps $TMP/RIKEN_chr22.eval.test+av_summary ;
+$BIN/process_eval.pl -t -T "REFSEQ ENSEMBL" \
+  -P "GENSCAN GENEID SRs SGP-MGSCv3 RIKEN-SRs SGP-RKNcDNA SGP-MGSCv3+RKNcDNA" \
+  $TMP/RIKEN_chr22.eval.summary > $TMP/RIKEN_chr22.eval.test_summary ;
+enscript -1r -Gjf Courier5 -M A4 -p $TMP/RIKEN_chr22.eval.test_summary.ps $TMP/RIKEN_chr22.eval.test_summary ;
+# 
+$BIN/process_eval.pl -tas -T "REFSEQ" -P "GENEID invMmusSRs SGP" \
+    $MUSHU/evaluation.summary > $TMP/Mmus.MGSCv3_20020411.eval_test.summary ;
+enscript -1r -Gjf Courier5 -M A4 -p $TMP/Mmus.MGSCv3_20020411.eval_test.summary.ps $TMP/Mmus.MGSCv3_20020411.eval_test.summary ;
+#
+lpr -Plp $TMP/20010806.UCSCgp.eval.test_summary.ps $TMP/20011222.UCSCgp.eval.test_summary.ps $TMP/RIKEN_chr22.eval.test_summary.ps $TMP/Mmus.MGSCv3_20020411.eval_test.summary.ps
 @ 
 
 
@@ -9175,7 +9321,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.35 2002-05-06 01:13:06 jabril Exp $
+# $Id: humus.nw,v 1.36 2002-05-09 12:49:30 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9534,6 +9680,65 @@ $BIN/viewstatustbl.pl | enscript -1C -Gjf Courier5 -M A4
 ( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}.report ); } ; done ; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '########################################## CHR '$n'_random #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}_random.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}_random.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}_random.report; }; } ; done ) 2>&1 | prtcode ;
 # gene-pred results quick summary
 ( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n} ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n} ); }; echo ''; } ; done ; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '########################################## CHR '$n'_random #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}_random.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n}_random ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}_random.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n}_random; }; echo ''; } ; done ) 2>&1 | prtcode ;
+#
+### GENE NUMBER
+HUMUS="/projects/H.sapiens/20011222.UCSCgp"
+# refseq
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { grep -v '^#' $HUMUS/chr$CHR/annotation/20011222/refseq/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $HUMUS/evaluations/refseq_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> REFSEQ from Hsap UCSC-GoldenPath assembly (20010806)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $HUMUS/evaluations/refseq_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $HUMUS/evaluations/refseq_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $HUMUS/evaluations/refseq_MGSCv3.genes_by_seq.report ;
+# ensembl
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { grep -v '^#' $HUMUS/chr$CHR/annotation/20011222/ensembl/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $HUMUS/evaluations/ensembl_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> ENSEMBL from Hsap UCSC-GoldenPath assembly (20010806)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $HUMUS/evaluations/ensembl_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $HUMUS/evaluations/ensembl_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $HUMUS/evaluations/ensembl_MGSCv3.genes_by_seq.report ;
+# genscan
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { grep -v '^#' $HUMUS/chr$CHR/annotation/20011222/genscan/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $HUMUS/evaluations/genscan_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENSCAN from Hsap UCSC-GoldenPath assembly (20010806)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $HUMUS/evaluations/genscan_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $HUMUS/evaluations/genscan_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $HUMUS/evaluations/genscan_MGSCv3.genes_by_seq.report ;
+# geneid
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { head -4 $HUMUS/chr$CHR/geneid/20011222/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $HUMUS/evaluations/geneid_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENEID on Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/geneid_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/geneid_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $HUMUS/evaluations/geneid_MGSCv3.genes_by_seq.report ;
+# sgp
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { head -4 $HUMUS/chr$CHR/sgp/20011222.UCSCgp-20020411.MGSCv3/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $HUMUS/evaluations/sgp_MGSCv3.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Hsap UCSC-GoldenPath assembly (20011222-NCBI28)"; echo "###       + Mmus MGSCv3 assembly (20020411)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/sgp_MGSCv3.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/sgp_MGSCv3.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $HUMUS/evaluations/sgp_MGSCv3.genes_by_seq.report ;
+# summarizing
+( cat $HUMUS/evaluations/refseq_MGSCv3.genes_by_seq.report; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/ensembl_MGSCv3.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/genscan_MGSCv3.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/geneid_MGSCv3.genes_by_seq.report; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/sgp_MGSCv3.genes_by_seq.report ) > $HUMUS/evaluations/ALL_MGSCv3.genes_by_seq.report ;
+#
+enscript --columns=3 -Gjf Courier5 -M A4 $HUMUS/evaluations/ALL_MGSCv3.genes_by_seq.report ;
+#
+perl -ne 'BEGIN{ $prog="???"; print STDOUT "PROG CLASS SEQ GENES\n"; } next if /^\s+$/o; /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next); next if /^\#/o; next unless /^\s*chr/; chomp; $_ =~ s/^\s+//o; @f=split /\s+/og; $type="ASSEMBLED"; $f[0] =~ s/_random$//o && ($type="RANDOM"); printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];' $HUMUS/evaluations/ALL_MGSCv3.genes_by_seq.report > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl # | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }'
+#
+function splittbls ()
+{
+perl -ne 'BEGIN{ $cls=shift @ARGV; } next unless $.>1; chomp; @f = split /\s+/o, $_; next unless ($f[1] eq $cls); $seq=$f[2]; $prg=$f[0]; defined($hprg{$prg}) || do { push @prog, $prg }; $hprg{$prg}++; defined($hseq{$seq}) || do { push @seqs, $seq }; $hseq{$seq}++; $genes{$seq}{$prg}=$f[3]; END{ $fmt=("\%-10s" x (scalar(@prog)+1))."\n"; printf STDOUT $fmt,"CHR",@prog; for ($n=0;$n<scalar(@seqs);$n++) { $s=$seqs[$n]; @tt=(); for ($p=0;$p<scalar(@prog);$p++) { push @tt, $genes{$s}{$prog[$p]}; }; printf STDOUT $fmt, $seqs[$n],@tt;} }' "$@"
+}
+splittbls "ASSEMBLED" $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_ASM.tbl 
+splittbls "RANDOM" $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_RND.tbl 
+#
+# drawing histograms with R
+def.par <- par()# save default, for resetting...
+plot.new()
+A <- read.table("/projects/H.sapiens/20011222.UCSCgp/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_ASM.tbl", header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+R <- read.table("/projects/H.sapiens/20011222.UCSCgp/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_RND.tbl", header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+
+postscript(file="/projects/H.sapiens/20011222.UCSCgp/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.ps", paper="a4", horizontal=TRUE) 
+# op <- par(mfrow=c(2,1)) # another way to produce a table of figures
+nf <- layout(matrix(c(1,2),2,1,byrow=TRUE), widths=c(lcm(25),lcm(25)), heights=c(lcm(10.5),lcm(8.5)), respect=TRUE)
+# layout.show(nf)
+par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 0.5, las = 2, mar = c(cm(0.75),cm(0.75),cm(0.75),cm(0.75)), mgp = c(3.25,1.5,0), adj = 0.5)
+# mgp: The margin line for the axis title, axis labels and axis line. The default is c(3, 1, 0)
+barplot(t(A), beside = TRUE, col = rainbow(5), ylim = c(0, 9900))
+title(ylab="Number of Genes", adj = 0.5, font = 3, cex.lab = 1.75)
+text(65, 9500, "H.sapiens Golden Path Assembly", font = 2, adj = 0.5, cex = 2.5)
+text(65, 8800, "( 22 Dec, 2001 - NCBI 28 )", font = 2, adj = 0.5, cex = 1.75)
+text(65, 7500, "Assembled Chromosomes", font = 2, adj = 0.5, cex = 2)
+legend(115, 7250, colnames(A), col = rainbow(5), cex = 1, pch = 16)
+#
+barplot(t(R), beside = TRUE, col = rainbow(5), ylim = c(0, 700))
+title(ylab="Number of Genes", adj = 0.5, font = 3, cex.lab = 1.75)
+text(65, 650, "Random Fragments", font = 2, adj = 0.5, cex = 2)
+legend(120, 650, colnames(R), col = rainbow(5), cex = 1, pch = 16)
+# par(op) # another way to produce a table of figures
+dev.off()# closing PostScript device
+par(def.par)#- reset to default
+#
 # gene-pred evaluation quick summary
 # source $WORK/.bash_VARS ; $BIN/stepper.pl --step HSAP_GP_ANNOTATION:HSAP_GP_REFSEQ,HSAP_GP_ENSEMBL,HSAP_GP_GENSCAN,HSAP_GP_GENSCAN_EVAL --step HSAPgpa_MGSCv3_WUTBLASTX:EVALUATING_SRs --step GENEID_STD:GENEID_EVALUATION --step SGP_HSAPgpa_MGSCv3_TBX:SGP_EVALUATION  > $HUMUS/tmp/.err/_ALL_eval_t.err  2>&1 ;
 #
@@ -9553,7 +9758,7 @@ enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_test.summary ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % pushd $HBASE/.fpt/PankajAgarwal/20020111.tbx-20010806UCSCgp-20011109SCphusion; ls -1 | while read n; do { gzip -v --best $n; }; done; popd
 % gawk '{print $1, $2}' seqid_list | while read CHR SEQ; do { echo "### $CHR --> $SEQ"; p="chr$CHR/tblastx/20020111/ori/$SEQ/" ; ( ls -1 $p | gawk "{ print \"$p\"\$1 }" | while read n; do { gzip -v --best $n; }; done; ); }; done
-%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  n <- 10
 %  g <- gl(n, 100, n * 100)
 %  x <- rnorm(n * 100) + sqrt(codes(g)) 
@@ -9561,8 +9766,250 @@ enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_test.summary ;
 %  title(main = "Notched Boxplots", xlab = "Group", font.main = 4,
 %    font.lab = 1)
 %  par(bg = "white")
-%  n <- 100
-%  x <- c(0, cumsum(rnorm(n)))
-%  y <- c(0, cumsum(rnorm(n)))
-%  xx <- c(0:n, n:0)
-%  yy <- c(x, rev(y))
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+function mkRtables ()
+{ gawk 'BEGIN{ OFS=" "; prt=1; }
+    $0~/^### CHR/ { chr=$3; seq=$5; len=$8; }
+    $0~/^### SUM/ { chr=$4; seq="ALL"; len=$7; }
+    $0!~/^#/ {
+       if ($1!~"PROGRAM") {
+          printf chr" "seq" "len; prtflds(); printf "\n";
+       } else {
+          if (prt) {
+            printf "CHR SEQ LEN"; prtflds(); printf "\n";
+            prt=0;
+          };
+       };
+    }
+function prtflds() { for (n=1;n<=NF;n++) { printf " "$n; }; }
+  ' $1;
+}
+WHR="/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations" ;
+PLT="$WHR/r-plots" ;
+mkRtables $WHR/20010806.UCSCgp.eval.test_summary      | \
+    gawk '$2!~"ALL" { print $0 }' - > $PLT/20010806_UCSCgp.tbl ;
+grep -v 'SRs' $PLT/20010806_UCSCgp.tbl > $PLT/20010806_UCSCgp_noSRs.tbl;
+mkRtables $WHR/20011222.UCSCgp.eval.test_summary      | \
+    gawk '$2!~"ALL" { print $0 }' - > $PLT/20011222_UCSCgp.tbl ;
+grep -v 'SRs-MGSCv3' $PLT/20011222_UCSCgp.tbl > $PLT/20011222_UCSCgp_noSRs.tbl;
+mkRtables $WHR/Mmus.MGSCv3_20020411.eval_test.summary | \
+    gawk '$2!~"ALL" { print $0 }' - > $PLT/20020411_MGSCv3.tbl ;
+grep -v 'invMmusSRs' $PLT/20020411_MGSCv3.tbl > $PLT/20020411_MGSCv3_noSRs.tbl ;
+mkRtables $WHR/RIKEN_chr22.eval.test_summary          | \
+    gawk '$2!~"ALL" { print $0 }' - > $PLT/chr22_RIKEN.tbl ;
+#
+mkRtables $WHR/20010806.UCSCgp.eval.test_summary      | \
+    gawk '$1~/^(TOTALS|CHR)$/ { print $0 }' - > $PLT/20010806_UCSCgp_TOT.tbl ;
+grep -v 'SRs' $PLT/20010806_UCSCgp_TOT.tbl > $PLT/20010806_UCSCgp_noSRs_TOT.tbl;
+mkRtables $WHR/20011222.UCSCgp.eval.test_summary      | \
+    gawk '$1~/^(TOTALS|CHR)$/ { print $0 }' - > $PLT/20011222_UCSCgp_TOT.tbl ;
+grep -v 'SRs-MGSCv3' $PLT/20011222_UCSCgp_TOT.tbl > $PLT/20011222_UCSCgp_noSRs_TOT.tbl;
+mkRtables $WHR/Mmus.MGSCv3_20020411.eval_test.summary | \
+    gawk '$1~/^(TOTALS|CHR)$/ { print $0 }' - > $PLT/20020411_MGSCv3_TOT.tbl ;
+grep -v 'invMmusSRs' $PLT/20020411_MGSCv3_TOT.tbl > $PLT/20020411_MGSCv3_noSRs_TOT.tbl ;
+mkRtables $WHR/RIKEN_chr22.eval.test_summary          | \
+    gawk '$1~/^(TOTALS|CHR)$/ { print $0 }' - > $PLT/chr22_RIKEN_TOT.tbl ;
+%%% R
+########################################################
+def.par <- par()# save default, for resetting...
+plot.new() 
+# fillcols <- c("lawngreen", "lemonchiffon", "lavender", "azure" )
+# bordcols <- c("lawngreen", "lemonchiffon", "lavenderblush4", "azure" )
+progs <- list("GENEID","GENSCAN","SGP","TBX-SRs")
+fillcols <- rainbow(4);
+#
+# NUCLEOTIDE LEVEL for 
+#
+W <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+w <- split(W,W$TEST)
+T <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_TOT.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+t <- split(T,T$TEST)
+#
+postscript(file="/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_NucLvl.ps", paper="a4",horizontal=TRUE) 
+##
+nf <- layout(matrix(c(1,2,3,4,5,6),2,3,byrow=TRUE), widths=c(lcm(8),lcm(8),lcm(8)), heights=c(lcm(8),lcm(8)), respect=TRUE)
+# layout.show(nf)
+par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 0.5, las = 1, mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0.75)))
+boxplot(w$REFSEQ$SN  ~ w$REFSEQ$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SN on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$SN ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$REFSEQ$SN ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$REFSEQ$SP  ~ w$REFSEQ$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SP on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$SP ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$REFSEQ$SP ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$REFSEQ$CC  ~ w$REFSEQ$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"CC on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$CC ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$REFSEQ$CC ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$ENSEMBL$SN  ~ w$ENSEMBL$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SN on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$SN ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$ENSEMBL$SN ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$ENSEMBL$SP  ~ w$ENSEMBL$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SP on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$SP ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$ENSEMBL$SP ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$ENSEMBL$CC  ~ w$ENSEMBL$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"CC on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$CC ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$ENSEMBL$CC ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+##
+dev.off()# closing PostScript device
+###############################################
+#
+# EXON LEVEL for 
+#
+W <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_noSRs.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+w <- split(W,W$TEST)
+T <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_noSRs_TOT.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+t <- split(T,T$TEST)
+#
+postscript(file="/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_ExnLvl.ps", paper="a4",horizontal=TRUE) 
+##
+nf <- layout(matrix(c(1,2,3,4,5,6),2,3,byrow=TRUE), widths=c(lcm(8),lcm(8),lcm(8)), heights=c(lcm(8),lcm(8)), respect=TRUE)
+# layout.show(nf)
+par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 0.5, las = 1, mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0.75)))
+boxplot(w$REFSEQ$SNe  ~ w$REFSEQ$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SNe on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$SNe ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$REFSEQ$SNe ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$REFSEQ$SPe  ~ w$REFSEQ$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SPe on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$SPe ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$REFSEQ$SPe ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$REFSEQ$SNSP  ~ w$REFSEQ$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SNSP on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$SNSP ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$REFSEQ$SNSP ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$ENSEMBL$SNe  ~ w$ENSEMBL$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SNe on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$SNe ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$ENSEMBL$SNe ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$ENSEMBL$SPe  ~ w$ENSEMBL$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SPe on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$SPe ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$ENSEMBL$SPe ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+#
+boxplot(w$ENSEMBL$SNSP  ~ w$ENSEMBL$PROGRAM, col = fillcols, ylim = c(0, 1.1), border = "black", notch = TRUE, boxwex=0.65)
+text(0.5,1.05,"SNSP on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$SNSP ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+points(t$ENSEMBL$SNSP ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow1", cex = 1.25)
+##
+dev.off()# closing PostScript device
+###############################################
+#
+# EXON/GENE MISSING/WRONG 
+#
+W <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_noSRs.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+w <- split(W,W$TEST)
+T <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_noSRs_TOT.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+t <- split(T,T$TEST)
+#
+postscript(file="/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_MWegLvl.ps", paper="a4",horizontal=TRUE) 
+##
+nf <- layout(matrix(c(1,2,3,4,5,6,7,8),2,4,byrow=TRUE), widths=c(lcm(7),lcm(7),lcm(7),lcm(7)), heights=c(lcm(8),lcm(8)), respect=TRUE)
+# layout.show(nf)
+par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 0.5, las = 1, mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0.75)))
+boxplot(w$REFSEQ$ME  ~ w$REFSEQ$PROGRAM, col = fillcols, border = "black", ylim = c(0,4250), notch = TRUE, boxwex=0.65)
+text(0.5,4200,"ME on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$ME ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$REFSEQ$ME ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+#
+boxplot(w$REFSEQ$WE  ~ w$REFSEQ$PROGRAM, col = fillcols, border = "black", ylim = c(0,34000), notch = TRUE, boxwex=0.65)
+text(0.5,33700,"WE on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$WE ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$REFSEQ$WE ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+#
+boxplot(w$REFSEQ$MG  ~ w$REFSEQ$PROGRAM, col = fillcols, border = "black", ylim = c(0,550), notch = TRUE, boxwex=0.65)
+text(0.5,542.5,"MG on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$MG ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$REFSEQ$MG ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+#
+boxplot(w$REFSEQ$WG  ~ w$REFSEQ$PROGRAM, col = fillcols, border = "black", ylim = c(0,7200), notch = TRUE, boxwex=0.65)
+text(0.5,7100,"WG on REFSEQ",font = 2, adj = 0, cex=1.5)
+points(w$REFSEQ$WG ~ w$REFSEQ$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$REFSEQ$WG ~ t$REFSEQ$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+#
+boxplot(w$ENSEMBL$ME  ~ w$ENSEMBL$PROGRAM, col = fillcols, border = "black", ylim = c(0,4250), notch = TRUE, boxwex=0.65)
+text(0.5,4200,"ME on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$ME ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$ENSEMBL$ME ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+#
+boxplot(w$ENSEMBL$WE  ~ w$ENSEMBL$PROGRAM, col = fillcols, border = "black", ylim = c(0,34000), notch = TRUE, boxwex=0.65)
+text(0.5,33700,"WE on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$WE ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$ENSEMBL$WE ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+#
+boxplot(w$ENSEMBL$MG  ~ w$ENSEMBL$PROGRAM, col = fillcols, border = "black", ylim = c(0,550), notch = TRUE, boxwex=0.65)
+text(0.5,542.5,"MG on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$MG ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$ENSEMBL$MG ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+#
+boxplot(w$ENSEMBL$WG  ~ w$ENSEMBL$PROGRAM, col = fillcols, border = "black", ylim = c(0,7200), notch = TRUE, boxwex=0.65)
+text(0.5,7100,"WG on ENSEMBL",font = 2, adj = 0, cex=1.5)
+points(w$ENSEMBL$WG ~ w$ENSEMBL$PROGRAM, pch = 21, bg = "darkorange", cex = 1.25)
+# points(t$ENSEMBL$WG ~ t$ENSEMBL$PROGRAM, pch = 21, bg = "yellow", cex = 1.25)
+##
+dev.off()# closing PostScript device
+##############################################
+#
+# BY CHROMOSOMES
+#
+plot.new()
+W <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+w <- split(W,W$TEST)
+wr <- split(w$REFSEQ,w$REFSEQ$PROGRAM)
+we <- split(w$ENSEMBL,w$ENSEMBL$PROGRAM)
+T <- read.table("/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp_TOT.tbl", header = TRUE, sep = " ", as.is = FALSE, na.strings = "nan")
+t <- split(T,T$TEST)
+fillcols <- rainbow(26);
+plot(w$REFSEQ$SN ~ c(w$REFSEQ$CHR), col = fillcols)
+points(wr$$GENEID$SN ~ c(wr$REFSEQ$CHR),  pch = 21, bg = "red", cex = 1.25)
+points(wr$REFSEQ$GENSCAN$SN ~ c(wr$REFSEQ$CHR), pch = 21, bg = "green", cex = 1.25)
+title(main = "SN on REFSEQ", font.main = 4, font.lab = 4) 
+plot(w$REFSEQ$SP ~ c(w$REFSEQ$CHR), col = fillcols, notch = TRUE)
+title(main = "SP on REFSEQ", font.main = 4, font.lab = 4) 
+plot(w$REFSEQ$CC ~ c(w$REFSEQ$CHR), col = fillcols, notch = TRUE)
+title(main = "CC on REFSEQ", font.main = 4, font.lab = 4) 
+
+#
+par(def.par)#- reset to default
+#
+# OTHER TESTS
+#
+wt<-list()
+wt$REFSEQ  <- split(w$REFSEQ, w$REFSEQ$PROGRAM)
+wt$ENSEMBL <- split(w$ENSEMBL,w$ENSEMBL$PROGRAM)
+tt<-list()
+tt$REFSEQ <- split(t$REFSEQ, t$REFSEQ$PROGRAM)
+tt$ENSEMBL <- split(t$ENSEMBL,t$ENSEMBL$PROGRAM)
+wn <- list(wt$REFSEQ$GENEID,wt$ENSEMBL$GENEID,wt$REFSEQ$GENSCAN,wt$ENSEMBL$GENSCAN,wt$REFSEQ$"SGP-MGSCv3",wt$ENSEMBL$"SGP-MGSCv3")
+tn <- list(tt$REFSEQ$GENEID,tt$ENSEMBL$GENEID,tt$REFSEQ$GENSCAN,tt$ENSEMBL$GENSCAN,tt$REFSEQ$"SGP-MGSCv3",tt$ENSEMBL$"SGP-MGSCv3")
+
+def.par <- par()# save default, for resetting...
+plot.new() 
+
+points(w$REFSEQ$SP ~ w$REFSEQ$CHR, pch = 21, bg = "lightpink", cex = 1.5) 
+
+boxplot(w$ENSEMBL$SP ~ w$ENSEMBL$PROG, col = fillcols, notch = TRUE)
+# GLOBAL PLOT: boxplot(split(W$SP, W$PROGRAM), col = cols, notch = TRUE) 
+
+# printing plots
+postscript(file="/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations/r-plots/20011222_UCSCgp.ps", paper="a4",horizontal=TRUE) 
+# the plot here
+dev.off() 
+
+par(def.par)#- reset to default
+
