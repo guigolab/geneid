@@ -12,10 +12,10 @@ boundaries_of_isochore
 
 # Exons score: Cutoffs and weights
 Cutoff_exons
--150 -150 -150 -150
+-15 -15 -15 -15
 
 Cutoff_Oligos
--100 -150 -150 -150
+-10 -15 -15 -15
 
 Weight_of_oligos_in_exons
 0.4 0.4 0.4 0.4
@@ -51513,7 +51513,7 @@ TTTTTT 4095 2 -0.508665
 
 # How many donors per acceptor can we use to build exons?
 maximum_number_of_donors_per_acceptor_site
-10
+5
 
 # Global Parameters 
 # Rules about Gene construction(GenAmic)
