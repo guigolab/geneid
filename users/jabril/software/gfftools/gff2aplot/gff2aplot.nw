@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.26 2001-11-30 19:39:53 jabril Exp $
+% $Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.26 2001-11-30 19:39:53 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -488,9 +488,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.26 $', #'
-     '$Date: 2001-11-30 19:39:53 $', #'
-     '$Id: gff2aplot.nw,v 1.26 2001-11-30 19:39:53 jabril Exp $', #'
+     '$Revision: 1.27 $', #'
+     '$Date: 2001-12-05 20:48:36 $', #'
+     '$Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -1167,9 +1167,9 @@ sub parse_custom_files() {
 		  }; # TWOTHREE
             $c = &varscheck($v_flag,$_v,\@line,\%CustomVars) ? $_c : $noCV;
         } continue {
-            &counter(++$n,$c) if ($Verbose && !$Quiet);
+            &counter(++$n,$c);
         }; # WHILE
-        &counter_end($n,$c) if ($Verbose && !$Quiet);
+        &counter_end($n,$c);
         close(THIS);
     }; # LOAD
   }; # MAIN
@@ -3995,30 +3995,229 @@ LDE:
 @ 
 
 
-\subsubsctn{Global settings}
-
-The following variables must be set to undef for layout defaults or not (Depending on what rules out the global layout settings or the feature attributes). 
-% VAR-ORD 41-60 : CLO-ORD 20-60
+%% 
+%% The following variables must be set to undef for layout defaults or not
+%% (Depending on what rules out the global layout settings or
+%% the feature attributes). % VAR-ORD 41-60 : CLO-ORD 20-60
+\subsubsctn{Global settings for features}
 
 <<default layout vars values>>=
-show_feature_label         => { TYPE => 'BOOLEAN', VALUE => $T     }, 
-feature_x_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
-feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
-feature_label_length       => { TYPE => 'INTEGER', VALUE => 0      },
-feature_label_rotate       => { TYPE => 'BOOLEAN', VALUE => $F      },
+show_feature_label         => { TYPE => 'BOOLEAN', VALUE => $F          }, 
 feature_label_font         => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-feature_label_fontsize     => { TYPE => 'PS_UNIT', VALUE => [ 5, 'pt' ]  },
-@ %def {show_feature_label}
+feature_label_fontsize     => { TYPE => 'PS_UNIT', VALUE => [ 6, 'pt' ] },
+@ %def {show_feature_label} {feature_label_font} {feature_label_fontsize}
+<<DESC custom file variables>>=
+ORD: 141
+SEC: LAYOUT
+SUB: Labels
+OPT: show_feature_label
+DEF: |on|
+PAR: <boolean>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 142
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_label_font
+DEF: |helvetica|
+PAR: <font>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 143
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_label_fontsize
+DEF: |6pt|
+PAR: <length>
+SDE: 
+LDE: 
+
+###EOR###
+@ 
 
 <<default layout vars values>>=
-show_group_label           => { TYPE => 'BOOLEAN', VALUE => $T     }, 
-group_x_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
-group_y_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
-group_label_length         => { TYPE => 'INTEGER', VALUE => 0      },
-group_label_rotate         => { TYPE => 'BOOLEAN', VALUE => $F      },
+feature_x_label_length     => { TYPE => 'INTEGER', VALUE => undef  },
+feature_x_label_angle      => { TYPE => 'DEGREES', VALUE => 0      },
+feature_x_label_rotate     => { TYPE => 'BOOLEAN', VALUE => $F     },
+@ %def {feature_x_label_length} {feature_x_label_angle} {feature_x_label_rotate}
+<<DESC custom file variables>>=
+ORD: 145
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_x_label_length
+PAR: <char-length>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 145
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_x_label_angle
+DEF: |$0^{\,\circ}$|
+PAR: <degrees>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 146
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_x_label_rotate
+DEF: |off|
+PAR: <boolean>
+SDE: 
+LDE: 
+
+###EOR###
+@ 
+
+<<default layout vars values>>=
+feature_y_label_length     => { TYPE => 'INTEGER', VALUE => undef  },
+feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+feature_y_label_rotate     => { TYPE => 'BOOLEAN', VALUE => $T     },
+@ %def {feature_y_label_length} {feature_y_label_angle} {feature_y_label_rotate}
+<<DESC custom file variables>>=
+ORD: 150
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_y_label_length
+PAR: <char-length>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 151
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_y_label_angle
+DEF: |$0^{\,\circ}$|
+PAR: <degrees>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 152
+SEC: LAYOUT
+SUB: Labels
+OPT: feature_y_label_rotate
+DEF: |on|
+PAR: <boolean>
+SDE: 
+LDE: 
+
+###EOR###
+@ 
+
+
+\subsubsctn{Global settings for groups}
+
+<<default layout vars values>>=
+show_group_label           => { TYPE => 'BOOLEAN', VALUE => $T          }, 
 group_label_font           => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-group_label_fontsize       => { TYPE => 'PS_UNIT', VALUE => [ 5, 'pt' ]  },
-@ %def {show_group_label}
+group_label_fontsize       => { TYPE => 'PS_UNIT', VALUE => [ 8, 'pt' ] },
+@ %def {show_group_label} {group_label_font} {group_label_fontsize}
+<<DESC custom file variables>>=
+ORD: 161
+SEC: LAYOUT
+SUB: Labels
+OPT: show_group_label
+DEF: |on|
+PAR: <boolean>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 162
+SEC: LAYOUT
+SUB: Labels
+OPT: group_label_font
+DEF: |helvetica|
+PAR: <font>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 163
+SEC: LAYOUT
+SUB: Labels
+OPT: group_label_fontsize
+DEF: |8pt|
+PAR: <length>
+SDE: 
+LDE: 
+
+###EOR###
+@ 
+
+<<default layout vars values>>=
+group_x_label_length       => { TYPE => 'INTEGER', VALUE => undef  },
+group_x_label_angle        => { TYPE => 'DEGREES', VALUE => 0      },
+group_x_label_rotate       => { TYPE => 'BOOLEAN', VALUE => $F     },
+@ %def {group_x_label_length} {group_x_label_angle} {group_x_label_rotate}
+<<DESC custom file variables>>=
+ORD: 164
+SEC: LAYOUT
+SUB: Labels
+OPT: group_x_label_length
+PAR: <char-length>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 165
+SEC: LAYOUT
+SUB: Labels
+OPT: group_x_label_angle
+DEF: |$0^{\,\circ}$|
+PAR: <degrees>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 166
+SEC: LAYOUT
+SUB: Labels
+OPT: group_x_label_rotate
+DEF: |off|
+PAR: <boolean>
+SDE: 
+LDE: 
+
+###EOR###
+@ 
+
+<<default layout vars values>>=
+group_y_label_length     => { TYPE => 'INTEGER', VALUE => undef  },
+group_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
+group_y_label_rotate     => { TYPE => 'BOOLEAN', VALUE => $T     },
+@ %def {group_y_label_length} {group_y_label_angle} {group_y_label_rotate}
+<<DESC custom file variables>>=
+ORD: 170
+SEC: LAYOUT
+SUB: Labels
+OPT: group_y_label_length
+PAR: <char-length>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 171
+SEC: LAYOUT
+SUB: Labels
+OPT: group_y_label_angle
+DEF: |$0^{\,\circ}$|
+PAR: <degrees>
+SDE: 
+LDE: JOIN-NEXT
+###EOR###
+ORD: 172
+SEC: LAYOUT
+SUB: Labels
+OPT: group_y_label_rotate
+DEF: |on|
+PAR: <boolean>
+SDE: 
+LDE: 
+
+###EOR###
+@ 
+
+
+\subsubsctn{Miscellanea}
 
 <<default layout vars values>>=
 hide_credits               => { TYPE => 'BOOLEAN', VALUE => $F      },
@@ -4052,6 +4251,7 @@ LDE:
 
 ###EOR###
 @
+
 
 <<Changes in command-line options>>=
 # "i"  => # Page_Orientation
@@ -4285,9 +4485,9 @@ sub parse_GFF_files() {
               (&warn('NOT_ENOUGH_FIELDS',$F,$file,$n,join(" ",@line)), next);
           $c = &GFF_format(&fieldscheck(\@line));
       } continue {
-          &counter(++$n,$c) if ($Verbose && !$Quiet);
+          &counter(++$n,$c);
       }; # WHILE
-      &counter_end($n,$c) if ($Verbose && !$Quiet);
+      &counter_end($n,$c);
       close(THIS);
   }; # LOAD
     print LOGFILE (Data::Dumper->Dump([ \%GFF_DATA, \%ALN_DATA  ],
@@ -4380,7 +4580,7 @@ sub fieldscheck() {
 For historical reasons the program can work with APLOT format (see Table~\ref{tbl:formats}). Initial field checking determines whether the record being processed is under that alignment GFF-like format, by determining that first, fourth and fifth fields contain a colon char. Then we assume we are under APLOT format.
 
 <<Parsing Input Data>>=
-sub fcolon() { return ($_[0] =~ /.+:.+/o ? $T : $F) }
+sub fcolon() { return ($_[0] =~ /^.+:.+$/o ? $T : $F) }
 @ %def &fcolon
 
 \subsctn{Validating fields}
@@ -4566,7 +4766,7 @@ $ \begin{array}{r@{\quad=\quad}l}
 \subsctn{Parsing APLOT format}
 \label{sec:parseAPLOT}
 
-'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
+'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}). To optimize feature search later, now [[&remove_colon]] can return undefined values; so that, we have to check if [[$strand_2]] and [[$frame_2]] are defined or not, to set the corresponding equivalence, but we do not do the same for [[$source_2]] and [[$feature_2]] (see [[<<select GFF or ALN settings>>]] code chunk to see what we do now when these last two vars were not defined).
 
 <<Parsing Input Data>>=
 sub load_aplot() { # if errors found > return $noGFF
@@ -4576,6 +4776,8 @@ sub load_aplot() { # if errors found > return $noGFF
      $start_1,$start_2,$end_1,$end_2,
      $strand_1,$strand_2,$frame_1,$frame_2) = 
      &remove_colon(@$list[0,1,2,3,4,6,7]);
+    defined($strand_2) || ($strand_2 = $strand_1);
+    defined($frame_2)  || ($frame_2  = $frame_1 );
     ($score_1,$score_2) = ($list->[5], undef);
     $w_gff = &load_grouping($F,$list->[8]);
     &check_aplot_fields($w_gff) || ($w_gff=$noGFF);
@@ -4640,9 +4842,10 @@ sub remove_colon() {
     my ($a,$b) = (undef,undef);
 	foreach my $fld (@_) {
 		($a,$b) = split /:/o, $fld, 2;
-        $a = '.' unless defined($a);
-        $b = $a  unless defined($b);
-		push @ary_out, $a, $b;
+		push @ary_out, (
+            (defined($a) ? $a : '.'  ),
+            (defined($b) ? $b : undef)
+            );
 	};
 	return @ary_out;
 } # remove_colon
@@ -4738,10 +4941,14 @@ ISALN: {
             \%ALN_DATA,
             \$aln_COUNT,
             'SEQUENCE' );
-        $seqname = join($;, $seqname_1, $seqname_2);
-        $source  = join($;, $source_1,  $source_2 );
-        $strand  = join($;, $strand_1,  $strand_2 );
-        $feature = join($;, $feature_1, $feature_2);
+        $seqname = join(":", $seqname_1, $seqname_2);
+        $source  = defined($source_2)
+                   ? join(":", $source_1, $source_2)
+                   : $source_1;
+        $strand  = $strand_1.$strand_2;
+        $feature = defined($feature_2) 
+                   ? join(":", $feature_1, $feature_2)
+                   : $feature_1;
         last ISALN;
     }; # $isaln
     $myfunc = \&load_gff_var;
@@ -4791,7 +4998,8 @@ We declare here auxiliary variables containing the array indexes used in the ano
 <<Pre-Declared Vars>>=
 $aln_COUNT $seq_COUNT
 $_counter $_prop $_element
-$_order $_elemNum $_ori $_end $_nori $_nend
+$_order $_elemNum $_ori $_end $_flw $_glw
+        $_mnsco $_mxsco $_nori $_nend
 $_fttype $_ftprop $_ftname $_ftid
          $_ftori  $_ftend  $_ftsco  $_ftfrm
          $_ftnori $_ftnend $_ftnsco $_ftnfrm
@@ -4799,7 +5007,8 @@ $_fttype $_ftprop $_ftname $_ftid
 
 <<Global Vars>>=
 ($_counter,$_prop,$_element) = (0..2);
-($_order,$_elemNum,$_ori,$_end,$_nori,$_nend) = (0..5);
+($_order,$_elemNum,$_ori,$_end,
+ $_mnsco,$_mxsco,$_flw,$_glw,$_nori,$_nend) = (0..9);
 ($_fttype,$_ftprop,$_ftname,$_ftid,
  $_ftori, $_ftend, $_ftsco, $_ftfrm,
  $_ftnori,$_ftnend,$_ftnsco,$_ftnfrm) = (0..11);
@@ -4819,8 +5028,8 @@ sub load_var() {
 
 \label{func:loadgffvar} \label{func:loadalnvar}
 <<Parsing Input Data>>=
-sub load_gff_var() { return [ $_[0], 0, 0, 0 ]; }
-sub load_aln_var() { return [ $_[0], 0, 0, 0, 0, 0 ]; }
+sub load_gff_var() { return [ $_[0], (0) x 7 ]; }
+sub load_aln_var() { return [ $_[0], (0) x 9 ]; }
 @ %def &load_gff_var &load_aln_var
 
 We initialize properties for each new element as references to '[[%DefaultVars]]' given level corresponding values. 
@@ -5293,9 +5502,13 @@ We need to sort the GFF elements by acceptor, it is more or less easy to sort th
 as arrays (it is implemented with the [[map]]/[[sort]]/[[map]] technique as it can be appreciated in [[<<sorting group elements>>]] code chunk). But we also need to sort groups by their coordinates and to sort sequences and sources by their input order (as they were read from input file I mean). This will be difficult to do on the original hashes because coords and order were placed in a subarray for a given group/source/sequence key name (that key point to an anonymous array containing that counters as you can see in table~\ref{tbl:gffdata}, page~\pageref{tbl:gffdata}). As we are looking for the GFF elements that belong to a group, which is related to a given strand of a source within a sequence, we can build an auxiliary variable that holds the proper ordering at each level as we go deep in the [[%GFF_DATA]]/[[%ALN_DATA]] variables hierarchy.
 At the same time we can fill the [[$_ori]] and [[$_end]] fields we left set to zero for the counters array in [[&load_gff_var]] (see function definition in page~\pageref{func:loadgffvar}).
 
+Something that really boost the ordering, if we compare to the old [[gawk]] version of {\prog}, is that we are performing the sort only on those groups that have more that one element, and that we are also ordering short sets of GFF elements instead of sorting the whole input records first and then sorting the groups we found in those records (also GFF records were ordered by an insertion sort algorithm when being loaded). Finally, we take advantage of the perl references pointing to different parts of complex data structures, so we are using ``less'' temporary variables and, indirectly, we are going to use ``less'' memory.
+
 <<HIDE: DONE>>=
 \doneitem{20011120}{Set ordering for [[%ALN_DATA]].}
 @
+
+\subsctn{Main sorting function}
 
 <<Sorting Features>>=
 sub sort_elements() {
@@ -5311,18 +5524,22 @@ sub sort_elements() {
         &report('SORT_GFF','*- ','ALIGNMENT DATA');
         &sort_elements_loop(\%ALN_DATA,'ALN');
     }; # scalar(%ALN_DATA) > 0
-    print LOGFILE (Data::Dumper->Dump([ \%Order ],
-                                   [ qw( *Order ) ]))
+    print LOGFILE (Data::Dumper->Dump([ \%Order, \%GFF_DATA, \%ALN_DATA ],
+                                   [ qw( *Order   *GFF_DATA   *ALN_DATA ) ]))
         if ($LogFile && $Debug);
     &footer("ELEMENTS SORTED");
 } # sort_elements
 @ %def &sort_elements
 
+We will take advantage of the fact that we are moving through all the data structures, to find minimum and maximum values for features, including start and end coordinates (twice if we are looking to alignment data), min/max scores, and length of longest label.
+
 <<Sorting Features>>=
 sub sort_elements_loop() {
     my ($s_ref,$ktr) = @_;
-    my ($v_max,$v_min);
-    my $sq_ord = \@{ $Order{$ktr} } ;
+    my ($v_max,$v_min,$w_max,$w_min,$s_max,$s_min,$l_max,$L_max,$aflg);
+    my $sq_ord = \@{ $Order{$ktr} } ; 
+    # my @tt_coords = ();
+    $aflg = $ktr eq 'ALN' ? $T : $F;
     @{ $sq_ord } = ();
     foreach my $s_seq (keys %{ $s_ref }) {
         <<sorting sequences>>
@@ -5387,7 +5604,7 @@ push @{ $sr_ord },
           () ]; # if uncomment '$sc_ref' set next to [2] instead of [1].
 my $st_ord = \@{ $sr_ord->[ $#{$sr_ord} ][1] };
 my $sr_ref = \%{ $sc_ref->{$s_str}[$_element] };
-<<set forward/reverse sorting functon>>
+<<set forward/reverse sorting function>>
 my $s_elem;
 foreach my $s_grp (keys %{ $sr_ref }) {
     <<sorting group elements>>
@@ -5399,7 +5616,7 @@ foreach my $s_grp (keys %{ $sr_ref }) {
 SORT_STR => "\%sStrand: \%s\n",
 @
 
-The main difference between this piece of code and the previous three ones is that we also find the boundaries of the groups here ([[$ft_min]]/[[$ft_max]] variables). This make possible to sort them and to know the first and the last coords that we can find in a strand/source/sequence (as we do in the last lines of the following piece of code, and in the next one [[<<sorting group coords by acceptor>>]]).
+The main difference between this piece of code and the previous three ones is that we also find the boundaries of the groups here ([[$v_min]]/[[$v_max]] variables). This make possible to sort them and to know the first and the last coords that we can find in a strand/source/sequence. It also allows us to retrieve the minimum and maximum for scores, start and end coordinates of the target sequence on alignment records, and feature/group labels longest string lengths (as we are doing in the last lines of the following piece of code, and in the next one [[<<sorting group coords by acceptor>>]]). \label{sec:setlabellengths}
 
 <<sorting group elements>>=
 &report('SORT_GRP',(('|  ' x 4).'*- '),$s_grp);
@@ -5408,20 +5625,44 @@ $s_elem = $sr_ref->{$s_grp}[$_counter][$_elemNum];
 $s_elem > 1 && do {
     @{ $sg_ref } = map { $_->[2] }
                    sort { &$sortfunct }
-                   map { [ $_->[4],
-                           $_->[5],
-                           $_ ] } @{ $sg_ref }; # maps 'start 'end 'arrayelement
+                   map { [ $_->[$_ftori],
+                           $_->[$_ftend],
+                           $_ ] } @{ $sg_ref }; # maps start,end,arrayelement
 }; # $s_elem > 1
-@ft_coords = ( map { $_->[4], $_->[5] } @{ $sg_ref } );
-$v_min = &min(@ft_coords);
-$v_max = &max(@ft_coords);
+# @ft_coords = ( map { $_->[$_ftori], $_->[$_ftend] } @{ $sg_ref } );
+$v_min = &min(map { $_->[$_ftori] } @{ $sg_ref });
+$v_max = &max(map { $_->[$_ftend] } @{ $sg_ref });
 $sr_ref->{$s_grp}[$_counter][$_ori] = $v_min;
 $sr_ref->{$s_grp}[$_counter][$_end] = $v_max;
-push @{ $st_ord }, [ $s_grp, $v_min, $v_max ];
+@ft_coords = ( map { $_->[$_ftsco] } @{ $sg_ref } );
+$s_min = &min(@ft_coords);
+$s_max = &max(@ft_coords);
+$sr_ref->{$s_grp}[$_counter][$_mnsco] = $s_min;
+$sr_ref->{$s_grp}[$_counter][$_mxsco] = $s_max;
+# @ft_coords = ( map { &max(length($_->[$_ftname]),length($_->[$_ftid])) }
+#                   @{ $sg_ref } );
+$l_max = &max(map { &max(length($_->[$_ftname]),length($_->[$_ftid])) }
+                  @{ $sg_ref });
+$sr_ref->{$s_grp}[$_counter][$_flw] = $l_max;
+$L_max = length($s_grp);
+#
+$aflg && do {
+    # @ft_coords = ( map { $_->[$_ftnori], $_->[$_ftnend] } @{ $sg_ref } );
+    $w_min = &min(map { $_->[$_ftnori] } @{ $sg_ref });
+    $w_max = &max(map { $_->[$_ftnend] } @{ $sg_ref });
+    $sr_ref->{$s_grp}[$_counter][$_nori] = $w_min;
+    $sr_ref->{$s_grp}[$_counter][$_nend] = $w_max;
+    push @{ $st_ord },
+         [ $s_grp, $v_min, $v_max, $s_min, $s_max,
+                   $l_max, $L_max, $w_min, $w_max ];
+}; 
+$aflg || do {
+    push @{ $st_ord },
+         [ $s_grp, $v_min, $v_max, $s_min, $s_max, $l_max, $L_max ];
+};
+#
 &report('SORT_FTR',('|  ' x 5),$s_elem);
 @
-
-Something that really boost the ordering, if we compare to the old [[gawk]] version of {\prog}, is that we are performing the sort only on those groups that have more that one element, and we are also ordering short sets of GFF elements instead of sorting the whole input records first and then sort the groups we found in those records.
 
 <<messages - sorting GFF data>>=
 SORT_GRP => "\%sGroup: \%s\n",
@@ -5430,19 +5671,44 @@ SORT_FTR => "\%s       Sorted \%s elements.\n",
 
 \subsctn{Sorting groups by coords and upper features by input order}
 
-Here we take advantage of having the group coords in a list of lists ([[@{ $st_ord }]]) instead of having it as a list within a key/value hash of lists.
+Here we take advantage of having the group coords in a list of lists ([[@{ $st_ord }]]) instead of having it as a list within a key/value hash of lists. Minimum and maximum values from a group counters array are already the minimum and maximum for all the elements within a group, then we do not need a temporary array to which list all coords or scores (as we did in [[<<sorting group elements>>]]).
 
 <<sorting group coords by acceptor>>=
-@ft_coords = ( map { $_->[1], $_->[2] } @{ $st_ord } );
-$v_min = &min(@ft_coords);
-$v_max = &max(@ft_coords);
+# @ft_coords = ( map { $_->[1], $_->[2] } @{ $st_ord } );
+$v_min = &min(map { $_->[1] } @{ $st_ord });
+$v_max = &max(map { $_->[2] } @{ $st_ord });
 $sc_ref->{$s_str}[$_counter][$_ori] = $v_min;
 $sc_ref->{$s_str}[$_counter][$_end] = $v_max;
-push @sr_coords, $v_min, $v_max;
+# @ft_coords = ( map { $_->[3], $_->[4] } @{ $st_ord } );
+$s_min = &min(map { $_->[3] } @{ $st_ord });
+$s_max = &max(map { $_->[4] } @{ $st_ord });
+$sc_ref->{$s_str}[$_counter][$_mnsco] = $s_min;
+$sc_ref->{$s_str}[$_counter][$_mxsco] = $s_max;
+# @ft_coords = ( map { $_->[5] } @{ $st_ord } );
+$l_max = &max(map { $_->[5] } @{ $st_ord });
+$L_max = &max(map { $_->[6] } @{ $st_ord });
+$sc_ref->{$s_str}[$_counter][$_flw]   = $l_max;
+$sc_ref->{$s_str}[$_counter][$_glw]   = $L_max;
+$aflg && do {
+    # @ft_coords = ( map { $_->[6], $_->[7] } @{ $st_ord } );
+    $w_min = &min(map { $_->[7] } @{ $st_ord });
+    $w_max = &max(map { $_->[8] } @{ $st_ord });
+    $sc_ref->{$s_str}[$_counter][$_nori] = $w_min;
+    $sc_ref->{$s_str}[$_counter][$_nend] = $w_max;
+    push @sr_coords,
+         [ $v_min, $v_max, $s_min, $s_max, $l_max, $L_max, $w_min, $w_max ];
+}; 
+# push @sr_coords, $v_min, $v_max;
+$aflg || do {
+    push @sr_coords,
+         [ $v_min, $v_max, $s_min, $s_max, $l_max, $L_max ];
+}; 
 #
 @{ $st_ord } = map { $_->[2] }
                sort { &$sortfunct }
-               map { [ $_->[1], $_->[2], $_->[0] ] } @{ $st_ord };
+               map { [ $_->[1],
+                       $_->[2],
+                       $_->[0] ] } @{ $st_ord };
 $s_elem = $sc_ref->{$s_str}[$_counter][$_elemNum];
 &report('SORT_GPN',('|  ' x 4),$s_elem);
 @ 
@@ -5456,16 +5722,52 @@ SORT_GPN => "\%s\`Sorted \%s groups.\n",
 We are going to skip the strand sorting, because the program will process always strands in a fixed order, that is: '+', '.' and '-' (so forward features first, followed by those features that does not have a defined strand, and finally reverse features).
 
 <<set source elements boundaries>>=
-$v_min = &min(@sr_coords);
-$v_max = &max(@sr_coords);
+# @tt_coords = ( map { $_->[0], $_->[1] } @sr_coords );
+$v_min = &min(map { $_->[0] } @sr_coords);
+$v_max = &max(map { $_->[1] } @sr_coords);
 $ss_ref->{$s_src}[$_counter][$_ori] = $v_min;
 $ss_ref->{$s_src}[$_counter][$_end] = $v_max;
-push @sc_coords, $v_min, $v_max;
+# @tt_coords = ( map { $_->[2], $_->[3] } @sr_coords );
+$s_min = &min(map { $_->[2] } @sr_coords);
+$s_max = &max(map { $_->[3] } @sr_coords);
+$ss_ref->{$s_src}[$_counter][$_mnsco] = $s_min;
+$ss_ref->{$s_src}[$_counter][$_mxsco] = $s_max;
+$l_max = &max(map { $_->[4] } @sr_coords);
+$L_max = &max(map { $_->[5] } @sr_coords);
+$ss_ref->{$s_src}[$_counter][$_flw]   = $l_max;
+$ss_ref->{$s_src}[$_counter][$_glw]   = $L_max;
+$aflg && do {
+    # @tt_coords = ( map { $_->[5], $_->[6] } @sr_coords );
+    $w_min = &min(map { $_->[6] } @sr_coords);
+    $w_max = &max(map { $_->[7] } @sr_coords);
+    $ss_ref->{$s_src}[$_counter][$_nori] = $w_min;
+    $ss_ref->{$s_src}[$_counter][$_nend] = $w_max;
+    push @sc_coords,
+         [ $v_min, $v_max, $s_min, $s_max, $l_max, $L_max, $w_min, $w_max ];
+}; 
+# push @sc_coords, $v_min, $v_max;
+$aflg || do {
+    push @sc_coords,
+         [ $v_min, $v_max, $s_min, $s_max, $l_max, $L_max ];
+}; 
 @ 
 
+We are at the sequence array level again:
+
 <<set sequence elements boundaries>>=
-$s_ref ->{$s_seq}[$_counter][$_ori] = &min(@sc_coords);
-$s_ref ->{$s_seq}[$_counter][$_end] = &max(@sc_coords);
+# @tt_coords = ( map { $_->[0], $_->[1] } @sc_coords );
+$s_ref ->{$s_seq}[$_counter][$_ori] = &min(map { $_->[0] } @sc_coords);
+$s_ref ->{$s_seq}[$_counter][$_end] = &max(map { $_->[1] } @sc_coords);
+# @tt_coords = ( map { $_->[2], $_->[3] } @sc_coords );
+$s_ref->{$s_seq}[$_counter][$_mnsco] = &min(map { $_->[2] } @sc_coords);
+$s_ref->{$s_seq}[$_counter][$_mxsco] = &max(map { $_->[3] } @sc_coords);
+$s_ref->{$s_seq}[$_counter][$_flw]   = &max(map { $_->[4] } @sc_coords);
+$s_ref->{$s_seq}[$_counter][$_glw]   = &max(map { $_->[5] } @sc_coords);
+$aflg && do {
+    # @tt_coords = ( map { $_->[5], $_->[6] } @sc_coords );
+    $s_ref->{$s_seq}[$_counter][$_nori] = &min(map { $_->[6] } @sc_coords);
+    $s_ref->{$s_seq}[$_counter][$_nend] = &max(map { $_->[7] } @sc_coords);
+}; 
 @ 
 
 <<Sorting Features>>=
@@ -5497,7 +5799,7 @@ sub sort_reverse {
 
 We choose between those two functions (both defining which fields to order and the direction --ascending/descending--), assigning by reference to [[$sortfunct]] variable which is de-referenced within the [[sort]] functions.
 
-<<set forward/reverse sorting functon>>=
+<<set forward/reverse sorting function>>=
 my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
 @
 %$
@@ -5518,7 +5820,7 @@ sub set_page_vars() {
     &set_seq_boundaries($var);
     &set_tickmark_vars($var);
     &find_prop_ratio($var);
-    &set_box_vars($var);
+    &set_misc_vars($var);
     &set_page_labels($var);
     &footer("PAGE LAYOUT SET for CURRENT PLOT");
 } # set_page_vars
@@ -5590,8 +5892,9 @@ $vrf->{_x_sequence_name} = defined($vrf->{x_sequence_name})
 $vrf->{_y_sequence_name} = defined($vrf->{y_sequence_name})
     ? $vrf->{y_sequence_name} : '.+';
 defined($vrf->{alignment_name}) && do {
-    $vrf->{_x_sequence_name} = $vrf->{alignment_name}[0];
-    $vrf->{_y_sequence_name} = $vrf->{alignment_name}[1];
+    ($vrf->{_x_sequence_name},
+     $vrf->{_y_sequence_name}) = 
+         split /:/o, $vrf->{alignment_name}, 2;
 }; # defined($vrf->{alignment_name})
 $vrf->{_alignment_name} = 
     [ $vrf->{_x_sequence_name}, $vrf->{_y_sequence_name} ];
@@ -5617,11 +5920,11 @@ $vrf->{_plot_aln} && do {
 \item Finally we grep those X and Y sequences from [[@{$Order{GFF}}]], so we sholud know if they are present there or not. This depends on what we have found in [[@{$Order{ALN}}]] but also on [[$Vars{LAYOUT}{x_sequence_name}]] and [[$Vars{LAYOUT}{y_sequence_name}]] settings.
 
 <<setting axes - step 3>>=
-$vrf->{_alignment_name} = join($;, @{ $vrf->{_alignment_name} });
-$vrf->{_plot_x_sequence} =
-    &search_seqname(\$$vrf{_x_sequence_name}, undef, \@{ $Order{GFF} });
-$vrf->{_plot_y_sequence} =
-    &search_seqname(\$$vrf{_y_sequence_name}, $vrf->{_x_sequence_name}, 
+$vrf->{_alignment_name} = join(":", @{ $vrf->{_alignment_name} });
+($vrf->{_plot_x_sequence},$vrf->{_x_sequence_name}) =
+    &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
+($vrf->{_plot_y_sequence},$vrf->{_y_sequence_name}) =
+    &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
                     \@{ $Order{GFF} });
 @ %def {_plot_x_sequence} {_plot_y_sequence}
 \end{enumerate}
@@ -5634,10 +5937,10 @@ sub set_page_axes() {
     <<setting axes - step 1>>
     <<setting axes - step 2>>
     <<setting axes - step 3>>
-    ($vrf->{alignment_name} = $vrf->{_alignment_name}) =~ s/$;/ : /o;
+    # ($vrf->{alignment_name} = $vrf->{_alignment_name}) =~ s/$;/ : /o;
     my ($yf,$nf) = ('was found. PLOTTING IT...','NOT found. NOT PLOTTED...');
     &report('SETPAGEAXES',
-             ( "ALIGNMENT \"$vrf->{alignment_name}\" ".
+             ( "ALIGNMENT \"$vrf->{_alignment_name}\" ".
                ( $vrf->{_plot_aln} ? $yf : $nf ).
                ( $vrf->{_swap_aln} ?
                  "\n###     The alignment found makes program".
@@ -5657,7 +5960,8 @@ SETPAGEAXES =>
   "###---> Setting plot AXES: \n###     \%s\n###     \%s\n###     \%s\n",
 @
 
-We need two auxiliarly functions to grep alignment and sequences names on [[@{$Order{ALN}}]] and [[@{$Order{GFF}}]] respectively. Remember that '[[$;]]' correspond to '[[SUBSET]]' in AWK.
+We need two auxiliarly functions to grep alignment and sequences names on [[@{$Order{ALN}}]] and [[@{$Order{GFF}}]] respectively. Remember that we are using a colon (':') as joining character between two sequence names (in order to simplify parsing of customization and GFF records, also to cross-interacting among them).
+% Remember that '[[$;]]' correspond to '[[SUBSEP]]' in AWK.
 
 <<Layout Settings>>=
 sub search_alnname() {
@@ -5666,7 +5970,7 @@ sub search_alnname() {
     #
     ($sq_a,$sq_b) = @$_ra;
     foreach $naln (@$_ro) {
-        ($nm_a,$nm_b) = split /$;/o, $naln->[0]; 
+        ($nm_a,$nm_b) = split /:/o, $naln->[0], 2; 
         ($nm_a =~ /^$sq_a$/ && $nm_b =~ /^$sq_b$/) && do {
             @$_ra = ($nm_a,$nm_b);
             return ($T, $F);
@@ -5674,10 +5978,9 @@ sub search_alnname() {
     }; # foreach $naln
     # swapping
     foreach $naln (@$_ro) {
-        ($nm_a,$nm_b) = split /$;/o, $naln->[0]; 
+        ($nm_a,$nm_b) = split /:/o, $naln->[0], 2; 
         ($nm_a =~ /^$sq_b$/ && $nm_b =~ /^$sq_a$/) && do {
             @$_ra = ($nm_b,$nm_a);
-            # @$_ra = reverse @$_ra;
             return ($T, $T);
         };
     }; # foreach $naln
@@ -5691,13 +5994,13 @@ sub search_seqname() {
     my ($sq_a,$sq_b,$_ro) = @_;
     my ($a_found,$naln);
     foreach $naln (@$_ro) {
-        ($$sq_a eq '.+' && defined($sq_b) && $naln->[0] eq $sq_b) && next;
+        ($sq_a eq '.+' && defined($sq_b) && $naln->[0] eq $sq_b) && next;
         $naln->[0] =~ /^$sq_a$/ && do {
-            $$sq_a = $naln->[0];
-            return $T;
+            $sq_a = $naln->[0];
+            return ($T, $sq_a);
         };
     }; # foreach $naln
-    return $F;
+    return ($F, undef);
 } # search_seqname
 @ %def &search_seqname
 
@@ -5733,15 +6036,17 @@ $vrf->{_plot_y_sequence} && do {
     push @{ $tcrds{ys} }, $rrf->[$_ori] ;
     push @{ $tcrds{ye} }, $rrf->[$_end] ;
 };
+# print LOGFILE (Data::Dumper->Dump([ \%tcrds ], [ qw( *tcrds ) ]))
+#     if ($LogFile && $Debug);
 #
-$vrf->{_x_start} = [ scalar(@{ $tcrds{xs} }) > 0 ?
-                        min(@{ $tcrds{xs} }) :    0, 'bp' ];
-$vrf->{_x_end}   = [ scalar(@{ $tcrds{xe} }) > 0 ? 
-                        max(@{ $tcrds{xe} }) : 1000, 'bp' ];
-$vrf->{_y_start} = [ scalar(@{ $tcrds{ys} }) > 0 ? 
-                        min(@{ $tcrds{ys} }) :    0, 'bp' ];
-$vrf->{_y_end}   = [ scalar(@{ $tcrds{ye} }) > 0 ? 
-                        max(@{ $tcrds{ye} }) : 1000, 'bp' ];
+$vrf->{_x_start} = [ ( scalar(@{ $tcrds{xs} }) > 0 ?
+                         &min(@{ $tcrds{xs} }) :    0 ), 'bp' ];
+$vrf->{_x_end}   = [ ( scalar(@{ $tcrds{xe} }) > 0 ? 
+                         &max(@{ $tcrds{xe} }) : 1000 ), 'bp' ];
+$vrf->{_y_start} = [ ( scalar(@{ $tcrds{ys} }) > 0 ? 
+                         &min(@{ $tcrds{ys} }) :    0 ), 'bp' ];
+$vrf->{_y_end}   = [ ( scalar(@{ $tcrds{ye} }) > 0 ? 
+                         &max(@{ $tcrds{ye} }) : 1000 ), 'bp' ];
 #
 @ %def {_x_start} {_x_end} {_y_start} {_y_end}
 
@@ -5794,6 +6099,8 @@ $vrf->{_y_end}   = [ scalar(@{ $tcrds{ye} }) > 0 ?
         $vrf->{_y_end}
         ],
    ); # %tcrds
+# print LOGFILE (Data::Dumper->Dump([ \%tcrds ], [ qw( *tcrds ) ]))
+#     if ($LogFile && $Debug);
 #
 $vrf->{_x_start} = &get_units(\@{ $vrf->{_x_start} });
 $vrf->{_x_end}   = &get_units(\@{ $vrf->{_x_end} });
@@ -6031,12 +6338,50 @@ As we are getting the ratio of X-axes divided by X-axes dimensionality, [[aplot_
 \subsctn{Misc plot sections variables}
 
 <<Layout Settings>>=
-sub set_box_vars() {
+sub set_misc_vars() {
     my ($vrf) = @_;
-    $vrf->{percent_box_height} = &get_units(\@{ $vrf->{percent_box_height} });
-    $vrf->{extra_box_height}   = &get_units(\@{ $vrf->{extra_box_height} });
-} #set_box_vars
-@ %def set_box_vars
+    my %lbllen;
+    <<looking for feature/group label lengths>>
+} # set_misc_vars
+@ %def &set_misc_vars
+
+Here, we take care if user has set a fixed width for feature and group labels, else it is taken from the main GFF data structure (the corresponding fields, [[$_flw]] and [[$_glw]], were set in section~\ref{sec:setlabellengths} on page~\pageref{sec:setlabellengths}).
+
+<<looking for feature/group label lengths>>=
+%lbllen = (
+    xfl => $vrf->{feature_x_label_length},
+    xgl => $vrf->{group_x_label_length}  ,
+    yfl => $vrf->{feature_y_label_length},
+    ygl => $vrf->{group_y_label_length}  ,
+  );
+$vrf->{_plot_x_sequence} && do { 
+    defined($lbllen{xfl}) || do {
+        $lbllen{xfl} = 
+            $GFF_DATA{$vrf->{_x_sequence_name}}[$_counter][$_flw];
+    }; # feature_x_label_length
+    defined($lbllen{xgl}) || do {
+        $lbllen{xgl} = 
+            $GFF_DATA{$vrf->{_x_sequence_name}}[$_counter][$_glw];
+    }; # group_x_label_length
+}; # _plot_x_sequence
+$vrf->{_plot_y_sequence} && do { 
+    defined($lbllen{yfl}) || do {
+        $lbllen{yfl} = 
+            $GFF_DATA{$vrf->{_y_sequence_name}}[$_counter][$_flw];
+    }; # feature_y_label_length
+    defined($lbllen{ygl}) || do {
+        $lbllen{ygl} = 
+            $GFF_DATA{$vrf->{_y_sequence_name}}[$_counter][$_glw];
+    }; # feature_y_label_length
+}; # _plot_y_sequence
+foreach my $u (keys %lbllen) {
+    $lbllen{$u} = (defined($lbllen{$u}) && $lbllen{$u} >= 0) ? $lbllen{$u} : 0;
+}; # foreach $u
+$vrf->{feature_x_label_length} = $lbllen{xfl};
+$vrf->{group_x_label_length}   = $lbllen{xgl};
+$vrf->{feature_y_label_length} = $lbllen{yfl};
+$vrf->{group_y_label_length}   = $lbllen{ygl};
+@ 
 
 
 \subsctn{Setting whole figure labels}
@@ -6047,7 +6392,7 @@ When setting some of the plot labels, we must check if they are defined or not, 
 sub set_page_labels() {
     my ($vrf) = @_;
     defined($vrf->{title})    || do {
-        ($vrf->{title} = $vrf->{_alignment_name}) =~ s/$;/ x /o;
+        ($vrf->{title} = $vrf->{_alignment_name}) =~ s/:/ x /o;
         $vrf->{_plot_aln} || 
             ($vrf->{subtitle} = 
               'This alignment sequence was not found on GFF input records.\n'.
@@ -6135,7 +6480,7 @@ sub ps_header() {
     my $vr = \%{ $Vars{LAYOUT} };
     print STDOUT << "+++HEADER+++";
 %!PS-Adobe-3.0
-%%Title: title
+%%Title: $vr->{title}
 %%Creator: $PROGRAM
 %%Version: $VERSION
 %%CreationDate: $DATE
@@ -6581,7 +6926,7 @@ D                                        %-%
 /XYR   $vr->{aplot_xy_scale} D                        %-%
 %-%
 /ZM    @{[ &tobool($vr->{zoom_marks}) ]} D            %:%
-@ %def flglscape H HT VT flgcrd Pb Qb axesb XYR ZM 
+@ %def H HT VT flgcrd flglscape Pb Qb axesb XYR ZM 
 
 <<PSVariables - layout>>=
 %-% getting page format
@@ -6627,17 +6972,17 @@ D                 %:%
 %-% Background Colors
 /bg {                       %-% bg -> c m y k 
   colordict begin           %-> recovering from colordict dictionary
-    $vr->{background_color} %-%               this color cmyk values
+    $vr->{background_color}    %-%            this color cmyk values
   end                       %-% close colordict
 } D                         %-% 
 /fg {                       %-% fg -> c m y k 
   colordict begin           %->
-    $vr->{foreground_color} %-%
+    $vr->{foreground_color}    %-%
   end                       %-%
 } D                         %-% 
 /ABc {                      %-% ABc -> c m y k 
   colordict begin           %->
-    $vr->{aplot_box_bgcolor} %-%
+    $vr->{aplot_box_bgcolor}   %-%
   end                       %-%
 } D                         %-% 
 /PBc {                      %-% PBc -> c m y k 
@@ -6647,7 +6992,7 @@ D                 %:%
 } D                         %-% 
 /QBc {                      %-% QBc -> c m y k 
   colordict begin           %->
-    $vr->{extra_box_bgcolor} %-%
+    $vr->{extra_box_bgcolor}   %-%
   end                       %-%
 } D                         %-% 
 @ %def bg fg ABc PBc QBc 
@@ -6666,9 +7011,9 @@ D                 %:%
 
 <<PSVariables - layout>>=
 %-% boxes heights
-/Ph $vr->{percent_box_height} D  %-% user can define a box height
-/Qh $vr->{extra_box_height}   D  %:% but it will always fit the page limitations
-@ %def 
+/Ph @{ $vr->{percent_box_height} } D  %-% user can define a box height
+/Qh @{ $vr->{extra_box_height} } D    %:% but it will always fit page limits 
+@ %def Ph Qh
 
 <<PSVariables - tickmarks>>=
 %-% tickmark boolean flags
@@ -6701,7 +7046,7 @@ D                 %:%
 \subsubsctn{Title area variables}
 
 <<PSVariables - labels>>=
-%% Labels
+%-% Title labels
 /TTLb @{[ &tobool($vr->{show_title}) ]} D      %-%
 /TTLl @{[ &tostring($vr->{title}) ]} D         %-%
 /TTLz @{ $vr->{title_fontsize} } D             %-%
@@ -6727,6 +7072,7 @@ D        %:%
 \subsubsctn{Labeling X/Y sequence axes}
 
 <<PSVariables - labels>>=
+%-% annotation labels
 /XSLb @{[ &tobool($vr->{show_x_sequence_label}) ]} D  %-%
 /XSLl @{[ &tostring($vr->{x_sequence_label}) ]} D     %-%
 /XSLz @{ $vr->{x_label_fontsize} } D                  %-%
@@ -6752,6 +7098,7 @@ D        %:%
 \subsubsctn{Labels for percent box}
 
 <<PSVariables - labels>>=
+%-% percent box labels
 /PBLb @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D  %-%
 /PBLl @{[ &tostring($vr->{percent_box_label}) ]} D        %-%
 /PBLz @{ $vr->{percent_box_label_fontsize} } D            %-%
@@ -6777,6 +7124,7 @@ D        %:%
 \subsubsctn{Labels for bottom panel}
 
 <<PSVariables - labels>>=
+%-% extra box labels
 /QBLb @{[ &tobool($vr->{show_extra_box_label}) ]} D   %-%
 /QBLl @{[ &tostring($vr->{extra_box_label}) ]} D      %-%
 /QBLz @{ $vr->{extra_box_label_fontsize} } D          %-%
@@ -6799,46 +7147,101 @@ D        %-%
 D        %:%
 @ %def QBLb QBLl QBLz QBLf QBLp QBlb QBll QBlz QBlf QBlp
 
+
+\subsubsctn{Labels for annotation features}
+
+<<PSVariables - labels>>=
+%-% feature labels: global settings
+/FTz @{ $vr->{feature_label_fontsize} } D         %-%
+/FTf { FTz $Fonts{$vr->{feature_label_font}} } D  %-%
+/FTp                                   %-% feature labels spacing
+  FTz 0.25 mul                         %-% (between feature labels
+D                                      %-%         and source tier)
+%-% feature labels: X-sequence vars
+/FTXw                                  %-% max feature label length
+  $vr->{feature_x_label_length}        %-%
+  FTf glblw                            %-%
+D                                      %-%
+/FTXa $vr->{feature_x_label_angle} D   %-%
+/FTXrb @{[ &tobool($vr->{feature_x_label_rotate}) ]} D  %-%
+%-% feature labels: Y-sequence vars
+/FTYw                                  %-% max feature label length
+  $vr->{feature_y_label_length}        %-%
+  FTf glblw                            %-%
+D                                      %-%
+/FTYa $vr->{feature_y_label_angle} D   %-%
+/FTYrb @{[ &tobool($vr->{feature_y_label_rotate}) ]} D  %:%
+@ %def FTz FTf FTp FTXw FTXa FTXrb FTYw FTYa FTYrb
+
+<<PSVariables - labels>>=
+/FTXh 1 D  %-% feature labels height
+/FTYh 1 D  %:% feature labels height
+@ %def FTXh FTYh
+
+
+\subsubsctn{Labels for annotated groups}
+
+<<PSVariables - labels>>=
+%-% group labels: global settings
+/GPz @{ $vr->{group_label_fontsize} } D         %-%
+/GPf { GPz $Fonts{$vr->{group_label_font}} } D  %-%
+/GPp                                 %-% group labels spacing 
+  GPz 0.25 mul                       %-% (between feature and group labels)
+D                                    %-% 
+%-% group labels: X-sequence vars
+/GPXw                                %-% max group label length
+  $vr->{group_x_label_length}        %-%
+  GPf glblw                          %-%
+D                                    %-%
+/GPXa $vr->{group_x_label_angle} D   %-%
+/GPXrb @{[ &tobool($vr->{group_x_label_rotate}) ]} D  %-%
+%-% group labels: Y-sequence vars
+/GPYw                                %-% max group label length
+  $vr->{group_y_label_length}        %-%
+  GPf glblw                          %-%
+D                                    %-%
+/GPYa $vr->{group_y_label_angle} D   %-%
+/GPYrb @{[ &tobool($vr->{group_y_label_rotate}) ]} D  %:%
+@ %def GPz GPf GPp GPXw GPXa GPXrb GPYw GPYa GPYrb
+
+<<PSVariables - labels>>=
+/GPXh 1 D  %-% group labels height
+/GPYh 1 D  %:% group labels height
+@ %def GPXh GPYh
+
 \subsubsctn{Misc layout variables}
 
 Those vars are not well defined yet.
 
 <<PSVariables - labels>>=
-/DRh 1 D  %:% source tier height
+/DRh 10 pt D  %:% source tier height
 @ %def DRh
 
 <<PSVariables - labels>>=
-/FTz  1 D  %-% feature labels font-size % Var["FEATURE_LABELS_FONTSIZE"];
-/FTw  1 D  %-% feature labels width
-/FTXa {} D  %-% feature labels angle % FTXangle~Var["FEATURE_X-LABELS_ANGLE"];
-/FTXh 1 D  %-% feature labels height
-/FTYa {} D  %-% feature labels angle  % FTYangle~Var["FEATURE_Y-LABELS_ANGLE"];
-/FTYh 1 D  %-% feature labels height
-/FTp            %-% feature labels spacing
-  FTz 0.25 mul  %-% (between feature labels and source tier)
-D               %:%
-@ %def FTz FTw FTXh FTYh FTp 
-
-<<PSVariables - labels>>=
-/GPz  1 D  %-% group labels font-size % Var["GROUP_LABELS_FONTSIZE"];
-/GPw  1 D  %-% group labels width
-/GPXa {} D  %-% group labels angle  % GPXangle ~ Var["GROUP_X-LABELS_ANGLE"];
-/GPXh 1 D  %-% group labels height
-/GPYa {} D  %-% group labels angle  % GPYangle ~ Var["GROUP_Y-LABELS_ANGLE"];
-/GPYh 1 D  %-% group labels height
-/GPp            %-% group labels spacing 
-  GPz 0.25 mul  %-% (between feature and group labels)
-D               %:% 
-@ %def GPz GPw GPXh GPYh GPp
-
-<<PSVariables - labels>>=
-/Blw 2 pt D %-% boxes border line width
-/KLz  5 D  %-% tickmarks labels font-size
-/KLw 20 D  %-% tickmarks labels max width
-/KLh  5 D  %-% tickmarks labels max height
-/KLp            %-% tickmark labels spacing plus drawn marks
-  KLz 0.50 mul  %-% 
-D               %:% 
+/Blw 2 pt D    %-% boxes border line width
+/KLz 8 pt D    %-% tickmarks labels font-size
+/KLf {            %->
+  KLz /Helvetica  %-%
+} D               %-% tickmarks labels font
+/KWx 1.5 pt D  %-% major tickmarks line width
+/KWn           %-> minor tickmarks line width
+  KWx 0.1 mul  %->
+D              %->
+/KHx           %-> major tickmarks height
+  KLz 0.75 mul %->
+D              %->
+/KHn           %-> minor tickmarks height
+  KLz 0.50 mul %->
+D              %->
+/KLp           %-> tickmarks labels spacer (plus drawn marks)
+  KLz 1.0 mul  %->
+D              %-%
+/KLh           %-> tickmarks labels max height
+  KLz KLp add  %->
+D              %->
+/KLw           %-> tickmarks labels max width
+  20 KLp add   %->
+D              %-%
 @ %def KLz KLw KLh KLp
 
 <<PSVariables - labels>>=
@@ -6953,7 +7356,7 @@ BLOCKRB =>
 BLOCKXY =>
   "###     + APLOT-BOX drawing \%s annotation...\n",
 BLOCKA =>
-  "###     + APLOT-BOX drawing alignment features...\n",
+  "###     + \%s drawing alignment features...\n",
 BLOCKFX =>
   "###     + APLOT-BOX extra features from custom files...\n",
 BLOCKDONE =>
@@ -7046,7 +7449,7 @@ sub ps_plot_features() {
 sub ps_plot_aln() {
     my ($aln) = @_;
     print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\n"; 
-    &report('BLOCKA');
+    &report('BLOCKA','APLOT-BOX');
  
 } # ps_plot_aln
 @ %def &ps_plot_aln
@@ -7096,13 +7499,13 @@ $vlr->{_aln_lower_sco} $vlr->{_aln_upper_sco} beginmatches
 sub ps_plot_pctaln() {
     my ($aln) = @_;
     print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\n"; 
-    &report('BLOCKA');
+    &report('BLOCKA','PERCENT-BOX');
  
 } # ps_plot_pctaln
 @ %def &ps_plot_pctaln
 
 
-\subsubsctn{Generating lower auxiliarly box}
+\subsubsctn{Generating lower panel}
 
 <<PostScript PLOT>>=
 sub ps_block_extra() {
@@ -7216,7 +7619,9 @@ We have implemented a perl script that is used as a [[noweb]] filter (see append
 %-% styles
 /cmyk { setcmykcolor } B       %-% we are going to use only CMYK colors
 /slw  { setlinewidth } B       %-%
-/dotted { [ 1 ] 0 setdash } D  %:%
+/dotted  { [ 1   ] 0 setdash } D  %-% dotted line style: 1 ON 1 OFF, offset=0
+/ldotted { [ 1 2 ] 0 setdash } D  %-% dotted line style: 1 ON 2 OFF, offset=0
+/dashed  { [ 3 2 ] 0 setdash } D  %:% dashed line style: 3 ON 2 OFF, offset=0
 %
 %%EndProcSet:   Short_names 1.0 0
 %
@@ -7292,8 +7697,8 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
 } B            %-%
 %-% 
 %-% msc is useful when we want to print var contents
-%-% because we can push the var names and their values into the stack
-%-% and it clears the stack once it has finished 
+%-%   because we can push the var names and their values into the stack
+%-%   and it clears the stack once it has finished 
 /msc {         %-> mark var_name.string.0 var_value.0 ...
   mst          %->   ... var_name.string.n var_value.n string msc 
   counttomark  %-> 
@@ -7311,6 +7716,7 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
 %
 <<PSFunctions - debugging>>
 <<PSFunctions - bbox>>
+<<PSFunctions - obox>>
 <<PSFunctions - min max>>
 <<PSFunctions - clim zlim>>
 <<PSFunctions - hip>>
@@ -7327,7 +7733,7 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
 \hspace{1cm}
 <<PSFunctions - bbox>>=
 /bbox {      %-> llx lly urx ury bbox
-  vflg { (bbox) msg } if  %-%
+  %-% vflg { (bbox) msg } if
   4 copy     %-> llx lly urx ury llx lly urx ury
   3 1 roll   %-> llx lly urx ury llx ury lly urx
   exch       %-> llx lly urx ury llx ury urx lly
@@ -7363,11 +7769,34 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
 \end{center}
 \end{figure}
 
+<<PSFunctions - obox>>=
+%-% obox draw a box that is enclosing its bounding box
+%-%   by displacing half the with of its path outside those limits
+/obox {     %-> LLx LLy URx URy lw  obox
+  %-% vflg { (obox) msg } if
+  2 div     %-> we get half the width, which is the correct offset to add
+  dup       %-> LLx LLy URx URy lw lw 
+  dup       %-> LLx LLy URx URy lw lw lw
+  dup       %-> LLx LLy URx URy lw lw lw lw
+  7 1 roll  %-> LLx lw LLy URx URy lw lw lw
+  5 1 roll  %-> LLx lw LLy lw URx URy lw lw
+  3 1 roll  %-> LLx lw LLy lw URx lw URy lw
+  add       %-> LLx lw LLy lw URx lw URy!
+  7 1 roll  %-> URy! LLx lw LLy lw URx lw
+  add       %-> URy! LLx lw LLy lw
+  6 1 roll  %-> URx! URy! LLx lw LLy lw
+  sub       %-> URx! URy! LLx lw LLy!
+  5 1 roll  %-> LLy! URx! URy! LLx lw
+  sub       %-> LLy! URx! URy! LLx!
+  4 1 roll  %-> LLx! LLy! URx! URy!
+  bbox      %->
+} B         %-%
+@ %def obox
 
 <<PSFunctions - min max>>=
 %-% minimum of two values
 /min {    %-> value1 value2 min -> min_value
-  vflg { (min) msg } if  %-%
+  %-% vflg { (min) msg } if
   2 copy  %-> value1 value2 value1 value2
   gt {    %-> is value1 greater than value2
     exch  %-> then stack-> value2 value1
@@ -7376,7 +7805,7 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
 } B       %-% returns smaller value
 %-% maximum of two values
 /max {    %-> value1 value2 max -> max_value
-  vflg { (max) msg } if  %-%
+  %-% vflg { (max) msg } if
   2 copy  %-> value1 value2 value1 value2
   lt {    %-> is value1 lower than value2
     exch  %-> then stack-> value2 value1
@@ -7389,14 +7818,14 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
 %-% clim returns a value that must fit within an interval
 %-%   by clipping off-limits to min or max values 
 /clim {      %-> min_value max_value value clim -> new_value
-  vflg { (clim) msg } if  %-%
+  %-% vflg { (clim) msg } if
   min        %-> min_value min(max_value,value)
   max        %-> max(min_value,min(max_value,value))
 } B          %-% min_value <= value <= max_value
 %-% zlim computes limits as clim
 %-%   but taking into account null values
 /zlim {      %-> min_value max_value curr_value zlim -> new_value
-  vflg { (zlim) msg } if  %-%
+  %-% vflg { (zlim) msg } if 
   dup        %-> min_value max_value curr_value curr_value
   0 eq {     %-> if font size is set to zero remove title area
     3 {      %-> 
@@ -7418,7 +7847,7 @@ tflg {  %-% if debbuging is on then push the mark object into the execution
 %-% hip returns the hypotenuse given two legs of a right triangle
 %-%   by applying Theorem of Pythagoras
 /hip {   %-> x-leg y-leg hip -> hypotenuse
-  vflg { (hip) msg } if  %-%
+  %-% vflg { (hip) msg } if
   dup    %-> x-leg y-leg y-leg
   mul    %-> x-leg y-leg^2
   exch   %-> y-leg^2 x-leg
@@ -7450,6 +7879,7 @@ $
 %%BeginProcSet: Text_functions 1.0 0
 %
 <<PSFunctions - sfnt>>
+<<PSFunctions - glblw>>
 <<PSFunctions - rtshw>>
 <<PSFunctions - ctshw>>
 <<PSFunctions - ltshw>>
@@ -7465,8 +7895,8 @@ $
 
 <<PSFunctions - sfnt>>=
 %-% sfnt is setting current scaled font
-/sfnt {      %-> font_size font_name sfnt
-  vflg { (sfnt) msg } if  %-%
+/sfnt {      %-> font_size font_name  sfnt
+  %-% vflg { (sfnt) msg } if
   findfont   %-> font_size <font>
   exch       %-> <font> font_size
   scalefont  %-> <scaled_font>
@@ -7474,10 +7904,20 @@ $
 } B          %:%
 @ %def sfnt
 
+<<PSFunctions - glblw>>=
+%-% glblw returns the length in points of a string having n chars
+/glblw {               %-> char_length {font_size font}  glblw
+  %-% vflg { (glblw) msg } if
+  sfnt                 %-> char_length font_def
+  (X) stringwidth pop  %-> getting length for a single char
+  mul                  %->   at the given font and fontsize
+} B                    %:%
+@ %def glblw
+
 <<PSFunctions - rtshw>>=
 %-% rtshw shows strings from (x,y) coords to right 
-/rtshw {     %-> (string) angle x y font_def c m y k rtshw
-  vflg { (rtshw) msg } if  %-%
+/rtshw {     %-> (string) angle x y font_def c m y k  rtshw
+  %-% vflg { (rtshw) msg } if
   S          %->
   cmyk       %-> (string) angle x y font_def
   sfnt       %-> (string) angle x y
@@ -7490,61 +7930,50 @@ $
 
 <<PSFunctions - ctshw>>=
 %-% ctshw shows strings centered on (x,y) coords 
-/ctshw {        %-> ctshw
-  vflg { (ctshw) msg } if  %-%
-  10 -1 roll    %->
-  dup           %->
-  11 1 roll     %->
-  7 -2 roll     %->
-  2 copy        %->
-  9 2 roll      %->
+/ctshw {        %-> (string) angle x y font_def c m y k  ctshw
+  %-% vflg { (ctshw) msg } if
+  10 -1 roll    %-> angle x y font_def={fontsize font} c m y k (string)
+  dup           %-> angle x y fontsize font c m y k (string) (string)
+  11 1 roll     %-> (string) angle x y fontsize font c m y k (string)
+  7 -2 roll     %-> (string) angle x y c m y k (string) fontsize font
+  2 copy        %-> (string) angle x y c m y k (string) f_size font f_size font
+  9 2 roll      %-> (string) angle x y f_size font c m y k (string) f_size font
   S             %->
     sfnt        %->
     stringwidth %->
-    pop         %->
+    pop         %-> (string) angle x y f_size font c m y k string_width
   R             %->
-  2 div         %->
-  H {           %->
-    9 -1 roll   %->
-    exch        %->
-    sub         %->
-    8 1 roll    %->
-  } {           %->
-    8 -1 roll   %->
-    exch        %->
-    sub         %->
-    7 1 roll    %->
-  } ifelse      %->
+  2 div         %-> (string) angle x y f_size font c m y k string_width/2
+  9 -1 roll     %-> (string) angle y f_size font c m y k width/2 x
+  exch          %-> (string) angle y f_size font c m y k x width/2
+  sub           %-> (string) angle y f_size font c m y k x!
+  8 1 roll      %-> (string) angle x! y f_size font c m y k
   rtshw         %->
 } B             %:%
 @ %def ctshw
 
+% /ctshw { vflg { (ctshw) msg } if 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfnt stringwidth pop R 2 div H { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse rtshw } B
+% /ltshw { vflg { (ltshw) msg } if 10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll S sfnt stringwidth pop R H { 9 -1 roll exch sub 8 1 roll } { 8 -1 roll exch sub 7 1 roll } ifelse rtshw } B
+
 <<PSFunctions - ltshw>>=
 %-% ltshw shows strings from (x,y) coords to left 
-/ltshw {        %->
+/ltshw {        %-> (string) angle x y font_def c m y k  ltshw
   vflg { (ltshw) msg } if  %-%
-  10 -1 roll    %->
-  dup           %->
-  11 1 roll     %->
-  7 -2 roll     %->
-  2 copy        %->
-  9 2 roll      %->
+  10 -1 roll    %-> angle x y font_def={fontsize font} c m y k (string)
+  dup           %-> angle x y fontsize font c m y k (string) (string)
+  11 1 roll     %-> (string) angle x y fontsize font c m y k (string)
+  7 -2 roll     %-> (string) angle x y c m y k (string) fontsize font
+  2 copy        %-> (string) angle x y c m y k (string) f_size font f_size font
+  9 2 roll      %-> (string) angle x y f_size font c m y k (string) f_size font
   S             %->
     sfnt        %->
     stringwidth %->
-    pop         %->
+    pop         %-> (string) angle x y f_size font c m y k string_width
   R             %->
-  H {           %->
-    9 -1 roll   %->
-    exch        %->
-    sub         %->
-    8 1 roll    %->
-  } {           %->
-    8 -1 roll   %->
-    exch        %->
-    sub         %->
-    7 1 roll    %->
-  } ifelse      %->
+  9 -1 roll     %-> (string) angle y f_size font c m y k string_width x
+  exch          %-> (string) angle y f_size font c m y k x string_width
+  sub           %-> (string) angle y f_size font c m y k x!
+  8 1 roll      %-> (string) angle x! y f_size font c m y k
   rtshw         %->
 } B             %:%
 @ %def ltshw
@@ -7711,13 +8140,24 @@ tflg { %-%
 After that we look how much width the alignment plot may have:
 
 <<POSTSCRIPT layout>>=
-/AXL             %-> left starting position for aplot
-  YSLz YSLp add  %-%  add Y-sequence label height and spacer
-  GPYh GPp add   %-%  add Y-seq group label height and spacer
+/ATX             %-> x-sequence total annotation width
+  GPXh GPp add   %-%  add X-seq group label height and spacer
+  FTXh FTp add   %-%  add X-seq feature label height and spacer
   add            %-%
+  DRh add        %-%  add source tier height
+D                %-%
+/ATY             %-> y-sequence total annotation width
+  GPYh GPp add   %-%  add Y-seq group label height and spacer
   FTYh FTp add   %-%  add Y-seq feature label height and spacer
   add            %-%
   DRh add        %-%  add source tier height
+D
+@ %def ATX ATY
+
+<<POSTSCRIPT layout>>=
+/AXL             %-> left starting position for aplot
+  YSLz YSLp add  %-%  add Y-sequence label height and spacer
+  ATY add        %-%  add annotation width 
 D                %-%
 %-%
 /AXR             %-> right ending position for aplot
@@ -7732,7 +8172,8 @@ D                %-%
 /AX              %-> getting aplot box max_width
   AXR AXL sub    %-%
 D                %:%
-tflg { mark (AXL:) AXL ( AXR:) AXR ( AX:) AX (*>*>*>) msc } if
+tflg { mark (ATX:) ATX ( ATY:) ATY                        %-%
+           ( AXL:) AXL ( AXR:) AXR ( AX:) AX (*>*>*>) msc } if
 @ %def AXL AXR AX
 
 And we have to calculate how much height the alignment plot has:
@@ -7744,10 +8185,7 @@ And we have to calculate how much height the alignment plot has:
   add            %-%  add subtitle area
   XSLz XSLp add  %-% 
   add            %-%  add X-seq label height and spacer
-  GPXh GPp add   %-%  
-  add            %-%  add X-seq group label height and spacer
-  FTXh FTp add   %-%
-  add            %-%  add X-seq feature label height and spacer
+  ATX add        %-%  add annotation width 
 D                %-%
 %-%
 /AYB             %-> although plots will have different heights,
@@ -7761,6 +8199,10 @@ tflg { mark (AYT:) AYT ( AYB:) AYB ( AY:) AY (*>*>*>) msc } if
 We re-scale the X and Y axes for the alignment plot:
 
 <<POSTSCRIPT layout>>=
+XYR 0 le {  %-%
+  /XYR 1 D  %-% reseting XYR if not defined as 1:1 x/y-ratio
+} if        %-%
+%-%
 axesb not {      %-%
   %-% if not aplot_xy_same_length flag then change previous def
   XYR 1 ge {     %-% 
@@ -7884,7 +8326,6 @@ tflg { mark (QYT:) QYT ( QYB:) QYB ( QY:) QY (*>*>*>) msc } if
 /ElmFont      { 12 FTLbsc mul /Times-Roman } D
 /TagFont      { 14 GPLbsc mul /Times-Roman } D
 /TagLabelFont { 16 /Times-Bold  } D
-/TickFont     { 10 /Helvetica } D
 %
 /xBDspl  1.8 putExon add putExLbl add putGnLbl add D % 1.25
 /xGLDspl 1.0 putExon add putExLbl add D              % 0.85
@@ -7910,6 +8351,7 @@ tflg { (%%% Setting aplot dictionary %%%) msg } if
   <<PSFunctions - fmt flt>>
   <<PSFunctions - line>>
   <<PSFunctions - uline>>
+  <<PSFunctions - corner>>
   <<PSFunctions - zoomtk>>
   <<PSFunctions - Line>>
   <<PSFunctions - Xline>>
@@ -7928,13 +8370,7 @@ tflg { (%%% Setting aplot dictionary %%%) msg } if
   <<PSFunctions - GnBanner>>
   <<PSFunctions - SbBanner>>
   <<PSFunctions - Banner>>
-  %
-  /tckdict 15 dict D tckdict begin
-    <<PSFunctions - mkmxt>>
-    <<PSFunctions - mwmod>>
-    <<PSFunctions - isltone>>
-  end % tckdict
-  %
+  <<PSFunctions - common tick functions>>
   <<PSFunctions - htick>>
   <<PSFunctions - vtick>>
   <<PSFunctions - nucltick>>
@@ -8018,56 +8454,51 @@ end % aplotdict
 } B              %:%
 @ %def uline
 
+<<PSFunctions - corner>>=
+/corner {        %-> X Y r s corner
+  S              %->
+    4 -2 roll    %-> r s X Y
+    m            %->         moving corner to its origin
+    0 0 0 0      %-> r s 0 0 0 0
+    6 4 roll     %-> 0 0 0 0 r s
+    dup neg      %-> 0 0 0 0 r s -s
+    5 1 roll     %-> 0 0 -s 0 0 r s
+    6 1 roll     %-> 0 s 0 -s 0 0 r
+    dup neg      %-> 0 s 0 -s 0 0 r -r
+    4 1 roll     %-> 0 s 0 -s -r 0 0 r
+    exch         %-> 0 s 0 -s -r 0 r 0
+    2 {          %->
+      rl         %-> going out from (X,Y)
+      S          %->
+        bg cmyk  %->
+        Blw 6 div slw %->
+        K        %->
+      R          %->
+      rl         %-> returning to (X,Y)
+      S          %->
+        fg cmyk  %->
+        Blw slw  %->
+        [1 3] 0 setdash %->
+        K        %->
+      R          %->
+    } repeat     %->
+  R              %->
+} B              %->
+@ %def corner
+
 <<PSFunctions - zoomtk>>=
-/zoomtk {  %->
+/zoomtk {   %-> LLx LLy URx URy zoomtk
   vflg { (zoomtk) msg } if  %-%
-  3 dict begin  %->
-    /r {  %->
-      TxWB  %->
-      BDspl  %->
-      mul  %->
-      Xscm  %->
-    } D  %->
-    /s {  %->
-      TyWB  %->
-      BDspl  %->
-      mul  %->
-      Yscm  %->
-    } D  %->
-    /corner {  %->
-      S  %->
-        10 -2 roll  %->
-        m   %->
-        2 {  %->
-          rl  %->
-          S  %->
-            bg cmyk  %->
-            .4 slw  %->
-            K  %->
-          R  %->
-          rl  %->
-          S  %->
-            fg cmyk  %->
-            2 slw  %->
-            [1 3] 0 setdash  %->
-            K  %->
-          R  %->
-        } repeat  %->
-      R   %->
-    } D  %->
-    4 copy  %->
-    3 1 roll  %->
-    exch  %->
-    0 s 0 s neg  %->
-      r neg 0 r 0 corner  %->
-    0 s neg 0 s  %->
-      r 0 r neg 0 corner  %->
-    0 s neg 0 s  %->
-      r neg 0 r 0 corner  %->
-    0 s 0 s neg  %->
-      r 0 r neg 0 corner  %->
-  end  %->
-} D  %:%
+  %-% setting coordinates for all four box corners
+  4 copy    %-> LLx LLy URx URy LLx LLy URx URy
+  3 1 roll  %-> LLx LLy URx URy LLx URy LLy URx
+  exch      %-> LLx LLy URx URy LLx URy URx LLy
+  %-% drawing corner marks
+  ATX     ATY     corner  %-> corner on URx LLy
+  ATX neg ATY neg corner  %-> corner on LLx URy
+  ATX     ATY neg corner  %-> corner on URx URy
+  ATX neg ATY     corner  %-> corner on LLx LLy
+} D         %:%
 @ %def zoomtk
 
 <<PSFunctions - Line>>=
@@ -8643,176 +9074,383 @@ end % aplotdict
 } B  %:%
 @ %def Banner
 
-% tckdict begin
-<<PSFunctions - mkmxt>>=
-/mkmxt {  %->
-  vflg { (mkmxt) msg } if  %-%
-  dup 0 lt {  %->
-    neg  %->
-  } if  %->
-  dup 10 lt {  %->
-    10 mul  %->
-    log  %->
-    round  %->
-    10 exch  %->
-    exp  %->
-    cvi  %->
-  } {  %->
-    log  %->
-    round  %->
-    10 exch  %->
-    exp  %->
-    cvi  %->
-  } ifelse  %->
-} D  %:%
-@ %def mkmxt
+<<PSFunctions - common tick functions>>=
+%-% mkgrid prints the grid lines if needed
+/mkgrid {      %-> boolean x y  mkgrid 
+  %-% vflg { (mkgrid) msg } if
+  S            %-> 
+    0 0 m      %-> set initial point
+    rl         %-> making the tickmark grid line relative from current point
+    fg cmyk    %->
+    {          %-> if boolean true, then major tickmark
+      dashed   %->
+      KWn 2 mul slw  %-> linewidth for major tickmarks grid lines
+    } {        %-> else minor tickmark
+      ldotted  %->
+      KWn slw  %-> linewidth for minor tickmarks grid lines
+    } ifelse   %-> setting dotted line style
+    K          %-> stroke tickmark grid line
+  R            %->
+} B            %-%
+%-% major tickmark lines
+/mjrtick {       %-> boolean  mjrtick
+  %-% vflg { (mjrtick) msg } if
+  S              %->
+    0 0 m        %-> set starting point
+    {            %-> boolean to choose horizontal or vertical axes
+      0 KHx neg  %-> horizontal axes
+	} {          %->
+      KHx 0      %-> vertical axes
+    } ifelse     %->
+    rl           %-> make a line of major tickmark heigth
+    KWx slw      %-> linewidth for major tickmarks
+    fg cmyk      %-> 
+    K            %-> stroke tickmark
+  R              %->
+} B              %-%
+%-% minor tickmark lines
+/mnrtick {       %-> boolean  mnrtick
+  %-% vflg { (mnrtick) msg } if
+  S              %->
+    0 0 m        %-> set starting point
+    {            %-> boolean to choose horizontal or vertical axes
+      0 KHn neg  %-> horizontal axes
+	} {          %->
+      KHn 0      %-> vertical axes
+    } ifelse     %->
+    rl           %-> make a line of minor tickmark heigth
+    KWn slw      %-> linewidth for minor tickmarks
+    fg cmyk      %-> 
+    K            %-> stroke minor tickmark
+  R              %->
+} B              %:%
+@ %def mkgrid mjrtick mnrtick 
 
-<<PSFunctions - mwmod>>=
-/nwmod {  %->
-  vflg { (nwmod) msg } if  %-%
-  dup 1 le {  %->
-    100 mul  %->
-    cvi  %->
-    exch  %->
-    100 mul  %->
-    cvi  %->
-    exch  %->
-    mod  %->
-    100 div  %->
-  } {  %->
-    exch  %->
-    dup  %->
-    1 le {  %->
-      100 mul  %->
-      cvi  %->
-      exch  %->
-      100 mul  %->
-      cvi  %->
-      mod  %->
-      100 div  %->
-    } {  %->
-      cvi  %->
-      exch  %->
-      cvi  %->
-      mod  %->
-    } ifelse  %->
-  } ifelse  %->
-} D  %:%
-@ %def mwmod
-
-<<PSFunctions - isltone>>=
-/isltone {  %->
-  vflg { (isltone) msg } if  %-%
-  dup  %->
-  1 lt {  %->
-    100 mul  %->
-    cvi  %->
-    100 div  %->
-  } if  %->
-} D  %:%
-@ %def isltone
 
 <<PSFunctions - htick>>=
-% mxt mnt xp yp ori end htick
-/htick {   %->
+/hticklbl {    %-> coord  ticklbl
+  %-% vflg { (hticklbl) msg } if
+  S            %->
+    10 string  %->
+    cvs        %-> converting coord to string
+    0          %-> string angle
+    0 KLh neg  %-> string angle x y
+    KLf fg     %-> string angle x y font color
+    ctshw      %->
+  R            %->
+} B            %-%
+%-%
+/htickslbl {      %-> coord bool  ticklbl
+  %-% vflg { (htickslbl) msg } if
+  S               %->
+    2 dict begin  %->
+      /f X        %-> get bool
+      /fdf {      %->
+        KLh neg   %-> y
+        KLf fg    %-> y font color
+      } D         %->
+      10 string   %->
+      cvs         %-> converting coord to string
+      0           %-> string angle
+      ZM {        %->
+        f {       %->
+          KHn neg %-> string angle x (was -4pt, now height of minor tickmark)
+          fdf     %-> string angle x y font color
+          ltshw   %->
+        } {       %->
+          KHn     %-> string angle x (was 4pt, now height of minor tickmark)
+          fdf     %-> string angle x y font color
+          rtshw   %->
+        } ifelse  %->
+      } {         %->
+        0         %-> string angle x
+        fdf       %-> string angle x y font color
+        ctshw     %->
+      } ifelse    %->
+    end           %->         
+  R               %->
+} B               %:%
+@ %def hticklbl htickslbl
+
+<<PSFunctions - htick>>=
+/htick {                 %-> height xori xend maxtck mintck  htick
   vflg { (htick) msg } if  %-%
-  S tckdict begin HT   %->
-    /yp exch Yscm D /xp exch Xscm D /xend X /xori X  %->
-    /nmnt exch cvi D /nmxt exch cvi D  %->
-    /mxt exch dup 0 lt { pop xend xori sub mkmxt } if D  %->
-    /mnt exch dup 0 lt { pop mxt nmnt div } if D  %->
-    /lori xori dup mnt nwmod sub mnt add D  %->
-    /lend xend dup mnt nwmod sub mnt sub D  %->
-    xp yp T  %->
-    lori mnt lend {  %->
-      isltone dup dup xori gt exch xend lt and {  %->
-        dup Xscm 0 m dup dup Xscme  %->
-        mxt nwmod 0 eq { 7.5 } { 4 } ifelse neg l  %->
-        1 slw fg cmyk K  %->
-        KGb 1 eq {  %->
-          S 0 y0 Yscm neg T dup Xscm dup y0 Yscm m y1 Yscm l  %->
-          0.1 slw verylightgrey cmyk K R  %->
-          } if  %->
-        dup mxt nwmod 0 eq {  %->
-          dup xend mnt sub exch ge {  %->
-            dup dup 1 ge { cvi } if  %->
-            10 string cvs 0 3 -1 roll Xscm -18 TickFont fg ctshw  %->
-            } if  %->
-          } {  %->
-            pop  %->
-          } ifelse  %->
-        } if  %->
-      } for  %->
-    xori Xscm dup 0 m 7.5 neg l 2 slw fg cmyk K  %->
-    xori 10 string cvs 0 xori Xscm ZoomON 1 eq { 4 sub } if  %->
-    -18 TickFont fg ZoomON 0 eq { ctshw } { ltshw } ifelse  %->
-    xend Xscm dup 0 m 7.5 neg l 2 slw fg cmyk K  %->
-    xend 10 string cvs 0 xend Xscm ZoomON 1 eq { 4 add } if  %->
-    -18 TickFont fg ZoomON 0 eq { ctshw } { rtshw } ifelse  %->
-  end R  %->
-} D  %:%
+  S                      %->
+    10 dict begin        %->
+      /tmn X             %-> get minor tickmark nucleotide length
+      /tmx X             %-> get major tickmark nucleotide length
+      /te X              %-> get tickmarks end
+      /to X              %-> get tickmarks start
+      /yt X              %-> get height
+      %-% major tickmarks start and end
+      /lxo               %->
+        to               %->
+        to tmx mod       %->
+        sub              %->
+      D                  %->
+      /lxe               %->
+        tmx              %->
+        te tmx mod       %->
+        sub              %->
+        te add           %->
+      D                  %->
+      %-% minor tickmarks start and end
+      /lno               %->
+        to               %->
+        to tmn mod       %->
+        sub              %->
+      D                  %->
+      /lne               %->
+        tmn              %->
+        te tmn mod       %->
+        sub              %->
+        te add           %->
+      D                  %->
+      %-% htick already starts at (LLx,LLy) so we do not have to tranlate
+      %-% 0 0 T
+      %-% Making major tickmarks
+      S                  %->
+        /cnt             %->
+          lxo            %->
+        D                %->
+        to neg Xscm 0 T  %-> translating to sequence absolute start
+        {                %-> begin loop
+          cnt te ge {    %->
+            exit         %-> if current tick greater than last tick
+          } if           %->   then exit from tickmarks loop
+          cnt to gt      %->
+          cnt te lt      %->
+          and {          %-> draw major tickmark if it is within limits
+            cnt Xscm     %->
+            S            %->
+              0 T                 %-> move to (current_coord, 0)
+              true mjrtick        %-> draw major tick line (true==horizontal)
+              KGb {               %->
+                true 0 yt mkgrid  %->
+              } if                %-> must show grid ?            
+              cnt hticklbl        %-> show tickmark coord
+            R            %->
+          } if           %->
+          /cnt           %-> adding new tickmark to counter
+            cnt tmx add  %->
+          D              %->
+         } loop          %-> end loop
+      R                  %->
+      %-% Making minor tickmarks
+      S                  %->
+        /cnt             %->
+          lno            %->
+        D                %->
+        to neg Xscm 0 T  %-> translating to minor tickmark start
+        {                %-> begin loop
+          cnt te ge {    %->
+            exit         %-> if current tick greater than last tick
+          } if           %->   then exit from tickmarks loop
+          cnt to gt      %->
+          cnt te lt      %-> is minor tickmark within limits ?
+          and            %->
+          cnt tmx mod    %-> skip minor tickmarks that overlap a major one
+          0 eq not       %-> 
+          and {          %->   if all above is true draw minor tickmark
+            cnt Xscm     %->
+            S            %->
+              0 T                  %-> move to (current_coord, 0)
+              true mnrtick         %-> draw minor tick line (true==horizontal)
+              KGb {                %->
+                false 0 yt mkgrid  %->
+              } if                 %-> must show grid ?
+            R            %-> (restoring last moveto)
+          } if           %->
+          /cnt           %-> adding new tickmark to counter
+            cnt tmn add  %->
+          D              %->
+        } loop           %-> end loop
+        %-% Start and end
+        S                %->
+          to Xscm 0 T    %-> move to sequence start
+          true mjrtick   %-> draw major tick line (true==horizontal)
+          to false htickslbl  %-> show start tickmark coord
+        R                %->
+        S                %->
+          te Xscm 0 T    %-> move to sequence end 
+          true mjrtick   %-> draw major tick line (true==horizontal)
+          te true  htickslbl  %-> show end tickmark coord
+        R                %->
+      R                  %->
+    end                  %-> closing tckdict
+  R                      %->
+} B                      %:%
 @ %def htick
 
+
 <<PSFunctions - vtick>>=
-/vtick {  %->
+/vticklbl {    %-> coord  ticklbl
+  %-% vflg { (hticklbl) msg } if
+  S            %->
+    10 string  %->
+    cvs        %-> converting coord to string
+    0          %-> string angle
+    KLp        %-> string angle x
+    KLz 3 div neg  %-> string angle x y
+    KLf fg     %-> string angle x y font color
+    rtshw      %->
+  R            %->
+} B            %-%
+%-%
+/vtickslbl {      %-> coord bool  ticklbl
+  %-% vflg { (htickslbl) msg } if
+  S               %->
+    3 dict begin  %->
+      /f X        %-> get bool
+      /p          %-> half the font size
+        KLz 3 div %->
+      D           %->
+      /fdf {      %->
+        KLp exch  %-> x _y_
+        KLf fg    %-> x _y_ font color
+      } D         %->
+      10 string   %->
+      cvs         %-> converting coord to string
+      0           %-> string angle
+      ZM {        %->
+        f {       %->
+          KLz neg %-> string angle y
+          fdf     %-> string angle x y font color
+        } {       %->
+          p       %-> string angle y
+          fdf     %-> string angle x y font color
+        } ifelse  %->
+      } {         %->
+        p neg     %-> string angle y (centering vertically ?)
+        fdf       %-> string angle x y font color
+      } ifelse    %->
+      rtshw       %->
+    end           %->         
+  R               %->
+} B               %:%
+@ %def vticklbl vtickslbl
+
+<<PSFunctions - vtick>>=
+/vtick {                 %-> width xori xend maxtck mintck  vtick
   vflg { (vtick) msg } if  %-%
-  S tckdict begin VT  %->
-    /yp exch Yscm D /xp exch Xscm D /xend X /xori X  %->
-    /nmnt exch cvi D /nmxt exch cvi D  %->
-    /mxt exch dup 0 lt { pop xend xori sub mkmxt } if D  %->
-    /mnt exch dup 0 lt { pop mxt nmnt div } if D  %->
-    /lori xori dup mnt nwmod sub mnt add D  %->
-    /lend xend dup mnt nwmod sub mnt sub D  %->
-    xp yp T  %->
-    lori mnt lend {  %->
-      isltone dup dup xori gt exch xend lt and {  %->
-        dup Yscm 0 exch m dup dup Yscme  %->
-        mxt nwmod 0 eq { 7.5 } { 4 } ifelse exch l  %->
-        1 slw fg cmyk K  %->
-        KGb 1 eq {  %->
-          S X0 Xscm 0 T dup Yscm dup X0 neg Xscme m  %->
-          X1 neg Xscme l 0.1 slw verylightgrey cmyk K R  %->
-          } if  %->
-        dup 0 eq {  %->
-          S dup dup X0 Xscme Yscm m X1 neg Xscme Yscm l  %->
-          0.1 slw fg cmyk K R  %->
-          } if  %->
-        dup mxt nwmod 0 eq {  %->
-          dup xend mnt sub exch ge {  %->
-            dup dup 1 ge { cvi } if  %->
-            10 string cvs 0 10 4 -1 roll Yscm 2.5 sub   %->
-              TickFont fg rtshw  %->
-            } if  %->
-          } {  %->
-            pop  %->
-          } ifelse  %->
-        } if  %->
-      } for  %->
-    7.5 xori Yscm dup 0 exch m l 2 slw fg cmyk K  %->
-    xori 10 string cvs 0 10 xori Yscm  %->
-    ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse  %->
-    TickFont fg rtshw 7.5 xend Yscm dup 0 exch m l  %->
-    2 slw fg cmyk K xend 10 string cvs 0 10 xend Yscm  %->
-    ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse  %->
-    TickFont fg rtshw end  %->
-  R  %->
-} D  %:%
+  S                      %->
+    10 dict begin        %->
+      /tmn X             %-> get minor tickmark nucleotide length
+      /tmx X             %-> get major tickmark nucleotide length
+      /te X              %-> get tickmarks end
+      /to X              %-> get tickmarks start
+      /xt X              %-> get width
+      %-% major tickmarks start and end
+      /lxo               %->
+        to               %->
+        to tmx mod       %->
+        sub              %->
+      D                  %->
+      /lxe               %->
+        tmx              %->
+        te tmx mod       %->
+        sub              %->
+        te add           %->
+      D                  %->
+      %-% minor tickmarks start and end
+      /lno               %->
+        to               %->
+        to tmn mod       %->
+        sub              %->
+      D                  %->
+      /lne               %->
+        tmn              %->
+        te tmn mod       %->
+        sub              %->
+        te add           %->
+      D                  %->
+      %-% as we assume that current point is (LLx,LLy) for the current box
+      %-% we must translate coords origin to (LLx,LRy)
+      xt 0 T             %->
+      %-% Making major tickmarks
+      S                  %->
+        /cnt             %->
+          lxo            %->
+        D                %->
+        0 to neg Yscm T  %-> translating to sequence absolute start
+        {                %-> begin loop
+          cnt te ge {    %->
+            exit         %-> if current tick greater than last tick
+          } if           %->   then exit from tickmarks loop
+          cnt to gt      %->
+          cnt te lt      %->
+          and {          %-> draw major tickmark if it is within limits
+            cnt Yscm     %->
+            S            %->
+              0 exch T            %-> move to (0,current_coord)
+              false mjrtick       %-> draw major tick line (false==vertical)
+              KGb {               %->
+                true xt neg 0     %->
+                          mkgrid  %->
+              } if                %-> must show grid ?            
+              cnt vticklbl        %-> show tickmark coord
+            R            %->
+          } if           %->
+          /cnt           %-> adding new tickmark to counter
+            cnt tmx add  %->
+          D              %->
+         } loop          %-> end loop
+        %-% Making minor tickmarks
+        /cnt             %->
+          lno            %->
+        D                %->
+        {                %-> begin loop
+          cnt te ge {    %->
+            exit         %-> if current tick greater than last tick
+          } if           %->   then exit from tickmarks loop
+          cnt to gt      %->
+          cnt te lt      %-> is minor tickmark within limits ?
+          and            %->
+          cnt tmx mod    %-> skip minor tickmarks that overlap a major one
+          0 eq not       %-> 
+          and {          %->   if all above is true draw minor tickmark
+            cnt Yscm     %->
+            S            %->
+              0 exch T             %-> move to (0,current_coord)
+              false mnrtick        %-> draw minor tick line (false==vertical)
+              KGb {                %->
+                false xt neg 0     %->
+                           mkgrid  %->
+              } if                 %-> must show grid ?
+            R            %-> (restoring last moveto)
+          } if           %->
+          /cnt           %-> adding new tickmark to counter
+            cnt tmn add  %->
+          D              %->
+        } loop           %-> end loop
+      R                  %->
+      %-% Start and end
+      S                  %->
+        0 to neg Yscm T  %-> absolute start
+        S                %->
+          0 to Yscm T    %-> move to sequence start
+          false mjrtick  %-> draw major tick line (false==vertical)
+          to false vtickslbl  %-> show start tickmark coord
+        R                %->
+        S                %->
+          0 te Yscm T    %-> move to sequence end 
+          false mjrtick  %-> draw major tick line (false==vertical)
+          te true  vtickslbl  %-> show end tickmark coord
+        R                %->
+      R                  %->
+    end                  %-> closing tckdict
+  R                      %->
+} B                      %:%
 @ %def vtick
 
 <<PSFunctions - nucltick>>=
-/nucltick {  %->
+/nucltick {  %-> height  nucltick
   vflg { (nucltick) msg } if  %-%
-  %-% tickmn  %->
-  %-% tickmx  %->
-  %-% maxtck  %->
-  %-% mintck  %->
-              KASn KASm 10 5 %-%
-  X0  %->
-  X1  %->
-  0  %->
-  y0  %->
-  htick  %->
-} D  %:%
+  XO XE      %-> X-sequence start and end
+  KASm KASn  %-> major and minor tickmarks (in nucleotides)
+    htick    %-> when calling htick we are already at (LLx,LLy)
+             %-% now PS stack must look like: height start end major minor
+} B          %:%
 @ %def nucltick
 
 <<PSFunctions - pctmarks>>=
@@ -8853,31 +9491,31 @@ end % aplotdict
 @
 
 <<PSFunctions - do init>>=
-/DoInit {           %-> DoInit
-  tflg {            %->
+/DoInit {             %-> DoInit
+  tflg {              %->
     (%%% START NEW PLOT %%%) msg  %->
-    /vflg true D    %->
-  } if              %->
+    /vflg true D      %->
+  } if                %->
   %-%
-  aplotdict begin   %->
-  %-%
-  Dpage 0 0 bbox    %-> filling page background with bg color
-  S                 %->
-    bg cmyk         %->
-    fill            %->
-  R                 %-> nothing can be drawn out of the page so we clip
-  clip              %->  by page bbox path, we have to clear path because
-  newpath           %->  clip does not initialize current path by itself
+  aplotdict begin     %->
+    %-%
+    Dpage 0 0 bbox    %-> filling page background with bg color
+    S                 %->
+      bg cmyk         %->
+      fill            %->
+    R                 %-> nothing can be drawn out of the page so we clip
+    clip              %->  by page bbox path, we have to clear path because
+    newpath           %->  clip does not initialize current path by itself
                     %->  (only stroke and fill do that)
-  %-% 
-  FXO FYO T  %-> we translate origin to top left corner of the page
-  %-% 1 -1 F %%% we do not invert the Y-axes,
-             %-% positive values still go from top to bottom
-             %-% remember that global vertical displacements must be negated
-  %-%
-  flgcrd {   %->  check if credits are shown
-    shwcrd   %->
-  } if       %->
+    %-% 
+    FXO FYO T  %-> we translate origin to top left corner of the page
+    %-% 1 -1 F %%% we do not invert the Y-axes,
+               %-% positive values still go from top to bottom
+               %-% remember that global vertical displacements must be negated
+    %-%
+    flgcrd {   %->  check if credits are shown
+      shwcrd   %->
+    } if       %->
 } B          %:%
 @ %def DoInit
 
@@ -8907,7 +9545,7 @@ end % aplotdict
 <<PSFunctions - endextra>>
 %-% OTHER FUNCTIONS
 <<PSFunctions - estlbl>>
-<<PSFunctions - GsclonX>>
+<<PSFunctions - getXscale>>
 <<PSFunctions - beginfunct>>
 <<PSFunctions - endfunct>>
 @
@@ -8996,104 +9634,57 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
 } B                 %:%
 @ %def shwcrd
 
-<<PSFunctions - estlbl>>=
-/estlbl {  %->
-  vflg { (estlbl) msg } if  %-%
-  S  %->
-    3 dict begin  %->
-      /lbl X  %->
-      /ypos X  %->
-      /xpos X  %->
-      HT  %->
-      0 Xlwdt 4 div neg T  %->
-      lbl 0  %->
-      xpos Xscm  %->
-      ypos Yscm  %->
-      5 /Helvetica  %->
-      black  %->
-      ctshw  %->
-      VT  %->
-    end  %->
-  R  %->
-} B  %:%
-@ %def estlbl
-
-<<PSFunctions - GsclonX>>=
-/GsclonX {  %->
-  vflg { (GsclonX) msg } if  %-%
-  /Y  %->
-    exch  %->
-    Y  %->
-    Spacer sub  %->
-    exch  %->
-    sub  %->
-  D  %->
-  Xmarg Y T  %->
-  axesp 0 eq {  %->
-    /Xscale {  %->
-      BBoxX  %->
-      X1 X0 sub  %->
-      Y1 Y0 sub  %->
-      max  %->
-      div  %->
-    } D  %->
-  } {  %->
-    /Xscale {  %->
-      BBoxX  %->
-      X1 X0 sub  %->
-      div  %->
-    } D  %->
-  } ifelse  %->
-} B  %:%
-@ %def GsclonX
-
 <<PSFunctions - begindata>>=
-/begindata {   %->
+/begindata {      %->
   vflg { (### BEGINdata) msg } if  %-%
-  S            %->
-    AXL        %->
-    AYB neg    %->
-    T          %->
-    S          %->
-      0 0      %->
-      AX AY    %->
-      bbox     %->
-      ABc cmyk %->
-      fill     %->
-    R          %->
-    S          %->
-      0 0      %->
-      AX AY    %->
-      ZM {     %->
-        4 copy %->
-        zoomtk %->
-      } if     %->
-      bbox     %->
-      fg cmyk  %->
-      Blw slw  %->
-      K        %->
-    R          %->
-} B            %:%
+  S               %->
+    AXL           %->
+    AYB neg       %->
+    T             %-> setting current point to (LLx,LLy) of aplot bbox
+    %-% aplot box BG color
+    S             %-> first of all we fill aplot box with the corresponding
+      0 0         %-> background color, so we have to draw a bbox path and
+      AX AY       %-> fill in it 
+      bbox        %->
+      ABc cmyk    %-> this process is similar for all main plot boxes
+      fill        %->
+    R             %->
+    %-% setting variables
+    /Xscale       %-> finding X-sequence scale
+      AX XD div   %->
+    D             %->
+    /Yscale       %-> finding Y-sequence scale
+      AY YD div   %-> (we do not need to check again axesb,
+    D             %->  AX and AY have the required width and height)
+    /yo YO D      %->
+    /ye YE D      %->
+    %-% tickmarks
+    S             %->
+      KAXb {      %-> if show h-tickmarks, start on the current point
+        AY nucltick  %-> as we are going to recycle nucltick funtion
+      } if        %->    we have to provide the height of each box
+    R             %->    
+    S  %->
+      KAYb {      %-> if show v-tickmarks, start on the current point
+        AX        %-> width
+        YO YE     %-> Y-sequence start and end
+        KASm KASn %-> major and minor tickmarks (in nucleotides)
+          vtick   %-> when calling vtick we must to move to (LLx,LRy=LLY+AX)
+      } if        %->
+    R             %->  
+    %-% vars to get defined
+    /TxWB {  %->
+      WBox Xscale div  %->
+    } D      %->
+    /TyWB {  %->
+      WBox Yscale div  %->
+    } D      %->
+} B               %:%
 /begindataOLD {  %->
   S  %->
     /y1 Y1 D  %->
     /y0 Y0 D  %->
-    BBoxY GsclonX  %->
-    axesp 0 eq {  %->
-      /Yscale Xscale D  %->
-    } {  %->
-      /Yscale {  %->
-        BBoxY  %->
-        y1 y0 sub  %->
-        div  %->
-      } D  %->
-    } ifelse  %->
-    /TxWB {  %->
-      WBox Xscale div  %->
-    } D  %->
-    /TyWB {  %->
-      WBox Yscale div  %->
-    } D  %->
+    BBoxY getXscale  %->
     /GDspl {  %->
       xGDspl  %->
       GDmore  %->
@@ -9107,53 +9698,25 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       GDmore  %->
       BDmore  %->
       } D  %->
-    X0 Xscm neg  %->
-    y0 Yscm neg  %->
-    T  %->
-    S  %->
-      X0 Xscm  %->
-      y0 Yscm  %->
-      X1 Xscm  %->
-      y1 Yscm  %->
-      bbox  %->
-      ABc cmyk  %->
-      fill  %->
-    R  %->
-    S  %->
-      X0 Xscm  %->
-      y0 Yscm  %->
-      X1 Xscm  %->
-      y1 Yscm  %->
-      ZoomON 1 eq {  %->
-        4 copy  %->
-        zoomtk  %->
-      } if  %->
-      bbox  %->
-      2 slw  %->
-      fg cmyk  %->
-      K  %->
-    R  %->
-    S  %->
-      KAXb {  %->
-        nucltick  %->
-        /Spacer 1 cm D  %->
-      } {  %->
-        /Spacer 0.5 cm D  %->
-      } ifelse  %->
-      KAYb {  %->
-        %-% tickmn tickmx  %->
-        %-% maxtck mintck  %->
-                           KASn KASm 10 5 %-%
-        y0 y1 X1 0  %->
-        vtick  %->
-      } if  %->
-    R  %->
     newpath  %->
 } D  %:%
 @ %def begindata
 
 <<PSFunctions - enddata>>=
 /enddata {  %->
+    %-% aplot box border
+    S          %-> here we draw the aplot bbox but now we are going to 
+      0 0      %-> stroke the bbox path so we have a border surrounding the
+      AX AY    %-> previously filled aplot bbox
+      ZM {     %->
+        4 copy %-> here we look if we must draw the zoom marks
+        zoomtk %->
+      } if     %->
+      Blw obox %->
+      fg cmyk  %->
+      Blw slw  %->
+      K        %->
+    R          %->
   R         %->
   /GDspl  xGDspl  D  %->
   /GLDspl xGLDspl D  %->
@@ -9176,10 +9739,25 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       PBc cmyk %->
       fill     %->
     R          %->
+    %-% tickmarks
+    S             %->
+      KPXb {      %-> if show h-tickmarks, start on the current point
+        PY nucltick  %-> as we are going to recycle nucltick funtion
+      } if        %->    we have to provide the height of each box
+    R             %->    
+    S  %->
+      KPYb {      %-> if show v-tickmarks, start on the current point
+        AX        %-> width
+        YO YE     %-> Y-sequence start and end
+        KASm KASn %-> major and minor tickmarks (in nucleotides)
+          vtick   %-> when calling vtick we must to move to (LLx,LRy=LLY+AX)
+      } if        %->
+    R             %->  
+    %-% percent box border
     S          %->
       0 0      %->
       AX PY    %->
-      bbox     %->
+      Blw obox %->
       fg cmyk  %->
       Blw slw  %->
       K        %->
@@ -9191,7 +9769,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
   S  %->
       5 /y1 X  %-> (5 must be provided by perl)
     100 /y0 X  %-> (5 must be provided by perl)
-    PY GsclonX  %->
+    PY getXscale  %->
     /Yscale  %->
       PY  %->
       y1 y0 sub  %->
@@ -9270,10 +9848,25 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       QBc cmyk %->
       fill     %->
     R          %->
+    %-% tickmarks
+    S             %->
+      KQXb {      %-> if show h-tickmarks, start on the current point
+        QY nucltick  %-> as we are going to recycle nucltick funtion
+      } if        %->    we have to provide the height of each box
+    R             %->    
+    S  %->
+      KQYb {      %-> if show v-tickmarks, start on the current point
+        AX        %-> width
+        YO YE     %-> Y-sequence start and end
+        KASm KASn %-> major and minor tickmarks (in nucleotides)
+          vtick   %-> when calling vtick we must to move to (LLx,LRy=LLY+AX)
+      } if        %->
+    R             %->  
+    %-% extra box border
     S          %->
       0 0      %->
       AX QY    %->
-      bbox     %->
+      Blw obox %->
       fg cmyk  %->
       Blw slw  %->
       K        %->
@@ -9285,7 +9878,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
   S  %->
     5 /nlines X  %-> (5 must be provided by perl)
     /y0 0 D  %->
-    QY GsclonX  %->
+    QY getXscale  %->
     /Yscale  %->
       QY  %->
       nlines 1 add  %->
@@ -9405,6 +9998,57 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
 } D  %:%
 @ %def endfunct
 
+<<PSFunctions - estlbl>>=
+/estlbl {  %->
+  vflg { (estlbl) msg } if  %-%
+  S  %->
+    3 dict begin  %->
+      /lbl X  %->
+      /ypos X  %->
+      /xpos X  %->
+      HT  %->
+      0 Xlwdt 4 div neg T  %->
+      lbl 0  %->
+      xpos Xscm  %->
+      ypos Yscm  %->
+      5 /Helvetica  %->
+      black  %->
+      ctshw  %->
+      VT  %->
+    end  %->
+  R  %->
+} B  %:%
+@ %def estlbl
+
+<<PSFunctions - getXscale>>=
+/getXscale {  %->
+  vflg { (getXscale) msg } if  %-%
+  /Y  %->
+    exch  %->
+    Y  %->
+    Spacer sub  %->
+    exch  %->
+    sub  %->
+  D  %->
+  Xmarg Y T  %->
+  axesp 0 eq {  %->
+    /Xscale {  %->
+      BBoxX  %->
+      X1 X0 sub  %->
+      Y1 Y0 sub  %->
+      max  %->
+      div  %->
+    } D  %->
+  } {  %->
+    /Xscale {  %->
+      BBoxX  %->
+      X1 X0 sub  %->
+      div  %->
+    } D  %->
+  } ifelse  %->
+} B  %:%
+@ %def getXscale
+
 
 \newpage
 
@@ -9518,7 +10162,7 @@ sub prt_to_logfile() { $LogFile && (print LOGFILE $_[0]) }
 sub prt_to_stderr()  { $Verbose && ($Quiet || print STDERR $_[0]) }
 @ %def &prt_to_logfile &prt_to_stderr
 
-\subsctn{Reporting messages}
+\subsubsctn{Process messages}
 
 <<Global Constants>>=
 my $line = ("#" x 80)."\n";
@@ -9551,6 +10195,30 @@ sub footer() {
     &prt_to_logfile("###\n");
 } # footer
 @ %def &header &footer
+
+
+\subsubsctn{Reporting parsing progress}
+
+<<Common Routines: Counter>>=
+#
+sub counter { # $_[0]~current_pos++ $_[1]~char
+    my $str;
+    $str = "$_[1]";
+    (($_[0] % 50) == 0) && ($str .= " [".&fill_left($_[0],6,"0")."]\n");
+    &prt_to_stderr($str);
+    &prt_to_logfile($str);        
+} # counter
+#
+sub counter_end { # $_[0]~current_pos   $_[1]~char
+    my $str;
+    (($_[0] % 50) != 0) && do {
+        $str = " [".&fill_left($_[0],6,"0")."]\n";
+        &prt_to_stderr($str);
+        &prt_to_logfile($str);        
+    }
+} # counter_end
+@
+
 
 \subsctn{Timing procedures}
 
@@ -9845,7 +10513,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.26 2001-11-30 19:39:53 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -11355,8 +12023,10 @@ chomp;
 <<Common Routines>>=
 <<Common Routines: min-max>>
 <<Common Routines: text fill>>
-<<Common Routines: counter>>
+<<Common Routines: Counter>>
 @
+
+In the functions calculating minimum and maximum values of a list we have to take into account the case in which the list contains a single element.
 
 <<Common Routines: min-max>>=
 #
@@ -11383,17 +12053,6 @@ sub fill_mid()   {
 } # fill_mid
 @
 
-<<Common Routines: counter>>=
-#
-sub counter { # $_[0]~current_pos++ $_[1]~char
-    print STDERR "$_[1]";
-    (($_[0] % 50) == 0) && (print STDERR " [".&fill_left($_[0],6,"0")."]\n");
-} # counter
-#
-sub counter_end { # $_[0]~current_pos   $_[1]~char
-    (($_[0] % 50) != 0) && (print STDERR " [".&fill_left($_[0],6,"0")."]\n");
-} # counter_end
-@
 
 \subsctn{BASH scripts}
 
@@ -11424,7 +12083,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.26 2001-11-30 19:39:53 jabril Exp $
+# $Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -11502,7 +12161,7 @@ notangle -L -R"APLOT" $WORK/$nwfile.nw | \
 # numbers may change if noweb doc is changed
 notangle -L -R"APLOT" $WORK/$nwfile.nw | \
     perl -ne '( $.>1 &&
-                $_ !~ /^\#line (455|465|474|1194|1289|1463|4344|4644|443)/o
+                $_ !~ /^\#line (467|477|486|1212|1308|1482|4531|4999|455)/o
                ) && print' - | cpif $BIN/gff2aplot.pl ;
 #
 chmod a+x $BIN/gff2aplot.pl ;
@@ -11539,7 +12198,7 @@ notangle -L -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | \
       perl -ne '( $.>1 &&
-                  $_ !~ /^\#line (467|477|486|1212|1308|1482|4331|4792|455)/o
+                  $_ !~ /^\#line (467|477|486|1212|1308|1482|4531|4999|455)/o
                  ) && print' - | perltidy - | cpif $BIN/gff2aplot.pl ;
 # reformating program with perltidy
 notangle -R"APLOT" \
