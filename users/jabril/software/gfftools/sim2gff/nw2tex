@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: nw2tex,v 1.1 2003-02-28 17:07:29 jabril Exp $
+# $Id: nw2tex,v 1.2 2003-02-28 17:08:23 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
