@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.5 2001-04-23 08:45:45 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.6 2001-04-23 08:49:07 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -90,8 +90,9 @@ void printDTD()
 
    <!-- Element declarations -->
    <!ELEMENT prediction (gene*)>
-   <!ELEMENT gene ((exon+),protein)>
+   <!ELEMENT gene ((exon+),cDNA,protein)>
    <!ELEMENT exon (site,site)>
+   <!ELEMENT cDNA (#PCDATA)>
    <!ELEMENT protein (#PCDATA)>
 
    <!-- Attribute declarations -->
