@@ -10,7 +10,7 @@
 #      Checking strand orientation for
 #      alignment features in aplot old format
 #
-# $Id: README_alnstrands,v 1.1 2002-01-11 19:24:23 jabril Exp $
+# $Id: README_alnstrands,v 1.2 2002-12-24 13:44:32 jabril Exp $
 #
 ##################################################
 #
@@ -297,6 +297,11 @@ filenames | while read n ;
     };
   done ;
 #
+#
+echo "# LaTeXing all figures together..." ;
+#
+latex aln_strands.tex;
+dvips aln_strands.dvi -o aln_strands.ps;
 #
 echo "###" ;
 echo "### TOTAL TIME: $SECONDS seconds..." ; 
