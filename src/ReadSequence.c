@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadSequence.c,v 1.2 2000-08-08 14:22:03 eblanco Exp $  */
+/*  $Id: ReadSequence.c,v 1.3 2001-04-25 08:29:27 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -53,7 +53,11 @@ int IniReadSequence(FILE* seqfile, char* line)
   /* Jumping until \n of the first fasta line */
   res = fscanf(seqfile,"%c",&cAux);
   while(cAux != '\n')
-    res = fscanf(seqfile,"%c",&cAux);
+    {
+      res = fscanf(seqfile,"%c",&cAux);
+      if (res==-1)
+	printError("Bad format: FASTA sequence");
+    }
     
   if (res == EOF)
     printError("Bad format DNA sequence\n");  
@@ -76,6 +80,8 @@ int ReadSequence (FILE* seqfile, char* Sequence, char* nextLocus)
     { 
       pos = pos + strlen(Sequence + pos);
       res = fscanf(seqfile,"%s",Sequence + pos);
+      if (res==-1)
+	printError("Bad format: FASTA sequence");
 
       if ( VRB && !(pos % 100000) )
 	{
