@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.7 2001-10-01 14:23:23 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -111,7 +111,7 @@
 
 \ \vfill
 \begin{center}
-\textsc{\textbf{\Huge Building\\ ORTHOLOGOUS\\[1ex] Dataset}}\\[5ex]
+\textsc{\textbf{\Huge Analysis on\\ ORTHOLOGOUS\\[1ex] Dataset}}\\[5ex]
 
 %\textbf{\Large Authors List Here}\\[1ex]
 \textbf{\Large Josep F. Abril}\\[1ex]
@@ -157,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.7 2001-10-01 14:23:23 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3141,7 +3141,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.7 2001-10-01 14:23:23 jabril Exp $
 @ 
 
 \newpage
@@ -3490,7 +3490,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.7 2001-10-01 14:23:23 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -3834,7 +3834,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.7 2001-10-01 14:23:23 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
