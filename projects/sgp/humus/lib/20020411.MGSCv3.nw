@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20020411.MGSCv3.nw,v 1.8 2002-06-18 23:12:51 jabril Exp $ 
+% # $Id: 20020411.MGSCv3.nw,v 1.9 2002-06-19 16:24:48 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.8 2002-06-18 23:12:51 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20020411.MGSCv3.nw,v 1.9 2002-06-19 16:24:48 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -356,6 +356,30 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/hsap.seqid_$ko | \
       } ;
     done ;
 #
+@ 
+
+<<>>=
+#
+# TWINSCAN DATA
+#
+gawk '$1!~/^\#/ {print $1, $2 }' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+       MD="$MUSHU/chr$CHR/twinscan" ;
+       OD="/home/ug/gparra/no_backup/twinscan/M.musculus" ;
+       MkDirs $MD ;
+       MD="$MD/20020613" ;
+       MkDirs $MD $MD/gtf $MD/gff $MD/eval ;
+       cp -v $OD/$SEQ.gtf $MD/gtf/ ;
+       } ;
+    done ;
+gawk '$1!~/^\#/ {print $1, $2 }' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+       MD="$MUSHU/chr$CHR/twinscan/20020613" ;
+       $BIN/gtf2gff.pl $MD/gtf/$SEQ.gtf > $MD/gff/$SEQ.gff;
+       } ;
+    done ;
 @ 
 
 <<runallmouseGENEID.sh>>=
@@ -481,7 +505,7 @@ gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
 
 
 <<Version Control Id Tag>>=
-# $Id: 20020411.MGSCv3.nw,v 1.8 2002-06-18 23:12:51 jabril Exp $
+# $Id: 20020411.MGSCv3.nw,v 1.9 2002-06-19 16:24:48 jabril Exp $
 @ 
 <<BASH shebang>>=
 #!/usr/bin/bash
@@ -899,7 +923,9 @@ gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
         do { MkDirs $SDIR/$c ; } ; done ;
       #
       EVDIR="$ADIR/annotation/refseq" ;
+      IDIR="$ADIR/sgp/$MMHS_REFSEQ/evids" ;
       ODIR="$SDIR/evids" ;
+      cp -vapudf $IDIR/* $ODIR/ ;
       #
       GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
       PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
