@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.tex,v 1.2 2001-08-21 13:15:04 jabril Exp $
+% $Id: deploy.tex,v 1.3 2001-09-03 18:26:42 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -50,72 +50,96 @@
 
 \input defs.tex
 
-\begin{comment}
-\nwfilename{/home/ug/jabril/development/jabril/software/deploy/deploy.nw}\nwbegincode{1}\sublabel{NWdepy-LaTS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTS-1}}}\moddef{LaTeX deploy new definitions~{\nwtagstyle{}\subpageref{NWdepy-LaTS-1}}}\endmoddef
-%%%%% Colors for gff2ps
-\\input ColorDefs.tex
-
-%%%%% New Commands are defined here
-\\newcommand\{\\sctn\}[1]\{\\section\{#1\}\}
-\\newcommand\{\\subsctn\}[1]\{\\subsection\{#1\}\}
-\\newcommand\{\\subsubsctn\}[1]\{\\subsubsection\{#1\}\}
-\\newcommand\{\\desc\}[1]\{\\item[#1] \\ \\\\\}
-
-%%%%% PSTRICKs definitions
-\\pslongbox\{ExFrame\}\{\\psframebox\}
-\\newcommand\{\\cln\}[1]\{\\fcolorbox\{black\}\{#1\}\{\\textcolor\{#1\}\{\\rule[-.3ex]\{1cm\}\{1ex\}\}\}\}
-\\newpsobject\{showgrid\}\{psgrid\}\{subgriddiv=0,griddots=1,gridlabels=6pt\}
-% \\pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]\{\\sffamily\\scshape\\bfseries\\veryHuge #1 \}
-
-%%%%% global urls
-% \\newcommand\{\\getpsf\}[1]\{\\html\{(\\htmladdnormallink\{Get PostScript file\}\{./Psfiles/#1\})\}\}   
-\LA{}new LaTeX urls~{\nwtagstyle{}\subpageref{NWdepy-newE-1}}\RA{}
-
-%%%%%% defs
-\\def\\noweb\{\\textsc\{noweb\}\}
-\\def\\ps\{\\textsc\{PostScript\}\}
-\LA{}new LaTeX definitions~{\nwtagstyle{}\subpageref{nw@notdef}}\RA{}
-
-%%%%% Setting text for footers and headers
-% \\def\\tit\{\\textsc\{[[deploy.pl]] \}\}
-\\fancyhead\{\} % clear all fields
-\\fancyfoot\{\} % clear all fields
-\\fancyhead[RO,LE]\{\\thepage\}
-\\fancyhead[LO,RE]\{\\rightmark\}
-\\fancyfoot[LO,LE]\{\\small\\textsl\{Abril, J.F.\}\}
-\\fancyfoot[RO,RE]\{\\small\\textbf\{\\today\}\}
-\\renewcommand\{\\headrulewidth\}\{1pt\}
-\\renewcommand\{\\footrulewidth\}\{1pt\}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\\def\\progname\{deploy.pl\}
-\\def\\mtjabril\{
- \\htmladdnormallink\{\\texttt\{jabril@imim.es\}\}
-                   \{MAILTO:jabril@imim.es?subject=[deploy.pl]\}
- \} % def mtjabril
-\\def\\authorslist\{
- Josep F. Abril \{\\mdseries\\small\\dotfill \\mtjabril \} \\\\
- % Other authors here...\\\\
- \} % def authorslist
-\\def\\license\{GNU General Public License (GNU-GPL)\}
-\\def\\description\{
-This perl script creates all the files we need to start a project report or to describe a program implementation under the \{\\noweb\} Literate Programming tool. It will produce the main \{\\noweb\} file, from which we can tangle the sources or weabe the \\LaTeX documentation.
- \} % def description 
-\\def\\showaffiliation\{
-\\scalebox\{0.9 1\}\{\\Large\\textsl\{\\textbf\{Genome Informatics Research Lab\}\}\}\\\\
-Grup de Recerca en Infom\\`atica Biom\\`edica\\\\
-Institut Municipal d'Investigaci\\'o M\\`edica\\\\
-Universitat Pompeu Fabra\\\\[2ex]
- \} % def showaffiliation
-%
-\nwnotused{LaTeX\ deploy\ new\ definitions}\nwendcode{}\nwbegindocs{2}\nwdocspar
-\end{comment}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\nwenddocs{}\nwbegindocs{3}\nwdocspar
+\nwfilename{/home/ug/jabril/development/softjabril/deploy/deploy.nw}\nwbegindocs{1}\nwdocspar
+
+\nwenddocs{}%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+\nwbegindocs{3}\nwdocspar
+
 \thispagestyle{empty}
 
 \begin{titlepage}
@@ -162,6 +186,12 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \end{titlepage} %'
 
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
+\nwenddocs{}%
+\nwbegindocs{5}\nwdocspar
+\nwenddocs{}%
+\nwbegindocs{7}\nwdocspar
+\nwenddocs{}%
+\nwbegindocs{9}\nwdocspar
 
 \newpage
 \pagenumbering{roman}
@@ -178,7 +208,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.tex,v 1.2 2001-08-21 13:15:04 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.tex,v 1.3 2001-09-03 18:26:42 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -187,35 +217,64 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-\sctn{empty section}
+\sctn{Introduction}
+
+\subsctn{Description}
+
+% \subsctn{Comments}
+
+\subsctn{To Do}
+
+\begin{itemize}
+ \input todo.tex
+\end{itemize}
+
+\label{todo:AAA}
+\nwenddocs{}%
+%
+\nwbegindocs{11}\nwdocspar
+\nwenddocs{}%
+%
+\nwbegindocs{13}\nwdocspar
+\todo{ \item \todoAAA } % todo
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Implementation}
 
 \subsctn{Program outline}
 
-\nwenddocs{}\nwbegincode{4}\sublabel{NWdepy-DEP6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-DEP6-1}}}\moddef{DEPLOY~{\nwtagstyle{}\subpageref{NWdepy-DEP6-1}}}\endmoddef
-\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWdepy-PERC-1}}\RA{}
+\nwenddocs{}\nwbegincode{14}\sublabel{NWdept-DEP6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-DEP6-1}}}\moddef{DEPLOY~{\nwtagstyle{}\subpageref{NWdept-DEP6-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWdept-PERC-1}}\RA{}
 #
 # MODULES
 #
-\LA{}Use Modules~{\nwtagstyle{}\subpageref{NWdepy-UseB-1}}\RA{}
+\LA{}Use Modules~{\nwtagstyle{}\subpageref{NWdept-UseB-1}}\RA{}
 #
 # VARIABLES
 #
-\LA{}Global Vars~{\nwtagstyle{}\subpageref{NWdepy-GloB-1}}\RA{}
+\LA{}Global Vars~{\nwtagstyle{}\subpageref{NWdept-GloB-1}}\RA{}
 #
 # MAIN LOOP
 #
-\LA{}Main Loop~{\nwtagstyle{}\subpageref{NWdepy-Mai9-1}}\RA{}
+\LA{}Main Loop~{\nwtagstyle{}\subpageref{NWdept-Mai9-1}}\RA{}
 #
 # FUNCTIONS
 #
-\LA{}Functions~{\nwtagstyle{}\subpageref{NWdepy-Fun9-1}}\RA{}
-\nwnotused{DEPLOY}\nwendcode{}\nwbegindocs{5}\nwdocspar
+\LA{}Functions~{\nwtagstyle{}\subpageref{NWdept-Fun9-1}}\RA{}
+\nwnotused{DEPLOY}\nwendcode{}\nwbegindocs{15}\nwdocspar
 
-\nwenddocs{}\nwbegincode{6}\sublabel{NWdepy-UseB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-UseB-1}}}\moddef{Use Modules~{\nwtagstyle{}\subpageref{NWdepy-UseB-1}}}\endmoddef
-\nwused{\\{NWdepy-DEP6-1}}\nwendcode{}\nwbegindocs{7}\nwdocspar
+\nwenddocs{}\nwbegincode{16}\sublabel{NWdept-UseB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-UseB-1}}}\moddef{Use Modules~{\nwtagstyle{}\subpageref{NWdept-UseB-1}}}\endmoddef
+\nwused{\\{NWdept-DEP6-1}}\nwendcode{}\nwbegindocs{17}\nwdocspar
 
-\nwenddocs{}\nwbegincode{8}\sublabel{NWdepy-GloB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-GloB-1}}}\moddef{Global Vars~{\nwtagstyle{}\subpageref{NWdepy-GloB-1}}}\endmoddef
-my $USAGE = "\\nUSAGE:\\n\\tdeploy.pl <projectname>\\n".
+\nwenddocs{}\nwbegincode{18}\sublabel{NWdept-GloB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-GloB-1}}}\moddef{Global Vars~{\nwtagstyle{}\subpageref{NWdept-GloB-1}}}\endmoddef
+my $PROGRAM = 'deploy.pl';
+my $VERSION = '1.0_alpha';
+my $DATE = localtime;
+my $USER = defined($ENV\{USER\}) ? $ENV\{USER\} : 'Child Process';
+my $host = `hostname`;
+chomp($host);
+my $USAGE = "\\nUSAGE:\\n\\tdeploy.pl <projectname> <template>\\n".
             "(It asumes that you are in the right directory)\\n\\n";
 my @working_dirs = qw(
                        RCS
@@ -224,15 +283,15 @@ my @working_dirs = qw(
                        docs docs/psfigures docs/tables docs/html
                        tests
                        );
-my $PROJECT;
+my ($PROJECT, $TEMPLATE);
 # my $HOME = $ENV\{HOME\};
 my $CWD  = `pwd`;
 chomp($CWD);
 my $PATH = $CWD;
 # $PATH =~ s%^$HOME/%%o;
-\nwused{\\{NWdepy-DEP6-1}}\nwendcode{}\nwbegindocs{9}\nwdocspar
+\nwused{\\{NWdept-DEP6-1}}\nwendcode{}\nwbegindocs{19}\nwdocspar
 
-\nwenddocs{}\nwbegincode{10}\sublabel{NWdepy-Mai9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-Mai9-1}}}\moddef{Main Loop~{\nwtagstyle{}\subpageref{NWdepy-Mai9-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{20}\sublabel{NWdept-Mai9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-Mai9-1}}}\moddef{Main Loop~{\nwtagstyle{}\subpageref{NWdept-Mai9-1}}}\endmoddef
 &parse_argvs();
 
 print STDERR "###\\n### RUNNING $PROGRAM..........\\n###\\n".
@@ -249,19 +308,20 @@ print STDERR "###\\n### RUNNING $PROGRAM..........\\n###\\n".
 print STDERR "###\\n### RUNNING deploy.pl............ DONE\\n###\\n";
 
 exit(0);
-\nwidentuses{\\{{{\char36}DATE}{:doDATE}}\\{{{\char36}USER}{:doUSER}}}\nwindexuse{{\char36}DATE}{:doDATE}{NWdepy-Mai9-1}\nwindexuse{{\char36}USER}{:doUSER}{NWdepy-Mai9-1}\nwused{\\{NWdepy-DEP6-1}}\nwendcode{}\nwbegindocs{11}\nwdocspar
+\nwused{\\{NWdept-DEP6-1}}\nwendcode{}\nwbegindocs{21}\nwdocspar
 
-\nwenddocs{}\nwbegincode{12}\sublabel{NWdepy-Fun9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-Fun9-1}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdepy-Fun9-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{22}\sublabel{NWdept-Fun9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-Fun9-1}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdept-Fun9-1}}}\endmoddef
 sub parse_argvs() \{
-    @ARGV > 0 || do \{
+    scalar(@ARGV) == 2 || do \{
         print STDERR $USAGE;
         exit(1);
     \};
     $PROJECT = shift @ARGV;
+    $TEMPLATE = shift @ARGV;
 \} # 
-\nwalsodefined{\\{NWdepy-Fun9-2}\\{NWdepy-Fun9-3}\\{NWdepy-Fun9-4}}\nwused{\\{NWdepy-DEP6-1}}\nwendcode{}\nwbegindocs{13}\nwdocspar
+\nwalsodefined{\\{NWdept-Fun9-2}\\{NWdept-Fun9-3}\\{NWdept-Fun9-4}}\nwused{\\{NWdept-DEP6-1}}\nwendcode{}\nwbegindocs{23}\nwdocspar
 
-\nwenddocs{}\nwbegincode{14}\sublabel{NWdepy-Fun9-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-Fun9-2}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdepy-Fun9-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{24}\sublabel{NWdept-Fun9-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-Fun9-2}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdept-Fun9-1}}}\plusendmoddef
 sub make_dirs() \{
     print STDERR "###\\n### Creating Project Subdirectories...\\n###\\n";
     foreach my $d (@working_dirs) \{
@@ -270,9 +330,9 @@ sub make_dirs() \{
     \};
     print STDERR "###\\n### Project Subdirectories............ DONE\\n###\\n";
 \} # make_dirs
-\nwendcode{}\nwbegindocs{15}\nwdocspar
+\nwendcode{}\nwbegindocs{25}\nwdocspar
 
-\nwenddocs{}\nwbegincode{16}\sublabel{NWdepy-Fun9-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-Fun9-3}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdepy-Fun9-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{26}\sublabel{NWdept-Fun9-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-Fun9-3}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdept-Fun9-1}}}\plusendmoddef
 sub new_noweb_doc() \{
     my $file = "$PROJECT.nw";
     (-e $file && -f _) && do \{
@@ -282,6 +342,8 @@ sub new_noweb_doc() \{
     \};
     print STDERR "###\\n### Writing Project NOWEB file: $file\\n###\\n";
     open(NOWEB,"> $file");
+    open(DATA,"< $TEMPLATE") ||
+        die ("#### ERROR #### Template File does not exists: $TEMPLATE . $!\\n");
     while (<DATA>) \{
         my ($FINDPATH,$FINDPROJECT) = ('@@@PATH@@@','@@@PROJECT@@@');
         my $l = $_;
@@ -293,12 +355,13 @@ sub new_noweb_doc() \{
         \};
         print NOWEB $l;
     \}; 
+    close(DATA);
     close(NOWEB);
     print STDERR "###\\n### NOWEB file........................ DONE\\n###\\n";
 \} # new_noweb_doc
-\nwendcode{}\nwbegindocs{17}\nwdocspar
+\nwendcode{}\nwbegindocs{27}\nwdocspar
 
-\nwenddocs{}\nwbegincode{18}\sublabel{NWdepy-Fun9-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-Fun9-4}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdepy-Fun9-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{28}\sublabel{NWdept-Fun9-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-Fun9-4}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWdept-Fun9-1}}}\plusendmoddef
 sub extract_files() \{
     print STDERR "###\\n### Extracting Files from NOWEB file...\\n###\\n";
     # my $WORK = '$HOME/'.$PATH;
@@ -321,7 +384,9 @@ $WORK/ltx ;
 +++EOS+++
     print STDERR "###\\n### File Extraction................. DONE\\n###\\n";
 \} # extract_files
-\nwendcode{}\nwbegindocs{19}\nwdocspar
+\nwendcode{}\nwbegindocs{29}\nwdocspar
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Template definitions}
 
@@ -329,65 +394,113 @@ $WORK/ltx ;
 
 This template may contain one or more scripts, but it was thought to describe a single program implementation in perl language (it may require few adjustements to work with other languages because {\noweb} is not language dependent).
 
-\nwenddocs{}\nwbegincode{20}\sublabel{NWdepy-PRON-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PRON-1}}}\moddef{PROJECT SCRIPT Template~{\nwtagstyle{}\subpageref{NWdepy-PRON-1}}}\endmoddef
-\LA{}EMACS header~{\nwtagstyle{}\subpageref{NWdepy-EMAC-1}}\RA{}
-\LA{}LaTeX header~{\nwtagstyle{}\subpageref{NWdepy-LaTC-1}}\RA{}
-\LA{}LaTeX packages~{\nwtagstyle{}\subpageref{NWdepy-LaTE-1}}\RA{}
-\\input defs.tex % from <LaTeX new definitions> chunk
-\LA{}LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdepy-LaTN-1}}\RA{}
-\LA{}PROGRAM LaTeX title~{\nwtagstyle{}\subpageref{NWdepy-PROJ-1}}\RA{}
+\nwenddocs{}\nwbegincode{30}\sublabel{NWdept-PRON-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PRON-1}}}\moddef{PROJECT SCRIPT Template~{\nwtagstyle{}\subpageref{NWdept-PRON-1}}}\endmoddef
+\LA{}EMACS header~{\nwtagstyle{}\subpageref{NWdept-EMAC-1}}\RA{}
+\LA{}LaTeX header~{\nwtagstyle{}\subpageref{NWdept-LaTC-1}}\RA{}
+\LA{}LaTeX packages~{\nwtagstyle{}\subpageref{NWdept-LaTE-1}}\RA{}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \\begin\{document\}
 %
-\LA{}LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTH-1}}\RA{}
-\LA{}LaTeX SCRIPT Mainmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTN.2-1}}\RA{}
-\LA{}LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTG-1}}\RA{}
+\LA{}LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdept-LaTN-1}}\RA{}
+\LA{}PROGRAM LaTeX title~{\nwtagstyle{}\subpageref{NWdept-PROJ-1}}\RA{}
 %
-\LA{}LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdepy-LaTX-1}}\RA{}
-\LA{}LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdepy-LaTX.2-1}}\RA{}
-\LA{}LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdepy-LaTa-1}}\RA{}
-\LA{}LaTeX common code appendix - license~{\nwtagstyle{}\subpageref{NWdepy-LaTa.2-1}}\RA{}
-\LA{}LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdepy-LaTY-1}}\RA{}
+\LA{}LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdept-LaTH-1}}\RA{}
+\LA{}LaTeX SCRIPT Mainmatter~{\nwtagstyle{}\subpageref{NWdept-LaTN.2-1}}\RA{}
+\LA{}LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdept-LaTG-1}}\RA{}
+%
+\LA{}LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdept-LaTX-1}}\RA{}
+\LA{}LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdept-LaTX.2-1}}\RA{}
+\LA{}LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdept-LaTa-1}}\RA{}
+\LA{}LaTeX common code appendix - license~{\nwtagstyle{}\subpageref{NWdept-LaTa.2-1}}\RA{}
+\LA{}LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdept-LaTY-1}}\RA{}
 %
 \\end\{document\}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nwnotused{PROJECT\ SCRIPT\ Template}\nwendcode{}\nwbegindocs{21}\nwdocspar
+\nwnotused{PROJECT\ SCRIPT\ Template}\nwendcode{}\nwbegindocs{31}\nwdocspar
+
+\nwenddocs{}\nwbegincode{32}\sublabel{NWdept-PROJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PROJ-1}}}\moddef{PROGRAM LaTeX title~{\nwtagstyle{}\subpageref{NWdept-PROJ-1}}}\endmoddef
+\\thispagestyle\{empty\}
+
+\\begin\{titlepage\}
+
+\\ \\vfill
+\\begin\{center\}
+\\begin\{bfseries\}
+\\begin\{large\}
+\\newlength\{\\lttbl\}\\setlength\{\\lttbl\}\{0.25\\linewidth\}
+\\newlength\{\\rttbl\}\\setlength\{\\rttbl\}\{0.70\\linewidth\}
+%\\fbox\{
+%\\vskip 2ex
+\\begin\{tabular\}\{>\{\\scshape\}r@\{\\quad\}l\}
+\\rule\{\\lttbl\}\{0pt\} & \\rule\{\\rttbl\}\{0pt\} \\\\[2ex]
+\\multicolumn\{2\}\{c\}\{\\shortstack\{\\rule[0ex]\{0.95\\linewidth\}\{2pt\}\\\\[0ex]
+                               \\rule[1ex]\{0.95\\linewidth\}\{2pt\}\}\}\\\\[2ex]
+Program Name: & \{\\Huge\\progname\}                       \\\\[3ex]
+\\multicolumn\{2\}\{c\}\{\\rule[0.5ex]\{0.95\\linewidth\}\{2pt\}\}\\\\[2ex]
+      Author: & \{\\Large
+                 \\begin\{minipage\}[t]\{0.95\\rttbl\}
+                 \\authorslist
+                 \\end\{minipage\}\}                       \\\\[2ex]
+     License: & \{\\license\}                             \\\\[2ex]
+ Last Update: & \{\\today\}                               \\\\[2ex]
+ Description: & \{\\large\\mdseries
+                 \\begin\{minipage\}[t]\{0.95\\rttbl\}
+                 \\description
+                 \\end\{minipage\}\}                       \\\\[2ex]
+\\\\
+\\multicolumn\{2\}\{c\}\{\\shortstack\{\\rule[0ex]\{0.95\\linewidth\}\{2pt\}\\\\[0ex]
+                               \\rule[1ex]\{0.95\\linewidth\}\{2pt\}\}\}\\\\[2ex]
+\\end\{tabular\}
+%\} % fbox
+\\end\{large\}
+\\end\{bfseries\}
+\\end\{center\}
+
+\\vfill
+
+\\begin\{raggedleft\}
+\\showaffiliation
+\\end\{raggedleft\}
+
+\\end\{titlepage\} %'
+
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}}\nwendcode{}\nwbegindocs{33}\nwdocspar
 
 \subsctn{Perl packages} %%%%SCTN
 
 Perl packages (or also called modules) must rely on three basic files to be portable: the perl module itself ('{\tt{}your{\char95}script.pm}'), the tester ('{\tt{}test.pl}') and the makefile ('{\tt{}Makefile.PL}'). There are three secondary files within the distribution: 
 
-\nwenddocs{}\nwbegincode{22}\sublabel{NWdepy-PROT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PROT-1}}}\moddef{PROJECT PERL PACKAGE Template~{\nwtagstyle{}\subpageref{NWdepy-PROT-1}}}\endmoddef
-\LA{}EMACS header~{\nwtagstyle{}\subpageref{NWdepy-EMAC-1}}\RA{}
-\LA{}LaTeX header~{\nwtagstyle{}\subpageref{NWdepy-LaTC-1}}\RA{}
-\LA{}LaTeX packages~{\nwtagstyle{}\subpageref{NWdepy-LaTE-1}}\RA{}
-\\input defs.tex % from <LaTeX new definitions> chunk
-\LA{}LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdepy-LaTN-1}}\RA{}
-\LA{}PROGRAM LaTeX title~{\nwtagstyle{}\subpageref{NWdepy-PROJ-1}}\RA{}
+\nwenddocs{}\nwbegincode{34}\sublabel{NWdept-PROT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PROT-1}}}\moddef{PROJECT PERL PACKAGE Template~{\nwtagstyle{}\subpageref{NWdept-PROT-1}}}\endmoddef
+\LA{}EMACS header~{\nwtagstyle{}\subpageref{NWdept-EMAC-1}}\RA{}
+\LA{}LaTeX header~{\nwtagstyle{}\subpageref{NWdept-LaTC-1}}\RA{}
+\LA{}LaTeX packages~{\nwtagstyle{}\subpageref{NWdept-LaTE-1}}\RA{}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \\begin\{document\}
 %
-\LA{}LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTH-1}}\RA{}
-\LA{}LaTeX PACKAGES Mainmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTP-1}}\RA{}
-\LA{}LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTG-1}}\RA{}
+\LA{}LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdept-LaTN-1}}\RA{}
+\LA{}PROGRAM LaTeX title~{\nwtagstyle{}\subpageref{NWdept-PROJ-1}}\RA{}
 %
-\LA{}LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdepy-LaTX-1}}\RA{}
-\LA{}LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdepy-LaTX.2-1}}\RA{}
-\LA{}LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdepy-LaTa-1}}\RA{}
-\LA{}LaTeX common code appendix - license~{\nwtagstyle{}\subpageref{NWdepy-LaTa.2-1}}\RA{}
-\LA{}LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdepy-LaTY-1}}\RA{}
+\LA{}LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdept-LaTH-1}}\RA{}
+\LA{}LaTeX PACKAGES Mainmatter~{\nwtagstyle{}\subpageref{NWdept-LaTP-1}}\RA{}
+\LA{}LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdept-LaTG-1}}\RA{}
+%
+\LA{}LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdept-LaTX-1}}\RA{}
+\LA{}LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdept-LaTX.2-1}}\RA{}
+\LA{}LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdept-LaTa-1}}\RA{}
+\LA{}LaTeX common code appendix - license~{\nwtagstyle{}\subpageref{NWdept-LaTa.2-1}}\RA{}
+\LA{}LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdept-LaTY-1}}\RA{}
 %
 \\end\{document\}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nwnotused{PROJECT\ PERL\ PACKAGE\ Template}\nwendcode{}\nwbegindocs{23}\nwdocspar
+\nwnotused{PROJECT\ PERL\ PACKAGE\ Template}\nwendcode{}\nwbegindocs{35}\nwdocspar
 
-\nwenddocs{}\nwbegincode{24}\sublabel{NWdepy-PERI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{36}\sublabel{NWdept-PERI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PERI-1}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdept-PERI-1}}}\endmoddef
 \\sctn\{Module outline\}
 
 <<MODULE>>=
@@ -461,10 +574,10 @@ L<perl>.
 
 =cut
 @
-\nwalsodefined{\\{NWdepy-PERI-2}\\{NWdepy-PERI-3}\\{NWdepy-PERI-4}\\{NWdepy-PERI-5}\\{NWdepy-PERI-6}}\nwused{\\{NWdepy-LaTP-1}}\nwendcode{}\nwbegindocs{25}\nwdocspar
+\nwalsodefined{\\{NWdept-PERI-2}\\{NWdept-PERI-3}\\{NWdept-PERI-4}\\{NWdept-PERI-5}\\{NWdept-PERI-6}}\nwused{\\{NWdept-LaTP-1}}\nwendcode{}\nwbegindocs{37}\nwdocspar
 
 
-\nwenddocs{}\nwbegincode{26}\sublabel{NWdepy-PERI-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PERI-2}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{38}\sublabel{NWdept-PERI-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PERI-2}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdept-PERI-1}}}\plusendmoddef
 \\sctn\{Makefile outline\}
 
 <<MAKEFILE>>=
@@ -480,9 +593,9 @@ WriteMakefile(
        AUTHOR     => 'A. U. Thor <a.u.thor@a.galaxy.far.far.away>') : ()),
 );
 @
-\nwendcode{}\nwbegindocs{27}\nwdocspar
+\nwendcode{}\nwbegindocs{39}\nwdocspar
 
-\nwenddocs{}\nwbegincode{28}\sublabel{NWdepy-PERI-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PERI-3}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{40}\sublabel{NWdept-PERI-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PERI-3}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdept-PERI-1}}}\plusendmoddef
 \\sctn\{Tester file outline\}
 
 <<TESTER>>=
@@ -504,9 +617,9 @@ ok(1); # If we made it this far, we're ok.
 # its man page ( perldoc Test ) for help writing this test script.
 
 @
-\nwendcode{}\nwbegindocs{29}\nwdocspar
+\nwendcode{}\nwbegindocs{41}\nwdocspar
 
-\nwenddocs{}\nwbegincode{30}\sublabel{NWdepy-PERI-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PERI-4}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{42}\sublabel{NWdept-PERI-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PERI-4}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdept-PERI-1}}}\plusendmoddef
 \\sctn\{README file main chunk\}
 
 <<README>>=
@@ -545,9 +658,9 @@ Put the correct copyright and licence information here.
 
 Copyright (C) 2001 A. U. Thor blah blah blah
 @ 
-\nwendcode{}\nwbegindocs{31}\nwdocspar
+\nwendcode{}\nwbegindocs{43}\nwdocspar
 
-\nwenddocs{}\nwbegincode{32}\sublabel{NWdepy-PERI-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PERI-5}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{44}\sublabel{NWdept-PERI-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PERI-5}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdept-PERI-1}}}\plusendmoddef
 \\sctn\{Manifest file main chunk\}
 
 <<MANIFEST>>=
@@ -558,9 +671,9 @@ README
 Sample.pm
 test.pl
 @ 
-\nwendcode{}\nwbegindocs{33}\nwdocspar
+\nwendcode{}\nwbegindocs{45}\nwdocspar
 
-\nwenddocs{}\nwbegincode{34}\sublabel{NWdepy-PERI-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PERI-6}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{46}\sublabel{NWdept-PERI-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PERI-6}}}\moddef{PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdept-PERI-1}}}\plusendmoddef
 \\sctn\{Changes log file main chunk\}
 
 <<CHANGES>>=
@@ -570,58 +683,58 @@ Revision history for Perl extension @@@PROJECT@@@.
         - original version; created by deploy.pl on
           a template from h2xs 1.21 with options -Xn.
 @ 
-\nwendcode{}\nwbegindocs{35}\nwdocspar
+\nwendcode{}\nwbegindocs{47}\nwdocspar
 
 \subsctn{Reports} %%%%SCTN
 
-\nwenddocs{}\nwbegincode{36}\sublabel{NWdepy-PRON.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PRON.2-1}}}\moddef{PROJECT REPORT Template~{\nwtagstyle{}\subpageref{NWdepy-PRON.2-1}}}\endmoddef
-\LA{}EMACS header~{\nwtagstyle{}\subpageref{NWdepy-EMAC-1}}\RA{}
-\LA{}LaTeX header~{\nwtagstyle{}\subpageref{NWdepy-LaTC-1}}\RA{}
-\LA{}LaTeX packages~{\nwtagstyle{}\subpageref{NWdepy-LaTE-1}}\RA{}
-\\input defs.tex % from <LaTeX new definitions> chunk
-\LA{}LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdepy-LaTN-1}}\RA{}
-\LA{}REPORT LaTeX title~{\nwtagstyle{}\subpageref{NWdepy-REPI-1}}\RA{}
+\nwenddocs{}\nwbegincode{48}\sublabel{NWdept-PRON.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PRON.2-1}}}\moddef{PROJECT REPORT Template~{\nwtagstyle{}\subpageref{NWdept-PRON.2-1}}}\endmoddef
+\LA{}EMACS header~{\nwtagstyle{}\subpageref{NWdept-EMAC-1}}\RA{}
+\LA{}LaTeX header~{\nwtagstyle{}\subpageref{NWdept-LaTC-1}}\RA{}
+\LA{}LaTeX packages~{\nwtagstyle{}\subpageref{NWdept-LaTE-1}}\RA{}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \\begin\{document\}
 %
-\LA{}LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTH-1}}\RA{}
-\LA{}LaTeX REPORT Mainmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTN.3-1}}\RA{}
-\LA{}LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTG-1}}\RA{}
+\LA{}LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdept-LaTN-1}}\RA{}
+\LA{}REPORT LaTeX title~{\nwtagstyle{}\subpageref{NWdept-REPI-1}}\RA{}
 %
-\LA{}LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdepy-LaTX-1}}\RA{}
-\LA{}LaTeX common code appendix - awk~{\nwtagstyle{}\subpageref{NWdepy-LaTW-1}}\RA{}
-\LA{}LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdepy-LaTX.2-1}}\RA{}
-\LA{}LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdepy-LaTa-1}}\RA{}
-\LA{}LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdepy-LaTY-1}}\RA{}
+\LA{}LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdept-LaTH-1}}\RA{}
+\LA{}LaTeX REPORT Mainmatter~{\nwtagstyle{}\subpageref{NWdept-LaTN.3-1}}\RA{}
+\LA{}LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdept-LaTG-1}}\RA{}
+%
+\LA{}LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdept-LaTX-1}}\RA{}
+\LA{}LaTeX common code appendix - awk~{\nwtagstyle{}\subpageref{NWdept-LaTW-1}}\RA{}
+\LA{}LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdept-LaTX.2-1}}\RA{}
+\LA{}LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdept-LaTa-1}}\RA{}
+\LA{}LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdept-LaTY-1}}\RA{}
 %
 \\end\{document\}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nwnotused{PROJECT\ REPORT\ Template}\nwendcode{}\nwbegindocs{37}\nwdocspar
+\nwnotused{PROJECT\ REPORT\ Template}\nwendcode{}\nwbegindocs{49}\nwdocspar
 
 
 Your {\noweb} documents (suffix them with '.nw' instead of '.tex' to remember yourself that they are special \LaTeX documents if you like) must start with something like the following code:
 
-\nwenddocs{}\nwbegincode{38}\sublabel{NWdepy-EMAC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-EMAC-1}}}\moddef{EMACS header~{\nwtagstyle{}\subpageref{NWdepy-EMAC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{50}\sublabel{NWdept-EMAC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-EMAC-1}}}\moddef{EMACS header~{\nwtagstyle{}\subpageref{NWdept-EMAC-1}}}\endmoddef
 % -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{39}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{51}\nwdocspar
 
 This line tells emacs to highlight code chunks with perl language highlight syntax (other emacs modes can be '{\tt{}awk-mode}', '{\tt{}sh-mode}', '{\tt{}c-mode}', and so on).
 
 
-\nwenddocs{}\nwbegincode{40}\sublabel{NWdepy-LaTC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTC-1}}}\moddef{LaTeX header~{\nwtagstyle{}\subpageref{NWdepy-LaTC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{52}\sublabel{NWdept-LaTC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTC-1}}}\moddef{LaTeX header~{\nwtagstyle{}\subpageref{NWdept-LaTC-1}}}\endmoddef
 \\documentclass[11pt]\{article\}
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% \LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdepy-VerM-1}}\RA{} 
+% \LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdept-VerM-1}}\RA{} 
 %
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{41}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{53}\nwdocspar
 
-\nwenddocs{}\nwbegincode{42}\sublabel{NWdepy-LaTE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTE-1}}}\moddef{LaTeX packages~{\nwtagstyle{}\subpageref{NWdepy-LaTE-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{54}\sublabel{NWdept-LaTE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTE-1}}}\moddef{LaTeX packages~{\nwtagstyle{}\subpageref{NWdept-LaTE-1}}}\endmoddef
 \\usepackage\{noweb\}
 \\usepackage[a4paper,offset=\{0pt,0pt\},hmargin=\{2cm,2cm\},vmargin=\{1cm,1cm\}]\{geometry\}
 \\usepackage\{graphics\}
@@ -639,11 +752,11 @@ This line tells emacs to highlight code chunks with perl language highlight synt
 \\usepackage\{html\}     
 \\usepackage\{htmllist\} 
 %% tables    
+\\usepackage\{dcolumn\}
 %\\usepackage\{colortbl\}
 %\\usepackage\{multirow\}
 %\\usepackage\{hhline\}
 %\\usepackage\{tabularx\}
-%\\usepackage\{dcolumn\}
 %% seminar
 %\\usepackage\{semcolor,semlayer,semrot,semhelv,sem-page,slidesec\}
 %% draft watermark
@@ -664,14 +777,13 @@ This line tells emacs to highlight code chunks with perl language highlight synt
 \\def\\nwendcode\{\\endtrivlist \\endgroup\} % relax page breaking scheme
 \\let\\nwdocspar=\\par                    %
 
-\\input defs.tex
+\\input defs.tex % from <LaTeX new definitions> chunk
 
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{43}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{55}\nwdocspar
 
 
-\nwenddocs{}\nwbegincode{44}\sublabel{NWdepy-LaTN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTN-1}}}\moddef{LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdepy-LaTN-1}}}\endmoddef
-\\begin\{comment\}
-<<LaTeX new definitions>>=
+\nwenddocs{}\nwbegincode{56}\sublabel{NWdept-LaTN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTN-1}}}\moddef{LaTeX basic definitions~{\nwtagstyle{}\subpageref{NWdept-LaTN-1}}}\endmoddef
+<<HIDE: LaTeX new definitions>>=
 %%%%% Colors for gff2ps
 \\input ColorDefs.tex
 
@@ -680,20 +792,46 @@ This line tells emacs to highlight code chunks with perl language highlight synt
 \\newcommand\{\\subsctn\}[1]\{\\subsection\{#1\}\}
 \\newcommand\{\\subsubsctn\}[1]\{\\subsubsection\{#1\}\}
 \\newcommand\{\\desc\}[1]\{\\item[#1] \\ \\\\\}
+\\newcommand\{\\todo\}[1]\{
+  \\vskip 3ex
+  \\hspace\{-0.75cm\}
+   \\psframebox[framearc=0.2,linecolor=darkred,linewidth=1pt,
+              fillstyle=solid,fillcolor=verylightyellow,framesep=2ex]\{
+     \\begin\{minipage\}[t]\{16cm\}
+     \\vskip -4.75ex
+     \\hspace\{-1.25cm\}
+       \\psframebox[framearc=1,linecolor=darkred,linewidth=1.25pt,
+               fillstyle=solid,fillcolor=verylightorange,framesep=5pt]\{
+               \\textcolor\{darkred\}\{\\textbf\{\\hspace\{2ex\}TO DO\\hspace\{2ex\}\}\}
+         \} % psframebox
+      \\begin\{itemize\}\\setlength\{\\itemsep\}\{-0.5ex\} #1 \\end\{itemize\}
+     \\end\{minipage\}
+     \} % psframebox
+  \\vskip 1.5ex
+\} % newcommand todo
+\\newcommand\{\\todoitem\}[2]\{
+\\item \{#1\}\\dotfill[\\textit\{Section\}~\\ref\{#2\}, \\textit\{page\}~\\pageref\{#2\}]
+\} % newcommand todoitem
+<<HIDE: new LaTeX commands>>
 
 %%%%% PSTRICKs definitions
 \\pslongbox\{ExFrame\}\{\\psframebox\}
 \\newcommand\{\\cln\}[1]\{\\fcolorbox\{black\}\{#1\}\{\\textcolor\{#1\}\{\\rule[-.3ex]\{1cm\}\{1ex\}\}\}\}
 \\newpsobject\{showgrid\}\{psgrid\}\{subgriddiv=0,griddots=1,gridlabels=6pt\}
 % \\pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]\{\\sffamily\\scshape\\bfseries\\veryHuge #1 \}
+<<HIDE: new LaTeX pstricks>>
 
 %%%%% global urls
 % \\newcommand\{\\getpsf\}[1]\{\\html\{(\\htmladdnormallink\{Get PostScript file\}\{./Psfiles/#1\})\}\}   
-\\def\\mtjabril\{\\htmladdnormallink\{\\textbf\{jabril@imim.es\}\}\{MAILTO:jabril@imim.es\}\}
+<<HIDE: new LaTeX urls>>
 
 %%%%% defs
 \\def\\noweb\{\\textsc\{noweb\}\}
 \\def\\ps\{\\textsc\{PostScript\}\}
+<<HIDE: new LaTeX definitions>>
+
+%%%%% TODO defs
+<<HIDE: new defs TODO>>
 
 %%%%% Setting text for footers and headers
 \\def\\tit\{\\textsc\{Project Title Here.- \}\}
@@ -711,7 +849,7 @@ This line tells emacs to highlight code chunks with perl language highlight synt
 \\def\\progname\{@@@PROJECT@@@\}
 \\def\\mtauthor\{
  \\htmladdnormallink\{\\texttt\{author@imim.es\}\}
-                   \{MAILTO:author@imim.es?subject=[deploy.pl]\}
+                   \{MAILTO:author@imim.es?subject=[@@@PROJECT@@@]\}
  \} % def mtjabril
 \\def\\authorslist\{
  The Author/s \{\\mdseries\\small\\dotfill \\mtauthor \} \\\\
@@ -729,26 +867,27 @@ Universitat Pompeu Fabra\\\\[2ex]
  \} % def showaffiliation
 %
 @
-\\end\{comment\}
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{45}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{57}\nwdocspar
 
-\nwenddocs{}\nwbegincode{46}\sublabel{NWdepy-REPI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-REPI-1}}}\moddef{REPORT LaTeX title~{\nwtagstyle{}\subpageref{NWdepy-REPI-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{58}\sublabel{NWdept-REPI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-REPI-1}}}\moddef{REPORT LaTeX title~{\nwtagstyle{}\subpageref{NWdept-REPI-1}}}\endmoddef
 \\thispagestyle\{empty\}
 
 \\begin\{titlepage\}
 
 \\ \\vfill
 \\begin\{center\}
-\\textbf\{\\Huge Project Title Here\}\\\\[5ex]
+\\textbf\{\\Huge \\progname\}\\\\[5ex]
 
-\\textbf\{\\Large Authors List Here\}\\\\[1ex]
-\\textbf\{\\Large Josep F. Abril\}\\\\[5ex] % \\raisebox\{0.85ex\}\{\\footnotesize$\\,\\dag$\}\\\\[0.5ex]
+% \\textbf\{\\Large Authors List Here\}\\\\[1ex]
+\\textbf\{\\Large Authors List Here\}\\\\[5ex] 
+        % \\raisebox\{0.85ex\}\{\\footnotesize$\\,\\dag$\}\\\\[0.5ex]
 
 \\textbf\{\\large --- \\today ---\}\\\\[10ex]
 
 \\begin\{abstract\}
 \\begin\{center\}
 \\parbox\{0.75\\linewidth\}\{
+\\description
 \} % parbox
 \\end\{center\}
 \\end\{abstract\}
@@ -763,55 +902,9 @@ Universitat Pompeu Fabra\\\\[2ex]
 
 \\end\{titlepage\} %'
 
-\nwused{\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{47}\nwdocspar
+\nwused{\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{59}\nwdocspar
 
-\nwenddocs{}\nwbegincode{48}\sublabel{NWdepy-PROJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PROJ-1}}}\moddef{PROGRAM LaTeX title~{\nwtagstyle{}\subpageref{NWdepy-PROJ-1}}}\endmoddef
-\\thispagestyle\{empty\}
-
-\\begin\{titlepage\}
-
-\\ \\vfill
-\\begin\{center\}
-\\begin\{bfseries\}
-\\begin\{large\}
-\\newlength\{\\lttbl\}\\setlength\{\\lttbl\}\{0.25\\linewidth\}
-\\newlength\{\\rttbl\}\\setlength\{\\rttbl\}\{0.70\\linewidth\}
-%\\fbox\{
-\\rule[0.5ex]\{0.95\\linewidth\}\{0.5ex\}
-%\\vskip 2ex
-\\begin\{tabular\}\{>\{\\scshape\}r@\{\\quad\}l\}
-\\rule\{\\lttbl\}\{0pt\} & \\rule\{\\rttbl\}\{0pt\} \\\\[2ex]
-Program Name: & \{\\Huge\\progname\}                       \\\\[2ex]
-      Author: & \{\\Large
-                 \\begin\{minipage\}[t]\{0.95\\rttbl\}
-                 \\authorslist
-                 \\end\{minipage\}\}                       \\\\[2ex]
-     License: & \{\\license\}                             \\\\[2ex]
- Last Update: & \{\\today\}                               \\\\[2ex]
- Description: & \{\\large\\mdseries
-                 \\begin\{minipage\}[t]\{0.95\\rttbl\}
-                 \\description
-                 \\end\{minipage\}\}                       \\\\[2ex]
-\\\\
-\\end\{tabular\}
-\\vskip 2ex
-\\rule[0.5ex]\{0.95\\linewidth\}\{0.5ex\}
-%\} % fbox
-\\end\{large\}
-\\end\{bfseries\}
-
-\\vfill
-
-\\begin\{raggedleft\}
-\\showaffiliation
-\\end\{raggedleft\}
-\\end\{center\}
-
-\\end\{titlepage\} %'
-
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}}\nwendcode{}\nwbegindocs{49}\nwdocspar
-
-\nwenddocs{}\nwbegincode{50}\sublabel{NWdepy-LaTH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTH-1}}}\moddef{LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTH-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{60}\sublabel{NWdept-LaTH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTH-1}}}\moddef{LaTeX Frontmatter~{\nwtagstyle{}\subpageref{NWdept-LaTH-1}}}\endmoddef
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
 \\newpage
@@ -829,12 +922,12 @@ Program Name: & \{\\Huge\\progname\}                       \\\\[2ex]
 
 \\vfill
 \\begin\{center\}
-\{\\small$<$ \\verb$Id: deploy.tex,v 1.2 2001-08-21 13:15:04 jabril Exp $$>$ \}
+\{\\small$<$ \\verb$Id: deploy.tex,v 1.3 2001-09-03 18:26:42 jabril Exp $$>$ \}
 \\end\{center\}
 
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{51}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{61}\nwdocspar
 
-\nwenddocs{}\nwbegincode{52}\sublabel{NWdepy-LaTP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTP-1}}}\moddef{LaTeX PACKAGES Mainmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTP-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{62}\sublabel{NWdept-LaTP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTP-1}}}\moddef{LaTeX PACKAGES Mainmatter~{\nwtagstyle{}\subpageref{NWdept-LaTP-1}}}\endmoddef
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
 \\newpage
@@ -845,23 +938,39 @@ Program Name: & \{\\Huge\\progname\}                       \\\\[2ex]
 
 \\subsctn\{Program description\}
 
-\LA{}PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdepy-PERI-1}}\RA{}
+\LA{}PERL PACKAGE files~{\nwtagstyle{}\subpageref{NWdept-PERI-1}}\RA{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \\begin\{comment\}
 \\end\{comment\}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\nwused{\\{NWdepy-PROT-1}}\nwendcode{}\nwbegindocs{53}\nwdocspar
+\nwused{\\{NWdept-PROT-1}}\nwendcode{}\nwbegindocs{63}\nwdocspar
 
-\nwenddocs{}\nwbegincode{54}\sublabel{NWdepy-LaTN.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTN.2-1}}}\moddef{LaTeX SCRIPT Mainmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTN.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{64}\sublabel{NWdept-LaTN.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTN.2-1}}}\moddef{LaTeX SCRIPT Mainmatter~{\nwtagstyle{}\subpageref{NWdept-LaTN.2-1}}}\endmoddef
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
 \\newpage
 \\pagenumbering\{arabic\}
 \\setcounter\{page\}\{1\}
 
-\\sctn\{empty section\}
+\\sctn\{Introduction\}
+
+\\subsctn\{Description\}
+
+\\subsctn\{Input\}
+
+\\subsctn\{Output\}
+
+% \\subsctn\{Comments\}
+
+\\subsctn\{To Do\}
+
+\\begin\{itemize\}
+ \\input todo.tex
+\\end\{itemize\}
+
+\\sctn\{Implementation\}
 
 \\subsctn\{Program outline\}
 
@@ -901,14 +1010,23 @@ sub \{
 \} # 
 @
 
+\\label\{todo:AAA\}
+<<HIDE: new defs TODO>>=
+\\def\\todoAAA\{This is a first draft of the \{\\progname\}.\} % todoAAA
+@
+<<HIDE: TODO>>=
+\\todoitem\{\\todoAAA\}\{todo:AAA\}
+@
+\\todo\{ \\item \\todoAAA \} % todo
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \\begin\{comment\}
 \\end\{comment\}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\nwused{\\{NWdepy-PRON-1}}\nwendcode{}\nwbegindocs{55}\nwdocspar
+\nwused{\\{NWdept-PRON-1}}\nwendcode{}\nwbegindocs{65}\nwdocspar
 
-\nwenddocs{}\nwbegincode{56}\sublabel{NWdepy-LaTN.3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTN.3-1}}}\moddef{LaTeX REPORT Mainmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTN.3-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{66}\sublabel{NWdept-LaTN.3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTN.3-1}}}\moddef{LaTeX REPORT Mainmatter~{\nwtagstyle{}\subpageref{NWdept-LaTN.3-1}}}\endmoddef
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
 \\newpage
@@ -929,9 +1047,9 @@ sub \{
 \\end\{comment\}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\nwused{\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{57}\nwdocspar
+\nwused{\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{67}\nwdocspar
 
-\nwenddocs{}\nwbegincode{58}\sublabel{NWdepy-LaTG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTG-1}}}\moddef{LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdepy-LaTG-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{68}\sublabel{NWdept-LaTG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTG-1}}}\moddef{LaTeX Backmatter~{\nwtagstyle{}\subpageref{NWdept-LaTG-1}}}\endmoddef
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
 
 % \\newpage
@@ -951,11 +1069,11 @@ sub \{
 \\end\{comment\}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{59}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{69}\nwdocspar
 
 \sctn{Appendixes}
 
-\nwenddocs{}\nwbegincode{60}\sublabel{NWdepy-LaTX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTX-1}}}\moddef{LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdepy-LaTX-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{70}\sublabel{NWdept-LaTX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTX-1}}}\moddef{LaTeX common code appendix - perl~{\nwtagstyle{}\subpageref{NWdept-LaTX-1}}}\endmoddef
 \\newpage
 
 \\sctn\{Common code blocks\}
@@ -1090,9 +1208,9 @@ The same happens to '[[warn]]' function which also requires a hash variable '[[%
 sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
 @
 
-\nwidentuses{\\{{{\char36}DATE}{:doDATE}}\\{{{\char36}F}{:doF}}\\{{{\char36}T}{:doT}}\\{{{\char36}USER}{:doUSER}}\\{{{\char36}c}{:doc}}\\{{{\char36}n}{:don}}}\nwindexuse{{\char36}DATE}{:doDATE}{NWdepy-LaTX-1}\nwindexuse{{\char36}F}{:doF}{NWdepy-LaTX-1}\nwindexuse{{\char36}T}{:doT}{NWdepy-LaTX-1}\nwindexuse{{\char36}USER}{:doUSER}{NWdepy-LaTX-1}\nwindexuse{{\char36}c}{:doc}{NWdepy-LaTX-1}\nwindexuse{{\char36}n}{:don}{NWdepy-LaTX-1}\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{61}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{71}\nwdocspar
 
-\nwenddocs{}\nwbegincode{62}\sublabel{NWdepy-LaTW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTW-1}}}\moddef{LaTeX common code appendix - awk~{\nwtagstyle{}\subpageref{NWdepy-LaTW-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{72}\sublabel{NWdept-LaTW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTW-1}}}\moddef{LaTeX common code appendix - awk~{\nwtagstyle{}\subpageref{NWdept-LaTW-1}}}\endmoddef
 \\subsctn\{AWK scripts\}
 
 <<GAWK shebang>>=
@@ -1101,9 +1219,9 @@ sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
 <<Version Control Id Tag>>
 @
 
-\nwused{\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{63}\nwdocspar
+\nwused{\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{73}\nwdocspar
 
-\nwenddocs{}\nwbegincode{64}\sublabel{NWdepy-LaTX.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTX.2-1}}}\moddef{LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdepy-LaTX.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{74}\sublabel{NWdept-LaTX.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTX.2-1}}}\moddef{LaTeX common code appendix - bash~{\nwtagstyle{}\subpageref{NWdept-LaTX.2-1}}}\endmoddef
 \\subsctn\{BASH scripts\}
 
 <<BASH shebang>>=
@@ -1128,28 +1246,28 @@ L="####################"
 exit 0
 @
 
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{65}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{75}\nwdocspar
 
-\nwenddocs{}\nwbegincode{66}\sublabel{NWdepy-LaTa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTa-1}}}\moddef{LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdepy-LaTa-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{76}\sublabel{NWdept-LaTa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTa-1}}}\moddef{LaTeX common code appendix - version~{\nwtagstyle{}\subpageref{NWdept-LaTa-1}}}\endmoddef
 \\subsctn\{Version control tags\}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: deploy.tex,v 1.2 2001-08-21 13:15:04 jabril Exp $
+# $Id: deploy.tex,v 1.3 2001-09-03 18:26:42 jabril Exp $
 @ 
 
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{67}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{77}\nwdocspar
 
-\nwenddocs{}\nwbegincode{68}\sublabel{NWdepy-LaTa.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTa.2-1}}}\moddef{LaTeX common code appendix - license~{\nwtagstyle{}\subpageref{NWdepy-LaTa.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{78}\sublabel{NWdept-LaTa.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTa.2-1}}}\moddef{LaTeX common code appendix - license~{\nwtagstyle{}\subpageref{NWdept-LaTa.2-1}}}\endmoddef
 \\subsctn\{GNU General Public License\}
 
 <<GNU License>>=
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# %                             DEPLOY                               %
+# %                          @@@PROJECT@@@                           %
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # 
-#    .
+#    Remember to put a short description of your script here...
 # 
 #     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
 #
@@ -1169,9 +1287,9 @@ This document is under Revision Control System (RCS). The version you are curren
 # 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @ 
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}}\nwendcode{}\nwbegindocs{69}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}}\nwendcode{}\nwbegindocs{79}\nwdocspar
 
-\nwenddocs{}\nwbegincode{70}\sublabel{NWdepy-LaTY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaTY-1}}}\moddef{LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdepy-LaTY-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{80}\sublabel{NWdept-LaTY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaTY-1}}}\moddef{LaTeX common code appendix - noweb~{\nwtagstyle{}\subpageref{NWdept-LaTY-1}}}\endmoddef
 \\newpage
 
 \\sctn\{Extracting code blocks from this document\}
@@ -1210,7 +1328,8 @@ chmod a+x $WORK/nw2tex $WORK/ltx;
 @ 
 
 <<tangling complementary LaTeX files>>=
-notangle -R"LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
+notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw > $DOCS/todo.tex ; 
 @ 
 
 <<weaving>>=
@@ -1218,7 +1337,9 @@ notangle -R"LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
 # weaving and LaTeXing
 <<BASH Environment Variables>>
 <<tangling complementary LaTeX files>>
-noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \\
+        $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+# noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
@@ -1231,10 +1352,15 @@ popd;
 # only LaTeXing
 <<BASH Environment Variables>>
 pushd $DOCS/ ;
+#
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+#
+# pdflatex $nwfile.tex ;
+ps2pdf $nwfile.ps $nwfile.pdf ;
+#
 popd ;
 <<BASH script end>>
 @ %$
@@ -1263,7 +1389,7 @@ source $WORK/.bash_VARS ;
 #
 @
 
-\nwused{\\{NWdepy-PRON-1}\\{NWdepy-PROT-1}\\{NWdepy-PRON.2-1}}\nwendcode{}\nwbegindocs{71}\nwdocspar
+\nwused{\\{NWdept-PRON-1}\\{NWdept-PROT-1}\\{NWdept-PRON.2-1}}\nwendcode{}\nwbegindocs{81}\nwdocspar
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
@@ -1299,46 +1425,46 @@ source $WORK/.bash_VARS ;
 
 \subsctn{PERL scripts}
 
-\nwenddocs{}\nwbegincode{72}\sublabel{NWdepy-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWdepy-PERC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{82}\sublabel{NWdept-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWdept-PERC-1}}}\endmoddef
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
 #
-\LA{}GNU License~{\nwtagstyle{}\subpageref{NWdepy-GNUB-1}}\RA{}
+\LA{}GNU License~{\nwtagstyle{}\subpageref{NWdept-GNUB-1}}\RA{}
 #
-\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdepy-VerM-1}}\RA{}
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdept-VerM-1}}\RA{}
 #
 use strict;
-\nwused{\\{NWdepy-DEP6-1}}\nwendcode{}\nwbegindocs{73}\nwdocspar
+\nwused{\\{NWdept-DEP6-1}}\nwendcode{}\nwbegindocs{83}\nwdocspar
 
-\nwenddocs{}\nwbegincode{74}\sublabel{NWdepy-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWdepy-GloQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{84}\sublabel{NWdept-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWdept-GloQ-1}}}\endmoddef
 my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
-\nwindexdefn{{\char36}T}{:doT}{NWdepy-GloQ-1}\nwindexdefn{{\char36}F}{:doF}{NWdepy-GloQ-1}\eatline
-\nwidentdefs{\\{{{\char36}F}{:doF}}\\{{{\char36}T}{:doT}}}\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{75}\nwdocspar
+\eatline
+\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{85}\nwdocspar
 We also set here the date when the script is running and who is the user running it.
 
-\nwenddocs{}\nwbegincode{76}\sublabel{NWdepy-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWdepy-GloR-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{86}\sublabel{NWdept-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWdept-GloR-1}}}\endmoddef
 my $DATE = localtime;
 my $USER = $ENV\{USER\};
-\nwindexdefn{{\char36}DATE}{:doDATE}{NWdepy-GloR-1}\nwindexdefn{{\char36}USER}{:doUSER}{NWdepy-GloR-1}\eatline
-\nwidentdefs{\\{{{\char36}DATE}{:doDATE}}\\{{{\char36}USER}{:doUSER}}}\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{77}\nwdocspar
+\eatline
+\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{87}\nwdocspar
 
 \subsubsctn{Timing our scripts}
 
 The '{\tt{}Benchmark}' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
 
-\nwenddocs{}\nwbegincode{78}\sublabel{NWdepy-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWdepy-UseN-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{88}\sublabel{NWdept-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWdept-UseN-1}}}\endmoddef
 use Benchmark;
-  \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWdepy-Tim8-1}}\RA{}
-\nwnotused{Use\ Modules\ -\ Benchmark}\nwendcode{}\nwbegindocs{79}\nwdocspar
+  \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWdept-Tim8-1}}\RA{}
+\nwnotused{Use\ Modules\ -\ Benchmark}\nwendcode{}\nwbegindocs{89}\nwdocspar
 
 See '{\tt{}man\ Benchmark}' for further info about this package. 
 We set an array to keep record of timing for each section.
 
-\nwenddocs{}\nwbegincode{80}\sublabel{NWdepy-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWdepy-Tim8-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{90}\sublabel{NWdept-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWdept-Tim8-1}}}\endmoddef
 my @Timer = (new Benchmark);
-\nwused{\\{NWdepy-UseN-1}}\nwendcode{}\nwbegindocs{81}\nwdocspar
+\nwused{\\{NWdept-UseN-1}}\nwendcode{}\nwbegindocs{91}\nwdocspar
 
-\nwenddocs{}\nwbegincode{82}\sublabel{NWdepy-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWdepy-ComS-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{92}\sublabel{NWdept-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWdept-ComS-1}}}\endmoddef
 sub timing() \{
     push @Timer, (new Benchmark);
     # partial time 
@@ -1347,7 +1473,7 @@ sub timing() \{
     # total time
     return timestr(timediff($Timer[$#Timer],$Timer[0]));
 \} # timing
-\nwnotused{Common\ PERL\ subs\ -\ Benchmark}\nwendcode{}\nwbegindocs{83}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Benchmark}\nwendcode{}\nwbegindocs{93}\nwdocspar
 
 
 \subsubsctn{Printing complex Data Structures}
@@ -1355,22 +1481,22 @@ sub timing() \{
 With '{\tt{}Data::Dumper}' we are able to pretty print complex data structures for debugging them.
 
 
-\nwenddocs{}\nwbegincode{84}\sublabel{NWdepy-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWdepy-UseK-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{94}\sublabel{NWdept-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWdept-UseK-1}}}\endmoddef
 use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
-\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{85}\nwdocspar
+\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{95}\nwdocspar
 
 
 \subsubsctn{Common functions}
 
-\nwenddocs{}\nwbegincode{86}\sublabel{NWdepy-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWdepy-SkiV-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{96}\sublabel{NWdept-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWdept-SkiV-1}}}\endmoddef
 next if /^\\#/o;
 next if /^\\s*$/o;
 chomp;
-\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{87}\nwdocspar
+\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{97}\nwdocspar
 
-\nwenddocs{}\nwbegincode{88}\sublabel{NWdepy-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWdepy-ComQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{98}\sublabel{NWdept-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWdept-ComQ-1}}}\endmoddef
 #
 sub max() \{
     my $z = shift @_;
@@ -1382,9 +1508,9 @@ sub min() \{
     foreach my $l (@_) \{ $z = $l if $l < $z \};
     return $z;
 \} # min
-\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{89}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{99}\nwdocspar
 
-\nwenddocs{}\nwbegincode{90}\sublabel{NWdepy-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWdepy-ComS.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{100}\sublabel{NWdept-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWdept-ComS.2-1}}}\endmoddef
 #
 sub fill_right() \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
 sub fill_left()  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
@@ -1393,11 +1519,11 @@ sub fill_mid()   \{
     my $k = int(($_[1] - $l)/2);
     ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
 \} # fill_mid
-\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{91}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{101}\nwdocspar
 
 These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
 
-\nwenddocs{}\nwbegincode{92}\sublabel{NWdepy-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWdepy-ComQ.2-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{102}\sublabel{NWdept-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWdept-ComQ.2-1}}}\endmoddef
 #
 sub counter \{ # $_[0]~current_pos++ $_[1]~char
     print STDERR "$_[1]";
@@ -1407,42 +1533,42 @@ sub counter \{ # $_[0]~current_pos++ $_[1]~char
 sub counter_end \{ # $_[0]~current_pos   $_[1]~char
     (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
 \} # counter_end
-\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{93}\nwdocspar
+\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{103}\nwdocspar
 
-\nwenddocs{}\nwbegincode{94}\sublabel{NWdepy-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWdepy-GloL-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{104}\sublabel{NWdept-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWdept-GloL-1}}}\endmoddef
 my ($n,$c); # counter and char (for &counter function)
-\nwindexdefn{{\char36}n}{:don}{NWdepy-GloL-1}\nwindexdefn{{\char36}c}{:doc}{NWdepy-GloL-1}\eatline
-\nwidentdefs{\\{{{\char36}c}{:doc}}\\{{{\char36}n}{:don}}}\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{95}\nwdocspar
+\eatline
+\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{105}\nwdocspar
 
 \subsubsctn{Common functions for reporting program processes}
 \label{sec:messagerpt}
 
 Function '{\tt{}report}' requires that a hash variable '{\tt{}{\char37}MessageList}' has been set, such hash contains the strings for each report message we will need. The first parameter for '{\tt{}report}' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the {\tt{}sprintf} function on that string.
 
-\nwenddocs{}\nwbegincode{96}\sublabel{NWdepy-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWdepy-ComP-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{106}\sublabel{NWdept-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWdept-ComP-1}}}\endmoddef
 sub report() \{ print STDERR sprintf($MessageList\{ shift @_ \},@_) \}
-\nwalsodefined{\\{NWdepy-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{97}\nwdocspar
+\nwalsodefined{\\{NWdept-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{107}\nwdocspar
 
 The same happens to '{\tt{}warn}' function which also requires a hash variable '{\tt{}{\char37}ErrorList}' containing the error messages.
 
-\nwenddocs{}\nwbegincode{98}\sublabel{NWdepy-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWdepy-ComP-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{108}\sublabel{NWdept-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWdept-ComP-1}}}\plusendmoddef
 sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
-\nwendcode{}\nwbegindocs{99}\nwdocspar
+\nwendcode{}\nwbegindocs{109}\nwdocspar
 
 \subsctn{AWK scripts}
 
-\nwenddocs{}\nwbegincode{100}\sublabel{NWdepy-GAWC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-GAWC-1}}}\moddef{GAWK shebang~{\nwtagstyle{}\subpageref{NWdepy-GAWC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{110}\sublabel{NWdept-GAWC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-GAWC-1}}}\moddef{GAWK shebang~{\nwtagstyle{}\subpageref{NWdept-GAWC-1}}}\endmoddef
 #!/usr/bin/gawk -f
 # GNU Awk 3.0.4
-\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdepy-VerM-1}}\RA{}
-\nwnotused{GAWK\ shebang}\nwendcode{}\nwbegindocs{101}\nwdocspar
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdept-VerM-1}}\RA{}
+\nwnotused{GAWK\ shebang}\nwendcode{}\nwbegindocs{111}\nwdocspar
 
 \subsctn{BASH scripts}
 
-\nwenddocs{}\nwbegincode{102}\sublabel{NWdepy-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWdepy-BASC-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{112}\sublabel{NWdept-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWdept-BASC-1}}}\endmoddef
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdepy-VerM-1}}\RA{}
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdept-VerM-1}}\RA{}
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -1451,32 +1577,32 @@ L="####################"
   echo "### RUNNING [$0]";
   echo "### Current date:`date`";
   echo "###"; \} 1>&2;
-\nwused{\\{NWdepy-wea7-1}\\{NWdepy-LaT8-1}}\nwendcode{}\nwbegindocs{103}\nwdocspar
+\nwused{\\{NWdept-wea7-1}\\{NWdept-LaT8-1}}\nwendcode{}\nwbegindocs{113}\nwdocspar
 
-\nwenddocs{}\nwbegincode{104}\sublabel{NWdepy-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWdepy-BASF-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{114}\sublabel{NWdept-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWdept-BASF-1}}}\endmoddef
 \{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
   echo "$L$L$L$L";
   echo ""; \} 1>&2;
 #
 exit 0
-\nwused{\\{NWdepy-wea7-1}\\{NWdepy-LaT8-1}}\nwendcode{}\nwbegindocs{105}\nwdocspar
+\nwused{\\{NWdept-wea7-1}\\{NWdept-LaT8-1}}\nwendcode{}\nwbegindocs{115}\nwdocspar
 
 \subsctn{Version control tags}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
-\nwenddocs{}\nwbegincode{106}\sublabel{NWdepy-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdepy-VerM-1}}}\endmoddef
-# $Id: deploy.tex,v 1.2 2001-08-21 13:15:04 jabril Exp $
-\nwused{\\{NWdepy-LaTC-1}\\{NWdepy-PERC-1}\\{NWdepy-GAWC-1}\\{NWdepy-BASC-1}}\nwendcode{}\nwbegindocs{107}\nwdocspar
+\nwenddocs{}\nwbegincode{116}\sublabel{NWdept-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWdept-VerM-1}}}\endmoddef
+# $Id: deploy.tex,v 1.3 2001-09-03 18:26:42 jabril Exp $
+\nwused{\\{NWdept-LaTC-1}\\{NWdept-PERC-1}\\{NWdept-GAWC-1}\\{NWdept-BASC-1}}\nwendcode{}\nwbegindocs{117}\nwdocspar
 
 \subsctn{GNU General Public License}
 
-\nwenddocs{}\nwbegincode{108}\sublabel{NWdepy-GNUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-GNUB-1}}}\moddef{GNU License~{\nwtagstyle{}\subpageref{NWdepy-GNUB-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{118}\sublabel{NWdept-GNUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-GNUB-1}}}\moddef{GNU License~{\nwtagstyle{}\subpageref{NWdept-GNUB-1}}}\endmoddef
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # %                             DEPLOY                               %
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # 
-#    .
+# Creates basic file set to work with noweb literate programming tool.
 # 
 #     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
 #
@@ -1495,7 +1621,7 @@ This document is under Revision Control System (RCS). The version you are curren
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nwused{\\{NWdepy-PERC-1}}\nwendcode{}\nwbegindocs{109}\nwdocspar
+\nwused{\\{NWdept-PERC-1}}\nwendcode{}\nwbegindocs{119}\nwdocspar
 
 \newpage
 
@@ -1508,25 +1634,24 @@ documentation. The following instructions are needed:
 
 Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
-\nwenddocs{}\nwbegincode{110}\sublabel{NWdepy-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdepy-tan8-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{120}\sublabel{NWdept-tanS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-tanS-1}}}\moddef{tangling development version~{\nwtagstyle{}\subpageref{NWdept-tanS-1}}}\endmoddef
 # showing line numbering comments in program
 notangle -L -R"DEPLOY" $WORK/$nwfile.nw | \\
     perl -ne '$.>1 && print' > $BIN/deploy.pl ;
 chmod a+x $BIN/deploy.pl ;
 #
-\nwalsodefined{\\{NWdepy-tan8-2}\\{NWdepy-tan8-3}\\{NWdepy-tan8-4}\\{NWdepy-tan8-5}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{111}\nwdocspar
+\nwnotused{tangling\ development\ version}\nwendcode{}\nwbegindocs{121}\nwdocspar
  
-\begin{comment}
-\nwenddocs{}\nwbegincode{112}\sublabel{NWdepy-newE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-newE-1}}}\moddef{new LaTeX urls~{\nwtagstyle{}\subpageref{NWdepy-newE-1}}}\endmoddef
-\\def\\perltidy\{
- \\htmladdnormallinkfoot\{\\texttt\{perltidy\}\}
-                   \{\\url|http://perltidy.sourceforge.net/|\}
- \} % def perltidy
-\nwused{\\{NWdepy-LaTS-1}}\nwendcode{}\nwbegindocs{113}\nwdocspar
-\end{comment}
+\nwenddocs{}%
+%
+%
+%
+%
+\nwbegindocs{123}\nwdocspar
+
 We use {\perltidy} to reformat final versions of perl scripts (without line numbering comments, correct indentations, etc...) and to pretty-print in html format.
 
-\nwenddocs{}\nwbegincode{114}\sublabel{NWdepy-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdepy-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{124}\sublabel{NWdept-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdept-tan8-1}}}\endmoddef
 # reformating program with perltidy
 notangle -R"DEPLOY" $WORK/$nwfile.nw | \\
     perltidy - > $BIN/deploy.pl ;
@@ -1534,60 +1659,77 @@ notangle -R"DEPLOY" $WORK/$nwfile.nw | \\
 notangle -R"DEPLOY" $WORK/$nwfile.nw | \\
     perltidy -html - > $DOCS/html/deploy.html ;
 #
-\nwendcode{}\nwbegindocs{115}\nwdocspar
+\nwalsodefined{\\{NWdept-tan8-2}\\{NWdept-tan8-3}\\{NWdept-tan8-4}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{125}\nwdocspar
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
-\nwenddocs{}\nwbegincode{116}\sublabel{NWdepy-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdepy-tan8-1}}}\plusendmoddef
-notangle -R"root" $WORK/$nwfile.nw \\
-    > $DATA/root_config ;
-\nwendcode{}\nwbegindocs{117}%$
+\nwenddocs{}\nwbegincode{126}\sublabel{NWdept-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdept-tan8-1}}}\plusendmoddef
+notangle -R"PROJECT SCRIPT Template" $WORK/$nwfile.nw \\
+    > $DATA/perlscript.nw ;
+notangle -R"PROJECT PERL PACKAGE Template" $WORK/$nwfile.nw \\
+    > $DATA/perlpackage.nw ;
+notangle -R"PROJECT REPORT Template" $WORK/$nwfile.nw \\
+    > $DATA/report.nw ;
+\nwendcode{}\nwbegindocs{127}%$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
-\nwenddocs{}\nwbegincode{118}\sublabel{NWdepy-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdepy-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{128}\sublabel{NWdept-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdept-tan8-1}}}\plusendmoddef
 notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
-\nwendcode{}\nwbegindocs{119}\nwdocspar
+\nwendcode{}\nwbegindocs{129}\nwdocspar
 
-\nwenddocs{}\nwbegincode{120}\sublabel{NWdepy-tanY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-tanY-1}}}\moddef{tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWdepy-tanY-1}}}\endmoddef
-notangle -R"LaTeX deploy new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
-\nwused{\\{NWdepy-wea7-1}}\nwendcode{}\nwbegindocs{121}\nwdocspar
+\nwenddocs{}\nwbegincode{130}\sublabel{NWdept-tanY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-tanY-1}}}\moddef{tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWdept-tanY-1}}}\endmoddef
+notangle -R"HIDE: LaTeX deploy new definitions" \\
+    $WORK/$nwfile.nw > $DOCS/defs.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw > $DOCS/todo.tex ; 
+\nwused{\\{NWdept-wea7-1}}\nwendcode{}\nwbegindocs{131}\nwdocspar
 
-\nwenddocs{}\nwbegincode{122}\sublabel{NWdepy-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWdepy-wea7-1}}}\endmoddef
-\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWdepy-BASC-1}}\RA{}
+\nwenddocs{}\nwbegincode{132}\sublabel{NWdept-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWdept-wea7-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWdept-BASC-1}}\RA{}
 # weaving and LaTeXing
-\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWdepy-BASQ-1}}\RA{}
-\LA{}tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWdepy-tanY-1}}\RA{}
-noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWdept-BASQ-1}}\RA{}
+\LA{}tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWdept-tanY-1}}\RA{}
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \\
+        $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+# noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
+#
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+#
 popd;
-\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWdepy-BASF-1}}\RA{}
-\nwnotused{weaving}\nwendcode{}\nwbegindocs{123}\nwdocspar
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWdept-BASF-1}}\RA{}
+\nwnotused{weaving}\nwendcode{}\nwbegindocs{133}\nwdocspar
 
-\nwenddocs{}\nwbegincode{124}\sublabel{NWdepy-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWdepy-LaT8-1}}}\endmoddef
-\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWdepy-BASC-1}}\RA{}
+\nwenddocs{}\nwbegincode{134}\sublabel{NWdept-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWdept-LaT8-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWdept-BASC-1}}\RA{}
 # only LaTeXing
-\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWdepy-BASQ-1}}\RA{}
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWdept-BASQ-1}}\RA{}
 pushd $DOCS/ ;
+#
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
-pdflatex $nwfile.tex ;
+#
+# pdflatex $nwfile.tex ;
+echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
+ps2pdf $nwfile.ps $nwfile.pdf ;
+#
 popd ;
-\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWdepy-BASF-1}}\RA{}
-\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{125}%$
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWdept-BASF-1}}\RA{}
+\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{135}%$
 
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
-\nwenddocs{}\nwbegincode{126}\sublabel{NWdepy-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWdepy-BASQ-1}}}\endmoddef
+\nwenddocs{}\nwbegincode{136}\sublabel{NWdept-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWdept-BASQ-1}}}\endmoddef
 #
 # Setting Global Variables
-WORK="/home/ug/jabril/development/jabril/software/deploy" ;
+WORK="$HOME/development/softjabril/deploy" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
@@ -1595,9 +1737,9 @@ DATA="$WORK/data" ;
 nwfile="deploy" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
 #
-\nwused{\\{NWdepy-wea7-1}\\{NWdepy-LaT8-1}}\nwendcode{}\nwbegindocs{127}\nwdocspar
+\nwused{\\{NWdept-wea7-1}\\{NWdept-LaT8-1}}\nwendcode{}\nwbegindocs{137}\nwdocspar
 
-\nwenddocs{}\nwbegincode{128}\sublabel{NWdepy-tan8-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWdepy-tan8-5}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdepy-tan8-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{138}\sublabel{NWdept-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWdept-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWdept-tan8-1}}}\plusendmoddef
 #
 # BASH Environment Variables
 notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \\
@@ -1606,65 +1748,64 @@ source $WORK/.bash_VARS ;
 #
 \nwendcode{}
 
-\nwixlogsorted{c}{{BASH Environment Variables}{NWdepy-BASQ-1}{\nwixu{NWdepy-wea7-1}\nwixu{NWdepy-LaT8-1}\nwixd{NWdepy-BASQ-1}}}%
-\nwixlogsorted{c}{{BASH script end}{NWdepy-BASF-1}{\nwixd{NWdepy-BASF-1}\nwixu{NWdepy-wea7-1}\nwixu{NWdepy-LaT8-1}}}%
-\nwixlogsorted{c}{{BASH shebang}{NWdepy-BASC-1}{\nwixd{NWdepy-BASC-1}\nwixu{NWdepy-wea7-1}\nwixu{NWdepy-LaT8-1}}}%
-\nwixlogsorted{c}{{Common PERL subs - Benchmark}{NWdepy-ComS-1}{\nwixd{NWdepy-ComS-1}}}%
-\nwixlogsorted{c}{{Common PERL subs - Counter}{NWdepy-ComQ.2-1}{\nwixd{NWdepy-ComQ.2-1}}}%
-\nwixlogsorted{c}{{Common PERL subs - Min Max}{NWdepy-ComQ-1}{\nwixd{NWdepy-ComQ-1}}}%
-\nwixlogsorted{c}{{Common PERL subs - STDERR}{NWdepy-ComP-1}{\nwixd{NWdepy-ComP-1}\nwixd{NWdepy-ComP-2}}}%
-\nwixlogsorted{c}{{Common PERL subs - Text fill}{NWdepy-ComS.2-1}{\nwixd{NWdepy-ComS.2-1}}}%
-\nwixlogsorted{c}{{DEPLOY}{NWdepy-DEP6-1}{\nwixd{NWdepy-DEP6-1}}}%
-\nwixlogsorted{c}{{EMACS header}{NWdepy-EMAC-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-EMAC-1}}}%
-\nwixlogsorted{c}{{Functions}{NWdepy-Fun9-1}{\nwixu{NWdepy-DEP6-1}\nwixd{NWdepy-Fun9-1}\nwixd{NWdepy-Fun9-2}\nwixd{NWdepy-Fun9-3}\nwixd{NWdepy-Fun9-4}}}%
-\nwixlogsorted{c}{{GAWK shebang}{NWdepy-GAWC-1}{\nwixd{NWdepy-GAWC-1}}}%
-\nwixlogsorted{c}{{GNU License}{NWdepy-GNUB-1}{\nwixu{NWdepy-PERC-1}\nwixd{NWdepy-GNUB-1}}}%
-\nwixlogsorted{c}{{Global Constants - Boolean}{NWdepy-GloQ-1}{\nwixd{NWdepy-GloQ-1}}}%
-\nwixlogsorted{c}{{Global Vars}{NWdepy-GloB-1}{\nwixu{NWdepy-DEP6-1}\nwixd{NWdepy-GloB-1}}}%
-\nwixlogsorted{c}{{Global Vars - Counter}{NWdepy-GloL-1}{\nwixd{NWdepy-GloL-1}}}%
-\nwixlogsorted{c}{{Global Vars - User and Date}{NWdepy-GloR-1}{\nwixd{NWdepy-GloR-1}}}%
-\nwixlogsorted{c}{{LaTeX Backmatter}{NWdepy-LaTG-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTG-1}}}%
-\nwixlogsorted{c}{{LaTeX Frontmatter}{NWdepy-LaTH-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTH-1}}}%
-\nwixlogsorted{c}{{LaTeX PACKAGES Mainmatter}{NWdepy-LaTP-1}{\nwixu{NWdepy-PROT-1}\nwixd{NWdepy-LaTP-1}}}%
-\nwixlogsorted{c}{{LaTeX REPORT Mainmatter}{NWdepy-LaTN.3-1}{\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTN.3-1}}}%
-\nwixlogsorted{c}{{LaTeX SCRIPT Mainmatter}{NWdepy-LaTN.2-1}{\nwixu{NWdepy-PRON-1}\nwixd{NWdepy-LaTN.2-1}}}%
-\nwixlogsorted{c}{{LaTeX basic definitions}{NWdepy-LaTN-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTN-1}}}%
-\nwixlogsorted{c}{{LaTeX common code appendix - awk}{NWdepy-LaTW-1}{\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTW-1}}}%
-\nwixlogsorted{c}{{LaTeX common code appendix - bash}{NWdepy-LaTX.2-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTX.2-1}}}%
-\nwixlogsorted{c}{{LaTeX common code appendix - license}{NWdepy-LaTa.2-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixd{NWdepy-LaTa.2-1}}}%
-\nwixlogsorted{c}{{LaTeX common code appendix - noweb}{NWdepy-LaTY-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTY-1}}}%
-\nwixlogsorted{c}{{LaTeX common code appendix - perl}{NWdepy-LaTX-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTX-1}}}%
-\nwixlogsorted{c}{{LaTeX common code appendix - version}{NWdepy-LaTa-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTa-1}}}%
-\nwixlogsorted{c}{{LaTeX deploy new definitions}{NWdepy-LaTS-1}{\nwixd{NWdepy-LaTS-1}}}%
-\nwixlogsorted{c}{{LaTeX header}{NWdepy-LaTC-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTC-1}}}%
-\nwixlogsorted{c}{{LaTeX packages}{NWdepy-LaTE-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-LaTE-1}}}%
-\nwixlogsorted{c}{{LaTeXing}{NWdepy-LaT8-1}{\nwixd{NWdepy-LaT8-1}}}%
-\nwixlogsorted{c}{{Main Loop}{NWdepy-Mai9-1}{\nwixu{NWdepy-DEP6-1}\nwixd{NWdepy-Mai9-1}}}%
-\nwixlogsorted{c}{{PERL PACKAGE files}{NWdepy-PERI-1}{\nwixd{NWdepy-PERI-1}\nwixd{NWdepy-PERI-2}\nwixd{NWdepy-PERI-3}\nwixd{NWdepy-PERI-4}\nwixd{NWdepy-PERI-5}\nwixd{NWdepy-PERI-6}\nwixu{NWdepy-LaTP-1}}}%
-\nwixlogsorted{c}{{PERL shebang}{NWdepy-PERC-1}{\nwixu{NWdepy-DEP6-1}\nwixd{NWdepy-PERC-1}}}%
-\nwixlogsorted{c}{{PROGRAM LaTeX title}{NWdepy-PROJ-1}{\nwixu{NWdepy-PRON-1}\nwixu{NWdepy-PROT-1}\nwixd{NWdepy-PROJ-1}}}%
-\nwixlogsorted{c}{{PROJECT PERL PACKAGE Template}{NWdepy-PROT-1}{\nwixd{NWdepy-PROT-1}}}%
-\nwixlogsorted{c}{{PROJECT REPORT Template}{NWdepy-PRON.2-1}{\nwixd{NWdepy-PRON.2-1}}}%
-\nwixlogsorted{c}{{PROJECT SCRIPT Template}{NWdepy-PRON-1}{\nwixd{NWdepy-PRON-1}}}%
-\nwixlogsorted{c}{{REPORT LaTeX title}{NWdepy-REPI-1}{\nwixu{NWdepy-PRON.2-1}\nwixd{NWdepy-REPI-1}}}%
-\nwixlogsorted{c}{{Skip comments and empty records}{NWdepy-SkiV-1}{\nwixd{NWdepy-SkiV-1}}}%
-\nwixlogsorted{c}{{Timer ON}{NWdepy-Tim8-1}{\nwixu{NWdepy-UseN-1}\nwixd{NWdepy-Tim8-1}}}%
-\nwixlogsorted{c}{{Use Modules}{NWdepy-UseB-1}{\nwixu{NWdepy-DEP6-1}\nwixd{NWdepy-UseB-1}}}%
-\nwixlogsorted{c}{{Use Modules - Benchmark}{NWdepy-UseN-1}{\nwixd{NWdepy-UseN-1}}}%
-\nwixlogsorted{c}{{Use Modules - Dumper}{NWdepy-UseK-1}{\nwixd{NWdepy-UseK-1}}}%
-\nwixlogsorted{c}{{Version Control Id Tag}{NWdepy-VerM-1}{\nwixu{NWdepy-LaTC-1}\nwixu{NWdepy-PERC-1}\nwixu{NWdepy-GAWC-1}\nwixu{NWdepy-BASC-1}\nwixd{NWdepy-VerM-1}}}%
-\nwixlogsorted{c}{{new LaTeX definitions}{nw@notdef}{\nwixu{NWdepy-LaTS-1}}}%
-\nwixlogsorted{c}{{new LaTeX urls}{NWdepy-newE-1}{\nwixu{NWdepy-LaTS-1}\nwixd{NWdepy-newE-1}}}%
-\nwixlogsorted{c}{{tangling}{NWdepy-tan8-1}{\nwixd{NWdepy-tan8-1}\nwixd{NWdepy-tan8-2}\nwixd{NWdepy-tan8-3}\nwixd{NWdepy-tan8-4}\nwixd{NWdepy-tan8-5}}}%
-\nwixlogsorted{c}{{tangling complementary LaTeX files}{NWdepy-tanY-1}{\nwixd{NWdepy-tanY-1}\nwixu{NWdepy-wea7-1}}}%
-\nwixlogsorted{c}{{weaving}{NWdepy-wea7-1}{\nwixd{NWdepy-wea7-1}}}%
-\nwixlogsorted{i}{{{\char36}DATE}{:doDATE}}%
-\nwixlogsorted{i}{{{\char36}F}{:doF}}%
-\nwixlogsorted{i}{{{\char36}T}{:doT}}%
-\nwixlogsorted{i}{{{\char36}USER}{:doUSER}}%
-\nwixlogsorted{i}{{{\char36}c}{:doc}}%
-\nwixlogsorted{i}{{{\char36}n}{:don}}%
-\nwbegindocs{129}\nwdocspar
+\nwixlogsorted{c}{{BASH Environment Variables}{NWdept-BASQ-1}{\nwixu{NWdept-wea7-1}\nwixu{NWdept-LaT8-1}\nwixd{NWdept-BASQ-1}}}%
+\nwixlogsorted{c}{{BASH script end}{NWdept-BASF-1}{\nwixd{NWdept-BASF-1}\nwixu{NWdept-wea7-1}\nwixu{NWdept-LaT8-1}}}%
+\nwixlogsorted{c}{{BASH shebang}{NWdept-BASC-1}{\nwixd{NWdept-BASC-1}\nwixu{NWdept-wea7-1}\nwixu{NWdept-LaT8-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Benchmark}{NWdept-ComS-1}{\nwixd{NWdept-ComS-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Counter}{NWdept-ComQ.2-1}{\nwixd{NWdept-ComQ.2-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Min Max}{NWdept-ComQ-1}{\nwixd{NWdept-ComQ-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - STDERR}{NWdept-ComP-1}{\nwixd{NWdept-ComP-1}\nwixd{NWdept-ComP-2}}}%
+\nwixlogsorted{c}{{Common PERL subs - Text fill}{NWdept-ComS.2-1}{\nwixd{NWdept-ComS.2-1}}}%
+\nwixlogsorted{c}{{DEPLOY}{NWdept-DEP6-1}{\nwixd{NWdept-DEP6-1}}}%
+\nwixlogsorted{c}{{EMACS header}{NWdept-EMAC-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-EMAC-1}}}%
+\nwixlogsorted{c}{{Functions}{NWdept-Fun9-1}{\nwixu{NWdept-DEP6-1}\nwixd{NWdept-Fun9-1}\nwixd{NWdept-Fun9-2}\nwixd{NWdept-Fun9-3}\nwixd{NWdept-Fun9-4}}}%
+\nwixlogsorted{c}{{GAWK shebang}{NWdept-GAWC-1}{\nwixd{NWdept-GAWC-1}}}%
+\nwixlogsorted{c}{{GNU License}{NWdept-GNUB-1}{\nwixu{NWdept-PERC-1}\nwixd{NWdept-GNUB-1}}}%
+\nwixlogsorted{c}{{Global Constants - Boolean}{NWdept-GloQ-1}{\nwixd{NWdept-GloQ-1}}}%
+\nwixlogsorted{c}{{Global Vars}{NWdept-GloB-1}{\nwixu{NWdept-DEP6-1}\nwixd{NWdept-GloB-1}}}%
+\nwixlogsorted{c}{{Global Vars - Counter}{NWdept-GloL-1}{\nwixd{NWdept-GloL-1}}}%
+\nwixlogsorted{c}{{Global Vars - User and Date}{NWdept-GloR-1}{\nwixd{NWdept-GloR-1}}}%
+\nwixlogsorted{c}{{HIDE: LaTeX deploy new definitions}{NWdept-HIDY-1}{\nwixd{NWdept-HIDY-1}}}%
+\nwixlogsorted{c}{{HIDE: TODO}{NWdept-HIDA-1}{\nwixd{NWdept-HIDA-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX commands}{NWdept-HIDO-1}{\nwixu{NWdept-HIDY-1}\nwixd{NWdept-HIDO-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX definitions}{NWdept-HIDR-1}{\nwixu{NWdept-HIDY-1}\nwixd{NWdept-HIDR-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX pstricks}{NWdept-HIDO.2-1}{\nwixu{NWdept-HIDY-1}\nwixd{NWdept-HIDO.2-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX urls}{NWdept-HIDK-1}{\nwixu{NWdept-HIDY-1}\nwixd{NWdept-HIDK-1}}}%
+\nwixlogsorted{c}{{HIDE: new defs TODO}{NWdept-HIDJ-1}{\nwixu{NWdept-HIDY-1}\nwixd{NWdept-HIDJ-1}}}%
+\nwixlogsorted{c}{{LaTeX Backmatter}{NWdept-LaTG-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTG-1}}}%
+\nwixlogsorted{c}{{LaTeX Frontmatter}{NWdept-LaTH-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTH-1}}}%
+\nwixlogsorted{c}{{LaTeX PACKAGES Mainmatter}{NWdept-LaTP-1}{\nwixu{NWdept-PROT-1}\nwixd{NWdept-LaTP-1}}}%
+\nwixlogsorted{c}{{LaTeX REPORT Mainmatter}{NWdept-LaTN.3-1}{\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTN.3-1}}}%
+\nwixlogsorted{c}{{LaTeX SCRIPT Mainmatter}{NWdept-LaTN.2-1}{\nwixu{NWdept-PRON-1}\nwixd{NWdept-LaTN.2-1}}}%
+\nwixlogsorted{c}{{LaTeX basic definitions}{NWdept-LaTN-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTN-1}}}%
+\nwixlogsorted{c}{{LaTeX common code appendix - awk}{NWdept-LaTW-1}{\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTW-1}}}%
+\nwixlogsorted{c}{{LaTeX common code appendix - bash}{NWdept-LaTX.2-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTX.2-1}}}%
+\nwixlogsorted{c}{{LaTeX common code appendix - license}{NWdept-LaTa.2-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixd{NWdept-LaTa.2-1}}}%
+\nwixlogsorted{c}{{LaTeX common code appendix - noweb}{NWdept-LaTY-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTY-1}}}%
+\nwixlogsorted{c}{{LaTeX common code appendix - perl}{NWdept-LaTX-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTX-1}}}%
+\nwixlogsorted{c}{{LaTeX common code appendix - version}{NWdept-LaTa-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTa-1}}}%
+\nwixlogsorted{c}{{LaTeX header}{NWdept-LaTC-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTC-1}}}%
+\nwixlogsorted{c}{{LaTeX packages}{NWdept-LaTE-1}{\nwixu{NWdept-PRON-1}\nwixu{NWdept-PROT-1}\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-LaTE-1}}}%
+\nwixlogsorted{c}{{LaTeXing}{NWdept-LaT8-1}{\nwixd{NWdept-LaT8-1}}}%
+\nwixlogsorted{c}{{Main Loop}{NWdept-Mai9-1}{\nwixu{NWdept-DEP6-1}\nwixd{NWdept-Mai9-1}}}%
+\nwixlogsorted{c}{{PERL PACKAGE files}{NWdept-PERI-1}{\nwixd{NWdept-PERI-1}\nwixd{NWdept-PERI-2}\nwixd{NWdept-PERI-3}\nwixd{NWdept-PERI-4}\nwixd{NWdept-PERI-5}\nwixd{NWdept-PERI-6}\nwixu{NWdept-LaTP-1}}}%
+\nwixlogsorted{c}{{PERL shebang}{NWdept-PERC-1}{\nwixu{NWdept-DEP6-1}\nwixd{NWdept-PERC-1}}}%
+\nwixlogsorted{c}{{PROGRAM LaTeX title}{NWdept-PROJ-1}{\nwixu{NWdept-PRON-1}\nwixd{NWdept-PROJ-1}\nwixu{NWdept-PROT-1}}}%
+\nwixlogsorted{c}{{PROJECT PERL PACKAGE Template}{NWdept-PROT-1}{\nwixd{NWdept-PROT-1}}}%
+\nwixlogsorted{c}{{PROJECT REPORT Template}{NWdept-PRON.2-1}{\nwixd{NWdept-PRON.2-1}}}%
+\nwixlogsorted{c}{{PROJECT SCRIPT Template}{NWdept-PRON-1}{\nwixd{NWdept-PRON-1}}}%
+\nwixlogsorted{c}{{REPORT LaTeX title}{NWdept-REPI-1}{\nwixu{NWdept-PRON.2-1}\nwixd{NWdept-REPI-1}}}%
+\nwixlogsorted{c}{{Skip comments and empty records}{NWdept-SkiV-1}{\nwixd{NWdept-SkiV-1}}}%
+\nwixlogsorted{c}{{Timer ON}{NWdept-Tim8-1}{\nwixu{NWdept-UseN-1}\nwixd{NWdept-Tim8-1}}}%
+\nwixlogsorted{c}{{Use Modules}{NWdept-UseB-1}{\nwixu{NWdept-DEP6-1}\nwixd{NWdept-UseB-1}}}%
+\nwixlogsorted{c}{{Use Modules - Benchmark}{NWdept-UseN-1}{\nwixd{NWdept-UseN-1}}}%
+\nwixlogsorted{c}{{Use Modules - Dumper}{NWdept-UseK-1}{\nwixd{NWdept-UseK-1}}}%
+\nwixlogsorted{c}{{Version Control Id Tag}{NWdept-VerM-1}{\nwixu{NWdept-LaTC-1}\nwixu{NWdept-PERC-1}\nwixu{NWdept-GAWC-1}\nwixu{NWdept-BASC-1}\nwixd{NWdept-VerM-1}}}%
+\nwixlogsorted{c}{{tangling}{NWdept-tan8-1}{\nwixd{NWdept-tan8-1}\nwixd{NWdept-tan8-2}\nwixd{NWdept-tan8-3}\nwixd{NWdept-tan8-4}}}%
+\nwixlogsorted{c}{{tangling complementary LaTeX files}{NWdept-tanY-1}{\nwixd{NWdept-tanY-1}\nwixu{NWdept-wea7-1}}}%
+\nwixlogsorted{c}{{tangling development version}{NWdept-tanS-1}{\nwixd{NWdept-tanS-1}}}%
+\nwixlogsorted{c}{{weaving}{NWdept-wea7-1}{\nwixd{NWdept-wea7-1}}}%
+\nwbegindocs{139}\nwdocspar
 
 \end{document}
 \nwenddocs{}
