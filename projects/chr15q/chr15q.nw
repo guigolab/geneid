@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: chr15q.nw,v 1.2 2001-12-13 18:24:33 gparra Exp $ 
+% # $Id: chr15q.nw,v 1.3 2002-03-16 17:19:17 gparra Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -214,7 +214,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: chr15q.nw,v 1.2 2001-12-13 18:24:33 gparra Exp $$>$ }
+{\small$<$ \verb$Id: chr15q.nw,v 1.3 2002-03-16 17:19:17 gparra Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -255,9 +255,11 @@ The goal of this project is to improve the public annotation of a concrete regio
 
 The studied sequence is delimited by two known genes:
 \begin{itemize}
-\item LOXL1. PubMed on Product: lysyl oxidase-like 1
+%\item LOXL1. PubMed on Product: lysyl oxidase-like 1
+\item NEO1. PubMed on Product: neogenin homolog 1
 \begin{itemize}
-\item RefSeq: NM\_005576 
+%\item RefSeq: NM\_005576 
+\item RefSeq:NM\_002499 
 \item Band: 15q24.1
 \end{itemize}
 \item BLM.  PubMed on Product: Bloom syndrome protein
@@ -281,6 +283,13 @@ Subsequence length: 22,020,055 bp (number of N in the raw sequence: 4,352,983)
 
 \item Celera genomics \\
 Subsequence length: 17,764,320  bp (number of N in the raw sequence: 971,003)
+
+\item golden path  from http://genome.cse.ucsc.edu/ \\
+December 2001 release from USCS (build 28 NCBI). \\
+Mapped positions \\
+NEO1 primer\\
+BLM primer \\
+Subsequence length: bp (number of N in the raw sequence: )
 
 \end{itemize}
 
@@ -347,6 +356,8 @@ mkdir $ANALYSIS/fasta $ANALYSIS/annotations $ANALYSIS/data/ \
 #
 SS $ANALYSIS/data/boundary_genes/LOXL1/NM_005576.fa 306 355 \
    > $ANALYSIS/data/boundary_genes/LOXL1/LOXL1_primer.fa 
+SS $ANALYSIS/data/boundary_genes/ARIH1/NM_005744.fa 315 364 \
+   > $ANALYSIS/data/boundary_genes/ARIH1/ARIH1_primer.fa 
 SS $ANALYSIS/data/boundary_genes/BLM/NM_000057.fa 4279 4328 \
    > $ANALYSIS/data/boundary_genes/BLM/BLM.primer.fa 
 # we will substract the sequence betwwen 5000 bp upstream  LOXL1_primer.fa ATG
@@ -391,13 +402,30 @@ SS  $ANALYSIS/_tmp/celera_ini/cel_chr15.fa 6648880 24413199 \
 # ATG OK!
 # SS  $ANALYSIS/fasta/cel/raw/cel_chr15.fa  17759317 17759320
 # TAA OK! 
+
+#####################
+# GOLDEN PATH dec01 #
+export GP="/seq/genomes/H.sapiens/golden_path_20011202";
+ARIH1  primer 69759405  69759454
+BLM primer 88305485  88305534
+# So, we need from 69759405 - 5000 to 88305534 + 5000 => 69754405 .. 88310534
+# the fragment length is 18,556,129 bp  
+SS $GP/chromFaMasked/15/chr15.fa.masked \
+  69754405 88310534 > $ANALYSIS/fasta/gp_dec01/msk/gp_aug01
+SS $GP/chromosomes/chr15.fa \
+  69754405  88310534 > $ANALYSIS/fasta/gp_dec01/raw/gp_aug01
+#To check the result: 
+# SS  fasta/gp_aug01/msk/gp_aug01 5001 5003
+# ATG OK!
+# SS  fasta/gp_aug01/msk/gp_aug01  22015053 22015055
+# TAA OK! 
+# Ns=1,304,686 masked=8,120,364
 @ 
 
 <<Goldenpath Annotations>>=
 ################
 ## GOLDENPATH ##
 # Annotations from golden path
-
 ##########
 # REFSEQ # 
 
@@ -476,6 +504,97 @@ cat $ANALYSIS/annotation/gp_aug01/refseq/gff/gp_aug01.exon \
 @
 %$
 
+<<Parsing celera genes>>=
+# Parsing celera obtained from Lauro DVD
+sed 's/^[0-9]*,\(hCG.*\),.*\(hCT.*\),.*\(hCP[0-9]*\).*,*"\(.*,[0-9][0-9][0-9],[0-9][0-9][0-9]\)".*[^0-9]\([0-9]*[0-9][.|,][0-9][0-9][0-9][.|,][0-9][0-9][0-9]\).*$/\1 \2 \3 \4 \5/' $ANALYSIS/Celera_Cr15.csv |  sed 's/\.//g;s/,//g'  | gawk '{xifra1=substr($4,1,1);xifra2=xifra1+1; if (substr($4,2,1)<=substr($5,1,1)) $5=xifra1$5; else $5=xifra2$5; print}' > $ANALYSIS/celGenes.tbl
+
+gawk '{print $3}' $ANALYSIS/celGenes.tbl | sort  > tmp~
+
+FastaToTbl /seq/genomes/H.sapiens/celera_1.0_20010216/prs_protein.fasta | sed 's/prs_protein|//' | join - tmp~ | TblToFasta > $ANALYSIS/celGenes.fa
+
+gawk '{print $2}' $ANALYSIS/celGenes.tbl | sort  > tmp~
+
+FastaToTbl /seq/genomes/H.sapiens/celera_1.0_20010216/prs_transcript.fasta | sed 's/prs_transcript|//' | join - tmp~ | TblToFasta > $ANALYSIS/celGenes.fa
+
+Proteins not found in the DVD data.
+# from the original 540 proteines only 347 were found
+# build a database with the ensPep.txt and refPep.txt
+# Filter the entries within the region for both datasets.
+GP="/seq/genomes/H.sapiens/golden_path_20010806/database/";
+
+gawk '$2=="chr15" && $4>74000000 && $5<96000000{print $1}' $GP/ensGene.txt \
+       | join2 $GP/ensPep.txt | TblToFasta \
+   > $ANALYSIS/ensPep.fa
+# It's difficult to link the proteins with the mrna 
+gawk '$2=="chr15" && $4>74000000 && $5<96000000{gsub("NM","NP");print $1}' \
+    $GP/refGene.txt | join2 $GP/refPep.txt | wc 
+# Only 50 proteins were recovered therefore we will use our translated 
+# set of proteins containing 99 of the 129.
+FastaToTbl  $ANALYSIS/annotation/gp_aug01/refseq/prot/* | \
+     egrep -v "[A-Z]\*[A-Z]" | TblToFasta \
+   > $ANALYSIS/refPep.fa 
+
+# Running fasta with all the protein groups.
+pb --stats formatdb -i $ANALYSIS/refPep.fa  -o T -p T \
+    -n disk2/scratch/gparra/refPep
+pb --stats formatdb -i $ANALYSIS/ensPep.fa  -o T -p T \
+    -n disk2/scratch/gparra/ensPep
+
+pb blastall -p blastp -i $ANALYSIS/celGenes.fa -d disk2/scratch/gparra/ensPep \
+   -e 1e-10 -v 3 -b 3 -g F -F F > $ANALYSIS/cel_vs_ens.blasp
+parseblast $ANALYSIS/cel_vs_ens.blasp | gawk '$6>90{print $18}' | uniq | wc
+pb blastall -p blastp -i $ANALYSIS/celGenes.fa -d disk2/scratch/gparra/refPep \
+   -e 1e-10 -v 3 -b 3 -g F -F F > $ANALYSIS/cel_vs_ref.blasp
+parseblast $ANALYSIS/cel_vs_ref.blasp | gawk '$6>90{print $18}' | uniq | wc
+
+celera 347
+ensembl 251
+refseq 99
+
+122 cel 151 ensembl from 251 
+77  cel 78 refseq from 99    
+@ 
+
+<<Obtaining the data>>=
+# We need the following information for the sequence:
+# The idea is to download the information from the ensembl server
+# Then we want to add some extra features not included in ensembl
+#
+# Golden path annotations
+# ensembl/  refseq/
+# Predictions
+# geneid/ SGP/
+# Others
+# celgenes/
+# - ### Obtaining each piece of information ### - # 
+# refseq/
+refGene.txt
+# ensembl/
+NOT AVALIABLE YET
+# geneid/
+mkdir $ANALYSIS/annotation/gp_dec01/geneid/gff \
+ $ANALYSIS/annotation/gp_dec01/geneid/geneid
+geneid -vG $ANALYSIS/fasta/gp_dec01/masked/gp_dec01 \
+   gawk '{if ($1=="chr15") {$3="exon";OFS="\t";} else OFS=" "; print}'	\
+   > $ANALYSIS/annotation/gp_dec01/geneid/gff/gp_dec01
+geneid -v -D $ANALYSIS/fasta/gp_dec01/masked/gp_dec01 \
+	> $ANALYSIS/annotation/gp_dec01/geneid/geneid/gp_dec01
+gawk "{ if (\$2==\"Gene\") file=++c; 
+   print \$0 > \"$ANALYSIS/annotation/gp_dec01/geneid/geneid/gene_\"file }" \
+     $ANALYSIS/annotation/gp_dec01/geneid/geneid/gp_dec01
+
+# SGP/
+NOT AVALIABLE YET
+# celgenes/
+xdformat -o gp_dec01 -n gp_dec01
+ls  $ANALYSIS/data/blast_celPep-gpPep/fasta/ |   while read gene
+do
+   echo $gene
+   wu-tblastn $ANALYSIS/blastdb/gp_dec01 \
+       $ANALYSIS/data/blast_celPep-gpPep/fasta/$gene \
+       -topcomboN=1  nogaps E=0.001 W=10 \
+       > $ANALYSIS/data/blast_celPep-gpPep/blast/$gene
+done
 
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
@@ -490,140 +609,6 @@ cat $ANALYSIS/annotation/gp_aug01/refseq/gff/gp_aug01.exon \
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Common code blocks}
-
-\subsctn{PERL scripts}
-
-<<PERL shebang>>=
-#!/usr/bin/perl -w
-# This is perl, version 5.005_03 built for i386-linux
-#
-<<Program Description>>
-#
-<<GNU License>>
-#
-<<Version Control Id Tag>>
-#
-use strict;
-#
-<<Program Info>>
-my $DATE = localtime;
-my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
-my $host = `hostname`;
-chomp($host);
-#
-@
-
-<<Global Constants - Boolean>>=
-my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
-@ %def $T $F
-
-
-\subsubsctn{Timing our scripts}
-
-The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
-
-<<Use Modules - Benchmark>>=
-use Benchmark;
-  <<Timer ON>>
-@ 
-
-See '[[man Benchmark]]' for further info about this package. 
-We set an array to keep record of timing for each section.
-
-<<Timer ON>>=
-my @Timer = (new Benchmark);
-@ 
-
-<<Common PERL subs - Benchmark>>=
-sub timing() {
-    push @Timer, (new Benchmark);
-    # partial time 
-    $_[0] || 
-        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
-    # total time
-    return timestr(timediff($Timer[$#Timer],$Timer[0]));
-} # timing
-@ 
-
-
-\subsubsctn{Printing complex Data Structures}
-
-With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them.
-
-
-<<Use Modules - Dumper>>=
-use Data::Dumper;
-local $Data::Dumper::Purity = 0;
-local $Data::Dumper::Deepcopy = 1;
-@ 
-
-
-\subsubsctn{Common functions}
-
-<<Skip comments and empty records>>=
-next if /^\#/o;
-next if /^\s*$/o;
-chomp;
-@
-
-<<Common PERL subs - Min Max>>=
-#
-sub max() {
-    my $z = shift @_;
-    foreach my $l (@_) { $z = $l if $l > $z };
-    return $z;
-} # max
-sub min() {
-    my $z = shift @_;
-    foreach my $l (@_) { $z = $l if $l < $z };
-    return $z;
-} # min
-@
-
-<<Common PERL subs - Text fill>>=
-#
-sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
-sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
-sub fill_mid()   { 
-    my $l = length($_[0]);
-    my $k = int(($_[1] - $l)/2);
-    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
-} # fill_mid
-@
-
-These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
-
-<<Common PERL subs - Counter>>=
-#
-sub counter { # $_[0]~current_pos++ $_[1]~char
-    print STDERR "$_[1]";
-    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
-} # counter
-#
-sub counter_end { # $_[0]~current_pos   $_[1]~char
-    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
-} # counter_end
-@
-
-<<Global Vars - Counter>>=
-my ($n,$c); # counter and char (for &counter function)
-@ %def $n $c
-
-
-\subsubsctn{Common functions for reporting program processes}
-\label{sec:messagerpt}
-
-Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
-
-<<Common PERL subs - STDERR>>=
-sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
-@
-
-The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
-
-<<Common PERL subs - STDERR>>=
-sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
-@
 
 \subsctn{AWK scripts}
 
@@ -644,7 +629,6 @@ BEGIN{
     feature="cds";
     score=".";
     frame=".";
-
 }
 {
     gsub (","," ");
@@ -655,9 +639,6 @@ BEGIN{
     ne=$8;   # number of exons
     cdsi=$6; # init of cds
     cdse=$7; # end of cds
-
-
-#    print $0;
 
     for (i=1;i<=ne;i++) {
         exon[i,1]= $(9+i-1)+1;
@@ -679,7 +660,6 @@ BEGIN{
 #    print "***", ne, j, k;
     for (i=j;i<=k;i++)
         print seqname, source,feature, exon[i,1], exon[i,2],score,strand,frame,group;
- 
 }
 @
 
@@ -760,7 +740,7 @@ run_GFF2PS ()
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: chr15q.nw,v 1.2 2001-12-13 18:24:33 gparra Exp $
+# $Id: chr15q.nw,v 1.3 2002-03-16 17:19:17 gparra Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
