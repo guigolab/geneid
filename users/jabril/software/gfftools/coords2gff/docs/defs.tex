@@ -1,0 +1,84 @@
+%%%%% Colors for gff2ps
+\input ColorDefs.tex
+
+%%%%% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\todo}[1]{
+  \vskip 3ex
+  \hspace{-0.75cm}
+   \psframebox[framearc=0.2,linecolor=darkred,linewidth=1pt,
+              fillstyle=solid,fillcolor=verylightyellow,framesep=2ex]{
+     \begin{minipage}[t]{16cm}
+     \vskip -4.75ex
+     \hspace{-1.25cm}
+       \psframebox[framearc=1,linecolor=darkred,linewidth=1.25pt,
+               fillstyle=solid,fillcolor=verylightorange,framesep=5pt]{
+               \textcolor{darkred}{\textbf{\hspace{2ex}TO DO\hspace{2ex}}}
+         } % psframebox
+      \begin{itemize}\setlength{\itemsep}{-0.5ex} #1 \end{itemize}
+     \end{minipage}
+     } % psframebox
+  \vskip 1.5ex
+} % newcommand todo
+\newcommand{\todoitem}[2]{
+\item {#1}\dotfill[\textit{Section}~\ref{#2}, \textit{page}~\pageref{#2}]
+} % newcommand todoitem
+
+
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+
+
+%%%%% defs
+\def\noweb{\textsc{noweb}}
+\def\ps{\textsc{PostScript}}
+
+
+%%%%% TODO defs
+\def\todoAAA{This is a first draft of the {\progname}.} % todoAAA
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\progname{coords2gff.pl}
+\def\mtjabril{
+ \htmladdnormallink{\texttt{jabril@imim.es}}
+                   {MAILTO:jabril@imim.es?subject=[coords2gff]}
+ } % def mtjabril
+\def\authorslist{
+ Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\license{GNU General Public License (GNU-GPL)}
+\def\description{
+ Converting coords files into GFF formated records.
+ } % def description 
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\def\tit{\textsc{\progname}}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\tit\quad\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%

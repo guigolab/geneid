@@ -1,0 +1,743 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% # $Id: coords2gff.tex,v 1.1 2001-09-25 17:38:13 jabril Exp $ 
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+\usepackage{dcolumn}
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+
+\input defs.tex % from <LaTeX new definitions> chunk
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{document}
+%
+\nwfilename{/home/ug/jabril/development/softjabril/gfftools/coords2gff/coords2gff.nw}%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+\nwbegindocs{2}\nwdocspar
+
+\nwenddocs{}%
+\nwbegindocs{4}\nwdocspar
+\nwenddocs{}%
+\nwbegindocs{6}\nwdocspar
+\nwenddocs{}%
+\nwbegindocs{8}\nwdocspar
+\nwenddocs{}%
+\nwbegindocs{10}\nwdocspar
+
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\begin{bfseries}
+\begin{large}
+\newlength{\lttbl}\setlength{\lttbl}{0.25\linewidth}
+\newlength{\rttbl}\setlength{\rttbl}{0.70\linewidth}
+%\fbox{
+%\vskip 2ex
+\begin{tabular}{>{\scshape}r@{\quad}l}
+\rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+Program Name: & {\Huge\progname}                       \\[3ex]
+\multicolumn{2}{c}{\rule[0.5ex]{0.95\linewidth}{2pt}}\\[2ex]
+      Author: & {\Large
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \authorslist
+                 \end{minipage}}                       \\[2ex]
+     License: & {\license}                             \\[2ex]
+ Last Update: & {\today}                               \\[2ex]
+ Description: & {\large\mdseries
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \description
+                 \end{minipage}}                       \\[2ex]
+\\
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+\end{tabular}
+%} % fbox
+\end{large}
+\end{bfseries}
+\end{center}
+
+\vfill
+
+\begin{raggedleft}
+\showaffiliation
+\end{raggedleft}
+
+\end{titlepage} %'
+
+%
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: coords2gff.tex,v 1.1 2001-09-25 17:38:13 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Introduction}
+
+\subsctn{Program description}
+
+\subsctn{Input}
+
+\subsctn{Output}
+
+% \subsctn{Comments}
+
+\subsctn{To Do}
+
+\begin{itemize}
+ \input todo.tex
+\end{itemize}
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Implementation}
+
+\subsctn{Program outline}
+
+\nwenddocs{}\nwbegincode{11}\sublabel{NWcoo1A-cooA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-cooA-1}}}\moddef{coords2gff~{\nwtagstyle{}\subpageref{NWcoo1A-cooA-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWcoo1A-PERC-1}}\RA{}
+#
+# MODULES
+#
+\LA{}Use Modules~{\nwtagstyle{}\subpageref{NWcoo1A-UseB-1}}\RA{}
+#
+# VARIABLES
+#
+\LA{}Global Vars~{\nwtagstyle{}\subpageref{NWcoo1A-GloB-1}}\RA{}
+#
+# MAIN LOOP
+#
+\LA{}Main Loop~{\nwtagstyle{}\subpageref{NWcoo1A-Mai9-1}}\RA{}
+#
+# FUNCTIONS
+#
+\LA{}Functions~{\nwtagstyle{}\subpageref{NWcoo1A-Fun9-1}}\RA{}
+#
+#
+\LA{}OLD IMPLEMENTATION~{\nwtagstyle{}\subpageref{NWcoo1A-OLDI-1}}\RA{}
+\nwnotused{coords2gff}\nwendcode{}\nwbegindocs{12}\nwdocspar
+
+\nwenddocs{}\nwbegincode{13}\sublabel{NWcoo1A-UseB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-UseB-1}}}\moddef{Use Modules~{\nwtagstyle{}\subpageref{NWcoo1A-UseB-1}}}\endmoddef
+\nwused{\\{NWcoo1A-cooA-1}}\nwendcode{}\nwbegindocs{14}\nwdocspar
+
+\nwenddocs{}\nwbegincode{15}\sublabel{NWcoo1A-GloB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-GloB-1}}}\moddef{Global Vars~{\nwtagstyle{}\subpageref{NWcoo1A-GloB-1}}}\endmoddef
+\nwused{\\{NWcoo1A-cooA-1}}\nwendcode{}\nwbegindocs{16}\nwdocspar
+
+\nwenddocs{}\nwbegincode{17}\sublabel{NWcoo1A-Mai9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-Mai9-1}}}\moddef{Main Loop~{\nwtagstyle{}\subpageref{NWcoo1A-Mai9-1}}}\endmoddef
+
+exit(0);
+\nwused{\\{NWcoo1A-cooA-1}}\nwendcode{}\nwbegindocs{18}\nwdocspar
+
+\nwenddocs{}\nwbegincode{19}\sublabel{NWcoo1A-Fun9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-Fun9-1}}}\moddef{Functions~{\nwtagstyle{}\subpageref{NWcoo1A-Fun9-1}}}\endmoddef
+sub \{
+\} # 
+\nwused{\\{NWcoo1A-cooA-1}}\nwendcode{}\nwbegindocs{20}\nwdocspar
+
+\label{todo:AAA}
+\nwenddocs{}%
+%
+\nwbegindocs{22}\nwdocspar
+\nwenddocs{}%
+%
+\nwbegindocs{24}\nwdocspar
+\todo{ \item \todoAAA } % todo
+
+\nwenddocs{}\nwbegincode{25}\sublabel{NWcoo1A-OLDI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-OLDI-1}}}\moddef{OLD IMPLEMENTATION~{\nwtagstyle{}\subpageref{NWcoo1A-OLDI-1}}}\endmoddef
+#
+# coords2gff.pl seqname < coords_file > GFF_file
+#
+#     Converting raw coords files to GFF
+#
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+
+my ($seqname,%gff,$string);
+$seqname = shift @ARGV;
+%gff = ();
+$string = ("\\%s\\t" x 8)."\\%s\\n";
+
+my $c = 0;
+while (<STDIN>) \{
+    next if /^\\s*$/o;
+    my ($l,$a,$b,$s,$r);
+    chomp;
+    $l = $_;
+    # print STDERR "$. (X): $l\\n";
+    $l =~ /^[><]/o && do \{
+        # print STDERR "$. (A): $l\\n";
+        $l =~ s/^([><])\\s*//o && ($s = $1);
+        $r = \\%\{ $gff\{++$c\} \};
+        ($r->\{gn_start\},$r->\{gn_end\},$r->\{gn_name\}) = split /\\s+/og, $l, 3;
+        $r->\{gn_name\} =~ s/\\s+$//og;
+        $r->\{gn_name\} =~ s/\\s+/_/og;
+        $r->\{strand\} = ($s eq '>') ? '+' : (($s eq '<') ? '-' : '.');
+        # $r->\{exons\} = ();
+        next;
+    \}; # $newgene ?
+    # print STDERR "$. (B): $l\\n";
+    ($a,$b,undef) = split /\\s+/og, $l, 3;
+    push @\{ $gff\{$c\}\{exons\} \}, [ $a, $b ];
+\}; # while
+# print STDERR Dumper(\\%gff);
+
+foreach my $i (1..$c) \{
+    my $r = \\%\{ $gff\{$i\} \};
+    my $exnum = scalar(@\{ $r->\{exons\} \});
+    print STDOUT "\\# $seqname - $r->\{gn_name\}: ".
+        ($exnum)." exons\\n";
+    printf STDOUT $string, 
+        $seqname,'annotation','Gene',$r->\{gn_start\},$r->\{gn_end\},
+        '.',$r->\{strand\},'.',$r->\{gn_name\};
+    $r->\{strand\} eq '-' && (@\{ $r->\{exons\} \} = reverse @\{ $r->\{exons\} \});
+    my ($lastori,$lastend,$lastfrm) = (0,0,0);
+    foreach my $j (0..$#\{ $r->\{exons\} \}) \{
+        my ($feat,$ori,$end,$frm);
+        ($ori,$end) = @\{ $\{ $r->\{exons\} \}[$j] \};
+      THIS: \{
+        ($j == 0) && do \{
+            $feat = 'First';
+            $exnum == 1 && ($feat = 'Single');
+            $frm = 0;
+            last THIS;
+        \}; # $d == 0
+        $frm = (($lastend - $lastori + 1) + $lastfrm) % 3;
+        ($j == $#\{ $r->\{exons\} \}) && do \{
+            $feat = 'Terminal';
+            last THIS;
+        \}; # $d == $#\{ $r->\{exons\} \}
+        $feat = 'Internal';
+      \}; # THIS
+        # print STDERR "$r->\{gn_name\} ($j): $ori $end $frm : ".
+        #              "$lastori $lastend $lastfrm\\n";
+        ($lastori,$lastend,$lastfrm) = ($ori,$end,$frm);
+        printf STDOUT $string, 
+            $seqname,'annotation',$feat,$ori,$end,
+            '.',$r->\{strand\},$frm,$r->\{gn_name\};
+    \}; # foreach @j
+\}; # foreach $i
+
+exit(0);
+\nwused{\\{NWcoo1A-cooA-1}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+\sctn{empty appendix section}
+
+\subsctn{empty appendix subsection}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Common code blocks}
+
+\subsctn{PERL scripts}
+
+\nwenddocs{}\nwbegincode{27}\sublabel{NWcoo1A-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWcoo1A-PERC-1}}}\endmoddef
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+\LA{}GNU License~{\nwtagstyle{}\subpageref{NWcoo1A-GNUB-1}}\RA{}
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWcoo1A-VerM-1}}\RA{}
+#
+use strict;
+\nwused{\\{NWcoo1A-cooA-1}}\nwendcode{}\nwbegindocs{28}\nwdocspar
+
+\nwenddocs{}\nwbegincode{29}\sublabel{NWcoo1A-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWcoo1A-GloQ-1}}}\endmoddef
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+\eatline
+\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{30}\nwdocspar
+We also set here the date when the script is running and who is the user running it.
+
+\nwenddocs{}\nwbegincode{31}\sublabel{NWcoo1A-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWcoo1A-GloR-1}}}\endmoddef
+my $DATE = localtime;
+my $USER = $ENV\{USER\};
+\eatline
+\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{32}\nwdocspar
+
+\subsubsctn{Timing our scripts}
+
+The '{\tt{}Benchmark}' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+\nwenddocs{}\nwbegincode{33}\sublabel{NWcoo1A-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWcoo1A-UseN-1}}}\endmoddef
+use Benchmark;
+  \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWcoo1A-Tim8-1}}\RA{}
+\nwnotused{Use\ Modules\ -\ Benchmark}\nwendcode{}\nwbegindocs{34}\nwdocspar
+
+See '{\tt{}man\ Benchmark}' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+\nwenddocs{}\nwbegincode{35}\sublabel{NWcoo1A-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWcoo1A-Tim8-1}}}\endmoddef
+my @Timer = (new Benchmark);
+\nwused{\\{NWcoo1A-UseN-1}}\nwendcode{}\nwbegindocs{36}\nwdocspar
+
+\nwenddocs{}\nwbegincode{37}\sublabel{NWcoo1A-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWcoo1A-ComS-1}}}\endmoddef
+sub timing() \{
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+\} # timing
+\nwnotused{Common\ PERL\ subs\ -\ Benchmark}\nwendcode{}\nwbegindocs{38}\nwdocspar
+
+
+\subsubsctn{Printing complex Data Structures}
+
+With '{\tt{}Data::Dumper}' we are able to pretty print complex data structures for debugging them.
+
+
+\nwenddocs{}\nwbegincode{39}\sublabel{NWcoo1A-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWcoo1A-UseK-1}}}\endmoddef
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{40}\nwdocspar
+
+
+\subsubsctn{Common functions}
+
+\nwenddocs{}\nwbegincode{41}\sublabel{NWcoo1A-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWcoo1A-SkiV-1}}}\endmoddef
+next if /^\\#/o;
+next if /^\\s*$/o;
+chomp;
+\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{42}\nwdocspar
+
+\nwenddocs{}\nwbegincode{43}\sublabel{NWcoo1A-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWcoo1A-ComQ-1}}}\endmoddef
+#
+sub max() \{
+    my $z = shift @_;
+    foreach my $l (@_) \{ $z = $l if $l > $z \};
+    return $z;
+\} # max
+sub min() \{
+    my $z = shift @_;
+    foreach my $l (@_) \{ $z = $l if $l < $z \};
+    return $z;
+\} # min
+\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{44}\nwdocspar
+
+\nwenddocs{}\nwbegincode{45}\sublabel{NWcoo1A-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWcoo1A-ComS.2-1}}}\endmoddef
+#
+sub fill_right() \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
+sub fill_left()  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
+sub fill_mid()   \{ 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+\} # fill_mid
+\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{46}\nwdocspar
+
+These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
+
+\nwenddocs{}\nwbegincode{47}\sublabel{NWcoo1A-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWcoo1A-ComQ.2-1}}}\endmoddef
+#
+sub counter \{ # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter
+#
+sub counter_end \{ # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter_end
+\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{48}\nwdocspar
+
+\nwenddocs{}\nwbegincode{49}\sublabel{NWcoo1A-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWcoo1A-GloL-1}}}\endmoddef
+my ($n,$c); # counter and char (for &counter function)
+\eatline
+\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{50}\nwdocspar
+
+\subsubsctn{Common functions for reporting program processes}
+\label{sec:messagerpt}
+
+Function '{\tt{}report}' requires that a hash variable '{\tt{}{\char37}MessageList}' has been set, such hash contains the strings for each report message we will need. The first parameter for '{\tt{}report}' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the {\tt{}sprintf} function on that string.
+
+\nwenddocs{}\nwbegincode{51}\sublabel{NWcoo1A-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWcoo1A-ComP-1}}}\endmoddef
+sub report() \{ print STDERR sprintf($MessageList\{ shift @_ \},@_) \}
+\nwalsodefined{\\{NWcoo1A-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{52}\nwdocspar
+
+The same happens to '{\tt{}warn}' function which also requires a hash variable '{\tt{}{\char37}ErrorList}' containing the error messages.
+
+\nwenddocs{}\nwbegincode{53}\sublabel{NWcoo1A-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWcoo1A-ComP-1}}}\plusendmoddef
+sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
+\nwendcode{}\nwbegindocs{54}\nwdocspar
+
+\subsctn{BASH scripts}
+
+\nwenddocs{}\nwbegincode{55}\sublabel{NWcoo1A-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWcoo1A-BASC-1}}}\endmoddef
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWcoo1A-VerM-1}}\RA{}
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+\{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; \} 1>&2;
+\nwused{\\{NWcoo1A-wea7-1}\\{NWcoo1A-LaT8-1}}\nwendcode{}\nwbegindocs{56}\nwdocspar
+
+\nwenddocs{}\nwbegincode{57}\sublabel{NWcoo1A-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWcoo1A-BASF-1}}}\endmoddef
+\{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; \} 1>&2;
+#
+exit 0
+\nwused{\\{NWcoo1A-wea7-1}\\{NWcoo1A-LaT8-1}}\nwendcode{}\nwbegindocs{58}\nwdocspar
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+\nwenddocs{}\nwbegincode{59}\sublabel{NWcoo1A-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWcoo1A-VerM-1}}}\endmoddef
+# $Id: coords2gff.tex,v 1.1 2001-09-25 17:38:13 jabril Exp $
+\nwused{\\{NWcoo1A-PERC-1}\\{NWcoo1A-BASC-1}}\nwendcode{}\nwbegindocs{60}\nwdocspar
+
+\subsctn{GNU General Public License}
+
+\nwenddocs{}\nwbegincode{61}\sublabel{NWcoo1A-GNUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-GNUB-1}}}\moddef{GNU License~{\nwtagstyle{}\subpageref{NWcoo1A-GNUB-1}}}\endmoddef
+# #----------------------------------------------------------------#
+# #                          coords2gff                         #
+# #----------------------------------------------------------------#
+# 
+#    Remember to put a short description of your script here...
+# 
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# 
+# #----------------------------------------------------------------#
+\nwused{\\{NWcoo1A-PERC-1}}\nwendcode{}\nwbegindocs{62}\nwdocspar
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracts Script code chunks from the {\noweb} file} % \\[-0.5ex]
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+\nwenddocs{}\nwbegincode{63}\sublabel{NWcoo1A-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWcoo1A-tan8-1}}}\endmoddef
+# showing line numbering comments in program
+notangle -L -R"coords2gff" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' | cpif $BIN/coords2gff ;
+chmod a+x $BIN/coords2gff ;
+\nwalsodefined{\\{NWcoo1A-tan8-2}\\{NWcoo1A-tan8-3}\\{NWcoo1A-tan8-4}\\{NWcoo1A-tan8-5}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{64}\nwdocspar
+
+\nwenddocs{}\nwbegincode{65}\sublabel{NWcoo1A-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWcoo1A-tan8-1}}}\plusendmoddef
+# reformating program with perltidy
+notangle -R"coords2gff" $WORK/$nwfile.nw | \\
+    perltidy - | cpif $BIN/coords2gff ;
+# html pretty-printing program with perltidy
+notangle -R"coords2gff" $WORK/$nwfile.nw | \\
+    perltidy -html - | cpif $DOCS/html/coords2gff.html ;
+#
+\nwendcode{}\nwbegindocs{66}\nwdocspar
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+\nwenddocs{}\nwbegincode{67}\sublabel{NWcoo1A-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWcoo1A-tan8-1}}}\plusendmoddef
+notangle -R"root" $WORK/$nwfile.nw | \\
+         cpif $DATA/root_config ;
+\nwendcode{}\nwbegindocs{68}%$
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+\nwenddocs{}\nwbegincode{69}\sublabel{NWcoo1A-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWcoo1A-tan8-1}}}\plusendmoddef
+notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+\nwendcode{}\nwbegindocs{70}\nwdocspar
+
+\nwenddocs{}\nwbegincode{71}\sublabel{NWcoo1A-tanY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-tanY-1}}}\moddef{tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWcoo1A-tanY-1}}}\endmoddef
+notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw | cpif $DOCS/defs.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tex ; 
+\nwused{\\{NWcoo1A-wea7-1}}\nwendcode{}\nwbegindocs{72}\nwdocspar
+
+\nwenddocs{}\nwbegincode{73}\sublabel{NWcoo1A-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWcoo1A-wea7-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWcoo1A-BASC-1}}\RA{}
+# weaving and LaTeXing
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWcoo1A-BASQ-1}}\RA{}
+\LA{}tangling complementary LaTeX files~{\nwtagstyle{}\subpageref{NWcoo1A-tanY-1}}\RA{}
+noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \\
+        $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
+# noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+#
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+#
+popd;
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWcoo1A-BASF-1}}\RA{}
+\nwnotused{weaving}\nwendcode{}\nwbegindocs{74}\nwdocspar
+
+\nwenddocs{}\nwbegincode{75}\sublabel{NWcoo1A-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWcoo1A-LaT8-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWcoo1A-BASC-1}}\RA{}
+# only LaTeXing
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWcoo1A-BASQ-1}}\RA{}
+pushd $DOCS/ ;
+#
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+#
+# pdflatex $nwfile.tex ;
+echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
+ps2pdf $nwfile.ps $nwfile.pdf ;
+#
+popd ;
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWcoo1A-BASF-1}}\RA{}
+\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{76}%$
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+\nwenddocs{}\nwbegincode{77}\sublabel{NWcoo1A-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWcoo1A-BASQ-1}}}\endmoddef
+#
+# Setting Global Variables
+WORK="/home/ug/jabril/development/softjabril/gfftools/coords2gff" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="coords2gff" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
+\nwused{\\{NWcoo1A-wea7-1}\\{NWcoo1A-LaT8-1}}\nwendcode{}\nwbegindocs{78}\nwdocspar
+
+\nwenddocs{}\nwbegincode{79}\sublabel{NWcoo1A-tan8-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWcoo1A-tan8-5}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWcoo1A-tan8-1}}}\plusendmoddef
+# 
+# BASH Environment Variables
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \\
+         cpif $WORK/.bash_VARS ; 
+source $WORK/.bash_VARS ;
+#
+\nwendcode{}
+
+\nwixlogsorted{c}{{BASH Environment Variables}{NWcoo1A-BASQ-1}{\nwixu{NWcoo1A-wea7-1}\nwixu{NWcoo1A-LaT8-1}\nwixd{NWcoo1A-BASQ-1}}}%
+\nwixlogsorted{c}{{BASH script end}{NWcoo1A-BASF-1}{\nwixd{NWcoo1A-BASF-1}\nwixu{NWcoo1A-wea7-1}\nwixu{NWcoo1A-LaT8-1}}}%
+\nwixlogsorted{c}{{BASH shebang}{NWcoo1A-BASC-1}{\nwixd{NWcoo1A-BASC-1}\nwixu{NWcoo1A-wea7-1}\nwixu{NWcoo1A-LaT8-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Benchmark}{NWcoo1A-ComS-1}{\nwixd{NWcoo1A-ComS-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Counter}{NWcoo1A-ComQ.2-1}{\nwixd{NWcoo1A-ComQ.2-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Min Max}{NWcoo1A-ComQ-1}{\nwixd{NWcoo1A-ComQ-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - STDERR}{NWcoo1A-ComP-1}{\nwixd{NWcoo1A-ComP-1}\nwixd{NWcoo1A-ComP-2}}}%
+\nwixlogsorted{c}{{Common PERL subs - Text fill}{NWcoo1A-ComS.2-1}{\nwixd{NWcoo1A-ComS.2-1}}}%
+\nwixlogsorted{c}{{Functions}{NWcoo1A-Fun9-1}{\nwixu{NWcoo1A-cooA-1}\nwixd{NWcoo1A-Fun9-1}}}%
+\nwixlogsorted{c}{{GNU License}{NWcoo1A-GNUB-1}{\nwixu{NWcoo1A-PERC-1}\nwixd{NWcoo1A-GNUB-1}}}%
+\nwixlogsorted{c}{{Global Constants - Boolean}{NWcoo1A-GloQ-1}{\nwixd{NWcoo1A-GloQ-1}}}%
+\nwixlogsorted{c}{{Global Vars}{NWcoo1A-GloB-1}{\nwixu{NWcoo1A-cooA-1}\nwixd{NWcoo1A-GloB-1}}}%
+\nwixlogsorted{c}{{Global Vars - Counter}{NWcoo1A-GloL-1}{\nwixd{NWcoo1A-GloL-1}}}%
+\nwixlogsorted{c}{{Global Vars - User and Date}{NWcoo1A-GloR-1}{\nwixd{NWcoo1A-GloR-1}}}%
+\nwixlogsorted{c}{{HIDE: LaTeX new definitions}{NWcoo1A-HIDR-1}{\nwixd{NWcoo1A-HIDR-1}}}%
+\nwixlogsorted{c}{{HIDE: TODO}{NWcoo1A-HIDA-1}{\nwixd{NWcoo1A-HIDA-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX commands}{NWcoo1A-HIDO-1}{\nwixu{NWcoo1A-HIDR-1}\nwixd{NWcoo1A-HIDO-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX definitions}{NWcoo1A-HIDR.2-1}{\nwixu{NWcoo1A-HIDR-1}\nwixd{NWcoo1A-HIDR.2-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX pstricks}{NWcoo1A-HIDO.2-1}{\nwixu{NWcoo1A-HIDR-1}\nwixd{NWcoo1A-HIDO.2-1}}}%
+\nwixlogsorted{c}{{HIDE: new LaTeX urls}{NWcoo1A-HIDK-1}{\nwixu{NWcoo1A-HIDR-1}\nwixd{NWcoo1A-HIDK-1}}}%
+\nwixlogsorted{c}{{HIDE: new defs TODO}{NWcoo1A-HIDJ-1}{\nwixu{NWcoo1A-HIDR-1}\nwixd{NWcoo1A-HIDJ-1}}}%
+\nwixlogsorted{c}{{LaTeXing}{NWcoo1A-LaT8-1}{\nwixd{NWcoo1A-LaT8-1}}}%
+\nwixlogsorted{c}{{Main Loop}{NWcoo1A-Mai9-1}{\nwixu{NWcoo1A-cooA-1}\nwixd{NWcoo1A-Mai9-1}}}%
+\nwixlogsorted{c}{{OLD IMPLEMENTATION}{NWcoo1A-OLDI-1}{\nwixu{NWcoo1A-cooA-1}\nwixd{NWcoo1A-OLDI-1}}}%
+\nwixlogsorted{c}{{PERL shebang}{NWcoo1A-PERC-1}{\nwixu{NWcoo1A-cooA-1}\nwixd{NWcoo1A-PERC-1}}}%
+\nwixlogsorted{c}{{Skip comments and empty records}{NWcoo1A-SkiV-1}{\nwixd{NWcoo1A-SkiV-1}}}%
+\nwixlogsorted{c}{{Timer ON}{NWcoo1A-Tim8-1}{\nwixu{NWcoo1A-UseN-1}\nwixd{NWcoo1A-Tim8-1}}}%
+\nwixlogsorted{c}{{Use Modules}{NWcoo1A-UseB-1}{\nwixu{NWcoo1A-cooA-1}\nwixd{NWcoo1A-UseB-1}}}%
+\nwixlogsorted{c}{{Use Modules - Benchmark}{NWcoo1A-UseN-1}{\nwixd{NWcoo1A-UseN-1}}}%
+\nwixlogsorted{c}{{Use Modules - Dumper}{NWcoo1A-UseK-1}{\nwixd{NWcoo1A-UseK-1}}}%
+\nwixlogsorted{c}{{Version Control Id Tag}{NWcoo1A-VerM-1}{\nwixu{NWcoo1A-PERC-1}\nwixu{NWcoo1A-BASC-1}\nwixd{NWcoo1A-VerM-1}}}%
+\nwixlogsorted{c}{{coords2gff}{NWcoo1A-cooA-1}{\nwixd{NWcoo1A-cooA-1}}}%
+\nwixlogsorted{c}{{tangling}{NWcoo1A-tan8-1}{\nwixd{NWcoo1A-tan8-1}\nwixd{NWcoo1A-tan8-2}\nwixd{NWcoo1A-tan8-3}\nwixd{NWcoo1A-tan8-4}\nwixd{NWcoo1A-tan8-5}}}%
+\nwixlogsorted{c}{{tangling complementary LaTeX files}{NWcoo1A-tanY-1}{\nwixd{NWcoo1A-tanY-1}\nwixu{NWcoo1A-wea7-1}}}%
+\nwixlogsorted{c}{{weaving}{NWcoo1A-wea7-1}{\nwixd{NWcoo1A-wea7-1}}}%
+\nwbegindocs{80}\nwdocspar
+
+%
+\end{document}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nwenddocs{}

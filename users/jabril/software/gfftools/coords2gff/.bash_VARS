@@ -1,0 +1,10 @@
+#
+# Setting Global Variables
+WORK="/home/ug/jabril/development/softjabril/gfftools/coords2gff" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="coords2gff" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
