@@ -1,42 +1,30 @@
-#!/bin/bash
+#!/bin/ksh
 
-# Mante un mirror de les parts mes importants del /usr/local
+# Sincronitza /aplicacions/genomics/linux a darwin amb /usr/local a monstre1
 #
 # Es fa una copia incremental amb "cp -afuv" i s'esborra el que pugui
 # sobrar amb l'script "direcmirror"
 #
-# ENCARA NO ESBORRA RES!!! ES LIMITA A COPIAR.***********************
+# Abans de res munta el disc de darwin a monstre1, i en acabar el desmunta
 #
-# La copia es fa al /home2/__backup_usr_local__
-#
-# Els directoris son:
-#   - BerkeleyDB.3.3
-#   - apache
-#   - cvs
-#   - genomics
-#   - mysql-3.23.36-pc-linux-gnu-i686
-#   - molbio
-#
-# Es copien tambe els fitxers de login:
-#   - bash.local*
-#   - csh.login*
-#   - cshrc.local*
-#   - profile*
-#
-# I es crea el link mysql apuntant (link relatiu) al mysql-3.23.36...
+# PER ARA NO ESBORRA RES!!! ES LIMITA A COPIAR.***********************
 
-ORIG=/usr/local
-COPIA=/home2/__backup_usr_local__
 
-for direc in BerkeleyDB.3.3 apache cvs genomics mysql-3.23.36-pc-linux-gnu-i686 molbio
-do
-   cp -afuv $ORIG/$direc $COPIA
-done
+if [ -d /__M1__ ]
+then
+   echo __M1__ JA EXISTEIX
+   exit
+fi
+mkdir /__M1__
 
-for fit in bash.local csh.login cshrc.local profile
-do
-   cp -afuv $ORIG/$fit* $COPIA
-done
+mount -t nfs darwin:/aplicacions/genomics/linux /__M1__
+if [ ! -d /__M1__/molbio ] # manera farsa de mirar si esta ben muntat
+then
+   echo __M1__ NO ESTA BE
+   exit
+fi
 
-cd $COPIA
-ln -sf mysql-3.23.36-pc-linux-gnu-i686 mysql
+cp -afuv /usr/local/* /__M1__
+
+umount /__M1__
+rmdir /__M1__

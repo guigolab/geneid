@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 #
 # per definir facilment el DISPLAY mentre no trobem una alternativa millor
 #
@@ -25,7 +25,7 @@ then
          cel        cchapple
          icarus     gparra
          kalamos    malba
-         korax      ogonzalez oscar
+         eidolon    ogonzalez oscar
          mar        rguigo roderic
          nautilus   fcamara
          rantanplan nbellora nicolas
@@ -36,12 +36,15 @@ then
    else
       maquina=${1%:*}
       monitor=${1#$maquina}
-      case $maquina in
+      curt=${maquina%%.*}
+      case $curt in
          a*)  maquina=apolo
               ;;
          b*)  maquina=basileia
               ;;
          c*)  maquina=cel
+              ;;
+         e*)  maquina=eidolon
               ;;
          i*)  maquina=icarus
               ;;
@@ -63,6 +66,8 @@ then
               ;;
          r*)  maquina=rantanplan
               ;;
+         tr*) maquina=tro
+              ;;
          t*)  maquina=tmatik
               ;;
          x*)  maquina=xinxan
@@ -79,6 +84,11 @@ then
       monitor=:0.0
    fi
 
+   if [ `hostname -s` = $maquina ]
+   then
+      maquina=""
+   fi
+
    export DISPLAY=$maquina$monitor
    unset maquina monitor
 
@@ -87,5 +97,10 @@ then
 
 fi
 
-echo "DISPLAY=$DISPLAY"
+if [ "${DISPLAY%:*}" = "" ]
+then
+   echo "DISPLAY=(`hostname -s`)$DISPLAY"
+else
+   echo DISPLAY=$DISPLAY
+fi
 

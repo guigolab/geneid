@@ -1,9 +1,9 @@
-cd $HOME/no_backup/_mirrors/miktex
+#!/bin/bash
 
 data=`date +%Y%m%d-%H%M`
 URL=ftp://ctan.tug.org/tex-archive/systems/win32/miktex
 
-
+cd /home/ogonzalez/mirror/miktex
 wget -m -nH --cut-dirs=3 $URL 2>&1 | tee tmp.txt
 /home/ug/ogonzalez/scripts/mirror miktex -n
 
@@ -17,12 +17,8 @@ resum1=`grep Downloaded mirror-$data.txt`
 rm tmp.txt
 echo
 
-if [ ! -s llista.txt ]
-then
-   touch llista.txt
-fi
-ls -l miktex/tm/packages | grep \.cab$ >llista.tmp
-diff llista.txt llista.tmp | grep '>' | awk '{ print $10 }' >llista.new
+grep '\.cab. saved \[' mirror-$data.txt | grep 'miktex/tm/packages/' |
+   cut -s -d\` -f2 | cut -s -d\' -f1 | cut -c20- >llista.new
 nous=`wc -l <llista.new`
 
 cd miktex/tm/packages
@@ -42,6 +38,8 @@ then
    echo :
    paste - tmp.txt <<EOF
 EOF
+else
+   echo -n " "
 fi
 mv tmp.txt ../../..
 rm tmp2.txt
@@ -50,15 +48,16 @@ cd ../../..
 awk '{ print $2 }' <tmp.txt >tmp2.txt
 diff llista.new tmp2.txt | grep '<' | awk '{ print $2 }' >tmp.txt
 num=`wc -l <tmp.txt`
-echo -n \ i $num no revisats
+echo -n i $num no revisats
 if [ $num != 0 ]
 then
    echo :
    paste - tmp.txt <<EOF
 EOF
+else
+   echo -n " "
 fi
-echo \ d\'un total de $nous
-mv llista.tmp llista.txt
+echo d\'un total de $nous
 rm llista.new tmp.txt tmp2.txt
 
 echo

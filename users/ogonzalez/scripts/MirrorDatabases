@@ -18,7 +18,10 @@ filtre() {
    /home/ug/ogonzalez/scripts/comprimits <$OUT
    echo
    date +"%d %b %Y - %H:%M"
-   /home/ug/ogonzalez/scripts/mirror $local -n
+   if [ "$1" != -norm ]
+   then
+      /home/ug/ogonzalez/scripts/mirror $local -n
+   fi
 
    cat $OUT >>$LOG
    rm $OUT
@@ -42,9 +45,7 @@ LOGDIR=/home/ug/ogonzalez/scripts/_LOGS
 
 echo Mirror arrencat: `date +"%d %b %Y - %H:%M"` >$MAIL
 
-ps -ef | grep 'bash ./MirrorDatabases' >$LOG
-
-if [ `grep -vc grep $LOG` != 1 ]
+if [ `ps -e | grep -c "^ *$$"` != 1 ]
 then
 
    # JA HI HA UN MIRROR EN MARXA
@@ -62,11 +63,11 @@ else
    # EMBL - release
    ##########
 
-      URL=$FTPSITE/pub/databases/embl/release
+      URL=$FTPSITE/databases/embl/release
       local=/seq/databases/embl/release
 
       cd $local
-      wget -m -nH --cut-dirs=4 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       versio=`ls -1 Release_* | tail -1`
       # COMPTE: AIXO DEPEN DE $local
@@ -84,13 +85,13 @@ else
    # EMBL - new
    ##########
 
-      URL=$FTPSITE/pub/databases/embl/new
+      URL=$FTPSITE/databases/embl/new
       local=/seq/databases/embl/new
       excfiles=newentries.ndx,*cumulative.dat.gz*,.NEW,.week.gz,r[0-9][0-9]u*.dat.gz
       excdirecs=/pub/databases/embl/new/list
 
       cd $local
-      wget -m -nH --cut-dirs=4 -R $excfiles -X $excdirecs $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --progres=dot:mega -R $excfiles -X $excdirecs $URL 2>&1 | tee $OUT
 
       AVIS=""
 
@@ -100,11 +101,11 @@ else
    # SWISS-PROT - release_compressed
    ##########
 
-      URL=$FTPSITE/pub/databases/swiss-prot/release_compressed
+      URL=$FTPSITE/databases/swiss-prot/release_compressed
       local=/seq/databases/swiss-prot/release_compressed
 
       cd $local
-      wget -m -nH --cut-dirs=4 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -112,11 +113,11 @@ else
    # SWISS-PROT - updates_compressed
    ##########
 
-      URL=$FTPSITE/pub/databases/swiss-prot/updates_compressed
+      URL=$FTPSITE/databases/swiss-prot/updates_compressed
       local=/seq/databases/swiss-prot/updates_compressed
 
       cd $local
-      wget -m -nH --cut-dirs=4 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -124,11 +125,11 @@ else
    # TREMBL - release_compressed
    ##########
 
-      URL=$FTPSITE/pub/databases/trembl/release_compressed
+      URL=$FTPSITE/databases/trembl/release_compressed
       local=/seq/databases/trembl/release_compressed
 
       cd $local
-      wget -m -nH --cut-dirs=4 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -136,11 +137,11 @@ else
    # SP_TR_NRDB
    ##########
 
-      URL=$FTPSITE/pub/databases/sp_tr_nrdb
+      URL=$FTPSITE/databases/sp_tr_nrdb
       local=/seq/databases/sp_tr_nrdb
 
       cd $local
-      wget -m -nH --cut-dirs=3 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -148,11 +149,11 @@ else
    # PIR - release
    ##########
 
-      URL=$FTPSITE/pub/databases/pir/release
+      URL=$FTPSITE/databases/pir/release
       local=/seq/databases/pir/release
 
       cd $local
-      wget -m -nH --cut-dirs=4 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -160,11 +161,11 @@ else
    # PIR - updates
    ##########
 
-      URL=$FTPSITE/pub/databases/pir/updates
+      URL=$FTPSITE/databases/pir/updates
       local=/seq/databases/pir/updates
 
       cd $local
-      wget -m -nH --cut-dirs=4 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -172,11 +173,11 @@ else
    # PDB_SEQ
    ##########
 
-      URL=$FTPSITE/pub/databases/pdb_seq
+      URL=$FTPSITE/databases/pdb_seq
       local=/seq/databases/pdb_seq
 
       cd $local
-      wget -m -nH --cut-dirs=3 $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -184,11 +185,29 @@ else
    # PDB
    ##########
 
-      URL=$FTPSITE/pub/databases/pdb
+      # no volem recrear l'estructura del servidor, sino tenir totes les
+      # molecules al mateix directori. per aixo fem -nd
+      # PROBLEMA: ELS .listing NO SON COMPLETS, AIXI QUE NO PODEM BASAR-NOS
+      # EN ELLS PER ESBORRAR FITXERS DESAPAREGUTS AL SERVIDOR. DESACTIVO
+      # AQUESTA FUNCIONALITAT AMB EL -norm A filtre
+
+      URL=$FTPSITE/databases/pdb/structures/divided/pdb
       local=/seq/databases/pdb
 
       cd $local
-      wget -m -nH --cut-dirs=3 $URL 2>&1 | tee $OUT
+      wget -m -nH -nd --progres=dot:mega $URL 2>&1 | tee $OUT
+
+      filtre -norm
+
+   ##########
+   # PFAM
+   ##########
+
+      URL=$FTPSITE/databases/Pfam
+      local=/seq/databases/pfam
+
+      cd $local
+      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -208,7 +227,7 @@ rm $MAIL
 NOM=mdb-`date +%Y%m%d-%H%M`
 mv $LOG $LOGDIR/$NOM
 cd $LOGDIR
-chown oscar:users $NOM
+chown ogonzalez:users $NOM
 gzip $NOM
 
 ls -t1 mdb* | tee $OUT | head -10 >$LOG

@@ -1,4 +1,12 @@
-cd $HOME/no_backup/_mirrors/tetex
+#!/bin/bash
+
+if [ `hostname` != "eidolon" ]
+then
+   echo NO SOM A EIDOLON!!!
+   exit
+fi
+
+cd /home/ogonzalez/mirror/tetex
 
 data=`date +%Y%m%d-%H%M`
 URL=ftp://sunsite.informatik.rwth-aachen.de/pub/comp/tex/teTeX

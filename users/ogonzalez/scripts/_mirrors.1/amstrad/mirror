@@ -1,6 +1,12 @@
 #!/bin/bash
 
-cd $HOME/no_backup/_mirrors/amstrad
+if [ `hostname` != "eidolon" ]
+then
+   echo NO SOM A EIDOLON!!!
+   exit
+fi
+
+cd /home/ogonzalez/mirror/amstrad
 
 data=`date +%Y%m%d-%H%M`
 

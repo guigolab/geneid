@@ -27,9 +27,9 @@ while ( $lin=<STDIN> ) {
          $nom=$1;
          $revisats++;
          $error=0;
-         if ( $nom =~ /.zip$/i ) {
+         if ( $nom =~ /\.zip$/i ) {
             $error=system("unzip -t $nom >/dev/null 2>&1");
-         } elsif ( $nom =~ /.gz$/ || $nom =~ /.Z$/ ) {
+         } elsif ( $nom =~ /\.gz$/ || $nom =~ /\.Z$/ ) {
             $error=system("gzip -t $nom >/dev/null 2>&1");
          }
          if ( $error != 0 ) {

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# els fitxers GP son a servidors http, aixi que un "wget -m" no xuta
+#
+# si no canvien el format, un wget retorna l'index.html autogenerat per
+# mostrar el directori. A partir d'aquest puc baixar la resta
+#
+# El primer parametre es la URL. D'aqui treurem el bigZips i el database.
+# Aquests dos directoris es generen, aixi que aixo s'ha d'executar des
+# del directori "golden_path_200xyyzz", que has de crear tu
+#
+# COMPTE: ets tu qui ha de controlar si la URL es correcta i si conte el
+#         que ha de contenir!!
+
+download() {
+
+   if [ ! -e $1 ]
+   then
+      mkdir $1
+   fi
+   cd $1
+   wget $URL/$1
+
+   /usr/bin/perl >index2.html <<EOF
+      open(FIT,"index.html");
+      foreach \$lin (<FIT>) {
+         \$lin =~ s/<A HREF="(\?.=.|.*\/)">//g;
+         \$lin =~ s/<IMG SRC[^>]+>//g;
+         print "\$lin";
+      }
+      close(FIT);
+EOF
+
+   # -F: interpreta els fitxers d'entrada com html
+   # -B: especifica la URL "base"
+   # -i: fitxer d'entrada amb les URL
+   wget -c -F -B "$URL/$1/" -i index2.html
+
+   rm index.html index2.html
+
+   cd ..
+
+}
+
+
+BASE=`pwd`
+if [ `dirname $BASE` != '/seq/genomes/H.sapiens' ]
+then
+   echo No som al directori H.sapiens!!!
+   exit
+fi
+
+URL=$1
+
+download bigZips
+download database
+

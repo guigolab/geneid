@@ -1,0 +1,46 @@
+#!/bin/bash
+
+cd /home/ogonzalez/mirror/miktex/miktex/tm/packages
+ls -1 *.cab >../../../llista.new
+nous=`wc -l <../../../llista.new`
+
+/home/ug/ogonzalez/scripts/_mirrors.1/miktex/revisamd5 | sort -k2 > tmp.txt
+if [ -s tmp.txt ]
+then
+   md5sum -c tmp.txt | tee tmp2.txt
+else
+   touch tmp2.txt
+fi
+
+resum="Possible error en `grep -cv OK$ tmp2.txt` fitxers"
+num=`wc -l <tmp.txt`
+echo -n $num fitxers revisats
+if [ $num != 0 ]
+then
+   echo :
+   paste - tmp.txt <<EOF
+EOF
+else
+   echo -n " "
+fi
+mv tmp.txt ../../..
+rm tmp2.txt
+
+cd ../../..
+awk '{ print $2 }' <tmp.txt >tmp2.txt
+diff llista.new tmp2.txt | grep '<' | awk '{ print $2 }' >tmp.txt
+num=`wc -l <tmp.txt`
+echo -n i $num no revisats
+if [ $num != 0 ]
+then
+   echo :
+   paste - tmp.txt <<EOF
+EOF
+fi
+echo \ d\'un total de $nous
+rm llista.new tmp.txt tmp2.txt
+
+echo
+echo $resum
+echo
+

@@ -19,7 +19,7 @@ foreach $linia (@lin) {
    $linia =~ s/<[^>]+>/ /g;
    $linia =~ s/^\s+//;
    if ( $linia =~ /([^\.]+\.cab)\s+[0-9]+\s+([a-z0-9]+)/i ) {
-      if ( grep(/$1/,@nous) ) {
+      if ( grep(/^$1/,@nous) ) {
          print "$2  $1\n";
       }
    }

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cdrw="1,0,0"
+cdrw="0,0,0"
 
 cdrecord -v blank=fast speed=4 dev=$cdrw

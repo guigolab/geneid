@@ -1,0 +1,137 @@
+#!/bin/bash
+
+##########
+# revisa la sortida d'un wget i indica si s'ha baixat res o no
+# i si ha baixat be
+# aquesta sortida sempre es troba al /tmp/MirrorRefSeq, pero
+# s'acaba afegint al "log" generic
+##########
+filtre() {
+   echo
+   echo ----------
+   echo
+   echo $local: $AVIS
+   echo
+   grep ^Downloaded $OUT
+   echo
+   date +"%d %b %Y - %H:%M"
+   /home/ug/ogonzalez/scripts/comprimits <$OUT
+   echo
+   date +"%d %b %Y - %H:%M"
+   if [ "$1" != "NO_RM" ]
+   then
+      /home/ug/ogonzalez/scripts/mirror $local -n
+   fi
+
+   cat $OUT >>$LOG
+   rm $OUT
+
+} >>$MAIL
+
+#######################################################
+#######################################################
+
+# busquem uns noms unics: si s'arrenca mes d'un mirror alhora, ens hem
+# d'assegurar que un no matxaca els fitxers de l'altre. tot i que el segon
+# mirror no fara res, necessita crear alguns fitxers temporals.
+# el que fem es emprar el PID del proces
+
+OUT=/tmp/MirrorRefSeq$$
+MAIL=/tmp/MirrorRefSeqMail$$
+LOG=/tmp/MirrorRefSeqLog$$
+LOGDIR=/home/ug/ogonzalez/scripts/_LOGS
+
+echo Mirror arrencat: `date +"%d %b %Y - %H:%M"` >$MAIL
+
+# TRUQUILLO!!! (O bug del linux?)
+#
+# amb RH73 i kernel 2.4.18 o 2.4.20 el grep del pipe apareix moltes
+# vegades al ps com a 'bash ./comanda' i provoca l'error d'execucions
+# multiples. Fer-ho de la manera aparentment mes senzilla:
+#
+#   ps -ef | grep 'bash ./MirrorRefSeq' >$LOG
+#
+# no funciona. Executa varies vegades aquest script i ho veuras:
+#
+#   #!/bin/bash
+#   echo $$
+#   ps -ef | grep $$
+#
+
+if [ `ps -e | grep -c "^ *$$"` != 1 ]
+then
+
+   # JA HI HA UN MIRROR EN MARXA
+
+   echo >>$MAIL
+   echo APARENTMENT JA HI HA UN MIRROR EN MARXA!!! >>$MAIL
+   echo >>$MAIL
+   echo EXECUCIO CANCEL.LADA >>$MAIL | tee $LOG
+
+else
+
+   rm -rf $LOG >/dev/null 2>&1
+
+   ##########
+   # RefSeq
+   ##########
+
+      URL=ftp://ftp.ncbi.nih.gov/refseq
+      local=/seq/databases/refseq
+
+      excdirecs=/refseq/cumulative,/refseq/daily
+
+      cd $local
+      wget -m -nH --cut-dirs=1 -X $excdirecs $URL 2>&1 | tee $OUT
+
+      AVIS=""
+
+      filtre
+
+   ##########
+   # GoldenPath - ensGene, ensPep, refGene...
+   ##########
+
+      URL=http://genome.ucsc.edu/goldenPath
+      rm $OUT
+      AVIS=""
+
+      rm /tmp/gp >/dev/null 2>&1
+      for organisme in H.sapiens M.musculus R.norvegicus
+      do
+         for local in `ls -1d /seq/genomes/$organisme/golden_path* | tail -3`
+         do
+            cd $local/database
+            nom=`basename $local`
+            remot=`grep $nom /home/ug/ogonzalez/scripts/MirrorGP.dat | awk '{print $1 }'`
+            for fitxer in ensGene ensLink ensPep refGene refLink refPep
+            do
+               echo "$URL/$remot/database/$fitxer.txt.gz" >>/tmp/gp
+            done
+            wget -m -nH -nd -i /tmp/gp 2>&1 | tee $OUT
+            rm /tmp/gp
+            filtre NO_RM
+         done
+      done
+
+fi
+
+#######################################################
+
+echo >>$MAIL
+echo ---------- >>$MAIL
+echo >>$MAIL
+
+data=`date +"%d %b %Y - %H:%M"`
+echo Mirror acabat: $data >>$MAIL
+
+mail -s"MirrorRefSeq $data" ogonzalez@imim.es <$MAIL
+rm $MAIL
+NOM=mrs-`date +%Y%m%d-%H%M`
+mv $LOG $LOGDIR/$NOM
+cd $LOGDIR
+chown oscar:users $NOM
+gzip $NOM
+
+ls -t1 mrs* | tee $OUT | head -10 >$LOG
+rm -f `diff $OUT $LOG | grep '^<' | cut -c3-` $OUT $LOG
