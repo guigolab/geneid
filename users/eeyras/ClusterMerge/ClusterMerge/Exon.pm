@@ -140,8 +140,12 @@ sub end_phase {
     $self->{_end_phase} = $endphase;
   }
   if ( !defined( $self->{_end_phase} ) ){
-    $self->throw("No end phase set in Exon. You must set it explicitly. $!" .
-	      "Caller: ".caller);
+      if ( defined( $self->phase ) ){
+	  $self->{_end_phase} = ($self->phase + $self->length)%3;
+      }
+      else{
+	  $self->{_end_phase} = 0;
+      }
   }
   return $self->{_end_phase};
 }
@@ -430,9 +434,6 @@ sub gff_string {
    $str .= (defined $self->score)       ?   $self->score."\t"        :  ".\t";
    $str .= (defined $self->strand)      ?   $strand."\t"             :  ".\t";
    $str .= (defined $self->phase)       ?   $self->phase."\t"        :  ".\t";
-   eval{
-     $str .= (defined $self->end_phase) ?   $self->end_phase."\t"        :  ".\t";
-   };
    $str .= (defined $self->group_tag)   ?   $self->group_tag."\t"        :  ".";
    return $str;
 }

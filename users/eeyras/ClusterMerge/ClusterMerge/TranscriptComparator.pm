@@ -1441,6 +1441,7 @@ sub find_intersecting_exon_assemblies{
 sub get_intersecting_CDS{
     my ($self, $t1, $t2 ) = @_;
 
+    #print "getting intersecting CDS for ".$t1->dbID." and ".$t2->dbID."\n";
     my @exons1 = sort { $a->start <=> $b->start } @{$t1->get_all_Exons};
     my @exons2 = sort { $a->start <=> $b->start } @{$t2->get_all_Exons};
 

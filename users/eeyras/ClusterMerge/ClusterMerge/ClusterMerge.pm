@@ -168,7 +168,7 @@ sub new {
   # $internal_splice_overlap = 0,
   
   # to get some blah,blah
-  $self->verbose(1);
+  $self->verbose(0);
 
   $use_score = 0;
   if ( $use_score ){
@@ -1638,13 +1638,13 @@ sub _merge_Transcripts{
     foreach my $list ( @$lists ){
       $count++;
       
-      #if ($verbose){
-      print STDERR "list $count:\n";
-      foreach my $t ( @$list ){
-	  print STDERR "list $count";
-	  ClusterMerge::TranscriptUtils->_print_SimpleTranscript( $t );
-	}
-      #}
+      if ($verbose){
+	  print STDERR "list $count:\n";
+	  foreach my $t ( @$list ){
+	      print STDERR "list $count";
+	      ClusterMerge::TranscriptUtils->_print_SimpleTranscript( $t );
+	  }
+      }
       my $order = scalar( @$list );
       if ( $order < $self->_minimum_order ){
 	print STDERR "list has only $order elements and the minimum allowed is ".$self->_minimum_order." - rejecting\n";
@@ -1691,7 +1691,7 @@ sub _merge_Transcripts{
       $list = $newlist;
       
       # cluster the exons
-      my $first_cluster_list = ClusterMerge::ExonUtils->_cluster_Exons( @allexons );
+      my ($first_cluster_list,$exon2cluster) = ClusterMerge::ExonUtils->_cluster_Exons( @allexons );
       
       # set start and end of the clusters (using the info collected above)
       my $cluster_list = $self->_set_splice_Ends($first_cluster_list,\%exon2transcript,\%is_first,\%is_last);
@@ -1731,10 +1731,10 @@ sub _merge_Transcripts{
 	$transcript->add_Exon($new_exon);
       }
       
-      #if ($verbose){
+      if ($verbose){
 	  print STDERR "Produced transcript:\n";
 	ClusterMerge::TranscriptUtils->_print_SimpleTranscript( $transcript );
-      #}
+      }
       
       if ( $self->use_score ){
 	my %duplicated;
@@ -1773,33 +1773,33 @@ sub _merge_Transcripts{
 =cut
 
 sub _set_splice_Ends {
-  my ($self, $cluster_list, $ref_exon2transcript_hash, $ref_is_first, $ref_is_last) = @_;
-  
-  # $cluster_list is a arrayref of exon-clusters, each cluster 
-  # representing all the exons that can be merged
-
-  # hash having exons as keys and mother-transcript as value
-  my %exon2transcript = %$ref_exon2transcript_hash;
-
-  # keep track of whether the exon is first or last in the transcript
-  my %is_first = %$ref_is_first;
+    my ($self, $cluster_list, $ref_exon2transcript_hash, $ref_is_first, $ref_is_last) = @_;
+    
+    # $cluster_list is a arrayref of exon-clusters, each cluster 
+    # representing all the exons that can be merged
+    
+    # hash having exons as keys and mother-transcript as value
+    my %exon2transcript = %$ref_exon2transcript_hash;
+    
+    # keep track of whether the exon is first or last in the transcript
+    my %is_first = %$ref_is_first;
   my %is_last  = %$ref_is_last;
-
-  #print STDERR "EST_GeneBuilder: setting common ends...\n";
-
-  # get the exon clusters
-  my @exon_clusters = @$cluster_list;
-
-  # sort clusters according to their start coord.
-  @exon_clusters = sort { $a->start <=> $b->start  } @exon_clusters;
-  my $count =  0;
-
-  # check whether a cluster has fused two separate exons from the same transcript
-  my $position_is = 0;
-  my @exon_list;
-  my $need_to_recluster = 0;		      
-
- CLUSTERS:		      
+    
+    #print STDERR "EST_GeneBuilder: setting common ends...\n";
+    
+    # get the exon clusters
+    my @exon_clusters = @$cluster_list;
+    
+    # sort clusters according to their start coord.
+    @exon_clusters = sort { $a->start <=> $b->start  } @exon_clusters;
+    my $count =  0;
+    
+    # check whether a cluster has fused two separate exons from the same transcript
+    my $position_is = 0;
+    my @exon_list;
+    my $need_to_recluster = 0;		      
+    
+  CLUSTERS:		      
  foreach my $cluster ( @exon_clusters ){
    $position_is++;
    

@@ -49,7 +49,7 @@ sub get_transcripts_from_GFF{
 ############################################################
 
 sub exon_from_gff {
-    my ($gffstring) = @_;
+    my ($self,$gffstring) = @_;
     
     #print STDERR "gff_string: $gffstring\n";
     
@@ -84,7 +84,7 @@ sub exon_from_gff {
     if ($score eq '.'){
 	$exon->score(0);
     }
-    elsif ( $score ){
+    elsif ( defined($score) ){
 	$exon->score( $score );
     }
     else{
@@ -98,6 +98,8 @@ sub exon_from_gff {
     ############################################################
     # warning: it parses only the first element of the group
     $exon->group_tag($group[0]);
+    
+    #print "group-tag = $group[0]\n";
     return $exon;
 }
 
