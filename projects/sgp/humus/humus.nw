@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.42 2002-05-23 19:49:57 jabril Exp $ 
+% # $Id: humus.nw,v 1.43 2002-05-24 18:57:56 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.42 2002-05-23 19:49:57 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.43 2002-05-24 18:57:56 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2816,7 +2816,7 @@ if [ -f "$EVIDENCE" ] ;
 CheckFile R $PARAM $ISEQ ;
 #
 GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $EVIDENCE_PAR $ISEQ" ;
-echo "$GENEID $GENEID_CMDLN > $ODIR/$SEQ 2> $EDIR/$SEQ.sgp" 1>&2 ;
+echo "$GENEID $GENEID_CMDLN > $ODIR/$SEQ.all 2> $EDIR/$SEQ.sgp" 1>&2 ;
 ( $GENEID $GENEID_CMDLN > $ODIR/$SEQ.all 2> $EDIR/$SEQ.sgp ) || TheEnd CKO ;
 ( cat $EDIR/$SEQ.sgp 1>&2 ) || TheEnd CMDKO ;
 #
@@ -3290,7 +3290,7 @@ gawk '$1~/^(TOTALS|CHR)$/ { print $0 }' $STATS/eval.test_summary.tbl \
 <<R-plots: gene-prediction stats>>=
 #
 # DRAWING GENE-PREDICTION STATS with R
-def.par <- par()# save default, for resetting...
+Mdef.par <- par()# save default, for resetting...
 #
 # global VARS
 IPATH <- "/projects/H.sapiens/20011222.UCSCgp/evaluations/SGP-MGSCv3+RefSeqEvids/"
@@ -3299,14 +3299,21 @@ FILE <- "eval.test_summary"
 WFILE <- paste(IPATH,FILE,"_CHR.tbl", sep="")
 TFILE <- paste(IPATH,FILE,"_TOT.tbl", sep="")
 PSFILE <- paste(OPATH,"eval", sep="")
-TSETS <- c("REFSEQ","ENSEMBL")
-PSETS <- c("GENSCAN","GENEID","SGP-MGSCv3","SGP-MGSCv3+RefSeq","SRs")
-VSETS <- c("SN","SP","CC", "SNe","SPe","SNSP", "SNg","SPg","SNSPg",  
-           "raME","raWE", "raMG","raWG", "raJG","raSG")
+#
 CSETS <- c("1","2","3","4","5","6","7","8","9","10",
            "11","12","13","14","15","16","17","18","19","20",
            "21","22","X","Y")
-rnbw_cols <- rainbow(length(PSETS))
+TSETS <- c("REFSEQ","ENSEMBL")
+PSETS  <- c("GENSCAN","GENEID","SGP-MGSCv3","SGP-MGSCv3+RefSeq","SRs")
+PNAMES <- c("GENSCAN","GENEID","SGP-MGSC",  "SGP-RfSq",         "SRs-MGSC")
+VSETS <- c("SN","SP","CC", "SNe","SPe","SNSP", "SNg","SPg","SNSPg",  
+           "raME","raWE", "raMG","raWG", "raJG","raSG")
+PCHK <- c("SRs")
+VCHK <- list(SRs=c("SN","SP","CC"))
+APAR <- list(   VARS= c("default","raJG","raSG"),
+             default= list(YLIM=c(0.0,1.0),YDIV=0.1*c(0:10)),
+                raJG= list(YLIM=c(1.0,1.5),YDIV=1.0+c(0.05*c(0:10))),
+                raSG= list(YLIM=c(1.0,1.5),YDIV=1.0+c(0.05*c(0:10))) )
 # MAINTIT <- "H.sapiens Golden Path Assembly"
 # VERSTIT <- "( 22 Dec, 2001 - NCBI 28 )"
 # ASUBTIT <- "Assembled Chromosomes"
@@ -3319,6 +3326,7 @@ T <- read.table(TFILE, header=TRUE, sep=" ", as.is=FALSE, na.strings="nan")
 t <- split(T,T$TEST)
 #
 # STATS PLOTED BY CHROMOSOMES
+source("/usr/local/molbio/share/sgp/bin/evalplotfunct.R") ;
 for(i in 1:length(TSETS)) {
   print(paste("###[",i,"]### WORKING ON ",TSETS[i]," ######", sep="")) ;
   F <- TSETS[i] ;
@@ -3327,51 +3335,118 @@ for(i in 1:length(TSETS)) {
   for(j in 1:length(VSETS)) {
     print(paste("###[",i,"]### |- ",F," [",j,"] --> ",VSETS[j], sep="")) ;
     V <- VSETS[j] ;
-    rw <- sw[[V]] ;
-    rt <- st[[V]] ;
-    MkPSplotByCHRs(F,V,rw) ;
+    rw <- data.frame(CHR=factor(sw$CHR),PRG=factor(sw$PROGRAM),VAR=sw[[V]]) ;
+    rt <- data.frame(CHR=factor(st$CHR),PRG=factor(st$PROGRAM),VAR=st[[V]]) ;
+    MkPSplotByCHRs(F,V,rw,rt) ; # set rw and rt as "data.frames"
   } ; # for j (VSETS)
   print(paste("###[",i,"]###", sep="")) ;
 } # for i (TSETS)
 ##############################################
 #
-MkPSplotByCHRs <- function(ftst,fvar,flstW) {
+par(Mdef.par) ;#- reset to default
+#
+@ 
+
+<<tangling: R scripts>>=
+echo "# --> \$BIN/evalplotfunct.R" 1>&2 ;
+notangle -R"R-plots functions" $WORK/$nwfile.nw | cpif $BIN/evalplotfunct.R ;
+@ 
+
+<<R-plots functions>>=
+#
+# evalplotfunct.R -> R functions for gene-prediction evaluation plots
+#
+<<Version Control Id Tag>>
+#
+<<R-plots functions: MkPSplotByCHRs>>
+@
+
+<<R-plots functions: MkPSplotByCHRs>>=
+#
+MkPSplotByCHRs <- function(ftst,fvar,flstW,flstT) {
   #
   FOUT <- paste(PSFILE,"_chrs.",ftst,"_",fvar,".ps", sep="") ;
+  Wary<-split(flstW,flstW$CHR) ;
+  Tary<-split(flstT,flstT$PRG) ;
+  #
+  rnbwC <- rainbow(length(PSETS))
+  rnbwCL <- rainbow(length(PSETS), s=0.15, v=0.85)
+  if (fvar %in% APAR$VARS) {
+    fylim <- APAR[[fvar]]$YLIM ;
+    fydiv <- APAR[[fvar]]$YDIV ;
+  } else {
+    fylim <- APAR$default$YLIM ;
+    fydiv <- APAR$default$YDIV ;
+  } ;
   # print(FOUT) ;
   #
   plot.new() ;
-  def.par <- par(ask=TRUE) ;# save default, for resetting...
+  # def.par <- par(ask=TRUE) ;# save default, for resetting...
+  def.par <- par(ask=FALSE) ;# save default, for resetting...
   #
   # BEGIN plot
-# postscript(file=FOUT, paper="a4", horizontal=TRUE) ; 
+  postscript(file=FOUT, paper="a4", horizontal=TRUE) ; 
   #
-# nf <- layout(matrix(c(1,2),1,2,byrow=TRUE),
-  nf <- layout(matrix(c(1,1),1,1,byrow=TRUE),
-               widths=c(lcm(12),lcm(7)),
-               heights=c(lcm(8),lcm(8)), respect=TRUE) ;
+# nf <- layout(matrix(c(1,1),1,1, byrow=TRUE),
+  nf <- layout(matrix(c(1,2),1,2, byrow=TRUE),
+               widths=c(lcm(18),lcm(8)),
+               heights=c(lcm(12),lcm(12)), respect=TRUE) ;
   # layout.show(nf)
   par(ps=8, bg="white", bty="o", font=2, 
       col.axis="blue", font.axis=1, cex.lab=0.5, las=1) ;
-  # drawing chromosome dots (left figure)
+  # drawing single chromosome dots (left figure)
+  print("###############----> CHROMOSOME DOTTER") ;
+  op.par <- par() ;
   par(mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0))) ;
-  plot(c(1,length(CSETS)), c(0.0,1.0), type="n",
+  plot(c(1,length(CSETS)), fylim, type="n",
        axes=FALSE, xlab="", ylab="", main="") ; 
-  abline(v=c(1:length(CSETS)), h=0.1*c(1:9), col="lightgray", lty="dotted") ;
+  # print("###############--------> Extra stuff") ;
+  title(main=paste(fvar," on ",ftst,sep=""), font=2, adj=0, cex=1.5) ;
+  abline(v=c(1:length(CSETS)), h=c(fydiv), col="lightgray", lty="dotted") ;
+  # print("###############--------> Chromosome Dots") ;
   for (chr in 1:length(CSETS)) {
-    op.par <- par(pch=21, lwd=0.01, cex=1.5) ;
+    wary<-split(Wary[[CSETS[chr]]],Wary[[CSETS[chr]]]$PRG) ;
     for (prg in 1:length(PSETS)) {
-      points(chr, flstW[prg], bg = rnbw_cols[prg]) ;
+      if ((PSETS[prg] %in% PCHK) && !(fvar %in% VCHK[[PSETS[prg]]])) next ;
+      fclr <- rnbwC[[prg]] ;
+      points(chr, wary[[PSETS[prg]]]$VAR, bg = fclr, pch=21, lwd=0.01, cex=1.5) ;
     } ; # for prg
-    par(op.par) ;
-    axis(1, at=chr, as.character(CSETS[chr])) ;
+    axis(1, at=chr, as.character(CSETS[chr]), adj=0.5) ;
   } ; # for chr
-  axis(2) 
-  box()   
+  axis(2) ; 
+  box() ;  
+#  op.par <- par(op.par) ;
+  # drawing dot-plots by program (right figure)
+  print("###############----> PROGRAM DOT-PLOTS") ;
+#  op.par <- par() ;
+  par(mar=c(cm(0.75),cm(0),cm(0.75),cm(0.75))) ;
+  boxplot(flstW$VAR  ~ flstW$PRG, col=rnbwCL, ylim=fylim,
+          border="black", notch=TRUE, axes=FALSE, ann=FALSE) ;# , boxwex=0.65
+  # print("###############--------> Extra stuff") ;
+  title(main=paste(fvar," on ",ftst,sep=""), font=2, adj=0, cex=1.5) ;
+  abline(v = c(1:length(PSETS)), h=c(fydiv), col="lightgray", lty="dotted") ;
+  # print("###############--------> Chromosome Dots") ;
+  lnsp <- 0.75 ;
+  for (prg in 1:length(PSETS)) {
+    if ((PSETS[prg] %in% PCHK) && !(fvar %in% VCHK[[PSETS[prg]]])) next ;
+    for (chr in 1:length(CSETS)) {
+      wary<-split(Wary[[CSETS[chr]]],Wary[[CSETS[chr]]]$PRG) ;
+      fclr <- rnbwC[[prg]] ;
+      points(prg, wary[[PSETS[prg]]]$VAR, bg=fclr, pch=21, lwd=0.01, cex=1.25) ;
+    } ; # for prg
+    points(prg, Tary[[PSETS[prg]]]$VAR, bg="black", pch=21, lwd=0.01, cex=1.25) ;
+    # text(prg, -1, as.character(PNAMES[prg]), font=1, adj=1, cex=0.25, crt=-90) ;
+    axis(1, at=prg, as.character(PNAMES[prg]), las=1, cex.lab=0.25, mgp=c(3,lnsp,0)) ;
+    if (lnsp == 0.75) { lnsp <- 1.25 ; } else { lnsp <- 0.75 ; } ;
+  } ; # for chr
+  axis(4) ;
+  box() ;
+  par(op.par) ;
   # END plot
-# dev.off() ;# closing PostScript device
+  dev.off() ;# closing PostScript device
   #
   par(def.par) ;#- reset to default
+  # par(ask=FALSE) ;
   #
 } # MkPSplot
 #
@@ -9934,7 +10009,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.42 2002-05-23 19:49:57 jabril Exp $
+# $Id: humus.nw,v 1.43 2002-05-24 18:57:56 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9973,6 +10048,8 @@ echo "# TANGLING PERL TK SCRIPTS:" 1>&2 ;
 <<tangling: perl Tk scripts>>
 echo "# TANGLING GAWK SCRIPTS:" 1>&2 ;
 <<tangling: gawk scripts>>
+echo "# TANGLING R SCRIPTS:" 1>&2 ;
+<<tangling: R scripts>>
 @ 
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
@@ -10088,6 +10165,7 @@ RIKENID="20020504.RIKEN" ;
 MGSC_RKN="${MMUSSTR}+${RIKENID}" ;
 REFSEQID="RefSeqEvids" ;
 HSMM_REFSEQ="${HSAPSTR}-${MMUSSTR}+${REFSEQID}" ;
+MMHS_REFSEQ="${MMUSSTR}-${HSAPSTR}+${REFSEQID}" ;
 #
 export HSAP HSAPID HSAPSTR HSEQ HSEQMSK \
        MMUS MMUSID MMUSSTR MSEQ MSEQMSK \
