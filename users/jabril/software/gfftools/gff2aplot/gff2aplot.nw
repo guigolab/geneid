@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $
+% $Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -488,9 +488,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.22 $', #'
-     '$Date: 2001-11-20 19:29:05 $', #'
-     '$Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $', #'
+     '$Revision: 1.23 $', #'
+     '$Date: 2001-11-23 01:08:10 $', #'
+     '$Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -5709,13 +5709,13 @@ $vrf->{_plot_y_sequence} && do {
     push @{ $tcrds{ye} }, $rrf->[$_end] ;
 };
 #
-$vrf->{_x_start} = [ scalar(@{ $tcrds{xs} }) ?
+$vrf->{_x_start} = [ scalar(@{ $tcrds{xs} }) > 0 ?
                         min(@{ $tcrds{xs} }) :    0, 'bp' ];
-$vrf->{_x_end}   = [ scalar(@{ $tcrds{xe} }) ? 
+$vrf->{_x_end}   = [ scalar(@{ $tcrds{xe} }) > 0 ? 
                         max(@{ $tcrds{xe} }) : 1000, 'bp' ];
-$vrf->{_y_start} = [ scalar(@{ $tcrds{ys} }) ? 
+$vrf->{_y_start} = [ scalar(@{ $tcrds{ys} }) > 0 ? 
                         min(@{ $tcrds{ys} }) :    0, 'bp' ];
-$vrf->{_y_end}   = [ scalar(@{ $tcrds{ye} }) ? 
+$vrf->{_y_end}   = [ scalar(@{ $tcrds{ye} }) > 0 ? 
                         max(@{ $tcrds{ye} }) : 1000, 'bp' ];
 #
 @ %def {_x_start} {_x_end} {_y_start} {_y_end}
@@ -6378,6 +6378,7 @@ Move this section to a perl package: \\ suggesting [[gfftools::PostScript::forma
 \subsubsctn{ISO standard page sizes: A series}
 
 <<page sizes perl definition>>=
+  # A Series
   a0        => [ ++$formats, 2384, 3370 ],
   a1        => [ ++$formats, 1684, 2384 ],
   a2        => [ ++$formats, 1190, 1684 ],
@@ -6394,6 +6395,7 @@ Move this section to a perl package: \\ suggesting [[gfftools::PostScript::forma
 \subsubsctn{ISO standard page sizes: B series}
 
 <<page sizes perl definition>>=
+  # B Series
   b0        => [ ++$formats, 2920, 4127 ],
   b1        => [ ++$formats, 2064, 2920 ],
   b2        => [ ++$formats, 1460, 2064 ],
@@ -6410,6 +6412,7 @@ Move this section to a perl package: \\ suggesting [[gfftools::PostScript::forma
 \subsubsctn{US standard page sizes}
 
 <<page sizes perl definition>>=
+  # USA Formats
   executive => [ ++$formats,  540,  720 ],
   folio     => [ ++$formats,  612,  936 ],
   legal     => [ ++$formats,  612, 1008 ],
@@ -6442,9 +6445,9 @@ sub ps_variables() {
     print STDOUT << "+++PSVARS+++";
 %%BeginProcSet: Setting_Vars 1.0 0
 %
-<<psvariables - layout>>
-<<psvariables - tickmarks>>
-<<psvariables - labels>>
+<<PSVariables - layout>>
+<<PSVariables - tickmarks>>
+<<PSVariables - labels>>
 %
 %%EndProcSet:   Setting_Vars 1.0 0
 +++PSVARS+++
@@ -6457,96 +6460,126 @@ PSVARS =>
   "###---> PostScript Variables SET...\n",
 @
 
-<<psvariables - layout>>=
+<<PSVariables - layout>>=
 %% Layout
-/flglscape @{[ &tobool($F) ]} D
+/flglscape @{[ &tobool($F) ]} D  %:% landscape mode not implemented yet
 /flgcrd @{[ &tobool($vr->{hide_credits}) ]} D
-/Dpage { pagedict begin pg$vr->{page_size} flglscape { exch } if end } B
-%% Margins (1 cm) (Up Down Left Right - margins are XY independent)
-/UpM @{ $vr->{margin_top} } D
-/DnM @{ $vr->{margin_bottom} } D
-/LtM @{ $vr->{margin_left} } D
-/RtM @{ $vr->{margin_right} } D
-%% Defining background-color for objects.
-/BGcolor { $vr->{background_color} } D
-/FGcolor { $vr->{foreground_color} } D
-/BBoxcol { $vr->{aplot_box_bgcolor} } D
-/SBoxcol { $vr->{percent_box_bgcolor} } D
-/XBoxcol { $vr->{extra_box_bgcolor} } D
-%% 
-/X0 $vr->{_x_start} D /X1 $vr->{_x_end} D
-/Y0 $vr->{_y_start} D /Y1 $vr->{_y_end} D
+/Dpage {                %-> Dpage -> page_width page_height
+  pagedict begin        %-> recovering from pagedict dictionary
+    pg$vr->{page_size}  %->          this page width and height        
+    flglscape {         %-> if flglscape is true 
+      exch              %->    exchanges width and height
+    } if                %->
+  end                   %-> close pagedict
+} B
+@ %def flglscape flgcrd Dpage
+
+<<PSVariables - layout>>=
+%% Margins                       %:% Margins are XY independent.
+/MT @{ $vr->{margin_top} } D     %-% Top margin
+/MB @{ $vr->{margin_bottom} } D  %-% Bottom margin
+/ML @{ $vr->{margin_left} } D    %-% Left margin
+/MR @{ $vr->{margin_right} } D   %:% Right margin
+@ %def MT MB ML MR
+
+<<PSVariables - layout>>=
+%% Background Colors
+/bg {                       %-> bg -> c m y k 
+  colordict begin           %-> recovering from colordict dictionary
+    $vr->{background_color} %->               this color cmyk values
+  end                       %-> close colordict
+} D                         %-% 
+/fg {                       %-> fg -> c m y k 
+  colordict begin           %-> recovering from colordict dictionary
+    $vr->{foreground_color} %->               this color cmyk values
+  end                       %-> close colordict
+} D                         %-% 
+/ABc { $vr->{aplot_box_bgcolor} } D   %-% 
+/PBc { $vr->{percent_box_bgcolor} } D %-% 
+/QBc { $vr->{extra_box_bgcolor} } D   %:% 
+@ %def bg fg ABc PBc QBc 
+
+<<PSVariables - layout>>=
+%% Limits
+/XO $vr->{_x_start} D  %-% X-sequence first nucleotide coord
+/XE $vr->{_x_end} D    %-% X-sequence last  nucleotide coord
+/YO $vr->{_y_start} D  %-% Y-sequence first nucleotide coord
+/YE $vr->{_y_end} D    %:% Y-sequence last  nucleotide coord
 /axesp @{[ &tobool($vr->{aplot_xy_same_length}) ]} D
 % /xyratio $vr->{aplot_xy_scale} D
-/ZoomON @{[ &tobool($vr->{zoom_marks}) ]} D
-@
+/Zmarks @{[ &tobool($vr->{zoom_marks}) ]} D
+@ %def XO XE YO YE axesp xyratio Zmarks
 
-<<psvariables - tickmarks>>=
+<<PSVariables - tickmarks>>=
 %% Tickmarks
-/GridON @{[ &tobool($vr->{show_grid}) ]} D
-/ShowTicks @{[ &tobool($vr->{show_tickmark_label}) ]} D
+/KGb @{[ &tobool($vr->{show_grid}) ]} D            %-% 
+/KLb @{[ &tobool($vr->{show_tickmark_label}) ]} D  %:% tickmark labels == coords
 %
-/BBXtickflg @{[ &tobool($vr->{show_aplot_x_ticks}) ]} D
-/BBYtickflg @{[ &tobool($vr->{show_aplot_y_ticks}) ]} D
-/SBXtickflg @{[ &tobool($vr->{show_percent_x_ticks}) ]} D
-/SBYtickflg @{[ &tobool($vr->{show_percent_y_ticks}) ]} D
-/XBXtickflg @{[ &tobool($vr->{show_extrabox_x_ticks}) ]} D
-/XBYtickflg @{[ &tobool($vr->{show_extrabox_y_ticks}) ]} D
+/KAXb @{[ &tobool($vr->{show_aplot_x_ticks}) ]} D    %-% Aplot X ticKmarks flg
+/KAYb @{[ &tobool($vr->{show_aplot_y_ticks}) ]} D    %-% Aplot Y ticKmarks flg
+/KPXb @{[ &tobool($vr->{show_percent_x_ticks}) ]} D  %-% Percent X ticKmarks flg
+/KPYb @{[ &tobool($vr->{show_percent_y_ticks}) ]} D  %-% Percent Y ticKmarks flg
+/KQXb @{[ &tobool($vr->{show_extrabox_x_ticks}) ]} D %-% extra-Q X ticKmarks flg
+/KQYb @{[ &tobool($vr->{show_extrabox_y_ticks}) ]} D %:% extra-Q X ticKmarks flg
 %
-/tickmx $vr->{major_tickmark_nucleotide} D
-/tickmn $vr->{minor_tickmark_nucleotide} D
-% /maxtck $vr->{aplot_major_tickmark} D
-% /mintck $vr->{aplot_minor_tickmark} D
-/pctmxt $vr->{percent_major_tickmark} D
-/pctmnt $vr->{percent_minor_tickmark} D
-/xtrmxt $vr->{extra_major_tickmark} D
-/xtrmnt $vr->{extra_minor_tickmark} D
+/KASm $vr->{major_tickmark_nucleotide} D
+/KASn $vr->{minor_tickmark_nucleotide} D
+% % /maxtck $vr->{aplot_major_tickmark} D
+% % /mintck $vr->{aplot_minor_tickmark} D
+% /KPSm $vr->{percent_major_tickmark_step} D
+% /KPSn $vr->{percent_minor_tickmark_step} D
+% % /pctmxt $vr->{percent_major_tickmark} D
+% % /pctmnt $vr->{percent_minor_tickmark} D
+% /KQSm $vr->{extra_major_tickmark_step} D
+% /KQSn $vr->{extra_minor_tickmark_step} D
+% % /xtrmxt $vr->{extra_major_tickmark} D
+% % /xtrmnt $vr->{extra_minor_tickmark} D
 @
 
-<<psvariables - labels>>=
+<<PSVariables - labels>>=
 %% Labels
-/Ttflg @{[ &tobool($vr->{show_title}) ]} D
-/Tt @{[ &tostring($vr->{title}) ]} D
-/Ttfsz @{ $vr->{title_fontsize} } D
-/Ttfnt { Ttfsz $Fonts{$vr->{title_font}} } D
+/TTLb @{[ &tobool($vr->{show_title}) ]} D
+/TTLl @{[ &tostring($vr->{title}) ]} D
+/TTLz @{ $vr->{title_fontsize} } D
+/TTLf { TTLz $Fonts{$vr->{title_font}} } D
 %
-/STtflg @{[ &tobool($vr->{show_subtitle}) ]} D
-/STt @{[ &tostring($vr->{subtitle}) ]} D
-/STtfsz @{ $vr->{subtitle_fontsize} } D
-/STtfnt { STtfsz $Fonts{$vr->{subtitle_font}} } D
+/TTlb @{[ &tobool($vr->{show_subtitle}) ]} D
+/TTll @{[ &tostring($vr->{subtitle}) ]} D
+/TTlz @{ $vr->{subtitle_fontsize} } D
+/TTlf { TTlz $Fonts{$vr->{subtitle_font}} } D
 %
-/XLflg @{[ &tobool($vr->{show_x_sequence_label}) ]} D
-/XL @{[ &tostring($vr->{x_sequence_label}) ]} D
-/XLfsz @{ $vr->{x_label_fontsize} } D
-/XLfnt { XLfsz $Fonts{$vr->{x_label_font}} } D
+/XSLb @{[ &tobool($vr->{show_x_sequence_label}) ]} D
+/XSLl @{[ &tostring($vr->{x_sequence_label}) ]} D
+/XSLz @{ $vr->{x_label_fontsize} } D
+/XSLf { XSLz $Fonts{$vr->{x_label_font}} } D
 %
-/YLflg @{[ &tobool($vr->{show_y_sequence_label}) ]} D
-/YL @{[ &tostring($vr->{y_sequence_label}) ]} D
-/YLfsz @{ $vr->{y_label_fontsize} } D
-/YLfnt { YLfsz $Fonts{$vr->{y_label_font}} } D
+/YSLb @{[ &tobool($vr->{show_y_sequence_label}) ]} D
+/YSLl @{[ &tostring($vr->{y_sequence_label}) ]} D
+/YSLz @{ $vr->{y_label_fontsize} } D
+/YSLf { YSLz $Fonts{$vr->{y_label_font}} } D
 %
-/SBoxLabflg @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D
-/SBoxLab @{[ &tostring($vr->{percent_box_label}) ]} D
-/SBoxLabfsz @{ $vr->{percent_box_label_fontsize} } D
-/SBoxLabfnt { SBoxLabfsz $Fonts{$vr->{percent_box_label_font}} } D
+/PBLb @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D
+/PBLl @{[ &tostring($vr->{percent_box_label}) ]} D
+/PBLz @{ $vr->{percent_box_label_fontsize} } D
+/PBLf { SBoxLabfsz $Fonts{$vr->{percent_box_label_font}} } D
 %
-/SBoxSLabflg @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D
-/SBoxSLab @{[ &tostring($vr->{percent_box_sublabel}) ]} D
-/SBoxSLabfsz @{ $vr->{percent_box_sublabel_fontsize} } D
-/SBoxSLabfnt { SBoxSLabfsz $Fonts{$vr->{percent_box_sublabel_font}} } D
+/PBlb @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D
+/PBll @{[ &tostring($vr->{percent_box_sublabel}) ]} D
+/PBlz @{ $vr->{percent_box_sublabel_fontsize} } D
+/PBlf { SBoxSLabfsz $Fonts{$vr->{percent_box_sublabel_font}} } D
 %
-/XBoxLabflg @{[ &tobool($vr->{show_extra_box_label}) ]} D
-/XBoxLab @{[ &tostring($vr->{extra_box_label}) ]} D
-/XBoxLabfsz @{ $vr->{extra_box_label_fontsize} } D
-/XBoxLabfnt { XBoxLabfsz $Fonts{$vr->{extra_box_label_font}} } D
+/QBLb @{[ &tobool($vr->{show_extra_box_label}) ]} D
+/QBLl @{[ &tostring($vr->{extra_box_label}) ]} D
+/QBLz @{ $vr->{extra_box_label_fontsize} } D
+/QBLf { XBoxLabfsz $Fonts{$vr->{extra_box_label_font}} } D
 %
-/XBoxSLabflg @{[ &tobool($vr->{show_extra_box_sublabel}) ]} D
-/XBoxSLab @{[ &tostring($vr->{extra_box_sublabel}) ]} D
-/XBoxSLabfsz @{ $vr->{extra_box_sublabel_fontsize} } D
-/XBoxSLabfnt { XBoxSLabfsz $Fonts{$vr->{extra_box_sublabel_font}} } D
+/QBlb @{[ &tobool($vr->{show_extra_box_sublabel}) ]} D
+/QBll @{[ &tostring($vr->{extra_box_sublabel}) ]} D
+/QBlz @{ $vr->{extra_box_sublabel_fontsize} } D
+/QBlf { XBoxSLabfsz $Fonts{$vr->{extra_box_sublabel_font}} } D
 @
 
-<<psvariables - labels>>=
+<<PSVariables - labels>>=
 %
 %  /FTXangle  D % Var["FEATURE_X-LABELS_ANGLE"];
 %  /GPXangle  D % Var["GROUP_X-LABELS_ANGLE"];
@@ -6650,15 +6683,15 @@ PSPLOT =>
 PSPLOTDONE =>
   "###---> PostScript Page FINISHED...\n",
 BLOCKRB =>
-  "###     + APLOT-BOX drawing \% ribbons...\n",
+  "###     + APLOT-BOX drawing \%s ribbons...\n",
 BLOCKXY =>
-  "###     + APLOT-BOX drawing \% annotation...\n",
+  "###     + APLOT-BOX drawing \%s annotation...\n",
 BLOCKA =>
   "###     + APLOT-BOX drawing alignment features...\n",
 BLOCKFX =>
   "###     + APLOT-BOX extra features from custom files...\n",
 BLOCKDONE =>
-  "###     + \% section DONE...\n",
+  "###     + \%s section DONE...\n",
 @
 
 \subsubsctn{Producing main aplot box}
@@ -6802,7 +6835,7 @@ sub ps_plot_pctaln() {
 @ %def &ps_plot_pctaln
 
 
-\subsubsctn{Generating percent box}
+\subsubsctn{Generating lower auxiliarly box}
 
 <<PostScript PLOT>>=
 sub ps_block_extra() {
@@ -6977,11 +7010,20 @@ We have implemented a perl script that is used as a [[noweb]] filter (see append
 %%BeginProcSet: Constants 1.0 0
 %
 % Printing Offset
-/VUpOS 0.25 cm D  % offset defines non printable
-/VDnOS 0.25 cm D  % paper area for pages (printer outlimits).
-/HLtOS 0.25 cm D
-/HRtOS 0.25 cm D
-/htag   0 D
+/OST 0.25 cm D  % offset defines non printable
+/OSB 0.25 cm D  % paper area for pages (printer outlimits).
+/OSL 0.25 cm D
+/OSR 0.25 cm D
+%
+%%EndProcSet:   Constants 1.0 0
+%
+@
+
+\subsctn{Page layout}
+
+<<POSTSCRIPT layout>>=
+%%BeginProcSet: Page_Layout 1.0 0
+%
 /Xmarg  5.0 cm D       % Starting Point (upper left corner)
 /Ymarg  842 2 cm sub D
 /Y Ymarg D
@@ -6997,15 +7039,7 @@ We have implemented a perl script that is used as a [[noweb]] filter (see append
 /HWBox WBox 2 div    D
 /Warw  WBox 0.75 mul D
 /HWarw Warw 2 div    D
-%
-%%EndProcSet:   Constants 1.0 0
-%
-@
-
-\subsctn{Page layout}
-
-<<POSTSCRIPT layout>>=
-%%BeginProcSet: Page_Layout 1.0 0
+/htag   0 D
 %
 /TitleFont    { 24 /Times-Bold  } D
 /SubTtFont    { 16 /Times-Roman } D
@@ -7598,18 +7632,94 @@ end % aplot dict
 
 <<PSFunctions - Arrow>>=
 /Arrow {  %->
-  /acol [ 9 -4 roll ] D /acolor { acol aload pop } D
-  S 1 eq { exch /sn { 1 mul } D } { /sn { 1 neg mul } D } ifelse
-    htag 1 eq { Xscm dup y1 Yscm HWBox add m
-      HWarw sn HWarw rl 0 Warw neg rl HWarw neg sn HWarw rl closepath
-      S acolor scmyk fill R
-      y1 Yscm HWBox add m Xscm y1 Yscm HWBox add l acolor scmyk 1 slw K
-      } { Yscm dup X0 Xscm HWBox sub exch m
-        HWarw neg HWarw sn rl Warw 0 rl HWarw neg HWarw neg sn rl closepath
-        S acolor scmyk fill R
-        X0 Xscm HWBox sub exch m Yscm X0 Xscm HWBox sub exch l
-        acolor scmyk 1 slw K
-      } ifelse
+  /acol
+    [
+      9 -4 roll
+    ]
+  D
+  /acolor {
+    acol
+    aload
+    pop
+  } D
+  S
+    1 eq {
+      exch
+      /sn {
+        1 mul
+      } D
+    } {
+      /sn {
+        1 neg
+        mul
+      } D
+    } ifelse
+    htag 1 eq {
+      Xscm
+      dup
+      y1 Yscm
+      HWBox add
+      m
+      HWarw
+      sn
+      HWarw
+      rl
+      0
+      Warw neg
+      rl
+      HWarw neg
+      sn
+      HWarw
+      rl
+      closepath
+      S
+        acolor scmyk
+        fill
+      R
+      y1 Yscm
+      HWBox add
+      m
+      Xscm
+      y1 Yscm
+      HWBox add
+      l
+      acolor scmyk
+      1 slw
+      K
+    } {
+      Yscm
+      dup
+      X0 Xscm
+      HWBox sub
+      exch
+      m
+      HWarw neg
+      HWarw
+      sn
+      rl
+      Warw 0 rl
+      HWarw neg
+      HWarw neg
+      sn
+      rl
+      closepath
+      S
+        acolor scmyk
+        fill
+      R
+      X0 Xscm
+      HWBox sub
+      exch
+      m
+      Yscm
+      X0 Xscm
+      HWBox sub
+      exch
+      l
+      acolor scmyk
+      1 slw
+      K
+    } ifelse
   R
 } B
 @  %def Arrow
@@ -7617,112 +7727,298 @@ end % aplot dict
 <<PSFunctions - FBox>>=
 /FBox {  %->
   htag 1 eq {
-    Xscme Xscme y1 Yscme y1 TyWB FBDspl mul add Yscm bbox
-    } {
-      Yscme Yscme X0 Xscm 3 1 roll X0 TxWB FBDspl mul sub Xscme bbox
-    } ifelse
-  S scmyk fill R FGcolor scmyk 1 slw K
+    Xscme
+    Xscme
+    y1 Yscme
+    y1
+    TyWB
+    FBDspl mul
+    add
+    Yscm
+    bbox
+  } {
+    Yscme
+    Yscme
+    X0 Xscm
+    3 1 roll
+    X0
+    TxWB
+    FBDspl mul
+    sub
+    Xscme
+    bbox
+  } ifelse
+  S
+    scmyk
+    fill
+  R
+  FGcolor scmyk
+  1 slw
+  K
 } B
 @  %def FBox
 
 <<PSFunctions - FTalgn>>=
 /FTalgn {  %->
   htag 1 eq {
-    FTXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse
+    FTXangle 0 eq {
+      (bv) (ch)
     } {
-      FTYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse
+      (cv) (lh)
     } ifelse
+  } {
+    FTYangle 0 eq {
+      (cv) (rh)
+    } {
+      (bv) (rh)
+    } ifelse
+  } ifelse
 } B
 @  %def FTalgn
 
 <<PSFunctions - GPalgn>>=
 /GPalgn {  %->
   htag 1 eq {
-    GPXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse
+    GPXangle 0 eq {
+      (bv) (ch)
     } {
-      GPYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse
+      (cv) (lh)
     } ifelse
+  } {
+    GPYangle 0 eq {
+      (cv) (rh)
+    } {
+      (bv) (rh)
+    } ifelse
+  } ifelse
 } B
 @  %def GPalgn
 
 <<PSFunctions - Box>>=
 /Box {  %->
-  2 copy 2 copy pop sub 2 div add 7 1 roll
-  S htag 1 eq {
-    Xscme Xscme y1 Yscme y1 TyWB add Yscm bbox
+  2 copy
+  2 copy
+  pop
+  sub
+  2 div
+  add
+  7 1 roll
+  S
+    htag 1 eq {
+      Xscme
+      Xscme
+      y1 Yscme
+      y1
+      TyWB add
+      Yscm
+      bbox
     } {
-      Yscme Yscme X0 Xscm 3 1 roll X0 TxWB sub Xscme bbox
+      Yscme
+      Yscme
+      X0 Xscm
+      3 1 roll
+      X0
+      TxWB sub
+      Xscme
+      bbox
     } ifelse
-  S scmyk fill R
-  FGcolor scmyk 1 slw K
-  htag 1 eq {
-    Xscm y1 TyWB 1.75 mul add Yscm FTXangle
+    S
+      scmyk
+      fill
+    R
+    FGcolor scmyk
+    1 slw
+    K
+    htag 1 eq {
+      Xscm
+      y1
+      TyWB 1.75 mul
+      add
+      Yscm
+      FTXangle
     } {
-      Yscm X0 TxWB 1.75 mul sub Xscme FTYangle
+      Yscm
+      X0
+      TxWB 1.75 mul
+      sub
+      Xscme
+      FTYangle
     } ifelse
-  6 -1 roll FTalgn 8 -2 roll FGcolor ttxt
+    6 -1 roll
+    FTalgn
+    8 -2 roll
+    FGcolor
+    ttxt
   R
 } B
 @  %def Box
 
 <<PSFunctions - GDmore>>=
 /GDmore {  %->
-  MxFtLBL S ElmFont sfont (M) stringwidth pop R mul
-  htag 1 eq { FTXangle sin } { FTYangle cos } ifelse
-  abs mul ivcm add
+  MxFtLBL
+  S
+    ElmFont sfont
+    (M) stringwidth
+    pop
+  R
+  mul
+  htag 1 eq {
+    FTXangle sin
+  } {
+    FTYangle cos
+  } ifelse
+  abs
+  mul
+  ivcm
+  add
 } B
 @  %def GDmore
 
 <<PSFunctions - BDmore>>=
 /BDmore {  %->
-  MxGpLBL S TagFont sfont (M) stringwidth pop R mul
-  htag 1 eq { GPXangle sin } { GPYangle cos } ifelse
-  abs mul ivcm add
+  MxGpLBL
+  S
+    TagFont sfont
+    (M) stringwidth
+    pop
+  R
+  mul
+  htag 1 eq {
+    GPXangle sin
+  } {
+    GPYangle cos
+  } ifelse
+  abs
+  mul
+  ivcm
+  add
 } B
 @  %def BDmore
 
 <<PSFunctions - GnBanner>>=
 /GnBanner{  %->
-  S 1 eq {
+  S
+    1 eq {
       2 copy
       htag 1 eq {
-        Xscme Xscme y1 TyWB GDspl mul add dup Yscme Yscm 3 1 roll
-        } {
-          Yscme Yscme X0 TxWB GDspl mul sub dup Xscme Xscme 4 1 roll exch
-        } ifelse
-      0.5 FGcolor uline
-      } if
-    2 copy pop sub 2 div add
-    htag 1 eq {
-      Xscm y1 TyWB GLDspl mul add Yscm GPXangle
+        Xscme
+        Xscme
+        y1
+        TyWB GDspl mul
+        add
+        dup
+        Yscme
+        Yscm
+        3 1 roll
       } {
-        Yscm X0 TxWB GLDspl mul sub Xscme GPYangle
+        Yscme
+        Yscme
+        X0
+        TxWB GDspl mul
+        sub
+        dup
+        Xscme
+        Xscme
+        4 1 roll
+        exch
       } ifelse
-    6 -1 roll GPalgn 8 -2 roll FGcolor ttxt
+      0.5 FGcolor uline
+    } if
+    2 copy
+    pop
+    sub
+    2 div
+    add
+    htag 1 eq {
+      Xscm
+      y1
+      TyWB GLDspl mul
+      add
+      Yscm
+      GPXangle
+    } {
+      Yscm
+      X0
+      TxWB GLDspl mul
+      sub
+      Xscme
+      GPYangle
+    } ifelse
+    6 -1 roll
+    GPalgn
+    8 -2 roll
+    FGcolor
+    ttxt
   R
 } B
 @  %def GnBanner
 
 <<PSFunctions - SbBanner>>=
 /SbBanner {  %->
-  S htag 1 eq {
-      0 X0 X1 X0 sub 2 div add Xscm y1 TyWB GDspl mul add Yscm
-      } {
-        90 X0 TxWB GDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm
-      } ifelse
-    5 -2 roll FGcolor ctshow
+  S
+    htag 1 eq {
+      0 X0
+      X1 X0 sub
+      2 div
+      add
+      Xscm
+      y1
+      TyWB
+      GDspl
+      mul
+      add
+      Yscm
+    } {
+      90 X0
+      TxWB
+      GDspl
+      mul
+      sub
+      Xscm
+      y0
+      y1 y0 sub
+      2 div
+      add
+      Yscm
+    } ifelse
+    5 -2 roll
+    FGcolor
+    ctshow
   R
 } B
 @  %def SbBanner
 
 <<PSFunctions - Banner>>=
 /Banner {  %->
-  S htag 1 eq {
-      0 X0 X1 X0 sub 2 div add Xscm y1 TyWB BDspl mul add Yscm
-      } {
-        90 X0 TxWB BDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm
-      } ifelse
-    5 -2 roll FGcolor ctshow
+  S
+    htag 1 eq {
+      0  X0
+      X1 X0 sub
+      2 div
+      add
+      Xscm
+      y1
+      TyWB
+      BDspl
+      mul
+      add
+      Yscm
+    } {
+      90 X0
+      TxWB
+      BDspl
+      mul
+      sub
+      Xscm
+      y0
+      y1 y0 sub
+      2 div
+      add
+      Yscm
+    } ifelse
+    5 -2 roll
+    FGcolor
+    ctshow
   R
 } B
 @  %def Banner
@@ -7730,27 +8026,55 @@ end % aplot dict
 % tckdict begin
 <<PSFunctions - mkmxt>>=
 /mkmxt {  %->
-  dup 0 lt { neg } if
+  dup 0 lt {
+    neg
+  } if
   dup 10 lt {
-    10 mul log round 10 exch exp cvi
-    } {
-      log round 10 exch exp cvi
-    } ifelse
+    10 mul
+    log
+    round
+    10 exch
+    exp
+    cvi
+  } {
+    log
+    round
+    10 exch
+    exp
+    cvi
+  } ifelse
 } D
 @  %def mkmxt
 
 <<PSFunctions - mwmod>>=
 /nwmod {  %->
   dup 1 le {
-    100 mul cvi exch 100 mul cvi exch mod 100 div
+    100 mul
+    cvi
+    exch
+    100 mul
+    cvi
+    exch
+    mod
+    100 div
+  } {
+    exch
+    dup
+    1 le {
+      100 mul
+      cvi
+      exch
+      100 mul
+      cvi
+      mod
+      100 div
     } {
-      exch dup
-      1 le {
-        100 mul cvi exch 100 mul cvi mod 100 div
-        } {
-          cvi exch cvi mod
-        } ifelse
+      cvi
+      exch
+      cvi
+      mod
     } ifelse
+  } ifelse
 } D
 @  %def mwmod
 
@@ -8534,6 +8858,25 @@ exit(0);
 By default, if no command-line option is given, input records must be in custom-file vars record format:
 
 <<parameter2tex - global vars>>=
+my $USAGE = << "+++EOU+++";
+################################################################################
+###
+#### $0
+###
+####\t\t@{[ (localtime)." : ".(defined($ENV{USER})?$ENV{USER}:"nouser") ]} 
+###
+#### USAGE:
+###
+###    parameter2tex [options] -o <output_file> -- <input_files>
+###
+###    -h              prints this help.
+###    -v              process custom-file vars input.
+###    -c              process command-line options input.
+###    -o <path+file>  output base name for the whole path/file (required).
+###
+################################################################################
++++EOU+++
+#
 my %VARS = ();
 my ($base_dir,$base_file,$base_ext) = ('./','out','.tex');
 my $parseinput = \&parseVars;
@@ -8543,11 +8886,12 @@ We use [[Getopt::Std]] because we only need to set two boolean variables that de
 
 <<parameter2tex - functions>>=
 sub getcmdlineopts() {
-    our($opt_v,$opt_c,$opt_o);
-    getopts('vco:');
-      # v - process custom-file vars input
-      # c - process command-line options input
-      # o <path+file> - output base name for the whole path/file.
+    our($opt_v,$opt_c,$opt_o,$opt_h);
+    getopts('vco:h');
+    $opt_h && do {
+        print STDERR $USAGE;
+        exit(1);
+    }; # $opt_h
     $opt_v && ($parseinput = \&parseVars);
     $opt_c && ($parseinput = \&parseOpts);
     ($base_file,$base_dir,$base_ext) = fileparse($opt_o, '\..*');
@@ -8695,7 +9039,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -9005,6 +9349,27 @@ sub parseOpts() {
 \subsctn{[[colors2tex.pl]]: formatting color definitions for manual.} %%%%%%%%%
 \label{sec:COLORprg}
 
+\subsubsctn{Extracting and running [[colors2tex.pl]]}
+\label{sec:cmykfiles}
+
+<<tangling>>=
+# showing line numbering comments in program
+notangle -L -R"colors2tex.pl" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' - | cpif $BIN/colors2tex.pl ;
+notangle -R"colors2tex.pl" $WORK/$nwfile.nw | cpif $BIN/colors2tex.pl ;
+chmod a+x $BIN/colors2tex.pl ;
+@ 
+
+<<tangling complementary LaTeX files for manual>>=
+# extracting color tables for the User's Manual #'
+echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
+notangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
+    $BIN/colors2tex.pl -d - | cpif $DOCS/tables/AplotColorDefs.tex ;
+echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." 1>&2 ;
+notangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
+    $BIN/colors2tex.pl -t "seagreen" - | cpif $DOCS/tables/AplotColorTbl.tex ;
+@ 
+
 \subsubsctn{[[colors2tex.pl]] implementation}
 
 <<colors2tex.pl>>=
@@ -9016,284 +9381,164 @@ sub parseOpts() {
 #
 use strict;
 use Getopt::Std;
-use File::Basename;
 #
 <<colors2tex - global vars>>
 #
 # MAIN
 &getcmdlineopts;
 &parseinput;
+
 exit(0);
 #
 # SUBS
 <<colors2tex - functions>>
 @
 
-<<HIDE: >>=
+Input records have always the same format, but we need to produce two output files formatted differently, one of them will contain a set of colors definitions ([[-d]] option) and the other one will make a {\LaTeX} table to show the colors that were defined in the ``User's Manual''. %'
+So that, we only need a single loop to read data from input stream, and a set functions called with a boolean flag to choose between one format or the other.
+
+<<colors2tex - global vars>>=
+my $USAGE = << "+++EOU+++";
+################################################################################
+###
+#### $0
+###
+####\t\t@{[ (localtime)." : ".(defined($ENV{USER})?$ENV{USER}:"nouser") ]} 
+###
+#### USAGE:
+###
+###    colors2tex.pl [options]  < STDIN  > STDOUT
+###
+###    -h          prints this help.
+###    -d          output is set to colors CMYK definition.
+###    -t "color"  output is set to colors LaTeX table.
+###                In this mode, a color name (defined on input)
+###                is required to choose which color starts 
+###                a new column in final LaTeX table.
+###
+################################################################################
++++EOU+++
 #
-##################################################
-#
-__DATA__
-<<cmyk colors perl definition>>
+my $tblflg = 0;
+my $splitcolor = '';
 @
 
-<<cmyk colors latex definition>>=
-% black+grey+white
-\definecolor{black}              {cmyk}{0.00,0.00,0.00,1.00}
-\definecolor{verydarkgrey}       {cmyk}{0.00,0.00,0.00,0.80}
-\definecolor{darkgrey}           {cmyk}{0.00,0.00,0.00,0.60}
-\definecolor{grey}               {cmyk}{0.00,0.00,0.00,0.40}
-\definecolor{lightgrey}          {cmyk}{0.00,0.00,0.00,0.20}
-\definecolor{verylightgrey}      {cmyk}{0.00,0.00,0.00,0.10}
-\definecolor{white}              {cmyk}{0.00,0.00,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% black+grey+white
-\clspc
-\clrow{black}                    & 0.00 & 0.00 & 0.00 & 1.00 \\
-\clrow{verydarkgrey}             & 0.00 & 0.00 & 0.00 & 0.80 \\
-\clrow{darkgrey}                 & 0.00 & 0.00 & 0.00 & 0.60 \\
-\clrow{grey}                     & 0.00 & 0.00 & 0.00 & 0.40 \\
-\clrow{lightgrey}                & 0.00 & 0.00 & 0.00 & 0.20 \\
-\clrow{verylightgrey}            & 0.00 & 0.00 & 0.00 & 0.10 \\
-\clrow{white}                    & 0.00 & 0.00 & 0.00 & 0.00 \\
+We use [[Getopt::Std]] because we only need to set a boolean and a single parameter variables (with such parameter being optional), having any of those will set the output function, by deafult set to [[&output_defs]].
+
+<<colors2tex - functions>>=
+sub getcmdlineopts() {
+    our($opt_d,$opt_t,$opt_h);
+    getopts('dt:h');
+    $opt_h && do {
+        print STDERR $USAGE;
+        exit(1);
+    }; # $opt_h
+    $opt_d && ($tblflg = 0);
+    defined($opt_t)
+           && ($splitcolor = $opt_t, $tblflg = 1);
+} # getcmdlineopts
 @
 
-<<cmyk colors latex definition>>=
-% magenta
-\definecolor{verydarkmagenta}    {cmyk}{0.00,1.00,0.00,0.30}
-\definecolor{darkmagenta}        {cmyk}{0.00,0.80,0.00,0.05}
-\definecolor{magenta}            {cmyk}{0.00,0.60,0.00,0.00}
-\definecolor{lightmagenta}       {cmyk}{0.00,0.40,0.00,0.00}
-\definecolor{verylightmagenta}   {cmyk}{0.00,0.20,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% magenta
-\clspc
-\clrow{verydarkmagenta}          & 0.00 & 1.00 & 0.00 & 0.30 \\
-\clrow{darkmagenta}              & 0.00 & 0.80 & 0.00 & 0.05 \\
-\clrow{magenta}                  & 0.00 & 0.60 & 0.00 & 0.00 \\
-\clrow{lightmagenta}             & 0.00 & 0.40 & 0.00 & 0.00 \\
-\clrow{verylightmagenta}         & 0.00 & 0.20 & 0.00 & 0.00 \\
+<<colors2tex - functions>>=
+sub parseinput() {
+    my @rec;
+    &print_prologue($tblflg);
+    while (<STDIN>) {
+        next if /^\s*$/o;
+        chomp;
+        $_ =~ s/^\s*//o;
+        @rec = split /\s+/og, $_;
+        $rec[0] eq '#' && do {
+            defined($rec[1]) || next;
+            &print_color_name($tblflg, $rec[1]);
+            next;
+        }; # set color header
+        (defined($rec[1]) && $rec[1] eq '=>') && do {
+            &print_color_row($tblflg, @rec[0,5..8]);
+        }; # set color line
+    }; # while
+    &print_trailer($tblflg);
+} # parseinput
 @
 
-<<cmyk colors latex definition>>=
-% violet
-\definecolor{verydarkviolet}     {cmyk}{0.45,0.85,0.00,0.00}
-\definecolor{darkviolet}         {cmyk}{0.30,0.65,0.00,0.00}
-\definecolor{violet}             {cmyk}{0.22,0.55,0.00,0.00}
-\definecolor{lightviolet}        {cmyk}{0.15,0.40,0.00,0.00}
-\definecolor{verylightviolet}    {cmyk}{0.10,0.20,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% violet
-\clspc
-\clrow{verydarkviolet}           & 0.45 & 0.85 & 0.00 & 0.00 \\
-\clrow{darkviolet}               & 0.30 & 0.65 & 0.00 & 0.00 \\
-\clrow{violet}                   & 0.22 & 0.55 & 0.00 & 0.00 \\
-\clrow{lightviolet}              & 0.15 & 0.40 & 0.00 & 0.00 \\
-\clrow{verylightviolet}          & 0.10 & 0.20 & 0.00 & 0.00 \\
-@
+As the {\LaTeX} color definition is done also in the CMYK color space, we have not to recompute any of the values assigned to each color.
 
-<<cmyk colors latex definition>>=
-% blue
-\definecolor{verydarkblue}       {cmyk}{1.00,1.00,0.00,0.20}
-\definecolor{darkblue}           {cmyk}{0.90,0.90,0.00,0.00}
-\definecolor{blue}               {cmyk}{0.75,0.75,0.00,0.00}
-\definecolor{lightblue}          {cmyk}{0.50,0.50,0.00,0.00}
-\definecolor{verylightblue}      {cmyk}{0.30,0.30,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% blue
-\clspc
-\clrow{verydarkblue}             & 1.00 & 1.00 & 0.00 & 0.20 \\
-\clrow{darkblue}                 & 0.90 & 0.90 & 0.00 & 0.00 \\
-\clrow{blue}                     & 0.75 & 0.75 & 0.00 & 0.00 \\
-\clrow{lightblue}                & 0.50 & 0.50 & 0.00 & 0.00 \\
-\clrow{verylightblue}            & 0.30 & 0.30 & 0.00 & 0.00 \\
-@
-
-<<cmyk colors latex definition>>=
-% skyblue
-\definecolor{verydarkskyblue}    {cmyk}{0.90,0.50,0.00,0.15}
-\definecolor{darkskyblue}        {cmyk}{0.75,0.45,0.00,0.00}
-\definecolor{skyblue}            {cmyk}{0.60,0.38,0.00,0.00}
-\definecolor{lightskyblue}       {cmyk}{0.45,0.25,0.00,0.00}
-\definecolor{verylightskyblue}   {cmyk}{0.30,0.15,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% skyblue
-\clspc
-\clrow{verydarkskyblue}          & 0.90 & 0.50 & 0.00 & 0.15 \\
-\clrow{darkskyblue}              & 0.75 & 0.45 & 0.00 & 0.00 \\
-\clrow{skyblue}                  & 0.60 & 0.38 & 0.00 & 0.00 \\
-\clrow{lightskyblue}             & 0.45 & 0.25 & 0.00 & 0.00 \\
-\clrow{verylightskyblue}         & 0.30 & 0.15 & 0.00 & 0.00 \\
-@
-
-<<cmyk colors latex definition>>=
-% cyan
-\definecolor{verydarkcyan}       {cmyk}{1.00,0.00,0.00,0.10}
-\definecolor{darkcyan}           {cmyk}{0.80,0.00,0.00,0.00}
-\definecolor{cyan}               {cmyk}{0.60,0.00,0.00,0.00}
-\definecolor{lightcyan}          {cmyk}{0.40,0.00,0.00,0.00}
-\definecolor{verylightcyan}      {cmyk}{0.20,0.00,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% cyan
-\clspc
-\clrow{verydarkcyan}             & 1.00 & 0.00 & 0.00 & 0.10 \\
-\clrow{darkcyan}                 & 0.80 & 0.00 & 0.00 & 0.00 \\
-\clrow{cyan}                     & 0.60 & 0.00 & 0.00 & 0.00 \\
-\clrow{lightcyan}                & 0.40 & 0.00 & 0.00 & 0.00 \\
-\clrow{verylightcyan}            & 0.20 & 0.00 & 0.00 & 0.00 \\
-@
-
-<<cmyk colors latex definition>>=
-% seagreen
-\definecolor{verydarkseagreen}   {cmyk}{0.75,0.00,0.45,0.00}
-\definecolor{darkseagreen}       {cmyk}{0.62,0.00,0.38,0.00}
-\definecolor{seagreen}           {cmyk}{0.50,0.00,0.30,0.00}
-\definecolor{lightseagreen}      {cmyk}{0.38,0.00,0.22,0.00}
-\definecolor{verylightseagreen}  {cmyk}{0.25,0.00,0.15,0.00}
-@ 
-<<cmyk color table - right>>=
-% seagreen
-\clspc
-\clrow{verydarkseagreen}         & 0.75 & 0.00 & 0.45 & 0.00 \\
-\clrow{darkseagreen}             & 0.62 & 0.00 & 0.38 & 0.00 \\
-\clrow{seagreen}                 & 0.50 & 0.00 & 0.30 & 0.00 \\
-\clrow{lightseagreen}            & 0.38 & 0.00 & 0.22 & 0.00 \\
-\clrow{verylightseagreen}        & 0.25 & 0.00 & 0.15 & 0.00 \\
-@
-
-<<cmyk colors latex definition>>=
-% green
-\definecolor{verydarkgreen}      {cmyk}{1.00,0.00,1.00,0.25}
-\definecolor{darkgreen}          {cmyk}{0.80,0.00,0.80,0.00}
-\definecolor{green}              {cmyk}{0.60,0.00,0.60,0.00}
-\definecolor{lightgreen}         {cmyk}{0.40,0.00,0.40,0.00}
-\definecolor{verylightgreen}     {cmyk}{0.20,0.00,0.20,0.00}
-@ 
-<<cmyk color table - right>>=
-% green
-\clspc
-\clrow{verydarkgreen}            & 1.00 & 0.00 & 1.00 & 0.25 \\
-\clrow{darkgreen}                & 0.80 & 0.00 & 0.80 & 0.00 \\
-\clrow{green}                    & 0.60 & 0.00 & 0.60 & 0.00 \\
-\clrow{lightgreen}               & 0.40 & 0.00 & 0.40 & 0.00 \\
-\clrow{verylightgreen}           & 0.20 & 0.00 & 0.20 & 0.00 \\
-@
-
-<<cmyk colors latex definition>>=
-% limegreen
-\definecolor{verydarklimegreen}  {cmyk}{0.50,0.00,1.00,0.10}
-\definecolor{darklimegreen}      {cmyk}{0.40,0.00,0.95,0.00}
-\definecolor{limegreen}          {cmyk}{0.30,0.00,0.80,0.00}
-\definecolor{lightlimegreen}     {cmyk}{0.20,0.00,0.65,0.00}
-\definecolor{verylightlimegreen} {cmyk}{0.10,0.00,0.50,0.00}
-@ 
-<<cmyk color table - right>>=
-% limegreen
-\clspc
-\clrow{verydarklimegreen}        & 0.50 & 0.00 & 1.00 & 0.10 \\
-\clrow{darklimegreen}            & 0.40 & 0.00 & 0.95 & 0.00 \\
-\clrow{limegreen}                & 0.30 & 0.00 & 0.80 & 0.00 \\
-\clrow{lightlimegreen}           & 0.20 & 0.00 & 0.65 & 0.00 \\
-\clrow{verylightlimegreen}       & 0.10 & 0.00 & 0.50 & 0.00 \\
-@
-
-<<cmyk colors latex definition>>=
-% yellow
-\definecolor{verydarkyellow}     {cmyk}{0.00,0.00,1.00,0.25}
-\definecolor{darkyellow}         {cmyk}{0.00,0.00,1.00,0.10}
-\definecolor{yellow}             {cmyk}{0.00,0.00,1.00,0.00}
-\definecolor{lightyellow}        {cmyk}{0.00,0.00,0.50,0.00}
-\definecolor{verylightyellow}    {cmyk}{0.00,0.00,0.25,0.00}
-@ 
-<<cmyk color table - right>>=
-% yellow
-\clspc
-\clrow{verydarkyellow}           & 0.00 & 0.00 & 1.00 & 0.25 \\
-\clrow{darkyellow}               & 0.00 & 0.00 & 1.00 & 0.10 \\
-\clrow{yellow}                   & 0.00 & 0.00 & 1.00 & 0.00 \\
-\clrow{lightyellow}              & 0.00 & 0.00 & 0.50 & 0.00 \\
-\clrow{verylightyellow}          & 0.00 & 0.00 & 0.25 & 0.00 \\
+<<colors2tex - functions>>=
+sub print_prologue() {
+    my ($flg) = @_;  
+    $flg || do {
+        print STDOUT << '+++EOP+++';
+<<colors2tex - LaTeX colors defs: open>>
++++EOP+++
+        return;
+    }; # !$flg
+    print STDOUT << '+++EOP+++';
+<<colors2tex - LaTeX colors table: open>>
++++EOP+++
+    return;
+} # print_prologue
 @ 
 
-<<cmyk colors latex definition>>=
-% orange
-\definecolor{verydarkorange}     {cmyk}{0.00,0.50,0.80,0.10}
-\definecolor{darkorange}         {cmyk}{0.00,0.40,0.80,0.00}
-\definecolor{orange}             {cmyk}{0.00,0.30,0.80,0.00}
-\definecolor{lightorange}        {cmyk}{0.00,0.20,0.75,0.00}
-\definecolor{verylightorange}    {cmyk}{0.00,0.15,0.70,0.00}
+<<colors2tex - functions>>=
+sub print_color_name() {
+    my ($flg,$name) = @_;    
+    $flg || do {
+        <<colors2tex - LaTeX colors defs: name>>
+        return;
+    }; # !$flg
+    <<colors2tex - LaTeX colors table: name>>
+    return;
+} # print_color_name
 @ 
-<<cmyk color table - right>>=
-% orange
-\clspc
-\clrow{verydarkorange}           & 0.00 & 0.50 & 0.80 & 0.10 \\
-\clrow{darkorange}               & 0.00 & 0.40 & 0.80 & 0.00 \\
-\clrow{orange}                   & 0.00 & 0.30 & 0.80 & 0.00 \\
-\clrow{lightorange}              & 0.00 & 0.20 & 0.75 & 0.00 \\
-\clrow{verylightorange}          & 0.00 & 0.15 & 0.70 & 0.00 \\
-@
 
-<<cmyk colors latex definition>>=
-% red
-\definecolor{verydarkred}        {cmyk}{0.00,1.00,1.00,0.15}
-\definecolor{darkred}            {cmyk}{0.00,0.80,0.80,0.00}
-\definecolor{red}                {cmyk}{0.00,0.60,0.60,0.00}
-\definecolor{lightred}           {cmyk}{0.00,0.40,0.40,0.00}
-\definecolor{verylightred}       {cmyk}{0.00,0.20,0.20,0.00}
+<<colors2tex - functions>>=
+sub print_new_col() {
+    print STDOUT << '+++EOP+++';
+<<colors2tex - LaTeX colors table: split>>
++++EOP+++
+} # print_new_col
 @ 
-<<cmyk color table - right>>=
-% red
-\clspc
-\clrow{verydarkred}              & 0.00 & 1.00 & 1.00 & 0.15 \\
-\clrow{darkred}                  & 0.00 & 0.80 & 0.80 & 0.00 \\
-\clrow{red}                      & 0.00 & 0.60 & 0.60 & 0.00 \\
-\clrow{lightred}                 & 0.00 & 0.40 & 0.40 & 0.00 \\
-\clrow{verylightred}             & 0.00 & 0.20 & 0.20 & 0.00 \\
-@
 
-<<cmyk colors latex definition>>=
-% brown
-\definecolor{verydarkbrown}     {cmyk}{0.35,0.85,1.00,0.40}
-\definecolor{darkbrown}         {cmyk}{0.30,0.70,1.00,0.35}
-\definecolor{brown}             {cmyk}{0.25,0.75,1.00,0.25}
-\definecolor{lightbrown}        {cmyk}{0.20,0.60,0.70,0.15}
-\definecolor{verylightbrown}    {cmyk}{0.15,0.45,0.55,0.00}
+<<colors2tex - functions>>=
+sub print_color_row() {
+    my ($flg,$name,$cyan,$magenta,$yellow,$black) = @_; # CMYK   
+    $flg || do {
+        <<colors2tex - LaTeX colors defs: row>>
+        return;
+    }; # !$flg
+    <<colors2tex - LaTeX colors table: row>>
+    return;
+} # print_color_row
 @ 
-<<cmyk color table - right>>=
-% brown
-\clspc
-\clrow{verydarkbrown}            & 0.35 & 0.85 & 1.00 & 0.40 \\
-\clrow{darkbrown}                & 0.30 & 0.70 & 1.00 & 0.35 \\
-\clrow{brown}                    & 0.25 & 0.75 & 1.00 & 0.25 \\
-\clrow{lightbrown}               & 0.20 & 0.60 & 0.70 & 0.15 \\
-\clrow{verylightbrown}           & 0.15 & 0.45 & 0.55 & 0.00 \\
-@
 
-\label{todo:LAA}
-<<HIDE: new defs TODO>>=
-\def\todoLAA{
-Automatize color table and definition file, and page sizes table, using a script which include the perl code for those colors and page sizes and a '\_\_\_DATA\_\_\_' trailer. This approach will allow to synchronize definitions with the manual without manual revision.
-} % todoLAA
-@
-<<HIDE: TODO>>=
-\todoitem{\todoLAA}{todo:LAA}
-@
-\todo{ \item \todoLAA } % todo
+<<colors2tex - functions>>=
+sub print_trailer() {
+    my ($flg) = @_;    
+    $flg || do {
+        print STDOUT << '+++EOP+++';
+<<colors2tex - LaTeX colors defs: close>>
++++EOP+++
+        return;
+    }; # !$flg
+    print STDOUT << '+++EOP+++';   
+<<colors2tex - LaTeX colors table: close>>
++++EOP+++
+    return;
+} # print_trailer
+@ 
 
 
-\subsubsctn{{\LaTeX} wrappers for CMYK color table}
+<<HIDE: DONE>>=
+\doneitem{20011113}{Automatize color table and definition file, and page sizes table, using a script which include the perl code for those colors and page sizes and a '\_\_\_DATA\_\_\_' trailer. This approach will allow to synchronize definitions with the manual without manual revision.}
+
+
+\subsubsctn{{\LaTeX} code for CMYK color definitions}
 
 Building the color definition file used by this file to produce the CMYK color definitions used in this document and the ``{\prog} User's Manual''.
 % Table~\ref{tbl:CMYKcolor}.
-\label{sec:cmykfiles}
 
-<<LATEX cmyk colors>>=
+<<colors2tex - LaTeX colors defs: open>>=
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % AplotColorDefs.tex
 %
@@ -9301,19 +9546,35 @@ Building the color definition file used by this file to produce the CMYK color d
 %
 % <<Version Control Id Tag>>
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-<<cmyk colors latex definition>>
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @
+
+<<colors2tex - LaTeX colors defs: name>>=
+print STDOUT '% '."$name\n";
+@
+
+<<colors2tex - LaTeX colors defs: row>>=
+print STDOUT '\definecolor{'.$name.'}'.(" " x (20 - length($name))).
+             '{cmyk}{'."$cyan,$magenta,$yellow,$black".'}'."\n";
+@
+
+<<colors2tex - LaTeX colors defs: close>>=
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+\subsubsctn{{\LaTeX} code for CMYK color table}
 
 Building the CMYK color table for the ``{\prog} User's Manual''.
 % Table~\ref{tbl:CMYKcolor} \LaTeX{} file.
 
-<<LATEX colors table>>=
+<<colors2tex - LaTeX colors table: open>>=
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % AplotColorTbl.tex
 %
 % Colors used in "gff2aplot": CMYK values table.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \label{sec:colortable}
 \newcommand{\clrow}[1]{
@@ -9322,9 +9583,10 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
     } % fcolorbox
   & #1
   } % newcommand
+%
 \newcommand{\clspc}{&&&&&\\}
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \vfill
 \begin{table}[!ht]
 %\setlength{\parindent}{-0.5cm}
@@ -9332,13 +9594,27 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
 \begin{scriptsize}
 \begin{tabular}{c@{\quad}c}
     \begin{tabular}{|c|c|cccc|} \hline
-      <<cmyk color table - left>>
+@
+
+<<colors2tex - LaTeX colors table: name>>=
+$name eq $splitcolor && &print_new_col;
+print STDOUT '% '."$name\n".'\clspc'."\n";
+@
+
+<<colors2tex - LaTeX colors table: row>>=
+print STDOUT '\clrow{'.$name.'}'.(" " x (24 - length($name))).
+             "& $cyan & $magenta & $yellow & $black \\\\\n";
+@
+
+<<colors2tex - LaTeX colors table: split>>=
       \clspc
       \hline
     \end{tabular} 
    &
     \begin{tabular}{|c|c|cccc|} \hline
-      <<cmyk color table - right>>
+@
+
+<<colors2tex - LaTeX colors table: close>>=
       \clspc
       \hline
     \end{tabular}
@@ -9356,7 +9632,7 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
 \end{center}
 \end{table}
 \vfill
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @
 
 
@@ -9364,6 +9640,23 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
 
 \subsctn{[[pagebbox2tex.pl]]: formatting page sizes for manual.} %%%%%%%%%%%%%%
 \label{sec:PBBOXprg}
+
+\subsubsctn{Extracting and running [[pagebbox2tex.pl]]}
+
+<<tangling>>=
+# showing line numbering comments in program
+notangle -L -R"pagebbox2tex.pl" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' - | cpif $BIN/pagebbox2tex.pl ;
+notangle -R"pagebbox2tex.pl" $WORK/$nwfile.nw | cpif $BIN/pagebbox2tex.pl ;
+chmod a+x $BIN/pagebbox2tex.pl ;
+@ 
+
+<<tangling complementary LaTeX files for manual>>=
+# extracting page-size tables for the User's Manual #'
+echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." 1>&2 ;
+notangle -R"page sizes perl definition" $WORK/$nwfile.nw | \
+    $BIN/pagebbox2tex.pl - | cpif $DOCS/tables/AplotPageSizeTbl.tex ;
+@
 
 \subsubsctn{[[pagebbox2tex.pl]] implementation}
 
@@ -9375,72 +9668,65 @@ Building the CMYK color table for the ``{\prog} User's Manual''.
 <<Version Control Id Tag>>
 #
 use strict;
-use Getopt::Std;
-use File::Basename;
 #
 <<pagebbox2tex - global vars>>
 #
 # MAIN
-&getcmdlineopts;
 &parseinput;
 exit(0);
 #
 # SUBS
 <<pagebbox2tex - functions>>
+<<Common Routines: text fill>>
 @
 
-<<HIDE: >>=
-#
-##################################################
-#
-__DATA__
-<<page sizes perl definition>>
+<<pagebbox2tex - global vars>>=
+my $USAGE = "###  pagebbox2tex  <STDINPUT  >STDOUTPUT \n";
 @
 
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-a0          & 2384 & 3370 &  84.1 & 118.9 &  33.1 &  46.8 \\
-a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
-a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
-a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
-a4          &  595 &  842 &  21.0 &  29.7 &   8.3 &  11.7 \\
-a5          &  420 &  595 &  14.8 &  21.0 &   5.8 &   8.3 \\
-a6          &  297 &  420 &  10.5 &  14.8 &   4.1 &   5.8 \\
-a7          &  210 &  297 &   7.4 &  10.5 &   2.9 &   4.1 \\
-a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
-a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
-a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
+<<pagebbox2tex - functions>>=
+sub parseinput() {
+    my @rec;
+    &print_prologue;
+    while (<STDIN>) {
+        next if /^\s*$/o;
+        chomp;
+        $_ =~ s/^\s*//o;
+        $_ =~ s/["',]//og; #'"
+        @rec = split /\s+/og, $_;
+        $rec[0] eq '#' && do {
+            <<pagebbox2tex - LaTeX formats table: spacer>>
+            next;
+        }; # set color header
+        (defined($rec[1]) && $rec[1] eq '=>') && do {
+            <<pagebbox2tex - LaTeX formats table: row>>
+        }; # set color line
+    }; # while
+    &print_trailer;    
+} # parseinput
 @
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-b0          & 2920 & 4127 & 103.0 & 145.6 &  40.6 &  57.3 \\
-b1          & 2064 & 2920 &  72.8 & 103.0 &  28.7 &  40.6 \\
-b2          & 1460 & 2064 &  51.5 &  72.8 &  20.3 &  28.7 \\
-b3          & 1032 & 1460 &  36.4 &  51.5 &  14.3 &  20.3 \\
-b4          &  729 & 1032 &  25.7 &  36.4 &  10.1 &  14.3 \\
-b5          &  516 &  729 &  18.2 &  25.7 &   7.2 &  10.1 \\
-b6          &  363 &  516 &  12.8 &  18.2 &   5.0 &   7.2 \\
-b7          &  258 &  363 &   9.1 &  12.8 &   3.6 &   5.0 \\
-b8          &  181 &  258 &   6.4 &   9.1 &   2.5 &   3.6 \\
-b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
-b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
+
+<<pagebbox2tex - functions>>=
+sub print_prologue() {
+    print STDOUT << '+++EOP+++';
+<<pagebbox2tex - LaTeX formats table: open>>
++++EOP+++
+} # print_prologue
 @
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-executive   &  540 &  720 &  19.0 &  25.4 &   7.5 &  10.0 \\
-folio       &  612 &  936 &  21.6 &  33.0 &   8.5 &  13.0 \\
-legal       &  612 & 1008 &  21.6 &  35.6 &   8.5 &  14.0 \\
-letter      &  612 &  792 &  21.6 &  27.9 &   8.5 &  11.0 \\
-quarto      &  610 &  780 &  21.5 &  27.5 &   8.5 &  10.8 \\
-statement   &  396 &  612 &  14.0 &  21.6 &   5.5 &   8.5 \\ \hline\hline
-10x14       &  720 & 1008 &  25.4 &  35.6 &  10.0 &  14.0 \\
-ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
-tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
+
+<<pagebbox2tex - functions>>=
+sub print_trailer() {
+    print STDOUT << '+++EOP+++';
+<<pagebbox2tex - LaTeX formats table: close>>
++++EOP+++
+} # print_trailer
 @
+
 
 \subsubsctn{{\LaTeX} wrappers for available page sizes}
 
-<<LATEX page format table>>=
+<<pagebbox2tex - LaTeX formats table: open>>=
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % AplotPageSizeTbl.tex
 %
@@ -9450,7 +9736,7 @@ tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
 %
 \label{sec:pagesizes}
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \vfill
 \begin{table}[!ht]
 \begin{center}
@@ -9458,15 +9744,54 @@ tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
 %\setlength{\arrayrulewidth}{1pt}
 \fbox{
  \begin{tabular}{|c||r|r||r|r||r|r|} \hline
-  \raisebox{-0.5ex}[0pt]{PAGE} &
-  \multicolumn{6}{c|}{PAGE SIZE}\\ \cline{2-7} \raisebox{0.25ex}[0pt]{FORMAT} &
-  \multicolumn{2}{c||}{(in points)} &
-  \multicolumn{2}{c||}{(in cms)} &
-  \multicolumn{2}{c|}{(in inches)}\\ \hline\hline
-  <<page sizes latex definition>>
+  \raisebox{-0.5ex}[0pt]{ PAGE } &
+    \multicolumn{6}{c|}{ PAGE SIZE }\\ \cline{2-7}
+  \raisebox{0.25ex}[0pt]{ FORMAT } &
+    \multicolumn{2}{c||}{ (in points) } &
+    \multicolumn{2}{c||}{ (in cms) } &
+    \multicolumn{2}{c|}{ (in inches) } \\
+@
+
+<<pagebbox2tex - LaTeX formats table: spacer>>=
+print STDOUT '\hline\hline'."\n";
+print STDOUT '%                  points    -  centimeters  -     inches'."\n";
+@
+
+<<pagebbox2tex - LaTeX formats table: row>>=
+print STDOUT (&fill_right($rec[0],12," ")).
+             (&get_sizes(@rec[4,5]))." \\\\\n";
+@
+
+<<pagebbox2tex - functions>>=
+sub get_sizes() {
+    my ($w,$h) = @_;
+    my $str = '';
+    $str  = ' &'.(&fill_left($w,6," ")).       ' &'.(&fill_left($h,6," "));
+    $str .= ' &'.(&fill_left(&tocm($w),6," ")).' &'.(&fill_left(&tocm($h),6," "));
+    $str .= ' &'.(&fill_left(&toin($w),6," ")).' &'.(&fill_left(&toin($h),6," "));
+    return $str;
+} # get_sizes
+@
+
+<<pagebbox2tex - functions>>=
+# to cm:   28.35 pts == 1 cm
+sub tocm() { return sprintf("%.1f", ($_[0] / 28.35)); }
+# to inch:    72 pts == 1 inch
+sub toin() { return sprintf("%.1f", ($_[0] / 72.00)); }
+@
+
+<<pagebbox2tex - LaTeX formats table: close>>=
+  \hline\hline
  \end{tabular}
 } % fbox
 \caption{\label{tbl:PageSizes}Page Sizes defined in {\prog}.}\hspace{1cm}
+\vskip 1ex
+\fbox{
+\begin{tabular}{c@{\quad$\equiv$\quad}c}
+28.35 pts & 1 cm   \\
+72.00 pts & 1 inch \\
+\end{tabular}
+} % fbox
   %\refstepcounter{table}
   %\addcontentsline{lot}{section}{
   %   \thetable\hspace{1em}Page Sizes available at {\prog}.}
@@ -9515,7 +9840,7 @@ notangle -R'POSTSCRIPT shortnames' \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
     $WORK/$nwfile.nw 2> kkkk > kkk ; 
 notangle -R"PostScript CODE Chunks" \
-    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction" 2> kkkk'\
+    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables" 2> kkkk'\
     $WORK/$nwfile.nw | more 
 #
 @ 
@@ -9573,7 +9898,8 @@ exit(0);
 <<Version Control Id Tag>>
 #
 use strict;
-my ($MaxLen,$clflg,$fnflg,$ln,$cln,$go) = (80,0,0,0,0,0);
+# my $MaxLen = 80; # Not Used now
+my ($clflg,$ln,$cln,$go) = (0,0,0,0);
 
 my $regexp = shift @ARGV;
 my $thori = '@defn';
@@ -9591,86 +9917,198 @@ my $thend = '@end code';
 };
 
 while (<STDIN>) {
-    my $tt;
-  # print STDERR "$. : $_";
-    # looking for code chunks 
-    $_ =~ /^$thori\s+($regexp)/o && do {
-        $go = 1;
-        print STDOUT "$_$nwlin";
-      # print STDERR "$_$nwlin";
-        next;
-    };
-    $_ =~ /^$thend/o && do {
-        $go = 0;
-        print STDOUT ($clflg ? "\n$nwlin$_" : "$_");
-      # print STDERR ($clflg ? "\n$nwlin$_" : "$_");
-        next;
-    };
-    # skipping the rest of the notangle output
-    $go || do {
-        print STDOUT $_;
-      # print STDERR $_;
-        next;
-    }; # !$go
-    #
-    ### processing code
-    #
-    # processing '@nl'
-    $_ =~ /^$nw/o && next;
-    #      
-    chomp;
-    # processing '@use'
-    $_ =~ /^$uslin/o && do {
-        print STDOUT "$_\n";
-      # print STDERR "$_\n";
-        $clflg && print STDOUT $nwlin;
-      # $clflg && print STDERR $nwlin;
-        next;        
-    };
-    # processing '@text'
-    $_ =~ /^$colin/o && do {
-        $_ =~ s/^$colin //o;
-        $_ =~ /^\%/o && do { # raw commentss are thrown to output directly...
-            $tt = $clflg ? "\n$nwlin" : '';
-            $fnflg = $clflg = $ln = 0;
-            print STDOUT "$tt$colin $_\n$nwlin";
-          # print STDERR "$tt$colin $_\n$nwlin";
-            next;
-        }; 
-        $_ =~ s/\s+/ /og;
-        $clflg && ($_ =~ s/^\s//o);
-      TYPE: {
-          ($_ =~ s/\s\%\-\>.*$//og) && do {
-              $fnflg = $clflg = 1;
-              last TYPE;
-          };
-          $fnflg = 0;
-          $clflg = ($_ =~ s/\s\%\-\%.*$//og) ? 1 : 0;
-      }; # TYPE
-        $cln = length($_);
-      SIZES: {
-        $ln == 0 && do {
-            $_ = "$colin $_";
-        }; 
-        $clflg || do {
-            $ln = 0;
-            last SIZES;
-        }; 
-        $ln > $MaxLen && do {
-            $fnflg && ($_ = " $_"); # indenting opened functions
-            $_ = ($clflg ? "\n$nwlin" : "")."$colin $_";
-            $ln = 0;
-        };
-        $ln += $cln;
-      }; # SIZES
-        # print STDERR "$cln ($ln) : $_\n";
-        $tt = $clflg ? " " : "\n$nwlin";
-        print STDOUT "$_$tt";
-      # print STDERR "$_$tt";
-    }; # $_ ~ @text
+    <<PScompactnw - looking for code chunks>>
+    <<PScompactnw - skipping the rest of the notangle output>>
+    <<PScompactnw - processing code>>
 }; # while
 
 exit(0);
+@
+
+We do not proces the whole file only those chunks of code which name starts with the command-line given regular expression.
+
+<<PScompactnw - looking for code chunks>>=
+$_ =~ /^$thori\s+($regexp)/o && do {
+    $go = 1;
+    print STDOUT "$_$nwlin";
+    next;
+};
+$_ =~ /^$thend/o && do {
+    $go = 0;
+    print STDOUT ($clflg ? "\n$nwlin$_" : "$_");
+    next;
+};
+@ 
+
+Anything else is just printed as it comes from input stream.
+
+<<PScompactnw - skipping the rest of the notangle output>>=
+$go || do {
+    print STDOUT $_;
+    next;
+}; # !$go
+@
+
+<<PScompactnw - processing code>>=
+<<PScompactnw - processing '@nl'>>
+chomp;
+<<PScompactnw - processing '@use'>>
+<<PScompactnw - processing '@text'>>
+@ 
+
+[[noweb]] newlines code is skipped directly, we will print out them where needed.
+
+<<PScompactnw - processing '@nl'>>=
+$_ =~ /^$nw/o && next;
+@ 
+
+[[@use]] is printed as is, without changes, it defines a link to another code chunk in the noweb intermediate file.
+
+<<PScompactnw - processing '@use'>>=
+$_ =~ /^$uslin/o && do {
+    print STDOUT "$_\n";
+    $clflg && print STDOUT $nwlin;
+    next;        
+}; # $_ =~ /^$uslin/
+@ 
+
+<<PScompactnw - processing '@text'>>=
+$_ =~ /^$colin/o && do {
+    <<PScompactnw - remove '@text'>>
+    <<PScompactnw - raw comments to output>>
+    <<PScompactnw - remove initial spaces>>
+    <<PScompactnw - special tag types>>
+    <<PScompactnw - checking lengths>>
+    <<PScompactnw - printing output>>
+}; # $_ =~ /^$colin/
+@
+
+<<PScompactnw - remove '@text'>>=
+$_ =~ s/^$colin //o;
+@
+
+Comments are printed without the 'extra' comments (all three types are explained later on this section but have no differences when filtering comments).
+
+<<PScompactnw - raw comments to output>>=
+$_ =~ /^\%/o && do { # raw comments are thrown to output directly...
+    $_ =~ s/\s\%(\:|\-)(\%|\>).*$//og;
+    $clflg = $ln = 0;
+    print STDOUT ($clflg ? "\n$nwlin" : '')."$colin $_\n$nwlin";
+    next;
+}; # $_ =~ /^\%/o
+@
+
+We clean up of extra white spaces.
+
+<<PScompactnw - remove initial spaces>>=
+$_ =~ s/\s+/ /og;
+$clflg && ($_ =~ s/^\s//o);
+@
+
+Now we are looking for three different tags:
+
+\begin{description}
+\item{[[%:%]]} A comment that is replaced by a newline.
+\item{[[%-%]]} A comment that joins next line to current one.
+\item{[[%->]]} Also joins next line to current one, we use it to distinguish between simple comments and stack/functions description, [[%-%]] and [[%->]] respectively.
+\end{description}
+
+<<PScompactnw - special tag types>>= 
+TYPE: {
+    ($_ =~ s/\s\%\:\%.*$//og)     && 
+        ( $clflg = 0, last TYPE );
+    ($_ =~ s/\s\%\-(\>|\%).*$//og) &&
+        ( $clflg = 1, last TYPE );
+    $clflg = 0;
+}; # TYPE
+@
+
+What we are going to do now is to join each new line that was preceeded by one of the 'join' tags, or leave as is. If an empty line is found is just removed. After that, we prepend the [[noweb]] text line header if we are starting a new code line.
+
+<<PScompactnw - checking lengths>>=
+$cln = length($_);
+$cln > 0 || next;
+SIZES: {
+    $ln == 0 && ( $_ = "$colin $_" );
+    $clflg || ( $ln = 0, last SIZES );
+#   $clflg && ( $_ = "\n$nwlin$colin $_" );
+    $ln += $cln + $clflg;
+}; # SIZES
+@
+
+And finally, we return the processed output to [[noweb]] pipeline:
+
+<<PScompactnw - printing output>>=
+$_ .= $clflg ? " " : "\n$nwlin";
+print STDOUT "$_";
+# print STDERR "$cln ($ln) : \n$_\n";
+@
+
+<<HIDE: PScompactnw - processing '@text'>>=
+# We tryed to get less than 80 chars columns,
+# now each function in a single line (see previous code chunk) 
+$_ =~ /^$colin/o && do {
+    $_ =~ s/^$colin //o;
+    $_ =~ /^\%/o && do { # raw commentss are thrown to output directly...
+        $_ =~ s/\s\%\:\%.*$//og;
+        $tt = $clflg ? "\n$nwlin" : '';
+        $fnflg = $clflg = $ln = 0;
+        print STDOUT "$tt$colin $_\n$nwlin";
+      # print STDERR "$tt$colin $_\n$nwlin";
+        next;
+    }; 
+    $_ =~ s/\s+/ /og;
+    $clflg && ($_ =~ s/^\s*//o);
+  TYPE: {
+      $jmflg = 0;
+      ($_ =~ s/\s\%\:\%.*$//og) && do {
+          $jmflg = 1;
+          last TYPE;
+      };
+      ($_ =~ s/\s\%\-\>.*$//og) && do {
+          $fnflg = $clflg = 1;
+          last TYPE;
+      };
+      $fnflg = 0;
+      $clflg = ($_ =~ s/\s\%\-\%.*$//og) ? 1 : 0;
+  }; # TYPE
+    $cln = length($_);
+  SIZES: {
+    ($ln == 0 && $cln > 0) && do {
+        $_ = "$colin $_";
+    }; 
+    $clflg || do {
+        $ln = 0;
+        last SIZES;
+    };
+    $tln = 0;
+    $clflg && do {
+      for (my $j = 0; $j < $cln; $j++) {
+        substr($_,$j,1) =~ /\s/o && do {
+            my $pp = $j + 1;
+            $pp = $ln + $pp;
+            $pp < $MaxLen && ($tln = $j, next);
+            $tln > $cln && last;
+            substr($_,$tln,0) = "\n$nwlin$colin ";
+            $tln = $cln - $tln + 1;
+            $cln = $tln;
+            $ln = 0;
+            last;
+        }; # substr($_,$j,1)
+      }; # for
+    }; # $clflg 
+    $ln += $cln + $clflg + $fnflg;
+    $ln >= $MaxLen && do {
+        $fnflg && ($_ = " $_"); # indenting opened functions
+        $_ = ($clflg ? "\n$nwlin" : "")."$colin $_";
+        $ln = $tln;
+    };
+  }; # SIZES
+    # print STDERR "$cln ($ln) : $_\n";
+    $tt = $clflg ? " " : "\n$nwlin";
+print STDERR "$cln : $tln : ($ln) : \n$_\n";
+    print STDOUT "$_$tt";
+}; # $_ ~ @text
 @
 
 
@@ -10108,7 +10546,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $
+# $Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -10215,19 +10653,23 @@ notangle -R"APLOT" $WORK/$nwfile.nw | \
 ############################
 # FLATTENING of PS CODE...
 #
-notangle -L -R"APLOT" -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
+notangle -L -R"APLOT" \
+    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | perl -ne '$.>1 && print' - | cpif $BIN/gff2aplot.pl ;
 #
-notangle -L -R"APLOT" -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
+notangle -L -R"APLOT" \
+    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | \
       perl -ne '( $.>1 &&
-                  $_ !~ /^\#line (467|477|486|1207|1302|1476|4300|4761|455)/o
+                  $_ !~ /^\#line (467|477|486|1212|1308|1482|4308|4769|455)/o
                  ) && print' - | perltidy - | cpif $BIN/gff2aplot.pl ;
 # reformating program with perltidy
-notangle -R"APLOT" -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
+notangle -R"APLOT" \
+    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | perltidy - | cpif $BIN/$nwfile.pl ;
 # html pretty-printing program with perltidy
-notangle -R"APLOT" -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
+notangle -R"APLOT" \
+    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | perltidy -html - | cpif $DOCS/html/$nwfile.html ;
 #
 @ 
@@ -10265,16 +10707,7 @@ notangle -R"HIDE: BiBTeX references" $WORK/$nwfile.nw | \
 @ 
 
 <<tangling complementary LaTeX files for manual>>=
-# extracting tables for the User's Manual #'
-echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
-notangle -R"LATEX cmyk colors" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotColorDefs.tex ;
-echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." 1>&2 ;
-notangle -R"LATEX colors table" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotColorTbl.tex ;
-echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." 1>&2 ;
-notangle -R"LATEX page format table" $WORK/$nwfile.nw | \
-         cpif $DOCS/tables/AplotPageSizeTbl.tex ;
+# extracting tables for the documentation
 echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." 1>&2 ;
 notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
          cpif $DOCS/tables/DataStructure_GFF.tex ;
