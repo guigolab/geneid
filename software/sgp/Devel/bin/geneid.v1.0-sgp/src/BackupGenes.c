@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.1 2000-07-05 07:46:13 eblanco Exp $  */
+/*  $Id: BackupGenes.c,v 1.2 2000-07-26 08:25:19 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern long MAXBACKUPSITES, MAXBACKUPEXONS;
 
 long IncrMod(long x, long Modulus)
 {
@@ -196,9 +198,12 @@ void cleanGenes(packGenes* pg, int nclass, packDump* dumpster)
   /* Clean Optimal Gen */
   pg->GOptim = pg->Ghost;
 
-  /* Reset dumpster */
-  dumpster->ndumpExons = 0;
-  dumpster->ndumpSites = 0;
+  if (MAXBACKUPSITES && MAXBACKUPEXONS)
+  {
+    /* Reset dumpster */
+    dumpster->ndumpExons = 0;
+    dumpster->ndumpSites = 0;
+  }
 }
 
 
