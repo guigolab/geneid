@@ -1,6 +1,7 @@
 # Global Variables
 export WORK="$HOME/development/sggp" ;
 export BIN="$WORK/bin" ;
+export LIB="$WORK/lib" ;
 export DOCS="$WORK/docs" ;
 export DATA="$WORK/data" ;
 export nwfile="SintenicGenePrediction" ;

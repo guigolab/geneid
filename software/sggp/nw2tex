@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: nw2tex,v 1.1.1.1 2001-06-02 11:24:16 jabril Exp $
+# $Id: nw2tex,v 1.2 2001-06-05 15:25:35 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -13,6 +13,7 @@ L="####################"
 # Global Variables
 export WORK="$HOME/development/sggp" ;
 export BIN="$WORK/bin" ;
+export LIB="$WORK/lib" ;
 export DOCS="$WORK/docs" ;
 export DATA="$WORK/data" ;
 export nwfile="SintenicGenePrediction" ;

@@ -1,6 +1,7 @@
 # Global Variables
 setenv WORK "$HOME/development/sggp" ;
 setenv BIN  "$WORK/bin" ;
+setenv LIB  "$WORK/lib" ;
 setenv DOCS "$WORK/docs" ;
 setenv DATA "$WORK/data" ;
 setenv nwfile "SintenicGenePrediction" ;

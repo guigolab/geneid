@@ -1,471 +1,7 @@
-% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
-\documentclass[11pt]{article}
-%
-%2345678901234567890123456789012345678901234567890123456789012345678901234567890
-%        1         2         3         4         5         6         7         8
-%
-% $Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $
-%
-\usepackage{noweb}
-\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
-\usepackage{graphics}
-\usepackage[dvips]{graphicx}
-%% pstricks
-\usepackage[dvips]{pstcol}
-\usepackage{pstricks}
-%\usepackage{pst-node}
-%\usepackage{pst-char}
-%\usepackage{pst-grad}
-%% bibliography
-\usepackage{natbib}
-%% latex2html
-\usepackage{url}
-\usepackage{html}     
-\usepackage{htmllist} 
-%% tables    
-%\usepackage{colortbl}
-%\usepackage{multirow}
-%\usepackage{hhline}
-%\usepackage{tabularx}
-%\usepackage{dcolumn}
-%% seminar
-%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
-%% draft watermark
-%\usepackage[all,dvips]{draftcopy}
-%\draftcopySetGrey{0.9}
-%\draftcopyName{CONFIDENTIAL}{100}
-%% layout
-\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
-%\usepackage{lscape}
-%\usepackage{rotating}
-%\usepackage{multicol}
-%% fonts
-\usepackage{times}\fontfamily{ptm}\selectfont
-\usepackage{t1enc}
-
-% noweb options
-\noweboptions{smallcode}
-\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
-\let\nwdocspar=\par                    %
- 
-% Colors for gff2ps
-\input ColorDefs.tex
-% New Commands are defined here
-\newcommand{\sctn}[1]{\section{#1}}
-\newcommand{\subsctn}[1]{\subsection{#1}}
-\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
-\newcommand{\desc}[1]{\item[#1] \ \\}
-
-% PSTRICKs definitions
-\pslongbox{ExFrame}{\psframebox}
-\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
-\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
-% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
-
-%%%%% global urls
-% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
-
-% defs
-\def\drome{\textit{Drosophila melanogaster}}
-\def\dro{\textit{Drosophila}}
-\def\dme{\textit{D. melanogaster}}
-\def\seq{\texttt{\textbf{X62937}}}
-\def\nowf{[[SintenicGenePrediction.nw]]}
-\def\rptm{\textsc{RepeatMasker}}
-\def\bl{\textsc{Blast}}
-\def\bn{\textsc{blastn}}
-\def\bx{\textsc{blastx}}
-\def\bp{\textsc{blastp}}
-\def\tbn{\textsc{tblastn}}
-\def\tbx{\textsc{tblastx}}
-\def\ps{\textsc{PostScript}}
-\def\gnid{\texttt{geneid}}
-\def\gnsc{\texttt{genscan}}
-\def\prog{\textsc{sgp}}
-
-% Setting text for footers and headers
-
-\def\tit{\textsc{Sintenic Gene Prediction Tool.- }}
-\fancyhead{} % clear all fields
-\fancyfoot{} % clear all fields
-\fancyhead[RO,LE]{\thepage}
-\fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Guig\`o, Parra, Abril}}
-\fancyfoot[RO,RE]{\small\textbf{\today}}
-\renewcommand{\headrulewidth}{1pt}
-\renewcommand{\footrulewidth}{1pt}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{document}
-@ 
-\thispagestyle{empty}
-
-\begin{titlepage}
-
-\ \vfill
-\begin{center}
-\textbf{\Huge Sintenic Gene Prediction Tool}\\[5ex]
-
-\textbf{\Large Roderic Guig\`o}\\[1ex]
-\textbf{\Large Gen\'{\i}s Parra}\\[1ex]
-\textbf{\Large Josep F. Abril}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
-
-\textbf{\large --- \today ---}\\[10ex]
-
-\begin{abstract}
-\begin{center}
-\parbox{0.75\linewidth}{
-The project main goal is to implement the {\prog} tool in Perl, make its parameters able to get configured through a customization file, and draft a script to automatize fine tunning of the program. We have to include in the distributable package a modified version of {\gnid}. We will need to optimize the {\bl} databases in order to increase query search speed when long subject sequences are given.
-} % parbox
-\end{center}
-\end{abstract}
-
-\vfill
-
-\begin{raggedleft}
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
-Grup de Recerca en Infom\`atica Biom\`edica\\
-Institut Municipal d'Investigaci\'o M\`edica\\
-Universitat Pompeu Fabra\\[2ex]
-\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
-\end{raggedleft}
-\end{center}
-
-\end{titlepage} %'
-
-%%%%%%%%%%%%%%%%%%%% FRONTMATTER
-
-\newpage
-\pagenumbering{roman}
-\setcounter{page}{1}
-\pagestyle{fancy}
-% Marks redefinition must go here because pagestyle 
-% resets the values to the default ones.
-\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
-\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
-
-\tableofcontents
-\listoftables
-\listoffigures
-
-\vfill
-\begin{center}
-{\small$<$ \verb$Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $$>$ }
-\end{center}
-
-%%%%%%%%%%%%%%%%%%%% MAINMATTER
-
-\newpage
-\pagenumbering{arabic}
-\setcounter{page}{1}
-
-\sctn{Introduction}
-
-\subsctn{On using comparative genomics to improve gene prediction at genomic scale.}
-
-Conservation in the genomic sequence of species at the appropiate
-phylogenetic distance may be indicative of conservation of sequence
-function.  We investigate here how sequence conservation may be
-indicative of coding function, and develop program, SGP-2, which
-integrates the results from {\gnid} and {\tbx} to produce gene
-predictions when comparing human/mouse sintenic regions.  We set up a
-number benchmark data sets, in which we benchmark {\prog} efficiency
-and we test it against \textit{ab initio} programs, sequence similarity
-based programs, and other hibrid programs.
-
-% How the program works...
-\subsctn{Overall algorithm}
-
-Figure~\ref{fig:algo2} describes the approach in {\prog}.  Given two
-genomic sequences, we follow the protocol outlined here: 
-
-\begin{enumerate}
-\item mask the sequences using {\rptm},
-\item run {\tbx} of one sequence agains the other,
-\item ``project'' the similarity regions onto each sequence,
-\item  run {\gnid} on each sequence with the projected similarity regions.
-\end{enumerate}
-
-\begin{figure}
-\begin{center}
-\framebox{
-\includegraphics[width=0.85\linewidth, trim= 10 10 20 10, clip]{./psfigures/algo2.ps}
-}
-\end{center}
-\caption{\label{fig:algo2} Schemma of the homology-based gene-prediction used in this project.}
-\end{figure}
-
-\sctn{The parameters file}
-
-\sctn{Parameter optimization}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment}
-\end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%% BACKMATTER
-
-% \newpage
-% 
-% \bibliographystyle{apalike}
-% \bibliography{/home1/rguigo/docs/biblio/References}
-
-\newpage
-\appendix
-
-\sctn{Sintenic Gene Prediction tool}
-
-Our initial program outline (our root chunk) looks like:\\[1ex]
-
-<<SGP TOOL>>=
-<<PERL shebang>>
-<<SGP Copyleft>>
-
-#### CONSTANTS DEFINITION ####
-
-<<Constant definition - SGP>>
-
-#### VARIABLES DECLARATION ####
-
-
-#### MAIN LOOP ####
-
-  <<Main Loop - SGP>>
-
-##### SUBS #####
-
-<<Main Routines - SGP>>
-
-#### EOF ####
-
-<<POD man page - SGP>>
-@ % 
-
-<<Constant definition - SGP>>=
-my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $ ';
-my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
-@
-
-A short description, followed by authors list and the GNU-GPL is described here.
-
-<<SGP Copyleft>>=
-######################################################################
-#                               SGP                                  #
-######################################################################
-#
-#     Sinteny based Gene Prediction tool.
-#
-#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO
-#                                   Genis PARRA FARRE
-#                                 Roderic GUIGO SERRA
-<<Copyleft>>
-@
-
-\subsctn{Main code chunks}
-
-<<Main Loop - SGP>>=
-exit(0);
-@
-
-<<Main Routines - SGP>>=
-<<SGP: parsing command-line>>
-<<SGP: parsing parameters file>>
-<<SGP: run blast>>
-<<SGP: extract HSPs>>
-<<SGP: run geneid>>
-<<SGP: graphical output>>
-@ 
-
-\subsctn{Parsing command-line options}
-
-<<SGP: parsing command-line>>=
-@ % 
-
-\subsctn{Parsing parameters file}
-
-<<SGP: parsing parameters file>>=
-@ %
-
-\subsctn{Running {\bl} on sequences}
-
-<<SGP: run blast>>=
-@ % 
-
-\subsctn{Processing HSPs from {\bl}}
-
-<<SGP: extract HSPs>>=
-@ % 
-
-\subsctn{Running {\gnid} on SRs}
-
-<<SGP: run geneid>>=
-@ % 
-
-\subsctn{Making plots}
-
-<<SGP: graphical output>>=
-@ % 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment}
-\end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newpage
-
-\subsctn{POD Pages}
-
-The documentation for [[perl]] programs is written in a simple markup language called POD (Plain Old Documentation). Translators exist for [[pod2man]], [[pod2text]], [[pod2html]], [[pod2latex]], and [[pod2fm]]. 
-The idea is to have the online documentation included with the source. That is possible with [[__DATA__]] tag, which defines a chunk of data within the same file.
-%% TODO: define POD tags and which style was used for building up this man. 
-
-<<POD man page - SGP>>=
-__DATA__
-
-=head1 NAME
-
-    
-$PROGRAM ($VERSION) - Improving Gene Prediction with Sinteny.
-
-=head1 SYNOPSIS
-
-    
-    $PROGRAM [-hv] [-o 'options'] [-g 'options'] \
-      [-P filename] [-p filename] [-k filename] \
-      [-c value] [-s value] -1 seqfile_1 -2 seqfile_2
-
-=head1 DESCRIPTION
-
-=head1 OPTIONS
-
-    
-
-=over 4
-
-=item B<-1> I<seqfile_1>
-
-input file for first species.
-
-=item B<-2> I<seqfile_2>
-
-input file for second species.
-
-=item B<-g>
-
-geneid options
-
-=item B<-o>
-
-tblastx options
-
-=item B<-c> I<value>
-
-tblastx score cuttof
-
-=item B<-s> I<value>
-
-shrink hsp\'s by value
-
-=item B<-t> I<filename>
-
-read tblastx file
-
-=item B<-f> I<prefix>
-
-read hsp gff files with in directory prefix and extension .hsp-rs
-
-=item B<-k> I<prefix>
-
-keep intermediate files with prefix
-
-=item B<-p> I<filename>
-
-ps output in filename file 
-
-=item B<-P> I<filename>
-
-geneid parameter file
-
-=item B<-v>
-
-verbose mode
-
-=item B<-h>
-
-produces this message
-
-=back
-
-=head1 FILES
-
-=head1 DIAGNOSTICS
-
-=head1 REQUIRES
-
-=head1 BUGS
-
-    
-Report any problem to: B<jabril@imim.es>
-
-=head1 AUTHOR
-
-    
-Roderic Guigo   : B<rguigo@imim.es>
-
-Josep F. Abril  : B<jabril@imim.es>
-
-Genis Parra     : B<gparra@imim.es>
-
-B<$PROGRAM> is under GNU-GPL (C) 2000
-@ %$
-
-\newpage
-
-\sctn{Converting C filters to Perl modules}
-
-We can improve speed by reducing the number of external programs that {\prog} has to fork, we can convert to Perl modules some of the filters that Enrique Blanco already developed in C. We take advantage of the new version of the [[Inline]] package by Brian Ingerson (v0.40). [[SGPfilters.pm]] basic outline is shown here:
-
-<<SGP::filters>>=
 package SGP::filters;
 use strict;
 #
-<<SGP::filters Copyleft>>
-#
-require Exporter;
-@SGP::filters::ISA = qw(Exporter);
-@SGP::filters::EXPORT = qw(
-                            <<Exported functions: blast to HSPs>>
-                            <<Exported functions: HSPs to SRs>>
-                            );
-$SGP::filters::VERSION = '0.1';
-
-use Inline ( C => DATA,
-             NAME => 'SGP::filters',
-             VERSION => '0.10' );
-
-__DATA__
-<<POD man page - SGP::filters>>
-__C__
-<<C functions: blast to HSPs>>
-<<C functions: HSPs to SRs>>
-@ 
-
-We also require a [[Makefile.pl]] squetched here:
-
-<<SGP::filters - Makefile.PL>>=
-use Inline::MakeMaker;
-
-WriteMakefile( NAME => 'SGP::filters';
-               VERSION_FROM => 'SGPfilters.pm' );
-@ 
-
-Once we got it running, we should add a MANIFEST, a README, a test harness (test.pl) and some POD documentation. After that, '[[make dist]]' will do the rest, generating a distributable package as a gzipped tarball. Final user only has to unpack that file, type commands '[[make]]' and '[[make install]]', and the module will be copied into the appropiate Perl sitelib directory (where an installed module should go).
-
-<<SGP::filters Copyleft>>=
+#line 462 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 ######################################################################
 #                         SGPfilters.pm                              #
 ######################################################################
@@ -476,40 +12,47 @@ Once we got it running, we should add a MANIFEST, a README, a test harness (test
 #                                   Genis PARRA FARRE
 #                                 Enrique BLANCO GARCIA
 #                                 Roderic GUIGO SERRA
-<<Copyleft>>
+#line 1653 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+######################################################################
+#
+#line 473 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 # 
-<<Version Control Id Tag>>
-@
+#line 1677 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
+# $Id: SGPfilters.pm,v 1.1 2001-06-05 15:25:35 jabril Exp $
+#line 430 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
+#
+require Exporter;
+@SGP::filters::ISA = qw(Exporter);
+@SGP::filters::EXPORT = qw(
+                            
+                            
+                            );
+$SGP::filters::VERSION = '0.1';
 
+use Inline ( C => DATA,
+             NAME => 'SGP::filters',
+             VERSION => '0.10' );
 
-\subsctn{Implementing module functions in C}
+__DATA__
 
-<<C functions: common code>>=
-@
- 
-<<Exported functions: blast to HSPs>>=
-@
-<<C functions: blast to HSPs>>=
-@
- 
-<<Exported functions: HSPs to SRs>>=
-@
-<<C functions: HSPs to SRs>>=
-<<blast2gff.h>>
-<<blast2gff.c>>
-<<readargv.c>>
-<<account.c>>
-<<RequestMemory.c>>
-<<ReadHSP.c>>
-<<SortHSP.c>>
-<<ProjectHSP.c>>
-<<JoinSR.c>>
-<<Output.c>>
-@ 
+__C__
 
-\subsubsctn{Headers}
-
-<<blast2gff.h>>=
+#line 506 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 /***************************************************************
 *                                                              *
 *   BLAST2GFF.                                                 *
@@ -639,9 +182,7 @@ void SortHSP(packHSP *allHsp);
 void JoinSR(packSR* allSr);
 void SortSR(packSR *allSr);
 
-@
-
-<<blast2gff.c>>=
+#line 638 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 /* Setup Flags of blast2gff */
 int   VRB=0, GFFIN, PSR=1 ,GFFOUT=0;
 
@@ -708,9 +249,7 @@ int main (int argc, char *argv[])
   return(0);   
 }
 
-@ 
-
-<<readargv.c>>=
+#line 707 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 extern int VRB, GFFIN, GFFOUT, PSR;
                 
 extern char* optarg;
@@ -777,9 +316,7 @@ void readargv (int argc,char* argv[],
     }
 }
 
-@ 
-
-<<account.c>>=
+#line 776 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 /* Init accounting */
 account* InitAcc()
 {
@@ -797,9 +334,7 @@ account* InitAcc()
   return(m);
 }
 
-@ 
-
-<<RequestMemory.c>>=
+#line 796 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 packHSP* RequestMemoryHSP()
 {
   packHSP *allHsp;
@@ -855,9 +390,7 @@ packSR* RequestMemorySR()
   return(allSr);
 }
 
-@ 
-
-<<ReadHSP.c>>=
+#line 854 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 extern int GFFIN;
 
 hsp* allocateNewHSP()
@@ -1035,9 +568,7 @@ void ReadHSP (packHSP* allHsp,char* HSPFile, char Query[LOCUSLENGTH])
     }
 }
 
-@ 
-
-<<SortHSP.c>>=
+#line 1034 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 int Split(hsp** hsps,int i, int j)
 {
   long k;
@@ -1103,9 +634,7 @@ void SortHSP(packHSP *allHsp)
     quickSort(allHsp->hsps[i],0,allHsp->nHsps[i]-1);
 }
 
-@ 
-
-<<ProjectHSP.c>>=
+#line 1102 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 void printSR(sr_t* t, long i)
 {
   sr_t* tmp; 
@@ -1459,9 +988,7 @@ void ProjectHSP(packHSP *allHsp, packSR *allSr)
     project1HSP(allHsp->hsps[i],allHsp->nHsps[i],allSr);
 }
 
-@ 
-
-<<JoinSR.c>>=
+#line 1458 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 void Merge(sr_t* A, sr_t* B)
 {
   /* A will remain and B will be free */
@@ -1512,9 +1039,7 @@ void JoinSR(packSR* allSr)
     Join1SR(allSr,i);  
 }
 
-@ 
-
-<<Output.c>>=
+#line 1511 "/home/ug/jabril/development/sggp/SintenicGenePrediction.nw"
 extern int VRB, GFFOUT, PSR;
 
 extern account *m;    
@@ -1643,319 +1168,3 @@ void Output(packHSP* allHSP, packSR* allSR, char Query[LOCUSLENGTH])
       PrintSR(allSR,Query);
 }
 
-@ 
-
-\subsctn{POD Pages}
-
-<<POD man page - SGP::filters>>=
-@
-
-\newpage
-
-\sctn{License Terms}
-
-The programs are distributed under GNU General Public License as described below.  Those are the license terms that must appear at programs begining.
-
-<<Copyleft>>=
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#
-######################################################################
-#
-@
-
-\sctn{CVS Tags}
-
-This document is under Concurrent Version System (CVS). The version you are currently reading is the following:
-
-<<Version Control Id Tag>>=
-# $Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $
-@ 
-
-The code tangled from this document will keep same tag until we check in the new versions.
-
-\newpage
-
-\sctn{Common code blocks}
-
-\subsctn{PERL scripts}
-
-<<PERL shebang>>=
-#!/usr/bin/perl -w
-# This is perl, version 5.005_03 built for i386-linux
-#
-<<Version Control Id Tag>>
-#
-use strict;
-#
-@
-
-<<Global Constants - Boolean>>=
-my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
-@ %def $T $F
-
-We also set here the date when the script is running and who is the user running it.
-
-<<Global Vars - User and Date>>=
-my $DATE = localtime;
-my $USER = $ENV{USER};
-@ %def $DATE $USER
-
-
-\subsubsctn{Timing our scripts}
-
-The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
-
-<<Use Modules - Benchmark>>=
-use Benchmark;
-  <<Timer ON>>
-@ 
-
-See '[[man Benchmark]]' for further info about this package. 
-We set an array to keep record of timing for each section.
-
-<<Timer ON>>=
-my @Timer = (new Benchmark);
-@ 
-
-<<Common PERL subs - Benchmark>>=
-sub timing() {
-    push @Timer, (new Benchmark);
-    # partial time 
-    $_[0] || 
-        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
-    # total time
-    return timestr(timediff($Timer[$#Timer],$Timer[0]));
-} # timing
-@ 
-
-
-\subsubsctn{Printing complex Data Structures}
-
-With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them.
-
-
-<<Use Modules - Dumper>>=
-use Data::Dumper;
-local $Data::Dumper::Purity = 0;
-local $Data::Dumper::Deepcopy = 1;
-@ 
-
-
-\subsubsctn{Common functions}
-
-<<Skip comments and empty records>>=
-next if /^\#/o;
-next if /^\s*$/o;
-chomp;
-@
-
-<<Common PERL subs - Min Max>>=
-#
-sub max() {
-    my $z = shift @_;
-    foreach my $l (@_) { $z = $l if $l > $z };
-    return $z;
-} # max
-sub min() {
-    my $z = shift @_;
-    foreach my $l (@_) { $z = $l if $l < $z };
-    return $z;
-} # min
-@
-
-<<Common PERL subs - Text fill>>=
-#
-sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
-sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
-sub fill_mid()   { 
-    my $l = length($_[0]);
-    my $k = int(($_[1] - $l)/2);
-    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
-} # fill_mid
-@
-
-These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
-
-<<Common PERL subs - Counter>>=
-#
-sub counter { # $_[0]~current_pos++ $_[1]~char
-    print STDERR "$_[1]";
-    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
-} # counter
-#
-sub counter_end { # $_[0]~current_pos   $_[1]~char
-    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
-} # counter_end
-@
-
-<<Global Vars - Counter>>=
-my ($n,$c); # counter and char (for &counter function)
-@ %def $n $c
-
-
-\subsubsctn{Common functions for reporting program processes}
-\label{sec:messagerpt}
-
-Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
-
-<<Common PERL subs - STDERR>>=
-sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
-@
-
-The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
-
-<<Common PERL subs - STDERR>>=
-sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
-@
-
-\subsctn{AWK scripts}
-
-<<GAWK shebang>>=
-#!/usr/bin/gawk -f
-# GNU Awk 3.0.4
-<<Version Control Id Tag>>
-@
-
-\subsctn{BASH scripts}
-
-<<BASH shebang>>=
-#!/usr/bin/bash
-# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-<<Version Control Id Tag>>
-#
-SECONDS=0 # Reset Timing
-# Which script are we running...
-L="####################"
-{ echo "$L$L$L$L";
-  echo "### RUNNING [$0]";
-  echo "### Current date:`date`";
-  echo "###"; } 1>&2;
-@
-
-<<BASH script end>>=
-{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
-  echo "$L$L$L$L";
-  echo ""; } 1>&2;
-#
-exit 0
-@
-
-\newpage
-
-\sctn{Extracting code blocks from this document}
-
-From this file we can obtain both the code and the
-documentation. The following instructions are needed:
-
-\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
-
-Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
-
-<<tangling>>=
-# showing line numbering comments in program
-notangle -L -R"SGP TOOL" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/sgp.pl ;
-notangle -L -R"SGP::filters" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $LIB/sgpfilters/SGPfilters.pm ;
-notangle -L -R"SGP::filters - Makefile.PL" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $LIB/sgpfilters/Makefile.PL ;
-# program without line numbering comments
-notangle -t4 -R"SGP TOOL" $WORK/$nwfile.nw \
-    > $BIN/sgp.pl ;
-notangle -t4 -R"SGP::filters" $WORK/$nwfile.nw \
-    > $LIB/sgpfilters/SGPfilters.pm ;
-notangle -t4 -R"SGP::filters - Makefile.pl" $WORK/$nwfile.nw \
-    > $LIB/sgpfilters/Makefile.PL ;
-# making them runnable
-chmod a+x $BIN/sgp.pl ;
-@ 
-
-\subsctn{Extracting different Config Files} % \\[-0.5ex]
-
-<<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw \
-    > $DATA/root_config ;
-@ %$
-
-\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
-
-<<tangling>>=
-notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
-notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
-chmod a+x $WORK/nw2tex $WORK/ltx;
-@ 
-
-<<weaving>>=
-<<BASH shebang>>
-# weaving and LaTeXing
-<<BASH Environment Variables>>
-noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
-pushd $DOCS/ ;
-latex $nwfile.tex ;
-dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
-popd;
-<<BASH script end>>
-@ 
-
-<<LaTeXing>>=
-<<BASH shebang>>
-# only LaTeXing
-<<BASH Environment Variables>>
-pushd $DOCS/ ;
-latex $nwfile.tex ; 
-latex $nwfile.tex ; 
-latex $nwfile.tex ;
-dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
-popd ;
-<<BASH script end>>
-@ %$
-
-\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
-
-<<BASH Environment Variables>>=
-# Global Variables
-export WORK="$HOME/development/sggp" ;
-export BIN="$WORK/bin" ;
-export LIB="$WORK/lib" ;
-export DOCS="$WORK/docs" ;
-export DATA="$WORK/data" ;
-export nwfile="SintenicGenePrediction" ;
-@ 
-
-<<CSH Environment Variables>>=
-# Global Variables
-setenv WORK "$HOME/development/sggp" ;
-setenv BIN  "$WORK/bin" ;
-setenv LIB  "$WORK/lib" ;
-setenv DOCS "$WORK/docs" ;
-setenv DATA "$WORK/data" ;
-setenv nwfile "SintenicGenePrediction" ;
-@ 
-
-<<tangling>>=
-# TO DO: add a test to check which shell is running
-# BASH shell
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
-         > $WORK/.bash_VARS ; 
-# CSH shell
-notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
-         > $WORK/.csh_VARS ; 
-# sourcing
-source $WORK/.bash_VARS ;
-source $WORK/.csh_VARS ;
-@
-
-\end{document}
