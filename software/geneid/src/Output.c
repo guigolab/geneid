@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.1 2000-07-05 08:18:48 eblanco Exp $  */
+/*  $Id: Output.c,v 1.2 2000-07-05 08:49:17 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -75,7 +75,7 @@ void PrintProfile (profile *p, char* signal)
   printMess(mess);
 }
 
-void OutputHeader()
+void OutputHeader(char* locus, long l)
 {
   char* s;
   
@@ -83,8 +83,10 @@ void OutputHeader()
     printf("## gff-version 2\n");
   
   printf("## source-version: geneid v 1.0 -- imim.es\n");
-  s = ctime(&m->tStart);
 
+  printf("## Sequence %s - Length = %ld bps\n",locus,l);
+
+  s = ctime(&m->tStart);
   printf("## date %s",s);
 }
 
