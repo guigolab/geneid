@@ -54,8 +54,9 @@ ALINK="blue">
 <div class="bulk"><font face="arial black" size=2>
 <tt>geneid</tt> depends on a parameter file to build the predictions. The parameter file contains
 mostly the description of the probabilistic model on which the predictions
-are based. It also contains the so-called gene model at the end, the set of rules describing how to chain gene elements
-(such as exons) into gene predictions. Through the usage of the gene model
+are based. It also contains the so-called gene model at the end, the set of 
+rules describing how to chain gene elements (such as exons) into gene 
+predictions. Through the usage of the gene model
 and the options <tt>O/R</tt>, <tt>geneid</tt> offers support for the
 integration of predictions from multiple sources.
 </font>
@@ -133,31 +134,47 @@ First-          First+:Terminal-        500:Infinity
 First line describes the relationship between the end of a gene
 in the forward strand  and the beginning of another one in the positive
 strand or the end of a gene in the reverse strand.
-Secod rule defines the connections between the beginning of a gene
+Second rule defines the connections between the beginning of a gene
 in the reverse strand and the beginning of a gene in the forward strand
 or the end of another gene in reverse strand. To specify no maximum 
 distance constrains, the keyword Infinity must be used.
 <br><p>
 The present version of <tt>geneid</tt> predicts elements with types
-<tt>First, Internal, Terminal and Single</tt>. Other elements in the
-additional files provided externally (O/R options) are ignored when they
-are not defined in any rule of the gene model.
+<tt>First, Internal, Terminal and Single</tt>. Gene termination is 
+coded within the program with the features <tt>First+/Terminal-</tt> 
+(start) and <tt>First-/Terminal+</tt> (end) while <tt>Single+/Single-</tt> 
+are both start and end from genes. Other elements in the additional 
+files provided externally (O/R options) are ignored when they are not 
+defined in any rule of the gene model.
 <br><p>
-The gene model does not specify which elements terminate genes (which are
-assumed to be represented by the group field of the gff file). Gene
-termination is coded within the program with the features
-<tt>First+/Terminal-</tt> (start) and <tt>First-/Terminal+</tt> (end) while
-<tt>Single+/Single-</tt> are both start and end from genes.
+<center>
+<table border=1 cellpadding=10 width=600>
+<tr>
+<td align=left bgcolor="skyblue">
+<font size=2>
+<pre>
+# BEGINNING and END of prediction
+Begin+        First+:Internal+:Terminal+:Single+  0:Infinity
+Begin-        First-:Internal-:Terminal-:Single-  0:Infinity
+First+:Internal+:Terminal+:Single+   End+         0:Infinity
+First-:Internal-:Terminal-:Single-   End-         0:Infinity
+</pre>
+</font>
+</td>
+</table>
+</center>
 <br><p>
-Option -F forces <tt>geneid</tt> to predict a complete gene structure in the
-input sequence. That is, either First-(Internal)*-Terminal or 
-Terminal-(Internal)*-First.
+Rules above are defining which elements are allowed to start and
+finish the prediction output. Option -F forces <tt>geneid</tt> to 
+predict a complete gene structure in the input sequence. That is, 
+either First-(Internal)*-Terminal, Terminal-(Internal)*-First or a 
+single-exon gene.
 </font>
 </div>
 </td>
 </table>
 
-<br><p><br><p>
+<br><p>
 <table border=0 width=700 cellpadding=10>
 <tr>
 <td bgcolor=orange><font face="arial black" size=3>Full description:</font>
@@ -330,9 +347,10 @@ element in the candidate region
 20 TTG -0.0335678
 20 TTT -0.172498
 
+<font size=1>
 # e.g. Given S=ATGAGC then
 # score(GAGC) = score(1,ATG) + score(2,TGA) + score(3,GAG) + score(4,AGC)
-</pre></b></font>
+</font></pre></b></font>
 </td>
 <tr>
 <td bgcolor="white">
