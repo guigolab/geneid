@@ -2,11 +2,11 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.3 2000-08-10 17:59:40 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.4 2000-08-10 22:23:18 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln.pl";
-my $VERSION = '$Version:$ ';
+my $VERSION = "Version 1.0";
 my $Start = time;
 
 use strict; # 'refs';
@@ -20,14 +20,17 @@ use Getopt::Long;
 
 Getopt::Long::Configure("bundling","pass_through");
 
-my ( $verbose_flg, $aln_flg, $bit_flg, $ids_flg,  # GETOPTs FLAGS
+my ( $verbose_flg, $bit_flg, $ids_flg,  # GETOPTs FLAGS
+	 $aln_flg, $aplot_flg, $hsp_flg, $hsp_too_flg,
 	 $only_Q_flg, $only_S_flg, $to_file, $to_file_flg,
-	 $help_flg, $prt_aln_flg, $debug_flg, $stdin_flg
-	 ) = (0,0,0,0,0,0,0,0,0,0,0,1);
+	 $help_flg, $debug_flg, $stdin_flg
+	 ) = (0,0,0,0,0,0,0,0,0,0,0,0,0,1);
 
 GetOptions( "Q|query-only"      => \$only_Q_flg  ,
 			"S|subject-only"    => \$only_S_flg  ,
-			"A|alignment"       => \$prt_aln_flg , # show only alignment not GFF
+			"A|aplot"           => \$aplot_flg   ,
+			"P|pairwise"        => \$aln_flg     , # show only alignment not GFF
+			"H|print-hsps:s"    => \$hsp_flg    ,
 			"b|bit-score"       => \$bit_flg     ,
 			"i|identity-score"  => \$ids_flg     ,
 			"W|write-to-file:s" => \$to_file     ,
@@ -44,8 +47,11 @@ $scoreopt = " -i" if $ids_flg; # 'identity' score from BLAST
 $scoreopt = " -b" if $bit_flg; # 'bit' score from BLAST
 $only_S_flg = 0 if $only_Q_flg;
 # $only_Q_flg = 0 if $only_S_flg;
+$aln_flg = 0 if $aplot_flg;
+$hsp_flg = 1 if $hsp_flg eq "";
+$hsp_too_flg = 1 if $hsp_flg;
 $to_file = 1 if $to_file eq "";
-$to_file_flg = 1 if ($to_file!=0 || $to_file ne "");
+$to_file_flg = 1 if $to_file;
 $VERSION =~ s/\$//og;
 
 &prt_help if $help_flg; 
@@ -59,18 +65,18 @@ my $parseblast = "parseblast"; # $blastgff = "blast2gff -g"
 my $pb_PROG   = "$parseblast$vrbopt$scoreopt -nFQ";
    # 'n'o comments # 'F'ullgff better then 'G'ff # Append se'Q'uence to GFF
    # only SUBJECT "-nGbS" # only ALN "-nPW"
-my ( $blast_file, $blast_alnQ, $blast_alnS, @data, $FH);
+my ( $blast_file, $blast_alnQ, $blast_alnS, $hsp_file, @data, $FLH);
 
 my ( %hsp, %sr, @project_query, @project_subject, # HSPs RECORDS
      @stack, %opened, $coord, $score, $index,
 	 );
 my ( $sr_count, $ori, $end, $sco, $idx, $rec, $dif, # SRs RECORDS
 	 $which_proj, $prj_flg, $Q_ori, $Q_end,
-	 $S_ori, $S_end, $Q_seq, $S_seq,
+	 $S_ori, $S_end, $Q_seq, $S_seq, $srs,
 	 );
 my ( $current_coord, $last_coord, $current_score, $last_score, # Building SRs
 	 $current_index, $last_index, $rcd, $w_sr, $lines, # $stack_index,
-	 $op, $n, $c, $stv, $t_score, $t_index, %tfxs, 
+	 $op, $n, $c, $stv, $t_score, $t_index, %tfxs, $no_stdout,
 	 );
 my %STR = ( "+" => 0,
 			"-" => 3 );
@@ -119,15 +125,22 @@ COMMAND-LINE OPTIONS:
 
     -Q, --query-only     : just print QUERY SRs (default both).
     -S, --subject-only   : just print SUBJECT SRs (default both).
-    -A, --alignment      : print pairwise alignment for each SR.
+    -A, --aplot          : prints output in APLOT "GFF" format.
+    -P, --pairwise       : print pairwise alignment for each SR.
+    -H, --print-hsps     : also includes HSPs in output (in GFF format).
+                           As "-W" option, see below, a non-mandatory
+                           parameter can be especified to send this
+                           output to a file named "<file_name>.hsp".
     -b, --bit-score      : set <score> field to Bits (default Alignment Score).
     -i, --identity-score : set <score> field to Identities (default Alignment).
     -W, --write-to-file  : write output to separate files
-                                 + for QUERY:   "<input_name>.alnQ"
-                                 + for SUBJECT: "<input_name>.alnS"
-                           you can provide "<input_name>" as parameter for
+                                 + for QUERY:   "<file_name>.alnQ"
+                                 + for SUBJECT: "<file_name>.alnS"
+                           you can provide "<file_name>" as parameter for
                            this option, as example, if you provide "-W results"
                            you send output to "results.alnQ" and "results.alnS".
+                           If "<file_name>" is not provided, input filename is
+                           set by default as "<file_name>".
     -v, --verbose        : warnings sent to <STDERR>.
     -D, --debuggingv     : extended report for debugging sent to <STDERR>.
     -h, --help           : show this help pages.
@@ -160,6 +173,27 @@ sub fill_right { $_[0].($_[2] x ($_[1] - length($_[0]))) }
 #
 sub fill_left  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
 
+# returns the max value from input array
+#
+sub max {
+	my ($z) = shift @_;	my $l;
+	foreach $l (@_) { $z = $l if $l > $z ; };
+	$z;
+}
+
+# Open a file or STDOUT
+#
+sub open_file_handle {
+	my ($flg, $fl) = @_;
+	$flg && do {
+		open(HF,"> $fl");
+		$FLH=*HF;
+		return 1;
+	};
+	$FLH=*STDOUT;
+	return 0;
+}
+ 
 # Timing.
 #
 sub get_exec_time {
@@ -194,7 +228,7 @@ sub define_files {
 
 	$blast_alnQ = $blast_alnS = "STDOUT";
 	$to_file_flg && do {
-		if ($to_file==1) {
+		if ($to_file == 1) {
 			$blast_alnQ = "$blast_file.alnQ"; 
 			$blast_alnS = "$blast_file.alnS";
 		} else {
@@ -202,6 +236,17 @@ sub define_files {
 			$blast_alnS = "$to_file.alnS";	
 		};
 	};
+
+	my $hstr = $hsp_too_flg ? "\n\#\#     HSPs from input \"$blast_file\" : STDOUT\n\#\#":"\n\#\#     Writing INPUT HSPs has been disabled\n\#\#";
+	$hsp_file = "STDOUT";
+	($to_file_flg && $hsp_too_flg) && do {
+		if ($hsp_flg == 1) {
+			$hsp_file = "$blast_file.hsp";
+		} else {
+			$hsp_file = "$hsp_flg.hsp"; 
+		};
+		$hstr = "\n\#\#     HSPs from input \"$blast_file\": $hsp_file\n\#\#";
+	};			
 
 	my $qstr = "Alignment from QUERY   SRs: $blast_alnQ";
 	$qstr = "Writing for QUERY has been disabled (\"-S\" option)." if $only_S_flg; 
@@ -216,7 +261,7 @@ print STDERR <<EOF if $verbose_flg;
 ## Reading Input from: $blast_file
 ##
 ## Writing Results to following files.
-##
+##$hstr
 ##     $qstr
 ##
 ##     $sstr
@@ -248,6 +293,7 @@ print STDERR <<EndOfPrt;
 #
 # HSP_INDEX: $k
 # SCORE    : $record->{SCORE}
+# E_VALUE  : $record->{E_VALUE}
 
   QUERY    : $record->{QUERY}    
   START_Q  : $record->{START_Q}  
@@ -286,11 +332,18 @@ sub read_HSPs {
 	  open(QUERY, "$pb_PROG $blast_file |");
   }
 
+	$no_stdout = 0;
+	$hsp_too_flg && do {
+		$no_stdout = &open_file_handle($to_file_flg,"$hsp_file");
+		print { $FLH } "\#\#\n\#\# HSPs from $blast_file\n\#\#\n";
+	};
+
     my ( $codeQ, $codeS, $id); # , @tsq, @teq, @tss, @tes);
 	$index = 0;
 	while (<QUERY>){ 
 		next if /^\#|^\s*$/;
 		chomp;
+		print { $FLH } "@_\n" if $hsp_too_flg;
 		split;
 		$_[9] =~ s/\"//og;
 		$codeQ = $STR{$_[6]}  + $_[7] ;
@@ -303,7 +356,7 @@ sub read_HSPs {
 			STRAND_Q => $_[6],  STRAND_S => $_[15],
 			FRAME_Q  => $_[7],  FRAME_S  => $_[17],
 			SEQ_Q    => $_[19], SEQ_S    => $_[21],
-			SCORE    => $_[5],
+			SCORE    => $_[5],  E_VALUE  => $_[13],
 			INDEX    => $id,
 		};
 		
@@ -330,6 +383,7 @@ sub read_HSPs {
 		$index++;
 	}; 
 
+	close($FLH) if $no_stdout;
 	close(QUERY);
 
 	&print_hsp if $verbose_flg;
@@ -418,6 +472,46 @@ EndOfPrt
 
 # Printing SR records
 #
+sub prt_Q_fullgff {
+print { $FLH } <<"EndOfFullGFF";
+$srs->{QUERY}\t$PROGRAM\tsr\t$srs->{START_Q}\t$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_Q}\t$srs->{FRAME_Q}\tTarget \"$srs->{SUBJECT}\"\t$srs->{START_S}\t$srs->{END_S}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_S}\tFrame $srs->{FRAME_S}\t\#Projection $srs->{PROJECTION} \#Seq-Query: $srs->{SEQ_Q} \#Seq-Subject: $srs->{SEQ_S}
+EndOfFullGFF
+}
+#
+sub prt_S_fullgff {
+print { $FLH } <<"EndOfFullGFF";
+$srs->{SUBJECT}\t$PROGRAM\tsr\t$srs->{START_S}\t$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_S}\t$srs->{FRAME_S}\tTarget \"$srs->{QUERY}\"\t$srs->{START_Q}\t$srs->{END_Q}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_Q}\tFrame $srs->{FRAME_Q}\t\#Projection $srs->{PROJECTION} \#Seq-Subject: $srs->{SEQ_S} \#Seq-Query: $srs->{SEQ_Q}
+EndOfFullGFF
+}
+#
+sub prt_Q_aplot {
+print { $FLH } <<"EndOfAPLOT";
+$srs->{QUERY}:$srs->{SUBJECT}\t$PROGRAM\tsr\t$srs->{START_Q}:$srs->{START_S}\t$srs->{END_Q}:$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_Q}:$srs->{STRAND_S}\t$srs->{FRAME_Q}:$srs->{FRAME_S}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION} \#Seq-Query: $srs->{SEQ_Q} \#Seq-Subject: $srs->{SEQ_S}
+EndOfAPLOT
+}
+# 
+sub prt_S_aplot {
+print { $FLH } <<"EndOfAPLOT";
+$srs->{SUBJECT}:$srs->{QUERY}\t$PROGRAM\tsr\t$srs->{START_S}:$srs->{START_Q}\t$srs->{END_S}:$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_S}:$srs->{STRAND_Q}\t$srs->{FRAME_S}:$srs->{FRAME_Q}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION} \#Seq-Subject: $srs->{SEQ_S} \#Seq-Query: $srs->{SEQ_Q}
+EndOfAPLOT
+}
+# 
+sub prt_pairwise {
+	my ($ml,$a,$b,$x,$y,$hsq,$heq,$hss,$hes);
+	($a,$b) = ($srs->{QUERY},$srs->{SUBJECT});
+	$ml = max(lenght($a),lenght($b));
+	($a,$b) = (&fill_right($a,$ml," "),&fill_right($b,$ml," "));
+	($hsq,$heq,$hss,$hes) = ($srs->{START_Q},$srs->{END_Q},$srs->{START_S},$srs->{END_S});
+	$ml = &max(length($hsq),length($heq),length($hss),length($hes));
+	($x,$y) = ( &fill_left($hsq,$ml," ")." ".&fill_left($heq,$ml," ")." $srs->{STRAND_Q} $srs->{FRAME_Q}",
+				&fill_left($hss,$ml," ")." ".&fill_left($hes,$ml," ")." $srs->{STRAND_S} $srs->{FRAME_S}");
+
+	$a .= " Q $x $srs->{SEQ_Q}\n";
+	$b .= " S $y $srs->{SEQ_S}\n";
+	$which_proj eq "QUERY" && (print { $FLH } "\#\n$a$b",return);
+	print { $FLH } "\#\n$b$a";
+}
+#
 sub print_SRs {
 	my $record;
 print STDERR <<EndOfPrt;
@@ -436,6 +530,7 @@ print STDERR <<EndOfSRs
 # PROJECTION: $record->{PROJECTION}
 #  HSP_INDEX: $record->{INDEX_HSP}
 #      SCORE: $record->{SCORE}
+#    E_VALUE: $record->{E_VALUE}
 
   QUERY    : $record->{QUERY}    
   START_Q  : $record->{START_Q}  
@@ -467,14 +562,13 @@ sub new_SR {
 		STRAND_Q  => $rec->{STRAND_Q}, STRAND_S => $rec->{STRAND_S},
 		FRAME_Q   => $rec->{FRAME_Q},  FRAME_S  => $rec->{FRAME_S},
 		SEQ_Q     => $Q_seq,           SEQ_S    => $S_seq,
-		SCORE     => $sco,
+		SCORE     => $sco,             E_VALUE  => $rec->{E_VALUE},
 		INDEX_HSP => $idx,
 		INDEX_SR  => $sr_count,
 	};
-	$sr_count++;
 } # END_SUB: new_SR
 #
-sub prt_sr { # GETS SRstart SRend HSPscore HSPindex # $prt_aln_flg!$only_S_flg!$only_Q_flg
+sub prt_sr { # GETS SRstart SRend HSPscore HSPindex
 	my $seq_ori;
 	($ori,$end,$sco,$idx) = @_;
 	$rec = \%{ $hsp{$idx} };
@@ -499,9 +593,18 @@ sub prt_sr { # GETS SRstart SRend HSPscore HSPindex # $prt_aln_flg!$only_S_flg!$
 	$Q_seq = substr($rec->{SEQ_Q},$seq_ori,$dif);
 	$S_seq = substr($rec->{SEQ_S},$seq_ori,$dif);
 	&new_SR($rec);
-
-	print { $FH } "@_ :: $stv\n";
-
+	
+    $srs = \%{ $sr{$sr_count} };
+  PRTOUT: {
+	  $aln_flg    && (&prt_pairwise, last PRTOUT);
+	  $which_proj eq "QUERY" && do {
+		  $aplot_flg  && (&prt_Q_aplot, last PRTOUT);
+		  &prt_Q_fullgff; last PRTOUT;
+	  }; # else $which_proj eq "SUBJECT"
+	  $aplot_flg  && (&prt_S_aplot, last PRTOUT);
+	  &prt_S_fullgff;
+  };
+	$sr_count++;
 }
 
 # Building SRs for each Coord on HSPs.
@@ -672,18 +775,7 @@ sub test_projection {
 
 # Computing SRs from projected HSP coords.
 #
-sub open_file_handle {
-	$to_file_flg && do {
-		open(HF,"> @_");
-		$FH=*HF;
-		return 1;
-	};
-	$FH=*STDOUT;
-	return 0;
-}
-#
 sub obtain_SRs {
-	my $no_stdout;
 print STDERR <<EndOfPrt if $verbose_flg;
 ##
 ##########################################################
@@ -694,15 +786,17 @@ EndOfPrt
 	
     $sr_count = 0;
     !$only_S_flg && do {
-		$no_stdout = &open_file_handle($blast_alnQ);
+		$no_stdout = &open_file_handle($to_file_flg,$blast_alnQ);
+		print { $FLH } "\#\#\n\#\# SRs from $blast_file : QUERY Projection\n\#\#\n";
 		&test_projection( " QUERY ", \@project_query );
-		close($FH) if $no_stdout;
+		close($FLH) if $no_stdout;
 	};
 	
     !$only_Q_flg && do {
-		$no_stdout = &open_file_handle($blast_alnS);
+		$no_stdout = &open_file_handle($to_file_flg,$blast_alnS);
+		print { $FLH } "\#\#\n\#\# SRs from $blast_file : SUBJECT Projection\n\#\#\n";
 		!$only_Q_flg && &test_projection( "SUBJECT", \@project_subject );
-		close($FH) if $no_stdout;
+		close($FLH) if $no_stdout;
 	};
 	
 	&print_SRs if $verbose_flg;	
