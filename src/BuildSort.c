@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: BuildSort                                                    *
 *                                                                        *
-*   Building of sorting by donor position of a list of exons.            *
+*   Sorting exons by donor position according to every class properties  *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,52 +24,63 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildSort.c,v 1.1 2000-07-05 07:54:51 eblanco Exp $  */
+/*  $Id: BuildSort.c,v 1.2 2001-12-18 15:18:32 eblanco Exp $  */
 
 #include "geneid.h"
 
-void BuildSort(dict *D, int nc[], int ne[], int UC[][MAXENTRY], 
-	       int DE[][MAXENTRY], int nclass, long km[], 
-	       exonGFF* **d, exonGFF *E, long nexons)
+void BuildSort(dict *D,
+               int nc[],
+               int ne[],
+               int UC[][MAXENTRY],
+               int DE[][MAXENTRY],
+               int nclass,
+               long km[],
+               exonGFF* **d,
+               exonGFF *E,
+               long nexons)
 {
   long i,k;
   int j;
   int type;
   int class;
-  char aux[MAXTYPE+1];
-
-  /* Each exon will be classified for every sorting function */
+  char aux[MAXTYPE];
+  
+  /* Every exon will be classified into some sorting function (d) */
+  /* Input exons are sorted by acceptor (left position) */
   for(i=0; i < nexons; i++)
     {
       aux[0]='\0';
       strcpy (aux, (E+i)->Type);
       strcat (aux, &((E+i)->Strand));
-
-      /* What's the type of exon ? Type+Strand */
+	  
+      /* What's the type of exon? "Type+Strand" */
       type = getkeyDict(D,aux);
       
+      /* Checking and getting exon type (dictionary) */
       if (type != NOTFOUND)
-	{
-	  /* every exon belongs to some upstream compatible classes */
-	  for(j=0; j < nc[type]; j++)
-	    {
-	      class = UC[type][j];
-	      k = km[class]-1;
-	      
-	      /* scanning the exons sorted before: Sorting by Insertion */
-	      while (k>=0 && (((E+i)->Donor->Position + (E+i)->offset2) 
-			      < 
-			      (d[class][k]->Donor->Position 
-			       + d[class][k]->offset2)))  
 		{
-		  d[class][k+1] = d[class][k];
-		  k--;
-		}
-	      d[class][k+1] = (E+i);
-	      km[class]++;
-	    }
-	}
-    }
+		  /* Exon may belong to some upstream compatible classes (UC) */
+		  for(j=0; j < nc[type]; j++)
+			{
+			  class = UC[type][j];
+			  k = km[class]-1;
+			  
+			  /* Screening the exons sorted before: sorting by insertion */
+			  while (k>=0 && (((E+i)->Donor->Position + (E+i)->offset2) 
+							  < 
+							  (d[class][k]->Donor->Position 
+							   + d[class][k]->offset2)))  
+				{
+				  /* Shifting down previous exons */
+				  d[class][k+1] = d[class][k];
+				  k--;
+				}
+			  /* Insert new exon before the previously shifted exons */
+			  d[class][k+1] = (E+i);
+			  km[class]++;
+			}
+		} /* end if type found */
+    } /* end forall exons */
 }
 
 
