@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.6 2001-12-18 15:41:41 eblanco Exp $  */
+/*  $Id: PrintExons.c,v 1.7 2002-04-11 14:51:46 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -159,7 +159,7 @@ void PrintGExon(exonGFF *e,
   if (GFF)
     {
       /* GFF format */
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t%hd\tgene_%ld\n",
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t%hd\t%s_%ld\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
 			  Name,
 			  (e->evidence)? EVIDENCE : VERSION,     
@@ -169,12 +169,13 @@ void PrintGExon(exonGFF *e,
 			  (e->Score==MAXSCORE)? 0.0:e->Score,
 			  e->Strand,
 			  e->Frame,
+			  Name,
 			  ngen);
     }
   else
     {
       /* Default format for genes */
-      printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\tAA %3d:%3d gene_%ld\n",
+      printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\tAA %3d:%3d %s_%ld\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
 			  e->Type,
 			  (e->evidence)? e->Acceptor->Position :e->Acceptor->Position + e->offset1,
@@ -189,6 +190,7 @@ void PrintGExon(exonGFF *e,
 			  e->SRScore,
 			  (e->Strand=='+')? nAA-AA2+COFFSET : AA1,
 			  (e->Strand=='+')? nAA-AA1+COFFSET : AA2,
+			  Name,
 			  ngen);
     }
 }
