@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.7 2000-08-10 22:57:39 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.8 2000-08-11 00:48:19 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln.pl";
@@ -23,16 +23,17 @@ Getopt::Long::Configure("bundling","pass_through");
 my ( $verbose_flg, $bit_flg, $ids_flg,  # GETOPTs FLAGS
 	 $aln_flg, $aplot_flg, $hsp_flg, $hsp_too_flg,
 	 $only_Q_flg, $only_S_flg, $to_file, $to_file_flg,
-	 $help_flg, $debug_flg, $stdin_flg
-	 ) = (0,0,0,0,0,0,0,0,0,0,0,0,0,1);
+	 $help_flg, $debug_flg, $cutoff_flg, $stdin_flg
+	 ) = (0,0,0,0,0,0,0,0,0,0,0,0,0,"-",1);
 
 GetOptions( "Q|query-only"      => \$only_Q_flg  ,
 			"S|subject-only"    => \$only_S_flg  ,
 			"A|aplot"           => \$aplot_flg   ,
 			"P|pairwise"        => \$aln_flg     , # show only alignment not GFF
-			"H|print-hsps:s"    => \$hsp_flg    ,
+			"H|print-hsps:s"    => \$hsp_flg     ,
 			"b|bit-score"       => \$bit_flg     ,
 			"i|identity-score"  => \$ids_flg     ,
+			"C|cutoff=f"        => \$cutoff_flg  ,
 			"W|write-to-file:s" => \$to_file     ,
 			"v|verbose"         => \$verbose_flg ,
 			"D|debugging"       => \$debug_flg   ,
@@ -129,6 +130,7 @@ COMMAND-LINE OPTIONS:
                            output to a file named "<file_name>.hsp".
     -b, --bit-score      : set <score> field to Bits (default Alignment Score).
     -i, --identity-score : set <score> field to Identities (default Alignment).
+    -C <f>, --cutoff <f> : <f> is a real number for lower HSP score cutoff.
     -W, --write-to-file  : write output to separate files
                                  + for QUERY:   "<file_name>.alnQ"
                                  + for SUBJECT: "<file_name>.alnS"
@@ -210,14 +212,15 @@ EOF
 
 # Defining output filenames.
 #
-sub define_files {
+sub set_input_file {
 	$blast_file = "STDIN";
 	if ($ARGV ne '-') {
 		$blast_file = $ARGV;
 		$stdin_flg = 0;
 		-e $blast_file || die "Can't open the file '$blast_file' : $!\n";
 	};
-
+}
+sub set_output_files {
 	$blast_alnQ = $blast_alnS = "STDOUT";
 	$to_file_flg && do {
 		if ($to_file == 1) {
@@ -228,8 +231,8 @@ sub define_files {
 			$blast_alnS = "$to_file.alnS";	
 		};
 	};
-
-	my $hstr = $hsp_too_flg ? "\n\#\#     HSPs from input \"$blast_file\" : STDOUT\n\#\#":"\n\#\#     Writing INPUT HSPs has been disabled\n\#\#";
+}
+sub set_hsp_file {
 	$hsp_file = "STDOUT";
 	($to_file_flg && $hsp_too_flg) && do {
 		if ($hsp_flg == 1) {
@@ -237,13 +240,31 @@ sub define_files {
 		} else {
 			$hsp_file = "$hsp_flg.hsp"; 
 		};
-		$hstr = "\n\#\#     HSPs from input \"$blast_file\": $hsp_file\n\#\#";
-	};			
+	};
+}	
+sub define_files {
+	my ($hstr,$qstr,$sstr,$scocf);
 
-	my $qstr = "Alignment from QUERY   SRs: $blast_alnQ";
+	&set_input_file;
+
+	&set_output_files;
+
+	&set_hsp_file;
+
+	$hstr = "\n\#\#     Writing INPUT HSPs has been disabled\n\#\#";
+	$hstr = "\n\#\#     HSPs from input \"$blast_file\" : STDOUT\n\#\#" if $hsp_too_flg;
+	$hstr = "\n\#\#     HSPs from input \"$blast_file\": $hsp_file\n\#\#"
+		if ($to_file_flg && $hsp_too_flg);
+
+	$qstr = "Alignment from QUERY   SRs: $blast_alnQ";
 	$qstr = "Writing for QUERY has been disabled (\"-S\" option)." if $only_S_flg; 
-	my $sstr = "Alignment from SUBJECT SRs: $blast_alnS";
+
+	$sstr = "Alignment from SUBJECT SRs: $blast_alnS";
 	$sstr = "Writing for SUBJECT has been disabled (\"-Q\" option)." if $only_Q_flg; 
+
+	$scocf = "\n\#\# No SCORE CUTOFF was set.\n\#\#";
+	$scocf = "\n\#\# SCORE CUTOFF was set to: $cutoff_flg\n\#\#"
+		if ($cutoff_flg ne "-" && $_[5]<$cutoff_flg);
 
 print STDERR <<EOF if $verbose_flg;
 ##########################################################
@@ -257,7 +278,7 @@ print STDERR <<EOF if $verbose_flg;
 ##     $qstr
 ##
 ##     $sstr
-##
+##$scocf
 ##########################################################
 ##
 EOF
@@ -366,6 +387,7 @@ sub read_HSPs {
 		chomp;
 		print { $FLH } "@_\n" if $hsp_too_flg;
 		split;
+		next if ($cutoff_flg ne "-" && $_[5]<$cutoff_flg);
 		$_[9] =~ s/\"//og;
 		$codeQ = $STR{$_[6]}  + $_[7] ;
 		$codeS = $STR{$_[15]} + $_[17];
