@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.46 2002-06-15 07:46:50 jabril Exp $ 
+% # $Id: humus.nw,v 1.47 2002-06-16 22:16:33 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.46 2002-06-15 07:46:50 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.47 2002-06-16 22:16:33 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3221,7 +3221,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.sgp+refseq.eval.rev.gff      \
 <<>>=
 #
 HUMUS="/projects/H.sapiens/20011222.UCSCgp" ;
-STATS="$HUMUS/evaluations/SGP-MGSCv3+RefSeqEvids" ;
+STATS="$HUMUS/evaluations/SGPmasked-MGSCv3+RefSeqEvids" ;
 MkDirs $STATS $STATS/gene-prediction.stats ;
 #
 # homology results quick summary
@@ -3258,6 +3258,7 @@ prtcode $STATS/SRs.summary ;
 #
 # gene-pred results quick summary
 ( GPDIR="sgp/20011222.UCSCgp-20020411.MGSCv3" ;
+  GP2DIR="sgp/20011222.UCSCgpmsk-20020411.MGSCv3" ;
   for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
     do {
       N=`echo $n | tr [:lower:] [:upper:]` ; 
@@ -3271,6 +3272,10 @@ prtcode $STATS/SRs.summary ;
       tail -20 $MD/$GPDIR/logs/chr$n.sgp | \
                egrep 'TOTAL:|Error:|segmentation fault' ;
       head -4 $MD/$GPDIR/out/chr$n ;
+      echo '### SGP MASKED' ;
+      tail -20 $MD/$GP2DIR/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GP2DIR/out/chr$n ;
       echo '### SGP+RefSeq' ;
       tail -20 $MD/$GPDIR+RefSeqEvids/logs/chr$n.sgp | \
                egrep 'TOTAL:|Error:|segmentation fault' ;
@@ -3293,6 +3298,10 @@ prtcode $STATS/SRs.summary ;
       tail -20 $MD/$GPDIR/logs/chr$n.sgp | \
                egrep 'TOTAL:|Error:|segmentation fault' ;
       head -4 $MD/$GPDIR/out/chr$n ;
+      echo '### SGP MASKED' ;
+      tail -20 $MD/$GP2DIR/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GP2DIR/out/chr$n ;
       echo '### SGP+RefSeq' ;
       tail -20 $MD/$GPDIR+RefSeqEvids/logs/chr$n.sgp | \
                egrep 'TOTAL:|Error:|segmentation fault' ;
@@ -3308,6 +3317,31 @@ prtcode $STATS/gene-prediction.summary ;
 <<>>=
 #
 ### GENE NUMBER
+# sgp on masked Hsap
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      MD="$HUMUS/chr$CHR/sgp/20011222.UCSCgpmsk-20020411.MGSCv3" ;
+      head -4 $MD/out/$SEQ | tail -1 | \
+        gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
+                   { printf "%12s %8d %12.3f\n", chr, $5, $9; }
+             ' "$SEQ" - ;
+      };
+    done > $STATS/sgpmsk.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###" ;
+  echo "###-> SGPmasked Hsap UCSC-GoldenPath assembly (20011222-NCBI28)" ;
+  echo "###       + Mmus MGSCv3 assembly (20020411)" ;
+  gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }' ;
+  gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }
+       ' $STATS/sgpmsk.genes_by_seq ;
+  gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }
+       ' $STATS/sgpmsk.genes_by_seq ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 }
+                        { print $0 }
+            END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }
+           ' > $STATS/sgpmsk.genes_by_seq.report ;
 # sgp+refseq
 gawk '{print $1,$2}' $HUMUS/seqid_list | \
   while read CHR SEQ ;
@@ -3345,6 +3379,8 @@ gawk '{print $1,$2}' $HUMUS/seqid_list | \
   cat $STATS/../old/geneid_MGSCv3.genes_by_seq.report;
   echo ""; echo "";
   cat $STATS/../old/sgp_MGSCv3.genes_by_seq.report;
+  echo ""; echo "";
+  cat $STATS/sgpmsk.genes_by_seq.report
   echo ""; echo "";
   cat $STATS/sgp.genes_by_seq.report
   ) > $STATS/ALL.genes_by_seq.report ;
@@ -3495,6 +3531,8 @@ enscript -1rGjf Courier5 -M A4 $STATS/evid_check.report ;
       egrep 'Error:|segmentation fault' \
         $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr$n.sgp_*.[fr]?? ;
       egrep 'Error:|segmentation fault' \
+        $MD/sgp/20011222.UCSCgpmsk-20020411.MGSCv3/eval/chr$n.sgp_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
         $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr$n.sgp+refseq_*.[fr]?? ;
       } ;
     done ;
@@ -3514,6 +3552,8 @@ enscript -1rGjf Courier5 -M A4 $STATS/evid_check.report ;
       egrep 'Error:|segmentation fault' \
         $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr$n.sgp_*.[fr]?? ;
       egrep 'Error:|segmentation fault' \
+        $MD/sgp/20011222.UCSCgpmsk-20020411.MGSCv3/eval/chr$n.sgp_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
         $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr$n.sgp+refseq_*.[fr]?? ;
       } ;
     done ) > $STATS/gene-prediction.errors 2>&1 ;
@@ -3532,6 +3572,8 @@ enscript -1rGjf Courier5 -M A4 $STATS/evid_check.report ;
       cat $MD/tblastx/20020425/eval/chr${n}.summary ;
       echo "###" ; echo '### SGP' ;
       cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}.summary ;
+      echo "###" ; echo '### SGP MASKED HSAP' ;
+      cat $MD/sgp/20011222.UCSCgpmsk-20020411.MGSCv3/eval/chr${n}.summary ;
       echo "###" ; echo '### SGP + RefSeq' ;
       cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr${n}.summary ;
       echo '';
@@ -3561,7 +3603,7 @@ enscript -1rGjf Courier4 -M A4 $STATS/eval.summary ;
 #
 $BIN/process_eval.pl -tas \
     -T "REFSEQ ENSEMBL"   \
-    -P "GENSCAN GENEID SRs SGP-MGSCv3 SGP-MGSCv3+RefSeq" \
+    -P "GENSCAN GENEID SRs SGP-MGSCv3 SGPmsk-MGSCv3 SGP-MGSCv3+RefSeq" \
     $STATS/eval.summary > $STATS/eval.test_summary ;
 enscript -1rGjf Courier4 -M A4 $STATS/eval.test_summary ;
 #
@@ -10298,7 +10340,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.46 2002-06-15 07:46:50 jabril Exp $
+# $Id: humus.nw,v 1.47 2002-06-16 22:16:33 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
