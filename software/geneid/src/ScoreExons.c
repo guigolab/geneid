@@ -312,7 +312,7 @@ long Score(exonGFF *Exons, long nExons,
 
       /* transition probability: Hexanucleotide */    
       scoreMarkov +=
-	isochores[currentIsochore]->OligoDistTran[j][endexon-OligoLength_1+1] - 
+	isochores[currentIsochore]->OligoDistTran[j][(endexon>OligoLength_1)?endexon-OligoLength_1+1:endexon] - 
 	isochores[currentIsochore]->OligoDistTran[j][(iniexon)?iniexon-1:0];   
 
       if (SRP)
