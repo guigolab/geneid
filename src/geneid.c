@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.11 2003-11-05 14:36:31 eblanco Exp $ */
+/* $Id: geneid.c,v 1.12 2004-01-27 16:22:25 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -53,7 +53,11 @@ int
   /* Score for regions not-supported by protein homology */
   NO_SCORE, 
   /* Force single prediction: 1 gene */
-  SGE=0;
+  SGE=0,
+  /* Detection of PolyPTracts in Acceptors */
+  PPT=0,
+  /* Detection of BranchPoints in Acceptors */
+  BP=0;
 
 /* Increase/decrease exon weight value (exon score) */
 float EW = NOVALUE;
@@ -247,7 +251,7 @@ int main (int argc, char *argv[])
 				sprintf(mess,"No information has been provided for %s\n",
 						Locus);
 			  else
-				sprintf(mess,"Using %d HSPs in %s\n",
+				sprintf(mess,"Using %ld HSPs in %s\n",
 						hsp->nTotalSegments,Locus);
 			  
 			  printMess(mess); 
@@ -349,12 +353,12 @@ int main (int argc, char *argv[])
 			  if (EVD && evidence != NULL)
 				nExons = nExons + external->ivExons;
 
-			  /* SGE- First ghost exon ^: + and - */
-			  if (SGE && (l1 == 0)) 
+			  /* BEGIN artificial exon: + and - */
+			  if (l1 == 0) 
 				nExons = nExons + 2;
 			  
-			  /* Last ghost exon $: + and - */
-			  if (SGE && (l2 == LengthSequence-1))
+			  /* END artitificial exon: + and - */
+			  if (l2 == LengthSequence-1)
 				nExons = nExons + 2;
 			  
 			  sprintf(mess,"Sorting %ld exons\n", nExons);  
