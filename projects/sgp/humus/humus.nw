@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.6 2002-03-18 18:42:20 jabril Exp $ 
+% # $Id: humus.nw,v 1.7 2002-03-18 19:04:15 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.6 2002-03-18 18:42:20 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.7 2002-03-18 19:04:15 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3342,16 +3342,16 @@ sub build_ordering_ary() {
     foreach my $key (keys %{ $hrf }) {
         my @order = ();
         foreach my $yek (keys %{ $hrf->{$key}{$sfeat} }) {
-            push @order, [ $yek, $hrf->{$key}{$sfeat}{$yek}{$skey} ];
+            push @order, [ $hrf->{$key}{$sfeat}{$yek}{$skey}, [ $key, $yek ] ];
         }; # foreach $key
         @order = map  { $_->[1] }
                  sort { $a->[0] <=> $b->[0] }
-                 map  { [ $_->[1], $_->[0] ] } @order;
-        push @{ $arf }, [ $key , $hrf->{$key}{$Skey}, [ @order ] ]
+                 map  { [ $_->[0], $_->[1] ] } @order;
+        push @{ $arf }, [ $hrf->{$key}{$Skey}, [ @order ] ]
     }; # foreach $key
-    @{ $arf } = map  { $_->[1] }
+    @{ $arf } = map  { @{ $_->[1] } }
                 sort { $a->[0] <=> $b->[0] }
-                map  { [ $_->[1], [ $_->[0], @{ $_->[2] } ] ] } @{ $arf };
+                map  { [ $_->[0], $_->[1] ] } @{ $arf };
 } # build_ordering_ary
 #
 sub put_row_fields() {
@@ -3940,15 +3940,19 @@ sub is_host_there() {
       return 0;
 } # is_host_there
 sub breed_crows() {
-    my ($run_at,$script,$scriptx,$script_stat,$pre_job,$clhpid,$syserr);
-    my ($seq,$pos) = @_;
+    my ($thechr,$theseq,$run_at,
+        $script,$scriptx,$script_stat,
+        $pre_job,$clhpid,$syserr);
+    my ($seqary,$pos) = @_;
     return if $pid = fork(); # return to parent, follows child code
+    ($thechr,$theseq) = @{$seqary};
     $clhpid = "$$.$gid";
     &mod_semaphore($pos,$clhpid);
-    print FHERR "## $clhpid ## Running child process jobs on sequence \"$seq\".\n";
-    foreach my $jobs (@idjobs) {
+    print FHERR "## $clhpid ## Running child process jobs".
+                " on sequence \"$theseq\" (chr $thechr).\n";
+    foreach my $jobary (@steps) {
+        my ($thejob,$thestep) = @{ $jobary };
         &mark_DB_exec_todo($thejob);
-        my ($thejob,@thesteps) = @{ $jobs };
         if ($skip_next[0]) {
             $script_stat = $status{'SKIPPED'}{'code'};
         } else {
@@ -3962,12 +3966,12 @@ sub breed_crows() {
 #
 ### CURRENT PROCESS DEFS
 #
-CHR= $chr ;
-SEQ= $seq ;
-JOB= $job ;
-STEP= $step ;
+CHR=$thechr ;
+SEQ=$theseq ;
+JOB=$thejob ;
+STEP=$thestep ;
 XID= ;
-MPID= $clhpid ;
+MPID=$clhpid ;
 CHRDIR="\$HUMUS/\$CHR" ;
 JOBDIR="\$CHRDIR/\$JOB/\$XID" ;
 IDIR=  ;
@@ -5573,7 +5577,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.6 2002-03-18 18:42:20 jabril Exp $
+# $Id: humus.nw,v 1.7 2002-03-18 19:04:15 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
