@@ -274,8 +274,8 @@ long Score(exonGFF *Exons, long nExons,
       else
 	endgc=endexon+ISOCONTEXT;
 
-      valueCG = ((float)(CG[endgc] - CG[inigc]) / (float)(endgc - inigc + 1));
-      
+      valueCG = ((float)(CG[endgc] - CG[inigc])) / ((float)(endgc - inigc + 1));
+
       currentIsochore = SearchIsochore(valueCG, isochores);
 
       OligoLength = isochores[currentIsochore]->OligoLength;
@@ -313,7 +313,7 @@ long Score(exonGFF *Exons, long nExons,
       /* transition probability: Hexanucleotide */    
       scoreMarkov +=
 	isochores[currentIsochore]->OligoDistTran[j][endexon-OligoLength_1+1] - 
-	isochores[currentIsochore]->OligoDistTran[j][iniexon-1];   
+	isochores[currentIsochore]->OligoDistTran[j][(iniexon)?iniexon-1:0];   
 
       if (SRP)
 	{
