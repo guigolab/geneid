@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $
+% $Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -465,9 +465,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.17 $', #'
-     '$Date: 2001-11-08 19:33:42 $', #'
-     '$Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $', #'
+     '$Revision: 1.18 $', #'
+     '$Date: 2001-11-09 20:08:47 $', #'
+     '$Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -1418,8 +1418,28 @@ This section is dedicated to those test we need to ensure that customization var
 } % fbox
 \caption[Customization parameters available formats]{\label{tbl:varformats} Parameter available formats we are going to use for customization variables checking.}
 \end{center}
+\end{table}
+ 
+<<HIDE: DONE>>=
+\doneitem{20011107}{Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.}
+@
 
-Here we define the annonymous functions that will provide units exchange to points or nucleotides.
+\label{todo:BBE}
+<<HIDE: new defs TODO>>=
+\def\todoBBE{
+More format variables need to be defined, such as: [[SHAPES]] from a shapes array, [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default), [[GROUP-BRACKETS]] (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--).
+} % todoBBE
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBE}{todo:BBE}
+@
+\todo{
+ \item \todoBBE
+ } % todo
+
+\subsubsctn{Handling sequence and {\ps} units}
+
+Here we define the annonymous functions that will provide units exchange to points ({\ps} units) or nucleotides (sequence units).
 \label{sec:UnitsHsh}
 
 <<Global Vars>>=
@@ -1457,25 +1477,12 @@ gbp => sub { return $_ * $giga },
 @
 
 As you can note, we have defined a function to convert from gigabases, but at this moment {\ps} can only handle numbers smaller than $2.1*10^9$ and {\prog} is not ready to workaround that. [[pt]] and [[bp]] have been introduced for consistency, so the functions using those units can be more general and avoid to check special cases and whole program code will be simpler.
- 
-<<HIDE: DONE>>=
-\doneitem{20011107}{Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.}
-@
 
-\label{todo:BBE}
-<<HIDE: new defs TODO>>=
-\def\todoBBE{
-More format variables need to be defined, such as: [[SHAPES]] from a shapes array, [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default), [[GROUP-BRACKETS]] (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--).
-} % todoBBE
-@
-<<HIDE: TODO>>=
-\todoitem{\todoBBE}{todo:BBE}
-@
-\todo{
- \item \todoBBE
- } % todo
+Finally, we need a simple function to recover the corresponding value for a given reference to an array which contain coords (as they are outputed by the test functions as a two elements array containing position and unit, in this order). This will simplify the code a little bit (as in section~\ref{sec:LAYOUTsec}). 
 
-\end{table}
+<<Common Routines>>=
+sub get_units() { return $UNITS{$_[0]->[1]}->($_[0]->[0]); }
+@  %def &get_units
 
 \subsubsctn{Checking boolean variables}
 
@@ -1713,7 +1720,13 @@ We provide three basic fonts that are standard in most {\ps} devices (a serif, a
     );
 @ 
 
-Font sizes can be given in points, centimeters or inches. If no units are provided, then we asume points, but always must be possitive values.
+Font sizes can be given in points, centimeters or inches. If no units are provided, then we asume points, but always must be possitive values (look at '[[PS_UNIT]]' test definition).
+
+<<HIDE: DONE>>=
+\doneitem{20011107}{Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
+It has been solved by returning a two elements array having the numeric value and the corresponding unit (setting to some default if it is not given).}
+\doneitem{20011107}{Can we do the same for SEQ_UNIT ? (section~\ref{sec:DNABASE}).}
+@
 
 <<HIDE: variable value checking>>=
 $_test eq 'PS_UNIT' && do {
@@ -1723,13 +1736,6 @@ $_test eq 'PS_UNIT' && do {
     &warn('NOT_A_FONTSIZE',$F,$_t,$_var);
     return $F;
 };
-@
-
-
-<<HIDE: DONE>>=
-\doneitem{20011107}{Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
-It has been solved by returning a two elements array having the numeric value and the corresponding unit (setting to some default if it is not given).}
-\doneitem{20011107}{Can we do the same for SEQ_UNIT ? (section~\ref{sec:DNABASE}).}
 @
 
 <<HIDE: warnings - parsing custom files>>=
@@ -1885,7 +1891,9 @@ NOT_A_PSUNIT =>
 
 \subsubsctn{Accepting numeric ranges}
 
-A range is a lower/upper limits pair for a given variable. One of the limits, or both, can be an asterisk ('*'), which means that the default value must be used.
+A range is a lower/upper limits pair for a given variable. One of the limits, or both, can be an asterisk ('*'), which means that the default value must be used. The result of the range related functions is an array containing two subarrays, one for the start and one for the end, having both two items within, a coord/position and a unit. We can schemmatize that as follows:
+
+\centerline{[[ @output = ( [ start, unit ],  [ end, unit ] ) ]]} 
 
 <<HIDE: DONE>>=
 \doneitem{20011107}{Here we must check something like '*..*'.}
@@ -1942,8 +1950,26 @@ scalar(@it) != 2 && do {
 }; # not enough params
 @ 
 
+<<HIDE: test>>=
+perl -e 'use Data::Dumper; 
+  local $Data::Dumper::Purity = 0;
+  local $Data::Dumper::Deepcopy = 1;
+  @it = ( "*", [ 1, "cm" ] );
+  print Dumper(\@it);
+  %hash = ( key1 => "+" );
+  print Dumper(\%hash);
+  $ref = \$hash{key1};
+  $$ref = [ $it[0] eq "*" ? undef : [ @{ $it[0] } ] , [ @{ $it[1] } ], $$ref ];
+  print Dumper(\%hash);' 
+@ 
+
+If any of the coords was defined with the willcard character '[[*]]', we return an undefined array element where it is needed, so this will make tests easier later.  
+
 <<splitting ranges result - common code>>=
-$$_v = [ @{ $it[0] } , @{ $it[1] } ];
+$$_v = [ 
+     $it[0] eq '*' ? undef : [ @{ $it[0] } ],
+     $it[1] eq '*' ? undef : [ @{ $it[1] } ]
+    ];
 return $T;
 @
 
@@ -2912,7 +2938,7 @@ LDE:
 The following variables define the boundary/clipping coordinates for each sequence, so you can select a region to be displayed in the {\ps} output.
 
 <<default layout vars values>>=
-x_sequence_coords          => { TYPE => 'DNARANGE', VALUE => '*..*' },
+x_sequence_coords          => { TYPE => 'DNARANGE', VALUE => undef  },
 x_sequence_start           => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 x_sequence_end             => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {x_sequence_coords} {x_sequence_start} {x_sequence_end}
@@ -2955,12 +2981,14 @@ LDE:
 
 ###EOR###
 @ 
+
+[[x_sequence_coords]] must not be defined by default (see [[<<setting boundaries - is zoom area ON>>]]). % DEF: |*..*|
+
 <<DESC custom file variables>>=
 ORD: 61
 SEC: LAYOUT
 SUB: Zoom
 OPT: x_sequence_coords
-DEF: |*..*|
 PAR: <pos..pos>
 SDE: 
 LDE: 
@@ -2988,7 +3016,7 @@ LDE:
  
 
 <<default layout vars values>>=
-y_sequence_coords          => { TYPE => 'DNARANGE', VALUE => '*..*' },
+y_sequence_coords          => { TYPE => 'DNARANGE', VALUE => undef  },
 y_sequence_start           => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 y_sequence_end             => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {y_sequence_coords} {y_sequence_start} {y_sequence_end}
@@ -3031,6 +3059,9 @@ LDE:
 
 ###EOR###
 @ 
+
+[[y_sequence_coords]] must not be defined by default (see [[<<setting boundaries - is zoom area ON>>]]). % DEF: |*..*|
+
 <<DESC custom file variables>>=
 ORD: 64
 SEC: LAYOUT
@@ -3064,7 +3095,7 @@ LDE:
 
 
 <<default layout vars values>>=
-x_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => '*..*' },
+x_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => undef  },
 x_sequence_zoom_start      => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 x_sequence_zoom_end        => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {x_sequence_zoom} {x_sequence_zoom_start} {x_sequence_zoom_end}
@@ -3085,12 +3116,14 @@ LDE:
 ###EOR###
 @
 % CLO-ORD 69
+
+[[x_sequence_zoom]] must not be defined by default (see [[<<setting boundaries - is zoom area ON>>]]). % DEF: |*..*|
+
 <<DESC custom file variables>>=
 ORD: 67
 SEC: LAYOUT
 SUB: Zoom
 OPT: x_sequence_zoom
-DEF: |*..*|
 PAR: <pos..pos>
 SDE: 
 LDE: 
@@ -3117,7 +3150,7 @@ LDE:
 @
 
 <<default layout vars values>>=
-y_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => '*..*' },
+y_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => undef  },
 y_sequence_zoom_start      => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 y_sequence_zoom_end        => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {y_sequence_zoom} {y_sequence_zoom_start} {y_sequence_zoom_end}
@@ -3137,12 +3170,14 @@ LDE:
 
 ###EOR###
 @ 
+
+[[y_sequence_zoom]] must not be defined by default (see [[<<setting boundaries - is zoom area ON>>]]).
+
 <<DESC custom file variables>>=
 ORD: 70
 SEC: LAYOUT
 SUB: Zoom
 OPT: y_sequence_zoom
-DEF: |*..*|
 PAR: <pos..pos>
 SDE: 
 LDE: 
@@ -3175,8 +3210,8 @@ zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F     },
 zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
 @ %def {zoom} {zoom_area} {zoom_marks} {zoom_area_mark_color}
 <<command-line options>>=
-"Z|zoom"                   => \$CmdLineVars{LAYOUT}{"zoom"}, # ZOOM_Zoom; Zoom_Marks
-"z|zoom-area"   => \$CmdLineVars{LAYOUT}{"zoom_area"}, # ZOOM_Area
+"Z|zoom"                 => \$CmdLineVars{LAYOUT}{"zoom"}, # ZOOM_Zoom; Zoom_Marks
+"z|zoom-area"            => \$CmdLineVars{LAYOUT}{"zoom_area"}, # ZOOM_Area
 @ 
 <<command-line help>>=
 -Z, --zoom [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
@@ -3265,9 +3300,9 @@ y_sequence_name           => { TYPE => 'STRING', VALUE => undef     },
      Defining which alignment is going to be plotted 
      if you have more than one alignment in your gff input.
 -N, --x-sequence-name <SeqXName>
-     Defining which sequence is going to be plotted at X-axes.
+     Defining which sequence is going to be plotted at X-axis.
 -n, --y-sequence-name <SeqYName>
-     Defining which sequence is going to be plotted at Y-axes.
+     Defining which sequence is going to be plotted at Y-axis.
 @
 <<DESC command-line options>>=
 ORD: 80
@@ -3293,10 +3328,10 @@ OPT: N
 LNG: x-sequence-name
 PAR: <seqXname>
 EQV: [x_sequence_name]=<seqXname>
-SDE: Selects which sequence to plot on X-axes.
+SDE: Selects which sequence to plot on X-axis.
 LDE: 
-You can choose the sequence that is going to be drawn along X-axes, or what
-is equivalent, which annotation will appear on that axes. See [alignment-name] 
+You can choose the sequence that is going to be drawn along X-axis, or what
+is equivalent, which annotation will appear on that axis. See [alignment-name] 
 description to know more about these variables.
 ###EOR###
 ORD: 82
@@ -3304,9 +3339,9 @@ OPT: n
 LNG: y-sequence-name
 PAR: <seqYname>
 EQV: [y_sequence_name]=<seqYname>
-SDE: Selects which sequence to plot on Y-axes.
+SDE: Selects which sequence to plot on Y-axis.
 LDE: 
-Here you will define which sequence is drawn on Y-axes. Take a look to 
+Here you will define which sequence is drawn on Y-axis. Take a look to 
 [alignment-name] to get more info about the interactions between these variables.
 ###EOR###
 @ 
@@ -3342,19 +3377,19 @@ and |SeqB|, and the alignment sequence name from filtered output after running
 those sequences through your alignment program was set to |my_a:my_b| instead
 of |SeqA:SeqB|, so you do not have to reformat the GFF records for the 
 alignment or the annotation. Following with that example, if nothing else is 
-defined, |SeqA| will be drawn on X-axes and |SeqB| on Y-axes. If happens that
+defined, |SeqA| will be drawn on X-axis and |SeqB| on Y-axis. If happens that
 |my_a:my_b| (neither in case you already have |SeqA:SeqB|) does not appear on
 GFF input, but program finds an alignment named as |my_b:my_a|, then 
-annotations will swap on axes, having |SeqA| along Y-axes and |SeqB| on X-axes.
+annotations will swap on axes, having |SeqA| along Y-axis and |SeqB| on X-axis.
 ###EOR###
 ORD: 81
 SEC: LAYOUT
 SUB: Aplot
 OPT: x_sequence_name
 PAR: <seqXname>
-SDE: Selects which sequence annotation is going to be plotted on X-axes.
+SDE: Selects which sequence annotation is going to be plotted on X-axis.
 LDE: 
-We define which sequence annotation is going to be drawn on X-axes,
+We define which sequence annotation is going to be drawn on X-axis,
 having two or more sequences from GFF input.
 By default, the program will use the first sequence id from that input (unless
  you have set something different on [alignment_name] or from command-line).
@@ -3369,10 +3404,10 @@ SEC: LAYOUT
 SUB: Aplot
 OPT: y_sequence_name
 PAR: <seqYname>
-SDE: Selects which sequence annotation is going to be plotted on Y-axes.
+SDE: Selects which sequence annotation is going to be plotted on Y-axis.
 LDE: 
 This variable allows you to define which sequence is going to be drawn along
-the Y-axes. Take a look to [alignment_name] and [x_sequence_name] variables 
+the Y-axis. Take a look to [alignment_name] and [x_sequence_name] variables 
 descriptions for a deeper explanation of their settings and behaviour. 
 ###EOR###
 @
@@ -5341,6 +5376,7 @@ my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
 \newpage
 
 \sctn{Setting page layout variables} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:LAYOUTsec}
 
 From now on, we are going to work internally with {\ps} points lengths. '[[%Vars]]' keys set to '[[_*]]' represent variables that are only visible within the program and cannot be configured by user.
 
@@ -5350,13 +5386,12 @@ sub set_page_vars() {
     my $var = \%{ $Vars{LAYOUT} };
     &set_page_size($var);
     &set_page_axes($var);
-    &set_page_labels($var);
     &set_seq_boundaries($var);
     &set_tickmark_vars($var);
+    &set_page_labels($var);
     &footer("PAGE LAYOUT SET for CURRENT PLOT");
 } # set_page_vars
 @ %def &set_page_vars
-
 
 \subsctn{Page dimensions}
 
@@ -5365,22 +5400,28 @@ We compute the whole page dimensions, width and height, those are the most outer
 <<Layout Settings>>=
 sub set_page_size() {
     my ($vrf) = @_;
-    defined($vrf->{page_bbox}) && do {
-        $vrf->{_page_width}  = 
-            $UNITS{$vrf->{page_bbox}[1][1]}->($vrf->{page_bbox}[1][0]);
-        $vrf->{_page_height} =
-            $UNITS{$vrf->{page_bbox}[1][1]}->($vrf->{page_bbox}[2][0]);
-        $FORMATS{$vrf->{page_bbox}[0]} = 
-            [ ++$formats, $vrf->{_page_width}, $vrf->{_page_height} ];
-        $vrf->{page_size} = $vrf->{page_bbox}[0];
-        return;
-    };
-    ($vrf->{_page_width},
-     $vrf->{_page_height}) = @{ $FORMATS{$vrf->{page_size}} }[1,2];
+    PSIZES: {
+        defined($vrf->{page_bbox}) && do {
+            $vrf->{_page_width}  = &get_units(\@{ $vrf->{page_bbox}[1] });
+            $vrf->{_page_height} = &get_units(\@{ $vrf->{page_bbox}[2] });
+            $FORMATS{$vrf->{page_bbox}[0]} = 
+                [ ++$formats, $vrf->{_page_width}, $vrf->{_page_height} ];
+            $vrf->{page_size} = $vrf->{page_bbox}[0];
+            last PSIZES;
+        };
+        ($vrf->{_page_width},
+         $vrf->{_page_height}) = @{ $FORMATS{$vrf->{page_size}} }[1,2];
+    }; # PSIZES
+    &report('SETPAGESIZE',$vrf->{page_size},
+            "@{ $vrf->{page_width} } x @{ $vrf->{page_height} }");
     return;
 } # set_page_size
 @ %def &set_page_size {_page_width} {_page_height}
 
+<<messages - input/output>>=
+SETPAGESIZE =>
+  "###---> Page size set to \"\%s\" ( \%s )...\n",
+@
 
 Not sure if the following function will be required, or better to pass values to PS code and compute layout there.
 
@@ -5391,10 +5432,10 @@ Not sure if the following function will be required, or better to pass values to
 sub set_page_margins() {
     my ($vrf) = @_;
     $vrf->{_page_margins} = [
-        $UNITS{$vrf->{margin_left}[0]}->($vrf->{margin_left}[0]),
-        $UNITS{$vrf->{margin_right}[0]}->($vrf->{margin_right}[0]),
-        $UNITS{$vrf->{margin_top}[0]}->($vrf->{margin_top}[0]),
-        $UNITS{$vrf->{margin_bottom}[0]}->($vrf->{margin_bottom}[0])
+        &get_units(\@{ $vrf->{margin_left}[0]   }),
+        &get_units(\@{ $vrf->{margin_right}[0]  }),
+        &get_units(\@{ $vrf->{margin_top}[0]    }),
+        &get_units(\@{ $vrf->{margin_bottom}[0] })
         ];
     $vrf->{_page_clip_width}  = $vrf->{_page_width} - 
          ($vrf->{_page_margins}[0] + $vrf->{_page_margins}[1]); 
@@ -5445,6 +5486,7 @@ $vrf->{_plot_aln} && do {
 \item Finally we grep those X and Y sequences from [[@{$Order{GFF}}]], so we sholud know if they are present there or not. This depends on what we have found in [[@{$Order{ALN}}]] but also on [[$Vars{LAYOUT}{x_sequence_name}]] and [[$Vars{LAYOUT}{y_sequence_name}]] settings.
 
 <<setting axes - step 3>>=
+$vrf->{_alignment_name} = join($;, @{ $vrf->{_alignment_name} });
 $vrf->{_plot_x_sequence} =
     &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
 $vrf->{_plot_y_sequence} =
@@ -5461,75 +5503,255 @@ sub set_page_axes() {
     <<setting axes - step 1>>
     <<setting axes - step 2>>
     <<setting axes - step 3>>
+    $vrf->{alignment_name} =~ s/$;/ : /o, $vrf->{_alignment_name};
+    my ($yf,$nf) = ('was found. PLOTTING IT...','NOT found. NOT PLOTTED...');
+    &report('SETPAGEAXES',
+             ( "ALIGNMENT \"$vrf->{alignment_name}\" ".
+               ( $vrf->{_plot_aln} ? $yf : $nf ).
+               ( $vrf->{_swap_aln} ?
+                 "\n###     The alignment found makes program".
+                          " to swap X-Y annotations..." : "" )
+               ),
+             ( "X-SEQUENCE \"$vrf->{_x_sequence_name}\" ".
+               ( $vrf->{_plot_x_sequence} ? $yf : $nf ) ),
+             ( "Y-SEQUENCE \"$vrf->{_y_sequence_name}\" ".
+               ( $vrf->{_plot_y_sequence} ? $yf : $nf ) )
+            );
     return;
 } # set_page_axes
 @ %def &set_page_axes
 
+<<messages - input/output>>=
+SETPAGEAXES =>
+  "###---> Setting plot AXES: \n###     \%s\n###     \%s\n###     \%s\n",
+@
 
-We need two auxiliarly functions to grep alignment and sequences names on [[@{$Order{ALN}}]] and [[@{$Order{GFF}}]] respectively.
+We need two auxiliarly functions to grep alignment and sequences names on [[@{$Order{ALN}}]] and [[@{$Order{GFF}}]] respectively. Remember that '[[$;]]' correspond to '[[SUBSET]]' in AWK.
 
 <<Layout Settings>>=
-# ($vrf->{_plot_aln}, $vrf->{_swap_aln}) = 
-#     &search_alnname(\@{ $vrf->{_alignment_name} }, \@{ $Order{ALN} });
-#
 sub search_alnname() {
     my ($_ra,$_ro) = @_;
-    my ($sq_a,$sq_b,$a_found,$naln);
+    my ($sq_a,$sq_b,@naln,$nm_a,$nm_b);
     #
     ($sq_a,$sq_b) = @$_ra;
-    $a_found = $F;
-    foreach $naln (@$_ro) {
-        
+    foreach @naln (@$_ro) {
+        ($nm_a,$nm_b) = split /$;/o, $naln[0]; 
+        ($nm_a =~ /^$sq_a$/ && $nm_b =~ /^$sq_b$/) && do {
+             return ($T, $F);
+        };
     }; # foreach $naln
-    $a_found && return ($T, $F);
     # swapping
-    @$_ra = reverse @$_ra;
-    ($sq_b,$sq_a) = ($sq_a,$sq_b);
-    $a_found = $F;
     foreach $naln (@$_ro) {
+        ($nm_a,$nm_b) = split /$;/o, $naln[0]; 
+        ($nm_a =~ /^$sq_b$/ && $nm_b =~ /^$sq_a$/) && do {
+             @$_ra = reverse @$_ra;
+             return ($T, $T);
+        };
     }; # foreach $naln
-    $a_found && return ($T, $T);
     #
     return ($F, $F);
 } # search_alnname
 @ %def &search_alnname
 
 <<Layout Settings>>=
-# $vrf->{_plot_x_sequence} =
-#     &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
-# $vrf->{_plot_y_sequence} =
-#    &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
-#                    \@{ $Order{GFF} });
-#
 sub search_seqname() {
     my ($sq_a,$sq_b,$_ro) = @_;
-    my ($a_found,$naln);
-    foreach $naln (@$_ro) {
+    my ($a_found,@naln,$skip);
+    $skip = $F;
+    foreach @naln (@$_ro) {
+        $naln[0] =~ /^$sq_a$/ && do {
+            ($sq_a eq '.+' && $sq_b eq '.+' && !$skip) && ($skip = $T, next);
+            return $T;
+        };
     }; # foreach $naln
-    $a_found && return $T;
     return $F;
 } # search_seqname
 @ %def &search_seqname
 
 
-\subsctn{Setting whole figure labels}
+\subsctn{Getting sequence coords limits to set axes boundaries}
+
+In order to compute coordinates limits that we will need later when calculating tickmarks and other variables, we follow these steps
+
+\begin{enumerate}
+\item We must take as defaults the starting and ending coordinates found in the GFF input records. If none is defined, because you have been playing with a not defined alingment or sequences names, program uses 0 as start and 1000 as end so it does not die on an empty plot.
+
+<<setting boundaries - initialize>>=
+%tcrds = ();
+($a, $x, $y) = (
+    $vrf->{_alignment_name}, 
+    $vrf->{_x_sequence_name},
+    $vrf->{_y_sequence_name}
+    );
+$vrf->{_plot_aln} && do {
+    $rrf = \@{ $ALN_DATA{$a}[$_counter] };
+    push @{ $tcrds{xs} }, $rrf->[$_ori] ;
+    push @{ $tcrds{xe} }, $rrf->[$_end] ;
+    push @{ $tcrds{ys} }, $rrf->[$_nori] ;
+    push @{ $tcrds{ye} }, $rrf->[$_nend] ;
+};
+$vrf->{_plot_x_sequence} && do {
+    $rrf = \@{ $GFF_DATA{$x}[$_counter] };
+    push @{ $tcrds{xs} }, $rrf->[$_ori] ;
+    push @{ $tcrds{xe} }, $rrf->[$_end] ;
+};
+$vrf->{_plot_y_sequence} && do {
+    $rrf = \@{ $GFF_DATA{$y}[$_counter] };
+    push @{ $tcrds{ys} }, $rrf->[$_ori] ;
+    push @{ $tcrds{ye} }, $rrf->[$_end] ;
+};
+#
+$vrf->{_x_start} = [ scalar(@{ $tcrds{xs} }) ?
+                        min(@{ $tcrds{xs} }) :    0, 'bp' ];
+$vrf->{_x_end}   = [ scalar(@{ $tcrds{xe} }) ? 
+                        max(@{ $tcrds{xe} }) : 1000, 'bp' ];
+$vrf->{_y_start} = [ scalar(@{ $tcrds{ys} }) ? 
+                        min(@{ $tcrds{ys} }) :    0, 'bp' ];
+$vrf->{_y_end}   = [ scalar(@{ $tcrds{ye} }) ? 
+                        max(@{ $tcrds{ye} }) : 1000, 'bp' ];
+#
+@ %def {_x_start} {_x_end} {_y_start} {_y_end}
+
+\item Now we look for user defined values, we build an array of possible values for each x and y start-end pairs, leaving an element undefined if the corresponding variable was not set. Then we can recover from those arrays the zoom-area clip, the normal zoom clip and the plot limits.
+
+<<setting boundaries - initialize customs>>=
+%tcrds = (
+    xs => [
+        defined($vrf->{x_sequence_zoom}) ?
+                $vrf->{x_sequence_zoom}[0] : undef,
+        defined($vrf->{x_sequence_zoom_start}) ?
+                $vrf->{x_sequence_zoom_start} : undef,
+        defined($vrf->{x_sequence_coords}) ?
+                $vrf->{x_sequence_coords}[0] : undef,
+        defined($vrf->{x_sequence_start}) ?
+                $vrf->{x_sequence_start} : undef,
+        $vrf->{_x_start}
+        ],
+    xe => [
+        defined($vrf->{x_sequence_zoom}) ?
+                $vrf->{x_sequence_zoom}[1] : undef,
+        defined($vrf->{x_sequence_zoom_end}) ?
+                $vrf->{x_sequence_zoom_end} : undef,
+        defined($vrf->{x_sequence_coords}) ?
+                $vrf->{x_sequence_coords}[1] : undef,
+        defined($vrf->{x_sequence_end}) ?
+                $vrf->{x_sequence_end} : undef,
+        $vrf->{_x_end}
+        ],
+    ys => [
+        defined($vrf->{y_sequence_zoom}) ?
+                $vrf->{y_sequence_zoom}[0] : undef,
+        defined($vrf->{y_sequence_zoom_start}) ?
+                $vrf->{y_sequence_zoom_start} : undef,
+        defined($vrf->{y_sequence_coords}) ?
+                $vrf->{y_sequence_coords}[0] : undef,
+        defined($vrf->{y_sequence_start}) ?
+                $vrf->{y_sequence_start} : undef,
+        $vrf->{_y_start}
+        ],
+    ye => [
+        defined($vrf->{y_sequence_zoom}) ?
+                $vrf->{y_sequence_zoom}[1] : undef,
+        defined($vrf->{y_sequence_zoom_end}) ?
+                $vrf->{y_sequence_zoom_end} : undef,
+        defined($vrf->{y_sequence_coords}) ?
+                $vrf->{y_sequence_coords}[1] : undef,
+        defined($vrf->{y_sequence_end}) ?
+                $vrf->{y_sequence_end} : undef,
+        $vrf->{_y_end}
+        ],
+   ); # %tcrds
+#
+$vrf->{_x_start} = &get_units(\@{ $vrf->{_x_start} });
+$vrf->{_x_end}   = &get_units(\@{ $vrf->{_x_end} });
+$vrf->{_y_start} = &get_units(\@{ $vrf->{_y_start} });
+$vrf->{_y_end}   = &get_units(\@{ $vrf->{_y_end} });
+@
+
+\item Once sequence defaults has been set, we check if [[zoom_area]] is switched on and, after that, we look for [[zoom]] switch. This will allow users to define a zoom area within an already zoomed plot (that feature was not available on old gawk version of {\prog}). Here we look for the zoom area coords, when they are same than sequence boundaries, [[zoom_area]] flag is disabled but also is [[zoom]] (because there are no sequence coords for any zoom defined by user and this way we can skip the corresponding test that will be unnecessary).
+ 
+<<setting boundaries - is zoom area ON>>=
+$vrf->{zoom_area} && do {
+  $cc = 0;
+  $vrf->{_x_zoomarea_start} = &get_first_coord(\@{ $tcrds{xs} },\$cc);
+  $vrf->{_x_zoomarea_end}   = &get_first_coord(\@{ $tcrds{xe} },\$cc);
+  $vrf->{_y_zoomarea_start} = &get_first_coord(\@{ $tcrds{ys} },\$cc);
+  $vrf->{_y_zoomarea_end}   = &get_first_coord(\@{ $tcrds{ye} },\$cc);
+  $cc == 4 && ($vrf->{zoom_area} = $F, $vrf->{zoom} = $F);
+}; # zoom_area
+@ %def {_x_zoomarea_start} {_x_zoomarea_end} {_y_zoomarea_start} {_y_zoomarea_end}
+
+Here we are looking for the zoom coordinates. If those coords are the same as sequence boundaries, the zoom is disabled.
+
+<<setting boundaries - is zoom ON>>=
+$vrf->{zoom} && do {
+  $cc = 0;
+  $vrf->{_x_zoom_start} = &get_first_coord(\@{ $tcrds{xs} },\$cc);
+  $vrf->{_x_zoom_end}   = &get_first_coord(\@{ $tcrds{xe} },\$cc);
+  $vrf->{_y_zoom_start} = &get_first_coord(\@{ $tcrds{ys} },\$cc);
+  $vrf->{_y_zoom_end}   = &get_first_coord(\@{ $tcrds{ye} },\$cc);
+  $cc == 4 && ($vrf->{zoom} = $F);
+}; # zoom
+@ %def {_x_zoom_start} {_x_zoom_end} {_y_zoom_start} {_y_zoom_end}
+
+We do need an auxiliarly function to decide which is the first defined value starting from left in each [[%tcrds]] subarray:
 
 <<Layout Settings>>=
-sub set_page_labels() {
-    my ($vrf) = @_;
-    return;
-} # set_page_labels
-@ %def &set_page_labels {}
+sub get_first_coord() {
+    my ($ary,$cct) = @_;
+    my ($thelast,$cur,$tht);
+    $thelast = $#{ $ary };
+    for ( $cur = 0; $cur < $thelast; $cur++ ) {
+        defined($ary[$cur]) && do {
+            ($tht, $ary[$cur]) = ($ary[$cur], undef);
+            return &get_units(\@$tht);
+        }; # defined($ary[$cur])
+    }; # for $cur
+    $$cct++;
+    return &get_units(\@{ $ary->[$thelast] });
+} # get_first_coord
+@ %def &get_first_coord
 
+\end{enumerate}
 
-\subsctn{Getting sequence coords boundaries and setting axes}
+So that, the [[&set_seq_boundaries]] function is set as:
 
 <<Layout Settings>>=
 sub set_seq_boundaries() {
     my ($vrf) = @_;
+    my ($a, $x, $y, $rrf, %tcrds, $cc);
+    <<setting boundaries - initialize>>
+    <<setting boundaries - initialize customs>>
+    <<setting boundaries - is zoom area ON>>
+    <<setting boundaries - is zoom ON>>
+    &report('PLOTLIMITS', "X : $vrf->{_x_start} to $vrf->{_x_end}",
+                          "Y : $vrf->{_y_start} to $vrf->{_y_end}");
+    &report( $vrf->{zoom_area}
+             ? ('ONZOOM',
+                "X : $vrf->{_x_zoom_start} to $vrf->{_x_zoom_end}",
+                "Y : $vrf->{_y_zoom_start} to $vrf->{_y_zoom_end}" )
+             : 'NOZOOM' );
+    &report( $vrf->{zoom_area}
+             ? ('ONZOOMAREA',
+                "X : $vrf->{_x_zoomarea_start} to $vrf->{_x_zoomarea_end}",
+                "Y : $vrf->{_y_zoomarea_start} to $vrf->{_y_zoomarea_end}" )
+             : 'NOZOOMAREA' );
     return;
 } # set_seq_boundaries
-@ %def &set_seq_boundaries {}
+@ %def &set_seq_boundaries
+
+<<messages - input/output>>=
+PLOTLIMITS =>
+  "###---> \n",
+ONZOOM =>
+  "###---> \n",
+NOZOOM =>
+  "###---> \n",
+ONZOOMAREA =>
+  "###---> \n",
+NOZOOMAREA =>
+  "###---> \n",
+@
 
 
 \subsctn{Setting tickmark variables}
@@ -5540,6 +5762,16 @@ sub set_tickmark_vars() {
     return;
 } # set_tickmark_vars
 @ %def &set_tickmark_vars {}
+
+
+\subsctn{Setting whole figure labels}
+
+<<Layout Settings>>=
+sub set_page_labels() {
+    my ($vrf) = @_;
+    return;
+} # set_page_labels
+@ %def &set_page_labels {}
 
 
 \newpage
@@ -5644,8 +5876,6 @@ sub ps_colors() {
 } # ps_colors
 @ %def &ps_colors
 
-\label{sec:ColorsHsh}
-
 <<Global Vars>>=
 $colors = 0;
 %COLORS = (    # [ ColorNUMBER, qw/ CYAN MAGENTA YELLOW BLACK / ]
@@ -5653,7 +5883,217 @@ $colors = 0;
   ); # %COLORS
 @
 
+
+\subsctn{Filling up the CMYK colors hash} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:CMYKcolordef}
+
+\label{todo:JAA}
+<<HIDE: new defs TODO>>=
+\def\todoJAA{
+Move this section to a perl package: \\ suggesting [[gfftools::PostScript]].
+} % todoJAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoJAA}{todo:JAA}
+@
+\todo{ \item \todoJAA } % todo
+
+To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, then the corresponding chunks are processedby [[colors2tex.pl]] to obtain the definitions {\LaTeX} file ('[[AplotColorDefs.tex]]') and the table summarizing them for the manual ('[[AplotColorTbl.tex]]').See appendix~\ref{sec:COLORprg} on page~\pageref{sec:COLORprg} to look at that script implementation. % outlined in page~\pageref{sec:cmykfiles}.
+
+\label{sec:ColorsHsh}
+
+\subsubsctn{Black and White}
+
+\newcommand{\clrtbl}[5]{\vskip -2.95ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}}
+\newcommand{\clrtblg}[7]{\vskip -2.95ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}\cln{#6}\cln{#7}}
+
+\clrtblg{black}{verydarkgrey}{darkgrey}{grey}{lightgrey}{verylightgrey}{white}
+
+<<cmyk colors perl definition>>=
+# black+grey+white
+black              => [ ++$colors, qw/ 0.00 0.00 0.00 1.00 / ],
+verydarkgrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.80 / ],
+darkgrey           => [ ++$colors, qw/ 0.00 0.00 0.00 0.60 / ],
+grey               => [ ++$colors, qw/ 0.00 0.00 0.00 0.40 / ],
+lightgrey          => [ ++$colors, qw/ 0.00 0.00 0.00 0.20 / ],
+verylightgrey      => [ ++$colors, qw/ 0.00 0.00 0.00 0.10 / ],
+white              => [ ++$colors, qw/ 0.00 0.00 0.00 0.00 / ],
+@
+
+\subsubsctn{Magenta}
+
+\clrtbl{verydarkmagenta}{darkmagenta}{magenta}{lightmagenta}{verylightmagenta}
+
+<<cmyk colors perl definition>>=
+# magenta				  
+verydarkmagenta    => [ ++$colors, qw/ 0.00 1.00 0.00 0.30 / ],
+darkmagenta        => [ ++$colors, qw/ 0.00 0.80 0.00 0.05 / ],
+magenta            => [ ++$colors, qw/ 0.00 0.60 0.00 0.00 / ],
+lightmagenta       => [ ++$colors, qw/ 0.00 0.40 0.00 0.00 / ],
+verylightmagenta   => [ ++$colors, qw/ 0.00 0.20 0.00 0.00 / ],
+@
+
+\subsubsctn{Violet}
+
+\clrtbl{verydarkviolet}{darkviolet}{violet}{lightviolet}{verylightviolet}
+
+<<cmyk colors perl definition>>=
+# violet				  
+verydarkviolet     => [ ++$colors, qw/ 0.45 0.85 0.00 0.00 / ],
+darkviolet         => [ ++$colors, qw/ 0.30 0.65 0.00 0.00 / ],
+violet             => [ ++$colors, qw/ 0.22 0.55 0.00 0.00 / ],
+lightviolet        => [ ++$colors, qw/ 0.15 0.40 0.00 0.00 / ],
+verylightviolet    => [ ++$colors, qw/ 0.10 0.20 0.00 0.00 / ],
+@
+
+\subsubsctn{Blue}
+
+\clrtbl{verydarkblue}{darkblue}{blue}{lightblue}{verylightblue}
+
+<<cmyk colors perl definition>>=
+# blue				  
+verydarkblue       => [ ++$colors, qw/ 1.00 1.00 0.00 0.20 / ],
+darkblue           => [ ++$colors, qw/ 0.90 0.90 0.00 0.00 / ],
+blue               => [ ++$colors, qw/ 0.75 0.75 0.00 0.00 / ],
+lightblue          => [ ++$colors, qw/ 0.50 0.50 0.00 0.00 / ],
+verylightblue      => [ ++$colors, qw/ 0.30 0.30 0.00 0.00 / ],
+@
+
+\subsubsctn{Skyblue}
+
+\clrtbl{verydarkskyblue}{darkskyblue}{skyblue}{lightskyblue}{verylightskyblue}
+
+<<cmyk colors perl definition>>=
+# skyblue				  
+verydarkskyblue    => [ ++$colors, qw/ 0.90 0.50 0.00 0.15 / ],
+darkskyblue        => [ ++$colors, qw/ 0.75 0.45 0.00 0.00 / ],
+skyblue            => [ ++$colors, qw/ 0.60 0.38 0.00 0.00 / ],
+lightskyblue       => [ ++$colors, qw/ 0.45 0.25 0.00 0.00 / ],
+verylightskyblue   => [ ++$colors, qw/ 0.30 0.15 0.00 0.00 / ],
+@
+
+\subsubsctn{Cyan}
+
+\clrtbl{verydarkcyan}{darkcyan}{cyan}{lightcyan}{verylightcyan}
+
+<<cmyk colors perl definition>>=
+# cyan				  
+verydarkcyan       => [ ++$colors, qw/ 1.00 0.00 0.00 0.10 / ],
+darkcyan           => [ ++$colors, qw/ 0.80 0.00 0.00 0.00 / ],
+cyan               => [ ++$colors, qw/ 0.60 0.00 0.00 0.00 / ],
+lightcyan          => [ ++$colors, qw/ 0.40 0.00 0.00 0.00 / ],
+verylightcyan      => [ ++$colors, qw/ 0.20 0.00 0.00 0.00 / ],
+@
+
+\subsubsctn{Seagreen}
+
+\clrtbl{verydarkseagreen}{darkseagreen}{seagreen}{lightseagreen}{verylightseagreen}
+
+<<cmyk colors perl definition>>=
+# seagreen			  
+verydarkseagreen   => [ ++$colors, qw/ 0.75 0.00 0.45 0.00 / ],
+darkseagreen       => [ ++$colors, qw/ 0.62 0.00 0.38 0.00 / ],
+seagreen           => [ ++$colors, qw/ 0.50 0.00 0.30 0.00 / ],
+lightseagreen      => [ ++$colors, qw/ 0.38 0.00 0.22 0.00 / ],
+verylightseagreen  => [ ++$colors, qw/ 0.25 0.00 0.15 0.00 / ],
+@
+
+\subsubsctn{Green}
+
+\clrtbl{verydarkgreen}{darkgreen}{green}{lightgreen}{verylightgreen}
+
+<<cmyk colors perl definition>>=
+# green				  
+verydarkgreen      => [ ++$colors, qw/ 1.00 0.00 1.00 0.25 / ],
+darkgreen          => [ ++$colors, qw/ 0.80 0.00 0.80 0.00 / ],
+green              => [ ++$colors, qw/ 0.60 0.00 0.60 0.00 / ],
+lightgreen         => [ ++$colors, qw/ 0.40 0.00 0.40 0.00 / ],
+verylightgreen     => [ ++$colors, qw/ 0.20 0.00 0.20 0.00 / ],
+@
+
+\subsubsctn{Limegreen}
+
+\clrtbl{verydarklimegreen}{darklimegreen}{limegreen}{lightlimegreen}{verylightlimegreen}
+
+<<cmyk colors perl definition>>=
+# limegreen			  
+verydarklimegreen  => [ ++$colors, qw/ 0.50 0.00 1.00 0.10 / ],
+darklimegreen      => [ ++$colors, qw/ 0.40 0.00 0.95 0.00 / ],
+limegreen          => [ ++$colors, qw/ 0.30 0.00 0.80 0.00 / ],
+lightlimegreen     => [ ++$colors, qw/ 0.20 0.00 0.65 0.00 / ],
+verylightlimegreen => [ ++$colors, qw/ 0.10 0.00 0.50 0.00 / ],
+@
+
+\subsubsctn{Yellow}
+
+\clrtbl{verydarkyellow}{darkyellow}{yellow}{lightyellow}{verylightyellow}
+
+<<cmyk colors perl definition>>=
+# yellow				  
+verydarkyellow     => [ ++$colors, qw/ 0.00 0.00 1.00 0.25 / ],
+darkyellow         => [ ++$colors, qw/ 0.00 0.00 1.00 0.10 / ],
+yellow             => [ ++$colors, qw/ 0.00 0.00 1.00 0.00 / ],
+lightyellow        => [ ++$colors, qw/ 0.00 0.00 0.50 0.00 / ],
+verylightyellow    => [ ++$colors, qw/ 0.00 0.00 0.25 0.00 / ],
+@
+
+\subsubsctn{Orange}
+
+\clrtbl{verydarkorange}{darkorange}{orange}{lightorange}{verylightorange}
+
+<<cmyk colors perl definition>>=
+# orange				  
+verydarkorange     => [ ++$colors, qw/ 0.00 0.50 0.80 0.10 / ],
+darkorange         => [ ++$colors, qw/ 0.00 0.40 0.80 0.00 / ],
+orange             => [ ++$colors, qw/ 0.00 0.30 0.80 0.00 / ],
+lightorange        => [ ++$colors, qw/ 0.00 0.20 0.75 0.00 / ],
+verylightorange    => [ ++$colors, qw/ 0.00 0.15 0.70 0.00 / ],
+@
+
+\subsubsctn{Red}
+
+\clrtbl{verydarkred}{darkred}{red}{lightred}{verylightred}
+
+<<cmyk colors perl definition>>=
+# red					  
+verydarkred        => [ ++$colors, qw/ 0.00 1.00 1.00 0.15 / ],
+darkred            => [ ++$colors, qw/ 0.00 0.80 0.80 0.00 / ],
+red                => [ ++$colors, qw/ 0.00 0.60 0.60 0.00 / ],
+lightred           => [ ++$colors, qw/ 0.00 0.40 0.40 0.00 / ],
+verylightred       => [ ++$colors, qw/ 0.00 0.20 0.20 0.00 / ],
+@
+
+\subsubsctn{Brown}
+
+\clrtbl{verydarkbrown}{darkbrown}{brown}{lightbrown}{verylightbrown}
+
+<<cmyk colors perl definition>>=
+# brown				  
+verydarkbrown      => [ ++$colors, qw/ 0.35 0.85 1.00 0.40 / ],
+darkbrown          => [ ++$colors, qw/ 0.30 0.70 1.00 0.35 / ],
+brown              => [ ++$colors, qw/ 0.25 0.75 1.00 0.25 / ],
+lightbrown         => [ ++$colors, qw/ 0.20 0.60 0.70 0.15 / ],
+verylightbrown     => [ ++$colors, qw/ 0.15 0.45 0.55 0.00 / ],
+@ 
+
+\subsubsctn{Colors Help}
+
+<<colors help>>=
+Those are the colors defined in $PROGRAM:
++ Basic Colors: black white.
++ Variable Colors: 
+      grey magenta violet blue skyblue cyan seagreen
+         green limegreen yellow orange red brown
+  You can get five color shades from Variable Colors with
+  \"verydark\", \"dark\", \"light\" and \"verylight\" prefixes,
+  as example: 
+    verydarkblue, darkblue, blue, lightblue and verylightblue.
+@
+
+
 \subsctn{Page formats definition}
+
+\label{sec:PAGEdef}
 
 <<PostScript FORMATS>>=
 sub ps_page_formats() {
@@ -5672,14 +6112,84 @@ sub ps_page_formats() {
 } # ps_page_formats
 @ %def &ps_page_formats
 
-\label{sec:FormatsHsh}
-
 <<Global Vars>>=
 $formats = 0;
 %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
   <<page sizes perl definition>>
   );
 @ 
+
+
+\subsctn{Filling up the page formats hash} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\label{todo:JAB}
+<<HIDE: new defs TODO>>=
+\def\todoJAB{
+Move this section to a perl package: \\ suggesting [[gfftools::PageSizes]].
+} % todoJAB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoJAB}{todo:JAB}
+@
+\todo{ \item \todoJAB } % todo
+
+
+\label{sec:FormatsHsh}
+
+\subsubsctn{ISO standard page sizes: A series}
+
+<<page sizes perl definition>>=
+  a0        => [ ++$formats, 2384, 3370 ],
+  a1        => [ ++$formats, 1684, 2384 ],
+  a2        => [ ++$formats, 1190, 1684 ],
+  a3        => [ ++$formats,  842, 1190 ],
+  a4        => [ ++$formats,  595,  842 ],
+  a5        => [ ++$formats,  420,  595 ],
+  a6        => [ ++$formats,  297,  420 ],
+  a7        => [ ++$formats,  210,  297 ],
+  a8        => [ ++$formats,  148,  210 ],
+  a9        => [ ++$formats,  105,  148 ],
+  a10       => [ ++$formats,   73,  105 ],
+@
+
+\subsubsctn{ISO standard page sizes: B series}
+
+<<page sizes perl definition>>=
+  b0        => [ ++$formats, 2920, 4127 ],
+  b1        => [ ++$formats, 2064, 2920 ],
+  b2        => [ ++$formats, 1460, 2064 ],
+  b3        => [ ++$formats, 1032, 1460 ],
+  b4        => [ ++$formats,  729, 1032 ],
+  b5        => [ ++$formats,  516,  729 ],
+  b6        => [ ++$formats,  363,  516 ],
+  b7        => [ ++$formats,  258,  363 ],
+  b8        => [ ++$formats,  181,  258 ],
+  b9        => [ ++$formats,  127,  181 ],
+  b10       => [ ++$formats,   91,  127 ],
+@
+
+\subsubsctn{US standard page sizes}
+
+<<page sizes perl definition>>=
+  executive => [ ++$formats,  540,  720 ],
+  folio     => [ ++$formats,  612,  936 ],
+  legal     => [ ++$formats,  612, 1008 ],
+  letter    => [ ++$formats,  612,  792 ],
+  quarto    => [ ++$formats,  610,  780 ],
+  statement => [ ++$formats,  396,  612 ],
+ '10x14'    => [ ++$formats,  720, 1008 ],
+  ledger    => [ ++$formats, 1224,  792 ],
+  tabloid   => [ ++$formats,  792, 1224 ],
+@
+
+\subsubsctn{Page sizes help}
+
+<<pages help>>=
+The following page sizes are available: from A0 to A10, 
+from B0 to B10, 10x14, executive, folio, ledger, legal, 
+letter, quarto, statement and tabloid.
+@
+
 
 \subsctn{Setting up {\ps} variables}
 
@@ -5812,550 +6322,6 @@ sub ps_trailer() {
 +++EOF+++
 } # ps_trailer
 @ %def &ps_trailer
-
-
-\newpage
-
-\sctn{CMYK color definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:CMYKcolordef}
-
-\label{todo:JAA}
-<<HIDE: new defs TODO>>=
-\def\todoJAA{
-Move this section to a perl package: \\ suggesting [[gfftools::PostScript]].
-} % todoJAA
-@
-<<HIDE: TODO>>=
-\todoitem{\todoJAA}{todo:JAA}
-@
-\todo{ \item \todoJAA } % todo
-
-To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, their {\LaTeX} definition ('[[AplotColorDefs.tex]]') and the table sumarizing them for the manual ('[[AplotColorTbl.tex]]'). % outlined in page~\pageref{sec:cmykfiles}.
-
-\subsctn{Black and White}
-
-\newcommand{\clrtbl}[5]{\vskip -2.5ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}}
-\newcommand{\clrtblg}[7]{\vskip -2.5ex \noindent\hrulefill\cln{#1}\cln{#2}\cln{#3}\cln{#4}\cln{#5}\cln{#6}\cln{#7}}
-
-\clrtblg{black}{verydarkgrey}{darkgrey}{grey}{lightgrey}{verylightgrey}{white}
-
-<<cmyk colors perl definition>>=
-# black+grey+white
-black              => [ ++$colors, qw/ 0.00 0.00 0.00 1.00 / ],
-verydarkgrey       => [ ++$colors, qw/ 0.00 0.00 0.00 0.80 / ],
-darkgrey           => [ ++$colors, qw/ 0.00 0.00 0.00 0.60 / ],
-grey               => [ ++$colors, qw/ 0.00 0.00 0.00 0.40 / ],
-lightgrey          => [ ++$colors, qw/ 0.00 0.00 0.00 0.20 / ],
-verylightgrey      => [ ++$colors, qw/ 0.00 0.00 0.00 0.10 / ],
-white              => [ ++$colors, qw/ 0.00 0.00 0.00 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% black+grey+white
-\definecolor{black}              {cmyk}{0.00,0.00,0.00,1.00}
-\definecolor{verydarkgrey}       {cmyk}{0.00,0.00,0.00,0.80}
-\definecolor{darkgrey}           {cmyk}{0.00,0.00,0.00,0.60}
-\definecolor{grey}               {cmyk}{0.00,0.00,0.00,0.40}
-\definecolor{lightgrey}          {cmyk}{0.00,0.00,0.00,0.20}
-\definecolor{verylightgrey}      {cmyk}{0.00,0.00,0.00,0.10}
-\definecolor{white}              {cmyk}{0.00,0.00,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% black+grey+white
-\clspc
-\clrow{black}                    & 0.00 & 0.00 & 0.00 & 1.00 \\
-\clrow{verydarkgrey}             & 0.00 & 0.00 & 0.00 & 0.80 \\
-\clrow{darkgrey}                 & 0.00 & 0.00 & 0.00 & 0.60 \\
-\clrow{grey}                     & 0.00 & 0.00 & 0.00 & 0.40 \\
-\clrow{lightgrey}                & 0.00 & 0.00 & 0.00 & 0.20 \\
-\clrow{verylightgrey}            & 0.00 & 0.00 & 0.00 & 0.10 \\
-\clrow{white}                    & 0.00 & 0.00 & 0.00 & 0.00 \\
-@
-
-\subsctn{Magenta}
-
-\clrtbl{verydarkmagenta}{darkmagenta}{magenta}{lightmagenta}{verylightmagenta}
-
-<<cmyk colors perl definition>>=
-# magenta				  
-verydarkmagenta    => [ ++$colors, qw/ 0.00 1.00 0.00 0.30 / ],
-darkmagenta        => [ ++$colors, qw/ 0.00 0.80 0.00 0.05 / ],
-magenta            => [ ++$colors, qw/ 0.00 0.60 0.00 0.00 / ],
-lightmagenta       => [ ++$colors, qw/ 0.00 0.40 0.00 0.00 / ],
-verylightmagenta   => [ ++$colors, qw/ 0.00 0.20 0.00 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% magenta
-\definecolor{verydarkmagenta}    {cmyk}{0.00,1.00,0.00,0.30}
-\definecolor{darkmagenta}        {cmyk}{0.00,0.80,0.00,0.05}
-\definecolor{magenta}            {cmyk}{0.00,0.60,0.00,0.00}
-\definecolor{lightmagenta}       {cmyk}{0.00,0.40,0.00,0.00}
-\definecolor{verylightmagenta}   {cmyk}{0.00,0.20,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% magenta
-\clspc
-\clrow{verydarkmagenta}          & 0.00 & 1.00 & 0.00 & 0.30 \\
-\clrow{darkmagenta}              & 0.00 & 0.80 & 0.00 & 0.05 \\
-\clrow{magenta}                  & 0.00 & 0.60 & 0.00 & 0.00 \\
-\clrow{lightmagenta}             & 0.00 & 0.40 & 0.00 & 0.00 \\
-\clrow{verylightmagenta}         & 0.00 & 0.20 & 0.00 & 0.00 \\
-@
-
-\subsctn{Violet}
-
-\clrtbl{verydarkviolet}{darkviolet}{violet}{lightviolet}{verylightviolet}
-
-<<cmyk colors perl definition>>=
-# violet				  
-verydarkviolet     => [ ++$colors, qw/ 0.45 0.85 0.00 0.00 / ],
-darkviolet         => [ ++$colors, qw/ 0.30 0.65 0.00 0.00 / ],
-violet             => [ ++$colors, qw/ 0.22 0.55 0.00 0.00 / ],
-lightviolet        => [ ++$colors, qw/ 0.15 0.40 0.00 0.00 / ],
-verylightviolet    => [ ++$colors, qw/ 0.10 0.20 0.00 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% violet
-\definecolor{verydarkviolet}     {cmyk}{0.45,0.85,0.00,0.00}
-\definecolor{darkviolet}         {cmyk}{0.30,0.65,0.00,0.00}
-\definecolor{violet}             {cmyk}{0.22,0.55,0.00,0.00}
-\definecolor{lightviolet}        {cmyk}{0.15,0.40,0.00,0.00}
-\definecolor{verylightviolet}    {cmyk}{0.10,0.20,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% violet
-\clspc
-\clrow{verydarkviolet}           & 0.45 & 0.85 & 0.00 & 0.00 \\
-\clrow{darkviolet}               & 0.30 & 0.65 & 0.00 & 0.00 \\
-\clrow{violet}                   & 0.22 & 0.55 & 0.00 & 0.00 \\
-\clrow{lightviolet}              & 0.15 & 0.40 & 0.00 & 0.00 \\
-\clrow{verylightviolet}          & 0.10 & 0.20 & 0.00 & 0.00 \\
-@
-
-\subsctn{Blue}
-
-\clrtbl{verydarkblue}{darkblue}{blue}{lightblue}{verylightblue}
-
-<<cmyk colors perl definition>>=
-# blue				  
-verydarkblue       => [ ++$colors, qw/ 1.00 1.00 0.00 0.20 / ],
-darkblue           => [ ++$colors, qw/ 0.90 0.90 0.00 0.00 / ],
-blue               => [ ++$colors, qw/ 0.75 0.75 0.00 0.00 / ],
-lightblue          => [ ++$colors, qw/ 0.50 0.50 0.00 0.00 / ],
-verylightblue      => [ ++$colors, qw/ 0.30 0.30 0.00 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% blue
-\definecolor{verydarkblue}       {cmyk}{1.00,1.00,0.00,0.20}
-\definecolor{darkblue}           {cmyk}{0.90,0.90,0.00,0.00}
-\definecolor{blue}               {cmyk}{0.75,0.75,0.00,0.00}
-\definecolor{lightblue}          {cmyk}{0.50,0.50,0.00,0.00}
-\definecolor{verylightblue}      {cmyk}{0.30,0.30,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% blue
-\clspc
-\clrow{verydarkblue}             & 1.00 & 1.00 & 0.00 & 0.20 \\
-\clrow{darkblue}                 & 0.90 & 0.90 & 0.00 & 0.00 \\
-\clrow{blue}                     & 0.75 & 0.75 & 0.00 & 0.00 \\
-\clrow{lightblue}                & 0.50 & 0.50 & 0.00 & 0.00 \\
-\clrow{verylightblue}            & 0.30 & 0.30 & 0.00 & 0.00 \\
-@
-
-\subsctn{Skyblue}
-
-\clrtbl{verydarkskyblue}{darkskyblue}{skyblue}{lightskyblue}{verylightskyblue}
-
-<<cmyk colors perl definition>>=
-# skyblue				  
-verydarkskyblue    => [ ++$colors, qw/ 0.90 0.50 0.00 0.15 / ],
-darkskyblue        => [ ++$colors, qw/ 0.75 0.45 0.00 0.00 / ],
-skyblue            => [ ++$colors, qw/ 0.60 0.38 0.00 0.00 / ],
-lightskyblue       => [ ++$colors, qw/ 0.45 0.25 0.00 0.00 / ],
-verylightskyblue   => [ ++$colors, qw/ 0.30 0.15 0.00 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% skyblue
-\definecolor{verydarkskyblue}    {cmyk}{0.90,0.50,0.00,0.15}
-\definecolor{darkskyblue}        {cmyk}{0.75,0.45,0.00,0.00}
-\definecolor{skyblue}            {cmyk}{0.60,0.38,0.00,0.00}
-\definecolor{lightskyblue}       {cmyk}{0.45,0.25,0.00,0.00}
-\definecolor{verylightskyblue}   {cmyk}{0.30,0.15,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% skyblue
-\clspc
-\clrow{verydarkskyblue}          & 0.90 & 0.50 & 0.00 & 0.15 \\
-\clrow{darkskyblue}              & 0.75 & 0.45 & 0.00 & 0.00 \\
-\clrow{skyblue}                  & 0.60 & 0.38 & 0.00 & 0.00 \\
-\clrow{lightskyblue}             & 0.45 & 0.25 & 0.00 & 0.00 \\
-\clrow{verylightskyblue}         & 0.30 & 0.15 & 0.00 & 0.00 \\
-@
-
-\subsctn{Cyan}
-
-\clrtbl{verydarkcyan}{darkcyan}{cyan}{lightcyan}{verylightcyan}
-
-<<cmyk colors perl definition>>=
-# cyan				  
-verydarkcyan       => [ ++$colors, qw/ 1.00 0.00 0.00 0.10 / ],
-darkcyan           => [ ++$colors, qw/ 0.80 0.00 0.00 0.00 / ],
-cyan               => [ ++$colors, qw/ 0.60 0.00 0.00 0.00 / ],
-lightcyan          => [ ++$colors, qw/ 0.40 0.00 0.00 0.00 / ],
-verylightcyan      => [ ++$colors, qw/ 0.20 0.00 0.00 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% cyan
-\definecolor{verydarkcyan}       {cmyk}{1.00,0.00,0.00,0.10}
-\definecolor{darkcyan}           {cmyk}{0.80,0.00,0.00,0.00}
-\definecolor{cyan}               {cmyk}{0.60,0.00,0.00,0.00}
-\definecolor{lightcyan}          {cmyk}{0.40,0.00,0.00,0.00}
-\definecolor{verylightcyan}      {cmyk}{0.20,0.00,0.00,0.00}
-@ 
-<<cmyk color table - left>>=
-% cyan
-\clspc
-\clrow{verydarkcyan}             & 1.00 & 0.00 & 0.00 & 0.10 \\
-\clrow{darkcyan}                 & 0.80 & 0.00 & 0.00 & 0.00 \\
-\clrow{cyan}                     & 0.60 & 0.00 & 0.00 & 0.00 \\
-\clrow{lightcyan}                & 0.40 & 0.00 & 0.00 & 0.00 \\
-\clrow{verylightcyan}            & 0.20 & 0.00 & 0.00 & 0.00 \\
-@
-
-\subsctn{Seagreen}
-
-\clrtbl{verydarkseagreen}{darkseagreen}{seagreen}{lightseagreen}{verylightseagreen}
-
-<<cmyk colors perl definition>>=
-# seagreen			  
-verydarkseagreen   => [ ++$colors, qw/ 0.75 0.00 0.45 0.00 / ],
-darkseagreen       => [ ++$colors, qw/ 0.62 0.00 0.38 0.00 / ],
-seagreen           => [ ++$colors, qw/ 0.50 0.00 0.30 0.00 / ],
-lightseagreen      => [ ++$colors, qw/ 0.38 0.00 0.22 0.00 / ],
-verylightseagreen  => [ ++$colors, qw/ 0.25 0.00 0.15 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% seagreen
-\definecolor{verydarkseagreen}   {cmyk}{0.75,0.00,0.45,0.00}
-\definecolor{darkseagreen}       {cmyk}{0.62,0.00,0.38,0.00}
-\definecolor{seagreen}           {cmyk}{0.50,0.00,0.30,0.00}
-\definecolor{lightseagreen}      {cmyk}{0.38,0.00,0.22,0.00}
-\definecolor{verylightseagreen}  {cmyk}{0.25,0.00,0.15,0.00}
-@ 
-<<cmyk color table - right>>=
-% seagreen
-\clspc
-\clrow{verydarkseagreen}         & 0.75 & 0.00 & 0.45 & 0.00 \\
-\clrow{darkseagreen}             & 0.62 & 0.00 & 0.38 & 0.00 \\
-\clrow{seagreen}                 & 0.50 & 0.00 & 0.30 & 0.00 \\
-\clrow{lightseagreen}            & 0.38 & 0.00 & 0.22 & 0.00 \\
-\clrow{verylightseagreen}        & 0.25 & 0.00 & 0.15 & 0.00 \\
-@
-
-\subsctn{Green}
-
-\clrtbl{verydarkgreen}{darkgreen}{green}{lightgreen}{verylightgreen}
-
-<<cmyk colors perl definition>>=
-# green				  
-verydarkgreen      => [ ++$colors, qw/ 1.00 0.00 1.00 0.25 / ],
-darkgreen          => [ ++$colors, qw/ 0.80 0.00 0.80 0.00 / ],
-green              => [ ++$colors, qw/ 0.60 0.00 0.60 0.00 / ],
-lightgreen         => [ ++$colors, qw/ 0.40 0.00 0.40 0.00 / ],
-verylightgreen     => [ ++$colors, qw/ 0.20 0.00 0.20 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% green
-\definecolor{verydarkgreen}      {cmyk}{1.00,0.00,1.00,0.25}
-\definecolor{darkgreen}          {cmyk}{0.80,0.00,0.80,0.00}
-\definecolor{green}              {cmyk}{0.60,0.00,0.60,0.00}
-\definecolor{lightgreen}         {cmyk}{0.40,0.00,0.40,0.00}
-\definecolor{verylightgreen}     {cmyk}{0.20,0.00,0.20,0.00}
-@ 
-<<cmyk color table - right>>=
-% green
-\clspc
-\clrow{verydarkgreen}            & 1.00 & 0.00 & 1.00 & 0.25 \\
-\clrow{darkgreen}                & 0.80 & 0.00 & 0.80 & 0.00 \\
-\clrow{green}                    & 0.60 & 0.00 & 0.60 & 0.00 \\
-\clrow{lightgreen}               & 0.40 & 0.00 & 0.40 & 0.00 \\
-\clrow{verylightgreen}           & 0.20 & 0.00 & 0.20 & 0.00 \\
-@
-
-\subsctn{Limegreen}
-
-\clrtbl{verydarklimegreen}{darklimegreen}{limegreen}{lightlimegreen}{verylightlimegreen}
-
-<<cmyk colors perl definition>>=
-# limegreen			  
-verydarklimegreen  => [ ++$colors, qw/ 0.50 0.00 1.00 0.10 / ],
-darklimegreen      => [ ++$colors, qw/ 0.40 0.00 0.95 0.00 / ],
-limegreen          => [ ++$colors, qw/ 0.30 0.00 0.80 0.00 / ],
-lightlimegreen     => [ ++$colors, qw/ 0.20 0.00 0.65 0.00 / ],
-verylightlimegreen => [ ++$colors, qw/ 0.10 0.00 0.50 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% limegreen
-\definecolor{verydarklimegreen}  {cmyk}{0.50,0.00,1.00,0.10}
-\definecolor{darklimegreen}      {cmyk}{0.40,0.00,0.95,0.00}
-\definecolor{limegreen}          {cmyk}{0.30,0.00,0.80,0.00}
-\definecolor{lightlimegreen}     {cmyk}{0.20,0.00,0.65,0.00}
-\definecolor{verylightlimegreen} {cmyk}{0.10,0.00,0.50,0.00}
-@ 
-<<cmyk color table - right>>=
-% limegreen
-\clspc
-\clrow{verydarklimegreen}        & 0.50 & 0.00 & 1.00 & 0.10 \\
-\clrow{darklimegreen}            & 0.40 & 0.00 & 0.95 & 0.00 \\
-\clrow{limegreen}                & 0.30 & 0.00 & 0.80 & 0.00 \\
-\clrow{lightlimegreen}           & 0.20 & 0.00 & 0.65 & 0.00 \\
-\clrow{verylightlimegreen}       & 0.10 & 0.00 & 0.50 & 0.00 \\
-@
-
-\subsctn{Yellow}
-
-\clrtbl{verydarkyellow}{darkyellow}{yellow}{lightyellow}{verylightyellow}
-
-<<cmyk colors perl definition>>=
-# yellow				  
-verydarkyellow     => [ ++$colors, qw/ 0.00 0.00 1.00 0.25 / ],
-darkyellow         => [ ++$colors, qw/ 0.00 0.00 1.00 0.10 / ],
-yellow             => [ ++$colors, qw/ 0.00 0.00 1.00 0.00 / ],
-lightyellow        => [ ++$colors, qw/ 0.00 0.00 0.50 0.00 / ],
-verylightyellow    => [ ++$colors, qw/ 0.00 0.00 0.25 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% yellow
-\definecolor{verydarkyellow}     {cmyk}{0.00,0.00,1.00,0.25}
-\definecolor{darkyellow}         {cmyk}{0.00,0.00,1.00,0.10}
-\definecolor{yellow}             {cmyk}{0.00,0.00,1.00,0.00}
-\definecolor{lightyellow}        {cmyk}{0.00,0.00,0.50,0.00}
-\definecolor{verylightyellow}    {cmyk}{0.00,0.00,0.25,0.00}
-@ 
-<<cmyk color table - right>>=
-% yellow
-\clspc
-\clrow{verydarkyellow}           & 0.00 & 0.00 & 1.00 & 0.25 \\
-\clrow{darkyellow}               & 0.00 & 0.00 & 1.00 & 0.10 \\
-\clrow{yellow}                   & 0.00 & 0.00 & 1.00 & 0.00 \\
-\clrow{lightyellow}              & 0.00 & 0.00 & 0.50 & 0.00 \\
-\clrow{verylightyellow}          & 0.00 & 0.00 & 0.25 & 0.00 \\
-@
-
-\subsctn{Orange}
-
-\clrtbl{verydarkorange}{darkorange}{orange}{lightorange}{verylightorange}
-
-<<cmyk colors perl definition>>=
-# orange				  
-verydarkorange     => [ ++$colors, qw/ 0.00 0.50 0.80 0.10 / ],
-darkorange         => [ ++$colors, qw/ 0.00 0.40 0.80 0.00 / ],
-orange             => [ ++$colors, qw/ 0.00 0.30 0.80 0.00 / ],
-lightorange        => [ ++$colors, qw/ 0.00 0.20 0.75 0.00 / ],
-verylightorange    => [ ++$colors, qw/ 0.00 0.15 0.70 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% orange
-\definecolor{verydarkorange}     {cmyk}{0.00,0.50,0.80,0.10}
-\definecolor{darkorange}         {cmyk}{0.00,0.40,0.80,0.00}
-\definecolor{orange}             {cmyk}{0.00,0.30,0.80,0.00}
-\definecolor{lightorange}        {cmyk}{0.00,0.20,0.75,0.00}
-\definecolor{verylightorange}    {cmyk}{0.00,0.15,0.70,0.00}
-@ 
-<<cmyk color table - right>>=
-% orange
-\clspc
-\clrow{verydarkorange}           & 0.00 & 0.50 & 0.80 & 0.10 \\
-\clrow{darkorange}               & 0.00 & 0.40 & 0.80 & 0.00 \\
-\clrow{orange}                   & 0.00 & 0.30 & 0.80 & 0.00 \\
-\clrow{lightorange}              & 0.00 & 0.20 & 0.75 & 0.00 \\
-\clrow{verylightorange}          & 0.00 & 0.15 & 0.70 & 0.00 \\
-@
-
-\subsctn{Red}
-
-\clrtbl{verydarkred}{darkred}{red}{lightred}{verylightred}
-
-<<cmyk colors perl definition>>=
-# red					  
-verydarkred        => [ ++$colors, qw/ 0.00 1.00 1.00 0.15 / ],
-darkred            => [ ++$colors, qw/ 0.00 0.80 0.80 0.00 / ],
-red                => [ ++$colors, qw/ 0.00 0.60 0.60 0.00 / ],
-lightred           => [ ++$colors, qw/ 0.00 0.40 0.40 0.00 / ],
-verylightred       => [ ++$colors, qw/ 0.00 0.20 0.20 0.00 / ],
-@
-<<cmyk colors latex definition>>=
-% red
-\definecolor{verydarkred}        {cmyk}{0.00,1.00,1.00,0.15}
-\definecolor{darkred}            {cmyk}{0.00,0.80,0.80,0.00}
-\definecolor{red}                {cmyk}{0.00,0.60,0.60,0.00}
-\definecolor{lightred}           {cmyk}{0.00,0.40,0.40,0.00}
-\definecolor{verylightred}       {cmyk}{0.00,0.20,0.20,0.00}
-@ 
-<<cmyk color table - right>>=
-% red
-\clspc
-\clrow{verydarkred}              & 0.00 & 1.00 & 1.00 & 0.15 \\
-\clrow{darkred}                  & 0.00 & 0.80 & 0.80 & 0.00 \\
-\clrow{red}                      & 0.00 & 0.60 & 0.60 & 0.00 \\
-\clrow{lightred}                 & 0.00 & 0.40 & 0.40 & 0.00 \\
-\clrow{verylightred}             & 0.00 & 0.20 & 0.20 & 0.00 \\
-@
-
-\subsctn{Brown}
-
-\clrtbl{verydarkbrown}{darkbrown}{brown}{lightbrown}{verylightbrown}
-
-<<cmyk colors perl definition>>=
-# brown				  
-verydarkbrown      => [ ++$colors, qw/ 0.35 0.85 1.00 0.40 / ],
-darkbrown          => [ ++$colors, qw/ 0.30 0.70 1.00 0.35 / ],
-brown              => [ ++$colors, qw/ 0.25 0.75 1.00 0.25 / ],
-lightbrown         => [ ++$colors, qw/ 0.20 0.60 0.70 0.15 / ],
-verylightbrown     => [ ++$colors, qw/ 0.15 0.45 0.55 0.00 / ],
-@ 
-<<cmyk colors latex definition>>=
-% brown
-\definecolor{verydarkbrown}     {cmyk}{0.35,0.85,1.00,0.40}
-\definecolor{darkbrown}         {cmyk}{0.30,0.70,1.00,0.35}
-\definecolor{brown}             {cmyk}{0.25,0.75,1.00,0.25}
-\definecolor{lightbrown}        {cmyk}{0.20,0.60,0.70,0.15}
-\definecolor{verylightbrown}    {cmyk}{0.15,0.45,0.55,0.00}
-@ 
-<<cmyk color table - right>>=
-% brown
-\clspc
-\clrow{verydarkbrown}            & 0.35 & 0.85 & 1.00 & 0.40 \\
-\clrow{darkbrown}                & 0.30 & 0.70 & 1.00 & 0.35 \\
-\clrow{brown}                    & 0.25 & 0.75 & 1.00 & 0.25 \\
-\clrow{lightbrown}               & 0.20 & 0.60 & 0.70 & 0.15 \\
-\clrow{verylightbrown}           & 0.15 & 0.45 & 0.55 & 0.00 \\
-@
-
-\subsctn{Colors Help}
-
-<<colors help>>=
-Those are the colors defined in $PROGRAM:
-+ Basic Colors: black white.
-+ Variable Colors: 
-      grey magenta violet blue skyblue cyan seagreen
-         green limegreen yellow orange red brown
-  You can get five color shades from Variable Colors with
-  \"verydark\", \"dark\", \"light\" and \"verylight\" prefixes,
-  as example: 
-    verydarkblue, darkblue, blue, lightblue and verylightblue.
-@
-
-
-\newpage
-
-\sctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:PAGEdef}
-
-\label{todo:JAB}
-<<HIDE: new defs TODO>>=
-\def\todoJAB{
-Move this section to a perl package: \\ suggesting [[gfftools::PageSizes]].
-} % todoJAB
-@
-<<HIDE: TODO>>=
-\todoitem{\todoJAB}{todo:JAB}
-@
-\todo{ \item \todoJAB } % todo
-
-\subsctn{ISO standard page sizes: A series}
-
-<<page sizes perl definition>>=
-  a0        => [ ++$formats, 2384, 3370 ],
-  a1        => [ ++$formats, 1684, 2384 ],
-  a2        => [ ++$formats, 1190, 1684 ],
-  a3        => [ ++$formats,  842, 1190 ],
-  a4        => [ ++$formats,  595,  842 ],
-  a5        => [ ++$formats,  420,  595 ],
-  a6        => [ ++$formats,  297,  420 ],
-  a7        => [ ++$formats,  210,  297 ],
-  a8        => [ ++$formats,  148,  210 ],
-  a9        => [ ++$formats,  105,  148 ],
-  a10       => [ ++$formats,   73,  105 ],
-@
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-a0          & 2384 & 3370 &  84.1 & 118.9 &  33.1 &  46.8 \\
-a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
-a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
-a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
-a4          &  595 &  842 &  21.0 &  29.7 &   8.3 &  11.7 \\
-a5          &  420 &  595 &  14.8 &  21.0 &   5.8 &   8.3 \\
-a6          &  297 &  420 &  10.5 &  14.8 &   4.1 &   5.8 \\
-a7          &  210 &  297 &   7.4 &  10.5 &   2.9 &   4.1 \\
-a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
-a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
-a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
-@
-
-\subsctn{ISO standard page sizes: B series}
-
-<<page sizes perl definition>>=
-  b0        => [ ++$formats, 2920, 4127 ],
-  b1        => [ ++$formats, 2064, 2920 ],
-  b2        => [ ++$formats, 1460, 2064 ],
-  b3        => [ ++$formats, 1032, 1460 ],
-  b4        => [ ++$formats,  729, 1032 ],
-  b5        => [ ++$formats,  516,  729 ],
-  b6        => [ ++$formats,  363,  516 ],
-  b7        => [ ++$formats,  258,  363 ],
-  b8        => [ ++$formats,  181,  258 ],
-  b9        => [ ++$formats,  127,  181 ],
-  b10       => [ ++$formats,   91,  127 ],
-@
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-b0          & 2920 & 4127 & 103.0 & 145.6 &  40.6 &  57.3 \\
-b1          & 2064 & 2920 &  72.8 & 103.0 &  28.7 &  40.6 \\
-b2          & 1460 & 2064 &  51.5 &  72.8 &  20.3 &  28.7 \\
-b3          & 1032 & 1460 &  36.4 &  51.5 &  14.3 &  20.3 \\
-b4          &  729 & 1032 &  25.7 &  36.4 &  10.1 &  14.3 \\
-b5          &  516 &  729 &  18.2 &  25.7 &   7.2 &  10.1 \\
-b6          &  363 &  516 &  12.8 &  18.2 &   5.0 &   7.2 \\
-b7          &  258 &  363 &   9.1 &  12.8 &   3.6 &   5.0 \\
-b8          &  181 &  258 &   6.4 &   9.1 &   2.5 &   3.6 \\
-b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
-b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
-@
-
-\subsctn{US standard page sizes}
-
-<<page sizes perl definition>>=
-  executive => [ ++$formats,  540,  720 ],
-  folio     => [ ++$formats,  612,  936 ],
-  legal     => [ ++$formats,  612, 1008 ],
-  letter    => [ ++$formats,  612,  792 ],
-  quarto    => [ ++$formats,  610,  780 ],
-  statement => [ ++$formats,  396,  612 ],
- '10x14'    => [ ++$formats,  720, 1008 ],
-  ledger    => [ ++$formats, 1224,  792 ],
-  tabloid   => [ ++$formats,  792, 1224 ],
-@
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-executive   &  540 &  720 &  19.0 &  25.4 &   7.5 &  10.0 \\
-folio       &  612 &  936 &  21.6 &  33.0 &   8.5 &  13.0 \\
-legal       &  612 & 1008 &  21.6 &  35.6 &   8.5 &  14.0 \\
-letter      &  612 &  792 &  21.6 &  27.9 &   8.5 &  11.0 \\
-quarto      &  610 &  780 &  21.5 &  27.5 &   8.5 &  10.8 \\
-statement   &  396 &  612 &  14.0 &  21.6 &   5.5 &   8.5 \\ \hline\hline
-10x14       &  720 & 1008 &  25.4 &  35.6 &  10.0 &  14.0 \\
-ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
-tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
-@
-
-\subsctn{Page sizes help}
-
-<<pages help>>=
-The following page sizes are available: from A0 to A10, 
-from B0 to B10, 10x14, executive, folio, ledger, legal, 
-letter, quarto, statement and tabloid.
-@
-
 
 \newpage
 
@@ -7498,7 +7464,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -7801,7 +7767,361 @@ sub parseOpts() {
 
 \newpage
 
-\sctn{Making tests} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsctn{[[colors2tex.pl]]: formatting color definitions for manual.} %%%%%%%%%
+\label{sec:COLORprg}
+
+\subsubsctn{[[colors2tex.pl]] implementation}
+
+<<colors2tex.pl>>=
+<<PERL shebang>>
+# 
+# colors2tex.pl
+#
+<<Version Control Id Tag>>
+#
+use strict;
+use Getopt::Std;
+use File::Basename;
+#
+<<colors2tex - global vars>>
+#
+# MAIN
+&getcmdlineopts;
+&parseinput;
+exit(0);
+#
+# SUBS
+<<colors2tex - functions>>
+@
+
+<<HIDE: >>=
+#
+##################################################
+#
+__DATA__
+<<cmyk colors perl definition>>
+@
+
+<<cmyk colors latex definition>>=
+% black+grey+white
+\definecolor{black}              {cmyk}{0.00,0.00,0.00,1.00}
+\definecolor{verydarkgrey}       {cmyk}{0.00,0.00,0.00,0.80}
+\definecolor{darkgrey}           {cmyk}{0.00,0.00,0.00,0.60}
+\definecolor{grey}               {cmyk}{0.00,0.00,0.00,0.40}
+\definecolor{lightgrey}          {cmyk}{0.00,0.00,0.00,0.20}
+\definecolor{verylightgrey}      {cmyk}{0.00,0.00,0.00,0.10}
+\definecolor{white}              {cmyk}{0.00,0.00,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% black+grey+white
+\clspc
+\clrow{black}                    & 0.00 & 0.00 & 0.00 & 1.00 \\
+\clrow{verydarkgrey}             & 0.00 & 0.00 & 0.00 & 0.80 \\
+\clrow{darkgrey}                 & 0.00 & 0.00 & 0.00 & 0.60 \\
+\clrow{grey}                     & 0.00 & 0.00 & 0.00 & 0.40 \\
+\clrow{lightgrey}                & 0.00 & 0.00 & 0.00 & 0.20 \\
+\clrow{verylightgrey}            & 0.00 & 0.00 & 0.00 & 0.10 \\
+\clrow{white}                    & 0.00 & 0.00 & 0.00 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% magenta
+\definecolor{verydarkmagenta}    {cmyk}{0.00,1.00,0.00,0.30}
+\definecolor{darkmagenta}        {cmyk}{0.00,0.80,0.00,0.05}
+\definecolor{magenta}            {cmyk}{0.00,0.60,0.00,0.00}
+\definecolor{lightmagenta}       {cmyk}{0.00,0.40,0.00,0.00}
+\definecolor{verylightmagenta}   {cmyk}{0.00,0.20,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% magenta
+\clspc
+\clrow{verydarkmagenta}          & 0.00 & 1.00 & 0.00 & 0.30 \\
+\clrow{darkmagenta}              & 0.00 & 0.80 & 0.00 & 0.05 \\
+\clrow{magenta}                  & 0.00 & 0.60 & 0.00 & 0.00 \\
+\clrow{lightmagenta}             & 0.00 & 0.40 & 0.00 & 0.00 \\
+\clrow{verylightmagenta}         & 0.00 & 0.20 & 0.00 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% violet
+\definecolor{verydarkviolet}     {cmyk}{0.45,0.85,0.00,0.00}
+\definecolor{darkviolet}         {cmyk}{0.30,0.65,0.00,0.00}
+\definecolor{violet}             {cmyk}{0.22,0.55,0.00,0.00}
+\definecolor{lightviolet}        {cmyk}{0.15,0.40,0.00,0.00}
+\definecolor{verylightviolet}    {cmyk}{0.10,0.20,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% violet
+\clspc
+\clrow{verydarkviolet}           & 0.45 & 0.85 & 0.00 & 0.00 \\
+\clrow{darkviolet}               & 0.30 & 0.65 & 0.00 & 0.00 \\
+\clrow{violet}                   & 0.22 & 0.55 & 0.00 & 0.00 \\
+\clrow{lightviolet}              & 0.15 & 0.40 & 0.00 & 0.00 \\
+\clrow{verylightviolet}          & 0.10 & 0.20 & 0.00 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% blue
+\definecolor{verydarkblue}       {cmyk}{1.00,1.00,0.00,0.20}
+\definecolor{darkblue}           {cmyk}{0.90,0.90,0.00,0.00}
+\definecolor{blue}               {cmyk}{0.75,0.75,0.00,0.00}
+\definecolor{lightblue}          {cmyk}{0.50,0.50,0.00,0.00}
+\definecolor{verylightblue}      {cmyk}{0.30,0.30,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% blue
+\clspc
+\clrow{verydarkblue}             & 1.00 & 1.00 & 0.00 & 0.20 \\
+\clrow{darkblue}                 & 0.90 & 0.90 & 0.00 & 0.00 \\
+\clrow{blue}                     & 0.75 & 0.75 & 0.00 & 0.00 \\
+\clrow{lightblue}                & 0.50 & 0.50 & 0.00 & 0.00 \\
+\clrow{verylightblue}            & 0.30 & 0.30 & 0.00 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% skyblue
+\definecolor{verydarkskyblue}    {cmyk}{0.90,0.50,0.00,0.15}
+\definecolor{darkskyblue}        {cmyk}{0.75,0.45,0.00,0.00}
+\definecolor{skyblue}            {cmyk}{0.60,0.38,0.00,0.00}
+\definecolor{lightskyblue}       {cmyk}{0.45,0.25,0.00,0.00}
+\definecolor{verylightskyblue}   {cmyk}{0.30,0.15,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% skyblue
+\clspc
+\clrow{verydarkskyblue}          & 0.90 & 0.50 & 0.00 & 0.15 \\
+\clrow{darkskyblue}              & 0.75 & 0.45 & 0.00 & 0.00 \\
+\clrow{skyblue}                  & 0.60 & 0.38 & 0.00 & 0.00 \\
+\clrow{lightskyblue}             & 0.45 & 0.25 & 0.00 & 0.00 \\
+\clrow{verylightskyblue}         & 0.30 & 0.15 & 0.00 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% cyan
+\definecolor{verydarkcyan}       {cmyk}{1.00,0.00,0.00,0.10}
+\definecolor{darkcyan}           {cmyk}{0.80,0.00,0.00,0.00}
+\definecolor{cyan}               {cmyk}{0.60,0.00,0.00,0.00}
+\definecolor{lightcyan}          {cmyk}{0.40,0.00,0.00,0.00}
+\definecolor{verylightcyan}      {cmyk}{0.20,0.00,0.00,0.00}
+@ 
+<<cmyk color table - left>>=
+% cyan
+\clspc
+\clrow{verydarkcyan}             & 1.00 & 0.00 & 0.00 & 0.10 \\
+\clrow{darkcyan}                 & 0.80 & 0.00 & 0.00 & 0.00 \\
+\clrow{cyan}                     & 0.60 & 0.00 & 0.00 & 0.00 \\
+\clrow{lightcyan}                & 0.40 & 0.00 & 0.00 & 0.00 \\
+\clrow{verylightcyan}            & 0.20 & 0.00 & 0.00 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% seagreen
+\definecolor{verydarkseagreen}   {cmyk}{0.75,0.00,0.45,0.00}
+\definecolor{darkseagreen}       {cmyk}{0.62,0.00,0.38,0.00}
+\definecolor{seagreen}           {cmyk}{0.50,0.00,0.30,0.00}
+\definecolor{lightseagreen}      {cmyk}{0.38,0.00,0.22,0.00}
+\definecolor{verylightseagreen}  {cmyk}{0.25,0.00,0.15,0.00}
+@ 
+<<cmyk color table - right>>=
+% seagreen
+\clspc
+\clrow{verydarkseagreen}         & 0.75 & 0.00 & 0.45 & 0.00 \\
+\clrow{darkseagreen}             & 0.62 & 0.00 & 0.38 & 0.00 \\
+\clrow{seagreen}                 & 0.50 & 0.00 & 0.30 & 0.00 \\
+\clrow{lightseagreen}            & 0.38 & 0.00 & 0.22 & 0.00 \\
+\clrow{verylightseagreen}        & 0.25 & 0.00 & 0.15 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% green
+\definecolor{verydarkgreen}      {cmyk}{1.00,0.00,1.00,0.25}
+\definecolor{darkgreen}          {cmyk}{0.80,0.00,0.80,0.00}
+\definecolor{green}              {cmyk}{0.60,0.00,0.60,0.00}
+\definecolor{lightgreen}         {cmyk}{0.40,0.00,0.40,0.00}
+\definecolor{verylightgreen}     {cmyk}{0.20,0.00,0.20,0.00}
+@ 
+<<cmyk color table - right>>=
+% green
+\clspc
+\clrow{verydarkgreen}            & 1.00 & 0.00 & 1.00 & 0.25 \\
+\clrow{darkgreen}                & 0.80 & 0.00 & 0.80 & 0.00 \\
+\clrow{green}                    & 0.60 & 0.00 & 0.60 & 0.00 \\
+\clrow{lightgreen}               & 0.40 & 0.00 & 0.40 & 0.00 \\
+\clrow{verylightgreen}           & 0.20 & 0.00 & 0.20 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% limegreen
+\definecolor{verydarklimegreen}  {cmyk}{0.50,0.00,1.00,0.10}
+\definecolor{darklimegreen}      {cmyk}{0.40,0.00,0.95,0.00}
+\definecolor{limegreen}          {cmyk}{0.30,0.00,0.80,0.00}
+\definecolor{lightlimegreen}     {cmyk}{0.20,0.00,0.65,0.00}
+\definecolor{verylightlimegreen} {cmyk}{0.10,0.00,0.50,0.00}
+@ 
+<<cmyk color table - right>>=
+% limegreen
+\clspc
+\clrow{verydarklimegreen}        & 0.50 & 0.00 & 1.00 & 0.10 \\
+\clrow{darklimegreen}            & 0.40 & 0.00 & 0.95 & 0.00 \\
+\clrow{limegreen}                & 0.30 & 0.00 & 0.80 & 0.00 \\
+\clrow{lightlimegreen}           & 0.20 & 0.00 & 0.65 & 0.00 \\
+\clrow{verylightlimegreen}       & 0.10 & 0.00 & 0.50 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% yellow
+\definecolor{verydarkyellow}     {cmyk}{0.00,0.00,1.00,0.25}
+\definecolor{darkyellow}         {cmyk}{0.00,0.00,1.00,0.10}
+\definecolor{yellow}             {cmyk}{0.00,0.00,1.00,0.00}
+\definecolor{lightyellow}        {cmyk}{0.00,0.00,0.50,0.00}
+\definecolor{verylightyellow}    {cmyk}{0.00,0.00,0.25,0.00}
+@ 
+<<cmyk color table - right>>=
+% yellow
+\clspc
+\clrow{verydarkyellow}           & 0.00 & 0.00 & 1.00 & 0.25 \\
+\clrow{darkyellow}               & 0.00 & 0.00 & 1.00 & 0.10 \\
+\clrow{yellow}                   & 0.00 & 0.00 & 1.00 & 0.00 \\
+\clrow{lightyellow}              & 0.00 & 0.00 & 0.50 & 0.00 \\
+\clrow{verylightyellow}          & 0.00 & 0.00 & 0.25 & 0.00 \\
+@ 
+
+<<cmyk colors latex definition>>=
+% orange
+\definecolor{verydarkorange}     {cmyk}{0.00,0.50,0.80,0.10}
+\definecolor{darkorange}         {cmyk}{0.00,0.40,0.80,0.00}
+\definecolor{orange}             {cmyk}{0.00,0.30,0.80,0.00}
+\definecolor{lightorange}        {cmyk}{0.00,0.20,0.75,0.00}
+\definecolor{verylightorange}    {cmyk}{0.00,0.15,0.70,0.00}
+@ 
+<<cmyk color table - right>>=
+% orange
+\clspc
+\clrow{verydarkorange}           & 0.00 & 0.50 & 0.80 & 0.10 \\
+\clrow{darkorange}               & 0.00 & 0.40 & 0.80 & 0.00 \\
+\clrow{orange}                   & 0.00 & 0.30 & 0.80 & 0.00 \\
+\clrow{lightorange}              & 0.00 & 0.20 & 0.75 & 0.00 \\
+\clrow{verylightorange}          & 0.00 & 0.15 & 0.70 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% red
+\definecolor{verydarkred}        {cmyk}{0.00,1.00,1.00,0.15}
+\definecolor{darkred}            {cmyk}{0.00,0.80,0.80,0.00}
+\definecolor{red}                {cmyk}{0.00,0.60,0.60,0.00}
+\definecolor{lightred}           {cmyk}{0.00,0.40,0.40,0.00}
+\definecolor{verylightred}       {cmyk}{0.00,0.20,0.20,0.00}
+@ 
+<<cmyk color table - right>>=
+% red
+\clspc
+\clrow{verydarkred}              & 0.00 & 1.00 & 1.00 & 0.15 \\
+\clrow{darkred}                  & 0.00 & 0.80 & 0.80 & 0.00 \\
+\clrow{red}                      & 0.00 & 0.60 & 0.60 & 0.00 \\
+\clrow{lightred}                 & 0.00 & 0.40 & 0.40 & 0.00 \\
+\clrow{verylightred}             & 0.00 & 0.20 & 0.20 & 0.00 \\
+@
+
+<<cmyk colors latex definition>>=
+% brown
+\definecolor{verydarkbrown}     {cmyk}{0.35,0.85,1.00,0.40}
+\definecolor{darkbrown}         {cmyk}{0.30,0.70,1.00,0.35}
+\definecolor{brown}             {cmyk}{0.25,0.75,1.00,0.25}
+\definecolor{lightbrown}        {cmyk}{0.20,0.60,0.70,0.15}
+\definecolor{verylightbrown}    {cmyk}{0.15,0.45,0.55,0.00}
+@ 
+<<cmyk color table - right>>=
+% brown
+\clspc
+\clrow{verydarkbrown}            & 0.35 & 0.85 & 1.00 & 0.40 \\
+\clrow{darkbrown}                & 0.30 & 0.70 & 1.00 & 0.35 \\
+\clrow{brown}                    & 0.25 & 0.75 & 1.00 & 0.25 \\
+\clrow{lightbrown}               & 0.20 & 0.60 & 0.70 & 0.15 \\
+\clrow{verylightbrown}           & 0.15 & 0.45 & 0.55 & 0.00 \\
+@
+
+\newpage
+
+\subsctn{[[pagebbox2tex.pl]]: formatting page sizes for manual.} %%%%%%%%%%%%%%
+\label{sec:PBBOXprg}
+
+\subsubsctn{[[pagebbox2tex.pl]] implementation}
+
+<<pagebbox2tex.pl>>=
+<<PERL shebang>>
+# 
+# pagebbox2tex.pl
+#
+<<Version Control Id Tag>>
+#
+use strict;
+use Getopt::Std;
+use File::Basename;
+#
+<<pagebbox2tex - global vars>>
+#
+# MAIN
+&getcmdlineopts;
+&parseinput;
+exit(0);
+#
+# SUBS
+<<pagebbox2tex - functions>>
+@
+
+<<HIDE: >>=
+#
+##################################################
+#
+__DATA__
+<<page sizes perl definition>>
+@
+
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+a0          & 2384 & 3370 &  84.1 & 118.9 &  33.1 &  46.8 \\
+a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
+a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
+a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
+a4          &  595 &  842 &  21.0 &  29.7 &   8.3 &  11.7 \\
+a5          &  420 &  595 &  14.8 &  21.0 &   5.8 &   8.3 \\
+a6          &  297 &  420 &  10.5 &  14.8 &   4.1 &   5.8 \\
+a7          &  210 &  297 &   7.4 &  10.5 &   2.9 &   4.1 \\
+a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
+a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
+a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+b0          & 2920 & 4127 & 103.0 & 145.6 &  40.6 &  57.3 \\
+b1          & 2064 & 2920 &  72.8 & 103.0 &  28.7 &  40.6 \\
+b2          & 1460 & 2064 &  51.5 &  72.8 &  20.3 &  28.7 \\
+b3          & 1032 & 1460 &  36.4 &  51.5 &  14.3 &  20.3 \\
+b4          &  729 & 1032 &  25.7 &  36.4 &  10.1 &  14.3 \\
+b5          &  516 &  729 &  18.2 &  25.7 &   7.2 &  10.1 \\
+b6          &  363 &  516 &  12.8 &  18.2 &   5.0 &   7.2 \\
+b7          &  258 &  363 &   9.1 &  12.8 &   3.6 &   5.0 \\
+b8          &  181 &  258 &   6.4 &   9.1 &   2.5 &   3.6 \\
+b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
+b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+executive   &  540 &  720 &  19.0 &  25.4 &   7.5 &  10.0 \\
+folio       &  612 &  936 &  21.6 &  33.0 &   8.5 &  13.0 \\
+legal       &  612 & 1008 &  21.6 &  35.6 &   8.5 &  14.0 \\
+letter      &  612 &  792 &  21.6 &  27.9 &   8.5 &  11.0 \\
+quarto      &  610 &  780 &  21.5 &  27.5 &   8.5 &  10.8 \\
+statement   &  396 &  612 &  14.0 &  21.6 &   5.5 &   8.5 \\ \hline\hline
+10x14       &  720 & 1008 &  25.4 &  35.6 &  10.0 &  14.0 \\
+ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
+tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
+@
+
+
+\newpage
+
+\subsctn{Making tests with [[aplottester.pl]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \label{todo:TAA}
 <<HIDE: new defs TODO>>=
@@ -7819,7 +8139,7 @@ Implement a perl script to test {\prog} functions.
 <<aplottester.pl>>=
 <<PERL shebang>>
 # 
-# parameter2tex.pl
+# aplottester.pl
 #
 <<Version Control Id Tag>>
 #
@@ -7842,7 +8162,7 @@ exit(0);
 <<aplottester - functions>>
 @ 
 
-\subsctn{Tests to be implemented}
+\subsubsctn{Tests to be implemented}
 
 <<testing regular expressions for element@id>>=
 The following does not work pretty well:
@@ -8233,7 +8553,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $
+# $Id: gff2aplot.nw,v 1.18 2001-11-09 20:08:47 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
