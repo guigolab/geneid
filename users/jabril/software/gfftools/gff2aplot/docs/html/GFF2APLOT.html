@@ -1,0 +1,539 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+ <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+ <META NAME="Generator" CONTENT="Hacker Hands">
+ <META NAME="author" CONTENT="Josep F. Abril">
+  <!-- $Id: GFF2APLOT.html,v 1.1 2003-06-05 17:23:14 jabril Exp $ -->
+  <META NAME="keywords"    CONTENT="GFF2APLOT, GFF, gff-format, Genomic Pairwise Alignments PostScript Plots, Genomic Analysis, Sinteny, Bioinformatics">
+  <META NAME="description" CONTENT="GFF2APLOT MAIN PAGE: Pair-wise Alignments in PostScript.">
+ <TITLE>GFF2APLOT MAIN PAGE: Pair-wise Alignments in PostScript.</TITLE>
+<BASE HREF="http://genome.imim.es/software/gfftools/">
+<link rel=stylesheet type="text/css" href="http://genome.imim.es/Genome.css" title="Genome">
+<STYLE type="text/css">
+ @import url(http://genome.imim.es/Genome_forms_mozilla.css);
+
+.codebg {
+ display: table-cell;
+ background: #CCFFCC;
+}
+.codefg {
+ font-family: "Monospaced", "Courier", sans-serif;
+ font-weight: normal;
+ font-size: 12px;
+ color: #000000;
+}
+</STYLE>
+<SCRIPT type="text/javascript" src="http://genome.imim.es/Genome.js"></SCRIPT>
+</head>
+
+<body onResize="init();" MARGINWIDTH="2" MARGINHEIGHT="0">
+<A NAME="TOP"></A>
+
+<!-- ############### TITLE AREA ############### -->
+<table border=0 cellpadding=0 cellspacing=0 width="100%">
+<tr>
+<td align="center">
+<FONT size=4 class="tit">Genome BioInformatics Research Lab</FONT>
+</td>
+</tr>
+</table>
+
+<!-- ############### MENU AREA ############### -->
+<table class="default" border=0 cellpadding=0 cellspacing=0 width="100%">
+<tr>
+<td class="links" align="CENTER">
+ <a href="http://genome.imim.es/main/help.html" 
+  onMouseover="window.status='Asking for Help';">Help</a>
+&nbsp;<FONT style="color: #005050;">&#124;</FONT>&nbsp;
+ <a href="http://genome.imim.es/main/news.html"
+  onMouseover="window.status='News';">News</a>
+&nbsp;<FONT style="color: #005050;">&#124;</FONT>&nbsp;
+ <a href="http://genome.imim.es/main/people.html"
+  onMouseover="window.status='Who is who in Genome Informatics Research Laboratory';">People</a>
+&nbsp;<FONT style="color: #005050;">&#124;</FONT>&nbsp;
+ <a href="http://genome.imim.es/main/research.html"
+  onMouseover="window.status='Research at our Group';">Research</a>
+&nbsp;<FONT style="background: #005050; color: #FFFFFF;">&nbsp;
+ <a href="http://genome.imim.es/main/software.html"
+  style="background: #005050; color: #DDDDDD;"
+  onMouseover="window.status='Software developed in our Group';">Software</a>
+&nbsp;</FONT>&nbsp; <!-- Current menu -->
+ <a href="http://genome.imim.es/main/publications.html"
+  onMouseover="window.status='Publications by our Group';">Publications</a>
+&nbsp;<FONT style="color: #005050;">&#124;</FONT>&nbsp;
+ <a href="http://genome.imim.es/main/links.html"
+  onMouseover="window.status='Interesting Links';">Links</a>
+</td>
+</tr>
+<tr>
+<td class="links" align="CENTER">
+ <a href="http://genome.imim.es/main/databases.html"
+  onMouseover="window.status='Datasets created/curated by our Group';" class="hh">Resources &amp; Datasets</a>
+&nbsp;<FONT style="color: #005050;">&#124;</FONT>&nbsp;
+ <a href="http://genome.imim.es/genepredictions/index.html"
+  onMouseover="window.status='Gene Predictions produced by our Software';" class="hh">Gene Predictions</a>
+&nbsp;<FONT style="color: #005050;">&#124;</FONT>&nbsp;
+ <a href="http://genome.imim.es/main/seminars.html"
+  onMouseover="window.status='Seminars, Courses and Group Sessions';" class="hh">Seminars &amp; Courses</a>
+</td>
+</tr>
+</table><BR class="hhh">
+
+<!-- ############### PATH AREA ############### -->
+<table border=1 cellpadding=0 cellspacing=0 width="100%">
+<tr>
+<td class="path" border=0 cellpadding=0 cellspacing=0 ALIGN="LEFT">
+ <table border=0 cellpadding=0 cellspacing=1>
+ <tr>
+ <td class="ppath" border=0 cellpadding=0 cellspacing=0>
+&nbsp;
+<a href="http://www.imim.es/"
+ onMouseover="window.status='Institut Municipal d\'Investigaci&oacute; M&egrave;dica';">IMIM</a>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<IMG SRC="http://genome.imim.es/g_icons/dmd.gif" ALT="*" HEIGHT=8 WIDTH=8 BORDER=0>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<a href="http://www.upf.es/"
+ onMouseover="window.status='Universitat Pompeu Fabra';">UPF</a>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<IMG SRC="http://genome.imim.es/g_icons/dmd.gif" ALT="*" HEIGHT=8 WIDTH=8 BORDER=0>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<a href="http://www.crg.es/"
+ onMouseover="window.status='Centre de Regulaci&oacute; Gen&ograve;mica';">CRG</a>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<IMG SRC="http://genome.imim.es/g_icons/dmd.gif" ALT="*" HEIGHT=8 WIDTH=8 BORDER=0>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<a href="http://www.imim.es/grib/eng/default.htm"
+ onMouseover="window.status='Grup de Recerca en Informàtica Biom&egrave;dica';">GRIB</a>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<A HREF="http://genome.imim.es/index.html" onMouseover="window.status='Genome Informatics Research Laboratory HOME PAGE: You are Welcome!!!'">
+<IMG SRC="http://genome.imim.es/g_icons/lhr.gif" ALT="HOME" HEIGHT=10 WIDTH=36 BORDER=0>
+</A>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<a href="http://genome.imim.es/main/software.html"
+  onMouseover="window.status='Software';">SOFTWARE</a>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<IMG SRC="http://genome.imim.es/g_icons/dmd.gif" ALT="*" HEIGHT=8 WIDTH=8 BORDER=0>
+ </td><td class="ppath" border=0 cellpadding=0 cellspacing=0>
+<a href="http://genome.imim.es/software/gfftools/GFF2APLOT.html#TOP"
+ onMouseover="window.status='This is the main page for GFF2APLOT.';">gff2aplot</a>
+ </td>
+ </tr>
+ </table>
+</td>
+</tr>
+</table>
+
+<!-- ############### USERS AREA ############### -->
+<table border=0 cellpadding=0 cellspacing=0 width="100%">
+<tr border=0 cellpadding=0 cellspacing=0>
+<td class="section" border=0 cellpadding=0 cellspacing=0 width="10px">&nbsp;</td>
+<td class="section" ALIGN=CENTER>
+ <CENTER><FONT size=6 class="tgen"><code>gff2aplot</code></FONT></CENTER>
+</td>
+<td class="section" border=0 cellpadding=0 cellspacing=0 width="10px">&nbsp;</td>
+</tr>
+<tr border=0 cellpadding=0 cellspacing=0>
+<td class="userspace" border=0 cellpadding=0 cellspacing=0 width="10px">&nbsp;</td>
+<td class="userspace" border=0 cellpadding=0 cellspacing=0>
+
+&nbsp;<BR>
+<A NAME="TOC"></A>
+<P>
+<FONT size=5 class="K"> Contents </FONT>
+<UL>
+  <LI><A HREF="GFF2APLOT.html#DESCRIPTION" onMouseover="window.status='PROGRAM DESCRIPTION';">PROGRAM DESCRIPTION</A> <BR></LI>
+  <LI><A HREF="GFF2APLOT.html#EXAMPLES" onMouseover="window.status='EXAMPLES';">EXAMPLES</A> <BR></LI>
+  <LI><A HREF="GFF2APLOT.html#HOWTOS" onMouseover="window.status='HOWTOs';">HOWTOs</A>
+  <LI><A HREF="GFF2APLOT.html#NEWS" onMouseover="window.status='NEWS';">NEWS</A> <BR></LI>
+  <LI><A HREF="GFF2APLOT.html#DOWNLOADING" onMouseover="window.status='DOWNLOADING gff2ps';">DOWNLOADING <STRONG>gff2aplot</STRONG></A> <BR></LI>
+  <LI><A HREF="GFF2APLOT.html#BUGS" onMouseover="window.status='REPORTING BUGS';">REPORTING BUGS</A> <BR></LI>
+<!--
+  <LI><A HREF="GFF2APLOT.html#SERVER" onMouseover="window.status='WEB SERVER';"><STRONG>gff2aplot</STRONG> WEB SERVER</A> <BR></LI>
+-->
+  <LI><A HREF="GFF2APLOT.html#FEATURES" onMouseover="window.status='MAIN FEATURES';">MAIN FEATURES</A> <BR></LI>
+  <LI><A HREF="GFF2APLOT.html#TODO" onMouseover="window.status='WISH LIST';">WISH LIST</A> <BR></LI>
+  <LI><A HREF="GFF2APLOT.html#AUTHORS" onMouseover="window.status='AUTHORS';">AUTHORS</A> <BR></LI>
+</UL>
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="DESCRIPTION"></a><FONT size=5 class="K"> PROGRAM DESCRIPTION </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P> <BR class="hh">
+<CENTER>
+<H3><TT>gff2aplot</TT> <BR>
+Pair-wise alignment-plots for genomic sequences in PostScript.</H3>
+</CENTER>
+</P>
+<P> <BR class="hh">
+Our basic goal is to provide an easy-to-use filter to get plots that will be useful in genomic analysis, and also giving enough quality to include them into your documents without losing resolution. We defined a simple format from <TT>GFF</TT> format to define pair-wise alignments, but now program can also read standard <TT>GFF</TT> for those alignments too. <BR><BR>
+
+"General Feature Format" (GFF) is described on the Sanger Centre <A HREF="http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml" onMouseover="window.status='General Feature Format Definition Page';">gff definition page</A>. Extended GFF-like aplot format is described in the <A href="GFF2APLOT.html#DOWNLOADING" onMouseover="window.status='GO TO DOWNLOAD SECTION FOR THE LATEST MANUAL VERSION';">"gff2aplot User's Manual"</A>. <BR><BR>
+
+We will appreciate if you can cite <TT>gff2aplot</TT> paper and/or the URL, as follows: <BR class="hh"><BR>
+
+<table border=0 cellpadding=0 cellspacing=0 width="95%">
+<TR>
+<TD width=10>&nbsp;&nbsp;&nbsp;</TD>
+<TD width=60 align=left>
+<A href="http://bioinformatics.oupjournals.org/cgi/content/abstract/16/8/743?maxtoshow=&HITS=10&hits=10&RESULTFORMAT=&searchid=QID_NOT_SET&stored_search=&FIRSTINDEX=&volume=16&firstpage=743&journalcode=bioinfo"><IMG SRC="icons/papers/Bioinformatics_16_8.jpg" HEIGHT="75" WIDTH="55" VSPACE="5" HSPACE="0" ALIGN=MIDDLE ALT="Bioinformatics cover 16(8)"></A>&nbsp;
+</TD>
+<TD width=10>&nbsp;&nbsp;&nbsp;</TD>
+<TD class="userspace" width="100%" ALIGN=LEFT VALIGN=MIDDLE>
+Abril, J.F., Guig&oacute;, R. and Wiehe, T.<BR>
+"<CODE>gff2aplot</CODE>: a plotting tool for sequence comparisons." <BR>
+<I>Bioinformatics</I>, (<EM>accepted</EM>)
+<!-- vol(is):ppo-ppe (2003). <BR> [<A HREF=""><I>Bioinformatics</I> Abstract</A>]&nbsp;[<A HREF="">PubMed Abstract</A>] -->
+ <BR class="hh"><BR class="hh">
+URL:&nbsp;&nbsp;<A href="http://genome.imim.es/software/gfftools/GFF2APLOT.html" onMouseover="window.status='GFF2APLOT URL... Thanks for citing it... ;^D';">http://genome.imim.es/software/gfftools/GFF2APLOT.html</A> <BR>
+</TD>
+</TR>
+</table> <BR>
+
+...Thanks in advance for your collaboration. <BR class="hh"><BR>
+
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="EXAMPLES"></a><FONT size=5 class="K"> EXAMPLES </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P>&nbsp;<BR class="hh">
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%"><TR>
+<TD width="100"><A href="http://genome.imim.es/software/gfftools/gff2aplot_docs/snapshots/index.html" onMouseover="window.status='Some examples on how to use GFF2APLOT';"><IMG SRC="http://genome.imim.es/software/gfftools/gff2aplot_docs/snapshots/snapshots.jpg" ALT="SNAPSHOTS" width="100" height="125" BORDER=1></A></TD><TD width="10">&nbsp;</TD>
+<TD class="userspace">&nbsp;<BR class="hh">
+Following this link you can get some <A href="http://genome.imim.es/software/gfftools/gff2aplot_docs/snapshots/index.html" onMouseover="window.status='Some examples on how to use GFF2APLOT';">snapshots</A> of <TT>gff2aplot</TT> output. <BR>
+</TD>
+</TR></TABLE>
+</P>
+<P>
+You can find several examples of the flexibility of <TT>gff2aplot</TT> in the following citation indexes (those published before 2003 were made using the old GNUawk/Bash implementation). <BR>
+<UL>
+<!--
+ <LI> <TT>gff2aplot</TT> paper was cited in the following papers: <BR class="hh"><BR>
+<UL class="lst">
+ <LI>  et al. <BR class="hh"> "." <BR class="hh"> <B>Fig</B>, <I></I>, v(i):po-pe, y. [<A HREF="">Abstract</A>] <BR> </LI>
+</UL> <BR>
+</LI>
+-->
+ <LI> <TT>gff2aplot</TT> URL was cited in the following papers: <BR class="hh"><BR>
+<UL class="lst">
+ <LI> T. Wiehe et al. <BR class="hh">
+      "SGP-1: prediction and validation of homologous genes based on sequence alignments." <BR class="hh">
+      <B>Figs 2 and 5</B>, <I>Genome Research</I>, 11(9):1574-1583, 2001. [<A HREF="http://www.genome.org/cgi/content/abstract/11/9/1574">Abstract</A>] <BR class="hh"><BR> </LI>
+ <LI> K. Reichwald et al. <BR class="hh">
+      "Comparative sequence analysis of the <I>MECP2</I>-locus in human and mouse reveals new transcribed regions." <BR class="hh">
+      <B>Fig 2</B>, <I>Mammalian Genome</I>, 11(3):182-190, 2000. [<A HREF="http://link.springer-ny.com/link/service/journals/00335/bibs/0011003/00110182.html">Abstract</A>] <BR class="hh"><BR> </LI>
+ <LI> T. Thomson et al. <BR class="hh">
+      "Fusion of the human gene for the polyubiquitination co-effector UEV-1 with <I>kua</I>, a newly identified gene." <BR class="hh">
+      <B>Fig 2B</B>, <I>Genome Research</I>, 10(11):1743-1756, 2000. [<A HREF="http://www.genome.org/cgi/content/abstract/10/11/1743">Abstract</A>] <BR> </LI>
+</UL> <BR>
+</LI>
+ <LI> <TT>gff2aplot</TT> was used, but not cited (sigh!), in the following papers: <BR class="hh"><BR>
+<UL class="lst">
+ <LI> G. Parra et al. <BR class="hh">
+      "Comparative Gene Prediction in Human and Mouse." <BR class="hh">
+      <B>Fig 1</B>, <I>Genome Research</I>, 13(1):108-117, 2003. [<A HREF="http://www.genome.org/cgi/content/abstract/13/1/108">Abstract</A>] <BR> </LI>
+</UL> <BR class="hh">
+ </LI>
+</UL>
+</P>
+<P>
+Do you think we have forgotten any citation ? Do not hesitate to send an email with the corresponding citation to <A HREF="MAILTO:jabril@imim.es?subject=[GFF2APLOT] CITATIONS:" onMouseover="window.status='Submitting GFF2APLOT CITATIONS... Thanks!!!';">authors</A> and we will include it here...
+</P> <!-- [<A HREF="">Abstract</A>] <BR> </LI> -->
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="HOWTOS"></a><FONT size=5 class="K"> HOWTOs </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2PS.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P> <BR class="hh">
+In this section you can find usefull tutorials on how to use <TT>gff2aplot</TT>. It will be regularly updated with new documents. Some knwoledge about unix commad-line is required, more specifically about bash shell. <BR>
+Most of the snapshot figures from those HTML pages are in PNG format. Our apologies if your browser is not able to handle PNGs. Anyway, you will find a link to a PostScript and/or PDF file for the main figures. <BR>
+</P>
+<UL class="lst">
+  <LI> <B><a href="gff2aplot_docs/first_contact/index.html">First contact</a></B>: <BR>
+A general introduction about using <TT>gff2aplot</TT> command-line switches, customization files and GFF input files. It starts describing how to run the program on a unix shell and few command-line switches. After that, it introduces to the customization files and the basics of customizing the program's output. It shows examples of the GFF input records. Finally, an example plot is generated in three steps. <BR class="kk"><BR>
+  </LI>
+  <LI> <B><a href="gff2aplot_docs/wublast/index.html">Plotting WU-BLAST alignments</a></B>: <BR>
+In this tutorial we will see examples on <code>parseblast</code> output when applying to a WU-BLAST file. There are three basic aligment formats that can be generated from a blast file by <code>parseblast.pl</code>, but all three must produce the same plots by <code>gff2aplot</code>. We will also see the raw output from <code>gff2aplot</code> and how to customize it a little bit. <BR class="kk"><BR>
+  </LI>
+  <LI> <B><a href="gff2aplot_docs/mhcregion/index.html">SIM alignment for a multigenic syntenic region</a></B>: <BR>
+We will visualize the output produced by SIM on the genomic MHC syntenic region between human and mouse. We will use <code>ali2gff</code>, a filter written in C, to convert its output into GFF. Once we have generated the whole genomic region figure, we will zoom into a single gene annotation. This will illustrate how you can expand a given area from your pictures, to highlight single features on multigenic annotation plots for instance.  <BR class="kk"><BR>
+  </LI>
+  <LI> <B><a href="gff2aplot_docs/plot_layers/index.html">Understanding <code>gff2aplot</code> layers</a></B>: <BR>
+Each set of features drawn by <code>gff2aplot</code> is put into one of the pre-defined layers. It is obvious that it is important to know which layers we have and what can be shown on each of them. Another interesting feature that can be learnt from this tutorial, is the way <code>gff2aplot</code> can handle customizing parameters from command-line and customization files. <BR class="kk"><BR>
+  </LI>
+  <LI> <B><a href="gff2ps_docs/visualizing/index.html">Visualizing PostScript output from <TT>gff2ps</TT></a></B>: <BR>
+Although this tutorial was written using only plots generated by <a href="http://genome.imim.es/software/gfftools/GFF2PS.html" onMouseover="window.status='Go to GFF2PS Home Page';">gff2ps</a>, it equally applies to <a href="http://genome.imim.es/software/gfftools/GFF2APLOT.html" onMouseover="window.status='Go to GFF2APLOT Home Page';">gff2aplot</a> output. As both programs produce PostScript plots, in this howto we will try to provide some help on handling that PostScript output and converting to other formats (including bitmaps and PDF). <BR>
+  </LI>
+</UL><BR class="hh">
+<P>
+You are welcome to provide more examples on how did you use <TT>gff2aplot</TT> in your projects, by sending your report files or a link to your own html report/howto. Your experience will be valuable for other users, mostly for newer ones. Send an email to <A HREF="MAILTO:jabril@imim.es?subject=[GFF2APLOT] HOWTOs:" onMouseover="window.status='Submitting HOWTOs';">authors</A>, we will try to include here your contribution as soon as possible.
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="NEWS"></a><FONT size=5 class="K"> NEWS </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<BR>
+<TABLE class="userspace" BORDER=0 WIDTH="100%">
+ <TR ALIGN=LEFT>
+  <TD WIDTH=10>&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>02&nbsp;Jun&nbsp;2003</TD>
+  <TD class="userspace" VALIGN=TOP>&nbsp;<A HREF="GFF2APLOT.html#DOWNLOADING" onMouseover="window.status='GO TO DOWNLOAD SECTION';">v2.0</A>&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>
+   Finally, <TT>gff2aplot</TT> has been fully re-implemented in <TT>Perl</TT>. Parsing process, record sorting and output throughput is much more faster. We also expect that the new program will be more portable than the previous versions. <BR>
+   Customization process is now more flexible, including <TT>gff2ps</TT>-like customization files (regular expressions, modularity of settings and multiple files allowed), ability to set all the variables via command-line switches. <BR>
+   Output PostScript code has also been improved, making the plots more compact and less prone to interpreter errors. <BR>
+   Old GNUawk/Bash version is no longer maintained although it is still available. <BR>
+  </TD>
+  <TD WIDTH=10>&nbsp;</TD>
+ </TR>
+ <TR ALIGN=LEFT>
+  <TD WIDTH=10>&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>26&nbsp;Jan&nbsp;2000</TD>
+  <TD class="userspace" VALIGN=TOP>&nbsp;v1.9&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>
+   After several bug fixes and versions not published, here is the new version for <TT>gff2aplot</TT>. <BR>
+   This version can work with "partial" custom files (without having to define all the variables) and can also read alignments in standard GFF format. <BR>
+  </TD>
+  <TD WIDTH=10>&nbsp;</TD>
+ </TR>
+ <TR ALIGN=LEFT>
+  <TD WIDTH=10>&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>24&nbsp;Apr&nbsp;1999</TD>
+  <TD class="userspace" VALIGN=TOP>&nbsp;v1.3&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>
+   Defaults are defined within the main gawk script too. Thus custom file is not mandatory now.
+  </TD>
+  <TD WIDTH=10>&nbsp;</TD>
+ </TR>
+ <TR ALIGN=LEFT>
+  <TD WIDTH=10>&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>22&nbsp;Mar&nbsp;1999</TD>
+  <TD class="userspace" VALIGN=TOP>&nbsp;v1.2&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>
+   Zoom option was defined. Data vectors can be passed to plot functions on the third panel.
+  </TD>
+  <TD WIDTH=10>&nbsp;</TD>
+ </TR>
+ <TR ALIGN=LEFT>
+  <TD WIDTH=10>&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>02&nbsp;Mar&nbsp;1999</TD>
+  <TD class="userspace" VALIGN=TOP>&nbsp;v1.0&nbsp;</TD>
+  <TD class="userspace" VALIGN=TOP>
+   First running version for <TT>gff2aplot</TT>. <BR>
+   Annotation on axes is defined in GFF-format. <BR>
+   Alignment definition is written in pseudo GFF (APLOT format).
+  </TD>
+  <TD WIDTH=10>&nbsp;</TD>
+ </TR>
+</TABLE>
+<BR>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="DOWNLOADING"></a><FONT size=5 class="K"> DOWNLOADING </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P> <BR class="hh">
+Download last version of <A href="ftp://genome.imim.es/pub/software/gff_tools/gff2aplot/gff2aplot-v2_0.tar.gz" onMouseover="window.status='DOWNLOAD GFF2APLOT FROM OUR FTP SERVER';"><TT>gff2aplot</TT> (v2.0) from our ftp server</A>. The <A href="ftp://genome.imim.es/pub/software/gff_tools/gff2aplot/last/GFF2APLOT_MANUAL.ps.gz" onMouseover="window.status='DOWNLOAD GFF2APLOT USER\'s MANUAL FROM OUR FTP SERVER';">last version of the "<TT>gff2aplot</TT> User's Manual" is also available via ftp</A> altough it is included in the program's tarball. This manual is not finished yet, you still can learn how to use <TT>gff2aplot</TT> from <a href="http://genome.imim.es/software/gfftools/GFF2APLOT.html#HOWTOS" onMouseover="window.status='GFF2APLOT Tutorials...';">the examples described at the tutorials section</a>. From version 2.0 we are only developing the perl implementation. The old GNUawk/Bash is no longer maintained but you can still <A href="ftp://genome.imim.es/pub/software/gff_tools/gff2aplot/old/gff2aplot_v1.9.tar.gz" onMouseover="window.status='OLD VERSION IS NO LONGER MAINTAINED';">get it from this link to <TT>gff2aplot</TT> version 1.9</A>. <BR><BR>
+<!-- <A href="ftp://genome.imim.es/pub/software/gff_tools/gff2aplot/" onMouseover="window.status='DOWNLOAD GFF2APLOT FROM OUR FTP SERVER';">ftp://genome.imim.es/pub/software/gff_tools/gff2aplot/</A> -->
+You have downloaded a gzipped tarball containing the perl version <TT>gff2aplot</TT>, all the supplementary scripts (i.e. WU-BLAST/NCBI-BLAST/SIM/BLAT filters), a README text file and few examples of what can be done with this tool. You can extract them with: <BR class="hh"><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE> gunzip -c <var>gff2aplot-vX_xx.tar.gz</var> | tar xvf - </CODE> <BR class="hh"><BR>
+On a Linux box you can try with: <BR class="hh"><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE> tar zxvf <var>gff2aplot-vX_xx.tar.gz</var> </CODE> <BR class="hh"><BR>
+A <CODE>gff2aplot-vX_xx</CODE> directory will be created, move into that directory and take a look to the <CODE>README</CODE> and <CODE>INSTALL</CODE> files. Once you have read them, just type: <BR class="hh"><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE> make </CODE> <BR class="hh"><BR>
+and then: <BR class="hh"><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE> make install </CODE> <BR class="hh"><BR>
+By default, the last command will move all the scripts to <CODE>/usr/local/bin</CODE> but if you want to place all the exec files into another directory, just define the new installation path as follows: <BR class="hh"><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE> make INSTALLDIR=/your/path/bin install </CODE> <BR class="hh"><BR>
+Another way of doing that is modifying that variable on the <CODE>Makefile</CODE> accordingly to your needs. <BR>
+Sorry but there is not a "<CODE>make test</CODE>" yet... <BR>
+At this point you are ready for running <TT>gff2aplot.pl</TT> and related code, <A HREF="GFF2APLOT.html#HOWTOS" onMouseover="window.status='HOWTOs';">see examples on how to use it from the tutorials section</A>.
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="BUGS"></a><FONT size=5 class="K"> REPORTING BUGS </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P> <BR class="hh">
+If you find any bug or something is not plotted properly, <A HREF="MAILTO:jabril@imim.es?subject=[GFF2APLOT] BUG REPORT:" onMouseover="window.status='REPORTING BUGS to AUTHORs';">you can send a bug report</A>. To easily find what's wrong, you should attach to that e-mail a tarball containing the custom file you were using when the bug ocurred, an example of your input GFF files, the PostScript file generated and a report file that you can get with the "-V" command-line option (type "<CODE>gff2aplot -h</CODE>" for further info on that verbose mode switch). We will try to answer as soon as possible. <BR>
+</P>
+
+<!--   
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="SERVER"></a><FONT size=5 class="K"> WEB SERVER </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P> <BR class="hh">
+<IMG SRC="icons/atwork_moving.gif" VSPACE=0 ALIGN=MIDDLE ALT="UnderConstruction">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>gff2aplot</TT> server is under construction. <BR>
+###   Thanks to <A HREF="MAILTO:vadim@imb-jena.de" onMouseover="window.status='MAIL TO V. Goremykin';">Vadim Goremykin</A> from IMB at Jena (Germany), who is writing the scripts for the <TT>gff2aplot</TT> web server. When it will be finished we should install a mirror in our server...
+</P>
+-->
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="FEATURES"></a><FONT size=5 class="K"> FEATURE LIST </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P> <BR class="hh">
+The following menu lists many features of <TT>gff2aplot</TT>: <BR>
+<UL class="lst">
+  <LI> The most important new feature is that <TT>gff2aplot</TT> has been fully re-written in Perl and now is faster and more robust. You can access from this link to a report in which we describe few aspects of the new implementation: <a href="http://www1.imim.es/~jabril/SEMINARS/GroupSessions/gff2aplot_20030116.pdf.gz" onMouseover="window.status='GFF2APLOT: Nuts and Bolts.';">GFF2APLOT: Nuts and Bolts</a> (3.3Mbytes gzipped PDF file). <BR></LI>
+  <LI> Comprehensive alignment plots for any GFF-feature. Attributes are defined separately so you can modify only whatsoever attributes for a given file or share same customization across different data-sets.  <BR></LI>
+  <LI> All parameters are set by default within the program, but it can be also fully configured via <TT>gff2ps</TT>-like flexible customization files. Program can handle several of such files, summarizing all the settings before producing the corresponding figure. Moreover, all customization parameters can be set via command-line switches, which allows users to play with those parameters before adding any to a customization file. <BR></LI>
+  <LI> Source order is taken from input files, if you swap file order you can visualize alignment and its annotation with the new input arrangement. <BR></LI>
+  <LI> All alignment scores can be visualized in a PiP box below gff2aplot area, using grey-color scale, user-defined color scale or score-dependent gradients. <BR></LI>
+  <LI> Scalable fonts, which can also be choosen among the basic PostScript default fonts. Feature and group labels can be rotated to improve readability in both annotation axes. <BR></LI>
+  <LI> The program is still defined as a Unix filter so it can handle data from files, redirections and pipes, writing output to standard-output and warnings to standard error. <BR></LI>
+  <LI> <TT>gff2aplot</TT> is able to manage many physical page formats (from A0 to A10, and more -see available page sizes in its manual-), including user-defined ones. This allows, for instance, the generation of poster size genomic maps, or the use of a continuous-paper supporting plotting device, either in portrait or landscape. 
+  <LI> You can draw different alignments on same alignment plot and distinguish them by using different colors for each. <BR></LI>
+  <LI> Shape dictionary has been expanded, so that further feature shapes are now available (see manual). <BR></LI>
+  <LI> Annotation projections through alignment plots (so called "ribbons") emulate transparencies via complementary color fill patterns. This feature allows to show color pseudo-blending when horizontal and vertical "ribbons" overlap. <BR></LI>
+</UL>
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="TODO"></a><FONT size=5 class="K"> WISH LIST </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P> <BR class="hh">
+Although we have implemented many features, there are few ideas not ready yet for the current version of <TT>gff2aplot</TT>. <BR>
+Here is a short list: <BR>
+<UL class="lst">
+  <LI> Finish the "<TT>gff2aplot</TT> User's Manual", including few examples from the HTML tutorials too. <BR></LI>
+  <LI> Extra panel at page bottom where you can display any feature or functions related with X-axes sequence. Old version is still available, but still not documented, if you need that feature now. <BR></LI>
+  <LI> Make this box as flexible as a <TT>gff2ps</TT> block or allow embeeding <TT>gff2ps</TT> figures. <BR></LI>
+  <LI> Splitting large page formats (poster-like) into horizontal and/or vertical multiple page-sheets (in a smaller paper size).  <BR></LI>
+  <LI> Display alignment strand and frame. <BR></LI>
+  <LI> Drawing functions for vector-data to visualize functions, spikes or bar-charts. <BR></LI>
+  <LI> "Splicing" feature to join elements within a group. <BR></LI>
+</UL></P>
+<P>
+<a HREF="MAILTO:jabril@imim.es?subject=[GFF2PS] SUGGESTIONS:" onMouseover="window.status='SEND SUGESTIONS to AUTHORs';">We are open to any helpful suggestion for improving our programs.</a> Do not hesitate to get in touch with us. <br>
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="AUTHORS"></a><FONT size=5 class="K"> AUTHORS </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="GFF2APLOT.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://genome.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P>
+<CENTER>
+<A HREF="MAILTO:jabril@imim.es?subject=[GFF2APLOT]" onMouseover="window.status='MAIL TO J.F. ABRIL';">Josep Francesc ABRIL FERRANDO</A> <BR>
+<A HREF="MAILTO:rguigo@imim.es?subject=[GFF2APLOT]" onMouseover="window.status='MAIL TO R. GUIG&Oacute;';">Roderic GUIG&Oacute; SERRA</A> <BR>
+<A HREF="MAILTO:twiehe@zedat.fu-berlin.de?subject=[GFF2APLOT]" onMouseover="window.status='MAIL TO T. WIEHE';">Thomas WIEHE</A> <BR><BR>
+
+<B>CopyRight &copy; 1999 - 2003</B> <BR><BR>
+
+<FONT SIZE=4><TT>gff2aplot</TT> is under <A href="http://genome.imim.es/main/GNU-GPL.html" onMouseover="window.status='GNU General Public License';">GNU General Public License</A></FONT>.
+</CENTER>
+</P>
+
+</td>
+<td class="userspace" border=0 cellpadding=0 cellspacing=0 width="10px">&nbsp;</td>
+</tr>
+</table>
+
+<!-- ############### TRAILER AREA ############### -->
+<table class="trailer" border=0 cellpadding=0 cellspacing=0 width="100%">
+ <tr class="default">
+ <td id="traila" align=left>
+&nbsp;
+<A HREF="http://genome.imim.es/main/disclaimer.html"
+ onMouseover="window.status='Data Release Policy and Software License';">Disclaimer</A>
+ </td>
+ <td id="trailb" align=center>
+<SCRIPT type="text/javascript" languaje="javascript">
+<!--
+ LastUpdateSplit()
+// -->
+</SCRIPT>
+ </td>
+ <td id="trailc" align=rigth>
+<A HREF="MAILTO:gmaster@imim.es"
+ onMouseover="window.status='Contact with our webmaster';">webmaster</A>
+&nbsp;
+ </td>
+ </tr>
+</table>
+
+<SCRIPT type="text/javascript" languaje="javascript">
+<!--
+ reportErrors();
+// -->
+</SCRIPT>
+<!-- ############### EOF ############### -->
+</body>
+</html>
