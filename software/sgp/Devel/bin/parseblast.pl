@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.2 2000-07-18 16:51:38 jabril Exp $
+# $Id: parseblast.pl,v 1.3 2000-07-18 17:02:51 jabril Exp $
 #
 
 use strict;
@@ -9,7 +9,7 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling");
 
 my $PROGRAM = " parseblast.pl ";
-my $VERSION = ' $Id: parseblast.pl,v 1.2 2000-07-18 16:51:38 jabril Exp $ ';
+my $VERSION = ' $Id: parseblast.pl,v 1.3 2000-07-18 17:02:51 jabril Exp $ ';
 
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, 
 	$comment_flg, $split_flg, $help_flg, $err_flg,
@@ -199,7 +199,7 @@ sub prt_out {
 		$lnq, $lns, $lnmin, $lnmax,    # LeNgthQuery, LeNgthSubject, LeNgthMINqueyxsubject, LeNgthMAXqueyxsubject
 		$lnmx, $gpq, $gps, $gpt        # LeNgthMaXhspseq, GaPQuery, GaPSubject, GaPTotal
 		);
-	if $comment_flg  { 
+	if ($comment_flg)  { 
 		print STDOUT $prog_params."\n"."#\n"; 
 	} else {
 		print STDOUT "#\n# $program $version\n";
@@ -390,7 +390,7 @@ while (<>) {
 	close(ARGV) if (eof);
 } # while
 
-print STDERR ".[$pt]\n" if $err_flg;
+$err_flg && print STDERR ".[$pt]\n";
 
 $prt && &prt_out;
 
