@@ -1,0 +1,9 @@
+# Global Variables
+WORK="$HOME/development/softjabril/gfftools/gff2aplot" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
+nwfile="gff2aplot" ;
+export WORK BIN PARAM DOCS DATA TEST nwfile ;

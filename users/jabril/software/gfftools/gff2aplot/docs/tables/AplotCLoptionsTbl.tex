@@ -1,0 +1,71 @@
+%
+% AplotCLoptionsTbl.tex
+%
+% Command-Line Options for "gff2aplot".
+%
+% # $Id: AplotCLoptionsTbl.tex,v 1.1 2001-08-21 14:54:21 jabril Exp $
+%
+% \newcommand{\op}[1]{\bfseries\sffamily #1}
+% \newcommand{\tp}[1]{'{\bfseries\sffamily #1}'}
+% \newcommand{\pr}[1]{\mdseries\sffamily\slshape $<$#1$>$}
+% \newcommand{\x}{\textmd{\,,\,}}
+%
+\label{sec:CLoptions}
+\newcommand{\rw}[2]{ \op{ #1 } & #2 \\}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vfill 
+%\setlength{\intextsep}{0ex}
+%\setlength{\textfloatsep}{0ex}
+%\setlength{\floatsep}{0ex}
+\begin{table}[!ht]
+\begin{center}
+\label{tbl:CLopt}
+% \refstepcounter{section}\refstepcounter{table}
+% \addcontentsline{lot}{section}{
+%   \thesection\hspace{1em}Shell command-line options for \prog.}
+% \addcontentsline{toc}{section}{
+%   \thesection\hspace{1em}Shell command-line options for \prog.}
+\setlength{\fboxsep}{10pt}
+\footnotesize
+\fbox{
+  \begin{tabular}{rl}
+\rw{-h{\x}-\/-help}{Shows this help.}
+\rw{-\/-version}{Shows current version and exits.}
+\rw{-v{\x}-\/-verbose}
+  {Verbose mode, a full report is sent to standard error.}
+\rw{-V{\x}-\/-logs-filename \pr{file}}
+  {Report is written to a log file.}
+\rw{-q{\x}-\/-quiet}
+  {Quiet mode, messages/warnings disabled (only ERRORS are reported)}
+\rw{-O{\x}-\/-custom-filename \pr{file}}
+  {Read customization parameters from file.}
+  \end{tabular}
+} % fbox
+\vspace{0.5cm}
+
+%\vfill
+\fbox{
+\begin{tabular}{rl}
+\pa{int}       &
+  An integer value. \\
+\pa{float}     &
+  A float value. \\
+\pa{string}    &
+  A free text string, single or double-quoted \\[-0.5ex]
+ &  if special chars or white-spaces/tabs are present respectively. \\
+\pa{format}    &
+  Page format, see available values on Appendix~\ref{tbl:PageSztbl} table. \\
+\pa{color}     &
+  A color name chosen from table on Appendix~\ref{tbl:CMYKcolortbl}. \\
+\pa{file}      &
+  A valid file name (including path if necessary). \\
+NOTE:          &
+  When a parameter is required, it applies for both short and long options. \\
+\end{tabular}
+} % fbox
+%
+\end{center}
+\end{table}
+\vfill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

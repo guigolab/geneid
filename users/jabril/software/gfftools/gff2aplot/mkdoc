@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+# $Id: mkdoc,v 1.1 2001-08-21 14:54:21 jabril Exp $
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+# only LaTeXing
+# Global Variables
+WORK="$HOME/development/softjabril/gfftools/gff2aplot" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
+nwfile="gff2aplot" ;
+export WORK BIN PARAM DOCS DATA TEST nwfile ;
+MANUAL="GFF2APLOT_MANUAL";
+pushd $DOCS/ ;
+latex $MANUAL.tex ; 
+latex $MANUAL.tex ; 
+latex $MANUAL.tex ;
+dvips $MANUAL.dvi -o $MANUAL.ps -t a4 ;
+popd ;
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0

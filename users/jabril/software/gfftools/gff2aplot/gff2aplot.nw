@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: GFF2APLOT.nw,v 1.3 2001-04-11 18:10:06 jabril Exp $
+% $Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -52,16 +52,21 @@
 \def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
 \let\nwdocspar=\par                    %
  
-% Colors for gff2ps
+\input defs.tex
+
+\begin{comment}
+<<LaTeX deploy new definitions>>=
+%%%%% Colors for gff2ps
 \input tables/AplotColorDefs.tex
-% New Commands are defined here
+
+%%%%% New Commands are defined here
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 \newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
 
-% PSTRICKs definitions
+%%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
 \newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
@@ -70,13 +75,17 @@
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
 \def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+<<new LaTeX urls>>
 
-% defs
+%%%%% defs
+% \def\tit{\textsc{[[gff2aplot.pl]] }}
 \def\prog{\textsc{\textbf{gff2aplot}}}
+\def\noweb{\textsc{noweb}}
 \def\ps{\textsc{PostScript}}
 \def\eoline{$\backslash\backslash$}
+<<new LaTeX definitions>>
 
-% Setting text for footers and headers
+%%%%% Setting text for footers and headers
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
@@ -87,6 +96,59 @@
 \renewcommand{\footrulewidth}{1pt}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\progname{gff2aplot.pl}
+\def\mtjabril{
+ \htmladdnormallink{\texttt{jabril@imim.es}}
+                   {MAILTO:jabril@imim.es?subject=[gff2aplot]}
+ } % def mtjabril
+\def\authorslist{
+ Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\license{GNU General Public License (GNU-GPL)}
+\def\description{
+I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using {\noweb} I pretend to improve the overall design and to open the code to other developers.
+ } % def description 
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+@
+\end{comment}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\ \vfill
+%%\begin{center}
+%%\textbf{\Huge A perl development for {\prog}}\\[5ex]
+%%
+%%\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
+%%
+%%\textbf{\large --- \today ---}\\[10ex]
+%%
+%%\begin{abstract}
+%%\begin{center}
+%%\parbox{0.75\linewidth}{
+%%I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old [[GNUawk]] format. Taking advantage of some capabilities of [[Perl]], such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using [[noweb]] I pretend to improve the overall design and to open the code to other developers.
+%%} % parbox
+%%\end{center}
+%%\end{abstract}\vskip 5ex
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $$>$ }
+%%
+%%\vfill
+%%
+%%\begin{flushright}
+%%\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+%%Grup de Recerca en Infom\`atica Biom\`edica\\
+%%Institut Municipal d'Investigaci\'o M\`edica\\
+%%Universitat Pompeu Fabra\\[2ex]
+%%\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+%%\end{flushright}
+%%\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 \thispagestyle{empty}
@@ -95,31 +157,42 @@
 
 \ \vfill
 \begin{center}
-\textbf{\Huge A perl development for {\prog}}\\[5ex]
-
-\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
-
-\textbf{\large --- \today ---}\\[10ex]
-
-\begin{abstract}
-\begin{center}
-\parbox{0.75\linewidth}{
-I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old [[GNUawk]] format. Taking advantage of some capabilities of [[Perl]], such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using [[noweb]] I pretend to improve the overall design and to open the code to other developers.
-} % parbox
+\begin{bfseries}
+\begin{large}
+\newlength{\lttbl}\setlength{\lttbl}{0.25\linewidth}
+\newlength{\rttbl}\setlength{\rttbl}{0.70\linewidth}
+%\fbox{
+%\vskip 2ex
+\begin{tabular}{>{\scshape}r@{\quad}l}
+\rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+Program Name: & {\Huge\progname}                       \\[3ex]
+\multicolumn{2}{c}{\rule[0.5ex]{0.95\linewidth}{2pt}}\\[2ex]
+      Author: & {\Large
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \authorslist
+                 \end{minipage}}                       \\[2ex]
+     License: & {\license}                             \\[2ex]
+ Last Update: & {\today}                               \\[2ex]
+ Description: & {\large\mdseries
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \description
+                 \end{minipage}}                       \\[2ex]
+\\
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+\end{tabular}
+%} % fbox
+\end{large}
+\end{bfseries}
 \end{center}
-\end{abstract}\vskip 5ex
-{\large$<$ \verb$Id: GFF2APLOT.nw,v 1.3 2001-04-11 18:10:06 jabril Exp $$>$ }
 
 \vfill
 
-\begin{flushright}
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
-Grup de Recerca en Infom\`atica Biom\`edica\\
-Institut Municipal d'Investigaci\'o M\`edica\\
-Universitat Pompeu Fabra\\[2ex]
-\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
-\end{flushright}
-\end{center}
+\begin{raggedleft}
+\showaffiliation
+\end{raggedleft}
 
 \end{titlepage}
 
@@ -238,9 +311,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.3 $', #'
-     '$Date: 2001-04-11 18:10:06 $', #'
-     '$Id: GFF2APLOT.nw,v 1.3 2001-04-11 18:10:06 jabril Exp $', #'
+     '$Revision: 1.1 $', #'
+     '$Date: 2001-08-21 14:54:21 $', #'
+     '$Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -4349,20 +4422,12 @@ L="####################"
 exit 0
 @
 
-\subsctn{AWK scripts}
-
-<<GAWK shebang>>=
-#!/usr/bin/gawk -f
-# GNU Awk 3.0.4
-<<Version Control Id Tag>>
-@
-
 \subsctn{Version control tags}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: GFF2APLOT.nw,v 1.3 2001-04-11 18:10:06 jabril Exp $
+# $Id: gff2aplot.nw,v 1.1 2001-08-21 14:54:21 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -4433,10 +4498,32 @@ documentation. The following instructions are needed:
 \subsctn{Extracting Script code chunks from the [[noweb]] file} % \\[-0.5ex]
 
 <<tangling>>=
+# showing line numbering comments in program
 notangle -L -R"APLOT" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' - > $BIN/gff2aplot ;
-notangle -R"shebang swapper" $WORK/$nwfile.nw > $BIN/swapper.pl ;
+    perl -ne '$.>1 && print' - > $BIN/gff2aplot.pl ;
+chmod a+x $BIN/gff2aplot.pl ;
+#
 @ 
+ 
+\begin{comment}
+<<new LaTeX urls>>=
+\def\perltidy{
+ \htmladdnormallinkfoot{\texttt{perltidy}}
+                   {\url|http://perltidy.sourceforge.net/|}
+ } % def perltidy
+@
+\end{comment}
+We use {\perltidy} to reformat final versions of perl scripts (without line numbering comments, correct indentations, etc...) and to pretty-print in html format.
+
+<<tangling>>=
+# reformating program with perltidy
+notangle -R"APLOT" $WORK/$nwfile.nw | \
+    perltidy - > $BIN/$nwfile.pl ;
+# pretty-printing program with perltidy
+notangle -R"APLOT" $WORK/$nwfile.nw | \
+    perltidy -html - > $DOCS/html/$nwfile.html ;
+#
+@
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
@@ -4446,16 +4533,18 @@ notangle -R"shebang swapper" $WORK/$nwfile.nw > $BIN/swapper.pl ;
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
 <<tangling>>=
+# extracting main document processors
 notangle -R"weaving"    $WORK/$nwfile.nw > $WORK/nw2tex ;
 notangle -R"LaTeXing"   $WORK/$nwfile.nw > $WORK/ltx ;
 notangle -R"The Manual" $WORK/$nwfile.nw > $WORK/mkdoc ;
+#
 @ 
 
-<<weaving>>=
-<<BASH shebang>>
-# weaving and LaTeXing
-<<BASH Environment Variables>>
+<<tangling complementary LaTeX files>>=
 # extracting complementary material 
+echo "Extracting \"$DOCS/defs.tex\"..." ;
+notangle -R"LaTeX deploy new definitions" $WORK/$nwfile.nw \
+         > $DOCS/defs.tex ;
 echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." ;
 notangle -R"LATEX command-line" $WORK/$nwfile.nw \
          > $DOCS/tables/AplotCLoptions.tex ;
@@ -4480,6 +4569,13 @@ notangle -R"LATEX page format table" $WORK/$nwfile.nw \
 echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." ;
 notangle -R"GFF DATA STRUCTURE" $WORK/$nwfile.nw \
          > $DOCS/tables/DataStructure_GFF.tex ;
+@ 
+
+<<weaving>>=
+<<BASH shebang>>
+# weaving and LaTeXing
+<<BASH Environment Variables>>
+<<tangling complementary LaTeX files>>
 # extracting main documentation
 echo "Weaving \"$DOCS/$nwfile.tex\"..." ;
 noweave -t4 -delay -x $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
@@ -4501,6 +4597,7 @@ latex $nwfile.tex ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+pdflatex $nwfile.tex ;
 popd ;
 <<BASH script closure>>
 @ %$
@@ -4519,55 +4616,27 @@ popd ;
 <<BASH script closure>>
 @ %$
 
-Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be swapped with the second line to make them runnable. So that you can use this script:
-
-<<shebang swapper>>=
-<<PERL shebang>>
-# USAGE: swapper script > new_script
-while (<>) {
-  $.  > 2 && do { 
-    print;
-    next;
-  };
-  $. == 1 && do { 
-#    split / /, $_, 3; 
-#    $n = "$_[0] ".(++$_[1])." $_[2]";
-      $n = $_;
-  }; 
-  $. == 2 && ( print "$_$n" );
-};
-@
-
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
 <<BASH Environment Variables>>=
 # Global Variables
-export WORK="$HOME/development/gfftools/Devel/aplot" ;
-export DOCS="$WORK/docs" ;
-export BIN="$WORK/bin" ;
-export TEST="$WORK/tests" ;
-export nwfile="GFF2APLOT" ;
-@ 
-
-<<CSH Environment Variables>>=
-# Global Variables
-setenv WORK "$HOME/development/gfftools/Devel/aplot" ;
-setenv DOCS "$WORK/docs" ;
-setenv BIN  "$WORK/bin" ;
-setenv TEST "$WORK/tests" ;
-setenv nwfile "GFF2APLOT" ;
+WORK="$HOME/development/softjabril/gfftools/gff2aplot" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
+nwfile="gff2aplot" ;
+export WORK BIN PARAM DOCS DATA TEST nwfile ;
 @ 
 
 <<tangling>>=
-# TO DO: add a test to check which shell is running
-# BASH shell
+#
+# BASH Environment Variables
 notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
          > $WORK/.bash_VARS ; 
 source $WORK/.bash_VARS ;
-# CSH shell
-notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
-         > $WORK/.csh_VARS ; 
-source $WORK/.csh_VARS ;
+#
 @
 
 \end{document}

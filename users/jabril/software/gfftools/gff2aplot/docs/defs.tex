@@ -1,0 +1,64 @@
+%%%%% Colors for gff2ps
+\input tables/AplotColorDefs.tex
+
+%%%%% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
+
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+\def\perltidy{
+ \htmladdnormallinkfoot{\texttt{perltidy}}
+                   {\url|http://perltidy.sourceforge.net/|}
+ } % def perltidy
+
+%%%%% defs
+% \def\tit{\textsc{[[gff2aplot.pl]] }}
+\def\prog{\textsc{\textbf{gff2aplot}}}
+\def\noweb{\textsc{noweb}}
+\def\ps{\textsc{PostScript}}
+\def\eoline{$\backslash\backslash$}
+
+
+%%%%% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\progname{gff2aplot.pl}
+\def\mtjabril{
+ \htmladdnormallink{\texttt{jabril@imim.es}}
+                   {MAILTO:jabril@imim.es?subject=[gff2aplot]}
+ } % def mtjabril
+\def\authorslist{
+ Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\license{GNU General Public License (GNU-GPL)}
+\def\description{
+I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain. Using {\noweb} I pretend to improve the overall design and to open the code to other developers.
+ } % def description 
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
