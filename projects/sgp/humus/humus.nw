@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.60 2002-07-12 13:07:30 jabril Exp $ 
+% # $Id: humus.nw,v 1.61 2002-07-26 18:20:30 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.60 2002-07-12 13:07:30 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.61 2002-07-26 18:20:30 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -5410,11 +5410,13 @@ local $Data::Dumper::Maxdepth = 2;
 #
 ### VARS
 my %gff = ();
-my %cnt = ( SEQ => { } ,  NSEQ => 0 ,
-            SRC => { } ,  NSRC => 0 ,
-            STR => { } ,  NSTR => 0 ,
-            GRP => { } ,  NGRP => 0 );
+my %cnt = ( SEQ  => { } ,  NSEQ => 0 ,
+            SRC  => { } ,  NSRC => 0 ,
+            STR  => { } ,  NSTR => 0 ,
+            GRPA => { } ,  NGRPA => 0,
+            GRPB => { } ,  NGRPB => 0 );
 my ($_num,$_str,$_hsh) = (0,1,2);
+my $lcoord = undef;
 #
 ### MAIN
 &main();
@@ -5434,13 +5436,14 @@ my ($_num,$_str,$_hsh) = (0,1,2);
 #            ref->str,ref->src,ref->seq,"file",
 #            @[ [ show_flg,feat,fori,fend,sco,frame,ref->grp ]_0 # @@feat
 #               ...
-#               [ ... ]_n ]]]]]
+#               [ ... ]_n ],
+#            cdslen ]]]]
 # %gff_*->{seqn}->{srcn}->{strn}->
 #            @[ [ g/fori g/fend show_flg ref->%%grp/@@feat "file" ovl_flg ]_0
 #               ... [ ... ]_n ]
 sub main() {
-    my ($A_cmp_B,%gff_A,%gff_B,@gff_O,$an,$bn);
-    @gff_O = ();
+    my ($A_cmp_B,%gff_A,%gff_B,%gff_O,$an,$bn);
+    %gff_O = ();
     &program_started($PROG);
     $an = &load_gff_records("A",\%gff_A,$file_A);
     #
@@ -5465,26 +5468,22 @@ sub main() {
           elsif    ($flags{NOT}) { $A_cmp_B = \&A_not_B; }
             elsif  ($flags{XOR}) { $A_cmp_B = \&A_xor_B; }
               else               { $A_cmp_B = \&A_cat_B; };
-        if        ($an > 0 && $bn > 0) { &do_cmp($A_cmp_B,\%gff_A,\%gff_B,\@gff_O); }
-          elsif   ($an > 0)            { &do_dump(\%gff_A,\@gff_O); }
-            elsif            ($bn > 0) { &do_dump(\%gff_B,\@gff_O); }
-              else                     { @gff_O = (); }; # warns later!!!
+        if        ($an > 0 && $bn > 0) { &do_cmp($A_cmp_B,\%gff_A,\%gff_B,\%gff_O); }
+          elsif   ($an > 0)            { &do_dump(\%gff_A,\%gff_O); }
+            elsif            ($bn > 0) { &do_dump(\%gff_B,\%gff_O); }
+              else                     { %gff_O = (); }; # warns later!!!
     } else {
-        if ($an > 0) { &do_dump(\%gff_A,\@gff_O); }
-          else       { @gff_O = (); }; # warns later!!!
+        if ($an > 0) { &do_dump(\%gff_A,\%gff_O); }
+          else       { %gff_O = (); }; # warns later!!!
     };
     #
     $flags{DBG} && do {
-        $Data::Dumper::Maxdepth = 2;
-        print STDERR Data::Dumper->Dump([ \@gff_O ], [ qw/ *gff_O / ]);
+        $Data::Dumper::Maxdepth = 4;
+        print STDERR Data::Dumper->Dump([ \%gff_O ], [ qw/ *gff_O / ]);
     };
     #
-    if (scalar(@gff_O) > 0) {
-        &no_overlaps(\@gff_O) if $flags{OVL};
-        &print_gff_records(\@gff_O);
-    } else {
-        print $ERRFH "### NO GFF RECORDS WERE FOUND TO BE TRANSFORMED...\n";
-    };
+    &trans_gff(\%gff_O);
+    #
     &program_finished($PROG);
     exit($exit_codes{'OK'}{CODE});
 } # main
@@ -5508,7 +5507,7 @@ sub load_gff_records() {
     print $ERRFH "###\n## READING GFF FILE [$fff]: $file\n";
     ($n,$_cntN) = (0,100);
     while (<GFF>) {
-        my (@f,$sq,$sc,$st,$grp,$grpid,$ref);
+        my (@f,$sq,$sc,$st,$grp,$grpid,$ref,$iscod,$x,$y);
         $c = '.';
         next if /^\#/o;
         next if /^\s*$/o;
@@ -5521,6 +5520,8 @@ sub load_gff_records() {
         ($sq,$sc,$st) = ((defined($flags{SEQ}) ? $flags{SEQ} : $f[0]),
                          (defined($flags{SRC}) ? $flags{SRC} : $f[1]),
                          (defined($flags{STR}) ? $flags{STR} : $f[6]));
+        $iscod = &is_coding(lc($f[2]));
+        #
         defined($hsh->{$sq}) || do {
             defined($cnt{SEQ}{$sq}) || ($cnt{NSEQ}++, $cnt{SEQ}{$sq} = $cnt{NSEQ});
             $hsh->{$sq} = [ $cnt{SEQ}{$sq}, $sq, {} ];
@@ -5536,23 +5537,33 @@ sub load_gff_records() {
             $ref->{$st} = [ $cnt{STR}{$st}, $st, {} ];
         };
         $ref = \%{ $ref->{$st}[$_hsh] };
-        (defined($cnt{GRP}{$grp}) && $grp ne '.') ||
-            ($c = 'X', $cnt{NGRP}++, $cnt{GRP}{$grp} = $cnt{NGRP});
-        $grpid = ($grp ne '.') ? $grp : $cnt{NGRP} ;
+        (defined($cnt{"GRP$fff"}{$grp}) && $grp ne '.') ||
+            ($c = 'X', $cnt{"NGRP$fff"}++,
+             $cnt{"GRP$fff"}{$grp} = $cnt{"NGRP$fff"});
+        $grpid = ($grp ne '.') ? $grp : $cnt{"NGRP$fff"} ;
         defined($ref->{$grpid}) || do {
-            $ref->{$grpid} = [ $grpid, $grp, @f[3,4], $shwflg,
+            if ($iscod || $flags{FGN}) { ($x,$y) = @f[3,4];
+            } else { ($x,$y) = (undef,undef); };
+            $ref->{$grpid} = [ $grpid, $grp, $x, $y, $shwflg,
                                \@{ $hsh->{$sq}[$_hsh]{$sc}[$_hsh]{$st} },
                                \@{ $hsh->{$sq}[$_hsh]{$sc} },
                                \@{ $hsh->{$sq} }, $fff,
-                               [ ] ]; # this is the group features array
+                               [ ], 0 ]; # "[]" is the group features array
         }; # defined($ref->{$grpid})
-        ($ref->{$grpid}[2],
-         $ref->{$grpid}[3]) = ( &min($ref->{$grpid}[2],$f[3]) ,
-                                &max($ref->{$grpid}[3],$f[4]) );
+        ($iscod || $flags{FGN}) && do {
+            if (defined($ref->{$grpid}[2])) {
+                ($ref->{$grpid}[2],
+                 $ref->{$grpid}[3]) = ( &min($ref->{$grpid}[2],$f[3]) ,
+                                        &max($ref->{$grpid}[3],$f[4]) );
+            } else { ($ref->{$grpid}[2],$ref->{$grpid}[3]) = @f[3,4]; };
+        };
+        ($iscod) && ($ref->{$grpid}[10] += ($f[4] - $f[3] + 1));
+                 # always coding length
         push @{ $ref->{$grpid}[9] },
              [ $shwflg, @f[2..5,7],
                \@{ $hsh->{$sq}[$_hsh]{$sc}[$_hsh]{$st}[$_hsh]{$grpid} } ];
         $rnc{$f[6]}++;
+        $lcoord = defined($lcoord) ? &max($lcoord,$f[4]) : $f[4];
     } continue {
         &counter(++$n,$c);
     }; # while
@@ -5565,11 +5576,17 @@ sub load_gff_records() {
     # &sort_records($ary) if ($aryn > 0);
     return $aryn;
 } # load_gff_records
+sub is_coding() {
+    my $sx = shift;
+    $sx =~ /single|first|internal|terminal|cds|exon/o && return $T;
+    return $F;
+} # is_coding
 sub build_coords_ary() {
     my ($hsh,$hou) = @_;
-    my ($nq,$nc,$nt,$fnum,$ref);
+    my ($nq,$nc,$nt,$fnum,$ref,$fo,$fe,$fl);
     print $ERRFH "###\n## BUILDING COORDINATES ARRAY...\n";
     $fnum = 0;
+    $lcoord++;
     foreach my $kq (keys %{ $hsh }) {
         $nq = $hsh->{$kq}[$_num];
         $hou->{$nq} = {};
@@ -5581,13 +5598,27 @@ sub build_coords_ary() {
                 $hou->{$nq}{$nc}{$nt} = [];
                 foreach my $kg (keys %{ $hsh->{$kq}[$_hsh]{$kc}[$_hsh]{$kt}[$_hsh] }) {
                     $ref = \@{ $hsh->{$kq}[$_hsh]{$kc}[$_hsh]{$kt}[$_hsh]{$kg} };
+                    defined($ref->[2]) || do {
+                        # skip those groups without coords...
+                        ($ref->[2], $ref->[3], $ref->[4]) = (0,0,$F);
+                    };
                     if ($flags{GRP}) { # working on groups
+                        ($fo,$fe,$fl) = ($ref->[2], $ref->[3], $ref->[10]);
+                        $kt eq '-' && do { # "reverse-strand" hack
+                            ($fo,$fe) = ($lcoord - $fe, $lcoord - $fo);
+                        };
                         push @{ $hou->{$nq}{$nc}{$nt} },
-                             [ $ref->[2], $ref->[3], $ref->[4], $ref, $ref->[8] ]; # ori end shw ref file
+                             [ $fo, $fe, $fl, $ref->[4],
+                               $ref, $ref->[8], $T ]; # ori end cdslen shw ref file ovl
                     } else {           # working on features
                         foreach my $ft (@{ $ref->[9] }) {
+                            ($fo,$fe,$fl) = ($ft->[2], $ft->[3], $ref->[10]);
+                            $kt eq '-' && do { # "reverse-strand" hack
+                                ($fo,$fe) = ($lcoord - $fe, $lcoord - $fo);
+                            };
                             push @{ $hou->{$nq}{$nc}{$nt} },
-                                 [ $ft->[2], $ft->[3], $ft->[0], $ft, $ref->[6][8] ]; # ori end shw ref file
+                                 [ $fo, $fe, $fl, $ft->[0],
+                                   $ft, $ft->[6][8], $T]; # ori end cdslen shw ref file
                         }; # foreach $ft
                     }; # if $flags{GRP}                    
                 }; # foreach $kg  
@@ -5604,7 +5635,9 @@ sub sort_records() {
     @$ary = map  { $_ }
             sort { $a->[0] <=> $b->[0]
                            ||
-                   $a->[1] <=> $b->[1] }
+                   $a->[1] <=> $b->[1]
+                           ||
+                   $b->[2] <=> $a->[2] } # sort by cdslen
             map  { $_ } @$ary;
 } # sort_records
 sub sort_records_plus() {
@@ -5615,105 +5648,176 @@ sub sort_records_plus() {
                            ||
                    $a->[1] <=> $b->[1]
                            ||
-                   $a->[4] cmp $b->[4]
+                   $a->[5] cmp $b->[5]
                            ||
-                   $b->[2] <=> $a->[2] }
+                   $b->[3] <=> $a->[3] }
             map  { $_ } @$ary;
 } # sort_records_plus
+sub trans_gff() {
+    my ($ory) = @_;
+    my ($nq,$nc,$nt) = (0,0,0);
+    my @tmp = ();
+    print $ERRFH "###\n## PROCESSING GFF OUTPUT\n";
+    scalar(keys %$ory) > 0 || do {
+        print $ERRFH "###\n### THERE WERE NO GFF RECORDS TO PROCESS...\n";
+        return;
+    };
+    while ($nq < $cnt{NSEQ}) {
+        $nq++;
+        defined($ory->{$nq}) || next;
+        while ($nc < $cnt{NSRC}) {
+            $nc++;
+            defined($ory->{$nq}{$nc}) || next;
+            while ($nt < $cnt{NSTR}) {
+                $nt++;
+                defined($ory->{$nq}{$nc}{$nt}) || next;
+                my ($ary,$str);
+                $ary = \@{ $ory->{$nq}{$nc}{$nt} };
+                if (scalar(@$ary) > 0) {
+                    print $ERRFH "<{$nq}{$nc}{$nt}> SET HAS ".scalar(@$ary).
+                                 " GFF-".($flags{GRP} ? "GROUP" : "FEATURE").
+                                 " RECORDS...\n";
+                    if ($flags{OVL}) {
+                        print $ERRFH "<{$nq}{$nc}{$nt}> ::: ".
+                                     "REMOVING OVERLAPPING FEATURES...\n";
+                        &no_overlaps($ary) ;
+                    };
+                    #
+                    $str = $flags{GRP} ? $ary->[0][4][5][$_str]
+                                       : $ary->[0][4][6][5][$_str];
+                    ($str eq '-') && do { # "reverse-strand" undo hack
+                        foreach my $ir (@{$ary}) {
+                            ($ir->[0],$ir->[1]) = ($lcoord - $ir->[1],
+                                                   $lcoord - $ir->[0]);
+                        };  # foreach $ir
+                    }; # $kt eq '-'
+                    push @tmp, @{$ary};
+                 } else {
+                    print $ERRFH "#{$nq}{$nc}{$nt}# SET HAS ".
+                                 "NO GFF RECORDS TO PROCESS...\n";
+                };
+            }; # while $nt
+        }; # while $nc
+    }; # while $nq
+    #
+    &sort_records_plus(\@tmp);
+              ## are they already sorted when A_cat_B ???
+    $flags{DBG} && do {
+        $Data::Dumper::Maxdepth = 2;
+        print STDERR Data::Dumper->Dump([ \@tmp ],
+                                     [ qw/ *tmp / ]);
+    };
+    #
+    &print_gff_records(\@tmp);
+} # trans_gff
 sub no_overlaps() {
     my ($ary) = @_;
-    my ($fn,$f,$ff, $ao,$ae,$as,$lo,$le,$ls);
-    print $ERRFH "###\n## REMOVING OVERLAPPING FEATURES...\n";
+    my ($fn,$f,$ff, $ao,$ae,$as, $lo,$le,$ls);
+    # print $ERRFH "###\n## REMOVING OVERLAPPING FEATURES...\n";
     $fn = scalar(@$ary);
-    $ff  = 0;
+    $ff = 0;
     $ls = $F;
     while ($ls == $F && $ff < $fn) { # get the first feat that is going to be shown
-        ($lo,$le,$ls) = @{$ary->[$ff]}[0..2];
+        ($lo,$le,$ls) = ($ary->[$ff][0],$ary->[$ff][1],$ary->[$ff][3]);
         $ls || do {
-            push @{$ary->[$ff]}, $F;
+            $ary->[$ff][6] = $F;
             $ff++;
         };
     }; # while $ls
-    ($ff < $fn) || return;
-    push @{$ary->[$ff]}, $T;
+    # ($ff < $fn) || return;
+    # $ary->[$ff][6] = $T;
     (++$ff < $fn) || return;
     for ($f = $ff; $f < $fn; $f++) { # check overlapping feats from that
-        ($ao,$ae,$as) = @{$ary->[$f]}[0..2];        
-        push @{$ary->[$f]}, $F;
-        ($ao > $le && $as) && do { 
+        ($ao,$ae,$as) = ($ary->[$f][0],$ary->[$f][1],$ary->[$f][3]);        
+        if ($ao > $le && $as) { 
             ($lo,$le,$ls) = ($ao,$ae,$as);
-            $ary->[$f][5] = $T;
-        };
+            # $ary->[$f][6] = $T;
+        } else { $ary->[$f][6] = $F; };
     }; # for $f  
 } # no_overlaps
 sub print_gff_records() {
     my ($ary) = @_;
     my $GFF = "\%s".(("\%s\t") x 8)."\%s\n";
-    my ($x,$y,$shw,$ref);
+    my ($x,$y,$l,$s,$f,$o,$shw,$ref);
     print $ERRFH "###\n## PRINTING GFF OUTPUT...\n";
+    scalar(@$ary) > 0 || do {
+        print $ERRFH "###\n### THERE WERE NO GFF RECORDS TO PRINT...\n";
+        return;
+    };
     foreach my $ft (@$ary) {
-        ($x,$y,$ref) = ($ft->[0],$ft->[1],$ft->[3]);
+        ($x,$y,$l,$s,$ref,$f,$o) = @{$ft};
+            # ori end cdslen shwflg ref file ovlflg
+        if ($flags{OVL} && $s) {
+            $shw = $o ? "" : "#O.".$f."# ";
+        } else {
+            $shw = $s ? "" : "#".$f."# ";
+        };
+        $o || ($s = $o); # if overlapp -> show off
         if ($flags{GRP}) { # working on groups
             #
             $flags{DBG} && do {
                 $Data::Dumper::Maxdepth = 2;
                 print STDERR Data::Dumper->Dump([ \@{ $ref->[9] } ], [ '*{ $ref->[9] }' ]);
+                # print STDERR "--> SHWFEAT $s : OVL $o : FLAGSALL $flags{ALL} -- TEST ".($s || $flags{ALL})."\n";
             };
             #
-            if ($flags{OVL} && $ft->[2]) {
-                $shw = $ft->[5] ? "" : "#O.".$ft->[4]."# ";
-            } else {
-                $shw = $ft->[2] ? "" : "#".$ft->[4]."# ";
-            };
-            foreach my $el (@{ $ref->[9] }) {
-                print STDOUT sprintf($GFF,
+            if ($s || $flags{ALL}) {
+                foreach my $el (@{ $ref->[9] }) {
+                    print STDOUT sprintf($GFF,
                                  $shw,
                                  $ref->[7][$_str],  # seq
                                  $ref->[6][$_str],  # source
-                                 $el->[1],$el->[2],$el->[3],$el->[4], # feat ori end score
-                                 $ref->[5][$_str],  # strand
+                                 $el->[1],          # feat
+                                 $el->[2],$el->[3], # ori end
+                                 $el->[4],$ref->[5][$_str], # score strand
                                  $el->[5],$ref->[1] # frame group_string
-                             ) unless (!$ft->[2] && !$flags{ALL});
-            }; # foreach $el
+                             );
+                }; # foreach $el
+            }; # test $s || $flags{ALL}
         } else {           # working on features
             #
             $flags{DBG} && do {
                 $Data::Dumper::Maxdepth = 2;
                 print STDERR Data::Dumper->Dump([ \@{ $ft } ], [ '*{ $ft }' ]);
+                # print STDERR "--> SHWFEAT $s : OVL $o : FLAGSALL $flags{ALL} -- TEST ".($s || $flags{ALL})."\n";
             };
             #
-            if ($flags{OVL} && $ft->[2]) {
-                $shw = $ft->[5] ? "" : "#O.".$ref->[4]."# ";
-            } else {
-                $shw = $ft->[2] ? "" : "#".$ref->[4]."# ";
-            };
-            print STDOUT sprintf($GFF,
+            if ($s || $flags{ALL}) {
+                print STDOUT sprintf($GFF,
                              $shw,
                              $ref->[6][7][$_str], # seq
                              $ref->[6][6][$_str], # source
-                             $ref->[1],$ref->[2],$ref->[3],$ref->[4], # feat ori end score
+                             $ref->[1],           # feat
+                             $ref->[2],$ref->[3], # ori end
+                             $ref->[4],           # score
                              $ref->[6][5][$_str], # strand
                              $ref->[5],$ref->[6][1] # frame group_string
-                         ) unless (!$ft->[2] && !$flags{ALL});
+                         );
+            }; # test $s || $flags{ALL}
         }; # if $flags{GRP}                    
     }; # foreach $ft
 } # print_gff_records
 sub do_cmp() {
     my ($scmp,$gA,$gB,$gO) = @_;
     my ($nq,$nc,$nt) = (0,0,0);
+    my $tmp = [];
     print $ERRFH "###\n## COMPARING/DUMPING COORDINATES FOR GFF ELEMENTS...\n";
     while ($nq < $cnt{NSEQ}) {
         $nq++;
+        $gO->{$nq} = {};
         while ($nc < $cnt{NSRC}) {
             $nc++;
+            $gO->{$nq}{$nc} = {};
             while ($nt < $cnt{NSTR}) {
                 $nt++;
+                $gO->{$nq}{$nc}{$nt} = [];
+                $tmp = \@{ $gO->{$nq}{$nc}{$nt} };
                 $scmp->(\@{ $gA->{$nq}{$nc}{$nt} },
-                        \@{ $gB->{$nq}{$nc}{$nt} },$gO);
+                        \@{ $gB->{$nq}{$nc}{$nt} },$tmp);
             }; # while $nt
         }; # while $nc
     }; # while $nq
-    &sort_records_plus($gO); ## are they already sorted when A_cat_B ???
+    # &sort_records_plus($gO); ## are they already sorted when A_cat_B ???
 } # do_cmp
 sub do_dump() {
     my ($gG,$gO) = @_;
@@ -5739,7 +5843,7 @@ sub A_and_B() {
             ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
         }; # while
         ($check_match->($ao,$ae,$bo,$be)) && do {
-            $a->[$ac][2] = $T; # showflg ON
+            $a->[$ac][3] = $T; # showflg ON
         };
         # $bc++; # if $bo larger than $ae we do need to check same $bc in next loop
     }; # for $ac
@@ -5754,7 +5858,7 @@ sub A_not_B() {
         print STDERR Data::Dumper->Dump([ \@$a, \@$b ], [ qw/ *$a *$b / ]);
     };
     foreach my $ft (@$a) {
-        $ft->[2] = $T; # showflg ON
+        $ft->[3] = $T; # showflg ON
     }; # foreach $ft
     ($an,$bn,$bc) = (scalar(@$a),scalar(@$b),0);
     for ($ac = 0; $ac < $an; $ac++) {
@@ -5766,7 +5870,7 @@ sub A_not_B() {
             ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
         }; # while
         ($check_match->($ao,$ae,$bo,$be)) && do {
-            $a->[$ac][2] = $F; # showflg OFF
+            $a->[$ac][3] = $F; # showflg OFF
         };
         # $bc++; # if $bo larger than $ae we do need to check same $bc in next loop
     }; # for $ac
@@ -5781,7 +5885,7 @@ sub A_xor_B() {
         print STDERR Data::Dumper->Dump([ \@$a, \@$b ], [ qw/ *$a *$b / ]);
     };
     foreach my $ft (@$a,@$b) {
-        $ft->[2] = $T; # showflg ON
+        $ft->[3] = $T; # showflg ON
     }; # foreach $ft
     ($an,$bn,$bc) = (scalar(@$a),scalar(@$b),0);
     for ($ac = 0; $ac < $an; $ac++) {
@@ -5793,8 +5897,8 @@ sub A_xor_B() {
             ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
         }; # while
         ($check_match->($ao,$ae,$bo,$be)) && do {
-            $a->[$ac][2] = $F; # showflg OFF
-            $b->[$bc][2] = $F; #
+            $a->[$ac][3] = $F; # showflg OFF
+            $b->[$bc][3] = $F; #
         };
         # $bc++; # if $bo larger than $ae we do need to check same $bc in next loop
     }; # for $ac
@@ -5803,14 +5907,14 @@ sub A_xor_B() {
 sub A_cat_B() {
     my ($a,$b,$o) = @_;
     foreach my $ft (@$a,@$b) {
-        $ft->[2] = $T; # showflg ON
+        $ft->[3] = $T; # showflg ON
     }; # foreach $ft
     push @$o, @$a, @$b;
 } # A_cat_B
 sub AB_dump() {
     my ($a,$b,$o) = @_;
     foreach my $ft (@$a) {
-        $ft->[2] = $T; # showflg ON
+        $ft->[3] = $T; # showflg ON
     }; # foreach $ft
     push @$o, @$a;
 } # AB_dump
@@ -5839,6 +5943,8 @@ sub check_exact_coords() {
 #    --ALL             : outputs non-selected features as comments
 #    --OVL             : removes overlapping groups/feats
 #    --IDN             : feature acceptor/donor matching coordinates must be identical
+#    --FGN             : full group-boundaries for GFF-groups (all features),
+#                        else group-boundaries taken from coding features only.
 #    --AND A.gff B.gff : the GFF-group/feat must appear in both files
 #    --NOT A.gff B.gff : the GFF-group/feat not appearing in the second file
 #    --XOR A.gff B.gff : GFF-group/feat must appear only on first or on second
@@ -5871,6 +5977,7 @@ my %flags = ( GRP => $T ,
               ALL => $F ,
               OVL => $F ,
               IDN => $F ,
+              FGN => $F ,
               AND => $F ,
               NOT => $F ,
               XOR => $F ,
@@ -5889,6 +5996,7 @@ GetOptions(
            'all|ALL'         => \$flags{ALL} ,
            'ovl|OVL'         => \$flags{OVL} ,
            'idn|IDN'         => \$flags{IDN} ,
+           'fgn|FGN'         => \$flags{FGN} ,
            'and|AND'         => \$flags{AND} ,
            'not|NOT'         => \$flags{NOT} ,
            'xor|XOR'         => \$flags{XOR} ,
@@ -11652,7 +11760,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.60 2002-07-12 13:07:30 jabril Exp $
+# $Id: humus.nw,v 1.61 2002-07-26 18:20:30 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
