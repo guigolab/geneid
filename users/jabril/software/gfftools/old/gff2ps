@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.9 1999-05-05 20:34:02 jabril Exp $	
+#         $Id: gff2ps,v 1.10 1999-05-07 20:45:07 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -319,7 +319,7 @@ flglscape {
 /XRgtLbl 4 cm  def
 /FRgtLbl true  def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
-/XOriPlot XOriBlck XLftLbl add def
+/XOriPlot { XOriBlck FLftLbl { XLftLbl add } if } def
 %%%% defining groups and lines
 %/LnFwd 3 def % groups for each strand
 %/LnBth 3 def
@@ -334,13 +334,18 @@ flglscape {
 MAINPSPROCS () { 
 cat <<'@@@MAINProcs@@@'
 /LnTot LnFwd LnBth LnRvs add add def
+/TkMrkW 0.25 cm def                  % Defining tickmark-width.
+/is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and LnFwd 0 eq LnRvs 0 eq and or and def % true if must plot two tickmark lines
+/putuptck LnFwd 0 gt LnFwd LnRvs add 0 eq or def
+/putdntck LnBth 0 gt LnFwd LnBth add 0 eq or def
+/TmpYSB YSBlck TkMrkW is2tck { 2 mul } if sub def  % Adjusting plot area size with tickmarks.
 /YSLine YSBlck LnTot div def
-/YSFwd LnFwd LnTot div YSBlck mul def
+/YSFwd LnFwd LnTot div TmpYSB mul def
 /YOriFwd YOriBlck def
-/YSBth LnBth LnTot div YSBlck mul def
-/YOriBth YOriFwd YSFwd add def
-/YSRvs LnRvs LnTot div YSBlck mul def
-/YOriRvs YOriBth YSBth add def
+/YSBth LnBth LnTot div TmpYSB mul def
+/YOriBth YOriFwd YSFwd add putuptck { TkMrkW add } if def
+/YSRvs LnRvs LnTot div TmpYSB mul def
+/YOriRvs YOriBth YSBth add putdntck { TkMrkW add } if def
 %
 % ---------------------------------
 %     EndVariableDefinitions
@@ -441,6 +446,12 @@ cat <<'@@@MAINProcs@@@'
 % .setstrand : moving to related strand plot area
 /featuredict 10 dict def
 featuredict begin
+  % <--- ori end xori yori .rule
+  % XOriPlot Y TkMrkW 2 div sub translate (for plot tickmark scale) 
+  % XOriPlot XSPlot add ( is the plot end )
+  % 
+  /rule { gsave  % placing center of TickMark line
+          grestore } def
   /dotted { [ 1 0 ] 0 setdash } def
   /box {} def
 end
