@@ -39,11 +39,12 @@ SHSP=6         # shring hsp by $SHSP
 # --------------------------------------------------
 
 
-USAGE="sgp [-hv] [-o 'options'] [-g 'options] [-P filename] [-p filename] [-c value] [-s value] -1 seqfile_1 -2 seqfile_2\n\n 
+USAGE="sgp [-hv] [-o 'options'] [-g 'options] [-P filename] [-p filename] [-k filename] [-c value] [-s value] -1 seqfile_1 -2 seqfile_2\n\n 
 -h \t\t produces this message\n 
 -v \t\t  verbose mode\n 
 -g \t\t geneid options\n  
 -o \t\t tblastx options\n  
+-k \t\t keep intermediate files with prefix\n  
 -c value \t\t tblastx score cuttof\n  
 -s value \t\t shrink hsp's by\n  
 -p filename \t ps output in filename file \n
@@ -60,6 +61,7 @@ do
 	P) GENEIDPARAM=$OPTARG;;                # geneid parameter file
         c) GENEIDOPTIONS=$OPTARG;;              # tblastx score cutoff
 	s) GENEIDPARAM=$OPTARG;;                # shrink hsp's by
+	k) OFN=$OPTARG;;                        # intermediate filename
         p) PSO=$OPTARG;;                        # postscript output
         v) VRB=1;;                              # verbose
         \? | h) echo $USAGE; exit 2;;
@@ -129,6 +131,12 @@ $BLASTPROGRAM $SEQ1DB $SEQ2 $BLASTOPTIONS > $SGPTMP.tbx
 
 rm $BLMATRIX
 
+if [ $OFN ]
+then
+    cp $SGPTMP.tbx $OFN$LOC1"_"$LOC2.tbx
+fi
+
+
 # --------------------------------------------------
 # 2. extract and process hsp's -- in development
 # --------------------------------------------------
@@ -145,6 +153,13 @@ then
  echo `wc -l $SGPTMP.aln | gawk '{print $1}'` hsp alignments   1>&2
 fi
 
+
+if [ $OFN ]
+then
+    cp $SGPTMP.aln $OFN$LOC1"_"$LOC2.aln
+fi
+
+
 # get the projected hsp's
 $SGP2/aln2gff $SGPTMP2.hsp $SGPTMP1.hsp $S_CUTOFF $SGPTMP.aln
 
@@ -153,6 +168,13 @@ then
     echo `wc $SGPTMP1.hsp | gawk '{print $1}'` projected hsps over $S_SCUTOFF in $SEQ1>&2
     echo `wc $SGPTMP2.hsp | gawk '{print $1}'` projected hsps over $S_SCUTOFF in $SEQ2>&2
 fi
+
+if [ $OFN ]
+then
+    cp  $SGPTMP1.hsp $OFN$LOC1.hsp
+    cp  $SGPTMP2.hsp $OFN$LOC2.hsp
+fi
+
 
 # sort projected hsps by end position, cluster and shrink
 sort +4n $SGPTMP1.hsp | $SGP2/getregs | sort +3n | awk "{\$4+=$SHSP;\$5-=$SHSP; print \$0;}" > $SGPTMP1.hsp-rs
@@ -164,6 +186,13 @@ then
     echo `wc $SGPTMP1.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ1 1>&2
     echo `wc $SGPTMP2.hsp-rs | gawk '{print $1}'` clustered hsps in $SEQ2 1>&2
 fi
+
+if [ $OFN ]
+then
+    cp  $SGPTMP1.hsp-rs $OFN$LOC1.hsp-rs
+    cp  $SGPTMP2.hsp-rs $OFN$LOC2.hsp-rs
+fi
+
 
 # --------------------------------------------------
 # 3. run geneid
