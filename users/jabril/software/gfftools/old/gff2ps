@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.63 2000-03-28 16:01:41 jabril Exp $	
+#         $Id: gff2ps,v 1.64 2000-03-28 16:28:19 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.63 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-28 16:01:41 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.64 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-28 16:28:19 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.63 2000-03-28 16:01:41 jabril Exp $
+%    $Id: gff2ps,v 1.64 2000-03-28 16:28:19 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -2000,7 +2000,7 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
           if (s!="-") {
             gpo=gp_ori-MGS;
 		    if (gpo<PORI) gpo=gp_end;
-            while (lastpos[ttt] > gpo) {
+            while (lastpos[ttt] > gpo && gp_ori<=gpo) {
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
               if (!(ttt in lastpos)) lastpos[ttt]=t_ori-MGS; # PORI;
@@ -2011,11 +2011,11 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
           else {
             gpe=gp_end+MGS;
 		    if (gpe>PEND) gpe=gp_ori;
-            while (lastpos[ttt] < gpe) {
+            while (lastpos[ttt] < gpe && gpe>=gp_end) {
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
               if (!(ttt in lastpos)) lastpos[ttt]=t_end+MGS; # PEND;
-              # PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
+              # PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_end,gpe));
             } # while lastpos
 		    lastpos[lg,gp_gpd,LN]=gp_ori;
           }
