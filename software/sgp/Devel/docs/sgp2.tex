@@ -1,0 +1,39 @@
+\documentclass[10pt]{article}
+%
+% I'm trying to learn Literate Programming. I will use sgp2 as an LP exercise.
+%
+% The same document contains the code which will be generated with the proper filter:
+%
+%   pqtangle -L sgp2.tex
+%
+% The project documentation is also available from the same file:
+%
+%   latex sgp2.tex; dvips sgp2.dvi -o sgp2.ps  # to obtain the PS version 
+%
+%   pdflatex sgp2.tex;                         # to obtain the PS version
+%
+% $Id: sgp2.tex,v 1.1 2000-10-07 14:57:04 jabril Exp $
+%  
+\usepackage{noweb,multicol}
+\noweboptions{smallcode}
+% relax page breaking scheme
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\newcommand{\sgp}{\texttt{\textbf{sgp2}}}
+
+% TITLE
+\title{Sintenic Gene Prediction Tool {\sgp}}
+\author{Josep F. Abril\\Roderic Guig\'o}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The initial goal for Josep F. Abril will be to implement a \textt{perl} version of {\sgp}, which works as the current shell implementation.
+\end{abstract}
+
+{\Large {\sgp} - \verb+$Id: sgp2.tex,v 1.1 2000-10-07 14:57:04 jabril Exp $+}
+
+\end{document}
