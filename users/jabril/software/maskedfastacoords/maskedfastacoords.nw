@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: maskedfastacoords.nw,v 1.3 2001-09-25 17:24:54 jabril Exp $ 
+% # $Id: maskedfastacoords.nw,v 1.4 2001-09-26 09:13:12 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -212,7 +212,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.3 2001-09-25 17:24:54 jabril Exp $$>$ }
+{\small$<$ \verb$Id: maskedfastacoords.nw,v 1.4 2001-09-26 09:13:12 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -254,6 +254,7 @@ TCAGTCCCTGTTGGGTGTAGGTCTG
 The sequence '[[Masked_fasta_sequence]]' is 325 nucleotides long. Masking is distributed in the following coords:
 
 \begin{center}
+\renewcommand{\arraystretch}{0.85}
 \begin{tabular}{rrl}
   51 & 100 & N-masking \\
  128 & 188 & soft-masking \\
@@ -267,27 +268,30 @@ The sequence '[[Masked_fasta_sequence]]' is 325 nucleotides long. Masking is dis
 
 \subsctn{Output}
 
-The program can produce three different outputs returning the coords of the sequence masked segments: only ``classical'' masking ('N' or 'n'), only soft-masking ('[a-z]'), both. From the previous example we must obtain the following results:
+The program can produce four different outputs returning the coords of the sequence masked segments: only ``classical'' masking ('N' or 'n'), only soft-masking ('[a-z]'), both or merge contiguous masked segments as if there were only one class. From the previous example we must obtain the following results:
 
 \begin{center}
-\renewcommand{\arraystretch}{0.75}
+\renewcommand{\arraystretch}{0.8}
 \begin{tabular}{c@{\qquad}c@{\qquad}c}
+\begin{tabular}[t]{l}
  \begin{tabular}[t]{rrl}
-\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Basic-masking} \hrulefill } \\
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Default-masking} \hrulefill } \\
   51 & 100 & N-masking \\
  189 & 200 & N-masking \\
- 274 & 278 & n-masking \\[2ex]
+ 274 & 278 & n-masking \\
  \end{tabular}
-&
+\\[3ex]
  \begin{tabular}[t]{rrl}
 \multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Soft-masking} \hrulefill } \\
  128 & 188 & soft-masking \\
  212 & 245 & soft-masking \\
- 269 & 284 & soft-masking \\[2ex]
+ 269 & 284 & soft-masking \\
  \end{tabular}
+\\
+\end{tabular}
 &
  \begin{tabular}[t]{rrl}
-\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Merged-masking} \hrulefill } \\
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{All-masking} \hrulefill } \\
   51 & 100 & N-masking \\
  128 & 188 & soft-masking \\
  189 & 200 & N-masking \\
@@ -295,6 +299,14 @@ The program can produce three different outputs returning the coords of the sequ
  269 & 273 & soft-masking \\
  274 & 278 & n-masking (soft) \\
  279 & 284 & soft-masking \\
+ \end{tabular}
+&
+ \begin{tabular}[t]{rrl}
+\multicolumn{3}{l}{ \hspace{-0.5cm}\textbf{Merged-masking} \hrulefill } \\
+  51 & 100 & N-masking \\
+ 128 & 200 & merged-masking \\
+ 212 & 245 & soft-masking \\
+ 269 & 284 & merged-masking \\
  \end{tabular}
 \\
 \end{tabular}
@@ -345,7 +357,7 @@ The program can produce three different outputs returning the coords of the sequ
 @ 
 
 <<Program Info>>=
-my $PROGRAM = 'getfastamasked.pl';
+my $PROGRAM = 'maskedfastacoords.pl';
 my $VERSION = '0.1_alpha';
 @ 
 <<Prog USAGE>>=
@@ -373,6 +385,11 @@ my $VERSION = '0.1_alpha';
 <<Boolean>>
 <<Stderr subs vars>>
 my ($id,$seq) = ('','');
+my %CmdLineVar = (
+                 <<cmdline defaults - masking>>
+                 <<cmdline defaults - fasta>>
+                 <<cmdline defaults - GFF>>
+                 );
 @
 
 <<Main Loop>>=
@@ -409,6 +426,7 @@ exit(0);
 \def\biopCPAN{\htmladdnormallinkfoot{{\biop} is also available from CPAN}{http://search.cpan.org/search?dist=bioperl}}
 \def\bioseq{\htmladdnormallinkfoot{\texttt{Bio::Seq}}{http://bioperl.org/Core/POD/Bio/Seq.html}}
 \def\bioseqIO{\htmladdnormallinkfoot{\texttt{Bio::SeqIO}}{http://bioperl.org/Core/POD/Bio/SeqIO.html}}
+\def\bioseqlarge{\htmladdnormallinkfoot{\texttt{Bio::Seq::LargeSeq}}{http://bioperl.org/Core/POD/Bio/Seq/LargeSeq.html}}
 @ 
 
 {\bioseq} is the {\biopORG} main sequence object while {\bioseqIO} is the {\biop} support for sequence input/output into files. {\biopCPAN}.
@@ -424,6 +442,17 @@ use Bio::SeqIO;
                You can download directly from CPAN or 
                from BioPerl web site at "http://bioperl.org/".
 @
+
+For sequences larger than 50~Kbp it is recommended to use the [[largefasta]] file format, defined in {\bioseqlarge} module, if you run off memory. It slows down the program because it is using temporary files to access the sequence. The module must be accessed through [[Bio::SeqIO]].
+
+<<Opening sequence object>>=
+my ($seqin,$sequence);
+if ($CmdLineVar{LARGE}) {
+    $seqin = Bio::SeqIO->new(-format => 'largefasta', -fh => \*STDIN);
+} else {
+    $seqin = Bio::SeqIO->new(-format => 'fasta', -fh => \*STDIN);
+};
+@ 
 
 \sctn{Program functions}
 
@@ -456,6 +485,7 @@ sub parse_cmdline() {
 } # parse_cmdline
 @
 
+
 <<warnings: command-line>>=
 'UNKNOWN_CL_OPTION' =>
   $Warn."Error trapped while processing command-line:\n".(" "x16)."\%s\n",
@@ -484,8 +514,8 @@ sub prt_version() {
 } # prt_version
 @ 
 
-<<messages - parsing command-line>>=
-'SHOW_VERSION' => $sp."### \%s -- \%s\n".$sp,
+<<messages: parsing command-line>>=
+'SHOW_VERSION' => $sp."### \%s -- Version: \%s\n".$sp,
 @
 
 Printing command-line help to [[STDERR]]:
@@ -563,24 +593,32 @@ Available options and a short description are listed here:
 \subsubsctn{Defining command-line options}
 
 <<command-line options - masking>>=
-"s|soft-masked"  => ,
-"m|merge-masked" => ,
-@ 
+"a|all-masked"   => sub { $CmdLineVar{MASKING} = 2 },
+"s|soft-masked"  => sub { $CmdLineVar{MASKING} = 4 },
+"m|merge-masked" => sub { $CmdLineVar{MASKING} = 8 },
+@
+<<cmdline defaults - masking>>=
+MASKING  => 0,
+@
 <<command-line help - masking>>=
--s, --soft-masked      Default is looking for "N" masked sequence
+-a, --all-masked       Default is looking for "N" masked sequence
                        segments. This option distinguish between 
                        upper/lower-case and assumes lower-case to 
                        define masked regions too (so called soft-masking).
--m, --merge-masked     Default is differentiating classical-masking
+-s, --soft-masked      Only outputs soft-masked sequence segments.
+-m, --merge-masked     Previous options differentiate classical-masking
                        (with "N"s) from soft-masking. This option merges
                        both as if they were the same masking type
                        (it also enables soft-masking search so previous 
-                       option is not required when passing this one).
+                       options are not required when passing this one).
 @
  
 <<command-line options - fasta>>=
-"l|large-fasta"  => ,
+"l|large-fasta"  => \$CmdLineVar{LARGE},
 @ 
+<<cmdline defaults - fasta>>=
+LARGE    => 0,
+@
 <<command-line help - fasta>>=
 -l, --large-fasta      For large genomic sequence you can enable
                        Bio::SeqIO to work with temporary files
@@ -589,12 +627,20 @@ Available options and a short description are listed here:
 @
 
 <<command-line options - GFF>>=
-"g|gff"        => ,
-"seq-name=s"   => ,
-"source=s"     => ,
-"f|feature=s"  => ,
-"strand=s"     => ,
-"group=s"      => ,
+"g|gff"        => \$CmdLineVar{GFF},
+"seq-name=s"   => \$CmdLineVar{sequence},
+"source=s"     => \$CmdLineVar{source},
+"f|feature=s"  => \$CmdLineVar{feature},
+"strand=s"     => \$CmdLineVar{strand},
+"group=s"      => \$CmdLineVar{group},
+@ 
+<<cmdline defaults - GFF>>=
+GFF      => 0,
+sequence => 'noname',
+source   => 'masked',
+feature  => 'masked',
+strand   => '.',
+group    => '',
 @ 
 <<command-line help - GFF>>=
 -g, --gff              Output in GFF format (default coords).
@@ -610,8 +656,8 @@ Available options and a short description are listed here:
 
 <<Main program function>>=
 sub main() {
-    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
-    while (my $sequence = $seqin->next_seq()) {
+    <<Opening sequence object>>
+    while ($sequence = $seqin->next_seq()) {
         my ($sid,$len,$seq,@nuc,@coords,$masked_flg,$match,$msk_num);
         @coords = ();
         <<Setting sequence variables from fasta record>>
@@ -621,6 +667,9 @@ sub main() {
 } # main
 @ 
 
+<<Global Vars>>=
+@ 
+
 <<Setting sequence variables from fasta record>>=
 print STDERR "### READING FASTA............\n";
 $sid  = $sequence->display_id();
@@ -628,14 +677,17 @@ $len  = $sequence->length();
 $seq  = $sequence->seq();
 @ 
 
-\label{todo:CCC}
+\label{todo:CCC}\label{todo:CCD}
 <<HIDE: new defs TODO>>=
 \def\todoCCC{We can define mask checking as three different subroutines that will be called by reference, so that a variable name (called for instance \texttt{\$test}) will be set depending on command-line options.} % todoCCC
+\def\todoCCD{It will be also necessary to define the parsing functions for largeseq in a different way from default fasta sequences.} % todoCCD
 @
 <<HIDE: TODO>>=
 \todoitem{\todoCCC}{todo:CCC}
+\todoitem{\todoCCD}{todo:CCD}
 @
-\todo{ \item \todoCCC } % todo
+\todo{ \item \todoCCC 
+       \item \todoCCD } % todo
 
 <<Finding masked regions coords>>=
 print STDERR "###         PARSING SEQUENCE: $sid ($len bp)\n";
@@ -707,13 +759,12 @@ for (my $n = 0; $n <= $#coords; $n+=2) {
 #
 use strict;
 #
-# BEGIN {
-    <<Program Info>>
-    my $DATE = localtime;
-    my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
-    my $host = `hostname`;
-    chomp($host);
-# } # BEGIN
+<<Program Info>>
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
+my $host = `hostname`;
+chomp($host);
+#
 @
 
 <<Boolean>>=
@@ -835,6 +886,7 @@ Those are accessory variables for the messages strings:
 <<Stderr subs vars>>=
 my $line = ('#' x 80)."\n";
 my $s = '### ';
+my $sp = "###\n";
 my $Error = "\<\<\<  ERROR  \>\>\> ";
 my $Warn  = "\<\<\< WARNING \>\>\> ";
 my $spl   = "\<\<\<\-\-\-\-\-\-\-\-\-\>\>\>\n";
@@ -849,6 +901,7 @@ my %Messages = (
     <<warnings: command-line>>
     # WORKING MESSAGES
     <<messages: program running>>
+    <<messages: parsing command-line>>
    ); # %Messages 
 @
 
@@ -881,7 +934,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: maskedfastacoords.nw,v 1.3 2001-09-25 17:24:54 jabril Exp $
+# $Id: maskedfastacoords.nw,v 1.4 2001-09-26 09:13:12 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
