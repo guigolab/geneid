@@ -30,7 +30,7 @@
 #
 # Last Update:  
 #
-# $Id: gff2aplot,v 1.2 2000-01-24 13:18:24 jabril Exp $	
+# $Id: gff2aplot,v 1.3 2000-01-24 15:19:07 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   PROGRAM="aplot";
   VERSION="v1.9";
   CREATIONDATE="1999/01/10"; # PSCREATION="1998/11/05"
-  REVISION=`echo '$Revision: 1.2 $' | gawk '{print $2}'`
-  DATERELEASE=`echo '$Date: 2000-01-24 13:18:24 $' | gawk '{print $2,$3}'`
+  REVISION=`echo '$Revision: 1.3 $' | gawk '{print $2}'`
+  DATERELEASE=`echo '$Date: 2000-01-24 15:19:07 $' | gawk '{print $2,$3}'`
   PSPROGRAM="PostScript Output from GFF2APLOT";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -1739,8 +1739,10 @@ function ReadElements() {
      }
    } # if FTExtraFunctions
  else {
-   if (!fseq1) { fseq1=1; SEQ1name=$seqname }
-   if (!fseq2 && fseq1) { fseq2=1; SEQ2name=$seqname }
+   if (!($seqname in LAST)) {
+     if (!fseq1) { fseq1=1; SEQ1name=$seqname }
+     else if (!fseq2) { fseq2=1; SEQ2name=$seqname }
+     }
    LAST[$seqname]=cnt;
    ft_ref=$seqname SUBSEP "-" SUBSEP cnt;
    SOURCE[ft_ref]=$source;
