@@ -1,37 +1,27 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.9 2000-08-02 18:22:58 jabril Exp $
+# $Id: parseblast.pl,v 1.10 2000-08-11 21:20:45 jabril Exp $
 #
 
+my $PROGRAM = "parseblast";
+my $VERSION = "Version 1.0";
 my $Start = time;
 
 use strict;
 use Getopt::Long;
 
-Getopt::Long::Configure("bundling");
 
-my $PROGRAM = "parseblast.pl";
-my $VERSION = '$Id: parseblast.pl,v 1.9 2000-08-02 18:22:58 jabril Exp $ ';
+##############################################################################
+##                       Getting Comand-line Options                        ##
+##############################################################################
+
+Getopt::Long::Configure("bundling");
 
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg, $subject_flg,
 	$sequence_flg, $comment_flg, $nocmmnt_flg, $split_flg, $help_flg, $err_flg,
     $expanded_flg, $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param, $aln_split, $prt_pos_flg
 	) = (0, 0, 0, 0, 0, 0, 0, 0);
-my ($prog_params, $program, $version, $seqname);
-my ($scQ, $scS);   # reSCale_Query/Subject : 1 to re-scalate lengths.
-my ($query_name, $db_name, $score, $descr,
-	$ori, $end, $seq, $txt, $tt, $pt, $ht);
-my (@seqlist, %prgseq, %dbase, %query, %cnt,
-	%desc, %sco, %hsp_start, %hsp_end, %hsp_seq);
-my ($qm, $sm, $x, $y, $ml, $a, $b, $aq, $as, $sql, $lq, $ls, $sq);
-my $foe = 0;
-my $index = 0; 
-my $chars_per_line = 50; # chars of sequences to show per line (in alignment modes)
-
-###################################################
-## Getting command-line options.
-###################################################
 
 GetOptions( "G|gff"            => \$gff_flg      ,
 			"F|fullgff"        => \$fullgff_flg  ,
@@ -49,10 +39,8 @@ GetOptions( "G|gff"            => \$gff_flg      ,
 			"n|no-comments"    => \$nocmmnt_flg  ,
 			"v|verbose"        => \$err_flg      ,
 			"h|help|\?"        => \$help_flg      );
-#			"a|align-score "   => \$aln_flg     ,
-#			"s|split-output"   => \$split_flg   ,
-#   -a, --align-score    : set <score> field to Alignment Score.
-#	-s, --split-output : output each sequence match in a separate file in the current directory.
+
+($help_flg) && &prt_help;
 
 {   # first choose disables any other command-line option.
     $aln_flg
@@ -86,12 +74,26 @@ GetOptions( "G|gff"            => \$gff_flg      ,
 
 $nocmmnt_flg && ($comment_flg = 0);
 
-($help_flg) && &prt_help;
+
+##############################################################################
+##                          Global Variables                                ##
+##############################################################################
+
+my ($prog_params, $program, $version, $seqname);
+my ($scQ, $scS);   # reSCale_Query/Subject : 1 to re-scalate lengths.
+my ($query_name, $db_name, $score, $descr,
+	$ori, $end, $seq, $txt, $tt, $pt, $ht);
+my (@seqlist, %prgseq, %dbase, %query, %cnt,
+	%desc, %sco, %hsp_start, %hsp_end, %hsp_seq);
+my ($qm, $sm, $x, $y, $ml, $a, $b, $aq, $as, $sql, $lq, $ls, $sq);
+my $foe = 0;
+my $index = 0; 
+my $chars_per_line = 50; # chars of sequences to show per line (in alignment modes)
 
 
-###################################################
-## Subroutines
-###################################################
+##############################################################################
+##                          Global Subroutines                              ##
+##############################################################################
 
 sub prt_progress {
     $err_flg && do {
@@ -106,14 +108,29 @@ sub prt_foeprg {
 sub fill_right { $_[0].($_[2] x ($_[1] - length($_[0]))) }
 sub fill_left  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
 
-sub max { # returns the max value from input array
-	my ($z) = shift @_;
-	my $l;
-	foreach $l (@_) {
-		$z = $l if $l > $z ;
-	};
-	$z;
-}
+sub max { my ($z) = shift @_; my $l; foreach $l (@_) { $z = $l if $l > $z ; }; $z; }
+
+#
+# Timing.
+
+sub get_exec_time {
+	$err_flg && do {
+		my $End = @_;
+        my ($c,$s,$m,$h,$r);
+        $r = $End - $Start;
+        $s = $r % 60;
+        $r = ($r - $s) / 60;
+        $m = $r % 60;
+        $r = ($r - $m) / 60;
+        $h = $r % 24;
+		($s,$m,$h) = (&fill_left($s,2,"0"),&fill_left($m,2,"0"),&fill_left($h,2,"0"));
+print STDERR <<EOF;
+##########################################################
+## \"$PROGRAM\"  Execution Time:  $h:$m:$s
+##########################################################
+EOF
+    };
+} # END_SUB: get_exec_time
 	
 #
 # Print help to STDERR.
@@ -423,12 +440,12 @@ EndOfALIGN
 sub prt_out {
 	$err_flg && print STDERR ("#"x58)."\n## WRITING OUTPUT TO STDOUT ".("#"x30)."\n".("#"x58)."\n";
 	while (@seqlist) {
-		&prt_progress(++$ht);
 		$nm = shift(@seqlist);
 		($wnm = $nm) =~ s/\_\d+$//o; 
 		(!$hsp_flg && $comment_flg) && (print STDOUT "#\n# $prgseq{$nm} :: DB $dbase{$nm} :: $cnt{$nm} HSPs for $query{$nm}x$wnm \n# DESCR: $desc{$nm}\n#\n");
 		($cnt{$nm}>0) && do {
 			for ($n = 1; $n <= $cnt{$nm}; $n++) {
+				&prt_progress(++$ht);
 				$tq = $nm."query".$n;
 				$ts = $nm."sbjct".$n;
 				($sc, $bt, $ex, $pv, $id, $frq, $frs) = &get_scores($sco{$nm.$n});
@@ -484,9 +501,9 @@ sub prt_out {
 				  &prt_aln       if $aln_flg;
 			  } # PRINT
 			} # for $cnt{$nm}
+			&prt_foeprg($ht);
 		} # do if $cnt{$nm}>0
 	} # foreach
-	&prt_foeprg($ht);
 }
 
 
@@ -613,26 +630,7 @@ while (<>) {
 
 $prt && &prt_out;
 
-###################################################
-## Timing
-###################################################
-
-$err_flg && do {
-	my $End = time;
-	my ($c,$s,$m,$h,$r);
-	$r = $End - $Start;
-	$s = $r % 60;
-	$r = ($r - $s) / 60;
-	$m = $r % 60;
-	$r = ($r - $m) / 60;
-	$h = $r % 24;
-    ($s,$m,$h) = (&fill_left($s,2,"0"),&fill_left($m,2,"0"),&fill_left($h,2,"0"));
-print STDERR <<"EndOfTiming";
-##########################################################
-## "$PROGRAM"  Execution Time:  $h:$m:$s
-##########################################################
-EndOfTiming
-};
+&get_exec_time(time);
 
 exit(0);
 
@@ -647,3 +645,7 @@ exit(0);
 #
 ## STILL NOT WORKING...
 ###################################################
+#			"a|align-score "   => \$aln_flg     ,
+#			"s|split-output"   => \$split_flg   ,
+#   -a, --align-score    : set <score> field to Alignment Score.
+#	-s, --split-output : output each sequence match in a separate file in the current directory.
