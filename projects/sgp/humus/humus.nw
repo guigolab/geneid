@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.41 2002-05-22 14:11:15 jabril Exp $ 
+% # $Id: humus.nw,v 1.42 2002-05-23 19:49:57 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.41 2002-05-22 14:11:15 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.42 2002-05-23 19:49:57 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2929,6 +2929,456 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.sgp+refseq.eval.rev.gff      \
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
 
+\subsubsctn{Statistics for current job execution}
+
+<<>>=
+#
+HUMUS="/projects/H.sapiens/20011222.UCSCgp" ;
+STATS="$HUMUS/evaluations/SGP-MGSCv3+RefSeqEvids" ;
+MkDirs $STATS $STATS/gene-prediction.stats ;
+#
+# homology results quick summary
+( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
+    do {
+      N=`echo $n | tr [:lower:] [:upper:]` ; 
+      MD="$HUMUS/chr$N" ;
+      echo '################################################### CHR '$n' #####' ;
+      perl -ne '/^\#\s+[cT+-]/o && print'     \
+        $MD/tblastx/20020425/hsp/chr$n.report \
+        $MD/tblastx/20020425/sr/chr$n.report  \
+        $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr$n.report ;
+      } ;
+    done ;
+  #
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      MD="$HUMUS/chr$N" ;
+      n=$n'_random' ;
+      echo '########################################## CHR '$n' #####' ;
+      perl -ne '/^\#\s+[cT+-]/o && print'     \
+        $MD/tblastx/20020425/hsp/chr$n.report \
+        $MD/tblastx/20020425/sr/chr$n.report  \
+        $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr$n.report ;
+      } ;
+    done ) > $STATS/SRs.summary 2>&1 ;
+#
+prtcode $STATS/SRs.summary ;
+#
+@ 
+
+<<>>=
+#
+# gene-pred results quick summary
+( GPDIR="sgp/20011222.UCSCgp-20020411.MGSCv3" ;
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
+    do {
+      N=`echo $n | tr [:lower:] [:upper:]` ; 
+      MD="$HUMUS/chr$N" ;
+      echo '################################################### CHR '$n' #####' ;
+      echo '### GENEID' ;
+      tail -20 $MD/geneid/20011222/logs/chr$n.geneid | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/geneid/20011222/out/chr$n ;
+      echo '### SGP' ;
+      tail -20 $MD/$GPDIR/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GPDIR/out/chr$n ;
+      echo '### SGP+RefSeq' ;
+      tail -20 $MD/$GPDIR+RefSeqEvids/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GPDIR+RefSeqEvids/out/chr$n ;
+      echo '' ;
+      } ;
+    done ;
+  #
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      MD="$HUMUS/chr$N" ;
+      n=$n'_random' ;
+      echo '########################################## CHR '$n' #####' ;
+      echo '### GENEID' ;
+      tail -20 $MD/geneid/20011222/logs/chr$n.geneid | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/geneid/20011222/out/chr$n ;
+      echo '### SGP' ;
+      tail -20 $MD/$GPDIR/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GPDIR/out/chr$n ;
+      echo '### SGP+RefSeq' ;
+      tail -20 $MD/$GPDIR+RefSeqEvids/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GPDIR+RefSeqEvids/out/chr$n ;
+      echo '' ;
+      } ;
+    done ) > $STATS/gene-prediction.summary 2>&1 ;
+#
+prtcode $STATS/gene-prediction.summary ;
+#
+@ 
+
+<<>>=
+#
+### GENE NUMBER
+# sgp+refseq
+gawk '{print $1,$2}' $HUMUS/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      MD="$HUMUS/chr$CHR/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids" ;
+      evis=`grep 'Annotation' $MD/evids/$SEQ.evids.gff | wc | gawk '{print $1}' ` ;
+      head -4 $MD/out/$SEQ | tail -1 | \
+        gawk 'BEGIN{ chr=ARGV[1]; evid=ARGV[2]; ARGV[1]=ARGV[2]=""; }
+                   { printf "%12s %8d %12.3f\n", chr, $5 - evid, $9; }
+             ' "$SEQ" $evis - ;
+      };
+    done > $STATS/sgp.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###" ;
+  echo "###-> SGPrefseq on Hsap UCSC-GoldenPath assembly (20011222-NCBI28)" ;
+  echo "###       + Mmus MGSCv3 assembly (20020411)" ;
+  echo "###       + RefSeq annotation as evidences (not included in #genes)" ;
+  gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }' ;
+  gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }
+       ' $STATS/sgp.genes_by_seq ;
+  gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }
+        END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }
+       ' $STATS/sgp.genes_by_seq ;
+  ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 }
+                        { print $0 }
+            END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }
+           ' > $STATS/sgp.genes_by_seq.report ;
+# summarizing
+( cat $STATS/../old/refseq_MGSCv3.genes_by_seq.report ;
+  echo ""; echo "";
+  cat $STATS/../old/ensembl_MGSCv3.genes_by_seq.report ;
+  echo ""; echo "";
+  cat $STATS/../old/genscan_MGSCv3.genes_by_seq.report ;
+  echo ""; echo "";
+  cat $STATS/../old/geneid_MGSCv3.genes_by_seq.report;
+  echo ""; echo "";
+  cat $STATS/../old/sgp_MGSCv3.genes_by_seq.report;
+  echo ""; echo "";
+  cat $STATS/sgp.genes_by_seq.report
+  ) > $STATS/ALL.genes_by_seq.report ;
+#
+enscript --columns=3 -Gjf Courier5 -M A4 $STATS/ALL.genes_by_seq.report ;
+#
+perl -ne 'BEGIN{
+  $prog="???";
+  print STDOUT "PROG CLASS SEQ GENES\n";
+  }
+  next if /^\s+$/o;
+  /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next);
+  next if /^\#/o;
+  next unless /^\s*chr/;
+  chomp;
+  $_ =~ s/^\s+//o;
+  @f=split /\s+/og;
+  $type="ASSEMBLED";
+  $f[0] =~ s/_random$//o && ($type="RANDOM");
+  printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];
+  ' $STATS/ALL.genes_by_seq.report > $STATS/ALL.genes_by_seq.tbl ;
+# | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }'
+#
+$BIN/splittbls.pl "ASSEMBLED" $STATS/ALL.genes_by_seq.tbl \
+                            > $STATS/ALL.genes_by_seq_ASM.tbl ;
+$BIN/splittbls.pl "RANDOM"    $STATS/ALL.genes_by_seq.tbl \
+                            > $STATS/ALL.genes_by_seq_RND.tbl ;
+#
+@ 
+
+<<R-plots: histograms>>=
+#
+# DRAWING HISTOGRAMS with R
+def.par <- par()# save default, for resetting...
+#
+# global VARS
+PATH <- "/projects/H.sapiens/20011222.UCSCgp/evaluations/SGP-MGSCv3+RefSeqEvids/"
+FILE <- paste(PATH,"ALL.genes_by_seq",sep="")
+PSFILE <- paste(FILE,".ps",sep="")
+MAINTIT <- "H.sapiens Golden Path Assembly"
+VERSTIT <- "( 22 Dec, 2001 - NCBI 28 )"
+ASUBTIT <- "Assembled Chromosomes"
+RSUBTIT <- "Random Fragments"
+#
+# load DATA
+A <- read.table(paste(FILE,"_ASM.tbl",sep=""),
+                header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+R <- read.table(paste(FILE,"_RND.tbl",sep=""),
+                header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+COLORS <- rainbow(ncol(A))
+#
+postscript(file=PSFILE, paper="a4", horizontal=TRUE) 
+#
+# BEGIN histograms
+nf <- layout(matrix(c(1,2),2,1,byrow=TRUE),
+             widths=c(lcm(28),lcm(28)),
+             heights=c(lcm(10.5),lcm(8.5)), respect=TRUE)
+# layout.show(nf)
+par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 0.5,
+    las = 2, mar = c(cm(1.00),cm(2.00),cm(0.50),cm(0.00)),
+    mgp = c(3.25,1.5,0), adj = 0.5)
+# mar: A numerical vector of the form c(bottom, left, top, right) which gives the lines of margin to be specified on the four sides of the plot.
+# mgp: The margin line for the axis title, axis labels and axis line. The default is c(3, 1, 0)
+YLAB <- function(){ 
+            title(ylab="Number of Genes", adj = 0.5, font = 3, cex.lab = 1.75)
+            }
+barplot(t(A), beside = TRUE, col = COLORS, ylim = c(0, 9900))
+YLAB()
+text(65, 9500, MAINTIT, font = 2, adj = 0.5, cex = 2.5)
+text(65, 8800, VERSTIT, font = 2, adj = 0.5, cex = 1.75)
+text(65, 7500, ASUBTIT, font = 2, adj = 0.5, cex = 2)
+legend(134, 7250, colnames(A), col = COLORS, cex = 1, pch = 16)
+#
+barplot(t(R), beside = TRUE, col = COLORS, ylim = c(0, 700))
+YLAB()
+text(65, 650, RSUBTIT, font = 2, adj = 0.5, cex = 2)
+legend(139, 650, colnames(R), col = COLORS, cex = 1, pch = 16)
+# closing PostScript device
+dev.off()
+#
+par(def.par)#- reset to default
+#
+@ 
+
+<<>>=
+#
+# Checking if evidences were included OK
+( echo "###" ; echo "### VERIFYING EVIDENCES BEING INCLUDED" ; echo "###" ; 
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
+    do {
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      MD="$HUMUS/chr$N/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids" ;
+      Ori=`grep 'Annotation' $MD/evids/chr$n.evids.gff | wc | gawk '{print $1}'`;
+      Out=`grep '^Annotation' $MD/out/chr$n.all | wc | gawk '{print $1}'`;
+      gawk "BEGIN{ a = \"chr$N\";
+                   b = $Ori; c = $Out;
+                   l = b-c; gsub(\"-\",\"\",l);
+                   d = (b==c) ? \"\" : \"<-- **CHECK** (\"l\")\";
+                   printf \"\%12s\%8s\%8s \%s\\n\",a,b,c,d }" ;
+      } ;
+    done ;
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      MD="$HUMUS/chr$N/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids" ;
+	  Ori=`grep 'Annotation' $MD/evids/chr${n}_random.evids.gff | wc | gawk '{print $1}'`;
+      Out=`grep '^Annotation' $MD/out/chr${n}_random.all | wc | gawk '{print $1}'`;
+      gawk "BEGIN{ a = \"chr${N}_random\";
+                   b = $Ori; c = $Out;
+                   l = b-c; gsub(\"-\",\"\",l);
+                   d = (b==c) ? \"\" : \"<-- **CHECK** (\"l\")\";
+                   printf \"\%12s\%8s\%8s \%s\\n\",a,b,c,d }" ;
+      } ;
+    done ;
+) > $STATS/evid_check.report ;
+#
+enscript -1rGjf Courier5 -M A4 $STATS/evid_check.report ;
+#
+@ 
+
+<<>>=
+#
+# gene-pred evaluation quick summary
+#
+# source $WORK/.bash_VARS ; 
+# ( $BIN/stepper.pl --debug
+#         --step HSAP_GP_ANNOTATION:HSAP_GP_REFSEQ,HSAP_GP_ENSEMBL \
+#         --step HSAP_GP_ANNOTATION:HSAP_GP_GENSCAN,HSAP_GP_GENSCAN_EVAL \
+#         --step HSAPgpa_MGSCv3_WUTBLASTX:EVALUATING_SRs  \
+#         --step GENEID_STD:GENEID_EVALUATION             \
+#         --step SGP_HSAPgpa_MGSCv3_TBX:SGP_EVALUATION    \
+#         --step SGP_HSAPgpa_MGSCv3+RefSeq:SGP_OUTPUT,SGP_EVALUATION \
+#         > $HUMUS/tmp/.out/_ALL_eval.out ) 2>&1 | \
+#       tee $HUMUS/tmp/.err/_ALL_eval.err;
+#
+# basic error checking
+( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
+    do {
+      N=`echo $n | tr [:lower:] [:upper:]` ; 
+      MD="$HUMUS/chr$N" ;
+      echo '################################################### CHR '$n' #####' ;
+      egrep 'Error:|segmentation fault' \
+        $MD/annotation/20011222/genscan/eval/chr$n.genscan_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/tblastx/20020425/eval/chr$n.sr_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/geneid/20011222/eval/chr$n.geneid_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr$n.sgp_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr$n.sgp+refseq_*.[fr]?? ;
+      } ;
+    done ;
+  #
+  for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      MD="$HUMUS/chr$N" ;
+      n=$n'_random' ;
+      echo '########################################## CHR '$n' #####' ;
+      egrep 'Error:|segmentation fault' \
+        $MD/annotation/20011222/genscan/eval/chr$n.genscan_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/tblastx/20020425/eval/chr$n.sr_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/geneid/20011222/eval/chr$n.geneid_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr$n.sgp_*.[fr]?? ;
+      egrep 'Error:|segmentation fault' \
+        $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr$n.sgp+refseq_*.[fr]?? ;
+      } ;
+    done ) > $STATS/gene-prediction.errors 2>&1 ;
+#
+# build summaries
+( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
+    do {
+      N=`echo $n | tr [:lower:] [:upper:]` ; 
+      MD="$HUMUS/chr$N" ;
+      echo '################################################### CHR '$n' #####' ;
+      echo "###" ; echo '### GENSCAN' ;
+      cat $MD/annotation/20011222/genscan/eval/chr${n}.summary ;
+      echo "###" ; echo '### GENEID' ;
+      cat $MD/geneid/20011222/eval/chr${n}.summary ;
+      echo "###" ; echo '### SRs' ;
+      cat $MD/tblastx/20020425/eval/chr${n}.summary ;
+      echo "###" ; echo '### SGP' ;
+      cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}.summary ;
+      echo "###" ; echo '### SGP + RefSeq' ;
+      cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr${n}.summary ;
+      echo '';
+      } ;
+    done ) > $STATS/eval.summary ;
+#
+( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ;
+    do { 
+      N=`echo $n | tr [:lower:] [:upper:]`; 
+      MD="$HUMUS/chr$N" ;
+      echo '################################################### CHR '$n' #####' ;
+      echo "###" ; echo '### GENSCAN' ;
+      cat $MD/annotation/20011222/genscan/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### GENEID' ;
+      cat $MD/geneid/20011222/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### SRs' ;
+      cat $MD/tblastx/20020425/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### SGP' ;
+      cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}_random.summary ;
+      echo "###" ; echo '### SGP + RefSeq' ;
+      cat $MD/sgp/20011222.UCSCgp-20020411.MGSCv3+RefSeqEvids/eval/chr${n}_random.summary ;
+      echo '';
+      } ;
+    done ) > $STATS/eval_random.summary ;
+#
+enscript -1rGjf Courier4 -M A4 $STATS/eval.summary ;
+#
+$BIN/process_eval.pl -tas \
+    -T "REFSEQ ENSEMBL"   \
+    -P "GENSCAN GENEID SRs SGP-MGSCv3 SGP-MGSCv3+RefSeq" \
+    $STATS/eval.summary > $STATS/eval.test_summary ;
+enscript -1rGjf Courier4 -M A4 $STATS/eval.test_summary ;
+#
+# filtering R tables from summary file
+$BIN/mkRtables.awk $STATS/eval.test_summary > $STATS/eval.test_summary.tbl ;
+gawk '$2!~"ALL" { print $0 }' $STATS/eval.test_summary.tbl \
+                            > $STATS/eval.test_summary_CHR.tbl ;
+gawk '$1~/^(TOTALS|CHR)$/ { print $0 }' $STATS/eval.test_summary.tbl \
+                                      > $STATS/eval.test_summary_TOT.tbl ;
+#
+@ 
+
+<<R-plots: gene-prediction stats>>=
+#
+# DRAWING GENE-PREDICTION STATS with R
+def.par <- par()# save default, for resetting...
+#
+# global VARS
+IPATH <- "/projects/H.sapiens/20011222.UCSCgp/evaluations/SGP-MGSCv3+RefSeqEvids/"
+OPATH <- paste(IPATH,"gene-prediction.stats/", sep="")
+FILE <- "eval.test_summary"
+WFILE <- paste(IPATH,FILE,"_CHR.tbl", sep="")
+TFILE <- paste(IPATH,FILE,"_TOT.tbl", sep="")
+PSFILE <- paste(OPATH,"eval", sep="")
+TSETS <- c("REFSEQ","ENSEMBL")
+PSETS <- c("GENSCAN","GENEID","SGP-MGSCv3","SGP-MGSCv3+RefSeq","SRs")
+VSETS <- c("SN","SP","CC", "SNe","SPe","SNSP", "SNg","SPg","SNSPg",  
+           "raME","raWE", "raMG","raWG", "raJG","raSG")
+CSETS <- c("1","2","3","4","5","6","7","8","9","10",
+           "11","12","13","14","15","16","17","18","19","20",
+           "21","22","X","Y")
+rnbw_cols <- rainbow(length(PSETS))
+# MAINTIT <- "H.sapiens Golden Path Assembly"
+# VERSTIT <- "( 22 Dec, 2001 - NCBI 28 )"
+# ASUBTIT <- "Assembled Chromosomes"
+# RSUBTIT <- "Random Fragments"
+#
+# load DATA
+W <- read.table(WFILE, header=TRUE, sep=" ", as.is=FALSE, na.strings="nan")
+w <- split(W,W$TEST)
+T <- read.table(TFILE, header=TRUE, sep=" ", as.is=FALSE, na.strings="nan")
+t <- split(T,T$TEST)
+#
+# STATS PLOTED BY CHROMOSOMES
+for(i in 1:length(TSETS)) {
+  print(paste("###[",i,"]### WORKING ON ",TSETS[i]," ######", sep="")) ;
+  F <- TSETS[i] ;
+  sw <- w[[F]] ;
+  st <- t[[F]] ;
+  for(j in 1:length(VSETS)) {
+    print(paste("###[",i,"]### |- ",F," [",j,"] --> ",VSETS[j], sep="")) ;
+    V <- VSETS[j] ;
+    rw <- sw[[V]] ;
+    rt <- st[[V]] ;
+    MkPSplotByCHRs(F,V,rw) ;
+  } ; # for j (VSETS)
+  print(paste("###[",i,"]###", sep="")) ;
+} # for i (TSETS)
+##############################################
+#
+MkPSplotByCHRs <- function(ftst,fvar,flstW) {
+  #
+  FOUT <- paste(PSFILE,"_chrs.",ftst,"_",fvar,".ps", sep="") ;
+  # print(FOUT) ;
+  #
+  plot.new() ;
+  def.par <- par(ask=TRUE) ;# save default, for resetting...
+  #
+  # BEGIN plot
+# postscript(file=FOUT, paper="a4", horizontal=TRUE) ; 
+  #
+# nf <- layout(matrix(c(1,2),1,2,byrow=TRUE),
+  nf <- layout(matrix(c(1,1),1,1,byrow=TRUE),
+               widths=c(lcm(12),lcm(7)),
+               heights=c(lcm(8),lcm(8)), respect=TRUE) ;
+  # layout.show(nf)
+  par(ps=8, bg="white", bty="o", font=2, 
+      col.axis="blue", font.axis=1, cex.lab=0.5, las=1) ;
+  # drawing chromosome dots (left figure)
+  par(mar=c(cm(0.75),cm(0.75),cm(0.75),cm(0))) ;
+  plot(c(1,length(CSETS)), c(0.0,1.0), type="n",
+       axes=FALSE, xlab="", ylab="", main="") ; 
+  abline(v=c(1:length(CSETS)), h=0.1*c(1:9), col="lightgray", lty="dotted") ;
+  for (chr in 1:length(CSETS)) {
+    op.par <- par(pch=21, lwd=0.01, cex=1.5) ;
+    for (prg in 1:length(PSETS)) {
+      points(chr, flstW[prg], bg = rnbw_cols[prg]) ;
+    } ; # for prg
+    par(op.par) ;
+    axis(1, at=chr, as.character(CSETS[chr])) ;
+  } ; # for chr
+  axis(2) 
+  box()   
+  # END plot
+# dev.off() ;# closing PostScript device
+  #
+  par(def.par) ;#- reset to default
+  #
+} # MkPSplot
+#
+@ 
+
+
+
 \chklst{
 \item ...
 }
@@ -4421,6 +4871,74 @@ sub run_parseblast() {
 @
 
 
+\subsubsctn{[[getHSPSR.pl]]: Re-scoring SRs}
+
+<<tangling: perl scripts>>=
+echo "# --> \$BIN/getHSPSR.pl" 1>&2 ;
+notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
+perl -c $BIN/getHSPSR.pl ;
+is_exec $BIN/getHSPSR.pl ;
+@
+ 
+<<getHSPSR.pl>>=
+<<PERL shebang>>
+# Re-scoring SRs to produce HSP-SRs for SGP homology.
+#
+# USAGE: getHSPSR.pl "chrname" < SR_file.gff > HSP-SR_file.gff > stdout.report
+#
+<<PERL strict pragma + info>>
+my $PROG = 'getHSPSR.pl';
+my $PRGVER = '0.9alpha';
+#
+my $chr = shift;
+my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
+my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
+          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
+          ".1" => 8,  ".2" => 9,  ".3" => 10, "." => 11,
+                     "all" => 12,            "sum" => [ (0) x 13 ] );
+my $HSPminLEN = 1; # $ori + $HSPminLEN - 1 ==> minimum length is 1 nucleotide
+my $S_CUTOFF = 26;
+my $SCF = 0; # substract to tblastx scores S_CUTOFF - SCF
+my $DSC = $S_CUTOFF - $SCF;
+my $SHSP  = 0;    # SHSP=6 # shrink hsp by $SHSP
+my $WTBX  = 0.19; # weigth of tblastx score
+my $WTBXF = 0.30; # weigth of tblastx score
+my $WTBXI = 0.20; # weigth of tblastx score
+my $WTBXT = 0.30; # weigth of tblastx score
+while (<STDIN>) {
+    my @l;
+    next if /^#/o;
+    next if /^\s*$/o;
+    chomp;
+    @l = split /\s+/og, $_;
+    next unless $l[$sco] > $S_CUTOFF;
+    $l[$sco] = sprintf("%.6f",($l[$sco] - $DSC) * $WTBX);
+    $l[$ori] += $SHSP;
+    $l[$end] -= $SHSP;
+    next if $l[$end] < ($l[$ori] + $HSPminLEN - 1);
+    print STDOUT (join("\t", (@l)))."\n";
+    $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
+}; # while
+$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
+$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
+$g{sum}[$g{"."}] = $g{sum}[$g{".1"}] + $g{sum}[$g{".2"}] + $g{sum}[$g{".3"}];
+$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
+print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSP-SRs on $chr: ".
+             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse, ".
+             $g{sum}[$g{"."}]." without strand.\n";
+foreach my $t (qw/ 1 2 3 /) {
+   printf STDERR "#\t%s : %6s\t\|\t%s : %6s\t|\t%s : %6s\n",
+          "+$t",$g{sum}[$g{"+$t"}],"-$t",$g{sum}[$g{"-$t"}],
+          ".$t",$g{sum}[$g{".$t"}];
+}; # foreach
+# foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
+#    printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
+# }; # foreach
+#
+exit(0);
+@
+
+
 \subsubsctn{[[swapHSPcoords.pl]]: mapping DB coordinates from parseblast}
 
 <<tangling: perl scripts>>=
@@ -5094,6 +5612,8 @@ sub print_single_line() {
 @ 
 
 
+\subsctn{Processing results} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsubsctn{[[processeval.pl]]: Processing evaluation data}
 
 <<tangling: perl scripts>>=
@@ -5155,11 +5675,13 @@ exit(0);
 
 <<processeval.pl: parsing summaries from input files>>=
 sub parsing_input_files() {
+    my $opened = 0;
     foreach my $ifile (@files) {
         open(EVAL,"< $ifile") || do {
-            print $ERRFH "## $PROG ## EXITING NOW: CANNOT open summary file $ifile\n";
+            print $ERRFH "## $PROG ## WARNING: CANNOT open summary file $ifile\n";
             next; # exit($exit_codes{'NOREADFILE'}{CODE});
         };
+        $opened++;
         while (<EVAL>) {
             my (@f,%t,$sq);
             next if /^\s*$/o;
@@ -5167,6 +5689,7 @@ sub parsing_input_files() {
             chomp;
             @f = split /\s+/o, $_;
             %t = ( map { split /:/o, $_ } @f );
+            next if $t{SEQ} eq '???';
             $sq = $t{CHR}.$;.$t{SEQ}; # $; is perl SUBSEP
             defined($data{$sq}) || do {
                 push @seqs, $sq;
@@ -5183,6 +5706,10 @@ sub parsing_input_files() {
         }; # while EVAL
         close(EVAL);
     }; # foreach $ifile
+    die("##\n#### ERROR ####\t\t!!! CANNOT open any input file !!!\n".
+        "#### ERROR ####\n".
+        "#### ERROR ####\t\tPlease, CHECK your COMMAND-LINE...\n##\n"
+        ) if $opened == 0;
 } # parsing_input_files
 @ 
 
@@ -5232,8 +5759,17 @@ sub vars_average() {
     foreach my $v (@colvals) {
         if ( $ref->{FWD}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o 
              && $ref->{REV}{$v} =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o ) {
-            $ref->{MEAN}{$v} = &decnum(( $ref->{FWD}{$v} + $ref->{REV}{$v} )/2);
+            if (defined($ref->{FWD}{$v}) && defined($ref->{REV}{$v})) { 
+                $ref->{MEAN}{$v} =
+                       &decnum(($ref->{FWD}{$v} + $ref->{REV}{$v})/2);
+            } elsif (  defined($ref->{FWD}{$v})  && !(defined($ref->{REV}{$v}))) {
+                $ref->{MEAN}{$v} = &decnum($ref->{FWD}{$v});
+            } elsif (!(defined($ref->{FWD}{$v})) &&   defined($ref->{REV}{$v}) ) {
+                $ref->{MEAN}{$v} = &decnum($ref->{REV}{$v});
+            } else { $ref->{MEAN}{$v} = "nan"; };
         } else { # not a number
+            defined($ref->{FWD}{$v}) || ($ref->{FWD}{$v} = "nan");
+            defined($ref->{REV}{$v}) || ($ref->{FWD}{$v} = "nan");
             $ref->{MEAN}{$v} = "$ref->{FWD}{$v}/$ref->{REV}{$v}";
         };
         $totals_flg && do {
@@ -5254,8 +5790,16 @@ sub vars_stats() {
     my ($ref,$tot) = @_;
     %{ $ref->{STATS} } = ();
     foreach my $v (@stats_level) {
-        $ref->{STATS}{$v} = ($ref->{FWD}{$v} + $ref->{REV}{$v});
-        $tot->{STATS}{$v} += $ref->{STATS}{$v};
+        if (defined($ref->{FWD}{$v}) && defined($ref->{REV}{$v})) {
+            $ref->{STATS}{$v} = ($ref->{FWD}{$v} + $ref->{REV}{$v});
+        } elsif (  defined($ref->{FWD}{$v})  && !(defined($ref->{REV}{$v}))) {
+            $ref->{STATS}{$v} = $ref->{FWD}{$v};
+        } elsif (!(defined($ref->{FWD}{$v})) &&   defined($ref->{REV}{$v}) ) {
+            $ref->{STATS}{$v} = $ref->{REV}{$v};
+        } else { $ref->{STATS}{$v} = "nan"; };
+        ($ref->{STATS}{$v} ne "nan") && do {
+            $tot->{STATS}{$v} += $ref->{STATS}{$v};
+        };
         $maxlen{$v} = &max($maxlen{$v},length($ref->{STATS}{$v}));
     }; # foreach $v
     &genepred_stats($ref);
@@ -5333,7 +5877,7 @@ sub print_output() {
         print STDOUT "###\n";
     }; # foreach $q
     $totals_flg && do {
-        $average_flg && do {
+        ($average_flg) && do {
             printf STDOUT "### SUMMARY : AVERAGE # Length $maxlen{LEN} bp ".
                           ('#'x25)."\n", (($seqlen{TOTAL}/2) / scalar(@seqs));
             &print_tbl_header();
@@ -5341,7 +5885,7 @@ sub print_output() {
             print STDOUT "###\n";        
         }; # $average_flg
         printf STDOUT "### SUMMARY : TOTALS # Length $maxlen{LEN} bp".
-                      " (all strands)".('#'x25)."\n", $seqlen{TOTAL};
+                      " (all strands)".('#'x25)."\n", $seqlen{TOTAL}/2;
         &print_tbl_header();
         $prt_function->('STATS',\%{ $data{TOTAL} });
         print STDOUT "###\n";
@@ -5447,7 +5991,7 @@ defined($opts{s}) && ($totals_flg  = 1);
 defined($opts{A}) && ($compute_flg = 0);
 @
 
-<<HIDE: >>=
+<<HIDE: testing process_eval.pl>>=
 for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y ;
   do {
     N=`echo $n | tr [:lower:] [:upper:]`;
@@ -5515,71 +6059,126 @@ lpr -Plp $TMP/20010806.UCSCgp.eval.test_summary.ps $TMP/20011222.UCSCgp.eval.tes
 @ 
 
 
-\subsubsctn{[[getHSPSR.pl]]: Re-scoring SRs}
+\subsubsctn{[[splittbls.pl]]: preparing data in tabular format for [[R]]}
 
 <<tangling: perl scripts>>=
-echo "# --> \$BIN/getHSPSR.pl" 1>&2 ;
-notangle -R"getHSPSR.pl" $WORK/$nwfile.nw | cpif $BIN/getHSPSR.pl ;
-perl -c $BIN/getHSPSR.pl ;
-is_exec $BIN/getHSPSR.pl ;
+echo "# --> \$BIN/splittbls.pl" 1>&2 ;
+notangle -R"splittbls.pl" $WORK/$nwfile.nw | cpif $BIN/splittbls.pl ;
+perl -c $BIN/splittbls.pl ;
+is_exec $BIN/splittbls.pl ;
 @
  
-<<getHSPSR.pl>>=
+<<splittbls.pl>>=
 <<PERL shebang>>
-# Re-scoring SRs to produce HSP-SRs for SGP homology.
+# USAGE: splittbls.pl "factor" file
 #
-# USAGE: getHSPSR.pl "chrname" < SR_file.gff > HSP-SR_file.gff > stdout.report
+use strict;
 #
-<<PERL strict pragma + info>>
-my $PROG = 'getHSPSR.pl';
-my $PRGVER = '0.9alpha';
+use global qw( :ExecReport :ExitStatus :MathFuncts );
+&init_timer(\@exectime);
 #
-my $chr = shift;
-my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm) = (0..7);
-my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
-          "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
-          ".1" => 8,  ".2" => 9,  ".3" => 10, "." => 11,
-                     "all" => 12,            "sum" => [ (0) x 13 ] );
-my $HSPminLEN = 1; # $ori + $HSPminLEN - 1 ==> minimum length is 1 nucleotide
-my $S_CUTOFF = 26;
-my $SCF = 0; # substract to tblastx scores S_CUTOFF - SCF
-my $DSC = $S_CUTOFF - $SCF;
-my $SHSP  = 0;    # SHSP=6 # shrink hsp by $SHSP
-my $WTBX  = 0.19; # weigth of tblastx score
-my $WTBXF = 0.30; # weigth of tblastx score
-my $WTBXI = 0.20; # weigth of tblastx score
-my $WTBXT = 0.30; # weigth of tblastx score
-while (<STDIN>) {
-    my @l;
-    next if /^#/o;
-    next if /^\s*$/o;
-    chomp;
-    @l = split /\s+/og, $_;
-    next unless $l[$sco] > $S_CUTOFF;
-    $l[$sco] = sprintf("%.6f",($l[$sco] - $DSC) * $WTBX);
-    $l[$ori] += $SHSP;
-    $l[$end] -= $SHSP;
-    next if $l[$end] < ($l[$ori] + $HSPminLEN - 1);
-    print STDOUT (join("\t", (@l)))."\n";
-    $g{sum}[$g{"$l[$str]$l[$frm]"}]++;
-}; # while
-$g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
-$g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
-$g{sum}[$g{"."}] = $g{sum}[$g{".1"}] + $g{sum}[$g{".2"}] + $g{sum}[$g{".3"}];
-$g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
-print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSP-SRs on $chr: ".
-             $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse, ".
-             $g{sum}[$g{"."}]." without strand.\n";
-foreach my $t (qw/ 1 2 3 /) {
-   printf STDERR "#\t%s : %6s\t\|\t%s : %6s\t|\t%s : %6s\n",
-          "+$t",$g{sum}[$g{"+$t"}],"-$t",$g{sum}[$g{"-$t"}],
-          ".$t",$g{sum}[$g{".$t"}];
-}; # foreach
-# foreach my $t (qw/ +1 +2 +3 -1 -2 -3 /) {
-#    printf STDERR "#\t%s : %s\n",$t,$g{sum}[$g{$t}];
-# }; # foreach
+$PROG = 'splittbls.pl';
+$PRGVER = '0.9alpha';
 #
+# VARS + ARGVS
+my ($cls,@files) = @ARGV;
+my (@prog,@seqs,%hprg,%hseq,%genes);
+#
+# MAIN
+&program_started($PROG);
+foreach my $file (@files) {
+    print STDERR "###\n### Working on $file\n";
+    @prog = (); @seqs = ();
+    %hprg = (); %hseq = (); %genes = ();
+    &parse_file($file);
+    &print_output();
+}; # foreach $file
+&program_finished($PROG);
 exit(0);
+#
+# SUBS
+sub parse_file() {
+    my $file = shift;
+    open(IFL,"< $file");
+    while (<IFL>) {
+        my (@f,$seq,$prg);
+        next unless $.>1;
+        chomp;
+        @f = split /\s+/o, $_;
+        next unless ($f[1] eq $cls);
+        $seq=$f[2];
+        $prg=$f[0];
+        defined($hprg{$prg}) || do { push @prog, $prg; };
+        $hprg{$prg}++;
+        defined($hseq{$seq}) || do { push @seqs, $seq; };
+        $hseq{$seq}++;
+        defined(%{ $genes{$seq} }) || do { %{ $genes{$seq} } = (); };
+        $genes{$seq}{$prg}=$f[3];
+    }; # while
+    close(IFL);
+} # parse_file
+sub print_output() {
+    my $fmt=("\%-10s" x (scalar(@prog)+1))."\n";
+    printf STDOUT $fmt,"CHR",@prog;
+    for (my $n = 0; $n < scalar(@seqs); $n++) {
+        my ($s,@tt);
+        $s=$seqs[$n];
+        @tt=();
+        for (my $p = 0; $p < scalar(@prog); $p++) {
+            push @tt, $genes{$s}{$prog[$p]};
+        }; # for $p
+        printf STDOUT $fmt, $seqs[$n],@tt;
+    }; # for $n
+} # print_output
+@
+
+
+\subsubsctn{[[mkRtables.awk]]: filtering FACTORS from report tables for [[R]]}
+
+<<tangling: gawk scripts>>=
+echo "# --> \$BIN/mkRtables.awk" 1>&2 ;
+notangle -R"mkRtables.awk" $WORK/$nwfile.nw | cpif $BIN/mkRtables.awk ;
+is_exec $BIN/mkRtables.awk ;
+@
+ 
+<<mkRtables.awk>>=
+<<GAWK shebang>>
+#
+# USAGE:  mkRtables.awk  summary_file > R_data.tbl
+# 
+# INIT
+#
+BEGIN{
+  OFS=" ";
+  prt=1;
+}
+#
+# MAIN LOOP
+#
+$0~/^### CHR/ {
+  chr=$3; seq=$5; len=$8;
+}
+$0~/^### SUM/ {
+  chr=$4; seq="ALL"; len=$7;
+}
+$0!~/^#/ {
+  if ($1!~"PROGRAM") {
+     printf chr" "seq" "len; prtflds(); printf "\n";
+  } else {
+     if (prt) {
+       printf "CHR SEQ LEN"; prtflds(); printf "\n";
+       prt=0;
+     };
+  };
+}
+#
+# SUBS
+#
+function prtflds() {
+  for (n=1;n<=NF;n++) {
+    printf " "$n;
+  };
+}
 @
 
 
@@ -9335,7 +9934,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.41 2002-05-22 14:11:15 jabril Exp $
+# $Id: humus.nw,v 1.42 2002-05-23 19:49:57 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9372,6 +9971,8 @@ echo "# TANGLING PERL SCRIPTS:" 1>&2 ;
 <<tangling: perl scripts>>
 echo "# TANGLING PERL TK SCRIPTS:" 1>&2 ;
 <<tangling: perl Tk scripts>>
+echo "# TANGLING GAWK SCRIPTS:" 1>&2 ;
+<<tangling: gawk scripts>>
 @ 
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
@@ -9726,12 +10327,8 @@ enscript --columns=3 -Gjf Courier5 -M A4 $HUMUS/evaluations/ALL_MGSCv3.genes_by_
 #
 perl -ne 'BEGIN{ $prog="???"; print STDOUT "PROG CLASS SEQ GENES\n"; } next if /^\s+$/o; /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next); next if /^\#/o; next unless /^\s*chr/; chomp; $_ =~ s/^\s+//o; @f=split /\s+/og; $type="ASSEMBLED"; $f[0] =~ s/_random$//o && ($type="RANDOM"); printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];' $HUMUS/evaluations/ALL_MGSCv3.genes_by_seq.report > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl # | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }'
 #
-function splittbls ()
-{
-perl -ne 'BEGIN{ $cls=shift @ARGV; } next unless $.>1; chomp; @f = split /\s+/o, $_; next unless ($f[1] eq $cls); $seq=$f[2]; $prg=$f[0]; defined($hprg{$prg}) || do { push @prog, $prg }; $hprg{$prg}++; defined($hseq{$seq}) || do { push @seqs, $seq }; $hseq{$seq}++; $genes{$seq}{$prg}=$f[3]; END{ $fmt=("\%-10s" x (scalar(@prog)+1))."\n"; printf STDOUT $fmt,"CHR",@prog; for ($n=0;$n<scalar(@seqs);$n++) { $s=$seqs[$n]; @tt=(); for ($p=0;$p<scalar(@prog);$p++) { push @tt, $genes{$s}{$prog[$p]}; }; printf STDOUT $fmt, $seqs[$n],@tt;} }' "$@"
-}
-splittbls "ASSEMBLED" $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_ASM.tbl 
-splittbls "RANDOM" $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_RND.tbl 
+$BIN/splittbls.pl "ASSEMBLED" $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_ASM.tbl 
+$BIN/splittbls.pl "RANDOM" $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_MGSCv3.genes_by_seq_RND.tbl 
 #
 # drawing histograms with R
 def.par <- par()# save default, for resetting...
@@ -9790,23 +10387,6 @@ enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_test.summary ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %
-function mkRtables ()
-{ gawk 'BEGIN{ OFS=" "; prt=1; }
-    $0~/^### CHR/ { chr=$3; seq=$5; len=$8; }
-    $0~/^### SUM/ { chr=$4; seq="ALL"; len=$7; }
-    $0!~/^#/ {
-       if ($1!~"PROGRAM") {
-          printf chr" "seq" "len; prtflds(); printf "\n";
-       } else {
-          if (prt) {
-            printf "CHR SEQ LEN"; prtflds(); printf "\n";
-            prt=0;
-          };
-       };
-    }
-function prtflds() { for (n=1;n<=NF;n++) { printf " "$n; }; }
-  ' $1;
-}
 WHR="/projects/H.sapiens/20011222.UCSCgp/tmp/evaluations" ;
 PLT="$WHR/r-plots" ;
 mkRtables $WHR/20010806.UCSCgp.eval.test_summary      | \
