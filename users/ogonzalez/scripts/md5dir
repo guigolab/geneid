@@ -1,0 +1,219 @@
+#!/usr/bin/perl
+
+# calcula l'md5 de tots els fitxers de l'estructura de directoris des d'on
+# l'executem, subdirectoris inclosos.
+#
+# retorna tambe el nombre de bytes, directoris i fitxers continguts a cada
+# directori
+#
+# sintaxi: md5sum [-c] [-f] fitxer_de_sortida
+#
+#	-c continua des d'on fitxer_de_sortida s va quedar
+#	   es responsabilitat teva assegurar que continues el fitxer correcte
+#
+#	-f permet sobreescriure fitxer_de_sortida. ignorat si tambe fem -c
+#
+#	-h miniajuda
+#
+#	fitxer_de_sortida no pot existir previament a no ser que continuem
+#	(-c) o sobreescrivim (-f)
+#
+#	si fitxer_de_sortida no existeix, -c i -f no fan res
+
+# interessant implementar:
+#
+#	1.- especificar un fitxer per continuar. aixo permetria aturar
+#	    el programa i continuar mes tard
+#
+#  OK	2.- el fitxer de sortida no s'hauria d'especificar via ">" sino
+#	    via parametre. aixo evitaria sobreescriure per error
+#
+#	3.- busca una manera d'implementar un control de progres, o com a
+#	    minim de veure si va lent o es que te problemes de lectura
+#
+#	4.- potser si faig un cat del fitxer a revisar amb un tee a un
+#	    fitxer al tmp i un pipe a md5sum puc trobar l'md5 a partir
+#	    del pipe i calcular el progres (restant bytes a la longitud
+#	    del fitxer i sumant-los als bytes ja revisats) a partir dels
+#	    bytes del fitxer original i els bytes ja copiats. aixo no
+#	    hauria de representar un extra de temps, crec...
+#
+#  OK	5.- estaria be sumar tots els bytes abans de comencar, i mostrar
+#	    no nomes un compte enrera de fitxers, com ara, sino tambe un
+#	    compte enrera de bytes
+#
+# potser amb
+#
+#	use Digest::MD5 qw(md5 md5_hex md5_base64);
+#
+# i canviant
+#
+#	$md5sum=`md5sum "$path/$nom" | cut -c-32`;
+#	chop($md5sum);
+# per
+#
+#	open (DADES,"$path/$nom");
+#	$md5sum=md5_hex(<DADES>);
+#	close(DADES);
+#
+# podem fer millor el tema del progres o jo que se, pero compte perque va
+# com dues o tres vegades mes lent amb funcions perl que escapant al sistema
+
+
+
+sub numero {
+   $tmp=$_[0];
+   $long=$_[1];
+   while ( $tmp =~ /\d{4}/ ) {
+      $tmp =~ s/(\d{3})(\.|$)/\.$1$2/;
+   }
+   return " " x ($long+3-length($tmp)) . "$tmp";
+}
+
+
+# continuar (-c) o forzar sobreescritura (-f) d'un fitxer que no existeix
+# provoca simplement que comenci de zero, com si no fessim -c o -f.
+$continua=0;
+$sobreescriu=0;
+while ( ( $opcio=shift(@ARGV) ) && ( $opcio =~ /^-.$/ ) ) {
+   if ( $opcio eq "-c" ) {
+      $continua=1;
+   } elsif ( $opcio eq "-f" ) {
+      $sobreescriu=1;
+   } elsif ( $opcio eq "-h" ) {
+      die("md5sum [-c] [-f] fitxer_de_sortida\n");
+   } else {
+      die("$opcio: parametre incorrecte\n");
+   }
+}
+if ( $#ARGV != -1 || $opcio =~ /^$/ ) {
+   die("Necessito un i nomes un fitxer de sortida\n");
+} elsif ( ( $continua == 0 && $sobreescriu == 0 ) && -e "$opcio" ) {
+   die("$opcio: fitxer existent\n");
+} 
+
+# AQUI O UNA MICA MES ENDAVANT HAURIES DE LLEGIR EL FITXER
+# EN CAS D'ESPECIFICAR -c I FER EL QUE CALGUI FER
+
+system("tree -asxfFN >/tmp/tree.out");
+
+open(fit,"/tmp/tree.out");
+@linia=<fit>;
+close(fit);
+
+$grandariaCD=0;
+foreach $fitxer (@linia) {
+   chop($fitxer);
+   if ( $fitxer =~ m#\[ *(\d+)\]  .+[^/]$# ) {
+      $grandariaCD += $1;
+   }
+}
+
+print STDERR &numero($#linia-2,5) . &numero($grandariaCD,13) . "\n";
+
+if ( $continua != 0 ) {
+   open(temp,">>/tmp/tree.tmp");
+} else {
+   open(temp,">/tmp/tree.tmp");
+}
+
+for ($ind=0;$ind<=100;$ind++) { # profunditat maxima de directoris = 100
+   $nombrefit[$ind]=0;
+   $nombredir[$ind]=0;
+   $nombrebyt[$ind]=0;
+}
+
+$longmax=0;  # la linia mes llarga per ara
+$revisats=0; # per controlar els bytes,
+$fitxers=0;  # els fitxers,
+$direcs=-1;  # i els directoris revisats fins ara 
+
+print temp "$linia[$#linia]\n";
+print temp "$linia[$#linia-1]\n";
+
+$longnom=1; # longitud del nom (per esborrar-lo en imprimir el seguent)
+for ($ind=$#linia-2;$ind>=0;$ind--) {
+   $nivell=index($linia[$ind],"[")/4;
+   $nivell=0 if ( $nivell < 0 );
+   $linia[$ind] =~ s#(\[ *\d+\]  )(.+)/([^/*]+)([*/]?)$#$1$3$4#;
+      # he eliminat l'asterisc final del nom si hi era, ja que el -F del
+      # tree el posa per tots els executables. aixo sera un problema si el
+      # nom conte asteriscs. d'altra banda, no controlo el "-> desti" dels
+      # links. RES D'AIXO HAURIA D'AFECTAR SI LA IDEA ES COMPROVAR DVDs,
+      # ES A DIR, FITXERS DE WINDOWS
+   $path=$2;
+   $nom=$3;
+   $nom =~ s/\$/\\\$/g;
+   if ( $linia[$ind] =~ /\/$/ || $linia[$ind] =~ /^\./ ) {
+      $linia[$ind] =~ s/(\[ *\d+\]  )|(\/$)//g;
+      print temp "$linia[$ind] ---- "
+         . "$nombrebyt[$nivell+1] "
+         . "$nombredir[$nivell] "
+         . "$nombrefit[$nivell+1] -\n";
+      $nombrebyt[$nivell]+=$nombrebyt[$nivell+1];
+      $nombrebyt[$nivell+1]=0;
+      $nombrefit[$nivell]+=$nombrefit[$nivell+1];
+      $nombrefit[$nivell+1]=0;
+      $nombredir[$nivell-1]+=$nombredir[$nivell]+1;
+      $nombredir[$nivell]=0;
+      $direcs++;
+   } else {
+      $linia[$ind] =~ s/\*$//;
+      $linia[$ind] =~ s/\[ *(\d+)\]  //;
+      print STDERR "\r" . " "x$longnom;
+      $longnom=length($nom)+41;
+      print STDERR "\r" . &numero($ind,5) . &numero($grandariaCD,13) .
+                          &numero($1,11) . "   $nom";
+      $md5sum=`md5sum "$path/$nom" | cut -c-32`;
+      chop($md5sum);
+      print temp "$linia[$ind] ---- $1 0 1 $md5sum\n";
+      $nombrebyt[$nivell]+=$1;
+      $nombrefit[$nivell]++;
+      $grandariaCD-=$1;
+      $revisats+=$1;
+      $fitxers++;
+   }
+   if ( length($linia[$ind]) > $longmax ) {
+      $longmax=length($linia[$ind]);
+   }
+}
+print STDERR "\r" . " "x$longnom;
+$resum=&numero($fitxers,5) . " fitxers," . &numero($revisats,13);
+$resum =~ s/ +/ /g;
+print STDERR "\r" . &numero($direcs,5) . " directoris," .
+                    "$resum bytes revisats\n";
+
+close(temp);
+
+open(temp,"/tmp/tree.tmp");
+@direcs=<temp>;
+close(temp);
+
+open(SORTIDA,">$opcio");
+
+$indentacio=$longmax+3;
+print SORTIDA " " x $indentacio . "       Bytes       Directoris"
+   . "    Fitxers                 md5sum\n";
+print SORTIDA " " x $indentacio . "   -------------   ----------"
+   . "   ---------   --------------------------------\n";
+for ($ind=$#direcs;$ind>=2;$ind--) {
+   chop($direcs[$ind]);
+   $direcs[$ind] =~ s/ ---- (\d+) (\d+) (\d+) (.*)$//;
+   $nombrebyt=$1;
+   $nombredir=$2;
+   $nombrefit=$3;
+   $md5sum=$4;
+   $indentacio=$longmax+3-length($direcs[$ind]);
+   print SORTIDA "$direcs[$ind]" . " " x $indentacio
+      . &numero($nombrebyt,13)
+      . &numero($nombredir,10)
+      . &numero($nombrefit,9)
+      . "   $md5sum"
+      . "\n";
+}
+
+close(SORTIDA);
+
+unlink("/tmp/tree.tmp");
+unlink("/tmp/tree.out");
+
