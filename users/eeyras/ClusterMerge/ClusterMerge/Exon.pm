@@ -92,7 +92,7 @@ sub new {
 				  SCORE
 				  ANALYSIS
 				  SEQNAME
-				  SOURCE_TAG
+				  SOURCE_tag
 				  PRIMARY_TAG
 				  PERCENT_ID
 				  P_VALUE
@@ -668,6 +668,40 @@ triplets (start, stop, strand) from which new ranges could be built.
   Args    : a RangeI to compare this one to
   Returns : nothing if they don''t overlap, or 
             a new exon based on the range that they do overlap
+=cut
+
+sub intersection{
+    my ($exon1, $exon2 ) = @_;
+
+    my ($start1,$end1) = ( $exon1->start, $exon1->end );
+    my ($start2,$end2) = ( $exon2->start, $exon2->end );
+    
+    my $end   = $exon1->min( $end1,  $end2 );
+    my $start = $exon1->max( $start1, $start2);
+
+    return ($start,$end);
+}
+
+sub min{
+    my ($self,$min, @values) = @_;
+    foreach my $v (@values){
+	if ($v < $min){
+	    $min = $v;
+	}
+    }
+    return $min;
+}
+
+sub max{
+    my ($self,$max, @values) = @_;
+    foreach my $v (@values){
+	if ($v > $max){
+	    $max = $v;
+	}
+    }
+    return $max;
+}
+
 
 
 =head2 union
