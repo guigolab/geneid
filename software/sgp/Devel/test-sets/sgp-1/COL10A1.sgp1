@@ -1,0 +1,30 @@
+# Optimal Gene Structure. Score = 4.932000
+X98568 sgp Single 2553 2576 0.285700 - 0	gene1:1
+X98568 sgp First 3486 3639 0.481500 + 0	gene2:1
+X98568 sgp Internal 6984 7010 0.265400 + 2	gene2:2
+X98568 sgp Internal 7254 7385 0.454900 + 2	gene2:3
+X98568 sgp Internal 7422 7490 0.408900 + 2	gene2:4
+X98568 sgp Internal 7650 7871 0.512600 + 2	gene2:5
+X98568 sgp Internal 7899 8015 0.378000 + 2	gene2:6
+X98568 sgp Internal 8052 8132 0.472500 + 2	gene2:7
+X98568 sgp Internal 8328 8422 0.373100 + 2	gene2:8
+X98568 sgp Internal 8564 8620 0.343100 + 0	gene2:9
+X98568 sgp Internal 8700 8734 0.305100 + 0	gene2:10
+X98568 sgp Internal 9434 9482 0.214800 + 1	gene2:11
+X98568 sgp Internal 9527 9563 0.436400 + 0	gene2:12
+# Optimal Gene Structure. Score = 5.055000
+X67348 sgp Single 699 722 0.312800 - 0	gene1:1
+X67348 sgp First 1648 1801 0.528200 + 0	gene2:1
+X67348 sgp Internal 5216 5284 0.325400 + 2	gene2:2
+X67348 sgp Internal 5486 5659 0.509200 + 2	gene2:3
+X67348 sgp Internal 5696 5728 0.327200 + 2	gene2:4
+X67348 sgp Internal 5942 6145 0.514800 + 2	gene2:5
+X67348 sgp Internal 6173 6289 0.397800 + 2	gene2:6
+X67348 sgp Internal 6344 6388 0.425100 + 2	gene2:7
+X67348 sgp Internal 6539 6696 0.361100 + 2	gene2:8
+X67348 sgp Internal 6838 6894 0.263500 + 0	gene2:9
+X67348 sgp Internal 6974 7008 0.307700 + 0	gene2:10
+X67348 sgp Internal 7677 7725 0.201600 + 1	gene2:11
+X67348 sgp Internal 7767 7799 0.324700 + 0	gene2:12
+X67348 sgp Terminal 8054 8092 0.255900 + 0	gene2:13
+

@@ -1,0 +1,19 @@
+# Optimal Gene Structure. Score = 16.500000
+J04469 sgp First 1131 1355 3.896300 + 0	gene1:1
+J04469 sgp Internal 1559 1654 1.324000 + 0	gene1:2
+J04469 sgp Internal 2041 2262 3.581600 + 0	gene1:3
+J04469 sgp Internal 2392 2477 1.092100 + 0	gene1:4
+J04469 sgp Internal 2593 2716 1.797800 + 1	gene1:5
+J04469 sgp Internal 4378 4512 1.793800 + 0	gene1:6
+J04469 sgp Internal 5014 5139 1.757500 + 0	gene1:7
+J04469 sgp Terminal 5343 5459 1.256900 + 0	gene1:8
+# Optimal Gene Structure. Score = 16.378700
+Z13969 sgp First 3282 3506 3.918900 + 0	gene1:1
+Z13969 sgp Internal 3674 3769 1.293900 + 0	gene1:2
+Z13969 sgp Internal 4265 4486 3.591500 + 0	gene1:3
+Z13969 sgp Internal 4611 4696 1.143500 + 0	gene1:4
+Z13969 sgp Internal 4815 4938 1.697000 + 1	gene1:5
+Z13969 sgp Internal 6218 6352 1.810300 + 0	gene1:6
+Z13969 sgp Internal 6518 6643 1.628700 + 0	gene1:7
+Z13969 sgp Terminal 7038 7154 1.294900 + 0	gene1:8
+

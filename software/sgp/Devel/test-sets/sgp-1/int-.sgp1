@@ -1,0 +1,9 @@
+# Optimal Gene Structure. Score = 9.022300
+X14445 sgp First 936 1155 3.751500 + 0	gene1:1
+X14445 sgp Internal 3445 3548 1.409700 + 2	gene1:2
+X14445 sgp Internal 9197 9442 3.861100 + 0	gene1:3
+# Optimal Gene Structure. Score = 9.355900
+Y00848 sgp First 1774 1993 3.845500 + 0	gene1:1
+Y00848 sgp Internal 3737 3840 1.474300 + 2	gene1:2
+Y00848 sgp Internal 5641 5886 4.036100 + 0	gene1:3
+

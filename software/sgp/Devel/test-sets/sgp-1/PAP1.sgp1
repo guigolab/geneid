@@ -1,0 +1,13 @@
+# Optimal Gene Structure. Score = 9.144300
+L15533 sgp First 1334 1409 1.448300 + 0	gene1:1
+L15533 sgp Internal 1970 2088 2.168300 + 2	gene1:2
+L15533 sgp Internal 2276 2413 2.675100 + 0	gene1:3
+L15533 sgp Internal 3040 3166 2.622800 + 0	gene1:4
+L15533 sgp Internal 3445 3476 0.229800 + 2	gene1:5
+# Optimal Gene Structure. Score = 8.513000
+D63360 sgp Internal 1953 2033 1.335600 + 2	gene1:1
+D63360 sgp Internal 2552 2670 2.017000 + 2	gene1:2
+D63360 sgp Internal 2841 2978 2.709400 + 0	gene1:3
+D63360 sgp Internal 3565 3691 2.363000 + 0	gene1:4
+D63360 sgp Internal 3952 3983 0.088000 + 2	gene1:5
+
