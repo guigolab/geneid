@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.5 1999-04-28 17:54:19 jabril Exp $	
+#         $Id: gff2ps,v 1.6 1999-04-30 18:15:59 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -366,11 +366,18 @@ true setstrokeadjust
 
 cat <<'@@@EndProcs@@@'
 /cm { 28.35 mul } bind def
+%%%% test flag
+/tflg true def
 %%%% page orientation flag
 /flglscape true def
 %/flglscape false def
 %%%% page size in points used for plot % pgA4 == 595  842
 /Dpage { pgA4 flglscape { exch } if } bind def
+%%%% filling for BGcolor page
+colordict begin
+ /BGcolor colordict /white get def
+ /FGcolor colordict /black get def 
+end
 %%%% offset defines non printable paper area on portrait pages
 /VUpOS 0.25 cm def
 /VDnOS 0.25 cm def
@@ -383,16 +390,16 @@ cat <<'@@@EndProcs@@@'
 /RtM 1 cm def
 %%%% checking if margins are within the defined offset
 flglscape {
-UpM HLtOS lt { /UpM HLtOS def } if % Checking margins for flglscape mode
-DnM HRtOS lt { /DnM HRtOS def } if
-LtM VDnOS lt { /LtM VDnOS def } if
-RtM VUpOS lt { /RtM VUpOS def } if
-} {
-UpM VUpOS lt { /UpM VUpOS def } if % Checking margins for portrait mode
-DnM VDnOS lt { /DnM VDnOS def } if
-LtM HLtOS lt { /LtM HLtOS def } if
-RtM HRtOS lt { /RtM HRtOS def } if
-} ifelse
+ UpM HLtOS lt { /UpM HLtOS def } if % Checking margins for flglscape mode
+ DnM HRtOS lt { /DnM HRtOS def } if
+ LtM VDnOS lt { /LtM VDnOS def } if
+ RtM VUpOS lt { /RtM VUpOS def } if
+ } {
+  UpM VUpOS lt { /UpM VUpOS def } if % Checking margins for portrait mode
+  DnM VDnOS lt { /DnM VDnOS def } if
+  LtM HLtOS lt { /LtM HLtOS def } if
+  RtM HRtOS lt { /RtM HRtOS def } if
+  } ifelse
 %%%%  defining pagelimits and X - Y scales (Xlim Ylim)
 /pglim { Dpage pop LtM RtM add sub Dpage exch pop UpM DnM add sub } def
 % /pgXsc { pglim pop 100 div } def
@@ -400,6 +407,36 @@ RtM HRtOS lt { /RtM HRtOS def } if
 %%%% Defining starting point on page.
 /XORI LtM def
 /YORI UpM def
+%%%% Defining page layout.
+/XOriTitl 1 cm def
+/YOriTitl 0 cm def
+/XSTitl pglim pop XOriTitl 2 mul sub def
+/YSTitl 1 cm def
+/FlgTitl true def
+/BlckSp 0.25 cm def
+/NBlck  1 def
+/XSBlck pglim pop def
+/YSBlck pglim exch pop YSTitl BlckSp NBlck mul add YOriTitl add sub NBlck div def
+/XOriBlck 0 def
+/YOriBlck YOriTitl YSTitl BlckSp add add def
+/XLftLbl 4 cm  def
+/FLftLbl true  def
+/XRgtLbl 4 cm  def
+/FRgtLbl true  def
+/XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
+/XOriPlot XOriBlck XLftLbl add def
+%%%% defining groups and lines
+/LnFwd 3 def % groups for each strand
+/LnBth 3 def
+/LnRvs 3 def
+/LnTot LnFwd LnBth LnRvs add add def
+/YSLine YSBlck LnTot div def
+/YSFwd LnFwd LnTot div YSBlck mul def
+/YOriFwd YOriBlck def
+/YSBth LnBth LnTot div YSBlck mul def
+/YOriBth YOriFwd YSFwd add def
+/YSRvs LnRvs LnTot div YSBlck mul def
+/YOriRvs YOriBth YSBth add def
 %
 % ---------------------------------
 %     EndVariableDefinitions
@@ -427,6 +464,8 @@ RtM HRtOS lt { /RtM HRtOS def } if
 %
 % <--- /colorname .scolor
 /scolor { colordict exch get exec setcmykcolor } bind def 
+% <--- /colorname linewidth .tbbox
+/tbbox { tflg { gsave setlinewidth scolor stroke grestore } { pop pop } ifelse } def
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % <--- score gcolor (must be defined also a inicolor, endcolor, maxscore, minscore for gradient).
 % <--- startcolor endcolor maxscore minscore .defgradsets % also useful on degradates from color to white
@@ -440,6 +479,22 @@ RtM HRtOS lt { /RtM HRtOS def } if
 % /db { matrix currentmatrix 5 1 roll XS YS scale moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath setmatrix } bind def
 % <--- width height xori yori .box
 /box { moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath } bind def
+% <--- .TB % Printing bounding boxes for all page elements.
+/TB { tflg {
+              pglim 0 0 box /FGcolor 2 tbbox /BGcolor scolor fill                              %%%% pglimit box
+    FlgTitl { XSTitl  YSTitl XOriTitl            YOriTitl box /green  1.0  tbbox newpath } if  %%%% title box
+              XSBlck  YSBlck XOriBlck            YOriBlck box /violet 2.0  tbbox newpath       %%%% block box
+    FLftLbl { XLftLbl YSBlck XOriBlck            YOriBlck box /red    0.5  tbbox newpath } if  %%%% left labels box
+    FRgtLbl { XRgtLbl YSBlck XOriPlot XSPlot add YOriBlck box /red    0.5  tbbox newpath } if  %%%% right labels box
+              XSPlot  YSBlck XOriPlot            YOriBlck box /cyan   0.5  tbbox newpath       %%%% plot box 
+ LnFwd 0 gt { XSPlot  YSFwd  XOriPlot            YOriFwd  box /green  0.25 tbbox newpath } if  %%%% Forward  box
+ LnBth 0 gt { XSPlot  YSBth  XOriPlot            YOriBth  box /blue   0.25 tbbox newpath } if  %%%% NoStrand box
+ LnRvs 0 gt { XSPlot  YSRvs  XOriPlot            YOriRvs  box /green  0.25 tbbox newpath } if  %%%% Reverse  box
+ LnTot 0 gt {
+  1 1 LnTot { 1 sub YSLine mul YOriBlck add
+              XSPlot  YSLine XOriPlot           4 -1 roll box /black  0.125 tbbox newpath      %%%% Lines box
+              } for } if
+              } if } bind def
 %
 %  Text Procedures
 % ---------------------------------
@@ -485,24 +540,24 @@ RtM HRtOS lt { /RtM HRtOS def } if
 %
 %%Page: 1 1
 %%BeginPageSetup
-/PageNumber (Page 1/1) def
-/pgsave save def
-%%EndPageSetup
 %
-% filling for BGcolor page
-% colordict begin /BGcolor colordict /blue get def /FGcolor colordict /yellow get def end
-Dpage flglscape { exch } if 0 0 box gsave stroke grestore /BGcolor scolor fill
+%%%% Saving current page settings
+/pgsave save def
+%%%% Defining pagenumber
+/PageNumber (Page 1/1) def
+%%%% Setting BGcolor for sheet 
+Dpage flglscape { exch } if 0 0 box /FGcolor 1 tbbox /BGcolor scolor fill
 %%%% setting coordinate axes for page orientation
 flglscape 
- { 90 rotate 1 -1 scale XORI YORI translate }                  % CTM for landscape pages
- { XORI Dpage exch pop YORI sub translate 1 -1 scale } ifelse  % CTM for portrait pages
-%%%%
-% pglim 0 0 box gsave stroke grestore /BGcolor scolor fill
+ { 90 rotate 1 -1 scale XORI YORI translate }                  % (0,0) - Ori for landscape pages
+ { XORI Dpage exch pop YORI sub translate 1 -1 scale } ifelse  % (0,0) - Ori for portrait pages
+%%%% If testing output print bounding_boxes for page elements
+TB
 %
-/FGcolor scolor
-% 0.125 setlinewidth 
-2 setlinewidth 
-pglim 0 0 box gsave stroke grestore /lightskyblue scolor fill
+% /FGcolor scolor
+%
+%%EndPageSetup
+%
 pgsave restore
 showpage
 % header
