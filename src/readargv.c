@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.6 2001-04-23 08:49:07 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.7 2001-04-23 08:58:46 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -35,7 +35,7 @@ extern int 	SFP,SDP,SAP,STP,
                 GENEID, GENAMIC,
                 GFF, X10,
                 EVD, SRP,
-                scanORF, XML cDNA;
+                scanORF, XML, cDNA;
 
 extern float EW;
 
