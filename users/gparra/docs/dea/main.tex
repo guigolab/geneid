@@ -1,0 +1,161 @@
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: main.tex,v 1.1 2002-07-29 10:52:58 gparra Exp $
+%
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+ 
+% Colors for gff2ps
+\input ColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es}}
+
+% defs
+\def\fugu{\textit{Fugu rubripes}}
+\def\drome{\textit{Drosophila melanogaster}}
+\def\dro{\textit{Drosophila}}
+\def\tetra{\textit{Tetraodon nigroviridis}}
+\def\danio{\textit{Brachydanio rerio}}
+\def\dme{\textit{D. melanogaster}}
+\def\bn{\textsc{blastn}}
+\def\tbx{\textsc{tblastx}}
+\def\ps{\textsc{PostScript}}
+\def\geneid{\texttt{geneid}}
+\def\genscan{\texttt{genscan}}
+\def\sgp{\texttt{sgp}}
+\def\dicty{\textit{Dictiostelium}}
+\def\genos{\textbf{Genoscope}}
+
+% Setting text for footers and headers
+
+\def\tit{\textsc{Training geneid in \fugu  }}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Gen\'{\i}s Parra}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textbf{\Huge Training geneid in \drome and \dicty}\\[5ex]
+
+%\textbf{\Large Authors List Here}\\[1ex]
+\textbf{\Large Gen\'{\i}s Parra}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+
+
+\vfill
+
+\begin{raggedleft}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtgparra}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+%\vfill
+%\begin{center}
+%{\tiny$<$ \verb$Id: main.tex,v 1.1 2002-07-29 10:52:58 gparra Exp $$>$ }
+%\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Abstract}
+
+\sctn{Introduction}
+
+\subsctn{Gene finding overview}
+\subsctn{\geneid history}
+\sctn{\geneid}
+\sctn{\geneid\ on \drome}
+\sctn{\geneid\ on \dicty}
+\sctn{Conclusions}
+
+\end{document}
+
+
