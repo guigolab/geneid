@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.6 2001-10-02 19:57:35 jabril Exp $
+% $Id: Human_Chromosome_22.nw,v 0.7 2001-10-17 18:43:44 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -98,7 +98,7 @@
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\rightmark}
 \fancyfoot[LO,LE]{\small\textbf{Genome Informatics Research Lab}}
-\fancyfoot[CO,CE]{\small\textsl{Abril, JF}}
+\fancyfoot[CO,CE]{\small\textsl{Abril, JF; Parra, G; Guig\'o, R}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -159,7 +159,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.6 2001-10-02 19:57:35 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.7 2001-10-17 18:43:44 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2633,6 +2633,138 @@ cp $IDIR/sgp/$EXP/chr22_evid.gtf2    $ODIR/Hsap_chr22_evid.gtf ;
 #
 @ 
 
+\sctn{Preparing GFF files for apolo}
+
+We merge few ENSEMBL tracks to our gene-prediction into a single GFF file properly formated for APOLLO viewer. Thanks to Steve Searle (\url|searle@sanger.ac.uk|), we can donwload the whole ENSEMBL data for a given chromosome with a single call:
+
+\url|http://www.ensembl.org/perl/apolloview?chr=22&vc_start=13000000&vc_end=48000000|
+
+<<APOLLO>>=
+pushd /projects/sgp/chr22/apollo/ori ;
+perl -we ' ##
+  use LWP::UserAgent;
+  use HTTP::Request;
+  use HTTP::Response;
+  use URI::Heuristic;
+  my ($chr,$min,$max,$step) = @ARGV;
+  @ARGV = ();
+  my $url = URI::Heuristic::uf_urlstr("www.ensembl.org/perl/apolloview?chr=");
+  my $ua = LWP::UserAgent->new();
+  $ua->agent("perl-script");
+  for (my $k = $min; $k < $max; $k += $step) {
+      my ($req,$response,$content,$nwurl,$j,$file);
+      $j = $k + $step; 
+      $nwurl = $url.$chr."\&vc_start=".$k."000000\&vc_end=".$j."000000";
+      print STDERR "# Downloading data from $nwurl\n";
+      $file = "./chr${chr}_${k}_${j}.gff";
+      open(HTMLOUT,"> $file") ||
+          die("### Cannot open file: $file $!");
+      $req = HTTP::Request->new(GET => $nwurl);
+      $req->referer("http://www1.imim.es");
+      $response = $ua->request($req);
+      # print STDERR "#... ".$response->title()."\n";
+      $content = $response->content();
+      print HTMLOUT $content;
+      print STDERR "#...... ".(length $content)."\n";
+      close(HTMLOUT);
+  }; # for
+  '  22  10 50 5   2>&1 | tee download_chr22.log ; 
+@ 
+
+<<APOLLO>>=
+BASE="/projects/sgp/chr22/apollo" ;
+# what to do when loading 5mbp Ensembl fragments using Apollo
+cat $BASE/ori/chr22_10_15.gff $BASE/ori/chr22_15_20.gff \
+    $BASE/ori/chr22_20_25.gff $BASE/ori/chr22_25_30.gff \
+    $BASE/ori/chr22_30_35.gff $BASE/ori/chr22_35_40.gff \
+    $BASE/ori/chr22_40_45.gff $BASE/ori/chr22_45_50.gff > $BASE/chr22.gff ;
+#
+gawk '{print $2,$3}' $BASE/chr22.gff | sort | uniq -c | sort -nr ;
+#   93781 sptr similarity
+#   81240 embl_vertrna similarity
+#   65423 RepeatMasker similarity
+#   52896 unigene.seq similarity
+#   22062 est similarity
+#   21054 Variation Variation
+#   14662 trace similarity
+#    6735 genscan exon
+#    2114 hugo exon
+#    1944 embl exon
+#    1432 sptrembl exon
+#     724 ensembl exon
+#     533 sequence similarity
+#     333 epcr exon
+#     216 cpg similarity
+#       8 RANGE: Chr
+#
+grep "genscan" $BASE/chr22.gff | sort +3n -5 +8n | \
+    gawk 'BEGIN{OFS="\t";gp=last=1}
+          { if (last!=$9) { gp++; last=$9; };
+            $9=gp; print $0;
+            }' - > $BASE/chr22_genscan.gff ;
+grep "est" $BASE/chr22.gff | sort +3n -5 > $BASE/chr22_est.gff ;
+gawk 'BEGIN{OFS="\t";gp=last=1}
+      $2 ~ /^(hugo|embl|ensembl|sptrembl|epcr)$/ {
+        print $0;
+      }' $BASE/chr22.gff | \
+         sort +3n -5 > $BASE/chr22_annot.gff ;
+#
+gawk 'BEGIN{OFS="\t";gp=last=1}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $1=$9; gsub("ENST","ENSG",$1); 
+        $2="annotation"; $3="exon"; $6=1; print $0;
+        }' /projects/datasets/chr22/annotation/ensembl/cds/gff/chr22 \
+        > $BASE/chr22_local-annot.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $1=++cnt;            # $1="static0";
+        $3="hsp-sr"; $8="."; # $9="__NONE__";
+        print $0;
+        }' /projects/sgp/chr22/sgp/Hsap.masked.3X+/hsp-rs/chr22 \
+        > $BASE/chr22_hsp-sr.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="geneid-raw"; $3="exon";
+        # split($9,n,"_"); $9=n[2]; # needed for chr21
+        print $0;
+        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+/gff/chr22 \
+        > $BASE/chr22_geneid_raw.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="geneid-masked"; $3="exon";
+        # split($9,n,"_"); $9=n[2]; # needed for chr21
+        print $0;
+        }' /projects/sgp/chr22/sgp/Hsap.masked.3X+/gff/chr22 \
+        > $BASE/chr22_geneid_masked.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="sgp-raw"; $3="exon";
+        # split($9,n,"_"); $9=n[2]; # needed for chr21
+        print $0;
+        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+/gff/chr22 \
+        > $BASE/chr22_sgp_raw.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="sgp-masked"; $3="exon";
+        # split($9,n,"_"); $9=n[2]; # needed for chr21
+        print $0;
+        }' /projects/sgp/chr22/sgp/Hsap.masked.3X+/gff/chr22 \
+        > $BASE/chr22_sgp_masked.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="sgp"; $3="exon";
+        # split($9,n,"_"); $9=n[2]; # needed for chr21
+        print $0;
+        }' /projects/sgp/chr22/sgp/Hsap.raw.3X+.ew-2+2/gff/chr22 \
+        > $BASE/chr22_sgp_ew.gff ;
+#
+cat $BASE/chr22_est.gff $BASE/chr22_genscan.gff \
+    $BASE/chr22_geneid_masked.gff $BASE/chr22_geneid_raw.gff \
+    $BASE/chr22_sgp_ew.gff $BASE/chr22_sgp_masked.gff $BASE/chr22_sgp_raw.gff \
+    $BASE/chr22_hsp-sr.gff $BASE/chr22_local-annot.gff $BASE/chr22_annot.gff \
+    > $BASE/all_chr22.gff ;
+@ 
+
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2996,7 +3128,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.6 2001-10-02 19:57:35 jabril Exp $
+# $Id: Human_Chromosome_22.nw,v 0.7 2001-10-17 18:43:44 jabril Exp $
 @ 
 
 \newpage

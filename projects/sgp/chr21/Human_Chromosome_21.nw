@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: Human_Chromosome_21.nw,v 1.3 2001-10-13 22:07:14 gparra Exp $ 
+% # $Id: Human_Chromosome_21.nw,v 1.4 2001-10-17 18:43:59 jabril Exp $ 
 %
 % THIS FILE WAS GENERATED WITH THE FOLOWING COMMAND:
 % ~jabril/bin/deploy Human_Chromosome_21  /home/ug/jabril/development/softjabril/deploy/data/report.nw
@@ -124,7 +124,7 @@
  % Other authors here...\\
  } % def authorslist
 \def\authorshort{
- Authors list here % Other authors here...
+ Abril, JF; Parra, G; Guig\'o, R
  } % def authorshort
 %
 \def\license{GNU General Public License (GNU-GPL)}
@@ -162,6 +162,25 @@ Universitat Pompeu Fabra\\[2ex]
 <<HIDE: new LaTeX urls>>=
 @ 
 <<HIDE: new LaTeX definitions>>=
+\def\biop{\textsc{BioPerl}}
+\def\rptm{\textsc{RepeatMasker}}
+\def\bl{\textsc{Blast}}
+\def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
+\def\ps{\textsc{PostScript}}
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
+\def\sgp{\textsc{sgp}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{aplot}}
+\def\data{\textbf{Chromosome 21 Dataset}}
+\def\chr{\textbf{Chromosome 21}}
 @ 
 <<HIDE: new defs TODO>>=
 @ 
@@ -175,8 +194,9 @@ Universitat Pompeu Fabra\\[2ex]
 \textbf{\Huge \progname}\\[5ex]
 
 % \textbf{\Large Authors List Here}\\[1ex]
-\textbf{\Large Authors List Here}\\[5ex] 
-        % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+\textbf{\Large Josep F. Abril}\\[1ex]
+\textbf{\Large Gen\'{\i}s Parra}\\[1ex]
+\textbf{\Large Roderic Guig\'o}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$        % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
 
 \textbf{\large --- \today ---}\\[10ex]
 
@@ -216,7 +236,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.3 2001-10-13 22:07:14 gparra Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.4 2001-10-17 18:43:59 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -227,7 +247,7 @@ Universitat Pompeu Fabra\\[2ex]
 \setcounter{page}{1}
 
 \sctn{Introduction}
-The goal of this project is to generate as fast as posible \sgp predictions of chromosome 21. geneid and SGP using hsp must be run, evaluated, and analized in three days.
+The goal of this project is to generate as fast as posible {\sgp} predictions of chromosome 21. geneid and SGP using hsp must be run, evaluated, and analized in three days.
 \sctn{Precition on chr21}
 
 \subsctn{Working on data}
@@ -270,6 +290,12 @@ cp /seq/genomes/H.sapiens/releases/golden_path-01apr2001/chromFaMasked/21/chr21.
 mkdir $ANALYSIS/blast $ANALYSIS/blast/wublast.tblastx 
 
 cp ~pagarwal/tbx.tar.gz $ANALYSIS/_tmp/Pankaj/
+#
+#
+grep -v "^>" /projects/datasets/chr21/fasta/masked/chr21 | fold -1 | \
+  perl -ne 'chomp; $_ !~ "N" && print "$.\n"' | head -1 
+     10000001
+#
 @
 %$
 
@@ -346,6 +372,251 @@ run_evaluation 21 geneid Hsap.raw $ANALYSIS/geneid $DATASETS/annotation/all all 
 
 @
 %$
+
+
+\sctn{Running {\gps}}
+
+\subsctn{Preparing GFF files}
+
+<<BASH commands ANALYSIS>>=
+#
+# MAKING PLOTS with GFF2PS
+#
+# There are no results for genscan/twinscan/slam
+#
+export CHR="chr21";
+#
+# Preparing annotaton and repeats
+gawk '$0!~/^#/ {$2="annotation";print $0}'\
+      $DATASETS/annotation/ensembl/chr21 | \
+      sort +3n +4n -5 +2 -3 \
+      > $DATASETS/annotation/ensembl/chr21.gff2ps ;
+#
+# gawk '{
+#     if ($9 in names) names[$9]++; 
+#     else names[$9]=1;
+#     gp = $9"-"names[$9];
+#     print $1,$2,$3,$4,$5,$6,$7,$8,gp;
+#     }' $DATASETS/masking/default/gff/chr22 \
+#      > $DATASETS/masking/default/gff/chr22.gff2ps ;
+#
+#
+# Preparing geneid files
+IDIR="$ANALYSIS/geneid/Hsap.masked" ;
+ODIR="$IDIR/ps/_tmp/geneid" ;
+[ -e $ODIR ] || ChckDirs $ODIR ;
+gawk 'BEGIN{OFS="\t"}
+      $1!~/^#|^[ \t]*$/ {
+          $2="geneid";
+          print $0;
+      }' $IDIR/gff/$CHR.geneid_v1.1 > $ODIR/$CHR ;
+@ 
+
+<<BASH Functions: Preparing SGP Output>>=
+#
+# Preparing SGP files
+set_feats_sgp ()
+{
+  # USAGE:  set_feats_sgp input_dir
+  IDIR="$1";
+  #
+  # set tblastx GFF files from last SGP run
+  ODIR="$IDIR/ps/_tmp/sr" ;
+  [ -e $ODIR ] || ChckDirs $ODIR ;
+  gawk 'BEGIN{ OFS="\t" }
+        { if ($1 !~ /^#|^[ \t]*$/) { $2="SR.3X"; $8="." };
+          print $0;
+          }' $IDIR/sr/$CHR > $ODIR/$CHR ;
+  ODIR="$IDIR/ps/_tmp/sr-rs" ;
+  [ -e $ODIR ] || ChckDirs $ODIR ;
+  gawk 'BEGIN{ OFS="\t" }
+        { if ($1 !~ /^#|^[ \t]*$/) { $2="SR-RS.3X"; $8="." };
+          print $0;
+          }' $IDIR/hsp-rs/$CHR > $ODIR/$CHR ;
+  #
+  # set SGP GFF files from SGP run
+  ODIR="$IDIR/ps/_tmp/sgp" ;
+  [ -e $ODIR ] || ChckDirs $ODIR ;
+  gawk 'BEGIN{ OFS="\t" }
+        { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.3X" };
+          print $0;
+          }' $IDIR/gff/$CHR > $ODIR/$CHR ;
+}
+#
+@ 
+
+
+\subsctn{Making plots with {\gps}}
+
+<<BASH Functions: Running GFF2PS>>=
+#
+export PARAM="/projects/sgp/chr21/_docs/bin/param" ;
+run_GFF2PS ()
+{
+  # 
+  # run_GFF2PS - Making plots with gff2ps (a4+a3+wide formats)
+  #
+  # USAGE: run_GFF2PS working_dir "GFF_files_list" custom_file_root [ps_tail]
+  #
+  # 'working_dir' where to save plots
+  # "GFF_files_list" a list of GFF files (with full path) to be plotted
+  #
+  ODIR="$1/gff2ps" ;
+  GFFfiles="$2" ;
+  PARM="$PARAM/gff2ps/$3" ;
+  [ "$4" ] && XTR="$4" || XTR="";
+  #
+  ChckDirs $ODIR \
+           $ODIR/a3      $ODIR/a4      $ODIR/wide \
+           $ODIR/a3/logs $ODIR/a4/logs $ODIR/wide/logs ;
+  #
+  CHR="chr21" ;
+  START="-S 10000000" ;
+  #
+  gff2ps -VC ${PARM}_wide.rc $START -- $GFFfiles \
+          2>&1 > $ODIR/wide/${CHR}${XTR} | tee $ODIR/wide/logs/${CHR}${XTR} ;
+  gff2ps -VC ${PARM}_a4.rc   $START -- $GFFfiles \
+          2>&1 > $ODIR/a4/${CHR}${XTR}   | tee $ODIR/a4/logs/${CHR}${XTR}   ;
+  gff2ps -VC ${PARM}_a3.rc   $START -- $GFFfiles \
+          2>&1 > $ODIR/a3/${CHR}${XTR}   | tee $ODIR/a3/logs/${CHR}${XTR}   ;
+}
+#
+@
+
+<<BASH commands ANALYSIS>>=
+#
+# Running GFF2PS on CHR21 Hsap masked against Mmus WGS-3X
+IDIR="$ANALYSIS/sgp/Hsap.masked.3X+/ps" ;
+#
+GFFIN="$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/chr21" ;    # geneid
+GFFIN="$GFFIN $IDIR/_tmp/sgp/chr21" ;                          # sgp
+GFFIN="$GFFIN $IDIR/_tmp/sr-rs/chr21" ;                        # sr-rs
+GFFIN="$GFFIN $IDIR/_tmp/sr/chr21" ;                           # sr
+GFFIN="$GFFIN $DATASETS/annotation/ensembl/chr21.gff2ps" ;       # annotation
+# GFFIN="$GFFIN $DATASETS/masking/default/gff/chr21.gff2ps" ;    # repeats
+#
+run_GFF2PS $IDIR "$GFFIN" masked 2> $IDIR/_tmp/20011015.log ;
+#
+@
+
+\sctn{Preparing GFF files for apolo}
+
+We merge few ENSEMBL tracks to our gene-prediction into a single GFF file properly formated for APOLLO viewer. We have donwloaded ENSEMBL data using that tool by 5Mbp fragments. Thanks to Steve Searle (\url|searle@sanger.ac.uk|), we can donwload the whole thing with a single call:
+
+\url|http://www.ensembl.org/perl/apolloview?chr=21&vc_start=10000000&vc_end=45000000|
+
+<<APOLLO>>=
+perl -we ' ##
+  use LWP::UserAgent;
+  use HTTP::Request;
+  use HTTP::Response;
+  use URI::Heuristic;
+  my ($chr,$min,$max,$step) = @ARGV;
+  @ARGV = ();
+  my $url = URI::Heuristic::uf_urlstr("www.ensembl.org/perl/apolloview?chr=");
+  my $ua = LWP::UserAgent->new();
+  $ua->agent("perl-script");
+  for (my $k = $min; $k < $max; $k += $step) {
+      my ($req,$response,$content,$nwurl,$j,$file);
+      $j = $k + $step; 
+      $nwurl = $url.$chr."\&vc_start=".$k."000000\&vc_end=".$j."000000";
+      print STDERR "# Downloading data from $nwurl\n";
+      $file = "./chr${chr}_${k}_${j}.gff";
+      open(HTMLOUT,"> $file") ||
+          die("### Cannot open file: $file $!");
+      $req = HTTP::Request->new(GET => $nwurl);
+      $req->referer("http://www1.imim.es");
+      $response = $ua->request($req);
+      # print STDERR "#... ".$response->title()."\n";
+      $content = $response->content();
+      print HTMLOUT $content;
+      print STDERR "#...... ".(length $content)."\n";
+      close(HTMLOUT);
+  }; # for
+  '  21  10 45 5   2>&1 | tee download_chr21.log ; 
+@ 
+
+<<APOLLO>>=
+# what to do when loading 5mbp Ensembl fragments using Apollo
+cat ori/chr21_10_15.gff ori/chr21_15_20.gff ori/chr21_20_25.gff \
+    ori/chr21_25_30.gff ori/chr21_30_35.gff ori/chr21_35_40.gff \
+    ori/chr21_40_45.gff > chr21.gff ;
+#
+gawk '{print $2,$3}' chr21.gff | sort | uniq -c | sort -nr ;
+#   57468 sptr similarity
+#   54303 embl_vertrna similarity
+#   44626 RepeatMasker similarity
+#   36119 unigene.seq similarity
+#   16338 Variation exon
+#   16085 est similarity
+#   10720 trace similarity
+#    6491
+#    3437 genscan exon
+#    1380 hugo exon
+#     809 embl exon
+#     397 ensembl exon
+#     238 sptrembl exon
+#     230 epcr exon
+#     109 sequence similarity
+#      94 cpg similarity
+#       1 tRNA similarity 
+#
+grep "genscan" chr21.gff | sort +3n -5 +8n | \
+    gawk 'BEGIN{OFS="\t";gp=last=1}
+          { if (last!=$9) { gp++; last=$9; };
+            $9=gp; print $0;
+            }' - > chr21_genscan.gff ;
+grep "est" chr21.gff | sort +3n -5 > chr21_est.gff ;
+gawk 'BEGIN{OFS="\t";gp=last=1}
+      $2 ~ /^(hugo|embl|ensembl|sptrembl|epcr)$/ {
+        print $0;
+      }' chr21.gff | \
+         sort +3n -5 > chr21_annot.gff ;
+#
+gawk 'BEGIN{OFS="\t";gp=last=1}
+      { $1=$9; gsub("ENST","ENSG",$1); 
+        $2="annotation"; $3="exon"; $6=1; print $0;
+        }' /projects/datasets/chr21/annotation/ensembl/cds/gff/chr21 \
+        > chr21_local-annot.gff ;
+gawk 'BEGIN{OFS="\t"}
+      { $1=++cnt;            # $1="static0";
+        $3="hsp-sr"; $8="."; # $9="__NONE__\t-1\t-1";
+        print $0;
+        }' /projects/sgp/chr21/sgp/Hsap.masked.3X+/hsp-rs/chr21 \
+        > chr21_hsp-sr.gff ;
+gawk 'BEGIN{OFS="\t"}
+      { $2="geneid-raw"; $3="exon";
+        split($9,n,"_"); $9=n[2]; print $0;
+        }' /projects/sgp/chr21/sgp/Hsap.raw.3X+/gff/chr21 \
+        > chr21_geneid_raw.gff ;
+gawk 'BEGIN{OFS="\t"}
+      { $2="geneid-masked"; $3="exon";
+        split($9,n,"_"); $9=n[2]; print $0;
+        }' /projects/sgp/chr21/sgp/Hsap.masked.3X+/gff/chr21 \
+        > chr21_geneid_masked.gff ;
+gawk 'BEGIN{OFS="\t"}
+      { $2="sgp-raw"; $3="exon";
+        split($9,n,"_"); $9=n[2]; print $0;
+        }' /projects/sgp/chr21/sgp/Hsap.raw.3X+/gff/chr21 \
+        > chr21_sgp_raw.gff ;
+gawk 'BEGIN{OFS="\t"}
+      { $2="sgp-masked"; $3="exon";
+        split($9,n,"_"); $9=n[2]; print $0;
+        }' /projects/sgp/chr21/sgp/Hsap.masked.3X+/gff/chr21 \
+        > chr21_sgp_masked.gff ;
+gawk 'BEGIN{OFS="\t"}
+      { $2="sgp"; $3="exon";
+        split($9,n,"_"); $9=n[2]; print $0;
+        }' /projects/sgp/chr21/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21 \
+        > chr21_sgp_ew.gff ;
+#
+cat chr21_est.gff chr21_genscan.gff \
+    chr21_geneid_masked.gff chr21_geneid_raw.gff \
+    chr21_sgp_ew.gff chr21_sgp_masked.gff chr21_sgp_raw.gff \
+    chr21_hsp-sr.gff chr21_local-annot.gff chr21_annot.gff \
+    > all_chr21.gff ;
+@ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
 \end{comment}
@@ -738,14 +1009,14 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_21.nw,v 1.3 2001-10-13 22:07:14 gparra Exp $
+# $Id: Human_Chromosome_21.nw,v 1.4 2001-10-17 18:43:59 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Extracting code blocks from this document}
 
-From this file we can obtain both the code and the
+>From this file we can obtain both the code and the
 documentation. The following instructions are needed:
 
 \subsctn{Extracts Script code chunks from the {\noweb} file} % \\[-0.5ex]
@@ -826,34 +1097,159 @@ popd ;
 <<BASH script end>>
 @ %$
 
+\subsctn{Defining shell functions for the current project} % \\[-0.5ex]
+
+<<BASH Functions Block>>=
+<<BASH Basic Shell Functions>>
+@ 
+
+\begin{comment}
+@<<BASH Functions: GTF to GFF>>
+@<<BASH Functions: Gene-Prediction Evaluation>>
+@<<BASH Functions: Running GENEID>>
+@<<BASH Functions: Running GENEID + Evidences>>
+@<<BASH Functions: Filtering GENEID RAW Output>>
+@<<BASH Functions: Running SGP>>
+@<<BASH Functions: SGP + Evidences>>
+@<<BASH Functions: Preparing SGP Output>>
+@<<BASH Functions: Predicted Genes Boundaries>>
+@<<BASH Functions: Running GFF2PS>>
+\end{comment}
+ 
+
+<<BASH Basic Shell Functions>>=
+#
+# BASIC Shell Functions
+#
+ChckDirs ()
+{
+  #
+  # USAGE: ChckDirs <path_list>
+  #
+  for name in "$@" ;
+    do {
+         [ -d "$name" ] && 
+           echo "### Directory Already Exist: $name" ||
+             mkdir --verbose $name ;
+      } ;
+    done ;
+}
+#
+renameSEQS ()
+{
+  #
+  # USAGE: renameSEQS ls_command reg_exp substitution_value
+  # Example: renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA'
+  #
+  $1 | while read n ; 
+    do {
+      k=`echo $n | sed "s/$2/$3/"` ;
+      [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
+    } ;
+    done ;
+}
+#
+MergeFiles ()
+{
+  #
+  # USAGE: MergeFiles <working_path>
+  #
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.Hsap ] && 
+    /bin/rm --force --verbose $1/all.Hsap ;
+  [ -e $1/all.Mmus ] &&
+    /bin/rm --force --verbose $1/all.Mmus ;
+  echo "### WORKING on HUMAN LOCI..." ;
+  cat $HSAP | while read locus ;
+    do { cat $1/$locus >> $1/all.Hsap ; } ; done ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  cat $MMUS | while read locus ;
+    do { cat $1/$locus >> $1/all.Mmus ; } ; done ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  cat $1/all.Hsap $1/all.Mmus > $1/all ;
+}
+#
+MergeGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path> <species_id> <flag>
+  #
+  flag=0 ;
+  [ "$3" = "1" ] && flag=1 ; 
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.$2 ] && 
+    /bin/rm --force --verbose $1/all.$2 ;
+  echo "### WORKING on $2 LOCI..." ;
+  c=0 ;
+  while read locus ;
+    do {
+         let c=c+1 ;
+         [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
+         [ $flag -eq 1 ] &&
+             cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
+         gawk 'BEGIN{OFS="\t"}
+             ($1 !~ /^#/ && $3 != "Gene") {
+                 print $0;
+             }' $1/$locus | sort +3n -5 - >> $1/all.$2 ; 
+       } ;
+    done < $DATASETS/id.$2 ;
+}
+#
+MergeALLGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path>
+  #
+  echo "### WORKING on HUMAN LOCI..." ;
+  MergeGFF $1 Hsap 1 ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  MergeGFF $1 Mmus 1 ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  echo '#$ ' | cat $1/all.Hsap - $1/all.Mmus > $1/all ;
+}
+@ 
+
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
 <<BASH Environment Variables>>=
 #
-# Setting Global Variables
-WORK="/projects/sgp/chr21/_docs" ;
+# NOWEB Document Variables
+# 
+WORK="$HOME/development/projects/sgp/chr21" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
-SRC="$WORK/src" ; # where to put the distributable files
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
-TEST="$WORK/tests" ;
 nwfile="Human_Chromosome_21" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
+#
+# CHR22 Dataset Variables
 #
 DATASETS="/projects/datasets/chr21" ;
 ANALYSIS="/projects/sgp/chr21" ;
 SGPBIN="/projects/sgp/bin" ;
 SGPPARAM="$SGPBIN/param" ;
-export DATASETS ANALYSIS SGPBIN SGPPARAM;
+#
+ID="$DATASETS/id" ;
+HSAP="$DATASETS/id.Hsap" ;
+MMUS="$DATASETS/id.Mmus" ;
+export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
+#
+SPLICING="/projects/splicing/chr21" ;
+export SPLICING ;
 # Allowing for users and group file permisions
 umask 002;
 @ 
 
+<<BASH RC FILE>>=
+<<BASH Environment Variables>>
+<<BASH Functions Block>>
+@ 
+
 <<tangling>>=
-# 
-# BASH Environment Variables
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+#
+# BASH shell
+notangle -R'BASH RC FILE' $WORK/$nwfile.nw | \
          cpif $WORK/.bash_VARS ; 
 source $WORK/.bash_VARS ;
 #
