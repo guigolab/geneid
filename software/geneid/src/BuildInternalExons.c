@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.1 2000-07-07 08:21:05 eblanco Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.2 2000-08-08 14:15:33 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern long NUMEXONS;
 
 long BuildInternalExons(site *Acceptor, long nAcceptors, 
 		        site *Donor, long nDonors,
@@ -59,7 +61,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
   LocalExon = (struct iexon *) calloc(MaxDonors, sizeof(struct iexon));
   
   /* main loop, for each Acceptor Site */
-  for (i=0; (i < nAcceptors) && (nExon<NUMEXONS); i++) 
+  for (i=0; (i < nAcceptors) && (nExon<(int)(NUMEXONS/RINTER)); i++) 
     {
       /* Open the windows... */
       for (f=0;f<3;f++) 
@@ -136,9 +138,9 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 	}
 
       /* Save predicted exons with current Acceptor */
-      for (l=0;(l<nLocalExons) && (nExon<NUMEXONS);l++) 
+      for (l=0;(l<nLocalExons) && (nExon<(int)(NUMEXONS/RINTER));l++) 
 	{
-	  for (ll=0;(ll<3) && (nExon<NUMEXONS);ll++)
+	  for (ll=0;(ll<3) && (nExon<(int)(NUMEXONS/RINTER));ll++)
 	    if ((LocalExon+l)->Frame[ll]) {
 	      (Exon+nExon)->Acceptor = (LocalExon+l)->Acceptor;
 	      (Exon+nExon)->Donor = (LocalExon+l)->Donor;
@@ -155,8 +157,8 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 	}
     }
   
-  if (nExon==NUMEXONS)
-    printError("Too many predicted exons: Change NUMEXONS parameter");
+  if (nExon>=(int)(NUMEXONS/RINTER))
+    printError("Too many predicted exons: Change RINTER parameter");
   
   free(LocalExon);
   return(nExon);
