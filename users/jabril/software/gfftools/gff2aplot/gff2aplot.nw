@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $
+% $Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -133,7 +133,6 @@
 <<HIDE: new LaTeX urls>>
 
 %%%%% defs
-% \def\tit{\textsc{[[gff2aplot.pl]] }}
 \def\prog{\textsc{\textbf{gff2aplot}}}
 \def\gps{\textsc{\textbf{gff2ps}}}
 \def\gft{\textsc{\textbf{gfftools}}}
@@ -147,7 +146,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{gff2aplot.pl}
+\def\tit{\textsc{\progname}}
+%
 \def\mtjabril{
  \htmladdnormallink{\texttt{jabril@imim.es}}
                    {MAILTO:jabril@imim.es?subject=[gff2aplot]}
@@ -156,12 +158,18 @@
  Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Abril, JF % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
+%
 \def\description{
 {\prog} is a tool to visualize the alignment of two genomic sequences together with their annotations. Input to the program are single or multiple files in General Feature Format (GFF). Output is in PostScript format so the program serves to generate scalable print-quality images for comparative genomics sequence analysis.
  } % def description 
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
@@ -174,7 +182,8 @@ Universitat Pompeu Fabra\\[2ex]
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -265,7 +274,14 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \sctn{Introduction}
 
-*** Cite here Vista, PiP-maker, Dotter and other dotplot tools
+\label{todo:AAZ}
+<<HIDE: new defs TODO>>=
+\def\todoAAZ{Cite here Vista, PiP-maker, Dotter and other dotplot tools.} % todoAAZ
+@
+<<HIDE: TODO>>=
+\todoitem{\todoAAZ}{todo:AAZ}
+@
+\todo{ \item \todoAAZ } % todo
 
 <<HIDE: BiBTeX references>>=
 @ 
@@ -282,6 +298,7 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 \todoitem{\todoAAA}{todo:AAA}
 @
 \todo{ \item \todoAAA } % todo
+
 \begin{figure}[!ht]
 \begin{center}
 \fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
@@ -290,21 +307,7 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 \end{center}
 \end{figure}
 
-\subsctn{Basic goals}
-
-\begin{itemize}
-\item I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain, it will be more portable too. 
-
-\item Using {\noweb} I pretend to improve the overall design and to open the code to other developers.
-
-\item \ldots 
-\end{itemize}
-
-\subsctn{TO DO: unfinished stuff and projects}
-
-\begin{itemize}
- \input todo.tex
-\end{itemize}
+\subsctn{Future extensions}
 
 \label{todo:AAB}
 <<HIDE: new defs TODO>>=
@@ -322,6 +325,22 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 \caption[Future modes of {\prog}.]{\label{fig:othermodes} Input, output and main code blocks are represented in this flowchart for the ``Interactive'', ``Graphic'' and ``Web/CGI'' versions of {\prog}.}
 \end{center}
 \end{figure}
+
+\subsctn{Basic goals}
+
+\begin{itemize}
+\item I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain, it will be more portable too. 
+
+\item Using {\noweb} I pretend to improve the overall design and to open the code to other developers.
+
+\item \ldots 
+\end{itemize}
+
+\subsctn{TO DO: Unfinished stuff for current release}
+
+\begin{itemize}
+ \input todo.tex
+\end{itemize}
 
 
 \newpage
@@ -428,9 +447,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.8 $', #'
-     '$Date: 2001-10-22 14:36:00 $', #'
-     '$Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $', #'
+     '$Revision: 1.9 $', #'
+     '$Date: 2001-10-22 18:27:32 $', #'
+     '$Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -848,9 +867,16 @@ defined($chk_stdin) && do {
 \todoitem{\todoBBC}{todo:BBC}
 @
 \todo{ \item \todoBBC } % todo
+
+As we reset [[%CmdLineVars]] in main loop we do not need to take care for those key-value pairs that were not defined by [[GetOptions]] function. We will check for two kinds of command-line variables, those having a specific command-line option (and related to [[LAYOUT]] variables) and those that define a feature-specific variable (for GFF-features, groups, sequences and so on). Last ones are validated and set in the following section. Therefore, if layout variables are provided on command-line by this way, they have precedence over the corresponding layout pre-defined command-line option. 
+
 <<Parsing Command-Line Options>>=
 sub check_command_line_vars() {
     &report("CHECKING_CMDLN_VARS");
+    &command_line_for_layout();
+    defined($CmdLineVars{VARS}) &&
+        &command_line_for_vars();
+    &footer("COMMAND-LINE OPTONS CHECKED");
 } # check_command_line
 @
 
@@ -858,6 +884,20 @@ sub check_command_line_vars() {
 CHECKING_CMDLN_VARS =>
   $sp."### Checking COMMAND-LINE Settings\n".$sp,
 @ 
+
+Here we take advantage of the [[&varscheck]] function, that was created to validate input from [[&parse_custom_files]], and that is described in section~\ref{sec:paramvalid}, page~\pageref{sec:paramvalid}.
+
+<<Parsing Command-Line Options>>=
+sub command_line_for_layout() {
+    $n = 0;
+    foreach my $cvar (keys %{ $CmdLineVars{LAYOUT} }) {
+        my @cary = ('LAYOUT',$cvar,$CmdLineVars{LAYOUT}{$cvar});
+        $c = &varscheck($F,'LAYOUT',\@cary) ? '.' : $noCV;
+        &counter(++$n,$c);
+	}; # foreach $cvar
+    &counter_end($n,$c);
+} # command_line_for_layout
+@
 
 \subsubsctn{Loading GFF elements custom variables from command-line}
 
@@ -872,8 +912,24 @@ Parsing and loading command-line options having structure like:\\
 \todoitem{\todoBBD}{todo:BBD}
 @
 \todo{ \item \todoBBD } % todo
+
 <<Parsing Command-Line Options>>=
-#
+sub command_line_for_vars() {
+    $n = 0;   
+    foreach my $calias qw/ L Q S T G F / {
+        my ($cvar,$cflg);
+        $cvar = $varkeys{$calias};
+        $cflg = ($calias ne 'L') ? $T : $F;
+        defined($CmdLineVars{VARS}{$cvar}) && do {
+            foreach my $ccv (keys $CmdLineVars{VARS}{$cvar}) {
+                $c = &varscheck($cflg,$ccv,$CmdLineVars{VARS}{$cvar}{$ccv})
+                     ? $calias : $noCV;
+                &counter(++$n,$c);
+            }; # foreach $ccv
+        }; # $CmdLineVars{VARS}{$cvar}
+	}; # foreach $calias
+    &counter_end($n,$c);
+} # command_line_for_vars
 @
 
 <<command-line options custom>>=
@@ -1094,7 +1150,18 @@ NO_CUSTOM_FOUND =>
   $sp."### NO CUSTOM FILES found: Using program DEFAULTS.\n".$sp,
 @
 
+\label{todo:BGA}
+<<HIDE: new defs TODO>>=
+\def\todoBGA{Include an ``XTRA'' section to custom files for ``markup'' shapes definition (box, circle, label, and so on).} % todoBGA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBGA}{todo:BGA}
+@
+\todo{ \item \todoBGA } % todo
+
+
 \subsubsctn{Validating customization parameters} 
+\label{sec:paramvalid}
 
 '[[$rec]]' is a reference to an array that contains three elements: feature, variable and value. First we check if variable name is defined in , then we check if the given value matches the variable type. After that we analyse the feature element, testing if it is a regular expression or not.
 
@@ -1435,10 +1502,24 @@ FONT\_SZ & A numeric value with font-size units (cm, mm, in or pt ---points---).
 \caption[Customization parameters available formats]{\label{tbl:varformats} Parameter available formats we are going to use for customization variables checking.}
 \end{center}
 
+
+\label{todo:BBE}\label{todo:BBF}
+<<HIDE: new defs TODO>>=
+\def\todoBBE{
+More format variables need to be defined, such as: [[SHAPES]] from a shapes array, [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default), [[GROUP-BRACKETS]] (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--).
+} % todoBBE
+\def\todoBBF{
+Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.
+} % todoBBF
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBE}{todo:BBE}
+\todoitem{\todoBBF}{todo:BBF}
+@
 \todo{
-\item More format variables need to be defined, such as: [[SHAPES]] from a shapes array, [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default), [[GROUP-BRACKETS]] (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--).
-\item maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.
-} % todo
+ \item \todoBBE
+ \item \todoBBF
+ } % todo
 
 \end{table}
 
@@ -1474,9 +1555,17 @@ $_test eq 'STRING' && do {
 };
 @
 
-\todo{
-\item Remember to check for some of the strings values such: '++none++', '++sequence++', and so on.
-} % todo
+\label{todo:BBG}
+<<HIDE: new defs TODO>>=
+\def\todoBBG{
+Remember to check for some of the strings values such: '++none++', '++sequence++', and so on.
+} % todoBBG
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBG}{todo:BBG}
+@
+\todo{ \item \todoBBG } % todo
+
 
 \subsubsctn{Validating numbers}
 
@@ -1531,14 +1620,22 @@ $_test eq 'COLOR' && do { # lc
 };
 @
 
-\todo{
-\item Set fg/bg multiple strings to a single color name such fgcolor/bgcolor for later use in the whole program (PS code too).
-} % todo
+\label{todo:BBH}
+<<HIDE: new defs TODO>>=
+\def\todoBBH{
+Set fg/bg multiple strings to a single color name such fgcolor/bgcolor for later use in the whole program (PS code too).
+} % todoBBH
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBH}{todo:BBH}
+@
+\todo{ \item \todoBBH } % todo
 
 <<warnings - parsing custom files>>=
 NOT_A_COLOR =>
   $Warn."\"\%s\" color not defined in \"\%s\" variable.\n",
 @
+
 
 \subsubsctn{Verifying named page-sizes}
 
@@ -1581,9 +1678,17 @@ NOT_A_DNABASE =>
 
 A range is a lower/upper limits pair for a given variable. One of the limits, or both, can be an asterisk ('*'), which means that the default value must be used.
 
-\todo{
-\item Here we must check something like '*..*'
-} % todo
+\label{todo:BBI}
+<<HIDE: new defs TODO>>=
+\def\todoBBI{
+Here we must check something like '*..*'
+} % todoBBI
+@
+<<HIDE: TODO>>=
+\todoitem{\todoBBI}{todo:BBI}
+@
+\todo{ \item \todoBBI } % todo
+
 <<variable value checking>>=
 $_test eq 'RANGE' && do {
 
@@ -1649,10 +1754,24 @@ $_test eq 'FONT_SZ' && do {
 };
 @
 
+
+\label{todo:CCA}\label{todo:CCB}
+<<HIDE: new defs TODO>>=
+\def\todoCCA{
+Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
+} % todoCCA
+\def\todoCCB{
+Can we do the same for DNABASE ? (section~\ref{sec:DNABASE})
+} % todoCCB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoCCA}{todo:CCA}
+\todoitem{\todoCCB}{todo:CCB}
+@
 \todo{
-\item Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
-\item Can we do the same for DNABASE ? (section~\ref{sec:DNABASE})
-} % todo
+ \item \todoCCA
+ \item \todoCCB
+ } % todo
 
 <<warnings - parsing custom files>>=
 NOT_A_FONTSIZE =>
@@ -1666,13 +1785,25 @@ NOT_A_FONTSIZE =>
 	\label{sec:customvardesc}
 % \subsctn{Command-line options}
 
+
+\label{todo:DDA}\label{todo:DDB}
+<<HIDE: new defs TODO>>=
+\def\todoDDA{
+Write a script to produce easier the appendix/descriptions tables for the manual from the options code chunks. Transforming to a fixed record formats like:\\
+\shortstack[l]{ORDER: ....\\OPTION: ....\\DEFAULTS: ....\\PARAMS: ....\\ SHORT DESC: .... (for the appendix table)\\ LONG DESC: .... (for the description table)}
+} % todoDDA
+\def\todoDDB{
+Set the final options/variables/parameters for the whole section.
+} % todoDDB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoDDA}{todo:DDA}
+\todoitem{\todoDDB}{todo:DDB}
+@
 \todo{
-\item Write a script to produce easier the appendix/descriptions tables for the manual from the options code chunks. Transforming to a fixed record formats like:\\
-\shortstack[l]{OPTION: ....\\DEFAULTS: ....\\PARAMS: ....\\ SHORT DESC: .... (for the appendix table)\\ LONG DESC: .... (for the description table)}
-
-\item Set the final options/variables/parameters for the whole section.
-} % todo
-
+ \item \todoDDA
+ \item \todoDDB
+ } % todo
 
 Two options are used for reporting how program is running. By default no messages are shown to standard error, only errors. One reports to a log file defined by user and the other shows the messages to standard error, both can be activated at the same time. A third one is needed to disable STDERR warnings.
 
@@ -2296,9 +2427,17 @@ for the figure, by default showing \pr{align\_name} in the form of
 
 We have to deal with two basic formats, the \textsl{standard} General Feature Format (GFF) and the derived \textsl{aplot} format, the former having two versions with some minor differences at field level. We are going to asume the record formats shown in the table~\ref{fig:formats} for the input files.
 
-\todo{
-\item A flow chart of the GFF record parsing process.\\[6cm]
-} % todo
+
+\label{todo:EEA}
+<<HIDE: new defs TODO>>=
+\def\todoEEA{
+A flow chart of the GFF record parsing process.
+} % todoEEA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoEEA}{todo:EEA}
+@
+\todo{ \item \todoEEA } % todo
 
 \begin{table}[!t]
 % \newcommand{\m}[1]{\multicolumn{2}{@{}c@{}}{#1}}
@@ -2621,9 +2760,17 @@ sub check_aplot_fields() {
 } # check_aplot_fields
 @
 
-\todo{
-\item Append a new record to the variable defined for APLOT records
-} % todo
+\label{todo:EHA}
+<<HIDE: new defs TODO>>=
+\def\todoEHA{
+Append a new record to the variable defined for APLOT records
+} % todoEHA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoEHA}{todo:EHA}
+@
+\todo{ \item \todoEHA } % todo
+
 <<Parsing Input Data>>=
 sub add_aplot_record() {
     return;
@@ -2679,9 +2826,16 @@ The outline of the inner structure of that variable is shown in table~\ref{tbl:g
 \end{center}
 \end{table}
 
-\todo{
-\item Define DATA STRUCTURE for [[%ALN_DATA]].
-} % todo
+\label{todo:ELA}
+<<HIDE: new defs TODO>>=
+\def\todoELA{
+Define DATA STRUCTURE for [[%ALN_DATA]] and include a figure if differs from [[%GFF_DATA]] definition.
+} % todoELA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoELA}{todo:ELA}
+@
+\todo{ \item \todoELA } % todo
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 <<HIDE: GFF DATA STRUCTURE>>= 
@@ -3004,10 +3158,18 @@ The following record formats share the field structure of a GFF standard record,
 
 \subsubsctn{Parsing alignment records}
 
-\todo{
-\item Parsing alignment records:\\
+\label{todo:ERA}
+<<HIDE: new defs TODO>>=
+\def\todoERA{
+Parsing alignment records:\\
 \centerline{[[aln_tag "value" target_ori target_end target_frame target_strand (...)]]}
-} % todo
+} % todoERA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoERA}{todo:ERA}
+@
+\todo{ \item \todoERA } % todo
+
 <<Parsing Input Data>>=
 sub load_GFF_align() {
 
@@ -3016,10 +3178,18 @@ sub load_GFF_align() {
 
 \subsubsctn{Parsing scoring vectors} \label{sec:loadvector}
 
-\todo{
-\item Parsing scoring vectors:\\
+\label{todo:EVA}
+<<HIDE: new defs TODO>>=
+\def\todoEVA{
+Parsing scoring vectors:\\
 \centerline{[[vector_tag "value" vector_type; step value; window value; scores sco ... sco]]}
-} % todo
+} % todoEVA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoEVA}{todo:EVA}
+@
+\todo{ \item \todoEVA } % todo
+
 <<Parsing Input Data>>=
 sub load_GFF_vector() {
 	@vect_ary = ();
@@ -3035,9 +3205,17 @@ my @vect_ary;
 
 \sctn{Mapping custom features to figure elements} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\todo{
-\item Set variable mapping for [[%ALN_DATA]] elements.
-} % todo
+\label{todo:HAA}
+<<HIDE: new defs TODO>>=
+\def\todoHAA{
+Set variable mapping for [[%ALN_DATA]] elements.
+} % todoHAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoHAA}{todo:HAA}
+@
+\todo{ \item \todoHAA } % todo
+
 
 \subsctn{Mapping customization variables to working variable}
 
@@ -3250,9 +3428,17 @@ We need to sort the GFF elements by acceptor, it is more or less easy to sort th
 as arrays (it is implemented with the [[map]]/[[sort]]/[[map]] technique as it can be appreciated in [[<<sorting group elements>>]] code chunk). But we also need to sort groups by their coordinates and to sort sequences and sources by their input order (as they were read from input file I mean). This will be difficult to do on the original hashes because coords and order were placed in a subarray for a given group/source/sequence key name (that key point to an anonymous array containing that counters as you can see in table~\ref{tbl:gffdata}, page~\pageref{tbl:gffdata}). As we are looking for the GFF elements that belong to a group, which is related to a given strand of a source within a sequence, we can build an auxiliary variable that holds the proper ordering at each level as we go deep in the [[%GFF_DATA]]/[[%ALN_DATA]] variables hierarchy.
 At the same time we can fill the [[$_ori]] and [[$_end]] fields we left set to zero for the counters array in [[&load_gff_var]] (see function definition in page~\pageref{func:loadgffvar}).
 
-\todo{
-\item Set ordering for [[%ALN_DATA]].
-} % todo
+\label{todo:HAB}
+<<HIDE: new defs TODO>>=
+\def\todoHAB{
+Set ordering for [[%ALN_DATA]].
+} % todoHAB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoHAB}{todo:HAB}
+@
+\todo{ \item \todoHAB } % todo
+
 <<Sorting Features>>=
 sub sort_elements() {
     &header("SORTING ELEMENTS BY ACCEPTOR (START)");
@@ -3460,9 +3646,24 @@ my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
 
 \sctn{Obtaining {\ps} output} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\todo{
-\item Description of Document Structuring Convention (DSC) and plot PS file structure.
-} % todo
+\label{todo:IAA}
+<<HIDE: new defs TODO>>=
+\def\todoIAA{
+Description of Document Structuring Convention (DSC) and sketch PS file structure on figure~\ref{fig:PSdsc}.
+} % todoIAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoIAA}{todo:IAA}
+@
+\todo{ \item \todoIAA } % todo
+
+\begin{figure}[!ht]
+\begin{center}
+\fbox{\parbox[c][6cm][c]{\linewidth}{\hfill}}
+% \includegraphics[]{}
+\caption[{\ps} Document Structuring Convention for {\prog} output.]{\label{fig:PSdsc} Document Structuring Convention for {\prog} {\ps} output.}
+\end{center}
+\end{figure}
 
 <<Making PS Figures>>=
 sub make_plot() {
@@ -3577,9 +3778,17 @@ my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
 
 \subsctn{Setting up {\ps} variables}
 
-\todo{
-\item Planning: 2001/08/28
-} % todo
+\label{todo:IAB}
+<<HIDE: new defs TODO>>=
+\def\todoIAB{
+Setting up PostScript variables
+} % todoIAB
+@
+<<HIDE: TODO>>=
+\todoitem{\todoIAB}{todo:IAB}
+@
+\todo{ \item \todoIAB } % todo
+
 <<PostScript VARS>>=
 sub ps_variables() {
     print STDOUT << '+++PSVARS+++';
@@ -3593,9 +3802,16 @@ sub ps_variables() {
 
 \subsctn{Main {\ps} functions}
 
-\todo{
-\item Page layout must be redefined (taking into account page size too).\\[6cm]
-} % todo
+\label{todo:IAC}
+<<HIDE: new defs TODO>>=
+\def\todoIAC{
+Page layout must be redefined (taking into account page size too).
+} % todoIAC
+@
+<<HIDE: TODO>>=
+\todoitem{\todoIAC}{todo:IAC}
+@
+\todo{ \item \todoIAC } % todo
 
 <<PostScript MAIN>>=
 sub ps_main() {
@@ -3624,9 +3840,17 @@ true setstrokeadjust
 
 \subsctn{Plotting data into the figure}
 
-\todo{
-\item Planning: 2001/08/29
-} % todo
+\label{todo:IAD}
+<<HIDE: new defs TODO>>=
+\def\todoIAD{
+Plotting data into the figure
+} % todoIAD
+@
+<<HIDE: TODO>>=
+\todoitem{\todoIAD}{todo:IAD}
+@
+\todo{ \item \todoIAD } % todo
+
 <<PostScript PLOT>>=
 sub ps_plot(){
 } # ps_plot
@@ -3690,9 +3914,16 @@ sub ps_trailer() {
 \sctn{CMYK color definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:CMYKcolordef}
 
-\todo{
-\item Move this section and the following (colors and page formats definition) to perl package [[gfftools::PostScript]].
-} % todo
+\label{todo:JAA}
+<<HIDE: new defs TODO>>=
+\def\todoJAA{
+Move this section and the following (colors and page formats definition) to perl package: \\ suggesting [[gfftools::PostScript]].
+} % todoJAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoJAA}{todo:JAA}
+@
+\todo{ \item \todoJAA } % todo
 
 To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, their {\LaTeX} definition ('[[AplotColorDefs.tex]]') and the table sumarizing them for the manual ('[[AplotColorTbl.tex]]'). % outlined in page~\pageref{sec:cmykfiles}.
 
@@ -4213,6 +4444,17 @@ letter, quarto, statement and tabloid.
 \newpage
 
 \sctn{{\ps} main program and routines} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\label{todo:KAA}
+<<HIDE: new defs TODO>>=
+\def\todoKAA{
+Enhance PostScript code readability, including special comments that should be stripped out when tangling code, making final PS code more compact while preserving full explanations in this document.
+} % todoKAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoKAA}{todo:KAA}
+@
+\todo{ \item \todoKAA } % todo
 
 \subsctn{Abbreviated function names}
 
@@ -5363,7 +5605,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $
+# $Id: gff2aplot.nw,v 1.9 2001-10-22 18:27:32 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
