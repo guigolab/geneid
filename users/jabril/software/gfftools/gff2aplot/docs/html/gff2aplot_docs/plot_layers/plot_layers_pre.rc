@@ -1,7 +1,7 @@
 #
 # plot_layers_pre.rc
 #
-# $Id: plot_layers_pre.rc,v 1.1 2002-01-11 19:28:39 jabril Exp $
+# $Id: plot_layers_pre.rc,v 1.2 2002-02-01 19:14:09 jabril Exp $
 #
 # X #
 
@@ -11,6 +11,6 @@ box 150 350 150 350 L:darkviolet S:dotted W:2pt F:lightviolet
 
 # circle  <Cx> <Cy> <Rx> <Ry>
 #       [ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ]
-circle 400 600 50 50 S:solid W:2pt L:lightbrown F:darkyellow
+circle 400 600 75 75 S:solid W:2pt L:lightbrown F:darkyellow
 circle 700 200 100 50 A:45 S:dashed W:1 L:lightbrown F:darkorange
 

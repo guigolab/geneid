@@ -29,10 +29,7 @@
 \item[$\triangleright$] [\textit{Section}~\ref{#2}, \textit{page}~\pageref{#2}]\\
               #1
 } % newcommand todoitem
-\newcommand{\op}[1]{{\bfseries\sffamily #1}}
-\newcommand{\tp}[1]{{'{\bfseries\sffamily #1}'}}
-\newcommand{\pr}[1]{{\mdseries\sffamily\slshape $<$#1$>$}}
-\newcommand{\x}{\textmd{\,,\,}}
+\input tabledefs.tex
  
 %%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
@@ -50,7 +47,6 @@
  } % def perltidy
 
 %%%%% defs
-% \def\tit{\textsc{{\tt{}gff2aplot.pl} }}
 \def\prog{\textsc{\textbf{gff2aplot}}}
 \def\gps{\textsc{\textbf{gff2ps}}}
 \def\gft{\textsc{\textbf{gfftools}}}
@@ -60,32 +56,87 @@
 
 
 %%%%% TODO defs
+\def\todoAAZ{Cite here Vista, PiP-maker, Dotter and other dotplot tools.} % todoAAZ
 \def\todoAAA{Flow diagram (Serial/Filter mode) for figure~\ref{fig:filtermode}.} % todoAAA
 \def\todoAAB{Flow diagram here (Interactive, Graphic and Web/CGI modes) for figure~\ref{fig:othermodes}.} % todoAAB
-\def\todoBBB{Diagram for figure~\ref{fig:customvarstruc}.} % todoBBB
-\def\todoBBC{Implement {\tt{}{\char38}check{\char95}command{\char95}line{\char95}vars} to verify if settings from command-line are OK.} % todoBBC
-\def\todoBBD{
-Parsing and loading command-line options having structure like:\\
-\centerline{{\tt{}--feature\ feature{\char95}name::variable{\char95}name=value}}
-} % todoBBD
+\def\todoBBB{Diagram for figure~\ref{fig:customvarstruc}:
+Structure of main customization variables and their relationships.} % todoBBB
+\def\todoBGA{Include an ``XTRA'' section to custom files for ``markup'' shapes definition (box, circle, label, and so on).} % todoBGA
+\def\todoBBE{
+Checking {\tt{}LINES}/{\tt{}LINESTYLES} (none, dotted, dashed, solid/default) for shapes joining lines. 
+} % todoBBE
+\def\todoBBG{
+Remember to check for some of the strings values such: '++none++', '++sequence++', and so on.
+} % todoBBG
+\def\todoDDB{
+Set the final options/variables/parameters for the whole section.
+} % todoDDB
+\def\todoEEA{
+A flow chart of the GFF record parsing process (figure~\ref{fig:parsingGFF}).
+} % todoEEA
+\def\todoEEB{
+Move this section to a perl package: \\ suggesting {\tt{}gfftools::parser}.
+} % todoEEB
+\def\todoELA{
+DATA STRUCTURE for {\tt{}{\char37}ALN{\char95}DATA} was defined:
+Include a figure if differs from {\tt{}{\char37}GFF{\char95}DATA} definition (table~\ref{tbl:alndata}).
+} % todoELA
+\def\todoEVA{
+Parsing scoring vectors:\\
+\centerline{{\tt{}vector{\char95}tag\ "value"\ vector{\char95}type;\ step\ value;\ window\ value;\ scores\ sco\ ...\ sco}}
+} % todoEVA
+\def\todoIAA{
+Description of Document Structuring Convention (DSC) and sketch PS file structure on figure~\ref{fig:PSdsc}.
+} % todoIAA
+\def\todoJAA{
+Move this section to a perl package: \\ suggesting {\tt{}gfftools::PostScript::colors}.
+} % todoJAA
+\def\todoJAB{
+Move this section to a perl package: \\ suggesting {\tt{}gfftools::PostScript::formats}.
+} % todoJAB
+\def\todoIAD{Plotting data into extra box (lower panel).} % todoIAD
+\def\todoIBD{Drawing extra features (circles, boxes, arrows, text).} % todoIBD
+\def\todoTAA{
+Implement a perl script to test {\prog} functions.
+} % todoTAA
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{gff2aplot.pl}
+\def\tit{\textsc{\progname}}
+%
 \def\mtjabril{
  \htmladdnormallink{\texttt{jabril@imim.es}}
                    {MAILTO:jabril@imim.es?subject=[gff2aplot]}
  } % def mtjabril
+\def\mttwiehe{
+ \htmladdnormallink{\texttt{twiehe@ice.mpg.de}}
+                   {MAILTO:twiehe@ice.mpg.de?subject=[gff2aplot]}
+ } % def mttwiehe
+\def\mtrguigo{
+ \htmladdnormallink{\texttt{rguigo@imim.es}}
+                   {MAILTO:rguigo@imim.es?subject=[gff2aplot]}
+ } % def mtrguigo
+%
 \def\authorslist{
- Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ Josep F. Abril   {\mdseries\small\dotfill \mtjabril } \\
+ Thomas   Wiehe   {\mdseries\small\dotfill \mttwiehe } \\
+ Roderic  Guig\'o {\mdseries\small\dotfill \mtrguigo } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Abril, JF; Wiehe, T; Guig\'o, R % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
-\def\description{
+%
+\def\progdesc{
 {\prog} is a tool to visualize the alignment of two genomic sequences together with their annotations. Input to the program are single or multiple files in General Feature Format (GFF). Output is in PostScript format so the program serves to generate scalable print-quality images for comparative genomics sequence analysis.
- } % def description 
+ } % def progdesc 
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
@@ -98,9 +149,10 @@ Universitat Pompeu Fabra\\[2ex]
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
 
-\nwfilename{/home/ug/jabril/development/softjabril/gfftools/gff2aplot/docs/defs.tmp}
+\nwfilename{}

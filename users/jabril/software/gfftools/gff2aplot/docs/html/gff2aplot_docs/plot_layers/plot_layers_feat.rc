@@ -1,7 +1,7 @@
 #
 # plot_layers_feat.rc
 #
-# $Id: plot_layers_feat.rc,v 1.1 2002-01-11 19:28:39 jabril Exp $
+# $Id: plot_layers_feat.rc,v 1.2 2002-02-01 19:14:05 jabril Exp $
 #
 # L #
 show_percent_box=on
@@ -15,3 +15,9 @@ aplot_box_bgcolor=verylightblue
 percent_box_bgcolor=verylightblue
 extra_box_bgcolor=verylightblue
 show_grid=on
+
+#
+# F #
+terminal::feature_shape=half_arrow
+internal::feature_shape=box
+first::feature_shape=half_arrow_end

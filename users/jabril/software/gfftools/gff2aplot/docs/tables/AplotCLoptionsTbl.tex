@@ -3,7 +3,7 @@
 %
 % Command-Line Options for "gff2aplot".
 %
-% # $Id: AplotCLoptionsTbl.tex,v 1.2 2001-09-06 18:33:36 jabril Exp $
+% # $Id: AplotCLoptionsTbl.tex,v 1.3 2002-02-01 19:14:14 jabril Exp $
 %
 % \newcommand{\op}[1]{\bfseries\sffamily #1}
 % \newcommand{\tp}[1]{'{\bfseries\sffamily #1}'}
@@ -30,28 +30,7 @@
 \footnotesize
 \fbox{
   \begin{tabular}{rl}
-\rw{-h{\x}-\/-help}{Shows this help.}
-\rw{-\/-version}{Shows current version and exits.}
-\rw{-v{\x}-\/-verbose}
-  {Verbose mode, a full report is sent to standard error.}
-\rw{-V{\x}-\/-logs-filename \pr{file}}
-  {Report is written to a log file.}
-\rw{-q{\x}-\/-quiet}
-  {Quiet mode, messages/warnings disabled (only ERRORS are reported)}
-\rw{-\/-feature-var '\pr{feature::variable=value}'}
-  {Set a feature customization variable from command-line.}
-\rw{-\/-group-var '\pr{group::variable=value}'}
-  {Set a group customization variable from command-line.}
-\rw{-\/-strand-var '\pr{strand::variable=value}'}
-  {Set a strand customization variable from command-line.}
-\rw{-\/-source-var '\pr{source::variable=value}'}
-  {Set a source customization variable from command-line.}
-\rw{-\/-sequence-var '\pr{sequence::variable=value}'}
-  {Set a sequence customization variable from command-line.}
-\rw{-\/-layout-var '\pr{variable=value}'}
-  {Set a layout customization variable from command-line.}
-\rw{-O{\x}-\/-custom-filename \pr{file}}
-  {Read customization parameters from file.}
+
   \end{tabular}
 } % fbox
 \vspace{0.5cm}
@@ -67,9 +46,9 @@
   A free text string, single or double-quoted \\[-0.5ex]
  &  if special chars or white-spaces/tabs are present respectively. \\
 \pa{format}    &
-  Page format, see available values on Appendix~\ref{tbl:PageSztbl} table. \\
+  Page format, see available values on Appendix~\ref{tbl:PageSizes} table. \\
 \pa{color}     &
-  A color name chosen from table on Appendix~\ref{tbl:CMYKcolortbl}. \\
+  A color name chosen from table on Appendix~\ref{tbl:CMYKcolor}. \\
 \pa{file}      &
   A valid file name (including path if necessary). \\
 NOTE:          &

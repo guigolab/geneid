@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
-# $Id: nw2tex,v 1.2 2001-09-06 18:33:35 jabril Exp $
+# $Id: nw2tex,v 1.3 2002-02-01 19:13:53 jabril Exp $
 #
 SECONDS=0 # Reset Timing
 # Which script are we running...
@@ -9,7 +9,9 @@ L="####################"
   echo "### RUNNING [$0]";
   echo "### Current date:`date`";
   echo "###"; } 1>&2;
-# weaving and LaTeXing
+#
+### weaving and LaTeXing
+#
 # Global Variables
 WORK="$HOME/development/softjabril/gfftools/gff2aplot" ;
 BIN="$WORK/bin" ;
@@ -21,43 +23,18 @@ nwfile="gff2aplot" ;
 export WORK BIN PARAM DOCS DATA TEST nwfile ;
 # extracting complementary material 
 echo "Extracting \"$DOCS/defs.tex\"..." 1>&2 ;
-notangle -R"HIDE: LaTeX deploy new definitions" $WORK/$nwfile.nw | \
-         cpif $DOCS/defs.tmp  ;
-noweave -v -t4 -delay $DOCS/defs.tmp | cpif $DOCS/defs.tex ;
+notangle -R"HIDE: LaTeX aplot new definitions" $WORK/$nwfile.nw | \
+         noweave -v -t4 -delay - | cpif $DOCS/defs.tex ;
 echo "Extracting \"$DOCS/todo.tex\"..." 1>&2 ;
-notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tmp ; 
-noweave -v -t4 -delay $DOCS/todo.tmp | cpif $DOCS/todo.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw | \
+         noweave -v -t4 -delay - | cpif $DOCS/todo.tex ;
 echo "Extracting \"$DOCS/localrefs.bib\"..." 1>&2 ;
 notangle -R"HIDE: BiBTeX references" $WORK/$nwfile.nw | \
          cpif $DOCS/localrefs.bib ;
-echo "Extracting \"$DOCS/AplotCLoptions.tex\"..." 1>&2 ;
-notangle -R"LATEX command-line" $WORK/$nwfile.nw | \
-         cpif $DOCS/tables/AplotCLoptions.tex ;
-echo "Extracting \"$DOCS/AplotCLoptionsTbl.tex\"..." ;
-notangle -R"LATEX command-line table" $WORK/$nwfile.nw | \
-         cpif $DOCS/tables/AplotCLoptionsTbl.tex ;
-echo "Extracting \"$DOCS/AplotCustomVars.tex\"..." 1>&2 ;
-notangle -R"LATEX custom-vars" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotCustomVars.tex ;
-echo "Extracting \"$DOCS/AplotCustomVarsTbl.tex\"..." 1>&2 ;
-notangle -R"LATEX custom-vars table" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotCustomVarsTbl.tex ;
-echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
-notangle -R"LATEX cmyk colors" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotColorDefs.tex ;
-echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." 1>&2 ;
-notangle -R"LATEX colors table" $WORK/$nwfile.nw  | \
-         cpif $DOCS/tables/AplotColorTbl.tex ;
-echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." 1>&2 ;
-notangle -R"LATEX page format table" $WORK/$nwfile.nw | \
-         cpif $DOCS/tables/AplotPageSizeTbl.tex ;
-echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." 1>&2 ;
-notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
-         cpif $DOCS/tables/DataStructure_GFF.tex ;
 #
 # extracting main documentation
 echo "Weaving \"$DOCS/$nwfile.tex\"..." ;
-noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
+noweave -v -t4 -delay -index -filter 'elide "HIDE: *"' \
         $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 # LaTeXing 
 echo "LaTeXing \"$DOCS/$nwfile.tex\"..." ;

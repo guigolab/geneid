@@ -12,24 +12,43 @@ font symbol Symbol
 color koko 0.00 0.50 0.00 0.25
 
 #
-# box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> [ S:<line_style> [ W:<line_width> [ F:<fill_color> ] ] ] ]
+# box  <Xori> <Xend> <Yori> <Yend>
+#       [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ]
 
 box 500 1000 3500 4000 L:verydarkcyan S:dotted W:2pt F:cyan
 
 #
-# circle  <Cx> <Cy> <Rx> <Ry> [ A:<angle> [ L:<line_color> [ S:<line_style> [ W:<line_width>
-#        [ F:<fill_color> ] ] ] ] ]
+# circle  <Cx> <Cy> <Rx> <Ry>
+#       [ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ]
 
-circle 3500 500 400 250 A:35 S:dashed W:1 F:orange L:darkorange
-
-#
-# arrow  <Cx> <Cy> <length> [ A:<angle> [ L:<line_color> [ S:<line_style> [ W:<line_width> 
-#       [ F:<fill_color> [ N:<font_name> [ Z:<font_size> [ T:<text_color> [ "<string>" ] ] ] ] ] ] ] ] ]
-
-arrow 950 950 20pt A:125 N:my_arial Z:10pt T:red H:right V:bottom "alpha"
+circle 3500 500 400 250 A:35 S:dashed W:1 L:orange F:my_koko
+circle 1750 1750 200 200 S:long_dashed W:2pt L:limegreen
 
 #
-# text  <Cx> <Cy> [ N:<font_name> [ Z:<font_size> [ A:<angle> 
-#       [ H:<horizontal_align> [ V:<vertical_align> [ T:<text_color> ] ] ] ] ] ] "<string>"
+# arrow  <Cx> <Cy> <length>
+#       [ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] 
+#       [ N:<font_name> ] [ Z:<font_size> ]
+#       [ H:<horizontal_align> ] [ V:<vertical_align> ] [ T:<text_color> ] [ "<string>" ]
 
-text 2800 2800 H:left V:top "Hello World!!"
+arrow 950 950 1cm A:125 N:my_arial Z:10pt T:red H:center V:bottom "alpha" W:2.5pt
+arrow 2000 3000 1cm A:0 N:my_arial Z:10pt T:red "0deg" W:2.5pt
+arrow 2000 3000 2cm A:-75 N:my_arial Z:10pt T:red "-75deg" W:2.5pt
+arrow 2000 3000 2cm A:95 N:my_arial Z:10pt T:red "95deg" W:2.5pt
+arrow 2000 3000 2cm A:165 N:my_arial Z:10pt T:red "165deg" W:2.5pt
+arrow 2000 3000 3cm A:235 N:my_arial Z:10pt T:red "235deg" W:2.5pt
+
+#
+# text  <Cx> <Cy> "<string>"
+#       [ A:<angle> ] [ N:<font_name> ] [ Z:<font_size> ]
+#       [ H:<horizontal_align> ] [ V:<vertical_align> ] [ T:<text_color> ]
+
+text 2800 2300 H:left V:top Z:12pt N:helvetica-bold "Hello World!!"
+text 2800 2300 H:c V:c Z:5pt T:red N:helvetica "x"
+text 2700 1900 T:brown A:90 H:center V:center Z:12pt N:helvetica "Hello World!!"
+text 2700 1900 H:c V:c Z:5pt T:red N:helvetica "x"
+text 3300 1900 A:-90 H:center V:center Z:12pt N:helvetica-oblique T:skyblue "Hello World!!"
+text 3300 1900 H:c V:c Z:5pt T:red N:helvetica "x"
+text 3200 1500 A:180 H:left V:bottom Z:12pt T:cyan N:helvetica-boldoblique "Hello World!!"
+text 3200 1500 H:c V:c Z:5pt T:red N:helvetica "x"
+text 3000 1900 H:c V:c Z:10pt T:blue N:helvetica "Hello\nWorld!!"
+text 3000 1900 H:c V:c Z:5pt T:red N:helvetica "x"
