@@ -1,5 +1,5 @@
 %
-% $Id: description.tex,v 1.1 2002-03-14 21:20:05 jabril Exp $
+% $Id: description.tex,v 1.2 2002-03-15 08:33:54 jabril Exp $
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
@@ -28,7 +28,12 @@
 
 \sctn{Artícles Publicats}
 
-A continuació es presenta una llista dels articles publicats en els que entre els autors hi figura el doctorand. Primerament s'indica la pàgina d'aquest document on es poden veure inclosses les dues primeres pàgines de cada artícle, ja que donat l'extensió d'alguns d'ells s'ha cregut convenient que es poden obtenir a través de la seva referència bibliogràfica; ara bé, el doctorand pot entregar una separata dels mateixos si fòra necessari. S'han inclòs també les figures principals corresponents a algun dels artícles per destacar la feina en la que es va participar, aquestes figures estan escalades a la mida de la pàgina amb el que no es pot apreciar el detall de les mateixes, encara que es poden recuperar a través de la referència bibliogràfica corresponent.\\[1ex]
+A continuació es presenta una llista dels articles publicats en els que entre els autors hi figura el doctorand. Primerament s'indica la pàgina d'aquest document on es poden veure inclosses les dues primeres pàgines de cada artícle, ja que donat l'extensió d'alguns d'ells s'ha cregut convenient que es poden obtenir a través de la seva referència bibliogràfica; ara bé, el doctorand pot entregar una separata dels mateixos si fòra necessari. S'han inclòs també les figures principals corresponents a algun dels artícles per destacar la feina en la que es va participar, aquestes figures estan escalades a la mida de la pàgina amb el que no es pot apreciar el detall de les mateixes, encara que es poden recuperar a través de la referència bibliogràfica corresponent.
+
+Es pot accedir a més informació sobre les publicacions, incloent-hi els seus abstracts, així com els pòsters presentats a congressos científics, amb el corresponent \textit{link} a la versió electrònica, des de la següent adreça d'internet:\\
+\centerline{\small\url|http://www1.imim.es/~jabril/index.html#PAPER|}
+\\[1ex]
+
 
 %\hspace{-1.25cm}
 %\begin{minipage}[t]{\linewidth}
@@ -57,7 +62,8 @@ A continuació es presenta una llista dels articles publicats en els que entre el
 \myitem{pag:gff2ps}
        {Visualitzant anotacions genòmiques amb el {\gps}}
        {abril:2000a}
-...
+Aquest programa genera a patir d'un conjunt d'anotacions genòmiques en format GFF\footnote{\label{fnt:gffformat}\url|http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml|} una figura en format {\ps} on es resumeix de manera molt intuitiva la informació. Els avantages de treballar amb aquest format de gràfics vectorials es poden resumir en els punts següents: és un format independent de dispossitiu, al ser de tipus vectorial els gràfics es poden ampliar i o reduir amb facilitat i permet treballar amb gran quantitat de dades de manera eficient.
+Malgrat que la seva publicació va ser a l'agost de l'any 2000, la primera versió operativa del programa ja era accessible a través d'internet des de principis de gener del mateix any, la qual cosa ens va permetre participar el la fase d'anotació del genoma de la mosca del vinagre (\textit{Drosophila melanogaster}). En les següents tres publicacions es va participar directament en la representació gràfica de les anotacions disponibles per a les corresponents seqüències genòmiques. A més, el programa està èssent utilitzat pel consorci públic que està seqüenciant i anotant el genoma de \textit{Dictyostelium discoideum}\footnote{\url|http://genome.imb-jena.de/dictyostelium/|}, els investigadors que estan desenvolupant el programa de predicció computacional de gens anomenat \texttt{Phat}\footnote{\url|http://stat-www.berkeley.edu/users/scawley/Phat/README.html|}, etcètera\ldots
 \moreinfo{
  \item Adreça a internet del programa: \\
        {\small\url|http://www1.imim.es/software/gfftools/GFF2PS.html|}
@@ -68,8 +74,10 @@ A continuació es presenta una llista dels articles publicats en els que entre el
 \myitem{pag:gasp}
        {Evaluant la anotació de la regió de 3Mbp \textit{Adh} a \textit{Drosophila melanogaster}}
        {reese:2000a}
-...
+En aquest artícle es comparaven alguns dels mètodes computacionals de predicció de gens amb la idea d'explorar la fiabilitat dels programes al treballar amb seqüències genòmiques d'organismes eucariotes. Els genomes eucariotes, a diferència dels procariotes, presenten la dificultat afegida de que la seva seqüència de DNA no codifica de manera contínua els gens i aquests a la seva vegada tampoc estan codificats de manera contínua, però a més, la distribució dels gens a llarg de la seqüència tampoc és uniforme, ni tan sols les longituts dels introns. Fins la publicació d'aquest article no es dispossava de seqüències llargues que continguessin múltiples gens i que haguès estat revisada amb cura per experts. Dotze grups, entre ells el nostre, van participar en el projecte d'avaluació d'anotacions genòmiques (GASP\footnote{http://www.fruitfly.org/GASP1/}) sobre un contig de 3Mbp del braç del cromosoma 2L de \textit{D. melanogaster}, la regió on es troba el gen de la \textit{Adh} i que conté uns 222 gens.
 \moreinfo{
+ \item La pàgina dedicada al pòster que es va presentar al ISMB'99: \\
+       {\small\url|http://www1.imim.es/software/gfftools/GFF2PS-ADHposter.html|}
  \item Versió electrònica del pòster, ``\textit{Drosophila} Genome Annotation Assessment Project''.\\
        {\small\url|http://www.genome.org/content/vol10/issue4/images/data/483/DC1/GR10n4_poster.zip|}
 } % moreinfo
@@ -77,7 +85,7 @@ A continuació es presenta una llista dels articles publicats en els que entre el
 \myitem{pag:drome}
        {Anàlisi del genoma de \textit{Drosophila melanogaster}}
        {adams:2000a}
-...
+Aquest artícle conté l'anàlisi de la primera versió ensamblada del genoma de \textit{D. melanogaster}, que van elaborar conjuntament el consorci públic de seqüenciació del genoma de la mosca, encapçalat pel \textit{Berkeley Drosophila Genome Project} de la universitat de Berkeley a Califòrnia (BDGP\footnote{\url|http://www.fruitfly.org/|}), i la empresa nordamericana Celera Genomics, dirigida pel Dr. Craig Venter. Va ser la proba de que el mètode de seqüenciació per fragments a l'atzar (\textit{shotgun sequencing}) era aplicable a genomes d'organismes eucariotes complexos, alhora que era el genoma més gran seqüenciat fins a la data, 120Mbp de seqüència repartits en 4 cromosomes. L'anàlisi computacional d'aquest genoma va revelar l'existència d'uns 13000 gens, que es van representar en la figura central d'aquest artícle (veieu la figura~\ref{fig:drome}, a la pàgina~\pageref{fig:drome} d'aquest informe). 
 \moreinfo{
  \item Versió electrònica de la figura 4, ``Coding content of the fly genome''.\\
        {\small\url|http://www.sciencemag.org/feature/data/genomes/2000/drosophila.shl|}
@@ -86,7 +94,7 @@ A continuació es presenta una llista dels articles publicats en els que entre el
 \myitem{pag:human}
        {Anàlisi del genoma humà}
        {venter:2001a}
-...
+El febrer del 2001 es van publicar de manera simultània els dos esborranys de la seqüència del genoma humà, l'un va aparèixer a la revista \textit{Nature} i estava signat pel consorci públic, mentre que l'altre ho feia a la revista \textit{Science} i venia signat per la empresa Celera Genomics. Donat que ja haviem col.laborat amb Celera en l'etapa d'anotació del genoma de \textit{D. melanogaster}, ens van oferir la oportunitat de poder treballar amb les dades del genoma humà de que disposaven. Va ser un repte, doncs el genoma humà, de 3Gbp, era 30 vegades més gran que el de la mosca del vinagre, es treballava amb uns 35000 gens i tota la informació adicional. Per complicar encara més les cosses, la seqüència del genoma humà tan sols codifica en un 1\%, la distribució dels gens al llarg de la seqüència dels cromosomes és molt variable així com la seva densitat (per exemple, el cromosoma 19 és un dels que té més gens per kilobase). Això ens va obligar a treballar amb dues escales, una per representar les regions on els gens mapaven sobre la seqüència dels cromosomes, i un altra, a mena d'expansions que es projectaven a partir d'aquelles regions, per poder visualitzar les estructures exòniques d'aquests gens. Alhora, es va haver de paralelitzar l'execució del programa {\gps} per poder obtenir esborranys de la figura en un temps raonable.
 \moreinfo{
  \item Versió electrònica de la figura 1, ``Annotation of the Celera Human Genome Assembly''.\\
        {\small\url|http://www.sciencemag.org/cgi/content/full/291/5507/1304/DC2|}
@@ -96,7 +104,10 @@ A continuació es presenta una llista dels articles publicats en els que entre el
 \myitem{pag:lseqs}
        {Fiabilitat dels programes de predicció computacional de gens en seqüències genòmiques}
        {guigo:2000c}
-...
+Donada la mancança de conjunts de dades per seqüències a escala genòmica, era necessari poder evaluar la fiabilitat i la precissió dels programes de predicció computacional de gens quan aquests s'enfrontèssin amb aquestes dades. Aquest punt és força important en quant que el primer resultat que en resulta de seqüenciar el genoma humà és el catàleg de gens codificats en la seva seqüència. Per que aquest conjunt de gens tingui una utilitat a nivell biomèdic ha de ser el més acurat i complet que es pugui. Es va treballar amb dos conjunts de dades: \\
+a) un extracte de la base de dades de seqüències EMBL, amb 178 seqüències genòmiques que contenien sencer un únic gen (i del qual es coneixien les coordenades del seu mRNA i dels exons que el composaven). La seva longitut mitjana era de 7Kbp.\\
+b) sobre un fons de seqüència generat a l'atzar per simular els espais intergènics es van combinar conjunts de les seqüències anteriors. La longitut mitjana d'aquests pseudo-BACs era d'uns 180Kbp.\\
+Els resultats suggerien que les eines de predicció computacional de gens a escala genòmica encara no són capaços de recuperar l'estructura exònica exacta de cadascun dels gens codificats en el genoma humà.  
 \moreinfo{
  \item El conjunt de seqüències de proba està disponible a: \\
        {\small\url|http://www1.imim.es/databases/gpeval2000/index.html|}
@@ -129,7 +140,7 @@ Per poder fer front als requeriments que sorgeixen de l'apartat anterior, ens ca
 \mylst{Artícles en preparació.}
 La feina que s'està duent a terme actualment es centra en la implementació de diferents programes per fer manipular i analitzar les dades d'origen genòmic, en concret:
  \begin{itemize} \renewcommand{\labelitemi}{\ding{227}}
-  \item {\aps}: visualitzant anotacions sobre alineaments de parells de seqüències (\textit{pairwise alignments}). A partir d'un o més fitxers en format GFF \footnote{\url|http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml|}, que contenen informació tant de la homologia entre parells de seqüències com de les anotacions per cadascuna de les seqüències, es genera un fitxer en {\ps}. Els principals avantatges respecte altres aplicacions actualment disponibles per visualitzar alineaments, sòn: que pot ser fàcilment incorporat en els programes que emprem per automatitzar tasques ---donat que treballem amb el format GFF per intercanviar dades entre diferents tasques---, que pot incorporar molta informació sobre les anotacions de les seqüències analitzades i per la gran qualitat que ens proporcionen els gràfics vectorials amb format {\ps}.
+  \item {\aps}: visualitzant anotacions sobre alineaments de parells de seqüències (\textit{pairwise alignments}). A partir d'un o més fitxers en format GFF\footnote{Veieu la nota a peu de pàgina número~\ref{fnt:gffformat}}, que contenen informació tant de la homologia entre parells de seqüències com de les anotacions per cadascuna de les seqüències, es genera un fitxer en {\ps}. Els principals avantatges respecte altres aplicacions actualment disponibles per visualitzar alineaments, sòn: que pot ser fàcilment incorporat en els programes que emprem per automatitzar tasques ---donat que treballem amb el format GFF per intercanviar dades entre diferents tasques---, que pot incorporar molta informació sobre les anotacions de les seqüències analitzades i per la gran qualitat que ens proporcionen els gràfics vectorials amb format {\ps}.
   \item {\sgp}: de \textit{Syntenic Gene Prediction tool}, aquesta eina combina la informació de la homologia entre seqüències de dues espècies que s'obté amb el programa {\tbx} ---que forma part de la aplicació {\bl} desenvolupada a Washington University\footnote{\bibentry{altschul:1990a}}---, amb els algoritmes de predicció computacional de gens que implementa el programa {\gnid}\footnote{\bibentry{guigo:1992a}}\raisebox{0.85ex}{\footnotesize ,}\footnote{\bibentry{parra:2000a}}. La seva potència es basa en millorar la puntuació dels exons predits que solapen regions conservades (els anomenats HSPs o \textit{High-scoring Segment Pairs}), tot i projectant la puntuació d'aquestes per aprofitar la seva informació, afegir aquestes puntuacions a les calculades pel {\gnid} per cada exò abans d'agrupar-los dintre d'estructures gèniques.
  \end{itemize}
 Un cop tinguem versions plenament operatives de tots dos programes, s'enviarà per la seva publicació un artícle per cadascun d'ells. Tots dos artícles estan en aquests moments en fase de preparació; en el cas del {\sgp} l'artícle corresponent detallarà els algoritmes i els paràmetres amb els que haurem treballat sobre els conjunts de seqüències de proba. 
