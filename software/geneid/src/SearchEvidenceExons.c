@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SearchEvidenceExons.c,v 1.3 2001-02-13 17:42:47 eblanco Exp $  */
+/*  $Id: SearchEvidenceExons.c,v 1.4 2001-02-14 14:47:04 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -35,7 +35,7 @@ long SearchEvidenceExons(packEvidence* pv, long l2)
   
   /* Evidences with acceptor higher than l2 will be always ignored */
   i = pv->i1vExons;
-  while ((i < pv->nvExons) && ((pv->vExons+i)->Acceptor->Position) <= l2+COFFSET)
+  while ((i < pv->nvExons) && ((pv->vExons+i)->Acceptor->Position) <= l2)
     i++;
     
   pv->i2vExons = i;
