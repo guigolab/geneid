@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.1 2000-07-05 08:34:03 eblanco Exp $  */
+/*  $Id: genamic.c,v 1.2 2000-07-11 08:54:10 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -45,7 +45,7 @@ void genamic(exonGFF *E, long nExons, packGenes* pg, gparam* gp)
   printMess("Running Genamic ...");
 
   /* geneid sends this set of exonsGFF */
-  sprintf(mess,"%ld exons GFF sent by geneId\n",nExons);
+  sprintf(mess,"%ld exons GFF sent by geneid\n",nExons);
   printMess(mess);
 
   /* Frame and remainder of reverse-strand exons must be exchanged */
