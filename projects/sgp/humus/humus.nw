@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.12 2002-04-04 12:35:57 jabril Exp $ 
+% # $Id: humus.nw,v 1.13 2002-04-05 19:04:47 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.12 2002-04-04 12:35:57 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.13 2002-04-05 19:04:47 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -363,8 +363,8 @@ CHR_c
              JOBDIR ($CHRDIR/$JOB/$XID),
              IDIR, ODIR, EDIR, ...
            > build directories: 
-             CheckDirs ODIR;
-             [EDIR != ODIR] && CheckDirs EDIR
+             MkDirs ODIR;
+             [EDIR != ODIR] && MkDirs EDIR
            > current step (use STEP_ID ?)
         - Report start status to DB execution table 
         - Launch $$ script to local/remote machine
@@ -500,7 +500,7 @@ $MySQLPAR/admin_db_Hsapiens.pl ;
 #
 # HUMUS="$BASE/H.sapiens" -> .project_VARS
 #
-CheckDirs $HUMUS/.ftp $HUMUS/.ftp/PankajAgarwal
+MkDirs $HUMUS/.ftp $HUMUS/.ftp/PankajAgarwal
 #
 @
  
@@ -525,8 +525,8 @@ CHRLIST="22" ;
 for n in $CHRLIST;
   do {
        chrdir="$HUMUS/chr$n" ;
-       CheckDirs $chrdir ;
-       CheckDirs $chrdir/fasta $chrdir/annotation $chrdir/masking \
+       MkDirs $chrdir ;
+       MkDirs $chrdir/fasta $chrdir/annotation $chrdir/masking \
                  $chrdir/tblastx $chrdir/geneid $chrdir/sgp ;
      };
   done ;
@@ -537,7 +537,7 @@ XID="20020122";
 #
 IDIR="$HSAP/database" ;
 ODIR="$HUMUS/$CHR/annotation/$HSAPID" ;
-CheckDirs $ODIR $ODIR/refseq $ODIR/genscan $ODIR/ensembl $ODIR/gaps $ODIR/repeats ;
+MkDirs $ODIR $ODIR/refseq $ODIR/genscan $ODIR/ensembl $ODIR/gaps $ODIR/repeats ;
 #
 @
 
@@ -629,13 +629,14 @@ perl -e '
 #># STEP_PATH .
 #># STEP_XID  $<JOB{.}{JOB_XID}>
 #># STEP_IDIR $HUMUS
-#># STEP_ODIR $CHRDIR
-#># STEP_EDIR $CHRDIR
+#># STEP_ODIR $JOBDIR
+#># STEP_EDIR $JOBDIR
 #># STEP_CODE   --------------------------------------------------------------#<#
-gawk 'BEGIN{ chrom="\^"$ARGV[1]"\$"; $ARGV[1]=""; }
+CheckFile R $IDIR/seqid_list ;
+gawk 'BEGIN{ chrom="\^"ARGV[1]"\$"; ARGV[1]=""; }
       $1 ~ chrom { print $0; }
-     ' $CHR $IDIR/seqid_list > $ODIR/desc ;
-gawk '{ print $2, $3; }' $ODIR/desc > $ODIR/length ;
+     ' $CHR $IDIR/seqid_list > $ODIR/desc || TheEnd GAWKKO ;
+gawk '{ print $2, $3; }' $ODIR/desc > $ODIR/length || TheEnd GAWKKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -656,13 +657,14 @@ gawk '{ print $2, $3; }' $ODIR/desc > $ODIR/length ;
 #
 #<# IDIR="$HSAP/database" ;
 #<# ODIR="$HUMUS/$NCHR/annotation/$HSAPID/refseq" ;
-#<# CheckDirs $ODIR $EDIR ;
+#<# MkDirs $ODIR $EDIR ;
+CheckFile R $IDIR/refGene.txt ;
 $BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
                $SEQ refseq $IDIR/refGene.txt \
              > $ODIR/$SEQ.fullgff \
-            2> $EDIR.report       ;
+            2> $EDIR/$SEQ.report  || TheEnd PERLKO ;
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
-               $ODIR/$SEQ.fullgff > $ODIR/$SEQ.gff ;
+               $ODIR/$SEQ.fullgff > $ODIR/$SEQ.gff || TheEnd GAWKKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -681,14 +683,15 @@ gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
 #
 #<# IDIR="$HSAP/database" ;
 #<# ODIR="$HUMUS/$NCHR/annotation/$HSAPID" ;
-#<# CheckDirs $ODIR $EDIR ;
+#<# MkDirs $ODIR $EDIR ;
+CheckFile R $IDIR/ensGene.txt ;
 $BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
                $SEQ ensembl $IDIR/ensGene.txt \
              > $ODIR/$SEQ.fullgff \
-            2> $EDIR.report       ;
+            2> $EDIR/$SEQ.report  || TheEnd PERLKO ;
 #
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
-               $ODIR/$SEQ.fullgff > $ODIR/$SEQ.gff ;
+               $ODIR/$SEQ.fullgff > $ODIR/$SEQ.gff || TheEnd GAWKKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -741,7 +744,8 @@ function pre_eval {
 #
 #<# IDIR="$HSAP/database" ;
 #<# ODIR="$HUMUS/$NCHR/annotation/$HSAPID/gaps" ;
-#<# CheckDirs $ODIR ;
+#<# MkDirs $ODIR ;
+CheckFile R $IDIR/${SEQ}_gap.txt ;
 perl -e '
   ($seq,$ori,$end,$char,$size,$type) = (1,2,3,5,6,7);
   $n = 1;
@@ -755,8 +759,8 @@ perl -e '
                               @l[$ori,$end],".",".",".",
             $l[$type].".".($n++)." # $l[$type]\: $l[$size]bp ($l[$char])\n");
   }; # while   
-  ' < $IDIR/${CHR}_gap.txt \
-    > $ODIR/${CHR}.gff ;
+  ' < $IDIR/${SEQ}_gap.txt \
+    > $ODIR/${SEQ}.gff || TheEnd PERLKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -775,7 +779,8 @@ perl -e '
 #
 #<# IDIR="$HSAP/database" ;
 #<# ODIR="$HUMUS/$NCHR/annotation/$HSAPID/repeats" ;
-#<# CheckDirs $ODIR ;
+#<# MkDirs $ODIR ;
+CheckFile R $IDIR/${SEQ}_rmsk.txt ;
 perl -e '
   ($sco,$seq,$ori,$end,$str,$name,$class,$fam) = (1,5,6,7,9,10,11,12);
   $n = 1;
@@ -788,8 +793,8 @@ perl -e '
                               @l[$ori,$end,$sco,$str],".",
                               $l[$class].".".($n++))." # @l[$name,$fam]\n";
   }; # while 
-  ' < $IDIR/${CHR}_rmsk.txt \
-    > $ODIR/${CHR}.gff ;
+  ' < $IDIR/${SEQ}_rmsk.txt \
+    > $ODIR/${SEQ}.gff || TheEnd PERLKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -810,13 +815,14 @@ perl -e '
 #
 #<# IDIR="$HSAP/database" ;
 #<# ODIR="$HUMUS/$NCHR/annotation/$HSAPID/genscan" ;
-#<# CheckDirs $ODIR ;
+#<# MkDirs $ODIR ;
+CheckFile R $IDIR/genscan.txt ;
 $BIN/gp2gff.pl --no-overlap --exonori-nuclfix 1 -- \
                $SEQ genscan $IDIR/genscan.txt \
              > $ODIR/$SEQ.fullgff \
-            2> $EDIR.report       ;
+            2> $EDIR/$SEQ.report  || TheEnd PERLKO ;
 gawk '$3~/^(Single|First|Internal|Terminal)$/ {print $0}' \
-               $ODIR/$SEQ.fullgff > $ODIR/$SEQ.gff ;
+               $ODIR/$SEQ.fullgff > $ODIR/$SEQ.gff || TheEnd GAWKKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -980,10 +986,11 @@ warnings  cpus=4  ctxfactor=36.0
 #
 #<# IDIR="$HUMUS/.ftp/PankajAgarwal/20020111.tbxPhusion" ;
 #<# ODIR="$HUMUS/$NCHR/tblastx/$XID/ori" ;
-#<# CheckDirs $ODIR ;
-mega "cp -v" $IDIR "^${CHR}_" $ODIR ;
+#<# MkDirs $ODIR ;
+MkDirs $ODIR/$SEQ ;
+mega "cp -v" $IDIR "^${SEQ}_" $ODIR/$SEQ || TheEnd FUNCKO;
 #
-$BIN/sbp_checkblastout.pl $SEQ $ODIR > $ODIR/ori.report ;
+$BIN/sbp_checkblastout.pl $SEQ $ODIR/$SEQ > $ODIR/$SEQ.report || TheEnd PERLKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -1017,20 +1024,20 @@ We had to deal with the frame issue of the HSPs fragments; once the HSP coords w
 #
 #<# IDIR="$HUMUS/$NCHR/tblastx/$XID/ori" ;
 #<# ODIR="$HUMUS/$NCHR/tblastx/$XID/hsp" ;
-#<# CheckDirs $ODIR ;
+#<# MkDirs $ODIR ;
 #<# LEN="$HUMUS/$NCHR/annotation/$HSAPID/length" ;
 LEN="$CHRDIR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/length" ;
 #
-$BIN/sbp_blast2gff.pl $SEQ $LEN $IDIR \
-         > $ODIR/$SEQ.fullgff 2> $ODIR.report ;
+$BIN/sbp_blast2gff.pl $SEQ $LEN $IDIR/$SEQ \
+         > $ODIR/$SEQ.fullgff 2> $EDIR/$SEQ.report || TheEnd PERLKO ;
 #
-perl -ne '/^#/o && next;
+( perl -ne '/^#/o && next;
           /^\s+$/o && next; 
           $_ =~ s/;\s+Strand//o; 
           $_ =~ s/;\s+Frame//o; 
           $_ =~ s/;\s+E_value.*$//o;
           print STDOUT $_;' $ODIR/$SEQ.fullgff | \
-          sort +3n -6 +6 -7 - > $ODIR/$SEQ.gff ;
+          sort +3n -6 +6 -7 - > $ODIR/$SEQ.gff ) || TheEnd PERLKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -1055,8 +1062,9 @@ perl -ne '/^#/o && next;
 #
 #<# IDIR="$HUMUS/$NCHR/tblastx/$XID/hsp" ;
 #<# ODIR="$HUMUS/$NCHR/tblastx/$XID/sr" ;
-#<# CheckDirs $ODIR ;
-$BIN/blast2gff -g $IDIR/$SEQ.gff > $ODIR/$SEQ.gff ;
+#<# MkDirs $ODIR ;
+CheckFile R $IDIR/$SEQ.gff ;
+$BIN/blast2gff -g $IDIR/$SEQ.gff > $ODIR/$SEQ.gff || TheEnd CKO ;
 #
 gawk '
   BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
@@ -1068,7 +1076,7 @@ gawk '
       printf "#  \t%s : %s\n", i, a[i];
     };
   }
-' $SEQ $ODIR/$SEQ.gff > $ODIR.report ;
+' $SEQ $ODIR/$SEQ.gff > $EDIR/$SEQ.report || TheEnd GAWKKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -1130,21 +1138,32 @@ gawk '
 @ 
 
 <<JOBS: Running GENEID standard>>=
+<<STEPS(geneid): Initialization>>
 <<STEPS(geneid std): Running geneid on raw sequences>>
 <<STEPS(geneid std): Processing geneid output>>
 <<STEPS(geneid std): Evaluating geneid results>>
 @ 
 
-<<GENEID: >>=
+<<STEPS(geneid): Initialization>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   GENEID_INITIALIZE
+#># STEP_DESC Preparing subdirectories for geneid results.
+#># STEP_PATH .
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR .
+#># STEP_ODIR $JOBDIR
+#># STEP_EDIR $JOBDIR
+#># STEP_CODE   --------------------------------------------------------------#<
 #
-# Initialization
-# 
-ODIR="$HUMUS/$NCHR/geneid/$XID" ;
+#<# ODIR="$HUMUS/$NCHR/geneid/$XID" ; MkDirs $ODIR ;
 #
-CheckDirs $ODIR ;
-for c in hsp-sr out gff gtf2 cds prot logs tmp ;
-    do { CheckDirs $ODIR/$c ; } ; done ;
+( for c in out gff gtf2 cds prot logs tmp ;
+    do {
+      MkDirs $ODIR/$c ;
+      } ;
+    done ) || TheEnd BASHKO ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 
 \subsubsctn{Running {\gnid} (without homology)}
@@ -1157,28 +1176,28 @@ for c in hsp-sr out gff gtf2 cds prot logs tmp ;
 #>#         : Golden Path assembly.
 #># STEP_PATH out
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/geneid/$XID
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
-#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/logs
 #># STEP_CODE   --------------------------------------------------------------#<#
-#
 #<# 
 GENEID="$SRC/geneid_v1.1/bin/geneid" ; # geneid v1.1
 PARAM="$SRC/geneid_v1.1/param/human3iso.param" ;
 EW=0 ; # add to exon weigth
 #
-# ISEQ="$HSAP/chromFaMasked/$CHRNUM/$SEQ.fa.masked" ; 
+#<# ISEQ="$HSAP/chromFaMasked/$CHRNUM/$SEQ.fa.masked" ; 
+#<# IDIR="$HUMUS/$NCHR/geneid/$XID/" ;
+#<# ODIR="$HUMUS/$NCHR/geneid/$XID/out" ;
 #--> we do not run geneid on masked sequences at this moment
 #--> we are using original un-masked fasta sequences from GP
 ISEQ="$HSAP/chromosomes/$SEQ.fa" ;
-IDIR="$HUMUS/$NCHR/geneid/$XID/" ;
-# ODIR="$HUMUS/$NCHR/geneid/$XID/out" ;
 #
-# {
-  { $GENEID -v -DE $EW -P $PARAM $ISEQ | grep -v evidence \
-        > $IDIR/out/$SEQ ;
-  } 2> $IDIR/logs/$SEQ ;
-#   } 2>&1 | tee $HUMUS/logs/geneid_sgp.$locus ;
+CheckFile R $PARAM $ISEQ ;
+#
+{ ( $GENEID -v -DE $EW -P $PARAM $ISEQ \
+            || TheEnd CKO ) |          \
+  grep -v 'evidence' > $ODIR/$SEQ ;
+  } 2>&1 | tee $EDIR/$SEQ.geneid 1>&2 ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -1195,23 +1214,25 @@ IDIR="$HUMUS/$NCHR/geneid/$XID/" ;
 #># STEP_DESC Processing geneid format from geneid output (without homology).
 #># STEP_PATH gff
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/geneid/$XID
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
 #
 #<# IDIR="$HUMUS/$NCHR/geneid/$XID" ;
 #
-geneid_raw2GFF $IDIR $IDIR/out/$SEQ ;
+CheckFile R $IDIR/out/$SEQ ;
 #
-ls -1 $IDIR/gff/ | egrep "^$SEQ" | \
-  while read n;
-    do {
-         cat $IDIR/gff/$n;
-       };
-    done | sort +3n +4n -5 - > $IDIR/gff/$SEQ ;
+geneid_raw2GFF $IDIR $IDIR/out/$SEQ || TheEnd FUNCKO ;
 #
-get_geneid_genes $IDIR/gff/$SEQ > $IDIR/out.gene_list ;
+( ls -1 $IDIR/gff/ | egrep "^$SEQ" | \
+    while read n;
+      do {
+        cat $IDIR/gff/$n;
+        };
+      done | sort +3n +4n -5 - > $IDIR/gff/$SEQ ) || TheEnd BASHKO ;
+#
+get_geneid_genes $IDIR/gff/$SEQ > $IDIR/$SEQ.gene_list || TheEnd FUNCKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -1230,7 +1251,7 @@ get_geneid_genes $IDIR/gff/$SEQ > $IDIR/out.gene_list ;
 #># STEP_DESC Evaluation of geneid predictions (without homology).
 #># STEP_PATH evaluation
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/geneid/$XID
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -1240,7 +1261,8 @@ get_geneid_genes $IDIR/gff/$SEQ > $IDIR/out.gene_list ;
 # run_evaluation #chrom program param       prog_results_dir \
 #                annotation_dir           testset  lenght
 run_evaluation   $SEQ   geneid  $XID \
-   $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo 47662662;
+   $ANALYSIS/geneid $DATASETS/annotation/set/pseudo VH_pseudo 47662662 \
+   || TheEnd CKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -1274,23 +1296,33 @@ run_evaluation   $SEQ   geneid  $XID \
 @ 
 
 <<JOBS: SGP with HSAPgpa x MMUSpha homology>>=
-<<STEPS(SGP HSAPgpa x MMUSpha): Re-scoring SRs>>
+<<STEPS(SGP): Initialization>>
 <<STEPS(SGP HSAPgpa x MMUSpha): Auxiliarly files>>
 <<STEPS(SGP HSAPgpa x MMUSpha): Running SGP>>
 <<STEPS(SGP HSAPgpa x MMUSpha): Processing SGP results>>
 <<STEPS(SGP HSAPgpa x MMUSpha): Evaluating SGP results>>
 @ 
 
-<<SGP: >>=
+<<STEPS(SGP): Initialization>>=
+####>#########>#######################<########################################<#
+#># STEP_ID   SGP_INITIALIZE
+#># STEP_DESC Preparing subdirectories for sgp results.
+#># STEP_PATH .
+#># STEP_XID  $<JOB{.}{JOB_XID}>
+#># STEP_IDIR .
+#># STEP_ODIR $JOBDIR
+#># STEP_EDIR $JOBDIR
+#># STEP_CODE   --------------------------------------------------------------#<
 #
-# Initialization
-# 
-ODIR="$HUMUS/$NCHR/sgp/$XID" ;
+#<# ODIR="$HUMUS/$NCHR/sgp/$XID" ; MkDirs $ODIR ;
 #
-CheckDirs $ODIR ;
-for c in hsp-sr out gff gtf2 cds prot logs tmp ;
-    do { ChckDirs $ODIR/$c ; } ; done ;
+( for c in out gff gtf2 cds prot hsp-sr logs tmp ;
+    do { 
+      MkDirs $ODIR/$c ;
+      } ;
+    done ) || TheEnd BASHKO ;
 #
+#># END_OF_STEP --------------------------------------------------------------#<#
 @
 
 \subsubsctn{Re-scoring SRs}
@@ -1302,15 +1334,17 @@ for c in hsp-sr out gff gtf2 cds prot logs tmp ;
 #>#         : (Hsapiens GP assembly against Mmusculus Phusion assembly).
 #># STEP_PATH hsp-sr
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/tblastx/$XID/sr
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{HSAPgpa_MMUSpha_WUTBLASTX}{JOB_PATH}>/$<JOB{HSAPgpa_MMUSpha_WUTBLASTX}{JOB_XID}>/$<JOB{HSAPgpa_MMUSpha_WUTBLASTX}{PROJECTING_HSPs}{STEP_PATH}>
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
 #
-#<# IDIR="$HUMUS/$NCHR/tblastx/$XID/sr" ;
+#<# IDIR="$HUMUS/$NCHR/$<JOB{HSAPgpa_MMUSpha_WUTBLASTX}{JOB_PATH}>/$XID/sr" ;
 #<# ODIR="$HUMUS/$NCHR/sgp/$XID/hsp-sr" ;
 #
-$BIN/getHSPSR.pl $SEQ < $IDIR/$SEQ.gff > $ODIR/$SEQ.gff 2> $ODIR.report ;
+CheckFile R $IDIR/$SEQ.gff ;
+$BIN/getHSPSR.pl $SEQ < $IDIR/$SEQ.gff \
+                      > $ODIR/$SEQ.gff 2> $EDIR/$SEQ.report || TheEnd PERLKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -1328,7 +1362,7 @@ $BIN/getHSPSR.pl $SEQ < $IDIR/$SEQ.gff > $ODIR/$SEQ.gff 2> $ODIR.report ;
 #># STEP_DESC Preparing auxiliarly files: CHR.termini
 #># STEP_PATH tmp
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/tblastx/$XID/sr
+#># STEP_IDIR .
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -1336,6 +1370,8 @@ $BIN/getHSPSR.pl $SEQ < $IDIR/$SEQ.gff > $ODIR/$SEQ.gff 2> $ODIR.report ;
 #<# ODIR="$HUMUS/$NCHR/sgp/$XID/tmp" ;
 #<# LEN="$HUMUS/$NCHR/annotation/$HSAPID/length" ;
 LEN="$CHRDIR/$<JOB{HSAP_GP_ANNOTATION}{JOB_PATH}>/$<JOB{HSAP_GP_ANNOTATION}{JOB_XID}>/length" ;
+#
+CheckFile R $LEN ;
 #
 perl -e '
   use strict;
@@ -1354,7 +1390,7 @@ perl -e '
   print STDOUT join("\t", $chr, qw/ force cap  -2  0 . + 0 / )."\n";
   print STDOUT join("\t", $chr, qw/ force poly /,
                         ($SEQlen{$chr} - 1) x 2, qw/ . + 0/ )."\n";
-' $SEQ $LEN > $ODIR/$SEQ.termini ;
+' $SEQ $LEN > $ODIR/$SEQ.termini || TheEnd PERLKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -1373,9 +1409,9 @@ perl -e '
 #>#         : with homology evidences taken from Mmusculus Phusion assembly.
 #># STEP_PATH out
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/sgp/$XID/
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
-#># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
+#># STEP_EDIR $JOBDIR/logs
 #># STEP_CODE   --------------------------------------------------------------#<#
 #
 #<# 
@@ -1384,20 +1420,39 @@ GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
 PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
 EW=0 ; # add to exon weigth
 #
-# ISEQ="$HSAP/chromFaMasked/$CHRNUM/$SEQ.fa.masked" ; 
+#<# ISEQ="$HSAP/chromFaMasked/$CHRNUM/$SEQ.fa.masked" ; 
+#<# IDIR="$HUMUS/$NCHR/sgp/$XID/" ;
+#<# ODIR="$HUMUS/$NCHR/sgp/$XID/out" ;
 #--> we do not run geneid on masked sequences at this moment
 #--> we are using original un-masked fasta sequences from GP
 ISEQ="$HSAP/chromosomes/$SEQ.fa" ;
-IDIR="$HUMUS/$NCHR/sgp/$XID/" ;
-# ODIR="$HUMUS/$NCHR/sgp/$XID/out" ;
-HOMOLOGY="$HUMUS/$NCHR/sgp/$XID/hsp-sr/$SEQ.gff" ;
 #
-# {
-  { $GENEID -v -DE $EW -P $PARAM -S $HOMOLOGY \
-        -R $IDIR/tmp/$SEQ.termini $ISEQ | grep -v evidence \
-        > $IDIR/out/$SEQ ;
-  } 2> $IDIR/logs/$SEQ ;
-#   } 2>&1 | tee $HUMUS/logs/geneid_sgp.$locus ;
+HOMOLOGY="$HUMUS/$NCHR/sgp/$XID/hsp-sr/$SEQ.gff" ;
+if [ -f "$HOMOLOGY" ] ;
+  then
+    echo "### Using homology data from: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="-S $HOMOLOGY" ;
+  else
+    echo "### Homology file NOT found: $HOMOLOGY" 1>&2 ;
+    HOMOLOGY_PAR="" ;
+  fi ;
+#
+TERMINI="$IDIR/tmp/$SEQ.termini" ;
+if [ -f "$TERMINI" ] ;
+  then
+    echo "### Using termini file: $TERMINI" 1>&2 ;
+    TERMINI_PAR="$TERMINI" ;
+  else
+    TERMINI_PAR="" ;
+  fi ;
+#
+CheckFile R $PARAM $ISEQ ;
+#
+{ ( $GENEID -v -DE $EW -P $PARAM             \
+            $HOMOLOGY_PAR $TERMINI_PAR $ISEQ \
+            || TheEnd CKO ) |                \
+  grep -v 'evidence' > $ODIR/$SEQ ;
+  } 2>&1 | tee $EDIR/$SEQ.geneid 1>&2 ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @ 
@@ -1414,23 +1469,25 @@ HOMOLOGY="$HUMUS/$NCHR/sgp/$XID/hsp-sr/$SEQ.gff" ;
 #># STEP_DESC Processing geneid format from sgp output (with homology).
 #># STEP_PATH gff
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/geneid/$XID
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
 #
 #<# IDIR="$HUMUS/$NCHR/sgp/$XID" ;
 #
-geneid_raw2GFF $IDIR $IDIR/out/$SEQ ;
+CheckFile R $IDIR/out/$SEQ ;
 #
-ls -1 $IDIR/gff/ | egrep "^$SEQ" | \
-  while read n;
-    do {
-         cat $IDIR/gff/$n;
-       };
-    done | sort +3n +4n -5 - > $IDIR/gff/$SEQ ;
+geneid_raw2GFF $IDIR $IDIR/out/$SEQ || TheEnd FUNCKO ;
 #
-get_geneid_genes $IDIR/gff/$SEQ > $IDIR/out.gene_list ;
+( ls -1 $IDIR/gff/ | egrep "^$SEQ" | \
+    while read n;
+      do {
+        cat $IDIR/gff/$n;
+        };
+      done | sort +3n +4n -5 - > $IDIR/gff/$SEQ ) || TheEnd BASHKO ;
+#
+get_geneid_genes $IDIR/gff/$SEQ > $IDIR/$SEQ.gene_list || TheEnd FUNCKO ;
 #
 #># END_OF_STEP --------------------------------------------------------------#<#
 @
@@ -1449,7 +1506,7 @@ get_geneid_genes $IDIR/gff/$SEQ > $IDIR/out.gene_list ;
 #># STEP_DESC Evaluation of SGP predictions (geneid with homology).
 #># STEP_PATH evaluation
 #># STEP_XID  $<JOB{.}{JOB_XID}>
-#># STEP_IDIR $HUMUS/$NCHR/geneid/$XID
+#># STEP_IDIR $HUMUS/$NCHR/$<JOB{.}{JOB_PATH}>/$XID
 #># STEP_ODIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_EDIR $JOBDIR/$<STEP{.}{.}{STEP_PATH}>
 #># STEP_CODE   --------------------------------------------------------------#<#
@@ -1508,8 +1565,8 @@ CHRLIST="22" ;
 for n in $CHRLIST;
   do {
        chrdir="$HUMUS/chr$n" ;
-       CheckDirs $chrdir ;
-       CheckDirs $chrdir/tblastx+ $chrdir/sgp+ ;
+       MkDirs $chrdir ;
+       MkDirs $chrdir/tblastx+ $chrdir/sgp+ ;
      };
   done ;
 #
@@ -1701,11 +1758,11 @@ warnings  cpus=4  ctxfactor=36.0
 IDIR="$HUMUS/.ftp/PankajAgarwal/20020212.genes-masked+tbxPhusion" ;
 ODIR="$HUMUS/$NCHR/tblastx+/$XID" ;
 #
-CheckDirs $ODIR $ODIR/ori ;
+MkDirs $ODIR $ODIR/ori ;
 #
 mv -v $IDIR/${CHR}* $ODIR/ori ;
 #
-$BIN/sbp_checkblastout.pl $SEQ $ODIR/ori > $ODIR/ori.report ;
+$BIN/sbp_checkblastout.pl $SEQ $ODIR/ori > $ODIR/ori/$SEQ.report ;
 #
 @ 
 
@@ -1719,10 +1776,10 @@ IDIR="$HUMUS/$NCHR/tblastx+/$XID/ori" ;
 ODIR="$HUMUS/$NCHR/tblastx+/$XID/hsp" ;
 SDIR="$HUMUS/$NCHR/annotation" ;
 #
-CheckDirs $ODIR ;
+MkDirs $ODIR ;
 #
 $BIN/sbp_blast2gff.pl $SEQ $SDIR/$HSAPID/length $IDIR \
-         > $ODIR/$SEQ.fullgff 2> $ODIR.report ;
+         > $ODIR/$SEQ.fullgff 2> $ODIR/$SEQ.report ;
 #
 perl -ne '/^#/o && next; /^\s+$/o && next; 
           $_ =~ s/;\s+Strand//o; 
@@ -1756,7 +1813,7 @@ cat $IDIR/$SEQ.gff $ODIR/$SEQ.gff |  \
 IDIR="$HUMUS/$NCHR/tblastx+/$XID/hsp" ;
 ODIR="$HUMUS/$NCHR/tblastx+/$XID/sr" ;
 #
-CheckDirs $ODIR ;
+MkDirs $ODIR ;
 #
 BLAST2GFF="/projects/bin/blast2gff";
 $BLAST2GFF -g $IDIR/$SEQ.gff > $ODIR/$SEQ.gff ;
@@ -1772,7 +1829,7 @@ gawk '
       printf "#  \t%s : %s\n", i, a[i];
     };
   }
-' $SEQ $ODIR/$SEQ.gff > $ODIR.report ;
+' $SEQ $ODIR/$SEQ.gff > $ODIR/$SEQ.report ;
 #
 gawk '
   BEGIN{ chr=ARGV[1]; ARGV[1]=""; }
@@ -1784,7 +1841,7 @@ gawk '
       printf "#  \t%s : %s\n", i, a[i];
     };
   }
-' $SEQ $ODIR/$SEQ.merged.gff > $ODIR.merged.report ;
+' $SEQ $ODIR/$SEQ.merged.gff > $ODIR/$SEQ.merged.report ;
 #
 @
 
@@ -1796,9 +1853,9 @@ gawk '
 # 
 ODIR="$HUMUS/$NCHR/sgp+/$XID" ;
 #
-CheckDirs $ODIR ;
+MkDirs $ODIR ;
 for c in hsp-sr out gff gtf2 cds prot logs tmp ;
-    do { CheckDirs $ODIR/$c ; } ; done ;
+    do { MkDirs $ODIR/$c ; } ; done ;
 #
 @
 
@@ -1812,7 +1869,7 @@ IDIR="$HUMUS/$NCHR/tblastx+/$XID/sr" ;
 ODIR="$HUMUS/$NCHR/sgp+/$XID/hsp-sr" ;
 #
 $BIN/getHSPSR.pl $SEQ < $IDIR/$SEQ.merged.gff \
-                      > $ODIR/$SEQ.gff 2> $ODIR.report ;
+                      > $ODIR/$SEQ.gff 2> $ODIR/$SEQ.report ;
 #
 @
 
@@ -1940,7 +1997,7 @@ IDIR="$HUMUS/$NCHR/sgp+/$XID" ;
 IDIR="$HUMUS/$NCHR" ;
 ODIR="$IDIR/apollo" ;
 #
-CheckDirs $ODIR $ODIR/$XID ;
+MkDirs $ODIR $ODIR/$XID ;
 #
 ODIR="$ODIR/$XID" ;
 #
@@ -2565,7 +2622,7 @@ while (<FRGLEN>) {
     $SEQlen{$l[0]} = $l[1];
 }; # while
 close(FRGLEN);
-open(FRGLST, "< $input.report");
+open(FRGLST, "< $input/$chr.report");
 while (<FRGLST>) {
     next if /^#/o;
     next if /^\s*$/o;
@@ -3998,6 +4055,7 @@ The [[&brown_dispatcher]] function requires a semaphore variable that controls h
 
 <<stepper.pl: Use module IPC>>=
 use IPC::Shareable; 
+IPC::Shareable->clean_up_all;
 @ 
 
 Here, we define the main function that launches child processes through [[fork]] perl function. Those child jobs are saving a temporary bash script that will be executed locally or remotely (using [[rsh]]) via a [[system]] command.
@@ -4014,10 +4072,8 @@ sub brown_dispatcher() {
     $seqnum = scalar(@seqs);
     while ($seqs_done < $seqnum) { # loop through sequences
         for ($sem = 0; $sem < $maxjobs; $sem++) {
-$handle->shlock();
-print STDERR "#@# PRE:  \$semaphore[\$sem][0] = $sem -> $semaphore[$sem][0]\n";
-$handle->shunlock();
-           $semaphore[$sem][0] || do {
+            $semaphore[$sem] =~ m/^(.*?):/o && ($thesem = $1);
+            ($thesem != 0) || do {
                next if $seqs_done == $seqnum; 
                next if (&no_host_there($hosts[$sem]));
                @tmpsq = @{ $seqs[$seqs_done] };
@@ -4025,43 +4081,42 @@ $handle->shunlock();
                @{ $pids{$pid} } = @tmpsq;
                $seqs_done++;
            }; # if job semaphore == 0 then fork child
-$handle->shlock();
-print STDERR "#@# POST: \$semaphore[\$sem][0] = $sem -> $semaphore[$sem][0] : \$pid = $pid\n";
-$handle->shunlock();
            &do_wait();
         }; # for semaphores...
     }; # while
     while (&not_all_done()) { &do_wait(); };
     print $ERRFH "### MAIN $gid ### All Jobs ID: \n ".
-                 join(" ",keys %pids)."\n".
+                 join(" ",(sort keys %pids))."\n".
                  "### MAIN $gid ### END MAIN LOOP\n";    
 #    close(FHERR);
 #    $ERRFH = $oldFHE;
 } # brown_dispatcher
 #
 sub do_wait() {
-    sleep 1; # select(undef,undef,undef,1);
+    sleep 5; # select(undef,undef,undef,1);
     &show_curr_pids($gid);
 } # do_wait
 sub show_curr_pids() {
     my $gd = shift;
     $handle->shlock();
     print $ERRFH "### MAIN $gd ### SEMAPHORE: ".
-          (join(" ", ( sub { my ($kk,@lk); foreach $kk (@_) { push @lk, $semaphore[$kk][0]; }; return @lk; }->(0..($maxjobs-1)) )))."\n";
+          (join(" ", ( map { $_ =~ m/^(.*?):/o; $1 } @semaphore )))."\n";
     $handle->shunlock();
 } # show_curr_pids
 sub not_all_done() {
     my $sum = 0;
     $handle->shlock();
     for (my $s = 0; $s < $maxjobs; $s++) {
-        $sum += $semaphore[$s][0];
+        my $th;
+        $semaphore[$s] =~ m/^(.*?):/o && ($th = $1);
+        $sum += $th;
     }; # for semaphores...
     $handle->shunlock();
     return ($sum>0) ? $T : $F;
 } # not_all_done
 sub no_host_there() {
       my $host = shift;
-      print $ERRFH "### MAIN $gid ### CHECKING $host CONECTION...\n";
+      # print $ERRFH "### MAIN $gid ### CHECKING $host CONECTION...\n";
       ($skip_next[0]) && do {
           print $ERRFH "### MAIN $gid ### STOPPING PROGRAM: \"$host\" NOT CHECKED !!!\n";
           return $F;
@@ -4082,24 +4137,26 @@ sub no_host_there() {
 } # no_host_there
 sub breed_crows() {
     my ($chrseq_code,$jobstep_code,$run_at,
-        $script,$scriptx,$script_stat,$script_err,
-        $pre_job,$chldpid,$chpid,$syserr);
+        $script,$scriptx,$scripto,$scripte,$script_stat,$script_err,
+        $pre_job,$chldpid,$chpid,$syscmd,$syserr);
     my ($thechr,$theseq,$pos) = @_;
     return if $pid = fork(); # return to parent, follows child code
-    local *TMP;
+    local *TMPFH;
     $chrseq_code = $chrs{$thechr}{seqs}{$theseq}{code};
     $chpid = "$$";
     $chldpid = "$chpid.$gid";
     if ($skip_next[0]) {
         print $ERRFH "## $chldpid ## Skipping ALL JOBS".
                      " for sequence \"$theseq($thechr)\".\n";
-        &init_DB_exec_tbl($chldpid,$chrseq_code,$status{'SKIPPED'}{'code'},
+        &init_DB_exec_tbl($hosts[$pos],$chldpid,$chrseq_code,
+                          $status{'SKIPPED'}{'code'},
                           $exit_codes{'NOTRUN'}{SHORT},\@steps);
         exit(0); # exiting child process if skipping
     } else {
         print $ERRFH "## $chldpid ## Running child process jobs".
                      " on sequence \"$theseq\" (chr $thechr).\n";
-        &init_DB_exec_tbl($chldpid,$chrseq_code,$status{'TODO'}{'code'},
+        &init_DB_exec_tbl($hosts[$pos],$chldpid,$chrseq_code,
+                          $status{'TODO'}{'code'},
                           "Job [$chldpid] has been scheduled...",\@steps);
     };
     foreach my $jobary (@steps) {
@@ -4108,7 +4165,7 @@ sub breed_crows() {
         $jobstep_code = $jobs{$thejob}{steps}{$thestep}{code};
         # &mod_semaphore($pos,$chldpid,$chrseq_code,$jobstep_code);
         $handle->shlock();
-        @{ $semaphore[$pos] } = ($chpid,$chrseq_code,$jobstep_code);
+        $semaphore[$pos] = "$chpid\:$chrseq_code\:$jobstep_code";
         $handle->shunlock();
         ($stdin,$stdout,$stderr) = ( $jobs{$thejob}{steps}{$thestep}{idir},
                                      $jobs{$thejob}{steps}{$thestep}{odir},
@@ -4122,10 +4179,13 @@ sub breed_crows() {
             $script_stat = $status{'RUNNING'}{'code'};
             $handle->shlock();
             &update_DB_exec_tbl($script_stat,$chrseq_code,$jobstep_code,
-                                $chldpid,undef,"Job [$chldpid] is runnning...");
+                                $hosts[$pos],$chldpid,
+                                undef,"Job [$chldpid] is runnning...");
             $handle->shunlock();
-            $script  = "$TMP/$thechr.$theseq.$thejob.$thestep.$chldpid";
-            $scriptx = "$script.exit";
+            # names were shortened to avoid problem with file creation
+            $script  = "$TMP/$thechr.$theseq.$jobstep_code.$chldpid";
+            ($scriptx,$scripto,$scripte) =
+                ("$script.x","$script.o","$script.e");
             ###
             $pre_job = <<"+++EOPre+++";
 #
@@ -4155,8 +4215,8 @@ export CHR NCHR SEQ JOB JOBP STEP XID MPID      \\
        CHRDIR CJBDIR JOBDIR IDIR ODIR EDIR PSRF ;
 #
 # Making directories
-CheckDirs \$CHRDIR \$CJBDIR \$JOBDIR \$ODIR ;
-[ "\$EDIR" != "\$ODIR" ] && CheckDirs \$EDIR ;
+MkDirs \$CHRDIR \$CJBDIR \$JOBDIR \$ODIR ;
+[ "\$EDIR" != "\$ODIR" ] && MkDirs \$EDIR ;
 #
 ### SCRIPT CODE
 #
@@ -4166,17 +4226,19 @@ CheckDirs \$CHRDIR \$CJBDIR \$JOBDIR \$ODIR ;
                 $run_at = <<"+++EOSCRIPT+++";
 # Run script remotely
 #
-# { rsh $hosts[$pos].imim.es $script > $script.out 2> $script.err } || exit 10 ;
-cat $script ;
-                                      # exit_code==10 if RSH fails
+# cat $script ;
+{ rsh $hosts[$pos].imim.es \\
+      $ENV{BIN}/remotelauncher.pl "$script > $scripto 2> $scripte" ;
+  } || exit 10 ;
+     # exit_code==10 if RSH fails
 #
 +++EOSCRIPT+++
             } else {
                 $run_at = <<"+++EOSCRIPT+++";
 # Run script locally
 #
-# $script > $script.out 2> $script.err ;
-cat $script ;
+# cat $script ;
+$script > $scripto 2> $scripte ;
 #
 +++EOSCRIPT+++
             }; # if ($hosts[$pos] ne $HOST)
@@ -4185,25 +4247,33 @@ cat $script ;
                          " on sequence \"$theseq($thechr)\".\n".
                          "## $chldpid ## Writing script to \"$script\"...\n";
             $handle->shlock();
-            open(TMP,"> $script");
-            print TMP $pre_script.$pre_job.
+            open(TMPFH,"> $script");
+            print TMPFH $pre_script.$pre_job.
                       $jobs{$thejob}{steps}{$thestep}{script}.$post_script;
-            close(TMP);
+            close(TMPFH);
             $handle->shunlock();
             ###
-            $syserr = system <<"+++EOFRSH+++";
+            $syscmd = <<"+++EOFRSH+++";
 ## LAUNCH JOB ##
 /bin/chmod a+x $script ;
 # Process Status Reporter File
-PSRF="$scriptx" ;
-#######
+export PSRF="$scriptx" ;
+# Run Job
 $run_at
-#######
 # Returning exit status from executed script
+c=0;
+while [ \\( ! -e "\$PSRF" \\) -a \$c -lt 900 ] ; # 900sec == 15min
+  do {
+    sleep 2 ;
+    c=`expr \$c + 2` ;
+    } ;
+  done ;
 exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
-           # exit_code==3 if cannot open PSRF (UNAVAILABLE) 
+                               # exit_code==3 if cannot open PSRF (UNAVAILABLE)
 ## END OF JOB ##
 +++EOFRSH+++
+            print $ERRFH $syscmd if $_verbose{DEBUG};
+            $syserr = system($syscmd);
             ###
             # print $ERRFH $mesg{};
             ($script_stat,$script_err) =
@@ -4211,16 +4281,18 @@ exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
         }; # else if !$skip_next[0]
         $handle->shlock();
         &update_DB_exec_tbl($script_stat,$chrseq_code,$jobstep_code,
-                            $chldpid,$stdout,$script_err);
+                            $hosts[$pos],$chldpid,$stdout,$script_err);
         $handle->shunlock();
+        # removing scripts once they have been run
+        print $ERRFH "## $chldpid ## Removing scripts from tmp dir !!!\n";
+        system("cat $scripte >> $TMP/.err/$thechr.$theseq.err");
+        system("cat $scripto >> $TMP/.out/$thechr.$theseq.out");
+        unlink($script,$scriptx,$scripto,$scripte);
     }; # foreach job
     # &mod_semaphore($pos,0,0,0);
     $handle->shlock();
-    @{ $semaphore[$pos] } = (0,0,0);
+    $semaphore[$pos] = '0:0:0';
     $handle->shunlock();
-    # removing scripts once they have been run
-#    print $ERRFH "## $chldpid ## Removing scripts from tmp dir !!!\n";
-#    unlink glob("$TMP/$thechr.$theseq.\*.$chldpid\*");
     #
     print $ERRFH "## $chldpid ## Child process is exiting now !!!\n";
     exit(0); # child process exits when done
@@ -4228,7 +4300,7 @@ exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
 sub mod_semaphore() {
     my ($p,$v,$sq,$jb) = @_;
     $handle->shlock();
-    @{ $semaphore[$p] } = ( $v, $sq, $jb );
+    $semaphore[$p] = "$v\:$sq\:$jb";
     $handle->shunlock();
 } # mod_semaphore
 sub report_crow_status() {
@@ -4236,7 +4308,7 @@ sub report_crow_status() {
     my ($okflg,$emsg,$whatever,$whatelse);
     ($okflg,$emsg,$err) = &check_syscall_exit($err);
     $err = $exit_codes{'CODES'}{$err};
-    print $ERRFH "## $ppid ## ERROR: ".
+    print $ERRFH "## $ppid ## ERROR MSG: ".
                  ($exit_codes{$err}{MSG}->($ppid,$job,$seq,$emsg))."\n";
     $whatelse = $exit_codes{$err}{SHORT};
     $whatever = ($okflg) ? $status{'DONE'}{'code'}
@@ -4244,33 +4316,38 @@ sub report_crow_status() {
     return ($whatever, $whatelse);
 } # report_crow_status
 sub init_DB_exec_tbl() { # to db_Hsapiens.pm ?
-    my ($thepid,$seqcode,$statcode,$statstr,$stepary) = @_;
+    my ($thehost,$thepid,$seqcode,$statcode,$statstr,$stepary) = @_;
     $handle->shlock();
     foreach my $stpary (@{ $stepary }) {
         my ($j,$s) = @{ $stpary };
         &update_DB_exec_tbl($statcode,$seqcode,$jobs{$j}{steps}{$s}{code},
-                            $thepid,undef,$statstr);
+                            $thehost,$thepid,undef,$statstr);
     }; # foreach $stpary
     $handle->shunlock();
 } # init_DB_exec_tbl
 sub update_DB_exec_tbl() { # to db_Hsapiens.pm
-    my ($stat,$cseq,$cstep,$ppid,$sout,$serr) = @_;
+    my ($stat,$cseq,$cstep,$chost,$ppid,$sout,$serr) = @_;
     my (@sel_fields,@data_fields,$tbl,@fld);
     defined($sout) || ($sout = 'NULL');
     defined($serr) || ($serr = 'NULL');
     if ($stat != $status{'SKIPPED'}{'code'} && $skip_next[0]) {
-        if ($skip_next[2]) {
-            $stat = $status{'DIED'}{'code'}; # Something happened to child
+        # if (!defined($skip_next[1])) { # $skip_next[1] is always set as $T/$F
+        #    $stat = $status{'DIED'}{'code'}; # Something happened to child
+        # } else {
+        if ($skip_next[1]) {
+            $stat = $status{'DIED'}{'code'};
+            $serr  = $exit_codes{'PROGDOWN'}{SHORT};
         } else {
-            $stat = ($skip_next[1]) ? $status{'DIED'}{'code'}
-                                    : $status{'KILLED'}{'code'};
+            $stat = $status{'KILLED'}{'code'};
+            $serr  = $exit_codes{'USERHALT'}{SHORT};
         };
+        # };
     };
     ($tbl, @fld) = qw( tb_exec 0 1 ); # we do not tae care of execution PID (2)
     @sel_fields =  qw( chr_seq job_step exec_pid
                        status exec_date host user stdout stderr );
     @data_fields = ( $cseq, $cstep, $ppid,
-                     $stat, $CDATE, $HOST, $USER, "$sout", "$serr" );
+                     $stat, $CDATE, $chost, $USER, "$sout", "$serr" );
     &put_row_fields($tbl, \@fld, \@sel_fields, \@data_fields);
 } # update_DB_exec_tbl
 @ 
@@ -4281,17 +4358,17 @@ my (%hosts_list,@hosts,$hc,$gid,%pids,$pid,$maxjobs,
 %pids = ();
 $hc = 0;
 %hosts_list = (
-  # hostname => [ order   numjobs  pbsflg ]
-    monstre1 => [ $hc++,  1,       $F     ],
-    monstre2 => [ $hc++,  1,       $F     ],
-    monstre3 => [ $hc++,  1,       $F     ],
-    monstre4 => [ $hc++,  2,       $F     ],
-  # aleph    => [ $hc++,  1,       $T     ],
-    ik12     => [ $hc++,  1,       $F     ],
-    ik13     => [ $hc++,  1,       $F     ],
-    i8       => [ $hc++,  1,       $F     ],
-    i10      => [ $hc++,  1,       $F     ],
-    i26      => [ $hc++,  1,       $F     ],
+  # hostname => [ order   numjobs  bash.p            pbsflg ]
+  # aleph    => [ $hc++,  1,       '/bin/bash',      $T     ],
+    monstre1 => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
+    monstre2 => [ $hc++,  2,       '/usr/bin/bash',  $F     ],
+    monstre3 => [ $hc++,  2,       '/usr/bin/bash',  $F     ],
+  # monstre4 => [ $hc++,  2,       '/bin/bash',      $F     ],
+    ik12     => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
+    ik13     => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
+    i8       => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
+    i10      => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
+    i26      => [ $hc++,  1,       '/usr/bin/bash',  $F     ],
     );
 @@hosts = map  { shift @$_; @$_ }
          sort { $a->[0] <=> $b->[0] }
@@ -4299,12 +4376,65 @@ $hc = 0;
          keys %hosts_list;
 $maxjobs = scalar(@hosts);
 $gid = $$;
-IPC::Shareable->clean_up_all();
 $handle = tie @semaphore, 'IPC::Shareable', undef, { destroy => 1 };
-for (my $z = 0; $z < $maxjobs; $z++) {
-    push @semaphore, [ 0, 0, 0 ];
-};
+@@semaphore = ( '0:0:0' ) x $maxjobs;
 @
+
+<<remotelauncher.pl>>=
+<<PERL shebang>>
+# remotelauncher.pl
+#
+# USAGE: remotelauncher.pl <filename>
+#
+use strict;
+<<Global Vars - Counter>>
+my (@param,$err,$secs_incr);
+#
+@@param = split /\s+/o, "@ARGV";
+#
+print STDERR "###--WAITING--> $param[0] \n";
+($n,$c,$_cntN,$secs_incr) = (0,".",60,2);
+while (!(-x $param[0])) {
+    sleep $secs_incr;
+    $n += $secs_incr;
+    &counter($n,$c);
+    exit(127) if $n >= 900; # exit_code==127 if command not found (NOCMD) 
+};
+&counter_end($n,$c);
+#
+print STDERR "###--RUNNING--> @param \n";
+$err = system("@param");
+exit($err);
+#
+sub fill_left() { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+<<Common PERL subs - Counter>>
+@ 
+
+<<tangling: perl scripts>>=
+# 
+echo "# --> \$BIN/remotelauncher.pl" 1>&2 ;
+notangle -R'remotelauncher.pl' \
+    $WORK/$nwfile.nw | cpif $BIN/remotelauncher.pl ;
+perl -c $BIN/remotelauncher.pl ;
+is_exec $BIN/remotelauncher.pl ;
+#
+@
+
+<<Checking IPC system stack>>=
+c=0;
+while [ 1 ];
+  do {
+    clear ;
+    perl -e '
+      ($s,$m,$h,undef,undef,undef,undef,undef,undef) = localtime(shift @ARGV);
+      print "#" x 50, sprintf(" \%02d:\%02d:\%02d\n",$h-1,$m,$s);
+      ' $c;
+    ipcs;
+    sleep 15;
+    c=`expr $c + 15`;
+    };
+  done;
+@ 
 
 \subsubsctn{Sequence and jobs related vars}
 
@@ -4339,11 +4469,16 @@ is_exec $BIN/viewstatustbl.pl ;
 #
 use strict;
 use db_Hsapiens;
+use global qw( :ExecReport );
+$PROG = 'viewstatustbl.pl';
+$PRGVER = '0.9beta';
 #
 # MAIN
+&program_started($PROG);
 &open_DB();
 &view_exec_tbl();
 &close_DB();
+&program_finished($PROG);
 exit(0);
 #
 # SUBS
@@ -4355,6 +4490,7 @@ sub view_exec_tbl() {
               m.id AS JOB,
               j.id AS STEP,
               t.id AS STATUS,
+              x.host AS HOST,
               x.exec_pid AS PID,
               x.stderr AS ERRORMSG
          FROM tb_chromosome AS c,
@@ -4428,6 +4564,9 @@ $VERSION = 1.00;
            );
 %EXPORT_TAGS = (
            # ParseCMDLN => [ qw( &parse_cmdline %CmdLineDefs %CmdLineOpts ) ],
+           ExecReport => [ qw( $PLVER $PROG $PRGVER $USAGE 
+                               $DATE $CDATE $USER $HOST
+                               &program_started &program_finished ) ],
            StringFill => [ qw( &fill_right &fill_left &fill_mid ) ],
            ExitStatus => [ qw( &check_syscall_exit &the_end 
                                %exit_codes $EXIT_REPORT_FILE ) ],
@@ -4524,7 +4663,7 @@ sub init_signals() {
     $SIG{QUIT} = \&trap_signals;
     $SIG{TERM} = \&trap_signals;
     $SIG{KILL} = \&trap_signals;
-    $SIG{CHLD} = 'IGNORE'; # \&child_reaper;
+    $SIG{CHLD} = \&child_reaper; # 'IGNORE';
     @skip_next = ($F, undef);
 } # init_signals
 sub trap_signals() {
@@ -4540,7 +4679,7 @@ sub trap_signals_prog() {
 Just to avoid zombie child processes we are now trying the following code\footnote{The code has been adapted from recipe 16.19, pp592, of ``Perl CookBook''} instead of setting [[$SIG{CHLD}]] to [[IGNORE]] (causing child processed to be automatically reaped), because that approach does not work reliably in our case. 
  
 % $SIG{CHLD} = 'IGNORE' child processes are automatically reaped, or not ???
-<<HIDE: global.pm: trapping signals>>=
+<<global.pm: trapping signals>>=
 sub child_reaper() {
     my $cpid;
     $cpid = waitpid(-1, &WNOHANG);
@@ -5094,8 +5233,13 @@ PROGHALT      &   5 & Process halted by program (kill -9) \\
 PROGDOWN      &   6 & Process is down                \\
 NOFORK        &   8 & Could not fork child           \\
 RSH           &  10 & RSH command failed             \\
-PBS           &  12 & PBS command failed             \\
-NOTRUN        &  15 & Program was not executed (skipping) \\ \hline\hline
+PBS           &  12 & PBS command failed             \\ \hline\hline
+NOTRUN        &  14 & Program was not executed (skipping) \\
+CKO           &  15 & C program failed...            \\
+PERLKO        &  16 & PERL script failed...          \\
+GAWKKO        &  17 & GAWK script failed...          \\
+BASHKO        &  18 & BASH script failed...          \\
+FUNCKO        &  19 & BASH user defined function failed... \\ \hline\hline
 NOFILE        &  20 & File not found                 \\
 NOREADFILE    &  22 & Could not open file to read    \\
 NOWRITEFILE   &  24 & Could not open file to write   \\
@@ -5190,9 +5334,34 @@ sub the_end() {
          MSG   => sub { return $exit_codes{'PBS'}{SHORT} },
          },
     'NOTRUN' => { 
-         CODE  =>  15,
+         CODE  =>  14,
          SHORT => "Program was not executed",
          MSG   => sub { return $exit_codes{'NOTRUN'}{SHORT} },
+         },
+    'CKO' => { 
+         CODE  =>  15,
+         SHORT => "C program failed...",
+         MSG   => sub { return $exit_codes{'CKO'}{SHORT} },
+         },
+    'PERLKO' => { 
+         CODE  =>  16,
+         SHORT => "PERL script failed...",
+         MSG   => sub { return $exit_codes{'PERLKO'}{SHORT} },
+         },
+    'GAWKKO' => { 
+         CODE  =>  17,
+         SHORT => "GAWK script failed...",
+         MSG   => sub { return $exit_codes{'GAWKKO'}{SHORT} },
+         },
+    'BASHKO' => { 
+         CODE  =>  18,
+         SHORT => "BASH script failed...",
+         MSG   => sub { return $exit_codes{'BASHKO'}{SHORT} },
+         },
+    'FUNCKO' => { 
+         CODE  =>  19,
+         SHORT => "BASH user defined function failed...",
+         MSG   => sub { return $exit_codes{'FUNCKO'}{SHORT} },
          },
     'NOFILE' => { 
          CODE  =>  20,
@@ -5321,6 +5490,8 @@ if (defined($ENV{HOSTNAME})) {
 };
 $HOST =~ s/\.imim\.es$//o;
 #
+chomp($WB = `which bash`);
+#
 # Directories that must exist in host
 if (-e "$MOLBIO" && -d _) { $DIRFLG="YES" }
 else { $DIRFLG=" NO" };
@@ -5361,10 +5532,11 @@ else {
 #
 # Output required info about host
 print STDOUT sprintf("--> %16s --> perl v%vd ".
+                     "--> \"bash\" ? %s ".
                      "--> \"molbio\" ? %s ".
                      "--> \"tmpbin\" ? %s (%s) ".
                      "--> \"tmpprj\" ? %s (%s)\n",
-       "$HOST.imim.es",$^V,$DIRFLG,$TMPFLG,$TMPWTRFLG,$TMPFLG2,$TMPWTRFLG2);
+       "$HOST.imim.es",$^V,$WB,$DIRFLG,$TMPFLG,$TMPWTRFLG,$TMPFLG2,$TMPWTRFLG2);
 #
 exit(0);
 @ 
@@ -6004,17 +6176,17 @@ These functions are used to report to STDERR a single char for each record proce
 #
 sub counter { # $_[0]~current_pos++ $_[1]~char
     print STDERR "$_[1]";
-    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+    (($_[0] % $_cntN) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
 } # counter
 #
 sub counter_end { # $_[0]~current_pos   $_[1]~char
-    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+    (($_[0] % $_cntN) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
 } # counter_end
 @
 
 <<Global Vars - Counter>>=
-my ($n,$c); # counter and char (for &counter function)
-@ %def $n $c
+my ($n,$c,$_cntN); # counter and char (for &counter function)
+@ %def $n $c $_cntN
 
 
 \subsubsctn{Common functions for reporting program processes}
@@ -6073,7 +6245,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.12 2002-04-04 12:35:57 jabril Exp $
+# $Id: humus.nw,v 1.13 2002-04-05 19:04:47 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -6242,21 +6414,21 @@ function TheEnd ()
   exit $SCODE ;
 }
 #
-function CheckDirs ()
+function MkDirs ()
 {
   #
-  # USAGE: ChckDirs <path_list>
+  # USAGE: MkDirs <path_list>
   #
   for name in "$@" ;
     do {
          if [ -d "$name" ] ;
          then 
-           echo "### Directory Already Exist: $name" ;
+           echo "### Directory Already Exist: $name" 1>&2 ;
          elif mkdir $name 2> /dev/null ;
            then
-             echo "### Making New Directory   : $name" ;
+             echo "### Making New Directory   : $name" 1>&2 ;
          else
-           echo "### CANNOT Create Directory: $name" ; 
+           echo "### CANNOT Create Directory: $name" 1>&2 ; 
            TheEnd NONEWDIR ; 
          fi ;
       } ;
@@ -6267,14 +6439,38 @@ function is_exec ()
 {
   #
   # USAGE: is_exec <filename_0>...<filename_N>
-  for file in $@;
+  for file in $@ ;
     do {
          if [ -x $file ] ;
          then
-           echo "#    Script $file has execute permissions ..." ;
+           echo "#    Script $file has execute permissions ..." 1>&2 ;
          else
-           echo "#    Setting execute permissions for $file ..." ;
+           echo "#    Setting execute permissions for $file ..." 1>&2 ;
            chmod a+x $file 2> /dev/null ;
+         fi ;
+      } ;
+    done ;
+}
+#
+function CheckFile ()
+{
+  #
+  # USAGE: CheckFile <MODE(RWAE)> <filename_0>...<filename_N>
+  mode="$1" ; shift ;
+  case $mode in
+    R|r) tst="-r" ; err="NOREADFILE"   ; msg="readable"  ;;
+    W|w) tst="-w" ; err="NOWRITEFILE"  ; msg="writeable" ;;
+    A|a) tst="-w" ; err="NOAPPENDFILE" ; msg="writeable" ;;
+      *) tst="-e" ; err="NOFILE"       ; msg="found"     ;;
+  esac; 
+  for file in "$@" ;
+    do {
+      if [ -f $file -a $tst $file ] ;
+         then
+           echo "#    $file IS $msg ..." 1>&2 ;
+         else
+           echo "#    $file IS NOT $msg ..." 1>&2 ;
+           TheEnd $err ;
          fi ;
       } ;
     done ;
@@ -6445,6 +6641,16 @@ is_exec $WORK/nw2tex $WORK/ltx;
 # tangling all steps
 { cat $WORK/.bash_VARS ;
   notangle -R'JOB COLLECTOR'        $WORK/$nwfile.nw ; } | bash ;
+#
+# updating LaTeX documents
+$WORK/nw2tex ; $WORK/ltx ;
+@ 
+
+<<HIDE: >>=
+pushd $TMP;
+RM $TMP/.[eo]*/*;
+$BIN/stepper.pl --debug 2> $TMP/.err/_ALL.err 1> $TMP/.out/_ALL.out
+ipcrm sem ; ipcrm shm  
 @ 
 
 %
