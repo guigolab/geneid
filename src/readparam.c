@@ -4,9 +4,9 @@
 *                                                                        *
 *   Reading statistic parameters and gene construction model             *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,9 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.5 2001-12-18 16:25:39 eblanco Exp $  */
+/*  $Id: readparam.c,v 1.6 2003-11-05 14:54:29 eblanco Exp $  */
+
+extern float NO_SCORE;
 
 #include "geneid.h"
 
@@ -74,7 +76,8 @@ void SetProfile(profile* p, FILE* RootFile, char* signal)
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%*d %*s %f", &(p->transitionValues[i][j])))!=1)
 			{
-			  sprintf(mess,"Wrong format: Transition values in %s profile",signal);
+			  sprintf(mess,"Wrong format: Transition values in %s profile",
+					  signal);
 			  printError(mess);
 			}
 		  readLine(RootFile,line);
@@ -161,7 +164,7 @@ void SetProfile(profile* p, FILE* RootFile, char* signal)
 		}
 	  break;
 	case 2:
-	  /* 125 combinations / pos */
+	  /* 125 combinations / pos: there are "dimension" positions */
 	  for(i=0; i < p->dimension; i++) 
 		{
 		  /* Reading AXX,CXX,GXX,TXX and creating ANX,CNX,GNX,TNX */
@@ -217,7 +220,7 @@ void SetProfile(profile* p, FILE* RootFile, char* signal)
 				(p->transitionValues[i][j+y] +
 				 p->transitionValues[i][j+1+y] +
 				 p->transitionValues[i][j+2+y] +
-				 p->transitionValues[i][j+3+y]) / 4;
+				 p->transitionValues[i][j+3+y]) / 4;			  
 			}
 		  
 		  /* Creating NAX,NCX,NGX,NTX (j=100)*/
@@ -239,6 +242,7 @@ void SetProfile(profile* p, FILE* RootFile, char* signal)
 				 p->transitionValues[i][j+y+2] +
 				 p->transitionValues[i][j+y+3]) / 4;
 			}
+
 		  /* Creating NNX (j=100,y=20)*/
 		  for(x=0; x < 4; x++)
 			{
@@ -248,6 +252,7 @@ void SetProfile(profile* p, FILE* RootFile, char* signal)
 				 p->transitionValues[i][j+10+x] +
 				 p->transitionValues[i][j+15+x]) /4;
 			}
+
 		  /* Finally, creating NNN (j=100,y=20,x=4) */
 		  p->transitionValues[i][j+y+x] = 
 			(p->transitionValues[i][j+y] +
@@ -301,7 +306,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
   char line[MAXLINE];
   char mess[MAXSTRING];
 
-  /* 0. read boundaries of isochores */
+  /* 1. read boundaries of isochores */
   readHeader(RootFile,line);
   readLine(RootFile,line);
 
@@ -315,7 +320,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  gp->rightValue);
   printMess(mess); 
 
-  /* 1. read cutoff (final score) to accept one predicted exon */
+  /* 2. read cutoff (final score) to accept one predicted exon */
   readHeader(RootFile,line);
   readLine(RootFile,line);
 
@@ -333,7 +338,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  gp->Single->ExonCutoff);
   printMess(mess); 
 
-  /* 2. read cutoff (potential coding score) to accept one predicted exon */
+  /* 3. read cutoff (potential coding score) to accept one predicted exon */
   readHeader(RootFile,line);
   readLine(RootFile,line);
   if ((sscanf(line,"%f %f %f %f\n",     
@@ -350,24 +355,59 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  gp->Single->OligoCutoff);
   printMess(mess); 
 
-  /* 3. Weight of coding potential score in exon score */
+  /* 4. Weight of signals in final exon score */
   readHeader(RootFile,line);
   readLine(RootFile,line);
   if ((sscanf(line,"%f %f %f %f\n",
-			  &(gp->Initial->OligoWeight),
-			  &(gp->Internal->OligoWeight),
-			  &(gp->Terminal->OligoWeight),
-			  &(gp->Single->OligoWeight)))!=4)
-	printError("Wrong format: weight of coding potential score (number/type)");  
+			  &(gp->Initial->siteFactor),
+			  &(gp->Internal->siteFactor),
+			  &(gp->Terminal->siteFactor),
+			  &(gp->Single->siteFactor)))!=4)
+	printError("Wrong format: weight of signal scores (number/type)");  
   
-  sprintf(mess,"Oligo weights: \t%9.3f\t%9.3f\t%9.3f\t%9.3f",
-		  gp->Initial->OligoWeight,
-		  gp->Internal->OligoWeight,
-		  gp->Terminal->OligoWeight,
-		  gp->Single->OligoWeight);
+  sprintf(mess,"Site factors: \t%9.2f\t%9.2f\t%9.2f\t%9.2f",
+		  gp->Initial->siteFactor,
+		  gp->Internal->siteFactor,
+		  gp->Terminal->siteFactor,
+		  gp->Single->siteFactor);
   printMess(mess); 
 
-  /* 4. read weigths to correct the score of exons after cutoff */
+  /* 5. Weight of coding potential in final exon score */
+  readHeader(RootFile,line);
+  readLine(RootFile,line);
+  if ((sscanf(line,"%f %f %f %f\n",
+			  &(gp->Initial->exonFactor),
+			  &(gp->Internal->exonFactor),
+			  &(gp->Terminal->exonFactor),
+			  &(gp->Single->exonFactor)))!=4)
+	printError("Wrong format: weight of coding potential scores (number/type)");  
+  
+  sprintf(mess,"Exon factors: \t%9.2f\t%9.2f\t%9.2f\t%9.2f",
+		  gp->Initial->exonFactor,
+		  gp->Internal->exonFactor,
+		  gp->Terminal->exonFactor,
+		  gp->Single->exonFactor);
+  printMess(mess); 
+
+  /* 6. Weight of homology information in final exon score */
+  readHeader(RootFile,line);
+  readLine(RootFile,line);
+  if ((sscanf(line,"%f %f %f %f\n",
+			  &(gp->Initial->HSPFactor),
+			  &(gp->Internal->HSPFactor),
+			  &(gp->Terminal->HSPFactor),
+			  &(gp->Single->HSPFactor)))!=4)
+
+	printError("Wrong format: weight of homology scores (number/type)");  
+  
+  sprintf(mess,"HSP factors: \t\t%9.2f\t%9.2f\t%9.2f\t%9.2f",
+		  gp->Initial->HSPFactor,
+		  gp->Internal->HSPFactor,
+		  gp->Terminal->HSPFactor,
+		  gp->Single->HSPFactor);
+  printMess(mess); 
+
+  /* 7. read weigths to correct the score of exons after general cutoff */
   readHeader(RootFile,line);
   readLine(RootFile,line);
   if ((sscanf(line,"%f %f %f %f\n",
@@ -384,7 +424,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  gp->Single->ExonWeight);
   printMess(mess);
 
-  /* 5. Read splice site profiles */
+  /* 8. Read splice site profiles */
   /* (a).start codon profile */
   ReadProfile(RootFile, gp->StartProfile , sSTA);
 
@@ -397,7 +437,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
   /* (d).stop codon profile */
   ReadProfile(RootFile, gp->StopProfile , sSTO);
   
-  /* 6. read coding potential log-likelihood values (Markov chains) */
+  /* 9. read coding potential log-likelihood values (Markov chains) */
   readHeader(RootFile,line);
   readLine(RootFile,line); 
 
@@ -449,7 +489,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
       gp->OligoLogsTran[f][i]=lscore;
     }
 
-  /* 7. read maximum number of donors per acceptor site (BuildExons) */
+  /* 10. read maximum number of donors per acceptor site (BuildExons) */
   readHeader(RootFile,line);
   readLine(RootFile,line); 
   
@@ -472,7 +512,7 @@ int readparam (char* name, gparam** isochores)
   char mess[MAXSTRING];
   int nIsochores;
 
-  /* 1. Select parameters filename for reading it */
+  /* 0. Select parameters filename for reading it */
   /* Filename must be: option P, env.var GENEID or default (none) */
   Geneid=getenv("GENEID");
 
@@ -501,6 +541,17 @@ int readparam (char* name, gparam** isochores)
       }
 
   /* rootfile will be the parameter file handle descriptor */
+  printMess(mess);
+
+  /* 1. Read NO_SCORE penalty for nucleotides not supported by homology */
+  readHeader(RootFile,line);
+  readLine(RootFile,line);
+  if ((sscanf(line,"%f\n",
+			  &(NO_SCORE)))!=1)
+	printError("Wrong format: NO_SCORE value scores (number/type)");  
+  
+  sprintf(mess,"NO_SCORE: \t%9.2f",
+		  NO_SCORE);
   printMess(mess);
 
   /* 2. Read the number of isochores */
@@ -542,7 +593,7 @@ int readparam (char* name, gparam** isochores)
 									   isochores[0]->Md,
 									   isochores[0]->block);
 
-  sprintf(mess,"%d Gene Model rules have been read and saved",
+  sprintf(mess,"%d Gene Model rules have been read and saved\n",
 		  isochores[0]->nclass);
   printMess(mess);   
 

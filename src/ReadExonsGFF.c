@@ -4,9 +4,9 @@
 *                                                                        *
 *   Reading exons (GFF format) from file                                 *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,21 +24,46 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.7 2001-12-18 15:54:14 eblanco Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.8 2003-11-05 14:49:05 eblanco Exp $  */
 
 #include "geneid.h"
-#define MAXSITESEVIDENCES 3*MAXEVIDENCES
+
+/* According to Locusname, select a group of annotations */
+packEvidence* SelectEvidence(packExternalInformation* external, 
+							 char* Locus)
+{
+  int a;
+  packEvidence* p;
+  
+  /* 1. Select the position in the array corresponding to Locus */
+  a = getkeyDict(external->locusNames, Locus);
+  if (a == NOTFOUND)
+	p = NULL;
+  else
+	{
+	  p = external->evidence[a];
+
+	  /* 2. Init counters */
+	  external->i1vExons = 0;
+	  external->i2vExons = 0;
+	  external->ivExons = 0;
+	}
+  
+  return(p);
+}
 
 /* Read annotations (exons) to improve or fixed some gene prediction */
 /* GFF format: tab "\t" is the field separator and # for comments */
 /* Name  Source  Type  Begin  End  Score  Strand  Frame  [group] */
-long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
+long ReadExonsGFF (char *FileName, 
+				   packExternalInformation* external, 
+				   dict* d)
 {
   /* File handle */
   FILE *file;
   
   /* Final number of exons loaded from file (including copies) */
-  long i;
+  long i,j;
   
   /* Split every input line into several tokens (gff records) */
   char line[MAXLINE];
@@ -54,17 +79,21 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
   char *line9;
   
   /* Control of good sorting property: starting position, increasing */
-  long lastAcceptor;
+  long lastAcceptor[MAXNSEQUENCES];
   long currAcceptor;
 
   /* If frame = '.' then make three copies of current exon (3 frames) */
   int three;
 
+  /* Identifier for a sequence (from dictionary) */
+  int a;
+
+  char Locusname[LOCUSLENGTH];
   char saux[MAXTYPE];
   char c;
   int slen;
   char mess[MAXSTRING];
-  
+
 
   /* 0. Open exons file to read the information */
   if ((file=fopen(FileName, "r"))==NULL)
@@ -73,7 +102,8 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
   /* 1. Reset counters */
   i = 0;
   three = 0; 
-  lastAcceptor = -INFI;
+  for(i=0; i<MAXNSEQUENCES; i++) 
+	lastAcceptor[i] = -INFI;
   
   /* 2. Read while there are exons left in the input file */
   while(fgets(line,MAXLINE,file)!=NULL)
@@ -107,50 +137,68 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 	      printError(mess);
 	    }
 	  
-	  /* 1/2. Sequence and Source records not used anymore (redundant) */
+	  /* 1. Locusname: leave the exon into the correct array */
+	  if (sscanf(line1,"%s",Locusname) != 1)
+	    {
+		  sprintf(mess,"Wrong GFF format in annotations (locusname):\n-->%s\n",lineCopy);
+	      printError(mess);
+	    }
 	  
+	  /* 2. Look-up the ID for that sequence */
+	  a = setkeyDict(external->locusNames,Locusname);
+	  if (a >= MAXNSEQUENCES)
+		printError("Too many DNA sequences: increase MAXNSEQUENCES parameter");
+
 	  /* 3. Exon feature: Single, First, Internal, Terminal, ... */
-	  if (sscanf(line3,"%s",(pv->vExons+i)->Type) != 1)
+	  if (sscanf(line3,"%s",
+				 (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type) != 1)
 	    {
 		  sprintf(mess,"Wrong GFF format in annotations (feature):\n-->%s\n",lineCopy);
 	      printError(mess);
 	    }
 	  
 	  /* 4. Starting position */
-	  if (sscanf(line4,"%ld",&((pv->vSites + pv->nvSites)->Position)) != 1)
+	  if (sscanf(line4,"%ld",
+				 &((external->evidence[a]->vSites + external->evidence[a]->nvSites)->Position)) != 1)
 	    {
 		  sprintf(mess,"Wrong GFF format in annotations (starting position):\n-->%s\n",lineCopy);
 		  printError(mess);
 	    }
 	  
 	  /* 5. Finishing position */
-	  if (sscanf(line5,"%ld",&((pv->vSites + pv->nvSites + 1)->Position)) != 1)
+	  if (sscanf(line5,"%ld",
+				 &((external->evidence[a]->vSites + external->evidence[a]->nvSites + 1)->Position)) != 1)
 	    {
 		  sprintf(mess,"Wrong GFF format in annotations (finishing position):\n-->%s\n",lineCopy);
 	      printError(mess);
 	    }
 	  
 	  /* 6. Score = float value or '.'(infinitum) */
-	  if (sscanf(line6,"%lf",&((pv->vExons+i)->Score)) != 1)
+	  if (sscanf(line6,"%f",&((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score)) != 1)
 	    {
 		  if ((sscanf(line6,"%c",&c) != 1) || (c != '.'))
 			{
 			  sprintf(mess,"Wrong GFF format in annotations (score):\n-->%s\n",lineCopy);
 			  printError(mess);
 			}
-	      (pv->vExons+i)->Score = MAXSCORE;
+	      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score = MAXSCORE;
 	    }
 	  
 	  /* 7. Strand (reading sense) [+|-] */
-	  if ((sscanf(line7,"%c",&((pv->vExons+i)->Strand))!= 1) ||
-		  (((pv->vExons+i)->Strand != '+') && ((pv->vExons+i)->Strand != '-')))
+	  if ((sscanf(line7,"%c",
+				  &((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand))!= 1) 
+		  ||
+		  (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand != '+') 
+		   && 
+		   ((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand != '-')))
 	    {       
 		  sprintf(mess,"Wrong GFF format in annotations (strand):\n-->%s\n",lineCopy);
 	      printError(mess);
 	    }
 	  
 	  /* 8. Frame = integer or '.' */
-	  if (sscanf(line8,"%hd",&((pv->vExons+i)->Frame)) != 1)
+	  if (sscanf(line8,"%hd",
+				 &((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame)) != 1)
 	    {
 		  /* Is it a dot? */
 		  if ((sscanf(line8,"%c",&c)!= 1) || (c!='.'))
@@ -164,7 +212,9 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 	  else
 		{
 		  /* Checking input frame between 0..2 */
-		  if (((pv->vExons+i)->Frame < 0) || ((pv->vExons+i)->Frame > 2))
+		  if (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame < 0) 
+			  || 
+			  ((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame > 2))
 			{
 			  sprintf(mess,"Wrong GFF value in annotations (frame not between 0..2):\n-->%s\n",lineCopy);
 			  printError(mess);
@@ -174,7 +224,8 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 	  /* 9. Group: optional, string */
 	  if (line9 != NULL)
 	    {
-		  if (sscanf(line9,"%s",(pv->vExons+i)->Group) != 1)
+		  if (sscanf(line9,"%s",
+					 (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group) != 1)
 			{
 			  sprintf(mess,"Wrong GFF value in annotations (group):\n-->%s\n",lineCopy);
 			  printError(mess);
@@ -183,15 +234,15 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 	  else
         {
 		  /* This exon will be allowed to join to ab initio predictions */
-		  strcpy((pv->vExons+i)->Group, NOGROUP);
+		  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group, NOGROUP);
         }
 	  
 	  /* 2.c. Process current exon */
-	  /* (A). Checking exon feature (gene model) */
+	  /* (A). Checking exon feature (gene model): type.strand */
 	  saux[0]='\0';
-	  strcpy (saux, (pv->vExons+i)->Type);
+	  strcpy (saux, (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type);
 	  slen = strlen(saux);
-	  saux[slen++] = (pv->vExons+i)->Strand;
+	  saux[slen++] = (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand;
 	  saux[slen] = '\0';
 	  
 	  if (getkeyDict(d,saux) == NOTFOUND)
@@ -203,95 +254,111 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 	  else
 	    {
 		  /* (B). Well-sorted (by start position) list of read exons */
-	      currAcceptor = (pv->vSites + pv->nvSites)->Position;
-	      if (lastAcceptor > currAcceptor)
+	      currAcceptor = (external->evidence[a]->vSites + external->evidence[a]->nvSites)->Position;
+	      if (lastAcceptor[a] > currAcceptor)
 			{
-			  sprintf(mess,"Wrong order in annotations (starting position %ld):\n-->%s\n",
-					  lastAcceptor,
+			  sprintf(mess,"Order violation: annotations (starting position %ld):\n-->%s\n",
+					  lastAcceptor[a],
 					  lineCopy);  
 			  printError(mess);  
 			}
 	      else
 			{
-			  lastAcceptor = (pv->vSites + pv->nvSites)->Position;
+			  lastAcceptor[a] = currAcceptor;
 			  
 			  /* (C). Setting dummy sites to this exon */
-			  (pv->vExons+i)->Acceptor = (pv->vSites + pv->nvSites);
-			  (pv->vExons+i)->Donor = (pv->vSites + pv->nvSites + 1); 
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Acceptor 
+				= (external->evidence[a]->vSites + external->evidence[a]->nvSites);
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Donor 
+				= (external->evidence[a]->vSites + external->evidence[a]->nvSites + 1);
 			  
 			  /* Updating information about sites to the range 0..L-1 */
-			  (pv->vExons+i)->offset1 = -COFFSET;
-			  (pv->vExons+i)->offset2 = -COFFSET;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->offset1 = -COFFSET;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->offset2 = -COFFSET;
 			  
 			  /* (D). Making three (two more) copies if needed */
 			  if (three)
 				{
 				  /* Creating three exons (3 frames): sharing sites */
-				  (pv->vExons+i+1)->Acceptor = (pv->vSites + pv->nvSites);
-				  (pv->vExons+i+1)->Donor = (pv->vSites + pv->nvSites + 1); 
-				  (pv->vExons+i+2)->Acceptor = (pv->vSites + pv->nvSites);
-				  (pv->vExons+i+2)->Donor = (pv->vSites + pv->nvSites + 1); 
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Acceptor = 
+					(external->evidence[a]->vSites + external->evidence[a]->nvSites);
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Donor = 
+					(external->evidence[a]->vSites + external->evidence[a]->nvSites + 1); 
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Acceptor = 
+					(external->evidence[a]->vSites + external->evidence[a]->nvSites);
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Donor = 
+					(external->evidence[a]->vSites + external->evidence[a]->nvSites + 1);
 				  
 				  /* Updating information about sites to the range 0..L-1 */
-				  (pv->vExons+i+1)->offset1 = -COFFSET;
-				  (pv->vExons+i+1)->offset2 = -COFFSET;
-				  (pv->vExons+i+2)->offset1 = -COFFSET;
-				  (pv->vExons+i+2)->offset2 = -COFFSET;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->offset1 = -COFFSET;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->offset2 = -COFFSET;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->offset1 = -COFFSET;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->offset2 = -COFFSET;
 				  
 				  /* Setting frame values */
-				  (pv->vExons+i)->Frame = 0;
-				  (pv->vExons+i+1)->Frame = 1;
-				  (pv->vExons+i+2)->Frame = 2;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame = 0;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame = 1;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame = 2;
 				  
 				  /* Copy some exon attributes */
-				  strcpy((pv->vExons+i+1)->Type,(pv->vExons+i)->Type);
-				  strcpy((pv->vExons+i+2)->Type,(pv->vExons+i)->Type);
-				  (pv->vExons+i+1)->Score = (pv->vExons+i)->Score;
-				  (pv->vExons+i+2)->Score = (pv->vExons+i)->Score;
-				  (pv->vExons+i+1)->Strand = (pv->vExons+i)->Strand;
-				  (pv->vExons+i+2)->Strand = (pv->vExons+i)->Strand;
+				  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Type,
+						 (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type);
+				  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Type,
+						 (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type);
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Score = 
+					(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Score = 
+					(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Strand = 
+					(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Strand = 
+					(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand;
 		      
 				  /* Computing remainder from frame value for copies 1,2 */
-				  (pv->vExons+i+1)->Remainder = 
-					((3 - (((pv->vExons+i+1)->Donor->Position - 
-							(pv->vExons+i+1)->Acceptor->Position - 
-							(pv->vExons+i+1)->Frame + 1)%3)) %3);
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = 
+					((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Donor->Position - 
+							(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Acceptor->Position - 
+							(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame + 1)%3)) %3);
 				  
-				  (pv->vExons+i+2)->Remainder = 
-					((3 - (((pv->vExons+i+2)->Donor->Position - 
-							(pv->vExons+i+2)->Acceptor->Position - 
-							(pv->vExons+i+2)->Frame + 1)%3)) %3);
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder = 
+					((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Donor->Position - 
+							(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Acceptor->Position - 
+							(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame + 1)%3)) %3);
 				  
 				  /* The same group */
-				  strcpy((pv->vExons+i+1)->Group,(pv->vExons+i)->Group);
-				  strcpy((pv->vExons+i+2)->Group,(pv->vExons+i)->Group);
+				  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Group,
+						 (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group);
+				  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Group,
+						 (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group);
 				  
 				  /* Evidence flag activated */
-				  (pv->vExons+i+1)->evidence = 1;
-				  (pv->vExons+i+2)->evidence = 1;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->evidence = 1;
+				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->evidence = 1;
 				  
 				} /* End of if(three) */      
 			  
 			  /* (E). Doing the same for the original exon: */
 			  /* Computing remainder from frame value */
-			  (pv->vExons+i)->Remainder = 
-				((3 - (((pv->vExons+i)->Donor->Position - 
-						(pv->vExons+i)->Acceptor->Position - 
-						(pv->vExons+i)->Frame + 1)%3)) %3);
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = 
+				((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Donor->Position - 
+						(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Acceptor->Position - 
+						(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame + 1)%3)) %3);
 			  
 			  /* Evidence flag activated */
-			  (pv->vExons+i)->evidence = 1;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->evidence = 1;
 			  
 			  /* Updating and checking loop counters */
-			  i = (three)? i+3 : i+1;
-			  pv->nvSites = pv->nvSites + 2;
+			  external->evidence[a]->nvExons = (three)? 
+				external->evidence[a]->nvExons+3 : 
+				external->evidence[a]->nvExons+1;
+			  external->evidence[a]->nvSites = external->evidence[a]->nvSites + 2;
 			  three = 0;
 			  
 			  if ((i + FRAMES) > MAXEVIDENCES)
-				printError("Too many evidences: increase MAXEVIDENCES definition");
+				printError("Too many annotations: increase MAXEVIDENCES definition");
 			  
-			  if ((pv->nvSites + (2*FRAMES)) > MAXSITESEVIDENCES)
-				printError("Too many site evidences: increase MAXEVIDENCES definition");
+			  if ((external->evidence[a]->nvSites + (2*FRAMES)) > MAXSITESEVIDENCES)
+				printError("Too many site annotations: increase MAXEVIDENCES definition");
 			  
 			} /* End of sorting checkpoint */
 		} /* End of feature_in_gene_model checkpoint */
@@ -299,7 +366,13 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
     } /* End of while (input exons) */
   fclose(file);
   
+  /* Obtain the number of different sequences */
+  external->nSequences = external->locusNames->nextFree;
+
   /* Return the number of created exons (including replications) */
+  for(i=0,j=0; j < external->nSequences; j++) 
+	i = i + external->evidence[j]->nvExons;
+
   return(i);
 }
 

@@ -4,9 +4,9 @@
 *                                                                        *
 *   Asking operating system for memory for geneid data structures        *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,13 +24,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.5 2002-02-20 17:22:51 eblanco Exp $  */
+/*  $Id: RequestMemory.c,v 1.6 2003-11-05 15:02:10 eblanco Exp $  */
 
 #include "geneid.h"
 
 /* Predicted amount of sites and exons found in one split */
 extern long NUMSITES, NUMEXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
 extern int scanORF;
+extern int SRP,EVD,GENEID;
 
 /* Allocating accounting data structure in memory */
 account* RequestMemoryAccounting()
@@ -172,17 +173,14 @@ packEvidence* RequestMemoryEvidence()
   /* Set counters */
   p->nvSites = 0;
   p->nvExons = 0;
-  p->i1vExons = 0;
-  p->i2vExons = 0;
-  p->ivExons = 0;
 
   return(p);
 }
 
-/* Allocating memory for input similarity regions (homology information) */
-packSR* RequestMemorySimilarityRegions()
+/* Allocating memory for blast HSPs (homology information) */
+packHSP* RequestMemoryHomology()
 {
-  packSR* p;
+  packHSP* p;
   int i;
   long HowMany;
 
@@ -191,30 +189,111 @@ packSR* RequestMemorySimilarityRegions()
 
   /* Allocating memory for similarity regions structure */
   if ((p = 
-       (struct s_packSR *) malloc(sizeof(struct s_packSR))) == NULL)
-    printError("Not enough memory: pack of similarity regions");    
+       (struct s_packHSP *) malloc(sizeof(struct s_packHSP))) == NULL)
+    printError("Not enough memory: pack of homology information");    
 
-  /* For each (strand,frame) a list of Similarity Regions will be used */
-  if ((p->sRegions = 
-       (SR **) calloc(HowMany, sizeof(SR*))) == NULL)
-    printError("Not enough memory: similarity regions array");
+  /* For each (strand,frame) a list of HSPs will be used */
+  if ((p->sPairs = 
+       (HSP **) calloc(HowMany, sizeof(HSP*))) == NULL)
+    printError("Not enough memory: general array of HSPs");
 
   for(i=0; i<HowMany; i++)
-    if ((p->sRegions[i] = 
-		 (SR *) calloc(MAXSR, sizeof(SR))) == NULL)
-      printError("Not enough space: similarity regions lists");  
+    if ((p->sPairs[i] = 
+		 (HSP *) calloc(MAXHSP, sizeof(HSP))) == NULL)
+      printError("Not enough space: individual array of HSPs");  
   
   /* Counters */
-  if ((p->nRegions =
+  if ((p->nSegments =
        (int*) calloc(HowMany, sizeof(int)))  == NULL)
-    printError("Not enough memory: SR total number counter");
+    printError("Not enough memory: HSP global counter (frame/strand)");
 
   /* Set counters */
   for(i=0;i<HowMany;i++)
-	p->nRegions[i] = 0;
-    
+	p->nSegments[i] = 0;
+      
+  p->nTotalSegments = 0;
+  p->visited = 0;
+
   return(p);
 }
+
+/* Alocating memory for external information */
+packExternalInformation* RequestMemoryExternalInformation()
+{
+  packExternalInformation* p;
+  int i;
+  long HowMany;
+
+  /* TWO senses plus THREE reading frames */
+  HowMany = STRANDS*FRAMES;
+
+  /* 0. Allocating main structure */
+  /* Allocating memory for similarity regions structure */
+  if ((p = 
+       (struct s_packExternalInformation *) 
+	   malloc(sizeof(struct s_packExternalInformation))) == NULL)
+    printError("Not enough memory: pack of external information");  
+
+  /* 1. Dictionary of exon features */
+  if ((p->locusNames = (dict *)malloc(sizeof(dict))) == NULL)
+    printError("Not enough memory: dictionary of locus names");
+
+  resetDict(p->locusNames);
+
+  /* 2. Arrays of evidence and homology records */
+  if (EVD || !GENEID)
+	{
+	  if ((p->evidence =
+		   (packEvidence**) calloc(MAXNSEQUENCES, sizeof(packEvidence*)))  == NULL)
+		printError("Not enough memory: array of evidence information");
+	  
+	  for(i=0; i<MAXNSEQUENCES; i++)
+		  p->evidence[i] = (packEvidence*) RequestMemoryEvidence();
+	}
+
+  if (SRP)
+	{
+	  if ((p->homology =
+		   (packHSP**) calloc(MAXNSEQUENCES, sizeof(packHSP*)))  == NULL)
+		printError("Not enough memory: array of homology information");
+	  
+	  for(i=0; i<MAXNSEQUENCES; i++)
+		p->homology[i] = (packHSP*) RequestMemoryHomology();
+	}
+  
+  /* 3. Counters for every sequence: evidence */
+  if (EVD)
+	{
+	  p->i1vExons = 0;
+	  p->i2vExons = 0;
+	  p->ivExons = 0;
+	}
+
+  /* 4. Counters for every sequence: homology */
+  if (SRP)
+	{
+	  if ((p->iSegments =
+		   (int*) calloc(HowMany, sizeof(int)))  == NULL)
+		printError("Not enough memory: HSP partial counter (frame/strand)");
+	  
+	  /* Set counters */
+	  for(i=0;i<HowMany;i++)
+		p->iSegments[i] = 0;
+	  
+	  /* Pre-processing array */
+	  if ((p->sr = 
+		   (float **) calloc(HowMany, sizeof(float*))) == NULL)
+		printError("Not enough memory: general preprocessing array of HSPs");
+	  
+	  for(i=0; i<HowMany; i++)
+		if ((p->sr[i] = 
+			 (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+		  printError("Not enough space: individual preprocessing array of HSPs"); 
+	}
+
+  return(p);
+}
+
 
 /* Allocating memory for GCinfo */
 packGC* RequestMemoryGC()
