@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.8 2000-08-02 17:58:29 jabril Exp $
+# $Id: parseblast.pl,v 1.9 2000-08-02 18:22:58 jabril Exp $
 #
 
 my $Start = time;
@@ -11,7 +11,7 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling");
 
 my $PROGRAM = "parseblast.pl";
-my $VERSION = '$Id: parseblast.pl,v 1.8 2000-08-02 17:58:29 jabril Exp $ ';
+my $VERSION = '$Id: parseblast.pl,v 1.9 2000-08-02 18:22:58 jabril Exp $ ';
 
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg, $subject_flg,
 	$sequence_flg, $comment_flg, $nocmmnt_flg, $split_flg, $help_flg, $err_flg,
@@ -275,7 +275,7 @@ sub chk_strand {
 
 #
 # Formatting output as plain, HSPs, GFF, APLOT, ALN.
-my ($n, $nm, $tq, $ts,             # couNter, NaMe, TagQuery, TagSubject
+my ($n, $nm, $wnm, $tq, $ts,       # couNter, NaMe, TagQuery, TagSubject
 	$sc, $bt, $ex, $pv, $id,       # SCore, BiTscore, EvalueX, IDentityscore
 	$frq, $frs,                    # QueryFRame, SubjectFRame
 	$stq, $sts,                    # QuerySTrand, SubjectSTrand
@@ -287,13 +287,13 @@ my ($n, $nm, $tq, $ts,             # couNter, NaMe, TagQuery, TagSubject
 
 sub prt_hsp {
 print STDOUT <<"EndOfHSPs";
-$prg $dbase{$nm} : $id $lnmin $gsc $sc $bt $ex $pv : $query{$nm} $hsq $heq $stq $frq : $nm $hss $hes $sts $frs : $desc{$nm}
+$prg $dbase{$nm} : $id $lnmin $gsc $sc $bt $ex $pv : $query{$nm} $hsq $heq $stq $frq : $wnm $hss $hes $sts $frs : $desc{$nm}
 EndOfHSPs
 last PRINT;
 }
 sub prt_ext {
 print STDOUT <<"EndOfPlain";
-MATCH($n): $query{$nm} x $nm
+MATCH($n): $query{$nm} x $wnm
 SCORE($n): $sc\nBITSC($n): $bt\nEXPEC($n): $ex Psum($pv)
 IDENT($n): $id/$lnmin : $gsc \%
 T_GAP($n): $gpt\nFRAME($n): $frq/$frs\nSTRND($n): $stq/$sts\nMXLEN($n): $lnmx
@@ -305,37 +305,37 @@ last PRINT;
 }
 sub prt_Q_gff {
 print STDOUT <<"EndOfGFF";
-$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\t$nm\t\# E_value $ex : P_sum $pv$sq
+$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\t$wnm\t\# E_value $ex : P_sum $pv$sq
 EndOfGFF
 last PRINT;
 }
 sub prt_S_gff {
 print STDOUT <<"EndOfGFF";
-$nm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\t$query{$nm}\t\# E_value $ex : P_sum $pv$sq
+$wnm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\t$query{$nm}\t\# E_value $ex : P_sum $pv$sq
 EndOfGFF
 last PRINT;
 }
 sub prt_Q_fullgff {
 print STDOUT <<"EndOfFullGFF";
-$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\tTarget \"$nm\"\t$hss\t$hes\tE_value $ex\tStrand $sts\tFrame $frs$sq
+$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\tTarget \"$wnm\"\t$hss\t$hes\tE_value $ex\tStrand $sts\tFrame $frs$sq
 EndOfFullGFF
 last PRINT;
 }
 sub prt_S_fullgff {
 print STDOUT <<"EndOfFullGFF";
-$nm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\tTarget \"$query{$nm}\"\t$hsq\t$heq\tE_value $ex\tStrand $stq\tFrame $frq$sq
+$wnm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\tTarget \"$query{$nm}\"\t$hsq\t$heq\tE_value $ex\tStrand $stq\tFrame $frq$sq
 EndOfFullGFF
 last PRINT;
 }
 sub prt_Q_aplot {
 print STDOUT <<"EndOfAPLOT";
-$query{$nm}:$nm\t$prg\thsp\t$hsq:$hss\t$heq:$hes\t$gsc\t$stq:$sts\t$frq:$frs\t$bt:$n\t\# E_value $ex : P_sum $pv$sq
+$query{$nm}:$wnm\t$prg\thsp\t$hsq:$hss\t$heq:$hes\t$gsc\t$stq:$sts\t$frq:$frs\t$bt:$n\t\# E_value $ex : P_sum $pv$sq
 EndOfAPLOT
 last PRINT;
 }
 sub prt_S_aplot {
 print STDOUT <<"EndOfAPLOT";
-$nm:$query{$nm}\t$prg\thsp\t$hss:$hsq\t$hes:$heq\t$gsc\t$sts:$stq\t$frs:$frq\t$bt:$n\t\# E_value $ex : P_sum $pv$sq
+$wnm:$query{$nm}\t$prg\thsp\t$hss:$hsq\t$hes:$heq\t$gsc\t$sts:$stq\t$frs:$frq\t$bt:$n\t\# E_value $ex : P_sum $pv$sq
 EndOfAPLOT
 last PRINT;
 }
@@ -357,7 +357,7 @@ sub prt_cmn_aln {
 print STDOUT <<"EndOfALN" if !$nocmmnt_flg;
 ################################################################################
 ##
-##  $query{$nm} x $nm #$n
+##  $query{$nm} x $wnm #$n
 ##
 ##    $prg $dbase{$nm}
 ##    Identity: $gsc  Score: $sc  Bits: $bt  E_value: $ex  P_value: $pv
@@ -367,7 +367,6 @@ EndOfALN
 }
 sub prt_msf {
     my ($i,$jq,$js,$vs,$ve,$chw);
-	my $nmb = "";
     ($aq,$as,$sql) = ($hsp_seq{$tq},$hsp_seq{$ts},length($hsp_seq{$tq}));
 	$aq =~ s/\.//og;
 	$as =~ s/\.//og;
@@ -375,7 +374,7 @@ sub prt_msf {
 	&prt_cmn_aln;
 print STDOUT <<"EndOfMSF";
 \n
-$query{$nm}\_x_$nm\_\#$n.msf  MSF: $sql  Type: P  May 4th, 2000  Check: 0  ..\n
+$query{$nm}\_x_$wnm\_\#$n.msf  MSF: $sql  Type: P  May 4th, 2000  Check: 0  ..\n
 Name: $a  Len: $lq  Check: 0  Weight: 1.00
 Name: $b  Len: $ls  Check: 0  Weight: 1.00
 \n//
@@ -426,7 +425,8 @@ sub prt_out {
 	while (@seqlist) {
 		&prt_progress(++$ht);
 		$nm = shift(@seqlist);
-		(!$hsp_flg && $comment_flg) && (print STDOUT "#\n# $prgseq{$nm} :: DB $dbase{$nm} :: $cnt{$nm} HSPs for $query{$nm}x$nm \n# DESCR: $desc{$nm}\n#\n");
+		($wnm = $nm) =~ s/\_\d+$//o; 
+		(!$hsp_flg && $comment_flg) && (print STDOUT "#\n# $prgseq{$nm} :: DB $dbase{$nm} :: $cnt{$nm} HSPs for $query{$nm}x$wnm \n# DESCR: $desc{$nm}\n#\n");
 		($cnt{$nm}>0) && do {
 			for ($n = 1; $n <= $cnt{$nm}; $n++) {
 				$tq = $nm."query".$n;
@@ -476,7 +476,7 @@ sub prt_out {
 				  &prt_ext       if $expanded_flg;
 				  #
 				  # ($qm, $sm, $x, $y) = ("$query{$nm}\_\#$n", "$nm\_\#$n", " ", " ");
-				  ($qm, $sm, $x, $y) = ("$query{$nm}", "$nm", " ", " ");
+				  ($qm, $sm, $x, $y) = ("$query{$nm}", "$wnm", " ", " ");
 				  $ml = &max(length($qm),length($sm));
 				  ($a,$b) = (&fill_right($qm,$ml," "),&fill_right($sm,$ml," "));
 				  &prt_pairwise  if $pairwise_flg;
