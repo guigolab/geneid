@@ -24,12 +24,13 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.3 2000-08-22 10:19:49 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.4 2001-03-07 22:55:32 eblanco Exp $  */
 
 #include "geneid.h"
 
 extern int X10;
 extern int GFF;
+extern int XML;
 
 void PrintExonGFF (exonGFF *e, char Name[], char Source[])
 {
@@ -66,19 +67,28 @@ void printProt(char* Name,long ngen, char* prot, int nAA)
 {
   long j;
 
-  printf("\n>%s|%s_predicted_protein_%ld|%d_AA\n",
+  if (!XML)
+     printf("\n>%s|%s_predicted_protein_%ld|%d_AA\n",
 	 Name,
 	 VERSION,
 	 ngen,
 	 nAA);
+  else
+     printf("\t");
 	  
   for(j=0; j < strlen(prot); j++)
     {
       printf("%c",prot[j]);
       if (!((j+1)%60))
-	printf("\n");
+	{
+	   printf("\n");
+	   if (XML)
+	      printf("\t");
+	}
     }
-  printf("\n\n");
+  printf("\n");
+  if (!XML)
+     printf("\n");  	
 }
 
 /* Select splice site profiles according to the type of a exon */
@@ -269,7 +279,7 @@ long CookingInfo(exonGFF *eorig, gen info[], long* nvExons)
 /* Print a gene according to formatted output selected */
 void PrintGene(exonGFF* start, exonGFF* end, char Name[],
 		char* s, gparam* gp, dict* dAA, long igen, long nAA,
-		int tAA[MAXEXONGEN][2], int nExon) 
+		int tAA[MAXEXONGEN][2], int nExon, int nExons) 
 {
   exonGFF* eaux;
   profile* p1;
@@ -281,32 +291,46 @@ void PrintGene(exonGFF* start, exonGFF* end, char Name[],
   if (start != end)
     {
       eaux = start -> PreviousExon;
-      PrintGene(eaux,end,Name,s,gp,dAA,igen,nAA,tAA,nExon+1);
-      if (X10)
-	{
-	  /* Print both sites of exon Start */
-	  selectFeatures(start->Type,start->Strand,
-			 &p1,&p2,&type1,&type2,&strand,gp);
-	  PrintSite(start->Acceptor,type1,Name,strand,s,p1);
-	  PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
-	  PrintSite(start->Donor,type2,Name,strand,s,p2);
+      PrintGene(eaux,end,Name,s,gp,dAA,igen,nAA,tAA,nExon+1,nExons);
+      if (XML)
+        {
+	   selectFeatures(start->Type,start->Strand,
+			  &p1,&p2,&type1,&type2,&strand,gp);
+	   PrintXMLExon(start,Name,igen,nExon+1,type1,type2,nExons);
 	}
-      else
-	PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+      else 
+	if (X10)
+	  {
+	    /* Print both sites of exon Start */
+	    selectFeatures(start->Type,start->Strand,
+			   &p1,&p2,&type1,&type2,&strand,gp);
+	    PrintSite(start->Acceptor,type1,Name,strand,s,p1);
+	    PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+	    PrintSite(start->Donor,type2,Name,strand,s,p2);
+	  }
+	else
+	  PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
     }
   else
-    {
-      if (X10)
-	{
-	  /* Print both sites of exon End */
+    { 
+      if (XML)
+        {
 	  selectFeatures(end->Type,end->Strand,
 			 &p1,&p2,&type1,&type2,&strand,gp);
-	  PrintSite(end->Acceptor,type1,Name,strand,s,p1);
-	  PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
-	  PrintSite(end->Donor,type2,Name,strand,s,p2);
+	  PrintXMLExon(end,Name,igen,nExon+1,type1,type2,nExons);
 	}
-      else
-	PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+      else 
+	if (X10)
+	  {
+	    /* Print both sites of exon End */
+	    selectFeatures(end->Type,end->Strand,
+			   &p1,&p2,&type1,&type2,&strand,gp);
+	    PrintSite(end->Acceptor,type1,Name,strand,s,p1);
+	    PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+	    PrintSite(end->Donor,type2,Name,strand,s,p2);
+	  }
+	else
+	  PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
     }
 } 
 
@@ -329,8 +353,13 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
     printError("Not enough space to store protein");
 
   /* Header multiple gene */
-  printf("# Optimal Gene Structure. %ld genes. Score = %.6f \n", 
-	 ngen,e -> GeneScore - nvExons*MAXSCORE); 
+    /* Header for  */
+  if (XML)
+    printf(" genes=\"%ld\" score =\"%.2f\">\n", 
+	   ngen,e -> GeneScore - nvExons*MAXSCORE); 
+  else
+    printf("# Optimal Gene Structure. %ld genes. Score = %.6f \n", 
+	   ngen,e -> GeneScore - nvExons*MAXSCORE); 
 
   for(igen=ngen-1; igen>=0; igen--)
     {
@@ -338,20 +367,34 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
       TranslateGen(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
       
       /* Header gene */
-      printf("# Gene %ld(%s). %ld exons. %d aa. Score = %f \n",
-	     ngen-igen,
-	     (info[igen].start->Strand == '+')? "Forward" : "Reverse",
-	     info[igen].nexons,
-	     nAA,
-	     info[igen].score);
+      if (XML)
+	printf("   <gene idGene=\"%s.G%ld\" strand =\"%c\" exons=\"%ld\" score=\"%.2f\">\n",
+	       Name,ngen-igen,info[igen].start->Strand,info[igen].nexons,info[igen].score);
+      else     
+	printf("# Gene %ld(%s). %ld exons. %d aa. Score = %f \n",
+	       ngen-igen,
+	       (info[igen].start->Strand == '+')? "Forward" : "Reverse",
+	       info[igen].nexons,
+	       nAA,
+	       info[igen].score);
       
-      PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,nAA,tAA,0);
+      PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,
+		nAA,tAA,0,info[igen].nexons);
       /* translated protein */
-      if (!(GFF))
-	{
-	  /* Protein in FASTA format */
-	  printProt(Name,ngen-igen,prot,nAA);
-	}
+      if (XML)
+      {
+	printf("      <protein length=\"%d\">\n",nAA);
+	/* Protein in FASTA format */
+	printProt(Name,ngen-igen,prot,nAA);
+	printf("      </protein>\n");
+	printf("   </gene>\n");
+      }
+      else
+	if (!(GFF))
+	  {
+	    /* Protein in FASTA format */
+	    printProt(Name,ngen-igen,prot,nAA);
+	  }
     }
   free(prot);
 }
