@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.3 2001-02-14 14:52:51 eblanco Exp $  */
+/*  $Id: PrintExons.c,v 1.4 2001-02-14 15:46:32 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -74,8 +74,8 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
 	      Name,
 	      (e->evidence)? EVIDENCE : EXONS,
 	      e->Type,
-	      e->Acceptor->Position + e->offset1,
-	      e->Donor->Position + e->offset2,
+	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 	      (e->Score==MAXSCORE)? 0.0: e->Score,
 	      e->Strand,
 	      e->Frame);
@@ -86,8 +86,8 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
       printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%d\t%s\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      e->Type,
-	      e->Acceptor->Position + e->offset1,
-	      e->Donor->Position + e->offset2,
+	      (e->evidence)? e->Acceptor->Position: e->Acceptor->Position + e->offset1,
+	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 	      (e->Score==MAXSCORE)? 0.0:e->Score,
 	      e->Strand,
 	      e->Frame,
@@ -151,8 +151,8 @@ void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA,
 	      Name,
 	      (e->evidence)? EVIDENCE : VERSION,     
 	      e->Type,
-	      e->Acceptor->Position + e->offset1,
-	      e->Donor->Position + e->offset2,
+	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 	      (e->Score==MAXSCORE)? 0.0:e->Score,
 	      e->Strand,
 	      e->Frame,
@@ -166,8 +166,8 @@ void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA,
       printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\tAA %3d:%3d gene_%ld\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      e->Type,
-	      e->Acceptor->Position + e->offset1,
-	      e->Donor->Position + e->offset2,
+	      (e->evidence)? e->Acceptor->Position :e->Acceptor->Position + e->offset1,
+	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 	      (e->Score==MAXSCORE)? 0.0:e->Score,
 	      e->Strand,
 	      e->Frame,
