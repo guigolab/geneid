@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -155,7 +155,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -196,7 +196,7 @@ Here we are drawing the main steps we followed
 
 \subsctn{The sequences test set}
 
-It was agreed to test gene-prediction programs on a eight sequences set that are syntenic between human and mouse. They were published at '\url|http://zilla.lbl.gov/TESTS/|', there is also an active mailing list at {\mthomology}. Table~\ref{tbl:seqnames} lists sequence names, their lengths for human and mouse, and the number of annotated genes contained in each.\\
+It was agreed to test gene-prediction programs on a eight sequences set that are syntenic between human and mouse. They were published at '\url|http://pipeline.lbl.gov/TESTS/|', there is also an active mailing list at {\mthomology}. Table~\ref{tbl:seqnames} lists sequence names, their lengths for human and mouse, and the number of annotated genes contained in each.\\
 
 \begin{comment}
 <<BASH commands>>=
@@ -242,16 +242,14 @@ ELN        &  388.7 Kb &  269.2 Kb &  6 & (Elastin)   \\
 HOXA       &  219.2 Kb &  202.1 Kb & 11 & repeat poor \\
 KVLQT1     &    1.3 Gb &    1.0 Gb & 19 &             \\
 MHC        &    2.4 Gb &    1.5 Gb & 93 & repeat rich \\
-SIL        &  305.9 Kb &  234.4 Kb &  3 &             \\[1.5ex]
-								     
-Chrom 22   &          &  4 Mb    &    & \raisebox{-2ex}{\shortstack[l]{Ongoing discussion to choose\\GoldenPath or Sanger Center Version}} \\\hline
+SIL        &  305.9 Kb &  234.4 Kb &  3 &             \\ % [1.5ex]
+% Chrom 22   &          &  4 Mb    &    & \raisebox{-2ex}{\shortstack[l]{Ongoing discussion to choose\\GoldenPath or Sanger Center Version}} \\\hline
 \end{tabular}
 \caption{\label{tbl:seqnames} Official human/mouse homologous sequences set.}
 \end{center}
 \end{table}
 
 {\data} database contains those 8 pairs of orthologous sequences from human and mouse. Table~\ref{tbl:genelist} on page~\pageref{tbl:genelist} lists the gene identifiers already annotated for each human sequence.
-
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -261,7 +259,7 @@ Chrom 22   &          &  4 Mb    &    & \raisebox{-2ex}{\shortstack[l]{Ongoing d
 
 The first sequence dataset was obtained from '\url|http://waldo.wi.mit.edu/~danb/HomologSeqs/|'. There were some differences between that set and the one used by {\twsc} gene-prediction team, coordinates mapped from ??Sanger?? and Golden Path did not match well. Those differences did our program, {\gnid}, to make predictions that were not comparable to the {\twsc} ones (so after their evaluation our program did pretty bad predictions).
 
-Next dataset was agreed to be available from '\url|http://zilla.lbl.gov/TESTS/|'. We found ``duplicated'' genes in the original files from that site, in three of the test sequences:
+Next dataset was agreed to be available from '\url|http://pipeline.lbl.gov/TESTS/|'. We found ``duplicated'' genes in the original files from that site, in three of the test sequences:
 
 \begin{center}
 \begin{tabular}{cl}
@@ -272,21 +270,107 @@ Hsap\_MHC    & TAP2, LTB, HSPA1A, HSPA1B, AIF1, TNXA/TNXB \\
 \end{center}
 
 Those duplications correspond to alternative splicing forms, but it is not clear yet how we have to deal with them, so that we have discarded the shorter gene or the gene with less exons (in TNXA/TNXB case, which exons were overlapping ---or the same---, we removed TNXA). 
+
+\subsubsctn{Ian Korf's annotation} 
+
+Fixed annotations were available from \url|http://sapiens.wustl.edu/~ikorf/annotation/|, see table~\ref{tbl:ikorf}. 
+
+<<BASH commands DATASETS>>=
+#
+# DOWNLOADING Ian Korf's Annotation
+pushd $DATASETS/_tmp/20010911.IanKorf ;
+wget -b --no-parent --mirror --tries=0            \
+     --output-file=download_orthologous.log       \
+     --no-host-directories --cut-dirs=3 --glob=on \
+	"http://sapiens.wustl.edu/~ikorf/annotation/blessed/" ;
+# find ./ '(' -name '\?*' -o -name 'index.html' ')' -exec /bin/rm -v {} ';' 
+@
+
+\begin{center}
+\begin{table}[!ht]
+\begin{center}
+\footnotesize
+\begin{tabular}{rrrrrrrr}
+Name   & Length  & GC     & Repeats & Genes & Annotations    & RefSeqs \\
+\htmladdnormallink{BTK}{http://sapiens.wustl.edu/~ikorf/annotation/BTK.html}
+       &  79 Kb  & 43.5\% & 39.0\%  &  6    & 5 (4 correct)  &  5 (5 correct) \\
+\htmladdnormallink{CD4}{http://sapiens.wustl.edu/~ikorf/annotation/CD4.html}
+       & 267 Kb  & 50.2\% & 42.1\%   & 16    &  0             & 13 (8 correct) \\ % Hs_CD4.14 is knowingly out of frame
+\htmladdnormallink{CFTR}{http://sapiens.wustl.edu/~ikorf/annotation/CFTR.html}
+       & 425 Kb  & 36.7\% & 41.4\%   &  4    &  3 (1 correct) &  2 (1 correct) \\
+\htmladdnormallink{DFNA5}{http://sapiens.wustl.edu/~ikorf/annotation/DFNA5.html}
+       & 243 Kb  & 41.2\% & 37.6\%   &  2    &  2 (0 correct) &  1 (1 correct) \\
+\htmladdnormallink{ELN}{http://sapiens.wustl.edu/~ikorf/annotation/Elastin.html}
+       & 389 Kb  & 51.1\% & 59.3\%   &  6    &  6 (3 correct) &  6 (3 correct) \\
+\htmladdnormallink{HOXA}{http://sapiens.wustl.edu/~ikorf/annotation/HOXa.html}
+       & 219 Kb  & 48.1\% & 21.2\%   & 13    & 11 (11 correct) & 11 (11 correct) \\
+\htmladdnormallink{KVLQT1}{http://sapiens.wustl.edu/~ikorf/annotation/KVLQT1.html}
+      & 1279 Kb  & 55.1\% & 25.6\%   & 20    &  BBB           &  CCC   \\ % Hs_KvLQT1.9 is knowingly out of frame
+MHC   &  XXX Kb  &  YYY\% &  ZZZ\%   & AAA   &  BBB           &  CCC   \\ % too lazy for this one
+\htmladdnormallink{SIL}{http://sapiens.wustl.edu/~ikorf/annotation/SIL.html}
+      &  306 Kb  & 43.2\% & 54.2\%   &  5     & 4 (3 correct)  & 3 (3 correct) \\
+\end{tabular}
+\vskip 1ex
+\begin{minipage}[c]{\linewith}
+Some notes on the annotated sequences (by Ian Korf):
+\begin{quote}
+\begin{enumerate}
+\item[a] one gene from CD4 and one from KvLQT1 look weird and go out of frame.
+The transcripts are pretty clear on the structure. So either the sequence
+is misassembled or these are SNPs.
+\item[b] KvLQT1 isn't entirely finished. This can lead to gene prediction
+errors.
+\item[c] I think I've done a reasonably good job with fixing the annotations,
+but there may still be errors. Note that the non-gene call around 660K on
+KvLQT1 is a really subtle pseudogene, and not a missed gene.
+\end{enumerate}
+\end{quote}
+\end{minipage}
+
+\caption[Ian Korf's revised annotation]{\label{tbl:ikorf} Ian Korf's revised annotation (from {\small\url|http://sapiens.wustl.edu/~ikorf/annotation/|}). }
+\end{center}
+\end{table}
+\end{center}
+
+\subsubsctn{Latest orthologous datasets update}
+ 
+We downloaded the new datasets, updated on Sep 28, 2001. Files shown in the web page of 'Pipeline' server has the following extensions:
+
+\begin{itemize}
+\item Conserved Regions: [[ Hs_Mm_main.cns ]]
+\item Annotation
+ \begin{itemize}
+  \item  Ian Korf:  [[ Hs.exons.ikorf ]]
+  \item    RefSeq:  [[ Hs.exons.refGene ]]
+  \item RefSeqGFF:  [[ Hs.exons.refGene.GFF2 ]]
+ \end{itemize}
+\item Sequences
+ \begin{itemize}
+  \item Human:  [[ Hs.fasta ]]
+  \item Mouse:  [[ Mm.fasta ]]
+ \end{itemize}
+\item Masked Sequences (orimasked)
+ \begin{itemize}
+  \item Human:  [[ Hs.fasta.masked ]]
+  \item Mouse:  [[ Mm.fasta.masked ]]
+ \end{itemize}
+\end{itemize}
  
 <<BASH commands DATASETS>>=
 #
 # DOWNLOADING DataSets
-wget -b --no-parent --mirror --tries=0  \
-     --output-file=download_orthologous.log    \
-     --no-host-directories --cut-dirs=1 \
-     'http://zilla.lbl.gov/TESTS/'
-#
+# pushd $DATASETS/_tmp/20010723.Pipeline ;
+pushd $DATASETS/_tmp/20010928.Pipeline ;
+wget -b --no-parent --mirror --tries=0      \
+     --output-file=download_orthologous.log \
+     --no-host-directories --cut-dirs=1     \
+     'http://pipeline.lbl.gov/TESTS/'
+# find ./ '(' -name '\?*' -o -name 'index.html' ')' -exec /bin/rm -v {} ';' 
 @
 \begin{comment}
 # 
 # http://zilla.lbl.gov/VISTAS/Chr6/NT_002572/Mm.fasta
 \end{comment}
- 
 
 \subsctn{Preparing files for the analysis}
 
@@ -309,10 +393,13 @@ KVLQT1  Hsap_KVLQT1  Mmus_KVLQT1
 MHC     Hsap_MHC     Mmus_MHC
 SIL     Hsap_SIL     Mmus_SIL
 @
+<<Sequence IDs extra>>=
+CD4     Hsap_CD4     Mmus_CD4
+@
 \vskip 1ex
 \end{minipage}
 &
-\hspace{1em}\parbox[b]{5cm}{\caption{\label{tbl:seqIDs} Contents of the main IDs file which was generated tangling this table from the document.}}
+\hspace{1em}\parbox[b]{5cm}{\caption{\label{tbl:seqIDs} Contents of the main IDs file which was generated tangling this table from the document. We have included \textbf{CD4} to the test set, so we actually have 9 sequences.}}
 \\\cline{1-1}
 \end{tabular}
 \end{center}
@@ -342,7 +429,7 @@ ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \
          $DATASETS/annotation $DATASETS/annotation/desc ;
 #
 # Preparing fasta files
-IDIR="$DATASETS/_tmp" ;
+IDIR="$DATASETS/_tmp/InitialSET" ;
 ODIR="$DATASETS/fasta/raw" ;
 while read locus human mouse ;
   do {
@@ -3052,7 +3139,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
 @ 
 
 \newpage
@@ -3401,7 +3488,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -3745,7 +3832,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
