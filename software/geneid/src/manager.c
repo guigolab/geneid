@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.1 2001-12-18 16:22:36 eblanco Exp $ */
+/* $Id: manager.c,v 1.2 2003-02-26 10:43:54 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -174,6 +174,8 @@ void  manager(char *Sequence,
       sprintf(mess,"ORFs \t\t\t%8ld", allExons->nORFs);
       printRes(mess); 
     }
+  else
+	allExons->nORFs = 0;
 
   /* 3. Scoring and Filtering Exons */
   ScoreExons(Sequence, allExons, 
