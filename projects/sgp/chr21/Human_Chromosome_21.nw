@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: Human_Chromosome_21.nw,v 1.4 2001-10-17 18:43:59 jabril Exp $ 
+% # $Id: Human_Chromosome_21.nw,v 1.5 2001-10-18 08:39:07 jabril Exp $ 
 %
 % THIS FILE WAS GENERATED WITH THE FOLOWING COMMAND:
 % ~jabril/bin/deploy Human_Chromosome_21  /home/ug/jabril/development/softjabril/deploy/data/report.nw
@@ -236,7 +236,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.4 2001-10-17 18:43:59 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_21.nw,v 1.5 2001-10-18 08:39:07 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -537,12 +537,14 @@ perl -we ' ##
 @ 
 
 <<APOLLO>>=
+BASE="/projects/sgp/chr21/apollo" ;
 # what to do when loading 5mbp Ensembl fragments using Apollo
-cat ori/chr21_10_15.gff ori/chr21_15_20.gff ori/chr21_20_25.gff \
-    ori/chr21_25_30.gff ori/chr21_30_35.gff ori/chr21_35_40.gff \
-    ori/chr21_40_45.gff > chr21.gff ;
+cat $BASE/ori/chr21_10_15.gff $BASE/ori/chr21_15_20.gff \
+    $BASE/ori/chr21_20_25.gff $BASE/ori/chr21_25_30.gff \
+    $BASE/ori/chr21_30_35.gff $BASE/ori/chr21_35_40.gff \
+    $BASE/ori/chr21_40_45.gff > $BASE/chr21.gff ;
 #
-gawk '{print $2,$3}' chr21.gff | sort | uniq -c | sort -nr ;
+gawk '{print $2,$3}' $BASE/chr21.gff | sort | uniq -c | sort -nr ;
 #   57468 sptr similarity
 #   54303 embl_vertrna similarity
 #   44626 RepeatMasker similarity
@@ -561,60 +563,69 @@ gawk '{print $2,$3}' chr21.gff | sort | uniq -c | sort -nr ;
 #      94 cpg similarity
 #       1 tRNA similarity 
 #
-grep "genscan" chr21.gff | sort +3n -5 +8n | \
+grep "genscan" $BASE/chr21.gff | sort +3n -5 +8n | \
     gawk 'BEGIN{OFS="\t";gp=last=1}
           { if (last!=$9) { gp++; last=$9; };
             $9=gp; print $0;
-            }' - > chr21_genscan.gff ;
-grep "est" chr21.gff | sort +3n -5 > chr21_est.gff ;
+            }' - > $BASE/chr21_genscan.gff ;
+grep "est" $BASE/chr21.gff | sort +3n -5 > $BASE/chr21_est.gff ;
 gawk 'BEGIN{OFS="\t";gp=last=1}
       $2 ~ /^(hugo|embl|ensembl|sptrembl|epcr)$/ {
         print $0;
-      }' chr21.gff | \
-         sort +3n -5 > chr21_annot.gff ;
+      }' $BASE/chr21.gff | \
+         sort +3n -5 > $BASE/chr21_annot.gff ;
 #
 gawk 'BEGIN{OFS="\t";gp=last=1}
-      { $1=$9; gsub("ENST","ENSG",$1); 
+      $1 !~ /^\#|^[ \t]*$/ {
+        $1=$9; gsub("ENST","ENSG",$1); 
         $2="annotation"; $3="exon"; $6=1; print $0;
         }' /projects/datasets/chr21/annotation/ensembl/cds/gff/chr21 \
-        > chr21_local-annot.gff ;
+        > $BASE/chr21_local-annot.gff ;
 gawk 'BEGIN{OFS="\t"}
-      { $1=++cnt;            # $1="static0";
+      $1 !~ /^\#|^[ \t]*$/ {
+        $1=++cnt;            # $1="static0";
         $3="hsp-sr"; $8="."; # $9="__NONE__\t-1\t-1";
         print $0;
         }' /projects/sgp/chr21/sgp/Hsap.masked.3X+/hsp-rs/chr21 \
-        > chr21_hsp-sr.gff ;
+        > $BASE/chr21_hsp-sr.gff ;
 gawk 'BEGIN{OFS="\t"}
-      { $2="geneid-raw"; $3="exon";
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="geneid-raw"; $3="exon";
+        # split($9,n,"_"); $9=n[2];
+        print $0;
+        }' /projects/sgp/chr21/geneid/Hsap.raw/gff/chr21 \
+        > $BASE/chr21_geneid_raw.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="geneid-masked"; $3="exon";
+        # split($9,n,"_"); $9=n[2];
+        print $0;
+        }' /projects/sgp/chr21/geneid/Hsap.masked/gff/chr21 \
+        > $BASE/chr21_geneid_masked.gff ;
+gawk 'BEGIN{OFS="\t"}
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="sgp-raw"; $3="exon";
         split($9,n,"_"); $9=n[2]; print $0;
         }' /projects/sgp/chr21/sgp/Hsap.raw.3X+/gff/chr21 \
-        > chr21_geneid_raw.gff ;
+        > $BASE/chr21_sgp_raw.gff ;
 gawk 'BEGIN{OFS="\t"}
-      { $2="geneid-masked"; $3="exon";
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="sgp-masked"; $3="exon";
         split($9,n,"_"); $9=n[2]; print $0;
         }' /projects/sgp/chr21/sgp/Hsap.masked.3X+/gff/chr21 \
-        > chr21_geneid_masked.gff ;
+        > $BASE/chr21_sgp_masked.gff ;
 gawk 'BEGIN{OFS="\t"}
-      { $2="sgp-raw"; $3="exon";
-        split($9,n,"_"); $9=n[2]; print $0;
-        }' /projects/sgp/chr21/sgp/Hsap.raw.3X+/gff/chr21 \
-        > chr21_sgp_raw.gff ;
-gawk 'BEGIN{OFS="\t"}
-      { $2="sgp-masked"; $3="exon";
-        split($9,n,"_"); $9=n[2]; print $0;
-        }' /projects/sgp/chr21/sgp/Hsap.masked.3X+/gff/chr21 \
-        > chr21_sgp_masked.gff ;
-gawk 'BEGIN{OFS="\t"}
-      { $2="sgp"; $3="exon";
+      $1 !~ /^\#|^[ \t]*$/ {
+        $2="sgp"; $3="exon";
         split($9,n,"_"); $9=n[2]; print $0;
         }' /projects/sgp/chr21/sgp/Hsap.raw.3X+.ew-2+2/gff/chr21 \
-        > chr21_sgp_ew.gff ;
+        > $BASE/chr21_sgp_ew.gff ;
 #
-cat chr21_est.gff chr21_genscan.gff \
-    chr21_geneid_masked.gff chr21_geneid_raw.gff \
-    chr21_sgp_ew.gff chr21_sgp_masked.gff chr21_sgp_raw.gff \
-    chr21_hsp-sr.gff chr21_local-annot.gff chr21_annot.gff \
-    > all_chr21.gff ;
+cat $BASE/chr21_est.gff $BASE/chr21_genscan.gff \
+    $BASE/chr21_geneid_masked.gff $BASE/chr21_geneid_raw.gff \
+    $BASE/chr21_sgp_ew.gff $BASE/chr21_sgp_masked.gff $BASE/chr21_sgp_raw.gff \
+    $BASE/chr21_hsp-sr.gff $BASE/chr21_local-annot.gff $BASE/chr21_annot.gff \
+    > $BASE/all_chr21.gff ;
 @ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1009,7 +1020,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_21.nw,v 1.4 2001-10-17 18:43:59 jabril Exp $
+# $Id: Human_Chromosome_21.nw,v 1.5 2001-10-18 08:39:07 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
