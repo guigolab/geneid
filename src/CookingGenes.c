@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.4 2001-03-07 22:55:32 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.5 2001-03-08 15:34:47 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -368,12 +368,16 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
       
       /* Header gene */
       if (XML)
-	printf("   <gene idGene=\"%s.G%ld\" strand =\"%c\" exons=\"%ld\" score=\"%.2f\">\n",
-	       Name,ngen-igen,info[igen].start->Strand,info[igen].nexons,info[igen].score);
-      else     
-	printf("# Gene %ld(%s). %ld exons. %d aa. Score = %f \n",
+	printf("   <gene idGene=\"%s.G%ld\" strand =\"%s\" exons=\"%ld\" score=\"%.2f\">\n",
+	       Name,
 	       ngen-igen,
-	       (info[igen].start->Strand == '+')? "Forward" : "Reverse",
+	       (info[igen].start->Strand == '+')? xmlFORWARD : xmlREVERSE, 
+	       info[igen].nexons,
+	       info[igen].score);
+      else     
+	printf("# Gene %ld (%s). %ld exons. %d aa. Score = %f \n",
+	       ngen-igen,
+	       (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
 	       info[igen].nexons,
 	       nAA,
 	       info[igen].score);
