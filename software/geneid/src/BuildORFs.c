@@ -1,12 +1,12 @@
 /*************************************************************************
 *                                                                        *
-*   Module: BuildSingles                                                 *
+*   Module: BuildORFs                                                    *
 *                                                                        *
-*   Using lists of splice sites, it builds single genes.                 *
+*   From start and stop codons, to build ORFs                            *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,65 +24,73 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildORFs.c,v 1.1 2000-12-18 09:37:55 eblanco Exp $  */
+/*  $Id: BuildORFs.c,v 1.2 2001-12-18 15:05:14 eblanco Exp $  */
 
 #include "geneid.h"
 
+/* Maximum allowed number of generic exons (divided by RSINGL) */
 extern long NUMEXONS;
+extern long MAXBACKUPSITES;
 
-long BuildSingles(site *Start, long nStarts, 
-		  site *Stop, long nStops,
-		  long cutPoint,
-		  exonGFF *Exon) 
+long BuildORFs(site *Start, long nStarts, 
+               site *Stop, long nStops,
+               long cutPoint, char* Sequence,
+               exonGFF *Exon) 
 {
   int Frame;
   long i, j, js;
+  
+  /* Maximum allowed number of ORFs per fragment */     
+  long HowMany;
+  
+  /* Final number of predicted ORFs */
   long nSingles;
   
-  /* main loop, for each Start codon */
+  /* Main loop, for each Start codon searching the first Stop in frame */
+  HowMany=(MAXBACKUPSITES)? (long)(NUMEXONS/RSINGL): NUMEXONS;
   for (i=0, j=0, nSingles=0;
-      (i < nStarts) && (j<nStops) &&
-      (nSingles<(int)(NUMEXONS/RSINGL));
-      i++)
+	   (i < nStarts) && (j<nStops) && (nSingles<HowMany);
+	   i++)
     {
-      Frame = (Start+i)->Position % 3;
-   
-      /* advance Stops to Start */
-      while ( (j < nStops) && 
-	      (((Stop+j)->Position+1) < (Start+i)->Position))
-	j++;
-
+      Frame = ((Start+i)->Position + 1) % 3;
+	  
+      /* Skip previous Stops to Start */
+      while ( (j < nStops) && (((Stop+j)->Position+1) <= (Start+i)->Position+1))
+		j++;
+	  
+      /* Save counter j for the next iteration */
       js=j;
-
-      /* Only use some stops (stops before cutPoint) */
-      /* find first Stop in Frame with Start: Stop closes Start frame */
+	  
+      /* Skip Stops not in frame with the current Start */
       while ((js < nStops) && (((Stop+js)->Position+1) % 3 != Frame))
-	js++;
-
-      /* Only use some stops (stops before cutPoint) */
-      /* first Stop after Start defines a single gen */
+		js++;
+	  
+      /* CutPoint: to preserve sorted exons between fragments */
       if (js < nStops && (Stop+js)->Position >= cutPoint)
-	{
-	  /* Length rule about Single Genes */
-	  if ( ((Stop+js)->Position + LENGTHCODON - (Start+i)->Position + 1)
-	       >= 
-	       SINGLEGENELENGTH)
-	    {
-	      (Exon + nSingles)->Acceptor = (Start+i);
-	      (Exon + nSingles)->Donor = (Stop+js);
-	      (Exon + nSingles)->Frame = 0;
-	      (Exon + nSingles)->Remainder = 0;
-	      strcpy((Exon + nSingles)->Type,"Single");
-	      (Exon + nSingles)->Group = NOGROUP;
-	      (Exon + nSingles)->evidence = 0;
+		{
+		  /* LENGTH rule about ORFs */
+		  if ( ((Stop+js)->Position + LENGTHCODON - (Start+i)->Position + 1)
+			   >= 
+			   ORFLENGTH)
+			{
+			  (Exon + nSingles)->Acceptor = (Start+i);
+			  (Exon + nSingles)->Donor = (Stop+js);
+			  (Exon + nSingles)->Frame = 0;
+			  (Exon + nSingles)->Remainder = 0;
+			  strcpy((Exon + nSingles)->Type,"ORF");
+			  strcpy((Exon + nSingles)->Group,NOGROUP);
+			  (Exon + nSingles)->evidence = 0;
 
-	      nSingles++;
-	    }
-	}
+			  /* Store info about frame and remainder nucleotides to avoid building stops in frame */
+			  ComputeStopInfo((Exon+nSingles),Sequence);
+		 
+			  nSingles++;
+			}
+		}
     }
-
-  if (nSingles>=(int)(NUMEXONS/RSINGL))
-    printError("Too many predicted exons: Change RSINGL parameter");
+  
+  if (nSingles >= HowMany)
+	printError("Too many ORF exons: decrease RSINGL parameter");
   
   return(nSingles);
 }
