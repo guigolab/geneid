@@ -1,4 +1,4 @@
-package Utils::GFFTools;
+package ClusterMerge::GFFTools;
 
 use vars qw(@ISA);
 use strict;
