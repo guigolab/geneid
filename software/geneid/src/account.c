@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: account                                                      *
 *                                                                        *
-*   Accounting of results stats and time of execution.                   *
+*   Accounting: results and run-time stats                               *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,23 +24,21 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: account.c,v 1.2 2000-07-26 07:54:33 eblanco Exp $  */
+/*  $Id: account.c,v 1.3 2001-12-18 16:18:43 eblanco Exp $  */
 
 #include "geneid.h"
 
-/* Init accounting */
+/* Init accounting (data structure) */
 account* InitAcc()
 {
   account* m; 
-  
-  /* Verifying geneid.h features */
-  if (LENGTHSi <= OVERLAP)
-    printError("LENGTHSi parameter must be greater than OVERLAP parameter");
 
-  m = (account *) malloc(sizeof(account));
+  /* Request memory to allocate acc. data */
+  m = (account*) RequestMemoryAccounting();
+
+  printMess("Reset accounting data");
 
   /* Reset counters */
-  m->totalExons = 0;
   m->starts = 0;
   m->stops = 0;
   m->acc = 0;
@@ -53,11 +51,16 @@ account* InitAcc()
   m->internal = 0;
   m->terminal = 0;
   m->single = 0;
+  m->orf = 0;
   m->first_r = 0;
   m->internal_r = 0;
   m->terminal_r = 0;
   m->single_r = 0;
+  m->orf_r = 0;
 
+  m->totalExons = 0;
+
+  /* Computing the time used by every module (benchmarking): NOT USED */
   m->tSites = 0;
   m->tExons = 0;
   m->tGenes = 0;
@@ -65,15 +68,17 @@ account* InitAcc()
   m->tScore = 0;
   m->tBackup = 0;
   
-  printMess("Reset accounting");
-  /* What time is it? */ 
-  clock();
+  /* Starting the count (running time) */
+  /* Real time */
   (void) time(&m->tStart);
+  /* CPU time */
+  clock();
+
 
   return(m);
 }
 
-/* Recompute total number of splice sites and exons of current sequence */
+/* Updating total number of sites and exons so far found in the sequence */
 void updateTotals(account *m,
                   packSites* allSites,
                   packSites* allSites_r,
@@ -94,11 +99,13 @@ void updateTotals(account *m,
   m->internal += allExons->nInternalExons;
   m->terminal += allExons->nTerminalExons;
   m->single += allExons->nSingles;
+  m->orf += allExons->nORFs;
 
   m->first_r += allExons_r->nInitialExons;
   m->internal_r += allExons_r->nInternalExons;
   m->terminal_r += allExons_r->nTerminalExons;  
   m->single_r += allExons_r->nSingles;  
+  m->orf_r += allExons_r->nORFs;  
 
   m->totalExons = 
     m->first + 
@@ -108,15 +115,16 @@ void updateTotals(account *m,
     m->terminal +
     m->terminal_r +
     m->single +
-    m->single_r;
+    m->single_r +
+    m->orf +
+    m->orf_r;
 }
 
-/* Reset counters to the next DNA sequence */
+/* Reset acc. counters for the next input sequence */
 void cleanAcc(account* m)
 {
   
-  /* ReInitialize */
-  m->totalExons = 0;
+  /* Reset */
   m->starts = 0;
   m->stops = 0;
   m->acc = 0;
@@ -125,13 +133,18 @@ void cleanAcc(account* m)
   m->stops_r = 0;
   m->acc_r = 0;
   m->don_r = 0;
+
   m->first = 0;
   m->internal = 0;
   m->terminal = 0;
   m->single = 0;
+  m->orf = 0;
   m->first_r = 0;
   m->internal_r = 0;
   m->terminal_r = 0;
   m->single_r = 0;
+  m->orf_r = 0;
+
+  m->totalExons = 0;
 }
 
