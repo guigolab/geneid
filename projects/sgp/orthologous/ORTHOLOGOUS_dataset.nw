@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -65,15 +65,10 @@
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[ORTHOLOGOUS SET]}}
-\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[HOMOLOGY]}}
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[8SEQ ORTHOLOGOUS]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[8SEQ ORTHOLOGOUS]}}
 
 % defs
-\def\drome{\textit{Drosophila melanogaster}}
-\def\dro{\textit{Drosophila}}
-\def\dme{\textit{D. melanogaster}}
-\def\seq{\texttt{\textbf{X62937}}}
-\def\nowf{[[DromeRepeats.nw]]}
 \def\biop{\textsc{BioPerl}}
 \def\rptm{\textsc{RepeatMasker}}
 \def\bl{\textsc{Blast}}
@@ -160,7 +155,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -1103,42 +1098,9 @@ EXTRABOX    : est
 
 \sctn{Gene predictions}
 
-Preparing directories:
+We analyzed the {\data} sequence dataset with different gene-prediction tools and evaluated their accuracy (sensitivity and specificity). We included results provided by other groups (cite TWINSCAN/SLAM).
 
-<<BASH commands ANALYSIS>>=
-#
-GI="$ANALYSIS/geneid" ;
-GS="$ANALYSIS/genscan" ;
-TS="$ANALYSIS/twinscan" ;
-SP="$ANALYSIS/sgp" ;
-R="Hsap.raw" ;
-O="Hsap.orimasked" ;
-for a in $GI $GS $TS $SP ;
-  do {
-    ChckDirs $a ;
-    for b in $a/$R $a/$O ;
-      do {
-        ChckDirs $b ;
-        for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
-          do {
-            ChckDirs $b/$c ;
-            } ;
-          done ;
-        } ;
-      done ;
-    } ;
-  done ;
-for b in $SP/$R $SP/$O ;
-  do {
-    for c in hsp sr hsp-rs tbx ;
-      do {
-        ChckDirs $b/$c ;
-        } ;
-      done ;
-    } ;
-  done ;
-#
-@ 
+.........PUT HERE a LIST of them.....
 
 \subsctn{Running {\gnid}} 
 
@@ -1407,18 +1369,6 @@ process_TWINSCAN ()
 
 \begin{comment}
 <<BASH commands ANALYSIS>>=
-#
-renameSEQS ()
-{
-  # renameSEQS ls_command reg_exp substitution_value
-  #
-  $1 | while read n ; 
-    do {
-      k=`echo $n | sed "s/$2/$3/"` ;
-      [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
-    } ;
-    done ;
-}
 #
 pushd $ANALYSIS/twinscan/Hsap.20010722/tmp/
 pushd $ANALYSIS/twinscan/Hsap.20010803/tmp/
@@ -1696,7 +1646,7 @@ while read locus ;
   do {
     echo "### Working on $locus..." ;
     #
-    IDIR="$ANALYSIS/genscan/Hsap.orimasked" ;
+    IDIR="$ANALYSIS/genscan/Hsap.masked" ;
     ODIR="$IDIR/ps/_tmp/genscan" ;
     [ -e $ODIR ] || ChckDirs $ODIR ;
     gawk 'BEGIN{OFS="\t"}
@@ -1705,7 +1655,7 @@ while read locus ;
               print;
           }' $IDIR/gff/$locus > $ODIR/$locus ;
     #
-    IDIR="$ANALYSIS/geneid/Hsap.orimasked" ;
+    IDIR="$ANALYSIS/geneid/Hsap.masked" ;
     ODIR="$IDIR/ps/_tmp/geneid" ;
     [ -e $ODIR ] || ChckDirs $ODIR ;
     gawk 'BEGIN{OFS="\t"}
@@ -1800,7 +1750,7 @@ run_GFF2PS ()
   # "GFF_files_list" a list of GFF files (with full path) to be plotted
   #
   ODIR="$1/gff2ps" ;
-  GFFfiles="$2";
+  #
   ChckDirs $ODIR \
            $ODIR/a3      $ODIR/a4      $ODIR/wide \
            $ODIR/a3/logs $ODIR/a4/logs $ODIR/wide/logs ;
@@ -1808,6 +1758,9 @@ run_GFF2PS ()
   while read locus ; # Requires previous $IDIR 
     do {
       echo "### Plotting $locus" ;
+      GFFfiles="";
+      for wdirs in $2;
+        do { GFFfiles="$GFFfiles $wdirs/$locus" ; } ; done ;
       gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a4.rc   -- $GFFfiles \
               2>&1 > $ODIR/a4/$locus   | tee $ODIR/a4/logs/$locus ;
       gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a3.rc   -- $GFFfiles \
@@ -1848,7 +1801,7 @@ GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
 GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
 # GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
 GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
-RunGFF2PS $IDIR "$GFFIN" ;
+run_GFF2PS $IDIR "$GFFIN" ;
 #
 @ 
 
@@ -1861,7 +1814,7 @@ annotation   & [[$DATASETS/annotation/gff/$locus]] \\
 sgp          & [[$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps/_tmp/sgp/$locus]] \\
 geneid msk   & [[$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/$locus]] \\
 % NOT YET: we do not know if we got twinscan results for 3XWGS
-% twinscan msk & [[$ANALYSIS/twinscan/Hsap.20010803/gff/$locus]] \\
+%     twinscan msk & [[$ANALYSIS/twinscan/Hsap.20010803/gff/$locus]] \\
 genscan msk  & [[$ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan/$locus]] \\
 hsp-rs       & [[$ANALYSIS/sgp/rguigo/ps/_tmp/tblastx/$locus]] \\
 repeats      & [[$DATASETS/masking/default/gff/$locus]] \\
@@ -1876,14 +1829,14 @@ GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
 # GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid" ;
 GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
 # NOT YET: we do not know if we got twinscan results for 3XWGS
-# GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff" ;
-# GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
+#     GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff" ;
+#     GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
 # GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan" ;
 GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
 GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
 # GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
 GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
-RunGFF2PS $IDIR "$GFFIN" ;
+run_GFF2PS $IDIR "$GFFIN" ;
 #
 @
 
@@ -1895,7 +1848,7 @@ RunGFF2PS $IDIR "$GFFIN" ;
 IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps_3X+FO" ;
 ChckDirs $IDIR ;
 GFFIN="" #################### (TO DEFINE!!!!)
-RunGFF2PS $IDIR "$GFFIN" ;
+run_GFF2PS $IDIR "$GFFIN" ;
 #
 @
 
@@ -2144,13 +2097,27 @@ masked::left_label=MASKED
 
 <<BASH commands ANALYSIS>>=
 #
-while read locus ;
-  do {
-    echo "### Converting GFF to GTF2: $locus ..." ;
-    $BIN/gff2gtf.pl < $ANALYSIS/sgp/rguigo/gff/$locus \
-                    > $ANALYSIS/sgp/rguigo/gtf2/$locus ;
-    } ;
-  done < $HSAP ; 
+toGTF ()
+{
+  #
+  # toGTF - Reformating GFF files to GTF2
+  #
+  # USAGE: toGTF test_path ID_file
+  #
+  while read locus ;
+    do {
+      echo "### Converting GFF to GTF2: $locus ..." ;
+      $BIN/gff2gtf.pl < $1/gff/$locus > $1/gtf2/$locus ;
+      } ;
+    done < $2 ; 
+}
+#
+toGTF $ANALYSIS/sgp/Hsap.orimasked   $HSAP ;
+toGTF $ANALYSIS/sgp/Hsap.raw         $HSAP ;
+toGTF $ANALYSIS/sgp/rguigo.orimasked $HSAP ;
+toGTF $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5 $HSAP ;
+toGTF $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5    $HSAP ;
+#
 @ 
 
 \subsctn{Results on human/mouse homologous sequence comparison}
@@ -2166,43 +2133,45 @@ HSAP="/projects/datasets/orthologous/id.Hsap" ;
 #
 CP="cp -vapudf" ;
 #
+BASE="$ANALYSIS/sgp/rguigo" ; # 20010802
 while read locus ;
   do {
     echo "### Copying files for $locus ..." ;
-    $CP $ANALYSIS/sgp/rguigo/ps/_tmp/sgp/$locus    $ODIR/$locus.gff ;
+    $CP $BASE/ps/_tmp/sgp/$locus    $ODIR/$locus.gff ;
     gawk 'BEGIN{ OFS="\t" }
           { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.homol" };
             print $0;
-            }' $ANALYSIS/sgp/rguigo/gtf2/$locus \
-              > $ODIR/$locus.gtf ;
-    $CP $ANALYSIS/sgp/rguigo/hsp/$locus            $ODIR/$locus.hsp ;
-    $CP $ANALYSIS/sgp/rguigo/tbx/$locus            $ODIR/$locus.tbx ;
-    $CP $ANALYSIS/sgp/rguigo/ps/gff2ps/a4/$locus   $ODIR/$locus.a4.ps ;
-    $CP $ANALYSIS/sgp/rguigo/ps/gff2ps/a3/$locus   $ODIR/$locus.a3.ps ;
-    # $CP $ANALYSIS/sgp/rguigo/ps/gff2ps/wide/$locus $ODIR/$locus.wide.ps ;
+            }' $BASE/gtf2/$locus  > $ODIR/$locus.gtf ;
+    $CP $BASE/hsp/$locus            $ODIR/$locus.hsp ;
+    $CP $BASE/tbx/$locus            $ODIR/$locus.tbx ;
+    $CP $BASE/ps/gff2ps/a4/$locus   $ODIR/$locus.a4.ps ;
+    $CP $BASE/ps/gff2ps/a3/$locus   $ODIR/$locus.a3.ps ;
+  # $CP $BASE/ps/gff2ps/wide/$locus $ODIR/$locus.wide.ps ;
     } ;
   done < $HSAP ; 
 #
 pushd $ODIR ;
 #
-cat Hsap_*.gff > All.gff ;
-cat Hsap_*.gtf > All.gtf ;
-cat Hsap_*.hsp > All.hsp ;
-cat Hsap_*.tbx > All.tbx ;
+cat Hsap_*.tbx > Homologous.tbx ; gzip -v Homologous.tbx ;
+cat Hsap_*.hsp > Homologous.hsp ;
+cat Hsap_*.gff > Homologous.gff ;
+cat Hsap_*.gtf > Homologous.gtf ;
 #
-tar -zcvf HomologyA3PS.tar.gz Hsap_*.a3.ps ;
-tar -zcvf HomologyA4PS.tar.gz Hsap_*.a4.ps ;
-tar -zcvf HomologyGFF.tar.gz  Hsap_*.gff ;
-tar -zcvf HomologyGTF.tar.gz  Hsap_*.gtf ;
-tar -zcvf HomologyHSP.tar.gz  Hsap_*.hsp ;
-tar -zcvf HomologyTBX.tar.gz  Hsap_*.tbx  ;
+tar -zcvf Homologous_TBX.tar.gz  Hsap_*.tbx  ;
+tar -zcvf Homologous_HSP.tar.gz  Hsap_*.hsp ;
+tar -zcvf Homologous_GFF.tar.gz  Hsap_*.gff ;
+tar -zcvf Homologous_GTF.tar.gz  Hsap_*.gtf ;
+tar -zcvf Homologous_A4PS.tar.gz Hsap_*.a4.ps ;
+tar -zcvf Homologous_A3PS.tar.gz Hsap_*.a3.ps ;
+#
+popd ;
 #
 @ 
 
-\subsctn{Results on human/mouse 3X WGS sequence comparison} % TO DO
+\subsctn{Results on human/mouse 3X WGS sequence comparison}
 
 \begin{comment}
-ODIR="./homologseqs" ;
+ODIR="./hsapmus3X" ;
 ANALYSIS="/projects/sgp/orthologous" ;
 HSAP="/projects/datasets/orthologous/id.Hsap" ;
 \end{comment}
@@ -2211,6 +2180,40 @@ HSAP="/projects/datasets/orthologous/id.Hsap" ;
 # Remember to set ODIR, ANALYSIS and HSAP by gmaster
 #
 CP="cp -vapudf" ;
+#
+# BASE="$ANALYSIS/sgp/rguigo" ; # 20010731
+BASE="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5" ; # 20010817
+while read locus ;
+  do {
+    echo "### Copying files for $locus ..." ;
+    $CP $BASE/ps/_tmp/sgp/$locus    $ODIR/${locus}_MmusWGS3X.gff ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.3X" };
+            print $0;
+            }' $BASE/gtf2/$locus  > $ODIR/${locus}_MmusWGS3X.gtf ;
+    $CP $BASE/hsp/$locus            $ODIR/${locus}_MmusWGS3X.hsp ;
+    $CP $BASE/tbx/$locus            $ODIR/${locus}_MmusWGS3X.tbx ;
+    $CP $BASE/ps/gff2ps/a4/$locus   $ODIR/${locus}_MmusWGS3X.a4.ps ;
+    $CP $BASE/ps/gff2ps/a3/$locus   $ODIR/${locus}_MmusWGS3X.a3.ps ;
+  # $CP $BASE/ps/gff2ps/wide/$locus $ODIR/${locus}_MmusWGS3X.wide.ps ;
+    } ;
+  done < $HSAP ; 
+#
+pushd $ODIR ;
+#
+cat Hsap_*.tbx > Hsap8seqs_MmusWGS3X.tbx ; gzip -v Hsap8seqs_MmusWGS3X.tbx ;
+cat Hsap_*.gff > Hsap8seqs_MmusWGS3X.gff ;
+cat Hsap_*.gtf > Hsap8seqs_MmusWGS3X.gtf ;
+cat Hsap_*.hsp > Hsap8seqs_MmusWGS3X.hsp ;
+#
+tar -zcvf Hsap8seqs_MmusWGS3X_TBX.tar.gz  Hsap_*.tbx  ;
+tar -zcvf Hsap8seqs_MmusWGS3X_HSP.tar.gz  Hsap_*.hsp ;
+tar -zcvf Hsap8seqs_MmusWGS3X_GFF.tar.gz  Hsap_*.gff ;
+tar -zcvf Hsap8seqs_MmusWGS3X_GTF.tar.gz  Hsap_*.gtf ;
+tar -zcvf Hsap8seqs_MmusWGS3X_A4PS.tar.gz Hsap_*.a4.ps ;
+tar -zcvf Hsap8seqs_MmusWGS3X_A3PS.tar.gz Hsap_*.a3.ps ;
+#
+popd ;
 #
 @ 
 
@@ -2258,6 +2261,7 @@ gawk 'BEGIN{
         print "\\end{tabular}"; # main table
         }' $DATASETS/genes.Hsap > $DOCS/tables/genelist.tex ;
 @ 
+%$
 \end{comment}
 
 \begin{table}[!h]
@@ -2809,722 +2813,6 @@ sub timing() {
 
 \newpage
 
-\subsctn{pspager.pl}
-
-\subsubsctn{Page formats definition}
-
-\input tables/PageSizeTbl.tex
-
-
-\subsubsctn{Available page sizes}
-
-<<LATEX page format table>>=
-%
-% PageSizeTbl.tex
-%
-% Page Sizes used in "pspager.pl".
-%
-% <<Version Control Id Tag>>
-%
-\label{sec:pagesizes}
-\def\prog{\texttt{pspager.pl}}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\vfill
-\begin{table}[!ht]
-\begin{center}
-\setlength{\fboxsep}{2pt}
-%\setlength{\arrayrulewidth}{1pt}
-\fbox{
- \begin{tabular}{|c||r|r||r|r||r|r|} \hline
-  \raisebox{-0.5ex}[0pt]{PAGE} &
-  \multicolumn{6}{c|}{PAGE SIZE}\\ \cline{2-7} \raisebox{0.25ex}[0pt]{FORMAT} &
-  \multicolumn{2}{c||}{(in points)} &
-  \multicolumn{2}{c||}{(in cms)} &
-  \multicolumn{2}{c|}{(in inches)}\\ \hline\hline
-  <<page sizes latex definition>>
- \end{tabular}
-} % fbox
-\caption{\label{tbl:PageSztbl}Page Sizes defined in {\prog}.}\hspace{1cm}
-  %\refstepcounter{table}
-  %\addcontentsline{lot}{section}{
-  %   \thetable\hspace{1em}Page Sizes available at {\prog}.}
-\end{center}
-\end{table}
-\vfill
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@
-
-<<Docs>>=
-echo "Extracting \"$DOCS/PageSizeTbl.tex\"..." ;
-notangle -R"LATEX page format table" $WORK/$nwfile.nw \
-         > $DOCS/tables/PageSizeTbl.tex ;
-@ 
-
-<<PostScript FORMATS>>=
-sub ps_page_formats() {
-  my %tmp = ();
-  print STDOUT "%% Paper Sizes (in points)\n";
-  print STDOUT "/pagedict ".($formats + 2)." dict def pagedict begin %% ".
-               $formats." formats + 2 definitions\n";
-  foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
-  for (my $j = 1; $j <= $formats; $j++) { 
-      my $name = $tmp{$j};
-      my $ref = \$FORMATS{$name};
-      my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
-      print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } def\n";
-      };
-  print STDOUT "end %% pagedict\n";}
-@
-
-<<Global Vars>>=
-my $formats = 0;
-my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
-  <<page sizes perl definition>>
-  );
-@ 
-
-\subsubsctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:PAGEdef}
-
-\subsubsubsctn{ISO standard page sizes: A series}
-
-<<page sizes perl definition>>=
-  a0        => [ ++$formats, 2384, 3370 ],
-  a1        => [ ++$formats, 1684, 2384 ],
-  a2        => [ ++$formats, 1190, 1684 ],
-  a3        => [ ++$formats,  842, 1190 ],
-  a4        => [ ++$formats,  595,  842 ],
-  a5        => [ ++$formats,  420,  595 ],
-  a6        => [ ++$formats,  297,  420 ],
-  a7        => [ ++$formats,  210,  297 ],
-  a8        => [ ++$formats,  148,  210 ],
-  a9        => [ ++$formats,  105,  148 ],
-  a10       => [ ++$formats,   73,  105 ],
-@
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-a0          & 2384 & 3370 &  84.1 & 118.9 &  33.1 &  46.8 \\
-a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
-a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
-a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
-a4          &  595 &  842 &  21.0 &  29.7 &   8.3 &  11.7 \\
-a5          &  420 &  595 &  14.8 &  21.0 &   5.8 &   8.3 \\
-a6          &  297 &  420 &  10.5 &  14.8 &   4.1 &   5.8 \\
-a7          &  210 &  297 &   7.4 &  10.5 &   2.9 &   4.1 \\
-a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
-a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
-a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
-@
-
-\subsubsubsctn{ISO standard page sizes: B series}
-
-<<page sizes perl definition>>=
-  b0        => [ ++$formats, 2920, 4127 ],
-  b1        => [ ++$formats, 2064, 2920 ],
-  b2        => [ ++$formats, 1460, 2064 ],
-  b3        => [ ++$formats, 1032, 1460 ],
-  b4        => [ ++$formats,  729, 1032 ],
-  b5        => [ ++$formats,  516,  729 ],
-  b6        => [ ++$formats,  363,  516 ],
-  b7        => [ ++$formats,  258,  363 ],
-  b8        => [ ++$formats,  181,  258 ],
-  b9        => [ ++$formats,  127,  181 ],
-  b10       => [ ++$formats,   91,  127 ],
-@
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-b0          & 2920 & 4127 & 103.0 & 145.6 &  40.6 &  57.3 \\
-b1          & 2064 & 2920 &  72.8 & 103.0 &  28.7 &  40.6 \\
-b2          & 1460 & 2064 &  51.5 &  72.8 &  20.3 &  28.7 \\
-b3          & 1032 & 1460 &  36.4 &  51.5 &  14.3 &  20.3 \\
-b4          &  729 & 1032 &  25.7 &  36.4 &  10.1 &  14.3 \\
-b5          &  516 &  729 &  18.2 &  25.7 &   7.2 &  10.1 \\
-b6          &  363 &  516 &  12.8 &  18.2 &   5.0 &   7.2 \\
-b7          &  258 &  363 &   9.1 &  12.8 &   3.6 &   5.0 \\
-b8          &  181 &  258 &   6.4 &   9.1 &   2.5 &   3.6 \\
-b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
-b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
-@
-
-\subsubsubsctn{US standard page sizes}
-
-<<page sizes perl definition>>=
-  executive => [ ++$formats,  540,  720 ],
-  folio     => [ ++$formats,  612,  936 ],
-  legal     => [ ++$formats,  612, 1008 ],
-  letter    => [ ++$formats,  612,  792 ],
-  quarto    => [ ++$formats,  610,  780 ],
-  statement => [ ++$formats,  396,  612 ],
- '10x14'    => [ ++$formats,  720, 1008 ],
-  ledger    => [ ++$formats, 1224,  792 ],
-  tabloid   => [ ++$formats,  792, 1224 ],
-@
-<<page sizes latex definition>>=
-%               points    -  centimeters  -     inches
-executive   &  540 &  720 &  19.0 &  25.4 &   7.5 &  10.0 \\
-folio       &  612 &  936 &  21.6 &  33.0 &   8.5 &  13.0 \\
-legal       &  612 & 1008 &  21.6 &  35.6 &   8.5 &  14.0 \\
-letter      &  612 &  792 &  21.6 &  27.9 &   8.5 &  11.0 \\
-quarto      &  610 &  780 &  21.5 &  27.5 &   8.5 &  10.8 \\
-statement   &  396 &  612 &  14.0 &  21.6 &   5.5 &   8.5 \\ \hline\hline
-10x14       &  720 & 1008 &  25.4 &  35.6 &  10.0 &  14.0 \\
-ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
-tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
-@
-
-\subsubsubsctn{Page sizes help}
-
-<<pages help>>=
-The following page sizes are available: from A0 to A10, 
-from B0 to B10, 10x14, executive, folio, ledger, legal, 
-letter, quarto, statement and tabloid.
-@
-
-\subsubsctn{The program}
-
-<<pspager.pl>>=
-<<PERL shebang>>
-#
-# pspager.pl : printing virtual pages into several physical ones.
-#
-# USAGE: pspager.pl [options] PSfile > PSfile_page 
-#
-# VARIABLES
-<<Global Vars - pspager>>
-#
-# MAIN LOOP
-<<Main Loop - pspager>>
-#
-# FUNCTIONS
-<<Functions - pspager>>
-@ 
-
-<<Main Loop - pspager>>=
-&parse_commandline();
-&parse_inputfile($PSinput);
-&setting_vars();
-&write_PS_output();
-
-exit(0);
-@ 
-
-<<Functions - pspager>>=
-sub parse_commandline() {
-    <<looking for STDIN>>
-
-    $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$T,$_[0]) };
-    GetOptions(
-               <<command-line options>>
-               ) || (&warn('CMD_LINE_ERROR',$T), exit(1));
-    $SIG{__WARN__} = 'DEFAULT';
-
-    <<open LOGFILE>>
-
-    &header('',"RUNNING $PROGRAM",'',"User: $USER","Date: $DATE");
-
-    &header("SETTING DEFAULTS");
-    %DefaultVars = ();
-    &set_default_vars;
-
-    &header("CHECKING COMMAND-LINE OPTIONS");
-    @data_files = ();
-    &set_input_file($cmdln_stdin);
-    @ARGV = (); # ensuring that command-line ARGVs array is empty
-
-    &set_custom_files();
-
-    <<Check command-line options>>
-
-    &footer("COMMAND-LINE CHECKED");
-} # parse_commandline
-@
-
-<<Functions - pspager>>=
-sub parse_inputfile() {
-} # parse_inputfile
-@
-
-<<Functions - pspager>>=
-sub setting_vars() {
-} # setting_vars
-@
-
-<<Functions - pspager>>=
-sub write_PS_output() {
-} # write_PS_output
-@
-
-<<pspager.pl>>=
-my ($ctx, $cty) = (0, 0);
-my ($x, $y);
-# my @page_OUT = (  792,  1224 ); # 11x17 (tabloid) page format
-my @page_OUT = (  612,  792 ); # letter page format
-# my @page_OUT = (  595,  842 ); # a4 page format
-my $margin = 20;
-my ($xdelta, $ydelta) = ($page_OUT[0]-($margin * 2), $page_OUT[1]-($margin * 2));
-
-my @page_IN;
-push @page_IN, shift @ARGV, shift @ARGV;
-
-my $orientation = shift @ARGV;
-my $orflg = $orientation eq "l" ? "true" : "false";
-
-my $file = $ARGV[0];
-
-print STDERR ("#"x40)."\n## RUNNING multipager ON: $file\n".("#"x40)."\n";
-print STDERR "## PAGE IN:  $page_IN[0] - $page_IN[1] (".($orientation eq "l" ? "Landscape" : "Portrait").")\n";
-print STDERR "## PAGE OUT: $page_OUT[0] - $page_OUT[1] (Portrait)\n".("#"x40)."\n";
-
-for ($x=0;$x<$page_IN[0];$x+=$xdelta) {
-        $ctx++; $cty = 0;
-        for ($y=0;$y<$page_IN[1];$y+=$ydelta) {
-                $cty++;
-                print STDERR "## Printing Page X($ctx) Y($cty)\n";
-                open(K,"< $file");
-                open(L,"> $file.MULTI.$ctx\_$cty");
-                while (<K>) {
-                        print L $_;
-                        /^%%BeginProlog/ && &pscode;
-                }
-                close(L);
-                close(K);
-        }
-}
-
-sub pscode {
-        print L << "EOF";
-%%
-/cutmrg $margin def
-/lndscp $orflg def
-/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll moveto lineto lineto lineto closepath } bind def 
-% 0 0 $page_OUT[0] $page_OUT[1] bbox 1 0 0 0 setcmykcolor fill newpath
-/cutmrk {
-  gsave 
-  translate scale
-  0 setgray 0.125 setlinewidth
-  gsave 0 -1 moveto 0 cutmrg neg lineto stroke grestore
-  gsave -1 0 moveto cutmrg neg 0 lineto stroke grestore
-  grestore
-  } bind def 
-/mkmrk {
-   gsave 0 0 translate cutmrg 12 add cutmrg 12 sub moveto /Helvetica-Bold findfont 9 scalefont setfont (Page $ctx/$cty - X($x):Y($y)) show grestore     
-    1  1 cutmrg                  cutmrg                   cutmrk
-   -1 -1 $page_OUT[0] cutmrg sub $page_OUT[1] cutmrg sub  cutmrk
-    1 -1 cutmrg                  $page_OUT[1] cutmrg sub  cutmrk
-   -1  1 $page_OUT[0] cutmrg sub cutmrg                   cutmrk
-   cutmrg cutmrg $page_OUT[0] cutmrg sub $page_OUT[1] cutmrg sub  bbox 
-  gsave 1 setgray fill grestore
-  % gsave stroke grestore
-  clip       
-  newpath    
-  } bind def 
-%%           
-2 dict dup /PageSize [ $page_OUT[0] $page_OUT[1] ] put dup /ImagingBBox null put setpagedevice
-mkmrk lndscp { cutmrg $x add neg cutmrg $y add neg translate } { cutmrg $x sub cutmrg $y sub translate } ifelse
-%%
-EOF
-}
-@ 
-
-<<pspager.pl>>=
-%!PS-Adobe-3.0 
-%%Title: (Using EPS file in Form in VM) 
-%%BoundingBox: 0 0 612 792 
-%%DocumentProcessColors: Black 
-%%Pages: 3 
-%%PageOrder: Special 
-%%EndComments 
-%%BeginProlog 
-%%BeginResource: procset helper_ops 1.0 0 
-%%Title: (Helper Operators) 
-%%Version: 1.0 
-userdict /helper_ops 10 dict dup begin put
-
-/L1? {
-    /languagelevel where {
-       pop languagelevel 2 lt
-    }{
-       true
-    } ifelse
-} bind def
-
-/StartDoc { 
-    userdict begin 
-    /PreForm save def 
-    /showpage {} def
-} bind def
-
-/EndDoc { 
-    PreForm restore 
-    end % userdict
-} bind def
-
-/rfill { % llx lly w h rfill --
-    gsave newpath 
-    4 -2 roll moveto % use x, y coordinates
-    2 copy 0.0 lt exch 0.0 lt xor { % check for one arg only being neg 
-        dup 0.0 exch rlineto % do height first 
-        exch 0.0 rlineto 
-        neg 0.0 exch rlineto
-    }{ 
-        exch dup 0.0 rlineto % do width first 
-        exch 0.0 exch rlineto
-        neg 0.0 rlineto
-    } ifelse
-    closepath
-    fill grestore
-} bind def
-
-/add_var_data { % procedure to add variable data to fill in form
-    /Times-Roman findfont 12 scalefont setfont 
-    L1? { % if Level 1, need to draw white boxes where data will be placed
-        gsave
-        1 setgray
-        87 360 350 20 rfill
-        190 430 350 20 rfill
-        190 535 350 20 rfill
-        190 600 350 20 rfill
-        grestore
-    } if
-    97 370 moveto show
-    200 440 moveto show
-    200 545 moveto show
-    200 610 moveto show
-} bind def
-
-/emitpage { 
-    L1? {
-       add_var_data copypage
-    }{
-       TestForm execform add_var_data showpage
-    } ifelse
-} bind def
-
-/emitlastpage {
-    L1? {
-       add_var_data showpage
-    }{
-       emitpage
-    } ifelse
-} bind def
-
-currentdict readonly pop end
-%%EndResource
-
-%%BeginResource: procset forms_procs 1.0 0 
-%%Title: (Forms Procs)
-%%Version: 1.0
-userdict /forms_procs 10 dict dup begin put
-
-/STRING_SIZE 16000 def
-/ARRAY_SIZE 5 def % UPDATE DEPENDING ON SIZE OF INCLUDED DOCUMENT
-                  % (leave room for initial counter and final empty string)
-
-/buffer STRING_SIZE string def 
-
-/readdata {
-  L1? { % readdata -- 
-      StartDoc
-  }{    % array readdata --
-      1 {                             % put counter on stack
-                                      % stack: array counter
-          2 copy                      % stack: array counter array counter
-          inputFile buffer readstring % read contents of currentfile into buffer
-                                      % stack: array counter array counter string boolean
-          4 1 roll                    % put boolean indicating EOF lower on stack
-          STRING_SIZE string copy     % copy buffer string into new string 
-                                      % stack: array counter boolean array counter newstring
-          put                         % put string into array
-          not {exit} if               % if EOF has been reached, exit loop.
-          1 add                       % increment counter
-        } loop
-      % increment counter and place empty string in next position 
-      1 add 2 copy () put pop
-      currentglobal true setglobal exch
-
-          0 1 array put % create an array for counter in global VM,
-                        % so as not to be affected by save/restore calls in EPS file.
-                        % place as first element of string array. 
-      setglobal  % restore previously set value
-  } ifelse
-} bind def
-currentdict readonly pop end
-%%EndResource
-
-%%EndProlog
-%%BeginSetup
-helper_ops begin
-forms_procs begin
-userdict begin
-
-L1? not {
-   % set MaxFormItem to be equivalent to MaxFormCache
-   1 dict begin
-        /MaxFormItem currentsystemparams /MaxFormCache get def
-   currentdict end
-   setuserparams
-}if
-
-% download form
-%%BeginResource: form TestForm 
-L1? not { % for > L1 case, define a form resource
-  /TestForm
-  10 dict begin
-     /FormType 1 def
-     /EPSArray ARRAY_SIZE array def
-     /AcquisitionProc {
-        EPSArray dup 0 get dup 0 get % array counter_array counter
-        dup 3 1 roll                 % array counter counter_array counter
-        1 add 0 exch put             % increment counter
-        get                          % use old counter as index into array, placing
-                                     % next string on operand stack.
-     } bind def
-     /PaintProc {
-       begin
-         StartDoc
-           EPSArray 0 get 0 1 put
-           /AcquisitionProc load 0 () /SubFileDecode filter
-           cvx exec
-       end % form dict
-     } bind def
-     /BBox [ 29 222 583 759] def % UPDATE FOR INCLUDED DOCUMENT
-     /Matrix [1 0 0 1 0 0] def
-  currentdict end def % TestForm
-  /inputFile currentfile 0 (% EOD_Marker_5882)
-  /SubFileDecode filter def
-  TestForm /EPSArray get 
-} if
-
-readdata
-%%BeginDocument: landscape_form % UPDATE TO NAME OF INCLUDED DOCUMENT
-
-%%EndDocument
-EndDoc % put this call after included EPS file. Followed by 
-% EOD_Marker_5882 % The % EOD_Marker_#### comment, which is needed so that 
-                  % SubFileDecode filter will reach end of data.
-%%EndResource
-%%EndSetup
-
-%%Page: 1 1
-%%BeginPageSetup
-/pgsave save def
-%%EndPageSetup
-(Joe Smith)                                  % parameters of example form
-(1281 Market Street, San Jose, CA 95053)     % parameters of example form
-(408-225-1818)                               % parameters of example form
-(Trim two pine trees in NE corner of lot.)   % parameters of example form
-emitpage                                     % calling example form
-%%PageTrailer
-pgsave restore
-
-%%Trailer
-end % userdict
-end % forms_procs
-end % helper_procs
-%%EOF
-@
-
-<<EPSbbox>>=
-%%
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
-%
-% Place this after the "%% EndComments" tag for small snapshots of the figure.
-%
-% 2 dict dup /PageSize [ 595 842 ] put dup /ImagingBBox null put setpagedevice
-% 0.2 0.2 scale
-%                    [ 595 842 ] for a4     (0.2 0.2 scale)
-%                    [ 612 792 ] for letter (0.1925 0.1925 scale)
-%                    [ 297 420 ] for a6     (0.1 0.1 scale)
-%
-%%
-% S 2116 340 2910 400 bbox bgcolor scmyk fill R % 40"x57" - old margins
-S 2116 300 2910 370 bbox bgcolor scmyk fill R % 40"x57"
-%% S 108 108 T 0 0 2808 4032 bbox fgcolor scmyk 1 slw K R % 40"x57"
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% CROP MARKS
-%%
-/cutmrg 1 in def
-/cuturx 3024 def % 40"x57"
-/cutury 4248 def % 40"x57"
-/cutmrk { S fgcolor scmyk 1 slw T F S 0 -1 m 0 cutmrg neg l K newpath 1 0 m cutmrg 0 l K R R } bdf 
-S
--1  1   cutmrg              cutmrg              cutmrk
- 1 -1   cuturx cutmrg sub   cutury cutmrg sub   cutmrk
--1 -1   cutmrg              cutury cutmrg sub   cutmrk
- 1  1   cuturx cutmrg sub   cutmrg              cutmrk
-R
-%%
-%%% CROP MARKS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% EPS Functions
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-/EPSDict 10 dict def
-EPSDict begin
-  /N { def } def
-  /B { bind def } N
-  /S { exch } N
-  /X { S N } B
-  /A { dup } B
-  /TR { translate } N
-  /KDict 50 dict N 
-  KDict begin
-    /@SpecialDefaults{
-      /hs 612 N
-      /vs 792 N
-      /ho 0 N
-      /vo 0 N
-      /hsc 1 N
-      /vsc 1 N
-      /ang 0 N
-      /CLIP 0 N
-      /rwiSeen false N
-      /rhiSeen false N
-      /letter {} N
-      /note {} N
-      /a4 {} N
-      /a3 {} N
-      /legal {} N
-      }B
-    /@scaleunit 100 N
-    /@hscale { @scaleunit div /hsc X } B
-    /@vscale { @scaleunit div /vsc X } B
-    /@hsize { /hs X /CLIP 1 N } B
-    /@vsize { /vs X /CLIP 1 N } B
-    /@clip { /CLIP 2 N } B
-    /@hoffset { /ho X } B
-    /@voffset { /vo X } B
-    /@angle { /ang X } B
-    /@rwi { 10 div /rwi X /rwiSeen true N } B
-    /@rhi { 10 div /rhi X /rhiSeen true N } B
-    /@llx { /llx X } B
-    /@lly { /lly X } B
-    /@urx { /urx X } B
-    /@ury { /ury X } B
-    /magscale true def
-    end % KDict
-  /@beginspecial{
-    KDict begin % begin_KDict_@beginspecial
-      /EPSsave save N
-      gsave
-        @SpecialDefaults count /ocount X
-        /dcount countdictstack N
-    }N
-  /@setspecial{
-    CLIP 1 eq {
-      newpath 0 0 moveto hs 0 rlineto 0 vs rlineto hs neg 0 rlineto closepath clip
-      }if
-    ho vo TR hsc vsc scale ang rotate
-    rwiSeen {
-      rwi urx llx sub div
-      rhiSeen { rhi ury lly sub div }{ dup } ifelse
-      scale llx neg lly neg TR
-     }{
-      rhiSeen { rhi ury lly sub div dup scale llx neg lly neg TR }if
-      }ifelse
-    CLIP 2 eq{
-      newpath llx lly moveto urx lly lineto urx ury lineto llx ury lineto closepath clip
-      }if
-    /showpage {} N
-    /erasepage {} N
-    /copypage {} N
-    newpath
-    } N
-  /@endspecial {
-    count ocount sub { pop } repeat
-    countdictstack dcount sub { end } repeat grestore
-    EPSsave restore
-    end % begin_KDict_@beginspecial
-    } N
-end
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% LEGEND MAIN TITLE
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-EPSDict begin
- @beginspecial
- 80 @hoffset 4400 @voffset  % 40"x57"
- 270 @angle                          % OK
- 235 @llx 35 @lly 375 @urx 2820 @ury % OK
- % 2030 @rwi
- @clip
- @setspecial
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%BeginDocument: Legend_Title.ps
-%%
-%%% Insert PS file HERE for MAIN TITLE
-%%
-%%EndDocument: Legend_Title.ps
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
- @endspecial % EPSDict
-%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% TEXT LEGEND
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-EPSDict begin
- @beginspecial
- % 120 @hoffset 255 @voffset % 39"x56"
- 228 @hoffset 300 @voffset   % 40"x57"
- 270 @angle                          % OK
- 212 @llx 30 @lly 400 @urx 1407 @ury % OK
- 2030 @rwi
- @clip
- @setspecial
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%BeginDocument: Legend_Text.ps
-%%
-%%% Insert PS file HERE for LEGEND TEXT
-%%
-%%EndDocument: Legend_Text.ps
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
- @endspecial % EPSDict
-%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% KEY FIGURE LEGEND
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-EPSDict begin
- @beginspecial
- % 1690 @hoffset 255 @voffset % 39"x56"
- 1798 @hoffset 300 @voffset   % 40"x57"
- 270 @angle                         % OK
- 212 @llx 30 @lly 400 @urx 944 @ury % OK
- 2030 @rwi
- @clip
- @setspecial
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%BeginDocument: Legend_Key.ps
-%%
-%%% Insert PS file HERE for LEGEND KEY
-%%
-%%EndDocument: Legend_Key.ps
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
- @endspecial % EPSDict
-%%
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% EPS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-
-@ 
-
-\newpage
-
 \sctn{Common code blocks}
 
 \subsctn{PERL scripts}
@@ -3707,7 +2995,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
 @ 
 
 \newpage
@@ -3825,6 +3113,9 @@ HSAP="$DATASETS/id.Hsap" ;
 MMUS="$DATASETS/id.Mmus" ;
 export ANALYSIS ID HSAP MMUS ;
 #
+SPLICING="/projects/splicing/chr22" ;
+export SPLICING ;
+#
 # BASIC Shell Functions
 #
 ChckDirs ()
@@ -3838,6 +3129,20 @@ ChckDirs ()
            echo "### Directory Already Exist: $name" ||
              mkdir --verbose $name ;
       } ;
+    done ;
+}
+#
+renameSEQS ()
+{
+  #
+  # USAGE: renameSEQS ls_command reg_exp substitution_value
+  # Example: renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA'
+  #
+  $1 | while read n ; 
+    do {
+      k=`echo $n | sed "s/$2/$3/"` ;
+      [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
+    } ;
     done ;
 }
 #
@@ -4039,7 +3344,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -4383,7 +3688,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
