@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.2 2001-02-14 16:58:00 eblanco Exp $  */
+/*  $Id: Translate.c,v 1.3 2001-04-23 13:11:49 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -75,7 +75,7 @@ int Translate(long p1, long p2, short fra, short rmd,
 
 /* Translate a complete gene to protein */
 void TranslateGen(exonGFF* e, char* s, dict* dAA, long nExons, 
-		  int tAA[MAXEXONGEN][2], char* prot, int* nAA)
+		  int tAA[MAXEXONGEN][2], char* prot, long* nAA)
 {  
   long i;
   short j;
@@ -347,3 +347,74 @@ void TranslateGen(exonGFF* e, char* s, dict* dAA, long nExons,
     }
   *nAA = totalAA;  
 }
+
+
+void GetcDNA(exonGFF* e, char* s, long nExons, char* cDNA, long* nNN)
+{  
+  char* tmpDNA;
+  long p1,p2;
+  char* rs;
+  int i;
+  long j;
+
+  if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+    printError("Not enough space to store tmp cDNA");
+
+  cDNA[0] = '\0';
+
+  if (e->Strand == '+')
+    {
+      for(i=0, *nNN = 0; i<nExons; i++)
+	{
+	  p1 = e->Acceptor->Position + e->offset1 - COFFSET;
+	  p2 = e->Donor->Position + e->offset2 - COFFSET;
+	  
+	  /* Get the cDNA for this exon */
+	  tmpDNA[0] = '\0';
+
+	  for(j=p1; j <= p2; j++)
+	    tmpDNA[j-p1] = s[j];
+	  
+	  tmpDNA[j-p1]='\0';
+	  
+	  /* Concat the current cDNA before the stored */
+	  strcat(tmpDNA,cDNA);
+	  strcpy(cDNA,tmpDNA);
+	  
+	  *nNN += p2-p1+1;
+	  e = e->PreviousExon;
+	}
+    }
+
+  /* Reverse and complement the sequence in this strand */
+  else
+    {
+      if ((rs = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+	printError("Not enough space to reverse cDNA(-)");  
+
+      for(i=0, *nNN = 0; i<nExons; i++)
+	{
+	  p1 = e->Acceptor->Position + e->offset1 - COFFSET;
+	  p2 = e->Donor->Position + e->offset2 - COFFSET;
+	  
+	  /* Get the cDNA for this exon */
+	  tmpDNA[0] = '\0';
+	  rs[0] = '\0';
+
+	  for(j=p1; j <= p2; j++)
+	    tmpDNA[j-p1] = s[j];
+	  
+	  tmpDNA[j-p1]='\0';
+	  
+	  ReverseSubSequence(0, j-p1-1, tmpDNA, rs);
+	  rs[j-p1]='\0';
+
+	  /* Concat the current cDNA after the stored */
+	  strcat(cDNA,rs);
+
+	  *nNN += p2-p1+1;
+	  e = e->PreviousExon;
+	}
+    }
+}
+
