@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.4 2001-02-14 15:46:32 eblanco Exp $  */
+/*  $Id: PrintExons.c,v 1.5 2001-02-14 16:45:27 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -146,7 +146,7 @@ void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA,
   if (GFF)
     {
       /* GFF format */
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t%hd\tgene_%ld\t# AA %3d:%3d\n",
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t%hd\t%ld\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      Name,
 	      (e->evidence)? EVIDENCE : VERSION,     
@@ -156,9 +156,7 @@ void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA,
 	      (e->Score==MAXSCORE)? 0.0:e->Score,
 	      e->Strand,
 	      e->Frame,
-	      ngen,
-	      (e->Strand=='+')? nAA-AA2+COFFSET : AA1,
-	      (e->Strand=='+')? nAA-AA1+COFFSET : AA2);
+	      ngen);
     }
   else
     {
