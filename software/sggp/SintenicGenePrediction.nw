@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $
+% $Id: SintenicGenePrediction.nw,v 1.5 2001-06-06 19:00:58 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -152,7 +152,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $$>$ }
+{\small$<$ \verb$Id: SintenicGenePrediction.nw,v 1.5 2001-06-06 19:00:58 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -224,16 +224,21 @@ Our initial program outline (our root chunk) looks like:\\[1ex]
 <<PERL shebang>>
 <<SGP Copyleft>>
 
+#### MODULES ####
+
+<<Use Modules - SGP>> 
+
 #### CONSTANTS DEFINITION ####
 
 <<Constant definition - SGP>>
 
-#### VARIABLES DECLARATION ####
+#### GLOBAL VARIABLES ####
 
+<<Global Vars - SGP>>
 
 #### MAIN LOOP ####
 
-  <<Main Loop - SGP>>
+    <<Main Loop - SGP>>
 
 ##### SUBS #####
 
@@ -244,13 +249,8 @@ Our initial program outline (our root chunk) looks like:\\[1ex]
 <<POD man page - SGP>>
 @ % 
 
-<<Constant definition - SGP>>=
-my $PROGRAM = "sgp2";
-my @tmp_ver = split / +/, ' $Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $ ';
-my $VERSION = "v$tmp_ver[3] [$tmp_ver[4] $tmp_ver[5] $tmp_ver[7]]";
-@
 
-A short description, followed by authors list and the GNU-GPL is described here.
+A short description, followed by authors list and the GNU-GPL, appears at the begining of the code.
 
 <<SGP Copyleft>>=
 ######################################################################
@@ -267,9 +267,54 @@ A short description, followed by authors list and the GNU-GPL is described here.
 
 \subsctn{Main code chunks}
 
+<<Use Modules - SGP>>=
+<<Use Modules - Benchmark>>
+<<Use Modules - Dumper>>
+@ 
+
+<<Constant definition - SGP>>=
+my $PROGRAM = "SGP";
+my @tmp_ver = split / +/, 
+    ': $Id: SintenicGenePrediction.nw,v 1.5 2001-06-06 19:00:58 jabril Exp $ :';
+my $VERSION = "v$tmp_ver[3] [@tmp_ver[4,5,7]]";
+<<Global Constants - Boolean>>
+<<Global Constants - STDERR>>
+@
+
+<<Global Vars - SGP>>=
+<<Global Vars - User and Date>>
+<<Global Vars - Counter>>
+<<SGP: Global Vars - STDERR>>
+@
+
 <<Main Loop - SGP>>=
+&report('START_JOB');
+# get options
+&Which_Options();
+# parameters for
+&read_parameter_file();
+#
+&report('JOB_DONE',&timing($T));
 exit(0);
 @
+
+<<SGP: runtime messages>>=
+START_JOB => "$line$s    RUNNING: $PROGRAM\n".
+                  "$s       USER: $USER\n".
+                  "$s       DATE: $DATE\n$line$r",
+JOB_DONE  => "$line$s  TOTAL TIME SPENT --> \%s\n$line",
+HEADER    => "$line\%s$line",
+TIMING    => "$r$s  \%s ...... DONE\n$s  Time Spent: \%s$r",
+@
+
+<<Common PERL subs - STDERR>>=
+sub prt_header() {
+    my $msg = $_[0];
+    my $l = $term_width - (2 * length($s));
+    $msg = &fill_mid($msg,$l,' ');
+    &report('HEADER',$msg);
+} # prt_header
+@ %def &prt_header
 
 <<Main Routines - SGP>>=
 <<SGP: parsing command-line>>
@@ -278,21 +323,294 @@ exit(0);
 <<SGP: extract HSPs>>
 <<SGP: run geneid>>
 <<SGP: graphical output>>
+<<Common PERL subs - Check sys command>>
+<<Common PERL subs - Min Max>>
+<<Common PERL subs - Text fill>>
+<<Common PERL subs - Counter>>
+<<Common PERL subs - STDERR>>
 @ 
+
+\subsctn{Reporting to [[STDERR]]}
+
+<<Global Constants - STDERR>>=
+my $term_width = 60;
+my $line = ("#" x $term_width)."\n";
+my ($s,$r) = ("###","###\n");
+my $Error = "\<\<\<  ERROR  \>\>\> "; # scaped symbols to avoid 
+my $Warn  = "\<\<\< WARNING \>\>\> "; #     problems with noweb
+my $spw   = "\<\<\<         \>\>\> ";
+my $spl   = "\<\<\<\-\-\-\-\-\-\-\-\-\>\>\>\n";
+@
+
+<<SGP: errors>>=
+@ 
+<<SGP: messages>>=
+@ 
+
+<<SGP: Global Vars - STDERR>>=
+#
+# Error/Warning Message List
+my %ErrorList = (
+                 <<SGP: errors>>
+                 <<SGP: commandline warnings>>
+                 );
+@
+
+<<SGP: Global Vars - STDERR>>=
+#
+# Verbose Message List
+my %MessageList = (
+                   <<SGP: messages>>
+                   <<SGP: runtime messages>>
+                   );
+@ 
+
+\subsctn{Removing temporary files}
+
+In such cases that we stop the program execution or it hangs up, we have to clean temporary path from any temporary files we have created.
+
+<<trap temporary files>>=
+$SIG{INT}  = \&trap_signals;
+$SIG{QUIT} = \&trap_signals;
+$SIG{TERM} = \&trap_signals;
+$SIG{CHLD} = 'IGNORE';
+sub trap_signals() {
+    # opendir(TDIR, $TMP) or &go_to_die("Can't open directory $TMP: $!");
+    # while (defined(my $file = readdir(TDIR)))
+    &clean_tmp();
+    &go_to_die("WARNING !!! $PROGRAM has been stopped by user.");
+}
+@ %$
+
+The following signals are trapped by our signal handler routine (to be precise, when assigning to [[$SIG]] the call by reference to that routine): %$
+\begin{itemize}\setlength{\itemsep}{-0.5ex}
+\item [[SIGINT]] is normally triggered by Ctrl-C, requesting that a process interrupt what it's doing.%'
+\item [[SIGQUIT]] is also generated by a terminal, usually Ctrl-$\backslash$, generating a core dump.
+\item [[SIGTERM]] is sent by [[kill]] shell command when no signal name is explicitly given (think of it as a polite request for a process to die). 
+\end{itemize}
 
 \subsctn{Parsing command-line options}
 
+<<declare uses>>=
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling pass_through /;
+@ 
+
+\begin{description}\setlength{\itemsep}{-0.5ex}
+\desc{[[use Getopt::Long;]]} This module implements an extended getopt function called [[GetOptions()]]. This function adheres to the POSIX syntax for command line options, with GNU extensions. In general, this means that options having long names instead of single letters are introduced with a double dash "-\/-". A double dash on itself signals end of the options list and start of the input 'files'.
+
+\desc{[[Getopt::Long::Configure qw( bundling pass_through );]]} [[GetOptions]] can be configured by calling subroutine [[Getopt::Long::Configure]]. This subroutine takes a list of quoted strings, each specifying a configuration option to be set. Options can be reset by prefixing with '[[no_]]'. 
+
+ \begin{description}\setlength{\itemsep}{-0.5ex}
+ \desc{[[bundling]]} Support for bundling of command line options, as was the case with the more traditional single-letter approach (introduced with a single dash "-"), is provided but not enabled by default. 
+
+ \desc{[[pass_through]]} Unknown options are passed through in [[@ARGV]] instead of being flagged as errors. This makes it possible to write wrapper scripts that process only part of the user supplied options, and passes the remaining options to some other program.
+ \end{description}
+\end{description}
+
+<<declare variables>>=
+# GetOptions Variables
+my ( $Seq1, $Seq2, $geneid_opt, $geneid_param, 
+     $blast_opt, $score_cutoff, $shrink, $tbx,
+     $hsp, $ofn, $ps_output, $savefiles_flg, $verbose_flg, $help_flg
+     ) = ( undef, undef, undef, undef, undef, undef,
+           undef, undef, undef, undef, undef, 0, 0, 0 );
+@ %
+
+Those variables will receive the values passed from command-line options in [[Which_Options()]] function. We set them as [[undef]] to check after [[Which_Options()]] if they have received any value (testing them with perl built-in [[defined()]] function).
+
 <<SGP: parsing command-line>>=
-@ % 
+# Parsing command-line options and processing its parameters.
+<<getopts subs>>
+sub Which_Options() {
+    $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$_[0]) };
+    GetOptions( 
+                "1=s"      => \$Seq1         , # seqfile_1
+                "2=s"      => \$Seq2         , # seqfile_2
+                "g=s"      => \$geneid_opt   , # geneid options      
+                "P=s"      => \$geneid_param , # geneid parameter file 
+                "o=s"      => \$blast_opt    , # tblastx options 
+                "c=f"      => \$score_cutoff , # tblastx score cutoff
+                "s=f"      => \$shrink       , # shrink hsp's by
+                "t=s"      => \$tbx          , # read tblastx from file
+                "f=s"      => \$hsp          , # read HSP files in directory
+                "k=s"      => \$ofn          , # intermediate filename
+                "p=s"      => \$ps_output    , # postscript output 
+                "v"        => \$verbose_flg  , # verbose    
+                "h|help|?" => \$help_flg     , # print help
+                ) || (&warn('CMD_LINE_ERROR'), exit(1));
+    $SIG{__WARN__} = 'DEFAULT';
+    &prt_Help if $help_flg;
+    &prt_Header("Processsing Command-Line Options") if $verbose_flg;
+    <<set flags-vars>>
+} # sub Which_Options
+@ %def &Which_Options 
+%$
+
+<<SGP: commandline warnings>>=
+UNKNOWN_CL_OPTION => "!!! Error trapped while processing command-line:\n",
+CMD_LINE_ERROR => "!!! Please, check your command-line options!!!\n",
+@
+ 
+In [[GetOptions()]] function, sufixing an option with '=s' implies that it will require a mandatory string parameter, with '=f' the option must be provided with a real number. The following variables need a filename: [[$geneid_param]] [[$tbx]] [[$hsp]] [[$ofn]] [[$ps_output]].%$
+
+\begin{comment}
+\todo{get options}{
+ \item [[$score_cutoff]] and [[$shrink]] still not used. 
+ \item Define better how the paths/filenames are passed through those options. Remember that these variables will be defined by giving a path, but some need a prefix.
+}
+\end{comment}
+ 
+<<getopts subs>>=
+# Checking input sequence files
+sub exists_file() {
+    my @files = @_;
+    my ($n, $r) = (' ', 0);
+    foreach $n (@files) {
+        $r++ if (-e "$n");
+    };
+    return $r;
+}
+sub check_fasta_format() {
+    my $file = $_[0];
+    my ($n, $c) = (undef, 0);
+    open(TMP,"< $file");
+    while (<TMP>) {
+        next unless /^>/;
+        />(\S+)\b/ && do {
+            $n = $1;
+            $c++;
+            next unless $c>1;
+        };
+        &go_to_die("FATAL ERROR !!! Multiple locus names found.\n  File \'$file\' must contain only one sequence definition.\n");
+    }
+    &go_to_die("FATAL ERROR !!! There is no '>' line, locus name not found.\n  Please, verify your fasta file \'$file\'\n") unless defined($n);
+    return $n;
+}
+@ %def &exists_file &check_fasta_format
+%$
+
+[[exists_file()]] : Given a list of filenames, this function returns how many among them does exist.
+
+[[check_fasta_format()]] : For a given file, returns the \textit{locus} name if file is in [[fasta]] format, else program dies.
+
+<<declare uses>>=
+use File::Basename;
+@
+
+This standard module contains routines to split up a filename. [[basename]] is provided for programmer compatibility with the same name \textsc{Unix} shell command.
+
+<<declare variables>>=
+# sequence files
+my ($Seq1_Name, $Seq2_Name, $Loc1, $Loc2, $SGPtmp1, $SGPtmp2, $SGPtmpG);
+@ %def $Seq1_Name $Seq2_Name $Loc1 $Loc2 $SGPtmp1 $SGPtmp2 $SGPtmpG
+
+<<set flags-vars>>=
+# do seq files exists
+my $file_number = &exists_file($Seq1, $Seq2);
+&go_to_die("FATAL ERROR!!! Two sequences are needed (-1 and -2 options are mandatory).\n")
+    unless $file_number == 2; 
+# extract basenames
+$Seq1_Name = basename($Seq1);
+$Seq2_Name = basename($Seq2);
+# check if files are provided in fasta format and get locus names
+$Loc1 = &check_fasta_format($Seq1);
+$Loc2 = &check_fasta_format($Seq2);
+&go_to_die("FATAL ERROR!!! Locus1($Loc1) have the same name as Locus2($Loc2).\n  Sequences \'$Seq1_Name\' and \'$Seq2_Name\' must have different locus names.\n")
+    if $Loc1 eq $Loc2;
+# tmpfiles prefix
+$SGPtmp1 = "$SGPTMP.$Seq1_Name";
+$SGPtmp2 = "$SGPTMP.$Seq2_Name";
+$SGPtmpG = "$SGPTMP.${Loc1}_${Loc2}"; 
+@
+
+We check here whether the user provided two sequences or not, either they are given in fasta format. We extract locus names and build some base filenames from which we can derive, when needed, several temporary output filenames.
+
+<<declare variables>>=
+# file flags
+my ($blast_flg, $hsps_flg, $geneid_flg, $plots_flg) = (1, 1, 1, 1);
+@ %def $blast_flg $hsps_flg $geneid_flg $plots_flg
+
+We initialize those flag variables to '1' in order to get, by default, into all the main subroutines called from main loop. They will be modified when [[Which_Options()]] function resets some of the option variables. 
+
+<<declare uses>>=
+use File::Copy;
+@
+
+The [[File::Copy]] module provides [[copy]] and [[move]] functions ([[move]] works across file-sytem boundaries, the standard [[Perl]] built-in [[rename]] ---usually--- does not).
+
+<<global subroutines>>=
+# copying files
+sub copy_files() {
+  	&go_to_die("FATAL ERROR!!! Couln't find \'$_[0]\' file. $!\n")
+         unless &exists_file($_[0]);
+    copy(@_) or &copy_error(@_);
+}
+sub copy_error() { &go_to_die("FATAL ERROR !!! Could not copy file \'$_[0]\' to \'$_[1]\': $!\n") }
+@ %def &copy_files &copy_error
+
+<<define defaults>>=
+my $verbose_str = " -v ";
+@ %def $verbose_str
+<<set flags-vars>>=
+do {
+    &copy_files("$hsp${Loc1}_${Loc2}.srQ", "$SGPtmpG.srQ");
+    &copy_files("$hsp${Loc1}_${Loc2}.srS", "$SGPtmpG.srS");
+    &copy_files("$hsp${Loc1}_${Loc2}.aln", "$SGPtmpG.aln");
+    $hsps_flg = 0;
+} if defined($hsp);
+do {
+    &copy_files("$tbx", "$SGPTMP.tbx");
+    $blast_flg = 0;
+} if defined($tbx);
+# $geneid_flg = 0;
+$savefiles_flg = 1 if defined($ofn);
+$plots_flg = 0 unless defined($ps_output);
+# setting other variables
+$GeneidOptions = "$geneid_opt"   if defined($geneid_opt);
+$GeneidParam   = "$geneid_param" if defined($geneid_param);
+$BlastOptions  = "$blast_opt"    if defined($blast_opt);
+$verbose_str = "" if $verbose_flg;
+@
+
+[[$verbose_str]] switch off the STDERR report generation on our GFF tools by default ('[[-v]]' option). If [[$verbose_flg]] %$
+is given then that variable is set to empty string (GFF tools will produce the basic report output on STDERR).
+
+\begin{comment}
+\todo{set flags-vars}{
+\item When redefining [[$GeneidOptions]] and [[$BlastOptions]] the new options passed through command-line override default ones, but these options are not checked (although that, program will die as [[geneid]] or [[blast]] receive wrong options). Is this a good choice, or maybe is better to join the user defined options to the default ones. Conflicts will arise with last approach whether the same option is defined from defaults and command-line (so, at least, it is simpler to override defaults by user provided values).
+}
+\end{comment}
+
 
 \subsctn{Parsing parameters file}
 
 <<SGP: parsing parameters file>>=
-@ %
+sub read_parameter_file() {
+    &prt_header("Processing Parameters File");
+    open(PFILE,"< $PARAM{PARAMETER_FILE}");
+    $n = 0;
+    while (<PFILE>) {
+    $c = '.';
+    <<Skip comments and empty records>>
+    } continue {
+        &counter(++$n,$c); 
+	}; # while
+    &counter_end($n,$c);
+    close(PFILE);
+    &report('TIMING',"Processing Parameters File",&timing($F));
+} # read_parameter_file
+@ %def &read_parameter_file
 
 \subsctn{Running {\bl} on sequences}
 
 <<SGP: run blast>>=
+$start = new Benchmark;
+$sys_rpt = system("$cmdline");
+$end = new Benchmark;
+&check_sys_result($sys_rpt);
+$ttime = timestr(timediff($end,$start));
+print STDERR "         Time Spent: $ttime \n";
 @ % 
 
 \subsctn{Processing HSPs from {\bl}}
@@ -424,6 +742,9 @@ B<$PROGRAM> is under GNU-GPL (C) 2000
 @ %$
 
 \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
 
 \sctn{Converting C filters to Perl modules}
 
@@ -1652,41 +1973,8 @@ void Output(packHSP* allHSP, packSR* allSR, char Query[LOCUSLENGTH])
 
 \newpage
 
-\sctn{License Terms}
-
-The programs are distributed under GNU General Public License as described below.  Those are the license terms that must appear at programs begining.
-
-<<Copyleft>>=
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#
-######################################################################
-#
-@
-
-\sctn{CVS Tags}
-
-This document is under Concurrent Version System (CVS). The version you are currently reading is the following:
-
-<<Version Control Id Tag>>=
-# $Id: SintenicGenePrediction.nw,v 1.4 2001-06-05 15:25:35 jabril Exp $
-@ 
-
-The code tangled from this document will keep same tag until we check in the new versions.
-
-\newpage
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Common code blocks}
 
@@ -1739,7 +2027,7 @@ sub timing() {
     # total time
     return timestr(timediff($Timer[$#Timer],$Timer[0]));
 } # timing
-@ 
+@ %def &timing
 
 
 \subsubsctn{Printing complex Data Structures}
@@ -1752,6 +2040,37 @@ use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
 @ 
+
+
+\subsctn{Checking signals returned by [[system]]}
+
+We check for exit signals returned by system once it has run the command-line defined in [[$cmdline]] variable (we use the recipe shown in the O'Reilly book, ``Programming Perl'', 2$^n$ edition, page 230). %'
+
+<<Common PERL subs - Check sys command>>=
+#
+sub check_sys_result() {
+    my $runOK = $F;
+    my $prog_exit = 0xffff & $_[0];
+    printf STDERR "### Command returned %#04x : ", $prog_exit;
+    if ($prog_exit == 0) {
+        print STDERR "ran with normal exit ...\n";
+        $runOK = $T;
+    } elsif ($prog_exit == 0xff00) {
+        print STDERR "command failed: $! ...\n";
+    } elsif (($prog_exit & 0xff) == 00) {
+        $prog_exit >>= 8;
+        print STDERR "ran with non-zero exit status $prog_exit ...\n";
+    } else {
+        print STDERR "ran with ";
+        if ($prog_exit &   0x80) {
+            $prog_exit &= ~0x80;
+            print STDERR "coredump from ";
+        };
+        print STDERR "signal $prog_exit ...\n";
+    };
+    return $runOK;
+} # check_sys_result()
+@ %def &check_sys_result
 
 
 \subsubsctn{Common functions}
@@ -1774,7 +2093,7 @@ sub min() {
     foreach my $l (@_) { $z = $l if $l < $z };
     return $z;
 } # min
-@
+@ %def &max &min
 
 <<Common PERL subs - Text fill>>=
 #
@@ -1785,7 +2104,7 @@ sub fill_mid()   {
     my $k = int(($_[1] - $l)/2);
     ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
 } # fill_mid
-@
+@ %def &fill_right &fill_left &fill_mid
 
 These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
 
@@ -1799,7 +2118,7 @@ sub counter { # $_[0]~current_pos++ $_[1]~char
 sub counter_end { # $_[0]~current_pos   $_[1]~char
     (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
 } # counter_end
-@
+@ %def &counter &counter_end
 
 <<Global Vars - Counter>>=
 my ($n,$c); # counter and char (for &counter function)
@@ -1813,13 +2132,14 @@ Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been 
 
 <<Common PERL subs - STDERR>>=
 sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
-@
+@ %def &report
 
 The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
 
 <<Common PERL subs - STDERR>>=
 sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
-@
+@ %def &warn
+
 
 \subsctn{AWK scripts}
 
@@ -1853,6 +2173,40 @@ L="####################"
 exit 0
 @
 
+\subsctn{License Terms}
+
+The programs are distributed under GNU General Public License as described below.  Those are the license terms that must appear at programs begining.
+
+<<Copyleft>>=
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+######################################################################
+#
+@
+
+\subsctn{CVS Tags}
+
+This document is under Concurrent Version System (CVS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: SintenicGenePrediction.nw,v 1.5 2001-06-06 19:00:58 jabril Exp $
+@ 
+
+The code tangled from this document will keep same tag until we check in the new versions.
+
 \newpage
 
 \sctn{Extracting code blocks from this document}
@@ -1860,7 +2214,7 @@ exit 0
 From this file we can obtain both the code and the
 documentation. The following instructions are needed:
 
-\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+\subsctn{Extracting Script code chunks from the [[noweb]] file} % \\[-0.5ex]
 
 Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
@@ -1873,11 +2227,11 @@ notangle -L -R"SGP::filters" $WORK/$nwfile.nw | \
 notangle -L -R"SGP::filters - Makefile.PL" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' > $LIB/sgpfilters/Makefile.PL ;
 # program without line numbering comments
-notangle -t4 -R"SGP TOOL" $WORK/$nwfile.nw \
+notangle -R"SGP TOOL" $WORK/$nwfile.nw \
     > $BIN/sgp.pl ;
-notangle -t4 -R"SGP::filters" $WORK/$nwfile.nw \
+notangle -R"SGP::filters" $WORK/$nwfile.nw \
     > $LIB/sgpfilters/SGPfilters.pm ;
-notangle -t4 -R"SGP::filters - Makefile.pl" $WORK/$nwfile.nw \
+notangle -R"SGP::filters - Makefile.pl" $WORK/$nwfile.nw \
     > $LIB/sgpfilters/Makefile.PL ;
 # making them runnable
 chmod a+x $BIN/sgp.pl ;
