@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.6 2003-02-21 20:51:50 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.7 2003-02-24 17:19:09 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.6 2003-02-21 20:51:50 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.7 2003-02-24 17:19:09 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -354,7 +354,7 @@ my ($fs,$GFFfmt,$GFFtgs,$GFFtgl,$GFFtg);
 my ($prt_funct, $prog_params, $program, $version, $seqname);
 my ($scQ, $scS);   # reSCale_Query/Subject : 1 to re-scalate lengths.
 my ($query_name, $db_name, $score, $descr,
-	$ori, $end, $seq, $txt, $tt, $pt, $ht);
+	$ori, $end, $seq, $txt, $tt, $CT, $PT, $HT);
 my (@seqlist, %prgseq, %dbase, %query, %cnt,
 	%desc, %sco, %hsp_start, %hsp_end, %hsp_seq);
 my ($qm, $sm, $x, $y, $ml, $a, $b, $aq, $as, $sql, $lq, $ls, $sq);
@@ -382,7 +382,6 @@ my ($n, $nm, $wnm, $tq, $ts,   # couNter, NaMe, TagQuery, TagSubject
 &get_commandline_opts(); # if help is ON no start header must be shown...
 &program_started("$PROGRAM $VERSION");
 &parseblast();
-&prt_out(); # $prt && &prt_out;
 &program_finished("$PROGRAM $VERSION");
 exit(0);
 
@@ -460,7 +459,8 @@ sub get_commandline_opts(){
 sub program_started() {
     my $prog = shift;
     print STDERR &header("RUNNING $prog",'',"Host: $HOST","User: $USER",
-                         "Perl: $PLVER",'',"Date: $DATE");
+                         "Perl: $PLVER",'',"Date: $DATE")
+                 if $err_flg;
 } # program_started
 sub program_finished() {
     my $prog = shift;
@@ -469,7 +469,8 @@ sub program_finished() {
         $txt = sprintf("Total Execution Time: %02d:%02d:%02d (%d secs)%s",
                   sub { ($_[2]-1, $_[1], $_[0]) }->(localtime($1)),$1,$txt);
     };
-    print STDERR &header("$prog HAS FINISHED",'',(split /\n/, $txt));
+    print STDERR &header("$prog HAS FINISHED",'',(split /\n/, $txt))
+                 if $err_flg;
 } # program_finished
 #
 sub header() {
@@ -550,12 +551,9 @@ USAGE:	parseblast.pl [options] <results.from.blast>
 
 DESCRIPTION:
 
-  Filtering High-scoring Segment Pairs (HSPs) from WU/NCBI BLAST
-  (it also can parse WEB-BLAST files, but take care that the hsp
-  coordinates for query and target are not joint to their
-  sequences or the program will not work properly). Different 
-  output options are available, the most important here are those
-  allowing to write HSPs in GFF format (GFFv1, GFFv2 or APLOT).
+  Filtering High-scoring Segment Pairs (HSPs) from WU/NCBI BLAST.
+  Different output options are available, the most important here are
+  those allowing to write HSPs in GFF format (GFFv1, GFFv2 or APLOT).
   Sequences can be included in the GFF records as a comment field.
   Furthermore, this script can output also the alignments
   for each HSP in ALN, MSF or tabular formats. 
@@ -565,6 +563,11 @@ DESCRIPTION:
       TBLASTN or TBLASTX), is missing, the program assumes that it
       contains BLASTN HSP records. So that, ensure that you feed
       the $PROGRAM script with a well formatted BLAST file.
+
+         Sometimes there are no spaces between the HSP coords and
+      its sequence, as it sometimes happens in Web-Blast or
+      Paracel-Blast outputs. Now those records are processed ok
+      and that HSP is retrieved as well as "standard" ones.
 
   WARNING.- Frame fields from GFF records generated with $PROGRAM
       contain BLAST frame (".","1","2","3") instead of the GFF standard
@@ -751,22 +754,22 @@ EndOfPlain
 } # prt_ext
 #
 sub prt_Q_gff { # $hss $hes;\tStrand $sts;\tFrame $frs;\t
-    printf STDOUT $GFFfmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"$wnm".(sprintf($GFFtg,$hss,$hes,$sts,$frs))."E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"$wnm".(sprintf($GFFtg,$hss,$hes,$sts,$frs))."$scores$sq";
 }
 sub prt_S_gff { # $hsq $heq;\tStrand $stq;\tFrame $frq;\t
-    printf STDOUT $GFFfmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"$query{$nm}".(sprintf($GFFtg,$hsq,$heq,$stq,$frq))."E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"$query{$nm}".(sprintf($GFFtg,$hsq,$heq,$stq,$frq))."$scores$sq";
 }
 sub prt_Q_fullgff { # $hss $hes;\tStrand $sts;\tFrame $frs;\t
-    printf STDOUT $GFFfmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"Target \"$wnm\"".(sprintf($GFFtg,$hss,$hes,$sts,$frs))."E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, $query{$nm},$prg,'hsp',$hsq,$heq,$gsc,$stq,$frq,"Target \"$wnm\"".(sprintf($GFFtg,$hss,$hes,$sts,$frs))."$scores$sq";
 }
 sub prt_S_fullgff { # $hsq $heq;\tStrand $stq;\tFrame $frq;\t
-    printf STDOUT $GFFfmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"Target \"$query{$nm}\"".(sprintf($GFFtg,$hsq,$heq,$stq,$frq))."E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, $wnm,$prg,'hsp',$hss,$hes,$gsc,$sts,$frs,"Target \"$query{$nm}\"".(sprintf($GFFtg,$hsq,$heq,$stq,$frq))."$scores$sq";
 }
 sub prt_Q_aplot {
-    printf STDOUT $GFFfmt, "$query{$nm}:$wnm",$prg,'hsp',"$hsq:$hss","$heq:$hes",$gsc,"$stq:$sts","$frq:$frs","$bt:$n # E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, "$query{$nm}:$wnm",$prg,'hsp',"$hsq:$hss","$heq:$hes",$gsc,"$stq:$sts","$frq:$frs","$bt:$n $scores$sq";
 }
 sub prt_S_aplot {
-    printf STDOUT $GFFfmt, "$wnm:$query{$nm}",$prg,'hsp',"$hss:$hsq","$hes:$heq",$gsc,"$sts:$stq","$frs:$frq","$bt:$n # E_value $ex$scores$sq";
+    printf STDOUT $GFFfmt, "$wnm:$query{$nm}",$prg,'hsp',"$hss:$hsq","$hes:$heq",$gsc,"$sts:$stq","$frs:$frq","$bt:$n $scores$sq";
 }
 sub prt_pairwise {
 	$prt_pos_flg && do {
@@ -871,7 +874,9 @@ sub setprtfunct() {
   }; # CHOOSE 
 } # setprtfunct
 #
-sub prt_out {
+sub prt_out() {
+    my $ht = 0;
+    $CT++;
 	$prt = 0;
 	$err_flg && print STDERR &header("WRITING OUTPUT TO STDOUT");
     &setprtfunct();
@@ -914,17 +919,24 @@ sub prt_out {
 				  #
 				  do {
 					  $sq = $scores = "";
-                      $scores = ";${fs}P_sum $pv;${fs}Aln_Score $sc;${fs}Bit_Score $bt;${fs}Idn_Score ".
-                          sprintf("%6.2f",($id/$lnmin) * 100)." ($id/$lnmin);${fs}Gaps ".
-                          sprintf("%4.2f",($gpt/$lnmx) * 100).
-                          " (Q:$gpq|S:$gps);${fs}Lengths Q:$lnq|S:$lns|T:$lnmx"
-                          if $full_scores;
+                      $full_scores && do {
+                          $scores = "E_value $ex;${fs}P_sum $pv;${fs}Aln_Score".
+                                    " $sc;${fs}Bit_Score $bt;${fs}Idn_Score ".
+                                    sprintf("%6.2f",($id/$lnmin) * 100).
+                                    " ($id/$lnmin);${fs}Gaps ".
+                                    sprintf("%4.2f",($gpt/$lnmx) * 100).
+                                    " (Q:$gpq|S:$gps);".
+                                    "${fs}Lengths Q:$lnq|S:$lns|T:$lnmx";
+                          $aplot_flg && ($scores = "# $scores");
+                      }; # $full_scores
 					  $subject_flg && do {
-						  $sq = ";${fs}Subject_seq $hsp_seq{$ts} ;${fs}Query_seq $hsp_seq{$tq}" if $sequence_flg;
+						  $sq = ";${fs}Subject_seq $hsp_seq{$ts} ;${fs}".
+                                "Query_seq $hsp_seq{$tq}" if $sequence_flg;
 						  $prt_funct->();
                           last PRINT;
 					  }; # $subject_flg
-					  $sq = ";${fs}Query_seq $hsp_seq{$tq} ;${fs}Subject_seq $hsp_seq{$ts}" if $sequence_flg;
+					  $sq = ";${fs}Query_seq $hsp_seq{$tq} ;${fs}".
+                            "Subject_seq $hsp_seq{$ts}" if $sequence_flg;
 					  $prt_funct->();
                       last PRINT;
 				  } unless $nogff_flg;
@@ -941,6 +953,11 @@ sub prt_out {
 		}; # do if $cnt{$nm}>0
 	}; # foreach
 	&prt_foeprg($ht);
+    $HT += $ht;
+    @seqlist = ();
+    print STDERR &header("FROM $. INPUT LINES",
+                         "$PT INPUT RECORDS READ",
+                         "TOTAL HSPs WRITTEN: $HT") if $err_flg;
 }
 
 ###################################################
@@ -948,16 +965,36 @@ sub prt_out {
 ###################################################
 #
 sub check_blastprogname() {
-    my $str = shift;
+    my ($str,$pt) = @_;
     # print STDERR "$_\n";
-    $prt && &prt_out;
-    ($program, $version) = split /\s+/og, $$str, 2;
+	($prt == 0 && $fragment == 1) && do {
+        $prt = 1;
+        $err_flg && print STDERR "##\n## NO PARAMETERS SECTION FOUND...\n##\n";
+	};
+    $prt && do {
+        &prt_foeprg($$pt);
+        $PT += $$pt;
+        $$pt = 0;
+        &prt_out;
+        $err_flg && do {
+            print STDERR "##\n";
+            print STDERR &header("PARSING STDIN (More Results From BLAST)");        
+        };
+    }; # $prt
+    #
+    ($program, $version) = split /\s+/og, $str, 2;
     # typeQ/typeS: 0 for proteins - 1 for nucleic acids.
-    ($program =~ /^BLASTP$/o ) && ( $scQ = 0, $scS = 0); # Amino Acids vs Amino Acids
-    ($program =~ /^BLASTN$/o ) && ( $scQ = 0, $scS = 0); # Nucleotides vs Nucleotides
-    ($program =~ /^BLASTX$/o ) && ( $scQ = 1, $scS = 0); # Nucleotides vs Amino Acids 
-	($program =~ /^TBLASTN$/o) && ( $scQ = 0, $scS = 1); # Amino Acids vs Nucleotides
-	($program =~ /^TBLASTX$/o) && ( $scQ = 1, $scS = 1); # Nucleotides translated vs Nucleotides translated
+    # Amino Acids vs Amino Acids
+    ($program =~ /^BLASTP$/o ) && ( $scQ = 0, $scS = 0);
+    # Nucleotides vs Nucleotides
+    ($program =~ /^BLASTN$/o ) && ( $scQ = 0, $scS = 0);
+    # Nucleotides vs Amino Acids 
+    ($program =~ /^BLASTX$/o ) && ( $scQ = 1, $scS = 0);
+    # Amino Acids vs Nucleotides
+	($program =~ /^TBLASTN$/o) && ( $scQ = 0, $scS = 1);
+    # Nucleotides translated vs Nucleotides translated
+	($program =~ /^TBLASTX$/o) && ( $scQ = 1, $scS = 1);
+    #
 	$prog_params = "#\n# $program $version\n#";
 	$query_name = $db_name = '';
 	$main = 1;
@@ -972,10 +1009,8 @@ sub check_seqids() {
         ($scQ,$scS) = (0,0);
 	    $prog_params = "#\n# $program $version\n#";
 	    $query_name = $db_name = '';
-	    $main = 1;
- 	    $seqflg = $hsp = $fragment = $param = 0;
     };
-	($seqname, $descr) = split /\s+/og, $$str, 2;
+	($seqname, $descr) = split /\s+/og, $str, 2;
 	$seqname =~ s/^\s*>//o;
 	$seqname =~ s/\s|:|\|/_/og;
 	$seqname .= "_".($index++);
@@ -987,35 +1022,37 @@ sub check_seqids() {
                     ? join(' ', $descr, &get_lines(' ')) : '';
 #	$cnt{$seqname} = 0;
 	$seqflg = 1;
-	$main = $hsp = $fragment = 0;
+	$main = $hsp = $fragment = $param = 0;
 } # check_seqids
 #
 sub parseblast() {
+    my $pt = 0;
+    ($CT,$PT,$HT) = (0,0,0);
     $err_flg && print STDERR &header("PARSING STDIN FROM BLAST");
     $program = undef; # default program name
     while (<>) {
-    	# s/\r\n$/\n/; # if your input records finish with "\r\n" (like EMBL).
-    	next if /^\s*$/;  # /^\s*$/ is similar to AWK /^[ \t]*$/
+    	next if /^\s*$/o;
         &prt_progress(++$pt);
     	my $tmpinput = $_;
-    	chomp;
+    	chomp;  # s/\r\n$/\n/;
+                # if your input records finish with "\r\n" (like EMBL).
         # print STDOUT "$. : $_ \n";
                      # "$." is record number && "$_" is whole record
       CHECK: {
     	  # Starts with "T?BLAST[PNX]?" ?
-          /^\s*T?BLAST[PNX]?/o        && do {
-	    	  &check_blastprogname(\$_);
+          $_ =~ /^\s*T?BLAST[PNX]?/o && do {
+	    	  &check_blastprogname($_,\$pt);
               last CHECK; 
 	      }; # /^\s*T?BLAST[PNX]?/
 	      # Starts with ">" ?: sequences.
-          /^>/o                    && do {
-		      &check_seqids(\$_);
+          $_ =~ /^>/o && do {
+		      &check_seqids($_);
               last CHECK;
 	      }; # /^\s*>/
 	      # Starts with "Score" ?: HSPs.
-          (/^\s*Score/o && $seqflg) && do {
+          ($_ =~ /^\s*Score/o && $seqflg) && do {
 		  # print STDERR "$_\n";
-		  ( $score = $_ ) =~ s/^\s*//o;
+              ( $score = $_ ) =~ s/^\s*//o;
 	    	  $cnt{$seqname}++;
 	    	  $sco{$seqname.$cnt{$seqname}} = join('', $score, &get_lines(', '));
 	    	  # print STDOUT $sco{$seqname.$cnt{$seqname}}."\n";
@@ -1024,13 +1061,13 @@ sub parseblast() {
 	    	  last CHECK;
 	      }; # (/^\s*Score/ && ($seqflg))
           # Starts with "Query" ?: Fragments.
-	      (/^Query:/o && $hsp)    && do {
+	      ($_ =~ /^Query:/o && $hsp) && do {
 	    	  # print STDERR "$_\n";
 	    	  $fragment = 1;          
 	    	  last CHECK;
 	      }; # (/^\s*Query/ && ($hsp))
           # Parameters Section.
-	      (/^\s*(?:Database|Parameters):/o && !$main) && do {
+	      ($seqflg && $_ =~ /^\s*(Database|Parameters):/o) && do {
 	    	  # print STDERR "$_\n";
 	    	  $prt = $param = 1;
 	    	  $seqflg = $hsp = $fragment = 0;
@@ -1041,30 +1078,37 @@ sub parseblast() {
       #              "HSP=$hsp FRAGMENT=$fragment => SEQNAME=$seqname\n";
       LOAD: {
     	  $fragment && do { # We are within a fragment.
+              my $kk;
 	    	  $txt = '';
 	    	  $tt = $cnt{$seqname};
-	    	  ($txt,$ori,$seq,$end) = split /\s+/og, $_;
-	    	  if ($txt =~ /^Query:/o) {
+	    	  ($txt,$kk) = split /:\s+/o, $_;
+	    	  if ($txt =~ /^Query/o) {
 	    		  # print STDERR "$_\n";
-	    		  ($hsp_start{$seqname."query".$tt}) ||
-                      ($hsp_start{$seqname."query".$tt} = $ori);
-		    	  $hsp_end{$seqname."query".$tt} = $end;
-		    	  $hsp_seq{$seqname."query".$tt} .= $seq;
+                  $kk =~ /^(\d+)\s*([^\d]+?)\s*(\d+)\s*$/o && do {
+                      ($ori,$seq,$end) = ($1,$2,$3);
+	    	          ($hsp_start{$seqname."query".$tt}) ||
+                           ($hsp_start{$seqname."query".$tt} = $ori);
+		    	      $hsp_end{$seqname."query".$tt} = $end;
+		    	      $hsp_seq{$seqname."query".$tt} .= $seq;
+                  };
 		      } # if ($txt =~ /Query/)
-		      elsif ($txt =~ /^Su?bje?ct:/o) {
+		      elsif ($txt =~ /^Su?bje?ct/o) {
 		    	  # print STDERR "$_\n";
-		    	  ($hsp_start{$seqname."sbjct".$tt}) ||
-                       ($hsp_start{$seqname."sbjct".$tt} = $ori);
-		    	  $hsp_end{$seqname."sbjct".$tt} = $end;
-		    	  $hsp_seq{$seqname."sbjct".$tt} .= $seq;
-			      $fragment = 0;
+                  $kk =~ /^(\d+)\s*([^\d\s]+)\s*(\d+)\s*$/o && do {
+                      ($ori,$seq,$end) = ($1,$2,$3);
+		    	      ($hsp_start{$seqname."sbjct".$tt}) ||
+                           ($hsp_start{$seqname."sbjct".$tt} = $ori);
+		    	      $hsp_end{$seqname."sbjct".$tt} = $end;
+		    	      $hsp_seq{$seqname."sbjct".$tt} .= $seq;
+			          $fragment = 0;
+                  };
 		      } # elsif ($txt =~ /Sbjct/)
 		      else { last LOAD; };
     	  }; # ($fragment)
 	      $main && do { # We are within the blast file header.
 	    	  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
 	    		  # print STDERR "$_\n";
-	    		  ($query_name = $1) =~ s/\s|:|\|/_/g ;
+	    		  ($query_name = $1) =~ s/[\s:\|]/_/g ;
 	    	  };
 	    	  /^\s*Database:\s+(.*?)(\s+([^\s]*)?)?$/o && do { 
 	    		  # print STDERR "$_\n";
@@ -1083,11 +1127,8 @@ sub parseblast() {
     	  $param && do { # We are within the blast file trailer.
     		  /^\s*Query=\s+(.*?)(\s+([^\s]*)?)?$/o && do {
     			  # print STDERR "$_\n";
-    			  &prt_foeprg($pt);
-    			  $prt && &prt_out;
-    			  $err_flg && print STDERR &header("PARSING STDIN FROM BLAST (New BLAST Results)");
 			 	  @seqlist = ();
-			 	  ($query_name = $1) =~ s/\s|:|\|/_/g ;
+			 	  ($query_name = $1) =~ s/[\s:\|]/_/g ;
 			 	  $main = 1;
 			 	  $seqflg = $hsp = $fragment = $param = 0;
 			 	  last LOAD;
@@ -1100,10 +1141,15 @@ sub parseblast() {
 		      } else { $param = 0; }
 		      last LOAD;
 	      }; # ($param)
-      }; # LOAD Block
-	    close(ARGV) if (eof);
+     }; # LOAD Block
     }; # while
-    &prt_foeprg($pt);
+    $prt && do {
+        &prt_foeprg($pt);
+        $PT += $pt;
+        $pt = 0;
+        &prt_out;
+    }; # $prt
+    # $prt || &prt_foeprg($pt);
 } # parseblast
 @ 
 
@@ -1314,7 +1360,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.6 2003-02-21 20:51:50 jabril Exp $
+# $Id: parseblast.nw,v 1.7 2003-02-24 17:19:09 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
