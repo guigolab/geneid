@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.34 1999-08-03 03:14:51 jabril Exp $	
+#         $Id: gff2ps,v 1.35 1999-09-08 20:46:10 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -38,8 +38,8 @@
 ##############################################################
 #################### PROGRAM DEFINITIONS #####################
 # 
-T_start=` time | gawk '{ split($0,ty," "); print ty[3] }' `
-PRG_DIR="/home/jabril/PostScript/07_GFF2PS"
+# T_start=` time | gawk '{ split($0,ty," "); print ty[3] }' `
+T_start=` gawk 'BEGIN{ "date" | getline t;  split(t,ty," "); print ty[4]}' `
 CMDLine=$0" "$*
 # 
 # Defining Default Values...
@@ -48,9 +48,9 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps"
   GAWK_PROG="gff2ps.awk"
-  VERSION="v0.9b"
-  REVISION='$Revision: 1.34 $'
-  DATERELEASE='$Date: 1999-08-03 03:14:51 $'
+  VERSION="v0.91b"
+  REVISION='$Revision: 1.35 $'
+  DATERELEASE='$Date: 1999-09-08 20:46:10 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -75,10 +75,18 @@ Defaults () {
 
  # 
  # Default User-Defined Options: 
+  PRG_DIR="./"
+  if [ $GFF2PS_DIR ]
+    then
+      if [ -d "$GFF2PS_DIR" ]   ###### Environment variable for gff2ps code directory.
+        then
+          PRG_DIR="$GFF2PS_DIR";
+        fi
+    fi
   CFDIR=`pwd`;
   if [ $GFFDIR ]
     then
-      if [ -d "$GFFDIR" ]                  ###### Environment variable for working directory.
+      if [ -d "$GFFDIR" ]      ###### Environment variable for working directory.
         then
           CFDIR="$GFFDIR";
         fi
@@ -125,6 +133,7 @@ Defaults () {
   v31="red";    n31="frame1_color";
   v32="green";  n32="frame2_color";
   v33="orange"; n33="frame_unknown_color";
+  v34=1; n34="quiet_mode";
 # Layout Properties
   c01="1cm"; m01="margin_left"
   c02="1cm"; m02="margin_right"
@@ -140,6 +149,11 @@ Defaults () {
   # c11="boxed"; m11="header_style"
   c12="default"; m12="block_style"
   # c12="boxed"; m12="block_style"
+  c13="true";  m13="show_left_source_label"
+  c14="false"; m14="show_right_source_label"
+  c15="3.5cm"; m15="left_source_label_width"; #
+  c16="3.5cm"; m16="right_source_label_width"; #
+  c17=250; m17="Min_Group_Separation"; # minimum nucleotide distance between two groups to avoid overlapping.
   #
   # c20=$c05;   m20="text_color"
   # c21="none"; m21="label"
@@ -150,84 +164,87 @@ Defaults () {
 #
 colorDef () { # still not defined seagreen and limegreen (now same as green)
 cat <<'@@@COLORS@@@'
+%
+% COLORS.gff2ps,v 1.2 1999/08/26 20:55:41 jabril Exp
+%
 % black+grey+white
 black               0.00 0.00 0.00 1.00
-verydarkgrey        0.00 0.00 0.00 0.90
-darkgrey            0.00 0.00 0.00 0.75
-grey                0.00 0.00 0.00 0.50
-lightgrey           0.00 0.00 0.00 0.25
+verydarkgrey        0.00 0.00 0.00 0.80
+darkgrey            0.00 0.00 0.00 0.60
+grey                0.00 0.00 0.00 0.40
+lightgrey           0.00 0.00 0.00 0.20
 verylightgrey       0.00 0.00 0.00 0.10
 white               0.00 0.00 0.00 0.00
 % magenta
-verydarkmagenta     0.00 1.00 0.00 0.50
-darkmagenta         0.00 1.00 0.00 0.25
-magenta             0.00 1.00 0.00 0.00
-lightmagenta        0.00 0.50 0.00 0.00
-verylightmagenta    0.00 0.25 0.00 0.00
+verydarkmagenta     0.00 1.00 0.00 0.30
+darkmagenta         0.00 0.80 0.00 0.05
+magenta             0.00 0.60 0.00 0.00
+lightmagenta        0.00 0.40 0.00 0.00
+verylightmagenta    0.00 0.20 0.00 0.00
 % violet
-verydarkviolet      0.40 0.80 0.20 0.00
-darkviolet          0.45 0.85 0.00 0.00
-violet              0.30 0.60 0.00 0.00
-lightviolet         0.15 0.55 0.00 0.00
-verylightviolet     0.05 0.45 0.00 0.00
+verydarkviolet      0.45 0.85 0.00 0.00
+darkviolet          0.37 0.75 0.00 0.00
+violet              0.30 0.65 0.00 0.00
+lightviolet         0.22 0.55 0.00 0.00
+verylightviolet     0.15 0.45 0.00 0.00
 % blue
-verydarkblue        1.00 1.00 0.00 0.25
-darkblue            1.00 1.00 0.00 0.00
-blue                0.85 0.85 0.00 0.00
-lightblue           0.70 0.70 0.00 0.00
-verylightblue       0.50 0.50 0.00 0.00
+verydarkblue        1.00 1.00 0.00 0.15
+darkblue            0.90 0.90 0.00 0.00
+blue                0.75 0.75 0.00 0.00
+lightblue           0.50 0.50 0.00 0.00
+verylightblue       0.30 0.30 0.00 0.00
 % skyblue
-verydarkskyblue     0.95 0.15 0.00 0.40
-darkskyblue         1.00 0.25 0.00 0.15
-skyblue             1.00 0.25 0.00 0.00
-lightskyblue        0.80 0.20 0.10 0.00
-verylightskyblue    0.60 0.15 0.15 0.00
+verydarkskyblue     0.90 0.50 0.00 0.10
+darkskyblue         0.75 0.45 0.00 0.00
+skyblue             0.60 0.38 0.00 0.00
+lightskyblue        0.45 0.25 0.00 0.00
+verylightskyblue    0.30 0.15 0.00 0.00
 % cyan
-verydarkcyan        1.00 0.00 0.00 0.50
-darkcyan            1.00 0.00 0.00 0.25
-cyan                1.00 0.00 0.00 0.00
-lightcyan           0.50 0.00 0.00 0.00
-verylightcyan       0.25 0.00 0.00 0.00
+verydarkcyan        1.00 0.00 0.00 0.00
+darkcyan            0.80 0.00 0.00 0.00
+cyan                0.60 0.00 0.00 0.00
+lightcyan           0.40 0.00 0.00 0.00
+verylightcyan       0.20 0.00 0.00 0.00
 % seagreen
-verydarkseagreen    1.00 0.00 0.50 0.40
-darkseagreen        1.00 0.00 0.50 0.10
-seagreen            1.00 0.00 0.50 0.00
-lightseagreen       1.00 0.00 0.25 0.00
-verylightseagreen   0.80 0.00 0.15 0.00
+verydarkseagreen    1.00 0.00 0.60 0.10
+darkseagreen        0.90 0.00 0.54 0.00
+seagreen            0.75 0.00 0.45 0.00
+lightseagreen       0.50 0.00 0.30 0.00
+verylightseagreen   0.25 0.00 0.15 0.00
 % green
-verydarkgreen       0.65 0.00 0.95 0.40
-darkgreen           0.90 0.00 0.90 0.10
-green               1.00 0.00 1.00 0.00
-lightgreen          0.50 0.00 1.00 0.00
-verylightgreen      0.25 0.00 0.75 0.00
+verydarkgreen       1.00 0.00 1.00 0.00
+darkgreen           0.80 0.00 0.80 0.00
+green               0.60 0.00 0.60 0.00
+lightgreen          0.40 0.00 0.40 0.00
+verylightgreen      0.20 0.00 0.20 0.00
 % limegreen
-verydarklimegreen   0.50 0.00 1.00 0.40
-darklimegreen       0.50 0.00 1.00 0.15
-limegreen           0.50 0.00 1.00 0.00
-lightlimegreen      0.25 0.00 1.00 0.00
-verylightlimegreen  0.10 0.00 1.00 0.00
+verydarklimegreen   0.50 0.00 1.00 0.10
+darklimegreen       0.40 0.00 0.95 0.00
+limegreen           0.30 0.00 0.80 0.00
+lightlimegreen      0.20 0.00 0.65 0.00
+verylightlimegreen  0.10 0.00 0.50 0.00
 % yellow
-verydarkyellow      0.00 0.00 1.00 0.30
+verydarkyellow      0.00 0.00 1.00 0.25
 darkyellow          0.00 0.00 1.00 0.10
 yellow              0.00 0.00 1.00 0.00
 lightyellow         0.00 0.00 0.50 0.00
 verylightyellow     0.00 0.00 0.25 0.00
 % orange
-verydarkorange      0.00 0.60 1.00 0.00
-darkorange          0.00 0.55 0.90 0.00
-orange              0.00 0.50 0.70 0.00
-lightorange         0.00 0.30 0.85 0.00
-verylightorange     0.00 0.30 0.55 0.00
+verydarkorange      0.00 0.55 0.65 0.20
+darkorange          0.00 0.50 0.70 0.00
+orange              0.00 0.40 0.75 0.00
+lightorange         0.00 0.30 0.80 0.00
+verylightorange     0.00 0.20 0.85 0.00
 % red
-verydarkred         0.00 0.90 0.90 0.30
-darkred             0.00 0.80 0.90 0.10
-red                 0.00 1.00 1.00 0.00
-lightred            0.05 0.80 0.90 0.00
-verylightred        0.15 0.40 0.60 0.00
+verydarkred         0.00 1.00 1.00 0.10
+darkred             0.00 0.80 0.80 0.00
+red                 0.00 0.60 0.60 0.00
+lightred            0.00 0.40 0.40 0.00
+verylightred        0.00 0.20 0.20 0.00
 % brown
 verydarkbrown       0.00 0.85 1.00 0.70
-darkbrown           0.00 0.75 1.00 0.60
-brown               0.00 0.70 1.00 0.40
+darkbrown           0.00 0.75 1.00 0.50
+brown               0.00 0.70 1.00 0.30
 lightbrown          0.30 0.60 0.70 0.00
 verylightbrown      0.15 0.45 0.55 0.00
 @@@COLORS@@@
@@ -302,7 +319,8 @@ Help () {
   echo ""
   echo "     -h  Shows this help."
   echo "     -H <option> Shows only help for the especified option."
-  echo "     -v Verbose mode, a report is sent to standard error."
+  echo "     -V Verbose mode, a full report is sent to standard error (default is only send Warnings)."
+  echo "     -v Silent mode: Disable all warnings, no messages sent to standard error."
   echo "     -s <page_size> Useful for modifying the page size (default is a4)."
   echo "     -P <\#> Sets how many pages are needed to split your output (default is one)."
   echo "     -p Switches page orientation to Portrait (default is Landscape)."
@@ -337,8 +355,12 @@ Help () {
   echo ""
   echo "ENVIRONMENT VARIABLES"
   echo ""
-  echo "     You can specify the $PROGRAM path where it can find the default files with the shell variable GFFDIR."
-  echo "     You can also define the default custom filename you will like with the variable GFF_CUSTOM_FILE, program default filename for custom file is \".gff2psrc\"."
+  echo "     You must define the \"GFF2PS_DIR\" environmental variable in which you can specify directory path where you have copied GFF2PS programs (\"gff2ps\" and \"gff2ps.awk\"). \"GFF2PS_DIR\" default value is "./" (that implies you only can use GFF2PS in the same directory where you put \"gff2ps\" and \"gff2ps.awk\")."
+
+  echo "       Using a Bourne-Shell (e.g. bash):\n         export GFF2PS_DIR=\"path\""
+  echo "       Using a C-Shell:                 \n         setenv GFF2PS_DIR \"path\""
+  echo "     You can specify the path where GFF2PS can find the default files with the shell variable \"GFFDIR\". Default value is path where you are running GFF2PS."
+  echo "     You can also define the default custom filename you will like with the variable \"GFF_CUSTOM_FILE\", program default filename for custom file is \"\$GFFDIR/.gff2psrc\"."
   echo ""
   echo "COMMENTS"
   echo ""
@@ -405,7 +427,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.34 1999-08-03 03:14:51 jabril Exp $
+%    $Id: gff2ps,v 1.35 1999-09-08 20:46:10 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -495,8 +517,10 @@ flglscape {
 /XSBlck pglim pop def
 /is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or def
 /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
-/YSBlck { pglim exch pop FlgTitl { YSTitl YOriTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div } def
-/YS2Blck { pglim exch pop FlgTitl { YSTitl YOriTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div FlgOS { TkMrkW 4 mul sub } if FlgIS { is1tck { TkMrkW 2 mul } if is2tck { TkMrkW 2 mul add } if sub } if } def
+/FSF 2.5 def % Point size for Credits for A4
+/CSF { pagedict begin pga4 pop end Dpage pop exch div mul } bdf
+/YSBlck { pglim exch pop flgcrd { FSF CSF 2 mul sub } if FlgTitl { YSTitl YOriTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div } def
+/YS2Blck { pglim exch pop flgcrd { FSF CSF 2 mul sub } if FlgTitl { YSTitl YOriTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div FlgOS { TkMrkW 4 mul sub } if FlgIS { is1tck { TkMrkW 2 mul is2tck { TkMrkW 2 mul add } if sub } if } if } def
 /XOriBlck 0 def
 /YOriBlck { FlgTitl { YOriTitl YSTitl add BlckSp add } { 0 } ifelse } def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
@@ -568,6 +592,7 @@ headerdict begin
  /ttfsz { YSTitl 0.50 mul } def
  /stfsz { YSTitl 0.25 mul } def
  /xtfsz { YSTitl 0.25 mul } def
+ /sepsz { YSTitl 0.125 mul } def
  % /xtpsz { xtfsz 2 div } def
  /ttfnt { ttfsz /Helvetica-Bold } def
  /stfnt { stfsz /Helvetica      } def
@@ -575,10 +600,10 @@ headerdict begin
  /tmfnt { xtfsz /Times-Roman    } def
  /pgfnt { xtfsz /Times-Roman    } def
  /ttlong { S ttfnt sfont Title stringwidth pop stfnt sfont SubTitle stringwidth pop R 2 copy gt { pop } { exch pop } ifelse 2 div } bdf
- /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox FGcolor scmyk K R } if ShwTt Title () ne and { 0.25 cm ttlong add YSTitl 12 sub 0 Title (tv) (ch) ttfnt FGcolor ttxt } if ShwST SubTitle () ne and { 0.25 cm ttlong add 12 0 SubTitle (bv) (ch) stfnt FGcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt FGcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt FGcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt FGcolor ttxt } if R } bdf
+ /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox FGcolor scmyk K R } if ShwTt Title () ne and { sepsz ttlong add YSTitl sepsz sub 0 Title (tv) (ch) ttfnt FGcolor ttxt } if ShwST SubTitle () ne and { sepsz ttlong add sepsz 0 SubTitle (bv) (ch) stfnt FGcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt FGcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt FGcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt FGcolor ttxt } if R } bdf
 end
 %
-/s_credits { S 1 dict begin /fs_cd 12 def pglim 1 cm add T 1 -1 F 0 0 0 (This poster has been obtained with gff2ps. You can get free last version at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman FGcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol FGcolor ttxt end R } bdf
+/s_credits { S 1 dict begin /fs_cd FSF CSF def pglim FSF 0.52 mul CSF sub T 1 -1 F 0 0 0 (This poster has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman FGcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol FGcolor ttxt end R } bdf
 %
 %%EndProcSet:   header_functions 1.0 0
 %
@@ -625,7 +650,7 @@ end % tmdct
  /v { clrproc v_s 0 m v_e 0 l K /v_s v_s vstp add def /v_e v_e vstp add def } bdf
  /GetVtVar { /v_cmod xdf /v_end xdf /v_ori xdf colordict begin v_cmod clrselc rt slw } bdf
 % /vt { S /VStp xdf /VWdw xdf /vstp VWdw Xscm def /v_s 0 def /v_e vstp def GetVtVar S v_ori VWdw gt { v_ori VStp 2 div sub Xscm 0 T } { VWdw 2 div VStp 2 div sub Xscm 0 T } ifelse { currentfile vst readline pop { { token { cvx exec v } { exit } ifelse } loop } stopped { exit } if } loop (Vector Loop finished...) msg R end R } bdf
- /vt { S /VStp xdf /VWdw xdf /vstp VWdw Xscm def GetVtVar /v_ini v_ori VWdw gt { v_ori VStp 2 div sub Xscm } { v_ori VWdw v_ori sub 2 div VStp 2 div sub add Xscm } ifelse def /v_s v_ini def /v_e v_ini vstp add def S { currentfile vst readline pop { { token { cvx exec v } { exit } ifelse } loop } stopped { exit } if } loop R end R } bdf % (Vector Loop finished...) msg 
+ /vt { S /VStp xdf /VWdw xdf /vstp VStp Xscm def GetVtVar v_ori VWdw ge { v_ori VStp 2 div sub Xscm } { v_ori VWdw v_ori sub 2 div VStp 2 div sub add Xscm } ifelse dup /v_s xdf /v_e exch vstp add def S { currentfile vst readline pop { { token { cvx exec v } { exit } ifelse } loop } stopped { exit } if } loop R end R } bdf % (Vector Loop finished...) msg 
  /vp { S GetVtVar v_ori 0 T { currentfile } bind loop (Position-Vector Loop finished...) msg R } bdf
 %
 % Functions for Shapes......
@@ -640,7 +665,7 @@ end % tmdct
  /postk { S 0 0 m 0 LY 0.55 mul rl 0.75 setgray 0 slw K R } bdf
  /shwpos { S Flgspos { seqori LY ScV 0 eq { 0.55 mul neg } if T sqend sqdif sqori 0 2 { S 0 T postk 10 string cvs 0 0 S strnd (-) ne { 1 -1 F 45 } { -45 } ifelse 4 -1 roll strnd (-) eq { (tv) } { (bv) } ifelse (lh) ShFont FGcolor ttxt R R } repeat } if R } bdf
 % *V align:  0 center : 1 baseline : -1 reverse
- /frs { S 0.3 slw strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } { FtV -1 eq { 1 -1 F } if } ifelse colordict begin /svmtrix mtrx currentmatrix def { p_s cvx exec scmyk } stopped not { S K R clip setcolmod } if newpath end R } bdf % (Filling clipping path...) msg 
+ /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } { FtV -1 eq { 1 -1 F } if } ifelse colordict begin /svmtrix mtrx currentmatrix def { p_s cvx exec scmyk } stopped not { S 0.125 slw FGcolor scmyk K R clip setcolmod } if newpath end R } bdf % (Filling clipping path...) msg 
  /GetVar { /ftlbl xdf /FtV xdf /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def pop /fflbl ftlbl () eq { false } { true } ifelse def /p_strk true def } bdf
  /p { S GetVar shwpos strnd (-) eq { seqend } { seqori } ifelse 0 T frs R } bdf
 % Shapes......
@@ -649,7 +674,8 @@ end % tmdct
  /lft { sqdif 0 T -1 1 F } bdf
  % /cpb { fshp } bdf 
  /no_shp { stop } bdf
- /line   { 0 0 m sqdif 0 l LY sc mul slw } bdf
+ /line   { sqdif LY sc mul F 0 0.5 m 1 0.5 l svmtrix setmatrix 0.5 slw scmyk K stop } bdf 
+ /scline { sqdif LY sc mul F 0 0.5 m 1 0.5 l svmtrix setmatrix LY sc mul slw scmyk K stop } bdf 
  /box    { 1.0 0.0 1.0 1.0 0.0 1.0 3 0.0 0.0 cpt } bdf
  /fcir   { 0.5 0.5 0.5 0 360 cptc } bdf
  /hcir   { 0.5 0.5 0.5 0 180 cptc } bdf
@@ -685,7 +711,7 @@ end % tmdct
 % Group functions...
 % /ctr { S 0 T sfont scmyk dup stringwidth pop 2 div neg stringheight strnd (-) eq { 2 div } { 1.25 mul neg } ifelse m show R } bdf
  /g_score 1.1 def % /g_score 0.5 def
- /GpFsz { Yscl 0.5 mul 8 lt { Yscl 0.25 mul } { 8 } ifelse } def
+ /GpFsz { Yscl 0.25 mul dup 8 gt { pop 8 } if } def
  /GpFont { GpFsz /Helvetica } bdf
  /gshp { 0 gp_st gp_nd 0 0 g_score gcmod g_shape GpV grlbl p } bdf
  /gp_no { 4 { pop } repeat } bdf
@@ -769,16 +795,18 @@ CheckColor () {
   gawk 'BEGIN{
     color=ARGV[1]
     if (color!~/^BG(color)?$|^FG(color)?$|^black$|^white$|^(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown)$/) {
-      printf "\n<<<<ERROR>>>> \" %s \" is not a defined color.\n", color | "cat 1>&2"
-      printf "              Default \" ARGV[2] \" is asigned to this option.\n" | "cat 1>&2"
-      printf "              You can choose one of this colors:\n" | "cat 1>&2"
-      print ARGV[3] | "cat 1>&2"
-      print "" | "cat 1>&2"
+      if (ARGV[4]) {
+		printf "\n<<<<ERROR>>>> \" %s \" is not a defined color.\n", color | "cat 1>&2";
+		printf "              Default \" ARGV[2] \" is asigned to this option.\n" | "cat 1>&2";
+		printf "              You can choose one of this colors:\n" | "cat 1>&2";
+		print ARGV[3] | "cat 1>&2";
+		print "" | "cat 1>&2";
+	  }
       color=ARGV[2]
-      }
+    } # if color
     print color
-    ARGV[1]=ARGV[2]=ARGV[3]=""
-    }' $1 $2 "$COLORS"
+    ARGV[1]=ARGV[2]=ARGV[3]=ARGV[4]=""
+    }' $1 $2 "$COLORS" $v34
   return 0
 } # End of CheckColor
 
@@ -788,10 +816,13 @@ CheckInt () {
   if [ `expr $1 : '[0-9]*'` -eq `expr $1 : '.*'` ]
     then echo "1"; return 0
     else 
-      echo "<<<<ERROR>>>> \" $1 \" is not an integer value." 1>&2
-      echo "              You must especify an integer value to -$W_OPTION" 1>&2
-      echo "              Program will take value from defaults..." 1>&2
-      echo "" 1>&2
+      if [ $v34 -eq 1 ]
+        then 
+		  echo "<<<<ERROR>>>> \" $1 \" is not an integer value." 1>&2
+		  echo "              You must especify an integer value to -$W_OPTION" 1>&2
+          echo "              Program will take value from defaults..." 1>&2
+          echo "" 1>&2
+        fi
       echo "0";return 1
     fi
   return 1
@@ -809,29 +840,76 @@ chkpagesize () {
 } # End of chkpagesize
 
 #
-# Testing if exist a File.
+# Testing if files exist.
+ExistFile () {
+  if [ ! -f "$1" ]
+    then echo "0"
+      if [ $v34 -eq 1 ]
+        then 
+          echo "Warning: File "$1" is empty or does not exist." 1>&2
+        fi
+      return 1
+    else echo "1" # exist_file
+      if [ $v34 -eq 1 ]
+        then 
+          echo "Report: File "$1" exist, included as a gff file." 1>&2
+        fi
+      return 0
+    fi
+} # End of ExistFile
+
 ExistCustomfile () {
   if [ ! -f "$1" ]
     then echo "0"
-      echo "Report: Default Custom File does not exist." 1>&2
+      if [ $v34 -eq 1 ]
+        then 
+          echo "Warning: Default Custom File does not exist." 1>&2
+          echo "" 1>&2
+        fi
       return 0
     else echo "1" # exist_default_customfile
-      echo "Warning: Default Custom File exist." 1>&2
-      echo "          Custom_Filename: $1" 1>&2
+      if [ $v34 -eq 1 ]
+        then 
+          echo "Report: Default Custom File exist." 1>&2
+          echo "        Custom_Filename: \"$1\"" 1>&2
+          echo "" 1>&2
+        fi
       return 1
     fi
 } # End of ExistCustomfile
 
-ExistFile () {
-  if [ ! -f "$1" ]
-    then echo "0"
-      echo "Warning: File "$1" is empty or does not exist." 1>&2
-      return 1
-    else echo "1" # exist_file
-      echo "Report: File "$1" exist, included as a gff file." 1>&2
-      return 0
-    fi
-} # End of ExistFile
+XtrCustomExist () {
+  if [ ! -f "$1" -a ! -f "$CFDIR/$1"  -a ! -f "./$1" ];    # load_customfile customfile_name
+	then v01=0;
+      if [ $v34 -eq 1 ]
+        then 
+          echo "Warning: Custom File \"$1\" does not exist...Not Loaded." 1>&2 ;
+          echo "" 1>&2
+        fi;
+	  return 1;
+	else v01=1;
+      if [ -f "$1" ] 
+	    then
+		  v02="$CFDIR/$1";
+        else
+          if [ -f "$CFDIR/$1" ]
+            then 
+			  v02="$CFDIR/$1"
+            else
+              if [ -f "./$1" ]
+			    then 
+                  v02="./$1"
+				fi;
+            fi;
+		fi;
+      if [ $v34 -eq 1 ]
+        then 
+	      echo "Report: Adding \"$v02\" Custom File to defaults." 1>&2 ;
+          echo "" 1>&2
+        fi;
+	  return 0;
+    fi;
+} # XtrCustomExist
 
 ###################################################################
 ################## MAIN GFF2PS SHELL SCRIPT #######################
@@ -840,15 +918,6 @@ ExistFile () {
 ###################################################################
 
 Defaults
-
-#
-# Checking if default custom file exists
-#  else switch on flag to create.
-echo "" 1>&2
-echo "Report: You have typed the following command line:" 1>&2
-echo "" 1>&2
-echo $CMDLine 1>&2
-echo "" 1>&2
 
 #
 # When no options, no parameters and 
@@ -873,21 +942,16 @@ case $1 in
 
 #
 # Processing all options and parameters passed to program.
-while getopts :dD:C:vs:pP:B:bS:E:N:nT:t:G:g:LlOowfcri0:1:2:3:M:m:K:k:Hh W_OPTION
+while getopts :dD:C:Vvs:pP:B:bS:E:N:nT:t:G:g:LlOowfcri0:1:2:3:M:m:K:k:Hh W_OPTION
   do
     case $W_OPTION in
       H|h) Help; exit 2;;
       d) v04_1=1;;                    # create_default_customfile (.gff2psrc) or rewrite
       D) v04_1=1;                     # create_default_customfile or rename_it if exist
          v03="$CFDIR/$OPTARG";;
-      C) if [ ! -f $CFDIR/$OPTARG ];    # load_customfile customfile_name
-           then v01=0;
-             echo "Error: Custom File $OPTARG does not exist...Not Loaded." 1>&2 ;
-           else v01=1;
-	         echo "Report: Adding $OPTARG Custom File to Default Custom File." 1>&2 ;
-             v02="$CFDIR/$OPTARG";
-           fi;;
-      v) v05=1;;                        # print_report
+      C) cftmp=$OPTARG;;
+      V) v05=1;v34=1;;                  # print_report
+      v) v34=0;;                        # quiet_mode
       s) v07=$OPTARG;                   # page_bbox
          v12=`chkpagesize $v07`;;  
       p) v06="Portrait";;               # page_orientation
@@ -957,26 +1021,57 @@ while getopts :dD:C:vs:pP:B:bS:E:N:nT:t:G:g:LlOowfcri0:1:2:3:M:m:K:k:Hh W_OPTION
  while [ $OPTIND -gt $incr ]
    do shift; incr=`expr $incr + 1`; done
 
+#
+# Report Command Line
+if [ $v34 -eq 1 ]
+  then 
+    echo "********************************************" 1>&2
+    echo "*  Running $PROGRAM $VERSION" 1>&2
+    echo "********************************************" 1>&2
+	echo "" 1>&2
+	echo "Report: You have typed the following command line:" 1>&2
+	echo "" 1>&2
+	echo $CMDLine 1>&2
+	echo "" 1>&2
+  fi
+
+#
+# Checking files
+ if [ $v34 -eq 1 ]
+  then 
+    echo "********************************************" 1>&2
+    echo "*  Checking input filenames given by user" 1>&2
+    echo "********************************************" 1>&2
+	echo "" 1>&2
+  fi
+
+ v04=`ExistCustomfile "$v03"`
+
+ XtrCustomExist $cftmp
+
  GFF_INPUT_FILES=""; ck=0; hmf=0;
-if [ $npar -ge $OPTIND ]
- then
- for files in $@
-   do
-     if [ `ExistFile ./$files` ]  # $CFDIR/
-       then 
-         if [ $ck -eq 1 ] 
-           then
-              GFF_INPUT_FILES=$GFF_INPUT_FILES" "
-           fi
-         GFF_INPUT_FILES=$GFF_INPUT_FILES./$files;  # $CFDIR/
-         shift; ck=1;
-         hmf=`expr $hmf + 1`;
-       fi;
-   done;
- fi
+ if [ $npar -ge $OPTIND ]
+   then
+     for files in $@
+       do
+         if [ `ExistFile ./$files` ]  # $CFDIR/
+           then 
+             if [ $ck -eq 1 ] 
+               then
+                 GFF_INPUT_FILES=$GFF_INPUT_FILES" "
+               fi
+             GFF_INPUT_FILES=$GFF_INPUT_FILES./$files;  # $CFDIR/
+             shift; ck=1;
+             hmf=`expr $hmf + 1`;
+           fi;
+       done;
+   fi
  if [ $hmf -eq 0 ]
    then
-     echo "WARNING: You have not passed any gff_file to program, it will create an empty page..." 1>&2;
+     if [ $v34 -eq 1 ]
+       then
+         echo "WARNING: You have not passed any gff_file to program, it will create an empty page..." 1>&2;
+       fi;
      if [ "$v18_e" = '*' ] 
        then
          v18_e=1000;
@@ -985,7 +1080,6 @@ if [ $npar -ge $OPTIND ]
 
 #
 # Defining PLOToptions STRING for GNU awk programs.
- v04=`ExistCustomfile "$v03"`
  v18="$v18_s..$v18_e"
    P="BACKGROUND_COLOR:="$bgcolor"::FOREGROUND_COLOR:="$fgcolor"::"$n04_1":="$v04_1"::"
  P=$P$n01":="$v01"::"$n02":="$v02"::"$n03":="$v03"::"$n04":="$v04"::"$n05":="$v05"::"
@@ -994,21 +1088,22 @@ if [ $npar -ge $OPTIND ]
  P=$P$n16":="$v16"::"$n17":="$v17"::"$n18":="$v18"::"$n19":="$v19"::"$n20":="$v20"::"
  P=$P$n21":="$v21"::"$n22":="$v22"::"$n23":="$v23"::"$n24":="$v24"::"$n25":="$v25"::"
  P=$P$n26":="$v26"::"$n27":="$v27"::"$n28":="$v28"::"$n29":="$v29"::"$n30":="$v30"::"
- P=$P$n31":="$v31"::"$n32":="$v32"::"$n33":="$v33"::"
+ P=$P$n31":="$v31"::"$n32":="$v32"::"$n33":="$v33"::"$n34":="$v34"::"
  P=$P$m01":="$c01"::"$m02":="$c02"::"$m03":="$c03"::"$m04":="$c04"::"$m05":="$c05"::"
  P=$P$m06":="$c06"::"$m07":="$c07"::"$m08":="$c08"::"$m09":="$c09"::"$m10":="$c10"::"
- P=$P$m11":="$c11"::"$m12":="$c12"::"
- P=$P"DCF:=$CFDIR/.gff2psrc::InputFNs:="$GFF_INPUT_FILES
+ P=$P$m11":="$c11"::"$m12":="$c12"::"$m13":="$c13"::"$m14":="$c14"::"$m15":="$c15"::"
+ P=$P$m16":="$c16"::"$m17":="$c17"::"
+ P=$P"InputFNs:="$GFF_INPUT_FILES
  PLOToptions=$P
- if [ $v05 -eq 1 ]
+ if [ $v34 -eq 1 ]
    then
      echo "" 1>&2
      echo "********************************************" 1>&2
-     echo ">>>>> Option String Passed to Program <<<<<<" 1>&2
+     echo "*  VARs passed to Program" 1>&2
      echo "********************************************" 1>&2
      echo "" 1>&2
-     echo $PLOToptions 1>&2
-     echo "" 1>&2
+#    echo $PLOToptions 1>&2
+#    echo "" 1>&2
    fi
 
 #
@@ -1019,24 +1114,32 @@ MAINPSHEADER
 # MAIN GFF2APLOT PROGRAM:
 #   Processing gff files and converting to PostScript.
 (echo "$PLOToptions"; MAINPSPROCS) |
-gawk -F'\t' -f $PRG_DIR/$GAWK_PROG - $GFF_INPUT_FILES
+	gawk -F'\t' -f $PRG_DIR$GAWK_PROG - $GFF_INPUT_FILES
 #### Main GFF2APLOT GNU awk Program DONE ####
 
 #
 ##################### EOF #####################
-T_end=` time | gawk '{ split($0,ty," "); print ty[3] }' `
-gawk 'BEGIN{
-  t1=ARGV[1];t2=ARGV[2];ARGV[1]=ARGV[2]="";
-  split(t1,tt1,":");split(t2,tt2,":");
-  printf "\n###################\nGFF2PS Execution Time\n###################\n" | "cat 1>&2";
-  printf "> Program started  at: %s\n",t1 | "cat 1>&2"; 
-  printf "> Program finished at: %s\n",t2 | "cat 1>&2";
-  if (tt2[3]<tt1[3]) { s=(tt2[3]+60)-tt1[3]; am=1 }
-    else { s=tt2[3]-tt1[3]; am=0 };
-  if (tt2[2]<(tt1[2]-am)) { m=(tt2[2]+60)-tt1[2]-am; ah=1 }
-    else { m=tt2[2]-tt1[2]-am; ah=0 };
-  h=tt2[1]-tt1[1]-ah;
-  printf ">>>>>> Execution time: %s:%s:%s\n",h,m,s | "cat 1>&2";
-  printf "\n###################\n" | "cat 1>&2";
-  }' $T_start $T_end
+# T_end=` time | gawk '{ split($0,ty," "); print ty[3] }' `
+T_end=` gawk 'BEGIN{ "date" | getline t;  split(t,ty," "); print ty[4]}' `
+if [ $v34 -eq 1 ]
+ then
+  gawk 'BEGIN{
+   t1=ARGV[1];t2=ARGV[2];ARGV[1]=ARGV[2]="";
+   split(t1,tt1,":");split(t2,tt2,":");
+   printf "\n********************************************\n" | "cat 1>&2";
+   printf "* GFF2PS Execution Time\n********************************************\n\n" | "cat 1>&2";
+   printf "> Program started  at: %s\n",t1 | "cat 1>&2"; 
+   printf "> Program finished at: %s\n",t2 | "cat 1>&2";
+   if (tt2[3]<tt1[3]) { s=(tt2[3]+60)-tt1[3]; am=1 }
+     else { s=tt2[3]-tt1[3]; am=0 };
+   if (tt2[2]<(tt1[2]-am)) { m=(tt2[2]+60)-tt1[2]-am; ah=1 }
+     else { m=tt2[2]-tt1[2]-am; ah=0 };
+   h=tt2[1]-tt1[1]-ah;
+   printf ">>>>>> Execution time: %s:%s:%s\n\n",h,m,s | "cat 1>&2";
+   }' $T_start $T_end
+  echo "********************************************" 1>&2
+  echo "" 1>&2
+  echo "************** End of Report ***************" 1>&2
+ fi
 exit 0
+
