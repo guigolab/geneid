@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -155,7 +155,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -820,6 +820,34 @@ while read locus human mouse ;
 #
 @ 
 
+\subsctn{{\tbx} parameters used by Pankaj}
+
+\begin{description}
+\item[tblastx parameters] orthologous \\
+\begin{verbatim}
+    -nogap
+    Z=3000000000
+    E=10 
+    -hspmax=10000
+    -filter=xnu
+    -matrix=blosum62mod
+\end{verbatim}
+\item[tblastx parameters] orthologous x WGS3X \\
+\begin{verbatim}
+    -nogap
+    Z=3000000000
+    E=0.01
+    E2=0.01
+    W=5
+    B=99000
+    V=99000
+    -hspmax=4
+    -topcomboN=4
+    -filter=xnu
+    -matrix=blosum62mod
+\end{verbatim}
+\end{description}
+
 \subsctn{Comparing results from different {\bl} programs}
 
 We are using {\aps} to visualize the differences among three approaches: {\bn}, {\tbx} and similarity regions filtered by {\sgp} from {\tbx}.
@@ -1157,11 +1185,13 @@ run_GENEID ()
   echo "### Running EVALUATION on $PROG ..." 1>&2 ;
   { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
     echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
-    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
   $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
   { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
     echo "### $BASE/eval_${prog}_brief.$RUN" ; echo "###" ;
-    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
   $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_${prog}_brief.$RUN ;
 } 
 #
@@ -1172,6 +1202,7 @@ run_GENEID ()
 <<BASH commands ANALYSIS>>=
 #
 # Raw sequences
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.raw $DATASETS/fasta/raw \
                     $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
@@ -1182,6 +1213,7 @@ run_GENEID Hsap.raw $DATASETS/fasta/raw \
 <<BASH commands ANALYSIS>>=
 #
 # Masked sequences (already masked: orimasked)
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \
                           $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
@@ -1192,6 +1224,7 @@ run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \
 <<BASH commands ANALYSIS>>=
 #
 # Masked sequences
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 run_GENEID Hsap.masked $DATASETS/fasta/masked \
                        $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
@@ -1480,11 +1513,13 @@ run_SGP ()
   #  -s: Short. Print a short output
   { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
     echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
-    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
   $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
   { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
     echo "### $BASE/eval_${prog}_brief.$RUN" ; echo "###" ;
-    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
   $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_${prog}_brief.$RUN ;
   #
   # Copying files to where they are going to be used
@@ -1506,6 +1541,7 @@ run_SGP ()
 #
 ####
 #### Using "STANDARD" SGP
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
 #
 export SGP="/projects/sgp/bin/SGP2-2/sggp2" ;
 #
@@ -1537,6 +1573,22 @@ run_SGP rguigo.orimasked3X_pankaj_W5 $DATASETS/fasta/orimasked \
 #
 # SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
 run_SGP rguigo.masked3X_pankaj_W5 $DATASETS/fasta/masked \
+               $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+# SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
+export GENEIDVERSION="------------------------- <geneid v1.1> -------------------------" ;
+run_SGP rguigo_new.masked3X_pankaj_W5 $DATASETS/fasta/masked \
+               $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+export HOME='/home/ug/jabril' ;
+#
+# SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
+export HOME='/home/ug/gparra' ; # to avoid modifying Roderic's scripts
+export SGP="/home/ug/gparra/no_backup/SGP/sgp_1.1" ;
+export GENEIDVERSION="------------------------- <geneid v1.1 - GENIS> -------------------------" ;
+run_SGP rguigo_new_genis.masked3X_pankaj_W5 $DATASETS/fasta/masked \
                $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
                $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
@@ -1630,6 +1682,11 @@ $ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp.rguigo.orimasked3X
 $ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp_brief.rguigo.orimasked3X_pankaj_W5 ;
 $ENSCRIPT $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp.rguigo.masked3X_pankaj_W5 ;
 $ENSCRIPT -r $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp_brief.rguigo.masked3X_pankaj_W5 ;
+#
+$ENSCRIPT $ANALYSIS/sgp/rguigo_new.masked3X_pankaj_W5/eval_sgp.rguigo_new.masked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo_new.masked3X_pankaj_W5/eval_sgp_brief.rguigo_new.masked3X_pankaj_W5 ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo_new_genis.masked3X_pankaj_W5/eval_sgp.rguigo_new_genis.masked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo_new_genis.masked3X_pankaj_W5/eval_sgp_brief.rguigo_new_genis.masked3X_pankaj_W5 ;
 #
 @
 
@@ -2995,7 +3052,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
 @ 
 
 \newpage
@@ -3344,7 +3401,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -3688,7 +3745,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.3 2001-08-30 10:42:00 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.4 2001-09-14 14:06:09 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
