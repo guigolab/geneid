@@ -354,6 +354,33 @@ sub end{
    return $self->{'_gsf_end'};
 }
 
+############################################################
+
+sub start_tr{
+    my ($self,$value) = @_;
+
+    if (defined($value)) {
+        if( $value !~ /^\-?\d+/ ) {
+            $self->throw("[$value] is not a valid start of translation");
+        }
+	$self->{'_start_translation'} = $value;
+    }
+    return $self->{'_start_translation'};
+}
+
+sub end_tr{
+    my ($self,$value) = @_;
+
+    if (defined($value)) {
+        if( $value !~ /^\-?\d+/ ) {
+            $self->throw("[$value] is not a valid end of translation");
+        }
+	$self->{'_end_translation'} = $value;
+    }
+    return $self->{'_end_translation'};
+}
+
+############################################################
 
 =head2 strand
 
