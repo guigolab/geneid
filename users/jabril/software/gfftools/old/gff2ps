@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.42 2000-01-11 21:26:55 jabril Exp $	
+#         $Id: gff2ps,v 1.43 2000-01-17 16:04:55 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.42 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-11 21:26:55 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.43 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-17 16:04:55 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.42 2000-01-11 21:26:55 jabril Exp $
+%    $Id: gff2ps,v 1.43 2000-01-17 16:04:55 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -687,8 +687,8 @@ end % tmdct
  /gp_lt { longdotted  gp_ln } bdf
  /gp_sh { shortdashed gp_ln } bdf
  /gp_lh { longdashed  gp_ln } bdf
- /gp_bk { scmyk 0.125 slw 1 dict begin /tl grdif 2 div def 0 0 m S 0 -2 rl K R tl 0 rl S 0 2 rl K R tl 0 rl S 0 -2 rl K R K end } bdf
- /gp_raw { scmyk 0.125 slw strnd (-) eq { grdif 0 T -1 1 F } if 1 dict begin /tl grdif 0.05 mul def tl 0 m tl neg dup S 1 rl K R S -1 rl K R grdif 0 l S tl neg 1 rl 0 -2 rl tl 1 rl S fill R K R K end } bdf
+ /gp_bk { scmyk 0.125 slw 2 dict begin /tl grdif 2 div def /ol GpFsz 0.05 mul def 0 0 m S 0 ol neg rl K R tl 0 rl S 0 ol rl K R tl 0 rl S 0 ol neg rl K R K end } bdf
+ /gp_raw { scmyk 0.125 slw strnd (-) eq { grdif 0 T -1 1 F } if 2 dict begin /tl grdif 0.05 mul def /ol GpFsz 0.1 mul def tl 0 m tl neg dup S ol rl K R S ol neg rl K R grdif 0 l S tl neg ol rl 0 -2 ol mul rl tl ol rl S fill R K R K end } bdf
  /gp_law { grdif 0 T -1 1 F gp_raw } bdf
  /CkGPL { dup GpFsz 2 div lt { pop GpFsz 0.55 mul } if } bdf
  /gln { S colordict begin g_line cvx exec end R } bdf
@@ -756,7 +756,7 @@ end
 %
 % initgraphics
 % true setpacking
-true setstrokeadjust
+false setstrokeadjust
 0.125 slw
 0 setlinejoin
 0 setlinecap
@@ -3049,6 +3049,8 @@ function ScoreLimits(    no_score,tt,scmt) {
       upper_sc=sc_score["MAX",sc] }
     else {
       split(PLOT_FT[sc,":","range"],scmt,/\.\./);
+      if (scmt[1]=="*") scmt[1]=sc_score["MIN",sc];
+      if (scmt[2]=="*") scmt[2]=sc_score["MAX",sc];
       if (scmt[1]>scmt[2]) { tt=scmt[1]; scmt[1]=scmt[2]; scmt[2]=tt }
       lower_sc=scmt[1];
       upper_sc=scmt[2] }}
