@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.56 2000-02-22 22:05:00 jabril Exp $	
+#         $Id: gff2ps,v 1.57 2000-03-03 23:51:43 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.56 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-02-22 22:05:00 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.57 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-03 23:51:43 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.56 2000-02-22 22:05:00 jabril Exp $
+%    $Id: gff2ps,v 1.57 2000-03-03 23:51:43 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -723,7 +723,7 @@ end % shpdct
 % Block Functions.
  % /tckszH tracksize 2 div def
  /YBori FlgOSU { TkMrkW 1 TkMspc add mul } { 0 } ifelse def
- /GetBVar { /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck FlgOSU { TkMrkW 1 TkMspc add mul } { 0 } ifelse add YSBlck blcknum mul add BlckSp blcknum mul add def } bdf
+ /GetBVar { /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck FlgOSU { TkMrkW 1 TkMspc add mul add } if YSBlck blcknum mul add BlckSp blcknum mul add def } bdf
  /kbb { XOriBlck 5 sub -2 XSBlck 10 add YSBlck 2 add bbox FlgBkBx { 1 slw fgcolor scmyk K } { newpath } ifelse } bdf
  /tm { S tmdct begin /ShowGrid xdf exec end R } bdf
  /shwtck { FlgGrd { blckori blckend XOriPlot 0 0 YSBlck {g} 0 tm } if FlgOSU { blckori blckend XOriPlot 0 {s} 0 tm } if FlgOSD { blckori blckend XOriPlot YSBlck TkMrkW sub {z} 0 tm } if is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and { blckori blckend XOriPlot TkMrkW FlgOSU { 2 TkMspc add mul } if YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if is2tck FlgISD and { blckori blckend XOriPlot TkMrkW FlgOSU { 3 TkMspc 2 mul add mul } if YSFwd add YSBth add {r} 0 tm } if } bdf
@@ -2013,30 +2013,31 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
 	  gp_end=gp[lg,g,gpend];
 	  if (fldGxU) gp_gpd=gp[lg,g,is_grouped];
 	  else gp_gpd=1; # 1 (grouped_) or 0 (ungrouped_)
-	  # PrintRPT(sprintf(">>>>>>>%s %s %s %s (%s %s) G %s SG %s\n",sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
+	  PrintRPT(sprintf(">>>>>>>%s %s %s %s (%s %s) G %s SG %s\n",sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
 	  LN=1;
+      ttt=lg SUBSEP gp_gpd SUBSEP LN;
 	  if ((gp_gpd && fldGln) || ((!gp_gpd) && fldUln)) {
-		# PrintRPT(sprintf("A........%s : %s (%s) G %s SG %s %s %s %s %s \n",LN,lastpos[lg,gp_gpd,LN],gp_ori,G[lg],g,sq,sc,s,gp_nm));
+		PrintRPT(sprintf("A........%s : %s (%s) G %s SG %s %s %s %s %s \n",LN,lastpos[lg,gp_gpd,LN],gp_ori,G[lg],g,sq,sc,s,gp_nm));
 		if (gp_end>PORI && gp_ori<PEND) {
           if (s!="-") {
             gpo=gp_ori-MGS;
 		    if (gpo<PORI) gpo=gp_end;
-            while (lastpos[lg,gp_gpd,LN] >= gpo ) {
+            while (lastpos[ttt] > gpo) {
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
-              if (!(ttt in lastpos)) lastpos[ttt]=t_ori; # PORI;
-              # PrintRPT(sprintf(".........%s : %s : %s (%s)\n",LN,ttt,lastpos[ttt],gp_ori));
+              if (!(ttt in lastpos)) lastpos[ttt]=t_ori-MGS; # PORI;
+              PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
             } # while lastpos
 		    lastpos[lg,gp_gpd,LN]=gp_end;
           }
           else {
             gpe=gp_end+MGS;
 		    if (gpe>PEND) gpe=gp_ori;
-            while (lastpos[lg,gp_gpd,LN] <= gpe ) {
+            while (lastpos[ttt] < gpe) {
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
-              if (!(ttt in lastpos)) lastpos[ttt]=t_end; # PORI;
-              # PrintRPT(sprintf(".........%s : %s : %s (%s)\n",LN,ttt,lastpos[ttt],gp_ori));
+              if (!(ttt in lastpos)) lastpos[ttt]=t_end+MGS; # PEND;
+              PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
             } # while lastpos
 		    lastpos[lg,gp_gpd,LN]=gp_ori;
           }
@@ -2044,7 +2045,7 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
 		# else {
 		  # PrintRPT(sprintf("OUT of ZOOM Limits: %s : %s : %s (%s)\n",LN,ttt,lastpos[lg,gp_gpd,LN],gp_ori));
 		# } # if not checklimits
-		# PrintRPT(sprintf("B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[lg,gp_gpd,LN],gp_ori,gp_end,G[lg],g));
+		PrintRPT(sprintf("B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[lg,gp_gpd,LN],gp_ori,gp_end,G[lg],g));
 	  } # if checking
 	  lines[lg,gp_gpd]=max(lines[lg,gp_gpd],LN);
 	  LE[lg,gp_gpd,LN]++;
@@ -2308,9 +2309,9 @@ function PlotElement(    shwpst) {
 function PlotVector(    lnct,step_,window_,scmin_,scmax_,start_,end_,WK,w,pos_) {
   start_=element[PE,start];
   end_=element[PE,end];
-  PrintRPT(sprintf("  Vector %s : %s : %s - %s\n",el,sel,start_,end_));
   step_=element[PE,v_step];
   window_=element[PE,v_window];
+  PrintRPT(sprintf("     Vector : %s - %s : Window %s : Step %s\n",start_,end_,window_,step_));
   if (step_=="NONE") step_=1;
   if (PLOT_FT[sc,":","range"]=="default") {
 	scmin_=element[PE,v_scmin];
@@ -2426,7 +2427,7 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
 		sq=SQC[1];
 		sc=SQC[2];
 		SSS=sq SUBSEP sc SUBSEP s;
-		PrintRPT(sprintf("** Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
+		PrintRPT(sprintf("   * Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
 		if (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) ungp=grouped_;
 		else ungp=ungrouped_; 
 		for (pd=grouped_;pd>=ungp;pd--) {
@@ -2501,7 +2502,7 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 		sq=SQC[1];
 		sc=SQC[2];
 		SSS=sq SUBSEP sc SUBSEP s;
-		PrintRPT(sprintf("** Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
+		PrintRPT(sprintf("   * Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
 		if (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) ungp=grouped_;
 		else ungp=ungrouped_; 
 		for (pd=grouped_;pd>=ungp;pd--) {
