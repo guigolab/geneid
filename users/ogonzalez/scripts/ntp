@@ -55,7 +55,7 @@ then
    log=ntp-`date +%Y%m%d-%H%M`
    for busca in monstre1 monstre2 monstre3 monstre4 nautilus eidolon xinxan \
                 tro rantanplan cel basileia tmatik zapiron kalamos icarus \
-                mar drac nit
+                mar drac nit nin
    do
       if [ -s ntp.$busca ]
       then

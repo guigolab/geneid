@@ -20,7 +20,7 @@ mv $velltot old$vell
 ../filtre <tmp.ftp >mirror-$data.ftp
 
 URL=http://andercheran.aiind.upv.es/~amstrad
-wget -m $URL 2>&1 | tee tmp.http
+wget -m --no-parent $URL 2>&1 | tee tmp.http
 /home/ug/ogonzalez/scripts/mirror andercheran.aiind.upv.es -n
 
 

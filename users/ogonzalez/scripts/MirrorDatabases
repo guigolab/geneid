@@ -44,20 +44,31 @@ OUT=/tmp/MirrorDatabases$$
 MAIL=/tmp/MirrorDatabasesMail$$
 LOG=/tmp/MirrorDatabasesLog$$
 LOGDIR=/home/ug/ogonzalez/scripts/_LOGS
+PID=/tmp/MirrorDatabasesPID
 
 echo Mirror arrencat: `date +"%d %b %Y - %H:%M"` >$MAIL
 
-if [ `ps -e | grep -c "^ *$$"` != 1 ]
+if [ -e $PID ]
 then
-
-   # JA HI HA UN MIRROR EN MARXA
-
-   echo >>$MAIL
-   echo APARENTMENT JA HI HA UN MIRROR EN MARXA!!! >>$MAIL
-   echo >>$MAIL
+   PIDVELL=`cat $PID`
+   if [ `ps -e | grep -c "^ *$PIDVELL"` != 0 ]
+   then
+      # JA HI HA UN MIRROR EN MARXA
+      echo >>$MAIL
+      echo JA HI HA UN MIRROR EN MARXA!!! >>$MAIL
+      echo >>$MAIL
+   else
+      # L'EXECUCIO ANTERIOR NO VA ACABAR NETAMENT
+      # DAVANT DEL DUBTE, TAMPOC CONTINUO EL MIRROR
+      echo >>$MAIL
+      echo Fitxer $PID detectat >>$MAIL
+      echo >>$MAIL
+   fi
    echo EXECUCIO CANCEL.LADA >>$MAIL | tee $LOG
 
 else
+
+   echo $$ >$PID
 
    rm -rf $LOG >/dev/null 2>&1
 
@@ -224,6 +235,10 @@ else
       wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
+
+   ###############
+   # nomes quan acaben tots els mirrors puc esborrar $PID
+   rm $PID
 
 fi
 

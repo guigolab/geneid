@@ -34,7 +34,16 @@ EOF
    # -F: interpreta els fitxers d'entrada com html
    # -B: especifica la URL "base"
    # -i: fitxer d'entrada amb les URL
-   wget -c -F -B "$URL/$1/" -i index2.html
+# NOOO: -c obliga l'wget a continuar. Si una segona execucio es
+#       troba un fitxer diferent i mes llarg, afegira la part nova
+#       del segon fitxer al final del primer, carregant-se'l
+#   wget -c -F -B "$URL/$1/" -i index2.html
+
+   # afegim -N: timestamping
+   wget -F -N -B "$URL/$1/" -i index2.html
+
+# aqui faltaria quelcom per comprovar la integritat dels fitxers
+# que han baixat!!!
 
    rm index.html index2.html
 
@@ -43,12 +52,12 @@ EOF
 }
 
 
-BASE=`pwd`
-if [ `dirname $BASE` != '/seq/genomes/H.sapiens' ]
-then
-   echo No som al directori H.sapiens!!!
-   exit
-fi
+#BASE=`pwd`
+#if [ `dirname $BASE` != '/seq/genomes/H.sapiens' ]
+#then
+#   echo No som al directori H.sapiens!!!
+#   exit
+#fi
 
 URL=$1
 

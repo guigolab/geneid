@@ -3,14 +3,14 @@
 # ratoli
 mmFeb2002	golden_path_200202mm2
 mmFeb2003	golden_path_200302mm
+mm4		golden_path_200310mm4
 
 # rata
 rnNov2002	golden_path_200211rn
 rnJan2003	golden_path_200301rn
 rnJun2003	golden_path_200306rn
 
-
 # huma
-28jun2002	golden_path_20020628
 14nov2002	golden_path_20021114
 10april2003	golden_path_20030410
+hg16		golden_path_200307

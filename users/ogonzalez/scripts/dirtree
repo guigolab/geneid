@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# la idea es agafar la sortida d'un "tree -asF" (que inclou la grandaria
+# la idea es agafar la sortida d'un "tree -asxF" (que inclou la grandaria
 # de cada fitxer) i calcular la grandaria de cada directori
 #
 # per cada direc la grandaria depen del nombre de fitxers que conte,
@@ -15,6 +15,12 @@
 # penja directament; els directoris es deixen, i la seva grandaria
 # (que es la suma de les grandaries dels fitxers) es suma a la del
 # directori que el conte; etc. etc. etc...
+#
+# a mes: -a llista tots els fitxers, -s mostra la grandaria de cada
+# fitxer, i -x evita que sortim del filesystem actual
+#
+# ignora qualsevol parametre d'entrada; el directori revisat es l'actual;
+# la sortida va a STDOUT
 
 sub numero {
    $tmp=$_[0];

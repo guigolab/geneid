@@ -136,7 +136,7 @@ echo 'no_backup: allo de que no es fara backup' >>/tmp/quota
 echo 'arrel:     el no_backup de $HOME (allo que es pot moure al disc' >>/tmp/quota
 echo '           local sense desorganitzar res)' >>/tmp/quota
 echo 'total:     espai total ocupat al disc: backup+no_backup' >>/tmp/quota
-echo
+echo >>/tmp/quota
 
 echo '     backup   no_backup       arrel       total grup usuari' >>/tmp/quota
 echo '----------- ----------- ----------- ----------- ---- ---------' >>/tmp/quota
