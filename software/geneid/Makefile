@@ -8,9 +8,10 @@
 INCLUDE= ./include
 CDIR= ./src
 OBJ = ./objects
+BIN = ./bin
 HEADERS = $(INCLUDE)/geneid.h 
 PROGRAM= geneid
-PRODUCT= bin/$(PROGRAM)
+PRODUCT= $(BIN)/$(PROGRAM)
 CC= gcc 
 OPTS=-I$(INCLUDE) -Wall -O3
 
@@ -31,8 +32,14 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalEx
 
 #######
 
-$(PRODUCT): $(OBJ)/$(PROGRAM).o $(OBJECTS) $(HEADERS)
+$(PRODUCT): $(BIN) $(OBJ) $(OBJ)/$(PROGRAM).o $(OBJECTS) $(HEADERS)
 	$(CC) $(OPTS) -o $(PRODUCT) $(OBJ)/$(PROGRAM).o $(OBJECTS) -lm
+
+$(BIN) :
+	mkdir $(BIN); 
+
+$(OBJ) :
+	mkdir $(OBJ); 
 
 $(OBJ)/$(PROGRAM).o : $(CDIR)/$(PROGRAM).c  $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/$(PROGRAM).c -o $(OBJ)/$(PROGRAM).o 
@@ -149,6 +156,6 @@ $(OBJ)/Translate.o :  $(CDIR)/Translate.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/Translate.c -o $(OBJ)/Translate.o
 
 clean:
-	rm -f $(OBJ)/*.o $(PRODUCT) *~ $(INCLUDE)/*~ $(CDIR)/*~ core
-
+	rm -f $(OBJ)/*.o $(PRODUCT) *~ $(INCLUDE)/*~ $(CDIR)/*~ core;
+	rmdir $(BIN) $(OBJ);
 
