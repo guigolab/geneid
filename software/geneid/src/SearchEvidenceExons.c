@@ -4,9 +4,9 @@
 *                                                                        *
 *   Extracting evidence exons between (l1, l2) for the current split     *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,37 +24,39 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SearchEvidenceExons.c,v 1.6 2002-03-20 10:44:38 eblanco Exp $  */
+/*  $Id: SearchEvidenceExons.c,v 1.7 2003-11-05 15:05:56 eblanco Exp $  */
 
 #include "geneid.h"
 
 /* Looking for annotations to include with current ab initio predictions */
-void SearchEvidenceExons(packEvidence* pv, long l2)
+void SearchEvidenceExons(packExternalInformation* p, 
+						 packEvidence* evidence,
+						 long l2)
 {
   long i;
   
-  /* Evidences with acceptor higher than l2 will be always ignored */
-  i = pv->i1vExons;
-  while ((i < pv->nvExons) &&
-		 ((pv->vExons+i)->Acceptor->Position + (pv->vExons+i)->offset1) <= l2)
+  /* Evidences with acceptor higher than l2 will be ignored */
+  i = p->i1vExons;
+  while ((i < evidence->nvExons) &&
+		 ((evidence->vExons+i)->Acceptor->Position + (evidence->vExons+i)->offset1) <= l2)
     i++;
   
-  pv->i2vExons = i;
+  p->i2vExons = i;
   
-  pv->ivExons = pv->i2vExons - pv->i1vExons;
+  p->ivExons = p->i2vExons - p->i1vExons;
 }
 
 /* Processing next block of annotations */
-void SwitchCounters(packEvidence* pv)
+void SwitchCounters(packExternalInformation* p)
 {
-  pv->i1vExons = pv->i2vExons;
+  p->i1vExons = p->i2vExons;
 }
 
 /* Reset counters in packEvidence for the next input sequence */
-void resetEvidenceCounters(packEvidence* pv)
+void resetEvidenceCounters(packExternalInformation* p)
 {
-  pv->i1vExons = 0;
-  pv->i2vExons = 0;
+  p->i1vExons = 0;
+  p->i2vExons = 0;
 }
 
 

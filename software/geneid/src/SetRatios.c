@@ -4,9 +4,9 @@
 *                                                                        *
 *   Stablish maximum allowed number of signals and exons per split       *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *

@@ -4,9 +4,9 @@
 *                                                                        *
 *   Score(exon) = reliability measure about coding potential regions     *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -29,6 +29,7 @@
 extern int scanORF;
 extern float EW;
 extern int SRP;
+extern float NO_SCORE;
 
 /* Matrix to translate characters to numbers. borrowed from jwf */
 int TRANS[] = {
@@ -55,6 +56,7 @@ int TRANS[] = {
 };
 
 /* Translation from string into integer: for oligonucleotides with this length */
+/* s: sequence; ls: length of sequence; cardinal: length of the alphabet */
 long OligoToInt(char* s, int ls, int cardinal)
 { 
   long index;
@@ -242,17 +244,143 @@ void MarkovScan(char* sequence,
     }
 }
 
-/* Homology to protein score: using homology information (SR or HSPs) */
-double ScoreSRexon(exonGFF* exon, int Strand, packSR* sr)
+/* Projection of HSPs: save the maximum for each nucleotide */
+void HSPScan(packExternalInformation* external,
+			 packHSP* hsp, 
+			 int Strand, 
+			 long l1, long l2)
+{
+  short x;
+  short frameStart, frameEnd;
+  long i,j;
+  float scoreHSP;
+  
+  if (Strand == FORWARD)
+    {
+	  frameStart = 0; 
+	  frameEnd = FRAMES;
+	}
+  else
+	{
+	  frameStart = FRAMES; 
+	  frameEnd = 2*FRAMES;
+	}
+    
+  /* For each frame and strand, preprocess homology information */
+  for(x=frameStart; x < frameEnd; x++)
+	{
+	  /* Reset arrays: NO_SCORE values */
+	  for(i=0; i < l2-l1+1; i++)
+		external->sr[x][i] = NO_SCORE;
+
+	  /* A. Partial HSPs in this fragment: left end */
+	  for (i = external->iSegments[x]; 
+		   i < hsp->nSegments[x] && hsp->sPairs[x][i].Pos1 < l1; 
+		   i++)
+		{
+		  /* Score value */
+		  scoreHSP = hsp->sPairs[x][i].Score / 
+			(hsp->sPairs[x][i].Pos2 - hsp->sPairs[x][i].Pos1 + 1);
+
+		  /* For each position in the HSP update the array sr */
+		  for(j = hsp->sPairs[x][i].Pos1; 
+			  j <= hsp->sPairs[x][i].Pos2 && j <l2;
+			  j++)
+			{
+			  if (scoreHSP > external->sr[x][j-l1])
+				external->sr[x][j-l1] = scoreHSP;
+			}
+		}
+
+	  /* B. Complete HSPs in this fragment */
+	  for (; 
+		   i < hsp->nSegments[x] && hsp->sPairs[x][i].Pos2 <= l2-OVERLAP; 
+		   i++)
+		{
+		  /* Score value */
+		  scoreHSP = hsp->sPairs[x][i].Score / 
+			(hsp->sPairs[x][i].Pos2 - hsp->sPairs[x][i].Pos1 + 1);
+
+		  /* For each position in the HSP update the array sr */
+		  for(j = hsp->sPairs[x][i].Pos1; 
+			  j <= hsp->sPairs[x][i].Pos2 && j <l2;
+			  j++)
+			{
+			  if (scoreHSP > external->sr[x][j-l1])
+				external->sr[x][j-l1] = scoreHSP;
+			}
+		}
+	  
+	  /* *** Update partial counter: useful HSPs for next fragment */
+	  external->iSegments[x] = i;
+
+	  /* C. Partial HSPs in this fragment: right end */
+	  for (; 
+		   i < hsp->nSegments[x] &&  hsp->sPairs[x][i].Pos1 <= l2; 
+		   i++)
+		{
+		  /* Score value */
+		  scoreHSP = hsp->sPairs[x][i].Score / 
+			(hsp->sPairs[x][i].Pos2 - hsp->sPairs[x][i].Pos1 + 1);
+
+		  /* Update the array sr with some positions of current HSPs */
+		  for(j = hsp->sPairs[x][i].Pos1; 
+			  j <= hsp->sPairs[x][i].Pos2 && j <= l2;
+			  j++)
+			{
+			  if (scoreHSP > external->sr[x][j-l1])
+				external->sr[x][j-l1] = scoreHSP;
+			}
+		}
+	}
+}
+/* Preprocessing of HSPs projections */
+void HSPScan2(packExternalInformation* external,
+			  packHSP* hsp, 
+			  int Strand, 
+			  long l1, long l2)
+{
+  short x;
+  long i;
+  float previousScore;
+  short frameStart, frameEnd;
+  
+  if (Strand == FORWARD)
+    {
+	  frameStart = 0; 
+	  frameEnd = FRAMES;
+	}
+  else
+	{
+	  frameStart = FRAMES; 
+	  frameEnd = 2*FRAMES;
+	}
+  
+  for(x=frameStart; x < frameEnd; x++)
+    {
+      previousScore = 0.0;
+      
+      /* Screening the whole sequence to accumulate the sum in every base */
+      for (i=l1; i<=l2; i++)
+		{
+		  /* Accumulating step */
+		  external->sr[x][i-l1] = previousScore + external->sr[x][i-l1];
+
+		  previousScore = external->sr[x][i-l1];
+		}
+    }  
+}
+
+/* Homology to protein score: using homology information (blast HSPs) */
+float ScoreHSPexon(exonGFF* exon, 
+				   int Strand, 
+				   packExternalInformation* external, 
+				   long l1, long l2)
 {
   int index;
   short trueFrame;
   long iniExon, endExon;
-  int i;
-  double Score;
-  long lIntersection;
-  long lSR;
-  long a,b;
+  float Score;
 
   iniExon = exon->Acceptor->Position + COFFSET;
   endExon = exon->Donor->Position + COFFSET;
@@ -266,48 +394,34 @@ double ScoreSRexon(exonGFF* exon, int Strand, packSR* sr)
   trueFrame = (iniExon + exon->Frame) % 3;
   trueFrame += index;
   
-  /* Scan all of the SR's in this frame/strand (HSPs are accepted) */
-  i = 0;
-  Score = 0;
-  while(i < sr->nRegions[trueFrame])
-    {
-      /* Looking for match between the SR and the exon */
-      a = MIN(endExon,sr->sRegions[trueFrame][i].Pos2);
-      b = MAX(iniExon,sr->sRegions[trueFrame][i].Pos1);
-      lIntersection = a - b + 1;
-      
-      if (lIntersection > 0)
-		{
-		  lSR = sr->sRegions[trueFrame][i].Pos2 - sr->sRegions[trueFrame][i].Pos1 + 1;
-		  Score += sr->sRegions[trueFrame][i].Score * ((float)lIntersection / (float)lSR);
-		}
-      i++;
-    }
+  /* Access the sr array to obtain the homology score for current score */
+  Score = external->sr[trueFrame][endExon] - external->sr[trueFrame][(iniExon>l1)?iniExon-1:iniExon];
 
   return(Score);
 }
 
-/* Computing the score of a list of exons (Markov, SR and total) */
+/* Computing the score of a list of exons from (Sites, Markov, homology) */
 long Score(exonGFF *Exons,
            long nExons,
            long l1,
            long l2,
            int Strand,
-           packSR* sr,
+		   packExternalInformation* external,
+           packHSP* hsp,
            gparam** isochores,
            packGC* GCInfo)
 {
-  long iniexon, endexon, i, j;
-  int exonlen;
+  long iniExon, endExon, i, j;
+  int exonLen;
   long inigc, endgc;
   short frame;
   short codonPosition;
   long n;
-  double scoreMarkov;
-  double scoreSR;
-  double scoreTotal;
+  float scoreMarkov;
+  float scoreHSP;
+  float scoreTotal;
   int OligoLength_1;
-  double ExonWeight;
+  float ExonWeight;
   float percentGC;
   int currentIsochore;
   paramexons* p;
@@ -321,21 +435,21 @@ long Score(exonGFF *Exons,
     {
       /* Measure G+C around the exon to select the best isochore */
       /* NOTE: Stop is not contained in Terminals, Singles and ORFs */
-      iniexon=(Exons+i)->Acceptor->Position - l1;
-      endexon=(Exons+i)->Donor->Position - l1;
-      exonlen=endexon-iniexon+1;
+      iniExon=(Exons+i)->Acceptor->Position - l1;
+      endExon=(Exons+i)->Donor->Position - l1;
+      exonLen=endExon-iniExon+1;
 
       /* 0. Get G+C content of the region around the exon (local) */
       /* selecting the proper isochore to score the exon */
-      if (iniexon <= ISOCONTEXT)
+      if (iniExon <= ISOCONTEXT)
 		inigc=0;
       else
-		inigc=iniexon-ISOCONTEXT;
+		inigc=iniExon-ISOCONTEXT;
 
-      if (endexon+ISOCONTEXT >= l2-l1)
+      if (endExon+ISOCONTEXT >= l2-l1)
 		endgc=l2-l1;
       else
-		endgc=endexon+ISOCONTEXT;
+		endgc=endExon+ISOCONTEXT;
 
       percentGC = ComputeGC(GCInfo,inigc,endgc); 
      
@@ -362,7 +476,7 @@ long Score(exonGFF *Exons,
       
       /* 1. Coding potential score: initial plus accumulated sums */
       /* Checkpoint for exons shorter than a minimum value */
-      if (exonlen < MINEXONLENGTH)
+      if (exonLen < MINEXONLENGTH)
 		scoreMarkov = MINSCORELENGTH;
       else
 		{
@@ -373,30 +487,30 @@ long Score(exonGFF *Exons,
 		  codonPosition = (3 - frame) % 3;
    
 		  /* Assign initial probability: pentanucleotide */
-		  scoreMarkov += gp->OligoDistIni[codonPosition][iniexon];
+		  scoreMarkov += gp->OligoDistIni[codonPosition][iniExon];
          
 		  /* Which one of the three combinations? */
-		  j = (iniexon + (3-codonPosition)) % 3;
+		  j = (iniExon + (3-codonPosition)) % 3;
    
 		  /* Accumulating transition probabilities: hexanucleotides */    
 		  scoreMarkov +=
-			gp->OligoDistTran[j][(endexon>OligoLength_1)?endexon-OligoLength_1+1 : endexon]
-			- gp->OligoDistTran[j][(iniexon)? iniexon - 1 : 0];
+			gp->OligoDistTran[j][(endExon>OligoLength_1)?endExon-OligoLength_1+1 : endExon]
+			- gp->OligoDistTran[j][(iniExon)? iniExon - 1 : 0];
 		}
 
       /* First cutoff: coding potential score */
       if (scoreMarkov >= p->OligoCutoff) 
 		{
 		  /* 2. Homology to protein score */
-		  scoreSR = 0;
-		  if (SRP)
-            scoreSR = ScoreSRexon((Exons+i),Strand,sr);
+		  scoreHSP = 0.0;
+		  if (SRP && hsp != NULL)
+            scoreHSP = ScoreHSPexon((Exons+i),Strand,external,l1,l2);
 
 		  /* 3. Total (combined) score */
 		  scoreTotal = 
-			((1 - p->OligoWeight) * ((Exons+i)->Acceptor->Score 
-									 + (Exons+i)->Donor->Score))
-			+ (p->OligoWeight * scoreMarkov) + scoreSR; 
+			(p->siteFactor * ((Exons+i)->Acceptor->Score + (Exons+i)->Donor->Score))
+			+ (p->exonFactor * scoreMarkov) 
+			+ (p->HSPFactor * scoreHSP); 
 	  
 		  /* Second cutoff- final score */
 		  if (scoreTotal >= p->ExonCutoff) 
@@ -411,7 +525,7 @@ long Score(exonGFF *Exons,
 
 			  (Exons+n)->Score = scoreTotal + ExonWeight;
 			  (Exons+n)->PartialScore = scoreMarkov;
-			  (Exons+n)->SRScore = scoreSR;
+			  (Exons+n)->HSPScore = scoreHSP;
    
 			  n++;
 			}
@@ -426,7 +540,8 @@ void ScoreExons(char *Sequence,
                 long l1,
                 long l2,
                 int Strand,
-                packSR* sr,
+				packExternalInformation* external,
+                packHSP* hsp,
                 gparam** isochores,
                 int nIsochores,
                 packGC* GCInfo)
@@ -438,40 +553,54 @@ void ScoreExons(char *Sequence,
   for(i=0; i<nIsochores; i++)
     {
       /* Filling OligoDistIni and OligoDistTran */
-      printMess("Computing accumulated sum for coding potential score");
+      printMess("Preprocessing coding potential scores");
       MarkovScan(Sequence, isochores[i], 
 				 isochores[i]->OligoDistIni, 
 				 isochores[i]->OligoDistTran, 
 				 l1, l2);
     }
+
+  /* Fill in the temporary HSP arrays (pre-processing) */
+  if (SRP && hsp != NULL)
+	{
+	  printMess("Preprocessing homology information: step 1");
+	  HSPScan(external,hsp,Strand,l1,l2);
+
+	  printMess("Preprocessing homology information: step 2");
+	  HSPScan2(external,hsp,Strand,l1,l2);
+	}
   
   /* 2. Ready for Score and Filter Exons? */
   printMess("Scoring and filtering exons");
   
   allExons->nInitialExons = Score(allExons->InitialExons,
 								  allExons->nInitialExons,
-								  l1, l2, Strand, sr, 
+								  l1, l2, Strand, 
+								  external, hsp, 
 								  isochores, GCInfo);
   sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
   printRes(mess); 
   
   allExons->nInternalExons=Score(allExons->InternalExons,
 								 allExons->nInternalExons, 
-								 l1, l2, Strand, sr, 
+								 l1, l2, Strand, 
+								 external, hsp, 
 								 isochores, GCInfo);
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
   
   allExons->nTerminalExons=Score(allExons->TerminalExons,
 								 allExons->nTerminalExons,
-								 l1, l2, Strand, sr, 
+								 l1, l2, Strand, 
+								 external, hsp, 
 								 isochores, GCInfo);
   sprintf(mess,"Terminal Exons \t\t%8ld", allExons->nTerminalExons);
   printRes(mess);  
   
   allExons->nSingles=Score(allExons->Singles,
 						   allExons->nSingles,
-						   l1, l2, Strand, sr, 
+						   l1, l2, Strand, 
+						   external, hsp, 
 						   isochores, GCInfo);
   sprintf(mess,"Singles \t\t%8ld", allExons->nSingles);
   printRes(mess);
@@ -480,7 +609,8 @@ void ScoreExons(char *Sequence,
     {
       allExons->nORFs=Score(allExons->ORFs,
 							allExons->nORFs,
-							l1, l2, Strand, sr, 
+							l1, l2, Strand, 
+							external, hsp, 
 							isochores, GCInfo);
       sprintf(mess,"ORFs \t\t\t%8ld", allExons->nORFs);
       printRes(mess);

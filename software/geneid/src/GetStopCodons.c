@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetStopCodons.c,v 1.6 2003-11-05 14:38:33 eblanco Exp $  */
+/*  $Id: GetStopCodons.c,v 1.7 2003-11-05 14:44:56 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -41,7 +41,7 @@ long GetStopCodons(char* s,
                    long l2) 
 {
   long ns,is;
-  double score;
+  float score;
   int i,j;
   
   /* Strings defining Stop codons */

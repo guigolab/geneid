@@ -4,9 +4,9 @@
 *                                                                        *
 *   Sort by left signal position all of predicted exons                  *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.5 2002-03-20 10:44:38 eblanco Exp $  */
+/*  $Id: SortExons.c,v 1.6 2003-11-05 15:09:25 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -34,6 +34,169 @@ extern long NUMEXONS;
 extern int EVD;
 extern int FWD,RVS;
 extern int scanORF;
+extern int SGE;
+
+/* Artificial initial gene feature: force complete gene prediction */
+void InsertFirstGhostExon(exonGFF* Exons)
+{
+  exonGFF* e;
+  exonGFF* re;
+
+  /* 1. Forward Strand */
+  /* Create the exon structure */
+  if ((e = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
+        printError("Not enough memory: first ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((e->Acceptor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: acceptor site for first ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((e->Donor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: donor site for first ghost exon(sGHOST)");
+  
+  e->Acceptor->Position = 0;
+  e->Donor->Position = 0;
+  
+  /* Save the extracted exon */
+  Exons[0].Acceptor = e->Acceptor;
+  Exons[0].Donor = e->Donor;
+  strcpy(Exons[0].Type,sGHOST);
+  Exons[0].Frame = 0;
+  Exons[0].Strand = '+';
+  Exons[0].Score = MAXSCORE;
+  Exons[0].PartialScore = 0;
+  Exons[0].HSPScore = 0;
+  Exons[0].GeneScore = 0; 
+  Exons[0].Remainder = 0;
+  strcpy(Exons[0].Group,NOGROUP);
+  Exons[0].evidence = 0;
+  Exons[0].offset1 = 0;
+  Exons[0].offset2 = 0; 
+  Exons[0].lValue = 0;
+  Exons[0].rValue = 0; 
+  Exons[0].selected = 0;
+
+  /* 2. Reverse Strand */
+  /* Create the exon structure */
+  if ((re = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
+        printError("Not enough memory: first ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((re->Acceptor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: acceptor site for first ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((re->Donor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: donor site for first ghost exon(sGHOST)");
+  
+  re->Acceptor->Position = 0;
+  re->Donor->Position = 0;
+  
+  /* Save the extracted exon */
+  Exons[1].Acceptor = re->Acceptor;
+  Exons[1].Donor = re->Donor;
+  strcpy(Exons[1].Type,sGHOST);
+  Exons[1].Frame = 0;
+  Exons[1].Strand = '-';
+  Exons[1].Score = MAXSCORE;
+  Exons[1].PartialScore = 0;
+  Exons[1].HSPScore = 0;
+  Exons[1].GeneScore = 0; 
+  Exons[1].Remainder = 0;
+  strcpy(Exons[1].Group,NOGROUP);
+  Exons[1].evidence = 0;
+  Exons[1].offset1 = 0;
+  Exons[1].offset2 = 0; 
+  Exons[1].lValue = 0;
+  Exons[1].rValue = 0; 
+  Exons[1].selected = 0;
+}
+
+/* Artificial terminal gene feature: force complete gene prediction */
+void InsertLastGhostExon(exonGFF* Exons, long n, long L)
+{
+  exonGFF* e;
+  exonGFF* re;
+
+  /* 1. Forward Strand */
+  /* Create the exon structure */
+  if ((e = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
+        printError("Not enough memory: last ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((e->Acceptor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: acceptor site for last ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((e->Donor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: donor site for last ghost exon(sGHOST)");
+
+  e->Acceptor->Position = L;
+  e->Donor->Position = L;
+
+  /* Save the extracted exon */
+  Exons[n].Acceptor = e->Acceptor;
+  Exons[n].Donor = e->Donor;
+  strcpy(Exons[n].Type,sGHOST);
+  Exons[n].Frame = 0;
+  Exons[n].Strand = '+';
+  Exons[n].Score = MAXSCORE;
+  Exons[n].PartialScore = 0;
+  Exons[n].HSPScore = 0;
+  Exons[n].GeneScore = 0; 
+  Exons[n].Remainder = 0;
+  strcpy(Exons[n].Group,NOGROUP);
+  Exons[n].evidence = 0;
+  Exons[n].offset1 = 0;
+  Exons[n].offset2 = 0; 
+  Exons[n].lValue = 0;
+  Exons[n].rValue = 0; 
+  Exons[n].selected = 0;
+
+  /* 1. Reverse Strand */
+  /* Create the exon structure */
+  if ((re = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
+        printError("Not enough memory: last ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((re->Acceptor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: acceptor site for last ghost exon(sGHOST)");
+
+  /* Create the sites structure */
+  if ((re->Donor =
+       (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: donor site for last ghost exon(sGHOST)");
+
+  re->Acceptor->Position = L;
+  re->Donor->Position = L;
+
+  /* Save the extracted exon */
+  Exons[n+1].Acceptor = re->Acceptor;
+  Exons[n+1].Donor = re->Donor;
+  strcpy(Exons[n+1].Type,sGHOST);
+  Exons[n+1].Frame = 0;
+  Exons[n+1].Strand = '-';
+  Exons[n+1].Score = MAXSCORE;
+  Exons[n+1].PartialScore = 0;
+  Exons[n+1].HSPScore = 0;
+  Exons[n+1].GeneScore = 0; 
+  Exons[n+1].Remainder = 0;
+  strcpy(Exons[n+1].Group,NOGROUP);
+  Exons[n+1].evidence = 0;
+  Exons[n+1].offset1 = 0;
+  Exons[n+1].offset2 = 0; 
+  Exons[n+1].lValue = 0;
+  Exons[n+1].rValue = 0; 
+  Exons[n+1].selected = 0;
+}
 
 /* Struct for a node (list): pointer to exon and to next node */
 struct exonitem 
@@ -74,9 +237,11 @@ void UpdateList(struct exonitem** p, exonGFF* InputExon)
 /* corresponding every list to a beginning position for predicted exons */
 void SortExons(packExons* allExons,
                packExons* allExons_r, 
-               packEvidence* pv,
-               exonGFF* Exons,         
-               long l1, long l2)
+               packExternalInformation* external,
+			   packEvidence* pv,
+			   exonGFF* Exons,         
+               long l1, long l2,
+			   long LengthSequence)
 { 
   struct exonitem **ExonList, *q;
   long i;
@@ -203,8 +368,8 @@ void SortExons(packExons* allExons,
       }
 
   /* 2. Merge evidence exons (annotations) with predictions */
-  if (EVD)
-    for (i = pv->i1vExons; i < pv->i2vExons ; i++) 
+  if (EVD && pv != NULL)
+    for (i = external->i1vExons; i < external->i2vExons ; i++) 
       {  
 		acceptor=(pv->vExons + i)->Acceptor->Position - left;
 		offset = (pv->vExons + i)->offset1;
@@ -240,9 +405,20 @@ void SortExons(packExons* allExons,
 		  }
       }
 
+
+  /* SGE- STARTING fragment: Insert first ghost exon sGHOST */
+  if (SGE && (l1 == 0))
+	{
+	  n = 2;
+	  InsertFirstGhostExon(Exons);
+	}
+  else
+	n = 0;
+
   /* 3. Traversing the table extracting the exons sorted by left position */
   HowMany = FSORT*NUMEXONS;
-  for (i=0, n=0; i<l; i++)
+  /* for (i=0, n=0; i<l; i++) */
+  for (i=0; i<l; i++)
     {
       /* Extracting exons from list q */
       q=ExonList[i];
@@ -256,7 +432,7 @@ void SortExons(packExons* allExons,
 		  Exons[n].Strand = q->Exon->Strand;
 		  Exons[n].Score = q->Exon->Score;
 		  Exons[n].PartialScore = q->Exon->PartialScore;
-		  Exons[n].SRScore = q->Exon->SRScore;
+		  Exons[n].HSPScore = q->Exon->HSPScore;
 		  Exons[n].GeneScore = 0; 
 		  Exons[n].Remainder = q->Exon->Remainder;
 		  strcpy(Exons[n].Group,q->Exon->Group);
@@ -279,6 +455,16 @@ void SortExons(packExons* allExons,
 	  FreeItems(ExonList[i]);       
 	}
 
+  /* SGE- FINISHING split: Insert last ghost exon "$" */
+  if (SGE && (l2 == LengthSequence - 1))
+	{
+	  InsertLastGhostExon(Exons, n, LengthSequence);
+	  n = n + 2;
+	  
+	  if (n >= HowMany)
+		printError("Too many predicted exons: increase FSORT parameter");
+	}
+  
   /* Free empty array */
   free(ExonList);
 }

@@ -4,9 +4,9 @@
 *                                                                        *
 *   Translate genomic sequences into protein products (amino acids)      *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.6 2001-12-18 16:17:32 eblanco Exp $  */
+/*  $Id: Translate.c,v 1.7 2003-11-05 15:11:30 eblanco Exp $  */
 
 #include "geneid.h"
 

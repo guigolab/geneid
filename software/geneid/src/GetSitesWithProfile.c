@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetSitesWithProfile.c,v 1.5 2003-11-05 14:37:43 eblanco Exp $  */
+/*  $Id: GetSitesWithProfile.c,v 1.6 2003-11-05 14:44:21 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -41,7 +41,7 @@ long  GetSitesWithProfile(char* s,
                           long l2) 
 {
   int i,j;
-  double score;
+  float score;
   long ns,is;
   long left,right;
   int index;

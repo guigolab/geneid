@@ -4,9 +4,9 @@
 *                                                                        *
 *   Read set up options and filenames from user input                    *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.12 2002-02-22 13:48:02 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.13 2003-11-05 14:46:54 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -36,14 +36,15 @@ extern int 	SFP,SDP,SAP,STP,
             GENEID, GENAMIC,
             GFF, X10,
             EVD, SRP, BEG,
-            scanORF, XML, cDNA;
+            scanORF, XML, cDNA,
+            SGE;
 extern float EW;
 
 /* required by getopts */
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to predict genes in genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz] [-D] [-Z]\n\t\t[-G] [-X] [-M] [-m]\n\t\t[-WC] [-o]\n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight] [-P ParameterFile]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.1a\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz]\n\t\t[-D] [-Z]\n\t\t[-G] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2a\n";
 
 void printHelp()
 {
@@ -72,69 +73,70 @@ void printHelp()
   
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
+  printf("\t-F: Force 1 gene prediction\n");
   printf("\t-o: Only running exon prediction (disable gene prediction)\n");
-  printf("\t-O exons_filename: Only running gene prediction (not exon prediction)\n");
+  printf("\t-O  <exons_filename>: Only running gene prediction (not exon prediction)\n");
   printf("\t-Z: Activate Open Reading Frames searching\n\n");
   
-  printf("\t-R exons_filename: Provide annotations to improve predictions\n");
-  printf("\t-S SR_filename: Using information about sequence homology to improve predictions\n\n");
+  printf("\t-R  <exons_filename>: Provide annotations to improve predictions\n");
+  printf("\t-S  <HSP_filename>: Using information from protein sequence alignments to improve predictions\n\n");
   
   printf("\t-E: Adding this value to the exon weight parameter (see parameter file)\n");
-  printf("\t-P parameter_file: Use other than default parameter file (human)\n\n");
+  printf("\t-P  <parameter_file>: Use other than default parameter file (human)\n\n");
   
   printf("\t-B: Display memory required to execute geneid given a sequence\n");
   printf("\t-v: Verbose. Display info messages\n");
   printf("\t-h: Show this help\n");
 
   printf ("AUTHORS\n");
-  printf("\tgeneid v 1.1 has been developed by Enrique Blanco and Roderic Guigo.\n\tParameter files have been computed by G. Parra. Any bug or suggestion\n\tcan be reported to geneid@imim.es\n");
+  printf("\tgeneid v 1.2 has been developed by Enrique Blanco and Roderic Guigo.\n\tParameter files have been created by Genis Parra. Any bug or suggestion\n\tcan be reported to geneid@imim.es\n");
 
   printf("\n\n\n");
 }
 
 void printDTD()
 {
-  printf("<?xml version=\"1.0\" ?>
-   <!-- DTD for XML format in geneid output -->
+  printf("<?xml version=\"1.0\" ?>");
+  printf("<!-- DTD for XML format in geneid output -->");
 
-   <!-- Element declarations -->
-   <!ELEMENT prediction (gene*)>
-   <!ELEMENT gene ((exon+),cDNA,protein)>
-   <!ELEMENT exon (site,site)>
-   <!ELEMENT cDNA (#PCDATA)>
-   <!ELEMENT protein (#PCDATA)>
+   printf("<!-- Element declarations -->");
+   printf("<!ELEMENT prediction (gene*)>");
+   printf("<!ELEMENT gene ((exon+),cDNA,protein)>");
+   printf("<!ELEMENT exon (site,site)>");
+   printf("<!ELEMENT cDNA (#PCDATA)>");
+   printf("<!ELEMENT protein (#PCDATA)>");
 
-   <!-- Attribute declarations -->
-   <!ATTLIST prediction
-        locus    CDATA   #REQUIRED
-        length   CDATA   #IMPLIED
-        source   CDATA   #IMPLIED
-        date     CDATA   #IMPLIED
-        genes    CDATA   #REQUIRED
-	score    CDATA   #REQUIRED>
+   printf("<!-- Attribute declarations -->");
+   printf("<!ATTLIST prediction");
+        printf("\tlocus    CDATA   #REQUIRED");
+        printf("\tlength   CDATA   #IMPLIED");
+        printf("\tsource   CDATA   #IMPLIED");
+        printf("\tdate     CDATA   #IMPLIED");
+        printf("\tgenes    CDATA   #REQUIRED");
+	    printf("\tscore    CDATA   #REQUIRED>");
 
-   <!ATTLIST gene
-        idGene   ID      #REQUIRED
-        strand   (fwd|rvs)   #IMPLIED
-        nExons   CDATA   #IMPLIED
-        score    CDATA   #REQUIRED>
+   printf("<!ATTLIST gene");
+        printf("\tidGene   ID      #REQUIRED");
+        printf("\tstrand   (fwd|rvs)   #IMPLIED");
+        printf("\tnExons   CDATA   #IMPLIED");
+        printf("\tscore    CDATA   #REQUIRED>");
 
-   <!ATTLIST exon  
-        idExon   ID      #REQUIRED
-        type     (First | Internal | Terminal | Single) #REQUIRED
-	frame    (0|1|2) #REQUIRED
-        score    CDATA   #REQUIRED>
+   printf("<!ATTLIST exon");  
+        printf("\tidExon   ID      #REQUIRED");
+        printf("\ttype     (First | Internal | Terminal | Single) #REQUIRED");
+	printf("frame    (0|1|2) #REQUIRED");
+        printf("\tscore    CDATA   #REQUIRED>");
 
-   <!ATTLIST site
-        idSite   ID      #REQUIRED
-        type     (Acceptor | Donor | Start | Stop) #REQUIRED
-	position CDATA   #REQUIRED
-        score    CDATA   #REQUIRED>\n\n");
+   printf("<!ATTLIST site");
+        printf("\tidSite   ID      #REQUIRED");
+        printf("\ttype     (Acceptor | Donor | Start | Stop) #REQUIRED");
+	printf("position CDATA   #REQUIRED");
+        printf("\tscore    CDATA   #REQUIRED>\n\n");
 }
 
 void readargv (int argc,char* argv[],
 			   char* ParamFile, char* SequenceFile,
-			   char* ExonsFile, char* SRFile) 
+			   char* ExonsFile, char* HSPFile) 
 {
   int c;
   int error=0;
@@ -144,28 +146,54 @@ void readargv (int argc,char* argv[],
   char mess[MAXSTRING];
   
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitsxDzZXmMGBvE:R:S:WCP:h")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitsxDzZXmMGBvE:R:S:WCFP:h")) != -1)
     switch(c)
       {
-      case 'Z': scanORF++;
+      case 'B': BEG++; 
+		break;
+	  case 'C': FWD--;
 		geneidOpts++;
 		break;
-      case 'o': GENAMIC--;
+	  case 'D': cDNA++;
+		genamicOpts++;
 		break;
-      case 'O': GENEID--;
+	  case 'E': EW = atof(optarg);
+		geneidOpts++;
+		break;
+	  case 'F': SGE++;
+		geneidOpts++;
+		break;
+	  case 'G': GFF++;
+		break;
+	  case 'M': XML++;
+        genamicOpts++;
+		break;
+	  case 'O': GENEID--;
 		strcpy (ExonsFile,optarg);
+		break;
+	  case 'P': strcpy (ParamFile,optarg); 
 		break;
       case 'R': EVD++;
 		strcpy (ExonsFile,optarg);
 		geneidOpts++;
 		break;
       case 'S': SRP++;
-		strcpy (SRFile,optarg);
+		strcpy (HSPFile,optarg);
 		geneidOpts++;
 		break;
-      case 'E': EW = atof(optarg);
+	  case 'W': RVS--;
 		geneidOpts++;
-		break;	
+		break; 
+      case 'X': X10++;
+		genamicOpts++;
+		break;
+      case 'Z': scanORF++;
+		geneidOpts++;
+		break;      
+	  case 'a': SAP++;
+		geneidOpts++;
+		printOptions++;
+		break;
       case 'b': SFP++;
 		geneidOpts++;
 		printOptions++;
@@ -174,11 +202,7 @@ void readargv (int argc,char* argv[],
 		geneidOpts++;
 		printOptions++;
 		break;
-      case 'a': SAP++;
-		geneidOpts++;
-		printOptions++;
-		break;
-      case 'e': STP++;
+	  case 'e': STP++;
 		geneidOpts++;
 		printOptions++;
 		break;
@@ -186,56 +210,35 @@ void readargv (int argc,char* argv[],
 		geneidOpts++;
 		printOptions++;
 		break;
+	  case 'h': printHelp();
+		exit(0);
+		break;
       case 'i': EIP++;
 		geneidOpts++;
 		printOptions++;
 		break;
-      case 't': ETP++;
-		printOptions++;
-		geneidOpts++;
+	  case 'm': printDTD();
+		exit(0);
 		break;
-      case 'x': EXP++;
-		geneidOpts++;
-		printOptions++;
+	  case 'o': GENAMIC--;
 		break;
       case 's': ESP++;
+		geneidOpts++;
+		printOptions++;
+		break;
+	  case 't': ETP++;
+		printOptions++;
+		geneidOpts++;
+		break;
+      case 'v': VRB++;
+		break;
+	  case 'x': EXP++;
 		geneidOpts++;
 		printOptions++;
 		break;
       case 'z': EOP++;
 		geneidOpts++;
 		printOptions++;
-		break;
-      case 'B': BEG++; 
-		break;
-      case 'v': VRB++;
-		break;
-      case 'W': RVS--;
-		geneidOpts++;
-		break; 
-      case 'C': FWD--;
-		geneidOpts++;
-		break;
-      case 'P': strcpy (ParamFile,optarg); 
-		break;
-      case 'G': GFF++;
-		break;
-      case 'D': cDNA++;
-		genamicOpts++;
-		break;
-      case 'X': X10++;
-		genamicOpts++;
-		break;
-      case 'M': XML++;
-        genamicOpts++;
-		break;
-      case '?':error++;
-		break; 
-      case 'm': printDTD();
-		exit(1);
-		break;
-      case 'h': printHelp();
-		exit(1);
 		break;
       }
   
@@ -272,14 +275,14 @@ void readargv (int argc,char* argv[],
       optind++;
       if (optind < argc)
 		{ 
-          sprintf(mess,"Only one filename required but more than one presented\n%s",USAGE);
+          sprintf(mess,"Input contains more than one file but only one is required\n%s",USAGE);
 		  printError(mess);
 		}
     }
   else
     if (GENEID)
       {
-        sprintf(mess,"One filename is needed (DNA sequence, fasta format)\n%s",USAGE);
+        sprintf(mess,"One filename is required (DNA sequence, Fasta format)\n%s",USAGE);
 		printError(mess);
       }
   

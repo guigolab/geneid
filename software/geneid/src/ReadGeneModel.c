@@ -4,9 +4,9 @@
 *                                                                        *
 *   Reading the rules used to assemble best predicted genes              *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadGeneModel.c,v 1.3 2001-12-18 15:56:42 eblanco Exp $  */
+/*  $Id: ReadGeneModel.c,v 1.4 2003-11-05 14:50:00 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern int SGE;
 
 /* Replicating the gene model rules for every isochore */
 void shareGeneModel(gparam** isochores, int nIsochores)
@@ -176,6 +178,43 @@ long ReadGeneModel (FILE* file, dict* d,
 		  nlines++;
 		} /* End of if-comment */
     } /* Next rule to read */
+
+  /* Adding internal rules to force 1 gene prediction */
+  if (SGE)
+	{
+	  printMess("Force one gene prediction");
+	  printMess("Adding internal rules in the Gene Model");
+
+	  /* ^+:^-      First+:Terminal-     0:Infinity */
+	  a = setkeyDict(d,sGHOSTFWD);
+	  UC[a][nc[a]++] = nlines;
+	  a = setkeyDict(d,sGHOSTRVS);
+	  UC[a][nc[a]++] = nlines;
+	  
+	  a = setkeyDict(d,"First+");
+	  DE[a][ne[a]++]=nlines;
+	  a = setkeyDict(d,"Terminal-");
+	  DE[a][ne[a]++]=nlines;
+	  
+	  md[nlines] = 0;
+	  Md[nlines] = INFI;
+	  nlines++;
+
+	  /* Terminal+:First-     ^+:^-      0:Infinity*/
+	  a = setkeyDict(d,"Terminal+");
+	  UC[a][nc[a]++] = nlines;
+	  a = setkeyDict(d,"First-");
+	  UC[a][nc[a]++] = nlines;
+	  
+	  a = setkeyDict(d,sGHOSTFWD);
+	  DE[a][ne[a]++]=nlines;
+	  a = setkeyDict(d,sGHOSTRVS);
+	  DE[a][ne[a]++]=nlines;
+	  
+	  md[nlines] = 0;
+	  Md[nlines] = INFI;
+	  nlines++;
+	}
   
   return(nlines);
 }
