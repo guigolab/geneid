@@ -398,6 +398,8 @@ sub length{
    return $self->end - $self->start +1;
 }
 
+############################################################
+
 =head2 gff_string
 
  Title   : gff_string
@@ -420,20 +422,46 @@ sub gffstring {
      $strand = "-";
    }
    
-   $str .= (defined $self->seqname)     ?   $self->seqname."\t"      :  "\t";
-   $str .= (defined $self->source_tag)  ?   $self->source_tag."\t"   :  "\t";
-   $str .= (defined $self->primary_tag) ?   $self->primary_tag."\t"  :  "\t";
-   $str .= (defined $self->start)       ?   $self->start."\t"        :  "\t";
-   $str .= (defined $self->end)         ?   $self->end."\t"          :  "\t";
-   $str .= (defined $self->score)       ?   $self->score."\t"        :  "\t";
+   $str .= (defined $self->seqname)     ?   $self->seqname."\t"      :  "unknown\t";
+   $str .= (defined $self->source_tag)  ?   $self->source_tag."\t"   :  "merged\t";
+   $str .= (defined $self->primary_tag) ?   $self->primary_tag."\t"  :  "exon\t";
+   $str .= (defined $self->start)       ?   $self->start."\t"        :  ".\t";
+   $str .= (defined $self->end)         ?   $self->end."\t"          :  ".\t";
+   $str .= (defined $self->score)       ?   $self->score."\t"        :  ".\t";
    $str .= (defined $self->strand)      ?   $strand."\t"             :  ".\t";
    $str .= (defined $self->phase)       ?   $self->phase."\t"        :  ".\t";
    eval{
-     $str .= (defined $self->end_phase)   ?   $self->end_phase."\t"        :  ".\t";
+     $str .= (defined $self->end_phase) ?   $self->end_phase."\t"        :  ".\t";
    };
-
+   $str .= (defined $self->group_tag)   ?   $self->group_tag."\t"        :  ".\t";
    return $str;
 }
+
+############################################################
+
+=head2 group_tag
+
+ Title   : group_tag
+ Usage   : $tag = $exon->group_tag()
+           $exon->group_tag('chr1_123');
+ Function: Store/Returns the transcript/group tag for an exon
+ Returns : a string
+ Args    : none
+
+
+=cut
+
+sub group_tag{
+    my ($self,$arg) = @_;
+
+    if (defined($arg)) {
+        $self->{_group_tag} = $arg;
+    }
+    
+    return $self->{_group_tag};
+}
+
+############################################################
 
 =head2 source_tag
 
@@ -498,17 +526,18 @@ sub score {
     my ($self,$value) = @_;
 
     if(defined ($value) ) {
-      if( $value !~ /^[+-]?\d+\.?\d*(e-\d+)?/ ) {
-          $self->throw("'$value' is not a valid score");
-      }
-      $self->{'_gsf_score'} = $value;
-  }
-
-  return $self->{'_gsf_score'};
+	if( $value !~ /^[+-]?\d+\.?\d*(e-\d+)?/ ) {
+	    $self->warn("'$value' is not a valid score - setting it to zero");
+	    $value = 0;
+	}
+	$self->{'_gsf_score'} = $value;
+    }
+    
+    return $self->{'_gsf_score'};
 }
 
 =head2 has_tag
-
+    
  Title   : has_tag
  Usage   : $value = $self->has_tag('some_tag')
  Function: Returns the value of the tag (undef if
