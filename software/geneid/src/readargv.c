@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.11 2002-02-22 13:41:06 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.12 2002-02-22 13:48:02 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -259,8 +259,11 @@ void readargv (int argc,char* argv[],
     printError("Incompatible options( -D | -G)");
   
   if (error)
-    printError(USAGE);
-  
+	{
+	  sprintf(mess,"Wrong usage of options\n%s",USAGE);
+	  printError(mess);
+	}
+
   /* Setup Errors (b): Wrong number of filenames */
   /* Read the name of the input fasta file */
   if (optind < argc)
