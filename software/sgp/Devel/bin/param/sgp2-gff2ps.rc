@@ -1,0 +1,9 @@
+# 
+# sgp2-gff2ps.rc - config file for gff2ps plots on sgp2.
+#
+# $Id: sgp2-gff2ps.rc,v 1.1 2000-10-16 18:31:59 jabril Exp $ 
+#
+# L # Page Layout
+# S # Sources
+# G # Groups
+# F # Features
