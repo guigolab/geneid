@@ -1,0 +1,285 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: mixture.nw,v 1.1 2001-10-31 14:24:41 gparra Exp $
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+ 
+% Colors for gff2ps
+\input ColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es}}
+
+% defs
+\def\drome{\textit{Drosophila melanogaster}}
+\def\dro{\textit{Drosophila}}
+\def\dme{\textit{D. melanogaster}}
+\def\seq{\texttt{\textbf{X62937}}}
+\def\nowf{[[DromeRepeats.nw]]}
+\def\bn{\textsc{blastn}}
+\def\ps{\textsc{PostScript}}
+
+% Setting text for footers and headers
+
+\def\tit{\textsc{Analysis of finite mixture of distributions}}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Gen\'{i}s Parra and Roderic Guig\'o}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+@ 
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textbf{\Huge Analysis of finite mixture of distributions}\\[5ex]
+
+\textbf{\Large Gen\'{i}s Parra and Roderic Guig\'o}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+} % parbox
+\end{center}
+\end{abstract}
+
+\vfill
+
+\begin{raggedleft}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtgparra}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: mixture.nw,v 1.1 2001-10-31 14:24:41 gparra Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{empty section}
+
+\subsctn{empty subsection}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage
+\appendix
+
+\sctn{empty appendix section}
+
+\subsctn{empty appendix subsection}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+
+\sctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: mixture.nw,v 1.1 2001-10-31 14:24:41 gparra Exp $
+@ 
+
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+<<tangling>>=
+# showing line numbering comments in program
+notangle -L -R"root" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/root_file ;
+# program without line numbering comments
+notangle -t4 -R"root" $WORK/$nwfile.nw \
+    > $BIN/root_file ;
+# making them runnable
+chmod a+x $BIN/root_file ;
+@ 
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+<<tangling>>=
+notangle -R"root" $WORK/$nwfile.nw \
+    > $DATA/root_config ;
+@ %$
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+<<tangling>>=
+notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+@ 
+
+<<weaving>>=
+<<BASH shebang>>
+# weaving and LaTeXing
+<<BASH Environment Variables>>
+noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+<<BASH script end>>
+@ 
+
+<<LaTeXing>>=
+<<BASH shebang>>
+# only LaTeXing
+<<BASH Environment Variables>>
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+<<BASH script end>>
+@ %$
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH Environment Variables>>=
+# Global Variables
+export WORK="$HOME/development/softgparra/mixture" ;
+export BIN="$WORK/bin" ;
+export DOCS="$WORK/docs" ;
+export DATA="$WORK/data" ;
+export nwfile="mixture" ;
+@ 
+
+<<CSH Environment Variables>>=
+# Global Variables
+setenv WORK "$HOME/development/softgparra/mixture" ;
+setenv BIN  "$WORK/bin" ;
+setenv DOCS "$WORK/docs" ;
+setenv SRC "$WORK/src" ;
+setenv nwfile "mixture" ;
+@ 
+
+<<tangling>>=
+# TO DO: add a test to check which shell is running
+# BASH shell
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
+         > $WORK/.bash_VARS ; 
+# CSH shell
+notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
+         > $WORK/.csh_VARS ; 
+# sourcing
+source $WORK/.bash_VARS ;
+source $WORK/.csh_VARS ;
+@
+
+\end{document}
