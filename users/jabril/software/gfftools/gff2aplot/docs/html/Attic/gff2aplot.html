@@ -3,7 +3,7 @@
  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
  <META NAME="Generator" CONTENT="Hacker Hands">
  <META NAME="author" CONTENT="Josep F. Abril">
- <!-- $Id: gff2aplot.html,v 1.4 2001-07-27 18:00:06 gmaster Exp $ -->
+ <!-- $Id: gff2aplot.html,v 1.5 2001-08-03 13:38:21 gmaster Exp $ -->
   <META NAME="keywords"    CONTENT="APLOT, GFF, gff-format, Genomic Pairwise Alignments PostScript Plots, Genomic Analysis, Sinteny, Bioinformatics">
   <META NAME="description" CONTENT="APLOT MAIN PAGE: Pair-wise Alignments in PostScript.">
  <TITLE>APLOT MAIN PAGE: Pair-wise Alignments in PostScript.</TITLE>
@@ -31,7 +31,7 @@
 </SCRIPT>
 </head>
 
-<body onResize="window.location.href = 'APLOT.html';" MARGINWIDTH="2" MARGINHEIGHT="0">
+<body onResize="window.location.href = 'GFF2APLOT.html';" MARGINWIDTH="2" MARGINHEIGHT="0">
 <A NAME="TOP"></A>
 
 <table border=0 cellpadding=0 cellspacing=0 width=100%>
@@ -159,7 +159,7 @@
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
 <TR>
 <TD class="section">
-<FONT size=5 class="K"> Index </FONT>
+<FONT size=5 class="K"> Contents </FONT>
 </TD>
 </TR>
 </TABLE>
@@ -184,7 +184,9 @@
 <B>Under Construction...</B>
 <UL class="mvleft">
   <LI><A HREF="APLOT.html#EXAMPLES" onMouseover="window.status='EXAMPLES';">EXAMPLES</A>
+<!--
   <LI><A HREF="APLOT.html#SERVER" onMouseover="window.status='WEB SERVER';"><STRONG>aplot</STRONG> WEB SERVER</A>
+-->
 </UL>
 </TD>
 </TR>
@@ -207,9 +209,9 @@
 <H3><TT>aplot</TT> -  Pair-wise Alignment-Plots for Genomic Sequences in PostScript.</H3>
 </CENTER>
 
-Our basic goal is to provide an easy-to-use filter to get plots that will be useful in genomic analysis, and also giving enough quality to include them into your documents without losing resolution. We defined a simple format from <TT>GFF</TT> format to define pair-wise alignments, but now program can also read standard <TT>GFF</TT> for those alignments too.<BR><BR>
+Our basic goal is to provide an easy-to-use filter to get plots that will be useful in genomic analysis, and also giving enough quality to include them into your documents without losing resolution. We defined a simple format from <TT>GFF</TT> format to define pair-wise alignments, but now program can also read standard <TT>GFF</TT> for those alignments too. <BR><BR>
 
-`General Finding Format' (GFF) is described on the Sanger Centre <A HREF="http://www.sanger.ac.uk/Software/GFF/GFF_Spec.shtml" onMouseover="window.status='General Finding Format Definition Page';">gff definition page</A>.<BR>
+`General Finding Format' (GFF) is described on the Sanger Centre <A HREF="http://www.sanger.ac.uk/Software/GFF/GFF_Spec.shtml" onMouseover="window.status='General Finding Format Definition Page';">gff definition page</A>. <BR>
 </P>
 
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
@@ -224,7 +226,7 @@ Our basic goal is to provide an easy-to-use filter to get plots that will be use
 </TD></TR>
 </TABLE>
 <P>
-<IMG SRC="icons/atwork_moving.gif" VSPACE=0 ALIGN=MIDDLE ALT="UnderConstruction">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Following this link you can get some <A href="http://www1.imim.es/software/gfftools/APLOT-Snapshots.html" onMouseover="window.status='Some examples on how to use APLOT';">snapshots</A> of <TT>aplot</TT> output.<BR>
+<IMG SRC="icons/atwork_moving.gif" VSPACE=0 ALIGN=MIDDLE ALT="UnderConstruction">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Following this link you can get some <A href="http://www1.imim.es/software/gfftools/APLOT-Snapshots.html" onMouseover="window.status='Some examples on how to use APLOT';">snapshots</A> of <TT>aplot</TT> output. <BR>
 </P>
 
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
@@ -245,8 +247,8 @@ Our basic goal is to provide an easy-to-use filter to get plots that will be use
   <TD class="userspace" VALIGN=TOP>26&nbsp;Jan&nbsp;2000</TD>
   <TD class="userspace" VALIGN=TOP>&nbsp;<A HREF="APLOT.html#DOWNLOADING" onMouseover="window.status='GO TO DOWNLOAD SECTION';">v1.9</A>&nbsp;</TD>
   <TD class="userspace" VALIGN=TOP>
-   After several bug fixes and versions not published, here is the new version for <TT>aplot</TT>.<BR>
-   This version can work with "partial" custom files (without having to define all the variables) and can also read alignments in standard GFF format:<BR>
+   After several bug fixes and versions not published, here is the new version for <TT>aplot</TT>. <BR>
+   This version can work with "partial" custom files (without having to define all the variables) and can also read alignments in standard GFF format: <BR>
   </TD>
   <TD WIDTH=10 rowspan=9></TD>
  </TR>
@@ -254,7 +256,7 @@ Our basic goal is to provide an easy-to-use filter to get plots that will be use
   <TD class="userspace" VALIGN=TOP>&nbsp;</TD>
   <TD class="userspace" VALIGN=TOP>&nbsp;</TD>
   <TD class="userspace" VALIGN=TOP>
-    <FONT SIZE=0>&lt;seq_name&gt;&nbsp;&lt;source&gt;&nbsp;&lt;feature&gt;&nbsp;&lt;startX&gt;&nbsp;&lt;endX&gt;&nbsp;&lt;gapped_align_score&gt;&nbsp;&lt;strand&gt;&nbsp;&lt;frame&gt;&nbsp;...<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&lt;Target&nbsp;"group_name"&gt;&nbsp;&lt;startY&gt;&nbsp;&lt;endY&gt;;&nbsp;&lt;optional_tag&gt;&nbsp;&lt;global_align_score&gt;</FONT><BR><BR>
+    <FONT SIZE=0>&lt;seq_name&gt;&nbsp;&lt;source&gt;&nbsp;&lt;feature&gt;&nbsp;&lt;startX&gt;&nbsp;&lt;endX&gt;&nbsp;&lt;gapped_align_score&gt;&nbsp;&lt;strand&gt;&nbsp;&lt;frame&gt;&nbsp;... <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&lt;Target&nbsp;"group_name"&gt;&nbsp;&lt;startY&gt;&nbsp;&lt;endY&gt;;&nbsp;&lt;optional_tag&gt;&nbsp;&lt;global_align_score&gt;</FONT> <BR><BR>
   </TD>
  </TR>
  <TR ALIGN=LEFT>
@@ -275,8 +277,8 @@ Our basic goal is to provide an easy-to-use filter to get plots that will be use
   <TD class="userspace" VALIGN=TOP>02&nbsp;Mar&nbsp;1999</TD>
   <TD class="userspace" VALIGN=TOP>&nbsp;v1.0&nbsp;</TD>
   <TD class="userspace" VALIGN=TOP>
-   First running version for <TT>aplot</TT>.<BR>
-   Annotation on axes is defined in GFF-format.<BR>
+   First running version for <TT>aplot</TT>. <BR>
+   Annotation on axes is defined in GFF-format. <BR>
    Alignment definition is written in pseudo GFF:
   </TD>
  </TR>
@@ -284,7 +286,7 @@ Our basic goal is to provide an easy-to-use filter to get plots that will be use
   <TD class="userspace" VALIGN=TOP>&nbsp;</TD>
   <TD class="userspace" VALIGN=TOP>&nbsp;</TD>
   <TD class="userspace" VALIGN=TOP>
-   <FONT SIZE=1>&lt;seq_nameX:seq_nameY&gt;&nbsp;&lt;source&gt;&nbsp;&lt;feature&gt;&nbsp;&lt;startX:startY&gt;&nbsp;&lt;endX:endY&gt;&nbsp;&lt;gapped_align_score&gt;&nbsp;...<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&lt;strand&gt;&nbsp;&lt;frame&gt;&nbsp;&lt;global_align_score:group&gt;<BR></FONT>
+   <FONT SIZE=1>&lt;seq_nameX:seq_nameY&gt;&nbsp;&lt;source&gt;&nbsp;&lt;feature&gt;&nbsp;&lt;startX:startY&gt;&nbsp;&lt;endX:endY&gt;&nbsp;&lt;gapped_align_score&gt;&nbsp;...<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&lt;strand&gt;&nbsp;&lt;frame&gt;&nbsp;&lt;global_align_score:group&gt; <BR></FONT>
   </TD>
  </TR>
 </TABLE>
@@ -322,6 +324,7 @@ Once you have downloaded files, you can extract them with:<BR><BR class="hh">
 </TABLE>
 </P>
 
+<!--   
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
 <TR>
 <TD class="section" width=80% ALIGN=LEFT>
@@ -334,9 +337,10 @@ Once you have downloaded files, you can extract them with:<BR><BR class="hh">
 </TD></TR>
 </TABLE>
 <P>
-<IMG SRC="icons/atwork_moving.gif" VSPACE=0 ALIGN=MIDDLE ALT="UnderConstruction">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>aplot</TT> server is under construction.<BR>
-<!--   Thanks to <A HREF="MAILTO:vadim@imb-jena.de" onMouseover="window.status='MAIL TO V. Goremykin';">Vadim Goremykin</A> from IMB at Jena (Germany), who is writing the scripts for the <TT>aplot</TT> web server. When it will be finished we should install a mirror in our server... -->
+<IMG SRC="icons/atwork_moving.gif" VSPACE=0 ALIGN=MIDDLE ALT="UnderConstruction">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>aplot</TT> server is under construction. <BR>
+###   Thanks to <A HREF="MAILTO:vadim@imb-jena.de" onMouseover="window.status='MAIL TO V. Goremykin';">Vadim Goremykin</A> from IMB at Jena (Germany), who is writing the scripts for the <TT>aplot</TT> web server. When it will be finished we should install a mirror in our server...
 </P>
+-->
 
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
 <TR>
@@ -350,11 +354,9 @@ Once you have downloaded files, you can extract them with:<BR><BR class="hh">
 </TD></TR>
 </TABLE>
 <P>
-This menu shows many features of <TT>aplot</TT>.<BR><BR class="hh">
+This menu shows many features of <TT>aplot</TT>. <BR><BR class="hh">
 <MENU class="mvleft">
 <!--
-  <LI class="lst">
-  <LI class="lst">
   <LI class="lst">
 -->
   <LI class="lst"> Plot attributes are set from a custom file that is created by default first time you use <TT>aplot</TT>, which contains all variable names in a readable list of name-value pairs.
@@ -378,8 +380,8 @@ This menu shows many features of <TT>aplot</TT>.<BR><BR class="hh">
 </TD></TR>
 </TABLE>
 <P>
-Although we have implemented many features, there are some ideas to be added before releasing version 2.0 of <TT>aplot</TT>.<BR>
-Here is a short list:<BR><BR class="hh">
+Although we have implemented many features, there are some ideas to be added before releasing version 2.0 of <TT>aplot</TT>. <BR>
+Here is a short list: <BR><BR class="hh">
 <MENU class="mvleft">
   <LI class="lst"> Draw different alignments on same aplot with different colors.
   <LI class="lst"> Display alignment strand and frame.
@@ -387,9 +389,9 @@ Here is a short list:<BR><BR class="hh">
   <LI class="lst"> Include <TT>gff2ps</TT> format in extra-box.
   <LI class="lst"> <TT>gff2ps</TT> shape dictionary will be imported to <TT>aplot</TT>.
   <LI class="lst"> Crossing ribbons will mix their colors.
-</MENU><BR>
-But first of all we are going to translate the code to <TT>Perl</TT>.<BR><BR class="hh">
-We thanks any helpful suggestion for improving our program. Message should contain <A HREF="MAILTO:jabril@imim.es" onMouseover="window.status='SEND SUGESTIONS to AUTHORs';">"APLOT - SUGGESTION"</A> as subject string.<BR>
+</MENU> <BR>
+But first of all we are going to translate the code to <TT>Perl</TT>. <BR><BR class="hh">
+We thanks any helpful suggestion for improving our program. Message should contain <A HREF="MAILTO:jabril@imim.es?subject=[APLOT] SUGGESTIONS :" onMouseover="window.status='SEND SUGESTIONS to AUTHORs';">"APLOT - SUGGESTION"</A> as subject string. <BR>
 </P>
 
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
@@ -404,7 +406,7 @@ We thanks any helpful suggestion for improving our program. Message should conta
 </TD></TR>
 </TABLE>
 <P>
-If you find any bug or something is not plotted properly, you can send a bug report that should contain as subject string: <A HREF="MAILTO:jabril@imim.es" onMouseover="window.status='REPORTING BUGS to AUTHORs';">"APLOT - BUG REPORT"</A>. To easily find what's wrong, you should attach to that e-mail a tarball containing the custom file you were using when the bug ocurred, an example of your input GFF files, the PostScript file generated and a report file that you can get from the standard error with the "-V" command-line option. We will try to answer as soon as possible.<BR>
+If you find any bug or something is not plotted properly, you can send a bug report that should contain as subject string: <A HREF="MAILTO:jabril@imim.es?subject=[APLOT] BUG REPORT :" onMouseover="window.status='REPORTING BUGS to AUTHORs';">"APLOT - BUG REPORT"</A>. To easily find what's wrong, you should attach to that e-mail a tarball containing the custom file you were using when the bug ocurred, an example of your input GFF files, the PostScript file generated and a report file that you can get from the standard error with the "-V" command-line option. We will try to answer as soon as possible. <BR>
 </P>
 
 <TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
@@ -420,11 +422,11 @@ If you find any bug or something is not plotted properly, you can send a bug rep
 </TABLE>
 <P>
 <CENTER>
-<A HREF="MAILTO:jabril@imim.es" onMouseover="window.status='MAIL TO J.F. ABRIL';">Josep Francesc ABRIL FERRANDO</A><BR>
-<A HREF="MAILTO:twiehe@ice.mpg.de" onMouseover="window.status='MAIL TO T. WIEHE';">Thomas WIEHE</A><BR>
-<A HREF="MAILTO:rguigo@imim.es" onMouseover="window.status='MAIL TO R. GUIG&Oacute;';">Roderic GUIG&Oacute; SERRA</A><BR><BR>
+<A HREF="MAILTO:jabril@imim.es" onMouseover="window.status='MAIL TO J.F. ABRIL';">Josep Francesc ABRIL FERRANDO</A> <BR>
+<A HREF="MAILTO:twiehe@ice.mpg.de" onMouseover="window.status='MAIL TO T. WIEHE';">Thomas WIEHE</A> <BR>
+<A HREF="MAILTO:rguigo@imim.es" onMouseover="window.status='MAIL TO R. GUIG&Oacute;';">Roderic GUIG&Oacute; SERRA</A> <BR><BR>
 
-<B>CopyRight &copy; 1999</B><BR><BR>
+<B>CopyRight &copy; 1999</B> <BR><BR>
 
 <FONT SIZE=4><TT>aplot</TT> is under <A href="http://www1.imim.es/main/GNU-GPL.html" onMouseover="window.status='GNU General Public License';">GNU General Public License</A></FONT>.
 </CENTER>
