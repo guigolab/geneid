@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $
+% $Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -492,9 +492,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.30 $', #'
-     '$Date: 2001-12-22 02:29:49 $', #'
-     '$Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $', #'
+     '$Revision: 1.31 $', #'
+     '$Date: 2002-01-08 17:09:40 $', #'
+     '$Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -2058,7 +2058,8 @@ LINESTY => sub { # Value, varName, Lowercase
       my ($_v,$_n,$_l) = @_;
       (defined($$_v) && defined($LineStyles{$_l})) &&
           ($$_v = $_l, return $T);
-      &warn('LINESTY_NOTOK',$F,$$_v,$_n);      return $F;
+      &warn('LINESTY_NOTOK',$F,$$_v,$_n);
+      return $F;
   },
 @ %def {LINESTY}
 
@@ -2606,24 +2607,30 @@ foreach my $oc (@kao) {
 %          0    1    2     3     4     5     6    7    8   9   10
 % @rr = ( $str $ang $lcol $lsty $lwdt $fcol $val $hal $fz $fn $tcol )
 <<preparing validated optional fields for special features>>=
+$a = defined($a) ? $a : 0;
 @rr = (
-	    '',
-        defined($a)  ? "$a"              : '0'         ,
-        defined($l)  ? "$l"              : 'fg'        ,
-        defined($s)  ? "($s)"            : '(solid)'   ,
-        defined($w)  ? "@{$w}"           : 'Clw'       ,
-        defined($f)  ? "$f ".&tobool($T) : &tobool($F) ,
-        defined($v)  ? "($TextAlign{'V'}{$v})"
-                                         : '(bv)'      ,
-        defined($h)  ? "($TextAlign{'H'}{$h})"
-                                         : '(lh)'      ,
-        defined($fz) ? "$fz"             : '8 pt'      ,
-        defined($fn) ? "$fn"             : $Fonts{'helvetica'} ,
-        defined($t)  ? "$t ".&tobool($T) : &tobool($F) ,
+	    '' ,
+        "$a" ,
+        defined($l)  ? "$l"                    : 'fg'                ,
+        defined($s)  ? "($LineStyles{$s})"     : '(solid)'           ,
+        defined($w)  ? "@{$w}"                 : 'Clw'               ,
+        defined($f)  ? "$f ".&tobool($T)       : &tobool($F)         ,
+        defined($v)  ? "($TextAlign{'V'}{$v})" :
+                       (sin($a*$torad) >= 0 ? '(bv)' : '(tv)')       ,
+        defined($h)  ? "($TextAlign{'H'}{$h})" :
+                       (cos($a*$torad) >= 0 ? '(lh)' : '(rh)')       ,
+        defined($fz) ? "$fz"                   : '8 pt'              ,
+        defined($fn) ? "$fn"                   : $Fonts{'helvetica'} ,
+        defined($t)  ? "$t ".&tobool($T)       : &tobool($F)         ,
         );
 $rr[0] = (defined($str)) ? &tostring($str) : '';
 @
 
+As trigonometric functions in perl only work with radians, we have to include a conversion factor from degrees to radians ($1^\circ\;=\;\frac{\pi}{180}\mbox{radian}$).
+
+<<Global Constants>>=
+my $torad = 3.1415926535898 / 180; 
+@ 
 
 \newpage
 
@@ -8994,6 +9001,7 @@ begindata
         &ps_plot_outlines($vlr->{_x_sequence_name},$T);
     $vlr->{_plot_y_sequence} && 
         &ps_plot_outlines($vlr->{_y_sequence_name},$F);
+    # extras
     scalar(@SpecialCache) > 0 && do {
         &ps_plot_addons;
     }; # _plot_addons
@@ -9001,7 +9009,7 @@ begindata
     $vlr->{_plot_aln} && do {
         &ps_plot_aln($vlr->{_alignment_name});
     }; # _plot_aln
-    #
+    # zoom area
     $vlr->{zoom_area} && do {
         my $kt = defined($vlr->{zoom_area_fill_color}) 
                  ? "$vlr->{zoom_area_fill_color} ".&tobool($T)
@@ -10711,14 +10719,14 @@ end % aplotdict
   S           %->
     cmyk      %-> ori end
     H {       %->
-      YH neg  %-> if horizontal (X-seq) then ribbon height is box height
+      YH neg    %-> if horizontal (X-seq) then ribbon height is box height
     } {       %->
-      AX neg  %-> if vertical (Y-seq) then ribbon height is box width
+      AX neg    %-> if vertical (Y-seq) then ribbon height is box width
     } ifelse  %->
     3 1 roll  %-> h1 ori end
-    Xscm      %-> h1 ori end!
+    Hscm      %-> h1 ori end!
     3 1 roll  %-> end! h1 ori
-    Xscm      %-> end! h1 ori!
+    Hscm      %-> end! h1 ori!
     0         %-> end! h1 ori! h0
     Clw2 ibox %-> filling inner region for the current path
     fill      %-> 
@@ -10730,14 +10738,14 @@ end % aplotdict
   %-% vflg { (rln) msg } if
   S           %->
     fg cmyk   %->
+    Hscm      %-> pos!
     H {       %->
       YH neg  %-> if horizontal (X-seq) then ribbon height is box height
     } {       %->
       AX neg  %-> if vertical (Y-seq) then ribbon height is box width
     } ifelse  %->
-    0         %-> pos h1 h0
-    3 -1 roll %-> h1 h0 pos
-    Xscm      %-> h1 h0 pos!
+    0         %-> pos! h1 h0
+    3 -1 roll %-> h1 h0 pos!
     dup       %-> h1 h0 pos! pos!
     4 1 roll  %-> pos! h1 h0 pos!
     exch      %-> pos! h1 pos! h0
@@ -10941,7 +10949,7 @@ end % aplotdict
     Xscme      %-> mark angle string valn haln {fz fn} {tcol tflg} x! y!
     counttomark %->
         2 roll  %-> mark x! y! angle string valn haln {fz fn} {tcol tflg}
-    {          %->  if text color is not given, use foreground color
+    not {      %-> if text color is not given, use foreground color
       fg       %->
     } if       %-> mark x! y! angle string valn haln {fz fn} tcol
     cmyk            %->
@@ -10999,14 +11007,14 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
 <<PSFunctions - xarw>>=
 %-%
 /xarw { %-% [string valn haln {fz fn} {tcol tflg}] lcol lw len angle x y  xarw
-  S            %->
-    Yscme      %-> [...] lcol lw len angle y! x
-    Xscme      %-> [...] lcol lw len angle x! y!
-    T          %-> [...] lcol lw len angle x! y!
-    dup neg    %-> [...] lcol lw len angle -angle
-    counttomark %->
-        1 roll  %-> -angle [...] lcol lw len angle
-    rotate     %-> -angle [...] lcol lw len
+  S               %->
+    Yscme         %-> [...] lcol lw len angle y! x
+    Xscme         %-> [...] lcol lw len angle x! y!
+    T             %-> [...] lcol lw len angle x! y!
+    dup neg       %-> [...] lcol lw len angle -angle
+    counttomark   %->
+        1 roll    %-> -angle [...] lcol lw len angle
+    rotate        %-> -angle [...] lcol lw len
     2 dict begin  %->
       /la X       %-> -angle [...] lcol lw
       /lb X       %-> -angle [...] lcol
@@ -11014,32 +11022,34 @@ We define here [[xarw]] because it uses [[xtxt]] (in {\ps}, a function must be d
       0 0 m       %-% drawing arrow head
       lb 6 mul    %-> ... ax
       dup         %-> ... ax ax
-      la gt {     %-> ... ax
-        pop la    %-> ... ax
-      } if        %-> ... ax
+      la gt {       %-> ... ax
+        pop         %->
+        la 0.75 mul %-> ... ax
+      } if          %-> ... ax
       dup         %-> ... ax ax
       dup         %-> ... ax ax ax
-      3 div       %-> ... ax ax ay
-      dup         %-> ... ax ax ay ay
-      1.5 mul     %-> ... ax ax ay ay'
-      neg         %-> ... ax ax ay -ay'
-      3 1 roll    %-> ... ax -ay' ax ay
-      l l         %-> ...
-      closepath   %-> 
+      dup         %-> ... ax ax ax ax
+      3 div       %-> ... ax ax ax ay
+      dup         %-> ... ax ax ax ay ay
+      neg         %-> ... ax ax ax ay -ay'
+      3 1 roll    %-> ... ax ax -ay' ax ay
+      l l         %-> ... ax
+      closepath   %-> ... ax
       fill        %-% filling arrow head
-      0 0 m       %->
+      0 m         %-> ...
       la 0 l      %-% arrow line
       lb slw      %->
       K           %->
                   %-% preparing x coord for text label
       la          %->
-      lb 2 mul    %->
+      lb          %->
       add         %-> -angle [string valn haln {fz fn} {tcol tflg}] x
     end           %->
-    0          %-> -angle [string valn haln {fz fn} {tcol tflg}] x y 
-    xtxt       %-% xtxt removes current mark
-  R            %->
-} B            %:%
+    0 T           %-% translating to string insertion point
+    0 0           %-> -angle [string valn haln {fz fn} {tcol tflg}] 0 0 
+    xtxt          %-% xtxt removes current mark
+  R               %->
+} B               %:%
 @ %def xarw
 
 
@@ -13692,7 +13702,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -15286,7 +15296,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.30 2001-12-22 02:29:49 jabril Exp $
+# $Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
