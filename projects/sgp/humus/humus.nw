@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.26 2002-05-02 19:32:02 jabril Exp $ 
+% # $Id: humus.nw,v 1.27 2002-05-03 00:00:48 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.26 2002-05-02 19:32:02 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.27 2002-05-03 00:00:48 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2400,10 +2400,21 @@ gawk '$1!~/^\#/ {print $1}' $MUSHU/seqid_list | \
       } ;
     done ;
 #
+gawk '$1!~/^\#/ {print $1}' $MUSHU/seqid_list | \
+  while read CHR ;
+    do {
+       cat $MUSHU/chr$CHR/length ;
+       } ;
+    done > $MUSHU/all_length ;
+#
 # RETRIEVE INVTBX HSPs FROM TBX[HsapSQ-MmusDB]
 # gawk '$1!~/^\#/ {print $1}' $MySQLPAR/Mmusculus_chrs.tbl | \
 MkDirs $MUSHU/invTBX $MUSHU/invTBX/$FTPTBXID ;
-gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+# gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_a | \
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_b | \
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_c | \
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/bin/seqid_d | \
   while read CHR SEQ ;
     do {
       ODIR="$MUSHU/chr$CHR" ;
@@ -2417,8 +2428,9 @@ gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
           done | \
         while read file ;
           do {
-            $BIN/swapHSPcoords.pl -o "-1" $SEQ $ODIR/length $file \
-                           > $MUSHU/invTBX/$FTPTBXID/$SEQ.$cnt.fullgff ;
+            $BIN/swapHSPcoords.pl -o "-1" \
+                  -a $MUSHU/invTBX/$FTPTBXID/'_*_'.$cnt.fullgff \
+                  $MUSHU/all_length $file ;
             cnt=`expr $cnt + 1` ;
             } ;
           done ;
@@ -2589,13 +2601,21 @@ gawk 'BEGIN{ prt=1 }
       { if (prt) print $0 }
       ' $MUSHU/seqid_list > $MUSHU/bin/seqid_a ;
 gawk 'BEGIN{ prt=0 }
-      $1~/^6$/ { prt=1 } $1~/^13$/ { prt=0 }
+      $1~/^6$/ { prt=1 } $1~/^11$/ { prt=0 }
       { if (prt) print $0 }
       ' $MUSHU/seqid_list > $MUSHU/bin/seqid_b ;
 gawk 'BEGIN{ prt=0 }
-      $1~/^13$/ { prt=1 }
+      $1~/^11$/ { prt=1 } $1~/^16$/ { prt=0 }
       { if (prt) print $0 }
       ' $MUSHU/seqid_list > $MUSHU/bin/seqid_c ;
+gawk 'BEGIN{ prt=0 }
+      $1~/^16$/ { prt=1 }
+      { if (prt) print $0 }
+      ' $MUSHU/seqid_list > $MUSHU/bin/seqid_d ;
+# ls -1 bin/seqid_* | while read n; do echo "$n ->"`gawk '{s+=$3}END{print s}' $n`; done
+#
+# monstre4
+$MUSHU/bin/runallmouse.sh $MUSHU/bin/seqid_d 2> $MUSHU/bin/seqid_a.log 1>&2 ;
 # monstre3
 $MUSHU/bin/runallmouse.sh $MUSHU/bin/seqid_a 2> $MUSHU/bin/seqid_a.log 1>&2 ;
 # monstre2
@@ -3367,8 +3387,9 @@ is_exec $BIN/swapHSPcoords.pl ;
 #
 use strict;
 #
-use global qw( :ExecReport :ExitStatus );
+use global qw( :ExecReport :ExitStatus :StringFill :Counter );
 &init_timer(\@exectime);
+$_cntN = 100; # split counter dots line each $_cntN dots
 #
 $PROG = 'swapHSPcoords.pl';
 $PRGVER = '0.9alpha';
@@ -3377,7 +3398,7 @@ my ($seq,$src,$ftr,$ori,$end,$sco,$str,$frm,$other) = (0..8);
 my @frame = ( 3, 1, 2 ); # frm 0 -> blastfrm 3
                          # frm 1 -> blastfrm 1
                          # frm 2 -> blastfrm 2
-my %SEQlen;
+my (%SEQlen, %opened, $FHOUT);
 my @files = ();
 my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
           "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
@@ -3388,14 +3409,26 @@ my ($fixpos,$cf,$cr);
 # ARGVS
 use Getopt::Std;
 my %opts = ();
-getopts("o:",\%opts);
+getopts("o:a:",\%opts);
        # -o integer
        #    fix coords offset (so if target label is seq_10001_10300
        #    and we set "-o -1", we can set start offset to 10000)
+       # -a prefix_*_suffix
+       #    open a filehandle for each sequence...
 $fixpos = (defined($opts{o}) && $opts{o} =~ /^[+-]?\d+$/o) ? $opts{o} : 0;
 #
-&match_argv_num(\@ARGV,3);
-my ($chr, $seqln, @inputfiles) = @ARGV;
+my ($chr, $flg, $ofile, $seqln, @inputfiles);
+if (defined($opts{a})) {
+    $ofile = $opts{a};
+    $flg = 1;
+    &match_argv_num(\@ARGV,2);
+    ($seqln, @inputfiles) = @ARGV;
+    $chr = '.*';
+} else {
+    $flg = 0;
+    &match_argv_num(\@ARGV,3);
+    ($chr, $seqln, @inputfiles) = @ARGV;
+};
 foreach (my $r = 0; $r < scalar(@inputfiles); $r++) {
     $inputfiles[$r] =~ s%/$%%o;
 };
@@ -3418,16 +3451,19 @@ exit(0);
 <<swapHSPcoords.pl: process records>>=
 sub parse_gff() {
     my %errcnt = ( FIELD => 0, STRAND => 0, FRAME => 0 , SKIPPED => 0 );
-    print STDERR "#\n# Processing ".(scalar @inputfiles)." tblastx files\n#\n# ".
-             (sprintf("%8s %8s %8s  %s\n","#hsp","#hsp(+)","#hsp(-)","file"));
+    my $summary = 
+          "#\n# Processing ".(scalar @inputfiles)." tblastx files\n#\n# ".
+          (sprintf("%8s %8s %8s  %s\n","#hsp","#hsp(+)","#hsp(-)","file"));
     foreach my $fl (@inputfiles) {
         $cf = $cr = 0;
         open(TBXFL, "< $fl") || do {
             print STDERR "## $PROG ## SKIPPING: CANNOT READ from $fl\n";
             next;
         };
+        $n = 0;
         while (<TBXFL>) {
-            my (@l,@f,@t,$out,$offset);
+            my (@l,@f,@t,$out,$sqlen,$offset);
+            $c = '.';
             next if /^\s*$/o;
             next if /^\#/o;
             # /^\#/o && do {
@@ -3436,10 +3472,11 @@ sub parse_gff() {
             # };
             chomp;
             @l = split /\s+/og, $_, 9;
-                 # we are going to assume that first eigth fileds are OK
+                 # we are going to assume that first eigth fields are OK
             @f = split /\s*;\s+/og, $l[8];
             (scalar(@l) < 8) && do {
-                print STDERR "## QUERY-FIELDS NUMBER ERROR ($.): @l \n";
+                # print STDERR "## QUERY-FIELDS NUMBER ERROR ($.): @l \n";
+                $c = '#';
                 $errcnt{FIELD}++;
                 next;
             };
@@ -3448,39 +3485,85 @@ sub parse_gff() {
                 $errcnt{$out}++;
                 next;
             };
-            $t[$seq] =~ /^($chr)_(\d+)_\d+$/ || do {
-                print STDERR "#[$.]# SKIPPING FIELD $seq \!= $chr\n";
-                $errcnt{SKIPPED}++;
-                next;
+            if ($flg) {
+                if ($t[$seq] =~ /^(.*)_(\d+)_\d+$/o) {
+                    $t[$seq] = $1;
+                    $offset  = $2 + $fixpos;
+                } else {
+                    # print STDERR "#[$.]# SKIPPING FIELD $seq \!= $chr\n";
+                    $c = '-';
+                    $errcnt{SKIPPED}++;
+                    next;
+                };
+            } else {
+                if ($t[$seq] =~ /^($chr)_(\d+)_\d+$/) {
+                    $t[$seq] = $1;
+                    $offset  = $2 + $fixpos;
+                } else {
+                    # print STDERR "#[$.]# SKIPPING FIELD $seq \!= $chr\n";
+                    $c = '-';
+                    $errcnt{SKIPPED}++;
+                    next;
+                };
             };
-            $t[$seq] = $1;
-            $offset  = $2 + $fixpos;
-            print STDERR "#[$.]# ACCEPTING FIELD $t[$seq] == $chr -> $offset\n";
+            # print STDERR "#[$.]# $t[$seq] --> $offset\n";
+            if ($flg) {
+                 defined($SEQlen{$t[$seq]}) || do {
+                    # print STDERR "#[$.]# NO LENGTH SET for $t[$se]\n";
+                    $c = '!';
+                    $errcnt{SKIPPED}++;
+                    next;
+                 }; 
+                 $sqlen = $SEQlen{$t[$seq]};
+            } else { 
+                 $sqlen = $SEQlen{$chr};
+            };
+            # print STDERR "#[$.]# ACCEPTING FIELD $t[$seq] == $chr -> $offset\n";
+            $c = '+';
             $t[$src] = "tblastx";
             $t[$ftr] = "hsp";
             $t[$ori] += $offset;
             $t[$end] += $offset;
             $t[$sco] = $l[$sco];
             if ($t[$str] eq "-") {
-                $t[$frm] = $frame[(($SEQlen{$chr} - $t[$end] + 1) % 3)];
+                $t[$frm] = $frame[(($sqlen - $t[$end] + 1) % 3)];
                 $cr++;
             } else {
                 $t[$frm] = $frame[($t[$ori] % 3)];
                 $cf++;
             };
-            print STDOUT (join("\t", (@t[$seq..$frm]))).
+            if ($flg) {
+                unless (defined($opened{$seq})) {
+                    my $flnm;
+                    ($flnm = $ofile) =~ s/\_\*\_/$t[$seq]/;
+                    open(FH, "> $flnm");
+                    $opened{$seq} = *FH;
+                };
+                $FHOUT = $opened{$seq};
+            } else {
+                $FHOUT = *STDOUT;
+            };
+            print $FHOUT (join("\t", (@t[$seq..$frm]))).
                          "\tTarget \"$l[$seq]\" $l[$ori] $l[$end] ;".
                          "\tStrand $l[$str] ;\tFrame $l[$frm] ;\t$t[$other]\n";
             $g{sum}[$g{"$t[$str]$t[$frm]"}]++;
+        } continue {
+            &counter(++$n,$c);
         }; # while
+        &counter_end($n,$c);
         close(TBXFL);
-        printf STDERR "  %8s %8s %8s  %s\n",($cf+$cr),$cf,$cr,$fl;
+        (scalar(keys %opened) > 0) && do {
+            foreach my $k (keys %opened) {
+                close($opened{$seq});
+            };
+        }; 
+        $summary .= sprintf("  %8s %8s %8s  %s\n",($cf+$cr),$cf,$cr,$fl);
     }; # foreach
     $g{sum}[$g{"+"}] = $g{sum}[$g{"+1"}] + $g{sum}[$g{"+2"}] + $g{sum}[$g{"+3"}];
     $g{sum}[$g{"-"}] = $g{sum}[$g{"-1"}] + $g{sum}[$g{"-2"}] + $g{sum}[$g{"-3"}];
     $g{sum}[$g{"."}] = $g{sum}[$g{".1"}] + $g{sum}[$g{".2"}] + $g{sum}[$g{".3"}];
     $g{sum}[$g{"all"}] = $g{sum}[$g{"+"}] + $g{sum}[$g{"-"}];
-    print STDERR "# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
+    print STDERR "$summary# TOTAL ".$g{sum}[$g{"all"}]." HSPs on $chr: ".
                  $g{sum}[$g{"+"}]." forward, ".$g{sum}[$g{"-"}]." reverse, ".
                  $g{sum}[$g{"."}]." without strand.\n";
     foreach my $t (qw/ 1 2 3 /) {
@@ -6200,7 +6283,7 @@ use vars qw(
            $PLVER $PROG $PRGVER $USAGE $DATE $CDATE $USER $HOST
            $T $F @skip_next @exectime %_verbose
            $ERRFH %Messages %exit_codes $EXIT_REPORT_FILE
-           %CmdLineDefs %CmdLineOpts
+           %CmdLineDefs %CmdLineOpts $n $c $_cntN
            );
 
 use Exporter;
@@ -6215,6 +6298,7 @@ $VERSION = 1.00;
            &parse_cmdline %CmdLineDefs %CmdLineOpts
            &check_syscall_exit &the_end %exit_codes $EXIT_REPORT_FILE
            &match_argv_num &check_file &check_dir
+           &counter &counter_end $n $c $_cntN
            &min &max
            );
 @@EXPORT_OK = qw(
@@ -6229,6 +6313,7 @@ $VERSION = 1.00;
                                &program_started &program_finished 
                                &init_timer @exectime ) ],
            StringFill => [ qw( &fill_right &fill_left &fill_mid ) ],
+           Counter    => [ qw( &counter &counter_end $n $c $_cntN ) ],
            CheckFiles => [ qw( &check_file &check_dir ) ],
            ExitStatus => [ qw( &check_syscall_exit &the_end 
                                %exit_codes $EXIT_REPORT_FILE
@@ -6279,6 +6364,7 @@ if (defined($ENV{PSRF})) {
 <<global.pm: check exit status for sys calls>>
 <<global.pm: normalized exit>>
 <<global.pm: general functions>>
+<<Common PERL subs - Counter>>
 
 #
 # Exiting from "global" package
@@ -7889,7 +7975,7 @@ sub counter_end { # $_[0]~current_pos   $_[1]~char
 @
 
 <<Global Vars - Counter>>=
-my ($n,$c,$_cntN); # counter and char (for &counter function)
+my ($n,$c,$_cntN); # counter, char and width (for &counter function)
 @ %def $n $c $_cntN
 
 
@@ -7949,7 +8035,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.26 2002-05-02 19:32:02 jabril Exp $
+# $Id: humus.nw,v 1.27 2002-05-03 00:00:48 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
