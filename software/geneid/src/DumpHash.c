@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: DumpHash                                                     *
 *                                                                        *
-*   Hash table of dumpster used during backup of genes                   *
+*   Hash table of exons used during backup of genes                      *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,10 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: DumpHash.c,v 1.3 2001-02-07 17:28:45 eblanco Exp $  */
+/*  $Id: DumpHash.c,v 1.4 2001-12-18 15:34:47 eblanco Exp $  */
 
 #include "geneid.h"
 
+/* Maximum memory space to backup exons between 2 fragments of sequence */
 extern long MAXBACKUPEXONS;
 
 long MAXDUMPHASH;
@@ -37,8 +38,8 @@ void resetDumpHash(dumpHash* h)
 {
   long i;
   
-  MAXDUMPHASH = MAXBACKUPEXONS;
- 
+  MAXDUMPHASH = (long) (MAXBACKUPEXONS / HASHFACTOR);
+  
   for(i=0; i<MAXDUMPHASH; i++)
     h->T[i] = NULL;
   h->total = 0;
@@ -51,31 +52,32 @@ long fDump(exonGFF* E)
   long sum2;
   long total; 
   long i;
-
+  
   sum = (E->Frame * E->Acceptor->Position + E->Donor->Position); 
-
+  
   for(i=0, sum2=0; i < strlen(E->Type); i++)
     sum2 = (i+1) * E->Type[i] + sum2;
-
+  
   total = (sum + sum2 * E->Strand) % MAXDUMPHASH;
-   
+  
   return(total);
 }
 
-/* Store the new exon if it wasn't in hash table before */
-void setExonDumpHash(exonGFF* E, dumpHash *h)
+/* Save the new exon into the hash table */
+void setExonDumpHash(exonGFF* E, dumpHash* h)
 {
   dumpNode* p;
   dumpNode* n;
   long i;
-
+  
+  /* Computing hash value */
   i = fDump(E);
   
-  /* Alloc the new word */
+  /* Allocate the new node */
   if ((n = (dumpNode *)malloc(sizeof(dumpNode))) == NULL)
-    printError("Not enough space to hold a sinonimous exon");
+    printError("Not enough memory: dumpster node");
   
-  /* Filling the node */
+  /* Filling in the node with exon features */
   n->acceptor = E->Acceptor->Position;
   n->donor = E->Donor->Position;
   n->frame = E->Frame;
@@ -83,7 +85,7 @@ void setExonDumpHash(exonGFF* E, dumpHash *h)
   strcpy(n->type,E->Type);
 
   n->exon = E;
-
+  
   if(h->T[i] == NULL)
     {
       n->next = NULL;
@@ -102,8 +104,8 @@ void setExonDumpHash(exonGFF* E, dumpHash *h)
   h->total++;
 }
 
-/* Returns the wanted exon or NULL */ 
-exonGFF* getExonDumpHash(exonGFF* E, dumpHash *h)
+/* Finding an exon. Returns the address or NULL pointer */ 
+exonGFF* getExonDumpHash(exonGFF* E, dumpHash* h)
 {
   long i;
   int found=0;
@@ -121,25 +123,26 @@ exonGFF* getExonDumpHash(exonGFF* E, dumpHash *h)
       p = h->T[i];
       /* Searching until the first position free */
       while( p != NULL && !found )
-	{
-	  /* Searching on the sinonimous the wanted exon */
-	  if ((p->acceptor == E->Acceptor->Position) &&
-	      (p->donor == E->Donor->Position) &&
-	      (p->frame == E->Frame) &&
-	      (p->strand == E->Strand) &&
-	      (!strcmp(p->type,E->Type))  )
-	    {
-	      found = 1;
-	      exon = p->exon;
-	    }
-	  p = p->next;
-	}
-      if(!found)
-	exon = NULL;
+		{
+		  /* Searching on the sinonimous list the wanted exon */
+		  if ((p->acceptor == E->Acceptor->Position) &&
+			  (p->donor == E->Donor->Position) &&
+			  (p->frame == E->Frame) &&
+			  (p->strand == E->Strand) &&
+			  (!strcmp(p->type,E->Type))  )
+			{
+			  found = 1;
+			  exon = p->exon;
+			}
+		  p = p->next;
+		}
+      if (!found)
+		exon = NULL;
     }
   return(exon);
 }
 
+/* Free memory of hash nodes (sinonimous) */
 void freeDumpNodes(dumpNode* node)
 {
   if (node == NULL)
@@ -151,6 +154,7 @@ void freeDumpNodes(dumpNode* node)
     }
 }
 
+/* Free memory of the whole hash table (dumpster is ready to work) */
 void cleanDumpHash(dumpHash *h)
 {
   long i;
