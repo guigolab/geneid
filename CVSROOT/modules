@@ -27,10 +27,13 @@
 #
 # software CVS
 #
-gfftools      software/gfftools
 geneid        software/geneid
 sgp           software/sgp
 sggp          software/sggp
+#
+gfftools      software/gfftools
+gff2ps        software/gfftools/gff2ps
+gff2aplot     software/gfftools/gff2aplot
 #
 # users CVS
 #
