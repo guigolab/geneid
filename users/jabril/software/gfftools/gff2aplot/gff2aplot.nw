@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.20 2001-11-14 19:10:31 jabril Exp $
+% $Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.20 2001-11-14 19:10:31 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -312,13 +312,35 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 
 \begin{figure}[!ht]
 \begin{center}
-\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
+\fbox{\parbox[c][6cm][c]{\linewidth}{\hfill}}
 % \includegraphics[]{}
 \caption[``Filter'' mode of {\prog}.]{\label{fig:filtermode} Input, output and main code blocks are represented in this flowchart for the ``Filter'' mode of {\prog}.}
 \end{center}
 \end{figure}
 
+\subsctn{Basic goals}
+
+\begin{itemize}
+\item I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain, it will be more portable too. 
+
+\item Using {\noweb} I pretend to improve the overall design and to open the code to other developers. From this {\LaTeX} document it should be possible to extract all the scripts and files needed for the current implementation.
+
+\item \ldots 
+\end{itemize}
+
 \subsctn{Future extensions}
+
+\begin{itemize}
+\item An interactive (using text menus on xterms) mode.
+
+\item A graphical interface (using [[perlTK]] maybe).
+
+\item Web/CGI mode, looping through the interactive mode perhaps.
+
+\item Move some code parts to perl packages, to share them with future implementations of [[gff2ps]]... (if we have time)
+
+\item \ldots
+\end{itemize}
 
 \label{todo:AAB}
 <<HIDE: new defs TODO>>=
@@ -336,16 +358,6 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 \caption[Future modes of {\prog}.]{\label{fig:othermodes} Input, output and main code blocks are represented in this flowchart for the ``Interactive'', ``Graphic'' and ``Web/CGI'' versions of {\prog}.}
 \end{center}
 \end{figure}
-
-\subsctn{Basic goals}
-
-\begin{itemize}
-\item I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain, it will be more portable too. 
-
-\item Using {\noweb} I pretend to improve the overall design and to open the code to other developers.
-
-\item \ldots 
-\end{itemize}
 
 \subsctn{TO DO: Unfinished stuff for current release}
 
@@ -476,9 +488,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.20 $', #'
-     '$Date: 2001-11-14 19:10:31 $', #'
-     '$Id: gff2aplot.nw,v 1.20 2001-11-14 19:10:31 jabril Exp $', #'
+     '$Revision: 1.21 $', #'
+     '$Date: 2001-11-16 17:54:13 $', #'
+     '$Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -585,7 +597,8 @@ The functions described in this section process each GFF-record, each custom def
 
 \label{todo:BBB}
 <<HIDE: new defs TODO>>=
-\def\todoBBB{Diagram for figure~\ref{fig:customvarstruc}.} % todoBBB
+\def\todoBBB{Diagram for figure~\ref{fig:customvarstruc}:
+Structure of main customization variables and their relationships.} % todoBBB
 @
 <<HIDE: TODO>>=
 \todoitem{\todoBBB}{todo:BBB}
@@ -1469,10 +1482,10 @@ Those units are used in layout/font-size lengths setting:
 ($cm2pt,$mm2pt,$in2pt) = (28.35,2.835,72);
 @ 
 <<units exchange functions>>=
-pt  => sub { return $_ },
-mm  => sub { return $_ * $mm2pt },
-cm  => sub { return $_ * $cm2pt },
-in  => sub { return $_ * $in2pt },
+"pt"  => sub ($) { return $_[0] },
+"mm"  => sub ($) { return $_[0] * $mm2pt },
+"cm"  => sub ($) { return $_[0] * $cm2pt },
+"in"  => sub ($) { return $_[0] * $in2pt },
 @ 
 
 Those allow to recover base-pair nucleotide coords for sequence related calculations:
@@ -1481,10 +1494,10 @@ Those allow to recover base-pair nucleotide coords for sequence related calculat
 ($kilo,$mega,$giga) = (10**3,10**6,10**9);
 @
 <<units exchange functions>>=
-bp  => sub { return $_ },
-kbp => sub { return $_ * $kilo },
-mbp => sub { return $_ * $mega },
-gbp => sub { return $_ * $giga },
+"bp"  => sub ($) { return $_[0] },
+"kbp" => sub ($) { return $_[0] * $kilo },
+"mbp" => sub ($) { return $_[0] * $mega },
+"gbp" => sub ($) { return $_[0] * $giga },
 @
 
 As you can note, we have defined a function to convert from gigabases, but at this moment {\ps} can only handle numbers smaller than $2.1*10^9$ and {\prog} is not ready to workaround that. [[pt]] and [[bp]] have been introduced for consistency, so the functions using those units can be more general and avoid to check special cases, then whole program code will be simpler.
@@ -1508,15 +1521,6 @@ BOOLEAN => sub { # Value, varName, Lowercase
       return $F;
   },
 @ %def {BOOLEAN}
-
-<<HIDE: variable value checking>>=
-$_test eq 'BOOLEAN' && do {
-    $_t =~ /^(1|on|t(rue)|y(es))$/o && ($$_val = $T, return $T);
-    $_t =~ /^(0|off|f(alse)|n(o))$/o && ($$_val = $F, return $T);
-    &warn('NOT_A_BOOLEAN',$F,$_var);
-    return $F;
-};
-@
 
 <<warnings - parsing custom files>>=
 NOT_A_BOOLEAN =>
@@ -1556,21 +1560,14 @@ Having a 'STRING' implies to replace/protect those characters that will produce 
 <<variable value checking>>=
 STRING => sub { # Value
       my ($_v,undef,undef) = @_;
-      $$_v =~ s{[\\]}{\\134}og;
-      $$_v =~ s{[\(]}{\\050}og;
-      $$_v =~ s{[\)]}{\\051}og;
+      defined($$_v) && do {
+          $$_v =~ s{[\\]}{\\134}og;
+          $$_v =~ s{[\(]}{\\050}og;
+          $$_v =~ s{[\)]}{\\051}og;
+      }; 
       return $T;
   },
 @ %def {STRING}
-
-<<HIDE: variable value checking>>=
-$_test eq 'STRING' && do {
-    $$_val =~ s{[\\]}{\\134}og;
-    $$_val =~ s{[\(]}{\\050}og;
-    $$_val =~ s{[\)]}{\\051}og;
-    return $T;
-};
-@
 
 <<Common Routines>>=
 sub tostring() {
@@ -1624,29 +1621,6 @@ REAL => sub { # Value, varName
   },
 @ %def {NATURAL} {INTEGER} {FLOAT} {REAL}
 
-<<HIDE: variable value checking>>=
-$_test eq 'NATURAL' && do {
-    $$_val =~ /^\d+$/o && return $T;
-    &warn('NOT_A_NATURAL',$F,$_var);
-    return $F;
-};
-$_test eq 'INTEGER' && do {
-    $$_val =~ /^[+-]?\d+$/o && return $T;
-    &warn('NOT_AN_INTEGER',$F,$_var);
-    return $F;
-};
-$_test eq 'FLOAT' && do {
-    $$_val =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/o && return $T;
-    &warn('NOT_A_FLOAT',$F,$_var);
-    return $F;
-};
-$_test eq 'REAL' && do {
-    $$_val =~ /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/o && return $T;
-    &warn('NOT_A_REAL',$F,$_var);
-    return $F;
-};
-@ %$
-
 <<warnings - parsing custom files>>=
 NOT_A_NATURAL =>
   $Warn."\"\%s\" variable is not a positive integer.\n",
@@ -1675,16 +1649,6 @@ COLOR => sub { # Value, varName, Lowercase
   },
 @ %def {COLOR}
 
-<<HIDE: variable value checking>>=
-$_test eq 'COLOR' && do { # lc
-	$_t =~ /^(b(ack)?|f(ore)?)g(round)?(color)?/o &&
-		($$_val = $_t, return $T);
-	defined($COLORS{$_t}) && ($$_val = $_t, return $T);
-    &warn('NOT_A_COLOR',$F,$_t,$_var);
-    return $F;
-};
-@
-
 <<HIDE: DONE>>=
 \doneitem{20011107}{Set fg/bg multiple strings to a single color name such fgcolor/bgcolor for later use in the whole program (PS code too).}
 @
@@ -1708,15 +1672,6 @@ FONT => sub { # Value, varName, Lowercase
       return $F;
   },
 @ %def {FONT}
-
-<<HIDE: variable value checking>>=
-$_test eq 'FONT' && do { # lc
-    defined($Fonts{$_t}) && 
-        ($$_val = $Fonts{$_t}, return $T);
-    &warn('NOT_A_FONT',$F,$_t,$_var);
-    return $F;
-};
-@
 
 <<warnings - parsing custom files>>=
 NOT_A_FONT =>
@@ -1753,21 +1708,6 @@ Font sizes can be given in points, centimeters or inches. If no units are provid
 \doneitem{20011107}{Assign the proper PS unit multiplier. Functions to convert to points/cm/inches, and a hash variable to reformat the values: [[%units]] ([[$units{pt} = ""; $units{cm} = " cm"; $units{mm} = " mm"; $units{in} = " in"]]).
 It has been solved by returning a two elements array having the numeric value and the corresponding unit (setting to some default if it is not given).}
 \doneitem{20011107}{Can we do the same for SEQ_UNIT ? (section~\ref{sec:DNABASE}).}
-@
-
-<<HIDE: variable value checking>>=
-$_test eq 'PS_UNIT' && do {
-    $_t =~ /^(?:\d+(?:\.\d*)?|\.\d+)
-            (pt|cm|mm|in(ches)?|points|(centi|mili)meters)?$/ox && 
-        ($$_val = $_t, return $T);
-    &warn('NOT_A_FONTSIZE',$F,$_t,$_var);
-    return $F;
-};
-@
-
-<<HIDE: warnings - parsing custom files>>=
-NOT_A_FONTSIZE =>
-  $Warn."\"\%s\" is not a valid font-size for \"\%s\" variable.",
 @
 
 
@@ -1807,14 +1747,6 @@ PAGE => sub { # Value, varName, Lowercase
       return $F;
   },
 @ %def {PAGE}
-
-<<HIDE: variable value checking>>=
-$_test eq 'PAGE' && do { # lc
-	defined($FORMATS{$_t}) && ($$_val = $_t, return $T);
-    &warn('NOT_A_PAGE',$F,$_t,$_var);
-    return $F;
-};
-@
 
 <<warnings - parsing custom files>>=
 NOT_A_PAGE =>
@@ -1861,15 +1793,6 @@ NOT_A_NUMBER =>
 NOT_A_DNAUNIT =>
   $Warn."\"\%s\" variable requires nucleotide units.\n".
   $spw." \"\%s\" is not valid (units must be in Gb, Mb, Kb, or bases).\n",
-@
-
-<<HIDE: variable value checking>>=
-$_test eq 'SEQ_UNIT' && do { # lc
-    $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)([gmk]?b(ases)?)?$/o && 
-        ($$_val = $_t, return $T);
-    &warn('NOT_A_DNAUNIT',$F,$_var,$_t);
-    return $F;
-};
 @
 
 
@@ -2006,12 +1929,17 @@ RANGE_NOTOK =>
   $spw." Format must be: \"\%s=<lower-value>..<upper-value>\" \n",
 @ 
 
-<<HIDE: variable value checking>>=
-$_test eq 'RANGE' && do {
-    return $T;
-};
-@
+\subsubsctn{Plot features}
 
+<<variable value checking>>=
+RIBBON => sub { # Value, varName, Lowercase
+      my ($_v,$_n,$_l) = @_;
+      defined($$_v) && do {
+          return $$_v;
+      };
+      return undef;
+  },
+@ %def {RIBBON}
 
 \newpage
 
@@ -2965,7 +2893,7 @@ LDE:
 The following variables define the boundary/clipping coordinates for each sequence, so you can select a region to be displayed in the {\ps} output.
 
 <<default layout vars values>>=
-x_sequence_coords          => { TYPE => 'DNARANGE', VALUE => undef  },
+x_sequence_coords          => { TYPE => 'SEQRANGE', VALUE => undef  },
 x_sequence_start           => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 x_sequence_end             => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {x_sequence_coords} {x_sequence_start} {x_sequence_end}
@@ -3043,7 +2971,7 @@ LDE:
  
 
 <<default layout vars values>>=
-y_sequence_coords          => { TYPE => 'DNARANGE', VALUE => undef  },
+y_sequence_coords          => { TYPE => 'SEQRANGE', VALUE => undef  },
 y_sequence_start           => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 y_sequence_end             => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {y_sequence_coords} {y_sequence_start} {y_sequence_end}
@@ -3122,7 +3050,7 @@ LDE:
 
 
 <<default layout vars values>>=
-x_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => undef  },
+x_sequence_zoom            => { TYPE => 'SEQRANGE', VALUE => undef  },
 x_sequence_zoom_start      => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 x_sequence_zoom_end        => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {x_sequence_zoom} {x_sequence_zoom_start} {x_sequence_zoom_end}
@@ -3177,7 +3105,7 @@ LDE:
 @
 
 <<default layout vars values>>=
-y_sequence_zoom            => { TYPE => 'DNARANGE', VALUE => undef  },
+y_sequence_zoom            => { TYPE => 'SEQRANGE', VALUE => undef  },
 y_sequence_zoom_start      => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 y_sequence_zoom_end        => { TYPE => 'SEQ_UNIT', VALUE => undef  },
 @ %def {y_sequence_zoom} {y_sequence_zoom_start} {y_sequence_zoom_end}
@@ -3234,7 +3162,9 @@ LDE:
 zoom                       => { TYPE => 'BOOLEAN', VALUE => $F     },
 zoom_area                  => { TYPE => 'BOOLEAN', VALUE => $F     },
 zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F     },
+zoom_area_mark_width       => { TYPE => 'PS_UNIT', VALUE => '2pt'  },
 zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
+zoom_area_fill_color       => { TYPE => 'COLOR'  , VALUE => undef  },
 @ %def {zoom} {zoom_area} {zoom_marks} {zoom_area_mark_color}
 <<command-line options>>=
 "Z|zoom"                 => \$CmdLineVars{LAYOUT}{"zoom"},
@@ -3297,11 +3227,30 @@ SDE:
 LDE: 
 
 ###EOR###
-ORD: 76
+ORD: 77
+SEC: LAYOUT
+SUB: Zoom
+OPT: zoom_area_mark_width
+DEF: |2pt|
+PAR: <length>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 78
 SEC: LAYOUT
 SUB: Zoom
 OPT: zoom_area_mark_color
 DEF: |lightred|
+PAR: <color>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 78
+SEC: LAYOUT
+SUB: Zoom
+OPT: zoom_area_fill_color
 PAR: <color>
 SDE: 
 LDE: 
@@ -3557,11 +3506,12 @@ LDE:
 
 
 <<default layout vars values>>=
-show_ribbons               => { TYPE => 'RIBBON',  VALUE => undef  },
+show_ribbons               => { TYPE => 'BOOLEAN', VALUE => $F     },
+ribbons_style              => { TYPE => 'RIBBON',  VALUE => undef  },
 show_grid                  => { TYPE => 'BOOLEAN', VALUE => $F     },
 @ %def {show_ribbons} {show_grid}
 <<command-line options>>=
-"K|show-ribbons=s"   => \$CmdLineVars{LAYOUT}{"show_ribbons"}, # Show_Ribbons (NLRB)
+"K|show-ribbons=s"   => \$CmdLineVars{LAYOUT}{"ribbons_style"}, # Show_Ribbons (NLRB)
 "G|show-grid"        => \$CmdLineVars{LAYOUT}{"show_grid"}, # Display_GRID
 # "g"    => \$CmdLineVars{LAYOUT}{""}, # Display_GRID
 @ 
@@ -4211,16 +4161,22 @@ Y_Sequence_NAME  /
 We have to deal with two basic formats, the \textsl{standard} General Feature Format (GFF) and the derived \textsl{aplot} format, the former having two versions with some minor differences at field level. We are going to asume the record formats shown in the table~\ref{tbl:formats} for the input files.
 
 
-\label{todo:EEA}
+\label{todo:EEA}\label{todo:EEB}
 <<HIDE: new defs TODO>>=
 \def\todoEEA{
-A flow chart of the GFF record parsing process.
+A flow chart of the GFF record parsing process (figure~\ref{fig:parsingGFF}).
 } % todoEEA
+\def\todoEEB{
+Move this section to a perl package: \\ suggesting [[gfftools::parser]].
+} % todoEEB
 @
 <<HIDE: TODO>>=
 \todoitem{\todoEEA}{todo:EEA}
+\todoitem{\todoEEB}{todo:EEB}
 @
-\todo{ \item \todoEEA } % todo
+\todo{ \item \todoEEA 
+       \item \todoEEB } % todo
+
 
 \begin{figure}[!t]
 \begin{center}
@@ -4384,9 +4340,9 @@ sub fieldscheck() {
     my ($seqname,$start,$end) = @$list[0,3,4]; 
                               # ($list->[0],$list->[3],$list->[4]);
     (&fcolon($seqname) && &fcolon($start) && &fcolon($end)) && do {
-        return &load_aplot(\@$list);
+        return &load_aplot($list);
     };
-    return &load_gff(\@$list);
+    return &load_gff($list);
 } # fieldscheck
 @ %def &fieldscheck
 
@@ -4494,9 +4450,6 @@ sub check_gff_fields() {
 } # check_gff_fields
 @ %def &check_gff_fields
 
-Once fields checking is done, we proceed to load the data structure defined for the GFF records as '[[%GFF_DATA]]' hash. \label{sec:GFFhsh}
-The outline of the inner structure of that variable is shown in table~\ref{tbl:gffdata}.
-
 \begin{table}[!t]
 \begin{center}
 \input tables/DataStructure_GFF.tex
@@ -4578,140 +4531,6 @@ $ \begin{array}{r@{\quad=\quad}l}
 @ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-<<Parsing Input Data>>=
-sub add_gff_record() {
-    my $_gff = $_[0];
-    <<add align records to aplot DS>>
-    my ($VarName,$Counter,$Type,$first_fld,$t,$myfunc);
-    $myfunc = \&load_gff_var;
-    ($VarName,$Counter,$Type) = (
-        \%GFF_DATA,
-        \$seq_COUNT,
-        'SEQUENCE' );
-    &load_var($seqname,$VarName,$Counter,$Type,$myfunc);
-    ($VarName,$Counter,$Type) = (
-        \%{$VarName->{$seqname}[$_element]},
-        \$$VarName{$seqname}[$_counter][$_elemNum],
-        'SOURCE' );
-    &load_var($source,$VarName,$Counter,$Type,$myfunc);
-    ($VarName,$Counter,$Type) = ( 
-        \%{$VarName->{$source}[$_element]},
-        \$$VarName{$source}[$_counter][$_elemNum],
-        'STRAND' );
-    &load_var($strand,$VarName,$Counter,$Type,$myfunc);
-    ($VarName,$Counter,$Type) = (
-        \%{$VarName->{$strand}[$_element]},
-        \$$VarName{$strand}[$_counter][$_elemNum],
-        'GROUP' );
-    &load_var($group,$VarName,$Counter,$Type,$myfunc);
-    <<adding new feature elements>>
-    return;
-} # add_gff_record
-@ %def &add_gff_record
-
-First we load the plain GFF attributes for a given record, when such record is defining a vector we add a new element to the feature anonymous array. That element is a list of the scores provided by the '[[&load_GFF_vector]]' function defined in section~\ref{sec:loadvector}, page~\pageref{sec:loadvector}.
-
-<<adding new feature elements>>=
-$first_fld = ($_gff eq $VECTOR) ? 'V' : 'G';
-push @{$VarName->{$group}[$_element]},
-    [
-      $first_fld,      # Type == plain GFF or vector
-	  {},              # Properties hash, now empty
-      $feature,        # GFF feature (3rd field)
-      $label,          # Record ID if exist, order# otherwise
-      $start, $end, $score, $frame,
-    ];
-$t = ++$VarName->{$group}[$_counter][$_elemNum];
-&set_var_defaults('FEATURE',
-                  \%{$VarName->{$group}[$_element][($t-1)][$_prop]});
-$_gff eq $VECTOR && do {
-	@{$VarName->{$group}[$_element][8]} = [ @vect_ary ];
-};
-@ 
-
-If the standard GFF alignment format is found, we process those records as if they were aplot records, so that we have to set all the variables required to fill such data structure ('[[&add_aplot_record]]' is described in section~\ref{func:loadalnvar}, page~\pageref{func:loadalnvar}).
-
-<<add align records to aplot DS>>=
-$_gff eq $ALIGN && do {
-    &add_aplot_record;
-    return;
-};
-@ 
-
-We declare here auxiliary variables containing the array indexes used in the anonymous arrays defined within the main variables containing all the GFF data ([[%GFF_DATA]], that was declared in section~\ref{sec:GFFhsh}, page~\pageref{sec:GFFhsh}), and the alignment data ([[%ALN_DATA]], that was declared in section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}).
-
-<<Pre-Declared Vars>>=
-$aln_COUNT $seq_COUNT
-$_counter $_prop $_element
-$_order $_elemNum $_ori $_end $_nori $_nend
-$_fttype $_ftprop $_ftname $_ftid
-         $_ftori  $_ftend  $_ftsco  $_ftfrm
-         $_ftnori $_ftnend $_ftnsco $_ftnfrm
-@ 
-
-<<Global Vars>>=
-($_counter,$_prop,$_element) = (0..2);
-($_order,$_elemNum,$_ori,$_end,$_nori,$_nend) = (0..5);
-($_fttype,$_ftprop,$_ftname,$_ftid,
- $_ftori, $_ftend, $_ftsco, $_ftfrm,
- $_ftnori,$_ftnend,$_ftnsco,$_ftnfrm) = (0..11);
-@ 
-
-\label{func:loadgffvar}
-<<Parsing Input Data>>=
-sub load_var() {
-    my ($_value,$_var,$_cnt,$_type,$_frf) = @_;
-	defined($$_var{$_value}) || do {
-		$$_var{$_value}[$_counter] = &$_frf(++$$_cnt);
-		&set_var_defaults($_type,\%{$$_var{$_value}[$_prop]});
-	};
-	return;
-} # load_var
-@ %def &load_var
-%$
-
-<<Parsing Input Data>>=
-sub load_gff_var() { return [ $_[0], 0, 0, 0 ]; }
-sub load_aln_var() { return [ $_[0], 0, 0, 0, 0, 0 ]; }
-@ %def &load_gff_var &load_aln_var
-
-<<HIDE: Parsing Input Data>>=
-sub load_gff_var() {
-    my ($_value,$_var,$_cnt,$_type) = @_;
-	defined($$_var{$_value}) || do {
-		$$_var{$_value}[$_counter] = [ ++$$_cnt, 0, 0, 0 ];
-		&set_var_defaults($_type,\%{$$_var{$_value}[$_prop]});
-	};
-	return;
-} # load_gff_var
-@ %def &load_gff_var
-%$
-
-We initialize properties for each new element as references to '[[%DefaultVars]]' given level corresponding values. 
-
-<<Parsing Input Data>>=
-sub set_var_defaults() {
-    my ($sect,$varhash) = @_;
-    <<P.I.D: set reference to all properties>>
-	return;
-} # load_gff_var
-@ %def &load_gff_var
-
-We can set default properties of GFF elements in two ways: making a reference to the default properties hash for that element, as shown in the [[<<P.I.D: set reference to all properties>>]], or reference each variable from the properties hash to a new key, as described in [[<<P.I.D: set reference for each property>>]].
-
-\label{sec:DATAdefaultvars}
-<<P.I.D: set reference to all properties>>=
-$$varhash = \%{$Defaults{$sect}};
-@
-
-<<P.I.D: set reference for each property>>=
-foreach my $nm (keys %{$DefaultVars{$sect}}) {
-    $$varhash{$nm} = \$DefaultVars{$sect}{$nm}{'VALUE'};
-}; # foreach $nm
-@
-
-We choose the first approach, and we will replace the hash reference by the keys with references to defaults if needed when setting variables from custom parameters for a given GFF element (see section~\ref{sec:mapcustoms}, page~\pageref{sec:mapcustoms}). That choice will save memory used by the elements properties if user does not customize any of the element properties, but requires a temporary default variable (due to the special structure of the [[%DefaultVars]] hash which contains not only default variable values but also variable type), named [[%Defaults]] and defined in section~\ref{sec:tmpdefaults}, page~\pageref{sec:tmpdefaults}.
-
 
 \subsctn{Parsing APLOT format}
 \label{sec:parseAPLOT}
@@ -4723,15 +4542,18 @@ sub load_aplot() { # if errors found > return $noGFF
     my ($list) = @_;
     my $w_gff;
     ($seqname_1,$seqname_2,$source_1,$source_2,$feature_1,$feature_2,
-     $start_1,$start_2,$end_1,$end_2,$score_1,$score_2,
+     $start_1,$start_2,$end_1,$end_2,
      $strand_1,$strand_2,$frame_1,$frame_2) = 
-     &remove_colon(@$list[0,1,2,3,4,5,6,7]);
+     &remove_colon(@$list[0,1,2,3,4,6,7]);
+    ($score_1,$score_2) = ($list->[5], undef);
     $w_gff = &load_grouping($F,$list->[8]);
     &check_aplot_fields($w_gff) || ($w_gff=$noGFF);
     return $w_gff;
 } # load_aplot
 @ %def &load_aplot
 %$
+
+We reserve [[$score_2]] for other scores than can be passed, we may have bit-scores in '[[score]]' field (so [[$score_1]] will be set to that) and alignment-scores in a tag-value pair found in extra data from grouping fields (we will use them to set [[$score_2]]), or viceversa. Although that could happen, we initialize [[$score_2]] to an undefined value.
 
 <<Global Vars>>=
 my ($seqname_1,$seqname_2,
@@ -4805,7 +4627,7 @@ sub check_aplot_fields() {
     &check_coords($start_1,$end_1,$start_2,$end_2) || (return $F);
     &check_strand($strand_1,$strand_2) || (return $F);
     &check_frame($frame_1,$frame_2) || (return $F);
-    &add_aplot_record($_[0]);
+    &add_gff_record($_[0]);
     return $T; 
 } # check_aplot_fields
 @ %def &check_aplot_fields
@@ -4820,7 +4642,8 @@ sub check_aplot_fields() {
 \label{todo:ELA}
 <<HIDE: new defs TODO>>=
 \def\todoELA{
-Define DATA STRUCTURE for [[%ALN_DATA]] and include a figure if differs from [[%GFF_DATA]] definition.
+DATA STRUCTURE for [[%ALN_DATA]] was defined:
+Include a figure if differs from [[%GFF_DATA]] definition (table~\ref{tbl:alndata}).
 } % todoELA
 @
 <<HIDE: TODO>>=
@@ -4834,22 +4657,23 @@ Define DATA STRUCTURE for [[%ALN_DATA]] and include a figure if differs from [[%
 @
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+\subsctn{Loading records to GFF/ALN hashes}
+
 <<HIDE: DONE>>=
 \doneitem{20011113}{Append a new record to the variable defined for APLOT records.}
 @
 
+Once fields checking is done, we proceed to load the data structure defined for the GFF records or for the ALIGNMENT ones, we have merged the loading functions for both record types in the current version because they shared many common structures. 
+
+In the first case we have to add the new record into '[[%GFF_DATA]]' hash, the outline of the inner structure of that variable is shown in table~\ref{tbl:gffdata}, page~\pageref{tbl:gffdata}. \label{sec:GFFhsh}
+On the other hand, ALIGMENT records need a pre-processing of some of the fields before being ready to fill '[[%ALN_DATA]]' hash, table~\ref{tbl:alndata} in page~\pageref{tbl:alndata} summarizes the differences between this record type and the GFF one. \label{sec:ALNhsh}
+
 <<Parsing Input Data>>=
-sub add_aplot_record() {
-    my ($VarName,$Counter,$Type,$t,$myfunc);
-    $myfunc = \&load_aln_var;
-    ($VarName,$Counter,$Type) = (
-        \%ALN_DATA,
-        \$aln_COUNT,
-        'SEQUENCE' );
-    $seqname = join($;, $seqname_1, $seqname_2);
-    $source  = join($;, $source_1,  $source_2 );
-    $strand  = join($;, $strand_1,  $strand_2 );
-    $feature = join($;, $feature_1, $feature_2);
+sub add_gff_record() {
+    my $_gff = $_[0];
+    my ($VarName,$Counter,$Type,$isaln,$myfunc,$t);
+    <<select GFF or ALN settings>>
     &load_var($seqname,$VarName,$Counter,$Type,$myfunc);
     ($VarName,$Counter,$Type) = (
         \%{$VarName->{$seqname}[$_element]},
@@ -4866,40 +4690,132 @@ sub add_aplot_record() {
         \$$VarName{$strand}[$_counter][$_elemNum],
         'GROUP' );
     &load_var($group,$VarName,$Counter,$Type,$myfunc);
-    <<adding new alignment elements>>    
+    <<adding new feature elements>>
     return;
-} # add_aplot_record
-@ %def &add_aplot_record
-%$
+} # add_gff_record
+@ %def &add_gff_record
 
-<<adding new alignment elements>>=
-push @{$VarName->{$group}[$_element]},
-    [
-      'A',       # Type == plain GFF
-	  {},        # Properties hash, now empty
-      $feature, # GFF feature (3rd field)
-      $label,    # Record ID if exist, order# otherwise
-      $start_1, $end_1, $score_1, $frame_1,
-      $start_2, $end_2, $score_2, $frame_2,
-    ];
+If the standard GFF alignment format is found, we process those records as if they were aplot records, so that we have to set all the variables required to fill such data structure. We solve that by setting the same variables when loading those standard GFF alignment records as we do when loading aplot records, then they can share the same processes that are switched on by [[$isaln]].
+% ('[[&add_aplot_record]]' is described in section~\ref{func:loadalnvar}, page~\pageref{func:loadalnvar})
+
+<<select GFF or ALN settings>>=
+$isaln = ($_gff =~ /$ALIGN|$APLOT|$APLOT_NOGP/o) ? $T : $F;
+ISALN: {
+    $isaln && do {
+        $myfunc = \&load_aln_var;
+        ($VarName,$Counter,$Type) = (
+            \%ALN_DATA,
+            \$aln_COUNT,
+            'SEQUENCE' );
+        $seqname = join($;, $seqname_1, $seqname_2);
+        $source  = join($;, $source_1,  $source_2 );
+        $strand  = join($;, $strand_1,  $strand_2 );
+        $feature = join($;, $feature_1, $feature_2);
+        last ISALN;
+    }; # $isaln
+    $myfunc = \&load_gff_var;
+    ($VarName,$Counter,$Type) = (
+        \%GFF_DATA,
+        \$seq_COUNT,
+        'SEQUENCE' );
+}; # ISALN
+@ 
+
+First we load the plain GFF attributes for a given record, when such record is defining a vector we add a new element to the feature anonymous array. That element is a list of the scores provided by the '[[&load_GFF_vector]]' function defined in section~\ref{sec:loadvector}, page~\pageref{sec:loadvector}.
+
+<<adding new feature elements>>=
+LDALN: {
+    $isaln && do {
+        push @{$VarName->{$group}[$_element]},
+            [
+              'A',       # Type == ALIGNMENT
+        	  {},        # Properties hash, now empty
+              $feature,  # GFF feature (3rd field)
+              $label,    # Record ID if exist, order# otherwise
+              $start_1, $end_1, $score_1, $frame_1,
+              $start_2, $end_2, $score_2, $frame_2,
+            ];
+        last LDALN;
+    }; # $isaln
+    my $first_fld = ($_gff eq $VECTOR) ? 'V' : 'G';
+    push @{$VarName->{$group}[$_element]},
+        [
+          $first_fld,      # Type == plain GFF or vector
+    	  {},              # Properties hash, now empty
+          $feature,        # GFF feature (3rd field)
+          $label,          # Record ID if exist, order# otherwise
+          $start, $end, $score, $frame,
+        ];
+    $_gff eq $VECTOR && do {
+    	@{$VarName->{$group}[$_element][8]} = [ @vect_ary ];
+    };
+}; # LDALN
 $t = ++$VarName->{$group}[$_counter][$_elemNum];
 &set_var_defaults('FEATURE',
                   \%{$VarName->{$group}[$_element][($t-1)][$_prop]});
 @ 
 
-\label{func:loadalnvar}
+We declare here auxiliary variables containing the array indexes used in the anonymous arrays defined within the main variables containing all the GFF data ([[%GFF_DATA]], that was declared in section~\ref{sec:GFFhsh}, page~\pageref{sec:GFFhsh}), and the alignment data ([[%ALN_DATA]], that was declared in section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}).
 
-<<HIDE: Parsing Input Data>>=
-sub load_aln_var() {
-    my ($_value,$_var,$_cnt,$_type) = @_;
+<<Pre-Declared Vars>>=
+$aln_COUNT $seq_COUNT
+$_counter $_prop $_element
+$_order $_elemNum $_ori $_end $_nori $_nend
+$_fttype $_ftprop $_ftname $_ftid
+         $_ftori  $_ftend  $_ftsco  $_ftfrm
+         $_ftnori $_ftnend $_ftnsco $_ftnfrm
+@ 
+
+<<Global Vars>>=
+($_counter,$_prop,$_element) = (0..2);
+($_order,$_elemNum,$_ori,$_end,$_nori,$_nend) = (0..5);
+($_fttype,$_ftprop,$_ftname,$_ftid,
+ $_ftori, $_ftend, $_ftsco, $_ftfrm,
+ $_ftnori,$_ftnend,$_ftnsco,$_ftnfrm) = (0..11);
+@ 
+
+<<Parsing Input Data>>=
+sub load_var() {
+    my ($_value,$_var,$_cnt,$_type,$_frf) = @_;
 	defined($$_var{$_value}) || do {
-		$$_var{$_value}[$_counter] = [ ++$$_cnt, 0, 0, 0, 0, 0 ];
+		$$_var{$_value}[$_counter] = &$_frf(++$$_cnt);
 		&set_var_defaults($_type,\%{$$_var{$_value}[$_prop]});
 	};
 	return;
-} # load_aln_var
-@ %def &load_aln_var
+} # load_var
+@ %def &load_var
 %$
+
+\label{func:loadgffvar} \label{func:loadalnvar}
+<<Parsing Input Data>>=
+sub load_gff_var() { return [ $_[0], 0, 0, 0 ]; }
+sub load_aln_var() { return [ $_[0], 0, 0, 0, 0, 0 ]; }
+@ %def &load_gff_var &load_aln_var
+
+We initialize properties for each new element as references to '[[%DefaultVars]]' given level corresponding values. 
+
+<<Parsing Input Data>>=
+sub set_var_defaults() {
+    my ($sect,$varhash) = @_;
+    <<P.I.D: set reference to all properties>>
+	return;
+} # set_var_defaults
+@ %def &set_var_defaults
+
+We can set default properties of GFF elements in two ways: making a reference to the default properties hash for that element, as shown in the [[<<P.I.D: set reference to all properties>>]], or reference each variable from the properties hash to a new key, as described in [[<<P.I.D: set reference for each property>>]].
+
+\label{sec:DATAdefaultvars}
+<<P.I.D: set reference to all properties>>=
+# $$varhash = \%{$Defaults{$sect}};
+@
+
+<<P.I.D: set reference for each property>>=
+foreach my $nm (keys %{$DefaultVars{$sect}}) {
+    $$varhash{$nm} = \$DefaultVars{$sect}{$nm}{'VALUE'};
+}; # foreach $nm
+@
+
+We choose the first approach, and we will replace the hash reference by the keys with references to defaults if needed when setting variables from custom parameters for a given GFF element (see section~\ref{sec:mapcustoms}, page~\pageref{sec:mapcustoms}). That choice will save memory used by the elements properties if user does not customize any of the element properties, but requires a temporary default variable (due to the special structure of the [[%DefaultVars]] hash which contains not only default variable values but also variable type), named [[%Defaults]] and defined in section~\ref{sec:tmpdefaults}, page~\pageref{sec:tmpdefaults}.
 
 
 \subsctn{Parsing grouping attributes}
@@ -6004,8 +5920,8 @@ Now we compute the tickmark steps for the nucleotide scale of the shortest edge 
 We explored several values of $\lambda$ and found that the most appropriate for the current implementation was $\lambda\,=\,0.175$ .
 
 <<set tickmarks - steps for shorter edge>>=
-$lx = $vrf->{_x_end} - $vrf->{_x_start};
-$ly = $vrf->{_y_end} - $vrf->{_y_start};
+$lx = $vrf->{_x_end} - $vrf->{_x_start} + 1;
+$ly = $vrf->{_y_end} - $vrf->{_y_start} + 1;
 if ( defined($vrf->{aplot_major_tickmark}) && 
     !defined($vrf->{major_tickmark_nucleotide}) ) {
     $stplen = 10**( int( &logdec( &min($lx,$ly) ) ) + 1 ) / 
@@ -6146,9 +6062,14 @@ sub ps_header() {
 <<POSTSCRIPT shortnames>>
 <<POSTSCRIPT constants>>
 +++HEADER+++
+    &report('PSHEADER');
 } # ps_header
 @ %def &ps_header
 
+<<messages - input/output>>=
+PSHEADER =>
+  "###---> PostScript Header DONE...\n",
+@
 
 \subsctn{Filling up the CMYK colors hash} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:CMYKcolordef}
@@ -6158,20 +6079,26 @@ This is the function that fills up the {\ps} colors array:
 
 <<PostScript COLORS>>=
 sub ps_colors() {
-  my %tmp = ();
-  print STDOUT "%% Fixed Color Variables (CMYK)\n";
-  print STDOUT "/colordict ".($colors + 28)." dict D colordict begin %% ".
-               $colors." colors + 28 definitions\n";
-  foreach my $key (keys %COLORS) { $tmp{$COLORS{$key}->[0]} = $key };
-  for (my $j = 1; $j <= $colors; $j++) { 
-      my $name = $tmp{$j};
-      my $ref = \$COLORS{$name};
-      my $cmyk = "$$ref->[1] $$ref->[2] $$ref->[3] $$ref->[4]";
-      print STDOUT "/".(&fill_right($name,20," "))."{ $cmyk } D\n";
-      };
-  print STDOUT "end %% colordict\n";
+    my %tmp = ();
+    print STDOUT "%% Fixed Color Variables (CMYK)\n";
+    print STDOUT "/colordict ".($colors + 28)." dict D colordict begin %% ".
+                 $colors." colors + 28 definitions\n";
+    foreach my $key (keys %COLORS) { $tmp{$COLORS{$key}->[0]} = $key };
+    for (my $j = 1; $j <= $colors; $j++) { 
+        my $name = $tmp{$j};
+        my $ref = \$COLORS{$name};
+        my $cmyk = "$$ref->[1] $$ref->[2] $$ref->[3] $$ref->[4]";
+        print STDOUT "/".(&fill_right($name,20," "))."{ $cmyk } D\n";
+        };
+    print STDOUT "end %% colordict\n";
+    &report('PSCOLORS');
 } # ps_colors
 @ %def &ps_colors colordict
+
+<<messages - input/output>>=
+PSCOLORS =>
+  "###---> PostScript Colors Table SET...\n",
+@
 
 <<Global Vars>>=
 $colors = 0;
@@ -6183,7 +6110,7 @@ $colors = 0;
 \label{todo:JAA}
 <<HIDE: new defs TODO>>=
 \def\todoJAA{
-Move this section to a perl package: \\ suggesting [[gfftools::PostScript]].
+Move this section to a perl package: \\ suggesting [[gfftools::PostScript::colors]].
 } % todoJAA
 @
 <<HIDE: TODO>>=
@@ -6394,20 +6321,26 @@ Now we have to fill the page formats {\ps} array:
 
 <<PostScript FORMATS>>=
 sub ps_page_formats() {
-  my %tmp = ();
-  print STDOUT "%% Paper Sizes (in points)\n";
-  print STDOUT "/pagedict ".($formats + 2)." dict D pagedict begin %% ".
-               $formats." formats + 2 definitions\n";
-  foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
-  for (my $j = 1; $j <= $formats; $j++) { 
-      my $name = $tmp{$j};
-      my $ref = \$FORMATS{$name};
-      my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
-      print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } D\n";
-      };
-  print STDOUT "end %% pagedict\n";
+    my %tmp = ();
+    print STDOUT "%% Paper Sizes (in points)\n";
+    print STDOUT "/pagedict ".($formats + 2)." dict D pagedict begin %% ".
+                 $formats." formats + 2 definitions\n";
+    foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
+    for (my $j = 1; $j <= $formats; $j++) { 
+        my $name = $tmp{$j};
+        my $ref = \$FORMATS{$name};
+        my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
+        print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } D\n";
+        };
+    print STDOUT "end %% pagedict\n";
+    &report('PSFORMATS');
 } # ps_page_formats
 @ %def &ps_page_formats pagedict
+
+<<messages - input/output>>=
+PSFORMATS =>
+  "###---> PostScript Page-formats Table SET...\n",
+@
 
 <<Global Vars>>=
 $formats = 0;
@@ -6420,7 +6353,7 @@ $formats = 0;
 \label{todo:JAB}
 <<HIDE: new defs TODO>>=
 \def\todoJAB{
-Move this section to a perl package: \\ suggesting [[gfftools::PageSizes]].
+Move this section to a perl package: \\ suggesting [[gfftools::PostScript::formats]].
 } % todoJAB
 @
 <<HIDE: TODO>>=
@@ -6504,8 +6437,14 @@ sub ps_variables() {
 %
 %%EndProcSet:   Setting_Vars 1.0 0
 +++PSVARS+++
+    &report('PSVARS');
 } # ps_variables
 @ %def &ps_variables
+
+<<messages - input/output>>=
+PSVARS =>
+  "###---> PostScript Variables SET...\n",
+@
 
 <<psvariables - layout>>=
 %% Layout
@@ -6524,6 +6463,8 @@ sub ps_variables() {
 /SBoxcol { $vr->{percent_box_bgcolor} } D
 /XBoxcol { $vr->{extra_box_bgcolor} } D
 %% 
+/X0 $vlr->{_x_start} D /X1 $vlr->{_x_end} D
+/Y0 $vlr->{_y_start} D /Y1 $vlr->{_y_end} D
 /axesp @{[ &tobool($vr->{aplot_xy_same_length}) ]} D
 % /xyratio $vr->{aplot_xy_scale} D
 /ZoomON @{[ &tobool($vr->{zoom_marks}) ]} D
@@ -6636,8 +6577,14 @@ sub ps_main() {
 <<PostScript SETUP>>
 %
 +++MAINProcs+++
+    &report('PSCODE');
 } # ps_main
 @ %def &ps_main
+
+<<messages - input/output>>=
+PSCODE =>
+  "###---> PostScript Functions SET...\n",
+@
 
 <<PostScript SETUP>>=
 %%BeginSetup
@@ -6655,6 +6602,8 @@ true setstrokeadjust
 
 \subsctn{Plotting data into the figure}
 
+We are going to translate data and their settings into {\ps} code, passing those elements to the {\ps} execution stack from where they can be taken as parameters of the built-in {\ps} functions (see section~\ref{sec:PSONLY}, page~\pageref{sec:PSONLY}, to get into the {\ps} functions implementation). {\prog} produces a single page figure, so that [[&ps_plot]] routine has been developed as a linear design.
+
 \label{todo:IAD}
 <<HIDE: new defs TODO>>=
 \def\todoIAD{
@@ -6668,8 +6617,203 @@ Plotting data into the figure
 
 <<PostScript PLOT>>=
 sub ps_plot(){
+    &report('PSPLOT');
+    #
+    &ps_open_page;
+    #
+    &ps_block_aplot;
+    #
+    $Vars{LAYOUT}{show_percent_box} && &ps_block_percent;
+    #
+    $Vars{LAYOUT}{show_extra_box}   && &ps_block_extra;
+    #
+    &ps_close_page;
+    #
+    &report('PSPLOTDONE');
 } # ps_plot
 @ %def &ps_plot
+
+<<messages - input/output>>=
+PSPLOT =>
+  "###---> Writting PostScript Page:\n",
+PSPLOTDONE =>
+  "###---> PostScript Page FINISHED...\n",
+BLOCKRB =>
+  "###     + APLOT-BOX drawing \% ribbons...\n",
+BLOCKXY =>
+  "###     + APLOT-BOX drawing \% annotation...\n",
+BLOCKA =>
+  "###     + APLOT-BOX drawing alignment features...\n",
+BLOCKFX =>
+  "###     + APLOT-BOX extra features from custom files...\n",
+BLOCKDONE =>
+  "###     + \% section DONE...\n",
+@
+
+\subsubsctn{Producing main aplot box}
+
+<<PostScript PLOT>>=
+sub ps_block_aplot() {
+    my $vlr = \%{ $Vars{LAYOUT} };
+    print STDOUT << '+++MAINProcs+++';
+%
+%%%% Figure Initialization
+%
+DoTitle
+%
+%%%%%%%% ALIGNMENT PLOT - BOX
+%
+begindata
++++MAINProcs+++
+    # feature ribbons
+    $vlr->{show_ribbons} && do {
+        $vlr->{_plot_x_sequence} && do { # horizontal
+            &ps_plot_ribbons($vlr->{_x_sequence_name},$T);
+        }; # _plot_x_sequence
+        $vlr->{_plot_y_sequence} && do { # vertical
+            &ps_plot_ribbons($vlr->{_y_sequence_name},$F);
+        }; # _plot_y_sequence
+        # nice ribbon lines finishing
+        &ps_plot_outlines;
+    }; # show_ribbons
+    # tag definitions: Box,Join,Arrow,Banner;
+    $vlr->{_plot_x_sequence} && do { # horizontal
+        &ps_plot_features($vlr->{_x_sequence_name},$T);
+    }; # _plot_x_sequence
+    $vlr->{_plot_y_sequence} && do { # vertical
+        &ps_plot_features($vlr->{_y_sequence_name},$F);
+    }; # _plot_y_sequence
+    $vlr->{_plot_aln} && do {
+        &ps_plot_aln($vlr->{_alignment_name});
+    }; # _plot_aln
+    $vlr->{_plot_addons} && do {
+        &ps_plot_addons; # PLOTREMARKS(seqname,flag)
+    }; # _plot_addons
+    $vlr->{zoom_area} && do {
+        my $kt = defined($vlr->{zoom_area_fill_color}) 
+                 ? "$vlr->{zoom_area_fill_color} ".&tobool($T)
+                 : &tobool($F);
+        printf STDOUT "%s %s %s %s %s %s %s Msquare\n",
+            $vlr->{zoom_area_mark_width}, $vlr->{zoom_area_mark_color}, $kt,
+            &max($vlr->{_x_zoomarea_start}, $vlr->{_x_start}),
+            &min($vlr->{_x_zoomarea_end},   $vlr->{_x_end}),
+            &max($vlr->{_y_zoomarea_start}, $vlr->{_y_start}),
+            &min($vlr->{_y_zoomarea_end},   $vlr->{_y_end});
+    }; # zoom_area
+    print STDOUT "\%\nenddata\n\%\n";
+    &report('BLOCKDONE','APLOT-BOX  ');
+} # ps_block_aplot
+@ %def &ps_block_aplot
+
+<<PostScript PLOT>>=
+sub ps_plot_ribbons() {
+    my ($seq,$flg) = @_;
+    my $what = $flg ? 'X-sequence' : 'Y-sequence';
+    print STDOUT "\%\n\%\%\%\% $what Ribbons\n\%\n"; 
+    &report('BLOCKRB',$what);
+
+} # ps_plot_ribbons
+@ %def &ps_plot_ribbons
+
+<<PostScript PLOT>>=
+sub ps_plot_outlines() {
+
+} # ps_plot_outlines
+@ %def &ps_plot_outlines
+
+<<PostScript PLOT>>=
+sub ps_plot_features() {
+    my ($seq,$flg) = @_;
+    my $what = $flg ? 'X-sequence' : 'Y-sequence';
+    print STDOUT "\%\n\%\%\%\% DATA ---> $what Annotations\n\%\n"; 
+    &report('BLOCKXY',$what);
+
+} # ps_plot_features
+@ %def &ps_plot_features
+
+<<PostScript PLOT>>=
+sub ps_plot_aln() {
+    my ($aln) = @_;
+    print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\n"; 
+    &report('BLOCKA');
+ 
+} # ps_plot_aln
+@ %def &ps_plot_aln
+
+<<PostScript PLOT>>=
+sub ps_plot_addons() {
+    print STDOUT "\%\n\%\%\%\% Extra features from custom files...\n\%\n"; 
+    &report('BLOCKFX');
+ 
+} # ps_plot_addons
+@ %def &ps_plot_addons
+
+
+\subsubsctn{Generating percent box}
+
+% Get the scores limits for the sequence 
+% (taking into account $vlr->{percent_box_score_range} )
+%
+% $vlr->{_aln_lower_sco} $vlr->{_aln_upper_sco}
+% $vlr->{_alignment_name}
+
+<<PostScript PLOT>>=
+sub ps_block_percent() {
+    my $vlr = \%{ $Vars{LAYOUT} };
+    print STDOUT << '+++MAINProcs+++';
+%
+%%%%%%%% MATCHES PERCENT - BOX
+%
+% lowerpct upperpct
+$vlr->{_aln_lower_sco} $vlr->{_aln_upper_sco} beginmatches
+%
++++MAINProcs+++
+    ($vlr->{show_ribbons} && $vlr->{_plot_x_sequence}) && do { # horizontal
+        &ps_plot_ribbons($vlr->{_x_sequence_name},$T);
+        &ps_plot_outlines;
+    }; # show_ribbons && _plot_x_sequence
+    print STDOUT "\%\nvertical\n\%\npctmarks\n";
+    $vlr->{_plot_aln} && do {
+        &ps_plot_pctaln($vlr->{_alignment_name});
+    }; # _plot_aln
+    print STDOUT "\%\nendmaches\n\%\n";
+    &report('BLOCKDONE','PERCENT-BOX');
+} # ps_block_percent
+@ %def &ps_block_percent
+
+<<PostScript PLOT>>=
+sub ps_plot_pctaln() {
+    my ($aln) = @_;
+    print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\n"; 
+    &report('BLOCKA');
+ 
+} # ps_plot_pctaln
+@ %def &ps_plot_pctaln
+
+
+\subsubsctn{Generating percent box}
+
+<<PostScript PLOT>>=
+sub ps_block_extra() {
+    my $vlr = \%{ $Vars{LAYOUT} };
+    print STDOUT << '+++MAINProcs+++';
+%
+%%%%%%%% EXTRA DATA - BOX
+%
+% numlines
+$vlr->{_x_sequence_sources} beginextra % NGROUPS
+%
++++MAINProcs+++
+    ($vlr->{show_ribbons} && $vlr->{_plot_x_sequence}) && do { # horizontal
+        &ps_plot_ribbons($vlr->{_x_sequence_name},$T);
+        &ps_plot_outlines;
+    }; # show_ribbons && _plot_x_sequence
+
+    print STDOUT "\%\nendextra\n\%\n";
+    &report('BLOCKDONE','EXTRA-BOX  ');
+} # ps_block_extra
+@ %def &ps_block_extra
+
 
 \subsctn{{\ps} code chunks}
 
@@ -6727,6 +6871,7 @@ sub ps_trailer() {
 \newpage
 
 \sctn{{\ps} main program and routines} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:PSONLY}
 
 This section is mainly focused on the {\ps} functions that are executed on the {\ps} device to produce the figures.
 We have implemented a perl script that is used as a [[noweb]] filter (see appendix~\ref{sec:PSnowebfilter}, page~\pageref{sec:PSnowebfilter}), that removes from {\ps} ocde chunks a special set of comments ('[[%-%]]' and '[[%->]]'). That makes such code more compact within executable {\prog} version, while preserving full readability in this document, as example by showing stack contents for functions and so on.
@@ -6786,7 +6931,7 @@ We have implemented a perl script that is used as a [[noweb]] filter (see append
   8 -2 roll  %-> urx lly urx ury llx ury llx lly
   m l l l    %->
   closepath  %->
-  } B
+} B
 @ %def bbox
 \end{center}
 \end{minipage}
@@ -6895,12 +7040,31 @@ flglscape {
 <<POSTSCRIPT text functions>>=
 %%BeginProcSet: text_functions 1.0 0
 %
+<<PSFunctions - sfont>>
+<<PSFunctions - tshow>>
+<<PSFunctions - ctshow>>
+<<PSFunctions - ltshow>>
+<<PSFunctions - chrh>>
+<<PSFunctions - strh>>
+<<PSFunctions - ttxt>>
+%
+/Title { S 0 Xmarg Y TitleFont FGcolor tshow R /Y Y 0.75 cm sub D } B 
+/SubTitle { S 0 Xmarg Y SubTtFont FGcolor tshow R /Y Y 2.5 cm sub D } B 
+%
+%%EndProcSet:   text_functions 1.0 0
+%
+@
+
+<<PSFunctions - sfont>>=
 /sfont {     %-> font_size font_name sfont
   findfont   %-> font_size <font>
   exch       %-> <font> font_size
   scalefont  %-> <scaled_font>
   setfont    %-> 
-  } B
+} B
+@ %def sfont
+
+<<PSFunctions - tshow>>=
 /tshow {     %-> (string) angle x y font_def c m y k tshow
   S          %->
   scmyk      %-> (string) angle x y font_def
@@ -6909,7 +7073,10 @@ flglscape {
   rotate     %-> (string)
   show       %-> 
   R          %-> 
-  } B
+} B
+@ %def tshow
+
+<<PSFunctions - ctshow>>=
 /ctshow {       %-> ctshow
   10 -1 roll    %->
   dup           %->
@@ -6928,133 +7095,497 @@ flglscape {
     exch        %->
     sub         %->
     8 1 roll    %->
-    } {         %->
-      8 -1 roll %->
-      exch      %->
-      sub       %->
-      7 1 roll  %->
-    } ifelse    %->
+  } {           %->
+    8 -1 roll   %->
+    exch        %->
+    sub         %->
+    7 1 roll    %->
+  } ifelse      %->
   tshow         %->
-  } B
-/ltshow {
-  10 -1 roll dup 11 1 roll 7 -2 roll 2 copy 9 2 roll 
-  S sfont stringwidth pop R 
-  htag 1 eq {
-    9 -1 roll exch sub 8 1 roll
-    } {
-      8 -1 roll exch sub 7 1 roll
-    } ifelse
-  tshow
-  } B
-%
+} B
+@ %def ctshow
+
+<<PSFunctions - ltshow>>=
+/ltshow {       %->
+  10 -1 roll    %->
+  dup           %->
+  11 1 roll     %->
+  7 -2 roll     %->
+  2 copy        %->
+  9 2 roll      %->
+  S             %->
+    sfont       %->
+    stringwidth %->
+    pop         %->
+  R             %->
+  htag 1 eq {   %->
+    9 -1 roll   %->
+    exch        %->
+    sub         %->
+    8 1 roll    %->
+  } {           %->
+    8 -1 roll   %->
+    exch        %->
+    sub         %->
+    7 1 roll    %->
+  } ifelse      %->
+  tshow         %->
+} B
+@ %def ltshow
+
+<<PSFunctions - chrh>>=
+/chrh {            %->
+  S                %->
+    newpath        %->
+    0 0 m          %->
+    false charpath %->
+    flattenpath    %->
+    pathbbox       %->
+    exch           %->
+    pop            %->
+    3 -1 roll      %->
+    pop            %->
+  R                %->
+} B
+@ %def chrh
+
+<<PSFunctions - strh>>=
+/strh {         %->
+  2 dict begin  %->
+    /lly 0.0 D  %->
+    /ury 0.0 D  %->
+    {     	    %->
+      ( )       %->
+      dup       %->
+      0    	    %->
+      4 -1 roll %->
+      put       %->
+      chrh     	%->
+      dup       %->
+      ury gt {  %->
+        /ury X  %->
+      } {       %->
+        pop     %->
+      } ifelse  %->
+      dup       %->
+      lly lt {  %->
+        /lly X  %->
+      } {       %->
+        pop     %->
+      } ifelse  %->
+    } forall    %->
+    ury    	    %->
+  end           %->
+} B
+@ %def strh
+
+<<PSFunctions - ttxt>>=
 % X Y angle string valign halign fnt color ttxt
  % valign : tv (top)  cv (middle) bv (bottom)
  % halign : lh (left) ch (center) rh (right)
-/chrh { 
-  S newpath 0 0 m false 
-  charpath flattenpath pathbbox exch pop
-  3 -1 roll pop R
-  } B
-/strh {
-  2 dict begin /lly 0.0 D /ury 0.0 D 
-  { ( ) dup 0 4 -1 roll put chrh 
-    dup ury gt { /ury X } { pop } ifelse
-    dup lly lt { /lly X } { pop } ifelse
-    } forall
-  ury end
-  } B
-/ttxt {
-  S scmyk sfont 8 dict begin 
-  /h X /v X /lbl X /angle X /y X /x X 
-  /hs lbl stringwidth pop neg D /vs lbl strh neg D
-  x y T angle rotate
-  h (rh) eq { hs
-    } {
-      h (ch) eq { hs 2 div } { 0 } ifelse
-    } ifelse
-  v (tv) eq { vs
-    } {
-      v (cv) eq { vs 2 div } { 0 } ifelse
-    } ifelse
-  m lbl show end R
-  } B
-%
-/Title { S 0 Xmarg Y TitleFont FGcolor tshow R /Y Y 0.75 cm sub D } B 
-/SubTitle { S 0 Xmarg Y SubTtFont FGcolor tshow R /Y Y 2.5 cm sub D } B 
-%
-%%EndProcSet:   text_functions 1.0 0
-%
-@
+/ttxt {             %->
+  S                 %->
+    scmyk           %->
+    sfont           %->
+    8 dict begin    %->
+      /h X          %->
+      /v X          %->
+      /lbl X        %->
+      /angle X      %->
+      /y X          %->
+      /x X          %->
+      /hs           %->
+        lbl         %->
+        stringwidth %->
+        pop         %->
+        neg         %->
+        D           %->
+      /vs           %->
+        lbl         %->
+        strh        %->
+        neg         %->
+        D           %->
+      x y T         %->
+      angle rotate  %->
+      h (rh) eq {   %->
+        hs          %->
+      } {           %->
+        h (ch) eq { %->
+          hs 2 div  %->
+        } {         %->
+          0         %->
+        } ifelse    %->
+      } ifelse      %->
+      v (tv) eq {   %->
+        vs          %->
+      } {           %->
+        v (cv) eq { %->
+          vs 2 div  %->
+        } {         %->
+          0         %->
+        } ifelse    %->
+      } ifelse      %->
+      m             %->
+      lbl show      %->
+    end             %->
+  R                 %->
+} B
+@ %def ttxt
 
 \subsctn{The APLOT dictionary}
 
 <<POSTSCRIPT aplotdict>>=
+%
 %%BeginProcSet: aplotdict 1.0 0
 %
 /aplot 120 dict D aplot begin
-/min { 2 copy gt { exch } if pop } B 
-/max { 2 copy lt { exch } if pop } B
-/Xscm { Xscale mul } B /Xscme { Xscm exch } B
-/Yscm { Yscale mul } B /Yscme { Yscm exch } B
-/fmt { Yscme Xscme m } B /flt { Yscme Xscme l } B
-/line { scmyk slw m l K } B
-/uline {
-  scmyk slw m S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse
-  rl K R l S htag 1 eq { 0 -0.1 cm } { 0.1 cm 0 } ifelse
-  rl K R K
-  } B
-/ZoomTicks {
-  /zmdict 3 dict D zmdict begin
-  /r { TxWB BDspl mul Xscm } D /s { TyWB BDspl mul Yscm } D
-  /corner { S 10 -2 roll m 
-    2 { rl S BGcolor scmyk .4 slw K R rl
-      S FGcolor scmyk 2 slw [1 3] 0 setdash K R
-      } repeat R 
-    } D
-  4 copy 3 1 roll exch
-  0 s 0 s neg r neg 0 r 0 corner
-  0 s neg 0 s r 0 r neg 0 corner
-  0 s neg 0 s r neg 0 r 0 corner
-  0 s 0 s neg r 0 r neg 0 corner end
-  } D
-/Line {
-  S 9 5 roll 
-    2 { Yscm 4 1 roll Xscm 4 1 roll } repeat
-    9 4 roll line
-  R } B
-/Xline { 
-  S 3 1 roll Xscme Xscme 3 -1 roll Yscm xwdt sub dup
-    3 1 roll xwdt 9 -4 roll line
-  R } B
-/Bline {
-  S htag 1 eq { Xscme Xscme y0 Yscme y1 Yscm bbox }
-     { Yscme Yscme X0 Xscm 3 1 roll X1 Xscme bbox } ifelse
-  S scmyk fill 
-  R scmyk slw K
-  R } B
-/Bsquare {
-  S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox 
-  S scmyk fill 
-  R scmyk slw K
-  R } B
-/Msquare {
-  S Yscme Yscme 4 2 roll Xscme Xscme 4 1 roll exch bbox
-    scmyk slw K
-  R } B
-/Mcircle {
-  S Yscme Xscme 3 -1 roll Xscm 0 360 arc closepath scmyk slw K
-  R } B
-/Join {
-  S 2 copy 2 copy pop sub 2 div add exch
-    htag 1 eq {
-      y1 TyWB add dup dup TyWB 0.75 mul add 4 1 roll 5 1 roll
-      } {
-        X0 TxWB sub dup dup TxWB 0.75 mul sub 5 1 roll 6 1 roll exch
-      } ifelse
-    3 { Yscme Xscme 6 2 roll } repeat
-    m l l 0.25 slw scmyk K
-  R } B
-/Arrow {
+  <<PSFunctions - min max>>
+  <<PSFunctions - Xscm Xscme>>
+  <<PSFunctions - Yscm Yscme>>
+  <<PSFunctions - fmt flt>>
+  <<PSFunctions - line>>
+  <<PSFunctions - uline>>
+  <<PSFunctions - ZoomTicks>>
+  <<PSFunctions - Line>>
+  <<PSFunctions - Xline>>
+  <<PSFunctions - Bline>>
+  <<PSFunctions - Bsquare>>
+  <<PSFunctions - Msquare>>
+  <<PSFunctions - Mcircle>>
+  <<PSFunctions - Join>>
+  <<PSFunctions - Arrow>>
+  <<PSFunctions - FBox>>
+  <<PSFunctions - FTalgn>>
+  <<PSFunctions - GPalgn>>
+  <<PSFunctions - Box>>
+  <<PSFunctions - GDmore>>
+  <<PSFunctions - BDmore>>
+  <<PSFunctions - GnBanner>>
+  <<PSFunctions - SbBanner>>
+  <<PSFunctions - Banner>>
+  %
+  /tckdict 15 dict D tckdict begin
+    <<PSFunctions - mkmxt>>
+    <<PSFunctions - mwmod>>
+    <<PSFunctions - isltone>>
+  end % tckdict
+  %
+  <<PSFunctions - htick>>
+  <<PSFunctions - vtick>>
+  <<PSFunctions - nucltick>>
+  <<PSFunctions - pctmarks>>
+  <<PSFunctions - beginfunct>>
+  <<PSFunctions - endfunct>>
+end % aplot dict
+%
+%%EndProcSet:   aplotdict 1.0 0
+%
+@
+
+
+<<PSFunctions - min max>>=
+/min {  %->
+  2 copy  %->
+  gt {  %->
+    exch  %->
+  } if  %->
+  pop  %->
+} B   %->
+/max {  %->
+  2 copy  %->
+  lt {  %->
+    exch  %->
+  } if  %->
+  pop  %->
+} B
+@  %def min max
+
+<<PSFunctions - Xscm Xscme>>=
+/Xscm {  %->
+  Xscale mul  %->
+} B  %->
+/Xscme {  %->
+  Xscm exch  %->
+} B
+@  %def Xscm Xscme
+
+<<PSFunctions - Yscm Yscme>>=
+/Yscm {  %->
+  Yscale mul  %->
+} B  %->
+/Yscme {  %->
+  Yscm exch  %->
+} B
+@  %def Yscm Yscme
+
+<<PSFunctions - fmt flt>>=
+/fmt {  %->
+  Yscme  %->
+  Xscme  %->
+  m  %->
+} B  %->
+/flt {  %->
+  Yscme  %->
+  Xscme  %->
+  l  %->
+} B
+@  %def fmt flt
+
+<<PSFunctions - line>>=
+/line {  %->
+  scmyk  %->
+  slw  %->
+  m  %->
+  l  %->
+  K  %->
+} B
+@  %def line
+
+<<PSFunctions - uline>>=
+/uline {  %->
+  scmyk  %->
+  slw  %->
+  m  %->
+  S  %->
+    htag 1 eq {  %->
+      0 -0.1 cm  %->
+    } {  %->
+      0.1 cm 0  %->
+    } ifelse  %->
+    rl  %->
+    K  %->
+  R  %->
+  l  %->
+  S  %->
+    htag 1 eq {  %->
+      0 -0.1 cm  %->
+    } {  %->
+      0.1 cm 0  %->
+    } ifelse  %->
+    rl  %->
+    K  %->
+  R  %->
+  K  %->
+} B
+@  %def uline
+
+<<PSFunctions - ZoomTicks>>=
+/ZoomTicks {  %->
+  /zmdict 3 dict D  %->
+  zmdict begin  %->
+    /r {  %->
+      TxWB  %->
+      BDspl  %->
+      mul  %->
+      Xscm  %->
+    } D  %->
+    /s {  %->
+      TyWB  %->
+      BDspl  %->
+      mul  %->
+      Yscm  %->
+    } D  %->
+    /corner {  %->
+      S  %->
+        10 -2 roll  %->
+        m   %->
+        2 {  %->
+          rl  %->
+          S  %->
+            BGcolor scmyk  %->
+            .4 slw  %->
+            K  %->
+          R  %->
+          rl  %->
+          S  %->
+            FGcolor scmyk  %->
+            2 slw  %->
+            [1 3] 0 setdash  %->
+            K  %->
+          R  %->
+        } repeat  %->
+      R   %->
+    } D  %->
+    4 copy  %->
+    3 1 roll  %->
+    exch  %->
+    0 s 0 s neg  %->
+      r neg 0 r 0 corner  %->
+    0 s neg 0 s  %->
+      r 0 r neg 0 corner  %->
+    0 s neg 0 s  %->
+      r neg 0 r 0 corner  %->
+    0 s 0 s neg  %->
+      r 0 r neg 0 corner  %->
+  end  %->
+} D
+@  %def ZoomTicks
+
+<<PSFunctions - Line>>=
+%%  x0 y0 x1 y1 lwidth lcolor Line
+/Line {  %->
+  S  %->
+    9 5 roll   %->
+    2 {  %->
+      Yscm  %->
+      4 1 roll  %->
+      Xscm  %->
+      4 1 roll  %->
+    } repeat  %->
+    9 4 roll  %->
+    line  %->
+  R  %->
+} B
+@  %def Line
+
+<<PSFunctions - Xline>>=
+/Xline {   %->
+  S  %->
+    3 1 roll  %->
+    Xscme  %->
+    Xscme  %->
+    3 -1 roll  %->
+    Yscm  %->
+    xwdt sub  %->
+    dup  %->
+    3 1 roll  %->
+    xwdt  %->
+    9 -4 roll  %->
+    line  %->
+  R  %->
+} B
+@  %def Xline
+
+<<PSFunctions - Bline>>=
+%% lwidth lcolor bcol ori end Bline
+/Bline {  %->
+  S  %->
+    htag 1 eq {  %->
+      Xscme  %->
+      Xscme  %->
+      y0 Yscme  %->
+      y1 Yscm  %->
+      bbox  %->
+    } {  %->
+      Yscme  %->
+      Yscme  %->
+      X0 Xscm  %->
+      3 1 roll  %->
+      X1 Xscme  %->
+      bbox  %->
+    } ifelse  %->
+    S  %->
+      scmyk  %->
+      fill   %->
+    R  %->
+    scmyk  %->
+    slw  %->
+    K  %->
+  R  %->
+} B
+@  %def Bline
+
+<<PSFunctions - Bsquare>>=
+/Bsquare {  %->
+  S  %->
+    Yscme  %->
+    Yscme  %->
+    4 2 roll  %->
+    Xscme  %->
+    Xscme  %->
+    4 1 roll  %->
+    exch  %->
+    bbox   %->
+    S  %->
+      scmyk  %->
+      fill   %->
+    R  %->
+    scmyk  %->
+    slw  %->
+    K  %->
+  R  %->
+} B
+@  %def Bsquare
+
+<<PSFunctions - Msquare>>=
+/Msquare {  %->
+  S  %->
+    Yscme  %->
+    Yscme  %->
+    4 2 roll  %->
+    Xscme  %->
+    Xscme  %->
+    4 1 roll  %->
+    exch  %->
+    bbox  %->
+    scmyk  %->
+    slw  %->
+    K  %->
+  R  %->
+} B
+@  %def Msquare
+
+<<PSFunctions - Mcircle>>=
+/Mcircle {  %->
+  S  %->
+    Yscme  %->
+    Xscme  %->
+    3 -1 roll  %->
+    Xscm  %->
+    0 360 arc  %->
+    closepath  %->
+    scmyk  %->
+    slw  %->
+    K  %->
+  R  %->
+} B
+@  %def Mcircle
+
+<<PSFunctions - Join>>=
+/Join {  %->
+  S  %->
+    2 copy  %->
+    2 copy  %->
+    pop  %->
+    sub  %->
+    2 div  %->
+    add  %->
+    exch  %->
+    htag 1 eq {  %->
+      y1 TyWB add  %->
+      dup  %->
+      dup  %->
+      TyWB 0.75 mul  %->
+      add  %->
+      4 1 roll  %->
+      5 1 roll  %->
+    } {  %->
+      X0 TxWB sub  %->
+      dup  %->
+      dup  %->
+      TxWB 0.75 mul  %->
+      sub  %->
+      5 1 roll  %->
+      6 1 roll  %->
+      exch  %->
+    } ifelse  %->
+    3 {  %->
+      Yscme  %->
+      Xscme  %->
+      6 2 roll  %->
+    } repeat  %->
+    m  %->
+    l  %->
+    l  %->
+    0.25 slw  %->
+    scmyk  %->
+    K  %->
+  R  %->
+} B
+@  %def Join
+
+<<PSFunctions - Arrow>>=
+/Arrow {  %->
   /acol [ 9 -4 roll ] D /acolor { acol aload pop } D
   S 1 eq { exch /sn { 1 mul } D } { /sn { 1 neg mul } D } ifelse
     htag 1 eq { Xscm dup y1 Yscm HWBox add m
@@ -7067,30 +7598,43 @@ flglscape {
         X0 Xscm HWBox sub exch m Yscm X0 Xscm HWBox sub exch l
         acolor scmyk 1 slw K
       } ifelse
-  R } B
-/FBox {
+  R
+} B
+@  %def Arrow
+
+<<PSFunctions - FBox>>=
+/FBox {  %->
   htag 1 eq {
     Xscme Xscme y1 Yscme y1 TyWB FBDspl mul add Yscm bbox
     } {
       Yscme Yscme X0 Xscm 3 1 roll X0 TxWB FBDspl mul sub Xscme bbox
     } ifelse
   S scmyk fill R FGcolor scmyk 1 slw K
-  } B
-/FTalgn {
+} B
+@  %def FBox
+
+<<PSFunctions - FTalgn>>=
+/FTalgn {  %->
   htag 1 eq {
     FTXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse
     } {
       FTYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse
     } ifelse
-  } B
-/GPalgn {
+} B
+@  %def FTalgn
+
+<<PSFunctions - GPalgn>>=
+/GPalgn {  %->
   htag 1 eq {
     GPXangle 0 eq { (bv) (ch) } { (cv) (lh) } ifelse
     } {
       GPYangle 0 eq { (cv) (rh) } { (bv) (rh) } ifelse
     } ifelse
-  } B
-/Box {
+} B
+@  %def GPalgn
+
+<<PSFunctions - Box>>=
+/Box {  %->
   2 copy 2 copy pop sub 2 div add 7 1 roll
   S htag 1 eq {
     Xscme Xscme y1 Yscme y1 TyWB add Yscm bbox
@@ -7105,20 +7649,28 @@ flglscape {
       Yscm X0 TxWB 1.75 mul sub Xscme FTYangle
     } ifelse
   6 -1 roll FTalgn 8 -2 roll FGcolor ttxt
-  R } B
-%
-/GDmore {
+  R
+} B
+@  %def Box
+
+<<PSFunctions - GDmore>>=
+/GDmore {  %->
   MxFtLBL S ElmFont sfont (M) stringwidth pop R mul
   htag 1 eq { FTXangle sin } { FTYangle cos } ifelse
   abs mul ivcm add
-  } B
-/BDmore {
+} B
+@  %def GDmore
+
+<<PSFunctions - BDmore>>=
+/BDmore {  %->
   MxGpLBL S TagFont sfont (M) stringwidth pop R mul
   htag 1 eq { GPXangle sin } { GPYangle cos } ifelse
   abs mul ivcm add
-  } B
-%
-/GnBanner{
+} B
+@  %def BDmore
+
+<<PSFunctions - GnBanner>>=
+/GnBanner{  %->
   S 1 eq {
       2 copy
       htag 1 eq {
@@ -7135,36 +7687,48 @@ flglscape {
         Yscm X0 TxWB GLDspl mul sub Xscme GPYangle
       } ifelse
     6 -1 roll GPalgn 8 -2 roll FGcolor ttxt
-  R } B
-/SbBanner {
+  R
+} B
+@  %def GnBanner
+
+<<PSFunctions - SbBanner>>=
+/SbBanner {  %->
   S htag 1 eq {
       0 X0 X1 X0 sub 2 div add Xscm y1 TyWB GDspl mul add Yscm
       } {
         90 X0 TxWB GDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm
       } ifelse
     5 -2 roll FGcolor ctshow
-  R } B
-/Banner {
+  R
+} B
+@  %def SbBanner
+
+<<PSFunctions - Banner>>=
+/Banner {  %->
   S htag 1 eq {
       0 X0 X1 X0 sub 2 div add Xscm y1 TyWB BDspl mul add Yscm
       } {
         90 X0 TxWB BDspl mul sub Xscm y0 y1 y0 sub 2 div add Yscm
       } ifelse
     5 -2 roll FGcolor ctshow
-  R } B
-%
-% mxt mnt xp yp ori end htick
-/tckdict 15 dict D
- tckdict begin
- /mkmxt {
+  R
+} B
+@  %def Banner
+
+% tckdict begin
+<<PSFunctions - mkmxt>>=
+/mkmxt {  %->
   dup 0 lt { neg } if
   dup 10 lt {
     10 mul log round 10 exch exp cvi
     } {
       log round 10 exch exp cvi
     } ifelse
-  } D
- /nwmod {
+} D
+@  %def mkmxt
+
+<<PSFunctions - mwmod>>=
+/nwmod {  %->
   dup 1 le {
     100 mul cvi exch 100 mul cvi exch mod 100 div
     } {
@@ -7175,10 +7739,23 @@ flglscape {
           cvi exch cvi mod
         } ifelse
     } ifelse
-  } D
- /isltone { dup 1 lt { 100 mul cvi 100 div } if } D
-end
-/htick { 
+} D
+@  %def mwmod
+
+<<PSFunctions - isltone>>=
+/isltone {  %->
+  dup  %->
+  1 lt {  %->
+    100 mul  %->
+    cvi  %->
+    100 div  %->
+  } if  %->
+} D
+@  %def isltone
+
+<<PSFunctions - htick>>=
+% mxt mnt xp yp ori end htick
+/htick {   %->
   S tckdict begin horizontal 
     /yp exch Yscm D /xp exch Xscm D /xend X /xori X
     /nmnt exch cvi D /nmxt exch cvi D
@@ -7212,8 +7789,12 @@ end
     xend Xscm dup 0 m 7.5 neg l 2 slw FGcolor scmyk K
     xend 10 string cvs 0 xend Xscm ZoomON 1 eq { 4 add } if
     -18 TickFont FGcolor ZoomON 0 eq { ctshow } { tshow } ifelse
-  end R } D
-/vtick {
+  end R
+} D
+@  %def htick
+
+<<PSFunctions - vtick>>=
+/vtick {  %->
   S tckdict begin vertical
     /yp exch Yscm D /xp exch Xscm D /xend X /xori X
     /nmnt exch cvi D /nmxt exch cvi D
@@ -7252,146 +7833,435 @@ end
     2 slw FGcolor scmyk K xend 10 string cvs 0 10 xend Yscm
     ZoomON 0 eq { 2.5 sub } { 2.5 add } ifelse
     TickFont FGcolor tshow end
-  R } D
-/nucltick { tickmn tickmx maxtck mintck X0 X1 0 y0 htick } D
-/pctmarks {
-  S y0 10 y1 {
-      Yscm dup X0 Xscm X1 Xscm 3 1 roll 4 1 roll 0.5 FGcolor line
-      } for
-  R } B
-%
-/beginfunct {
-  R S 3 dict begin
-    /maxx exch ceiling D /minx exch floor D
-    /Yscale XBoxY maxx minx sub div D
-    minx 0 lt { 0 minx neg Yscm T } if
-    S XBYtickflg 1 eq {
-        -1 -1 xtrmxt xtrmnt minx maxx X1 0 vtick
-        S X0 Xscm 0 m X1 Xscm 0 l dotted FGcolor scmyk K R
-        } if
-    R
-  } D /endfunct { end R } D
-end % aplot dict
-%
-%%EndProcSet:   aplotdict 1.0 0
-%
-@
+  R
+} D
+@  %def vtick
+
+<<PSFunctions - nucltick>>=
+/nucltick {  %->
+  tickmn  %->
+  tickmx  %->
+  maxtck  %->
+  mintck  %->
+  X0  %->
+  X1  %->
+  0  %->
+  y0  %->
+  htick  %->
+} D
+@  %def nucltick
+
+<<PSFunctions - pctmarks>>=
+/pctmarks {  %->
+  S  %->
+    y0 10 y1 {  %->
+      Yscm  %->
+      dup  %->
+      X0 Xscm  %->
+      X1 Xscm  %->
+      3 1 roll  %->
+      4 1 roll  %->
+      0.5  %->
+      FGcolor  %->
+      line  %->
+    } for  %->
+  R  %->
+} B
+@  %def pctmarks
+
+<<PSFunctions - beginfunct>>=
+/beginfunct {  %->
+      R  %->
+      S  %->
+        3 dict begin  %->
+          /maxx  %->
+            exch  %->
+            ceiling  %->
+          D  %->
+          /minx  %->
+            exch  %->
+            floor  %->
+          D  %->
+          /Yscale  %->
+            XBoxY  %->
+            maxx minx sub  %->
+            div  %->
+          D  %->
+          minx 0 lt {  %->
+            0 minx neg Yscm T  %->
+          } if  %->
+          S  %->
+            XBYtickflg 1 eq {  %->
+              -1 -1  %->
+              xtrmxt xtrmnt  %->
+              minx maxx  %->
+              X1 0  %->
+              vtick  %->
+              S  %->
+                X0 Xscm  %->
+                0  %->
+                m  %->
+                X1 Xscm  %->
+                0  %->
+                l  %->
+                dotted  %->
+                FGcolor scmyk  %->
+                K  %->
+              R  %->
+            } if  %->
+          R  %->
+} D
+@  %def beginfunct
+
+<<PSFunctions - endfunct>>=
+/endfunct {  %->
+        end  %->
+      R  %->
+} D
+@  %def endfunct
+
 
 \subsctn{Main functions definition}
 
 <<POSTSCRIPT main function calls>>=
 %%BeginProcSet: main_function_calls 1.0 0
 %
-/s_credits {
-  S 1 dict begin
-    /fs_cd FSF D
-    pagedict begin
-    pga4 pop end 1 cm sub DnM T 0 0 0
-(This plot has been obtained using GFF2APLOT. The most recent version of GFF2APLOT is freely available at \042http:\/\/www1.imim.es/software/gfftools/APLOT.html\042. Copyright      1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)
-    (cv) (rh) fs_cd /Times-Roman FGcolor ttxt
-    S fs_cd /Times-Roman sfont
-    (   1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)
-    stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol FGcolor ttxt
-    end
-  R } B
+<<PSFunctions - scredits>>
 %
-/estlbl {
-  S 3 dict begin
-    /lbl X /ypos X /xpos X
-    horizontal
-      0 Xlwdt 4 div neg T
-      lbl 0 xpos Xscm ypos Yscm 5 /Helvetica black ctshow
-    vertical
-    end
-  R } B
+<<PSFunctions - estlbl>>
 %
-/GsclonX {
-  /Y exch Y Spacer sub exch sub D
-  Xmarg Y T
-  axesp 0 eq {
-    /Xscale { BBoxX X1 X0 sub Y1 Y0 sub max div } D
-    } {
-      /Xscale { BBoxX X1 X0 sub div } D
-    } ifelse
-  } B
-%
-% DOTPLOT BOX
-/begindata {
- aplot begin
-  S /y1 Y1 D /y0 Y0 D
-    BBoxY GsclonX
-    axesp 0 eq {
-      /Yscale Xscale D
-      } {
-        /Yscale { BBoxY y1 y0 sub div } D
-      } ifelse
-    /TxWB { WBox Xscale div } D /TyWB { WBox Yscale div } D
-    /GDspl { xGDspl GDmore } D /GLDspl { xGLDspl GDmore } D
-    /BDspl { xBDspl GDmore BDmore } D
-    X0 Xscm neg y0 Yscm neg T
-    S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox BBoxcol scmyk fill R
-    S X0 Xscm y0 Yscm X1 Xscm y1 Yscm
-      ZoomON 1 eq { 4 copy ZoomTicks } if bbox
-      2 slw FGcolor scmyk K
-    R
-    S BBXtickflg 1 eq {
-        nucltick /Spacer 1 cm D
-        } {
-          /Spacer 0.5 cm D
-        } ifelse
-      BBYtickflg 1 eq {
-        tickmn tickmx maxtck mintck y0 y1 X1 0 vtick
-        } if
-    R newpath
- } D
-/enddata { R /GDspl xGDspl D /GLDspl xGLDspl D /BDspl xBDspl D end } D
-%
-% PERCENT BOX
-/beginmatches {
- aplot begin 
-   /ZoomON 0 D S /y1 X /y0 X SBoxY GsclonX
-   /Yscale SBoxY y1 y0 sub div D
-   X0 Xscm neg y0 Yscm neg T S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox
-   S
-     S SBoxcol scmyk fill R
-     S SBoxLab TagLabelFont Banner SBoxSLab TagFont SbBanner
-       SBXtickflg 1 eq {
-         nucltick /Spacer 1 cm D
-         } {
-           /Spacer 0.5 cm D
-         } ifelse
-     R
-     S SBYtickflg 1 eq { -1 -1 pctmxt pctmnt y0 y1 X1 0 vtick } if
-     R
-     S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox 2 slw FGcolor scmyk K
-     R
-   R clip newpath
- } D /endmatches { R R end } D
-%
-% EXTRA BOX
-/beginextra {
- aplot begin
-   S /nlines X /y0 0 D XBoxY GsclonX
-     /Yscale XBoxY nlines 1 add div D
-     /Xlwdt Yscale 0.75 mul D /xwdt Yscale 2 div D
-     /y1 XBoxY Yscale div D
-     X0 Xscm neg 0 T
-     S X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox
-       S XBoxcol scmyk fill R
-       S XBoxLab TagLabelFont Banner XBoxSLab TagFont SbBanner
-         XBXtickflg 1 eq { nucltick } if
-       R newpath
-  } D
-/endextra {
-  /Yscale XBoxY nlines 1 add div D
-  X0 Xscm y0 Yscm X1 Xscm y1 Yscm bbox
-  2 slw FGcolor scmyk K R
-  R end
-  } D
+<<PSFunctions - GsclonX>>
+% ALIGNMENT PLOT BOX
+<<PSFunctions - begindata>>
+<<PSFunctions - enddata>>
+% MATCHES PERCENT BOX
+<<PSFunctions - beginmatches>>
+<<PSFunctions - endmatches>>
+% EXTRA FEATURES BOX
+<<PSFunctions - beginextra>>
+<<PSFunctions - endextra>>
 %
 %%EndProcSet:   main_function_calls 1.0 0
 %
 @
+
+<<PSFunctions - scredits>>=
+/s_credits {  %->
+  S  %->
+    1 dict begin  %->
+      /fs_cd FSF D  %->
+      pagedict begin  %->
+        pga4 pop  %->
+      end  %->
+      1 cm sub  %->
+      DnM T  %->
+      0 0 0  
+(This plot has been obtained using GFF2APLOT.\ 
+ The most recent version of GFF2APLOT is freely\ 
+ available at \042http:\/\/www1.imim.es/software/gfftools/APLOT.html\042.\ 
+ Copyright      1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)
+      (cv) (rh)  %->
+      fs_cd  %->
+      /Times-Roman  %->
+      FGcolor  %->
+      ttxt  %->
+      S  %->
+        fs_cd  %->
+        /Times-Roman sfont  %->
+        (   1999 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %->
+        stringwidth  %->
+        pop  %->
+        neg  %->
+      R  %->
+      0 0  %->
+      (\343)  %->
+      (cv) (ch)  %->
+      fs_cd  %->
+      /Symbol  %->
+      FGcolor  %->
+      ttxt  %->
+    end  %->
+  R
+} B
+@ %def s_credits
+
+<<PSFunctions - estlbl>>=
+/estlbl {  %->
+  S  %->
+    3 dict begin  %->
+      /lbl X  %->
+      /ypos X  %->
+      /xpos X  %->
+      horizontal  %->
+      0 Xlwdt 4 div neg T  %->
+      lbl 0  %->
+      xpos Xscm  %->
+      ypos Yscm  %->
+      5 /Helvetica  %->
+      black  %->
+      ctshow  %->
+      vertical  %->
+    end  %->
+  R  %->
+} B
+@ %def estlbl
+
+<<PSFunctions - GsclonX>>=
+/GsclonX {  %->
+  /Y  %->
+    exch  %->
+    Y  %->
+    Spacer sub  %->
+    exch  %->
+    sub  %->
+  D  %->
+  Xmarg Y T  %->
+  axesp 0 eq {  %->
+    /Xscale {  %->
+      BBoxX  %->
+      X1 X0 sub  %->
+      Y1 Y0 sub  %->
+      max  %->
+      div  %->
+    } D  %->
+  } {  %->
+    /Xscale {  %->
+      BBoxX  %->
+      X1 X0 sub  %->
+      div  %->
+    } D  %->
+  } ifelse  %->
+} B
+@ %def GsclonX
+
+<<PSFunctions - begindata>>=
+/begindata {  %->
+  aplot begin  %->
+    S  %->
+      /y1 Y1 D  %->
+      /y0 Y0 D  %->
+      BBoxY GsclonX  %->
+      axesp 0 eq {  %->
+        /Yscale Xscale D  %->
+      } {  %->
+        /Yscale {  %->
+          BBoxY  %->
+          y1 y0 sub  %->
+          div  %->
+        } D  %->
+      } ifelse  %->
+      /TxWB {  %->
+        WBox Xscale div  %->
+      } D  %->
+      /TyWB {  %->
+        WBox Yscale div  %->
+      } D  %->
+      /GDspl {  %->
+        xGDspl  %->
+        GDmore  %->
+      } D  %->
+      /GLDspl {  %->
+        xGLDspl  %->
+        GDmore  %->
+      } D  %->
+      /BDspl {  %->
+        xBDspl  %->
+        GDmore  %->
+        BDmore  %->
+        } D  %->
+      X0 Xscm neg  %->
+      y0 Yscm neg  %->
+      T  %->
+      S  %->
+        X0 Xscm  %->
+        y0 Yscm  %->
+        X1 Xscm  %->
+        y1 Yscm  %->
+        bbox  %->
+        BBoxcol scmyk  %->
+        fill  %->
+      R  %->
+      S  %->
+        X0 Xscm  %->
+        y0 Yscm  %->
+        X1 Xscm  %->
+        y1 Yscm  %->
+        ZoomON 1 eq {  %->
+          4 copy  %->
+          ZoomTicks  %->
+        } if  %->
+        bbox  %->
+        2 slw  %->
+        FGcolor scmyk  %->
+        K  %->
+      R  %->
+      S  %->
+        BBXtickflg 1 eq {  %->
+          nucltick  %->
+          /Spacer 1 cm D  %->
+        } {  %->
+          /Spacer 0.5 cm D  %->
+        } ifelse  %->
+        BBYtickflg 1 eq {  %->
+          tickmn tickmx  %->
+          maxtck mintck  %->
+          y0 y1 X1 0  %->
+          vtick  %->
+        } if  %->
+      R  %->
+      newpath  %->
+} D
+@ %def begindata
+
+<<PSFunctions - enddata>>=
+/enddata {  %->
+    R  %->
+    /GDspl  xGDspl  D  %->
+    /GLDspl xGLDspl D  %->
+    /BDspl  xBDspl  D  %->
+  end  %->
+} D
+@ %def enddata
+
+<<PSFunctions - beginmatches>>=
+/beginmatches {  %->
+  aplot begin   %->
+    /ZoomON 0 D  %->
+    S  %->
+      /y1 X  %->
+      /y0 X  %->
+      SBoxY GsclonX  %->
+      /Yscale  %->
+        SBoxY  %->
+        y1 y0 sub  %->
+        div  %->
+      D  %->
+      X0 Xscm neg  %->
+      y0 Yscm neg  %->
+      T  %->
+      S  %->
+        X0 Xscm  %->
+        y0 Yscm  %->
+        X1 Xscm  %->
+        y1 Yscm  %->
+        bbox  %->
+        S  %->
+          S  %->
+            SBoxcol scmyk  %->
+            fill  %->
+          R  %->
+          S  %->
+            SBoxLab  %->
+            TagLabelFont  %->
+            Banner  %->
+            SBoxSLab  %->
+            TagFont  %->
+            SbBanner  %->
+            SBXtickflg 1 eq {  %->
+              nucltick  %->
+              /Spacer 1 cm D  %->
+            } {  %->
+              /Spacer 0.5 cm D  %->
+            } ifelse  %->
+          R  %->
+          S  %->
+            SBYtickflg 1 eq {  %->
+              -1 -1 pctmxt pctmnt  %->
+              y0 y1 X1 0  %->
+              vtick  %->
+            } if  %->
+          R  %->
+          S  %->
+            X0 Xscm  %->
+            y0 Yscm  %->
+            X1 Xscm  %->
+            y1 Yscm  %->
+            bbox  %->
+            2 slw  %->
+            FGcolor scmyk  %->
+            K  %->
+          R  %->
+        R  %->
+        clip  %->
+        newpath  %->
+} D
+@ %def beginmatches
+
+<<PSFunctions - endmatches>>=
+/endmatches {  %->
+      R  %->
+    R  %->
+  end  %->
+} D
+@ %def endmatches
+
+<<PSFunctions - beginextra>>=
+/beginextra {  %->
+  aplot begin  %->
+    S  %->
+      /nlines X  %->
+      /y0 0 D  %->
+      XBoxY GsclonX  %->
+      /Yscale  %->
+        XBoxY  %->
+        nlines 1 add  %->
+        div  %->
+      D  %->
+      /Xlwdt  %->
+        Yscale 0.75 mul  %->
+      D   %->
+      /xwdt  %->
+        Yscale 2 div  %->
+      D  %->
+      /y1  %->
+        XBoxY Yscale div  %->
+      D  %->
+      X0 Xscm neg 0 T  %->
+      S  %->
+        X0 Xscm  %->
+        y0 Yscm  %->
+        X1 Xscm  %->
+        y1 Yscm  %->
+        bbox  %->
+        S  %->
+          XBoxcol scmyk  %->
+          fill  %->
+        R  %->
+        S  %->
+          XBoxLab  %->
+          TagLabelFont  %->
+          Banner  %->
+          XBoxSLab  %->
+          TagFont  %->
+          SbBanner  %->
+          XBXtickflg 1 eq {  %->
+            nucltick  %->
+          } if  %->
+        R  %->
+        newpath  %->
+} D
+@ %def beginextra
+
+<<PSFunctions - endextra>>=
+/endextra {  %->
+        /Yscale  %->
+          XBoxY  %->
+          nlines 1 add  %->
+          div  %->
+        D  %->
+        X0 Xscm  %->
+        y0 Yscm  %->
+        X1 Xscm  %->
+        y1 Yscm  %->
+        bbox  %->
+        2 slw  %->
+        FGcolor scmyk  %->
+        K  %->
+      R  %->
+    R  %->
+  end  %->
+} D
+@ %def endextra
 
 
 \newpage
@@ -7811,7 +8681,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.20 2001-11-14 19:10:31 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -9224,7 +10094,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.20 2001-11-14 19:10:31 jabril Exp $
+# $Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -9337,8 +10207,8 @@ notangle -L -R"APLOT" -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
 notangle -L -R"APLOT" -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
     $WORK/$nwfile.nw | \
       perl -ne '( $.>1 &&
-                  $_ !~ /^\#line (455|465|474|1194|1289|1463|4344|4644|443)/o
-                 ) && print' - | cpif $BIN/gff2aplot.pl ;
+                  $_ !~ /^\#line (467|477|486|1207|1302|1476|4300|4761|455)/o
+                 ) && print' - | perltidy - | cpif $BIN/gff2aplot.pl ;
 # reformating program with perltidy
 notangle -R"APLOT" -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
     $WORK/$nwfile.nw | perltidy - | cpif $BIN/$nwfile.pl ;
