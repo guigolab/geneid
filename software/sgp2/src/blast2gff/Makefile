@@ -8,9 +8,10 @@
 INCLUDE= ./include
 CDIR= ./src
 OBJ = ./objects
+BIN = ./bin
 HEADERS = $(INCLUDE)/blast2gff.h 
 PROGRAM= blast2gff
-PRODUCT= $(PROGRAM)
+PRODUCT= $(BIN)/$(PROGRAM)
 CC= gcc
 OPTS=-I$(INCLUDE) -Wall
 
@@ -21,8 +22,14 @@ OBJECTS = $(OBJ)/readargv.o $(OBJ)/account.o $(OBJ)/Output.o $(OBJ)/SortHSP.o\
 	$(OBJ)/SortSR.o\
 #######
 
-$(PRODUCT): $(OBJ)/$(PROGRAM).o $(OBJECTS) $(HEADERS)
+$(PRODUCT): $(BIN) $(OBJ) $(OBJ)/$(PROGRAM).o $(OBJECTS) $(HEADERS)
 	$(CC) $(OPTS) -o $(PRODUCT) $(OBJ)/$(PROGRAM).o $(OBJECTS) -lm
+
+$(BIN) :
+	mkdir $(BIN); 
+
+$(OBJ) :
+	mkdir $(OBJ); 
 
 $(OBJ)/$(PROGRAM).o : $(CDIR)/$(PROGRAM).c  $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/$(PROGRAM).c -o $(OBJ)/$(PROGRAM).o
@@ -53,7 +60,9 @@ $(OBJ)/Output.o: $(CDIR)/Output.c $(HEADERS)
 
 $(OBJ)/account.o :  $(CDIR)/account.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/account.c -o $(OBJ)/account.o
+
 clean:
-	rm -f $(OBJ)/*.o $(PROGRAM) *~ $(INCLUDE)/*~ $(CDIR)/*~ core
+	rm -f $(OBJ)/*.o $(BIN)/$(PROGRAM) *~ $(INCLUDE)/*~ $(CDIR)/*~ core 
+	rmdir $(BIN) $(OBJ);
 
 
