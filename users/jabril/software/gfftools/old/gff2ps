@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.41 2000-01-11 21:12:11 jabril Exp $	
+#         $Id: gff2ps,v 1.42 2000-01-11 21:26:55 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.41 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-11 21:12:11 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.42 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-11 21:26:55 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.41 2000-01-11 21:12:11 jabril Exp $
+%    $Id: gff2ps,v 1.42 2000-01-11 21:26:55 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -2446,8 +2446,8 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
  	  if (laststrand=="." && NStSize>0) {
         dflt_up=VSw;
         tmpup=up_+dflt_up;
-        printf "VChangeStrand\n";
 		up_=ChangePage(tmpup,dflt_up);
+        printf "VChangeStrand\n";
 	    # up_=ChangePage(up_+Sw);
 	  } # if changestrand
 	  # PrintRPT(sprintf("GP------ Source: --- Strand: %s Counter: %s\n", s, lastcnt)); 
@@ -2497,8 +2497,8 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 	  notyet=0;
       dflt_up=VSw;
       tmpup=up_+dflt_up;
+	  up_=ChangePage(tmpup,dflt_up);
 	  printf "VChangeStrand\n";
-      up_=ChangePage(tmpup,dflt_up);
 	  # up_=ChangePage(up_+Sw);
 	} # if changestrand
 	laststrand=s;
