@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.14 2000-08-12 22:42:27 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.15 2000-08-12 22:50:54 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln";
@@ -387,8 +387,8 @@ EndOfPrt
 	$index = $blst_prg = 0;
 	while (<QUERY>){ 
 		next if /^\#|^\s*$/;
-		$tmpbf = $_;
 		chomp;
+		$tmpbf = $_;
 		split;
 		next if ($cutoff_flg ne "-" && $_[5]<$cutoff_flg);
 		print { $FLH } "$tmpbf\n" if $hsp_too_flg;
