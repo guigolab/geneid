@@ -10,7 +10,7 @@
 #      Checking strand orientation for
 #      alignment features in aplot old format
 #
-# $Id: README,v 1.1 2003-06-05 18:33:16 jabril Exp $
+# $Id: README,v 1.2 2003-06-05 19:15:44 jabril Exp $
 #
 ##################################################
 #
@@ -311,5 +311,5 @@ echo "### TOTAL TIME: $SECONDS seconds..." ;
 #
 # That's all folks... ;^D
 #
-#        >> Copyleft (C) 2002 - Josep F. Abril <<
+#        >> Copyleft (C) 2002/2003 - Josep F. Abril <<
 #
