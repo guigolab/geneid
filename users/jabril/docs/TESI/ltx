@@ -2,11 +2,14 @@
 # convert into a makefile
 
 BASE="main";
+VER="DEA.tex";
 TEX="$BASE.tex";
 DVI="$BASE.dvi";
 PS="$BASE.ps";
 PDF="$BASE.pdf";
 
+
+perl -ne 'm/\$(Id.*?)\s*\$/o && print "< $1 >"' $TEX > $VER;
 latex  $TEX;
 bibtex $TEX;
 latex  $TEX;
