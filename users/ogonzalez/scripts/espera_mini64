@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo -n Esperant autoumount...
+while [ `mount|grep -c mini64` == 1 ]
+do
+   sleep 1
+   echo -n .
+done
+echo " OK"
