@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.15 2004-02-03 10:24:43 eblanco Exp $ */
+/* $Id: geneid.h,v 1.16 2004-04-22 12:46:14 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -126,7 +126,7 @@ A. DEFINITIONS
 
 /* Number of nucloetides to scan for PPTs   */
 /* or Branch Points before the Acceptor site*/
-#define ACCEPTOR_CONTEXT 40
+#define ACCEPTOR_CONTEXT 25
 
 /* Markov score penalty for unknown symbols */
 #define NULL_OLIGO_SCORE  -4     
