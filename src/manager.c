@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.3 2003-11-05 14:40:29 eblanco Exp $ */
+/* $Id: manager.c,v 1.4 2004-01-15 10:47:03 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -104,7 +104,12 @@ void  manager(char *Sequence,
   printRes(mess);
 
   allSites->nAcceptorSites =
-    GetSitesWithProfile(Sequence,gp->AcceptorProfile,allSites->AcceptorSites,l1a,l2a);
+    BuildAcceptors(Sequence,
+				   gp->AcceptorProfile,
+				   gp->PolyPTractProfile,
+				   gp->BranchPointProfile,
+				   allSites->AcceptorSites,
+				   l1a,l2a);
   sprintf(mess, "Acceptor Sites \t\t%8ld", allSites->nAcceptorSites);
   printRes(mess);
 
