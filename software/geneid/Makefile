@@ -12,12 +12,12 @@ BIN = ./bin
 HEADERS = $(INCLUDE)/geneid.h 
 PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
-CC= /home/ug/eblanco/no_backup/gcc-3.3.1/objects/salida/bin/gcc 
+CC=/home/ug/eblanco/no_backup/gcc-3.3.1/objects/salida/bin/gcc 
 OPTS=-I$(INCLUDE) -Wall -O3
 
 #######
 
-OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o \
+OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o \
 	$(OBJ)/BuildORFs.o $(OBJ)/BuildSingles.o $(OBJ)/BuildSort.o $(OBJ)/BuildTerminalExons.o \
 	$(OBJ)/ComputeStopInfo.o $(OBJ)/CookingGenes.o $(OBJ)/CorrectExon.o \
 	$(OBJ)/Dictionary.o $(OBJ)/DumpHash.o $(OBJ)/FetchSequence.o \
@@ -25,8 +25,8 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalEx
 	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o \
 	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o\
 	$(OBJ)/RequestMemory.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
-	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SwitchFrames.o $(OBJ)/SwitchPositions.o \
-	$(OBJ)/Translate.o \
+	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SortHSPs.o $(OBJ)/SwitchFrames.o \
+	$(OBJ)/SwitchPositions.o $(OBJ)/Translate.o \
 	$(OBJ)/account.o $(OBJ)/beggar.o $(OBJ)/genamic.o $(OBJ)/manager.o \
 	$(OBJ)/readparam.o $(OBJ)/readargv.o \
 
@@ -64,6 +64,9 @@ $(OBJ)/readparam.o : $(CDIR)/readparam.c $(HEADERS)
 
 $(OBJ)/BackupGenes.o : $(CDIR)/BackupGenes.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BackupGenes.c -o $(OBJ)/BackupGenes.o
+
+$(OBJ)/BuildAcceptors.o : $(CDIR)/BuildAcceptors.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/BuildAcceptors.c -o $(OBJ)/BuildAcceptors.o
 
 $(OBJ)/BuildInitialExons.o : $(CDIR)/BuildInitialExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildInitialExons.c -o $(OBJ)/BuildInitialExons.o
@@ -145,6 +148,9 @@ $(OBJ)/SetRatios.o : $(CDIR)/SetRatios.c $(HEADERS)
 
 $(OBJ)/SortExons.o : $(CDIR)/SortExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/SortExons.c -o $(OBJ)/SortExons.o
+
+$(OBJ)/SortHSPs.o : $(CDIR)/SortHSPs.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/SortHSPs.c -o $(OBJ)/SortHSPs.o
 
 $(OBJ)/SwitchFrames.o : $(CDIR)/SwitchFrames.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/SwitchFrames.c -o $(OBJ)/SwitchFrames.o
