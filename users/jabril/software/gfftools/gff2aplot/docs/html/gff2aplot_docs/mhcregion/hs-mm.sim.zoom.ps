@@ -2,7 +2,7 @@
 %%Title: Human/Mouse MHCII Region
 %%Creator: gff2aplot
 %%Version: v2.0
-%%CreationDate: Thu Feb 27 17:17:01 2003
+%%CreationDate: Tue Jun  3 16:41:47 2003
 %%For: lopep
 %%Pages: 1
 %%Orientation: Portrait
@@ -15,9 +15,9 @@
 % 
 %    Converting alignments in GFF format to PostScript dotplots.
 % 
-%     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
-%                                  Thomas WIEHE                   
-%                                 Roderic GUIGO SERRA       
+%     Copyright (C) 1999-2003 - Josep Francesc ABRIL FERRANDO  
+%                                       Thomas WIEHE                   
+%                                      Roderic GUIGO SERRA       
 %
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% $Id: hs-mm.sim.zoom.ps,v 1.1 2003-03-04 18:06:27 jabril Exp $
+% $Id: hs-mm.sim.zoom.ps,v 1.2 2003-06-05 18:10:36 jabril Exp $
 %
 % Report BUGS to: jabril@imim.es 
 %
@@ -149,7 +149,7 @@ tflg { (%%% Setting aplot dictionary %%%) msg } if
 /rF { 1 exch dup 0 eq { pop 10 -9 exp } if div } B 
 /Fm { Yscme Xscme m } B /Fl { Yscme Xscme l } B
 /corner { S 4 -2 roll m 0 0 4 1 roll 2 { S rl fg cmyk Blw slw [Blw 3] 0 setdash K R } repeat R } B 
-/zoomtk { 4 copy 3 1 roll exch ATX neg ATY corner ATX ATY neg corner ATX ATY corner ATX neg ATY neg corner } D
+/zoomtk { 1 dict begin /_ATX Pb Qb or { KLh } { ATX } ie D 4 copy 3 1 roll exch _ATX neg ATY corner ATX ATY neg corner ATX ATY corner _ATX neg ATY neg corner end } D
 /gradcol { dup dup dup 7 1 roll 5 1 roll 3 1 roll mul 7 1 roll mul 6 1 roll mul 5 1 roll mul 4 1 roll } B
 /shp { S 7 dict begin /s_s X Hscm /s_e X Hscm /s_o X /s_p X /f_x { s_e s_o sub } D /s_m { f_x 2 div s_o add } D 0 BClw T { H { FTXa } { FTYa } ie s_m DRFTlh 4 -2 roll exch H { FTXt } { FTYt } ie FTf fg ttshw } if S s_o 0 T { DRht s_p mul DRhb add } { DRh } ie /f_y X f_x f_y F s_s (-) eq { 1 0 T -1 1 F } if { s_p gradcol } if cmyk cvx exec S fill R f_x rF f_y rF F fg cmyk Clw slw 2 setmiterlimit K R end R } B
 /rbx { S rbxcol H { YH neg } { AX neg } ie 3 1 roll Hscm 3 1 roll Hscm 0 Clw2 ibox fill R } B /rln { S fg cmyk Hscm H { YH neg } { AX neg } ie 0 3 -1 roll dup 4 1 roll exch m l Clw slw K R } B /Rln { counttomark { rln } repeat pop } B
@@ -189,7 +189,7 @@ tflg { (%%% Setting aplot dictionary %%%) msg } if
 /ghaw { _t _f garh } B /ghad { _t _t garh } B /ghsw { _f _f garh } B /ghsd { _f _t garh } B
 %
 /DoHeader { TTLb { S AXL TTLz neg 0 TTLl (bv) (lh) TTLf fg ttshw R } if TTlb { S AXL TTLz TTLp add TTlz add neg 0 TTll (bv) (lh) TTlf fg ttshw R } if } B
-/shwcrd { S 2 dict begin /Cz Ch 1 pt PPC 2 div mul sub D /Cf { Cz /Courier } D FL Ch add neg 2 copy 0 (This plot has been obtained using GFF2APLOT. The most recent version is freely available at \042http:\057\057www1.imim.es\057software\057gfftools\057GFF2APLOT.html\042. Copyright\040\0401999-2003 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) (bv) (rh) Cf fg ttshw exch S Cf sfnt (\0401999-2003 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) stringwidth pop sub R exch 0 (\343) (bv) (ch) Cz /Symbol fg ttshw end R } B
+/shwcrd { S 2 dict begin /Cz Ch 1 pt PPC 2 div mul sub D /Cf { Cz /Courier } D FL Ch add neg 2 copy 0 (This plot has been obtained using GFF2APLOT. The most recent version is freely available at \042http:\057\057genome.imim.es\057software\057gfftools\057GFF2APLOT.html\042. Copyright\040\0401999-2003 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) (bv) (rh) Cf fg ttshw exch S Cf sfnt (\0401999-2003 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO) stringwidth pop sub R exch 0 (\343) (bv) (ch) Cz /Symbol fg ttshw end R } B
 /begindata { vflg { (### BEGINdata) msg } if S AXL AYB neg T S 0 0 AX AY 4 copy bbox ABc cmyk fill Blw obox fg cmyk Blw slw K R /Xscale AX XD div D /Yscale AY YD div D /YH AY D /YY YO D S KAXb { AY nucltick } if R S KAYb { AX YO YE KASm KASn vtick } if R S XSLb { AX 2 div AY ATX add XSLp add 0 XSLl (bv) (ch) XSLf fg ttshw } if YSLb { ATY YSLp add neg AY 2 div 90 YSLl (bv) (ch) YSLf fg ttshw } if R } B
 /enddata { ZM { S 0 0 AX AY zoomtk R /ZM _f D } if R vflg { (### ENDdata) msg } if } B
 /beginXseq { S 0 0 AX YH ATX add bbox clip newpath XO neg Xscm YH T colordict begin HT } B /beginYseq { S ATY neg 0 AX YH bbox clip newpath 0 YO neg Yscm T 90 rotate colordict begin VT } B /beginaln { S 0 Alw 2 div neg AX YH Alw add bbox clip newpath XO neg Xscm YY neg Yscm T colordict begin } B /endseq { end R } B
@@ -332,6 +332,9 @@ beginaln
 1317 1193 1322 1198 fg _t _f 0.830 aln
 1414 1199 1435 1220 fg _t _f 0.590 aln
 1506 1221 1533 1248 fg _t _f 0.570 aln
+1553 1969 1576 1992 fg _t _f 0.710 aln
+1578 1993 1596 2011 fg _t _f 0.840 aln
+1597 2013 1621 2037 fg _t _f 0.720 aln
 1696 1249 1773 1326 fg _t _f 0.680 aln
 1774 1330 1803 1359 fg _t _f 0.670 aln
 1804 1364 1830 1390 fg _t _f 0.700 aln
@@ -371,11 +374,15 @@ beginaln
 3464 3375 3510 3421 fg _t _f 0.510 aln
 3518 3422 3527 3431 fg _t _f 0.700 aln
 3530 3432 3578 3480 fg _t _f 0.530 aln
+3570 3067 3635 3132 fg _t _f 0.670 aln
 3579 3490 3598 3509 fg _t _f 0.600 aln
 3599 3576 3627 3604 fg _t _f 0.550 aln
 3628 3617 3641 3630 fg _t _f 0.640 aln
+3636 3136 3648 3148 fg _t _f 0.770 aln
 3642 3641 3649 3648 fg _t _f 0.880 aln
 3650 3749 3689 3788 fg _t _f 0.630 aln
+3650 3149 3662 3161 fg _t _f 0.770 aln
+3667 3162 3679 3174 fg _t _f 0.920 aln
 3690 3833 3708 3851 fg _t _f 0.530 aln
 3709 3862 3748 3901 fg _t _f 0.630 aln
 3749 3905 3777 3933 fg _t _f 0.660 aln
@@ -456,13 +463,6 @@ beginaln
 6409 6116 6430 6137 fg _t _f 0.820 aln
 6431 6150 6444 6163 fg _t _f 0.710 aln
 6447 6164 6503 6220 fg _t _f 0.560 aln
-1553 1969 1576 1992 fg _t _f 0.710 aln
-1578 1993 1596 2011 fg _t _f 0.840 aln
-1597 2013 1621 2037 fg _t _f 0.720 aln
-3570 3067 3635 3132 fg _t _f 0.670 aln
-3636 3136 3648 3148 fg _t _f 0.770 aln
-3650 3149 3662 3161 fg _t _f 0.770 aln
-3667 3162 3679 3174 fg _t _f 0.920 aln
 endseq
 %
 enddata
@@ -509,6 +509,9 @@ beginaln
 1317 0.830 1322 0.830 fg _t _f 0.830 aln
 1414 0.590 1435 0.590 fg _t _f 0.590 aln
 1506 0.570 1533 0.570 fg _t _f 0.570 aln
+1553 0.710 1576 0.710 fg _t _f 0.710 aln
+1578 0.840 1596 0.840 fg _t _f 0.840 aln
+1597 0.720 1621 0.720 fg _t _f 0.720 aln
 1696 0.680 1773 0.680 fg _t _f 0.680 aln
 1774 0.670 1803 0.670 fg _t _f 0.670 aln
 1804 0.700 1830 0.700 fg _t _f 0.700 aln
@@ -548,11 +551,15 @@ beginaln
 3464 0.510 3510 0.510 fg _t _f 0.510 aln
 3518 0.700 3527 0.700 fg _t _f 0.700 aln
 3530 0.530 3578 0.530 fg _t _f 0.530 aln
+3570 0.670 3635 0.670 fg _t _f 0.670 aln
 3579 0.600 3598 0.600 fg _t _f 0.600 aln
 3599 0.550 3627 0.550 fg _t _f 0.550 aln
 3628 0.640 3641 0.640 fg _t _f 0.640 aln
+3636 0.770 3648 0.770 fg _t _f 0.770 aln
 3642 0.880 3649 0.880 fg _t _f 0.880 aln
 3650 0.630 3689 0.630 fg _t _f 0.630 aln
+3650 0.770 3662 0.770 fg _t _f 0.770 aln
+3667 0.920 3679 0.920 fg _t _f 0.920 aln
 3690 0.530 3708 0.530 fg _t _f 0.530 aln
 3709 0.630 3748 0.630 fg _t _f 0.630 aln
 3749 0.660 3777 0.660 fg _t _f 0.660 aln
@@ -633,13 +640,6 @@ beginaln
 6409 0.820 6430 0.820 fg _t _f 0.820 aln
 6431 0.710 6444 0.710 fg _t _f 0.710 aln
 6447 0.560 6503 0.560 fg _t _f 0.560 aln
-1553 0.710 1576 0.710 fg _t _f 0.710 aln
-1578 0.840 1596 0.840 fg _t _f 0.840 aln
-1597 0.720 1621 0.720 fg _t _f 0.720 aln
-3570 0.670 3635 0.670 fg _t _f 0.670 aln
-3636 0.770 3648 0.770 fg _t _f 0.770 aln
-3650 0.770 3662 0.770 fg _t _f 0.770 aln
-3667 0.920 3679 0.920 fg _t _f 0.920 aln
 endseq
 %
 endmatches

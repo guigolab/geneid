@@ -1,8 +1,20 @@
+##################################################
 #
-# README for two colors alignment gff2aplot example
-# 
+# README mhcregion
 #
-# $Id: README,v 1.1 2003-03-04 18:06:17 jabril Exp $
+# This README runs as a shell script.
+# Here you can find the commands
+# we used to produce all the figures for:
+#
+#   "Analysis of a Syntenic Region by SIM"
+#
+# USAGE: bash README > .log 2>&1
+#
+# $Id: README,v 1.2 2003-06-05 18:10:36 jabril Exp $
+#
+##################################################
+#
+SECONDS=0 ;
 #
 
 #
@@ -34,31 +46,49 @@
 # gawk 'BEGIN {min=max="kk"} $3~/alignment/ { if (min=="kk") { min=max=$6 } else { if (min>$6) { min=$6; next }; if (max<$6) max=$6}} END { print "MIN "min" : MAX "max}' hs-mm.sim.gff
 # MIN 208.000 : MAX 18340.000
 
-# Running gff2aplot: GFF -> PS
-BIN="$HOME/development/softjabril/gfftools/gff2aplot/bin"
-# DEFAULTS
-$BIN/gff2aplot.pl -v -L "Identity%" \
-                  -T "Human/Mouse MHCII Region" \
-                  -t "" \
-                  -- hs.gff \
-                     mm.gff \
-                     hs-mm.sim.gff \
-                   > hs-mm.sim.ps \
-                  2> hs-mm.sim.log;
 #
-$BIN/gff2aplot.pl -v -L "Identity%" --show-percent-box \
-                  -T "Human/Mouse MHCII Region" \
-                  -t "" \
-                  --feature-var "seqbounds::alignment_color=grey" \
-                  --feature-var "alignment::alignment_color=red" \
-                  --feature-var "fragment::alignment_color=green" \
-                  --strand-var "..::strand_layer=0" \
-                  --strand-var "++::strand_layer=2" \
-                  -- hs.gff \
-                     mm.gff \
-                     hs-mm.sim.gff \
-                   > hs-mm.sim2.ps \
-                  2> hs-mm.sim2.log;
+echo "# Running ALI2GFF" ;
+#
+$BIN/ali2gff -x "X87344"             \
+             -y "AF100956+AF027865"  \
+                hs-mm.sim > hs-mm.sim.gff ;
+perl -npe 's{/home.+/(ali2gff)}{ $1};' hs-mm.sim.gff > tmp.gff ;
+mv -v tmp.gff hs-mm.sim.gff ;
+
+#
+echo "# Getting the PostScripts with GFF2APLOT" ;
+#
+echo "#  -> Default plot" ;
+#
+$BIN/gff2aplot.pl                      \
+    --verbose                          \
+    --percent-box-label "Identity%"    \
+    --title "Human/Mouse MHCII Region" \
+    --subtitle ""                      \
+    -- hs.gff                          \
+       mm.gff                          \
+       hs-mm.sim.gff                   \
+     > hs-mm.sim.ps                    \
+    2> hs-mm.sim.log ;
+#
+echo "#  -> CMDline settings" ;
+#
+$BIN/gff2aplot.pl                                    \
+     --verbose                                       \
+     --percent-box-label "Identity%"                 \
+     --show-percent-box                              \
+     --title "Human/Mouse MHCII Region"              \
+     --subtitle ""                                   \
+     --feature-var "seqbounds::alignment_color=grey" \
+     --feature-var "alignment::alignment_color=red"  \
+     --feature-var "fragment::alignment_color=green" \
+     --strand-var "..::strand_layer=0"               \
+     --strand-var "++::strand_layer=2"               \
+     -- hs.gff                                       \
+        mm.gff                                       \
+        hs-mm.sim.gff                                \
+      > hs-mm.sim2.ps                                \
+     2> hs-mm.sim2.log ;
 # 
 # in case the strand for seqbounds was same as the other features:
 # 
@@ -115,17 +145,24 @@ alignment::hide=off
 alignment::feature_color=lightorange
 +++EOF+++
 #
-$BIN/gff2aplot.pl -v -L "Identity%" \
-                  -T "Human/Mouse MHCII Region" \
-                  -t "" \
-                  --x-label Human --y-label Mouse \
-                  --custom-filename mhc2.rc \
-                  --custom-filename mhc2spc.rc \
-                  -- hs.gff \
-                     mm.gff \
-                     hs-mm.sim.gff \
-                   > hs-mm.sim.ini.ps \
-                  2> hs-mm.sim.ini.log;
+echo "#  -> Customized settings" ;
+#
+$BIN/gff2aplot.pl                       \
+    --verbose                           \
+    --percent-box-label "Identity%"     \
+    --show-percent-box                  \
+    --title  "Human/Mouse MHCII Region" \
+    --subtitle ""                       \
+    --x-label "Human" --y-label "Mouse" \
+    --custom-filename mhc2.rc           \
+    --custom-filename mhc2spc.rc        \
+    -- hs.gff                           \
+       mm.gff                           \
+       hs-mm.sim.gff                    \
+     > hs-mm.sim.ini.ps                 \
+    2> hs-mm.sim.ini.log ;
+#
+### ZOOM MARKED
 #
 cat > mhc2labels.rc <<'+++EOF+++'
 #
@@ -134,21 +171,30 @@ group_x_label_angle=45
 group_y_label_angle=315
 +++EOF+++
 #
-# MARKING ZOOM BOX
-$BIN/gff2aplot.pl -v -L "Identity%" \
-                  -T "Human/Mouse MHCII Region" \
-                  -t "Zooming into the LMP2 gene region" \
-                  -z -E 6500 -e 6500 \
-                  --x-label "Human X87344" \
-                  --y-label "Mouse AF100956+AF027865" \
-                  --custom-filename mhc2.rc \
-                  --custom-filename mhc2labels.rc \
-                  -- hs.gff \
-                     mm.gff \
-                     hs-mm.sim.gff \
-                   > hs-mm.sim.zbox.ps \
-                  2> hs-mm.sim.zbox.log;
-# ZOOMED
+#
+echo "#  ->  MARKING ZOOM BOX" ;
+#
+$BIN/gff2aplot.pl                                  \
+    --verbose                                      \
+    --percent-box-label "Identity%"                \
+    --show-percent-box                             \
+    --title  "Human/Mouse MHCII Region"            \
+    --subtitle "Zooming into the LMP2 gene region" \
+    --zoom-area                                    \
+    --end-x-sequence 6500                          \
+    --end-y-sequence 6500                          \
+    --x-label "Human X87344"                       \
+    --y-label "Mouse AF100956+AF027865"            \
+    --custom-filename mhc2.rc                      \
+    --custom-filename mhc2labels.rc                \
+    -- hs.gff                                      \
+       mm.gff                                      \
+       hs-mm.sim.gff                               \
+     > hs-mm.sim.zbox.ps                           \
+    2> hs-mm.sim.zbox.log ;
+#
+### ZOOMED
+#
 cat > mhc2+sgp1.rc <<'+++EOF+++'
 #
 # L #
@@ -184,21 +230,99 @@ polya::show_ribbons=on
 polya::ribbon_color=grey
 +++EOF+++
 #
-$BIN/gff2aplot.pl -v -L "Identity%" \
-                  -T "Human/Mouse MHCII Region" \
-                  -t "Zooming into the LMP2 gene region" \
-                  -Z -E 6500 -e 6500 \
-                  --x-label Human --y-label Mouse \
-                  --custom-filename mhc2.rc \
-                  --custom-filename mhc2labels.rc \
-                  --custom-filename mhc2+sgp1.rc \
-                  -- hs.gff \
-                     mm.gff \
-                     hs-mm.sgp1.gff \
-                     hs-mm.sim.gff \
-                   > hs-mm.sim.zoom.ps \
-                  2> hs-mm.sim.zoom.log;
+echo "#  ->  ZOOMED REGION" ;
+#
+$BIN/gff2aplot.pl                                  \
+    --verbose                                      \
+    --percent-box-label "Identity%"                \
+    --show-percent-box                             \
+    --title  "Human/Mouse MHCII Region"            \
+    --subtitle "Zooming into the LMP2 gene region" \
+    --zoom                                         \
+    --end-x-sequence 6500                          \
+    --end-y-sequence 6500                          \
+    --x-label "Human"                              \
+    --y-label "Mouse"                              \
+    --custom-filename mhc2.rc                      \
+    --custom-filename mhc2labels.rc                \
+    --custom-filename mhc2+sgp1.rc                 \
+    -- hs.gff                                      \
+       mm.gff                                      \
+       hs-mm.sgp1.gff                              \
+       hs-mm.sim.gff                               \
+     > hs-mm.sim.zoom.ps                           \
+    2> hs-mm.sim.zoom.log ;
 
 #
 #
 # perl -e '$x="X87344"; $y="AF100956+AF027865"; $a="X87344:AF100956+AF027865"; $x = &escape_input($x); $y = &escape_input($y); $a = &escape_input($a); @b=split /:/o, $a,2; print "$b[0] : $b[1] ::: $b[0] =~ $x -> ".($b[0] =~ /^$x$/)." ::: $b[0] eq $x -> ".($b[0] eq $x)." ::: \"$b[0]\" eq \"$x\" -> ".("$b[0]" eq "$x")."\n";  print "$b[0] : $b[1] ::: $b[1] =~ $y -> ".($b[1] =~ /^$y$/)." ::: $b[1] eq $y -> ".($b[1] eq $y)." ::: \"$b[1]\" eq \"$y\" -> ".("$b[1]" eq "$y")."\n"; sub escape_input() { my $var = $_[0]; $var =~ s{([+*;,<>&!\{\}`'\''"])}{\\$1}g; return $var;}'
+
+#
+#
+# Preparing web images
+#
+filenames () {
+  cat << 'EOF';
+hs-mm.sim
+hs-mm.sim2
+hs-mm.sim.ini
+hs-mm.sim.zbox
+hs-mm.sim.zoom
+EOF
+};
+#
+# echo "# Using \"ghostscript\" to obtain JPEG images from PS files" ;
+echo "# Using \"ghostscript\" to obtain PNG images from PS files" ;
+#
+GS=`which gs || echo "gs"`;
+MG=`which mogrify || echo "mogrify"`;
+CV=`which convert || echo "convert"`;
+#
+filenames | while read n ;
+  do {
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300        \
+        -sPAPERSIZE=a4 -sDEVICE=png16m \
+        -sOutputFile=$n.png $n.ps      ;
+    cp -v $n.png $n.s.png ;
+    # mogrify is a ImageMagick tool that allow us to transform images on batch,
+    # large high-resolution jpeg files are scaled down to thumbnail resolution (2479x3508=>123x175)
+    # it overwrites original file (so that we previously get a renamed copy for each jpeg to process).
+    $MG -verbose -geometry 5% $n.s.png ;
+    #
+    # $GS -dBATCH -dNOPAUSE -r300      \
+    #     -sPAPERSIZE=a4 -sDEVICE=jpeg \
+    #     -sOutputFile=$n.jpg $n.ps    ;
+    # png large version is pretty smaller than jpeg
+    # cp -v $n.jpg $n.s.jpg ;
+    # $MG -verbose -geometry 5% $n.s.jpg ;
+    };
+  done ;
+$CV 'vid:*.s.png'  mhcregion.summary.png
+#
+echo "# Using \"ghostscript\" to obtain PDF documents from PS files" ;
+#
+filenames | while read n ;
+  do {
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300          \
+        -sPAPERSIZE=a4 -sDEVICE=pdfwrite \
+        -sOutputFile=$n.pdf $n.ps        ;
+    };
+  done ;
+#
+#
+# echo "# LaTeXing all figures together..." ;
+#
+# latex mhcregion.tex;
+# dvips mhcregion.dvi -o mhcregion.ps;
+#
+#
+echo "###" ;
+echo "### TOTAL TIME: $SECONDS seconds..." ;
+#
+#
+# That's all folks... ;^D
+#
+#        >> Copyleft (C) 2002/2003 - Josep F. Abril <<
+#
