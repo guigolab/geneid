@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.36 1999-12-23 18:08:24 jabril Exp $	
+#         $Id: gff2ps,v 1.37 1999-12-31 13:25:31 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -69,10 +69,10 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps";
   GAWK_PROG="gff2ps.awk";
-  VERSION="v0.92";
+  VERSION="v0.93";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.36 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 1999-12-23 18:08:24 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.37 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 1999-12-31 13:25:31 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.36 1999-12-23 18:08:24 jabril Exp $
+%    $Id: gff2ps,v 1.37 1999-12-31 13:25:31 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -455,7 +455,8 @@ flglscape {
 /XSTitl pglim pop XOriTitl 2 mul sub def
 /XSBlck pglim pop def
 /FSF 2.5 def % Point size for Credits for A4
-/CSF { pagedict begin pga4 pop end Dpage pop exch div mul } bdf
+/CSF { pagedict begin pga4 pop end Dpage pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
+/YSTitl YSTitl CSF dup 4 cm gt { pop 4 cm } if def
 /XOriBlck 0 def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
 /XOriPlot { XOriBlck FLftLbl { XLftLbl add } if } def
@@ -499,11 +500,8 @@ NBlck 0 eq {
 /K { stroke } bdf
 /scmyk { setcmykcolor } bdf
 /slw { setlinewidth } bdf
-/min { 2 copy gt { exch } if pop } bdf 
-/max { 2 copy lt { exch } if pop } bdf
-/Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
-/ChkLimits { 3 copy pop 5 2 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or { pop false } { true } ifelse } def 
-/nucdif { 2 copy exch sub } bdf
+% /min { 2 copy gt { exch } if pop } bdf 
+% /max { 2 copy lt { exch } if pop } bdf
 %%EndProcSet:   functions 1.0 0
 %
 %%BeginProcSet: text_functions 1.0 0
@@ -553,15 +551,16 @@ headerdict begin
  /pgfnt { xtfsz /Times-Roman    } def
  /ttlong { S ttfnt sfont Title stringwidth pop stfnt sfont SubTitle stringwidth pop R 2 copy gt { pop } { exch pop } ifelse 2 div } bdf
  /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox fgcolor scmyk K R } if ShwTt Title () ne and { sepsz ttlong add YSTitl sepsz sub 0 Title (tv) (ch) ttfnt fgcolor ttxt } if ShwST SubTitle () ne and { sepsz ttlong add sepsz 0 SubTitle (bv) (ch) stfnt fgcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt fgcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt fgcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt fgcolor ttxt } if R } bdf
-end
 %
-/s_credits { S 1 dict begin /fs_cd FSF CSF def pglim FSF 0.52 mul CSF sub T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
+ /s_credits { S 1 dict begin /fs_cd FSF CSF def pglim FSF 0.52 mul CSF sub T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
+end
 %
 %%EndProcSet:   header_functions 1.0 0
 %
 %%BeginProcSet: tickmarks 1.4 0
 % Rule.ps ---> rules and scales
-/tmdct 22 dict def tmdct begin
+/tmdct 24 dict def tmdct begin
+ /ChkLimits { 3 copy pop 5 2 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or { pop false } { true } ifelse } bdf 
  /ShowGrid 0 def % 0 - none : 1 - MinTicks : 2 - MaxTicks : 3 - Both
  /Gridup true def /Griddn true def /flgup true def
  /TkMrkHW TkMrkW  2 div def
@@ -588,6 +587,7 @@ end % tmdct
 %
 %%BeginProcSet: objects 1.1 0
 /shpdct 200 dict def shpdct begin
+ /nucdif { 2 copy exch sub } bdf
  /mtrx matrix def
  /mrr false def
  /LY { Yscl 0.45 mul } bdf
@@ -700,6 +700,7 @@ end % shpdct
 %
 %%BeginProcSet: blocks 1.0 0
 /blckdct 60 dict def blckdct begin
+ /Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
  /gst 250 string def
  /XLL { blckori MaxTick sub } bdf
  /XLR { blckend MaxTick add } bdf
@@ -1134,6 +1135,7 @@ BEGIN{ ######### INITIALITATION ###############
   seq_nordcnt=seq_ordcnt=0;
   grouped_=1;ungrouped_=0;
   gff_NR=0; SGLVCT=0;
+  TITLE_FN="";
   #
   # Color REGEXP
 #  V_COLORS="(^fgcolor$|^black$|^white$|^(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown)$)";
@@ -1153,7 +1155,7 @@ BEGIN{ ######### INITIALITATION ###############
   # skips those comment lines (starting with "#") or empty lines
   # also checking if input line is gff_formated.
   while (!ChkInput()) { 
-    PrintWRN(sprintf(">>> %10s :: Not Read :: <%s>\n", NR, $0));
+    PrintWRN(sprintf(">>> %10s :: Not Read :: <%s>\n", NR, ChkCharIF($0)));
     if (getline<=0) { is_EOF=1; break };
   } # while
   if (!is_EOF) {
@@ -1552,7 +1554,7 @@ function ChkInput() { # some changes will be made on input line if some defaults
 	} # else gff-line NON-Standard
   } # else empty line
   else {
-    if ($0~/^[\t ]*[\#].*/) PrintWRN(sprintf(">>> %10s :: Comment Line: <%s>\n", NR, $0));
+    if ($0~/^[\t ]*[\#].*/) PrintWRN(sprintf(">>> %10s :: Comment Line: <%s>\n", NR, ChkCharIF($0)));
     else PrintWRN(sprintf(">>> %10s :: Empty line... <%s>\n", NR, $0));
 	return 0;
   } # if not comment
@@ -1747,6 +1749,7 @@ function ReadElements() { # read gff element within source, strand, and group
     if ($strand=="." && !($seqname in seqs)) {
       seq_order["none",seq_nordcnt++]=$seqname }
   }
+  if (!($seqname in seqs)) TITLE_FN=TITLE_FN""$seqname" ";
   # getting source order from file...
   if (($strand=="+" || $strand=="-") && !(iS in sources)) {
     src_order["strand",src_ordcnt++]=$source }
@@ -1852,7 +1855,7 @@ function SET_VARS() {
     NumPGSZ++;
   }
   # Title definition...
-  TITLE_FN=Var["InputFNs"]; # if (gff_NR==0) TITLE_SEQNAME=$seqname;
+  # TITLE_FN=TITLE_SEQNAME # TITLE_FN=Var["InputFNs"];
   if (Default["title"]=="none") { flgt="false"; title="" }
   else {
 	flgt="true";
@@ -1931,12 +1934,22 @@ function SortGroups(    g) {
 		if (G[g]>0) {
 		  for (t=1;t<=G[g];t++) {
 			gs=t-1;
-			gpstrt_=gp[g,t,gpstart];
-			# PrintRPT(sprintf("------- %s : (%s) %s\n",t,gp[g,t,gpname],gpstrt_));
-			while (gpstrt_ < gp[g,SG[g,gs],gpstart] && gs>0) {
-              # PrintRPT(sprintf("------- %s < %s\n",gp[g,t,gpstart],gp[g,SG[g,gs],gpstart]));
-			  SG[g,gs+1]=SG[g,gs]; gs--;
-			} # while
+            if (s!="-") { # sorting forward and no-strand by acceptors
+			  gpstrt_=gp[g,t,gpstart];
+			  # PrintRPT(sprintf("------- %s : (%s) %s\n",t,gp[g,t,gpname],gpstrt_));
+			  while (gpstrt_ < gp[g,SG[g,gs],gpstart] && gs>0) {
+                # PrintRPT(sprintf("------- %s < %s\n",gp[g,t,gpstart],gp[g,SG[g,gs],gpstart]));
+			    SG[g,gs+1]=SG[g,gs]; gs--;
+			  } # while
+            }
+            else { # sorting reverse by acceptors
+			  gpstrt_=gp[g,t,gpend];
+			  # PrintRPT(sprintf("------- %s : (%s) %s\n",t,gp[g,t,gpname],gpstrt_));
+			  while (gpstrt_ > gp[g,SG[g,gs],gpend] && gs>0) {
+                # PrintRPT(sprintf("------- %s > %s\n",gp[g,t,gpend],gp[g,SG[g,gs],gpend]));
+			    SG[g,gs+1]=SG[g,gs]; gs--;
+			  } # while              
+            }
 			SG[g,gs+1]=t;
 		  } # for t 
 		  for (t=1;t<=G[g];t++)
@@ -1949,16 +1962,19 @@ function SortGroups(    g) {
   PrintWRN(sprintf("*\n* ........................................................ DONE\n*\n%s\n",BigLINE));
 } # End of SortGroups
 #
-function Aux_LINES() {
+function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
   lg=sq SUBSEP sc SUBSEP s;
   fldGxU=OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]);
   fldGln=OnOff(PLOT_FT[sc,":","unfold_grouped_line"]);
   fldUln=OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]);
   if (!fldGxU) { c=(fldGln||fldUln); fldGln=fldUln=c }
   if (G[lg]>0) {
-	lastpos[lg,grouped_,1]=lastpos[lg,ungrouped_,1]=t_ori-1; # PORI;
+    if (s!="-") lastpos[lg,grouped_,1]=lastpos[lg,ungrouped_,1]=t_ori-1; # PORI;
+    else lastpos[lg,grouped_,1]=lastpos[lg,ungrouped_,1]=t_end+1; # PEND;
 	lines[lg,grouped_]=lines[lg,ungrouped_]=1;
-	for (g=1;g<=SG[lg,G[lg]];g++) {
+#	for (g=1;g<=SG[lg,G[lg]];g++) {
+	for (pg=1;pg<=G[lg];pg++) {
+      g=SG[lg,pg];
 	  gp_nm =gp[lg,g,gpname];
 	  gp_ori=gp[lg,g,gpstart];
 	  gp_end=gp[lg,g,gpend];
@@ -1969,19 +1985,32 @@ function Aux_LINES() {
 	  if ((gp_gpd && fldGln) || ((!gp_gpd) && fldUln)) {
 		# PrintRPT(sprintf("A........%s : %s (%s) G %s SG %s %s %s %s %s \n",LN,lastpos[lg,gp_gpd,LN],gp_ori,G[lg],g,sq,sc,s,gp_nm));
 		if (gp_end>PORI && gp_ori<PEND) {
-          gpo=gp_ori-MGS;
-		  if (gpo<PORI) gpo=gp_end;
-		  while (lastpos[lg,gp_gpd,LN] >= gpo ) {
-			LN++;
-			ttt=lg SUBSEP gp_gpd SUBSEP LN;
-			if (!(ttt in lastpos)) lastpos[ttt]=t_ori; # PORI;
-			# PrintRPT(sprintf(".........%s : %s : %s (%s)\n",LN,ttt,lastpos[ttt],gp_ori));
-		  } # while lastpos
-		  lastpos[lg,gp_gpd,LN]=gp_end;
+          if (s!="-") {
+            gpo=gp_ori-MGS;
+		    if (gpo<PORI) gpo=gp_end;
+            while (lastpos[lg,gp_gpd,LN] >= gpo ) {
+              LN++;
+              ttt=lg SUBSEP gp_gpd SUBSEP LN;
+              if (!(ttt in lastpos)) lastpos[ttt]=t_ori; # PORI;
+              # PrintRPT(sprintf(".........%s : %s : %s (%s)\n",LN,ttt,lastpos[ttt],gp_ori));
+            } # while lastpos
+		    lastpos[lg,gp_gpd,LN]=gp_end;
+          }
+          else {
+            gpe=gp_end+MGS;
+		    if (gpe>PEND) gpe=gp_ori;
+            while (lastpos[lg,gp_gpd,LN] <= gpe ) {
+              LN++;
+              ttt=lg SUBSEP gp_gpd SUBSEP LN;
+              if (!(ttt in lastpos)) lastpos[ttt]=t_end; # PORI;
+              # PrintRPT(sprintf(".........%s : %s : %s (%s)\n",LN,ttt,lastpos[ttt],gp_ori));
+            } # while lastpos
+		    lastpos[lg,gp_gpd,LN]=gp_ori;
+          }
 		} # if checklimits
-		else {
+		# else {
 		  # PrintRPT(sprintf("OUT of ZOOM Limits: %s : %s : %s (%s)\n",LN,ttt,lastpos[lg,gp_gpd,LN],gp_ori));
-		} # if not checklimits
+		# } # if not checklimits
 		# PrintRPT(sprintf("B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[lg,gp_gpd,LN],gp_ori,gp_end,G[lg],g));
 	  } # if checking
 	  lines[lg,gp_gpd]=max(lines[lg,gp_gpd],LN);
@@ -1998,21 +2027,21 @@ function MakeGroupLines(    lg,c) {
 	if (OnOff(Default["sort_tracks_by_sequence"])) {
 	  for (sq in seqs) {
 		for (sc in sources) {
-		  Aux_LINES();
+		  Aux_LINES(sq,sc,s);
 		} # for sources
 	  } # for seqs
 	}
 	else {
 	  for (sc in sources) {
 		for (sq in seqs) {
-		  Aux_LINES();
+		  Aux_LINES(sq,sc,s);
 		} # for seqs
 	  } # for sources
 	}
   } # for strands
 } # End of MakeGroupLines
 #
-function PrtSorted(    g) {
+function PrtSorted(    g) { # now is not used
   if (Var["print_report"]) { 
     printf "\n%s\n*  Groups were sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2";
 	for (sq in seqs) {
@@ -2142,15 +2171,31 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
   # PrintRPT(sprintf("\n***+++***StrSizeFwd::%s::***StrSizeRvs::%s::***NStSize::%s::***BSize::%s::\n", StrSizeFwd, StrSizeRvs, NStSize, BSize));
   if (B>0) VP=1;
   else {
+    Sw=calcpt(Default["default_scale_width"]);
+    if (StrSizeFwd>0 && (NStSize>0 || StrSizeRvs>0)) BSize=BSize+Sw;
+    if (NStSize>0 && StrSizeRvs>0) BSize=BSize+Sw;
     if (Default["page_orientation"]=="Landscape") ttbby=bbx; else ttbby=bby;
-	if (OnOff(shtt)) tthdr=calcpt(HDRheight); else tthdr=0; # +(4*calcpt(Default["default_scale_width"]))
-    Tsize=ttbby-(tthdr+calcpt(Default["margin_upper"])+calcpt(Default["margin_lower"])+calcpt(Default["default_block_spacing_width"]));
+	if (OnOff(shtt)) {
+      tthdr=calcpt(HDRheight)*(bbx/PsizeX["a4"]);
+      tthdr=(tthdr>calcpt("4cm"))?calcpt("4cm"):tthdr;
+      tthdr=tthdr+calcpt(Default["default_block_spacing_width"]);
+    }
+    else tthdr=0; # +(4*calcpt(Default["default_scale_width"]))
+    if (OnOff(Var["Show_Credits"])) {
+      crdt=calcpt("2.5pt")*(bbx/PsizeX["a4"]);
+      crdt=(crdt>calcpt("1cm"))?calcpt("1cm"):crdt;
+      crdt=2*crdt;
+    }
+    else crdt=0;
+    if (OnOff(Default["show_outer_scale"])) TSw=4*Sw; else TSw=0;
+    Tsize=ttbby-(tthdr+calcpt(Default["margin_upper"])+calcpt(Default["margin_lower"])+TSw+crdt);
 	VP=(BSize/Tsize);
     if (int(VP)<VP) VP=int(VP)+1;
+    PrintRPT(sprintf("\n\n************* Page Vsize = %s cm **** Title Vsize = %s cm **** Block Tsize = %s cm **** Credit Vsize = %s cm ***************\n\n\n",ttbby/28.35,tthdr/28.35,Tsize/28.35,crdt/28.35));
   } # else B==0
   # Major Minor Tickmarks ratio
   if (Default["major_tickmarks_nucleotides"]==-1) {
-	Default["major_tickmarks_nucleotides"]=Nuc_round((PDIF/Default["major_tickmarks_num"]),0) }
+	Default["major_tickmarks_nucleotides"]=Nuc_round((NOFFSET/Default["major_tickmarks_num"]),0) }
   if (Default["minor_tickmarks_nucleotides"]==-1) {
 	Default["minor_tickmarks_nucleotides"]=Default["major_tickmarks_nucleotides"]/Default["minor_tickmarks_num"] }
 } # End of function SET_PAGE_VARS
@@ -2184,7 +2229,7 @@ function MAIN_PAGE_LOOP() { # MAIN LOOP: Start
       # Converting to PostScript all plot elements.
 	  printf "%%\n%% Block Num: - Page: %s.%s\n%%\n",pages,Vpages;
 	  printf "%s %s 1 vblock\n", BORI, BEND;
-      PrintWRN(sprintf("*  Page: %sH.%sV\nNuc_Ori: %s - Nuc_End: %s\n",pages,Vpages,BORI,BEND));
+      PrintWRN(sprintf("\n*  Page: %sH.%sV\nNuc_Ori: %s - Nuc_End: %s\n",pages,Vpages,BORI,BEND));
 	  #
 	  PRINTTRACKS(); # VP=(BSize/Tsize)
       # Closing Pages MAIN LOOP.
@@ -2374,21 +2419,25 @@ function ChangePage(ttt) {
 	startPSpage(pages,P,Vpages,VP);
 	printf "%%\n%% Block Num: - Page: %s.%s\n%%\n",pages,Vpages;
 	printf "%s %s 1 vblock\n", BORI, BEND;
-	PrintRPT(sprintf("\n%s\n*  Printing Lines\nPage: %sH.%sV\nNuc_Ori: %s - Nuc_End: %s\n%s\n\n",BigLINE,pages,Vpages,BORI,BEND,BigLINE));
-	return dflt_up
+    PrintWRN(sprintf("*  Page: %sH.%sV\nNuc_Ori: %s - Nuc_End: %s\n",pages,Vpages,BORI,BEND));
+	return dflt_up;
   } # if up>Tsize
-  else return up_
+  else return ttt;
 } # End of function ChangePage
 #
-function PRINTTRACKS(    dflt_up) {
+function PRINTTRACKS(    tmpup) {
+  if (OnOff(Default["show_inner_scale"])) Sw=2*Sw; else Sw=0;
   laststrand="+"; notyet=1;
-  dflt_up=(4*calcpt(Default["default_scale_width"]));
-  up_=dflt_up;
+  up_=0; # 4*Sw+crdt;
   for (stp=1;stp<=3;stp++) { # for s in strand
     s=wstr[stp];
 	if ((s=="+" && OnOff(Default["strand_show_forward"])) || (s=="." && OnOff(Default["strand_show_independent"])) || (s=="-" && OnOff(Default["strand_show_reverse"]))) {
 	  if (s=="+" || s=="-") lastcnt=ordcnt;
-	  else lastcnt=nordcnt; 
+	  else lastcnt=nordcnt;
+ 	  if (laststrand=="." && NStSize>0) {
+	    printf "VChangeStrand\n";
+	    up_=ChangePage(up_+Sw);
+	  } # if changestrand
 	  # PrintRPT(sprintf("GP------ Source: --- Strand: %s Counter: %s\n", s, lastcnt)); 
 	  for (srcord=0;srcord<lastcnt;srcord++) { # for sc in sources
 		if (s=="-") { ngcnt=(lastcnt-1)-srcord; split(order["strand",ngcnt],SQC,SUBSEP) }
@@ -2406,6 +2455,12 @@ function PRINTTRACKS(    dflt_up) {
 		  if (s!=".") m_lines=max(lines[sq,sc,"+",i],lines[sq,sc,"-",i]);
 		  else m_lines=lines[sq,sc,".",i];
 		  for (pl=1;pl<=m_lines;pl++) {
+			#
+			# Computing if next line fits on current page
+            dflt_up=(aS*PLOT_FT[sc,":","track_scale"])+(bS*PLOT_FT[sc,":","track_spacing_scale"]);
+            tmpup=up_+dflt_up;
+			up_=ChangePage(tmpup);
+            #
 			if (s=="-") l=m_lines-pl+1; else l=pl;
 			# PrintRPT(sprintf("GP------ Sequence: %10s Source: %10s Strand: %s Counter: %s\n", sq, sc, s, srcord));
 			if (DoUnFoldMixed(sc) || (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) && !OnOff(PLOT_FT[sc,":","unfold_grouped_line"]) && !OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) fl_gp="M";
@@ -2421,12 +2476,6 @@ function PRINTTRACKS(    dflt_up) {
 			#
 			# Closing source
 			printf "s_end\n";
-			#
-			# Computing if next line fits on current page
-			up_+=(aS*PLOT_FT[sc,":","track_scale"])+(bS*PLOT_FT[sc,":","track_spacing_scale"]);
-			if (s~/^+$|^-$/) split(order["strand",ordcnt-1],nsc,SUBSEP);
-			else split(order["none",0],nsc,SUBSEP);    # if s=="."
-			up_=ChangePage(up_+(aS*PLOT_FT[nsc[2],":","track_scale"])+(bS*PLOT_FT[nsc[2],":","track_spacing_scale"]));
 		  } # for pl(m_lines)
 		} # for pd
 	  } # for scord
@@ -2435,13 +2484,7 @@ function PRINTTRACKS(    dflt_up) {
 	if (laststrand=="+" && StrSizeFwd>0 && notyet ) { 
 	  notyet=0;
 	  printf "VChangeStrand\n";
-	  up_+=(2*calcpt(Default["default_scale_width"]));
-      # Computing if next line fits on current page
-	  if (stp<3) {
-		if (wstr[stp+1]=="-") split(order["strand",ordcnt-1],nsc,SUBSEP);
-		else split(order["none",0],nsc,SUBSEP);    # if s=="."
-		up_=ChangePage(up_+(aS*PLOT_FT[nsc[2],":","track_scale"])+(bS*PLOT_FT[nsc[2],":","track_spacing_scale"]));
-	  } # if stp<3
+	  up_=ChangePage(up_+Sw);
 	} # if changestrand
 	laststrand=s;
   } # for stp
@@ -2748,9 +2791,14 @@ function checklbl(chain) {
     return chain }
 } # End of function checklbl
 #
+function ChkCharIF(chain) { # Avoiding problems with config file variable names for elements.
+  if (chain=="") return ""; 
+  else { gsub(/[%]/,"%%",chain); return chain }
+} # End of function ChkCharIF
+#
 function ChkCharRG(chain) { # Avoiding problems with config file variable names for elements.
   if (chain=="") return ""; 
-  else { gsub(/[ \t]/,"",chain);
+  else { # gsub(/[ \t]/,"",chain);
    gsub(/[\\]/,"\\\\",chain); gsub(/[\(]/,"\\(",chain); gsub(/[\)]/,"\\)",chain);
     gsub(/[\[]/,"\\[",chain); gsub(/[\]]/,"\\]",chain); gsub(/[\|]/,"\\|",chain);
     gsub(/[\{]/,"\\{",chain); gsub(/[\}]/,"\\}",chain); gsub(/[\/]/,"\\/",chain);
@@ -2823,18 +2871,17 @@ function Plot_Lbl(gff_feat,    sq,sc,s,lbl,vn) {
 function SRC_LBL(sl,sq,sc,s,flg    ,lbl) {
   if (sl=="++none++") lbl="";
   else {
-	if (sl=="++default++" || sl=="++info++") { 
-	  if (OnOff(Default["sort_tracks_by_sequence"])) lbl=sq; else lbl=sc;
-	  if (sl=="++info++") lbl=lbl"("flg""s")" }
+	if (sl=="++default++") {  # is not wrong, when sorting by sequence, source label is source else seqname
+	  if (OnOff(Default["sort_tracks_by_sequence"])) lbl=sc; else lbl=sq }
 	else
       if (sl=="++sequence++") lbl=sq;
       else
         if (sl=="++source++") lbl=sc;
         else
-          if (sl=="++both++") {
+          if (sl=="++both++" || sl=="++info++") {
             if (OnOff(Default["sort_tracks_by_sequence"])) lbl=sq" ("sc")";
             else lbl=sc" ("sq")";
-            }
+            if (sl=="++info++") lbl=lbl" ["flg""s"]" }
           else lbl=sl }
   return checklbl(lbl);
 }
@@ -3091,9 +3138,9 @@ function defPSvars(    flgst,subtitle,shbx,fixed,dfgc,dbgc) {
   printf "/XOriTitl 0 cm def\n";
   printf "/YOriTitl 0 cm def\n";
   printf "/YSTitl %s def\n", chkun(HDRheight);
-  printf "/flgcrd %s def %% credits flag\n", TxtBool(Var["Show_Credits"]);
+  printf "/flgcrd %s def %% credits flag\n", TxtBool(OnOff(Var["Show_Credits"]));
   printf "/FlgTitl %s def\n", shtt;
-  printf "/headerdict 24 dict def headerdict begin\n";
+  printf "/headerdict 25 dict def headerdict begin\n";
   printf " /ShwTBx %s def\n", shbt;
   printf " /ShwTt %s def\n", flgt;
   printf " /Title (%s) def\n", checklbl(title);
@@ -3132,7 +3179,7 @@ function startPSpage(num,tot,vpg,vtot) {
   printf "%% Printing Header\n";
   printf "headerdict begin\n";
   if (B>0) printf " /PageNumber (Page %s of %s) def\n",num,tot;
-  else printf " /PageNumber (Page %s.%s of %sH:%sV) def\n",num,vpg,tot,vtot;
+  else printf " /PageNumber (Page %s.%s of %s.%s) def\n",num,vpg,tot,vtot;
   printf " FlgTitl { Header } if\n";
   printf "end\n%%\n";
   printf "%%%%EndPageSetup\n";
@@ -3141,7 +3188,7 @@ function startPSpage(num,tot,vpg,vtot) {
 #
 function endPSpage(p,vp) {
   # PrintWRN("*  Closing PostScript Page.\n");
-  printf "%%\nflgcrd { s_credits } if\ngrestoreall\npgsave restore\nshowpage\n";
+  printf "%%\nflgcrd { headerdict begin s_credits end } if\ngrestoreall\npgsave restore\nshowpage\n";
   if (B>0) printf "%%\n%% PageEND: %s %s\n%%\n",p,p;
   else printf "%%\n%% PageEND: %s.%s %s\n%%\n",p,vp,BPC;
 } # End of function endPSpage
