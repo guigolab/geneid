@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInitialExons.c,v 1.1 2000-07-07 08:20:50 eblanco Exp $  */
+/*  $Id: BuildInitialExons.c,v 1.2 2000-08-08 14:15:10 eblanco Exp $  */
 
 #include "geneid.h"
+
+extern long NUMEXONS;
 
 long BuildInitialExons(site *Start, long nStarts, 
 		       site *Donor, long nDonors,
@@ -46,7 +48,7 @@ long BuildInitialExons(site *Start, long nStarts,
   
   /* main loop, for each Start codon */
   for (i = 0, nExon = 0;
-       (nExon<NUMEXONS) && (i < nStarts); 
+       (nExon<(int)(NUMEXONS/RFIRST)) && (i < nStarts); 
        i++)
   { 
     Frame = (Start+i)->Position % 3;
@@ -106,7 +108,7 @@ long BuildInitialExons(site *Start, long nStarts,
       }
     
     /* put LocalExon into InitialExons. Within Start sort by Donor */  
-    for (l=0;(l<nLocalExons) && (nExon<NUMEXONS);l++) 
+    for (l=0;(l<nLocalExons) && (nExon<(int)(NUMEXONS/RFIRST));l++) 
       {
 	Exon[nExon] = LocalExon[l];
 	(Exon+nExon)->Frame = 0;
@@ -120,8 +122,8 @@ long BuildInitialExons(site *Start, long nStarts,
     }
   }
 
-  if (nExon==NUMEXONS)
-   printError("Too many predicted exons: Change NUMEXONS parameter");
+  if (nExon>=(int)(NUMEXONS/RFIRST))
+   printError("Too many predicted exons: Change RFIRST parameter");
 
   free(LocalExon);
   return(nExon);
