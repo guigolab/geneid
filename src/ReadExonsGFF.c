@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.2 2000-07-28 10:56:52 eblanco Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.3 2000-08-08 14:19:47 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -59,7 +59,11 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
   i = 0; 
   three = 0; 
   lastAcceptor = -INFI;
+
+  pv->i1vExons = 0;
+  pv->i2vExons = 0;
   pv->nvSites = 0;
+
   while(fgets(line,MAXLINE,file)!=NULL)
     {
       if(line[0]=='#' || line[0]=='\n')
