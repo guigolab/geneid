@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildTerminalExons.c,v 1.1 2000-07-07 08:22:11 eblanco Exp $  */
+/*  $Id: BuildTerminalExons.c,v 1.2 2000-10-03 10:50:45 jabril Exp $  */
 
 #include "geneid.h"
+
+extern long NUMEXONS;
 
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
 		         site *Stop, long nStops,

@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadSR.c,v 1.1 2000-07-05 08:23:34 eblanco Exp $  */
+/*  $Id: ReadSR.c,v 1.2 2000-10-03 10:54:23 jabril Exp $  */
 
 #include "geneid.h"
 
@@ -68,6 +68,13 @@ long ReadSR (char *FileName, packSR* sr, long LengthSequence)
   if ((file=fopen(FileName, "r"))==NULL)
     printError("The similarity regions file cannot be open for read");
   
+  /* Reset counters */
+  for(i=0;i<STRANDS*FRAMES;i++)
+    {
+      sr->nRegions[i] = 0;
+      sr->iRegions[i] = 0;
+    }            
+
   /* Coments: line begins with # */
   /* gff format = "Name  Source  Type  Begin  End  Score  Strand  Frame */
   i = 0;

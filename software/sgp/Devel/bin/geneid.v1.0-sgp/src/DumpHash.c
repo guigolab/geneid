@@ -24,15 +24,21 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: DumpHash.c,v 1.1 2000-07-05 08:12:52 eblanco Exp $  */
+/*  $Id: DumpHash.c,v 1.2 2000-10-03 10:51:08 jabril Exp $  */
 
 #include "geneid.h"
+
+extern long MAXBACKUPEXONS;
+
+long MAXDUMPHASH;
 
 /* Initialize the hash table */
 void resetDumpHash(dumpHash* h)
 {
   int i;
-
+  
+  MAXDUMPHASH = MAXBACKUPEXONS;
+ 
   for(i=0; i<MAXDUMPHASH; i++)
     h->T[i] = NULL;
   h->total = 0;

@@ -24,11 +24,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetSitesWithProfile.c,v 1.1 2000-07-05 08:14:44 eblanco Exp $  */
+/*  $Id: GetSitesWithProfile.c,v 1.2 2000-10-03 10:51:46 jabril Exp $  */
 
 #include "geneid.h"
 
 extern int TRANS[];
+extern long NUMSITES;
 
 long  GetSitesWithProfile(char *s, profile *p, 
 			  site *st, 

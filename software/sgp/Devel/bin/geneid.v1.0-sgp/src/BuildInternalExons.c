@@ -24,9 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.1 2000-07-07 08:21:05 eblanco Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.2 2000-10-03 10:49:28 jabril Exp $  */
 
 #include "geneid.h"
+
+extern long NUMEXONS;
 
 long BuildInternalExons(site *Acceptor, long nAcceptors, 
 		        site *Donor, long nDonors,

@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.2 2000-07-05 08:49:17 eblanco Exp $  */
+/*  $Id: Output.c,v 1.3 2000-10-03 10:52:50 jabril Exp $  */
 
 #include "geneid.h"
 
@@ -32,7 +32,7 @@ extern int VRB;
 
 extern int SFP, SDP, SAP, STP,
            EFP, EIP, ETP, EXP, ESP,
-           FWD, RVS,
+           FWD, RVS,EVD,
            GENAMIC, GENEID,
            GFF;
 
@@ -189,7 +189,7 @@ void OutputGene(packGenes* pg, long nExons, char* Locus,
     }
 }
 
-void OutputStats(char* Locus, long nvExons)
+void OutputStats(char* Locus)
 {
   char mess[MAXSTRING];
 
@@ -220,9 +220,10 @@ void OutputStats(char* Locus, long nvExons)
 	      m->single_r);      
       printRes(mess);
 
-      sprintf(mess,"TOTAL: %ld predicted exons (%ld evidence exons)\n",
-	      m->totalExons,
-	      nvExons);
+
+      sprintf(mess,"TOTAL: %ld predicted exons\n",
+	      m->totalExons);
+      
       printRes(mess);
     }
 }
