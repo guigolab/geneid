@@ -1,0 +1,64 @@
+###########################################
+#
+# fancylayers.rc
+#
+# $Id: fancylayers.rc,v 1.1 2003-06-05 18:14:40 jabril Exp $
+#
+###########################################
+
+#
+# L # Page Layout Section
+
+x_label=X Sequence
+y_label=Y Sequence
+show_ribbons=on
+ribbon_style=both
+ribbon_color=verylightred
+show_percent_box=on
+show_extra_box=on
+x_sequence_coords=0..1000
+y_sequence_coords=0..1000
+percent_box_label=SCORES
+extra_box_label=EXTRA-BOX
+background_color=lightblue
+aplot_box_bgcolor=verylightblue
+percent_box_bgcolor=verylightblue
+extra_box_bgcolor=verylightblue
+show_grid=on
+
+#
+# F # GFF-features Section
+
+terminal::feature_shape=half_arrow
+internal::feature_shape=box
+first::feature_shape=half_arrow_end
+*::alignment_color=darkblue
+
+#
+# X # Extra plot features
+
+# box  <Xori> <Xend> <Yori> <Yend>
+#       [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ]
+box 150 350 150 350 L:darkviolet S:dotted W:2pt F:lightviolet
+
+# circle  <Cx> <Cy> <Rx> <Ry>
+#       [ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ]
+circle 400 600 75 75 S:solid W:2pt L:lightbrown F:darkyellow
+circle 700 200 100 50 A:45 S:dashed W:1 L:lightbrown F:darkorange
+
+# arrow  <Cx> <Cy> <length>
+#       [ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] 
+#       [ N:<font_name> ] [ Z:<font_size> ]
+#       [ H:<horizontal_align> ] [ V:<vertical_align> ] [ T:<text_color> ] [ "<string>" ]
+arrow 400 350 1cm A:0   N:helvetica Z:10pt T:red "0deg"   W:1.5pt
+arrow 400 350 2cm A:-75 N:helvetica Z:10pt T:red "-75deg" W:1.5pt
+arrow 400 350 2cm A:85  N:helvetica Z:10pt T:red "85deg"  W:1.5pt
+arrow 400 350 2cm A:165 N:helvetica Z:10pt T:red "165deg" W:1.5pt
+arrow 400 350 3cm A:235 N:helvetica Z:10pt T:red "235deg" W:1.5pt
+
+# text  <Cx> <Cy> "<string>"
+#       [ A:<angle> ] [ N:<font_name> ] [ Z:<font_size> ]
+#       [ H:<horizontal_align> ] [ V:<vertical_align> ] [ T:<text_color> ]
+text 750 750 H:center V:center Z:12pt N:helvetica-bold "A free-text string example!!!"
+
+###########################################

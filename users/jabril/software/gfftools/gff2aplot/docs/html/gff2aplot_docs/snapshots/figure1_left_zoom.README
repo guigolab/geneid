@@ -1,0 +1,18 @@
+#
+# $Id: figure1_left_zoom.README,v 1.1 2003-06-05 18:14:40 jabril Exp $
+#
+echo "#  -> Aplot paper: figure 1 left panel subfigure" ;
+#
+$BIN/gff2aplot.pl                                   \
+    --verbose                                       \
+    --title  "Human/Mouse MHCII Region"             \
+    --subtitle "Zooming into the LMP2 gene region"  \
+    --x-label "Human"                               \
+    --y-label "Mouse"                               \
+    --end-x-sequence 6500                           \
+    --end-y-sequence 6500                           \
+    --zoom                                          \
+    --custom-filename figure1_left_zoom.rc          \
+    -- figure1_left_zoom.gff > figure1_left_zoom.ps \
+                            2> figure1_left_zoom.log ;
+#

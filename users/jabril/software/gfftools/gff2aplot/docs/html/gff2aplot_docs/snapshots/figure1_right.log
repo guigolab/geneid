@@ -1,0 +1,345 @@
+################################################################################
+###                                                                          ###
+###                            RUNNING gff2aplot                             ###
+###                                                                          ###
+###                               User: lopep                                ###
+###                      Date: Thu Jun  5 16:51:25 2003                      ###
+###                               Perl: v5.8.0                               ###
+################################################################################
+################################################################################
+###                             SETTING DEFAULTS                             ###
+################################################################################
+################################################################################
+###                      CHECKING COMMAND-LINE OPTIONS                       ###
+################################################################################
+###
+### Validating INPUT FILENAMES
+###
+###---> "figure1_right.gff" exists, including as Input File.
+###
+### Validating CUSTOM FILENAMES
+###
+###---> ".gff2aplotrc" NOT FOUND, skipping!!!
+###---> "figure1_right.rc" exists, including as Custom File.
+###
+### Checking COMMAND-LINE Options
+###
+.... [000004]
+###
+### Checking Custom Variables SET by COMMAND-LINE
+###
+################################################################################
+###                       COMMAND-LINE OPTIONS CHECKED                       ###
+###           0 wallclock secs ( 0.04 usr +  0.00 sys =  0.04 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           COMMAND-LINE CHECKED                           ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           READING CUSTOM FILES                           ###
+################################################################################
+###
+### Reading Customization Parameters from "figure1_right.rc"
+###
+.........*...LLLLLLLLLLL..*.G..*.FFFFFFFF.F.FF [000046]
+################################################################################
+###                           CUSTOM FILES LOADED                            ###
+###           0 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)           ###
+################################################################################
+###
+################################################################################
+###                MAPPING CUSTOMIZATION INPUTS TO MAIN VARS                 ###
+################################################################################
+################################################################################
+###                         VALUES SET for MAIN VARS                         ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                        PARSING INPUT GFF RECORDS                         ###
+################################################################################
+###
+### Reading GFF records from "figure1_right.gff"
+###
+XXXXXXXXXXXXXXXXXXXXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [004950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [005950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [006950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [007350]
+OOOOOOO [007357]
+################################################################################
+###                               DATA LOADED                                ###
+###           7 wallclock secs ( 6.98 usr +  0.16 sys =  7.14 CPU)           ###
+################################################################################
+###
+################################################################################
+###                  SETTING CUSTOM VALUES TO GFF ELEMENTS                   ###
+################################################################################
+################################################################################
+###                       VALUES SET for GFF ELEMENTS                        ###
+###           4 wallclock secs ( 3.71 usr +  0.01 sys =  3.72 CPU)           ###
+################################################################################
+###
+################################################################################
+###                   SORTING ELEMENTS BY ACCEPTOR (START)                   ###
+################################################################################
+*- Sorting ANNOTATION DATA
+|  *- Sequence: HSCKBG
+|  |  *- Source: embl
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: HSCKBG
+|  |  |  |  |         Sorted 10 elements.
+|  |  |  |  `Sorted 1 groups.
+|  *- Sequence: MMCRKNB
+|  |  *- Source: embl
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: MMCRKNB
+|  |  |  |  |         Sorted 10 elements.
+|  |  |  |  `Sorted 1 groups.
+*- Sorting ALIGNMENT DATA
+|  *- Sequence: HSCKBG:MMCRKNB
+|  |  *- Source: ssitesim
+|  |  |  *- Strand: ++
+|  |  |  |  *- Group: 0.91
+|  |  |  |  |         Sorted 11 elements.
+|  |  |  |  *- Group: 0.2
+|  |  |  |  |         Sorted 2171 elements.
+|  |  |  |  *- Group: 0.64
+|  |  |  |  |         Sorted 10 elements.
+|  |  |  |  *- Group: 0.27
+|  |  |  |  |         Sorted 601 elements.
+|  |  |  |  *- Group: 0.09
+|  |  |  |  |         Sorted 1450 elements.
+|  |  |  |  *- Group: 0.82
+|  |  |  |  |         Sorted 4 elements.
+|  |  |  |  *- Group: 0.45
+|  |  |  |  |         Sorted 115 elements.
+|  |  |  |  *- Group: 1
+|  |  |  |  |         Sorted 13 elements.
+|  |  |  |  *- Group: 0.4
+|  |  |  |  |         Sorted 1090 elements.
+|  |  |  |  *- Group: 0.36
+|  |  |  |  |         Sorted 291 elements.
+|  |  |  |  *- Group: 0.8
+|  |  |  |  |         Sorted 58 elements.
+|  |  |  |  *- Group: 0.73
+|  |  |  |  |         Sorted 4 elements.
+|  |  |  |  *- Group: 1.00
+|  |  |  |  |         Sorted 2 elements.
+|  |  |  |  *- Group: 0.6
+|  |  |  |  |         Sorted 366 elements.
+|  |  |  |  *- Group: 0.18
+|  |  |  |  |         Sorted 1123 elements.
+|  |  |  |  *- Group: 0.55
+|  |  |  |  |         Sorted 28 elements.
+|  |  |  |  `Sorted 16 groups.
+################################################################################
+###                             ELEMENTS SORTED                              ###
+###           1 wallclock secs ( 1.08 usr +  0.00 sys =  1.08 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           SETTING PAGE LAYOUT                            ###
+################################################################################
+###---> Page size set to "a4" ( 595 x 842 )...
+###---> Setting plot AXES: 
+###     ALIGNMENT "HSCKBG:MMCRKNB" was found. PLOTTING IT...
+###     X-SEQUENCE "HSCKBG" was found. PLOTTING IT...
+###     Y-SEQUENCE "MMCRKNB" was found. PLOTTING IT...
+###---> SEQUENCE BOUNDARIES selected for this plot:
+###      X : 0 to 4200
+###      Y : 0 to 4600
+###---> SEQUENCE ZOOM is not enabled for this plot...
+###---> NO ZOOM AREA was selected for this plot... 
+###---> SCORE BOUNDARIES selected for this plot:
+###      ALIGNMENT:   0 to 1
+###      PERCENT box: 0.0 to 1.0
+###---> TICKMARKS were set: 
+###      Nucleotide-Scale: Major step 1000 - Minor step 200
+###      Score-Scale:      Major step 0.25 - Minor step 0.05
+###---> X/Y scale settings are: 
+###     XY-RATIO is not taken into account for this plot ...
+###     Are X/Y axes going to have same length ?  YES 
+################################################################################
+###                     PAGE LAYOUT SET for CURRENT PLOT                     ###
+###           0 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)           ###
+################################################################################
+###
+################################################################################
+###                       WRITING POSTSCRIPT TO STDOUT                       ###
+################################################################################
+###---> PostScript Header DONE...
+###---> PostScript Colors Table SET...
+###---> PostScript Page-formats Table SET...
+###---> PostScript Variables SET...
+###---> PostScript Functions SET...
+###---> Writting PostScript Page:
+###     + APLOT-BOX section :
+###       + drawing X-sequence annotation (HSCKBG)...
+###       + drawing X-sequence ribbons...
+###       + drawing Y-sequence annotation (MMCRKNB)...
+###       + drawing Y-sequence ribbons...
+###       + drawing X-sequence ribbons outline...
+###       + drawing Y-sequence ribbons outline...
+###       + drawing alignment features (HSCKBG:MMCRKNB)...
+###       + APLOT-BOX section DONE...
+###     + PERCENT-BOX section :
+###       + drawing X-sequence ribbons...
+###       + drawing X-sequence ribbons outline...
+###       + drawing alignment features (HSCKBG:MMCRKNB)...
+###       + PERCENT-BOX section DONE...
+###---> PostScript Page FINISHED...
+################################################################################
+###                       WRITING POSTSCRIPT FINISHED                        ###
+###           4 wallclock secs ( 3.85 usr +  0.00 sys =  3.85 CPU)           ###
+################################################################################
+###
+################################################################################
+###                          gff2aplot HAS FINISHED                          ###
+###        [ 16 wallclock secs (15.68 usr +  0.17 sys = 15.85 CPU) ]         ###
+################################################################################

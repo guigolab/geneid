@@ -1,8 +1,20 @@
+##################################################
 #
-# README for two colors alignment gff2aplot example
-# 
+# README splice_sites
 #
-# $Id: README,v 1.2 2003-03-04 19:06:09 jabril Exp $
+# This README runs as a shell script.
+# Here you can find the commands
+# we used to produce all the figures for:
+#
+#   ""
+#
+# USAGE: bash README > .log 2>&1
+#
+# $Id: README,v 1.3 2003-06-05 18:15:29 jabril Exp $
+#
+##################################################
+#
+SECONDS=0 ;
 #
 
 #
@@ -24,8 +36,9 @@
 # sort +3n -4 KCRB.mm.gff~ KCRB.mm_utr.gff > KCRB.mm.gff
 
 #
-# Running gff2aplot: GFF -> PS
-BIN="$HOME/development/softjabril/gfftools/gff2aplot/bin"
+echo "# Getting the PostScripts with GFF2APLOT" ;
+#
+echo "#  ->  GT - DONORS" ;
 # GT - DONORS
 $BIN/gff2aplot.pl -v -t "DONOR SITES" \
                   -- KCRB.hs.gff \
@@ -33,6 +46,8 @@ $BIN/gff2aplot.pl -v -t "DONOR SITES" \
                      KCRB.GT.hs-mm.gff \
                    > KCRB.GT.hs-mm.ps \
                   2> KCRB.GT.hs-mm.log;
+#
+echo "#  ->  AG - ACCEPTORS" ;
 # AG - ACCEPTORS
 $BIN/gff2aplot.pl -v -t "ACCEPTOR SITES" \
                   -- KCRB.hs.gff \
@@ -40,6 +55,8 @@ $BIN/gff2aplot.pl -v -t "ACCEPTOR SITES" \
                      KCRB.AG.hs-mm.gff \
                    > KCRB.AG.hs-mm.ps \
                   2> KCRB.AG.hs-mm.log;
+#
+echo "#  ->  GT + AG" ;
 # GT + AG
 $BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES" \
                   -- KCRB.hs.gff \
@@ -85,6 +102,8 @@ alignGT::alignment_color=darkred
 alignAG::alignment_color=darkblue
 *::alignment_scale_color=on
 +++EOF+++
+#
+echo "#  -> GT + AG ... CUSTOMIZED" ;
 # GT + AG
 $BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES (Color Version)" \
                   --x-sequence-coords 0..4200 \
@@ -100,8 +119,10 @@ $BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES (Color Version)" \
 # Extra customization
 cat > GT-AG_sm.rc <<'+++EOF+++'
 # L #
-color_merge_factor=2
+color_merge_factor=1
 +++EOF+++
+#
+echo "#  -> GT + AG ... MORE CUSTOMIZED" ;
 # GT + AG
 $BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES (Color Version)" \
                   --x-sequence-coords 0..4200 \
@@ -114,3 +135,67 @@ $BIN/gff2aplot.pl -v -t "DONOR + ACCEPTOR SITES (Color Version)" \
                      KCRB.AG.hs-mm.gff \
                    > KCRB.GT-AG.hs-mm.color_small.ps \
                   2> KCRB.GT-AG.hs-mm.color_small.log;
+
+#
+# Preparing web images
+#
+filenames () {
+  cat << 'EOF';
+EOF
+};
+#
+# echo "# Using \"ghostscript\" to obtain JPEG images from PS files" ;
+echo "# Using \"ghostscript\" to obtain PNG images from PS files" ;
+#
+GS=`which gs || echo "gs"`;
+MG=`which mogrify || echo "mogrify"`;
+CV=`which convert || echo "convert"`;
+#
+filenames | while read n ;
+  do { 
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300        \
+        -sPAPERSIZE=a4 -sDEVICE=png16m \
+        -sOutputFile=$n.png $n.ps      ;
+    cp -v $n.png $n.s.png ;
+    # mogrify is a ImageMagick tool that allow us to transform images on batch,
+    # large high-resolution jpeg files are scaled down to thumbnail resolution (2479x3508=>123x175)
+    # it overwrites original file (so that we previously get a renamed copy for each jpeg to process). 
+    $MG -verbose -geometry 5% $n.s.png ;
+    #
+    # $GS -dBATCH -dNOPAUSE -r300      \
+    #     -sPAPERSIZE=a4 -sDEVICE=jpeg \
+    #     -sOutputFile=$n.jpg $n.ps    ;
+    # png large version is pretty smaller than jpeg
+    # cp -v $n.jpg $n.s.jpg ;
+    # $MG -verbose -geometry 5% $n.s.jpg ;
+    };
+  done ;
+$CV 'vid:*.s.png'  splicesites.summary.png 
+#
+echo "# Using \"ghostscript\" to obtain PDF documents from PS files" ;
+#
+filenames | while read n ;
+  do { 
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300          \
+        -sPAPERSIZE=a4 -sDEVICE=pdfwrite \
+        -sOutputFile=$n.pdf $n.ps        ;
+    };
+  done ;
+#
+#
+# echo "# LaTeXing all figures together..." ;
+#
+# latex splicesites.tex;
+# dvips splicesites.dvi -o splicesites.ps;
+#
+#
+echo "###" ;
+echo "### TOTAL TIME: $SECONDS seconds..." ; 
+#
+#
+# That's all folks... ;^D
+#
+#        >> Copyleft (C) 2002/2003 - Josep F. Abril <<
+#

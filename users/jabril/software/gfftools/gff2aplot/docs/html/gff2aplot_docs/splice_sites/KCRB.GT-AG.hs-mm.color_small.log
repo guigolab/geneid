@@ -1,0 +1,363 @@
+################################################################################
+###                                                                          ###
+###                            RUNNING gff2aplot                             ###
+###                                                                          ###
+###                               User: lopep                                ###
+###                      Date: Thu Feb 27 17:21:47 2003                      ###
+###                               Perl: v5.6.1                               ###
+################################################################################
+################################################################################
+###                             SETTING DEFAULTS                             ###
+################################################################################
+################################################################################
+###                      CHECKING COMMAND-LINE OPTIONS                       ###
+################################################################################
+###
+### Validating INPUT FILENAMES
+###
+###---> "KCRB.hs.gff" exists, including as Input File.
+###---> "KCRB.mm.gff" exists, including as Input File.
+###---> "KCRB.GT.hs-mm.gff" exists, including as Input File.
+###---> "KCRB.AG.hs-mm.gff" exists, including as Input File.
+###
+### Validating CUSTOM FILENAMES
+###
+###---> ".gff2aplotrc" NOT FOUND, skipping!!!
+###---> "GT-AG.rc" exists, including as Custom File.
+###---> "GT-AG_sm.rc" exists, including as Custom File.
+###
+### Checking COMMAND-LINE Options
+###
+... [000003]
+###
+### Checking Custom Variables SET by COMMAND-LINE
+###
+################################################################################
+###                       COMMAND-LINE OPTIONS CHECKED                       ###
+###           0 wallclock secs ( 0.04 usr +  0.02 sys =  0.06 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           COMMAND-LINE CHECKED                           ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           READING CUSTOM FILES                           ###
+################################################################################
+###
+### Reading Customization Parameters from "GT-AG.rc"
+###
+.*..LLLLLLLLLLL.*G.*FFFFFFFF.F.FF [000033]
+###
+### Reading Customization Parameters from "GT-AG_sm.rc"
+###
+*L [000002]
+################################################################################
+###                           CUSTOM FILES LOADED                            ###
+###           0 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)           ###
+################################################################################
+###
+################################################################################
+###                MAPPING CUSTOMIZATION INPUTS TO MAIN VARS                 ###
+################################################################################
+################################################################################
+###                         VALUES SET for MAIN VARS                         ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                        PARSING INPUT GFF RECORDS                         ###
+################################################################################
+###
+### Reading GFF records from "KCRB.hs.gff"
+###
+XXXXXXXXXX [000010]
+###
+### Reading GFF records from "KCRB.mm.gff"
+###
+XXXXXXXXXX [000010]
+###
+### Reading GFF records from "KCRB.GT.hs-mm.gff"
+###
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003698]
+###
+### Reading GFF records from "KCRB.AG.hs-mm.gff"
+###
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [000950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [001950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002650]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002700]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002750]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002800]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002850]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002900]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [002950]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003000]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003050]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003100]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003150]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003200]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003250]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003300]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003350]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003400]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003450]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003500]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003550]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003600]
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO [003639]
+################################################################################
+###                               DATA LOADED                                ###
+###           6 wallclock secs ( 5.49 usr +  0.15 sys =  5.64 CPU)           ###
+################################################################################
+###
+################################################################################
+###                  SETTING CUSTOM VALUES TO GFF ELEMENTS                   ###
+################################################################################
+################################################################################
+###                       VALUES SET for GFF ELEMENTS                        ###
+###           3 wallclock secs ( 2.94 usr +  0.00 sys =  2.94 CPU)           ###
+################################################################################
+###
+################################################################################
+###                   SORTING ELEMENTS BY ACCEPTOR (START)                   ###
+################################################################################
+*- Sorting ANNOTATION DATA
+|  *- Sequence: HSCKBG
+|  |  *- Source: embl
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: HSCKBG
+|  |  |  |  |         Sorted 10 elements.
+|  |  |  |  `Sorted 1 groups.
+|  *- Sequence: MMCRKNB
+|  |  *- Source: embl
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: MMCRKNB
+|  |  |  |  |         Sorted 10 elements.
+|  |  |  |  `Sorted 1 groups.
+*- Sorting ALIGNMENT DATA
+|  *- Sequence: HSCKBG:MMCRKNB
+|  |  *- Source: ssitesim
+|  |  |  *- Strand: ++
+|  |  |  |  *- Group: 0.64
+|  |  |  |  |         Sorted 10 elements.
+|  |  |  |  *- Group: 0.73
+|  |  |  |  |         Sorted 4 elements.
+|  |  |  |  *- Group: 0.82
+|  |  |  |  |         Sorted 4 elements.
+|  |  |  |  *- Group: 1
+|  |  |  |  |         Sorted 13 elements.
+|  |  |  |  *- Group: 0.2
+|  |  |  |  |         Sorted 2171 elements.
+|  |  |  |  *- Group: 0.91
+|  |  |  |  |         Sorted 11 elements.
+|  |  |  |  *- Group: 1.00
+|  |  |  |  |         Sorted 2 elements.
+|  |  |  |  *- Group: 0.4
+|  |  |  |  |         Sorted 1090 elements.
+|  |  |  |  *- Group: 0.6
+|  |  |  |  |         Sorted 366 elements.
+|  |  |  |  *- Group: 0.8
+|  |  |  |  |         Sorted 58 elements.
+|  |  |  |  *- Group: 0.09
+|  |  |  |  |         Sorted 1450 elements.
+|  |  |  |  *- Group: 0.18
+|  |  |  |  |         Sorted 1123 elements.
+|  |  |  |  *- Group: 0.27
+|  |  |  |  |         Sorted 601 elements.
+|  |  |  |  *- Group: 0.36
+|  |  |  |  |         Sorted 291 elements.
+|  |  |  |  *- Group: 0.45
+|  |  |  |  |         Sorted 115 elements.
+|  |  |  |  *- Group: 0.55
+|  |  |  |  |         Sorted 28 elements.
+|  |  |  |  `Sorted 16 groups.
+################################################################################
+###                             ELEMENTS SORTED                              ###
+###           1 wallclock secs ( 1.15 usr +  0.00 sys =  1.15 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           SETTING PAGE LAYOUT                            ###
+################################################################################
+###---> Page size set to "a4" ( 595 x 842 )...
+###---> Setting plot AXES: 
+###     ALIGNMENT "HSCKBG:MMCRKNB" was found. PLOTTING IT...
+###     X-SEQUENCE "HSCKBG" was found. PLOTTING IT...
+###     Y-SEQUENCE "MMCRKNB" was found. PLOTTING IT...
+###---> SEQUENCE BOUNDARIES selected for this plot:
+###      X : 0 to 4200
+###      Y : 0 to 4600
+###---> SEQUENCE ZOOM is not enabled for this plot...
+###---> NO ZOOM AREA was selected for this plot... 
+###---> SCORE BOUNDARIES selected for this plot:
+###      ALIGNMENT:   0 to 1
+###      PERCENT box: 0.0 to 1.0
+###---> TICKMARKS were set: 
+###      Nucleotide-Scale: Major step 1000 - Minor step 200
+###      Score-Scale:      Major step 0.25 - Minor step 0.05
+###---> X/Y scale settings are: 
+###     XY-RATIO is not taken into account for this plot ...
+###     Are X/Y axes going to have same length ?  YES 
+################################################################################
+###                     PAGE LAYOUT SET for CURRENT PLOT                     ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                       WRITING POSTSCRIPT TO STDOUT                       ###
+################################################################################
+###---> PostScript Header DONE...
+###---> PostScript Colors Table SET...
+###---> PostScript Page-formats Table SET...
+###---> PostScript Variables SET...
+###---> PostScript Functions SET...
+###---> Writting PostScript Page:
+###     + APLOT-BOX section :
+###       + drawing X-sequence annotation (HSCKBG)...
+###       + drawing X-sequence ribbons...
+###       + drawing Y-sequence annotation (MMCRKNB)...
+###       + drawing Y-sequence ribbons...
+###       + drawing X-sequence ribbons outline...
+###       + drawing Y-sequence ribbons outline...
+###       + drawing alignment features (HSCKBG:MMCRKNB)...
+###       + APLOT-BOX section DONE...
+###     + PERCENT-BOX section :
+###       + drawing X-sequence ribbons...
+###       + drawing X-sequence ribbons outline...
+###       + drawing alignment features (HSCKBG:MMCRKNB)...
+###       + PERCENT-BOX section DONE...
+###---> PostScript Page FINISHED...
+################################################################################
+###                       WRITING POSTSCRIPT FINISHED                        ###
+###           4 wallclock secs ( 3.53 usr +  0.02 sys =  3.55 CPU)           ###
+################################################################################
+###
+################################################################################
+###                          gff2aplot HAS FINISHED                          ###
+###        [ 14 wallclock secs (13.16 usr +  0.19 sys = 13.35 CPU) ]         ###
+################################################################################

@@ -1,8 +1,8 @@
 %!PS-Adobe-3.0
-%%Title: NM_009315 x NM_005641
+%%Title: A COLOR-FULL EXAMPLE
 %%Creator: gff2aplot
 %%Version: v2.0
-%%CreationDate: Tue Jun  3 16:42:28 2003
+%%CreationDate: Thu Jun  5 16:51:44 2003
 %%For: lopep
 %%Pages: 1
 %%Orientation: Portrait
@@ -35,7 +35,7 @@
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% $Id: taf6.mmhs.genomic.blastn.aplot.ps,v 1.2 2003-06-05 18:18:22 jabril Exp $
+% $Id: fancylayers.ps,v 1.1 2003-06-05 18:14:40 jabril Exp $
 %
 % Report BUGS to: jabril@imim.es 
 %
@@ -79,10 +79,10 @@
 %%BeginProcSet: Pseudohash_dicts 1.0 0
 %
 %% Fixed Color Variables (CMYK)
-/colordict 34 dict D colordict begin %% using 6 colors + 28 definitions
-/black { 0.00 0.00 0.00 1.00 } D /grey { 0.00 0.00 0.00 0.50 } D /verylightgrey { 0.00 0.00 0.00 0.30 } D /white { 0.00 0.00 0.00 0.00 } D /red { 0.00 0.60 0.60 0.00 } D /lightred { 0.00 0.45 0.45 0.00 } D
-
-end %% colordict
+/colordict 43 dict D colordict begin %% using 15 colors + 28 definitions
+/black { 0.00 0.00 0.00 1.00 } D /grey { 0.00 0.00 0.00 0.50 } D /verylightgrey { 0.00 0.00 0.00 0.30 } D /white { 0.00 0.00 0.00 0.00 } D /darkviolet { 0.35 0.75 0.00 0.00 } D /lightviolet { 0.22 0.45 0.00 0.00 } D
+/darkblue { 0.75 0.75 0.00 0.00 } D /lightblue { 0.45 0.45 0.00 0.00 } D /verylightblue { 0.30 0.30 0.00 0.00 } D /darkyellow { 0.00 0.00 0.75 0.00 } D /darkorange { 0.00 0.30 0.75 0.00 } D
+/red { 0.00 0.60 0.60 0.00 } D /lightred { 0.00 0.45 0.45 0.00 } D /verylightred { 0.00 0.30 0.30 0.00 } D /lightbrown { 0.15 0.40 0.55 0.00 } D end %% colordict
 %% Ribbon color mode (cmyk/pattern)
 /rbxcol { cmyk } B
 %% Paper Sizes (in points)
@@ -97,24 +97,24 @@ tflg { (%%% Basic settings and functions were defined %%%) msg } if
 %%BeginProcSet: Setting_Vars 1.0 0
 %
 tflg { (%%% Setting variables %%%) msg } if
-/H _t D /HT { /H _t D } B /VT { /H _f D } B /flgcrd _t D /flglscape _f D /Pb _f D /Qb _f D /axesb _t D /XYR -1 D /ZM _f D
+/H _t D /HT { /H _t D } B /VT { /H _f D } B /flgcrd _t D /flglscape _f D /Pb _t D /Qb _t D /axesb _t D /XYR -1 D /ZM _f D
 /Dpage { pagedict begin pga4 flglscape { exch } if end } D /PPC pagedict begin pga4 end hip Dpage hip exch div D /Ch 4 pt 15 pt 4 pt PPC mul clim D
 /MT 1 cm D /MB 1 cm D /ML 1 cm D /MR 1 cm D
-/bg { colordict begin white end } D /fg { colordict begin black end } D /ABc { colordict begin bg end } D /PBc { colordict begin bg end } D /QBc { colordict begin bg end } D
-/XO 1 D /XE 5878 D /XD XE XO sub 1 add D /YO 1 D /YE 12278 D /YD YE YO sub 1 add D /PO 127 D /PE 1405 D /PD PE PO sub D
+/bg { colordict begin lightblue end } D /fg { colordict begin black end } D /ABc { colordict begin verylightblue end } D /PBc { colordict begin verylightblue end } D /QBc { colordict begin verylightblue end } D
+/XO 0 D /XE 1000 D /XD XE XO sub 1 add D /YO 0 D /YE 1000 D /YD YE YO sub 1 add D /PO 0.35 D /PE 0.75 D /PD PE PO sub D
 /QO 0 D /QE 1 D /QD PE PO sub D
 /Ph -1 pt D /Qh -1 pt D
-/KGb _f D /KLb _t D /KAXb _t D /KAYb _t D /KPXb _t D /KPYb _t D /KQXb _t D /KQYb _t D
-/KASm 1000 D /KASn 200 D /KPSm 1000 D /KPSn 250 D /KQSm 10 D /KQSn 10 D
-/TTLb _t D /TTLl (NM_009315 x NM_005641) D /TTLz 24 pt D /TTLf { TTLz /Helvetica-Bold } D /TTLp 10 pt 25 pt TTLz 2 div zlim D /TTlb _t D /TTll () D /TTlz 16 pt D /TTlf { TTlz /Helvetica } D /TTlp 10 pt 20 pt TTlz zlim D
-/XSLb _t D /XSLl (NM_009315) D /XSLz 12 pt D /XSLf { XSLz /Helvetica-Bold } D /XSLp 2.5 pt 10 pt XSLz 0.25 mul zlim D /YSLb _t D /YSLl (NM_005641) D /YSLz 12 pt D /YSLf { YSLz /Helvetica-Bold } D /YSLp 2.5 pt 10 pt YSLz 0.25 mul zlim D
-/PBLb _t D /PBLl () D /PBLz 12 pt D /PBLf { PBLz /Helvetica-Bold } D /PBLp 10 pt 20 pt PBLz zlim D /PBlb _t D /PBll () D /PBlz 9 pt D /PBlf { PBlz /Helvetica } D /PBlp 10 pt 20 pt PBlz zlim D
-/QBLb _t D /QBLl () D /QBLz 10 pt D /QBLf { QBLz /Helvetica-Bold } D /QBLp 10 pt 20 pt QBLz zlim D /QBlb _t D /QBll () D /QBlz 9 pt D /QBlf { QBlz /Helvetica } D /QBlp 10 pt 20 pt QBlz zlim D
-/FTz 6 pt D /FTf { FTz /Helvetica } D /FTp 2 pt 10 pt FTz 0.5 mul zlim D /FTXw FTz 0 gt { 12 FTf glblw } { 0 } ie D /FTXa 0 D /FTXrb _f D /FTYw FTz 0 gt { 12 FTf glblw } { 0 } ie D /FTYa 0 D /FTYrb _t D
-/GPz 8 pt D /GPf { GPz /Helvetica } D /GPp 4 pt 16 pt GPz 0.75 mul zlim D /GPpt GPp 0.25 mul D /GPXw GPz 0 gt { 10 GPf glblw } { 0 } ie D /GPXa 0 D /GPXrb _f D /GPYw GPz 0 gt { 9 GPf glblw } { 0 } ie D /GPYa 0 D /GPYrb _t D
+/KGb _t D /KLb _t D /KAXb _t D /KAYb _t D /KPXb _t D /KPYb _t D /KQXb _t D /KQYb _t D
+/KASm 100 D /KASn 20 D /KPSm 1 D /KPSn 0.25 D /KQSm 10 D /KQSn 10 D
+/TTLb _t D /TTLl (A COLOR-FULL EXAMPLE) D /TTLz 24 pt D /TTLf { TTLz /Helvetica-Bold } D /TTLp 10 pt 25 pt TTLz 2 div zlim D /TTlb _t D /TTll (Showing many features available from gff2aplot.) D /TTlz 16 pt D /TTlf { TTlz /Helvetica } D /TTlp 10 pt 20 pt TTlz zlim D
+/XSLb _t D /XSLl (X Sequence) D /XSLz 12 pt D /XSLf { XSLz /Helvetica-Bold } D /XSLp 2.5 pt 10 pt XSLz 0.25 mul zlim D /YSLb _t D /YSLl (Y Sequence) D /YSLz 12 pt D /YSLf { YSLz /Helvetica-Bold } D /YSLp 2.5 pt 10 pt YSLz 0.25 mul zlim D
+/PBLb _t D /PBLl (SCORES) D /PBLz 12 pt D /PBLf { PBLz /Helvetica-Bold } D /PBLp 10 pt 20 pt PBLz zlim D /PBlb _t D /PBll () D /PBlz 9 pt D /PBlf { PBlz /Helvetica } D /PBlp 10 pt 20 pt PBlz zlim D
+/QBLb _t D /QBLl (EXTRA-BOX) D /QBLz 10 pt D /QBLf { QBLz /Helvetica-Bold } D /QBLp 10 pt 20 pt QBLz zlim D /QBlb _t D /QBll () D /QBlz 9 pt D /QBlf { QBlz /Helvetica } D /QBlp 10 pt 20 pt QBlz zlim D
+/FTz 6 pt D /FTf { FTz /Helvetica } D /FTp 2 pt 10 pt FTz 0.5 mul zlim D /FTXw FTz 0 gt { 8 FTf glblw } { 0 } ie D /FTXa 0 D /FTXrb _f D /FTYw FTz 0 gt { 8 FTf glblw } { 0 } ie D /FTYa 0 D /FTYrb _t D
+/GPz 8 pt D /GPf { GPz /Helvetica } D /GPp 4 pt 16 pt GPz 0.75 mul zlim D /GPpt GPp 0.25 mul D /GPXw GPz 0 gt { 6 GPf glblw } { 0 } ie D /GPXa 0 D /GPXrb _f D /GPYw GPz 0 gt { 7 GPf glblw } { 0 } ie D /GPYa 0 D /GPYrb _t D
 /DRh 10 pt D /DRhb DRh 0.1 mul D /DRht DRh DRhb sub D /DRFTlh DRh FTp add D /DRGPlh DRFTlh FTz add GPp add D /DRGPlnh DRGPlh GPpt 2 mul sub D
 /Blw 2 pt D /Alw 1 pt D /Clw 0.1 pt D /Clw2 Clw 2 mul D /BClw Blw Clw sub D
-/KLz 8 pt D /KLf { KLz /Helvetica } D /KWx 1.5 pt D /KWn KWx 0.1 mul D /KHx KLz 0.75 mul D /KHn KLz 0.50 mul D /KHt KLz 1.0 mul D /KLp KLz 0.5 mul D /KLh KHt KLz add KLp add D /KLw 5 KLf glblw D
+/KLz 8 pt D /KLf { KLz /Helvetica } D /KWx 1.5 pt D /KWn KWx 0.1 mul D /KHx KLz 0.75 mul D /KHn KLz 0.50 mul D /KHt KLz 1.0 mul D /KLp KLz 0.5 mul D /KLh KHt KLz add KLp add D /KLw 4 KLf glblw D
 %
 %%EndProcSet:   Setting_Vars 1.0 0
 %
@@ -242,96 +242,141 @@ begindata
 %%%% DATA ---> X-sequence Annotations
 %
 beginXseq
-/fbox lightred _f _f _f 1 1 10 (+) shp
-/fbox lightred _f _f _f 1 11 166 (+) shp
-/fbox lightred _f _f _f 1 574 660 (+) shp
-/fbox lightred _f _f _f 1 778 931 (+) shp
-/fbox lightred _f _f _f 1 1129 1185 (+) shp
-/fbox lightred _f _f _f 1 1285 1404 (+) shp
-/fbox lightred _f _f _f 1 1756 1901 (+) shp
-/fbox lightred _f _f _f 1 2008 2085 (+) shp
-/fbox lightred _f _f _f 1 2197 2298 (+) shp
-/fbox lightred _f _f _f 1 2409 2591 (+) shp
-/fbox lightred _f _f _f 1 3307 3381 (+) shp
-/fbox lightred _f _f _f 1 3483 3608 (+) shp
-/fbox lightred _f _f _f 1 4546 4719 (+) shp
-/fbox lightred _f _f _f 1 4889 5086 (+) shp
-/fbox lightred _f _f _f 1 5353 5733 (+) shp
-/fbox lightred _f _f _f 1 5734 5878 (+) shp
-/gbrk _f fg (M.musculus) _t 1 5878 (+) grp
+/hrae lightred _f _f _f 1 200 300 (+) shp
+/fbox lightred _f _f _f 1 500 650 (+) shp
+/hraw lightred _f _f _f 1 700 825 (+) shp
+/gbrk _f fg (Gene A) _t 200 825 (+) grp
+endseq
+%
+%%%% X-sequence Ribbons
+%
+beginXseq
+200 300 verylightred rbx
+500 650 verylightred rbx
+700 825 verylightred rbx
 endseq
 %
 %%%% DATA ---> Y-sequence Annotations
 %
 beginYseq
-/fbox lightred _f _f _f 1 1 477 (+) shp
-/fbox lightred _f _f _f 1 5089 5147 (+) shp
-/fbox lightred _f _f _f 1 5148 5303 (+) shp
-/fbox lightred _f _f _f 1 5403 5489 (+) shp
-/fbox lightred _f _f _f 1 5588 5741 (+) shp
-/fbox lightred _f _f _f 1 5952 6008 (+) shp
-/fbox lightred _f _f _f 1 6440 6559 (+) shp
-/fbox lightred _f _f _f 1 7104 7249 (+) shp
-/fbox lightred _f _f _f 1 7358 7435 (+) shp
-/fbox lightred _f _f _f 1 7528 7629 (+) shp
-/fbox lightred _f _f _f 1 8036 8218 (+) shp
-/fbox lightred _f _f _f 1 9083 9157 (+) shp
-/fbox lightred _f _f _f 1 9284 9409 (+) shp
-/fbox lightred _f _f _f 1 10817 10990 (+) shp
-/fbox lightred _f _f _f 1 11234 11431 (+) shp
-/fbox lightred _f _f _f 1 11734 12111 (+) shp
-/fbox lightred _f _f _f 1 12112 12278 (+) shp
-/gbrk _f fg (H.sapiens) _t 1 12278 (+) grp
+/hrae lightred _f _f _f 1 175 275 (+) shp
+/fbox lightred _f _f _f 1 450 600 (+) shp
+/hraw lightred _f _f _f 1 725 850 (+) shp
+/gbrk _f fg (Gene a') _t 175 850 (+) grp
+endseq
+%
+%%%% Y-sequence Ribbons
+%
+beginYseq
+175 275 verylightred rbx
+450 600 verylightred rbx
+725 850 verylightred rbx
+endseq
+%
+%%%% Finishing X-sequence Ribbons
+%
+beginXseq
+[ 200 300 500 650 700 825 Rln
+endseq
+%
+%%%% Finishing Y-sequence Ribbons
+%
+beginYseq
+[ 175 275 450 600 725 850 Rln
+endseq
+%
+%%%% Extra features from custom files (PRE)...
+%
+beginaln
+lightred 2 solid _f 100 400 600 900 xbox
+darkviolet 2 pt (dotted) lightviolet _t 150 350 150 350 xbox
+lightbrown 2 pt (solid) darkyellow _t 75 75 0 400 600 xcir
+lightbrown 1 pt (dashed) darkorange _t 100 50 45 700 200 xcir
 endseq
 %
 %%%% DATA ---> Alignment
 %
 beginaln
-1 5138 292 5426 fg _f _f 0.441 aln
-357 1748 463 1853 fg _f _f 0.018 aln
-3118 6314 3167 6364 fg _f _f 0.018 aln
-399 9592 453 9647 fg _f _f 0.004 aln
-550 5378 675 5504 fg _f _f 0.261 aln
-664 5482 1262 6065 fg _f _f 0.639 aln
-1239 6393 1462 6618 fg _f _f 0.467 aln
-1719 7067 2099 7448 fg _f _f 0.779 aln
-2116 7444 2390 7714 fg _f _f 0.412 aln
-2375 8002 2778 8402 fg _f _f 0.553 aln
-2710 10244 3013 10543 fg _f _f 0.029 aln
-3111 913 3190 994 fg _f _f 0.029 aln
-2710 4552 2804 4647 fg _f _f 0.017 aln
-3082 10512 3156 10581 fg _f _f 0.017 aln
-2727 605 2911 791 fg _f _f 0.009 aln
-2728 929 3006 1212 fg _f _f 0.023 aln
-2757 6007 2926 6180 fg _f _f 0.035 aln
-2769 9981 2855 10063 fg _f _f 0.034 aln
-2783 1290 3006 1523 fg _f _f 0.000 aln
-2788 6612 2855 6673 fg _f _f 0.019 aln
-2791 1283 2855 1342 fg _f _f 0.012 aln
-2797 3670 2842 3715 fg _f _f 0.010 aln
-2804 8525 2863 8585 fg _f _f 0.008 aln
-2811 8839 2950 8979 fg _f _f 0.001 aln
-3028 10323 3190 10493 fg _f _f 0.041 aln
-3056 3724 3172 3837 fg _f _f 0.060 aln
-3058 10064 3177 10180 fg _f _f 0.067 aln
-3061 3416 3172 3528 fg _f _f 0.057 aln
-3079 1490 3192 1610 fg _f _f 0.098 aln
-3083 3564 3204 3694 fg _f _f 0.061 aln
-3086 6827 3175 6924 fg _f _f 0.099 aln
-3104 8752 3175 8825 fg _f _f 0.040 aln
-3109 8902 3832 9636 fg _f _f 0.551 aln
-3109 10246 3172 10311 fg _f _f 0.030 aln
-3111 1390 3177 1461 fg _f _f 0.039 aln
-3114 2194 3172 2253 fg _f _f 0.039 aln
-3114 2801 3172 2860 fg _f _f 0.053 aln
-3118 8633 3192 8708 fg _f _f 0.033 aln
-4535 10806 4738 11009 fg _f _f 0.480 aln
-4851 11198 5137 11485 fg _f _f 0.564 aln
-5219 11597 5832 12218 fg _f _f 1.000 aln
-5558 11954 5878 12278 fg _f _f 0.180 aln
+100 75 175 150 darkblue _f _f 0.125 aln
+225 200 275 250 darkblue _f _f 0.625 aln
+300 325 375 400 darkblue _f _f 0.500 aln
+475 425 575 525 darkblue _f _f 1.000 aln
+600 550 650 600 darkblue _f _f 0.750 aln
+650 625 675 650 darkblue _f _f 0.000 aln
+700 725 775 800 darkblue _f _f 1.000 aln
+800 875 875 950 darkblue _f _f 0.250 aln
+endseq
+%
+%%%% Extra features from custom files (POST)...
+%
+beginaln
+[ (0deg) (bv) (lh) 10 /Helvetica red _t fg 1.5 pt 28.35 0 400 350 xarw
+[ (-75deg) (tv) (lh) 10 /Helvetica red _t fg 1.5 pt 56.7 -75 400 350 xarw
+[ (85deg) (bv) (lh) 10 /Helvetica red _t fg 1.5 pt 56.7 85 400 350 xarw
+[ (165deg) (bv) (rh) 10 /Helvetica red _t fg 1.5 pt 56.7 165 400 350 xarw
+[ (235deg) (tv) (rh) 10 /Helvetica red _t fg 1.5 pt 85.05 235 400 350 xarw
+[ 0 (A free-text string example!!!) (cv) (ch) 12 /Helvetica-Bold _f 750 750 xtxt
 endseq
 %
 enddata
+%
+%
+%%%%%%%% MATCHES PERCENT - BOX
+%
+beginmatches
+%
+%
+%%%% X-sequence Ribbons
+%
+beginXseq
+200 300 verylightred rbx
+500 650 verylightred rbx
+700 825 verylightred rbx
+endseq
+%
+%%%% Finishing X-sequence Ribbons
+%
+beginXseq
+[ 200 300 500 650 700 825 Rln
+endseq
+%
+%%%% DATA ---> Alignment
+%
+beginaln
+100 0.40 175 0.40 darkblue _f _f 0.125 aln
+225 0.60 275 0.60 darkblue _f _f 0.625 aln
+300 0.55 375 0.55 darkblue _f _f 0.500 aln
+475 0.75 575 0.75 darkblue _f _f 1.000 aln
+600 0.65 650 0.65 darkblue _f _f 0.750 aln
+650 0.35 675 0.35 darkblue _f _f 0.000 aln
+700 0.75 775 0.75 darkblue _f _f 1.000 aln
+800 0.45 875 0.45 darkblue _f _f 0.250 aln
+endseq
+%
+endmatches
+%
+%
+%%%%%%%% EXTRA DATA - BOX
+%
+% numlines <- vlr->{_x_sequence_sources} % NGROUPS 
+beginextra
+%
+%
+%%%% X-sequence Ribbons
+%
+beginXseq
+200 300 verylightred rbx
+500 650 verylightred rbx
+700 825 verylightred rbx
+endseq
+%
+%%%% Finishing X-sequence Ribbons
+%
+beginXseq
+[ 200 300 500 650 700 825 Rln
+endseq
+%
+endextra
 %
 %
 DoEnd

@@ -1,0 +1,400 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+ <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+ <META NAME="Generator" CONTENT="Hacker Hands">
+ <META NAME="author" CONTENT="Josep F. Abril">
+  <!-- $Id: index.html,v 1.1 2003-06-05 18:14:41 jabril Exp $ -->  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+  <META NAME="keywords"    CONTENT="GFF2APLOT, GFF2APLOT Snapshots">
+  <META NAME="description" CONTENT="GFF2APLOT: Output snapshots.">
+ <TITLE> GFF2APLOT: Output snapshots. </TITLE>
+<!-- <BASE HREF="http://genome.imim.es/software/gfftools/"> -->
+<SCRIPT type="text/javascript" src="http://genome.imim.es/Genome.js"></SCRIPT>
+</HEAD>
+
+<BODY TEXT="moccasin" BGCOLOR="black" LINK="darkorange" VLINK="orange" ALINK="yellow" BACKGROUND="">
+<A NAME="TOC"></A>
+<BASEFONT SIZE=3>
+
+<CENTER>
+<H1> <IMG SRC="icons/gff2aplot.snapshots.jpg" ALT="GFF2APLOT SNAPSHOTS" WIDTH=500 HEIGHT=50> </H1>
+<H2>- EXAMPLES OF <STRONG>GFF2APLOT</STRONG> OUTPUT -</H2>
+</CENTER>
+
+<HR>
+
+<TABLE BORDER="0" WIDTH="100%">
+ <TR>
+  <TD ALIGN=LEFT>
+   <A HREF="GFF2APLOT.html">
+   <IMG SRC="icons/bck.gif" HEIGHT=40 HSPACE=5 ALIGN=LEFT ALT="<-"></A>
+   &nbsp;BACK to <BR>&nbsp;GFF2APLOT<BR>&nbsp;HOME PAGE
+  </TD>
+  <TD ALIGN=RIGHT>
+   <A HREF="http://genome.imim.es/~jabril/">
+   <IMG SRC="icons/home.gif" HEIGHT=40 HSPACE=5 ALIGN=RIGHT ALT="->"></A>
+   BACK to <BR>&nbsp;Josep F. ABRIL's<BR>&nbsp; HOME PAGE&nbsp;
+  </TD>
+ </TR>
+</TABLE>
+
+<HR>
+
+Some of the figures that you can find in this page may correspond to the final plot from one of the <code>gff2aplot</code> tutorials. In such cases, the command-line has been simplified. The customization files, if many, have also been summarized into a single one, only the last setting of any variable being redefined from one file to another was kept in sake of clarity. GFF files were merged following the same ordering that was used when passing them via command-line. We hope you will find this examples useful to start using <code>gff2aplot</code>. <BR><BR>
+
+<I> Click on the figures to visualize a high resolution PNG. You can retrieve from the links below each figure the original PostScript files and the same plots in PDF or PNG formats. </I><BR>
+<IMG SRC="icons/book.gif" HEIGHT=15 HSPACE=5 ALIGN=LEFT VALIGN=MIDDLE ALT="*">&nbsp;<I> Click on the book to get the original GFF input file. </I><BR>
+<IMG SRC="icons/rc.gif" HEIGHT=15 HSPACE=5 ALIGN=LEFT VALIGN=MIDDLE ALT="*">&nbsp;<I> Click on the green loop to visualize the customization file. </I><BR>
+<IMG SRC="icons/star.gif" HEIGHT=15 HSPACE=5 ALIGN=LEFT VALIGN=MIDDLE ALT="*">&nbsp;<I> Click on the stars to download a gzipped tarball for each example. The tarball contains a README with the command-line which generated the plot, the GFF input file, the PostScript output file, and the corresponding customization file (if any was applied to figure layout).</I><BR>
+
+<HR>
+
+<P>
+<CENTER><H3>JUST DEFAULT SETTINGS</H3></CENTER>
+</P>
+<P>
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD WIDTH=140 ALIGN=CENTER VALIGN=TOP>
+<a href="defaults.png"><IMG SRC="defaults.s.png" ALT="Default settings" HEIGHT=180 WIDTH=140 BORDER=1></a> <BR>
+&nbsp;[<a href="defaults.png">PNG</a>]&nbsp;[<a href="defaults.ps">PS</a>]&nbsp;[<a href="defaults.pdf">PDF</a>]&nbsp; <BR>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;<code>gff2aplot</code> default settings may be enough for what you want to display. When visually exploring pair-wise alignments, this will be the starting point unless you have already defined a customized layout. You can do this by defining a default customization file, by naming it as "<code>.gff2aplot.rc</code>" or by setting a shell variable that points to a file. Imagine you have a customization file named "<code>/your/path/mycustoms</code>" (it is cleaner if you always use a fixed suffix to distinguish among your files, "<code>.rc</code>" for instance). Then, you can force such file to be the default customization file by typing: <BR>
+<CENTER><PRE>
+GFF2APLOT_CUSTOMPATH=/your/path<BR>
+GFF2APLOT_CUSTOMFILE=mycustoms 
+</PRE></CENTER>
+The following command-line uses the internal program definitions for all the configurable parameters: <BR>
+<CENTER><PRE>
+gff2aplot.pl  --verbose  --  <a href="defaults.gff">defaults.gff</a> \
+            > <a href="defaults.ps">defaults.ps</a>  2> <a href="defaults.log">defaults.log</a>   
+</PRE></CENTER>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+</TR>
+</TABLE>
+</P>
+<P>
+<table BORDER="0" WIDTH="100%">
+<tr>
+<td ALIGN=RIGHT>
+ <table border=0 cellpadding=0 cellspacing=0 ALIGN=RIGHT>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="defaults.gff"><font SIZE=2>defaults.gff</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="defaults.gff"><img SRC="icons/book.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="defaults.tar.gz"><font SIZE=2>defaults.tar.gz</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="defaults.tar.gz"><img SRC="icons/star.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="index.html#TOC"><font SIZE=2>Back&nbsp;to&nbsp;Top</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="index.html#TOC"><img SRC="icons/up.gif" HEIGHT=25 VALIGN=MIDDLE ALT="/\"></a></td>
+ </tr></table>
+</td></tr></table>
+</P>
+
+<HR>
+
+<P>
+<CENTER><H3>MHC GENOMIC REGION ANALYSIS</H3></CENTER>
+</P>
+<P>
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;We are running <code>gff2aplot</code> to visualize the alignment produced by SIM on the syntenic MHCII genomic region between human and mouse. The violet left bottom box indicates the region being expanded in the next example ("Zooming into the LMP2 gene region"). The sequences shown here contain four human genes (LMP2, TAP1, LMP7 and TAP2) and their counterpart ones in mouse (<I>lmp</I>2, <I>tap</I>1, <I>lmp</I>7 and <I>tap</I>2). Only the alignment fragments from the SIM output were displayed on the main panel. Scores for those fragments were projected along the human sequence axes in the bottom panel. <BR>
+<CENTER><PRE>
+gff2aplot.pl --verbose                             \
+    --title  "Human/Mouse MHCII Region"            \
+    --subtitle "Zooming into the LMP2 gene region" \
+    --x-label "Human X87344"                       \
+    --y-label "Mouse AF100956+AF027865"            \
+    --end-x-sequence 6500                          \
+    --end-y-sequence 6500                          \
+    --zoom-area                                    \
+    --custom-filename <a href="figure1_left.rc">figure1_left.rc</a>              \
+    -- <a href="figure1_left.gff">figure1_left.gff</a> > <a href="figure1_left.ps">figure1_left.ps</a>          \
+                       2> <a href="figure1_left.log">figure1_left.log</a>          
+</PRE></CENTER>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD WIDTH=140 ALIGN=CENTER VALIGN=TOP>
+<a href="figure1_left.png"><IMG SRC="figure1_left.s.png" ALT="Default settings" HEIGHT=180 WIDTH=140 BORDER=1></a> <BR>
+&nbsp;[<a href="figure1_left.png">PNG</a>]&nbsp;[<a href="figure1_left.ps">PS</a>]&nbsp;[<a href="figure1_left.pdf">PDF</a>]&nbsp; <BR>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+</TR>
+</TABLE>
+</P>
+<P>
+<table BORDER="0" WIDTH="100%">
+<tr>
+<td ALIGN=LEFT>
+ <table border=0 cellpadding=0 cellspacing=0 ALIGN=LEFTT>
+ <td WIDTH="25"><a href="index.html#TOC"><img SRC="icons/up.gif" HEIGHT=25 VALIGN=MIDDLE ALT="/\"></a></td>
+ <td WIDTH="25">&nbsp;<a href="index.html#TOC"><font SIZE=2>Back&nbsp;to&nbsp;Top</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left.gff"><img SRC="icons/book.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="figure1_left.gff"><font SIZE=2>figure1_left.gff</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left.gff"><img SRC="icons/rc.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="figure1_left.rc"><font SIZE=2>figure1_left.rc</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left.tar.gz"><img SRC="icons/star.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="figure1_left.tar.gz"><font SIZE=2>figure1_left.tar.gz</font></a>&nbsp;&nbsp;&nbsp;</td>
+ </tr></table>
+</td></tr></table>
+</P>
+
+<HR>
+
+<P>
+<CENTER><H3>ZOOMING INTO THE LMP2 GENE REGION</H3></CENTER>
+</P>
+<P>
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD WIDTH=140 ALIGN=CENTER VALIGN=TOP>
+<a href="figure1_left_zoom.png"><IMG SRC="figure1_left_zoom.s.png" ALT="Default settings" HEIGHT=180 WIDTH=140 BORDER=1></a> <BR>
+&nbsp;[<a href="figure1_left_zoom.png">PNG</a>]&nbsp;[<a href="figure1_left_zoom.ps">PS</a>]&nbsp;[<a href="figure1_left_zoom.pdf">PDF</a>]&nbsp; <BR>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;We are focusing on the LMP2 human gene from previous example MHCII genomic region. Gene predictions produced by SGP1 program were included, the predicted exons are shown in red, while the standard GenBank annotated exons color remains green. The main difference between the follwoing command-line and the one from prevoius example is that we replaced the "<code>--zoom-area</code>" switch by the "<code>--zoom</code>" one in order to activate the zoom. <BR>
+<CENTER><PRE>
+gff2aplot.pl --verbose                              \
+    --title  "Human/Mouse MHCII Region"             \
+    --subtitle "Zooming into the LMP2 gene region"  \
+    --x-label "Human"                               \
+    --y-label "Mouse"                               \
+    --end-x-sequence 6500                           \
+    --end-y-sequence 6500                           \
+    --zoom                                          \
+    --custom-filename <a href="figure1_left_zoom.rc">figure1_left_zoom.rc</a>          \
+    -- <a href="figure1_left_zoom.gff">figure1_left_zoom.gff</a> > <a href="figure1_left_zoom.ps">figure1_left_zoom.ps</a> \
+                                2> <a href="figure1_left_zoom.log">figure1_left_zoom.log</a>     
+</PRE></CENTER> <BR>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+</TR>
+</TABLE>
+</P>
+<P>
+<table BORDER="0" WIDTH="100%">
+<tr>
+<td ALIGN=RIGHT>
+ <table border=0 cellpadding=0 cellspacing=0 ALIGN=RIGHT>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="figure1_left_zoom.gff"><font SIZE=2>figure1_left_zoom.gff</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left_zoom.gff"><img SRC="icons/book.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="figure1_left_zoom.rc"><font SIZE=2>figure1_left_zoom.rc</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left_zoom.gff"><img SRC="icons/rc.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="figure1_left_zoom.tar.gz"><font SIZE=2>figure1_left_zoom.tar.gz</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left_zoom.tar.gz"><img SRC="icons/star.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="index.html#TOC"><font SIZE=2>Back&nbsp;to&nbsp;Top</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="index.html#TOC"><img SRC="icons/up.gif" HEIGHT=25 VALIGN=MIDDLE ALT="/\"></a></td>
+ </tr></table>
+</td></tr></table>
+</P>
+
+<HR>
+
+<P>
+<CENTER><H3>EMBEEDING PLOTS INTO A LaTeX DOCUMENT</H3></CENTER>
+</P>
+<P>
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;We want to make a figure containing the last two examples. There are several ways of doing that. Here we are showing how to embeed them into a single plot after processing a LaTeX document. That file is also included in the example tarball. <BR>
+<CENTER><PRE>
+( latex <a href="figure1_left_final.ps">figure1_left_final.tex</a> ;                       
+  dvips <a href="figure1_left_final.ps">figure1_left_final.dvi</a> -o <a href="figure1_left_final.ps">figure1_left_final.ps</a>
+  ) > <a href="figure1_left_final.ps">figure1_left_final.log</a> 2>&1                      
+</PRE></CENTER>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD WIDTH=140 ALIGN=CENTER VALIGN=TOP>
+<a href="figure1_left_final.png"><IMG SRC="figure1_left_final.s.png" ALT="Default settings" HEIGHT=180 WIDTH=140 BORDER=1></a> <BR>
+&nbsp;[<a href="figure1_left_final.png">PNG</a>]&nbsp;[<a href="figure1_left_final.ps">PS</a>]&nbsp;[<a href="figure1_left_final.pdf">PDF</a>]&nbsp; <BR>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+</TR>
+</TABLE>
+</P>
+<P>
+<table BORDER="0" WIDTH="100%">
+<tr>
+<td ALIGN=LEFT>
+ <table border=0 cellpadding=0 cellspacing=0 ALIGN=LEFTT>
+ <td WIDTH="25"><a href="index.html#TOC"><img SRC="icons/up.gif" HEIGHT=25 VALIGN=MIDDLE ALT="/\"></a></td>
+ <td WIDTH="25">&nbsp;<a href="index.html#TOC"><font SIZE=2>Back&nbsp;to&nbsp;Top</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left_final.gff"><img SRC="icons/book.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="figure1_left_final.gff"><font SIZE=2>figure1_left_final.gff</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left_final.gff"><img SRC="icons/rc.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="figure1_left_final.rc"><font SIZE=2>figure1_left_final.rc</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_left_final.tar.gz"><img SRC="icons/star.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="figure1_left_final.tar.gz"><font SIZE=2>figure1_left_final.tar.gz</font></a>&nbsp;&nbsp;&nbsp;</td>
+ </tr></table>
+</td></tr></table>
+</P>
+
+<HR>
+
+<P>
+<CENTER><H3>ANALYSIS OF HOMOLOGOUS SPLICE SITES</H3></CENTER>
+</P>
+<P>
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD WIDTH=140 ALIGN=CENTER VALIGN=TOP>
+<a href="figure1_right.png"><IMG SRC="figure1_right.s.png" ALT="Default settings" HEIGHT=180 WIDTH=140 BORDER=1></a> <BR>
+&nbsp;[<a href="figure1_right.png">PNG</a>]&nbsp;[<a href="figure1_right.ps">PS</a>]&nbsp;[<a href="figure1_right.pdf">PDF</a>]&nbsp; <BR>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;You can set different alignment colors with <code>gff2aplot</code> in order to visualize different alignment features. For this example, we are comparing all the possible splice sites found in an human/mouse orthologous gene genomic sequences. We have set color for donor sites ("GT", 3698 hits) to red and color for acceptor sites ("AG", 3639 hits) to blue. Color intensity for both features depends on the score we assigned to those splice sites (more likely to be real, darker the color). Another interesting feature already implemented in <code>gff2aplot</code> is the pseudo color blend that enhances the axes annotation projections. <BR>
+<CENTER><PRE>
+gff2aplot.pl --verbose                                           \
+    --title  "DONOR + ACCEPTOR SPLICE SITES"                     \
+    --subtitle                                                   \
+      "An example of annotation projections pseudo color-merge." \
+    --x-sequence-coords 0..4200                                  \
+    --y-sequence-coords 0..4600                                  \
+    --custom-filename <a href="figure1_right.rc">figure1_right.rc</a>                           \
+    -- <a href="figure1_right.gff">figure1_right.gff</a> > <a href="figure1_right.ps">figure1_right.ps</a>                      \
+                        2> <a href="figure1_right.log">figure1_right.log</a>                      
+</PRE></CENTER>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+</TR>
+</TABLE>
+</P>
+<P>
+<table BORDER="0" WIDTH="100%">
+<tr>
+<td ALIGN=RIGHT>
+ <table border=0 cellpadding=0 cellspacing=0 ALIGN=RIGHT>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="figure1_right.gff"><font SIZE=2>figure1_right.gff</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_right.gff"><img SRC="icons/book.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="figure1_right.rc"><font SIZE=2>figure1_right.rc</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_right.gff"><img SRC="icons/rc.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="figure1_right.tar.gz"><font SIZE=2>figure1_right.tar.gz</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="figure1_right.tar.gz"><img SRC="icons/star.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;&nbsp;&nbsp;<a href="index.html#TOC"><font SIZE=2>Back&nbsp;to&nbsp;Top</font></a>&nbsp;</td>
+ <td WIDTH="25"><a href="index.html#TOC"><img SRC="icons/up.gif" HEIGHT=25 VALIGN=MIDDLE ALT="/\"></a></td>
+ </tr></table>
+</td></tr></table>
+</P>
+
+<HR>
+
+<P>
+<CENTER><H3>GFF2APLOT FIGURE LAYERS</H3></CENTER>
+</P>
+<P>
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%">
+<TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;An invented data set is used here to illustrate different drawing features of <code>gff2aplot</code>. Look carefully to the customization file to understand how you can include "extra" features (such boxes, circles, arrows and text) into your plots. This allows you to highlight any region on your alignment panel. <BR>
+<CENTER><PRE>
+gff2aplot.pl --verbose                                  \
+    --custom-filename <a href="fancylayers.rc">fancylayers.rc</a>                    \
+    --title 'A COLOR-FULL EXAMPLE'                      \
+    --subtitle                                          \
+      'Showing many features available from gff2aplot.' \
+    --x-sequence-zoom  100..400                         \
+    --y-sequence-zoom  600..900                         \
+    --zoom-area                                         \
+    -- <a href="fancylayers.gff">fancylayers.gff</a> > <a href="fancylayers.ps">fancylayers.ps</a>                 \
+                      2> <a href="fancylayers.log">fancylayers.log</a>                 
+</PRE></CENTER>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD WIDTH=140 ALIGN=CENTER VALIGN=TOP>
+<a href="fancylayers.png"><IMG SRC="fancylayers.s.png" ALT="Default settings" HEIGHT=180 WIDTH=140 BORDER=1></a> <BR>
+&nbsp;[<a href="fancylayers.png">PNG</a>]&nbsp;[<a href="fancylayers.ps">PS</a>]&nbsp;[<a href="fancylayers.pdf">PDF</a>]&nbsp; <BR>
+</TD>
+<TD>&nbsp;&nbsp;</TD>
+</TR>
+</TABLE>
+</P>
+<P>
+<table BORDER="0" WIDTH="100%">
+<tr>
+<td ALIGN=LEFT>
+ <table border=0 cellpadding=0 cellspacing=0 ALIGN=LEFTT>
+ <td WIDTH="25"><a href="index.html#TOC"><img SRC="icons/up.gif" HEIGHT=25 VALIGN=MIDDLE ALT="/\"></a></td>
+ <td WIDTH="25">&nbsp;<a href="index.html#TOC"><font SIZE=2>Back&nbsp;to&nbsp;Top</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="fancylayers.gff"><img SRC="icons/book.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="fancylayers.gff"><font SIZE=2>fancylayers.gff</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="fancylayers.gff"><img SRC="icons/rc.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="fancylayers.rc"><font SIZE=2>fancylayers.rc</font></a>&nbsp;&nbsp;&nbsp;</td>
+ <td WIDTH="25"><a href="fancylayers.tar.gz"><img SRC="icons/star.gif" HEIGHT=25 VALIGN=MIDDLE ALT="*"></a></td>
+ <td WIDTH="25">&nbsp;<a href="fancylayers.tar.gz"><font SIZE=2>fancylayers.tar.gz</font></a>&nbsp;&nbsp;&nbsp;</td>
+ </tr></table>
+</td></tr></table>
+</P>
+
+<HR>
+
+<CENTER>
+<TABLE>
+ <TR>
+<TD>&nbsp;&nbsp;</TD>
+<TD><IMG SRC="icons/awc.gif" HEIGHT=100 HSPACE=5 ALT="AT WORK... X^D"></TD>
+<TD>&nbsp;&nbsp;</TD>
+<TD ALIGN=RIGHT><P> <BR>
+Do you have an interesting example of using gff2aplot ? <BR>
+Would you share it with us ? <BR>
+<A HREF="MAILTO:jabril@imim.es?subject=[GFF2APLOT] Examples:">Then get in contact with authors...</A> <BR><BR>
+More snapshots are coming soon...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<BR>
+Thanks for visiting us...&nbsp;&nbsp;<FONT color="yellow">;^D</FONT><BR>
+</P></TD>
+<TD>&nbsp;&nbsp;</TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<HR>
+
+<TABLE BORDER="0" WIDTH="100%">
+ <TR>
+  <TD ALIGN=LEFT>
+   <A HREF="GFF2APLOT.html">
+   <IMG SRC="icons/bck.gif" HEIGHT=40 HSPACE=5 ALIGN=LEFT ALT="<-"></A>
+   &nbsp;BACK to <BR>&nbsp;GFF2APLOT<BR>&nbsp;HOME PAGE
+  </TD>
+  <TD ALIGN=RIGHT>
+   <A HREF="http://genome.imim.es/~jabril/">
+   <IMG SRC="icons/home.gif" HEIGHT=40 HSPACE=5 ALIGN=RIGHT ALT="->"></A>
+   BACK to <BR>&nbsp;Josep F. ABRIL's<BR>&nbsp; HOME PAGE&nbsp;
+  </TD>
+ </TR>
+</TABLE>
+
+<HR>
+
+<!-- $Created$ -->
+<!-- open table for page footer -->
+<FONT SIZE=2>
+<TABLE BORDER="0" WIDTH="100%">
+ <TR>
+  <TD ALIGN=LEFT>
+    <SCRIPT LANGUAGE="JavaScript">
+      var theDate = ""
+      theDate = document.lastModified
+      document.write("<I>Last Updated</I>: ");
+      document.write(theDate);
+      document.write();
+    </SCRIPT>
+  </TD>
+  <TD ALIGN=RIGHT>
+   <ADDRESS><A HREF="MAILTO:jabril@imim.es">jabril@imim.es</A></ADDRESS>
+  </TD>
+ </TR>
+</TABLE>
+</FONT>
+<!-- close table for page footer -->
+
+<SCRIPT type="text/javascript" languaje="javascript">
+<!--
+ reportErrors();
+// -->
+</SCRIPT>
+</BODY>
+</HTML>

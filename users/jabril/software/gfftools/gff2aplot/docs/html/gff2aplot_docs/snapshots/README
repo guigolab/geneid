@@ -1,0 +1,212 @@
+##################################################
+#
+# README Snapshots
+#
+# This README runs as a shell script.
+# Here you can find the commands
+# we used to produce all the figures for
+# the gff2aplot snapshots web page.
+#
+# USAGE: bash README > .log 2>&1
+#
+# $Id: README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+##################################################
+#
+SECONDS=0 ;
+#
+TAR=`which tar`"  -zcvf"; 
+
+#
+cat > defaults.README <<'+++EOF+++' ;
+#
+# $Id: README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+echo "#  -> Default plot" ;
+#
+$BIN/gff2aplot.pl                  \
+    --verbose                      \
+    -- defaults.gff > defaults.ps  \
+                   2> defaults.log ;
+#
++++EOF+++
+bash defaults.README ;
+$TAR defaults.tar.gz defaults.README defaults.gff defaults.ps ;
+
+#
+cat > figure1_left.README <<'+++EOF+++' ;
+#
+# $Id: README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+echo "#  -> Aplot paper: figure 1 left panel" ;
+#
+$BIN/gff2aplot.pl                                  \
+    --verbose                                      \
+    --title  "Human/Mouse MHCII Region"            \
+    --subtitle "Zooming into the LMP2 gene region" \
+    --x-label "Human X87344"                       \
+    --y-label "Mouse AF100956+AF027865"            \
+    --end-x-sequence 6500                          \
+    --end-y-sequence 6500                          \
+    --zoom-area                                    \
+    --custom-filename figure1_left.rc              \
+    -- figure1_left.gff > figure1_left.ps          \
+                      2> figure1_left.log ;
+#
++++EOF+++
+bash figure1_left.README ;
+$TAR figure1_left.tar.gz figure1_left.README figure1_left.rc figure1_left.gff figure1_left.ps ;
+
+#
+cat > figure1_left_zoom.README <<'+++EOF+++' ;
+#
+# $Id: README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+echo "#  -> Aplot paper: figure 1 left panel subfigure" ;
+#
+$BIN/gff2aplot.pl                                   \
+    --verbose                                       \
+    --title  "Human/Mouse MHCII Region"             \
+    --subtitle "Zooming into the LMP2 gene region"  \
+    --x-label "Human"                               \
+    --y-label "Mouse"                               \
+    --end-x-sequence 6500                           \
+    --end-y-sequence 6500                           \
+    --zoom                                          \
+    --custom-filename figure1_left_zoom.rc          \
+    -- figure1_left_zoom.gff > figure1_left_zoom.ps \
+                            2> figure1_left_zoom.log ;
+#
++++EOF+++
+bash figure1_left_zoom.README ;
+$TAR figure1_left_zoom.tar.gz figure1_left_zoom.README figure1_left_zoom.rc figure1_left_zoom.gff figure1_left_zoom.ps ;
+
+#
+cat > figure1_left_final.README <<'+++EOF+++' ;
+#
+# $Id: README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+echo "#  -> Aplot paper: latexing left panel" ;
+#
+( latex figure1_left_final.tex ;
+  dvips figure1_left_final.dvi -o figure1_left_final.ps
+  ) > figure1_left_final.log 2>&1 ;
+#
++++EOF+++
+bash figure1_left_final.README ;
+$TAR figure1_left_final.tar.gz figure1_left_final.README figure1_left_final.tex figure1_left.ps figure1_left_zoom.ps figure1_left_final.ps;
+
+#
+cat > figure1_right.README <<'+++EOF+++' ;
+#
+# $Id: README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+echo "#  -> Aplot paper: figure 1 right panel" ;
+#
+$BIN/gff2aplot.pl                                                \
+    --verbose                                                    \
+    --title  "DONOR + ACCEPTOR SPLICE SITES"                     \
+    --subtitle                                                   \
+      "An example of annotation projections pseudo color-merge." \
+    --x-sequence-coords 0..4200                                  \
+    --y-sequence-coords 0..4600                                  \
+    --custom-filename figure1_right.rc                           \
+    -- figure1_right.gff > figure1_right.ps                      \
+                        2> figure1_right.log ;
+#
++++EOF+++
+bash figure1_right.README ;
+$TAR figure1_right.tar.gz figure1_right.README figure1_right.rc figure1_right.gff figure1_right.ps ;
+
+#
+cat > fancylayers.README <<'+++EOF+++' ;
+#
+# $Id: README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+echo "#  -> Fancy layers" ;
+#
+$BIN/gff2aplot.pl                                       \
+    --verbose                                           \
+    --custom-filename fancylayers.rc                    \
+    --title 'A COLOR-FULL EXAMPLE'                      \
+    --subtitle                                          \
+      'Showing many features available from gff2aplot.' \
+    --x-sequence-zoom  100..400                         \
+    --y-sequence-zoom  600..900                         \
+    --zoom-area                                         \
+    -- fancylayers.gff > fancylayers.ps                 \
+                      2> fancylayers.log ;
+#
++++EOF+++
+bash fancylayers.README ;
+$TAR fancylayers.tar.gz fancylayers.README fancylayers.rc fancylayers.gff fancylayers.ps;
+
+#
+# Preparing web images
+#
+filenames () {
+  cat << 'EOF';
+defaults
+figure1_left
+figure1_left_zoom
+figure1_left_final
+figure1_right
+fancylayers
+EOF
+};
+#
+# echo "# Using \"ghostscript\" to obtain JPEG images from PS files" ;
+echo "# Using \"ghostscript\" to obtain PNG images from PS files" ;
+#
+GS=`which gs || echo "gs"`;
+MG=`which mogrify || echo "mogrify"`;
+CV=`which convert || echo "convert"`;
+#
+filenames | while read n ;
+  do {
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300        \
+        -sPAPERSIZE=a4 -sDEVICE=png16m \
+        -sOutputFile=$n.png $n.ps      ;
+    cp -v $n.png $n.s.png ;
+    # mogrify is a ImageMagick tool that allow us to transform images on batch,
+    # large high-resolution jpeg files are scaled down to thumbnail resolution (2479x3508=>123x175)
+    # it overwrites original file (so that we previously get a renamed copy for each jpeg to process).
+    $MG -verbose -geometry 5% $n.s.png ;
+    #
+    # $GS -dBATCH -dNOPAUSE -r300      \
+    #     -sPAPERSIZE=a4 -sDEVICE=jpeg \
+    #     -sOutputFile=$n.jpg $n.ps    ;
+    # png large version is pretty smaller than jpeg
+    # cp -v $n.jpg $n.s.jpg ;
+    # $MG -verbose -geometry 5% $n.s.jpg ;
+    };
+  done ;
+$CV 'vid:*.s.png'  snapshots.summary.png
+#
+echo "# Using \"ghostscript\" to obtain PDF documents from PS files" ;
+#
+filenames | while read n ;
+  do {
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300          \
+        -sPAPERSIZE=a4 -sDEVICE=pdfwrite \
+        -sOutputFile=$n.pdf $n.ps        ;
+    };
+  done ;
+#
+#
+# echo "# LaTeXing all figures together..." ;
+#
+# latex snapshots.tex;
+# dvips snapshots.dvi -o snapshots.ps;
+#
+#
+echo "###" ;
+echo "### TOTAL TIME: $SECONDS seconds..." ;
+#
+#
+# That's all folks... ;^D
+#
+#        >> Copyleft (C) 2002/2003 - Josep F. Abril <<
+#

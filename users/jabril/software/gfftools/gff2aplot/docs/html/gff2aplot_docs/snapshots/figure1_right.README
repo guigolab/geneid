@@ -1,0 +1,16 @@
+#
+# $Id: figure1_right.README,v 1.1 2003-06-05 18:14:41 jabril Exp $
+#
+echo "#  -> Aplot paper: figure 1 right panel" ;
+#
+$BIN/gff2aplot.pl                                                \
+    --verbose                                                    \
+    --title  "DONOR + ACCEPTOR SPLICE SITES"                     \
+    --subtitle                                                   \
+      "An example of annotation projections pseudo color-merge." \
+    --x-sequence-coords 0..4200                                  \
+    --y-sequence-coords 0..4600                                  \
+    --custom-filename figure1_right.rc                           \
+    -- figure1_right.gff > figure1_right.ps                      \
+                        2> figure1_right.log ;
+#

@@ -1,0 +1,166 @@
+################################################################################
+###                                                                          ###
+###                            RUNNING gff2aplot                             ###
+###                                                                          ###
+###                               User: lopep                                ###
+###                      Date: Tue Jun  3 16:42:27 2003                      ###
+###                               Perl: v5.8.0                               ###
+################################################################################
+################################################################################
+###                             SETTING DEFAULTS                             ###
+################################################################################
+################################################################################
+###                      CHECKING COMMAND-LINE OPTIONS                       ###
+################################################################################
+###
+### Validating INPUT FILENAMES
+###
+###---> "taf6.mmhs.genomic.blastn.gff" exists, including as Input File.
+###---> "taf6.mm.gene.gff" exists, including as Input File.
+###---> "taf6.hs.gene.gff" exists, including as Input File.
+###
+### Validating CUSTOM FILENAMES
+###
+###---> NO CUSTOM FILES found. Using program DEFAULTS.
+###
+### Checking COMMAND-LINE Options
+###
+###
+### Checking Custom Variables SET by COMMAND-LINE
+###
+################################################################################
+###                       COMMAND-LINE OPTIONS CHECKED                       ###
+###           0 wallclock secs ( 0.00 usr +  0.04 sys =  0.04 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           COMMAND-LINE CHECKED                           ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           READING CUSTOM FILES                           ###
+################################################################################
+###
+### NO CUSTOM FILES found: Using program DEFAULTS.
+###
+################################################################################
+###                           CUSTOM FILES LOADED                            ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                MAPPING CUSTOMIZATION INPUTS TO MAIN VARS                 ###
+################################################################################
+################################################################################
+###                         VALUES SET for MAIN VARS                         ###
+###           0 wallclock secs ( 0.00 usr +  0.01 sys =  0.01 CPU)           ###
+################################################################################
+###
+################################################################################
+###                        PARSING INPUT GFF RECORDS                         ###
+################################################################################
+###
+### Reading GFF records from "taf6.mmhs.genomic.blastn.gff"
+###
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA [000042]
+###
+### Reading GFF records from "taf6.mm.gene.gff"
+###
+XXXXXXXXXXXXXXXX [000016]
+###
+### Reading GFF records from "taf6.hs.gene.gff"
+###
+XXXXXXXXXXXXXXXXX [000017]
+################################################################################
+###                               DATA LOADED                                ###
+###           0 wallclock secs ( 0.03 usr +  0.06 sys =  0.09 CPU)           ###
+################################################################################
+###
+################################################################################
+###                  SETTING CUSTOM VALUES TO GFF ELEMENTS                   ###
+################################################################################
+################################################################################
+###                       VALUES SET for GFF ELEMENTS                        ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                   SORTING ELEMENTS BY ACCEPTOR (START)                   ###
+################################################################################
+*- Sorting ANNOTATION DATA
+|  *- Sequence: NM_009315
+|  |  *- Source: chr5
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: M.musculus
+|  |  |  |  |         Sorted 16 elements.
+|  |  |  |  `Sorted 1 groups.
+|  *- Sequence: NM_005641
+|  |  *- Source: chr7
+|  |  |  *- Strand: +
+|  |  |  |  *- Group: H.sapiens
+|  |  |  |  |         Sorted 17 elements.
+|  |  |  |  `Sorted 1 groups.
+*- Sorting ALIGNMENT DATA
+|  *- Sequence: NM_009315:NM_005641
+|  |  *- Source: BLASTN
+|  |  |  *- Strand: ++
+|  |  |  |  *- Group: NM_005641
+|  |  |  |  |         Sorted 42 elements.
+|  |  |  |  `Sorted 1 groups.
+################################################################################
+###                             ELEMENTS SORTED                              ###
+###           0 wallclock secs ( 0.02 usr +  0.00 sys =  0.02 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           SETTING PAGE LAYOUT                            ###
+################################################################################
+###---> Page size set to "a4" ( 595 x 842 )...
+###---> Setting plot AXES: 
+###     ALIGNMENT "NM_009315:NM_005641" was found. PLOTTING IT...
+###     X-SEQUENCE "NM_009315" was found. PLOTTING IT...
+###     Y-SEQUENCE "NM_005641" was found. PLOTTING IT...
+###---> SEQUENCE BOUNDARIES selected for this plot:
+###      X : 1 to 5878
+###      Y : 1 to 12278
+###---> SEQUENCE ZOOM is not enabled for this plot...
+###---> NO ZOOM AREA was selected for this plot... 
+###---> SCORE BOUNDARIES selected for this plot:
+###      ALIGNMENT:   127 to 1405
+###      PERCENT box: 127 to 1405
+###---> TICKMARKS were set: 
+###      Nucleotide-Scale: Major step 1000 - Minor step 200
+###      Score-Scale:      Major step 1000 - Minor step 250
+###---> X/Y scale settings are: 
+###     XY-RATIO is not taken into account for this plot ...
+###     Are X/Y axes going to have same length ?  YES 
+################################################################################
+###                     PAGE LAYOUT SET for CURRENT PLOT                     ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                       WRITING POSTSCRIPT TO STDOUT                       ###
+################################################################################
+###---> PostScript Header DONE...
+###---> PostScript Colors Table SET...
+###---> PostScript Page-formats Table SET...
+###---> PostScript Variables SET...
+###---> PostScript Functions SET...
+###---> Writting PostScript Page:
+###     + APLOT-BOX section :
+###       + drawing X-sequence annotation (NM_009315)...
+###       + drawing Y-sequence annotation (NM_005641)...
+###       + drawing alignment features (NM_009315:NM_005641)...
+###       + APLOT-BOX section DONE...
+###---> PostScript Page FINISHED...
+################################################################################
+###                       WRITING POSTSCRIPT FINISHED                        ###
+###           0 wallclock secs ( 0.06 usr +  0.00 sys =  0.06 CPU)           ###
+################################################################################
+###
+################################################################################
+###                          gff2aplot HAS FINISHED                          ###
+###        [  0 wallclock secs ( 0.11 usr +  0.11 sys =  0.22 CPU) ]         ###
+################################################################################
