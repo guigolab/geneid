@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.2 2000-07-21 11:40:12 eblanco Exp $ */
+/* $Id: geneid.h,v 1.3 2000-07-26 07:55:02 eblanco Exp $ */
 
 /* Include libraries */
 #include <stdio.h>
@@ -41,22 +41,23 @@
 #include <math.h>
 #include <sys/stat.h>
 
-/* Definitions used in GeneId */
+/* Memory definitions used in GeneId */
 
-#define NUMSITES 25000                 /* maximum number of sites         */
-#define NUMEXONS 50000                 /* maximum number of exons         */
+#define RSITES 4                       /* maximum number of sites         */
+#define REXONS 2                       /* maximum number of exons         */
 
-#define NUMEEVIDENCES 10000            /* maximum number of evidence exons */
+#define RBSITES 250                    /* Backup Information sizes        */
+#define RBEXONS 250      
+
+#define NUMEEVIDENCES 10000            /* maximum number of evidences     */
 #define NUMSEVIDENCES 2*NUMEEVIDENCES          
 
 #define MAXGENE 10000                  /* Max number of genes(multigenes) */
-#define MAXEXONGEN 50000               /* Max numer of exon per gene      */
+#define MAXEXONGEN 50000               /* Max number of exon per gene     */
 #define LENGTHSi 100000                /* Max length of each split of S   */ 
 #define OVERLAP 15000                  /* Max length of a exon(overlap)   */
 
-#define MAXBACKUPSITES 125000          /* Backup Information sizes */
-#define MAXBACKUPEXONS 125000      
-#define MAXDUMPHASH 124997
+/* Other definitions */
 
 #define MAXAA 10000                    /* Max lenght (aminoacids/protein) */
 
@@ -273,7 +274,7 @@ typedef struct s_dumpNode
 
 typedef struct s_dumpHash              /* Structure of a hash table       */
 {
-  pdumpNode T[MAXDUMPHASH];
+  pdumpNode* T;
   long total; 
 } dumpHash;
 
@@ -470,7 +471,7 @@ void cleanDumpHash(dumpHash *h);
 void OutputGene(packGenes* pg, long nExons, char* Locus,
                 char* Sequence, gparam* gp, dict* dAA);
 
-void OutputStats(char* Locus, long nvExons);
+void OutputStats(char* Locus);
 void OutputTime();
 
 void RecomputePositions(packSites* allSites, long l);
