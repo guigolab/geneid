@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.5 2000-09-08 10:11:36 eblanco Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.6 2001-02-14 15:47:06 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -192,6 +192,10 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 		  /* Assign fool sites to this exon */
 		  (pv->vExons+i)->Acceptor = (pv->vSites + pv->nvSites);
 		  (pv->vExons+i)->Donor = (pv->vSites + pv->nvSites + 1); 
+
+		  /* Updating sites to the range 0..LengthSequence-1 */
+		  (pv->vExons+i)->offset1 = -COFFSET;
+		  (pv->vExons+i)->offset2 = -COFFSET;
 	      
 		  if (three)
 		    {
@@ -200,6 +204,12 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d)
 		      (pv->vExons+i+1)->Donor = (pv->vSites + pv->nvSites + 1); 
 		      (pv->vExons+i+2)->Acceptor = (pv->vSites + pv->nvSites);
 		      (pv->vExons+i+2)->Donor = (pv->vSites + pv->nvSites + 1); 
+
+		      /* Updating sites to the range 0..LengthSequence-1 */
+		      (pv->vExons+i+1)->offset1 = -COFFSET;
+		      (pv->vExons+i+1)->offset2 = -COFFSET;
+		      (pv->vExons+i+2)->offset1 = -COFFSET;
+		      (pv->vExons+i+2)->offset2 = -COFFSET;
 		      
 		      (pv->vExons+i)->Frame = 0;
 		      (pv->vExons+i+1)->Frame = 1;
