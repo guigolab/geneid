@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.24 1999-07-01 12:59:24 jabril Exp $	
+#         $Id: gff2ps,v 1.25 1999-07-12 18:24:33 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -46,8 +46,8 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps"
   VERSION="v1.0"
-  REVISION='$Revision: 1.24 $'
-  DATERELEASE='$Date: 1999-07-01 12:59:24 $'
+  REVISION='$Revision: 1.25 $'
+  DATERELEASE='$Date: 1999-07-12 18:24:33 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -265,7 +265,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.24 1999-07-01 12:59:24 jabril Exp $
+%    $Id: gff2ps,v 1.25 1999-07-12 18:24:33 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -401,8 +401,8 @@ flglscape {
 %%BeginProcSet: text_functions 1.0 0
 /sfont { findfont exch scalefont setfont } bdf
 /stringheight  { gsave newpath 0 0 moveto (0) false charpath flattenpath pathbbox exch pop exch sub exch pop 0.95 mul grestore } bdf
-/ct { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight 2 div moveto show grestore } bdf
-/ctr { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight 1.65 mul neg moveto show grestore } bdf
+/ct { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight 2 div neg moveto show grestore } bdf
+% /ctr { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight 1.65 mul neg moveto show grestore } bdf
 %%EndProcSet:   text_functions 1.0 0
 %
 %%BeginProcSet: painting_functions 1.0 0
@@ -454,7 +454,7 @@ end % tmdct
 %%BeginProcSet: objects 1.1 0
 /shpdct 52 dict def shpdct begin
  /ShFont { TkMrkW 2 div /Helvetica } def
- /LY { tracksize 0.75 mul } bdf
+ /LY { tracksize } bdf % 0.75 mul } bdf
  /trackbb { LY 0.55 mul } bdf
  /RWTS { LY 1.5 mul } bdf
  /mtrx matrix def
@@ -498,7 +498,9 @@ end % tmdct
  /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def sqdif LY sc mul scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos pop } bdf
  /f { gsave getvar strnd (-) eq { seqend } { seqori } ifelse 0 translate frshared grestore } bdf
  /gpuline { Flggbline { gsave gplmod 1 eq { 0 0 moveto grdif 0 rlineto /red scolor 1 setlinewidth stroke } if grestore } if } bdf
- /shgplbl { Flgglbl { gsave grori trackbb strnd (-) ne { neg } if translate gplmod 0 gt { gpuline } if grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
+% /shgplbl { Flgglbl { gsave grori trackbb strnd (-) ne { neg } if translate gplmod 0 gt { gpuline } if grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
+ /ctr { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight strnd (-) eq { 2 div } { 1.25 mul neg } ifelse moveto show grestore } bdf
+ /shgplbl { Flgglbl { gsave grori trackbb strnd (+) eq { neg } if translate gplmod 0 gt { gpuline } if grlbl FGcolor 8 /Helvetica grdif 2 div ctr grestore } if } bdf 
  /g_end { end exit } bdf 
 %
 % functions for vectors-like data-sets
@@ -517,9 +519,10 @@ end % shpdct
  /pbox { XOriBlck 5 sub 0 XSBlck 10 add YSBlck bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
  /bline { Flgsbline { gsave FGcolor scmyk 0.25 setlinewidth 0 0 moveto XSPlot 0 lineto stroke grestore } if } bdf
  /shsrclbl { FLftLbl { Flgslbl { gsave srclbl FGcolor 10 /Courier XLftLbl 2 div neg ct grestore } if } if } bdf
- /srcbndbox { tracksize spcrsize add YSLine mul dup neg -5 exch XSPlot 10 add  4 -1 roll bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
+ /srcbndbox { tracksize spcrsize add YSLine mul 2 cm add dup neg -5 exch XSPlot 10 add  4 -1 roll bbox clip tflg not { newpath } { 1 setlinewidth FGcolor scmyk stroke } ifelse } bdf
 % /source { /strnd xdf /nxtspacer exch spcrsize mul def 2 dict begin /Yscl exch tracksize mul 2 div def /srclbl xdf /Y Y nxtspacer add Yscl add def 0 Y translate gsave XOriPlot 0 translate gsave 1 -1 scale bline shsrclbl srcbndbox blckori Xscm neg 0 translate } bdf
- /source { /Flgsbline xdf /Flgslbl xdf /strnd xdf /nxtspacer exch spcrsize mul def /Yscl exch tracksize mul 2 div def /srclbl xdf /Y Y nxtspacer strnd (.) eq { 2 div } if add Yscl add def gsave 0 Y translate gsave XOriPlot 0 translate gsave 1 -1 scale bline shsrclbl srcbndbox blckori Xscm neg 0 translate } bdf
+% ScValign 0:center 1:baseline -1:reverse
+ /source { /ScValign xdf /Flgsbline xdf /Flgslbl xdf /strnd xdf /sclines xdf /nxtspacer exch spcrsize mul def /Yscl exch tracksize mul ScValign 0 eq { 2 div } if def /srclbl xdf /Y Y nxtspacer strnd (.) eq { 2 div } if add Yscl add def gsave 0 Y translate gsave XOriPlot 0 translate gsave 1 -1 scale bline shsrclbl srcbndbox blckori Xscm neg 0 translate } bdf
  /s_end { grestore grestore grestore /Y Y Yscl add strnd (.) eq { nxtspacer 2 div add } if def } bdf
 %
  /gp { gsave shpdct begin /Flggbline xdf /Flgglbl xdf nucdif /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /gplmod xdf /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
@@ -535,14 +538,14 @@ end % shpdct
            blckori blckend XOriPlot YSBlck TkMrkW sub {z} 2 tm
            } bdf
 %
- /ChangeStrand { /Y Y YSTck def } bdf
+ /ChangeStrand { /Y Y YSTck add def } bdf
  /b_end { end grestore } bdf
 end
 %%EndProcSet:   blocks 1.0 0
 %
 %%BeginProcSet: main_function_calls 1.0 0
 %
-/block { blckdct begin /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck YSBlck blcknum mul add BlckSp blcknum mul add def gsave 0 YB translate pbox shwtck /Y 0 def } bdf
+/block { blckdct begin /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck YSBlck blcknum mul add BlckSp blcknum mul add def gsave 0 YB translate pbox shwtck /Y YSTck def } bdf
 %
 %%EndProcSet:   main_function_calls 1.0 0
 %
@@ -798,6 +801,15 @@ gawk 'BEGIN{
   strands["+"]=strands["."]=strands["-"]=1;
   wstr[1]="+";wstr[2]=".";wstr[3]="-";
   Frames["."]=Frames["0"]=Frames["1"]=Frames["2"]=1;
+# coding shape-names
+  shpnm["box"]="box";
+  shpnm["arrow"]=shpnm["right_arrow"]="arw";
+  shpnm["end_arrow"]=shpnm["end_right_arrow"]="end";
+  shpnm["circle"]="cir";
+  shpnm["single"]=shpnm["right_single"]="sgl";
+  shpnm["line"]="line";
+  shpnm["center"]="f";
+  shpnm["baseline"]="h";
 # Loading PSMainProgram. Line 0 is the Command Line Parameter String.
   psline=0;
   while ((getline < ARGV[1])>0) { PSMAIN[psline++]=$0 };
@@ -883,7 +895,7 @@ gawk 'BEGIN{
   SO_PROP["label"]="default";         # none , default , "user-def"
   SO_PROP["label_show"]="on";    #
   SO_PROP["baseline_show"]="on"; #
-  SO_PROP["vert_align"]="center";     # center or baseline
+  SO_PROP["vert_align"]="center";     # center,baseline(down), 
   SO_PROP["baseline_align"]="center";
   SO_PROP["baseline_color"]=Default["foreground_color"];
   SO_PROP["baseline_linetype"]="dotted";
@@ -912,6 +924,7 @@ gawk 'BEGIN{
  FIRST_POS=0;
  LAST_POS=0;
  nordcnt=ordcnt=0;
+ grouped_=1;ungrouped_=0;
 #
  if (Var["print_report"])
   printf "\n%s\nInput File...\n%s\n\n",BigLINE,BigLINE | "cat 1>&2"
@@ -938,7 +951,7 @@ gawk 'BEGIN{
 # place gff element in sort array by acceptor position
   if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
    NS=N[$source,$strand,$group]-1;
-   while ($start < element[$source,$strand,S[$source,$strand,$group,NS],start]) {
+   while ($start < element[$source,$strand,$group,S[$source,$strand,$group,NS],start]) {
      S[$source,$strand,$group,NS+1]=S[$source,$strand,$group,NS]; NS-- } # while
    S[$source,$strand,$group,NS+1]=N[$source,$strand,$group]
    } else {
@@ -981,7 +994,7 @@ END{
       printf "%%\n%% Block Num: %s Page: %s\n%%\n",blocks,pages
       printf "%s %s %s block\n", BORI, BEND, blocks
       # make groups. assumes elements sorted by increasing acceptor position
-      MAKEGROUPS()
+      if (!OnOff(SO_PROP["unfold_grouped_ungrouped"])) MAKEGROUPS()
       # PostScript Drawing strands, sources, groups, features
       # make plotlines. Put non-overlapping groups into the same plotting line.
       if (Var["print_report"]) printf "\n%s\nPrinting Lines......\nPage: %s Block: %s\nNuc_Ori: %s - Nuc_End: %s\n%s\n\n",BigLINE,pages,blocks,BORI,BEND,BigLINE | "cat 1>&2"
@@ -1087,7 +1100,7 @@ function Set_feat_Clr(gff_feat,gp,sc,    clrmode,color1,color2,vn,clm) { # remai
  clrmode=0; color1=""; color2=""; # "none" or not defined
  k=split(PLOT_FT[gff_feat,":","color"],clm,/\.\./);
  vn=PLOT_FT[gff_feat,":","fill_shape_mode"]
- if (PLOT_FT[gp,":","color"]=="default" && PLOT_FT[sc,":","color"]=="default") {
+ if ((PLOT_FT[gp,":","color"]=="default" || PLOT_FT[gp,":","color"]=="") && (PLOT_FT[sc,":","color"]=="default" || PLOT_FT[sc,":","color"]=="")) {
    if (vn=="default") { clrmode=1; color1="FGcolor " }
    else {
      if (vn=="1_color") { 
@@ -1101,32 +1114,24 @@ function Set_feat_Clr(gff_feat,gp,sc,    clrmode,color1,color2,vn,clm) { # remai
          }}}
    tmp=color1""color2""clrmode }
  else {
-   if (PLOT_FT[gp,":","color"]!="default") tmp=PLOT_FT[gp,":","color"]" "1
-   if (PLOT_FT[sc,":","color"]!="default") tmp=PLOT_FT[sc,":","color"]" "1
+   if (PLOT_FT[gp,":","color"]!="default" && PLOT_FT[gp,":","color"]!="") tmp=PLOT_FT[gp,":","color"]" "1
+   if (PLOT_FT[sc,":","color"]!="default" && PLOT_FT[gp,":","color"]!="") tmp=PLOT_FT[sc,":","color"]" "1
    }
  return tmp } # End of Set_feat_Clr
 function Set_feat_Shape(gff_feat,src    ,shp,pos,tmp,vn) {
  vn=PLOT_FT[gff_feat,":","shape"]
- if (vn=="box") shp="box";
- else if (vn=="arrow") shp="arw";
- else if (vn=="end_arrow") shp="end";
- else if (vn=="circle") shp="cir";
- else if (vn=="single") shp="sgl";
- else shp="line";
-  # else if (vn==" vector, spike, block ")
- if (PLOT_FT[src,":","vert_align"]=="center") pos="f";
- else if (PLOT_FT[src,":","vert_align"]=="baseline") pos="h";
+ if (vn~/box|(end_)?(right_)?arrow|circle|(right_)?single|line/) shp=shpnm[vn];
+ else shp=shpnm["line"];  # (vn==" vector, spike, block ")
+ if (PLOT_FT[src,":","vert_align"]~/center|baseline/) pos=shpnm[PLOT_FT[src,":","vert_align"]]
+ else pos=shpnm["center"]
  tmp=pos""shp;
  return tmp } # End of Set_feat_Shape
-function showelemS(s,p,q,  string){
-  string=" : ";
-  string=string" "element[s,p,q,feature]" ";
-  string=string" "element[s,p,q,start]" ";
-  string=string" "element[s,p,q,end]" ";
-  string=string" "element[s,p,q,frame]" ";
-  string=string" "element[s,p,q,group];
-  return string } # End of showelemS
-function showelem(a,b,     c,string){ c=n[a,b]; string=showelemS(s,p,q); return string }
+function VertPos(pos,    tt) {
+ tt=lcase(pos);
+ if (tt=="center" || tt=="default") return 0;
+ else if (tt=="baseline" || tt=="down") return 1;
+ else if (tt=="reverse" || tt=="up") return -1;
+ return 0 } # End of VertPos
 function ReadElements() { # read gff element within source, strand, and group 
   sources[$source]++;                       # field 2 (source) counter
   tmp=$source SUBSEP $strand SUBSEP $group;
@@ -1136,26 +1141,26 @@ function ReadElements() { # read gff element within source, strand, and group
     gp[$source,$strand,G[$source,$strand],gpstart]=$start;
     gp[$source,$strand,G[$source,$strand],gpend]=$end;
     gp[$source,$strand,G[$source,$strand],is_grouped]=flg_grp;
-    printf "********* Creating Group DataSet : {%s} %s %s %s ( %s %s ) : is_grouped? %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend],TxtBool(gp[$source,$strand,G[$source,$strand],is_grouped]) | "cat 1>&2"
+    if (Var["print_report"]) printf "********* Creating Group DataSet : {%s} %s %s %s ( %s %s ) : is_grouped? %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend],TxtBool(gp[$source,$strand,G[$source,$strand],is_grouped]) | "cat 1>&2"
     } # if N
   N[$source,$strand,$group]++;
   GP_ary[$group]++;                         # field 9 (group) counter
   FT_ary[$feature]++ ;                       # field 3 (gff-feature) counter
   if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
-   element[$source,$strand,N[$source,$strand,$group],feature] = $feature; 
-   element[$source,$strand,N[$source,$strand,$group],start]   = $start;
-   element[$source,$strand,N[$source,$strand,$group],end]     = $end;
-   element[$source,$strand,N[$source,$strand,$group],frame]   = $frame;  
-   element[$source,$strand,N[$source,$strand,$group],score]   = $score;  
-   element[$source,$strand,N[$source,$strand,$group],group]   = $group; 
+   element[$source,$strand,$group,N[$source,$strand,$group],feature] = $feature; 
+   element[$source,$strand,$group,N[$source,$strand,$group],start]   = $start;
+   element[$source,$strand,$group,N[$source,$strand,$group],end]     = $end;
+   element[$source,$strand,$group,N[$source,$strand,$group],frame]   = $frame;  
+   element[$source,$strand,$group,N[$source,$strand,$group],score]   = $score;  
+   element[$source,$strand,$group,N[$source,$strand,$group],group]   = $group; 
    if (NF>group) {
      for (i=(group+1);i<=NF;i++) {
-       if ($i~"Label") { element[$source,$strand,N[$source,$strand,$group],label]= $(i+1); i++ }  
-       if ($i~"Color") { element[$source,$strand,N[$source,$strand,$group],color]= $(i+1); i++ }  
+       if ($i~"Label") { element[$source,$strand,$group,N[$source,$strand,$group],label]= $(i+1); i++ }  
+       if ($i~"Color") { element[$source,$strand,$group,N[$source,$strand,$group],color]= $(i+1); i++ }  
        if ($i~"Vector") {
-         element[$source,$strand,N[$source,$strand,$group],pos_score]= $(i+1); i++;
+         element[$source,$strand,$group,N[$source,$strand,$group],pos_score]= $(i+1); i++;
          while (i<=NF) {
-           element[$source,$strand,N[$source,$strand,$group],pos_score]=element[$source,$strand,N[$source,$strand,$group],pos_score]":"$(i++)"-"$(i++) } # while
+           element[$source,$strand,$group,N[$source,$strand,$group],pos_score]=element[$source,$strand,$group,N[$source,$strand,$group],pos_score]":"$(i++)"-"$(i++) } # while
          }  # if $i==Vector
        } # for i
      } # if NF
@@ -1184,13 +1189,13 @@ function ReadElements() { # read gff element within source, strand, and group
 # start-end for each group-sc-strand  
   gp[$source,$strand,G[$source,$strand],gpstart]=min(gp[$source,$strand,G[$source,$strand],gpstart],$start) 
   gp[$source,$strand,G[$source,$strand],gpend]  =max(gp[$source,$strand,G[$source,$strand],gpend],$end)
-  printf "*** Checking group boundaries : {%s} %s %s %s %s %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend] | "cat 1>&2"
+  if (Var["print_report"]) printf "*** Checking group boundaries : {%s} %s %s %s %s %s\n",G[$source,$strand],$source,$strand,$group,gp[$source,$strand,G[$source,$strand],gpstart],gp[$source,$strand,G[$source,$strand],gpend] | "cat 1>&2"
 # getting score - boundaries 
   if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
     if ($score < MINSCORE) {
-      element[$source,$strand,N[$source,$strand,$group],score]=MINSCORE }
+      element[$source,$strand,$group,N[$source,$strand,$group],score]=MINSCORE }
     else {
-      if ($score > MAXSCORE) element[$source,$strand,N[$source,$strand,$group],score]=MAXSCORE }
+      if ($score > MAXSCORE) element[$source,$strand,$group,N[$source,$strand,$group],score]=MAXSCORE }
     } else {
     if ($score < MINSCORE) {
       element[$source,$strand,n[$source,$strand],score]=MINSCORE }
@@ -1206,10 +1211,11 @@ function SortGroups() {
         for (t=1;t<=G[sc,s];t++) {
           gs=t-1
           gpstrt_=gp[sc,s,t,gpstart]
-           printf "------- %s : (%s) %s\n",t,gp[sc,s,t,gpname],gpstrt_  | "cat 1>&2"
+          if (Var["print_report"]) printf "------- %s : (%s) %s\n",t,gp[sc,s,t,gpname],gpstrt_  | "cat 1>&2"
           while (gpstrt_ < gp[sc,s,SG[sc,s,gs],gpstart]) {
-           printf "------- %s < %s\n",gp[sc,s,t,gpstart],gp[sc,s,SG[sc,s,gs],gpstart]  | "cat 1>&2"
-           SG[sc,s,gs+1]=t; gs-- } # while
+           if (Var["print_report"]) printf "------- %s < %s\n",gp[sc,s,t,gpstart],gp[sc,s,SG[sc,s,gs],gpstart]  | "cat 1>&2"
+           SG[sc,s,gs+1]=t; gs--
+           } # while
           SG[sc,s,gs+1]=t;
          } # for t 
         for (t=1;t<=G[sc,s];t++) {
@@ -1221,7 +1227,6 @@ function SortGroups() {
  } # End of SortGroups
 function MakeGroupLines() {
   if (Var["print_report"]) printf "\n%s\nPlacing groups on lines...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
-  grouped_=1;ungrouped_=0;
   for (stp=1;stp<=3;stp++) { # for s in strand
     s=wstr[stp]
     for (sc in sources) { 
@@ -1235,20 +1240,18 @@ function MakeGroupLines() {
             gp_ori=gp[sc,s,g,gpstart];
             gp_end=gp[sc,s,g,gpend];
             gp_gpd= OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) ? gp[sc,s,g,is_grouped] : 1; # 1 (grouped_) or 0 (ungrouped_)
-            printf ">>>>>>>%s %s %s (%s %s) G %s SG %s\n",sc,s,gp_nm,gp_ori,gp_end,G[sc,s],g | "cat 1>&2"
-
+            if (Var["print_report"]) printf ">>>>>>>%s %s %s (%s %s) G %s SG %s\n",sc,s,gp_nm,gp_ori,gp_end,G[sc,s],g | "cat 1>&2"
             LN=1;
             if ((gp_gpd==1 && OnOff(PLOT_FT[sc,":","unfold_grouped_line"])) || (gp_gpd==0 && OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"])) || OnOff(PLOT_FT[sc,":","unfold_mixed_grouped_ungrouped"])) {
-              printf "A........%s : %s (%s) G %s SG %s %s %s %s \n",LN,lastpos[sc,s,gp_gpd,LN],gp_ori,G[sc,s],g,sc,s,gp_nm | "cat 1>&2"
+             if (Var["print_report"]) printf "A........%s : %s (%s) G %s SG %s %s %s %s \n",LN,lastpos[sc,s,gp_gpd,LN],gp_ori,G[sc,s],g,sc,s,gp_nm | "cat 1>&2"
              while (lastpos[sc,s,gp_gpd,LN] >= gp_ori) {
               LN++;
               ttt=sc SUBSEP s SUBSEP gp_gpd SUBSEP LN;
               if (!(ttt in lastpos)) lastpos[sc,s,gp_gpd,LN]=PORI;
-              printf ".........%s : %s : %s (%s)\n",LN,ttt,lastpos[sc,s,gp_gpd,LN],gp_ori | "cat 1>&2"
-              # if (lastpos[sc,s,gp_gpd,LN]=="") lastpos[sc,s,gp_gpd,LN]=PORI;
-              }
+              if (Var["print_report"]) printf ".........%s : %s : %s (%s)\n",LN,ttt,lastpos[sc,s,gp_gpd,LN],gp_ori | "cat 1>&2"
+              } # while lastpos
              lastpos[sc,s,gp_gpd,LN]=gp_end;
-             printf "B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[sc,s,gp_gpd,LN],gp_ori,gp_end,G[sc,s],g | "cat 1>&2"
+             if (Var["print_report"]) printf "B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[sc,s,gp_gpd,LN],gp_ori,gp_end,G[sc,s],g | "cat 1>&2"
              } # if checking
             lines[sc,s,gp_gpd]=max(lines[sc,s,gp_gpd],LN);
             LE[sc,s,gp_gpd,LN]++;
@@ -1256,47 +1259,76 @@ function MakeGroupLines() {
             } # for g(SG)
 #         } # for t(G)
         } # if G>0
-      for (pd=1;pd>=0;pd--) {
-        for (h=1;h<=lines[sc,s,pd];h++) {
-          if (LE[sc,s,pd,h]>0) {
-           printf "%s %s : is_grouped %s : Line %s \>\n",sc,s,TxtBool(pd),h | "cat 1>&2"
-           for (t=1;t<=LE[sc,s,pd,h];t++) {
-             elm_=LNelem[sc,s,pd,h,t];
-             printf "\tgpd_%s:line_%s:le_%s:LNel_%s (%s:%s-%s)\n",pd,h,t,elm_,gp[sc,s,elm_,gpname],gp[sc,s,elm_,gpstart],gp[sc,s,elm_,gpend] | "cat 1>&2"
-             } # for t
-           } # if LE
-          } # for h
-        } # for pd
       } # for sources
     } # for strands
  } # End of MakeGroupLines
+function showelemS(s,p,q,  string){
+  string=" : ";
+  string=string" "element[s,p,q,feature]" ";
+  string=string" "element[s,p,q,start]" ";
+  string=string" "element[s,p,q,end]" ";
+  string=string" "element[s,p,q,frame]" ";
+  string=string" "element[s,p,q,group];
+  return string } # End of showelemS
+function showelemGS(s,p,g,q,  string){
+  string=" : ";
+  string=string" "element[s,p,g,q,feature]" ";
+  string=string" "element[s,p,g,q,start]" ";
+  string=string" "element[s,p,g,q,end]" ";
+  string=string" "element[s,p,g,q,frame]" ";
+  string=string" "element[s,p,g,q,group];
+  return string } # End of showelemS
+# function showelem(a,b,     c,string){ c=n[a,b]; string=showelemS(s,p,q); return string }
 function PrtSorted() {
   if (Var["print_report"]) {
     printf "\n%s\nGroups were sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
     for (sc in sources) {
       for (s in strands) {
-        for (t=1;t<=G[sc,s];t++) {
-          gnm=gp[sc,s,SG[sc,s,t],gpname]
-          printf "************* Group %s Strand %s Source %s have %s elements\n",gnm,s,sc,GP_ary[gnm] | "cat 1>&2"
-          printf "*** Order=%3s Group %s starts at %s and ends at %s\n",t,gnm,gp[sc,s,SG[sc,s,t],gpstart],gp[sc,s,SG[sc,s,t],gpend] | "cat 1>&2"
-          } # for t
+        for (ppd=grouped_;ppd>=ungrouped_;ppd--) {
+          if (s=="-") pd=1-ppd; else pd=ppd
+          for (h=1;h<=lines[sc,s,pd];h++) {
+            if (LE[sc,s,pd,h]>0) {
+             printf "%s %s : is_grouped %s : Line %s \>\n",sc,s,TxtBool(pd),h | "cat 1>&2"
+             for (t=1;t<=LE[sc,s,pd,h];t++) {
+               elm_=LNelem[sc,s,pd,h,t];
+               printf "\tgpd_%s:line_%s:le_%s:LNel_%s (%s:%s-%s)\n",TxtBool(pd),h,t,elm_,gp[sc,s,elm_,gpname],gp[sc,s,elm_,gpstart],gp[sc,s,elm_,gpend] | "cat 1>&2"
+               } # for t
+             } # if LE
+            } # for h
+          } # for pd
         } # for strands
       } # for sources
     close("cat 1>&2")
-    } # if print_report
-  if (Var["print_report"]) {
-   printf "\n%s\ngff elements were sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
-   for (sc in sources) 
-    for (s in strands) {
-      printf "\nSOURCE: %s\nSTRAND: %s\n",sc,s | "cat 1>&2"
-      if (n[sc,s]>0) {
-        for (i=1;i<=n[sc,s];i++)
-          printf "%10s %s\n", S[sc,s,i],showelemS(sc,s,S[sc,s,i]) | "cat 1>&2"
-        }
-      else
-        printf "%10s This block is empty ##\n", "##" | "cat 1>&2"
-      }
-   close("cat 1>&2")
+    printf "\n%s\ngff elements were sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+    if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
+      for (sc in sources) {
+        for (s in strands) {
+          printf "\nSOURCE: %s\nSTRAND: %s\n",sc,s | "cat 1>&2"
+          if (G[sc,s]>0) {
+            for (g=1;g<=G[sc,s];g++) {
+              gs=SG[sc,s,g]
+              gnm=gp[sc,s,gs,gpname];
+              printf "     GROUP : %s (%s:%s)\n",gnm,gp[sc,s,gs,gpstart],gp[sc,s,gs,gpend] | "cat 1>&2"
+              if (N[sc,s,gnm]>0) {
+                for (i=1;i<=N[sc,s,gnm];i++)
+                  printf "%10s %s\n", S[sc,s,gnm,i],showelemGS(sc,s,gnm,S[sc,s,gnm,i]) | "cat 1>&2"
+                } # if N
+              } # for G
+            } # if G
+          } # for s
+        } # for sc
+      } else {
+      for (sc in sources) 
+        for (s in strands) {
+          printf "\nSOURCE: %s\nSTRAND: %s\n",sc,s | "cat 1>&2"
+          if (n[sc,s]>0) {
+            for (i=1;i<=n[sc,s];i++)
+              printf "%10s %s\n", S[sc,s,i],showelemS(sc,s,S[sc,s,i]) | "cat 1>&2"
+            } else
+            printf "%10s This block is empty ##\n", "##" | "cat 1>&2"
+          } # for s
+      close("cat 1>&2")
+	  } # if OnOff
    } # if print_report
  } # End of PrtSorted
 function SET_VARS() {
@@ -1321,6 +1353,7 @@ function SET_VARS() {
       if (dft!=Var[lytdef] && Var[lytdef]!="") Default[lytdef]=Var[lytdef]
       if (Var["print_report"]) printf "%s : Default Value=%s Custom File=%s Command-Line=%s : Using=%s\n", lytdef,dft,PLOT_LY[lytdef],Var[lytdef],Default[lytdef] | "sort | cat 1>&2"
       } # for lytdef
+    close("sort | cat 1>&2")
     }   # if ECF==0
   # Calculating Page Number, Blocks and NucxLine
   PORI=Nuc_round(FIRST_POS,0) # floor
@@ -1342,20 +1375,24 @@ function SET_PAGE_VARS() {
   P = B1%B!=0 ? ((B1-(B1%B))/B)+1 : ((B1-(B1%B))/B)
   if (Default["show_blocks_top-bottom"]) { BOFFSET=NOFFSET; POFFSET=B*NOFFSET }
   else { BOFFSET=P*NOFFSET; POFFSET=NOFFSET }
-  printf "\n%s\nPostScript Page Definitions...\n%s\n",BigLINE,BigLINE | "cat 1>&2"  
-  printf "\npage_number %s\nblocks_x_page %s\nnucleotides_x_line %s\nshow_blocks_top-bottom %s\n",Default["page_number"],Default["blocks_x_page"],Default["nucleotides_x_line"],Default["show_blocks_top-bottom"] | "cat 1>&2"  
-  printf "\nPORI %s\nPEND %s\nP %s\nB %s\nNOFFSET %s\nBOFFSET %s\n\n",PORI,PEND,P,B,NOFFSET,BOFFSET | "cat 1>&2"  
+  if (Var["print_report"]) printf "\n%s\nPostScript Page Definitions...\n%s\n",BigLINE,BigLINE | "cat 1>&2"  
+  if (Var["print_report"]) printf "\npage_number %s\nblocks_x_page %s\nnucleotides_x_line %s\nshow_blocks_top-bottom %s\n",Default["page_number"],Default["blocks_x_page"],Default["nucleotides_x_line"],Default["show_blocks_top-bottom"] | "cat 1>&2"  
+  if (Var["print_report"]) printf "\nPORI %s\nPEND %s\nP %s\nB %s\nNOFFSET %s\nBOFFSET %s\n\n",PORI,PEND,P,B,NOFFSET,BOFFSET | "cat 1>&2"  
   # Calculating Block scale factor.
   StrSize=0; NStSize=0; # for strands...
   aS=calcpt(Default["default_track_width"]);
   bS=calcpt(Default["default_track_spacing_width"]);
   for (ws in order) {
     split(ws,wsb,SUBSEP)
-    if (wsb[1]=="strand")
-      StrSize=StrSize+(aS*PLOT_FT[order[ws],":","track_scale"])+(bS*PLOT_FT[order[ws],":","track_spacing_scale"])
-    else if (wsb[1]=="none")
-      NStSize=NStSize+(aS*PLOT_FT[order[ws],":","track_scale"])+(bS*PLOT_FT[order[ws],":","track_spacing_scale"])
-    }
+    if (wsb[1]=="strand") {
+      cl=max(lines[order[ws],"+",grouped_],lines[order[ws],"-",grouped_])+max(lines[order[ws],"+",ungrouped_],lines[order[ws],"-",ungrouped_])
+      StrSize=StrSize+cl*((aS*PLOT_FT[order[ws],":","track_scale"])+(bS*PLOT_FT[order[ws],":","track_spacing_scale"]))
+      }
+    else if (wsb[1]=="none") {
+      cl=lines[order[ws],".",grouped_]+lines[order[ws],".",ungrouped_]
+      NStSize=NStSize+cl*((aS*PLOT_FT[order[ws],":","track_scale"])+(bS*PLOT_FT[order[ws],":","track_spacing_scale"]))
+      } # if wsb
+    } # for order
   if (OnOff(Default["strand_show_forward"])) StrSizeFwd=StrSize; else StrSizeFwd=0
   if (OnOff(Default["strand_show_reverse"])) StrSizeRvs=StrSize; else StrSizeRvs=0
   if (!OnOff(Default["strand_show_independent"])) NStSize=0
@@ -1380,24 +1417,17 @@ function MAKEGROUPS() {
         start_=element[sc,s,S[sc,s,i],start];
         end_=element[sc,s,S[sc,s,i],end];
 	    tgr=element[sc,s,S[sc,s,i],group];
-	  #  if (!grouping[sc,s,tgr,start]) {
-	  #    grouping[sc,s,tgr,start]=element[sc,s,S[sc,s,i],start];
-	  #    ng[sc,s]++;
-	  #    group_[sc,s,ng[sc,s]]=tgr
-      #    }
-      #  if (grouping[sc,s,tgr,end]<element[sc,s,S[sc,s,i],end])
-      #    grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
      # only goes on when features are inside page limits.
        if (ChkLimits(start_,BORI,end_,BEND)) {
         feature_=element[sc,s,S[sc,s,i],feature];
         score_=element[sc,s,S[sc,s,i],score];
      # for gene mode. try to recompute relative frame and remainder
         if (element[sc,s,S[sc,s,i],frame]!=".") {
-            frame_[sc,s,tgr]=element[sc,s,S[sc,s,i],frame];
-            remainder_[sc,s,tgr]=(3-(end_-(start_+frame_[sc,s,tgr])+1)%3)%3 }
-          else { frame_[sc,s,tgr]="(.)"; remainder_[sc,s,tgr]="(.)" }
-        printf "%s %s %s : %s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_) | "cat 1>&2"
-        grouping[sc,s,tgr,group,blocks,pages] = sprintf("%s%s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", grouping[sc,s,tgr,group,blocks,pages], PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_))
+            frm_[sc,s,tgr]=element[sc,s,S[sc,s,i],frame];
+            rmndr_[sc,s,tgr]=(3-(end_-(start_+frm_[sc,s,tgr])+1)%3)%3 }
+          else { frm_[sc,s,tgr]="(.)"; rmndr_[sc,s,tgr]="(.)" }
+        printf "%s %s %s : %s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frm_[sc,s,tgr] ,rmndr_[sc,s,tgr], score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_) | "cat 1>&2"
+        grouping[sc,s,tgr,group,blocks,pages] = sprintf("%s%s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", grouping[sc,s,tgr,group,blocks,pages], PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frm_[sc,s,tgr] ,rmndr_[sc,s,tgr], score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_))
        #  plot_group[tgr,blocks,pages]=1
        } # if ChkLimits
       }  # for i
@@ -1406,6 +1436,73 @@ function MAKEGROUPS() {
   }      # for sc
  } # End of function MAKEGROUPS
 function PRINTGROUPS() { # print groups PlotSeqComp-like.
+ if (OnOff(SO_PROP["unfold_grouped_ungrouped"])) {
+  for (stp=1;stp<=3;stp++) { # for s in strand
+    prtrule=0
+    s=wstr[stp]
+   if ((s=="+" && OnOff(Default["strand_show_forward"])) || (s=="." && OnOff(Default["strand_show_independent"])) || (s=="-" && OnOff(Default["strand_show_reverse"]))) {
+    if (s=="+" || s=="-") lastcnt=ordcnt
+    else { lastcnt=nordcnt; prtrule=1 }
+    printf "GP------ Source: --- Strand: %s Counter: %s\n", s, lastcnt | "cat 1>&2" 
+    if (prtrule && (StrSizeFwd>0 && NStSize>0)) printf "ChangeStrand\n"
+    printf "%% ------------------ Strand(%s) Begin\n",s
+    for (srcord=0;srcord<lastcnt;srcord++) { # for sc in sources
+      if (s=="-") { ngcnt=lastcnt-(srcord+1); sc=order["strand",ngcnt] }
+      else {
+        if (s=="+") sc=order["strand",srcord]
+        else sc=order["none",srcord]      # (s==".")
+        }
+      for (pd=grouped_;pd>=ungrouped_;pd--) {
+        if (s=="-") i=1-pd; else i=pd
+        for (l=1;l<=lines[sc,s,i];l++) {
+          printf "GP------ Source: %10s Strand: %s Counter: %s\n", sc, s, srcord | "cat 1>&2" 
+          printf "(%s) %s %s %s (%s) %s %s %s source\n", Plot_Lbl(sc)"("s")", PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],(lines[sc,s,grouped_]+lines[sc,s,ungrouped_]),s,TxtBool(OnOff(PLOT_FT[sc,":","label_show"])),TxtBool(OnOff(PLOT_FT[sc,":","baseline_show"])),VertPos(PLOT_FT[sc,":","vert_align"])
+          for (gl=1;gl<=LE[sc,s,i,l];gl++) {
+            g=LNelem[sc,s,i,l,gl];
+            ng_=gp[sc,s,g,gpname];
+            sg_=gp[sc,s,g,gpstart];
+            eg_=gp[sc,s,g,gpend];
+            if (ChkLimits(sg_,BORI,eg_,BEND)) {
+              # plot group in file
+              if (Var["print_report"])
+                printf "GROUP : %-15s : line_%s order_%s %10d %10d (%s)\n", ng_, l, gl, sg_, eg_, N[sc,s,ng_] | "cat 1>&2";
+              if (PLOT_FT[ng_,":","group_line"]=="none") gplt=0         # group without lines
+              else if (PLOT_FT[ng_,":","group_line"]=="default") gplt=1 # group red-line
+              printf "(%s) %s %s %s %s %s gp \n", Plot_Lbl(ng_), gplt, sg_, eg_, TxtBool(OnOff(PLOT_FT[ng_,":","label_show"])),TxtBool(OnOff(PLOT_FT[ng_,":","group_line_show"]))
+              for (el=1;el<=N[sc,s,ng_];el++) {
+                sel=S[sc,s,ng_,el];
+                start_=element[sc,s,ng_,sel,start];
+                end_=element[sc,s,ng_,sel,end];
+                if (Var["print_report"]) printf "Element %s : %s : %s - %s\n",el,sel,start_,end_ | "cat 1>&2";
+                if (Var["print_report"]) printf "Start %s - BORI %s : end %s - BEND %s\n",start_,BORI,end_,BEND | "cat 1>&2";
+                if (ChkLimits(start_,BORI,end_,BEND)) {
+                  feature_=element[sc,s,ng_,sel,feature];
+                  score_=element[sc,s,ng_,sel,score];
+                  # for gene mode. try to recompute relative frame and remainder
+                  if (Var["print_report"]) printf "Element %s : %s : %s - %s : %s %s %s/%s \n",el,sel,start_,end_,feature_, score_,frame_,remainder_ | "cat 1>&2";
+                  if (element[sc,s,ng_,sel,frame]!=".") {
+                      frame_=element[sc,s,ng_,sel,frame];
+                      remainder_=(3-(end_-(start_+frame_)+1)%3)%3 }
+                  else { frame_="(.)"; remainder_="(.)" }
+                if (Var["print_report"]) printf "Element* %s : %s : %s - %s : %s %s %s/%s \n",el,sel,start_,end_,feature_, score_,frame_,remainder_ | "cat 1>&2";
+                  if (Var["print_report"])
+                    printf "%s %s %s : %s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_) | "cat 1>&2"
+                  printf "%s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_) # | "cat | sort +0nr -1 +6nr -7 +2n -3 +3nr -4"
+                  } # if element checklimits
+                } # for elements in group             
+              # close("cat | sort +0nr -1 +6nr -7 +2n -3 +3nr -4")
+              printf "g_end\n"
+              } # if group checklimits
+            } # for LE
+          printf "s_end\n"
+          }   # for lines
+        } # for grpd
+      }   # for scord(source_ordering)
+      printf "%% ------------------ Strand(%s) End\n",s
+      if (prtrule && (StrSizeRvs>0 && (StrSizeFwd>0 || NStSize>0))) printf "ChangeStrand\n"
+     }    # if strand_show
+    }     # for strands(stp)
+ } else { # if SO_PROP
   for (stp=1;stp<=3;stp++) { # for s in strand
     prtrule=0
     s=wstr[stp]
@@ -1422,7 +1519,7 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
         else sc=order["none",srcord]      # (s==".")
         }
       printf "------ Source: %10s Strand: %s Counter: %s\n", sc, s, srcord | "cat 1>&2" 
-      printf "(%s) %s %s (%s) %s %s source\n", Plot_Lbl(sc)"("s")", PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],s,TxtBool(OnOff(PLOT_FT[sc,":","label_show"])),TxtBool(OnOff(PLOT_FT[sc,":","baseline_show"]))
+      printf "(%s) %s %s %s (%s) %s %s source\n", Plot_Lbl(sc)"("s")", PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],1,s,TxtBool(OnOff(PLOT_FT[sc,":","label_show"])),TxtBool(OnOff(PLOT_FT[sc,":","baseline_show"]))
       scnt=0
       for (i=1;i<=ng[sc,s];i++) {
         scnt++
@@ -1451,6 +1548,7 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
       if (prtrule && (StrSizeRvs>0 && (StrSizeFwd>0 || NStSize>0))) printf "ChangeStrand\n"
      }    # if strand_show
     }     # for strands(stp)
+ } # if SO_PROP
  } # End of function PRINTGROUPS
 function CreateProps(flag,    STRING,prop,dffeat,feat,gpfeat,sofeat) {
   ############ Create Properties Index for Objects ############ 
