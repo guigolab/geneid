@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.59 2002-06-20 14:03:17 jabril Exp $ 
+% # $Id: humus.nw,v 1.60 2002-07-12 13:07:30 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.59 2002-06-20 14:03:17 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.60 2002-07-12 13:07:30 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -5380,6 +5380,547 @@ sub print_gff_records() {
 @ 
 
 
+\subsubsctn{[[transgff.pl]]: Manipulating GFF files}
+
+<<tangling: perl scripts>>=
+echo "# --> \$BIN/transgff.pl" 1>&2 ;
+notangle -R"transgff.pl" $WORK/$nwfile.nw | cpif $BIN/transgff.pl ;
+perl -c $BIN/transgff.pl ;
+is_exec $BIN/transgff.pl ;
+@ 
+<<transgff.pl>>=
+<<PERL shebang>>
+<<transgff.pl: USAGE>>
+use strict;
+#
+use global qw( :ExecReport :ExitStatus :Counter :MathFuncts );
+&init_timer(\@exectime);
+#
+$PROG = 'transgff.pl';
+$PRGVER = '0.9alpha';
+my ($T,$F) = (1,0);
+#
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+local $Data::Dumper::Maxdepth = 2;
+#
+### ARGVS
+<<transgff.pl: ARGVS>>
+#
+### VARS
+my %gff = ();
+my %cnt = ( SEQ => { } ,  NSEQ => 0 ,
+            SRC => { } ,  NSRC => 0 ,
+            STR => { } ,  NSTR => 0 ,
+            GRP => { } ,  NGRP => 0 );
+my ($_num,$_str,$_hsh) = (0,1,2);
+#
+### MAIN
+&main();
+#
+### SUBS
+<<transgff.pl: SUBS>>
+#
+### EOF ###
+@ 
+
+<<transgff.pl: SUBS>>=
+# %gff->{"file"}->{seq}->
+#   @[seqn,seqname,%{src}->
+#     @[srcn,srcname,%{str}->
+#       @[strn,srtname,%{grp}->                                  # %%grp
+#         @[ grpname,grpstring,gori,gend,show_flg,
+#            ref->str,ref->src,ref->seq,"file",
+#            @[ [ show_flg,feat,fori,fend,sco,frame,ref->grp ]_0 # @@feat
+#               ...
+#               [ ... ]_n ]]]]]
+# %gff_*->{seqn}->{srcn}->{strn}->
+#            @[ [ g/fori g/fend show_flg ref->%%grp/@@feat "file" ovl_flg ]_0
+#               ... [ ... ]_n ]
+sub main() {
+    my ($A_cmp_B,%gff_A,%gff_B,@gff_O,$an,$bn);
+    @gff_O = ();
+    &program_started($PROG);
+    $an = &load_gff_records("A",\%gff_A,$file_A);
+    #
+    $flags{DBG} && do {
+        $Data::Dumper::Maxdepth = 8;
+        print STDERR Data::Dumper->Dump([ \%{$gff{A}} ], [ qw/ *<$gff{A}> / ]);
+        $Data::Dumper::Maxdepth = 5;
+        print STDERR Data::Dumper->Dump([ \%gff_A ], [ qw/ *gff_A / ]);
+    };
+    #
+    if (defined($file_B)) {
+        $bn = &load_gff_records("B",\%gff_B,$file_B);
+        #
+        $flags{DBG} && do {
+            $Data::Dumper::Maxdepth = 8;
+            print STDERR Data::Dumper->Dump([ \%{$gff{B}} ], [ qw/ *<$gff{B}> / ]);
+            $Data::Dumper::Maxdepth = 5;
+            print STDERR Data::Dumper->Dump([ \%gff_B ], [ qw/ *gff_B / ]);
+        };
+        #
+        if         ($flags{AND}) { $A_cmp_B = \&A_and_B; }
+          elsif    ($flags{NOT}) { $A_cmp_B = \&A_not_B; }
+            elsif  ($flags{XOR}) { $A_cmp_B = \&A_xor_B; }
+              else               { $A_cmp_B = \&A_cat_B; };
+        if        ($an > 0 && $bn > 0) { &do_cmp($A_cmp_B,\%gff_A,\%gff_B,\@gff_O); }
+          elsif   ($an > 0)            { &do_dump(\%gff_A,\@gff_O); }
+            elsif            ($bn > 0) { &do_dump(\%gff_B,\@gff_O); }
+              else                     { @gff_O = (); }; # warns later!!!
+    } else {
+        if ($an > 0) { &do_dump(\%gff_A,\@gff_O); }
+          else       { @gff_O = (); }; # warns later!!!
+    };
+    #
+    $flags{DBG} && do {
+        $Data::Dumper::Maxdepth = 2;
+        print STDERR Data::Dumper->Dump([ \@gff_O ], [ qw/ *gff_O / ]);
+    };
+    #
+    if (scalar(@gff_O) > 0) {
+        &no_overlaps(\@gff_O) if $flags{OVL};
+        &print_gff_records(\@gff_O);
+    } else {
+        print $ERRFH "### NO GFF RECORDS WERE FOUND TO BE TRANSFORMED...\n";
+    };
+    &program_finished($PROG);
+    exit($exit_codes{'OK'}{CODE});
+} # main
+sub help() {    
+    print $ERRFH "\n$PROG - $PRGVER\n\n";
+    print $ERRFH <<'+++EOF+++';
+<<transgff.pl: USAGE>>
++++EOF+++
+    exit($exit_codes{'HELP'}{CODE});
+} # help
+sub load_gff_records() {
+    my ($fff,$hou,$file) = @_;
+    my $hsh = \%{$gff{$fff}};
+    my ($shwflg,$aryn) = ($F,0);
+    my %rnc = ( '+' => 0, '-' => 0, '.' => 0 );
+    %$hsh = (); %$hou = ();
+    open(GFF,"<$file") || do {
+        print $ERRFH "## ERROR ## SKIPPING: CANNOT OPEN GFF FILE [$fff] $file\n";
+        return $F;
+    };
+    print $ERRFH "###\n## READING GFF FILE [$fff]: $file\n";
+    ($n,$_cntN) = (0,100);
+    while (<GFF>) {
+        my (@f,$sq,$sc,$st,$grp,$grpid,$ref);
+        $c = '.';
+        next if /^\#/o;
+        next if /^\s*$/o;
+        $c = 'x';
+        chomp;
+        @f = split /\s+/og, $_, 9;
+        $f[8] =~ /^\w+\s+\"(.*?)\"(.*)?$|^(.*?)(\s+.*)?$/o
+             && ($grp = defined($1) ? $1 : (defined($3) ? $3 : "." ));
+        $grp =~ s/;$//o ;
+        ($sq,$sc,$st) = ((defined($flags{SEQ}) ? $flags{SEQ} : $f[0]),
+                         (defined($flags{SRC}) ? $flags{SRC} : $f[1]),
+                         (defined($flags{STR}) ? $flags{STR} : $f[6]));
+        defined($hsh->{$sq}) || do {
+            defined($cnt{SEQ}{$sq}) || ($cnt{NSEQ}++, $cnt{SEQ}{$sq} = $cnt{NSEQ});
+            $hsh->{$sq} = [ $cnt{SEQ}{$sq}, $sq, {} ];
+        };
+        $ref = \%{ $hsh->{$sq}[$_hsh] };
+        defined($ref->{$sc}) || do {
+            defined($cnt{SRC}{$sc}) || ($cnt{NSRC}++, $cnt{SRC}{$sc} = $cnt{NSRC});
+            $ref->{$sc} = [ $cnt{SRC}{$sc}, $sc, {} ];
+        };
+        $ref = \%{ $ref->{$sc}[$_hsh] };
+        defined($ref->{$st}) || do {
+            defined($cnt{STR}{$st}) || ($cnt{NSTR}++, $cnt{STR}{$st} = $cnt{NSTR});
+            $ref->{$st} = [ $cnt{STR}{$st}, $st, {} ];
+        };
+        $ref = \%{ $ref->{$st}[$_hsh] };
+        (defined($cnt{GRP}{$grp}) && $grp ne '.') ||
+            ($c = 'X', $cnt{NGRP}++, $cnt{GRP}{$grp} = $cnt{NGRP});
+        $grpid = ($grp ne '.') ? $grp : $cnt{NGRP} ;
+        defined($ref->{$grpid}) || do {
+            $ref->{$grpid} = [ $grpid, $grp, @f[3,4], $shwflg,
+                               \@{ $hsh->{$sq}[$_hsh]{$sc}[$_hsh]{$st} },
+                               \@{ $hsh->{$sq}[$_hsh]{$sc} },
+                               \@{ $hsh->{$sq} }, $fff,
+                               [ ] ]; # this is the group features array
+        }; # defined($ref->{$grpid})
+        ($ref->{$grpid}[2],
+         $ref->{$grpid}[3]) = ( &min($ref->{$grpid}[2],$f[3]) ,
+                                &max($ref->{$grpid}[3],$f[4]) );
+        push @{ $ref->{$grpid}[9] },
+             [ $shwflg, @f[2..5,7],
+               \@{ $hsh->{$sq}[$_hsh]{$sc}[$_hsh]{$st}[$_hsh]{$grpid} } ];
+        $rnc{$f[6]}++;
+    } continue {
+        &counter(++$n,$c);
+    }; # while
+    &counter_end($n,$c);
+    print $ERRFH "## GFF file has ".
+                 ($rnc{'+'} + $rnc{'-'} + $rnc{'.'})." records ".
+                 "[ $rnc{'+'} (+), $rnc{'-'} (-) and $rnc{'.'} (.) ]...\n";
+    close(GFF);
+    $aryn = &build_coords_ary($hsh,$hou);
+    # &sort_records($ary) if ($aryn > 0);
+    return $aryn;
+} # load_gff_records
+sub build_coords_ary() {
+    my ($hsh,$hou) = @_;
+    my ($nq,$nc,$nt,$fnum,$ref);
+    print $ERRFH "###\n## BUILDING COORDINATES ARRAY...\n";
+    $fnum = 0;
+    foreach my $kq (keys %{ $hsh }) {
+        $nq = $hsh->{$kq}[$_num];
+        $hou->{$nq} = {};
+        foreach my $kc (keys %{ $hsh->{$kq}[$_hsh] }) {
+            $nc = $hsh->{$kq}[$_hsh]{$kc}[$_num];
+            $hou->{$nq}{$nc} = {};
+            foreach my $kt (keys %{ $hsh->{$kq}[$_hsh]{$kc}[$_hsh] }) {
+                $nt = $hsh->{$kq}[$_hsh]{$kc}[$_hsh]{$kt}[$_num];
+                $hou->{$nq}{$nc}{$nt} = [];
+                foreach my $kg (keys %{ $hsh->{$kq}[$_hsh]{$kc}[$_hsh]{$kt}[$_hsh] }) {
+                    $ref = \@{ $hsh->{$kq}[$_hsh]{$kc}[$_hsh]{$kt}[$_hsh]{$kg} };
+                    if ($flags{GRP}) { # working on groups
+                        push @{ $hou->{$nq}{$nc}{$nt} },
+                             [ $ref->[2], $ref->[3], $ref->[4], $ref, $ref->[8] ]; # ori end shw ref file
+                    } else {           # working on features
+                        foreach my $ft (@{ $ref->[9] }) {
+                            push @{ $hou->{$nq}{$nc}{$nt} },
+                                 [ $ft->[2], $ft->[3], $ft->[0], $ft, $ref->[6][8] ]; # ori end shw ref file
+                        }; # foreach $ft
+                    }; # if $flags{GRP}                    
+                }; # foreach $kg  
+                &sort_records(\@{ $hou->{$nq}{$nc}{$nt} });
+                $fnum += scalar(@{ $hou->{$nq}{$nc}{$nt} });
+            }; # foreach $kt  
+        }; # foreach $kc  
+    }; # foreach $kq  
+    return $fnum;
+} # 
+sub sort_records() {
+    my ($ary) = @_;
+    scalar(@$ary) > 0 || return;
+    @$ary = map  { $_ }
+            sort { $a->[0] <=> $b->[0]
+                           ||
+                   $a->[1] <=> $b->[1] }
+            map  { $_ } @$ary;
+} # sort_records
+sub sort_records_plus() {
+    my ($ary) = @_;
+    scalar(@$ary) > 0 || return;
+    @$ary = map  { $_ }
+            sort { $a->[0] <=> $b->[0]
+                           ||
+                   $a->[1] <=> $b->[1]
+                           ||
+                   $a->[4] cmp $b->[4]
+                           ||
+                   $b->[2] <=> $a->[2] }
+            map  { $_ } @$ary;
+} # sort_records_plus
+sub no_overlaps() {
+    my ($ary) = @_;
+    my ($fn,$f,$ff, $ao,$ae,$as,$lo,$le,$ls);
+    print $ERRFH "###\n## REMOVING OVERLAPPING FEATURES...\n";
+    $fn = scalar(@$ary);
+    $ff  = 0;
+    $ls = $F;
+    while ($ls == $F && $ff < $fn) { # get the first feat that is going to be shown
+        ($lo,$le,$ls) = @{$ary->[$ff]}[0..2];
+        $ls || do {
+            push @{$ary->[$ff]}, $F;
+            $ff++;
+        };
+    }; # while $ls
+    ($ff < $fn) || return;
+    push @{$ary->[$ff]}, $T;
+    (++$ff < $fn) || return;
+    for ($f = $ff; $f < $fn; $f++) { # check overlapping feats from that
+        ($ao,$ae,$as) = @{$ary->[$f]}[0..2];        
+        push @{$ary->[$f]}, $F;
+        ($ao > $le && $as) && do { 
+            ($lo,$le,$ls) = ($ao,$ae,$as);
+            $ary->[$f][5] = $T;
+        };
+    }; # for $f  
+} # no_overlaps
+sub print_gff_records() {
+    my ($ary) = @_;
+    my $GFF = "\%s".(("\%s\t") x 8)."\%s\n";
+    my ($x,$y,$shw,$ref);
+    print $ERRFH "###\n## PRINTING GFF OUTPUT...\n";
+    foreach my $ft (@$ary) {
+        ($x,$y,$ref) = ($ft->[0],$ft->[1],$ft->[3]);
+        if ($flags{GRP}) { # working on groups
+            #
+            $flags{DBG} && do {
+                $Data::Dumper::Maxdepth = 2;
+                print STDERR Data::Dumper->Dump([ \@{ $ref->[9] } ], [ '*{ $ref->[9] }' ]);
+            };
+            #
+            if ($flags{OVL} && $ft->[2]) {
+                $shw = $ft->[5] ? "" : "#O.".$ft->[4]."# ";
+            } else {
+                $shw = $ft->[2] ? "" : "#".$ft->[4]."# ";
+            };
+            foreach my $el (@{ $ref->[9] }) {
+                print STDOUT sprintf($GFF,
+                                 $shw,
+                                 $ref->[7][$_str],  # seq
+                                 $ref->[6][$_str],  # source
+                                 $el->[1],$el->[2],$el->[3],$el->[4], # feat ori end score
+                                 $ref->[5][$_str],  # strand
+                                 $el->[5],$ref->[1] # frame group_string
+                             ) unless (!$ft->[2] && !$flags{ALL});
+            }; # foreach $el
+        } else {           # working on features
+            #
+            $flags{DBG} && do {
+                $Data::Dumper::Maxdepth = 2;
+                print STDERR Data::Dumper->Dump([ \@{ $ft } ], [ '*{ $ft }' ]);
+            };
+            #
+            if ($flags{OVL} && $ft->[2]) {
+                $shw = $ft->[5] ? "" : "#O.".$ref->[4]."# ";
+            } else {
+                $shw = $ft->[2] ? "" : "#".$ref->[4]."# ";
+            };
+            print STDOUT sprintf($GFF,
+                             $shw,
+                             $ref->[6][7][$_str], # seq
+                             $ref->[6][6][$_str], # source
+                             $ref->[1],$ref->[2],$ref->[3],$ref->[4], # feat ori end score
+                             $ref->[6][5][$_str], # strand
+                             $ref->[5],$ref->[6][1] # frame group_string
+                         ) unless (!$ft->[2] && !$flags{ALL});
+        }; # if $flags{GRP}                    
+    }; # foreach $ft
+} # print_gff_records
+sub do_cmp() {
+    my ($scmp,$gA,$gB,$gO) = @_;
+    my ($nq,$nc,$nt) = (0,0,0);
+    print $ERRFH "###\n## COMPARING/DUMPING COORDINATES FOR GFF ELEMENTS...\n";
+    while ($nq < $cnt{NSEQ}) {
+        $nq++;
+        while ($nc < $cnt{NSRC}) {
+            $nc++;
+            while ($nt < $cnt{NSTR}) {
+                $nt++;
+                $scmp->(\@{ $gA->{$nq}{$nc}{$nt} },
+                        \@{ $gB->{$nq}{$nc}{$nt} },$gO);
+            }; # while $nt
+        }; # while $nc
+    }; # while $nq
+    &sort_records_plus($gO); ## are they already sorted when A_cat_B ???
+} # do_cmp
+sub do_dump() {
+    my ($gG,$gO) = @_;
+    my $A_cmp_B = \&AB_dump;
+    &do_cmp($A_cmp_B,$gG,$gG,$gO);
+    # &sort_records($gO);
+} # do_dump
+sub A_and_B() {
+    my ($a,$b,$o) = @_;
+    my ($ao,$ae,$ac,$an, $bo,$be,$bc,$bn);
+    $flags{DBG} && do {
+        print $ERRFH "### A AND B:\n";
+        $Data::Dumper::Maxdepth = 2;
+        print STDERR Data::Dumper->Dump([ \@$a, \@$b ], [ qw/ *$a *$b / ]);
+    };
+    ($an,$bn,$bc) = (scalar(@$a),scalar(@$b),0);
+    for ($ac = 0; $ac < $an; $ac++) { ##################
+        $bc < $bn || last;
+        ($ao,$ae) = ($a->[$ac][0],$a->[$ac][1]);
+        ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
+        while ($be < $ao && $bc < $bn) {
+            $bc++;
+            ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
+        }; # while
+        ($check_match->($ao,$ae,$bo,$be)) && do {
+            $a->[$ac][2] = $T; # showflg ON
+        };
+        # $bc++; # if $bo larger than $ae we do need to check same $bc in next loop
+    }; # for $ac
+    push @$o, @$a, @$b;
+} # A_and_B
+sub A_not_B() {
+    my ($a,$b,$o) = @_;
+    my ($ao,$ae,$ac,$an, $bo,$be,$bc,$bn);
+    $flags{DBG} && do {
+        print $ERRFH "### A XOR B:\n";
+        $Data::Dumper::Maxdepth = 2;
+        print STDERR Data::Dumper->Dump([ \@$a, \@$b ], [ qw/ *$a *$b / ]);
+    };
+    foreach my $ft (@$a) {
+        $ft->[2] = $T; # showflg ON
+    }; # foreach $ft
+    ($an,$bn,$bc) = (scalar(@$a),scalar(@$b),0);
+    for ($ac = 0; $ac < $an; $ac++) {
+        $bc < $bn || last;
+        ($ao,$ae) = ($a->[$ac][0],$a->[$ac][1]);
+        ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
+        while ($be < $ao && $bc < $bn) {
+            $bc++;
+            ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
+        }; # while
+        ($check_match->($ao,$ae,$bo,$be)) && do {
+            $a->[$ac][2] = $F; # showflg OFF
+        };
+        # $bc++; # if $bo larger than $ae we do need to check same $bc in next loop
+    }; # for $ac
+    push @$o, @$a, @$b;
+} # A_not_B
+sub A_xor_B() {
+    my ($a,$b,$o) = @_;
+    my ($ao,$ae,$ac,$an, $bo,$be,$bc,$bn);
+    $flags{DBG} && do {
+        print $ERRFH "### A XOR B:\n";
+        $Data::Dumper::Maxdepth = 2;
+        print STDERR Data::Dumper->Dump([ \@$a, \@$b ], [ qw/ *$a *$b / ]);
+    };
+    foreach my $ft (@$a,@$b) {
+        $ft->[2] = $T; # showflg ON
+    }; # foreach $ft
+    ($an,$bn,$bc) = (scalar(@$a),scalar(@$b),0);
+    for ($ac = 0; $ac < $an; $ac++) {
+        $bc < $bn || last;
+        ($ao,$ae) = ($a->[$ac][0],$a->[$ac][1]);
+        ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
+        while ($be < $ao && $bc < $bn) {
+            $bc++;
+            ($bo,$be) = ($b->[$bc][0],$b->[$bc][1]);
+        }; # while
+        ($check_match->($ao,$ae,$bo,$be)) && do {
+            $a->[$ac][2] = $F; # showflg OFF
+            $b->[$bc][2] = $F; #
+        };
+        # $bc++; # if $bo larger than $ae we do need to check same $bc in next loop
+    }; # for $ac
+    push @$o, @$a, @$b;
+} # A_xor_B
+sub A_cat_B() {
+    my ($a,$b,$o) = @_;
+    foreach my $ft (@$a,@$b) {
+        $ft->[2] = $T; # showflg ON
+    }; # foreach $ft
+    push @$o, @$a, @$b;
+} # A_cat_B
+sub AB_dump() {
+    my ($a,$b,$o) = @_;
+    foreach my $ft (@$a) {
+        $ft->[2] = $T; # showflg ON
+    }; # foreach $ft
+    push @$o, @$a;
+} # AB_dump
+sub check_overlap_coords() { 
+    my ($ao,$ae,$bo,$be) = @_;
+    return $T if ($be > $ao && $bo < $ae);
+    return $F;
+} # check_overlap_coords
+sub check_exact_coords() {
+    my ($ao,$ae,$bo,$be) = @_;
+    return $T if ($ao == $bo && $be == $ae);
+    return $F;
+} # check_exact_coords
+@
+
+<<transgff.pl: USAGE>>=
+#
+# USAGE: transgff.pl [options] gff-file_A [gff-file_B] > stdout
+#
+#    Manipulating fields from one or two GFF files.
+#
+#  In function of the GFF-group/feats coordinates
+#  performs the following operations:
+#    --GRP             : works on GFF-groups (default)
+#    --FEA             : works on GFF-features
+#    --ALL             : outputs non-selected features as comments
+#    --OVL             : removes overlapping groups/feats
+#    --IDN             : feature acceptor/donor matching coordinates must be identical
+#    --AND A.gff B.gff : the GFF-group/feat must appear in both files
+#    --NOT A.gff B.gff : the GFF-group/feat not appearing in the second file
+#    --XOR A.gff B.gff : GFF-group/feat must appear only on first or on second
+#                        (eXclussive OR)
+#
+#  If no options are passed then files are merged and sorted by GFF-group.
+#
+#  The program takes care of the sequence, the source and the strand,
+#  unless you pass any of the following command-line options: 
+#     --SEQUENCE [ sequence_name ]
+#     --SOURCE [ source_name ]
+#     --STRAND [ strand ]
+#  When a [ sequence_name ], [ source_name ] or [ strand ] is provided,
+#  it is used to output the corresponding fields with the given string.
+#  Else, "seq", "src" and "." are used on output fields respectively.
+#
+#  Further command-line options:
+#      -v, --verbose : STDERR shows program execution
+#      -d, --debug   : STDERR also reports internal data structures contents
+#      -h, --help    : shows this help...
+#
+@ 
+
+<<transgff.pl: ARGVS>>=
+use Getopt::Long;
+Getopt::Long::Configure qw/ bundling /;
+#
+my %flags = ( GRP => $T ,
+              RAW => $T ,  # default choice if nothing else is selected
+              ALL => $F ,
+              OVL => $F ,
+              IDN => $F ,
+              AND => $F ,
+              NOT => $F ,
+              XOR => $F ,
+              SEQ => undef ,
+              SRC => undef ,
+              STR => undef ,
+              DBG => $F ,
+              VRB => $F ); # be verbose
+#
+$SIG{__WARN__} = sub {
+                       print $ERRFH "### UNKNOWN COMMAND-LINE OPTION: $_[0]\n";
+                     };
+GetOptions(
+           'grp|GRP'         => sub { $flags{GRP} = $T } ,
+           'fea|FEA'         => sub { $flags{GRP} = $F } ,
+           'all|ALL'         => \$flags{ALL} ,
+           'ovl|OVL'         => \$flags{OVL} ,
+           'idn|IDN'         => \$flags{IDN} ,
+           'and|AND'         => \$flags{AND} ,
+           'not|NOT'         => \$flags{NOT} ,
+           'xor|XOR'         => \$flags{XOR} ,
+           'SEQUENCE:s'      => \$flags{SEQ} ,
+           'SOURCE:s'        => \$flags{SRC} ,
+           'STRAND:s'        => \$flags{STR} ,
+           'd|debug'         => \$flags{DBG} ,
+           'v|verbose'       => \$flags{VRB} ,
+           'h|help'          => \&help
+           ) || do {
+               print $ERRFH "### ERROR when PARSING ARGUMENTS\n";
+               exit($exit_codes{'BADCMDLINEOPT'}{CODE});
+           };
+$SIG{__WARN__} = 'DEFAULT';
+# getting file-names
+my @files = @ARGV;
+my ($file_A,$file_B) = (undef, undef);
+(scalar(@files) > 0) || do {
+    print $ERRFH "### ERROR: $PROG requires at least one file!!!\n";
+    exit($exit_codes{'NOCMDLINEFILE'}{CODE});
+};
+$file_A = $files[0];
+defined($files[1]) && ($file_B = $files[1]);
+#
+my $check_match = ($flags{IDN}) ? \&check_exact_coords : \&check_overlap_coords;
+# setting other vars
+(defined($flags{SEQ}) && $flags{SEQ} eq "") && ($flags{SEQ} = "seq");
+(defined($flags{SRC}) && $flags{SRC} eq "") && (($flags{SRC} = $PROG) =~ s/\.pl$//o);
+(defined($flags{STR}) && $flags{STR} eq "") && ($flags{STR} = ".");
+@
+
+
 \subsubsctn{[[gp2gff.pl]]: Processing Golden Path annotation}
 
 <<tangling: perl scripts>>=
@@ -10087,6 +10628,8 @@ NOREADPIPE    &  42 & Could not open pipe to read    \\
 NOWRITEPIPE   &  44 & Could not open pipe to write   \\ \hline\hline
 COMMANDLINE   &  60 & Error trapped when parsing commandline options \\
 BADCMDLINEOPT &  62 & Wrong command-line option forced program exit  \\
+NOCMDLINEFILE &  64 & Missing file names from command-line           \\
+HELP          &  69 & Help requested via command-line option         \\
 ENVERROR      &  70 & Error trapped when setting shell environment   \\
 ENVUNDEFVAR   &  72 & Environment variable not defined    \\ \hline\hline
 DBCONNECT     & 100 & Could not connect to DataBase  \\
@@ -10276,6 +10819,16 @@ sub the_end() {
          CODE  =>  62,
          SHORT => "Wrong command-line option forced program exit",
          MSG   => sub { return $exit_codes{'BADCMDLINEOPT'}{SHORT} },
+         },
+    'NOCMDLINEFILE' => { 
+         CODE  =>  64,
+         SHORT => "Missing file names from command-line...",
+         MSG   => sub { return $exit_codes{'NOCMDLINEFILE'}{SHORT} },
+         },
+    'HELP' => { 
+         CODE  =>  69,
+         SHORT => "User requested script usage via command-line options",
+         MSG   => sub { return $exit_codes{'HELP'}{SHORT} },
          },
     'ENVERROR' => { 
          CODE  =>  70,
@@ -11099,7 +11652,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.59 2002-06-20 14:03:17 jabril Exp $
+# $Id: humus.nw,v 1.60 2002-07-12 13:07:30 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
