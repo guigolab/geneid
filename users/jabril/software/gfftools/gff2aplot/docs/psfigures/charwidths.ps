@@ -1,0 +1,200 @@
+%!PS-Adobe-3.0
+%%Title: CHAR WIDTHS ANALYSIS
+%%Creator: $Author: jabril $ (Hacker Hands)
+%%Version: $Revision: 1.1 $
+%%CreationDate: $Date: 2003-02-27 14:50:50 $
+%%For: GFF2APLOT USER's MANUAL
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EndComments
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                             charwidths.ps                            %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Finding mean for char widths to select a good candidate among them
+%    for the string length estimation used to calculate label position
+%    for axes annotations of gff2aplot.pl PostScript output.
+%
+%          CopyLeft (C) 2003 - Josep Francesc ABRIL FERRANDO  
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    $Id: charwidths.ps,v 1.1 2003-02-27 14:50:50 jabril Exp $
+%
+%    Report BUGS to: jabril@imim.es
+%
+%%BeginProlog
+%
+%%BeginProcSet: Short_names 1.0 0
+%
+/B { bind def } bind def
+/X { exch def } B
+/x { exch } B
+/r { roll } B
+/D { def } B
+/S { gsave } B
+/R { grestore } B
+/F { scale } B
+/T { translate } B
+/A { rotate } B
+/m { moveto } B
+/rm { rmoveto } B
+/l { lineto } B
+/rl { rlineto } B
+/k { stroke } B
+/gk { S stroke R } B
+/f { fill } B
+/gf { S fill R } B
+/ie { ifelse } B
+/cmyk { setcmykcolor } B
+/slw { setlinewidth } B
+/sfnt { findfont x scalefont setfont } B
+%
+%%EndProcSet: Short_names 1.0 0
+%
+%%BeginProcSet: Colors 1.0 0
+%
+/colordict 128 dict D
+colordict begin
+/black { 0.00 0.00 0.00 1.00 } D /white { 0.00 0.00 0.00 0.00 } D
+/verydeepgrey { 0.00 0.00 0.00 0.90 } D /deepgrey { 0.00 0.00 0.00 0.80 } D /verydarkgrey { 0.00 0.00 0.00 0.70 } D /darkgrey { 0.00 0.00 0.00 0.60 } D /grey { 0.00 0.00 0.00 0.50 } D /lightgrey { 0.00 0.00 0.00 0.40 } D /verylightgrey { 0.00 0.00 0.00 0.30 } D /palegrey { 0.00 0.00 0.00 0.20 } D /verypalegrey { 0.00 0.00 0.00 0.10 } D 
+/verydeeppink { 0.00 0.60 0.15 0.35 } D /deeppink { 0.00 0.75 0.20 0.15 } D /verydarkpink { 0.00 0.90 0.25 0.00 } D /darkpink { 0.00 0.75 0.30 0.00 } D /pink { 0.00 0.60 0.25 0.00 } D /lightpink { 0.00 0.45 0.20 0.00 } D /verylightpink { 0.00 0.30 0.15 0.00 } D /palepink { 0.00 0.20 0.10 0.00 } D /verypalepink { 0.00 0.10 0.05 0.00 } D
+/verydeepmagenta { 0.00 0.60 0.00 0.40 } D /deepmagenta { 0.00 0.75 0.00 0.20 } D /verydarkmagenta { 0.00 0.90 0.00 0.00 } D /darkmagenta { 0.00 0.75 0.00 0.00 } D /magenta { 0.00 0.60 0.00 0.00 } D /lightmagenta { 0.00 0.45 0.00 0.00 } D /verylightmagenta { 0.00 0.30 0.00 0.00 } D /palemagenta { 0.00 0.20 0.00 0.00 } D /verypalemagenta { 0.00 0.10 0.00 0.00 } D
+/verydeepviolet { 0.30 0.60 0.00 0.40 } D /deepviolet { 0.35 0.75 0.00 0.20 } D /verydarkviolet { 0.45 0.90 0.00 0.00 } D /darkviolet { 0.35 0.75 0.00 0.00 } D /violet { 0.30 0.60 0.00 0.00 } D /lightviolet { 0.22 0.45 0.00 0.00 } D /verylightviolet { 0.15 0.30 0.00 0.00 } D /paleviolet { 0.10 0.20 0.00 0.00 } D /verypaleviolet { 0.05 0.10 0.00 0.00 } D
+/verydeepblue { 0.60 0.60 0.00 0.40 } D /deepblue { 0.75 0.75 0.00 0.20 } D /verydarkblue { 0.90 0.90 0.00 0.00 } D /darkblue { 0.75 0.75 0.00 0.00 } D /blue { 0.60 0.60 0.00 0.00 } D /lightblue { 0.45 0.45 0.00 0.00 } D /verylightblue { 0.30 0.30 0.00 0.00 } D /paleblue { 0.20 0.20 0.00 0.00 } D /verypaleblue { 0.10 0.10 0.00 0.00 } D
+/verydeepskyblue { 0.60 0.40 0.00 0.40 } D /deepskyblue { 0.75 0.50 0.00 0.20 } D /verydarkskyblue { 0.90 0.60 0.00 0.00 } D /darkskyblue { 0.75 0.50 0.00 0.00 } D /skyblue { 0.60 0.40 0.00 0.00 } D /lightskyblue { 0.45 0.30 0.00 0.00 } D /verylightskyblue { 0.30 0.22 0.00 0.00 } D /paleskyblue { 0.20 0.14 0.00 0.00 } D /verypaleskyblue { 0.10 0.07 0.00 0.00 } D
+/verydeepcyan { 0.60 0.00 0.00 0.40 } D /deepcyan { 0.75 0.00 0.00 0.20 } D /verydarkcyan { 0.90 0.00 0.00 0.00 } D /darkcyan { 0.75 0.00 0.00 0.00 } D /cyan { 0.60 0.00 0.00 0.00 } D /lightcyan { 0.45 0.00 0.00 0.00 } D /verylightcyan { 0.30 0.00 0.00 0.00 } D /palecyan { 0.20 0.00 0.00 0.00 } D /verypalecyan { 0.10 0.00 0.00 0.00 } D
+/verydeepseagreen { 0.60 0.00 0.15 0.40 } D /deepseagreen { 0.75 0.00 0.20 0.20 } D /verydarkseagreen { 0.90 0.00 0.25 0.00 } D /darkseagreen { 0.75 0.00 0.30 0.00 } D /seagreen { 0.60 0.00 0.25 0.00 } D /lightseagreen { 0.45 0.00 0.20 0.00 } D /verylightseagreen { 0.30 0.00 0.15 0.00 } D /paleseagreen { 0.20 0.00 0.10 0.00 } D /verypaleseagreen { 0.10 0.00 0.05 0.00 } D
+/verydeepgreen { 0.60 0.00 0.60 0.40 } D /deepgreen { 0.75 0.00 0.75 0.20 } D /verydarkgreen { 0.90 0.00 0.90 0.00 } D /darkgreen { 0.75 0.00 0.75 0.00 } D /green { 0.60 0.00 0.60 0.00 } D /lightgreen { 0.45 0.00 0.45 0.00 } D /verylightgreen { 0.30 0.00 0.30 0.00 } D /palegreen { 0.20 0.00 0.20 0.00 } D /verypalegreen { 0.10 0.00 0.10 0.00 } D
+/verydeeplimegreen { 0.15 0.00 0.60 0.40 } D /deeplimegreen { 0.20 0.00 0.75 0.20 } D /verydarklimegreen { 0.25 0.00 0.90 0.00 } D /darklimegreen { 0.30 0.00 0.75 0.00 } D /limegreen { 0.25 0.00 0.60 0.00 } D /lightlimegreen { 0.20 0.00 0.45 0.00 } D /verylightlimegreen { 0.15 0.00 0.30 0.00 } D /palelimegreen { 0.10 0.00 0.20 0.00 } D /verypalelimegreen { 0.05 0.00 0.10 0.00 } D
+/verydeepyellow { 0.00 0.00 0.60 0.40 } D /deepyellow { 0.00 0.00 0.75 0.20 } D /verydarkyellow { 0.00 0.00 0.90 0.00 } D /darkyellow { 0.00 0.00 0.75 0.00 } D /yellow { 0.00 0.00 0.60 0.00 } D /lightyellow { 0.00 0.00 0.45 0.00 } D /verylightyellow { 0.00 0.00 0.30 0.00 } D /paleyellow { 0.00 0.00 0.20 0.00 } D /verypaleyellow { 0.00 0.00 0.10 0.00 } D
+/verydeeporange { 0.00 0.30 0.80 0.40 } D /deeporange { 0.00 0.32 0.85 0.20 } D /verydarkorange { 0.00 0.35 0.90 0.00 } D /darkorange { 0.00 0.30 0.75 0.00 } D /orange { 0.00 0.25 0.60 0.00 } D /lightorange { 0.00 0.20 0.45 0.00 } D /verylightorange { 0.00 0.15 0.30 0.00 } D /paleorange { 0.00 0.10 0.20 0.00 } D /verypaleorange { 0.00 0.05 0.10 0.00 } D
+/verydeepred { 0.00 0.60 0.60 0.40 } D /deepred { 0.00 0.75 0.75 0.20 } D /verydarkred { 0.00 0.90 0.90 0.00 } D /darkred { 0.00 0.75 0.75 0.00 } D /red { 0.00 0.60 0.60 0.00 } D /lightred { 0.00 0.45 0.45 0.00 } D /verylightred { 0.00 0.30 0.30 0.00 } D /palered { 0.00 0.20 0.20 0.00 } D /verypalered { 0.00 0.10 0.10 0.00 } D
+/verydeepbrown { 0.35 0.85 0.90 0.35 } D /deepbrown { 0.30 0.75 0.90 0.25 } D /verydarkbrown { 0.25 0.70 0.90 0.15 } D /darkbrown { 0.20 0.60 0.75 0.05 } D /brown { 0.17 0.50 0.65 0.00 } D /lightbrown { 0.15 0.40 0.55 0.00 } D /verylightbrown { 0.12 0.28 0.45 0.00 } D /palebrown { 0.10 0.18 0.30 0.00 } D /verypalebrown { 0.05 0.10 0.20 0.00 } D
+end
+%
+%%EndProcSet: Colors 1.0 0
+%
+%%BeginProcSet: Functions 1.0 0
+%
+% /pgA4 { 595 842 } D
+/cm { 28.35 mul } B
+/in { 72 mul } B
+/bbox { 4 copy 3 1 r x 6 2 r 8 -2 r m l l l closepath } B
+%
+%%EndProcSet: Functions 1.0 0
+%
+%%BeginProcSet: Local_Functions 1.0 0
+%
+/charslist { (A) (B) (C) (D) (E) (F) (G) (H) (I) (J) (K) (L) (M)
+             (N) (O) (P) (Q) (R) (S) (T) (U) (V) (W) (X) (Y) (Z)
+             (a) (b) (c) (d) (e) (f) (g) (h) (i) (j) (k) (l) (m)
+             (n) (o) (p) (q) (r) (s) (t) (u) (v) (w) (x) (y) (z)
+             (0) (1) (2) (3) (4) (5) (6) (7) (8) (9) (.) (,) (;)
+             (:) (_) (=) (+) (-) (*) (@) (#) ($) (&) (%) (<) (>)
+             (!) (?) (\\) (\/) (\() (\[) (\{) (·) (~)
+} D % 82 chars
+/charsfont1 { 10 /Helvetica-Bold sfnt } B
+/charsfont2 { 10 /Courier-Bold sfnt } B
+/initvars {
+    /counter 0 D
+    /ACwidth 0 D
+    /curpos 0 D
+    /curwdth 0 D
+    /curchar () D
+} B
+%
+%%EndProcSet: Local_Functions 1.0 0
+%
+%%EndProlog
+%
+%%BeginSetup
+%
+% initgraphics % must not be used in EPS documents
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%
+%%EndSetup
+%
+%%Page: 1 1
+%%BeginPageSetup
+%
+/pgsave save def
+%
+%%EndPageSetup
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+colordict begin
+%
+100 100 T
+S
+initvars
+charsfont1
+375 0 T
+mark charslist
+counttomark {
+	/curchar X
+	/counter counter 1 add D	
+	/curpos curpos 1 add D	
+	/curwdth curchar stringwidth pop D
+	/ACwidth ACwidth curwdth add D
+	curpos 30 mod 0 eq { -75 0 T /curpos 1 D } if
+    0 curpos 20 mul m
+	curchar show ( : ) show curwdth 10 string cvs show	
+} repeat
+0 -20 m (MEAN : ) show ACwidth counter div 10 string cvs show
+0 625 m (FONT: Helvetica-Bold) show
+R
+S
+initvars
+charsfont2
+125 0 T
+mark charslist
+counttomark {
+	/curchar X
+	/counter counter 1 add D	
+	/curpos curpos 1 add D	
+	/curwdth curchar stringwidth pop D
+	/ACwidth ACwidth curwdth add D
+	curpos 30 mod 0 eq { -75 0 T /curpos 1 D } if
+    0 curpos 20 mul m
+	curchar show ( : ) show curwdth 10 string cvs show	
+} repeat
+0 -20 m (MEAN : ) show ACwidth counter div 10 string cvs show
+0 625 m (FONT: Courier-Bold) show
+R
+%
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% grestoreall % must not be used in EPS documents
+pgsave restore
+showpage
+%
+% Page: 1 1
+%%PageTrailer
+%
+%%Trailer
+%
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EOF
