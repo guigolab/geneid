@@ -1,0 +1,185 @@
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: main.tex,v 1.1 2003-09-29 17:03:21 gparra Exp $
+%
+
+\usepackage[a4paper,offset={0pt,0pt},hmargin={3.5cm,3cm},vmargin={2.5cm,2.5cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+%\usepackage{times}\fontfamily{ptm}\selectfont
+%\usepackage{t1enc}
+
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtgparra{\htmladdnormallink{\textbf{gparra@imim.es}}{MAILTO:gparra@imim.es}}
+
+% defs
+\def\dicty{\textit{Dictyostelium discoideum}}
+\def\dic{\textit{D. discoideum}}
+\def\fugu{\textit{Fugu rubripes}}
+\def\fug{\textit{F. rubripes}}
+\def\drome{\textit{Drosophila melanogaster}}
+\def\dme{\textit{D. melanogaster}}
+\def\dro{\textit{Drosophila}}
+\def\tetra{\textit{Tetraodon nigroviridis}}
+\def\danio{\textit{Brachydanio rerio}}
+\def\homo{\textit{Homo sapiens}}
+\def\arab{\textit{Arabidopsis thaliana}}
+\def\wheat{\textit{Triticum aestivum}}
+\def\bn{\textsc{blastn}}
+\def\tbx{\textsc{tblastx}}
+\def\ps{\textsc{PostScript}}
+\def\geneid{\texttt{geneid}}
+\def\genscan{\texttt{genscan}}
+\def\sgp{\texttt{SGP2}}
+\def\genos{\textbf{Genoscope}}
+
+% Setting text for footers and headers
+
+\def\tit{\textsc{Computational identification of genes}}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\tit}
+\fancyfoot[LO,LE]{\small\textsl{Gen\'{\i}s Parra}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input Colores
+
+\begin{document}
+\bodytext{text="#000000" bgcolor="#FFFF99"}
+
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\begin{center}
+\vfill
+\begin{latexonly}
+\psframebox[framearc=0.5,fillstyle=solid,fillcolor=lightorange]{
+\parbox[b][2cm][c]{3.7cm}{
+{\textbf{\Large \shortstack[c]{Ph.D Thesis \\[1ex] Draft Version}}}}}\\[12ex]
+\end{latexonly}
+
+\begin{rawhtml}
+<BR>
+\end{rawhtml}
+
+\textbf{\huge Computational identification of genes}\\[12ex]
+
+
+%\textbf{\Large Authors List Here}\\[1ex]
+\textbf{\Large Gen\'{\i}s Parra Farr\'e\raisebox{0.85ex}{\footnotesize$\dag\,$}}\\[2ex]
+\textbf{Ph.D. Advisor: Roderic Guig\'o Serra}\\[5ex]
+
+ % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large \today}\\[10ex]
+
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+
+
+} % parbox
+\end{center}
+\end{abstract}
+ 
+\vfill
+
+
+\vfill
+
+\begin{raggedleft}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Centre de Regulaci\'o Gen\`omica \\
+Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtgparra}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+
+\vfill
+\begin{center}
+{\tiny$<$ \verb$Id: main.tex,v 1.1 2003-09-29 17:03:21 gparra Exp $$>$ }
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\ \\
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
