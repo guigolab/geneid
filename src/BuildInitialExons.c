@@ -4,9 +4,9 @@
 *                                                                        *
 *   From start/stop codons and donor sites, to build initial exons       *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,11 +24,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInitialExons.c,v 1.4 2003-02-26 10:50:58 eblanco Exp $  */
+/*  $Id: BuildInitialExons.c,v 1.5 2003-11-05 13:27:37 eblanco Exp $  */
 
 #include "geneid.h"
 
 /* Maximum allowed number of generic exons (divided by RFIRST) */
+/* Sequence is used to save information to prevent Stop codons in frame */
 extern long NUMEXONS;
 extern long MAXBACKUPSITES;
 
@@ -42,7 +43,7 @@ long BuildInitialExons(site *Start, long nStarts,
   /* Best exons built by using the current start codon */
   exonGFF *LocalExon;
   int nLocalExons, LowestLocalExon;
-  double LowestLocalScore;
+  float LowestLocalScore;
   
   /* Maximum allowed number of predicted initial exons per fragment */
   long HowMany;
@@ -68,19 +69,19 @@ long BuildInitialExons(site *Start, long nStarts,
 	{ 
 	  /* Reset the best local exons array */
 	  nLocalExons = 0;
-	  LowestLocalScore = DBL_MAX;
+	  LowestLocalScore = INF;
 	  LowestLocalExon = 0;
-
+	  
 	  /* Computing the frame to look for the first stop in frame */
 	  Frame = (Start+i)->Position % 3;
 	  
 	  /* Skip previous Stops to current Start */
 	  while (((Stop+j)->Position+1 < (Start+i)->Position) && (j < nStops))
 		j++;
-
+	  
 	  /* Save counter j for the next iteration */
 	  js=j;
-    
+	  
 	  /* Finding first Stop in Frame with current Start */
 	  while ((((Stop+js)->Position+1) % 3 != Frame) && (js < nStops))
 		js++;
@@ -151,7 +152,7 @@ long BuildInitialExons(site *Start, long nStarts,
          strcpy((Exon+nExon)->Group,NOGROUP);
          (Exon+nExon)->evidence = 0;
 
-		 /* Store info about frame and remainder nucleotides to avoid building stops in frame */
+		 /* Store info to prevent building stops in frame */
 		 ComputeStopInfo((Exon+nExon),Sequence);
 
          nExon++;
