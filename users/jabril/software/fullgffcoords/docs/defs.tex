@@ -1,0 +1,99 @@
+%%%%% Colors for gff2ps
+\input ColorDefs.tex
+
+%%%%% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\todo}[1]{
+  \vskip 3ex
+  \hspace{-0.75cm}
+   \psframebox[framearc=0.2,linecolor=darkred,linewidth=1pt,
+              fillstyle=solid,fillcolor=verylightyellow,framesep=2ex]{
+     \begin{minipage}[t]{16cm}
+     \vskip -4.75ex
+     \hspace{-1.25cm}
+       \psframebox[framearc=1,linecolor=darkred,linewidth=1.25pt,
+               fillstyle=solid,fillcolor=verylightorange,framesep=5pt]{
+               \textcolor{darkred}{\textbf{\hspace{2ex}TO DO\hspace{2ex}}}
+         } % psframebox
+      \begin{itemize}\setlength{\itemsep}{-0.5ex} #1 \end{itemize}
+     \end{minipage}
+     } % psframebox
+  \vskip 1.5ex
+} % newcommand todo
+\newcommand{\todoitem}[2]{
+  \item[$\triangleright$] [\textit{Section}~\ref{#2}, 
+                           \textit{page}~\pageref{#2}]\\ {#1}
+} % newcommand todoitem
+
+
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+
+
+%%%%% defs
+\def\noweb{\textsc{noweb}}
+\def\ps{\textsc{PostScript}}
+
+
+%%%%% TODO defs
+\def\todoAAA{A full description of the program and schemmes of some tricky parts.} % todoAAA
+\def\todoAAB{Include examples of input/output files and append a testing section.} % todoAAB
+\def\todoBAA{Not implemented yet an option to switch on/off reporting execution to STDERR (now by default send logs there but cannot be dissabled).} % todoBAA
+\def\todoCAA{When printing CDS and Protein output, all the records must have same strand. Open issue: how we can recover later the strand for genomic coords.} % todoCAA
+\def\todoCAB{Append group name to sequence name when getting projections on CDS and Protein coords.} % todoCAB
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
+\def\progname{fullgffcoords.pl}
+\def\tit{\textsc{\progname}}
+%
+\def\mtjabril{
+ \htmladdnormallink{\texttt{jabril@imim.es}}
+                   {MAILTO:jabril@imim.es?subject=[maskedfastacoords]}
+ } % def mtjabril
+%
+\def\authorslist{
+ Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\authorshort{
+ Abril, JF % Other authors here...
+ } % def authorshort
+%
+\def\license{GNU General Public License (GNU-GPL)}
+%
+\def\progdesc{
+Given a GFF file in which coords are mapping genomic coords, we want to retrive CDS and amino-acid positions for each group. As a side product, we can obtain the group start and end coords in genomic ones. 
+ } % def progdesc
+%
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\tit\quad\rightmark}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%
