@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.45 2000-01-21 16:59:33 jabril Exp $	
+#         $Id: gff2ps,v 1.46 2000-01-25 16:22:10 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.45 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-21 16:59:33 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.46 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-25 16:22:10 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.45 2000-01-21 16:59:33 jabril Exp $
+%    $Id: gff2ps,v 1.46 2000-01-25 16:22:10 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -570,7 +570,7 @@ end
  /CheckCloser { 3 copy pop MaxWidthT sub 3 1 roll MaxWidthT add 3 1 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or 4 1 roll 3 copy dup 3 1 roll ne 3 1 roll ne and 5 -1 roll and { pop false } { true } ifelse } bdf
  /ctextick { S TkFont sfont dup stringheight 2 div exch stringwidth pop 2 Xscm div neg Xscm exch 2 copy neg T 2 mul exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 2 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
  /bltextick { S TkFont sfont dup stringwidth pop 2 Xscm div neg Xscm TkMrkHW 2 copy flgup { TkMrkDW add T } { 2 mul T 1 -1 F } ifelse exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 2 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
- /tonormtick { 0 eq { dup dup 0 ne { MinTick mod } if sub exch dup dup 0 ne { MinTick mod } if sub exch } { dup dup 0 ne { MaxTick mod } if sub exch dup dup 0 ne { MaxTick mod } if sub exch } ifelse } bdf
+ /tonormtick { 0 eq { 2 { dup dup 0 ne { MinTick mod } if sub exch } repeat } { 2 { dup dup 0 ne { MaxTick mod } if sub exch } repeat } ifelse } bdf
  /Mkg { 0 0 m l fgcolor scmyk dotted K } bdf
  /MkVGrid { S slw Gridup flgup not { not } if { 0 up Mkg } if Griddn flgup not { not } if { 0 down neg Mkg } if  R } bdf
  /MkAtick { slw 0 TkMrkHW neg m 0 TkMrkHW l fgcolor scmyk K } bdf
@@ -590,11 +590,12 @@ end % tmdct
  /nucdif { 2 copy exch sub } bdf
  /mtrx matrix def
  /mrr false def
- /LY { Yscl 0.45 mul } bdf
+ /LY { Yscl FlgScRM { 0.45 mul } if } bdf
 %
 % X Y angle string valign halign fnt color ttxt
 % functions for vectors-like data-sets
- /rt { tracksize strnd (.) eq { 0.975 mul } { 0.50 mul } ifelse } bdf
+% /rt { tracksize strnd (.) eq { 0.975 mul } { 0.50 mul } ifelse } bdf
+ /rt { Yscl 0.975 mul } bdf
  /vst 250 string def
  % /clrproc colordict begin white black load2col /col2 load end def
  /clrselc { cvx exec dup 2 eq { pop load2col /clrproc /col2 load def } { dup 3 eq { pop load3col /clrproc /col3 load def } { dup 0 eq { pop white black load2col /clrproc /col2 load def } { dup 4 eq { 5 { pop } repeat /clrproc /rainbow load def } { 1 eq { white 8 4 roll load2col /clrproc /col2 load def } if } ifelse } ifelse } ifelse } ifelse } bdf % no end for closing dict because grdct must be closed by calling function
@@ -723,7 +724,7 @@ end % shpdct
  /sbb { S 0 0 XSPlot Yscl bbox FlgScBx { 0.25 slw fgcolor scmyk K } { newpath } ifelse R sbc } bdf
  /shsll { S FLftLbl Flgslftlbl and { XLftLbl 2 div neg Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srclftlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
  /shsrl { S FRgtLbl Flgsrgtlbl and { XSPlot XRgtLbl 2 div add Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srcrgtlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
- /GetSVar { /srcrgtlbl xdf /srclftlbl xdf /s_line xdf /strnd xdf /FlgScBx xdf /spacer exch spcrsize mul def /Yscl exch tracksize mul def /ScV exch dup 2 eq { pop 0 } if def /Flgsrgtlbl srcrgtlbl () eq { false } { true } ifelse def /Flgslftlbl srclftlbl () eq { false } { true } ifelse def strnd (.) eq { /Y Y spacer 2 div add def } { strnd (-) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
+ /GetSVar { /srcrgtlbl xdf /srclftlbl xdf /s_line xdf /strnd xdf /FlgScRM xdf /FlgScBx xdf /spacer exch spcrsize mul def /Yscl exch tracksize mul def /ScV exch dup 2 eq { pop 0 } if def /Flgsrgtlbl srcrgtlbl () eq { false } { true } ifelse def /Flgslftlbl srclftlbl () eq { false } { true } ifelse def strnd (.) eq { /Y Y spacer 2 div add def } { strnd (-) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
  /source { S GetSVar XOriPlot Y T strnd (-) eq { 1 -1 F } if shsrl shsll sbb S ScV 0 eq { 0 Yscl 2 div T 1 -1 F } { ScV 1 eq { 0 Yscl T 1 -1 F } if } ifelse sln S blckori Xscm neg 0 T } bdf
  /s_end { R R R strnd (.) eq { /Y Y Yscl add spacer 2 div add def } { strnd (+) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
 %
@@ -756,7 +757,7 @@ end
 %
 % initgraphics
 % true setpacking
-false setstrokeadjust
+true setstrokeadjust
 0.125 slw
 0 setlinejoin
 0 setlinecap
@@ -1357,13 +1358,16 @@ function ARY_VARIABLES() {
   SO_PROP["feature_stroke_color"]="default";
   SO_PROP["group_color"]="default";   # 
   SO_PROP["left_label"]="++default++";     # ++none++ , ++default++ , ++sequence++, ++source++ , ++both++ , ++info++ , "user-def"
+  SO_PROP["show_left_label"]="on";     #
   SO_PROP["right_label"]="++default++";    # ++none++ , ++default++ , ++sequence++, ++source++ , ++both++ , ++info++ , "user-def"
+  SO_PROP["show_right_label"]="on";    #
   SO_PROP["source_style"]="default";  # default, boxed
   SO_PROP["source_line"]="default";   # none , default (black line), line, dotted, longdotted, shortdashed, longdashed 
   SO_PROP["source_line_color"]="verydarkred"; #
   SO_PROP["vert_align"]="default";    # default,center,baseline(down), 
   SO_PROP["range"]="default";         # range of lower-upper scores (none, default, "#user_def number#")
   SO_PROP["show_source_positions"]="false";  #
+  SO_PROP["keep_feature_label_space"]="true";  # on/off
   SO_PROP["track_scale"]=1;                  #
   SO_PROP["track_spacing_scale"]=0.25;       #
   SO_PROP["unfold_grouped_ungrouped"]="off"; # on/off
@@ -1382,12 +1386,7 @@ function ARY_VARIABLES() {
 #  GR_PROP["join_linetype"]="solid";
 #  GR_PROP["join_show"]="off";
 #
-#  SO_PROP["show"]="on"; # 
-#  SO_PROP["baseline_align"]="center";
-#  SO_PROP["baseline_color"]=Default["foreground_color"];
-#  SO_PROP["baseline_linetype"]="dotted";
 #  SO_PROP["bbox_color"]=Default["foreground_color"];
-#  SO_PROP["bbox_show"]="off";
 #
 #  ?_PROP["rule_scale"]="nucleotide";
 #  ?_PROP["rule_rel"]="none";
@@ -2209,9 +2208,10 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
     PrintRPT(sprintf("\n\n************* Page Vsize = %s cm **** Title Vsize = %s cm **** Block Tsize = %s cm **** Credit Vsize = %s cm ***************\n\n\n",ttbby/28.35,tthdr/28.35,Tsize/28.35,crdt/28.35));
   } # else B==0
   # Major Minor Tickmarks ratio
-  if (Default["major_tickmarks_nucleotides"]==-1) {
-	Default["major_tickmarks_nucleotides"]=Nuc_round((NOFFSET/Default["major_tickmarks_num"]),0) }
-  if (Default["minor_tickmarks_nucleotides"]==-1) {
+  if (Default["major_tickmarks_nucleotides"]==-1 || NOFFSET<Default["major_tickmarks_nucleotides"]) {
+	kt=NOFFSET/Default["major_tickmarks_num"];
+    Default["major_tickmarks_nucleotides"]=kt<1000?kt:Nuc_round(kt,0); }
+  if (Default["minor_tickmarks_nucleotides"]==-1 || Default["major_tickmarks_nucleotides"]<Default["minor_tickmarks_nucleotides"]) {
 	Default["minor_tickmarks_nucleotides"]=Default["major_tickmarks_nucleotides"]/Default["minor_tickmarks_num"] }
 } # End of function SET_PAGE_VARS
 #
@@ -2410,8 +2410,8 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
 			sco_lm=ScoreLimits();
 			if (PLOT_FT[sc,":","source_style"]=="boxed") shscbx="true"; 
 			else shscbx="false";
-			# PrintRPT(sprintf("%s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
-			printf "%s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			printf "%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
 			PRINT_ELEMENTS();
@@ -2486,8 +2486,8 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 			sco_lm=ScoreLimits();
 			if (PLOT_FT[sc,":","source_style"]=="boxed") shscbx="true"; 
 			else shscbx="false";
-			# PrintRPT(sprintf("%s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
-			printf "%s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			printf "%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
 			PRINT_ELEMENTS();
@@ -2909,7 +2909,9 @@ function SRC_LBL(sl,sq,sc,s,flg    ,lbl) {
 #
 function Source_Lbl(sq,sc,s,flg,    lftlbl,rgtlbl,tlb) {
   lftlbl=SRC_LBL(PLOT_FT[sc,":","left_label"],sq,sc,s,flg);
+  if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftlbl="";
   rgtlbl=SRC_LBL(PLOT_FT[sc,":","right_label"],sq,sc,s,flg);
+  if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtlbl="";
   tlb="("lftlbl") ("rgtlbl")";
   return tlb;
 } # End of function Plot_Lbl
