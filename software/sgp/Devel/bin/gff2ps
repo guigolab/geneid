@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.23 1999-06-30 14:23:05 jabril Exp $	
+#         $Id: gff2ps,v 1.24 1999-07-01 12:59:24 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -46,8 +46,8 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps"
   VERSION="v1.0"
-  REVISION='$Revision: 1.23 $'
-  DATERELEASE='$Date: 1999-06-30 14:23:05 $'
+  REVISION='$Revision: 1.24 $'
+  DATERELEASE='$Date: 1999-07-01 12:59:24 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -265,7 +265,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.23 1999-06-30 14:23:05 jabril Exp $
+%    $Id: gff2ps,v 1.24 1999-07-01 12:59:24 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -452,7 +452,7 @@ end % tmdct
 %%EndProcSet:   tickmarks 1.4 0
 %
 %%BeginProcSet: objects 1.1 0
-/shpdct 48 dict def shpdct begin
+/shpdct 52 dict def shpdct begin
  /ShFont { TkMrkW 2 div /Helvetica } def
  /LY { tracksize 0.75 mul } bdf
  /trackbb { LY 0.55 mul } bdf
@@ -474,6 +474,16 @@ end % tmdct
           0.0   -0.5  0.745 -0.5  0.745 -0.6  0.75  -0.6             9  1.0  0.0  cpt } bdf
  /hcir {  0.5   -0.5  0.5    0   360 arc closepath } bdf
  /fcir {  0.5    0.0  0.5    0   360 arc closepath } bdf
+ /hrtgl { 1.0    0.0  0.0   -1.0                                     2  0.0  0.0  cpt } bdf
+ /frtgl { 0.0    0.5  0.0   -0.5                                     2  1.0  0.0  cpt } bdf
+ /prmx {  gsave newpath
+          1.0   -0.8  0.5   -0.8  0.5   -0.25 moveto lineto lineto
+          FGcolor scmyk 0.1 setlinewidth stroke 
+          1.0   -0.8  0.75  -0.60 0.75  -1.0  3  1.0   -0.8 cpt
+          0.01 setlinewidth gsave stroke grestore fill grestore } bdf
+ /hprm {  1.0    0.0  1.0   -0.25 0.0   -0.25 3  0.0  0.0  cpt prmx } bdf
+ /fprm {  0.0    0.25 1.0    0.25 1.0   -0.25 3  0.0 -0.25 cpt prmx } bdf
+ 
 % ......Shapes
  /getfrcol { dup (.) eq { pop frmN } { dup 0 eq { pop frm0 } { dup 1 eq { pop frm1 } { 2 eq { frm2 } if } ifelse } ifelse } ifelse } bdf
  /cmdln { 0 moveto sqdif 2 div 0 lineto scmyk stroke } bdf
@@ -885,8 +895,9 @@ gawk 'BEGIN{
   SO_PROP["rule_rel"]="none";
   SO_PROP["rule_abs"]="none";
   SO_PROP["unfold_grouped_ungrouped"]="on";
+  SO_PROP["unfold_mixed_grouped_ungrouped"]="off";
   SO_PROP["unfold_grouped_line"]="on";
-  SO_PROP["unfold_ungrouped_line"]="on";
+  SO_PROP["unfold_ungrouped_line"]="off";
 # Data for upper-case to lower-case function #lcase()#
  CM["A"]="a";CM["B"]="b";CM["C"]="c";CM["D"]="d";CM["E"]="e";
  CM["F"]="f";CM["G"]="g";CM["H"]="h";CM["I"]="i";CM["J"]="j";
@@ -946,47 +957,7 @@ END{
   SortGroups()
   #
   # Making Lines...
-  if (Var["print_report"]) printf "\n%s\nPlacing groups on lines...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
-  grouped_=1;ungrouped_=0;
-  for (stp=1;stp<=3;stp++) { # for s in strand
-    s=wstr[stp]
-    for (sc in sources) { 
-      if (G[sc,s]>0) {
-         lastpos[sc,s,grouped_,1]=lastpos[sc,s,ungrouped_,1]=PORI;
-#        for (t=1;t<=G[sc,s];t++) {
-          for (g=1;g<=SG[sc,s,G[sc,s]];g++) {
-            # g=SG[sc,s,t]
-            gp_nm =gp[sc,s,g,gpname];
-            gp_ori=gp[sc,s,g,gpstart];
-            gp_end=gp[sc,s,g,gpend];
-            gp_gpd= OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) ? gp[sc,s,g,is_grouped] : 1; # 1 (grouped_) or 0 (ungrouped_)
-            LN[sc,s,grouped_]=LN[sc,s,ungrouped_]=1;
-            if ((gp_gpd==1 && OnOff(PLOT_FT[sc,":","unfold_grouped_line"])) || (gp_gpd==0 && OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) {
-             while (lastpos[sc,s,gp_gpd,LN[sc,s,gp_gpd]] >= gp_ori) {
-              LN[sc,s,gp_gpd]++;
-              ttt=sc SUBSEP s SUBSEP gp_gpd SUBSEP LN[sc,s,gp_gpd]
-              if (!(ttt in lastpos)) lastpos[sc,s,gp_gpd,LN[sc,s,gp_gpd]]=PORI;
-              }
-             lastpos[sc,s,gp_gpd,LN[sc,s,gp_gpd]]=gp_end;
-             } # if checking
-            lines[sc,s,gp_gpd]=max(lines[sc,s,gp_gpd],LN[sc,s,gp_gpd]);
-            LE[sc,s,gp_gpd,LN[sc,s,gp_gpd]]++
-            LNelem[sc,s,gp_gpd,LE[sc,s,gp_gpd,LN[sc,s,gp_gpd]]]=g
-            } # for g(SG)
-#         } # for t(G)
-        } # if G>0
-      for (pd=1;pd>=0;pd--) {
-        for (h=1;h<=lines[sc,s,pd];h++) {
-          printf "%s %s : is_grouped %s : Line %s \>",sc,s,TxtBool(pd),h | "cat 1>&2"
-          for (t=1;t<=LE[sc,s,pd,h];t++) {
-            elm_=LNelem[sc,s,pd,t]
-            printf " %s(%s:%s-%s)",elm_,gp[sc,s,elm_,gpname],gp[sc,s,elm_,gpstart],gp[sc,s,elm_,gpend] | "cat 1>&2"
-            } # for t
-          printf "\n" | "cat 1>&2"
-          } # for h
-        } # for pd
-      } # for sources
-    } # for strands
+  MakeGroupLines()
   #
   # Printing groups and elements sorted
   PrtSorted()
@@ -1248,6 +1219,57 @@ function SortGroups() {
       } # for strands
     } # for sources
  } # End of SortGroups
+function MakeGroupLines() {
+  if (Var["print_report"]) printf "\n%s\nPlacing groups on lines...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+  grouped_=1;ungrouped_=0;
+  for (stp=1;stp<=3;stp++) { # for s in strand
+    s=wstr[stp]
+    for (sc in sources) { 
+      if (G[sc,s]>0) {
+         lastpos[sc,s,grouped_,1]=lastpos[sc,s,ungrouped_,1]=PORI;
+         lines[sc,s,grouped_]=lines[sc,s,ungrouped_]=1;
+#        for (t=1;t<=G[sc,s];t++) {
+          for (g=1;g<=SG[sc,s,G[sc,s]];g++) {
+            # g=SG[sc,s,t]
+            gp_nm =gp[sc,s,g,gpname];
+            gp_ori=gp[sc,s,g,gpstart];
+            gp_end=gp[sc,s,g,gpend];
+            gp_gpd= OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) ? gp[sc,s,g,is_grouped] : 1; # 1 (grouped_) or 0 (ungrouped_)
+            printf ">>>>>>>%s %s %s (%s %s) G %s SG %s\n",sc,s,gp_nm,gp_ori,gp_end,G[sc,s],g | "cat 1>&2"
+
+            LN=1;
+            if ((gp_gpd==1 && OnOff(PLOT_FT[sc,":","unfold_grouped_line"])) || (gp_gpd==0 && OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"])) || OnOff(PLOT_FT[sc,":","unfold_mixed_grouped_ungrouped"])) {
+              printf "A........%s : %s (%s) G %s SG %s %s %s %s \n",LN,lastpos[sc,s,gp_gpd,LN],gp_ori,G[sc,s],g,sc,s,gp_nm | "cat 1>&2"
+             while (lastpos[sc,s,gp_gpd,LN] >= gp_ori) {
+              LN++;
+              ttt=sc SUBSEP s SUBSEP gp_gpd SUBSEP LN;
+              if (!(ttt in lastpos)) lastpos[sc,s,gp_gpd,LN]=PORI;
+              printf ".........%s : %s : %s (%s)\n",LN,ttt,lastpos[sc,s,gp_gpd,LN],gp_ori | "cat 1>&2"
+              # if (lastpos[sc,s,gp_gpd,LN]=="") lastpos[sc,s,gp_gpd,LN]=PORI;
+              }
+             lastpos[sc,s,gp_gpd,LN]=gp_end;
+             printf "B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[sc,s,gp_gpd,LN],gp_ori,gp_end,G[sc,s],g | "cat 1>&2"
+             } # if checking
+            lines[sc,s,gp_gpd]=max(lines[sc,s,gp_gpd],LN);
+            LE[sc,s,gp_gpd,LN]++;
+            LNelem[sc,s,gp_gpd,LN,LE[sc,s,gp_gpd,LN]]=g;
+            } # for g(SG)
+#         } # for t(G)
+        } # if G>0
+      for (pd=1;pd>=0;pd--) {
+        for (h=1;h<=lines[sc,s,pd];h++) {
+          if (LE[sc,s,pd,h]>0) {
+           printf "%s %s : is_grouped %s : Line %s \>\n",sc,s,TxtBool(pd),h | "cat 1>&2"
+           for (t=1;t<=LE[sc,s,pd,h];t++) {
+             elm_=LNelem[sc,s,pd,h,t];
+             printf "\tgpd_%s:line_%s:le_%s:LNel_%s (%s:%s-%s)\n",pd,h,t,elm_,gp[sc,s,elm_,gpname],gp[sc,s,elm_,gpstart],gp[sc,s,elm_,gpend] | "cat 1>&2"
+             } # for t
+           } # if LE
+          } # for h
+        } # for pd
+      } # for sources
+    } # for strands
+ } # End of MakeGroupLines
 function PrtSorted() {
   if (Var["print_report"]) {
     printf "\n%s\nGroups were sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
@@ -1358,15 +1380,15 @@ function MAKEGROUPS() {
         start_=element[sc,s,S[sc,s,i],start];
         end_=element[sc,s,S[sc,s,i],end];
 	    tgr=element[sc,s,S[sc,s,i],group];
-	    if (!grouping[sc,s,tgr,start]) {
-	      grouping[sc,s,tgr,start]=element[sc,s,S[sc,s,i],start];
-	      ng[sc,s]++;
-	      group_[sc,s,ng[sc,s]]=tgr
-          }
-        if (grouping[sc,s,tgr,end]<element[sc,s,S[sc,s,i],end])
-          grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
+	  #  if (!grouping[sc,s,tgr,start]) {
+	  #    grouping[sc,s,tgr,start]=element[sc,s,S[sc,s,i],start];
+	  #    ng[sc,s]++;
+	  #    group_[sc,s,ng[sc,s]]=tgr
+      #    }
+      #  if (grouping[sc,s,tgr,end]<element[sc,s,S[sc,s,i],end])
+      #    grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
      # only goes on when features are inside page limits.
-       if (ChkLimits(start_,BORI,end_,(BEND))) {
+       if (ChkLimits(start_,BORI,end_,BEND)) {
         feature_=element[sc,s,S[sc,s,i],feature];
         score_=element[sc,s,S[sc,s,i],score];
      # for gene mode. try to recompute relative frame and remainder
@@ -1376,7 +1398,7 @@ function MAKEGROUPS() {
           else { frame_[sc,s,tgr]="(.)"; remainder_[sc,s,tgr]="(.)" }
         printf "%s %s %s : %s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", sc,s,i, PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_) | "cat 1>&2"
         grouping[sc,s,tgr,group,blocks,pages] = sprintf("%s%s \/%s %d %d %s %s %4.2f (%s) (%s) f\n", grouping[sc,s,tgr,group,blocks,pages], PLOT_FT[feature_,":","layer"], Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Set_feat_Clr(feature_,tgr,sc), Plot_Lbl(feature_))
-        plot_group[tgr,blocks,pages]=1
+       #  plot_group[tgr,blocks,pages]=1
        } # if ChkLimits
       }  # for i
 #     printf "\n" | "cat 1>&2"
@@ -1413,8 +1435,11 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
           printf "GROUP : %-10s : %s %10d %10d \n", g, s, grouping[sc,s,g,start], grouping[sc,s,g,end] | " sort +6 | cat 1>&2";
         if (PLOT_FT[g,":","group_line"]=="none") gplt=0         # group without lines
         else if (PLOT_FT[g,":","group_line"]=="default") gplt=1 # group red-line
-        if (plot_group[g,blocks,pages]==1) {
-          printf "(%s) %s %s %s %s %s gp \n", Plot_Lbl(g), gplt, grouping[sc,s,g,start], grouping[sc,s,g,end],TxtBool(OnOff(PLOT_FT[g,":","label_show"])),TxtBool(OnOff(PLOT_FT[g,":","group_line_show"]))
+#        if (plot_group[g,blocks,pages]==1) {
+       g_ori=gp[sc,s,SG[sc,s,i],gpstart];
+       g_end=gp[sc,s,SG[sc,s,i],gpend];
+       if (ChkLimits(g_ori,BORI,g_end,BEND)) {
+          printf "(%s) %s %s %s %s %s gp \n", Plot_Lbl(g), gplt, gp[sc,s,SG[sc,s,i],gpstart], gp[sc,s,SG[sc,s,i],gpend],TxtBool(OnOff(PLOT_FT[g,":","label_show"])),TxtBool(OnOff(PLOT_FT[g,":","group_line_show"]))
           printf "%s", grouping[sc,s,g,group,blocks,pages] | "sort +0nr +6nr +2n +3nr"
           close("sort +0nr +6nr +2n +3nr")
           printf "g_end\n"
