@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: perlscript.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $ 
+% # $Id: perlscript.nw,v 1.6 2001-10-22 14:36:00 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -108,21 +108,31 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{@@@QUOTED@@@}
+\def\tit{\textsc{\progname}}
+%
 \def\mtauthor{
  \htmladdnormallink{\texttt{author@imim.es}}
                    {MAILTO:author@imim.es?subject=[@@@PROJECT@@@]}
  } % def mtauthor
+%
 \def\authorslist{
  The Author/s {\mdseries\small\dotfill \mtauthor } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Authors list here % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
-\def\description{
+%
+\def\progdesc{
 Short description of your program here !!!
- } % def description 
+ } % def progdesc
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
@@ -131,12 +141,12 @@ Universitat Pompeu Fabra\\[2ex]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%% Setting text for footers and headers
-\def\tit{\textsc{\progname}}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\tit\quad\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -180,7 +190,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
  Last Update: & {\today}                               \\[2ex]
  Description: & {\large\mdseries
                  \begin{minipage}[t]{0.95\rttbl}
-                 \description
+                 \progdesc
                  \end{minipage}}                       \\[2ex]
 \\
 \multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
@@ -217,7 +227,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: perlscript.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $$>$ }
+{\small$<$ \verb$Id: perlscript.nw,v 1.6 2001-10-22 14:36:00 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -246,6 +256,30 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \sctn{Implementation}
 
+<<Program Info>>=
+my $PROGRAM = '@@@PROJECT@@@';
+my $VERSION = '0.1_alpha';
+@ 
+<<Prog USAGE>>=
+$PROGRAM [options] < input_files > output_files
+@
+<<Prog DESC>>=
+A short description of what your program does.
+@
+
+<<Program Description>>=
+# #----------------------------------------------------------------#
+# #                          @@@PROJECT@@@                         #
+# #----------------------------------------------------------------#
+# 
+#  $PROGRAM [options] < input_files > output_files
+#
+#  Remember to put a short description of what your program does here...
+#
+#
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+@ 
+
 \subsctn{Program outline}
 
 <<@@@PROJECT@@@>>=
@@ -266,17 +300,6 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 # FUNCTIONS
 #
 <<Functions>>
-@ 
-
-<<Program Info>>=
-my $PROGRAM = '@@@PROJECT@@@';
-my $VERSION = '0.1_alpha';
-@ 
-
-<<Program Description>>=
-# @@@PROJECT@@@ [options] <files>
-#
-#     Short description (single line).
 @ 
 
 <<Use Modules>>=
@@ -496,20 +519,12 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: perlscript.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $
+# $Id: perlscript.nw,v 1.6 2001-10-22 14:36:00 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
 
 <<GNU License>>=
-# #----------------------------------------------------------------#
-# #                          @@@PROJECT@@@                         #
-# #----------------------------------------------------------------#
-# 
-#    Remember to put a short description of your script here...
-# 
-#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -620,8 +635,10 @@ popd ;
 WORK="@@@PATH@@@" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
+SRC="$WORK/src" ; # where to put the distributable files
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
 nwfile="@@@PROJECT@@@" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
 #

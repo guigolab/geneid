@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: report.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $ 
+% # $Id: report.nw,v 1.6 2001-10-22 14:36:00 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -108,21 +108,31 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{@@@QUOTED@@@}
+\def\tit{\textsc{\progname}}
+%
 \def\mtauthor{
  \htmladdnormallink{\texttt{author@imim.es}}
                    {MAILTO:author@imim.es?subject=[@@@PROJECT@@@]}
  } % def mtauthor
+%
 \def\authorslist{
  The Author/s {\mdseries\small\dotfill \mtauthor } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Authors list here % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
-\def\description{
+%
+\def\progdesc{
 Short description of your program here !!!
- } % def description 
+ } % def progdesc
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
@@ -131,12 +141,12 @@ Universitat Pompeu Fabra\\[2ex]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%% Setting text for footers and headers
-\def\tit{\textsc{\progname}}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\tit\quad\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -171,7 +181,7 @@ Universitat Pompeu Fabra\\[2ex]
 \begin{abstract}
 \begin{center}
 \parbox{0.75\linewidth}{
-\description
+\progdesc
 } % parbox
 \end{center}
 \end{abstract}
@@ -204,7 +214,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: report.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $$>$ }
+{\small$<$ \verb$Id: report.nw,v 1.6 2001-10-22 14:36:00 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -425,7 +435,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: report.nw,v 1.5 2001-10-03 11:21:02 jabril Exp $
+# $Id: report.nw,v 1.6 2001-10-22 14:36:00 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -521,8 +531,10 @@ popd ;
 WORK="@@@PATH@@@" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
+SRC="$WORK/src" ; # where to put the distributable files
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
 nwfile="@@@PROJECT@@@" ;
 export WORK BIN PARAM DOCS DATA nwfile ;
 #

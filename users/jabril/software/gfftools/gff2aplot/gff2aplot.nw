@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $
+% $Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -428,9 +428,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.7 $', #'
-     '$Date: 2001-09-06 18:33:35 $', #'
-     '$Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $', #'
+     '$Revision: 1.8 $', #'
+     '$Date: 2001-10-22 14:36:00 $', #'
+     '$Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -741,7 +741,7 @@ UNKNOWN_CL_OPTION =>
   $Warn."Error trapped while processing command-line:\n".(" "x16)."\%s\n",
 CMD_LINE_ERROR =>
   $spl.$spw." Please, check your command-line options!!!\n".$Error."\n".
-  $spw." ".("."x12)." Type \"gff2aplot -h\" for help.\n".$spl,
+  $spw." ".("."x12)." Type \"$PROGRAM -h\" for help.\n".$spl,
 @
 
 \subsubsctn{Special command-line options (forcing exit from program)}
@@ -5363,7 +5363,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.7 2001-09-06 18:33:35 jabril Exp $
+# $Id: gff2aplot.nw,v 1.8 2001-10-22 14:36:00 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}

@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: multigeneplots.nw,v 1.1 2001-10-15 15:01:11 jabril Exp $ 
+% # $Id: multigeneplots.nw,v 1.2 2001-10-22 14:36:01 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -227,7 +227,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: multigeneplots.nw,v 1.1 2001-10-15 15:01:11 jabril Exp $$>$ }
+{\small$<$ \verb$Id: multigeneplots.nw,v 1.2 2001-10-22 14:36:01 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -575,6 +575,7 @@ SHOWGROUPS => 0,
 @
 
 <<command-line options - GFF>>=
+"s|save-gff:s"      => ,
 "1|gff-version1"    => sub { $CmdLineVar{GFFVERSION} = 1 },
 "2|gff-version2"    => sub { $CmdLineVar{GFFVERSION} = 2 },
 @
@@ -582,10 +583,11 @@ SHOWGROUPS => 0,
 GFFVERSION => 1,
 @
 <<command-line help - GFF>>=
--s, --save-gff         Output GFF version, default is 1, where version 1
-                       means simple grouping field and version 2 forces
-                       grouping to be tag-value pair grouping field, 
-                       putting value between double quotes.
+-s, --save-gff         Save a GFF file for each group found on input file.
+                       By default program creates a "./tmp" directory where
+                       to put those files. You can provide another path,
+                       but if program fails to find/create it then will return
+                       to default behaviour.
 @
 
 \label{todo:BAA}
@@ -875,7 +877,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: multigeneplots.nw,v 1.1 2001-10-15 15:01:11 jabril Exp $
+# $Id: multigeneplots.nw,v 1.2 2001-10-22 14:36:01 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
