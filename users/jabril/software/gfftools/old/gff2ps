@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.62 2000-03-06 19:27:45 jabril Exp $	
+#         $Id: gff2ps,v 1.63 2000-03-28 16:01:41 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.62 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-06 19:27:45 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.63 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-28 16:01:41 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.62 2000-03-06 19:27:45 jabril Exp $
+%    $Id: gff2ps,v 1.63 2000-03-28 16:01:41 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -572,6 +572,7 @@ end % tmdct
  /mtrx matrix def
  /mrr false def
  /LY { Yscl FlgScRM { 0.45 mul } { 0.975 mul } ifelse } bdf
+ /HLY { LY sc mul 2 div } bdf
 %
 % X Y angle string valign halign fnt color ttxt
 % functions for vectors-like data-sets
@@ -592,7 +593,7 @@ end % tmdct
 %
 % Functions for Shapes......
  /getfrcol { dup (.) eq { pop frmN } { dup 0 eq { pop frm0 } { dup 1 eq { pop frm1 } { 2 eq { frm2 } if } ifelse } ifelse } ifelse } bdf
- /cmdln { 0 m sqdif 2 div neg 0 rl scmyk K } bdf % S - R removed to allow frame-remainder fill mode to work.
+ /cmdln { HLY m sqdif 2 div neg 0 rl scmyk K } bdf % S - R removed to allow frame-remainder fill mode to work.
  /lnfill { S Yscl slw sqdif cmdln sqdif 2 div cmdln R } bdf
  /frmfill { frm getfrcol rmd getfrcol lnfill } bdf
  /rnbfill { 1 dict begin S /incr sqdif 100 div def 0 incr sqdif { dup dup incr add 0 exch 0 m l dup 0 gt { sqdif div } if rainbow Yscl slw K } for R end } bdf 
@@ -603,7 +604,7 @@ end % tmdct
  /postk { S 0 0 m 0 LY ScV 0 eq { 0.65 } { 1.15 } ifelse mul rl longdotted fgcolor scmyk 0.125 slw K R } bdf
  /shwpos { S Flgspos { seqori LY neg ScV 0 eq { 0.65 mul T } { 1 -1 F 1.15 mul T } ifelse sqend sqdif sqori 0 2 { S 0 T postk 10 string cvs 0 0 S ScV 1 eq { 1 -1 F } if strnd (-) eq { 1 -1 F 45 } { -45 } ifelse ScV 1 eq { neg } if 4 -1 roll strnd (-) eq { ScV 1 ne { (bv) } { (tv) } ifelse } { ScV 1 ne { (tv) } { (bv) } ifelse } ifelse (lh) ShFont fgcolor ttxt R R } repeat } if R } bdf
 % *V align:  0 center : 1 baseline : -1 reverse
- /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } if colordict begin p_s cvx exec newpath end R } bdf
+ /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 HLY neg T } if colordict begin p_s cvx exec newpath end R } bdf
  /GetVar { /ftlbl xdf /flblfg xdf /Flgspos xdf /FtV exch dup 2 eq { pop 0 /mrr true def } { /mrr false def } ifelse def /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def /fflbl ftlbl () eq { false } { flblfg } ifelse def /p_strk true def pop } bdf
  /p { S GetVar shwpos strnd (-) eq { seqend } { seqori } ifelse 0 T frs R } bdf
 %
