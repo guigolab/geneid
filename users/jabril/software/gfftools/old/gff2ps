@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.68 2000-06-29 18:12:34 jabril Exp $	
+#         $Id: gff2ps,v 1.69 2000-10-12 16:08:35 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.68 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-06-29 18:12:34 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.69 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-10-12 16:08:35 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.68 2000-06-29 18:12:34 jabril Exp $
+%    $Id: gff2ps,v 1.69 2000-10-12 16:08:35 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -444,8 +444,12 @@ flglscape {
 /Xscale XSPlot MaxNuclPage div def
 /YOriBlck { FlgTitl { YSTitl BlckSp add } { 0 } ifelse } def
 /adcrd { flgcrd { FSF CYSF 2 mul FlgBkBx { 5 add } if sub } if } bdf
-/is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or def
-/is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
+%
+% /is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or def
+% /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
+/is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and FlgISU FlgISD and and def % true if must plot two tickmark lines
+/is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or is2tck or FlgISU FlgISD or and def
+%
 NBlck 0 eq {
   /YSBlck { pglim exch pop adcrd FlgTitl { YOriTitl YSTitl BlckSp add add sub } if } def
   /YS2Blck { pglim exch pop adcrd FlgTitl { YOriTitl YSTitl BlckSp add add sub } if FlgOSU { TkMrkW 1 TkMspc add mul sub } if FlgOSD { TkMrkW 1 TkMspc add mul sub } if } def
