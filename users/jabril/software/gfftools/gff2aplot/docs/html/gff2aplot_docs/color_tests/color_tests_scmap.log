@@ -1,0 +1,155 @@
+################################################################################
+###                                                                          ###
+###                            RUNNING gff2aplot                             ###
+###                                                                          ###
+###                               User: jabril                               ###
+###                      Date: Fri Feb  7 19:49:17 2003                      ###
+###                               Perl: v5.6.1                               ###
+################################################################################
+################################################################################
+###                             SETTING DEFAULTS                             ###
+################################################################################
+################################################################################
+###                      CHECKING COMMAND-LINE OPTIONS                       ###
+################################################################################
+###
+### Validating INPUT FILENAMES
+###
+###---> "color_boxes.gff" exists, including as Input File.
+###
+### Validating CUSTOM FILENAMES
+###
+###---> ".gff2aplotrc" NOT FOUND, skipping!!!
+###---> "color_boxes.rc" exists, including as Custom File.
+###
+### Checking COMMAND-LINE Options
+###
+. [000001]
+###
+### Checking Custom Variables SET by COMMAND-LINE
+###
+################################################################################
+###                       COMMAND-LINE OPTIONS CHECKED                       ###
+###           0 wallclock secs ( 0.06 usr +  0.00 sys =  0.06 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           COMMAND-LINE CHECKED                           ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           READING CUSTOM FILES                           ###
+################################################################################
+###
+### Reading Customization Parameters from "color_boxes.rc"
+###
+..*....XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX [000050]
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX [000100]
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX. [000134]
+################################################################################
+###                           CUSTOM FILES LOADED                            ###
+###           0 wallclock secs ( 0.13 usr +  0.00 sys =  0.13 CPU)           ###
+################################################################################
+###
+################################################################################
+###                MAPPING CUSTOMIZATION INPUTS TO MAIN VARS                 ###
+################################################################################
+################################################################################
+###                         VALUES SET for MAIN VARS                         ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                        PARSING INPUT GFF RECORDS                         ###
+################################################################################
+###
+### Reading GFF records from "color_boxes.gff"
+###
+..XXXXXXXXXXXXXXXXXXXXXXX. [000026]
+################################################################################
+###                               DATA LOADED                                ###
+###           0 wallclock secs ( 0.02 usr +  0.00 sys =  0.02 CPU)           ###
+################################################################################
+###
+################################################################################
+###                  SETTING CUSTOM VALUES TO GFF ELEMENTS                   ###
+################################################################################
+################################################################################
+###                       VALUES SET for GFF ELEMENTS                        ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                   SORTING ELEMENTS BY ACCEPTOR (START)                   ###
+################################################################################
+*- Sorting ANNOTATION DATA
+|  *- Sequence: tone
+|  |  *- Source: range
+|  |  |  *- Strand: .
+|  |  |  |  *- Group: color
+|  |  |  |  |         Sorted 9 elements.
+|  |  |  |  `Sorted 1 groups.
+|  *- Sequence: color
+|  |  *- Source: name
+|  |  |  *- Strand: .
+|  |  |  |  *- Group: color
+|  |  |  |  |         Sorted 14 elements.
+|  |  |  |  `Sorted 1 groups.
+################################################################################
+###                             ELEMENTS SORTED                              ###
+###           0 wallclock secs ( 0.01 usr +  0.00 sys =  0.01 CPU)           ###
+################################################################################
+###
+################################################################################
+###                           SETTING PAGE LAYOUT                            ###
+################################################################################
+###---> Page size set to "a4" ( 595 x 842 )...
+###---> Setting plot AXES: 
+###     ALIGNMENT "color:tone" NOT found. NOT PLOTTED...
+###     X-SEQUENCE "color" was found. PLOTTING IT...
+###     Y-SEQUENCE "tone" was found. PLOTTING IT...
+###---> SEQUENCE BOUNDARIES selected for this plot:
+###      X : 75 to 1375
+###      Y : 75 to 875
+###---> SEQUENCE ZOOM is not enabled for this plot...
+###---> NO ZOOM AREA was selected for this plot... 
+###---> SCORE BOUNDARIES selected for this plot:
+###      ALIGNMENT:   0 to 100
+###      PERCENT box: 0 to 100
+###---> TICKMARKS were set: 
+###      Nucleotide-Scale: Major step 100 - Minor step 20
+###      Score-Scale:      Major step 100 - Minor step 25
+###---> X/Y scale settings are: 
+###     XY-RATIO is not taken into account for this plot ...
+###     Are X/Y axes going to have same length ?  YES 
+################################################################################
+###                     PAGE LAYOUT SET for CURRENT PLOT                     ###
+###           0 wallclock secs ( 0.00 usr +  0.00 sys =  0.00 CPU)           ###
+################################################################################
+###
+################################################################################
+###                       WRITING POSTSCRIPT TO STDOUT                       ###
+################################################################################
+###---> PostScript Header DONE...
+###---> PostScript Colors Table SET...
+###---> PostScript Page-formats Table SET...
+###---> PostScript Variables SET...
+###---> PostScript Functions SET...
+###---> Writting PostScript Page:
+###     + APLOT-BOX section :
+###       + drawing X-sequence annotation (color)...
+###       + drawing Y-sequence annotation (tone)...
+###       + drawing special features from custom files...
+###       + drawing special features from custom files...
+###       + APLOT-BOX section DONE...
+###---> PostScript Page FINISHED...
+################################################################################
+###                       WRITING POSTSCRIPT FINISHED                        ###
+###           0 wallclock secs ( 0.03 usr +  0.00 sys =  0.03 CPU)           ###
+################################################################################
+###
+################################################################################
+###                          gff2aplot HAS FINISHED                          ###
+###        [  0 wallclock secs ( 0.25 usr +  0.00 sys =  0.25 CPU) ]         ###
+################################################################################

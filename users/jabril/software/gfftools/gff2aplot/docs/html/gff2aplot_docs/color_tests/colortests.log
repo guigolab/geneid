@@ -1,0 +1,102 @@
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2003.1.20)  7 FEB 2003 20:00
+**colortests.tex
+(colortests.tex
+LaTeX2e <2000/06/01>
+Babel <v3.7h> and hyphenation patterns for american, french, german, ngerman, i
+talian, nohyphenation, loaded.
+(/usr/share/texmf/tex/latex/base/article.cls
+Document Class: article 2000/05/19 v1.4b Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size10.clo
+File: size10.clo 2000/05/19 v1.4b Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf/tex/latex/misc/geometry.sty
+Package: geometry 1999/10/07 v2.2 Page Geometry
+
+(/usr/share/texmf/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+\geom@cnth=\count87
+\geom@cntv=\count88
+
+(/usr/share/texmf/tex/latex/config/geometry.cfg))
+(/usr/share/texmf/tex/latex/graphics/graphics.sty
+Package: graphics 1999/02/16 v1.0l Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/share/texmf/tex/latex/config/graphics.cfg)
+Package graphics Info: Driver file: dvips.def on input line 80.
+
+(/usr/share/texmf/tex/latex/graphics/dvips.def
+File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+))
+(/usr/share/texmf/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+\Gin@req@height=\dimen103
+\Gin@req@width=\dimen104
+)
+(/usr/share/texmf/tex/latex/graphics/lscape.sty
+Package: lscape 1999/02/16 v3.0a Landscape Pages (DPC)
+)
+(/usr/share/texmf/tex/latex/psnfss/helvet.sty
+Package: helvet 2000/01/12 PSNFSS-v8.1 Helvetica font as default sans (WaS) 
+)
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 35.
+
+(/usr/share/texmf/tex/latex/psnfss/ot1phv.fd
+File: ot1phv.fd 2000/01/12 PSNFSS-v8.1 scalable font definitions for OT1/phv.
+) (colortests.aux)
+\openout1 = `colortests.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 44.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 44.
+File: color_tests_empty.ps Graphic file (type eps)
+
+<color_tests_empty.ps>
+File: color_tests_scmap.ps Graphic file (type eps)
+ <color_tests_scmap.ps>
+File: color_tests_SCMap.ps Graphic file (type eps)
+ <color_tests_SCMap.ps>
+File: color_tests_SCMAP.ps Graphic file (type eps)
+
+<color_tests_SCMAP.ps> [1
+
+] (colortests.aux) ) 
+Here is how much of TeX's memory you used:
+ 778 strings out of 61422
+ 9780 string characters out of 697363
+ 56315 words of memory out of 8000001
+ 3764 multiletter control sequences out of 10000+50000
+ 4554 words of font info for 16 fonts, out of 1000000 for 2000
+ 14 hyphenation exceptions out of 32000
+ 24i,17n,29p,194b,418s stack positions out of 5000i,500n,3000p,200000b,15000s
+
+Output written on colortests.dvi (1 page, 1164 bytes).

@@ -1,0 +1,24 @@
+#
+# L #
+show_percent_box=on
+percent_box_label=SIMILARITY
+percent_box_label_fontsize=10pt
+percent_box_score_range=0..1000
+major_tickmark_score=250
+ribbon_color_merge=on
+color_merge_factor=2
+# group_y_label_angle=315
+#
+# G #
+/.*M.musculus.*/::group_label=taf6 (M.musculus)
+/.*H.sapiens.*/::group_label=taf6 (H.sapiens)
+#
+# F #
+/[it].*exon/::feature_color=darkgreen
+utrexon::feature_color=skyblue
+initialexon::feature_shape=half_arrow_end
+terminalexon::feature_shape=half_arrow
+/.*exon/::show_ribbons=on
+/.*exon/::ribbon_style=ribbons
+/[it].*exon/::ribbon_color=verylightgreen
+utrexon::ribbon_color=verylightskyblue

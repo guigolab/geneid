@@ -1,0 +1,274 @@
+# Getting the PostScripts with GFF2APLOT
+#  -> Empty Plot
+#  -> Global feature layers
+#  -> Extra custom features layers (PRE)
+#  -> Alignment
+#  -> Pseudo color merge
+#  -> Extra custom features layers (POST)
+# Using "ghostscript" to obtain PNG images from PS files
+# -> plot_layers_bg
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604203 1722904 408308 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 669969 1883672 549298 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711869 1883672 569799 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761003 1903768 440482 1 done.
+`plot_layers_bg.png' -> `plot_layers_bg.s.png'
+plot_layers_bg.s.png=>plot_layers_bg.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 2433b 12.5u 0:20
+plot_layers_bg.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 12.4u 0:19
+# -> plot_layers_bgcol
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604215 1722904 408389 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 669981 1883672 549379 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711881 1883672 569880 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761015 1903768 440557 1 done.
+`plot_layers_bgcol.png' -> `plot_layers_bgcol.s.png'
+plot_layers_bgcol.s.png=>plot_layers_bgcol.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 7024b 12.9u 0:25
+plot_layers_bgcol.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 12.8u 0:23
+# -> plot_layers_boxcol
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604229 1722904 408455 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 669995 1883672 549445 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711895 1883672 569946 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761029 1903768 439809 1 done.
+`plot_layers_boxcol.png' -> `plot_layers_boxcol.s.png'
+plot_layers_boxcol.s.png=>plot_layers_boxcol.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 7212b 11.5u 0:19
+plot_layers_boxcol.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 11.4u 0:18
+# -> plot_layers_grd
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604226 1722904 408436 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 669992 1883672 549426 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711892 1883672 569927 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761026 1903768 439796 1 done.
+`plot_layers_grd.png' -> `plot_layers_grd.s.png'
+plot_layers_grd.s.png=>plot_layers_grd.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 14808b 11.3u 0:23
+plot_layers_grd.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 11.0u 0:22
+# -> plot_layers_feat
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604227 1722904 408480 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 669993 1883672 549470 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711893 1883672 569971 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761027 1903768 439826 1 done.
+`plot_layers_feat.png' -> `plot_layers_feat.s.png'
+plot_layers_feat.s.png=>plot_layers_feat.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 16520b 11.5u 0:20
+plot_layers_feat.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 11.2u 0:18
+# -> plot_layers_featrib
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604242 1722904 408492 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 670008 1883672 549482 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711908 1883672 569983 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761042 1903768 440644 1 done.
+`plot_layers_featrib.png' -> `plot_layers_featrib.s.png'
+plot_layers_featrib.s.png=>plot_layers_featrib.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 15669b 12.0u 0:17
+plot_layers_featrib.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 11.8u 0:16
+# -> plot_layers_featribln
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604244 1722904 408498 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 670010 1883672 549488 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711910 1883672 569989 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761044 1903768 440646 1 done.
+`plot_layers_featribln.png' -> `plot_layers_featribln.s.png'
+plot_layers_featribln.s.png=>plot_layers_featribln.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 15982b 9.3u 0:17
+plot_layers_featribln.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 9.1u 0:15
+# -> plot_layers_prezm
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604240 1722904 407966 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 670006 1883672 549382 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711906 1883672 569883 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761040 1883672 572435 1 done.
+`plot_layers_prezm.png' -> `plot_layers_prezm.s.png'
+plot_layers_prezm.s.png=>plot_layers_prezm.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 16894b 10.8u 0:23
+plot_layers_prezm.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 10.6u 0:22
+# -> plot_layers_pre
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604289 1722904 408241 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 670055 1883672 549657 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711955 1883672 570158 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761089 1883672 572710 1 done.
+`plot_layers_pre.png' -> `plot_layers_pre.s.png'
+plot_layers_pre.s.png=>plot_layers_pre.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 18554b 11.6u 0:14
+plot_layers_pre.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 11.4u 0:14
+# -> plot_layers_aln
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604297 1722904 408741 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 670063 1883672 549731 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711963 1883672 570232 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761097 1903768 441134 1 done.
+`plot_layers_aln.png' -> `plot_layers_aln.s.png'
+plot_layers_aln.s.png=>plot_layers_aln.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 18588b 10.3u 0:11
+plot_layers_aln.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 10.1u 0:11
+# -> plot_layers_alncol
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604306 1722904 413085 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 670072 1883672 555601 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711972 1903768 465335 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761106 1903768 467887 1 done.
+`plot_layers_alncol.png' -> `plot_layers_alncol.s.png'
+plot_layers_alncol.s.png=>plot_layers_alncol.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 21177b 10.7u 0:11
+plot_layers_alncol.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 10.5u 0:11
+# -> plot_layers_post
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1959908 604298 1722904 408280 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2020196 670064 1883672 549696 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2060388 711964 1883672 570197 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2120676 761098 1883672 572749 1 done.
+`plot_layers_post.png' -> `plot_layers_post.s.png'
+plot_layers_post.s.png=>plot_layers_post.s.mgk MGK 2479x3508=>124x175+0+0 DirectClass 8-bit 20683b 10.4u 0:11
+plot_layers_post.s.png PNG 2479x3508=>124x175+0+0 DirectClass 8-bit 10.2u 0:11
+convert: Unable to read font (/usr/share/ghostscript/fonts/n019003l.pfb) [No such file or directory].
+# Using "ghostscript" to obtain PDF documents from PS files
+# -> plot_layers_bg
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604535 1722904 408968 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675171 1883672 550022 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717071 1883672 568195 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762877 1903768 439738 1 done.
+# -> plot_layers_bgcol
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604547 1722904 409049 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675183 1883672 550103 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717083 1883672 568276 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762889 1903768 439813 1 done.
+# -> plot_layers_boxcol
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604561 1722904 409095 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675197 1883672 550149 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717097 1883672 568322 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762903 1903768 439857 1 done.
+# -> plot_layers_grd
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604558 1722904 409076 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675194 1883672 550130 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717094 1883672 568303 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762900 1903768 439844 1 done.
+# -> plot_layers_feat
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604559 1722904 409120 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675195 1883672 550174 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717095 1883672 568347 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762901 1903768 439874 1 done.
+# -> plot_layers_featrib
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604574 1722904 409152 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675210 1883672 550206 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717110 1883672 568379 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762916 1903768 439900 1 done.
+# -> plot_layers_featribln
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604576 1722904 409158 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675212 1883672 550212 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717112 1883672 568385 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762918 1903768 439902 1 done.
+# -> plot_layers_prezm
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604572 1722904 408606 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675208 1883672 549660 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717108 1883672 567833 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762914 1903768 439846 1 done.
+# -> plot_layers_pre
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604621 1722904 408881 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675257 1883672 549935 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717157 1883672 568108 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762963 1903768 440259 1 done.
+# -> plot_layers_aln
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604629 1722904 409421 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675265 1883672 550475 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717165 1883672 568648 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762971 1903768 440126 1 done.
+# -> plot_layers_alncol
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604638 1722904 413765 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675274 1883672 556345 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717174 1903768 462027 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762980 1903768 464459 1 done.
+# -> plot_layers_post
+GNU Ghostscript 7.05 (2002-04-22)
+Copyright (C) 2002 artofcode LLC, Benicia, CA.  All rights reserved.
+This software comes with NO WARRANTY: see the file PUBLIC for details.
+Loading NimbusSanL-Regu font from /usr/local/share/ghostscript/fonts/n019003l.pfb... 1957236 604630 1722904 408920 0 done.
+Loading NimbusMonL-Regu font from /usr/local/share/ghostscript/fonts/n022003l.pfb... 2037620 675266 1883672 549974 1 done.
+Loading StandardSymL font from /usr/local/share/ghostscript/fonts/s050000l.pfb... 2077812 717166 1883672 568147 1 done.
+Loading NimbusSanL-Bold font from /usr/local/share/ghostscript/fonts/n019004l.pfb... 2118004 762972 1903768 440293 1 done.
+# LaTeXing all figures together...
+This is TeX, Version 3.14159 (Web2C 7.3.1)
+(plotlayers.tex
+LaTeX2e <2000/06/01>
+Babel <v3.7h> and hyphenation patterns for american, french, german, ngerman, i
+talian, nohyphenation, loaded.
+(/usr/share/texmf/tex/latex/base/article.cls
+Document Class: article 2000/05/19 v1.4b Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size10.clo))
+(/usr/share/texmf/tex/latex/misc/geometry.sty
+(/usr/share/texmf/tex/latex/graphics/keyval.sty)
+(/usr/share/texmf/tex/latex/config/geometry.cfg))
+(/usr/share/texmf/tex/latex/graphics/graphics.sty
+(/usr/share/texmf/tex/latex/graphics/trig.sty)
+(/usr/share/texmf/tex/latex/config/graphics.cfg)
+(/usr/share/texmf/tex/latex/graphics/dvips.def))
+(/usr/share/texmf/tex/latex/graphics/graphicx.sty)
+(/usr/share/texmf/tex/latex/graphics/lscape.sty)
+(/usr/share/texmf/tex/latex/psnfss/helvet.sty)
+(/usr/share/texmf/tex/latex/psnfss/ot1phv.fd) (plotlayers.aux)
+<plot_layers_bg.ps> <plot_layers_bgcol.ps> <plot_layers_boxcol.ps>
+<plot_layers_grd.ps> [1] <plot_layers_feat.ps> <plot_layers_featrib.ps>
+<plot_layers_featribln.ps> <plot_layers_prezm.ps> [2] <plot_layers_pre.ps>
+<plot_layers_aln.ps> <plot_layers_alncol.ps> <plot_layers_post.ps> [3]
+(plotlayers.aux) )
+Output written on plotlayers.dvi (3 pages, 3252 bytes).
+Transcript written on plotlayers.log.
+This is dvips(k) 5.86 Copyright 1999 Radical Eye Software (www.radicaleye.com)
+' TeX output 2003.06.03:1648' -> plotlayers.ps
+<texc.pro><special.pro>. [1<plot_layers_bg.ps><plot_layers_bgcol.ps>
+<plot_layers_boxcol.ps><plot_layers_grd.ps>] [2<plot_layers_feat.ps>
+<plot_layers_featrib.ps><plot_layers_featribln.ps><plot_layers_prezm.ps>] [3
+<plot_layers_pre.ps><plot_layers_aln.ps><plot_layers_alncol.ps>
+<plot_layers_post.ps>] 
+###
+### TOTAL TIME: 418 seconds...

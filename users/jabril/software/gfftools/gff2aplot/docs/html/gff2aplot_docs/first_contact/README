@@ -1,0 +1,171 @@
+##################################################
+#
+# README First Contact
+#
+# This README runs as a shell script.
+# Here you can find the commands
+# we used to produce all the figures for:
+#
+#   "Introduction to GFF2APLOT"
+#
+# USAGE: bash README > .log 2>&1
+#
+# $Id: README,v 1.1 2003-06-05 17:47:51 jabril Exp $
+#
+##################################################
+#
+SECONDS=0 ;
+#
+
+#
+echo "# Help and Version..." ;
+#
+$BIN/gff2aplot.pl --help > gff2aplot.help
+$BIN/gff2aplot.pl --version 2> gff2aplot.version
+#
+#echo "# Reading from empty stdin. Wait five seconds and press CTRL-C..." ;
+#
+#$BIN/gff2aplot.pl 2> userstop.err
+# the following  does not work...
+# # T=`eval 'echo $!'`;
+# # echo "T equals to $T";
+# # sleep 5;
+# # kill $T;
+
+#
+echo "# Getting the PostScripts with GFF2APLOT" ;
+#
+echo "#  -> Default plot" ;
+#
+cat taf6.mmhs.blastn.aplot.gff \
+    taf6.mm.gff                \
+    taf6.hs.gff                \
+  > taf6.gff ;
+#
+$BIN/gff2aplot.pl                   \
+    --verbose                       \
+    -- taf6.gff > taf6_defaults.ps  \
+               2> taf6_defaults.log ;
+#
+echo "#  -> Command-line settings" ;
+#
+$BIN/gff2aplot.pl                                                 \
+    --verbose                                                     \
+    --title 'TAF6 Human/Mouse Orthologous Genes'                  \
+    --subtitle                                                    \
+      'Figure displays TBLASTX results for this genomic region.'  \
+    --show-percent-box                                            \
+    --percent-box-label "SIMILARITY"                              \
+    --group-var '/.*M.musculus.*/::group_label=taf6 (M.musculus)' \
+    --group-var '/.*H.sapiens.*/::group_label=taf6 (H.sapiens)'   \
+    --feature-var '/[it].*exon/::feature_color=darkgreen'         \
+    --feature-var 'utrexon::feature_color=skyblue'                \
+    --feature-var 'initialexon::feature_shape=half_arrow_end'     \
+    --feature-var 'terminalexon::feature_shape=half_arrow'        \
+    --  taf6.gff  > taf6_cmdline.ps  2> taf6_cmdline.log ;
+#
+echo "#  -> Customization from files" ;
+#
+# Extra customization
+cat > taf6.rc <<'+++EOF+++'
+#
+# L #
+show_percent_box=on
+percent_box_label=SIMILARITY
+percent_box_label_fontsize=10pt
+percent_box_score_range=0..1000
+major_tickmark_score=250
+ribbon_color_merge=on
+color_merge_factor=2
+# group_y_label_angle=315
+#
+# G #
+/.*M.musculus.*/::group_label=taf6 (M.musculus)
+/.*H.sapiens.*/::group_label=taf6 (H.sapiens)
+#
+# F #
+/[it].*exon/::feature_color=darkgreen
+utrexon::feature_color=skyblue
+initialexon::feature_shape=half_arrow_end
+terminalexon::feature_shape=half_arrow
+/.*exon/::show_ribbons=on
+/.*exon/::ribbon_style=ribbons
+/[it].*exon/::ribbon_color=verylightgreen
+utrexon::ribbon_color=verylightskyblue
++++EOF+++
+#
+$BIN/gff2aplot.pl                                                \
+    --verbose                                                    \
+    --title 'TAF6 Human/Mouse Orthologous Genes'                 \
+    --subtitle                                                   \
+      'Figure displays TBLASTX results for this genomic region.' \
+    --custom-filename taf6.rc                                    \
+    --  taf6.gff  > taf6_final.ps  2> taf6_final.log ;
+
+#
+#
+# Preparing web images
+#
+filenames () {
+  cat << 'EOF';
+taf6_defaults
+taf6_cmdline
+taf6_final
+EOF
+};
+#
+# echo "# Using \"ghostscript\" to obtain JPEG images from PS files" ;
+echo "# Using \"ghostscript\" to obtain PNG images from PS files" ;
+#
+GS=`which gs || echo "gs"`;
+MG=`which mogrify || echo "mogrify"`;
+CV=`which convert || echo "convert"`;
+#
+filenames | while read n ;
+  do {
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300        \
+        -sPAPERSIZE=a4 -sDEVICE=png16m \
+        -sOutputFile=$n.png $n.ps      ;
+    cp -v $n.png $n.s.png ;
+    # mogrify is a ImageMagick tool that allow us to transform images on batch,
+    # large high-resolution jpeg files are scaled down to thumbnail resolution (2479x3508=>123x175)
+    # it overwrites original file (so that we previously get a renamed copy for each jpeg to process).
+    $MG -verbose -geometry 5% $n.s.png ;
+    #
+    # $GS -dBATCH -dNOPAUSE -r300      \
+    #     -sPAPERSIZE=a4 -sDEVICE=jpeg \
+    #     -sOutputFile=$n.jpg $n.ps    ;
+    # png large version is pretty smaller than jpeg
+    # cp -v $n.jpg $n.s.jpg ;
+    # $MG -verbose -geometry 5% $n.s.jpg ;
+    };
+  done ;
+$CV 'vid:*.s.png'  firstcontact.summary.png
+#
+echo "# Using \"ghostscript\" to obtain PDF documents from PS files" ;
+#
+filenames | while read n ;
+  do {
+    echo "# -> $n" ;
+    $GS -dBATCH -dNOPAUSE -r300          \
+        -sPAPERSIZE=a4 -sDEVICE=pdfwrite \
+        -sOutputFile=$n.pdf $n.ps        ;
+    };
+  done ;
+#
+#
+# echo "# LaTeXing all figures together..." ;
+#
+# latex firstcontact.tex;
+# dvips firstcontact.dvi -o firstcontact.ps;
+#
+#
+echo "###" ;
+echo "### TOTAL TIME: $SECONDS seconds..." ;
+#
+#
+# That's all folks... ;^D
+#
+#        >> Copyleft (C) 2002/2003 - Josep F. Abril <<
+#

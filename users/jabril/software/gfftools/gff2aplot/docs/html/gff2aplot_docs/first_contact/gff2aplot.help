@@ -1,0 +1,188 @@
+PROGRAM:
+                        gff2aplot - v2.0
+
+    Converting GFF files for pairwise alignments to PostScript.
+
+USAGE:        gff2aplot [options] <GFF_files|STDIN>
+
+DESCRIPTION:
+
+    This program draws color-filled alignment plots from GFF
+    files for that alignment and two sequences annotations.
+
+REQUIRES:
+
+    gff2aplot needs the following Perl modules installed in 
+    your system, we used those available from the standard 
+    Perl distribution. Those that are not in the standard 
+    distribution are marked with an '(*)', in such cases 
+    make sure that you already have downloaded them from 
+    CPAN (http://www.perl.com/CPAN) and installed.
+
+    "Getopt::Long" - processing command-line options.
+    "Data::Dumper" - pretty printing data structures for debugging (*).
+    "Benchmark" - checking and comparing running times of code.
+
+ENVIRONMENT VARIABLES:
+
+        There are two environmental variables that can be set by 
+    users to their preferences:
+     + You can specify the path where gff2aplot can find the default
+      files with the shell variable "GFF2APLOT_CUSTOMPATH". Default
+      value is the path where you are running gff2aplot.
+     + You can also define the default custom filename you will like
+      with the variable "GFF2APLOT_CUSTOMFILE", program default
+      filename for custom file is ".gff2aplotrc".
+     + Now gff2aplot does not need to write any temporary file, 
+      so that previous versions default temporary directory path
+      variable ("GFF2APLOT_TMP") is no longer used.
+     + Setting those vars in Bourne-shell and C-shell:
+       o Using a Bourne-Shell (e.g. bash):
+            export GFF2APLOT_CUSTOMPATH="path"
+            export GFF2APLOT_CUSTOMFILE="file_name"
+       o Using a C-Shell:
+            setenv GFF2APLOT_CUSTOMPATH "path"
+            setenv GFF2APLOT_CUSTOMFILE "file_name"
+
+COMMAND-LINE OPTIONS:
+
+    A double dash on itself "--" signals end of the options
+    and start of file names (if present). You can use a single
+    dash "-" as STDIN placeholder. Available options and a
+    short description are listed here:
+
+    -h, --help   Shows this help.
+    --version    Shows current version and exits.
+    -v, --verbose
+          Verbose mode, a full report is sent to standard error 
+          (default is set to showing only WARNINGS).
+    -V, --logs-filename  <filename>
+          Report is written to a log file.
+    -q, --quiet
+          Quiet mode, do not show any message/warning
+          to standard error (reporting only ERRORS).
+    -P, --page-bbox  <width,height>
+          Setting a user-defined page size, <width> and
+          <height> are set to points if no unit is given,
+          you can use pt, mm, cm or in. This option overrides ANY
+          'page-size' definition (from command-line or custom file).
+    -p, --page-size  <format_name>
+          Setting a page size among pre-defined ones
+          (see below for a list of available page formats).
+    --margin-left   <length>
+    --margin-right  <length>
+    --margin-top    <length>
+    --margin-bottom <length>
+          Setting each page margin to <length>. If no units are provided,
+          points are assumed, you can use points, milimeters, centimeters
+          or inches (pt, mm, cm or in, respectively).
+    -B, --background-color  <color>    Background color.
+    -F, --foreground-color  <color>    Foreground color.
+    -T, --title <string>   Definning plot title.
+    -t, --subtitle <string>   Definning plot subtitle.
+    -X, --x-label <string>   Defining X-axis label.
+    -Y, --y-label <Y-Label>   Defining Y-axis label.
+    -L, --percent-box-label <string>   Defining percent-box label.
+    -l, --extra-box-label <XBox-Label>   Definning Extra-Box Label.
+    -x, --x-sequence-coords <pos..pos> 
+    -S, --start-x-sequence <pos>  Sets X-sequence first nucleotide.
+    -E, --end-x-sequence <pos>    Sets X-sequence last nucleotide.
+    -y, --y-sequence-coords <pos..pos> 
+    -s, --start-y-sequence <pos>  Sets Y-sequence first nucleotide.
+    -e, --end-y-sequence <pos>    Sets Y-sequence last nucleotide.
+    --x-sequence-zoom <pos..pos> 
+    --y-sequence-zoom <pos..pos> 
+    -Z, --zoom [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
+                   This option zooms an area you have selected
+                   with -S,-E,-s,-e (all 4 are optional).
+    -z, --zoom-area [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
+                   This option marks a zoom area on your plot,
+                   but does not make a zoom.
+    -A, --alignment-name <SeqXName:SeqYName>
+         Defining which alignment is going to be plotted 
+         if you have more than one alignment in your gff input.
+    -N, --x-sequence-name <SeqXName>
+         Defining which sequence is going to be plotted at X-axis.
+    -n, --y-sequence-name <SeqYName>
+         Defining which sequence is going to be plotted at Y-axis.
+    -r, --aplot-xy-noteq
+          By default X and Y axes have same length, this option 
+          disables such behaviour, so X and Y sequence will have
+          axes-lengths proportional to their nucleotide lengths.
+    -R, --xy-axes-scale  <X/Y ratio>
+          This option allows to set a different scale between X
+          and Y axes lengths (by default is '1'). Below 1 values
+          make Y larger than X, and larger than 1 result in getting
+          X larger than Y. # Must be explained better.
+    -W, --aln-scale-width   Scaling score on width for Aplot lines.
+    -w, --aln-scale-color   Scaling score on color for Aplot lines.
+    -K, --show-ribbons <ribbon_type>
+          Force Ribbons for all features on axes to be:
+             (N)one, (L)ines, (R)ibbons, (B)oth.
+    -G, --show-grid
+          Switches 'on' grid (default is 'off').
+    -g, --hide-grid
+          Switches 'off' grid (if switched on from customization files).
+    -I, --show-percent-box
+          Switches 'on' Percent box (default is 'off').
+    -i, --hide-percent-box
+          Switches 'off' Percent box (if set to 'on' on custom files).
+    -O, --show-extra-box
+          Switches 'on' Extra box (default is 'off').
+    -o, --hide-extra-box
+          Switches 'off' Extra box (if set to 'on' on custom files).
+    -D, --aplot-box-color <color>   Aplot main box background color.
+    -d, --percent-box-color <color>   Percent box background color.
+    -b, --extra-box-color <color>   Extra box background color.
+    --nopswarnings
+          Switch off warnings that may appear on the final PostScript figure
+          when X sequence, Y sequence and/or alignment input data is missing.
+    -a, --hide-credits
+          Switch off gff2aplot credits line on plot.
+    --debug
+        Reporting variable contents when testing the program.
+        Requires that log report file option was also activated.
+      --layout-var '<variable=value>'
+    --sequence-var '<sequence::variable=value>'
+      --source-var '<source::variable=value>'
+      --strand-var '<strand::variable=value>' 
+       --group-var '<group::variable=value>'
+     --feature-var '<feature::variable=value>'
+             Loading a feature/group/strand/source/sequence/layout
+             customization variable from command-line. You can set
+             several variables by repeating any of these options, 
+             i.e.:
+               ... --feature-var 'cds::feature_shape=box' 
+                   --feature-var 'cds::feature_color=blue' ... 
+    -C, --custom-filename <filename>
+          Loading customization parameters from a given file (if 
+          default ".gff2aplotrc" exists is loaded before it).
+
+    Those are the colors defined in gff2aplot:
+    + Default Colors: black white.
+    + Color Palette: 
+          grey pink magenta violet blue skyblue cyan seagreen
+             green limegreen yellow orange red brown
+      You can get up to nine color shades from Variable Colors with
+        "verydeep", "deep", "verydark", "dark",
+        "light", "verylight", "pale" and "verypale" prefixes,
+      as example: 
+        verydeepblue, deepblue, verydarkblue, darkblue,
+        blue, lightblue, verylightblue, paleblue and verypaleblue.
+    + Dynamic colors: gradient rainbow.
+
+    The following page sizes are available: from A0 to A10, 
+    from B0 to B10, 10x14, executive, folio, ledger, legal, 
+    letter, quarto, statement and tabloid.
+
+BUGS:    Report any problem to 'jabril@imim.es'.
+
+AUTHORS:
+
+            gff2aplot is under GNU-GPL
+         Josep Francesc ABRIL FERRANDO  
+                 Thomas WIEHE                   
+                Roderic GUIGO SERRA       
+
+            Copyright (C) 1999-2003
+

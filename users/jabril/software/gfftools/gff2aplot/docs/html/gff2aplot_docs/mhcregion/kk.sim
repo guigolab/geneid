@@ -1,0 +1,816 @@
+##gff-version 2
+##source-version /home/ug/jabril/development/softjabril/gfftools/gff2aplot/dist/ftp/gff2aplot-v2_0/bin/ali2gff
+##date Jun/03/2003 14:44:36
+##
+##/home/ug/jabril/development/softjabril/gfftools/gff2aplot/dist/ftp/gff2aplot-v2_0/bin/ali2gff  -x X87344 -y AF100956+AF027865 hs-mm.sim
+#name1:name2		source		feature		beg1:beg2	end1:end2	score	strand	frame	group	comment
+X87344:AF100956+AF027865	sim96_LIN	seqbounds	1:1	32000:35000	.	.	.
+X87344:AF100956+AF027865	sim96_LIN	alignment	863:804	19762:20115	18340.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	863:804	890:831	0.790	+:+	.:.	## cumulative nmp: 0.001
+X87344:AF100956+AF027865	sim96_LIN	fragment	892:832	1055:995	0.850	+:+	.:.	## cumulative nmp: 0.008
+X87344:AF100956+AF027865	sim96_LIN	fragment	1057:996	1072:1011	0.810	+:+	.:.	## cumulative nmp: 0.009
+X87344:AF100956+AF027865	sim96_LIN	fragment	1073:1019	1089:1035	0.650	+:+	.:.	## cumulative nmp: 0.010
+X87344:AF100956+AF027865	sim96_LIN	fragment	1095:1036	1137:1078	0.600	+:+	.:.	## cumulative nmp: 0.011
+X87344:AF100956+AF027865	sim96_LIN	fragment	1141:1079	1169:1107	0.620	+:+	.:.	## cumulative nmp: 0.012
+X87344:AF100956+AF027865	sim96_LIN	fragment	1224:1108	1254:1138	0.710	+:+	.:.	## cumulative nmp: 0.013
+X87344:AF100956+AF027865	sim96_LIN	fragment	1272:1139	1292:1159	0.710	+:+	.:.	## cumulative nmp: 0.014
+X87344:AF100956+AF027865	sim96_LIN	fragment	1293:1164	1316:1187	0.710	+:+	.:.	## cumulative nmp: 0.015
+X87344:AF100956+AF027865	sim96_LIN	fragment	1317:1193	1322:1198	0.830	+:+	.:.	## cumulative nmp: 0.015
+X87344:AF100956+AF027865	sim96_LIN	fragment	1414:1199	1435:1220	0.590	+:+	.:.	## cumulative nmp: 0.016
+X87344:AF100956+AF027865	sim96_LIN	fragment	1506:1221	1533:1248	0.570	+:+	.:.	## cumulative nmp: 0.017
+X87344:AF100956+AF027865	sim96_LIN	fragment	1696:1249	1773:1326	0.680	+:+	.:.	## cumulative nmp: 0.019
+X87344:AF100956+AF027865	sim96_LIN	fragment	1774:1330	1803:1359	0.670	+:+	.:.	## cumulative nmp: 0.020
+X87344:AF100956+AF027865	sim96_LIN	fragment	1804:1364	1830:1390	0.700	+:+	.:.	## cumulative nmp: 0.021
+X87344:AF100956+AF027865	sim96_LIN	fragment	1831:1456	1845:1470	0.670	+:+	.:.	## cumulative nmp: 0.022
+X87344:AF100956+AF027865	sim96_LIN	fragment	1846:1623	1916:1693	0.790	+:+	.:.	## cumulative nmp: 0.025
+X87344:AF100956+AF027865	sim96_LIN	fragment	1917:1695	2088:1866	0.830	+:+	.:.	## cumulative nmp: 0.032
+X87344:AF100956+AF027865	sim96_LIN	fragment	2089:1868	2108:1887	0.750	+:+	.:.	## cumulative nmp: 0.033
+X87344:AF100956+AF027865	sim96_LIN	fragment	2109:1891	2130:1912	0.640	+:+	.:.	## cumulative nmp: 0.034
+X87344:AF100956+AF027865	sim96_LIN	fragment	2131:1936	2163:1968	0.480	+:+	.:.	## cumulative nmp: 0.035
+X87344:AF100956+AF027865	sim96_LIN	fragment	2164:2011	2180:2027	0.760	+:+	.:.	## cumulative nmp: 0.035
+X87344:AF100956+AF027865	sim96_LIN	fragment	2181:2057	2194:2070	0.790	+:+	.:.	## cumulative nmp: 0.036
+X87344:AF100956+AF027865	sim96_LIN	fragment	2195:2134	2283:2222	0.670	+:+	.:.	## cumulative nmp: 0.039
+X87344:AF100956+AF027865	sim96_LIN	fragment	2290:2223	2482:2415	0.730	+:+	.:.	## cumulative nmp: 0.046
+X87344:AF100956+AF027865	sim96_LIN	fragment	2483:2419	2493:2429	0.910	+:+	.:.	## cumulative nmp: 0.047
+X87344:AF100956+AF027865	sim96_LIN	fragment	2501:2430	2509:2438	0.670	+:+	.:.	## cumulative nmp: 0.047
+X87344:AF100956+AF027865	sim96_LIN	fragment	2510:2444	2533:2467	0.670	+:+	.:.	## cumulative nmp: 0.048
+X87344:AF100956+AF027865	sim96_LIN	fragment	2541:2468	2601:2528	0.640	+:+	.:.	## cumulative nmp: 0.050
+X87344:AF100956+AF027865	sim96_LIN	fragment	2602:2536	2637:2571	0.530	+:+	.:.	## cumulative nmp: 0.051
+X87344:AF100956+AF027865	sim96_LIN	fragment	2641:2572	2705:2636	0.650	+:+	.:.	## cumulative nmp: 0.053
+X87344:AF100956+AF027865	sim96_LIN	fragment	2706:2640	2741:2675	0.860	+:+	.:.	## cumulative nmp: 0.055
+X87344:AF100956+AF027865	sim96_LIN	fragment	2744:2676	2763:2695	0.900	+:+	.:.	## cumulative nmp: 0.056
+X87344:AF100956+AF027865	sim96_LIN	fragment	2764:2697	2826:2759	0.670	+:+	.:.	## cumulative nmp: 0.058
+X87344:AF100956+AF027865	sim96_LIN	fragment	2832:2760	2850:2778	0.580	+:+	.:.	## cumulative nmp: 0.059
+X87344:AF100956+AF027865	sim96_LIN	fragment	2873:2779	2884:2790	0.580	+:+	.:.	## cumulative nmp: 0.059
+X87344:AF100956+AF027865	sim96_LIN	fragment	2885:2792	2907:2814	0.830	+:+	.:.	## cumulative nmp: 0.060
+X87344:AF100956+AF027865	sim96_LIN	fragment	2908:2816	2941:2849	0.500	+:+	.:.	## cumulative nmp: 0.061
+X87344:AF100956+AF027865	sim96_LIN	fragment	2972:2850	2981:2859	0.800	+:+	.:.	## cumulative nmp: 0.061
+X87344:AF100956+AF027865	sim96_LIN	fragment	2998:2860	3006:2868	0.780	+:+	.:.	## cumulative nmp: 0.062
+X87344:AF100956+AF027865	sim96_LIN	fragment	3009:2869	3209:3069	0.820	+:+	.:.	## cumulative nmp: 0.070
+X87344:AF100956+AF027865	sim96_LIN	fragment	3210:3166	3265:3221	0.480	+:+	.:.	## cumulative nmp: 0.072
+X87344:AF100956+AF027865	sim96_LIN	fragment	3266:3231	3286:3251	0.670	+:+	.:.	## cumulative nmp: 0.073
+X87344:AF100956+AF027865	sim96_LIN	fragment	3319:3252	3331:3264	0.690	+:+	.:.	## cumulative nmp: 0.073
+X87344:AF100956+AF027865	sim96_LIN	fragment	3346:3265	3363:3282	0.610	+:+	.:.	## cumulative nmp: 0.074
+X87344:AF100956+AF027865	sim96_LIN	fragment	3364:3307	3385:3328	0.550	+:+	.:.	## cumulative nmp: 0.074
+X87344:AF100956+AF027865	sim96_LIN	fragment	3404:3329	3430:3355	0.590	+:+	.:.	## cumulative nmp: 0.075
+X87344:AF100956+AF027865	sim96_LIN	fragment	3437:3356	3455:3374	0.630	+:+	.:.	## cumulative nmp: 0.076
+X87344:AF100956+AF027865	sim96_LIN	fragment	3464:3375	3510:3421	0.510	+:+	.:.	## cumulative nmp: 0.077
+X87344:AF100956+AF027865	sim96_LIN	fragment	3518:3422	3527:3431	0.700	+:+	.:.	## cumulative nmp: 0.077
+X87344:AF100956+AF027865	sim96_LIN	fragment	3530:3432	3578:3480	0.530	+:+	.:.	## cumulative nmp: 0.079
+X87344:AF100956+AF027865	sim96_LIN	fragment	3579:3490	3598:3509	0.600	+:+	.:.	## cumulative nmp: 0.079
+X87344:AF100956+AF027865	sim96_LIN	fragment	3599:3576	3627:3604	0.550	+:+	.:.	## cumulative nmp: 0.080
+X87344:AF100956+AF027865	sim96_LIN	fragment	3628:3617	3641:3630	0.640	+:+	.:.	## cumulative nmp: 0.081
+X87344:AF100956+AF027865	sim96_LIN	fragment	3642:3641	3649:3648	0.880	+:+	.:.	## cumulative nmp: 0.081
+X87344:AF100956+AF027865	sim96_LIN	fragment	3650:3749	3689:3788	0.630	+:+	.:.	## cumulative nmp: 0.082
+X87344:AF100956+AF027865	sim96_LIN	fragment	3690:3833	3708:3851	0.530	+:+	.:.	## cumulative nmp: 0.083
+X87344:AF100956+AF027865	sim96_LIN	fragment	3709:3862	3748:3901	0.630	+:+	.:.	## cumulative nmp: 0.084
+X87344:AF100956+AF027865	sim96_LIN	fragment	3749:3905	3777:3933	0.660	+:+	.:.	## cumulative nmp: 0.085
+X87344:AF100956+AF027865	sim96_LIN	fragment	3778:3937	3831:3990	0.520	+:+	.:.	## cumulative nmp: 0.087
+X87344:AF100956+AF027865	sim96_LIN	fragment	3835:3991	3860:4016	0.690	+:+	.:.	## cumulative nmp: 0.088
+X87344:AF100956+AF027865	sim96_LIN	fragment	3862:4017	3878:4033	0.710	+:+	.:.	## cumulative nmp: 0.088
+X87344:AF100956+AF027865	sim96_LIN	fragment	3879:4035	3902:4058	0.670	+:+	.:.	## cumulative nmp: 0.089
+X87344:AF100956+AF027865	sim96_LIN	fragment	3906:4059	3938:4091	0.640	+:+	.:.	## cumulative nmp: 0.090
+X87344:AF100956+AF027865	sim96_LIN	fragment	3939:4096	3951:4108	0.770	+:+	.:.	## cumulative nmp: 0.091
+X87344:AF100956+AF027865	sim96_LIN	fragment	3954:4109	3975:4130	0.640	+:+	.:.	## cumulative nmp: 0.091
+X87344:AF100956+AF027865	sim96_LIN	fragment	3979:4131	4008:4160	0.730	+:+	.:.	## cumulative nmp: 0.093
+X87344:AF100956+AF027865	sim96_LIN	fragment	4041:4161	4066:4186	0.500	+:+	.:.	## cumulative nmp: 0.093
+X87344:AF100956+AF027865	sim96_LIN	fragment	4067:4192	4145:4270	0.590	+:+	.:.	## cumulative nmp: 0.096
+X87344:AF100956+AF027865	sim96_LIN	fragment	4152:4271	4219:4338	0.660	+:+	.:.	## cumulative nmp: 0.098
+X87344:AF100956+AF027865	sim96_LIN	fragment	4221:4339	4325:4443	0.810	+:+	.:.	## cumulative nmp: 0.102
+X87344:AF100956+AF027865	sim96_LIN	fragment	4328:4444	4357:4473	0.700	+:+	.:.	## cumulative nmp: 0.104
+X87344:AF100956+AF027865	sim96_LIN	fragment	4359:4474	4393:4508	0.570	+:+	.:.	## cumulative nmp: 0.105
+X87344:AF100956+AF027865	sim96_LIN	fragment	4398:4509	4415:4526	0.780	+:+	.:.	## cumulative nmp: 0.105
+X87344:AF100956+AF027865	sim96_LIN	fragment	4419:4527	4435:4543	0.590	+:+	.:.	## cumulative nmp: 0.106
+X87344:AF100956+AF027865	sim96_LIN	fragment	4440:4544	4455:4559	0.560	+:+	.:.	## cumulative nmp: 0.106
+X87344:AF100956+AF027865	sim96_LIN	fragment	4517:4560	4548:4591	0.560	+:+	.:.	## cumulative nmp: 0.107
+X87344:AF100956+AF027865	sim96_LIN	fragment	4572:4592	4583:4603	0.670	+:+	.:.	## cumulative nmp: 0.108
+X87344:AF100956+AF027865	sim96_LIN	fragment	4624:4604	4639:4619	0.690	+:+	.:.	## cumulative nmp: 0.108
+X87344:AF100956+AF027865	sim96_LIN	fragment	4678:4620	4720:4662	0.470	+:+	.:.	## cumulative nmp: 0.109
+X87344:AF100956+AF027865	sim96_LIN	fragment	4723:4663	4738:4678	0.750	+:+	.:.	## cumulative nmp: 0.110
+X87344:AF100956+AF027865	sim96_LIN	fragment	4747:4679	4772:4704	0.690	+:+	.:.	## cumulative nmp: 0.111
+X87344:AF100956+AF027865	sim96_LIN	fragment	4774:4705	4811:4742	0.550	+:+	.:.	## cumulative nmp: 0.112
+X87344:AF100956+AF027865	sim96_LIN	fragment	4813:4743	4829:4759	0.760	+:+	.:.	## cumulative nmp: 0.113
+X87344:AF100956+AF027865	sim96_LIN	fragment	4834:4760	4862:4788	0.760	+:+	.:.	## cumulative nmp: 0.114
+X87344:AF100956+AF027865	sim96_LIN	fragment	4863:4790	4870:4797	0.630	+:+	.:.	## cumulative nmp: 0.114
+X87344:AF100956+AF027865	sim96_LIN	fragment	4874:4798	4890:4814	0.880	+:+	.:.	## cumulative nmp: 0.115
+X87344:AF100956+AF027865	sim96_LIN	fragment	4916:4815	4926:4825	0.820	+:+	.:.	## cumulative nmp: 0.115
+X87344:AF100956+AF027865	sim96_LIN	fragment	4927:4829	4942:4844	0.630	+:+	.:.	## cumulative nmp: 0.116
+X87344:AF100956+AF027865	sim96_LIN	fragment	4951:4845	4969:4863	0.790	+:+	.:.	## cumulative nmp: 0.117
+X87344:AF100956+AF027865	sim96_LIN	fragment	4984:4864	5008:4888	0.520	+:+	.:.	## cumulative nmp: 0.117
+X87344:AF100956+AF027865	sim96_LIN	fragment	5019:4889	5059:4929	0.800	+:+	.:.	## cumulative nmp: 0.119
+X87344:AF100956+AF027865	sim96_LIN	fragment	5062:4930	5074:4942	0.690	+:+	.:.	## cumulative nmp: 0.120
+X87344:AF100956+AF027865	sim96_LIN	fragment	5075:4950	5101:4976	0.590	+:+	.:.	## cumulative nmp: 0.120
+X87344:AF100956+AF027865	sim96_LIN	fragment	5102:4978	5139:5015	0.630	+:+	.:.	## cumulative nmp: 0.122
+X87344:AF100956+AF027865	sim96_LIN	fragment	5143:5016	5164:5037	0.550	+:+	.:.	## cumulative nmp: 0.122
+X87344:AF100956+AF027865	sim96_LIN	fragment	5196:5038	5222:5064	0.810	+:+	.:.	## cumulative nmp: 0.123
+X87344:AF100956+AF027865	sim96_LIN	fragment	5226:5065	5253:5092	0.610	+:+	.:.	## cumulative nmp: 0.124
+X87344:AF100956+AF027865	sim96_LIN	fragment	5255:5093	5265:5103	0.910	+:+	.:.	## cumulative nmp: 0.125
+X87344:AF100956+AF027865	sim96_LIN	fragment	5266:5105	5278:5117	0.690	+:+	.:.	## cumulative nmp: 0.125
+X87344:AF100956+AF027865	sim96_LIN	fragment	5300:5118	5316:5134	0.710	+:+	.:.	## cumulative nmp: 0.126
+X87344:AF100956+AF027865	sim96_LIN	fragment	5319:5135	5347:5163	0.550	+:+	.:.	## cumulative nmp: 0.127
+X87344:AF100956+AF027865	sim96_LIN	fragment	5348:5165	5363:5180	0.810	+:+	.:.	## cumulative nmp: 0.127
+X87344:AF100956+AF027865	sim96_LIN	fragment	5376:5181	5393:5198	0.610	+:+	.:.	## cumulative nmp: 0.128
+X87344:AF100956+AF027865	sim96_LIN	fragment	5404:5199	5421:5216	0.560	+:+	.:.	## cumulative nmp: 0.129
+X87344:AF100956+AF027865	sim96_LIN	fragment	5422:5219	5442:5239	0.480	+:+	.:.	## cumulative nmp: 0.129
+X87344:AF100956+AF027865	sim96_LIN	fragment	5457:5240	5466:5249	0.800	+:+	.:.	## cumulative nmp: 0.129
+X87344:AF100956+AF027865	sim96_LIN	fragment	5469:5250	5486:5267	0.830	+:+	.:.	## cumulative nmp: 0.130
+X87344:AF100956+AF027865	sim96_LIN	fragment	5503:5268	5514:5279	0.920	+:+	.:.	## cumulative nmp: 0.131
+X87344:AF100956+AF027865	sim96_LIN	fragment	5516:5280	5542:5306	0.520	+:+	.:.	## cumulative nmp: 0.132
+X87344:AF100956+AF027865	sim96_LIN	fragment	5548:5307	5551:5310	1.000	+:+	.:.	## cumulative nmp: 0.132
+X87344:AF100956+AF027865	sim96_LIN	fragment	5552:5313	5562:5323	0.820	+:+	.:.	## cumulative nmp: 0.132
+X87344:AF100956+AF027865	sim96_LIN	fragment	5564:5324	5589:5349	0.580	+:+	.:.	## cumulative nmp: 0.133
+X87344:AF100956+AF027865	sim96_LIN	fragment	5590:5360	5610:5380	0.860	+:+	.:.	## cumulative nmp: 0.134
+X87344:AF100956+AF027865	sim96_LIN	fragment	5657:5381	5670:5394	0.710	+:+	.:.	## cumulative nmp: 0.134
+X87344:AF100956+AF027865	sim96_LIN	fragment	5671:5423	5684:5436	0.710	+:+	.:.	## cumulative nmp: 0.135
+X87344:AF100956+AF027865	sim96_LIN	fragment	5685:5447	5731:5493	0.660	+:+	.:.	## cumulative nmp: 0.137
+X87344:AF100956+AF027865	sim96_LIN	fragment	5732:5498	5771:5537	0.750	+:+	.:.	## cumulative nmp: 0.138
+X87344:AF100956+AF027865	sim96_LIN	fragment	5780:5538	5793:5551	0.860	+:+	.:.	## cumulative nmp: 0.139
+X87344:AF100956+AF027865	sim96_LIN	fragment	5795:5552	5844:5601	0.660	+:+	.:.	## cumulative nmp: 0.141
+X87344:AF100956+AF027865	sim96_LIN	fragment	5845:5605	5853:5613	0.890	+:+	.:.	## cumulative nmp: 0.141
+X87344:AF100956+AF027865	sim96_LIN	fragment	5855:5614	5915:5674	0.820	+:+	.:.	## cumulative nmp: 0.144
+X87344:AF100956+AF027865	sim96_LIN	fragment	5917:5675	5937:5695	0.710	+:+	.:.	## cumulative nmp: 0.144
+X87344:AF100956+AF027865	sim96_LIN	fragment	5939:5696	5954:5711	0.810	+:+	.:.	## cumulative nmp: 0.145
+X87344:AF100956+AF027865	sim96_LIN	fragment	5956:5712	5970:5726	0.800	+:+	.:.	## cumulative nmp: 0.146
+X87344:AF100956+AF027865	sim96_LIN	fragment	5972:5727	6050:5805	0.660	+:+	.:.	## cumulative nmp: 0.148
+X87344:AF100956+AF027865	sim96_LIN	fragment	6065:5806	6083:5824	0.680	+:+	.:.	## cumulative nmp: 0.149
+X87344:AF100956+AF027865	sim96_LIN	fragment	6089:5825	6104:5840	0.750	+:+	.:.	## cumulative nmp: 0.150
+X87344:AF100956+AF027865	sim96_LIN	fragment	6119:5841	6230:5952	0.740	+:+	.:.	## cumulative nmp: 0.154
+X87344:AF100956+AF027865	sim96_LIN	fragment	6250:5953	6281:5984	0.720	+:+	.:.	## cumulative nmp: 0.155
+X87344:AF100956+AF027865	sim96_LIN	fragment	6282:5994	6311:6023	0.670	+:+	.:.	## cumulative nmp: 0.156
+X87344:AF100956+AF027865	sim96_LIN	fragment	6325:6024	6348:6047	0.580	+:+	.:.	## cumulative nmp: 0.157
+X87344:AF100956+AF027865	sim96_LIN	fragment	6349:6054	6408:6113	0.750	+:+	.:.	## cumulative nmp: 0.159
+X87344:AF100956+AF027865	sim96_LIN	fragment	6409:6116	6430:6137	0.820	+:+	.:.	## cumulative nmp: 0.160
+X87344:AF100956+AF027865	sim96_LIN	fragment	6431:6150	6444:6163	0.710	+:+	.:.	## cumulative nmp: 0.161
+X87344:AF100956+AF027865	sim96_LIN	fragment	6447:6164	6503:6220	0.560	+:+	.:.	## cumulative nmp: 0.163
+X87344:AF100956+AF027865	sim96_LIN	fragment	6504:6224	6589:6309	0.630	+:+	.:.	## cumulative nmp: 0.165
+X87344:AF100956+AF027865	sim96_LIN	fragment	6591:6310	6655:6374	0.690	+:+	.:.	## cumulative nmp: 0.168
+X87344:AF100956+AF027865	sim96_LIN	fragment	6656:6379	6688:6411	0.670	+:+	.:.	## cumulative nmp: 0.169
+X87344:AF100956+AF027865	sim96_LIN	fragment	6689:6421	6709:6441	0.810	+:+	.:.	## cumulative nmp: 0.170
+X87344:AF100956+AF027865	sim96_LIN	fragment	6741:6442	6791:6492	0.650	+:+	.:.	## cumulative nmp: 0.171
+X87344:AF100956+AF027865	sim96_LIN	fragment	6792:6494	6800:6502	0.780	+:+	.:.	## cumulative nmp: 0.172
+X87344:AF100956+AF027865	sim96_LIN	fragment	6830:6503	6841:6514	0.670	+:+	.:.	## cumulative nmp: 0.172
+X87344:AF100956+AF027865	sim96_LIN	fragment	6864:6515	6957:6608	0.720	+:+	.:.	## cumulative nmp: 0.176
+X87344:AF100956+AF027865	sim96_LIN	fragment	6961:6609	7048:6696	0.820	+:+	.:.	## cumulative nmp: 0.180
+X87344:AF100956+AF027865	sim96_LIN	fragment	7070:6697	7421:7048	0.740	+:+	.:.	## cumulative nmp: 0.193
+X87344:AF100956+AF027865	sim96_LIN	fragment	7424:7049	7444:7069	0.670	+:+	.:.	## cumulative nmp: 0.194
+X87344:AF100956+AF027865	sim96_LIN	fragment	7446:7070	7455:7079	0.900	+:+	.:.	## cumulative nmp: 0.194
+X87344:AF100956+AF027865	sim96_LIN	fragment	7464:7080	7474:7090	0.730	+:+	.:.	## cumulative nmp: 0.195
+X87344:AF100956+AF027865	sim96_LIN	fragment	7475:7094	7506:7125	0.660	+:+	.:.	## cumulative nmp: 0.196
+X87344:AF100956+AF027865	sim96_LIN	fragment	7515:7126	7527:7138	0.620	+:+	.:.	## cumulative nmp: 0.196
+X87344:AF100956+AF027865	sim96_LIN	fragment	7542:7139	7602:7199	0.480	+:+	.:.	## cumulative nmp: 0.198
+X87344:AF100956+AF027865	sim96_LIN	fragment	7607:7200	7624:7217	0.780	+:+	.:.	## cumulative nmp: 0.199
+X87344:AF100956+AF027865	sim96_LIN	fragment	7625:7256	7642:7273	0.670	+:+	.:.	## cumulative nmp: 0.199
+X87344:AF100956+AF027865	sim96_LIN	fragment	7655:7274	7666:7285	0.750	+:+	.:.	## cumulative nmp: 0.200
+X87344:AF100956+AF027865	sim96_LIN	fragment	7687:7286	7705:7304	0.530	+:+	.:.	## cumulative nmp: 0.200
+X87344:AF100956+AF027865	sim96_LIN	fragment	7706:7485	7713:7492	1.000	+:+	.:.	## cumulative nmp: 0.201
+X87344:AF100956+AF027865	sim96_LIN	fragment	7714:7500	7737:7523	0.540	+:+	.:.	## cumulative nmp: 0.201
+X87344:AF100956+AF027865	sim96_LIN	fragment	7738:7569	7760:7591	0.700	+:+	.:.	## cumulative nmp: 0.202
+X87344:AF100956+AF027865	sim96_LIN	fragment	7761:7652	7802:7693	0.520	+:+	.:.	## cumulative nmp: 0.203
+X87344:AF100956+AF027865	sim96_LIN	fragment	7803:7706	7820:7723	0.670	+:+	.:.	## cumulative nmp: 0.204
+X87344:AF100956+AF027865	sim96_LIN	fragment	7841:7724	7872:7755	0.690	+:+	.:.	## cumulative nmp: 0.205
+X87344:AF100956+AF027865	sim96_LIN	fragment	7873:7758	7889:7774	0.590	+:+	.:.	## cumulative nmp: 0.206
+X87344:AF100956+AF027865	sim96_LIN	fragment	7909:7775	7929:7795	0.710	+:+	.:.	## cumulative nmp: 0.206
+X87344:AF100956+AF027865	sim96_LIN	fragment	7930:7798	8089:7957	0.800	+:+	.:.	## cumulative nmp: 0.213
+X87344:AF100956+AF027865	sim96_LIN	fragment	8091:7958	8144:8011	0.630	+:+	.:.	## cumulative nmp: 0.215
+X87344:AF100956+AF027865	sim96_LIN	fragment	8147:8012	8153:8018	1.000	+:+	.:.	## cumulative nmp: 0.215
+X87344:AF100956+AF027865	sim96_LIN	fragment	8160:8019	8178:8037	0.530	+:+	.:.	## cumulative nmp: 0.216
+X87344:AF100956+AF027865	sim96_LIN	fragment	8179:8040	8203:8064	0.600	+:+	.:.	## cumulative nmp: 0.217
+X87344:AF100956+AF027865	sim96_LIN	fragment	8208:8065	8361:8218	0.780	+:+	.:.	## cumulative nmp: 0.223
+X87344:AF100956+AF027865	sim96_LIN	fragment	8362:8220	8393:8251	0.560	+:+	.:.	## cumulative nmp: 0.224
+X87344:AF100956+AF027865	sim96_LIN	fragment	8398:8252	8420:8274	0.700	+:+	.:.	## cumulative nmp: 0.225
+X87344:AF100956+AF027865	sim96_LIN	fragment	8421:8280	8424:8283	0.750	+:+	.:.	## cumulative nmp: 0.225
+X87344:AF100956+AF027865	sim96_LIN	fragment	8432:8284	8459:8311	0.680	+:+	.:.	## cumulative nmp: 0.226
+X87344:AF100956+AF027865	sim96_LIN	fragment	8460:8403	8477:8420	0.670	+:+	.:.	## cumulative nmp: 0.226
+X87344:AF100956+AF027865	sim96_LIN	fragment	8478:8424	8519:8465	0.520	+:+	.:.	## cumulative nmp: 0.228
+X87344:AF100956+AF027865	sim96_LIN	fragment	8520:8476	8527:8483	0.880	+:+	.:.	## cumulative nmp: 0.228
+X87344:AF100956+AF027865	sim96_LIN	fragment	8528:8485	8542:8499	0.530	+:+	.:.	## cumulative nmp: 0.228
+X87344:AF100956+AF027865	sim96_LIN	fragment	8549:8500	8570:8521	0.730	+:+	.:.	## cumulative nmp: 0.229
+X87344:AF100956+AF027865	sim96_LIN	fragment	8571:8525	8606:8560	0.810	+:+	.:.	## cumulative nmp: 0.231
+X87344:AF100956+AF027865	sim96_LIN	fragment	8632:8561	8658:8587	0.520	+:+	.:.	## cumulative nmp: 0.231
+X87344:AF100956+AF027865	sim96_LIN	fragment	8662:8588	8725:8651	0.630	+:+	.:.	## cumulative nmp: 0.234
+X87344:AF100956+AF027865	sim96_LIN	fragment	8727:8652	8767:8692	0.730	+:+	.:.	## cumulative nmp: 0.235
+X87344:AF100956+AF027865	sim96_LIN	fragment	8777:8693	8790:8706	0.570	+:+	.:.	## cumulative nmp: 0.236
+X87344:AF100956+AF027865	sim96_LIN	fragment	8794:8707	8805:8718	0.830	+:+	.:.	## cumulative nmp: 0.236
+X87344:AF100956+AF027865	sim96_LIN	fragment	8856:8719	8877:8740	0.590	+:+	.:.	## cumulative nmp: 0.237
+X87344:AF100956+AF027865	sim96_LIN	fragment	8951:8741	8974:8764	0.670	+:+	.:.	## cumulative nmp: 0.238
+X87344:AF100956+AF027865	sim96_LIN	fragment	8991:8765	9000:8774	0.900	+:+	.:.	## cumulative nmp: 0.238
+X87344:AF100956+AF027865	sim96_LIN	fragment	9001:8798	9034:8831	0.500	+:+	.:.	## cumulative nmp: 0.239
+X87344:AF100956+AF027865	sim96_LIN	fragment	9035:8839	9069:8873	0.830	+:+	.:.	## cumulative nmp: 0.241
+X87344:AF100956+AF027865	sim96_LIN	fragment	9070:8883	9084:8897	0.600	+:+	.:.	## cumulative nmp: 0.241
+X87344:AF100956+AF027865	sim96_LIN	fragment	9085:8911	9093:8919	0.780	+:+	.:.	## cumulative nmp: 0.241
+X87344:AF100956+AF027865	sim96_LIN	fragment	9094:8969	9102:8977	0.780	+:+	.:.	## cumulative nmp: 0.242
+X87344:AF100956+AF027865	sim96_LIN	fragment	9103:9030	9123:9050	0.620	+:+	.:.	## cumulative nmp: 0.242
+X87344:AF100956+AF027865	sim96_LIN	fragment	9131:9051	9173:9093	0.580	+:+	.:.	## cumulative nmp: 0.244
+X87344:AF100956+AF027865	sim96_LIN	fragment	9182:9094	9212:9124	0.580	+:+	.:.	## cumulative nmp: 0.245
+X87344:AF100956+AF027865	sim96_LIN	fragment	9214:9125	9224:9135	0.820	+:+	.:.	## cumulative nmp: 0.245
+X87344:AF100956+AF027865	sim96_LIN	fragment	9231:9136	9260:9165	0.700	+:+	.:.	## cumulative nmp: 0.246
+X87344:AF100956+AF027865	sim96_LIN	fragment	9266:9166	9514:9414	0.740	+:+	.:.	## cumulative nmp: 0.256
+X87344:AF100956+AF027865	sim96_LIN	fragment	9535:9415	9556:9436	0.770	+:+	.:.	## cumulative nmp: 0.257
+X87344:AF100956+AF027865	sim96_LIN	fragment	9566:9437	9603:9474	0.740	+:+	.:.	## cumulative nmp: 0.258
+X87344:AF100956+AF027865	sim96_LIN	fragment	9617:9475	9638:9496	0.640	+:+	.:.	## cumulative nmp: 0.259
+X87344:AF100956+AF027865	sim96_LIN	fragment	9642:9497	9672:9527	0.580	+:+	.:.	## cumulative nmp: 0.260
+X87344:AF100956+AF027865	sim96_LIN	fragment	9673:9530	9688:9545	0.690	+:+	.:.	## cumulative nmp: 0.260
+X87344:AF100956+AF027865	sim96_LIN	fragment	9693:9546	9730:9583	0.840	+:+	.:.	## cumulative nmp: 0.262
+X87344:AF100956+AF027865	sim96_LIN	fragment	9731:9650	9761:9680	0.610	+:+	.:.	## cumulative nmp: 0.263
+X87344:AF100956+AF027865	sim96_LIN	fragment	9762:9722	9770:9730	0.890	+:+	.:.	## cumulative nmp: 0.264
+X87344:AF100956+AF027865	sim96_LIN	fragment	9771:9738	9785:9752	0.530	+:+	.:.	## cumulative nmp: 0.264
+X87344:AF100956+AF027865	sim96_LIN	fragment	9786:9822	9823:9859	0.660	+:+	.:.	## cumulative nmp: 0.265
+X87344:AF100956+AF027865	sim96_LIN	fragment	9825:9860	9845:9880	0.710	+:+	.:.	## cumulative nmp: 0.266
+X87344:AF100956+AF027865	sim96_LIN	fragment	9847:9881	9895:9929	0.590	+:+	.:.	## cumulative nmp: 0.268
+X87344:AF100956+AF027865	sim96_LIN	fragment	9897:9930	9925:9958	0.790	+:+	.:.	## cumulative nmp: 0.269
+X87344:AF100956+AF027865	sim96_LIN	fragment	9926:9960	10141:10175	0.790	+:+	.:.	## cumulative nmp: 0.278
+X87344:AF100956+AF027865	sim96_LIN	fragment	10143:10176	10164:10197	0.680	+:+	.:.	## cumulative nmp: 0.278
+X87344:AF100956+AF027865	sim96_LIN	fragment	10166:10198	10189:10221	0.540	+:+	.:.	## cumulative nmp: 0.279
+X87344:AF100956+AF027865	sim96_LIN	fragment	10191:10222	10214:10245	0.750	+:+	.:.	## cumulative nmp: 0.280
+X87344:AF100956+AF027865	sim96_LIN	fragment	10221:10246	10248:10273	0.640	+:+	.:.	## cumulative nmp: 0.281
+X87344:AF100956+AF027865	sim96_LIN	fragment	10270:10274	10283:10287	0.710	+:+	.:.	## cumulative nmp: 0.282
+X87344:AF100956+AF027865	sim96_LIN	fragment	10284:10293	10310:10319	0.560	+:+	.:.	## cumulative nmp: 0.282
+X87344:AF100956+AF027865	sim96_LIN	fragment	10313:10320	10359:10366	0.600	+:+	.:.	## cumulative nmp: 0.284
+X87344:AF100956+AF027865	sim96_LIN	fragment	10361:10367	10389:10395	0.620	+:+	.:.	## cumulative nmp: 0.285
+X87344:AF100956+AF027865	sim96_LIN	fragment	10391:10396	10418:10423	0.640	+:+	.:.	## cumulative nmp: 0.286
+X87344:AF100956+AF027865	sim96_LIN	fragment	10430:10424	10505:10499	0.570	+:+	.:.	## cumulative nmp: 0.288
+X87344:AF100956+AF027865	sim96_LIN	fragment	10506:10501	10529:10524	0.710	+:+	.:.	## cumulative nmp: 0.289
+X87344:AF100956+AF027865	sim96_LIN	fragment	10540:10525	10572:10557	0.640	+:+	.:.	## cumulative nmp: 0.290
+X87344:AF100956+AF027865	sim96_LIN	fragment	10580:10558	10613:10591	0.500	+:+	.:.	## cumulative nmp: 0.291
+X87344:AF100956+AF027865	sim96_LIN	fragment	10617:10592	10651:10626	0.600	+:+	.:.	## cumulative nmp: 0.292
+X87344:AF100956+AF027865	sim96_LIN	fragment	10652:10642	10694:10684	0.470	+:+	.:.	## cumulative nmp: 0.293
+X87344:AF100956+AF027865	sim96_LIN	fragment	10701:10685	10717:10701	0.710	+:+	.:.	## cumulative nmp: 0.294
+X87344:AF100956+AF027865	sim96_LIN	fragment	10718:10766	10725:10773	0.630	+:+	.:.	## cumulative nmp: 0.294
+X87344:AF100956+AF027865	sim96_LIN	fragment	10726:10789	10784:10847	0.510	+:+	.:.	## cumulative nmp: 0.295
+X87344:AF100956+AF027865	sim96_LIN	fragment	10785:10871	10830:10916	0.500	+:+	.:.	## cumulative nmp: 0.297
+X87344:AF100956+AF027865	sim96_LIN	fragment	10831:10941	10839:10949	0.560	+:+	.:.	## cumulative nmp: 0.297
+X87344:AF100956+AF027865	sim96_LIN	fragment	10866:10950	10887:10971	0.550	+:+	.:.	## cumulative nmp: 0.298
+X87344:AF100956+AF027865	sim96_LIN	fragment	10889:10972	10912:10995	0.500	+:+	.:.	## cumulative nmp: 0.298
+X87344:AF100956+AF027865	sim96_LIN	fragment	10913:11008	10924:11019	0.670	+:+	.:.	## cumulative nmp: 0.299
+X87344:AF100956+AF027865	sim96_LIN	fragment	10925:11031	10955:11061	0.520	+:+	.:.	## cumulative nmp: 0.299
+X87344:AF100956+AF027865	sim96_LIN	fragment	10956:11095	10979:11118	0.630	+:+	.:.	## cumulative nmp: 0.300
+X87344:AF100956+AF027865	sim96_LIN	fragment	10980:11130	11008:11158	0.480	+:+	.:.	## cumulative nmp: 0.301
+X87344:AF100956+AF027865	sim96_LIN	fragment	11015:11159	11033:11177	0.580	+:+	.:.	## cumulative nmp: 0.302
+X87344:AF100956+AF027865	sim96_LIN	fragment	11034:11196	11062:11224	0.550	+:+	.:.	## cumulative nmp: 0.302
+X87344:AF100956+AF027865	sim96_LIN	fragment	11063:11254	11068:11259	0.670	+:+	.:.	## cumulative nmp: 0.303
+X87344:AF100956+AF027865	sim96_LIN	fragment	11069:11280	11132:11343	0.640	+:+	.:.	## cumulative nmp: 0.305
+X87344:AF100956+AF027865	sim96_LIN	fragment	11142:11344	11169:11371	0.640	+:+	.:.	## cumulative nmp: 0.306
+X87344:AF100956+AF027865	sim96_LIN	fragment	11198:11372	11218:11392	0.760	+:+	.:.	## cumulative nmp: 0.307
+X87344:AF100956+AF027865	sim96_LIN	fragment	11219:11401	11225:11407	0.860	+:+	.:.	## cumulative nmp: 0.307
+X87344:AF100956+AF027865	sim96_LIN	fragment	11230:11408	11239:11417	0.700	+:+	.:.	## cumulative nmp: 0.307
+X87344:AF100956+AF027865	sim96_LIN	fragment	11243:11418	11285:11460	0.580	+:+	.:.	## cumulative nmp: 0.309
+X87344:AF100956+AF027865	sim96_LIN	fragment	11318:11461	11464:11607	0.830	+:+	.:.	## cumulative nmp: 0.315
+X87344:AF100956+AF027865	sim96_LIN	fragment	11467:11608	11506:11647	0.550	+:+	.:.	## cumulative nmp: 0.316
+X87344:AF100956+AF027865	sim96_LIN	fragment	11527:11648	11551:11672	0.520	+:+	.:.	## cumulative nmp: 0.317
+X87344:AF100956+AF027865	sim96_LIN	fragment	11552:11678	11578:11704	0.740	+:+	.:.	## cumulative nmp: 0.318
+X87344:AF100956+AF027865	sim96_LIN	fragment	11579:11709	11603:11733	0.640	+:+	.:.	## cumulative nmp: 0.319
+X87344:AF100956+AF027865	sim96_LIN	fragment	11604:11760	11818:11974	0.790	+:+	.:.	## cumulative nmp: 0.328
+X87344:AF100956+AF027865	sim96_LIN	fragment	12046:11975	12083:12012	0.550	+:+	.:.	## cumulative nmp: 0.329
+X87344:AF100956+AF027865	sim96_LIN	fragment	12174:12013	12195:12034	0.730	+:+	.:.	## cumulative nmp: 0.329
+X87344:AF100956+AF027865	sim96_LIN	fragment	12240:12035	12265:12060	0.650	+:+	.:.	## cumulative nmp: 0.330
+X87344:AF100956+AF027865	sim96_LIN	fragment	12300:12061	12330:12091	0.450	+:+	.:.	## cumulative nmp: 0.331
+X87344:AF100956+AF027865	sim96_LIN	fragment	12331:12099	12563:12331	0.810	+:+	.:.	## cumulative nmp: 0.341
+X87344:AF100956+AF027865	sim96_LIN	fragment	12566:12332	12609:12375	0.570	+:+	.:.	## cumulative nmp: 0.342
+X87344:AF100956+AF027865	sim96_LIN	fragment	12611:12376	12627:12392	0.650	+:+	.:.	## cumulative nmp: 0.343
+X87344:AF100956+AF027865	sim96_LIN	fragment	12629:12393	12664:12428	0.640	+:+	.:.	## cumulative nmp: 0.344
+X87344:AF100956+AF027865	sim96_LIN	fragment	12670:12429	12687:12446	0.610	+:+	.:.	## cumulative nmp: 0.345
+X87344:AF100956+AF027865	sim96_LIN	fragment	12694:12447	12730:12483	0.700	+:+	.:.	## cumulative nmp: 0.346
+X87344:AF100956+AF027865	sim96_LIN	fragment	12733:12484	12743:12494	0.640	+:+	.:.	## cumulative nmp: 0.346
+X87344:AF100956+AF027865	sim96_LIN	fragment	12745:12495	12757:12507	0.850	+:+	.:.	## cumulative nmp: 0.347
+X87344:AF100956+AF027865	sim96_LIN	fragment	12761:12508	12939:12686	0.850	+:+	.:.	## cumulative nmp: 0.355
+X87344:AF100956+AF027865	sim96_LIN	fragment	12943:12687	12951:12695	0.890	+:+	.:.	## cumulative nmp: 0.355
+X87344:AF100956+AF027865	sim96_LIN	fragment	12960:12696	12972:12708	0.690	+:+	.:.	## cumulative nmp: 0.356
+X87344:AF100956+AF027865	sim96_LIN	fragment	12989:12709	13048:12768	0.730	+:+	.:.	## cumulative nmp: 0.358
+X87344:AF100956+AF027865	sim96_LIN	fragment	13049:12775	13079:12805	0.610	+:+	.:.	## cumulative nmp: 0.359
+X87344:AF100956+AF027865	sim96_LIN	fragment	13099:12806	13124:12831	0.580	+:+	.:.	## cumulative nmp: 0.360
+X87344:AF100956+AF027865	sim96_LIN	fragment	13133:12832	13141:12840	0.780	+:+	.:.	## cumulative nmp: 0.360
+X87344:AF100956+AF027865	sim96_LIN	fragment	13142:12851	13164:12873	0.740	+:+	.:.	## cumulative nmp: 0.361
+X87344:AF100956+AF027865	sim96_LIN	fragment	13165:13351	13209:13395	0.710	+:+	.:.	## cumulative nmp: 0.363
+X87344:AF100956+AF027865	sim96_LIN	fragment	13210:13449	13389:13628	0.810	+:+	.:.	## cumulative nmp: 0.370
+X87344:AF100956+AF027865	sim96_LIN	fragment	13390:13770	13424:13804	0.630	+:+	.:.	## cumulative nmp: 0.372
+X87344:AF100956+AF027865	sim96_LIN	fragment	13425:13806	13493:13874	0.710	+:+	.:.	## cumulative nmp: 0.374
+X87344:AF100956+AF027865	sim96_LIN	fragment	13495:13875	13511:13891	0.590	+:+	.:.	## cumulative nmp: 0.375
+X87344:AF100956+AF027865	sim96_LIN	fragment	13512:13968	13532:13988	0.570	+:+	.:.	## cumulative nmp: 0.375
+X87344:AF100956+AF027865	sim96_LIN	fragment	13533:14027	13578:14072	0.520	+:+	.:.	## cumulative nmp: 0.377
+X87344:AF100956+AF027865	sim96_LIN	fragment	13579:14104	13591:14116	0.620	+:+	.:.	## cumulative nmp: 0.377
+X87344:AF100956+AF027865	sim96_LIN	fragment	13592:14121	13616:14145	0.600	+:+	.:.	## cumulative nmp: 0.378
+X87344:AF100956+AF027865	sim96_LIN	fragment	13617:14147	13636:14166	0.800	+:+	.:.	## cumulative nmp: 0.379
+X87344:AF100956+AF027865	sim96_LIN	fragment	13637:14223	13652:14238	0.750	+:+	.:.	## cumulative nmp: 0.379
+X87344:AF100956+AF027865	sim96_LIN	fragment	13653:14255	13661:14263	0.670	+:+	.:.	## cumulative nmp: 0.380
+X87344:AF100956+AF027865	sim96_LIN	fragment	13662:14274	13694:14306	0.550	+:+	.:.	## cumulative nmp: 0.380
+X87344:AF100956+AF027865	sim96_LIN	fragment	13695:14341	13712:14358	0.720	+:+	.:.	## cumulative nmp: 0.381
+X87344:AF100956+AF027865	sim96_LIN	fragment	13718:14359	13724:14365	0.860	+:+	.:.	## cumulative nmp: 0.381
+X87344:AF100956+AF027865	sim96_LIN	fragment	13729:14366	13733:14370	1.000	+:+	.:.	## cumulative nmp: 0.382
+X87344:AF100956+AF027865	sim96_LIN	fragment	13744:14371	13762:14389	0.530	+:+	.:.	## cumulative nmp: 0.382
+X87344:AF100956+AF027865	sim96_LIN	fragment	13774:14390	13788:14404	0.670	+:+	.:.	## cumulative nmp: 0.383
+X87344:AF100956+AF027865	sim96_LIN	fragment	13789:14412	13804:14427	0.630	+:+	.:.	## cumulative nmp: 0.383
+X87344:AF100956+AF027865	sim96_LIN	fragment	13814:14428	13822:14436	0.780	+:+	.:.	## cumulative nmp: 0.384
+X87344:AF100956+AF027865	sim96_LIN	fragment	13823:14467	13831:14475	0.780	+:+	.:.	## cumulative nmp: 0.384
+X87344:AF100956+AF027865	sim96_LIN	fragment	13832:14479	13849:14496	0.610	+:+	.:.	## cumulative nmp: 0.385
+X87344:AF100956+AF027865	sim96_LIN	fragment	13861:14497	13867:14503	0.860	+:+	.:.	## cumulative nmp: 0.385
+X87344:AF100956+AF027865	sim96_LIN	fragment	13869:14504	13938:14573	0.460	+:+	.:.	## cumulative nmp: 0.387
+X87344:AF100956+AF027865	sim96_LIN	fragment	13939:14584	13953:14598	0.670	+:+	.:.	## cumulative nmp: 0.387
+X87344:AF100956+AF027865	sim96_LIN	fragment	13954:14612	14003:14661	0.520	+:+	.:.	## cumulative nmp: 0.389
+X87344:AF100956+AF027865	sim96_LIN	fragment	14007:14662	14050:14705	0.410	+:+	.:.	## cumulative nmp: 0.389
+X87344:AF100956+AF027865	sim96_LIN	fragment	14073:14706	14089:14722	0.650	+:+	.:.	## cumulative nmp: 0.390
+X87344:AF100956+AF027865	sim96_LIN	fragment	14110:14723	14124:14737	0.730	+:+	.:.	## cumulative nmp: 0.391
+X87344:AF100956+AF027865	sim96_LIN	fragment	14125:14750	14148:14773	0.630	+:+	.:.	## cumulative nmp: 0.391
+X87344:AF100956+AF027865	sim96_LIN	fragment	14149:14781	14172:14804	0.500	+:+	.:.	## cumulative nmp: 0.392
+X87344:AF100956+AF027865	sim96_LIN	fragment	14173:14856	14203:14886	0.610	+:+	.:.	## cumulative nmp: 0.393
+X87344:AF100956+AF027865	sim96_LIN	fragment	14225:14887	14264:14926	0.530	+:+	.:.	## cumulative nmp: 0.394
+X87344:AF100956+AF027865	sim96_LIN	fragment	14272:14927	14322:14977	0.410	+:+	.:.	## cumulative nmp: 0.395
+X87344:AF100956+AF027865	sim96_LIN	fragment	14341:14978	14356:14993	0.690	+:+	.:.	## cumulative nmp: 0.396
+X87344:AF100956+AF027865	sim96_LIN	fragment	14367:14994	14397:15024	0.740	+:+	.:.	## cumulative nmp: 0.397
+X87344:AF100956+AF027865	sim96_LIN	fragment	14398:15026	14413:15041	0.690	+:+	.:.	## cumulative nmp: 0.398
+X87344:AF100956+AF027865	sim96_LIN	fragment	14414:15048	14441:15075	0.540	+:+	.:.	## cumulative nmp: 0.398
+X87344:AF100956+AF027865	sim96_LIN	fragment	14468:15076	14488:15096	0.570	+:+	.:.	## cumulative nmp: 0.399
+X87344:AF100956+AF027865	sim96_LIN	fragment	14490:15097	14542:15149	0.530	+:+	.:.	## cumulative nmp: 0.400
+X87344:AF100956+AF027865	sim96_LIN	fragment	14586:15150	14611:15175	0.920	+:+	.:.	## cumulative nmp: 0.402
+X87344:AF100956+AF027865	sim96_LIN	fragment	14632:15176	14870:15414	0.740	+:+	.:.	## cumulative nmp: 0.411
+X87344:AF100956+AF027865	sim96_LIN	fragment	14871:15416	14879:15424	0.780	+:+	.:.	## cumulative nmp: 0.411
+X87344:AF100956+AF027865	sim96_LIN	fragment	14882:15425	14897:15440	0.690	+:+	.:.	## cumulative nmp: 0.412
+X87344:AF100956+AF027865	sim96_LIN	fragment	14898:15446	14909:15457	0.670	+:+	.:.	## cumulative nmp: 0.412
+X87344:AF100956+AF027865	sim96_LIN	fragment	14910:15459	14932:15481	0.780	+:+	.:.	## cumulative nmp: 0.413
+X87344:AF100956+AF027865	sim96_LIN	fragment	14933:15513	14947:15527	0.670	+:+	.:.	## cumulative nmp: 0.414
+X87344:AF100956+AF027865	sim96_LIN	fragment	14948:15529	14964:15545	0.530	+:+	.:.	## cumulative nmp: 0.414
+X87344:AF100956+AF027865	sim96_LIN	fragment	14965:15562	14997:15594	0.730	+:+	.:.	## cumulative nmp: 0.416
+X87344:AF100956+AF027865	sim96_LIN	fragment	15004:15595	15038:15629	0.490	+:+	.:.	## cumulative nmp: 0.416
+X87344:AF100956+AF027865	sim96_LIN	fragment	15039:15635	15060:15656	0.640	+:+	.:.	## cumulative nmp: 0.417
+X87344:AF100956+AF027865	sim96_LIN	fragment	15063:15657	15078:15672	0.380	+:+	.:.	## cumulative nmp: 0.417
+X87344:AF100956+AF027865	sim96_LIN	fragment	15083:15673	15122:15712	0.530	+:+	.:.	## cumulative nmp: 0.419
+X87344:AF100956+AF027865	sim96_LIN	fragment	15123:15742	15149:15768	0.700	+:+	.:.	## cumulative nmp: 0.420
+X87344:AF100956+AF027865	sim96_LIN	fragment	15150:15771	15166:15787	0.590	+:+	.:.	## cumulative nmp: 0.420
+X87344:AF100956+AF027865	sim96_LIN	fragment	15168:15788	15261:15881	0.730	+:+	.:.	## cumulative nmp: 0.424
+X87344:AF100956+AF027865	sim96_LIN	fragment	15262:15883	15278:15899	0.590	+:+	.:.	## cumulative nmp: 0.424
+X87344:AF100956+AF027865	sim96_LIN	fragment	15279:15901	15337:15959	0.460	+:+	.:.	## cumulative nmp: 0.426
+X87344:AF100956+AF027865	sim96_LIN	fragment	15338:15961	15363:15986	0.650	+:+	.:.	## cumulative nmp: 0.427
+X87344:AF100956+AF027865	sim96_LIN	fragment	15378:15987	15418:16027	0.540	+:+	.:.	## cumulative nmp: 0.428
+X87344:AF100956+AF027865	sim96_LIN	fragment	15422:16028	15443:16049	0.590	+:+	.:.	## cumulative nmp: 0.428
+X87344:AF100956+AF027865	sim96_LIN	fragment	15444:16061	15493:16110	0.560	+:+	.:.	## cumulative nmp: 0.430
+X87344:AF100956+AF027865	sim96_LIN	fragment	15494:16115	15526:16147	0.610	+:+	.:.	## cumulative nmp: 0.431
+X87344:AF100956+AF027865	sim96_LIN	fragment	15537:16148	15558:16169	0.550	+:+	.:.	## cumulative nmp: 0.432
+X87344:AF100956+AF027865	sim96_LIN	fragment	15569:16170	15611:16212	0.530	+:+	.:.	## cumulative nmp: 0.433
+X87344:AF100956+AF027865	sim96_LIN	fragment	15613:16213	15696:16296	0.680	+:+	.:.	## cumulative nmp: 0.436
+X87344:AF100956+AF027865	sim96_LIN	fragment	15698:16297	15745:16344	0.790	+:+	.:.	## cumulative nmp: 0.438
+X87344:AF100956+AF027865	sim96_LIN	fragment	15746:16346	15764:16364	0.790	+:+	.:.	## cumulative nmp: 0.438
+X87344:AF100956+AF027865	sim96_LIN	fragment	15768:16365	15820:16417	0.550	+:+	.:.	## cumulative nmp: 0.440
+X87344:AF100956+AF027865	sim96_LIN	fragment	15824:16418	15893:16487	0.760	+:+	.:.	## cumulative nmp: 0.443
+X87344:AF100956+AF027865	sim96_LIN	fragment	15895:16488	15905:16498	0.640	+:+	.:.	## cumulative nmp: 0.443
+X87344:AF100956+AF027865	sim96_LIN	fragment	15909:16499	15941:16531	0.700	+:+	.:.	## cumulative nmp: 0.444
+X87344:AF100956+AF027865	sim96_LIN	fragment	15958:16532	15983:16557	0.690	+:+	.:.	## cumulative nmp: 0.445
+X87344:AF100956+AF027865	sim96_LIN	fragment	15989:16558	15995:16564	0.860	+:+	.:.	## cumulative nmp: 0.446
+X87344:AF100956+AF027865	sim96_LIN	fragment	15996:16568	16002:16574	0.710	+:+	.:.	## cumulative nmp: 0.446
+X87344:AF100956+AF027865	sim96_LIN	fragment	16003:16580	16010:16587	0.880	+:+	.:.	## cumulative nmp: 0.446
+X87344:AF100956+AF027865	sim96_LIN	fragment	16018:16588	16044:16614	0.780	+:+	.:.	## cumulative nmp: 0.447
+X87344:AF100956+AF027865	sim96_LIN	fragment	16045:16624	16061:16640	0.650	+:+	.:.	## cumulative nmp: 0.448
+X87344:AF100956+AF027865	sim96_LIN	fragment	16062:16655	16087:16680	0.540	+:+	.:.	## cumulative nmp: 0.449
+X87344:AF100956+AF027865	sim96_LIN	fragment	16089:16681	16102:16694	0.640	+:+	.:.	## cumulative nmp: 0.449
+X87344:AF100956+AF027865	sim96_LIN	fragment	16108:16695	16138:16725	0.650	+:+	.:.	## cumulative nmp: 0.450
+X87344:AF100956+AF027865	sim96_LIN	fragment	16139:16731	16168:16760	0.700	+:+	.:.	## cumulative nmp: 0.451
+X87344:AF100956+AF027865	sim96_LIN	fragment	16174:16761	16185:16772	0.580	+:+	.:.	## cumulative nmp: 0.452
+X87344:AF100956+AF027865	sim96_LIN	fragment	16186:16784	16219:16817	0.620	+:+	.:.	## cumulative nmp: 0.453
+X87344:AF100956+AF027865	sim96_LIN	fragment	16234:16818	16305:16889	0.490	+:+	.:.	## cumulative nmp: 0.455
+X87344:AF100956+AF027865	sim96_LIN	fragment	16307:16890	16325:16908	0.680	+:+	.:.	## cumulative nmp: 0.455
+X87344:AF100956+AF027865	sim96_LIN	fragment	16326:16913	16355:16942	0.830	+:+	.:.	## cumulative nmp: 0.457
+X87344:AF100956+AF027865	sim96_LIN	fragment	16357:16943	16435:17021	0.770	+:+	.:.	## cumulative nmp: 0.460
+X87344:AF100956+AF027865	sim96_LIN	fragment	16437:17022	16633:17218	0.780	+:+	.:.	## cumulative nmp: 0.468
+X87344:AF100956+AF027865	sim96_LIN	fragment	16635:17219	16646:17230	0.750	+:+	.:.	## cumulative nmp: 0.468
+X87344:AF100956+AF027865	sim96_LIN	fragment	16647:17248	16691:17292	0.580	+:+	.:.	## cumulative nmp: 0.470
+X87344:AF100956+AF027865	sim96_LIN	fragment	16692:17300	16718:17326	0.670	+:+	.:.	## cumulative nmp: 0.471
+X87344:AF100956+AF027865	sim96_LIN	fragment	16734:17327	16752:17345	0.630	+:+	.:.	## cumulative nmp: 0.471
+X87344:AF100956+AF027865	sim96_LIN	fragment	16753:17349	16765:17361	0.770	+:+	.:.	## cumulative nmp: 0.472
+X87344:AF100956+AF027865	sim96_LIN	fragment	16769:17362	16789:17382	0.520	+:+	.:.	## cumulative nmp: 0.472
+X87344:AF100956+AF027865	sim96_LIN	fragment	16790:17388	16831:17429	0.550	+:+	.:.	## cumulative nmp: 0.474
+X87344:AF100956+AF027865	sim96_LIN	fragment	16836:17430	16863:17457	0.610	+:+	.:.	## cumulative nmp: 0.474
+X87344:AF100956+AF027865	sim96_LIN	fragment	16868:17458	16895:17485	0.430	+:+	.:.	## cumulative nmp: 0.475
+X87344:AF100956+AF027865	sim96_LIN	fragment	16896:17498	16915:17517	0.600	+:+	.:.	## cumulative nmp: 0.476
+X87344:AF100956+AF027865	sim96_LIN	fragment	16916:17519	16944:17547	0.790	+:+	.:.	## cumulative nmp: 0.477
+X87344:AF100956+AF027865	sim96_LIN	fragment	16945:17549	16969:17573	0.680	+:+	.:.	## cumulative nmp: 0.478
+X87344:AF100956+AF027865	sim96_LIN	fragment	16971:17574	17033:17636	0.680	+:+	.:.	## cumulative nmp: 0.480
+X87344:AF100956+AF027865	sim96_LIN	fragment	17035:17637	17097:17699	0.510	+:+	.:.	## cumulative nmp: 0.482
+X87344:AF100956+AF027865	sim96_LIN	fragment	17119:17700	17134:17715	0.690	+:+	.:.	## cumulative nmp: 0.482
+X87344:AF100956+AF027865	sim96_LIN	fragment	17141:17716	17163:17738	0.650	+:+	.:.	## cumulative nmp: 0.483
+X87344:AF100956+AF027865	sim96_LIN	fragment	17172:17739	17182:17749	0.640	+:+	.:.	## cumulative nmp: 0.483
+X87344:AF100956+AF027865	sim96_LIN	fragment	17183:17755	17218:17790	0.720	+:+	.:.	## cumulative nmp: 0.485
+X87344:AF100956+AF027865	sim96_LIN	fragment	17260:17791	17288:17819	0.620	+:+	.:.	## cumulative nmp: 0.486
+X87344:AF100956+AF027865	sim96_LIN	fragment	17298:17820	17327:17849	0.630	+:+	.:.	## cumulative nmp: 0.487
+X87344:AF100956+AF027865	sim96_LIN	fragment	17337:17850	17354:17867	0.670	+:+	.:.	## cumulative nmp: 0.487
+X87344:AF100956+AF027865	sim96_LIN	fragment	17356:17868	17530:18042	0.770	+:+	.:.	## cumulative nmp: 0.494
+X87344:AF100956+AF027865	sim96_LIN	fragment	17531:18054	17537:18060	0.710	+:+	.:.	## cumulative nmp: 0.495
+X87344:AF100956+AF027865	sim96_LIN	fragment	17539:18061	17570:18092	0.660	+:+	.:.	## cumulative nmp: 0.496
+X87344:AF100956+AF027865	sim96_LIN	fragment	17576:18093	17615:18132	0.550	+:+	.:.	## cumulative nmp: 0.497
+X87344:AF100956+AF027865	sim96_LIN	fragment	17616:18167	17652:18203	0.730	+:+	.:.	## cumulative nmp: 0.498
+X87344:AF100956+AF027865	sim96_LIN	fragment	17660:18204	17840:18384	0.760	+:+	.:.	## cumulative nmp: 0.506
+X87344:AF100956+AF027865	sim96_LIN	fragment	17847:18385	17885:18423	0.540	+:+	.:.	## cumulative nmp: 0.507
+X87344:AF100956+AF027865	sim96_LIN	fragment	17886:18454	17948:18516	0.590	+:+	.:.	## cumulative nmp: 0.509
+X87344:AF100956+AF027865	sim96_LIN	fragment	17949:18518	17983:18552	0.660	+:+	.:.	## cumulative nmp: 0.510
+X87344:AF100956+AF027865	sim96_LIN	fragment	18000:18553	18081:18634	0.650	+:+	.:.	## cumulative nmp: 0.513
+X87344:AF100956+AF027865	sim96_LIN	fragment	18082:18640	18118:18676	0.680	+:+	.:.	## cumulative nmp: 0.514
+X87344:AF100956+AF027865	sim96_LIN	fragment	18123:18677	18138:18692	0.690	+:+	.:.	## cumulative nmp: 0.514
+X87344:AF100956+AF027865	sim96_LIN	fragment	18139:18696	18150:18707	0.580	+:+	.:.	## cumulative nmp: 0.515
+X87344:AF100956+AF027865	sim96_LIN	fragment	18151:18738	18163:18750	0.850	+:+	.:.	## cumulative nmp: 0.515
+X87344:AF100956+AF027865	sim96_LIN	fragment	18165:18751	18177:18763	0.690	+:+	.:.	## cumulative nmp: 0.516
+X87344:AF100956+AF027865	sim96_LIN	fragment	18178:18766	18348:18936	0.800	+:+	.:.	## cumulative nmp: 0.523
+X87344:AF100956+AF027865	sim96_LIN	fragment	18354:18937	18358:18941	0.800	+:+	.:.	## cumulative nmp: 0.523
+X87344:AF100956+AF027865	sim96_LIN	fragment	18368:18942	18392:18966	0.600	+:+	.:.	## cumulative nmp: 0.524
+X87344:AF100956+AF027865	sim96_LIN	fragment	18396:18967	18420:18991	0.520	+:+	.:.	## cumulative nmp: 0.525
+X87344:AF100956+AF027865	sim96_LIN	fragment	18421:19002	18456:19037	0.530	+:+	.:.	## cumulative nmp: 0.526
+X87344:AF100956+AF027865	sim96_LIN	fragment	18465:19038	18471:19044	1.000	+:+	.:.	## cumulative nmp: 0.526
+X87344:AF100956+AF027865	sim96_LIN	fragment	18494:19045	18506:19057	0.690	+:+	.:.	## cumulative nmp: 0.527
+X87344:AF100956+AF027865	sim96_LIN	fragment	18507:19064	18511:19068	1.000	+:+	.:.	## cumulative nmp: 0.527
+X87344:AF100956+AF027865	sim96_LIN	fragment	18512:19126	18524:19138	0.690	+:+	.:.	## cumulative nmp: 0.527
+X87344:AF100956+AF027865	sim96_LIN	fragment	18525:19145	18539:19159	0.730	+:+	.:.	## cumulative nmp: 0.528
+X87344:AF100956+AF027865	sim96_LIN	fragment	18540:19182	18573:19215	0.470	+:+	.:.	## cumulative nmp: 0.529
+X87344:AF100956+AF027865	sim96_LIN	fragment	18581:19216	18623:19258	0.600	+:+	.:.	## cumulative nmp: 0.530
+X87344:AF100956+AF027865	sim96_LIN	fragment	18625:19259	18673:19307	0.510	+:+	.:.	## cumulative nmp: 0.531
+X87344:AF100956+AF027865	sim96_LIN	fragment	18681:19308	18703:19330	0.610	+:+	.:.	## cumulative nmp: 0.532
+X87344:AF100956+AF027865	sim96_LIN	fragment	18704:19334	18944:19574	0.850	+:+	.:.	## cumulative nmp: 0.543
+X87344:AF100956+AF027865	sim96_LIN	fragment	19009:19575	19027:19593	0.680	+:+	.:.	## cumulative nmp: 0.543
+X87344:AF100956+AF027865	sim96_LIN	fragment	19076:19594	19081:19599	1.000	+:+	.:.	## cumulative nmp: 0.544
+X87344:AF100956+AF027865	sim96_LIN	fragment	19083:19600	19104:19621	0.640	+:+	.:.	## cumulative nmp: 0.545
+X87344:AF100956+AF027865	sim96_LIN	fragment	19124:19622	19133:19631	0.800	+:+	.:.	## cumulative nmp: 0.545
+X87344:AF100956+AF027865	sim96_LIN	fragment	19213:19632	19225:19644	0.850	+:+	.:.	## cumulative nmp: 0.546
+X87344:AF100956+AF027865	sim96_LIN	fragment	19230:19645	19242:19657	0.770	+:+	.:.	## cumulative nmp: 0.546
+X87344:AF100956+AF027865	sim96_LIN	fragment	19248:19658	19267:19677	0.600	+:+	.:.	## cumulative nmp: 0.547
+X87344:AF100956+AF027865	sim96_LIN	fragment	19274:19678	19290:19694	0.710	+:+	.:.	## cumulative nmp: 0.547
+X87344:AF100956+AF027865	sim96_LIN	fragment	19292:19695	19321:19724	0.570	+:+	.:.	## cumulative nmp: 0.548
+X87344:AF100956+AF027865	sim96_LIN	fragment	19322:19732	19342:19752	0.570	+:+	.:.	## cumulative nmp: 0.549
+X87344:AF100956+AF027865	sim96_LIN	fragment	19344:19753	19485:19894	0.800	+:+	.:.	## cumulative nmp: 0.555
+X87344:AF100956+AF027865	sim96_LIN	fragment	19495:19895	19521:19921	0.810	+:+	.:.	## cumulative nmp: 0.556
+X87344:AF100956+AF027865	sim96_LIN	fragment	19522:19931	19603:20012	0.620	+:+	.:.	## cumulative nmp: 0.559
+X87344:AF100956+AF027865	sim96_LIN	fragment	19645:20013	19672:20040	0.540	+:+	.:.	## cumulative nmp: 0.559
+X87344:AF100956+AF027865	sim96_LIN	fragment	19689:20041	19714:20066	0.650	+:+	.:.	## cumulative nmp: 0.560
+X87344:AF100956+AF027865	sim96_LIN	fragment	19715:20068	19762:20115	0.850	+:+	.:.	## cumulative nmp: 0.562
+X87344:AF100956+AF027865	sim96_LIN	alignment	27619:30496	31875:34952	5902.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	27619:30496	27833:30710	0.800	+:+	.:.	## cumulative nmp: 0.039
+X87344:AF100956+AF027865	sim96_LIN	fragment	27834:30717	27843:30726	0.700	+:+	.:.	## cumulative nmp: 0.041
+X87344:AF100956+AF027865	sim96_LIN	fragment	27844:30735	27874:30765	0.650	+:+	.:.	## cumulative nmp: 0.046
+X87344:AF100956+AF027865	sim96_LIN	fragment	27875:30781	27884:30790	0.800	+:+	.:.	## cumulative nmp: 0.048
+X87344:AF100956+AF027865	sim96_LIN	fragment	27885:30795	27919:30829	0.570	+:+	.:.	## cumulative nmp: 0.052
+X87344:AF100956+AF027865	sim96_LIN	fragment	27944:30830	27952:30838	0.780	+:+	.:.	## cumulative nmp: 0.054
+X87344:AF100956+AF027865	sim96_LIN	fragment	27959:30839	27976:30856	0.670	+:+	.:.	## cumulative nmp: 0.057
+X87344:AF100956+AF027865	sim96_LIN	fragment	27983:30857	28127:31001	0.750	+:+	.:.	## cumulative nmp: 0.081
+X87344:AF100956+AF027865	sim96_LIN	fragment	28137:31002	28152:31017	0.560	+:+	.:.	## cumulative nmp: 0.084
+X87344:AF100956+AF027865	sim96_LIN	fragment	28154:31018	28188:31052	0.710	+:+	.:.	## cumulative nmp: 0.089
+X87344:AF100956+AF027865	sim96_LIN	fragment	28236:31053	28278:31095	0.700	+:+	.:.	## cumulative nmp: 0.096
+X87344:AF100956+AF027865	sim96_LIN	fragment	28283:31096	28330:31143	0.600	+:+	.:.	## cumulative nmp: 0.103
+X87344:AF100956+AF027865	sim96_LIN	fragment	28331:31207	28368:31244	0.550	+:+	.:.	## cumulative nmp: 0.108
+X87344:AF100956+AF027865	sim96_LIN	fragment	28369:31278	28384:31293	0.750	+:+	.:.	## cumulative nmp: 0.110
+X87344:AF100956+AF027865	sim96_LIN	fragment	28385:31396	28415:31426	0.740	+:+	.:.	## cumulative nmp: 0.116
+X87344:AF100956+AF027865	sim96_LIN	fragment	28419:31427	28464:31472	0.670	+:+	.:.	## cumulative nmp: 0.123
+X87344:AF100956+AF027865	sim96_LIN	fragment	28468:31473	28526:31531	0.560	+:+	.:.	## cumulative nmp: 0.130
+X87344:AF100956+AF027865	sim96_LIN	fragment	28529:31532	28555:31558	0.560	+:+	.:.	## cumulative nmp: 0.134
+X87344:AF100956+AF027865	sim96_LIN	fragment	28625:31559	28648:31582	0.710	+:+	.:.	## cumulative nmp: 0.138
+X87344:AF100956+AF027865	sim96_LIN	fragment	28651:31583	28673:31605	0.650	+:+	.:.	## cumulative nmp: 0.141
+X87344:AF100956+AF027865	sim96_LIN	fragment	28723:31606	28738:31621	0.690	+:+	.:.	## cumulative nmp: 0.144
+X87344:AF100956+AF027865	sim96_LIN	fragment	28739:31624	28743:31628	1.000	+:+	.:.	## cumulative nmp: 0.145
+X87344:AF100956+AF027865	sim96_LIN	fragment	28750:31629	28769:31648	0.800	+:+	.:.	## cumulative nmp: 0.148
+X87344:AF100956+AF027865	sim96_LIN	fragment	28770:31650	28810:31690	0.680	+:+	.:.	## cumulative nmp: 0.155
+X87344:AF100956+AF027865	sim96_LIN	fragment	28811:31693	28831:31713	0.620	+:+	.:.	## cumulative nmp: 0.158
+X87344:AF100956+AF027865	sim96_LIN	fragment	28832:31730	28846:31744	0.800	+:+	.:.	## cumulative nmp: 0.161
+X87344:AF100956+AF027865	sim96_LIN	fragment	28851:31745	28883:31777	0.700	+:+	.:.	## cumulative nmp: 0.166
+X87344:AF100956+AF027865	sim96_LIN	fragment	28885:31778	28903:31796	0.530	+:+	.:.	## cumulative nmp: 0.168
+X87344:AF100956+AF027865	sim96_LIN	fragment	28927:31797	28995:31865	0.590	+:+	.:.	## cumulative nmp: 0.177
+X87344:AF100956+AF027865	sim96_LIN	fragment	28996:31868	29091:31963	0.530	+:+	.:.	## cumulative nmp: 0.189
+X87344:AF100956+AF027865	sim96_LIN	fragment	29094:31964	29154:32024	0.670	+:+	.:.	## cumulative nmp: 0.199
+X87344:AF100956+AF027865	sim96_LIN	fragment	29164:32025	29169:32030	0.830	+:+	.:.	## cumulative nmp: 0.200
+X87344:AF100956+AF027865	sim96_LIN	fragment	29170:32033	29181:32044	0.750	+:+	.:.	## cumulative nmp: 0.202
+X87344:AF100956+AF027865	sim96_LIN	fragment	29183:32045	29229:32091	0.550	+:+	.:.	## cumulative nmp: 0.208
+X87344:AF100956+AF027865	sim96_LIN	fragment	29231:32092	29326:32187	0.660	+:+	.:.	## cumulative nmp: 0.222
+X87344:AF100956+AF027865	sim96_LIN	fragment	29327:32189	29344:32206	0.670	+:+	.:.	## cumulative nmp: 0.225
+X87344:AF100956+AF027865	sim96_LIN	fragment	29363:32207	29394:32238	0.530	+:+	.:.	## cumulative nmp: 0.229
+X87344:AF100956+AF027865	sim96_LIN	fragment	29398:32239	29412:32253	0.670	+:+	.:.	## cumulative nmp: 0.231
+X87344:AF100956+AF027865	sim96_LIN	fragment	29414:32254	29432:32272	0.580	+:+	.:.	## cumulative nmp: 0.234
+X87344:AF100956+AF027865	sim96_LIN	fragment	29445:32273	29505:32333	0.690	+:+	.:.	## cumulative nmp: 0.243
+X87344:AF100956+AF027865	sim96_LIN	fragment	29506:32523	29535:32552	0.600	+:+	.:.	## cumulative nmp: 0.248
+X87344:AF100956+AF027865	sim96_LIN	fragment	29536:32555	29555:32574	0.700	+:+	.:.	## cumulative nmp: 0.251
+X87344:AF100956+AF027865	sim96_LIN	fragment	29556:32589	29577:32610	0.770	+:+	.:.	## cumulative nmp: 0.255
+X87344:AF100956+AF027865	sim96_LIN	fragment	29588:32611	29607:32630	0.600	+:+	.:.	## cumulative nmp: 0.257
+X87344:AF100956+AF027865	sim96_LIN	fragment	29627:32631	29846:32850	0.800	+:+	.:.	## cumulative nmp: 0.298
+X87344:AF100956+AF027865	sim96_LIN	fragment	29847:32855	29854:32862	0.630	+:+	.:.	## cumulative nmp: 0.299
+X87344:AF100956+AF027865	sim96_LIN	fragment	29857:32863	29883:32889	0.740	+:+	.:.	## cumulative nmp: 0.304
+X87344:AF100956+AF027865	sim96_LIN	fragment	29888:32890	29915:32917	0.610	+:+	.:.	## cumulative nmp: 0.307
+X87344:AF100956+AF027865	sim96_LIN	fragment	29917:32918	29942:32943	0.650	+:+	.:.	## cumulative nmp: 0.311
+X87344:AF100956+AF027865	sim96_LIN	fragment	29998:32944	30223:33169	0.800	+:+	.:.	## cumulative nmp: 0.353
+X87344:AF100956+AF027865	sim96_LIN	fragment	30224:33173	30295:33244	0.530	+:+	.:.	## cumulative nmp: 0.362
+X87344:AF100956+AF027865	sim96_LIN	fragment	30297:33245	30300:33248	0.750	+:+	.:.	## cumulative nmp: 0.362
+X87344:AF100956+AF027865	sim96_LIN	fragment	30331:33249	30528:33446	0.770	+:+	.:.	## cumulative nmp: 0.397
+X87344:AF100956+AF027865	sim96_LIN	fragment	30529:33450	30554:33475	0.420	+:+	.:.	## cumulative nmp: 0.400
+X87344:AF100956+AF027865	sim96_LIN	fragment	30562:33476	30575:33489	0.790	+:+	.:.	## cumulative nmp: 0.402
+X87344:AF100956+AF027865	sim96_LIN	fragment	30583:33490	30603:33510	0.570	+:+	.:.	## cumulative nmp: 0.405
+X87344:AF100956+AF027865	sim96_LIN	fragment	30604:33553	30624:33573	0.570	+:+	.:.	## cumulative nmp: 0.408
+X87344:AF100956+AF027865	sim96_LIN	fragment	30625:33628	30634:33637	0.900	+:+	.:.	## cumulative nmp: 0.410
+X87344:AF100956+AF027865	sim96_LIN	fragment	30644:33638	30666:33660	0.650	+:+	.:.	## cumulative nmp: 0.413
+X87344:AF100956+AF027865	sim96_LIN	fragment	30667:33662	30694:33689	0.540	+:+	.:.	## cumulative nmp: 0.417
+X87344:AF100956+AF027865	sim96_LIN	fragment	30695:33753	30734:33792	0.550	+:+	.:.	## cumulative nmp: 0.422
+X87344:AF100956+AF027865	sim96_LIN	fragment	30735:33818	30750:33833	0.690	+:+	.:.	## cumulative nmp: 0.424
+X87344:AF100956+AF027865	sim96_LIN	fragment	30772:33834	30781:33843	0.800	+:+	.:.	## cumulative nmp: 0.426
+X87344:AF100956+AF027865	sim96_LIN	fragment	30801:33844	30846:33889	0.540	+:+	.:.	## cumulative nmp: 0.432
+X87344:AF100956+AF027865	sim96_LIN	fragment	30847:33893	30858:33904	0.670	+:+	.:.	## cumulative nmp: 0.434
+X87344:AF100956+AF027865	sim96_LIN	fragment	30859:33912	30871:33924	0.770	+:+	.:.	## cumulative nmp: 0.436
+X87344:AF100956+AF027865	sim96_LIN	fragment	30873:33925	30898:33950	0.730	+:+	.:.	## cumulative nmp: 0.440
+X87344:AF100956+AF027865	sim96_LIN	fragment	30899:33952	31060:34113	0.850	+:+	.:.	## cumulative nmp: 0.472
+X87344:AF100956+AF027865	sim96_LIN	fragment	31061:34117	31086:34142	0.770	+:+	.:.	## cumulative nmp: 0.477
+X87344:AF100956+AF027865	sim96_LIN	fragment	31089:34143	31129:34183	0.590	+:+	.:.	## cumulative nmp: 0.482
+X87344:AF100956+AF027865	sim96_LIN	fragment	31132:34184	31158:34210	0.520	+:+	.:.	## cumulative nmp: 0.485
+X87344:AF100956+AF027865	sim96_LIN	fragment	31159:34273	31172:34286	0.860	+:+	.:.	## cumulative nmp: 0.488
+X87344:AF100956+AF027865	sim96_LIN	fragment	31173:34334	31191:34352	0.630	+:+	.:.	## cumulative nmp: 0.491
+X87344:AF100956+AF027865	sim96_LIN	fragment	31192:34354	31209:34371	0.610	+:+	.:.	## cumulative nmp: 0.493
+X87344:AF100956+AF027865	sim96_LIN	fragment	31222:34372	31239:34389	0.720	+:+	.:.	## cumulative nmp: 0.496
+X87344:AF100956+AF027865	sim96_LIN	fragment	31242:34390	31263:34411	0.590	+:+	.:.	## cumulative nmp: 0.499
+X87344:AF100956+AF027865	sim96_LIN	fragment	31265:34412	31278:34425	0.790	+:+	.:.	## cumulative nmp: 0.502
+X87344:AF100956+AF027865	sim96_LIN	fragment	31284:34426	31313:34455	0.530	+:+	.:.	## cumulative nmp: 0.506
+X87344:AF100956+AF027865	sim96_LIN	fragment	31314:34457	31347:34490	0.650	+:+	.:.	## cumulative nmp: 0.511
+X87344:AF100956+AF027865	sim96_LIN	fragment	31351:34491	31362:34502	0.670	+:+	.:.	## cumulative nmp: 0.512
+X87344:AF100956+AF027865	sim96_LIN	fragment	31367:34503	31385:34521	0.630	+:+	.:.	## cumulative nmp: 0.515
+X87344:AF100956+AF027865	sim96_LIN	fragment	31391:34522	31604:34735	0.710	+:+	.:.	## cumulative nmp: 0.550
+X87344:AF100956+AF027865	sim96_LIN	fragment	31608:34736	31641:34769	0.620	+:+	.:.	## cumulative nmp: 0.555
+X87344:AF100956+AF027865	sim96_LIN	fragment	31661:34770	31687:34796	0.480	+:+	.:.	## cumulative nmp: 0.558
+X87344:AF100956+AF027865	sim96_LIN	fragment	31700:34797	31720:34817	0.620	+:+	.:.	## cumulative nmp: 0.561
+X87344:AF100956+AF027865	sim96_LIN	fragment	31721:34828	31733:34840	0.850	+:+	.:.	## cumulative nmp: 0.563
+X87344:AF100956+AF027865	sim96_LIN	fragment	31735:34841	31816:34922	0.610	+:+	.:.	## cumulative nmp: 0.575
+X87344:AF100956+AF027865	sim96_LIN	fragment	31846:34923	31875:34952	0.800	+:+	.:.	## cumulative nmp: 0.580
+X87344:AF100956+AF027865	sim96_LIN	alignment	22145:23856	22915:24619	3906.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	22145:23856	22622:24333	0.740	+:+	.:.	## cumulative nmp: 0.461
+X87344:AF100956+AF027865	sim96_LIN	fragment	22626:24334	22716:24424	0.820	+:+	.:.	## cumulative nmp: 0.558
+X87344:AF100956+AF027865	sim96_LIN	fragment	22718:24425	22757:24464	0.750	+:+	.:.	## cumulative nmp: 0.598
+X87344:AF100956+AF027865	sim96_LIN	fragment	22761:24465	22915:24619	0.830	+:+	.:.	## cumulative nmp: 0.765
+X87344:AF100956+AF027865	sim96_LIN	alignment	24432:27215	25351:27993	2260.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	24432:27215	24469:27252	0.760	+:+	.:.	## cumulative nmp: 0.034
+X87344:AF100956+AF027865	sim96_LIN	fragment	24471:27253	24487:27269	0.710	+:+	.:.	## cumulative nmp: 0.048
+X87344:AF100956+AF027865	sim96_LIN	fragment	24538:27270	24576:27308	0.670	+:+	.:.	## cumulative nmp: 0.079
+X87344:AF100956+AF027865	sim96_LIN	fragment	24588:27309	24596:27317	0.890	+:+	.:.	## cumulative nmp: 0.088
+X87344:AF100956+AF027865	sim96_LIN	fragment	24610:27318	24622:27330	0.770	+:+	.:.	## cumulative nmp: 0.100
+X87344:AF100956+AF027865	sim96_LIN	fragment	24629:27331	24652:27354	0.710	+:+	.:.	## cumulative nmp: 0.120
+X87344:AF100956+AF027865	sim96_LIN	fragment	24653:27363	24812:27522	0.780	+:+	.:.	## cumulative nmp: 0.267
+X87344:AF100956+AF027865	sim96_LIN	fragment	24814:27523	24834:27543	0.670	+:+	.:.	## cumulative nmp: 0.284
+X87344:AF100956+AF027865	sim96_LIN	fragment	24848:27544	24866:27562	0.530	+:+	.:.	## cumulative nmp: 0.296
+X87344:AF100956+AF027865	sim96_LIN	fragment	24872:27563	24877:27568	0.830	+:+	.:.	## cumulative nmp: 0.302
+X87344:AF100956+AF027865	sim96_LIN	fragment	24878:27573	24907:27602	0.600	+:+	.:.	## cumulative nmp: 0.323
+X87344:AF100956+AF027865	sim96_LIN	fragment	24921:27603	24930:27612	0.900	+:+	.:.	## cumulative nmp: 0.333
+X87344:AF100956+AF027865	sim96_LIN	fragment	24935:27613	24955:27633	0.670	+:+	.:.	## cumulative nmp: 0.350
+X87344:AF100956+AF027865	sim96_LIN	fragment	24960:27634	24973:27647	0.710	+:+	.:.	## cumulative nmp: 0.362
+X87344:AF100956+AF027865	sim96_LIN	fragment	24978:27648	24984:27654	0.710	+:+	.:.	## cumulative nmp: 0.368
+X87344:AF100956+AF027865	sim96_LIN	fragment	24997:27655	25015:27673	0.740	+:+	.:.	## cumulative nmp: 0.384
+X87344:AF100956+AF027865	sim96_LIN	fragment	25017:27674	25046:27703	0.630	+:+	.:.	## cumulative nmp: 0.406
+X87344:AF100956+AF027865	sim96_LIN	fragment	25059:27704	25064:27709	1.000	+:+	.:.	## cumulative nmp: 0.413
+X87344:AF100956+AF027865	sim96_LIN	fragment	25078:27710	25320:27952	0.810	+:+	.:.	## cumulative nmp: 0.645
+X87344:AF100956+AF027865	sim96_LIN	fragment	25321:27963	25351:27993	0.650	+:+	.:.	## cumulative nmp: 0.669
+X87344:AF100956+AF027865	sim96_LIN	alignment	12353:32952	12532:33131	1240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	12353:32952	12532:33131	0.840	+:+	.:.	## cumulative nmp: 0.840
+X87344:AF100956+AF027865	sim96_LIN	alignment	30005:12120	30235:12346	1222.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	30005:12120	30186:12301	0.820	+:+	.:.	## cumulative nmp: 0.652
+X87344:AF100956+AF027865	sim96_LIN	fragment	30191:12302	30235:12346	0.620	+:+	.:.	## cumulative nmp: 0.774
+X87344:AF100956+AF027865	sim96_LIN	alignment	30899:13469	31033:13603	470.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	30899:13469	31033:13603	0.670	+:+	.:.	## cumulative nmp: 0.670
+X87344:AF100956+AF027865	sim96_LIN	alignment	14205:14020	14298:14108	400.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	14205:14020	14256:14071	0.790	+:+	.:.	## cumulative nmp: 0.451
+X87344:AF100956+AF027865	sim96_LIN	fragment	14262:14072	14298:14108	0.730	+:+	.:.	## cumulative nmp: 0.748
+X87344:AF100956+AF027865	sim96_LIN	alignment	13219:33934	13365:34087	396.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13219:33934	13241:33956	0.700	+:+	.:.	## cumulative nmp: 0.107
+X87344:AF100956+AF027865	sim96_LIN	fragment	13242:33964	13365:34087	0.650	+:+	.:.	## cumulative nmp: 0.645
+X87344:AF100956+AF027865	sim96_LIN	alignment	1546:26929	1621:27004	360.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1546:26929	1621:27004	0.740	+:+	.:.	## cumulative nmp: 0.740
+X87344:AF100956+AF027865	sim96_LIN	alignment	27251:29881	27317:29947	350.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	27251:29881	27317:29947	0.760	+:+	.:.	## cumulative nmp: 0.760
+X87344:AF100956+AF027865	sim96_LIN	alignment	27162:29632	27213:29683	340.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	27162:29632	27213:29683	0.830	+:+	.:.	## cumulative nmp: 0.830
+X87344:AF100956+AF027865	sim96_LIN	alignment	29680:11801	29834:11955	336.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	29680:11801	29717:11838	0.710	+:+	.:.	## cumulative nmp: 0.174
+X87344:AF100956+AF027865	sim96_LIN	fragment	29718:11840	29737:11859	0.500	+:+	.:.	## cumulative nmp: 0.239
+X87344:AF100956+AF027865	sim96_LIN	fragment	29739:11860	29834:11955	0.660	+:+	.:.	## cumulative nmp: 0.647
+X87344:AF100956+AF027865	sim96_LIN	alignment	11645:32684	11799:32838	310.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	11645:32684	11799:32838	0.600	+:+	.:.	## cumulative nmp: 0.600
+X87344:AF100956+AF027865	sim96_LIN	alignment	25436:28188	25519:28271	300.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	25436:28188	25519:28271	0.680	+:+	.:.	## cumulative nmp: 0.680
+X87344:AF100956+AF027865	sim96_LIN	alignment	24017:26879	24063:26925	290.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	24017:26879	24063:26925	0.810	+:+	.:.	## cumulative nmp: 0.810
+X87344:AF100956+AF027865	sim96_LIN	alignment	19032:25861	19211:26029	288.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	19032:25861	19054:25883	0.740	+:+	.:.	## cumulative nmp: 0.098
+X87344:AF100956+AF027865	sim96_LIN	fragment	19055:25885	19081:25911	0.700	+:+	.:.	## cumulative nmp: 0.206
+X87344:AF100956+AF027865	sim96_LIN	fragment	19083:25912	19111:25940	0.830	+:+	.:.	## cumulative nmp: 0.345
+X87344:AF100956+AF027865	sim96_LIN	fragment	19121:25941	19130:25950	0.700	+:+	.:.	## cumulative nmp: 0.385
+X87344:AF100956+AF027865	sim96_LIN	fragment	19162:25951	19183:25972	0.820	+:+	.:.	## cumulative nmp: 0.489
+X87344:AF100956+AF027865	sim96_LIN	fragment	19184:26002	19211:26029	0.750	+:+	.:.	## cumulative nmp: 0.609
+X87344:AF100956+AF027865	sim96_LIN	alignment	3570:3067	3679:3174	274.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	3570:3067	3635:3132	0.670	+:+	.:.	## cumulative nmp: 0.406
+X87344:AF100956+AF027865	sim96_LIN	fragment	3636:3136	3648:3148	0.770	+:+	.:.	## cumulative nmp: 0.498
+X87344:AF100956+AF027865	sim96_LIN	fragment	3650:3149	3662:3161	0.770	+:+	.:.	## cumulative nmp: 0.589
+X87344:AF100956+AF027865	sim96_LIN	fragment	3667:3162	3679:3174	0.920	+:+	.:.	## cumulative nmp: 0.699
+X87344:AF100956+AF027865	sim96_LIN	alignment	13997:8880	14108:8996	270.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13997:8880	14036:8919	0.700	+:+	.:.	## cumulative nmp: 0.246
+X87344:AF100956+AF027865	sim96_LIN	fragment	14037:8925	14108:8996	0.630	+:+	.:.	## cumulative nmp: 0.644
+X87344:AF100956+AF027865	sim96_LIN	alignment	13802:8883	13909:8995	270.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13802:8883	13868:8949	0.610	+:+	.:.	## cumulative nmp: 0.372
+X87344:AF100956+AF027865	sim96_LIN	fragment	13869:8955	13909:8995	0.730	+:+	.:.	## cumulative nmp: 0.644
+X87344:AF100956+AF027865	sim96_LIN	alignment	1371:26924	1427:26993	264.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1371:26924	1390:26943	0.900	+:+	.:.	## cumulative nmp: 0.286
+X87344:AF100956+AF027865	sim96_LIN	fragment	1391:26957	1427:26993	0.760	+:+	.:.	## cumulative nmp: 0.732
+X87344:AF100956+AF027865	sim96_LIN	alignment	26870:28873	26939:28932	260.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	26870:28873	26906:28909	0.810	+:+	.:.	## cumulative nmp: 0.461
+X87344:AF100956+AF027865	sim96_LIN	fragment	26917:28910	26939:28932	0.740	+:+	.:.	## cumulative nmp: 0.723
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:13075	13213:13142	260.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:13075	13213:13142	0.690	+:+	.:.	## cumulative nmp: 0.690
+X87344:AF100956+AF027865	sim96_LIN	alignment	10643:22920	10698:22975	260.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10643:22920	10698:22975	0.730	+:+	.:.	## cumulative nmp: 0.730
+X87344:AF100956+AF027865	sim96_LIN	alignment	8514:33675	8541:33702	260.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8514:33675	8541:33702	0.960	+:+	.:.	## cumulative nmp: 0.960
+X87344:AF100956+AF027865	sim96_LIN	alignment	8516:33675	8541:33700	260.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8516:33675	8541:33700	1.000	+:+	.:.	## cumulative nmp: 1.000
+X87344:AF100956+AF027865	sim96_LIN	alignment	2:22944	41:22983	260.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	2:22944	41:22983	0.830	+:+	.:.	## cumulative nmp: 0.830
+X87344:AF100956+AF027865	sim96_LIN	alignment	1583:8880	1684:8986	252.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1583:8880	1620:8917	0.740	+:+	.:.	## cumulative nmp: 0.270
+X87344:AF100956+AF027865	sim96_LIN	fragment	1627:8918	1638:8929	0.580	+:+	.:.	## cumulative nmp: 0.337
+X87344:AF100956+AF027865	sim96_LIN	fragment	1639:8942	1651:8954	0.770	+:+	.:.	## cumulative nmp: 0.434
+X87344:AF100956+AF027865	sim96_LIN	fragment	1653:8955	1684:8986	0.810	+:+	.:.	## cumulative nmp: 0.683
+X87344:AF100956+AF027865	sim96_LIN	alignment	12771:33276	12843:33348	250.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	12771:33276	12843:33348	0.670	+:+	.:.	## cumulative nmp: 0.670
+X87344:AF100956+AF027865	sim96_LIN	alignment	21600:23084	21844:23303	250.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	21600:23084	21645:23129	0.610	+:+	.:.	## cumulative nmp: 0.121
+X87344:AF100956+AF027865	sim96_LIN	fragment	21647:23130	21669:23152	0.830	+:+	.:.	## cumulative nmp: 0.203
+X87344:AF100956+AF027865	sim96_LIN	fragment	21671:23153	21710:23192	0.630	+:+	.:.	## cumulative nmp: 0.312
+X87344:AF100956+AF027865	sim96_LIN	fragment	21719:23193	21750:23224	0.530	+:+	.:.	## cumulative nmp: 0.385
+X87344:AF100956+AF027865	sim96_LIN	fragment	21761:23225	21778:23242	0.720	+:+	.:.	## cumulative nmp: 0.441
+X87344:AF100956+AF027865	sim96_LIN	fragment	21782:23243	21818:23279	0.680	+:+	.:.	## cumulative nmp: 0.549
+X87344:AF100956+AF027865	sim96_LIN	fragment	21821:23280	21844:23303	0.670	+:+	.:.	## cumulative nmp: 0.619
+X87344:AF100956+AF027865	sim96_LIN	alignment	8512:33675	8540:33703	250.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8512:33675	8540:33703	0.930	+:+	.:.	## cumulative nmp: 0.930
+X87344:AF100956+AF027865	sim96_LIN	alignment	1542:22923	1578:22959	250.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1542:22923	1578:22959	0.840	+:+	.:.	## cumulative nmp: 0.840
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:26922	71:26992	250.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:26922	71:26992	0.680	+:+	.:.	## cumulative nmp: 0.680
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22934	41:22974	250.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22934	41:22974	0.800	+:+	.:.	## cumulative nmp: 0.800
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22921	37:22957	250.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22921	37:22957	0.840	+:+	.:.	## cumulative nmp: 0.840
+X87344:AF100956+AF027865	sim96_LIN	alignment	19046:3724	19107:3784	248.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	19046:3724	19081:3759	0.670	+:+	.:.	## cumulative nmp: 0.395
+X87344:AF100956+AF027865	sim96_LIN	fragment	19083:3760	19107:3784	0.880	+:+	.:.	## cumulative nmp: 0.756
+X87344:AF100956+AF027865	sim96_LIN	alignment	8422:33675	8541:33738	248.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8422:33675	8449:33702	0.930	+:+	.:.	## cumulative nmp: 0.283
+X87344:AF100956+AF027865	sim96_LIN	fragment	8506:33703	8541:33738	0.750	+:+	.:.	## cumulative nmp: 0.577
+X87344:AF100956+AF027865	sim96_LIN	alignment	8424:33675	8541:33736	248.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8424:33675	8449:33700	0.960	+:+	.:.	## cumulative nmp: 0.277
+X87344:AF100956+AF027865	sim96_LIN	fragment	8506:33701	8541:33736	0.750	+:+	.:.	## cumulative nmp: 0.577
+X87344:AF100956+AF027865	sim96_LIN	alignment	10848:26928	10917:27004	246.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10848:26928	10876:26956	0.790	+:+	.:.	## cumulative nmp: 0.314
+X87344:AF100956+AF027865	sim96_LIN	fragment	10877:26964	10917:27004	0.680	+:+	.:.	## cumulative nmp: 0.696
+X87344:AF100956+AF027865	sim96_LIN	alignment	10639:26917	10729:26993	242.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10639:26917	10679:26957	0.730	+:+	.:.	## cumulative nmp: 0.356
+X87344:AF100956+AF027865	sim96_LIN	fragment	10694:26958	10729:26993	0.690	+:+	.:.	## cumulative nmp: 0.652
+X87344:AF100956+AF027865	sim96_LIN	alignment	13143:13194	13208:13259	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13143:13194	13208:13259	0.680	+:+	.:.	## cumulative nmp: 0.680
+X87344:AF100956+AF027865	sim96_LIN	alignment	13982:26951	14035:27004	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13982:26951	14035:27004	0.720	+:+	.:.	## cumulative nmp: 0.720
+X87344:AF100956+AF027865	sim96_LIN	alignment	8504:33673	8541:33710	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8504:33673	8541:33710	0.820	+:+	.:.	## cumulative nmp: 0.820
+X87344:AF100956+AF027865	sim96_LIN	alignment	8508:33675	8541:33708	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8508:33675	8541:33708	0.850	+:+	.:.	## cumulative nmp: 0.850
+X87344:AF100956+AF027865	sim96_LIN	alignment	8510:33675	8541:33706	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8510:33675	8541:33706	0.880	+:+	.:.	## cumulative nmp: 0.880
+X87344:AF100956+AF027865	sim96_LIN	alignment	8419:33674	8448:33703	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8419:33674	8448:33703	0.900	+:+	.:.	## cumulative nmp: 0.900
+X87344:AF100956+AF027865	sim96_LIN	alignment	3488:8955	3537:9004	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	3488:8955	3537:9004	0.740	+:+	.:.	## cumulative nmp: 0.740
+X87344:AF100956+AF027865	sim96_LIN	alignment	2:26921	61:26980	240.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	2:26921	61:26980	0.700	+:+	.:.	## cumulative nmp: 0.700
+X87344:AF100956+AF027865	sim96_LIN	alignment	20521:22071	20665:22164	238.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	20521:22071	20556:22106	0.810	+:+	.:.	## cumulative nmp: 0.245
+X87344:AF100956+AF027865	sim96_LIN	fragment	20593:22107	20621:22135	0.620	+:+	.:.	## cumulative nmp: 0.396
+X87344:AF100956+AF027865	sim96_LIN	fragment	20637:22136	20665:22164	0.790	+:+	.:.	## cumulative nmp: 0.589
+X87344:AF100956+AF027865	sim96_LIN	alignment	13138:13384	13202:13447	238.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13138:13384	13185:13431	0.730	+:+	.:.	## cumulative nmp: 0.548
+X87344:AF100956+AF027865	sim96_LIN	fragment	13187:13432	13202:13447	0.750	+:+	.:.	## cumulative nmp: 0.735
+X87344:AF100956+AF027865	sim96_LIN	alignment	22:7484	61:7525	236.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	22:7484	36:7498	0.870	+:+	.:.	## cumulative nmp: 0.318
+X87344:AF100956+AF027865	sim96_LIN	fragment	37:7501	61:7525	0.880	+:+	.:.	## cumulative nmp: 0.855
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22942	39:22980	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22942	39:22980	0.790	+:+	.:.	## cumulative nmp: 0.790
+X87344:AF100956+AF027865	sim96_LIN	alignment	21191:26946	21247:27002	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	21191:26946	21247:27002	0.700	+:+	.:.	## cumulative nmp: 0.700
+X87344:AF100956+AF027865	sim96_LIN	alignment	20124:20375	20164:20415	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	20124:20375	20164:20415	0.780	+:+	.:.	## cumulative nmp: 0.780
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:13368	13198:13420	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:13368	13198:13420	0.720	+:+	.:.	## cumulative nmp: 0.720
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:13129	13198:13181	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:13129	13198:13181	0.720	+:+	.:.	## cumulative nmp: 0.720
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:12859	13190:12903	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:12859	13190:12903	0.760	+:+	.:.	## cumulative nmp: 0.760
+X87344:AF100956+AF027865	sim96_LIN	alignment	8505:33676	8541:33712	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8505:33676	8541:33712	0.810	+:+	.:.	## cumulative nmp: 0.810
+X87344:AF100956+AF027865	sim96_LIN	alignment	3:22919	41:22957	230.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	3:22919	41:22957	0.790	+:+	.:.	## cumulative nmp: 0.790
+X87344:AF100956+AF027865	sim96_LIN	alignment	1542:26928	1621:27033	228.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1542:26928	1575:26961	0.760	+:+	.:.	## cumulative nmp: 0.278
+X87344:AF100956+AF027865	sim96_LIN	fragment	1576:26978	1590:26992	0.670	+:+	.:.	## cumulative nmp: 0.386
+X87344:AF100956+AF027865	sim96_LIN	fragment	1591:27003	1621:27033	0.770	+:+	.:.	## cumulative nmp: 0.643
+X87344:AF100956+AF027865	sim96_LIN	alignment	3225:26925	3279:26993	222.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	3225:26925	3250:26950	0.880	+:+	.:.	## cumulative nmp: 0.369
+X87344:AF100956+AF027865	sim96_LIN	fragment	3251:26963	3257:26969	1.000	+:+	.:.	## cumulative nmp: 0.482
+X87344:AF100956+AF027865	sim96_LIN	fragment	3258:26972	3279:26993	0.730	+:+	.:.	## cumulative nmp: 0.741
+X87344:AF100956+AF027865	sim96_LIN	alignment	8484:33673	8541:33730	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8484:33673	8541:33730	0.690	+:+	.:.	## cumulative nmp: 0.690
+X87344:AF100956+AF027865	sim96_LIN	alignment	8488:33675	8541:33728	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8488:33675	8541:33728	0.700	+:+	.:.	## cumulative nmp: 0.700
+X87344:AF100956+AF027865	sim96_LIN	alignment	8490:33675	8541:33726	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8490:33675	8541:33726	0.710	+:+	.:.	## cumulative nmp: 0.710
+X87344:AF100956+AF027865	sim96_LIN	alignment	8492:33675	8541:33724	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8492:33675	8541:33724	0.720	+:+	.:.	## cumulative nmp: 0.720
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:13049	13211:13114	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:13049	13211:13114	0.670	+:+	.:.	## cumulative nmp: 0.670
+X87344:AF100956+AF027865	sim96_LIN	alignment	13147:13176	13190:13219	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13147:13176	13190:13219	0.750	+:+	.:.	## cumulative nmp: 0.750
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:12987	13189:13030	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:12987	13189:13030	0.750	+:+	.:.	## cumulative nmp: 0.750
+X87344:AF100956+AF027865	sim96_LIN	alignment	21188:1978	21314:2121	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	21188:1978	21203:1993	0.750	+:+	.:.	## cumulative nmp: 0.089
+X87344:AF100956+AF027865	sim96_LIN	fragment	21207:1994	21224:2011	0.830	+:+	.:.	## cumulative nmp: 0.200
+X87344:AF100956+AF027865	sim96_LIN	fragment	21225:2013	21249:2037	0.720	+:+	.:.	## cumulative nmp: 0.333
+X87344:AF100956+AF027865	sim96_LIN	fragment	21250:2058	21285:2093	0.640	+:+	.:.	## cumulative nmp: 0.504
+X87344:AF100956+AF027865	sim96_LIN	fragment	21287:2094	21314:2121	0.680	+:+	.:.	## cumulative nmp: 0.645
+X87344:AF100956+AF027865	sim96_LIN	alignment	21212:7539	21313:7630	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	21212:7539	21252:7579	0.710	+:+	.:.	## cumulative nmp: 0.300
+X87344:AF100956+AF027865	sim96_LIN	fragment	21260:7580	21280:7600	0.670	+:+	.:.	## cumulative nmp: 0.445
+X87344:AF100956+AF027865	sim96_LIN	fragment	21284:7601	21313:7630	0.700	+:+	.:.	## cumulative nmp: 0.662
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:28666	13183:28703	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:28666	13183:28703	0.790	+:+	.:.	## cumulative nmp: 0.790
+X87344:AF100956+AF027865	sim96_LIN	alignment	13137:28653	13184:28700	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13137:28653	13184:28700	0.730	+:+	.:.	## cumulative nmp: 0.730
+X87344:AF100956+AF027865	sim96_LIN	alignment	10647:22928	10698:22979	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10647:22928	10698:22979	0.710	+:+	.:.	## cumulative nmp: 0.710
+X87344:AF100956+AF027865	sim96_LIN	alignment	10634:22934	10683:22983	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10634:22934	10683:22983	0.720	+:+	.:.	## cumulative nmp: 0.720
+X87344:AF100956+AF027865	sim96_LIN	alignment	10645:26927	10678:26960	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10645:26927	10678:26960	0.820	+:+	.:.	## cumulative nmp: 0.820
+X87344:AF100956+AF027865	sim96_LIN	alignment	10636:26922	10673:26959	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10636:26922	10673:26959	0.790	+:+	.:.	## cumulative nmp: 0.790
+X87344:AF100956+AF027865	sim96_LIN	alignment	9929:30500	10040:30611	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	9929:30500	10040:30611	0.600	+:+	.:.	## cumulative nmp: 0.600
+X87344:AF100956+AF027865	sim96_LIN	alignment	8494:33675	8541:33722	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8494:33675	8541:33722	0.730	+:+	.:.	## cumulative nmp: 0.730
+X87344:AF100956+AF027865	sim96_LIN	alignment	8498:33673	8541:33716	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8498:33673	8541:33716	0.750	+:+	.:.	## cumulative nmp: 0.750
+X87344:AF100956+AF027865	sim96_LIN	alignment	8502:33675	8541:33714	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8502:33675	8541:33714	0.780	+:+	.:.	## cumulative nmp: 0.780
+X87344:AF100956+AF027865	sim96_LIN	alignment	8518:33675	8541:33698	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8518:33675	8541:33698	0.960	+:+	.:.	## cumulative nmp: 0.960
+X87344:AF100956+AF027865	sim96_LIN	alignment	1375:7484	1426:7535	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1375:7484	1426:7535	0.710	+:+	.:.	## cumulative nmp: 0.710
+X87344:AF100956+AF027865	sim96_LIN	alignment	2:22949	39:22986	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	2:22949	39:22986	0.790	+:+	.:.	## cumulative nmp: 0.790
+X87344:AF100956+AF027865	sim96_LIN	alignment	2:22940	41:22979	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	2:22940	41:22979	0.780	+:+	.:.	## cumulative nmp: 0.780
+X87344:AF100956+AF027865	sim96_LIN	alignment	2:22927	41:22966	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	2:22927	41:22966	0.780	+:+	.:.	## cumulative nmp: 0.780
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22930	38:22967	220.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22930	38:22967	0.790	+:+	.:.	## cumulative nmp: 0.790
+X87344:AF100956+AF027865	sim96_LIN	alignment	13604:26933	13663:26993	218.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13604:26933	13633:26962	0.700	+:+	.:.	## cumulative nmp: 0.350
+X87344:AF100956+AF027865	sim96_LIN	fragment	13634:26964	13663:26993	0.770	+:+	.:.	## cumulative nmp: 0.735
+X87344:AF100956+AF027865	sim96_LIN	alignment	1553:1969	1621:2037	216.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1553:1969	1576:1992	0.710	+:+	.:.	## cumulative nmp: 0.247
+X87344:AF100956+AF027865	sim96_LIN	fragment	1578:1993	1596:2011	0.840	+:+	.:.	## cumulative nmp: 0.478
+X87344:AF100956+AF027865	sim96_LIN	fragment	1597:2013	1621:2037	0.720	+:+	.:.	## cumulative nmp: 0.739
+X87344:AF100956+AF027865	sim96_LIN	alignment	20873:22422	20972:22517	212.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	20873:22422	20909:22458	0.680	+:+	.:.	## cumulative nmp: 0.257
+X87344:AF100956+AF027865	sim96_LIN	fragment	20911:22459	20936:22484	0.620	+:+	.:.	## cumulative nmp: 0.421
+X87344:AF100956+AF027865	sim96_LIN	fragment	20940:22485	20972:22517	0.730	+:+	.:.	## cumulative nmp: 0.667
+X87344:AF100956+AF027865	sim96_LIN	alignment	8485:33676	8541:33732	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8485:33676	8541:33732	0.680	+:+	.:.	## cumulative nmp: 0.680
+X87344:AF100956+AF027865	sim96_LIN	alignment	28187:33557	28228:33613	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	28187:33557	28205:33575	0.840	+:+	.:.	## cumulative nmp: 0.326
+X87344:AF100956+AF027865	sim96_LIN	fragment	28206:33591	28228:33613	0.870	+:+	.:.	## cumulative nmp: 0.734
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:12883	13194:12931	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:12883	13194:12931	0.710	+:+	.:.	## cumulative nmp: 0.710
+X87344:AF100956+AF027865	sim96_LIN	alignment	13147:13054	13189:13096	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13147:13054	13189:13096	0.740	+:+	.:.	## cumulative nmp: 0.740
+X87344:AF100956+AF027865	sim96_LIN	alignment	13147:28659	13189:28701	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13147:28659	13189:28701	0.740	+:+	.:.	## cumulative nmp: 0.740
+X87344:AF100956+AF027865	sim96_LIN	alignment	13146:28664	13184:28702	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	13146:28664	13184:28702	0.770	+:+	.:.	## cumulative nmp: 0.770
+X87344:AF100956+AF027865	sim96_LIN	alignment	10634:22920	10692:22978	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	10634:22920	10692:22978	0.680	+:+	.:.	## cumulative nmp: 0.680
+X87344:AF100956+AF027865	sim96_LIN	alignment	8499:33676	8541:33718	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8499:33676	8541:33718	0.740	+:+	.:.	## cumulative nmp: 0.740
+X87344:AF100956+AF027865	sim96_LIN	alignment	3225:22917	3251:22943	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	3225:22917	3251:22943	0.890	+:+	.:.	## cumulative nmp: 0.890
+X87344:AF100956+AF027865	sim96_LIN	alignment	3218:22909	3250:22941	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	3218:22909	3250:22941	0.820	+:+	.:.	## cumulative nmp: 0.820
+X87344:AF100956+AF027865	sim96_LIN	alignment	3213:26907	3249:26943	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	3213:26907	3249:26943	0.780	+:+	.:.	## cumulative nmp: 0.780
+X87344:AF100956+AF027865	sim96_LIN	alignment	1546:22946	1576:22976	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1546:22946	1576:22976	0.840	+:+	.:.	## cumulative nmp: 0.840
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22938	41:22978	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22938	41:22978	0.760	+:+	.:.	## cumulative nmp: 0.760
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22932	41:22972	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22932	41:22972	0.760	+:+	.:.	## cumulative nmp: 0.760
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22920	41:22960	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22920	41:22960	0.760	+:+	.:.	## cumulative nmp: 0.760
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22949	37:22985	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22949	37:22985	0.780	+:+	.:.	## cumulative nmp: 0.780
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22927	37:22963	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22927	37:22963	0.780	+:+	.:.	## cumulative nmp: 0.780
+X87344:AF100956+AF027865	sim96_LIN	alignment	1:22953	33:22985	210.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	1:22953	33:22985	0.820	+:+	.:.	## cumulative nmp: 0.820
+X87344:AF100956+AF027865	sim96_LIN	alignment	8418:33675	8541:33742	208.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8418:33675	8449:33706	0.810	+:+	.:.	## cumulative nmp: 0.270
+X87344:AF100956+AF027865	sim96_LIN	fragment	8506:33707	8541:33742	0.750	+:+	.:.	## cumulative nmp: 0.551
+X87344:AF100956+AF027865	sim96_LIN	alignment	8426:33675	8541:33734	208.000	+:+	.:.
+X87344:AF100956+AF027865	sim96_LIN	fragment	8426:33675	8449:33698	0.920	+:+	.:.	## cumulative nmp: 0.251
+X87344:AF100956+AF027865	sim96_LIN	fragment	8506:33699	8541:33734	0.750	+:+	.:.	## cumulative nmp: 0.558
