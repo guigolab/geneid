@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.16 2004-04-22 12:46:14 eblanco Exp $ */
+/* $Id: geneid.h,v 1.17 2004-04-22 13:23:56 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -89,7 +89,7 @@ A. DEFINITIONS
 #define MAXHSP 150000             
 
 /* Max number of locus in multi-fasta files */
-#define MAXNSEQUENCES 20         
+#define MAXNSEQUENCES 1000         
 
 /* Maximum number of predicted genes        */
 #define MAXGENE 20000            
