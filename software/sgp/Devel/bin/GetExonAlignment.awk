@@ -204,11 +204,10 @@ BEGIN{
 
   # get exon frame compatible with hsps
   if ($strand == "+")
-     ExonFrame=(($start+$frame) % 3);
-  else {
-    ExonFrame=((3-(($end - $start + 1 + $frame) % 3)) %3);
-    ExonFrame=(($start+ExonFrame) % 3) + FRAMES ;
-  }
+      ExonFrame=(($start+$frame) % 3);
+  else 
+      ExonFrame=(($end-$frame) % 3);
+
  
   for (i=1; i<=nsr;i++) {
   # get hsp frame compatible with exon
