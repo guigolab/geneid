@@ -197,7 +197,7 @@ double ScoreSRexon(exonGFF* exon, int Strand, packSR* sr)
   float NOSCORE=-1;
   */
 
-  float NOSCORE=0;
+  float NOSCORE=-0.30;
   long lExon;  
 
   /* end hack.rgs */
@@ -286,6 +286,7 @@ long Score(exonGFF *Exons, long nExons,
   /* begin hack */
   float TMPW=1;
   float TMPWMAR=1;
+  float TMPWTBX=0.20;
   /* end hack */
 
   if (SRP)
@@ -363,7 +364,7 @@ long Score(exonGFF *Exons, long nExons,
 	  scoreMarkov = (scoreMarkov/LOG2)*TMPWMAR;
 	  /* end hack */
   
-	  scoreMarkov += scoreSR; 
+	  scoreMarkov += (TMPWTBX*scoreSR); 
 	}
 
       /* First cutoff- Markov */
