@@ -24,24 +24,25 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.1 2000-07-05 08:34:41 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.2 2001-03-07 21:05:43 eblanco Exp $  */
 
 #include "geneid.h"
 
 extern int 	SFP,SDP,SAP,STP,
-		EFP,EIP,ETP,EXP,ESP,
+                EFP,EIP,ETP,EXP,ESP,EOP,
                 VRB,
                 FWD,RVS,
                 GENEID, GENAMIC,
                 GFF, X10,
-                EVD, SRP;
+                EVD, SRP,
+                scanORF, XML;
 
 extern float EW;
 
 extern char* optarg;
 extern int optind;
 
-char *USAGE="Incorrect usage:\nNAME\n\tgeneid - a program to predict genes\nSYNOPSIS\n\tgeneid\t[-bdaefitxs]\n\t\t[-v] [-W] [-C] \n\t\t[-P ParameterFile]\n\t\t[-h] [-X] [-G] [-o] \n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight]\n\t\t<locus_seq_in_fasta_format>\n\n";
+char *USAGE="Incorrect usage:\nNAME\n\tgeneid - a program to predict genes\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz]\n\t\t[-v] [-Z] [-W] [-C] [-M] [-m]\n\t\t[-P ParameterFile]\n\t\t[-h] [-X] [-G] [-o] \n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight]\n\t\t<locus_seq_in_fasta_format>\n\n";
 
 void printHelp()
 {
@@ -57,10 +58,15 @@ void printHelp()
   printf("\t-i: Print Internal Exons\n");
   printf("\t-t: Print Terminal Exons\n");
   printf("\t-s: Print Single Genes\n");
+  printf("\t-z: Print ORFs\n");
   printf("\t-x: Print All exons\n\n");
+
+  printf("\t-Z: Activate ORFs searching\n\n");
 
   printf("\t-G: Print output predictions in GFF-format\n");
   printf("\t-X: Print extended-format Output Gene Predicted \n\n");
+  printf("\t-M: Print XML-format Output for Gene Prediction \n\n");
+  printf("\t-m: Print XML-DTD for XML-format Output \n\n");
 
   printf("\t-W: Only Forward Prediction(Watson)\n");
   printf("\t-C: Only Reverse Prediction(Crick)\n");
@@ -76,6 +82,46 @@ void printHelp()
   printf("\t-h: Show this Short Manual\n");
 }
 
+void printDTD()
+{
+  printf("
+   <?xml version=\"1.0\" ?>
+   <!-- DTD for XML format in geneid output -->
+
+   <!-- Element declarations -->
+   <!ELEMENT prediction (gene*)>
+   <!ELEMENT gene ((exon+),protein>
+   <!ELEMENT exon (site,site)>
+   <!ELEMENT protein (#PCDATA)>
+
+   <!-- Attribute declarations -->
+   <!ATTLIST prediction
+        locus    CDATA   #REQUIRED
+        length   CDATA   #IMPLIED
+        source   CDATA   #IMPLIED
+        date     CDATA   #IMPLIED
+        genes    CDATA   #REQUIRED
+	score    CDATA   #REQUIRED>
+
+   <!ATTLIST gene
+        idGene   ID      #REQUIRED
+        strand   (+|-)   #IMPLIED
+        nExons   CDATA   #IMPLIED
+        score    CDATA   #REQUIRED>
+
+   <!ATTLIST exon  
+        idExon   ID      #REQUIRED
+        type     (First | Internal | Terminal | Single) #REQUIRED
+	frame    (0|1|2) #REQUIRED
+        score    CDATA   #REQUIRED>
+
+   <!ATTLIST site
+        idSite   ID      #REQUIRED
+        type     (Acceptor | Donor | Start | Stop) #REQUIRED
+	position CDATA   #REQUIRED
+        score    CDATA   #REQUIRED>\n\n");
+}
+
 void readargv (int argc,char* argv[],
 	       char* ParamFile, char* SequenceFile,
 	       char* ExonsFile, char* SRFile) 
@@ -87,9 +133,12 @@ void readargv (int argc,char* argv[],
   char mess[MAXSTRING];
 
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitsxXGvE:R:S:WCP:h")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitsxzZXmMGvE:R:S:WCP:h")) != -1)
     switch(c)
       {
+      case 'Z': scanORF++;
+	geneidOpts++;
+	break;
       case 'o': GENAMIC--;
 	break;
       case 'O': GENEID--;
@@ -133,6 +182,9 @@ void readargv (int argc,char* argv[],
       case 's': ESP++;
 	geneidOpts++;
 	break;
+      case 'z': EOP++;
+	geneidOpts++;
+	break;
       case 'v': VRB++; 
 	break;
       case 'W': RVS--;
@@ -146,10 +198,16 @@ void readargv (int argc,char* argv[],
       case 'G': GFF++;
 	break;
       case 'X': X10++;
-   genamicOpts++;
+	genamicOpts++;
+	break;
+      case 'M': XML++;
+        genamicOpts++;
 	break;
       case '?':error++;
 	break; 
+      case 'm': printDTD();
+	exit(1);
+	break;
       case 'h': printHelp();
 	exit(1);
 	break;
@@ -164,7 +222,10 @@ void readargv (int argc,char* argv[],
 
   if (!GENAMIC && !GENEID)
     printError("Incompatible options(-o|-O)");
-
+ 
+  if (XML && (GFF || X10))
+    printError("Incompatible options(-M|-X,-G)");
+  
   if (error)
     printError(USAGE);
 
