@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.13 2000-08-12 19:59:06 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.14 2000-08-12 22:42:27 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln";
@@ -64,7 +64,7 @@ my $pb_PROG   = "$parseblast$vrbopt$scoreopt -nF";
 my ( $blast_file, $blast_alnQ, $blast_alnS, $hsp_file, @data, $FLH);
 my ( %hsp, %sr, @project_query, @project_subject,   # HSPs RECORDS
      @stack, %opened, $coord, $score, $index,
-	 $codeQ, $codeS, $query_lbl, $sbjct_lbl,
+	 $codeQ, $codeS, $query_lbl, $sbjct_lbl, $blst_prg,
 	 );
 my ( $sr_count, $ori, $end, $sco, $idx, $rec,       # SRs RECORDS
 	 $which_proj, $prj_flg, $Q_ori, $Q_end,
@@ -302,7 +302,8 @@ EndOfPrt
 		$record = \%{ $hsp{$k} };
 print STDERR <<EndOfPrt;
 #
-# HSP_INDEX: $k
+# HSP_INDEX: $k ($record->{PROGRAM})
+#
 # SCORE    : $record->{SCORE}
 # E_VALUE  : $record->{E_VALUE}
 
@@ -331,7 +332,7 @@ sub new_hsp {
 		STRAND_Q => $_[6],  STRAND_S => $_[15],
 		FRAME_Q  => $_[7],  FRAME_S  => $_[17],
 		SCORE    => $_[5],  E_VALUE  => $_[13],
-		INDEX    => $index,
+		INDEX    => $index, PROGRAM  => $blst_prg,
 	};
 	# Here are defined the auxiliary lists needed to obtain SRs
 	!$only_S_flg && do {
@@ -359,6 +360,7 @@ sub new_hsp {
 # Read HSPs from file or STDIN, and defining data structures.
 #
 sub read_HSPs {
+	my $tmpbf;
 print STDERR <<EndOfPrt if $verbose_flg;
 ##########################################################
 ## FILTERING INPUT WITH \"$pb_PROG\"
@@ -382,16 +384,18 @@ EndOfPrt
 		print { $FLH } "\#\#\n\#\# HSPs from $blast_file\n\#\#\n";
 	};
 
-	$index = 0;
+	$index = $blst_prg = 0;
 	while (<QUERY>){ 
 		next if /^\#|^\s*$/;
+		$tmpbf = $_;
 		chomp;
-		print { $FLH } "@_\n" if $hsp_too_flg;
 		split;
 		next if ($cutoff_flg ne "-" && $_[5]<$cutoff_flg);
+		print { $FLH } "$tmpbf\n" if $hsp_too_flg;
 		$_[9] =~ s/\"//og;
 		$codeQ = $STR{$_[6]}  + $_[7] ;
 		$codeS = $STR{$_[15]} + $_[17];
+		$blst_prg = $_[1] if !$blst_prg;
 		&new_hsp;
 		$index++;
 	}; 
@@ -491,25 +495,25 @@ EndOfPrt
 #
 sub prt_Q_fullgff {
 print { $FLH } <<"EndOfFullGFF";
-$srs->{QUERY}\t$PROGRAM\tsr\t$srs->{START_Q}\t$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_Q}\t$srs->{FRAME_Q}\tTarget \"$srs->{SUBJECT}\"\t$srs->{START_S}\t$srs->{END_S}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_S}\tFrame $srs->{FRAME_S}\t\#Projection $srs->{PROJECTION}
+$srs->{QUERY}\t$blst_prg\tsr\t$srs->{START_Q}\t$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_Q}\t$srs->{FRAME_Q}\tTarget \"$srs->{SUBJECT}\"\t$srs->{START_S}\t$srs->{END_S}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_S}\tFrame $srs->{FRAME_S}\t\#Projection $srs->{PROJECTION}
 EndOfFullGFF
 } # END_SUB: prt_Q_fullgff
 #
 sub prt_S_fullgff {
 print { $FLH } <<"EndOfFullGFF";
-$srs->{SUBJECT}\t$PROGRAM\tsr\t$srs->{START_S}\t$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_S}\t$srs->{FRAME_S}\tTarget \"$srs->{QUERY}\"\t$srs->{START_Q}\t$srs->{END_Q}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_Q}\tFrame $srs->{FRAME_Q}\t\#Projection $srs->{PROJECTION}
+$srs->{SUBJECT}\t$blst_prg\tsr\t$srs->{START_S}\t$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_S}\t$srs->{FRAME_S}\tTarget \"$srs->{QUERY}\"\t$srs->{START_Q}\t$srs->{END_Q}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_Q}\tFrame $srs->{FRAME_Q}\t\#Projection $srs->{PROJECTION}
 EndOfFullGFF
 } # END_SUB: prt_S_fullgff
 #
 sub prt_Q_aplot {
 print { $FLH } <<"EndOfAPLOT";
-$srs->{QUERY}:$srs->{SUBJECT}\t$PROGRAM\tsr:sr\t$srs->{START_Q}:$srs->{START_S}\t$srs->{END_Q}:$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_Q}:$srs->{STRAND_S}\t$srs->{FRAME_Q}:$srs->{FRAME_S}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION}
+$srs->{QUERY}:$srs->{SUBJECT}\t$blst_prg\tsr:sr\t$srs->{START_Q}:$srs->{START_S}\t$srs->{END_Q}:$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_Q}:$srs->{STRAND_S}\t$srs->{FRAME_Q}:$srs->{FRAME_S}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION}
 EndOfAPLOT
 } # END_SUB: prt_Q_aplot
 # 
 sub prt_S_aplot {
 print { $FLH } <<"EndOfAPLOT";
-$srs->{SUBJECT}:$srs->{QUERY}\t$PROGRAM\tsr:sr\t$srs->{START_S}:$srs->{START_Q}\t$srs->{END_S}:$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_S}:$srs->{STRAND_Q}\t$srs->{FRAME_S}:$srs->{FRAME_Q}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION}
+$srs->{SUBJECT}:$srs->{QUERY}\t$blst_prg\tsr:sr\t$srs->{START_S}:$srs->{START_Q}\t$srs->{END_S}:$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_S}:$srs->{STRAND_Q}\t$srs->{FRAME_S}:$srs->{FRAME_Q}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION}
 EndOfAPLOT
 } # END_SUB: prt_S_aplot
 #
@@ -526,7 +530,7 @@ EndOfPrt
 		$record = \%{ $sr{$k} };
 print STDERR <<EndOfSRs
 #
-#   SR_INDEX: $k 
+#   SR_INDEX: $k  ($record->{PROGRAM})
 #
 # PROJECTION: $record->{PROJECTION}
 #  HSP_INDEX: $record->{INDEX_HSP}
@@ -554,7 +558,7 @@ EndOfSRs
 #
 sub new_SR {
 	$sr{$sr_count} = {
-		PROJECTION => $which_proj,
+		PROJECTION => $which_proj,     PROGRAM  => $blst_prg,
 		QUERY     => $rec->{QUERY},    SUBJECT  => $rec->{SUBJECT},
 		START_Q   => $Q_ori,           START_S  => $S_ori,
 		END_Q     => $Q_end,           END_S    => $S_end,
