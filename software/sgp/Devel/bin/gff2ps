@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.58 2000-03-04 17:51:56 jabril Exp $	
+#         $Id: gff2ps,v 1.59 2000-03-04 17:57:37 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.58 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-04 17:51:56 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.59 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-04 17:57:37 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.58 2000-03-04 17:51:56 jabril Exp $
+%    $Id: gff2ps,v 1.59 2000-03-04 17:57:37 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -2386,7 +2386,7 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
 		sq=SQC[1];
 		sc=SQC[2];
 		SSS=sq SUBSEP sc SUBSEP s;
-		PrintRPT(sprintf("   * Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
+		PrintRPT(sprintf("   * Sequence: %-25s Source: %-25s Strand: %s\n", sq, sc, s));
 		if (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) ungp=grouped_;
 		else ungp=ungrouped_; 
 		for (pd=grouped_;pd>=ungp;pd--) {
@@ -2455,7 +2455,7 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 		sq=SQC[1];
 		sc=SQC[2];
 		SSS=sq SUBSEP sc SUBSEP s;
-		PrintRPT(sprintf("   * Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
+		PrintRPT(sprintf("   * Sequence: %-25s Source: %-25s Strand: %s\n", sq, sc, s));
 		if (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) ungp=grouped_;
 		else ungp=ungrouped_; 
 		for (pd=grouped_;pd>=ungp;pd--) {
