@@ -1,6 +1,10 @@
-# Global Variables
-export WORK="/home/ug/jabril/development/jabril/software/deploy" ;
-export BIN="$WORK/bin" ;
-export DOCS="$WORK/docs" ;
-export DATA="$WORK/data" ;
-export nwfile="deploy" ;
+#
+# Setting Global Variables
+WORK="/home/ug/jabril/development/jabril/software/deploy" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="deploy" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#

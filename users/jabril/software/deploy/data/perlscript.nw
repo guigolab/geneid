@@ -1,0 +1,539 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% # $Id: perlscript.nw,v 1.1 2001-08-21 13:15:04 jabril Exp $ 
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+
+\input defs.tex % from <LaTeX new definitions> chunk
+
+\begin{comment}
+<<LaTeX new definitions>>=
+%%%%% Colors for gff2ps
+\input ColorDefs.tex
+
+%%%%% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+%%%%% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+
+%%%%% defs
+\def\noweb{\textsc{noweb}}
+\def\ps{\textsc{PostScript}}
+
+%%%%% Setting text for footers and headers
+\def\tit{\textsc{Project Title Here.- }}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\progname{@@@PROJECT@@@}
+\def\mtauthor{
+ \htmladdnormallink{\texttt{author@imim.es}}
+                   {MAILTO:author@imim.es?subject=[deploy.pl]}
+ } % def mtjabril
+\def\authorslist{
+ The Author/s {\mdseries\small\dotfill \mtauthor } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\license{GNU General Public License (GNU-GPL)}
+\def\description{
+Short description of your program here !!!
+ } % def description 
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+@
+\end{comment}
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\begin{bfseries}
+\begin{large}
+\newlength{\lttbl}\setlength{\lttbl}{0.25\linewidth}
+\newlength{\rttbl}\setlength{\rttbl}{0.70\linewidth}
+%\fbox{
+\rule[0.5ex]{0.95\linewidth}{0.5ex}
+%\vskip 2ex
+\begin{tabular}{>{\scshape}r@{\quad}l}
+\rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
+Program Name: & {\Huge\progname}                       \\[2ex]
+      Author: & {\Large
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \authorslist
+                 \end{minipage}}                       \\[2ex]
+     License: & {\license}                             \\[2ex]
+ Last Update: & {\today}                               \\[2ex]
+ Description: & {\large\mdseries
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \description
+                 \end{minipage}}                       \\[2ex]
+\\
+\end{tabular}
+\vskip 2ex
+\rule[0.5ex]{0.95\linewidth}{0.5ex}
+%} % fbox
+\end{large}
+\end{bfseries}
+
+\vfill
+
+\begin{raggedleft}
+\showaffiliation
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{document}
+%
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: perlscript.nw,v 1.1 2001-08-21 13:15:04 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{empty section}
+
+\subsctn{Program outline}
+
+<<DEPLOY>>=
+<<PERL shebang>>
+#
+# MODULES
+#
+<<Use Modules>>
+#
+# VARIABLES
+#
+<<Global Vars>>
+#
+# MAIN LOOP
+#
+<<Main Loop>>
+#
+# FUNCTIONS
+#
+<<Functions>>
+@ 
+
+<<Use Modules>>=
+@
+
+<<Global Vars>>=
+@
+
+<<Main Loop>>=
+
+exit(0);
+@
+
+<<Functions>>=
+sub {
+} # 
+@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage
+\appendix
+
+\sctn{empty appendix section}
+
+\subsctn{empty appendix subsection}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%
+\newpage
+
+\sctn{Common code blocks}
+
+\subsctn{PERL scripts}
+
+<<PERL shebang>>=
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+<<GNU License>>
+<<Version Control Id Tag>>
+#
+use strict;
+@
+
+<<Global Constants - Boolean>>=
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+@ %def $T $F
+
+We also set here the date when the script is running and who is the user running it.
+
+<<Global Vars - User and Date>>=
+my $DATE = localtime;
+my $USER = $ENV{USER};
+@ %def $DATE $USER
+
+
+\subsubsctn{Timing our scripts}
+
+The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+<<Use Modules - Benchmark>>=
+use Benchmark;
+  <<Timer ON>>
+@ 
+
+See '[[man Benchmark]]' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+<<Timer ON>>=
+my @Timer = (new Benchmark);
+@ 
+
+<<Common PERL subs - Benchmark>>=
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+
+\subsubsctn{Printing complex Data Structures}
+
+With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them.
+
+
+<<Use Modules - Dumper>>=
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+@ 
+
+
+\subsubsctn{Common functions}
+
+<<Skip comments and empty records>>=
+next if /^\#/o;
+next if /^\s*$/o;
+chomp;
+@
+
+<<Common PERL subs - Min Max>>=
+#
+sub max() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min
+@
+
+<<Common PERL subs - Text fill>>=
+#
+sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+} # fill_mid
+@
+
+These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
+
+<<Common PERL subs - Counter>>=
+#
+sub counter { # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter
+#
+sub counter_end { # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter_end
+@
+
+<<Global Vars - Counter>>=
+my ($n,$c); # counter and char (for &counter function)
+@ %def $n $c
+
+
+\subsubsctn{Common functions for reporting program processes}
+\label{sec:messagerpt}
+
+Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
+
+<<Common PERL subs - STDERR>>=
+sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
+@
+
+The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
+
+<<Common PERL subs - STDERR>>=
+sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
+@
+
+\subsctn{BASH scripts}
+
+<<BASH shebang>>=
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+<<Version Control Id Tag>>
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+@
+
+<<BASH script end>>=
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
+@
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: perlscript.nw,v 1.1 2001-08-21 13:15:04 jabril Exp $
+@ 
+
+\subsctn{GNU General Public License}
+
+<<GNU License>>=
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %                             DEPLOY                               %
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 
+#    .
+# 
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@ 
+\newpage
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracts Script code chunks from the {\noweb} file} % \\[-0.5ex]
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+<<tangling>>=
+# showing line numbering comments in program
+notangle -L -R"root" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/root_file ;
+# program without line numbering comments
+notangle -t4 -R"root" $WORK/$nwfile.nw \
+    > $BIN/root_file ;
+# making them runnable
+chmod a+x $BIN/root_file ;
+@ 
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+<<tangling>>=
+notangle -R"root" $WORK/$nwfile.nw \
+    > $DATA/root_config ;
+@ %$
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+<<tangling>>=
+notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+@ 
+
+<<tangling complementary LaTeX files>>=
+notangle -R"LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
+@ 
+
+<<weaving>>=
+<<BASH shebang>>
+# weaving and LaTeXing
+<<BASH Environment Variables>>
+<<tangling complementary LaTeX files>>
+noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+<<BASH script end>>
+@ 
+
+<<LaTeXing>>=
+<<BASH shebang>>
+# only LaTeXing
+<<BASH Environment Variables>>
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+<<BASH script end>>
+@ %$
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH Environment Variables>>=
+#
+# Setting Global Variables
+WORK="@@@PATH@@@" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="@@@PROJECT@@@" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
+@ 
+
+<<tangling>>=
+# 
+# BASH Environment Variables
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
+         > $WORK/.bash_VARS ; 
+source $WORK/.bash_VARS ;
+#
+@
+
+%
+\end{document}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

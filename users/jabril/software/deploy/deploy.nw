@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.nw,v 1.1 2001-08-18 19:21:15 jabril Exp $
+% $Id: deploy.nw,v 1.2 2001-08-21 13:15:04 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -47,16 +47,21 @@
 \noweboptions{smallcode}
 \def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
 \let\nwdocspar=\par                    %
- 
-% Colors for gff2ps
+
+\input defs.tex
+
+\begin{comment}
+<<LaTeX deploy new definitions>>=
+%%%%% Colors for gff2ps
 \input ColorDefs.tex
-% New Commands are defined here
+
+%%%%% New Commands are defined here
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 
-% PSTRICKs definitions
+%%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
 \newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
@@ -64,9 +69,14 @@
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+<<new LaTeX urls>>
 
-% Setting text for footers and headers
+%%%%%% defs
+\def\noweb{\textsc{noweb}}
+\def\ps{\textsc{PostScript}}
+<<new LaTeX definitions>>
 
+%%%%% Setting text for footers and headers
 % \def\tit{\textsc{[[deploy.pl]] }}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
@@ -78,20 +88,29 @@
 \renewcommand{\footrulewidth}{1pt}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
 \def\progname{deploy.pl}
 \def\mtjabril{
  \htmladdnormallink{\texttt{jabril@imim.es}}
                    {MAILTO:jabril@imim.es?subject=[deploy.pl]}
  } % def mtjabril
 \def\authorslist{
- Josep F. Abril {\small (\mtjabril) }\\
- Other authors here...\\
+ Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
+ % Other authors here...\\
  } % def authorslist
 \def\license{GNU General Public License (GNU-GPL)}
 \def\description{
-This perl script creates all the files we need to start a project report or to describe a program implementation under the [[noweb]] Literate Programming tool. It will produce the main [[noweb]] file, from which we can tangle the sources or weabe the \LaTeX documentation.
+This perl script creates all the files we need to start a project report or to describe a program implementation under the {\noweb} Literate Programming tool. It will produce the main {\noweb} file, from which we can tangle the sources or weabe the \LaTeX documentation.
  } % def description 
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+@
+\end{comment}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -108,11 +127,13 @@ This perl script creates all the files we need to start a project report or to d
 \newlength{\lttbl}\setlength{\lttbl}{0.25\linewidth}
 \newlength{\rttbl}\setlength{\rttbl}{0.70\linewidth}
 %\fbox{
-\rule[0.5ex]{0.95\linewidth}{0.5ex}
 %\vskip 2ex
 \begin{tabular}{>{\scshape}r@{\quad}l}
 \rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
-Program Name: & {\Huge\progname}                       \\[2ex]
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
+Program Name: & {\Huge\progname}                       \\[3ex]
+\multicolumn{2}{c}{\rule[0.5ex]{0.95\linewidth}{2pt}}\\[2ex]
       Author: & {\Large
                  \begin{minipage}[t]{0.95\rttbl}
                  \authorslist
@@ -124,22 +145,19 @@ Program Name: & {\Huge\progname}                       \\[2ex]
                  \description
                  \end{minipage}}                       \\[2ex]
 \\
+\multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
+                               \rule[1ex]{0.95\linewidth}{2pt}}}\\[2ex]
 \end{tabular}
-\vskip 2ex
-\rule[0.5ex]{0.95\linewidth}{0.5ex}
 %} % fbox
 \end{large}
 \end{bfseries}
+\end{center}
 
 \vfill
 
 \begin{raggedleft}
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
-Grup de Recerca en Infom\`atica Biom\`edica\\
-Institut Municipal d'Investigaci\'o M\`edica\\
-Universitat Pompeu Fabra\\[2ex]
+\showaffiliation
 \end{raggedleft}
-\end{center}
 
 \end{titlepage} %'
 
@@ -160,7 +178,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.1 2001-08-18 19:21:15 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.2 2001-08-21 13:15:04 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -171,21 +189,32 @@ Universitat Pompeu Fabra\\[2ex]
 
 \sctn{empty section}
 
-\subsctn{empty subsection}
+\subsctn{Program outline}
 
-<<Program Outline>>=
-#!/usr/bin/perl -w
-# This is perl, version 5.005_03 built for i386-linux
-#
-# $Id: deploy.nw,v 1.1 2001-08-18 19:21:15 jabril Exp $
-#
-
-use strict;
-
+<<DEPLOY>>=
+<<PERL shebang>>
 #
 # MODULES
 #
-# CONSTANTS
+<<Use Modules>>
+#
+# VARIABLES
+#
+<<Global Vars>>
+#
+# MAIN LOOP
+#
+<<Main Loop>>
+#
+# FUNCTIONS
+#
+<<Functions>>
+@ 
+
+<<Use Modules>>=
+@
+
+<<Global Vars>>=
 my $USAGE = "\nUSAGE:\n\tdeploy.pl <projectname>\n".
             "(It asumes that you are in the right directory)\n\n";
 my @working_dirs = qw(
@@ -195,38 +224,44 @@ my @working_dirs = qw(
                        docs docs/psfigures docs/tables docs/html
                        tests
                        );
-#
-# VARIABLES
 my $PROJECT;
 # my $HOME = $ENV{HOME};
 my $CWD  = `pwd`;
 chomp($CWD);
 my $PATH = $CWD;
 # $PATH =~ s%^$HOME/%%o;
-#
-# MAIN
+@
 
-@ARGV > 0 || do {
-    print STDERR $USAGE;
-	exit(1);
-};
-$PROJECT = shift @ARGV;
+<<Main Loop>>=
+&parse_argvs();
 
-print STDERR "###\n### RUNNING deploy.pl..........\n###\n".
+print STDERR "###\n### RUNNING $PROGRAM..........\n###\n".
+             "### User: $USER\n".
+             "### Date: $DATE\n###\n".
              "### Current Working Directory: $CWD\n".
              "### Setting PATH to: $PATH\n".
              "### Project NAME: $PROJECT\n###\n";
 
-&make_dirs;
-&new_noweb_doc;
-&extract_files;
+&make_dirs();
+&new_noweb_doc();
+&extract_files();
 
 print STDERR "###\n### RUNNING deploy.pl............ DONE\n###\n";
 
 exit(0);
+@
 
-#
-# SUBS
+<<Functions>>=
+sub parse_argvs() {
+    @ARGV > 0 || do {
+        print STDERR $USAGE;
+	    exit(1);
+    };
+    $PROJECT = shift @ARGV;
+} # 
+@
+
+<<Functions>>=
 sub make_dirs() {
     print STDERR "###\n### Creating Project Subdirectories...\n###\n";
     foreach my $d (@working_dirs) {
@@ -235,6 +270,9 @@ sub make_dirs() {
 	};
     print STDERR "###\n### Project Subdirectories............ DONE\n###\n";
 } # make_dirs
+@
+
+<<Functions>>=
 sub new_noweb_doc() {
     my $file = "$PROJECT.nw";
     (-e $file && -f _) && do {
@@ -258,6 +296,9 @@ sub new_noweb_doc() {
 	close(NOWEB);
     print STDERR "###\n### NOWEB file........................ DONE\n###\n";
 } # new_noweb_doc
+@
+
+<<Functions>>=
 sub extract_files() {
     print STDERR "###\n### Extracting Files from NOWEB file...\n###\n";
     # my $WORK = '$HOME/'.$PATH;
@@ -280,23 +321,304 @@ $WORK/ltx ;
 +++EOS+++
     print STDERR "###\n### File Extraction................. DONE\n###\n";
 } # extract_files
+@
 
-__DATA__
+\sctn{Template definitions}
+
+\subsctn{Perl scripts} %%%%SCTN
+
+This template may contain one or more scripts, but it was thought to describe a single program implementation in perl language (it may require few adjustements to work with other languages because {\noweb} is not language dependent).
+
+<<PROJECT SCRIPT Template>>=
+<<EMACS header>>
+<<LaTeX header>>
+<<LaTeX packages>>
+<<LaTeX basic definitions>>
+<<PROGRAM LaTeX title>>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{document}
+%
+<<LaTeX Frontmatter>>
+<<LaTeX SCRIPT Mainmatter>>
+<<LaTeX Backmatter>>
+%
+<<LaTeX common code appendix - perl>>
+<<LaTeX common code appendix - bash>>
+<<LaTeX common code appendix - version>>
+<<LaTeX common code appendix - license>>
+<<LaTeX common code appendix - noweb>>
+%
+\end{document}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+\subsctn{Perl packages} %%%%SCTN
+
+Perl packages (or also called modules) must rely on three basic files to be portable: the perl module itself ('[[your_script.pm]]'), the tester ('[[test.pl]]') and the makefile ('[[Makefile.PL]]'). There are three secondary files within the distribution: 
+
+<<PROJECT PERL PACKAGE Template>>=
+<<EMACS header>>
+<<LaTeX header>>
+<<LaTeX packages>>
+<<LaTeX basic definitions>>
+<<PROGRAM LaTeX title>>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{document}
+%
+<<LaTeX Frontmatter>>
+<<LaTeX PACKAGES Mainmatter>>
+<<LaTeX Backmatter>>
+%
+<<LaTeX common code appendix - perl>>
+<<LaTeX common code appendix - bash>>
+<<LaTeX common code appendix - version>>
+<<LaTeX common code appendix - license>>
+<<LaTeX common code appendix - noweb>>
+%
+\end{document}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+<<PERL PACKAGE files>>=
+\sctn{Module outline}
+
+@<<MODULE>>=
+package Sample;
+
+use 5.006;
+use strict;
+use warnings;
+
+require Exporter;
+use AutoLoader qw(AUTOLOAD);
+
+our @ISA = qw(Exporter);
+
+# Items to export into callers namespace by default. Note: do not export
+# names by default without a very good reason. Use EXPORT_OK instead.
+# Do not simply export all your public functions/methods/constants.
+
+# This allows declaration       use Sample ':all';
+# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
+# will save memory.
+our %EXPORT_TAGS = ( 'all' => [ qw(
+
+) ] );
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+
+our @EXPORT = qw(
+
+);
+our $VERSION = '0.01';
+
+
+# Preloaded methods go here.
+
+# Autoload methods go after =cut, and are processed by the autosplit program.
+
+1;
+__END__
+# Below is stub documentation for your module. You better edit it!
+
+=head1 NAME
+
+@@@@PROJECT@@@ - Perl extension for blah blah blah
+
+=head1 SYNOPSIS
+
+  use @@@PROJECT@@@;
+  blah blah blah
+
+=head1 DESCRIPTION
+
+Stub documentation for @@@PROJECT@@@, created by "deploy.pl". 
+It looks like the author of the extension was negligent 
+enough to leave the stub unedited.
+
+Blah blah blah.
+
+=head2 EXPORT
+
+None by default.
+
+
+=head1 AUTHOR
+
+A. U. Thor, E<lt>a.u.thor@a.galaxy.far.far.awayE<gt>
+
+=head1 SEE ALSO
+
+L<perl>.
+
+=cut
+@@
+@
+
+
+<<PERL PACKAGE files>>=
+\sctn{Makefile outline}
+
+@<<MAKEFILE>>=
+use ExtUtils::MakeMaker;
+# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+# the contents of the Makefile that is written.
+WriteMakefile(
+    'NAME'              => '@@@PROJECT@@@',
+    'VERSION_FROM'      => '@@@PROJECT@@@.pm', # finds $VERSION
+    'PREREQ_PM'         => {}, # e.g., Module::Name => 1.1
+    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
+      (ABSTRACT_FROM => '@@@PROJECT@@@.pm', # retrieve abstract from module
+       AUTHOR     => 'A. U. Thor <a.u.thor@a.galaxy.far.far.away>') : ()),
+);
+@@
+@
+
+<<PERL PACKAGE files>>=
+\sctn{Tester file outline}
+
+@<<TESTER>>=
+# Before `make install' is performed this script should be runnable with
+# `make test'. After `make install' it should work as `perl test.pl'
+
+#########################
+
+# change 'tests => 1' to 'tests => last_test_to_print';
+
+use Test;
+BEGIN { plan tests => 1 };
+use Sample;
+ok(1); # If we made it this far, we're ok.
+
+#########################
+
+# Insert your test code below, the Test module is use()ed here so read
+# its man page ( perldoc Test ) for help writing this test script.
+
+@@
+@
+
+<<PERL PACKAGE files>>=
+\sctn{README file main chunk}
+
+@<<README>>=
+@@@@PROJECT@@@ version 0.01
+===================
+
+The README is used to introduce the module and provide instructions on
+how to install the module, any machine dependencies it may have (for
+example C compilers and installed libraries) and any other information
+that should be provided before the module is installed.
+
+A README file is required for CPAN modules since CPAN extracts the
+README file from a module distribution so that people browsing the
+archive can use it get an idea of the modules uses. It is usually a
+good idea to provide version information here so that people can
+decide whether fixes for the module are worth downloading.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  blah blah blah
+
+COPYRIGHT AND LICENCE
+
+Put the correct copyright and licence information here.
+
+Copyright (C) 2001 A. U. Thor blah blah blah
+@@ 
 @ 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
+<<PERL PACKAGE files>>=
+\sctn{Manifest file main chunk}
+
+@<<MANIFEST>>=
+Changes
+Makefile.PL
+MANIFEST
+README
+Sample.pm
+test.pl
+@@ 
+@ 
+
+<<PERL PACKAGE files>>=
+\sctn{Changes log file main chunk}
+
+@<<CHANGES>>=
+Revision history for Perl extension @@@PROJECT@@@.
+
+0.01  Mon Aug  6 22:01:46 2001
+        - original version; created by deploy.pl on
+          a template from h2xs 1.21 with options -Xn.
+@@ 
+@ 
+
+\subsctn{Reports} %%%%SCTN
+
 <<PROJECT REPORT Template>>=
+<<EMACS header>>
+<<LaTeX header>>
+<<LaTeX packages>>
+<<LaTeX basic definitions>>
+<<REPORT LaTeX title>>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{document}
+%
+<<LaTeX Frontmatter>>
+<<LaTeX REPORT Mainmatter>>
+<<LaTeX Backmatter>>
+%
+<<LaTeX common code appendix - perl>>
+<<LaTeX common code appendix - awk>>
+<<LaTeX common code appendix - bash>>
+<<LaTeX common code appendix - version>>
+<<LaTeX common code appendix - noweb>>
+%
+\end{document}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@ 
+
+
+Your {\noweb} documents (suffix them with '.nw' instead of '.tex' to remember yourself that they are special \LaTeX documents if you like) must start with something like the following code:
+
+<<EMACS header>>=
 % -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+@ 
+
+This line tells emacs to highlight code chunks with perl language highlight syntax (other emacs modes can be '[[awk-mode]]', '[[sh-mode]]', '[[c-mode]]', and so on).
+
+
+<<LaTeX header>>=
 \documentclass[11pt]{article}
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.nw,v 1.1 2001-08-18 19:21:15 jabril Exp $
+% <<Version Control Id Tag>> 
 %
+@ 
+
+<<LaTeX packages>>=
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
 \usepackage{graphics}
@@ -338,16 +660,25 @@ __DATA__
 \noweboptions{smallcode}
 \def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
 \let\nwdocspar=\par                    %
- 
-% Colors for gff2ps
+
+\input defs.tex % from <LaTeX new definitions> chunk
+
+@ 
+
+
+<<LaTeX basic definitions>>=
+\begin{comment}
+@<<LaTeX new definitions>>=
+%%%%% Colors for gff2ps
 \input ColorDefs.tex
-% New Commands are defined here
+
+%%%%% New Commands are defined here
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 
-% PSTRICKs definitions
+%%%%% PSTRICKs definitions
 \pslongbox{ExFrame}{\psframebox}
 \newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
@@ -357,17 +688,11 @@ __DATA__
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
 \def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
 
-% defs
-\def\drome{\textit{Drosophila melanogaster}}
-\def\dro{\textit{Drosophila}}
-\def\dme{\textit{D. melanogaster}}
-\def\seq{\texttt{\textbf{X62937}}}
-\def\nowf{[[DromeRepeats.nw]]}
-\def\bn{\textsc{blastn}}
+%%%%% defs
+\def\noweb{\textsc{noweb}}
 \def\ps{\textsc{PostScript}}
 
-% Setting text for footers and headers
-
+%%%%% Setting text for footers and headers
 \def\tit{\textsc{Project Title Here.- }}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
@@ -379,9 +704,32 @@ __DATA__
 \renewcommand{\footrulewidth}{1pt}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\def\progname{@@@PROJECT@@@}
+\def\mtauthor{
+ \htmladdnormallink{\texttt{author@imim.es}}
+                   {MAILTO:author@imim.es?subject=[deploy.pl]}
+ } % def mtjabril
+\def\authorslist{
+ The Author/s {\mdseries\small\dotfill \mtauthor } \\
+ % Other authors here...\\
+ } % def authorslist
+\def\license{GNU General Public License (GNU-GPL)}
+\def\description{
+Short description of your program here !!!
+ } % def description 
+\def\showaffiliation{
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+ } % def showaffiliation
+%
+@@
+\end{comment}
+@ 
 
-\begin{document}
-@@ 
+<<REPORT LaTeX title>>=
 \thispagestyle{empty}
 
 \begin{titlepage}
@@ -405,16 +753,62 @@ __DATA__
 \vfill
 
 \begin{raggedleft}
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
-Grup de Recerca en Infom\`atica Biom\`edica\\
-Institut Municipal d'Investigaci\'o M\`edica\\
-Universitat Pompeu Fabra\\[2ex]
+\showaffiliation
 \raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
 \end{raggedleft}
 \end{center}
 
 \end{titlepage} %'
 
+@ 
+
+<<PROGRAM LaTeX title>>=
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\begin{bfseries}
+\begin{large}
+\newlength{\lttbl}\setlength{\lttbl}{0.25\linewidth}
+\newlength{\rttbl}\setlength{\rttbl}{0.70\linewidth}
+%\fbox{
+\rule[0.5ex]{0.95\linewidth}{0.5ex}
+%\vskip 2ex
+\begin{tabular}{>{\scshape}r@{\quad}l}
+\rule{\lttbl}{0pt} & \rule{\rttbl}{0pt} \\[2ex]
+Program Name: & {\Huge\progname}                       \\[2ex]
+      Author: & {\Large
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \authorslist
+                 \end{minipage}}                       \\[2ex]
+     License: & {\license}                             \\[2ex]
+ Last Update: & {\today}                               \\[2ex]
+ Description: & {\large\mdseries
+                 \begin{minipage}[t]{0.95\rttbl}
+                 \description
+                 \end{minipage}}                       \\[2ex]
+\\
+\end{tabular}
+\vskip 2ex
+\rule[0.5ex]{0.95\linewidth}{0.5ex}
+%} % fbox
+\end{large}
+\end{bfseries}
+
+\vfill
+
+\begin{raggedleft}
+\showaffiliation
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+@ 
+
+<<LaTeX Frontmatter>>=
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
 \newpage
@@ -432,9 +826,32 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.1 2001-08-18 19:21:15 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.2 2001-08-21 13:15:04 jabril Exp $$>$ }
 \end{center}
 
+@
+
+<<LaTeX PACKAGES Mainmatter>>=
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Introduction}
+
+\subsctn{Program description}
+
+<<PERL PACKAGE files>>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@ 
+
+<<LaTeX SCRIPT Mainmatter>>=
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
 \newpage
@@ -443,13 +860,75 @@ Universitat Pompeu Fabra\\[2ex]
 
 \sctn{empty section}
 
-\subsctn{empty subsection}
+\subsctn{Program outline}
+
+@<<DEPLOY>>=
+@<<PERL shebang>>
+#
+# MODULES
+#
+@<<Use Modules>>
+#
+# VARIABLES
+#
+@<<Global Vars>>
+#
+# MAIN LOOP
+#
+@<<Main Loop>>
+#
+# FUNCTIONS
+#
+@<<Functions>>
+@@ 
+
+@<<Use Modules>>=
+@@
+
+@<<Global Vars>>=
+@@
+
+@<<Main Loop>>=
+
+exit(0);
+@@
+
+@<<Functions>>=
+sub {
+} # 
+@@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
 \end{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+@
+
+<<LaTeX REPORT Mainmatter>>=
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Introduction}
+
+\subsctn{Command-line}
+
+@<<BASH commands>>=
+#
+#
+@@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@ 
+
+<<LaTeX Backmatter>>=
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
 
 % \newpage
@@ -469,6 +948,11 @@ Universitat Pompeu Fabra\\[2ex]
 \end{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+@
+
+\sctn{Appendixes}
+
+<<LaTeX common code appendix - perl>>=
 \newpage
 
 \sctn{Common code blocks}
@@ -478,6 +962,7 @@ Universitat Pompeu Fabra\\[2ex]
 @<<PERL shebang>>=
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
+@<<GNU License>>
 @<<Version Control Id Tag>>
 #
 use strict;
@@ -602,6 +1087,9 @@ The same happens to '[[warn]]' function which also requires a hash variable '[[%
 sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
 @@
 
+@ 
+
+<<LaTeX common code appendix - awk>>=
 \subsctn{AWK scripts}
 
 @<<GAWK shebang>>=
@@ -610,6 +1098,9 @@ sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
 @<<Version Control Id Tag>>
 @@
 
+@ 
+
+<<LaTeX common code appendix - bash>>=
 \subsctn{BASH scripts}
 
 @<<BASH shebang>>=
@@ -634,14 +1125,50 @@ L="####################"
 exit 0
 @@
 
+@ 
+
+<<LaTeX common code appendix - version>>=
 \subsctn{Version control tags}
 
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 @<<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.1 2001-08-18 19:21:15 jabril Exp $
+# $Id: deploy.nw,v 1.2 2001-08-21 13:15:04 jabril Exp $
 @@ 
 
+@ 
+
+<<LaTeX common code appendix - license>>=
+\subsctn{GNU General Public License}
+
+@<<GNU License>>=
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %                             DEPLOY                               %
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 
+#    .
+# 
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@@ 
+@ 
+
+<<LaTeX common code appendix - noweb>>=
 \newpage
 
 \sctn{Extracting code blocks from this document}
@@ -649,9 +1176,9 @@ This document is under Revision Control System (RCS). The version you are curren
 From this file we can obtain both the code and the
 documentation. The following instructions are needed:
 
-\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+\subsctn{Extracts Script code chunks from the {\noweb} file} % \\[-0.5ex]
 
-Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
 @<<tangling>>=
 # showing line numbering comments in program
@@ -679,10 +1206,15 @@ notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
 @@ 
 
+@<<tangling complementary LaTeX files>>=
+notangle -R"LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
+@@ 
+
 @<<weaving>>=
 @<<BASH shebang>>
 # weaving and LaTeXing
 @<<BASH Environment Variables>>
+@<<tangling complementary LaTeX files>>
 noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
 latex $nwfile.tex ;
@@ -707,37 +1239,27 @@ popd ;
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
 @<<BASH Environment Variables>>=
-# Global Variables
-export WORK="@@@PATH@@@" ;
-export BIN="$WORK/bin" ;
-export DOCS="$WORK/docs" ;
-export DATA="$WORK/data" ;
-export nwfile="@@@PROJECT@@@" ;
-@@ 
-
-@<<CSH Environment Variables>>=
-# Global Variables
-setenv WORK "@@@PATH@@@" ;
-setenv BIN  "$WORK/bin" ;
-setenv DOCS "$WORK/docs" ;
-setenv DATA "$WORK/data" ;
-setenv nwfile "@@@PROJECT@@@" ;
+#
+# Setting Global Variables
+WORK="@@@PATH@@@" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="@@@PROJECT@@@" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
 @@ 
 
 @<<tangling>>=
-# TO DO: add a test to check which shell is running
-# BASH shell
+# 
+# BASH Environment Variables
 notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
          > $WORK/.bash_VARS ; 
-# CSH shell
-notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
-         > $WORK/.csh_VARS ; 
-# sourcing
 source $WORK/.bash_VARS ;
-source $WORK/.csh_VARS ;
+#
 @@
 
-\end{document}
 @
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER LATEX DOC
@@ -777,6 +1299,9 @@ source $WORK/.csh_VARS ;
 <<PERL shebang>>=
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
+#
+<<GNU License>>
+#
 <<Version Control Id Tag>>
 #
 use strict;
@@ -938,7 +1463,35 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.1 2001-08-18 19:21:15 jabril Exp $
+# $Id: deploy.nw,v 1.2 2001-08-21 13:15:04 jabril Exp $
+@ 
+
+\subsctn{GNU General Public License}
+
+<<GNU License>>=
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %                             DEPLOY                               %
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 
+# Creates basic file set to work with noweb literate programming tool.
+# 
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @ 
 
 \newpage
@@ -948,26 +1501,47 @@ This document is under Revision Control System (RCS). The version you are curren
 From this file we can obtain both the code and the
 documentation. The following instructions are needed:
 
-\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+\subsctn{Extracts Script code chunks from the {\noweb} file} % \\[-0.5ex]
 
-Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+<<tangling development version>>=
+# showing line numbering comments in program
+notangle -L -R"DEPLOY" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/deploy.pl ;
+chmod a+x $BIN/deploy.pl ;
+#
+@
+ 
+\begin{comment}
+<<new LaTeX urls>>=
+\def\perltidy{
+ \htmladdnormallinkfoot{\texttt{perltidy}}
+                   {\url|http://perltidy.sourceforge.net/|}
+ } % def perltidy
+@
+\end{comment}
+We use {\perltidy} to reformat final versions of perl scripts (without line numbering comments, correct indentations, etc...) and to pretty-print in html format.
 
 <<tangling>>=
-# showing line numbering comments in program
-notangle -L -R"root" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/root_file ;
-# program without line numbering comments
-notangle -t4 -R"root" $WORK/$nwfile.nw \
-    > $BIN/root_file ;
-# making them runnable
-chmod a+x $BIN/root_file ;
-@ 
+# reformating program with perltidy
+notangle -R"DEPLOY" $WORK/$nwfile.nw | \
+    perltidy - > $BIN/deploy.pl ;
+# pretty-printing program with perltidy
+notangle -R"DEPLOY" $WORK/$nwfile.nw | \
+    perltidy -html - > $DOCS/html/deploy.html ;
+#
+@
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
 <<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw \
-    > $DATA/root_config ;
+notangle -R"PROJECT SCRIPT Template" $WORK/$nwfile.nw \
+    > $DATA/perlscript.nw ;
+notangle -R"PROJECT PERL PACKAGE Template" $WORK/$nwfile.nw \
+    > $DATA/perlpackage.nw ;
+notangle -R"PROJECT REPORT Template" $WORK/$nwfile.nw \
+    > $DATA/report.nw ;
 @ %$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
@@ -978,10 +1552,15 @@ notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
 @ 
 
+<<tangling complementary LaTeX files>>=
+notangle -R"LaTeX deploy new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
+@ 
+
 <<weaving>>=
 <<BASH shebang>>
 # weaving and LaTeXing
 <<BASH Environment Variables>>
+<<tangling complementary LaTeX files>>
 noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
 latex $nwfile.tex ;
@@ -999,6 +1578,7 @@ latex $nwfile.tex ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+pdflatex $nwfile.tex ;
 popd ;
 <<BASH script end>>
 @ %$
@@ -1006,34 +1586,25 @@ popd ;
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
 <<BASH Environment Variables>>=
-# Global Variables
-export WORK="/home/ug/jabril/development/jabril/software/deploy" ;
-export BIN="$WORK/bin" ;
-export DOCS="$WORK/docs" ;
-export DATA="$WORK/data" ;
-export nwfile="deploy" ;
-@ 
-
-<<CSH Environment Variables>>=
-# Global Variables
-setenv WORK "/home/ug/jabril/development/jabril/software/deploy" ;
-setenv BIN  "$WORK/bin" ;
-setenv DOCS "$WORK/docs" ;
-setenv DATA "$WORK/data" ;
-setenv nwfile "deploy" ;
+#
+# Setting Global Variables
+WORK="/home/ug/jabril/development/jabril/software/deploy" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="deploy" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
 @ 
 
 <<tangling>>=
-# TO DO: add a test to check which shell is running
-# BASH shell
+#
+# BASH Environment Variables
 notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
          > $WORK/.bash_VARS ; 
-# CSH shell
-notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
-         > $WORK/.csh_VARS ; 
-# sourcing
 source $WORK/.bash_VARS ;
-source $WORK/.csh_VARS ;
+#
 @
 
 \end{document}
