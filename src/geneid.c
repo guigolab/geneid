@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.9 2001-12-18 16:28:50 eblanco Exp $ */
+/* $Id: geneid.c,v 1.10 2003-02-26 10:48:14 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -175,14 +175,20 @@ int main (int argc, char *argv[])
   /* 1.b. Optional data structures according to the selected options */
   if (EVD || !GENEID)
     evidence   = (packEvidence*) RequestMemoryEvidence();
-  
+  else
+	evidence = NULL;
+
   if (SRP)
     sr         = (packSR*)       RequestMemorySimilarityRegions();
-  
+  else
+	sr = NULL;
+
   /* 1.c. Backup information might be necessary between splits */
   if (LengthSequence > LENGTHSi)
     dumpster   = (packDump*)     RequestMemoryDumpster();
-  
+  else
+	dumpster = NULL;
+
   /** 2. Reading statistical model parameters file **/
   printMess("Reading parameters..."); 
   nIsochores = readparam(ParamFile, isochores);
