@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $
+% $Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -488,9 +488,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.21 $', #'
-     '$Date: 2001-11-16 17:54:13 $', #'
-     '$Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $', #'
+     '$Revision: 1.22 $', #'
+     '$Date: 2001-11-20 19:29:05 $', #'
+     '$Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -639,9 +639,12 @@ sub set_default_vars() {
         },
     ); # %DefaultVars
     <<map default vars to defaults working copy>>
-    print LOGFILE '>>> \%DefaultVars : '.(Dumper(\%DefaultVars)) if ($LogFile && $Debug);
+    print LOGFILE (Data::Dumper->Dump([ \%DefaultVars ],
+                                   [ qw( *DefaultVars ) ]))
+        if ($LogFile && $Debug);
 } # set_default_vars
 @ %def &set_default_vars
+% print LOGFILE '>>> %DefaultVars : '.(Dumper(\%DefaultVars))
 
 We also build from this structure, making easier variable maintenance because default value and variable type are edited together in [[%DefaultVars]] (as [[TYPE]]/[[VALUE]] pairs), an auxiliary variable which allows us to load default values into GFF elements.
 
@@ -1170,11 +1173,13 @@ sub parse_custom_files() {
         close(THIS);
     }; # LOAD
   }; # MAIN
-    print LOGFILE '>>> \%CustomVars : '.(Dumper(\%CustomVars))
+    print LOGFILE (Data::Dumper->Dump([ \%CustomVars ],
+                                   [ qw( *CustomVars ) ]))
         if ($LogFile && $Debug);
     &footer("CUSTOM FILES LOADED");
 } # parse_custom_files
 @ %def &parse_custom_files
+% print LOGFILE '>>> \%CustomVars : '.(Dumper(\%CustomVars))
 
 \begin{table}[!t]
 \begin{center}
@@ -1246,6 +1251,7 @@ sub varscheck() {
     defined($DefaultVars{$class}) || 
         (&warn('SECTION_NOT_DEF',$F),return $F);
 	my $_var = \%{$DefaultVars{$class}};
+    defined($$rec[2]) || return $F;
     defined($_var->{$$rec[1]}) || 
         (&warn('VAR_NOT_DEFINED',$F,$class,$$rec[1]),return $F);
     &checkvarvalues($_var->{$$rec[1]}{'TYPE'},\$$rec[2],$$rec[1]) || return $F;
@@ -2133,10 +2139,10 @@ coded for most common paper formats.
 
 <<default layout vars values>>=
 # Page MARGINS
-margin_left                => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
-margin_right               => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
-margin_top                 => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
-margin_bottom              => { TYPE => 'PS_UNIT'  , VALUE => '1cm' },
+margin_left                => { TYPE => 'PS_UNIT'  , VALUE => [ 1, 'cm' ] },
+margin_right               => { TYPE => 'PS_UNIT'  , VALUE => [ 1, 'cm' ] },
+margin_top                 => { TYPE => 'PS_UNIT'  , VALUE => [ 1, 'cm' ] },
+margin_bottom              => { TYPE => 'PS_UNIT'  , VALUE => [ 1, 'cm' ] },
 @ %def {margin_left} {margin_right} {margin_top} {margin_bottom}
 <<command-line options>>=
 "margin-left=s"         => \$CmdLineVars{LAYOUT}{"margin_left"},
@@ -2376,7 +2382,7 @@ that area from plot).
 @ 
 <<default layout vars values>>=
 title_font                 => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-title_fontsize             => { TYPE => 'PS_UNIT', VALUE => '24pt'  },
+title_fontsize             => { TYPE => 'PS_UNIT', VALUE => [ 24, 'pt' ]  },
 @ %def {title_font} {title_fontsize}
 <<DESC custom file variables>>=
 ORD: 11
@@ -2454,8 +2460,8 @@ want to remove that area from plot too).
 ###EOR###
 @ 
 <<default layout vars values>>=
-subtitle_font              => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-subtitle_fontsize          => { TYPE => 'PS_UNIT', VALUE => '16pt'  },
+subtitle_font              => { TYPE => 'FONT'   , VALUE => 'helvetica'   },
+subtitle_fontsize          => { TYPE => 'PS_UNIT', VALUE => [ 16, 'pt' ]  },
 @ %def {subtitle_font} {subtitle_fontsize}
 <<DESC custom file variables>>=
 ORD: 15
@@ -2533,7 +2539,7 @@ want to remove that area from plot too).
 @ 
 <<default layout vars values>>=
 x_label_font               => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-x_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => '12pt'  },
+x_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => [ 12, 'pt' ]  },
 @ %def {x_label_font} {x_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 19
@@ -2612,7 +2618,7 @@ want to remove that area from plot too).
 @ 
 <<default layout vars values>>=
 y_label_font               => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-y_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => '12pt'  },
+y_label_fontsize           => { TYPE => 'PS_UNIT', VALUE => [ 12, 'pt' ]  },
 @ %def {y_label_font} {y_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 23
@@ -2685,7 +2691,7 @@ LDE:
 @ 
 <<default layout vars values>>=
 percent_box_label_font     => { TYPE => 'FONT'   , VALUE => 'helvetica-bold' },
-percent_box_label_fontsize => { TYPE => 'PS_UNIT', VALUE => '12pt'  },
+percent_box_label_fontsize => { TYPE => 'PS_UNIT', VALUE => [ 12, 'pt' ]  },
 @ %def {percent_box_label_font} {percent_box_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 27
@@ -2738,8 +2744,8 @@ LDE:
 ###EOR###
 @ 
 <<default layout vars values>>=
-percent_box_sublabel_font     => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-percent_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => '9pt'  },
+percent_box_sublabel_font     => { TYPE => 'FONT'   , VALUE => 'helvetica'  },
+percent_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => [ 9, 'pt' ]  },
 @ %def {percent_box_sublabel_font} {percent_box_sublabel_fontsize}
 <<DESC custom file variables>>=
 ORD: 31
@@ -2808,8 +2814,8 @@ LDE:
 ###EOR###
 @ 
 <<default layout vars values>>=
-extra_box_label_font       => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-extra_box_label_fontsize   => { TYPE => 'PS_UNIT', VALUE => '9pt'  },
+extra_box_label_font       => { TYPE => 'FONT'   , VALUE => 'helvetica'  },
+extra_box_label_fontsize   => { TYPE => 'PS_UNIT', VALUE => [ 9, 'pt' ]  },
 @ %def {extra_box_label_font} {extra_box_label_fontsize}
 <<DESC custom file variables>>=
 ORD: 35
@@ -2861,8 +2867,8 @@ LDE:
 ###EOR###
 @ 
 <<default layout vars values>>=
-extra_box_sublabel_font    => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-extra_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => '9pt'  },
+extra_box_sublabel_font     => { TYPE => 'FONT'   , VALUE => 'helvetica'  },
+extra_box_sublabel_fontsize => { TYPE => 'PS_UNIT', VALUE => [ 9, 'pt' ]  },
 @ %def {extra_box_sublabel_font} {extra_box_sublabel_fontsize}
 <<DESC custom file variables>>=
 ORD: 39
@@ -3162,7 +3168,7 @@ LDE:
 zoom                       => { TYPE => 'BOOLEAN', VALUE => $F     },
 zoom_area                  => { TYPE => 'BOOLEAN', VALUE => $F     },
 zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F     },
-zoom_area_mark_width       => { TYPE => 'PS_UNIT', VALUE => '2pt'  },
+zoom_area_mark_width       => { TYPE => 'PS_UNIT', VALUE => [ 2, 'pt' ]  },
 zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
 zoom_area_fill_color       => { TYPE => 'COLOR'  , VALUE => undef  },
 @ %def {zoom} {zoom_area} {zoom_marks} {zoom_area_mark_color}
@@ -3978,7 +3984,7 @@ feature_y_label_angle      => { TYPE => 'INTEGER', VALUE => 0      },
 feature_label_length       => { TYPE => 'INTEGER', VALUE => 0      },
 feature_label_rotate       => { TYPE => 'BOOLEAN', VALUE => $F      },
 feature_label_font         => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-feature_label_fontsize     => { TYPE => 'PS_UNIT', VALUE => '5pt'  },
+feature_label_fontsize     => { TYPE => 'PS_UNIT', VALUE => [ 5, 'pt' ]  },
 @ %def {show_feature_label}
 
 <<default layout vars values>>=
@@ -3988,7 +3994,7 @@ group_y_label_angle        => { TYPE => 'INTEGER', VALUE => 0      },
 group_label_length         => { TYPE => 'INTEGER', VALUE => 0      },
 group_label_rotate         => { TYPE => 'BOOLEAN', VALUE => $F      },
 group_label_font           => { TYPE => 'FONT'   , VALUE => 'helvetica' },
-group_label_fontsize       => { TYPE => 'PS_UNIT', VALUE => '5pt'  },
+group_label_fontsize       => { TYPE => 'PS_UNIT', VALUE => [ 5, 'pt' ]  },
 @ %def {show_group_label}
 
 <<default layout vars values>>=
@@ -4261,12 +4267,14 @@ sub parse_GFF_files() {
       &counter_end($n,$c) if ($Verbose && !$Quiet);
       close(THIS);
   }; # LOAD
-    print LOGFILE '>>> \%GFF_DATA : '.(Dumper(\%GFF_DATA))
+    print LOGFILE (Data::Dumper->Dump([ \%GFF_DATA, \%ALN_DATA  ],
+                                   [ qw( *GFF_DATA   *ALN_DATA ) ]))
         if ($LogFile && $Debug);
     &footer("DATA LOADED");
 } # sub parse_GFF
 @ %def &parse_GFF
-%$
+%$ print LOGFILE '>>> \%GFF_DATA : '.(Dumper(\%GFF_DATA))
+
 
 We define the following constants, used to report which format was found in the current read record (See table~\ref{tbl:DTkeysXreport}).
 
@@ -5036,17 +5044,9 @@ my @vect_ary;
 
 \sctn{Mapping custom features to figure elements} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\label{todo:HAA}
-<<HIDE: new defs TODO>>=
-\def\todoHAA{
-Set variable mapping for [[%ALN_DATA]] elements.
-} % todoHAA
+<<HIDE: DONE>>=
+\doneitem{20011113}{Set variable mapping for [[%ALN_DATA]] elements.}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoHAA}{todo:HAA}
-@
-\todo{ \item \todoHAA } % todo
-
 
 \subsctn{Mapping customization variables to working variable}
 
@@ -5075,6 +5075,9 @@ sub merge_custom_vars() {
     &header("MAPPING CUSTOMIZATION INPUTS TO MAIN VARS");
     <<setting layout variables>>
     <<setting non-layout variables>>
+    print LOGFILE (Data::Dumper->Dump([ \%Vars ],
+                                   [ qw( *Vars ) ]))
+        if ($LogFile && $Debug);
     &footer("VALUES SET for MAIN VARS");
 } # merge_custom_vars
 @ %def &merge_custom_vars
@@ -5082,7 +5085,7 @@ sub merge_custom_vars() {
 Layout variables are simpler than the rest, they are defined as a key-value pair, so that mapping is straightforward.
 
 <<setting layout variables>>=
-foreach my $var_name (%{ $Defaults{LAYOUT} }) {
+foreach my $var_name (keys %{ $Defaults{LAYOUT} }) {
     defined($CmdLineVars{LAYOUT}{$var_name}) && do {
         $Vars{LAYOUT}{$var_name} = $CmdLineVars{LAYOUT}{$var_name};
         next;
@@ -5136,31 +5139,38 @@ sub map_vars_data() {
         foreach my $v_var (keys %{$Vars{$v_sec}}) {
             my @v_values = @{ $Vars{$v_sec}{$v_var} };
             for (my $foo = 0; $foo < $#v_values; $foo+=4) {
-                my ($neg_flg, $id_flg, $reg_exp, $the_value, $name_test);
-                ($neg_flg, $id_flg, $reg_exp, $the_value) = 
-                      @v_values[$foo..($foo + 3)];
-                $name_test = $neg_flg ? \&match_regexp_neg : \&match_regexp;
-                <<set reference to GFF data>>
+                my @tl = @v_values[$foo..($foo + 3)];
+                &map_vars_to_GFF(\%GFF_DATA,$v_sec,$v_var,@tl);
+                &map_vars_to_GFF(\%ALN_DATA,$v_sec,$v_var,@tl);
             }; # for $foo
 	    }; # foreach $vnm
     }; # foreach $sct
+    print LOGFILE (Data::Dumper->Dump([ \%GFF_DATA, \%ALN_DATA ], 
+                                   [ qw( *GFF_DATA   *ALN_DATA ) ]))
+        if ($LogFile && $Debug);
     &footer("VALUES SET for GFF ELEMENTS");
 } # map_vars_data
 @ %def &map_vars_data
 
 We have to set the properties hash corresponding to the GFF elements present in the current section (say here SEQUENCE, SOURCE, STRAND, GROUP or FEATURE). To do that we have to define a reference to that anonymous hash and also retrieve the element string ([[$element]]) to check if it match to the regular expression ([[$reg_exp]]) which determines if the variable of that element is re-assigned to the current value ([[$the_value]]).
 
-<<set reference to GFF data>>=
-foreach my $seq (keys %GFF_DATA) {
-    my $seq_ref = \@{ $GFF_DATA{$seq} };
-    $v_sec eq 'SEQUENCE' && do {
-        &does_feat_match($name_test,$seq,$reg_exp,$seq_ref,
-                         $_prop,$v_sec,$v_var,$the_value);
-        next;
-    };
-    <<set reference to GFF data: SOURCES>>
-}; # foreach my $seq
-@ 
+<<Features Setting>>=
+sub map_vars_to_GFF() {
+    my ($mainref,  $v_sec,   $v_var,
+        $neg_flg, $id_flg, $reg_exp, $the_value, $name_test) = @_;
+    $name_test = $neg_flg ? \&match_regexp_neg : \&match_regexp;
+    foreach my $seq (keys %{ $mainref }) {
+        my $seq_ref = \@{ $mainref->{$seq} };
+        $v_sec eq 'SEQUENCE' && do {
+            &does_feat_match($name_test,$seq,$reg_exp,$seq_ref,
+                             $_prop,$v_sec,$v_var,$the_value);
+            next;
+        };
+        <<set reference to GFF data: SOURCES>>
+    }; # foreach my $seq
+    return;
+} # map_vars_to_GFF
+@ %def &map_vars_to_GFF
 
 <<set reference to GFF data: SOURCES>>=
 foreach my $src (keys %{ $seq_ref->[$_element] }) {
@@ -5260,16 +5270,9 @@ We need to sort the GFF elements by acceptor, it is more or less easy to sort th
 as arrays (it is implemented with the [[map]]/[[sort]]/[[map]] technique as it can be appreciated in [[<<sorting group elements>>]] code chunk). But we also need to sort groups by their coordinates and to sort sequences and sources by their input order (as they were read from input file I mean). This will be difficult to do on the original hashes because coords and order were placed in a subarray for a given group/source/sequence key name (that key point to an anonymous array containing that counters as you can see in table~\ref{tbl:gffdata}, page~\pageref{tbl:gffdata}). As we are looking for the GFF elements that belong to a group, which is related to a given strand of a source within a sequence, we can build an auxiliary variable that holds the proper ordering at each level as we go deep in the [[%GFF_DATA]]/[[%ALN_DATA]] variables hierarchy.
 At the same time we can fill the [[$_ori]] and [[$_end]] fields we left set to zero for the counters array in [[&load_gff_var]] (see function definition in page~\pageref{func:loadgffvar}).
 
-\label{todo:HAB}
-<<HIDE: new defs TODO>>=
-\def\todoHAB{
-Set ordering for [[%ALN_DATA]].
-} % todoHAB
+<<HIDE: DONE>>=
+\doneitem{20011120}{Set ordering for [[%ALN_DATA]].}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoHAB}{todo:HAB}
-@
-\todo{ \item \todoHAB } % todo
 
 <<Sorting Features>>=
 sub sort_elements() {
@@ -5278,27 +5281,33 @@ sub sort_elements() {
     # sorting %GFF_DATA contents 
     scalar(%GFF_DATA) && do {
         &report('SORT_GFF','*- ','ANNOTATION DATA');
-        my ($v_max,$v_min);
-        my $sq_ord = \@{ $Order{GFF} } ;
-        @{ $sq_ord } = ();
-        my $s_ref = \%GFF_DATA;
-        foreach my $s_seq (keys %{ $s_ref }) {
-            <<sorting sequences>>
-        }; # foreach $s_seq
-        &sort_by_inputorder($sq_ord);
-        print LOGFILE '>>> \%Order{GFF} : '.(Dumper(\%{ $Order{GFF} }))
-            if ($LogFile && $Debug);
+        &sort_elements_loop(\%GFF_DATA,'GFF');
     }; # scalar(%GFF_DATA) > 0
     # sorting %ALN_DATA contents 
     scalar(%ALN_DATA) && do {
-        my $s_ref = \%ALN_DATA;
         &report('SORT_GFF','*- ','ALIGNMENT DATA');
+        &sort_elements_loop(\%ALN_DATA,'ALN');
     }; # scalar(%ALN_DATA) > 0
-  # print LOGFILE '>>> \%GFF_DATA : '.(Dumper(\%GFF_DATA))
-  #     if ($LogFile && $Debug);
+    print LOGFILE (Data::Dumper->Dump([ \%Order ],
+                                   [ qw( *Order ) ]))
+        if ($LogFile && $Debug);
     &footer("ELEMENTS SORTED");
 } # sort_elements
 @ %def &sort_elements
+
+<<Sorting Features>>=
+sub sort_elements_loop() {
+    my ($s_ref,$ktr) = @_;
+    my ($v_max,$v_min);
+    my $sq_ord = \@{ $Order{$ktr} } ;
+    @{ $sq_ord } = ();
+    foreach my $s_seq (keys %{ $s_ref }) {
+        <<sorting sequences>>
+    }; # foreach $s_seq
+    &sort_by_inputorder($sq_ord);
+    return;
+} #sort_elements_loop
+@ %def &sort_elements_loop
 
 Once we get into [[&sort_elements]] function we initialize the arrays within the [[%Order]] hash as we are requiring them. \label{sec:ORDERhsh}
 
@@ -5510,7 +5519,7 @@ sub set_page_size() {
          $vrf->{_page_height}) = @{ $FORMATS{$vrf->{page_size}} }[1,2];
     }; # PSIZES
     &report('SETPAGESIZE',$vrf->{page_size},
-            "@{ $vrf->{page_width} } x @{ $vrf->{page_height} }");
+            "$vrf->{_page_width} x $vrf->{_page_height}");
     return;
 } # set_page_size
 @ %def &set_page_size {_page_width} {_page_height}
@@ -5585,9 +5594,9 @@ $vrf->{_plot_aln} && do {
 <<setting axes - step 3>>=
 $vrf->{_alignment_name} = join($;, @{ $vrf->{_alignment_name} });
 $vrf->{_plot_x_sequence} =
-    &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
+    &search_seqname(\$$vrf{_x_sequence_name}, undef, \@{ $Order{GFF} });
 $vrf->{_plot_y_sequence} =
-    &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
+    &search_seqname(\$$vrf{_y_sequence_name}, $vrf->{_x_sequence_name}, 
                     \@{ $Order{GFF} });
 @ %def {_plot_x_sequence} {_plot_y_sequence}
 \end{enumerate}
@@ -5634,15 +5643,17 @@ sub search_alnname() {
     foreach $naln (@$_ro) {
         ($nm_a,$nm_b) = split /$;/o, $naln->[0]; 
         ($nm_a =~ /^$sq_a$/ && $nm_b =~ /^$sq_b$/) && do {
-             return ($T, $F);
+            @$_ra = ($nm_a,$nm_b);
+            return ($T, $F);
         };
     }; # foreach $naln
     # swapping
     foreach $naln (@$_ro) {
         ($nm_a,$nm_b) = split /$;/o, $naln->[0]; 
         ($nm_a =~ /^$sq_b$/ && $nm_b =~ /^$sq_a$/) && do {
-             @$_ra = reverse @$_ra;
-             return ($T, $T);
+            @$_ra = ($nm_b,$nm_a);
+            # @$_ra = reverse @$_ra;
+            return ($T, $T);
         };
     }; # foreach $naln
     #
@@ -5653,11 +5664,11 @@ sub search_alnname() {
 <<Layout Settings>>=
 sub search_seqname() {
     my ($sq_a,$sq_b,$_ro) = @_;
-    my ($a_found,$naln,$skip);
-    $skip = $F;
+    my ($a_found,$naln);
     foreach $naln (@$_ro) {
+        ($$sq_a eq '.+' && defined($sq_b) && $naln->[0] eq $sq_b) && next;
         $naln->[0] =~ /^$sq_a$/ && do {
-            ($sq_a eq '.+' && $sq_b eq '.+' && !$skip) && ($skip = $T, next);
+            $$sq_a = $naln->[0];
             return $T;
         };
     }; # foreach $naln
@@ -5829,16 +5840,16 @@ sub set_seq_boundaries() {
     <<setting boundaries - is zoom ON>>
     &report('PLOTLIMITS', "X : $vrf->{_x_start} to $vrf->{_x_end}",
                           "Y : $vrf->{_y_start} to $vrf->{_y_end}");
-    &report( $vrf->{zoom_area}
+    &report(( $vrf->{zoom_area}
              ? ('ONZOOM',
                 "X : $vrf->{_x_zoom_start} to $vrf->{_x_zoom_end}",
                 "Y : $vrf->{_y_zoom_start} to $vrf->{_y_zoom_end}" )
-             : 'NOZOOM' );
-    &report( $vrf->{zoom_area}
+             : 'NOZOOM' ));
+    &report(( $vrf->{zoom_area}
              ? ('ONZOOMAREA',
                 "X : $vrf->{_x_zoomarea_start} to $vrf->{_x_zoomarea_end}",
                 "Y : $vrf->{_y_zoomarea_start} to $vrf->{_y_zoomarea_end}" )
-             : 'NOZOOMAREA' );
+             : 'NOZOOMAREA' ));
     return;
 } # set_seq_boundaries
 @ %def &set_seq_boundaries
@@ -6428,7 +6439,7 @@ letter, quarto, statement and tabloid.
 <<PostScript VARS>>=
 sub ps_variables() {
     my $vr = \%{ $Vars{LAYOUT} };
-    print STDOUT << '+++PSVARS+++';
+    print STDOUT << "+++PSVARS+++";
 %%BeginProcSet: Setting_Vars 1.0 0
 %
 <<psvariables - layout>>
@@ -6463,8 +6474,8 @@ PSVARS =>
 /SBoxcol { $vr->{percent_box_bgcolor} } D
 /XBoxcol { $vr->{extra_box_bgcolor} } D
 %% 
-/X0 $vlr->{_x_start} D /X1 $vlr->{_x_end} D
-/Y0 $vlr->{_y_start} D /Y1 $vlr->{_y_end} D
+/X0 $vr->{_x_start} D /X1 $vr->{_x_end} D
+/Y0 $vr->{_y_start} D /Y1 $vr->{_y_end} D
 /axesp @{[ &tobool($vr->{aplot_xy_same_length}) ]} D
 % /xyratio $vr->{aplot_xy_scale} D
 /ZoomON @{[ &tobool($vr->{zoom_marks}) ]} D
@@ -6906,6 +6917,7 @@ We have implemented a perl script that is used as a [[noweb]] filter (see append
 /slw { setlinewidth } B        %-%
 /dotted { [ 1 ] 0 setdash } D 
 %
+/pt   {           } B          %-%
 /cm   { 28.35 mul } B          %-%
 /ivcm { 28.35 div } B          %-%
 /in   { 72    mul } B
@@ -8325,7 +8337,9 @@ local $Data::Dumper::Deepcopy = 1;
 "debug"  => \$Debug, # Dumps Vars -> LogFile
 @ 
 <<command-line help>>=
---debug    Reporting variable contents when testing the program.
+--debug
+    Reporting variable contents when testing the program.
+    Requires that log report file option was also activated.
 @
 
 \subsctn{Reporting program status}
@@ -8681,7 +8695,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -10057,11 +10071,11 @@ sub fill_mid()   {
 #
 sub counter { # $_[0]~current_pos++ $_[1]~char
     print STDERR "$_[1]";
-    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+    (($_[0] % 50) == 0) && (print STDERR " [".&fill_left($_[0],6,"0")."]\n");
 } # counter
 #
 sub counter_end { # $_[0]~current_pos   $_[1]~char
-    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+    (($_[0] % 50) != 0) && (print STDERR " [".&fill_left($_[0],6,"0")."]\n");
 } # counter_end
 @
 
@@ -10094,7 +10108,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.21 2001-11-16 17:54:13 jabril Exp $
+# $Id: gff2aplot.nw,v 1.22 2001-11-20 19:29:05 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
