@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.3 2001-02-08 09:58:18 eblanco Exp $  */
+/*  $Id: SortExons.c,v 1.4 2001-02-14 15:41:53 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -79,6 +79,7 @@ void SortExons(packExons* allExons,
   long l;
   long left;
   long right;
+  long room;
   char mess[MAXSTRING]; 
 
   /* Boundaries of sorting-array */
@@ -193,9 +194,11 @@ void SortExons(packExons* allExons,
     for (i = pv->i1vExons; i < pv->i2vExons ; i++) 
       {  
 	acceptor=(pv->vExons + i)->Acceptor->Position - left;
+	offset = (pv->vExons + i)->offset1;
+	room = ((acceptor + offset)<0)? 0 : (acceptor + offset);
 
 	/* Requirement 1: range of values */
-	if (acceptor < 0 || acceptor > (l2 + LENGTHCODON))
+	if (acceptor < 0)
 	  {
 	    /* Skip wrong exon (A) */
 	    sprintf(mess,"Skipped evidence (range): %ld %ld %c %hd",
@@ -220,7 +223,7 @@ void SortExons(packExons* allExons,
 		printMess(mess);
 	      }
 	    else
-	      UpdateList(&(ExonList[acceptor]), pv->vExons+i);
+	      UpdateList(&(ExonList[room]), pv->vExons+i);
 	  }
       }
 
