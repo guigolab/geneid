@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.24 2002-05-01 20:05:10 jabril Exp $ 
+% # $Id: humus.nw,v 1.25 2002-05-02 19:13:13 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.24 2002-05-01 20:05:10 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.25 2002-05-02 19:13:13 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -528,7 +528,8 @@ $BIN/getfastadesc.pl $MySQLPAR/chrs.tbl $HSAP/chromFa \
 ###################################################################
 #
 # Fixing Pankaj TBLASTX files
-ls -1 MGSCv3-22dec2001GP-tbx/ | grep -c '^chr' ;
+ls -1 /project/H.sapiens/.ftp/PankajAgarwal/MGSCv3-22dec2001GP-tbx/ | \
+  grep -c '^chr' ;
   32232 TOTAL FILES
 #
   32219	TBLASTX
@@ -2368,6 +2369,235 @@ cat $ODIR/${CHR}_gaps.gff    \
 #
 @
 
+
+\sctn{Working on {\lmmus} sequences}
+
+<<>>=
+# GET SEQS
+$BIN/getfastadesc.pl $MySQLPAR/Mmusculus_chrs.tbl $MSEQ \
+                     > $MUSHU/seqid_list 2> $MUSHU/seqid_list.rpt ;
+   ## checking execution status of getfastadesc.pl
+   grep '^\#\# ' seqid_list.rpt | \
+     gawk '{
+         gsub(/[\"]/,"",$7);
+         printf "\n%s %s %s %s",$1,$2,$3,$6"-> "$7
+       }
+       END{ printf " <-\n"; }' | sort +4n ;
+#
+# INITIALIZE
+gawk '$1!~/^\#/ {print $1}' $MUSHU/seqid_list | \
+  while read CHR ;
+    do {
+      ODIR="$MUSHU/chr$CHR" ;
+      MkDirs $ODIR ;
+      gawk 'BEGIN{ chrom="\^"ARGV[1]"\$"; ARGV[1]=""; }
+            $1 ~ chrom { print $0; }
+           ' $CHR $MUSHU/seqid_list > $ODIR/desc ;
+      gawk '{ print $2, $3; }' $ODIR/desc > $ODIR/length ;
+      gawk 'BEGIN{ OFS="\t"; ofile=ARGV[1]; s="Sequence"; d="." }
+            { print $1,s,s,1,$2,d,d,d,1 > ofile"."$1".gff"; }
+           ' $ODIR/length ;
+      } ;
+    done ;
+# RETRIEVE INVTBX HSPs FROM TBX[HsapSQ-MmusDB]
+# gawk '$1!~/^\#/ {print $1}' $MySQLPAR/Mmusculus_chrs.tbl | \
+MkDirs $MUSHU/invTBX $MUSHU/invTBX/$FTPTBXID ;
+gawk '$1!~/^\#/ {print $1, $2}' $MUSHU/seqid_list | \
+  while read CHR SEQ ;
+    do {
+      ODIR="$MUSHU/chr$CHR" ;
+      cnt=0 ;
+      export ODIR CHR SEQ cnt ;
+      gawk '$1!~/^\#/ {print $1, $2}' $HUMUS/seqid_list | \
+          while read CH SQ;
+            do { # HUMUS=/projects/H.sapiens/20011222.UCSCgp
+              ls "-1" $HUMUS/chr$CH/tblastx/$FTPTBXID/hsp/$SQ.fullgff ; 
+            } ;
+          done | \
+        while read file ;
+          do {
+            $BIN/swapHSPcoords.pl -o "-1" $SEQ $ODIR/length $file \
+                           > $MUSHU/invTBX/$FTPTBXID/$SEQ.$cnt.fullgff ;
+            cnt=`expr $cnt + 1` ;
+            } ;
+          done ;
+      } ;
+    done ;
+@ 
+
+<<runallmouse.sh>>=
+###
+### runallmouse.sh ### RUNNING ALMOST EVERYTHING ON MOUSE !!!
+###
+<<BASH Project Variables>>
+# $MUSHU/seqid_list
+SEQID="$1" ;
+gawk '$1!~/^\#/ {print $1, $2}' $SEQID | \
+  while read CHR SEQ ;
+    do {
+      ODIR="$MUSHU/chr$CHR" ;
+      ###
+      echo "# PROCESSING TBLASTX INV-HSPs on $CHR" 1>&2 ;
+      TDIR="$ODIR/tblastx";
+      MkDirs $TDIR $TDIR/$FTPTBXID ;
+      TDIR="$ODIR/tblastx/$FTPTBXID";
+      for c in ori inv-hsp inv-sr eval;
+        do { MkDirs $TDIR/$c ; } ; done ;
+      mega "cp -v" $MUSHU/invTBX/$FTPTBXID '^'$SEQ'\.[0-9]' $TDIR/ori ;
+      mega "cat" $TDIR/ori '^'$SEQ'.*'\.fullgff' > $TDIR/inv-hsp/$SEQ.fullgff ;
+      perl -ne '/^#/o && next;
+                /^\s+$/o && next; 
+                $_ =~ s/;\s+Strand//o; 
+                $_ =~ s/;\s+Frame//o; 
+                $_ =~ s/;\s+E_value.*$//o;
+                print STDOUT $_;
+           ' $TDIR/inv-hsp/$SEQ.fullgff | \
+             sort +3n -6 +6 -7 - > $TDIR/inv-hsp/$SEQ.gff ;
+      $BIN/blast2gff -vg  $TDIR/inv-hsp/$SEQ.gff > $TDIR/inv-sr/$SEQ.gff ;
+      gawk '
+        BEGIN{ chr=ARGV[1]; ARGV[1]=""; t=b["+"]=b["-"]=b["."]=0; }
+        ($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { t++; a[$7,$8]++; b[$7]++; c[$8]++ }
+        END{ 
+          printf "# TOTAL %s SRs on %s: %s forward, %s reverse, %s without strand.\n", 
+                 t, chr, b["+"], b["-"], b["."];
+          for (i in c) {
+            printf "#\t%s : %6s\t\|\t%s : %6s\t|\t%s : %6s\n", 
+                   "+"i, a["+",c[i]] ? a["+",i] : 0,
+                   "-"i, a["-",c[i]] ? a["-",i] : 0,
+                   "."i, a[".",c[i]] ? a[".",i] : 0;
+          };
+        }
+      ' $SEQ $TDIR/inv-sr/$SEQ.gff > $TDIR/inv-sr/$SEQ.report ;
+      ###
+      echo "# RUNNING GENEID on $CHR" 1>&2 ;
+      GDIR="$ODIR/geneid" ;
+      MkDirs $GDIR $GDIR/$FTPTBXID ;
+      GDIR="$ODIR/geneid/$FTPTBXID" ;
+      for c in out gff gtf2 cds prot logs tmp eval ;
+        do { MkDirs $GDIR/$c ; } ; done ;
+      GENEID="$SRC/geneid_v1.1/bin/geneid" ; # geneid v1.1
+      PARAM="$SRC/geneid_v1.1/param/human3iso.param" ;
+      EW=0 ; # add to exon weigth
+      ISEQ="$MSEQMSK/$SEQ.fa.masked" ;
+      GENEID_CMDLN="-v -DE $EW -P $PARAM $ISEQ" ;
+      echo "$GENEID $GENEID_CMDLN" 1>&2 ;
+      $GENEID $GENEID_CMDLN 2> $GDIR/logs/$SEQ.geneid | \
+              grep -v 'evidence' > $GDIR/out/$SEQ ;
+      $BIN/geneid_raw2GFF.pl $SEQ $GDIR $GDIR/out/$SEQ ;
+      #
+      ls -1 $GDIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
+      while read n;
+        do {
+          cat $GDIR/gff/$SEQ.sg/$n;
+          };
+        done | sort +3n +4n -5 - > $GDIR/gff/$SEQ ;
+    #
+    gawk '($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { # get_geneid_genes 
+        genes[$9]++;
+        if (genes[$9]>1) {
+          min[$9] = $4<min[$9] ? $4 : min[$9] ;
+          max[$9] = $5>max[$9] ? $5 : max[$9] ;
+        } else {
+          min[$9] = $4 ;
+          max[$9] = $5 ;
+          strand[$9] = $7;
+        };
+        len[$9]+=$5-$4+1
+      }
+      END {
+        for (n in genes) {
+          print n, min[n], max[n], strand[n], len[n],genes[n];
+        };
+      }' $GDIR/gff/$SEQ | \
+         sort +1n +2n -3 - > $GDIR/$SEQ.gene_list ;
+      ###
+      echo "# RUNNING SGP on $CHR" 1>&2 ;
+      SDIR="$ODIR/sgp" ;
+      MkDirs $SDIR $SDIR/$FTPTBXID ;
+      SDIR="$ODIR/sgp/$FTPTBXID" ;
+      for c in inv-hsp-sr out gff gtf2 cds prot logs tmp eval ;
+        do { MkDirs $SDIR/$c ; } ; done ;
+      $BIN/getHSPSR.pl $SEQ < $TDIR/inv-sr/$SEQ.gff \
+            > $SDIR/inv-hsp-sr/$SEQ.gff 2> $SDIR/inv-hsp-sr/$SEQ.report ;
+      #
+      GENEID="$SRC/geneid_v1.1-sgp/bin/geneid" ; # geneid v1.1-sgp
+      PARAM="$SRC/geneid_v1.1-sgp/param/human3iso.param.sgp" ;
+      EW=0 ; # add to exon weigth
+      ISEQ="$MSEQ/$SEQ.fa" ;
+      HOMOLOGY="$SDIR/inv-hsp-sr/$SEQ.gff" ;
+      if [ -f "$HOMOLOGY" ] ;
+        then
+          echo "### Using homology data from: $HOMOLOGY" 1>&2 ;
+          HOMOLOGY_PAR="-S $HOMOLOGY" ;
+        else
+          echo "### Homology file NOT found: $HOMOLOGY" 1>&2 ;
+          HOMOLOGY_PAR="" ;
+        fi ;
+      #
+      GENEID_CMDLN="-v -DE $EW -P $PARAM $HOMOLOGY_PAR $ISEQ" ;
+      echo "$GENEID $GENEID_CMDLN" 1>&2 ;
+      $GENEID $GENEID_CMDLN 2> $SDIR/logs/$SEQ.sgp | \
+          grep -v 'evidence' > $SDIR/out/$SEQ ;
+      $BIN/geneid_raw2GFF.pl $SEQ $SDIR $SDIR/out/$SEQ ;
+      #
+      ls -1 $SDIR/gff/$SEQ.sg/ | egrep "^$SEQ" | \
+        while read n;
+          do {
+            cat $SDIR/gff/$SEQ.sg/$n;
+            };
+          done | sort +3n +4n -5 - > $SDIR/gff/$SEQ ;
+      #
+      gawk '($0 !~ /^[ \t]*$/ && $1 !~ /^\#/) { # get_geneid_genes 
+          genes[$9]++;
+          if (genes[$9]>1) {
+            min[$9] = $4<min[$9] ? $4 : min[$9] ;
+            max[$9] = $5>max[$9] ? $5 : max[$9] ;
+          } else {
+            min[$9] = $4 ;
+            max[$9] = $5 ;
+            strand[$9] = $7;
+          };
+          len[$9]+=$5-$4+1
+        }
+        END {
+          for (n in genes) {
+            print n, min[n], max[n], strand[n], len[n],genes[n];
+          };
+        }' $SDIR/gff/$SEQ | \
+           sort +1n +2n -3 - > $SDIR/$SEQ.gene_list ;      
+      } ;
+    done ;
+###EOF###
+@ 
+<<Mouse Fast Scripting>>=
+notangle -R'runallmouse.sh' $WORK/$nwfile.nw | cpif $MUSHU/bin/runallmouse.sh ;
+is_exec $MUSHU/bin/runallmouse.sh ;
+##
+##
+gawk 'BEGIN{ prt=1 }
+      $1~/^6$/ { prt=0 }
+      { if (prt) print $0 }
+      ' $MUSHU/seqid_list > $MUSHU/bin/seqid_a ;
+gawk 'BEGIN{ prt=0 }
+      $1~/^6$/ { prt=1 } $1~/^13$/ { prt=0 }
+      { if (prt) print $0 }
+      ' $MUSHU/seqid_list > $MUSHU/bin/seqid_b ;
+gawk 'BEGIN{ prt=0 }
+      $1~/^13$/ { prt=1 }
+      { if (prt) print $0 }
+      ' $MUSHU/seqid_list > $MUSHU/bin/seqid_c ;
+# monstre3
+$MUSHU/bin/runallmouse.sh $MUSHU/bin/seqid_a 2> $MUSHU/bin/seqid_a.log 1>&2 ;
+# monstre2
+$MUSHU/bin/runallmouse.sh $MUSHU/bin/seqid_b 2> $MUSHU/bin/seqid_b.log 1>&2 ;
+# monstre1
+$MUSHU/bin/runallmouse.sh $MUSHU/bin/seqid_c 2> $MUSHU/bin/seqid_c.log 1>&2 ;
+@ 
+
+<<>>=
+# EVALUATIONS ???
+@ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{comment}
 \end{comment}
@@ -3143,9 +3373,17 @@ my %g = ( "+1" => 0,  "+2" => 1,  "+3" => 2,  "+" => 3,
           "-1" => 4,  "-2" => 5,  "-3" => 6,  "-" => 7,
           ".1" => 8,  ".2" => 9,  ".3" => 10, "." => 11,
                      "all" => 12,            "sum" => [ (0) x 13 ] );
-my ($cf,$cr);
+my ($fixpos,$cf,$cr);
 #
 # ARGVS
+use Getopt::Std;
+my %opts = ();
+getopts("o:",\%opts);
+       # -o integer
+       #    fix coords offset (so if target label is seq_10001_10300
+       #    and we set "-o -1", we can set start offset to 10000)
+$fixpos = (defined($opts{o}) && $opts{o} =~ /^[+-]?\d+$/o) ? $opts{o} : 0;
+#
 &match_argv_num(\@ARGV,3);
 my ($chr, $seqln, @inputfiles) = @ARGV;
 foreach (my $r = 0; $r < scalar(@inputfiles); $r++) {
@@ -3154,7 +3392,8 @@ foreach (my $r = 0; $r < scalar(@inputfiles); $r++) {
 #
 # MAIN
 &program_started($PROG);
-print STDERR "### Getting sequence length from\n\t-> $seqln\n".
+print STDERR "### Working on SEQUENCE -> $chr\n".
+             "### Getting sequence length from\n\t-> $seqln\n".
              "### Processing the following files\n\t-> ".(join("\n\t->", @inputfiles))."\n";
 &read_lengths();
 &parse_gff();
@@ -3180,10 +3419,11 @@ sub parse_gff() {
         while (<TBXFL>) {
             my (@l,@f,@t,$out,$offset);
             next if /^\s*$/o;
-            /^\#/o && do {
-                print STDOUT $_;
-                next;
-            };
+            next if /^\#/o;
+            # /^\#/o && do {
+            #     print STDOUT $_;
+            #     next;
+            # };
             chomp;
             @l = split /\s+/og, $_, 9;
                  # we are going to assume that first eigth fileds are OK
@@ -3199,12 +3439,13 @@ sub parse_gff() {
                 next;
             };
             $t[$seq] =~ /^($chr)_(\d+)_\d+$/ || do {
-                print STDERR "## SKIPPING FIELD $seq \!= $chr\n";
+                print STDERR "#[$.]# SKIPPING FIELD $seq \!= $chr\n";
                 $errcnt{SKIPPED}++;
                 next;
             };
             $t[$seq] = $1;
-            $offset  = $2;
+            $offset  = $2 + $fixpos;
+            print STDERR "#[$.]# ACCEPTING FIELD $t[$seq] == $chr -> $offset\n";
             $t[$src] = "tblastx";
             $t[$ftr] = "hsp";
             $t[$ori] += $offset;
@@ -4281,6 +4522,7 @@ Just wait to the next update round to see if connection problem persist...
 <<tangling: mySQL param>>=
 # 
 # mySQL perl auxiliarly files 
+( echo "###"; echo "### PARAMETER FILES FOR H.sapiens..."; echo "###" ) 1>&2 ; 
 for n in chrs jobs steps status;
   do { 
        echo "# --> \$MySQLPAR/$n.tbl" 1>&2 ;
@@ -4292,6 +4534,87 @@ for n in chrs jobs steps status;
 echo "# --> \$MySQLPAR/seqs.tbl" 1>&2 ;
 { notangle -R'MySQL: adm file - seqs' $WORK/$nwfile.nw ; 
   cat $HUMUS/seqid_list ; } | cpif $MySQLPAR/seqs.tbl ;
+#
+@ 
+
+The following files contain the relevant data for mouse.
+
+<<MySQL: adm file - mouse chrs>>=
+#
+# Mmusculus_chrs.tbl
+#
+#   chromosome table
+#
+<<Version Control Id Tag>>
+#
+# Setting global version (must start with '#># ')
+#
+#># MGSC V3 20020411
+#
+# Record Format:
+#   <chr_id> <version> <description>
+# where:
+#       <version> == . --> global version
+#   <description> == . --> undef
+ 1 . .
+ 2 . .
+ 3 . .
+ 4 . .
+ 5 . .
+ 6 . .
+ 7 . .
+ 8 . .
+ 9 . .
+10 . .
+11 . .
+12 . .
+13 . .
+14 . .
+15 . .
+16 . .
+17 . .
+18 . .
+19 . .
+ X . .
+# Y . .
+#
+UN . .
+# NA . .
+# UL . .
+#
+@  %%% MySQL: adm file - Mmusculus_chrs
+
+<<MySQL: adm file - mouse seqs>>=
+#
+# Mmusculus_seqs.tbl
+#
+#   sequences for each chromosome
+#
+<<Version Control Id Tag>>
+#
+# Record Format:
+#   <chr_id> <sequence_id> <length> <file_modifying_date> <description>
+# where:
+#   <file_modifying_date> is in YYYYMMDDhhmmss format
+#   <description> == . --> undef
+# 
+@  %%% MySQL: adm file - Mmusculus_seqs
+
+<<tangling: mySQL param>>=
+# 
+# mySQL perl auxiliarly files
+( echo "###"; echo "### PARAMETER FILES FOR M.musculus..."; echo "###" ) 1>&2 ; 
+for n in chrs ; #  jobs steps status;
+  do { 
+       echo "# --> \$MySQLPAR/Mmusculus_$n.tbl" 1>&2 ;
+       notangle -R"MySQL: adm file - mouse $n" \
+           $WORK/$nwfile.nw | cpif $MySQLPAR/Mmusculus_$n.tbl ;
+     }; 
+  done;
+# seqs.tbl is produced by initialization script on sequence analysis section
+echo "# --> \$MySQLPAR/Mmusculus_seqs.tbl" 1>&2 ;
+{ notangle -R'MySQL: adm file - mouse seqs' $WORK/$nwfile.nw ; 
+  cat $MUSHU/seqid_list ; } | cpif $MySQLPAR/Mmusculus_seqs.tbl ;
 #
 @ 
 
@@ -7616,7 +7939,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.24 2002-05-01 20:05:10 jabril Exp $
+# $Id: humus.nw,v 1.25 2002-05-02 19:13:13 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7757,18 +8080,21 @@ export BASE HBASE MBASE ;
 HSAP="/seq/genomes/H.sapiens/golden_path_20011222" ; # UCSC
 HSAPID="20011222" ; HSAPSTR="20011222.UCSCgp" ;
 HSEQ="$HSAP/chromFa" ; 
+HSEQMSK="$HSAP/chromFa_msk" ; 
 # MMUS="/seq/genomes/M.musculus/sanger_phusion_20011109" ; # 
 # MMUSID="20011109" ; MMUSSTR="20011109.SCphu" ;
 MMUS="/seq/genomes/M.musculus/MGSC_V3_20020411" ; # 
 MMUSID="20020411" ; MMUSSTR="20020411.MGSCv3" ;
 MSEQ="$MMUS/golden_path_200202MM/bigZips/unmasked" ; 
+MSEQMSK="$MMUS/golden_path_200202MM/bigZips/masked" ; 
 # 
 # FTPTBX="$HUMUS/.ftp/PankajAgarwal/20020111.tbx-20010806UCSCgp-20011109SCphusion" ;
 # FTPTBXID="20020111" ;
 FTPTBX="$HBASE/.ftp/PankajAgarwal/20020425.tbx-20011222UCSCgp-20020411MGSCv3" ;
 FTPTBXID="20020425" ;
 #
-export HSAP HSAPID HSAPSTR HSEQ MMUS MMUSID MMUSSTR MSEQ FTPTBX FTPTBXID ;
+export HSAP HSAPID HSAPSTR HSEQ HSEQMSK \
+       MMUS MMUSID MMUSSTR MSEQ MSEQMSK FTPTBX FTPTBXID ;
 #
 HUMUS="$HBASE/$HSAPSTR" ;
 MUSHU="$MBASE/$MMUSSTR" ;
