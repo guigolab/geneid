@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: splitfasta.nw,v 1.1 2001-09-06 18:26:09 jabril Exp $ 
+% # $Id: splitfasta.nw,v 1.2 2001-10-05 16:36:23 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -107,21 +107,31 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\def\genomelab{\textbf{Genome Informatics Research Lab}}
 \def\progname{splitfasta.pl}
+\def\tit{\textsc{\progname}}
+%
 \def\mtjabril{
  \htmladdnormallink{\texttt{jabril@imim.es}}
                    {MAILTO:jabril@imim.es?subject=[splitfasta]}
  } % def mtjabril
+%
 \def\authorslist{
  Josep F. Abril {\mdseries\small\dotfill \mtjabril } \\
  % Other authors here...\\
  } % def authorslist
+\def\authorshort{
+ Abril, JF % Other authors here...
+ } % def authorshort
+%
 \def\license{GNU General Public License (GNU-GPL)}
-\def\description{
+%
+\def\progdesc{
 This program breaks large fasta files into smaller fasta sequences, given a certain subsequence length and a fixed overlap.
- } % def description 
+ } % def progdesc 
+%
 \def\showaffiliation{
-\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+\scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
@@ -135,7 +145,8 @@ Universitat Pompeu Fabra\\[2ex]
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\tit\quad\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -177,7 +188,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
  Last Update: & {\today}                               \\[2ex]
  Description: & {\large\mdseries
                  \begin{minipage}[t]{0.95\rttbl}
-                 \description
+                 \progdesc
                  \end{minipage}}                       \\[2ex]
 \\
 \multicolumn{2}{c}{\shortstack{\rule[0ex]{0.95\linewidth}{2pt}\\[0ex]
@@ -214,7 +225,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: splitfasta.nw,v 1.1 2001-09-06 18:26:09 jabril Exp $$>$ }
+{\small$<$ \verb$Id: splitfasta.nw,v 1.2 2001-10-05 16:36:23 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -242,6 +253,24 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Implementation}
+
+<<Program Info>>=
+my $PROGRAM = 'splitfasta.pl';
+my $VERSION = '1.0_alpha';
+@ 
+
+<<Program Description>>=
+# #----------------------------------------------------------------#
+# #                          splitfasta                            #
+# #----------------------------------------------------------------#
+#
+#     splitfasta.pl  seqlength overlap < fastafile > output
+#
+#         Breaking large fasta sequences to build 
+#         databases for running tblastx faster
+# 
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+@
 
 \subsctn{Program outline}
 
@@ -294,24 +323,12 @@ sub {
 \todo{ \item \todoAAA } % todo
 
 <<OLD IMPLEMENTATION>>=
-#
-# splitfastaseq.pl \
-#     seqlength overlap < fastafile > output
-#
-#     Breaking large fasta sequences to build 
-#     databases for running tblastx faster
-# 
 use lib qw( /usr/lib/perl5/site_perl/5.005/ );
 use Bio::Seq;
 use Bio::SeqIO;
 use Benchmark;
 my ($T,$F) = (1,0);
 my @Timer = (new Benchmark);
-my $PROGRAM = 'splitfastaseq.pl';
-my $DATE = localtime;
-my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
-my $host = `hostname`;
-chomp($host);
 my $line = ('#' x 80)."\n";
 my $s = '### ';
 #
@@ -413,22 +430,25 @@ sub timing() {
 <<PERL shebang>>=
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
+<<Program Description>>
+#
 <<GNU License>>
+#
 <<Version Control Id Tag>>
 #
 use strict;
+#
+<<Program Info>>
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : 'Child Process';
+my $host = `hostname`;
+chomp($host);
+#
 @
 
 <<Global Constants - Boolean>>=
 my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
 @ %def $T $F
-
-We also set here the date when the script is running and who is the user running it.
-
-<<Global Vars - User and Date>>=
-my $DATE = localtime;
-my $USER = $ENV{USER};
-@ %def $DATE $USER
 
 
 \subsubsctn{Timing our scripts}
@@ -567,20 +587,12 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: splitfasta.nw,v 1.1 2001-09-06 18:26:09 jabril Exp $
+# $Id: splitfasta.nw,v 1.2 2001-10-05 16:36:23 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
 
 <<GNU License>>=
-# #----------------------------------------------------------------#
-# #                          splitfasta                         #
-# #----------------------------------------------------------------#
-# 
-#    Remember to put a short description of your script here...
-# 
-#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
