@@ -2,11 +2,11 @@
 *                                                                        *
 *   Module: SearchEvidenceExons                                          *
 *                                                                        *
-*   Searching evidence exons between (l1, l2).                           *
+*   Extracting evidence exons between (l1, l2) for the current split     *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,26 +24,38 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SearchEvidenceExons.c,v 1.5 2001-02-14 15:40:33 eblanco Exp $  */
+/*  $Id: SearchEvidenceExons.c,v 1.6 2002-03-20 10:44:38 eblanco Exp $  */
 
 #include "geneid.h"
 
-/* Looking for evidence exons to join with current split predictions */
-long SearchEvidenceExons(packEvidence* pv, long l2)
+/* Looking for annotations to include with current ab initio predictions */
+void SearchEvidenceExons(packEvidence* pv, long l2)
 {
   long i;
   
   /* Evidences with acceptor higher than l2 will be always ignored */
   i = pv->i1vExons;
-  while ((i < pv->nvExons) && ((pv->vExons+i)->Acceptor->Position + (pv->vExons+i)->offset1) <= l2)
+  while ((i < pv->nvExons) &&
+		 ((pv->vExons+i)->Acceptor->Position + (pv->vExons+i)->offset1) <= l2)
     i++;
-    
+  
   pv->i2vExons = i;
-
-  return(pv->i2vExons - pv->i1vExons);
+  
+  pv->ivExons = pv->i2vExons - pv->i1vExons;
 }
 
+/* Processing next block of annotations */
 void SwitchCounters(packEvidence* pv)
 {
   pv->i1vExons = pv->i2vExons;
 }
+
+/* Reset counters in packEvidence for the next input sequence */
+void resetEvidenceCounters(packEvidence* pv)
+{
+  pv->i1vExons = 0;
+  pv->i2vExons = 0;
+}
+
+
+
