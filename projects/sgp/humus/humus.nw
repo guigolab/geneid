@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.56 2002-06-19 11:35:39 jabril Exp $ 
+% # $Id: humus.nw,v 1.57 2002-06-19 18:54:19 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.56 2002-06-19 11:35:39 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.57 2002-06-19 18:54:19 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3580,6 +3580,10 @@ prtcode $STATS/SRs.summary ;
       tail -20 $MD/$GPDIR+RefSeqEvids/logs/chr$n.sgp | \
                egrep 'TOTAL:|Error:|segmentation fault' ;
       head -4 $MD/$GPDIR+RefSeqEvids/out/chr$n ;
+      echo '### SGP MASKED+RefSeq' ;
+      tail -20 $MD/$GP2DIR+RefSeqEvids/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GP2DIR+RefSeqEvids/out/chr$n ;
       echo '' ;
       } ;
     done ;
@@ -3606,6 +3610,10 @@ prtcode $STATS/SRs.summary ;
       tail -20 $MD/$GPDIR+RefSeqEvids/logs/chr$n.sgp | \
                egrep 'TOTAL:|Error:|segmentation fault' ;
       head -4 $MD/$GPDIR+RefSeqEvids/out/chr$n ;
+      echo '### SGP MASKED+RefSeq' ;
+      tail -20 $MD/$GP2DIR+RefSeqEvids/logs/chr$n.sgp | \
+               egrep 'TOTAL:|Error:|segmentation fault' ;
+      head -4 $MD/$GP2DIR+RefSeqEvids/out/chr$n ;
       echo '' ;
       } ;
     done ) > $STATS/gene-prediction.summary 2>&1 ;
@@ -4959,7 +4967,7 @@ use Data::Dumper;
 local $Data::Dumper::Purity = 0;
 local $Data::Dumper::Deepcopy = 1;
 #
-use global qw( :ExecReport :ExitStatus :Counter );
+use global qw( :ExecReport :ExitStatus :Counter :MathFuncts );
 &init_timer(\@exectime);
 #
 $PROG = 'gtf2gff.pl';
@@ -4973,13 +4981,16 @@ my $ifile = shift @ARGV;
 my ($T,$F) = (1,0);
 my %genes = ();
 my @geneslst = ();
+my ($PRTFEAT,$STOPFEAT) = qw( cds stop_codon );
 #
 # MAIN
 &program_started($PROG);
 
 &load_gtf_records($ifile) || exit(1);
 &sort_gff_records();
-print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
+&print_gff_records();
+# print STDERR Data::Dumper->Dump([ \%genes ],[ qw/ *genes / ]);
+# print STDERR Data::Dumper->Dump([ \@geneslst ],[ qw/ *geneslst / ]);
 
 &program_finished($PROG);
 exit(0);
@@ -5004,8 +5015,9 @@ sub load_gtf_records() {
         chomp;
         @f = split /\s+/og, $_;
         ($grp = $f[9]) =~ s/\"//og ;
+        $grp =~ s/;$//o ;
         $key = $grp.$f[6];
-        print STDERR "### $key\n";
+        # print STDERR "### $key\n";
         defined($gene_list{$key}) || do { # group + strand
             $c = 'X';
             $gcnt++;
@@ -5050,9 +5062,37 @@ sub sort_gff_records() {
                 sort { $a->[0] <=> $b->[0]
                                ||
                        $a->[1] <=> $b->[1] }
-                map  { $genes{$_}{START}, $genes{$_}{STOP}, $_ } (keys %genes);
-    }; # foreach $ref
+                map  { [ $genes{$_}{START}, $genes{$_}{STOP}, $_ ] } (keys %genes);
 } # sort_gff_records
+sub print_gff_records() {
+    print $ERRFH "## $PROG ## PRINTING GFF RECORDS...\n";
+    for (my $k = 0; $k <= $#geneslst; $k++) {
+        my ($rf,$str,$grp,@out);
+        @out = (); 
+        $rf = \@{ $genes{$geneslst[$k]}{FEATURES} };
+        $str = $genes{$geneslst[$k]}{STRAND};
+        $grp = $genes{$geneslst[$k]}{NAME};
+        for (my $q = 0; $q <= $#{$rf}; $q++) {
+            my $feat = lc($rf->[$q][2]);
+            $feat eq $PRTFEAT && do {
+                push @out, \@{ $rf->[$q] };
+                next;
+            };
+            ($feat eq $STOPFEAT) && do {
+                ($str eq '-') && do {
+                    $rf->[($q + 1)][3] = $rf->[$q][3];
+                    next;
+                };
+                ($str eq '+') && do {
+                    ${$out[$#out]}->[4] = $rf->[$q][4];
+                };
+            };
+        }; # for $q
+        foreach my $o (@out) {
+            print STDOUT join("\t", (@{$o}, $grp))."\n";
+        };
+    }; # for $k
+} # print_gff_records
 @ 
 
 
@@ -10761,7 +10801,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.56 2002-06-19 11:35:39 jabril Exp $
+# $Id: humus.nw,v 1.57 2002-06-19 18:54:19 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
