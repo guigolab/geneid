@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Dictionary.c,v 1.5 2003-11-05 14:22:00 eblanco Exp $  */
+/*  $Id: Dictionary.c,v 1.6 2004-02-03 10:18:23 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -217,11 +217,11 @@ char getAADict(dict* d, char s[])
   int aa;
   node *p;
 
-  aa = 'X';
+  aa = UNKNOWNAA;
   
   i = f(s);
   if(d->T[i]==NULL)
-    aa = 'X';
+    aa = UNKNOWNAA;
   else
     {
       /* There are more nodes in this position */
@@ -237,7 +237,7 @@ char getAADict(dict* d, char s[])
 		  p = p->next;
 		}
       if(!found)
-		aa = 'X';
+		aa = UNKNOWNAA;
     }
   return(aa);
 }
