@@ -1,0 +1,44 @@
+#
+#  README_CVS - recording CVS commands for this project
+#
+#  $Id: README_CVS,v 1.1.1.1 2001-06-02 11:24:16 jabril Exp $
+# 
+
+[~]$ cd ~jabril/development/sggp/
+
+# First of all, we need to login to CVS server.
+
+[sggp]$ cvs login
+(Logging in to jabril@monstre.imim.es) 
+CVS password: <type here your CVS password>
+
+
+# Putting a NEW project into a CVS repository is known as importing.
+
+[sggp]$ cvs import -m "Initial import of SGGP project into CVS" software/sggp jabril start
+I sggp/RCS
+N sggp/ltx
+N sggp/SintenicGenePrediction.nw
+N sggp/nw2tex
+N sggp/.bash_VARS
+N sggp/.csh_VARS
+cvs server: Importing /usr/local/cvs/sggp/bin
+N sggp/bin/sgp.pl
+cvs server: Importing /usr/local/cvs/sggp/data
+cvs server: Importing /usr/local/cvs/sggp/data/bi
+N sggp/data/bi/bi
+N sggp/data/bi/bi.fa
+N sggp/data/bi/bi.gff
+cvs server: Importing /usr/local/cvs/sggp/data/imog
+N sggp/data/imog/imog
+N sggp/data/imog/imog.gff
+N sggp/data/imog/imog.fa
+cvs server: Importing /usr/local/cvs/sggp/docs
+N sggp/docs/README_CVS
+N sggp/docs/GNU_GPL
+N sggp/docs/SintenicGenePrediction.ps
+N sggp/docs/SintenicGenePrediction.tex
+cvs server: Importing /usr/local/cvs/sggp/docs/psfigures
+N sggp/docs/psfigures/algo2.ps
+
+No conflicts created by this import
