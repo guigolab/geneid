@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.15 2002-04-27 17:29:16 jabril Exp $ 
+% # $Id: humus.nw,v 1.16 2002-04-28 00:28:34 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.15 2002-04-27 17:29:16 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.16 2002-04-28 00:28:34 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -509,14 +509,122 @@ MkDirs $HUMUS/.ftp $HUMUS/.ftp/PankajAgarwal
 #
 # Retrieving Golden path sequence names and length
 #
-HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
-HSAPID="20010806";
+##
+## HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
+## HSAPID="20010806";
+##
+HSAP="/seq/genomes/H.sapiens/golden_path_20011222" ; # UCSC
+HSAPID="20011222";
+HUMUS="/projects/H.sapiens/20011222.UCSCgp";
+MkDirs $HUMUS
+##
 # 
 # getfastadesc.pl must be executed after table update
 #   on mySQL database (after admin_db_Hsapiens.pl)
 #
-$BIN/getfastadesc.pl $MySQLPAR/chrs.tbl $HSAP/chromosomes \
+$BIN/getfastadesc.pl $MySQLPAR/chrs.tbl $HSAP/chromFa \
                      > $HUMUS/seqid_list 2> $HUMUS/seqid_list.rpt ;
+#
+###################################################################
+#
+# Fixing Pankaj TBLASTX files
+ls -1 MGSCv3-22dec2001GP-tbx/ | grep -c '^chr' ;
+  32232 TOTAL FILES
+#
+  32219	TBLASTX
+      4	                       (^@ x n times)
+      3	                         "       "
+      1	                         "       "
+      1	                         "       "
+      1	....10....20....30......60....70....80....90....100%
+      1	....10....30....40....50........70....80....90....100%
+      1	....10....20...30....40....50....60......80....90....100%
+      1	........20....30....40....50....60....70....80....90....100%
+        13 FILES WITH BAD TBX HEADER !!!!
+  32232 TOTAL FILES
+# FILES WITH BAD TBX HEADER
+chr10_107400000_100300
+chr12_500000_100300
+chr13_77200000_100300
+chr15_46400000_100300
+chr17_31400000_100300
+chr18_36200000_100300
+chr22_35300000_100300
+chr2_58500000_100300
+chr2_92300000_100300
+chr4_22100000_100300
+chr8_139100000_100300
+chr8_82800000_100300
+chrX_92200000_100300
+## FIXING !!!
+errsfound=0 ;
+IDIR="/projects/H.sapiens/.ftp/PankajAgarwal/MGSCv3-22dec2001GP-tbx" ;
+ls -1 $IDIR/ | \
+  grep '^chr' | \
+    while read n ; 
+      do {
+        head -1 $IDIR/$n | \
+          gawk 'BEGIN{ fl=ARGV[1]; ARGV[1]="" }
+                $1 !~ "TBLASTX" {print fl}' $n - ;
+      } ;
+  done > $IDIR/MGSCv3-22dec2001GP-tbx.bad_header_files ;
+cat $IDIR/../MGSCv3-22dec2001GP-tbx.bad_header_files | \
+  while read m ;
+    do {
+      errsfound=`expr $errsfound + 1` ;
+      perl -e ' use strict;
+my $ifile = shift @ARGV;
+my $fl = "";
+($ifile =~ m%/([^/]*)$%o) && ($fl = $1);
+print STDERR "# Working on $ifile --> $fl \n";
+#
+open(TBX,"< $ifile") || die("### CANNOT OPEN FILE $ifile $!");
+my $prt = 0;
+while (<TBX>) {
+    $prt && do { print STDOUT $_ };
+    $_ =~ /^Sequences producing High-scoring Segment Pairs:/io && do {
+        $prt = 1;
+        &prthead($fl);
+        print STDOUT $_;
+    };
+}; # while TBX
+close(TBX);
+exit(0);
+#
+sub prthead() {
+    my $query = shift;
+    print STDOUT <<"+++EOT+++" 
+TBLASTX 2.0MP-WashU [13-Dec-2000] [decunix4.0-ev5-L64 09:44:13 06-Sep-2001]
+
+Copyright (C) 1996-2000 Washington University, Saint Louis, Missouri USA.
+All Rights Reserved.
+
+Reference:  Gish, W. (1996-2000) http://blast.wustl.edu
+
+Notice:  statistical significance is estimated under the assumption that the
+equivalent of one entire reading frame of the query sequence and one entire
+reading frame of the database code for protein and that significant alignments
+will only involve coding reading frames.
+
+Query=  $query
+        (100,300 letters)
+
+  Translating both strands of query sequence in all 6 reading frames
+
+Database:  MGSCv3Asm
+           27,280 sequences; 2,735,012,454 total letters.
+Searching....10....20....30....40....50....60....70....80....90....100% done
+
+                                                                     Smallest
+                                                                       Sum
+                                                     Reading  High  Probability
++++EOT+++
+} # prthead
+      ' $IDIR/$m > $IDIR/$m.tmp ;
+      mv -v $IDIR/$m.tmp $IDIR/$m ;
+    } ;
+  done ; 
+echo "### BAD TBLASTX FILE HEADERS FOUND FOR $errsfound FILES..." ;
 #
 @
 
@@ -1289,7 +1397,7 @@ EW=0 ; # add to exon weigth
 #<# ODIR="$HUMUS/$NCHR/geneid/$XID/out" ;
 #--> we do not run geneid on masked sequences at this moment
 #--> we are using original un-masked fasta sequences from GP
-ISEQ="$HSAP/chromosomes/$SEQ.fa" ;
+ISEQ="$HSEQ/$SEQ.fa" ;
 #
 CheckFile R $PARAM $ISEQ ;
 #
@@ -1549,7 +1657,7 @@ EW=0 ; # add to exon weigth
 #<# ODIR="$HUMUS/$NCHR/sgp/$XID/out" ;
 #--> we do not run geneid on masked sequences at this moment
 #--> we are using original un-masked fasta sequences from GP
-ISEQ="$HSAP/chromosomes/$SEQ.fa" ;
+ISEQ="$HSEQ/$SEQ.fa" ;
 #
 HOMOLOGY="$HUMUS/$NCHR/sgp/$XID/hsp-sr/$SEQ.gff" ;
 if [ -f "$HOMOLOGY" ] ;
@@ -7256,7 +7364,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.15 2002-04-27 17:29:16 jabril Exp $
+# $Id: humus.nw,v 1.16 2002-04-28 00:28:34 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7386,11 +7494,18 @@ source $WORK/.project_VARS ;
 umask 002 ;
 #
 # Make these "six" vars independent from script (maybe join them with %HOSTS)
-HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
-HSAPID="20010806" ; HSAPSTR="20010806.UCSCgp" ; 
-MMUS="/seq/genomes/M.musculus/sanger_phusion_20011109" ; # 
-MMUSID="20011109" ; MMUSSTR="20011109.SCphu" ;
-export HSAP HSAPID HSAPSTR MMUS MMUSID MMUSSTR ;
+# HSAP="/seq/genomes/H.sapiens/golden_path_20010806" ; # UCSC
+# HSAPID="20010806" ; HSAPSTR="20010806.UCSCgp" ; 
+# HSEQ="$HSAP/chromosomes" ; 
+HSAP="/seq/genomes/H.sapiens/golden_path_20011222" ; # UCSC
+HSAPID="20011222" ; HSAPSTR="20011222.UCSCgp" ;
+HSEQ="$HSAP/chromFa" ; 
+# MMUS="/seq/genomes/M.musculus/sanger_phusion_20011109" ; # 
+# MMUSID="20011109" ; MMUSSTR="20011109.SCphu" ;
+MMUS="/seq/genomes/M.musculus/MGSC_V3_20020411" ; # 
+MMUSID="20020411" ; MMUSSTR="20020411.MGSCv3" ;
+MSEQ="$MMUS/golden_path_200202MM/bigZips/unmasked" ; 
+export HSAP HSAPID HSAPSTR HSEQ MMUS MMUSID MMUSSTR MSEQ ;
 #
 BASE="/projects" ;
 HUMUS="$BASE/H.sapiens/$HSAPSTR" ;
