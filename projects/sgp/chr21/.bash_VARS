@@ -1,0 +1,19 @@
+#
+# Setting Global Variables
+WORK="/projects/sgp/chr21/_docs" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+SRC="$WORK/src" ; # where to put the distributable files
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+TEST="$WORK/tests" ;
+nwfile="Human_Chromosome_21" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
+DATASETS="/projects/datasets/chr21" ;
+ANALYSIS="/projects/sgp/chr21" ;
+SGPBIN="/projects/sgp/bin" ;
+SGPPARAM="$SGPBIN/param" ;
+export DATASETS ANALYSIS SGPBIN SGPPARAM;
+# Allowing for users and group file permisions
+umask 002;
