@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $
+% $Id: gff2aplot.nw,v 1.24 2001-11-23 19:28:49 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.24 2001-11-23 19:28:49 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -488,9 +488,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.23 $', #'
-     '$Date: 2001-11-23 01:08:10 $', #'
-     '$Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $', #'
+     '$Revision: 1.24 $', #'
+     '$Date: 2001-11-23 19:28:49 $', #'
+     '$Id: gff2aplot.nw,v 1.24 2001-11-23 19:28:49 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -6462,8 +6462,10 @@ PSVARS =>
 
 <<PSVariables - layout>>=
 %% Layout
-/flglscape @{[ &tobool($F) ]} D  %:% landscape mode not implemented yet
+/flglscape @{[ &tobool($F) ]} D      %:% landscape mode not implemented yet
+ %:%
 /flgcrd @{[ &tobool($vr->{hide_credits}) ]} D
+ %:%
 /Dpage {                %-> Dpage -> page_width page_height
   pagedict begin        %-> recovering from pagedict dictionary
     pg$vr->{page_size}  %->          this page width and height        
@@ -6471,7 +6473,7 @@ PSVARS =>
       exch              %->    exchanges width and height
     } if                %->
   end                   %-> close pagedict
-} B
+} B                     %:%
 @ %def flglscape flgcrd Dpage
 
 <<PSVariables - layout>>=
@@ -6505,23 +6507,24 @@ PSVARS =>
 /XE $vr->{_x_end} D    %-% X-sequence last  nucleotide coord
 /YO $vr->{_y_start} D  %-% Y-sequence first nucleotide coord
 /YE $vr->{_y_end} D    %:% Y-sequence last  nucleotide coord
-/axesp @{[ &tobool($vr->{aplot_xy_same_length}) ]} D
-% /xyratio $vr->{aplot_xy_scale} D
-/Zmarks @{[ &tobool($vr->{zoom_marks}) ]} D
+/axesp @{[ &tobool($vr->{aplot_xy_same_length}) ]} D  %-%
+% /xyratio $vr->{aplot_xy_scale} D                    %-%
+/Zmarks @{[ &tobool($vr->{zoom_marks}) ]} D           %:%
 @ %def XO XE YO YE axesp xyratio Zmarks
 
 <<PSVariables - tickmarks>>=
 %% Tickmarks
 /KGb @{[ &tobool($vr->{show_grid}) ]} D            %-% 
 /KLb @{[ &tobool($vr->{show_tickmark_label}) ]} D  %:% tickmark labels == coords
-%
 /KAXb @{[ &tobool($vr->{show_aplot_x_ticks}) ]} D    %-% Aplot X ticKmarks flg
 /KAYb @{[ &tobool($vr->{show_aplot_y_ticks}) ]} D    %-% Aplot Y ticKmarks flg
 /KPXb @{[ &tobool($vr->{show_percent_x_ticks}) ]} D  %-% Percent X ticKmarks flg
 /KPYb @{[ &tobool($vr->{show_percent_y_ticks}) ]} D  %-% Percent Y ticKmarks flg
 /KQXb @{[ &tobool($vr->{show_extrabox_x_ticks}) ]} D %-% extra-Q X ticKmarks flg
 /KQYb @{[ &tobool($vr->{show_extrabox_y_ticks}) ]} D %:% extra-Q X ticKmarks flg
-%
+@ %def KGb KLb KAXb KAYb KPXb KPYb KQXb KQYb
+
+<<PSVariables - tickmarks>>=
 /KASm $vr->{major_tickmark_nucleotide} D
 /KASn $vr->{minor_tickmark_nucleotide} D
 % % /maxtck $vr->{aplot_major_tickmark} D
@@ -6534,50 +6537,52 @@ PSVARS =>
 % /KQSn $vr->{extra_minor_tickmark_step} D
 % % /xtrmxt $vr->{extra_major_tickmark} D
 % % /xtrmnt $vr->{extra_minor_tickmark} D
-@
+@ %def KASm KASn KPSm KPSn KQSm KQSn
 
 <<PSVariables - labels>>=
 %% Labels
-/TTLb @{[ &tobool($vr->{show_title}) ]} D
-/TTLl @{[ &tostring($vr->{title}) ]} D
-/TTLz @{ $vr->{title_fontsize} } D
-/TTLf { TTLz $Fonts{$vr->{title_font}} } D
-%
-/TTlb @{[ &tobool($vr->{show_subtitle}) ]} D
-/TTll @{[ &tostring($vr->{subtitle}) ]} D
-/TTlz @{ $vr->{subtitle_fontsize} } D
-/TTlf { TTlz $Fonts{$vr->{subtitle_font}} } D
-%
-/XSLb @{[ &tobool($vr->{show_x_sequence_label}) ]} D
-/XSLl @{[ &tostring($vr->{x_sequence_label}) ]} D
-/XSLz @{ $vr->{x_label_fontsize} } D
-/XSLf { XSLz $Fonts{$vr->{x_label_font}} } D
-%
-/YSLb @{[ &tobool($vr->{show_y_sequence_label}) ]} D
-/YSLl @{[ &tostring($vr->{y_sequence_label}) ]} D
-/YSLz @{ $vr->{y_label_fontsize} } D
-/YSLf { YSLz $Fonts{$vr->{y_label_font}} } D
-%
-/PBLb @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D
-/PBLl @{[ &tostring($vr->{percent_box_label}) ]} D
-/PBLz @{ $vr->{percent_box_label_fontsize} } D
-/PBLf { SBoxLabfsz $Fonts{$vr->{percent_box_label_font}} } D
-%
-/PBlb @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D
-/PBll @{[ &tostring($vr->{percent_box_sublabel}) ]} D
-/PBlz @{ $vr->{percent_box_sublabel_fontsize} } D
-/PBlf { SBoxSLabfsz $Fonts{$vr->{percent_box_sublabel_font}} } D
-%
-/QBLb @{[ &tobool($vr->{show_extra_box_label}) ]} D
-/QBLl @{[ &tostring($vr->{extra_box_label}) ]} D
-/QBLz @{ $vr->{extra_box_label_fontsize} } D
-/QBLf { XBoxLabfsz $Fonts{$vr->{extra_box_label_font}} } D
-%
-/QBlb @{[ &tobool($vr->{show_extra_box_sublabel}) ]} D
-/QBll @{[ &tostring($vr->{extra_box_sublabel}) ]} D
-/QBlz @{ $vr->{extra_box_sublabel_fontsize} } D
-/QBlf { XBoxSLabfsz $Fonts{$vr->{extra_box_sublabel_font}} } D
-@
+/TTLb @{[ &tobool($vr->{show_title}) ]} D      %-%
+/TTLl @{[ &tostring($vr->{title}) ]} D         %-%
+/TTLz @{ $vr->{title_fontsize} } D             %-%
+/TTLf { TTLz $Fonts{$vr->{title_font}} } D     %-%
+/TTlb @{[ &tobool($vr->{show_subtitle}) ]} D   %-%
+/TTll @{[ &tostring($vr->{subtitle}) ]} D      %-%
+/TTlz @{ $vr->{subtitle_fontsize} } D          %-%
+/TTlf { TTlz $Fonts{$vr->{subtitle_font}} } D  %:%
+@ %def TTLb TTLl TTLz TTLf TTlb TTll TTlz TTlf
+
+<<PSVariables - labels>>=
+/XSLb @{[ &tobool($vr->{show_x_sequence_label}) ]} D  %-%
+/XSLl @{[ &tostring($vr->{x_sequence_label}) ]} D     %-%
+/XSLz @{ $vr->{x_label_fontsize} } D                  %-%
+/XSLf { XSLz $Fonts{$vr->{x_label_font}} } D          %-%
+/YSLb @{[ &tobool($vr->{show_y_sequence_label}) ]} D  %-%
+/YSLl @{[ &tostring($vr->{y_sequence_label}) ]} D     %-%
+/YSLz @{ $vr->{y_label_fontsize} } D                  %-%
+/YSLf { YSLz $Fonts{$vr->{y_label_font}} } D          %:%
+@ %def XSLb XSLl XSLz XSLf YSLb YSLl YSLz YSLf
+
+<<PSVariables - labels>>=
+/PBLb @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D      %-%
+/PBLl @{[ &tostring($vr->{percent_box_label}) ]} D            %-%
+/PBLz @{ $vr->{percent_box_label_fontsize} } D                %-%
+/PBLf { SBoxLabfsz $Fonts{$vr->{percent_box_label_font}} } D  %-%
+/PBlb @{[ &tobool($vr->{show_percent_box_sublabel}) ]} D      %-%
+/PBll @{[ &tostring($vr->{percent_box_sublabel}) ]} D         %-%
+/PBlz @{ $vr->{percent_box_sublabel_fontsize} } D             %-%
+/PBlf { SBoxSLabfsz $Fonts{$vr->{percent_box_sublabel_font}} } D  %:%
+@ %def PBLb PBLl PBLz PBLf PBlb PBll PBlz PBlf
+
+<<PSVariables - labels>>=
+/QBLb @{[ &tobool($vr->{show_extra_box_label}) ]} D         %-%
+/QBLl @{[ &tostring($vr->{extra_box_label}) ]} D            %-%
+/QBLz @{ $vr->{extra_box_label_fontsize} } D                %-%
+/QBLf { XBoxLabfsz $Fonts{$vr->{extra_box_label_font}} } D  %-%
+/QBlb @{[ &tobool($vr->{show_extra_box_sublabel}) ]} D      %-%
+/QBll @{[ &tostring($vr->{extra_box_sublabel}) ]} D         %-%
+/QBlz @{ $vr->{extra_box_sublabel_fontsize} } D             %-%
+/QBlf { XBoxSLabfsz $Fonts{$vr->{extra_box_sublabel_font}} } D  %:%
+@ %def QBLb QBLl QBLz QBLf QBlb QBll QBlz QBlf
 
 <<PSVariables - labels>>=
 %
@@ -6933,27 +6938,27 @@ We have implemented a perl script that is used as a [[noweb]] filter (see append
 %
 /B { bind def } bind def       %-%
 /X { exch def } B              %-%
-/D { def      } B
+/D { def      } B              %:%
 %
 /S { gsave     } B             %-%
 /R { grestore  } B             %-%
 /F { scale     } B             %-%
-/T { translate } B
+/T { translate } B             %:%
 %
 /m  { moveto  } B              %-%
 /rm { rmoveto } B              %-%
 /l  { lineto  } B              %-%
 /rl { rlineto } B              %-%
-/K  { stroke  } B
+/K  { stroke  } B              %:%
 %
 /scmyk { setcmykcolor } B      %-%
 /slw { setlinewidth } B        %-%
-/dotted { [ 1 ] 0 setdash } D 
+/dotted { [ 1 ] 0 setdash } D  %:%
 %
 /pt   {           } B          %-%
 /cm   { 28.35 mul } B          %-%
 /ivcm { 28.35 div } B          %-%
-/in   { 72    mul } B
+/in   { 72    mul } B          %:%
 %
 <<PSFunctions - bbox>>
 %
@@ -6976,7 +6981,7 @@ We have implemented a perl script that is used as a [[noweb]] filter (see append
   8 -2 roll  %-> urx lly urx ury llx ury llx lly
   m l l l    %->
   closepath  %->
-} B
+} B          %:%
 @ %def bbox
 \end{center}
 \end{minipage}
@@ -9039,7 +9044,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.24 2001-11-23 19:28:49 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -9327,16 +9332,14 @@ sub parseOpts() {
 %
 \newcommand{\rvdef}[1]{
 \multicolumn{3}{l}{
- \vspace{2ex}
-% \begin{flushright}
+ \vspace{2ex}                        % \begin{flushright}
   \hrulefill
   \raisebox{-0.5ex}[0pt]{
     \psframebox[framearc=1,framesep=0.75ex,linestyle=solid,
                 linecolor=black,fillcolor=white,fillstyle=solid]{
                    \textbf{\textsc{#1}}
                 } % psframebox
-    } % raisebox
-% \end{flushright}
+    } % raisebox                     % \end{flushright}
 } \\[1.5ex] % multicolumn
 } % rvdef
 \newcommand{\rvdesc}[3]{ \hfill #1 \hfill & \centering #2 & #3 \\}
@@ -9788,8 +9791,8 @@ sub toin() { return sprintf("%.1f", ($_[0] / 72.00)); }
 \vskip 1ex
 \fbox{
 \begin{tabular}{c@{\quad$\equiv$\quad}c}
-28.35 pts & 1 cm   \\
-72.00 pts & 1 inch \\
+28.35 pt & 1 cm   \\
+72.00 pt & 1 inch \\
 \end{tabular}
 } % fbox
   %\refstepcounter{table}
@@ -9813,6 +9816,37 @@ sub toin() { return sprintf("%.1f", ($_[0] / 72.00)); }
 notangle -R"PScompactnw.pl" $WORK/$nwfile.nw | cpif $BIN/PScompactnw.pl ;
 chmod a+x $BIN/PScompactnw.pl ;
 #
+notangle -R"flt.sh" $WORK/$nwfile.nw | cpif $BIN/flt.sh ;
+chmod a+x $BIN/flt.sh ;
+#
+@ 
+
+<<tests on PScompactnw.pl script>>=
+notangle -R"APLOT" -filter '$BIN/flt.sh ./kkk1 ./kkk2' \
+    $WORK/$nwfile.nw > ./kkk ;
+@ 
+
+<<flt.sh>>=
+#!/bin/bash
+
+toerr () {
+  perl -e '
+    $cdon=0;
+    while (<STDIN>) {
+      $_ =~ /^@(begin|end) code/o && do {
+        $cdon = 1 - $cdon;
+        print STDERR $_ unless $cdon;
+      };
+      $cdon && do { print STDERR $_ };
+      print STDOUT $_;
+    };
+  ' $1 2> $2;
+}
+
+toerr - $1 |
+  $BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables" - | \
+  toerr - $2 ; 
+#
 @ 
 
 <<HIDE: tests on PScompact script>>=
@@ -9831,64 +9865,10 @@ notangle -R'POSTSCRIPT shortnames' $nwfile.nw | \
     print $_.($clflg ? " " : "\n")' 2> kkkk | more ;    
 #
 # perl version tests
-# --> pipeline version
-notangle -R"HIDE: PScompact.pl" $WORK/$nwfile.nw | cpif $BIN/PScompact.pl ;
-chmod a+x $BIN/PScompact.pl ;
-notangle -R'POSTSCRIPT shortnames' $nwfile.nw  2> kkkk | $BIN/PScompact.pl ;
-# --> noweb filter version (good one... ?)
-notangle -R'POSTSCRIPT shortnames' \
-    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction"' \
-    $WORK/$nwfile.nw 2> kkkk > kkk ; 
-notangle -R"PostScript CODE Chunks" \
-    -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables" 2> kkkk'\
-    $WORK/$nwfile.nw | more 
-#
 @ 
 
-<<HIDE: PScompact.pl>>=
-<<PERL shebang>>
-# 
-# PScompact.pl
-#
-<<Version Control Id Tag>>
-#
-use strict;
-my ($MaxLen,$clflg,$fnflg,$ln,$cln) = (25,0,0,0,0);
 
-while (<STDIN>) {
-    my $tt;
-    chomp;
-    $_ =~ /^\%/o && do { # raw commentss are thrown to output directly...
-        $tt = $clflg ? "\n" : '';
-        $fnflg = $clflg = $ln = 0;
-        print STDOUT "$tt$_\n";
-        next;
-    }; 
-    $_ =~ s/\s+/ /og;
-    $clflg && ($_ =~ s/^\s//o);
-  TYPE: {
-      ($_ =~ s/\s\%\-\>.*$//og) && do {
-          $fnflg = $clflg = 1;
-          last TYPE;
-      };
-      $fnflg = 0;
-      $clflg = ($_ =~ s/\s\%\-\%.*$//og) ? 1 : 0;
-  }; # TYPE
-    $cln = length($_);
-    $ln > $MaxLen && do {
-        $fnflg && ($_ = "  $_"); # indenting opened functions
-        $_ = "\n$_";
-        $ln = 0;
-    };
-    $ln += $cln;
-    print STDERR "$cln ($ln) : $_\n";
-    $tt = $clflg ? " " : "\n";
-    print STDOUT "$_$tt";
-}; # while
-
-exit(0);
-@
-
+\subsubsctn{[[PScompactnw.pl]] implementation}
 
 <<PScompactnw.pl>>=
 <<PERL shebang>>
@@ -9907,6 +9887,7 @@ my $colin = '@text';
 my $nw    = '@nl';
 my $nwlin = "$nw\n";
 my $uslin = '@use';
+my $idxln = '@index';
 my $thend = '@end code';
 
 (defined($regexp) && $regexp ne '') || do {
@@ -9966,10 +9947,15 @@ $_ =~ /^$nw/o && next;
 
 <<PScompactnw - processing '@use'>>=
 $_ =~ /^$uslin/o && do {
-    print STDOUT "$_\n";
-    $clflg && print STDOUT $nwlin;
+    print STDOUT ($clflg ? "\n$nwlin" : "")."$_\n$colin \n$nwlin";
+    $clflg = 0;
     next;        
 }; # $_ =~ /^$uslin/
+$_ =~ /^$idxln/o && do {
+    print STDOUT ($clflg ? "\n$nwlin" : '')."$_\n";
+    $clflg = 0;
+    next;        
+}; # $_ =~ /^$idxln/
 @ 
 
 <<PScompactnw - processing '@text'>>=
@@ -9992,8 +9978,8 @@ Comments are printed without the 'extra' comments (all three types are explained
 <<PScompactnw - raw comments to output>>=
 $_ =~ /^\%/o && do { # raw comments are thrown to output directly...
     $_ =~ s/\s\%(\:|\-)(\%|\>).*$//og;
-    $clflg = $ln = 0;
     print STDOUT ($clflg ? "\n$nwlin" : '')."$colin $_\n$nwlin";
+    $clflg = $ln = 0;
     next;
 }; # $_ =~ /^\%/o
 @
@@ -10015,10 +10001,20 @@ Now we are looking for three different tags:
 
 <<PScompactnw - special tag types>>= 
 TYPE: {
-    ($_ =~ s/\s\%\:\%.*$//og)     && 
-        ( $clflg = 0, last TYPE );
-    ($_ =~ s/\s\%\-(\>|\%).*$//og) &&
-        ( $clflg = 1, last TYPE );
+    ($_ =~ s/\s\%\:\%.*$//og)     && do {
+        $clflg && do { 
+            $_ .= "\n$nwlin";
+        };
+        $clflg = 0;
+        last TYPE;
+    };
+    ($_ =~ s/\s\%\-(\>|\%).*$//og) && do {
+        $_ .= " ";
+        $clflg = 1;
+        last TYPE;
+    };
+    $ln = length($_);
+    $_ .= "\n$nwlin";
     $clflg = 0;
 }; # TYPE
 @
@@ -10028,6 +10024,7 @@ What we are going to do now is to join each new line that was preceeded by one o
 <<PScompactnw - checking lengths>>=
 $cln = length($_);
 $cln > 0 || next;
+$_ =~ /^\s*$/o && next;
 SIZES: {
     $ln == 0 && ( $_ = "$colin $_" );
     $clflg || ( $ln = 0, last SIZES );
@@ -10039,11 +10036,56 @@ SIZES: {
 And finally, we return the processed output to [[noweb]] pipeline:
 
 <<PScompactnw - printing output>>=
-$_ .= $clflg ? " " : "\n$nwlin";
+# $_ .= $clflg ? " " : "\n$nwlin";
 print STDOUT "$_";
 # print STDERR "$cln ($ln) : \n$_\n";
 @
 
+
+<<HIDE: PScompact.pl>>=
+<<PERL shebang>>
+##################################################################
+# 
+# PScompact.pl
+#
+<<Version Control Id Tag>>
+#
+use strict;
+my ($MaxLen,$clflg,$fnflg,$ln,$cln) = (25,0,0,0,0);
+
+while (<STDIN>) {
+    my $tt;
+    chomp;
+    $_ =~ /^\%/o && do { # raw commentss are thrown to output directly...
+        $tt = $clflg ? "\n" : '';
+        $fnflg = $clflg = $ln = 0;
+        print STDOUT "$tt$_\n";
+        next;
+    }; 
+    $_ =~ s/\s+/ /og;
+    $clflg && ($_ =~ s/^\s//o);
+  TYPE: {
+      ($_ =~ s/\s\%\-\>.*$//og) && do {
+          $fnflg = $clflg = 1;
+          last TYPE;
+      };
+      $fnflg = 0;
+      $clflg = ($_ =~ s/\s\%\-\%.*$//og) ? 1 : 0;
+  }; # TYPE
+    $cln = length($_);
+    $ln > $MaxLen && do {
+        $fnflg && ($_ = "  $_"); # indenting opened functions
+        $_ = "\n$_";
+        $ln = 0;
+    };
+    $ln += $cln;
+    print STDERR "$cln ($ln) : $_\n";
+    $tt = $clflg ? " " : "\n";
+    print STDOUT "$_$tt";
+}; # while
+
+exit(0);
+@
 <<HIDE: PScompactnw - processing '@text'>>=
 # We tryed to get less than 80 chars columns,
 # now each function in a single line (see previous code chunk) 
@@ -10546,7 +10588,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.23 2001-11-23 01:08:10 jabril Exp $
+# $Id: gff2aplot.nw,v 1.24 2001-11-23 19:28:49 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
