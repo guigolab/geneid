@@ -25,6 +25,11 @@
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
 #
+######### TESTS CVS #########
+#
+tests         tests/
+#
+#
 ######### software CVS #########
 #
 geneid        software/geneid
