@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.55 2000-02-22 13:18:02 jabril Exp $	
+#         $Id: gff2ps,v 1.56 2000-02-22 22:05:00 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.55 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-02-22 13:18:02 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.56 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-02-22 22:05:00 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -116,62 +116,36 @@ Defaults () {
   v04=0; n04="exist_default_customfile";
   v04_1=0; n04_1="create_default_customfile";
   v05=0; n05="print_report";
-  v06="Landscape"; n06="page_orientation";
-  v07="a4"; n07="page_size";
-  v08=1; n08="page_number";
-  v09=1; n09="blocks_x_page";
-  v10=0; n10="nucleotides_x_line";
-  v11=1; n11="show_blocks_top-bottom";
-  v12="auto,0,0"; n12="page_bbox";
-  v13=10; n13="major_tickmarks_num";
-  v14=-1; n14="major_tickmarks_nucleotides";
-  v15=10; n15="minor_tickmarks_num";
-  v16=-1; n16="minor_tickmarks_nucleotides";
-  v17="false"; n17="show_positions";
+  v06="!!!???"; n06="page_orientation"; # "Landscape"
+  v07="!!!???"; n07="page_size"; # "a4"
+  v08="!!!???"; n08="page_number"; # 1
+  v09="!!!???"; n09="blocks_x_page"; # 1
+  v10="!!!???"; n10="nucleotides_x_line"; # 0
+  v11="!!!???"; n11="show_blocks_top-bottom"; # 1
+  v12="!!!???"; n12="page_bbox"; # "auto,0,0"
+  v13="!!!???"; n13="major_tickmarks_num"; # 10
+  v14="!!!???"; n14="major_tickmarks_nucleotides"; # -1
+  v15="!!!???"; n15="minor_tickmarks_num"; # 10
+  v16="!!!???"; n16="minor_tickmarks_nucleotides"; # -1
+  v17="!!!???"; n17="show_positions"; # "false"
   v18_s='*'; v18_e='*'; n18="zoom";
-  v19="FGcolor"; n19="foreground_color";
-  v20="BGcolor"; n20="background_color";
-  v21="default"; n21="header_style";
-  v22="on"; n22="show_page_numbers";
-  v23="on"; n23="show_date";
-  v24="on"; n24="show_time";
-  v25="default"; n25="title";
-  v26="default"; n26="subtitle";
-  v27="on"; n27="strand_show_forward";
-  v28="on"; n28="strand_show_reverse";
-  v29="on"; n29="strand_show_independent";
-  v30="blue";   n30="frame0_color";
-  v31="red";    n31="frame1_color";
-  v32="green";  n32="frame2_color";
-  v33="orange"; n33="frame_unknown_color";
+  v19="!!!???"; n19="foreground_color"; # "FGcolor"
+  v20="!!!???"; n20="background_color"; # "BGcolor"
+  v21="!!!???"; n21="header_style"; # "default"
+  v22="!!!???"; n22="show_page_numbers"; # "on"
+  v23="!!!???"; n23="show_date"; # "on"
+  v24="!!!???"; n24="show_time"; # "on"
+  v25="!!!???"; n25="title"; # "default"
+  v26="!!!???"; n26="subtitle"; # "default"
+  v27="!!!???"; n27="strand_show_forward"; # "on"
+  v28="!!!???"; n28="strand_show_reverse"; # "on"
+  v29="!!!???"; n29="strand_show_independent"; # "on"
+  v30="!!!???"; n30="frame0_color"; # "blue"
+  v31="!!!???"; n31="frame1_color"; # "red"
+  v32="!!!???"; n32="frame2_color"; # "green"
+  v33="!!!???"; n33="frame_unknown_color"; # "orange"
   v34=1; n34="quiet_mode";
   v35=1; n35="Show_Credits";
-# Layout Properties
-  c01="1cm"; m01="margin_left";
-  c02="1cm"; m02="margin_right";
-  c03="1cm"; m03="margin_upper";
-  c04="1cm"; m04="margin_lower";
-  c05="0.25cm"; m05="default_scale_width";
-  c19=1;        m19="default_scale_spacing_width";
-  c20=1;        m20="show_grid";
-  c21="default";  m21="nucleotide_scale";
-  c06="1cm";    m06="default_track_width";
-  c07="0.25cm";    m07="default_track_spacing_width";
-  c08="0.25cm"; m08="default_block_spacing_width";
-  c09="both"; m09="show_inner_scale";
-  c10="both"; m10="show_outer_scale";
-  c11="default"; m11="header_style";
-  # c11="boxed"; m11="header_style";
-  c12="default"; m12="block_style";
-  # c12="boxed"; m12="block_style";
-  c13="true";  m13="show_left_source_label";
-  c14="false"; m14="show_right_source_label";
-  c15="2cm"; m15="left_source_label_width"; #
-  c16="2cm"; m16="right_source_label_width"; #
-  c17="on"; m17="sort_tracks_by_sequence"; #
-  c18=10;  m18="min_group_separation"; # minimum nucleotide distance between two groups to avoid overlapping.
-  #
-  # c20=$c05;   m20="text_color"
 } # End of Defaults
 
 #  
@@ -380,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.55 2000-02-22 13:18:02 jabril Exp $
+%    $Id: gff2ps,v 1.56 2000-02-22 22:05:00 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -863,8 +837,8 @@ ExistCustomfile () {
       echo "1"; # exist_default_customfile
       if [ $v34 -eq 1 ];
         then 
-          { echo "CUSTOM FILE: Default Custom File exist.";
-            echo "             Custom_Filename: \"$1\""; echo ""; } 1>&2;
+          { echo "CUSTOM FILE: Default Custom File exist."; echo "";
+            echo "             Filename: \"$1\""; echo ""; } 1>&2;
         fi;
       return 1;
     fi;
@@ -1120,11 +1094,6 @@ $n16:=$v16::$n17:=$v17::$n18:=$v18::$n19:=$v19::$n20:=$v20
 $n21:=$v21::$n22:=$v22::$n23:=$v23::$n24:=$v24::$n25:=$v25
 $n26:=$v26::$n27:=$v27::$n28:=$v28::$n29:=$v29::$n30:=$v30
 $n31:=$v31::$n32:=$v32::$n33:=$v33::$n34:=$v34::$n35:=$v35
-$m01:=$c01::$m02:=$c02::$m03:=$c03::$m04:=$c04::$m05:=$c05
-$m06:=$c06::$m07:=$c07::$m08:=$c08::$m09:=$c09::$m10:=$c10
-$m11:=$c11::$m12:=$c12::$m13:=$c13::$m14:=$c14::$m15:=$c15
-$m16:=$c16::$m17:=$c17::$m18:=$c18::$m19:=$c19::$m20:=$c20
-$m21:=$c21
 PID:=$PID::InputFNs:=$GFF_INPUT_FILES::PS_Header_FN:=$PSHEAD::PS_Main_FN:=$PSMAIN
 PROGRAM:=$PROGRAM::VERSION:=$VERSION::AUTHOR:=$AUTHOR::EMAIL:=$EMAIL::PSPROGRAM:=$PSPROGRAM
 @@@EndOfOptions@@@
@@ -1533,14 +1502,10 @@ function READ_CL() {
 		if (!ChkColor(ecolor)) elem[2]=BG_COLOR;
 		else if (tolower(ecolor)~/^fg(color)?$/) elem[2]=FG_COLOR;
 	  } # if elem[1]
-	  Var[elem[1]]=elem[2];
+	  if (elem[2]!="!!!???") Var[elem[1]]=elem[2];
 	} # for
   } # while
   ARGV[1]="";  
-  # if (Var["print_report"]) { # PrintRPT
-	# for (v in Var)
-	#   printf "VAR: %-28s :: Value: %s\n", v, Var[v] | "sort 1>&2";
-	# close("sort 1>&2") }
 } # End of function READ_CL
 #
 function ChkInput() { # some changes will be made on input line if some defaults were present.
@@ -1775,7 +1740,14 @@ function ReadElements() { # read gff element within source, strand, and group
   if (!($seqname in seqs)) {
     TITLE_FN=TITLE_FN""$seqname" ";
   }
-  if ($strand~/[+-]/) STR_PMT=1; else STR_PMT=0;
+  if ($strand~/[+-]/) {
+    STR_PMT=1;
+    Nss[II]++; # Valid Sequence-Source Combinations (Strand)
+  }
+  else {
+    STR_PMT=0;
+    Nsn[II]++; # Valid Sequence-Source Combinations (No-Strand)
+  }
   if (SQ_ORD[$seqname,STR_PMT]!="Y") {
     if (STR_PMT) seq_order["strand",seq_ordcnt++]=$seqname;
     else seq_order["none",seq_nordcnt++]=$seqname;
@@ -1783,7 +1755,7 @@ function ReadElements() { # read gff element within source, strand, and group
   }
   # getting source order from file...
   if (!(iS in sources)) {
-    sc_score["MIN",iS] = 0; # $score;
+    sc_score["MIN",iS] = 0;
     sc_score["MAX",iS] = $score;
   }
   if (SC_ORD[$seqname,iS,STR_PMT]!="Y") {
@@ -1792,7 +1764,6 @@ function ReadElements() { # read gff element within source, strand, and group
     SC_ORD[$seqname,iS,STR_PMT]="Y";
   }
   # Defining some counters.
-  Nss[II]++; # Valid Sequence-Source Combinations
   seqs[$seqname]++;
   sources[iS]++;   # field 2 (source) record-counter (Nsources for no-strand)
   FT_ary[iF]++ ;              # field 3 (gff-feature) record-counter
@@ -1864,10 +1835,12 @@ function SET_VARS() {
   PrintWRN(sprintf("\n%s\n*  Command-Line Options\n*\n",BigLINE));
   for (lytdef in Default) {
     dft=Default[lytdef];
-    if (dft!=Var[lytdef] && Var[lytdef]!="") Default[lytdef]=Var[lytdef];
-	else {
-	  if (PLOT_LY[lytdef]!="") Default[lytdef]=PLOT_LY[lytdef];
-	} # else
+ 	if (PLOT_LY[lytdef]!="") Default[lytdef]=PLOT_LY[lytdef];
+    if (lytdef in Var) {
+      if (dft!=Var[lytdef] && Var[lytdef]!="") Default[lytdef]=Var[lytdef];
+    } # if lytdef in var
+    else Var[lytdef]="\"NOT_DEF\"";
+    if (PLOT_LY[lytdef]=="") PLOT_LY[lytdef]="\"NOT_DEF\"";
 	if (Var["print_report"]) printf "%s *** Default Value=%s : Custom File=%s : Command-Line=%s *** Using=%s\n", lytdef,dft,PLOT_LY[lytdef],Var[lytdef],Default[lytdef] | "sort 1>&2";
   } # for lytdef
   if (Var["print_report"]) close("sort 1>&2");
@@ -1936,9 +1909,10 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
 	for (Q=0;Q<lseq;Q++) {   # sequence ordering ary loop
 	  for (S=0;S<lsrc;S++) { # source ordering ary loop
         seso_rd=seq_order["strand",Q] SUBSEP src_order["strand",S];
-		if (seso_rd in Nss) {
+		if ((seso_rd in Nss) && !(seso_rd in CHKs)) {
 		  order["strand",ordcnt++]=seso_rd;
-          PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S]));
+          CHKs[seso_rd]++;
+          PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S], CHKs[seso_rd]));
         } # if seso_rd
 	  } # for S
 	} # for Q
@@ -1946,9 +1920,10 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
 	for (Q=0;Q<lseq;Q++) {   # sequence ordering ary loop
 	  for (S=0;S<lsrc;S++) { # source ordering ary loop
         seso_rd=seq_order["none",Q] SUBSEP src_order["none",S];
-		if (seso_rd in Nss) {
+		if ((seso_rd in Nsn) && !(seso_rd in CHKn)) {
 		  order["none",nordcnt++]=seso_rd;
-		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S]));
+          CHKn[seso_rd]++;
+		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S], CHKn[seso_rd]));
         } # if seso_rd
 	  } # for S
 	} # for Q
@@ -1959,9 +1934,10 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
 	for (S=0;S<lsrc;S++) {   # source ordering ary loop
 	  for (Q=0;Q<lseq;Q++) { # sequence ordering ary loop
         seso_rd=seq_order["strand",Q] SUBSEP src_order["strand",S];
-		if (seso_rd in Nss) {
+		if ((seso_rd in Nss) && !(seso_rd in CHKs)) {
 		  order["strand",ordcnt++]=seso_rd;
-		  PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S]));
+          CHKs[seso_rd]++;
+		  PrintRPT(sprintf("***+++***STRAND***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (ordcnt-1), order["strand",(ordcnt-1)], seq_order["strand",Q], src_order["strand",S], CHKs[seso_rd]));
         } # if seso_rd
 	  } # for Q
 	} # for S
@@ -1969,9 +1945,10 @@ function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or
 	for (S=0;S<lsrc;S++) {   # source ordering ary loop
 	  for (Q=0;Q<lseq;Q++) { # sequence ordering ary loop
         seso_rd=seq_order["none",Q] SUBSEP src_order["none",S];
-		if (seso_rd in Nss) {
+		if ((seso_rd in Nsn) && !(seso_rd in CHKn)) {
           order["none",nordcnt++]=seso_rd;
-		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S]));
+          CHKn[seso_rd]++;
+		  PrintRPT(sprintf("***+++***NO-STR***Order[%s]::%s::***K1::%s::***K2::%s::***CTRL::%s\n", (nordcnt-1), order["none",(nordcnt-1)], seq_order["none",Q], src_order["none",S], CHKn[seso_rd]));
         } # if seso_rd
 	  } # for Q	
 	} # for S
@@ -2331,26 +2308,26 @@ function PlotElement(    shwpst) {
 function PlotVector(    lnct,step_,window_,scmin_,scmax_,start_,end_,WK,w,pos_) {
   start_=element[PE,start];
   end_=element[PE,end];
-  PrintRPT(sprintf("Vector %s : %s : %s - %s\n",el,sel,start_,end_));
+  PrintRPT(sprintf("  Vector %s : %s : %s - %s\n",el,sel,start_,end_));
   step_=element[PE,v_step];
   window_=element[PE,v_window];
   if (step_=="NONE") step_=1;
   if (PLOT_FT[sc,":","range"]=="default") {
 	scmin_=element[PE,v_scmin];
 	scmax_=element[PE,v_scmax];
-	PrintWRN(sprintf("Range has been modified to vector field on gff-file: %s - %s\n",scmin_,scmax_)) }
+	PrintWRN(sprintf("  Range has been modified to vector field on gff-file: %s - %s\n",scmin_,scmax_)) }
   else { scmin_=lower_sc; scmax_=upper_sc }
   gsub(/[ \t]+$/,"",element[PE,v_DATA]);
   WK=split(element[PE,v_DATA],V_ary,/[ \t]+/);
-  if (Var["print_report"]) { # PrintRPT
-    # printf "Vector %s: Elements Vector Line %s\n",el,element[PE,v_DATA] | "cat 1>&2";
-	printf "Vector %s: Elements Report... Has %s elements.\n",el,WK | "cat 1>&2";
-	mn_s=element[PE,v_scmin]; mx_s=element[PE,v_scmax];
-	printf "Vector %s: ScoreLimits %s - %s has been re-scaled to %s - %s ...\n",el,mn_s,mx_s,GetScore(mn_s,scmin_,scmax_),GetScore(mx_s,scmin_,scmax_) | "cat 1>&2";
-	# if (window_!="NONE") { for (w=1;w<=WK;w++) printf "%5.3f : ",V_ary[w] | "cat 1>&2" }
-	# else { for (w=1;w<=WK;w+=2) printf "%5.3f %s : ",V_ary[w],V_ary[w+1] | "cat 1>&2" }
-	# printf "\n" | "cat 1>&2";
-  }
+#  if (Var["print_report"]) { # PrintRPT
+#   # printf "Vector %s: Elements Vector Line %s\n",el,element[PE,v_DATA] | "cat 1>&2";
+# 	printf "Vector %s: Elements Report... Has %s elements.\n",el,WK | "cat 1>&2";
+# 	mn_s=element[PE,v_scmin]; mx_s=element[PE,v_scmax];
+# 	printf "Vector %s: ScoreLimits %s - %s has been re-scaled to %s - %s ...\n",el,mn_s,mx_s,GetScore(mn_s,scmin_,scmax_),GetScore(mx_s,scmin_,scmax_) | "cat 1>&2";
+# 	# if (window_!="NONE") { for (w=1;w<=WK;w++) printf "%5.3f : ",V_ary[w] | "cat 1>&2" }
+# 	# else { for (w=1;w<=WK;w+=2) printf "%5.3f %s : ",V_ary[w],V_ary[w+1] | "cat 1>&2" }
+# 	# printf "\n" | "cat 1>&2";
+#   }
   lnct=0;
   if (WK>0) {
     if (window_!="NONE") {
@@ -2449,6 +2426,7 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
 		sq=SQC[1];
 		sc=SQC[2];
 		SSS=sq SUBSEP sc SUBSEP s;
+		PrintRPT(sprintf("** Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
 		if (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) ungp=grouped_;
 		else ungp=ungrouped_; 
 		for (pd=grouped_;pd>=ungp;pd--) {
@@ -2523,6 +2501,7 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 		sq=SQC[1];
 		sc=SQC[2];
 		SSS=sq SUBSEP sc SUBSEP s;
+		PrintRPT(sprintf("** Sequence: %10s Source: %10s Strand: %s\n", sq, sc, s));
 		if (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"])) ungp=grouped_;
 		else ungp=ungrouped_; 
 		for (pd=grouped_;pd>=ungp;pd--) {
@@ -2709,7 +2688,7 @@ function chkGlobal(feat,gffirst,re,np,    go_on) {
 function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,feat,lytdef,dft,exp_reg,neg_ptrn,df_,eq_,type_sel) { # Read CustomFile
   # PrintRPT(sprintf("\n%s\n*  Reading Custom File:\n%s\n\n*  %s\n*\n", BigLINE,BigLINE,file));
   MATCH_T="*** %s *** Feature %s - Match between: %s & %s : %s=%s\n";
-  MATCH_F="********* Feature %s - No Match found - New Feature: %s=%s\n";
+  MATCH_F="********* Feature %s - No Match found : %s=%s\n";
   type_sel=0;
   while ((getline < file) > 0 ) {
 	if ( $0~/^[^\#]/ && $0!~/^( )*$/ && type_sel ) { 
@@ -2748,11 +2727,9 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 		  go_on=chkGlobal(feat,gffirst,exp_reg,neg_ptrn);
 		  if (go_on) {
 			PLOT_FT[feat,":",second]=nwfeat[2];
-			PrintRPT("+++ "go_on" +++ Match found: "feat" "eq_" "gffirst" +++ <"nwfeat[2]">\n");
-            # PrintRPT("*********** "ccstr" **** "PLOT_FT[ccstr]" ****\n");
-			# PrintRPT(sprintf(MATCH_T,ft_type,feat,feat,first,(feat":"second),nwfeat[2]));
+			PrintRPT(" +++ "ft_type" +++ Match found: "feat" "eq_" "gffirst" +++ <"nwfeat[2]">\n");
 		  } # if go_on
-		  # else PrintRPT("+++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
+		  # else PrintRPT(" +++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
 		 }
 		 if (!exp_reg && !(gffirst in FT_ary)) {
 		  for (pro_ in FT_PROP) {
@@ -2764,21 +2741,19 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 		  # PrintRPT(sprintf(MATCH_F,gffirst,(gffirst":"second),nwfeat[2]));
 		 } # if !go_on
         } # if varname exist
-	    else PrintWRN(sprintf("*** VAR NAME NOT DEFINED *** "MATCH_F,first,first,nwfeat[2]));
+	    else PrintWRN(sprintf("*** VAR NAME NOT DEFINED on FEATURE SECTION *** "MATCH_F,first,second,nwfeat[2]));
       } # if type="F"
 	  else { 
 		if (ft_type=="G") { # G
 		  gffirst=first;
-		  if (second in GP_PROP) {
+		  if (second in GR_PROP) {
 		   for (feat in GP_ary) { 
 			go_on=chkGlobal(feat,gffirst,exp_reg,neg_ptrn);
 			if (go_on) {
 			  PLOT_FT[feat,":",second]=nwfeat[2];
-			  PrintRPT("+++ "go_on" +++ Match found: "feat" "eq_" "gffirst" +++ <"nwfeat[2]">\n");
-              # PrintRPT("*********** "ccstr" **** "PLOT_FT[ccstr]" ****\n");
-			  # PrintRPT(sprintf(MATCH_T,ft_type,feat,feat,first,(feat":"second),nwfeat[2]));
+			  PrintRPT(" +++ "ft_type" +++ Match found: "feat" "eq_" "gffirst" +++ <"nwfeat[2]">\n");
 			} # if go_on
-			# else PrintRPT("+++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
+			# else PrintRPT(" +++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
 		   }
 		   if (!exp_reg && !(gffirst in GP_ary)) {
 			for (pro_ in GP_PROP) {
@@ -2790,7 +2765,7 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 			# PrintRPT(sprintf(MATCH_F,gffirst,(gffirst":"second),nwfeat[2]));
 		   } # if !go_on
           } # if varname exist
-		  else PrintWRN(sprintf("*** VAR NAME NOT DEFINED *** "MATCH_F,first,first,nwfeat[2]));
+		  else PrintWRN(sprintf("*** VAR NAME NOT DEFINED on GROUP SECTION *** "MATCH_F,first,second,nwfeat[2]));
 		} # if type="G"
 		else { 
 		  if (ft_type=="S") { # S
@@ -2800,11 +2775,9 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 			  go_on=chkGlobal(feat,gffirst,exp_reg,neg_ptrn);
 			  if (go_on) {
 				PLOT_FT[feat,":",second]=nwfeat[2];
-				PrintRPT("+++ "go_on" +++ Match found: "feat" "eq_" "gffirst" +++ <"nwfeat[2]">\n");
-                # PrintRPT("*********** "ccstr" **** "PLOT_FT[ccstr]" ****\n");
-				# PrintRPT(sprintf(MATCH_T,ft_type,feat,feat,first,(feat":"second),nwfeat[2]));
+				PrintRPT(" +++ "ft_type" +++ Match found: "feat" "eq_" "gffirst" +++ <"nwfeat[2]">\n");
 			  } # if go_on
-			  # else PrintRPT("+++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
+			  # else PrintRPT(" +++ "go_on" +++ No Match found: "feat" "df_" "gffirst" \n");
 			 }
 			 if (!exp_reg && !(gffirst in sources)) {
 			  for (pro_ in SO_PROP) {
@@ -2816,16 +2789,16 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 			  # PrintRPT(sprintf(MATCH_F,gffirst,(gffirst":"second),nwfeat[2]));
 			 } # if !go_on
             } # if varname exist
-			else PrintWRN(sprintf("*** VAR NAME NOT DEFINED *** "MATCH_F,first,first,nwfeat[2]));
+			else PrintWRN(sprintf("*** VAR NAME NOT DEFINED on SOURCE SECTION *** "MATCH_F,first,second,nwfeat[2]));
 		  } # if type="S"
 		  else { # L
 			if (ft_type=="L") {
 			  if (first in Default) {
 				PLOT_LY[first]=nwfeat[2];
-				PrintRPT(sprintf("+++ L +++ Match found: %s & %s : <%s>\n",first,first,nwfeat[2]));
+				PrintRPT(sprintf(" +++ %s +++ Match found: %s & %s : <%s>\n",ft_type,first,first,nwfeat[2]));
 				# PrintRPT(sprintf(MATCH_T,ft_type,first,first,first,first,nwfeat[2]));
 			  }
-			  else PrintWRN(sprintf("*** VAR NAME NOT DEFINED *** "MATCH_F,first,first,nwfeat[2]));
+			  else PrintWRN(sprintf("*** VAR NAME NOT DEFINED on LAYOUT SECTION *** "MATCH_F,first,first,nwfeat[2]));
 			} # if type="L"
 		  } # else ! "S"
 		} # else ! "G"
@@ -2871,7 +2844,7 @@ function DoUnFoldMixed(SC) {
   else return 0 } # end of DoUnFoldMixed
 #
 function ChkColor(ncolor) {
-  # { PrintRPT(sprintf("+++Checking COLOR_NAMES: %s :: %s\n",ncolor,TxtBool(tolower(ncolor)~Valid_Colors))); return 1; } 
+  # { PrintRPT(sprintf(" +++ Checking COLOR_NAMES: %s :: %s\n",ncolor,TxtBool(tolower(ncolor)~Valid_Colors))); return 1; } 
   if (tolower(ncolor)~Valid_Colors) return 1; 
   else return 0 } # also when ncolor == ^BG$|(##DEFAULT##)
 #
