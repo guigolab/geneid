@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.6 2000-07-29 16:29:33 jabril Exp $
+# $Id: parseblast.pl,v 1.7 2000-07-31 16:55:26 jabril Exp $
 #
 
 my $Start = time;
@@ -11,10 +11,10 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling");
 
 my $PROGRAM = "parseblast.pl";
-my $VERSION = '$Id: parseblast.pl,v 1.6 2000-07-29 16:29:33 jabril Exp $ ';
+my $VERSION = '$Id: parseblast.pl,v 1.7 2000-07-31 16:55:26 jabril Exp $ ';
 
 my ($hsp_flg, $gff_flg, $fullgff_flg, $aplot_flg, $nogff_flg, $subject_flg,
-	$comment_flg, $nocmmnt_flg, $split_flg, $help_flg, $err_flg,
+	$sequence_flg, $comment_flg, $nocmmnt_flg, $split_flg, $help_flg, $err_flg,
     $expanded_flg, $pairwise_flg, $msf_flg, $aln_flg, $bit_flg, $ids_flg);
 my ($prt, $main, $seqflg, $hsp, $fragment, $param, $aln_split, $prt_pos_flg
 	) = (0, 0, 0, 0, 0, 0, 0, 0);
@@ -24,7 +24,7 @@ my ($query_name, $db_name, $score, $descr,
 	$ori, $end, $seq, $txt, $tt, $pt, $ht);
 my (@seqlist, %prgseq, %dbase, %query, %cnt,
 	%desc, %sco, %hsp_start, %hsp_end, %hsp_seq);
-my ($qm, $sm, $x, $y, $ml, $a, $b, $aq, $as, $sql, $lq, $ls);
+my ($qm, $sm, $x, $y, $ml, $a, $b, $aq, $as, $sql, $lq, $ls, $sq);
 my $foe = 0;
 my $chars_per_line = 50; # chars of sequences to show per line (in alignment modes)
 
@@ -36,6 +36,7 @@ GetOptions( "G|gff"            => \$gff_flg      ,
 			"F|fullgff"        => \$fullgff_flg  ,
 			"A|aplot"          => \$aplot_flg    ,
             "S|subject"        => \$subject_flg  ,
+            "Q|sequence"       => \$sequence_flg  ,
             "X|extended"       => \$expanded_flg ,
 			"P|pairwise"       => \$pairwise_flg ,
 			"M|msf"            => \$msf_flg      ,
@@ -141,6 +142,7 @@ COMMAND-LINE OPTIONS:
     -F, --fullgff        : prints output in GFF "alignment" format.
     -A, --aplot          : prints output in APLOT "GFF" format.
     -S, --subject        : projecting GFF output by SUBJECT (default by QUERY).
+    -Q, --sequence       : append query and subject sequences to GFF record.
     -b, --bit-score      : set <score> field to Bits (default Alignment Score).
     -i, --identity-score : set <score> field to Identities (default Alignment).
 
@@ -302,37 +304,37 @@ last PRINT;
 }
 sub prt_Q_gff {
 print STDOUT <<"EndOfGFF";
-$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\t$nm\t\# E_value $ex : P_sum $pv
+$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\t$nm\t\# E_value $ex : P_sum $pv$sq
 EndOfGFF
 last PRINT;
 }
 sub prt_S_gff {
 print STDOUT <<"EndOfGFF";
-$nm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\t$query{$nm}\t\# E_value $ex : P_sum $pv
+$nm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\t$query{$nm}\t\# E_value $ex : P_sum $pv$sq
 EndOfGFF
 last PRINT;
 }
 sub prt_Q_fullgff {
 print STDOUT <<"EndOfFullGFF";
-$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\tTarget \"$nm\"\t$hss\t$hes\tE_value $ex\tStrand $sts\tFrame $frs
+$query{$nm}\t$prg\thsp\t$hsq\t$heq\t$gsc\t$stq\t$frq\tTarget \"$nm\"\t$hss\t$hes\tE_value $ex\tStrand $sts\tFrame $frs$sq
 EndOfFullGFF
 last PRINT;
 }
 sub prt_S_fullgff {
 print STDOUT <<"EndOfFullGFF";
-$nm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\tTarget \"$query{$nm}\"\t$hsq\t$heq\tE_value $ex\tStrand $stq\tFrame $frq
+$nm\t$prg\thsp\t$hss\t$hes\t$gsc\t$sts\t$frs\tTarget \"$query{$nm}\"\t$hsq\t$heq\tE_value $ex\tStrand $stq\tFrame $frq$sq
 EndOfFullGFF
 last PRINT;
 }
 sub prt_Q_aplot {
 print STDOUT <<"EndOfAPLOT";
-$query{$nm}:$nm\t$prg\thsp\t$hsq:$hss\t$heq:$hes\t$gsc\t$stq:$sts\t$frq:$frs\t$bt:$n\t\# E_value $ex : P_sum $pv
+$query{$nm}:$nm\t$prg\thsp\t$hsq:$hss\t$heq:$hes\t$gsc\t$stq:$sts\t$frq:$frs\t$bt:$n\t\# E_value $ex : P_sum $pv$sq
 EndOfAPLOT
 last PRINT;
 }
 sub prt_S_aplot {
 print STDOUT <<"EndOfAPLOT";
-$nm:$query{$nm}\t$prg\thsp\t$hss:$hsq\t$hes:$heq\t$gsc\t$sts:$stq\t$frs:$frq\t$bt:$n\t\# E_value $ex : P_sum $pv
+$nm:$query{$nm}\t$prg\thsp\t$hss:$hsq\t$hes:$heq\t$gsc\t$sts:$stq\t$frs:$frq\t$bt:$n\t\# E_value $ex : P_sum $pv$sq
 EndOfAPLOT
 last PRINT;
 }
@@ -457,11 +459,14 @@ sub prt_out {
 				  &prt_hsp       if $hsp_flg; # default output
 				  #
 				  do {
+					  $sq = "";
 					  $subject_flg && do {
+						  $sq = " #-S: $hsp_seq{$ts} #-Q: $hsp_seq{$tq}" if $sequence_flg;
 						  &prt_S_gff     if $gff_flg;
 						  &prt_S_fullgff if $fullgff_flg;
 						  &prt_S_aplot   if $aplot_flg;
 					  }; # $subject_flg
+					  $sq = " #-Q: $hsp_seq{$tq} #-S: $hsp_seq{$ts}" if $sequence_flg;
 					  &prt_Q_gff     if $gff_flg;
 					  &prt_Q_fullgff if $fullgff_flg;
 					  &prt_Q_aplot   if $aplot_flg;
