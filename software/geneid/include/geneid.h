@@ -27,7 +27,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.4 2000-08-08 14:14:31 eblanco Exp $ */
+/* $Id: geneid.h,v 1.5 2000-09-08 09:54:46 eblanco Exp $ */
 
 /* Include libraries */
 #include <stdio.h>
@@ -56,7 +56,7 @@
 
 #define RSORTE 3                       /* Total number ox exons/split     */
 
-#define NUMEEVIDENCES 0                /* maximum number of evidences     */
+#define NUMEEVIDENCES 1000             /* maximum number of evidences     */
 #define NUMSEVIDENCES 2*NUMEEVIDENCES          
 
 #define MAXGENE 10000                  /* Max number of genes(multigenes) */
