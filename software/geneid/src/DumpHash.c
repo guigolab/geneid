@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: DumpHash.c,v 1.4 2001-12-18 15:34:47 eblanco Exp $  */
+/*  $Id: DumpHash.c,v 1.5 2003-02-26 10:59:16 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -112,6 +112,7 @@ exonGFF* getExonDumpHash(exonGFF* E, dumpHash* h)
   exonGFF* exon;
   dumpNode *p;
   
+  exon = NULL;
   i = fDump(E);
   
   /* Nobody lives here */
