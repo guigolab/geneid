@@ -27,17 +27,18 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.2 2000-08-08 14:24:49 eblanco Exp $ */
+/* $Id: geneid.c,v 1.3 2001-02-07 17:36:34 eblanco Exp $ */
 
 #include "geneid.h"
 
 /* Setup Flags of geneid */
 int   SFP=0, SDP=0, SAP=0, STP=0,
-      EFP=0, EIP=0, ETP=0, EXP=0, ESP=0,
+      EFP=0, EIP=0, ETP=0, EXP=0, ESP=0, EOP = 0,
       VRB=0, FWD=1, RVS=1,
       GENAMIC = 1, GENEID = 1, 
       GFF = 0, X10 = 0, 
-      EVD = 0, SRP = 0;
+      EVD = 0, SRP = 0,
+      scanORF = 0;
 
 float EW = NOVALUE;
 
@@ -123,7 +124,7 @@ void  PredictExons(char *Sequence, long LengthSequence,
        l1c, l2c;
 
   long cutPoint;
-  
+ 
   /* 0. Define boundaries of splice site prediction
         according to current split positions and strand selected */
   if (Strand == FORWARD)
@@ -207,10 +208,11 @@ void  PredictExons(char *Sequence, long LengthSequence,
   printRes(mess); 
   
   allExons->nInternalExons =
-    BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
-		       allSites->DonorSites,allSites->nDonorSites,
-		       allSites->StopCodons,allSites->nStopCodons,
-		       gp->MaxDonors,allExons->InternalExons);
+  BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+		     allSites->DonorSites,allSites->nDonorSites,
+		     allSites->StopCodons,allSites->nStopCodons,
+		     gp->MaxDonors,allExons->InternalExons);
+
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
   
@@ -229,6 +231,16 @@ void  PredictExons(char *Sequence, long LengthSequence,
   sprintf(mess,"Single genes \t\t%8ld", allExons->nSingles);
   printRes(mess); 
 
+  if (scanORF)
+    {
+      allExons->nORFs =
+	BuildORFs(allSites->StopCodons,allSites->nStopCodons,
+		  allSites->StopCodons,allSites->nStopCodons,
+		  cutPoint, allExons->ORFs);
+      sprintf(mess,"ORFs \t\t\t%8ld", allExons->nORFs);
+      printRes(mess); 
+    }
+
   /* 3. Scoring and Filtering Exons */
   
   /* Scoring and filtering built exons */
@@ -238,9 +250,10 @@ void  PredictExons(char *Sequence, long LengthSequence,
   
   /* Total number of built exons in this strand */
   allExons->nExons = allExons->nInitialExons + 
-         allExons->nInternalExons +
-         allExons->nTerminalExons +
-         allExons->nSingles;
+    allExons->nInternalExons +
+    allExons->nTerminalExons +
+    allExons->nSingles +
+    allExons->nORFs;
 
   sprintf(mess,"---------\t\t%8ld", allExons->nExons);
   printRes(mess); 
