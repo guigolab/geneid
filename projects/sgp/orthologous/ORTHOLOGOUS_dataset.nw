@@ -1,0 +1,3253 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+ 
+% Colors for gff2ps
+\input ColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\subsubsubsctn}[1]{\paragraph{#1}\vskip 1ex}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+
+% defs
+\def\drome{\textit{Drosophila melanogaster}}
+\def\dro{\textit{Drosophila}}
+\def\dme{\textit{D. melanogaster}}
+\def\seq{\texttt{\textbf{X62937}}}
+\def\nowf{[[DromeRepeats.nw]]}
+\def\biop{\textsc{BioPerl}}
+\def\rptm{\textsc{RepeatMasker}}
+\def\bl{\textsc{Blast}}
+\def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
+\def\ps{\textsc{PostScript}}
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\sgp{\textsc{sgp}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{aplot}}
+\def\data{\textbf{Human/Mouse Orthologous}}
+
+% Setting text for footers and headers
+
+\def\tit{\textsc{ORTHOLOGOUS Dataset}}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textbf{Genome Informatics Research Lab}}
+\fancyfoot[CO,CE]{\small\textsl{Abril, JF}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+@ 
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textsc{\textbf{\Huge Building\\ ORTHOLOGOUS\\[1ex] Dataset}}\\[5ex]
+
+%\textbf{\Large Authors List Here}\\[1ex]
+\textbf{\Large Josep F. Abril}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+} % parbox
+\end{center}
+\end{abstract}
+
+\vfill
+
+\begin{raggedleft}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Introduction}
+
+\subsctn{Main goals}
+
+\noindent  a) Official Sequences:
+
+\begin{tabular}{p{4cm}p{4cm}p{4cm}p{4cm}}
+Region     & Mouse length & Human length & Comment     \\
+DFNA5      &   330 kb     &   200 kb     &             \\
+KvLQT      &   1.1 Mb     &   920 kb     &             \\
+HOXA       &   400 Kb     &   500 Kb     & repeat poor \\
+MHC        &   1.5 Mb     &   2.6 Mb     & repeat rich \\
+ELN        &   270 kb     &   380 kb     & (Elastin)   \\
+SIL        &   230 kb     &   193 kb     &             \\
+BTK        &   89 kb      &   200 kb     &             \\
+CFTR       &   360 kb     &   450 kb     & "Gene poor" \\
+\\
+Chrom 22   &   4 Mb       &              & \shortstack{Ongoing discussion to choose\\GoldenPath or Sanger Center Version} \\
+\end{tabular}
+
+\sctn{Building orthologous dataset}
+
+\subsctn{Data set}
+ 
+Downloading (into '[[_tmp]]' dir):
+
+<<BASH commands>>=
+wget -b --no-parent --mirror --tries=0  \
+     --output-file=download_orthologous.log    \
+     --no-host-directories --cut-dirs=1 \
+     'http://zilla.lbl.gov/TESTS/'
+# 
+# http://zilla.lbl.gov/VISTAS/Chr6/NT_002572/Mm.fasta
+@
+ 
+{\data} database contains 8 pairs of orthologous sequences from human and mouse. Table~\ref{tbl:genelist} lists the gene identifiers found for each human/mouse sequence pairs.
+
+\begin{table}[!ht]
+\begin{center}
+\caption{\label{tbl:genelist}}
+\end{center}
+\end{table}
+
+\subsctn{Preparing files}
+
+\subsubsctn{Auxiliary files}
+
+<<Sequence IDs>>=
+BTK     Hsap_BTK     Mmus_BTK
+CFTR    Hsap_CFTR    Mmus_CFTR
+DFNA5   Hsap_DFNA5   Mmus_DFNA5
+ELN     Hsap_ELN     Mmus_ELN
+HOXA    Hsap_HOXA    Mmus_HOXA
+KVLQT1  Hsap_KVLQT1  Mmus_KVLQT1
+MHC     Hsap_MHC     Mmus_MHC
+SIL     Hsap_SIL     Mmus_SIL
+@
+
+<<BASH commands>>=
+#
+perl -ane 'print "$F[1]\n"' $ID > $HSAP ;
+perl -ane 'print "$F[2]\n"' $ID > $MMUS ;
+#
+@
+
+\subsubsctn{Moving and renaming fasta files}
+
+<<BASH commands>>=
+#
+ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \
+         $DATASETS/fasta/orimasked $DATASETS/fasta/softmasked \
+         $DATASETS/annotation $DATASETS/annotation/desc ;
+#
+# preparing fasta files
+IDIR="$DATASETS/_tmp" ;
+ODIR="$DATASETS/fasta/raw" ;
+while read locus human mouse ;
+  do {
+    $BIN/fasta_renamer.pl $IDIR/$locus/Hs.fasta \
+        $DATASETS/annotation/desc/Hsap_$locus Hsap_$locus \
+        > $ODIR/Hsap_$locus;
+    $BIN/fasta_renamer.pl $IDIR/$locus/Mm.fasta \
+        $DATASETS/annotation/desc/Mmus_$locus Mmus_$locus \
+        > $ODIR/Mmus_$locus;
+    } ;
+  done < $ID ;
+MergeFiles $ODIR ;
+#
+# the same if masked files where provided
+IDIR="$DATASETS/_tmp" ;
+ODIR="$DATASETS/fasta/orimasked" ;
+while read locus human mouse ;
+  do {
+    $BIN/fasta_renamer.pl $IDIR/$locus/Hs.fasta.masked \
+        $DATASETS/annotation/desc/Hsap_$locus.msk Hsap_$locus \
+        > $ODIR/Hsap_$locus;
+    $BIN/fasta_renamer.pl $IDIR/$locus/Mm.fasta.masked \
+        $DATASETS/annotation/desc/Mmus_$locus.msk Mmus_$locus \
+        > $ODIR/Mmus_$locus;
+    } ;
+  done < $ID ;
+MergeFiles $ODIR ;
+#
+@
+
+\subsubsctn{Getting lengths from description files}
+
+<<BASH commands>>=
+#
+IDIR="$DATASETS/annotation/desc" ;
+multicat ()
+{
+  cat "$@" | while read n ;
+    do {
+      cat $DATASETS/annotation/desc/$n ;
+      } ;
+    done;
+}
+multicat $HSAP | gawk '{printf "%-12s%8s\n",$1,$3}' - > $DATASETS/length.Hsap;
+multicat $MMUS | gawk '{printf "%-12s%8s\n",$1,$3}' - > $DATASETS/length.Mmus;
+@
+
+\subsctn{Masking fasta sequences}
+
+\subsubsctn{Retrieving masked regions coords from 'orimasked' fasta files}
+
+<<BASH commands>>=
+#
+IDIR="$DATASETS/masking" ;
+ChckDirs $IDIR $IDIR/orimasked $IDIR/orimasked/gff $IDIR/orimasked/logs ;
+#
+IDIR="$DATASETS/fasta/orimasked" ;
+ODIR="$DATASETS/masking/orimasked" ;
+cat $HSAP $MMUS | while read n ;
+  do {
+    echo "### WORKING ON $n " ;
+    $BIN/getfastamasked.pl < $IDIR/$n > $ODIR/gff/$n 2> $ODIR/logs/$n ;
+    } ;
+  done ;
+#
+@ 
+
+\subsubsctn{Masking fasta sequences} (!!!! TO DO, also SOFT masking !!!!)
+
+<<BASH commands>>=
+# each sequence without any change
+cat $HSAP $MMUS | while read n ;
+  do {
+    WDIR="$WORK/RepeatMasker/fastamasked" ;
+    echo "### WORKING ON $n " ;
+    cp -v $FASTA/fasta/$n $WDIR/$n ;
+    # 8 procs at monstre
+    RepeatMasker -parallel 8 $WDIR/$n ;
+    /bin/rm -v $WDIR/$n ;
+    mv -v $WDIR/$n.masked $FASTA/fastamasked/$n;
+# include parsing repeats to GFF
+    } ;
+  done ;
+#
+@
+
+\subsubsctn{Masking fasta sequences (with softmask options)} (!!!! TO DO !!!!)
+
+<<BASH commands>>=
+#
+#
+@
+
+\subsctn{Mapping annotations to GFF}
+
+<<BASH commands>>=
+#
+ChckDirs $DATASETS/annotation $DATASETS/annotation/coords \
+         $DATASETS/annotation/fullgff $DATASETS/annotation/gff \
+         $DATASETS/annotation/gtf2 $DATASETS/annotation/cds ;
+#
+IDIR="$DATASETS/_tmp" ;
+ODIR="$DATASETS/annotation" ;
+while read locus human mouse ;
+  do {
+    #
+    # due to a problem with alternative splicing forms 
+    # I must edit some $ODIR/coords/ files by hand ...
+    #
+ #  cp -vf $IDIR/$locus/Hs.exons.refGene $ODIR/coords/$human ;
+    #
+    gawk '$3 !~ "utr" { print $0 }' $ODIR/coords/$human > $ODIR/cds/$human ;
+    gawk 'BEGIN{ seq=ARGV[1]; ARGV[1]="" }
+          $1  ~ "#" { print $0 }
+          $1 !~ "#" { $1=seq; print $0 }' $locus \
+          $IDIR/$locus/Hs.exons.refGene.GFF2 \
+          > $ODIR/fullgff/$human ;
+    $BIN/coords2gff.pl $human < $ODIR/cds/$human > $ODIR/gff/$human
+    # gawk '$3==CDS { print $0 }' $ODIR/fullgff/$human > $ODIR/gff/$human ;
+    $BIN/gff2gtf.pl < $ODIR/gff/$human > $ODIR/gtf2/$human ;
+    } ;
+  done < $ID ;
+#
+# Preparing GFF files for evaluation program:
+MergeGFF $DATASETS/annotation/gff Hsap 1 ;
+#
+@
+
+We found ``duplicated'' genes in the original files from \url{http://zilla.lbl.gov/TESTS/}, in three of the test sequences:
+
+\begin{center}
+\begin{tabular}{cl}
+Hsap\_ELN    & WBSCR5, LIMK1 \\
+Hsap\_KVLQT1 & TSSC4 \\
+Hsap\_MHC    & TAP2, LTB, HSPA1A, HSPA1B, AIF1, TNXA/TNXB \\
+\end{tabular}
+\end{center}
+
+We have discarded the shorter gene or the gene with less exons (in TNXA/TNXB case, which exons were overlapping ---or the same---, we removed TNXA).
+
+\subsctn{Other auxiliary files}
+
+<<BASH commands>>=
+#
+gawk '$3 == "Gene" {print $1,$9,$4,$5,$7}' $DATASETS/annotation/gff/Hsap_* \
+                                           > $DATASETS/genes.Hsap ;
+cat $DATASETS/annotation/desc/Hsap_*[^.msk] > $DATASETS/desc.Hsap ;
+cat $DATASETS/annotation/desc/Mmus_*[^.msk] > $DATASETS/desc.Mmus ;
+#
+ChckDirs $DATASETS/annotation/length ;
+gawk 'BEGIN{
+    OFS="\t";
+    opath=ARGV[1];
+    ARGV[1]="";
+  }
+  {
+    file= opath "/" $1;
+    # split($1,n,"_");
+    # name=n[2];
+    name=$1;
+    print "# Writing to ", file | "cat 1>&2";
+    printf "%s\tannotation\tSequence\t1\t%s\t.\t.\t.\t.\n", name, $2 > file;
+  }' $DATASETS/annotation/length $DATASETS/length.Hsap $DATASETS/length.Mmus ;
+#
+@
+
+\subsctn{Building WU-BLAST databases (only for mouse seqs)}
+
+<<BASH commands>>=
+#
+ChckDirs $DATASETS/blastdb $DATASETS/blastdb/wublast \
+     $DATASETS/blastdb/wublast/raw $DATASETS/blastdb/wublast/masked \
+     $DATASETS/blastdb/wublast/orimasked $DATASETS/blastdb/wublast/softmasked ;
+#
+IDIR="$DATASETS/fasta" ;
+ODIR="$DATASETS/blastdb/wublast" ;
+{ cat $MMUS; echo "all.Mmus"; } | while read n ;
+  do {
+    echo "### WORKING ON $n " ;
+    pressdb $IDIR/raw/$n        -o $ODIR/raw/$n        ;
+    pressdb $IDIR/orimasked/$n  -o $ODIR/orimasked/$n  ;
+  # pressdb $IDIR/masked/$n     -o $ODIR/masked/$n     ;
+  # pressdb $IDIR/softmasked/$n -o $ODIR/softmasked/$n ;
+    } ;
+  done ;
+#
+@
+
+\sctn{Running Blast}
+
++ Running TBLASTX on ALEPH server
+
+<<BASH commands>>=
+#
+# Running in /home/ug/jabril/no_backup/PBS
+BASE="/home/ug/jabril/no_backup/PBS" ;
+WGS="/seq/genomes/M.musculus/WGS/wublast8" ;
+WGS3X="$WGS/Mm.WGS001_010 $WGS/Mm.WGS010_020 $WGS/Mm.WGS021_030" ;
+WGS3X="$WGS3X $WGS/Mm.WGS031_040 $WGS/Mm.WGS041_050 $WGS/Mm.WGS051_060" ;
+WGS3X="$WGS3X $WGS/Mm.WGS061_070 $WGS/Mm.WGS071_081" ;
+export BASE WGS3X;
+#
+# loop que encua els fitxers PBS
+runpbs ()
+{
+  while read gene locus mouse ;
+    do {
+      echo "### Queuing $gene ..." ;
+      db="$2" ;
+      [ $1 -eq 1 ] && db="$db/$mouse" ;
+      export locus db ;
+      qsub -V $BASE/PBS.sh ;
+      } ;
+    done < $BASE/id ;
+}
+#
+#
+ChckDirs $BASE $BASE/matrix $BASE/matrix/aa \
+    $BASE/fasta $BASE/fasta/raw $BASE/fasta/blastdb \
+    $BASE/fasta/blast $BASE/fasta/logs \
+    $BASE/fasta/blast3X $BASE/fasta/logs3X \
+    $BASE/fastamasked $BASE/fastamasked/raw $BASE/fastamasked/blastdb \
+    $BASE/fastamasked/blast $BASE/fastamasked/logs \
+    $BASE/fastamasked/blast3X $BASE/fastamasked/logs3X ;
+#
+#
+cp -vapudf $DATASETS/fasta/raw/*                 $BASE/fasta/raw/ ;
+cp -vapudf $DATASETS/blastdb/wublast/raw/*       $BASE/fasta/blastdb/ ;
+cp -vapudf $DATASETS/fasta/orimasked/*           $BASE/fastamasked/raw/ ;
+cp -vapudf $DATASETS/blastdb/wublast/orimasked/* $BASE/fastamasked/blastdb/ ;
+#
+# Working on raw files - ORTHOLOGOUS SEQS
+IN="$BASE/fasta/raw" ;
+OUT="$BASE/fasta/blast" ;
+ERROR="$BASE/fasta/logs" ;
+BLASTOPTIONS="Z=3000000000 -nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod" ;
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fasta/logs ;
+runpbs 1 "$BASE/fasta/blastdb" ;
+popd ;
+#
+# Working on orimasked files - ORTHOLOGOUS SEQS
+IN="$BASE/fastamasked/raw" ;
+OUT="$BASE/fastamasked/blast" ;
+ERROR="$BASE/fastamasked/logs" ;
+BLASTOPTIONS="Z=3000000000 -nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod" ;
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fastamasked/logs ;
+runpbs 1 "$BASE/fastamasked/blastdb" ;
+popd ;
+#
+# Working on raw files - 3X SEQS
+IN="$BASE/fasta/raw" ;
+OUT="$BASE/fasta/blast3X" ;
+ERROR="$BASE/fasta/logs3X" ;
+BLASTOPTIONS="-nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod Z=3000000000" ;
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fasta/logs3X ;
+runpbs 0 "$WGS3X" ;
+popd ;
+#
+# Working on orimasked files - 3X SEQS
+IN="$BASE/fastamasked/raw" ;
+OUT="$BASE/fastamasked/blast3X" ;
+ERROR="$BASE/fastamasked/logs3X" ;
+BLASTOPTIONS="-nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod Z=3000000000" ;
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fastamasked/logs3X ;
+runpbs 0 "$WGS3X" ;
+popd ;
+#
+#
+ChckDirs $ANALYSIS/blast $ANALYSIS/blast/wublast \
+         $ANALYSIS/blast/wublast/raw $ANALYSIS/blast/wublast/orimasked \
+         $ANALYSIS/blast/wublast/raw3X $ANALYSIS/blast/wublast/orimasked3X ;
+#
+#
+cp -vapudf $BASE/fasta/blast/*         $ANALYSIS/blast/wublast/raw/
+cp -vapudf $BASE/fastamasked/blast/*   $ANALYSIS/blast/wublast/orimasked/
+cp -vapudf $BASE/fasta/blast3X/*       $ANALYSIS/blast/wublast/raw3X/
+cp -vapudf $BASE/fastamasked/blast3X/* $ANALYSIS/blast/wublast/orimasked3X/
+#
+@
+
+<<PBS tblastx shell>>=
+#!/bin/bash
+#
+# PBS.sh - Running tblastx on ALEPH server
+#
+:
+#PBS -e $ERROR/$locus.error
+#PBS -o $ERROR/$locus.out
+#PBS -q ace@aleph.imim.es
+#PBS -V
+#
+export BLASTMAT="$BASE/matrix/" ;
+ [ -e "$OUT/$locus" ]  && /bin/rm $OUT/$locus ;
+[ -e "$ERROR/$locus" ] && /bin/rm $ERROR/$locus ;
+for mousedb in $db ;
+  do {
+    echo "### PBS: TBLASTX Working on : $locus x $mousedb" >> $ERROR/$locus ;
+    tblastx $mousedb $IN/$locus $BLASTOPTIONS \
+            >> $OUT/$locus 2>> $ERROR/$locus ;
+    echo "### PBS: TBLASTX ... DONE $mousedb !!!" >> $ERROR/$locus ;
+    } ;
+  done ;
+@
+
+\sctn{Gene predictions}
+
+Preparing directories:
+
+<<BASH commands>>=
+#
+GI="$ANALYSIS/geneid" ;
+GS="$ANALYSIS/genscan" ;
+TS="$ANALYSIS/twinscan" ;
+SP="$ANALYSIS/sgp" ;
+R="Hsap.raw" ;
+O="Hsap.orimasked" ;
+for a in $GI $GS $TS $SP ;
+  do {
+    ChckDirs $a ;
+    for b in $a/$R $a/$O ;
+      do {
+        ChckDirs $b ;
+        for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+          do {
+            ChckDirs $b/$c ;
+            } ;
+          done ;
+        } ;
+      done ;
+    } ;
+  done ;
+for b in $SP/$R $SP/$O ;
+  do {
+    for c in hsp sr hsp-rs tbx ;
+      do {
+        ChckDirs $b/$c ;
+        } ;
+      done ;
+    } ;
+  done ;
+#
+@ 
+
+\subsctn{Running {\gnid}} 
+
+<<BASH commands>>=
+#
+GENEID="/projects/sgp/param/geneid/human3iso.param" ;
+#
+IDIR="$DATASETS/fasta/raw" ;
+ODIR="$ANALYSIS/geneid/Hsap.raw" ;
+while read gene human mouse ;
+  do {
+    echo "### WORKING ON $gene " ;
+    /projects/sgp/bin/geneid -vG $IDIR/$human     \
+                             > $ODIR/gff/$human  \
+                            2> $ODIR/logs/$human ;
+    } ;
+  done < $ID ; 
+#
+MergeGFF $ANALYSIS/geneid/Hsap.raw/gff Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa $ANALYSIS/geneid/Hsap.raw/gff/all.Hsap \
+                        $DATASETS/annotation/gff/all.Hsap             \
+                      > $ANALYSIS/geneid/Hsap.raw/eval.geneid_Hsap_raw ;
+#
+IDIR="$DATASETS/fasta/orimasked" ;
+ODIR="$ANALYSIS/geneid/Hsap.orimasked" ;
+while read gene human mouse ;
+  do {
+    echo "### WORKING ON $gene " ;
+    /projects/sgp/bin/geneid -vG $IDIR/$human     \
+                             > $ODIR/gff/$human  \
+                            2> $ODIR/logs/$human ;
+    } ;
+  done < $ID ; 
+#
+MergeGFF $ANALYSIS/geneid/Hsap.orimasked/gff Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa $ANALYSIS/geneid/Hsap.orimasked/gff/all.Hsap \
+                   $DATASETS/annotation/gff/all.Hsap                  \
+                 > $ANALYSIS/geneid/Hsap.orimasked/eval.geneid_Hsap_orimasked ;
+#
+@ 
+
+\subsctn{Running {\gnsc}} 
+
+<<BASH commands>>=
+#
+GENSCAN="/usr/local/molbio/Install/GENSCAN/param/HumanIso.smat" ;
+#
+IDIR="$DATASETS/fasta/raw" ;
+ODIR="$ANALYSIS/genscan/Hsap.raw" ;
+while read gene human mouse ;
+  do {
+    echo "### WORKING ON $gene " ;
+    /usr/local/molbio/bin/genscan $GENSCAN $IDIR/$human   \
+                                  2> $ODIR/logs/$human | \
+            /projects/sgp/bin/genscan2gff seqname=$human        \
+                                          > $ODIR/gff/$human  \
+                                        2>> $ODIR/logs/$human ;
+    } ;
+  done < $ID ; 
+#
+MergeGFF $ANALYSIS/genscan/Hsap.raw/gff Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa $ANALYSIS/genscan/Hsap.raw/gff/all.Hsap \
+                        $DATASETS/annotation/gff/all.Hsap             \
+                      > $ANALYSIS/genscan/Hsap.raw/eval.genscan_Hsap_raw ;
+#
+IDIR="$DATASETS/fasta/orimasked" ;
+ODIR="$ANALYSIS/genscan/Hsap.orimasked" ;
+while read gene human mouse ;
+  do {
+    echo "### WORKING ON $gene " ;
+    /usr/local/molbio/bin/genscan $GENSCAN $IDIR/$human   \
+                                  2> $ODIR/logs/$human | \
+            /projects/sgp/bin/genscan2gff seqname=$human        \
+                                          > $ODIR/gff/$human  \
+                                        2>> $ODIR/logs/$human ;
+    } ;
+  done < $ID ; 
+#
+MergeGFF $ANALYSIS/genscan/Hsap.orimasked/gff Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa $ANALYSIS/genscan/Hsap.orimasked/gff/all.Hsap \
+                   $DATASETS/annotation/gff/all.Hsap                  \
+                 > $ANALYSIS/genscan/Hsap.orimasked/eval.genscan_Hsap_orimasked ;
+#
+@
+
+\subsctn{Working on {\twsc} results}
+
+<<BASH commands>>=
+#
+while read gene human mouse; 
+  do {
+    gawk 'BEGIN{
+            OFS="\t";
+            seq=ARGV[1];
+            ARGV[1]="";
+          }
+          $3 == "CDS" {
+            $1=seq;
+            gsub(/[\"\;]/,"",$10);
+            $9=$10;
+            $10=$11=$12="";
+            print $0
+          }' $human $ANALYSIS/_tmp/$gene/$gene.Hs.fasta.gff \
+                  > $ANALYSIS/twinscan/Hsap.orimasked/gff/$human ;
+    } ;
+  done < $ID ; 
+#
+MergeGFF $ANALYSIS/twinscan/Hsap.orimasked/gff Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa $ANALYSIS/twinscan/Hsap.orimasked/gff/all.Hsap \
+              $DATASETS/annotation/gff/all.Hsap                        \
+            > $ANALYSIS/twinscan/Hsap.orimasked/eval.twinscan_Hsap_orimasked ;
+#
+@
+
+\subsctn{Running {\sgp}}
+
+<<BASH commands>>=
+#
+# Raw sequences
+#
+sh $SGPBIN/SGP2-2/runsggp-t.sh $DATASETS/fasta/raw \
+                $ANALYSIS/sgp/Hsap.raw/tmp/        \
+                $ANALYSIS/blast/wublast/raw        \
+                $ANALYSIS/sgp/Hsap.raw/gff         \
+                $ANALYSIS/sgp/Hsap.raw/logs        \
+                < $HSAP ;
+#
+MergeGFF $ANALYSIS/sgp/Hsap.raw/gff Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa $ANALYSIS/sgp/Hsap.raw/gff/all.Hsap \
+                        $DATASETS/annotation/gff/all.Hsap   \
+                      > $ANALYSIS/sgp/Hsap.raw/eval.sgp_Hsap_raw ;
+#
+IDIR="$ANALYSIS/sgp/Hsap.raw/tmp" ;
+ODIR="$ANALYSIS/sgp/Hsap.raw" ;
+while read locus ;
+  do {
+    # cp -vapudf $IDIR/$locus.sgp    $ODIR/gff/$locus ;
+    cp -vapudf $IDIR/$locus.hsp    $ODIR/hsp/$locus ;
+    cp -vapudf $IDIR/$locus.sr     $ODIR/sr/$locus ;
+    cp -vapudf $IDIR/$locus.hsp-rs $ODIR/hsp-rs/$locus ;
+    cp -vapudf $IDIR/$locus.tbx    $ODIR/tbx/$locus ;
+    } ;
+  done < $HSAP ;
+#
+# Masked sequences (already masked: orimasked)
+#
+sh $SGPBIN/SGP2-2/runsggp-t.sh $DATASETS/fasta/orimasked \
+                $ANALYSIS/sgp/Hsap.orimasked/tmp/        \
+                $ANALYSIS/blast/wublast/orimasked        \
+                $ANALYSIS/sgp/Hsap.orimasked/gff         \
+                $ANALYSIS/sgp/Hsap.orimasked/logs        \
+                < $HSAP ;
+#
+MergeGFF $ANALYSIS/sgp/Hsap.orimasked/gff Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa $ANALYSIS/sgp/Hsap.orimasked/gff/all.Hsap \
+                        $DATASETS/annotation/gff/all.Hsap         \
+                      > $ANALYSIS/sgp/Hsap.orimasked/eval.sgp_Hsap_orimasked ;
+#
+IDIR="$ANALYSIS/sgp/Hsap.orimasked/tmp" ;
+ODIR="$ANALYSIS/sgp/Hsap.orimasked" ;
+while read locus ;
+  do {
+    # cp -vapudf $IDIR/$locus.sgp    $ODIR/gff/$locus ;
+    cp -vapudf $IDIR/$locus.hsp    $ODIR/hsp/$locus ;
+    cp -vapudf $IDIR/$locus.sr     $ODIR/sr/$locus ;
+    cp -vapudf $IDIR/$locus.hsp-rs $ODIR/hsp-rs/$locus ;
+    cp -vapudf $IDIR/$locus.tbx    $ODIR/tbx/$locus ;
+    } ;
+  done < $HSAP ;
+#
+# Roderic's Tests on a SGP variant
+#
+IDIR="$ANALYSIS/sgp/rguigo" ;
+ChckDirs $IDIR ;
+for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+  do {
+    ChckDirs $IDIR/$c ;
+    } ;
+  done ;
+for c in hsp sr hsp-rs tbx ;
+  do {
+    ChckDirs $IDIR/$c ;
+    } ;
+  done ;
+#
+MergeGFF $ANALYSIS/sgp/rguigo/gff/$locus Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa /home/ug/rguigo/research/humus/SGP2-2/11.2/ortho.sgp \
+                        $DATASETS/annotation/gff/all.Hsap                    \
+                      > $ANALYSIS/sgp/eval.sgp_Hsap_RGUIGO ;
+$SGPBIN/evaluation -tsa $ANALYSIS/sgp/rguigo/gff/all.Hsap                    \
+                        $DATASETS/annotation/gff/all.Hsap                    \
+                      > $ANALYSIS/sgp/eval.sgp_Hsap_RGUIGO.2 ;
+#
+IDIR="/home/ug/rguigo/research/humus/SGP2-2/11.2/sgp" ;
+ODIR="$ANALYSIS/sgp/rguigo" ;
+while read locus ;
+  do {
+    cp -vapudf $IDIR/$locus.sgp     $ODIR/gff/$locus ;
+    perl -npe 's/^\s+//o' $IDIR/$locus.hsp \
+                                  > $ODIR/hsp/$locus ;
+    cp -vapudf $IDIR/$locus.sr      $ODIR/sr/$locus ;
+    cp -vapudf $IDIR/$locus.hsp-rs  $ODIR/hsp-rs/$locus ;
+    cp -vapudf $IDIR/$locus.tbx     $ODIR/tbx/$locus ;
+    } ;
+  done < $HSAP ;
+#
+@
+
+\subsctn{Printing gene-prediction statistics}
+
+<<BASH commands>>=
+#
+ENSCRIPT="enscript -1rC -Gjf Courier7 -M A4" ;
+#
+$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval.geneid_Hsap_raw ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.orimasked/eval.geneid_Hsap_orimasked ;
+#
+$ENSCRIPT $ANALYSIS/genscan/Hsap.raw/eval.genscan_Hsap_raw ;
+$ENSCRIPT $ANALYSIS/genscan/Hsap.orimasked/eval.genscan_Hsap_orimasked ;
+#
+$ENSCRIPT $ANALYSIS/twinscan/Hsap.orimasked/eval.twinscan_Hsap_orimasked ;
+#
+$ENSCRIPT $ANALYSIS/sgp/Hsap.raw/eval.sgp_Hsap_raw ;
+$ENSCRIPT $ANALYSIS/sgp/Hsap.orimasked/eval.sgp_Hsap_orimasked ;
+# Roderic's Tests on a SGP variant
+$ENSCRIPT $ANALYSIS/sgp/eval.sgp_Hsap_RGUIGO ;
+#
+@
+
+\sctn{Making plots for {\sgp}}
+
+\subsctn{Preparing GFF files}
+
+<<BASH commands>>=
+#
+# geneid and genscan files (Twinscan used as is)
+while read locus ;
+  do {
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/genscan/Hsap.orimasked" ;
+    ODIR="$IDIR/ps/_tmp/genscan" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{OFS="\t"}
+          $1!~/^#|^[ \t]*$/ {
+              $9="gene_"$9;
+              print;
+          }' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    IDIR="$ANALYSIS/geneid/Hsap.orimasked" ;
+    ODIR="$IDIR/ps/_tmp/geneid" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{OFS="\t"}
+          $1!~/^#|^[ \t]*$/ {
+              print;
+          }' $IDIR/gff/$locus > $ODIR/$locus ;
+    } ;
+  done < $HSAP ; 
+#
+# FullOrthologous against sequences
+while read locus ;
+  do {
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/sgp/Hsap.orimasked" ;
+    ODIR="$IDIR/ps/_tmp/sgp" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.homol" };
+            print $0;
+            }' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    IDIR="$ANALYSIS/sgp/Hsap.orimasked" ;
+    ODIR="$IDIR/ps/_tmp/tblastx" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="tblastx.homol"; $8="." };
+            print $0;
+          }' $IDIR/hsp-rs/$locus > $ODIR/$locus ;
+    } ;
+  done < $HSAP ; 
+#
+# FullOrthologous against sequences (Roderic's SGP testing version)
+while read locus ;
+  do {
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo" ;
+    ODIR="$IDIR/ps/_tmp/sgp" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.homol" };
+            print $0;
+            }' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo" ;
+    ODIR="$IDIR/ps/_tmp/tblastx" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="tblastx.homol"; $8="." };
+            print $0;
+            }' $IDIR/hsp-rs/$locus > $ODIR/$locus ;
+    } ;
+  done < $HSAP ; 
+#
+# 3X against sequences (!!!!! TO DO !!!!!)
+while read locus ;
+  do {
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="SGP.3X";print}' $WORK/sgp/HsapMmus3X.msk/gff/$locus \
+         > $WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus ;
+    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="tblastx.3X";$8=".";print}' $WORK/sgp/HsapMmus3X.msk/hsp-rs/$locus \
+         > $WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus ;
+    } ;
+  done < $HSAP ; 
+#
+@
+
+\subsctn{Making plots with {\gps}}
+
+\subsubsctn{Human x FO Mouse Roderic's SGP results} %'
+
+We are going to display the following data: 
+
+\begin{tabular}{rl}
+annotation   & [[$DATASETS/annotation/gff/$locus]] \\
+sgp          & [[$ANALYSIS/sgp/rguigo/ps/_tmp/sgp/$locus]] \\
+geneid msk   & [[$ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid/$locus]] \\
+twinscan msk & [[$ANALYSIS/twinscan/Hsap.orimasked/gff/$locus]] \\
+genscan msk  & [[$ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan/$locus]] \\
+hsp-rs       & [[$ANALYSIS/sgp/rguigo/ps/_tmp/tblastx/$locus]] \\
+repeats      & [[$DATASETS/masking/orimasked/gff/$locus]] \\
+\end{tabular}
+
+<<BASH commands>>=
+#
+IDIR="$ANALYSIS/sgp/rguigo/ps";
+ChckDirs $IDIR/gff2ps \
+         $IDIR/gff2ps/a3      $IDIR/gff2ps/a4      $IDIR/gff2ps/wide \
+         $IDIR/gff2ps/a3/logs $IDIR/gff2ps/a4/logs $IDIR/gff2ps/wide/logs ;
+#
+while read locus ; # Requires previous $IDIR 
+  do {
+    echo "### Plotting $locus" ;
+    GFFIN="$DATASETS/annotation/gff/$locus" ;
+    GFFIN="$GFFIN $IDIR/_tmp/sgp/$locus" ;
+    GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid/$locus" ;
+    GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff/$locus" ;
+    GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan/$locus" ;
+    GFFIN="$GFFIN $IDIR/_tmp/tblastx/$locus" ;
+    GFFIN="$GFFIN $DATASETS/masking/orimasked/gff/$locus" ;
+    ODIR="$IDIR/gff2ps" ;
+    gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a4.rc   -- $GFFIN \
+            2>&1 > $ODIR/a4/$locus   | tee $ODIR/a4/logs/$locus ;
+    gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a3.rc   -- $GFFIN \
+            2>&1 > $ODIR/a3/$locus   | tee $ODIR/a3/logs/$locus ;
+    gff2ps -VC $PARAM/gff2ps/ortho_orimasked_wide.rc -- $GFFIN \
+            2>&1 > $ODIR/wide/$locus | tee $ODIR/wide/logs/$locus ;
+    } ;
+  done < $HSAP ; 
+#
+@ 
+
+\subsctn{Customization files for {\gps}}
+
++ LAYOUT
+
+<<Common Layout Settings>>=
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=1000
+minor_tickmarks_nucleotides=250
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=off
+#
+group_label_scale=2
+#
+@
+
+<<Settings for a3 paper size>>=
+page_size=a3
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=4
+nucleotides_x_line=30000
+#
+@ 
+
+<<Settings for a4 paper size>>=
+page_size=a4
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=3
+nucleotides_x_line=10000
+#
+@ 
+
+<<Settings for wide display>>=
+page_bbox=wide,400,3000
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=1
+# nucleotides_x_line=10000
+#
+@ 
+
++ FEATURES
+
+<<Common Features Settings>>=
+*::fill_shape_mode=1_color
+gene::shape=none
+@
+
+<<Repeats Features Settings>>=
+LINE/L2::feature_color=verydarkred
+SINE/Alu::feature_color=verydarkgreen
+SINE/MIR::feature_color=verydarkbrown
+LTR/ERV1::feature_color=verydarkblue
+Low_complexity::feature_color=verydarkyellow
+Simple_repeat::feature_color=verydarkorange
+#
+@
+
++ GROUPS
+
+<<Common Group Settings>>=
+*::group_line=none
+*::group_shape=thick_line
+@
+
++ SOURCES
+
+<<Common Source Settings>>=
+*::unfold_grouped_ungrouped=off
+*::unfold_ungrouped_line=off
+*::unfold_grouped_line=off
+*::range=none
+*::source_line_color=black
+*::source_line=long_dotted
+#
+@
+ 
+<<annotation source settings>>=
+annotation::feature_color=darkgreen
+annotation::group_color=verydarkgreen
+annotation::left_label=ANNOTATION
+@ 
+
+<<sgp source settings>>=
+SGP.3X::feature_color=darkorange
+SGP.3X::group_color=verydarkorange
+SGP.3X::left_label=SGP 3X
+SGP.homol::feature_color=darkorange
+SGP.homol::group_color=verydarkorange
+SGP.homol::left_label=SGP
+@ 
+
+<<geneid source settings>>=
+geneid_v1.0::feature_color=lightviolet
+geneid_v1.0::group_color=darkviolet
+geneid_v1.0::left_label=GENEID
+@ 
+
+<<twinscan source settings>>=
+Twinscan-1.0::feature_color=verylightbrown
+Twinscan-1.0::group_color=brown
+Twinscan-1.0::left_label=TWINSCAN
+@ 
+
+<<genscan source settings>>=
+genscan::feature_color=blue
+genscan::group_color=verydarkblue
+genscan::left_label=GENSCAN
+@ 
+
+<<tblastx source settings>>=
+tblastx.3X::feature_color=red
+tblastx.3X::group_color=verydarkred
+tblastx.3X::left_label=TBLASTX 3X
+tblastx.homol::feature_color=red
+tblastx.homol::group_color=verydarkred
+tblastx.homol::left_label=TBLASTX
+@ 
+
+<<repeatmasker source settings>>=
+# RepeatMasker::feature_color=####
+# RepeatMasker::group_color=####
+RepeatMasker::left_label=REPEATS
+@ 
+
+<<orimasked source settings>>=
+# masked::feature_color=####
+# masked::group_color=####
+masked::left_label=MASKED
+@ 
+
++ CUSTOM FILES
+
+<<GFF2PS customization: ortho orimasked a4>>=
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A4 PAGE   ##
+##########################################
+#
+# ortho_orimasked_a4.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for a4 paper size>>
+<<Common Layout Settings>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings>>
+<<annotation source settings>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+<<orimasked source settings>>
+@ 
+
+<<GFF2PS customization: ortho orimasked a3>>=
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A3 PAGE   ##
+##########################################
+#
+# ortho_orimasked_a3.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for a3 paper size>>
+<<Common Layout Settings>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings>>
+<<annotation source settings>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+<<orimasked source settings>>
+@ 
+
+<<GFF2PS customization: ortho orimasked wide>>=
+############################################
+##   CUSTOM FILE FOR GFF2PS - WIDE PAGE   ##
+############################################
+#
+# ortho_orimasked_wide.rc
+#
+<<Version Control Id Tag>>
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+<<Settings for wide display>>
+<<Common Layout Settings>>
+#
+# F ############GENOMIC FEATURES############
+#
+<<Common Features Settings>>
+#
+# G ############GROUP FEATURES##############
+#
+<<Common Group Settings>>
+#
+# S ############SOURCE FEATURES#############
+#
+<<Common Source Settings>>
+<<annotation source settings>>
+<<sgp source settings>>
+<<geneid source settings>>
+<<twinscan source settings>>
+<<genscan source settings>>
+<<tblastx source settings>>
+<<orimasked source settings>>
+@ 
+
+\subsubsctn{Human x WGS3X Mouse SGP results}
+
+<<BASH commands>>=
+#
+#### Human against Mouse 3X (!!!!! TO DO !!!!!)
+while read locus ;
+  do {
+    echo "### Plotting $locus" ;
+    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
+    PSOUT1="$WORK/ps/sgp/HsapMmus3X/$locus.a3" ;
+    PSOUT2="$WORK/ps/sgp/HsapMmus3X/$locus.a4" ;
+    LOGFILE1="$WORK/ps/sgp/HsapMmus3X/logs/$locus.a3" ;
+    LOGFILE2="$WORK/ps/sgp/HsapMmus3X/logs/$locus.a4" ;
+    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
+    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
+    } ;
+  done < $HSAP ; 
+#
+#### Human against Mouse 3X + Human against Mouse Homologous (!!!!! TO DO !!!!!)
+while read locus ;
+  do {
+    echo "### Plotting $locus" ;
+    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmusHomolog/gff/$locus " ;
+    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
+    PSOUT1="$WORK/ps/sgp/all/$locus.a3" ;
+    PSOUT2="$WORK/ps/sgp/all/$locus.a4" ;
+    LOGFILE1="$WORK/ps/sgp/all/logs/$locus.a3" ;
+    LOGFILE2="$WORK/ps/sgp/all/logs/$locus.a4" ;
+    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
+    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
+    } ;
+  done < $HSAP ; 
+@
+
+\sctn{Preparing files on web site (as \textbf{gmaster})}
+
+<<BASH commands>>=
+#
+while read locus ;
+  do {
+    echo "### Converting GFF to GTF2: $locus ..." ;
+    $BIN/gff2gtf.pl < $ANALYSIS/sgp/rguigo/gff/$locus \
+                    > $ANALYSIS/sgp/rguigo/gtf2/$locus ;
+    } ;
+  done < $HSAP ; 
+@ 
+
+\begin{comment}
+ODIR="./homologseqs" ;
+ANALYSIS="/projects/sgp/orthologous" ;
+HSAP="/projects/datasets/orthologous/id.Hsap" ;
+\end{comment}
+<<BASH commands>>=
+#
+# Remember to set ODIR, ANALYSIS and HSAP by gmaster
+#
+CP="cp -vapudf" ;
+#
+while read locus ;
+  do {
+    echo "### Copying files for $locus ..." ;
+    $CP $ANALYSIS/sgp/rguigo/ps/_tmp/sgp/$locus    $ODIR/$locus.gff ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.homol" };
+            print $0;
+            }' $ANALYSIS/sgp/rguigo/gtf2/$locus \
+              > $ODIR/$locus.gtf ;
+    $CP $ANALYSIS/sgp/rguigo/hsp/$locus            $ODIR/$locus.hsp ;
+    $CP $ANALYSIS/sgp/rguigo/tbx/$locus            $ODIR/$locus.tbx ;
+    $CP $ANALYSIS/sgp/rguigo/ps/gff2ps/a4/$locus   $ODIR/$locus.a4.ps ;
+    $CP $ANALYSIS/sgp/rguigo/ps/gff2ps/a3/$locus   $ODIR/$locus.a3.ps ;
+    # $CP $ANALYSIS/sgp/rguigo/ps/gff2ps/wide/$locus $ODIR/$locus.wide.ps ;
+    } ;
+  done < $HSAP ; 
+#
+pushd $ODIR ;
+#
+cat Hsap_*.gff > All.gff ;
+cat Hsap_*.gtf > All.gtf ;
+cat Hsap_*.hsp > All.hsp ;
+cat Hsap_*.tbx > All.tbx ;
+#
+tar -zcvf HomologyA3PS.tar.gz Hsap_*.a3.ps ;
+tar -zcvf HomologyA4PS.tar.gz Hsap_*.a4.ps ;
+tar -zcvf HomologyGFF.tar.gz  Hsap_*.gff ;
+tar -zcvf HomologyGTF.tar.gz  Hsap_*.gtf ;
+tar -zcvf HomologyHSP.tar.gz  Hsap_*.hsp ;
+tar -zcvf HomologyTBX.tar.gz  Hsap_*.tbx  ;
+#
+@ 
+
+\newpage
+\appendix
+
+\sctn{Programs not included in this document}
+
+The \sgp used in this approach uses different scrips and programs. When we started it was still not well controled. Therefore we decided to copy the binary files from [[~rguigo/research/humus/SGP2-2/sggp2/bin]] to [[/projects/sgp/bin/SGP2-2/]]. The copied files were the following:
+
+\begin{center}
+\begin{tabular}{l}
+geneid          \\
+blast2gff       \\
+blast2hsp       \\
+human3iso.param \\
+\end{tabular}
+\end{center}
+
+The path variable in the sggp2 shell script has been changed to [[/projects/sgp/bin/SGP2-2/]].
+
+
+\sctn{Scripts Central}
+
+\subsctn{[[fasta_renamer.pl]]: renaming and reformating fasta files}
+
+<<Renaming fasta sequence IDs>>=
+<<PERL shebang>>
+#
+# fasta_renamer.pl infile descfile new_seq_id > outfile
+#
+#     Replacing sequence name 
+#     for single sequence fasta files
+#     and reformating sequence to 80 cols.
+#
+use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use Bio::Seq;
+use Bio::SeqIO;
+
+my ($infile,$descfile,$newid) = @ARGV;
+
+my $seqin  = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
+my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
+
+open(DESC,"> $descfile");
+while (my $sequence = $seqin->next_seq()) {
+    my ($sid,$len,$seq,$desc);
+    print STDERR "### READING FASTA... $newid\n";
+    $sid  = $sequence->display_id();
+    $desc = $sequence->desc();
+    $len  = $sequence->length();
+    $seq  = $sequence->seq();
+    $sid =~ s/\s+/\_/og;
+    $seq =~ tr/[a-z]/[A-Z]/;
+    print STDERR "### WRITING FASTA... $newid\n";
+    print DESC "$newid $sid $len $desc\n";
+    $sequence->display_id($newid);
+    $sequence->desc('');
+    $sequence->seq($seq);
+    $seqout->write_seq($sequence);
+}; # while 
+close(DESC);
+exit(0);
+@
+
+\newpage
+
+\subsctn{[[coords2gff.pl]]: converting coords files into GFF}
+
+<<Raw coords to GFF>>=
+<<PERL shebang>>
+#
+# coords2gff.pl seqname < coords_file > GFF_file
+#
+#     Converting raw coords files to GFF
+#
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+
+my ($seqname,%gff,$string);
+$seqname = shift @ARGV;
+%gff = ();
+$string = ("\%s\t" x 8)."\%s\n";
+
+my $c = 0;
+while (<STDIN>) {
+    next if /^\s*$/o;
+    my ($l,$a,$b,$s,$r);
+    chomp;
+    $l = $_;
+	# print STDERR "$. (X): $l\n";
+    $l =~ /^[><]/o && do {
+	    # print STDERR "$. (A): $l\n";
+        $l =~ s/^([><])\s*//o && ($s = $1);
+        $r = \%{ $gff{++$c} };
+        ($r->{gn_start},$r->{gn_end},$r->{gn_name}) = split /\s+/og, $l, 3;
+        $r->{gn_name} =~ s/\s+$//og;
+        $r->{gn_name} =~ s/\s+/_/og;
+        $r->{strand} = ($s eq '>') ? '+' : (($s eq '<') ? '-' : '.');
+        # $r->{exons} = ();
+        next;
+	}; # $newgene ?
+	# print STDERR "$. (B): $l\n";
+    ($a,$b,undef) = split /\s+/og, $l, 3;
+    push @{ $gff{$c}{exons} }, [ $a, $b ];
+}; # while
+# print STDERR Dumper(\%gff);
+
+foreach my $i (1..$c) {
+    my $r = \%{ $gff{$i} };
+    my $exnum = scalar(@{ $r->{exons} });
+    print STDOUT "\# $seqname - $r->{gn_name}: ".
+        ($exnum)." exons\n";
+    printf STDOUT $string, 
+        $seqname,'annotation','Gene',$r->{gn_start},$r->{gn_end},
+        '.',$r->{strand},'.',$r->{gn_name};
+    $r->{strand} eq '-' && (@{ $r->{exons} } = reverse @{ $r->{exons} });
+    my ($lastori,$lastend,$lastfrm) = (0,0,0);
+    foreach my $j (0..$#{ $r->{exons} }) {
+        my ($feat,$ori,$end,$frm);
+        ($ori,$end) = @{ ${ $r->{exons} }[$j] };
+	  THIS: {
+        ($j == 0) && do {
+            $feat = 'First';
+            $exnum == 1 && ($feat = 'Single');
+            $frm = 0;
+            last THIS;
+        }; # $d == 0
+        $frm = (($lastend - $lastori + 1) + $lastfrm) % 3;
+        ($j == $#{ $r->{exons} }) && do {
+            $feat = 'Terminal';
+            last THIS;
+        }; # $d == $#{ $r->{exons} }
+        $feat = 'Internal';
+      }; # THIS
+        # print STDERR "$r->{gn_name} ($j): $ori $end $frm : ".
+        #              "$lastori $lastend $lastfrm\n";
+        ($lastori,$lastend,$lastfrm) = ($ori,$end,$frm);
+        printf STDOUT $string, 
+            $seqname,'annotation',$feat,$ori,$end,
+            '.',$r->{strand},$frm,$r->{gn_name};
+    }; # foreach @j
+}; # foreach $i
+
+exit(0);
+@ 
+
+\newpage
+
+\subsctn{[[getfastamasked.pl]]: retrieve masked from fasta sequences}
+
+<<Masked from fasta sequences>>=
+<<PERL shebang>>
+#
+# getfastamasked.pl < fastafile > GFFfile
+#
+#     Retrieving masked regions coords from fasta files
+#
+use Bio::Seq;
+use Bio::SeqIO;
+<<Use Modules - Benchmark>>
+my $PROGRAM = 'getfastamasked.pl';
+my ($T,$F) = (1,0);
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+my ($id,$seq) = ('','');
+my ($total_time);
+
+print STDERR << "+++EOR+++";
+$line$s\n$s Running $PROGRAM\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+&main();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s $PROGRAM FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub main() {
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
+    while (my $sequence = $seqin->next_seq()) {
+        my ($sid,$len,$seq,@nuc,@coords,$masked_flg,$match,$msk_num);
+        @coords = ();
+        <<Setting sequence variables from fasta record>>
+        <<Finding masked regions coords>>
+        <<Writing masked regions coords in GFF>>
+    }; # while 
+} # main
+<<Common PERL subs - Benchmark>>
+@ 
+
+<<Setting sequence variables from fasta record>>=
+print STDERR "### READING FASTA............\n";
+$sid  = $sequence->display_id();
+$len  = $sequence->length();
+$seq  = $sequence->seq();
+@ 
+
+<<Finding masked regions coords>>=
+print STDERR "###         PARSING SEQUENCE: $sid ($len bp)\n";
+@nuc = split //og, $seq;
+($masked_flg,$match) = ($F,$F) ;
+for (my $n = 0; $n <= $#nuc; $n++) {
+    $match = ( $nuc[$n] =~ /[NnXx]/o ) ? $T : $F;
+    ( !$masked_flg && $match ) && do {
+        $masked_flg = $T ;
+        # $n contains the last non-masked nucleotide
+        push @coords, ($n + 1);
+        next;
+    };
+    $masked_flg && do {
+        $match && (next);
+        $masked_flg = $F ;
+        # $n contains the last masked nucleotide now
+        push @coords, $n;
+    };
+}; # for nuc in $seq
+# if last nucleotide is masked, previous loop not includes its coord. 
+$masked_flg &&( push @coords, $len);
+@ 
+
+<<Writing masked regions coords in GFF>>=
+$msk_num = scalar(@coords) / 2;
+print STDERR "###         WRITING GFF COORDS: $msk_num masked regions found.\n";
+for (my $n = 0; $n <= $#coords; $n+=2) {
+    my $GFFstring = ("\%s\t" x 5).(".\t" x 3).".\n";
+    printf STDOUT $GFFstring, $sid, "masked", "masked", @coords[$n..($n + 1)];
+}; # for coords in @coords
+@ 
+
+\newpage
+
+\subsctn{[[splitfastaseq.pl]]: split large fasta sequences}
+
+<<Breaking fasta sequences>>=
+<<PERL shebang>>
+#
+# splitfastaseq.pl \
+#     seqlength overlap < fastafile > output
+#
+#     Breaking large fasta sequences to build 
+#     databases for running tblastx faster
+# 
+use lib qw( /usr/lib/perl5/site_perl/5.005/ );
+use Bio::Seq;
+use Bio::SeqIO;
+use Benchmark;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $PROGRAM = 'splitfastaseq.pl';
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+my ($id,$ln,$sq) = ('',0,'');
+my ($total_time,$seq);
+my ($maxlen,$overlap) = @ARGV;
+
+print STDERR << "+++EOR+++";
+$line$s\n$s Running $PROGRAM\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+&getseq();
+&splitseq();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s $PROGRAM FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub getseq() { # assuming here single sequence input fasta files
+    print STDERR "$s Processing fasta file.\n";
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
+    while (my $iseq = $seqin->next_seq()) {
+        $id = $iseq->display_id();
+        $ln = $iseq->length();
+        $sq = $iseq->seq();
+        last; # to make sure that we only catch a single fasta sequence
+    }; # while next_seq
+    $seq = Bio::Seq->new( -seq => $sq , -id => $id );
+    print STDERR "$s Processing DONE: ".(&timing($F))."\n$s\n";
+} # getseq
+#
+sub splitseq() {
+    my ($e,$sid,$ssq,$nseq,$wseq);
+    my ($t,$sqlen) = (1,($maxlen + $overlap - 1));
+    print STDERR "$s Creating splitted-sequence fasta file ($ln nt).\n";
+    my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
+    while ($t < $ln) {
+         $e = $t + $sqlen;
+         ($e > $ln) && ($e = $ln);
+         $sid = "$id\_$t\_$e";
+         print STDERR "$s --> $id : from $t to $e (".($e - $t + 1)." nt)\n";
+         $ssq = $seq->subseq($t,$e);
+         $t += $maxlen;
+         #
+         $wseq = Bio::Seq->new( -seq => $ssq , -id => $sid );
+         $seqout->write_seq($wseq);
+    }; # while  
+    print STDERR "$s Splitting DONE: ".(&timing($F))."\n$s\n";
+} # splitseq
+#
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+\newpage
+
+\subsctn{[[gff2gtf.pl]]: translating GFF to GTF2}
+
+<<GFF to GTF>>=
+<<PERL shebang>>
+#
+# gff2gtf.pl < infile > outfile
+#
+#     Converting GFF formated records into GTF
+#
+# use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use Benchmark;
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $PROGRAM = 'gff2gtf.pl';
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+print STDERR << "+++EOR+++";
+$line$s\n$s Running $PROGRAM\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+my %genes;
+my @f = ();
+my $gcnt = 0;
+while (<>) {
+    /^\# Gene/o && do {
+        $gcnt++;
+        $genes{$gcnt}{COMMENT} = $_;
+        next;
+    };
+    next if /^\#/o;
+    next if /^\s*$/o;
+    chomp;
+    @f = split /\s+/og, $_;
+    push @{ $genes{$gcnt}{FEATURES} }, [ @f[0..8] ];
+}; # while
+
+# print STDERR Dumper(\%genes);
+
+my $GTFrec = ("\%s\t" x 8)."\%s\n";
+foreach my $i (1..$gcnt) {
+    print STDOUT $genes{$i}{COMMENT};
+    my ($main,$tail_O,$tail_E,$groupflg,$gtfgroup) = ('','','',$T,'');
+    foreach my $j (0..$#{ $genes{$i}{FEATURES} }) {
+        my ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group,
+            $cdsfeat,$cdsori,$cdsend,$t);
+        ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group) =
+                @{ $genes{$i}{FEATURES}[$j] };
+        $score = '.';
+        $groupflg && do {
+            $group =~ s/gene_//o;
+            $t = &fill_left($group,3,"0");
+            $gtfgroup = "gene_id $t; transcript_id $t.1";
+            $groupflg = $F;
+        }; # $groupflg
+      FEATS: {
+          $feat eq 'Single' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              last FEATS;
+          }; # Single
+          $feat eq 'First' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);              
+              last FEATS;
+          }; # First
+          $feat eq 'Terminal' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+                  # only if nucleotides of stop codon not included
+                  #     $strand eq '+' && ($end = $end + 3);
+                  #     $strand eq '-' && ($start = $start - 3);
+              # last FEATS;
+          }; # Terminal
+        }; # FEATS
+        $feat = 'CDS';
+        $main .= sprintf($GTFrec,$seq,$source,$feat,$start,$end,
+                         $score,$strand,$frame,$gtfgroup); 
+    }; # foreach $j
+    print STDOUT "$main$tail_O$tail_E";
+}; # foreach $i
+
+my $total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s $PROGRAM FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub get_start() {
+    my ($o,$e,$s) = @_;
+    my $str = "start_codon";
+    $s eq '+' && do {
+       return $str, $o, ($o + 2);
+    }; # forward
+    $s eq '-' && do {
+       return $str, ($e - 2), $e;
+    }; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+} # 
+#
+sub get_final() {
+    my ($o,$e,$s) = @_;
+    my $str = "stop_codon";
+    $s eq '+' && do {
+        return $str, ($e - 2), $e;
+           # only if nucleotides of stop codon not included
+           #     return $str, ($e + 1), ($e + 3);
+    }; # forward
+    $s eq '-' && do {
+        return $str, $o, ($o + 2);
+           # only if nucleotides of stop codon not included
+           #     return $str, ($o - 3), ($o -1);
+    }; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+} # 
+#
+sub fill_left() { ($_[2] x ($_[1] - length($_[0]))).$_[0] } 
+#
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+\newpage
+
+\sctn{Common code blocks}
+
+\subsctn{PERL scripts}
+
+<<PERL shebang>>=
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+<<Version Control Id Tag>>
+#
+use strict;
+@
+
+<<Global Constants - Boolean>>=
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+@
+
+We also set here the date when the script is running and who is the user running it.
+
+<<Global Vars - User and Date>>=
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
+@
+
+
+\subsubsctn{Timing our scripts}
+
+The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+<<Use Modules - Benchmark>>=
+use Benchmark;
+  <<Timer ON>>
+@ 
+
+See '[[man Benchmark]]' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+<<Timer ON>>=
+my @Timer = (new Benchmark);
+@ 
+
+<<Common PERL subs - Benchmark>>=
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+
+\subsubsctn{Printing complex Data Structures}
+
+With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them.
+
+
+<<Use Modules - Dumper>>=
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+@ 
+
+An example on how to use: [[print STDERR Dumper(\%var_ref)]] 
+
+\subsubsctn{Common functions}
+
+<<Skip comments and empty records>>=
+next if /^\#/o;
+next if /^\s*$/o;
+chomp;
+@
+
+<<Common PERL subs - Min Max>>=
+#
+sub max() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min
+@
+
+<<Common PERL subs - Text fill>>=
+#
+sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+} # fill_mid
+@
+
+These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
+
+<<Common PERL subs - Counter>>=
+#
+sub counter { # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter
+#
+sub counter_end { # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter_end
+@
+
+<<Global Vars - Counter>>=
+my ($n,$c); # counter and char (for &counter function)
+@
+
+
+\subsubsctn{Common functions for reporting program processes}
+\label{sec:messagerpt}
+
+Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
+
+<<Common PERL subs - STDERR>>=
+sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
+@
+
+The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
+
+<<Common PERL subs - STDERR>>=
+sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
+@
+
+\subsctn{{\biop} modules}
+
+\def\bioseq{\htmladdnormallinkfoot{[[Bio::Seq]]}{http://bioperl.org/Core/POD/Bio/Seq.html}}
+\def\bioseqIO{\htmladdnormallinkfoot{[[Bio::SeqIO]]}{http://bioperl.org/Core/POD/Bio/SeqIO.html}}
+
+{\bioseq} is the {\biop} main sequence object while {\bioseqIO} is the {\bp} support for sequence input/output into files.
+
+<<Use Modules - Bio::Seq>>=
+use Bio::Seq;
+use Bio::SeqIO;
+@
+ 
+
+\subsctn{AWK scripts}
+
+<<GAWK shebang>>=
+#!/usr/bin/gawk -f
+# GNU Awk 3.0.4
+<<Version Control Id Tag>>
+@
+
+\subsctn{BASH scripts}
+
+<<BASH shebang>>=
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+<<Version Control Id Tag>>
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+@
+
+<<BASH script end>>=
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
+@
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+@ 
+
+\newpage
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+<<tangling>>=
+# PBS
+notangle -R"PBS tblastx shell" $WORK/$nwfile.nw \
+    > /home/ug/jabril/no_backup/PBS/PBS.sh ;
+chmod a+x /home/ug/jabril/no_backup/PBS/PBS.sh ;
+# showing line numbering comments in program (DEVEL VERSIONS)
+notangle -L -R"Renaming fasta sequence IDs" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/fasta_renamer.pl ;
+notangle -L -R"Raw coords to GFF" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/coords2gff.pl ;
+notangle -L -R"Masked from fasta sequences" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/getfastamasked.pl ;
+notangle -L -R"Breaking fasta sequences" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/splitfastaseq.pl ;
+notangle -L -R"GFF to GTF" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/gff2gtf.pl ;
+# making them runnable
+chmod a+x $BIN/fasta_renamer.pl ;
+chmod a+x $BIN/coords2gff.pl ;
+chmod a+x $BIN/getfastamasked.pl ;
+chmod a+x $BIN/splitfastaseq.pl ;
+chmod a+x $BIN/gff2gtf.pl ;
+#
+@ 
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+<<tangling>>=
+#
+notangle -R"Sequence IDs" $WORK/$nwfile.nw > $ID ;
+#
+ChckDirs $PARAM/gff2ps
+#
+notangle -R"GFF2PS customization: ortho orimasked a4" $WORK/$nwfile.nw \
+         > $PARAM/gff2ps/ortho_orimasked_a4.rc
+notangle -R"GFF2PS customization: ortho orimasked a3" $WORK/$nwfile.nw \
+         > $PARAM/gff2ps/ortho_orimasked_a3.rc
+notangle -R"GFF2PS customization: ortho orimasked wide" $WORK/$nwfile.nw \
+         > $PARAM/gff2ps/ortho_orimasked_wide.rc
+#
+@ %$
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+<<tangling>>=
+#
+notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+#
+@ 
+
+<<weaving>>=
+<<BASH shebang>>
+# weaving and LaTeXing
+<<BASH Environment Variables>>
+noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+<<BASH script end>>
+@ 
+
+<<LaTeXing>>=
+<<BASH shebang>>
+# only LaTeXing
+<<BASH Environment Variables>>
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+<<BASH script end>>
+@ %$
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH Environment Variables>>=
+#
+# Global Variables
+#
+DATASETS="/projects/datasets/orthologous";
+WORK="$DATASETS/_docs" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="ORTHOLOGOUS_dataset" ;
+export DATASETS WORK BIN PARAM DOCS DATA nwfile ;
+#
+SGPBIN="/projects/sgp/bin" ;
+export SGPBIN ;
+#
+# ORTHOLOGOUS Dataset Variables
+#
+ANALYSIS="/projects/sgp/orthologous" ;
+ID="$DATASETS/id" ;
+HSAP="$DATASETS/id.Hsap" ;
+MMUS="$DATASETS/id.Mmus" ;
+export ANALYSIS ID HSAP MMUS ;
+#
+# Shell Functions
+#
+ChckDirs ()
+{
+  #
+  # USAGE: ChckDirs <path_list>
+  #
+  for name in "$@" ;
+    do
+      {
+        [ -d "$name" ] && 
+          echo "### Directory Already Exist: $name" ||
+            mkdir --verbose $name ;
+      } ;
+    done ;
+}
+#
+MergeFiles ()
+{
+  #
+  # USAGE: MergeFiles <working_path>
+  #
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.Hsap ] && 
+    /bin/rm --force --verbose $1/all.Hsap ;
+  [ -e $1/all.Mmus ] &&
+    /bin/rm --force --verbose $1/all.Mmus ;
+  echo "### WORKING on HUMAN LOCI..." ;
+  cat $HSAP | while read locus ;
+    do { cat $1/$locus >> $1/all.Hsap ; } ; done ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  cat $MMUS | while read locus ;
+    do { cat $1/$locus >> $1/all.Mmus ; } ; done ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  cat $1/all.Hsap $1/all.Mmus > $1/all ;
+}
+#
+MergeGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path> <species_id> <flag>
+  #
+  flag=0 ;
+  [ "$3" = "1" ] && flag=1 ; 
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.$2 ] && 
+    /bin/rm --force --verbose $1/all.$2 ;
+  echo "### WORKING on $2 LOCI..." ;
+  c=0 ;
+  while read locus ;
+    do {
+         let c=c+1 ;
+         [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
+         [ $flag -eq 1 ] &&
+             cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
+         gawk 'BEGIN{OFS="\t"}
+             ($1 !~ /^#/ && $3 != "Gene") {
+                 print $0;
+             }' $1/$locus | sort +3n -5 - >> $1/all.$2 ; 
+       } ;
+    done < $DATASETS/id.$2 ;
+}
+#
+MergeALLGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path>
+  #
+  echo "### WORKING on HUMAN LOCI..." ;
+  MergeGFF $1 Hsap 1 ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  MergeGFF $1 Mmus 1 ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  echo '#$ ' | cat $1/all.Hsap - $1/all.Mmus > $1/all ;
+}
+@ 
+
+<<tangling>>=
+# TO DO: add a test to check which shell is running
+# BASH shell
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
+         > $WORK/.bash_VARS ; 
+# sourcing
+source $WORK/.bash_VARS ;
+@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{comment}
+
+\sctn{Obtaining signals from raw sequences}
+
+% ~rguigo/research/humus/HUMUS-1/Conservation/
+
+\subsctn{Running {\gnid} to get scores for sites}
+
+We calculate scores for all sites with {\gnid}, and split the output for each site: acceptors, donors, starts and stops. We are going to use only the first two at this moment, but it is worthy having the other for future analysis.
+
+<<BASH commands>>=
+#
+ChckDirs $SITES $SITES/geneid $SITES/geneid/logs ;
+#
+cat $HSAP $MMUS | while read locus ;
+  do
+    {
+      echo "### WORKING on LOCUS: $locus" ;
+      geneid -v -P $BASE/param/geneid/human3iso.param \
+             -bedaGo $DATASETS/fasta/$locus \
+              > $SITES/geneid/$locus \
+             2> $SITES/geneid/logs/$locus.logs ;
+    } ;
+  done ;
+#
+# gawk '$0 !~ /^#/ {print $0 > FILENAME"."tolower($3)}' HSMIMAR.gnid.sites ;
+@ 
+%$
+
+\subsctn{Extracting real splice sites}
+
+We extract splice-site sequences, but we first need to read exonic coords and the fasta sequences.
+
+<<BASH commands>>=
+#
+ChckDirs $SITES/real $SITES/real/logs ;
+#
+# Take care because 'all' files must contain 'sequence' record for evaluation
+#   program. We move those files to temporary ones to run this command.
+MergeFiles $DATASETS/gff ;
+# After that we have moved the new 'all' files to 'all_gff' and
+#   restored temporary 'all' files. 
+#
+MergeFiles $SITES/geneid/ GFF ;
+#
+$BIN/ExtractIntronSites.pl $ID $DATASETS/gff/all_gff \
+                           $SITES/geneid/all $SITES/real \
+                           2> $SITES/real/logs/ExtractIntronSites_20010711.log ;
+#
+MergeFiles $SITES/real/ GFF ;
+#
+@ 
+%$
+
+\subsctn{Visualizing structures of homologous genes}
+
+We run {\gps} to generate the figures for each human/mouse homologous genes pair. We include cds annotation and real sites, all the plots are made on forward strand. The following commands process the GFF files and save the output to the [[$SITES/plots/tmp/]] dir. %$
+
+<<BASH commands>>=
+#
+gawk 'BEGIN{ PT=ARGV[1]; ARGV[1]=""; }
+   $3 == "Sequence" { 
+      $7="+"; print $0 > PT"/gff_length/"$1; 
+      $7="."; print $0 > PT"/gff_length/"$1; 
+      $7="-"; print $0 > PT"/gff_length/"$1;
+   }' $DATASETS $DATASETS/gff/all ;
+#
+MergeFiles $DATASETS/gff_length ;
+#
+ChckDirs $SITES/plots $SITES/plots/_tmp $SITES/plots/logs ;
+#
+cat $HSAP $MMUS | while read locus;
+  do
+    {
+      echo "### WORKING on LOCUS: $locus" ;
+      gawk '$7 == "+" { print $0 }' $DATASETS/gff_length/$locus | \
+           cat - $DATASETS/gff/$locus > $SITES/plots/tmp/$locus.cds ;
+      gawk '{ $2="SITES"; print $0 }' $SITES/real/$locus \
+           > $SITES/plots/tmp/$locus.sites ;
+    } ;
+  done ;
+#
+@
+
+\subsubsctn{Making the sites figures}
+
+<<BASH commands>>=
+#
+while read locus human mouse ;
+  do
+    {
+      echo "### WORKING on LOCUS: $locus" ;
+      gff2ps -arVC $BIN/param/sites_hsap_mmus.gff2psrc \
+          -T "$locus : H.sap $human vs M.mus $mouse" -- \
+          $SITES/plots/tmp/$human.cds  $SITES/plots/tmp/$human.sites \
+          $SITES/plots/tmp/$mouse.cds  $SITES/plots/tmp/$mouse.sites \
+           > $SITES/plots/${human}_${mouse}.ps \
+          2> $SITES/plots/logs/${human}_${mouse}.log ;
+    } ;
+  done < $ID ;
+#
+@
+
+Once obtained the plots, we make a {\LaTeX} wrapper to visualize and/or print them, each three on a single page.
+
+<<BASH commands>>=
+#
+$BIN/SitesFigureMerger.pl $ID $SITES/plots \
+                          > $SITES/plots/all.tex \
+                         2> $SITES/plots/all.log ;
+#
+pushd $DOCS/psfigures/ ;
+latex all_main.tex ;
+popd ;
+dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
+@
+
+%
+%
+%
+<<LaTeX wrapper main doc>>=
+\documentclass[a4,11pt]{article}
+%
+% all_main.tex
+%
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+%
+% pushd $DOCS/psfigures/; latex all_main.tex; popd;
+% dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
+%
+\usepackage[a4paper,offset={0pt,0pt},hmargin={0.5cm,0.5cm},vmargin={0.5cm,0.5cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%\usepackage{lscape}
+%\usepackage{rotating}
+%
+\begin{document}
+\pagestyle{plain}
+%\landscape
+
+ \input /projects/splicing/scimit/sites/plots/all.tex
+
+\end{document}
+@ 
+%
+%
+%
+
+\subsubsctn{Setting {\gps} parameters}
+
+This is the {\gps} customization file we used to obtain the {\ps} plots for sites comparison between human and mouse sequences:
+
+<<gff2ps customization for sites>>=
+#
+# sites_hsap_mmus.gff2psrc
+#
+<<Version Control Id Tag>>
+#
+# L #
+<<Layout settings for sites>>
+#
+# S #
+<<Source settings for sites>>
+#
+# G #
+<<Group settings for sites>>
+#
+# F #
+<<Feature settings for sites>>
+#
+@ 
+
+<<Layout settings for sites>>=
+page_bbox=short,200,800
+header_scale=0.5
+margin_left=0.5cm
+margin_right=0.5cm
+margin_top=0.5cm
+margin_bottom=0.5cm
+show_outer_scale=top
+show_grid=off
+# group_label_scale=2.5
+@
+ 
+<<Source settings for sites>>=
+*::unfold_grouped_ungrouped=off
+*::unfold_grouped_line=off
+*::unfold_ungrouped_line=off
+*::source_line=none
+SCIMIT::vert_align=bottom
+SCIMIT::left_label=++sequence++
+SCIMIT::track_spacing_scale=0
+SITES::vert_align=top
+SITES::left_label=++none++
+SITES::keep_feature_label_space=off
+SITES::track_spacing_scale=0.1
+SITES::source_style=boxed
+# SITES::range=-9..9
+SITES::range=1..6
+SITES::track_scale=2
+@ 
+
+<<Group settings for sites>>=
+*::label=++none++
+*::group_line=none
+@ 
+
+<<Feature settings for sites>>=
+sequence::feature_color=violet
+sequence::shape=base_line
+acceptor::feature_color=red
+acceptor::feature_stroke_color=red
+acceptor::shape=half_right_triangle
+donor::feature_color=blue
+donor::feature_stroke_color=blue
+donor::shape=half_left_triangle
+first::shape=half_arrow_end
+terminal::shape=half_arrow_head
+single::shape=half_arrow
+@ 
+
+\subsctn{Reporting errors in annotation}
+
+I have found some mistakes in the annotation of three mouse sequences when running [[ExtractIntronSites.pl]].
+
+<<BASH commands>>=
+cds_sites ()
+{
+  # usage:    cds_sites <seqname>
+  cat $DATASETS/gff/$1 ;
+  echo ":::::::::::::::" ;
+  cat $SITES/geneid/$1 ;
+  echo ":::::::::::::::" ;
+  cat $SITES/real/$1 ;
+}
+@ 
+
+\begin{verbatim}
+:::::::::::::: MMINSIIG
+
+MMINSIIG SCIMIT First    1133 1318 1.000 + 0 MIT72
+MMINSIIG SCIMIT Terminal 1807 1953 1.000 + 0 MIT72
+
+MMINSIIG geneid_v1.0 Donor    1319 1320 5.16 + . # AAGGTGAGT
+MMINSIIG geneid_v1.0 Acceptor 1807 1808 0.53 + . # GCTCTGACACAACCTCCCTGGCAGTGG
+
+:::::::::::::: MMLYL1
+
+MMLYL1 SCIMIT First    1615 1947 1.000 + 0 MIT86
+MMLYL1 SCIMIT Internal 2039 2128 1.000 + 0 MIT86
+MMLYL1 SCIMIT Terminal 2844 3257 1.000 + 0 MIT86
+
+MMLYL1 geneid_v1.0 Donor    1946 1947 3.11 + . # CAGGTCAGT
+MMLYL1 geneid_v1.0 Acceptor 2037 2038 1.33 + . # TTCATGACCCACAACCCCTTACAGTGT
+MMLYL1 geneid_v1.0 Donor    2129 2130 3.67 + . # ACGGTGAGT
+MMLYL1 geneid_v1.0 Acceptor 2844 2845 2.86 + . # TGATGCTATCCCTTGGGTCCTCAGGGC
+
+:::::::::::::: MUSHSP25A
+
+MUSHSP25A SCIMIT First     756 1130 1.000 + 0 MIT62
+MUSHSP25A SCIMIT Internal 1727 1792 1.000 + 0 MIT62
+MUSHSP25A SCIMIT Terminal 1920 2108 1.000 + 0 MIT62
+
+MUSHSP25A geneid_v1.0 Donor    1131 1132 4.05 + . # CTGGTGAGT
+MUSHSP25A geneid_v1.0 Acceptor 1727 1728 4.83 + . # CTGACCTTCTGTCCCCACCCACAGGCA
+MUSHSP25A geneid_v1.0 Donor    1791 1792 3.43 + . # CACGTGAGT
+MUSHSP25A geneid_v1.0 Acceptor 1918 1919 3.22 + . # TGCCCTGATTTTCTGTGTGTCCAGGCT
+\end{verbatim}
+
+\sctn{Sequence comparison with {\bn} on non-coding regions}
+
+We run {\bn} on the human/mouse orthologous sequences, we masked coding regions before that because we are interested to know if there are any conservation in non-coding regions. Such conservation at sequence level will mean that there are regulatory regions that will work in a similar way between human and mouse. In our case, we are interested in those regulatory elements that affect splicing placed in the intronic regions.
+
+\subsctn{Masking coding regions}
+
+We use [[MaskCDS.pl]] script defined in section~\ref{sec:maskcds}, page~\pageref{sec:maskcds}, to mask {\data} fasta sequences with the GFF coords of their coding regions.
+
+<<BASH commands>>=
+#
+ChckDirs $DATASETS/fasta/fastamaskedcds $DATASETS/fasta/fastamaskedcds/logs ;
+#
+cat $HSAP $MMUS | while read locus ;
+  do
+    {
+      echo "### WORKING on LOCUS: $locus" ;
+      $BIN/MaskCDS.pl $DATASETS/fasta/fasta/$locus \
+                      $DATASETS/gff/$locus \
+                      > $DATASETS/fasta/fastamaskedcds/$locus \
+                     2> $DATASETS/fasta/fastamaskedcds/logs/$locus ;
+    } ;
+  done ;
+#
+MergeFiles $DATASETS/fasta/fastamasked_cds/ ;
+#
+# To check if there was any problem while masking sequences.
+#
+grep '!!!' $DATASETS/fasta/fastamaskedcds/logs/* ;
+#
+@ 
+
+\subsctn{Running {\bn} on masked sequences}
+
+Once we have the sequences with their coding regions masked, we compare human and mouse orthologous sequence pairs, using human sequences as queries and mouse ones as database. Here we prepare the {\bl} databases (including human sequences, if we will use them later on other analyses).
+
+<<BASH commands>>=
+#
+ChckDirs $DATASETS/blastdb/wumaskedcds ;
+#
+cat $HSAP $MMUS | while read locus ;
+  do
+    {
+      echo "### WORKING on LOCUS: $locus" ;
+      pressdb $DATASETS/fasta/fastamaskedcds/$locus \
+           -o $DATASETS/blastdb/wumaskedcds/$locus ;
+    } ;
+  done ;
+#
+@ 
+
+Now we are ready to run {\bn} with defaults (just database and query fasta sequence). We do not pass '-nogap' option because we are interested in finding any match although it will have few gaps but still representing a conserved region.
+
+<<BASH commands>>=
+#
+ChckDirs $SCIMIT/blast $SCIMIT/blast/blastn \
+         $SCIMIT/blast/blastn/wumaskedcds \
+         $SCIMIT/blast/blastn/wumaskedcds/blast \
+         $SCIMIT/blast/blastn/wumaskedcds/logs ;
+#
+while read locus human mouse;
+  do
+    {
+      echo "### RUNNING BLASTN on LOCUS: $locus ($human seq against $mouse DB)" ;
+      blastn $DATASETS/blastdb/wumaskedcds/$mouse \
+             $DATASETS/fasta/fastamaskedcds/$human \
+           > $SCIMIT/blast/blastn/wumaskedcds/blast/$human \
+          2> $SCIMIT/blast/blastn/wumaskedcds/logs/$human ;            
+    } ;
+  done < $ID ;
+#
+@
+
+\subsctn{Filtering HSPs and SRs}
+
+We are parsing {\bn} output to extract the high-scoring segment pairs (HSPs). We set score field to bit-score and we also include the sequence of each HSP at the end of the GFF record (as comments).
+
+<<BASH commands>>=
+#
+ChckDirs $SCIMIT/blast/blastn/wumaskedcds/hsp \
+         $SCIMIT/blast/blastn/wumaskedcds/sr \
+         $SCIMIT/blast/blastn/wumaskedcds/aplot ;
+#
+cat $HSAP | while read locus;
+  do
+    {
+      echo "### RUNNING parseblast on: $locus" ;
+      echo "### RUNNING parseblast on: $locus" 1>&2 ;
+      parseblast -vbFQs $SCIMIT/blast/blastn/wumaskedcds/blast/$locus \
+                     > $SCIMIT/blast/blastn/wumaskedcds/hsp/$locus ;
+      parseblast -vbAQs $SCIMIT/blast/blastn/wumaskedcds/blast/$locus \
+                     > $SCIMIT/blast/blastn/wumaskedcds/aplot/$locus ;
+    } ;
+  done 2> $SCIMIT/blast/blastn/wumaskedcds/logs/parseblast ;
+#
+@
+
+Once we have obtained HSPs we can project them into similarity regions (SRs)...
+
+\subsctn{Visualizing {\bn} alignments of homologous genes}
+
+\subsubsctn{Making the alignment plots}
+
+\subsubsubsctn{Running {\aps}:}
+
+<<BASH commands>>=
+#
+ChckDirs $SCIMIT/blast/blastn/wumaskedcds/plots \
+         $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps \
+         $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/logs \
+         $SCIMIT/blast/blastn/wumaskedcds/plots/aplot \
+         $SCIMIT/blast/blastn/wumaskedcds/plots/aplot/logs \
+         $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp ;
+#
+while read locus human mouse;
+  do
+    {
+      echo "### RUNNING gff2aplot on: $locus" ;
+      gff2aplot -VaP -T "$locus: $human x $mouse" -- \
+           $SITES/plots/tmp/$human.cds \
+           $SITES/plots/tmp/$mouse.cds \
+           $SCIMIT/blast/blastn/wumaskedcds/aplot/$human \
+         > $SCIMIT/blast/blastn/wumaskedcds/plots/aplot/${human}_${mouse}.ps \
+        2> $SCIMIT/blast/blastn/wumaskedcds/plots/aplot/logs/${human}_${mouse} ;
+    } ;
+  done < $ID ;
+#
+@ 
+
+\subsubsubsctn{Running {\gps}:}
+
+<<BASH commands>>=
+#
+while read locus human mouse ;
+  do
+    {
+      echo "### WORKING on LOCUS: $locus" ;
+      perl -e 'open(HSP,"<".(shift @ARGV));
+                open(HSAP,">".(shift @ARGV));
+                open(MMUS,">".(shift @ARGV));
+                while (<HSP>) {
+                    next if /^\#/o;
+                    next if /^\s*$/o;
+                    chomp;
+                    @F = split /[\s]+/og;
+                    $F[6] = $F[14] = "+";
+                    $F[8] = ".";
+                    $F[9] =~ s/\"//og;
+                    print HSAP join("\t",(@F[0..8]))."\n";
+                    print MMUS join("\t",(@F[9,1,2,10,11,5,14,17,8]))."\n";
+                };
+                close(MMUS);
+                close(HSAP);
+                close(HSP);
+          ' $SCIMIT/blast/blastn/wumaskedcds/hsp/$human \
+            $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$human.blastn \
+            $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$mouse.blastn ;
+    } ;
+  done < $ID ;
+#
+while read locus human mouse ;
+  do
+    {
+      echo "### WORKING on LOCUS: $locus" ;
+      gff2ps -arVC $BIN/param/blastn_hsap_mmus.gff2psrc \
+             -T "$locus : H.sap $human vs M.mus $mouse" -- \
+             $SITES/plots/tmp/$human.cds \
+             $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$human.blastn \
+             $SITES/plots/tmp/$human.sites \
+             $SITES/plots/tmp/$mouse.cds \
+             $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$mouse.blastn \
+             $SITES/plots/tmp/$mouse.sites \
+             > $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/${human}_${mouse}.ps \
+            2> $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/logs/${human}_${mouse}.log ;
+    } ;
+  done < $ID ;
+#
+@
+
+Once obtained the plots, we make a {\LaTeX} wrapper to visualize and/or print them, each three on a single page.
+
+<<BASH commands>>=
+#
+$BIN/SitesFigureMerger.pl $ID $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps \
+               > $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/all_blast.tex \
+              2> $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/all_blast.log ;
+#
+pushd $DOCS/psfigures/ ;
+latex all_blast_main.tex ;
+popd ;
+dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
+@
+
+%
+%
+%
+<<LaTeX wrapper main doc for blast>>=
+\documentclass[a4,11pt]{article}
+%
+% all_blast_main.tex
+%
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+%
+% pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
+% dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
+%
+\usepackage[a4paper,offset={0pt,0pt},hmargin={0.5cm,0.5cm},vmargin={0.5cm,0.5cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%\usepackage{lscape}
+%\usepackage{rotating}
+%
+\begin{document}
+\pagestyle{plain}
+%\landscape
+
+ \input /projects/splicing/scimit/blast/blastn/wumaskedcds/plots/gff2ps/all_blast.tex
+
+\end{document}
+@ 
+%
+%
+%
+
+\subsubsubsctn{Setting {\gps} parameters.}
+
+<<gff2ps customization for blastn>>=
+#
+# blastn_hsap_mmus.gff2psrc
+#
+<<Version Control Id Tag>>
+#
+# L #
+<<Layout settings for sites>>
+#
+# S #
+<<Source settings for sites>>
+BLASTN::vert_align=center
+BLASTN::left_label=++none++
+BLASTN::keep_feature_label_space=off
+BLASTN::track_spacing_scale=0
+BLASTN::source_style=boxed
+BLASTN::range=none
+BLASTN::track_scale=0.5
+BLASTN::feature_color=darkorange
+#
+# G #
+<<Group settings for sites>>
+#
+# F #
+<<Feature settings for sites>>
+hsp::shape=box
+#
+@ 
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage
+\appendix
+
+\sctn{Scripts developed for this work}
+
+\subsctn{Filtering Real Sites}
+
+The main goal of this script is to filter from sites obtained running {\gnid} those that correspond to real ones. We require that output from {\gnid} must be in GFF format ('-G' command-line option). The command-line usage is:
+
+\centerline{[[ExtractIntronSites.pl <IDs_file> <CDSs_File> <Sites_File> <Output_Dir>]]}
+
+[[<IDs_file>]] records have three fields: a gene identifier, a sequence ID for first species (human) and another one for second species (mouse). [[<CDSs_File>]] and [[<Sites_File>]] are both in GFF, first one contains exon coordinates, second must contain not only sites coords but also their sequence (appearing within the trailing record comment). Finally [[<Output_Dir>]] defines the path to which all the output files will be saved.
+
+<<Grep Real Intron Sites>>=
+<<PERL shebang>>
+#
+# ExtractIntronSites.pl
+#
+#     Filtering real sites from geneid output.
+#
+# Usage:
+#     ExtractIntronSites.pl <IDs_file> <CDSs_File> <Sites_File> <Output_Dir>
+#
+#<Use Modules - RIS>>
+<<Use Modules - Dumper>>
+#
+<<Global Vars - Counter>>
+<<Global Vars - RIS>>
+#
+<<Main Loop - RIS>>
+#
+<<Main Subs - RIS>>
+<<Common PERL subs - Text fill>>
+<<Common PERL subs - Counter>>
+@ 
+
+<<Global Vars - RIS>>=
+my ( $ids_file, $cds_file, $sites_file, $output_dir,
+     $cnt, %seq_ids, %coords_list, %acceptors, %donors );
+@ 
+
+<<Main Loop - RIS>>=
+print STDERR "###\n### RUNNING ExtractIntronSites.pl\n###\n".
+             "### $ENV{USER} - ".(`date`)."###\n#\n";
+&parse_args();
+&load_seqids($ids_file);
+&load_coords($cds_file);
+&load_sites($sites_file);
+&filter_sites();
+@ 
+
+First of all we check command-line arguments, because there are three mandatory parameters that must be files.
+
+<<Main Subs - RIS>>=
+sub parse_args() {
+    scalar(@ARGV) < 4 && do {
+        print "\nUSAGE: \n".
+              "ExtractIntronSites.pl <IDs_file> <CDSs_File> ".
+              "<Sites_File> <Output_Dir>\n\n";
+        die("!!! ERROR - NOT ENOUGH COMMAND-LINE PARAMETERS. $!");
+    };
+    $ids_file   = shift @ARGV;
+    ( -e $ids_file ) ||
+        die("!!! $ids_file DOES NOT EXIST...\n");
+    $cds_file   = shift @ARGV;
+    ( -e $cds_file ) ||
+        die("!!! $cds_file DOES NOT EXIST...\n");
+    $sites_file = shift @ARGV;
+    ( -e $sites_file ) ||
+        die("!!! $sites_file DOES NOT EXIST...\n");
+    $output_dir = shift @ARGV;
+    $output_dir =~ s%/$%%o;
+    ( -e $output_dir && -d _ ) ||
+        die("!!! $output_dir DOES NOT EXIST...\n");
+    @ARGV = ();
+} # parse_args
+@ 
+
+We load sequence IDs for both species including the common sequence name.
+
+<<Main Subs - RIS>>=
+<<Main Subs - loadseqids>>
+@
+ 
+\label{func:loadseqids}
+<<Main Subs - loadseqids>>=
+sub load_seqids() {
+    my $infile = $_[0];
+    $cnt = 0;
+    print STDERR "### READING SEQUENCE IDs FROM: $infile\n";
+    open(IDS,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<IDS>) {
+        my @f;
+        <<Skip comments and empty records>>
+        @f = split /\s+/og;
+        $cnt++;
+        $seq_ids{$cnt}{NAME} = $f[0]; 
+        $seq_ids{$cnt}{SEQ1} = $f[1]; 
+        $seq_ids{$cnt}{SEQ2} = $f[2];
+    }; # while (<IDS>)
+    close(IDS);
+    # print STDERR "SEQ_IDS - ".(Dumper(\%seq_ids));
+    print STDERR "#\n# There are $cnt sequences in this file...\n#\n";
+} # load_seqids
+@
+
+[[load_coords()]] 
+
+<<Main Subs - RIS>>=
+sub load_coords() {
+    my $infile = $_[0];
+    my (%tmp,$id);
+    print STDERR "### READING COORDS FROM: $infile\n";
+    open(GFF,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<GFF>) {
+        my @f;
+        <<Skip comments and empty records>>
+        @f = split /\s+/og;
+        $id = $f[0];
+        defined($coords_list{$id}) || do {
+            print STDERR "> Reading Coords for: $id\n";
+            $coords_list{$id}{GENENAME} = $f[8];
+            $coords_list{$id}{STRAND}   = $f[6];
+            @{ $tmp{$id} } = ();
+        };
+        push @{ $tmp{$id} }, [ @f[3,4] ] if
+           (lc($f[2]) =~ /first|internal|terminal|single/);
+    }; # while (<GFF>)
+    close(GFF);
+    foreach $id (keys %tmp) {
+        print STDERR "> Processing coords for: $id\n";
+        @{ $tmp{$id} } = sort { $a->[0] <=> $b->[0] } @{ $tmp{$id} };
+        $coords_list{$id}{STRAND} eq '-' && do {
+            @{ $tmp{$id} } = reverse map { reverse $_ } @{ $tmp{$id} };
+        };
+        # print STDERR 'SORTED @tmp:'.(Dumper(\@{ $tmp{$id} }));
+        foreach (my $l = 0; $l <= $#{ $tmp{$id} }; $l++) {
+            push @{ $coords_list{$id}{COORDS} }, $tmp{$id}[$l][0], $tmp{$id}[$l][1];
+        };
+        $coords_list{$id}{C_NUM} = scalar(@{ $coords_list{$id}{COORDS} }) / 2;
+    }; # foreach $id
+    # print STDERR Dumper(\%coords_list);
+} # load_coords
+@ 
+
+[[load_sites()]] reads sites found by {\gnid} that were saved as GFF records. 
+
+<<Main Subs - RIS>>=
+sub load_sites() {
+    my $infile = $_[0];
+    my (@tmp,$id,$strand,$pos,$rec);
+    print STDERR "### READING SITES FROM: $infile\n";
+    open(SITES,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    $n = 0;
+    while (<SITES>) {
+        my @f;
+        $c = '.';
+        <<Skip comments and empty records>>
+        $rec = $_;
+        @f = split /\s+/og, $rec;
+        ($id,$strand) = @f[0,6];
+        lc($f[2]) eq 'acceptor' && do {
+            $c = 'A';
+            $pos = ($strand eq '+') ? $f[4] : $f[3] ;
+            $acceptors{$id}{$strand}{$pos}{SCORE}  = $f[5];
+            $acceptors{$id}{$strand}{$pos}{SEQ}    = $f[9];
+            $acceptors{$id}{$strand}{$pos}{GFF}    = $rec;
+        };
+        lc($f[2]) eq 'donor'    && do {
+            $c = 'D';
+            $pos = ($strand eq '+') ? $f[3] : $f[4] ;
+            $donors{$id}{$strand}{$pos}{SCORE}  = $f[5];
+            $donors{$id}{$strand}{$pos}{SEQ}    = $f[9];
+            $donors{$id}{$strand}{$pos}{GFF}    = $rec;
+        };
+    } continue { 
+        &counter(++$n,$c);
+    }; # while (<SITES>)
+    &counter_end($n,$c);
+    close(SITES);
+    # print STDERR Dumper(\%acceptors);
+    # print STDERR Dumper(\%donors);
+} # load_sites
+@ 
+%$
+
+Here we filter real sites from the whole sites set and we save to the corresponding file in the output dir (as it is set in [[$output_dir]] variable).%$ 
+
+<<Main Subs - RIS>>=
+sub filter_sites() {
+    my $i;
+    for ($i = 1; $i<=$cnt; $i++) {
+        print STDERR "# Working on: $seq_ids{$i}{NAME}\n";
+        &save_GFF($seq_ids{$i}{SEQ1}); 
+        &save_GFF($seq_ids{$i}{SEQ2});
+    }; # for $i
+} # filter_sites
+@ 
+
+<<Main Subs - RIS>>=
+sub save_GFF() {
+    my $infile = $_[0];
+    my ($j,$pos);
+    my ($dn_cnt,$ac_cnt) = (0,0);
+    my $ref = \%{ $coords_list{$infile} };
+    open(GFF,"> $output_dir/$infile") || do {
+        print STDERR "!!! CANNOT OPEN $output_dir/$infile ...\n";
+        return;
+    };
+  CHECKPOINT: {
+      ($ref->{C_NUM} == 1) && do {
+          print STDERR "!!! $infile has no intronic sites annotated...\n";
+          print GFF "#\n# $infile has no intronic sites annotated\n".
+                       "#         (no cds found or single gene).#\n";
+          last CHECKPOINT;
+      };
+      for ($j = 2; $j < ($ref->{C_NUM} * 2) - 1; $j+=2 ) {
+          $pos = $ref->{COORDS}[$j];
+          defined($acceptors{$infile}{$ref->{STRAND}}{$pos}{GFF}) && do {
+              $ac_cnt++;
+              print GFF "$acceptors{$infile}{$ref->{STRAND}}{$pos}{GFF}\n";
+          };
+      }; # for $j
+      for ($j = 1; $j < ($ref->{C_NUM} * 2) - 1; $j+=2 ) {
+          $pos = $ref->{COORDS}[$j];
+          defined($donors{$infile}{$ref->{STRAND}}{$pos}{GFF}) && do {
+              $dn_cnt++;
+              print GFF "$donors{$infile}{$ref->{STRAND}}{$pos}{GFF}\n";
+          };
+      }; # for $j
+    }; # CHECKPOINT
+    close(GFF);
+    print STDERR "#> $infile : $ref->{C_NUM} exons  ".
+                 "$dn_cnt donors  $ac_cnt acceptors.\n";
+} # save_GFF
+# $coords_list{$id}{GENENAME}
+# $coords_list{$id}{STRAND}
+# $coords_list{$id}{C_NUM}
+# @{ $coords_list{$id}{COORDS} }
+# $acceptors{$id}{$pos}{STRAND}
+# $acceptors{$id}{$pos}{SCORE}
+# $acceptors{$id}{$pos}{SEQ}
+# $acceptors{$id}{$pos}{GFF}
+# $donors{$id}{$pos}{STRAND}
+# $donors{$id}{$pos}{SCORE}
+# $donors{$id}{$pos}{SEQ}
+# $donors{$id}{$pos}{GFF}
+@ 
+
+\subsctn{Joining {\ps} figures with {\LaTeX}}
+
+<<Merging Figures for Sites>>=
+<<PERL shebang>>
+#
+# SitesFigureMerger.pl
+#
+#     Merging gff2ps figures set to "page_BBox=200,800" to save printing space.
+#
+# Usage:
+#     SitesFigureMerger.pl <IDs_file> <Input_Dir> > file.tex
+#
+#<Use Modules - MFS>>
+#
+<<Global Vars - MFS>>
+#
+<<Main Loop - MFS>>
+#
+<<Main Subs - MFS>>
+@
+
+<<Global Vars - MFS>>=
+my ($cnt, %seq_ids, $ids_file, $input_dir);
+my $mod_value = 5;
+@
+
+<<Main Loop - MFS>>=
+print STDERR "###\n### RUNNING SitesFigureMerger.pl\n###\n".
+             "### $ENV{USER} - ".(`date`)."###\n#\n";
+&parse_args();
+&load_seqids($ids_file);
+&print_LaTeX();
+@
+
+<<Main Subs - MFS>>=
+sub parse_args() {
+    scalar(@ARGV) < 2 && do {
+        print "\nUSAGE: \n".
+              "SitesFigureMerger.pl <IDs_file> <Input_Dir> > file.tex\n\n";
+        die("!!! ERROR - NOT ENOUGH COMMAND-LINE PARAMETERS. $!");
+    };
+    $ids_file   = shift @ARGV;
+    ( -e $ids_file ) ||
+        die("!!! $ids_file DOES NOT EXIST...\n");
+    $input_dir = shift @ARGV;
+    $input_dir =~ s%/$%%o;
+    ( -e $input_dir && -d _ ) ||
+        die("!!! $input_dir DOES NOT EXIST...\n");
+    @ARGV = ();
+} # parse_args
+@
+
+We are reusing here the [[load_seqids()]] (section~\ref{func:loadseqids}, page~\pageref{func:loadseqids}). 
+
+<<Main Subs - MFS>>=
+<<Main Subs - loadseqids>>
+@
+
+<<Main Subs - MFS>>=
+sub print_LaTeX() {
+    my ($i, $file, $nwfig, $open_flg);
+    $open_flg = 0;
+    print STDOUT $ltx_header;
+    for ($i = 1; $i <= $cnt; $i++) {
+        print STDERR "# Working on: $seq_ids{$i}{NAME}\n";
+        $file = "$input_dir/$seq_ids{$i}{SEQ1}\_$seq_ids{$i}{SEQ2}.ps";
+        ($nwfig = $ltx_figure) =~ s/\:\:\:PSFILE\:\:\:/$file/o;
+        ($i % $mod_value == 1) && do {
+            $open_flg = 1;
+            print STDOUT '\ \vfill'."\n".'\begin{center}'."\n".
+                         '\noindent\begin{tabular}{c}'."\n";
+            # print STDOUT '\begin{sidewaysfigure}'."\n";
+        };
+        print STDOUT $nwfig;
+        ($i % $mod_value == 0) && do {
+            $open_flg = 0;
+            print STDOUT '\end{tabular}'."\n".'\end{center}'."\n".'\vfill'."\n";
+            # print STDOUT '\end{sidewaysfigure}'."\n";
+            print STDOUT "\n".'\newpage'."\n\n" unless $i == $cnt;
+        };
+    }; # for
+    $open_flg && do {
+        print STDOUT '\end{tabular}'."\n".'\end{center}'."\n".'\vfill'."\n";
+        # print STDOUT '\end{sidewaysfigure}'."\n";
+    };
+} # print_LaTeX
+@
+
+<<Global Vars - MFS>>=
+my $ltx_header = <<'+++EOLTX+++';
+%
+% This file contains a wrapper to visualize a series of PostScript plots
+% obtained with gff2ps, which have the same BoundingBox (defined as 200x800)
+%
++++EOLTX+++
+my $ltx_figure = <<'+++EOLTX+++';
+\fbox{\setlength{\fboxsep}{0pt}
+ \includegraphics[angle=270,width=19cm]{:::PSFILE:::}
+ } % fbox
+\\[-1ex]
++++EOLTX+++
+@
+
+\subsctn{Masking CDS from fasta files}
+
+<<Masking CDS on fasta files>>=
+<<PERL shebang>>
+#
+# MaskCDS.pl
+#
+#     Masking CDS on fasta files.
+#
+# Usage:
+#     MaskCDS.pl <fasta_file> <CDS_file(GFF)> > <fasta_masked>
+#
+<<Use Modules - MCFF>>
+#
+<<Global Vars - MCFF>>
+#
+<<Main Loop - MCFF>>
+#
+<<Main Subs - MCFF>>
+<<Common PERL subs - Min Max>>
+@
+
+<<Use Modules - MCFF>>=
+<<Use Modules - Bio::Seq>>
+@
+
+<<Global Vars - MCFF>>=
+my (%seqs, $fasta_file, $cds_file);
+@
+
+<<Main Loop - MCFF>>=
+print STDERR "###\n### RUNNING MaskCDS.pl\n###\n".
+             "### $ENV{USER} - ".(`date`)."###\n#\n";
+&parse_args();
+&load_fasta($fasta_file);
+&load_coords($cds_file);
+&mask_sequence();
+&write_fasta(); # STDOUT
+@
+
+<<Main Subs - MCFF>>=
+sub parse_args() {
+    scalar(@ARGV) < 2 && do {
+        print "\nUSAGE: \n".
+              "MaskCDS.pl <fasta_file> <CDS_file(GFF)> > <fasta_masked>\n\n";
+        die("!!! ERROR - NOT ENOUGH COMMAND-LINE PARAMETERS. $!");
+    };
+    $fasta_file   = shift @ARGV;
+    ( -e $fasta_file ) ||
+        die("!!! $fasta_file DOES NOT EXIST...\n");
+    $cds_file   = shift @ARGV;
+    ( -e $cds_file ) ||
+        die("!!! $cds_file DOES NOT EXIST...\n");
+    @ARGV = ();
+} # parse_args
+@
+
+<<Main Subs - MCFF>>=
+sub load_fasta($fasta_file) {
+    my $infile = $_[0];
+    my ($seqin,$seq,$seqnum,$sid);
+    print STDERR "### READING FASTA SEQUENCES FROM: $infile\n";
+    $seqnum = 0;
+    $seqin = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
+    while ($seq = $seqin->next_seq()) {
+        $sid = $seq->display_id();
+        $seqs{$sid}{FLG} = 1;
+        $seqs{$sid}{MAX} = 0;
+        $seqs{$sid}{SEQ} = $seq->seq();
+        $seqs{$sid}{LEN} = $seq->length();
+        $seqs{$sid}{CDS} = ();
+        $seqnum++;
+        }; # while next_seq
+    print STDERR "#\n#   $seqnum sequences found...\n#\n";
+} # load_fasta
+@
+
+We are saving CDS coords in array [[@{ $seqs{$sid}{CDS} }]], but we do not split into subarrays because we are going to parse the main array by pairs of its elements.
+
+<<Main Subs - MCFF>>=
+sub load_coords($cds_file) {
+    my $infile = $_[0];
+    my %recnum;
+    print STDERR "### READING GFF COORDS FROM: $infile\n";
+    open(GFF,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<GFF>) {
+        my ($sid,$feat,$ori,$end);
+        <<Skip comments and empty records>>
+        ($sid,undef,$feat,$ori,$end,undef) = split /\s+/og, $_, 6;
+        $seqs{$sid}{MAX} = &max($seqs{$sid}{MAX},$ori,$end);
+        push @{ $seqs{$sid}{CDS} }, ($ori,$end) if
+           (lc($feat) =~ /first|internal|terminal|single/);
+        $recnum{$sid}++;
+    }; # while (<GFF>)
+    close(GFF);
+    my $ln = "";
+    foreach my $sid (sort keys %recnum) {
+        $ln .= "#   $recnum{$sid} GFF records found for sequence $sid...\n";
+    }; # foreach
+    print STDERR "#\n$ln#\n";
+} # load_coords
+@
+
+<<Main Subs - MCFF>>=
+sub mask_sequence() {
+    my ($sid,$cds,$tmp,$msknum);
+    $msknum = 0;
+    print STDERR "### MASKING SEQUENCES\n#\n";
+    foreach $sid (keys %seqs) {
+        $tmp = \@{ $seqs{$sid}{CDS} };
+        (scalar(@{$tmp}) == 0) && do {
+            $seqs{$sid}{MSG} = "no coords found in its GFF files";
+            print STDERR "!!! SKIPING sequence $sid: $seqs{$sid}{MSG}\n";
+            $seqs{$sid}{FLG} = 0;
+            next;
+        };
+        $seqs{$sid}{MAX} > $seqs{$sid}{LEN} && do {
+            $seqs{$sid}{MSG} = "coords out of sequence length range";
+            print STDERR "!!! SKIPING sequence $sid: $seqs{$sid}{MSG}\n";
+            $seqs{$sid}{FLG} = 0;
+            next;
+        };
+        for ($cds = 0; $cds < $#{$tmp}; $cds+=2) {
+			my ($cds_len,$cds_ori,$cds_end,$n);
+            ($cds_ori,$cds_end) = ($tmp->[$cds],$tmp->[($cds + 1)]);
+            $cds_len = $cds_end - $cds_ori + 1;
+            $n = "N" x $cds_len;
+            substr($seqs{$sid}{SEQ}, ($cds_ori - 1), $cds_len) = $n;
+        }; # foreach $cds
+        $msknum++;
+    }; # foreach $sid
+    print STDERR "#\n#   $msknum sequences masked...\n#\n";
+} # mask_sequence
+@
+
+<<Main Subs - MCFF>>=
+sub write_fasta() {
+    my ($seqout,$seq,$sid);
+    print STDERR "### WRITING MASKED SEQUENCES to STDOUT\n#\n";
+    $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
+    foreach $sid (keys %seqs) {
+        $seqs{$sid}{FLG} || do {
+            print STDERR "!!! Sequence $sid was not masked ... \n".            
+                         "!!! ... $seqs{$sid}{MSG} \n#\n";
+            # next;
+        };
+        $seq = Bio::Seq->new();
+        $seq->display_id($sid);
+        $seq->seq($seqs{$sid}{SEQ});
+        $seqout->write_seq($seq);
+    }; # foreach $sid
+    print STDERR "#\n#   Writing masked sequences DONE...\n#\n";
+} # write_fasta
+@
+
+<<Tangling SITES>>=
+#
+notangle -L -R"Grep Real Intron Sites" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/ExtractIntronSites.pl ;
+notangle -L -R"Merging Figures for Sites" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/SitesFigureMerger.pl ;
+notangle -L -R"Masking CDS on fasta files" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/MaskCDS.pl ;
+#
+chmod a+x $BIN/ExtractIntronSites.pl ;
+chmod a+x $BIN/SitesFigureMerger.pl ;
+chmod a+x $BIN/MaskCDS.pl ;
+#
+notangle -R"gff2ps customization for sites" $WORK/$nwfile.nw \
+    > $BIN/param/sites_hsap_mmus.gff2psrc ;
+notangle -R"gff2ps customization for blastn" $WORK/$nwfile.nw \
+    > $BIN/param/blastn_hsap_mmus.gff2psrc ;
+#
+notangle -R"LaTeX wrapper main doc" $WORK/$nwfile.nw \
+    > $DOCS/psfigures/all_main.tex ;
+notangle -R"LaTeX wrapper main doc for blast" $WORK/$nwfile.nw \
+    > $DOCS/psfigures/all_blast_main.tex ;
+#
+notangle -R"MetaPost sites scores" $WORK/$nwfile.nw \
+    > $DOCS/psfigures/sites_score_distribution.mp ;
+notangle -R"MetaPost sites scores" $WORK/$nwfile.nw \
+    > $DOCS/psfigures/sites_score_distribution.mp ;
+notangle -R"MetaPost acceptors scores" $WORK/$nwfile.nw \
+    > $DOCS/psfigures/acceptors_score_distribution.mp ;
+notangle -R"MetaPost donors scores" $WORK/$nwfile.nw \
+    > $DOCS/psfigures/donors_score_distribution.mp ;
+@ 
+
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
