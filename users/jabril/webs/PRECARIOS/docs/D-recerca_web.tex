@@ -1,0 +1,526 @@
+% -*- mode: Noweb; noweb-code-mode: html-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: D-recerca_web.tex,v 1.1 2001-07-15 02:07:48 jabril Exp $
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+ 
+% Colors for gff2ps
+\input ColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{josep\_abril@terra.es}}{\html{MAILTO:josep_abril@terra.es}}}
+
+% defs
+\def\ps{\textsc{PostScript}}
+\def\d{\textsl{D-recerca}}
+\def\h{\textsc{Html}}
+
+% Setting text for footers and headers
+
+\def\tit{\textsc{Project Title Here.- }}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Abril, JF}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\nwfilename{/home/jabril/development/webprecarios/D-recerca_web.nw}\nwbegindocs{1}\nwdocspar
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textbf{\Huge {\d} Web Page}\\[5ex]
+
+% \textbf{\Large Authors List Here}\\[1ex]
+\textbf{\Large Josep F. Abril}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+This is the formal development of the {\d} new web page, implementing it with Cascading Style Sheets (CSS). We develop {\h} templates and reuse them thanks to {\tt{}noweb} literate programming tool.
+} % parbox
+\end{center}
+\end{abstract}
+
+\vfill
+
+\begin{raggedleft}
+% \scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+% Grup de Recerca en Infom\`atica Biom\`edica\\
+% Institut Municipal d'Investigaci\'o M\`edica\\
+% Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: D-recerca_web.tex,v 1.1 2001-07-15 02:07:48 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Defining Style Sheets}
+
+\subsctn{}
+
+\nwenddocs{}\nwbegincode{2}\sublabel{NWD*rs-DreP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-DreP-1}}}\moddef{Drecerca Main Style Sheet~{\nwtagstyle{}\subpageref{NWD*rs-DreP-1}}}\endmoddef
+\nwnotused{Drecerca\ Main\ Style\ Sheet}\nwendcode{}\nwbegindocs{3}\nwdocspar
+
+
+\sctn{Common {\h} chunks: templates}
+
+\subsctn{{\h} header}
+
+\nwenddocs{}\nwbegincode{4}\sublabel{NWD*rs-HTMB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMB-1}}}\moddef{HTML header~{\nwtagstyle{}\subpageref{NWD*rs-HTMB-1}}}\endmoddef
+
+\nwnotused{HTML\ header}\nwendcode{}\nwbegindocs{5}\nwdocspar
+
+\subsctn{JavaScripts}
+
+\nwenddocs{}\nwbegincode{6}\sublabel{NWD*rs-javD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-javD-1}}}\moddef{javascripts: ~{\nwtagstyle{}\subpageref{NWD*rs-javD-1}}}\endmoddef
+
+\nwnotused{javascripts:\ }\nwendcode{}\nwbegindocs{7}\nwdocspar
+
+\subsctn{{\h} trailer}
+
+\nwenddocs{}\nwbegincode{8}\sublabel{NWD*rs-HTMC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMC-1}}}\moddef{HTML trailer~{\nwtagstyle{}\subpageref{NWD*rs-HTMC-1}}}\endmoddef
+
+\nwnotused{HTML\ trailer}\nwendcode{}\nwbegindocs{9}\nwdocspar
+
+\subsctn{Main Menu bar}
+
+\nwenddocs{}\nwbegincode{10}\sublabel{NWD*rs-HTME-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTME-1}}}\moddef{HTML main menu~{\nwtagstyle{}\subpageref{NWD*rs-HTME-1}}}\endmoddef
+
+\nwnotused{HTML\ main\ menu}\nwendcode{}\nwbegindocs{11}\nwdocspar
+
+\subsctn{Navigation bar}
+
+\nwenddocs{}\nwbegincode{12}\sublabel{NWD*rs-HTMJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMJ-1}}}\moddef{HTML navigation bar~{\nwtagstyle{}\subpageref{NWD*rs-HTMJ-1}}}\endmoddef
+
+\nwnotused{HTML\ navigation\ bar}\nwendcode{}\nwbegindocs{13}\nwdocspar
+
+\subsctn{Title area}
+
+\nwenddocs{}\nwbegincode{14}\sublabel{NWD*rs-HTMA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-HTMA-1}}}\moddef{HTML title~{\nwtagstyle{}\subpageref{NWD*rs-HTMA-1}}}\endmoddef
+\nwnotused{HTML\ title}\nwendcode{}\nwbegindocs{15}\nwdocspar
+
+\sctn{{\d} web pages definition}
+
+\subsctn{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage
+\appendix
+
+\sctn{empty appendix section}
+
+\subsctn{empty appendix subsection}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+\sctn{Common code blocks}
+
+\subsctn{PERL scripts}
+
+\nwenddocs{}\nwbegincode{16}\sublabel{NWD*rs-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWD*rs-PERC-1}}}\endmoddef
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}\RA{}
+#
+use strict;
+\nwnotused{PERL\ shebang}\nwendcode{}\nwbegindocs{17}\nwdocspar
+
+\nwenddocs{}\nwbegincode{18}\sublabel{NWD*rs-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWD*rs-GloQ-1}}}\endmoddef
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+\nwindexdefn{{\char36}T}{:doT}{NWD*rs-GloQ-1}\nwindexdefn{{\char36}F}{:doF}{NWD*rs-GloQ-1}\eatline
+\nwidentdefs{\\{{{\char36}F}{:doF}}\\{{{\char36}T}{:doT}}}\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{19}\nwdocspar
+We also set here the date when the script is running and who is the user running it.
+
+\nwenddocs{}\nwbegincode{20}\sublabel{NWD*rs-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWD*rs-GloR-1}}}\endmoddef
+my $DATE = localtime;
+my $USER = $ENV\{USER\};
+\nwindexdefn{{\char36}DATE}{:doDATE}{NWD*rs-GloR-1}\nwindexdefn{{\char36}USER}{:doUSER}{NWD*rs-GloR-1}\eatline
+\nwidentdefs{\\{{{\char36}DATE}{:doDATE}}\\{{{\char36}USER}{:doUSER}}}\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{21}\nwdocspar
+
+\subsubsctn{Timing our scripts}
+
+The '{\tt{}Benchmark}' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+\nwenddocs{}\nwbegincode{22}\sublabel{NWD*rs-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWD*rs-UseN-1}}}\endmoddef
+use Benchmark;
+  \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}\RA{}
+\nwnotused{Use\ Modules\ -\ Benchmark}\nwendcode{}\nwbegindocs{23}\nwdocspar
+
+See '{\tt{}man\ Benchmark}' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+\nwenddocs{}\nwbegincode{24}\sublabel{NWD*rs-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWD*rs-Tim8-1}}}\endmoddef
+my @Timer = (new Benchmark);
+\nwused{\\{NWD*rs-UseN-1}}\nwendcode{}\nwbegindocs{25}\nwdocspar
+
+\nwenddocs{}\nwbegincode{26}\sublabel{NWD*rs-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWD*rs-ComS-1}}}\endmoddef
+sub timing() \{
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+\} # timing
+\nwnotused{Common\ PERL\ subs\ -\ Benchmark}\nwendcode{}\nwbegindocs{27}\nwdocspar
+
+
+\subsubsctn{Printing complex Data Structures}
+
+With '{\tt{}Data::Dumper}' we are able to pretty print complex data structures for debugging them.
+
+
+\nwenddocs{}\nwbegincode{28}\sublabel{NWD*rs-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWD*rs-UseK-1}}}\endmoddef
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+\nwnotused{Use\ Modules\ -\ Dumper}\nwendcode{}\nwbegindocs{29}\nwdocspar
+
+
+\subsubsctn{Common functions}
+
+\nwenddocs{}\nwbegincode{30}\sublabel{NWD*rs-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWD*rs-SkiV-1}}}\endmoddef
+next if /^\\#/o;
+next if /^\\s*$/o;
+chomp;
+\nwnotused{Skip\ comments\ and\ empty\ records}\nwendcode{}\nwbegindocs{31}\nwdocspar
+
+\nwenddocs{}\nwbegincode{32}\sublabel{NWD*rs-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWD*rs-ComQ-1}}}\endmoddef
+#
+sub max() \{
+    my $z = shift @_;
+    foreach my $l (@_) \{ $z = $l if $l > $z \};
+    return $z;
+\} # max
+sub min() \{
+    my $z = shift @_;
+    foreach my $l (@_) \{ $z = $l if $l < $z \};
+    return $z;
+\} # min
+\nwnotused{Common\ PERL\ subs\ -\ Min\ Max}\nwendcode{}\nwbegindocs{33}\nwdocspar
+
+\nwenddocs{}\nwbegincode{34}\sublabel{NWD*rs-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWD*rs-ComS.2-1}}}\endmoddef
+#
+sub fill_right() \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
+sub fill_left()  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
+sub fill_mid()   \{ 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+\} # fill_mid
+\nwnotused{Common\ PERL\ subs\ -\ Text\ fill}\nwendcode{}\nwbegindocs{35}\nwdocspar
+
+These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
+
+\nwenddocs{}\nwbegincode{36}\sublabel{NWD*rs-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWD*rs-ComQ.2-1}}}\endmoddef
+#
+sub counter \{ # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter
+#
+sub counter_end \{ # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter_end
+\nwnotused{Common\ PERL\ subs\ -\ Counter}\nwendcode{}\nwbegindocs{37}\nwdocspar
+
+\nwenddocs{}\nwbegincode{38}\sublabel{NWD*rs-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWD*rs-GloL-1}}}\endmoddef
+my ($n,$c); # counter and char (for &counter function)
+\nwindexdefn{{\char36}n}{:don}{NWD*rs-GloL-1}\nwindexdefn{{\char36}c}{:doc}{NWD*rs-GloL-1}\eatline
+\nwidentdefs{\\{{{\char36}c}{:doc}}\\{{{\char36}n}{:don}}}\nwnotused{Global\ Vars\ -\ Counter}\nwendcode{}\nwbegindocs{39}\nwdocspar
+
+\subsubsctn{Common functions for reporting program processes}
+\label{sec:messagerpt}
+
+Function '{\tt{}report}' requires that a hash variable '{\tt{}{\char37}MessageList}' has been set, such hash contains the strings for each report message we will need. The first parameter for '{\tt{}report}' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the {\tt{}sprintf} function on that string.
+
+\nwenddocs{}\nwbegincode{40}\sublabel{NWD*rs-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\endmoddef
+sub report() \{ print STDERR sprintf($MessageList\{ shift @_ \},@_) \}
+\nwalsodefined{\\{NWD*rs-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{41}\nwdocspar
+
+The same happens to '{\tt{}warn}' function which also requires a hash variable '{\tt{}{\char37}ErrorList}' containing the error messages.
+
+\nwenddocs{}\nwbegincode{42}\sublabel{NWD*rs-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWD*rs-ComP-1}}}\plusendmoddef
+sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
+\nwendcode{}\nwbegindocs{43}\nwdocspar
+
+\subsctn{AWK scripts}
+
+\nwenddocs{}\nwbegincode{44}\sublabel{NWD*rs-GAWC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-GAWC-1}}}\moddef{GAWK shebang~{\nwtagstyle{}\subpageref{NWD*rs-GAWC-1}}}\endmoddef
+#!/usr/bin/gawk -f
+# GNU Awk 3.0.4
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}\RA{}
+\nwnotused{GAWK\ shebang}\nwendcode{}\nwbegindocs{45}\nwdocspar
+
+\subsctn{BASH scripts}
+
+\nwenddocs{}\nwbegincode{46}\sublabel{NWD*rs-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}}\endmoddef
+#!/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}\RA{}
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+\{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; \} 1>&2;
+\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{47}\nwdocspar
+
+\nwenddocs{}\nwbegincode{48}\sublabel{NWD*rs-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}}\endmoddef
+\{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; \} 1>&2;
+#
+exit 0
+\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{49}\nwdocspar
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+\nwenddocs{}\nwbegincode{50}\sublabel{NWD*rs-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWD*rs-VerM-1}}}\endmoddef
+# $Id: D-recerca_web.tex,v 1.1 2001-07-15 02:07:48 jabril Exp $
+\nwused{\\{NWD*rs-PERC-1}\\{NWD*rs-GAWC-1}\\{NWD*rs-BASC-1}}\nwendcode{}\nwbegindocs{51}\nwdocspar
+
+\newpage
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\tt{}noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+\subsctn{Extracting {\h} pages to public www} % \\[-0.5ex]
+
+\nwenddocs{}\nwbegincode{52}\sublabel{NWD*rs-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\endmoddef
+notangle -R"root" $WORK/$nwfile.nw \\
+    > $DATA/root_config ;
+\nwalsodefined{\\{NWD*rs-tan8-2}\\{NWD*rs-tan8-3}\\{NWD*rs-tan8-4}\\{NWD*rs-tan8-5}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{53}%$
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+\nwenddocs{}\nwbegincode{54}\sublabel{NWD*rs-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+notangle -R"root" $WORK/$nwfile.nw \\
+    > $PUBLIC/root_config ;
+\nwendcode{}\nwbegindocs{55}%$
+
+
+\subsctn{Extracts Script code chunks from the {\tt{}noweb} file} % \\[-0.5ex]
+
+
+\nwenddocs{}\nwbegincode{56}\sublabel{NWD*rs-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+# showing line numbering comments in program
+notangle -L -R"root" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/root_file ;
+# program without line numbering comments
+notangle -t4 -R"root" $WORK/$nwfile.nw \\
+    > $BIN/root_file ;
+# making them runnable
+chmod a+x $BIN/root_file ;
+\nwendcode{}\nwbegindocs{57}\nwdocspar
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+\nwenddocs{}\nwbegincode{58}\sublabel{NWD*rs-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+\nwendcode{}\nwbegindocs{59}\nwdocspar
+
+\nwenddocs{}\nwbegincode{60}\sublabel{NWD*rs-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWD*rs-wea7-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}\RA{}
+# weaving and LaTeXing
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}\RA{}
+noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}\RA{}
+\nwnotused{weaving}\nwendcode{}\nwbegindocs{61}\nwdocspar
+
+\nwenddocs{}\nwbegincode{62}\sublabel{NWD*rs-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWD*rs-LaT8-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWD*rs-BASC-1}}\RA{}
+# only LaTeXing
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}\RA{}
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWD*rs-BASF-1}}\RA{}
+\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{63}%$
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+\nwenddocs{}\nwbegincode{64}\sublabel{NWD*rs-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWD*rs-BASQ-1}}}\endmoddef
+# Global Variables
+nwfile="D-recerca_web" ;
+WORK="$HOME/development/webprecarios" ;
+BIN="$WORK/bin" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+PUBLIC="$WORK/public_html" ;
+export WORK BIN DOCS DATA nwfile PUBLIC ;
+\nwused{\\{NWD*rs-wea7-1}\\{NWD*rs-LaT8-1}}\nwendcode{}\nwbegindocs{65}\nwdocspar
+
+\nwenddocs{}\nwbegincode{66}\sublabel{NWD*rs-tan8-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWD*rs-tan8-5}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWD*rs-tan8-1}}}\plusendmoddef
+# TO DO: add a test to check which shell is running
+# BASH shell
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \\
+         > $WORK/.bash_VARS ; 
+# sourcing
+source $WORK/.bash_VARS ;
+\nwendcode{}
+
+\nwixlogsorted{c}{{BASH Environment Variables}{NWD*rs-BASQ-1}{\nwixu{NWD*rs-wea7-1}\nwixu{NWD*rs-LaT8-1}\nwixd{NWD*rs-BASQ-1}}}%
+\nwixlogsorted{c}{{BASH script end}{NWD*rs-BASF-1}{\nwixd{NWD*rs-BASF-1}\nwixu{NWD*rs-wea7-1}\nwixu{NWD*rs-LaT8-1}}}%
+\nwixlogsorted{c}{{BASH shebang}{NWD*rs-BASC-1}{\nwixd{NWD*rs-BASC-1}\nwixu{NWD*rs-wea7-1}\nwixu{NWD*rs-LaT8-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Benchmark}{NWD*rs-ComS-1}{\nwixd{NWD*rs-ComS-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Counter}{NWD*rs-ComQ.2-1}{\nwixd{NWD*rs-ComQ.2-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Min Max}{NWD*rs-ComQ-1}{\nwixd{NWD*rs-ComQ-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - STDERR}{NWD*rs-ComP-1}{\nwixd{NWD*rs-ComP-1}\nwixd{NWD*rs-ComP-2}}}%
+\nwixlogsorted{c}{{Common PERL subs - Text fill}{NWD*rs-ComS.2-1}{\nwixd{NWD*rs-ComS.2-1}}}%
+\nwixlogsorted{c}{{Drecerca Main Style Sheet}{NWD*rs-DreP-1}{\nwixd{NWD*rs-DreP-1}}}%
+\nwixlogsorted{c}{{GAWK shebang}{NWD*rs-GAWC-1}{\nwixd{NWD*rs-GAWC-1}}}%
+\nwixlogsorted{c}{{Global Constants - Boolean}{NWD*rs-GloQ-1}{\nwixd{NWD*rs-GloQ-1}}}%
+\nwixlogsorted{c}{{Global Vars - Counter}{NWD*rs-GloL-1}{\nwixd{NWD*rs-GloL-1}}}%
+\nwixlogsorted{c}{{Global Vars - User and Date}{NWD*rs-GloR-1}{\nwixd{NWD*rs-GloR-1}}}%
+\nwixlogsorted{c}{{HTML header}{NWD*rs-HTMB-1}{\nwixd{NWD*rs-HTMB-1}}}%
+\nwixlogsorted{c}{{HTML main menu}{NWD*rs-HTME-1}{\nwixd{NWD*rs-HTME-1}}}%
+\nwixlogsorted{c}{{HTML navigation bar}{NWD*rs-HTMJ-1}{\nwixd{NWD*rs-HTMJ-1}}}%
+\nwixlogsorted{c}{{HTML title}{NWD*rs-HTMA-1}{\nwixd{NWD*rs-HTMA-1}}}%
+\nwixlogsorted{c}{{HTML trailer}{NWD*rs-HTMC-1}{\nwixd{NWD*rs-HTMC-1}}}%
+\nwixlogsorted{c}{{LaTeXing}{NWD*rs-LaT8-1}{\nwixd{NWD*rs-LaT8-1}}}%
+\nwixlogsorted{c}{{PERL shebang}{NWD*rs-PERC-1}{\nwixd{NWD*rs-PERC-1}}}%
+\nwixlogsorted{c}{{Skip comments and empty records}{NWD*rs-SkiV-1}{\nwixd{NWD*rs-SkiV-1}}}%
+\nwixlogsorted{c}{{Timer ON}{NWD*rs-Tim8-1}{\nwixu{NWD*rs-UseN-1}\nwixd{NWD*rs-Tim8-1}}}%
+\nwixlogsorted{c}{{Use Modules - Benchmark}{NWD*rs-UseN-1}{\nwixd{NWD*rs-UseN-1}}}%
+\nwixlogsorted{c}{{Use Modules - Dumper}{NWD*rs-UseK-1}{\nwixd{NWD*rs-UseK-1}}}%
+\nwixlogsorted{c}{{Version Control Id Tag}{NWD*rs-VerM-1}{\nwixu{NWD*rs-PERC-1}\nwixu{NWD*rs-GAWC-1}\nwixu{NWD*rs-BASC-1}\nwixd{NWD*rs-VerM-1}}}%
+\nwixlogsorted{c}{{javascripts: }{NWD*rs-javD-1}{\nwixd{NWD*rs-javD-1}}}%
+\nwixlogsorted{c}{{tangling}{NWD*rs-tan8-1}{\nwixd{NWD*rs-tan8-1}\nwixd{NWD*rs-tan8-2}\nwixd{NWD*rs-tan8-3}\nwixd{NWD*rs-tan8-4}\nwixd{NWD*rs-tan8-5}}}%
+\nwixlogsorted{c}{{weaving}{NWD*rs-wea7-1}{\nwixd{NWD*rs-wea7-1}}}%
+\nwixlogsorted{i}{{{\char36}DATE}{:doDATE}}%
+\nwixlogsorted{i}{{{\char36}F}{:doF}}%
+\nwixlogsorted{i}{{{\char36}T}{:doT}}%
+\nwixlogsorted{i}{{{\char36}USER}{:doUSER}}%
+\nwixlogsorted{i}{{{\char36}c}{:doc}}%
+\nwixlogsorted{i}{{{\char36}n}{:don}}%
+\nwbegindocs{67}\nwdocspar
+
+\end{document}
+\nwenddocs{}

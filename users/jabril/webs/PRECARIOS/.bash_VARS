@@ -1,0 +1,8 @@
+# Global Variables
+nwfile="D-recerca_web" ;
+WORK="$HOME/development/webprecarios" ;
+BIN="$WORK/bin" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+PUBLIC="$WORK/public_html" ;
+export WORK BIN DOCS DATA nwfile PUBLIC ;

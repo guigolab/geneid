@@ -1,0 +1,504 @@
+% -*- mode: Noweb; noweb-code-mode: html-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: cdrom_web.nw,v 1.1 2001-07-15 02:08:36 jabril Exp $
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+ 
+% Colors for gff2ps
+\input ColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+
+% defs
+\def\drome{\textit{Drosophila melanogaster}}
+\def\dro{\textit{Drosophila}}
+\def\dme{\textit{D. melanogaster}}
+\def\seq{\texttt{\textbf{X62937}}}
+\def\nowf{[[DromeRepeats.nw]]}
+\def\bn{\textsc{blastn}}
+\def\ps{\textsc{PostScript}}
+
+% Setting text for footers and headers
+
+\def\tit{\textsc{Exploring this CDROM with HTML Pages.- }}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Josep F. Abril}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+@ 
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textsc{\textbf{\Huge Exploring\\ this CDrom\\[1ex] with HTML Pages}}\\[5ex]
+
+% \textbf{\Large Authors List Here}\\[1ex]
+\textbf{\Large Josep F. Abril}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+} % parbox
+\end{center}
+\end{abstract}
+
+\vfill
+
+\begin{raggedleft}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: cdrom_web.nw,v 1.1 2001-07-15 02:08:36 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Defining HTML Templates}
+
+In this section we are going to describe the common parts for all the HTML pages in this CDROM. The basic structure for those pages is outlined in figure~\ref{fig:basicstruct}
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{bfseries}
+\fbox{HTML\\
+  \fbox{HEAD\\
+    \fbox{SCRIPTS}
+  } \\ % HEAD
+  \fbox{BODY\\
+    \fbox{TITLE AREA} \\
+    \fbox{PATH AREA} \\
+    \fbox{MENU AREA} \fbox{PAGE AREA} \\
+    \fbox{TRAILER AREA} \\
+  }  % BODY
+} \vskip 2ex % HTML
+\end{bfseries}
+\caption{\label{fig:basicstruct} General outline of the HTML pages in this CDROM.}
+\end{center}
+\end{figure}
+
+
+\subsctn{}
+
+<<ICONS PATH>>=
+@
+
+<<JavaScripts>>=
+<SCRIPT LANGUAGE="JavaScript">
+<!-- Begin
+ if (window != top) top.location.href = location.href;
+
+ var theDate = "";
+ theDate = document.lastModified;
+
+ function LastUpdate() {
+  document.write("<B>Last Updated:</B>  <I>"+theDate+"</I><BR>&copy;&nbsp;Genome Informatics Research Laboratory");
+ }
+
+ function NewItem(todate) {
+  exp = new Date(todate);
+  cur = new Date();
+  // document.write("HHH::"+exp+"::"+cur+"::HHH");
+  if (cur.getTime() < exp.getTime())
+   document.write("&nbsp;&nbsp;<IMG SRC='<<ICONS PATH>>new_rotating.gif'
+                   WIDTH=30 HEIGHT=15 BORDER=0 ALIGN='TOP' ALT='NEW'>");
+ }
+// End -->
+</SCRIPT>
+@ 
+
+<<Diamond spacer>>=
+<IMG SRC="<<ICONS PATH>>dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+@ 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage
+\appendix
+
+\sctn{empty appendix section}
+
+\subsctn{empty appendix subsection}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{comment}
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+\sctn{Common code blocks}
+
+\subsctn{PERL scripts}
+
+<<PERL shebang>>=
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+<<Version Control Id Tag>>
+#
+use strict;
+@
+
+<<Global Constants - Boolean>>=
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+@ %def $T $F
+
+We also set here the date when the script is running and who is the user running it.
+
+<<Global Vars - User and Date>>=
+my $DATE = localtime;
+my $USER = $ENV{USER};
+@ %def $DATE $USER
+
+
+\subsubsctn{Timing our scripts}
+
+The '[[Benchmark]]' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+<<Use Modules - Benchmark>>=
+use Benchmark;
+  <<Timer ON>>
+@ 
+
+See '[[man Benchmark]]' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+<<Timer ON>>=
+my @Timer = (new Benchmark);
+@ 
+
+<<Common PERL subs - Benchmark>>=
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+
+\subsubsctn{Printing complex Data Structures}
+
+With '[[Data::Dumper]]' we are able to pretty print complex data structures for debugging them.
+
+
+<<Use Modules - Dumper>>=
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+@ 
+
+
+\subsubsctn{Common functions}
+
+<<Skip comments and empty records>>=
+next if /^\#/o;
+next if /^\s*$/o;
+chomp;
+@
+
+<<Common PERL subs - Min Max>>=
+#
+sub max() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l > $z };
+    return $z;
+} # max
+sub min() {
+    my $z = shift @_;
+    foreach my $l (@_) { $z = $l if $l < $z };
+    return $z;
+} # min
+@
+
+<<Common PERL subs - Text fill>>=
+#
+sub fill_right() { $_[0].($_[2] x ($_[1] - length($_[0]))) }
+sub fill_left()  { ($_[2] x ($_[1] - length($_[0]))).$_[0] }
+sub fill_mid()   { 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+} # fill_mid
+@
+
+These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
+
+<<Common PERL subs - Counter>>=
+#
+sub counter { # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter
+#
+sub counter_end { # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\n");
+} # counter_end
+@
+
+<<Global Vars - Counter>>=
+my ($n,$c); # counter and char (for &counter function)
+@ %def $n $c
+
+
+\subsubsctn{Common functions for reporting program processes}
+\label{sec:messagerpt}
+
+Function '[[report]]' requires that a hash variable '[[%MessageList]]' has been set, such hash contains the strings for each report message we will need. The first parameter for '[[report]]' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the [[sprintf]] function on that string.
+
+<<Common PERL subs - STDERR>>=
+sub report() { print STDERR sprintf($MessageList{ shift @_ },@_) }
+@
+
+The same happens to '[[warn]]' function which also requires a hash variable '[[%ErrorList]]' containing the error messages.
+
+<<Common PERL subs - STDERR>>=
+sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
+@
+
+\subsctn{AWK scripts}
+
+<<GAWK shebang>>=
+#!/usr/bin/gawk -f
+# GNU Awk 3.0.4
+<<Version Control Id Tag>>
+@
+
+\subsctn{BASH scripts}
+
+<<BASH shebang>>=
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+<<Version Control Id Tag>>
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+@
+
+<<BASH script end>>=
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0
+@
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+<<Version Control Id Tag>>=
+# $Id: cdrom_web.nw,v 1.1 2001-07-15 02:08:36 jabril Exp $
+@ 
+
+\newpage
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracts Script code chunks from the [[noweb]] file} % \\[-0.5ex]
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+<<tangling>>=
+# showing line numbering comments in program
+notangle -L -R"root" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/root_file ;
+# program without line numbering comments
+notangle -t4 -R"root" $WORK/$nwfile.nw \
+    > $BIN/root_file ;
+# making them runnable
+chmod a+x $BIN/root_file ;
+@ 
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+<<tangling>>=
+notangle -R"root" $WORK/$nwfile.nw \
+    > $DATA/root_config ;
+@ %$
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+<<tangling>>=
+notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+@ 
+
+<<weaving>>=
+<<BASH shebang>>
+# weaving and LaTeXing
+<<BASH Environment Variables>>
+noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+<<BASH script end>>
+@ 
+
+<<LaTeXing>>=
+<<BASH shebang>>
+# only LaTeXing
+<<BASH Environment Variables>>
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+<<BASH script end>>
+@ %$
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+<<BASH Environment Variables>>=
+# Global Variables
+export WORK="$HOME/CDROM/CD1/web/web_src" ;
+export BIN="$WORK/bin" ;
+export DOCS="$WORK/docs" ;
+export DATA="$WORK/data" ;
+export nwfile="cdrom_web" ;
+@ 
+
+<<CSH Environment Variables>>=
+# Global Variables
+setenv WORK "$HOME/CDROM/CD1/web/web_src" ;
+setenv BIN  "$WORK/bin" ;
+setenv DOCS "$WORK/docs" ;
+setenv DATA "$WORK/data" ;
+setenv nwfile "cdrom_web" ;
+@ 
+
+<<tangling>>=
+# TO DO: add a test to check which shell is running
+# BASH shell
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
+         > $WORK/.bash_VARS ; 
+# CSH shell
+notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
+         > $WORK/.csh_VARS ; 
+# sourcing
+source $WORK/.bash_VARS ;
+source $WORK/.csh_VARS ;
+@
+
+\end{document}
