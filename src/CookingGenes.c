@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.6 2001-04-23 13:12:22 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.7 2001-04-30 13:02:17 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -289,7 +289,7 @@ long CookingInfo(exonGFF *eorig, gen info[], long* nvExons)
 /* Print a gene according to formatted output selected */
 void PrintGene(exonGFF* start, exonGFF* end, char Name[],
 		char* s, gparam* gp, dict* dAA, long igen, long nAA,
-		int tAA[MAXEXONGEN][2], int nExon, int nExons) 
+		int** tAA, int nExon, int nExons) 
 {
   exonGFF* eaux;
   profile* p1;
@@ -349,22 +349,35 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
 {
   long igen;
   long ngen;
-  gen info[MAXGENE];
+  gen* info;
   char* prot;
   char* tmpDNA;
   long nAA, nNN;
-  int tAA[MAXEXONGEN][2];
+  int** tAA;
   long nvExons;
+  long i;
 
   /* Get info about each gen */
+  if ((info = (gen*) calloc(MAXGENE,sizeof(gen))) == NULL)
+    printError("Not enough space to store info_gen structure");
+  
+  if ((tAA = (int**) calloc(MAXEXONGENE,sizeof(int*))) == NULL)
+    printError("Not enough space to store tAA general structure");
+  
+  for(i=0; i<MAXEXONGENE; i++)
+    if ((tAA[i] = (int*) calloc(2,sizeof(int))) == NULL)
+      printError("Not enough space to store tAA[] structure");
+  
   ngen = CookingInfo(e,info,&nvExons);
 
   /* Protein */
   if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
     printError("Not enough space to store protein");
 
-  if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
-    printError("Not enough space to store cDNA");
+  /* cDNA memory */
+  if (cDNA)
+    if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+      printError("Not enough space to store cDNA");
 
   /* Header multiple gene */
     /* Header for  */
@@ -379,7 +392,7 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
     {
       /* Translate gen to protein */
       TranslateGen(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
-      
+ 
       if (cDNA)
 	GetcDNA(info[igen].start,s,info[igen].nexons, tmpDNA, &nNN);
       
@@ -398,9 +411,10 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
 	       info[igen].nexons,
 	       nAA,
 	       info[igen].score);
-      
+
       PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,
 		nAA,tAA,0,info[igen].nexons);
+
       /* [cDNA] and translated protein */
       if (XML)
       {
@@ -429,5 +443,12 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
 	    printProt(Name,ngen-igen,prot,nAA,PROT);
 	  }
     }
+
+  /* Free operations */
   free(prot);
+  free(info);
+  for(i=0; i<MAXEXONGENE; i++)
+    free(tAA[i]);
+  if (cDNA)
+    free(tmpDNA);
 }
