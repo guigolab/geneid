@@ -1,0 +1,266 @@
+<HTML>
+  <HEAD>
+    <TITLE> MySQL </TITLE>
+    <LINK REL="stylesheet" TYPE="text/css" HREF="css/mysql.css">
+  </HEAD>
+  <BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#000000" VLINK="#000000" ALINK="#000000" TOPMARGIN=5 LEFTMARGIN=5 MARGINWIDTH=5 MARGINHEIGHT=5>
+    <SCRIPT LANGUAGE="JavaScript">
+    <!--
+
+      img_link1_off = new Image(); img_link1_off.src = "images/navi-1-0.gif"; img_link1_on = new Image(); img_link1_on.src = "images/navi-1-1.gif";
+      img_link2_off = new Image(); img_link2_off.src = "images/navi-2-0.gif"; img_link2_on = new Image(); img_link2_on.src = "images/navi-2-1.gif";
+      img_link3_off = new Image(); img_link3_off.src = "images/navi-3-0.gif"; img_link3_on = new Image(); img_link3_on.src = "images/navi-3-1.gif";
+      img_link4_off = new Image(); img_link4_off.src = "images/navi-4-0.gif"; img_link4_on = new Image(); img_link4_on.src = "images/navi-4-1.gif";
+      img_link5_off = new Image(); img_link5_off.src = "images/navi-5-0.gif"; img_link5_on = new Image(); img_link5_on.src = "images/navi-5-1.gif";
+      img_link6_off = new Image(); img_link6_off.src = "images/navi-6-0.gif"; img_link6_on = new Image(); img_link6_on.src = "images/navi-6-1.gif";
+
+      function donothing() {}
+      function mousein(num) { document.images[eval("\"link" + num + "\"")].src = eval("img_link" + num + "_on.src"); }
+      function mouseout(num) { document.images[eval("\"link" + num + "\"")].src = eval("img_link" + num + "_off.src"); }
+
+    // -->
+    </SCRIPT>
+    <CENTER><!--MAGIC IN A GARBAGE CAN-->
+    <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+
+      <!-- Navi -->
+      <TR><TD COLSPAN=7 BGCOLOR="#000000"><TABLE WIDTH=100% BORDER=0 CELLSPACING=1 CELLPADDING=0>
+        <TR>
+        <TD COLSPAN=6 ALIGN=LEFT BGCOLOR="#FFCC00"><TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+          <TD ALIGN=LEFT><A HREF=""><IMG SRC="images/navi-logo.gif" BORDER=0 WIDTH=120 HEIGHT=40 HSPACE=0 VSPACE=0></A></TD>
+          <TD ALIGN=RIGHT></TD>
+        </TABLE></TD>
+        </TR>
+        <TR>
+        <TD ALIGN=MIDDLE BGCOLOR="#464646"><A HREF="news/" onMouseOver="mousein(1)" onMouseOut="mouseout(1)" onFocus="this.blur()"><IMG NAME="link1" SRC="images/navi-1-0.gif" BORDER=0 WIDTH=120 HEIGHT=20 HSPACE=0 VSPACE=0></A></TD>
+        <TD ALIGN=MIDDLE BGCOLOR="#464646"><A HREF="information/" onMouseOver="mousein(2)" onMouseOut="mouseout(2)" onFocus="this.blur()"><IMG NAME="link2" SRC="images/navi-2-0.gif" BORDER=0 WIDTH=120 HEIGHT=20 HSPACE=0 VSPACE=0></A></TD>
+        <TD ALIGN=MIDDLE BGCOLOR="#464646"><A HREF="documentation/" onMouseOver="mousein(3)" onMouseOut="mouseout(3)" onFocus="this.blur()"><IMG NAME="link3" SRC="images/navi-3-0.gif" BORDER=0 WIDTH=120 HEIGHT=20 HSPACE=0 VSPACE=0></A></TD>
+        <TD ALIGN=MIDDLE BGCOLOR="#464646"><A HREF="support/" onMouseOver="mousein(4)" onMouseOut="mouseout(4)" onFocus="this.blur()"><IMG NAME="link4" SRC="images/navi-4-0.gif" BORDER=0 WIDTH=120 HEIGHT=20 HSPACE=0 VSPACE=0></A></TD>
+        <TD ALIGN=MIDDLE BGCOLOR="#464646"><A HREF="downloads/" onMouseOver="mousein(5)" onMouseOut="mouseout(5)" onFocus="this.blur()"><IMG NAME="link5" SRC="images/navi-5-0.gif" BORDER=0 WIDTH=120 HEIGHT=20 HSPACE=0 VSPACE=0></A></TD>
+        <TD ALIGN=MIDDLE BGCOLOR="#464646"><A HREF="development/" onMouseOver="mousein(6)" onMouseOut="mouseout(6)" onFocus="this.blur()"><IMG NAME="link6" SRC="images/navi-6-0.gif" BORDER=0 WIDTH=120 HEIGHT=20 HSPACE=0 VSPACE=0></A></TD>
+        </TR>
+      </TABLE></TD></TR>
+      <TR><TD COLSPAN=7 ALIGN=MIDDLE><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=727 HEIGHT=3 HSPACE=0 VSPACE=0></TD></TR>
+
+      <TR>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=150 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=3 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=570 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      </TR>
+
+      <!-- Left navi -->
+      <TR>
+      <TD ROWSPAN=5 BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD ROWSPAN=5 BGCOLOR="#FFCC00" ALIGN=MIDDLE VALIGN=TOP><TABLE WIDTH=130 BORDER=0 CELLSPACING=0 CELLPADDING=1>
+
+          <TR><TD><DIV CLASS="navi"><IMG SRC="http://www.mysql.com/stats/mirror_track.php" BORDER=0 WIDTH=10 HEIGHT=10 HSPACE=0 VSPACE=0></DIV></TD></TR>
+
+          <TR><TD><TABLE BORDER=0 CELLSPACING=0 CELLPADDING=1><FORM METHOD=GET ACTION="http://www.mysql.com/udmsearch/search.php">
+            <TR><TD><DIV CLASS="navi"><B>Search:</B></DIV></TD></TR>
+            <TR><TD><INPUT TYPE=TEXT NAME="q" SIZE=9 STYLE="width: 120px" CLASS="smalltxt" VALUE=""></TD></TR>
+          </FORM></TABLE></TD></TR>
+
+          <TR><TD><HR SIZE=1></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="other/sitemap.html">Site Map</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="https://order.mysql.com/">Order Support</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="information/partners.html">Partners</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="portal/books/html/index.html">Books</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="portal/index.html">Portals</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="development/jobs/">Jobs</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="other/advertising.html">Advertising</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="information/contact.html">Contact</A></DIV></TD></TR>
+          <TR><TD><DIV CLASS="navi"><A CLASS="navi" HREF="documentation/lists.html">Join Mailing Lists</A></DIV></TD></TR>
+          <TR><TD><HR SIZE=1></TD></TR>
+
+          <TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="news/index.html">News</A><BR></DIV></TD></TR><TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="articles/index.html">Articles</A><BR></DIV></TD></TR><TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="information/index.html">Information</A><BR></DIV></TD></TR><TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="documentation/index.html">Documentation</A><BR></DIV></TD></TR><TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="support/index.html">Support</A><BR></DIV></TD></TR><TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="training/index.html">Training</A><BR></DIV></TD></TR><TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="downloads/index.html">Downloads</A><BR></DIV></TD></TR><TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=0 HEIGHT=1 HSPACE=0 VSPACE=0><A CLASS="navi" HREF="development/index.html">Development</A><BR></DIV></TD></TR>
+          <TR><TD><HR SIZE=1></TD></TR>
+<!--	  <TR><TD ALIGN=MIDDLE><FONT SIZE=1 FACE="Arial,Helvetica">Sponsored in part by:<BR>-->
+
+          <TR><TD><DIV CLASS="navi"><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=10 HEIGHT=10 HSPACE=0 VSPACE=0></DIV></TD></TR>
+
+      </TABLE></TD>
+      <TD ROWSPAN=5 BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD ROWSPAN=5><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=3 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+
+      <!-- Upper banner -->
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD ALIGN=MIDDLE><TABLE WIDTH=468 BORDER=0 CELLSPACING=0 CELLPADDING=5>
+        <TR><TD ALIGN=MIDDLE><table border="0" cellpadding="0" cellspacing="0"><tr><td><iframe src="http://ad.doubleclick.net/adi/mysql/home;pos=top;sz=468x60;ord=1160016496?" width="468" height="60" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no"><a href="http://ad.doubleclick.net/jump/mysql/home;abr=!ie;pos=top;sz=468x60;ord=1160016496?"><img src="http://ad.doubleclick.net/ad/mysql/home;abr=!ie;pos=top;sz=468x60;ord=1160016496?" border="0" width="468" height="60" /></a></iframe></td></tr></table></TD></TR>
+      </TABLE></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      </TR>
+      <TR><TD COLSPAN=3 BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=572 HEIGHT=1 HSPACE=0 VSPACE=0></TD></TR>
+      <TR><TD COLSPAN=3><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=572 HEIGHT=3 HSPACE=0 VSPACE=0></TD></TR>
+
+      <!-- Content -->
+      <TR><TD COLSPAN=3 BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=572 HEIGHT=1 HSPACE=0 VSPACE=0></TD></TR>
+      <TR>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=300 HSPACE=0 VSPACE=0></TD>
+      <TD VALIGN=TOP ALIGN=MIDDLE><TABLE WIDTH=570 BORDER=0 CELLSPACING=0 CELLPADDING=15><TD ALIGN=LEFT VALIGN=TOP CLASS="default">
+
+        <TABLE WIDTH=540 BORDER=0 CELLSPACING=0 CELLPADDING=0>
+  <TR>
+  <TD ALIGN=LEFT VALIGN=TOP><TABLE WIDTH=390 BORDER=0 CELLSPACING=0 CELLPADDING=0>
+
+    <TR> 
+    <TD><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+    <TD><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=188 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+    </TR>
+
+    <TR>
+    <TD COLSPAN=2 CLASS="sectionhead">Latest News<HR SIZE=1></TD>
+    </TR>
+    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+        <TR>
+    <TD VALIGN=TOP CLASS="default"><B>2001/07/24</B></TD>
+    <TD VALIGN=TOP CLASS="default"><B><A HREF="news/article-77.html">Presenting the new <strong>MySQL</strong> Logo</A></B></TD>
+    </TR>
+		    <TR>
+    <TD></TD>
+    <TD VALIGN=TOP CLASS="default"><P ALIGN=JUSTIFY><p><img src="http://www.mysql.com/images/interface-logo.gif" height=87 width=167 alt="New MySQL Dolphin Logo">
+
+<p>We're proud to present the new <strong>MySQL</strong> logo - a jumping dolphin - 
+symbolizing the speed, power, precision and good nature of the <strong>MySQL</strong> 
+database and community. The logo will be gradually introduced in the weeks to come. </P></TD>
+    </TR>
+		    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+        <TR>
+    <TD VALIGN=TOP CLASS="default"><B>2001/07/16</B></TD>
+    <TD VALIGN=TOP CLASS="default"><B><A HREF="news/article-76.html">Invitation to NuSphere and Progress</A></B></TD>
+    </TR>
+		    <TR>
+    <TD></TD>
+    <TD VALIGN=TOP CLASS="default"><P ALIGN=JUSTIFY>The people at <strong>MySQL AB</strong> would like to invite you, NuSphere Corporation
+and Progress Software Corporation, to talks on neutral soil for the
+purpose of resolving our disputes.  We propose to meet on Wednesday 18
+July 2001 and continue for as long as we need, possibly with a break
+for visiting the Open Source Convention in San Diego on 23 July
+onwards. </P></TD>
+    </TR>
+		    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+        <TR>
+    <TD VALIGN=TOP CLASS="default"><B>2001/07/13</B></TD>
+    <TD VALIGN=TOP CLASS="default"><B><A HREF="news/article-75.html">FAQ on <strong>MySQL</strong> vs. NuSphere Dispute</A></B></TD>
+    </TR>
+		    <TR>
+    <TD></TD>
+    <TD VALIGN=TOP CLASS="default"><P ALIGN=JUSTIFY>Uppsala, Sweden, 13 July 2001 - This is a summary of information that 
+numerous people have asked us directly and on Slashdot and other discussion 
+sites in the previous days. This summary does not contain ALL information 
+relating to the present discussions and our relationship with NuSphere 
+Corporation, but we have made every effort to include relevant items and 
+present facts as facts. You are welcome with additional enquiries or 
+comments to us at &lt;<a href="mailto:opensource@mysql.com">opensource@mysql.com</a>&gt;. </P></TD>
+    </TR>
+		    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+        <TR>
+    <TD VALIGN=TOP CLASS="default"><B>2001/07/12</B></TD>
+    <TD VALIGN=TOP CLASS="default"><B><A HREF="news/article-74.html"><strong>MySQL</strong> Community Threatened by Obscure MySQL.ORG Website</A></B></TD>
+    </TR>
+		    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+        <TR>
+    <TD VALIGN=TOP CLASS="default"><B>2001/07/03</B></TD>
+    <TD VALIGN=TOP CLASS="default"><B><A HREF="news/article-72.html">Introducing MySQL.com Portals</A></B></TD>
+    </TR>
+		    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+        <TR>
+    <TD VALIGN=TOP CLASS="default"><B>2001/06/26</B></TD>
+    <TD VALIGN=TOP CLASS="default"><B><A HREF="news/article-71.html">Article: MySQL Wizardry - Cross Tabulations</A></B></TD>
+    </TR>
+		    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+    
+    <TR><TD></TD>
+    <TD VALIGN=TOP CLASS="default"><P ALIGN=JUSTIFY><B><A HREF="news/">More News</A></B></TD></TR>
+    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+
+  </TABLE></TD>
+  <TD ALIGN=RIGHT VALIGN=TOP><TABLE WIDTH=144 BORDER=0 CELLSPACING=0 CELLPADDING=0>
+
+    <TR>
+    <TD><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+    </TR>
+
+    <TR>
+    <TD CLASS="sectionhead">Latest Versions<HR SIZE=1></TD>
+    </TR>
+    <TR><TD ><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+        <TR><TD VALIGN=TOP>
+    <TABLE WIDTH="100%">
+    <TR>
+    <TD VALIGN=MIDDLE CLASS="default"><FONT SIZE="-1"><B><A HREF="downloads/mysql-3.23.html">MySQL</A></B></FONT></TD>
+    <TD VALIGN=MIDDLE ALIGN=RIGHT CLASS="default"><FONT SIZE="-1">3.23.40</FONT></TD></TR></TABLE>
+    </TD></TR>
+
+    <TR><TD VALIGN=TOP>
+    <TABLE WIDTH="100%">
+    <TR>
+    <TD VALIGN=MIDDLE CLASS="default"><FONT SIZE="-1"><B><A HREF="downloads/mysql-max-3.23.html">MySQL-Max</A></B></FONT></TD>
+    <TD VALIGN=MIDDLE ALIGN=RIGHT CLASS="default"><FONT SIZE="-1">3.23.40</FONT></TD></TR></TABLE>
+    </TD></TR>
+
+    <TR><TD VALIGN=TOP>
+    <TABLE WIDTH="100%">
+    <TR>
+    <TD VALIGN=MIDDLE CLASS="default"><FONT SIZE="-1"><B><A HREF="downloads/gui-mysqlgui.html">MySQLGUI</A></B></FONT></TD>
+    <TD VALIGN=MIDDLE ALIGN=RIGHT CLASS="default"><FONT SIZE="-1">1.7.5</FONT></TD></TR></TABLE>
+    </TD></TR>
+
+    <TR><TD VALIGN=TOP>
+    <TABLE WIDTH="100%">
+    <TR>
+    <TD VALIGN=MIDDLE CLASS="default"><FONT SIZE="-1"><B><A HREF="downloads/api-mysql++.html">MySQL++</A></B></FONT></TD>
+    <TD VALIGN=MIDDLE ALIGN=RIGHT CLASS="default"><FONT SIZE="-1">1.7.9</FONT></TD></TR></TABLE>
+    </TD></TR>
+
+    <TR><TD VALIGN=TOP>
+    <TABLE WIDTH="100%">
+    <TR>
+    <TD VALIGN=MIDDLE CLASS="default"><FONT SIZE="-1"><B><A HREF="downloads/api-myodbc.html">MyODBC</A></B></FONT></TD>
+    <TD VALIGN=MIDDLE ALIGN=RIGHT CLASS="default"><FONT SIZE="-1">2.50.37</FONT></TD></TR></TABLE>
+    </TD></TR>
+
+    <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=12 HSPACE=0 VSPACE=0></TD></TR>
+
+    <TR><TD COLSPAN=2 ALIGN=CENTER><A HREF="https://order.mysql.com/">Order Support and Commercial <strong>MySQL</strong> Licenses</A></TD></TR>
+
+    
+  </TABLE></TD>
+  </TR>
+  <TR><TD COLSPAN=2><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=78 HEIGHT=8 HSPACE=0 VSPACE=0></TD></TR>
+  <TR><TD COLSPAN=2><TABLE WIDTH=540 BORDER=0 CELLSPACING=0 CELLPADDING=0>
+    <TD ALIGN=LEFT><A HREF="http://petition.eurolinux.org/"><IMG SRC="images/banner-patents.gif" BORDER=0 WIDTH=393 HEIGHT=82 BORDER=0 HSPACE=0 VSPACE=0></A></TD>
+    <TD ALIGN=RIGHT><A HREF="http://www.oreillynet.com/index.csp"><IMG SRC="images/banner-oreilly.gif" BORDER=0 WIDTH=144 HEIGHT=82 BORDER=0 HSPACE=0 VSPACE=0></A></TD>
+  </TABLE></TD></TR>
+
+</TABLE>
+
+      </TD></TABLE></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=300 HSPACE=0 VSPACE=0></TD>
+      </TR>
+
+      <TR>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=150 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=3 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=570 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      <TD BGCOLOR="#000000"><IMG SRC="images/pixel-black.gif" BORDER=0 WIDTH=1 HEIGHT=1 HSPACE=0 VSPACE=0></TD>
+      </TR>
+
+      <TR>
+      <TD COLSPAN=7 ALIGN=MIDDLE><IMG SRC="images/pixel-trans.gif" BORDER=0 WIDTH=700 HEIGHT=3 HSPACE=0 VSPACE=0></TD>
+      </TR>
+
+      <TR>
+      <TD COLSPAN=7 ALIGN=MIDDLE><DIV CLASS="footer"><!--<A CLASS="footer" HREF="/other/copyright.html">-->© 1995-2001 MySQL AB<!--</A> | <A CLASS="footer" HREF="/other/privacy.html">Privacy policy</A>--><BR>Page generated: 2001/08/02 10:33:40</DIV></TD>
+      </TR>
+
+    </TABLE>
+    </CENTER>
+  </BODY>
+</HTML>
