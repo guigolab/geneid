@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $
+% $Id: gff2aplot.nw,v 1.28 2001-12-07 18:38:50 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.28 2001-12-07 18:38:50 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -488,9 +488,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.27 $', #'
-     '$Date: 2001-12-05 20:48:36 $', #'
-     '$Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $', #'
+     '$Revision: 1.28 $', #'
+     '$Date: 2001-12-07 18:38:50 $', #'
+     '$Id: gff2aplot.nw,v 1.28 2001-12-07 18:38:50 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -3994,6 +3994,31 @@ LDE:
 ###EOR###
 @ 
 
+<<default layout vars values>>=
+major_tickmark_score       => { TYPE => 'FLOAT', VALUE => undef  },
+minor_tickmark_score       => { TYPE => 'FLOAT', VALUE => undef  },
+@ %def {major_tickmark_score} {minor_tickmark_score}
+<<DESC custom file variables>>=
+ORD: 119
+SEC: LAYOUT
+SUB: Tickmarks
+OPT: major_tickmark_score
+PAR: <score-step>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 120
+SEC: LAYOUT
+SUB: Tickmarks
+OPT: minor_tickmark_score
+PAR: <score-step>
+SDE: 
+LDE: 
+
+###EOR###
+@ 
+
 
 %% 
 %% The following variables must be set to undef for layout defaults or not
@@ -5818,6 +5843,7 @@ sub set_page_vars() {
     &set_page_size($var);
     &set_page_axes($var);
     &set_seq_boundaries($var);
+    &set_score_boundaries($var);
     &set_tickmark_vars($var);
     &find_prop_ratio($var);
     &set_misc_vars($var);
@@ -6204,6 +6230,78 @@ NOZOOMAREA =>
 @
 
 
+\subsctn{Getting score limits for alignment and percent box}
+
+We have to find which are the lower and upper scores for the alignment and for the percent box, this will be used by the program to skip the outlayers when drawing the percent box and to fix the score treshold for minimum and maximum alignment features line-width on the aplot box. 
+
+<<Layout Settings>>=
+sub set_score_boundaries() {
+    my ($vrf) = @_;
+    my ($mnsco, $mxsco);
+    <<setting score limits: current alignment>>
+    <<setting score limits: percent box>>
+    &report('PLOTSCORES',
+            "ALIGNMENT:   $vrf->{_aln_min_score} to $vrf->{_aln_max_score}",
+            "PERCENT box: $vrf->{_pbox_min_score} to $vrf->{_pbox_max_score}");
+} # set_score_boundaries
+@ %def &set_score_boundaries
+
+<<messages - input/output>>=
+PLOTSCORES =>
+  "###---> SCORE BOUNDARIES selected for this plot:\n".
+  "###      \%s\n###      \%s\n",
+@
+
+If [[percent_box_score_range]] was not defined then we look for [[aplot_score_range]] else we use the scores found in the [[%ALN_DATA]] for the corresponding alignment. We get first those minimum and maximum scores for the choosen alignment (once we provided a suitable pair of default values), and then we change the related variables if needed.
+
+<<setting score limits: current alignment>>=
+($vrf->{_aln_min_score},$vrf->{_aln_max_score}) = (0,100);
+$vrf->{_plot_aln} && do {
+    $vrf->{_aln_min_score} =
+        $ALN_DATA{$vrf->{_alignment_name}}[$_counter][$_mnsco];
+    $vrf->{_aln_max_score} =
+        $ALN_DATA{$vrf->{_alignment_name}}[$_counter][$_mxsco];
+}; # _plot_aln
+defined($vrf->{aplot_score_range}) && do {
+    ($mnsco, $mxsco) = @{ $vrf->{aplot_score_range} };
+    defined($mnsco) && ($vrf->{_aln_min_score} = $mnsco);
+    defined($mxsco) && ($vrf->{_aln_max_score} = $mxsco);
+}; # defined($vrf->{aplot_score_range})
+@ %def {_aln_min_score} {_aln_max_score}
+
+Having already defined the alignment variables ([[_aln_min_score]] and [[_aln_max_score]]), we take them as defaults for the percent box variables ([[_pbox_min_score]] and [[_pbox_max_score]]), before finding specific values in the corresponding variables.
+
+<<setting score limits: percent box>>=
+($vrf->{_pbox_min_score}, $vrf->{_pbox_max_score}) =
+     ($vrf->{_aln_min_score}, $vrf->{_aln_max_score});
+($vrf->{show_percent_box} && defined($vrf->{percent_box_score_range})) && do {
+    ($mnsco, $mxsco) = @{ $vrf->{percent_box_score_range} };
+    defined($mnsco) && ($vrf->{_pbox_min_score} = $mnsco);
+    defined($mxsco) && ($vrf->{_pbox_max_score} = $mxsco);
+}; # show_percent_box
+@ %def {_pbox_min_score} {_pbox_max_score}
+
+Here we are implementing how the script is going to set major and minor tickmark steps for scores, although it is included in the following section main function [[&set_tickmark_vars]]. 
+
+<<set tickmarks - percents>>=
+$vrf->{_pbox_len} = $vrf->{_pbox_max_score} - $vrf->{_pbox_min_score} + 1;
+if ( defined($vrf->{percent_major_tickmark}) && 
+    !defined($vrf->{major_tickmark_score}) ) {
+    $stplen = 10**( int( &logdec( $vrf->{_pbox_len} ) ) + 1 )
+              / $vrf->{percent_major_tickmark};
+} else {
+    $stplen = 10**( int( &logdec( $vrf->{_pbox_len} ) - 0.175 ) );
+};
+defined($vrf->{major_tickmark_score}) || do {
+    $vrf->{major_tickmark_score} = $stplen;
+}; # defined($vrf->{major_tickmark_score})
+defined($vrf->{minor_tickmark_score}) || do {
+    $vrf->{minor_tickmark_score} = 
+        $vrf->{major_tickmark_score} / $vrf->{percent_minor_tickmark};
+}; # defined($vrf->{minor_tickmark_score})
+@ %def {_pbox_len}
+
+
 \subsctn{Setting tickmark variables}
 
 <<Layout Settings>>=
@@ -6212,14 +6310,20 @@ sub set_tickmark_vars() {
     my (@tary,$stplen);
     <<set tickmarks - bottom one>>
     <<set tickmarks - steps for shorter edge>>
-    &report('TICKDONE');
+    <<set tickmarks - percents>>
+    &report('TICKDONE',
+        "Major step $vrf->{major_tickmark_nucleotide} - ".
+        "Minor step $vrf->{minor_tickmark_nucleotide}",
+        "Major step $vrf->{major_tickmark_score} - ".
+        "Minor step $vrf->{minor_tickmark_score}");
     return;
 } # set_tickmark_vars
-@ %def &set_tickmark_vars {}
+@ %def &set_tickmark_vars
 
 <<messages - input/output>>=
 TICKDONE =>
-  "###---> TICKMARKS were set: \n",
+  "###---> TICKMARKS were set: \n".
+  "###      Nucleotide-Scale: \%s\n###      Score-Scale:      \%s\n",
 @
 
 We have to switch on the bottomest scale that appears on plot (it depends on [[show_percent_box]] and [[show_extra_box]]) when [[show_only_bottom_ticks]] is on.
@@ -6409,10 +6513,14 @@ sub set_page_labels() {
         $vrf->{_plot_y_sequence} ||
             ($vrf->{y_label} .= " (Annotation NOT FOUND)");
     };
-    defined($vrf->{percent_box_label})    || ($vrf->{percent_box_label} = '');
-    defined($vrf->{percent_box_sublabel}) || ($vrf->{percent_box_sublabel} = '');
-    defined($vrf->{extra_box_label})      || ($vrf->{extra_box_label} = '');
-    defined($vrf->{extra_box_sublabel})   || ($vrf->{extra_box_sublabel} = '');
+    defined($vrf->{percent_box_label})    ||
+        ($vrf->{percent_box_label} = '');
+    defined($vrf->{percent_box_sublabel}) ||
+        ($vrf->{percent_box_sublabel} = '');
+    defined($vrf->{extra_box_label})      ||
+        ($vrf->{extra_box_label} = '');
+    defined($vrf->{extra_box_sublabel})   ||
+        ($vrf->{extra_box_sublabel} = '');
     return;
 } # set_page_labels
 @ %def &set_page_labels
@@ -7006,8 +7114,21 @@ D                 %:%
 /XD XE XO sub 1 add D  %-%
 /YO $vr->{_y_start} D  %-% Y-sequence first nucleotide coord
 /YE $vr->{_y_end} D    %-% Y-sequence last  nucleotide coord
-/YD YE YO sub 1 add D  %:%
-@ %def XO XE XD YO YE YD
+/YD YE YO sub 1 add D  %-%
+/PO $vr->{_pbox_min_score} D  %-% Percent lower score value
+/PE $vr->{_pbox_max_score} D  %-% Percent upper score value
+/PD PE PO sub D        %:%
+@ %def XO XE XD YO YE YD PO PE PD
+
+% not very useful at this moment but could be interesting
+% /PD
+%   PE PO sub 
+%   PO chktk 
+%   PE chktk
+%   max
+%   10 exch neg exp % if PE=1.0 and PO=0.2   then adds 0.1
+%   add             % if PE=1.0 and PO=0.25  then adds 0.01
+% D                 % if PE=1.0 and PO=0.255 then adds 0.001
 
 <<PSVariables - layout>>=
 %-% boxes heights
@@ -7031,10 +7152,12 @@ D                 %:%
 %-% tickmark start/end and step variables
 /KASm $vr->{major_tickmark_nucleotide} D  %-%
 /KASn $vr->{minor_tickmark_nucleotide} D  %-%
+%-%
+/KPSm $vr->{major_tickmark_score} D       %-%
+/KPSn $vr->{minor_tickmark_score} D       %-%
+%-%
     /maxtck 10 D %-% $vr->{aplot_major_tickmark} D
     /mintck  5 D %-% $vr->{aplot_minor_tickmark} D
-  /KPSm 10 D %-% $vr->{percent_major_tickmark_step} D
-  /KPSn 10 D %-% $vr->{percent_minor_tickmark_step} D
     /pctmxt 10 D %-% $vr->{percent_major_tickmark} D
     /pctmnt  5 D %-% $vr->{percent_minor_tickmark} D
   /KQSm 10 D %-% $vr->{extra_major_tickmark_step} D
@@ -7073,20 +7196,20 @@ D        %:%
 
 <<PSVariables - labels>>=
 %-% annotation labels
-/XSLb @{[ &tobool($vr->{show_x_sequence_label}) ]} D  %-%
-/XSLl @{[ &tostring($vr->{x_sequence_label}) ]} D     %-%
-/XSLz @{ $vr->{x_label_fontsize} } D                  %-%
-/XSLf { XSLz $Fonts{$vr->{x_label_font}} } D          %-%
+/XSLb @{[ &tobool($vr->{show_x_label}) ]} D   %-%
+/XSLl @{[ &tostring($vr->{x_label}) ]} D      %-%
+/XSLz @{ $vr->{x_label_fontsize} } D          %-%
+/XSLf { XSLz $Fonts{$vr->{x_label_font}} } D  %-%
 /XSLp    %-% X-sequence label spacer
    5 pt  %-%  min_value
   10 pt  %-%  max_value
   XSLz   %-%  current_value
   zlim   %-%  return value within interval or zero
 D        %-%
-/YSLb @{[ &tobool($vr->{show_y_sequence_label}) ]} D  %-%
-/YSLl @{[ &tostring($vr->{y_sequence_label}) ]} D     %-%
-/YSLz @{ $vr->{y_label_fontsize} } D                  %-%
-/YSLf { YSLz $Fonts{$vr->{y_label_font}} } D          %-%
+/YSLb @{[ &tobool($vr->{show_y_label}) ]} D   %-%
+/YSLl @{[ &tostring($vr->{y_label}) ]} D      %-%
+/YSLz @{ $vr->{y_label_fontsize} } D          %-%
+/YSLf { YSLz $Fonts{$vr->{y_label_font}} } D  %-%
 /YSLp    %-% Y-sequence label spacer
    5 pt  %-%  min_value
   10 pt  %-%  max_value
@@ -7173,11 +7296,6 @@ D                                      %-%
 /FTYrb @{[ &tobool($vr->{feature_y_label_rotate}) ]} D  %:%
 @ %def FTz FTf FTp FTXw FTXa FTXrb FTYw FTYa FTYrb
 
-<<PSVariables - labels>>=
-/FTXh 1 D  %-% feature labels height
-/FTYh 1 D  %:% feature labels height
-@ %def FTXh FTYh
-
 
 \subsubsctn{Labels for annotated groups}
 
@@ -7203,11 +7321,6 @@ D                                    %-%
 /GPYa $vr->{group_y_label_angle} D   %-%
 /GPYrb @{[ &tobool($vr->{group_y_label_rotate}) ]} D  %:%
 @ %def GPz GPf GPp GPXw GPXa GPXrb GPYw GPYa GPYrb
-
-<<PSVariables - labels>>=
-/GPXh 1 D  %-% group labels height
-/GPYh 1 D  %:% group labels height
-@ %def GPXh GPYh
 
 \subsubsctn{Misc layout variables}
 
@@ -7423,9 +7536,12 @@ begindata
 sub ps_plot_ribbons() {
     my ($seq,$flg) = @_;
     my $what = $flg ? 'X-sequence' : 'Y-sequence';
-    print STDOUT "\%\n\%\%\%\% $what Ribbons\n\%\n"; 
     &report('BLOCKRB',$what);
+    print STDOUT "\%\n\%\%\%\% $what Ribbons\n\%\n".
+                 ($flg ? 'beginXseq'  : 'beginYseq')."\n"; 
 
+
+    print STDOUT "endseq\n";
 } # ps_plot_ribbons
 @ %def &ps_plot_ribbons
 
@@ -7439,26 +7555,33 @@ sub ps_plot_outlines() {
 sub ps_plot_features() {
     my ($seq,$flg) = @_;
     my $what = $flg ? 'X-sequence' : 'Y-sequence';
-    print STDOUT "\%\n\%\%\%\% DATA ---> $what Annotations\n\%\n"; 
     &report('BLOCKXY',$what);
+    print STDOUT "\%\n\%\%\%\% DATA ---> $what Annotations\n\%\n".
+                 ($flg ? 'beginXseq'  : 'beginYseq')."\n"; 
 
+
+    print STDOUT "endseq\n";
 } # ps_plot_features
 @ %def &ps_plot_features
 
 <<PostScript PLOT>>=
 sub ps_plot_aln() {
     my ($aln) = @_;
-    print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\n"; 
     &report('BLOCKA','APLOT-BOX');
+    print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\nbeginaln\n"; 
+
  
+    print STDOUT "endseq\n";
 } # ps_plot_aln
 @ %def &ps_plot_aln
 
 <<PostScript PLOT>>=
 sub ps_plot_addons() {
-    print STDOUT "\%\n\%\%\%\% Extra features from custom files...\n\%\n"; 
     &report('BLOCKFX');
+    print STDOUT "\%\n\%\%\%\% Extra features from custom files...\n\%\nbeginaln\n"; 
  
+
+    print STDOUT "endseq\n";
 } # ps_plot_addons
 @ %def &ps_plot_addons
 
@@ -8137,6 +8260,26 @@ tflg { %-%
 } if %:%
 @ %def FL FXO FYO
 
+We also need to know how much space is required for feature and group labels.
+
+<<POSTSCRIPT layout>>=
+/FTXh      %-%
+ 10        %-%
+D          %-% feature labels height
+/FTYh      %-%
+ 10        %-%
+D          %:% feature labels height
+@ %def FTXh FTYh
+
+<<POSTSCRIPT layout>>=
+/GPXh      %-%
+ 10        %-%
+D          %-% group labels height
+/GPYh      %-%
+ 10        %-%
+D          %:% group labels height
+@ %def GPXh GPYh
+
 After that we look how much width the alignment plot may have:
 
 <<POSTSCRIPT layout>>=
@@ -8315,7 +8458,6 @@ D              %-%
 D             %:%  to extra-box upper coord
 tflg { mark (QYT:) QYT ( QYB:) QYB ( QY:) QY (*>*>*>) msc } if
 @ %def QYT QYB QY
-
 
 <<POSTSCRIPT layout>>=
 /WBox     0.50 cm D    % TagBox Size
@@ -9075,6 +9217,78 @@ end % aplotdict
 @ %def Banner
 
 <<PSFunctions - common tick functions>>=
+%-% we provide a number to this function to find how many  
+%-%   decimal digits it has, and chktk function returns that value (ge 0)
+/chktk {          %-> number  chktk
+  3 dict begin    %-> 
+    /pk X         %-> load "number" into a local variable (pk)
+    /ck 0 D       %-> initializing counters
+    /ek 1 D       %->
+    {             %-> begin loop
+      ck 5 gt {   %->
+        exit      %-> we are not interested in very large decimal numbers
+      } if        %-> and we take at least 5 significative digits
+                  %-% (also PS code does not support integer numbers 
+                  %-%  larger than 2147483647 or smaller than -2147483648,
+                  %-%  although it can handle reals in the +-10e+-38 range)
+      /ek         %->
+        10 ck exp %->
+      D           %-> setting exponent factor
+      pk ek mul   %-> number.real = number * e-factor
+      cvi         %-> number.real is converted to number.integer
+      ek div      %-> number! = number.integer / e-factor
+      pk eq {     %-> 
+        exit      %-> if number == number! then exiting from loop
+      } if        %-> ck variable will contain the number of decimals
+                  %-% that the original number had 
+      /ck         %->
+        ck 1 add  %-> increase 1 decimal 
+      D           %->
+    } loop        %-> end loop
+    ck            %-> returning ck contents through stack
+  end             %->
+} B               %->
+%-%
+/mymod {          %-> a b  mymod
+  %-% vflg { (mymod) msg } if
+  2 copy          %-> a b a b
+  chktk           %-> a b a bc
+  exch            %-> a b bc a
+  chktk           %-> a b bc ac
+  max             %-> a b f
+  dup 0 eq {      %-> a b f f
+    pop           %-> a b
+    2 {           %->
+      cvi exch    %-> here we make sure that we are passing two integers to mod
+    } repeat      %->
+    mod           %->     when f==0 then we compute the builtin modulus of a/b
+                  %-%     because mod function requires that both given
+                  %-%     parameters were integers
+  } {             %-> a b f
+    1 dict begin  %->
+      /ff         %-> a b f /ff
+        10        %-> a b f /ff 10
+        3 -1 roll %-> a b /ff 10 f
+        exp       %-> a b /-> /ff = 10^f 
+      D           %-> a b
+      2 {         %->
+        ff mul    %->
+        %-%
+        round     %-> we are going to compare the nearest integer values
+        cvi       %->   of a and b (just to make all tickmarks work fine) 
+                  %-% just remember that we are taking into account up to
+                  %-%   5 significant digits on the chktk function
+        %-%
+        exch      %-> a b! -> b! a -> b! a! -> a! b!
+      } repeat    %-> now a and b are integers,
+      mod         %-> so modulus can return another integer 
+      ff div      %-> which we can use to recover the real modulus
+    end           %-> of the original two decimal numbers
+  } ifelse        %->
+} B               %:% returns the a/b modulus via the stack
+@ %def chktk mymod
+
+<<PSFunctions - common tick functions>>=
 %-% mkgrid prints the grid lines if needed
 /mkgrid {      %-> boolean x y  mkgrid 
   %-% vflg { (mkgrid) msg } if
@@ -9185,24 +9399,24 @@ end % aplotdict
       %-% major tickmarks start and end
       /lxo               %->
         to               %->
-        to tmx mod       %->
+        to tmx mymod     %->
         sub              %->
       D                  %->
       /lxe               %->
         tmx              %->
-        te tmx mod       %->
+        te tmx mymod     %->
         sub              %->
         te add           %->
       D                  %->
       %-% minor tickmarks start and end
       /lno               %->
         to               %->
-        to tmn mod       %->
+        to tmn mymod     %->
         sub              %->
       D                  %->
       /lne               %->
         tmn              %->
-        te tmn mod       %->
+        te tmn mymod     %->
         sub              %->
         te add           %->
       D                  %->
@@ -9249,7 +9463,7 @@ end % aplotdict
           cnt to gt      %->
           cnt te lt      %-> is minor tickmark within limits ?
           and            %->
-          cnt tmx mod    %-> skip minor tickmarks that overlap a major one
+          cnt tmx mymod  %-> skip minor tickmarks that overlap a major one
           0 eq not       %-> 
           and {          %->   if all above is true draw minor tickmark
             cnt Xscm     %->
@@ -9343,24 +9557,24 @@ end % aplotdict
       %-% major tickmarks start and end
       /lxo               %->
         to               %->
-        to tmx mod       %->
+        to tmx mymod     %->
         sub              %->
       D                  %->
       /lxe               %->
         tmx              %->
-        te tmx mod       %->
+        te tmx mymod     %->
         sub              %->
         te add           %->
       D                  %->
       %-% minor tickmarks start and end
       /lno               %->
         to               %->
-        to tmn mod       %->
+        to tmn mymod     %->
         sub              %->
       D                  %->
       /lne               %->
         tmn              %->
-        te tmn mod       %->
+        te tmn mymod     %->
         sub              %->
         te add           %->
       D                  %->
@@ -9406,7 +9620,7 @@ end % aplotdict
           cnt to gt      %->
           cnt te lt      %-> is minor tickmark within limits ?
           and            %->
-          cnt tmx mod    %-> skip minor tickmarks that overlap a major one
+          cnt tmx mymod  %-> skip minor tickmarks that overlap a major one
           0 eq not       %-> 
           and {          %->   if all above is true draw minor tickmark
             cnt Yscm     %->
@@ -9537,6 +9751,7 @@ end % aplotdict
 %-% ALIGNMENT PLOT BOX
 <<PSFunctions - begindata>>
 <<PSFunctions - enddata>>
+<<PSFunctions - seqs annotation>>
 %-% MATCHES PERCENT BOX
 <<PSFunctions - beginmatches>>
 <<PSFunctions - endmatches>>
@@ -9637,6 +9852,7 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
 <<PSFunctions - begindata>>=
 /begindata {      %->
   vflg { (### BEGINdata) msg } if  %-%
+  %-%
   S               %->
     AXL           %->
     AYB neg       %->
@@ -9656,8 +9872,6 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
     /Yscale       %-> finding Y-sequence scale
       AY YD div   %-> (we do not need to check again axesb,
     D             %->  AX and AY have the required width and height)
-    /yo YO D      %->
-    /ye YE D      %->
     %-% tickmarks
     S             %->
       KAXb {      %-> if show h-tickmarks, start on the current point
@@ -9672,19 +9886,40 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
           vtick   %-> when calling vtick we must to move to (LLx,LRy=LLY+AX)
       } if        %->
     R             %->  
+    %-% Axes annotation labels
+    S             %->
+      XSLb {      %->
+        XSLl      %->
+        0         %->
+        AX 2 div  %->
+        AY        %->
+        ATX add   %->
+        XSLp add  %->
+        XSLf      %->
+        fg        %->
+        ctshw     %->
+      } if        %->
+      YSLb {      %->
+        YSLl      %->
+        90        %->
+        ATY neg   %->
+        YSLp sub  %->
+        AY 2 div  %->
+        YSLf      %->
+        fg        %->
+        ctshw     %->
+      } if        %->
+    R             %->
+    %-%
     %-% vars to get defined
+    /yo YO D %->
+    /ye YE D %->
     /TxWB {  %->
       WBox Xscale div  %->
     } D      %->
     /TyWB {  %->
       WBox Yscale div  %->
     } D      %->
-} B               %:%
-/begindataOLD {  %->
-  S  %->
-    /y1 Y1 D  %->
-    /y0 Y0 D  %->
-    BBoxY getXscale  %->
     /GDspl {  %->
       xGDspl  %->
       GDmore  %->
@@ -9697,73 +9932,109 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       xBDspl  %->
       GDmore  %->
       BDmore  %->
-      } D  %->
-    newpath  %->
-} D  %:%
+    } D  %->
+} B               %:%
 @ %def begindata
 
 <<PSFunctions - enddata>>=
-/enddata {  %->
+/enddata {      %->
     %-% aplot box border
-    S          %-> here we draw the aplot bbox but now we are going to 
-      0 0      %-> stroke the bbox path so we have a border surrounding the
-      AX AY    %-> previously filled aplot bbox
-      ZM {     %->
-        4 copy %-> here we look if we must draw the zoom marks
-        zoomtk %->
-      } if     %->
-      Blw obox %->
-      fg cmyk  %->
-      Blw slw  %->
-      K        %->
-    R          %->
-  R         %->
+    S           %-> here we draw the aplot bbox but now we are going to 
+      0 0       %-> stroke the bbox path so we have a border surrounding the
+      AX AY     %-> previously filled aplot bbox
+      ZM {      %->
+        4 copy  %-> here we look if we must draw the zoom marks
+        zoomtk  %->
+      } if      %->
+      Blw obox  %->
+      fg cmyk   %->
+      Blw slw   %->
+      K         %->
+    R           %->
+  R             %->
+  %-% vars to get defined
   /GDspl  xGDspl  D  %->
   /GLDspl xGLDspl D  %->
   /BDspl  xBDspl  D  %->
+  %-%
   vflg { (### ENDdata) msg } if  %-%
-} D         %:%
+} B             %:%
 @ %def enddata
 
+<<PSFunctions - seqs annotation>>=
+/beginXseq {     %-> setting X-sequence origin and clip path
+  S              %->
+    XO neg Xscm  %->
+    AY           %->
+      T          %->
+} B              %-%
+%-%
+/beginYseq {     %-> setting Y-sequence origin and clip path
+  S              %->
+    0            %->
+    YO neg Yscm  %->
+      T          %->
+    90 rotate    %->
+} B              %-%
+%-%
+/beginaln {      %-> setting aplot origin and clip path
+  S              %->
+    0  0         %->
+    AX AY        %->
+    bbox         %->
+    clip         %->
+    newpath      %->
+    XO neg Xscm  %->
+    YO neg Yscm  %->
+      T          %->    
+} B              %-%
+%-%
+/endseq {        %-> closing any of above three functions:
+  R              %->   beginXseq, beginYseq or beginaln
+} B              %:%
+@ %def beginXseq beginYseq beginaln endseq
+
+
 <<PSFunctions - beginmatches>>=
-/beginmatches {  %->
+/beginmatches {   %->
   vflg { (### BEGINmatches) msg } if  %-%
-  S            %->
-    AXL        %->
-    PYB neg    %->
-    T          %->
-    S          %->
-      0 0      %->
-      AX PY    %->
-      bbox     %->
-      PBc cmyk %->
-      fill     %->
-    R          %->
+  S               %->
+    AXL           %->
+    PYB neg       %->
+    T             %->
+    %-% percent box BG color
+    S             %->
+      0 0         %->
+      AX PY       %->
+      bbox        %->
+      PBc cmyk    %->
+      fill        %->
+    R             %->
+    %-% setting variables
+    /Yscale       %-> finding percent scale
+      PY PD div   %-> (we do not need to check again axesb, PY has
+    D             %->  the required height, and width is same for all boxes)
     %-% tickmarks
     S             %->
       KPXb {      %-> if show h-tickmarks, start on the current point
         PY nucltick  %-> as we are going to recycle nucltick funtion
       } if        %->    we have to provide the height of each box
     R             %->    
-    S  %->
+    S             %->
       KPYb {      %-> if show v-tickmarks, start on the current point
         AX        %-> width
-        YO YE     %-> Y-sequence start and end
-        KASm KASn %-> major and minor tickmarks (in nucleotides)
+        PO PE     %-> Y-sequence start and end
+        KPSm KPSn %-> major and minor tickmarks (in percents)
           vtick   %-> when calling vtick we must to move to (LLx,LRy=LLY+AX)
       } if        %->
     R             %->  
-    %-% percent box border
-    S          %->
-      0 0      %->
-      AX PY    %->
-      Blw obox %->
-      fg cmyk  %->
-      Blw slw  %->
-      K        %->
-    R          %->
-    S          %->
-} D            %:%
+    %-% box labels
+%    S             %->
+%      XSLb {      %->
+%      } if        %->
+%    R             %->
+    S   %->
+} D               %:%
 /beginmatchesOLD {  %->
   /ZoomON 0 D  %->
   S  %->
@@ -9827,11 +10098,20 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
 @ %def beginmatches
 
 <<PSFunctions - endmatches>>=
-/endmatches {  %->
+/endmatches {   %->
     R  %->
-  R  %->
+    %-% percent box border
+    S           %->
+      0 0       %->
+      AX PY     %->
+      Blw obox  %->
+      fg cmyk   %->
+      Blw slw   %->
+      K         %->
+    R           %->
+  R             %->
   vflg { (### ENDmatches) msg } if  %-%
-} D  %:%
+} D             %:%
 @ %def endmatches
 
 <<PSFunctions - beginextra>>=
@@ -10513,7 +10793,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.28 2001-12-07 18:38:50 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -12083,7 +12363,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.27 2001-12-05 20:48:36 jabril Exp $
+# $Id: gff2aplot.nw,v 1.28 2001-12-07 18:38:50 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
