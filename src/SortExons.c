@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.6 2003-11-05 15:09:25 eblanco Exp $  */
+/*  $Id: SortExons.c,v 1.7 2004-01-27 16:25:08 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -34,10 +34,9 @@ extern long NUMEXONS;
 extern int EVD;
 extern int FWD,RVS;
 extern int scanORF;
-extern int SGE;
 
 /* Artificial initial gene feature: force complete gene prediction */
-void InsertFirstGhostExon(exonGFF* Exons)
+void InsertBeginExon(exonGFF* Exons)
 {
   exonGFF* e;
   exonGFF* re;
@@ -45,17 +44,17 @@ void InsertFirstGhostExon(exonGFF* Exons)
   /* 1. Forward Strand */
   /* Create the exon structure */
   if ((e = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
-        printError("Not enough memory: first ghost exon(sGHOST)");
+        printError("Not enough memory: artificial FWD Begin exon");
 
   /* Create the sites structure */
   if ((e->Acceptor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: acceptor site for first ghost exon(sGHOST)");
+    printError("Not enough memory: acceptor site for artificial FWD Begin exon");
 
   /* Create the sites structure */
   if ((e->Donor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: donor site for first ghost exon(sGHOST)");
+    printError("Not enough memory: donor site for artificial FWD Begin exon");
   
   e->Acceptor->Position = 0;
   e->Donor->Position = 0;
@@ -63,7 +62,7 @@ void InsertFirstGhostExon(exonGFF* Exons)
   /* Save the extracted exon */
   Exons[0].Acceptor = e->Acceptor;
   Exons[0].Donor = e->Donor;
-  strcpy(Exons[0].Type,sGHOST);
+  strcpy(Exons[0].Type,sBEGIN);
   Exons[0].Frame = 0;
   Exons[0].Strand = '+';
   Exons[0].Score = MAXSCORE;
@@ -82,17 +81,16 @@ void InsertFirstGhostExon(exonGFF* Exons)
   /* 2. Reverse Strand */
   /* Create the exon structure */
   if ((re = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
-        printError("Not enough memory: first ghost exon(sGHOST)");
+        printError("Not enough memory: artificial RVS Begin exon");
 
   /* Create the sites structure */
   if ((re->Acceptor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: acceptor site for first ghost exon(sGHOST)");
-
+    printError("Not enough memory: acceptor site for artificial RVS Begin exon");
   /* Create the sites structure */
   if ((re->Donor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: donor site for first ghost exon(sGHOST)");
+    printError("Not enough memory: donor site for artificial RVS Begin exon");
   
   re->Acceptor->Position = 0;
   re->Donor->Position = 0;
@@ -100,7 +98,7 @@ void InsertFirstGhostExon(exonGFF* Exons)
   /* Save the extracted exon */
   Exons[1].Acceptor = re->Acceptor;
   Exons[1].Donor = re->Donor;
-  strcpy(Exons[1].Type,sGHOST);
+  strcpy(Exons[1].Type,sBEGIN);
   Exons[1].Frame = 0;
   Exons[1].Strand = '-';
   Exons[1].Score = MAXSCORE;
@@ -118,7 +116,7 @@ void InsertFirstGhostExon(exonGFF* Exons)
 }
 
 /* Artificial terminal gene feature: force complete gene prediction */
-void InsertLastGhostExon(exonGFF* Exons, long n, long L)
+void InsertEndExon(exonGFF* Exons, long n, long L)
 {
   exonGFF* e;
   exonGFF* re;
@@ -126,17 +124,17 @@ void InsertLastGhostExon(exonGFF* Exons, long n, long L)
   /* 1. Forward Strand */
   /* Create the exon structure */
   if ((e = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
-        printError("Not enough memory: last ghost exon(sGHOST)");
+        printError("Not enough memory: artificial FWD End exon");
 
   /* Create the sites structure */
   if ((e->Acceptor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: acceptor site for last ghost exon(sGHOST)");
+    printError("Not enough memory: acceptor site for artificial FWD End exon");
 
   /* Create the sites structure */
   if ((e->Donor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: donor site for last ghost exon(sGHOST)");
+    printError("Not enough memory: donor site for artificial FWD End exon");
 
   e->Acceptor->Position = L;
   e->Donor->Position = L;
@@ -144,7 +142,7 @@ void InsertLastGhostExon(exonGFF* Exons, long n, long L)
   /* Save the extracted exon */
   Exons[n].Acceptor = e->Acceptor;
   Exons[n].Donor = e->Donor;
-  strcpy(Exons[n].Type,sGHOST);
+  strcpy(Exons[n].Type,sEND);
   Exons[n].Frame = 0;
   Exons[n].Strand = '+';
   Exons[n].Score = MAXSCORE;
@@ -163,17 +161,17 @@ void InsertLastGhostExon(exonGFF* Exons, long n, long L)
   /* 1. Reverse Strand */
   /* Create the exon structure */
   if ((re = (exonGFF*) malloc(sizeof(exonGFF))) == NULL)
-        printError("Not enough memory: last ghost exon(sGHOST)");
+        printError("Not enough memory: artificial RVS End exon");
 
   /* Create the sites structure */
   if ((re->Acceptor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: acceptor site for last ghost exon(sGHOST)");
+    printError("Not enough memory: acceptor site for artificial RVS End exon");
 
   /* Create the sites structure */
   if ((re->Donor =
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: donor site for last ghost exon(sGHOST)");
+    printError("Not enough memory: donor site for artificial RVS End exon");
 
   re->Acceptor->Position = L;
   re->Donor->Position = L;
@@ -181,7 +179,7 @@ void InsertLastGhostExon(exonGFF* Exons, long n, long L)
   /* Save the extracted exon */
   Exons[n+1].Acceptor = re->Acceptor;
   Exons[n+1].Donor = re->Donor;
-  strcpy(Exons[n+1].Type,sGHOST);
+  strcpy(Exons[n+1].Type,sEND);
   Exons[n+1].Frame = 0;
   Exons[n+1].Strand = '-';
   Exons[n+1].Score = MAXSCORE;
@@ -406,11 +404,11 @@ void SortExons(packExons* allExons,
       }
 
 
-  /* SGE- STARTING fragment: Insert first ghost exon sGHOST */
-  if (SGE && (l1 == 0))
+  /* FIRST SPLIT: Insert first artificial exon */
+  if (l1 == 0)
 	{
+	  InsertBeginExon(Exons);
 	  n = 2;
-	  InsertFirstGhostExon(Exons);
 	}
   else
 	n = 0;
@@ -455,10 +453,10 @@ void SortExons(packExons* allExons,
 	  FreeItems(ExonList[i]);       
 	}
 
-  /* SGE- FINISHING split: Insert last ghost exon "$" */
-  if (SGE && (l2 == LengthSequence - 1))
+  /* FINISHING split: Insert last artificial exon */
+  if (l2 == LengthSequence - 1)
 	{
-	  InsertLastGhostExon(Exons, n, LengthSequence);
+	  InsertEndExon(Exons, n, LengthSequence);
 	  n = n + 2;
 	  
 	  if (n >= HowMany)
