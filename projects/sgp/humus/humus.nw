@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.20 2002-04-28 01:50:21 jabril Exp $ 
+% # $Id: humus.nw,v 1.21 2002-04-28 23:05:47 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.20 2002-04-28 01:50:21 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.21 2002-04-28 23:05:47 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -7365,7 +7365,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.20 2002-04-28 01:50:21 jabril Exp $
+# $Id: humus.nw,v 1.21 2002-04-28 23:05:47 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7716,13 +7716,20 @@ ipcs -s | grep jabril | gawk '{print $2}' | while read n; do ipcrm sem $n; done;
 ipcs -m | grep jabril | gawk '{print $2}' | while read n; do ipcrm shm $n; done;
 #
 # homology results quick summary
-for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y NA UL ; do { { [ "$n" != "NA" -a "$n" != "UL" ] && ( echo '################################################### CHR '$n' #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${n}/tblastx/20020111/hsp/chr${n}.report $HUMUS/chr${n}/tblastx/20020111/sr/chr${n}.report $HUMUS/chr${n}/sgp/20020225/hsp-sr/chr${n}.report ); }; { [ `perl -e '%h = ( 1 => 1, 3 => 1, 4 => 1, 5 => 1, 8 => 1, 9 => 1, 10 => 1, 15 => 1, 17 => 1, 18 => 1, 19 => 1, X => 1, NA => 1, UL => 1 ); $k = shift @ARGV; if (defined($h{$k})) { print 1; } else { print 0; };' $n` -eq 1 ] && ( echo '########################################## CHR '$n'_random #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${n}/tblastx/20020111/hsp/chr${n}_random.report $HUMUS/chr${n}/tblastx/20020111/sr/chr${n}_random.report $HUMUS/chr${n}/sgp/20020225/hsp-sr/chr${n}_random.report ); }; } ; done 2>&1 | prtcode ;
+for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { { echo '################################################### CHR '$n' #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${n}/tblastx/20020425/hsp/chr${n}.report $HUMUS/chr${n}/tblastx/20020425/sr/chr${n}.report $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}.report; }; { echo '########################################## CHR '$n'_random #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${n}/tblastx/20020425/hsp/chr${n}_random.report $HUMUS/chr${n}/tblastx/20020425/sr/chr${n}_random.report $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}_random.report; }; } ; done 2>&1 | prtcode ;
 # gene-pred results quick summary
-for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y NA UL ; do { { [ "$n" != "NA" -a "$n" != "UL" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENEID'; tail -20 $HUMUS/chr${n}/geneid/20020225/logs/chr${n}.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/geneid/20020225/out/chr${n} ; echo '### SGP'; tail -20 $HUMUS/chr${n}/sgp/20020225/logs/chr${n}.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/sgp/20020225/out/chr${n} ); }; echo ''; { [ `perl -e '%h = ( 1 => 1, 3 => 1, 4 => 1, 5 => 1, 8 => 1, 9 => 1, 10 => 1, 15 => 1, 17 => 1, 18 => 1, 19 => 1, X => 1, NA => 1, UL => 1 ); $k = shift @ARGV; if (defined($h{$k})) { print 1; } else { print 0; };' $n` -eq 1 ] && ( echo '########################################## CHR '$n'_random #####'; echo '### GENEID'; tail -20 $HUMUS/chr${n}/geneid/20020225/logs/chr${n}_random.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/geneid/20020225/out/chr${n}_random ; echo '### SGP'; tail -20 $HUMUS/chr${n}/sgp/20020225/logs/chr${n}_random.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/sgp/20020225/out/chr${n}_random ); }; echo ''; } ; done 2>&1 | prtcode ;
+for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { { echo '################################################### CHR '$n' #####'; echo '### GENEID'; tail -20 $HUMUS/chr${n}/geneid/20011222/logs/chr${n}.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/geneid/20011222/out/chr${n} ; echo '### SGP'; tail -20 $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n}; }; echo ''; { echo '########################################## CHR '$n'_random #####'; echo '### GENEID'; tail -20 $HUMUS/chr${n}/geneid/20011222/logs/chr${n}_random.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/geneid/20011222/out/chr${n}_random ; echo '### SGP'; tail -20 $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}_random.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n}_random; }; echo ''; } ; done 2>&1 | prtcode ;
 # gene-pred evaluation quick summary
-source $WORK/.bash_VARS ; $BIN/stepper.pl --step HSAP_GP_ANNOTATION:HSAP_GP_REFSEQ,HSAP_GP_ENSEMBL,HSAP_GP_GENSCAN,HSAP_GP_GENSCAN_EVAL --step HSAPgpa_MMUSpha_WUTBLASTX:EVALUATING_SRs --step GENEID_STD:GENEID_EVALUATION --step SGP_HSAPgpa_MMUSpha_TBX:SGP_EVALUATION  > $HUMUS/tmp/.err/_ALL_eval_t.err  2>&1 ;
-egrep 'Error:|segmentation fault' $HUMUS/chr*/annotation/20010806/genscan/eval/chr*.genscan_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/tblastx/20020111/eval/chr*.sr_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/geneid/20020225/eval/chr*.geneid_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/sgp/20020225/eval/chr*.sgp_*.[fr]?? ;
-for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y NA UL ; do { { [ "$n" != "NA" -a "$n" != "UL" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENSCAN'; cat $HUMUS/chr${n}/annotation/20010806/genscan/eval/chr${n}.summary ; echo '### SRs'; cat $HUMUS/chr${n}/tblastx/20020111/eval/chr${n}.summary ; echo '### GENEID';  cat $HUMUS/chr${n}/geneid/20020225/eval/chr${n}.summary ; echo '### SGP';  cat $HUMUS/chr${n}/sgp/20020225/eval/chr${n}.summary ); };  echo ''; { [ `perl -e '%h = ( 1 => 1, 3 => 1, 4 => 1, 5 => 1, 8 => 1, 9 => 1, 10 => 1, 15 => 1, 17 => 1, 18 => 1, 19 => 1, X => 1, NA => 1, UL => 1 ); $k = shift @ARGV; if (defined($h{$k})) { print 1; } else { print 0; };' $n` -eq 1 ] && ( echo '################################################### CHR '$n'_random #####'; echo '### GENSCAN'; cat $HUMUS/chr${n}/annotation/20010806/genscan/eval/chr${n}_random.summary ; echo '### SRs'; cat $HUMUS/chr${n}/tblastx/20020111/eval/chr${n}_random.summary ; echo '### GENEID';  cat $HUMUS/chr${n}/geneid/20020225/eval/chr${n}_random.summary ; echo '### SGP';  cat $HUMUS/chr${n}/sgp/20020225/eval/chr${n}_random.summary ); };  echo ''; } ; done 2>&1 | enscript -1rC -Gjf Courier5 -M A4
+# source $WORK/.bash_VARS ; $BIN/stepper.pl --step HSAP_GP_ANNOTATION:HSAP_GP_REFSEQ,HSAP_GP_ENSEMBL,HSAP_GP_GENSCAN,HSAP_GP_GENSCAN_EVAL --step HSAPgpa_MMUSpha_WUTBLASTX:EVALUATING_SRs --step GENEID_STD:GENEID_EVALUATION --step SGP_HSAPgpa_MMUSpha_TBX:SGP_EVALUATION  > $HUMUS/tmp/.err/_ALL_eval_t.err  2>&1 ;
+#
+egrep 'Error:|segmentation fault' $HUMUS/chr*/annotation/20011222/genscan/eval/chr*.genscan_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/tblastx/20020425/eval/chr*.sr_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/geneid/20011222/eval/chr*.geneid_*.[fr]?? ; egrep 'Error:|segmentation fault' $HUMUS/chr*/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr*.sgp_*.[fr]?? ;
+#
+for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { { echo '################################################### CHR '$n' #####'; echo '### GENSCAN'; cat $HUMUS/chr${n}/annotation/20011222/genscan/eval/chr${n}.summary ; echo '### SRs'; cat $HUMUS/chr${n}/tblastx/20020425/eval/chr${n}.summary ; echo '### GENEID';  cat $HUMUS/chr${n}/geneid/20011222/eval/chr${n}.summary ; echo '### SGP';  cat $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}.summary; };  echo ''; { echo '################################################### CHR '$n'_random #####'; echo '### GENSCAN'; cat $HUMUS/chr${n}/annotation/20011222/genscan/eval/chr${n}_random.summary ; echo '### SRs'; cat $HUMUS/chr${n}/tblastx/20020425/eval/chr${n}_random.summary ; echo '### GENEID';  cat $HUMUS/chr${n}/geneid/20011222/eval/chr${n}_random.summary ; echo '### SGP';  cat $HUMUS/chr${n}/sgp/20011222.UCSCgp-20020411.MGSCv3/eval/chr${n}_random.summary; };  echo ''; } ; done 2>&1  > $HUMUS/evaluations/EVAL.summary ;
+$BIN/process_eval.pl    $HUMUS/evaluations/EVAL.summary > $HUMUS/evaluations/EVAL_prog.summary ;
+$BIN/process_eval.pl -t $HUMUS/evaluations/EVAL.summary > $HUMUS/evaluations/EVAL_test.summary ;
+enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL.summary ;
+enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_prog.summary ;
+enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_test.summary ;
 @ 
 
 %
