@@ -30,7 +30,7 @@
 #
 # Last Update:  
 #
-# $Id: gff2aplot,v 1.7 2000-03-14 20:12:12 jabril Exp $	
+# $Id: gff2aplot,v 1.8 2000-03-14 21:03:43 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -70,8 +70,8 @@ Defaults () {
   PROGRAM="aplot";
   VERSION="v1.9";
   CREATIONDATE="1999/01/10"; # PSCREATION="1998/11/05"
-  REVISION=`echo '$Revision: 1.7 $' | gawk '{print $2}'`
-  DATERELEASE=`echo '$Date: 2000-03-14 20:12:12 $' | gawk '{print $2,$3}'`
+  REVISION=`echo '$Revision: 1.8 $' | gawk '{print $2}'`
+  DATERELEASE=`echo '$Date: 2000-03-14 21:03:43 $' | gawk '{print $2,$3}'`
   PSPROGRAM="PostScript Output from GFF2APLOT";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -1159,8 +1159,8 @@ if [ $v99 -eq 1 ];
   then
     { echo "";
       echo "***************************************************";
-      echo "*  Processing Command-Line Options for $PROGAM...";
-      echo "***************************************************"; echo ""; } 1>&2;
+      echo "*  Processing Command-Line Options for $PROGRAM...";
+      echo "***************************************************"; } 1>&2;
   fi;
 
 #
@@ -1488,7 +1488,9 @@ function READ_CUSTOM() {
         }
       else if (doproc==1) Var[$1]=OnOff($3);
       # PrintRPT(sprintf( "***: %s : DOPROC : %s\n", $1, doproc));
-      PrintRPT("VAR: " $1 " :: " Var[$1] "\n");
+      if (doproc==4 || doproc==5) PrintRPT("Defining feature :: " $1 "\n");
+      if ($0!~/^(FL|DF|OP|FT|SP) \#/ && doproc<4) PrintRPT("VAR: " $1 " :: " Var[$1] "\n");
+      else PrintRPT("VAR: " $1 " SECTION::::::::::::::::::::\n");
       } # if not empty nor comment
     } # while 
   close(CUSTOMFILE); 
@@ -1799,7 +1801,7 @@ function ReadElements() {
 }
 #
 function SET_PAGE_VARS() {
- PrintRPT(sprintf("\n%s\n* Setting Some Variables...\n%s\n\n",BigLINE,BigLINE));
+ PrintRPT(sprintf("\n%s\n* SETTING PAGE VARIABLES...\n%s\n\n",BigLINE,BigLINE));
  # page size
  bbpgsz=tolower(Var["PAGE_SIZE"]); 
  if (!chkps(bbpgsz)) { bbx=PsizeX["a4"]; bby=PsizeY["a4"] }
@@ -1904,6 +1906,7 @@ function SET_PAGE_VARS() {
 }
 #
 function APLOT_BLOCK() {
+ PrintWRN(sprintf("\n%s\n* GENERATING APLOT BOX...\n%s\n\n",BigLINE,BigLINE));
  printf "%%\n%% New BLOCK ---> LABELS\n%%\n"
  printf "%% (label) Title\n(%s) Title\n", checklbl(T);
  printf "%% (label) SubTitle\n(%s) SubTitle\n", checklbl(ST);
@@ -1949,6 +1952,7 @@ function APLOT_BLOCK() {
        }
      }
    }
+ PrintRPT("*** DRAWING ALIGNMENT DATA...\n");
  printf "%%\n%%\n%% DATA ---> Alignment...\n%%\n";
  for (i=1;i<=LAST[ALIGNname];i++) {
    alname=ALIGNname SUBSEP "-" SUBSEP i;
@@ -2002,6 +2006,8 @@ function APLOT_BLOCK() {
 }
 #
 function PERCENT_BLOCK() {
+ PrintWRN(sprintf("\n%s\n* GENERATING PERCENT BOX...\n%s\n\n",BigLINE,BigLINE));
+ #
  if (OnOff(Var["Display_PERCENT-BOX"])) {
    printf "%%\n%% New BLOCK ---> MATCHES\n%%\n"
    printf "%% xpct ypct\n %s %s beginmatches\n", Var["PERCENT_ORIGIN"], Var["PERCENT_END"]
@@ -2013,6 +2019,7 @@ function PERCENT_BLOCK() {
      PLOTLINES()
      }
    printf "%%\nvertical\n%%\npctmarks\n"
+   PrintRPT("*** DRAWING ALIGNMENT DATA...\n");
    printf "%%\n%%\n%% DATA ---> Alignment...\n%%\n"
    for (i=1;i<=LAST[ALIGNname];i++) {
      pcname=ALIGNname SUBSEP "-" SUBSEP i
@@ -2055,6 +2062,8 @@ function PERCENT_BLOCK() {
 }
 #
 function EXTRA_BLOCK() {
+ PrintWRN(sprintf("\n%s\n* GENERATING EXTRA BOX...\n%s\n\n",BigLINE,BigLINE));
+ #
  if (OnOff(Var["Display_EXTRA-BOX"])) {
    printf "%%\n%% New BLOCK ---> EXTRA-BOX\n%%\n"
    printf "%% numlines\n %s beginextra\n", NGROUPS 
@@ -2209,7 +2218,10 @@ function GetLW(type) {
  else if (type~/N|n/) return 0.5;
  else if (type~/D|d/) return 1;
  }
-function PLOTRibbons(SEQ,ish) {
+function PLOTRibbons(SEQ,ish    ,tt) {
+ if (ish) tt="HORIZONTAL"; else tt="VERTICAL";
+ PrintRPT("*** PLOT RIBBONS * " tt " AXES\n");
+ #
  for (l=maxlayer;l>=0;l--) {          ### Plotting features by layers...  
    for (i=1;i<=LAST[SEQ];i++) {
      name=SEQ SUBSEP "-" SUBSEP i;
@@ -2225,7 +2237,7 @@ function PLOTRibbons(SEQ,ish) {
        else rbbncol=Var["Ribbon_BGCOLOR"];
        if (featln=="r") rbbnlnc=rbbncol;
        else rbbnlnc=Var["FOREGROUND_COLOR"];
-       PrintRPT(sprintf("************PLOTRIBBONS***%s:%s-%s(%s):%s\n",feat,bori,bend,featln,rbbnlnc));
+       # PrintRPT(sprintf("************PLOTRIBBONS***%s:%s-%s(%s):%s\n",feat,bori,bend,featln,rbbnlnc));
        if (featln~/b|r/) {
          goprt=0;
          if (ish) {
@@ -2261,7 +2273,10 @@ function PLOTRibbons(SEQ,ish) {
      }  # for i 
    }  # for l
  }  # function
-function PLOTFEATURES(SEQ,isq) {
+function PLOTFEATURES(SEQ,isq    ,tt) {
+ if (ish) tt="HORIZONTAL"; else tt="VERTICAL";
+ PrintRPT("*** PLOT FEATURES * " tt " AXES\n");
+ #
  printf "%% (label) ElmFont bcol ori end Box\n"
  printf "%% color ori end dir Arrow %% dir: 0=left 1=rigth\n"
  printf "%% jcol ori end Join\n"
@@ -2362,7 +2377,10 @@ function PLOTFEATURES(SEQ,isq) {
      } # for
    }  # if GENE_LABEL
 }  # function
-function PLOTREMARKS(SEQ,isr) {
+function PLOTREMARKS(SEQ,isr    ,tt) {
+ if (ish) tt="HORIZONTAL"; else tt="VERTICAL";
+ PrintRPT("*** PLOT Remarks * " tt " AXES\n");
+ #
  for (h=1;h<=LAST[SEQ];h++) {
    xtname=SEQ SUBSEP "-" SUBSEP h
    bori=SQ_ORI[xtname]; bend=SQ_END[xtname];
@@ -2409,7 +2427,7 @@ function PLOTLINES() {
  if (hlcnt>0 && OnOff(Var["Display_RIBBON"])) {
    for (h=0;h<hlcnt;h++) { 
      PRTLine(HLary[h], HLary[h], HLWary[h], HLWcol[h]);
-     PrintRPT(sprintf("************PLOTLINES***%s:%s-%s(%s):%s\n",h,HLary[h],HLary[h],HLWary[h],HLWcol[h]));
+     # PrintRPT(sprintf("************PLOTLINES***%s:%s-%s(%s):%s\n",h,HLary[h],HLary[h],HLWary[h],HLWcol[h]));
      delete HLary[h]; delete HLary[h]; delete HLWary[h]; delete HLWcol[h];
      }
    }
@@ -2427,13 +2445,13 @@ function PRTLineV(ori,end,pct,col) {
    }
  }
 function prtReport() {
-  printf "\n**************************************\n" | "cat 1>&2"
-  printf ">>>>>>>> VARIABLE DEFINITIONS <<<<<<<<\n" | "cat 1>&2"
-  printf "\nPlot X-Limits: %s %s - Plot Y-Limits: %s %s\n",OSQ1,ESQ1,OSQ2,ESQ2 | "cat 1>&2"
-  for (names in Def) {
-    printf "%-25s : %8s <<\n", names, Var[names] | "sort 1>&2"
-    }
-  close("sort 1>&2")
+  # printf "\n**************************************\n" | "cat 1>&2"
+  # printf ">>>>>>>> VARIABLE DEFINITIONS <<<<<<<<\n" | "cat 1>&2"
+  # printf "\nPlot X-Limits: %s %s - Plot Y-Limits: %s %s\n",OSQ1,ESQ1,OSQ2,ESQ2 | "cat 1>&2"
+  # for (names in Var) {
+  #   printf "%-25s : %8s <<\n", names, Var[names] | "sort 1>&2"
+  #   }
+  # close("sort 1>&2")
   printf "\n**************************************\n" | "cat 1>&2"
   printf ">>>>>>>> FEATURES DEFINITIONS <<<<<<<<\n\n" | "cat 1>&2"
   for (names in FTindex) { 
@@ -2442,40 +2460,40 @@ function prtReport() {
       FTputJoin[names],FTputArrow[names],FTputLabel[names],FTLineWidth[names], 
       FTColor[names],FTRbnColor[names] | "cat 1>&2" 
     }
-  print "There are "FTcounter" features..." | "cat 1>&2"
+  print "There are "FTcounter" featuresdefined..." | "cat 1>&2"
   printf "\n************************************************\n" | "cat 1>&2"
   printf ">>>>>>>> Sequences Defined on gff Files <<<<<<<<\n\n" | "cat 1>&2"
   inc=0
   for (names in SEQNAME) printf "Sequence %s : %s\n",inc++,SEQNAME[names] | "cat 1>&2"
-  printf "\n**********************************\n" | "cat 1>&2"
-  printf ">>>>>>>> Genomic Data Set <<<<<<<<\n" | "cat 1>&2"
+  printf "\n*************************************\n" | "cat 1>&2"
+  printf ">>>> DATA SHOWN: APLOT+PiP BOXES <<<<\n" | "cat 1>&2"
   for (seq in SEQNAME) {
     if (seq==SEQ1LABEL || seq==SEQ2LABEL || seq==ALIGNname)
          printf "\nSequence: %s ### USED on PLOT.\n", seq | "cat 1>&2"
     else printf "\nSequence: %s ### NOT USED on PLOT.\n", seq | "cat 1>&2"
-    for (i=1;i<=LAST[seq];i++) {
-      name=seq SUBSEP "-" SUBSEP i
-      if (!ChkFT(FEATURE[name])) {
-        printf "%-10s - %-10s - %-10s - %8s - %8s - %4s - %3s - %3s - %-10s - %-10s\n",   
-        name, SOURCE[name], FEATURE[name], SQ_ORI[name], SQ_END[name], 
-        SCORE[name], STRAND[name], FRAME[name], GROUP[name], LABEL[name] | "cat 1>&2"
-        }
-      }
+    # for (i=1;i<=LAST[seq];i++) {
+    #   name=seq SUBSEP "-" SUBSEP i
+    #   if (!ChkFT(FEATURE[name])) {
+    #     printf "%-10s - %-10s - %-10s - %8s - %8s - %4s - %3s - %3s - %-10s - %-10s\n",   
+    #     name, SOURCE[name], FEATURE[name], SQ_ORI[name], SQ_END[name], 
+    #     SCORE[name], STRAND[name], FRAME[name], GROUP[name], LABEL[name] | "cat 1>&2"
+    #     }
+    #   }
     }
-  printf "\n*****************************************\n" | "cat 1>&2"
-  printf ">>>>>>>> EXTRA Features Data Set <<<<<<<<\n" | "cat 1>&2"
+  printf "\n********************************************\n" | "cat 1>&2"
+  printf "  >>>> DATA SHOWN in EXTRA BOX <<<<<<<<<<<<<<<\n" | "cat 1>&2"
   for (seq in SEQNAME) {
     if (seq==SEQ1LABEL || seq==SEQ2LABEL || seq==ALIGNname)
          printf "\nSequence: %s ### USED on PLOT.\n", seq | "cat 1>&2"
     else printf "\nSequence: %s ### NOT USED on PLOT.\n", seq | "cat 1>&2"
-    for (i=1;i<=LAST[seq];i++) {
-      name=seq SUBSEP "-" SUBSEP i
-      if (ChkFT(FEATURE[name])) {
-        printf "%s: %-10s - %-10s - %-10s - %8s - %8s - %4s - %3s - %3s - %-10s - %-10s\n",  
-        i, name, SOURCE[name], FEATURE[name], SQ_ORI[name], SQ_END[name], 
-        SCORE[name], STRAND[name], FRAME[name], GROUP[name], LABEL[name] | "cat 1>&2"
-        }
-      }
+    # for (i=1;i<=LAST[seq];i++) {
+    #   name=seq SUBSEP "-" SUBSEP i
+    #   if (ChkFT(FEATURE[name])) {
+    #     printf "%s: %-10s - %-10s - %-10s - %8s - %8s - %4s - %3s - %3s - %-10s - %-10s\n",  
+    #     i, name, SOURCE[name], FEATURE[name], SQ_ORI[name], SQ_END[name], 
+    #     SCORE[name], STRAND[name], FRAME[name], GROUP[name], LABEL[name] | "cat 1>&2"
+    #     }
+    #   }
     }
  }
 #
