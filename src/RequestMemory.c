@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.6 2003-11-05 15:02:10 eblanco Exp $  */
+/*  $Id: RequestMemory.c,v 1.7 2004-01-27 16:19:34 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -177,6 +177,18 @@ packEvidence* RequestMemoryEvidence()
   return(p);
 }
 
+HSP* RequestNewHSP()
+{
+  HSP* p;
+
+  /* New HSP */
+  if ((p = (HSP *) malloc(sizeof(HSP))) == NULL)
+    printError("Not enough space to hold one new HSP");
+
+  return(p);
+}
+
+
 /* Allocating memory for blast HSPs (homology information) */
 packHSP* RequestMemoryHomology()
 {
@@ -194,17 +206,17 @@ packHSP* RequestMemoryHomology()
 
   /* For each (strand,frame) a list of HSPs will be used */
   if ((p->sPairs = 
-       (HSP **) calloc(HowMany, sizeof(HSP*))) == NULL)
+       (HSP ***) calloc(HowMany, sizeof(HSP**))) == NULL)
     printError("Not enough memory: general array of HSPs");
 
   for(i=0; i<HowMany; i++)
     if ((p->sPairs[i] = 
-		 (HSP *) calloc(MAXHSP, sizeof(HSP))) == NULL)
-      printError("Not enough space: individual array of HSPs");  
+		 (HSP **) calloc(MAXHSP, sizeof(HSP*))) == NULL)
+      printError("Not enough space: individual array of pointers to HSP");  
   
   /* Counters */
   if ((p->nSegments =
-       (int*) calloc(HowMany, sizeof(int)))  == NULL)
+       (long*) calloc(HowMany, sizeof(long)))  == NULL)
     printError("Not enough memory: HSP global counter (frame/strand)");
 
   /* Set counters */
@@ -273,7 +285,7 @@ packExternalInformation* RequestMemoryExternalInformation()
   if (SRP)
 	{
 	  if ((p->iSegments =
-		   (int*) calloc(HowMany, sizeof(int)))  == NULL)
+		   (long*) calloc(HowMany, sizeof(long)))  == NULL)
 		printError("Not enough memory: HSP partial counter (frame/strand)");
 	  
 	  /* Set counters */
@@ -332,6 +344,12 @@ gparam* RequestMemoryParams()
 
   if ((gp->AcceptorProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: acceptor profile");
+
+  if ((gp->PolyPTractProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: acceptor Poly Pyrimidine Tract profile");
+
+  if ((gp->BranchPointProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: acceptor Branch Point profile");
 
   if ((gp->DonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: donor profile");
