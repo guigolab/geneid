@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $
+% $Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $
 %
 \usepackage{noweb,multicol}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -250,7 +250,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \sctn{Introduction}
 
-*** Cite here pip-plot, dotter and other dotplot tools
+*** Cite here Vista, PiP-maker, Dotter and other dotplot tools
 
 <<HIDE: BiBTeX references>>=
 @ 
@@ -294,6 +294,9 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 \caption[Future modes of {\prog}.]{\label{fig:othermodes} Input, output and main code blocks are represented in this flowchart for the ``Interactive'', ``Graphic'' and ``Web/CGI'' versions of {\prog}.}
 \end{center}
 \end{figure}
+
+
+\newpage
 
 \sctn{Main program definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -361,7 +364,7 @@ This is the main loop for the {\prog} ``Filter'' mode:
 &parse_custom_files;
 
 %Vars = ();
-&map_vars_layout;
+&merge_custom_vars;
 
 %GFF_DATA = %ALN_DATA = (); # Reseting DATA
 &parse_GFF_files;
@@ -397,9 +400,9 @@ Some info about the program itself.
 <<Global Constants>>=
 my ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.4 $', #'
-     '$Date: 2001-08-25 13:58:56 $', #'
-     '$Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $', #'
+     '$Revision: 1.5 $', #'
+     '$Date: 2001-08-27 17:47:43 $', #'
+     '$Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -486,6 +489,9 @@ short description are listed here:
 
 @
 
+
+\newpage
+
 \sctn{Variable Definition and Customization} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The functions described in this section process each GFF-record, each custom definition or each command-line options, not only loading the internal variables, also checking for the correctness of the user input in each case.
@@ -537,7 +543,7 @@ We also build from this structure, making easier variable maintenance because de
 \label{sec:tmpdefaults}
 <<map default vars to defaults working copy>>=
 %Defaults = ();
-foreach my $sct (keys %{$DefaultVars{$sct}}) {
+foreach my $sct (keys %DefaultVars) {
     foreach my $vnm (keys %{$DefaultVars{$sct}}) {
         $Defaults{$sct}{$vnm} = $DefaultVars{$sct}{$vnm}{'VALUE'};
 	}; # foreach $vnm
@@ -993,20 +999,27 @@ NO_CUSTOM_FOUND =>
 <<Parsing Custom Files>>=
 sub varscheck() {
     my ($flag,$class,$rec) = @_;
-    defined($class) || 
+    defined($DefaultVars{$class}) || 
         (&warn('SECTION_NOT_DEF',$F),return $F);
 	my $_var = \%{$DefaultVars{$class}};
     defined($_var->{$$rec[1]}) || 
         (&warn('VAR_NOT_DEFINED',$F,$class,$$rec[1]),return $F);
     &checkvarvalues($_var->{$$rec[1]}{'TYPE'},\$$rec[2],$$rec[1]) || return $F;
     $flag && do {
-        push @{$CustomVars{$class}{$$rec[1]}}, [ &find_regexp($$rec[0]), $$rec[2] ];
+        defined(@{ $CustomVars{$class}{$$rec[1]} }) || do {
+            @{ $CustomVars{$class}{$$rec[1]} } = ();
+        };
+        push @{ $CustomVars{$class}{$$rec[1]} }, 
+             ( &find_regexp($$rec[0]), $$rec[2] );
         return $T;
 	};
     $CustomVars{$class}{$$rec[1]} = $$rec[2];
     return $T;
 } # varscheck
 @ 
+
+\label{sec:DATAtriadarray}
+For the same variable name, say here [[ $$rec[1] ]], we will have more than one setting (for the same element or not). This requirement force us to save element-value pairs (and a third field which tells us if element contains a regular expression that must not to be matched or not). The array will preserve the input ordering of each new setting for the same variable. We want this behaviour, as the global definitions must precede specific ones in the custom files. 
 
 <<warnings - parsing custom files>>=
 SECTION_NOT_DEF =>
@@ -1040,22 +1053,68 @@ VARTYPE_NOT_DEFINED =>
 \item Check [[ $$rec[0] ]] and determine its structure: [[element]], [[element@id]], [[/regexp/]], [[/regexp/@id]], [[!/regexp/]], [[!/regexp/@id]] and finally [[*]] and [[!*]] as special shorthands for [[/.*/]] and [[!/.*/]] respectively.
 }
 
-If an element appears not to be a regular expression we transform it to '[[^element$]]' before returning it.
+If an element appears not to be a regular expression we transform it
+to '[[^element$]]' before returning it. [[$not_flg]] and [[$id_flg]]
+will be set to a true value in case that input string contains a
+'[[!]]' as first character ([[!/regexp/]], [[!/regexp/@id]] and
+[[!*]]) and that an ID is given ([[element@id]], [[/regexp/@id]] and
+[[!/regexp/@id]]), respectively. Both flags will be helpful to
+determine what test we have to perform in order to know if we have to
+set the variable value for a GFF element (see
+section~\ref{sec:mapcustoms}, page~\pageref{sec:mapcustoms}). For
+[[$id_flg]], the true value will consist on the feature identifier, so
+that we do not need to introduce a new field in the array.
 
 <<Parsing Custom Files>>=
 sub find_regexp() {
     my $string = $_[0];
-    my ($not_flg, $regexp_flg, $new_string, $tmpstr);
+    my ($not_flg, $id_flg, $regexp_flg, $new_string, $tmpstr, $tmpid);
     $not_flg = $regexp_flg = $F;
+    $id_flg = $NULL;
     $string =~ s/^!//o && ($not_flg = $T); # not_regexp is true
     <<does string contain a regular expression>>
-    $regexp_flg || $new_string = '^'.$string.'$';
-    return ($not_flg, $new_string);
+    $regexp_flg || $new_string = '^'.$string.'$'; #'
+    return ($not_flg, $id_flg, $new_string);
 } # find_regexp
+@
+
+<<Global Constants>>= 
+$NULL = '+@+NULL+@+';
 @ 
 
+Two steps are needed for parsing element fields. We must ensure first that there is an [[@id]] feature delimiter in the element field and, after removing that delimiter, check if we have a regular expression or not.  
+
 <<does string contain a regular expression>>=
-#
+$string =~ /^(.*)(?:@(.*?))?$/ && (($tmpstr, $tmpid) = ($1,$2));
+
+@ 
+
+<<HIDE: testing regular expressions for element@id>>=
+As we can see in the perl script below, reversing the regular expression is a good choice. Further information on sexeger (reversed regexes) can be found at \url|http://www.perl.com/pub/2001/05/01/expressions.html| and \url|http://www.pobox.com/~japhy/|.
+
+perl -ne ' 
+    chomp;
+    $a=$b=undef;
+    (reverse($_) =~ /^([^\/]*?)(?:\@)(.*)$/o) && 
+        ($a=reverse($2),$b=reverse($1));
+    defined($b) && 
+        (print ">>> \"$a\" \@ \"".($b?$b:"NIL")."\"\n") ||
+            (print ">>> \"$_\"\n"); '
+
+jhkjfhgkjdf@one
+>>> "jhkjfhgkjdf" @ "one"
+/.*@@.*/
+>>> "/.*@@.*/"
+ffgdg
+>>> "ffgdg"
+jhkjfhgkjdf@
+>>> "jhkjfhgkjdf" @ "NIL"
+/.*@@.*/@kk
+>>> "/.*@@.*/" @ "kk"
+*@yoyo
+>>> "*" @ "yoyo"
+!@@@@@lio
+>>> "!@@@@" @ "lio"
 @ 
 
 \subsctn{Customization variable values validation}
@@ -1307,6 +1366,9 @@ NOT_A_FONTSIZE =>
   $Warn."\"\%s\" is not a valid font-size for \"\%s\" variable.",
 @
 
+
+\newpage
+
 \sctn{Customization Variables Description} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\label{sec:customvardesc}
 % \subsctn{Command-line options}
@@ -1382,7 +1444,7 @@ before continuing to run the program in a silent mode.
 The following variables define the boundary/clipping coordinates for each sequence, so you can select a region to be displayed in the {\ps} output.
 
 <<command-line options>>=
-"S|sequence1-start=i"  => \$CmdLineVars{"sequence1_start"}, # SEQUENCE1_ORIGIN # Zoom_SEQUENCE1_ORIGIN
+"S|sequence1-start=i"  => \$CmdLineVars{LAYOUT}{"sequence1_start"}, # SEQUENCE1_ORIGIN # Zoom_SEQUENCE1_ORIGIN
 @ 
 <<command-line help>>=
 -S, --sequence1-start <pos>   Sets X-sequence first nucleotide.
@@ -1394,7 +1456,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"E|sequence1_end=i"  => \$CmdLineVars{"sequence1_end"}, # SEQUENCE1_END    # Zoom_SEQUENCE1_END
+"E|sequence1_end=i"  => \$CmdLineVars{LAYOUT}{"sequence1_end"}, # SEQUENCE1_END    # Zoom_SEQUENCE1_END
 @ 
 <<command-line help>>=
 -E, --sequence1-end <pos>     Sets X-sequence last nucleotide.
@@ -1406,7 +1468,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"s|sequence2_start=i"  => \$CmdLineVars{"sequence2_start"}, # SEQUENCE2_ORIGIN # Zoom_SEQUENCE2_ORIGIN
+"s|sequence2_start=i"  => \$CmdLineVars{LAYOUT}{"sequence2_start"}, # SEQUENCE2_ORIGIN # Zoom_SEQUENCE2_ORIGIN
 @ 
 <<command-line help>>=
 -s, --sequence2-start <pos>   Sets Y-sequence first nucleotide.
@@ -1418,7 +1480,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"e|sequence2_end=i"  => \$CmdLineVars{"sequence2_end"}, # SEQUENCE2_END    # Zoom_SEQUENCE2_END
+"e|sequence2_end=i"  => \$CmdLineVars{LAYOUT}{"sequence2_end"}, # SEQUENCE2_END    # Zoom_SEQUENCE2_END
 @ 
 <<command-line help>>=
 -e, --sequence2-end <pos>     Sets Y-sequence last nucleotide.
@@ -1430,7 +1492,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"Z|zoom"   => \$CmdLineVars{"zoom"}, # ZOOM_Zoom; Zoom_Marks
+"Z|zoom"   => \$CmdLineVars{LAYOUT}{"zoom"}, # ZOOM_Zoom; Zoom_Marks
 @ 
 <<command-line help>>=
 -Z, --zoom [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
@@ -1444,7 +1506,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"z|zoom-area"   => \$CmdLineVars{"zoom_area"}, # ZOOM_Area
+"z|zoom-area"   => \$CmdLineVars{LAYOUT}{"zoom_area"}, # ZOOM_Area
 @ 
 <<command-line help>>=
 -z, --zoom-area [ [-S <pos>] [-E <pos>] [-s <pos>] [-e <pos>] ]
@@ -1458,8 +1520,8 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"G|display-grid"   => \$CmdLineVars{"display_grid"}, # Display_GRID
-# "g"    => \$CmdLineVars{""}, # Display_GRID
+"G|display-grid"   => \$CmdLineVars{LAYOUT}{"display_grid"}, # Display_GRID
+# "g"    => \$CmdLineVars{LAYOUT}{""}, # Display_GRID
 @ 
 <<command-line help>>=
 -G, --display-grid   Switches 'on' grid (default is 'off').
@@ -1471,8 +1533,8 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"P|display-percent-box"   => \$CmdLineVars{"display_percent_box"}, # Display_PERCENT-BOX
-# "p"    => \$CmdLineVars{""}, # Display_PERCENT-BOX
+"P|display-percent-box"   => \$CmdLineVars{LAYOUT}{"display_percent_box"}, # Display_PERCENT-BOX
+# "p"    => \$CmdLineVars{LAYOUT}{""}, # Display_PERCENT-BOX
 @ 
 <<command-line help>>=
 -P, --display-percent-box   Switches 'on' Percent box (default is 'off').
@@ -1484,8 +1546,8 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"Q|display-extra-box"   => \$CmdLineVars{"display_extra_box"}, # Display_EXTRA-BOX
-# "q"    => \$CmdLineVars{""}, # Display_EXTRA-BOX
+"Q|display-extra-box"   => \$CmdLineVars{LAYOUT}{"display_extra_box"}, # Display_EXTRA-BOX
+# "q"    => \$CmdLineVars{LAYOUT}{""}, # Display_EXTRA-BOX
 @ 
 <<command-line help>>=
 -Q, --display-extra-box   Switches 'on' Extra box (default is 'off').
@@ -1497,7 +1559,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"T|title=s"  => \$CmdLineVars{"title"}, # TITLE
+"T|title=s"  => \$CmdLineVars{LAYOUT}{"title"}, # TITLE
 @ 
 <<command-line help>>=
 -T, --title <Title>   Definning Plot Title.
@@ -1509,7 +1571,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"t|subtitle=s"  => \$CmdLineVars{"subtitle"}, # SUBTITLE
+"t|subtitle=s"  => \$CmdLineVars{LAYOUT}{"subtitle"}, # SUBTITLE
 @ 
 <<command-line help>>=
 -t, --subtitle <Subtitle>   Definning Plot SubTitle.
@@ -1521,7 +1583,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"X|x-label=s"  => \$CmdLineVars{"x-axis_label"}, # X-Axis_LABEL
+"X|x-label=s"  => \$CmdLineVars{LAYOUT}{"x-axis_label"}, # X-Axis_LABEL
 @ 
 <<command-line help>>=
 -X, --x-label <X-Label>   Definning X-Axis Label.
@@ -1533,7 +1595,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"Y|y-label=s"  => \$CmdLineVars{"y-axis_label"}, # Y-Axis_LABEL
+"Y|y-label=s"  => \$CmdLineVars{LAYOUT}{"y-axis_label"}, # Y-Axis_LABEL
 @ 
 <<command-line help>>=
 -Y, --y-label <Y-Label>   Defining Y-Axis Label.
@@ -1546,7 +1608,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 
 
 <<command-line options>>=
-"L|percent-box-label=s"  => \$CmdLineVars{"percent_box_label"}, # Percent-Box_LABEL
+"L|percent-box-label=s"  => \$CmdLineVars{LAYOUT}{"percent_box_label"}, # Percent-Box_LABEL
 @ 
 <<command-line help>>=
 -L, --percent-box-label <PBox-Label>   Definning Percent-Box Label.
@@ -1558,7 +1620,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"l|extra-box-label=s"  => \$CmdLineVars{"extra_box_label"}, # Extra-Box_LABEL
+"l|extra-box-label=s"  => \$CmdLineVars{LAYOUT}{"extra_box_label"}, # Extra-Box_LABEL
 @ 
 <<command-line help>>=
 -l, --extra-box-label <XBox-Label>   Definning Extra-Box Label.
@@ -1570,8 +1632,8 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"R|xy-axes-scale"   => \$CmdLineVars{"xy_axes_scale"}, # XY_AXES_Same-SIZE
-# "r"    => \$CmdLineVars{""}, # XY_AXES_Same-SIZE
+"R|xy-axes-scale"   => \$CmdLineVars{LAYOUT}{"xy_axes_scale"}, # XY_AXES_Same-SIZE
+# "r"    => \$CmdLineVars{LAYOUT}{""}, # XY_AXES_Same-SIZE
 @ 
 <<command-line help>>=
 -R, --xy-axes-scale   X and Y axes having same scale (default is 'off').
@@ -1583,7 +1645,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"W|aln-scale-width"    => \$CmdLineVars{"alignment_scale_width"}, # APlotLine_ScaleWidth; APlotLine_GroupScore
+"W|aln-scale-width"    => \$CmdLineVars{LAYOUT}{"alignment_scale_width"}, # APlotLine_ScaleWidth; APlotLine_GroupScore
 @ 
 <<command-line help>>=
 -W, --aln-scale-width   Scaling score on width for Aplot line.
@@ -1595,7 +1657,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"w|aln-scale-color"    => \$CmdLineVars{"alignment_scale_color"}, # APlotLine_ScaleGrey; APlotLine_GroupScore
+"w|aln-scale-color"    => \$CmdLineVars{LAYOUT}{"alignment_scale_color"}, # APlotLine_ScaleGrey; APlotLine_GroupScore
 @ 
 <<command-line help>>=
 -w, --aln-scale-color   Scaling score on color for Aplot line.
@@ -1607,7 +1669,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"B|background-color=s"  => \$CmdLineVars{"background_color"}, # BACKGROUND_COLOR
+"B|background-color=s"  => \$CmdLineVars{LAYOUT}{"background_color"}, # BACKGROUND_COLOR
 @ 
 <<command-line help>>=
 -B, --background-color <color>   Background color.
@@ -1619,7 +1681,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"F|foreground-color=s"  => \$CmdLineVars{"foreground_color"}, # FOREGROUND_COLOR
+"F|foreground-color=s"  => \$CmdLineVars{LAYOUT}{"foreground_color"}, # FOREGROUND_COLOR
 @ 
 <<command-line help>>=
 -F, --foreground-color <color>   Foreground color.
@@ -1631,7 +1693,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"D|aplot-box-color=s"  => \$CmdLineVars{"aplot_box_color"}, # APlotBox_BqGCOLOR
+"D|aplot-box-color=s"  => \$CmdLineVars{LAYOUT}{"aplot_box_color"}, # APlotBox_BqGCOLOR
 @ 
 <<command-line help>>=
 -D, --aplot-box-color <color>   Aplot main box background color.
@@ -1643,7 +1705,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"C|percent-box-color=s"  => \$CmdLineVars{"percent_box_color"}, # PercentBox_BGCOLOR
+"C|percent-box-color=s"  => \$CmdLineVars{LAYOUT}{"percent_box_color"}, # PercentBox_BGCOLOR
 @ 
 <<command-line help>>=
 -C, --percent-box-color <color>   Percent box background color.
@@ -1655,7 +1717,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"c|extra-box-color=s"  => \$CmdLineVars{"extra_box_color"}, # ExtraBox_BGCOLOR
+"c|extra-box-color=s"  => \$CmdLineVars{LAYOUT}{"extra_box_color"}, # ExtraBox_BGCOLOR
 @ 
 <<command-line help>>=
 -c, --extra-box-color <color>   Extra box background color.
@@ -1667,7 +1729,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"A|alignment-name=s"  => \$CmdLineVars{"alignment_name"}, # Align_NAME
+"A|alignment-name=s"  => \$CmdLineVars{LAYOUT}{"alignment_name"}, # Align_NAME
 @ 
 <<command-line help>>=
 -A, --alignment-name <SeqXName:SeqYName>   Defining which alignment is going to be plotted 
@@ -1680,7 +1742,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"N|x-sequence-name=s"  => \$CmdLineVars{"x-sequence_name"}, # X-Sequence_NAME
+"N|x-sequence-name=s"  => \$CmdLineVars{LAYOUT}{"x-sequence_name"}, # X-Sequence_NAME
 @ 
 <<command-line help>>=
 -N, --x-sequence-name <SeqXName>   Defining which sequence is going to be plotted at X-axes.
@@ -1692,7 +1754,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"n|y-sequence-name=s"  => \$CmdLineVars{"y-sequence_name"}, # Y-Sequence_NAME
+"n|y-sequence-name=s"  => \$CmdLineVars{LAYOUT}{"y-sequence_name"}, # Y-Sequence_NAME
 @ 
 <<command-line help>>=
 -n, --y-sequence-name <SeqYName>   Defining which sequence is going to be plotted at Y-axes.
@@ -1704,7 +1766,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"K|show-ribbons=s"   => \$CmdLineVars{"show_ribbons"}, # Show_Ribbons (NLRB)
+"K|show-ribbons=s"   => \$CmdLineVars{LAYOUT}{"show_ribbons"}, # Show_Ribbons (NLRB)
 @ 
 <<command-line help>>=
 -K, --show-ribbons <ribbon_type> Force Ribbons for all features on axes:
@@ -1717,7 +1779,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"I|page-size=s"  => \$CmdLineVars{"page_size"}, # PAGE_SIZE
+"I|page-size=s"  => \$CmdLineVars{LAYOUT}{"page_size"}, # PAGE_SIZE
 @ 
 <<command-line help>>=
 -I, --page-size <page_size> Set page size for plot (default is a4).
@@ -1729,7 +1791,7 @@ The following variables define the boundary/clipping coordinates for each sequen
 @
 
 <<command-line options>>=
-"a|show-credits"   => \$CmdLineVars{"show_credits"}, # Show_Credits
+"a|show-credits"   => \$CmdLineVars{LAYOUT}{"show_credits"}, # Show_Credits
 @ 
 <<command-line help>>=
 -a, --show-credits  Switch off $PROGRAM CopyRight line on plot.
@@ -1742,10 +1804,10 @@ The following variables define the boundary/clipping coordinates for each sequen
 
 <<Changes in command-line options>>=
 # "i"  => # Page_Orientation
-# "F"  => \$CmdLineVars{""}, # Function_COLOR;Display_FUNCTION;Display_EXTRA-BOX
-# "f"  => \$CmdLineVars{""}, # Display_FUNCTION; Display_EXTRA-BOX
-# "M"  => \$CmdLineVars{""}, # Display_GFF; Display_EXTRA-BOX
-# "m"  => \$CmdLineVars{""}, # Display_GFF-ReverseOrder; Display_EXTRA-BOX
+# "F"  => \$CmdLineVars{LAYOUT}{""}, # Function_COLOR;Display_FUNCTION;Display_EXTRA-BOX
+# "f"  => \$CmdLineVars{LAYOUT}{""}, # Display_FUNCTION; Display_EXTRA-BOX
+# "M"  => \$CmdLineVars{LAYOUT}{""}, # Display_GFF; Display_EXTRA-BOX
+# "m"  => \$CmdLineVars{LAYOUT}{""}, # Display_GFF-ReverseOrder; Display_EXTRA-BOX
 @
 
 <<default layout vars values>>=
@@ -1933,6 +1995,9 @@ Y_Sequence_NAME  /
 for the figure, by default showing \pr{align\_name} in the form of
 'sequence1\_name x sequence2\_name'.
 @
+
+
+\newpage
 
 \sctn{Reading GFF records} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2464,8 +2529,9 @@ We declare here the main variable containing all the GFF data, and auxiliary var
 
 <<Global Vars>>=
 my (%GFF_DATA,$seq_COUNT);
-my ($_counter,$_prop,$_element) = (0,1,2);
-my ($_order,$_elemNum,$_ori,$_end) = (0,1,2,3);
+my ($_counter,$_prop,$_element) = (0..2);
+my ($_order,$_elemNum,$_ori,$_end) = (0..3);
+my ($_fttype,$_ftprop,$_ftname,$_ftid,$_ftori,$_ftend,$_ftsco,$_ftfrm) = (0..7);
 @ 
 
 \label{func:loadgffvar}
@@ -2492,6 +2558,7 @@ sub set_var_defaults() {
 
 We can set default properties of GFF elements in two ways: making a reference to the default properties hash for that element, as shown in the [[<<P.I.D: set reference to all properties>>]], or reference each variable from the properties hash to a new key, as described in [[<<P.I.D: set reference for each property>>]].
 
+\label{sec:DATAdefaultvars}
 <<P.I.D: set reference to all properties>>=
 $$varhash = \%{$Defaults{$sect}};
 @
@@ -2499,7 +2566,7 @@ $$varhash = \%{$Defaults{$sect}};
 <<P.I.D: set reference for each property>>=
 foreach my $nm (keys %{$DefaultVars{$sect}}) {
     $$varhash{$nm} = \$DefaultVars{$sect}{$nm}{'VALUE'};
-	};
+}; # foreach $nm
 @
 
 We choose the first approach, and we will replace the hash reference by the keys with references to defaults if needed when setting variables from custom parameters for a given GFF element (see section~\ref{sec:mapcustoms}, page~\pageref{sec:mapcustoms}). That choice will save memory used by the elements properties if user does not customize any of the element properties, but requires a temporary default variable (due to the special structure of the [[%DefaultVars]] hash which contains not only default variable values but also variable type), named [[%Defaults]] and defined in section~\ref{sec:tmpdefaults}, page~\pageref{sec:tmpdefaults}.
@@ -2632,21 +2699,15 @@ label_tag                  => { TYPE => 'STRING' , VALUE => 'id'   },
 Using this attribute makes easy to set specific properties for one or more elements. Remember that tags are not case-sensitive.
 @
 
-<<Global Vars>>=
-my %SOURCE = ( # this is a temporary hash name (to implement later)
-               align_tag  => 'target',
-               vector_tag => 'vector',
-               label_tag  => 'id',
-               );
-@ 
-
 % \subsctn{Parsing extended GFF format}\label{sec:parseXTRA}
 
-The following record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing data that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be defined by users with the variable '[[%SOURCE]]'. .
+The following record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing data that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be redefined by users from custom files.
 
+\begin{comment}
 \todo{
 \item [[%SOURCE]] is a \textbf{provisional varname} that must be replaced by the corresponding [[$DefaultVars{LAYOUT}]], [[$CustomVars{LAYOUT}]] or [[$CmdLineVars{LAYOUT}]]. Those 'LAYOUT' variables must be set before reading GFF input files because some settings are used by parser functions.
 } % todo
+\end{comment}
 
 \subsubsctn{Parsing alignment records}
 
@@ -2676,36 +2737,219 @@ sub load_GFF_vector() {
 my @vect_ary;
 @ 
 
+
+\newpage
+
 \sctn{Mapping custom features to figure elements} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsctn{Mapping customization to Layout features}
-
-We define here [[&map_vars_layout]] to combine LAYOUT parameters from [[%DefaultVars]], [[%CmdLineVars]] and [[%CustomVars]] before start parsing GFF input files. 
-
 \todo{
-\item Planning: 2001/08/27
+\item Set variable mapping for [[%ALN_DATA]] elements.
 } % todo
-<<Features Setting>>=
-sub map_vars_layout() {
-    &header("SETTING CUSTOM VALUES TO LAYOUT ELEMENTS");
 
-    &footer("VALUES SET for LAYOUT ELEMENTS");
-} # map_vars_layout
+\subsctn{Mapping customization variables to working variable}
+
+We define here [[&merge_custom_vars]] to combine customization
+parameters from [[%CmdLineVars]] and [[%CustomVars]] into [[%Vars]]
+before start parsing GFF input files. The main reason to do this
+variable mapping at this point is that there are some LAYOUT variables
+that are used when parsing the GFF records (basically
+[[align_tag]],[[vector_tag]] and [[label_tag]]). Another reason is
+that from now on, we only have to take care of a single variable,
+which summarizes all the settings from different inputs, say here the
+program built-in defaults, the custom files and the command-line
+options. The values set on command-line override those from custom
+files and those set from custom files override defaults. We are going
+to concatenate each element-value pairs for each variable (not for the
+layout variables but for all the rest), so that we will have a
+variable name reference linked to a list of element-value pairs, which
+will be used when mapping those values for a given element in the data
+variables. When loading variables, defaults are set to [[%Defaults]]
+(see section~\ref{sec:DATAdefaultvars},
+page~\pageref{sec:DATAdefaultvars}), so we only take care here of
+those values that are redefined by user (we do not use [[%DefaultVars]] because we already checked variable values and [[%Defaults]] variable has a simpler structure than it).
+
+<<Features Setting>>=
+sub merge_custom_vars() {
+    &header("MAPPING CUSTOMIZATION INPUTS TO MAIN VARS");
+    <<setting layout variables>>
+    <<setting non-layout variables>>
+    &footer("VALUES SET for MAIN VARS");
+} # merge_custom_vars
 @ 
 
+Layout variables are simpler than the rest, they are defined as a key-value pair, so that mapping is straightforward.
+
+<<setting layout variables>>=
+foreach my $var_name (%{ $Defaults{LAYOUT} }) {
+    defined($CmdLineVars{LAYOUT}{$var_name}) && do {
+        $Vars{LAYOUT}{$var_name} = $CmdLineVars{LAYOUT}{$var_name};
+        next;
+    };
+    defined($CustomVars{LAYOUT}{$var_name}) && do {
+        $Vars{LAYOUT}{$var_name} = $CustomVars{LAYOUT}{$var_name};
+        next;
+    };
+    $Vars{LAYOUT}{$var_name} = $Defaults{LAYOUT}{$var_name};
+}; # foreach $var_name
+@ 
+
+For the rest of variable classes (SEQUENCE, SOURCE, STRAND, GROUP and
+FEATURE), which are defined as an element-key-value triad, we can have
+more than one element and with a different value settings, for each
+key (say here variable name). We store that information in a list. We
+know that every three values of the list we have a variable definition
+for a given element and if it is a negation or not (i.e., see
+section~\ref{sec:DATAtriadarray}, page~\pageref{sec:DATAtriadarray},
+for its definition in [[%CustomVars]]). The structure of that subset
+of the list is squetched here:\\
+
+\centerline{\ldots , 'negate regexp flag', 'element regular expression', 'variable value' , \ldots}
+
+<<setting non-layout variables>>=
+foreach my $_sec (keys %Defaults) {
+    $_sec eq 'LAYOUT' && next; # skip layout variables
+    foreach my $_var (keys %{$Defaults{$_sec}}) {
+        defined($CustomVars{$_sec}{$_var}) && do {
+            push @{ $Vars{$_sec}{$_var} }, @{ $CustomVars{$_sec}{$_var} };
+        }; # defined($CustomVars{$_sec}{$_var})
+        defined($CmdLineVars{$_sec}{$_var}) && do {
+            push @{ $Vars{$_sec}{$_var} }, @{ $CmdLineVars{$_sec}{$_var} };
+        }; # defined($CustomVars{$_sec}{$_var})        
+	}; # foreach $vnm
+}; # foreach $sct
+@ 
+
+Here we load the custom files definitions before the command-line ones, because for those variables in [[%Vars]] ordering is important, and later definitions in the array will override previous ones. 
+
 \subsctn{Mapping customization to GFF elements}
+
+Once we have set the variables from different sources as we did in the previous section, and once we loaded the GFF data from input files, we have to assign the corresponding settings to each GFF element. Defaults were already set as a reference to [[%Defaults]] hash (see section~\ref{sec:DATAdefaultvars}, page~\pageref{sec:DATAdefaultvars}). Perhaps this will be the most time consuming function of the program as we have to traverse all the variables for each class (if they are set in [[%Vars]], which will save much of that time if they are not defined) throught all the GFF elements.
 \label{sec:mapcustoms}
 
-\todo{
-\item Planning: 2001/08/27
-} % todo
 <<Features Setting>>=
 sub map_vars_data() {
     &header("SETTING CUSTOM VALUES TO GFF ELEMENTS");
-
+    foreach my $v_sec (keys %Vars) {
+        $v_sec eq 'LAYOUT' && next; # skip layout variables
+        foreach my $v_var (keys %{$Vars{$v_sec}}) {
+            my @v_values = @{ $Vars{$v_sec}{$v_var} }
+            for (my $foo = 0; $foo < $#v_values; $foo+=4) {
+                my ($neg_flg, $id_flg, $reg_exp, $the_value, $name_test);
+                ($neg_flg, $id_flg, $reg_exp, $the_value) = @v_values[$foo..($foo + 3)];
+                $name_test = $neg_flg ? \&match_regexp_neg : \&match_regexp;
+                <<set reference to GFF data>>
+            }; # for $foo
+	    }; # foreach $vnm
+    }; # foreach $sct
     &footer("VALUES SET for GFF ELEMENTS");
 } # map_vars_data
 @ 
+
+We have to set the properties hash corresponding to the GFF elements present in the current section (say here SEQUENCE, SOURCE, STRAND, GROUP or FEATURE). To do that we have to define a reference to that anonymous hash and also retrieve the element string ([[$element]]) to check if it match to the regular expression ([[$reg_exp]]) which determines if the variable of that element is re-assigned to the current value ([[$the_value]]).
+
+<<set reference to GFF data>>=
+foreach my $seq (keys %GFF_DATA) {
+    $v_sec eq 'SEQUENCE' && do {
+        my $seq_ref = \@{ $GFF_DATA{$seq} };
+        &does_feat_match($seq,$reg_exp,$seq_ref,
+                         $_prop,$v_sec,$v_var,$the_value);
+        next;
+    };
+    <<set reference to GFF data: SOURCES>>
+}; # foreach my $seq
+@ 
+
+<<set reference to GFF data: SOURCES>>=
+foreach my $src (keys $seq_ref->[$_element]) {
+    $v_sec eq 'SOURCE' && do {
+        my $src_ref = \@{ $seq_ref->[$_element]{$src} };
+        &does_feat_match($src,$reg_exp,$src_ref,
+                         $_prop,$v_sec,$v_var,$the_value);
+        next;
+    };
+    <<set reference to GFF data: STRANDS>>
+}; # foreach my $src
+@ 
+
+<<set reference to GFF data: STRANDS>>=
+foreach my $str (keys $src_ref->[$_element]) {
+    $v_sec eq 'STRAND' && do {
+        my $str_ref = \@{ $src_ref->[$_element]{$str} };
+        &does_feat_match($str,$reg_exp,$str_ref,
+                         $_prop,$v_sec,$v_var,$the_value);
+        next;
+    };
+    <<set reference to GFF data: GROUPS>>
+}; # foreach my $src
+@ 
+
+<<set reference to GFF data: GROUPS>>=
+foreach my $grp (keys $str_ref->[$_element]) {
+    $v_sec eq 'GROUP' && do {
+        my $grp_ref = \@{ $str_ref->[$_element]{$grp} };
+        &does_feat_match($grp,$reg_exp,$grp_ref,
+                         $_prop,$v_sec,$v_var,$the_value);
+        next;
+    };
+    <<set reference to GFF data: FEATURES>>
+}; # foreach my $src
+@ 
+
+<<set reference to GFF data: FEATURES>>=
+foreach my $feat (0..$#{ $grp_ref->[$_element] }) {
+    my ($feat_ref, $ft_name, $ft_id, $ft_vars);
+    $feat_ref = \@{ $grp_ref->[$_element][$feat] };
+    ($ft_name, $ft_id) = ($feat_ref->[$_ftname],$feat_ref->[$_ftid]);
+    # check ID
+    $id_flg ne $NULL && {
+        $ft_id ~ /^$id_flg$/o && do {
+            &does_feat_match($ft_name,$reg_exp,$feat_ref,
+                             $_ftprop,$v_sec,$v_var,$the_value);
+        }; # $ft_id ~ /^$id_flg$/o
+        next;
+    }; # $id_flg ne $NULL
+    # check regexp
+    &does_feat_match($ft_name,$reg_exp,$feat_ref,
+                     $_ftprop,$v_sec,$v_var,$the_value);
+}; # foreach my $src
+@
+
+<<Features Setting>>=
+sub does_feat_match() {
+    my ($name,$rexp,$gffref,$prop,$sct,$var,$value) = @_;
+    &$name_test($name,$rexp) && do {
+        (ref($gffref->[$prop]) eq 'REF') &&
+            &set_all_defaults($gffref, $sct);
+        $gffref->[$prop]{$var} = $value;
+    };
+} # does_feat_match
+@ 
+
+The following two functions are checking if a GFF element match or not a given regular expression (minimal expression consists in a GFF element string). They return a true/flase result that decides if a variable is set or not for a given GFF element.
+
+<<Features Setting>>=
+sub match_regexp() {
+    $_[0]  ~ /$_[1]/o && return $T;
+    return $F;
+} # match_regexp
+sub match_regexp_neg() {
+    $_[0] !~ /$_[1]/o && return $T;
+    return $F;
+} # match_regexp_neg
+@ 
+
+<<Features Setting>>=
+sub set_all_defaults() {
+    my ($the_hash,$the_sec) = @_;
+    $the_hash->[$_prop] = ();
+    foreach my $vnm (keys %{$Defaults{$the_sec}}) {
+        $the_hash->[$_prop]{$vnm} = \$Defaults{$the_sec}{$vnm};
+    }; # foreach $nm
+} # set_all_defaults
+@ 
+
+
+\newpage
 
 \sctn{Sorting GFF features} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2918,6 +3162,8 @@ We choose between those two functions (both defining which fields to order and t
 my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
 @
 
+
+\newpage
 
 \sctn{Obtaining {\ps} output} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -3144,6 +3390,9 @@ sub ps_trailer() {
 +++EOF+++
 } # ps_trailer
 @
+
+
+\newpage
 
 \sctn{CMYK color definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:CMYKcolordef}
@@ -3567,6 +3816,9 @@ Those are the colors defined in $PROGRAM:
     verydarkblue, darkblue, blue, lightblue and verylightblue.
 @
 
+
+\newpage
+
 \sctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:PAGEdef}
 
@@ -3663,6 +3915,9 @@ The following page sizes are available: from A0 to A10,
 from B0 to B10, 10x14, executive, folio, ledger, legal, 
 letter, quarto, statement and tabloid.
 @
+
+
+\newpage
 
 \sctn{{\ps} main program and routines} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -4245,6 +4500,9 @@ end % aplot dict
 %
 @
 
+
+\newpage
+
 \sctn{Reporting Program Execution} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsctn{Signal trapping}
@@ -4812,7 +5070,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.4 2001-08-25 13:58:56 jabril Exp $
+# $Id: gff2aplot.nw,v 1.5 2001-08-27 17:47:43 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
