@@ -1,0 +1,34 @@
+#
+# color_tests_SCMAP.rc
+#
+# L #
+#
+show_grid=off
+show_ps_warnings=off
+x_sequence_coords=0..1450
+y_sequence_coords=0..950
+aplot_xy_same_length=off
+#
+show_aplot_x_ticks=off
+show_aplot_y_ticks=off
+#
+x_label_fontsize=25pt
+y_label_fontsize=25pt
+#
+group_label_fontsize=0pt
+#
+feature_label_font=helvetica-bold
+feature_label_fontsize=10pt
+feature_x_label_angle=45
+feature_y_label_angle=270
+#
+# F #
+#
+*::show_feature_label=on
+*@rawcolor::hide=on
+#
+# G #
+#
+*::show_group_label=off
+*::group_shape=none
+### EOF ###
