@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadHSP.c,v 1.2 2004-01-27 16:16:20 eblanco Exp $  */
+/*  $Id: ReadHSP.c,v 1.3 2004-04-23 16:12:26 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -82,7 +82,7 @@ packHSP* SelectHSP(packExternalInformation* external,
   return(p);
 }
 
-/* Input blast HSPs from external file that must be previously sorted */
+/* Input blast HSPs from external file */
 long ReadHSP (char* FileName, packExternalInformation* external)
 {
   long i,j;
@@ -107,7 +107,6 @@ long ReadHSP (char* FileName, packExternalInformation* external)
   char Locusname[LOCUSLENGTH];
   char mess[MAXSTRING];
   long pos1, pos2;
-  long posPrev[MAXNSEQUENCES];
   float score;
   char strand;
   short frame;
@@ -126,7 +125,6 @@ long ReadHSP (char* FileName, packExternalInformation* external)
   i = 0;
   three = 0;
   for(i=0; i<MAXNSEQUENCES; i++)
-	posPrev[i] = 0;
   
   while(fgets(line,MAXLINE,file)!=NULL)
     {
@@ -221,17 +219,6 @@ long ReadHSP (char* FileName, packExternalInformation* external)
 				  printError(mess);
 				}
 			}
-
-		  /* Sorting-check: previous HSP position must be <= current HSP */
-		  if (posPrev[a] > pos1)
-			{
-			  sprintf(mess,"Order violation: homology records (starting position %ld):\n-->%s\n",
-					  pos1,
-					  lineCopy);  
-			  printError(mess);  
-			}
-		  else
-			posPrev[a] = pos1;
 
 		  /* Allocating current hsp in packHSP */
 		  /* a) Forward sense */
