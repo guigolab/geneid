@@ -12,7 +12,7 @@
 # -. defaults
 # --------------------------------------------------
 NF=0;                # number of input files
-SGP2=bin             # binaries, scripts and params in SGP2
+SGP2=/home/guigor00/research/humus/sgp2/bin       # binaries, scripts and params in SGP2
 TMP=/tmp              # temporal files
 SGPTMP=$TMP/sgp2_$$  # prefix for temporal files
 trap 'rm -f $SGPTMP; exit 1' 0 1 2 3 9 15 
