@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.10 2001-12-18 16:23:47 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.11 2002-02-22 13:41:06 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -43,12 +43,13 @@ extern float EW;
 extern char* optarg;
 extern int optind;
 
-char* USAGE="Incorrect usage:\nNAME\n\tgeneid 1.1 - a program to predict genes in genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz] [-D] [-Z]\n\t\t[-G] [-X] [-M] [-m]\n\t\t[-WC] [-o]\n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight] [-P ParameterFile]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\n\n";
+char* USAGE="NAME\n\tgeneid - a program to predict genes in genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz] [-D] [-Z]\n\t\t[-G] [-X] [-M] [-m]\n\t\t[-WC] [-o]\n\t\t[-O gff_exons_file]\n\t\t[-R gff_evidences-file]\n\t\t[-S gff_similarity_regions-file]\n\t\t[-E exonweight] [-P ParameterFile]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.1a\n";
 
 void printHelp()
 {
-  printf("\tgeneid 1.1: Setup options\n");
-  printf("\t------------------------\n\n");
+  printf(USAGE);
+
+  printf ("OPTIONS\n");
   
   printf("\t-b: Output Start codons\n");
   printf("\t-d: Output Donor splice sites\n");
@@ -84,6 +85,11 @@ void printHelp()
   printf("\t-B: Display memory required to execute geneid given a sequence\n");
   printf("\t-v: Verbose. Display info messages\n");
   printf("\t-h: Show this help\n");
+
+  printf ("AUTHORS\n");
+  printf("\tgeneid v 1.1 has been developed by Enrique Blanco and Roderic Guigo.\n\tParameter files have been computed by G. Parra. Any bug or suggestion\n\tcan be reported to geneid@imim.es\n");
+
+  printf("\n\n\n");
 }
 
 void printDTD()
