@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.11 2000-08-12 01:16:00 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.12 2000-08-12 01:36:24 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln";
@@ -21,15 +21,14 @@ use Getopt::Long;
 Getopt::Long::Configure("bundling","pass_through");
 
 my ( $verbose_flg, $bit_flg, $ids_flg,  # GETOPTs FLAGS
-	 $aln_flg, $aplot_flg, $hsp_flg, $hsp_too_flg,
+	 $aplot_flg, $hsp_flg, $hsp_too_flg,
 	 $only_Q_flg, $only_S_flg, $to_file, $to_file_flg,
 	 $help_flg, $debug_flg, $cutoff_flg, $stdin_flg
-	 ) = (0,0,0,0,0,0,0,0,0,0,0,0,0,"-",1);
+	 ) = (0,0,0,0,0,0,0,0,0,0,0,0,"-",1);
 
 GetOptions( "Q|query-only"      => \$only_Q_flg  ,
 			"S|subject-only"    => \$only_S_flg  ,
 			"A|aplot"           => \$aplot_flg   ,
-			"P|pairwise"        => \$aln_flg     , # show only alignment not GFF
 			"H|print-hsps:s"    => \$hsp_flg     ,
 			"b|bit-score"       => \$bit_flg     ,
 			"i|identity-score"  => \$ids_flg     ,
@@ -48,7 +47,6 @@ $vrbopt = " -v" if $verbose_flg;
 $scoreopt = " -i" if $ids_flg; # 'identity' score from BLAST
 $scoreopt = " -b" if $bit_flg; # 'bit' score from BLAST
 $only_S_flg = 0 if $only_Q_flg;
-$aln_flg = 0 if $aplot_flg;
 $hsp_flg = 1 if $hsp_flg eq ""; # Print also HSPs from input
 $hsp_too_flg = 1 if $hsp_flg;
 $to_file = 1 if $to_file eq ""; # Write output to file
@@ -60,17 +58,17 @@ $to_file_flg = 1 if $to_file;
 ##############################################################################
 
 my $parseblast = "parseblast"; # $blastgff = "blast2gff -g"
-my $pb_PROG   = "$parseblast$vrbopt$scoreopt -nFQ";
-   # 'n'o comments # 'F'ullgff better then 'G'ff # Append se'Q'uence to GFF
+my $pb_PROG   = "$parseblast$vrbopt$scoreopt -nF";
+   # 'n'o comments # 'F'ullgff better then 'G'ff
    # only SUBJECT "-nGbS" # only ALN "-nPW"
 my ( $blast_file, $blast_alnQ, $blast_alnS, $hsp_file, @data, $FLH);
 my ( %hsp, %sr, @project_query, @project_subject,   # HSPs RECORDS
      @stack, %opened, $coord, $score, $index,
 	 $codeQ, $codeS, $query_lbl, $sbjct_lbl,
 	 );
-my ( $sr_count, $ori, $end, $sco, $idx, $rec, $dif, # SRs RECORDS
+my ( $sr_count, $ori, $end, $sco, $idx, $rec,       # SRs RECORDS
 	 $which_proj, $prj_flg, $Q_ori, $Q_end,
-	 $S_ori, $S_end, $Q_seq, $S_seq, $srs, %sr_ctr,
+	 $S_ori, $S_end, $srs, %sr_ctr,
 	 );
 my ( $current_coord, $last_coord, $current_score,   # Building SRs
 	 $last_score, $current_index, $last_index, $rcd, $w_sr, $lines,
@@ -124,7 +122,6 @@ COMMAND-LINE OPTIONS:
     -Q, --query-only     : just print QUERY SRs (default both).
     -S, --subject-only   : just print SUBJECT SRs (default both).
     -A, --aplot          : prints output in APLOT "GFF" format.
-    -P, --pairwise       : print pairwise alignment for each SR.
     -H, --print-hsps     : also includes HSPs in output (in GFF format).
                            As "-W" option, see below, a non-mandatory
                            parameter can be especified to send this
@@ -314,14 +311,12 @@ print STDERR <<EndOfPrt;
   END_Q    : $record->{END_Q}    
   STRAND_Q : $record->{STRAND_Q} 
   FRAME_Q  : $record->{FRAME_Q}  
-  SEQ_Q    : $record->{SEQ_Q}
 
   |  SUBJECT  : $record->{SUBJECT}
   |  START_S  : $record->{START_S}
   |  END_S    : $record->{END_S}
   |  STRAND_S : $record->{STRAND_S}
   |  FRAME_S  : $record->{FRAME_S}
-  |  SEQ_S    : $record->{SEQ_S}
 
 #
 EndOfPrt
@@ -335,7 +330,6 @@ sub new_hsp {
 		END_Q    => $_[4],  END_S    => $_[11],
 		STRAND_Q => $_[6],  STRAND_S => $_[15],
 		FRAME_Q  => $_[7],  FRAME_S  => $_[17],
-		SEQ_Q    => $_[19], SEQ_S    => $_[21],
 		SCORE    => $_[5],  E_VALUE  => $_[13],
 		INDEX    => $index,
 	};
@@ -497,46 +491,27 @@ EndOfPrt
 #
 sub prt_Q_fullgff {
 print { $FLH } <<"EndOfFullGFF";
-$srs->{QUERY}\t$PROGRAM\tsr\t$srs->{START_Q}\t$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_Q}\t$srs->{FRAME_Q}\tTarget \"$srs->{SUBJECT}\"\t$srs->{START_S}\t$srs->{END_S}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_S}\tFrame $srs->{FRAME_S}\t\#Projection $srs->{PROJECTION} \#Seq-Query: $srs->{SEQ_Q} \#Seq-Subject: $srs->{SEQ_S}
+$srs->{QUERY}\t$PROGRAM\tsr\t$srs->{START_Q}\t$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_Q}\t$srs->{FRAME_Q}\tTarget \"$srs->{SUBJECT}\"\t$srs->{START_S}\t$srs->{END_S}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_S}\tFrame $srs->{FRAME_S}\t\#Projection $srs->{PROJECTION}
 EndOfFullGFF
 } # END_SUB: prt_Q_fullgff
 #
 sub prt_S_fullgff {
 print { $FLH } <<"EndOfFullGFF";
-$srs->{SUBJECT}\t$PROGRAM\tsr\t$srs->{START_S}\t$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_S}\t$srs->{FRAME_S}\tTarget \"$srs->{QUERY}\"\t$srs->{START_Q}\t$srs->{END_Q}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_Q}\tFrame $srs->{FRAME_Q}\t\#Projection $srs->{PROJECTION} \#Seq-Subject: $srs->{SEQ_S} \#Seq-Query: $srs->{SEQ_Q}
+$srs->{SUBJECT}\t$PROGRAM\tsr\t$srs->{START_S}\t$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_S}\t$srs->{FRAME_S}\tTarget \"$srs->{QUERY}\"\t$srs->{START_Q}\t$srs->{END_Q}\tE_value $srs->{E_VALUE}\tStrand $srs->{STRAND_Q}\tFrame $srs->{FRAME_Q}\t\#Projection $srs->{PROJECTION}
 EndOfFullGFF
 } # END_SUB: prt_S_fullgff
 #
 sub prt_Q_aplot {
 print { $FLH } <<"EndOfAPLOT";
-$srs->{QUERY}:$srs->{SUBJECT}\t$PROGRAM\tsr\t$srs->{START_Q}:$srs->{START_S}\t$srs->{END_Q}:$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_Q}:$srs->{STRAND_S}\t$srs->{FRAME_Q}:$srs->{FRAME_S}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION} \#Seq-Query: $srs->{SEQ_Q} \#Seq-Subject: $srs->{SEQ_S}
+$srs->{QUERY}:$srs->{SUBJECT}\t$PROGRAM\tsr:sr\t$srs->{START_Q}:$srs->{START_S}\t$srs->{END_Q}:$srs->{END_S}\t$srs->{SCORE}\t$srs->{STRAND_Q}:$srs->{STRAND_S}\t$srs->{FRAME_Q}:$srs->{FRAME_S}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION}
 EndOfAPLOT
 } # END_SUB: prt_Q_aplot
 # 
 sub prt_S_aplot {
 print { $FLH } <<"EndOfAPLOT";
-$srs->{SUBJECT}:$srs->{QUERY}\t$PROGRAM\tsr\t$srs->{START_S}:$srs->{START_Q}\t$srs->{END_S}:$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_S}:$srs->{STRAND_Q}\t$srs->{FRAME_S}:$srs->{FRAME_Q}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION} \#Seq-Subject: $srs->{SEQ_S} \#Seq-Query: $srs->{SEQ_Q}
+$srs->{SUBJECT}:$srs->{QUERY}\t$PROGRAM\tsr:sr\t$srs->{START_S}:$srs->{START_Q}\t$srs->{END_S}:$srs->{END_Q}\t$srs->{SCORE}\t$srs->{STRAND_S}:$srs->{STRAND_Q}\t$srs->{FRAME_S}:$srs->{FRAME_Q}\t$srs->{INDEX_HSP}:$srs->{INDEX_SR}\t\#E_value $srs->{E_VALUE} \#Projection $srs->{PROJECTION}
 EndOfAPLOT
 } # END_SUB: prt_S_aplot
-# 
-sub prt_pairwise {
-	my ($ml,$a,$b,$x,$y,$hsq,$heq,$hss,$hes);
-	($a,$b) = ($srs->{QUERY},$srs->{SUBJECT});
-	$ml = max(length($a),length($b));
-	($a,$b) = (&fill_right($a,$ml," "),&fill_right($b,$ml," "));
-	($hsq,$heq,$hss,$hes) = ($srs->{START_Q},$srs->{END_Q},$srs->{START_S},$srs->{END_S});
-	$ml = &max(length($hsq),length($heq),length($hss),length($hes));
-	($x,$y) = ( &fill_left($hsq,$ml," ")." ".&fill_left($heq,$ml," ")." $srs->{STRAND_Q} $srs->{FRAME_Q}",
-				&fill_left($hss,$ml," ")." ".&fill_left($hes,$ml," ")." $srs->{STRAND_S} $srs->{FRAME_S}");
-
-	$a .= " Q $x $srs->{SEQ_Q}\n";
-	$b .= " S $y $srs->{SEQ_S}\n";
-	$which_proj eq "QUERY" && do {
-		print { $FLH } "\#\n$a$b";
-		return;
-	};
-	print { $FLH } "\#\n$b$a";
-} # END_SUB: prt_pairwise
 #
 sub print_SRs {
 	my $record;
@@ -563,14 +538,12 @@ print STDERR <<EndOfSRs
   END_Q    : $record->{END_Q}    
   STRAND_Q : $record->{STRAND_Q} 
   FRAME_Q  : $record->{FRAME_Q}  
-  SEQ_Q    : $record->{SEQ_Q}
 
   |  SUBJECT  : $record->{SUBJECT}
   |  START_S  : $record->{START_S}
   |  END_S    : $record->{END_S}
   |  STRAND_S : $record->{STRAND_S}
   |  FRAME_S  : $record->{FRAME_S}
-  |  SEQ_S    : $record->{SEQ_S}
 
 #
 EndOfSRs
@@ -587,7 +560,6 @@ sub new_SR {
 		END_Q     => $Q_end,           END_S    => $S_end,
 		STRAND_Q  => $rec->{STRAND_Q}, STRAND_S => $rec->{STRAND_S},
 		FRAME_Q   => $rec->{FRAME_Q},  FRAME_S  => $rec->{FRAME_S},
-		SEQ_Q     => $Q_seq,           SEQ_S    => $S_seq,
 		SCORE     => $sco,             E_VALUE  => $rec->{E_VALUE},
 		INDEX_HSP => $idx,
 		INDEX_SR  => $sr_count,
@@ -595,7 +567,6 @@ sub new_SR {
 } # END_SUB: new_SR
 #
 sub get_sr { # GETS SRstart SRend HSPscore HSPindex
-	my $seq_ori;
 	($ori,$end,$sco,$idx) = @_;
 	$rec = \%{ $hsp{$idx} };
 	# print STDERR "##GREP##*****\n##GREP##********** @_ :: $stv \n##GREP##*****\n" if $debug_flg;
@@ -603,25 +574,18 @@ sub get_sr { # GETS SRstart SRend HSPscore HSPindex
   MKVARS: {
 	  $which_proj eq "QUERY" && do {
 		  ($Q_ori,$Q_end) = ($ori,$end);
-		  $seq_ori = $Q_ori   - $rec->{START_Q};
-		  $S_ori   = $seq_ori + $rec->{START_S};
-		  $dif     = $end - $ori + 1;
-		  $S_end   = $dif - 1 + $rec->{START_S};
+		  $S_ori = $Q_ori - $rec->{START_Q} + $rec->{START_S};
+		  $S_end = $end - $ori + $rec->{START_S};
 		  last MKVARS;
 	  }; # else $which_proj eq "SUBJECT" 
 	  ($S_ori,$S_end) = ($ori,$end);
-	  $seq_ori = $S_ori   - $rec->{START_S};
-	  $Q_ori   = $seq_ori + $rec->{START_Q};
-	  $dif     = $end - $ori + 1;
-	  $Q_end   = $dif - 1 + $rec->{START_Q};
+	  $Q_ori = $S_ori - $rec->{START_S} + $rec->{START_Q};
+	  $Q_end = $end - $ori + $rec->{START_Q};
   };
-	$Q_seq = substr($rec->{SEQ_Q},$seq_ori,$dif);
-	$S_seq = substr($rec->{SEQ_S},$seq_ori,$dif);
 	&new_SR($rec);
 	
     $srs = \%{ $sr{$sr_count} };
   PRTOUT: {
-	  $aln_flg    && (&prt_pairwise, last PRTOUT);
 	  $which_proj eq "QUERY" && do {
 		  $aplot_flg  && (&prt_Q_aplot, last PRTOUT);
 		  &prt_Q_fullgff; last PRTOUT;
@@ -805,7 +769,7 @@ sub test_projection {
 	  $sr_ctr{$which_proj}{$stv} = 0;
 	  defined(@{ $lines->[$c] }) && do {
 		  $lnc = $#{ $lines->[$c] };
-		  print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n" if $verbose_flg;
+		  print STDERR "*** $w_sr \n*** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n" if $verbose_flg;
 		  # print STDERR "##GREP## ".("*"x73)."\n##GREP## *** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n##GREP## ".("*"x73)."\n" if $debug_flg;
 		  $op = 0;
 		LINES: for $n (0..$lnc) {
@@ -833,7 +797,7 @@ sub test_projection {
 		  # print STDERR "##GREP## \n" if $debug_flg;
 		  next MAIN;
 	  }; # defined(@{ $lines[$c] })
-	  print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $verbose_flg;	
+	  print STDERR "*** $w_sr \n*** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $verbose_flg;	
 	  # print STDERR "##GREP## *** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $debug_flg;	
   }; # foreach :MAIN: $c (1..$max_frame_num)
 } # END_SUB: test_projection 
