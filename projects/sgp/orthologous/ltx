@@ -1,0 +1,137 @@
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+# $Id: ltx,v 1.1 2001-10-01 14:09:27 jabril Exp $
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; } 1>&2;
+# only LaTeXing
+#
+# NOWEB Document Variables
+#
+WORK="$HOME/development/projects/sgp/orthologous/" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="ORTHOLOGOUS_dataset" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
+# ORTHOLOGOUS Dataset Variables
+#
+DATASETS="/projects/datasets/orthologous";
+ANALYSIS="/projects/sgp/orthologous" ;
+SGPBIN="/projects/sgp/bin" ;
+SGPPARAM="$SGPBIN/param" ;
+#
+ID="$DATASETS/id" ;
+HSAP="$DATASETS/id.Hsap" ;
+MMUS="$DATASETS/id.Mmus" ;
+export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
+#
+SPLICING="/projects/splicing/chr22" ;
+export SPLICING ;
+#
+# BASIC Shell Functions
+#
+ChckDirs ()
+{
+  #
+  # USAGE: ChckDirs <path_list>
+  #
+  for name in "$@" ;
+    do {
+         [ -d "$name" ] && 
+           echo "### Directory Already Exist: $name" ||
+             mkdir --verbose $name ;
+      } ;
+    done ;
+}
+#
+renameSEQS ()
+{
+  #
+  # USAGE: renameSEQS ls_command reg_exp substitution_value
+  # Example: renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA'
+  #
+  $1 | while read n ; 
+    do {
+      k=`echo $n | sed "s/$2/$3/"` ;
+      [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
+    } ;
+    done ;
+}
+#
+MergeFiles ()
+{
+  #
+  # USAGE: MergeFiles <working_path>
+  #
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.Hsap ] && 
+    /bin/rm --force --verbose $1/all.Hsap ;
+  [ -e $1/all.Mmus ] &&
+    /bin/rm --force --verbose $1/all.Mmus ;
+  echo "### WORKING on HUMAN LOCI..." ;
+  cat $HSAP | while read locus ;
+    do { cat $1/$locus >> $1/all.Hsap ; } ; done ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  cat $MMUS | while read locus ;
+    do { cat $1/$locus >> $1/all.Mmus ; } ; done ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  cat $1/all.Hsap $1/all.Mmus > $1/all ;
+}
+#
+MergeGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path> <species_id> <flag>
+  #
+  flag=0 ;
+  [ "$3" = "1" ] && flag=1 ; 
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.$2 ] && 
+    /bin/rm --force --verbose $1/all.$2 ;
+  echo "### WORKING on $2 LOCI..." ;
+  c=0 ;
+  while read locus ;
+    do {
+         let c=c+1 ;
+         [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
+         [ $flag -eq 1 ] &&
+             cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
+         gawk 'BEGIN{OFS="\t"}
+             ($1 !~ /^#/ && $3 != "Gene") {
+                 print $0;
+             }' $1/$locus | sort +3n -5 - >> $1/all.$2 ; 
+       } ;
+    done < $DATASETS/id.$2 ;
+}
+#
+MergeALLGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path>
+  #
+  echo "### WORKING on HUMAN LOCI..." ;
+  MergeGFF $1 Hsap 1 ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  MergeGFF $1 Mmus 1 ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  echo '#$ ' | cat $1/all.Hsap - $1/all.Mmus > $1/all ;
+}
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; } 1>&2;
+#
+exit 0

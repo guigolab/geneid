@@ -1,0 +1,4536 @@
+% -*- mode: Noweb; noweb-code-mode: perl-mode; tab-width: 4 -*-
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: ORTHOLOGOUS_dataset.tex,v 1.1 2001-10-01 14:09:27 jabril Exp $
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+%\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+%\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+\usepackage{rotating}
+%\usepackage{multicol}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+
+% noweb options
+\noweboptions{smallcode}
+\def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+\let\nwdocspar=\par                    %
+ 
+% Colors for gff2ps
+\input ColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\subsubsubsctn}[1]{\paragraph{#1}\vskip 1ex}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[8SEQ ORTHOLOGOUS]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[8SEQ ORTHOLOGOUS]}}
+
+% defs
+\def\biop{\textsc{BioPerl}}
+\def\rptm{\textsc{RepeatMasker}}
+\def\bl{\textsc{Blast}}
+\def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
+\def\ps{\textsc{PostScript}}
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
+\def\sgp{\textsc{sgp}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{aplot}}
+\def\data{\textbf{Human/Mouse Orthologous}}
+
+% Setting text for footers and headers
+
+\def\tit{\textsc{ORTHOLOGOUS Dataset}}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textbf{Genome Informatics Research Lab}}
+\fancyfoot[CO,CE]{\small\textsl{Abril, JF}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\nwfilename{/home/ug/jabril/development/projects/sgp/orthologous//ORTHOLOGOUS_dataset.nw}\nwbegindocs{1}\nwdocspar
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\textsc{\textbf{\Huge Building\\ ORTHOLOGOUS\\[1ex] Dataset}}\\[5ex]
+
+%\textbf{\Large Authors List Here}\\[1ex]
+\textbf{\Large Josep F. Abril}\\[1ex]
+\textbf{\Large Gen\'{\i}s Parra}\\[1ex]
+\textbf{\Large Roderic Guig\'o}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\begin{abstract}
+\begin{center}
+\parbox{0.75\linewidth}{
+} % parbox
+\end{center}
+\end{abstract}
+
+\vfill
+
+\begin{raggedleft}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+% \raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+\end{raggedleft}
+\end{center}
+
+\end{titlepage} %'
+
+%%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{\markboth{}{\thesubsection.\ \textsl{#1}}}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\vfill
+\begin{center}
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.tex,v 1.1 2001-10-01 14:09:27 jabril Exp $$>$ }
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\sctn{Introduction}
+
+Sequence comparisons at nucleotide/aminoacid level among phylogenetically related species would help to produce better annotations and to find new genes, as it has been suggested in the literature. At this moment, in which it has been obtained the first draf of the human genome and the mouse genome project is reaching a good sequence coverage, that approach will we useful in the re-annotation of the current human genes and in the search of novel human genes. 
+\begin{comment}
+Homology between human and mouse sequences serves as a useful guide for identifying genes in both organisms. Additionally, conserved sequences that have no coding potential are good candidates for regulatory elements.
+-- From \url|http://bio.cse.psu.edu/mousegroup/doc.html|
+An annotation of the orthologous test set of genomic sequences and their regulatory regions is available at \url|http://bio.cse.psu.edu/mousegroup/test8/|
+\end{comment}
+
+This document contains the procedures we followed to train our gene-prediction tools in order to find the optimal parameters which raise the most accurate predictions. All the command-line scripts are detailed on the main sections, while stand-alone scripts are described and implemented in the appendixes. There you can also find the results for some of the analysis performed on the sequences. 
+
+\subsctn{Main goals}
+
+\subsctn{Protocol outline}
+
+Here we are drawing the main steps we followed 
+
+\begin{description}
+ \item[Masking Sequences]
+ \item[Homology Search]
+ \item[Gene-Finding]
+ \item[Syntenic Gene-Prediction]
+ \item[Sequence Analysis] \ \\
+   \begin{description}
+    \item[G+C Content]
+    \item[Splice Sites Distribution]
+    \item[Exonic Structure Conservation]
+   \end{description}
+\end{description}
+
+\subsctn{The sequences test set}
+
+It was agreed to test gene-prediction programs on a eight sequences set that are syntenic between human and mouse. They were published at '\url|http://pipeline.lbl.gov/TESTS/|', there is also an active mailing list at {\mthomology}. Table~\ref{tbl:seqnames} lists sequence names, their lengths for human and mouse, and the number of annotated genes contained in each.\\
+
+\begin{comment}
+\nwenddocs{}\nwbegincode{2}\sublabel{NWORT1E-BASD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\endmoddef
+gawk '\{ print $1 \}' $DATASETS/genes.Hsap | sort | uniq -c
+      5 Hsap_BTK
+      2 Hsap_CFTR
+      1 Hsap_DFNA5
+      6 Hsap_ELN
+     11 Hsap_HOXA
+     19 Hsap_KVLQT1
+     93 Hsap_MHC
+      3 Hsap_SIL
+gawk '\{
+        printf "%-12s %6.1f Kb\\n",$1,$2/1000;
+        \}' $DATASETS/length.Hsap $DATASETS/length.Mmus 
+Hsap_BTK       78.9 Kb
+Hsap_CFTR     424.8 Kb
+Hsap_DFNA5    243.3 Kb
+Hsap_ELN      388.7 Kb
+Hsap_HOXA     219.2 Kb
+Hsap_KVLQT1  1279.4 Kb
+Hsap_MHC     2358.6 Kb
+Hsap_SIL      305.9 Kb
+Mmus_BTK       88.9 Kb
+Mmus_CFTR     357.9 Kb
+Mmus_DFNA5    206.4 Kb
+Mmus_ELN      269.2 Kb
+Mmus_HOXA     202.1 Kb
+Mmus_KVLQT1  1013.6 Kb
+Mmus_MHC     1521.2 Kb
+Mmus_SIL      234.4 Kb
+\nwalsodefined{\\{NWORT1E-BASD-2}\\{NWORT1E-BASD-3}\\{NWORT1E-BASD-4}\\{NWORT1E-BASD-5}\\{NWORT1E-BASD-6}\\{NWORT1E-BASD-7}\\{NWORT1E-BASD-8}\\{NWORT1E-BASD-9}\\{NWORT1E-BASD-A}\\{NWORT1E-BASD-B}\\{NWORT1E-BASD-C}\\{NWORT1E-BASD-D}\\{NWORT1E-BASD-E}\\{NWORT1E-BASD-F}}\nwnotused{BASH\ commands}\nwendcode{}\nwbegindocs{3}\nwdocspar
+\end{comment}
+\begin{table}[!ht]
+\begin{center}
+\begin{tabular}{|c|r|r|c|l|}\hline
+\textbf{Region} & \multicolumn{2}{c|}{\textbf{Sequence Length}} & \textbf{\#Gen} & \textbf{Comment} \\\cline{2-3}
+           & \textbf{Human} & \textbf{Mouse} & & \\\hline\hline
+BTK        &   78.9 Kb &   88.9 Kb &  5 &             \\
+CFTR       &  424.8 Kb &  357.9 Kb &  2 & "Gene poor" \\
+DFNA5      &  243.3 Kb &  206.4 Kb &  1 &             \\
+ELN        &  388.7 Kb &  269.2 Kb &  6 & (Elastin)   \\
+HOXA       &  219.2 Kb &  202.1 Kb & 11 & repeat poor \\
+KVLQT1     &    1.3 Gb &    1.0 Gb & 19 &             \\
+MHC        &    2.4 Gb &    1.5 Gb & 93 & repeat rich \\
+SIL        &  305.9 Kb &  234.4 Kb &  3 &             \\ % [1.5ex]
+% Chrom 22   &          &  4 Mb    &    & \raisebox{-2ex}{\shortstack[l]{Ongoing discussion to choose\\GoldenPath or Sanger Center Version}} \\\hline
+\end{tabular}
+\caption{\label{tbl:seqnames} Official human/mouse homologous sequences set.}
+\end{center}
+\end{table}
+
+{\data} database contains those 8 pairs of orthologous sequences from human and mouse. Table~\ref{tbl:genelist} on page~\pageref{tbl:genelist} lists the gene identifiers already annotated for each human sequence.
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Building orthologous dataset}
+
+\subsctn{Downloading Data set}
+
+The first sequence dataset was obtained from '\url|http://waldo.wi.mit.edu/~danb/HomologSeqs/|'. There were some differences between that set and the one used by {\twsc} gene-prediction team, coordinates mapped from ??Sanger?? and Golden Path did not match well. Those differences did our program, {\gnid}, to make predictions that were not comparable to the {\twsc} ones (so after their evaluation our program did pretty bad predictions).
+
+Next dataset was agreed to be available from '\url|http://pipeline.lbl.gov/TESTS/|'. We found ``duplicated'' genes in the original files from that site, in three of the test sequences:
+
+\begin{center}
+\begin{tabular}{cl}
+Hsap\_ELN    & WBSCR5, LIMK1 \\
+Hsap\_KVLQT1 & TSSC4 \\
+Hsap\_MHC    & TAP2, LTB, HSPA1A, HSPA1B, AIF1, TNXA/TNXB \\
+\end{tabular}
+\end{center}
+
+Those duplications correspond to alternative splicing forms, but it is not clear yet how we have to deal with them, so that we have discarded the shorter gene or the gene with less exons (in TNXA/TNXB case, which exons were overlapping ---or the same---, we removed TNXA). 
+
+\subsubsctn{Ian Korf's annotation} 
+
+Fixed annotations were available from \url|http://sapiens.wustl.edu/~ikorf/annotation/|, see table~\ref{tbl:ikorf}. 
+
+\nwenddocs{}\nwbegincode{4}\sublabel{NWORT1E-BASM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\endmoddef
+#
+# DOWNLOADING Ian Korf's Annotation
+pushd $DATASETS/_tmp/20010911.IanKorf ;
+wget -b --no-parent --mirror --tries=0            \\
+     --output-file=download_orthologous.log       \\
+     --no-host-directories --cut-dirs=3 --glob=on \\
+    "http://sapiens.wustl.edu/~ikorf/annotation/blessed/" ;
+# find ./ '(' -name '\\?*' -o -name 'index.html' ')' -exec /bin/rm -v \{\} ';' 
+\nwalsodefined{\\{NWORT1E-BASM-2}\\{NWORT1E-BASM-3}\\{NWORT1E-BASM-4}\\{NWORT1E-BASM-5}\\{NWORT1E-BASM-6}\\{NWORT1E-BASM-7}\\{NWORT1E-BASM-8}\\{NWORT1E-BASM-9}\\{NWORT1E-BASM-A}\\{NWORT1E-BASM-B}\\{NWORT1E-BASM-C}\\{NWORT1E-BASM-D}\\{NWORT1E-BASM-E}}\nwused{\\{NWORT1E-DATF-1}}\nwendcode{}\nwbegindocs{5}\nwdocspar
+
+\begin{center}
+\begin{table}[!ht]
+\begin{center}
+\footnotesize
+\begin{tabular}{rrrrrrrr}
+Name   & Length  & GC     & Repeats & Genes & Annotations    & RefSeqs \\
+\htmladdnormallink{BTK}{http://sapiens.wustl.edu/~ikorf/annotation/BTK.html}
+       &  79 Kb  & 43.5\% & 39.0\%  &  6    & 5 (4 correct)  &  5 (5 correct) \\
+\htmladdnormallink{CD4}{http://sapiens.wustl.edu/~ikorf/annotation/CD4.html}
+       & 267 Kb  & 50.2\% & 42.1\%   & 16    &  0             & 13 (8 correct) \\ % Hs_CD4.14 is knowingly out of frame
+\htmladdnormallink{CFTR}{http://sapiens.wustl.edu/~ikorf/annotation/CFTR.html}
+       & 425 Kb  & 36.7\% & 41.4\%   &  4    &  3 (1 correct) &  2 (1 correct) \\
+\htmladdnormallink{DFNA5}{http://sapiens.wustl.edu/~ikorf/annotation/DFNA5.html}
+       & 243 Kb  & 41.2\% & 37.6\%   &  2    &  2 (0 correct) &  1 (1 correct) \\
+\htmladdnormallink{ELN}{http://sapiens.wustl.edu/~ikorf/annotation/Elastin.html}
+       & 389 Kb  & 51.1\% & 59.3\%   &  6    &  6 (3 correct) &  6 (3 correct) \\
+\htmladdnormallink{HOXA}{http://sapiens.wustl.edu/~ikorf/annotation/HOXa.html}
+       & 219 Kb  & 48.1\% & 21.2\%   & 13    & 11 (11 correct) & 11 (11 correct) \\
+\htmladdnormallink{KVLQT1}{http://sapiens.wustl.edu/~ikorf/annotation/KVLQT1.html}
+      & 1279 Kb  & 55.1\% & 25.6\%   & 20    &  BBB           &  CCC   \\ % Hs_KvLQT1.9 is knowingly out of frame
+MHC   &  XXX Kb  &  YYY\% &  ZZZ\%   & AAA   &  BBB           &  CCC   \\ % too lazy for this one
+\htmladdnormallink{SIL}{http://sapiens.wustl.edu/~ikorf/annotation/SIL.html}
+      &  306 Kb  & 43.2\% & 54.2\%   &  5     & 4 (3 correct)  & 3 (3 correct) \\
+\end{tabular}
+\vskip 1ex
+\begin{minipage}[c]{\linewidth}
+Some notes on the annotated sequences (by Ian Korf):
+\begin{quote}
+\begin{enumerate}
+\item[a] one gene from CD4 and one from KvLQT1 look weird and go out of frame.
+The transcripts are pretty clear on the structure. So either the sequence
+is misassembled or these are SNPs.
+\item[b] KvLQT1 isn't entirely finished. This can lead to gene prediction
+errors.
+\item[c] I think I've done a reasonably good job with fixing the annotations,
+but there may still be errors. Note that the non-gene call around 660K on
+KvLQT1 is a really subtle pseudogene, and not a missed gene.
+\end{enumerate}
+\end{quote}
+\end{minipage}
+
+\caption[Ian Korf's revised annotation]{\label{tbl:ikorf} Ian Korf's revised annotation (from {\small\url|http://sapiens.wustl.edu/~ikorf/annotation/|}). }
+\end{center}
+\end{table}
+\end{center}
+
+\subsubsctn{Latest orthologous datasets update}
+ 
+We downloaded the new datasets, updated on Sep 28, 2001. Files shown in the web page of 'Pipeline' server has the following extensions:
+
+\begin{itemize}
+\item Conserved Regions: {\tt{}\ Hs{\char95}Mm{\char95}main.cns\ }
+\item Annotation
+ \begin{itemize}
+  \item  Ian Korf:  {\tt{}\ Hs.exons.ikorf\ }
+  \item    RefSeq:  {\tt{}\ Hs.exons.refGene\ }
+  \item RefSeqGFF:  {\tt{}\ Hs.exons.refGene.GFF2\ }
+ \end{itemize}
+\item Sequences
+ \begin{itemize}
+  \item Human:  {\tt{}\ Hs.fasta\ }
+  \item Mouse:  {\tt{}\ Mm.fasta\ }
+ \end{itemize}
+\item Masked Sequences (orimasked)
+ \begin{itemize}
+  \item Human:  {\tt{}\ Hs.fasta.masked\ }
+  \item Mouse:  {\tt{}\ Mm.fasta.masked\ }
+ \end{itemize}
+\end{itemize}
+ 
+\nwenddocs{}\nwbegincode{6}\sublabel{NWORT1E-BASM-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-2}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+# DOWNLOADING DataSets
+# pushd $DATASETS/_tmp/20010723.Pipeline ;
+pushd $DATASETS/_tmp/20010928.Pipeline ;
+wget -b --no-parent --mirror --tries=0      \\
+     --output-file=download_orthologous.log \\
+     --no-host-directories --cut-dirs=1     \\
+     'http://pipeline.lbl.gov/TESTS/'
+# find ./ '(' -name '\\?*' -o -name 'index.html' ')' -exec /bin/rm -v \{\} ';' 
+\nwendcode{}\nwbegindocs{7}\nwdocspar
+\begin{comment}
+# 
+# http://zilla.lbl.gov/VISTAS/Chr6/NT_002572/Mm.fasta
+\end{comment}
+
+\subsctn{Preparing files for the analysis}
+
+\subsubsctn{Writing files for sequence IDs}
+
+Here, we assign human and mouse locus names to each sequence in the test set, the locus names will serve as file names either as indexes in some scripts.\\
+
+\begin{table}[!ht]
+\begin{center}
+\begin{tabular}{|@{\quad}c@{\quad}|c}\cline{1-1}
+\begin{minipage}[b]{8cm}
+\vskip 1ex
+\nwenddocs{}\nwbegincode{8}\sublabel{NWORT1E-SeqC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SeqC-1}}}\moddef{Sequence IDs~{\nwtagstyle{}\subpageref{NWORT1E-SeqC-1}}}\endmoddef
+BTK     Hsap_BTK     Mmus_BTK
+CFTR    Hsap_CFTR    Mmus_CFTR
+DFNA5   Hsap_DFNA5   Mmus_DFNA5
+ELN     Hsap_ELN     Mmus_ELN
+HOXA    Hsap_HOXA    Mmus_HOXA
+KVLQT1  Hsap_KVLQT1  Mmus_KVLQT1
+MHC     Hsap_MHC     Mmus_MHC
+SIL     Hsap_SIL     Mmus_SIL
+\nwnotused{Sequence\ IDs}\nwendcode{}\nwbegindocs{9}\nwdocspar
+\nwenddocs{}\nwbegincode{10}\sublabel{NWORT1E-SeqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SeqI-1}}}\moddef{Sequence IDs extra~{\nwtagstyle{}\subpageref{NWORT1E-SeqI-1}}}\endmoddef
+CD4     Hsap_CD4     Mmus_CD4
+\nwnotused{Sequence\ IDs\ extra}\nwendcode{}\nwbegindocs{11}\nwdocspar
+\vskip 1ex
+\end{minipage}
+&
+\hspace{1em}\parbox[b]{5cm}{\caption{\label{tbl:seqIDs} Contents of the main IDs file which was generated tangling this table from the document. We have included \textbf{CD4} to the test set, so we actually have 9 sequences.}}
+\\\cline{1-1}
+\end{tabular}
+\end{center}
+\end{table}
+
+\nwenddocs{}\nwbegincode{12}\sublabel{NWORT1E-BASM-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-3}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+# Extracting IDs from main document.
+notangle -R"Sequence IDs" $WORK/$nwfile.nw > $ID ;
+#
+perl -ane 'print "$F[1]\\n"' $ID > $HSAP ;
+perl -ane 'print "$F[2]\\n"' $ID > $MMUS ;
+#
+cat $HSAP $MMUS > $ID.all ;
+#
+\nwendcode{}\nwbegindocs{13}\nwdocspar
+
+\subsubsctn{Moving and renaming fasta files}
+
+We move fasta files from the download directories to the corresponding ones. Furthermore, we filter them through {\tt{}fasta{\char95}renamer.pl} not only to rename ID record to hold the same string as the file name, but to normalize length for all the sequence records in each fasta file.
+
+\nwenddocs{}\nwbegincode{14}\sublabel{NWORT1E-BASM-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-4}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+# MOVING and RENAMING fasta files
+ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \\
+         $DATASETS/fasta/orimasked $DATASETS/fasta/softmasked \\
+         $DATASETS/annotation $DATASETS/annotation/desc ;
+#
+# Preparing fasta files
+IDIR="$DATASETS/_tmp/InitialSET" ;
+ODIR="$DATASETS/fasta/raw" ;
+while read locus human mouse ;
+  do \{
+    $BIN/fasta_renamer.pl $IDIR/$locus/Hs.fasta \\
+        $DATASETS/annotation/desc/Hsap_$locus Hsap_$locus \\
+        > $ODIR/Hsap_$locus;
+    $BIN/fasta_renamer.pl $IDIR/$locus/Mm.fasta \\
+        $DATASETS/annotation/desc/Mmus_$locus Mmus_$locus \\
+        > $ODIR/Mmus_$locus;
+    \} ;
+  done < $ID ;
+MergeFiles $ODIR ;
+#
+# The same if masked files where provided
+IDIR="$DATASETS/_tmp" ;
+ODIR="$DATASETS/fasta/orimasked" ;
+while read locus human mouse ;
+  do \{
+    $BIN/fasta_renamer.pl $IDIR/$locus/Hs.fasta.masked \\
+        $DATASETS/annotation/desc/Hsap_$locus.msk Hsap_$locus \\
+        > $ODIR/Hsap_$locus;
+    $BIN/fasta_renamer.pl $IDIR/$locus/Mm.fasta.masked \\
+        $DATASETS/annotation/desc/Mmus_$locus.msk Mmus_$locus \\
+        > $ODIR/Mmus_$locus;
+    \} ;
+  done < $ID ;
+MergeFiles $ODIR ;
+#
+\nwendcode{}\nwbegindocs{15}\nwdocspar
+
+\subsubsctn{Getting lengths from description files}
+
+\nwenddocs{}\nwbegincode{16}\sublabel{NWORT1E-BASM-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-5}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+IDIR="$DATASETS/annotation/desc" ;
+multicat ()
+\{
+  cat "$@" | while read n ;
+    do \{
+      cat $DATASETS/annotation/desc/$n ;
+      \} ;
+    done;
+\}
+multicat $HSAP | gawk '\{printf "%-12s%8s\\n",$1,$3\}' - > $DATASETS/length.Hsap;
+multicat $MMUS | gawk '\{printf "%-12s%8s\\n",$1,$3\}' - > $DATASETS/length.Mmus;
+\nwendcode{}\nwbegindocs{17}\nwdocspar
+
+\subsctn{Masking fasta sequences}
+
+\nwenddocs{}\nwbegincode{18}\sublabel{NWORT1E-BASM-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-6}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+# MASKING FASTA SEQUENCES
+ChckDirs $DATASETS/masking ;
+# Running RepeatMasker
+run_RptMsk ()
+\{
+  #
+  # run_RptMsk - Running RepeatMasker
+  #
+  # USAGE: run_RptMsk options workdir fastadir outputdir IDsfile
+  #
+  # 'options' RepeatMasker command-line options
+  # 'workdir' temporary path for RepeatMasker files
+  # 'fastadir' where to get from input fasta files
+  # 'outputdir' where to save masked fasta files
+  # 'IDsfile' IDs to loop 
+  #
+  CMD="RepeatMasker $1"; WDIR=$2 ; FDIR=$3 ; ODIR=$4 ; TID=$5 ;
+  #
+  ChckDirs $WDIR $WDIR/tmp $WDIR/gff $WDIR/gff-projection $ODIR ;
+  #
+  WDIR="$WDIR/tmp" ;
+  while read locus ; 
+    do \{
+      echo "### REPEAT MASKING ON $locus ..." ;
+      cp -v $FDIR/$locus $WDIR/$locus ;
+      # 8 procs at monstre
+      $CMD $WDIR/$locus ;
+      /bin/rm -v $WDIR/$locus ;
+      mv -v $WDIR/$locus.masked $ODIR/$locus;
+      #
+      \};
+    done < $TID ;
+\}
+#
+\nwendcode{}\nwbegindocs{19}\nwdocspar
+
+\nwenddocs{}\nwbegincode{20}\sublabel{NWORT1E-BASM-7}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-7}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+RptMsk2GFF ()
+\{
+  #
+  # RptMsk2GFF - Converting RepeatMasker repeats table into GFF
+  #
+  # USAGE: RptMsk2GFF fastadir outputdir logsdir IDsfile [options]
+  #
+  # 'fastadir' where to get from input masked fasta files
+  # 'outputdir' where to save GFF files
+  # 'logsdir' where to save logs
+  # 'IDsfile' IDs to loop
+  # 'options' options for getfastamasked.pl
+  #           '-s|--softmasked' if masked fasta file is softmasked
+  #                             (lowercase instead of "N"s)
+  #
+  IDIR=$1 ;
+  ODIR=$2 ;
+  LDIR=$3 ;
+  TID=$4 ;
+  OPTS=$5 ;
+  #
+  ChckDirs $ODIR $LDIR;
+  #
+  while read locus ;
+    do \{
+      #
+      echo "### FINDING MASKED REGIONS COORDS ON $locus ..." ;
+      $BIN/getfastamasked.pl $OPTS < $IDIR/$locus > $ODIR/$locus \\
+                                                 2> $LDIR/$locus ;
+      \};
+    done < $TID ;
+\}
+#
+\nwendcode{}\nwbegindocs{21}\nwdocspar
+
+\nwenddocs{}\nwbegincode{22}\sublabel{NWORT1E-BASM-8}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-8}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+FastaMsk2GFF ()
+\{
+  #
+  # FastaMsk2GFF - Finding masked regions in fasta files and saving into GFF
+  #
+  # USAGE: FastaMsk2GFF inputdir outputdir IDsfile
+  # 
+  # 'inputdir' where to get from the RepeatMasker repeats table
+  # 'outputdir' where to save GFF files
+  # 'IDsfile' IDs to loop
+  #
+  IDIR=$1 ;
+  ODIR=$2 ;
+  TID=$3 ;
+  #
+  ChckDirs $ODIR $LDIR;
+  #
+  while read locus ;
+    do \{
+      echo "### REPEATS TBL TO GFF - WORKING ON $locus ..." ;
+      gawk 'BEGIN\{ OFS="\\t" \}
+        NR>3\{
+          str = ($9!="C") ? "+" : "-";
+          print $5,"RepeatMasker",$11,$6,$7,$1,str,".",$10"."NR-3;
+        \}' $IDIR/$locus.out \\
+         > $ODIR/$locus ;
+      \};
+    done < $TID ;
+\}
+#
+\nwendcode{}\nwbegindocs{23}\nwdocspar
+
+\subsubsctn{Downloaded masked fasta sequences} 
+
+Here we retrieve masked regions coords from 'orimasked' fasta files
+
+\nwenddocs{}\nwbegincode{24}\sublabel{NWORT1E-BASM-9}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-9}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+# Retrieving masked regions coords for orimasked fasta files
+WDIR="$DATASETS/masking/orimasked" ;
+ChckDirs $WDIR $WDIR/gff $WDIR/gff-projection $WDIR/tmp $WDIR/logs ;
+while read locus human mouse ;
+  do \{ 
+    cp -v $DATASETS/_tmp/$locus/Hs.fasta.out $WDIR/tmp/Hsap_$locus.out ;
+    cp -v $DATASETS/_tmp/$locus/Mm.fasta.out $WDIR/tmp/Mmus_$locus.out  ;
+    \} ;
+  done < $ID ;
+#
+RptMsk2GFF $DATASETS/fasta/orimasked \\
+           $WDIR/gff-projection $WDIR/logs $ID.all ;
+FastaMsk2GFF $WDIR/tmp $WDIR/gff $ID.all ;
+#
+\nwendcode{}\nwbegindocs{25}\nwdocspar
+
+\subsubsctn{Masking fasta sequences} 
+
+\subsubsubsctn{Default masking}
+
+\nwenddocs{}\nwbegincode{26}\sublabel{NWORT1E-BASM-A}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-A}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+# Masking fasta sequences
+WDIR="$DATASETS/masking/default" ;
+run_RptMsk "-parallel 8" $WDIR \\
+           $DATASETS/fasta/raw $DATASETS/fasta/masked $ID.all ;
+RptMsk2GFF $DATASETS/fasta/masked \\
+           $WDIR/gff-projection $WDIR/logs $ID.all ;
+FastaMsk2GFF $WDIR/tmp $WDIR/gff $ID.all ;
+#
+\nwendcode{}\nwbegindocs{27}\nwdocspar
+
+\subsubsubsctn{Soft masking (lowercase symbols)} (!!! TO DO !!!)
+
+\nwenddocs{}\nwbegincode{28}\sublabel{NWORT1E-BASM-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-B}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+# Masking fasta sequences (with softmask options)
+WDIR="$DATASETS/masking/softmasked" ;
+run_RptMsk "-parallel 8 -xsmall" $WDIR \\
+           $DATASETS/fasta/raw $DATASETS/fasta/softmasked $ID.all ;
+RptMsk2GFF $DATASETS/fasta/softmasked \\
+           $WDIR/gff-projection $WDIR/logs $ID.all '-s';
+FastaMsk2GFF $WDIR/tmp $WDIR/gff $ID.all ;
+#
+\nwendcode{}\nwbegindocs{29}\nwdocspar
+
+\subsctn{Mapping annotations to GFF}
+
+\nwenddocs{}\nwbegincode{30}\sublabel{NWORT1E-BASM-C}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-C}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+ChckDirs $DATASETS/annotation $DATASETS/annotation/coords \\
+         $DATASETS/annotation/fullgff $DATASETS/annotation/gff \\
+         $DATASETS/annotation/gtf2 $DATASETS/annotation/cds ;
+#
+IDIR="$DATASETS/_tmp" ;
+ODIR="$DATASETS/annotation" ;
+while read locus human mouse ;
+  do \{
+    #
+    # due to a problem with alternative splicing forms 
+    # I must edit some $ODIR/coords/ files by hand ...
+    #
+ #  cp -vf $IDIR/$locus/Hs.exons.refGene $ODIR/coords/$human ;
+    #
+    gawk '$3 !~ "utr" \{ print $0 \}' $ODIR/coords/$human > $ODIR/cds/$human ;
+    gawk 'BEGIN\{ seq=ARGV[1]; ARGV[1]="" \}
+          $1  ~ "#" \{ print $0 \}
+          $1 !~ "#" \{ $1=seq; print $0 \}' $locus \\
+          $IDIR/$locus/Hs.exons.refGene.GFF2 \\
+          > $ODIR/fullgff/$human ;
+    $BIN/coords2gff.pl $human < $ODIR/cds/$human > $ODIR/gff/$human
+    # gawk '$3==CDS \{ print $0 \}' $ODIR/fullgff/$human > $ODIR/gff/$human ;
+    $BIN/gff2gtf.pl < $ODIR/gff/$human > $ODIR/gtf2/$human ;
+    \} ;
+  done < $ID ;
+#
+# Preparing GFF files for evaluation program:
+MergeGFF $DATASETS/annotation/gff Hsap 1 ;
+#
+\nwendcode{}\nwbegindocs{31}\nwdocspar
+
+\subsctn{Other auxiliary files}
+
+\nwenddocs{}\nwbegincode{32}\sublabel{NWORT1E-BASM-D}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-D}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+gawk '$3 == "Gene" \{print $1,$9,$4,$5,$7\}' $DATASETS/annotation/gff/Hsap_* \\
+                                           > $DATASETS/genes.Hsap ;
+cat $DATASETS/annotation/desc/Hsap_*[^.msk] > $DATASETS/desc.Hsap ;
+cat $DATASETS/annotation/desc/Mmus_*[^.msk] > $DATASETS/desc.Mmus ;
+#
+ChckDirs $DATASETS/annotation/length ;
+gawk 'BEGIN\{
+    OFS="\\t";
+    opath=ARGV[1];
+    ARGV[1]="";
+  \}
+  \{
+    file= opath "/" $1;
+    # split($1,n,"_");
+    # name=n[2];
+    name=$1;
+    print "# Writing to ", file | "cat 1>&2";
+    printf "%s\\tannotation\\tSequence\\t1\\t%s\\t.\\t.\\t.\\t.\\n", name, $2 > file;
+  \}' $DATASETS/annotation/length $DATASETS/length.Hsap $DATASETS/length.Mmus ;
+#
+\nwendcode{}\nwbegindocs{33}\nwdocspar
+
+\subsctn{Building WU-BLAST databases (only for mouse seqs)}
+
+\nwenddocs{}\nwbegincode{34}\sublabel{NWORT1E-BASM-E}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM-E}}}\moddef{BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}}\plusendmoddef
+#
+ChckDirs $DATASETS/blastdb ;
+WDIR="$DATASETS/blastdb/wublast" ;
+ChckDirs $WDIR $WDIR/raw $WDIR/masked $WDIR/orimasked $WDIR/softmasked ;
+#
+IDIR="$DATASETS/fasta" ;
+ODIR="$DATASETS/blastdb/wublast" ;
+\{ cat $MMUS; echo "all.Mmus"; \} | while read n ;
+  do \{
+    echo "### WORKING ON $n RAW" ;
+    pressdb $IDIR/raw/$n        -o $ODIR/raw/$n        ;
+    echo "### WORKING ON $n ORIMASKED" ;
+    pressdb $IDIR/orimasked/$n  -o $ODIR/orimasked/$n  ;
+    echo "### WORKING ON $n MASKED" ;
+    pressdb $IDIR/masked/$n     -o $ODIR/masked/$n     ;
+    echo "### WORKING ON $n SOFTMASKED" ;
+    pressdb $IDIR/softmasked/$n -o $ODIR/softmasked/$n ;
+    \} ;
+  done ;
+#
+\nwendcode{}\nwbegindocs{35}\nwdocspar
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Homology Search}
+
+\subsctn{Running {\tbx} on ALEPH server}
+
+\nwenddocs{}\nwbegincode{36}\sublabel{NWORT1E-BASM.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\endmoddef
+#
+# Running in /home/ug/jabril/no_backup/PBS
+BASE="/home/ug/jabril/no_backup/PBS" ;
+WGS="/seq/genomes/M.musculus/WGS/wublast8" ;
+WGS3X="$WGS/Mm.WGS001_010 $WGS/Mm.WGS010_020 $WGS/Mm.WGS021_030" ;
+WGS3X="$WGS3X $WGS/Mm.WGS031_040 $WGS/Mm.WGS041_050 $WGS/Mm.WGS051_060" ;
+WGS3X="$WGS3X $WGS/Mm.WGS061_070 $WGS/Mm.WGS071_081" ;
+export BASE WGS3X;
+#
+# loop que encua els fitxers PBS
+runpbs ()
+\{
+  while read gene locus mouse ;
+    do \{
+      echo "### Queuing $gene ..." ;
+      db="$2" ;
+      [ $1 -eq 1 ] && db="$db/$mouse" ;
+      export locus db ;
+      qsub -V $BASE/PBS.sh ;
+      \} ;
+    done < $BASE/id ;
+\}
+#
+#
+ChckDirs $BASE $BASE/matrix $BASE/matrix/aa \\
+    $BASE/fasta $BASE/fasta/raw $BASE/fasta/blastdb \\
+    $BASE/fasta/blast $BASE/fasta/logs \\
+    $BASE/fasta/blast3X $BASE/fasta/logs3X \\
+    $BASE/fastamasked $BASE/fastamasked/raw $BASE/fastamasked/blastdb \\
+    $BASE/fastamasked/blast $BASE/fastamasked/logs \\
+    $BASE/fastamasked/blast3X $BASE/fastamasked/logs3X ;
+#
+#
+cp -vapudf $DATASETS/fasta/raw/*                         $BASE/fasta/raw/ ;
+cp -vapudf $DATASETS/blastdb/wublast.tblastx/raw/*       $BASE/fasta/blastdb/ ;
+cp -vapudf $DATASETS/fasta/orimasked/*                   $BASE/fastamasked/raw/ ;
+cp -vapudf $DATASETS/blastdb/wublast.tblastx/orimasked/* $BASE/fastamasked/blastdb/ ;
+#
+# Working on raw files - ORTHOLOGOUS SEQS
+IN="$BASE/fasta/raw" ;
+OUT="$BASE/fasta/blast" ;
+ERROR="$BASE/fasta/logs" ;
+BLASTOPTIONS="Z=3000000000 -nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod" ; # 
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fasta/logs ;
+runpbs 1 "$BASE/fasta/blastdb" ;
+popd ;
+#
+# Working on orimasked files - ORTHOLOGOUS SEQS
+IN="$BASE/fastamasked/raw" ;
+OUT="$BASE/fastamasked/blast" ;
+ERROR="$BASE/fastamasked/logs" ;
+BLASTOPTIONS="Z=3000000000 -nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod" ;
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fastamasked/logs ;
+runpbs 1 "$BASE/fastamasked/blastdb" ;
+popd ;
+#
+# Working on raw files - 3X SEQS
+IN="$BASE/fasta/raw" ;
+OUT="$BASE/fasta/blast3X" ;
+ERROR="$BASE/fasta/logs3X" ;
+BLASTOPTIONS="-nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod Z=3000000000" ;
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fasta/logs3X ;
+runpbs 0 "$WGS3X" ;
+popd ;
+#
+# Working on orimasked files - 3X SEQS
+IN="$BASE/fastamasked/raw" ;
+OUT="$BASE/fastamasked/blast3X" ;
+ERROR="$BASE/fastamasked/logs3X" ;
+BLASTOPTIONS="-nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod Z=3000000000" ;
+export IN OUT ERROR BLASTOPTIONS ;
+pushd $BASE/fastamasked/logs3X ;
+runpbs 0 "$WGS3X" ;
+popd ;
+#
+#
+ChckDirs $ANALYSIS/blast ;
+WDIR="$ANALYSIS/blast/wublast.blastn" ;
+ChckDirs $WDIR $WDIR/raw   $WDIR/masked   $WDIR/orimasked   $WDIR/softmasked \\
+               $WDIR/raw3X $WDIR/masked3X $WDIR/orimasked3X $WDIR/softmasked3X ;
+WDIR="$ANALYSIS/blast/wublast.tblastx" ;
+ChckDirs $WDIR $WDIR/raw   $WDIR/masked   $WDIR/orimasked   $WDIR/softmasked \\
+               $WDIR/raw3X $WDIR/masked3X $WDIR/orimasked3X $WDIR/softmasked3X ;
+#
+#
+cp -vapudf $BASE/fasta/blast/*         $ANALYSIS/blast/wublast.tblastx/raw/
+cp -vapudf $BASE/fastamasked/blast/*   $ANALYSIS/blast/wublast.tblastx/orimasked/
+cp -vapudf $BASE/fasta/blast3X/*       $ANALYSIS/blast/wublast.tblastx/raw3X/
+cp -vapudf $BASE/fastamasked/blast3X/* $ANALYSIS/blast/wublast.tblastx/orimasked3X/
+#
+\nwalsodefined{\\{NWORT1E-BASM.2-2}\\{NWORT1E-BASM.2-3}\\{NWORT1E-BASM.2-4}\\{NWORT1E-BASM.2-5}\\{NWORT1E-BASM.2-6}\\{NWORT1E-BASM.2-7}\\{NWORT1E-BASM.2-8}\\{NWORT1E-BASM.2-9}\\{NWORT1E-BASM.2-A}\\{NWORT1E-BASM.2-B}\\{NWORT1E-BASM.2-C}\\{NWORT1E-BASM.2-D}\\{NWORT1E-BASM.2-E}\\{NWORT1E-BASM.2-F}\\{NWORT1E-BASM.2-G}\\{NWORT1E-BASM.2-H}\\{NWORT1E-BASM.2-I}\\{NWORT1E-BASM.2-J}\\{NWORT1E-BASM.2-K}\\{NWORT1E-BASM.2-L}\\{NWORT1E-BASM.2-M}\\{NWORT1E-BASM.2-N}\\{NWORT1E-BASM.2-O}\\{NWORT1E-BASM.2-P}\\{NWORT1E-BASM.2-Q}\\{NWORT1E-BASM.2-R}\\{NWORT1E-BASM.2-S}\\{NWORT1E-BASM.2-T}}\nwused{\\{NWORT1E-SGPA-1}}\nwendcode{}\nwbegindocs{37}\nwdocspar
+
+\nwenddocs{}\nwbegincode{38}\sublabel{NWORT1E-PBSH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-PBSH-1}}}\moddef{PBS tblastx shell~{\nwtagstyle{}\subpageref{NWORT1E-PBSH-1}}}\endmoddef
+#!/bin/bash
+#
+# PBS.sh - Running tblastx on ALEPH server
+#
+:
+#PBS -e $ERROR/$locus.error
+#PBS -o $ERROR/$locus.out
+#PBS -q ace@aleph.imim.es
+#PBS -V
+#
+export BLASTMAT="$BASE/matrix/" ;
+ [ -e "$OUT/$locus" ]  && /bin/rm $OUT/$locus ;
+[ -e "$ERROR/$locus" ] && /bin/rm $ERROR/$locus ;
+for mousedb in $db ;
+  do \{
+    echo "### PBS: TBLASTX Working on : $locus x $mousedb" >> $ERROR/$locus ;
+    tblastx $mousedb $IN/$locus $BLASTOPTIONS \\
+            >> $OUT/$locus 2>> $ERROR/$locus ;
+    echo "### PBS: TBLASTX ... DONE $mousedb !!!" >> $ERROR/$locus ;
+    \} ;
+  done ;
+\nwnotused{PBS\ tblastx\ shell}\nwendcode{}\nwbegindocs{39}\nwdocspar
+
+\nwenddocs{}\nwbegincode{40}\sublabel{NWORT1E-BASM.2-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-2}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+WGS="/seq/genomes/M.musculus/WGS/wublast8" ;
+WGS3X="$WGS/Mm.WGS001_010 $WGS/Mm.WGS010_020 $WGS/Mm.WGS021_030" ;
+WGS3X="$WGS3X $WGS/Mm.WGS031_040 $WGS/Mm.WGS041_050 $WGS/Mm.WGS051_060" ;
+WGS3X="$WGS3X $WGS/Mm.WGS061_070 $WGS/Mm.WGS071_081" ;
+WDIR="/home/ug/jabril/tmp/projects/masked" ;
+BLASTMAT="/home/ug/jabril/tmp/projects/wublast.tblastx/" ;
+BLASTOPTIONS="-topcomboN=4 W=5 -filter=xnu+seg Z=3000000000 -nogaps -hspmax=1000000 -matrix=blosum62mod" ;
+export WGS3X WDIR BLASTMAT BLASTOPTIONS ;
+locus="Hsap_SIL" ; # running on monstre1
+locus="Hsap_CFTR" ; # running on monstre2
+locus="Hsap_DFNA5" ; # running on monstre3
+locus="Hsap_KVLQT1" ; # running on monstre4
+for mousedb in $WGS3X ;
+  do \{
+    db=`basename $mousedb` ;
+    echo "### TBLASTX Working on : $locus x $db" ;
+    tblastx $mousedb $WDIR/$locus $BLASTOPTIONS \\
+            > $WDIR/$locus.$db.tbx 2> $WDIR/$locus.$db.err &
+    \} ;
+  done ;
+#
+\nwendcode{}\nwbegindocs{41}\nwdocspar
+
+\subsctn{Running {\bn} on orthologous sequences}
+
+\nwenddocs{}\nwbegincode{42}\sublabel{NWORT1E-BASM.2-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-3}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+MergeFiles ../fasta/masked/ ;
+MergeFiles ../fasta/softmasked/ ;
+#
+WDIR="$ANALYSIS/blast/wublast.blastn/masked" ;
+ChckDirs $WDIR $WDIR/out $WDIR/gff $WDIR/ps $WDIR/logs ;
+BLASTOPTIONS="Z=3000000000 -hspmax=1000000" ; # no filters for nucleotides
+while read locus human mouse ;
+  do \{
+    echo "### RUNNING BLASTN on $locus" ;
+    blastn $DATASETS/blastdb/wublast/masked/$mouse \\
+           $DATASETS/fasta/masked/$human $BLASTOPTIONS \\
+         > $ANALYSIS/blast/wublast.blastn/masked/out/$human.$mouse \\
+        2> $ANALYSIS/blast/wublast.blastn/masked/logs/$human.$mouse.blastn ;
+    \} ;
+  done < $ID ;
+#
+while read locus human mouse ;
+  do \{
+    echo "### RUNNING PARSEBLAST on $locus" ;
+    parseblast --aplot --full-scores --comments --verbose \\
+           $ANALYSIS/blast/wublast.blastn/masked/out/$human.$mouse \\
+         > $ANALYSIS/blast/wublast.blastn/masked/gff/$human.$mouse \\
+        2> $ANALYSIS/blast/wublast.blastn/masked/logs/$human.$mouse.parseblast ;
+    \} ;
+  done < $ID ;
+#
+\nwendcode{}\nwbegindocs{43}\nwdocspar
+
+\subsctn{{\tbx} parameters used by Pankaj}
+
+\begin{description}
+\item[tblastx parameters] orthologous \\
+\begin{verbatim}
+    -nogap
+    Z=3000000000
+    E=10 
+    -hspmax=10000
+    -filter=xnu
+    -matrix=blosum62mod
+\end{verbatim}
+\item[tblastx parameters] orthologous x WGS3X \\
+\begin{verbatim}
+    -nogap
+    Z=3000000000
+    E=0.01
+    E2=0.01
+    W=5
+    B=99000
+    V=99000
+    -hspmax=4
+    -topcomboN=4
+    -filter=xnu
+    -matrix=blosum62mod
+\end{verbatim}
+\end{description}
+
+\subsctn{Comparing results from different {\bl} programs}
+
+We are using {\aps} to visualize the differences among three approaches: {\bn}, {\tbx} and similarity regions filtered by {\sgp} from {\tbx}.
+
+\subsubsctn{Human x FO Mouse sequences}
+
+\nwenddocs{}\nwbegincode{44}\sublabel{NWORT1E-BASM.2-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-4}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Running GFF2APLOT
+WDIR="$ANALYSIS/blast/wublast.blastn/masked" ;
+pushd $WORK/tests/ ; # to force gff2aplot saving default config file there
+while read locus human mouse ;
+  do \{
+    echo "### RUNNING PARSEBLAST on $locus" ;
+    gff2aplot -PVO $PARAM/gff2aplot/ortho_masked_a4.rc -- \\
+                   $WDIR/gff/$human.$mouse \\
+                   $DATASETS/annotation/gff/$human \\
+                 > $WDIR/ps/$human.$mouse.ps \\
+                2> $WDIR/logs/$human.$mouse.aplot ;
+    \} ;
+  done < $ID ;
+popd ;
+WDIR="$ANALYSIS/blast/wublast.blastn/masked" ;
+pushd $WORK/tests/ ; # to force gff2aplot saving default config file there
+while read locus human mouse ;
+  do \{
+    echo "### RUNNING PARSEBLAST on $locus" ;
+    gff2aplot -PV -I a2 -O $PARAM/gff2aplot/ortho_masked_a4.rc -- \\
+                   $WDIR/gff/$human.$mouse \\
+                   $DATASETS/annotation/gff/$human \\
+                 > $WDIR/ps/$human.$mouse.a2.ps \\
+                2> $WDIR/logs/$human.$mouse.aplot.a2 ;
+    \} ;
+  done < $ID ;
+popd ;
+#
+\nwendcode{}\nwbegindocs{45}\nwdocspar
+
+\subsubsctn{Customization files for {\gps}}
+
+\nwenddocs{}\nwbegincode{46}\sublabel{NWORT1E-GFFb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GFFb-1}}}\moddef{GFF2APLOT customization: ortho masked~{\nwtagstyle{}\subpageref{NWORT1E-GFFb-1}}}\endmoddef
+## ########################################################################## ##
+##                                                                            ##
+##                  USER CUSTOMIZATION FILE FOR GFF2APLOT                     ##
+##                                                                            ##
+## ########################################################################## ##
+##
+## This is the file in which you can define
+##   the OPTIONS and FEATURES required by gff2aplot program.
+## 
+## If you want to modify this file, please, do not
+##   forget to make a backup copy of your old file 
+##   (like .gff2aplot.rc.old or .gff2aplot.rc.bck).
+##
+## Creation Date: 27.01.99
+## Last Revision: 20.04.99
+##
+## Creator: Josep Francesc ABRIL FERRANDO
+##
+##  e-mail:        jabril@imim.es
+##
+## ########################################################################## ##
+## #################### OPTIONS for gff2aplot PROGRAM ##################### ##
+## ########################################################################## ##
+##
+FL ########################################################################## ##
+## #################################### FLAGs ############################### ##
+##
+## You could set FLAG variables to:
+##       0/OFF/NO/N/FALSE/F - Switch OFF
+##       1/ON/YES/Y/TRUE/T  - Switch ON
+##
+## Variable ############# Switch ############
+##
+Display_TITLE             : Y
+Display_SUBTITLE          : Y
+Display_X-Axis_LABEL      : Y
+Display_Y-Axis_LABEL      : Y
+Display_Percent-Box_LABEL : Y
+Display_Extra-Box_LABEL   : Y
+Display_PERCENT-BOX       : N
+Display_EXTRA-BOX         : N
+Display_GENE_LABEL        : Y
+Display_GENE_RULE         : Y
+Display_HalfHeightBOX     : Y
+Display_FullHeightBOX     : Y
+Display_BOX_LABEL         : Y
+Display_UserDef_BOX_LABEL : Y
+Display_ARROW             : Y
+Display_JOINS             : Y
+Display_RIBBON            : Y
+Display_SELECTION-BOX     : Y
+Display_GFF               : N
+Display_GFF-ReverseOrder  : N
+Display_FUNCTION          : N
+APlotLine_GroupScore      : N
+APlotLine_ScaleWidth      : N
+APlotLine_ScaleGrey       : N
+XY_AXES_Same-SIZE         : N
+Display_TickMark-LABEL    : Y
+Display_APlot_X-Ticks     : Y
+Display_Percent_X-Ticks   : Y
+Display_ExtraBox_X-Ticks  : Y
+Display_APlot_Y-Ticks     : Y
+Display_Percent_Y-Ticks   : Y
+Display_ExtraBox_Y-Ticks  : Y
+Display_OnlyLower_X-Ticks : N
+Display_GRID              : N
+ZOOM_Zoom                 : N
+ZOOM_Area                 : N
+Zoom_Marks                : N
+##
+DF ########################################################################## ##
+## ############################# DEFAULT VALUES ############################# ##
+##
+## Some Default Values...
+##
+## Variable ######## Definition ######## 
+##
+PAGE_SIZE               :  a4
+FEATURE_LABELS_LENGTH   :  0     # Number of chars displayed in labels (0 means show full label string).
+GROUP_LABELS_LENGTH     :  0     # Number of chars displayed in labels (0 means show full label string).
+FEATURE_X-LABELS_ANGLE  :  0     # In degrees.
+GROUP_X-LABELS_ANGLE    :  0     # In degrees.
+FEATURE_Y-LABELS_ANGLE  :  0     # In degrees.
+GROUP_Y-LABELS_ANGLE    :  0     # In degrees.
+FEATURE_LABELS_FONTSIZE :  1     # Font size scale Factor.
+GROUP_LABELS_FONTSIZE   :  1     # Font size scale Factor.
+BACKGROUND_COLOR        : white
+FOREGROUND_COLOR        : black
+APlotBox_BGCOLOR        :  BG
+PercentBox_BGCOLOR      :  BG
+ExtraBox_BGCOLOR        :  BG
+Strand-Arrows_COLOR     :  FG
+Join-Lines_COLOR        :  FG
+SelectionBox_BGCOLOR    : grey
+Function_COLOR          : red
+Zoom_Area_Mark_COLOR    : lightred
+PERCENT_ORIGIN          :  50
+PERCENT_END             : 100
+ScaleMajorTICKMARK      :   2    # major tickmarks per axis.
+ScaleMinorTICKMARK      :   5    # minor tickmarks per each major.
+PercentMajorTICKMARK    :   5    # major tickmarks per axis.
+PercentMinorTICKMARK    :   5    # minor tickmarks per each major.
+ExtraMajorTICKMARK      :   2    # major tickmarks per axis.
+ExtraMinorTICKMARK      :   5    # minor tickmarks per each major.
+##
+OP ########################################################################## ##
+## #################################### OPTIONs ############################# ##
+##
+## Changing default values overrides any other definition you made for features.
+##
+##   ##DEFAULT##  means that program uses for these options
+##                those values you have defined in feature table.
+##         FG    the option is defined with FOREGROUND_COLOR.
+##         BG    the option is defined with BACKGROUND_COLOR.
+##
+## Variable ######## Definition ######## 
+##
+Align_NAME            : ##DEFAULT##
+X-Sequence_NAME       : ##DEFAULT##
+Y-Sequence_NAME       : ##DEFAULT##
+TITLE                 : ##DEFAULT##
+SUBTITLE              : ##DEFAULT##
+X-Axis_LABEL          : ##DEFAULT##
+Y-Axis_LABEL          : ##DEFAULT##
+Percent-Box_LABEL     : ##DEFAULT##
+Percent-Box_SUBLABEL  : ##DEFAULT##
+Extra-Box_LABEL       : ##DEFAULT##
+Extra-Box_SUBLABEL    : ##DEFAULT##
+HalfSizeBox_BGCOLOR   : ##DEFAULT##
+FullSizeBox_BGCOLOR   : ##DEFAULT##
+Ribbon_BGCOLOR        : ##DEFAULT##
+SEQUENCE1_ORIGIN      : ##DEFAULT##
+SEQUENCE1_END         : ##DEFAULT##
+SEQUENCE2_ORIGIN      : ##DEFAULT##
+SEQUENCE2_END         : ##DEFAULT##
+Zoom_SEQUENCE1_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE1_END    : ##DEFAULT##
+Zoom_SEQUENCE2_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE2_END    : ##DEFAULT##
+TICKMARK              : ##DEFAULT##
+SMALLTICKMARK         : ##DEFAULT##
+##
+FT ########################################################################## ##
+## #################################### GFF FEATUREs DEFINITION ############# ##
+## 
+## ########### Description of each element of the Features Array. ########### ##
+##
+## (str) means a string of chars (in a string numbers are treated as chars).
+## (bin) means you only could define variable as
+##       0/OFF/NO/N/FALSE/F = Switch OFF the element.
+##       1/ON/YES/Y/TRUE/T  = Switch ON  the element.
+## (FHN) means you can choose between "(F)ull" or "(H)alf" size Boxes,
+##       also you can define "(N)one", then the feature is without a box.
+## (NLRB) means you can choose among "(N)o lines", "draw (L)ines at <feature>
+##       boundaries", "(R)ibbons" or "(B)oth -Lines and Ribbons".
+## (HND) means "(H)alfSize", "(N)ormalSize" or "(D)oubleSize" LineWidth.
+##
+## (clr) means that you can choose among the following color names:
+##
+##    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white
+##       verydarkgreen | darkgreen | green | lightgreen | verylightgreen
+##   verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue
+##          verydarkblue | darkblue | blue | lightblue | verylightblue
+##         verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan
+##     verydarkviolet | darkviolet | violet | lightviolet | verylightviolet
+##            verydarkred | darkred | red | lightred | verylightred
+##     verydarkorange | darkorange | orange | lightorange | verylightorange
+##     verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow
+##        verydarkbrown | darkbrown | brown | lightbrown | verylightbrown 
+##
+##       If you do not want to define a color, you can enter
+##        BG (background color) or FG (foreground color), 
+##        but you must choose one of the above definitions.
+## 
+## ## 
+## Feature (str): A feature name. Only <features> defined below
+##    will be recognized in your .gff file.
+## ## 
+## XTR (bin): Force those <features> for which XTR is switched ON
+##   to be displayed in the third panel, if the Plot Option 
+##   "Display_EXTRA-BOX" is switched ON.
+## ## 
+## Box (FHN): Define the box size (FHN) for <feature>.
+## ##
+## Line (NLRB): Draw lines across all panels for the <feature>.
+## ##
+## Join (bin): Switch ON to connect elements of one group with splice symbols.
+## ##
+## Arrw (bin): Swicth ON to display an arrow that shows the <feature>'s strand.
+## ##
+## Lbl (bin): Swicth ON to display the <feature>'s label
+##   (if it's defined in the .gff file).
+## ##
+## Color (clr): Fill <Box> with this color.
+## ##
+## CLine (clr): Fill Line <Ribbons> with this color.
+## ##
+## Wdth (HND): You can choose among three predefined LineWidths.
+## ##
+## Layr : Layer where is drawed each feature.
+##   You must pass an integer for feature ordering (1..n),
+##   put 0 to print the feature always on top. 
+## ##
+##  
+## ########################## Features Definition ################################ ##
+## Feature  #XTR #Box #Line#Join#Arrw#Lbl #Wdth#Layr#Color ###########CLine #########
+##
+gene          N    H    L    N    Y    N    H    1    blue             lightgrey
+first         N    F    R    Y    N    N    H    0    red              lightgrey
+internal      N    F    R    Y    N    N    H    0    red              lightgrey
+terminal      N    F    R    Y    N    N    H    0    red              lightgrey    
+#
+sine          N    N    R    N    N    N    H    6    BG               verylightgreen
+line          N    N    R    N    N    N    H    6    BG               verylightgreen
+alu           N    N    R    N    N    N    H    6    BG               lightgreen   
+repeat        N    N    R    N    N    N    H    6    BG               verylightgreen
+## ######1#########2#########3#########4#########5#########6#########7#########8#####
+##  
+SP ########################## Special gff Features ############################### ##
+##
+GROUPLIMITS : gene
+PLOTLIMITS  : sequence                                             
+APLOT       : hsp
+HIGHLIGHT   : boxit
+RECTANGLE   : rectangle
+CIRCLE      : circle
+TEXT        : text
+FUNCTION    : function
+EXTRABOX    : est
+## ######1#########2#########3#########4#########5#########6#########7#########8#####
+\nwnotused{GFF2APLOT\ customization:\ ortho\ masked}\nwendcode{}\nwbegindocs{47}\nwdocspar
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Gene predictions}
+
+We analyzed the {\data} sequence dataset with different gene-prediction tools and evaluated their accuracy (sensitivity and specificity). We included results provided by other groups (cite TWINSCAN/SLAM).
+
+.........PUT HERE a LIST of them.....
+
+\subsctn{Running {\gnid}} 
+
+\nwenddocs{}\nwbegincode{48}\sublabel{NWORT1E-BASM.2-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-5}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+run_GENEID () 
+\{
+  #
+  # run_GENEID - Running GENEID and Evaluation for a given sequence set
+  #
+  # USAGE: run_GENEID testname sequence testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="GENEID" ; prog="geneid" ;
+  GENEID="/projects/sgp/param/geneid/human3iso.param" ;
+  CMD="/projects/sgp/bin/geneid -vG" ;
+      # GENEID tool command-line options:
+      #  '-v' be verbose
+      #  '-G' GFF output
+  # Setting VARS
+  MAIN="$ANALYSIS/geneid" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  TSET="$3" ;
+  SPC="$4" ;
+  IDS="$ID.$SPC" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
+  while read locus ;
+    do \{
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        $CMD $ISEQ/$locus > $ODIR/$locus 2> $EDIR/$locus ;
+      \} ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  echo "### Running EVALUATION on $PROG ..." 1>&2 ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; \} > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$\{prog\}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; \} > $BASE/eval_$\{prog\}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_$\{prog\}_brief.$RUN ;
+\} 
+#
+\nwendcode{}\nwbegindocs{49}\nwdocspar
+
+\subsubsctn{{\gnid} on raw sequences} 
+
+\nwenddocs{}\nwbegincode{50}\sublabel{NWORT1E-BASM.2-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-6}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Raw sequences
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
+run_GENEID Hsap.raw $DATASETS/fasta/raw \\
+                    $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+\nwendcode{}\nwbegindocs{51}\nwdocspar
+
+\subsubsctn{{\gnid} on downloaded masked sequences} 
+
+\nwenddocs{}\nwbegincode{52}\sublabel{NWORT1E-BASM.2-7}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-7}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Masked sequences (already masked: orimasked)
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
+run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \\
+                          $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+\nwendcode{}\nwbegindocs{53}\nwdocspar
+ 
+\subsubsctn{{\gnid} on masked sequences} 
+
+\nwenddocs{}\nwbegincode{54}\sublabel{NWORT1E-BASM.2-8}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-8}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Masked sequences
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
+run_GENEID Hsap.masked $DATASETS/fasta/masked \\
+                       $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+\nwendcode{}\nwbegindocs{55}\nwdocspar
+
+\subsctn{Running {\gnsc}}
+ 
+\nwenddocs{}\nwbegincode{56}\sublabel{NWORT1E-BASM.2-9}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-9}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+run_GENSCAN () 
+\{
+  #
+  # run_GENSCAN - Running GENSCAN and Evaluation for a given sequence set
+  #
+  # USAGE: run_GENSCAN testname sequence testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="GENSCAN" ; prog="genscan" ;
+  GENSCAN="/usr/local/molbio/Install/GENSCAN/param/HumanIso.smat" ;
+  CMD="/usr/local/molbio/bin/genscan $GENSCAN" ;
+      # genscan paramfilename sequencefilename [-v]
+      #  '-v' be verbose
+  # Setting VARS
+  MAIN="$ANALYSIS/genscan" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  TSET="$3" ;
+  SPC="$4" ;
+  IDS="$ID.$SPC" ;
+  GSCN="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
+  while read locus ;
+    do \{
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        $CMD $ISEQ/$locus > $GSCN/$locus 2> $EDIR/$locus ;
+        $SGPBIN/genscan2gff seqname=$human < $GSCN/$locus \\
+                          > $ODIR/$locus 2>> $EDIR/$locus ;
+      \} ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  echo "### Running EVALUATION on $PROG ..." 1>&2 ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; \} > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$\{prog\}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; \} > $BASE/eval_$\{prog\}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_$\{prog\}_brief.$RUN ;
+\} 
+#
+\nwendcode{}\nwbegindocs{57}\nwdocspar
+
+\subsubsctn{{\gnsc} on raw sequences} 
+
+\nwenddocs{}\nwbegincode{58}\sublabel{NWORT1E-BASM.2-A}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-A}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Raw sequences
+run_GENSCAN Hsap.raw $DATASETS/fasta/raw \\
+                     $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+\nwendcode{}\nwbegindocs{59}\nwdocspar
+
+\subsubsctn{{\gnsc} on downloaded masked sequences} 
+
+\nwenddocs{}\nwbegincode{60}\sublabel{NWORT1E-BASM.2-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-B}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Masked sequences (already masked: orimasked)
+run_GENSCAN Hsap.orimasked $DATASETS/fasta/orimasked \\
+                           $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+\nwendcode{}\nwbegindocs{61}\nwdocspar
+ 
+\subsubsctn{{\gnsc} on masked sequences} 
+
+\nwenddocs{}\nwbegincode{62}\sublabel{NWORT1E-BASM.2-C}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-C}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Masked sequences
+run_GENSCAN Hsap.masked $DATASETS/fasta/masked \\
+                        $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+\nwendcode{}\nwbegindocs{63}\nwdocspar
+
+\subsctn{Working on {\twsc} results}
+
+{\twsc} original data was downloaded from \url|http://genes.cs.wustl.edu/8-orthologs/all-files.tgz| .
+
+\nwenddocs{}\nwbegincode{64}\sublabel{NWORT1E-BASM.2-D}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-D}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+process_TWINSCAN () 
+\{
+  #
+  # process_TWINSCAN - Processing TWINSCAN results and evaluating them
+  #                    for a given sequence set
+  #
+  # USAGE: process_TWINSCAN testname testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="TWINSCAN" ; prog="twinscan" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/twinscan" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  TSET="$2" ;
+  SPC="$3" ;
+  IDS="$ID"; # IDS="$ID.$SPC" ;
+  TWSCN="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
+  while read locus human mouse ;
+    do \{
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        gawk 'BEGIN\{
+                OFS="\\t";
+                seq=ARGV[1];
+                ARGV[1]="";
+              \}
+              $3 == "CDS" \{
+                $1=seq;
+                gsub(/[\\"\\;]/,"",$10);
+                $9=$10;
+                $10=$11=$12="";
+                print $0;
+              \}' $human $TWSCN/$locus/$locus.$SPC.fasta.gff > $ODIR/$human ;
+      \} ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  echo "### Running EVALUATION on $PROG ..." 1>&2 ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; \} > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$\{prog\}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; \} > $BASE/eval_$\{prog\}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_$\{prog\}_brief.$RUN ;
+\} 
+#
+\nwendcode{}\nwbegindocs{65}\nwdocspar
+
+\begin{comment}
+\nwenddocs{}\nwbegincode{66}\sublabel{NWORT1E-BASM.2-E}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-E}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+pushd $ANALYSIS/twinscan/Hsap.20010722/tmp/
+pushd $ANALYSIS/twinscan/Hsap.20010803/tmp/
+mv Elastin ELN ;
+cd ELN ;
+renameSEQS 'ls -1 Elastin*' '^Elastin' 'ELN' ;
+cd .. ;
+mv HOXa HOXA ;
+cd HOXA ;
+renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA' ;
+cd .. ;
+mv KvLQT1 KVLQT1 ;
+cd KVLQT1 ;
+renameSEQS 'ls -1 KvLQT1*' '^KvLQT1' 'KVLQT1' ;
+( gawk "\{print \\$1\}" $ID ; echo 'CD4' ) | \\
+  while read j; \\
+    do \{ cd $j; renameSEQS 'ls -1' '.Hs.' '.Hsap.'; cd .. ; \}; done ;
+popd ;
+#
+\nwendcode{}\nwbegindocs{67}\nwdocspar
+\end{comment}
+\nwenddocs{}\nwbegincode{68}\sublabel{NWORT1E-BASM.2-F}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-F}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+process_TWINSCAN Hsap.20010722 $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+process_TWINSCAN Hsap.20010803 $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+\nwendcode{}\nwbegindocs{69}\nwdocspar
+
+\subsctn{Working on {\slam} results}
+
+{\slam} original data was downloaded from \url|http://bio.math.berkeley.edu/slam/8pairs/|
+
+\begin{comment}
+\nwenddocs{}\nwbegincode{70}\sublabel{NWORT1E-BASM.2-G}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-G}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+renameSEQS 'ls -1 hs.btk*' '^hs.btk' 'BTK.Hs'
+renameSEQS 'ls -1 hs.dfna5*' '^hs.dfna5' 'DFNA5.Hs'
+renameSEQS 'ls -1 hs.hoxa*' '^hs.hoxa' 'HOXA.Hs'
+#
+\nwendcode{}\nwbegindocs{71}\nwdocspar
+\end{comment}
+\nwenddocs{}\nwbegincode{72}\sublabel{NWORT1E-BASM.2-H}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-H}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+wget -b --no-parent --mirror --tries=0           \\
+     --output-file=download_orthologous_slam.log \\
+     --no-host-directories --cut-dirs=2          \\
+     'http://bio.math.berkeley.edu/slam/8pairs/' ;
+#
+\nwendcode{}\nwbegindocs{73}\nwdocspar
+
+\subsctn{Running {\sgp}}
+
+\nwenddocs{}\nwbegincode{74}\sublabel{NWORT1E-BASM.2-I}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-I}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+run_SGP () 
+\{
+  #
+  # run_SGP - Running SGP and Evaluation for a given sequence set
+  #
+  # USAGE: run_SGP testname sequence blastdata testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'blastdata' is path to the blast output/s for homology evidences
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="SGP" ; prog="sgp" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/sgp" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  BDIR="$3" ;
+  TSET="$4" ;
+  SPC="$5" ;
+  IDS="$ID.$SPC" ;
+  HSP_SR="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in hsp sr hsp-rs tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do \{ ChckDirs $BASE/$c ; \} ; done ;
+  #
+  # Running SGP TOOL
+  while read locus ;
+    do \{
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        # SGGP tool command-line options:
+        #  '-t filename' read tblastx file
+        #  '-k prefix' keep intermediate files with prefix (trailing / required)
+        #  '-1 seqfile_1'
+        #  '-d database'
+        $SGP -v -1 $ISEQ/$locus -d /tmp/ -k $HSP_SR/ \\
+                -t $BDIR/$locus > $ODIR/$locus 2> $EDIR/$locus ;
+      \} ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; \} > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  \{ echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$\{prog\}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ;
+    echo "### $GENEIDVERSION" ; echo "###" ; \} > $BASE/eval_$\{prog\}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_$\{prog\}_brief.$RUN ;
+  #
+  # Copying files to where they are going to be used
+  CMMD="mv -v" ; # Instead of "cp -vapudf"
+  while read locus ;
+    do \{
+    # $CMMD $HSP_SR/$locus.sgp    $ODIR/$locus ; # already exists
+      $CMMD $HSP_SR/$locus.hsp    $BASE/hsp/$locus ;
+      $CMMD $HSP_SR/$locus.sr     $BASE/sr/$locus ;
+      $CMMD $HSP_SR/$locus.hsp-rs $BASE/hsp-rs/$locus ;
+      $CMMD $HSP_SR/$locus.tbx    $BASE/tbx/$locus ;
+      \} ;
+    done < $IDS ;
+\} 
+#
+\nwendcode{}\nwbegindocs{75}\nwdocspar
+
+\nwenddocs{}\nwbegincode{76}\sublabel{NWORT1E-BASM.2-J}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-J}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+####
+#### Using "STANDARD" SGP
+export GENEIDVERSION="------------------------- <geneid v1.0> -------------------------" ;
+#
+export SGP="/projects/sgp/bin/SGP2-2/sggp2" ;
+#
+# SGP on Raw sequences
+run_SGP Hsap.raw $DATASETS/fasta/raw \\
+               $ANALYSIS/blast/wublast.tblastx/raw \\
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+# SGP on Masked sequences (already masked: orimasked)
+run_SGP Hsap.orimasked $DATASETS/fasta/orimasked \\
+               $ANALYSIS/blast/wublast.tblastx/orimasked \\
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+####
+#### Roderic's TESTS on a SGP variant
+#
+export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
+export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
+#
+# SGP on Masked sequences (already masked: orimasked)
+run_SGP rguigo.orimasked $DATASETS/fasta/orimasked \\
+               $ANALYSIS/blast/wublast.tblastx/orimasked \\
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+# SGP on TBX results from Pankaj (W=5) for ORI masked sequences
+run_SGP rguigo.orimasked3X_pankaj_W5 $DATASETS/fasta/orimasked \\
+               $ANALYSIS/blast/wublast.tblastx/orimasked3X/pankaj_W5 \\
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+# SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
+run_SGP rguigo.masked3X_pankaj_W5 $DATASETS/fasta/masked \\
+               $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \\
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+# SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
+export GENEIDVERSION="------------------------- <geneid v1.1> -------------------------" ;
+run_SGP rguigo_new.masked3X_pankaj_W5 $DATASETS/fasta/masked \\
+               $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \\
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+export HOME='/home/ug/jabril' ;
+#
+# SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
+export HOME='/home/ug/gparra' ; # to avoid modifying Roderic's scripts
+export SGP="/home/ug/gparra/no_backup/SGP/sgp_1.1" ;
+export GENEIDVERSION="------------------------- <geneid v1.1 - GENIS> -------------------------" ;
+run_SGP rguigo_new_genis.masked3X_pankaj_W5 $DATASETS/fasta/masked \\
+               $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \\
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+export HOME='/home/ug/jabril' ;
+#
+\nwendcode{}\nwbegindocs{77}\nwdocspar
+
+\nwenddocs{}\nwbegincode{78}\sublabel{NWORT1E-BASM.2-K}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-K}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Roderic's Tests on a SGP variant (TAKING files from his LOCAL PATH)
+#
+IDIR="$ANALYSIS/sgp/rguigo" ;
+ChckDirs $IDIR ;
+for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+  do \{
+    ChckDirs $IDIR/$c ;
+    \} ;
+  done ;
+for c in hsp sr hsp-rs tbx ;
+  do \{
+    ChckDirs $IDIR/$c ;
+    \} ;
+  done ;
+#
+MergeGFF $ANALYSIS/sgp/rguigo/gff/$locus Hsap 0 ;
+#
+$SGPBIN/evaluation -tsa /home/ug/rguigo/research/humus/SGP2-2/11.2/ortho.sgp \\
+                        $DATASETS/annotation/gff/all.Hsap                    \\
+                      > $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO ;
+$SGPBIN/evaluation -tsa $ANALYSIS/sgp/rguigo/gff/all.Hsap                    \\
+                        $DATASETS/annotation/gff/all.Hsap                    \\
+                      > $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO.2 ;
+#
+IDIR="/home/ug/rguigo/research/humus/SGP2-2/11.2/sgp" ;
+ODIR="$ANALYSIS/sgp/rguigo" ;
+while read locus ;
+  do \{
+    cp -vapudf $IDIR/$locus.sgp     $ODIR/gff/$locus ;
+    perl -npe 's/^\\s+//o' $IDIR/$locus.hsp \\
+                                  > $ODIR/hsp/$locus ;
+    cp -vapudf $IDIR/$locus.sr      $ODIR/sr/$locus ;
+    cp -vapudf $IDIR/$locus.hsp-rs  $ODIR/hsp-rs/$locus ;
+    cp -vapudf $IDIR/$locus.tbx     $ODIR/tbx/$locus ;
+    \} ;
+  done < $HSAP ;
+#
+\nwendcode{}\nwbegindocs{79}\nwdocspar
+
+\subsctn{Printing gene-prediction statistics}
+
+\nwenddocs{}\nwbegincode{80}\sublabel{NWORT1E-BASM.2-L}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-L}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+### PRINTING GENE-PREDICTION EVALUATIONS
+ENSCRIPT="enscript -1C -Gjf Courier7 -M A4" ;
+#
+# GENEID evaluation
+$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.orimasked/eval_geneid.Hsap.orimasked ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.orimasked/eval_geneid_brief.Hsap.orimasked ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked ;
+#
+# GENSCAN evaluation
+$ENSCRIPT $ANALYSIS/genscan/Hsap.raw/eval_genscan.Hsap.raw ;
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.raw/eval_genscan_brief.Hsap.raw ;
+$ENSCRIPT $ANALYSIS/genscan/Hsap.orimasked/eval_genscan.Hsap.orimasked ;
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.orimasked/eval_genscan_brief.Hsap.orimasked ;
+$ENSCRIPT $ANALYSIS/genscan/Hsap.masked/eval_genscan.Hsap.masked ;
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.masked/eval_genscan_brief.Hsap.masked ;
+#
+# SLAM evaluation
+#
+# TWINSCAN evaluation
+$ENSCRIPT $ANALYSIS/twinscan/Hsap.20010722/eval_twinscan.Hsap.20010722 ;
+$ENSCRIPT -r $ANALYSIS/twinscan/Hsap.20010722/eval_twinscan_brief.Hsap.20010722 ;
+$ENSCRIPT $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan.Hsap.20010803 ;
+$ENSCRIPT -r $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan_brief.Hsap.20010803 ;
+#
+# SGP evaluation
+$ENSCRIPT $ANALYSIS/sgp/Hsap.raw/eval_sgp.Hsap.raw ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw/eval_sgp_brief.Hsap.raw ;
+$ENSCRIPT $ANALYSIS/sgp/Hsap.orimasked/eval_sgp.Hsap.orimasked ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.orimasked/eval_sgp_brief.Hsap.orimasked ;
+# SGP evaluation (Roderic's SGP variant)
+$ENSCRIPT $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO.2 ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked/eval_sgp.rguigo.orimasked ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked/eval_sgp_brief.rguigo.orimasked ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp.rguigo.orimasked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp_brief.rguigo.orimasked3X_pankaj_W5 ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp.rguigo.masked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp_brief.rguigo.masked3X_pankaj_W5 ;
+#
+$ENSCRIPT $ANALYSIS/sgp/rguigo_new.masked3X_pankaj_W5/eval_sgp.rguigo_new.masked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo_new.masked3X_pankaj_W5/eval_sgp_brief.rguigo_new.masked3X_pankaj_W5 ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo_new_genis.masked3X_pankaj_W5/eval_sgp.rguigo_new_genis.masked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo_new_genis.masked3X_pankaj_W5/eval_sgp_brief.rguigo_new_genis.masked3X_pankaj_W5 ;
+#
+\nwendcode{}\nwbegindocs{81}\nwdocspar
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Making plots for {\sgp}}
+
+\subsctn{Preparing GFF files}
+
+\nwenddocs{}\nwbegincode{82}\sublabel{NWORT1E-BASM.2-M}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-M}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# geneid and genscan files (Twinscan used as is)
+while read locus ;
+  do \{
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/genscan/Hsap.masked" ;
+    ODIR="$IDIR/ps/_tmp/genscan" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{OFS="\\t"\}
+          $1!~/^#|^[ \\t]*$/ \{
+              $9="gene_"$9;
+              print;
+          \}' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    IDIR="$ANALYSIS/geneid/Hsap.masked" ;
+    ODIR="$IDIR/ps/_tmp/geneid" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{OFS="\\t"\}
+          $1!~/^#|^[ \\t]*$/ \{
+              print;
+          \}' $IDIR/gff/$locus > $ODIR/$locus ;
+    \} ;
+  done < $HSAP ; 
+#
+# FullOrthologous against sequences
+while read locus ;
+  do \{
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/sgp/Hsap.orimasked" ;
+    ODIR="$IDIR/ps/_tmp/sgp" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SGP.homol" \};
+            print $0;
+            \}' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    IDIR="$ANALYSIS/sgp/Hsap.orimasked" ;
+    ODIR="$IDIR/ps/_tmp/tblastx" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="tblastx.homol"; $8="." \};
+            print $0;
+          \}' $IDIR/hsp-rs/$locus > $ODIR/$locus ;
+    \} ;
+  done < $HSAP ; 
+#
+# FullOrthologous against sequences (Roderic's SGP testing version)
+while read locus ;
+  do \{
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo" ;
+    ODIR="$IDIR/ps/_tmp/sgp" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SGP.homol" \};
+            print $0;
+            \}' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo" ;
+    ODIR="$IDIR/ps/_tmp/tblastx" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="tblastx.homol"; $8="." \};
+            print $0;
+            \}' $IDIR/hsp-rs/$locus > $ODIR/$locus ;
+    \} ;
+  done < $HSAP ; 
+#
+# 3X against sequences (Roderic's SGP testing version)
+while read locus ;
+  do \{
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5" ;
+    ODIR="$IDIR/ps/_tmp/sgp" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SGP.3X" \};
+            print $0;
+            \}' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    ODIR="$IDIR/ps/_tmp/tblastx" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="tblastx.3X"; $8="." \};
+            print $0;
+            \}' $IDIR/hsp-rs/$locus > $ODIR/$locus ;
+    \} ;
+  done < $HSAP ; 
+#
+\nwendcode{}\nwbegindocs{83}\nwdocspar
+
+\subsctn{Making plots with {\gps}}
+
+\nwenddocs{}\nwbegincode{84}\sublabel{NWORT1E-BASM.2-N}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-N}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+run_GFF2PS ()
+\{
+  # 
+  # run_GFF2PS - Making plots with gff2ps (a4+a3+wide formats)
+  #
+  # USAGE: run_GFF2PS working_dir "GFF_files_list"
+  #
+  # 'working_dir' where to save plots
+  # "GFF_files_list" a list of GFF files (with full path) to be plotted
+  #
+  ODIR="$1/gff2ps" ;
+  #
+  ChckDirs $ODIR \\
+           $ODIR/a3      $ODIR/a4      $ODIR/wide \\
+           $ODIR/a3/logs $ODIR/a4/logs $ODIR/wide/logs ;
+  #
+  while read locus ; # Requires previous $IDIR 
+    do \{
+      echo "### Plotting $locus" ;
+      GFFfiles="";
+      for wdirs in $2;
+        do \{ GFFfiles="$GFFfiles $wdirs/$locus" ; \} ; done ;
+      gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a4.rc   -- $GFFfiles \\
+              2>&1 > $ODIR/a4/$locus   | tee $ODIR/a4/logs/$locus ;
+      gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a3.rc   -- $GFFfiles \\
+              2>&1 > $ODIR/a3/$locus   | tee $ODIR/a3/logs/$locus ;
+      gff2ps -VC $PARAM/gff2ps/ortho_orimasked_wide.rc -- $GFFfiles \\
+              2>&1 > $ODIR/wide/$locus | tee $ODIR/wide/logs/$locus ;
+      \} ;
+    done < $HSAP ;
+\}
+#
+\nwendcode{}\nwbegindocs{85}\nwdocspar
+
+\subsubsctn{Human x FO Mouse (Roderic's SGP results)} %'
+
+We are going to display the following data: 
+
+\begin{tabular}{rl}
+annotation   & {\tt{}{\char36}DATASETS/annotation/gff/{\char36}locus} \\
+sgp          & {\tt{}{\char36}ANALYSIS/sgp/rguigo/ps/{\char95}tmp/sgp/{\char36}locus} \\
+geneid msk   & {\tt{}{\char36}ANALYSIS/geneid/Hsap.masked/ps/{\char95}tmp/geneid/{\char36}locus} \\
+twinscan msk & {\tt{}{\char36}ANALYSIS/twinscan/Hsap.20010803/gff/{\char36}locus} \\
+genscan msk  & {\tt{}{\char36}ANALYSIS/genscan/Hsap.masked/ps/{\char95}tmp/genscan/{\char36}locus} \\
+hsp-rs       & {\tt{}{\char36}ANALYSIS/sgp/rguigo/ps/{\char95}tmp/tblastx/{\char36}locus} \\
+repeats      & {\tt{}{\char36}DATASETS/masking/default/gff/{\char36}locus} \\
+\end{tabular}
+
+\nwenddocs{}\nwbegincode{86}\sublabel{NWORT1E-BASM.2-O}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-O}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+IDIR="$ANALYSIS/sgp/rguigo/ps" ;
+GFFIN="$DATASETS/annotation/gff" ;
+GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
+# GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid" ;
+GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
+# GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff" ;
+GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
+# GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
+# GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
+GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
+run_GFF2PS $IDIR "$GFFIN" ;
+#
+\nwendcode{}\nwbegindocs{87}\nwdocspar
+
+\subsubsctn{Human x WGS3X Mouse (Roderic's SGP results)} %'
+
+We are going to display the following data: 
+
+\begin{tabular}{rl}
+annotation   & {\tt{}{\char36}DATASETS/annotation/gff/{\char36}locus} \\
+sgp          & {\tt{}{\char36}ANALYSIS/sgp/rguigo.masked3X{\char95}pankaj{\char95}W5/ps/{\char95}tmp/sgp/{\char36}locus} \\
+geneid msk   & {\tt{}{\char36}ANALYSIS/geneid/Hsap.masked/ps/{\char95}tmp/geneid/{\char36}locus} \\
+% NOT YET: we do not know if we got twinscan results for 3XWGS
+%     twinscan msk & {\tt{}{\char36}ANALYSIS/twinscan/Hsap.20010803/gff/{\char36}locus} \\
+genscan msk  & {\tt{}{\char36}ANALYSIS/genscan/Hsap.masked/ps/{\char95}tmp/genscan/{\char36}locus} \\
+hsp-rs       & {\tt{}{\char36}ANALYSIS/sgp/rguigo/ps/{\char95}tmp/tblastx/{\char36}locus} \\
+repeats      & {\tt{}{\char36}DATASETS/masking/default/gff/{\char36}locus} \\
+\end{tabular}
+
+\nwenddocs{}\nwbegincode{88}\sublabel{NWORT1E-BASM.2-P}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-P}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+#### Human against Mouse 3X 
+IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps" ;
+GFFIN="$DATASETS/annotation/gff" ;
+GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
+# GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid" ;
+GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
+# NOT YET: we do not know if we got twinscan results for 3XWGS
+#     GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff" ;
+#     GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
+# GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
+# GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
+GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
+run_GFF2PS $IDIR "$GFFIN" ;
+#
+\nwendcode{}\nwbegindocs{89}\nwdocspar
+
+\subsubsctn{Human x WGS3X Mouse + FO Mouse (Roderic's SGP results)} %'
+
+\nwenddocs{}\nwbegincode{90}\sublabel{NWORT1E-BASM.2-Q}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-Q}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+#### Human against Mouse 3X + Human against Mouse Homologous 
+IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps_3X+FO" ;
+ChckDirs $IDIR ;
+GFFIN="" #################### (TO DEFINE!!!!)
+run_GFF2PS $IDIR "$GFFIN" ;
+#
+\nwendcode{}\nwbegindocs{91}\nwdocspar
+
+\subsubsctn{Customization files for {\gps}}
+
++ LAYOUT
+
+\nwenddocs{}\nwbegincode{92}\sublabel{NWORT1E-ComM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComM-1}}}\moddef{Common Layout Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM-1}}}\endmoddef
+zoom=*..*
+# major_tickmarks_num=10
+# minor_tickmarks_num=10
+major_tickmarks_nucleotides=1000
+minor_tickmarks_nucleotides=250
+#
+left_source_label_width=2.5cm
+show_blocks_top-bottom=off
+#
+group_label_scale=2
+#
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{93}\nwdocspar
+
+\nwenddocs{}\nwbegincode{94}\sublabel{NWORT1E-SetQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SetQ-1}}}\moddef{Settings for a3 paper size~{\nwtagstyle{}\subpageref{NWORT1E-SetQ-1}}}\endmoddef
+page_size=a3
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=4
+nucleotides_x_line=30000
+#
+\nwused{\\{NWORT1E-GFFe.2-1}}\nwendcode{}\nwbegindocs{95}\nwdocspar
+
+\nwenddocs{}\nwbegincode{96}\sublabel{NWORT1E-SetQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SetQ.2-1}}}\moddef{Settings for a4 paper size~{\nwtagstyle{}\subpageref{NWORT1E-SetQ.2-1}}}\endmoddef
+page_size=a4
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=3
+nucleotides_x_line=10000
+#
+\nwused{\\{NWORT1E-GFFe-1}}\nwendcode{}\nwbegindocs{97}\nwdocspar
+
+\nwenddocs{}\nwbegincode{98}\sublabel{NWORT1E-SetP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SetP-1}}}\moddef{Settings for wide display~{\nwtagstyle{}\subpageref{NWORT1E-SetP-1}}}\endmoddef
+page_bbox=wide,400,3000
+page_orientation=Landscape
+# page_number=1
+blocks_x_page=1
+# nucleotides_x_line=10000
+#
+\nwused{\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{99}\nwdocspar
+
++ FEATURES
+
+\nwenddocs{}\nwbegincode{100}\sublabel{NWORT1E-ComO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComO-1}}}\moddef{Common Features Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComO-1}}}\endmoddef
+*::fill_shape_mode=1_color
+gene::shape=none
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{101}\nwdocspar
+
+\nwenddocs{}\nwbegincode{102}\sublabel{NWORT1E-RepP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-RepP-1}}}\moddef{Repeats Features Settings~{\nwtagstyle{}\subpageref{NWORT1E-RepP-1}}}\endmoddef
+LINE/L2::feature_color=verydarkred
+SINE/Alu::feature_color=verydarkgreen
+SINE/MIR::feature_color=verydarkbrown
+LTR/ERV1::feature_color=verydarkblue
+Low_complexity::feature_color=verydarkyellow
+Simple_repeat::feature_color=verydarkorange
+#
+\nwnotused{Repeats\ Features\ Settings}\nwendcode{}\nwbegindocs{103}\nwdocspar
+
++ GROUPS
+
+\nwenddocs{}\nwbegincode{104}\sublabel{NWORT1E-ComL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComL-1}}}\moddef{Common Group Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComL-1}}}\endmoddef
+*::group_line=none
+*::group_shape=thick_line
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{105}\nwdocspar
+
++ SOURCES
+
+\nwenddocs{}\nwbegincode{106}\sublabel{NWORT1E-ComM.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComM.2-1}}}\moddef{Common Source Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM.2-1}}}\endmoddef
+*::unfold_grouped_ungrouped=off
+*::unfold_ungrouped_line=off
+*::unfold_grouped_line=off
+*::range=none
+*::source_line_color=black
+*::source_line=long_dotted
+#
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{107}\nwdocspar
+ 
+\nwenddocs{}\nwbegincode{108}\sublabel{NWORT1E-annQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-annQ-1}}}\moddef{annotation source settings~{\nwtagstyle{}\subpageref{NWORT1E-annQ-1}}}\endmoddef
+annotation::feature_color=darkgreen
+annotation::group_color=verydarkgreen
+annotation::left_label=ANNOTATION
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{109}\nwdocspar
+
+\nwenddocs{}\nwbegincode{110}\sublabel{NWORT1E-sgpJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-sgpJ-1}}}\moddef{sgp source settings~{\nwtagstyle{}\subpageref{NWORT1E-sgpJ-1}}}\endmoddef
+SGP.3X::feature_color=darkorange
+SGP.3X::group_color=verydarkorange
+SGP.3X::left_label=SGP 3X
+SGP.homol::feature_color=darkorange
+SGP.homol::group_color=verydarkorange
+SGP.homol::left_label=SGP
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{111}\nwdocspar
+
+\nwenddocs{}\nwbegincode{112}\sublabel{NWORT1E-genM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-genM-1}}}\moddef{geneid source settings~{\nwtagstyle{}\subpageref{NWORT1E-genM-1}}}\endmoddef
+geneid_v1.0::feature_color=lightviolet
+geneid_v1.0::group_color=darkviolet
+geneid_v1.0::left_label=GENEID
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{113}\nwdocspar
+
+\nwenddocs{}\nwbegincode{114}\sublabel{NWORT1E-twiO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-twiO-1}}}\moddef{twinscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-twiO-1}}}\endmoddef
+Twinscan-1.0::feature_color=verylightbrown
+Twinscan-1.0::group_color=brown
+Twinscan-1.0::left_label=TWINSCAN
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{115}\nwdocspar
+
+\nwenddocs{}\nwbegincode{116}\sublabel{NWORT1E-genN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-genN-1}}}\moddef{genscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-genN-1}}}\endmoddef
+genscan::feature_color=blue
+genscan::group_color=verydarkblue
+genscan::left_label=GENSCAN
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{117}\nwdocspar
+
+\nwenddocs{}\nwbegincode{118}\sublabel{NWORT1E-tblN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-tblN-1}}}\moddef{tblastx source settings~{\nwtagstyle{}\subpageref{NWORT1E-tblN-1}}}\endmoddef
+tblastx.3X::feature_color=red
+tblastx.3X::group_color=verydarkred
+tblastx.3X::left_label=TBLASTX 3X
+tblastx.homol::feature_color=red
+tblastx.homol::group_color=verydarkred
+tblastx.homol::left_label=TBLASTX
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{119}\nwdocspar
+
+\nwenddocs{}\nwbegincode{120}\sublabel{NWORT1E-repS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-repS-1}}}\moddef{repeatmasker source settings~{\nwtagstyle{}\subpageref{NWORT1E-repS-1}}}\endmoddef
+# RepeatMasker::feature_color=####
+# RepeatMasker::group_color=####
+RepeatMasker::left_label=REPEATS
+\nwnotused{repeatmasker\ source\ settings}\nwendcode{}\nwbegindocs{121}\nwdocspar
+
+\nwenddocs{}\nwbegincode{122}\sublabel{NWORT1E-oriP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-oriP-1}}}\moddef{orimasked source settings~{\nwtagstyle{}\subpageref{NWORT1E-oriP-1}}}\endmoddef
+# masked::feature_color=####
+# masked::group_color=####
+masked::left_label=MASKED
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}}\nwendcode{}\nwbegindocs{123}\nwdocspar
+
++ CUSTOM FILES
+
+\nwenddocs{}\nwbegincode{124}\sublabel{NWORT1E-GFFe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GFFe-1}}}\moddef{GFF2PS customization: ortho orimasked a4~{\nwtagstyle{}\subpageref{NWORT1E-GFFe-1}}}\endmoddef
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A4 PAGE   ##
+##########################################
+#
+# ortho_orimasked_a4.rc
+#
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+\LA{}Settings for a4 paper size~{\nwtagstyle{}\subpageref{NWORT1E-SetQ.2-1}}\RA{}
+\LA{}Common Layout Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM-1}}\RA{}
+#
+# F ############GENOMIC FEATURES############
+#
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComO-1}}\RA{}
+#
+# G ############GROUP FEATURES##############
+#
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComL-1}}\RA{}
+#
+# S ############SOURCE FEATURES#############
+#
+\LA{}Common Source Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM.2-1}}\RA{}
+\LA{}annotation source settings~{\nwtagstyle{}\subpageref{NWORT1E-annQ-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWORT1E-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWORT1E-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWORT1E-tblN-1}}\RA{}
+\LA{}orimasked source settings~{\nwtagstyle{}\subpageref{NWORT1E-oriP-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ ortho\ orimasked\ a4}\nwendcode{}\nwbegindocs{125}\nwdocspar
+
+\nwenddocs{}\nwbegincode{126}\sublabel{NWORT1E-GFFe.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GFFe.2-1}}}\moddef{GFF2PS customization: ortho orimasked a3~{\nwtagstyle{}\subpageref{NWORT1E-GFFe.2-1}}}\endmoddef
+##########################################
+##   CUSTOM FILE FOR GFF2PS - A3 PAGE   ##
+##########################################
+#
+# ortho_orimasked_a3.rc
+#
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+\LA{}Settings for a3 paper size~{\nwtagstyle{}\subpageref{NWORT1E-SetQ-1}}\RA{}
+\LA{}Common Layout Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM-1}}\RA{}
+#
+# F ############GENOMIC FEATURES############
+#
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComO-1}}\RA{}
+#
+# G ############GROUP FEATURES##############
+#
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComL-1}}\RA{}
+#
+# S ############SOURCE FEATURES#############
+#
+\LA{}Common Source Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM.2-1}}\RA{}
+\LA{}annotation source settings~{\nwtagstyle{}\subpageref{NWORT1E-annQ-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWORT1E-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWORT1E-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWORT1E-tblN-1}}\RA{}
+\LA{}orimasked source settings~{\nwtagstyle{}\subpageref{NWORT1E-oriP-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ ortho\ orimasked\ a3}\nwendcode{}\nwbegindocs{127}\nwdocspar
+
+\nwenddocs{}\nwbegincode{128}\sublabel{NWORT1E-GFFg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GFFg-1}}}\moddef{GFF2PS customization: ortho orimasked wide~{\nwtagstyle{}\subpageref{NWORT1E-GFFg-1}}}\endmoddef
+############################################
+##   CUSTOM FILE FOR GFF2PS - WIDE PAGE   ##
+############################################
+#
+# ortho_orimasked_wide.rc
+#
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+# L ######PAGE LAYOUT & PROGRAM OPTIONS######
+#
+\LA{}Settings for wide display~{\nwtagstyle{}\subpageref{NWORT1E-SetP-1}}\RA{}
+\LA{}Common Layout Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM-1}}\RA{}
+#
+# F ############GENOMIC FEATURES############
+#
+\LA{}Common Features Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComO-1}}\RA{}
+#
+# G ############GROUP FEATURES##############
+#
+\LA{}Common Group Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComL-1}}\RA{}
+#
+# S ############SOURCE FEATURES#############
+#
+\LA{}Common Source Settings~{\nwtagstyle{}\subpageref{NWORT1E-ComM.2-1}}\RA{}
+\LA{}annotation source settings~{\nwtagstyle{}\subpageref{NWORT1E-annQ-1}}\RA{}
+\LA{}sgp source settings~{\nwtagstyle{}\subpageref{NWORT1E-sgpJ-1}}\RA{}
+\LA{}geneid source settings~{\nwtagstyle{}\subpageref{NWORT1E-genM-1}}\RA{}
+\LA{}twinscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-twiO-1}}\RA{}
+\LA{}genscan source settings~{\nwtagstyle{}\subpageref{NWORT1E-genN-1}}\RA{}
+\LA{}tblastx source settings~{\nwtagstyle{}\subpageref{NWORT1E-tblN-1}}\RA{}
+\LA{}orimasked source settings~{\nwtagstyle{}\subpageref{NWORT1E-oriP-1}}\RA{}
+\nwnotused{GFF2PS\ customization:\ ortho\ orimasked\ wide}\nwendcode{}\nwbegindocs{129}\nwdocspar
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Preparing files on web site (as \textbf{gmaster})}
+
+\nwenddocs{}\nwbegincode{130}\sublabel{NWORT1E-BASM.2-R}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-R}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+toGTF ()
+\{
+  #
+  # toGTF - Reformating GFF files to GTF2
+  #
+  # USAGE: toGTF test_path ID_file
+  #
+  while read locus ;
+    do \{
+      echo "### Converting GFF to GTF2: $locus ..." ;
+      $BIN/gff2gtf.pl < $1/gff/$locus > $1/gtf2/$locus ;
+      \} ;
+    done < $2 ; 
+\}
+#
+toGTF $ANALYSIS/sgp/Hsap.orimasked   $HSAP ;
+toGTF $ANALYSIS/sgp/Hsap.raw         $HSAP ;
+toGTF $ANALYSIS/sgp/rguigo.orimasked $HSAP ;
+toGTF $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5 $HSAP ;
+toGTF $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5    $HSAP ;
+#
+\nwendcode{}\nwbegindocs{131}\nwdocspar
+
+\subsctn{Results on human/mouse homologous sequence comparison}
+
+\begin{comment}
+ODIR="./homologseqs" ;
+ANALYSIS="/projects/sgp/orthologous" ;
+HSAP="/projects/datasets/orthologous/id.Hsap" ;
+\end{comment}
+\nwenddocs{}\nwbegincode{132}\sublabel{NWORT1E-BASM.2-S}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-S}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Remember to set ODIR, ANALYSIS and HSAP by gmaster
+#
+CP="cp -vapudf" ;
+#
+BASE="$ANALYSIS/sgp/rguigo" ; # 20010802
+while read locus ;
+  do \{
+    echo "### Copying files for $locus ..." ;
+    $CP $BASE/ps/_tmp/sgp/$locus    $ODIR/$locus.gff ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SGP.homol" \};
+            print $0;
+            \}' $BASE/gtf2/$locus  > $ODIR/$locus.gtf ;
+    $CP $BASE/hsp/$locus            $ODIR/$locus.hsp ;
+    $CP $BASE/tbx/$locus            $ODIR/$locus.tbx ;
+    $CP $BASE/ps/gff2ps/a4/$locus   $ODIR/$locus.a4.ps ;
+    $CP $BASE/ps/gff2ps/a3/$locus   $ODIR/$locus.a3.ps ;
+  # $CP $BASE/ps/gff2ps/wide/$locus $ODIR/$locus.wide.ps ;
+    \} ;
+  done < $HSAP ; 
+#
+pushd $ODIR ;
+#
+cat Hsap_*.tbx > Homologous.tbx ; gzip -v Homologous.tbx ;
+cat Hsap_*.hsp > Homologous.hsp ;
+cat Hsap_*.gff > Homologous.gff ;
+cat Hsap_*.gtf > Homologous.gtf ;
+#
+tar -zcvf Homologous_TBX.tar.gz  Hsap_*.tbx  ;
+tar -zcvf Homologous_HSP.tar.gz  Hsap_*.hsp ;
+tar -zcvf Homologous_GFF.tar.gz  Hsap_*.gff ;
+tar -zcvf Homologous_GTF.tar.gz  Hsap_*.gtf ;
+tar -zcvf Homologous_A4PS.tar.gz Hsap_*.a4.ps ;
+tar -zcvf Homologous_A3PS.tar.gz Hsap_*.a3.ps ;
+#
+popd ;
+#
+\nwendcode{}\nwbegindocs{133}\nwdocspar
+
+\subsctn{Results on human/mouse 3X WGS sequence comparison}
+
+\begin{comment}
+ODIR="./hsapmus3X" ;
+ANALYSIS="/projects/sgp/orthologous" ;
+HSAP="/projects/datasets/orthologous/id.Hsap" ;
+\end{comment}
+\nwenddocs{}\nwbegincode{134}\sublabel{NWORT1E-BASM.2-T}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-T}}}\moddef{BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}}\plusendmoddef
+#
+# Remember to set ODIR, ANALYSIS and HSAP by gmaster
+#
+CP="cp -vapudf" ;
+#
+# BASE="$ANALYSIS/sgp/rguigo" ; # 20010731
+BASE="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5" ; # 20010817
+while read locus ;
+  do \{
+    echo "### Copying files for $locus ..." ;
+    $CP $BASE/ps/_tmp/sgp/$locus    $ODIR/$\{locus\}_MmusWGS3X.gff ;
+    gawk 'BEGIN\{ OFS="\\t" \}
+          \{ if ($1 !~ /^#|^[ \\t]*$/) \{ $2="SGP.3X" \};
+            print $0;
+            \}' $BASE/gtf2/$locus  > $ODIR/$\{locus\}_MmusWGS3X.gtf ;
+    $CP $BASE/hsp/$locus            $ODIR/$\{locus\}_MmusWGS3X.hsp ;
+    $CP $BASE/tbx/$locus            $ODIR/$\{locus\}_MmusWGS3X.tbx ;
+    $CP $BASE/ps/gff2ps/a4/$locus   $ODIR/$\{locus\}_MmusWGS3X.a4.ps ;
+    $CP $BASE/ps/gff2ps/a3/$locus   $ODIR/$\{locus\}_MmusWGS3X.a3.ps ;
+  # $CP $BASE/ps/gff2ps/wide/$locus $ODIR/$\{locus\}_MmusWGS3X.wide.ps ;
+    \} ;
+  done < $HSAP ; 
+#
+pushd $ODIR ;
+#
+cat Hsap_*.tbx > Hsap8seqs_MmusWGS3X.tbx ; gzip -v Hsap8seqs_MmusWGS3X.tbx ;
+cat Hsap_*.gff > Hsap8seqs_MmusWGS3X.gff ;
+cat Hsap_*.gtf > Hsap8seqs_MmusWGS3X.gtf ;
+cat Hsap_*.hsp > Hsap8seqs_MmusWGS3X.hsp ;
+#
+tar -zcvf Hsap8seqs_MmusWGS3X_TBX.tar.gz  Hsap_*.tbx  ;
+tar -zcvf Hsap8seqs_MmusWGS3X_HSP.tar.gz  Hsap_*.hsp ;
+tar -zcvf Hsap8seqs_MmusWGS3X_GFF.tar.gz  Hsap_*.gff ;
+tar -zcvf Hsap8seqs_MmusWGS3X_GTF.tar.gz  Hsap_*.gtf ;
+tar -zcvf Hsap8seqs_MmusWGS3X_A4PS.tar.gz Hsap_*.a4.ps ;
+tar -zcvf Hsap8seqs_MmusWGS3X_A3PS.tar.gz Hsap_*.a3.ps ;
+#
+popd ;
+#
+\nwendcode{}\nwbegindocs{135}\nwdocspar
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Related Tables and Plots}
+
+\subsctn{Annotated Human Genes for Homologous Sequences Set}
+
+\begin{comment}
+\nwenddocs{}\nwbegincode{136}\sublabel{NWORT1E-BASD-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-2}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+gawk 'BEGIN\{ 
+        lncnt=0;
+        ROWS=47;
+        header="\\\\begin\{tabular\}[t]\{|r|lrrc|\}\\n\\\\hline\\n";
+        header=header"\\\\lb\{1cm\}\{r\}\{SEQ\} & \\\\lb\{1.5cm\}\{l\}\{GENE\} & ";
+        header=header"\\\\lb\{1cm\}\{r\}\{START\} & \\\\lb\{1cm\}\{r\}\{END\} & ";
+        header=header"\\\\lb\{0.5cm\}\{c\}\{STR\} \\\\\\\\";
+        print "\\\\newcommand\{\\\\lb\}[3]\{\\\\makebox[#1][#2]\{#3\}\}\\n";
+        print "\\\\begin\{tabular\}\{c@\{\\\\quad\}c@\{\\\\quad\}c\}"; # main table
+        print header;
+        \}
+      \{ split($1,n,"_");
+        corr="";
+        if ( lncnt%ROWS == 0 && lncnt > 0 ) \{
+          print "\\\\hline\\n\\\\end\{tabular\}\\n &";
+          print header;
+          n[2]="\\\\raisebox\{-2.25ex\}\{\\\\shortstack\{" n[2] "\\\\\\\\(\\\\textit\{cont.\})\}\}";
+          corr="[-1.75ex]";
+          \} 
+        if ( cnt[n[2]] && n[2] !~ /\\\{cont\\.\\\}/ ) \{
+          n[2]=""; 
+          \} 
+        else \{ 
+          printf "\\\\hline\\n"; 
+          cnt[n[2]]++;
+          \}
+        printf "%8s & %-10s & %8s & %8s & %s \\\\\\\\%s\\n", n[2],$2,$3,$4,$5,corr;
+        lncnt++;
+        \}
+      END\{ 
+        print "\\\\hline\\n\\\\end\{tabular\}\\n\\\\\\\\";
+        print "\\\\end\{tabular\}"; # main table
+        \}' $DATASETS/genes.Hsap > $DOCS/tables/genelist.tex ;
+\nwendcode{}\nwbegindocs{137}\nwdocspar
+%$
+\end{comment}
+
+\begin{table}[!h]
+\hspace{-0.5cm}
+\fbox{
+\rotatebox{90}{
+\begin{minipage}[c][17.5cm][c]{22.5cm}
+\begin{center}
+\begin{scriptsize}
+ \input ./tables/genelist.tex
+\end{scriptsize}
+\caption[Annotated genes for the human sequences in the test set]{\label{tbl:genelist} Annotated genes for the human sequences in the {\data} test set.}\vskip 1ex
+\end{center}
+\end{minipage}
+}}
+\end{table}
+
+\newpage
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Main {\tt{}README} files}
+
+Here we provide the basic skeleton for the {\tt{}README} files we will generate on each main directories for the current dataset.
+
+\nwenddocs{}\nwbegincode{138}\sublabel{NWORT1E-DATF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-DATF-1}}}\moddef{DATASETS README~{\nwtagstyle{}\subpageref{NWORT1E-DATF-1}}}\endmoddef
+#
+#                 PREPARING DATASETS FOR
+\LA{}README common~{\nwtagstyle{}\subpageref{NWORT1E-READ-1}}\RA{}
+\LA{}BASH commands DATASETS~{\nwtagstyle{}\subpageref{NWORT1E-BASM-1}}\RA{}
+\nwnotused{DATASETS\ README}\nwendcode{}\nwbegindocs{139}\nwdocspar
+
+\nwenddocs{}\nwbegincode{140}\sublabel{NWORT1E-SGPA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SGPA-1}}}\moddef{SGP README~{\nwtagstyle{}\subpageref{NWORT1E-SGPA-1}}}\endmoddef
+#
+#               RUNNING GENE-PREDICTION FOR
+\LA{}README common~{\nwtagstyle{}\subpageref{NWORT1E-READ-1}}\RA{}
+\LA{}BASH commands ANALYSIS~{\nwtagstyle{}\subpageref{NWORT1E-BASM.2-1}}\RA{}
+\nwnotused{SGP\ README}\nwendcode{}\nwbegindocs{141}\nwdocspar
+
+\nwenddocs{}\nwbegincode{142}\sublabel{NWORT1E-SPLF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SPLF-1}}}\moddef{SPLICING README~{\nwtagstyle{}\subpageref{NWORT1E-SPLF-1}}}\endmoddef
+#
+#                  SPLICING ANALYSIS ON
+\LA{}README common~{\nwtagstyle{}\subpageref{NWORT1E-READ-1}}\RA{}
+\LA{}BASH commands SPLICING~{\nwtagstyle{}\subpageref{nw@notdef}}\RA{}
+\nwnotused{SPLICING\ README}\nwendcode{}\nwbegindocs{143}\nwdocspar
+
+\nwenddocs{}\nwbegincode{144}\sublabel{NWORT1E-READ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-READ-1}}}\moddef{README common~{\nwtagstyle{}\subpageref{NWORT1E-READ-1}}}\endmoddef
+#           8 ORTHOLOGOUS HUMAN/MOUSE SEQUENCES
+#
+# This README file was tangled from ORTHOLOGOUS_dataset.nw
+#
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+# EXPORTING GLOBAL VARS and DEFINING BASIC SHELL FUNCTIONS
+#
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWORT1E-BASQ-1}}\RA{}
+#
+\nwused{\\{NWORT1E-DATF-1}\\{NWORT1E-SGPA-1}\\{NWORT1E-SPLF-1}}\nwendcode{}\nwbegindocs{145}\nwdocspar
+
+\nwenddocs{}\nwbegincode{146}\sublabel{NWORT1E-tanI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-tanI-1}}}\moddef{tangling - READMEs~{\nwtagstyle{}\subpageref{NWORT1E-tanI-1}}}\endmoddef
+notangle -R"DATASETS README" $WORK/$nwfile.nw \\
+    > $DATASETS/README ;
+notangle -R"SGP README" $WORK/$nwfile.nw \\
+    > $ANALYSIS/README ;
+notangle -R"SPLICING README" $WORK/$nwfile.nw \\
+    > $SPLICING/README ;
+\nwnotused{tangling\ -\ READMEs}\nwendcode{}\nwbegindocs{147}\nwdocspar
+
+% \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Programs not included in this document}
+
+The \sgp used in this approach uses different scrips and programs. When we started it was still not well controled. Therefore we decided to copy the binary files from {\tt{}{\char126}rguigo/research/humus/SGP2-2/sggp2/bin} to {\tt{}/projects/sgp/bin/SGP2-2/}. The copied files were the following:
+
+\begin{center}
+\begin{tabular}{l}
+geneid          \\
+blast2gff       \\
+blast2hsp       \\
+human3iso.param \\
+\end{tabular}
+\end{center}
+
+The path variable in the sggp2 shell script has been changed to {\tt{}/projects/sgp/bin/SGP2-2/}.
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Scripts Central}
+
+\subsctn{{\tt{}fasta{\char95}renamer.pl}: renaming and reformating fasta files}
+
+\nwenddocs{}\nwbegincode{148}\sublabel{NWORT1E-RenR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-RenR-1}}}\moddef{Renaming fasta sequence IDs~{\nwtagstyle{}\subpageref{NWORT1E-RenR-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# fasta_renamer.pl infile descfile new_seq_id > outfile
+#
+#     Replacing sequence name 
+#     for single sequence fasta files
+#     and reformating sequence to 80 cols.
+#
+use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use Bio::Seq;
+use Bio::SeqIO;
+
+my ($infile,$descfile,$newid) = @ARGV;
+
+my $seqin  = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
+my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \\*STDOUT);
+
+open(DESC,"> $descfile");
+while (my $sequence = $seqin->next_seq()) \{
+    my ($sid,$len,$seq,$desc);
+    print STDERR "### READING FASTA... $newid\\n";
+    $sid  = $sequence->display_id();
+    $desc = $sequence->desc();
+    $len  = $sequence->length();
+    $seq  = $sequence->seq();
+    $sid =~ s/\\s+/\\_/og;
+    $seq =~ tr/[a-z]/[A-Z]/;
+    print STDERR "### WRITING FASTA... $newid\\n";
+    print DESC "$newid $sid $len $desc\\n";
+    $sequence->display_id($newid);
+    $sequence->desc('');
+    $sequence->seq($seq);
+    $seqout->write_seq($sequence);
+\}; # while 
+close(DESC);
+exit(0);
+\nwnotused{Renaming\ fasta\ sequence\ IDs}\nwendcode{}\nwbegindocs{149}\nwdocspar
+
+\newpage
+
+\subsctn{{\tt{}coords2gff.pl}: converting coords files into GFF}
+
+\nwenddocs{}\nwbegincode{150}\sublabel{NWORT1E-RawH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-RawH-1}}}\moddef{Raw coords to GFF~{\nwtagstyle{}\subpageref{NWORT1E-RawH-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# coords2gff.pl seqname < coords_file > GFF_file
+#
+#     Converting raw coords files to GFF
+#
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+
+my ($seqname,%gff,$string);
+$seqname = shift @ARGV;
+%gff = ();
+$string = ("\\%s\\t" x 8)."\\%s\\n";
+
+my $c = 0;
+while (<STDIN>) \{
+    next if /^\\s*$/o;
+    my ($l,$a,$b,$s,$r);
+    chomp;
+    $l = $_;
+    # print STDERR "$. (X): $l\\n";
+    $l =~ /^[><]/o && do \{
+        # print STDERR "$. (A): $l\\n";
+        $l =~ s/^([><])\\s*//o && ($s = $1);
+        $r = \\%\{ $gff\{++$c\} \};
+        ($r->\{gn_start\},$r->\{gn_end\},$r->\{gn_name\}) = split /\\s+/og, $l, 3;
+        $r->\{gn_name\} =~ s/\\s+$//og;
+        $r->\{gn_name\} =~ s/\\s+/_/og;
+        $r->\{strand\} = ($s eq '>') ? '+' : (($s eq '<') ? '-' : '.');
+        # $r->\{exons\} = ();
+        next;
+    \}; # $newgene ?
+    # print STDERR "$. (B): $l\\n";
+    ($a,$b,undef) = split /\\s+/og, $l, 3;
+    push @\{ $gff\{$c\}\{exons\} \}, [ $a, $b ];
+\}; # while
+# print STDERR Dumper(\\%gff);
+
+foreach my $i (1..$c) \{
+    my $r = \\%\{ $gff\{$i\} \};
+    my $exnum = scalar(@\{ $r->\{exons\} \});
+    print STDOUT "\\# $seqname - $r->\{gn_name\}: ".
+        ($exnum)." exons\\n";
+    printf STDOUT $string, 
+        $seqname,'annotation','Gene',$r->\{gn_start\},$r->\{gn_end\},
+        '.',$r->\{strand\},'.',$r->\{gn_name\};
+    $r->\{strand\} eq '-' && (@\{ $r->\{exons\} \} = reverse @\{ $r->\{exons\} \});
+    my ($lastori,$lastend,$lastfrm) = (0,0,0);
+    foreach my $j (0..$#\{ $r->\{exons\} \}) \{
+        my ($feat,$ori,$end,$frm);
+        ($ori,$end) = @\{ $\{ $r->\{exons\} \}[$j] \};
+      THIS: \{
+        ($j == 0) && do \{
+            $feat = 'First';
+            $exnum == 1 && ($feat = 'Single');
+            $frm = 0;
+            last THIS;
+        \}; # $d == 0
+        $frm = (($lastend - $lastori + 1) + $lastfrm) % 3;
+        ($j == $#\{ $r->\{exons\} \}) && do \{
+            $feat = 'Terminal';
+            last THIS;
+        \}; # $d == $#\{ $r->\{exons\} \}
+        $feat = 'Internal';
+      \}; # THIS
+        # print STDERR "$r->\{gn_name\} ($j): $ori $end $frm : ".
+        #              "$lastori $lastend $lastfrm\\n";
+        ($lastori,$lastend,$lastfrm) = ($ori,$end,$frm);
+        printf STDOUT $string, 
+            $seqname,'annotation',$feat,$ori,$end,
+            '.',$r->\{strand\},$frm,$r->\{gn_name\};
+    \}; # foreach @j
+\}; # foreach $i
+
+exit(0);
+\nwnotused{Raw\ coords\ to\ GFF}\nwendcode{}\nwbegindocs{151}\nwdocspar
+
+\newpage
+
+\subsctn{{\tt{}getfastamasked.pl}: retrieve masked from fasta sequences}
+
+\nwenddocs{}\nwbegincode{152}\sublabel{NWORT1E-MasR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MasR-1}}}\moddef{Masked from fasta sequences~{\nwtagstyle{}\subpageref{NWORT1E-MasR-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# getfastamasked.pl < fastafile > GFFfile
+#
+#     Retrieving masked regions coords from fasta files
+#
+use Bio::Seq;
+use Bio::SeqIO;
+\LA{}Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWORT1E-UseN-1}}\RA{}
+my $PROGRAM = 'getfastamasked.pl';
+my ($T,$F) = (1,0);
+my $DATE = localtime;
+my $USER = defined($ENV\{USER\}) ? $ENV\{USER\} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\\n";
+my $s = '### ';
+#
+my ($id,$seq) = ('','');
+my ($total_time);
+
+print STDERR << "+++EOR+++";
+$line$s\\n$s Running $PROGRAM\\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\\n$s\\n$line$s
++++EOR+++
+
+&main();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\\n$line$s\\n$s $PROGRAM FINISHED\\n$s
+$s TOTAL TIME: $total_time\\n$line
++++EOR+++
+
+exit(0);
+
+sub main() \{
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \\*STDIN);
+    while (my $sequence = $seqin->next_seq()) \{
+        my ($sid,$len,$seq,@nuc,@coords,$masked_flg,$match,$msk_num);
+        @coords = ();
+        \LA{}Setting sequence variables from fasta record~{\nwtagstyle{}\subpageref{NWORT1E-Seti-1}}\RA{}
+        \LA{}Finding masked regions coords~{\nwtagstyle{}\subpageref{NWORT1E-FinT-1}}\RA{}
+        \LA{}Writing masked regions coords in GFF~{\nwtagstyle{}\subpageref{NWORT1E-Wria-1}}\RA{}
+    \}; # while 
+\} # main
+\LA{}Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWORT1E-ComS-1}}\RA{}
+\nwnotused{Masked\ from\ fasta\ sequences}\nwendcode{}\nwbegindocs{153}\nwdocspar
+
+\nwenddocs{}\nwbegincode{154}\sublabel{NWORT1E-Seti-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-Seti-1}}}\moddef{Setting sequence variables from fasta record~{\nwtagstyle{}\subpageref{NWORT1E-Seti-1}}}\endmoddef
+print STDERR "### READING FASTA............\\n";
+$sid  = $sequence->display_id();
+$len  = $sequence->length();
+$seq  = $sequence->seq();
+\nwused{\\{NWORT1E-MasR-1}}\nwendcode{}\nwbegindocs{155}\nwdocspar
+
+\nwenddocs{}\nwbegincode{156}\sublabel{NWORT1E-FinT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-FinT-1}}}\moddef{Finding masked regions coords~{\nwtagstyle{}\subpageref{NWORT1E-FinT-1}}}\endmoddef
+print STDERR "###         PARSING SEQUENCE: $sid ($len bp)\\n";
+@nuc = split //og, $seq;
+($masked_flg,$match) = ($F,$F) ;
+for (my $n = 0; $n <= $#nuc; $n++) \{
+    $match = ( $nuc[$n] =~ /[NnXx]/o ) ? $T : $F;
+    ( !$masked_flg && $match ) && do \{
+        $masked_flg = $T ;
+        # $n contains the last non-masked nucleotide
+        push @coords, ($n + 1);
+        next;
+    \};
+    $masked_flg && do \{
+        $match && (next);
+        $masked_flg = $F ;
+        # $n contains the last masked nucleotide now
+        push @coords, $n;
+    \};
+\}; # for nuc in $seq
+# if last nucleotide is masked, previous loop not includes its coord. 
+$masked_flg &&( push @coords, $len);
+\nwused{\\{NWORT1E-MasR-1}}\nwendcode{}\nwbegindocs{157}\nwdocspar
+
+\nwenddocs{}\nwbegincode{158}\sublabel{NWORT1E-Wria-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-Wria-1}}}\moddef{Writing masked regions coords in GFF~{\nwtagstyle{}\subpageref{NWORT1E-Wria-1}}}\endmoddef
+$msk_num = scalar(@coords) / 2;
+print STDERR "###         WRITING GFF COORDS: $msk_num masked regions found.\\n";
+for (my $n = 0; $n <= $#coords; $n+=2) \{
+    my $GFFstring = ("\\%s\\t" x 5).(".\\t" x 3).".\\n";
+    printf STDOUT $GFFstring, $sid, "masked", "masked", @coords[$n..($n + 1)];
+\}; # for coords in @coords
+\nwused{\\{NWORT1E-MasR-1}}\nwendcode{}\nwbegindocs{159}\nwdocspar
+
+\newpage
+
+\subsctn{{\tt{}splitfastaseq.pl}: split large fasta sequences}
+
+\nwenddocs{}\nwbegincode{160}\sublabel{NWORT1E-BreO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BreO-1}}}\moddef{Breaking fasta sequences~{\nwtagstyle{}\subpageref{NWORT1E-BreO-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# splitfastaseq.pl \\
+#     seqlength overlap < fastafile > output
+#
+#     Breaking large fasta sequences to build 
+#     databases for running tblastx faster
+# 
+use lib qw( /usr/lib/perl5/site_perl/5.005/ );
+use Bio::Seq;
+use Bio::SeqIO;
+use Benchmark;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $PROGRAM = 'splitfastaseq.pl';
+my $DATE = localtime;
+my $USER = defined($ENV\{USER\}) ? $ENV\{USER\} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\\n";
+my $s = '### ';
+#
+my ($id,$ln,$sq) = ('',0,'');
+my ($total_time,$seq);
+my ($maxlen,$overlap) = @ARGV;
+
+print STDERR << "+++EOR+++";
+$line$s\\n$s Running $PROGRAM\\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\\n$s\\n$line$s
++++EOR+++
+
+&getseq();
+&splitseq();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\\n$line$s\\n$s $PROGRAM FINISHED\\n$s
+$s TOTAL TIME: $total_time\\n$line
++++EOR+++
+
+exit(0);
+
+sub getseq() \{ # assuming here single sequence input fasta files
+    print STDERR "$s Processing fasta file.\\n";
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \\*STDIN);
+    while (my $iseq = $seqin->next_seq()) \{
+        $id = $iseq->display_id();
+        $ln = $iseq->length();
+        $sq = $iseq->seq();
+        last; # to make sure that we only catch a single fasta sequence
+    \}; # while next_seq
+    $seq = Bio::Seq->new( -seq => $sq , -id => $id );
+    print STDERR "$s Processing DONE: ".(&timing($F))."\\n$s\\n";
+\} # getseq
+#
+sub splitseq() \{
+    my ($e,$sid,$ssq,$nseq,$wseq);
+    my ($t,$sqlen) = (1,($maxlen + $overlap - 1));
+    print STDERR "$s Creating splitted-sequence fasta file ($ln nt).\\n";
+    my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \\*STDOUT);
+    while ($t < $ln) \{
+         $e = $t + $sqlen;
+         ($e > $ln) && ($e = $ln);
+         $sid = "$id\\_$t\\_$e";
+         print STDERR "$s --> $id : from $t to $e (".($e - $t + 1)." nt)\\n";
+         $ssq = $seq->subseq($t,$e);
+         $t += $maxlen;
+         #
+         $wseq = Bio::Seq->new( -seq => $ssq , -id => $sid );
+         $seqout->write_seq($wseq);
+    \}; # while  
+    print STDERR "$s Splitting DONE: ".(&timing($F))."\\n$s\\n";
+\} # splitseq
+#
+sub timing() \{
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+\} # timing
+\nwnotused{Breaking\ fasta\ sequences}\nwendcode{}\nwbegindocs{161}\nwdocspar
+
+\newpage
+
+\subsctn{{\tt{}gff2gtf.pl}: translating GFF to GTF2}
+
+\nwenddocs{}\nwbegincode{162}\sublabel{NWORT1E-GFFA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GFFA-1}}}\moddef{GFF to GTF~{\nwtagstyle{}\subpageref{NWORT1E-GFFA-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# gff2gtf.pl < infile > outfile
+#
+#     Converting GFF formated records into GTF
+#
+# use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use Benchmark;
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $PROGRAM = 'gff2gtf.pl';
+my $DATE = localtime;
+my $USER = defined($ENV\{USER\}) ? $ENV\{USER\} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\\n";
+my $s = '### ';
+#
+print STDERR << "+++EOR+++";
+$line$s\\n$s Running $PROGRAM\\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\\n$s\\n$line$s
++++EOR+++
+
+my %genes;
+my @f = ();
+my $gcnt = 0;
+while (<>) \{
+    /^\\# Gene/o && do \{
+        $gcnt++;
+        $genes\{$gcnt\}\{COMMENT\} = $_;
+        next;
+    \};
+    next if /^\\#/o;
+    next if /^\\s*$/o;
+    chomp;
+    @f = split /\\s+/og, $_;
+    push @\{ $genes\{$gcnt\}\{FEATURES\} \}, [ @f[0..8] ];
+\}; # while
+
+# print STDERR Dumper(\\%genes);
+
+my $GTFrec = ("\\%s\\t" x 8)."\\%s\\n";
+foreach my $i (1..$gcnt) \{
+    print STDOUT $genes\{$i\}\{COMMENT\};
+    my ($main,$tail_O,$tail_E,$groupflg,$gtfgroup) = ('','','',$T,'');
+    foreach my $j (0..$#\{ $genes\{$i\}\{FEATURES\} \}) \{
+        my ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group,
+            $cdsfeat,$cdsori,$cdsend,$t);
+        ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group) =
+                @\{ $genes\{$i\}\{FEATURES\}[$j] \};
+        $score = '.';
+        $groupflg && do \{
+            $group =~ s/gene_//o;
+            $t = &fill_left($group,3,"0");
+            $gtfgroup = "gene_id $t; transcript_id $t.1";
+            $groupflg = $F;
+        \}; # $groupflg
+      FEATS: \{
+          $feat eq 'Single' && do \{
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              last FEATS;
+          \}; # Single
+          $feat eq 'First' && do \{
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);              
+              last FEATS;
+          \}; # First
+          $feat eq 'Terminal' && do \{
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+                  # only if nucleotides of stop codon not included
+                  #     $strand eq '+' && ($end = $end + 3);
+                  #     $strand eq '-' && ($start = $start - 3);
+              # last FEATS;
+          \}; # Terminal
+        \}; # FEATS
+        $feat = 'CDS';
+        $main .= sprintf($GTFrec,$seq,$source,$feat,$start,$end,
+                         $score,$strand,$frame,$gtfgroup); 
+    \}; # foreach $j
+    print STDOUT "$main$tail_O$tail_E";
+\}; # foreach $i
+
+my $total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\\n$line$s\\n$s $PROGRAM FINISHED\\n$s
+$s TOTAL TIME: $total_time\\n$line
++++EOR+++
+
+exit(0);
+
+sub get_start() \{
+    my ($o,$e,$s) = @_;
+    my $str = "start_codon";
+    $s eq '+' && do \{
+       return $str, $o, ($o + 2);
+    \}; # forward
+    $s eq '-' && do \{
+       return $str, ($e - 2), $e;
+    \}; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+\} # 
+#
+sub get_final() \{
+    my ($o,$e,$s) = @_;
+    my $str = "stop_codon";
+    $s eq '+' && do \{
+        return $str, ($e - 2), $e;
+           # only if nucleotides of stop codon not included
+           #     return $str, ($e + 1), ($e + 3);
+    \}; # forward
+    $s eq '-' && do \{
+        return $str, $o, ($o + 2);
+           # only if nucleotides of stop codon not included
+           #     return $str, ($o - 3), ($o -1);
+    \}; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+\} # 
+#
+sub fill_left() \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \} 
+#
+sub timing() \{
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+\} # timing
+\nwnotused{GFF\ to\ GTF}\nwendcode{}\nwbegindocs{163}\nwdocspar
+
+\newpage
+
+\sctn{Common code blocks}
+
+\subsctn{PERL scripts}
+
+\nwenddocs{}\nwbegincode{164}\sublabel{NWORT1E-PERC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}}\moddef{PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}}\endmoddef
+#!/usr/bin/perl -w
+# This is perl, version 5.005_03 built for i386-linux
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+use strict;
+\nwused{\\{NWORT1E-RenR-1}\\{NWORT1E-RawH-1}\\{NWORT1E-MasR-1}\\{NWORT1E-BreO-1}\\{NWORT1E-GFFA-1}\\{NWORT1E-GreM-1}\\{NWORT1E-MerP-1}\\{NWORT1E-MasQ-1}}\nwendcode{}\nwbegindocs{165}\nwdocspar
+
+\nwenddocs{}\nwbegincode{166}\sublabel{NWORT1E-GloQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GloQ-1}}}\moddef{Global Constants - Boolean~{\nwtagstyle{}\subpageref{NWORT1E-GloQ-1}}}\endmoddef
+my ($T,$F) = (1,0); # for 'T'rue and 'F'alse
+\nwnotused{Global\ Constants\ -\ Boolean}\nwendcode{}\nwbegindocs{167}\nwdocspar
+
+We also set here the date when the script is running and who is the user running it.
+
+\nwenddocs{}\nwbegincode{168}\sublabel{NWORT1E-GloR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GloR-1}}}\moddef{Global Vars - User and Date~{\nwtagstyle{}\subpageref{NWORT1E-GloR-1}}}\endmoddef
+my $DATE = localtime;
+my $USER = defined($ENV\{USER\}) ? $ENV\{USER\} : '??????';
+\nwnotused{Global\ Vars\ -\ User\ and\ Date}\nwendcode{}\nwbegindocs{169}\nwdocspar
+
+
+\subsubsctn{Timing our scripts}
+
+The '{\tt{}Benchmark}' module encapsulates a number of routines to help to figure out how long it takes to execute a piece of code and the whole script.
+
+\nwenddocs{}\nwbegincode{170}\sublabel{NWORT1E-UseN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-UseN-1}}}\moddef{Use Modules - Benchmark~{\nwtagstyle{}\subpageref{NWORT1E-UseN-1}}}\endmoddef
+use Benchmark;
+  \LA{}Timer ON~{\nwtagstyle{}\subpageref{NWORT1E-Tim8-1}}\RA{}
+\nwused{\\{NWORT1E-MasR-1}}\nwendcode{}\nwbegindocs{171}\nwdocspar
+
+See '{\tt{}man\ Benchmark}' for further info about this package. 
+We set an array to keep record of timing for each section.
+
+\nwenddocs{}\nwbegincode{172}\sublabel{NWORT1E-Tim8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-Tim8-1}}}\moddef{Timer ON~{\nwtagstyle{}\subpageref{NWORT1E-Tim8-1}}}\endmoddef
+my @Timer = (new Benchmark);
+\nwused{\\{NWORT1E-UseN-1}}\nwendcode{}\nwbegindocs{173}\nwdocspar
+
+\nwenddocs{}\nwbegincode{174}\sublabel{NWORT1E-ComS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComS-1}}}\moddef{Common PERL subs - Benchmark~{\nwtagstyle{}\subpageref{NWORT1E-ComS-1}}}\endmoddef
+sub timing() \{
+    push @Timer, (new Benchmark);
+    # partial time 
+    $_[0] || 
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+\} # timing
+\nwused{\\{NWORT1E-MasR-1}}\nwendcode{}\nwbegindocs{175}\nwdocspar
+
+
+\subsubsctn{Printing complex Data Structures}
+
+With '{\tt{}Data::Dumper}' we are able to pretty print complex data structures for debugging them.
+
+
+\nwenddocs{}\nwbegincode{176}\sublabel{NWORT1E-UseK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-UseK-1}}}\moddef{Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWORT1E-UseK-1}}}\endmoddef
+use Data::Dumper;
+local $Data::Dumper::Purity = 0;
+local $Data::Dumper::Deepcopy = 1;
+\nwused{\\{NWORT1E-GreM-1}}\nwendcode{}\nwbegindocs{177}\nwdocspar
+
+An example on how to use: {\tt{}print\ STDERR\ Dumper({\char92}{\char37}var{\char95}ref)} 
+
+\subsubsctn{Common functions}
+
+\nwenddocs{}\nwbegincode{178}\sublabel{NWORT1E-SkiV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SkiV-1}}}\moddef{Skip comments and empty records~{\nwtagstyle{}\subpageref{NWORT1E-SkiV-1}}}\endmoddef
+next if /^\\#/o;
+next if /^\\s*$/o;
+chomp;
+\nwused{\\{NWORT1E-MaiM-1}\\{NWORT1E-MaiF.2-3}\\{NWORT1E-MaiF.2-4}\\{NWORT1E-MaiG.2-3}}\nwendcode{}\nwbegindocs{179}\nwdocspar
+
+\nwenddocs{}\nwbegincode{180}\sublabel{NWORT1E-ComQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComQ-1}}}\moddef{Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWORT1E-ComQ-1}}}\endmoddef
+#
+sub max() \{
+    my $z = shift @_;
+    foreach my $l (@_) \{ $z = $l if $l > $z \};
+    return $z;
+\} # max
+sub min() \{
+    my $z = shift @_;
+    foreach my $l (@_) \{ $z = $l if $l < $z \};
+    return $z;
+\} # min
+\nwused{\\{NWORT1E-MasQ-1}}\nwendcode{}\nwbegindocs{181}\nwdocspar
+
+\nwenddocs{}\nwbegincode{182}\sublabel{NWORT1E-ComS.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComS.2-1}}}\moddef{Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWORT1E-ComS.2-1}}}\endmoddef
+#
+sub fill_right() \{ $_[0].($_[2] x ($_[1] - length($_[0]))) \}
+sub fill_left()  \{ ($_[2] x ($_[1] - length($_[0]))).$_[0] \}
+sub fill_mid()   \{ 
+    my $l = length($_[0]);
+    my $k = int(($_[1] - $l)/2);
+    ($_[2] x $k).$_[0].($_[2] x ($_[1] - ($l+$k)));
+\} # fill_mid
+\nwused{\\{NWORT1E-GreM-1}}\nwendcode{}\nwbegindocs{183}\nwdocspar
+
+These functions are used to report to STDERR a single char for each record processed (useful for reporting parsed records).
+
+\nwenddocs{}\nwbegincode{184}\sublabel{NWORT1E-ComQ.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComQ.2-1}}}\moddef{Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWORT1E-ComQ.2-1}}}\endmoddef
+#
+sub counter \{ # $_[0]~current_pos++ $_[1]~char
+    print STDERR "$_[1]";
+    (($_[0] % 50) == 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter
+#
+sub counter_end \{ # $_[0]~current_pos   $_[1]~char
+    (($_[0] % 50) != 0) && (print STDERR "[".&fill_left($_[0],6,"0")."]\\n");
+\} # counter_end
+\nwused{\\{NWORT1E-GreM-1}}\nwendcode{}\nwbegindocs{185}\nwdocspar
+
+\nwenddocs{}\nwbegincode{186}\sublabel{NWORT1E-GloL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GloL-1}}}\moddef{Global Vars - Counter~{\nwtagstyle{}\subpageref{NWORT1E-GloL-1}}}\endmoddef
+my ($n,$c); # counter and char (for &counter function)
+\nwused{\\{NWORT1E-GreM-1}}\nwendcode{}\nwbegindocs{187}\nwdocspar
+
+
+\subsubsctn{Common functions for reporting program processes}
+\label{sec:messagerpt}
+
+Function '{\tt{}report}' requires that a hash variable '{\tt{}{\char37}MessageList}' has been set, such hash contains the strings for each report message we will need. The first parameter for '{\tt{}report}' is a key for that hash, in order to retrieve the message string, the other parameters passed are processed by the {\tt{}sprintf} function on that string.
+
+\nwenddocs{}\nwbegincode{188}\sublabel{NWORT1E-ComP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComP-1}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWORT1E-ComP-1}}}\endmoddef
+sub report() \{ print STDERR sprintf($MessageList\{ shift @_ \},@_) \}
+\nwalsodefined{\\{NWORT1E-ComP-2}}\nwnotused{Common\ PERL\ subs\ -\ STDERR}\nwendcode{}\nwbegindocs{189}\nwdocspar
+
+The same happens to '{\tt{}warn}' function which also requires a hash variable '{\tt{}{\char37}ErrorList}' containing the error messages.
+
+\nwenddocs{}\nwbegincode{190}\sublabel{NWORT1E-ComP-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-ComP-2}}}\moddef{Common PERL subs - STDERR~{\nwtagstyle{}\subpageref{NWORT1E-ComP-1}}}\plusendmoddef
+sub warn() \{ print STDERR sprintf($ErrorList\{ shift @_ \}, @_) \}
+\nwendcode{}\nwbegindocs{191}\nwdocspar
+
+\subsctn{{\biop} modules}
+
+\def\bioseq{\htmladdnormallinkfoot{{\tt{}Bio::Seq}}{http://bioperl.org/Core/POD/Bio/Seq.html}}
+\def\bioseqIO{\htmladdnormallinkfoot{{\tt{}Bio::SeqIO}}{http://bioperl.org/Core/POD/Bio/SeqIO.html}}
+
+{\bioseq} is the {\biop} main sequence object while {\bioseqIO} is the {\bp} support for sequence input/output into files.
+
+\nwenddocs{}\nwbegincode{192}\sublabel{NWORT1E-UseM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-UseM-1}}}\moddef{Use Modules - Bio::Seq~{\nwtagstyle{}\subpageref{NWORT1E-UseM-1}}}\endmoddef
+use Bio::Seq;
+use Bio::SeqIO;
+\nwused{\\{NWORT1E-UseI-1}}\nwendcode{}\nwbegindocs{193}\nwdocspar
+ 
+
+\subsctn{AWK scripts}
+
+\nwenddocs{}\nwbegincode{194}\sublabel{NWORT1E-GAWC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GAWC-1}}}\moddef{GAWK shebang~{\nwtagstyle{}\subpageref{NWORT1E-GAWC-1}}}\endmoddef
+#!/usr/bin/gawk -f
+# GNU Awk 3.0.4
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+\nwnotused{GAWK\ shebang}\nwendcode{}\nwbegindocs{195}\nwdocspar
+
+\subsctn{BASH scripts}
+
+\nwenddocs{}\nwbegincode{196}\sublabel{NWORT1E-BASC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASC-1}}}\moddef{BASH shebang~{\nwtagstyle{}\subpageref{NWORT1E-BASC-1}}}\endmoddef
+#!/usr/bin/bash
+# GNU bash, version 2.03.6(1)-release (i386-redhat-linux-gnu)
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+SECONDS=0 # Reset Timing
+# Which script are we running...
+L="####################"
+\{ echo "$L$L$L$L";
+  echo "### RUNNING [$0]";
+  echo "### Current date:`date`";
+  echo "###"; \} 1>&2;
+\nwused{\\{NWORT1E-wea7-1}\\{NWORT1E-LaT8-1}}\nwendcode{}\nwbegindocs{197}\nwdocspar
+
+\nwenddocs{}\nwbegincode{198}\sublabel{NWORT1E-BASF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASF-1}}}\moddef{BASH script end~{\nwtagstyle{}\subpageref{NWORT1E-BASF-1}}}\endmoddef
+\{ echo "###"; echo "### Execution time for [$0] : $SECONDS secs";
+  echo "$L$L$L$L";
+  echo ""; \} 1>&2;
+#
+exit 0
+\nwused{\\{NWORT1E-wea7-1}\\{NWORT1E-LaT8-1}}\nwendcode{}\nwbegindocs{199}\nwdocspar
+
+\subsctn{Version control tags}
+
+This document is under Revision Control System (RCS). The version you are currently reading is the following:
+
+\nwenddocs{}\nwbegincode{200}\sublabel{NWORT1E-VerM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}}\moddef{Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}}\endmoddef
+# $Id: ORTHOLOGOUS_dataset.tex,v 1.1 2001-10-01 14:09:27 jabril Exp $
+\nwused{\\{NWORT1E-GFFe-1}\\{NWORT1E-GFFe.2-1}\\{NWORT1E-GFFg-1}\\{NWORT1E-READ-1}\\{NWORT1E-PERC-1}\\{NWORT1E-GAWC-1}\\{NWORT1E-BASC-1}\\{NWORT1E-gffU-1}\\{NWORT1E-gffV-1}}\nwendcode{}\nwbegindocs{201}\nwdocspar
+
+\newpage
+
+\sctn{Extracting code blocks from this document}
+
+From this file we can obtain both the code and the
+documentation. The following instructions are needed:
+
+\subsctn{Extracts Script code chunks from the {\tt{}noweb} file} % \\[-0.5ex]
+
+Remember when tangling that '-L' option allows you to include program line-numbering relative to original {\tt{}noweb} file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
+
+\nwenddocs{}\nwbegincode{202}\sublabel{NWORT1E-tan8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-tan8-1}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWORT1E-tan8-1}}}\endmoddef
+# PBS
+notangle -R"PBS tblastx shell" $WORK/$nwfile.nw \\
+    > /home/ug/jabril/no_backup/PBS/PBS.sh ;
+chmod a+x /home/ug/jabril/no_backup/PBS/PBS.sh ;
+# showing line numbering comments in program (DEVEL VERSIONS)
+notangle -L -R"Renaming fasta sequence IDs" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/fasta_renamer.pl ;
+notangle -L -R"Raw coords to GFF" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/coords2gff.pl ;
+notangle -L -R"Masked from fasta sequences" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/getfastamasked.pl ;
+notangle -L -R"Breaking fasta sequences" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/splitfastaseq.pl ;
+notangle -L -R"GFF to GTF" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/gff2gtf.pl ;
+# making them runnable
+chmod a+x $BIN/fasta_renamer.pl ;
+chmod a+x $BIN/coords2gff.pl ;
+chmod a+x $BIN/getfastamasked.pl ;
+chmod a+x $BIN/splitfastaseq.pl ;
+chmod a+x $BIN/gff2gtf.pl ;
+#
+\nwalsodefined{\\{NWORT1E-tan8-2}\\{NWORT1E-tan8-3}\\{NWORT1E-tan8-4}}\nwnotused{tangling}\nwendcode{}\nwbegindocs{203}\nwdocspar
+
+\subsctn{Extracting different Config Files} % \\[-0.5ex]
+
+\nwenddocs{}\nwbegincode{204}\sublabel{NWORT1E-tan8-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-tan8-2}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWORT1E-tan8-1}}}\plusendmoddef
+#
+ChckDirs $PARAM/gff2ps $PARAM/gff2aplot ;
+#
+notangle -R"GFF2APLOT customization: ortho masked" $WORK/$nwfile.nw \\
+         > $PARAM/gff2aplot/ortho_masked_a4.rc ;
+#
+notangle -R"GFF2PS customization: ortho orimasked a4" $WORK/$nwfile.nw \\
+         > $PARAM/gff2ps/ortho_orimasked_a4.rc ;
+notangle -R"GFF2PS customization: ortho orimasked a3" $WORK/$nwfile.nw \\
+         > $PARAM/gff2ps/ortho_orimasked_a3.rc ;
+notangle -R"GFF2PS customization: ortho orimasked wide" $WORK/$nwfile.nw \\
+         > $PARAM/gff2ps/ortho_orimasked_wide.rc ;
+#
+\nwendcode{}\nwbegindocs{205}%$
+
+\subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
+
+\nwenddocs{}\nwbegincode{206}\sublabel{NWORT1E-tan8-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-tan8-3}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWORT1E-tan8-1}}}\plusendmoddef
+#
+notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+chmod a+x $WORK/nw2tex $WORK/ltx;
+#
+\nwendcode{}\nwbegindocs{207}\nwdocspar
+
+\nwenddocs{}\nwbegincode{208}\sublabel{NWORT1E-wea7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-wea7-1}}}\moddef{weaving~{\nwtagstyle{}\subpageref{NWORT1E-wea7-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWORT1E-BASC-1}}\RA{}
+# weaving and LaTeXing
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWORT1E-BASQ-1}}\RA{}
+noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
+pushd $DOCS/ ;
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd;
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWORT1E-BASF-1}}\RA{}
+\nwnotused{weaving}\nwendcode{}\nwbegindocs{209}\nwdocspar
+
+\nwenddocs{}\nwbegincode{210}\sublabel{NWORT1E-LaT8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-LaT8-1}}}\moddef{LaTeXing~{\nwtagstyle{}\subpageref{NWORT1E-LaT8-1}}}\endmoddef
+\LA{}BASH shebang~{\nwtagstyle{}\subpageref{NWORT1E-BASC-1}}\RA{}
+# only LaTeXing
+\LA{}BASH Environment Variables~{\nwtagstyle{}\subpageref{NWORT1E-BASQ-1}}\RA{}
+pushd $DOCS/ ;
+latex $nwfile.tex ; 
+latex $nwfile.tex ; 
+latex $nwfile.tex ;
+dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
+popd ;
+\LA{}BASH script end~{\nwtagstyle{}\subpageref{NWORT1E-BASF-1}}\RA{}
+\nwnotused{LaTeXing}\nwendcode{}\nwbegindocs{211}%$
+
+\subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
+
+\nwenddocs{}\nwbegincode{212}\sublabel{NWORT1E-BASQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASQ-1}}}\moddef{BASH Environment Variables~{\nwtagstyle{}\subpageref{NWORT1E-BASQ-1}}}\endmoddef
+#
+# NOWEB Document Variables
+#
+WORK="$HOME/development/projects/sgp/orthologous/" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="ORTHOLOGOUS_dataset" ;
+export WORK BIN PARAM DOCS DATA nwfile ;
+#
+# ORTHOLOGOUS Dataset Variables
+#
+DATASETS="/projects/datasets/orthologous";
+ANALYSIS="/projects/sgp/orthologous" ;
+SGPBIN="/projects/sgp/bin" ;
+SGPPARAM="$SGPBIN/param" ;
+#
+ID="$DATASETS/id" ;
+HSAP="$DATASETS/id.Hsap" ;
+MMUS="$DATASETS/id.Mmus" ;
+export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
+#
+SPLICING="/projects/splicing/chr22" ;
+export SPLICING ;
+#
+# BASIC Shell Functions
+#
+ChckDirs ()
+\{
+  #
+  # USAGE: ChckDirs <path_list>
+  #
+  for name in "$@" ;
+    do \{
+         [ -d "$name" ] && 
+           echo "### Directory Already Exist: $name" ||
+             mkdir --verbose $name ;
+      \} ;
+    done ;
+\}
+#
+renameSEQS ()
+\{
+  #
+  # USAGE: renameSEQS ls_command reg_exp substitution_value
+  # Example: renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA'
+  #
+  $1 | while read n ; 
+    do \{
+      k=`echo $n | sed "s/$2/$3/"` ;
+      [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
+    \} ;
+    done ;
+\}
+#
+MergeFiles ()
+\{
+  #
+  # USAGE: MergeFiles <working_path>
+  #
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.Hsap ] && 
+    /bin/rm --force --verbose $1/all.Hsap ;
+  [ -e $1/all.Mmus ] &&
+    /bin/rm --force --verbose $1/all.Mmus ;
+  echo "### WORKING on HUMAN LOCI..." ;
+  cat $HSAP | while read locus ;
+    do \{ cat $1/$locus >> $1/all.Hsap ; \} ; done ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  cat $MMUS | while read locus ;
+    do \{ cat $1/$locus >> $1/all.Mmus ; \} ; done ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  cat $1/all.Hsap $1/all.Mmus > $1/all ;
+\}
+#
+MergeGFF () 
+\{
+  #
+  # USAGE: MergeGFF <working_path> <species_id> <flag>
+  #
+  flag=0 ;
+  [ "$3" = "1" ] && flag=1 ; 
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.$2 ] && 
+    /bin/rm --force --verbose $1/all.$2 ;
+  echo "### WORKING on $2 LOCI..." ;
+  c=0 ;
+  while read locus ;
+    do \{
+         let c=c+1 ;
+         [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
+         [ $flag -eq 1 ] &&
+             cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
+         gawk 'BEGIN\{OFS="\\t"\}
+             ($1 !~ /^#/ && $3 != "Gene") \{
+                 print $0;
+             \}' $1/$locus | sort +3n -5 - >> $1/all.$2 ; 
+       \} ;
+    done < $DATASETS/id.$2 ;
+\}
+#
+MergeALLGFF () 
+\{
+  #
+  # USAGE: MergeGFF <working_path>
+  #
+  echo "### WORKING on HUMAN LOCI..." ;
+  MergeGFF $1 Hsap 1 ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  MergeGFF $1 Mmus 1 ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  echo '#$ ' | cat $1/all.Hsap - $1/all.Mmus > $1/all ;
+\}
+\nwused{\\{NWORT1E-READ-1}\\{NWORT1E-wea7-1}\\{NWORT1E-LaT8-1}}\nwendcode{}\nwbegindocs{213}\nwdocspar
+
+\nwenddocs{}\nwbegincode{214}\sublabel{NWORT1E-tan8-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-tan8-4}}}\moddef{tangling~{\nwtagstyle{}\subpageref{NWORT1E-tan8-1}}}\plusendmoddef
+# TO DO: add a test to check which shell is running
+# BASH shell
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \\
+         > $WORK/.bash_VARS ; 
+# sourcing
+source $WORK/.bash_VARS ;
+\nwendcode{}\nwbegindocs{215}\nwdocspar
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{comment}
+
+\sctn{Obtaining signals from raw sequences}
+
+% ~rguigo/research/humus/HUMUS-1/Conservation/
+
+\subsctn{Running {\gnid} to get scores for sites}
+
+We calculate scores for all sites with {\gnid}, and split the output for each site: acceptors, donors, starts and stops. We are going to use only the first two at this moment, but it is worthy having the other for future analysis.
+
+\nwenddocs{}\nwbegincode{216}\sublabel{NWORT1E-BASD-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-3}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+ChckDirs $SITES $SITES/geneid $SITES/geneid/logs ;
+#
+cat $HSAP $MMUS | while read locus ;
+  do
+    \{
+      echo "### WORKING on LOCUS: $locus" ;
+      geneid -v -P $BASE/param/geneid/human3iso.param \\
+             -bedaGo $DATASETS/fasta/$locus \\
+              > $SITES/geneid/$locus \\
+             2> $SITES/geneid/logs/$locus.logs ;
+    \} ;
+  done ;
+#
+# gawk '$0 !~ /^#/ \{print $0 > FILENAME"."tolower($3)\}' HSMIMAR.gnid.sites ;
+\nwendcode{}\nwbegindocs{217}\nwdocspar
+%$
+
+\subsctn{Extracting real splice sites}
+
+We extract splice-site sequences, but we first need to read exonic coords and the fasta sequences.
+
+\nwenddocs{}\nwbegincode{218}\sublabel{NWORT1E-BASD-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-4}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+ChckDirs $SITES/real $SITES/real/logs ;
+#
+# Take care because 'all' files must contain 'sequence' record for evaluation
+#   program. We move those files to temporary ones to run this command.
+MergeFiles $DATASETS/gff ;
+# After that we have moved the new 'all' files to 'all_gff' and
+#   restored temporary 'all' files. 
+#
+MergeFiles $SITES/geneid/ GFF ;
+#
+$BIN/ExtractIntronSites.pl $ID $DATASETS/gff/all_gff \\
+                           $SITES/geneid/all $SITES/real \\
+                           2> $SITES/real/logs/ExtractIntronSites_20010711.log ;
+#
+MergeFiles $SITES/real/ GFF ;
+#
+\nwendcode{}\nwbegindocs{219}\nwdocspar
+%$
+
+\subsctn{Visualizing structures of homologous genes}
+
+We run {\gps} to generate the figures for each human/mouse homologous genes pair. We include cds annotation and real sites, all the plots are made on forward strand. The following commands process the GFF files and save the output to the {\tt{}{\char36}SITES/plots/tmp/} dir. %$
+
+\nwenddocs{}\nwbegincode{220}\sublabel{NWORT1E-BASD-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-5}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+gawk 'BEGIN\{ PT=ARGV[1]; ARGV[1]=""; \}
+   $3 == "Sequence" \{ 
+      $7="+"; print $0 > PT"/gff_length/"$1; 
+      $7="."; print $0 > PT"/gff_length/"$1; 
+      $7="-"; print $0 > PT"/gff_length/"$1;
+   \}' $DATASETS $DATASETS/gff/all ;
+#
+MergeFiles $DATASETS/gff_length ;
+#
+ChckDirs $SITES/plots $SITES/plots/_tmp $SITES/plots/logs ;
+#
+cat $HSAP $MMUS | while read locus;
+  do
+    \{
+      echo "### WORKING on LOCUS: $locus" ;
+      gawk '$7 == "+" \{ print $0 \}' $DATASETS/gff_length/$locus | \\
+           cat - $DATASETS/gff/$locus > $SITES/plots/tmp/$locus.cds ;
+      gawk '\{ $2="SITES"; print $0 \}' $SITES/real/$locus \\
+           > $SITES/plots/tmp/$locus.sites ;
+    \} ;
+  done ;
+#
+\nwendcode{}\nwbegindocs{221}\nwdocspar
+
+\subsubsctn{Making the sites figures}
+
+\nwenddocs{}\nwbegincode{222}\sublabel{NWORT1E-BASD-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-6}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+while read locus human mouse ;
+  do
+    \{
+      echo "### WORKING on LOCUS: $locus" ;
+      gff2ps -arVC $BIN/param/sites_hsap_mmus.gff2psrc \\
+          -T "$locus : H.sap $human vs M.mus $mouse" -- \\
+          $SITES/plots/tmp/$human.cds  $SITES/plots/tmp/$human.sites \\
+          $SITES/plots/tmp/$mouse.cds  $SITES/plots/tmp/$mouse.sites \\
+           > $SITES/plots/$\{human\}_$\{mouse\}.ps \\
+          2> $SITES/plots/logs/$\{human\}_$\{mouse\}.log ;
+    \} ;
+  done < $ID ;
+#
+\nwendcode{}\nwbegindocs{223}\nwdocspar
+
+Once obtained the plots, we make a {\LaTeX} wrapper to visualize and/or print them, each three on a single page.
+
+\nwenddocs{}\nwbegincode{224}\sublabel{NWORT1E-BASD-7}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-7}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+$BIN/SitesFigureMerger.pl $ID $SITES/plots \\
+                          > $SITES/plots/all.tex \\
+                         2> $SITES/plots/all.log ;
+#
+pushd $DOCS/psfigures/ ;
+latex all_main.tex ;
+popd ;
+dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
+\nwendcode{}\nwbegindocs{225}\nwdocspar
+
+%
+%
+%
+\nwenddocs{}\nwbegincode{226}\sublabel{NWORT1E-LaTM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-LaTM-1}}}\moddef{LaTeX wrapper main doc~{\nwtagstyle{}\subpageref{NWORT1E-LaTM-1}}}\endmoddef
+\\documentclass[a4,11pt]\{article\}
+%
+% all_main.tex
+%
+% $Id: ORTHOLOGOUS_dataset.tex,v 1.1 2001-10-01 14:09:27 jabril Exp $
+%
+% pushd $DOCS/psfigures/; latex all_main.tex; popd;
+% dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
+%
+\\usepackage[a4paper,offset=\{0pt,0pt\},hmargin=\{0.5cm,0.5cm\},vmargin=\{0.5cm,0.5cm\}]\{geometry\}
+\\usepackage\{graphics\}
+\\usepackage[dvips]\{graphicx\}
+%\\usepackage\{lscape\}
+%\\usepackage\{rotating\}
+%
+\\begin\{document\}
+\\pagestyle\{plain\}
+%\\landscape
+
+ \\input /projects/splicing/scimit/sites/plots/all.tex
+
+\\end\{document\}
+\nwnotused{LaTeX\ wrapper\ main\ doc}\nwendcode{}\nwbegindocs{227}\nwdocspar
+%
+%
+%
+
+\subsubsctn{Setting {\gps} parameters}
+
+This is the {\gps} customization file we used to obtain the {\ps} plots for sites comparison between human and mouse sequences:
+
+\nwenddocs{}\nwbegincode{228}\sublabel{NWORT1E-gffU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-gffU-1}}}\moddef{gff2ps customization for sites~{\nwtagstyle{}\subpageref{NWORT1E-gffU-1}}}\endmoddef
+#
+# sites_hsap_mmus.gff2psrc
+#
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+# L #
+\LA{}Layout settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-LayP-1}}\RA{}
+#
+# S #
+\LA{}Source settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-SouP-1}}\RA{}
+#
+# G #
+\LA{}Group settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-GroO-1}}\RA{}
+#
+# F #
+\LA{}Feature settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-FeaQ-1}}\RA{}
+#
+\nwnotused{gff2ps\ customization\ for\ sites}\nwendcode{}\nwbegindocs{229}\nwdocspar
+
+\nwenddocs{}\nwbegincode{230}\sublabel{NWORT1E-LayP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-LayP-1}}}\moddef{Layout settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-LayP-1}}}\endmoddef
+page_bbox=short,200,800
+header_scale=0.5
+margin_left=0.5cm
+margin_right=0.5cm
+margin_top=0.5cm
+margin_bottom=0.5cm
+show_outer_scale=top
+show_grid=off
+# group_label_scale=2.5
+\nwused{\\{NWORT1E-gffU-1}\\{NWORT1E-gffV-1}}\nwendcode{}\nwbegindocs{231}\nwdocspar
+ 
+\nwenddocs{}\nwbegincode{232}\sublabel{NWORT1E-SouP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-SouP-1}}}\moddef{Source settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-SouP-1}}}\endmoddef
+*::unfold_grouped_ungrouped=off
+*::unfold_grouped_line=off
+*::unfold_ungrouped_line=off
+*::source_line=none
+SCIMIT::vert_align=bottom
+SCIMIT::left_label=++sequence++
+SCIMIT::track_spacing_scale=0
+SITES::vert_align=top
+SITES::left_label=++none++
+SITES::keep_feature_label_space=off
+SITES::track_spacing_scale=0.1
+SITES::source_style=boxed
+# SITES::range=-9..9
+SITES::range=1..6
+SITES::track_scale=2
+\nwused{\\{NWORT1E-gffU-1}\\{NWORT1E-gffV-1}}\nwendcode{}\nwbegindocs{233}\nwdocspar
+
+\nwenddocs{}\nwbegincode{234}\sublabel{NWORT1E-GroO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GroO-1}}}\moddef{Group settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-GroO-1}}}\endmoddef
+*::label=++none++
+*::group_line=none
+\nwused{\\{NWORT1E-gffU-1}\\{NWORT1E-gffV-1}}\nwendcode{}\nwbegindocs{235}\nwdocspar
+
+\nwenddocs{}\nwbegincode{236}\sublabel{NWORT1E-FeaQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-FeaQ-1}}}\moddef{Feature settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-FeaQ-1}}}\endmoddef
+sequence::feature_color=violet
+sequence::shape=base_line
+acceptor::feature_color=red
+acceptor::feature_stroke_color=red
+acceptor::shape=half_right_triangle
+donor::feature_color=blue
+donor::feature_stroke_color=blue
+donor::shape=half_left_triangle
+first::shape=half_arrow_end
+terminal::shape=half_arrow_head
+single::shape=half_arrow
+\nwused{\\{NWORT1E-gffU-1}\\{NWORT1E-gffV-1}}\nwendcode{}\nwbegindocs{237}\nwdocspar
+
+\subsctn{Reporting errors in annotation}
+
+I have found some mistakes in the annotation of three mouse sequences when running {\tt{}ExtractIntronSites.pl}.
+
+\nwenddocs{}\nwbegincode{238}\sublabel{NWORT1E-BASD-8}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-8}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+cds_sites ()
+\{
+  # usage:    cds_sites <seqname>
+  cat $DATASETS/gff/$1 ;
+  echo ":::::::::::::::" ;
+  cat $SITES/geneid/$1 ;
+  echo ":::::::::::::::" ;
+  cat $SITES/real/$1 ;
+\}
+\nwendcode{}\nwbegindocs{239}\nwdocspar
+
+\begin{verbatim}
+:::::::::::::: MMINSIIG
+
+MMINSIIG SCIMIT First    1133 1318 1.000 + 0 MIT72
+MMINSIIG SCIMIT Terminal 1807 1953 1.000 + 0 MIT72
+
+MMINSIIG geneid_v1.0 Donor    1319 1320 5.16 + . # AAGGTGAGT
+MMINSIIG geneid_v1.0 Acceptor 1807 1808 0.53 + . # GCTCTGACACAACCTCCCTGGCAGTGG
+
+:::::::::::::: MMLYL1
+
+MMLYL1 SCIMIT First    1615 1947 1.000 + 0 MIT86
+MMLYL1 SCIMIT Internal 2039 2128 1.000 + 0 MIT86
+MMLYL1 SCIMIT Terminal 2844 3257 1.000 + 0 MIT86
+
+MMLYL1 geneid_v1.0 Donor    1946 1947 3.11 + . # CAGGTCAGT
+MMLYL1 geneid_v1.0 Acceptor 2037 2038 1.33 + . # TTCATGACCCACAACCCCTTACAGTGT
+MMLYL1 geneid_v1.0 Donor    2129 2130 3.67 + . # ACGGTGAGT
+MMLYL1 geneid_v1.0 Acceptor 2844 2845 2.86 + . # TGATGCTATCCCTTGGGTCCTCAGGGC
+
+:::::::::::::: MUSHSP25A
+
+MUSHSP25A SCIMIT First     756 1130 1.000 + 0 MIT62
+MUSHSP25A SCIMIT Internal 1727 1792 1.000 + 0 MIT62
+MUSHSP25A SCIMIT Terminal 1920 2108 1.000 + 0 MIT62
+
+MUSHSP25A geneid_v1.0 Donor    1131 1132 4.05 + . # CTGGTGAGT
+MUSHSP25A geneid_v1.0 Acceptor 1727 1728 4.83 + . # CTGACCTTCTGTCCCCACCCACAGGCA
+MUSHSP25A geneid_v1.0 Donor    1791 1792 3.43 + . # CACGTGAGT
+MUSHSP25A geneid_v1.0 Acceptor 1918 1919 3.22 + . # TGCCCTGATTTTCTGTGTGTCCAGGCT
+\end{verbatim}
+
+\sctn{Sequence comparison with {\bn} on non-coding regions}
+
+We run {\bn} on the human/mouse orthologous sequences, we masked coding regions before that because we are interested to know if there are any conservation in non-coding regions. Such conservation at sequence level will mean that there are regulatory regions that will work in a similar way between human and mouse. In our case, we are interested in those regulatory elements that affect splicing placed in the intronic regions.
+
+\subsctn{Masking coding regions}
+
+We use {\tt{}MaskCDS.pl} script defined in section~\ref{sec:maskcds}, page~\pageref{sec:maskcds}, to mask {\data} fasta sequences with the GFF coords of their coding regions.
+
+\nwenddocs{}\nwbegincode{240}\sublabel{NWORT1E-BASD-9}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-9}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+ChckDirs $DATASETS/fasta/fastamaskedcds $DATASETS/fasta/fastamaskedcds/logs ;
+#
+cat $HSAP $MMUS | while read locus ;
+  do
+    \{
+      echo "### WORKING on LOCUS: $locus" ;
+      $BIN/MaskCDS.pl $DATASETS/fasta/fasta/$locus \\
+                      $DATASETS/gff/$locus \\
+                      > $DATASETS/fasta/fastamaskedcds/$locus \\
+                     2> $DATASETS/fasta/fastamaskedcds/logs/$locus ;
+    \} ;
+  done ;
+#
+MergeFiles $DATASETS/fasta/fastamasked_cds/ ;
+#
+# To check if there was any problem while masking sequences.
+#
+grep '!!!' $DATASETS/fasta/fastamaskedcds/logs/* ;
+#
+\nwendcode{}\nwbegindocs{241}\nwdocspar
+
+\subsctn{Running {\bn} on masked sequences}
+
+Once we have the sequences with their coding regions masked, we compare human and mouse orthologous sequence pairs, using human sequences as queries and mouse ones as database. Here we prepare the {\bl} databases (including human sequences, if we will use them later on other analyses).
+
+\nwenddocs{}\nwbegincode{242}\sublabel{NWORT1E-BASD-A}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-A}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+ChckDirs $DATASETS/blastdb/wumaskedcds ;
+#
+cat $HSAP $MMUS | while read locus ;
+  do
+    \{
+      echo "### WORKING on LOCUS: $locus" ;
+      pressdb $DATASETS/fasta/fastamaskedcds/$locus \\
+           -o $DATASETS/blastdb/wumaskedcds/$locus ;
+    \} ;
+  done ;
+#
+\nwendcode{}\nwbegindocs{243}\nwdocspar
+
+Now we are ready to run {\bn} with defaults (just database and query fasta sequence). We do not pass '-nogap' option because we are interested in finding any match although it will have few gaps but still representing a conserved region.
+
+\nwenddocs{}\nwbegincode{244}\sublabel{NWORT1E-BASD-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-B}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+ChckDirs $SCIMIT/blast $SCIMIT/blast/blastn \\
+         $SCIMIT/blast/blastn/wumaskedcds \\
+         $SCIMIT/blast/blastn/wumaskedcds/blast \\
+         $SCIMIT/blast/blastn/wumaskedcds/logs ;
+#
+while read locus human mouse;
+  do
+    \{
+      echo "### RUNNING BLASTN on LOCUS: $locus ($human seq against $mouse DB)" ;
+      blastn $DATASETS/blastdb/wumaskedcds/$mouse \\
+             $DATASETS/fasta/fastamaskedcds/$human \\
+           > $SCIMIT/blast/blastn/wumaskedcds/blast/$human \\
+          2> $SCIMIT/blast/blastn/wumaskedcds/logs/$human ;            
+    \} ;
+  done < $ID ;
+#
+\nwendcode{}\nwbegindocs{245}\nwdocspar
+
+\subsctn{Filtering HSPs and SRs}
+
+We are parsing {\bn} output to extract the high-scoring segment pairs (HSPs). We set score field to bit-score and we also include the sequence of each HSP at the end of the GFF record (as comments).
+
+\nwenddocs{}\nwbegincode{246}\sublabel{NWORT1E-BASD-C}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-C}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+ChckDirs $SCIMIT/blast/blastn/wumaskedcds/hsp \\
+         $SCIMIT/blast/blastn/wumaskedcds/sr \\
+         $SCIMIT/blast/blastn/wumaskedcds/aplot ;
+#
+cat $HSAP | while read locus;
+  do
+    \{
+      echo "### RUNNING parseblast on: $locus" ;
+      echo "### RUNNING parseblast on: $locus" 1>&2 ;
+      parseblast -vbFQs $SCIMIT/blast/blastn/wumaskedcds/blast/$locus \\
+                     > $SCIMIT/blast/blastn/wumaskedcds/hsp/$locus ;
+      parseblast -vbAQs $SCIMIT/blast/blastn/wumaskedcds/blast/$locus \\
+                     > $SCIMIT/blast/blastn/wumaskedcds/aplot/$locus ;
+    \} ;
+  done 2> $SCIMIT/blast/blastn/wumaskedcds/logs/parseblast ;
+#
+\nwendcode{}\nwbegindocs{247}\nwdocspar
+
+Once we have obtained HSPs we can project them into similarity regions (SRs)...
+
+\subsctn{Visualizing {\bn} alignments of homologous genes}
+
+\subsubsctn{Making the alignment plots}
+
+\subsubsubsctn{Running {\aps}:}
+
+\nwenddocs{}\nwbegincode{248}\sublabel{NWORT1E-BASD-D}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-D}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+ChckDirs $SCIMIT/blast/blastn/wumaskedcds/plots \\
+         $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps \\
+         $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/logs \\
+         $SCIMIT/blast/blastn/wumaskedcds/plots/aplot \\
+         $SCIMIT/blast/blastn/wumaskedcds/plots/aplot/logs \\
+         $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp ;
+#
+while read locus human mouse;
+  do
+    \{
+      echo "### RUNNING gff2aplot on: $locus" ;
+      gff2aplot -VaP -T "$locus: $human x $mouse" -- \\
+           $SITES/plots/tmp/$human.cds \\
+           $SITES/plots/tmp/$mouse.cds \\
+           $SCIMIT/blast/blastn/wumaskedcds/aplot/$human \\
+         > $SCIMIT/blast/blastn/wumaskedcds/plots/aplot/$\{human\}_$\{mouse\}.ps \\
+        2> $SCIMIT/blast/blastn/wumaskedcds/plots/aplot/logs/$\{human\}_$\{mouse\} ;
+    \} ;
+  done < $ID ;
+#
+\nwendcode{}\nwbegindocs{249}\nwdocspar
+
+\subsubsubsctn{Running {\gps}:}
+
+\nwenddocs{}\nwbegincode{250}\sublabel{NWORT1E-BASD-E}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-E}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+while read locus human mouse ;
+  do
+    \{
+      echo "### WORKING on LOCUS: $locus" ;
+      perl -e 'open(HSP,"<".(shift @ARGV));
+                open(HSAP,">".(shift @ARGV));
+                open(MMUS,">".(shift @ARGV));
+                while (<HSP>) \{
+                    next if /^\\#/o;
+                    next if /^\\s*$/o;
+                    chomp;
+                    @F = split /[\\s]+/og;
+                    $F[6] = $F[14] = "+";
+                    $F[8] = ".";
+                    $F[9] =~ s/\\"//og;
+                    print HSAP join("\\t",(@F[0..8]))."\\n";
+                    print MMUS join("\\t",(@F[9,1,2,10,11,5,14,17,8]))."\\n";
+                \};
+                close(MMUS);
+                close(HSAP);
+                close(HSP);
+          ' $SCIMIT/blast/blastn/wumaskedcds/hsp/$human \\
+            $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$human.blastn \\
+            $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$mouse.blastn ;
+    \} ;
+  done < $ID ;
+#
+while read locus human mouse ;
+  do
+    \{
+      echo "### WORKING on LOCUS: $locus" ;
+      gff2ps -arVC $BIN/param/blastn_hsap_mmus.gff2psrc \\
+             -T "$locus : H.sap $human vs M.mus $mouse" -- \\
+             $SITES/plots/tmp/$human.cds \\
+             $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$human.blastn \\
+             $SITES/plots/tmp/$human.sites \\
+             $SITES/plots/tmp/$mouse.cds \\
+             $SCIMIT/blast/blastn/wumaskedcds/plots/_tmp/$mouse.blastn \\
+             $SITES/plots/tmp/$mouse.sites \\
+             > $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/$\{human\}_$\{mouse\}.ps \\
+            2> $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/logs/$\{human\}_$\{mouse\}.log ;
+    \} ;
+  done < $ID ;
+#
+\nwendcode{}\nwbegindocs{251}\nwdocspar
+
+Once obtained the plots, we make a {\LaTeX} wrapper to visualize and/or print them, each three on a single page.
+
+\nwenddocs{}\nwbegincode{252}\sublabel{NWORT1E-BASD-F}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-BASD-F}}}\moddef{BASH commands~{\nwtagstyle{}\subpageref{NWORT1E-BASD-1}}}\plusendmoddef
+#
+$BIN/SitesFigureMerger.pl $ID $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps \\
+               > $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/all_blast.tex \\
+              2> $SCIMIT/blast/blastn/wumaskedcds/plots/gff2ps/all_blast.log ;
+#
+pushd $DOCS/psfigures/ ;
+latex all_blast_main.tex ;
+popd ;
+dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
+\nwendcode{}\nwbegindocs{253}\nwdocspar
+
+%
+%
+%
+\nwenddocs{}\nwbegincode{254}\sublabel{NWORT1E-LaTW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-LaTW-1}}}\moddef{LaTeX wrapper main doc for blast~{\nwtagstyle{}\subpageref{NWORT1E-LaTW-1}}}\endmoddef
+\\documentclass[a4,11pt]\{article\}
+%
+% all_blast_main.tex
+%
+% $Id: ORTHOLOGOUS_dataset.tex,v 1.1 2001-10-01 14:09:27 jabril Exp $
+%
+% pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
+% dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
+%
+\\usepackage[a4paper,offset=\{0pt,0pt\},hmargin=\{0.5cm,0.5cm\},vmargin=\{0.5cm,0.5cm\}]\{geometry\}
+\\usepackage\{graphics\}
+\\usepackage[dvips]\{graphicx\}
+%\\usepackage\{lscape\}
+%\\usepackage\{rotating\}
+%
+\\begin\{document\}
+\\pagestyle\{plain\}
+%\\landscape
+
+ \\input /projects/splicing/scimit/blast/blastn/wumaskedcds/plots/gff2ps/all_blast.tex
+
+\\end\{document\}
+\nwnotused{LaTeX\ wrapper\ main\ doc\ for\ blast}\nwendcode{}\nwbegindocs{255}\nwdocspar
+%
+%
+%
+
+\subsubsubsctn{Setting {\gps} parameters.}
+
+\nwenddocs{}\nwbegincode{256}\sublabel{NWORT1E-gffV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-gffV-1}}}\moddef{gff2ps customization for blastn~{\nwtagstyle{}\subpageref{NWORT1E-gffV-1}}}\endmoddef
+#
+# blastn_hsap_mmus.gff2psrc
+#
+\LA{}Version Control Id Tag~{\nwtagstyle{}\subpageref{NWORT1E-VerM-1}}\RA{}
+#
+# L #
+\LA{}Layout settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-LayP-1}}\RA{}
+#
+# S #
+\LA{}Source settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-SouP-1}}\RA{}
+BLASTN::vert_align=center
+BLASTN::left_label=++none++
+BLASTN::keep_feature_label_space=off
+BLASTN::track_spacing_scale=0
+BLASTN::source_style=boxed
+BLASTN::range=none
+BLASTN::track_scale=0.5
+BLASTN::feature_color=darkorange
+#
+# G #
+\LA{}Group settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-GroO-1}}\RA{}
+#
+# F #
+\LA{}Feature settings for sites~{\nwtagstyle{}\subpageref{NWORT1E-FeaQ-1}}\RA{}
+hsp::shape=box
+#
+\nwnotused{gff2ps\ customization\ for\ blastn}\nwendcode{}\nwbegindocs{257}\nwdocspar
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\newpage
+\appendix
+
+\sctn{Scripts developed for this work}
+
+\subsctn{Filtering Real Sites}
+
+The main goal of this script is to filter from sites obtained running {\gnid} those that correspond to real ones. We require that output from {\gnid} must be in GFF format ('-G' command-line option). The command-line usage is:
+
+\centerline{{\tt{}ExtractIntronSites.pl\ <IDs{\char95}file>\ <CDSs{\char95}File>\ <Sites{\char95}File>\ <Output{\char95}Dir>}}
+
+{\tt{}<IDs{\char95}file>} records have three fields: a gene identifier, a sequence ID for first species (human) and another one for second species (mouse). {\tt{}<CDSs{\char95}File>} and {\tt{}<Sites{\char95}File>} are both in GFF, first one contains exon coordinates, second must contain not only sites coords but also their sequence (appearing within the trailing record comment). Finally {\tt{}<Output{\char95}Dir>} defines the path to which all the output files will be saved.
+
+\nwenddocs{}\nwbegincode{258}\sublabel{NWORT1E-GreM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GreM-1}}}\moddef{Grep Real Intron Sites~{\nwtagstyle{}\subpageref{NWORT1E-GreM-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# ExtractIntronSites.pl
+#
+#     Filtering real sites from geneid output.
+#
+# Usage:
+#     ExtractIntronSites.pl <IDs_file> <CDSs_File> <Sites_File> <Output_Dir>
+#
+#<Use Modules - RIS>>
+\LA{}Use Modules - Dumper~{\nwtagstyle{}\subpageref{NWORT1E-UseK-1}}\RA{}
+#
+\LA{}Global Vars - Counter~{\nwtagstyle{}\subpageref{NWORT1E-GloL-1}}\RA{}
+\LA{}Global Vars - RIS~{\nwtagstyle{}\subpageref{NWORT1E-GloH-1}}\RA{}
+#
+\LA{}Main Loop - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF-1}}\RA{}
+#
+\LA{}Main Subs - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}\RA{}
+\LA{}Common PERL subs - Text fill~{\nwtagstyle{}\subpageref{NWORT1E-ComS.2-1}}\RA{}
+\LA{}Common PERL subs - Counter~{\nwtagstyle{}\subpageref{NWORT1E-ComQ.2-1}}\RA{}
+\nwnotused{Grep\ Real\ Intron\ Sites}\nwendcode{}\nwbegindocs{259}\nwdocspar
+
+\nwenddocs{}\nwbegincode{260}\sublabel{NWORT1E-GloH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GloH-1}}}\moddef{Global Vars - RIS~{\nwtagstyle{}\subpageref{NWORT1E-GloH-1}}}\endmoddef
+my ( $ids_file, $cds_file, $sites_file, $output_dir,
+     $cnt, %seq_ids, %coords_list, %acceptors, %donors );
+\nwused{\\{NWORT1E-GreM-1}}\nwendcode{}\nwbegindocs{261}\nwdocspar
+
+\nwenddocs{}\nwbegincode{262}\sublabel{NWORT1E-MaiF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF-1}}}\moddef{Main Loop - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF-1}}}\endmoddef
+print STDERR "###\\n### RUNNING ExtractIntronSites.pl\\n###\\n".
+             "### $ENV\{USER\} - ".(`date`)."###\\n#\\n";
+&parse_args();
+&load_seqids($ids_file);
+&load_coords($cds_file);
+&load_sites($sites_file);
+&filter_sites();
+\nwused{\\{NWORT1E-GreM-1}}\nwendcode{}\nwbegindocs{263}\nwdocspar
+
+First of all we check command-line arguments, because there are three mandatory parameters that must be files.
+
+\nwenddocs{}\nwbegincode{264}\sublabel{NWORT1E-MaiF.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}}\moddef{Main Subs - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}}\endmoddef
+sub parse_args() \{
+    scalar(@ARGV) < 4 && do \{
+        print "\\nUSAGE: \\n".
+              "ExtractIntronSites.pl <IDs_file> <CDSs_File> ".
+              "<Sites_File> <Output_Dir>\\n\\n";
+        die("!!! ERROR - NOT ENOUGH COMMAND-LINE PARAMETERS. $!");
+    \};
+    $ids_file   = shift @ARGV;
+    ( -e $ids_file ) ||
+        die("!!! $ids_file DOES NOT EXIST...\\n");
+    $cds_file   = shift @ARGV;
+    ( -e $cds_file ) ||
+        die("!!! $cds_file DOES NOT EXIST...\\n");
+    $sites_file = shift @ARGV;
+    ( -e $sites_file ) ||
+        die("!!! $sites_file DOES NOT EXIST...\\n");
+    $output_dir = shift @ARGV;
+    $output_dir =~ s%/$%%o;
+    ( -e $output_dir && -d _ ) ||
+        die("!!! $output_dir DOES NOT EXIST...\\n");
+    @ARGV = ();
+\} # parse_args
+\nwalsodefined{\\{NWORT1E-MaiF.2-2}\\{NWORT1E-MaiF.2-3}\\{NWORT1E-MaiF.2-4}\\{NWORT1E-MaiF.2-5}\\{NWORT1E-MaiF.2-6}}\nwused{\\{NWORT1E-GreM-1}}\nwendcode{}\nwbegindocs{265}\nwdocspar
+
+We load sequence IDs for both species including the common sequence name.
+
+\nwenddocs{}\nwbegincode{266}\sublabel{NWORT1E-MaiF.2-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-2}}}\moddef{Main Subs - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}}\plusendmoddef
+\LA{}Main Subs - loadseqids~{\nwtagstyle{}\subpageref{NWORT1E-MaiM-1}}\RA{}
+\nwendcode{}\nwbegindocs{267}\nwdocspar
+ 
+\label{func:loadseqids}
+\nwenddocs{}\nwbegincode{268}\sublabel{NWORT1E-MaiM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiM-1}}}\moddef{Main Subs - loadseqids~{\nwtagstyle{}\subpageref{NWORT1E-MaiM-1}}}\endmoddef
+sub load_seqids() \{
+    my $infile = $_[0];
+    $cnt = 0;
+    print STDERR "### READING SEQUENCE IDs FROM: $infile\\n";
+    open(IDS,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<IDS>) \{
+        my @f;
+        \LA{}Skip comments and empty records~{\nwtagstyle{}\subpageref{NWORT1E-SkiV-1}}\RA{}
+        @f = split /\\s+/og;
+        $cnt++;
+        $seq_ids\{$cnt\}\{NAME\} = $f[0]; 
+        $seq_ids\{$cnt\}\{SEQ1\} = $f[1]; 
+        $seq_ids\{$cnt\}\{SEQ2\} = $f[2];
+    \}; # while (<IDS>)
+    close(IDS);
+    # print STDERR "SEQ_IDS - ".(Dumper(\\%seq_ids));
+    print STDERR "#\\n# There are $cnt sequences in this file...\\n#\\n";
+\} # load_seqids
+\nwused{\\{NWORT1E-MaiF.2-2}\\{NWORT1E-MaiF.4-2}}\nwendcode{}\nwbegindocs{269}\nwdocspar
+
+{\tt{}load{\char95}coords()} 
+
+\nwenddocs{}\nwbegincode{270}\sublabel{NWORT1E-MaiF.2-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-3}}}\moddef{Main Subs - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}}\plusendmoddef
+sub load_coords() \{
+    my $infile = $_[0];
+    my (%tmp,$id);
+    print STDERR "### READING COORDS FROM: $infile\\n";
+    open(GFF,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<GFF>) \{
+        my @f;
+        \LA{}Skip comments and empty records~{\nwtagstyle{}\subpageref{NWORT1E-SkiV-1}}\RA{}
+        @f = split /\\s+/og;
+        $id = $f[0];
+        defined($coords_list\{$id\}) || do \{
+            print STDERR "> Reading Coords for: $id\\n";
+            $coords_list\{$id\}\{GENENAME\} = $f[8];
+            $coords_list\{$id\}\{STRAND\}   = $f[6];
+            @\{ $tmp\{$id\} \} = ();
+        \};
+        push @\{ $tmp\{$id\} \}, [ @f[3,4] ] if
+           (lc($f[2]) =~ /first|internal|terminal|single/);
+    \}; # while (<GFF>)
+    close(GFF);
+    foreach $id (keys %tmp) \{
+        print STDERR "> Processing coords for: $id\\n";
+        @\{ $tmp\{$id\} \} = sort \{ $a->[0] <=> $b->[0] \} @\{ $tmp\{$id\} \};
+        $coords_list\{$id\}\{STRAND\} eq '-' && do \{
+            @\{ $tmp\{$id\} \} = reverse map \{ reverse $_ \} @\{ $tmp\{$id\} \};
+        \};
+        # print STDERR 'SORTED @tmp:'.(Dumper(\\@\{ $tmp\{$id\} \}));
+        foreach (my $l = 0; $l <= $#\{ $tmp\{$id\} \}; $l++) \{
+            push @\{ $coords_list\{$id\}\{COORDS\} \}, $tmp\{$id\}[$l][0], $tmp\{$id\}[$l][1];
+        \};
+        $coords_list\{$id\}\{C_NUM\} = scalar(@\{ $coords_list\{$id\}\{COORDS\} \}) / 2;
+    \}; # foreach $id
+    # print STDERR Dumper(\\%coords_list);
+\} # load_coords
+\nwendcode{}\nwbegindocs{271}\nwdocspar
+
+{\tt{}load{\char95}sites()} reads sites found by {\gnid} that were saved as GFF records. 
+
+\nwenddocs{}\nwbegincode{272}\sublabel{NWORT1E-MaiF.2-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-4}}}\moddef{Main Subs - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}}\plusendmoddef
+sub load_sites() \{
+    my $infile = $_[0];
+    my (@tmp,$id,$strand,$pos,$rec);
+    print STDERR "### READING SITES FROM: $infile\\n";
+    open(SITES,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    $n = 0;
+    while (<SITES>) \{
+        my @f;
+        $c = '.';
+        \LA{}Skip comments and empty records~{\nwtagstyle{}\subpageref{NWORT1E-SkiV-1}}\RA{}
+        $rec = $_;
+        @f = split /\\s+/og, $rec;
+        ($id,$strand) = @f[0,6];
+        lc($f[2]) eq 'acceptor' && do \{
+            $c = 'A';
+            $pos = ($strand eq '+') ? $f[4] : $f[3] ;
+            $acceptors\{$id\}\{$strand\}\{$pos\}\{SCORE\}  = $f[5];
+            $acceptors\{$id\}\{$strand\}\{$pos\}\{SEQ\}    = $f[9];
+            $acceptors\{$id\}\{$strand\}\{$pos\}\{GFF\}    = $rec;
+        \};
+        lc($f[2]) eq 'donor'    && do \{
+            $c = 'D';
+            $pos = ($strand eq '+') ? $f[3] : $f[4] ;
+            $donors\{$id\}\{$strand\}\{$pos\}\{SCORE\}  = $f[5];
+            $donors\{$id\}\{$strand\}\{$pos\}\{SEQ\}    = $f[9];
+            $donors\{$id\}\{$strand\}\{$pos\}\{GFF\}    = $rec;
+        \};
+    \} continue \{ 
+        &counter(++$n,$c);
+    \}; # while (<SITES>)
+    &counter_end($n,$c);
+    close(SITES);
+    # print STDERR Dumper(\\%acceptors);
+    # print STDERR Dumper(\\%donors);
+\} # load_sites
+\nwendcode{}\nwbegindocs{273}\nwdocspar
+%$
+
+Here we filter real sites from the whole sites set and we save to the corresponding file in the output dir (as it is set in {\tt{}{\char36}output{\char95}dir} variable).%$ 
+
+\nwenddocs{}\nwbegincode{274}\sublabel{NWORT1E-MaiF.2-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-5}}}\moddef{Main Subs - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}}\plusendmoddef
+sub filter_sites() \{
+    my $i;
+    for ($i = 1; $i<=$cnt; $i++) \{
+        print STDERR "# Working on: $seq_ids\{$i\}\{NAME\}\\n";
+        &save_GFF($seq_ids\{$i\}\{SEQ1\}); 
+        &save_GFF($seq_ids\{$i\}\{SEQ2\});
+    \}; # for $i
+\} # filter_sites
+\nwendcode{}\nwbegindocs{275}\nwdocspar
+
+\nwenddocs{}\nwbegincode{276}\sublabel{NWORT1E-MaiF.2-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-6}}}\moddef{Main Subs - RIS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.2-1}}}\plusendmoddef
+sub save_GFF() \{
+    my $infile = $_[0];
+    my ($j,$pos);
+    my ($dn_cnt,$ac_cnt) = (0,0);
+    my $ref = \\%\{ $coords_list\{$infile\} \};
+    open(GFF,"> $output_dir/$infile") || do \{
+        print STDERR "!!! CANNOT OPEN $output_dir/$infile ...\\n";
+        return;
+    \};
+  CHECKPOINT: \{
+      ($ref->\{C_NUM\} == 1) && do \{
+          print STDERR "!!! $infile has no intronic sites annotated...\\n";
+          print GFF "#\\n# $infile has no intronic sites annotated\\n".
+                       "#         (no cds found or single gene).#\\n";
+          last CHECKPOINT;
+      \};
+      for ($j = 2; $j < ($ref->\{C_NUM\} * 2) - 1; $j+=2 ) \{
+          $pos = $ref->\{COORDS\}[$j];
+          defined($acceptors\{$infile\}\{$ref->\{STRAND\}\}\{$pos\}\{GFF\}) && do \{
+              $ac_cnt++;
+              print GFF "$acceptors\{$infile\}\{$ref->\{STRAND\}\}\{$pos\}\{GFF\}\\n";
+          \};
+      \}; # for $j
+      for ($j = 1; $j < ($ref->\{C_NUM\} * 2) - 1; $j+=2 ) \{
+          $pos = $ref->\{COORDS\}[$j];
+          defined($donors\{$infile\}\{$ref->\{STRAND\}\}\{$pos\}\{GFF\}) && do \{
+              $dn_cnt++;
+              print GFF "$donors\{$infile\}\{$ref->\{STRAND\}\}\{$pos\}\{GFF\}\\n";
+          \};
+      \}; # for $j
+    \}; # CHECKPOINT
+    close(GFF);
+    print STDERR "#> $infile : $ref->\{C_NUM\} exons  ".
+                 "$dn_cnt donors  $ac_cnt acceptors.\\n";
+\} # save_GFF
+# $coords_list\{$id\}\{GENENAME\}
+# $coords_list\{$id\}\{STRAND\}
+# $coords_list\{$id\}\{C_NUM\}
+# @\{ $coords_list\{$id\}\{COORDS\} \}
+# $acceptors\{$id\}\{$pos\}\{STRAND\}
+# $acceptors\{$id\}\{$pos\}\{SCORE\}
+# $acceptors\{$id\}\{$pos\}\{SEQ\}
+# $acceptors\{$id\}\{$pos\}\{GFF\}
+# $donors\{$id\}\{$pos\}\{STRAND\}
+# $donors\{$id\}\{$pos\}\{SCORE\}
+# $donors\{$id\}\{$pos\}\{SEQ\}
+# $donors\{$id\}\{$pos\}\{GFF\}
+\nwendcode{}\nwbegindocs{277}\nwdocspar
+
+\subsctn{Joining {\ps} figures with {\LaTeX}}
+
+\nwenddocs{}\nwbegincode{278}\sublabel{NWORT1E-MerP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MerP-1}}}\moddef{Merging Figures for Sites~{\nwtagstyle{}\subpageref{NWORT1E-MerP-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# SitesFigureMerger.pl
+#
+#     Merging gff2ps figures set to "page_BBox=200,800" to save printing space.
+#
+# Usage:
+#     SitesFigureMerger.pl <IDs_file> <Input_Dir> > file.tex
+#
+#<Use Modules - MFS>>
+#
+\LA{}Global Vars - MFS~{\nwtagstyle{}\subpageref{NWORT1E-GloH.2-1}}\RA{}
+#
+\LA{}Main Loop - MFS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.3-1}}\RA{}
+#
+\LA{}Main Subs - MFS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.4-1}}\RA{}
+\nwnotused{Merging\ Figures\ for\ Sites}\nwendcode{}\nwbegindocs{279}\nwdocspar
+
+\nwenddocs{}\nwbegincode{280}\sublabel{NWORT1E-GloH.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GloH.2-1}}}\moddef{Global Vars - MFS~{\nwtagstyle{}\subpageref{NWORT1E-GloH.2-1}}}\endmoddef
+my ($cnt, %seq_ids, $ids_file, $input_dir);
+my $mod_value = 5;
+\nwalsodefined{\\{NWORT1E-GloH.2-2}}\nwused{\\{NWORT1E-MerP-1}}\nwendcode{}\nwbegindocs{281}\nwdocspar
+
+\nwenddocs{}\nwbegincode{282}\sublabel{NWORT1E-MaiF.3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.3-1}}}\moddef{Main Loop - MFS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.3-1}}}\endmoddef
+print STDERR "###\\n### RUNNING SitesFigureMerger.pl\\n###\\n".
+             "### $ENV\{USER\} - ".(`date`)."###\\n#\\n";
+&parse_args();
+&load_seqids($ids_file);
+&print_LaTeX();
+\nwused{\\{NWORT1E-MerP-1}}\nwendcode{}\nwbegindocs{283}\nwdocspar
+
+\nwenddocs{}\nwbegincode{284}\sublabel{NWORT1E-MaiF.4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.4-1}}}\moddef{Main Subs - MFS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.4-1}}}\endmoddef
+sub parse_args() \{
+    scalar(@ARGV) < 2 && do \{
+        print "\\nUSAGE: \\n".
+              "SitesFigureMerger.pl <IDs_file> <Input_Dir> > file.tex\\n\\n";
+        die("!!! ERROR - NOT ENOUGH COMMAND-LINE PARAMETERS. $!");
+    \};
+    $ids_file   = shift @ARGV;
+    ( -e $ids_file ) ||
+        die("!!! $ids_file DOES NOT EXIST...\\n");
+    $input_dir = shift @ARGV;
+    $input_dir =~ s%/$%%o;
+    ( -e $input_dir && -d _ ) ||
+        die("!!! $input_dir DOES NOT EXIST...\\n");
+    @ARGV = ();
+\} # parse_args
+\nwalsodefined{\\{NWORT1E-MaiF.4-2}\\{NWORT1E-MaiF.4-3}}\nwused{\\{NWORT1E-MerP-1}}\nwendcode{}\nwbegindocs{285}\nwdocspar
+
+We are reusing here the {\tt{}load{\char95}seqids()} (section~\ref{func:loadseqids}, page~\pageref{func:loadseqids}). 
+
+\nwenddocs{}\nwbegincode{286}\sublabel{NWORT1E-MaiF.4-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.4-2}}}\moddef{Main Subs - MFS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.4-1}}}\plusendmoddef
+\LA{}Main Subs - loadseqids~{\nwtagstyle{}\subpageref{NWORT1E-MaiM-1}}\RA{}
+\nwendcode{}\nwbegindocs{287}\nwdocspar
+
+\nwenddocs{}\nwbegincode{288}\sublabel{NWORT1E-MaiF.4-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiF.4-3}}}\moddef{Main Subs - MFS~{\nwtagstyle{}\subpageref{NWORT1E-MaiF.4-1}}}\plusendmoddef
+sub print_LaTeX() \{
+    my ($i, $file, $nwfig, $open_flg);
+    $open_flg = 0;
+    print STDOUT $ltx_header;
+    for ($i = 1; $i <= $cnt; $i++) \{
+        print STDERR "# Working on: $seq_ids\{$i\}\{NAME\}\\n";
+        $file = "$input_dir/$seq_ids\{$i\}\{SEQ1\}\\_$seq_ids\{$i\}\{SEQ2\}.ps";
+        ($nwfig = $ltx_figure) =~ s/\\:\\:\\:PSFILE\\:\\:\\:/$file/o;
+        ($i % $mod_value == 1) && do \{
+            $open_flg = 1;
+            print STDOUT '\\ \\vfill'."\\n".'\\begin\{center\}'."\\n".
+                         '\\noindent\\begin\{tabular\}\{c\}'."\\n";
+            # print STDOUT '\\begin\{sidewaysfigure\}'."\\n";
+        \};
+        print STDOUT $nwfig;
+        ($i % $mod_value == 0) && do \{
+            $open_flg = 0;
+            print STDOUT '\\end\{tabular\}'."\\n".'\\end\{center\}'."\\n".'\\vfill'."\\n";
+            # print STDOUT '\\end\{sidewaysfigure\}'."\\n";
+            print STDOUT "\\n".'\\newpage'."\\n\\n" unless $i == $cnt;
+        \};
+    \}; # for
+    $open_flg && do \{
+        print STDOUT '\\end\{tabular\}'."\\n".'\\end\{center\}'."\\n".'\\vfill'."\\n";
+        # print STDOUT '\\end\{sidewaysfigure\}'."\\n";
+    \};
+\} # print_LaTeX
+\nwendcode{}\nwbegindocs{289}\nwdocspar
+
+\nwenddocs{}\nwbegincode{290}\sublabel{NWORT1E-GloH.2-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GloH.2-2}}}\moddef{Global Vars - MFS~{\nwtagstyle{}\subpageref{NWORT1E-GloH.2-1}}}\plusendmoddef
+my $ltx_header = <<'+++EOLTX+++';
+%
+% This file contains a wrapper to visualize a series of PostScript plots
+% obtained with gff2ps, which have the same BoundingBox (defined as 200x800)
+%
++++EOLTX+++
+my $ltx_figure = <<'+++EOLTX+++';
+\\fbox\{\\setlength\{\\fboxsep\}\{0pt\}
+ \\includegraphics[angle=270,width=19cm]\{:::PSFILE:::\}
+ \} % fbox
+\\\\[-1ex]
++++EOLTX+++
+\nwendcode{}\nwbegindocs{291}\nwdocspar
+
+\subsctn{Masking CDS from fasta files}
+
+\nwenddocs{}\nwbegincode{292}\sublabel{NWORT1E-MasQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MasQ-1}}}\moddef{Masking CDS on fasta files~{\nwtagstyle{}\subpageref{NWORT1E-MasQ-1}}}\endmoddef
+\LA{}PERL shebang~{\nwtagstyle{}\subpageref{NWORT1E-PERC-1}}\RA{}
+#
+# MaskCDS.pl
+#
+#     Masking CDS on fasta files.
+#
+# Usage:
+#     MaskCDS.pl <fasta_file> <CDS_file(GFF)> > <fasta_masked>
+#
+\LA{}Use Modules - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-UseI-1}}\RA{}
+#
+\LA{}Global Vars - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-GloI-1}}\RA{}
+#
+\LA{}Main Loop - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG-1}}\RA{}
+#
+\LA{}Main Subs - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-1}}\RA{}
+\LA{}Common PERL subs - Min Max~{\nwtagstyle{}\subpageref{NWORT1E-ComQ-1}}\RA{}
+\nwnotused{Masking\ CDS\ on\ fasta\ files}\nwendcode{}\nwbegindocs{293}\nwdocspar
+
+\nwenddocs{}\nwbegincode{294}\sublabel{NWORT1E-UseI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-UseI-1}}}\moddef{Use Modules - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-UseI-1}}}\endmoddef
+\LA{}Use Modules - Bio::Seq~{\nwtagstyle{}\subpageref{NWORT1E-UseM-1}}\RA{}
+\nwused{\\{NWORT1E-MasQ-1}}\nwendcode{}\nwbegindocs{295}\nwdocspar
+
+\nwenddocs{}\nwbegincode{296}\sublabel{NWORT1E-GloI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-GloI-1}}}\moddef{Global Vars - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-GloI-1}}}\endmoddef
+my (%seqs, $fasta_file, $cds_file);
+\nwused{\\{NWORT1E-MasQ-1}}\nwendcode{}\nwbegindocs{297}\nwdocspar
+
+\nwenddocs{}\nwbegincode{298}\sublabel{NWORT1E-MaiG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiG-1}}}\moddef{Main Loop - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG-1}}}\endmoddef
+print STDERR "###\\n### RUNNING MaskCDS.pl\\n###\\n".
+             "### $ENV\{USER\} - ".(`date`)."###\\n#\\n";
+&parse_args();
+&load_fasta($fasta_file);
+&load_coords($cds_file);
+&mask_sequence();
+&write_fasta(); # STDOUT
+\nwused{\\{NWORT1E-MasQ-1}}\nwendcode{}\nwbegindocs{299}\nwdocspar
+
+\nwenddocs{}\nwbegincode{300}\sublabel{NWORT1E-MaiG.2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-1}}}\moddef{Main Subs - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-1}}}\endmoddef
+sub parse_args() \{
+    scalar(@ARGV) < 2 && do \{
+        print "\\nUSAGE: \\n".
+              "MaskCDS.pl <fasta_file> <CDS_file(GFF)> > <fasta_masked>\\n\\n";
+        die("!!! ERROR - NOT ENOUGH COMMAND-LINE PARAMETERS. $!");
+    \};
+    $fasta_file   = shift @ARGV;
+    ( -e $fasta_file ) ||
+        die("!!! $fasta_file DOES NOT EXIST...\\n");
+    $cds_file   = shift @ARGV;
+    ( -e $cds_file ) ||
+        die("!!! $cds_file DOES NOT EXIST...\\n");
+    @ARGV = ();
+\} # parse_args
+\nwalsodefined{\\{NWORT1E-MaiG.2-2}\\{NWORT1E-MaiG.2-3}\\{NWORT1E-MaiG.2-4}\\{NWORT1E-MaiG.2-5}}\nwused{\\{NWORT1E-MasQ-1}}\nwendcode{}\nwbegindocs{301}\nwdocspar
+
+\nwenddocs{}\nwbegincode{302}\sublabel{NWORT1E-MaiG.2-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-2}}}\moddef{Main Subs - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-1}}}\plusendmoddef
+sub load_fasta($fasta_file) \{
+    my $infile = $_[0];
+    my ($seqin,$seq,$seqnum,$sid);
+    print STDERR "### READING FASTA SEQUENCES FROM: $infile\\n";
+    $seqnum = 0;
+    $seqin = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
+    while ($seq = $seqin->next_seq()) \{
+        $sid = $seq->display_id();
+        $seqs\{$sid\}\{FLG\} = 1;
+        $seqs\{$sid\}\{MAX\} = 0;
+        $seqs\{$sid\}\{SEQ\} = $seq->seq();
+        $seqs\{$sid\}\{LEN\} = $seq->length();
+        $seqs\{$sid\}\{CDS\} = ();
+        $seqnum++;
+        \}; # while next_seq
+    print STDERR "#\\n#   $seqnum sequences found...\\n#\\n";
+\} # load_fasta
+\nwendcode{}\nwbegindocs{303}\nwdocspar
+
+We are saving CDS coords in array {\tt{}@{\char123}\ {\char36}seqs{\char123}{\char36}sid{\char125}{\char123}CDS{\char125}\ {\char125}}, but we do not split into subarrays because we are going to parse the main array by pairs of its elements.
+
+\nwenddocs{}\nwbegincode{304}\sublabel{NWORT1E-MaiG.2-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-3}}}\moddef{Main Subs - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-1}}}\plusendmoddef
+sub load_coords($cds_file) \{
+    my $infile = $_[0];
+    my %recnum;
+    print STDERR "### READING GFF COORDS FROM: $infile\\n";
+    open(GFF,"< $infile") ||
+        die("!!! CANNOT OPEN FILE: $infile $!");
+    while (<GFF>) \{
+        my ($sid,$feat,$ori,$end);
+        \LA{}Skip comments and empty records~{\nwtagstyle{}\subpageref{NWORT1E-SkiV-1}}\RA{}
+        ($sid,undef,$feat,$ori,$end,undef) = split /\\s+/og, $_, 6;
+        $seqs\{$sid\}\{MAX\} = &max($seqs\{$sid\}\{MAX\},$ori,$end);
+        push @\{ $seqs\{$sid\}\{CDS\} \}, ($ori,$end) if
+           (lc($feat) =~ /first|internal|terminal|single/);
+        $recnum\{$sid\}++;
+    \}; # while (<GFF>)
+    close(GFF);
+    my $ln = "";
+    foreach my $sid (sort keys %recnum) \{
+        $ln .= "#   $recnum\{$sid\} GFF records found for sequence $sid...\\n";
+    \}; # foreach
+    print STDERR "#\\n$ln#\\n";
+\} # load_coords
+\nwendcode{}\nwbegindocs{305}\nwdocspar
+
+\nwenddocs{}\nwbegincode{306}\sublabel{NWORT1E-MaiG.2-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-4}}}\moddef{Main Subs - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-1}}}\plusendmoddef
+sub mask_sequence() \{
+    my ($sid,$cds,$tmp,$msknum);
+    $msknum = 0;
+    print STDERR "### MASKING SEQUENCES\\n#\\n";
+    foreach $sid (keys %seqs) \{
+        $tmp = \\@\{ $seqs\{$sid\}\{CDS\} \};
+        (scalar(@\{$tmp\}) == 0) && do \{
+            $seqs\{$sid\}\{MSG\} = "no coords found in its GFF files";
+            print STDERR "!!! SKIPING sequence $sid: $seqs\{$sid\}\{MSG\}\\n";
+            $seqs\{$sid\}\{FLG\} = 0;
+            next;
+        \};
+        $seqs\{$sid\}\{MAX\} > $seqs\{$sid\}\{LEN\} && do \{
+            $seqs\{$sid\}\{MSG\} = "coords out of sequence length range";
+            print STDERR "!!! SKIPING sequence $sid: $seqs\{$sid\}\{MSG\}\\n";
+            $seqs\{$sid\}\{FLG\} = 0;
+            next;
+        \};
+        for ($cds = 0; $cds < $#\{$tmp\}; $cds+=2) \{
+            my ($cds_len,$cds_ori,$cds_end,$n);
+            ($cds_ori,$cds_end) = ($tmp->[$cds],$tmp->[($cds + 1)]);
+            $cds_len = $cds_end - $cds_ori + 1;
+            $n = "N" x $cds_len;
+            substr($seqs\{$sid\}\{SEQ\}, ($cds_ori - 1), $cds_len) = $n;
+        \}; # foreach $cds
+        $msknum++;
+    \}; # foreach $sid
+    print STDERR "#\\n#   $msknum sequences masked...\\n#\\n";
+\} # mask_sequence
+\nwendcode{}\nwbegindocs{307}\nwdocspar
+
+\nwenddocs{}\nwbegincode{308}\sublabel{NWORT1E-MaiG.2-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-5}}}\moddef{Main Subs - MCFF~{\nwtagstyle{}\subpageref{NWORT1E-MaiG.2-1}}}\plusendmoddef
+sub write_fasta() \{
+    my ($seqout,$seq,$sid);
+    print STDERR "### WRITING MASKED SEQUENCES to STDOUT\\n#\\n";
+    $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \\*STDOUT);
+    foreach $sid (keys %seqs) \{
+        $seqs\{$sid\}\{FLG\} || do \{
+            print STDERR "!!! Sequence $sid was not masked ... \\n".            
+                         "!!! ... $seqs\{$sid\}\{MSG\} \\n#\\n";
+            # next;
+        \};
+        $seq = Bio::Seq->new();
+        $seq->display_id($sid);
+        $seq->seq($seqs\{$sid\}\{SEQ\});
+        $seqout->write_seq($seq);
+    \}; # foreach $sid
+    print STDERR "#\\n#   Writing masked sequences DONE...\\n#\\n";
+\} # write_fasta
+\nwendcode{}\nwbegindocs{309}\nwdocspar
+
+\nwenddocs{}\nwbegincode{310}\sublabel{NWORT1E-TanE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWORT1E-TanE-1}}}\moddef{Tangling SITES~{\nwtagstyle{}\subpageref{NWORT1E-TanE-1}}}\endmoddef
+#
+notangle -L -R"Grep Real Intron Sites" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/ExtractIntronSites.pl ;
+notangle -L -R"Merging Figures for Sites" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/SitesFigureMerger.pl ;
+notangle -L -R"Masking CDS on fasta files" $WORK/$nwfile.nw | \\
+    perl -ne '$.>1 && print' > $BIN/MaskCDS.pl ;
+#
+chmod a+x $BIN/ExtractIntronSites.pl ;
+chmod a+x $BIN/SitesFigureMerger.pl ;
+chmod a+x $BIN/MaskCDS.pl ;
+#
+notangle -R"gff2ps customization for sites" $WORK/$nwfile.nw \\
+    > $BIN/param/sites_hsap_mmus.gff2psrc ;
+notangle -R"gff2ps customization for blastn" $WORK/$nwfile.nw \\
+    > $BIN/param/blastn_hsap_mmus.gff2psrc ;
+#
+notangle -R"LaTeX wrapper main doc" $WORK/$nwfile.nw \\
+    > $DOCS/psfigures/all_main.tex ;
+notangle -R"LaTeX wrapper main doc for blast" $WORK/$nwfile.nw \\
+    > $DOCS/psfigures/all_blast_main.tex ;
+#
+notangle -R"MetaPost sites scores" $WORK/$nwfile.nw \\
+    > $DOCS/psfigures/sites_score_distribution.mp ;
+notangle -R"MetaPost sites scores" $WORK/$nwfile.nw \\
+    > $DOCS/psfigures/sites_score_distribution.mp ;
+notangle -R"MetaPost acceptors scores" $WORK/$nwfile.nw \\
+    > $DOCS/psfigures/acceptors_score_distribution.mp ;
+notangle -R"MetaPost donors scores" $WORK/$nwfile.nw \\
+    > $DOCS/psfigures/donors_score_distribution.mp ;
+\nwnotused{Tangling\ SITES}\nwendcode{}
+
+\nwixlogsorted{c}{{BASH Environment Variables}{NWORT1E-BASQ-1}{\nwixu{NWORT1E-READ-1}\nwixu{NWORT1E-wea7-1}\nwixu{NWORT1E-LaT8-1}\nwixd{NWORT1E-BASQ-1}}}%
+\nwixlogsorted{c}{{BASH commands}{NWORT1E-BASD-1}{\nwixd{NWORT1E-BASD-1}\nwixd{NWORT1E-BASD-2}\nwixd{NWORT1E-BASD-3}\nwixd{NWORT1E-BASD-4}\nwixd{NWORT1E-BASD-5}\nwixd{NWORT1E-BASD-6}\nwixd{NWORT1E-BASD-7}\nwixd{NWORT1E-BASD-8}\nwixd{NWORT1E-BASD-9}\nwixd{NWORT1E-BASD-A}\nwixd{NWORT1E-BASD-B}\nwixd{NWORT1E-BASD-C}\nwixd{NWORT1E-BASD-D}\nwixd{NWORT1E-BASD-E}\nwixd{NWORT1E-BASD-F}}}%
+\nwixlogsorted{c}{{BASH commands ANALYSIS}{NWORT1E-BASM.2-1}{\nwixd{NWORT1E-BASM.2-1}\nwixd{NWORT1E-BASM.2-2}\nwixd{NWORT1E-BASM.2-3}\nwixd{NWORT1E-BASM.2-4}\nwixd{NWORT1E-BASM.2-5}\nwixd{NWORT1E-BASM.2-6}\nwixd{NWORT1E-BASM.2-7}\nwixd{NWORT1E-BASM.2-8}\nwixd{NWORT1E-BASM.2-9}\nwixd{NWORT1E-BASM.2-A}\nwixd{NWORT1E-BASM.2-B}\nwixd{NWORT1E-BASM.2-C}\nwixd{NWORT1E-BASM.2-D}\nwixd{NWORT1E-BASM.2-E}\nwixd{NWORT1E-BASM.2-F}\nwixd{NWORT1E-BASM.2-G}\nwixd{NWORT1E-BASM.2-H}\nwixd{NWORT1E-BASM.2-I}\nwixd{NWORT1E-BASM.2-J}\nwixd{NWORT1E-BASM.2-K}\nwixd{NWORT1E-BASM.2-L}\nwixd{NWORT1E-BASM.2-M}\nwixd{NWORT1E-BASM.2-N}\nwixd{NWORT1E-BASM.2-O}\nwixd{NWORT1E-BASM.2-P}\nwixd{NWORT1E-BASM.2-Q}\nwixd{NWORT1E-BASM.2-R}\nwixd{NWORT1E-BASM.2-S}\nwixd{NWORT1E-BASM.2-T}\nwixu{NWORT1E-SGPA-1}}}%
+\nwixlogsorted{c}{{BASH commands DATASETS}{NWORT1E-BASM-1}{\nwixd{NWORT1E-BASM-1}\nwixd{NWORT1E-BASM-2}\nwixd{NWORT1E-BASM-3}\nwixd{NWORT1E-BASM-4}\nwixd{NWORT1E-BASM-5}\nwixd{NWORT1E-BASM-6}\nwixd{NWORT1E-BASM-7}\nwixd{NWORT1E-BASM-8}\nwixd{NWORT1E-BASM-9}\nwixd{NWORT1E-BASM-A}\nwixd{NWORT1E-BASM-B}\nwixd{NWORT1E-BASM-C}\nwixd{NWORT1E-BASM-D}\nwixd{NWORT1E-BASM-E}\nwixu{NWORT1E-DATF-1}}}%
+\nwixlogsorted{c}{{BASH commands SPLICING}{nw@notdef}{\nwixu{NWORT1E-SPLF-1}}}%
+\nwixlogsorted{c}{{BASH script end}{NWORT1E-BASF-1}{\nwixd{NWORT1E-BASF-1}\nwixu{NWORT1E-wea7-1}\nwixu{NWORT1E-LaT8-1}}}%
+\nwixlogsorted{c}{{BASH shebang}{NWORT1E-BASC-1}{\nwixd{NWORT1E-BASC-1}\nwixu{NWORT1E-wea7-1}\nwixu{NWORT1E-LaT8-1}}}%
+\nwixlogsorted{c}{{Breaking fasta sequences}{NWORT1E-BreO-1}{\nwixd{NWORT1E-BreO-1}}}%
+\nwixlogsorted{c}{{Common Features Settings}{NWORT1E-ComO-1}{\nwixd{NWORT1E-ComO-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{Common Group Settings}{NWORT1E-ComL-1}{\nwixd{NWORT1E-ComL-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{Common Layout Settings}{NWORT1E-ComM-1}{\nwixd{NWORT1E-ComM-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Benchmark}{NWORT1E-ComS-1}{\nwixu{NWORT1E-MasR-1}\nwixd{NWORT1E-ComS-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Counter}{NWORT1E-ComQ.2-1}{\nwixd{NWORT1E-ComQ.2-1}\nwixu{NWORT1E-GreM-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - Min Max}{NWORT1E-ComQ-1}{\nwixd{NWORT1E-ComQ-1}\nwixu{NWORT1E-MasQ-1}}}%
+\nwixlogsorted{c}{{Common PERL subs - STDERR}{NWORT1E-ComP-1}{\nwixd{NWORT1E-ComP-1}\nwixd{NWORT1E-ComP-2}}}%
+\nwixlogsorted{c}{{Common PERL subs - Text fill}{NWORT1E-ComS.2-1}{\nwixd{NWORT1E-ComS.2-1}\nwixu{NWORT1E-GreM-1}}}%
+\nwixlogsorted{c}{{Common Source Settings}{NWORT1E-ComM.2-1}{\nwixd{NWORT1E-ComM.2-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{DATASETS README}{NWORT1E-DATF-1}{\nwixd{NWORT1E-DATF-1}}}%
+\nwixlogsorted{c}{{Feature settings for sites}{NWORT1E-FeaQ-1}{\nwixu{NWORT1E-gffU-1}\nwixd{NWORT1E-FeaQ-1}\nwixu{NWORT1E-gffV-1}}}%
+\nwixlogsorted{c}{{Finding masked regions coords}{NWORT1E-FinT-1}{\nwixu{NWORT1E-MasR-1}\nwixd{NWORT1E-FinT-1}}}%
+\nwixlogsorted{c}{{GAWK shebang}{NWORT1E-GAWC-1}{\nwixd{NWORT1E-GAWC-1}}}%
+\nwixlogsorted{c}{{GFF to GTF}{NWORT1E-GFFA-1}{\nwixd{NWORT1E-GFFA-1}}}%
+\nwixlogsorted{c}{{GFF2APLOT customization: ortho masked}{NWORT1E-GFFb-1}{\nwixd{NWORT1E-GFFb-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: ortho orimasked a3}{NWORT1E-GFFe.2-1}{\nwixd{NWORT1E-GFFe.2-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: ortho orimasked a4}{NWORT1E-GFFe-1}{\nwixd{NWORT1E-GFFe-1}}}%
+\nwixlogsorted{c}{{GFF2PS customization: ortho orimasked wide}{NWORT1E-GFFg-1}{\nwixd{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{Global Constants - Boolean}{NWORT1E-GloQ-1}{\nwixd{NWORT1E-GloQ-1}}}%
+\nwixlogsorted{c}{{Global Vars - Counter}{NWORT1E-GloL-1}{\nwixd{NWORT1E-GloL-1}\nwixu{NWORT1E-GreM-1}}}%
+\nwixlogsorted{c}{{Global Vars - MCFF}{NWORT1E-GloI-1}{\nwixu{NWORT1E-MasQ-1}\nwixd{NWORT1E-GloI-1}}}%
+\nwixlogsorted{c}{{Global Vars - MFS}{NWORT1E-GloH.2-1}{\nwixu{NWORT1E-MerP-1}\nwixd{NWORT1E-GloH.2-1}\nwixd{NWORT1E-GloH.2-2}}}%
+\nwixlogsorted{c}{{Global Vars - RIS}{NWORT1E-GloH-1}{\nwixu{NWORT1E-GreM-1}\nwixd{NWORT1E-GloH-1}}}%
+\nwixlogsorted{c}{{Global Vars - User and Date}{NWORT1E-GloR-1}{\nwixd{NWORT1E-GloR-1}}}%
+\nwixlogsorted{c}{{Grep Real Intron Sites}{NWORT1E-GreM-1}{\nwixd{NWORT1E-GreM-1}}}%
+\nwixlogsorted{c}{{Group settings for sites}{NWORT1E-GroO-1}{\nwixu{NWORT1E-gffU-1}\nwixd{NWORT1E-GroO-1}\nwixu{NWORT1E-gffV-1}}}%
+\nwixlogsorted{c}{{LaTeX wrapper main doc}{NWORT1E-LaTM-1}{\nwixd{NWORT1E-LaTM-1}}}%
+\nwixlogsorted{c}{{LaTeX wrapper main doc for blast}{NWORT1E-LaTW-1}{\nwixd{NWORT1E-LaTW-1}}}%
+\nwixlogsorted{c}{{LaTeXing}{NWORT1E-LaT8-1}{\nwixd{NWORT1E-LaT8-1}}}%
+\nwixlogsorted{c}{{Layout settings for sites}{NWORT1E-LayP-1}{\nwixu{NWORT1E-gffU-1}\nwixd{NWORT1E-LayP-1}\nwixu{NWORT1E-gffV-1}}}%
+\nwixlogsorted{c}{{Main Loop - MCFF}{NWORT1E-MaiG-1}{\nwixu{NWORT1E-MasQ-1}\nwixd{NWORT1E-MaiG-1}}}%
+\nwixlogsorted{c}{{Main Loop - MFS}{NWORT1E-MaiF.3-1}{\nwixu{NWORT1E-MerP-1}\nwixd{NWORT1E-MaiF.3-1}}}%
+\nwixlogsorted{c}{{Main Loop - RIS}{NWORT1E-MaiF-1}{\nwixu{NWORT1E-GreM-1}\nwixd{NWORT1E-MaiF-1}}}%
+\nwixlogsorted{c}{{Main Subs - MCFF}{NWORT1E-MaiG.2-1}{\nwixu{NWORT1E-MasQ-1}\nwixd{NWORT1E-MaiG.2-1}\nwixd{NWORT1E-MaiG.2-2}\nwixd{NWORT1E-MaiG.2-3}\nwixd{NWORT1E-MaiG.2-4}\nwixd{NWORT1E-MaiG.2-5}}}%
+\nwixlogsorted{c}{{Main Subs - MFS}{NWORT1E-MaiF.4-1}{\nwixu{NWORT1E-MerP-1}\nwixd{NWORT1E-MaiF.4-1}\nwixd{NWORT1E-MaiF.4-2}\nwixd{NWORT1E-MaiF.4-3}}}%
+\nwixlogsorted{c}{{Main Subs - RIS}{NWORT1E-MaiF.2-1}{\nwixu{NWORT1E-GreM-1}\nwixd{NWORT1E-MaiF.2-1}\nwixd{NWORT1E-MaiF.2-2}\nwixd{NWORT1E-MaiF.2-3}\nwixd{NWORT1E-MaiF.2-4}\nwixd{NWORT1E-MaiF.2-5}\nwixd{NWORT1E-MaiF.2-6}}}%
+\nwixlogsorted{c}{{Main Subs - loadseqids}{NWORT1E-MaiM-1}{\nwixu{NWORT1E-MaiF.2-2}\nwixd{NWORT1E-MaiM-1}\nwixu{NWORT1E-MaiF.4-2}}}%
+\nwixlogsorted{c}{{Masked from fasta sequences}{NWORT1E-MasR-1}{\nwixd{NWORT1E-MasR-1}}}%
+\nwixlogsorted{c}{{Masking CDS on fasta files}{NWORT1E-MasQ-1}{\nwixd{NWORT1E-MasQ-1}}}%
+\nwixlogsorted{c}{{Merging Figures for Sites}{NWORT1E-MerP-1}{\nwixd{NWORT1E-MerP-1}}}%
+\nwixlogsorted{c}{{PBS tblastx shell}{NWORT1E-PBSH-1}{\nwixd{NWORT1E-PBSH-1}}}%
+\nwixlogsorted{c}{{PERL shebang}{NWORT1E-PERC-1}{\nwixu{NWORT1E-RenR-1}\nwixu{NWORT1E-RawH-1}\nwixu{NWORT1E-MasR-1}\nwixu{NWORT1E-BreO-1}\nwixu{NWORT1E-GFFA-1}\nwixd{NWORT1E-PERC-1}\nwixu{NWORT1E-GreM-1}\nwixu{NWORT1E-MerP-1}\nwixu{NWORT1E-MasQ-1}}}%
+\nwixlogsorted{c}{{README common}{NWORT1E-READ-1}{\nwixu{NWORT1E-DATF-1}\nwixu{NWORT1E-SGPA-1}\nwixu{NWORT1E-SPLF-1}\nwixd{NWORT1E-READ-1}}}%
+\nwixlogsorted{c}{{Raw coords to GFF}{NWORT1E-RawH-1}{\nwixd{NWORT1E-RawH-1}}}%
+\nwixlogsorted{c}{{Renaming fasta sequence IDs}{NWORT1E-RenR-1}{\nwixd{NWORT1E-RenR-1}}}%
+\nwixlogsorted{c}{{Repeats Features Settings}{NWORT1E-RepP-1}{\nwixd{NWORT1E-RepP-1}}}%
+\nwixlogsorted{c}{{SGP README}{NWORT1E-SGPA-1}{\nwixd{NWORT1E-SGPA-1}}}%
+\nwixlogsorted{c}{{SPLICING README}{NWORT1E-SPLF-1}{\nwixd{NWORT1E-SPLF-1}}}%
+\nwixlogsorted{c}{{Sequence IDs}{NWORT1E-SeqC-1}{\nwixd{NWORT1E-SeqC-1}}}%
+\nwixlogsorted{c}{{Sequence IDs extra}{NWORT1E-SeqI-1}{\nwixd{NWORT1E-SeqI-1}}}%
+\nwixlogsorted{c}{{Setting sequence variables from fasta record}{NWORT1E-Seti-1}{\nwixu{NWORT1E-MasR-1}\nwixd{NWORT1E-Seti-1}}}%
+\nwixlogsorted{c}{{Settings for a3 paper size}{NWORT1E-SetQ-1}{\nwixd{NWORT1E-SetQ-1}\nwixu{NWORT1E-GFFe.2-1}}}%
+\nwixlogsorted{c}{{Settings for a4 paper size}{NWORT1E-SetQ.2-1}{\nwixd{NWORT1E-SetQ.2-1}\nwixu{NWORT1E-GFFe-1}}}%
+\nwixlogsorted{c}{{Settings for wide display}{NWORT1E-SetP-1}{\nwixd{NWORT1E-SetP-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{Skip comments and empty records}{NWORT1E-SkiV-1}{\nwixd{NWORT1E-SkiV-1}\nwixu{NWORT1E-MaiM-1}\nwixu{NWORT1E-MaiF.2-3}\nwixu{NWORT1E-MaiF.2-4}\nwixu{NWORT1E-MaiG.2-3}}}%
+\nwixlogsorted{c}{{Source settings for sites}{NWORT1E-SouP-1}{\nwixu{NWORT1E-gffU-1}\nwixd{NWORT1E-SouP-1}\nwixu{NWORT1E-gffV-1}}}%
+\nwixlogsorted{c}{{Tangling SITES}{NWORT1E-TanE-1}{\nwixd{NWORT1E-TanE-1}}}%
+\nwixlogsorted{c}{{Timer ON}{NWORT1E-Tim8-1}{\nwixu{NWORT1E-UseN-1}\nwixd{NWORT1E-Tim8-1}}}%
+\nwixlogsorted{c}{{Use Modules - Benchmark}{NWORT1E-UseN-1}{\nwixu{NWORT1E-MasR-1}\nwixd{NWORT1E-UseN-1}}}%
+\nwixlogsorted{c}{{Use Modules - Bio::Seq}{NWORT1E-UseM-1}{\nwixd{NWORT1E-UseM-1}\nwixu{NWORT1E-UseI-1}}}%
+\nwixlogsorted{c}{{Use Modules - Dumper}{NWORT1E-UseK-1}{\nwixd{NWORT1E-UseK-1}\nwixu{NWORT1E-GreM-1}}}%
+\nwixlogsorted{c}{{Use Modules - MCFF}{NWORT1E-UseI-1}{\nwixu{NWORT1E-MasQ-1}\nwixd{NWORT1E-UseI-1}}}%
+\nwixlogsorted{c}{{Version Control Id Tag}{NWORT1E-VerM-1}{\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}\nwixu{NWORT1E-READ-1}\nwixu{NWORT1E-PERC-1}\nwixu{NWORT1E-GAWC-1}\nwixu{NWORT1E-BASC-1}\nwixd{NWORT1E-VerM-1}\nwixu{NWORT1E-gffU-1}\nwixu{NWORT1E-gffV-1}}}%
+\nwixlogsorted{c}{{Writing masked regions coords in GFF}{NWORT1E-Wria-1}{\nwixu{NWORT1E-MasR-1}\nwixd{NWORT1E-Wria-1}}}%
+\nwixlogsorted{c}{{annotation source settings}{NWORT1E-annQ-1}{\nwixd{NWORT1E-annQ-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{geneid source settings}{NWORT1E-genM-1}{\nwixd{NWORT1E-genM-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{genscan source settings}{NWORT1E-genN-1}{\nwixd{NWORT1E-genN-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{gff2ps customization for blastn}{NWORT1E-gffV-1}{\nwixd{NWORT1E-gffV-1}}}%
+\nwixlogsorted{c}{{gff2ps customization for sites}{NWORT1E-gffU-1}{\nwixd{NWORT1E-gffU-1}}}%
+\nwixlogsorted{c}{{orimasked source settings}{NWORT1E-oriP-1}{\nwixd{NWORT1E-oriP-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{repeatmasker source settings}{NWORT1E-repS-1}{\nwixd{NWORT1E-repS-1}}}%
+\nwixlogsorted{c}{{sgp source settings}{NWORT1E-sgpJ-1}{\nwixd{NWORT1E-sgpJ-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{tangling}{NWORT1E-tan8-1}{\nwixd{NWORT1E-tan8-1}\nwixd{NWORT1E-tan8-2}\nwixd{NWORT1E-tan8-3}\nwixd{NWORT1E-tan8-4}}}%
+\nwixlogsorted{c}{{tangling - READMEs}{NWORT1E-tanI-1}{\nwixd{NWORT1E-tanI-1}}}%
+\nwixlogsorted{c}{{tblastx source settings}{NWORT1E-tblN-1}{\nwixd{NWORT1E-tblN-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{twinscan source settings}{NWORT1E-twiO-1}{\nwixd{NWORT1E-twiO-1}\nwixu{NWORT1E-GFFe-1}\nwixu{NWORT1E-GFFe.2-1}\nwixu{NWORT1E-GFFg-1}}}%
+\nwixlogsorted{c}{{weaving}{NWORT1E-wea7-1}{\nwixd{NWORT1E-wea7-1}}}%
+\nwbegindocs{311}\nwdocspar
+
+\end{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+\nwenddocs{}

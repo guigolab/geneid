@@ -1,0 +1,231 @@
+## ########################################################################## ##
+##                                                                            ##
+##                  USER CUSTOMIZATION FILE FOR GFF2APLOT                     ##
+##                                                                            ##
+## ########################################################################## ##
+##
+## This is the file in which you can define
+##   the OPTIONS and FEATURES required by gff2aplot program.
+## 
+## If you want to modify this file, please, do not
+##   forget to make a backup copy of your old file 
+##   (like .gff2aplot.rc.old or .gff2aplot.rc.bck).
+##
+## Creation Date: 27.01.99
+## Last Revision: 20.04.99
+##
+## Creator: Josep Francesc ABRIL FERRANDO
+##
+##  e-mail:        jabril@imim.es
+##
+## ########################################################################## ##
+## #################### OPTIONS for gff2aplot PROGRAM ##################### ##
+## ########################################################################## ##
+##
+FL ########################################################################## ##
+## #################################### FLAGs ############################### ##
+##
+## You could set FLAG variables to:
+##       0/OFF/NO/N/FALSE/F - Switch OFF
+##       1/ON/YES/Y/TRUE/T  - Switch ON
+##
+## Variable ############# Switch ############
+##
+Display_TITLE             : Y
+Display_SUBTITLE          : Y
+Display_X-Axis_LABEL      : Y
+Display_Y-Axis_LABEL      : Y
+Display_Percent-Box_LABEL : Y
+Display_Extra-Box_LABEL   : Y
+Display_PERCENT-BOX       : N
+Display_EXTRA-BOX         : N
+Display_GENE_LABEL        : Y
+Display_GENE_RULE         : Y
+Display_HalfHeightBOX     : Y
+Display_FullHeightBOX     : Y
+Display_BOX_LABEL         : Y
+Display_UserDef_BOX_LABEL : Y
+Display_ARROW             : Y
+Display_JOINS             : Y
+Display_RIBBON            : Y
+Display_SELECTION-BOX     : Y
+Display_GFF               : N
+Display_GFF-ReverseOrder  : N
+Display_FUNCTION          : N
+APlotLine_GroupScore      : N
+APlotLine_ScaleWidth      : N
+APlotLine_ScaleGrey       : N
+XY_AXES_Same-SIZE         : N
+Display_TickMark-LABEL    : Y
+Display_APlot_X-Ticks     : Y
+Display_Percent_X-Ticks   : Y
+Display_ExtraBox_X-Ticks  : Y
+Display_APlot_Y-Ticks     : Y
+Display_Percent_Y-Ticks   : Y
+Display_ExtraBox_Y-Ticks  : Y
+Display_OnlyLower_X-Ticks : N
+Display_GRID              : N
+ZOOM_Zoom                 : N
+ZOOM_Area                 : N
+Zoom_Marks                : N
+##
+DF ########################################################################## ##
+## ############################# DEFAULT VALUES ############################# ##
+##
+## Some Default Values...
+##
+## Variable ######## Definition ######## 
+##
+PAGE_SIZE               :  a4
+FEATURE_LABELS_LENGTH   :  0     # Number of chars displayed in labels (0 means show full label string).
+GROUP_LABELS_LENGTH     :  0     # Number of chars displayed in labels (0 means show full label string).
+FEATURE_X-LABELS_ANGLE  :  0     # In degrees.
+GROUP_X-LABELS_ANGLE    :  0     # In degrees.
+FEATURE_Y-LABELS_ANGLE  :  0     # In degrees.
+GROUP_Y-LABELS_ANGLE    :  0     # In degrees.
+FEATURE_LABELS_FONTSIZE :  1     # Font size scale Factor.
+GROUP_LABELS_FONTSIZE   :  1     # Font size scale Factor.
+BACKGROUND_COLOR        : white
+FOREGROUND_COLOR        : black
+APlotBox_BGCOLOR        :  BG
+PercentBox_BGCOLOR      :  BG
+ExtraBox_BGCOLOR        :  BG
+Strand-Arrows_COLOR     :  FG
+Join-Lines_COLOR        :  FG
+SelectionBox_BGCOLOR    : grey
+Function_COLOR          : red
+Zoom_Area_Mark_COLOR    : lightred
+PERCENT_ORIGIN          :  50
+PERCENT_END             : 100
+ScaleMajorTICKMARK      :   2    # major tickmarks per axis.
+ScaleMinorTICKMARK      :   5    # minor tickmarks per each major.
+PercentMajorTICKMARK    :   5    # major tickmarks per axis.
+PercentMinorTICKMARK    :   5    # minor tickmarks per each major.
+ExtraMajorTICKMARK      :   2    # major tickmarks per axis.
+ExtraMinorTICKMARK      :   5    # minor tickmarks per each major.
+##
+OP ########################################################################## ##
+## #################################### OPTIONs ############################# ##
+##
+## Changing default values overrides any other definition you made for features.
+##
+##   ##DEFAULT##  means that program uses for these options
+##                those values you have defined in feature table.
+##         FG    the option is defined with FOREGROUND_COLOR.
+##         BG    the option is defined with BACKGROUND_COLOR.
+##
+## Variable ######## Definition ######## 
+##
+Align_NAME            : ##DEFAULT##
+X-Sequence_NAME       : ##DEFAULT##
+Y-Sequence_NAME       : ##DEFAULT##
+TITLE                 : ##DEFAULT##
+SUBTITLE              : ##DEFAULT##
+X-Axis_LABEL          : ##DEFAULT##
+Y-Axis_LABEL          : ##DEFAULT##
+Percent-Box_LABEL     : ##DEFAULT##
+Percent-Box_SUBLABEL  : ##DEFAULT##
+Extra-Box_LABEL       : ##DEFAULT##
+Extra-Box_SUBLABEL    : ##DEFAULT##
+HalfSizeBox_BGCOLOR   : ##DEFAULT##
+FullSizeBox_BGCOLOR   : ##DEFAULT##
+Ribbon_BGCOLOR        : ##DEFAULT##
+SEQUENCE1_ORIGIN      : ##DEFAULT##
+SEQUENCE1_END         : ##DEFAULT##
+SEQUENCE2_ORIGIN      : ##DEFAULT##
+SEQUENCE2_END         : ##DEFAULT##
+Zoom_SEQUENCE1_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE1_END    : ##DEFAULT##
+Zoom_SEQUENCE2_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE2_END    : ##DEFAULT##
+TICKMARK              : ##DEFAULT##
+SMALLTICKMARK         : ##DEFAULT##
+##
+FT ########################################################################## ##
+## #################################### GFF FEATUREs DEFINITION ############# ##
+## 
+## ########### Description of each element of the Features Array. ########### ##
+##
+## (str) means a string of chars (in a string numbers are treated as chars).
+## (bin) means you only could define variable as
+##       0/OFF/NO/N/FALSE/F = Switch OFF the element.
+##       1/ON/YES/Y/TRUE/T  = Switch ON  the element.
+## (FHN) means you can choose between "(F)ull" or "(H)alf" size Boxes,
+##       also you can define "(N)one", then the feature is without a box.
+## (NLRB) means you can choose among "(N)o lines", "draw (L)ines at <feature>
+##       boundaries", "(R)ibbons" or "(B)oth -Lines and Ribbons".
+## (HND) means "(H)alfSize", "(N)ormalSize" or "(D)oubleSize" LineWidth.
+##
+## (clr) means that you can choose among the following color names:
+##
+##    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white
+##       verydarkgreen | darkgreen | green | lightgreen | verylightgreen
+##   verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue
+##          verydarkblue | darkblue | blue | lightblue | verylightblue
+##         verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan
+##     verydarkviolet | darkviolet | violet | lightviolet | verylightviolet
+##            verydarkred | darkred | red | lightred | verylightred
+##     verydarkorange | darkorange | orange | lightorange | verylightorange
+##     verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow
+##        verydarkbrown | darkbrown | brown | lightbrown | verylightbrown 
+##
+##       If you do not want to define a color, you can enter
+##        BG (background color) or FG (foreground color), 
+##        but you must choose one of the above definitions.
+## 
+## ## 
+## Feature (str): A feature name. Only <features> defined below
+##    will be recognized in your .gff file.
+## ## 
+## XTR (bin): Force those <features> for which XTR is switched ON
+##   to be displayed in the third panel, if the Plot Option 
+##   "Display_EXTRA-BOX" is switched ON.
+## ## 
+## Box (FHN): Define the box size (FHN) for <feature>.
+## ##
+## Line (NLRB): Draw lines across all panels for the <feature>.
+## ##
+## Join (bin): Switch ON to connect elements of one group with splice symbols.
+## ##
+## Arrw (bin): Swicth ON to display an arrow that shows the <feature>'s strand.
+## ##
+## Lbl (bin): Swicth ON to display the <feature>'s label
+##   (if it's defined in the .gff file).
+## ##
+## Color (clr): Fill <Box> with this color.
+## ##
+## CLine (clr): Fill Line <Ribbons> with this color.
+## ##
+## Wdth (HND): You can choose among three predefined LineWidths.
+## ##
+## Layr : Layer where is drawed each feature.
+##   You must pass an integer for feature ordering (1..n),
+##   put 0 to print the feature always on top. 
+## ##
+##  
+## ########################## Features Definition ################################ ##
+## Feature  #XTR #Box #Line#Join#Arrw#Lbl #Wdth#Layr#Color ###########CLine #########
+##
+gene          N    H    L    N    Y    N    H    1    blue             lightgrey
+first         N    F    R    Y    N    N    H    0    red              lightgrey
+internal      N    F    R    Y    N    N    H    0    red              lightgrey
+terminal      N    F    R    Y    N    N    H    0    red              lightgrey    
+#
+sine          N    N    R    N    N    N    H    6    BG               verylightgreen
+line          N    N    R    N    N    N    H    6    BG               verylightgreen
+alu           N    N    R    N    N    N    H    6    BG               lightgreen   
+repeat        N    N    R    N    N    N    H    6    BG               verylightgreen
+## ######1#########2#########3#########4#########5#########6#########7#########8#####
+##  
+SP ########################## Special gff Features ############################### ##
+##
+GROUPLIMITS : gene
+PLOTLIMITS  : sequence                                             
+APLOT       : hsp
+HIGHLIGHT   : boxit
+RECTANGLE   : rectangle
+CIRCLE      : circle
+TEXT        : text
+FUNCTION    : function
+EXTRABOX    : est
+## ######1#########2#########3#########4#########5#########6#########7#########8#####

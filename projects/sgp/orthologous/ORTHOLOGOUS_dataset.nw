@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -114,7 +114,9 @@
 \textsc{\textbf{\Huge Building\\ ORTHOLOGOUS\\[1ex] Dataset}}\\[5ex]
 
 %\textbf{\Large Authors List Here}\\[1ex]
-\textbf{\Large Josep F. Abril}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
+\textbf{\Large Josep F. Abril}\\[1ex]
+\textbf{\Large Gen\'{\i}s Parra}\\[1ex]
+\textbf{\Large Roderic Guig\'o}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
 
 \textbf{\large --- \today ---}\\[10ex]
 
@@ -132,7 +134,7 @@
 Grup de Recerca en Infom\`atica Biom\`edica\\
 Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
-\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+% \raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
 \end{raggedleft}
 \end{center}
 
@@ -155,7 +157,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -311,7 +313,7 @@ MHC   &  XXX Kb  &  YYY\% &  ZZZ\%   & AAA   &  BBB           &  CCC   \\ % too 
       &  306 Kb  & 43.2\% & 54.2\%   &  5     & 4 (3 correct)  & 3 (3 correct) \\
 \end{tabular}
 \vskip 1ex
-\begin{minipage}[c]{\linewith}
+\begin{minipage}[c]{\linewidth}
 Some notes on the annotated sequences (by Ian Korf):
 \begin{quote}
 \begin{enumerate}
@@ -3139,7 +3141,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
 @ 
 
 \newpage
@@ -3235,27 +3237,27 @@ popd ;
 
 <<BASH Environment Variables>>=
 #
-# ORTHOLOGOUS Dataset Variables
+# NOWEB Document Variables
 #
-DATASETS="/projects/datasets/orthologous";
-WORK="$DATASETS/_docs" ;
+WORK="$HOME/development/projects/sgp/orthologous/" ;
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
 nwfile="ORTHOLOGOUS_dataset" ;
-export DATASETS WORK BIN PARAM DOCS DATA nwfile ;
-#
-SGPBIN="/projects/sgp/bin" ;
-export SGPBIN ;
+export WORK BIN PARAM DOCS DATA nwfile ;
 #
 # ORTHOLOGOUS Dataset Variables
 #
+DATASETS="/projects/datasets/orthologous";
 ANALYSIS="/projects/sgp/orthologous" ;
+SGPBIN="/projects/sgp/bin" ;
+SGPPARAM="$SGPBIN/param" ;
+#
 ID="$DATASETS/id" ;
 HSAP="$DATASETS/id.Hsap" ;
 MMUS="$DATASETS/id.Mmus" ;
-export ANALYSIS ID HSAP MMUS ;
+export DATASETS ANALYSIS SGPBIN SGPPARAM ID HSAP MMUS ;
 #
 SPLICING="/projects/splicing/chr22" ;
 export SPLICING ;
@@ -3488,7 +3490,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -3832,7 +3834,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.5 2001-10-01 13:11:22 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.6 2001-10-01 14:09:27 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
