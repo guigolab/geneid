@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $
+% $Id: deploy.nw,v 1.12 2001-10-05 18:30:33 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -146,7 +146,8 @@ Universitat Pompeu Fabra\\[2ex]
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\tit\quad\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[LO,LE]{\small\textbf{\genomelab}}
+\fancyfoot[CO,CE]{\small\textsl{\authorshort}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -221,7 +222,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.12 2001-10-05 18:30:33 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -232,6 +233,23 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \sctn{Introduction}
 
+\label{todo:IAA}
+<<HIDE: new defs TODO>>=
+\def\todoIAA{Flow diagram (Serial/Filter mode) for {\progname} execution (figure~\ref{fig:flowdiag}).}
+ % todoIAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoIAA}{todo:IAA}
+@
+\todo{ \item \todoIAA } % todo
+\begin{figure}[!ht]
+\begin{center}
+\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
+% \includegraphics[]{}
+\caption[Flow diagram for \progname.]{\label{fig:flowdiag} Flow diagram for {\progname} showing interactions of external processes, output files and {\LaTeX} documents.}
+\end{center}
+\end{figure}
+ 
 \subsctn{Description}
 
 % \subsctn{Comments}
@@ -245,6 +263,24 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Implementation}
+
+<<Program Info>>=
+my $PROGRAM = 'deploy.pl';
+my $VERSION = '1.0_alpha';
+@ 
+
+<<Program Description>>=
+# #----------------------------------------------------------------#
+# #                           deploy.pl                            #
+# #----------------------------------------------------------------#
+#
+#         deploy.pl [options] project_name template_file
+#
+#   Preparing all files we need to work with noweb on a project.
+# Creates basic file set to work with noweb literate programming tool.
+# 
+#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+@ 
 
 \subsctn{Program outline}
 
@@ -270,17 +306,6 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 <<Use Modules>>=
 @
-
-<<Program Info>>=
-my $PROGRAM = 'deploy.pl';
-my $VERSION = '1.0_alpha';
-@ 
-
-<<Program Description>>=
-# deploy.pl [options] project_name template_file
-#
-#     Preparing all files we need to work with noweb on a project.
-@ 
 
 <<Global Vars>>=
 my $USAGE = "\nUSAGE:\n\tdeploy.pl <projectname> <template>\n".
@@ -441,18 +466,21 @@ $WORK/ltx ;
 
 \sctn{Template definitions}
 
-\label{todo:BAA}\label{todo:BAB}
+\label{todo:BAA}\label{todo:BAB}\label{todo:BAC}
 <<HIDE: new defs TODO>>=
 \def\todoBAA{Template for C programs (including Header/Module/Makefile sections).} % todoBAA
-\def\todoBAB{Re-structure templates.} % todoBAB
+\def\todoBAB{Re-structure templates section.} % todoBAB
+\def\todoBAC{Finish templates to be used by PDFlatex and LaTeX2HTML.} % todoBAC
 @
 <<HIDE: TODO>>=
 \todoitem{\todoBAA}{todo:BAA}
 \todoitem{\todoBAB}{todo:BAB}
+\todoitem{\todoBAC}{todo:BAC}
 @
 \todo{ 
  \item \todoBAA
  \item \todoBAB
+ \item \todoBAC
  } % todo
 
 \subsctn{Perl scripts} %%%%SCTN
@@ -1012,7 +1040,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.12 2001-10-05 18:30:33 jabril Exp $$>$ }
 \end{center}
 
 @
@@ -1072,28 +1100,6 @@ Universitat Pompeu Fabra\\[2ex]
 
 \sctn{Implementation}
 
-\subsctn{Program outline}
-
-@<<@@@PROJECT@@@@>>=
-@<<PERL shebang>>
-#
-# MODULES
-#
-@<<Use Modules>>
-#
-# VARIABLES
-#
-@<<Global Vars>>
-#
-# MAIN LOOP
-#
-@<<Main Loop>>
-#
-# FUNCTIONS
-#
-@<<Functions>>
-@@ 
-
 @<<Program Info>>=
 my $PROGRAM = '@@@PROJECT@@@';
 my $VERSION = '0.1_alpha';
@@ -1116,6 +1122,28 @@ A short description of what your program does.
 #
 #
 #     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
+@@ 
+
+\subsctn{Program outline}
+
+@<<@@@PROJECT@@@@>>=
+@<<PERL shebang>>
+#
+# MODULES
+#
+@<<Use Modules>>
+#
+# VARIABLES
+#
+@<<Global Vars>>
+#
+# MAIN LOOP
+#
+@<<Main Loop>>
+#
+# FUNCTIONS
+#
+@<<Functions>>
 @@ 
 
 @<<Use Modules>>=
@@ -1385,7 +1413,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 @<<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $
+# $Id: deploy.nw,v 1.12 2001-10-05 18:30:33 jabril Exp $
 @@ 
 
 @ 
@@ -1730,20 +1758,12 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.11 2001-10-05 16:19:45 jabril Exp $
+# $Id: deploy.nw,v 1.12 2001-10-05 18:30:33 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
 
 <<GNU License>>=
-# #----------------------------------------------------------------#
-# #                             DEPLOY                             #
-# #----------------------------------------------------------------#
-# 
-# Creates basic file set to work with noweb literate programming tool.
-# 
-#     Copyright (C) 2001 - Josep Francesc ABRIL FERRANDO  
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
