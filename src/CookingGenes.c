@@ -24,13 +24,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.5 2001-03-08 15:34:47 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.6 2001-04-23 13:12:22 eblanco Exp $  */
 
 #include "geneid.h"
 
 extern int X10;
 extern int GFF;
 extern int XML;
+extern int cDNA;
 
 void PrintExonGFF (exonGFF *e, char Name[], char Source[])
 {
@@ -63,16 +64,25 @@ typedef struct s_gen
 } gen;
 
 /* Printing a protein (Fasta format) */
-void printProt(char* Name,long ngen, char* prot, int nAA)
+void printProt(char* Name,long ngen, char* prot, long nAA, int mode)
 {
   long j;
+  char header[MAXLINE];
+
+  if (mode == PROT)
+    sprintf(header,"\n>%s|%s_predicted_protein_%ld|%ld_AA\n",
+	    Name,
+	    VERSION,
+	    ngen,
+	    nAA);
+  else
+    sprintf(header,"\n>%s|%s_predicted_cDNA_%ld|%ld_NN\n",Name,
+	    VERSION,
+	    ngen,
+	    nAA);
 
   if (!XML)
-     printf("\n>%s|%s_predicted_protein_%ld|%d_AA\n",
-	 Name,
-	 VERSION,
-	 ngen,
-	 nAA);
+    printf("%s",header);
   else
      printf("\t");
 	  
@@ -87,7 +97,7 @@ void printProt(char* Name,long ngen, char* prot, int nAA)
 	}
     }
   printf("\n");
-  if (!XML)
+  if (!XML && (mode == PROT))
      printf("\n");  	
 }
 
@@ -341,7 +351,8 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
   long ngen;
   gen info[MAXGENE];
   char* prot;
-  int nAA;
+  char* tmpDNA;
+  long nAA, nNN;
   int tAA[MAXEXONGEN][2];
   long nvExons;
 
@@ -351,6 +362,9 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
   /* Protein */
   if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
     printError("Not enough space to store protein");
+
+  if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+    printError("Not enough space to store cDNA");
 
   /* Header multiple gene */
     /* Header for  */
@@ -366,6 +380,9 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
       /* Translate gen to protein */
       TranslateGen(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
       
+      if (cDNA)
+	GetcDNA(info[igen].start,s,info[igen].nexons, tmpDNA, &nNN);
+      
       /* Header gene */
       if (XML)
 	printf("   <gene idGene=\"%s.G%ld\" strand =\"%s\" exons=\"%ld\" score=\"%.2f\">\n",
@@ -375,7 +392,7 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
 	       info[igen].nexons,
 	       info[igen].score);
       else     
-	printf("# Gene %ld (%s). %ld exons. %d aa. Score = %f \n",
+	printf("# Gene %ld (%s). %ld exons. %ld aa. Score = %f \n",
 	       ngen-igen,
 	       (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
 	       info[igen].nexons,
@@ -384,20 +401,32 @@ void CookingGenes(exonGFF *e, char Name[], char* s,
       
       PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,
 		nAA,tAA,0,info[igen].nexons);
-      /* translated protein */
+      /* [cDNA] and translated protein */
       if (XML)
       {
-	printf("      <protein length=\"%d\">\n",nAA);
+	if (cDNA)
+	  {
+	    printf("      <cDNA length=\"%ld\">\n",nNN);
+	    /* cDNA in FASTA format */
+	    printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
+	    printf("      </cDNA>\n");
+	  }
+	
+	printf("      <protein length=\"%ld\">\n",nAA);
 	/* Protein in FASTA format */
-	printProt(Name,ngen-igen,prot,nAA);
+	printProt(Name,ngen-igen,prot,nAA,PROT);
 	printf("      </protein>\n");
 	printf("   </gene>\n");
       }
       else
 	if (!(GFF))
 	  {
+	    /* cDNA */
+	    if (cDNA)
+	      printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
+	    
 	    /* Protein in FASTA format */
-	    printProt(Name,ngen-igen,prot,nAA);
+	    printProt(Name,ngen-igen,prot,nAA,PROT);
 	  }
     }
   free(prot);
