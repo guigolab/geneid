@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.57 2000-03-03 23:51:43 jabril Exp $	
+#         $Id: gff2ps,v 1.58 2000-03-04 17:51:56 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.57 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-03 23:51:43 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.58 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-04 17:51:56 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.57 2000-03-03 23:51:43 jabril Exp $
+%    $Id: gff2ps,v 1.58 2000-03-04 17:51:56 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -433,7 +433,7 @@ flglscape {
 % Defining page-elements layout.
 /XSTitl pglim pop XOriTitl 2 mul sub def
 /XSBlck pglim pop def
-/FSF 2.5 def % Point size for Credits for A4
+/FSF 4 def % Point size for Credits for A4
 /CSF { pagedict begin pga4 pop end Dpage pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
 /CYSF { pagedict begin pga4 exch pop end Dpage exch pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
 /TYSF { pagedict begin pga4 exch pop end Dpage exch pop exch div dup 4 cm gt { pop 4 cm } if mul } bdf
@@ -443,26 +443,24 @@ flglscape {
 /XOriPlot { XOriBlck FLftLbl { XLftLbl add } if } def
 /Xscale XSPlot MaxNuclPage div def
 /YOriBlck { FlgTitl { YSTitl BlckSp add } { 0 } ifelse } def
+/adcrd { flgcrd { FSF CYSF 2 mul FlgBkBx { 5 add } if sub } if } bdf
+/is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or def
+/is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
 NBlck 0 eq {
-  /is1tck false def
-  /is2tck false def
-  /YSBlck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if } def
-  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if FlgOSU { TkMrkW 1 TkMspc add mul sub } if FlgOSD { TkMrkW 1 TkMspc add mul sub } if } def
+  /YSBlck { pglim exch pop adcrd FlgTitl { YOriTitl YSTitl BlckSp add add sub } if } def
+  /YS2Blck { pglim exch pop adcrd FlgTitl { YOriTitl YSTitl BlckSp add add sub } if FlgOSU { TkMrkW 1 TkMspc add mul sub } if FlgOSD { TkMrkW 1 TkMspc add mul sub } if } def
   /YSFwd LnFwd def
   /YSBth LnBth def
   /YSRvs LnRvs def
  } {
-  /is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or def
-  /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
-  /YSBlck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div } def
-  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div FlgOSU { TkMrkW 1 TkMspc add mul sub } if FlgOSD { TkMrkW 1 TkMspc add mul sub } if is1tck { TkMrkW 1 TkMspc add mul is2tck { TkMrkW 1 TkMspc add mul add } if sub } if } def
+  /YSBlck { pglim exch pop adcrd FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div } def
+  /YS2Blck { pglim exch pop adcrd FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div FlgOSU { TkMrkW 1 TkMspc add mul sub } if FlgOSD { TkMrkW 1 TkMspc add mul sub } if is1tck { TkMrkW 1 TkMspc add mul is2tck { TkMrkW 1 TkMspc add mul add } if sub } if } def
   /YSLine YS2Blck LnTot div def
   /tracksize tracksize YSLine mul def
   /spcrsize spcrsize YSLine mul def
   /YSFwd LnFwd YSLine mul def
   /YSBth LnBth YSLine mul def
   /YSRvs LnRvs YSLine mul def
-% /YSTck LnTck YSLine mul def
 } ifelse
 %%EndProcSet:   Page_Layout 1.0 0
 %
@@ -480,8 +478,8 @@ NBlck 0 eq {
 /K { stroke } bdf
 /scmyk { setcmykcolor } bdf
 /slw { setlinewidth } bdf
-% /min { 2 copy gt { exch } if pop } bdf 
-% /max { 2 copy lt { exch } if pop } bdf
+%/min { 2 copy gt { exch } if pop } bdf 
+%/max { 2 copy lt { exch } if pop } bdf
 %%EndProcSet:   functions 1.0 0
 %
 %%BeginProcSet: text_functions 1.0 0
@@ -515,6 +513,7 @@ colordict begin % adding definitions and functions
  /col3 { 3 dict begin /p xdf p n ne { /pcd { p 2 mul mul add } bdf /pcu { p 0.5 sub 2 mul mul add } bdf p 0.5 le { cd dc pcd md dm pcd yd dy pcd kd dk pcd } { cnm uc pcu mm um pcu ym uy pcu km uk pcu } ifelse } { BGcolor } ifelse scmyk end } bdf
  /rainbow { 1 dict begin /p xdf p n ne { p 0.1 le { p 0.2 div 0.5 add 1 0 0 } { p 0.4 le { 1 1 p 0.1 sub 0.3 div sub 0 0 } { p 0.6 le { 1 0 p 0.4 sub 0.2 div 0 } { p 0.8 le { 1 p 0.6 sub 0.2 div sub 0 1 0 } { 0 p 0.8 sub 0.2 div 1 0 } ifelse } ifelse } ifelse } ifelse } { BGcolor } ifelse scmyk end } bdf
 end % colordict
+%
 %%EndProcSet:   painting_functions 1.0 0
 %
 %%BeginProcSet: header_functions 1.0 0
@@ -524,7 +523,6 @@ headerdict begin
  /stfsz { YSTitl 0.25 mul } def
  /xtfsz { YSTitl 0.25 mul } def
  /sepsz { YSTitl 0.125 mul } def
- % /xtpsz { xtfsz 2 div } def
  /ttfnt { ttfsz /Helvetica-Bold } def
  /stfnt { stfsz /Helvetica      } def
  /dtfnt { xtfsz /Times-Roman    } def
@@ -533,7 +531,7 @@ headerdict begin
  /ttlong { S ttfnt sfont Title stringwidth pop stfnt sfont SubTitle stringwidth pop R 2 copy gt { pop } { exch pop } ifelse 2 div } bdf
  /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox 0.125 slw fgcolor scmyk K R } if ShwTt Title () ne and { sepsz ttlong add YSTitl sepsz sub 0 Title (tv) (ch) ttfnt fgcolor ttxt } if ShwST SubTitle () ne and { sepsz ttlong add sepsz 0 SubTitle (bv) (ch) stfnt fgcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt fgcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt fgcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt fgcolor ttxt } if R } bdf
 %
- /s_credits { S 1 dict begin /fs_cd FSF CYSF def pglim FSF CYSF add T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
+ /s_credits { S 1 dict begin /fs_cd FSF CYSF def pglim fs_cd 0.5 mul sub T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (bv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (bv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
 end
 %
 %%EndProcSet:   header_functions 1.0 0
@@ -560,11 +558,11 @@ end
  /MkCtick { slw 0 0 m 0 TkMrkHW 3 -1 roll { TkMrkDW sub } if l fgcolor scmyk K } bdf
  /MkDtick { S dup Xscm 0 T CheckCloser { Mklb bltextick } if ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if false 1 MkCtick R } bdf
  /baseline { S Xscm TkMrkDW m Xscm TkMrkDW l TkMrkDW 2 mul slw fgcolor scmyk K R } bdf
- /r { /Gridup true def /Griddn true def /flgup true def 0 exch T S 0 T 1 -1 F 4 { 2 copy } repeat pop neg Xscm 0 T 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat pop pop R } bdf
+ /r { /Gridup true def /Griddn true def /flgup true def 0 exch TkMrkHW sub T S 0 T 1 -1 F 4 { 2 copy } repeat pop neg Xscm 0 T 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat pop pop R } bdf
  /x { 5 { 2 copy } repeat pop neg Xscm 0 T baseline 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T true 0.25 MkCtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkDtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkDtick } { pop } ifelse } repeat pop pop } bdf 
  /s { /Gridup false def /Griddn true def /flgup true def 0 exch TkMrkW add T S 0 T 1 -1 F x R } bdf
- /z { /Gridup true def /Griddn false def /flgup false def 0 exch T S 0 T 1 1 F x R } bdf
- /g { /down xdf /up xdf S T 2 copy 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T 0.125 slw 0 down Mkg R } if } for R pop pop } bdf
+ /z { /Gridup true def /Griddn false def /flgup false def 0 exch TkMrkW sub T S 0 T 1 1 F x R } bdf
+ /g { /down xdf /up xdf S T 2 { 2 copy } repeat pop neg Xscm 0 T 1 tonormtick MaxTick exch { ChkLimits { S Xscm 0 T 0.125 slw 0 down Mkg R } if } for R pop pop } bdf
 end % tmdct
 %%EndProcSet:   tickmarks 1.5 0
 %
@@ -577,17 +575,13 @@ end % tmdct
 %
 % X Y angle string valign halign fnt color ttxt
 % functions for vectors-like data-sets
-% /rt { tracksize strnd (.) eq { 0.975 mul } { 0.50 mul } ifelse } bdf
+ %/rt { tracksize strnd (.) eq { 0.975 mul } { 0.50 mul } ifelse } bdf
  /rt { Yscl 0.975 mul } bdf
  /vst 250 string def
- % /clrproc colordict begin white black load2col /col2 load end def
  /clrselc { cvx exec dup 2 eq { pop load2col /clrproc /col2 load def } { dup 3 eq { pop load3col /clrproc /col3 load def } { dup 0 eq { pop white black load2col /clrproc /col2 load def } { dup 4 eq { 5 { pop } repeat /clrproc /rainbow load def } { 1 eq { white 8 4 roll load2col /clrproc /col2 load def } if } ifelse } ifelse } ifelse } ifelse } bdf % no end for closing dict because grdct must be closed by calling function
-% /ov { S shpdct begin exch Xscm exch T { currentfile token { exec } { exit } ifelse } loop end R } bdf
-% /v { S Xscm dup vtoffset sub exch vtoffset add 0 m 0 l clrproc exec K R } bdf
  /v { clrproc v_s 0 m v_e 0 l K /v_s v_s vstp add def /v_e v_e vstp add def } bdf
  /GetVtVar { /v_cmod xdf /v_ori xdf /v_end xdf /sc_ori xdf sc_ori v_ori gt { /v_ori sc_ori def } if colordict begin v_cmod clrselc rt slw } bdf
  % score vector
-% /vt { S /VStp xdf /VWdw xdf /vstp VWdw Xscm def /v_s 0 def /v_e vstp def GetVtVar S v_ori VWdw gt { v_ori VStp 2 div sub Xscm 0 T } { VWdw 2 div VStp 2 div sub Xscm 0 T } ifelse { currentfile vst readline pop { { token { cvx exec v } { exit } ifelse } loop } stopped { exit } if } loop (Vector Loop finished...) msg R end R } bdf
  /vt { S /VStp xdf /VWdw xdf /vstp VStp Xscm def GetVtVar v_ori VWdw ge { v_ori VStp 2 div sub Xscm } { v_ori VWdw v_ori sub 2 div VStp 2 div sub add Xscm } ifelse dup /v_s xdf /v_e exch vstp add def S { currentfile vst readline pop { { token { cvx exec v } { exit } ifelse } loop } stopped { exit } if } loop R end R } bdf % (Score-Vector Loop finished...) msg 
  % position-score vector
  /vp { S GetVtVar v_ori 0 T { currentfile } bind loop (Position-Vector Loop finished...) msg R } bdf
@@ -603,14 +597,13 @@ end % tmdct
  /frmfill { frm getfrcol rmd getfrcol lnfill } bdf
  /rnbfill { 1 dict begin S /incr sqdif 100 div def 0 incr sqdif { dup dup incr add 0 exch 0 m l dup 0 gt { sqdif div } if rainbow Yscl slw K } for R end } bdf 
  /setcolmod { cmod cvx exec dup 1 eq { pop scmyk fill } { dup 2 eq { pop lnfill } { dup 5 eq { 5 { pop } repeat frmfill } { dup 4 eq { 5 { pop } repeat rnbfill } { pop } ifelse } ifelse } ifelse } ifelse } bdf
-% /ShFsz { TkMrkW dup GpFsz 2 div gt { pop GpFsz 4 div } { 2 div } ifelse } bdf
+ %/ShFsz { TkMrkW dup GpFsz 2 div gt { pop GpFsz 4 div } { 2 div } ifelse } bdf
  /ShFsz { GpFsz 2 div } bdf
  /ShFont { ShFsz /Helvetica } bdf 
  /postk { S 0 0 m 0 LY ScV 0 eq { 0.65 } { 1.15 } ifelse mul rl longdotted fgcolor scmyk 0.125 slw K R } bdf
  /shwpos { S Flgspos { seqori LY neg ScV 0 eq { 0.65 mul T } { 1 -1 F 1.15 mul T } ifelse sqend sqdif sqori 0 2 { S 0 T postk 10 string cvs 0 0 S ScV 1 eq { 1 -1 F } if strnd (-) eq { 1 -1 F 45 } { -45 } ifelse ScV 1 eq { neg } if 4 -1 roll strnd (-) eq { ScV 1 ne { (bv) } { (tv) } ifelse } { ScV 1 ne { (tv) } { (bv) } ifelse } ifelse (lh) ShFont fgcolor ttxt R R } repeat } if R } bdf
 % *V align:  0 center : 1 baseline : -1 reverse
-% /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } { FtV -1 eq { 1 -1 F } if } ifelse colordict begin 1 dict begin /svmtrix mtrx currentmatrix def { p_s cvx exec scmyk } stopped not { S 0.25 slw fgcolor scmyk K R clip setcolmod } if newpath end end R } bdf % (Filling clipping path...) msg 
- /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } if colordict begin p_s cvx exec newpath end R } bdf % (Filling clipping path...) msg 
+ /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } if colordict begin p_s cvx exec newpath end R } bdf
  /GetVar { /ftlbl xdf /flblfg xdf /Flgspos xdf /FtV exch dup 2 eq { pop 0 /mrr true def } { /mrr false def } ifelse def /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def /fflbl ftlbl () eq { false } { flblfg } ifelse def /p_strk true def } bdf
  /p { S GetVar shwpos strnd (-) eq { seqend } { seqori } ifelse 0 T frs R } bdf
 %
@@ -624,7 +617,6 @@ end % tmdct
  /cpt { PMX sqdif LY sc mul F m { l } repeat closepath PMK KCFmod } bdf
  /cptc { sqdif LY sc mul F arc closepath PMK KCFmod } bdf
  /lft { sqdif 0 T -1 1 F } bdf
- % /cpb { fshp } bdf 
  /no_shp { 4 { pop } repeat } bdf
  /line   { PMX sqdif LY sc mul F 0 0.5 m 1 0.5 l PMK 1 slw scmyk K } bdf 
  /scline { PMX sqdif LY sc mul F 0 0.5 m 1 0.5 l PMK LY sc mul slw scmyk K } bdf 
@@ -655,13 +647,13 @@ end % tmdct
  /f2tgl { 1.0 0.0 0.0 1.0 1.0 1.0 3 0.0 0.0 cpt } bdf
  /fast  { scmyk PMX sqdif LY sc mul F 0.5 0.5 T 0.025 slw 10 { -0.5 0 m 0.5 0 l K 18 rotate } repeat PMK } bdf
  /fstar { PMX sqdif LY sc mul F 0 0.5 T 22.5 rotate 0 0 m 8 { 0.925 0 rlineto 225 rotate } repeat closepath PMK 0.75 slw scmyk S K R clip setcolmod } bdf 
- %%
+ %% gap shape definition begin 
  /gbbx { 1.1 -0.5 1.1 1.5 -0.1 1.5 3 -0.1 -0.5 m { l } repeat closepath } bdf
  /gfna { 0.60 1.50 0.0 0.5 0.50 0.5 -0.10 -0.50 m 3 { l } repeat } bdf
  /gfnb { 1 LY sc mul F gfna reversepath sqdif 0.50 sub 0 T gfna } bdf
  /gfnc { 0.0 0.0 0.0 1.0 1.0 1.0 3 1.0 0.0 m { l } repeat closepath } bdf
  /gap { PMX gfnb S 0.10 0 T sqdif 0.68 sub neg 1 F gbbx clippath newpath gfnc PMK 0.1 slw 4 copy scmyk S dotted K R clip setcolmod R S scmyk 0.36 slw K R S BGcolor scmyk 0.12 slw K R } bdf
-  %%
+ %% gap shape definition end
 %
 % /hstar { PMX ScV 0 ne { 1 2 F 0.0 0.5 } { 0.0 -0.5 } ifelse T sqdif LY sc mul F newpath -0.1 -0.1 1.1 0.5 bbox newpath 22.5 rotate 0 0 m 8 { 0.925 0 rlineto 225 rotate } repeat closepath PMK 0.75 slw scmyk S K R S eoclip setcolmod R newpath 0 0.5 m sqdif 0.5 l K } bdf
 %
@@ -671,7 +663,7 @@ end % tmdct
 % Group functions...
 % /ctr { S 0 T sfont scmyk dup stringwidth pop 2 div neg stringheight strnd (-) eq { 2 div } { 1.25 mul neg } ifelse m show R } bdf
  /g_score 1.1 def % /g_score 0.5 def
- /GpFsz { Yscl 0.25 mul dup 8 gt { pop 8 } if } def
+ /GpFsz { Yscl 0.15 mul dup 8 gt { pop 8 } if } def
  /GpFont { GpFsz /Helvetica } bdf
  /gshp { S 0 gp_st gp_nd 0 0 g_score gcmod g_shape GpV Flgrpspos Flgglbl grlbl p R } bdf
  /gp_no { 4 { pop } repeat } bdf
@@ -700,7 +692,7 @@ end % shpdct
  /CKL { 2 { dup XLL lt { pop XLL } { dup XLR gt { pop XLR } if } ifelse exch } repeat } bdf
 % 
 % Group Functions
- /gp { S shpdct begin GetGVar shgl gshp { currentfile token pop exec } loop end R } bdf % (Group Loop finished...) msg
+ /gp { S shpdct begin GetGVar shgl gshp { currentfile token pop exec } loop end R } bdf
 %
 % Source Functions.
  /ScFsz { Yscl 0.75 mul dup 10 gt { pop 10 } if } def
@@ -712,7 +704,7 @@ end % shpdct
  /sc_sh { shortdashed sc_ln } bdf
  /sc_lh { longdashed  sc_ln } bdf
  /sln { S colordict begin s_line cvx exec end R } bdf
- /sbc { -10 Yscl 2 mul neg XSPlot 10 add Yscl 1.5 mul bbox clip newpath } bdf % S K R
+ /sbc { -10 Yscl 2 mul neg XSPlot 10 add Yscl 1.5 mul bbox clip newpath } bdf
  /sbb { S 0 0 XSPlot Yscl bbox FlgScBx { 0.25 slw fgcolor scmyk K } { newpath } ifelse R sbc } bdf
  /shsll { S FLftLbl Flgslftlbl and { XLftLbl 2 div neg Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srclftlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
  /shsrl { S FRgtLbl Flgsrgtlbl and { XSPlot XRgtLbl 2 div add Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srcrgtlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
@@ -722,15 +714,18 @@ end % shpdct
 %
 % Block Functions.
  % /tckszH tracksize 2 div def
- /YBori FlgOSU { TkMrkW 1 TkMspc add mul } { 0 } ifelse def
- /GetBVar { /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck FlgOSU { TkMrkW 1 TkMspc add mul add } if YSBlck blcknum mul add BlckSp blcknum mul add def } bdf
+ /GetBVar { /blcknum exch 1 sub def /blckend xdf /blckori xdf /Y FlgOSU { TkMrkW 1 TkMspc add mul } { 0 } ifelse def /YB YOriBlck YSBlck blcknum mul add BlckSp blcknum mul add def } bdf
  /kbb { XOriBlck 5 sub -2 XSBlck 10 add YSBlck 2 add bbox FlgBkBx { 1 slw fgcolor scmyk K } { newpath } ifelse } bdf
  /tm { S tmdct begin /ShowGrid xdf exec end R } bdf
- /shwtck { FlgGrd { blckori blckend XOriPlot 0 0 YSBlck {g} 0 tm } if FlgOSU { blckori blckend XOriPlot 0 {s} 0 tm } if FlgOSD { blckori blckend XOriPlot YSBlck TkMrkW sub {z} 0 tm } if is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and { blckori blckend XOriPlot TkMrkW FlgOSU { 2 TkMspc add mul } if YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if is2tck FlgISD and { blckori blckend XOriPlot TkMrkW FlgOSU { 3 TkMspc 2 mul add mul } if YSFwd add YSBth add {r} 0 tm } if } bdf
- /ChangeStrand { is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { /Y Y TkMrkW 1 TkMspc add mul def } if } bdf
- /uptck { FlgGrd { blckori blckend XOriPlot FlgOSU { TkMrkW } { 0 } ifelse 0 YSBlck FlgOSU { TkMrkW sub } if FlgOSD { TkMrkW sub } if {g} 0 tm } if FlgOSU { blckori blckend XOriPlot 0 {s} 0 tm } if } bdf
- /dntck { FlgOSD { blckori blckend XOriPlot Y TkMrkW add {z} 0 tm } if } bdf
- /VChangeStrand { /Y Y is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { TkMrkW TkMspc mul add } if def is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { blckori blckend XOriPlot Y {r} 0 tm } if /Y Y is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { TkMrkW TkMspc mul add } if def } bdf
+ /shwgrd { FlgGrd { blckori blckend XOriPlot FlgOSU { TkMrkW } { 0 } ifelse 0 YSBlck FlgOSU { TkMrkW sub } if FlgOSD { TkMrkW sub } if {g} 0 tm } if } bdf
+ /shwtck { shwgrd FlgOSU { blckori blckend XOriPlot 0 {s} 0 tm } if FlgOSD { blckori blckend XOriPlot YSBlck {z} 0 tm } if } bdf
+ /chgtst { FlgISU FlgISD or is2tck not is1tck and and FlgISU is2tck and or
+           is2tck FlgISD and or } bdf
+ /uptck { shwgrd FlgOSU { blckori blckend XOriPlot 0 {s} 0 tm } if } bdf
+ /dntck { FlgOSD { blckori blckend XOriPlot Y TkMrkW 1 TkMspc add mul add {z} 0 tm } if } bdf
+ % YSFwd 0 gt YSBth 0 gt or and exch YSFwd 0 gt and or % YSRvs 0 gt and exch YSRvs 0 gt YSBth 0 gt or and
+ /nxtblck { dup dup (.) eq { pop YSFwd 0 gt { YSBth } { 0 } ifelse } { (-) eq { YSFwd 0 gt YSBth 0 gt or { YSRvs } { 0 } ifelse } { 0 } ifelse } ifelse } bdf
+ /Strand { nxtblck 0 gt { /Y Y chgtst { TkMrkW 1 TkMspc add mul 2 div add } if def dup (.) eq { pop is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and { blckori blckend XOriPlot TkMrkW FlgOSU { 2 TkMspc 1.5 mul add mul } if YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if } { (-) eq { is2tck FlgISD and { blckori blckend XOriPlot TkMrkW FlgOSU { 3 TkMspc 2.5 mul add mul } if YSFwd add YSBth add {r} 0 tm } if } if } ifelse /Y Y chgtst { TkMrkW 1 TkMspc add mul 2 div add } if def } { pop } ifelse } bdf 
  /b_end { R end } bdf
  /vb_end { dntck R end } bdf
 end
@@ -738,8 +733,8 @@ end
 %
 %%BeginProcSet: main_function_calls 1.0 0
 %
-/block { blckdct begin GetBVar S 0 YB T kbb shwtck /Y YBori def } bdf
-/vblock { blckdct begin GetBVar S 0 YB T kbb uptck /Y YBori def } bdf
+/block { blckdct begin GetBVar S 0 YB T kbb shwtck } bdf
+/vblock { blckdct begin GetBVar S 0 YB T kbb uptck } bdf
 %
 %%EndProcSet:   main_function_calls 1.0 0
 %
@@ -1134,9 +1129,9 @@ BEGIN{ ######### INITIALITATION ###############
   TITLE_FN="";
   #
   # Color REGEXP
-#  V_COLORS="(^fgcolor$|^black$|^white$|^(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown)$)";
-#  Valid_Colors="^"V_COLORS"(\.\."V_COLORS"(\.\."V_COLORS")?)?$";
+# V_COLORS="(^fgcolor$|^black$|^white$|^(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown)$)";
   V_COLORS="((fg|foreground)(color)?|black|white|(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown))";
+# Valid_Colors="^"V_COLORS"(\.\."V_COLORS"(\.\."V_COLORS")?)?$";
   Valid_Colors="^("V_COLORS"(\\\.\\\."V_COLORS"(\\\.\\\."V_COLORS")?)?)$"
   # 
   PrintWRN(sprintf("%s\n*  GFF2PS Inizialization DONE \!\!\!\n%s\n\n",BigLINE,BigLINE));
@@ -1265,7 +1260,7 @@ function ARY_VARIABLES() {
   ############################################## LAYOUT
   # Page Layout
   Default["page_size"]="a4";               # Var["page_size"]
-  Default["page_bbox"]="auto,0,0";       # Var["page_bbox"]
+  Default["page_bbox"]="auto,0,0";         # Var["page_bbox"]
   Default["page_orientation"]="Landscape"; # Var["page_orientation"] : Landscape (default), Portrait.
   Default["margin_left"]="1cm";            # cm, in, pt
   Default["margin_right"]="1cm";           #
@@ -1292,37 +1287,37 @@ function ARY_VARIABLES() {
   Default["major_tickmarks_nucleotides"]=-1; #
   Default["minor_tickmarks_num"]=10;         #
   Default["minor_tickmarks_nucleotides"]=-1; #
-  Default["show_grid"]=1;
+  Default["show_grid"]=1;                    #
   Default["show_inner_scale"]="both";        # both(default)/none/top/bottom
   Default["show_outer_scale"]="both";        #
   Default["default_scale_width"]="0.25cm";   #
-  Default["default_scale_spacing_width"]=1;   # Only for outer scale. Units in rule_widths
-  Default["nucleotide_scale"]="default";
-  # Blocks Layout
-  # Default["strand_show_mixed"]="off";         #
-  Default["strand_show_forward"]="on";         #
-  Default["strand_show_reverse"]="on";         #
-  Default["strand_show_independent"]="on";     #
-  Default["show_left_source_label"]="true";    #
+  Default["default_scale_spacing_width"]=1;  # Only for outer scale. Units in rule_widths
+  Default["nucleotide_scale"]="default";     #
+# Blocks Layout
+# Default["strand_show_mixed"]="off";
+  Default["strand_show_forward"]="on";       #
+  Default["strand_show_reverse"]="on";       #
+  Default["strand_show_independent"]="on";   #
+  Default["show_left_source_label"]="true";  #
   Default["left_source_label_width"]="2cm";  #
-  Default["show_right_source_label"]="false";  #
+  Default["show_right_source_label"]="false"; #
   Default["right_source_label_width"]="2cm"; #
-  Default["default_track_width"]="1cm";
+  Default["default_track_width"]="1cm";      #
   Default["default_track_spacing_width"]="0.25cm"; #
-  Default["sort_tracks_by_sequence"]="on"; # on : by sequence - off : by source
-  # Default["default_track_scale"]=1;            #
-  # Default["default_track_spacing_scale"]=0.25; #
+  Default["sort_tracks_by_sequence"]="on";   # on : by sequence - off : by source
+# Default["default_track_scale"]=1;
+# Default["default_track_spacing_scale"]=0.25;
   # General Properties
   Default["frame_unknown_color"]="orange"; #
-  Default["frame0_color"]="blue";          #
-  Default["frame1_color"]="red";           #
-  Default["frame2_color"]="green";         #
-  Default["show_positions"]="false";       #
+  Default["frame0_color"]="blue";         #
+  Default["frame1_color"]="red";          #
+  Default["frame2_color"]="green";        #
+  Default["show_positions"]="false";      #
   Default["min_group_separation"]=10;     # minimum nucleotide distance between two groups to avoid overlapping.
   #
   ############################################## GFF-FEATURES
   FT_PROP["feature_color"]="default";    # default,1color(color),2color(color..color),3color(color..color..color)
-  FT_PROP["feature_stroke_color"]="default";
+  FT_PROP["feature_stroke_color"]="default"; #
   FT_PROP["shape"]="box";                # box, arrow, end_arrow, circle # still not implemented: vector, spike, block
   FT_PROP["fill_shape_mode"]="default";  # none(BGcolor), default(FGcolor 1color), 1_color, 2_color, frame-remainder, rainbow
   FT_PROP["fill_vector_mode"]="default"; # none(0 BGcolor grad), default(0 black grad), rainbow(1), 1_color(BGcolor color 2), 2_color(color1 color2 2), 3_color(col1 col2 col3 2)
@@ -1330,47 +1325,46 @@ function ARY_VARIABLES() {
   FT_PROP["layer"]=0;                    # now is implemented, first sorting for feature lines is made on FT_PROP["layer"]
   FT_PROP["label"]="++default++";        # ++none++ , ++default++ , "user-def"
   FT_PROP["show_feature"]="on";          # 
-  FT_PROP["show_feature_positions"]="false";  #
+  FT_PROP["show_feature_positions"]="false"; #
   #
   ############################################## GROUPS
-  GR_PROP["feature_color"]="default";    # 
-  GR_PROP["feature_stroke_color"]="default";
-  GR_PROP["group_color"]="default";      # 
-  GR_PROP["group_shape"]="none";         # default (none) , ...
-  GR_PROP["fill_shape_mode"]="default";  # none(BGcolor), default(FGcolor 1color), 1_color, 2_color, frame-remainder, rainbow
-  GR_PROP["fill_vector_mode"]="default"; # none(0 BGcolor grad), default(0 black grad), rainbow(1), 1_color(BGcolor color 2), 2_color(color1 color2 2), 3_color(col1 col2 col3 2)
-  GR_PROP["group_line"]="default";       # none , default (black line)
-  GR_PROP["group_line_color"]="default"; #
-  GR_PROP["vert_align"]="default";       # center or baseline
-  GR_PROP["label"]="++default++";        # ++none++ , ++default++ , "user-def"
-  GR_PROP["show_group"]="on";            # 
-  GR_PROP["show_group_positions"]="false";  #
+  GR_PROP["feature_color"]="default";      # 
+  GR_PROP["feature_stroke_color"]="default"; #
+  GR_PROP["group_color"]="default";        # 
+  GR_PROP["group_shape"]="none";           # default (none) , ...
+  GR_PROP["fill_shape_mode"]="default";    # none(BGcolor), default(FGcolor 1color), 1_color, 2_color, frame-remainder, rainbow
+  GR_PROP["fill_vector_mode"]="default";   # none(0 BGcolor grad), default(0 black grad), rainbow(1), 1_color(BGcolor color 2), 2_color(color1 color2 2), 3_color(col1 col2 col3 2)
+  GR_PROP["group_line"]="default";         # none , default (black line)
+  GR_PROP["group_line_color"]="default";   #
+  GR_PROP["vert_align"]="default";         # center or baseline
+  GR_PROP["label"]="++default++";          # ++none++ , ++default++ , "user-def"
+  GR_PROP["show_group"]="on";              # 
+  GR_PROP["show_group_positions"]="false"; #
   #
   ############################################## METHODS/SOURCES
-  SO_PROP["feature_color"]="default"; # 
-  SO_PROP["feature_stroke_color"]="default";
-  SO_PROP["group_color"]="default";   # 
-  SO_PROP["left_label"]="++default++";     # ++none++ , ++default++ , ++sequence++, ++source++ , ++both++ , ++info++ , "user-def"
-  SO_PROP["show_left_label"]="on";     #
-  SO_PROP["right_label"]="++default++";    # ++none++ , ++default++ , ++sequence++, ++source++ , ++both++ , ++info++ , "user-def"
-  SO_PROP["show_right_label"]="on";    #
-  SO_PROP["source_style"]="default";  # default, boxed
-  SO_PROP["source_line"]="default";   # none , default (black line), line, dotted, longdotted, shortdashed, longdashed 
+  SO_PROP["feature_color"]="default";   # 
+  SO_PROP["feature_stroke_color"]="default"; #
+  SO_PROP["group_color"]="default";     # 
+  SO_PROP["left_label"]="++default++";  # ++none++ , ++default++ , ++sequence++, ++source++ , ++both++ , ++info++ , "user-def"
+  SO_PROP["show_left_label"]="on";      #
+  SO_PROP["right_label"]="++default++"; # ++none++ , ++default++ , ++sequence++, ++source++ , ++both++ , ++info++ , "user-def"
+  SO_PROP["show_right_label"]="on";     #
+  SO_PROP["source_style"]="default";    # default, boxed
+  SO_PROP["source_line"]="default";     # none , default (black line), line, dotted, longdotted, shortdashed, longdashed 
   SO_PROP["source_line_color"]="verydarkred"; #
-  SO_PROP["vert_align"]="default";    # default,center,baseline(down), 
-  SO_PROP["range"]="default";         # range of lower-upper scores (none, default, "#user_def number#")
-  SO_PROP["show_source_positions"]="false";  #
-  SO_PROP["keep_feature_label_space"]="true";  # on/off
-  SO_PROP["track_scale"]=1;                  #
-  SO_PROP["track_spacing_scale"]=0.25;       #
-  SO_PROP["unfold_grouped_ungrouped"]="off"; # on/off
-  SO_PROP["unfold_grouped_line"]="on";      # on/off
-  SO_PROP["unfold_ungrouped_line"]="on";    # on/off
+  SO_PROP["vert_align"]="default";      # default,center,baseline(down), 
+  SO_PROP["range"]="default";           # range of lower-upper scores (none, default, "#user_def number#")
+  SO_PROP["show_source_positions"]="false";   #
+  SO_PROP["keep_feature_label_space"]="true"; # on/off
+  SO_PROP["track_scale"]=1;                   #
+  SO_PROP["track_spacing_scale"]=0.25;        #
+  SO_PROP["unfold_grouped_ungrouped"]="off";  # on/off
+  SO_PROP["unfold_grouped_line"]="on";        # on/off
+  SO_PROP["unfold_ungrouped_line"]="on";      # on/off
 #
 # Not defined yet:
 #
 #  Default["text_color"]=Default["foreground_color"]; 
-#  Default["label"]="none";
 #
 #  FT_PROP["join"]="on";
 #
@@ -1395,7 +1389,7 @@ function ARY_VARIABLES() {
   # vector classes
   VT["sco"]=VT["score"]=VT["0pos-sco"]= 0;                            # only scores
   VT["pos"]=VT["position"]=VT["1pos-sco"]=VT["def"]=VT["default"]= 1; # position-score pairs
-  VT["seg"]=VT["segment"]=VT["2pos-sco"]= 2;                           # position-position-score triplets
+  VT["seg"]=VT["segment"]=VT["2pos-sco"]= 2;                          # position-position-score triplets
   VT["str"]=VT["string"]=VT["sequence"]= 3;                           # position-position-score triplets
   #
   # Coding shape-names
@@ -1525,13 +1519,11 @@ function ChkInput() { # some changes will be made on input line if some defaults
 	  PrintWRN(sprintf("*** WARNING ******  Non-standard gff-formatted input line [%s]: <%s>\n            ***  REMEMBER that START(%s) must be lower or equal than END(%s): Swapping their values.\n", NR, $0,$start,$end));
 	} # if start>end
 	if ($0~gff_format_V2) { 
-	  # printf "\n***GFFv2*** %s ***RE*** \/%s\/\n", $0~gff_format_V2, gff_format_V2 | "cat 1>&2";
 	  GFF_V=2;
 	  return 1;
 	} # if gff-line Version 2 OK
 	else { 
 	  if ($0~gff_format_V1) {
-		# printf "***GFFv1*** %s ***RE*** \/%s\/\n", $0~gff_format_V1, gff_format_V1 | "cat 1>&2";
 		GFF_V=1;
 		return 1;
 	  } # if gff-line Version 1 OK    
@@ -1562,7 +1554,6 @@ function scan_quotes(Vscn) {
 #
 function LOAD_Quoted(GFN,    mm) {
   if ($GFN~"^"REgroupV2"$") { 
-	# printf "***GFFV*** %s ***GP*** %s ***RE***\/%s\/ *** %s ***\n", GFF_V, $GFN, REgroupV2, $GFN~"^"REgroupV2"$" | "cat 1>&2";
 	split($GFN,mm,/\"/);
 	gp_tag=mm[1];
 	Gtv=mm[2];
@@ -1571,7 +1562,6 @@ function LOAD_Quoted(GFN,    mm) {
   } # if tag-value single single
   else {
 	if ($GFN~"^"REtag"$" && $(GFN+1)~"^"REval"$") {
-	  # printf "***GFFV*** %s ***GP*** %s ***RE***\/%s\/ *** %s ***\n", GFF_V, $GFN, "^"REtag"$\/ \&\& \/^"REval"$", $GFN~"^"REtag"$" && $(GFN+1)~"^"REval"$"  | "cat 1>&2";
 	  gp_tag=$GFN;
 	  Gtv=$(GFN+1);
 	  gp_TYPE="Tag-Value (Single)";
@@ -1579,7 +1569,6 @@ function LOAD_Quoted(GFN,    mm) {
 	} # if tag-value single double
 	else {
 	  if ($GFN~"^"REtag"$" && $(GFN+1)~/^\".*[^\"]$/) {
-		# printf "***GFFV*** %s ***GP*** %s ***RE***\/%s\/ *** %s ***\n", GFF_V, $GFN, "^"REtag"\/ \&\& \/^\\\".*[^\\\"]$", $GFN~"^"REtag && $(GFN+1)~/^\".*[^\"]$/ | "cat 1>&2";
 		gp_tag=$GFN;
 		Gtv=$(GFN+1);
 		Vscn=GFN+2;
@@ -1589,14 +1578,12 @@ function LOAD_Quoted(GFN,    mm) {
 	  } # if tag-value multiple
 	  else {
 		if ($GFN~"^"CKgroupV1"$") {
-		  # printf "***GFFV*** %s ***GP*** %s ***RE***\/%s\/ *** %s ***\n", GFF_V, $GFN, "^"CKgroupV1"$", $GFN~"^"CKgroupV1"$"  | "cat 1>&2";
 		  Gtv=$GFN;
 		  gp_TYPE="Value (Single)";
 		  # printf "***GFFV*** %s *** %s ***Tag*** %s ***Val*** %s\n", GFF_V, gp_TYPE, gp_tag, Gtv | "cat 1>&2"; 
 		} # if value single
 		else {
 		  if ($GFN~/^\".*[^\"]$/) {
-			# printf "***GFFV*** %s ***GP*** %s ***RE***\/%s\/ *** %s ***\n", GFF_V, $GFN, "^\\\".*[^\\\"]$", $GFN~/^\".*[^\"]$/ | "cat 1>&2";
 			Gtv=$GFN;
 			Vscn=GFN+1;
 			scan_quotes(Vscn);
@@ -1706,9 +1693,6 @@ function LOAD_Vectors(     v_nm,K,k,W,w,vs,vv,va,v_,stp,lsco,usco,nsc,vtsc) {
 	       } # if sco!="-"
 	    } # for w
         element[iG2,v_nm,v_DATA]=vtsc;
-#		if (element[iG2,v_nm,v_window]!="NONE") {
-#		  for (w=1;w<=W;w++) printf "%5.3f : ",V_at[w] | "cat 1>&2" }
-#		else { for (w=1;w<=W;w+=2) printf "%5.3f %s : ",V_at[w],V_at[w+1] | "cat 1>&2" }
 		for (w=1;w<=W;w++) delete va[w];
 	  } # if scores
 	}  # for
@@ -1717,13 +1701,6 @@ function LOAD_Vectors(     v_nm,K,k,W,w,vs,vv,va,v_,stp,lsco,usco,nsc,vtsc) {
   }  # else single-record
   #
   element[iG2,v_nm,vector] = 1;
-  # Printing Report.
-  # PrintRPT(sprintf("***************\n********* V ***  CLASS : %s\n",element[iG2,v_nm,v_CLASS]));
-  # PrintRPT(sprintf("********* E ***  WINDOW: %s\n",      element[iG2,v_nm,v_window]));
-  # PrintRPT(sprintf("********* C ***  STEP  : %s\n",      element[iG2,v_nm,v_step]));
-  # PrintRPT(sprintf("********* T ***  Score MinVal: %s\n",element[iG2,v_nm,v_scmin]));
-  # PrintRPT(sprintf("********* O ***  Score MaxVal: %s\n",element[iG2,v_nm,v_scmax]));
-  # PrintRPT(sprintf("********* R ***  DATA  : \n%s\n\n",  element[iG2,v_nm,v_DATA]));
 }  # End function LOAD_Vectors
 #
 function ReadElements() { # read gff element within source, strand, and group 
@@ -1804,13 +1781,12 @@ function ReadElements() { # read gff element within source, strand, and group
   # start-end for each group-sc-strand  
   gp[iG1,gp_cnt[Gtv],gpstart] = min(gp[iG1,gp_cnt[Gtv],gpstart],$start);
   gp[iG1,gp_cnt[Gtv],gpend]   = max(gp[iG1,gp_cnt[Gtv],gpend],$end);
-  # PrintRPT(sprintf("***** %s {%s} *** Checking group boundaries *** Start %s - End %s\n",Gtv,G[iG1],gp[iG1,gp_cnt[Gtv],gpstart],gp[iG1,gp_cnt[Gtv],gpend]));
   # getting score - boundaries 
   sc_score["MIN",iS]=min($score,sc_score["MIN",iS]);
   sc_score["MAX",iS]=max($score,sc_score["MAX",iS]);
   # place gff element in sort array by acceptor position
   NS=N[iG2]-1;
-  while ($start < element[iG2,S[iG2,NS],start] && NS>0) { # if (Var["print_report"]) print "hey...",NS | "cat 1>&2";
+  while ($start < element[iG2,S[iG2,NS],start] && NS>0) { 
     S[iG2,NS+1]=S[iG2,NS]; NS-- } # while
   S[iG2,NS+1]=N[iG2];
 } # End of ReadElements
@@ -1863,7 +1839,7 @@ function SET_VARS() {
   if (Default["title"]=="none") { flgt="false"; title="" }
   else {
 	flgt="true";
-	if (Default["title"]=="default") { title=TITLE_FN } # z=split(Var["InputFNs"],tc,"/"); title=tc[z] }
+	if (Default["title"]=="default") { title=TITLE_FN } 
 	else title=Default["title"] }
   title=substr(title,1,100);
   # First and last position, zoom option checking...
@@ -2005,7 +1981,6 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
     if (s!="-") lastpos[lg,grouped_,1]=lastpos[lg,ungrouped_,1]=t_ori-1; # PORI;
     else lastpos[lg,grouped_,1]=lastpos[lg,ungrouped_,1]=t_end+1; # PEND;
 	lines[lg,grouped_]=lines[lg,ungrouped_]=1;
-#	for (g=1;g<=SG[lg,G[lg]];g++) {
 	for (pg=1;pg<=G[lg];pg++) {
       g=SG[lg,pg];
 	  gp_nm =gp[lg,g,gpname];
@@ -2013,11 +1988,11 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
 	  gp_end=gp[lg,g,gpend];
 	  if (fldGxU) gp_gpd=gp[lg,g,is_grouped];
 	  else gp_gpd=1; # 1 (grouped_) or 0 (ungrouped_)
-	  PrintRPT(sprintf(">>>>>>>%s %s %s %s (%s %s) G %s SG %s\n",sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
+	  # PrintRPT(sprintf(">>>>>>>%s %s %s %s (%s %s) G %s SG %s\n",sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
 	  LN=1;
       ttt=lg SUBSEP gp_gpd SUBSEP LN;
 	  if ((gp_gpd && fldGln) || ((!gp_gpd) && fldUln)) {
-		PrintRPT(sprintf("A........%s : %s (%s) G %s SG %s %s %s %s %s \n",LN,lastpos[lg,gp_gpd,LN],gp_ori,G[lg],g,sq,sc,s,gp_nm));
+		# PrintRPT(sprintf("A........%s : %s (%s) G %s SG %s %s %s %s %s \n",LN,lastpos[lg,gp_gpd,LN],gp_ori,G[lg],g,sq,sc,s,gp_nm));
 		if (gp_end>PORI && gp_ori<PEND) {
           if (s!="-") {
             gpo=gp_ori-MGS;
@@ -2026,7 +2001,7 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
               if (!(ttt in lastpos)) lastpos[ttt]=t_ori-MGS; # PORI;
-              PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
+              # PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
             } # while lastpos
 		    lastpos[lg,gp_gpd,LN]=gp_end;
           }
@@ -2037,15 +2012,13 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
               if (!(ttt in lastpos)) lastpos[ttt]=t_end+MGS; # PEND;
-              PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
+              # PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
             } # while lastpos
 		    lastpos[lg,gp_gpd,LN]=gp_ori;
           }
 		} # if checklimits
-		# else {
-		  # PrintRPT(sprintf("OUT of ZOOM Limits: %s : %s : %s (%s)\n",LN,ttt,lastpos[lg,gp_gpd,LN],gp_ori));
-		# } # if not checklimits
-		PrintRPT(sprintf("B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[lg,gp_gpd,LN],gp_ori,gp_end,G[lg],g));
+		# PrintRPT(sprintf("B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[lg,gp_gpd,LN],gp_ori,gp_end,G[lg],g));
+        PrintRPT(sprintf(">>>>>>> Line %s : LastPos %s : ID <%s><%s><%s><%s> (%s %s) \#G %s \#SG %s\n",LN,lastpos[lg,gp_gpd,LN],sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
 	  } # if checking
 	  lines[lg,gp_gpd]=max(lines[lg,gp_gpd],LN);
 	  LE[lg,gp_gpd,LN]++;
@@ -2292,14 +2265,11 @@ function PlotElement(    shwpst) {
     # PrintRPT(sprintf("Scores for %s: score %s (Min:%s - Max:%s)\n",el,elem_sc,lower_sc,upper_sc));
     if (sco_lm) score_=1; else score_=GetScore(elem_sc,lower_sc,upper_sc);
     # for gene mode. try to recompute relative frame and remainder
-    # PrintRPT(sprintf("Element %s : %s : %s - %s : %s %s %s/%s \n",el,sel,start_,end_,feature_, score_,frame_,remainder_));
     if (element[PE,frame]!=".") {
       frame_=element[PE,frame];
       remainder_=(3-(end_-(start_+frame_)+1)%3)%3;
       frcfrm=1 }
     else { frame_="(.)"; remainder_="(.)"; frcfrm=0 }
-    # PrintRPT(sprintf("Element* %s : %s : %s - %s : %s %s %s/%s \n",el,sel,start_,end_,feature_, score_,frame_,remainder_));
-    # PrintRPT(sprintf("%s %s %s : %s %d %d %s %s %4.2f (%s) (%s) %s %s %s (%s) p\n", sc,s,i,PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, flflg, Plot_Lbl(feature_)));
     if (PLOT_FT[feature_,":","label"]=="++none++") flflg="false";
     else flflg="true";  
     printf "%s %d %d %s %s %4.2f (%s) (%s) %s %s %s (%s) p\n", PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, flflg, Plot_Lbl(feature_) | "sort -b +0n -1 +1n -2 +2nr -3n +5nr -6";
@@ -2316,19 +2286,11 @@ function PlotVector(    lnct,step_,window_,scmin_,scmax_,start_,end_,WK,w,pos_) 
   if (PLOT_FT[sc,":","range"]=="default") {
 	scmin_=element[PE,v_scmin];
 	scmax_=element[PE,v_scmax];
-	PrintWRN(sprintf("  Range has been modified to vector field on gff-file: %s - %s\n",scmin_,scmax_)) }
+	# PrintWRN(sprintf("  Range has been modified to vector field on gff-file: %s - %s\n",scmin_,scmax_))
+    }
   else { scmin_=lower_sc; scmax_=upper_sc }
   gsub(/[ \t]+$/,"",element[PE,v_DATA]);
   WK=split(element[PE,v_DATA],V_ary,/[ \t]+/);
-#  if (Var["print_report"]) { # PrintRPT
-#   # printf "Vector %s: Elements Vector Line %s\n",el,element[PE,v_DATA] | "cat 1>&2";
-# 	printf "Vector %s: Elements Report... Has %s elements.\n",el,WK | "cat 1>&2";
-# 	mn_s=element[PE,v_scmin]; mx_s=element[PE,v_scmax];
-# 	printf "Vector %s: ScoreLimits %s - %s has been re-scaled to %s - %s ...\n",el,mn_s,mx_s,GetScore(mn_s,scmin_,scmax_),GetScore(mx_s,scmin_,scmax_) | "cat 1>&2";
-# 	# if (window_!="NONE") { for (w=1;w<=WK;w++) printf "%5.3f : ",V_ary[w] | "cat 1>&2" }
-# 	# else { for (w=1;w<=WK;w+=2) printf "%5.3f %s : ",V_ary[w],V_ary[w+1] | "cat 1>&2" }
-# 	# printf "\n" | "cat 1>&2";
-#   }
   lnct=0;
   if (WK>0) {
     if (window_!="NONE") {
@@ -2388,7 +2350,6 @@ function PRINT_ELEMENTS() {
         shwgrpst=TxtBool(OnOff(Default["show_positions"]) || OnOff(PLOT_FT[ng_,":","show_group_positions"]) || OnOff(PLOT_FT[sc,":","show_source_positions"]));
         if (PLOT_FT[ng_,":","label"]=="++none++") glflg="false";
         else glflg="true";  
-		# PrintRPT(sprintf("GROUP : %-15s : line_%s order_%s %10d %10d (%s)\n", ng_, l, gl, sg_, eg_, N[SSS,ng_]));
 		printf "%s %s (%s) (%s) %s (%s) %s %s (%s) gp\n", sg_, eg_, Set_group_Clr(ng_,sc), Set_group_Shape(ng_,sc), VertPos(2,sc,ng_), Set_Line(ng_,"gp_"), shwgrpst, glflg, Plot_Lbl(ng_,sq,sc,s);
 		for (el=1;el<=N[SSS,ng_];el++) {
 		  sel=S[SSS,ng_,el];
@@ -2409,15 +2370,13 @@ function PRINT_ELEMENTS() {
 } # End of function PRINT_ELEMENTS
 #
 function PRINTSOURCES() { # print groups PlotSeqComp-like.
-  laststrand="+"; notyet=1;
+  notyet=1;
   for (stp=1;stp<=3;stp++) { # for s in strand
     s=wstr[stp];
+    printf "(%s) Strand %% ------------------ Strand(%s) Begin\n", s, s;
 	if ((s=="+" && OnOff(Default["strand_show_forward"])) || (s=="." && OnOff(Default["strand_show_independent"])) || (s=="-" && OnOff(Default["strand_show_reverse"]))) {
 	  if (s~/[+-]/) lastcnt=ordcnt;
 	  else lastcnt=nordcnt; 
-	  # PrintRPT(sprintf("GP------ Source: --- Strand: %s Counter: %s\n", s, lastcnt)); 
-	  if (laststrand=="." && NStSize>0) printf "ChangeStrand\n";
-	  printf "%% ------------------ Strand(%s) Begin\n",s;
 	  for (srcord=0;srcord<lastcnt;srcord++) { # for sc in sources
 		if (s=="-") { ngcnt=(lastcnt-1)-srcord; split(order["strand",ngcnt],SQC,SUBSEP) }
 		else {
@@ -2436,7 +2395,6 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
 		  else m_lines=lines[sq,sc,".",i];
 		  for (pl=1;pl<=m_lines;pl++) {
 			if (s=="-") l=m_lines-pl+1; else l=pl;
-			# PrintRPT(sprintf("GP------ Sequence: %10s Source: %10s Strand: %s Counter: %s\n", sq, sc, s, srcord));
 			if (DoUnFoldMixed(sc) || (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) && !OnOff(PLOT_FT[sc,":","unfold_grouped_line"]) && !OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) fl_gp="M";
 			else { if (i) fl_gp="G"; else fl_gp="U" }
 			sco_lm=ScoreLimits();
@@ -2446,7 +2404,6 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
             if (PLOT_FT[sc,":","right_label"]=="++none++") rgtflb="false";
             if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftflb="false"; else lftflb="true";
             if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtflb="false"; else rgtflb="true";
-			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			printf "%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
@@ -2457,9 +2414,7 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
         } # for grpd
       }   # for scord(source_ordering)
 	}    # if strand_show
-	printf "%% ------------------ Strand(%s) End\n",s;
-	if (laststrand=="+" && StrSizeFwd>0 && notyet ) { printf "ChangeStrand\n"; notyet=0 }
-	laststrand=s;
+	printf "%% ------------------------------ Strand(%s) End\n",s;
   }     # for strands(stp)
 } # End of function PRINTSOURCES
 #
@@ -2482,6 +2437,7 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
   laststrand="+"; notyet=1;
   for (stp=1;stp<=3;stp++) { # for s in strand
     s=wstr[stp];
+    printf "(%s) Strand %% ------------------ Strand(%s) Begin\n", s, s;
 	if ((s=="+" && OnOff(Default["strand_show_forward"])) || (s=="." && OnOff(Default["strand_show_independent"])) || (s=="-" && OnOff(Default["strand_show_reverse"]))) {
 	  if (s=="+" || s=="-") lastcnt=ordcnt;
 	  else lastcnt=nordcnt;
@@ -2489,10 +2445,7 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
         dflt_up=VSw;
         tmpup=up_+dflt_up;
 		up_=ChangePage(tmpup,dflt_up);
-        printf "VChangeStrand\n";
-	    # up_=ChangePage(up_+Sw);
 	  } # if changestrand
-	  # PrintRPT(sprintf("GP------ Source: --- Strand: %s Counter: %s\n", s, lastcnt)); 
 	  for (srcord=0;srcord<lastcnt;srcord++) { # for sc in sources
 		if (s=="-") { ngcnt=(lastcnt-1)-srcord; split(order["strand",ngcnt],SQC,SUBSEP) }
 		else {
@@ -2517,7 +2470,6 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 			up_=ChangePage(tmpup,dflt_up);
             #
 			if (s=="-") l=m_lines-pl+1; else l=pl;
-			# PrintRPT(sprintf("GP------ Sequence: %10s Source: %10s Strand: %s Counter: %s\n", sq, sc, s, srcord));
 			if (DoUnFoldMixed(sc) || (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) && !OnOff(PLOT_FT[sc,":","unfold_grouped_line"]) && !OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) fl_gp="M";
 			else { if (i) fl_gp="G"; else fl_gp="U" }
 			sco_lm=ScoreLimits();
@@ -2527,7 +2479,6 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
             if (PLOT_FT[sc,":","right_label"]=="++none++") rgtflb="false";
             if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftflb="false"; else lftflb="true";
             if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtflb="false"; else rgtflb="true";
-			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			printf "%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
@@ -2539,16 +2490,14 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 		} # for pd
 	  } # for scord
 	} # if show_strand
-	printf "%% ------------------ Strand(%s) End\n",s;
 	if (laststrand=="+" && StrSizeFwd>0 && notyet ) { 
 	  notyet=0;
       dflt_up=VSw;
       tmpup=up_+dflt_up;
 	  up_=ChangePage(tmpup,dflt_up);
-	  printf "VChangeStrand\n";
-	  # up_=ChangePage(up_+Sw);
 	} # if changestrand
 	laststrand=s;
+	printf "%% ------------------------------ Strand(%s) End\n",s;
   } # for stp
 } # End of function PRINTTRACKS
 #
@@ -3014,7 +2963,6 @@ function Set_feat_Clr(gff_feat,gp,sc,is_vector,fcf,    vn,stcl,a1,a2,a3) { # rem
   a1=PLOT_FT[gff_feat,":","feature_color"];
   a2=PLOT_FT[gp,":","feature_color"];
   a3=PLOT_FT[sc,":","feature_color"];
-  #PrintRPT(sprintf("*** FEATURE COLORS ::%s:: GROUP^FEAT ::%s:: SOURCE^FEAT ::%s:: CHECK %s\n",a1,a2,a3,TxtBool(ChkColor(a1))"/"TxtBool(ChkColor(a2))"/"TxtBool(ChkColor(a3))));
   if (ChkColor(a1)) stcl=a1;
   else stcl="fgcolor";    
   if (a2!=/default|^$/ && ChkColor(a2)) stcl=a2;
@@ -3042,7 +2990,6 @@ function Set_group_Clr(grp,src,    vn,stcl) {
   stcl=PLOT_FT[grp,":","group_color"];
   if (PLOT_FT[src,":","group_color"]!=/default|^$/) stcl=PLOT_FT[src,":","group_color"];
   vn=PLOT_FT[grp,":","fill_shape_mode"];
-  #PrintRPT(sprintf("*** GROUP COLOR ::%s:: GROUP SHAPE ::%s::\n",sctl,vn));
   return Set_Color(tolower(vn),tolower(stcl));
 } # End of function Set_group_Clr
 #
@@ -3146,7 +3093,6 @@ function PSheader() {
   printf "%%%%EndComments\n%%\n";
   printf "%%    Author : %s\n", Var["AUTHOR"];
   printf "%%    e-mail :        %s\n%%\n", Var["EMAIL"];
-  # title, ARGV[2], ARGV[3], date, usr, ARGV[8], bbary[2], bbary[3], ARGV[4], ARGV[5], ARGV[6];
   printf "%% ------------------------------------------------------------------------\n";
   printf "%%                     %s\n", Var["PSPROGRAM"];
   printf "%% ------------------------------------------------------------------------\n";
@@ -3210,9 +3156,7 @@ function defPSvars(    flgst,subtitle,shbx,fixed,dfgc,dbgc) {
   printf "/LnFwd %s def\n", StrSizeFwd; # if they are 0 then not showed
   printf "/LnRvs %s def\n", StrSizeRvs;
   printf "/LnBth %s def\n", NStSize;
-  # printf "/LnTck %s def\n", calcpt(Default["default_scale_width"]);
   printf "/vectoffset 10 def\n%%\n";
-  # printf "/Flgspos %s def\n%%\n", TxtBool(OnOff(Default["show_positions"]));
   printf "/XLftLbl %s def\n", chkun(Default["left_source_label_width"]);
   printf "/FLftLbl %s def\n", TxtBool(OnOff(Default["show_left_source_label"])); #
   printf "/XRgtLbl %s def\n", chkun(Default["right_source_label_width"]);
@@ -3253,6 +3197,8 @@ function startPSpage(num,tot,vpg,vtot) {
   printf "/pgsave save def\n";
   printf "%% Setting BGcolor for sheet \n";
   printf "Dpage flglscape { exch } if 0 0 bbox S bgcolor scmyk fill R clip newpath\n";
+  printf "%% Only for testing pagelimits\n";
+  printf "% S XORI YORI T pglim flglscape { exch } if 0 0 bbox FGcolor scmyk longdashed K R\n";
   printf "%% setting coordinate axes for page orientation\n";
   printf "flglscape\n";
   printf " { XORI YORI T 90 rotate 1 -1 F }                  %% (0,0) - Ori for landscape pages\n";
