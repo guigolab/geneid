@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.52 2000-02-03 17:26:27 jabril Exp $	
+#         $Id: gff2ps,v 1.53 2000-02-21 20:52:47 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -41,10 +41,20 @@
 ##############################################################
 #################### PROGRAM DEFINITIONS #####################
 # 
-T_start=`date +%s`;
 TT_start=`date +%T`;
 CMDLine=$0" "$*;
 PID=$$;
+GD="";
+  if [ $GAWK_DIR ];
+    then
+      if [ -x "$GAWK_DIR"gawk ];   ###### User can now define a directory for gawk.
+        then
+          GD="$GAWK_DIR";
+        elif [ -x "$GAWK_DIR/"gawk ]; 
+          then
+            GD="$GAWK_DIR/";
+        fi;
+    fi;
 TEMP="/tmp";
   if [ $GFF2PS_TMP ];
     then
@@ -69,10 +79,10 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps";
   GAWK_PROG="gff2ps.awk";
-  VERSION="v0.94";
+  VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.52 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-02-03 17:26:27 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.53 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-02-21 20:52:47 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -84,14 +94,6 @@ Defaults () {
   PAGES="       From A0 to A10, from B0 to B10, 10x14, executive, folio, ledger, legal, letter, quarto, statement and tabloid.";
  # 
  # Default User-Defined Options:
-#  PRG_DIR="./"
-#  if [ $GFF2PS_DIR ]
-#    then
-#      if [ -d "$GFF2PS_DIR" ]   ###### Environment variable for gff2ps code directory.
-#        then
-#          PRG_DIR="$GFF2PS_DIR";
-#        fi
-#    fi
   CFDIR=`pwd`;
   if [ $GFF2PS_CFDIR ];
     then
@@ -150,11 +152,13 @@ Defaults () {
   c03="1cm"; m03="margin_upper";
   c04="1cm"; m04="margin_lower";
   c05="0.25cm"; m05="default_scale_width";
+  c19=1;        m19="default_scale_spacing_width";
+  c20=1;        m20="show_grid";
   c06="1cm";    m06="default_track_width";
   c07="0.25cm";    m07="default_track_spacing_width";
   c08="0.25cm"; m08="default_block_spacing_width";
-  c09=1; m09="show_inner_scale";
-  c10=1; m10="show_outer_scale";
+  c09="both"; m09="show_inner_scale";
+  c10="both"; m10="show_outer_scale";
   c11="default"; m11="header_style";
   # c11="boxed"; m11="header_style";
   c12="default"; m12="block_style";
@@ -359,7 +363,7 @@ Help () {
 } # End of Help
 
 ShowHelpLine () {
- Help | gawk 'BEGIN{
+ Help | "$GAWK_DIR"gawk 'BEGIN{
   IGNORECASE=1; flg=0; srch=ARGV[1]; ARGV[1]=""
   gsub("-","",srch); srch="\ -"srch"\ " }
   { if ($0~srch) { print $0; flg=1 } }
@@ -375,7 +379,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.52 2000-02-03 17:26:27 jabril Exp $
+%    $Id: gff2ps,v 1.53 2000-02-21 20:52:47 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -417,7 +421,7 @@ cat <<'@@@EndProlog@@@'
 /HRtOS 0.25 cm def
 @@@EndProlog@@@
 #
-colorDef | gawk 'BEGIN{ i=0 }
+colorDef | "$GAWK_DIR"gawk 'BEGIN{ i=0 }
  { if ($1!="%") { count[i++]=$1; C[$1]=$2; M[$1]=$3; Y[$1]=$4; K[$1]=$5 } }
  END {
   printf "%% Fixed Color Variables (CMYK)\n";
@@ -457,26 +461,26 @@ flglscape {
 /FSF 2.5 def % Point size for Credits for A4
 /CSF { pagedict begin pga4 pop end Dpage pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
 /CYSF { pagedict begin pga4 exch pop end Dpage exch pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
-/YSTitl YSTitl CYSF dup 4 cm gt { pop 4 cm } if def
+/TYSF { pagedict begin pga4 exch pop end Dpage exch pop exch div dup 4 cm gt { pop 4 cm } if mul } bdf
+/YSTitl YSTitl TYSF def
 /XOriBlck 0 def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
 /XOriPlot { XOriBlck FLftLbl { XLftLbl add } if } def
 /Xscale XSPlot MaxNuclPage div def
-/YOriBlck { FlgTitl { YOriTitl YSTitl add BlckSp add } { 0 } ifelse } def
+/YOriBlck { FlgTitl { YSTitl BlckSp add } { 0 } ifelse } def
 NBlck 0 eq {
   /is1tck false def
   /is2tck false def
   /YSBlck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if } def
-  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if TkMrkW FlgOS { 4 } { 2 } ifelse mul sub FlgIS { is1tck { TkMrkW 2 mul is2tck { TkMrkW 2 mul add } if sub } if } if } def
+  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if FlgOSU { TkMrkW 1 TkMspc add mul sub } if FlgOSD { TkMrkW 1 TkMspc add mul sub } if } def
   /YSFwd LnFwd def
   /YSBth LnBth def
   /YSRvs LnRvs def
-% /YSTck LnTck def
  } {
   /is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or def
   /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
   /YSBlck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div } def
-  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div TkMrkW FlgOS { 4 } { 2 } ifelse mul sub FlgIS { is1tck { TkMrkW 2 mul is2tck { TkMrkW 2 mul add } if sub } if } if } def
+  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div FlgOSU { TkMrkW 1 TkMspc add mul sub } if FlgOSD { TkMrkW 1 TkMspc add mul sub } if is1tck { TkMrkW 1 TkMspc add mul is2tck { TkMrkW 1 TkMspc add mul add } if sub } if } def
   /YSLine YS2Blck LnTot div def
   /tracksize tracksize YSLine mul def
   /spcrsize spcrsize YSLine mul def
@@ -529,11 +533,12 @@ colordict begin % adding definitions and functions
  /lup { /ku xdf /yu xdf /mu xdf /cu xdf } bdf
  /lmd { /km xdf /ym xdf /mm xdf /cnm xdf } bdf
  /ldn { /kd xdf /yd xdf /md xdf /cd xdf } bdf
+ /n (-) def
  /load2col { lup ldn /dk ku kd sub def /dy yu yd sub def /dm mu md sub def /dc cu cd sub def } bdf
  /load3col { lup lmd ldn /uk ku km sub def /uy yu ym sub def /um mu mm sub def /uc cu cnm sub def /dk km kd sub def /dy ym yd sub def /dm mm md sub def /dc cnm cd sub def } bdf
- /col2 { 2 dict begin /p xdf /pcd { p mul add } bdf cd dc pcd md dm pcd yd dy pcd kd dk pcd scmyk end } bdf
- /col3 { 3 dict begin /p xdf /pcd { p 2 mul mul add } bdf /pcu { p 0.5 sub 2 mul mul add } bdf p 0.5 le { cd dc pcd md dm pcd yd dy pcd kd dk pcd } { cnm uc pcu mm um pcu ym uy pcu km uk pcu } ifelse scmyk end } bdf
- /rainbow { 1 dict begin /p xdf p 0.1 le { p 0.2 div 0.5 add 1 0 0 scmyk } { p 0.4 le { 1 1 p 0.1 sub 0.3 div sub 0 0 scmyk } { p 0.6 le { 1 0 p 0.4 sub 0.2 div 0 scmyk } { p 0.8 le { 1 p 0.6 sub 0.2 div sub 0 1 0  scmyk } { 0 p 0.8 sub 0.2 div 1 0 scmyk } ifelse } ifelse } ifelse } ifelse end } bdf
+ /col2 { 2 dict begin /p xdf p n ne { /pcd { p mul add } bdf cd dc pcd md dm pcd yd dy pcd kd dk pcd } { BGcolor } ifelse scmyk end } bdf
+ /col3 { 3 dict begin /p xdf p n ne { /pcd { p 2 mul mul add } bdf /pcu { p 0.5 sub 2 mul mul add } bdf p 0.5 le { cd dc pcd md dm pcd yd dy pcd kd dk pcd } { cnm uc pcu mm um pcu ym uy pcu km uk pcu } ifelse } { BGcolor } ifelse scmyk end } bdf
+ /rainbow { 1 dict begin /p xdf p n ne { p 0.1 le { p 0.2 div 0.5 add 1 0 0 } { p 0.4 le { 1 1 p 0.1 sub 0.3 div sub 0 0 } { p 0.6 le { 1 0 p 0.4 sub 0.2 div 0 } { p 0.8 le { 1 p 0.6 sub 0.2 div sub 0 1 0 } { 0 p 0.8 sub 0.2 div 1 0 } ifelse } ifelse } ifelse } ifelse } { BGcolor } ifelse scmyk end } bdf
 end % colordict
 %%EndProcSet:   painting_functions 1.0 0
 %
@@ -551,16 +556,16 @@ headerdict begin
  /tmfnt { xtfsz /Times-Roman    } def
  /pgfnt { xtfsz /Times-Roman    } def
  /ttlong { S ttfnt sfont Title stringwidth pop stfnt sfont SubTitle stringwidth pop R 2 copy gt { pop } { exch pop } ifelse 2 div } bdf
- /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox fgcolor scmyk K R } if ShwTt Title () ne and { sepsz ttlong add YSTitl sepsz sub 0 Title (tv) (ch) ttfnt fgcolor ttxt } if ShwST SubTitle () ne and { sepsz ttlong add sepsz 0 SubTitle (bv) (ch) stfnt fgcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt fgcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt fgcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt fgcolor ttxt } if R } bdf
+ /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox 0.125 slw fgcolor scmyk K R } if ShwTt Title () ne and { sepsz ttlong add YSTitl sepsz sub 0 Title (tv) (ch) ttfnt fgcolor ttxt } if ShwST SubTitle () ne and { sepsz ttlong add sepsz 0 SubTitle (bv) (ch) stfnt fgcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt fgcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt fgcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt fgcolor ttxt } if R } bdf
 %
- /s_credits { S 1 dict begin /fs_cd FSF CYSF def pglim FSF 0.52 mul CYSF sub T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
+ /s_credits { S 1 dict begin /fs_cd FSF CYSF def pglim FSF CYSF add T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
 end
 %
 %%EndProcSet:   header_functions 1.0 0
 %
-%%BeginProcSet: tickmarks 1.4 0
+%%BeginProcSet: tickmarks 1.5 0
 % Rule.ps ---> rules and scales
-/tmdct 24 dict def tmdct begin
+/tmdct 30 dict def tmdct begin
  /ChkLimits { 3 copy pop 5 2 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or { pop false } { true } ifelse } bdf 
  /ShowGrid 0 def % 0 - none : 1 - MinTicks : 2 - MaxTicks : 3 - Both
  /Gridup true def /Griddn true def /flgup true def
@@ -569,29 +574,31 @@ end
  /TkFont { TkMrkHW /Helvetica } def
  /MaxWidthT { S MaxNuclPage 10 string cvs TkFont sfont stringwidth pop 2 mul R } bdf
  /CheckCloser { 3 copy pop MaxWidthT sub 3 1 roll MaxWidthT add 3 1 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or 4 1 roll 3 copy dup 3 1 roll ne 3 1 roll ne and 5 -1 roll and { pop false } { true } ifelse } bdf
- /ctextick { S TkFont sfont dup stringheight 2 div exch stringwidth pop 2 Xscm div neg Xscm exch 2 copy neg T 2 mul exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 2 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
- /bltextick { S TkFont sfont dup stringwidth pop 2 Xscm div neg Xscm TkMrkHW 2 copy flgup { TkMrkDW add T } { 2 mul T 1 -1 F } ifelse exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 2 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
+ /ctextick { S TkFont sfont dup stringheight 2 div exch stringwidth pop 2 Xscm div neg Xscm exch 2 copy neg T 2 mul exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 0.125 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
+ /bltextick { S TkFont sfont dup stringwidth pop 2 Xscm div neg Xscm TkMrkHW 2 copy flgup { TkMrkDW add T } { 2 mul T 1 -1 F } ifelse exch 2 mul neg exch S 0 0 bbox bgcolor scmyk S tflg { fgcolor scmyk } if 0.125 slw K R fill R 0 0 m fgcolor scmyk show R } bdf
  /tonormtick { 0 eq { 2 { dup dup 0 ne { MinTick mod } if sub exch } repeat } { 2 { dup dup 0 ne { MaxTick mod } if sub exch } repeat } ifelse } bdf
  /Mkg { 0 0 m l fgcolor scmyk dotted K } bdf
+ /Mklb { S 3 dict begin TS 3 eq { 1000000 div /q exch 20 string cvs def /y q length def /h y 2 add string def h 0 q putinterval h y (Mb) putinterval h } { TS 2 eq { 1000 div cvi /q exch 20 string cvs def /y q length def /h y 2 add string def h 0 q putinterval h y (Kb) putinterval h } { 10 string cvs } ifelse } ifelse end R } bdf  
  /MkVGrid { S slw Gridup flgup not { not } if { 0 up Mkg } if Griddn flgup not { not } if { 0 down neg Mkg } if  R } bdf
  /MkAtick { slw 0 TkMrkHW neg m 0 TkMrkHW l fgcolor scmyk K } bdf
- /MkBtick { S dup Xscm 0 T ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if 1 MkAtick CheckCloser { 10 string cvs ctextick } if R } bdf
+ /MkBtick { S dup Xscm 0 T ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if 1 MkAtick CheckCloser { Mklb ctextick } if R } bdf
  /MkCtick { slw 0 0 m 0 TkMrkHW 3 -1 roll { TkMrkDW sub } if l fgcolor scmyk K } bdf
- /MkDtick { S dup Xscm 0 T CheckCloser { 10 string cvs bltextick } if ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if false 1 MkCtick R } bdf
+ /MkDtick { S dup Xscm 0 T CheckCloser { Mklb bltextick } if ShowGrid 2 eq ShowGrid 3 eq or { 0.25 MkVGrid } if false 1 MkCtick R } bdf
  /baseline { S Xscm TkMrkDW m Xscm TkMrkDW l TkMrkDW 2 mul slw fgcolor scmyk K R } bdf
  /r { /Gridup true def /Griddn true def /flgup true def 0 exch T S 0 T 1 -1 F 4 { 2 copy } repeat pop neg Xscm 0 T 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T 0.25 MkAtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkBtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkBtick } { pop } ifelse } repeat pop pop R } bdf
  /x { 5 { 2 copy } repeat pop neg Xscm 0 T baseline 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T true 0.25 MkCtick ShowGrid 1 eq ShowGrid 3 eq or { 0 MkVGrid } if R } if } for 1 tonormtick MaxTick exch { ChkLimits { MkDtick } if } for 2 { dup dup 0 ne { MaxTick mod } if 0 ne { MkDtick } { pop } ifelse } repeat pop pop } bdf 
  /s { /Gridup false def /Griddn true def /flgup true def 0 exch TkMrkW add T S 0 T 1 -1 F x R } bdf
  /z { /Gridup true def /Griddn false def /flgup false def 0 exch T S 0 T 1 1 F x R } bdf
+ /g { /down xdf /up xdf S T 2 copy 0 tonormtick MinTick exch { ChkLimits { S Xscm 0 T 0.125 slw 0 down Mkg R } if } for R pop pop } bdf
 end % tmdct
-%%EndProcSet:   tickmarks 1.4 0
+%%EndProcSet:   tickmarks 1.5 0
 %
-%%BeginProcSet: objects 1.1 0
+%%BeginProcSet: objects 1.2 0
 /shpdct 225 dict def shpdct begin
  /nucdif { 2 copy exch sub } bdf
  /mtrx matrix def
  /mrr false def
- /LY { Yscl FlgScRM { 0.45 mul } if } bdf
+ /LY { Yscl FlgScRM { 0.45 mul } { 0.975 mul } ifelse } bdf
 %
 % X Y angle string valign halign fnt color ttxt
 % functions for vectors-like data-sets
@@ -629,7 +636,7 @@ end % tmdct
 % *V align:  0 center : 1 baseline : -1 reverse
 % /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } { FtV -1 eq { 1 -1 F } if } ifelse colordict begin 1 dict begin /svmtrix mtrx currentmatrix def { p_s cvx exec scmyk } stopped not { S 0.25 slw fgcolor scmyk K R clip setcolmod } if newpath end end R } bdf % (Filling clipping path...) msg 
  /frs { S strnd (-) eq { -1 1 F } if FtV 0 eq { 0 LY sc mul 2 div neg T } if colordict begin p_s cvx exec newpath end R } bdf % (Filling clipping path...) msg 
- /GetVar { /ftlbl xdf /Flgspos xdf /FtV exch dup 2 eq { pop 0 /mrr true def } { /mrr false def } ifelse def /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def pop /fflbl { ftlbl () eq { false } { true } ifelse } def /p_strk true def } bdf
+ /GetVar { /ftlbl xdf /flblfg xdf /Flgspos xdf /FtV exch dup 2 eq { pop 0 /mrr true def } { /mrr false def } ifelse def /p_s xdf /cmod xdf /sc xdf /rmd xdf /frm xdf CKL nucdif /sqdif exch Xscm def /sqend xdf /seqend sqend Xscm def /sqori xdf /seqori sqori Xscm def /fflbl ftlbl () eq { false } { flblfg } ifelse def /p_strk true def } bdf
  /p { S GetVar shwpos strnd (-) eq { seqend } { seqori } ifelse 0 T frs R } bdf
 %
 % Shapes......
@@ -648,6 +655,7 @@ end % tmdct
  /scline { PMX sqdif LY sc mul F 0 0.5 m 1 0.5 l PMK LY sc mul slw scmyk K } bdf 
  /box    { 1.0 0.0 1.0 1.0 0.0 1.0 3 0.0 0.0 cpt } bdf
  /hbox   { ScV 0 ne { 1.0 0.0 1.0 1.0 0.0 1.0 3 0.0 0.0 } { 1.0 0.5 1.0 1.0 0.0 1.0 3 0.0 0.5 } ifelse cpt } bdf
+ /gtgb   { PMX 1.0 0.0 1.0 1.0 0.0 1.0 3 0.0 0.0 sqdif LY sc mul F m { l } repeat closepath PMK 0.25 slw scmyk S clip BGcolor scmyk fill R K grlbl () ne { S sqdif 2 div LY 2 div dup sc mul 0 grlbl (cv) (ch) 6 -1 roll /Helvetica FGcolor ttxt R } if } bdf
  /fcir   { PMX 0.5 0.5 0.5 0 360 cptc } bdf
  /hcir   { PMX ScV 0 ne { 1 2 F 0.5 0.0 } { 0.5 0.5 } ifelse 0.5 0 180 cptc } bdf
  /frhead { 0.75 0.0 0.75 -0.1 0.755 -0.1 1.0 0.5 0.755 1.1 0.75 1.1 0.75 1.0 0.0 1.0 8 0.0 0.0 cpt } bdf
@@ -690,7 +698,7 @@ end % tmdct
  /g_score 1.1 def % /g_score 0.5 def
  /GpFsz { Yscl 0.25 mul dup 8 gt { pop 8 } if } def
  /GpFont { GpFsz /Helvetica } bdf
- /gshp { S 0 gp_st gp_nd 0 0 g_score gcmod g_shape GpV Flgrpspos grlbl p R } bdf
+ /gshp { S 0 gp_st gp_nd 0 0 g_score gcmod g_shape GpV Flgrpspos Flgglbl grlbl p R } bdf
  /gp_no { 4 { pop } repeat } bdf
  /gp_ln { scmyk 0.25 slw 0 0 m grdif 0 l K } bdf
  /gp_dt { dotted gp_ln } bdf
@@ -703,12 +711,12 @@ end % tmdct
  /CkGPL { dup GpFsz 2 div lt { pop GpFsz 0.55 mul } if } bdf
  /gln { S colordict begin g_line cvx exec end R } bdf
  /shgl { S grori Yscl ScV 0 eq { 0.2875 mul } { 0.775 mul } ifelse T gln S grdif 2 div Yscl 0.25 mul 2 div CkGPL 2 div T strnd (-) eq { 1 -1 F } if ScV -1 eq { 1 -1 F } if Flgglbl { 0 0 0 grlbl strnd (-) eq { ScV -1 eq { (bv) } { (tv) } ifelse } { ScV -1 eq { (tv) } { (bv) } ifelse } ifelse (ch) GpFont fgcolor ttxt } if R R } bdf 
- /GetGVar { /grlbl xdf /Flgrpspos xdf /g_line xdf /GpV xdf /g_shape xdf /gcmod xdf CKL nucdif /grdif exch Xscm def /gp_nd xdf /grend gp_nd Xscm def /gp_st xdf /grori gp_st Xscm def /Flgglbl { grlbl () eq { false } { true } ifelse } def } bdf
+ /GetGVar { /grlbl xdf /glblfg xdf /Flgrpspos xdf /g_line xdf /GpV xdf /g_shape xdf /gcmod xdf CKL nucdif /grdif exch Xscm def /gp_nd xdf /grend gp_nd Xscm def /gp_st xdf /grori gp_st Xscm def /Flgglbl grlbl () eq { false } { glblfg } ifelse def } bdf
  /gx { exit } bdf 
 end % shpdct
-%%EndProcSet:   objects 1.1 0
+%%EndProcSet:   objects 1.2 0
 %
-%%BeginProcSet: blocks 1.0 0
+%%BeginProcSet: blocks 1.1 0
 /blckdct 60 dict def blckdct begin
  /Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
  /gst 250 string def
@@ -733,22 +741,21 @@ end % shpdct
  /sbb { S 0 0 XSPlot Yscl bbox FlgScBx { 0.25 slw fgcolor scmyk K } { newpath } ifelse R sbc } bdf
  /shsll { S FLftLbl Flgslftlbl and { XLftLbl 2 div neg Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srclftlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
  /shsrl { S FRgtLbl Flgsrgtlbl and { XSPlot XRgtLbl 2 div add Yscl 2 div T strnd (-) ne { 1 -1 F } if 0 0 0 srcrgtlbl (cv) (ch) ScFont fgcolor ttxt } if R } bdf
- /GetSVar { /srcrgtlbl xdf /srclftlbl xdf /s_line xdf /strnd xdf /FlgScRM xdf /FlgScBx xdf /spacer exch spcrsize mul def /Yscl exch tracksize mul def /ScV exch dup 2 eq { pop 0 } if def /Flgsrgtlbl srcrgtlbl () eq { false } { true } ifelse def /Flgslftlbl srclftlbl () eq { false } { true } ifelse def strnd (.) eq { /Y Y spacer 2 div add def } { strnd (-) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
+ /GetSVar { /srcrgtlbl xdf /srclftlbl xdf /srgtlblfg xdf /slftlblfg xdf /s_line xdf /strnd xdf /FlgScRM xdf /FlgScBx xdf /spacer exch spcrsize mul def /Yscl exch tracksize mul def /ScV exch dup 2 eq { pop 0 } if def /Flgsrgtlbl srcrgtlbl () eq { false } { srgtlblfg } ifelse def /Flgslftlbl srclftlbl () eq { false } { slftlblfg } ifelse def strnd (.) eq { /Y Y spacer 2 div add def } { strnd (-) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
  /source { S GetSVar XOriPlot Y T strnd (-) eq { 1 -1 F } if shsrl shsll sbb S ScV 0 eq { 0 Yscl 2 div T 1 -1 F } { ScV 1 eq { 0 Yscl T 1 -1 F } if } ifelse sln S blckori Xscm neg 0 T } bdf
  /s_end { R R R strnd (.) eq { /Y Y Yscl add spacer 2 div add def } { strnd (+) eq { /Y Y Yscl spacer add add def } if } ifelse } bdf
 %
 % Block Functions.
  % /tckszH tracksize 2 div def
- /YBori TkMrkW FlgOS { 2 mul } if def
- /GetBVar { /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck YSBlck blcknum mul add BlckSp blcknum mul add def } bdf
+ /YBori FlgOSU { TkMrkW 1 TkMspc add mul } { 0 } ifelse def
+ /GetBVar { /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck FlgOSU { TkMrkW 1 TkMspc add mul } { 0 } ifelse add YSBlck blcknum mul add BlckSp blcknum mul add def } bdf
  /kbb { XOriBlck 5 sub -2 XSBlck 10 add YSBlck 2 add bbox FlgBkBx { 1 slw fgcolor scmyk K } { newpath } ifelse } bdf
  /tm { S tmdct begin /ShowGrid xdf exec end R } bdf
-% /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 3 } { 2 } ifelse mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 5 } { 4 } ifelse mul YSFwd add YSBth add {r} 0 tm } if } bdf
- /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgIS not YSBth 0 gt and { YSFwd 0 gt { /down down YSBth TkMrkW 2 mul add add def } { YSRvs 0 gt { /up up YSBth TkMrkW 2 mul add add def } if } ifelse } if FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 3 } { 2 } ifelse mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} FlgOS { 0 } { 2 } ifelse tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 5 } { 4 } ifelse mul YSFwd add YSBth add {r} FlgOS { 0 } { 1 } ifelse  tm } if } bdf
- /ChangeStrand { FlgIS { /Y Y TkMrkW 2 mul add def } if } bdf
- /uptck { FlgOS { blckori blckend XOriPlot 0 {s} 0 tm } if } bdf
- /dntck { FlgOS { blckori blckend XOriPlot Y TkMrkW add {z} 0 tm } if } bdf
- /VChangeStrand { /Y Y TkMrkW add def FlgIS { blckori blckend XOriPlot Y {r} 0 tm } if /Y Y TkMrkW add def } bdf
+ /shwtck { FlgGrd { blckori blckend XOriPlot 0 0 YSBlck {g} 0 tm } if FlgOSU { blckori blckend XOriPlot 0 {s} 0 tm } if FlgOSD { blckori blckend XOriPlot YSBlck TkMrkW sub {z} 0 tm } if is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and { blckori blckend XOriPlot TkMrkW FlgOSU { 2 TkMspc add mul } if YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if is2tck FlgISD and { blckori blckend XOriPlot TkMrkW FlgOSU { 3 TkMspc 2 mul add mul } if YSFwd add YSBth add {r} 0 tm } if } bdf
+ /ChangeStrand { is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { /Y Y TkMrkW 1 TkMspc add mul def } if } bdf
+ /uptck { FlgGrd { blckori blckend XOriPlot FlgOSU { TkMrkW } { 0 } ifelse 0 YSBlck FlgOSU { TkMrkW sub } if FlgOSD { TkMrkW sub } if {g} 0 tm } if FlgOSU { blckori blckend XOriPlot 0 {s} 0 tm } if } bdf
+ /dntck { FlgOSD { blckori blckend XOriPlot Y TkMrkW add {z} 0 tm } if } bdf
+ /VChangeStrand { /Y Y is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { TkMrkW TkMspc mul add } if def is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { blckori blckend XOriPlot Y {r} 0 tm } if /Y Y is1tck FlgISU FlgISD or is2tck not and FlgISU is2tck and or and is2tck FlgISD and or { TkMrkW TkMspc mul add } if def } bdf
  /b_end { R end } bdf
  /vb_end { dntck R end } bdf
 end
@@ -773,7 +780,7 @@ true setstrokeadjust
 0 setlinecap
 % 
 % Only for error-tracking purposes
- mark
+% mark
 %
 %%EndSetup
 %
@@ -786,7 +793,7 @@ true setstrokeadjust
 #
 # Testing parameters passed by User: Colors.
 CheckColor () {
-  gawk 'BEGIN{
+  "$GAWK_DIR"gawk 'BEGIN{
     color=ARGV[1];
     if (tolower(color)!~/^((b|f)g(color)?|black|white|(very)?(light|dark)?(grey|(sea|lime)?green|(sky)?blue|cyan|violet|magenta|red|orange|yellow|brown))$/) {
       if (ARGV[4]) {
@@ -1018,12 +1025,13 @@ if [ $v34 -eq 1 ];
      echo "********************************************"; echo "";
 	 echo "Report: You have typed the following command line:"; echo "";
 	 echo $CMDLine; echo "";
-     if [ -n "$GFF2PS_CFDIR" -o -n "$GFF2PS_CUSTOMFILE" -o -n "$GFF2PS_TMP" ];
+     if [ -n "$GFF2PS_CFDIR" -o -n "$GFF2PS_CUSTOMFILE" -o -n "$GFF2PS_TMP" -o -n "$GAWK_DIR" ];
        then
 	     echo "Report: You have defined the following $PROGRAM Shell-Vars:"; echo "";
 	     if [ $GFF2PS_CFDIR ];      then echo "        \$GFF2PS_CFDIR      = \"$GFF2PS_CFDIR\""; fi;
 	     if [ $GFF2PS_CUSTOMFILE ]; then echo "        \$GFF2PS_CUSTOMFILE = \"$GFF2PS_CUSTOMFILE\""; fi;
 	     if [ $GFF2PS_TMP ];        then echo "        \$GFF2PS_TMP        = \"$GFF2PS_TMP\""; fi;
+	     if [ $GAWK_DIR ];          then echo "        \$GAWK_DIR          = \"$GAWK_DIR\""; fi;
          echo "";
        fi; } 1>&2;
   fi;
@@ -1114,7 +1122,7 @@ $n31:=$v31::$n32:=$v32::$n33:=$v33::$n34:=$v34::$n35:=$v35
 $m01:=$c01::$m02:=$c02::$m03:=$c03::$m04:=$c04::$m05:=$c05
 $m06:=$c06::$m07:=$c07::$m08:=$c08::$m09:=$c09::$m10:=$c10
 $m11:=$c11::$m12:=$c12::$m13:=$c13::$m14:=$c14::$m15:=$c15
-$m16:=$c16::$m17:=$c17::$m18:=$c18
+$m16:=$c16::$m17:=$c17::$m18:=$c18::$m19:=$c19::$m20:=$c20
 PID:=$PID::InputFNs:=$GFF_INPUT_FILES::PS_Header_FN:=$PSHEAD::PS_Main_FN:=$PSMAIN
 PROGRAM:=$PROGRAM::VERSION:=$VERSION::AUTHOR:=$AUTHOR::EMAIL:=$EMAIL::PSPROGRAM:=$PSPROGRAM
 @@@EndOfOptions@@@
@@ -1132,11 +1140,11 @@ BEGIN{ ######### INITIALITATION ###############
   PageSizesDEF();
   #
   # Find actual date...
-  "date +%Y/%m/%d" | getline date;
-  "date +%T" | getline time;
+  "date +%Y/%m/%d" | getline date; close("date +%Y/%m/%d");
+  "date +%T" | getline time; close("date +%T");
   #
   # Finding logged user...
-  "whoami" | getline usr;
+  "whoami" | getline usr; close("whoami");
   #
   # Defining pre-variables by CommandLine
   READ_CL();
@@ -1313,11 +1321,13 @@ function ARY_VARIABLES() {
   Default["major_tickmarks_nucleotides"]=-1; #
   Default["minor_tickmarks_num"]=10;         #
   Default["minor_tickmarks_nucleotides"]=-1; #
-  Default["show_inner_scale"]=1;             #
-  Default["show_outer_scale"]=1;             #
+  Default["show_grid"]=1;
+  Default["show_inner_scale"]="both";        # both(default)/none/top/bottom
+  Default["show_outer_scale"]="both";        #
   Default["default_scale_width"]="0.25cm";   #
+  Default["default_scale_spacing_width"]=1;   # Only for outer scale. Units in rule_widths
   # Blocks Layout
-  Default["strand_show_mixed"]="off";         #
+  # Default["strand_show_mixed"]="off";         #
   Default["strand_show_forward"]="on";         #
   Default["strand_show_reverse"]="on";         #
   Default["strand_show_independent"]="on";     #
@@ -1447,6 +1457,7 @@ function ARY_VARIABLES() {
   shpnm["asterisk"]="fast";
   shpnm["star"]="fstar";
   shpnm["gap"]="gap";
+  shpnm["group_tag_box"]="gtgb";
   # shpnm["half_star"]="hstar";
   #
   # Coding baseline alignment
@@ -1678,7 +1689,7 @@ function LOAD_Vectors(     v_nm,K,k,W,w,vs,vv,va,v_,stp,lsco,usco,nsc,vtsc) {
 	  GP_ary[Gtv]--;     # field 9 (group) record-counter
 	}
   } # if multi-record vectors.
-  else { # Loading single-record vectors.
+  else { # Loading single-record vectors. (Vector: sco sco ... sco)
 	v_nm=N[iG2];
 	element[iG2,v_nm,v_window] = 0; # if none then paired data.
 	element[iG2,v_nm,v_step]   = 0; # if none then paired data.
@@ -1718,12 +1729,14 @@ function LOAD_Vectors(     v_nm,K,k,W,w,vs,vv,va,v_,stp,lsco,usco,nsc,vtsc) {
 		  else if (element[iG2,v_nm,v_CLASS]==2) {
             vtsc=vtsc""va[w]" "va[w+1]" "va[w+2]" ";
             nsc=va[w+1] }
-          if(w>2) {
-            if (!lsco) element[iG2,v_nm,v_scmin] = min(element[iG2,v_nm,v_scmin],nsc);
-            if (!usco) element[iG2,v_nm,v_scmax] = max(element[iG2,v_nm,v_scmax],nsc);
-            }
-          else element[iG2,v_nm,v_scmin]=element[iG2,v_nm,v_scmax]=nsc;
-		} # for w
+         if (nsc!="-") {
+           if (w>2) {
+             if (!lsco) element[iG2,v_nm,v_scmin] = min(element[iG2,v_nm,v_scmin],nsc);
+             if (!usco) element[iG2,v_nm,v_scmax] = max(element[iG2,v_nm,v_scmax],nsc);
+             }
+           else element[iG2,v_nm,v_scmin]=element[iG2,v_nm,v_scmax]=nsc;
+	       } # if sco!="-"
+	    } # for w
         element[iG2,v_nm,v_DATA]=vtsc;
 #		if (element[iG2,v_nm,v_window]!="NONE") {
 #		  for (w=1;w<=W;w++) printf "%5.3f : ",V_at[w] | "cat 1>&2" }
@@ -1886,7 +1899,7 @@ function SET_VARS() {
 	if (poszm[1]=="*") PORI=t_ori; else PORI=poszm[1];
 	if (poszm[2]=="*") PEND=t_end; else PEND=poszm[2];
   } # else zoom
-  if (gff_NR==0) { 
+  if (gff_NR==0) { ## Here can be included a checking for no strand drawn??
 	PORI=0; PEND=1000;
 	title="Empty PLOT";
 	PrintWRN("\n***************\n*** WARNING *** There were no gff-records from input-files.\n*** WARNING *** You are going to obtain an empty page...\n***************\n");
@@ -1894,6 +1907,21 @@ function SET_VARS() {
   if (PORI!=0) PDIF=PEND-PORI; # if PDIF=PEND-PORI+1 then plot with an "extra" nucleotide position.
   else PDIF=PEND;
   MGS=Default["min_group_separation"];
+  # switching for tickmarks (none,both/default,top,bottom)
+  FlgSwISUp=0; FlgSwISDn=0; TmTt=chktmk(Default["show_inner_scale"]);
+  if (TmTt=="both") { FlgSwISUp=1; FlgSwISDn=1; }
+  else {
+    if (TmTt=="top") FlgSwISUp=1;
+    else
+      if (TmTt=="bottom") FlgSwISDn=1;
+  }
+  FlgSwOSUp=0; FlgSwOSDn=0; TmTt=chktmk(Default["show_outer_scale"]);
+  if (TmTt=="both") { FlgSwOSUp=1; FlgSwOSDn=1; }
+  else {
+    if (TmTt=="top") FlgSwOSUp=1;
+    else
+      if (TmTt=="bottom") FlgSwOSDn=1;
+  }
 } # End of function SET_VARS
 #
 function SET_ORDER(    Q,S,lseq,lsrc,seso_rd) { # for swapping order for seqs or srcs.
@@ -2127,7 +2155,7 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
 	  else NOFFSET=PDIF;
 	}
 	else NOFFSET=Default["nucleotides_x_line"];
-	if (NOFFSET>PDIF) NOFFSET=PDIF; # necessary if it is defined a Zoom.
+	# if (NOFFSET>PDIF) NOFFSET=PDIF; # necessary if it is defined a Zoom.
 	B1= PDIF%NOFFSET!=0 ? ((PDIF-(PDIF%NOFFSET))/NOFFSET)+1 : ((PDIF-(PDIF%NOFFSET))/NOFFSET);
 	P = B1%B!=0 ? ((B1-(B1%B))/B)+1 : ((B1-(B1%B))/B);
 	if (OnOff(Default["show_blocks_top-bottom"])) { BOFFSET=NOFFSET; POFFSET=B*NOFFSET }
@@ -2142,7 +2170,7 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
 	  else NOFFSET=PDIF;
 	}
 	else NOFFSET=Default["nucleotides_x_line"];
-	if (NOFFSET>PDIF) NOFFSET=PDIF; # necessary if it is defined a Zoom.
+	# if (NOFFSET>PDIF) NOFFSET=PDIF; # necessary if it is defined a Zoom.
 	P = PDIF%NOFFSET!=0 ? ((PDIF-(PDIF%NOFFSET))/NOFFSET)+1 : ((PDIF-(PDIF%NOFFSET))/NOFFSET);
 	POFFSET=BOFFSET=NOFFSET;
 	PrintWRN(sprintf("\n%s\n*  PostScript Page Definitions\n%s\n\n",BigLINE,BigLINE));
@@ -2198,8 +2226,8 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
   if (B>0) VP=1;
   else {
     Sw=calcpt(Default["default_scale_width"]);
-    if (StrSizeFwd>0 && (NStSize>0 || StrSizeRvs>0)) BSize=BSize+Sw;
-    if (NStSize>0 && StrSizeRvs>0) BSize=BSize+Sw;
+    if (StrSizeFwd>0 && (NStSize>0 || StrSizeRvs>0) && (OnOff(FlgSwISDn) || OnOff(FlgSwISUp))) BSize=BSize+Sw;
+    if (NStSize>0 && StrSizeRvs>0 && (OnOff(FlgSwISDn) || OnOff(FlgSwISUp))) BSize=BSize+Sw;
     if (Default["page_orientation"]=="Landscape") ttbby=bbx; else ttbby=bby;
 	if (OnOff(shtt)) {
       tthdr=calcpt(HDRheight)*(bbx/PsizeX["a4"]);
@@ -2213,11 +2241,13 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
       crdt=2*crdt;
     }
     else crdt=0;
-    if (OnOff(Default["show_outer_scale"])) TSw=4*Sw; else TSw=0;
+    if (OnOff(FlgSwOSUp)) TSwu=(1+Default["default_scale_spacing_width"])*Sw; else TSwu=0;
+    if (OnOff(FlgSwOSDn)) TSwd=(1+Default["default_scale_spacing_width"])*Sw; else TSwd=0;
+    TSw=TSwu+TSwd;
     Tsize=ttbby-(tthdr+calcpt(Default["margin_upper"])+calcpt(Default["margin_lower"])+TSw+crdt);
 	VP=(BSize/Tsize);
     if (int(VP)<VP) VP=int(VP)+1;
-    PrintRPT(sprintf("\n\n************* Page Vsize = %s cm **** Title Vsize = %s cm **** Block Tsize = %s cm **** Credit Vsize = %s cm ***************\n\n\n",ttbby/28.35,tthdr/28.35,Tsize/28.35,crdt/28.35));
+    PrintRPT(sprintf("\n*********\n**** Page Vsize = %s cm \n**** Title Vsize = %s cm \n**** Block Tsize = %s cm \n**** Credit Vsize = %s cm \n***************\n\n",ttbby/28.35,tthdr/28.35,Tsize/28.35,crdt/28.35));
   } # else B==0
   # Major Minor Tickmarks ratio
   if (Default["major_tickmarks_nucleotides"]==-1 || NOFFSET<Default["major_tickmarks_nucleotides"]) {
@@ -2228,7 +2258,9 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
 } # End of function SET_PAGE_VARS
 #
 function MAIN_PAGE_LOOP() { # MAIN LOOP: Start
-  if (OnOff(Default["show_inner_scale"])) VSw=2*Sw; else VSw=0; # for PRINTTRACKS function only
+  if (OnOff(FlgSwISUp)) VSwu=Sw; else VSwu=0; 
+  if (OnOff(FlgSwISDn)) VSwd=Sw; else VSwd=0; # for PRINTTRACKS function only
+  VSw=VSwu+VSwd;
   for (pages=1;pages<=P;pages++) {
 	Vpages=1;
     BORI=PORI;
@@ -2286,9 +2318,10 @@ function PlotElement(    shwpst) {
       frcfrm=1 }
     else { frame_="(.)"; remainder_="(.)"; frcfrm=0 }
     # PrintRPT(sprintf("Element* %s : %s : %s - %s : %s %s %s/%s \n",el,sel,start_,end_,feature_, score_,frame_,remainder_));
-    # PrintRPT(sprintf("%s %s %s : %s %d %d %s %s %4.2f (%s) (%s) %s %s (%s) p\n", sc,s,i,PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, Plot_Lbl(feature_)));
-    printf "%s %d %d %s %s %4.2f (%s) (%s) %s %s (%s) p\n",
- PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, Plot_Lbl(feature_) | "sort -b +0n -1 +1n -2 +2nr -3n +5nr -6";
+    # PrintRPT(sprintf("%s %s %s : %s %d %d %s %s %4.2f (%s) (%s) %s %s %s (%s) p\n", sc,s,i,PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, flflg, Plot_Lbl(feature_)));
+    if (PLOT_FT[feature_,":","label"]=="++none++") flflg="false";
+    else flflg="true";  
+    printf "%s %d %d %s %s %4.2f (%s) (%s) %s %s %s (%s) p\n", PLOT_FT[feature_,":","layer"], start_, end_, frame_ , remainder_, score_, Set_feat_Clr(feature_,ng_,sc,0,frcfrm), Set_feat_Shape(feature_,ng_,sc), VertPos(3,sc,ng_,feature_), shwpst, flflg, Plot_Lbl(feature_) | "sort -b +0n -1 +1n -2 +2nr -3n +5nr -6";
   } # if element checklimits
 } # End of function PlotElement
 #
@@ -2326,9 +2359,12 @@ function PlotVector(    lnct,step_,window_,scmin_,scmax_,start_,end_,WK,w,pos_) 
       for (w=1;w<=WK;w++) {
         if (pos_>=BORI && pos_<=BEND) { # pos_ is always taken as mid_position.
           lnct++;
-		  if (sco_lm) score_=1; else score_=GetScore(V_ary[w],scmin_,scmax_);
           if (lnct>1) printf " ";
-          printf "%5.3f", score_;
+          if (V_ary[w]!="-") {
+            if (sco_lm) score_=1; else score_=GetScore(V_ary[w],scmin_,scmax_);
+            printf "%5.3f", score_;
+            }
+          else printf "  n  "; 
 		} # if frame is on page
         if (lnct==20 || w==WK) { printf "\n"; lnct=0 }
         pos_=pos_+step_;
@@ -2369,8 +2405,10 @@ function PRINT_ELEMENTS() {
 	  if (ChkLimits(sg_,BORI,eg_,BEND)) {
         # plot group in file
         shwgrpst=TxtBool(OnOff(Default["show_positions"]) || OnOff(PLOT_FT[ng_,":","show_group_positions"]) || OnOff(PLOT_FT[sc,":","show_source_positions"]));
+        if (PLOT_FT[ng_,":","label"]=="++none++") glflg="false";
+        else glflg="true";  
 		# PrintRPT(sprintf("GROUP : %-15s : line_%s order_%s %10d %10d (%s)\n", ng_, l, gl, sg_, eg_, N[SSS,ng_]));
-		printf "%s %s (%s) (%s) %s (%s) %s (%s) gp\n", sg_, eg_, Set_group_Clr(ng_,sc), Set_group_Shape(ng_,sc), VertPos(2,sc,ng_), Set_Line(ng_,"gp_"), shwgrpst, Plot_Lbl(ng_,sq,sc,s);
+		printf "%s %s (%s) (%s) %s (%s) %s %s (%s) gp\n", sg_, eg_, Set_group_Clr(ng_,sc), Set_group_Shape(ng_,sc), VertPos(2,sc,ng_), Set_Line(ng_,"gp_"), shwgrpst, glflg, Plot_Lbl(ng_,sq,sc,s);
 		for (el=1;el<=N[SSS,ng_];el++) {
 		  sel=S[SSS,ng_,el];
 		  PE=sq SUBSEP sc SUBSEP s SUBSEP ng_ SUBSEP sel;
@@ -2420,10 +2458,14 @@ function PRINTSOURCES() { # print groups PlotSeqComp-like.
 			if (DoUnFoldMixed(sc) || (!OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]) && !OnOff(PLOT_FT[sc,":","unfold_grouped_line"]) && !OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]))) fl_gp="M";
 			else { if (i) fl_gp="G"; else fl_gp="U" }
 			sco_lm=ScoreLimits();
-			if (PLOT_FT[sc,":","source_style"]=="boxed") shscbx="true"; 
-			else shscbx="false";
-			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
-			printf "%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+            if (PLOT_FT[sc,":","source_style"]=="boxed") shscbx="true";
+            else shscbx="false";
+            if (PLOT_FT[sc,":","left_label"]=="++none++") lftflb="false";
+            if (PLOT_FT[sc,":","right_label"]=="++none++") rgtflb="false";
+            if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftflb="false"; else lftflb="true";
+            if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtflb="false"; else rgtflb="true";
+			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			printf "%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
 			PRINT_ELEMENTS();
@@ -2498,8 +2540,12 @@ function PRINTTRACKS(    up_,tmpup,dflt_up) {
 			sco_lm=ScoreLimits();
 			if (PLOT_FT[sc,":","source_style"]=="boxed") shscbx="true"; 
 			else shscbx="false";
-			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
-			printf "%s %s %s %s %s (%s) (%s) %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+            if (PLOT_FT[sc,":","left_label"]=="++none++") lftflb="false";
+            if (PLOT_FT[sc,":","right_label"]=="++none++") rgtflb="false";
+            if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftflb="false"; else lftflb="true";
+            if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtflb="false"; else rgtflb="true";
+			# PrintRPT(sprintf("%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"), lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp)));  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
+			printf "%s %s %s %s %s (%s) (%s) %s %s %s source\n", VertPos(1,sc), PLOT_FT[sc,":","track_scale"], PLOT_FT[sc,":","track_spacing_scale"],shscbx,TxtBool(OnOff(PLOT_FT[sc,":","keep_feature_label_space"])),s,Set_Line(sc,"sc_"),lftflb,rgtflb,Source_Lbl(sq,sc,s,fl_gp);  # (lines[sq,sc,s,grouped_]+lines[sq,sc,s,ungrouped_])
 			#
 			# Plotting all elements for that source
 			PRINT_ELEMENTS();
@@ -2691,7 +2737,7 @@ function RCFile(file,    MATCH_T,MATCH_F,nothere,first,gffirst,second,ft_type,fe
 	  }
 	  else neg_ptrn=0;
 	  second=nwfeat[1];
-      # PrintRPT("***:"$0":***:"first":***:"second":***:"nwfeat[2]":***REGEXP:"exp_reg"\n");
+      PrintRPT("***:"$0":***:"first":***:"second":***:"nwfeat[2]":***REGEXP:"exp_reg"\n");
 	  if (ft_type=="F") { # F
 		gffirst=tolower(first);
 		for (feat in FT_ary) { 
@@ -2824,6 +2870,12 @@ function checklbl(chain) {
     return chain }
 } # End of function checklbl
 #
+function chktmk(tk,    t) {
+  t=tolower(tk);
+  if (t~/both|top|bottom/) return t;
+  else return "both";
+}
+#
 function ChkCharIF(chain) { # Avoiding problems with config file variable names for elements.
   if (chain=="") return ""; 
   else { gsub(/[%]/,"%%",chain); return chain }
@@ -2892,19 +2944,15 @@ function showelemGS(sq,s,p,g,q,  string) {
 #
 function Plot_Lbl(gff_feat,    sq,sc,s,lbl,vn) {
   vn=PLOT_FT[gff_feat,":","label"];
-  if (vn=="++none++") lbl="";
-  else {
-	if (vn=="++default++") { 
-	  lbl=gff_feat;
-	  if (gff_feat in GP_ary)  lbl=gp[sq,sc,s,gp_cnt[gff_feat],gplabel] }
-	else lbl=vn }
+  if (vn=="++default++" || vn=="++none++") { 
+    lbl=gff_feat;
+    if (gff_feat in GP_ary)  lbl=gp[sq,sc,s,gp_cnt[gff_feat],gplabel] }
+  else lbl=vn;
   return checklbl(lbl);
 } # End of function Plot_Lbl
 #
 function SRC_LBL(sl,sq,sc,s,flg    ,lbl) {
-  if (sl=="++none++") lbl="";
-  else {
-	if (sl=="++default++") {  # is not wrong, when sorting by sequence, source label is source else seqname
+	if (sl=="++default++" || sl=="++none++") {  # is not wrong, when sorting by sequence, source label is source else seqname
 	  if (OnOff(Default["sort_tracks_by_sequence"])) lbl=sc; else lbl=sq }
 	else
       if (sl=="++sequence++") lbl=sq;
@@ -2915,15 +2963,13 @@ function SRC_LBL(sl,sq,sc,s,flg    ,lbl) {
             if (OnOff(Default["sort_tracks_by_sequence"])) lbl=sq" ("sc")";
             else lbl=sc" ("sq")";
             if (sl=="++info++") lbl=lbl" ["flg""s"]" }
-          else lbl=sl }
+          else lbl=sl;
   return checklbl(lbl);
 }
 #
 function Source_Lbl(sq,sc,s,flg,    lftlbl,rgtlbl,tlb) {
   lftlbl=SRC_LBL(PLOT_FT[sc,":","left_label"],sq,sc,s,flg);
-  if (!OnOff(PLOT_FT[sc,":","show_left_label"])) lftlbl="";
   rgtlbl=SRC_LBL(PLOT_FT[sc,":","right_label"],sq,sc,s,flg);
-  if (!OnOff(PLOT_FT[sc,":","show_right_label"])) rgtlbl="";
   tlb="("lftlbl") ("rgtlbl")";
   return tlb;
 } # End of function Plot_Lbl
@@ -3146,6 +3192,7 @@ function defPSvars(    flgst,subtitle,shbx,fixed,dfgc,dbgc) {
   printf "/LtM %s def\n", chkun(Default["margin_left"]);
   printf "/RtM %s def\n%%\n", chkun(Default["margin_right"]);
   printf "/TkMrkW %s def %% Defining tickmark-width.\n", chkun(Default["default_scale_width"]);
+  printf "/TkMspc %s def\n", Default["default_scale_spacing_width"];
   printf "/BlckSp %s def %% Defining blocks-spacing\n%%\n", chkun(Default["default_block_spacing_width"]);
   printf "/SeqLen %s def\n", PDIF; 
   printf "/XNucOffSet %s def\n", PORI; 
@@ -3155,8 +3202,11 @@ function defPSvars(    flgst,subtitle,shbx,fixed,dfgc,dbgc) {
   if (Default["block_style"]=="boxed") shbx="true"; 
   else shbx="false";
   printf "/FlgBkBx %s def\n", shbx;
-  printf "/FlgOS %s def\n",TxtBool(OnOff(Default["show_outer_scale"]));
-  printf "/FlgIS %s def\n",TxtBool(OnOff(Default["show_inner_scale"]));
+  printf "/FlgOSU %s def\n",TxtBool(OnOff(FlgSwOSUp));
+  printf "/FlgOSD %s def\n",TxtBool(OnOff(FlgSwOSDn));
+  printf "/FlgISU %s def\n",TxtBool(OnOff(FlgSwISUp));
+  printf "/FlgISD %s def\n",TxtBool(OnOff(FlgSwISDn));
+  printf "/FlgGrd %s def\n",TxtBool(OnOff(Default["show_grid"]));
   printf "/MaxTick %s def\n", Default["major_tickmarks_nucleotides"];
   printf "/MinTick %s def\n%%\n", Default["minor_tickmarks_nucleotides"];
   printf "/tracksize %s def\n", chkun(Default["default_track_width"]);
@@ -3210,7 +3260,7 @@ function startPSpage(num,tot,vpg,vtot) {
   printf "Dpage flglscape { exch } if 0 0 bbox S bgcolor scmyk fill R clip newpath\n";
   printf "%% setting coordinate axes for page orientation\n";
   printf "flglscape\n";
-  printf " { 90 rotate 1 -1 F XORI YORI T }                  %% (0,0) - Ori for landscape pages\n";
+  printf " { XORI YORI T 90 rotate 1 -1 F }                  %% (0,0) - Ori for landscape pages\n";
   printf " { XORI Dpage exch pop YORI sub T 1 -1 F } ifelse  %% (0,0) - Ori for portrait pages\n";
   printf "%%\n";
   printf "%% Printing Header\n";
@@ -3247,7 +3297,7 @@ function PSTrailer() {
 ####            MAIN GFF2PS PROGRAM               ####
 # Processing gff files and converting to PostScript. #
 
-     gawk -f $GWKPRG $GWKOPT $GFF_INPUT_FILES ;      #
+"$GAWK_DIR"gawk -f $GWKPRG $GWKOPT $GFF_INPUT_FILES ; #
 
 #                                                    #
 ####     Main GFF2PS GNU awk Program :  DONE      ####
@@ -3259,28 +3309,20 @@ rm -f $GWKPRG $GWKOPT $PSHEAD $PSMAIN 2>/dev/null;
 
 #
 # Timing gff2ps...
-# TT_end=`date +%T`;
-T_end=`date +%s`;
+TT_end=`date +%T`;
 if [ $v34 -eq 1 ];
  then
   { echo "";
     echo "********************************************";
-    echo "* GFF2PS Execution Time";
+    echo "********** GFF2PS Execution Time ***********";
     echo "********************************************"; echo "";
-    gawk 'BEGIN{
-      t1=ARGV[1];t2=ARGV[2];
-      T1=ARGV[3]; # T2=ARGV[4];
-      ARGV[1]=ARGV[2]=ARGV[3]=ARGV[4]="";
-      s=t2-t1;
-      secs=s%60;
-      m=int(s/60);
-      mins=m%60;
-      hours=int(m/60);
+    "$GAWK_DIR"gawk 'BEGIN{
+      T1=ARGV[1]; T2=ARGV[2];
+      ARGV[1]=ARGV[2]="";
       printf "> Program started  at: %s\n",T1;
-      # printf "> Program finished at: %s\n",T2;
-      printf ">>>>>> Execution time: %s:%s:%s\n\n", substr("00",1,2-length(hours)) hours, substr("00",1,2-length(mins)) mins, substr("00",1,2-length(secs)) secs;
-      }' $T_start $T_end $TT_start; # $TT_end ;
-    echo "********************************************"; echo "";
+      printf "> Program finished at: %s\n",T2;
+      }' $TT_start $TT_end; echo "";
+    echo "********************************************";
     echo "************** End of Report ***************"; } 1>&2;
  fi;
 
