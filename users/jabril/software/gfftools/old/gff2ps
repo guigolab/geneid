@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.66 2000-03-29 10:37:57 jabril Exp $	
+#         $Id: gff2ps,v 1.67 2000-06-29 18:01:16 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.66 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-29 10:37:57 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.67 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-06-29 18:01:16 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.66 2000-03-29 10:37:57 jabril Exp $
+%    $Id: gff2ps,v 1.67 2000-06-29 18:01:16 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -436,7 +436,7 @@ flglscape {
 /FSF 4 def % Point size for Credits for A4
 /CSF { pagedict begin pga4 pop end Dpage pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
 /CYSF { pagedict begin pga4 exch pop end Dpage exch pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
-/TYSF { pagedict begin pga4 exch pop end Dpage exch pop exch div dup 4 cm gt { pop 4 cm } if mul } bdf
+/TYSF { pagedict begin pga4 end Dpage 3 2 roll div 3 1 roll exch div div dup 4 cm gt { pop 4 cm } if dup 0.5 cm lt { pop 0.5 cm } if mul } bdf
 /YSTitl YSTitl TYSF def
 /XOriBlck 0 def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
@@ -1974,12 +1974,12 @@ function SortGroups(    g) {
   PrintWRN(sprintf("*\n* ........................................................ DONE\n*\n%s\n",BigLINE));
 } # End of SortGroups
 #
-function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
+function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN,c) {
   lg=sq SUBSEP sc SUBSEP s;
   fldGxU=OnOff(PLOT_FT[sc,":","unfold_grouped_ungrouped"]);
   fldGln=OnOff(PLOT_FT[sc,":","unfold_grouped_line"]);
   fldUln=OnOff(PLOT_FT[sc,":","unfold_ungrouped_line"]);
-  if (!fldGxU) { c=(fldGln||fldUln); fldGln=fldUln=c }
+  #if (!fldGxU) { c=(fldGln||fldUln); fldGln=fldUln=c }
   if (G[lg]>0) {
     if (s!="-") lastpos[lg,grouped_,1]=lastpos[lg,ungrouped_,1]=t_ori-1; # PORI;
     else lastpos[lg,grouped_,1]=lastpos[lg,ungrouped_,1]=t_end+1; # PEND;
@@ -1989,38 +1989,39 @@ function Aux_LINES(sq,sc,s,   g,lg,pg,fldGxU,fldGln,fldUln,LN) {
 	  gp_nm =gp[lg,g,gpname];
 	  gp_ori=gp[lg,g,gpstart];
 	  gp_end=gp[lg,g,gpend];
-	  if (fldGxU) gp_gpd=gp[lg,g,is_grouped];
+      c=gp[lg,g,is_grouped];
+      if (fldGxU) gp_gpd=c
 	  else gp_gpd=1; # 1 (grouped_) or 0 (ungrouped_)
-	  # PrintRPT(sprintf(">>>>>>>%s %s %s %s (%s %s) G %s SG %s\n",sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
+	  PrintRPT(sprintf(">>>>>>>%s %s %s %s (%s %s) G %s SG %s\n",sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
 	  LN=1;
       ttt=lg SUBSEP gp_gpd SUBSEP LN;
-	  if ((gp_gpd && fldGln) || ((!gp_gpd) && fldUln)) {
-		# PrintRPT(sprintf("A........%s : %s (%s) G %s SG %s %s %s %s %s \n",LN,lastpos[lg,gp_gpd,LN],gp_ori,G[lg],g,sq,sc,s,gp_nm));
+	  if ((fldGln && c) || (fldUln && !c)) {
+		PrintRPT(sprintf("A........%s : %s (%s) G %s SG %s %s %s %s %s \n",LN,lastpos[lg,gp_gpd,LN],gp_ori,G[lg],g,sq,sc,s,gp_nm));
 		if (gp_end>PORI && gp_ori<PEND) {
           if (s!="-") {
             gpo=gp_ori-MGS;
 		    if (gpo<PORI) gpo=gp_end;
-            while (lastpos[ttt] > gpo && gp_ori<=gpo) {
+            while (lastpos[ttt] > gpo) { # && gp_ori<=gpo
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
               if (!(ttt in lastpos)) lastpos[ttt]=t_ori-MGS; # PORI;
-              # PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
+              PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_ori,gpo));
             } # while lastpos
 		    lastpos[lg,gp_gpd,LN]=gp_end;
           }
           else {
             gpe=gp_end+MGS;
 		    if (gpe>PEND) gpe=gp_ori;
-            while (lastpos[ttt] < gpe && gpe>=gp_end) {
+            while (lastpos[ttt] < gpe) { # && gpe>=gp_end
               LN++;
               ttt=lg SUBSEP gp_gpd SUBSEP LN;
               if (!(ttt in lastpos)) lastpos[ttt]=t_end+MGS; # PEND;
-              # PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_end,gpe));
+              PrintRPT(sprintf("a(%s).........%s : %s : %s (%s..%s)\n",s,LN,ttt,lastpos[ttt],gp_end,gpe));
             } # while lastpos
 		    lastpos[lg,gp_gpd,LN]=gp_ori;
           }
 		} # if checklimits
-		# PrintRPT(sprintf("B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[lg,gp_gpd,LN],gp_ori,gp_end,G[lg],g));
+		PrintRPT(sprintf("B........%s : %s (%s %s) G %s SG %s\n",LN,lastpos[lg,gp_gpd,LN],gp_ori,gp_end,G[lg],g));
         PrintRPT(sprintf(">>>>>>> Line %s : LastPos %s : ID <%s><%s><%s><%s> (%s %s) \#G %s \#SG %s\n",LN,lastpos[lg,gp_gpd,LN],sq,sc,s,gp_nm,gp_ori,gp_end,G[lg],g));
 	  } # if checking
 	  lines[lg,gp_gpd]=max(lines[lg,gp_gpd],LN);
