@@ -2,7 +2,7 @@
 #
 # GetSRsAln.pl - Obtaining Similarity Regions and its sequence from HSPs.
 #
-# $Id: GetSRsAln.pl,v 1.10 2000-08-11 21:21:29 jabril Exp $
+# $Id: GetSRsAln.pl,v 1.11 2000-08-12 01:16:00 jabril Exp $
 #
 
 my $PROGRAM = "GetSRsAln";
@@ -65,7 +65,8 @@ my $pb_PROG   = "$parseblast$vrbopt$scoreopt -nFQ";
    # only SUBJECT "-nGbS" # only ALN "-nPW"
 my ( $blast_file, $blast_alnQ, $blast_alnS, $hsp_file, @data, $FLH);
 my ( %hsp, %sr, @project_query, @project_subject,   # HSPs RECORDS
-     @stack, %opened, $coord, $score, $index, $codeQ, $codeS,
+     @stack, %opened, $coord, $score, $index,
+	 $codeQ, $codeS, $query_lbl, $sbjct_lbl,
 	 );
 my ( $sr_count, $ori, $end, $sco, $idx, $rec, $dif, # SRs RECORDS
 	 $which_proj, $prj_flg, $Q_ori, $Q_end,
@@ -192,7 +193,7 @@ sub open_file_handle {
 #
 sub get_exec_time {
 	$verbose_flg && do {
-		my $End = @_;
+		my $End = $_[0];
         my ($c,$s,$m,$h,$r);
         $r = $End - $Start;
         $s = $r % 60;
@@ -308,7 +309,7 @@ print STDERR <<EndOfPrt;
 # SCORE    : $record->{SCORE}
 # E_VALUE  : $record->{E_VALUE}
 
-  QUERY    : $record->{QUERY}    
+  QUERY    : $record->{QUERY} 
   START_Q  : $record->{START_Q}  
   END_Q    : $record->{END_Q}    
   STRAND_Q : $record->{STRAND_Q} 
@@ -404,6 +405,9 @@ EndOfPrt
 	close($FLH) if $no_stdout;
 	close(QUERY);
 
+    $query_lbl = $hsp{0}{QUERY};
+    $sbjct_lbl = $hsp{0}{SUBJECT};
+
 	&print_hsp if $debug_flg;
 } # END_SUB: read_HSPs
 
@@ -454,7 +458,7 @@ EndOfPrt
 sub sort_by_fields {
 	my ($w_sr, $array) = @_;
     my $c;
-	print STDERR "\#\#\n\#\# $w_sr\n" if $verbose_flg;
+	print STDERR "\#\#\n\#\#\#\#$w_sr\n\#\#\n" if $verbose_flg;
  SORT: foreach $c (1..$max_frame_num) {
 	  defined(@{ $array->[$c] }) && do {
 		  print STDERR "\#\#     SORTING *** STRAND/FRAME: $FRxST{$c} ***\n" if $verbose_flg;
@@ -482,8 +486,8 @@ print STDERR <<EndOfPrt if $verbose_flg;
 ##########################################################
 EndOfPrt
 
-	!$only_S_flg && &sort_by_fields(" QUERY ", \@project_query);
-    !$only_Q_flg && &sort_by_fields("SUBJECT", \@project_subject);
+	!$only_S_flg && &sort_by_fields("\#\# QUERY: $query_lbl", \@project_query);
+    !$only_Q_flg && &sort_by_fields(" SUBJECT: $sbjct_lbl", \@project_subject);
 
     &print_project if $debug_flg;
 
@@ -594,7 +598,7 @@ sub get_sr { # GETS SRstart SRend HSPscore HSPindex
 	my $seq_ori;
 	($ori,$end,$sco,$idx) = @_;
 	$rec = \%{ $hsp{$idx} };
-	print STDERR "##GREP##*****\n##GREP##********** @_ :: $stv \n##GREP##*****\n" if $debug_flg;
+	# print STDERR "##GREP##*****\n##GREP##********** @_ :: $stv \n##GREP##*****\n" if $debug_flg;
 
   MKVARS: {
 	  $which_proj eq "QUERY" && do {
@@ -631,9 +635,9 @@ sub get_sr { # GETS SRstart SRend HSPscore HSPindex
 
 # Building SRs for each Coord on HSPs.
 #
-sub chkvars {
-	print STDERR "##GREP## @_ ## COORD:$last_coord/$current_coord ## SCORE:$last_score/$current_score ## INDEX:$last_index/$current_index\n" if $debug_flg;
-} # END_SUB: chkvars
+#  sub chkvars {
+#      print STDERR "##GREP## @_ ## COORD:$last_coord/$current_coord ## SCORE:$last_score/$current_score ## INDEX:$last_index/$current_index\n" if $debug_flg;
+#  } # END_SUB: chkvars
 #
 sub get_from_stack {
 	@stack>0 && do {
@@ -653,23 +657,23 @@ sub check_GT_closed_score {
   CLSC: {
 	  # $current_coord>$last_coord && !opened{$current_index} && $current_score>$last_score
 	  $current_score>$last_score && do { 
-		  &chkvars("#01($op,".@stack.")");
+		  # &chkvars("#01($op,".@stack.")");
 		  &get_sr($last_coord, $current_coord-1, $last_score, $last_index);
 		  ($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
 		  last CLSC;
 	  };
 	  # $current_coord>$last_coord && !opened{$current_index} && $current_score<$last_score
 	  $current_score<$last_score && do {
-		  &chkvars("#02($op,".@stack.")");
+		  # &chkvars("#02($op,".@stack.")");
 		  last CLSC;
 	  };
 	  # $current_coord>$last_coord && !opened{$current_index} && $current_score==$last_score
 	  # &get_sr($last_coord, $current_coord, $last_score, $last_index);
-	  &chkvars("#25($op,".@stack.")");
+	  # &chkvars("#25($op,".@stack.")");
 	  exists($opened{$last_index}) && do {
-		  &chkvars("#03($op,".@stack.")");
+		  # &chkvars("#03($op,".@stack.")");
 		  $current_index == $last_index && do {
-			  &chkvars("#27($op,".@stack.")");
+			  # &chkvars("#27($op,".@stack.")");
 			  &get_sr($last_coord, $current_coord, $last_score, $last_index);
 			  delete($opened{$current_index}); $op--;
 			  ($last_coord,$last_index) = ($current_coord+1,$current_index);
@@ -677,13 +681,13 @@ sub check_GT_closed_score {
 		  last CLSC;
 		  # shift @stack; ########################################################################### NEW
 	  };
-	  &chkvars("#04($op,".@stack.")");
+	  # &chkvars("#04($op,".@stack.")");
 	  $opened{$current_index} = $n; $op++;
 	  ($last_coord,$last_index) = ($current_coord+1,$current_index);
 	  last CLSC;
   }; # CLSC
 	# Sorting temporary stack for opened-index scores.
-	&chkvars("#05($op,".@stack.")");
+	# &chkvars("#05($op,".@stack.")");
 	my @t_stack = ( map  { $_->[0] }
 					sort { $b->[1] <=> $a->[1] || $a->[2] <=> $b->[2] || $a->[3] <=> $b->[3] }
 					map  { [ $_, $_->[0] , $_->[1] , $_->[2] ] } @{ @stack } ) ;
@@ -694,28 +698,28 @@ sub check_GT_opened_score {
   OPSC: {
 	  # $current_coord>$last_coord && opened{$current_index} && $current_score>$last_score
 	  $current_score>$last_score && do { 
-		  &chkvars("#06($op,".@stack.")");
+		  # &chkvars("#06($op,".@stack.")");
 		  &get_sr($last_coord, $current_coord-1, $last_score, $last_index);
 		  ($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
 		  last OPSC;
 	  };
 	  # $current_coord>$last_coord && opened{$current_index} && $current_score<$last_score
 	  $current_score<$last_score && do {
-		  &chkvars("#07($op,".@stack.")");
+		  # &chkvars("#07($op,".@stack.")");
 		  !exists($opened{$last_index}) && do { 
-			  &chkvars("#08($op,".@stack.")");
+			  # &chkvars("#08($op,".@stack.")");
 			  ($last_score,$last_index) = ($current_score,$current_index);
 			  &get_sr($last_coord, $current_coord, $last_score, $last_index);
 			  $last_coord = $current_coord;
 		  };
-		  &chkvars("#09($op,".@stack.")");
+		  # &chkvars("#09($op,".@stack.")");
 		  delete($opened{$current_index}); $op--;
 		  last OPSC;
 	  };
 	  # $current_coord>$last_coord && opened{$current_index} && $current_score==$last_score
-	  &chkvars("#10($op,".@stack.")");
+	  # &chkvars("#10($op,".@stack.")");
 	  $current_index == $last_index && do {
-		  &chkvars("#26($op,".@stack.")");	  
+		  # &chkvars("#26($op,".@stack.")");	  
 		  &get_sr($last_coord, $current_coord, $last_score, $last_index);
 		  # shift @stack; ########################################################################### NEW
 		  ($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
@@ -728,84 +732,84 @@ sub check_GT_opened_score {
 sub check_EQ_coord {
 	# $current_coord==$last_coord && $current_score==$last_score
 	$current_score==$last_score &&  do { ### replace eq by ==
-		&chkvars("#11($op,".@stack.")");
+		# &chkvars("#11($op,".@stack.")");
 	  CURRIDX: {
 		  # $current_index == $last_index
 		  $current_index == $last_index && do {
-			  &chkvars("#12($op,".@stack.")");
+			  # &chkvars("#12($op,".@stack.")");
 			  &get_sr($last_coord, $current_coord, $last_score, $last_index);
 			  last CURRIDX;
 		  };
 		  # ELSE $current_index != $last_index
-		  &chkvars("#13($op,".@stack.")");
+		  # &chkvars("#13($op,".@stack.")");
 		  push @stack, [ $current_score, $current_coord, $current_index ];
 	  };
 	};
 	# $current_coord==$last_coord && $current_score>$last_score
 	$current_score>$last_score && do { 
-		&chkvars("#14($op,".@stack.")");
+		# &chkvars("#14($op,".@stack.")");
 		($last_score,$last_index) = ($current_score,$current_index);
 	};
 # General stuff when $current_coord==$last_coord
 	# !exists($opened{$current_index}) && $current_coord==$last_coord
-	&chkvars("#15($op,".@stack.")");
+	# &chkvars("#15($op,".@stack.")");
 	!exists($opened{$current_index}) && do {
-		&chkvars("#16($op,".@stack.")");
+		# &chkvars("#16($op,".@stack.")");
 		$opened{$current_index} = $n; $op++;
 		return;
 	};
 	# ELSE exists($opened{$current_index}) && $current_coord==$last_coord
-	&chkvars("#17($op,".@stack.")");
+	# &chkvars("#17($op,".@stack.")");
 	delete($opened{$current_index}); $op--;
 } # END_SUB: check_EQ_coord
 #
 sub check_coords {
 	# $current_coord<$last_coord
 	$current_coord<$last_coord && do {
-		&chkvars("#18($op,".@stack.")");
+		# &chkvars("#18($op,".@stack.")");
 		&get_from_stack;
 		exists($opened{$current_index}) && do { ############################################### NEW
-			&chkvars("#19($op,".@stack.")");
+			# &chkvars("#19($op,".@stack.")");
 			delete($opened{$current_index}); $op--; ########################################### NEW
 		}; #################################################################################### NEW
 		return; ############################################################################### NEW
 	};
 	# $current_coord>$last_coord
 	$current_coord>$last_coord && do {
-		&chkvars("#20($op,".@stack.")");
+		# &chkvars("#20($op,".@stack.")");
 		# !exists($opened{$current_index}) && $current_coord>$last_coord
 		!exists($opened{$current_index}) && do {
-			&chkvars("#21($op,".@stack.")");
+			# &chkvars("#21($op,".@stack.")");
 			&check_GT_closed_score;
 			$opened{$current_index} = $n; $op++;
 			return;
 		};
 		# ELSE exists($opened{$current_index}) && $current_coord>$last_coord
-		&chkvars("#22($op,".@stack.")");
+		# &chkvars("#22($op,".@stack.")");
 		&check_GT_opened_score;
 		return;
 	}; # $current_coord>$last_coord
 	# ELSE $current_coord==$last_coord
-	&chkvars("#23($op,".@stack.")");
+	# &chkvars("#23($op,".@stack.")");
 	&check_EQ_coord;
 } # END_SUB: check_coords
 #
 sub test_projection {
 # 	$tfxs{$w_sr} = $#{ $lines->[$c] };
-	($w_sr, $lines) = @_;
+	($which_proj, $lines) = @_;
 	my $lnc;
   MAIN: foreach $c (1..$max_frame_num) {
 	  my $yc = 0;
-	  ($which_proj = $w_sr) =~ s/\s//og; #QUERY/SUBJECT
+	  $w_sr = $which_proj eq "QUERY" ? "QUERY: $query_lbl": "SUBJECT: $sbjct_lbl"; #QUERY/SUBJECT
 	  $stv = $FRxST{$c};
 	  $sr_ctr{$which_proj}{$stv} = 0;
 	  defined(@{ $lines->[$c] }) && do {
 		  $lnc = $#{ $lines->[$c] };
-		  # print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n" if $verbose_flg;
-		  print STDERR "##GREP## ".("*"x73)."\n##GREP## *** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n##GREP## ".("*"x73)."\n" if $debug_flg;
+		  print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n" if $verbose_flg;
+		  # print STDERR "##GREP## ".("*"x73)."\n##GREP## *** $w_sr *** SRs on STRAND/FRAME: $stv *** (checking ".&fill_left(($lnc+1),3," ")." points) ***\n##GREP## ".("*"x73)."\n" if $debug_flg;
 		  $op = 0;
 		LINES: for $n (0..$lnc) {
-			# &prt_progress(++$yc);
+			&prt_progress(++$yc);
 			$rcd = \@{ $lines->[$c][$n] };
 			$current_coord = $rcd->[0];
 			$current_score = $rcd->[2];
@@ -813,24 +817,24 @@ sub test_projection {
 
 			# $n>0 && $op>0 :: n_ary element to be checked && HSPs opened
 			($op>0) && do { 
-				&chkvars(("-"x73)."\n##GREP## #24($op,".@stack.")");
+				# &chkvars(("-"x73)."\n##GREP## #24($op,".@stack.")");
 				&check_coords;
 				next LINES;
 			};
 			# ELSE $n==0 || $op==0 :: First element to be checked || No HSPs opened
-			&chkvars("#25($op,".@stack.")");
+			# &chkvars("#25($op,".@stack.")");
 			$opened{$current_index} = $n; $op++;
 			@stack = ();
 			push @stack, [ $current_score, $current_coord, $current_index ];
 			($last_coord,$last_score,$last_index) = ($current_coord,$current_score,$current_index);
 
 		} # for :LINES: $n (0..$lnc) 
-		  # &prt_foeprg($yc);
-		  print STDERR "##GREP## \n" if $debug_flg;
+		  &prt_foeprg($yc);
+		  # print STDERR "##GREP## \n" if $debug_flg;
 		  next MAIN;
 	  }; # defined(@{ $lines[$c] })
-	  # print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $verbose_flg;	
-	  print STDERR "##GREP## *** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $debug_flg;	
+	  print STDERR "*** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $verbose_flg;	
+	  # print STDERR "##GREP## *** $w_sr *** SRs on STRAND/FRAME: $stv *** No Coords Defined ***\n" if $debug_flg;	
   }; # foreach :MAIN: $c (1..$max_frame_num)
 } # END_SUB: test_projection 
 #
@@ -847,7 +851,8 @@ EndOfPrt
     my $f = &max(@g);
 	my $hd = 0;
     foreach my $r ("QUERY", "SUBJECT") {
-		print STDERR "\#\#\n\#\#  $r\n";
+		my $fy = $r eq "QUERY" ? $query_lbl : $sbjct_lbl;
+		print STDERR "\#\#\n\#\#  $r: $fy\n";
 		my $hc = 0;
 		foreach my $j (sort keys %{ $sr_ctr{$r} }) {
 			$hc += $sr_ctr{$r}{$j};
@@ -872,14 +877,14 @@ EndOfPrt
     $sr_count = 0;
     !$only_S_flg && do {
 		$no_stdout = &open_file_handle($to_file_flg,$blast_alnQ);
-		print { $FLH } "\#\#\n\#\# SRs from $blast_file : QUERY Projection\n\#\#\n";
-		&test_projection( " QUERY ", \@project_query );
+		print { $FLH } "\#\#\n\#\# SRs from $blast_file : QUERY Projection ($query_lbl)\n\#\#\n";
+		&test_projection( "QUERY", \@project_query );
 		close($FLH) if $no_stdout;
 	};
 	
     !$only_Q_flg && do {
 		$no_stdout = &open_file_handle($to_file_flg,$blast_alnS);
-		print { $FLH } "\#\#\n\#\# SRs from $blast_file : SUBJECT Projection\n\#\#\n";
+		print { $FLH } "\#\#\n\#\# SRs from $blast_file : SUBJECT Projection ($sbjct_lbl)\n\#\#\n";
 		!$only_Q_flg && &test_projection( "SUBJECT", \@project_subject );
 		close($FLH) if $no_stdout;
 	};
