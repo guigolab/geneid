@@ -22,7 +22,7 @@ ALINK="black">
 <font face=courier size=5 color=red>RequestMemory.c</font>
 </td>
 <td align=right>
-<font face=courier size=3>geneid v 1.1</font>
+<font face=courier size=3>geneid v 1.2</font>
 <font face=arial black size=3>source documentation</font>
 </td>
 </table>
@@ -135,7 +135,7 @@ Memory for input annotations (evidences).
 <tr>
 <td><font face=courier size=4 color=red>
 <pre>
-packSR* RequestMemorySimilarityRegions()
+packHSP* RequestMemoryHomology()
 </pre>
 </font>
 </td>
@@ -143,6 +143,20 @@ packSR* RequestMemorySimilarityRegions()
 <td bgcolor=skyblue>
 <div class="bulk"><font face="arial black" size=2>
 Memory for input similarity to protein regions (homology).
+</font>
+</div>
+</td>
+<tr>
+<td><font face=courier size=4 color=red>
+<pre>
+packExternalInformation* RequestMemoryExternalInformation()
+</pre>
+</font>
+</td>
+<tr>
+<td bgcolor=skyblue>
+<div class="bulk"><font face="arial black" size=2>
+Memory for external information (dictionary of Locus names)
 </font>
 </div>
 </td>
@@ -271,7 +285,7 @@ var modifieddate=document.lastModified
 </table>
 
 <br><p>
-Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+Enrique Blanco Garcia &copy; 2003<br><p><br><p>
 </center>
 </body>
 </html>
