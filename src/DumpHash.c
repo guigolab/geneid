@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: DumpHash.c,v 1.2 2000-08-08 14:16:54 eblanco Exp $  */
+/*  $Id: DumpHash.c,v 1.3 2001-02-07 17:28:45 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -35,7 +35,7 @@ long MAXDUMPHASH;
 /* Initialize the hash table */
 void resetDumpHash(dumpHash* h)
 {
-  int i;
+  long i;
   
   MAXDUMPHASH = MAXBACKUPEXONS;
  
@@ -45,20 +45,20 @@ void resetDumpHash(dumpHash* h)
 }
 
 /* Hash Function:: String -> Integer between 0..MAXDUMPHASH-1 */
-int fDump(exonGFF* E)
+long fDump(exonGFF* E)
 {
   long sum;
   long sum2;
-  int total; 
-  int i;
+  long total; 
+  long i;
 
-  sum = (E->Frame * E->Acceptor->Position + E->Strand * E->Donor->Position); 
+  sum = (E->Frame * E->Acceptor->Position + E->Donor->Position); 
 
   for(i=0, sum2=0; i < strlen(E->Type); i++)
     sum2 = (i+1) * E->Type[i] + sum2;
 
-  total = (sum + sum2) % MAXDUMPHASH;
-  
+  total = (sum + sum2 * E->Strand) % MAXDUMPHASH;
+   
   return(total);
 }
 
@@ -67,7 +67,7 @@ void setExonDumpHash(exonGFF* E, dumpHash *h)
 {
   dumpNode* p;
   dumpNode* n;
-  int i;
+  long i;
 
   i = fDump(E);
   
@@ -105,7 +105,7 @@ void setExonDumpHash(exonGFF* E, dumpHash *h)
 /* Returns the wanted exon or NULL */ 
 exonGFF* getExonDumpHash(exonGFF* E, dumpHash *h)
 {
-  int i;
+  long i;
   int found=0;
   exonGFF* exon;
   dumpNode *p;
@@ -153,7 +153,7 @@ void freeDumpNodes(dumpNode* node)
 
 void cleanDumpHash(dumpHash *h)
 {
-  int i;
+  long i;
 
   /* free all the exons of the hash table */
   for(i=0; i<MAXDUMPHASH; i++)
