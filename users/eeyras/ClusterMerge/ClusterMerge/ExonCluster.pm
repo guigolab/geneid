@@ -41,7 +41,7 @@ sub new {
   Title   : start
   Usage   : $start = $transcript_cluster->end();
   Function: get/set the start of the range covered by the cluster. This is re-calculated and set everytime
-            a new transcript is added to the cluster
+            a new exonst is added to the cluster
   Returns : a number
   Args    : optionaly allows the start to be set
 
