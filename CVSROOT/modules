@@ -63,6 +63,9 @@ homeprecarios users/jabril/webs/PRECARIOS/public_html
 #
 #
 gparra        users/gparra
+softgparra    users/gparra/software 
+mixture       users/gparra/software/mixture
+SSgff         users/gparra/software/SSgff
 #
 #
 scaste        users/scaste
