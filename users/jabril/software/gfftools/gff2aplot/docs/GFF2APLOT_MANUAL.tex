@@ -1,0 +1,222 @@
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: GFF2APLOT_MANUAL.tex,v 1.1 2001-04-11 18:00:17 jabril Exp $
+%
+% latex GFF2APLOT_MANUAL.tex ; dvips GFF2APLOT_MANUAL.dvi -o GFF2APLOT_MANUAL.ps -t a4 ;
+%
+\usepackage{noweb}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={3cm,2cm},vmargin={2cm,2cm}]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+%\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+%% bibliography
+\usepackage{natbib}
+%% latex2html
+\usepackage{url}
+\usepackage{html}     
+\usepackage{htmllist} 
+%% tables    
+%\usepackage{colortbl}
+\usepackage{multirow}
+%\usepackage{hhline}
+%\usepackage{tabularx}
+\usepackage{dcolumn}
+%% seminar
+%\usepackage{semcolor,semlayer,semrot,semhelv,sem-page,slidesec}
+%% draft watermark
+%\usepackage[all,dvips]{draftcopy}
+%\draftcopySetGrey{0.9}
+%\draftcopyName{CONFIDENTIAL}{100}
+%% layout
+%\usepackage{fancyheadings}
+%\usepackage{fancybox}
+\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+%\usepackage{lscape}
+%\usepackage{rotating}
+%\usepackage{multicol}
+\usepackage{verbatim}
+%\usepackage{version}
+%% fonts
+\usepackage{times}\fontfamily{ptm}\selectfont
+\usepackage{t1enc}
+ 
+% Colors for gff2ps
+\input tables/AplotColorDefs.tex
+% New Commands are defined here
+\newcommand{\sctn}[1]{\section{#1}}
+\newcommand{\subsctn}[1]{\subsection{#1}}
+\newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\desc}[1]{\item[#1] \ \\}
+\newcommand{\pa}[1]{{\footnotesize\textsf{$<$\textsl{#1}$>$}}}
+
+\newcommand{\op}[1]{{\bfseries\sffamily #1}}
+\newcommand{\tp}[1]{{'{\bfseries\sffamily #1}'}}
+\newcommand{\pr}[1]{{\mdseries\sffamily\slshape $<$#1$>$}}
+\newcommand{\x}{\textmd{\,,\,}}
+
+% PSTRICKs definitions
+\pslongbox{ExFrame}{\psframebox}
+\newcommand{\cln}[1]{\fcolorbox{black}{#1}{\textcolor{#1}{\rule[-.3ex]{1cm}{1ex}}}}
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+% \pscharpath[fillstyle=solid, fillcolor=verydarkcyan, linecolor=black, linewidth=1pt]{\sffamily\scshape\bfseries\veryHuge #1 }
+
+%%%%% global urls
+% \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+
+% defs
+\def\prog{\textsc{\textbf{gff2aplot}}}
+\def\ps{\textsc{PostScript}}
+\def\eoline{$\backslash\backslash$}
+
+% Setting text for footers and headers
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Abril, J.F.}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{titlepage}
+
+\ \vfill
+\begin{center}
+\fbox{\parbox{0.6\linewidth}{\centering\textbf{\Huge \\[1ex]{\prog}\\[2ex]USER's\\[2ex]MANUAL\\[2ex]}}}\\[5ex]
+
+\textbf{\Large Josep F. Abril}\raisebox{0.85ex}{\footnotesize$\,\dag$}\\[5ex]
+
+\textbf{\large --- \today ---}\\[10ex]
+
+\vskip 5ex
+
+{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.1 2001-04-11 18:00:17 jabril Exp $$>$ }
+
+\vfill
+
+\begin{flushright}
+\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+Grup de Recerca en Infom\`atica Biom\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\
+Universitat Pompeu Fabra\\[2ex]
+\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
+\end{flushright}
+\end{center}
+
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%% FRONTMATTER: License, Acknowledgements, TOC, LOF, and LOT.
+
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{1}
+\pagestyle{fancy}
+% Marks redefinition must go here because pagestyle 
+% resets the values to the default ones.
+\renewcommand{\sectionmark}[1]{\markboth{}{\textbf{\prog}\hspace{4ex}\thesection.\ #1}} 
+\renewcommand{\subsectionmark}[1]{\markboth{}{\textbf{\prog}\hspace{4ex}\thesubsection.\ \textsl{#1}}}
+
+% %% Copyright Advice
+% \input GNU_GPL.tex
+
+% \newpage
+
+% %% Acknowledgements
+% \sctm{Acknowledgements}
+% \input Acknowledgements.tex 
+
+\tableofcontents
+
+\listoffigures
+
+\listoftables
+
+%%%%%%%%%%%%%%%%%%%% MAINMATTER: CHAPTERS 
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+%
+% \include{Introduction.tex}
+
+%
+% \include{Basics.tex}
+
+%
+% \include{Settings.tex}
+
+%
+% \include{Options.tex}
+
+%
+% \include{GettingStart.tex}
+
+%
+% \include{Appendix.tex}
+
+%\newpage
+
+\sctn{Command-line Options Description}
+
+% This section describes command-line options and customization variables as they will appear in the {\prog} manual.
+
+\input tables/AplotCLoptions.tex
+
+\newpage
+
+\sctn{Customization Variables Description}
+
+\input tables/AplotCustomVars.tex
+
+%%%%%%%%%%%%%%%%%%%% BACKMATTER: Bibliography, APPENDIXES, Index.
+
+% \newpage
+% 
+% \bibliographystyle{apalike}
+% \bibliography{/home1/rguigo/docs/biblio/References}
+
+\appendix
+
+\newpage
+
+\sctn{Command-Line Options Summary for \prog.}
+
+\input tables/AplotCLoptionsTbl.tex
+
+\newpage
+
+\sctn{Customization Variables Sumary for \prog.}
+
+\input tables/AplotCustomVarsTbl.tex
+
+\newpage
+
+\sctn{CMYK color definition}
+
+\input tables/AplotColorTbl.tex
+
+\newpage
+
+\sctn{Page format definition}
+
+\input tables/AplotPageSizeTbl.tex
+
+\end{document}
+
+
+
