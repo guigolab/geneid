@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.8 2001-12-18 15:27:02 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.9 2002-01-29 09:48:50 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -195,7 +195,7 @@ long CookingInfo(exonGFF* eorig,
   while (!stop)
     {
       /* A. Single Genes: only one exon (don't care the strand) */
-      if (!strcmp(e->Type,"Single"))
+      if (!strcmp(e->Type,"Single") || !strcmp(e->Type,"Promoter"))
 		{
 		  info[igen].start = e;
 		  info[igen].end = e;
@@ -231,24 +231,24 @@ long CookingInfo(exonGFF* eorig,
 			  /* stop1 means change of gene: new gene found */
 			  stop1 = (!strcmp(e->Type,"First") || 
 					   !strcmp(e->Type,"Single") ||  
+					   !strcmp(e->Type,"Promoter") || 
 					   e->Strand == '+'); 
 			  while( !stop && !stop1 )
 				{  
-				  if (strcmp(e->Type,"Promoter"))  
-					{
-					  info[igen].nexons++;
-					  /* Evidences (annotations) not sumed if infinitum score */
-					  if (e->Score==MAXSCORE)
-						(*nvExons)++;
-					  else
-						info[igen].score += e->Score;
-					  info[igen].end = e;
-					}
+				  info[igen].nexons++;
+				  /* Evidences (annotations) not sumed if infinitum score */
+				  if (e->Score==MAXSCORE)
+					(*nvExons)++;
+				  else
+					info[igen].score += e->Score;
+				  info[igen].end = e;
+				  
 				  /* JUMP loop! */
 				  e = (e-> PreviousExon);
 				  stop = (e->Strand == '*');
 				  stop1 = (!strcmp(e->Type,"First") ||  
-						   !strcmp(e->Type,"Single") ||  
+						   !strcmp(e->Type,"Single") ||
+						   !strcmp(e->Type,"Promoter") || 
 						   e->Strand == '+'); 
 				} 
 			}
@@ -270,24 +270,24 @@ long CookingInfo(exonGFF* eorig,
 				/* stop1 means change of gene */
 				stop2 = (!strcmp(e->Type,"Terminal") ||  
 						 !strcmp(e->Type,"Single") ||
+						 !strcmp(e->Type,"Promoter") || 
 						 e->Strand == '-'); 
 				while( !stop && !stop2 )
 				  { 
-					if (strcmp(e->Type,"Promoter"))  
-					  {
-						info[igen].nexons++;
-						/* Evidences (annotations) not sumed if infinitum score */
-						if (e->Score==MAXSCORE)
-						  (*nvExons)++;
-						else
-						  info[igen].score += e->Score;
-						info[igen].end = e;
-					  }
+					info[igen].nexons++;
+					/* Evidences (annotations) not sumed if infinitum score */
+					if (e->Score==MAXSCORE)
+					  (*nvExons)++;
+					else
+					  info[igen].score += e->Score;
+					info[igen].end = e;
+								
 					/* JUMP loop! */
 					e = (e-> PreviousExon);
 					stop = (e->Strand == '*');
 					stop2 = (!strcmp(e->Type,"Terminal") ||
 							 !strcmp(e->Type,"Single") ||
+							 !strcmp(e->Type,"Promoter") || 
 							 e->Strand == '-'); 
 				  }	
 			  }
@@ -441,12 +441,18 @@ void CookingGenes(exonGFF* e,
 			   info[igen].nexons,
 			   info[igen].score);
       else     
-		printf("# Gene %ld (%s). %ld exons. %ld aa. Score = %f \n",
-			   ngen-igen,
-			   (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
-			   info[igen].nexons,
-			   nAA,
-			   info[igen].score);
+		if (strcmp(info[igen].start->Type,"Promoter"))
+		  printf("# Gene %ld (%s). %ld exons. %ld aa. Score = %f \n",
+				 ngen-igen,
+				 (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
+				 info[igen].nexons,
+				 nAA,
+				 info[igen].score);
+		else
+		  printf("# Gene %ld (%s). Promoter. %ld bp\n",
+				 ngen-igen,
+				 (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
+				 nAA*3);
 	  
       PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,
 				nAA,tAA,0,info[igen].nexons);
@@ -462,10 +468,13 @@ void CookingGenes(exonGFF* e,
 			  printf("      </cDNA>\n");
 			}
 	
-		  printf("      <protein length=\"%ld\">\n",nAA);
-		  /* Protein in FASTA format */
-		  printProt(Name,ngen-igen,prot,nAA,PROT);
-		  printf("      </protein>\n");
+		  if (strcmp(info[igen].start->Type,"Promoter"))
+			{
+			  printf("      <protein length=\"%ld\">\n",nAA);
+			  /* Protein in FASTA format */
+			  printProt(Name,ngen-igen,prot,nAA,PROT);
+			  printf("      </protein>\n");
+			}
 		  printf("   </gene>\n");
 		}
       else
@@ -475,8 +484,12 @@ void CookingGenes(exonGFF* e,
 			if (cDNA)
 			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
 			
-			/* Protein in FASTA format */
-			printProt(Name,ngen-igen,prot,nAA,PROT);
+			/* Protein in FASTA format (except promoters) */
+			if (strcmp(info[igen].start->Type,"Promoter"))
+			  printProt(Name,ngen-igen,prot,nAA,PROT);
+			else
+			  if (!cDNA)
+				printf("\n");
 		  }
     }
   
