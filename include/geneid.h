@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.18 2004-04-22 13:51:29 eblanco Exp $ */
+/* $Id: geneid.h,v 1.19 2004-09-16 13:32:57 eblanco Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -76,23 +76,23 @@ A. DEFINITIONS
 #define FDARRAY 5                
 
 /* Basic values (in addition to ratios)     */
-#define BASEVALUESITES_SHORT 10000
-#define BASEVALUEEXONS_SHORT 5000
-#define BASEVALUESITES_LARGE 600000
-#define BASEVALUEEXONS_LARGE 300000
+#define BASEVALUESITES_SHORT 100000
+#define BASEVALUEEXONS_SHORT 50000
+#define BASEVALUESITES_LARGE 6000000
+#define BASEVALUEEXONS_LARGE 3000000
 
 /* Max number of annotations per locus      */
 #define MAXEVIDENCES 50000       
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 25000             
+#define MAXHSP 100000             
 
 /* Max number of locus in multi-fasta files */
-#define MAXNSEQUENCES 1000         
+#define MAXNSEQUENCES 200         
 
 /* Maximum number of predicted genes        */
-#define MAXGENE 20000            
+#define MAXGENE 100000            
 
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         
