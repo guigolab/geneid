@@ -4,9 +4,9 @@
 *                                                                        *
 *   Signal prediction by using a Position Weighted Array                 *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetSitesWithProfile.c,v 1.4 2002-02-13 07:25:15 eblanco Exp $  */
+/*  $Id: GetSitesWithProfile.c,v 1.5 2003-11-05 14:37:43 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -149,7 +149,9 @@ long  GetSitesWithProfile(char* s,
 		  for (i=0;i<p->dimension;i++)
 			{
 			  /* i is the position inside the region */
-			  index = OligoToInt(s + i - p->order , p->order+1,5);
+			  /* 5 is used because there are A,C,G,T and N */
+			  index = OligoToInt(s + i - p->order, p->order+1,5);
+
 			  if (index >= p->dimensionTrans)
 				score = score + -INFI;
 			  else

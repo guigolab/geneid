@@ -4,9 +4,9 @@
 *                                                                        *
 *   geneid main program                                                  *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *     with contributions from:                                           *
 *                          Moises  BURSET ALVAREDA                       *
@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.10 2003-02-26 10:48:14 eblanco Exp $ */
+/* $Id: geneid.c,v 1.11 2003-11-05 14:36:31 eblanco Exp $ */
 
 #include "geneid.h"
 
@@ -49,7 +49,11 @@ int
   /* Output formats */
   GFF = 0, X10 = 0, XML = 0, cDNA = 0,
   /* Verbose flag (memory/processing information) */
-  BEG=0, VRB=0;
+  BEG=0, VRB=0,
+  /* Score for regions not-supported by protein homology */
+  NO_SCORE, 
+  /* Force single prediction: 1 gene */
+  SGE=0;
 
 /* Increase/decrease exon weight value (exon score) */
 float EW = NOVALUE;
@@ -87,11 +91,10 @@ int main (int argc, char *argv[])
   exonGFF* exons; 
   long nExons;
   
-  /* Evidences (annotations) input by user */
+  /* External information: reannotation */
+  packExternalInformation* external;
   packEvidence* evidence;
-  
-  /* Similarity to protein regions input by user */
-  packSR* sr;
+  packHSP* hsp;
   
   /* Best partial predicted genes */
   packGenes* genes;   
@@ -109,7 +112,7 @@ int main (int argc, char *argv[])
   /* Input Filenames */
   char   SequenceFile[FILENAMELENGTH],
 	ExonsFile[FILENAMELENGTH],
-	SRFile[FILENAMELENGTH],
+	HSPFile[FILENAMELENGTH],
 	ParamFile[FILENAMELENGTH]="";
   
   /* Locus sequence name */ 
@@ -124,12 +127,15 @@ int main (int argc, char *argv[])
   int currentIsochore;
   int nIsochores;
   
+  int reading;
   int lastSplit;
   char mess[MAXSTRING];
-  int reading;
   
   
   /** 0. Starting and reading options, parameters and sequence... **/
+  nExons = 0;
+  evidence = NULL;
+  hsp = NULL;
   
   /* 0.a. Previous checkpoint about length in splits and overlapping */
   if (LENGTHSi <= OVERLAP)
@@ -139,8 +145,8 @@ int main (int argc, char *argv[])
   m = (account*)InitAcc();  
   
   /* 0.c. Read setup options */
-  readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,SRFile);
-  printRes("\n\n\t\t\t** Executing geneid 1.1 2001 geneid@imim.es **\n\n");
+  readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,HSPFile);
+  printRes("\n\n\t\t\t** Running geneid 1.2 2003 geneid@imim.es **\n\n");
   
   /* 0.d. Prediction of DNA sequence length to request memory */
   LengthSequence = analizeFile(SequenceFile);
@@ -156,7 +162,7 @@ int main (int argc, char *argv[])
             LengthSequence);
   
   /** 1. Allocating main geneid data structures **/
-  printMess("Request Memory to Operating System");
+  printMess("Request Memory to Operating System\n");
   
   /* 1.a. Mandatory geneid data structures */
   Sequence   = (char*)         RequestMemorySequence(LengthSequence);
@@ -171,19 +177,9 @@ int main (int argc, char *argv[])
   GCInfo     = (packGC*)       RequestMemoryGC();
   GCInfo_r   = (packGC*)       RequestMemoryGC();
   dAA        = (dict*)         RequestMemoryAaDictionary();
-  
-  /* 1.b. Optional data structures according to the selected options */
-  if (EVD || !GENEID)
-    evidence   = (packEvidence*) RequestMemoryEvidence();
-  else
-	evidence = NULL;
+  external   = (packExternalInformation*) RequestMemoryExternalInformation();  
 
-  if (SRP)
-    sr         = (packSR*)       RequestMemorySimilarityRegions();
-  else
-	sr = NULL;
-
-  /* 1.c. Backup information might be necessary between splits */
+  /* 1.b. Backup information might be necessary between splits */
   if (LengthSequence > LENGTHSi)
     dumpster   = (packDump*)     RequestMemoryDumpster();
   else
@@ -197,21 +193,37 @@ int main (int argc, char *argv[])
   if (GENEID)
     {
       /* A. Predicting signals, exons and genes in DNA sequences */
-      /* A.1. Reading evidences (annotations) */
+      /* A.1. Reading external information I: annotations */
 	  if (EVD)
 		{ 
-		  printMess("Reading evidences (annotations)");
-		  evidence->nvExons =
-			ReadExonsGFF(ExonsFile, evidence, isochores[0]->D);
-		  sprintf(mess,"%ld evidences read\n", evidence->nvExons); 
+		  printMess("Reading evidence (annotations)...");
+		  external->nvExons = 
+			ReadExonsGFF(ExonsFile, external, isochores[0]->D);
+		  sprintf(mess,"%ld annotations acquired from file\n", 
+				  external->nvExons); 
 		  printMess(mess);
 		}
 	
-	  /* MOVING THIS TO THE NEXT LOOP */
-  
-      /** A.3. Input DNA sequences (perhaps more than one) **/
+	  /* A.2. Reading external information II: homology information */
+	  if (SRP)
+		{
+		  printMess("Reading homology information...");
+		  external->nHSPs = ReadHSP(HSPFile, external);
+		  sprintf(mess,"%ld HSPs acquired from file",
+				  external->nHSPs);
+		  printMess(mess); 
+		}
+	  
+	  if (EVD || SRP)
+		{
+		  sprintf(mess,"External information acquired from %ld sequences\n",
+				  external->nSequences);
+		  printMess(mess); 
+		}
+
+	  /** A.3. Input DNA sequences (perhaps more than one) **/
       if ((seqfile = fopen(SequenceFile, "rb"))==NULL) 
-        printError("The input sequence file can not be opened to read");
+        printError("The input sequence file can not be accessed");
 	  
       /* reading the locusname of sequence (in Fasta format) */
       reading = IniReadSequence(seqfile,Locus);
@@ -221,21 +233,38 @@ int main (int argc, char *argv[])
           printMess("Loading DNA sequence");
 		  reading = ReadSequence(seqfile, Sequence, nextLocus);
 		  		  
-          /* A.4. Prepare sequence to work on */
+          /* A.3. Prepare sequence to work on */
           printMess("Processing DNA sequence");
           LengthSequence = FetchSequence(Sequence, RSequence);
-		
-		  /* A.2. Reading homology to protein information */
+		  OutputHeader(Locus, LengthSequence);
+
+		  /* A.4. Prepare external information */
 		  if (SRP)
 			{
-			  printMess("Reading similarity regions (homology information)");
-			  sr->nTotalRegions = ReadSR(SRFile, sr, LengthSequence);
-			  sprintf(mess,"%d similarity regions (SR) read\n",sr->nTotalRegions);
+			  printMess("Select homology information");
+			  hsp = (packHSP*) SelectHSP(external, Locus, LengthSequence);
+			  if (hsp == NULL)
+				sprintf(mess,"No information has been provided for %s\n",
+						Locus);
+			  else
+				sprintf(mess,"Using %d HSPs in %s\n",
+						hsp->nTotalSegments,Locus);
+			  
 			  printMess(mess); 
 			}
-  
-          /* Output header information */
-          OutputHeader(Locus, LengthSequence);
+
+		  if (EVD)
+			{
+			  printMess("Select annotations");
+			  evidence = (packEvidence*) SelectEvidence(external,Locus);
+			  if (evidence == NULL)
+				sprintf(mess,"No information has been provided for %s\n",
+						Locus);
+			  else
+				sprintf(mess,"Using %ld annotations in %s\n",
+						evidence->nvExons,Locus);
+			  printMess(mess);
+			}
 
 		  /* A.5. Processing sequence into several fragments if required */
 		  /* l1 is the left end and l2 is the right end in Sequence */
@@ -268,8 +297,10 @@ int main (int argc, char *argv[])
 				  sprintf(mess,"Running FWD  %s: %ld - %ld", Locus,l1,l2);
 				  printMess(mess);
 				  manager(Sequence, LengthSequence, 
-						  allSites, allExons, l1, l2,
-						  FORWARD, sr, gp,
+						  allSites, allExons, 
+						  l1, l2,
+						  FORWARD, 
+						  external, hsp, gp,
 						  isochores,nIsochores,
 						  GCInfo);
 				}      
@@ -284,7 +315,8 @@ int main (int argc, char *argv[])
 						  allSites_r, allExons_r, 
 						  LengthSequence-1 - l2, 
 						  LengthSequence-1 - l1,
-						  REVERSE, sr, gp,
+						  REVERSE, 
+						  external, hsp, gp,
 						  isochores,nIsochores,
 						  GCInfo_r);
 				  				  
@@ -296,36 +328,49 @@ int main (int argc, char *argv[])
 				}
 
 			  /* B.3. Sort all of exons by left (minor) position */
-			  if (EVD)
+			  if (EVD && evidence != NULL)
 				{
-				  /* Searching evidence exons in this split */
-				  printMess("Searching annotations to be used in this split");
-				  SearchEvidenceExons(evidence, (lastSplit)?l2:l2-OVERLAP);
+				  /* Searching evidence exons in this fragment */
+				  printMess("Searching annotations to be used in this fragment");
+				  SearchEvidenceExons(external,
+									  evidence, 
+									  (lastSplit)?l2:l2-OVERLAP);
 				  
 				  /* Unused annotations: out of range (info) */
 				  if (lastSplit)
 					{
-					  sprintf(mess,"Forgotten last %ld evidences (out of range)",
-							  evidence->nvExons - evidence->i2vExons);
+					  sprintf(mess,"Leaving out last %ld evidences (out of range)",
+							  evidence->nvExons - external->i2vExons);
 					  printMess(mess);
 					}
 				}
 			 
 			  nExons = allExons->nExons + allExons_r->nExons;
-			  if (EVD)
-				{
-				  nExons = nExons + evidence->ivExons;
-				}
+			  if (EVD && evidence != NULL)
+				nExons = nExons + external->ivExons;
 
-			  sprintf(mess,"Sorting %ld exons", nExons);  
+			  /* SGE- First ghost exon ^: + and - */
+			  if (SGE && (l1 == 0)) 
+				nExons = nExons + 2;
+			  
+			  /* Last ghost exon $: + and - */
+			  if (SGE && (l2 == LengthSequence-1))
+				nExons = nExons + 2;
+			  
+			  sprintf(mess,"Sorting %ld exons\n", nExons);  
 			  printMess(mess);
 			  
 			  /* Merge predicted exons with some evidence exons */
-			  SortExons(allExons, allExons_r, evidence, exons, l1, l2);
+			  SortExons(allExons, allExons_r, 
+						external,
+						evidence, 
+						exons, 
+						l1, l2, 
+						LengthSequence);
 			  
 			  /* Next block of annotations to be processed */
-			  if (EVD)
-				SwitchCounters(evidence);
+			  if (EVD && evidence != NULL)
+				SwitchCounters(external);
 
 			  /* B.4. Printing current fragment predictions (sites and exons) */
 			  Output(allSites, allSites_r, allExons, allExons_r, 
@@ -368,7 +413,9 @@ int main (int argc, char *argv[])
 			{	      
 			  /* Printing gene predictions */
 			  OutputGene(genes,
-						 (EVD)? m->totalExons + evidence->nvExons : m->totalExons, 
+						 (EVD && evidence != NULL)? 
+						 m->totalExons + evidence->nvExons : 
+						 m->totalExons, 
 						 Locus, Sequence, gp, dAA);
 
 			  /* Reset best genes data structures for next input sequence */
@@ -380,8 +427,8 @@ int main (int argc, char *argv[])
 		  OutputStats(Locus);
 
 		  /* Reset evidence temporary counters */
-		  if (EVD)
-			resetEvidenceCounters(evidence);
+		  if (EVD && evidence != NULL)
+			resetEvidenceCounters(external);
 
 		  cleanAcc(m);
 		  strcpy(Locus,nextLocus);
@@ -390,8 +437,7 @@ int main (int argc, char *argv[])
   else
     {
       /* B. Only assembling genes from input exons */
-      /* It might be necessary to increase NUMSITES and NUMEXONS */
-	  
+      	  
       /* B.0. Reading DNA sequence to make the translations */
       /* open the Sequence File */
       if ((seqfile = fopen(SequenceFile, "rb"))==NULL) 
@@ -409,19 +455,30 @@ int main (int argc, char *argv[])
       OutputHeader(Locus, LengthSequence);
       
       /* B.1. Reading exons in GFF format */
-      printMess("Reading exonsGFF from file");
-      nExons = ReadExonsGFF(ExonsFile, evidence, isochores[0]->D);     
-      sprintf(mess,"%ld exons GFF stored\n", nExons); 
-      printMess(mess); 
-      
-      if (nExons) 
+	  printMess("Reading exonsGFF from file");
+	  external->nvExons = 
+		ReadExonsGFF(ExonsFile, external, isochores[0]->D);
+	  sprintf(mess,"%ld exons acquired from file\n", 
+			  external->nvExons); 
+	  printMess(mess);
+	  
+	  if (external->nSequences > 1)
+		{
+		  sprintf(mess,"Exons in more than one different locus were detected (%ld sequences)\n", external->nSequences);
+		  printError(mess);
+		}
+	  
+      if (external->nvExons > 0) 
 		{ 
 		  /* B.2. Calling to genamic for assembling the best gene */
-		  genamic(evidence->vExons, nExons, genes, isochores[0]);  
+		  genamic(external->evidence[0]->vExons, 
+				  external->evidence[0]->nvExons, 
+				  genes, isochores[0]);  
 		}
       
       /* B.3. Printing gene predictions */
-      OutputGene(genes, nExons, Locus, Sequence, isochores[0], dAA);
+      OutputGene(genes, external->evidence[0]->nvExons, 
+				 Locus, Sequence, isochores[0], dAA);
     } /* end only gene assembling from exons file */
   
 

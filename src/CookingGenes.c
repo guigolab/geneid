@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.12 2003-11-05 14:20:06 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.13 2003-11-05 14:43:53 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -38,7 +38,7 @@ extern int cDNA;
 typedef struct s_gene
 {
   long nexons;
-  double score;
+  float score;
   exonGFF *start;
   exonGFF *end;
 } gene;
