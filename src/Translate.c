@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.4 2001-04-30 13:03:04 eblanco Exp $  */
+/*  $Id: Translate.c,v 1.5 2001-04-30 14:49:54 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -415,6 +415,9 @@ void GetcDNA(exonGFF* e, char* s, long nExons, char* cDNA, long* nNN)
 	  *nNN += p2-p1+1;
 	  e = e->PreviousExon;
 	}
+      
+      /* Set free */
+      free(rs);
     }
 }
 
