@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl -w
 #
 #
-# $Id: sim2gff.nw,v 1.1 2003-02-21 10:40:25 lopep Exp $
+# $Id: sim2gff.nw,v 1.2 2003-02-28 17:22:01 lopep Exp $
 #
 use strict;
 use Carp;
