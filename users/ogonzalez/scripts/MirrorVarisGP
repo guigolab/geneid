@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# actualitzo els genomes de GoldenPath que calgui...
+
+URL=http://genome.ucsc.edu/goldenPath
+
+for organisme in H.sapiens M.musculus R.norvegicus
+do
+   for local in `ls -1d /seq/genomes/$organisme/golden_path* | tail -3`
+   do
+      nom=`basename $local`
+      remot=`grep $nom /home/ug/ogonzalez/scripts/MirrorGP.dat | awk '{print $1 }'`
+      cd $local
+      /home/ug/ogonzalez/scripts/MirrorGoldenPath $URL/$remot | tee /mnt/MirrorVarisGP.log
+   done
+done
+
+

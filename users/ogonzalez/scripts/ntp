@@ -70,7 +70,7 @@ then
    chown ogonzalez:users $log
    data=`date +"%d %b %Y - %H:%M"`
    mail -s"ntp $data" ogonzalez@imim.es <$log
-   # ara hauria d'esborrar els fitxers antics
+   # esborro els fitxers antics
    ls -t1 ntp* | tee /tmp/ntp.1 | head -10 >/tmp/ntp.2
    rm -f `diff /tmp/ntp.[12] | grep '^<' | cut -c3-` /tmp/ntp.[12]
 fi

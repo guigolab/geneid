@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 # calcula en bytes la grandaria d'un direc (per assegurar-me que en
 # copiar d'una maquina a una altra no falta res)
