@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.61 2000-03-06 18:28:50 jabril Exp $	
+#         $Id: gff2ps,v 1.62 2000-03-06 19:27:45 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -81,8 +81,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.95";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.61 $' | "$GAWK_DIR"gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-03-06 18:28:50 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.62 $' | "$GAWK_DIR"gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-03-06 19:27:45 $' | "$GAWK_DIR"gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -354,7 +354,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.61 2000-03-06 18:28:50 jabril Exp $
+%    $Id: gff2ps,v 1.62 2000-03-06 19:27:45 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -2829,7 +2829,8 @@ function ChkCharRG(chain) { # Avoiding problems with config file variable names 
     return chain }
 } # End of function ChkCharRG
 #
-function chkpo(v) { if (v=="Portrait") return "false"; else return "true" }
+function chkpo(v) { if (tolower(v)=="portrait") return "false"; else return "true" }
+function cktxpo(v) { if (tolower(v)=="portrait") return "Portrait"; else return "Landscape" }
 function chkps(v) {
   if (v~/^(a|b)([0-9]|10)$|^10x14$|^(executive|folio|(le)(tter|gal|dger)|quarto|statement|tabloid|userdefined)$/)
 	return 1;
@@ -3090,7 +3091,7 @@ function PSheader() {
   printf "%%%%CreationDate: %s\n", date" "time;
   printf "%%%%For: %s\n", usr;
   printf "%%%%Pages: %s\n", "(atend)";
-  printf "%%%%Orientation: %s\n", Default["page_orientation"];
+  printf "%%%%Orientation: %s\n", cktxpo(Default["page_orientation"]);
   printf "%%%%BoundingBox: 0 0 %s %s\n", bbx, bby;
   printf "%%%%EndComments\n%%\n";
   printf "%%    Author : %s\n", Var["AUTHOR"];
@@ -3230,7 +3231,7 @@ function PSTrailer() {
   printf "%%%%Trailer\n%%\n";
   if (B>0) printf "%%%%Pages: %s\n", P;
   else printf "%%%%Pages: %s\n", BPC;
-  printf "%%%%Orientation: %s\n", Default["page_orientation"];
+  printf "%%%%Orientation: %s\n", cktxpo(Default["page_orientation"]);
   printf "%%%%BoundingBox: 0 0 %s %s\n", bbx, bby;
   printf "%%%%EOF\n";
 } # End of function PSTrailer
