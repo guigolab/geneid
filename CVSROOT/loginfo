@@ -23,8 +23,17 @@
 # For example:
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
-#DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
+DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
+CVSROOT  /usr/bin/Mail -s "CVS update report: CVSROOT has been updated" gmaster@imim.es
+#
+# 
 gfftools /usr/bin/Mail -s "CVS update report: GFFTOOLS project" jabril@imim.es
 sgp      /usr/bin/Mail -s "CVS update report: SGP project" jabril@imim.es
 sggp     /usr/bin/Mail -s "CVS update report: SGGP project" jabril@imim.es gparra@imim.es
-CVSROOT  /usr/bin/Mail -s "CVS update report: CVSROOT has been updated" gmaster@imim.es
+#
+#
+scimit      /usr/bin/Mail -s "CVS update report: SCIMIT"       jabril@imim.es gparra@imim.es
+orthologous /usr/bin/Mail -s "CVS update report: ORTHOLOGOUS"  jabril@imim.es gparra@imim.es
+chr22       /usr/bin/Mail -s "CVS update report: CHR22"        jabril@imim.es gparra@imim.es
+humangenome /usr/bin/Mail -s "CVS update report: HUMAN GENOME" jabril@imim.es gparra@imim.es
+#
