@@ -24,3 +24,6 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
+^gfftools /usr/bin/Mail -s "%{s} has been updated" jabril@imim.es
+^sgp      /usr/bin/Mail -s "%{s} has been updated" jabril@imim.es
+^CVSROOT  /usr/bin/Mail -s "%{s} has been updated" gmaster@imim.es
