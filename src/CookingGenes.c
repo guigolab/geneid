@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.13 2003-11-05 14:43:53 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.14 2004-02-03 10:24:04 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -171,10 +171,10 @@ void selectFeatures(char* exonType,
 }
 
 /* Processing of genes to make pretty printing afterwards */
-/* nvExons is the number of annotations (infinitum score) found */
+/* artScore is the value that must be substracted from total score (forced evidences) */
 long CookingInfo(exonGFF* eorig,
                  gene info[],
-                 long* nvExons)
+                 double* artScore)
 {
   /* Identifier of current gene */
   long igen;
@@ -183,7 +183,7 @@ long CookingInfo(exonGFF* eorig,
   exonGFF* e;
   
   /* Reset counters into the gene information structure */
-  *nvExons = 0;
+  *artScore = 0.0;
   e = eorig;
   for(igen=0; igen < MAXGENE; igen++)
     {
@@ -197,11 +197,11 @@ long CookingInfo(exonGFF* eorig,
   stop = (e->Strand == '*');
   while (!stop)
     {
-	  /* A. Force 1 gene prediction -> erase every record with sGHOST features */
-	  if (!strcmp(e->Type,sGHOST))
+	  /* A. Skip BEGIN/END features */
+	  if (!strcmp(e->Type,sEND) || !strcmp(e->Type,sBEGIN))
 		{
 		  /* Skip this feature: substract the score from the total score */
-		  (*nvExons)++;
+		  *artScore = *artScore + MAXSCORE;
 
 		  /* JUMP! */
 		  e = (e-> PreviousExon);
@@ -217,7 +217,7 @@ long CookingInfo(exonGFF* eorig,
 			  info[igen].nexons = 1;
 			  /* Evidences (annotations) not sumed if infinitum score */
 			  if (e->Score==MAXSCORE)
-				(*nvExons)++;
+				*artScore = *artScore + MAXSCORE;
 			  else
 				info[igen].score = e->Score;
 			  
@@ -235,7 +235,7 @@ long CookingInfo(exonGFF* eorig,
 				  info[igen].nexons++;
 				  /* Evidences (annotations) not added if infinitum score */
 				  if (e->Score==MAXSCORE)
-					(*nvExons)++;
+					*artScore = *artScore + MAXSCORE;
 				  else
 					info[igen].score += e->Score;
 				  
@@ -247,14 +247,14 @@ long CookingInfo(exonGFF* eorig,
 				  stop1 = (!strcmp(e->Type,sFIRST) || 
 						   !strcmp(e->Type,sSINGLE) ||  
 						   !strcmp(e->Type,sPROMOTER) || 
-						   !strcmp(e->Type,sGHOST) || 
+						   !strcmp(e->Type,sBEGIN) ||
 						   e->Strand == '+'); 
 				  while( !stop && !stop1 )
 					{  
 					  info[igen].nexons++;
 					  /* Evidences (annotations) not sumed if infinitum score */
 					  if (e->Score==MAXSCORE)
-						(*nvExons)++;
+						*artScore = *artScore + MAXSCORE;
 					  else
 						info[igen].score += e->Score;
 					  info[igen].end = e;
@@ -265,7 +265,7 @@ long CookingInfo(exonGFF* eorig,
 					  stop1 = (!strcmp(e->Type,sFIRST) ||  
 							   !strcmp(e->Type,sSINGLE) ||
 							   !strcmp(e->Type,sPROMOTER) || 
-							   !strcmp(e->Type,sGHOST) || 
+							   !strcmp(e->Type,sBEGIN) || 
 							   e->Strand == '+'); 
 					} 
 				}
@@ -277,7 +277,7 @@ long CookingInfo(exonGFF* eorig,
 					info[igen].end = e;
 					info[igen].nexons++;
 					if (e->Score==MAXSCORE)
-					  (*nvExons)++;
+					  *artScore = *artScore + MAXSCORE;
 					else
 					  info[igen].score += e->Score;
 					
@@ -288,14 +288,14 @@ long CookingInfo(exonGFF* eorig,
 					stop2 = (!strcmp(e->Type,sTERMINAL) ||  
 							 !strcmp(e->Type,sSINGLE) ||
 							 !strcmp(e->Type,sPROMOTER) ||
-							 !strcmp(e->Type,sGHOST) || 
+							 !strcmp(e->Type,sBEGIN) ||
 							 e->Strand == '-'); 
 					while( !stop && !stop2 )
 					  { 
 						info[igen].nexons++;
 						/* Evidences (annotations) not added if infinitum score */
 						if (e->Score==MAXSCORE)
-						  (*nvExons)++;
+						  *artScore = *artScore + MAXSCORE;
 						else
 						  info[igen].score += e->Score;
 						info[igen].end = e;
@@ -306,7 +306,7 @@ long CookingInfo(exonGFF* eorig,
 						stop2 = (!strcmp(e->Type,sTERMINAL) ||
 								 !strcmp(e->Type,sSINGLE) ||
 								 !strcmp(e->Type,sPROMOTER) || 
-								 !strcmp(e->Type,sGHOST) || 
+								 !strcmp(e->Type,sBEGIN) ||
 								 e->Strand == '-'); 
 					  }	
 				  }
@@ -404,7 +404,7 @@ void CookingGenes(exonGFF* e,
   char* tmpDNA;
   long nAA, nNN;
   int** tAA;
-  long nvExons;
+  double artificialScore;
   long i;
   
   tmpDNA = NULL;
@@ -424,7 +424,7 @@ void CookingGenes(exonGFF* e,
       printError("Not enough memory: tAA[] structure");
   
   /* Post-processing of genes */
-  ngen = CookingInfo(e,info,&nvExons);
+  ngen = CookingInfo(e,info,&artificialScore);
 
   /* Protein space */
   if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
@@ -438,10 +438,10 @@ void CookingGenes(exonGFF* e,
   /* Principal header: forced annotations not used in gene score sum */
   if (XML)
     printf(" genes=\"%ld\" score =\"%.2f\">\n", 
-	   ngen,e -> GeneScore - nvExons*MAXSCORE); 
+	   ngen,e -> GeneScore - artificialScore); 
   else
     printf("# Optimal Gene Structure. %ld genes. Score = %.2f \n", 
-		   ngen,e -> GeneScore - nvExons*MAXSCORE); 
+		   ngen,e -> GeneScore - artificialScore); 
   
   /* Pretty-printing of every gene */
   for(igen=ngen-1; igen>=0; igen--)

@@ -284,11 +284,13 @@ void HSPScan(packExternalInformation* external,
 				(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1);
 			  
 			  /* For each position in the HSP update the array sr */
+			  /* Save the projection of HSPs into the array: including negative HSPs */
 			  for(j = l1; 
 				  j <= hsp->sPairs[x][i]->Pos2 && j <l2;
 				  j++)
 				{
-				  if (scoreHSP > external->sr[x][j-l1])
+				  if (scoreHSP > external->sr[x][j-l1] || 
+					  external->sr[x][j-l1] == NO_SCORE)
 					external->sr[x][j-l1] = scoreHSP;
 				}
 			}
@@ -303,11 +305,13 @@ void HSPScan(packExternalInformation* external,
 				(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1);
 			  
 			  /* For each position in the HSP update the array sr */
+			  /* Save the projection of HSPs into the array: including negative HSPs */
 			  for(j = hsp->sPairs[x][i]->Pos1; 
 				  j <= hsp->sPairs[x][i]->Pos2 && j <l2;
 				  j++)
 				{
-				  if (scoreHSP > external->sr[x][j-l1])
+				  if (scoreHSP > external->sr[x][j-l1] || 
+					  external->sr[x][j-l1] == NO_SCORE)
 					external->sr[x][j-l1] = scoreHSP;
 				}
 			}
@@ -329,7 +333,8 @@ void HSPScan(packExternalInformation* external,
 				  j <= hsp->sPairs[x][i]->Pos2 && j <= l2;
 				  j++)
 				{
-				  if (scoreHSP > external->sr[x][j-l1])
+				  if (scoreHSP > external->sr[x][j-l1] ||
+					  external->sr[x][j-l1] == NO_SCORE)
 					external->sr[x][j-l1] = scoreHSP;
 				}
 			}
@@ -369,7 +374,8 @@ void HSPScan(packExternalInformation* external,
 				  j < l2;
 				  j++)
 				{
-				  if (scoreHSP > external->sr[x][j-l1])
+				  if (scoreHSP > external->sr[x][j-l1] ||
+					  external->sr[x][j-l1] == NO_SCORE)
 					external->sr[x][j-l1] = scoreHSP;
 				}
 			}
@@ -388,7 +394,8 @@ void HSPScan(packExternalInformation* external,
 				  j <= hsp->sPairs[x][i]->Pos2 && j <l2;
 				  j++)
 				{
-				  if (scoreHSP > external->sr[x][j-l1])
+				  if (scoreHSP > external->sr[x][j-l1] ||
+					  external->sr[x][j-l1] == NO_SCORE)
 					external->sr[x][j-l1] = scoreHSP;
 				}
 			}
@@ -410,7 +417,8 @@ void HSPScan(packExternalInformation* external,
 				  j >= hsp->sPairs[x][i]->Pos1 && j >= l1;
 				  j--)
 				{
-				  if (scoreHSP > external->sr[x][j-l1])
+				  if (scoreHSP > external->sr[x][j-l1] ||
+					  external->sr[x][j-l1] == NO_SCORE)
 					external->sr[x][j-l1] = scoreHSP;
 				}
 			}
