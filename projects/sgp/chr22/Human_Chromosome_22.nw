@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: Human_Chromosome_22.nw,v 0.1 2001-08-24 09:57:44 jabril Exp $
+% $Id: Human_Chromosome_22.nw,v 0.2 2001-08-30 10:40:08 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -54,6 +54,7 @@
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
+\newcommand{\subsubsubsctn}[1]{\paragraph{#1}\vskip 1ex}
 \newcommand{\desc}[1]{\item[#1] \ \\}
 
 % PSTRICKs definitions
@@ -64,25 +65,39 @@
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[CHR22 HOMOLOGY]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[CHR22 HOMOLOGY]}}
 
 % defs
-\def\drome{\textit{Drosophila melanogaster}}
-\def\dro{\textit{Drosophila}}
-\def\dme{\textit{D. melanogaster}}
-\def\seq{\texttt{\textbf{X62937}}}
-\def\nowf{[[DromeRepeats.nw]]}
+\def\biop{\textsc{BioPerl}}
+\def\rptm{\textsc{RepeatMasker}}
+\def\bl{\textsc{Blast}}
 \def\bn{\textsc{blastn}}
+\def\bx{\textsc{blastx}}
+\def\bp{\textsc{blastp}}
+\def\tbn{\textsc{tblastn}}
+\def\tbx{\textsc{tblastx}}
+\def\pb{\texttt{parseblast}}
 \def\ps{\textsc{PostScript}}
+\def\gnid{\texttt{geneid}}
+\def\gnsc{\texttt{genscan}}
+\def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
+\def\sgp{\textsc{sgp}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{aplot}}
+\def\data{\textbf{Chromosome 22 Dataset}}
+\def\chr{\textbf{Chromosome 22}}
 
 % Setting text for footers and headers
 
-\def\tit{\textsc{Project Title Here.- }}
+\def\tit{\textsc{Chromosome 22 Dataset }}
 \fancyhead{} % clear all fields
 \fancyfoot{} % clear all fields
 \fancyhead[RO,LE]{\thepage}
 \fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[LO,LE]{\small\textbf{Genome Informatics Research Lab}}
+\fancyfoot[CO,CE]{\small\textsl{Abril, JF}}
 \fancyfoot[RO,RE]{\small\textbf{\today}}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
@@ -97,9 +112,9 @@
 
 \ \vfill
 \begin{center}
-\textbf{\Huge Project Title Here}\\[5ex]
+\textbf{\Huge Building\\ Chromosome 22\\[1ex] Dataset}\\[5ex]
 
-\textbf{\Large Authors List Here}\\[1ex]
+%\textbf{\Large Authors List Here}\\[1ex]
 \textbf{\Large Josep F. Abril}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
 
 \textbf{\large --- \today ---}\\[10ex]
@@ -141,7 +156,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.1 2001-08-24 09:57:44 jabril Exp $$>$ }
+{\small$<$ \verb$Id: Human_Chromosome_22.nw,v 0.2 2001-08-30 10:40:08 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -150,33 +165,1110 @@ Universitat Pompeu Fabra\\[2ex]
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-\sctn{empty section}
+\sctn{Introduction}
 
-\subsctn{empty subsection}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Sequence comparisons at nucleotide/aminoacid level among phylogenetically related species would help to produce better annotations and to find new genes, as it has been suggested in the literature. At this moment, in which it has been obtained the first draf of the human genome and the mouse genome project is reaching a good sequence coverage, that approach will we useful in the re-annotation of the current human genes and in the search of novel human genes. 
 \begin{comment}
+Homology between human and mouse sequences serves as a useful guide for identifying genes in both organisms. Additionally, conserved sequences that have no coding potential are good candidates for regulatory elements.
+-- From \url|http://bio.cse.psu.edu/mousegroup/doc.html|
+An annotation of the orthologous test set of genomic sequences and their regulatory regions is available at \url|http://bio.cse.psu.edu/mousegroup/test8/|
 \end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%% BACKMATTER
+This document contains the procedures we followed to test our gene-prediction tools applying the knowledge from the training sequences (say here SCIMIT/8 Orthologous sequences) at a chromosomic scale. We work on chromosome 22, due to the fact that its assembly is almost finished (it was the first human genome finished and fully annotated [Ref DUNHAM99]). All the command-line scripts are detailed on the main sections, while stand-alone scripts are described and implemented in the appendixes. There you can also find the results for some of the analysis performed on the sequences. 
 
-% \newpage
-% 
-% \bibliographystyle{apalike}
-% \bibliography{/home1/rguigo/docs/biblio/References}
+\begin{comment} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[Ref DUNHAM99]
+
+``The DNA sequence of human chromosome 22'' Nature 402, 489 - 495 (dec 2, 1999)
+     
+I. DUNHAM, A. R. HUNT, J. E. COLLINS, R. BRUSKIEWICH, D. M. BEARE,
+M. CLAMP, L. J. SMINK, R. AINSCOUGH, J. P. ALMEIDA, A. BABBAGE,
+C. BAGGULEY, J. BAILEY, K. BARLOW, K. N. BATES, O. BEASLEY,
+C. P. BIRD, S. BLAKEY, A. M. BRIDGEMAN, D. BUCK, J. BURGESS,
+W. D. BURRILL, J. BURTON, C. CARDER, N. P. CARTER, Y. CHEN, G. CLARK,
+S. M. CLEGG, V. COBLEY, C. G. COLE, R. E. COLLIER, R. E. CONNOR,
+D. CONROY, N. CORBY, G. J. COVILLE, A. V. COX, J. DAVIS, E. DAWSON,
+P. D. DHAMI, C. DOCKREE, S. J. DODSWORTH, R. M. DURBIN, A. ELLINGTON,
+K. L. EVANS, J. M. FEY, K. FLEMING, L. FRENCH, A. A. GARNER,
+J. G. R. GILBERT, M. E. GOWARD, D. GRAFHAM, M. N. GRIFFITHS, C. HALL,
+R. HALL, G. HALL-TAMLYN, R. W. HEATHCOTT, S. HO, S. HOLMES,
+S. E. HUNT, M. C. JONES, J. KERSHAW, A. KIMBERLEY, A. KING,
+G. K. LAIRD, C. F. LANGFORD, M. A. LEVERSHA, C. LLOYD, D. M. LLOYD,
+I. D. MARTYN, M. MASHREGHI-MOHAMMADI, L. MATTHEWS, O. T. MCCANN,
+J. MCCLAY, S. MCLAREN, A. A. MCMURRAY, S. A. MILNE, B. J. MORTIMORE,
+C. N. ODELL, R. PAVITT, A. V. PEARCE, D. PEARSON, B. J. PHILLIMORE,
+S. H. PHILLIPS, R. W. PLUMB, H. RAMSAY, Y. RAMSEY, L. ROGERS,
+M. T. ROSS, C. E. SCOTT, H. K. SEHRA, C. D. SKUCE, S. SMALLEY,
+M. L. SMITH, C. SODERLUND, L. SPRAGON, C. A. STEWARD, J. E. SULSTON,
+R. M. SWANN, M. VAUDIN, M. WALL, J. M. WALLIS, M. N. WHITELEY,
+D. WILLEY, L. WILLIAMS, S. WILLIAMS, H. WILLIAMSON, T. E. WILMER,
+L. WILMING, C. L. WRIGHT, T. HUBBARD, D. R. BENTLEY, S. BECK,
+J. ROGERS, N. SHIMIZU, S. MINOSHIMA, K. KAWASAKI, T. SASAKI,
+S. ASAKAWA, J. KUDOH, A. SHINTANI, K. SHIBUYA, Y. YOSHIZAKI, N. AOKI,
+S. MITSUYAMA, B. A. ROE, F. CHEN, L. CHU, J. CRABTREE, S. DESCHAMPS,
+A. DO, T. DO, A. DORMAN, F. FANG, Y. FU, P. HU, A. HUA, S. KENTON,
+H. LAI, H. I. LAO, J. LEWIS, S. LEWIS, S.-P. LIN, P. LOH, E. MALAJ,
+T. NGUYEN, H. PAN, S. PHAN, S. QI, Y. QIAN, L. RAY, Q. REN, S. SHAULL,
+D. SLOAN, L. SONG, Q. WANG, Y. WANG, Z. WANG, J. WHITE, D. WILLINGHAM,
+H. WU, Z. YAO, M. ZHAN, G. ZHANG, S. CHISSOE, J. MURRAY, N. MILLER,
+P. MINX, R. FULTON, D. JOHNSON, G. BEMIS, D. BENTLEY, H. BRADSHAW,
+S. BOURNE, M. CORDES, Z. DU, L. FULTON, D. GOELA, T. GRAVES,
+J. HAWKINS, K. HINDS, K. KEMP, P. LATREILLE, D. LAYMAN, P. OZERSKY,
+T. ROHLFING, P. SCHEET, C. WALKER, A. WAMSLEY, P. WOHLDMANN, K. PEPIN,
+J. NELSON, I. KORF, J. A. BEDELL, L. HILLIER, E. MARDIS, R. WATERSTON,
+R. WILSON, B. S. EMANUEL, T. SHAIKH, H. KURAHASHI, S. SAITTA,
+M. L. BUDARF, H. E. MCDERMID, A. JOHNSON, A. C. C. WONG, B. E. MORROW,
+L. EDELMANN, U. J. KIM, H. SHIZUYA, M. I. SIMON, J. P. DUMANSKI,
+M. PEYRARD, D. KEDRA, E. SEROUSSI, I. FRANSSON, I. TAPIA, C. E. BRUDER
+& K. P. O'BRIEN
+
+ABSTRACT: Knowledge of the complete genomic DNA sequence of an
+organism allows a systematic approach to defining its genetic
+components. The genomic sequence provides access to the complete
+structures of all genes, including those without known function, their
+control elements, and, by inference, the proteins they encode, as well
+as all other biologically important sequences. Furthermore, the
+sequence is a rich and permanent source of information for the design
+of further biological studies of the organism and for the study of
+evolution through cross-species sequence comparison. The power of this
+approach has been amply demonstrated by the determination of the
+sequences of a number of microbial and model organisms.  The next step
+is to obtain the complete sequence of the entire human genome. Here we
+report the sequence of the euchromatic part of human chromosome
+22. The sequence obtained consists of 12 contiguous segments spanning
+33.4 megabases, contains at least 545 genes and 134 pseudogenes, and
+provides the first view of the complex chromosomal landscapes that
+will be found in the rest of the genome.
+
+Abstract URL: \url|http://www.nature.com/cgi-taf/DynaPage.taf?file=/nature/journal/v402/n6761/abs/402489a0_fs.html&_UserReference=C0A804EC46B418A9D0386D625A953B867124|
+
+\url|http://www.sanger.ac.uk/HGP/Chr22/|
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[Ref HATTORI00]
+
+``The DNA sequence of human chromosome 21'' Nature 405, 311 - 319 (may 18, 2000)
+
+M. HATTORI, A. FUJIYAMA, T. D. TAYLOR, H. WATANABE, T. YADA,
+H.-S. PARK, A. TOYODA, K. ISHII, Y. TOTOKI, D.-K. CHOI, E. SOEDA,
+M. OHKI, T. TAKAGI, Y. SAKAKI, S. TAUDIEN, K. BLECHSCHMIDT, A. POLLEY,
+U. MENZEL, J. DELABAR, K. KUMPF, R. LEHMANN, D. PATTERSON,
+K. REICHWALD, A. RUMP, M. SCHILLHABEL, A. SCHUDY, W. ZIMMERMANN,
+A. ROSENTHAL, J. KUDOH, K. SHIBUYA, K. KAWASAKI, S. ASAKAWA,
+A. SHINTANI, T. SASAKI, K. NAGAMINE, S. MITSUYAMA, S. E. ANTONARAKIS,
+S. MINOSHIMA, N. SHIMIZU, G. NORDSIEK, K. HORNISCHER, P. BRANDT,
+M. SCHARFE, O. SCH\"ON, A. DESARIO, J. REICHELT, G. KAUER, H. BL\"OCKER,
+J. RAMSER, A. BECK, S. KLAGES, S. HENNIG, L. RIESSELMANN, E. DAGAND,
+T. HAAF, S. WEHRMEYER, K. BORZYM, K. GARDINER, D. NIZETIC, F. FRANCIS,
+H. LEHRACH, R. REINHARDT & M.-L. YASPO
+
+ABSTRACT: Chromosome 21 is the smallest human autosome. An extra copy
+of chromosome 21 causes Down syndrome, the most frequent genetic cause
+of significant mental retardation, which affects up to 1 in 700 live
+births. Several anonymous loci for monogenic disorders and
+predispositions for common complex disorders have also been mapped to
+this chromosome, and loss of heterozygosity has been observed in
+regions associated with solid tumours. Here we report the sequence and
+gene catalogue of the long arm of chromosome 21. We have sequenced
+33,546,361 base pairs (bp) of DNA with very high accuracy, the largest
+contig being 25,491,867 bp. Only three small clone gaps and seven
+sequencing gaps remain, comprising about 100 kilobases. Thus, we
+achieved 99.7\% coverage of 21q. We also sequenced 281,116 bp from the
+short arm. The structural features identified include duplications
+that are probably involved in chromosomal abnormalities and repeat
+structures in the telomeric and pericentromeric regions. Analysis of
+the chromosome revealed 127 known genes, 98 predicted genes and 59
+pseudogenes.
+
+Abstract URL: \url|http://www.nature.com/cgi-taf/DynaPage.taf?file=/nature/journal/v405/n6784/abs/405311a0_fs.html|
+
+\url|http://chr21.rz-berlin.mpg.de/|
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+\end{comment}
+
+<<BASH Commands>>=
+gawk '{print $2}' chr22.tbl | fold -1 | sort | uniq -c
+ 2504453 A
+ 2262438 C
+ 2258158 G
+13876897   N
+ 2484855 T
+ 6332938 a
+ 5819310 c
+ 5817180 g
+      16   n
+ 6306417 t
+@ %$
+
+\begin{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsctn{Internet resources}
+
+Sanger Centre
+       \url|http://www.sanger.ac.uk/|
+   Ensembl
+       \url|http://www.ensembl.org/|
+   Chr22
+       \url|ftp://ftp.sanger.ac.uk/pub/human/chr22/sequences/Chr_22/complete_sequence/|
+   Clipped Mouse data at Sanger Center
+       \url|ftp://ftp.sanger.ac.uk/pub/image/tmp/NCBI/|
+%
+UCSC (U. California Santa Cruz)
+       \url|http://www.ucsc.edu|
+   Genomics Group (David Haussler)
+       \url|http://www.cse.ucsc.edu/centers/cbe/Genome/|
+   Golden Path - Human genome project working draft at UCSC (the Golden Path) 
+       \url|http://genome.cse.ucsc.edu/|
+   Chr22 Sequence
+       \url|http://genome.cse.ucsc.edu/goldenPath/01apr2001/chromosomes/|
+%
+The Berkeley Genome Pipeline
+   A pipeline for real-time comparative analysis of the human and mouse genomes
+       \url|http://pipeline.lbl.gov/|
+   Hsap/Mmus homology
+       \url|http://pipeline.lbl.gov/cgi-bin/test.pl|
+       \url|http://pipeline.lbl.gov/indexOctober.html|
+%
+NCBI (National Center for Biotechnology Information)
+       \url|http://www.ncbi.nlm.nih.gov/|
+   Human genome
+       \url|http://www.ncbi.nlm.nih.gov/genome/seq/HsProgress.shtml|
+       \url|http://www.ncbi.nlm.nih.gov/genome/guide/human| (by chromosome + contig)
+   Chr22
+       \url|http://www.ncbi.nlm.nih.gov/cgi-bin/Entrez/maps.cgi?ORG=hum&MAPS=ideogr,est,loc&LINKS=ON&VERBOSE=ON&CHR=22|
+   Hsap/Mmus homology
+       \url|http://www.ncbi.nlm.nih.gov/Homology/|
+   Mouse genome
+       \url|http://www.ncbi.nlm.nih.gov/genome/seq/MmProgress.shtml|
+       \url|http://www.ncbi.nlm.nih.gov/genome/guide/M_musculus.html|
+   Clipped mouse reads at NCBI
+       \url|ftp://ftp.ncbi.nlm.nih.gov/pub/TraceDB/mus_musculus/ClipReads/|
+%
+Washington University in St. Louis --School of Medicine--
+       \url|http://medschool.wustl.edu/|
+   Center for Computational Biology (Michael Brent)
+       \url|http://www.ccb.wustl.edu/|
+   Computational Genomics Page
+       \url|http://www.cs.wustl.edu/%7Ebrent/Bio/index.html|
+   Results on human/mouse 8 orthologous
+       \url|http://genes.cs.wustl.edu/8-orthologs/|
+   Twinscan server
+       \url|http://genes.cs.wustl.edu/|
+%
+Columbia University, Columbia Genome Center, Department of Computer Science
+       \url|http://www.cs.columbia.edu/home/|
+   Computational Biology Group (Victoria Haghighi)
+       \url|http://www.cs.columbia.edu/compbio/|
+   Transfer Sanger Annotation to GBD
+       \url|http://www.cs.columbia.edu/~vic/sanger2gbd/|
+%
+% End of internet resources
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{comment}
+
+\subsctn{Main goals}
+
+\subsctn{Protocol outline}
+
+Here we are drawing the main steps we followed 
+
+\begin{description}
+ \item[Masking Sequences] 
+
+    Fasta sequence were masked by [Pankaj] using RepeatBlaster.
+
+\begin{comment}
+% Masking references
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
++ RepeatMasker:
+
+  Smit, AFA \& Green, P. 
+  RepeatMasker at \url|http://ftp.genome.washington.edu/RM/RepeatMasker.html|
+
++ MaskerAid:
+
+  Bedell JA, Korf I, Gish W.
+  ``MaskerAid: a performance enhancement to RepeatMasker.''
+  Bioinformatics 2000 Nov; 16(11):1040-1
+
+  ABSTRACT: Identifying and masking repetitive elements is usually the
+  first step when analyzing vertebrate genomic sequence. Current
+  repeat identification software is sensitive but slow, creating a
+  costly bottleneck in large-scale analyses. We have developed
+  MaskerAid, a software enhancement to RepeatMasker that increased the
+  speed of masking more than 30-fold at the most sensitive setting.
+
+  Abstract URL: \url|http://bioinformatics.oupjournals.org/cgi/content/abstract/16/11/1040|
+
+  \url|http://sapiens.wustl.edu/MaskerAid/|
+
++ Tandem Repeats Finder:
+
+  G. Benson,
+  ``Tandem repeats finder: a program to analyze DNA sequences.''
+  Nucleic Acids Research (1999) Vol. 27, No. 2, pp. 573-580.
+
+  ABSTRACT: A tandem repeat in DNA is two or more contiguous,
+  approximate copies of a pattern of nucleotides. Tandem repeats have
+  been shown to cause human disease, may play a variety of regulatory
+  and evolutionary roles and are important laboratory and analytic
+  tools. Extensive knowledge about pattern size, copy number,
+  mutational history, etc. for tandem repeats has been limited by the
+  inability to easily detect them in genomic sequence data. In this
+  paper, we present a new algorithm for finding tandem repeats which
+  works without the need to specify either the pattern or pattern
+  size. We model tandem repeats by percent identity and frequency of
+  indels between adjacent pattern copies and use statistically based
+  recognition criteria. We demonstrate the algorithm's speed and its
+  ability to detect tandem repeats that have undergone extensive
+  mutational change by analyzing four sequences: the human frataxin
+  gene, the human beta T cellreceptor locus sequence and two yeast
+  chromosomes. These sequences range in size from 3 kb up to 700 kb. A
+  World Wide Web server interface atc3.biomath.mssm.edu/trf.html has
+  been established for automated use of the program.
+
+  Abstract URL: \url|http://nar.oupjournals.org/cgi/content/abstract/27/2/573|
+
+  \url|http://c3.biomath.mssm.edu/trf.test.html|
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+\end{comment} % Masking references
+
+ \item[Homology Search]
+ \item[Gene-Finding]
+ \item[Syntenic Gene-Prediction]
+ \item[Sequence Analysis] \ \\
+   \begin{description}
+    \item[G+C Content]
+    \item[Splice Sites Distribution]
+    \item[Exonic Structure Conservation]
+   \end{description}
+\end{description}
+
+\subsctn{The {\chr} sequence}
+
+We are using the ***WHICH VERSION*** verion of the {\chr} sequence. It has ***bp length, and originally contains ***bp 'N's representing assembly gaps (or non-sequenced heterochromatin).
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Building orthologous dataset}
+
+\subsctn{Downloading Data set}
+
+Pankaj has sent us the sequence and its masked version (he run repeatblaster on the raw sequence). After running {\bl}, he used his own blast2hsps to filter the {\bl} results into HSPs. He used the {\chr} sequence from the URL which is identical to the one in April goldenPath from UCSC.
+
+<<BASH commands DATASETS>>=
+#
+# Preparing some dirs
+ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \
+         $DATASETS/annotation $DATASETS/annotation/desc ;
+#
+# MOVING and RENAMING fasta files
+IDIR="$DATASETS/_tmp/Pankaj/seq";
+#
+# Merging raw sequences
+ODIR="$DATASETS/fasta/raw";
+counter=0 ;
+while [ -e "$IDIR/chr22_$counter" ];
+  do {
+    echo "### Processing $IDIR/chr22_$counter" 1>&2 ;
+    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter ;
+    counter=`expr $counter + 100000` ;
+    } ;
+  done | (echo ">chr22"; cat -) > $ODIR/chr22.tmp ;
+perl -e ' # Reformatting fasta sequence
+    use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+    use Bio::Seq;
+    use Bio::SeqIO;
+    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDIN );
+    my $seqout = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDOUT);
+    while (my $sequence = $seqin->next_seq()) {
+        $seqout->write_seq($sequence);
+    }; # while
+    exit(0);
+  ' < $ODIR/chr22.tmp | \
+  gawk '($0 !~/^>|^[ \t]*$/ || NR==1) {print $0}' - > $ODIR/chr22 ;
+# looking for errors... 
+wc $ODIR/chr22* ;
+  802630  802630 48941298 fasta/raw/chr22.tmp
+  802313  802313 48940981 fasta/raw/chr22
+gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22.tmp | wc ;
+     478     956   13303
+gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22 | wc ;
+       2       4      19
+    :: 000001 >chr22
+    :: 802313 TT
+perl -ne 'chomp; /^\s*$/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
+perl -ne 'chomp;    /^>/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
+grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr ;
+    14013913 N
+     8925945 A
+     8880101 T
+     8162358 C
+     8156345 G
+#
+@ 
+
+<<BASH commands DATASETS>>=
+#
+# Merging masked sequences
+ODIR="$DATASETS/fasta/masked";
+counter=0 ;
+while [ -e "$IDIR/chr22_$counter.masked" ];
+  do {
+    echo "### Processing $IDIR/chr22_$counter.masked" 1>&2 ;
+    gawk '$0 !~/^>|^[ \t]*$/ {print $0}' $IDIR/chr22_$counter.masked ;
+    counter=`expr $counter + 100000` ;
+    } ;
+  done |  (echo ">chr22"; cat -) > $ODIR/chr22.tmp ;
+perl -e ' # Reformatting fasta sequence
+    use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+    use Bio::Seq;
+    use Bio::SeqIO;
+    my $seqin  = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDIN );
+    my $seqout = Bio::SeqIO->new(-format => "largefasta", -fh => \*STDOUT);
+    while (my $sequence = $seqin->next_seq()) {
+        $seqout->write_seq($sequence);
+    }; # while
+    exit(0);
+  ' < $ODIR/chr22.tmp | \
+  gawk '($0 !~/^>|^[ \t]*$/ || NR==1) {print $0}' - > $ODIR/chr22 ;
+# looking for errors...
+wc $ODIR/chr22* ;
+   962775  962775 49101443 /projects/datasets/chr22/fasta/masked/chr22.tmp
+   802313  802313 48940981 /projects/datasets/chr22/fasta/masked/chr22
+gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22.tmp | wc ;
+   962775 1925550 55729763
+gawk 'length($0)!=60 {print NR, $0}' $ODIR/chr22 | wc ;
+       2       4      19
+    :: 000001 >chr22
+    :: 802313 TT
+perl -ne 'chomp; /^\s*$/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
+perl -ne 'chomp;    /^>/o && print "$. \"$_\"\n"' $ODIR/chr22 ;
+grep -v "^>" $ODIR/chr22 | fold -1 | sort | uniq -c | sort -nr ;
+
+#
+@ 
+
+<<BASH commands DATASETS>>=
+#
+# MASKING FASTA SEQUENCES
+ChckDirs $DATASETS/masking ;
+#
+# Merging results from RepeatBlaster (Pankaj)
+IDIR="$DATASETS/_tmp/Pankaj/out";
+ODIR="$DATASETS/masking/default" ;
+ChckDirs $ODIR $ODIR/gff $ODIR/gff-projection $ODIR/logs ;
+counter=0 ;
+while [ -e "$IDIR/chr22_$counter.out" ] ;
+  do {
+    echo "### Processing $IDIR/chr22_$counter.out" 1>&2 ;
+    gawk 'BEGIN{ OFS="\t" }
+      {
+        str = ($9!="C") ? "+" : "-";
+        if ($1~/^[0-9]+$/) {
+          print "chr22\tRepeatMasker",$11,$6,$7,$1,str,".",$10"."NR-3,"# "$5;
+        } else {
+          print $0 | "cat 1>&2";
+        };
+      }' $IDIR/chr22_$counter.out ;
+    counter=`expr $counter + 100000` ;
+    } ;
+  done > $ODIR/gff/chr22 ;
+gawk '{print $3}' $ODIR/gff/chr22 | sort | uniq -c | sort -nr \
+                > $ODIR/repeat_summary ;
+#
+@ 
+
+There are 65307 masked regions in the whole {\chr} sequence.
+
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Homology Search}
+
+\subsctn{Processing {\tbx} results from Pankaj}
+
+<<BASH commands ANALYSIS>>=
+#
+# Filtering HSPs from tblastx output (Pankaj)
+INFILE="$DATASETS/_tmp/Pankaj/chr22.hsps" ;
+
+**Problem**
+
+From this record:
+
+chr22_13000000 gnl|ti|9493919_44_700 101 13025701 13025621 168 248 27 18 20 3 657 3.8e-11
+
+which is the bit-score ?
+does the strand/frame pair correspond to query or to sequence ?
+
+we have to convert to:
+
+Hsap_BTK   TBLASTX HSP  66384 67763 1031.0 + 3 0 
+#
+@
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Gene predictions}
+
+We analyzed the {\data} sequence dataset with different gene-prediction tools and evaluated their accuracy (sensitivity and specificity). We included results provided by other groups when possible (cite TWINSCAN/SLAM).
+
+.........PUT HERE a LIST of them.....
+
+\subsctn{Running {\gnid}} 
+
+<<BASH commands ANALYSIS>>=
+run_GENEID () 
+{
+  #
+  # run_GENEID - Running GENEID on a chromosome
+  #
+  # USAGE: run_GENEID testname sequence chr
+  #
+  SECONDS=0;
+  PROG="GENEID" ; prog="geneid" ;
+  GENEID="/projects/sgp/param/geneid/human3iso.param" ;
+  CMD="/projects/sgp/bin/geneid -vG" ;
+      # GENEID tool command-line options:
+      #  '-v' be verbose
+      #  '-G' GFF output
+  # Setting VARS
+  MAIN="$ANALYSIS/geneid" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  locus="$3";
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  #
+  # Run program
+  echo "### Running $PROG on $locus ..." 1>&2 ;
+  $CMD $ISEQ/$locus > $ODIR/$locus 2> $EDIR/$locus ;
+  #
+  { echo "###"; echo "### Execution time for [$0] : $SECONDS secs"; 
+    echo "###"; } 1>&2;
+}
+#
+@
+
+\subsubsctn{{\gnid} on raw sequences} 
+
+<<BASH commands ANALYSIS>>=
+#
+# Raw sequences
+run_GENEID Hsap.raw $DATASETS/fasta/raw chr22 ;
+#
+@ 
+ 
+\subsubsctn{{\gnid} on masked sequences} 
+
+<<BASH commands ANALYSIS>>=
+#
+# Masked sequences
+run_GENEID Hsap.masked $DATASETS/fasta/masked chr22 ;
+#
+@ 
+
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Related Tables and Plots}
+
+\subsctn{Annotated Human Genes for Homologous Sequences Set}
+
+\begin{comment}
+<<BASH commands>>=
+gawk 'BEGIN{ 
+        lncnt=0;
+        ROWS=47;
+        header="\\begin{tabular}[t]{|lrrc|}\n\\hline\n";
+        header=header"\\lb{1.5cm}{l}{GENE} & ";
+        header=header"\\lb{1cm}{r}{START} & \\lb{1cm}{r}{END} & ";
+        header=header"\\lb{0.5cm}{c}{STR} \\\\";
+        print "\\newcommand{\\lb}[3]{\\makebox[#1][#2]{#3}}\n";
+        print "\\begin{tabular}{c@{\\quad}c@{\\quad}c@{\\quad}c}"; # main table
+        print header;
+        }
+      { split($1,n,"_");
+        corr="";
+        if ( lncnt%ROWS == 0 && lncnt > 0 ) {
+          print "\\hline\n\\end{tabular}\n &";
+          print header;
+          n[2]="\\raisebox{-2.25ex}{\\shortstack{" n[2] "\\\\(\\textit{cont.})}}";
+          corr="[-1.75ex]";
+          } 
+        if ( cnt[n[2]] && n[2] !~ /\{cont\.\}/ ) {
+          n[2]=""; 
+          } 
+        else { 
+          printf "\\hline\n"; 
+          cnt[n[2]]++;
+          }
+        printf "%8s & %-10s & %8s & %8s & %s \\\\%s\n", n[2],$2,$3,$4,$5,corr;
+        lncnt++;
+        }
+      END{ 
+        print "\\hline\n\\end{tabular}\n\\\\";
+        print "\\end{tabular}"; # main table
+        }' $DATASETS/genes.Hsap > $DOCS/tables/genelist.tex ;
+@ 
+%$
+\end{comment}
+
+\begin{table}[!h]
+\hspace{-0.5cm}
+\fbox{
+\rotatebox{90}{
+\begin{minipage}[c][17.5cm][c]{22.5cm}
+\begin{center}
+\begin{scriptsize}
+% \input ./tables/genelist.tex
+\end{scriptsize}
+\caption[Annotated genes for the human chromosome 22]{\label{tbl:genelist} Annotated genes for the human chromosome 22 in the {\data}.}\vskip 1ex
+\end{center}
+\end{minipage}
+}}
+\end{table}
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Main [[README]] files}
+
+Here we provide the basic skeleton for the [[README]] files we will generate on each main directories for the current dataset.
+
+<<DATASETS README>>=
+#
+#                 PREPARING DATASETS FOR
+<<README common>>
+<<BASH commands DATASETS>>
+@ 
+
+<<SGP README>>=
+#
+#               RUNNING GENE-PREDICTION FOR
+<<README common>>
+<<BASH commands ANALYSIS>>
+@ 
+
+<<SPLICING README>>=
+#
+#                  SPLICING ANALYSIS ON
+<<README common>>
+<<BASH commands SPLICING>>
+@ 
+
+<<README common>>=
+#           8 ORTHOLOGOUS HUMAN/MOUSE SEQUENCES
+#
+# This README file was tangled from ORTHOLOGOUS_dataset.nw
+#
+<<Version Control Id Tag>>
+#
+# EXPORTING GLOBAL VARS and DEFINING BASIC SHELL FUNCTIONS
+#
+<<BASH Environment Variables>>
+#
+@ 
+
+<<tangling - READMEs>>=
+notangle -R"DATASETS README" $WORK/$nwfile.nw \
+    > $DATASETS/README ;
+notangle -R"SGP README" $WORK/$nwfile.nw \
+    > $ANALYSIS/README ;
+notangle -R"SPLICING README" $WORK/$nwfile.nw \
+    > $SPLICING/README ;
+@
+
+% \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Programs not included in this document}
+
+The \sgp used in this approach uses different scrips and programs. When we started it was still not well controled. Therefore we decided to copy the binary files from [[~rguigo/research/humus/SGP2-2/sggp2/bin]] to [[/projects/sgp/bin/SGP2-2/]]. The copied files were the following:
+
+\begin{center}
+\begin{tabular}{l}
+geneid          \\
+blast2gff       \\
+blast2hsp       \\
+human3iso.param \\
+\end{tabular}
+\end{center}
+
+The path variable in the sggp2 shell script has been changed to [[/projects/sgp/bin/SGP2-2/]].
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Scripts Central}
+
+\subsctn{[[fasta_renamer.pl]]: renaming and reformating fasta files}
+
+<<Renaming fasta sequence IDs>>=
+<<PERL shebang>>
+#
+# fasta_renamer.pl infile descfile new_seq_id > outfile
+#
+#     Replacing sequence name 
+#     for single sequence fasta files
+#     and reformating sequence to 80 cols.
+#
+use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use Bio::Seq;
+use Bio::SeqIO;
+
+my ($infile,$descfile,$newid) = @ARGV;
+
+my $seqin  = Bio::SeqIO->new(-format => 'FASTA', -file => "$infile");
+my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
+
+open(DESC,"> $descfile");
+while (my $sequence = $seqin->next_seq()) {
+    my ($sid,$len,$seq,$desc);
+    print STDERR "### READING FASTA... $newid\n";
+    $sid  = $sequence->display_id();
+    $desc = $sequence->desc();
+    $len  = $sequence->length();
+    $seq  = $sequence->seq();
+    $sid =~ s/\s+/\_/og;
+    $seq =~ tr/[a-z]/[A-Z]/;
+    print STDERR "### WRITING FASTA... $newid\n";
+    print DESC "$newid $sid $len $desc\n";
+    $sequence->display_id($newid);
+    $sequence->desc('');
+    $sequence->seq($seq);
+    $seqout->write_seq($sequence);
+}; # while 
+close(DESC);
+exit(0);
+@
 
 \newpage
-\appendix
 
-\sctn{empty appendix section}
+\subsctn{[[coords2gff.pl]]: converting coords files into GFF}
 
-\subsctn{empty appendix subsection}
+<<Raw coords to GFF>>=
+<<PERL shebang>>
+#
+# coords2gff.pl seqname < coords_file > GFF_file
+#
+#     Converting raw coords files to GFF
+#
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment}
-\end{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+my ($seqname,%gff,$string);
+$seqname = shift @ARGV;
+%gff = ();
+$string = ("\%s\t" x 8)."\%s\n";
+
+my $c = 0;
+while (<STDIN>) {
+    next if /^\s*$/o;
+    my ($l,$a,$b,$s,$r);
+    chomp;
+    $l = $_;
+	# print STDERR "$. (X): $l\n";
+    $l =~ /^[><]/o && do {
+	    # print STDERR "$. (A): $l\n";
+        $l =~ s/^([><])\s*//o && ($s = $1);
+        $r = \%{ $gff{++$c} };
+        ($r->{gn_start},$r->{gn_end},$r->{gn_name}) = split /\s+/og, $l, 3;
+        $r->{gn_name} =~ s/\s+$//og;
+        $r->{gn_name} =~ s/\s+/_/og;
+        $r->{strand} = ($s eq '>') ? '+' : (($s eq '<') ? '-' : '.');
+        # $r->{exons} = ();
+        next;
+	}; # $newgene ?
+	# print STDERR "$. (B): $l\n";
+    ($a,$b,undef) = split /\s+/og, $l, 3;
+    push @{ $gff{$c}{exons} }, [ $a, $b ];
+}; # while
+# print STDERR Dumper(\%gff);
+
+foreach my $i (1..$c) {
+    my $r = \%{ $gff{$i} };
+    my $exnum = scalar(@{ $r->{exons} });
+    print STDOUT "\# $seqname - $r->{gn_name}: ".
+        ($exnum)." exons\n";
+    printf STDOUT $string, 
+        $seqname,'annotation','Gene',$r->{gn_start},$r->{gn_end},
+        '.',$r->{strand},'.',$r->{gn_name};
+    $r->{strand} eq '-' && (@{ $r->{exons} } = reverse @{ $r->{exons} });
+    my ($lastori,$lastend,$lastfrm) = (0,0,0);
+    foreach my $j (0..$#{ $r->{exons} }) {
+        my ($feat,$ori,$end,$frm);
+        ($ori,$end) = @{ ${ $r->{exons} }[$j] };
+	  THIS: {
+        ($j == 0) && do {
+            $feat = 'First';
+            $exnum == 1 && ($feat = 'Single');
+            $frm = 0;
+            last THIS;
+        }; # $d == 0
+        $frm = (($lastend - $lastori + 1) + $lastfrm) % 3;
+        ($j == $#{ $r->{exons} }) && do {
+            $feat = 'Terminal';
+            last THIS;
+        }; # $d == $#{ $r->{exons} }
+        $feat = 'Internal';
+      }; # THIS
+        # print STDERR "$r->{gn_name} ($j): $ori $end $frm : ".
+        #              "$lastori $lastend $lastfrm\n";
+        ($lastori,$lastend,$lastfrm) = ($ori,$end,$frm);
+        printf STDOUT $string, 
+            $seqname,'annotation',$feat,$ori,$end,
+            '.',$r->{strand},$frm,$r->{gn_name};
+    }; # foreach @j
+}; # foreach $i
+
+exit(0);
+@ 
+
+\newpage
+
+\subsctn{[[getfastamasked.pl]]: retrieve masked from fasta sequences}
+
+<<Masked from fasta sequences>>=
+<<PERL shebang>>
+#
+# getfastamasked.pl < fastafile > GFFfile
+#
+#     Retrieving masked regions coords from fasta files
+#
+use Bio::Seq;
+use Bio::SeqIO;
+<<Use Modules - Benchmark>>
+my $PROGRAM = 'getfastamasked.pl';
+my ($T,$F) = (1,0);
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+my ($id,$seq) = ('','');
+my ($total_time);
+
+print STDERR << "+++EOR+++";
+$line$s\n$s Running $PROGRAM\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+&main();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s $PROGRAM FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub main() {
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
+    while (my $sequence = $seqin->next_seq()) {
+        my ($sid,$len,$seq,@nuc,@coords,$masked_flg,$match,$msk_num);
+        @coords = ();
+        <<Setting sequence variables from fasta record>>
+        <<Finding masked regions coords>>
+        <<Writing masked regions coords in GFF>>
+    }; # while 
+} # main
+<<Common PERL subs - Benchmark>>
+@ 
+
+<<Setting sequence variables from fasta record>>=
+print STDERR "### READING FASTA............\n";
+$sid  = $sequence->display_id();
+$len  = $sequence->length();
+$seq  = $sequence->seq();
+@ 
+
+<<Finding masked regions coords>>=
+print STDERR "###         PARSING SEQUENCE: $sid ($len bp)\n";
+@nuc = split //og, $seq;
+($masked_flg,$match) = ($F,$F) ;
+for (my $n = 0; $n <= $#nuc; $n++) {
+    $match = ( $nuc[$n] =~ /[NnXx]/o ) ? $T : $F;
+    ( !$masked_flg && $match ) && do {
+        $masked_flg = $T ;
+        # $n contains the last non-masked nucleotide
+        push @coords, ($n + 1);
+        next;
+    };
+    $masked_flg && do {
+        $match && (next);
+        $masked_flg = $F ;
+        # $n contains the last masked nucleotide now
+        push @coords, $n;
+    };
+}; # for nuc in $seq
+# if last nucleotide is masked, previous loop not includes its coord. 
+$masked_flg &&( push @coords, $len);
+@ 
+
+<<Writing masked regions coords in GFF>>=
+$msk_num = scalar(@coords) / 2;
+print STDERR "###         WRITING GFF COORDS: $msk_num masked regions found.\n";
+for (my $n = 0; $n <= $#coords; $n+=2) {
+    my $GFFstring = ("\%s\t" x 5).(".\t" x 3).".\n";
+    printf STDOUT $GFFstring, $sid, "masked", "masked", @coords[$n..($n + 1)];
+}; # for coords in @coords
+@ 
+
+\newpage
+
+\subsctn{[[splitfastaseq.pl]]: split large fasta sequences}
+
+<<Breaking fasta sequences>>=
+<<PERL shebang>>
+#
+# splitfastaseq.pl \
+#     seqlength overlap < fastafile > output
+#
+#     Breaking large fasta sequences to build 
+#     databases for running tblastx faster
+# 
+use lib qw( /usr/lib/perl5/site_perl/5.005/ );
+use Bio::Seq;
+use Bio::SeqIO;
+use Benchmark;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $PROGRAM = 'splitfastaseq.pl';
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+my ($id,$ln,$sq) = ('',0,'');
+my ($total_time,$seq);
+my ($maxlen,$overlap) = @ARGV;
+
+print STDERR << "+++EOR+++";
+$line$s\n$s Running $PROGRAM\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+&getseq();
+&splitseq();
+
+$total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s $PROGRAM FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub getseq() { # assuming here single sequence input fasta files
+    print STDERR "$s Processing fasta file.\n";
+    my $seqin = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDIN);
+    while (my $iseq = $seqin->next_seq()) {
+        $id = $iseq->display_id();
+        $ln = $iseq->length();
+        $sq = $iseq->seq();
+        last; # to make sure that we only catch a single fasta sequence
+    }; # while next_seq
+    $seq = Bio::Seq->new( -seq => $sq , -id => $id );
+    print STDERR "$s Processing DONE: ".(&timing($F))."\n$s\n";
+} # getseq
+#
+sub splitseq() {
+    my ($e,$sid,$ssq,$nseq,$wseq);
+    my ($t,$sqlen) = (1,($maxlen + $overlap - 1));
+    print STDERR "$s Creating splitted-sequence fasta file ($ln nt).\n";
+    my $seqout = Bio::SeqIO->new(-format => 'FASTA', -fh => \*STDOUT);
+    while ($t < $ln) {
+         $e = $t + $sqlen;
+         ($e > $ln) && ($e = $ln);
+         $sid = "$id\_$t\_$e";
+         print STDERR "$s --> $id : from $t to $e (".($e - $t + 1)." nt)\n";
+         $ssq = $seq->subseq($t,$e);
+         $t += $maxlen;
+         #
+         $wseq = Bio::Seq->new( -seq => $ssq , -id => $sid );
+         $seqout->write_seq($wseq);
+    }; # while  
+    print STDERR "$s Splitting DONE: ".(&timing($F))."\n$s\n";
+} # splitseq
+#
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
+
+\newpage
+
+\subsctn{[[gff2gtf.pl]]: translating GFF to GTF2}
+
+<<GFF to GTF>>=
+<<PERL shebang>>
+#
+# gff2gtf.pl < infile > outfile
+#
+#     Converting GFF formated records into GTF
+#
+# use lib qw( /usr/lib/perl5/site_perl/5.005/ /usr/lib/perl5/5.00503/ ) ;
+use Benchmark;
+# use Data::Dumper;
+# local $Data::Dumper::Purity = 0;
+# local $Data::Dumper::Deepcopy = 1;
+my ($T,$F) = (1,0);
+my @Timer = (new Benchmark);
+my $PROGRAM = 'gff2gtf.pl';
+my $DATE = localtime;
+my $USER = defined($ENV{USER}) ? $ENV{USER} : '??????';
+my $host = `hostname`;
+chomp($host);
+my $line = ('#' x 80)."\n";
+my $s = '### ';
+#
+print STDERR << "+++EOR+++";
+$line$s\n$s Running $PROGRAM\n$s
+$s HOST: $host
+$s USER: $USER
+$s DATE: $DATE\n$s\n$line$s
++++EOR+++
+
+my %genes;
+my @f = ();
+my $gcnt = 0;
+while (<>) {
+    /^\# Gene/o && do {
+        $gcnt++;
+        $genes{$gcnt}{COMMENT} = $_;
+        next;
+    };
+    next if /^\#/o;
+    next if /^\s*$/o;
+    chomp;
+    @f = split /\s+/og, $_;
+    push @{ $genes{$gcnt}{FEATURES} }, [ @f[0..8] ];
+}; # while
+
+# print STDERR Dumper(\%genes);
+
+my $GTFrec = ("\%s\t" x 8)."\%s\n";
+foreach my $i (1..$gcnt) {
+    print STDOUT $genes{$i}{COMMENT};
+    my ($main,$tail_O,$tail_E,$groupflg,$gtfgroup) = ('','','',$T,'');
+    foreach my $j (0..$#{ $genes{$i}{FEATURES} }) {
+        my ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group,
+            $cdsfeat,$cdsori,$cdsend,$t);
+        ($seq,$source,$feat,$start,$end,
+            $score,$strand,$frame,$group) =
+                @{ $genes{$i}{FEATURES}[$j] };
+        $score = '.';
+        $groupflg && do {
+            $group =~ s/gene_//o;
+            $t = &fill_left($group,3,"0");
+            $gtfgroup = "gene_id $t; transcript_id $t.1";
+            $groupflg = $F;
+        }; # $groupflg
+      FEATS: {
+          $feat eq 'Single' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+              last FEATS;
+          }; # Single
+          $feat eq 'First' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_start($start,$end,$strand);
+              $tail_O = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);              
+              last FEATS;
+          }; # First
+          $feat eq 'Terminal' && do {
+              ($cdsfeat,$cdsori,$cdsend) = &get_final($start,$end,$strand);
+              $tail_E = sprintf($GTFrec,$seq,$source,$cdsfeat,$cdsori,$cdsend,
+                                $score,$strand,'0',$gtfgroup);
+                  # only if nucleotides of stop codon not included
+                  #     $strand eq '+' && ($end = $end + 3);
+                  #     $strand eq '-' && ($start = $start - 3);
+              # last FEATS;
+          }; # Terminal
+        }; # FEATS
+        $feat = 'CDS';
+        $main .= sprintf($GTFrec,$seq,$source,$feat,$start,$end,
+                         $score,$strand,$frame,$gtfgroup); 
+    }; # foreach $j
+    print STDOUT "$main$tail_O$tail_E";
+}; # foreach $i
+
+my $total_time = &timing($T);
+print STDERR << "+++EOR+++";
+$s\n$line$s\n$s $PROGRAM FINISHED\n$s
+$s TOTAL TIME: $total_time\n$line
++++EOR+++
+
+exit(0);
+
+sub get_start() {
+    my ($o,$e,$s) = @_;
+    my $str = "start_codon";
+    $s eq '+' && do {
+       return $str, $o, ($o + 2);
+    }; # forward
+    $s eq '-' && do {
+       return $str, ($e - 2), $e;
+    }; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+} # 
+#
+sub get_final() {
+    my ($o,$e,$s) = @_;
+    my $str = "stop_codon";
+    $s eq '+' && do {
+        return $str, ($e - 2), $e;
+           # only if nucleotides of stop codon not included
+           #     return $str, ($e + 1), ($e + 3);
+    }; # forward
+    $s eq '-' && do {
+        return $str, $o, ($o + 2);
+           # only if nucleotides of stop codon not included
+           #     return $str, ($o - 3), ($o -1);
+    }; # reverse
+    die("### ERROR: Strand not defined... ($o $e : $s)... $!");
+} # 
+#
+sub fill_left() { ($_[2] x ($_[1] - length($_[0]))).$_[0] } 
+#
+sub timing() {
+    push @Timer, (new Benchmark);
+    # partial time
+    $_[0] ||
+        (return timestr(timediff($Timer[$#Timer],$Timer[($#Timer - 1)])));
+    # total time
+    return timestr(timediff($Timer[$#Timer],$Timer[0]));
+} # timing
+@ 
 
 \newpage
 
@@ -311,6 +1403,19 @@ The same happens to '[[warn]]' function which also requires a hash variable '[[%
 sub warn() { print STDERR sprintf($ErrorList{ shift @_ }, @_) }
 @
 
+\subsctn{{\biop} modules}
+
+\def\bioseq{\htmladdnormallinkfoot{[[Bio::Seq]]}{http://bioperl.org/Core/POD/Bio/Seq.html}}
+\def\bioseqIO{\htmladdnormallinkfoot{[[Bio::SeqIO]]}{http://bioperl.org/Core/POD/Bio/SeqIO.html}}
+
+{\bioseq} is the {\biop} main sequence object while {\bioseqIO} is the {\bp} support for sequence input/output into files.
+
+<<Use Modules - Bio::Seq>>=
+use Bio::Seq;
+use Bio::SeqIO;
+@
+
+
 \subsctn{AWK scripts}
 
 <<GAWK shebang>>=
@@ -348,7 +1453,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: Human_Chromosome_22.nw,v 0.1 2001-08-24 09:57:44 jabril Exp $
+# $Id: Human_Chromosome_22.nw,v 0.2 2001-08-30 10:40:08 jabril Exp $
 @ 
 
 \newpage
@@ -363,29 +1468,56 @@ documentation. The following instructions are needed:
 Remember when tangling that '-L' option allows you to include program line-numbering relative to original [[noweb]] file. Then the first line of the executable files is a comment, not a shebang, and must be removed to make scripts runnable.
 
 <<tangling>>=
-# showing line numbering comments in program
-notangle -L -R"root" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/root_file ;
-# program without line numbering comments
-notangle -t4 -R"root" $WORK/$nwfile.nw \
-    > $BIN/root_file ;
+# PBS
+notangle -R"PBS tblastx shell" $WORK/$nwfile.nw \
+    > /home/ug/jabril/no_backup/PBS/PBS.sh ;
+chmod a+x /home/ug/jabril/no_backup/PBS/PBS.sh ;
+# showing line numbering comments in program (DEVEL VERSIONS)
+notangle -L -R"Renaming fasta sequence IDs" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/fasta_renamer.pl ;
+notangle -L -R"Raw coords to GFF" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/coords2gff.pl ;
+notangle -L -R"Masked from fasta sequences" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/getfastamasked.pl ;
+notangle -L -R"Breaking fasta sequences" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/splitfastaseq.pl ;
+notangle -L -R"GFF to GTF" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' > $BIN/gff2gtf.pl ;
 # making them runnable
-chmod a+x $BIN/root_file ;
+chmod a+x $BIN/fasta_renamer.pl ;
+chmod a+x $BIN/coords2gff.pl ;
+chmod a+x $BIN/getfastamasked.pl ;
+chmod a+x $BIN/splitfastaseq.pl ;
+chmod a+x $BIN/gff2gtf.pl ;
+#
 @ 
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
 <<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw \
-    > $DATA/root_config ;
+#
+ChckDirs $PARAM/gff2ps $PARAM/gff2aplot ;
+#
+notangle -R"GFF2APLOT customization: ortho masked" $WORK/$nwfile.nw \
+         > $PARAM/gff2aplot/ortho_masked_a4.rc ;
+#
+notangle -R"GFF2PS customization: ortho orimasked a4" $WORK/$nwfile.nw \
+         > $PARAM/gff2ps/ortho_orimasked_a4.rc ;
+notangle -R"GFF2PS customization: ortho orimasked a3" $WORK/$nwfile.nw \
+         > $PARAM/gff2ps/ortho_orimasked_a3.rc ;
+notangle -R"GFF2PS customization: ortho orimasked wide" $WORK/$nwfile.nw \
+         > $PARAM/gff2ps/ortho_orimasked_wide.rc ;
+#
 @ %$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
 <<tangling>>=
+#
 notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
+#
 @ 
 
 <<weaving>>=
@@ -416,34 +1548,129 @@ popd ;
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
 <<BASH Environment Variables>>=
-# Global Variables
-export WORK="/projects/datasets/chr22/_docs" ;
-export BIN="$WORK/bin" ;
-export DOCS="$WORK/docs" ;
-export DATA="$WORK/data" ;
-export nwfile="Human_Chromosome_22" ;
-@ 
-
-<<CSH Environment Variables>>=
-# Global Variables
-setenv WORK "/projects/datasets/chr22/_docs" ;
-setenv BIN  "$WORK/bin" ;
-setenv DOCS "$WORK/docs" ;
-setenv DATA "$WORK/data" ;
-setenv nwfile "Human_Chromosome_22" ;
+#
+# CHR22 Dataset Variables
+# 
+DATASETS="/projects/datasets/chr22" ;
+WORK="$DATASETS/_docs" ;
+BIN="$WORK/bin" ;
+PARAM="$BIN/param" ;
+DOCS="$WORK/docs" ;
+DATA="$WORK/data" ;
+nwfile="Human_Chromosome_22" ;
+export DATASETS WORK BIN PARAM DOCS DATA nwfile ;
+#
+SGPBIN="/projects/sgp/bin" ;
+export SGPBIN ;
+#
+# ORTHOLOGOUS Dataset Variables
+#
+ANALYSIS="/projects/sgp/chr22" ;
+ID="$DATASETS/id" ;
+HSAP="$DATASETS/id.Hsap" ;
+MMUS="$DATASETS/id.Mmus" ;
+export ANALYSIS ID HSAP MMUS ;
+#
+SPLICING="/projects/splicing/chr22" ;
+export SPLICING ;
+#
+# BASIC Shell Functions
+#
+ChckDirs ()
+{
+  #
+  # USAGE: ChckDirs <path_list>
+  #
+  for name in "$@" ;
+    do {
+         [ -d "$name" ] && 
+           echo "### Directory Already Exist: $name" ||
+             mkdir --verbose $name ;
+      } ;
+    done ;
+}
+#
+renameSEQS ()
+{
+  #
+  # USAGE: renameSEQS ls_command reg_exp substitution_value
+  # Example: renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA'
+  #
+  $1 | while read n ; 
+    do {
+      k=`echo $n | sed "s/$2/$3/"` ;
+      [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
+    } ;
+    done ;
+}
+#
+MergeFiles ()
+{
+  #
+  # USAGE: MergeFiles <working_path>
+  #
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.Hsap ] && 
+    /bin/rm --force --verbose $1/all.Hsap ;
+  [ -e $1/all.Mmus ] &&
+    /bin/rm --force --verbose $1/all.Mmus ;
+  echo "### WORKING on HUMAN LOCI..." ;
+  cat $HSAP | while read locus ;
+    do { cat $1/$locus >> $1/all.Hsap ; } ; done ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  cat $MMUS | while read locus ;
+    do { cat $1/$locus >> $1/all.Mmus ; } ; done ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  cat $1/all.Hsap $1/all.Mmus > $1/all ;
+}
+#
+MergeGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path> <species_id> <flag>
+  #
+  flag=0 ;
+  [ "$3" = "1" ] && flag=1 ; 
+  echo "### REMOVING OLD FILES..." ;
+  [ -e $1/all.$2 ] && 
+    /bin/rm --force --verbose $1/all.$2 ;
+  echo "### WORKING on $2 LOCI..." ;
+  c=0 ;
+  while read locus ;
+    do {
+         let c=c+1 ;
+         [ $c -gt 1 ] && echo '#$ ' >> $1/all.$2 ;
+         [ $flag -eq 1 ] &&
+             cat $DATASETS/annotation/length/$locus >> $1/all.$2 ;
+         gawk 'BEGIN{OFS="\t"}
+             ($1 !~ /^#/ && $3 != "Gene") {
+                 print $0;
+             }' $1/$locus | sort +3n -5 - >> $1/all.$2 ; 
+       } ;
+    done < $DATASETS/id.$2 ;
+}
+#
+MergeALLGFF () 
+{
+  #
+  # USAGE: MergeGFF <working_path>
+  #
+  echo "### WORKING on HUMAN LOCI..." ;
+  MergeGFF $1 Hsap 1 ;
+  echo "### WORKING on MOUSE LOCI..." ;
+  MergeGFF $1 Mmus 1 ;
+  echo "### MERGING HUMAN and MOUSE..." ;
+  echo '#$ ' | cat $1/all.Hsap - $1/all.Mmus > $1/all ;
+}
 @ 
 
 <<tangling>>=
-# TO DO: add a test to check which shell is running
+#
 # BASH shell
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
-         > $WORK/.bash_VARS ; 
-# CSH shell
-notangle -R'CSH Environment Variables'  $WORK/$nwfile.nw \
-         > $WORK/.csh_VARS ; 
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+         cpif $WORK/.bash_VARS ; 
 # sourcing
 source $WORK/.bash_VARS ;
-source $WORK/.csh_VARS ;
 @
 
 \end{document}
