@@ -3,12 +3,12 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: GFF2APLOT_MANUAL.tex,v 1.3 2001-11-06 10:07:57 jabril Exp $
+% $Id: GFF2APLOT_MANUAL.tex,v 1.4 2001-11-06 17:38:27 jabril Exp $
 %
 % latex GFF2APLOT_MANUAL.tex ; dvips GFF2APLOT_MANUAL.dvi -o GFF2APLOT_MANUAL.ps -t a4 ;
 %
 \usepackage{noweb}
-\usepackage[a4paper,offset={0pt,0pt},hmargin={3cm,2cm},vmargin={2cm,2cm}]{geometry}
+\usepackage[a4paper,offset={0pt,0pt},hmargin={2.5cm,2cm},vmargin={2cm,2cm}]{geometry}
 \usepackage{graphics}
 \usepackage[dvips]{graphicx}
 %% pstricks
@@ -106,7 +106,7 @@
 
 \vskip 5ex
 
-{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.3 2001-11-06 10:07:57 jabril Exp $$>$ }
+{\large$<$\verb$Id: GFF2APLOT_MANUAL.tex,v 1.4 2001-11-06 17:38:27 jabril Exp $$>$ }
 
 \vfill
 
@@ -246,13 +246,23 @@ Universitat Pompeu Fabra\\[2ex]
 \appendix
 
 \newpage
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{}
+\fancyfoot[LO,LE]{}
+\fancyfoot[RO,RE]{}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{0pt}
+\geometry{noheadfoot}
+%\enlargethispage*{40cm}
 
 \sctn{Command-Line Options Summary for \prog.}
+%\vskip -0.25cm
 
-\vfill
+%\vfill
 % 
 \begin{table}[!ht]
- \begin{center}
+\centering
+% \begin{center}
  \label{tbl:CLopt} 
  \setlength{\fboxsep}{10pt}
  \footnotesize 
@@ -261,7 +271,7 @@ Universitat Pompeu Fabra\\[2ex]
   \input tables/AplotCLopts_tbl.tex % tables/AplotCLoptionsTbl.tex
 } % fbox
 %
-\vskip 0.5cm
+\vskip 0.25cm
 %
 \fbox{
 \begin{tabular}{rl}
@@ -283,9 +293,10 @@ Universitat Pompeu Fabra\\[2ex]
 \end{tabular}
 } % fbox
 %
-\end{center}
+%\end{center}
+\vskip -2cm
 \end{table}
-\vfill
+%\vfill
 
 \newpage
 
@@ -295,22 +306,24 @@ Universitat Pompeu Fabra\\[2ex]
 
 \newpage
 \landscape
-% \begin{center}
+\begin{center}
 \begin{footnotesize}
 \setlength{\parindent}{-0.45cm}
 
   \input tables/AplotCFvars_tblplayout.tex
-  \vskip 0.5cm
+  \vskip 1cm
   \input tables/AplotCFvars_tblzoom.tex
 \newpage
   \input tables/AplotCFvars_tbllabel.tex
 \newpage
   \input tables/AplotCFvars_tblticks.tex
-  \vskip 0.5cm
-  \input tables/AplotCFvars_tblaplot.tex
-  \vskip 0.5cm
-  \input tables/AplotCFvars_tblgeneral.tex
   \vskip 1cm
+  \input tables/AplotCFvars_tblaplot.tex
+  \vskip 1cm
+  \input tables/AplotCFvars_tblgeneral.tex
+
+\newpage
+% \vskip 1cm
 
   \input tables/AplotCFvars_tblfeat.tex
   \vskip 1cm
@@ -327,7 +340,7 @@ Universitat Pompeu Fabra\\[2ex]
   \input tables/AplotCFvars_tblseq.tex
 
 \end{footnotesize}
-% \end{center}
+\end{center}
 \newpage
 \endlandscape
 
