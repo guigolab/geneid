@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.1 2000-07-05 08:32:15 eblanco Exp $  */
+/*  $Id: Translate.c,v 1.2 2001-02-14 16:58:00 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -95,8 +95,12 @@ void TranslateGen(exonGFF* e, char* s, dict* dAA, long nExons,
     {
       for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
 	{
-	  p1 = e->Acceptor->Position + e->offset1 - COFFSET;
-	  p2 = e->Donor->Position + e->offset2 - COFFSET;
+	  p1 = (e->evidence)? 
+	    e->Acceptor->Position + e->offset1 : 
+	    e->Acceptor->Position + e->offset1 - COFFSET;
+	  p2 = (e->evidence)? 
+	    e->Donor->Position + e->offset2: 
+	    e->Donor->Position + e->offset2 - COFFSET;
 
 	  /* Remainder of the last exon from the gene */
 	  if (!i)
@@ -214,8 +218,12 @@ void TranslateGen(exonGFF* e, char* s, dict* dAA, long nExons,
       prot[0] = '\0'; 
       for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
 	{
-	  p1 = e->Acceptor->Position + e->offset1 - COFFSET;
-	  p2 = e->Donor->Position + e->offset2 - COFFSET;
+	  p1 = (e->evidence)? 
+	    e->Acceptor->Position + e->offset1: 
+	    e->Acceptor->Position + e->offset1 - COFFSET;
+	  p2 = (e->evidence)? 
+	    e->Donor->Position + e->offset2: 
+	    e->Donor->Position + e->offset2 - COFFSET;
 	  
 	  /* Reverse strand exon */
 	  if ((rs = (char*) calloc(p2-p1+2,sizeof(char))) == NULL)
