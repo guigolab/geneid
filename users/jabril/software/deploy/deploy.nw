@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.nw,v 1.5 2001-09-03 15:14:34 jabril Exp $
+% $Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -186,8 +186,14 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 \end{titlepage} %'
 
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
+<<HIDE: new LaTeX commands>>=
+@ 
+<<HIDE: new LaTeX pstricks>>=
+@ 
+<<HIDE: new LaTeX definitions>>=
+@ 
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{roman}
 \setcounter{page}{1}
 \pagestyle{fancy}
@@ -202,12 +208,12 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.5 2001-09-03 15:14:34 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
@@ -232,7 +238,9 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 @
 \todo{ \item \todoAAA } % todo
 
-\sctn{empty section}
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Implementation}
 
 \subsctn{Program outline}
 
@@ -377,6 +385,8 @@ $WORK/ltx ;
     print STDERR "###\n### File Extraction................. DONE\n###\n";
 } # extract_files
 @
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Template definitions}
 
@@ -823,17 +833,6 @@ This line tells emacs to highlight code chunks with perl language highlight synt
 %%%%% TODO defs
 @<<HIDE: new defs TODO>>
 
-%%%%% Setting text for footers and headers
-\def\tit{\textsc{Project Title Here.- }}
-\fancyhead{} % clear all fields
-\fancyfoot{} % clear all fields
-\fancyhead[RO,LE]{\thepage}
-\fancyhead[LO,RE]{\rightmark}
-\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
-\fancyfoot[RO,RE]{\small\textbf{\today}}
-\renewcommand{\headrulewidth}{1pt}
-\renewcommand{\footrulewidth}{1pt}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \def\progname{@@@PROJECT@@@}
@@ -856,7 +855,30 @@ Institut Municipal d'Investigaci\'o M\`edica\\
 Universitat Pompeu Fabra\\[2ex]
  } % def showaffiliation
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% Setting text for footers and headers
+\def\tit{\textsc{\progname}}
+\fancyhead{} % clear all fields
+\fancyfoot{} % clear all fields
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\tit\quad\rightmark}
+\fancyfoot[LO,LE]{\small\textsl{Authors List Here}}
+\fancyfoot[RO,RE]{\small\textbf{\today}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%
 @@
+
+@<<HIDE: new LaTeX commands>>=
+@@ 
+@<<HIDE: new LaTeX pstricks>>=
+@@ 
+@<<HIDE: new LaTeX urls>>=
+@@ 
+@<<HIDE: new LaTeX definitions>>=
+@@ 
+
 @ 
 
 <<REPORT LaTeX title>>=
@@ -897,7 +919,7 @@ Universitat Pompeu Fabra\\[2ex]
 <<LaTeX Frontmatter>>=
 %%%%%%%%%%%%%%%%%%%% FRONTMATTER
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{roman}
 \setcounter{page}{1}
 \pagestyle{fancy}
@@ -912,7 +934,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.5 2001-09-03 15:14:34 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $$>$ }
 \end{center}
 
 @
@@ -920,13 +942,21 @@ Universitat Pompeu Fabra\\[2ex]
 <<LaTeX PACKAGES Mainmatter>>=
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
 \sctn{Introduction}
 
 \subsctn{Program description}
+
+% \subsctn{Input}
+
+% \subsctn{Output}
+
+% \subsctn{Comments}
+
+\subsctn{To Do}
 
 <<PERL PACKAGE files>>
 
@@ -940,13 +970,13 @@ Universitat Pompeu Fabra\\[2ex]
 <<LaTeX SCRIPT Mainmatter>>=
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
 \sctn{Introduction}
 
-\subsctn{Description}
+\subsctn{Program description}
 
 \subsctn{Input}
 
@@ -960,11 +990,13 @@ Universitat Pompeu Fabra\\[2ex]
  \input todo.tex
 \end{itemize}
 
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \sctn{Implementation}
 
 \subsctn{Program outline}
 
-@<<DEPLOY>>=
+@<<@@@PROJECT@@@>>=
 @<<PERL shebang>>
 #
 # MODULES
@@ -1019,11 +1051,14 @@ sub {
 <<LaTeX REPORT Mainmatter>>=
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
 \sctn{Introduction}
+
+\sctn{Working on data}
 
 \subsctn{Command-line}
 
@@ -1042,12 +1077,12 @@ sub {
 <<LaTeX Backmatter>>=
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
 
-% \newpage
+% \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 % \bibliographystyle{apalike}
 % \bibliography{/home1/rguigo/docs/biblio/References}
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
 \sctn{empty appendix section}
@@ -1064,7 +1099,7 @@ sub {
 \sctn{Appendixes}
 
 <<LaTeX common code appendix - perl>>=
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Common code blocks}
 
@@ -1244,7 +1279,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 @<<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.5 2001-09-03 15:14:34 jabril Exp $
+# $Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $
 @@ 
 
 @ 
@@ -1253,9 +1288,9 @@ This document is under Revision Control System (RCS). The version you are curren
 \subsctn{GNU General Public License}
 
 @<<GNU License>>=
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# %                          @@@PROJECT@@@                           %
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# #----------------------------------------------------------------#
+# #                          @@@PROJECT@@@                         #
+# #----------------------------------------------------------------#
 # 
 #    Remember to put a short description of your script here...
 # 
@@ -1275,12 +1310,13 @@ This document is under Revision Control System (RCS). The version you are curren
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# #----------------------------------------------------------------#
 @@ 
+
 @ 
 
 <<LaTeX common code appendix - noweb>>=
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Extracting code blocks from this document}
 
@@ -1293,33 +1329,39 @@ Remember when tangling that '-L' option allows you to include program line-numbe
 
 @<<tangling>>=
 # showing line numbering comments in program
-notangle -L -R"root" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/root_file ;
-# program without line numbering comments
-notangle -t4 -R"root" $WORK/$nwfile.nw \
-    > $BIN/root_file ;
-# making them runnable
-chmod a+x $BIN/root_file ;
+notangle -L -R"@@@PROJECT@@@" $WORK/$nwfile.nw | \
+    perl -ne '$.>1 && print' | cpif $BIN/@@@PROJECT@@@ ;
+chmod a+x $BIN/@@@PROJECT@@@ ;
+@@ 
+
+@<<tangling>>=
+# reformating program with perltidy
+notangle -R"@@@PROJECT@@@" $WORK/$nwfile.nw | \
+    perltidy - | cpif $BIN/@@@PROJECT@@@ ;
+# html pretty-printing program with perltidy
+notangle -R"@@@PROJECT@@@" $WORK/$nwfile.nw | \
+    perltidy -html - | cpif $DOCS/html/@@@PROJECT@@@.html ;
+#
 @@ 
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
 @<<tangling>>=
-notangle -R"root" $WORK/$nwfile.nw \
-    > $DATA/root_config ;
+notangle -R"root" $WORK/$nwfile.nw | \
+         cpif $DATA/root_config ;
 @@ %$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
 @<<tangling>>=
-notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
-notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
 @@ 
 
 @<<tangling complementary LaTeX files>>=
-notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw > $DOCS/defs.tex ;
-notangle -R"HIDE: TODO" $WORK/$nwfile.nw > $DOCS/todo.tex ; 
+notangle -R"HIDE: LaTeX new definitions" $WORK/$nwfile.nw | cpif $DOCS/defs.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tex ; 
 @@ 
 
 @<<weaving>>=
@@ -1328,7 +1370,7 @@ notangle -R"HIDE: TODO" $WORK/$nwfile.nw > $DOCS/todo.tex ;
 @<<BASH Environment Variables>>
 @<<tangling complementary LaTeX files>>
 noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
-        $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+        $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 # noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
 latex $nwfile.tex ;
@@ -1373,8 +1415,8 @@ export WORK BIN PARAM DOCS DATA nwfile ;
 @<<tangling>>=
 # 
 # BASH Environment Variables
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
-         > $WORK/.bash_VARS ; 
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+         cpif $WORK/.bash_VARS ; 
 source $WORK/.bash_VARS ;
 #
 @@
@@ -1392,12 +1434,12 @@ source $WORK/.bash_VARS ;
 
 %%%%%%%%%%%%%%%%%%%% BACKMATTER
 
-% \newpage
+% \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 % \bibliographystyle{apalike}
 % \bibliography{/home1/rguigo/docs/biblio/References}
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
 \sctn{empty appendix section}
@@ -1409,7 +1451,7 @@ source $WORK/.bash_VARS ;
 \end{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Common code blocks}
 
@@ -1582,15 +1624,15 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.5 2001-09-03 15:14:34 jabril Exp $
+# $Id: deploy.nw,v 1.6 2001-09-03 17:59:15 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
 
 <<GNU License>>=
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# %                             DEPLOY                               %
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# #----------------------------------------------------------------#
+# #                             DEPLOY                             #
+# #----------------------------------------------------------------#
 # 
 # Creates basic file set to work with noweb literate programming tool.
 # 
@@ -1610,10 +1652,10 @@ This document is under Revision Control System (RCS). The version you are curren
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# #----------------------------------------------------------------#
 @ 
 
-\newpage
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Extracting code blocks from this document}
 
@@ -1627,7 +1669,7 @@ Remember when tangling that '-L' option allows you to include program line-numbe
 <<tangling development version>>=
 # showing line numbering comments in program
 notangle -L -R"DEPLOY" $WORK/$nwfile.nw | \
-    perl -ne '$.>1 && print' > $BIN/deploy.pl ;
+    perl -ne '$.>1 && print' | cpif $BIN/deploy.pl ;
 chmod a+x $BIN/deploy.pl ;
 #
 @
@@ -1644,36 +1686,36 @@ We use {\perltidy} to reformat final versions of perl scripts (without line numb
 <<tangling>>=
 # reformating program with perltidy
 notangle -R"DEPLOY" $WORK/$nwfile.nw | \
-    perltidy - > $BIN/deploy.pl ;
+    perltidy - | cpif $BIN/deploy.pl ;
 # pretty-printing program with perltidy
 notangle -R"DEPLOY" $WORK/$nwfile.nw | \
-    perltidy -html - > $DOCS/html/deploy.html ;
+    perltidy -html - | cpif $DOCS/html/deploy.html ;
 #
 @
 
 \subsctn{Extracting different Config Files} % \\[-0.5ex]
 
 <<tangling>>=
-notangle -R"PROJECT SCRIPT Template" $WORK/$nwfile.nw \
-    > $DATA/perlscript.nw ;
-notangle -R"PROJECT PERL PACKAGE Template" $WORK/$nwfile.nw \
-    > $DATA/perlpackage.nw ;
-notangle -R"PROJECT REPORT Template" $WORK/$nwfile.nw \
-    > $DATA/report.nw ;
+notangle -R"PROJECT SCRIPT Template" $WORK/$nwfile.nw | \
+    cpif $DATA/perlscript.nw ;
+notangle -R"PROJECT PERL PACKAGE Template" $WORK/$nwfile.nw | \
+    cpif $DATA/perlpackage.nw ;
+notangle -R"PROJECT REPORT Template" $WORK/$nwfile.nw | \
+    cpif $DATA/report.nw ;
 @ %$
 
 \subsctn{Extracting documentation and \LaTeX{}'ing it} % \\[-0.5ex] %'
 
 <<tangling>>=
-notangle -Rweaving  $WORK/$nwfile.nw > $WORK/nw2tex ;
-notangle -RLaTeXing $WORK/$nwfile.nw > $WORK/ltx ;
+notangle -Rweaving  $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
+notangle -RLaTeXing $WORK/$nwfile.nw | cpif $WORK/ltx ;
 chmod a+x $WORK/nw2tex $WORK/ltx;
 @ 
 
 <<tangling complementary LaTeX files>>=
 notangle -R"HIDE: LaTeX deploy new definitions" \
-    $WORK/$nwfile.nw > $DOCS/defs.tex ;
-notangle -R"HIDE: TODO" $WORK/$nwfile.nw > $DOCS/todo.tex ; 
+    $WORK/$nwfile.nw | cpif $DOCS/defs.tex ;
+notangle -R"HIDE: TODO" $WORK/$nwfile.nw | cpif $DOCS/todo.tex ; 
 @ 
 
 <<weaving>>=
@@ -1682,11 +1724,11 @@ notangle -R"HIDE: TODO" $WORK/$nwfile.nw > $DOCS/todo.tex ;
 <<BASH Environment Variables>>
 <<tangling complementary LaTeX files>>
 noweave -v -t4 -delay -x -filter 'elide "HIDE: *"' \
-        $WORK/$nwfile.nw > $DOCS/$nwfile.tex ;
+        $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 # noweave -t4 -delay -index $WORK/$nwfile.nw > $DOCS/$nwfile.tex 
 pushd $DOCS/ ;
 #
-echo "### RUNNING LaTeX on $nwfile.tex" ;
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 #
@@ -1700,14 +1742,14 @@ popd;
 <<BASH Environment Variables>>
 pushd $DOCS/ ;
 #
-echo "### RUNNING LaTeX on $nwfile.tex" ;
+echo "### RUNNING LaTeX on $nwfile.tex" 1>&2 ;
 latex $nwfile.tex ; 
 latex $nwfile.tex ; 
 latex $nwfile.tex ;
 dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 #
 # pdflatex $nwfile.tex ;
-echo "### CONVERTING PS to PDF: $nwfile" ;
+echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
 ps2pdf $nwfile.ps $nwfile.pdf ;
 #
 popd ;
@@ -1732,8 +1774,8 @@ export WORK BIN PARAM DOCS DATA nwfile ;
 <<tangling>>=
 #
 # BASH Environment Variables
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw \
-         > $WORK/.bash_VARS ; 
+notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+         cpif $WORK/.bash_VARS ; 
 source $WORK/.bash_VARS ;
 #
 @
