@@ -1,6 +1,6 @@
 #!/usr/bin/perl 
 #
-# $Id: parseblast.pl,v 1.11 2000-08-12 00:47:18 jabril Exp $
+# $Id: parseblast.pl,v 1.12 2000-09-07 18:02:00 jabril Exp $
 #
 
 my $PROGRAM = "parseblast";
@@ -438,6 +438,7 @@ EndOfALIGN
 }
 
 sub prt_out {
+	$prt = 0;
 	$err_flg && print STDERR ("#"x58)."\n## WRITING OUTPUT TO STDOUT ".("#"x30)."\n".("#"x58)."\n";
 	while (@seqlist) {
 		$nm = shift(@seqlist);
@@ -501,9 +502,9 @@ sub prt_out {
 				  &prt_aln       if $aln_flg;
 			  } # PRINT
 			} # for $cnt{$nm}
-			&prt_foeprg($ht);
 		} # do if $cnt{$nm}>0
 	} # foreach
+	&prt_foeprg($ht);
 }
 
 
@@ -540,7 +541,7 @@ while (<>) {
 		  # print STDERR "$_\n";
 		  ($seqname, $descr) = split(/\s+/, $_, 2);
 		  $seqname =~ s/^\s*>//o;
-		  $seqname =~ s/:|\|/_/og;
+		  $seqname =~ s/\s|:|\|/_/og;
 		  $seqname .= "_".($index++);
 		  $prgseq{$seqname} = "$program ($version)";
 		  $query{$seqname} = $query_name;
@@ -598,7 +599,7 @@ while (<>) {
 	  $main && do { # We are within the blast file header.
 		  /^\s*Query= +(.*)\s*$/o && do {
 			  # print STDERR "$_\n";
-			  ($query_name = $1) =~ s/:|\|/_/g ;
+			  ($query_name = $1) =~ s/\s|:|\|/_/g ;
 		  };
 		  /^\s*Database: +(.*)\s*$/o && do { 
 			  # print STDERR "$_\n";
@@ -615,6 +616,17 @@ while (<>) {
 		  last LOAD;
 	  }; # ($main)
 	  $param && do { # We are within the blast file trailer.
+		  /^\s*Query= +(.*)\s*$/o && do {
+			  # print STDERR "$_\n";
+			  &prt_foeprg($pt);
+			  $prt && &prt_out;
+			  $err_flg && print STDERR ("#"x58)."\n## PARSING STDIN FROM BLAST (New BLAST Results) ".("#"x9)."\n".("#"x58)."\n";
+			  @seqlist = ();
+			  ($query_name = $1) =~ s/\s|:|\|/_/g ;
+			  $main = 1;
+			  $seqflg = $hsp = $fragment = $param = 0;
+			  last LOAD;
+		  };
 		  if (/^\s*[^\[\<\-]/o) {
 			  # print STDERR "$_\n";
 			  chop;
@@ -628,7 +640,8 @@ while (<>) {
 } # while
 &prt_foeprg($pt);
 
-$prt && &prt_out;
+# $prt && &prt_out;
+&prt_out;
 
 &get_exec_time(time);
 
