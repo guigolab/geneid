@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.46 2000-01-25 16:22:10 jabril Exp $	
+#         $Id: gff2ps,v 1.47 2000-01-29 00:30:38 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.46 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-25 16:22:10 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.47 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-29 00:30:38 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.46 2000-01-25 16:22:10 jabril Exp $
+%    $Id: gff2ps,v 1.47 2000-01-29 00:30:38 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -456,7 +456,8 @@ flglscape {
 /XSBlck pglim pop def
 /FSF 2.5 def % Point size for Credits for A4
 /CSF { pagedict begin pga4 pop end Dpage pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
-/YSTitl YSTitl CSF dup 4 cm gt { pop 4 cm } if def
+/CYSF { pagedict begin pga4 exch pop end Dpage exch pop exch div dup 1 cm gt { pop 1 cm } if mul } bdf
+/YSTitl YSTitl CYSF dup 4 cm gt { pop 4 cm } if def
 /XOriBlck 0 def
 /XSPlot { XSBlck FLftLbl { XLftLbl sub } if FRgtLbl { XRgtLbl sub } if } def
 /XOriPlot { XOriBlck FLftLbl { XLftLbl add } if } def
@@ -465,8 +466,8 @@ flglscape {
 NBlck 0 eq {
   /is1tck false def
   /is2tck false def
-  /YSBlck { pglim exch pop flgcrd { FSF CSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if } def
-  /YS2Blck { pglim exch pop flgcrd { FSF CSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if FlgOS { TkMrkW 4 mul sub } if FlgIS { is1tck { TkMrkW 2 mul is2tck { TkMrkW 2 mul add } if sub } if } if } def
+  /YSBlck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if } def
+  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl BlckSp add add sub } if TkMrkW FlgOS { 4 } { 2 } ifelse mul sub FlgIS { is1tck { TkMrkW 2 mul is2tck { TkMrkW 2 mul add } if sub } if } if } def
   /YSFwd LnFwd def
   /YSBth LnBth def
   /YSRvs LnRvs def
@@ -474,8 +475,8 @@ NBlck 0 eq {
  } {
   /is1tck LnFwd 0 gt LnBth 0 gt and LnFwd 0 gt LnRvs 0 gt and or LnBth 0 gt LnRvs 0 gt and or def
   /is2tck LnBth 0 gt LnFwd 0 gt LnRvs 0 gt and and def % true if must plot two tickmark lines
-  /YSBlck { pglim exch pop flgcrd { FSF CSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div } def
-  /YS2Blck { pglim exch pop flgcrd { FSF CSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div FlgOS { TkMrkW 4 mul sub } if FlgIS { is1tck { TkMrkW 2 mul is2tck { TkMrkW 2 mul add } if sub } if } if } def
+  /YSBlck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div } def
+  /YS2Blck { pglim exch pop flgcrd { FSF CYSF 2 mul sub } if FlgTitl { YOriTitl YSTitl add NBlck } { 0 NBlck 1 sub } ifelse BlckSp mul add sub NBlck div TkMrkW FlgOS { 4 } { 2 } ifelse mul sub FlgIS { is1tck { TkMrkW 2 mul is2tck { TkMrkW 2 mul add } if sub } if } if } def
   /YSLine YS2Blck LnTot div def
   /tracksize tracksize YSLine mul def
   /spcrsize spcrsize YSLine mul def
@@ -552,7 +553,7 @@ headerdict begin
  /ttlong { S ttfnt sfont Title stringwidth pop stfnt sfont SubTitle stringwidth pop R 2 copy gt { pop } { exch pop } ifelse 2 div } bdf
  /Header { S XOriTitl YOriTitl YSTitl add T 1 -1 F ShwTBx { S 0 0 XSTitl YSTitl bbox fgcolor scmyk K R } if ShwTt Title () ne and { sepsz ttlong add YSTitl sepsz sub 0 Title (tv) (ch) ttfnt fgcolor ttxt } if ShwST SubTitle () ne and { sepsz ttlong add sepsz 0 SubTitle (bv) (ch) stfnt fgcolor ttxt } if ShwDate { XSTitl 4.5 sub xtfsz 0 Sdate (tv) (rh) tmfnt fgcolor ttxt } if ShwTime { XSTitl 4.5 sub YSTitl 2 div 0 Stime (cv) (rh) dtfnt fgcolor ttxt } if Shwp_num { XSTitl 4.5 sub YSTitl xtfsz sub 0 PageNumber (bv) (rh) pgfnt fgcolor ttxt } if R } bdf
 %
- /s_credits { S 1 dict begin /fs_cd FSF CSF def pglim FSF 0.52 mul CSF sub T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
+ /s_credits { S 1 dict begin /fs_cd FSF CYSF def pglim FSF 0.52 mul CYSF sub T 1 -1 F 0 0 0 (This plot has been obtained using gff2ps. The most recent version of gff2ps is freely available at \042http:\/\/www1.imim.es/\176jabril/\042. Copyright      1999 by Josep F. Abril & Roderic Guigo) (cv) (rh) fs_cd /Times-Roman fgcolor ttxt S fs_cd /Times-Roman sfont (   1999 by Josep F. Abril & Roderic Guigo) stringwidth pop neg R 0 0 (\343) (cv) (ch) fs_cd /Symbol fgcolor ttxt end R } bdf
 end
 %
 %%EndProcSet:   header_functions 1.0 0
@@ -730,11 +731,12 @@ end % shpdct
 %
 % Block Functions.
  % /tckszH tracksize 2 div def
- /YBori TkMrkW 2 mul def
+ /YBori TkMrkW FlgOS { 2 mul } if def
  /GetBVar { /blcknum exch 1 sub def /blckend xdf /blckori xdf /YB YOriBlck YSBlck blcknum mul add BlckSp blcknum mul add def } bdf
  /kbb { XOriBlck 5 sub -2 XSBlck 10 add YSBlck 2 add bbox FlgBkBx { 1 slw fgcolor scmyk K } { newpath } ifelse } bdf
  /tm { S tmdct begin /ShowGrid xdf exec end R } bdf
- /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW 3 mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW 5 mul YSFwd add YSBth add {r} 0 tm } if } bdf
+% /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 3 } { 2 } ifelse mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} 0 tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 5 } { 4 } ifelse mul YSFwd add YSBth add {r} 0 tm } if } bdf
+ /shwtck { YSFwd 0 gt YSFwd 0 eq YSBth 0 gt and or { /down YSFwd TkMrkW 2 mul add def } { /down 0 def } ifelse YSRvs 0 gt YSRvs 0 eq YSBth 0 gt and or { /up YSRvs TkMrkW 2 mul add def } { /up 0 def } ifelse FlgOS { blckori blckend XOriPlot 0 {s} YSFwd 0 eq { 0 } { 2 } ifelse tm blckori blckend XOriPlot YSBlck TkMrkW sub {z} YSRvs 0 eq { 0 } { 2 } ifelse tm } if is1tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 3 } { 2 } ifelse mul YSFwd 0 gt { YSFwd add } { YSBth add } ifelse {r} FlgOS { 0 } { 2 } ifelse tm } if is2tck FlgIS and { blckori blckend XOriPlot TkMrkW FlgOS { 5 } { 4 } ifelse mul YSFwd add YSBth add {r} FlgOS { 0 } { 1 } ifelse  tm } if } bdf
  /ChangeStrand { FlgIS { /Y Y TkMrkW 2 mul add def } if } bdf
  /uptck { FlgOS { blckori blckend XOriPlot 0 {s} 0 tm } if } bdf
  /dntck { FlgOS { blckori blckend XOriPlot Y TkMrkW add {z} 0 tm } if } bdf
