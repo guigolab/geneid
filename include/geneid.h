@@ -2,14 +2,15 @@
 *                                                                        *
 *   Module: geneid.h                                                     *
 *                                                                        *
-*   Main program. Management of the actions of geneid.                   *
+*   Definitions, data structures types and imported headers              *
 *                                                                        *
-*   This file is part of the geneid Distribution                         *
+*   This file is part of the geneid 1.1 distribution                     *
 *                                                                        *
-*     Copyright (C) 2000 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *
 *     with contributions from:                                           *
 *                          Moises  BURSET ALVAREDA                       *
+*                          Genis   PARRA FARRE                           *
 *                          Xavier  MESSEGUER PEYPOCH                     *
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -27,9 +28,9 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.9 2001-06-25 13:56:34 eblanco Exp $ */
+/* $Id: geneid.h,v 1.10 2001-12-18 17:20:59 eblanco Exp $ */
 
-/* Include libraries */
+/* Required libraries */
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>
@@ -41,77 +42,94 @@
 #include <math.h>
 #include <sys/stat.h>
 
-/* Parameters for standard-size predictions 
-#define RSITES 10  
-#define RSINGL 10                       
-#define RFIRST 2 
-#define RINTER 1
-#define RTERMI 1.9
-#define RORF   10
-End of comment */
+/*************************************************************************
+(A). DEFINITIONS
+*************************************************************************/
 
-/* Parameters for chromosome-size predictions 
-#define RSITES 5
+#define LENGTHSi 100000          /* Length of every processed fragment   */ 
+#define OVERLAP 10000            /* Overlap between 2 fragments          */
 
-#define RSINGL 3                       
-#define RFIRST 1
+#define RSITES 5                 /* One signal per L / RSITES bp         */
+#define REXONS 3                 /* One exon per L / REXONS bp           */
+
+#define RBSITES 250              /* Estimated amount of backup signals   */
+#define RBEXONS 500              /* Estimated amount of backup exons     */
+
+#define RFIRST 1                 /* Ratios according to every exon type  */
 #define RINTER 0.5
 #define RTERMI 1
-#define RORF   3   
-End of comment */
+#define RSINGL 3 
+#define RORF   3
 
-/* Memory definitions used in geneid */
+#define FSORT 3                  /* Total number ox exons/split (factor) */
 
-#define RSITES 5                       /* maximum number of sites         */
-#define REXONS 3                       /* maximum number of exons         */
 
-#define RBSITES 250                    /* Backup Information sizes         */
-#define RBEXONS 500      
+#define BASEVALUESITES_SHORT 1000
+#define BASEVALUEEXONS_SHORT 500
+#define BASEVALUESITES_LARGE 70000
+#define BASEVALUEEXONS_LARGE 35000
 
-#define RSINGL 3                       /* ratios for exon types            */
-#define RFIRST 1 
-#define RINTER 0.5
-#define RTERMI 1
-#define RORF   3   
+#define MAXEVIDENCES 10000       /* Maximum number of annotations        */
+#define MAXSR 10000              /* Maximum number of SR (strand/frame)  */
 
-#define RSORTE 3                       /* Total number ox exons/split     */
+#define MAXGENE 20000            /* Maximum number of predicted genes    */
+#define MAXEXONGENE 1000         /* Maximum number of exons in a gene    */
+#define MAXAA 300000             /* Maximum lenght of a protein          */
+#define MAXCDNA MAXAA*3          /* Maximum length of (cDNA) in genes    */
+#define MAXISOCHORES 4           /* Maximum number of isochores          */
 
-#define NUMEEVIDENCES 10000              /* maximum number of evidences     */
-#define NUMSEVIDENCES 2*NUMEEVIDENCES          
+#define EXONLENGTH 18            /* minimum exon length (internal)       */
+#define SINGLEGENELENGTH 60      /* minimum single gene length           */
+#define ORFLENGTH 60             /* minimum ORF length                   */
 
-#define MAXGENE 10000                  /* Max number of genes(multigenes) */
-#define MAXEXONGENE 10000               /* Max number of exon per gene     */
-#define LENGTHSi 100000                /* Max length of each split of S   */ 
-#define OVERLAP 10000                  /* Max length of a exon(overlap)   */
+#define MINEXONLENGTH 6          /* Min. length to score an exon (Markov)*/
+#define MINSCORELENGTH 0.0       /* Score for <  MINEXONLENGTH           */
 
-/* Other definitions */
+#define ISOCONTEXT 1000          /* Region around exon to measure G+C    */
 
-#define MAXAA 1000000                    /* Max lenght (aminoacids/protein) */
+#define NULL_OLIGO_SCORE  -4     /* Markov score penalty: N's            */
+#define PROFILEDIM 100           /* maximum profile's dimension          */
 
-#define LOCUSLENGTH 50                 /* maximum number of chars (locus) */
+#define LOCUSLENGTH 100          /* maximum number of chars (locus)      */
+#define OLIGOLENGTH 10           /* maximum oligo (word) length          */
+#define MAXLINE 1000             /* Maximum chars per input line         */
+#define FASTALINE 60             /* Characters per fasta line            */
+#define MAXSTRING 100            /* Maximum length for strings (mess)    */
 
-#define PROFILEDIM 100                 /* maximum profile's dimension     */
+#define BLOCK 1                  /* Mark a rule as blocking              */
+#define NONBLOCK 0               /* Mark a rule as non blocking          */
 
-#define OLIGOLENGTH 10                 /* maximum oligo-word length       */
+#define COFFSET 1                /* Array range in C: 0..N-1             */
 
-#define EXONLENGTH 18                  /* minimum exon length (internal   */
-                                       
-#define SINGLEGENELENGTH 60            /* minimum single gene length      */ 
-#define ORFLENGTH 60                   /* minimum ORF length              */
+#define MAXENTRY 97              /* Dictionary definitions (hash)        */
+#define MAXTYPE 50               /* Maximum number of chars/exonTypes    */
+#define MAXINFO 100
+#define NOTFOUND -1
 
-#define INTRONLENGTH 50                /* minimum exon length (internal   */
-                                       /* and terminal)                   */
-#define NULL_OLIGO_SCORE  -4           /* temporal hack to recompute */
+#define HASHFACTOR 3             /* Dumpster hash table size (factor)    */ 
 
-#define VERSION   "geneid_v1.1"        /* The name of the game            */
-#define SITES     "geneid_v1.1"        /* The name of the sites           */
-#define EXONS     "geneid_v1.1"        /* The name of the exons           */
-#define EVIDENCE  "evidence"           /* The name of evidence exons      */
+#define FILENAMELENGTH 200       /* maximum length of filenames          */
+#define PARAMETERFILE  "param.default"   /* default parameters file      */
 
-#define FRAMES 3                       /* 3 possible reading frames       */
-#define STRANDS 2                      /* 2 strands of DNA molecule       */ 
+#define VERSION   "geneid_v1.1"  /* The name of the game                 */
+#define SITES     "geneid_v1.1"  /* gff fields: source and feature       */
+#define EXONS     "geneid_v1.1"        
+#define EVIDENCE  "evidence"           
 
-#define FORWARD 0                      /* DNA - Strands                   */
+#define FRAMES 3                 /* Constants:                           */
+#define STRANDS 2                      
+#define LENGTHCODON 3                  
+#define PERCENT 100
+#define MINUTE 60                    
+#define MEGABYTE 1048576
+#define MAXTIMES 100
+#define PROT 0
+#define DNA  1
+
+#define cFORWARD '+'
+#define cREVERSE '-'
+
+#define FORWARD 0                      
 #define REVERSE 1
 
 #define sFORWARD "Forward"
@@ -120,79 +138,51 @@ End of comment */
 #define xmlFORWARD "fwd"
 #define xmlREVERSE "rvs"
 
-#define ACC 0                          /* Define site types               */
+#define ACC 0                    /* Signals                              */
 #define DON 1
 #define STA 2
 #define STO 3
 
-#define FIRST    0                     /* Define exon types               */
+#define sACC "Acceptor"                
+#define sDON "Donor"
+#define sSTA "Start"
+#define sSTO "Stop"
+
+#define FIRST    0               /* Exons                                */
 #define INTERNAL 1
 #define TERMINAL 2
 #define SINGLE   3
 #define ORF      4
 
-#define sACC "Acceptor"                /* Define site types               */
-#define sDON "Donor"
-#define sSTA "Start"
-#define sSTO "Stop"
-
-#define sFIRST    "First"              /* Define exon types               */
+#define sFIRST    "First"              
 #define sINTERNAL "Internal"
 #define sTERMINAL "Terminal"
 #define sSINGLE   "Single"
 #define sORF      "ORF"
+#define sEXON     "Exon"
 
-#define BLOCK 1                        /* define a block rule             */
-#define NONBLOCK 0                     /* define a non/block rule         */
+#define INFI 999999999           /* the biggest in geneid world          */
+#define SINFI "Infinity"         
+#define INF  1.7976931348623157E+308  
 
-#define COFFSET 1                      /* C-arrays correction             */
-#define LENGTHCODON 3                  /* 3 nucleotids                    */
+#define MAXSCORE 10000.0         /* Score (forced annotations)           */
 
-#define MAXLINE 1000                   /* Max number of chars/inputline   */
+#define MESSAGE_FREQ 100000      /* Message (info) per input X chars     */
 
-#define MAXTYPE 20                     /* Max number of chars/exonTypes   */
+#define NOGROUP "NON_GROUPED"    /* Field group in gff: Not grouped exons*/
 
-#define MAXENTRY 97                    /* Dictionary definitions          */
-#define MAXSTRING 100                   
-#define MAXINFO 100
-#define NOTFOUND -1
+#define NOVALUE 0              
 
-#define MEGABYTE 1048576               /* Accounting                      */
-#define MAXTIMES 100
-
-#define PARAMETERFILE  "param.default" /* default parameters file         */
-					
-
-#define FILENAMELENGTH 200             /* maximum length of filenames     */
-#define INF 1.7976931348623157E+308    /* maximal decimal value of double */
-                                       /* from limits.h                   */
-#define INFI 999999999                 /* the biggest number in the geneid world */
-#define SINFI "Infinity"               /* string to represent infinitum */
-
-#define MAXSCORE 10000.0               /* Maximum score (evidence exons) */
-
-#define MINUTE 60                      /* 1 minute = 60 seconds           */
-
+/* Macros (functions) */
 #define MIN(a,b) (a<b)?a:b;
 #define MAX(a,b) (a>b)?a:b;
 
-#define MAXSR 10000                     /* Maximum number of sr per frame  */
-#define MAXISOCHORES 4                 /* Maximum number of isochores */
-#define PERCENT 100   
 
-#define NOVALUE 0
-#define NOGROUP -13
+/*************************************************************************
+(B). DATA TYPES
+*************************************************************************/
 
-#define ISOCONTEXT 1000
-
-#define MAXCDNA 300000                 /* Maximum nucleotides per gene (cDNA) */
-#define PROT 0
-#define DNA  1
-
-/****************************************************************************/
-
-/* GeneId data types */
-typedef struct s_profile               /* Predict sites profile           */
+typedef struct s_profile               
 {
   int    dimension;
   int    offset;
@@ -201,31 +191,30 @@ typedef struct s_profile               /* Predict sites profile           */
 
   long dimensionTrans;
   float*  transitionValues[PROFILEDIM];
-  /*  float  matrix[127][PROFILEDIM]; */
 } profile;
 
-typedef struct s_site                  /* Site data type                  */
+typedef struct s_site                  
 {
   long Position;                       
   double Score;                        
 } site;
 
-typedef struct s_packSites             /* Pack of sites                   */
+typedef struct s_packSites             
 {
-  site* StartCodons;                   /* Sites                           */
+  site* StartCodons;                   
   site* AcceptorSites;
   site* DonorSites;
   site* StopCodons;
 
-  long  nStartCodons;                  /* Counters of sites               */
+  long  nStartCodons;                  
   long  nAcceptorSites;
   long  nDonorSites;
   long  nStopCodons;
 
-  long nSites;                         /* Counter of the total number     */
+  long nSites;                         
 } packSites;
 
-typedef struct s_exonGFF *pexonGFF;    /* Standard GFF-format exon        */
+typedef struct s_exonGFF *pexonGFF;    
 typedef struct s_exonGFF
 {
   site* Acceptor;
@@ -239,28 +228,30 @@ typedef struct s_exonGFF
   double Score;
   pexonGFF PreviousExon;
   double GeneScore;
-  int Group;
+  char Group[MAXSTRING];
   int offset1;
   int offset2;
+  short lValue;
+  short rValue;
   short evidence;
   short selected;
 } exonGFF;
 
-typedef struct s_packExons             /* Pack of exons                   */
+typedef struct s_packExons             
 {
-  exonGFF* InitialExons;               /* Exons                           */
+  exonGFF* InitialExons;               
   exonGFF* InternalExons;
   exonGFF* TerminalExons;
   exonGFF* Singles;
   exonGFF* ORFs;
 
-  long nInitialExons;                  /* Counters of exons               */
+  long nInitialExons;                  
   long nInternalExons;
   long nTerminalExons;
   long nSingles;
   long nORFs;
 
-  long nExons;                         /* Counter of the total number     */
+  long nExons;                         
 } packExons;
 
 typedef struct s_packGenes
@@ -285,6 +276,7 @@ typedef struct s_packEvidence
   long i1vExons;
   long i2vExons;
 
+  long ivExons;
 } packEvidence;
 
 typedef struct s_SR
@@ -297,26 +289,25 @@ typedef struct s_SR
 typedef struct s_packSR
 {
   SR** sRegions;
-  int* iRegions;
   int* nRegions;
   int nTotalRegions;
 } packSR;
 
 
-typedef struct s_dumpNode *pdumpNode;  /* Structure of a sinonimous       */
+typedef struct s_dumpNode *pdumpNode;  
 typedef struct s_dumpNode
 {
-   long acceptor;                      /* Hash keys                       */
+   long acceptor;                      
    long donor;
    short frame;
    char strand;
    char type[MAXTYPE];
 
-   exonGFF* exon;                      /* Info                            */
+   exonGFF* exon;                      
    pdumpNode next;
 } dumpNode; 
 
-typedef struct s_dumpHash              /* Structure of a hash table       */
+typedef struct s_dumpHash              
 {
   pdumpNode* T;
   long total; 
@@ -324,16 +315,16 @@ typedef struct s_dumpHash              /* Structure of a hash table       */
 
 typedef struct s_packDump
 { 
-  site* dumpSites;                     /* backup sites                    */
+  site* dumpSites;                     
   long ndumpSites;
   
-  exonGFF* dumpExons;                  /* backup exons                    */
+  exonGFF* dumpExons;                  
   long ndumpExons;
 
   dumpHash* h; 
 } packDump;
 
-typedef struct s_account               /* Accounting                      */
+typedef struct s_account               
 {
   long starts, starts_r,
     stops, stops_r,
@@ -354,7 +345,14 @@ typedef struct s_account               /* Accounting                      */
 
 } account;
 
-typedef struct s_node *pnode;          /* Structure of a sinonimous       */
+typedef struct s_packGC
+{
+  long* GC;
+  long* N;
+} packGC;
+
+
+typedef struct s_node *pnode;          
 typedef struct s_node
 {
   char s[MAXSTRING];
@@ -362,13 +360,13 @@ typedef struct s_node
   pnode next;
 } node; 
 
-typedef struct s_dict                  /* Structure of a hash table       */
+typedef struct s_dict                  
 {
   pnode T[MAXENTRY];
   int nextFree; 
 } dict;
 
-typedef struct s_paramexons            /* Data type of score-params       */
+typedef struct s_paramexons            
 {
 float OligoWeight;
 float OligoCutoff;
@@ -376,24 +374,24 @@ float ExonWeight;
 float ExonCutoff;
 } paramexons;
 
-typedef struct s_gparam                /* Data type of GeneId-params      */
+typedef struct s_gparam                
 {
   int leftValue;
   int rightValue;
 
-  profile* StartProfile;               /* Profiles for predicting sites   */
+  profile* StartProfile;               
   profile* AcceptorProfile;
   profile* DonorProfile;
   profile* StopProfile;
 
-  float* OligoLogsIni[3];              /* Markov initial values           */
+  float* OligoLogsIni[3];              
   float* OligoLogsTran[3];
 
-  long OligoDim;                       /* Markov models parameters        */
+  long OligoDim;                       
   long OligoDim_1;           
   int  OligoLength;
 
-  paramexons* Initial;                 /* Score exons parameters          */
+  paramexons* Initial;                 
   paramexons* Internal;
   paramexons* Terminal;
   paramexons* Single;
@@ -401,9 +399,9 @@ typedef struct s_gparam                /* Data type of GeneId-params      */
   float* OligoDistIni[FRAMES]; 
   float* OligoDistTran[FRAMES];
 
-  int MaxDonors;                       /* Max number of exons per acc     */
+  int MaxDonors;                       
 
-  dict* D;                             /* GeneModel configuration         */
+  dict* D;                             
   int*  nc;
   int*  ne;
   long* md;
@@ -416,16 +414,17 @@ typedef struct s_gparam                /* Data type of GeneId-params      */
 } gparam;
 
 
-/* Import function headers */
+/*************************************************************************
+(C). IMPORTED HEADERS
+*************************************************************************/
 
-/* Printing error messages */
 void printError(char *s);
 
-/* Printing messages (information) */
 void printMess(char* s);
 
-/* Printing partial and final results (information) */
 void printRes(char* s);
+
+void printReadingInfo(char* s);
 
 long GetSitesWithProfile(char *s, profile *p, site *st, long l1, long l2); 
 
@@ -435,29 +434,34 @@ long BuildInitialExons(site *Start, long nStarts,
                        site *Donor, long nDonors,
                        site *Stop, long nStops,
                        int MaxDonors,
+					   char* Sequence,
                        exonGFF *Exon);
 
 long BuildInternalExons(site *Acceptor, long nAcceptors, 
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
                         int MaxDonors,
+						char* Sequence,
                         exonGFF* Exon);
  
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
                          site *Stop, long nStops,
                          long LengthSequence,
-                         exonGFF* Exon,
-                         long cutPoint);
+                         long cutPoint,
+						 char* Sequence,
+						 exonGFF* Exon);
 
 long BuildSingles(site *Start, long nStarts, 
                   site *Stop, long nStops,
                   long cutPoint,
+				  char* Sequence,
                   exonGFF *Exon);
 
 long BuildORFs(site *Start, long nStarts, 
-                  site *Stop, long nStops,
-                  long cutPoint,
-                  exonGFF *Exon);
+			   site *Stop, long nStops,
+			   long cutPoint,
+			   char* Sequence,
+			   exonGFF *Exon);
 
 packSites* RequestMemorySites();
 packExons* RequestMemoryExons();
@@ -468,6 +472,7 @@ packGenes* RequestMemoryGenes();
 packDump* RequestMemoryDumpster();
 dict* RequestMemoryAaDictionary();
 void RequestMemoryProfile(profile* p);
+account* RequestMemoryAccounting();
 
 void readargv (int argc,char *argv[],
 	       char *ParamFile, char* SequenceFile,
@@ -489,7 +494,7 @@ long ReadExonsGFF (char *FileName, packEvidence* pv, dict* d);
 
 void SwitchPositions(packExons *allExons);
 
-long SearchEvidenceExons(packEvidence* pv, long l2);
+void SearchEvidenceExons(packEvidence* pv, long l2);
 
 void SortExons(packExons* allExons, 
                packExons* allExons_r, 
@@ -561,7 +566,7 @@ void CorrectExon(exonGFF *e);
 
 void CorrectORF(exonGFF *e);
 
-void SwitchFrames(exonGFF *e, long n, int when);
+void SwitchFrames(exonGFF* e, long n);
 
 void SwitchFramesDa(packGenes* pg, int nclass);
 
@@ -584,8 +589,13 @@ void PrintXMLExon(exonGFF *e, char Name[],
 		  int type1, int type2, 
 		  int nExons);
 
-void TranslateGen(exonGFF* e, char* s,dict* dAA, long nExons, 
-                  int** tAA, char* prot, long* nAA);
+void TranslateGene(exonGFF* e,
+                   char* s,
+                   dict* dAA,
+                   long nExons,
+                   int** tAA,
+                   char* prot,
+                   long* nAA);
 
 void resetDumpHash(dumpHash* h);
 
@@ -610,14 +620,51 @@ long ReadSR (char *FileName, packSR* sr, long LengthSequence);
 
 void shareGeneModel(gparam** isochores, int n);
 
-long OligoToInt(char *s, int ls);
+long OligoToInt(char *s, int ls, int cardinal);
 
 char* RequestMemorySequence(long L);
 
-
 void ScoreExons(char *Sequence, 
-		packExons* allExons, 
-		long l1, long l2, int Strand, packSR* sr,
-		gparam** isochores, int nIsochores);
+                packExons* allExons, 
+                long l1,
+                long l2,
+                int Strand,
+                packSR* sr,
+                gparam** isochores,
+                int nIsochores,
+                packGC* GCInfo);
 
 void GetcDNA(exonGFF* e, char* s, long nExons, char* cDNA, long* nNN);
+
+float ComputeGC(packGC* GCInfo, long inigc, long endgc);
+
+void GCScan(char* s, packGC* GCInfo, long l1, long l2);
+
+void beggar(long L);
+
+void SetRatios(long* NUMSITES,
+               long* NUMEXONS,
+               long* MAXBACKUPSITES,
+               long* MAXBACKUPEXONS,
+               long L);
+
+long analizeFile(char* SequenceFile);
+
+packGC* RequestMemoryGC();
+
+int SelectIsochore(float percent, gparam** isochores);
+
+void  manager(char *Sequence, long LengthSequence,
+			  packSites* allSites,
+			  packExons* allExons,
+			  long l1, long l2,
+			  int Strand,
+			  packSR* sr,
+			  gparam* gp,
+			  gparam** isochores,
+			  int nIsochores,
+			  packGC* GCInfo);
+
+void resetEvidenceCounters(packEvidence* pv);
+
+void ComputeStopInfo(exonGFF* e, char* s);
