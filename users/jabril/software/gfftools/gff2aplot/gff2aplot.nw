@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $
+% $Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -437,22 +437,25 @@ use vars qw/
 @ 
 
 % Typeglobs set to a referenced scalar forces a constant value for all execution
+% They can only be set with 'local' (not 'my'), and must be de-referenced
+% (say here $$T and $$F) so it is not woth using them for this little script.
 
 <<Pre-Declared Vars>>=
 $T $F $n $c
 @
 
-@ 
 <<Global Constants>>=
-($T,$F) = (\1,\0); # for 'T'rue and 'F'alse
+($T,$F) = (1,0); # for 'T'rue and 'F'alse
 @
 
-Those are the main variables containing customization parameters and input data from GFF records. We split customization variables on three input classes: [[%DefaultVars]] to set default values and their type (what makes easy to check if a variable exists or not and if its given value has the expected format), [[%CmdLineVars]] for those parameters passed on command-line and [[%CustomVars]] which collects vaiables customization from external parameter files. Two temporary variables ([[%Defaults]] to initialize element variables and [[%Vars]] to provide the customization from command-line and parameter files to those element variables) allow us to merge all the information from these three variables and transfer to each GFF element in the GFF data variables ([[%GFF_DATA]] for annotations and [[%ALN_DATA]] for alignments). \label{sec:APLOT-DS}\label{sec:GFF-DS}
+Those are the main variables containing customization parameters and input data from GFF records. We split customization variables on three input classes: [[%DefaultVars]] to set default values and their type (what makes easy to check if a variable exists or not and if its given value has the expected format), [[%CmdLineVars]] for those parameters passed on command-line and [[%CustomVars]] which collects vaiables customization from external parameter files. Two temporary variables ([[%Defaults]] to initialize element variables and [[%Vars]] to provide the customization from command-line and parameter files to those element variables) allow us to merge all the information from these three variables and transfer to each GFF element in the GFF data variables ([[%GFF_DATA]] for annotations and [[%ALN_DATA]] for alignments).
 
 <<Pre-Declared Vars>>=
-%DefaultVars %CmdLineVars %CustomVars %Defaults %Vars
+%DefaultVars %CmdLineVars %CustomVars %Defaults %Vars %Order
 %GFF_DATA %ALN_DATA
 @ 
+
+[[%ALN_DATA]] is set on section~\ref{sec:APLOThsh} (see page~\pageref{sec:APLOThsh}), [[%GFF_DATA]] is set on section~\ref{sec:GFFhsh} (see page~\pageref{sec:APLOThsh}), and [[%Order]] is set on section~\ref{sec:ORDERhsh} (see page~\pageref{sec:ORDERhsh}). 
 
 Some info about the program itself.
 
@@ -462,9 +465,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.16 $', #'
-     '$Date: 2001-11-07 18:56:49 $', #'
-     '$Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $', #'
+     '$Revision: 1.17 $', #'
+     '$Date: 2001-11-08 19:33:42 $', #'
+     '$Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -1269,10 +1272,10 @@ VARTYPE_NOT_DEFINED =>
   $spw."  could not check value for \"\%s\".\n",
 @
 
-The following hash keys serve as references to annonymous functions, each one defining a single test for the variable value passed by reference and modifying it if needed. [[%Fonts]] is set on section~\ref{sec:FontsHsh} (page~\pageref{sec:FontsHsh}), [[%COLORS]] is set on section~\ref{sec:ColorsHsh} (page~\pageref{sec:ColorsHsh}), [[%FORMATS]] is set on section~\ref{sec:FormatsHsh} (page~\pageref{sec:FormatsHsh}), [[%Messages]] is set on section~\ref{sec:MessagesHsh} (page~\pageref{sec:MessagesHsh})
+The following hash keys serve as references to annonymous functions, each one defining a single test for the variable value passed by reference and modifying it if needed. [[%Fonts]] is set on section~\ref{sec:FontsHsh} (page~\pageref{sec:FontsHsh}), [[%COLORS]] is set on section~\ref{sec:ColorsHsh} (page~\pageref{sec:ColorsHsh}), [[%FORMATS]] is set on section~\ref{sec:FormatsHsh} (page~\pageref{sec:FormatsHsh}), [[%Messages]] is set on section~\ref{sec:MessagesHsh} (page~\pageref{sec:MessagesHsh}) and [[%UNITS]] is set on section~\ref{sec:UnitsHsh} (page~\pageref{sec:UnitsHsh}).
 
 <<Pre-Declared Vars>>=
-%TESTS %Fonts %COLORS $colors %FORMATS $formats %Messages
+%TESTS %Fonts %COLORS $colors %FORMATS $formats %Messages %UNITS
 @ 
 <<Global Vars>>=
 %TESTS = (
@@ -1361,39 +1364,6 @@ $tmpstr =~ m{^/(.*)/$}o && do {
 $string = '^'.(quotemeta($tmpstr)).'$'; #' 
 @ 
 
-<<HIDE: testing regular expressions for element@id>>=
-The following does not work pretty well:
-
-$string =~ /^(.*)(?:@(.*?))?$/ && (($tmpstr, $tmpid) = ($1,$2));
-
-As we can see in the perl script below, reversing the regular expression is a good choice: 
-
-perl -ne ' 
-    chomp;
-    $a=$b=undef;
-    (reverse($_) =~ /^([^\/]*?)(?:\@)(?!\\)(.*)$/o) && 
-        ($a=reverse($2),$b=reverse($1));
-    defined($b) && 
-        (print ">>> \"$a\" \@ \"".($b?$b:"NIL")."\"\n") ||
-            (print ">>> \"$_\"\n"); '
-jhkjfhgkjdf@one # feature string and ID, both defined
->>> "jhkjfhgkjdf" @ "one"
-/.*@@.*/        # only feature regexp, no ID
->>> "/.*@@.*/"
-ffgdg           # only feature string, no ID
->>> "ffgdg"
-jhkjfhgkjdf@    # only feature string, but an empty ID field ? 
->>> "jhkjfhgkjdf" @ "NIL"
-jhkjfhgkjdf\@   # use "\" to preserve "@" if feat ends with "@" (most unlikely)
->>> "jhkjfhgkjdf\@"
-/.*@@.*/@kk     # feature regexp and ID, both defined
->>> "/.*@@.*/" @ "kk"
-*@yoyo          # feature pseudo-regexp ("*" ~ "/.*/") and ID, both defined
->>> "*" @ "yoyo"
-!@@@@@lio       # a very extrange test, isn't it ? ... ;^D
->>> "!@@@@" @ "lio"
-@ %$
-
 <<Parsing Custom Files>>=
 sub eval_regexp() {
     my $str = $_[0];
@@ -1419,124 +1389,6 @@ sub escape_input() {
 } # escape_input
 @ %def &escape_input
 
-<<HIDE: testing regexes: regexptester.pl>>=
-BEGIN { ($NULL,$T,$F) = ("+@+NULL+@+",1,0); }
-    chomp;
-    s{^:::\s+}{}o;
-    print ">>> $_ \n";
-    ($a,$b) = split /\s+:::\s+/o, $_, 2;
-    @results = &find_regexp($a);
-    @results_mod = (($results[0] ? "TRUE" : "FALSE"),
-                    ($results[1] ? "TRUE" : "FALSE"),
-                    (defined($results[2]) ? $results[2] : "FALSE"),
-                    "$results[3]");
-    printf ">>> IS_OK::%s::  IS_NEG::%s::  GET_ID::%s::  GET_STRING::%s::\n",
-           @results_mod;
-    !$results[1] &&
-         print ">>> ".
-             (  ( (eval { $b =~ m{$results[3]}; 1 } || 0) ?
-                         ($b =~ m{$results[3]}) : 0 ) ? 
-                     "\"$b\" MATCHES \/$results[3]\/ " : 
-                     "\"$b\" DOES NOT MATCH \/$results[3]\/ ")."\n\n";
-    $results[1] &&
-         print ">>> ".
-             (!(( (eval { $b =~ m{$results[3]}; 1 } || 0) ?
-                         ($b =~ m{$results[3]}) : 0 )) ? 
-                       "\"$b\"  MATCHES !\/$results[3]\/ " : 
-                       "\"$b\" DOES NOT MATCH !\/$results[3]\/ ")."\n\n";
-sub find_regexp() {
-    my $string = $_[0];
-    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid);
-    $isOK_flg = $T;
-    $not_flg = $F;
-    $id_flg = undef;
-    $string =~ s{^!}{}o && ($not_flg = $T); # not_regexp is true
-    $string =~ s{(\\@)$}{@@}o;
-    $string = &escape_input($string);
-    ($tmpstr, $tmpid) = (undef, undef);
-    ( reverse($string) =~ m{^([^\/@]*?)(?:@){1}(.*)$}o ) && do {
-        $tmpstr = reverse($2);
-        $tmpid  = reverse($1);
-    };
-  REGEXPS: {
-      print ">>> STRING($tmpstr) ID($tmpid)\n";
-      (defined($tmpid) && $tmpid ne "") && ($id_flg = $tmpid);
-      (defined($tmpstr) && $tmpstr ne "") || do {
-          $string eq '@' && ($string="", $isOK_flg=$F);
-          $tmpstr = $string;
-      };
-      $tmpstr eq '*' && do {
-          $string = '^.*$';
-          last REGEXPS;
-      };
-      $tmpstr =~ m{^/(.*)/$}o && do {    
-          ($string, $isOK_flg) = &eval_regexp($1);
-          last REGEXPS;
-      }; # $tmpstr is a regexp
-      $string = '^'.(quotemeta($tmpstr)).'$';
-    }; # REGEXPS
-    return ($isOK_flg, $not_flg, $id_flg, $string);
-} # find_regexp
-sub eval_regexp() {
-    my $str = $_[0];
-    my $flag;
-    # $str =~ s{^[^\\]*?/+}{}o;
-    # $str =~ s{/+.*?$}{}o;
-    eval { "" =~ m{$str}; $flag = $T; } || ($flag = $F);
-    return ($str, $flag);
-} # eval_regexp
-sub escape_input() {
-  $_[0] =~ s{([;<>&!{}'`"])}{\\$1}og; # "`'
-  return $_[0];
-} # escape_input
-@
-
-<<HIDE: testing regexes: regexes.test>>=
-::: @ ::: @
-::: \@ ::: @
-::: @@ ::: @
-::: element ::: element
-::: element ::: any
-::: !element ::: element
-::: !element ::: any
-::: element@id ::: element
-::: !element@id ::: element
-::: /.*any.*/ ::: chooseanyfeat
-::: /; system(" echo \"I have found your name: \$USER ... X.D\" "); / ::: any
-::: /; `echo "I have found your name: \$USER ... X.D"`; / ::: any
-::: / @{[ system("echo \"I have found your name: \$USER ... X.D\"") ]} / ::: any
-::: / @{[ system('echo "I have found your name: $USER ... X.D"') ]} / ::: any
-::: / @{ \( system("echo \"I have found your name: \$USER ... X.D\"") ) } / ::: any
-::: / @{ \( exec "echo \"I have found your name: \$USER ... X.D\"" ) } / ::: any
-::: /(a)+ny/ ::: any
-::: /(a)+ny/ ::: aany
-::: /^(a)+ny/ ::: any
-::: /^a?ny/ ::: any
-::: /^a?ny/ ::: aany
-::: /^a?ny/@id ::: any
-::: /^a?ny/@id ::: onyony
-::: /^a?ny/@id ::: nyony
-::: !/^a?ny/ ::: any
-::: !/^a?ny/ ::: aany
-::: !/^a?ny/ ::: ony
-::: 5'cds ::: 5'cds
-::: /^5'.*$/ ::: 5'utr
-::: /^a.*?y$/ ::: annnnny
-::: /^a.*?y$/ ::: anyany
-::: /^a[^y]*y$/ ::: annnnny
-::: /^a[^y]*y$/ ::: anyany
-::: /a.+?y/ ::: annnnny
-::: /a.+?y/ ::: ayyyyyy
-::: /y{6}/ ::: ayyyyyy
-@
-
-<<HIDE: test file for the previous regexp tester>>=
-notangle -L -R'HIDE: testing regexes: regexptester.pl' $WORK/$nwfile.nw | \
-         cpif $BIN/regexptester.pl ;
-notangle -R'HIDE: testing regexes: regexes.test' $WORK/$nwfile.nw | \
-         cpif $TEST/regexes.test ;
-perl -n $BIN/regexptester.pl < $TEST/regexes.test > $TEST/regexes.report ;
-@ 
 
 \subsctn{Customization variable values validation}
 
@@ -1567,7 +1419,45 @@ This section is dedicated to those test we need to ensure that customization var
 \caption[Customization parameters available formats]{\label{tbl:varformats} Parameter available formats we are going to use for customization variables checking.}
 \end{center}
 
+Here we define the annonymous functions that will provide units exchange to points or nucleotides.
+\label{sec:UnitsHsh}
 
+<<Global Vars>>=
+%UNITS = (
+    <<units exchange functions>>
+    );
+@
+
+<<Pre-Declared Vars>>=
+$kilo $mega $giga $cm2pt $mm2pt $in2pt
+@
+
+Those units are used in layout/font-size lengths setting:
+
+<<Global Constants>>=
+($cm2pt,$mm2pt,$in2pt) = (28.35,2.835,72);
+@ 
+<<units exchange functions>>=
+pt  => sub { return $_ },
+mm  => sub { return $_ * $mm2pt },
+cm  => sub { return $_ * $cm2pt },
+in  => sub { return $_ * $in2pt },
+@ 
+
+Those allow to recover base-pair nucleotide coords for sequence related calculations:
+
+<<Global Constants>>=
+($kilo,$mega,$giga) = (10**3,10**6,10**9);
+@
+<<units exchange functions>>=
+bp  => sub { return $_ },
+kbp => sub { return $_ * $kilo },
+mbp => sub { return $_ * $mega },
+gbp => sub { return $_ * $giga },
+@
+
+As you can note, we have defined a function to convert from gigabases, but at this moment {\ps} can only handle numbers smaller than $2.1*10^9$ and {\prog} is not ready to workaround that. [[pt]] and [[bp]] have been introduced for consistency, so the functions using those units can be more general and avoid to check special cases and whole program code will be simpler.
+ 
 <<HIDE: DONE>>=
 \doneitem{20011107}{Maybe [[UNITS]] instead of [[FONT_SZ]] will have broader applicability.}
 @
@@ -1823,11 +1713,6 @@ We provide three basic fonts that are standard in most {\ps} devices (a serif, a
     );
 @ 
 
-<<warnings - parsing custom files>>=
-NOT_A_FONT =>
-  $Warn."\"\%s\" font is not available for \"\%s\" variable.\n",
-@
-
 Font sizes can be given in points, centimeters or inches. If no units are provided, then we asume points, but always must be possitive values.
 
 <<HIDE: variable value checking>>=
@@ -1847,7 +1732,7 @@ It has been solved by returning a two elements array having the numeric value an
 \doneitem{20011107}{Can we do the same for SEQ_UNIT ? (section~\ref{sec:DNABASE}).}
 @
 
-<<warnings - parsing custom files>>=
+<<HIDE: warnings - parsing custom files>>=
 NOT_A_FONTSIZE =>
   $Warn."\"\%s\" is not a valid font-size for \"\%s\" variable.",
 @
@@ -1945,60 +1830,6 @@ NOT_A_DNAUNIT =>
   $spw." \"\%s\" is not valid (units must be in Gb, Mb, Kb, or bases).\n",
 @
 
-<<HIDE: testing regular expressions for SEQ_UNIT>>=
-perl -ne '$q = undef; chomp;
-          $a = $_;
-          ($_ =~ /^\.$|^\s*$/o) && do {
-               print "$a ::: Wrong VALUE... !!!\n";
-               next;
-          };
-          $_ =~ s/(?:\.)?
-                  (?:(g(?:iga)?|m(?:ega)?|k(?:ilo)?)?
-                  b(?:ase)?
-                  (?:p(?:air)?)?
-                  (?:s)?)$
-                 //ox && ($q = $1);
-          defined($q) || do {
-              $_ =~ /[^\d]+$/o && do {
-                   print "$a ::: Wrong UNITS !!!\n";
-                   next;
-              };
-          };
-          (defined($_) && $_ ne "") ||  do {
-               print "$a ::: Wrong VALUE !!!\n";
-               next;
-          };
-          ($q,undef) = split //o,$q,2;
-          $q .= 'bp';
-          print "$a ::: $_ $q\n"; ' << 'EOF'
-10kbp
-10kilobp
-10gigabp
-11.33kk
--1kb
-0.5bp
-.
-
-0.bp
-0
-10+e15bp
-EOF
-
-The results are the following:
-
-10kbp ::: 10 kbp
-10kilobp ::: 10 kbp
-10gigabp ::: 10 gbp
-11.33kk ::: Wrong UNITS !!!
--1kb ::: -1 kbp
-0.5bp ::: 0.5 bp
-. ::: Wrong VALUE... !!!
- ::: Wrong VALUE !!!
-0.bp ::: 0 bp
-0 ::: 0 bp
-10+e15bp ::: 10+e15 bp
-@ 
-
 <<HIDE: variable value checking>>=
 $_test eq 'SEQ_UNIT' && do { # lc
     $_t =~ /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)([gmk]?b(ases)?)?$/o && 
@@ -2050,66 +1881,6 @@ NOT_A_PSUNIT =>
   $Warn."\"\%s\" variable requires PostScript units.\n".
   $spw." \"\%s\" is not valid (units must be in points, cm, mm, or inches).\n",
 @
-
-<<HIDE: testing regular expressions for SEQ_UNIT>>=
-perl -ne '$q = undef; chomp;
-          $a = $_;
-          ($_ =~ /^\.$|^\s*$/o) && do {
-               print "$a ::: Wrong VALUE... !!!\n";
-               next;
-          };
-          PSLEN: {
-              $_ =~ s/m(eter(s)?)?$//o && do {
-                  $_ =~ s/(\.)?c(enti)?$//o && ($q = "cm", last PSLEN);
-                  $_ =~ s/(\.)?m(ili)?$//o  && ($q = "mm", last PSLEN);
-                  last PSLEN;
-              };
-              $_ =~ s/(\.)?in(ch(es)?)?$//o && ($q = "in", last PSLEN);
-              $_ =~ s/(\.)?(pt|point(s)?)$//o    && ($q = "pt");
-          }; # PSLEN
-          defined($q) || do {
-              $_ =~ /[^\d]+$/o && do {
-                   print "$a ::: Wrong UNITS !!!\n";
-                   next;
-              };
-              $q = "pt";
-          };
-          (defined($_) && $_ ne "") ||  do {
-               print "$a ::: Wrong VALUE !!!\n";
-               next;
-          };
-          print "$a ::: $_ $q\n"; ' << 'EOF'
-10cm
-10centimeters
-10mmeters
-11.33kk
--1in
-0.5pt
-100inches
-1inch
-.
-
-0.points
-0
-10+e15pts
-EOF
-
-The results are the following:
-
-10cm ::: 10 cm
-10centimeters ::: 10 cm
-10mmeters ::: 10 mm
-11.33kk ::: Wrong UNITS !!!
--1in ::: -1 in
-0.5pt ::: 0.5 pt
-100inches ::: 100 in
-1inch ::: 1 in
-. ::: Wrong VALUE... !!!
- ::: Wrong VALUE... !!!
-0.points ::: 0 pt
-0 ::: 0 pt
-10+e15pts ::: Wrong UNITS !!!
-@ 
 
 
 \subsubsctn{Accepting numeric ranges}
@@ -2312,7 +2083,8 @@ automatically a format name for this new page dimensions).
 See [page_bbox] customization variable on page~\pageref{sec:pagebbox} 
 (section~\ref{sec:pagebbox}) for further info on this command-line option.
 It overrides any [page-size] command-line option (and any related variable 
-passed through custom files).
+passed through custom files). <width> and <height> are set to points 
+if no unit is given, now you can use pt, mm, cm or in.
 ###EOR###
 @
 <<DESC custom file variables>>=
@@ -2332,8 +2104,8 @@ using standard page sizes which can be set using [page_size], because
 [page_bbox] overrides any further page definition by that variable. If
 the variable is not set, default value forces the use of any settings
 given for [page_size]. <width> and <height> are set to points if no unit is
-given, you can use points, milimeters, centimeters or inches (pt, mm,
-cm or in, respectively). See table~\ref{tbl:PageSizes} for a reference
+given, now you can also use points, milimeters, centimeters or inches (pt, 
+mm, cm or in, respectively). See table~\ref{tbl:PageSizes} for a reference
 on already defined page sizes and their dimensions.
 ###EOR###
 @ 
@@ -3491,7 +3263,7 @@ y_sequence_name           => { TYPE => 'STRING', VALUE => undef     },
 <<command-line help>>=
 -A, --alignment-name <SeqXName:SeqYName>
      Defining which alignment is going to be plotted 
-     if you have more than one alignment in your gff files.
+     if you have more than one alignment in your gff input.
 -N, --x-sequence-name <SeqXName>
      Defining which sequence is going to be plotted at X-axes.
 -n, --y-sequence-name <SeqYName>
@@ -3501,29 +3273,41 @@ y_sequence_name           => { TYPE => 'STRING', VALUE => undef     },
 ORD: 80
 OPT: A
 LNG: alignment-name
-PAR: <string:string>
-EQV: [alignment_name]=<string:string>
-SDE: 
+PAR: <seqXname:seqYname>
+EQV: [alignment_name]=<seqXname:seqYname>
+SDE: Selects <seqXname:seqYname> alignment.
 LDE: 
-
+When you are providing several alignments from input, you can select which one
+to be plotted. By default program uses first alignment found in the input 
+stream if [x_sequence_name] and [y_sequence_name] were also not defined, else
+it will try combining those variables if they are set by user or relying on 
+their default values. See [alignment_name] customization variable description
+on section~\ref{sec:seqXseqY}, page~\pageref{sec:seqXseqY}, for further info.
+It is also explained there but remember that you should take care of unexpected
+side effects when setting different sequence names to this command-line option
+and its siblings, [x-sequence-name] and [y_sequence_name], if you set one of 
+them in a custom file and the others on command-line or viceversa.
 ###EOR###
 ORD: 81
 OPT: N
 LNG: x-sequence-name
-PAR: <string>
-EQV: [x_sequence_name]=<string>
-SDE: 
+PAR: <seqXname>
+EQV: [x_sequence_name]=<seqXname>
+SDE: Selects which sequence to plot on X-axes.
 LDE: 
-
+You can choose the sequence that is going to be drawn along X-axes, or what
+is equivalent, which annotation will appear on that axes. See [alignment-name] 
+description to know more about these variables.
 ###EOR###
 ORD: 82
 OPT: n
 LNG: y-sequence-name
-PAR: <string>
-EQV: [y_sequence_name]=<string>
-SDE: 
+PAR: <seqYname>
+EQV: [y_sequence_name]=<seqYname>
+SDE: Selects which sequence to plot on Y-axes.
 LDE: 
-
+Here you will define which sequence is drawn on Y-axes. Take a look to 
+[alignment-name] to get more info about the interactions between these variables.
 ###EOR###
 @ 
 <<DESC custom file variables>>=
@@ -3531,28 +3315,65 @@ ORD: 80
 SEC: LAYOUT
 SUB: Aplot
 OPT: alignment_name
-PAR: <string:string>
-SDE: 
+PAR: <seqXname:seqYname>
+SDE: Selects <seqXname:seqYname> alignment (useful when input contain many alignments).
 LDE: 
-
+\label{sec:seqXseqY}
+When you are providing several alignments from input, you can select which one
+to be plotted. By default program uses first alignment found in the input 
+stream if [x_sequence_name] and [y_sequence_name] were also not defined, else
+it will try combining those variables if they are set by user or relying on 
+their default values. The precedence of those variables is the following:
+\centerline{<seqXname:seqYname> $\gg$ <seqXname>:<seqYname> $\gg$ <defaults>}
+Where <seqXname>:<seqYname> stands for the combination of the values set for
+[x_sequence_name] and [y_sequence_name] variables.
+If you set [alignment_name] and <seqXname:seqYname> is not found in the list
+of read alignments, program tries to find the reverse, <seqYname:seqXname>, 
+else no alignment will be drawn. \\
+Remember that if you set this variable on 
+command-line and the other two in a customization file or viceversa, you will 
+get a plot in which sequence annotation along the axes does not correlate to
+the alignment shown, so that make sure that you are using all three in a 
+coordinated way (although you are looking for that uncorrelated effect, but 
+then it will be your fault, do not blame on {\prog}). This can seem a drawback,
+but think that it will be very useful if you are parsing GFF input and the 
+alignment name was set with different sequence names: say here you have |SeqA|
+and |SeqB|, and the alignment sequence name from filtered output after running
+those sequences through your alignment program was set to |my_a:my_b| instead
+of |SeqA:SeqB|, so you do not have to reformat the GFF records for the 
+alignment or the annotation. Following with that example, if nothing else is 
+defined, |SeqA| will be drawn on X-axes and |SeqB| on Y-axes. If happens that
+|my_a:my_b| (neither in case you already have |SeqA:SeqB|) does not appear on
+GFF input, but program finds an alignment named as |my_b:my_a|, then 
+annotations will swap on axes, having |SeqA| along Y-axes and |SeqB| on X-axes.
 ###EOR###
 ORD: 81
 SEC: LAYOUT
 SUB: Aplot
 OPT: x_sequence_name
-PAR: <string>
-SDE: 
+PAR: <seqXname>
+SDE: Selects which sequence annotation is going to be plotted on X-axes.
 LDE: 
-
+We define which sequence annotation is going to be drawn on X-axes,
+having two or more sequences from GFF input.
+By default, the program will use the first sequence id from that input (unless
+ you have set something different on [alignment_name] or from command-line).
+<seqXname> will be the same as <seqYname> (but then you must define both 
+variables, [x_sequence_name] and [y_sequence_name]), this is useful when 
+comparing a sequence against itself to find repeated elements, but take care 
+not doing that when you are trying to compare different sequences because the 
+program cannot guess that you do not want to do that.
 ###EOR###
 ORD: 82
 SEC: LAYOUT
 SUB: Aplot
 OPT: y_sequence_name
-PAR: <string>
-SDE: 
+PAR: <seqYname>
+SDE: Selects which sequence annotation is going to be plotted on Y-axes.
 LDE: 
-
+This variable allows you to define which sequence is going to be drawn along
+the Y-axes. Take a look to [alignment_name] and [x_sequence_name] variables 
+descriptions for a deeper explanation of their settings and behaviour. 
 ###EOR###
 @
 
@@ -4548,7 +4369,7 @@ FRAME_MISMATCH =>
 
 \subsctn{Parsing APLOT format}\label{sec:parseAPLOT}
 
-'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOT-DS}, page~\pageref{sec:APLOT-DS}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
+'[[&check_aplot_fields]]' will call to the '[[&add_aplot_record]]' which loads the new record if everything is OK into '[[%ALN_DATA]]' (see section~\ref{sec:APLOThsh}, page~\pageref{sec:APLOThsh}). The first parameter for '[[&load_grouping]]' function is set to 'False' is for APLOT grouping definition ('True' for GFF grouping definition, see section~\ref{sec:parseGFF}).
 
 <<Parsing Input Data>>=
 sub load_aplot() { # if errors found > return $noGFF
@@ -4630,7 +4451,7 @@ sub remove_colon() {
 
 \subsubsctn{Checking fields and accepting APLOT records}
 
-If records are OK, then we can append a new record to the variable defined for APLOT records (so called in section~\ref{sec:APLOT-DS} as '[[%ALN_DATA]]', see page~\pageref{sec:APLOT-DS}).
+If records are OK, then we can append a new record to the variable defined for APLOT records (so called in section~\ref{sec:APLOThsh} as '[[%ALN_DATA]]', see page~\pageref{sec:APLOThsh}).
 
 <<Parsing Input Data>>=
 sub check_aplot_fields() {
@@ -4663,7 +4484,7 @@ sub add_aplot_record() {
 
 \subsctn{Parsing standard GFF format}\label{sec:parseGFF}
 
-'[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFF-DS}, page~\pageref{sec:GFF-DS}). The first parameter for '[[&load_grouping]]' function is set to 'True' for GFF grouping definition ('False' is for APLOT grouping definition, see section~\ref{sec:parseAPLOT}). 
+'[[&check_gff_fields]]' will call to the '[[&add_gff_record]]' which loads the new record if everything is OK into '[[%GFF_DATA]]' (see section~\ref{sec:GFFhsh}, page~\pageref{sec:GFFhsh}). The first parameter for '[[&load_grouping]]' function is set to 'True' for GFF grouping definition ('False' is for APLOT grouping definition, see section~\ref{sec:parseAPLOT}). 
 
 <<Parsing Input Data>>=
 sub load_gff() { # if errors found > return $noGFF
@@ -4694,7 +4515,7 @@ sub check_gff_fields() {
 } # check_gff_fields
 @ %def &check_gff_fields
 
-Once fields checking is done, we proceed to load the data structure defined for the GFF records as '[[%GFF_DATA]]' hash.
+Once fields checking is done, we proceed to load the data structure defined for the GFF records as '[[%GFF_DATA]]' hash. \label{sec:GFFhsh}
 The outline of the inner structure of that variable is shown in table~\ref{tbl:gffdata}.
 
 \begin{table}[!ht]
@@ -4841,7 +4662,7 @@ $_gff eq $VECTOR && do {
 };
 @ 
 
-If the standard GFF alignment format is found, we process them as if it was an aplot records, so that we have to set all the variables required to fill such data structure ('[[%ALN_DATA]]' in section~\ref{sec:APLOT-DS} , page~\pageref{sec:APLOT-DS}).
+If the standard GFF alignment format is found, we process them as if it was an aplot records, so that we have to set all the variables required to fill such data structure ('[[%ALN_DATA]]' in section~\ref{sec:APLOThsh} , page~\pageref{sec:APLOThsh}).
 
 <<add align records to aplot DS>>=
 $_gff eq $ALIGN && do {
@@ -4850,7 +4671,7 @@ $_gff eq $ALIGN && do {
 };
 @ 
 
-We declare here auxiliary variables containing the array indexes used in the anonymous arrays defined within the main variable containing all the GFF data [[%GFF_DATA]], that was declared in section~\ref{sec:GFF-DS}, page~\pageref{sec:GFF-DS}.
+We declare here auxiliary variables containing the array indexes used in the anonymous arrays defined within the main variable containing all the GFF data [[%GFF_DATA]], that was declared in section~\ref{sec:GFFhsh}, page~\pageref{sec:GFFhsh}.
 
 <<Global Vars>>=
 my $seq_COUNT;
@@ -5347,11 +5168,7 @@ sub sort_elements() {
 } # sort_elements
 @ %def &sort_elements
 
-Once we get into [[&sort_elements]] function we initialize the arrays within the [[%Order]] hash as we are requiring them.
-
-<<Global Vars>>=
-my %Order;
-@ 
+Once we get into [[&sort_elements]] function we initialize the arrays within the [[%Order]] hash as we are requiring them. \label{sec:ORDERhsh}
 
 <<messages - sorting GFF data>>=
 SORT_GFF => "\%sSorting \%s\n",
@@ -5525,30 +5342,205 @@ my $sortfunct = ($s_str eq '-') ? \&sort_reverse : \&sort_forward;
 
 \sctn{Setting page layout variables} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+From now on, we are going to work internally with {\ps} points lengths. '[[%Vars]]' keys set to '[[_*]]' represent variables that are only visible within the program and cannot be configured by user.
+
 <<Layout Settings>>=
 sub set_page_vars() {
     &header("SETTING PAGE LAYOUT");
-
     my $var = \%{ $Vars{LAYOUT} };
-
     &set_page_size($var);
-    
+    &set_page_axes($var);
+    &set_page_labels($var);
+    &set_seq_boundaries($var);
+    &set_tickmark_vars($var);
     &footer("PAGE LAYOUT SET for CURRENT PLOT");
 } # set_page_vars
 @ %def &set_page_vars
 
+
+\subsctn{Page dimensions}
+
+We compute the whole page dimensions, width and height, those are the most outer boundaries in the {\ps} figure.  
+
 <<Layout Settings>>=
 sub set_page_size() {
     my ($vrf) = @_;
-
-    $vrf->{"page_bbox"};
-    $vrf->{"page_size"};
-
-    $FORMATS{$vrf->{"page_bbox"}[0]} = 
-        [ ++$formats, @$vrf->{"page_bbox"}[1,2] ];
-
+    defined($vrf->{page_bbox}) && do {
+        $vrf->{_page_width}  = 
+            $UNITS{$vrf->{page_bbox}[1][1]}->($vrf->{page_bbox}[1][0]);
+        $vrf->{_page_height} =
+            $UNITS{$vrf->{page_bbox}[1][1]}->($vrf->{page_bbox}[2][0]);
+        $FORMATS{$vrf->{page_bbox}[0]} = 
+            [ ++$formats, $vrf->{_page_width}, $vrf->{_page_height} ];
+        $vrf->{page_size} = $vrf->{page_bbox}[0];
+        return;
+    };
+    ($vrf->{_page_width},
+     $vrf->{_page_height}) = @{ $FORMATS{$vrf->{page_size}} }[1,2];
+    return;
 } # set_page_size
-@ %def &set_page_size 
+@ %def &set_page_size {_page_width} {_page_height}
+
+
+Not sure if the following function will be required, or better to pass values to PS code and compute layout there.
+
+<<HIDE: Layout Settings>>=
+#   &set_page_margins($var);
+@ 
+<<Layout Settings>>=
+sub set_page_margins() {
+    my ($vrf) = @_;
+    $vrf->{_page_margins} = [
+        $UNITS{$vrf->{margin_left}[0]}->($vrf->{margin_left}[0]),
+        $UNITS{$vrf->{margin_right}[0]}->($vrf->{margin_right}[0]),
+        $UNITS{$vrf->{margin_top}[0]}->($vrf->{margin_top}[0]),
+        $UNITS{$vrf->{margin_bottom}[0]}->($vrf->{margin_bottom}[0])
+        ];
+    $vrf->{_page_clip_width}  = $vrf->{_page_width} - 
+         ($vrf->{_page_margins}[0] + $vrf->{_page_margins}[1]); 
+    $vrf->{_page_clip_height} = $vrf->{_page_height} - 
+         ($vrf->{_page_margins}[2] + $vrf->{_page_margins}[3]); 
+    return;
+} # set_page_margins
+@ %def &set_page_margins {_page_margins} {_page_clip_width} {_page_clip_height}
+
+
+\subsctn{Choosing which alignment and annotation to show}
+
+Now, we should choose which alignment and which annotations will appear on the plot, by default the first ones read from input files. This process is done in three steps: 
+
+\begin{enumerate}
+\item First we should look for customization variables sequence names if defined ([[alignment_name]], [[x_sequence_name]] and [[y_sequence_name]] variables and their corresponding command-line options, see section~\ref{sec:customvardesc} on page~\pageref{sec:customvardesc} for further info).
+
+<<setting axes - step 1>>=
+$vrf->{_x_sequence_name} = defined($vrf->{x_sequence_name})
+    ? $vrf->{x_sequence_name} : '.+';
+$vrf->{_y_sequence_name} = defined($vrf->{y_sequence_name})
+    ? $vrf->{y_sequence_name} : '.+';
+defined($vrf->{alignment_name}) && do {
+    $vrf->{_x_sequence_name} = $vrf->{alignment_name}[0];
+    $vrf->{_y_sequence_name} = $vrf->{alignment_name}[1];
+}; # defined($vrf->{alignment_name})
+$vrf->{_alignment_name} = 
+    [ $vrf->{_x_sequence_name}, $vrf->{_y_sequence_name} ];
+@  %def {_alignment_name}
+
+\item Then we must find if the resulting alignment has been loaded, searching on [[@{$Order{ALN}}]], and setting X and Y sequences accordingly. [[&search_alnname]] will return the final X-Y sequence names by modifying [[@{ $vrf->{_alignment_name} }]]. We do not swap sequence names on [[$vrf->{_alignment_name}]] at [[$vrf->{_swap_aln}]] test because it is already swapped within that function.
+
+<<setting axes - step 2>>=
+($vrf->{_plot_aln}, $vrf->{_swap_aln}) = 
+    &search_alnname(\@{ $vrf->{_alignment_name} }, \@{ $Order{ALN} });
+$vrf->{_swap_aln} && do {
+    ($vrf->{x_sequence_name},$vrf->{y_sequence_name}) =
+        ($vrf->{y_sequence_name},$vrf->{x_sequence_name});
+}; # $vrf->{_swap_aln} 
+$vrf->{_plot_aln} && do {
+    $vrf->{_x_sequence_name} = defined($vrf->{x_sequence_name})
+        ? $vrf->{x_sequence_name} : $vrf->{_alignment_name}[0];
+    $vrf->{_y_sequence_name} = defined($vrf->{y_sequence_name})
+        ? $vrf->{y_sequence_name} : $vrf->{_alignment_name}[1];
+}; # $vrf->{_plot_aln}
+@ %def {_plot_aln} {_swap_aln}
+
+\item Finally we grep those X and Y sequences from [[@{$Order{GFF}}]], so we sholud know if they are present there or not. This depends on what we have found in [[@{$Order{ALN}}]] but also on [[$Vars{LAYOUT}{x_sequence_name}]] and [[$Vars{LAYOUT}{y_sequence_name}]] settings.
+
+<<setting axes - step 3>>=
+$vrf->{_plot_x_sequence} =
+    &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
+$vrf->{_plot_y_sequence} =
+    &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
+                    \@{ $Order{GFF} });
+@ %def {_plot_x_sequence} {_plot_y_sequence}
+\end{enumerate}
+
+While following those points, we will set also three variables that tell {\prog} if it is worth to plot alignments, x and y sequence ([[_plot_aln]], [[_plot_x_sequence]] and [[_plot_y_sequence]] respectively).
+
+<<Layout Settings>>=
+sub set_page_axes() {
+    my ($vrf) = @_;
+    <<setting axes - step 1>>
+    <<setting axes - step 2>>
+    <<setting axes - step 3>>
+    return;
+} # set_page_axes
+@ %def &set_page_axes
+
+
+We need two auxiliarly functions to grep alignment and sequences names on [[@{$Order{ALN}}]] and [[@{$Order{GFF}}]] respectively.
+
+<<Layout Settings>>=
+# ($vrf->{_plot_aln}, $vrf->{_swap_aln}) = 
+#     &search_alnname(\@{ $vrf->{_alignment_name} }, \@{ $Order{ALN} });
+#
+sub search_alnname() {
+    my ($_ra,$_ro) = @_;
+    my ($sq_a,$sq_b,$a_found,$naln);
+    #
+    ($sq_a,$sq_b) = @$_ra;
+    $a_found = $F;
+    foreach $naln (@$_ro) {
+        
+    }; # foreach $naln
+    $a_found && return ($T, $F);
+    # swapping
+    @$_ra = reverse @$_ra;
+    ($sq_b,$sq_a) = ($sq_a,$sq_b);
+    $a_found = $F;
+    foreach $naln (@$_ro) {
+    }; # foreach $naln
+    $a_found && return ($T, $T);
+    #
+    return ($F, $F);
+} # search_alnname
+@ %def &search_alnname
+
+<<Layout Settings>>=
+# $vrf->{_plot_x_sequence} =
+#     &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
+# $vrf->{_plot_y_sequence} =
+#    &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
+#                    \@{ $Order{GFF} });
+#
+sub search_seqname() {
+    my ($sq_a,$sq_b,$_ro) = @_;
+    my ($a_found,$naln);
+    foreach $naln (@$_ro) {
+    }; # foreach $naln
+    $a_found && return $T;
+    return $F;
+} # search_seqname
+@ %def &search_seqname
+
+
+\subsctn{Setting whole figure labels}
+
+<<Layout Settings>>=
+sub set_page_labels() {
+    my ($vrf) = @_;
+    return;
+} # set_page_labels
+@ %def &set_page_labels {}
+
+
+\subsctn{Getting sequence coords boundaries and setting axes}
+
+<<Layout Settings>>=
+sub set_seq_boundaries() {
+    my ($vrf) = @_;
+    return;
+} # set_seq_boundaries
+@ %def &set_seq_boundaries {}
+
+
+\subsctn{Setting tickmark variables}
+
+<<Layout Settings>>=
+sub set_tickmark_vars() {
+    my ($vrf) = @_;
+    return;
+} # set_tickmark_vars
+@ %def &set_tickmark_vars {}
+
 
 \newpage
 
@@ -7506,7 +7498,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -7811,6 +7803,315 @@ sub parseOpts() {
 
 \sctn{Making tests} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\label{todo:TAA}
+<<HIDE: new defs TODO>>=
+\def\todoTAA{
+Implement a perl script to test {\prog} functions.
+} % todoTAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoTAA}{todo:TAA}
+@
+\todo{ \item \todoTAA } % todo
+
+\subsubsctn{[[aplottester.pl]] implementation}
+
+<<aplottester.pl>>=
+<<PERL shebang>>
+# 
+# parameter2tex.pl
+#
+<<Version Control Id Tag>>
+#
+use strict;
+use Test;
+#
+BEGIN { plan tests => 14, todo => [3,4] } # set to approiate values
+#
+#################
+use gff2aplot.pl;
+#################
+#
+<<aplottester - global vars>>
+#
+# MAIN
+
+exit(0);
+#
+# SUBS
+<<aplottester - functions>>
+@ 
+
+\subsctn{Tests to be implemented}
+
+<<testing regular expressions for element@id>>=
+The following does not work pretty well:
+
+$string =~ /^(.*)(?:@(.*?))?$/ && (($tmpstr, $tmpid) = ($1,$2));
+
+As we can see in the perl script below, reversing the regular expression is a good choice: 
+
+perl -ne ' 
+    chomp;
+    $a=$b=undef;
+    (reverse($_) =~ /^([^\/]*?)(?:\@)(?!\\)(.*)$/o) && 
+        ($a=reverse($2),$b=reverse($1));
+    defined($b) && 
+        (print ">>> \"$a\" \@ \"".($b?$b:"NIL")."\"\n") ||
+            (print ">>> \"$_\"\n"); '
+jhkjfhgkjdf@one # feature string and ID, both defined
+>>> "jhkjfhgkjdf" @ "one"
+/.*@@.*/        # only feature regexp, no ID
+>>> "/.*@@.*/"
+ffgdg           # only feature string, no ID
+>>> "ffgdg"
+jhkjfhgkjdf@    # only feature string, but an empty ID field ? 
+>>> "jhkjfhgkjdf" @ "NIL"
+jhkjfhgkjdf\@   # use "\" to preserve "@" if feat ends with "@" (most unlikely)
+>>> "jhkjfhgkjdf\@"
+/.*@@.*/@kk     # feature regexp and ID, both defined
+>>> "/.*@@.*/" @ "kk"
+*@yoyo          # feature pseudo-regexp ("*" ~ "/.*/") and ID, both defined
+>>> "*" @ "yoyo"
+!@@@@@lio       # a very extrange test, isn't it ? ... ;^D
+>>> "!@@@@" @ "lio"
+@ %$
+
+
+<<testing regexes: regexptester.pl>>=
+BEGIN { ($NULL,$T,$F) = ("+@+NULL+@+",1,0); }
+    chomp;
+    s{^:::\s+}{}o;
+    print ">>> $_ \n";
+    ($a,$b) = split /\s+:::\s+/o, $_, 2;
+    @results = &find_regexp($a);
+    @results_mod = (($results[0] ? "TRUE" : "FALSE"),
+                    ($results[1] ? "TRUE" : "FALSE"),
+                    (defined($results[2]) ? $results[2] : "FALSE"),
+                    "$results[3]");
+    printf ">>> IS_OK::%s::  IS_NEG::%s::  GET_ID::%s::  GET_STRING::%s::\n",
+           @results_mod;
+    !$results[1] &&
+         print ">>> ".
+             (  ( (eval { $b =~ m{$results[3]}; 1 } || 0) ?
+                         ($b =~ m{$results[3]}) : 0 ) ? 
+                     "\"$b\" MATCHES \/$results[3]\/ " : 
+                     "\"$b\" DOES NOT MATCH \/$results[3]\/ ")."\n\n";
+    $results[1] &&
+         print ">>> ".
+             (!(( (eval { $b =~ m{$results[3]}; 1 } || 0) ?
+                         ($b =~ m{$results[3]}) : 0 )) ? 
+                       "\"$b\"  MATCHES !\/$results[3]\/ " : 
+                       "\"$b\" DOES NOT MATCH !\/$results[3]\/ ")."\n\n";
+sub find_regexp() {
+    my $string = $_[0];
+    my ($isOK_flg,$not_flg,$id_flg,$tmpstr,$tmpid);
+    $isOK_flg = $T;
+    $not_flg = $F;
+    $id_flg = undef;
+    $string =~ s{^!}{}o && ($not_flg = $T); # not_regexp is true
+    $string =~ s{(\\@)$}{@@}o;
+    $string = &escape_input($string);
+    ($tmpstr, $tmpid) = (undef, undef);
+    ( reverse($string) =~ m{^([^\/@]*?)(?:@){1}(.*)$}o ) && do {
+        $tmpstr = reverse($2);
+        $tmpid  = reverse($1);
+    };
+  REGEXPS: {
+      print ">>> STRING($tmpstr) ID($tmpid)\n";
+      (defined($tmpid) && $tmpid ne "") && ($id_flg = $tmpid);
+      (defined($tmpstr) && $tmpstr ne "") || do {
+          $string eq '@' && ($string="", $isOK_flg=$F);
+          $tmpstr = $string;
+      };
+      $tmpstr eq '*' && do {
+          $string = '^.*$';
+          last REGEXPS;
+      };
+      $tmpstr =~ m{^/(.*)/$}o && do {    
+          ($string, $isOK_flg) = &eval_regexp($1);
+          last REGEXPS;
+      }; # $tmpstr is a regexp
+      $string = '^'.(quotemeta($tmpstr)).'$';
+    }; # REGEXPS
+    return ($isOK_flg, $not_flg, $id_flg, $string);
+} # find_regexp
+sub eval_regexp() {
+    my $str = $_[0];
+    my $flag;
+    # $str =~ s{^[^\\]*?/+}{}o;
+    # $str =~ s{/+.*?$}{}o;
+    eval { "" =~ m{$str}; $flag = $T; } || ($flag = $F);
+    return ($str, $flag);
+} # eval_regexp
+sub escape_input() {
+  $_[0] =~ s{([;<>&!{}'`"])}{\\$1}og; # "`'
+  return $_[0];
+} # escape_input
+@
+
+<<HIDE: testing regexes: regexes.test>>=
+::: @ ::: @
+::: \@ ::: @
+::: @@ ::: @
+::: element ::: element
+::: element ::: any
+::: !element ::: element
+::: !element ::: any
+::: element@id ::: element
+::: !element@id ::: element
+::: /.*any.*/ ::: chooseanyfeat
+::: /; system(" echo \"I have found your name: \$USER ... X.D\" "); / ::: any
+::: /; `echo "I have found your name: \$USER ... X.D"`; / ::: any
+::: / @{[ system("echo \"I have found your name: \$USER ... X.D\"") ]} / ::: any
+::: / @{[ system('echo "I have found your name: $USER ... X.D"') ]} / ::: any
+::: / @{ \( system("echo \"I have found your name: \$USER ... X.D\"") ) } / ::: any
+::: / @{ \( exec "echo \"I have found your name: \$USER ... X.D\"" ) } / ::: any
+::: /(a)+ny/ ::: any
+::: /(a)+ny/ ::: aany
+::: /^(a)+ny/ ::: any
+::: /^a?ny/ ::: any
+::: /^a?ny/ ::: aany
+::: /^a?ny/@id ::: any
+::: /^a?ny/@id ::: onyony
+::: /^a?ny/@id ::: nyony
+::: !/^a?ny/ ::: any
+::: !/^a?ny/ ::: aany
+::: !/^a?ny/ ::: ony
+::: 5'cds ::: 5'cds
+::: /^5'.*$/ ::: 5'utr
+::: /^a.*?y$/ ::: annnnny
+::: /^a.*?y$/ ::: anyany
+::: /^a[^y]*y$/ ::: annnnny
+::: /^a[^y]*y$/ ::: anyany
+::: /a.+?y/ ::: annnnny
+::: /a.+?y/ ::: ayyyyyy
+::: /y{6}/ ::: ayyyyyy
+@
+
+<<test file for the previous regexp tester>>=
+notangle -L -R'testing regexes: regexptester.pl' $WORK/$nwfile.nw | \
+         cpif $BIN/regexptester.pl ;
+notangle -R'HIDE: testing regexes: regexes.test' $WORK/$nwfile.nw | \
+         cpif $TEST/regexes.test ;
+perl -n $BIN/regexptester.pl < $TEST/regexes.test > $TEST/regexes.report ;
+@ 
+
+
+<<testing regular expressions for SEQ\_UNIT>>=
+perl -ne '$q = undef; chomp;
+          $a = $_;
+          ($_ =~ /^\.$|^\s*$/o) && do {
+               print "$a ::: Wrong VALUE... !!!\n";
+               next;
+          };
+          $_ =~ s/(?:\.)?
+                  (?:(g(?:iga)?|m(?:ega)?|k(?:ilo)?)?
+                  b(?:ase)?
+                  (?:p(?:air)?)?
+                  (?:s)?)$
+                 //ox && ($q = $1);
+          defined($q) || do {
+              $_ =~ /[^\d]+$/o && do {
+                   print "$a ::: Wrong UNITS !!!\n";
+                   next;
+              };
+          };
+          (defined($_) && $_ ne "") ||  do {
+               print "$a ::: Wrong VALUE !!!\n";
+               next;
+          };
+          ($q,undef) = split //o,$q,2;
+          $q .= 'bp';
+          print "$a ::: $_ $q\n"; ' << 'EOF'
+10kbp
+10kilobp
+10gigabp
+11.33kk
+-1kb
+0.5bp
+.
+
+0.bp
+0
+10+e15bp
+EOF
+
+The results are the following:
+
+10kbp ::: 10 kbp
+10kilobp ::: 10 kbp
+10gigabp ::: 10 gbp
+11.33kk ::: Wrong UNITS !!!
+-1kb ::: -1 kbp
+0.5bp ::: 0.5 bp
+. ::: Wrong VALUE... !!!
+ ::: Wrong VALUE !!!
+0.bp ::: 0 bp
+0 ::: 0 bp
+10+e15bp ::: 10+e15 bp
+@ 
+
+
+<<testing regular expressions for PS\_UNIT>>=
+perl -ne '$q = undef; chomp;
+          $a = $_;
+          ($_ =~ /^\.$|^\s*$/o) && do {
+               print "$a ::: Wrong VALUE... !!!\n";
+               next;
+          };
+          PSLEN: {
+              $_ =~ s/m(eter(s)?)?$//o && do {
+                  $_ =~ s/(\.)?c(enti)?$//o && ($q = "cm", last PSLEN);
+                  $_ =~ s/(\.)?m(ili)?$//o  && ($q = "mm", last PSLEN);
+                  last PSLEN;
+              };
+              $_ =~ s/(\.)?in(ch(es)?)?$//o && ($q = "in", last PSLEN);
+              $_ =~ s/(\.)?(pt|point(s)?)$//o    && ($q = "pt");
+          }; # PSLEN
+          defined($q) || do {
+              $_ =~ /[^\d]+$/o && do {
+                   print "$a ::: Wrong UNITS !!!\n";
+                   next;
+              };
+              $q = "pt";
+          };
+          (defined($_) && $_ ne "") ||  do {
+               print "$a ::: Wrong VALUE !!!\n";
+               next;
+          };
+          print "$a ::: $_ $q\n"; ' << 'EOF'
+10cm
+10centimeters
+10mmeters
+11.33kk
+-1in
+0.5pt
+100inches
+1inch
+.
+
+0.points
+0
+10+e15pts
+EOF
+
+The results are the following:
+
+10cm ::: 10 cm
+10centimeters ::: 10 cm
+10mmeters ::: 10 mm
+11.33kk ::: Wrong UNITS !!!
+-1in ::: -1 in
+0.5pt ::: 0.5 pt
+100inches ::: 100 in
+1inch ::: 1 in
+. ::: Wrong VALUE... !!!
+ ::: Wrong VALUE... !!!
+0.points ::: 0 pt
+0 ::: 0 pt
+10+e15pts ::: Wrong UNITS !!!
+@ 
 
 
 \newpage
@@ -7932,7 +8233,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.16 2001-11-07 18:56:49 jabril Exp $
+# $Id: gff2aplot.nw,v 1.17 2001-11-08 19:33:42 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -8009,8 +8310,9 @@ notangle -L -R"APLOT" $WORK/$nwfile.nw | \
 # we remove here the comments within "use vars qw/ ... /",
 # numbers may change if noweb doc is changed
 notangle -L -R"APLOT" $WORK/$nwfile.nw | \
-    perl -ne '($.>1 && $_ !~ /^\#line (442|453|460|1180|1275|4431|432)/o) &&
-               print' - | cpif $BIN/gff2aplot.pl ;
+    perl -ne '( $.>1 &&
+                $_ !~ /^\#line (444|454|461|1181|1276|1430|4201|432)/o
+               ) && print' - | cpif $BIN/gff2aplot.pl ;
 chmod a+x $BIN/gff2aplot.pl ;
 #
 @ 
