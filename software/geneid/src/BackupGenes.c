@@ -4,9 +4,9 @@
 *                                                                        *
 *   To save best partial genes between 2 contigous fragments             *
 *                                                                        *
-*   This file is part of the geneid 1.1 distribution                     *
+*   This file is part of the geneid 1.2 distribution                     *
 *                                                                        *
-*     Copyright (C) 2001 - Enrique BLANCO GARCIA                         *
+*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.3 2001-12-18 14:57:36 eblanco Exp $  */
+/*  $Id: BackupGenes.c,v 1.4 2003-11-05 13:23:01 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -64,7 +64,7 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
   d->dumpExons[d->ndumpExons].Strand = E->Strand; 
   d->dumpExons[d->ndumpExons].Score  = E->Score;
   d->dumpExons[d->ndumpExons].PartialScore = E->PartialScore;
-  d->dumpExons[d->ndumpExons].SRScore = E->SRScore;
+  d->dumpExons[d->ndumpExons].HSPScore = E->HSPScore;
   d->dumpExons[d->ndumpExons].GeneScore  = E->GeneScore;
   d->dumpExons[d->ndumpExons].Remainder = E->Remainder; 
   strcpy(d->dumpExons[d->ndumpExons].Group,E->Group);
@@ -217,7 +217,3 @@ void cleanGenes(packGenes* pg, int nclass, packDump* dumpster)
 	  dumpster->ndumpSites = 0;
 	}
 }
-
-
-
-
