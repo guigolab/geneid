@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -65,7 +65,8 @@
 
 %%%%% global urls
 % \newcommand{\getpsf}[1]{\html{(\htmladdnormallink{Get PostScript file}{./Psfiles/#1})}}   
-\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es}}
+\def\mtjabril{\htmladdnormallink{\textbf{jabril@imim.es}}{MAILTO:jabril@imim.es?subject=[ORTHOLOGOUS SET]}}
+\def\mthomology{\htmladdnormallink{\textbf{homology@viaken.com}}{MAILTO:homology@viaken.com?subject=[HOMOLOGY]}}
 
 % defs
 \def\drome{\textit{Drosophila melanogaster}}
@@ -86,6 +87,7 @@
 \def\gnid{\texttt{geneid}}
 \def\gnsc{\texttt{genscan}}
 \def\twsc{\texttt{twinscan}}
+\def\slam{\textsc{slam}}
 \def\sgp{\textsc{sgp}}
 \def\gps{\texttt{gff2ps}}
 \def\aps{\texttt{aplot}}
@@ -158,7 +160,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $$>$ }
+{\small$<$ \verb$Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -169,51 +171,139 @@ Universitat Pompeu Fabra\\[2ex]
 
 \sctn{Introduction}
 
+Sequence comparisons at nucleotide/aminoacid level among phylogenetically related species would help to produce better annotations and to find new genes, as it has been suggested in the literature. At this moment, in which it has been obtained the first draf of the human genome and the mouse genome project is reaching a good sequence coverage, that approach will we useful in the re-annotation of the current human genes and in the search of novel human genes. 
+\begin{comment}
+Homology between human and mouse sequences serves as a useful guide for identifying genes in both organisms. Additionally, conserved sequences that have no coding potential are good candidates for regulatory elements.
+-- From \url|http://bio.cse.psu.edu/mousegroup/doc.html|
+An annotation of the orthologous test set of genomic sequences and their regulatory regions is available at \url|http://bio.cse.psu.edu/mousegroup/test8/|
+\end{comment}
+
+This document contains the procedures we followed to train our gene-prediction tools in order to find the optimal parameters which raise the most accurate predictions. All the command-line scripts are detailed on the main sections, while stand-alone scripts are described and implemented in the appendixes. There you can also find the results for some of the analysis performed on the sequences. 
+
 \subsctn{Main goals}
 
-\noindent  a) Official Sequences:
+\subsctn{Protocol outline}
 
-\begin{tabular}{p{4cm}p{4cm}p{4cm}p{4cm}}
-Region     & Mouse length & Human length & Comment     \\
-DFNA5      &   330 kb     &   200 kb     &             \\
-KvLQT      &   1.1 Mb     &   920 kb     &             \\
-HOXA       &   400 Kb     &   500 Kb     & repeat poor \\
-MHC        &   1.5 Mb     &   2.6 Mb     & repeat rich \\
-ELN        &   270 kb     &   380 kb     & (Elastin)   \\
-SIL        &   230 kb     &   193 kb     &             \\
-BTK        &   89 kb      &   200 kb     &             \\
-CFTR       &   360 kb     &   450 kb     & "Gene poor" \\
-\\
-Chrom 22   &   4 Mb       &              & \shortstack{Ongoing discussion to choose\\GoldenPath or Sanger Center Version} \\
+Here we are drawing the main steps we followed 
+
+\begin{description}
+ \item[Masking Sequences]
+ \item[Homology Search]
+ \item[Gene-Finding]
+ \item[Syntenic Gene-Prediction]
+ \item[Sequence Analysis] \ \\
+   \begin{description}
+    \item[G+C Content]
+    \item[Splice Sites Distribution]
+    \item[Exonic Structure Conservation]
+   \end{description}
+\end{description}
+
+\subsctn{The sequences test set}
+
+It was agreed to test gene-prediction programs on a eight sequences set that are syntenic between human and mouse. They were published at '\url|http://zilla.lbl.gov/TESTS/|', there is also an active mailing list at {\mthomology}. Table~\ref{tbl:seqnames} lists sequence names, their lengths for human and mouse, and the number of annotated genes contained in each.\\
+
+\begin{comment}
+<<BASH commands>>=
+gawk '{ print $1 }' $DATASETS/genes.Hsap | sort | uniq -c
+      5 Hsap_BTK
+      2 Hsap_CFTR
+      1 Hsap_DFNA5
+      6 Hsap_ELN
+     11 Hsap_HOXA
+     19 Hsap_KVLQT1
+     93 Hsap_MHC
+      3 Hsap_SIL
+gawk '{
+        printf "%-12s %6.1f Kb\n",$1,$2/1000;
+        }' $DATASETS/length.Hsap $DATASETS/length.Mmus 
+Hsap_BTK       78.9 Kb
+Hsap_CFTR     424.8 Kb
+Hsap_DFNA5    243.3 Kb
+Hsap_ELN      388.7 Kb
+Hsap_HOXA     219.2 Kb
+Hsap_KVLQT1  1279.4 Kb
+Hsap_MHC     2358.6 Kb
+Hsap_SIL      305.9 Kb
+Mmus_BTK       88.9 Kb
+Mmus_CFTR     357.9 Kb
+Mmus_DFNA5    206.4 Kb
+Mmus_ELN      269.2 Kb
+Mmus_HOXA     202.1 Kb
+Mmus_KVLQT1  1013.6 Kb
+Mmus_MHC     1521.2 Kb
+Mmus_SIL      234.4 Kb
+@ 
+\end{comment}
+\begin{table}[!ht]
+\begin{center}
+\begin{tabular}{|c|r|r|c|l|}\hline
+\textbf{Region} & \multicolumn{2}{c|}{\textbf{Sequence Length}} & \textbf{\#Gen} & \textbf{Comment} \\\cline{2-3}
+           & \textbf{Human} & \textbf{Mouse} & & \\\hline\hline
+BTK        &   78.9 Kb &   88.9 Kb &  5 &             \\
+CFTR       &  424.8 Kb &  357.9 Kb &  2 & "Gene poor" \\
+DFNA5      &  243.3 Kb &  206.4 Kb &  1 &             \\
+ELN        &  388.7 Kb &  269.2 Kb &  6 & (Elastin)   \\
+HOXA       &  219.2 Kb &  202.1 Kb & 11 & repeat poor \\
+KVLQT1     &    1.3 Gb &    1.0 Gb & 19 &             \\
+MHC        &    2.4 Gb &    1.5 Gb & 93 & repeat rich \\
+SIL        &  305.9 Kb &  234.4 Kb &  3 &             \\[1.5ex]
+								     
+Chrom 22   &          &  4 Mb    &    & \raisebox{-2ex}{\shortstack[l]{Ongoing discussion to choose\\GoldenPath or Sanger Center Version}} \\\hline
 \end{tabular}
+\caption{\label{tbl:seqnames} Official human/mouse homologous sequences set.}
+\end{center}
+\end{table}
+
+{\data} database contains those 8 pairs of orthologous sequences from human and mouse. Table~\ref{tbl:genelist} on page~\pageref{tbl:genelist} lists the gene identifiers already annotated for each human sequence.
+
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Building orthologous dataset}
 
-\subsctn{Data set}
- 
-Downloading (into '[[_tmp]]' dir):
+\subsctn{Downloading Data set}
 
-<<BASH commands>>=
+The first sequence dataset was obtained from '\url|http://waldo.wi.mit.edu/~danb/HomologSeqs/|'. There were some differences between that set and the one used by {\twsc} gene-prediction team, coordinates mapped from ??Sanger?? and Golden Path did not match well. Those differences did our program, {\gnid}, to make predictions that were not comparable to the {\twsc} ones (so after their evaluation our program did pretty bad predictions).
+
+Next dataset was agreed to be available from '\url|http://zilla.lbl.gov/TESTS/|'. We found ``duplicated'' genes in the original files from that site, in three of the test sequences:
+
+\begin{center}
+\begin{tabular}{cl}
+Hsap\_ELN    & WBSCR5, LIMK1 \\
+Hsap\_KVLQT1 & TSSC4 \\
+Hsap\_MHC    & TAP2, LTB, HSPA1A, HSPA1B, AIF1, TNXA/TNXB \\
+\end{tabular}
+\end{center}
+
+Those duplications correspond to alternative splicing forms, but it is not clear yet how we have to deal with them, so that we have discarded the shorter gene or the gene with less exons (in TNXA/TNXB case, which exons were overlapping ---or the same---, we removed TNXA). 
+ 
+<<BASH commands DATASETS>>=
+#
+# DOWNLOADING DataSets
 wget -b --no-parent --mirror --tries=0  \
      --output-file=download_orthologous.log    \
      --no-host-directories --cut-dirs=1 \
      'http://zilla.lbl.gov/TESTS/'
+#
+@
+\begin{comment}
 # 
 # http://zilla.lbl.gov/VISTAS/Chr6/NT_002572/Mm.fasta
-@
+\end{comment}
  
-{\data} database contains 8 pairs of orthologous sequences from human and mouse. Table~\ref{tbl:genelist} lists the gene identifiers found for each human/mouse sequence pairs.
+
+\subsctn{Preparing files for the analysis}
+
+\subsubsctn{Writing files for sequence IDs}
+
+Here, we assign human and mouse locus names to each sequence in the test set, the locus names will serve as file names either as indexes in some scripts.\\
 
 \begin{table}[!ht]
 \begin{center}
-\caption{\label{tbl:genelist}}
-\end{center}
-\end{table}
-
-\subsctn{Preparing files}
-
-\subsubsctn{Auxiliary files}
-
+\begin{tabular}{|@{\quad}c@{\quad}|c}\cline{1-1}
+\begin{minipage}[b]{8cm}
+\vskip 1ex
 <<Sequence IDs>>=
 BTK     Hsap_BTK     Mmus_BTK
 CFTR    Hsap_CFTR    Mmus_CFTR
@@ -224,23 +314,39 @@ KVLQT1  Hsap_KVLQT1  Mmus_KVLQT1
 MHC     Hsap_MHC     Mmus_MHC
 SIL     Hsap_SIL     Mmus_SIL
 @
+\vskip 1ex
+\end{minipage}
+&
+\hspace{1em}\parbox[b]{5cm}{\caption{\label{tbl:seqIDs} Contents of the main IDs file which was generated tangling this table from the document.}}
+\\\cline{1-1}
+\end{tabular}
+\end{center}
+\end{table}
 
-<<BASH commands>>=
+<<BASH commands DATASETS>>=
+#
+# Extracting IDs from main document.
+notangle -R"Sequence IDs" $WORK/$nwfile.nw > $ID ;
 #
 perl -ane 'print "$F[1]\n"' $ID > $HSAP ;
 perl -ane 'print "$F[2]\n"' $ID > $MMUS ;
+#
+cat $HSAP $MMUS > $ID.all ;
 #
 @
 
 \subsubsctn{Moving and renaming fasta files}
 
-<<BASH commands>>=
+We move fasta files from the download directories to the corresponding ones. Furthermore, we filter them through [[fasta_renamer.pl]] not only to rename ID record to hold the same string as the file name, but to normalize length for all the sequence records in each fasta file.
+
+<<BASH commands DATASETS>>=
 #
+# MOVING and RENAMING fasta files
 ChckDirs $DATASETS/fasta $DATASETS/fasta/raw $DATASETS/fasta/masked \
          $DATASETS/fasta/orimasked $DATASETS/fasta/softmasked \
          $DATASETS/annotation $DATASETS/annotation/desc ;
 #
-# preparing fasta files
+# Preparing fasta files
 IDIR="$DATASETS/_tmp" ;
 ODIR="$DATASETS/fasta/raw" ;
 while read locus human mouse ;
@@ -255,7 +361,7 @@ while read locus human mouse ;
   done < $ID ;
 MergeFiles $ODIR ;
 #
-# the same if masked files where provided
+# The same if masked files where provided
 IDIR="$DATASETS/_tmp" ;
 ODIR="$DATASETS/fasta/orimasked" ;
 while read locus human mouse ;
@@ -274,7 +380,7 @@ MergeFiles $ODIR ;
 
 \subsubsctn{Getting lengths from description files}
 
-<<BASH commands>>=
+<<BASH commands DATASETS>>=
 #
 IDIR="$DATASETS/annotation/desc" ;
 multicat ()
@@ -291,53 +397,168 @@ multicat $MMUS | gawk '{printf "%-12s%8s\n",$1,$3}' - > $DATASETS/length.Mmus;
 
 \subsctn{Masking fasta sequences}
 
-\subsubsctn{Retrieving masked regions coords from 'orimasked' fasta files}
-
-<<BASH commands>>=
+<<BASH commands DATASETS>>=
 #
-IDIR="$DATASETS/masking" ;
-ChckDirs $IDIR $IDIR/orimasked $IDIR/orimasked/gff $IDIR/orimasked/logs ;
-#
-IDIR="$DATASETS/fasta/orimasked" ;
-ODIR="$DATASETS/masking/orimasked" ;
-cat $HSAP $MMUS | while read n ;
-  do {
-    echo "### WORKING ON $n " ;
-    $BIN/getfastamasked.pl < $IDIR/$n > $ODIR/gff/$n 2> $ODIR/logs/$n ;
-    } ;
-  done ;
+# MASKING FASTA SEQUENCES
+ChckDirs $DATASETS/masking ;
+# Running RepeatMasker
+run_RptMsk ()
+{
+  #
+  # run_RptMsk - Running RepeatMasker
+  #
+  # USAGE: run_RptMsk options workdir fastadir outputdir IDsfile
+  #
+  # 'options' RepeatMasker command-line options
+  # 'workdir' temporary path for RepeatMasker files
+  # 'fastadir' where to get from input fasta files
+  # 'outputdir' where to save masked fasta files
+  # 'IDsfile' IDs to loop 
+  #
+  CMD="RepeatMasker $1"; WDIR=$2 ; FDIR=$3 ; ODIR=$4 ; TID=$5 ;
+  #
+  ChckDirs $WDIR $WDIR/tmp $WDIR/gff $WDIR/gff-projection $ODIR ;
+  #
+  WDIR="$WDIR/tmp" ;
+  while read locus ; 
+    do {
+      echo "### REPEAT MASKING ON $locus ..." ;
+      cp -v $FDIR/$locus $WDIR/$locus ;
+      # 8 procs at monstre
+      $CMD $WDIR/$locus ;
+      /bin/rm -v $WDIR/$locus ;
+      mv -v $WDIR/$locus.masked $ODIR/$locus;
+      #
+      };
+    done < $TID ;
+}
 #
 @ 
 
-\subsubsctn{Masking fasta sequences} (!!!! TO DO, also SOFT masking !!!!)
+<<BASH commands DATASETS>>=
+#
+RptMsk2GFF ()
+{
+  #
+  # RptMsk2GFF - Converting RepeatMasker repeats table into GFF
+  #
+  # USAGE: RptMsk2GFF fastadir outputdir logsdir IDsfile [options]
+  #
+  # 'fastadir' where to get from input masked fasta files
+  # 'outputdir' where to save GFF files
+  # 'logsdir' where to save logs
+  # 'IDsfile' IDs to loop
+  # 'options' options for getfastamasked.pl
+  #           '-s|--softmasked' if masked fasta file is softmasked
+  #                             (lowercase instead of "N"s)
+  #
+  IDIR=$1 ;
+  ODIR=$2 ;
+  LDIR=$3 ;
+  TID=$4 ;
+  OPTS=$5 ;
+  #
+  ChckDirs $ODIR $LDIR;
+  #
+  while read locus ;
+    do {
+      #
+      echo "### FINDING MASKED REGIONS COORDS ON $locus ..." ;
+      $BIN/getfastamasked.pl $OPTS < $IDIR/$locus > $ODIR/$locus \
+                                                 2> $LDIR/$locus ;
+      };
+    done < $TID ;
+}
+#
+@ 
 
-<<BASH commands>>=
-# each sequence without any change
-cat $HSAP $MMUS | while read n ;
-  do {
-    WDIR="$WORK/RepeatMasker/fastamasked" ;
-    echo "### WORKING ON $n " ;
-    cp -v $FASTA/fasta/$n $WDIR/$n ;
-    # 8 procs at monstre
-    RepeatMasker -parallel 8 $WDIR/$n ;
-    /bin/rm -v $WDIR/$n ;
-    mv -v $WDIR/$n.masked $FASTA/fastamasked/$n;
-# include parsing repeats to GFF
-    } ;
-  done ;
+<<BASH commands DATASETS>>=
+#
+FastaMsk2GFF ()
+{
+  #
+  # FastaMsk2GFF - Finding masked regions in fasta files and saving into GFF
+  #
+  # USAGE: FastaMsk2GFF inputdir outputdir IDsfile
+  # 
+  # 'inputdir' where to get from the RepeatMasker repeats table
+  # 'outputdir' where to save GFF files
+  # 'IDsfile' IDs to loop
+  #
+  IDIR=$1 ;
+  ODIR=$2 ;
+  TID=$3 ;
+  #
+  ChckDirs $ODIR $LDIR;
+  #
+  while read locus ;
+    do {
+      echo "### REPEATS TBL TO GFF - WORKING ON $locus ..." ;
+      gawk 'BEGIN{ OFS="\t" }
+        NR>3{
+          str = ($9!="C") ? "+" : "-";
+          print $5,"RepeatMasker",$11,$6,$7,$1,str,".",$10"."NR-3;
+        }' $IDIR/$locus.out \
+         > $ODIR/$locus ;
+      };
+    done < $TID ;
+}
 #
 @
 
-\subsubsctn{Masking fasta sequences (with softmask options)} (!!!! TO DO !!!!)
+\subsubsctn{Downloaded masked fasta sequences} 
 
-<<BASH commands>>=
+Here we retrieve masked regions coords from 'orimasked' fasta files
+
+<<BASH commands DATASETS>>=
 #
+# Retrieving masked regions coords for orimasked fasta files
+WDIR="$DATASETS/masking/orimasked" ;
+ChckDirs $WDIR $WDIR/gff $WDIR/gff-projection $WDIR/tmp $WDIR/logs ;
+while read locus human mouse ;
+  do { 
+    cp -v $DATASETS/_tmp/$locus/Hs.fasta.out $WDIR/tmp/Hsap_$locus.out ;
+    cp -v $DATASETS/_tmp/$locus/Mm.fasta.out $WDIR/tmp/Mmus_$locus.out  ;
+    } ;
+  done < $ID ;
+#
+RptMsk2GFF $DATASETS/fasta/orimasked \
+           $WDIR/gff-projection $WDIR/logs $ID.all ;
+FastaMsk2GFF $WDIR/tmp $WDIR/gff $ID.all ;
+#
+@ 
+
+\subsubsctn{Masking fasta sequences} 
+
+\subsubsubsctn{Default masking}
+
+<<BASH commands DATASETS>>=
+# Masking fasta sequences
+WDIR="$DATASETS/masking/default" ;
+run_RptMsk "-parallel 8" $WDIR \
+           $DATASETS/fasta/raw $DATASETS/fasta/masked $ID.all ;
+RptMsk2GFF $DATASETS/fasta/masked \
+           $WDIR/gff-projection $WDIR/logs $ID.all ;
+FastaMsk2GFF $WDIR/tmp $WDIR/gff $ID.all ;
+#
+@
+
+\subsubsubsctn{Soft masking (lowercase symbols)} (!!! TO DO !!!)
+
+<<BASH commands DATASETS>>=
+# Masking fasta sequences (with softmask options)
+WDIR="$DATASETS/masking/softmasked" ;
+run_RptMsk "-parallel 8 -xsmall" $WDIR \
+           $DATASETS/fasta/raw $DATASETS/fasta/softmasked $ID.all ;
+RptMsk2GFF $DATASETS/fasta/softmasked \
+           $WDIR/gff-projection $WDIR/logs $ID.all '-s';
+FastaMsk2GFF $WDIR/tmp $WDIR/gff $ID.all ;
 #
 @
 
 \subsctn{Mapping annotations to GFF}
 
-<<BASH commands>>=
+<<BASH commands DATASETS>>=
 #
 ChckDirs $DATASETS/annotation $DATASETS/annotation/coords \
          $DATASETS/annotation/fullgff $DATASETS/annotation/gff \
@@ -370,21 +591,9 @@ MergeGFF $DATASETS/annotation/gff Hsap 1 ;
 #
 @
 
-We found ``duplicated'' genes in the original files from \url{http://zilla.lbl.gov/TESTS/}, in three of the test sequences:
-
-\begin{center}
-\begin{tabular}{cl}
-Hsap\_ELN    & WBSCR5, LIMK1 \\
-Hsap\_KVLQT1 & TSSC4 \\
-Hsap\_MHC    & TAP2, LTB, HSPA1A, HSPA1B, AIF1, TNXA/TNXB \\
-\end{tabular}
-\end{center}
-
-We have discarded the shorter gene or the gene with less exons (in TNXA/TNXB case, which exons were overlapping ---or the same---, we removed TNXA).
-
 \subsctn{Other auxiliary files}
 
-<<BASH commands>>=
+<<BASH commands DATASETS>>=
 #
 gawk '$3 == "Gene" {print $1,$9,$4,$5,$7}' $DATASETS/annotation/gff/Hsap_* \
                                            > $DATASETS/genes.Hsap ;
@@ -410,31 +619,36 @@ gawk 'BEGIN{
 
 \subsctn{Building WU-BLAST databases (only for mouse seqs)}
 
-<<BASH commands>>=
+<<BASH commands DATASETS>>=
 #
-ChckDirs $DATASETS/blastdb $DATASETS/blastdb/wublast \
-     $DATASETS/blastdb/wublast/raw $DATASETS/blastdb/wublast/masked \
-     $DATASETS/blastdb/wublast/orimasked $DATASETS/blastdb/wublast/softmasked ;
+ChckDirs $DATASETS/blastdb ;
+WDIR="$DATASETS/blastdb/wublast" ;
+ChckDirs $WDIR $WDIR/raw $WDIR/masked $WDIR/orimasked $WDIR/softmasked ;
 #
 IDIR="$DATASETS/fasta" ;
 ODIR="$DATASETS/blastdb/wublast" ;
 { cat $MMUS; echo "all.Mmus"; } | while read n ;
   do {
-    echo "### WORKING ON $n " ;
+    echo "### WORKING ON $n RAW" ;
     pressdb $IDIR/raw/$n        -o $ODIR/raw/$n        ;
+    echo "### WORKING ON $n ORIMASKED" ;
     pressdb $IDIR/orimasked/$n  -o $ODIR/orimasked/$n  ;
-  # pressdb $IDIR/masked/$n     -o $ODIR/masked/$n     ;
-  # pressdb $IDIR/softmasked/$n -o $ODIR/softmasked/$n ;
+    echo "### WORKING ON $n MASKED" ;
+    pressdb $IDIR/masked/$n     -o $ODIR/masked/$n     ;
+    echo "### WORKING ON $n SOFTMASKED" ;
+    pressdb $IDIR/softmasked/$n -o $ODIR/softmasked/$n ;
     } ;
   done ;
 #
 @
 
-\sctn{Running Blast}
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-+ Running TBLASTX on ALEPH server
+\sctn{Homology Search}
 
-<<BASH commands>>=
+\subsctn{Running {\tbx} on ALEPH server}
+
+<<BASH commands ANALYSIS>>=
 #
 # Running in /home/ug/jabril/no_backup/PBS
 BASE="/home/ug/jabril/no_backup/PBS" ;
@@ -468,16 +682,16 @@ ChckDirs $BASE $BASE/matrix $BASE/matrix/aa \
     $BASE/fastamasked/blast3X $BASE/fastamasked/logs3X ;
 #
 #
-cp -vapudf $DATASETS/fasta/raw/*                 $BASE/fasta/raw/ ;
-cp -vapudf $DATASETS/blastdb/wublast/raw/*       $BASE/fasta/blastdb/ ;
-cp -vapudf $DATASETS/fasta/orimasked/*           $BASE/fastamasked/raw/ ;
-cp -vapudf $DATASETS/blastdb/wublast/orimasked/* $BASE/fastamasked/blastdb/ ;
+cp -vapudf $DATASETS/fasta/raw/*                         $BASE/fasta/raw/ ;
+cp -vapudf $DATASETS/blastdb/wublast.tblastx/raw/*       $BASE/fasta/blastdb/ ;
+cp -vapudf $DATASETS/fasta/orimasked/*                   $BASE/fastamasked/raw/ ;
+cp -vapudf $DATASETS/blastdb/wublast.tblastx/orimasked/* $BASE/fastamasked/blastdb/ ;
 #
 # Working on raw files - ORTHOLOGOUS SEQS
 IN="$BASE/fasta/raw" ;
 OUT="$BASE/fasta/blast" ;
 ERROR="$BASE/fasta/logs" ;
-BLASTOPTIONS="Z=3000000000 -nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod" ;
+BLASTOPTIONS="Z=3000000000 -nogaps -hspmax=10000 -filter=xnu -matrix=blosum62mod" ; # 
 export IN OUT ERROR BLASTOPTIONS ;
 pushd $BASE/fasta/logs ;
 runpbs 1 "$BASE/fasta/blastdb" ;
@@ -514,15 +728,19 @@ runpbs 0 "$WGS3X" ;
 popd ;
 #
 #
-ChckDirs $ANALYSIS/blast $ANALYSIS/blast/wublast \
-         $ANALYSIS/blast/wublast/raw $ANALYSIS/blast/wublast/orimasked \
-         $ANALYSIS/blast/wublast/raw3X $ANALYSIS/blast/wublast/orimasked3X ;
+ChckDirs $ANALYSIS/blast ;
+WDIR="$ANALYSIS/blast/wublast.blastn" ;
+ChckDirs $WDIR $WDIR/raw   $WDIR/masked   $WDIR/orimasked   $WDIR/softmasked \
+               $WDIR/raw3X $WDIR/masked3X $WDIR/orimasked3X $WDIR/softmasked3X ;
+WDIR="$ANALYSIS/blast/wublast.tblastx" ;
+ChckDirs $WDIR $WDIR/raw   $WDIR/masked   $WDIR/orimasked   $WDIR/softmasked \
+               $WDIR/raw3X $WDIR/masked3X $WDIR/orimasked3X $WDIR/softmasked3X ;
 #
 #
-cp -vapudf $BASE/fasta/blast/*         $ANALYSIS/blast/wublast/raw/
-cp -vapudf $BASE/fastamasked/blast/*   $ANALYSIS/blast/wublast/orimasked/
-cp -vapudf $BASE/fasta/blast3X/*       $ANALYSIS/blast/wublast/raw3X/
-cp -vapudf $BASE/fastamasked/blast3X/* $ANALYSIS/blast/wublast/orimasked3X/
+cp -vapudf $BASE/fasta/blast/*         $ANALYSIS/blast/wublast.tblastx/raw/
+cp -vapudf $BASE/fastamasked/blast/*   $ANALYSIS/blast/wublast.tblastx/orimasked/
+cp -vapudf $BASE/fasta/blast3X/*       $ANALYSIS/blast/wublast.tblastx/raw3X/
+cp -vapudf $BASE/fastamasked/blast3X/* $ANALYSIS/blast/wublast.tblastx/orimasked3X/
 #
 @
 
@@ -550,11 +768,344 @@ for mousedb in $db ;
   done ;
 @
 
+<<BASH commands ANALYSIS>>=
+#
+WGS="/seq/genomes/M.musculus/WGS/wublast8" ;
+WGS3X="$WGS/Mm.WGS001_010 $WGS/Mm.WGS010_020 $WGS/Mm.WGS021_030" ;
+WGS3X="$WGS3X $WGS/Mm.WGS031_040 $WGS/Mm.WGS041_050 $WGS/Mm.WGS051_060" ;
+WGS3X="$WGS3X $WGS/Mm.WGS061_070 $WGS/Mm.WGS071_081" ;
+WDIR="/home/ug/jabril/tmp/projects/masked" ;
+BLASTMAT="/home/ug/jabril/tmp/projects/wublast.tblastx/" ;
+BLASTOPTIONS="-topcomboN=4 W=5 -filter=xnu+seg Z=3000000000 -nogaps -hspmax=1000000 -matrix=blosum62mod" ;
+export WGS3X WDIR BLASTMAT BLASTOPTIONS ;
+locus="Hsap_SIL" ; # running on monstre1
+locus="Hsap_CFTR" ; # running on monstre2
+locus="Hsap_DFNA5" ; # running on monstre3
+locus="Hsap_KVLQT1" ; # running on monstre4
+for mousedb in $WGS3X ;
+  do {
+    db=`basename $mousedb` ;
+    echo "### TBLASTX Working on : $locus x $db" ;
+    tblastx $mousedb $WDIR/$locus $BLASTOPTIONS \
+            > $WDIR/$locus.$db.tbx 2> $WDIR/$locus.$db.err &
+    } ;
+  done ;
+#
+@
+
+\subsctn{Running {\bn} on orthologous sequences}
+
+<<BASH commands ANALYSIS>>=
+#
+MergeFiles ../fasta/masked/ ;
+MergeFiles ../fasta/softmasked/ ;
+#
+WDIR="$ANALYSIS/blast/wublast.blastn/masked" ;
+ChckDirs $WDIR $WDIR/out $WDIR/gff $WDIR/ps $WDIR/logs ;
+BLASTOPTIONS="Z=3000000000 -hspmax=1000000" ; # no filters for nucleotides
+while read locus human mouse ;
+  do {
+    echo "### RUNNING BLASTN on $locus" ;
+    blastn $DATASETS/blastdb/wublast/masked/$mouse \
+           $DATASETS/fasta/masked/$human $BLASTOPTIONS \
+         > $ANALYSIS/blast/wublast.blastn/masked/out/$human.$mouse \
+        2> $ANALYSIS/blast/wublast.blastn/masked/logs/$human.$mouse.blastn ;
+    } ;
+  done < $ID ;
+#
+while read locus human mouse ;
+  do {
+    echo "### RUNNING PARSEBLAST on $locus" ;
+    parseblast --aplot --full-scores --comments --verbose \
+           $ANALYSIS/blast/wublast.blastn/masked/out/$human.$mouse \
+         > $ANALYSIS/blast/wublast.blastn/masked/gff/$human.$mouse \
+        2> $ANALYSIS/blast/wublast.blastn/masked/logs/$human.$mouse.parseblast ;
+    } ;
+  done < $ID ;
+#
+@ 
+
+\subsctn{Comparing results from different {\bl} programs}
+
+We are using {\aps} to visualize the differences among three approaches: {\bn}, {\tbx} and similarity regions filtered by {\sgp} from {\tbx}.
+
+\subsubsctn{Human x FO Mouse sequences}
+
+<<BASH commands ANALYSIS>>=
+#
+# Running GFF2APLOT
+WDIR="$ANALYSIS/blast/wublast.blastn/masked" ;
+pushd $WORK/tests/ ; # to force gff2aplot saving default config file there
+while read locus human mouse ;
+  do {
+    echo "### RUNNING PARSEBLAST on $locus" ;
+    gff2aplot -PVO $PARAM/gff2aplot/ortho_masked_a4.rc -- \
+                   $WDIR/gff/$human.$mouse \
+                   $DATASETS/annotation/gff/$human \
+                 > $WDIR/ps/$human.$mouse.ps \
+                2> $WDIR/logs/$human.$mouse.aplot ;
+    } ;
+  done < $ID ;
+popd ;
+WDIR="$ANALYSIS/blast/wublast.blastn/masked" ;
+pushd $WORK/tests/ ; # to force gff2aplot saving default config file there
+while read locus human mouse ;
+  do {
+    echo "### RUNNING PARSEBLAST on $locus" ;
+    gff2aplot -PV -I a2 -O $PARAM/gff2aplot/ortho_masked_a4.rc -- \
+                   $WDIR/gff/$human.$mouse \
+                   $DATASETS/annotation/gff/$human \
+                 > $WDIR/ps/$human.$mouse.a2.ps \
+                2> $WDIR/logs/$human.$mouse.aplot.a2 ;
+    } ;
+  done < $ID ;
+popd ;
+#
+@ 
+
+\subsubsctn{Customization files for {\gps}}
+
+<<GFF2APLOT customization: ortho masked>>=
+## ########################################################################## ##
+##                                                                            ##
+##                  USER CUSTOMIZATION FILE FOR GFF2APLOT                     ##
+##                                                                            ##
+## ########################################################################## ##
+##
+## This is the file in which you can define
+##   the OPTIONS and FEATURES required by gff2aplot program.
+## 
+## If you want to modify this file, please, do not
+##   forget to make a backup copy of your old file 
+##   (like .gff2aplot.rc.old or .gff2aplot.rc.bck).
+##
+## Creation Date: 27.01.99
+## Last Revision: 20.04.99
+##
+## Creator: Josep Francesc ABRIL FERRANDO
+##
+##  e-mail:        jabril@imim.es
+##
+## ########################################################################## ##
+## #################### OPTIONS for gff2aplot PROGRAM ##################### ##
+## ########################################################################## ##
+##
+FL ########################################################################## ##
+## #################################### FLAGs ############################### ##
+##
+## You could set FLAG variables to:
+##       0/OFF/NO/N/FALSE/F - Switch OFF
+##       1/ON/YES/Y/TRUE/T  - Switch ON
+##
+## Variable ############# Switch ############
+##
+Display_TITLE             : Y
+Display_SUBTITLE          : Y
+Display_X-Axis_LABEL      : Y
+Display_Y-Axis_LABEL      : Y
+Display_Percent-Box_LABEL : Y
+Display_Extra-Box_LABEL   : Y
+Display_PERCENT-BOX       : N
+Display_EXTRA-BOX         : N
+Display_GENE_LABEL        : Y
+Display_GENE_RULE         : Y
+Display_HalfHeightBOX     : Y
+Display_FullHeightBOX     : Y
+Display_BOX_LABEL         : Y
+Display_UserDef_BOX_LABEL : Y
+Display_ARROW             : Y
+Display_JOINS             : Y
+Display_RIBBON            : Y
+Display_SELECTION-BOX     : Y
+Display_GFF               : N
+Display_GFF-ReverseOrder  : N
+Display_FUNCTION          : N
+APlotLine_GroupScore      : N
+APlotLine_ScaleWidth      : N
+APlotLine_ScaleGrey       : N
+XY_AXES_Same-SIZE         : N
+Display_TickMark-LABEL    : Y
+Display_APlot_X-Ticks     : Y
+Display_Percent_X-Ticks   : Y
+Display_ExtraBox_X-Ticks  : Y
+Display_APlot_Y-Ticks     : Y
+Display_Percent_Y-Ticks   : Y
+Display_ExtraBox_Y-Ticks  : Y
+Display_OnlyLower_X-Ticks : N
+Display_GRID              : N
+ZOOM_Zoom                 : N
+ZOOM_Area                 : N
+Zoom_Marks                : N
+##
+DF ########################################################################## ##
+## ############################# DEFAULT VALUES ############################# ##
+##
+## Some Default Values...
+##
+## Variable ######## Definition ######## 
+##
+PAGE_SIZE               :  a4
+FEATURE_LABELS_LENGTH   :  0     # Number of chars displayed in labels (0 means show full label string).
+GROUP_LABELS_LENGTH     :  0     # Number of chars displayed in labels (0 means show full label string).
+FEATURE_X-LABELS_ANGLE  :  0     # In degrees.
+GROUP_X-LABELS_ANGLE    :  0     # In degrees.
+FEATURE_Y-LABELS_ANGLE  :  0     # In degrees.
+GROUP_Y-LABELS_ANGLE    :  0     # In degrees.
+FEATURE_LABELS_FONTSIZE :  1     # Font size scale Factor.
+GROUP_LABELS_FONTSIZE   :  1     # Font size scale Factor.
+BACKGROUND_COLOR        : white
+FOREGROUND_COLOR        : black
+APlotBox_BGCOLOR        :  BG
+PercentBox_BGCOLOR      :  BG
+ExtraBox_BGCOLOR        :  BG
+Strand-Arrows_COLOR     :  FG
+Join-Lines_COLOR        :  FG
+SelectionBox_BGCOLOR    : grey
+Function_COLOR          : red
+Zoom_Area_Mark_COLOR    : lightred
+PERCENT_ORIGIN          :  50
+PERCENT_END             : 100
+ScaleMajorTICKMARK      :   2    # major tickmarks per axis.
+ScaleMinorTICKMARK      :   5    # minor tickmarks per each major.
+PercentMajorTICKMARK    :   5    # major tickmarks per axis.
+PercentMinorTICKMARK    :   5    # minor tickmarks per each major.
+ExtraMajorTICKMARK      :   2    # major tickmarks per axis.
+ExtraMinorTICKMARK      :   5    # minor tickmarks per each major.
+##
+OP ########################################################################## ##
+## #################################### OPTIONs ############################# ##
+##
+## Changing default values overrides any other definition you made for features.
+##
+##   ##DEFAULT##  means that program uses for these options
+##                those values you have defined in feature table.
+##         FG    the option is defined with FOREGROUND_COLOR.
+##         BG    the option is defined with BACKGROUND_COLOR.
+##
+## Variable ######## Definition ######## 
+##
+Align_NAME            : ##DEFAULT##
+X-Sequence_NAME       : ##DEFAULT##
+Y-Sequence_NAME       : ##DEFAULT##
+TITLE                 : ##DEFAULT##
+SUBTITLE              : ##DEFAULT##
+X-Axis_LABEL          : ##DEFAULT##
+Y-Axis_LABEL          : ##DEFAULT##
+Percent-Box_LABEL     : ##DEFAULT##
+Percent-Box_SUBLABEL  : ##DEFAULT##
+Extra-Box_LABEL       : ##DEFAULT##
+Extra-Box_SUBLABEL    : ##DEFAULT##
+HalfSizeBox_BGCOLOR   : ##DEFAULT##
+FullSizeBox_BGCOLOR   : ##DEFAULT##
+Ribbon_BGCOLOR        : ##DEFAULT##
+SEQUENCE1_ORIGIN      : ##DEFAULT##
+SEQUENCE1_END         : ##DEFAULT##
+SEQUENCE2_ORIGIN      : ##DEFAULT##
+SEQUENCE2_END         : ##DEFAULT##
+Zoom_SEQUENCE1_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE1_END    : ##DEFAULT##
+Zoom_SEQUENCE2_ORIGIN : ##DEFAULT##
+Zoom_SEQUENCE2_END    : ##DEFAULT##
+TICKMARK              : ##DEFAULT##
+SMALLTICKMARK         : ##DEFAULT##
+##
+FT ########################################################################## ##
+## #################################### GFF FEATUREs DEFINITION ############# ##
+## 
+## ########### Description of each element of the Features Array. ########### ##
+##
+## (str) means a string of chars (in a string numbers are treated as chars).
+## (bin) means you only could define variable as
+##       0/OFF/NO/N/FALSE/F = Switch OFF the element.
+##       1/ON/YES/Y/TRUE/T  = Switch ON  the element.
+## (FHN) means you can choose between "(F)ull" or "(H)alf" size Boxes,
+##       also you can define "(N)one", then the feature is without a box.
+## (NLRB) means you can choose among "(N)o lines", "draw (L)ines at <feature>
+##       boundaries", "(R)ibbons" or "(B)oth -Lines and Ribbons".
+## (HND) means "(H)alfSize", "(N)ormalSize" or "(D)oubleSize" LineWidth.
+##
+## (clr) means that you can choose among the following color names:
+##
+##    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white
+##       verydarkgreen | darkgreen | green | lightgreen | verylightgreen
+##   verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue
+##          verydarkblue | darkblue | blue | lightblue | verylightblue
+##         verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan
+##     verydarkviolet | darkviolet | violet | lightviolet | verylightviolet
+##            verydarkred | darkred | red | lightred | verylightred
+##     verydarkorange | darkorange | orange | lightorange | verylightorange
+##     verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow
+##        verydarkbrown | darkbrown | brown | lightbrown | verylightbrown 
+##
+##       If you do not want to define a color, you can enter
+##        BG (background color) or FG (foreground color), 
+##        but you must choose one of the above definitions.
+## 
+## ## 
+## Feature (str): A feature name. Only <features> defined below
+##    will be recognized in your .gff file.
+## ## 
+## XTR (bin): Force those <features> for which XTR is switched ON
+##   to be displayed in the third panel, if the Plot Option 
+##   "Display_EXTRA-BOX" is switched ON.
+## ## 
+## Box (FHN): Define the box size (FHN) for <feature>.
+## ##
+## Line (NLRB): Draw lines across all panels for the <feature>.
+## ##
+## Join (bin): Switch ON to connect elements of one group with splice symbols.
+## ##
+## Arrw (bin): Swicth ON to display an arrow that shows the <feature>'s strand.
+## ##
+## Lbl (bin): Swicth ON to display the <feature>'s label
+##   (if it's defined in the .gff file).
+## ##
+## Color (clr): Fill <Box> with this color.
+## ##
+## CLine (clr): Fill Line <Ribbons> with this color.
+## ##
+## Wdth (HND): You can choose among three predefined LineWidths.
+## ##
+## Layr : Layer where is drawed each feature.
+##   You must pass an integer for feature ordering (1..n),
+##   put 0 to print the feature always on top. 
+## ##
+##  
+## ########################## Features Definition ################################ ##
+## Feature  #XTR #Box #Line#Join#Arrw#Lbl #Wdth#Layr#Color ###########CLine #########
+##
+gene          N    H    L    N    Y    N    H    1    blue             lightgrey
+first         N    F    R    Y    N    N    H    0    red              lightgrey
+internal      N    F    R    Y    N    N    H    0    red              lightgrey
+terminal      N    F    R    Y    N    N    H    0    red              lightgrey    
+#
+sine          N    N    R    N    N    N    H    6    BG               verylightgreen
+line          N    N    R    N    N    N    H    6    BG               verylightgreen
+alu           N    N    R    N    N    N    H    6    BG               lightgreen   
+repeat        N    N    R    N    N    N    H    6    BG               verylightgreen
+## ######1#########2#########3#########4#########5#########6#########7#########8#####
+##  
+SP ########################## Special gff Features ############################### ##
+##
+GROUPLIMITS : gene
+PLOTLIMITS  : sequence                                             
+APLOT       : hsp
+HIGHLIGHT   : boxit
+RECTANGLE   : rectangle
+CIRCLE      : circle
+TEXT        : text
+FUNCTION    : function
+EXTRABOX    : est
+## ######1#########2#########3#########4#########5#########6#########7#########8#####
+@
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \sctn{Gene predictions}
 
 Preparing directories:
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
 GI="$ANALYSIS/geneid" ;
 GS="$ANALYSIS/genscan" ;
@@ -591,181 +1142,461 @@ for b in $SP/$R $SP/$O ;
 
 \subsctn{Running {\gnid}} 
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
-GENEID="/projects/sgp/param/geneid/human3iso.param" ;
-#
-IDIR="$DATASETS/fasta/raw" ;
-ODIR="$ANALYSIS/geneid/Hsap.raw" ;
-while read gene human mouse ;
-  do {
-    echo "### WORKING ON $gene " ;
-    /projects/sgp/bin/geneid -vG $IDIR/$human     \
-                             > $ODIR/gff/$human  \
-                            2> $ODIR/logs/$human ;
-    } ;
-  done < $ID ; 
-#
-MergeGFF $ANALYSIS/geneid/Hsap.raw/gff Hsap 0 ;
-#
-$SGPBIN/evaluation -tsa $ANALYSIS/geneid/Hsap.raw/gff/all.Hsap \
-                        $DATASETS/annotation/gff/all.Hsap             \
-                      > $ANALYSIS/geneid/Hsap.raw/eval.geneid_Hsap_raw ;
-#
-IDIR="$DATASETS/fasta/orimasked" ;
-ODIR="$ANALYSIS/geneid/Hsap.orimasked" ;
-while read gene human mouse ;
-  do {
-    echo "### WORKING ON $gene " ;
-    /projects/sgp/bin/geneid -vG $IDIR/$human     \
-                             > $ODIR/gff/$human  \
-                            2> $ODIR/logs/$human ;
-    } ;
-  done < $ID ; 
-#
-MergeGFF $ANALYSIS/geneid/Hsap.orimasked/gff Hsap 0 ;
-#
-$SGPBIN/evaluation -tsa $ANALYSIS/geneid/Hsap.orimasked/gff/all.Hsap \
-                   $DATASETS/annotation/gff/all.Hsap                  \
-                 > $ANALYSIS/geneid/Hsap.orimasked/eval.geneid_Hsap_orimasked ;
+run_GENEID () 
+{
+  #
+  # run_GENEID - Running GENEID and Evaluation for a given sequence set
+  #
+  # USAGE: run_GENEID testname sequence testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="GENEID" ; prog="geneid" ;
+  GENEID="/projects/sgp/param/geneid/human3iso.param" ;
+  CMD="/projects/sgp/bin/geneid -vG" ;
+      # GENEID tool command-line options:
+      #  '-v' be verbose
+      #  '-G' GFF output
+  # Setting VARS
+  MAIN="$ANALYSIS/geneid" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  TSET="$3" ;
+  SPC="$4" ;
+  IDS="$ID.$SPC" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  while read locus ;
+    do {
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        $CMD $ISEQ/$locus > $ODIR/$locus 2> $EDIR/$locus ;
+      } ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  echo "### Running EVALUATION on $PROG ..." 1>&2 ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_${prog}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_${prog}_brief.$RUN ;
+} 
 #
 @ 
 
-\subsctn{Running {\gnsc}} 
+\subsubsctn{{\gnid} on raw sequences} 
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
-GENSCAN="/usr/local/molbio/Install/GENSCAN/param/HumanIso.smat" ;
+# Raw sequences
+run_GENEID Hsap.raw $DATASETS/fasta/raw \
+                    $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
-IDIR="$DATASETS/fasta/raw" ;
-ODIR="$ANALYSIS/genscan/Hsap.raw" ;
-while read gene human mouse ;
-  do {
-    echo "### WORKING ON $gene " ;
-    /usr/local/molbio/bin/genscan $GENSCAN $IDIR/$human   \
-                                  2> $ODIR/logs/$human | \
-            /projects/sgp/bin/genscan2gff seqname=$human        \
-                                          > $ODIR/gff/$human  \
-                                        2>> $ODIR/logs/$human ;
-    } ;
-  done < $ID ; 
+@ 
+
+\subsubsctn{{\gnid} on downloaded masked sequences} 
+
+<<BASH commands ANALYSIS>>=
 #
-MergeGFF $ANALYSIS/genscan/Hsap.raw/gff Hsap 0 ;
+# Masked sequences (already masked: orimasked)
+run_GENEID Hsap.orimasked $DATASETS/fasta/orimasked \
+                          $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
-$SGPBIN/evaluation -tsa $ANALYSIS/genscan/Hsap.raw/gff/all.Hsap \
-                        $DATASETS/annotation/gff/all.Hsap             \
-                      > $ANALYSIS/genscan/Hsap.raw/eval.genscan_Hsap_raw ;
+@
+ 
+\subsubsctn{{\gnid} on masked sequences} 
+
+<<BASH commands ANALYSIS>>=
 #
-IDIR="$DATASETS/fasta/orimasked" ;
-ODIR="$ANALYSIS/genscan/Hsap.orimasked" ;
-while read gene human mouse ;
-  do {
-    echo "### WORKING ON $gene " ;
-    /usr/local/molbio/bin/genscan $GENSCAN $IDIR/$human   \
-                                  2> $ODIR/logs/$human | \
-            /projects/sgp/bin/genscan2gff seqname=$human        \
-                                          > $ODIR/gff/$human  \
-                                        2>> $ODIR/logs/$human ;
-    } ;
-  done < $ID ; 
+# Masked sequences
+run_GENEID Hsap.masked $DATASETS/fasta/masked \
+                       $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
-MergeGFF $ANALYSIS/genscan/Hsap.orimasked/gff Hsap 0 ;
+@ 
+
+\subsctn{Running {\gnsc}}
+ 
+<<BASH commands ANALYSIS>>=
 #
-$SGPBIN/evaluation -tsa $ANALYSIS/genscan/Hsap.orimasked/gff/all.Hsap \
-                   $DATASETS/annotation/gff/all.Hsap                  \
-                 > $ANALYSIS/genscan/Hsap.orimasked/eval.genscan_Hsap_orimasked ;
+run_GENSCAN () 
+{
+  #
+  # run_GENSCAN - Running GENSCAN and Evaluation for a given sequence set
+  #
+  # USAGE: run_GENSCAN testname sequence testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="GENSCAN" ; prog="genscan" ;
+  GENSCAN="/usr/local/molbio/Install/GENSCAN/param/HumanIso.smat" ;
+  CMD="/usr/local/molbio/bin/genscan $GENSCAN" ;
+      # genscan paramfilename sequencefilename [-v]
+      #  '-v' be verbose
+  # Setting VARS
+  MAIN="$ANALYSIS/genscan" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  TSET="$3" ;
+  SPC="$4" ;
+  IDS="$ID.$SPC" ;
+  GSCN="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  while read locus ;
+    do {
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        $CMD $ISEQ/$locus > $GSCN/$locus 2> $EDIR/$locus ;
+        $SGPBIN/genscan2gff seqname=$human < $GSCN/$locus \
+                          > $ODIR/$locus 2>> $EDIR/$locus ;
+      } ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  echo "### Running EVALUATION on $PROG ..." 1>&2 ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_${prog}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_${prog}_brief.$RUN ;
+} 
+#
+@ 
+
+\subsubsctn{{\gnsc} on raw sequences} 
+
+<<BASH commands ANALYSIS>>=
+#
+# Raw sequences
+run_GENSCAN Hsap.raw $DATASETS/fasta/raw \
+                     $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+@ 
+
+\subsubsctn{{\gnsc} on downloaded masked sequences} 
+
+<<BASH commands ANALYSIS>>=
+#
+# Masked sequences (already masked: orimasked)
+run_GENSCAN Hsap.orimasked $DATASETS/fasta/orimasked \
+                           $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+@
+ 
+\subsubsctn{{\gnsc} on masked sequences} 
+
+<<BASH commands ANALYSIS>>=
+#
+# Masked sequences
+run_GENSCAN Hsap.masked $DATASETS/fasta/masked \
+                        $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
 @
 
 \subsctn{Working on {\twsc} results}
 
-<<BASH commands>>=
+{\twsc} original data was downloaded from \url|http://genes.cs.wustl.edu/8-orthologs/all-files.tgz| .
+
+<<BASH commands ANALYSIS>>=
 #
-while read gene human mouse; 
-  do {
-    gawk 'BEGIN{
-            OFS="\t";
-            seq=ARGV[1];
-            ARGV[1]="";
-          }
-          $3 == "CDS" {
-            $1=seq;
-            gsub(/[\"\;]/,"",$10);
-            $9=$10;
-            $10=$11=$12="";
-            print $0
-          }' $human $ANALYSIS/_tmp/$gene/$gene.Hs.fasta.gff \
-                  > $ANALYSIS/twinscan/Hsap.orimasked/gff/$human ;
+process_TWINSCAN () 
+{
+  #
+  # process_TWINSCAN - Processing TWINSCAN results and evaluating them
+  #                    for a given sequence set
+  #
+  # USAGE: process_TWINSCAN testname testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="TWINSCAN" ; prog="twinscan" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/twinscan" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  TSET="$2" ;
+  SPC="$3" ;
+  IDS="$ID"; # IDS="$ID.$SPC" ;
+  TWSCN="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  while read locus human mouse ;
+    do {
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        gawk 'BEGIN{
+                OFS="\t";
+                seq=ARGV[1];
+                ARGV[1]="";
+              }
+              $3 == "CDS" {
+                $1=seq;
+                gsub(/[\"\;]/,"",$10);
+                $9=$10;
+                $10=$11=$12="";
+                print $0;
+              }' $human $TWSCN/$locus/$locus.$SPC.fasta.gff > $ODIR/$human ;
+      } ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  echo "### Running EVALUATION on $PROG ..." 1>&2 ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_${prog}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_${prog}_brief.$RUN ;
+} 
+#
+@ 
+
+\begin{comment}
+<<BASH commands ANALYSIS>>=
+#
+renameSEQS ()
+{
+  # renameSEQS ls_command reg_exp substitution_value
+  #
+  $1 | while read n ; 
+    do {
+      k=`echo $n | sed "s/$2/$3/"` ;
+      [ -e "$n" ] && mv -v $n $k || echo "## FILE DOES NOT EXIST: $n" ;
     } ;
-  done < $ID ; 
+    done ;
+}
 #
-MergeGFF $ANALYSIS/twinscan/Hsap.orimasked/gff Hsap 0 ;
+pushd $ANALYSIS/twinscan/Hsap.20010722/tmp/
+pushd $ANALYSIS/twinscan/Hsap.20010803/tmp/
+mv Elastin ELN ;
+cd ELN ;
+renameSEQS 'ls -1 Elastin*' '^Elastin' 'ELN' ;
+cd .. ;
+mv HOXa HOXA ;
+cd HOXA ;
+renameSEQS 'ls -1 HOXa*' '^HOXa' 'HOXA' ;
+cd .. ;
+mv KvLQT1 KVLQT1 ;
+cd KVLQT1 ;
+renameSEQS 'ls -1 KvLQT1*' '^KvLQT1' 'KVLQT1' ;
+( gawk "{print \$1}" $ID ; echo 'CD4' ) | \
+  while read j; \
+    do { cd $j; renameSEQS 'ls -1' '.Hs.' '.Hsap.'; cd .. ; }; done ;
+popd ;
 #
-$SGPBIN/evaluation -tsa $ANALYSIS/twinscan/Hsap.orimasked/gff/all.Hsap \
-              $DATASETS/annotation/gff/all.Hsap                        \
-            > $ANALYSIS/twinscan/Hsap.orimasked/eval.twinscan_Hsap_orimasked ;
+@ 
+\end{comment}
+<<BASH commands ANALYSIS>>=
+#
+process_TWINSCAN Hsap.20010722 $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+process_TWINSCAN Hsap.20010803 $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+@
+
+\subsctn{Working on {\slam} results}
+
+{\slam} original data was downloaded from \url|http://bio.math.berkeley.edu/slam/8pairs/|
+
+\begin{comment}
+<<BASH commands ANALYSIS>>=
+#
+renameSEQS 'ls -1 hs.btk*' '^hs.btk' 'BTK.Hs'
+renameSEQS 'ls -1 hs.dfna5*' '^hs.dfna5' 'DFNA5.Hs'
+renameSEQS 'ls -1 hs.hoxa*' '^hs.hoxa' 'HOXA.Hs'
+#
+@
+\end{comment}
+<<BASH commands ANALYSIS>>=
+#
+wget -b --no-parent --mirror --tries=0           \
+     --output-file=download_orthologous_slam.log \
+     --no-host-directories --cut-dirs=2          \
+     'http://bio.math.berkeley.edu/slam/8pairs/' ;
 #
 @
 
 \subsctn{Running {\sgp}}
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
-# Raw sequences
+run_SGP () 
+{
+  #
+  # run_SGP - Running SGP and Evaluation for a given sequence set
+  #
+  # USAGE: run_SGP testname sequence blastdata testset IDfile
+  #
+  # 'testname' is the subdir of $MAIN where to save all the results
+  # 'sequence' is path to the fasta file/s containing the query sequence
+  # 'blastdata' is path to the blast output/s for homology evidences
+  # 'testset' is a GFF file containing the real annotation for evaluation
+  # 'IDfile' is a file listing the IDs of sequences to be processed
+  #
+  PROG="SGP" ; prog="sgp" ;
+  # Setting VARS
+  MAIN="$ANALYSIS/sgp" ;
+  RUN="$1" ;
+  BASE="$MAIN/$RUN" ;
+  ISEQ="$2" ;
+  BDIR="$3" ;
+  TSET="$4" ;
+  SPC="$5" ;
+  IDS="$ID.$SPC" ;
+  HSP_SR="$BASE/tmp" ;
+  ODIR="$BASE/gff" ;
+  EDIR="$BASE/logs" ;
+  #
+  # Checking if DIRS does EXIST
+  ChckDirs $MAIN $BASE ;
+  for c in hsp sr hsp-rs tbx gff gtf2 cds prot logs tmp ps ps/_tmp ;
+    do { ChckDirs $BASE/$c ; } ; done ;
+  #
+  # Running SGP TOOL
+  while read locus ;
+    do {
+        echo "### Running $PROG on $locus ..." 1>&2 ;
+        # SGGP tool command-line options:
+        #  '-t filename' read tblastx file
+        #  '-k prefix' keep intermediate files with prefix (trailing / required)
+        #  '-1 seqfile_1'
+        #  '-d database'
+        $SGP -v -1 $ISEQ/$locus -d /tmp/ -k $HSP_SR/ \
+                -t $BDIR/$locus > $ODIR/$locus 2> $EDIR/$locus ;
+      } ;
+    done < $IDS ;
+  #
+  # Performing EVALUATION
+  MergeGFF $ODIR $SPC 0 ; # It produces $ODIR/all.Hsap
+  #
+  # EVALUATION tool command-line options:
+  #  -v: Verbose. Print all messages
+  #  -a: Average. Print average stats (more than 1 sequence)
+  #  -t: Total. Print total stats (more than 1 sequence)
+  #  -s: Short. Print a short output
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_$prog.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_$prog.$RUN ;
+  $SGPBIN/evaluation -ta  $ODIR/all.Hsap $TSET >> $BASE/eval_$prog.$RUN ;
+  { echo "###" ; echo "### EVALUATION of $PROG RESULTS on $RUN" ; echo "###" ;
+    echo "### $BASE/eval_${prog}_brief.$RUN" ; echo "###" ;
+    echo "### "`whoami`" - "`date` ; echo "###" ; } > $BASE/eval_${prog}_brief.$RUN ;
+  $SGPBIN/evaluation -tsa $ODIR/all.Hsap $TSET >> $BASE/eval_${prog}_brief.$RUN ;
+  #
+  # Copying files to where they are going to be used
+  CMMD="mv -v" ; # Instead of "cp -vapudf"
+  while read locus ;
+    do {
+    # $CMMD $HSP_SR/$locus.sgp    $ODIR/$locus ; # already exists
+      $CMMD $HSP_SR/$locus.hsp    $BASE/hsp/$locus ;
+      $CMMD $HSP_SR/$locus.sr     $BASE/sr/$locus ;
+      $CMMD $HSP_SR/$locus.hsp-rs $BASE/hsp-rs/$locus ;
+      $CMMD $HSP_SR/$locus.tbx    $BASE/tbx/$locus ;
+      } ;
+    done < $IDS ;
+} 
 #
-sh $SGPBIN/SGP2-2/runsggp-t.sh $DATASETS/fasta/raw \
-                $ANALYSIS/sgp/Hsap.raw/tmp/        \
-                $ANALYSIS/blast/wublast/raw        \
-                $ANALYSIS/sgp/Hsap.raw/gff         \
-                $ANALYSIS/sgp/Hsap.raw/logs        \
-                < $HSAP ;
+@ 
+
+<<BASH commands ANALYSIS>>=
 #
-MergeGFF $ANALYSIS/sgp/Hsap.raw/gff Hsap 0 ;
+####
+#### Using "STANDARD" SGP
 #
-$SGPBIN/evaluation -tsa $ANALYSIS/sgp/Hsap.raw/gff/all.Hsap \
-                        $DATASETS/annotation/gff/all.Hsap   \
-                      > $ANALYSIS/sgp/Hsap.raw/eval.sgp_Hsap_raw ;
+export SGP="/projects/sgp/bin/SGP2-2/sggp2" ;
 #
-IDIR="$ANALYSIS/sgp/Hsap.raw/tmp" ;
-ODIR="$ANALYSIS/sgp/Hsap.raw" ;
-while read locus ;
-  do {
-    # cp -vapudf $IDIR/$locus.sgp    $ODIR/gff/$locus ;
-    cp -vapudf $IDIR/$locus.hsp    $ODIR/hsp/$locus ;
-    cp -vapudf $IDIR/$locus.sr     $ODIR/sr/$locus ;
-    cp -vapudf $IDIR/$locus.hsp-rs $ODIR/hsp-rs/$locus ;
-    cp -vapudf $IDIR/$locus.tbx    $ODIR/tbx/$locus ;
-    } ;
-  done < $HSAP ;
+# SGP on Raw sequences
+run_SGP Hsap.raw $DATASETS/fasta/raw \
+               $ANALYSIS/blast/wublast.tblastx/raw \
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
-# Masked sequences (already masked: orimasked)
+# SGP on Masked sequences (already masked: orimasked)
+run_SGP Hsap.orimasked $DATASETS/fasta/orimasked \
+               $ANALYSIS/blast/wublast.tblastx/orimasked \
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
-sh $SGPBIN/SGP2-2/runsggp-t.sh $DATASETS/fasta/orimasked \
-                $ANALYSIS/sgp/Hsap.orimasked/tmp/        \
-                $ANALYSIS/blast/wublast/orimasked        \
-                $ANALYSIS/sgp/Hsap.orimasked/gff         \
-                $ANALYSIS/sgp/Hsap.orimasked/logs        \
-                < $HSAP ;
+####
+#### Roderic's TESTS on a SGP variant
 #
-MergeGFF $ANALYSIS/sgp/Hsap.orimasked/gff Hsap 0 ;
+export HOME='/home/ug/rguigo' ; # to avoid modifying Roderic's scripts
+export SGP="/home/ug/rguigo/research/humus/SGP2-2/bin/sggp2" ;
 #
-$SGPBIN/evaluation -tsa $ANALYSIS/sgp/Hsap.orimasked/gff/all.Hsap \
-                        $DATASETS/annotation/gff/all.Hsap         \
-                      > $ANALYSIS/sgp/Hsap.orimasked/eval.sgp_Hsap_orimasked ;
+# SGP on Masked sequences (already masked: orimasked)
+run_SGP rguigo.orimasked $DATASETS/fasta/orimasked \
+               $ANALYSIS/blast/wublast.tblastx/orimasked \
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
-IDIR="$ANALYSIS/sgp/Hsap.orimasked/tmp" ;
-ODIR="$ANALYSIS/sgp/Hsap.orimasked" ;
-while read locus ;
-  do {
-    # cp -vapudf $IDIR/$locus.sgp    $ODIR/gff/$locus ;
-    cp -vapudf $IDIR/$locus.hsp    $ODIR/hsp/$locus ;
-    cp -vapudf $IDIR/$locus.sr     $ODIR/sr/$locus ;
-    cp -vapudf $IDIR/$locus.hsp-rs $ODIR/hsp-rs/$locus ;
-    cp -vapudf $IDIR/$locus.tbx    $ODIR/tbx/$locus ;
-    } ;
-  done < $HSAP ;
+# SGP on TBX results from Pankaj (W=5) for ORI masked sequences
+run_SGP rguigo.orimasked3X_pankaj_W5 $DATASETS/fasta/orimasked \
+               $ANALYSIS/blast/wublast.tblastx/orimasked3X/pankaj_W5 \
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
 #
-# Roderic's Tests on a SGP variant
+# SGP on TBX results from Pankaj (W=5) for IMIM masked sequences
+run_SGP rguigo.masked3X_pankaj_W5 $DATASETS/fasta/masked \
+               $ANALYSIS/blast/wublast.tblastx/masked3X/pankaj_W5 \
+               $DATASETS/annotation/gff/all.Hsap Hsap ;
+#
+export HOME='/home/ug/jabril' ;
+#
+@ 
+
+<<BASH commands ANALYSIS>>=
+#
+# Roderic's Tests on a SGP variant (TAKING files from his LOCAL PATH)
 #
 IDIR="$ANALYSIS/sgp/rguigo" ;
 ChckDirs $IDIR ;
@@ -784,10 +1615,10 @@ MergeGFF $ANALYSIS/sgp/rguigo/gff/$locus Hsap 0 ;
 #
 $SGPBIN/evaluation -tsa /home/ug/rguigo/research/humus/SGP2-2/11.2/ortho.sgp \
                         $DATASETS/annotation/gff/all.Hsap                    \
-                      > $ANALYSIS/sgp/eval.sgp_Hsap_RGUIGO ;
+                      > $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO ;
 $SGPBIN/evaluation -tsa $ANALYSIS/sgp/rguigo/gff/all.Hsap                    \
                         $DATASETS/annotation/gff/all.Hsap                    \
-                      > $ANALYSIS/sgp/eval.sgp_Hsap_RGUIGO.2 ;
+                      > $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO.2 ;
 #
 IDIR="/home/ug/rguigo/research/humus/SGP2-2/11.2/sgp" ;
 ODIR="$ANALYSIS/sgp/rguigo" ;
@@ -806,30 +1637,59 @@ while read locus ;
 
 \subsctn{Printing gene-prediction statistics}
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
-ENSCRIPT="enscript -1rC -Gjf Courier7 -M A4" ;
+### PRINTING GENE-PREDICTION EVALUATIONS
+ENSCRIPT="enscript -1C -Gjf Courier7 -M A4" ;
 #
-$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval.geneid_Hsap_raw ;
-$ENSCRIPT $ANALYSIS/geneid/Hsap.orimasked/eval.geneid_Hsap_orimasked ;
+# GENEID evaluation
+$ENSCRIPT $ANALYSIS/geneid/Hsap.raw/eval_geneid.Hsap.raw ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.raw/eval_geneid_brief.Hsap.raw ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.orimasked/eval_geneid.Hsap.orimasked ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.orimasked/eval_geneid_brief.Hsap.orimasked ;
+$ENSCRIPT $ANALYSIS/geneid/Hsap.masked/eval_geneid.Hsap.masked ;
+$ENSCRIPT -r $ANALYSIS/geneid/Hsap.masked/eval_geneid_brief.Hsap.masked ;
 #
-$ENSCRIPT $ANALYSIS/genscan/Hsap.raw/eval.genscan_Hsap_raw ;
-$ENSCRIPT $ANALYSIS/genscan/Hsap.orimasked/eval.genscan_Hsap_orimasked ;
+# GENSCAN evaluation
+$ENSCRIPT $ANALYSIS/genscan/Hsap.raw/eval_genscan.Hsap.raw ;
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.raw/eval_genscan_brief.Hsap.raw ;
+$ENSCRIPT $ANALYSIS/genscan/Hsap.orimasked/eval_genscan.Hsap.orimasked ;
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.orimasked/eval_genscan_brief.Hsap.orimasked ;
+$ENSCRIPT $ANALYSIS/genscan/Hsap.masked/eval_genscan.Hsap.masked ;
+$ENSCRIPT -r $ANALYSIS/genscan/Hsap.masked/eval_genscan_brief.Hsap.masked ;
 #
-$ENSCRIPT $ANALYSIS/twinscan/Hsap.orimasked/eval.twinscan_Hsap_orimasked ;
+# SLAM evaluation
 #
-$ENSCRIPT $ANALYSIS/sgp/Hsap.raw/eval.sgp_Hsap_raw ;
-$ENSCRIPT $ANALYSIS/sgp/Hsap.orimasked/eval.sgp_Hsap_orimasked ;
-# Roderic's Tests on a SGP variant
-$ENSCRIPT $ANALYSIS/sgp/eval.sgp_Hsap_RGUIGO ;
+# TWINSCAN evaluation
+$ENSCRIPT $ANALYSIS/twinscan/Hsap.20010722/eval_twinscan.Hsap.20010722 ;
+$ENSCRIPT -r $ANALYSIS/twinscan/Hsap.20010722/eval_twinscan_brief.Hsap.20010722 ;
+$ENSCRIPT $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan.Hsap.20010803 ;
+$ENSCRIPT -r $ANALYSIS/twinscan/Hsap.20010803/eval_twinscan_brief.Hsap.20010803 ;
+#
+# SGP evaluation
+$ENSCRIPT $ANALYSIS/sgp/Hsap.raw/eval_sgp.Hsap.raw ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.raw/eval_sgp_brief.Hsap.raw ;
+$ENSCRIPT $ANALYSIS/sgp/Hsap.orimasked/eval_sgp.Hsap.orimasked ;
+$ENSCRIPT -r $ANALYSIS/sgp/Hsap.orimasked/eval_sgp_brief.Hsap.orimasked ;
+# SGP evaluation (Roderic's SGP variant)
+$ENSCRIPT $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo/eval_sgp.Hsap_RGUIGO.2 ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked/eval_sgp.rguigo.orimasked ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked/eval_sgp_brief.rguigo.orimasked ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp.rguigo.orimasked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.orimasked3X_pankaj_W5/eval_sgp_brief.rguigo.orimasked3X_pankaj_W5 ;
+$ENSCRIPT $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp.rguigo.masked3X_pankaj_W5 ;
+$ENSCRIPT -r $ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/eval_sgp_brief.rguigo.masked3X_pankaj_W5 ;
 #
 @
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Making plots for {\sgp}}
 
 \subsctn{Preparing GFF files}
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
 # geneid and genscan files (Twinscan used as is)
 while read locus ;
@@ -901,13 +1761,25 @@ while read locus ;
     } ;
   done < $HSAP ; 
 #
-# 3X against sequences (!!!!! TO DO !!!!!)
+# 3X against sequences (Roderic's SGP testing version)
 while read locus ;
   do {
-    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="SGP.3X";print}' $WORK/sgp/HsapMmus3X.msk/gff/$locus \
-         > $WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus ;
-    gawk 'BEGIN{OFS="\t"} $1!~/^#|^[ \t]*$/ {$2="tblastx.3X";$8=".";print}' $WORK/sgp/HsapMmus3X.msk/hsp-rs/$locus \
-         > $WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus ;
+    echo "### Working on $locus..." ;
+    #
+    IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5" ;
+    ODIR="$IDIR/ps/_tmp/sgp" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="SGP.3X" };
+            print $0;
+            }' $IDIR/gff/$locus > $ODIR/$locus ;
+    #
+    ODIR="$IDIR/ps/_tmp/tblastx" ;
+    [ -e $ODIR ] || ChckDirs $ODIR ;
+    gawk 'BEGIN{ OFS="\t" }
+          { if ($1 !~ /^#|^[ \t]*$/) { $2="tblastx.3X"; $8="." };
+            print $0;
+            }' $IDIR/hsp-rs/$locus > $ODIR/$locus ;
     } ;
   done < $HSAP ; 
 #
@@ -915,50 +1787,119 @@ while read locus ;
 
 \subsctn{Making plots with {\gps}}
 
-\subsubsctn{Human x FO Mouse Roderic's SGP results} %'
+<<BASH commands ANALYSIS>>=
+#
+run_GFF2PS ()
+{
+  # 
+  # run_GFF2PS - Making plots with gff2ps (a4+a3+wide formats)
+  #
+  # USAGE: run_GFF2PS working_dir "GFF_files_list"
+  #
+  # 'working_dir' where to save plots
+  # "GFF_files_list" a list of GFF files (with full path) to be plotted
+  #
+  ODIR="$1/gff2ps" ;
+  GFFfiles="$2";
+  ChckDirs $ODIR \
+           $ODIR/a3      $ODIR/a4      $ODIR/wide \
+           $ODIR/a3/logs $ODIR/a4/logs $ODIR/wide/logs ;
+  #
+  while read locus ; # Requires previous $IDIR 
+    do {
+      echo "### Plotting $locus" ;
+      gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a4.rc   -- $GFFfiles \
+              2>&1 > $ODIR/a4/$locus   | tee $ODIR/a4/logs/$locus ;
+      gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a3.rc   -- $GFFfiles \
+              2>&1 > $ODIR/a3/$locus   | tee $ODIR/a3/logs/$locus ;
+      gff2ps -VC $PARAM/gff2ps/ortho_orimasked_wide.rc -- $GFFfiles \
+              2>&1 > $ODIR/wide/$locus | tee $ODIR/wide/logs/$locus ;
+      } ;
+    done < $HSAP ;
+}
+#
+@ 
+
+\subsubsctn{Human x FO Mouse (Roderic's SGP results)} %'
 
 We are going to display the following data: 
 
 \begin{tabular}{rl}
 annotation   & [[$DATASETS/annotation/gff/$locus]] \\
 sgp          & [[$ANALYSIS/sgp/rguigo/ps/_tmp/sgp/$locus]] \\
-geneid msk   & [[$ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid/$locus]] \\
-twinscan msk & [[$ANALYSIS/twinscan/Hsap.orimasked/gff/$locus]] \\
-genscan msk  & [[$ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan/$locus]] \\
+geneid msk   & [[$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/$locus]] \\
+twinscan msk & [[$ANALYSIS/twinscan/Hsap.20010803/gff/$locus]] \\
+genscan msk  & [[$ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan/$locus]] \\
 hsp-rs       & [[$ANALYSIS/sgp/rguigo/ps/_tmp/tblastx/$locus]] \\
-repeats      & [[$DATASETS/masking/orimasked/gff/$locus]] \\
+repeats      & [[$DATASETS/masking/default/gff/$locus]] \\
 \end{tabular}
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
-IDIR="$ANALYSIS/sgp/rguigo/ps";
-ChckDirs $IDIR/gff2ps \
-         $IDIR/gff2ps/a3      $IDIR/gff2ps/a4      $IDIR/gff2ps/wide \
-         $IDIR/gff2ps/a3/logs $IDIR/gff2ps/a4/logs $IDIR/gff2ps/wide/logs ;
-#
-while read locus ; # Requires previous $IDIR 
-  do {
-    echo "### Plotting $locus" ;
-    GFFIN="$DATASETS/annotation/gff/$locus" ;
-    GFFIN="$GFFIN $IDIR/_tmp/sgp/$locus" ;
-    GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid/$locus" ;
-    GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff/$locus" ;
-    GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan/$locus" ;
-    GFFIN="$GFFIN $IDIR/_tmp/tblastx/$locus" ;
-    GFFIN="$GFFIN $DATASETS/masking/orimasked/gff/$locus" ;
-    ODIR="$IDIR/gff2ps" ;
-    gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a4.rc   -- $GFFIN \
-            2>&1 > $ODIR/a4/$locus   | tee $ODIR/a4/logs/$locus ;
-    gff2ps -VC $PARAM/gff2ps/ortho_orimasked_a3.rc   -- $GFFIN \
-            2>&1 > $ODIR/a3/$locus   | tee $ODIR/a3/logs/$locus ;
-    gff2ps -VC $PARAM/gff2ps/ortho_orimasked_wide.rc -- $GFFIN \
-            2>&1 > $ODIR/wide/$locus | tee $ODIR/wide/logs/$locus ;
-    } ;
-  done < $HSAP ; 
+IDIR="$ANALYSIS/sgp/rguigo/ps" ;
+GFFIN="$DATASETS/annotation/gff" ;
+GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
+# GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid" ;
+GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
+# GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff" ;
+GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
+# GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
+# GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
+GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
+RunGFF2PS $IDIR "$GFFIN" ;
 #
 @ 
 
-\subsctn{Customization files for {\gps}}
+\subsubsctn{Human x WGS3X Mouse (Roderic's SGP results)} %'
+
+We are going to display the following data: 
+
+\begin{tabular}{rl}
+annotation   & [[$DATASETS/annotation/gff/$locus]] \\
+sgp          & [[$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps/_tmp/sgp/$locus]] \\
+geneid msk   & [[$ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid/$locus]] \\
+% NOT YET: we do not know if we got twinscan results for 3XWGS
+% twinscan msk & [[$ANALYSIS/twinscan/Hsap.20010803/gff/$locus]] \\
+genscan msk  & [[$ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan/$locus]] \\
+hsp-rs       & [[$ANALYSIS/sgp/rguigo/ps/_tmp/tblastx/$locus]] \\
+repeats      & [[$DATASETS/masking/default/gff/$locus]] \\
+\end{tabular}
+
+<<BASH commands ANALYSIS>>=
+#
+#### Human against Mouse 3X 
+IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps" ;
+GFFIN="$DATASETS/annotation/gff" ;
+GFFIN="$GFFIN $IDIR/_tmp/sgp" ;
+# GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.orimasked/ps/_tmp/geneid" ;
+GFFIN="$GFFIN $ANALYSIS/geneid/Hsap.masked/ps/_tmp/geneid" ;
+# NOT YET: we do not know if we got twinscan results for 3XWGS
+# GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.orimasked/gff" ;
+# GFFIN="$GFFIN $ANALYSIS/twinscan/Hsap.20010803/gff" ;
+# GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.orimasked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $ANALYSIS/genscan/Hsap.masked/ps/_tmp/genscan" ;
+GFFIN="$GFFIN $IDIR/_tmp/tblastx" ;
+# GFFIN="$GFFIN $DATASETS/masking/orimasked/gff" ;
+GFFIN="$GFFIN $DATASETS/masking/default/gff" ;
+RunGFF2PS $IDIR "$GFFIN" ;
+#
+@
+
+\subsubsctn{Human x WGS3X Mouse + FO Mouse (Roderic's SGP results)} %'
+
+<<BASH commands ANALYSIS>>=
+#
+#### Human against Mouse 3X + Human against Mouse Homologous 
+IDIR="$ANALYSIS/sgp/rguigo.masked3X_pankaj_W5/ps_3X+FO" ;
+ChckDirs $IDIR ;
+GFFIN="" #################### (TO DEFINE!!!!)
+RunGFF2PS $IDIR "$GFFIN" ;
+#
+@
+
+\subsubsctn{Customization files for {\gps}}
 
 + LAYOUT
 
@@ -1197,54 +2138,11 @@ masked::left_label=MASKED
 <<orimasked source settings>>
 @ 
 
-\subsubsctn{Human x WGS3X Mouse SGP results}
-
-<<BASH commands>>=
-#
-#### Human against Mouse 3X (!!!!! TO DO !!!!!)
-while read locus ;
-  do {
-    echo "### Plotting $locus" ;
-    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
-    PSOUT1="$WORK/ps/sgp/HsapMmus3X/$locus.a3" ;
-    PSOUT2="$WORK/ps/sgp/HsapMmus3X/$locus.a4" ;
-    LOGFILE1="$WORK/ps/sgp/HsapMmus3X/logs/$locus.a3" ;
-    LOGFILE2="$WORK/ps/sgp/HsapMmus3X/logs/$locus.a4" ;
-    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
-    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
-    } ;
-  done < $HSAP ; 
-#
-#### Human against Mouse 3X + Human against Mouse Homologous (!!!!! TO DO !!!!!)
-while read locus ;
-  do {
-    echo "### Plotting $locus" ;
-    GFFIN="$WORK/ps/_tmp/annotation/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmus3X/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/sgp/HsapMmusHomolog/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/geneid/Hsap.msk/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/genscan/Hsap.msk/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmus3X/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/ps/_tmp/tblastx/HsapMmusHomolog/gff/$locus " ;
-    GFFIN="$GFFIN$WORK/20010609/RepeatMasker/Hsap/gff/$locus " ;
-    PSOUT1="$WORK/ps/sgp/all/$locus.a3" ;
-    PSOUT2="$WORK/ps/sgp/all/$locus.a4" ;
-    LOGFILE1="$WORK/ps/sgp/all/logs/$locus.a3" ;
-    LOGFILE2="$WORK/ps/sgp/all/logs/$locus.a4" ;
-    gff2ps -VC $PARAM/gff2ps/brown.a3.rc -- $GFFIN 2>&1 >$PSOUT1 | tee $LOGFILE1 ;
-    gff2ps -VC $PARAM/gff2ps/brown.a4.rc -- $GFFIN 2>&1 >$PSOUT2 | tee $LOGFILE2 ;
-    } ;
-  done < $HSAP ; 
-@
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Preparing files on web site (as \textbf{gmaster})}
 
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
 while read locus ;
   do {
@@ -1255,12 +2153,14 @@ while read locus ;
   done < $HSAP ; 
 @ 
 
+\subsctn{Results on human/mouse homologous sequence comparison}
+
 \begin{comment}
 ODIR="./homologseqs" ;
 ANALYSIS="/projects/sgp/orthologous" ;
 HSAP="/projects/datasets/orthologous/id.Hsap" ;
 \end{comment}
-<<BASH commands>>=
+<<BASH commands ANALYSIS>>=
 #
 # Remember to set ODIR, ANALYSIS and HSAP by gmaster
 #
@@ -1299,8 +2199,134 @@ tar -zcvf HomologyTBX.tar.gz  Hsap_*.tbx  ;
 #
 @ 
 
+\subsctn{Results on human/mouse 3X WGS sequence comparison} % TO DO
+
+\begin{comment}
+ODIR="./homologseqs" ;
+ANALYSIS="/projects/sgp/orthologous" ;
+HSAP="/projects/datasets/orthologous/id.Hsap" ;
+\end{comment}
+<<BASH commands ANALYSIS>>=
+#
+# Remember to set ODIR, ANALYSIS and HSAP by gmaster
+#
+CP="cp -vapudf" ;
+#
+@ 
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Related Tables and Plots}
+
+\subsctn{Annotated Human Genes for Homologous Sequences Set}
+
+\begin{comment}
+<<BASH commands>>=
+gawk 'BEGIN{ 
+        lncnt=0;
+        ROWS=47;
+        header="\\begin{tabular}[t]{|r|lrrc|}\n\\hline\n";
+        header=header"\\lb{1cm}{r}{SEQ} & \\lb{1.5cm}{l}{GENE} & ";
+        header=header"\\lb{1cm}{r}{START} & \\lb{1cm}{r}{END} & ";
+        header=header"\\lb{0.5cm}{c}{STR} \\\\";
+        print "\\newcommand{\\lb}[3]{\\makebox[#1][#2]{#3}}\n";
+        print "\\begin{tabular}{c@{\\quad}c@{\\quad}c}"; # main table
+        print header;
+        }
+      { split($1,n,"_");
+        corr="";
+        if ( lncnt%ROWS == 0 && lncnt > 0 ) {
+          print "\\hline\n\\end{tabular}\n &";
+          print header;
+          n[2]="\\raisebox{-2.25ex}{\\shortstack{" n[2] "\\\\(\\textit{cont.})}}";
+          corr="[-1.75ex]";
+          } 
+        if ( cnt[n[2]] && n[2] !~ /\{cont\.\}/ ) {
+          n[2]=""; 
+          } 
+        else { 
+          printf "\\hline\n"; 
+          cnt[n[2]]++;
+          }
+        printf "%8s & %-10s & %8s & %8s & %s \\\\%s\n", n[2],$2,$3,$4,$5,corr;
+        lncnt++;
+        }
+      END{ 
+        print "\\hline\n\\end{tabular}\n\\\\";
+        print "\\end{tabular}"; # main table
+        }' $DATASETS/genes.Hsap > $DOCS/tables/genelist.tex ;
+@ 
+\end{comment}
+
+\begin{table}[!h]
+\hspace{-0.5cm}
+\fbox{
+\rotatebox{90}{
+\begin{minipage}[c][17.5cm][c]{22.5cm}
+\begin{center}
+\begin{scriptsize}
+ \input ./tables/genelist.tex
+\end{scriptsize}
+\caption[Annotated genes for the human sequences in the test set]{\label{tbl:genelist} Annotated genes for the human sequences in the {\data} test set.}\vskip 1ex
+\end{center}
+\end{minipage}
+}}
+\end{table}
+
 \newpage
-\appendix
+
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\sctn{Main [[README]] files}
+
+Here we provide the basic skeleton for the [[README]] files we will generate on each main directories for the current dataset.
+
+<<DATASETS README>>=
+#
+#                 PREPARING DATASETS FOR
+<<README common>>
+<<BASH commands DATASETS>>
+@ 
+
+<<SGP README>>=
+#
+#               RUNNING GENE-PREDICTION FOR
+<<README common>>
+<<BASH commands ANALYSIS>>
+@ 
+
+<<SPLICING README>>=
+#
+#                  SPLICING ANALYSIS ON
+<<README common>>
+<<BASH commands SPLICING>>
+@ 
+
+<<README common>>=
+#           8 ORTHOLOGOUS HUMAN/MOUSE SEQUENCES
+#
+# This README file was tangled from ORTHOLOGOUS_dataset.nw
+#
+<<Version Control Id Tag>>
+#
+# EXPORTING GLOBAL VARS and DEFINING BASIC SHELL FUNCTIONS
+#
+<<BASH Environment Variables>>
+#
+@ 
+
+<<tangling - READMEs>>=
+notangle -R"DATASETS README" $WORK/$nwfile.nw \
+    > $DATASETS/README ;
+notangle -R"SGP README" $WORK/$nwfile.nw \
+    > $ANALYSIS/README ;
+notangle -R"SPLICING README" $WORK/$nwfile.nw \
+    > $SPLICING/README ;
+@
+
+% \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Programs not included in this document}
 
@@ -1317,6 +2343,7 @@ human3iso.param \\
 
 The path variable in the sggp2 shell script has been changed to [[/projects/sgp/bin/SGP2-2/]].
 
+\newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \sctn{Scripts Central}
 
@@ -1782,6 +2809,722 @@ sub timing() {
 
 \newpage
 
+\subsctn{pspager.pl}
+
+\subsubsctn{Page formats definition}
+
+\input tables/PageSizeTbl.tex
+
+
+\subsubsctn{Available page sizes}
+
+<<LATEX page format table>>=
+%
+% PageSizeTbl.tex
+%
+% Page Sizes used in "pspager.pl".
+%
+% <<Version Control Id Tag>>
+%
+\label{sec:pagesizes}
+\def\prog{\texttt{pspager.pl}}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vfill
+\begin{table}[!ht]
+\begin{center}
+\setlength{\fboxsep}{2pt}
+%\setlength{\arrayrulewidth}{1pt}
+\fbox{
+ \begin{tabular}{|c||r|r||r|r||r|r|} \hline
+  \raisebox{-0.5ex}[0pt]{PAGE} &
+  \multicolumn{6}{c|}{PAGE SIZE}\\ \cline{2-7} \raisebox{0.25ex}[0pt]{FORMAT} &
+  \multicolumn{2}{c||}{(in points)} &
+  \multicolumn{2}{c||}{(in cms)} &
+  \multicolumn{2}{c|}{(in inches)}\\ \hline\hline
+  <<page sizes latex definition>>
+ \end{tabular}
+} % fbox
+\caption{\label{tbl:PageSztbl}Page Sizes defined in {\prog}.}\hspace{1cm}
+  %\refstepcounter{table}
+  %\addcontentsline{lot}{section}{
+  %   \thetable\hspace{1em}Page Sizes available at {\prog}.}
+\end{center}
+\end{table}
+\vfill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@
+
+<<Docs>>=
+echo "Extracting \"$DOCS/PageSizeTbl.tex\"..." ;
+notangle -R"LATEX page format table" $WORK/$nwfile.nw \
+         > $DOCS/tables/PageSizeTbl.tex ;
+@ 
+
+<<PostScript FORMATS>>=
+sub ps_page_formats() {
+  my %tmp = ();
+  print STDOUT "%% Paper Sizes (in points)\n";
+  print STDOUT "/pagedict ".($formats + 2)." dict def pagedict begin %% ".
+               $formats." formats + 2 definitions\n";
+  foreach my $key (keys %FORMATS) { $tmp{$FORMATS{$key}->[0]} = $key };
+  for (my $j = 1; $j <= $formats; $j++) { 
+      my $name = $tmp{$j};
+      my $ref = \$FORMATS{$name};
+      my $pgsz = &fill_left($$ref->[1],4," ").&fill_left($$ref->[2],5," ");
+      print STDOUT "/pg".(&fill_right($name,10," "))."{ $pgsz } def\n";
+      };
+  print STDOUT "end %% pagedict\n";}
+@
+
+<<Global Vars>>=
+my $formats = 0;
+my %FORMATS = (   # [ FormatNUMBER, X(short edge), Y(long edge) ]
+  <<page sizes perl definition>>
+  );
+@ 
+
+\subsubsctn{Page format definition} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:PAGEdef}
+
+\subsubsubsctn{ISO standard page sizes: A series}
+
+<<page sizes perl definition>>=
+  a0        => [ ++$formats, 2384, 3370 ],
+  a1        => [ ++$formats, 1684, 2384 ],
+  a2        => [ ++$formats, 1190, 1684 ],
+  a3        => [ ++$formats,  842, 1190 ],
+  a4        => [ ++$formats,  595,  842 ],
+  a5        => [ ++$formats,  420,  595 ],
+  a6        => [ ++$formats,  297,  420 ],
+  a7        => [ ++$formats,  210,  297 ],
+  a8        => [ ++$formats,  148,  210 ],
+  a9        => [ ++$formats,  105,  148 ],
+  a10       => [ ++$formats,   73,  105 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+a0          & 2384 & 3370 &  84.1 & 118.9 &  33.1 &  46.8 \\
+a1          & 1684 & 2384 &  59.4 &  84.1 &  23.4 &  33.1 \\
+a2          & 1190 & 1684 &  42.0 &  59.4 &  16.5 &  23.4 \\
+a3          &  842 & 1190 &  29.7 &  42.0 &  11.7 &  16.5 \\
+a4          &  595 &  842 &  21.0 &  29.7 &   8.3 &  11.7 \\
+a5          &  420 &  595 &  14.8 &  21.0 &   5.8 &   8.3 \\
+a6          &  297 &  420 &  10.5 &  14.8 &   4.1 &   5.8 \\
+a7          &  210 &  297 &   7.4 &  10.5 &   2.9 &   4.1 \\
+a8          &  148 &  210 &   5.2 &   7.4 &   2.1 &   2.9 \\
+a9          &  105 &  148 &   3.7 &   5.2 &   1.5 &   2.1 \\
+a10         &   73 &  105 &   2.6 &   3.7 &   1.0 &   1.5 \\ \hline\hline
+@
+
+\subsubsubsctn{ISO standard page sizes: B series}
+
+<<page sizes perl definition>>=
+  b0        => [ ++$formats, 2920, 4127 ],
+  b1        => [ ++$formats, 2064, 2920 ],
+  b2        => [ ++$formats, 1460, 2064 ],
+  b3        => [ ++$formats, 1032, 1460 ],
+  b4        => [ ++$formats,  729, 1032 ],
+  b5        => [ ++$formats,  516,  729 ],
+  b6        => [ ++$formats,  363,  516 ],
+  b7        => [ ++$formats,  258,  363 ],
+  b8        => [ ++$formats,  181,  258 ],
+  b9        => [ ++$formats,  127,  181 ],
+  b10       => [ ++$formats,   91,  127 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+b0          & 2920 & 4127 & 103.0 & 145.6 &  40.6 &  57.3 \\
+b1          & 2064 & 2920 &  72.8 & 103.0 &  28.7 &  40.6 \\
+b2          & 1460 & 2064 &  51.5 &  72.8 &  20.3 &  28.7 \\
+b3          & 1032 & 1460 &  36.4 &  51.5 &  14.3 &  20.3 \\
+b4          &  729 & 1032 &  25.7 &  36.4 &  10.1 &  14.3 \\
+b5          &  516 &  729 &  18.2 &  25.7 &   7.2 &  10.1 \\
+b6          &  363 &  516 &  12.8 &  18.2 &   5.0 &   7.2 \\
+b7          &  258 &  363 &   9.1 &  12.8 &   3.6 &   5.0 \\
+b8          &  181 &  258 &   6.4 &   9.1 &   2.5 &   3.6 \\
+b9          &  127 &  181 &   4.5 &   6.4 &   1.8 &   2.5 \\
+b10         &   91 &  127 &   3.2 &   4.5 &   1.3 &   1.8 \\ \hline\hline
+@
+
+\subsubsubsctn{US standard page sizes}
+
+<<page sizes perl definition>>=
+  executive => [ ++$formats,  540,  720 ],
+  folio     => [ ++$formats,  612,  936 ],
+  legal     => [ ++$formats,  612, 1008 ],
+  letter    => [ ++$formats,  612,  792 ],
+  quarto    => [ ++$formats,  610,  780 ],
+  statement => [ ++$formats,  396,  612 ],
+ '10x14'    => [ ++$formats,  720, 1008 ],
+  ledger    => [ ++$formats, 1224,  792 ],
+  tabloid   => [ ++$formats,  792, 1224 ],
+@
+<<page sizes latex definition>>=
+%               points    -  centimeters  -     inches
+executive   &  540 &  720 &  19.0 &  25.4 &   7.5 &  10.0 \\
+folio       &  612 &  936 &  21.6 &  33.0 &   8.5 &  13.0 \\
+legal       &  612 & 1008 &  21.6 &  35.6 &   8.5 &  14.0 \\
+letter      &  612 &  792 &  21.6 &  27.9 &   8.5 &  11.0 \\
+quarto      &  610 &  780 &  21.5 &  27.5 &   8.5 &  10.8 \\
+statement   &  396 &  612 &  14.0 &  21.6 &   5.5 &   8.5 \\ \hline\hline
+10x14       &  720 & 1008 &  25.4 &  35.6 &  10.0 &  14.0 \\
+ledger      & 1224 &  792 &  43.2 &  27.9 &  17.0 &  11.0 \\
+tabloid     &  792 & 1224 &  27.9 &  43.2 &  11.0 &  17.0 \\ \hline
+@
+
+\subsubsubsctn{Page sizes help}
+
+<<pages help>>=
+The following page sizes are available: from A0 to A10, 
+from B0 to B10, 10x14, executive, folio, ledger, legal, 
+letter, quarto, statement and tabloid.
+@
+
+\subsubsctn{The program}
+
+<<pspager.pl>>=
+<<PERL shebang>>
+#
+# pspager.pl : printing virtual pages into several physical ones.
+#
+# USAGE: pspager.pl [options] PSfile > PSfile_page 
+#
+# VARIABLES
+<<Global Vars - pspager>>
+#
+# MAIN LOOP
+<<Main Loop - pspager>>
+#
+# FUNCTIONS
+<<Functions - pspager>>
+@ 
+
+<<Main Loop - pspager>>=
+&parse_commandline();
+&parse_inputfile($PSinput);
+&setting_vars();
+&write_PS_output();
+
+exit(0);
+@ 
+
+<<Functions - pspager>>=
+sub parse_commandline() {
+    <<looking for STDIN>>
+
+    $SIG{__WARN__} = sub { &warn('UNKNOWN_CL_OPTION',$T,$_[0]) };
+    GetOptions(
+               <<command-line options>>
+               ) || (&warn('CMD_LINE_ERROR',$T), exit(1));
+    $SIG{__WARN__} = 'DEFAULT';
+
+    <<open LOGFILE>>
+
+    &header('',"RUNNING $PROGRAM",'',"User: $USER","Date: $DATE");
+
+    &header("SETTING DEFAULTS");
+    %DefaultVars = ();
+    &set_default_vars;
+
+    &header("CHECKING COMMAND-LINE OPTIONS");
+    @data_files = ();
+    &set_input_file($cmdln_stdin);
+    @ARGV = (); # ensuring that command-line ARGVs array is empty
+
+    &set_custom_files();
+
+    <<Check command-line options>>
+
+    &footer("COMMAND-LINE CHECKED");
+} # parse_commandline
+@
+
+<<Functions - pspager>>=
+sub parse_inputfile() {
+} # parse_inputfile
+@
+
+<<Functions - pspager>>=
+sub setting_vars() {
+} # setting_vars
+@
+
+<<Functions - pspager>>=
+sub write_PS_output() {
+} # write_PS_output
+@
+
+<<pspager.pl>>=
+my ($ctx, $cty) = (0, 0);
+my ($x, $y);
+# my @page_OUT = (  792,  1224 ); # 11x17 (tabloid) page format
+my @page_OUT = (  612,  792 ); # letter page format
+# my @page_OUT = (  595,  842 ); # a4 page format
+my $margin = 20;
+my ($xdelta, $ydelta) = ($page_OUT[0]-($margin * 2), $page_OUT[1]-($margin * 2));
+
+my @page_IN;
+push @page_IN, shift @ARGV, shift @ARGV;
+
+my $orientation = shift @ARGV;
+my $orflg = $orientation eq "l" ? "true" : "false";
+
+my $file = $ARGV[0];
+
+print STDERR ("#"x40)."\n## RUNNING multipager ON: $file\n".("#"x40)."\n";
+print STDERR "## PAGE IN:  $page_IN[0] - $page_IN[1] (".($orientation eq "l" ? "Landscape" : "Portrait").")\n";
+print STDERR "## PAGE OUT: $page_OUT[0] - $page_OUT[1] (Portrait)\n".("#"x40)."\n";
+
+for ($x=0;$x<$page_IN[0];$x+=$xdelta) {
+        $ctx++; $cty = 0;
+        for ($y=0;$y<$page_IN[1];$y+=$ydelta) {
+                $cty++;
+                print STDERR "## Printing Page X($ctx) Y($cty)\n";
+                open(K,"< $file");
+                open(L,"> $file.MULTI.$ctx\_$cty");
+                while (<K>) {
+                        print L $_;
+                        /^%%BeginProlog/ && &pscode;
+                }
+                close(L);
+                close(K);
+        }
+}
+
+sub pscode {
+        print L << "EOF";
+%%
+/cutmrg $margin def
+/lndscp $orflg def
+/bbox { 4 copy 3 1 roll exch 6 2 roll 8 -2 roll moveto lineto lineto lineto closepath } bind def 
+% 0 0 $page_OUT[0] $page_OUT[1] bbox 1 0 0 0 setcmykcolor fill newpath
+/cutmrk {
+  gsave 
+  translate scale
+  0 setgray 0.125 setlinewidth
+  gsave 0 -1 moveto 0 cutmrg neg lineto stroke grestore
+  gsave -1 0 moveto cutmrg neg 0 lineto stroke grestore
+  grestore
+  } bind def 
+/mkmrk {
+   gsave 0 0 translate cutmrg 12 add cutmrg 12 sub moveto /Helvetica-Bold findfont 9 scalefont setfont (Page $ctx/$cty - X($x):Y($y)) show grestore     
+    1  1 cutmrg                  cutmrg                   cutmrk
+   -1 -1 $page_OUT[0] cutmrg sub $page_OUT[1] cutmrg sub  cutmrk
+    1 -1 cutmrg                  $page_OUT[1] cutmrg sub  cutmrk
+   -1  1 $page_OUT[0] cutmrg sub cutmrg                   cutmrk
+   cutmrg cutmrg $page_OUT[0] cutmrg sub $page_OUT[1] cutmrg sub  bbox 
+  gsave 1 setgray fill grestore
+  % gsave stroke grestore
+  clip       
+  newpath    
+  } bind def 
+%%           
+2 dict dup /PageSize [ $page_OUT[0] $page_OUT[1] ] put dup /ImagingBBox null put setpagedevice
+mkmrk lndscp { cutmrg $x add neg cutmrg $y add neg translate } { cutmrg $x sub cutmrg $y sub translate } ifelse
+%%
+EOF
+}
+@ 
+
+<<pspager.pl>>=
+%!PS-Adobe-3.0 
+%%Title: (Using EPS file in Form in VM) 
+%%BoundingBox: 0 0 612 792 
+%%DocumentProcessColors: Black 
+%%Pages: 3 
+%%PageOrder: Special 
+%%EndComments 
+%%BeginProlog 
+%%BeginResource: procset helper_ops 1.0 0 
+%%Title: (Helper Operators) 
+%%Version: 1.0 
+userdict /helper_ops 10 dict dup begin put
+
+/L1? {
+    /languagelevel where {
+       pop languagelevel 2 lt
+    }{
+       true
+    } ifelse
+} bind def
+
+/StartDoc { 
+    userdict begin 
+    /PreForm save def 
+    /showpage {} def
+} bind def
+
+/EndDoc { 
+    PreForm restore 
+    end % userdict
+} bind def
+
+/rfill { % llx lly w h rfill --
+    gsave newpath 
+    4 -2 roll moveto % use x, y coordinates
+    2 copy 0.0 lt exch 0.0 lt xor { % check for one arg only being neg 
+        dup 0.0 exch rlineto % do height first 
+        exch 0.0 rlineto 
+        neg 0.0 exch rlineto
+    }{ 
+        exch dup 0.0 rlineto % do width first 
+        exch 0.0 exch rlineto
+        neg 0.0 rlineto
+    } ifelse
+    closepath
+    fill grestore
+} bind def
+
+/add_var_data { % procedure to add variable data to fill in form
+    /Times-Roman findfont 12 scalefont setfont 
+    L1? { % if Level 1, need to draw white boxes where data will be placed
+        gsave
+        1 setgray
+        87 360 350 20 rfill
+        190 430 350 20 rfill
+        190 535 350 20 rfill
+        190 600 350 20 rfill
+        grestore
+    } if
+    97 370 moveto show
+    200 440 moveto show
+    200 545 moveto show
+    200 610 moveto show
+} bind def
+
+/emitpage { 
+    L1? {
+       add_var_data copypage
+    }{
+       TestForm execform add_var_data showpage
+    } ifelse
+} bind def
+
+/emitlastpage {
+    L1? {
+       add_var_data showpage
+    }{
+       emitpage
+    } ifelse
+} bind def
+
+currentdict readonly pop end
+%%EndResource
+
+%%BeginResource: procset forms_procs 1.0 0 
+%%Title: (Forms Procs)
+%%Version: 1.0
+userdict /forms_procs 10 dict dup begin put
+
+/STRING_SIZE 16000 def
+/ARRAY_SIZE 5 def % UPDATE DEPENDING ON SIZE OF INCLUDED DOCUMENT
+                  % (leave room for initial counter and final empty string)
+
+/buffer STRING_SIZE string def 
+
+/readdata {
+  L1? { % readdata -- 
+      StartDoc
+  }{    % array readdata --
+      1 {                             % put counter on stack
+                                      % stack: array counter
+          2 copy                      % stack: array counter array counter
+          inputFile buffer readstring % read contents of currentfile into buffer
+                                      % stack: array counter array counter string boolean
+          4 1 roll                    % put boolean indicating EOF lower on stack
+          STRING_SIZE string copy     % copy buffer string into new string 
+                                      % stack: array counter boolean array counter newstring
+          put                         % put string into array
+          not {exit} if               % if EOF has been reached, exit loop.
+          1 add                       % increment counter
+        } loop
+      % increment counter and place empty string in next position 
+      1 add 2 copy () put pop
+      currentglobal true setglobal exch
+
+          0 1 array put % create an array for counter in global VM,
+                        % so as not to be affected by save/restore calls in EPS file.
+                        % place as first element of string array. 
+      setglobal  % restore previously set value
+  } ifelse
+} bind def
+currentdict readonly pop end
+%%EndResource
+
+%%EndProlog
+%%BeginSetup
+helper_ops begin
+forms_procs begin
+userdict begin
+
+L1? not {
+   % set MaxFormItem to be equivalent to MaxFormCache
+   1 dict begin
+        /MaxFormItem currentsystemparams /MaxFormCache get def
+   currentdict end
+   setuserparams
+}if
+
+% download form
+%%BeginResource: form TestForm 
+L1? not { % for > L1 case, define a form resource
+  /TestForm
+  10 dict begin
+     /FormType 1 def
+     /EPSArray ARRAY_SIZE array def
+     /AcquisitionProc {
+        EPSArray dup 0 get dup 0 get % array counter_array counter
+        dup 3 1 roll                 % array counter counter_array counter
+        1 add 0 exch put             % increment counter
+        get                          % use old counter as index into array, placing
+                                     % next string on operand stack.
+     } bind def
+     /PaintProc {
+       begin
+         StartDoc
+           EPSArray 0 get 0 1 put
+           /AcquisitionProc load 0 () /SubFileDecode filter
+           cvx exec
+       end % form dict
+     } bind def
+     /BBox [ 29 222 583 759] def % UPDATE FOR INCLUDED DOCUMENT
+     /Matrix [1 0 0 1 0 0] def
+  currentdict end def % TestForm
+  /inputFile currentfile 0 (% EOD_Marker_5882)
+  /SubFileDecode filter def
+  TestForm /EPSArray get 
+} if
+
+readdata
+%%BeginDocument: landscape_form % UPDATE TO NAME OF INCLUDED DOCUMENT
+
+%%EndDocument
+EndDoc % put this call after included EPS file. Followed by 
+% EOD_Marker_5882 % The % EOD_Marker_#### comment, which is needed so that 
+                  % SubFileDecode filter will reach end of data.
+%%EndResource
+%%EndSetup
+
+%%Page: 1 1
+%%BeginPageSetup
+/pgsave save def
+%%EndPageSetup
+(Joe Smith)                                  % parameters of example form
+(1281 Market Street, San Jose, CA 95053)     % parameters of example form
+(408-225-1818)                               % parameters of example form
+(Trim two pine trees in NE corner of lot.)   % parameters of example form
+emitpage                                     % calling example form
+%%PageTrailer
+pgsave restore
+
+%%Trailer
+end % userdict
+end % forms_procs
+end % helper_procs
+%%EOF
+@
+
+<<EPSbbox>>=
+%%
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
+%
+% Place this after the "%% EndComments" tag for small snapshots of the figure.
+%
+% 2 dict dup /PageSize [ 595 842 ] put dup /ImagingBBox null put setpagedevice
+% 0.2 0.2 scale
+%                    [ 595 842 ] for a4     (0.2 0.2 scale)
+%                    [ 612 792 ] for letter (0.1925 0.1925 scale)
+%                    [ 297 420 ] for a6     (0.1 0.1 scale)
+%
+%%
+% S 2116 340 2910 400 bbox bgcolor scmyk fill R % 40"x57" - old margins
+S 2116 300 2910 370 bbox bgcolor scmyk fill R % 40"x57"
+%% S 108 108 T 0 0 2808 4032 bbox fgcolor scmyk 1 slw K R % 40"x57"
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% CROP MARKS
+%%
+/cutmrg 1 in def
+/cuturx 3024 def % 40"x57"
+/cutury 4248 def % 40"x57"
+/cutmrk { S fgcolor scmyk 1 slw T F S 0 -1 m 0 cutmrg neg l K newpath 1 0 m cutmrg 0 l K R R } bdf 
+S
+-1  1   cutmrg              cutmrg              cutmrk
+ 1 -1   cuturx cutmrg sub   cutury cutmrg sub   cutmrk
+-1 -1   cutmrg              cutury cutmrg sub   cutmrk
+ 1  1   cuturx cutmrg sub   cutmrg              cutmrk
+R
+%%
+%%% CROP MARKS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% EPS Functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+/EPSDict 10 dict def
+EPSDict begin
+  /N { def } def
+  /B { bind def } N
+  /S { exch } N
+  /X { S N } B
+  /A { dup } B
+  /TR { translate } N
+  /KDict 50 dict N 
+  KDict begin
+    /@SpecialDefaults{
+      /hs 612 N
+      /vs 792 N
+      /ho 0 N
+      /vo 0 N
+      /hsc 1 N
+      /vsc 1 N
+      /ang 0 N
+      /CLIP 0 N
+      /rwiSeen false N
+      /rhiSeen false N
+      /letter {} N
+      /note {} N
+      /a4 {} N
+      /a3 {} N
+      /legal {} N
+      }B
+    /@scaleunit 100 N
+    /@hscale { @scaleunit div /hsc X } B
+    /@vscale { @scaleunit div /vsc X } B
+    /@hsize { /hs X /CLIP 1 N } B
+    /@vsize { /vs X /CLIP 1 N } B
+    /@clip { /CLIP 2 N } B
+    /@hoffset { /ho X } B
+    /@voffset { /vo X } B
+    /@angle { /ang X } B
+    /@rwi { 10 div /rwi X /rwiSeen true N } B
+    /@rhi { 10 div /rhi X /rhiSeen true N } B
+    /@llx { /llx X } B
+    /@lly { /lly X } B
+    /@urx { /urx X } B
+    /@ury { /ury X } B
+    /magscale true def
+    end % KDict
+  /@beginspecial{
+    KDict begin % begin_KDict_@beginspecial
+      /EPSsave save N
+      gsave
+        @SpecialDefaults count /ocount X
+        /dcount countdictstack N
+    }N
+  /@setspecial{
+    CLIP 1 eq {
+      newpath 0 0 moveto hs 0 rlineto 0 vs rlineto hs neg 0 rlineto closepath clip
+      }if
+    ho vo TR hsc vsc scale ang rotate
+    rwiSeen {
+      rwi urx llx sub div
+      rhiSeen { rhi ury lly sub div }{ dup } ifelse
+      scale llx neg lly neg TR
+     }{
+      rhiSeen { rhi ury lly sub div dup scale llx neg lly neg TR }if
+      }ifelse
+    CLIP 2 eq{
+      newpath llx lly moveto urx lly lineto urx ury lineto llx ury lineto closepath clip
+      }if
+    /showpage {} N
+    /erasepage {} N
+    /copypage {} N
+    newpath
+    } N
+  /@endspecial {
+    count ocount sub { pop } repeat
+    countdictstack dcount sub { end } repeat grestore
+    EPSsave restore
+    end % begin_KDict_@beginspecial
+    } N
+end
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% LEGEND MAIN TITLE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+EPSDict begin
+ @beginspecial
+ 80 @hoffset 4400 @voffset  % 40"x57"
+ 270 @angle                          % OK
+ 235 @llx 35 @lly 375 @urx 2820 @ury % OK
+ % 2030 @rwi
+ @clip
+ @setspecial
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%BeginDocument: Legend_Title.ps
+%%
+%%% Insert PS file HERE for MAIN TITLE
+%%
+%%EndDocument: Legend_Title.ps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+ @endspecial % EPSDict
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% TEXT LEGEND
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+EPSDict begin
+ @beginspecial
+ % 120 @hoffset 255 @voffset % 39"x56"
+ 228 @hoffset 300 @voffset   % 40"x57"
+ 270 @angle                          % OK
+ 212 @llx 30 @lly 400 @urx 1407 @ury % OK
+ 2030 @rwi
+ @clip
+ @setspecial
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%BeginDocument: Legend_Text.ps
+%%
+%%% Insert PS file HERE for LEGEND TEXT
+%%
+%%EndDocument: Legend_Text.ps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+ @endspecial % EPSDict
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% KEY FIGURE LEGEND
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+EPSDict begin
+ @beginspecial
+ % 1690 @hoffset 255 @voffset % 39"x56"
+ 1798 @hoffset 300 @voffset   % 40"x57"
+ 270 @angle                         % OK
+ 212 @llx 30 @lly 400 @urx 944 @ury % OK
+ 2030 @rwi
+ @clip
+ @setspecial
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%BeginDocument: Legend_Key.ps
+%%
+%%% Insert PS file HERE for LEGEND KEY
+%%
+%%EndDocument: Legend_Key.ps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+ @endspecial % EPSDict
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% EPS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+
+@ 
+
+\newpage
+
 \sctn{Common code blocks}
 
 \subsctn{PERL scripts}
@@ -1964,7 +3707,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+# $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
 @ 
 
 \newpage
@@ -2007,16 +3750,17 @@ chmod a+x $BIN/gff2gtf.pl ;
 
 <<tangling>>=
 #
-notangle -R"Sequence IDs" $WORK/$nwfile.nw > $ID ;
+ChckDirs $PARAM/gff2ps $PARAM/gff2aplot ;
 #
-ChckDirs $PARAM/gff2ps
+notangle -R"GFF2APLOT customization: ortho masked" $WORK/$nwfile.nw \
+         > $PARAM/gff2aplot/ortho_masked_a4.rc ;
 #
 notangle -R"GFF2PS customization: ortho orimasked a4" $WORK/$nwfile.nw \
-         > $PARAM/gff2ps/ortho_orimasked_a4.rc
+         > $PARAM/gff2ps/ortho_orimasked_a4.rc ;
 notangle -R"GFF2PS customization: ortho orimasked a3" $WORK/$nwfile.nw \
-         > $PARAM/gff2ps/ortho_orimasked_a3.rc
+         > $PARAM/gff2ps/ortho_orimasked_a3.rc ;
 notangle -R"GFF2PS customization: ortho orimasked wide" $WORK/$nwfile.nw \
-         > $PARAM/gff2ps/ortho_orimasked_wide.rc
+         > $PARAM/gff2ps/ortho_orimasked_wide.rc ;
 #
 @ %$
 
@@ -2059,7 +3803,7 @@ popd ;
 
 <<BASH Environment Variables>>=
 #
-# Global Variables
+# ORTHOLOGOUS Dataset Variables
 #
 DATASETS="/projects/datasets/orthologous";
 WORK="$DATASETS/_docs" ;
@@ -2081,7 +3825,7 @@ HSAP="$DATASETS/id.Hsap" ;
 MMUS="$DATASETS/id.Mmus" ;
 export ANALYSIS ID HSAP MMUS ;
 #
-# Shell Functions
+# BASIC Shell Functions
 #
 ChckDirs ()
 {
@@ -2089,11 +3833,10 @@ ChckDirs ()
   # USAGE: ChckDirs <path_list>
   #
   for name in "$@" ;
-    do
-      {
-        [ -d "$name" ] && 
-          echo "### Directory Already Exist: $name" ||
-            mkdir --verbose $name ;
+    do {
+         [ -d "$name" ] && 
+           echo "### Directory Already Exist: $name" ||
+             mkdir --verbose $name ;
       } ;
     done ;
 }
@@ -2296,7 +4039,7 @@ dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps ;
 %
 % all_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_main.tex; popd;
 % dvips $DOCS/psfigures/all_main.dvi -o $DOCS/psfigures/all_main.ps
@@ -2640,7 +4383,7 @@ dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps ;
 %
 % all_blast_main.tex
 %
-% $Id: ORTHOLOGOUS_dataset.nw,v 1.1 2001-08-07 18:02:55 jabril Exp $
+% $Id: ORTHOLOGOUS_dataset.nw,v 1.2 2001-08-17 17:35:27 jabril Exp $
 %
 % pushd $DOCS/psfigures/; latex all_blast_main.tex; popd;
 % dvips $DOCS/psfigures/all_blast_main.dvi -o $DOCS/psfigures/all_blast_main.ps
@@ -3251,3 +4994,4 @@ notangle -R"MetaPost donors scores" $WORK/$nwfile.nw \
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
+
