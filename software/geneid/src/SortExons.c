@@ -24,10 +24,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.1 2000-07-05 08:27:21 eblanco Exp $  */
+/*  $Id: SortExons.c,v 1.2 2000-08-08 14:24:29 eblanco Exp $  */
 
 #include "geneid.h"
 
+extern long NUMEXONS; 
 extern int EVD;
 
 struct exonitem 
@@ -192,12 +193,16 @@ void SortExons(packExons* allExons,
 	  Exons[n].selected = 0;
 
 	  n++;
+	  
+	  if (n == RSORTE*NUMEXONS)
+	    printError("Too many predicted exons: Change REXONS parameter");
+	  
 	  q=q->nexitem;
 	}
       /* Free all chained items in q */
-      if (ExonList[i] != NULL)
-	FreeItems(ExonList[i]->nexitem); 
+      FreeItems(ExonList[i]);       
     }
+
   /* Free empty array */
   free(ExonList);
 }
