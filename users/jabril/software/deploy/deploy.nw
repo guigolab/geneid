@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $
+% $Id: deploy.nw,v 1.8 2001-09-06 18:30:44 jabril Exp $
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -82,7 +82,8 @@
   \vskip 1.5ex
 } % newcommand todo
 \newcommand{\todoitem}[2]{
-\item {#1}\dotfill[\textit{Section}~\ref{#2}, \textit{page}~\pageref{#2}]
+  \item[$\triangleright$] [\textit{Section}~\ref{#2}, 
+                           \textit{page}~\pageref{#2}]\\ {#1}
 } % newcommand todoitem
 <<HIDE: new LaTeX commands>>
 
@@ -208,7 +209,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.8 2001-09-06 18:30:44 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -372,8 +373,8 @@ notangle -Rweaving  $WORK/$nwfile > $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile > $WORK/ltx ;
 chmod a+x $WORK/nw2tex ;
 chmod a+x $WORK/ltx ;
-ci -l -i0.1 -t-\'\t\t$nwfile: NOWEB file for $PROJECT\' \\
-   -m'BASIC TEMPLATE for THIS PROJECT' $nwfile ;
+# ci -l -i0.1 -t-\'\t\t$nwfile: NOWEB file for $PROJECT\' \\
+#    -m'BASIC TEMPLATE for THIS PROJECT' $nwfile ;
 emacs $nwfile \&
 $WORK/nw2tex ;
 $WORK/ltx ;
@@ -383,6 +384,15 @@ $WORK/ltx ;
     print STDERR "###\n### File Extraction................. DONE\n###\n";
 } # extract_files
 @
+
+\label{todo:DDD}
+<<HIDE: new defs TODO>>=
+\def\todoDDD{A switch for those working with RCS/CVS or none of both.} % todoDDD
+@
+<<HIDE: TODO>>=
+\todoitem{\todoDDD}{todo:DDD}
+@
+\todo{ \item \todoDDD } % todo
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -808,7 +818,8 @@ This line tells emacs to highlight code chunks with perl language highlight synt
   \vskip 1.5ex
 } % newcommand todo
 \newcommand{\todoitem}[2]{
-\item {#1}\dotfill[\textit{Section}~\ref{#2}, \textit{page}~\pageref{#2}]
+  \item[$\triangleright$] [\textit{Section}~\ref{#2}, 
+                           \textit{page}~\pageref{#2}]\\ {#1}
 } % newcommand todoitem
 @<<HIDE: new LaTeX commands>>
 
@@ -932,7 +943,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $$>$ }
+{\small$<$ \verb$Id: deploy.nw,v 1.8 2001-09-06 18:30:44 jabril Exp $$>$ }
 \end{center}
 
 @
@@ -994,7 +1005,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \subsctn{Program outline}
 
-@<<@@@PROJECT@@@>>=
+@<<@@@PROJECT@@@@>>=
 @<<PERL shebang>>
 #
 # MODULES
@@ -1277,7 +1288,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 @<<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $
+# $Id: deploy.nw,v 1.8 2001-09-06 18:30:44 jabril Exp $
 @@ 
 
 @ 
@@ -1626,7 +1637,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: deploy.nw,v 1.7 2001-09-03 18:23:46 jabril Exp $
+# $Id: deploy.nw,v 1.8 2001-09-06 18:30:44 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}

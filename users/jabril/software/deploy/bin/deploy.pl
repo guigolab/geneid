@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 # This is perl, version 5.005_03 built for i386-linux
 #
-#line 1635 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 1646 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 # #----------------------------------------------------------------#
 # #                             DEPLOY                             #
 # #----------------------------------------------------------------#
@@ -25,14 +25,14 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 # #----------------------------------------------------------------#
-#line 1467 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 1478 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
-#line 1629 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
-# $Id: deploy.pl,v 1.3 2001-09-03 18:23:46 jabril Exp $
-#line 1469 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 1640 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+# $Id: deploy.pl,v 1.4 2001-09-06 18:30:44 jabril Exp $
+#line 1480 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 use strict;
-#line 249 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 250 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 # MODULES
 #
@@ -40,7 +40,7 @@ use strict;
 #
 # VARIABLES
 #
-#line 271 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 272 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 my $PROGRAM = 'deploy.pl';
 my $VERSION = '1.0_alpha';
 my $DATE = localtime;
@@ -61,11 +61,11 @@ my $CWD  = `pwd`;
 chomp($CWD);
 my $PATH = $CWD;
 # $PATH =~ s%^$HOME/%%o;
-#line 257 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 258 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 # MAIN LOOP
 #
-#line 294 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 295 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 &parse_argvs();
 
 print STDERR "###\n### RUNNING $PROGRAM..........\n###\n".
@@ -82,11 +82,11 @@ print STDERR "###\n### RUNNING $PROGRAM..........\n###\n".
 print STDERR "###\n### RUNNING deploy.pl............ DONE\n###\n";
 
 exit(0);
-#line 261 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 262 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 #
 # FUNCTIONS
 #
-#line 313 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 314 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub parse_argvs() {
     scalar(@ARGV) == 2 || do {
         print STDERR $USAGE;
@@ -95,7 +95,7 @@ sub parse_argvs() {
     $PROJECT = shift @ARGV;
     $TEMPLATE = shift @ARGV;
 } # 
-#line 324 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 325 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub make_dirs() {
     print STDERR "###\n### Creating Project Subdirectories...\n###\n";
     foreach my $d (@working_dirs) {
@@ -104,7 +104,7 @@ sub make_dirs() {
 	};
     print STDERR "###\n### Project Subdirectories............ DONE\n###\n";
 } # make_dirs
-#line 335 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 336 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub new_noweb_doc() {
     my $file = "$PROJECT.nw";
     (-e $file && -f _) && do {
@@ -131,7 +131,7 @@ sub new_noweb_doc() {
 	close(NOWEB);
     print STDERR "###\n### NOWEB file........................ DONE\n###\n";
 } # new_noweb_doc
-#line 364 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
+#line 365 "/home/ug/jabril/development/softjabril/deploy/deploy.nw"
 sub extract_files() {
     print STDERR "###\n### Extracting Files from NOWEB file...\n###\n";
     # my $WORK = '$HOME/'.$PATH;
@@ -143,8 +143,8 @@ notangle -Rweaving  $WORK/$nwfile > $WORK/nw2tex ;
 notangle -RLaTeXing $WORK/$nwfile > $WORK/ltx ;
 chmod a+x $WORK/nw2tex ;
 chmod a+x $WORK/ltx ;
-ci -l -i0.1 -t-\'\t\t$nwfile: NOWEB file for $PROJECT\' \\
-   -m'BASIC TEMPLATE for THIS PROJECT' $nwfile ;
+# ci -l -i0.1 -t-\'\t\t$nwfile: NOWEB file for $PROJECT\' \\
+#    -m'BASIC TEMPLATE for THIS PROJECT' $nwfile ;
 emacs $nwfile \&
 $WORK/nw2tex ;
 $WORK/ltx ;
