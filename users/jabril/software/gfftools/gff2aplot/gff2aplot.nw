@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $
+% $Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,19 +70,19 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
 %%\begin{flushright}
-%%\scalebox{0.9 1}{\Large\textsl{\textbf{Genome Informatics Research Lab}}}\\
+%%\scalebox{0.9 1}{\Large\textsl{\textbf{Genome BioInformatics Lab}}}\\
 %%Grup de Recerca en Infom\`atica Biom\`edica\\
 %%Institut Municipal d'Investigaci\'o M\`edica\\
 %%Universitat Pompeu Fabra\\[2ex]
 %%\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: \mtjabril}\\
 %%\end{flushright}
 %%\end{center}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%'%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
@@ -139,6 +139,7 @@
 \def\noweb{\textsc{noweb}}
 \def\ps{\textsc{PostScript}}
 \def\eoline{$\backslash\backslash$}
+\def\ver{2.0}
 <<HIDE: new LaTeX definitions>>
 
 %%%%% TODO defs
@@ -146,7 +147,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\def\genomelab{\textbf{Genome Informatics Research Lab}}
+\def\genomelab{\textbf{Genome BioInformatics Lab}}
 \def\progname{gff2aplot.pl}
 \def\tit{\textsc{\progname}}
 %
@@ -182,7 +183,7 @@
 \def\showaffiliation{
 \scalebox{0.9 1}{\Large\textsl{\genomelab}}\\
 Grup de Recerca en Infom\`atica Biom\`edica\\
-Institut Municipal d'Investigaci\'o M\`edica\\
+Institut Municipal d'Investigaci\'o M\`edica\\ %`
 Universitat Pompeu Fabra\\[2ex]
  } % def showaffiliation
 %
@@ -206,7 +207,7 @@ Universitat Pompeu Fabra\\[2ex]
 <<HIDE: new LaTeX definitions>>=
 @ 
 
-\thispagestyle{empty}
+\pagestyle{empty}
 
 \begin{titlepage}
 
@@ -251,11 +252,18 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \end{titlepage}
 
-%'%%%%%%%%%%%%%%%%%%% FRONTMATTER
+\newpage
+
+\ % \vfill
+% \hrulefill
 
 \newpage
 
-\thispagestyle{empty}
+\input ./manual/GNU_GPL.tex
+
+%'%%%%%%%%%%%%%%%%%%% FRONTMATTER
+
+\newpage
 
 \ % \vfill
 % \hrulefill
@@ -299,7 +307,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \subsctn{Project description}
 
-At the first stage of the new {\prog} implementation, we are going to define a simple main loop that performs a serial process, such in the old [[GNUawk]] version. So that, the program will read the input files and parameters defined by user and perform the plots, finishing the job. Once the new version will be operative, we will try to implement an iterative mode and/or a GUI in [[perlTK]].  
+At the first stage of the new {\prog} implementation, we are going to define a simple main loop that performs a serial process, such in the old [[bash/GNUawk]] version. So that, the program will read the input files and parameters defined by user, performing the plots and then exiting, just finishing the job. Once the new version will be operative, we will try to implement an iterative mode and/or a GUI in [[perlTK]].  
 
 \label{todo:AAA}
 <<HIDE: new defs TODO>>=
@@ -321,7 +329,7 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 \subsctn{Basic goals}
 
 \begin{itemize}
-\item I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such implemented quicksort sorting algorithm and the posibility of building complex data structures, will make the program faster and easier to maintain, it will be more portable too. 
+\item I am trying to improve some aspects of the {\prog} utility that may be hard to solve in its old \texttt{bash/GNUawk} format. Taking advantage of some capabilities of \texttt{Perl}, such internal quicksort algorithm implementation and the capability to build and handle complex data structures, will make the program faster and easier to maintain. Furthermore, it will be more portable. 
 
 \item Using {\noweb} I pretend to improve the overall design and to open the code to other developers. From this {\LaTeX} document it should be possible to extract all the scripts and files needed for the current implementation.
 
@@ -337,7 +345,7 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 
 \item Web/CGI mode, looping through the interactive mode perhaps.
 
-\item Move some code parts to perl packages, to share them with future implementations of [[gff2ps]]... (if we have time)
+\item Move some code parts to perl packages, to share them with a future re-implementation of [[gff2ps]]... (if we have time)
 
 \item \ldots
 \end{itemize}
@@ -495,9 +503,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.33 $', #'
-     '$Date: 2002-02-01 18:26:50 $', #'
-     '$Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $', #'
+     '$Revision: 1.34 $', #'
+     '$Date: 2002-12-24 13:39:08 $', #'
+     '$Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -602,20 +610,16 @@ short description are listed here:
 
 The functions described in this section process each GFF-record, each custom definition or each command-line options, not only loading the internal variables, also checking for the correctness of the user input in each case.
 
-\label{todo:BBB}
-<<HIDE: new defs TODO>>=
-\def\todoBBB{Diagram for figure~\ref{fig:customvarstruc}:
-Structure of main customization variables and their relationships.} % todoBBB
+<<HIDE: DONE>>=
+\doneitem{20021125}{Diagram for figure~\ref{fig:customvarstruc}: Structure of main customization variables and their relationships.} % todoBBB
 @
-<<HIDE: TODO>>=
-\todoitem{\todoBBB}{todo:BBB}
-@
-\todo{ \item \todoBBB } % todo
 \begin{figure}[!ht]
 \begin{center}
-\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
-% \includegraphics[]{}
-\caption[Structure of main customization variables]{\label{fig:customvarstruc} Structure of main customization variables: [[%DefaultVars]], [[%CmdLineVars]], [[%CustomVars]], [[%Defaults]], [[%Vars]]. Relationships among them and their interaction with [[%GFF_DATA]] and [[%ALN_DATA]] variables which contain data are also shown.}
+\fbox{ % \parbox[c][8cm][c]{\linewidth}{\hfill}
+ \includegraphics[bb=20 5 540 770,clip,angle=270,width=\linewidth]
+                 {./psfigures/flowchart_settingvariables.ps}
+}%fbox
+\caption[Structure of main customization variables]{\label{fig:customvarstruc} Data structure schemma of main customization variables and their relationships: [[%DefaultVars]], [[%CmdLineVars]], [[%CustomVars]], [[%Defaults]], [[%Vars]]. Last three variables share the same internal data structure. Above them, a graph showing the processes involved in the parsing of customization parameters from different sources (defaults, customization file and command-line) and the functions involved in the definition of those variables. Green arrow and boxes correspond to main loop functions, which are also executed in that order.}
 \end{center}
 \end{figure}
 
@@ -1250,8 +1254,7 @@ sub parse_custom_files() {
 @ %def &parse_custom_files
 % print LOGFILE '>>> \%CustomVars : '.(Dumper(\%CustomVars))
 
-\begin{table}[!t]
-\begin{center}
+<<HIDE: CustomFile parser codes>>=
 \begin{tabular}{cc}
 \fbox{
 \begin{tabular}[b]{c>{\bfseries}c}
@@ -1275,6 +1278,10 @@ Unknown                 & ? \\
 } % parbox
 \\
 \end{tabular}
+@ 
+\begin{table}[!t]
+\begin{center}
+ \input tables/CustomFile_parser_codes.tex
 \end{center}
 \end{table}
 
@@ -1307,14 +1314,9 @@ NO_CUSTOM_FOUND =>
   $sp."### NO CUSTOM FILES found: Using program DEFAULTS.\n".$sp,
 @
 
-\label{todo:BGA}
-<<HIDE: new defs TODO>>=
-\def\todoBGA{Include an ``XTRA'' section to custom files for ``markup'' shapes definition (box, circle, label, and so on).} % todoBGA
+<<HIDE: DONE>>=
+\doneitem{20011222}{Include an ``XTRA'' section to custom files for ``markup'' shapes definition (box, circle, label, and so on).}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoBGA}{todo:BGA}
-@
-\todo{ \item \todoBGA } % todo
 
 
 \subsubsctn{Validating customization parameters} 
@@ -1527,7 +1529,7 @@ This section is dedicated to those test we need to ensure that customization var
 [[PSRANGE]]  & A '[[lower-limit..upper-limit]]' {\ps} lengths pair.\\
 [[SEQRANGE]] & A '[[lower-limit..upper-limit]]' sequence coords pair.\\
 [[SHAPE]]    & Selecting feature shapes from [[%Shapes]].\\
-[[RIBBON]]   & Feature ribbons on aplot box set on [[%Ribbons]].\\
+[[RIBBON]]   & Feature ribbons on alignment box set on [[%Ribbons]].\\
 [[GPSHAPE]]  & Grouping bracket styles are choosen from [[%GroupShapes]].\\
 [[LINESTY]]  & Line styles for special feats from custom files, see [[%LineStyles]].\\
 [[TXTALIGN]] & Checks vertical and horizontal string alignment relative to\\[-0.25ex] 
@@ -1543,18 +1545,9 @@ This section is dedicated to those test we need to ensure that customization var
 \doneitem{20011207}{More format variables need to be defined, such as: [[SHAPES]] from a shapes array, [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default), [[GROUP-BRACKETS]] (bracket, arrow, half-arrow, dotted-bracket --with vertical dotted lines at both ends like conecting to baseline--).}
 @
 
-\label{todo:BBE}
-<<HIDE: new defs TODO>>=
-\def\todoBBE{
-Checking [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default) for shapes joining lines. 
-} % todoBBE
+<<HIDE: DONE>>=
+\doneitem{20020111}{Checking [[LINES]]/[[LINESTYLES]] (none, dotted, dashed, solid/default) for shapes joining lines.}
 @
-<<HIDE: TODO>>=
-\todoitem{\todoBBE}{todo:BBE}
-@
-\todo{
- \item \todoBBE
- } % todo
 
 \subsubsctn{Handling sequence and {\ps} units}
 
@@ -3973,7 +3966,7 @@ LDE:
 @
 
 
-\subsubsctn{The aplot layout}
+\subsubsctn{The alignment plot layout}
 
 <<default layout vars values>>=
 alignment_name            => { TYPE => 'STRING', VALUE => undef     },
@@ -5604,34 +5597,33 @@ Function_COLOR             => { TYPE => 'COLOR'  , VALUE => 'red'  },
 We have to deal with two basic formats, the \textsl{standard} General Feature Format (GFF) and the derived \textsl{aplot} format, the former having two versions with some minor differences at field level. We are going to asume the record formats shown in the table~\ref{tbl:formats} for the input files.
 
 
-\label{todo:EEA}\label{todo:EEB}
+<<HIDE: DONE>>=
+\doneitem{20021120}{A flow chart of the GFF record parsing process (figure~\ref{fig:parsingGFF}).}
+@
+\label{todo:EEB}
 <<HIDE: new defs TODO>>=
-\def\todoEEA{
-A flow chart of the GFF record parsing process (figure~\ref{fig:parsingGFF}).
-} % todoEEA
 \def\todoEEB{
 Move this section to a perl package: \\ suggesting [[gfftools::parser]].
 } % todoEEB
 @
 <<HIDE: TODO>>=
-\todoitem{\todoEEA}{todo:EEA}
 \todoitem{\todoEEB}{todo:EEB}
 @
-\todo{ \item \todoEEA 
-       \item \todoEEB } % todo
+\todo{ \item \todoEEB } % todo
 
 
 \begin{figure}[!t]
 \begin{center}
-\fbox{\parbox[c][8cm][c]{\linewidth}{\hfill}}
-% \includegraphics[]{}
-\caption[Flow diagram of the input records parsing.]{\label{fig:parsingGFF} Flow diagram of the input records parsing showing the main function names involved in this process.}
+\fbox{ % \parbox[c][8cm][c]{\linewidth}{\hfill}}
+ \includegraphics[bb=5 435 600 740,clip,width=\linewidth]
+                 {./psfigures/flowchart_GFFrecordparsing.ps}
+}%fbox
+\caption[Flow diagram of the input GFF-records parsing.]{\label{fig:parsingGFF} Flow diagram of the input GFF-records parsing showing the main function names involved in this process.}
 \end{center}
 \end{figure}
 
-\begin{table}[!t]
-% \newcommand{\m}[1]{\multicolumn{2}{@{}c@{}}{#1}}
-\begin{center}\setlength{\fboxsep}{10pt}
+<<HIDE: regular expressions for GFF-records>>=
+\setlength{\fboxsep}{10pt}
 \fbox{
 \begin{minipage}[c]{0.95\linewidth}
 \begin{center}
@@ -5672,6 +5664,11 @@ Move this section to a perl package: \\ suggesting [[gfftools::parser]].
 \end{minipage}
 } %fbox
 \caption{\label{tbl:formats} Input records format definition for {\prog}.}
+@
+\begin{table}[!t]
+% \newcommand{\m}[1]{\multicolumn{2}{@{}c@{}}{#1}}
+\begin{center}
+ \input tables/GFF_regexes.tex
 \end{center}
 \end{table}
 
@@ -5715,8 +5712,7 @@ sub parse_GFF_files() {
 
 We define the following constants, used to report which format was found in the current read record (See table~\ref{tbl:DTkeysXreport}).
 
-\begin{table}[!t]
-\begin{center}
+<<HIDE: GFF parser codes>>=
 \begin{tabular}{cc}
 \fbox{
 \begin{tabular}[b]{c>{\bfseries}c}
@@ -5738,6 +5734,10 @@ Unknown             & ? \\
 } % parbox
 \\
 \end{tabular}
+@ 
+\begin{table}[!t]
+\begin{center}
+ \input tables/GFF_parser_codes.tex
 \end{center}
 \end{table}
 
@@ -6054,8 +6054,7 @@ my ($tag,$group,$group_id,$label,
     $group_gff_counter,$group_aplot_counter); # GROUPING temporary vars
 @ 
 
-\begin{table}[!t]
-\begin{center}
+<<HIDE: Missing strands substitution>>=
 \fbox{
 \begin{tabular}{c@{\qquad}c}
 Strand
@@ -6088,6 +6087,10 @@ Frame
 \parbox{0.75\linewidth}{
 \caption[Retrieving second element when missing in old APLOT format]{\label{tbl:missingfields} For {\prog} old format, when in a '\pa{element1}:\pa{element2}' field pair the second element is missing, second is set to first element.}
 } % parbox
+@ 
+\begin{table}[!t]
+\begin{center}
+ \input tables/missing_strands_substitution.tex
 \end{center}
 \end{table}
 
@@ -6514,7 +6517,12 @@ your GFF dataset. Remember that tags are not case-sensitive.
 ###EOR###
 @
 
-\label{sec:groupingfieldstagkeys}
+Vector and alignment record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing some attributes that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be redefined by users from custom files. The two following subsections describe each specific attribute tags that apply to alignments or vectors.
+
+
+\subsubsctn{Layout variables involved in alignment tags}
+
+\label{sec:groupingalntagkeys}
 <<default layout vars values>>=
 start_tag                  => { TYPE => 'ALPHA', VALUE => 'start'    },
 end_tag                    => { TYPE => 'ALPHA', VALUE => 'end'      },
@@ -6571,17 +6579,65 @@ LDE:
 @
 
 
-The following record formats share the field structure of a GFF standard record, but there are special tags in the grouping fields containing data that will be used by {\prog}. Both formats require a fixed tag string (by default 'Vector' for the scoring vectors and 'Target' for the alignment data), which can be redefined by users from custom files.
+\subsubsctn{Layout variables involved in vector tags}
+
+\label{sec:groupingvectagkeys}
+<<default layout vars values>>=
+scotype_tag                  => { TYPE => 'ALPHA', VALUE => 'vectype'    },
+window_tag                   => { TYPE => 'ALPHA', VALUE => 'window'     },
+step_tag                     => { TYPE => 'ALPHA', VALUE => 'step'       },
+scoary_tag                   => { TYPE => 'ALPHA', VALUE => 'scores'     },
+@ %def {scotype_tag} {window_tag} {step_tag} {scoary_tag}
+<<DESC custom file variables>>=
+ORD: 250
+SEC: LAYOUT
+SUB: General
+OPT: scotype_tag
+DEF: |vectype|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+ORD: 251
+SEC: LAYOUT
+SUB: General
+OPT: window_tag
+DEF: |window|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+ORD: 252
+SEC: LAYOUT
+SUB: General
+OPT: step_tag
+DEF: |step|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+ORD: 253
+SEC: LAYOUT
+SUB: General
+OPT: scoary_tag
+DEF: |scores|
+PAR: <tag>
+SDE: 
+LDE: 
+###EOR###
+@
 
 <<HIDE: DONE>>=
 \doneitem{20011113}{[[%SOURCE]] is a \textbf{provisional varname} that must be replaced by the corresponding [[$DefaultVars{LAYOUT}]], [[$CustomVars{LAYOUT}]] or [[$CmdLineVars{LAYOUT}]]. Those 'LAYOUT' variables must be set before reading GFF input files because some settings are used by parser functions.}
 @ 
+
+
 \subsubsctn{Parsing alignment records}
 
 <<HIDE: DONE>>=
 \doneitem{20011219}{
 Parsing alignment records:\\
-\centerline{[[aln_tag "value" target_ori target_end target_frame target_strand [ ; (...) ] ]]}
+\centerline{\scriptsize [[aln_tag "value" target_ori target_end target_frame target_strand [ ; (...) ] ]]}
 }
 @
 
@@ -6624,6 +6680,7 @@ $fst ne '@@NO@@NE@@' && do {
 
 Now it is time for looking if there are any tag-value pairs other than grouping one. We are looking for the following tag-value pairs, extra elements (shown in their descriptions as '[[ [ ... ] ]]') in those fields are ignored:
 
+\begin{minipage}{0.85\linewidth}
 \begin{description}
 \item[Start:]    {\scriptsize [[... ; start_tag target_start [ ... ] [ ; (...) ] ]]}
 \item[End:]      {\scriptsize [[... ; end_tag target_end [ ... ] [ ; (...) ] ]]}
@@ -6632,8 +6689,9 @@ Now it is time for looking if there are any tag-value pairs other than grouping 
 \item[Score:]    {\scriptsize [[... ; score_tag secondary_score [ ... ] [ ; (...) ] ]]}
 \item[Id label:] {\scriptsize [[... ; id_tag "group_id" [ ... ] [ ; (...) ] ]]}
 \end{description}
+\end{minipage}
 
-See section~\ref{sec:groupingfieldstagkeys}, page~\pageref{sec:groupingfieldstagkeys}, for a description of the customization variables related to those fields tags.
+See section~\ref{sec:groupingalntagkeys}, page~\pageref{sec:groupingalntagkeys}, for a description of the customization variables related to those fields tags.
 
 <<load-GFF-align: looping through tag-value pairs>>=
 for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
@@ -6673,7 +6731,7 @@ for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
 }; # for $gh
 @
 
-Finally, we must set up all the variables that will be loaded when parsing a ``standard'' old aplot record, although it may seem redundant, because the rest of the functions working on the parsing process will expect them loaded the same way if we assume that we got an alignment record.
+Finally, we must set up all the variables that will be loaded when parsing a ``standard'' old {\prog} record, although it may seem redundant, because the rest of the functions working on the parsing process will expect them loaded the same way if we assume that we got an alignment record.
 
 <<load-GFF-align: loading variables>>=
 (defined($aln_ori) && defined($aln_end)) || return $GFF;
@@ -6693,29 +6751,137 @@ return $ALIGN;
 
 \subsubsctn{Parsing scoring vectors} \label{sec:loadvector}
 
-\label{todo:EVA}
+<<HIDE: DONE>>=
+\doneitem{20021111}{Parsing scoring vectors:\\
+\centerline{\scriptsize [[vector_tag "value" vector_type; window value; step value; scores sco ... sco]]}} 
+@
+
+In this case, we are parsing group records that fit the following format:\\
+\centerline{\scriptsize [[... vector_tag "value" [ vector_type [ window [ step ] ] ]; type value; window value; step value; scores sco ... sco ; (...)]]}
+\vskip 1ex
+There are four vector types:\\[1.5ex]
+\begin{minipage}{0.85\linewidth}
+\begin{description}
+\item[\texttt{sco}:] from ``\textbf{sco}re'', this is the default value, it is not required unless you want to define window and step without the corresponding tag-value fields.
+\item[\texttt{pos}:] from ``\textbf{pos}ition+score'', scores list must be interpreted as a list of coordinate and score pairs. In order to simplify, coordinates are always taken as relative to the GFF-record start field.
+\item[\texttt{box}:] here, scores list encodes a start-end-score triad. Again, as in the previous item, coordinates are relative to the GFF-record start field.
+\item[\texttt{chr}:] a set of strings (one or more), containing a character per position (also relative to the GFF-record coords).
+\end{description}
+\end{minipage}
+\vskip 1ex
+
+\begin{table}[!t]
+\begin{center}
+% \input tables/DataStructure_ALN.tex
+\caption[Internal data structure to store ``vectors'']{\label{tbl:vctdata} Data vectors retrieved from GFF-records are stored in '[[%GFF_DATA]]' (see table~\ref{tbl:gffdata}). All the differences between standard GFF-records and data vectors are at the ELEMENTS array level. \textsf{Type} is set to ``V'' instead of ``G'', while an extra field is attached at the end of the element array, which is another array containing the single scores. Note that the three first fields of such array are reserved for data related to the vector type.}
+\end{center}
+\end{table}
+
+\label{todo:ELB}
 <<HIDE: new defs TODO>>=
-\def\todoEVA{
-Parsing scoring vectors:\\
-\centerline{[[vector_tag "value" vector_type; step value; window value; scores sco ... sco]]}
-} % todoEVA
+\def\todoELB{
+DATA STRUCTURE for vectors within [[%GFF_DATA]] at elements level.
+} % todoELB
 @
 <<HIDE: TODO>>=
-\todoitem{\todoEVA}{todo:EVA}
+\todoitem{\todoELB}{todo:ELB}
 @
-\todo{ \item \todoEVA } % todo
+\todo{ \item \todoELB } % todo
 
 <<Parsing Input Data>>=
 sub load_GFF_vector() {
     my ($strf) = @_;
+    my ($v_type,$v_window,$v_step) = ($vect_type{'sco'}, undef, undef);
+    my (@lst, $fst);
 	@vect_ary = ();
-    return $VECTOR;
+    <<load-GFF-vector: simple fields>>
+    <<load-GFF-vector: looping through tag-value pairs>>
+    <<load-GFF-vector: loading variables>>
 } # load_GFF_vector
 @ %def &load_GFF_vector
 
 <<Global Vars>>=
 my @vect_ary;
+my %vect_type = ( 'sco' => 1,
+                  'pos' => 2,
+                  'box' => 3,
+                  'chr' => 0,
+                  'ERROR' => -1 );
+@ %def @vect_ary %vect_type
+
+We first check whether the GFF-record contains the vector type and the window/step numeric values. If vector type is not present, then ``sco'' is assumed, the most simple scoring vector in which each numeric value in the scoring-vector corresponds to a single score.
+
+<<load-GFF-vector: simple fields>>=
+($fst) = shift @$strf;
+$fst ne '@@NO@@NE@@' && do {
+    @lst = split /\s+/og, $fst;
+    (defined($lst[0]) && defined($vect_type{lc($lst[0])})) && do {
+        $v_type = $vect_type{lc($lst[0])};
+        (defined($lst[1]) && $lst[1] =~ /$regexp_float/o) && do {
+            $v_window = $lst[1];
+            (defined($lst[2]) && $lst[2] =~ /$regexp_float/o) && do {
+                $v_step = $lst[2];
+            }; # $v_step
+        }; # $v_window
+    }; # $v_type
+}; # defined($strf[0])
 @ 
+
+We are going to parse any tag-value pairs that will define scoring-vector parameters.  We are looking for the following tag-value pairs, extra elements (shown in their descriptions as '[[ [ ... ] ]]') in those fields are ignored:\\[1.5ex]
+
+\begin{minipage}{0.85\linewidth}
+\begin{description}
+\item[Type:]    {\scriptsize [[... ; scotype_tag vector_type [ ... ] [ ; (...) ] ]]}
+\item[Window:]  {\scriptsize [[... ; window_tag window_length [ ... ] [ ; (...) ] ]]}
+\item[Step:]    {\scriptsize [[... ; step_tag step_length [ ... ] [ ; (...) ] ]]}
+\item[Scores:]  {\scriptsize [[... ; scoary_tag score_1 ... score_n [ ; (...) ] ]]}
+\end{description}
+\end{minipage}
+\vskip 1ex
+
+See section~\ref{sec:groupingvectagkeys}, page~\pageref{sec:groupingvectagkeys}, for a description of the customization variables related to those fields tags.
+
+<<load-GFF-vector: looping through tag-value pairs>>=
+for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
+    my (@q, $t, @new_id);
+    @q = split /\s+/og, $strf->[$gh];
+    $t = lc($q[0]);
+    # print STDERR join(' : ',$strf->[$gh], join('***',@q).'**|', 
+    #                   $t, $Vars{LAYOUT}{label_tag})."\n";
+    $t =~ /^($Vars{LAYOUT}{scotype_tag})$/ && do {
+        defined($vect_type{lc($strf->[$gh])}) &&
+            ($v_type = $vect_type{lc($strf->[$gh])});
+        next;
+    }; # id_tag
+    $t =~ /^($Vars{LAYOUT}{window_tag})$/ && do {
+        (defined($q[1]) && $q[1] =~ /$regexp_float/o)
+            && ($v_window = $q[1]);
+        next;
+    }; # id_tag
+    $t =~ /^($Vars{LAYOUT}{step_tag})$/ && do {
+        (defined($q[1]) && $q[1] =~ /$regexp_float/o)
+            && ($v_step = $q[1]);
+        next;
+    }; # id_tag
+    $t =~ /^$Vars{LAYOUT}{scoary_tag}$/ && do {
+        @vect_ary = split /\s+/og, $q[1];
+    }; # frame_tag
+}; # for $gh
+@ 
+
+If step is not defined, then is set to be equal to window length. No window is set by default, so if user does not provide it for ``sco'' vectors they are not drawn (and a warning is thrown). Whe return the new record as a 'GFF' record when the vector is encoded as a multiple GFF records (like the way we passed functions data to the old {\prog}). The format for those GFF-vector-like records is the following:\\[1.5ex]
+\centerline{\scriptsize [[seqname source feature start end score strand frame vector_tag "value"]]}
+\vskip 1ex
+They are taken as start-end-score vectors grouped by [[value]] (vector type set to ``box'').
+
+<<load-GFF-vector: loading variables>>=
+scalar(@vect_ary) > 0 || return $GFF;
+($v_type == $vect_type{'sco'} && !defined($v_window)) &&
+    ($v_type = $vect_type{'ERROR'}); 
+defined($v_step) || ($v_step = $v_window);
+@vect_ary = ($v_type,$v_window,$v_step,@vect_ary);
+return $VECTOR;
+@
 
 
 \newpage
@@ -7537,15 +7703,15 @@ In order to compute coordinates limits that we will need later when calculating 
 $vrf->{_plot_aln} && do {
     $rrf = \@{ $ALN_DATA{$a}[$_counter] };
     if ($vrf->{_swap_aln}) {
-        push @{ $tcrds{xs} }, $rrf->[$_ori] ;
-        push @{ $tcrds{xe} }, $rrf->[$_end] ;
-        push @{ $tcrds{ys} }, $rrf->[$_nori] ;
-        push @{ $tcrds{ye} }, $rrf->[$_nend] ;
-    } else {
         push @{ $tcrds{xs} }, $rrf->[$_nori] ;
         push @{ $tcrds{xe} }, $rrf->[$_nend] ;
         push @{ $tcrds{ys} }, $rrf->[$_ori] ;
         push @{ $tcrds{ye} }, $rrf->[$_end] ;
+    } else {
+        push @{ $tcrds{xs} }, $rrf->[$_ori] ;
+        push @{ $tcrds{xe} }, $rrf->[$_end] ;
+        push @{ $tcrds{ys} }, $rrf->[$_nori] ;
+        push @{ $tcrds{ye} }, $rrf->[$_nend] ;
     }; # if $vrf->{_swap_aln}
 };
 $vrf->{_plot_x_sequence} && do {
@@ -8173,16 +8339,21 @@ $colors = 0;
   ); # %COLORS
 @ %def COLORS
 
-\label{todo:JAA}
+\label{todo:JAA}\label{todo:JAB}
 <<HIDE: new defs TODO>>=
 \def\todoJAA{
 Move this section to a perl package: \\ suggesting [[gfftools::PostScript::colors]].
 } % todoJAA
+\def\todoJAB{
+Re-define the color palette, including verypale/pale/.../deep/verydeep (four extra color intensities). Look for new color gradients: khaki, pink, ...
+} % todoJAB
 @
 <<HIDE: TODO>>=
 \todoitem{\todoJAA}{todo:JAA}
+\todoitem{\todoJAB}{todo:JAB}
 @
-\todo{ \item \todoJAA } % todo
+\todo{ \item \todoJAA
+       \item \todoJAB } % todo
 
 To avoid mistakes when working with three separate files, we define here CMYK color names used by this perl program, then the corresponding chunks are processedby [[colors2tex.pl]] to obtain the definitions {\LaTeX} file ('[[AplotColorDefs.tex]]') and the table summarizing them for the manual ('[[AplotColorTbl.tex]]').See appendix~\ref{sec:COLORprg} on page~\pageref{sec:COLORprg} to look at that script implementation. % outlined in page~\pageref{sec:cmykfiles}.
 
@@ -8416,16 +8587,16 @@ $formats = 0;
 @ %def FORMATS
 
 
-\label{todo:JAB}
+\label{todo:JBB}
 <<HIDE: new defs TODO>>=
-\def\todoJAB{
+\def\todoJBB{
 Move this section to a perl package: \\ suggesting [[gfftools::PostScript::formats]].
-} % todoJAB
+} % todoJBB
 @
 <<HIDE: TODO>>=
-\todoitem{\todoJAB}{todo:JAB}
+\todoitem{\todoJBB}{todo:JBB}
 @
-\todo{ \item \todoJAB } % todo
+\todo{ \item \todoJBB } % todo
 
 
 \label{sec:FormatsHsh}
@@ -8997,7 +9168,7 @@ PSCODE =>
 <<PostScript SETUP>>=
 %%BeginSetup
 %
-% initgraphics
+% initgraphics % must not be used in EPS documents
 % _t setpacking
 _t setstrokeadjust
 0.125 setlinewidth
@@ -9018,17 +9189,17 @@ We define a new hash that will contain temporary strings that are generated when
 %StringCache
 @ %def StringCache
 
-\label{todo:IAD}\label{todo:IBD}
+<<HIDE: DONE>>=
+\doneitem{20011222}{Drawing extra features (circles, boxes, arrows, text).}
+@
+\label{todo:IAD}
 <<HIDE: new defs TODO>>=
 \def\todoIAD{Plotting data into extra box (lower panel).} % todoIAD
-\def\todoIBD{Drawing extra features (circles, boxes, arrows, text).} % todoIBD
 @
 <<HIDE: TODO>>=
 \todoitem{\todoIAD}{todo:IAD}
-\todoitem{\todoIBD}{todo:IBD}
 @
-\todo{ \item \todoIAD
-       \item \todoIBD } % todo
+\todo{ \item \todoIAD } % todo
 
 <<PostScript PLOT>>=
 sub ps_plot(){
@@ -9689,7 +9860,7 @@ DoEnd
 %
 %%%%%%%% PLOT DONE
 %
-grestoreall
+% grestoreall % must not be used in EPS documents
 pgsave restore
 showpage
 %
@@ -12384,7 +12555,7 @@ Group lines functions will be placed to a fixed height that will be provided by 
       2 copy        %-> x y x y
       0             %-> x y x y angle
 (This plot has been obtained using GFF2APLOT.     %-% octal values:
- The most recent version of GFF2APLOT is freely   %-% \042 == doublequotes
+ The most recent version is freely                %-% \042 == doublequotes
  available at                                     %-% \057 == slash (/)
 \042http:\057\057www1.imim.es\057software\057gfftools\057GFF2APLOT.html\042. %-% 
 Copyright\040\0401999                             %-% \040 == white space
@@ -13604,7 +13775,7 @@ The main reason for writing this script was the idea to keep sincronized any cha
 
 <<tangling>>=
 # showing line numbering comments in program
-notangle -L -R"parameter2tex.pl" $WORK/$nwfile.nw | \
+no tangle -L -R"parameter2tex.pl" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' - | cpif $BIN/parameter2tex.pl ;
 chmod a+x $BIN/parameter2tex.pl ;
 #
@@ -13613,13 +13784,13 @@ chmod a+x $BIN/parameter2tex.pl ;
 <<tangling complementary LaTeX files for manual>>=
 # Preparing variables and options descriptions for User's manual #'
 echo "Extracting VARS/OPTIONS definitions for LaTeX files..." 1>&2 ;
-notangle -R"parameter2tex - LaTeX" $WORK/$nwfile.nw | \
+no tangle -R"parameter2tex - LaTeX" $WORK/$nwfile.nw | \
          cpif $DOCS/tabledefs.tex ;
 echo "Extracting COMMAND-LINE options for LaTeX files..." 1>&2 ;
-notangle -R"DESC command-line options" $WORK/$nwfile.nw | \
+no tangle -R"DESC command-line options" $WORK/$nwfile.nw | \
          $BIN/parameter2tex.pl -c -o $DOCS/tables/AplotCLopts.tex -- - ;
 echo "Extracting CUSTOM-FILE variables for LaTeX files..." 1>&2 ;
-notangle -R"DESC custom file variables" $WORK/$nwfile.nw | \
+no tangle -R"DESC custom file variables" $WORK/$nwfile.nw | \
          $BIN/parameter2tex.pl -v -o $DOCS/tables/AplotCFvars.tex -- - ;
 #
 @ 
@@ -13837,7 +14008,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -13886,7 +14057,7 @@ sub parseVars() {
              next;
          }; # SEC/SUB NOT DEFINED ON PROGRAM
         if (defined($VARS{$k}{PAR}) && $VARS{$k}{PAR} ne '') {
-            $par = &rep_param($VARS{$k}{PAR});
+            $par = (&rep_chars(&rep_varop(&rep_param($VARS{$k}{PAR}))));
         } else {
             $par = '';
         }; # PAR
@@ -13901,7 +14072,8 @@ sub parseVars() {
         #
         $vareqj = ' \hfill ';
         if (defined($VARS{$k}{DEF})) {
-            $vareq  = (&rep_varop(&rep_param(&rep_value($VARS{$k}{DEF}))));
+            $vareq  = (&rep_chars(&rep_varop(
+                           &rep_param(&rep_value($VARS{$k}{DEF})))));
         } else {
             $vareq  = '\bydef';
         }; # DEF
@@ -13939,7 +14111,8 @@ Here we define the available values for the '[[SEC]]'/'[[SUB]]' fields:
 
 <<parameter2tex - global vars>>=
 local (*LAYa,*LAYb,*LAYc,*LAYd,*LAYe,*LAYf,*LAYg,
-       *SEQa,*SEQb,*SRCa,*SRCb,*STRa,*STRb,*GRPa,*GRPb,*FEAa,*FEAb);
+       *SEQa,*SEQb,*SRCa,*SRCb,*STRa,*STRb,*GRPa,*GRPb,*FEAa,*FEAb,
+       *XTRa,*XTRb);
 my %varO = (
     #                    [ HANDLE, EXTENSION, LABEL                     ]
     LAYOUT            => [ \*LAYa, 'Layout'                             ],
@@ -13964,13 +14137,16 @@ my %varO = (
     #
     FEATURE           => [ \*FEAa, 'Feature'                            ],
     FEATUREFeatures   => [ \*FEAb, 'feat',    'GFF-Feature Attributes'  ],
+    #
+    EXTRA             => [ \*XTRa, 'Extra'                              ],
+    EXTRAExtra        => [ \*XTRb, 'extra',   'Special Customization Features'  ],
     );
-my @varMain = qw / LAYOUT SEQUENCE SOURCE STRAND GROUP FEATURE /;
+my @varMain = qw / LAYOUT SEQUENCE SOURCE STRAND GROUP FEATURE EXTRA /;
 my @varSub  = qw /
                    LAYOUTPageLayout  LAYOUTZoom      LAYOUTLabels 
                    LAYOUTTickmarks   LAYOUTAplot     LAYOUTGeneral
                    SEQUENCESequences SOURCESources   STRANDStrands
-                   GROUPGroups       FEATUREFeatures
+                   GROUPGroups       FEATUREFeatures EXTRAExtra
                  /;
 @
 
@@ -14150,19 +14326,19 @@ sub parseOpts() {
 
 <<tangling>>=
 # showing line numbering comments in program
-notangle -L -R"colors2tex.pl" $WORK/$nwfile.nw | \
+no tangle -L -R"colors2tex.pl" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' - | cpif $BIN/colors2tex.pl ;
-notangle -R"colors2tex.pl" $WORK/$nwfile.nw | cpif $BIN/colors2tex.pl ;
+no tangle -R"colors2tex.pl" $WORK/$nwfile.nw | cpif $BIN/colors2tex.pl ;
 chmod a+x $BIN/colors2tex.pl ;
 @ 
 
 <<tangling complementary LaTeX files for manual>>=
 # extracting color tables for the User's Manual #'
 echo "Extracting \"$DOCS/AplotColorDefs.tex\"..." 1>&2 ;
-notangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
+no tangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
     $BIN/colors2tex.pl -d - | cpif $DOCS/tables/AplotColorDefs.tex ;
 echo "Extracting \"$DOCS/AplotColorTbl.tex\"..." 1>&2 ;
-notangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
+no tangle -R"cmyk colors perl definition" $WORK/$nwfile.nw  | \
     $BIN/colors2tex.pl -t "seagreen" - | cpif $DOCS/tables/AplotColorTbl.tex ;
 @ 
 
@@ -14441,16 +14617,16 @@ print STDOUT '\clrow{'.$name.'}'.(" " x (24 - length($name))).
 
 <<tangling>>=
 # showing line numbering comments in program
-notangle -L -R"pagebbox2tex.pl" $WORK/$nwfile.nw | \
+no tangle -L -R"pagebbox2tex.pl" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' - | cpif $BIN/pagebbox2tex.pl ;
-notangle -R"pagebbox2tex.pl" $WORK/$nwfile.nw | cpif $BIN/pagebbox2tex.pl ;
+no tangle -R"pagebbox2tex.pl" $WORK/$nwfile.nw | cpif $BIN/pagebbox2tex.pl ;
 chmod a+x $BIN/pagebbox2tex.pl ;
 @ 
 
 <<tangling complementary LaTeX files for manual>>=
 # extracting page-size tables for the User's Manual #'
 echo "Extracting \"$DOCS/AplotPageSizeTbl.tex\"..." 1>&2 ;
-notangle -R"page sizes perl definition" $WORK/$nwfile.nw | \
+no tangle -R"page sizes perl definition" $WORK/$nwfile.nw | \
     $BIN/pagebbox2tex.pl - | cpif $DOCS/tables/AplotPageSizeTbl.tex ;
 @
 
@@ -14606,30 +14782,30 @@ sub toin() { return sprintf("%.1f", ($_[0] / 72.00)); }
 
 <<tangling>>=
 # PostScript code flattening
-notangle -R"PScompactnw.pl" $WORK/$nwfile.nw | cpif $BIN/PScompactnw.pl ;
+no tangle -R"PScompactnw.pl" $WORK/$nwfile.nw | cpif $BIN/PScompactnw.pl ;
 chmod a+x $BIN/PScompactnw.pl ;
 #
-notangle -R"flt.sh" $WORK/$nwfile.nw | cpif $BIN/flt.sh ;
+no tangle -R"flt.sh" $WORK/$nwfile.nw | cpif $BIN/flt.sh ;
 chmod a+x $BIN/flt.sh ;
 #
 @ 
 
 <<tests on PScompactnw.pl script>>=
-notangle -R"APLOT" \
+no tangle -R"APLOT" \
   -filter '$BIN/flt.sh $WORK/tests/PScompact_pre $WORK/tests/PScompact_post' \
   $WORK/$nwfile.nw > $WORK/tests/PScompact_out 2> $WORK/tests/PScompact_err ;
 @ 
 
-We use the following script to check the intermediate outputs from [[notangle]], before and after running our filter that removes extra comments from {\ps} code (in case you guess, [[PScompactnw.pl]]).
+We use the following script to check the intermediate outputs from [[no tangle]], before and after running our filter that removes extra comments from {\ps} code (in case you guess, [[PScompactnw.pl]]).
 
 <<flt.sh>>=
 #!/bin/bash
 #
 # USAGE:
-#   notangle ... -filter '$BIN/flt.sh pre_logfilename post_logfilename' ... 
+#   no tangle ... -filter '$BIN/flt.sh pre_logfilename post_logfilename' ... 
 #
 # this function duplicate input sending part to standard error
-# and everything to standard output (so 'notangle' does not complain).
+# and everything to standard output (so 'no tangle' does not complain).
 toerr () {
   perl -e '
     $cdon=0;
@@ -14654,7 +14830,7 @@ toerr - $1 |
 <<HIDE: tests on PScompact script>>=
 #
 # first command-line draft
-notangle -R'POSTSCRIPT shortnames' $nwfile.nw | \
+no tangle -R'POSTSCRIPT shortnames' $nwfile.nw | \
   perl -ne 'BEGIN{$clflg=0;$ln=0};
     chomp; $clflg && ($_ =~ s/^\s*//o);
     $clflg = ($_ =~ s/\s+\%\-\%.*$//og) ? 1 : 0 ; 
@@ -14701,7 +14877,7 @@ my $thend = '@end code';
 
 while (<STDIN>) {
     <<PScompactnw - looking for code chunks>>
-    <<PScompactnw - skipping the rest of the notangle output>>
+    <<PScompactnw - skipping the rest of the no tangle output>>
     <<PScompactnw - processing code>>
 }; # while
 
@@ -14725,7 +14901,7 @@ $_ =~ /^$thend/o && do {
 
 Anything else is just printed as it comes from input stream.
 
-<<PScompactnw - skipping the rest of the notangle output>>=
+<<PScompactnw - skipping the rest of the no tangle output>>=
 $go || do {
     print STDOUT $_;
     next;
@@ -14971,8 +15147,21 @@ print STDERR "$cln : $tln : ($ln) : \n$_\n";
 
 \subsctn{Making tests with [[aplottester.pl]]} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\label{todo:YAA}
+<<HIDE: new defs TODO>>=
+\def\todoYAA{
+Write tests to check functions, to build the examples. Maybe [[configure]] or [[Makefile]] scripts.
+} % todoYAA
+@
+<<HIDE: TODO>>=
+\todoitem{\todoYAA}{todo:YAA}
+@
+\todo{ \item \todoYAA } % todo
+
+
 <<Running gff2aplot.pl on a test GFF file>>=
-$BIN/gff2aplot.pl --debug -V $WORK/tests/running.log \
+EXDT="20021121";
+$BIN/gff2aplot.pl --debug -V $WORK/tests/$EXDT.running.log \
     --subtitle "A simple test set is being drawn using GFF2APLOT..." \
     --background-color verylightviolet  \
     --aplot-box-color   lightyellow     \
@@ -14981,33 +15170,35 @@ $BIN/gff2aplot.pl --debug -V $WORK/tests/running.log \
     --show-percent-box --show-extra-box \
     --custom-filename $WORK/tests/running.rc \
     -- $WORK/tests/GFFmix.gff   \
-     > $WORK/tests/running.ps.t \
-    2> $WORK/tests/running.err  ;
-egrep -v '^#' $WORK/tests/running.ps.t > $WORK/tests/running.ps ;
-gv -portrait $WORK/tests/running.ps ;
+     > $WORK/tests/tmp.running.ps \
+    2> $WORK/tests/$EXDT.running.err  ;
+egrep -v '^#' $WORK/tests/tmp.running.ps > $WORK/tests/$EXDT.running.ps ;
+gv -portrait $WORK/tests/$EXDT.running.ps ;
 #
-$BIN/gff2aplot.pl --debug -V $WORK/tests/running.log
-     --custom-filename $WORK/tests/running.extra.rc
-     --custom-filename $WORK/tests/running.rc
-     --subtitle "A simple test set is being drawn using GFF2APLOT..."
-     --background-color  verylightviolet
-     --aplot-box-color   lightyellow
-     --percent-box-color lightcyan
-     --extra-box-color   lightseagreen
-     --show-percent-box --show-extra-box
-     --feature-var 'exon::ribbon_style=lines'
-     --feature-var 'exon@e4::show_feature_label=on'
-     --feature-var 'mrna::ribbon_style=r'
-     --feature-var '*::show_ribbons=on'
-     --feature-var 'mrna::feature_layer=-1'
-     --feature-var 'align::feature_layer=5'
-     --feature-var 'mrna::feature_color=lightgreen'
-     --feature-var 'mrna::feature_scale_height=on'
-     --feature-var 'mrna::feature_score_range=0..0.5'
-     --layout-var 'percent_box_score_range=0..1'
-     -- $WORK/tests/GFFmix.gff
-      > $WORK/tests/running.ps
-     2> $WORK/tests/running.err  ;
+EXDT="20021121";
+$BIN/gff2aplot.pl --debug -V $WORK/tests/$EXDT.running.log \
+     --custom-filename $WORK/tests/running.extra.rc        \
+     --custom-filename $WORK/tests/running.rc              \
+     --subtitle "A simple test set is being drawn using GFF2APLOT..." \
+     --background-color  verylightviolet \
+     --aplot-box-color   lightyellow     \
+     --percent-box-color lightcyan       \
+     --extra-box-color   lightseagreen   \
+     --show-percent-box --show-extra-box \
+     --feature-var 'exon::ribbon_style=lines'         \
+     --feature-var 'exon@e4::show_feature_label=on'   \
+     --feature-var 'mrna::ribbon_style=r'             \
+     --feature-var '*::show_ribbons=on'               \
+     --feature-var 'mrna::feature_layer=-1'           \
+     --feature-var 'align::feature_layer=5'           \
+     --feature-var 'mrna::feature_color=lightgreen'   \
+     --feature-var 'mrna::feature_scale_height=on'    \
+     --feature-var 'mrna::feature_score_range=0..0.5' \
+     --layout-var 'percent_box_score_range=0..1'      \
+     -- $WORK/tests/GFFmix.gff          \
+     2> $WORK/tests/$EXDT.running.err | \
+     egrep -v '^#' - > $WORK/tests/$EXDT.running.ps ;
+gv -portrait $WORK/tests/$EXDT.running.ps ;
 @ 
 
 \label{todo:TAA}
@@ -15197,9 +15388,9 @@ sub escape_input() {
 @
 
 <<test file for the previous regexp tester>>=
-notangle -L -R'testing regexes: regexptester.pl' $WORK/$nwfile.nw | \
+no tangle -L -R'testing regexes: regexptester.pl' $WORK/$nwfile.nw | \
          cpif $BIN/regexptester.pl ;
-notangle -R'HIDE: testing regexes: regexes.test' $WORK/$nwfile.nw | \
+no tangle -R'HIDE: testing regexes: regexes.test' $WORK/$nwfile.nw | \
          cpif $TEST/regexes.test ;
 perl -n $BIN/regexptester.pl < $TEST/regexes.test > $TEST/regexes.report ;
 @ 
@@ -15431,7 +15622,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.33 2002-02-01 18:26:50 jabril Exp $
+# $Id: gff2aplot.nw,v 1.34 2002-12-24 13:39:08 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -15503,13 +15694,13 @@ documentation. The following instructions are needed:
 
 <<tangling>>=
 # showing line numbering comments in program
-notangle -L -R"APLOT" $WORK/$nwfile.nw | \
+no tangle -L -R"APLOT" $WORK/$nwfile.nw | \
     perl -ne '$.>1 && print' - | cpif $BIN/gff2aplot.pl ;
 # we remove here the comments within "use vars qw/ ... /",
 # numbers may change if noweb doc is changed
-notangle -L -R"APLOT" $WORK/$nwfile.nw | \
+no tangle -L -R"APLOT" $WORK/$nwfile.nw | \
     perl -ne '( $.>1 &&
-              $_ !~ /^\#line (468|478|487|1213|1309|1486|4890|5358|7528|455)/o
+              $_ !~ /^\#line (482|492|501|1286|1384|1561|2215|5735|6249|9176|468|1711|5859|5883|6372|470)/o
               ) && print' - | cpif $BIN/gff2aplot.pl ;
 #
 chmod a+x $BIN/gff2aplot.pl ;
@@ -15526,10 +15717,10 @@ We use {\perltidy} to reformat final versions of perl scripts (without line numb
 
 <<tangling>>=
 # reformating program with perltidy
-notangle -R"APLOT" $WORK/$nwfile.nw | \
+no tangle -R"APLOT" $WORK/$nwfile.nw | \
     perltidy - | cpif $BIN/$nwfile.pl ;
 # html pretty-printing program with perltidy
-notangle -R"APLOT" $WORK/$nwfile.nw | \
+no tangle -R"APLOT" $WORK/$nwfile.nw | \
     perltidy -html - | cpif $DOCS/html/gff2aplot_code/$nwfile.html ;
 #
 @
@@ -15538,22 +15729,24 @@ notangle -R"APLOT" $WORK/$nwfile.nw | \
 ############################
 # FLATTENING of PS CODE...
 #
-notangle -L -R"APLOT" \
+no tangle -L -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | perl -ne '$.>1 && print' - | cpif $BIN/gff2aplot.pl ;
 #
-notangle -L -R"APLOT" \
+# perl -ne 'BEGIN{ $f=0; } /^use vars/o && ($f=1); last if /^\s+\/;$/o; next unless (/^#line/o && $f); $_ =~ /^#line\s+(\d+)\s+/o; print $1."|"; END{ print "\n" }' $BIN/gff2aplot.pl
+#
+no tangle -L -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | \
         perl -ne '( $.>1 &&
-               $_ !~ /^\#line (468|478|487|1213|1309|1486|4890|5358|7528|455)/o
+               $_ !~ /^\#line (482|492|501|1286|1384|1561|2215|5735|6249|8869|468|1711|5859|5883|6372|470)/o
                ) && print' - | perltidy - | cpif $BIN/gff2aplot.pl ;
 # reformating program with perltidy
-notangle -R"APLOT" \
+no tangle -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | perltidy - | cpif $BIN/$nwfile.pl ;
 # html pretty-printing program with perltidy
-notangle -R"APLOT" \
+no tangle -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
     $WORK/$nwfile.nw | perltidy -html - | \
     cpif $DOCS/html/gff2aplot_code/$nwfile.html ;
@@ -15570,37 +15763,51 @@ notangle -R"APLOT" \
 
 <<tangling>>=
 # extracting main document processors
-notangle -R"weaving"    $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
-notangle -R"LaTeXing"   $WORK/$nwfile.nw | cpif $WORK/ltx ;
-notangle -R"The Manual" $WORK/$nwfile.nw | cpif $WORK/mkdoc ;
+no tangle -R"weaving"    $WORK/$nwfile.nw | cpif $WORK/nw2tex ;
+no tangle -R"LaTeXing"   $WORK/$nwfile.nw | cpif $WORK/ltx ;
+no tangle -R"The Manual" $WORK/$nwfile.nw | cpif $WORK/mkdoc ;
 #
 @
 
-[[cpif]] is an auxiliary tool for use with [[notangle]] and [[make]]. [[cpif]] compares its standard input to each of the named files, overwriting the file if the comparison succeeds or if the named file does not exist.
+[[cpif]] is an auxiliary tool for use with [[no tangle]] and [[make]]. [[cpif]] compares its standard input to each of the named files, overwriting the file if the comparison succeeds or if the named file does not exist.
 
 <<tangling complementary LaTeX files>>=
 # extracting complementary material 
 echo "Extracting \"$DOCS/defs.tex\"..." 1>&2 ;
-notangle -R"HIDE: LaTeX aplot new definitions" $WORK/$nwfile.nw | \
-         noweave -v -t4 -delay - | cpif $DOCS/defs.tex ;
+no tangle -R"HIDE: LaTeX aplot new definitions" $WORK/$nwfile.nw | \
+         no weave -v -t4 -delay - | cpif $DOCS/defs.tex ;
 echo "Extracting \"$DOCS/todo.tex\"..." 1>&2 ;
-notangle -R"HIDE: TODO" $WORK/$nwfile.nw | \
-         noweave -v -t4 -delay - | cpif $DOCS/todo.tex ;
+no tangle -R"HIDE: TODO" $WORK/$nwfile.nw | \
+         no weave -v -t4 -delay - | cpif $DOCS/todo.tex ;
 echo "Extracting \"$DOCS/localrefs.bib\"..." 1>&2 ;
-notangle -R"HIDE: BiBTeX references" $WORK/$nwfile.nw | \
+no tangle -R"HIDE: BiBTeX references" $WORK/$nwfile.nw | \
          cpif $DOCS/localrefs.bib ;
+#
+echo "Extracting \"$DOCS/tables/GFF_regexes.tex\"..." 1>&2 ;
+no tangle -R"HIDE: regular expressions for GFF-records" $WORK/$nwfile.nw | \
+      no weave -v -delay - | cpif $DOCS/tables/GFF_regexes.tex ;
+#
+echo "Extracting \"$DOCS/tables/CustomFile_parser_codes.tex\"..." 1>&2 ;
+no tangle -R"HIDE: CustomFile parser codes" $WORK/$nwfile.nw | \
+      no weave -v -delay - | cpif $DOCS/tables/CustomFile_parser_codes.tex ;
+echo "Extracting \"$DOCS/tables/GFF_parser_codes.tex\"..." 1>&2 ;
+no tangle -R"HIDE: GFF parser codes" $WORK/$nwfile.nw | \
+      no weave -v -delay - | cpif $DOCS/tables/GFF_parser_codes.tex ;
+echo "Extracting \"$DOCS/tables/missing_strands_substitution.tex\"..." 1>&2 ;
+no tangle -R"HIDE: Missing strands substitution" $WORK/$nwfile.nw | \
+      no weave -v -delay - | cpif $DOCS/tables/missing_strands_substitution.tex ;
 #
 @ 
 
 <<tangling complementary LaTeX files for manual>>=
 # extracting tables for the documentation
-echo "Extracting \"$DOCS/DataStructure_GFF.tex\"..." 1>&2 ;
-notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
+echo "Extracting \"$DOCS/tables/DataStructure_GFF.tex\"..." 1>&2 ;
+no tangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
          cpif $DOCS/tables/DataStructure_GFF.tex ;
 #
 @ 
 
-[[noweave]] options:
+[[no weave]] options:
 
 \begin{tabular}{>{\bfseries}rp{14cm}}\hline
 [[-v]] & be verbose. \\
@@ -15620,7 +15827,7 @@ notangle -R"HIDE: GFF DATA STRUCTURE" $WORK/$nwfile.nw | \
 <<tangling complementary LaTeX files>>
 # extracting main documentation
 echo "Weaving \"$DOCS/$nwfile.tex\"..." ;
-noweave -v -t4 -delay -index -filter 'elide "HIDE: *"' \
+no weave -v -t4 -delay -index -filter 'elide "HIDE: *"' \
         $WORK/$nwfile.nw | cpif $DOCS/$nwfile.tex ;
 # LaTeXing 
 echo "LaTeXing \"$DOCS/$nwfile.tex\"..." ;
@@ -15648,6 +15855,9 @@ dvips $nwfile.dvi -o $nwfile.ps -t a4 ;
 # echo "### CONVERTING PS to PDF: $nwfile" 1>&2 ;
 # ps2pdf $nwfile.ps $nwfile.pdf ;
 #
+# echo "### 2 PAGES x PAGE SMALL NWDOC: $nwfile" 1>&2 ;
+# ps2ps $nwfile.ps $nwfile.eps; mpage -vkT2 -bA4 -t $nwfile.eps > $nwfile.small.ps
+#
 popd ;
 <<BASH script closure>>
 @ %$
@@ -15673,28 +15883,37 @@ dvips $MANUAL.dvi -o $MANUAL.ps -t a4 ;
 # echo "### CONVERTING PS to PDF: $MANUAL" 1>&2 ;
 # ps2pdf $MANUAL.ps $MANUAL.pdf ;
 #
+#
+# echo "### 2 PAGES x PAGE SMALL MANUAL: $MANUAL" 1>&2 ;
+# ps2ps $MANUAL.ps $MANUAL.eps; mpage -vkT2 -bA4 -t $MANUAL.eps > $MANUAL.small.ps
 popd ;
 <<BASH script closure>>
 @ %$
 
 \subsctn{Defining working shell variables for the current project} % \\[-0.5ex]
 
+You need to set [[$WORK]] from shell. The way we do here is to define an alias, we use the following definition:\\
+
+\centerline{[[alias setcwd='export WORK=`pwd`; source $WORK/.bash_VARS']]}
+
+So that, once you are in the working directory you just type [[setcwd]], and it sets [[$WORK]] but also loads all the project related variables.
+
 <<BASH Environment Variables>>=
 # Global Variables
-WORK="$HOME/development/softjabril/gfftools/gff2aplot" ;
+# WORK is defined with "setcwd"...
 BIN="$WORK/bin" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
 TEST="$WORK/tests" ;
 nwfile="gff2aplot" ;
-export WORK BIN PARAM DOCS DATA TEST nwfile ;
+export BIN PARAM DOCS DATA TEST nwfile ;
 @ 
 
 <<tangling>>=
 #
 # BASH Environment Variables
-notangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
+no tangle -R'BASH Environment Variables' $WORK/$nwfile.nw | \
          cpif $WORK/.bash_VARS ; 
 source $WORK/.bash_VARS ;
 #
@@ -15702,8 +15921,13 @@ source $WORK/.bash_VARS ;
 
 \newpage
 
-\sctn{Code chunks list}
+% \sctn{Code chunks list}
 
-\nowebchunks
+\sctn {Index}
+\subsctn {Code Chunks}
+\nowebchunks{}
+
+\subsctn{Identifiers}
+\nowebindex{}
 
 \end{document}
