@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.12 1999-06-08 12:24:28 jabril Exp $	
+#         $Id: gff2ps,v 1.13 1999-06-09 19:48:54 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -34,7 +34,10 @@
 # ( ./gff2ps -vC mygffcustomfile -- samples/data.gff > samples/.ps ) > & samples/report.
 #
 
-CMDLine=$0" "$*
+ CMDLine=$0" "$*
+# CMDLine=`history | gawk '{last=$0}END{print last}' -`
+# CMDLine=`history | gawk '{$1=$2="";last[NR]=$0}END{print last[NR-1]}' -`
+
 ##############################################################
 #################### PROGRAM DEFINITIONS #####################
 # 
@@ -79,6 +82,7 @@ Defaults () {
   v04="0"; n04="Exist_Default_CustomFile"
   v05="0"; n05="Print_Report"
   v06="Landscape"; n06="page_orientation"
+  v07="0,0"; n07=""
 }
 
 #
@@ -107,8 +111,11 @@ Help () {
   echo ""
   echo "OPTIONS"
   echo ""
-  echo "     -h  Show this help."
+  echo "     -h  Shows this help."
   echo "     -H <option> Show only help for the especified option."
+  echo "     -C <custom_filename>  Load given custom file and append to default custom file (.gff2psrc)."
+  echo "     -v Verbose mode, a report is sent to standard error."
+  echo "     -p Switch page orientation to Portrait (default is Landscape)."
   echo ""
   echo "COMMENTS"
   echo ""
@@ -145,7 +152,7 @@ ShowHelpLine () {
 MAINPSCPR () {
 cat <<'@@@EndCopyRight@@@'
 % 
-% $Id: gff2ps,v 1.12 1999-06-08 12:24:28 jabril Exp $
+% $Id: gff2ps,v 1.13 1999-06-09 19:48:54 jabril Exp $
 % 
 %          Converting GFF files to PostScript plots.
 %
@@ -296,9 +303,10 @@ flglscape {
 %
 %  Newer vars
 %
-/spcrsize 5 def
-/tracksize 10 def
+/spcrsize 25 def
+/tracksize 25 def
 /vectoffset 10 def
+/flpos true def % flag for showing Seq Xpos for all elements.
 %
 /Fbline true def % flag for showing baseline for each method.
 /FgpLbl true def % flag for showing baseline for each group.
@@ -344,12 +352,15 @@ cat <<'@@@MAINProcs@@@'
 /max { 2 copy lt { exch } if pop } bdf
 /Xscm { Xscale mul } bdf /Xscme { Xscm exch } bdf
 /Yscm { Yscale mul } bdf /Yscme { Yscm exch } bdf
-/ChkLimits { 3 copy pop 5 2 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or { pop false } { true } ifelse } def % or%%EndProcSet:   functions 1.0 0
+/ChkLimits { 3 copy pop 5 2 roll dup dup 5 1 roll 3 1 roll lt 3 1 roll gt or { pop false } { true } ifelse } def 
+/nucdif { 2 copy exch sub } bdf
+%%EndProcSet:   functions 1.0 0
 %
 %%BeginProcSet: text_functions 1.0 0
 /sfont { findfont exch scalefont setfont } bdf
 /stringheight  { gsave newpath 0 0 moveto (0) false charpath flattenpath pathbbox exch pop exch sub exch pop 0.95 mul grestore } bdf
 /ct { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight 2 div moveto show grestore } bdf
+/ctr { gsave 0 translate sfont scmyk dup stringwidth pop 2 div neg stringheight 1.65 mul neg moveto show grestore } bdf
 %%EndProcSet:   text_functions 1.0 0
 %
 %%BeginProcSet: painting_functions 1.0 0
@@ -401,35 +412,38 @@ end % tmdct
 %%EndProcSet:   tickmarks 1.4 0
 %
 %%BeginProcSet: objects 1.0 0
-/shpdct 38 dict def shpdct begin
- /Line-Yscale 5 def
+/shpdct 40 dict def shpdct begin
+ /LY { tracksize 1.5 mul } bdf
+ /ShFont { TkMrkW 2 div /Helvetica } def
+ /RWTS { LY 1.5 mul } bdf
  /mtrx matrix def
  /cpt { moveto { lineto } repeat closepath } bdf
- /fline { 0 0 moveto 1 0 lineto closepath } bdf
- /hline { fline } bdf
- /harw {  0.0  0.0  -1.0  0.0  -1.0  0.75 -1.1  0.75 -1.1  0.75  5  0.0  1.0  cpt } bdf
- /farw {  0.6  0.75  0.6  0.75  0.5  0.75  0.5  0.0  -0.5  0.0
-         -0.5  0.75 -0.6  0.75 -0.6  0.75                        8  0.0  1.0  cpt } bdf
- /hend {  0.0  0.0   0.0 -1.0   1.0 -1.0                         3  0.0  0.75  cpt } bdf
- /fend {  1.0  0.5   0.0  0.5   0.0 -0.5   1.0 -0.5              4  0.0  0.75 cpt } bdf
- /hbox {  0.0  1.0  -1.0  1.0  -1.0  0.0                         3  0.0  0.0  cpt } bdf
- /fbox {  0.5  0.0   0.5  1.0  -0.5  1.0                         3 -0.5  0.0  cpt } bdf
- /hcir { -0.5  0.5   0.5  0 360 arc closepath } bdf
- /fcir {  0.0  0.5   0.5  0 360 arc closepath } bdf
+ /hline { 0 0 moveto 1 0 lineto closepath } bdf
+ /fline { hline tracksize sc mul setlinewidth } bdf
+ /harw {  0.0  0.0  0.0  -1.0  0.745 -1.0  0.745 -1.1  0.75 -1.1  5  1.0  0.0  cpt } bdf
+ /farw {  0.75   0.6  0.745  0.6  0.745  0.5  0.0   0.5  0.0  -0.5
+          0.745 -0.5  0.745 -0.6  0.75 -0.6                        8  1.0  0.0  cpt } bdf
+ /hend {  0.0  0.0  -1.0   0.0 -1.0   1.0                        3  0.75 0.0  cpt } bdf
+ /fend {  0.5  1.0   0.5   0.0 -0.5   0.0 -0.5   1.0             4  0.75 0.0  cpt } bdf
+ /hbox {  1.0  0.0   1.0  -1.0  0.0  -1.0                        3  0.0  0.0  cpt } bdf
+ /fbox {  0.0  0.5   1.0   0.5  1.0  -0.5                        3  0.0 -0.5  cpt } bdf
+ /hcir {  0.5 -0.5   0.5   0   360 arc closepath } bdf
+ /fcir {  0.5  0.0   0.5   0   360 arc closepath } bdf
 %%% /getcol { colordict begin /ct xdf /s end } bdf
 % must define frame colors /frm0 /frm1 /frm2...
  /getfrcol { dup 0 eq { pop frm0 } { dup 1 eq { pop frm1 } { 2 eq { frm2 } if } ifelse } ifelse } bdf
  /cmdln { 0 moveto sqdif 2 div 0 lineto scmyk stroke } bdf
- /lnfill { gsave Line-Yscale setlinewidth sqdif cmdln 0 cmdln grestore } bdf
+ /lnfill { gsave RWTS setlinewidth sqdif 2 div cmdln 0 cmdln grestore } bdf
  /frmfill { frm getfrcol rmd getfrcol lnfill } bdf
- /rnbfill { 2 dict begin gsave Line-Yscale setlinewidth /incr sqdif 100 div def 0 incr sqdif { gsave dup dup incr add 0 exch 0 moveto lineto rainbow stroke grestore } for grestore end } bdf 
- /setcolmod { aload pop dup 1 eq { pop scmyk fill } { dup 2 eq { pop lnfill } { dup 3 eq { pop frmfill } { dup 4 eq { pop rnbfill } { 0 eq { BGcolor scmyk fill } if } ifelse } ifelse } ifelse } ifelse } bdf
-% /setcolmod { colordict begin aload pop dup 1 eq { pop scolor fill } { dup 2 eq { pop lnfill } { dup 3 eq { pop frmfill } { dup 4 eq { pop rnbfill } { 0 eq { BGcolor scmyk fill } if } ifelse } ifelse } ifelse } ifelse end } bdf
- /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf strnd (-) eq { exch } if 2 copy exch sub dup /sqdif exch Xscm def /sqdsc exch Xscale div def /seqend exch Xscm def /seqori exch Xscm def } bdf
- /frshared { /svmtrix mtrx currentmatrix def Xscale sqdsc div Line-Yscale scale exec svmtrix setmatrix gsave BGcolor scmyk 1 setlinewidth stroke grestore clip setcolmod } bdf
- /f { gsave getvar strnd (-) eq { seqori 0 translate -1 -1 scale } { seqori 0 translate 1 1 scale } ifelse frshared grestore } bdf
- /gpuline { gsave grori 0.5 moveto grend 0.5 lineto /red scolor stroke grestore } bdf
- /shgplbl { FgpLbl { gsave gpuline grori 0.5 translate grlbl FGcolor 8 /Helvetica grdif 2 div ct grestore } if } bdf 
+ /rnbfill { 1 dict begin gsave /incr sqdif 100 div def 0 incr sqdif { dup dup incr add 0 exch 0 moveto lineto dup 0 gt { sqdif div } if rainbow RWTS setlinewidth stroke } for grestore end } bdf 
+% /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf strnd (-) eq { exch } if 2 copy exch sub /sqdif exch Xscm def /sqdsc sqdif Xscale div def /seqend exch Xscm def /seqori exch Xscm def /cmod xdf } bdf
+ /getvar { /ftlbl xdf /sc xdf /rmd xdf /frm xdf nucdif /sqdif exch Xscm def /sqend exch def /sqori exch def /seqend sqend Xscm def /seqori sqori Xscm def /cmod xdf } bdf
+ /setcolmod { colordict begin cmod cvx exec dup 1 eq { pop scmyk fill } { dup 2 eq { pop lnfill } { dup 3 eq { pop frmfill } { dup 4 eq { pop rnbfill } { 0 eq { BGcolor scmyk fill } if } ifelse } ifelse } ifelse } ifelse end } bdf
+ /shwpos { flpos { sqend sqori strnd (-) eq { exch } if sqdif exch 0 2 { gsave tracksize 0.75 mul moveto 10 string cvs gsave strnd (-) eq { -1 -1 scale -45 } { 45 } ifelse rotate ShFont sfont FGcolor scmyk show grestore grestore } repeat } if } bdf
+ /frshared { strnd (-) eq { -1 -1 scale } if 0.5 setlinewidth gsave /svmtrix mtrx currentmatrix def LY sc mul sqdif flglscape { exch } if scale cvx exec svmtrix setmatrix gsave FGcolor scmyk stroke grestore clip setcolmod grestore shwpos } bdf
+ /f { gsave getvar strnd (-) eq { seqend } { seqori } ifelse 0 translate frshared grestore } bdf
+ /gpuline { gsave 0 0 moveto grdif 0 rlineto /red scolor 1 setlinewidth stroke grestore } bdf
+ /shgplbl { FgpLbl { gsave grori tracksize 0.75 mul strnd (-) ne { neg } if translate gpuline grlbl FGcolor 8 /Helvetica grdif 2 div strnd (-) eq { ct } { ctr } ifelse grestore } if } bdf 
  /g_end { exit end } bdf 
 end % shpdct
 %%EndProcSet:   objects 1.0 0
@@ -455,7 +469,8 @@ end % vctdct
 /source { gsave 3 dict begin /nxtspacer exch spcrsize mul def /Yscl exch tracksize mul def /srclbl xdf /Y Y Yscl add def XOriPlot Y translate 1 -1 scale bline shsrclbl } bdf
 /endsource { end grestore /Y Y nxtspacer add def } bdf
 %
-/gp { gsave shpdct begin /strnd xdf strnd (-) eq { exch } if 2 copy exch sub /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl colordict begin { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
+% /gp { gsave shpdct begin /strnd xdf strnd (-) eq { exch } if 2 copy exch sub /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
+ /gp { gsave shpdct begin /strnd xdf nucdif /grdif exch Xscm def /grend exch Xscm def /grori exch Xscm def /grlbl xdf shgplbl { currentfile token { exec } { exit } ifelse } loop grestore } bdf
 %
 /ov { gsave vctdct begin exch Xscm exch translate { currentfile token { exec } { exit } ifelse } loop end grestore } bdf
 %
@@ -876,7 +891,9 @@ END{
 	      ng[sc,s]++;
 	      group_[sc,s,ng[sc,s]]=tgr
           }
-        grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
+
+        if (grouping[sc,s,tgr,end]<element[sc,s,S[sc,s,i],end])
+          grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
 
         # for gene mode. try to recompute relative frame and remainder
         start_=element[sc,s,S[sc,s,i],start];
@@ -893,8 +910,8 @@ END{
 
         remainder_[sc,s,tgr]=(3-(end_-(start_+frame_[sc,s,tgr])+1)%3)%3;
 mylbl=Plot_Lbl(feature_)
-        printf "%s %s %s : [ %s ] { %s } %d %d %d %d %4.2f (%s) f\n", sc,s,i, Set_feat_Clr(feature_), Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Plot_Lbl(feature_) | "cat 1>&2"
-        grouping[sc,s,tgr,group] = sprintf("%s[ %s ] { %s } %d %d %d %d %4.2f (%s) f\n", grouping[sc,s,tgr,group], Set_feat_Clr(feature_), Set_feat_Shape(feature_,sc), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Plot_Lbl(feature_))
+        printf "%s %s %s : \/%s (%s) %d %d %d %d %4.2f (%s) f\n", sc,s,i, Set_feat_Shape(feature_,sc), Set_feat_Clr(feature_), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Plot_Lbl(feature_) | "cat 1>&2"
+        grouping[sc,s,tgr,group] = sprintf("%s\/%s (%s) %d %d %d %d %4.2f (%s) f\n", grouping[sc,s,tgr,group], Set_feat_Shape(feature_,sc), Set_feat_Clr(feature_), start_, end_, frame_[sc,s,tgr] ,remainder_[sc,s,tgr], score_, Plot_Lbl(feature_))
       } # for i
         printf "\n" | "cat 1>&2"
     }   # for s
