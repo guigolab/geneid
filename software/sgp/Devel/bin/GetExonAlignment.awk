@@ -182,7 +182,7 @@ BEGIN{
       print "WARNING: hsp differ in sequences length"
       
       #recompute blosum scores
-      hsp[nsr,"blscore"]=sim(hsp[nsr,"aaseq"],hsp[nsr,"alaaseq"],SMAT);
+       hsp[nsr,"blscore"]=sim(hsp[nsr,"aaseq"],hsp[nsr,"alaaseq"],SMAT);
 
     }
   }
@@ -211,17 +211,19 @@ BEGIN{
  
   for (i=1; i<=nsr;i++) {
   # get hsp frame compatible with exon
-  ind = hsp[i,"strand"] == "+" ? 0 : FRAMES;
-  HSPFrame = (hsp[i,"frame"] % 3) + ind;
-
+      if (hsp[i,"strand"] == "+")
+	  HSPFrame = hsp[i,"frame"] % 3;
+      else 
+	  HSPFrame = (lenseq[locus1] - hsp[i,"end"] + 1) % 3;
+      
 #  if (HSPFrame==5)
 #    HSPFrame=4;
 #  else if (HSPFrame==4)
 #      HSPFrame=5;
 
-    print ExonFrame, HSPFrame , $strand , hsp[i,"strand"], hsp[i,"start"], hsp[i,"end"], $start, $end;
-    if (ExonFrame == HSPFrame && $strand == hsp[i,"strand"]) { 
-      print $start, $end, hsp[i,"start"], hsp[i,"end"];
+      print ExonFrame, HSPFrame , $strand , hsp[i,"strand"], hsp[i,"start"], hsp[i,"end"], $start, $end;
+      if (ExonFrame == HSPFrame && $strand == hsp[i,"strand"]) { 
+	  print $start, $end, hsp[i,"start"], hsp[i,"end"];
 
       # compatible frames and strands
       a = min($end,hsp[i,"end"]);
@@ -230,7 +232,7 @@ BEGIN{
 	print "overlap"
       #overlap, rescore exons
 	lIntersection = a - b + 1;
-	SRscore+=hsp[i,"score"] * (lIntersection/hsp[i,"length"]);
+	SRscore+=(hsp[i,"score"] * (lIntersection/hsp[i,"length"]));
 	print hsp[i,"score"],SRscore, lIntersection, hsp[i,"length"];
       }
     }
