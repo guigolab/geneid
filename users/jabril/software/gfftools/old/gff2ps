@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.39 2000-01-10 17:46:38 jabril Exp $	
+#         $Id: gff2ps,v 1.40 2000-01-11 18:41:17 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -41,8 +41,8 @@
 ##############################################################
 #################### PROGRAM DEFINITIONS #####################
 # 
-TT_start=`date +%T`;
 T_start=`date +%s`;
+TT_start=`date +%T`;
 CMDLine=$0" "$*;
 PID=$$;
 TEMP="/tmp";
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.39 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-10 17:46:38 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.40 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-11 18:41:17 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.39 2000-01-10 17:46:38 jabril Exp $
+%    $Id: gff2ps,v 1.40 2000-01-11 18:41:17 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -687,8 +687,8 @@ end % tmdct
  /gp_lt { longdotted  gp_ln } bdf
  /gp_sh { shortdashed gp_ln } bdf
  /gp_lh { longdashed  gp_ln } bdf
- /gp_bk { scmyk 0.5 slw 1 dict begin /tl grdif 2 div def 0 0 m S 0 -2 rl K R tl 0 rl S 0 2 rl K R tl 0 rl S 0 -2 rl K R K end } bdf
- /gp_raw { scmyk 0.5 slw strnd (-) eq { grdif 0 T -1 1 F } if 1 dict begin /tl grdif 0.05 mul def tl 0 m tl neg dup S 1 rl K R S -1 rl K R grdif 0 l S tl neg 1 rl 0 -2 rl tl 1 rl S fill R K R K end } bdf
+ /gp_bk { scmyk 0.125 slw 1 dict begin /tl grdif 2 div def 0 0 m S 0 -2 rl K R tl 0 rl S 0 2 rl K R tl 0 rl S 0 -2 rl K R K end } bdf
+ /gp_raw { scmyk 0.125 slw strnd (-) eq { grdif 0 T -1 1 F } if 1 dict begin /tl grdif 0.05 mul def tl 0 m tl neg dup S 1 rl K R S -1 rl K R grdif 0 l S tl neg 1 rl 0 -2 rl tl 1 rl S fill R K R K end } bdf
  /gp_law { grdif 0 T -1 1 F gp_raw } bdf
  /CkGPL { dup GpFsz 2 div lt { pop GpFsz 0.55 mul } if } bdf
  /gln { S colordict begin g_line cvx exec end R } bdf
@@ -2126,6 +2126,7 @@ function SET_PAGE_VARS() {  # Calculating Page Number, Blocks and NucxLine
 	}
 	else NOFFSET=Default["nucleotides_x_line"];
 	if (NOFFSET>PDIF) NOFFSET=PDIF; # necessary if it is defined a Zoom.
+	P = PDIF%NOFFSET!=0 ? ((PDIF-(PDIF%NOFFSET))/NOFFSET)+1 : ((PDIF-(PDIF%NOFFSET))/NOFFSET);
 	POFFSET=BOFFSET=NOFFSET;
 	PrintWRN(sprintf("\n%s\n*  PostScript Page Definitions\n%s\n\n",BigLINE,BigLINE));
 	PrintRPT(sprintf("page_number %s\nblocks_x_page %s\nnucleotides_x_line %s\nshow_blocks_top-bottom %s\n\n",P,B,NOFFSET,OnOff(Default["show_blocks_top-bottom"])));
@@ -3021,12 +3022,12 @@ function VertPos(lv,Vsc,Vgp,Vfg,   ps1,ps2,ps3) {
   }
   if (lv>=2) {
     ps2=ChkVT(tolower(PLOT_FT[Vgp,":","vert_align"]));
-    if (ps2~/default|center|mirror/) ps1=ps2;
+    if (ps2~/default|center|mirror/ && ps1~/default/) ps1=ps2;
     #PrintRPT(sprintf("*******>>> Vertical ALIGN  SC(%s) GP(%s) FT(%s)\n",ps1,ps2,ps3))
   }
   if (lv>=3) {
     ps3=ChkVT(tolower(PLOT_FT[Vfg,":","vert_align"]));
-    if (ps3~/default|center|mirror/) ps1=ps3;
+    if (ps3~/default|center|mirror/ && ps2~/default/ && ps1~/default/) ps1=ps3;
     #PrintRPT(sprintf("*******>>> Vertical ALIGN  SC(%s) GP(%s) FT(%s)\n",ps1,ps2,ps3))
   }
     #PrintRPT(sprintf("*******>>> Vertical ALIGN  SC(%s) GP(%s) FT(%s) ---> %s\n",ps1,ps2,ps3,shpal[ps1]))
@@ -3230,8 +3231,8 @@ rm -f $GWKPRG $GWKOPT $PSHEAD $PSMAIN 2>/dev/null;
 
 #
 # Timing gff2ps...
+# TT_end=`date +%T`;
 T_end=`date +%s`;
-TT_end=`date +%T`;
 if [ $v34 -eq 1 ];
  then
   { echo "";
@@ -3240,7 +3241,7 @@ if [ $v34 -eq 1 ];
     echo "********************************************"; echo "";
     gawk 'BEGIN{
       t1=ARGV[1];t2=ARGV[2];
-      T1=ARGV[3];T2=ARGV[4];
+      T1=ARGV[3]; # T2=ARGV[4];
       ARGV[1]=ARGV[2]=ARGV[3]=ARGV[4]="";
       s=t2-t1;
       secs=s%60;
@@ -3248,9 +3249,9 @@ if [ $v34 -eq 1 ];
       mins=m%60;
       hours=int(m/60);
       printf "> Program started  at: %s\n",T1;
-      printf "> Program finished at: %s\n",T2;
+      # printf "> Program finished at: %s\n",T2;
       printf ">>>>>> Execution time: %s:%s:%s\n\n", substr("00",1,2-length(hours)) hours, substr("00",1,2-length(mins)) mins, substr("00",1,2-length(secs)) secs;
-      }' $T_start $T_end $TT_start $TT_end ;
+      }' $T_start $T_end $TT_start; # $TT_end ;
     echo "********************************************"; echo "";
     echo "************** End of Report ***************"; } 1>&2;
  fi;
@@ -3258,3 +3259,6 @@ if [ $v34 -eq 1 ];
 #
 ##################### EOF #####################
 exit 0
+
+
+
