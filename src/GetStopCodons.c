@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetStopCodons.c,v 1.3 2001-12-18 15:38:38 eblanco Exp $  */
+/*  $Id: GetStopCodons.c,v 1.4 2002-02-13 07:26:02 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -229,7 +229,7 @@ long GetStopCodons(char* s,
     }
   
   if (ns >= NUMSITES)
-    printError("Too many predicted sites: increase NUMSITES parameter");
+    printError("Too many predicted sites: decrease RSITES parameter");
   
   return(ns);
 }
