@@ -1,9 +1,9 @@
-\documentclass[a4paper,11pt]{article}
+\documentclass[11pt]{article}
 %
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: flowchart_settingvariables.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $
+% $Id: flowchart_settingvariables.tex,v 1.2 2003-02-05 16:17:52 jabril Exp $
 %
 % T='flowchart_settingvariables'; latex $T.tex; dvips $T.dvi -o $T.tmp.ps; ps2ps $T.tmp.ps $T.ps;
 % gs -sDEVICE=epswrite -sOutputFile=$T.ps  -dNOPAUSE -dBATCH $T.tmp.ps
@@ -14,7 +14,8 @@
 % \def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
 % \let\nwdocspar=\par                    %
 %
-\usepackage[offset={0pt,0pt},hmargin=0.5cm,vmargin=0.5cm,noheadfoot]{geometry}
+%\usepackage[offset={0pt,0pt},hmargin=0.5cm,vmargin=0.5cm,noheadfoot]{geometry}
+\usepackage[papersize={21cm,29.7cm},offset=0pt,hmargin=0.5cm,vmargin=0.45cm,noheadfoot,dvips]{geometry}
 \usepackage{graphics}
 \usepackage[dvips]{graphicx}
 %% pstricks
@@ -25,14 +26,24 @@
 %\usepackage{pst-grad}
 \usepackage{lscape}
 \usepackage{fancyvrb}
+\pagestyle{empty}
 %
 \newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
 %
 \input ../tables/AplotColorDefs.tex
 %
+\newcommand{\mnpsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=none,linestyle=dotted,linewidth=0.5pt]{#1}}
+\newcommand{\mapsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=solid,fillcolor=verylightgreen,linestyle=dotted,linewidth=0.5pt]{#1}}
+\newcommand{\mbpsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=solid,fillcolor=verylightviolet,linestyle=dotted,linewidth=0.5pt]{#1}}
+\newcommand{\mcpsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightyellow,linestyle=solid,linewidth=0.25pt]{#1}}
+\newcommand{\mdpsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightorange,linestyle=solid,linewidth=0.25pt]{#1}}
+\newcommand{\mepsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightred,linestyle=solid,linewidth=0.25pt]{#1}}
+%
+\newcommand{\thynod}[2]{\rnode{#1}{#2}}
+%
 \begin{document}
-\pagestyle{empty}
-\landscape
+\small%
+\begin{landscape}%
 %
 \fvset{fontfamily=courier,fontseries=b}
 \DefineShortVerb{\|}
@@ -46,7 +57,7 @@
 \SaveVerb{checkcommandlinevars}|&check_command_line_vars|
 \SaveVerb{commandlineforvars}|&command_line_for_vars|
 \SaveVerb{commandlineforlayout}|&command_line_for_layout|
-\SaveVerb{varscheck}|&vars_check|
+\SaveVerb{varscheck}|&varscheck|
 \SaveVerb{parsecustomfiles}|&parse_custom_files|
 \SaveVerb{mergecustomvars}|&merge_custom_vars|
 \SaveVerb{DATAF}|@data_files|
@@ -57,20 +68,10 @@
 \SaveVerb{COMVARS}|%CmdLineVars|
 \SaveVerb{VARS}|%Vars|
 %
-\newcommand{\mnpsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=none,linestyle=dotted,linewidth=0.5pt]{#1}}
-\newcommand{\mapsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=solid,fillcolor=verylightgreen,linestyle=dotted,linewidth=0.5pt]{#1}}
-\newcommand{\mbpsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=solid,fillcolor=verylightviolet,linestyle=dotted,linewidth=0.5pt]{#1}}
-\newcommand{\mcpsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightyellow,linestyle=solid,linewidth=0.25pt]{#1}}
-\newcommand{\mdpsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightorange,linestyle=solid,linewidth=0.25pt]{#1}}
-\newcommand{\mepsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightred,linestyle=solid,linewidth=0.25pt]{#1}}
-%
-\newcommand{\thynod}[2]{\rnode{#1}{#2}}
-%
-\begin{center}
-\small
+\begin{center}%
 \fbox{%
 \begin{pspicture}(28,19)
- %\showgrid%
+ \input showgrid.tex %
  \rput[t](14.5,18){%
    \begin{psmatrix}[rowsep=20pt,colsep=1cm]
 %
@@ -78,8 +79,9 @@
       &  &  &  
                 & \mbpsbx{\rnode{C}{\UseVerb{checkcommandlinevars}}} \\
       & \raisebox{3ex}{\rnode{D}{\mbpsbx{\UseVerb{setcustomfiles}}}} & \rnode{E}{\mbpsbx{\UseVerb{setdefaultvars}}} & \raisebox{0ex}{\mbpsbx{\shortstack[c]{\rnode{F}{\UseVerb{getopts}}\\(\UseVerb{getoptions})}}} & \rnode{vC}{\UseVerb{commandlineforlayout}} \\
-      \rnode{G}{\mapsbx{\UseVerb{parsecustomfiles}}} & \raisebox{3ex}{\rnode{vD}{\UseVerb{CUSTF}}} & \rnode{vE}{\mcpsbx{\UseVerb{DEFVARS}}} &  & \rnode{vCC}{\UseVerb{commandlineforvars}} & \\[1cm]
-      \rnode{vGG}{\UseVerb{varscheck}}\hspace{1cm} & \rnode{vG}{\mdpsbx{\UseVerb{CUSVARS}}} & \rnode{vEE}{\mdpsbx{\UseVerb{DEFAULT}}} & \rnode{vF}{\mdpsbx{\UseVerb{COMVARS}}} & \hspace{1cm}\rnode{vCG}{\UseVerb{varscheck}}\hspace{1cm}\pnode{pBB}\\[1cm]
+      \rnode{G}{\mapsbx{\UseVerb{parsecustomfiles}}} & \raisebox{3ex}{\rnode{vD}{\UseVerb{CUSTF}}} & \rnode{vE}{\mcpsbx{\UseVerb{DEFVARS}}} &  & \rnode{vCC}{\UseVerb{commandlineforvars}} & \\%[1cm]
+      & \hspace{1cm}\rnode{vGG}{\UseVerb{varscheck}}\\
+      & \rnode{vG}{\mdpsbx{\UseVerb{CUSVARS}}} & \rnode{vEE}{\mdpsbx{\UseVerb{DEFAULT}}} & \rnode{vF}{\mdpsbx{\UseVerb{COMVARS}}} & \hspace{4cm}\pnode{pBB}\\[1cm] % \hspace{1cm}\rnode{vCG}{\UseVerb{varscheck}}\hspace{1cm}\pnode{pBB}\\[1cm]
       & \rnode{H}{\mepsbx{\UseVerb{VARS}}} & \mapsbx{\rnode{I}{\UseVerb{mergecustomvars}}} & \rnode{J}{\mepsbx{\UseVerb{VARS}}} &  \\
 %
    \psset{arrows=->,linecolor=black,linewidth=1pt,nodesep=5pt}
@@ -89,10 +91,13 @@
    \nccurve[angleA=-15,angleB=115,ncurvB=0.125]{A}{E}
    \nccurve[angleA=-10,angleB=115,ncurvB=0.125,nodesepB=10pt]{A}{F}
    \ncline[nodesepA=10pt]{C}{vC}
-   \nccurve[angleA=-15,angleB=5,ncurvA=1.50,ncurvB=0.65,nodesepA=10pt]{C}{vCC}
+   \nccurve[angleA=-15,angleB=-1,ncurvA=1.25,ncurvB=0.5,nodesepA=10pt]{C}{vCC}
    \psset{arrows=<->,linecolor=black,linewidth=1pt,nodesep=5pt}
-   \ncline{G}{vGG}
-   \ncline{vCC}{vCG}
+%   \ncline{G}{vGG}
+%   \ncline{vCC}{vCG}
+   \nccurve[angleA=-10,angleB=180,ncurvA=0.05,linestyle=dotted]{G}{vGG}
+   \nccurve[angleA=-115,angleB=0,ncurvA=0.25,linestyle=dotted]{vCC}{vGG}
+% 
    \psset{arrows=->,linecolor=red,linestyle=dashed,linewidth=1pt,nodesep=5pt}
    \ncline{B}{vB}
    \ncline[nodesepB=5pt]{vB}{vBB}
@@ -100,7 +105,9 @@
    \ncarc[angleA=-90,angleB=0]{vD}{G}
    \ncline{E}{vE}
    \ncline{vE}{vEE}
-   \ncarc[angleA=-20,angleB=20,arcangle=65]{E}{vEE}
+%   \ncarc[angleA=-20,angleB=20,arcangle=65]{E}{vEE}
+   \nccurve[angleA=180,angleB=60]{vE}{vGG}
+%
    \ncline[nodesepA=25pt]{F}{vF}
    \nccurve[angleA=190,angleB=60]{vC}{vF}
    \nccurve[angleA=190,angleB=35]{vCC}{vF}
@@ -226,12 +233,11 @@
     \end{minipage}
    }%mcpsbx
  }%rput
+ %
+ \rput(14,-0.5){{\large\bfseries \Verb+>>+ flowchart\_settingvariables.ps \Verb+<<+}}
 \end{pspicture}
 }%fbox
-\vskip 0.25cm
-
-{\large\bfseries \verb+>>+ flowchart\_settingvariables.ps \verb+<<+}
 \end{center}
-\endlandscape
+\end{landscape}
 \end{document}
 

@@ -1,0 +1,126 @@
+\documentclass[11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: blockdiagram_interactive.tex,v 1.1 2003-02-05 16:17:52 jabril Exp $
+%
+% T='blockdiagram_interactive'; latex $T.tex; dvips $T.dvi -o $T.tmp.ps; ps2ps $T.tmp.ps $T.ps;
+% gs -sDEVICE=epswrite -sOutputFile=$T.ps  -dNOPAUSE -dBATCH $T.tmp.ps
+%
+% \usepackage{noweb}
+% noweb options
+% \noweboptions{smallcode,shortxref}
+% \def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+% \let\nwdocspar=\par                    %
+%
+%\usepackage[body={20cm,29cm},top=0.35cm,left=0.5cm,noheadfoot]{geometry}
+\usepackage[papersize={21cm,29.7cm},offset=0pt,hmargin=0.5cm,vmargin=0.45cm,noheadfoot,dvips]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+\usepackage{lscape}
+%\usepackage{rotating}
+\usepackage{helvet}
+\usepackage{fancyvrb}
+% 
+%\setlength{\textheight}{29cm}
+%\setlength{\textwidth}{20cm}
+%\setlength{\topmargin}{-1in}%{-2.18968cm}% 1in~2.53968cm - 0.35cm 
+%\setlength{\headheight}{0pt}
+%\setlength{\headsep}{0pt}
+\setlength{\topskip}{0pt}
+%\setlength{\evensidemargin}{0.35cm}
+%\setlength{\oddsidemargin}{-2.18968cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\pagestyle{empty}
+%
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+%
+\input ../tables/AplotColorDefs.tex
+% 
+\newcommand{\myoval}[2]{\psovalbox[fillcolor=#1,fillstyle=solid]{\textbf{\textsc{#2}}}}%
+\newcommand{\myboxA}[2]{\psframebox[fillcolor=#1,fillstyle=solid]{\textbf{\textsc{#2}}}}%
+\newcommand{\myboxB}[2]{\psframebox[framearc=0.2,framesep=0.2cm,linewidth=1pt,linestyle=none,fillstyle=solid,fillcolor=#1,fillstyle=solid]{\textbf{\textsc{\shortstack{#2}}}}}%
+%
+\setlength{\fboxsep}{0pt}%
+% 
+\begin{document}%
+\sffamily%
+\begin{landscape}%
+%
+\begin{center}%
+\fbox{%
+\begin{pspicture}(28,19)%
+ \input showgrid.tex %  
+ \psset{framesep=0.25cm,linewidth=1pt,linestyle=solid}%
+ \psframe[fillcolor=lightskyblue,fillstyle=solid](6,3)(22,8)%
+ %
+ \rput(3,7){\rnode{DF}{\myoval{verylightorange}{GFF Data}}}%
+ \rput(10.5,7.0){\rnode{DP}{\myboxB{verylightskyblue}{GFF\\Parser}}}%
+ \ncline[angleB=180,linewidth=2.5pt]{->}{DF}{DP}%
+ %
+ % \rput(8,4){\pnode{VM}}%
+ \rput(3,5.0){\Rnode{VC}{\myboxA{lightseagreen}{Command Line}}}%
+ \rput(3,3.5){\Rnode{VF}{\myboxA{lightseagreen}{Custom Files}}}%
+ \rput(8,5.5){\Rnode{VD}{\myboxB{lightseagreen}{Defaults}}}%
+ \rput(8,4){\Rnode{VP}{\myboxB{verylightskyblue}{Options\\Parser}}}%(10.5,4.0)
+ \ncdiagg[angleA=0,angleB=180,linewidth=2.5pt]{->}{VC}{VP}%{VM}%
+ \ncdiagg[angleA=0,angleB=180,linewidth=2.5pt]{->}{VF}{VP}%{VM}%
+ \ncline[angleA=-90,angleB=90]{<->}{VD}{VP}%{VM}%
+ %\ncline[angleB=180]{VM}{VP}%
+ %
+ \rput(13,5.5){\rnode{CM}{\myboxB{verylightskyblue}{Customization\\Mapper}}}%
+ \nccurve[angleA=5,angleB=-100,ncurvB=0.5]{->}{VP}{CM}%
+ \nccurve[angleA=2.5,angleB=90]{->}{DP}{CM}%
+ %
+ \rput(15.5,7.0){\rnode{GS}{\myboxB{verylightskyblue}{GFF\\Sorter}}}%
+ \nccurve[angleA=0,angleB=-90]{->}{CM}{GS}%
+ %
+ \rput(17.5,5.5){\rnode{PB}{\myboxB{verylightskyblue}{Page\\Builder}}}%
+ \nccurve[angleA=0,angleB=90]{->}{GS}{PB}%
+ \nccurve[angleA=0,angleB=205,ncurvB=0.75,linecolor=darkred]{->}{VP}{PB}%
+ % 
+ \rput[b](15.75,3.05){\rnode{CON}{\myboxB{verylightskyblue}{Console\\Interface}}}% 
+ \nccurve[angleA=-90,angleB=45,linewidth=1.5pt,linecolor=darklimegreen]{->}{PB}{CON}%
+ \nccurve[angleA=185,angleB=-5,ncurvA=0.5,linewidth=1.5pt,linecolor=darklimegreen]{->}{CON}{VP}%
+ \nccurve[angleA=180,angleB=-90,ncurvA=2,ncurvB=1,linewidth=1.5pt,linecolor=darklimegreen]{->}{CON}{DP}%
+ % 
+ \rput(15.75,2){\rnode{COM}{\myboxA{verylightviolet}{Console Commands}}}% 
+ \ncarc[angleA=-88,angleB=88,linewidth=2pt,arcangle=10,linecolor=verydarklimegreen]{->}{CON}{COM}
+ \ncarc[angleA=-92,angleB=92,linewidth=2pt,arcangle=-10,linecolor=verydarklimegreen]{<-}{CON}{COM}
+ % 
+ \rput[b](18.25,3.05){\rnode{EX}{\myboxB{verylightred}{\textcolor{darkred}{EXIT}}}}%
+ \ncline[angleA=-90,angleB=90,linewidth=1.5pt,linecolor=darklimegreen]{->}{CON}{EX}%
+ %
+ \rput[lb](19.25,3.25){\psframe[fillcolor=verylightyellow,fillstyle=solid,linestyle=none,framearc=0.2](0,0)(2.5,4.5)}%[lb](19.25,3.25)
+ \rput(21.75,5.5){\pnode{PS}}%
+ \rput[b](20.5,7.25){\textbf{\textsc{PS header}}}%
+ \rput[lb](19.5,6.6){\psframe[fillcolor=verylightbrown,fillstyle=solid,linestyle=none,framearc=0](0,0)(2,0.5)}%
+ \rput(19.5,6.85){\pnode{PV}}%
+ \rput(20.5,6.85){\textbf{\textsc{PS vars}}}%
+ \rput[b](20.5,6.15){\textbf{\textsc{PS code}}}%
+ \rput[lb](19.5,4){\psframe[fillcolor=verylightbrown,fillstyle=solid,linestyle=none,framearc=0](0,0)(2,2)}%
+ \rput(19.5,5.5){\pnode{PP}}%
+ \rput[b](20.5,5.5){\textbf{\textsc{PS page}}}%
+ \rput[b](20.5,3.5){\textbf{\textsc{PS trailer}}}%
+ \ncline[angleA=0,angleB=180,linecolor=darkred]{->}{PB}{PV}%
+ \ncline[angleA=0,angleB=180]{->}{PB}{PP}%
+ %
+ %\rput(25,5.5){\rnode{OP}{\myboxA{lightyellow}{\scshape\shortstack{PostScript\\Output\\[2cm]\psframe[fillcolor=white,fillstyle=solid](0,0)(2,2)}}}}%
+ \rput(25,5.5){\rnode{OP}{\myboxA{lightyellow}{\scshape\shortstack{PostScript\\Output\\[1ex]\fbox{\includegraphics[bb=30 145 570 755,clip,width=3.1cm]{aplot_example.ps}}}}}}%
+ \ncline[angleA=0,angleB=180,linewidth=4pt]{->}{PS}{OP}%
+ %
+ \rput(14,-0.5){{\large\bfseries \Verb|>>| blockdiagram\_interactive.ps \Verb|<<|}}
+\end{pspicture}%
+}%fbox
+\end{center}%
+\end{landscape}%
+%
+\end{document}
