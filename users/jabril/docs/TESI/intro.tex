@@ -1,7 +1,94 @@
 %
-% $Id: intro.tex,v 1.1 2002-03-11 11:44:55 jabril Exp $
+% $Id: intro.tex,v 1.2 2002-03-13 10:14:10 jabril Exp $
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
 %
 \chap{Introducció}
-\sctn{Aspectes Biològics}
-\sctn{Predicció Computacional de Gens}
-\sctn{Reanotació de genomes}
+
+\sctn{Aspectes Biològics.}
+
+\subsctn{Les seqüències genòmiques.}
+
+Entre finals del 1989 i principis del 1990 es van definir les bases del que més tard s'anomenaria el Projecte Genoma Humà, que consistiria en obtenir la seqüència de nucleòtids que composa les molècules de DNA de la nostra espècie.
+Gràcies a les noves tecnologies, en especial de les màquines seqüenciadores automàtiques i del mètode de seqüenciació per \textit{shotgunn}, en els darrers anys hem pogut assistir a l'explossió ... de les dades genòmiques sobre seqüècies de diferents espècies (veieu la taula~\ref{tbl:seqdgenomes}).
+
+\begin{table}[!b] %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\cpt{tbl:seqdgenomes}
+    {Fites en la seqüenciació de genomes.}
+    {Es resumeixen aquí les fites més importants en la seqüenciació de genomes. Cal destacar l'increment en la mida dels genomes que s'han pogut analitzar. En el cas del genoma humà, actualment es disposa d'un primer esborrany que es correspon amb les dades publicades el febrer de l'any 2001, però la seqüenciació encara continua i el ensamblatge definitiu encara trigarà un o dos anys més. El que anirem veient serà el degoteig de cromosomes humans per als quals s'hagi aconseguit completar totes les etapes de la seqüenciació, com és el cas dels cromosomes 20, 21 i 22.}
+%
+\input ./tables/seqdgenomes
+%
+\end{center}
+\end{table}       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsctn{Homologia entre espècies.}
+
+
+\begin{figure}[!t]
+\begin{center}
+\begin{minipage}[b]{0.5\linewidth}
+\fbox{
+ \includegraphics[trim= 25 100 25,clip,width=\linewidth]{./psfigures/GF004.ps}
+} % fbox
+\end{minipage}
+\hspace{0.25cm}
+\begin{minipage}[b]{0.45\linewidth}
+\cpt{fig:homology4spec}
+    {Anàlisi de l'estructura gènica mitjançant la homologia entre espècies.}
+    {Espècies relativament properes no tan sols conserven, a nivell de seqüència, les regions codificants i la homologia sovint s'estén més enllà dels senyals que delimiten els exons, els \textit{splice sites} o llocs d'\textit{splicing}. Això es pot apreciar en els dos alineaments de seqüències entre dues espècies molt pròximes com són la rata (\textit{Rattus norvegiques}) i el ratolí (\textit{Mus musculus}) de la regió que conté el gen de la hormona del creixement i els seus ortòlegs corresponents. Si es fa el mateix comparant la seqüència en humans amb la del ratolí, encara que hi ha variació a nivell de les longituts dels introns, podem observar un patró similar al del cas anterior. A mesura que ens anem allunyant en l'escala filogenètica, la conservació de les regions intròniques va desapareixent, com es pot comprovar per en els dos alineaments entre la regió genòmica de l'hormona del creixement en humans envers la regió homòloga en pollastre (\textit{Gallus gallus}) i el peix globus (\textit{Fugu rubripes}).}
+\end{minipage}
+\end{center}
+\end{figure}
+
+
+\sctn{Predicció Computacional de Gens.}
+
+\subsctn{De la seqüència de DNA a l'estructura de la proteïna.}
+
+\begin{figure}[!t]
+\begin{center}
+\begin{minipage}[t]{0.5\linewidth}
+\fbox{
+ \begin{minipage}[c][5cm][c]{\linewidth}\hfill\end{minipage}
+% \includegraphics[width=0.45\linewidth]{./psfigures/.ps}
+} % fbox
+\end{minipage}
+\hspace{0.25cm}
+\begin{minipage}[t]{0.45\linewidth}
+\cpt{fig:sequencesignals}
+    {Recerca computacional d'estructures gèniques en seqüències de DNA.}
+    {...}
+\end{minipage}
+\end{center}
+\end{figure}
+ 
+\subsctn{Predicció d'estructures gèniques basada en la homologia.}
+
+\begin{figure}[!t]
+\begin{center}
+\begin{minipage}[t]{0.5\linewidth}
+\fbox{
+ \includegraphics[width=0.85\linewidth, trim= 10 10 20 10, clip]
+                 {./psfigures/algo2.ps}
+} % fbox
+\end{minipage}
+\hspace{0.25cm}
+\begin{minipage}[t]{0.45\linewidth}
+\cpt{fig:homologygenepred}
+    {Predicció d'estructures gèniques basada en la homologia.}
+    {...}
+\end{minipage}
+\end{center}
+\end{figure}
+
+
+\subsctn{Reanotació de Genomes.}
+
+
+
+
+

@@ -11,7 +11,7 @@ PDF="$BASE.pdf";
 
 perl -ne 'm/\$(Id.*?)\s*\$/o && print "< $1 >"' $TEX > $VER;
 latex  $TEX;
-bibtex $TEX;
+bibtex $BASE;
 latex  $TEX;
 latex  $TEX;
 dvips  $DVI -o $PS;

@@ -1,5 +1,8 @@
 %
-% $Id: title.tex,v 1.3 2002-03-11 18:25:37 jabril Exp $
+% $Id: title.tex,v 1.4 2002-03-13 10:14:20 jabril Exp $
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
 %
 \pagestyle{empty}
 
@@ -7,20 +10,16 @@
 
 \ \vfill
 \begin{center}
-\textbf{\Huge \tit}\\[5ex]
+\textbf{\Huge \tit} \\[5ex]
+\authorslist      \ \\[5ex]
 
-% \textbf{\Large Authors List Here}\\[1ex]
-\textbf{\Large Josep F. Abril}\\[1ex]
-\textbf{\Large Gen\'{\i}s Parra}\\[1ex]
-\textbf{\Large Roderic Guig\'o}\\[5ex] % \raisebox{0.85ex}{\footnotesize$\,\dag$}\\[0.5ex]
-
-\textbf{\large --- \today ---}\\[10ex]
+\textbf{\large --- \today ---} \\[10ex]
 
 \vfill
 
 \begin{raggedleft}
 \showaffiliation
-\raisebox{0.85ex}{\footnotesize$\dag\,$}{\large e-mail: {\mtjabril}, {\mtgparra} and {\mtrguigo}}\\
+\showemails
 \end{raggedleft}
 \end{center}
 
@@ -41,10 +40,12 @@
 
 \newpage
 
-\vfill
-\begin{raggedleft}
-A la paciència de les dones, en especial de la meva\ldots
-\end{raggedleft}
+\ \vfill
+\begin{flushright}
+\begin{minipage}[c]{30ex}
+A la paciència de les dones,\\ en especial de la meva\ldots \verb+;^)+
+\end{minipage}
+\end{flushright}
 \vfill
 
 \newpage % EMPTY PAGE

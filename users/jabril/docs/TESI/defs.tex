@@ -1,14 +1,25 @@
 %
-% $Id: defs.tex,v 1.3 2002-03-11 18:25:37 jabril Exp $
+% $Id: defs.tex,v 1.4 2002-03-13 10:14:10 jabril Exp $
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% New Commands are defined here
-\newcommand{\chap}[1]{\chapter{#1}}
+\newcommand{\chap}[1]{
+  \begin{flushright}
+  \vspace*{10cm}
+  \begin{minipage}[c]{0.5\linewidth}
+  \thispagestyle{empty}
+  \chapter{#1}
+  \end{minipage}
+  \end{flushright}
+  \newpage
+} % chap
 \newcommand{\sctn}[1]{\section{#1}}
 \newcommand{\subsctn}[1]{\subsection{#1}}
 \newcommand{\subsubsctn}[1]{\subsubsection{#1}}
-
+\newcommand{\cpt}[3]{
+  \caption[#2]{\label{#1}\small \textbf{#2}\\#3}
+} % cpt
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% PSTRICKs definitions
@@ -21,26 +32,34 @@
 %%%%% THIS WORK definitions
 %
 \def\genomelab{\textbf{Genome Informatics Research Lab}}
-\def\shorttit{\textbf{Human + Mouse}}
-\def\tit{\textsc{\shortstack{Human Genome Annotation\\using Mouse Homology}}}
+\def\shorttit{\textbf{Anotant el Genoma}}
+\def\tit{\textsc{\shortstack{Anotant el Genoma Humà}}}
 %
-\def\mtauthor{
- \htmladdnormallink{\texttt{author@imim.es}}
-                   {MAILTO:author@imim.es?subject=[humus]}
- } % def mtauthor
+\def\mtauthor{\mtjabril} % def mtauthor
 %
 \def\authorslist{
- The Author/s {\mdseries\small\dotfill \mtauthor } \\
+  \textbf{\Large Josep F. Abril}   \\[1ex]
+  \textbf{\Large Gen\'{\i}s Parra} \\[1ex]
+  \textbf{\Large Roderic Guig\'o}  \\[1ex]
+  % \raisebox{0.85ex}{\footnotesize$\,\dag$ The Author/s {\mdseries\small\dotfill \mtauthor } \\
  % Other authors here...\\
  } % def authorslist
 \def\authorshort{
- Abril, JF; Parra, G; Guig\'o, R
+ Abril, JF
  } % def authorshort
+\def\showemails{
+ \raisebox{0.85ex}{\footnotesize$\dag\,$}
+ { \large e-mail:\hspace{6ex}{\mtjabril}, \\
+                             {\mtgparra}\hspace{1ex}\\
+                         and {\mtrguigo}\hspace{1ex}\\ }
+}
 %
 \def\license{GNU General Public License (GNU-GPL)}
 %
 \def\progdesc{
-We are going to scale up all the processes we have tested on {\lhsap} chromosomes 22 and 21, to the whole genome approach, in which we take advantage of the homology between {\hsap} and {\lmmus} genomes to increase gene prediction accuracy and producing a better genome annotation of the coding regions.
+
+... the abstract here ...
+
  } % def progdesc
 %
 \def\showaffiliation{
@@ -55,8 +74,14 @@ Universitat Pompeu Fabra\\[2ex]
 %%%%% ALIASES
 \def\perl{\textsc{Perl}}
 \def\biop{\textsc{BioPerl}}
+%
 \def\ps{\textsc{PostScript}}
+\def\gps{\texttt{gff2ps}}
+\def\aps{\texttt{gff2aplot}}
+\def\apo{\textsl{Apollo}}
+%
 \def\rptm{\textsc{RepeatMasker}}
+%
 \def\bl{\textsc{Blast}}
 \def\bn{\textsc{blastn}}
 \def\bx{\textsc{blastx}}
@@ -64,17 +89,17 @@ Universitat Pompeu Fabra\\[2ex]
 \def\tbn{\textsc{tblastn}}
 \def\tbx{\textsc{tblastx}}
 \def\pb{\texttt{parseblast}}
+%
 \def\gnid{\texttt{geneid}}
 \def\gnsc{\texttt{genscan}}
 \def\twsc{\texttt{twinscan}}
 \def\slam{\textsc{slam}}
 \def\sgp{\textsc{sgp}}
 \def\stp{\texttt{stepper}}
-\def\gps{\texttt{gff2ps}}
-\def\aps{\texttt{gff2aplot}}
-\def\apo{\textsl{Apollo}}
+%
 \def\refseq{\textsc{RefSeq}}
 \def\ens{\textit{\texttt{emsembl}}}
+%
 \def\hsap{\textit{H. sapiens}}
 \def\lhsap{\textit{Homo sapiens}}
 \def\mmus{\textit{M. musculus}}
