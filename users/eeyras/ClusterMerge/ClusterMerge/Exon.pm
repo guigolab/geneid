@@ -411,7 +411,7 @@ sub length{
 
 =cut
 
-sub gffstring {
+sub gff_string {
    my ($self) = @_;
 
    my $str;
@@ -433,7 +433,7 @@ sub gffstring {
    eval{
      $str .= (defined $self->end_phase) ?   $self->end_phase."\t"        :  ".\t";
    };
-   $str .= (defined $self->group_tag)   ?   $self->group_tag."\t"        :  ".\t";
+   $str .= (defined $self->group_tag)   ?   $self->group_tag."\t"        :  ".";
    return $str;
 }
 
