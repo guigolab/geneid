@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.49 2002-06-17 14:20:34 jabril Exp $ 
+% # $Id: humus.nw,v 1.50 2002-06-17 14:38:14 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.49 2002-06-17 14:20:34 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.50 2002-06-17 14:38:14 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3239,7 +3239,7 @@ $BIN/runeval.pl $A_ENSEMBL.rev.gff $ODIR/$SEQ.sgp+refseq.eval.rev.gff      \
 #>#        :  homology evidences once they have been projected into SRs
 #>#        :  plus the current RefSeq annotations for the analyzed sequence.
 #># JOB_PATH  sgp
-#># JOB_XID   ${HSmskMM_REFSEQ}
+#># JOB_XID   ${HSmskMM_RS}
 #># JOB_FILE  ${LIBSTEP}/masked-sgp-mgsc+refseq.job
 #># END_OF_JOB ##################################################################
 @ 
@@ -6943,7 +6943,7 @@ CREATE TABLE tb_job
   code    INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   descr   TEXT,
   path    VARCHAR(100) NOT NULL,
-  jxid    VARCHAR(25)  NOT NULL
+  jxid    VARCHAR(50)  NOT NULL
 );
 CREATE TABLE tb_step
 (
@@ -6953,7 +6953,7 @@ CREATE TABLE tb_step
   version VARCHAR(40), /* which program and its version is being run */
   descr   TEXT,
   path    VARCHAR(100) NOT NULL,
-  sxid    VARCHAR(25)  NOT NULL,
+  sxid    VARCHAR(50)  NOT NULL,
   idir    VARCHAR(200) NOT NULL,
   odir    VARCHAR(200) NOT NULL,
   edir    VARCHAR(200) NOT NULL,
@@ -10614,7 +10614,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.49 2002-06-17 14:20:34 jabril Exp $
+# $Id: humus.nw,v 1.50 2002-06-17 14:38:14 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -10770,7 +10770,7 @@ RIKENID="20020504.RIKEN" ;
 MGSC_RKN="${MMUSSTR}+${RIKENID}" ;
 REFSEQID="RefSeqEvids" ;
 HSMM_REFSEQ="${HSAPSTR}-${MMUSSTR}+${REFSEQID}" ;
-HSmskMM_REFSEQ="${HSAPSTR}msk-${MMUSSTR}+${REFSEQID}" ;
+HSmskMM_RS="${HSAPSTR}msk-${MMUSSTR}+${REFSEQID}" ;
 MMHS_REFSEQ="${MMUSSTR}-${HSAPSTR}+${REFSEQID}" ;
 #
 export HSAP HSAPID HSAPSTR HSEQ HSEQMSK \
