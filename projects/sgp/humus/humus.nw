@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.5 2002-03-11 11:52:18 jabril Exp $ 
+% # $Id: humus.nw,v 1.6 2002-03-18 18:42:20 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.5 2002-03-11 11:52:18 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.6 2002-03-18 18:42:20 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3047,7 +3047,7 @@ use strict;
 use vars qw(
            @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION 
            $mySQL_db $mySQL_host $mySQL_user $MySQLPAR $dbh $sth
-           $_verbose $isDBon %status %chrs %jobs
+           $_verbose $isDBon %status %chrs %jobs @seqs @steps
            );
 
 use Exporter;
@@ -3057,7 +3057,7 @@ $VERSION = 1.00;
     $mySQL_db $mySQL_host $mySQL_user $_verbose $isDBon
     &open_DB &close_DB $MySQLPAR $dbh $sth
     &get_tbl_hash &get_row_fields &put_row_fields
-    &get_DB_codes %status %chrs %jobs
+    &get_DB_codes %status %chrs %jobs @seqs @steps
   );
 @@EXPORT_OK = qw(
     &connection_details &load_to_tbl_ifdef
@@ -3222,46 +3222,57 @@ sub load_to_tbl_ifdef() { # mv $field to end of args and set as an array to allo
 
 sub get_tbl_hash() {
     # here we assume that the first element of $aryfld is a hash key
-    my ($href, $table, $aryfld) = @_;
+    my ($href, $table, $aryflds, $queryflds, $queryvals) = @_;
     print STDERR $Messages{'DBIHEADER'}->(
         "RETRIEVING HASH from TABLE \"$table\"");
-    my ($ssth,@ary);
-    my $aryfld_len = $#{ $aryfld };
-    my $sstr = qq{
-        SELECT @{[ join(', ',@{$aryfld}) ]}
-               FROM $table
+    my ($ssth,$sstr,@ary,$aryfld_len,$fldstr,$valstr);
+    $aryfld_len = $#{ $aryflds };
+    $fldstr = join(', ',@{ $aryflds });
+    $valstr = &build_where_clause($queryflds,$queryvals);
+    $sstr = qq{
+        SELECT $fldstr
+               FROM $table $valstr
         }; 
     print STDERR $Messages{'DBICMD'}->("$sstr");
     $ssth = $dbh->prepare($sstr);
     $ssth->execute();
     while (@ary = $ssth->fetchrow_array()) {
-        %{ $href->{$ary[0]} } = map { $aryfld->[$_] => $ary[$_]
+        %{ $href->{$ary[0]} } = map { $aryflds->[$_] => $ary[$_]
                                       } (1..$aryfld_len);
     }; # while @ary
     print STDERR $Messages{'DBIMSG'}->(
         "",(scalar (keys %{$href}))." records were retrieved...","");
     $ssth->finish();
 } # get_tbl_hash
-
+sub build_where_clause() {
+    my ($queryflds, $queryvals) = @_;
+    my ($valstr,$q_len);
+    $valstr = "";
+    ((defined($queryflds) && scalar(@{ $queryflds }) > 0) &&
+     (defined($queryvals) && scalar(@{ $queryvals }) > 0)) && do {
+        # ensure that both arys ($queryflds & $queryvals)
+        # have same length in calling function/script, and that are paired too...
+        $q_len = &min($#{ $queryflds }, $#{ $queryvals });
+        for (my $i = 0; $i <= $q_len; $i++) {
+           $valstr .= "$queryflds->[$i] = ".
+                      ($dbh->quote($queryvals->[$i]))." \n";
+	    };
+        chomp($valstr);
+        $valstr = join('\n               AND ', (split /\n/og, $valstr));
+        $valstr = "\n               WHERE $valstr";
+	};
+    return $valstr;
+} # build_where_clause
 sub get_row_fields() {
     my ($table, $outflds, $queryflds, $queryvals) = @_;
     my ($ssth,$sstr,$fldstr,$valstr,$q_len,@out);
-    # ensure that both arys ($queryflds & $queryvals)
-    #   have same length in calling function/script, and that are paired too...
-    $q_len = &min($#{ $queryflds }, $#{ $queryvals });
     $fldstr = join(', ',@{$outflds});
-    $valstr = "";
-    for (my $i = 0; $i <= $q_len; $i++) {
-       $valstr .= "$queryflds->[$i] = ".($dbh->quote($queryvals->[$i]))." \n";
-	};
-    chomp($valstr);
-    $valstr = join('\n               AND ', (split /\n/og, $valstr));
     print STDERR $Messages{'DBIHEADER'}->(
         "RETRIEVING \"$fldstr\" ROW(s) from TABLE \"$table\"");
+    $valstr = &build_where_clause($queryflds,$queryvals);
     $sstr = qq{
         SELECT $fldstr
-               FROM $table
-               WHERE $valstr
+               FROM $table $valstr
 		};
     print STDERR $Messages{'DBICMD'}->("$sstr");
     $ssth = $dbh->prepare($sstr);
@@ -3279,34 +3290,70 @@ sub get_row_fields() {
 } # get_row_fields
 
 sub get_DB_codes() {
-    my @sel_fields = ();
+    my (@sel_fields,@qry_fields,@qry_values);
     #
     # Loading Status tables
     %status = ();
     @sel_fields =  qw( id code descr color );
     &get_tbl_hash(\%status, 'tb_status', \@sel_fields);
-    print STDOUT (Data::Dumper->Dump([ \%status ],
+    print STDERR (Data::Dumper->Dump([ \%status ],
                                   [ qw( *status ) ]));
     #
     # Loading Chromosome tables
     %chrs = ();
     @sel_fields =  qw( id code version descr );
     &get_tbl_hash(\%chrs, 'tb_chromosome', \@sel_fields);
-#     foreach my $key (keys %chrs) {
-#         @sel_fields =  qw( id code length version composition descr );
-#         &get_tbl_hash(\%chrs, 'tb_sequence', \@sel_fields);        
-#     };
-   print STDOUT (Data::Dumper->Dump([ \%chrs ],
-                                 [ qw( *chrs ) ]));
+    foreach my $key (keys %chrs) {
+        %{ $chrs{$key}{seqs} } = ();
+        @sel_fields = qw( id code length version composition descr );
+        @qry_fields = qw( chr );
+        @qry_values = ( $chrs{$key}{code} );
+        &get_tbl_hash(\%{ $chrs{$key}{seqs} }, 'tb_sequence',
+                      \@sel_fields, \@qry_fields, \@qry_values);        
+    }; # foreach $key
+    print STDERR (Data::Dumper->Dump([ \%chrs ],
+                                  [ qw( *chrs ) ]));
     #
     # Loading Job tables
     %jobs = ();
     @sel_fields =  qw( id code descr );
     &get_tbl_hash(\%jobs, 'tb_job', \@sel_fields);
-#    print STDOUT (Data::Dumper->Dump([ \%jobs ],
-#                                  [ qw( *jobs ) ]));
+    foreach my $key (keys %jobs) {
+        %{ $jobs{$key}{steps} } = ();
+        @sel_fields = qw( id code version descr path
+                          sxid idir odir edir script );
+        @qry_fields = qw( job );
+        @qry_values = ( $jobs{$key}{code} );
+        &get_tbl_hash(\%{ $jobs{$key}{steps} }, 'tb_step',
+                      \@sel_fields, \@qry_fields, \@qry_values);        
+    }; # foreach $key
+    print STDERR (Data::Dumper->Dump([ \%jobs ],
+                                  [ qw( *jobs ) ]));
+    #
+    # Building order arrays for chromosome seqs and job steps
+    &build_ordering_ary(\@seqs, \%chrs, 'code', 'seqs',  'code');
+    &build_ordering_ary(\@steps, \%jobs, 'code', 'steps', 'code');
+    print STDERR (Data::Dumper->Dump([ \@seqs, \@steps ],
+                                  [ qw( *seqs   *steps ) ]));
 } # get_DB_codes
-
+sub build_ordering_ary() {
+    my ($arf,$hrf,$Skey,$sfeat,$skey) = @_;
+    @{ $arf } = ();
+    foreach my $key (keys %{ $hrf }) {
+        my @order = ();
+        foreach my $yek (keys %{ $hrf->{$key}{$sfeat} }) {
+            push @order, [ $yek, $hrf->{$key}{$sfeat}{$yek}{$skey} ];
+        }; # foreach $key
+        @order = map  { $_->[1] }
+                 sort { $a->[0] <=> $b->[0] }
+                 map  { [ $_->[1], $_->[0] ] } @order;
+        push @{ $arf }, [ $key , $hrf->{$key}{$Skey}, [ @order ] ]
+    }; # foreach $key
+    @{ $arf } = map  { $_->[1] }
+                sort { $a->[0] <=> $b->[0] }
+                map  { [ $_->[1], [ $_->[0], @{ $_->[2] } ] ] } @{ $arf };
+} # build_ordering_ary
+#
 sub put_row_fields() {
     my ($table, $fields, $aryfld, $aryrow) = @_;
     my ($q_len,$filter,$fldstr,$valstr,$setstr,
@@ -3792,7 +3839,7 @@ my $stepfls = shift @ARGV;
 &set_filter(\%filter);
 
 &open_DB();
-&get_DB_codes(); # sets %chr, $chr{}{seqs}, %job, $job{}{steps}, @chrs, @jobs
+&get_DB_codes(); # sets %chr, $chr{}{seqs}, %job, $job{}{steps}, @seqs, @steps
 
 while (!$skip_next) {
     &brown_dispatcher();
@@ -5526,7 +5573,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.5 2002-03-11 11:52:18 jabril Exp $
+# $Id: humus.nw,v 1.6 2002-03-18 18:42:20 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
