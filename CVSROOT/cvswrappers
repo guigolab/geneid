@@ -19,7 +19,9 @@
 #  -k		expansion mode		value: b, o, kkv, &c
 #
 #  and value is a single-quote delimited value.
-# For example:
+#
+# $Id: cvswrappers,v 1.3 2000-09-29 11:37:00 adminmonstre Exp $
+#
 
 *.aiff   -k 'b' -m 'COPY'
 *.ani    -k 'b' -m 'COPY'
@@ -98,6 +100,9 @@
 *.zip    -k 'b' -m 'COPY'
 *.z      -k 'b' -m 'COPY'
 *.Z      -k 'b' -m 'COPY'
+
+
+
 
 
 
