@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.38 2002-05-17 19:33:58 jabril Exp $ 
+% # $Id: humus.nw,v 1.39 2002-05-20 18:51:09 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -270,7 +270,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.38 2002-05-17 19:33:58 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.39 2002-05-20 18:51:09 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3557,6 +3557,7 @@ my ($seqname,$source,$ifile) = @ARGV;
 my $c = 0;
 my (@allgp,@exary);
 my %laste = ();
+my %gn_name = ();
 #
 # MAIN
 &program_started($PROG);
@@ -3591,8 +3592,13 @@ sub process_gene() {
     my $maxrec = 10; # refseq record structure
     my ($gene,$seq,$strand,$mrna_ori,$mrna_end,
         $cds_ori,$cds_end,$exons_num,$exons_ori,$exons_end) = (0..($maxrec - 1));
-    my (@l,@o,@e,$frame,$cdso,$cdse);
+    my (@l,@o,@e,$frame,$cdso,$cdse,$tgn);
     @l = @{ $rec };
+    $tgn = "$l[$gene].$seqname$l[$strand]"; # hack to avoid duplicated genes...
+    defined($gn_name{$tgn}) || do {
+        $gn_name{$tgn} = 0;
+    };
+    $l[$gene] = $tgn.(++$gn_name{$tgn});
     ((scalar(@l) >= $maxrec) && ($l[$seq] eq $seqname)) || return 0;
     @o = split /,/og, $l[$exons_ori];
     @e = split /,/og, $l[$exons_end];
@@ -8900,7 +8906,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.38 2002-05-17 19:33:58 jabril Exp $
+# $Id: humus.nw,v 1.39 2002-05-20 18:51:09 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
