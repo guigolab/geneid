@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.2 2002-05-05 08:59:58 jabril Exp $ 
+% # $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.3 2002-05-09 12:49:58 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.2 2002-05-05 08:59:58 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.3 2002-05-09 12:49:58 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2167,7 +2167,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.2 2002-05-05 08:59:58 jabril Exp $
+# $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.3 2002-05-09 12:49:58 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2526,6 +2526,65 @@ $BIN/viewstatustbl.pl | enscript -1C -Gjf Courier5 -M A4
 ( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}.report ); } ; done ; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '########################################## CHR '$n'_random #####'; perl -ne '/^\#\s+[cT+-]/o && print' $HUMUS/chr${N}/tblastx/20020425/hsp/chr${n}_random.report $HUMUS/chr${N}/tblastx/20020425/sr/chr${n}_random.report $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/hsp-sr/chr${n}_random.report; }; } ; done ) 2>&1 | prtcode ;
 # gene-pred results quick summary
 ( for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { [ "$N" != "UN" ] && ( echo '################################################### CHR '$n' #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n} ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n} ); }; echo ''; } ; done ; for  n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y Un ; do { N=`echo $n | tr [:lower:] [:upper:]`; { echo '########################################## CHR '$n'_random #####'; echo '### GENEID'; tail -20 $HUMUS/chr${N}/geneid/20011222/logs/chr${n}_random.geneid | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/geneid/20011222/out/chr${n}_random ; echo '### SGP'; tail -20 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/logs/chr${n}_random.sgp | egrep 'TOTAL:|Error:|segmentation fault'; head -4 $HUMUS/chr${N}/sgp/20011222.UCSCgp-20020411.MGSCv3/out/chr${n}_random; }; echo ''; } ; done ) 2>&1 | prtcode ;
+#
+### GENE NUMBER
+HUMUS="/projects/H.sapiens/20010806.UCSCgp"
+# refseq
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { grep -v '^#' $HUMUS/chr$CHR/annotation/20010806/refseq/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $HUMUS/evaluations/refseq_Phusion.genes_by_seq ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> REFSEQ from Hsap UCSC-GoldenPath assembly (20010806)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $HUMUS/evaluations/refseq_Phusion.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $HUMUS/evaluations/refseq_Phusion.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $HUMUS/evaluations/refseq_Phusion.genes_by_seq.report ;
+# ensembl
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { grep -v '^#' $HUMUS/chr$CHR/annotation/20010806/ensembl/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $HUMUS/evaluations/ensembl_Phusion.genes_by_seq ;
+( echo "### NUMBER OF REAL GENES ###"; echo "###-> ENSEMBL from Hsap UCSC-GoldenPath assembly (20010806)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $HUMUS/evaluations/ensembl_Phusion.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $HUMUS/evaluations/ensembl_Phusion.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $HUMUS/evaluations/ensembl_Phusion.genes_by_seq.report ;
+# genscan
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { grep -v '^#' $HUMUS/chr$CHR/annotation/20010806/genscan/$SEQ.report | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d\n", chr, $1 }' "$SEQ" - ; }; done > $HUMUS/evaluations/genscan_Phusion.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> GENSCAN from Hsap UCSC-GoldenPath assembly (20010806)"; gawk 'BEGIN{ printf "\n%12s %8s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs TOTAL\n\n", "",g; }' $HUMUS/evaluations/genscan_Phusion.genes_by_seq; gawk '$1~/random$/ { g+=$2; print $0 }END{ printf "%12s %8d  CHRs_RANDOM TOTAL\n\n", "",g; }' $HUMUS/evaluations/genscan_Phusion.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1 } { print $0 } END{ printf "%12s %8d  GRAND TOTAL\n", "",g; }' > $HUMUS/evaluations/genscan_Phusion.genes_by_seq.report ;
+# geneid
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { head -4 $HUMUS/chr$CHR/geneid/20020225/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $HUMUS/evaluations/geneid_Phusion.genes_by_seq ;
+( echo "# NUMBER OF PREDICTED GENES ###"; echo "###-> GENEID on Hsap UCSC-GoldenPath assembly (20010806)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/geneid_Phusion.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/geneid_Phusion.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $HUMUS/evaluations/geneid_Phusion.genes_by_seq.report ;
+# sgp
+gawk '{print $1,$2}' $HUMUS/seqid_list | while read CHR SEQ; do { head -4 $HUMUS/chr$CHR/sgp/20020225/out/$SEQ | tail -1 | gawk 'BEGIN{ chr=ARGV[1]; ARGV[1]=""; }{ printf "%12s %8d %12.3f\n", chr,$5,$9; }' "$SEQ" ; }; done > $HUMUS/evaluations/sgp_Phusion.genes_by_seq ;
+( echo "### NUMBER OF PREDICTED GENES ###"; echo "###-> SGP on Hsap UCSC-GoldenPath assembly (20010806)"; echo "###        + Mmus SC Phusion assembly (20011106)"; gawk 'BEGIN{ printf "\n%12s %8s %12s\n\n", "CHR_SEQNAME","#Genes","Score" }'; gawk '$1!~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/sgp_Phusion.genes_by_seq; gawk '$1~/random$/ { g+=$2; s+=$3; print $0 }END{ printf "%12s %8d %12.3f  CHRs_RANDOM TOTAL\n\n", "",g,s; }' $HUMUS/evaluations/sgp_Phusion.genes_by_seq ) | gawk '$0~/TOTAL$/ { g+=$1; s+=$2 } { print $0 } END{ printf "%12s %8d %12.3f  GRAND TOTAL\n", "",g,s; }' > $HUMUS/evaluations/sgp_Phusion.genes_by_seq.report ;
+# summarizing
+( cat $HUMUS/evaluations/refseq_Phusion.genes_by_seq.report; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/ensembl_Phusion.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/genscan_Phusion.genes_by_seq.report ; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/geneid_Phusion.genes_by_seq.report; echo ""; echo "";  echo ""; cat $HUMUS/evaluations/sgp_Phusion.genes_by_seq.report ) > $HUMUS/evaluations/ALL_Phusion.genes_by_seq.report ;
+#
+enscript --columns=3 -Gjf Courier5 -M A4 $HUMUS/evaluations/ALL_Phusion.genes_by_seq.report ;
+#
+perl -ne 'BEGIN{ $prog="???"; print STDOUT "PROG CLASS SEQ GENES\n"; } next if /^\s+$/o; /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next); next if /^\#/o; next unless /^\s*chr/; chomp; $_ =~ s/^\s+//o; @f=split /\s+/og; $type="ASSEMBLED"; $f[0] =~ s/_random$//o && ($type="RANDOM"); printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];' $HUMUS/evaluations/ALL_Phusion.genes_by_seq.report > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl # | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }' 
+#
+function splittbls ()
+{
+perl -ne 'BEGIN{ $cls=shift @ARGV; } next unless $.>1; chomp; @f = split /\s+/o, $_; next unless ($f[1] eq $cls); $seq=$f[2]; $prg=$f[0]; defined($hprg{$prg}) || do { push @prog, $prg }; $hprg{$prg}++; defined($hseq{$seq}) || do { push @seqs, $seq }; $hseq{$seq}++; $genes{$seq}{$prg}=$f[3]; END{ $fmt=("\%-10s" x (scalar(@prog)+1))."\n"; printf STDOUT $fmt,"CHR",@prog; for ($n=0;$n<scalar(@seqs);$n++) { $s=$seqs[$n]; @tt=(); for ($p=0;$p<scalar(@prog);$p++) { push @tt, $genes{$s}{$prog[$p]}; }; printf STDOUT $fmt, $seqs[$n],@tt;} }' "$@"
+}
+splittbls "ASSEMBLED" $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq_ASM.tbl 
+splittbls "RANDOM" $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq_RND.tbl 
+#
+# drawing histograms with R
+def.par <- par()# save default, for resetting...
+plot.new()
+A <- read.table("/projects/H.sapiens/20010806.UCSCgp/evaluations/r-plots/ALL_Phusion.genes_by_seq_ASM.tbl", header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+R <- read.table("/projects/H.sapiens/20010806.UCSCgp/evaluations/r-plots/ALL_Phusion.genes_by_seq_RND.tbl", header = TRUE, row.names=1, as.is = FALSE, na.strings = "nan")
+
+postscript(file="/projects/H.sapiens/20010806.UCSCgp/evaluations/r-plots/ALL_Phusion.genes_by_seq.ps", paper="a4", horizontal=TRUE) 
+# op <- par(mfrow=c(2,1)) # another way to produce a table of figures
+nf <- layout(matrix(c(1,1,1,0,2,0),2,3,byrow=TRUE), widths=c(lcm(6.25),lcm(12.5),lcm(6.25),lcm(6.25),lcm(12.5),lcm(6.25)), heights=c(lcm(10.5),lcm(8.5)), respect=TRUE)
+# layout.show(nf)
+par(ps = 8, bg = "white", bty = "o", font = 2, font.axis = 1, cex.lab = 2, las = 2, mar = c(cm(0.75),cm(0.75),cm(0.75),cm(0.75)), mgp = c(3.25,1.5,0), adj = 0.5)
+# mgp: The margin line for the axis title, axis labels and axis line. The default is c(3, 1, 0)
+barplot(t(A), beside = TRUE, col = rainbow(5), ylim = c(0, 9900))
+title(ylab="Number of Genes", adj = 0.5, font = 3, cex.lab = 3.5)
+text(65, 9500, "H.sapiens Golden Path Assembly", font = 2, adj = 0.5, cex = 5)
+text(65, 8800, "( 8 Aug, 2001 )", font = 2, adj = 0.5, cex = 3.5)
+text(65, 7500, "Assembled Chromosomes", font = 2, adj = 0.5, cex = 4)
+legend(102, 7250, colnames(A), col = rainbow(5), cex = 2, pch = 16)
+#
+barplot(t(R), beside = TRUE, col = rainbow(5), ylim = c(0, 1000))
+title(ylab="Number of Genes", adj = 0.5, font = 3, cex.lab = 3.5)
+text(38.5, 950, "Random Fragments", font = 2, adj = 0.5, cex = 4)
+legend(4, 850, colnames(R), col = rainbow(5), cex = 2, pch = 16)
+# par(op) # another way to produce a table of figures
+dev.off()# closing PostScript device
+par(def.par)#- reset to default
+#
 # gene-pred evaluation quick summary
 # source $WORK/.bash_VARS ; $BIN/stepper.pl --step HSAP_GP_ANNOTATION:HSAP_GP_REFSEQ,HSAP_GP_ENSEMBL,HSAP_GP_GENSCAN,HSAP_GP_GENSCAN_EVAL --step HSAPgpa_MMUSpha_WUTBLASTX:EVALUATING_SRs --step GENEID_STD:GENEID_EVALUATION --step SGP_HSAPgpa_MMUSpha_TBX:SGP_EVALUATION  > $HUMUS/tmp/.err/_ALL_eval_t.err  2>&1 ;
 #
@@ -2537,6 +2596,9 @@ $BIN/process_eval.pl -t $HUMUS/evaluations/EVAL.summary > $HUMUS/evaluations/EVA
 enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL.summary ;
 enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_prog.summary ;
 enscript -1rC -Gjf Courier5 -M A4 $HUMUS/evaluations/EVAL_test.summary ;
+#
+#
+# All files containing final stats were copied to /projects/H.sapiens/tmp/stats 
 @ 
 
 %
