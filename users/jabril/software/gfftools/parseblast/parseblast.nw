@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: parseblast.nw,v 1.5 2003-02-21 20:36:53 jabril Exp $ 
+% # $Id: parseblast.nw,v 1.6 2003-02-21 20:51:50 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -224,7 +224,7 @@ Program Name: & {\Huge\progname}                       \\[3ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: parseblast.nw,v 1.5 2003-02-21 20:36:53 jabril Exp $$>$ }
+{\small$<$ \verb$Id: parseblast.nw,v 1.6 2003-02-21 20:51:50 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -379,8 +379,8 @@ my ($n, $nm, $wnm, $tq, $ts,   # couNter, NaMe, TagQuery, TagSubject
 ##                              MAIN LOOP                                   ##
 ##############################################################################
 #
+&get_commandline_opts(); # if help is ON no start header must be shown...
 &program_started("$PROGRAM $VERSION");
-&get_commandline_opts();
 &parseblast();
 &prt_out(); # $prt && &prt_out;
 &program_finished("$PROGRAM $VERSION");
@@ -578,7 +578,7 @@ DESCRIPTION:
 
 COMMAND-LINE OPTIONS:
 
-    "$PROGRAM" prints output in "HSP" format by default (see below).
+    $PROGRAM prints output in "HSP" format by default (see below).
   It takes input from <STDIN> or single/multiple files, and writes
   its output to <STDOUT>, so user can redirect to a file but
   he also could use the program as a filter within a pipe. 
@@ -1314,7 +1314,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: parseblast.nw,v 1.5 2003-02-21 20:36:53 jabril Exp $
+# $Id: parseblast.nw,v 1.6 2003-02-21 20:51:50 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
