@@ -9,7 +9,7 @@
 #
 # modified by jabril - 2000/08/10
 #
-# $Id: sgp2,v 1.8 2000-08-12 23:26:24 jabril Exp $
+# $Id: sgp2,v 1.9 2000-08-12 23:53:40 jabril Exp $
 #
 
 # --------------------------------------------------
@@ -270,24 +270,24 @@ if [ $VRB ]
    echo "Processing HSP/SR files from BLAST" 1>&2
  fi
 
-EXTRACT $SGPTMP1.hsp-rs $SGPTMPG.srQ
-EXTRACT $SGPTMP2.hsp-rs $SGPTMPG.srS
-EXTRACT $SGPTMP1.hsp $SGPTMP2.hsp $SGPTMPG.hsp
+EXTRACT $SGPTMP1.hsp-rs $SGPTMPG.srS  # I suposse that $SGPTMP1 is Subject
+EXTRACT $SGPTMP2.hsp-rs $SGPTMPG.srQ  # and $SGPTMP2 is query, else modify this lines.
+EXTRACT $SGPTMP2.hsp $SGPTMP1.hsp $SGPTMPG.hsp
 gawk '{ 
   gsub(/\"/,"",$10); 
   print $1":"$10, $2, "hsp:hsp", $4":"$11, $5":"$12, $6, $7":"$16, $8":"$18 ;
-}' $SGPTMPG.hsp > $SGPTMPG.aln
+}' $SGPTMPG.hsp > $SGPTMP.aln # Remember that GetSRsAln also removes HSP lower than $S_CUTOFF.
 #
 if [ $OFN ]
  then
-     cp $SGPTMPG.srQ    $OFN$LOC1"_"$LOC2.srQ  
-     cp $SGPTMPG.srS    $OFN$LOC1"_"$LOC2.srS 
-     cp $SGPTMPG.hsp    $OFN$LOC1"_"$LOC2.hsp
+     cp $SGPTMPG.srQ    $OFN$LOC1"_"$LOC2.srQ  # Those files have the relationships between
+     cp $SGPTMPG.srS    $OFN$LOC1"_"$LOC2.srS  # Query and Subject coordinates so you can
+     cp $SGPTMPG.hsp    $OFN$LOC1"_"$LOC2.hsp  # recover the sequence substring for both.
      cp $SGPTMP1.hsp-rs $OFN$LOC1.hsp-rs
      cp $SGPTMP2.hsp-rs $OFN$LOC2.hsp-rs
      cp $SGPTMP1.hsp    $OFN$LOC1.hsp
      cp $SGPTMP2.hsp    $OFN$LOC2.hsp
-     cp $SGPTMPG.aln    $OFN$LOC1"_"$LOC2.aln
+     cp $SGPTMP.aln     $OFN$LOC1"_"$LOC2.aln
  fi
   ## Added by jabril ##
   #####################
