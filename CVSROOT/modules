@@ -35,6 +35,7 @@ tests         tests/
 geneid        software/geneid
 sgp           software/sgp
 sggp          software/sggp
+sgp2          software/sgp2
 #
 #
 ######### projects CVS #########
