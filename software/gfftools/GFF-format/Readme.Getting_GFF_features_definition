@@ -1,0 +1,29 @@
+#
+# Readme.Getting_GFF_features_definition
+#
+# Obtaining a gff-features standard set from Sanger Centre HTML files.
+#
+# $Id: Readme.Getting_GFF_features_definition,v 1.1 2000-09-27 15:08:50 jabril Exp $
+#
+
+0. Files from directory "/home/jabril/PostScript/07_GFF2PS/gff_format" :
+
+	Readme.Getting_GFF_features_definition		This file.
+
+	GFF_Spec.shtml			GFF (Gene Finding Features) Specifications Document.
+	key_tree.html			FTD: Feature key relationship tree.
+	keys_alphabetical.html	FTD: Feature keys - alphabetical list
+	key_defs.html			FTD: Feature key definitions
+	feature_key_ref.html	FTD: Feature keys reference.
+	qual_summary.html		FTD: Summary of qualifiers for feature keys
+							NOTE: FTD means "The DDBJ/EMBL/GenBank Feature Table Definition"
+
+	GFF_feature_list.txt	Only GFF feature names.
+
+1. Getting feature names from "key_tree.html":
+
+	%> grep 'key_defs\.html\#' key_tree.html | sed 's/^.*">//g' | sed 's/<.*$//g' | sort > GFF_feature_list.txt
+
+2. Getting definitions for each features. It was completed with some definitions from SmithKleene & Beecham mails and also from gff mailing-list:
+
+	%> sed '/^$/{N;/^\n$/D;}' key_defs.html | sed -n '/^Feature Key/{s/^Feature Key *//; N; s/<\/a>//; s/\n/ : /;p;}; /^Definition/,/^$/{s/^Definition//; p;}' | sed '/:/,/^$/{:rep;N; s/\n [ \t]*/ /g;/^$/\!b rep;}' > key_defs_extract.txt

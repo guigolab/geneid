@@ -1,0 +1,148 @@
+allele : a related individual or strain contains stable, alternative forms of the same gene which differs from the presented sequence at this location (and perhaps others).
+
+attenuator : 1) region of DNA at which regulation of termination of ranscription occurs, which controls the expression of some bacterial operons; 2) sequence segment located between the promoter and the first structural gene that causes partial termination of transcription.
+
+C_region : Constant region of immunoglobulin light and heavy  chains, and T-cell receptor alpha, beta, and gamma  chains.  Includes one or more exons depending on the  particular chain.
+
+CAAT_signal : CAAT box; part of a conserved sequence located about 75 bp up-stream of the start point of eukaryotic ranscription units which may be involved in RNA polymerase binding; consensus=GG(C or T)CAATCT [1,2].
+
+CDS : coding sequence; sequence of nucleotides that corresponds with the sequence of amino acids in a protein (location includes stop codon).  Feature includes amino acid conceptual translation. SKB[ start to stop - only coding sequence - no introns allowed only way to include this as a single feature is if only one exon is found. Can also build from ExonB to ExonE.  This is a useful thing to be able to view as a construct.  Link exons starting from the start codon to the stop codon. ] GFF[ coding exon : the part of the exon that is protein coding. ]
+
+conflict : independent determinations of the "same" sequence differ at this site or region.
+
+SKB[ CpG : CpG islands. ]
+
+D-loop : displacement loop; a region within mitochondrial DNA in which a short stretch of RNA is paired with one strand of DNA, displacing the original partner DNA strand in his region; also used to describe the displacement of a region of one strand of duplex DNA by a single stranded invader in the reaction catalyzed by RecA protein.
+
+D_segment : Diversity segment of immunoglobulin heavy chain, and  T-cell receptor beta chain.  
+
+enhancer : a cis-acting sequence that increases the utilization of (some)  eukaryotic promoters, and can function in either orientation and in any location (upstream or downstream) relative to the promoter.
+
+exon : region of genome that codes for portion of spliced mRNA; may contain 5'UTR, all CDSs, and 3' UTR.
+
+SKB[ Exon_Alt : Alternatively spliced exon (use glyph to stand out yet still relate to gene). ]
+
+GC_signal : GC box; a conserved GC-rich region located upstream of he start point of eukaryotic transcription units which may occur in multiple copies or in either orientation; consensus=GGGCGG.
+
+gene : region of biological interest identified as a gene and for which a  name has been assigned. SKB[ 5' UTR to 3'UTR - encompasses every base between these two points. ] GFF[ DNA region that spans the information for a certain protein. In this way also alternative splice forms are covered. ]
+
+
+iDNA : intervening DNA; DNA which is eliminated through any of several kinds of recombination.
+
+intron : a segment of DNA that is transcribed, but removed from within the transcript by splicing together the sequences (exons) on either side of it . SKB[ non-coding sequence internal to gene that is spliced out. ]
+
+J_segment :  Joining segment of immunoglobulin light and heavy  chains, and T-cell receptor alpha, beta, and gamma  chains.  
+
+LTR : long terminal repeat, a sequence directly repeated at both ends of a defined sequence, of the sort typically found in retroviruses.
+
+GFF[ locus : "gene" in Mendel's sense. ]
+
+mat_peptide : mature peptide or protein coding sequence; coding sequence for the mature or final peptide or protein product following post-translational modification.  The location does not include the stop codon (unlike the corresponding CDS).
+
+misc_binding : site in nucleic acid which covalently or non-covalently binds another moiety that cannot be described by any other Binding key (primer_bind or protein_bind).
+
+misc_difference : feature sequence is different from that presented in the entry and cannot be described by any other Difference key (conflict, unsure, old_sequence, mutation, variation, allele, or modified_base).
+
+misc_feature : region of biological interest which cannot be described by any other feature key; a new or rare feature.
+
+misc_recomb : site of any generalized, site-specific or replicative recombination event where there is a breakage and reunion of duplex DNA that cannot be described by other recombination keys (iDNA and virion) or qualifiers of source key (/insertion_seq, /transposon, /proviral).
+
+misc_RNA : any transcript or RNA product that cannot be defined by other RNA keys (prim_transcript, precursor_RNA, mRNA, 5'clip, 3'clip, 5'UTR, 3'UTR, exon, CDS, sig_peptide, ransit_peptide, mat_peptide, intron, polyA_site, rRNA, RNA, scRNA, and snRNA).
+
+misc_signal : any region containing a signal controlling or altering gene function or expression that cannot be described by other Signal keys (promoter, CAAT_signal, TATA_signal, -35_signal, -10_signal, GC_signal, RBS, polyA_signal, enhancer, attenuator, terminator, and rep_origin).
+
+misc_structure : any secondary or tertiary nucleotide structure or  conformation that	cannot be described by other Structure keys (stem_loop and D-loop).
+
+modified_base : he indicated nucleotide is a modified nucleotide and should be substituted for by the indicated molecule (given in the mod_base  qualifier value).
+
+mRNA : messenger RNA; includes 5'untranslated region (5'UTR), coding sequences (CDS, exon) and 3'untranslated region (3'UTR). SKB[ 5' UTR to 3' UTR after removing introns. ]
+
+mutation : a related strain has an abrupt, inheritable change in he sequence at this location.
+
+N_region : Extra nucleotides inserted between rearranged  immmunoglobulin segments.
+
+old_sequence : he presented sequence revises a previous version of the sequence at this location.
+
+GFF[ orf : open reading frames ]
+
+polyA_signal : recognition region necessary for endonuclease cleavage of an RNA transcript that is followed by polyadenylation; consensus=AATAAA [1].
+
+polyA_site : site on an RNA transcript to which will be added adenine residues by post-transcriptional polyadenylation.
+
+precursor_RNA : any RNA species that is not yet the mature RNA product; may include 5' clipped region (5'clip), 5' untranslated region (5'UTR), coding sequences (CDS, exon), intervening sequences (intron), 3' untranslated region (3'UTR), and 3' clipped region (3'clip).
+
+prim_transcript : primary (initial, unprocessed) transcript;  includes 5' clipped region (5'clip), 5' untranslated region (5'UTR), coding sequences (CDS, exon), intervening sequences (intron), 3' untranslated region (3'UTR), and 3' clipped region (3'clip).
+
+primer_bind : Non-covalent primer binding site for initiation of replication, transcription, or reverse transcription. Includes site(s) for synthetic e.g., PCR primer elements.
+
+promoter : region on a DNA molecule involved in RNA polymerase binding to initiate transcription.
+
+protein_bind : non-covalent protein binding site on nucleic acid. GFF[ TF_binding_site  ]
+
+RBS : ribosome binding site.
+
+repeat_region : region of genome containing repeating units.
+
+repeat_unit : single repeat element.
+
+rep_origin : origin of replication; starting site for duplication of nucleic acid to give two identical copies.
+
+rRNA : mature ribosomal RNA ; the RNA component of the ribonucleoprotein particle (ribosome) which assembles amino acids into proteins.
+
+S_region : Switch region of immunoglobulin heavy chains.   Involved in the rearrangement of heavy chain DNA leading  o the expression of a different immunoglobulin class  from the same B-cell.
+
+satellite : many tandem repeats (identical or related) of a short basic repeating unit;  many have a base composition or other property different from the genome average  that allows them to be separated from the bulk (main band) genomic DNA.
+
+scRNA : small cytoplasmic RNA; any one of several small cytoplasmic RNA molecules present in the cytoplasm and (sometimes) nucleus of a eukaryote.
+
+sig_peptide : signal peptide coding sequence; coding sequence for an N-terminal domain of a secreted protein; this domain is involved in attaching nascent polypeptide to the membrane; leader sequence.
+
+snRNA : small nuclear RNA; any one of many small RNA species confined to the nucleus; several of the snRNAs are involved in splicing or other RNA processing reactions.
+
+source : identifies the biological source of the specified span of the sequence. This key is mandatory. Every entry will have, as a minimum, a single source key spanning the entire sequence. More than one source key per sequence is permissable.
+
+SKB[ Start : start codon. ] GFF[ start_codon : ATG, feature needed because it's not implicit in the definition of CDS. ]
+
+GFF[ TSS : Transcription start site ]
+
+stem_loop : hairpin; a double-helical region formed by base-pairing between adjacent (inverted) complementary sequences in a single strand of RNA or DNA.
+
+SKB[ SNP : Single Nucleotide Polymorphism. ]
+
+STS : Sequence Tagged Site. Short, single-copy DNA sequence hat characterizes a mapping landmark on the genome and can be detected by PCR. A region of the genome can be mapped by determining the order of a series of STSs.
+
+TATA_signal : TATA box; Goldberg-Hogness box; a conserved AT-rich septamer found about 25 bp before the start point of each eukaryotic RNA polymerase II  transcript  unit which may be involved in positioning the enzyme  for correct  initiation; consensus=TATA(A or T)A(A or T) [1,2].
+
+terminator : sequence of DNA located either at the end of the ranscript  that causes RNA polymerase to terminate transcription.
+
+transit_peptide : ransit peptide coding sequence; coding sequence for an N-terminal domain of a nuclear-encoded organellar protein; this domain is involved in post-translational import of the protein into the organelle.
+
+GFF[ transcript : a transcribed region. ]
+
+tRNA : mature transfer RNA, a small RNA molecule (75-85 bases long) that mediates the translation of a nucleic acid sequence into an amino acid sequence.
+
+unsure : author is unsure of exact sequence in this region.
+
+V_region : Variable region of immunoglobulin light and heavy chains, and T-cell receptor alpha, beta, and gamma chains.  Codes for the variable amino terminal portion. Can be made up from V_segments, D_segments, N_regions, and J_segments.
+
+V_segment : Variable segment of immunoglobulin light and heavy chains, and T-cell receptor alpha, beta, and gamma chains.  Codes for most of the variable region (V_region) and the last few amino acids of the leader peptide.
+
+variation : a related strain contains stable mutations from the same gene (e.g., RFLPs, polymorphisms, etc.) which differ from the presented sequence at this location (and possibly others).
+
+3'clip : 3'-most region of a precursor transcript that is clipped off during processing.
+
+3'UTR : region at the 3' end of a mature transcript (following the stop codon) that is not translated into a protein.
+
+GFF[ 3'splice_site: splice_donor ]
+
+5'clip : 5'-most region of a precursor transcript that is clipped off during processing.
+
+5'UTR : region at the 5' end of a mature transcript (preceding the initiation codon) that is not translated into a protein.
+
+GFF[ 5'splice_site: splice_acceptor ]
+
+-10_signal : Pribnow box; a conserved region about 10 bp upstream of he start point of bacterial transcription units which may be involved in  binding RNA polymerase; consensus=TAtAaT [1,2,3,4].
+
+-35_signal : a conserved hexamer about 35 bp upstream of the start point of bacterial transcription units; consensus=TTGACa [  ] or TGTTGACA [  ].
+
+SKB[ Promoter|Enhancer|TSS|TATA_Box|TFBP_Element|Regulatory_Reg : Regulatory regions. These identifiers all refer to regulatory regions and should have the same glyph. TSS=Transcription start site, TFBP=regulatory protein region. ]

@@ -1,0 +1,722 @@
+<title>The DDBJ/EMBL/GenBank Feature Table Definition</title>
+
+<h2>Appendix IV: Summary of qualifiers for feature keys</h2>
+
+<ul>
+<li><a href="quals_alphabetical.html">
+    Feature key qualifiers - alphabetical index</a>
+
+</ul>
+
+<hr>
+
+The following is a list of available qualifiers for feature keys and their
+usage.  The information is arranged as follows:
+<p>
+<pre>
+
+Qualifier	name of qualifier; qualifier requires a value if followed by
+                an equal sign
+Definition	definition of the qualifier
+Value format	format of value, if required
+Example         example of qualifier with value
+Comment         comments, questions and clarifications
+
+<hr>
+
+<a name="allele"><b>
+Qualifier	/allele=
+Definition	name of the allele for the a given gene.
+Value format	"text"
+Example	        /allele="adh1-1"
+Comment         only valid on the gene feature 
+
+
+<a name="anticodon"><b>
+Qualifier	/anticodon=(pos:  ,aa:  )</b>
+Definition	location of the anticodon of tRNA and the amino acid for which
+                it codes
+Value format	pos:&lt;base_range&gt;,aa:&lt;amino_acid&gt;  where base_range
+                is the position of the anticodon and amino_acid is the
+                abbreviation for the amino acid encoded
+Example         /anticodon=(pos:34..36, aa:Phe)
+
+
+<a name="bound_moiety"><b>
+Qualifier	/bound_moiety=</b>
+Definition	moiety bound
+Value format	"text"
+Example	        /bound_moiety="repressor"
+
+
+<a name="cell_line"><b>
+Qualifier	/cell_line=</b>
+Definition    	cell line from which the sequence was obtained
+Value format	"text"
+Example		/cell_line="MCF7"
+
+
+<a name="cell_type"><b>
+Qualifier	/cell_type=</b>
+Definition	cell type from which the sequence was obtained
+Value format	"text"
+Example		/cell_type="leukocyte"
+
+
+<a name="chromosome"><b>
+Qualifier	/chromosome=</b>
+Definition	chromosome (e.g. Chromosome number) from which
+		the sequence was obtained
+Value format	"text"
+Example		/chromosome="1"
+Comment         issue: not sure if this handles polytene chromosomes
+
+
+<a name="chlorplast"><b>
+Qualifier	/chloroplast</b>
+Definition	organelle type from which the sequence was obtained
+Value format	none
+Example		/chloroplast
+
+
+<a name="chromoplast"><b>
+Qualifier	/chromoplast</b>
+Definition	organelle type from which the sequence was obtained
+Value format	none
+Example		/chromoplast
+
+
+<a name="citation"><b>
+Qualifier	/citation=</b>
+Definition	reference to a citation listed in the entry reference field
+Value format	[integer-number] where integer-number is the number of the
+                reference as enumerated in the reference field
+Example         /citation=[3]
+Comment         used to indicate the citation providing the claim of and/or
+                evidence for a feature; brackets are used for conformity
+
+
+<a name="clone"><b>
+Qualifier	/clone=</b>
+Definition	clone from which the sequence was obtained
+Value format	"text"
+Example		/clone="lambda-hIL7.3"
+Comment		not more than one clone should be specified for a given source 
+		feature.  to indicate that the sequence was obtained from
+		multiple clones, multiple source features should be indicated.
+
+
+<a name="clone_lib"><b>
+Qualifier	/clone_lib=</b>
+Definition	clone library from which the sequence was obtained
+Value format	"text"
+Example		/clone_lib="lambda-hIL7"
+
+
+<a name="codon"><b>
+Qualifier	/codon=</b>
+Definition	specifies a codon which is different from any found in the
+                reference genetic code
+Value format	(seq:"codon-sequence",aa:&lt;amino_acid&gt;) where
+                codon-sequence is the bases of the codon and amino_acid is
+                either the abbreviation for the translated amino acid, taken
+                from the controlled vocabulary (<a href="aa_abbrevs.html">section 7.5.3</a>)
+                or it can be the word OTHER
+Example         /codon=(seq:"ttt", aa:Leu)
+Comment         Amino acids not on the controlled vocabulary list can be
+                indicated by using "aa:OTHER" as the amino acid designation
+                and giving the name of the residue in a /note
+
+
+<a name="codon_start"><b>
+Qualifier	/codon_start=</b>
+Definition	indicates the offset at which the first complete codon of a
+                coding feature can be found, relative to the first base of that
+                feature.
+Value format	1 or 2 or 3
+Example         /codon_start=2
+
+
+<a name="cons_splice"><b>
+Qualifier	/cons_splice=</b>
+Definition	differentiates between intron splice sites that conform to the 
+                5'-GT ... AG-3' splice site consensus
+Value format	(5'site:&lt;bool&gt;, 3'site:&lt;bool&gt;)
+Example         /cons_splice=(5'site:YES, 3'site:NO)
+Comment         valid boolean values are 'yes', 'no' or 'absent';  Since the 
+		vast majority of splice sites conform to the consensus, this 
+		qualifier should be used only when one does not and the sequence has
+                been checked. 'absent' can be used when one of the termini is 
+                not consensus.
+
+
+
+<a name="country"><b>
+Qualifier	/country=</b>
+Definition	Country of origin for DNA sample, intended
+                for epidemiological or population studies.
+Value format:   "any country from annex 7.5.7 of the Feature
+                Table documentation"
+Example:        "Canada"
+Comment:        /country should be a single token taken from
+                feature table documentation. /country can
+                also have the following format: country:sub_region,
+                such as: /country="Canada:Vancouver".
+               
+
+
+<a name="cultivar"><b>
+Qualifier	/cultivar=</b>
+Definition	 variety of plant from which sequence was obtained.
+Value format	"text"
+Example         /cultivar="Taichung 65"
+Comment         used primarily in source feature key
+
+
+<a name="cyanelle"><b>
+Qualifier	/cyanelle</b>
+Definition	organelle type from which the sequence was obtained
+Value format	none
+Example		/cyanelle
+
+<a name="db_xref"><b>
+Qualifier	/db_xref="&lt;database&gt;:&ltidentifier&gt;"</b>
+Definition	database cross-reference: pointer to related information in 
+		another database.
+Value format	"&lt;database&gt;:&ltidentifier&gt;" where &lt;database&gt; is
+		the name of the database containing related information, and 
+		identifier is the internal identifier of the related information
+		according to the naming conventions of the cross-referenced 
+		database.
+Example		/db_xref="SWISS-PROT:P12345"
+Comment 	The complete list of allowed &lt;database&gt; types will be kept on 
+		NCBI's public WWW server, at this URL: 
+		http://www.ncbi.nlm.nih.gov/collab/ or can be obtained by 
+		sending an e-mail message to info@ncbi.nlm.nih.gov
+
+<a name="dev_stage"><b>
+Qualifier	/dev_stage=</b>
+Definition	if the sequence was obtained from an organism in a specific 
+		developmental stage, it is specified with this qualifier
+Value format	"text"
+Example		/dev_stage="fourth instar larva"
+
+
+<a name="direction"><b>
+Qualifier	/direction=</b>
+Definition	direction of DNA replication
+Value format	left, right, or both where left indicates toward the 5' end of
+                the entry sequence (as presented) and right indicates toward
+                the 3' end
+Example         /direction=LEFT
+
+
+<a name="ec_number"><b>
+Qualifier	/EC_number=</b>
+Definition	Enzyme Commission number for enzyme product of sequence
+Value format	"text"
+Example         /EC_number="1.1.2.4"
+Comment         Valid values for EC numbers are defined in the list prepared
+                by the IUPAC-IUB Commission on Biochemical Enzyme Nomenclature 
+                (published in Enzyme Nomenclature 1984.  New York: Academic 
+                Press (1984) or a more recent revision thereof)
+
+
+<a name="evidence"><b>
+Qualifier	/evidence=</b>
+Definition	value indicating the nature of supporting evidence,
+                distinguishing between experimentally determined and
+                theoretically derived data
+Value format	experimental, not_experimental
+Example         /evidence=experimental
+Comment         experimental indicates that the feature identification or
+                assignment is supported by direct experimental evidence. 
+                not_experimental indicates that the data for the feature are
+                derived (eg promotor as identified by consensus match) 
+
+<a name="exception"><b>
+Qualifier	/exception=</b>
+Definition	indicates that the amino acid or RNA sequence
+                will not translate or agree with the DNA  sequence according 
+		to standard biological rules.
+Value format	"text"
+Example	        /exception="RNA editing"
+Comment	        Intended for CDS features, and should not be used where 
+                transl_except would be adequate.
+		Protein translation of /exception CDS will be different from 
+		the according conceptual translation.
+		Should be used to describe biological mechanisms such as RNA
+                editing. Where the exception cannot easily be described a 
+                published citation may be referred to.
+	
+
+
+<a name="focus"><b>
+Qualifier	/focus=</b>
+Definition	defines the preferred source feature for records that
+               	have more than one source feature
+Value format	none
+Example	        /focus
+Comment	        To be used only if there is more than  one source feature. 
+                The preferred source feature is used to determine which
+		organism is displayed in the SOURCE and ORGANISM lines and 
+		to determine the DDBJ/EMBL/GenBank taxonomic division.
+		If no translation table is specified, the organism with /focus
+		will define the translation table. Within an entry with 
+		several source features, only one will exist with /focus on it.
+
+
+<a name="frequency"><b>
+Qualifier	/frequency=</b>
+Definition	frequency of the occurrence of a feature
+Value format	text representing the fraction of population carrying the
+                variation expressed as a decimal fraction
+Example         /frequency=".85"
+
+
+<a name="function"><b>
+Qualifier	/function=</b>
+Definition	function attributed to a sequence
+Value format	"text"
+Example         function="essential for recognition of cofactor"
+Comment         /function is used when the gene name and/or product name do not 
+                convey the function attributable to a sequence
+
+
+<a name="gene"><b>
+Qualifier	/gene=</b>
+Definition	symbol of the gene corresponding to a sequence region
+Value format	"text"
+Example         /gene="ilvE"
+Comment         see O'Brien, S.J., ed., Genetic Maps 1987, Cold Spring Harbor
+                or a recent revision.  Are there other standard genetic maps
+                or symbol lists which should be included?
+
+
+<a name="germline"><b>
+Qualifier	/germline</b>
+Definition	if the sequence shown is DNA and a member of the immunoglobulin 
+                family, this qualifier is used to denote that the sequence is
+                from unrearranged DNA. 
+Value format	none
+Example		/germline
+
+
+<a name="haplotype"><b>
+Qualifier	/haplotype=</b>
+Definition	haplotype of organism from which the sequence was obtained
+Value format	"text"
+Example		/haplotype="Dw3 B5 Cw1 A1"
+
+
+<a name="insertion_seq"><b>
+Qualifier	/insertion_seq=</b>
+Definition	insertion sequence element  from which the sequence was obtained
+Value format	"text"
+Example		/insertion_seq="IS-11"
+
+
+<a name="isolate"><b>
+Qualifier	/isolate=</b>
+Definition	individual isolate from which the sequence was obtained
+Value format	"text"
+Example		/isolate="Patient #152"
+
+
+<a name="kinetoplast"><b>
+Qualifier	/kinetoplast</b>
+Definition	organelle type from which the sequence was obtained
+Value format	none
+Example		/kinetoplast
+
+
+<a name="label"><b>
+Qualifier	/label=</b>
+Definition	a label used to permanently tag a feature
+Value format	feature_label.  feature labels follow the naming conventtions
+                for all feature table objects
+                (see Sections <a href="naming_conventions.html">3.1</a> and
+                <a href="components.html#feature_labels">3.4</a>)
+Example         /label=Alb1_exon1
+
+
+<a name="lab_host"><b>
+Qualifier	/lab_host=</b>
+Definition	laboratory host used to propagate the organism from which the 
+                sequence was obtained
+Value format	"text"
+Example		/lab_host="chicken embryos"
+
+
+<a name="map"><b>
+Qualifier	/map=</b>
+Definition	genomic map position of feature
+Value format	"text"
+Example	        /map="8q12-13"
+
+
+<a name="macronuclear"><b>
+Qualifier	/macronuclear</b>
+Definition	if the sequence shown is DNA and from an organism which 
+                undergoes chromosomal differentiation between macronuclear and
+                micronuclear stages, this qualifier is used to denote that the 
+                sequence is from macronuclear DNA. 
+Value format	none
+Example		/macronuclear
+
+
+<a name="mitochondrion"><b>
+Qualifier	/mitochondrion</b>
+Definition	organelle type from which the sequence was obtained
+Value format	none
+Example		/mitochondrion
+
+
+<a name="mod_base"><b>
+Qualifier	/mod_base=</b>
+Definition	abbreviation for a modified nucleotide base
+Value format	modified_base
+Example         /mod_base=m5c
+Comment         Modified nucleotides not found in the restricted vocabulary
+                list can be annotated by entering '/mod_base=OTHER' with
+                '/note="name of modified base"'
+
+
+<a name="note"><b>
+Qualifier	/note=</b>
+Definition	any comment or additional information
+Value format	"text"
+Example         /note="This qualifier is equivalent to a comment."
+
+
+<a name="number"><b>
+Qualifier	/number=</b>
+Definition	a number to indicate the order of genetic elements (e.g.,
+                exons or introns) in the 5' to 3' direction
+Value format	&lt;integer&gt;
+Example         /number=4
+
+
+<a name="organism"><b>
+Qualifier	/organism=</b>
+Definition	The scientific name of the organism that provided the 
+		sequenced genetic material.  
+Value format	"text"
+Example		/organism="Homo sapiens"
+Comment         Both EMBL and GenBank will continue with their existing OS 
+		and ORGANISM linetypes respectively.  The organism name which 
+		appears on the OS or ORGANISM line will match the value of 
+		the /organism qualifier of the source key in the simplest case
+		of a one-source sequence.  
+
+
+<a name="partial"><b>
+Qualifier	/partial</b>
+Definition	differentiates between complete regions and partial ones
+Value format	none
+Example         /partial
+Comment         need be used only with features where incompleteness is not
+                indicated by the location given (i.e., the location does not
+                contain a '&lt;' or '&gt;')
+
+
+<a name="pcr_conditions"><b>
+Qualifier	/PCR_conditions=</b>
+Definition	description of reaction conditions and components for PCR 
+Value format	"text"=
+Example         /PCR_conditions="Initial denaturation:94degC,1.5min"
+Comment         used with primer_bind key
+
+
+<a name="pop_variant"><b>
+Qualifier	/pop_variant=</b>
+Definition	population variant from which the sequence was obtained
+Value format	"text"
+Example		/pop_variant="population variant name"
+
+
+<a name="phenotype"><b>
+Qualifier	/phenotype=</b>
+Definition	phenotype conferred by the feature
+Value format	"text"
+Example         /phenotype="erythromycin resistance"
+
+
+<a name="plasmid"><b>
+Qualifier	/plasmid=</b>
+Definition	name of plasmid from which sequence was obtained
+Value format	"text"
+Example         /plasmid="C-589"
+
+
+<a name="product"><b>
+Qualifier	/product=</b>
+Definition	name of a product encoded by a sequence
+Value format	"text"
+Example         /product="catalase"
+
+
+<a name="protein_id"><b>
+Qualifier	/protein_id=</b>
+Definition	Protein Identifier, issued by International collaborators.
+                This qualifier consists of a stable ID portion (3+5 format
+                with 3 position letters and 5 numbers) plus a version number
+                after the decimal point.
+Value format	&ltidentifier&gt;
+Example	        /protein_id="AAA12345.1"
+Comment		When the protein sequence encoded by the CDS changes, only 
+                the version number of the /protein_id value is incremented. 
+		The stable part of the /protein_id remains unchanged and as a
+                result will permanently be associated with a given protein.
+                This qualifier is valid only on CDS features which translate
+                into a valid protein. 
+
+<a name="proviral"><b>
+Qualifier	/proviral</b>
+Definition	if the sequence shown is viral and integrated into another
+                organism's genome, this qualifier is used to denote that.
+Value format	none
+Example		/proviral
+
+
+<a name="pseudo"><b>
+Qualifier	/pseudo</b>
+Definition	indicates that this feature is a non-functional version of the
+                element named by the feature key
+Value format	none
+Example         /pseudo
+
+
+<a name="rearranged"><b>
+Qualifier	/rearranged</b>
+Definition	if the sequence shown is DNA and a member of the immunoglobulin 
+                family, this qualifier is used to denote that the sequence is
+                from rearranged DNA. 
+Value format	none
+Example		/rearranged
+
+
+<a name="replace="><b>
+Qualifier	/replace=</b>
+Definition	indicates that the sequence identified a feature's intervals is replaced 
+                by the  sequence shown in "text" 
+Value format	"text"
+Example	        /replace="a"
+
+
+<a name="rpt_family"><b>
+Qualifier	/rpt_family=</b>
+Definition	type of repeated sequence; "Alu" or "Kpn", for example
+Value format	"text"
+Example         /rpt_family="Alu"
+Comment         preferred usage is to qualify the repeat_region instead of any
+                of the constituent repeat_units
+
+
+<a name="rpt_type"><b>
+Qualifier	/rpt_type=</b>
+Definition	organization of repeated sequence
+Value format	tandem, inverted, flanking, terminal, direct, dispersed, and
+                other
+Example         /rpt_type=INVERTED
+Comment         preferred usage is to qualify the repeat_region instead of any
+                of the constituent repeat_units.  definitions of these values
+                will be added in a future release of this document.  see
+                Singer, M.  Int Rev Cytol 76, 67-112 (1982); Cell 26, 293-95
+                (1981); Hardman, N. Biochem J 234, 1-11 (1986)
+
+
+<a name="rpt_unit"><b>
+Qualifier	/rpt_unit=</b>
+Definition	identity of repeat unit which constitutes a repeat_region
+Value format	&lt;feature_label&gt;  or  &lt;base_range&gt;
+Example         /rpt_unit=Alu_rpt1
+                /rpt_unit=202..245
+Comment         used to indicate feature which defines (or base range of) the
+                repeat unit of which a repeat region is made
+
+
+<a name="sequenced_mol"><b>
+Qualifier	/sequenced_mol=</b>
+Definition	molecule from which the sequence was obtained
+Value format	"text"
+Example		/sequenced_mol="cDNA to mRNA"
+Comment		text limited to "cDNA", "cDNA to genomic RNA", "cDNA to mRNA", 
+		"cDNA to other RNA", "cDNA to rRNA", "DNA", "mRNA", "RNA", 
+		"rRNA", "scRNA", "snRNA", "tRNA".
+
+
+<a name="serotype"><b>
+Qualifier	/serotype=</b>
+Definition	variety of a species (usually bacteria or virus) characterized
+		by its antigenic properties
+Value format	"text"
+Example		/serotype="B1"
+Comment		used primarily with source feature key
+
+
+<a name="sex"><b>
+Qualifier	/sex=</b>
+Definition	sex of the organism from which the sequence was obtained
+Value format	"text"
+Example		/sex="female"
+
+
+<a name="specific_host"><b>
+Qualifier	/specific_host=</b>
+Definition	natural host from which the sequence was obtained
+Value format	"text"
+Example		/specific_host="Rhizobium NGR234"
+
+<a name="specimen_voucher"><b>
+Qualifier	/specimen_voucher=</b>
+Definition	an identifier of the individual or collection of the source
+                organism and the place where it is currently stored, usually
+                an institution.
+Value format	"text"
+Example	        /specimen_voucher="Smith s. n. 4-IV-1995 (U. S. Natl.
+                Herbarium)""
+
+<a name="standard_name"><b>
+Qualifier	/standard_name=</b>
+Definition	accepted standard name for this feature
+Value format	"text"
+Example         /standard_name="dotted"
+Comment         use /standard_name to give full gene name, but use /gene to
+                give gene symbol (in the above example /gene="Dt")
+
+
+<a name="strain"><b>
+Qualifier	/strain=</b>
+Definition	strain from which the sequence was obtained
+Value format	"text"
+Example		/strain="BALB/c"
+
+
+<a name="sub_clone"><b>
+Qualifier	/sub_clone=</b>
+Definition	sub-clone from which the sequence was obtained
+Value format	"text"
+Example		/sub_clone="lambda-hIL7.20g"
+Comment		the comments on /clone apply to /sub_clone
+
+
+<a name="sub_species"><b>
+Qualifier	/sub_species=</b>
+Definition	sub-species name of organism  from which the sequence was
+                obtained
+Value format	"text"
+Example		/sub_species="japonica"
+
+
+<a name="sub_strain"><b>
+Qualifier	/sub_strain=</b>
+Definition	sub_strain from which the sequence was obtained
+Value format	"text"
+Example		/sub_strain="abis"
+
+
+<a name="tissue_lib"><b>
+Qualifier	/tissue_lib=</b>
+Definition	tissue library from which the sequence was obtained
+Value format	"text"
+Example		/tissue_lib="tissue library 772"
+
+
+<a name="tissue_type"><b>
+Qualifier	/tissue_type=</b>
+Definition	tissue type from which the sequence was obtained
+Value format	"text"
+Example		/tissue_type="liver"
+
+
+<a name="translation"><b>
+Qualifier	/translation=</b>
+Definition	automatically generated one-letter abbreviated amino acid
+                sequence derived from either the universal genetic code or the
+                table as specified in /transl_table and as determined by
+                exceptions in the /transl_except and /codon qualifiers
+Value format	IUPAC one-letter amino acid abbreviation, "X" is to be used
+                for AA exceptions.
+Example         /translation="MASTFPPWYRGCASTPSLKGLIMCTW"
+Comment         For use with CDS feature only.
+                Optional qualifier for CDS key
+                Translations which use the X exception should have
+                an accompanying /transl_except= qualifier
+                See /transl_table for definition and location of genetic code
+                tables
+                This is not a mandatory qualifier to the CDS feature Key.
+                Please note that while the appearence of a CDS feature with a
+                /translation qualifier implies that the data currently in the
+                feature generate a legal translation, the absence of the
+                qualifier does not imply that the data do not generate a legal
+                translation.
+
+
+<a name="transl_except"><b>
+Qualifier	/transl_except=</b>
+Definition	translational exception: single codon the translation of which
+                does not conform to genetic code defined by Organism and /codon=
+Value format 	(pos:location,aa:&lt;amino_acid&gt;) where amino_acid is the
+                amino acid coded by the codon at the base_range position
+Example         /transl_except=(pos:213..215, aa:Trp)
+	        /transl_except=(pos:X22222:15..17,aa:Ala)
+Comment		If the amino acid is not on the restricted vocabulary list use, 
+		e.g., '/transl_except=(pos:213..215, aa:OTHER)' with 
+		'/note="name of unusual amino acid"'.
+               	For modified amino-acid selenocysteine use three letter code
+               	'Sec'  (one letter code 'U' in amino-acid sequence)
+               	/transl_except=(pos:1002..1004,aa:Sec)
+
+
+<a name="transl_table"><b>
+Qualifier	/transl_table=</b>
+Definition	definition of genetic code table used if other than universal
+                genetic code table. Tables used are described in appendix V,
+                section <a href="translation_tables.html">7.5.5.</a>
+Value format	&lt;integer&gt;; 1=non-universal table 1;2=non-universal table 2;...
+Example         /transl_table=4
+Comment 	Genetic code exceptions outside range of specified tables are
+                reported in /codon or /transl_except qualifiers
+
+
+<a name="transposon"><b>
+Qualifier	/transposon=</b>
+Definition	transposable element  from which the sequence was obtained
+Value format	"text"
+Example		/transposon="Tn9"
+
+
+<a name="usedin"><b>
+Qualifier	/usedin=</b>
+Definition	indicates that the feature is used in a compound feature in
+                another entry
+Value format	Accession-number:feature-name or 
+                Database_name::Acc_number:feature_label
+Example         /usedin=X10087:proteinx
+Comment         Database_name is an abbreviation for the name of the database
+                in which the entry for the Acc-number accession number can be
+                found.
+
+
+
+
+
+<a name="variety"><b>
+Qualifier	/variety=</b>
+Definition	variety from which sequence was obtained
+Value format	"text"
+Example         /variety="Bright Yellow 4"
+Comment         Used primarily in Source feature key
+
+
+<a name="virion"><b>
+Qualifier	/virion
+Definition	viral genomic sequence as it is encapsidated (distinguished from its 
+                proviral form integrated in a host cell's chromosome) 
+Value format	none
+Example		/virion
+
+
+
+</pre>
