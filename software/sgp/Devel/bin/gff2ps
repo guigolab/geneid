@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.44 2000-01-17 18:29:45 jabril Exp $	
+#         $Id: gff2ps,v 1.45 2000-01-21 16:59:33 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -71,8 +71,8 @@ Defaults () {
   GAWK_PROG="gff2ps.awk";
   VERSION="v0.94";
   CREATIONDATE="1999/03/01"; # PSCREATION="1999/03/01"
-  REVISION=`echo '$Revision: 1.44 $' | gawk '{print $2}'`;
-  DATERELEASE=`echo '$Date: 2000-01-17 18:29:45 $' | gawk '{print $2,$3}'`;
+  REVISION=`echo '$Revision: 1.45 $' | gawk '{print $2}'`;
+  DATERELEASE=`echo '$Date: 2000-01-21 16:59:33 $' | gawk '{print $2,$3}'`;
   PSPROGRAM="PostScript Output from gff2ps";
   AUTHOR="Josep Francesc ABRIL FERRANDO";
   EMAIL="jabril@imim.es";
@@ -375,7 +375,7 @@ ShowHelpLine () {
 {
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.44 2000-01-17 18:29:45 jabril Exp $
+%    $Id: gff2ps,v 1.45 2000-01-21 16:59:33 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -1041,7 +1041,10 @@ if [ $npar -ge $OPTIND ];
              shift; ck=1;
              hmf=`expr $hmf + 1`;
              rd_std=1;
-             { echo "INPUT DATA: Standard-input is going to be included with input files..."; echo ""; } 1>&2;
+             if [ $v34 -eq 1 ];
+               then
+                 { echo "INPUT DATA: Standard-input is going to be included with input files..."; echo ""; } 1>&2;
+               fi;
            else
              if [ `ExistFile $files` -eq 1 ];  # Checks any kind of input files (*, ./*, path/*). 
                then 
@@ -1055,7 +1058,10 @@ if [ $npar -ge $OPTIND ];
                fi;
 		   fi;
        done;
-     { echo "INPUT DATA: $GFF_INPUT_FILES"; echo ""; } 1>&2;
+     if [ $v34 -eq 1 ];
+       then
+         { echo "INPUT DATA: $GFF_INPUT_FILES"; echo ""; } 1>&2;
+       fi;
    fi;
 if [ $hmf -eq 0 ];
    then
