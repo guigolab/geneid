@@ -1,0 +1,505 @@
+#!/bin/sh
+######################################################################
+#                               gff2ps                               #
+######################################################################
+#
+#     Converting GFF files to PostScript.
+#
+#     Copyright (C) 1999 - Josep Francesc ABRIL FERRANDO  
+#                                 Roderic GUIGO SERRA       
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+######################################################################
+#
+# Creation Date: 01.03.1999
+# Last Update:
+#              $Id: gff2ps,v 1.1 1999-04-24 10:59:53 jabril Exp $	
+#
+# Autor : Josep Francesc ABRIL FERRANDO
+# e-mail: jabril@imim.es
+#
+#
+
+##############################################################
+#################### PROGRAM DEFINITIONS #####################
+
+# 
+# Defining Default Values...
+#
+Defaults () {
+ # 
+ # Constants: 
+  PROGRAM="gff2ps"
+  VERSION="v1.0"
+  SHCREATION="01.03.1999"
+  SHREVISION="24.04.1999"
+  PSPROGRAM="PlotSeqComp.ps"
+  PSVERSION="v2.4"
+  PSCREATION="02.09.1998"
+  PSREVISION="24.04.1999"
+  AUTHOR="Josep Francesc ABRIL FERRANDO"
+  EMAIL="jabril@imim.es"
+  MAIL="%%                  Dept. Informatica Medica
+%%          Institut Municipal d'Investigacio Medica
+%%                   C./ Doctor Aiguader 80
+%%                  08003 - BARCELONA (SPAIN)"
+  USAGE=$PROGRAM" [-h][-H <option>] gff_file"
+  COLORS="    black | verydarkgrey | darkgrey | grey | lightgrey | verylightgrey | white 
+       verydarkgreen | darkgreen | green | lightgreen | verylightgreen 
+   verydarkskyblue | darkskyblue | skyblue | lightskyblue | verylightskyblue 
+          verydarkblue | darkblue | blue | lightblue | verylightblue 
+         verydarkcyan | darkcyan | cyan | lightcyan | verylightcyan 
+     verydarkviolet | darkviolet | violet | lightviolet | verylightviolet 
+            verydarkred | darkred | red | lightred | verylightred 
+     verydarkorange | darkorange | orange | lightorange | verylightorange 
+     verydarkyellow | darkyellow | yellow | lightyellow | verylightyellow 
+        verydarkbrown | darkbrown | brown | lightbrown | verylightbrown"
+ # 
+ # Default User-Defined Options: 
+  bgcolor="white"
+  fgcolor="black"
+}
+
+#
+# Defining Help...
+#
+Help () {
+#  echo ""
+#  echo "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
+#  echo "         1         2         3         4         5         6         7         8"
+  echo ""
+  echo "NAME           $PROGRAM"
+  echo "VERSION        $VERSION"
+  echo ""
+  echo "Creation DATE: $SHCREATION"
+  echo "Last REVISION: $SHREVISION"
+  echo ""
+  echo "SYNOPSIS"
+  echo ""
+  echo "      $USAGE"
+  echo ""
+  echo "DESCRIPTION"
+  echo ""
+  echo "       This program draws color-filled DotPlots"
+  echo "       from files with gff-formatted data fields."
+  echo "   "
+  echo ""
+  echo "OPTIONS"
+  echo ""
+  echo "     -h  Show this help."
+  echo "     -H <option> Show only help for the especified option."
+  echo ""
+  echo "COMMENTS"
+  echo ""
+  echo "  * Colors Defined are:"
+  echo ""
+  echo "$COLORS"
+  echo ""
+  echo "BUGS"
+  echo ""
+  echo "  Please, report bugs to:"
+  echo "       $AUTHOR"
+  echo "       e-mail: $EMAIL"
+  echo "       Mail  : "
+  gawk 'BEGIN{tt=ARGV[1];ARGV[1]="";gsub("\%\%","",tt);printf tt;print}' "$MAIL"
+  echo ""
+  return
+}
+
+ShowHelpLine () {
+ Help | gawk 'BEGIN{
+  IGNORECASE=1; flg=0; srch=ARGV[1]; ARGV[1]=""
+  gsub("-","",srch); srch="\ -"srch"\ " }
+  { if ($0~srch) { print $0; flg=1 } }
+  END{ if (!flg) printf "\n\tERROR: Option %s is not defined,\n\t\tmake sure which option you need help.\n",srch }' $1 
+ echo ""
+ return
+}
+
+#
+# Testing parameters passed by User.
+#
+CheckColor () {
+  gawk 'BEGIN{
+    color=ARGV[1]
+    if (color!~/^BG$|^FG$|^black$|^white$|^(very)?(light|dark)?(grey|green|(sky)?blue|cyan|violet|red|orange|yellow|brown)$/) {
+      printf "\n<<<<ERROR>>>> \" %s \" is not a defined color.\n", color | "cat 1>&2"
+      printf "              Default \" black \" is asigned to option.\n" | "cat 1>&2"
+      printf "              You can choose one of this colors:\n" | "cat 1>&2"
+      print ARGV[3] | "cat 1>&2"
+      print "" | "cat 1>&2"
+      color=ARGV[2]
+      }
+    print color
+    ARGV[1]=ARGV[2]=ARGV[3]=""
+    }' $1 $2 "$COLORS"
+  return 0
+}
+
+CheckInt () {
+  if [ `expr $1 : '[0-9]*'` -eq `expr $1 : '.*'` ]
+    then echo "1"; return 0
+    else 
+      echo "<<<<ERROR>>>> \" $1 \" is not an integer value." 1>&2
+      echo "              You must especify an integer value to -$W_OPTION" 1>&2
+      echo "              Program will take value from defaults..." 1>&2
+      echo "" 1>&2
+      echo "0";return 1
+    fi
+  return 1
+}
+###################################################################
+################# Choosing Options for GFF2APLOT ##################
+
+#
+# Resetting default program variables.
+#
+Defaults
+
+#
+# When no options, no parameters and 
+#  no inputstream are given, print USAGE.
+#
+if [ $# -eq 0 ] 
+  then
+    echo; echo $USAGE; echo; exit 1
+  fi
+
+#
+# Asking for Help, output it to screen. 
+#
+case $1 in
+  -h) Help; exit 2;;
+  -H) echo; echo $PROGRAM" : Option Definition Help."; echo;
+      if [ $# -gt 1 ]; 
+        then shift; fi;
+      for temp in $@;
+        do ShowHelpLine $temp; done;
+      exit 2;;
+  esac
+
+#
+# Processing all options and parameters passed to program.
+#
+## while getopts
+
+gawk 'BEGIN{
+  ############ INITIALITATION ############
+
+  # defaults
+  MINSCORE=0.25;
+  MAXSCORE=1.00;
+  BigLINE="########################################"
+
+  # gff data structure
+  seqname  = 1;
+  source   = 2;
+  feature  = 3;
+  start    = 4;
+  end      = 5;
+  score    = 6;
+  strand   = 7;
+  frame    = 8;
+  group    = 9;
+
+  # gff strand codification
+  strands["+"]=strands["-"]=strands["."]=1;
+
+  # Find actual date...
+  "date" | getline d
+  split(d,dt," ")
+  date = dt[3] "." dt[2] "." dt[6] " " substr(dt[4],1,5)
+
+  # Finding logged user...
+  "whoami" | getline usr
+
+  # Finding current process...
+  "echo $$" | getline IDP
+
+# Layout Properties
+  Default["page_size"]="a4"
+  Default["page_orientation"]="landscape"
+  Default["margin_left"]="1cm"
+  Default["margin_right"]="1cm"
+  Default["margin_upper"]="1cm"
+  Default["margin_bottom"]="1cm"
+  Default["foreground_color"]="FGcolor"
+  Default["background_color"]="BGcolor"
+  Default["block_number"]=1
+  Default["strand_show_forward"]="on"
+  Default["strand_show_reverse"]="on"
+  Default["strand_show_independent"]="on"
+# General Properties
+  Default["text_color"]=Default["foreground_color"]
+  Default["label"]="none"
+# Features Properties
+  # Default["fillcolor"]=Default["background_color"]
+  FT_PROP["label"]="default" # none , default , "user-def"
+  FT_PROP["color"]=Default["foreground_color"]
+  FT_PROP["shape"]="box"
+  FT_PROP["layer"]=0
+# Group Properties
+  GR_PROP["label"]="default" # none , default , "user-def"
+  GR_PROP["rank"]="0:1"
+  GR_PROP["join_align"]="center"
+  GR_PROP["join_color"]=Default["foreground_color"]
+  GR_PROP["join_linetype"]="solid"
+  GR_PROP["join_show"]="off"
+# Lines (Method) Properties
+  SO_PROP["label"]="default" # none , default , "user-def"
+  SO_PROP["baseline_align"]="center"
+  SO_PROP["baseline_color"]=Default["foreground_color"]
+  SO_PROP["baseline_linetype"]="dotted"
+  SO_PROP["baseline_show"]="off"
+  SO_PROP["bbox_color"]=Default["foreground_color"]
+  SO_PROP["bbox_show"]="off"
+  SO_PROP["scale"]=1
+  SO_PROP["rule_scale"]="nucleotide"
+  SO_PROP["rule_rel"]="none"
+  SO_PROP["rule_abs"]="none"
+# Default[""]=
+
+ # Data for upper-case to lower-case function #lcase()#
+ CM["A"]="a";CM["B"]="b";CM["C"]="c";CM["D"]="d";CM["E"]="e";
+ CM["F"]="f";CM["G"]="g";CM["H"]="h";CM["I"]="i";CM["J"]="j";
+ CM["K"]="k";CM["L"]="l";CM["M"]="m";CM["N"]="n";CM["O"]="o";
+ CM["P"]="p";CM["Q"]="q";CM["R"]="r";CM["S"]="s";CM["T"]="t";
+ CM["U"]="u";CM["V"]="v";CM["W"]="w";CM["X"]="x";CM["Y"]="y";
+ CM["Z"]="z";CM["Ñ"]="ñ";CM["Ç"]="ç"
+
+ }
+{ ############ READING .GFF FILES  ############
+
+  # skips those empty lines or comments "#"
+  #
+  while ($0~/^( )*$|^(\#)+/) { 
+    if (getline<=0) break }
+
+  # read gff element within source and strand
+  #
+  sources[$source]++;  
+  n[$source,$strand]++;
+  $feature=lcase($feature);
+  element[$source,$strand,n[$source,$strand],feature] = $feature; 
+  if (!($feature in FT_ary) && $feature!~/\./) FT_ary[$feature]=$feature;
+  element[$source,$strand,n[$source,$strand],start]   = $start;
+  element[$source,$strand,n[$source,$strand],end]     = $end;
+  element[$source,$strand,n[$source,$strand],frame]   = $frame;  
+  element[$source,$strand,n[$source,$strand],group]   = $group; 
+  if (!($group in GP_ary) && $group!~/\./) GP_ary[$group]=$group;
+  if ($NF>group) {
+    for (i=(group+1);i<=$NF;i++) {
+      if ($i~"Label")
+        element[$source,$strand,n[$source,$strand],$i]= $(i+1);  
+    }
+  }
+
+  # recompute scores between MINSCORE and MAXSCORE
+  #
+  if ($score < MINSCORE)
+    element[$source,$strand,n[$source,$strand],score]  = MINSCORE;
+  else if ($score > MAXSCORE)
+    element[$source,$strand,n[$source,$strand],score]  = MAXSCORE;
+
+  # place gff element in sort array by acceptor position
+  #
+  printf "%s\nSorting gff elements...\n%s\n",BigLINE,$0,BigLINE
+  ns=n[$source,$strand]-1;
+  while ($start < element[$source,$strand,S[$source,$strand,ns],start]) {
+    S[$source,$strand,ns+1]=S[$source,$strand,ns];
+    print S[$source,$strand,ns],$source,$strand,ns," :",showelem($source,$strand)
+    ns--;
+  }
+  S[$source,$strand,ns+1]=n[$source,$strand]
+  print S[$source,$strand,ns+1],$source,$strand,ns+1," :",showelem($source,$strand)
+
+}
+END{
+  # Defining Object Properties
+  #
+  printf "%s\nDefining Object Properties..........\n%s\n",BigLINE,BigLINE
+  CreateProps("C")
+  if (loadcustom) RCFile(CFILE)
+  CreateProps("P")
+
+  # make groups. assumes elements sorted by increasing acceptor position
+  #
+  printf "%s\nMaking Groups...............\n%s\n",BigLINE,BigLINE
+  for (sc in sources) {
+    for (s in strands) {
+      for (i=1;i<=n[sc,s];i++) {
+	tgr=element[sc,s,S[sc,s,i],group];
+	if (!grouping[sc,s,tgr,start]) {
+	  grouping[sc,s,tgr,start]= element[sc,s,S[sc,s,i],start];
+	  ng[sc,s]++;
+	  group_[sc,s,ng[sc,s]]=tgr
+    for (prop in FT_PROP) {
+      print grouping[sc,s,tgr,start],sc,s,tgr,start," :",showelem(sc,s)," : ",prop," ",PLOT_FT[element[sc,s,S[sc,s,i],feature],":",prop]
+    }
+	}
+####################
+#        grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
+#
+#        # for gene mode. try to recompute relative frame and remainder
+#        start_=element[sc,s,S[sc,s,i],start];
+#        end_=element[sc,s,S[sc,s,i],end];
+#        feature_=element[sc,s,S[sc,s,i],feature];
+#
+#        frame_[sc,s,tgr]= element[sc,s,S[sc,s,i],frame];
+#
+#        if (feature_=="First" || feature_=="Single") 
+#          frame_[sc,s,tgr]=0;
+#        else if (feature_=="Internal" || feature_=="Terminal" )
+#          frame_[sc,s,tgr]=remainder_[sc,s,tgr];
+#
+#        remainder_[sc,s,tgr]=(3-(end_-(start_+frame_[sc,s,tgr])+1)%3)%3;
+#
+#        grouping[sc,s,tgr,group] = sprintf("%s %d %d %s %d %d %5.3f", grouping[sc,s,tgr,group], element[sc,s,S[sc,s,i],start], element[sc,s,S[sc,s,i],end], psc_feature[element[sc,s,S[sc,s,i],feature]], frame_[sc,s,tgr] ,remainder_[sc,s,tgr],  element[sc,s,S[sc,s,i],score]);
+##################### 
+	if (element[sc,s,S[sc,s,i],end]>grouping[sc,s,tgr,end]) {
+	  grouping[sc,s,tgr,end]= element[sc,s,S[sc,s,i],end];
+    for (prop in FT_PROP) {
+      print grouping[sc,s,tgr,end],sc,s,tgr,end," :",showelem(sc,s)," : ",prop," ",PLOT_FT[element[sc,s,S[sc,s,i],feature],":",prop]
+    }
+          }
+      }
+    }
+  }
+
+  # make plotlines. Put non-overlapping groups into the same plotting line.
+  #
+  printf "%s\nPrinting Lines...............\n%s\n",BigLINE,BigLINE
+  for (sc in sources) {
+    for (s in strands) {
+      for (i=1;i<=ng[sc,s];i++) {
+	g=group_[sc,s,i];
+	for (j=1;j<=nl[sc,s] && grouping[sc,s,g,start] < endline[sc,s,j];j++);
+	nl[sc,s] = j==nl[sc,s]+1 ? j : nl[sc,s];
+        endline[sc,s,j]=grouping[sc,s,g,end];
+	# plot group in file
+	printf "GROUP : %s : %s %d %d \n", g, s, grouping[sc,s,g,start], grouping[sc,s,g,end];        
+        }
+     }
+  }
+  
+}
+function lcase(string) {
+  for (chr in CM) gsub(chr,CM[chr],string)
+  return string
+}
+function CreateProps(flag) {
+  ############ Create Properties Index for Objects ############
+  if (flag=="P") { 
+    printf "#\n# L ############PAGE LAYOUT############\n#\n" 
+    for (feat in Default) printf "%s=%s\n", feat, Default[feat]
+    print "#"
+    }
+  if (flag=="P") { printf "# F ############GENOMIC FEATURES############\n#\n" }
+  for (feat in FT_ary) {
+    for (prop in FT_PROP) {
+      if (flag=="P") {
+	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] # | "sort"
+        }
+      else PLOT_FT[feat,":",prop]=FT_PROP[prop]
+      }
+    if (flag=="P") print "#"
+    }
+  if (flag=="P") { printf "# G ############GROUP FEATURES############\n#\n" }
+  for (feat in GP_ary) {
+    for (prop in GR_PROP) {
+      if (flag=="P") {
+	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] # | "sort"
+        }
+      else PLOT_FT[feat,":",prop]=GR_PROP[prop]
+      }
+    if (flag=="P") {
+      printf "# %s:%s=%s\n", feat, "feature_number", Nfeat[feat,":","feature_number"]
+      print "#"
+      }
+    }
+  if (flag=="P") { printf "# S ############SOURCE FEATURES############\n#\n" }
+  for (feat in sources) {
+    for (prop in SO_PROP) {
+      if (flag=="P") {
+	printf "%s:%s=%s\n", feat, prop, PLOT_FT[feat,":",prop] # | "sort"
+        }
+      else PLOT_FT[feat,":",prop]=SO_PROP[prop]
+      }
+    if (flag=="P") {
+      printf "# %s:%s=%s\n", feat, "group_number", Ngroup[feat,":","group_number"]
+      print "#"
+      }
+    }
+}
+function RCFile(file) { ############ Read CustomFile
+  while ((getline < file) > 0 ) {
+    ChckLn(file)
+    nothere=0
+    split($0,defs,"=")
+    split(defs[1],nwfeat,":")
+    first=nwfeat[1]
+    if (first=="*") first=".*" 
+    gffirst=lcase(first)
+    second=nwfeat[2]
+    # for (feat in NAME)
+    #  if (feat~first)
+    #    if (feat in PLOT_FT) PLOT_FT[feat,":",second]=defs[2]
+    for (feat in FT_ary) {
+      if (match(feat,gffirst)) {
+        # print "Feature Match between: " feat " & " first
+	if ((feat,":",second) in PLOT_FT) {
+          PLOT_FT[feat,":",second]=defs[2]
+     	  nothere=1
+        }
+      }
+    }
+    for (feat in GP_ary) { 
+      if (match(feat,first)) {
+        # print "Group Match between: " feat " & " first
+	if ((feat,":",second) in PLOT_FT) {
+          PLOT_FT[feat,":",second]=defs[2]
+	  nothere=1
+        }
+      }
+    }
+    for (feat in sources) {
+      if (match(feat,first)) {
+        # print "Source Match between: " feat " & " first
+	if ((feat,":",second) in PLOT_FT) { 
+          PLOT_FT[feat,":",second]=defs[2]
+	  nothere=1
+        }
+      }
+    }
+    # print ">>>New Feature>>>" $0
+    if (nothere==0) {
+      # print "No Match found: " first      
+      FT_ary[gffirst]=gffirst
+      PLOT_FT[gffirst,":",second]=defs[2]
+    }
+  }
+  close(file)  
+}
+function showelem(a,b){
+  string=" : "
+  string=string element[a,b,n[a,b],feature]" "
+  string=string element[a,b,n[a,b],start]" "
+  string=string element[a,b,n[a,b],end]" "
+  string=string element[a,b,n[a,b],frame]" "
+  string=string element[a,b,n[a,b],group]
+  return string
+ }
+' "$@"
