@@ -1,0 +1,468 @@
+<BASE HREF="http://www1.imim.es/datasets/humanmouse/gff2ps/">
+<html>
+<head>
+ <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+ <META NAME="Generator" CONTENT="Hacker Hands">
+ <META NAME="author" CONTENT="Josep F. Abril">
+ <!-- $Id: humanmousegff2ps_index.html,v 1.1 2001-07-27 13:44:02 jabril Exp $ -->
+ <!-- KEYWORDS and DESCRIPTION for INTERNET SEARCH ENGINES -->
+  <META NAME="keywords"    CONTENT="">
+  <META NAME="description" CONTENT="">
+ <!-- KEYWORDS and DESCRIPTION for INTERNET SEARCH ENGINES -->
+ <TITLE>DATASETS: "Visualizing SGP results with gff2ps."</TITLE>
+<BASE HREF="http://www1.imim.es/datasets/humanmouse/gff2ps/">
+<link rel=stylesheet type="text/css" href="http://www1.imim.es/Genome.css" title="Genome">
+<SCRIPT LANGUAGE="JavaScript">
+<!-- Begin
+ if (window != top) top.location.href = location.href;
+
+ var theDate = "";
+ theDate = document.lastModified;
+
+ function LastUpdate() {
+  document.write("<B>Last Updated:</B>  <I>"+theDate+"</I><BR>&copy;&nbsp;Genome Informatics Research Laboratory");
+ }
+
+ function NewItem(todate) {
+  exp = new Date(todate);
+  cur = new Date();
+  // document.write("HHH::"+exp+"::"+cur+"::HHH");
+  if (cur.getTime() < exp.getTime())
+   document.write("&nbsp;&nbsp;<IMG SRC='http://www1.imim.es/g_icons/new_rotating.gif' WIDTH=30 HEIGHT=15 BORDER=0 ALIGN='TOP' ALT='NEW'>");
+ }
+// End -->
+</SCRIPT>
+</head>
+
+<body onResize="window.location.href = 'index.html';" MARGINWIDTH="2" MARGINHEIGHT="0">
+<A NAME="TOP"></A>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+<!-- ############### TITLE AREA ############### -->
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class="title" VALIGN=TOP WIDTH=84 HEIGHT=50>
+<IMG SRC="http://www1.imim.es/g_icons/LOGO.gif" ALT="HOME" BORDER=2 WIDTH=80 HEIGHT=50 ALIGN=MIDDLE>
+</td>
+<td class="title" VALIGN=TOP>
+
+<CENTER><FONT size=7 class="T">Visualizing SGP results</FONT></CENTER>
+
+</td>
+</tr>
+
+<!-- ############### PATH AREA ############### -->
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td colspan=2>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+<TR>
+<TD class="path" width=75% ALIGN=LEFT>
+<a href="http://www.upf.es/"
+ onMouseover="window.status='Universitat Pompeu Fabra';">UPF</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www.imim.es/"
+ onMouseover="window.status='Institut Municipal d\'Investigació Mèdica';">IMIM</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www.imim.es/imim/unitats/grim/english/index.htm"
+ onMouseover="window.status='Grup de Recerca en Informàtica Biomèdica';">GRIB</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www1.imim.es/index.html"
+ onMouseover="window.status='Genome Informatics Research Laboratory HOME PAGE: You are Welcome!!!';">HOME</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www1.imim.es/main/databases.html"
+ onMouseover="window.status='DataSets';">DATASETS</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="http://www1.imim.es/datasets/humanmouse/index.html"
+ onMouseover="window.status='Gene prediction in the human genome using the mouse genome';">Hsap/Mmus SGP</a>
+<IMG SRC="http://www1.imim.es/g_icons/dmd.gif" HEIGHT=8 WIDTH=8 BORDER=0>
+<a href="index.html#TOP"
+ onMouseover="window.status='Visualizing SGP predictions with gff2ps';">gff2ps</a>
+
+</TD>
+<TD class="path" width=25% ALIGN=RIGHT>
+<A HREF="javascript:history.go(-1)" onMouseover="window.status='PREVIOUS VISITED PAGE'"><IMG SRC="http://www1.imim.es/g_icons/left.gif" HEIGHT=15 WIDTH=15 BORDER=0></A>
+<A HREF="http://www1.imim.es/index.html" onMouseover="window.status='HOME'"><IMG SRC="http://www1.imim.es/g_icons/home.gif" HEIGHT=15 WIDTH=15 BORDER=0></A>
+<A HREF="javascript:history.go(1)" onMouseover="window.status='NEXT VISITED PAGE'"><IMG SRC="http://www1.imim.es/g_icons/right.gif" HEIGHT=15 WIDTH=15 BORDER=0></A>
+</TD>
+</TABLE>
+
+</td>
+</tr>
+
+<!-- ############### MENU AREA ############### -->
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class="menu" VALIGN=TOP>
+
+<table class="default">
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/news.html"
+  onMouseover="window.status='News';">News</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/research.html"
+  onMouseover="window.status='Research at our Group';">Research</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/people.html"
+  onMouseover="window.status='Who is who in Genome Informatics Research Laboratory';">People</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/software.html"
+  onMouseover="window.status='Software developed by our Group';">Software</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/databases.html"
+  onMouseover="window.status='Databases created/curated by our Group';" class="hh">Resources<BR>&amp;Datasets</a>
+</td>
+</tr>
+
+<tr class="default">
+<td class ="links">
+ <a href="http://www1.imim.es/main/publications.html"
+  onMouseover="window.status='Publications by our Group';">Publications</a>
+</td>
+</tr>
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class ="links">
+ <a href="http://www1.imim.es/main/seminars.html"
+  onMouseover="window.status='Seminars, Courses and Group Sessions';" class="hh">Seminars<BR>&amp; Courses</a>
+</td>
+</tr>
+
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class ="links">
+ <a href="http://www1.imim.es/main/links.html"
+  onMouseover="window.status='Interesting Links';">Links</a>
+</td>
+</tr>
+
+</table>
+</td>
+
+<!-- ############### USERS AREA ############### -->
+
+<td class="userspace" border=0 cellpadding=0 cellspacing=0 width=100%>
+
+<P><BR>
+<FONT SIZE=4><B>SUMMARY</B><BR><BR class="hh"></FONT>
+
+One of the <a href="http://www1.imim.es/software/gfftools/GFF2PS.html" onMouseover="window.status='Go to GFF2PS Home Page';"><code> gff2ps </code></a> program strenghts is comparing results from different sources, so it is easy to see differences among a genomic sequence annotation and one or more gene prediction programs, including results from other programs such <tt> blast </tt> (always processing those results and converting to a <a href="http://www.sanger.ac.uk/Software/GFF/GFF_Spec.shtml" onMouseover="window.status='Sanger Center General Feature Format definition';">GFF compliant file</a> suitable for <tt> gff2ps </tt> of course). Here we are illustrating how we generated the PostScript plots you can find in the <a href="http://www1.imim.es/datasets/humanmouse/index.html" onMouseover="window.status='Gene prediction in the human genome using the mouse genome';">Human/Mouse Gene Prediction</a> page. If you have problems when visualizing the PostScript files take a look on the section about using <tt> ghostview</tt>. 
+<BR>
+<BR>
+
+<B>INDEX:</B><BR class="hh">
+
+<UL>
+ <LI> <a href="index.html#FILES">GFF input files.</A> </LI>
+ <LI> <a href="index.html#PARAM"><CODE> gff2ps </CODE> customization files.</A> </LI>
+ <LI> <a href="index.html#GFFPS">Running <CODE> gff2ps</CODE>.</A> </LI>
+ <LI> <a href="index.html#GVIEW">Notes on <CODE>  ghostview </CODE> usage.</A> </LI>
+</UL>
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="FILES"></a><FONT size=5 class="K"> GFF input files </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="index.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://www1.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P>
+As example we are using <tt>Hsap_BTK</tt> files. To avoid that both <tt> sgp </tt> predictions (for Full Ortologous -FO- and WGS sequences -3X-) collapse on the same track of <tt> geneid </tt> ones, we replaced '<code>geneid_v1.0</code>' from source field by '<code>SGP.3X</code>' and '<code>SGP.homol</code>' (in '<code>Hsap_BTK_sgp3X</code>' and '<code>Hsap_BTK_sgpFO</code>' respectively). Click on the filenames to see their contents.
+<BR><BR class="hh">
+
+<CENTER>
+<TABLE border=0 cellpadding=0 cellspacing=0 width=90% class="tbl">
+<TR VALIGN=TOP>
+<TD class="tbl" width=20>&nbsp;</TD>
+<TD class="tbl" width=40 ALIGN=RIGHT><a href="Hsap_BTK_annotation.gff">Hsap_BTK_annotation.gff</a></TD>
+<TD class="tbl" width=10>&nbsp;</TD>
+<TD class="tbl">Annotation of real genes for BTK region converted to GFF from <a href="http://waldo.wi.mit.edu/~danb/HomologSeqs/BTK/">Dan Brown annotation</a>.<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl" ALIGN=RIGHT><a href="Hsap_BTK_sgp3X.gff">Hsap_BTK_sgp3X.gff</a></TD>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl"><tt> sgp </tt> predictions using as evidence <tt> tblastx </tt> on human sequence against the WGS database (currently 3X).<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl" ALIGN=RIGHT><a href="Hsap_BTK_sgpFO.gff">Hsap_BTK_sgpFO.gff</a></TD>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl"><tt> sgp </tt> predictions using as evidence <tt> tblastx </tt> on human sequence against mouse ortologous sequence (<CODE>Hsap_BTK</CODE> over <CODE>Mmus_BTK</CODE>).<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl" ALIGN=RIGHT><a href="Hsap_BTK_geneid.gff">Hsap_BTK_geneid.gff</a></TD>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl"><tt> geneid </tt> predictions on <CODE>Hsap_BTK</CODE> sequence.<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl" ALIGN=RIGHT><a href="Hsap_BTK_genscan.gff">Hsap_BTK_genscan.gff</a></TD>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl"><tt> genscan </tt> predictions on <CODE>Hsap_BTK</CODE> sequence.<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl" ALIGN=RIGHT><a href="Hsap_BTK_tblastx3X.gff">Hsap_BTK_tblastx3X.gff</a></TD>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl"><tt> tblastx </tt> similarity regions from human sequence searches against the WGS database (currently 3X).<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl" ALIGN=RIGHT><a href="Hsap_BTK_tblastxFO.gff">Hsap_BTK_tblastxFO.gff</a></TD>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl"><tt> tblastx </tt> similarity regions from human sequence searches against mouse ortologous sequence (<CODE>Hsap_BTK</CODE> over <CODE>Mmus_BTK</CODE>).<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl" ALIGN=RIGHT><a href="Hsap_BTK_repeatmasker.gff">Hsap_BTK_repeatmasker.gff</a></TD>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl">repeats found in BTK human sequence converted to GFF (filtered from the '<CODE>Hsap_BTK.out</CODE>' file obtained with <tt> RepeatMasker</tt>).<BR><BR class="hh"></TD>
+</TR>
+</TABLE>
+</CENTER>
+
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="PARAM"></a><FONT size=5 class="K"> <CODE> gff2ps </CODE> customization files </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="index.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://www1.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P>
+We ran <tt> gff2ps </tt> on the same GFF input files, using two slightly different customization files. Following table shows the basic differences between them, all the other variables are set to same values:<BR><BR class="hh">
+
+<CENTER>
+<TABLE border=0 cellpadding=0 cellspacing=0 width=90% class="tbl">
+<TR VALIGN=TOP>
+<TD class="tbl" width=20>&nbsp;</TD>
+<TD class="tbl" width=25 ALIGN=RIGHT><a href="brown.a4.rc">brown.a4.rc</a></TD>
+<TD class="tbl" width=10>&nbsp;</TD>
+<TD class="tbl">Page size is set to A4, there are three blocks per page and 10Kbp will appear on each block.<BR><BR class="hh"></TD>
+</TR>
+<TR VALIGN=TOP>
+<TD class="tbl">&nbsp;</TD>
+<TD class="tbl"  width=25 ALIGN=RIGHT><a href="brown.a3.rc">brown.a3.rc</a></TD>
+<TD class="tbl"  width=10>&nbsp;</TD>
+<TD class="tbl" >Page size is set to A3, there are four blocks per page and 30Kbp will appear on each block.</TD>
+</TR>
+</TABLE>
+</CENTER>
+</P>
+<P>
+Structure of <tt> gff2ps </tt> customization files is shown in the following picture.<BR><BR class="hh">
+<CENTER>
+<IMG SRC="gff2ps_custom.gif" HEIGHT=390 WIDTH=475 BORDER=0>
+</CENTER>
+<BR>
+Customization files and available variables are explained in chapter four of the User's Manual. From here you can donwload the <a href="MANUAL_GFF2PS.ps.gz">latest version of the manual</a> (v0.96) and of the <a href="gff2ps.gz"><code> gff2ps</code> program</a> (v0.97b). You must replace from the script the paths for bash and gawk to the ones defined in your system on the following two lines:<BR><BR class="hh">
+
+&nbsp;&nbsp;&nbsp;&nbsp;#!/bin/bash<BR><BR class="hh">
+&nbsp;&nbsp;&nbsp;&nbsp;GAWK="/usr/local/bin/gawk";<BR>
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="GFFPS"></a><FONT size=5 class="K"> Running <CODE> gff2ps </CODE> </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="index.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://www1.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P>
+There are two basic ways to work on GFF records with <tt> gff2ps </tt>: you can merge all the GFF records from different sources into a single GFF file or you can split GFF records from different sources into different files. The second approach provides to you the advantage of easily ordering sources in your plots by ordering the different GFF source files in the command-line. You must keep on mind that sources appear on the PostScript figure in the same order as they are given from input (so that we prefer to work with separate files for each source).<BR>
+If you manage to have a fixed set of sequence, source and feature names, you can define a fixed set of customization variables (as we did in the previous section), and reuse the custom files for all the plots having the same layout but different datasets (and it is easy to automate the process at the command-line/scripts level too).
+</P>
+<P>
+The following two commands are using the same customization file on different files (for <tt> sgp </tt> and <tt> tblastx </tt> sources):<BR><BR class="hh">
+
+<CENTER>
+<TABLE border=0 cellpadding=0 cellspacing=0 width=450 class="tbl">
+<TR>
+<TD class="tbl" ALIGN=LEFT>
+<CODE>
+gff2ps -VC brown.a3.rc -- Hsap_BTK_annotation.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_sgpFO.gff Hsap_BTK_geneid.gff      \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_genscan.gff Hsap_BTK_tblastxFO.gff \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_repeatmasker.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;> <a href="Hsap_BTK_FO_a3.ps">Hsap_BTK_FO_a3.ps</a> 2> <a href="Hsap_BTK_FO_a3.log">Hsap_BTK_FO_a3.log</a>     <BR><BR><BR class="hh">
+<!-- gff2ps -VC brown.a3.rc -- Hsap_BTK_annotation.gff Hsap_BTK_sgpFO.gff Hsap_BTK_geneid.gff Hsap_BTK_genscan.gff Hsap_BTK_tblastxFO.gff Hsap_BTK_repeatmasker.gff > Hsap_BTK_FO_a3.ps 2> Hsap_BTK_FO_a3.log -->
+</CODE>
+</TD>
+</TR>
+<TR>
+<TD class="tbl" ALIGN=LEFT>
+<CODE>
+gff2ps -VC brown.a3.rc -- Hsap_BTK_annotation.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_sgp3X.gff Hsap_BTK_geneid.gff      \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_genscan.gff Hsap_BTK_tblastx3X.gff \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_repeatmasker.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;> <a href="Hsap_BTK_3X_a3.ps">Hsap_BTK_3X_a3.ps</a> 2> <a href="Hsap_BTK_3X_a3.log">Hsap_BTK_3X_a3.log</a>
+<!-- gff2ps -VC brown.a3.rc -- Hsap_BTK_annotation.gff Hsap_BTK_sgp3X.gff Hsap_BTK_geneid.gff Hsap_BTK_genscan.gff Hsap_BTK_tblastx3X.gff Hsap_BTK_repeatmasker.gff > Hsap_BTK_3X_a3.ps 2> Hsap_BTK_3X_a3.log -->
+</CODE>
+</TD>
+</TR>
+</TABLE>
+</CENTER>
+</P>
+
+<P>
+Note that we preserved the sources ordering (annotation, sgp, geneid, genscan, tblastx and repeatmasker). Backslashes ('\') mean that the command is passed in a single line.<BR><BR><BR class="hh">
+</P>
+
+<P>
+The following two commands are using different customization files on the same files:<BR><BR class="hh">
+
+<CENTER>
+<TABLE border=0 cellpadding=0 cellspacing=0 width=450 class="tbl">
+<TR>
+<TD class="tbl" ALIGN=LEFT>
+<CODE>
+gff2ps -VC brown.a4.rc -- Hsap_BTK_annotation.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_sgp3X.gff Hsap_BTK_tblastx3X.gff   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_sgpFO.gff Hsap_BTK_tblastxFO.gff   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_geneid.gff Hsap_BTK_genscan.gff    \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_repeatmasker.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;> <a href="Hsap_BTK_ALL_a4.ps">Hsap_BTK_ALL_a4.ps</a> 2> <a href="Hsap_BTK_ALL_a4.log">Hsap_BTK_ALL_a4.log</a>   <BR><BR><BR class="hh">
+<!-- gff2ps -VC brown.a4.rc -- Hsap_BTK_annotation.gff Hsap_BTK_sgp3X.gff Hsap_BTK_tblastx3X.gff Hsap_BTK_sgpFO.gff Hsap_BTK_tblastxFO.gff Hsap_BTK_geneid.gff Hsap_BTK_genscan.gff Hsap_BTK_repeatmasker.gff > Hsap_BTK_ALL_a4.ps 2> Hsap_BTK_ALL_a4.log -->
+</CODE>
+</TD>
+</TR>
+<TR>
+<TD class="tbl" ALIGN=LEFT>
+<CODE>
+gff2ps -VC brown.a3.rc -- Hsap_BTK_annotation.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_sgp3X.gff Hsap_BTK_tblastx3X.gff   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_sgpFO.gff Hsap_BTK_tblastxFO.gff   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_geneid.gff Hsap_BTK_genscan.gff    \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Hsap_BTK_repeatmasker.gff                   \ <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;> <a href="Hsap_BTK_ALL_a3.ps">Hsap_BTK_ALL_a3.ps</a> 2> <a href="Hsap_BTK_ALL_a3.log">Hsap_BTK_ALL_a3.log</a> 
+<!-- gff2ps -VC brown.a3.rc -- Hsap_BTK_annotation.gff Hsap_BTK_sgp3X.gff Hsap_BTK_tblastx3X.gff Hsap_BTK_sgpFO.gff Hsap_BTK_tblastxFO.gff Hsap_BTK_geneid.gff Hsap_BTK_genscan.gff Hsap_BTK_repeatmasker.gff > Hsap_BTK_ALL_a3.ps 2> Hsap_BTK_ALL_a3.log -->
+</CODE>
+</TD>
+</TR>
+</TABLE>
+</CENTER>
+</P>
+
+<P>
+You can see here how easy is to merge new sources to the final plots and how easy is to change the plot layout when using differnt customization files.
+</P>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>
+<TR>
+<TD class="section" width=80% ALIGN=LEFT>
+<a name="GVIEW"></a><FONT size=5 class="K"> NOTES on <CODE>  ghostview </CODE> usage </FONT>
+</TD>
+<TD class="section" width=20% ALIGN=RIGHT>
+<a href="index.html#TOP"
+ onMouseover="window.status='TOP of the PAGE';">
+<IMG class="pnt" SRC="http://www1.imim.es/g_icons/top.gif" HEIGHT=15 WIDTH=15 BORDER=0></a>
+</TD></TR>
+</TABLE>
+<P>
+You can visualize PostScript files using <tt> ghostview </tt> but maybe there is a problem with latest versions of that program (or the underlying PostScript interpreter <tt> ghostscript</tt>) because color filled shapes are shown empty (just the shape frame) if you have set antialiasing on (which is set by default when you start <tt> ghostview </tt>, see <a href="#FIG1" onMouseover="window.status='Figure 1: Antialias ON';" onClick="open('gv_antialias_on.gif','displayWindow','width=550,height=500,titlebar=no,status=no,toolbar=no,menubar=no');">figure 1</a>). On the other hand, this is not happening if you have <tt> Distiller </tt> (utility available with <tt> Adobe Acrobat </tt>), or you open those PostScript files with <tt> Adobe Illustrator </tt> (Adobe defined the PostScript language, so it is straighforward that a PostScript program should work with those programs as it does when sending the file to a PostScript printer). So that, the best current option is to switch off antialiasing from the corresponding pop up menu on <tt> ghostview </tt> (<B>State</B> menu --&gt; <B>Antialias</B>, as shown in <a href="#FIG2" onMouseover="window.status='Figure 2: Antialias OFF';" onClick="open('gv_antialias_off.gif','displayWindow','width=550,height=500,titlebar=no,status=no,toolbar=no,menubar=no');">figure 2</a>).
+<BR>
+<BR>
+Another issue is, when opening the PostScript files, that they look like they were missing part of the plot. This maybe a result of visualizing with a different page-size than the one defined for the figure. By default, <tt> ghostview </tt> opens files in A4 or Letter page size. Both formats have small diferences in with/height, so that you will miss a small part of the figure if it was generated in A4 and you are visualizing with Letter size or <I>viceversa</I>. It is worse when you are trying to visualize an A3 (similar to Tabloid/Ledger US format) in an A4 display, because you are missing half of the plot. It is very easy to visualize the whole picture if the PostScript file has defined a <I>BoundingBox</I> (such the <tt> gff2ps </tt> PostScript output), simply select <B>BBox</B> from the <B>Page Size</B> menu (the button containing the current page size displayed by <tt> ghostview</tt>, see <a href="#FIG3" onMouseover="window.status='Figure 3: Page Size Menu';" onClick="open('gv_a4tobbox.gif','displayWindow','width=550,height=500,titlebar=no,status=no,toolbar=no,menubar=no');">figure 3</a>). Those files which does not include a <I>BoundingBox</I> definition require that you set the proper page size on that menu.
+<BR><BR><BR class="hh">
+
+<CENTER>
+<TABLE border=0 cellpadding=0 cellspacing=0 width=90%>
+<TR>
+<TD ALIGN=CENTER width=30%><a href="#FIG1" onMouseover="window.status='Figure 1: Antialias ON';" onClick="open('gv_antialias_on.gif','displayWindow','width=550,height=500,titlebar=no,status=no,toolbar=no,menubar=no');"><IMG SRC="gv_antialias_on.gif" HEIGHT=150 WIDTH=150 BORDER=1></a><a name="FIG1"></a></TD>
+<TD ALIGN=CENTER width=30%><a href="#FIG2" onMouseover="window.status='Figure 2: Antialias OFF';" onClick="open('gv_antialias_off.gif','displayWindow','width=550,height=500,titlebar=no,status=no,toolbar=no,menubar=no');"><IMG SRC="gv_antialias_off.gif" HEIGHT=150 WIDTH=150 BORDER=1></a><a name="FIG2"></a></TD>
+<TD ALIGN=CENTER width=30%><a href="#FIG3" onMouseover="window.status='Figure 3: Page Size Menu';" onClick="open('gv_a4tobbox.gif','displayWindow','width=550,height=500,titlebar=no,status=no,toolbar=no,menubar=no');"><IMG SRC="gv_a4tobbox.gif" HEIGHT=150 WIDTH=150 BORDER=1></a><a name="FIG3"></a></TD>
+</TR>
+<TR>
+<TD ALIGN=CENTER class="tbl" width=30%><B>Figure 1:</B> Antialias ON.</TD>
+<TD ALIGN=CENTER class="tbl" width=30%><B>Figure 2:</B> Antialias OFF.</TD>
+<TD ALIGN=CENTER class="tbl" width=30%><B>Figure 3:</B> Page Size Menu.</TD>
+</TR>
+<TR>
+<TD ALIGN=CENTER class="tbl" COLSPAN=3><BR class="hh">Click on the previous images to see the snapshots at their real size.</TD>
+</TR>
+</TABLE></CENTER>
+</P>
+
+</td>
+</tr>
+
+
+<!-- ############### TRAILER AREA ############### -->
+<tr class="default" border=0 cellpadding=0 cellspacing=0>
+<td class="default" colspan=2>
+
+<table class="trailer" border=0 cellpadding=0 cellspacing=0 width=100%>
+<tr class="default">
+<td id="traila">
+<A HREF="http://www1.imim.es/main/disclaimer.html"
+ onMouseover="window.status='Data Release Policy and Software License';">Disclaimer</A>
+</td>
+
+<td id="trailb">
+<B>Last Updated:</B>  <I>Mon 16 Jul 2001 02:48:30 PM CEST</I><BR>© Genome Informatics Research Laboratory
+</TD>
+
+<TD id="trailc">
+<TABLE border=0 cellpadding=0 cellspacing=0>
+<TR>
+<TD id="trailc" VALIGN=MIDDLE>
+<A HREF="MAILTO:gmaster@imim.es"
+ onMouseover="window.status='Contact with our webmaster';">
+ webmaster
+</A>
+</TD>
+<TD VALIGN=MIDDLE>
+<A HREF="MAILTO:gmaster@imim.es"
+ onMouseover="window.status='Contact with our webmaster';">
+<IMG class="mid" SRC="http://www1.imim.es/g_icons/mini-mail.gif" border=0>
+</A>
+</TD>
+</TR>
+</TABLE>
+</TD>
+</TR>
+</TABLE>
+
+</TD>
+</TR>
+
+
+</TABLE>
+
+</BODY>
+</HTML>

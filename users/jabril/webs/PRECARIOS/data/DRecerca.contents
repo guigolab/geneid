@@ -1,0 +1,54 @@
+###
+### WEB PAGE DEFINITION 
+###
+### NAME        "unique identifier"
+### FILENAME    "where to save this record (no path)"
+### TITLE 
+### WIN_TITLE      
+### KEYWORDS    "keywords for internet search engines" 
+### DESCRIPTION "description for internet search engines"
+### DESC        "short description"
+### HREF        {$ROOT}path
+### ICON        icons_path
+### USER_SPACE  your web page contents
+### >--EOR--<   (End of Record)
+#
+>#< NAME        DRECERCA-HOMEPAGE
+>#< FILENAME    index.html
+>#< TITLE       D-Recerca Homepage
+>#< WIN_TITLE   D-Recerca Homepage
+>#< KEYWORDS    D-Recerca, Precarios
+>#< DESCRIPTION Aquesta es la pagina dels estudiants de doctorat de Catalunya...
+>#< BASE_HREF   {$ROOT}
+>#< DESC        D-Recerca Home Page
+>#< HREF        {$ROOT}
+>#< ICON        {$ROOT}
+>#< USER_SPACE
+
+>--EOR--<   (End of Record)
+>#< NAME        DRECERCA-NEWS
+>#< FILENAME    news.html
+>#< TITLE       News
+>#< WIN_TITLE   D-Recerca News
+>#< KEYWORDS    D-Recerca, Precarios, News
+>#< DESCRIPTION Aquesta es la pagina dels estudiants de doctorat de Catalunya...
+>#< BASE_HREF   {$ROOT}
+>#< DESC        D-Recerca News
+>#< HREF        {$ROOT}
+>#< ICON        {$ROOT}
+>#< USER_SPACE
+
+>--EOR--<   (End of Record)
+>#< NAME        DRECERCA-DOCS
+>#< FILENAME    docs.html
+>#< TITLE       Documents
+>#< WIN_TITLE   D-Recerca Documents
+>#< KEYWORDS    D-Recerca, Precarios, Documents
+>#< DESCRIPTION Aquesta es la pagina dels estudiants de doctorat de Catalunya...
+>#< BASE_HREF   {$ROOT}
+>#< DESC        D-Recerca Docs
+>#< HREF        {$ROOT}
+>#< ICON        {$ROOT}
+>#< USER_SPACE
+
+>--EOR--<   (End of Record)

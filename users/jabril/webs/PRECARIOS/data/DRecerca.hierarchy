@@ -1,0 +1,22 @@
+###
+### NAVIGATION PATHS for D-RECERCA WEB
+###
+### $Id: DRecerca.hierarchy,v 1.1 2001-07-27 13:44:02 jabril Exp $
+###
+### MAIN VARIABLES
+###
+>#< ROOT       ./
+>#< CSS        {$ROOT}precarios.css
+>#< WEBMASTER  jabril@imim.es
+###
+### NODE DEFINITION and RELATIONSHIPS
+###
+### NAME "child  node NAME"
+### PREV "parent node NAME"
+### BASE_HREF {$ROOT}path
+#
+### NAME                 ### PREV                 ### BASE_HREF
+#
+DRECERCA-HOMEPAGE        ROOT                     {$ROOT}
+DRECERCA-NEWS            DRECERCA-HOMEPAGE        {$ROOT}
+DRECERCA-DOCS            DRECERCA-HOMEPAGE        {$ROOT}
