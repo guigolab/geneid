@@ -40,6 +40,7 @@ rguigo        users/rguigo
 jabril        users/jabril
 softjabril    users/jabril/software
 gfftools      users/jabril/software/gfftools
+gffperlmod    users/jabril/software/gfftools/gfftools
 gff2ps        users/jabril/software/gfftools/gff2ps
 gff2aplot     users/jabril/software/gfftools/gff2aplot
 webjabril     users/jabril/webs/HOMEjabril
