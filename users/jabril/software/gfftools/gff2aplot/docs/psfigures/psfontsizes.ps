@@ -1,0 +1,150 @@
+%!PS-Adobe-3.0
+%%Title: Font sizes example
+%%Creator: $Author: jabril $ (Hacker Hands)
+%%Version: $Revision: 1.1 $
+%%CreationDate: $Date: 2003-02-05 17:10:57 $
+%%For: GFF2APLOT USER's MANUAL
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EndComments
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %                            psfontsizes.ps                            %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%                      PostScript font size examples.
+%
+%          CopyLeft (C) 2003 - Josep Francesc ABRIL FERRANDO  
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    $Id: psfontsizes.ps,v 1.1 2003-02-05 17:10:57 jabril Exp $
+%
+%    Report BUGS to: jabril@imim.es
+%
+%%BeginProlog
+%
+%%BeginProcSet: Short_Names 1.0 0
+%
+/B { bind def } bind def
+/X { exch def } B
+/x { exch } B
+/r { roll } B
+/D { def } B
+/S { gsave } B
+/R { grestore } B
+/F { scale } B
+/T { translate } B
+/A { rotate } B
+/m { moveto } B
+/rm { rmoveto } B
+/l { lineto } B
+/rl { rlineto } B
+/k { stroke } B
+/gk { S stroke R } B
+/f { fill } B
+/gf { S fill R } B
+/ie { ifelse } B
+/cmyk { setcmykcolor } B
+/slw { setlinewidth } B
+/sfnt { findfont x scalefont setfont } B
+%
+%%EndProcSet: Short_Names 1.0 0
+%
+%%BeginProcSet: Colors 1.0 0
+%
+/black { 0.00 0.00 0.00 1.00 } D /white { 0.00 0.00 0.00 0.00 } D
+%
+%%EndProcSet: Colors 1.0 0
+%
+%%BeginProcSet: Functions 1.0 0
+%
+% /pgA4 { 595 842 } D
+/cm { 28.35 mul } B
+/in { 72 mul } B
+/bbox { 4 copy 3 1 r x 6 2 r 8 -2 r m l l l closepath } B
+%
+%%EndProcSet: Functions 1.0 0
+%
+%%BeginProcSet: Local_Functions 1.0 0
+%
+/fsz 1 D /ifsz fsz 1.25 mul D /spc 5 D
+/setfsz { /fsz X /ifsz fsz 1.25 mul D /spc 5 D } B
+/oY 800 D /oX 80 D
+/nY { /oY oY ifsz 3 mul 10 add sub D oY } B
+/str  (   pt) D
+/strU (ABCDEFGHIJKLMNOPQRSTUVWXYZ) D
+/strL (abcdefghijklmnopqrstuvwxyz) D
+/strN (1234567890 @#$%&_-+*?!\\/|[]{}<>\(\)) D
+/ex { S setfsz oX x T fsz /Helvetica sfnt spc 0 m strU show spc ifsz neg m strL show spc ifsz 2 mul neg m strN show 9 /Courier sfnt str fsz 10 ge { 0 } { 1 } ie fsz 2 string cvs putinterval str dup stringwidth pop spc add neg 0 m show R } B
+%
+%%EndProcSet: Local_Functions 1.0 0
+%
+%%EndProlog
+%
+%%BeginSetup
+%
+% initgraphics % must not be used in EPS documents
+true setstrokeadjust
+0.125 setlinewidth
+0 setlinejoin
+0 setlinecap
+%
+%%EndSetup
+%
+%%Page: 1 1
+%%BeginPageSetup
+%
+/pgsave save def
+%
+%%EndPageSetup
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+black cmyk
+% sans serif
+nY  1 ex
+nY  2 ex
+nY  4 ex
+nY  6 ex
+nY  8 ex
+nY 10 ex
+nY 12 ex
+nY 14 ex
+nY 16 ex
+nY 18 ex
+nY 20 ex
+nY 25 ex
+% plot title
+nY pop nY
+oX x m 10 /Courier-Bold sfnt (<<psfontsizes.ps (/Helvetica from 2pt to 20pt by 2pt, plus 1pt and 25pt)>>) show
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+pgsave restore
+showpage
+%
+% Page: 1 1
+%%PageTrailer
+%
+%%Trailer
+%
+%%Pages: 1
+%%Orientation: Portrait
+%%BoundingBox: 0 0 595 842
+%%EOF
