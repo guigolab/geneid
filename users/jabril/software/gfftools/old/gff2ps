@@ -26,7 +26,7 @@
 #
 # Creation Date: 01.03.1999
 # Last Update:
-#         $Id: gff2ps,v 1.20 1999-06-25 12:29:23 jabril Exp $	
+#         $Id: gff2ps,v 1.21 1999-06-25 20:14:44 jabril Exp $	
 #
 # Autor : Josep Francesc ABRIL FERRANDO
 # e-mail: jabril@imim.es
@@ -47,8 +47,8 @@ Defaults () {
  # Constants: 
   PROGRAM="gff2ps"
   VERSION="v1.0"
-  REVISION='$Revision: 1.20 $'
-  DATERELEASE='$Date: 1999-06-25 12:29:23 $'
+  REVISION='$Revision: 1.21 $'
+  DATERELEASE='$Date: 1999-06-25 20:14:44 $'
   PSPROGRAM="PostScript Output from gff2ps"
   AUTHOR="Josep Francesc ABRIL FERRANDO"
   EMAIL="jabril@imim.es"
@@ -263,7 +263,7 @@ gawk 'BEGIN{
 
 cat <<'@@@EndProlog@@@'
 % 
-%    $Id: gff2ps,v 1.20 1999-06-25 12:29:23 jabril Exp $
+%    $Id: gff2ps,v 1.21 1999-06-25 20:14:44 jabril Exp $
 % 
 % 
 %        Converting GFF files to PostScript plots.
@@ -888,7 +888,7 @@ gawk 'BEGIN{
  CM["K"]="k";CM["L"]="l";CM["M"]="m";CM["N"]="n";CM["O"]="o";
  CM["P"]="p";CM["Q"]="q";CM["R"]="r";CM["S"]="s";CM["T"]="t";
  CM["U"]="u";CM["V"]="v";CM["W"]="w";CM["X"]="x";CM["Y"]="y";
- CM["Z"]="z";# CM["Ñ"]="ñ";CM["Ç"]="ç";
+ CM["Z"]="z";CM["Ñ"]="ñ";CM["Ç"]="ç";
 # Initialization for some vars.
  BigLINE="########################################";
  MINSCORE=0.10;
@@ -903,13 +903,10 @@ gawk 'BEGIN{
 }
 { ############ READING .GFF FILES  ############
   is_EOF=0;
-  if (!($frame in Frames)) { 
-     printf ">>>WARNING<<< Unknown frame %s (replaced by \".\") in : %s\n",$frame,$0 | "cat 1>&2"
-     $frame="." }
 # skips those comment lines (starting with "#") or empty lines
 # also checking if input line is gff_formated.
   while (!ChkInput()) { 
-    if (Var["print_report"]) { printf "%10s :: Not Read :: %s\n", NR, $0 | "cat 1>&2" };
+    if (Var["print_report"]) { printf ">>> %10s :: Not Read :: %s\n", NR, $0 | "cat 1>&2" };
     if (getline<=0) { is_EOF=1; break };
     }; # while
  if (!is_EOF) {
@@ -922,7 +919,12 @@ gawk 'BEGIN{
     order["none",nordcnt]=$source; nordcnt++ };
 # read gff element within source and strand
   sources[$source]++;                       # field 2 (source) counter
-  if ($group=="") $group=".";               # empty group defined as default (none==".")
+  if (!($group in GP_ary)) {
+    scstgp[$source,$strand]++; 
+    gpname[$source,$strand,scstgp[$source,$strand]]=$group
+    gpori[$source,$strand,scstgp[$source,$strand]]=999999999999999999999999
+    gpend[$source,$strand,scstgp[$source,$strand]]=0
+    }
   GP_ary[$group]++;                         # field 9 (group) counter
   $feature=lcase($feature);
   FT_ary[$feature]++ ;                       # field 3 (gff-feature) counter
@@ -946,6 +948,9 @@ gawk 'BEGIN{
     } # if NF
   if (FIRST_POS>$start) FIRST_POS=$start;
   if (LAST_POS<$end) LAST_POS=$end;
+# start-end for each group-sc-strand
+  gpori[$source,$strand,scstgp[$source,$strand]] = min(gpori[$source,$strand,scstgp[$source,$strand]],$start) 
+  gpend[$source,$strand,scstgp[$source,$strand]] = max(gpend[$source,$strand,scstgp[$source,$strand]],$end) 
 # recompute scores between MINSCORE and MAXSCORE
   if ($score < MINSCORE) {
     element[$source,$strand,n[$source,$strand],score]=MINSCORE }
@@ -959,6 +964,17 @@ gawk 'BEGIN{
   } # if (!is_EOF)
  }  # Main Loop END
 END{
+# Sorting groups
+  printf "\n%s\nGroups defined...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
+  for (sc in sources) {
+    for (s in strands) {
+      if (scstgp[sc,s]>0) {
+      for (r=1;r<=scstgp[sc,s];r++) {
+        printf "*** Grup %s Strand %s Source %s have %s elements\n",gpname[sc,s,r],s,sc,GP_ary[gpname[sc,s,r]] | "cat 1>&2"
+        printf "*** Grup %s starts at %s and ends at %s\n",gpname[sc,s,r],gpori[sc,s,r],gpend[sc,s,r] | "cat 1>&2"
+        }}
+      }
+    }
 # Printing elements sorted
   if (Var["print_report"]) {
    printf "\n%s\ngff elements are sorted...\n%s\n",BigLINE,BigLINE | "cat 1>&2"
@@ -1020,10 +1036,16 @@ END{
 function lcase(string,    chr) { for (chr in CM) gsub(chr,CM[chr],string); return string }
 function min(a,b) { if (a<=b) return a; else return b }
 function max(a,b) { if (a>=b) return a; else return b }
-function ChkInput() { 
- if ($0~/^.+[ \t]+.+[ \t]+.+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]*[.]?[0-9]*[ \t]+[+-.][ \t]+[.012][ \t]+.*/) return 1;
+function ChkInput() { # some changes will be made on input line if some defaults were present.
+ f=split($0,ln,/ \#/);$0="";
+ $0=ln[1];for (s=1;s<=f;s++) { delete ln[s] };
+ if (!($frame in Frames) && !($0~/^(\#)+/ || NF==0)) { 
+   printf ">>>WARNING<<< Unknown frame %s (replaced by \".\") in : %s\n",$frame,$0 | "cat 1>&2"
+   $frame="." }
+ if ($group=="" || $group==".") $group="##" $source $strand $seqname "##";    # empty group defined as default (none==".")
+ if ($0~/^[^\#]+[ \t]+.+[ \t]+.+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]+[ \t]+[+-]?[0-9]*[.]?[0-9]*[ \t]+[+-.][ \t]+[.012][ \t]+.*/) return 1;
  else {
-   if ($0~/^(\#)+/ || NF==0) printf ">>>Comment Line: %s", $0 | "cat 1>&2"
+   if ($0~/^(\#)+.*/ || NF==0) printf ">>>Comment Line: %s", $0 | "cat 1>&2"
    else printf ">>>WARNING<<< Non-standard gff-formatted input line: %s\n", $0 | "cat 1>&2"
    return 0 }
  } # End function ChkInput
@@ -1269,7 +1291,7 @@ function PRINTGROUPS() { # print groups PlotSeqComp-like.
       if (prtrule && (StrSizeRvs>0 && (StrSizeFwd>0 || NStSize>0))) printf "ChangeStrand\n"
      }    # if strand_show
     }     # for strands(stp)
- } 
+ } # End of function PRINTGROUPS
 function CreateProps(flag,    STRING,prop,dffeat,feat,gpfeat,sofeat) {
   ############ Create Properties Index for Objects ############ 
   STRING="#\n# L ######PAGE LAYOUT \& PROGRAM OPTIONS######\n#\n"
