@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Mante un mirror de les parts mes importants del /usr/local
+#
+# Es fa una copia incremental amb "cp -afuv" i s'esborra el que pugui
+# sobrar amb l'script "direcmirror"
+#
+# ENCARA NO ESBORRA RES!!! ES LIMITA A COPIAR.***********************
+#
+# La copia es fa al /home2/__backup_usr_local__
+#
+# Els directoris son:
+#   - BerkeleyDB.3.3
+#   - apache
+#   - cvs
+#   - genomics
+#   - mysql-3.23.36-pc-linux-gnu-i686
+#   - molbio
+#
+# Es copien tambe els fitxers de login:
+#   - bash.local*
+#   - csh.login*
+#   - cshrc.local*
+#   - profile*
+#
+# I es crea el link mysql apuntant (link relatiu) al mysql-3.23.36...
+
+ORIG=/usr/local
+COPIA=/home2/__backup_usr_local__
+
+for direc in BerkeleyDB.3.3 apache cvs genomics mysql-3.23.36-pc-linux-gnu-i686 molbio
+do
+   cp -afuv $ORIG/$direc $COPIA
+done
+
+for fit in bash.local csh.login cshrc.local profile
+do
+   cp -afuv $ORIG/$fit* $COPIA
+done
+
+cd $COPIA
+ln -sf mysql-3.23.36-pc-linux-gnu-i686 mysql
