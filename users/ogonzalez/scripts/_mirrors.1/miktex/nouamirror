@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# la idea es trobar allo que es nou despres de fer un mirror (comparant
+# el que ha baixat amb el que hi ha a un fitxer de llista) i recrear
+# l'estructura de directoris pero nomes amb els fitxers nous. aixi, en
+# fer un mirror nomes cal que porti a casa els fitxers que hi ha a
+# la nova estructura
+
+# si el fitxer de llista no existeix, el creo; tots els fitxers seran
+# considerats com si fossin nous, evidentment
+
+# si el directori de fitxers nous no existeix, el creo; es de suposar
+# que s'ha eliminat perque tot allo que era nou ja ho he dut a casa
+
+# el fitxer amb la llista i el directori amb el mirror han d'estar al
+# directori actual i han de tenir el mateix nom, pero el fitxer te
+# extensio ".txt". el directori amb fitxers nous tambe te el mateix
+# nom i extensio ".nou"
+
+# el nom l'especifico com a parametre
+
+# el fitxer ha de contenir nom (amb path relatiu des de "."), data
+# i grandaria. em plantejo la opcio de ficar l'md5 per comparar el
+# que tinc a casa i el que tinc a la feina (fitxers mal gravats)
+
+# ATENCIO:
+# suposo que d'alguna manera haure d'avisar dels fitxers que han
+# desaparegut del mirror: fitxers que surten al fitxer de llista
+# pero ja no son al directori
+
+if [ $# != 1 ]
+then
+   echo Falta argument
+   exit
+elif [ ! -d $1 ]
+then
+   echo $1 no es un directori
+   exit
+fi
+
+vell=$1
+nou=$1.nou
+txt=$1.txt
+tmp=$1.tmp
+
+if [ ! -s $txt ]
+then
+   touch $txt
+fi
+
+cd $vell
+find . -exec ls -ld {} \; | \
+   awk '{ printf "%9.0f %4s %2i %5s %s\n",$5,$6,$7,$8,$9 }' | \
+   sort -k5 | grep -v " $vell$" > ../$tmp
+cd ..
+
+# donada la situacio:
+#   1. si un fitxer te diferent grandaria i/o data, es considera nou.
+#      aixo pot ser mentida si he modificat per error el fitxer, pero
+#      es un problema que s'arreglara en tornar a correr el mirror
+#   2. si un fitxer nomes es al directori, es nou
+#   3. si un fitxer nomes es a la llista, ha de ser esborrat
+
+# quan un fitxer canvia, s'afegeix o s'esborra, la data del directori
+# que el conte canvia. per tant, no m'he de preocupar de crear el
+# directori en copiar un fitxer, ja que s'haura creat en revisar si
+# el directori mateix ha canviat
+
+# Comencem amb els punts 1 i 2
+while read grand datam datad dataa nom
+do
+   nomp=${nom#\./}
+   hies=`grep -c " $nom$" $txt`
+   if [ $hies = 0 ]
+   then
+      # no hi es ==> es nou
+      if [ -d $vell/$nomp ]
+      then
+         mkdir -p $nou/$nomp
+      else
+         cp -a $vell/$nomp $nou/$nomp
+      fi
+      printf "n  "
+   elif [ $hies = 1 ]
+   then
+      # hi es ==> revisem grandaria i data per veure si es nou
+      if [ "`grep \ $nom$ $txt`" != "`grep \ $nom$ $tmp`" ]
+      then
+         if [ -d $vell/$nomp ]
+         then
+            mkdir -p $nou/$nomp
+         else
+            cp -a $vell/$nomp $nou/$nomp
+         fi
+         printf "n  "
+      else
+         printf "   "
+      fi
+   else
+      # per si de cas, controlo si el grep dona coses extranyes
+      echo GREP != 0, 1!!!
+      exit
+   fi
+   printf "%9.0f %4s %2i %5s %s\n" $grand $datam $datad $dataa $nom
+done <$tmp
+
+# I acabem amb el punt 3
+while read grand datam datad dataa nom
+do
+   nomp=${nom#\./}
+   hies=`grep -c " $nom$" $tmp`
+   if [ $hies = 0 ]
+   then
+      # no hi es ==> s'ha d'esborrar
+      echo $vell/$nomp ja no hi es
+   elif [ $hies != 1 ]
+   then
+      # de nou, controlo si el grep dona coses extranyes
+      echo GREP != 0, 1!!!
+      exit
+   fi
+done <$txt
+
+mv $tmp $txt

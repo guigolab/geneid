@@ -1,0 +1,51 @@
+# calcula en bytes la grandaria d'un direc (per assegurar-me que en
+# copiar d'una maquina a una altra no falta res)
+
+grandaria() {
+   valor=$1
+   dec=""
+   while [ "$valor" != "${valor%???}" ]
+   do
+      cap=${valor%???}
+      dec=${valor#$cap}.$dec
+      valor=$cap
+   done
+   dec=$valor.$dec
+   dec=${dec%.}
+   dec=${dec#.}
+   printf "%18s " $dec
+}
+
+if [ $# != 0 ]
+then
+   while [ $# != 0 ]
+   do
+      echo $1
+      find $1 -exec ls -ld {} \; | awk '
+               BEGIN { bytes=0; dir=0; fit=0; tot=0 }
+               /^d/ { dir=dir+1 }
+               /^-/ { fit=fit+1; bytes=bytes+$5 }
+               { tot=tot+1 }
+               END { printf "%9.0f bytes\n %i direc\n %i fitxers\n %i total\n",bytes,dir,fit,tot }
+      ' | while read num txt
+      do
+         grandaria $num
+         echo $txt
+      done
+      shift
+   done
+else
+   pwd
+   find . -exec ls -ld {} \; | awk '
+            BEGIN { bytes=0; dir=0; fit=0; tot=0 }
+            /^d/ { dir=dir+1 }
+            /^-/ { fit=fit+1; bytes=bytes+$5 }
+            { tot=tot+1 }
+            END { printf "%9.0f bytes\n %i direc\n %i fitxers\n %i total\n",bytes,dir,fit,tot }
+   ' | while read num txt
+   do
+      grandaria $num
+      echo $txt
+   done
+fi
+
