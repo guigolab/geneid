@@ -1,6 +1,7 @@
 # Global Variables
 # WORK is defined with "setcwd"...
 BIN="$WORK/bin" ;
+SRC="$WORK/src" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;

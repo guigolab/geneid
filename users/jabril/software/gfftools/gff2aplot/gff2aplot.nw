@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $
+% $Id: gff2aplot.nw,v 1.36 2003-06-10 10:36:28 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -72,7 +72,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.36 2003-06-10 10:36:28 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -387,8 +387,8 @@ At the first stage of the new {\prog} implementation, we are going to define a s
 
 This is the {\prog} program outline:
 
+%<PERL shebang>>
 <<APLOT>>=
-<<PERL shebang>>
 <<Program Info>>
 #
 # MODULES
@@ -512,9 +512,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants: Version>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.35 $', #'
-     '$Date: 2003-03-04 18:05:30 $', #'
-     '$Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $', #'
+     '$Revision: 1.36 $', #'
+     '$Date: 2003-06-10 10:36:28 $', #'
+     '$Id: gff2aplot.nw,v 1.36 2003-06-10 10:36:28 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -597,9 +597,11 @@ AUTHORS:
 $PROGRAM needs the following Perl modules installed in 
 your system, we used those available from the standard 
 Perl distribution. Those that are not in the standard 
-distribution are marked with an '(*)', in such cases 
-make sure that you already have downloaded them from 
-CPAN (http://www.perl.com/CPAN) and installed.
+distribution are marked with an '(*)', although this 
+will change from one installation to another. In such 
+cases, make sure that you already have downloaded them 
+from CPAN (http://www.perl.com/CPAN) and that you got
+them installed.
 
 @ %$
 
@@ -874,6 +876,8 @@ Shows current program version and exits.
 sub prt_version() {
     my $comment = $Messages{'SHOW_VERSION'};
     $comment = sprintf($comment,$PROGRAM,$VERSION);
+    $Verbose = $T;
+    $Quiet = $F;
     &prt_to_stderr($comment);
     exit(1);
 } # prt_version
@@ -1783,7 +1787,7 @@ EXTCOLOR => sub { # Value, varName, Lowercase
                   $$_v = $_lt;
               } else {
                   $_vt =~ s/\s*$//og;
-                  @_cl = split /\s+|_/og, $_vt;
+                  @_cl = split /\s+|_/o, $_vt;
                   @_ll = ();
                   for (my $l = 0; ($l <= $#_cl && $l < $maxcolornum); $l++) {
                       $_t = '';
@@ -1917,7 +1921,7 @@ A new page bounding-box can be passed through command-line or customization file
 BBOX => sub { # Value, varName, Lowercase
       my ($_v,$_n,$_l) = @_;
       my @it = ();
-      @it = split /,/og, $_l;
+      @it = split /,/o, $_l;
       scalar(@it) != 2 && do {
           &warn('BBOX_NOTOK',$F,$_n,$_l,$_n);
           return $F;
@@ -2111,7 +2115,7 @@ SEQRANGE => sub { # Value, varName, Lowercase
 
 <<splitting ranges - common code>>=
 my @it = ();
-@@it = split /\.\./og, $_l;
+@@it = split /\.\./o, $_l;
 scalar(@it) != 2 && do {
     &warn('RANGE_NOTOK',$F,$_n,$$_v,$_n);
     return $F;
@@ -2342,7 +2346,7 @@ font => sub {
             &warn('CANNOTDEFNOW',$F,'CUSTOM FONT ALIAS',$cstr);
             return $F;
         }; # $cflg
-        @fld = split /\s+/og, $cstr;
+        @fld = split /\s+/o, $cstr;
         (defined($fld[0]) && defined($fld[1])) || do {
             &warn('WRONGSPECREC',$F,'FONT',2,
                   'font  <font-alias> <PostScript-font-name>');
@@ -2396,7 +2400,7 @@ color => sub {
             &warn('CANNOTDEFNOW',$F,'CUSTOM CMYK COLOR',$cstr);
             return $F;
         }; # $cflg
-        @fld = split /\s+/og, $cstr;
+        @fld = split /\s+/o, $cstr;
         scalar(@fld) < 5 && do {
             &warn('WRONGSPECREC',$F,'CMYK COLOR',5,
                   'color  <color-alias> <cyan> <magenta> <yellow> <black>');
@@ -2436,7 +2440,7 @@ box => sub {
         my ($cstr,undef) = @_;
         my (@fld,@tld);
         my $_n = 'Special Features [BOX] ';
-        @fld = split /\s+/og, $cstr, 5;
+        @fld = split /\s+/o, $cstr, 5;
         scalar(@fld) < 4 && do {
             &warn('WRONGSPECREC',$F,'BOX',4,
                 'box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> ] '.
@@ -2482,7 +2486,7 @@ circle => sub {
         my ($cstr,undef) = @_;
         my (@fld,@tld);
         my $_n = 'Special Features [CIRCLE] ';
-        @fld = split /\s+/og, $cstr, 5;
+        @fld = split /\s+/o, $cstr, 5;
         scalar(@fld) < 4 && do {
             &warn('WRONGSPECREC',$F,'CIRCLE',4,
                   'circle  <Cx> <Cy> <Rx> <Ry> '.
@@ -2529,7 +2533,7 @@ arrow => sub {
         my ($cstr,undef) = @_;
         my (@fld,@tld);
         my $_n = 'Special Features [ARROW] ';
-        @fld = split /\s+/og, $cstr, 4;
+        @fld = split /\s+/o, $cstr, 4;
         scalar(@fld) < 3 && do {
             &warn('WRONGSPECREC',$F,'ARROW',3,
                   'arrow  <Cx> <Cy> <length> [ A:<angle> ] '.
@@ -2578,7 +2582,7 @@ text => sub {
         my ($cstr,undef) = @_;
         my (@fld,@tld);
         my $_n = 'Special Features [TEXT] ';
-        @fld = split /\s+/og, $cstr, 3;
+        @fld = split /\s+/o, $cstr, 3;
         scalar(@fld) < 2 && do {
             &warn('WRONGSPECREC',$F,'TEXT',3,
                   'text  <Cx> <Cy> "<string>" [ A:<angle> ] '.
@@ -2633,7 +2637,7 @@ sub get_spfeat_props() {
     $cflg && do {
         $cstr =~ s/\"(.+?)\"//o && ($str = $1);
     }; # $cflg
-    @kao = split /\s+/og, $cstr;
+    @kao = split /\s+/o, $cstr;
     scalar(@kao) && do {
         <<looping through optional fields for special features>>
     }; # scalar(@kao)
@@ -5274,6 +5278,7 @@ There is no [[hide]] variable for sequences, as they are shown following a diffe
 
 <<default sequence vars values>>=
 feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef },
+alignment_color              => { TYPE => 'EXTCOLOR', VALUE => undef },
 ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef },
 @
 <<DESC custom file variables>>=
@@ -5287,6 +5292,16 @@ LDE:
 
 ###EOR###
 ORD: 302
+SEC: SEQUENCE
+SUB: Sequences
+OPT: alignment_color
+PAR: <color>
+SDE: Setting stroke color for the alignment segments for all the features
+     corresponding to this sequence.
+LDE: 
+
+###EOR###
+ORD: 303
 SEC: SEQUENCE
 SUB: Sequences
 OPT: ribbon_color
@@ -5337,6 +5352,7 @@ LDE:
 
 <<default source vars values>>=
 feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef },
+alignment_color              => { TYPE => 'EXTCOLOR', VALUE => undef },
 ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef },
 @
 <<DESC custom file variables>>=
@@ -5350,6 +5366,16 @@ LDE:
 
 ###EOR###
 ORD: 452
+SEC: SOURCE
+SUB: Sources
+OPT: alignment_color
+PAR: <color>
+SDE: Setting stroke color for the alignment segments for all the features
+     corresponding to the given source.
+LDE: 
+
+###EOR###
+ORD: 453
 SEC: SOURCE
 SUB: Sources
 OPT: ribbon_color
@@ -5399,6 +5425,7 @@ LDE:
 
 <<default strand vars values>>=
 feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef },
+alignment_color              => { TYPE => 'EXTCOLOR', VALUE => undef },
 ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef },
 @
 <<DESC custom file variables>>=
@@ -5412,6 +5439,16 @@ LDE:
 
 ###EOR###
 ORD: 552
+SEC: STRAND
+SUB: Strands
+OPT: alignment_color
+PAR: <color>
+SDE: Setting stroke color for the alignment segments for all the features
+     appearing on the strand provided.
+LDE: 
+
+###EOR###
+ORD: 553
 SEC: STRAND
 SUB: Strands
 OPT: ribbon_color
@@ -5549,6 +5586,7 @@ Join_Lines_COLOR           => { TYPE => 'COLOR'  , VALUE => 'fg'   },
 
 <<default group vars values>>=
 feature_color                => { TYPE => 'EXTCOLOR', VALUE => undef   },
+alignment_color              => { TYPE => 'EXTCOLOR', VALUE => undef   },
 ribbon_color                 => { TYPE => 'COLOR',    VALUE => undef   },
 @
 <<DESC custom file variables>>=
@@ -5562,6 +5600,16 @@ LDE:
 
 ###EOR###
 ORD: 652
+SEC: GROUP
+SUB: Groups
+OPT: alignment_color
+PAR: <color>
+SDE: Setting stroke color for the alignment segments of all the features
+     comprised within this group.
+LDE: 
+
+###EOR###
+ORD: 653
 SEC: GROUP
 SUB: Groups
 OPT: ribbon_color
@@ -6642,7 +6690,7 @@ sub load_grouping() {
         $group = "$grp_string\_$group_id";
 	    return $grp_NOGP;
     };
-    @grouping_list = split /\s*;\s*/og, $attributes;
+    @grouping_list = split /\s*;\s*/o, $attributes;
 	<<parse grouping attributes>>
 	<<parse other attributes>>
     return $grp_GP;
@@ -6712,7 +6760,7 @@ for (my $element = 0; $element <= $#grouping_list; $element++) {
         ($new_group[1] eq '') || ($label = $new_group[1]);
 #            $label = $new_group[1];
 #            $label eq "" && do {
-#                (undef,$label,undef) = split /\s+/og, $new_group[0];
+#                (undef,$label,undef) = split /\s+/o, $new_group[0];
 #            };
     };
 }; # for $element
@@ -6959,7 +7007,7 @@ If it is not the case, then we skip this code chunk and starts the tag-value che
 <<load-GFF-align: checking simple coords>>=
 ($fst) = shift @$strf;
 $fst ne '@@NO@@NE@@' && do {
-    @lst = split /\s+/og, $fst;
+    @lst = split /\s+/o, $fst;
     ((defined($lst[0]) && $lst[0] =~ /$regexp_float/o) &&
      (defined($lst[1]) && $lst[1] =~ /$regexp_float/o)) && do {
         ($aln_ori,$aln_end) = @lst[0,1];
@@ -6993,7 +7041,7 @@ See section~\ref{sec:groupingalntagkeys}, page~\pageref{sec:groupingalntagkeys},
 <<load-GFF-align: looping through tag-value pairs>>=
 for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
     my (@q, $t, @new_id);
-    @q = split /\s+/og, $strf->[$gh];
+    @q = split /\s+/o, $strf->[$gh];
     $t = lc($q[0]);
     # print STDERR join(' : ',$strf->[$gh], join('***',@q).'**|', 
     #                   $t, $Vars{LAYOUT}{label_tag})."\n";
@@ -7115,7 +7163,7 @@ We first check whether the GFF-record contains the vector type and the window/st
 <<load-GFF-vector: simple fields>>=
 ($fst) = shift @$strf;
 $fst ne '@@NO@@NE@@' && do {
-    @lst = split /\s+/og, $fst;
+    @lst = split /\s+/o, $fst;
     (defined($lst[0]) && defined($vect_type{lc($lst[0])})) && do {
         $v_type = $vect_type{lc($lst[0])};
         (defined($lst[1]) && $lst[1] =~ /$regexp_float/o) && do {
@@ -7145,7 +7193,7 @@ See section~\ref{sec:groupingvectagkeys}, page~\pageref{sec:groupingvectagkeys},
 <<load-GFF-vector: looping through tag-value pairs>>=
 for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
     my (@q, $t, @new_id);
-    @q = split /\s+/og, $strf->[$gh];
+    @q = split /\s+/o, $strf->[$gh];
     $t = lc($q[0]);
     # print STDERR join(' : ',$strf->[$gh], join('***',@q).'**|', 
     #                   $t, $Vars{LAYOUT}{label_tag})."\n";
@@ -7174,7 +7222,7 @@ for (my $gh = 0; $gh <= $#{ $strf }; $gh++) {
         next;
     }; # step_tag
     $t =~ /^$Vars{LAYOUT}{scoary_tag}$/ && do {
-        @vect_ary = split /\s+/og, $q[1];
+        @vect_ary = split /\s+/o, $q[1];
     }; # frame_tag
 }; # for $gh
 @ 
@@ -11771,18 +11819,27 @@ end % aplotdict
 @ %def corner
 
 <<PSFunctions - zoomtk>>=
-/zoomtk {                 %-> LLx LLy URx URy zoomtk
+/zoomtk {                    %-> LLx LLy URx URy zoomtk
   %-% vflg { (zoomtk) msg } if
   %-% setting coordinates for all four box corners
-  4 copy                  %-> LLx LLy URx URy LLx LLy URx URy
-  3 1 roll                %-> LLx LLy URx URy LLx URy LLy URx
-  exch                    %-> LLx LLy URx URy LLx URy URx LLy
-  %-% drawing corner marks
-  ATX neg ATY     corner  %-> corner on URx LLy
-  ATX     ATY neg corner  %-> corner on LLx URy
-  ATX     ATY     corner  %-> corner on URx URy
-  ATX neg ATY neg corner  %-> corner on LLx LLy
-} D                       %:%
+  1 dict begin               %->
+    /_ATX                    %->
+      Pb Qb or {             %-> bottom vertical zoom marks
+        KLh                  %-> must be shorter 
+      } {                    %-> whether percent_box or extra_box
+        ATX                  %-> are switched on
+      } ie                   %-> and appear on final plot
+    D                        %->
+    4 copy                   %-> LLx LLy URx URy LLx LLy URx URy
+    3 1 roll                 %-> LLx LLy URx URy LLx URy LLy URx
+    exch                     %-> LLx LLy URx URy LLx URy URx LLy
+    %-% drawing corner marks
+    _ATX neg ATY     corner  %-> corner on URx LLy
+     ATX     ATY neg corner  %-> corner on LLx URy
+     ATX     ATY     corner  %-> corner on URx URy
+    _ATX neg ATY neg corner  %-> corner on LLx LLy
+  end                        %->
+} D                          %:%
 @ %def zoomtk
 
 <<PSFunctions - gradcol>>=
@@ -13516,7 +13573,7 @@ Group lines functions will be placed to a fixed height that will be provided by 
 (This plot has been obtained using GFF2APLOT.     %-% octal values:
  The most recent version is freely                %-% \042 == doublequotes
  available at                                     %-% \057 == slash (/)
-\042http:\057\057www1.imim.es\057software\057gfftools\057GFF2APLOT.html\042. %-% 
+\042http:\057\057genome.imim.es\057software\057gfftools\057GFF2APLOT.html\042. %-% 
 Copyright\040\0401999-2003                        %-% \040 == white space
 by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
       (bv)          %-> x y x y angle string v-align
@@ -14557,7 +14614,7 @@ local $Data::Dumper::Deepcopy = 1;
 @ 
 
 <<perl requires help>>=
-"Data::Dumper" - pretty printing data structures for debugging (*).
+"Data::Dumper" - pretty printing data structures for debugging (*?).
 @
 
 <<command-line options>>=
@@ -15005,7 +15062,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.36 2003-06-10 10:36:28 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -15424,7 +15481,7 @@ sub getcmdlineopts() {
     defined($opt_t) && do {
         $splitcolor = $opt_t;
         $splitcolornum = &max($splitcolornum,
-                              scalar (split /\|/og, $splitcolor) );
+                              scalar (split /\|/o, $splitcolor) );
         $tblflg = 1;
     };
 } # getcmdlineopts
@@ -15438,7 +15495,7 @@ sub parseinput() {
         next if /^\s*$/o;
         chomp;
         $_ =~ s/^\s*//o;
-        @rec = split /\s+/og, $_;
+        @rec = split /\s+/o, $_;
         $rec[0] eq '#' && do {
             defined($rec[1]) || next;
             &print_color_name($tblflg, $rec[1]);
@@ -15661,7 +15718,7 @@ sub parseinput() {
         chomp;
         $_ =~ s/^\s*//o;
         $_ =~ s/["',]//og; #'"
-        @rec = split /\s+/og, $_;
+        @rec = split /\s+/o, $_;
         $rec[0] eq '#' && do {
             <<pagebbox2tex - LaTeX formats table: spacer>>
             next;
@@ -16620,7 +16677,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.35 2003-03-04 18:05:30 jabril Exp $
+# $Id: gff2aplot.nw,v 1.36 2003-06-10 10:36:28 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -16741,10 +16798,16 @@ no tangle -L -R"APLOT" \
         perl -ne '( $.>1 &&
                $_ !~ /^\#line (482|492|501|1286|1384|1561|2215|5735|6249|8869|468|1711|5859|5883|6372|470)/o
                ) && print' - | perltidy - | cpif $BIN/gff2aplot.pl ;
+@ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% These are the main program tangler commands
+<<tangling>>=
 # reformating program with perltidy
 no tangle -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
-    $WORK/$nwfile.nw | perltidy - | cpif $BIN/$nwfile.pl ;
+    $WORK/$nwfile.nw | perltidy - | cpif $SRC/$nwfile.pl ;
+( echo '#!'`which perl`' -w'; cat $SRC/$nwfile.pl ) | cpif $BIN/$nwfile.pl ;
 # html pretty-printing program with perltidy
 no tangle -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
@@ -16929,6 +16992,7 @@ So that, once you are in the working directory you just type [[setcwd]], and it 
 # Global Variables
 # WORK is defined with "setcwd"...
 BIN="$WORK/bin" ;
+SRC="$WORK/src" ;
 PARAM="$BIN/param" ;
 DOCS="$WORK/docs" ;
 DATA="$WORK/data" ;
