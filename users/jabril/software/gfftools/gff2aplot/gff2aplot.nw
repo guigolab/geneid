@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% $Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $
+% $Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $
 %
 \usepackage{noweb}
 % noweb options
@@ -70,7 +70,7 @@
 %%} % parbox
 %%\end{center}
 %%\end{abstract}\vskip 5ex
-%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $$>$ }
+%%{\large$<$ \verb$Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $$>$ }
 %%
 %%\vfill
 %%
@@ -430,7 +430,10 @@ This is the main loop for the {\prog} ``Filter'' mode:
 {\gft}, say here {\prog} and {\gps}, share many of the basic procedures, both must parse same format input files, must map the read fields to the customization variables and sort groups and their elements by acceptor site coord. That is the main reason for developing a module containing the definitions of such common functions.
 
 <<Basic common block for gfftools>>=
-@SpecialCache = ();         # Reseting Special features cache
+%SpecialCache = (           # Reseting Special features cache
+   PRE  => [],
+   POST => [],
+   );
 %CustomVars = ();           # Reseting Customization OPTIONS
 &parse_custom_files;
 
@@ -448,7 +451,7 @@ This is the main loop for the {\prog} ``Filter'' mode:
 
 @
 
-[[@SpecialCache]] array is initialized here, it is used to save temporary data for the special features passed by custom files that are defined in section~\ref{sec:specfeatvarscfile}, page~\pageref{sec:specfeatvarscfile}.
+[[%SpecialCache]] hash is initialized here, it is used to save temporary data for the special features passed by custom files that are defined in section~\ref{sec:specfeatvarscfile}, page~\pageref{sec:specfeatvarscfile}.
 We force that all the variables must be declared before using them and restrict unsafe constructs with'[[use strict]]'. After that we switch on signal trapping.
  
 <<Use Modules>>=
@@ -492,9 +495,9 @@ $PROGRAM $VERSION $REVISION $REVISION_DATE $LAST_UPDATE
 <<Global Constants>>=
 ($PROGRAM,$VERSION,$REVISION,$REVISION_DATE,$LAST_UPDATE) = 
    ( 'gff2aplot','v2.0',
-     '$Revision: 1.31 $', #'
-     '$Date: 2002-01-08 17:09:40 $', #'
-     '$Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $', #'
+     '$Revision: 1.32 $', #'
+     '$Date: 2002-01-11 20:05:15 $', #'
+     '$Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $', #'
     );
 $REVISION =~ s/\$//og;
 $REVISION_DATE =~ s/\$//og;
@@ -1239,7 +1242,7 @@ sub parse_custom_files() {
         close(THIS);
     }; # LOAD
   }; # MAIN
-    print LOGFILE (Data::Dumper->Dump([ \@SpecialCache, \%CustomVars ],
+    print LOGFILE (Data::Dumper->Dump([ \%SpecialCache, \%CustomVars ],
                                    [ qw( *SpecialCache   *CustomVars ) ]))
         if ($LogFile && $Debug);
     &footer("CUSTOM FILES LOADED");
@@ -2105,14 +2108,14 @@ The following hash definition sets the available ribbon styles:
 
 <<Global Vars>>=
 %Ribbons = (    # shw lns  
-    'n'      => [ $F, $F ],
-    'none'   => [ $F, $F ],
-    'l'      => [ $F, $T ],
-    'lines'  => [ $F, $T ],
-    'r'      => [ $T, $F ],
-    'ribbon' => [ $T, $F ],
-    'b'      => [ $T, $T ],
-    'both'   => [ $T, $T ],
+    'n'       => [ $F, $F ],
+    'none'    => [ $F, $F ],
+    'l'       => [ $F, $T ],
+    'lines'   => [ $F, $T ],
+    'r'       => [ $T, $F ],
+    'ribbons' => [ $T, $F ],
+    'b'       => [ $T, $T ],
+    'both'    => [ $T, $T ],
     ); # %Ribbons
 @
 
@@ -2219,7 +2222,7 @@ sub parse_special_customs() {
 @ %def &parse_special_customs
 
 <<Pre-Declared Vars>>=
-%SpecialVars @SpecialCache
+%SpecialVars %SpecialCache
 @ %def SpecialVars SpecialCache
 
 <<Global Vars>>=
@@ -2311,7 +2314,7 @@ color => sub {
         $TESTS{CMYKFLOAT}->(\$fld[2],$_n.'(magenta)',$fld[2]) || return $F;
         $TESTS{CMYKFLOAT}->(\$fld[3],$_n.'(yellow)' ,$fld[3]) || return $F;
         $TESTS{CMYKFLOAT}->(\$fld[4],$_n.'(black)'  ,$fld[4]) || return $F;
-        @{$COLORS{('my_'.$fld[0])}} = [ ++$colors, @fld[1..5] ];
+        $COLORS{('my_'.$fld[0])} = [ ++$colors, @fld[1..5] ];
         return $T;
     }, # color
 @
@@ -2343,8 +2346,8 @@ box => sub {
         @fld = split /\s+/og, $cstr, 5;
         scalar(@fld) < 4 && do {
             &warn('WRONGSPECREC',$F,'BOX',4,
-                 'box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> '.
-                 '[ S:<line_style> [ W:<line_width> [ F:<fill_color> ] ] ] ]');
+                 'box  <Xori> <Xend> <Yori> <Yend> [ L:<line_color> ] '.
+                 '[ S:<line_style> ] [ W:<line_width> ] [ F:<fill_color> ]');
             return $F;
         }; # defined
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Xori)',lc($fld[0])) || return $F;
@@ -2352,7 +2355,7 @@ box => sub {
         $TESTS{SEQ_UNIT}->(\$fld[2],$_n.'(Yori)',lc($fld[2])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[3],$_n.'(Yend)',lc($fld[3])) || return $F;
         @tld = &get_spfeat_props($fld[4],$F,$_n);
-        push @SpecialCache,
+        push @{ $SpecialCache{PRE} },
              [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[1]}),
                &get_units(\@{$fld[2]}),&get_units(\@{$fld[3]}),
                join(" ",@tld[2,4,3,5],
@@ -2369,7 +2372,8 @@ ORD: 903
 SEC: EXTRA
 SUB: Extra
 OPT: box
-PAR: <Xori> <Xend> <Yori> <Yend> %{ L:<line_color> %{ S:<line_style> %{ W:<line_width> %{ F:<fill_color> %} %} %} %}
+PAR: <Xori> <Xend> <Yori> <Yend> %{ L:<line_color> %} \n\
+     %{ S:<line_style> %} %{ W:<line_width> %} %{ F:<fill_color> %}
 SDE: 
 LDE: 
 ###EOR###
@@ -2387,8 +2391,8 @@ circle => sub {
         scalar(@fld) < 4 && do {
             &warn('WRONGSPECREC',$F,'CIRCLE',4,
                   'circle  <Cx> <Cy> <Rx> <Ry> '.
-                  '[ A:<angle> [ L:<line_color> [ S:<line_style> '.
-                  '[ W:<line_width> [ F:<fill_color> ] ] ] ] ]');
+                  '[ A:<angle> ] [ L:<line_color> ] [ S:<line_style> ] '.
+                  '[ W:<line_width> ] [ F:<fill_color> ]');
             return $F;
         }; # defined
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
@@ -2396,7 +2400,7 @@ circle => sub {
         $TESTS{SEQ_UNIT}->(\$fld[2],$_n.'(Rx)',lc($fld[2])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[3],$_n.'(Ry)',lc($fld[3])) || return $F;
         @tld = &get_spfeat_props($fld[4],$F,$_n);
-        push @SpecialCache,
+        push @{ $SpecialCache{PRE} },
              [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
                &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
                join(" ",@tld[2,4,3,5],
@@ -2412,8 +2416,9 @@ circle => sub {
 ORD: 904
 SEC: EXTRA
 SUB: Extra
-OPT: color
-PAR: <Cx> <Cy> <Rx> <Ry> %{ A:<angle> %{ L:<line_color> %{ S:<line_style> %{ W:<line_width> %{ F:<fill_color> %} %} %} %} %}
+OPT: circle
+PAR: <Cx> <Cy> <Rx> <Ry> %{ A:<angle> %} %{ L:<line_color> %} \n\
+     %{ S:<line_style> %} %{ W:<line_width> %} %{ F:<fill_color> %}
 SDE: 
 LDE: 
 ###EOR###
@@ -2430,10 +2435,10 @@ arrow => sub {
         @fld = split /\s+/og, $cstr, 4;
         scalar(@fld) < 3 && do {
             &warn('WRONGSPECREC',$F,'ARROW',3,
-                  'arrow  <Cx> <Cy> <length> [ A:<angle> '.
-                  '[ L:<line_color> [ S:<line_style> [ W:<line_width> '.
-                  '[ F:<fill_color> [ N:<font_name> [ Z:<font_size> '.
-                  '[ T:<text_color> [ "<string>" ] ] ] ] ] ] ] ] ]');
+                  'arrow  <Cx> <Cy> <length> [ A:<angle> ] '.
+                  '[ L:<line_color> ] [ S:<line_style> ] [ W:<line_width> ] '.
+                  '[ N:<font_name> ] [ Z:<font_size> ] [ H:<horizontal_align> ] '.
+                  '[ V:<vertical_align> ] [ T:<text_color> ] [ "<string>" ]');
             return $F;
         }; # defined
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
@@ -2441,7 +2446,7 @@ arrow => sub {
         $TESTS{PS_UNIT}->(\$fld[2],$_n.'(length)',lc($fld[2])) || return $F;
         @tld = &get_spfeat_props($fld[3],$T,$_n);
         $tld[0] ne '' || ($tld[0] = '( )');
-        push @SpecialCache,
+        push @{ $SpecialCache{POST} },
              [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
                &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
                '[ '.join(" ",@tld[0,6..10,2,4],&get_units(\@{$fld[2]}),
@@ -2458,7 +2463,9 @@ ORD: 905
 SEC: EXTRA
 SUB: Extra
 OPT: arrow
-PAR: <Cx> <Cy> <length> %{ A:<angle> %{ L:<line_color> %{ S:<line_style> %{ W:<line_width> %{ F:<fill_color> %{ N:<font_name> %{ Z:<font_size> %{ T:<text_color> %{ "<string>" %} %} %} %} %} %} %} %} %}
+PAR: <Cx> <Cy> <length> %{ A:<angle> %} %{ L:<line_color> %} %{ S:<line_style> %} \n\
+     %{ W:<line_width> %} %{ N:<font_name> %} %{ Z:<font_size> %} \n\
+     %{ H:<horizontal_align> %} %{ V:<vertical_align> %} %{ T:<text_color> %} %{ "<string>" %}
 SDE: 
 LDE: 
 ###EOR###
@@ -2473,25 +2480,24 @@ text => sub {
         my ($cstr,undef) = @_;
         my (@fld,@tld);
         my $_n = 'Special Features [TEXT] ';
-        @fld = split /\s+/og, $cstr, 4;
-        scalar(@fld) < 3 && do {
+        @fld = split /\s+/og, $cstr, 3;
+        scalar(@fld) < 2 && do {
             &warn('WRONGSPECREC',$F,'TEXT',3,
-                  'text  <Cx> <Cy> '.
-                  '[ N:<font_name> [ Z:<font_size> [ A:<angle> '.
-                  '[ H:<horizontal_align> [ V:<vertical_align> '.
-                  '[ T:<text_color> ] ] ] ] ] ] "<string>"');
+                  'text  <Cx> <Cy> "<string>" [ A:<angle> ] '.
+                  '[ N:<font_name> ] [ Z:<font_size> ] [ H:<horizontal_align> ] '.
+                  '[ V:<vertical_align> ] [ T:<text_color> ]');
             return $F;
         }; # defined
         $TESTS{SEQ_UNIT}->(\$fld[0],$_n.'(Cx)',lc($fld[0])) || return $F;
         $TESTS{SEQ_UNIT}->(\$fld[1],$_n.'(Cy)',lc($fld[1])) || return $F;
         @tld = &get_spfeat_props($fld[2],$T,$_n);
         $tld[0] ne '' && do {
-             push @SpecialCache,
-                  [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
-                    &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
-                    '[ '.join(" ",@tld[1,0,6..10],&get_units(\@{$fld[0]}),
-                              &get_units(\@{$fld[1]}))." xtxt" ];
-             return $T;
+            push @{ $SpecialCache{POST} },
+                 [ &get_units(\@{$fld[0]}),&get_units(\@{$fld[0]}),
+                   &get_units(\@{$fld[1]}),&get_units(\@{$fld[1]}),
+                   '[ '.join(" ",@tld[1,0,6..10],&get_units(\@{$fld[0]}),
+                             &get_units(\@{$fld[1]}))." xtxt" ];
+            return $T;
         };
         &warn('EMPTYSTRING',$F,$_n);
         return $F;
@@ -2511,7 +2517,8 @@ ORD: 906
 SEC: EXTRA
 SUB: Extra
 OPT: text
-PAR: <Cx> <Cy> %{ N:<font_name> %{ Z:<font_size> %{ A:<angle> %{ H:<horizontal_align> %{ V:<vertical_align> %{ T:<text_color> %} %} %} %} %} %} "<string>"
+PAR: <Cx> <Cy> "<string>" %{ A:<angle> %} %{ N:<font_name> %} %{ Z:<font_size> %} \n\
+     %{ H:<horizontal_align> %} %{ V:<vertical_align> %} %{ T:<text_color> %}
 SDE: 
 LDE: 
 ###EOR###
@@ -3179,7 +3186,7 @@ show_x_label               => { TYPE => 'BOOLEAN', VALUE => $T     },
 x_label                    => { TYPE => 'STRING' , VALUE => undef  },
 @ %def {show_x_label} {x_label}
 <<command-line options>>=
-"X|x-label=s"  => \$CmdLineVars{LAYOUT}{"x-axis_label"}, # X-Axis_LABEL
+"X|x-label=s"  => \$CmdLineVars{LAYOUT}{"x_label"},
 @ 
 <<command-line help>>=
 -X, --x-label <string>   Defining X-axis label.
@@ -3258,7 +3265,7 @@ show_y_label              => { TYPE => 'BOOLEAN', VALUE => $T     },
 y_label                   => { TYPE => 'STRING' , VALUE => undef  },
 @ %def {show_y_sequence_label} {y_sequence_label}
 <<command-line options>>=
-"Y|y-label=s"  => \$CmdLineVars{LAYOUT}{"y-axis_label"}, # Y-Axis_LABEL
+"Y|y-label=s"  => \$CmdLineVars{LAYOUT}{"y_label"},
 @ 
 <<command-line help>>=
 -Y, --y-label <Y-Label>   Defining Y-axis label.
@@ -3850,13 +3857,9 @@ LDE:
 @
 
 <<default layout vars values>>=
-zoom                       => { TYPE => 'BOOLEAN', VALUE => $F     },
-zoom_area                  => { TYPE => 'BOOLEAN', VALUE => $F     },
-zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F     },
-zoom_area_mark_width       => { TYPE => 'PS_UNIT', VALUE => [ 2, 'pt' ]  },
-zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred' },
-zoom_area_fill_color       => { TYPE => 'COLOR'  , VALUE => undef  },
-@ %def {zoom} {zoom_area} {zoom_marks} {zoom_area_mark_color}
+zoom                       => { TYPE => 'BOOLEAN', VALUE => $F           },
+zoom_area                  => { TYPE => 'BOOLEAN', VALUE => $F           },
+@ %def {zoom} {zoom_area}
 <<command-line options>>=
 "Z|zoom"                 => \$CmdLineVars{LAYOUT}{"zoom"},
 "z|zoom-area"            => \$CmdLineVars{LAYOUT}{"zoom_area"},
@@ -3908,6 +3911,16 @@ SDE:
 LDE: 
 
 ###EOR###
+@ 
+
+<<default layout vars values>>=
+zoom_marks                 => { TYPE => 'BOOLEAN', VALUE => $F           },
+zoom_area_mark_width       => { TYPE => 'PS_UNIT', VALUE => [ 2, 'pt' ]  },
+zoom_area_mark_style       => { TYPE => 'LINESTY', VALUE => 'solid'      },
+zoom_area_mark_color       => { TYPE => 'COLOR'  , VALUE => 'lightred'   },
+zoom_area_fill_color       => { TYPE => 'COLOR'  , VALUE => undef        },
+@ %def {zoom_marks} {zoom_area_mark_width} {zoom_area_mark_style} {zoom_area_mark_color} {zoom_area_fill_color}
+<<DESC custom file variables>>=
 ORD: 75
 SEC: LAYOUT
 SUB: Zoom
@@ -3918,12 +3931,22 @@ SDE:
 LDE: 
 
 ###EOR###
-ORD: 77
+ORD: 76
 SEC: LAYOUT
 SUB: Zoom
 OPT: zoom_area_mark_width
 DEF: |2pt|
 PAR: <length>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 77
+SEC: LAYOUT
+SUB: Zoom
+OPT: zoom_area_mark_style
+DEF: |solid|
+PAR: <line_style>
 SDE: 
 LDE: 
 
@@ -3938,7 +3961,7 @@ SDE:
 LDE: 
 
 ###EOR###
-ORD: 78
+ORD: 79
 SEC: LAYOUT
 SUB: Zoom
 OPT: zoom_area_fill_color
@@ -4196,19 +4219,26 @@ LDE:
 
 <<default layout vars values>>=
 show_ribbons               => { TYPE => 'BOOLEAN', VALUE => undef  },
-ribbons_style              => { TYPE => 'RIBBON',  VALUE => undef  },
+ribbon_style              => { TYPE => 'RIBBON',  VALUE => undef  },
+ribbon_color               => { TYPE => 'COLOR',   VALUE => undef  },
 show_grid                  => { TYPE => 'BOOLEAN', VALUE => $F     },
 @ %def {show_grid}
 <<command-line options>>=
-"K|show-ribbons=s"   => \$CmdLineVars{LAYOUT}{"ribbons_style"}, # Show_Ribbons (NLRB)
-"G|show-grid"        => \$CmdLineVars{LAYOUT}{"show_grid"}, # Display_GRID
-# "g"    => \$CmdLineVars{LAYOUT}{""}, # Display_GRID
-@ 
+"K|show-ribbons=s"   => sub {
+                              $CmdLineVars{LAYOUT}{"show_ribbons"} = $T;
+                              $CmdLineVars{LAYOUT}{"ribbon_style"} = $_[1];
+                             },
+"G|show-grid"        => \$CmdLineVars{LAYOUT}{"show_grid"},
+"g|hide-grid"        => sub { $CmdLineVars{LAYOUT}{"show_grid"} = $F },
+@
 <<command-line help>>=
 -K, --show-ribbons <ribbon_type>
       Force Ribbons for all features on axes to be:
          (N)one, (L)ines, (R)ibbons, (B)oth.
--G, --show-grid   Switches 'on' grid (default is 'off').
+-G, --show-grid
+      Switches 'on' grid (default is 'off').
+-g, --hide-grid
+      Switches 'off' grid (if switched on from customization files).
 @
 <<DESC command-line options>>=
 ORD: 87
@@ -4228,13 +4258,39 @@ SDE:
 LDE: 
 
 ###EOR###
+ORD: 
+OPT: g
+LNG: hide-grid
+EQV: [show_grid]=|off|
+SDE: 
+LDE: 
+
+###EOR###
 @ 
 <<DESC custom file variables>>=
 ORD: 87
 SEC: LAYOUT
 SUB: Aplot
 OPT: show_ribbons
+PAR: <boolean>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 
+SEC: LAYOUT
+SUB: Aplot
+OPT: ribbon_style
 PAR: <ribbon-type>
+SDE: 
+LDE: 
+
+###EOR###
+ORD: 
+SEC: LAYOUT
+SUB: Aplot
+OPT: ribbon_color
+PAR: <color>
 SDE: 
 LDE: 
 
@@ -4242,7 +4298,7 @@ LDE:
 ORD: 88
 SEC: LAYOUT
 SUB: Aplot
-OPT: show-grid
+OPT: show_grid
 DEF: |off|
 PAR: <boolean>
 SDE: 
@@ -5341,8 +5397,8 @@ LDE:
 
 <<default feature vars values>>=
 show_ribbons               => { TYPE => 'BOOLEAN', VALUE => $F     },
-ribbons_style              => { TYPE => 'RIBBON',  VALUE => 'none' },
-@ %def {show_ribbons} {ribbons_style} 
+ribbon_style              => { TYPE => 'RIBBON',  VALUE => 'none' },
+@ %def {show_ribbons} {ribbon_style} 
 <<DESC custom file variables>>=
 ORD: 710
 SEC: FEATURE
@@ -5357,7 +5413,7 @@ LDE:
 ORD: 711
 SEC: FEATURE
 SUB: Features
-OPT: ribbons_style
+OPT: ribbon_style
 DEF: |none|
 PAR: <ribbon>
 SDE: 
@@ -5745,7 +5801,7 @@ sub fcolon() { return ($_[0] =~ /^.+:.+$/o ? $T : $F) }
 
 The following functions checks whether some of the input GFF fields are well defined. They return '[[True]]' ('[[$T]]') if no error found and '[[False]]' ('[[$F]]') when input fields are wrong. The returned value forces '[[&load_aplot]]' or '[[&load_gff]]' functions to skip the records having format errors.
 
-Here we test that '\pa{start}' field must be lower or equal than '\pa{end}' in standard GFF-records (not in second coord pair of aplot):
+Here we test that '\pa{start}' field must be lower or equal than '\pa{end}' in standard GFF-records. From now on, it is also required for the second coords pair if we get coords from aplot records.
 
 \label{func:checkcoords}
 <<Parsing Input Data>>=
@@ -5753,10 +5809,8 @@ sub check_coords() { # ((ori,end)_1,...,(ori,end)_n)
     my ($aflg,@ary) = @_;
     for (my $j=0; $j<=$#ary; $j+=2) {
         $ary[$j] > $ary[$j+1] && do {
-            ($aflg || $j < 2) && do {
-                &warn('ORI_GREATER_END',$F,$ary[$j],$ary[$j+1],$file,$n+1);
-                return $F;
-            }; # $aflg
+            &warn('ORI_GREATER_END',$F,$ary[$j],$ary[$j+1],$file,$n+1);
+            return $F;
         }; # $ary[$j] > $ary[$j+1]
     }; # for
     return $T;
@@ -5767,6 +5821,16 @@ sub check_coords() { # ((ori,end)_1,...,(ori,end)_n)
 ORI_GREATER_END =>
   $Warn."Start greater than end \"\%s > \%s\" in file \"\%s\" line \"\%s\".\n", 
 @
+
+'\pa{score}' field may contain '.' (for records having no score), we change score for those cases to '0'.
+
+<<Parsing Input Data>>=
+sub check_score() { # (scoref_1,...,scoref_n)
+    foreach my $sco (@_) {
+        (defined($$sco) && $$sco eq '.') && ($$sco = 0);
+    }; # foreach
+} # check_score
+@ %def &check_score
 
 '\pa{strand}' field must contain only '+', '-' or '.' (for records having no strand).
 
@@ -5867,6 +5931,7 @@ my ($seqname,$source,$feature,$start,
 sub check_gff_fields() {
     &check_coords($T,$start,$end) || (return $F);
     &check_strand($strand) || (return $F);
+    &check_score(\$score);
     &check_frame($frame) || (return $F);
     &add_gff_record($_[0]);
     return $T; 
@@ -6052,6 +6117,7 @@ If records are OK, then we can append a new record to the variable defined for A
 sub check_aplot_fields() {
     &check_coords($F,$start_1,$end_1,$start_2,$end_2) || (return $F);
     &check_strand($strand_1,$strand_2) || (return $F);
+    &check_score(\$score_1,\$score_2);
     &check_frame($frame_1,$frame_2) || (return $F);
     &add_gff_record($_[0]);
     return $T; 
@@ -7356,18 +7422,21 @@ $vrf->{_plot_aln} && do {
     $vrf->{_y_sequence_name} = defined($vrf->{y_sequence_name})
         ? $vrf->{y_sequence_name} : $vrf->{_alignment_name}[1];
 }; # $vrf->{_plot_aln}
-@ %def {_plot_aln} {_swap_aln}
+($vrf->{_report_x_sequence_name},$vrf->{_report_y_sequence_name}) =
+     ($vrf->{_x_sequence_name},$vrf->{_y_sequence_name});
+@ %def {_plot_aln} {_swap_aln} {_report_x_sequence_name} {_report_y_sequence_name}
 
 \item Finally we grep those X and Y sequences from [[@{$Order{GFF}}]], so we sholud know if they are present there or not. This depends on what we have found in [[@{$Order{ALN}}]] but also on [[$Vars{LAYOUT}{x_sequence_name}]] and [[$Vars{LAYOUT}{y_sequence_name}]] settings.
 
 <<setting axes - step 3>>=
 $vrf->{_alignment_name} = join(":", @{ $vrf->{_alignment_name} });
+$vrf->{_report_alignment_name} = $vrf->{_alignment_name};
 ($vrf->{_plot_x_sequence},$vrf->{_x_sequence_name}) =
     &search_seqname($vrf->{_x_sequence_name}, undef, \@{ $Order{GFF} });
 ($vrf->{_plot_y_sequence},$vrf->{_y_sequence_name}) =
     &search_seqname($vrf->{_y_sequence_name}, $vrf->{_x_sequence_name}, 
                     \@{ $Order{GFF} });
-@ %def {_plot_x_sequence} {_plot_y_sequence}
+@ %def {_plot_x_sequence} {_plot_y_sequence} {_report_alignment_name}
 \end{enumerate}
 
 While following those points, we will set also three variables that tell {\prog} if it is worth to plot alignments, x and y sequence ([[_plot_aln]], [[_plot_x_sequence]] and [[_plot_y_sequence]] respectively).
@@ -7381,15 +7450,15 @@ sub set_page_axes() {
     # ($vrf->{alignment_name} = $vrf->{_alignment_name}) =~ s/$;/ : /o;
     my ($yf,$nf) = ('was found. PLOTTING IT...','NOT found. NOT PLOTTED...');
     &report('SETPAGEAXES',
-             ( "ALIGNMENT \"$vrf->{_alignment_name}\" ".
+             ( "ALIGNMENT \"$vrf->{_report_alignment_name}\" ".
                ( $vrf->{_plot_aln} ? $yf : $nf ).
                ( $vrf->{_swap_aln} ?
                  "\n###     The alignment found makes program".
                           " to swap X-Y annotations..." : "" )
                ),
-             ( "X-SEQUENCE \"$vrf->{_x_sequence_name}\" ".
+             ( "X-SEQUENCE \"$vrf->{_report_x_sequence_name}\" ".
                ( $vrf->{_plot_x_sequence} ? $yf : $nf ) ),
-             ( "Y-SEQUENCE \"$vrf->{_y_sequence_name}\" ".
+             ( "Y-SEQUENCE \"$vrf->{_report_y_sequence_name}\" ".
                ( $vrf->{_plot_y_sequence} ? $yf : $nf ) )
             );
     return;
@@ -7421,7 +7490,7 @@ sub search_alnname() {
     foreach $naln (@$_ro) {
         ($nm_a,$nm_b) = split /:/o, $naln->[0], 2; 
         ($nm_a =~ /^$sq_b$/ && $nm_b =~ /^$sq_a$/) && do {
-            @$_ra = ($nm_b,$nm_a);
+            @$_ra = ($nm_a,$nm_b);
             return ($T, $T);
         };
     }; # foreach $naln
@@ -7454,7 +7523,12 @@ In order to compute coordinates limits that we will need later when calculating 
 \item We must take as defaults the starting and ending coordinates found in the GFF input records. If none is defined, because you have been playing with a not defined alingment or sequences names, program uses 0 as start and 1000 as end so it does not die on an empty plot.
 
 <<setting boundaries - initialize>>=
-%tcrds = ();
+%tcrds = (
+           xs => [],
+           xe => [],
+           ys => [],
+           ye => [],
+          );
 ($a, $x, $y) = (
     $vrf->{_alignment_name}, 
     $vrf->{_x_sequence_name},
@@ -7550,10 +7624,18 @@ $vrf->{_y_end}   = [ ( scalar(@{ $tcrds{ye} }) > 0 ?
 # print LOGFILE (Data::Dumper->Dump([ \%tcrds ], [ qw( *tcrds ) ]))
 #     if ($LogFile && $Debug);
 #
-$vrf->{_x_start} = &get_units(\@{ $vrf->{_x_start} });
-$vrf->{_x_end}   = &get_units(\@{ $vrf->{_x_end} });
-$vrf->{_y_start} = &get_units(\@{ $vrf->{_y_start} });
-$vrf->{_y_end}   = &get_units(\@{ $vrf->{_y_end} });
+$vrf->{_x_start} = &get_units(defined($vrf->{x_sequence_coords})
+                              ? \@{ $vrf->{x_sequence_coords}[0] }
+                              : \@{ $vrf->{_x_start} });
+$vrf->{_x_end}   = &get_units(defined($vrf->{x_sequence_coords})
+                              ? \@{ $vrf->{x_sequence_coords}[1] }
+                              : \@{ $vrf->{_x_end} });
+$vrf->{_y_start} = &get_units(defined($vrf->{y_sequence_coords})
+                              ? \@{ $vrf->{y_sequence_coords}[0] }
+                              : \@{ $vrf->{_y_start} });
+$vrf->{_y_end}   = &get_units(defined($vrf->{y_sequence_coords})
+                              ? \@{ $vrf->{y_sequence_coords}[1] }
+                              : \@{ $vrf->{_y_end} });
 @
 
 \item Once sequence defaults has been set, we check if [[zoom_area]] is switched on and, after that, we look for [[zoom]] switch. This will allow users to define a zoom area within an already zoomed plot (that feature was not available on old gawk version of {\prog}). Here we look for the zoom area coords, when they are same than sequence boundaries, [[zoom_area]] flag is disabled but also is [[zoom]] (because there are no sequence coords for any zoom defined by user and this way we can skip the corresponding test that will be unnecessary).
@@ -7586,7 +7668,7 @@ $vrf->{zoom} && do {
       $vrf->{_y_end}   = $vrf->{_y_zoom_end};
   }; # zoom...
 }; # zoom
-$vrf->{zoom} || ($vrf->{zoom_marks} = $F);
+$vrf->{zoom} || ($vrf->{zoom_marks} = $F); # !zoom
 @ %def {_x_zoom_start} {_x_zoom_end} {_y_zoom_start} {_y_zoom_end}
 
 We do need an auxiliarly function to decide which is the first defined value starting from left in each [[%tcrds]] subarray:
@@ -7621,7 +7703,7 @@ sub set_seq_boundaries() {
     <<setting boundaries - is zoom ON>>
     &report('PLOTLIMITS', "X : $vrf->{_x_start} to $vrf->{_x_end}",
                           "Y : $vrf->{_y_start} to $vrf->{_y_end}");
-    &report(( $vrf->{zoom_area}
+    &report(( $vrf->{zoom}
              ? ('ONZOOM',
                 "X : $vrf->{_x_zoom_start} to $vrf->{_x_zoom_end}",
                 "Y : $vrf->{_y_zoom_start} to $vrf->{_y_zoom_end}" )
@@ -7643,12 +7725,12 @@ ONZOOM =>
   "###---> SEQUENCE ZOOM that has been choosen:\n".
   "###      \%s\n###      \%s\n",
 NOZOOM =>
-  "###     SEQUENCE ZOOM is not enabled for this plot...\n",
+  "###---> SEQUENCE ZOOM is not enabled for this plot...\n",
 ONZOOMAREA =>
   "###---> ZOOM AREA that is going to be highlighted:\n".
   "###      \%s\n###      \%s\n",
 NOZOOMAREA =>
-  "###     NO ZOOM AREA was selected for this plot... \n",
+  "###---> NO ZOOM AREA was selected for this plot... \n",
 @
 
 
@@ -7845,9 +7927,9 @@ sub find_prop_ratio() {
     }; # RATIO
     &report('SCALEDONE',
             (($vrf->{aplot_xy_scale} ne -1)
-             ? "Current plot has an XY-RATIO of $vrf->{aplot_xy_scale}"
-             : "XY-RATIO is not taken into account for this plot"
-             ), &tobool($vrf->{aplot_xy_same_length}));
+             ? "Current plot has an XY-RATIO of $vrf->{aplot_xy_scale} ..."
+             : "XY-RATIO is not taken into account for this plot ..."
+             ), ($vrf->{aplot_xy_same_length} ? 'YES' : 'NO'));
     return;
 } # find_prop_ratio
 @ %def &find_prop_ratio
@@ -7855,7 +7937,7 @@ sub find_prop_ratio() {
 <<messages - input/output>>=
 SCALEDONE =>
   "###---> X/Y scale settings are: \n###     \%s\n".
-  "###     Are X/Y axes going to have same length ? \%s \n",
+  "###     Are X/Y axes going to have same length ?  \%s \n",
 @
 
 As we are getting the ratio of X-axes divided by X-axes dimensionality, [[aplot_xy_scale]] over 1 correspond to X-axes larger than Y-axes and the opposite for values below 1. This will be useful in the PS code as we are now independent of the nucleotide lengths represented along the axes. 
@@ -7919,22 +8001,35 @@ sub set_page_labels() {
     my ($vrf) = @_;
     defined($vrf->{title})    || do {
         ($vrf->{title} = $vrf->{_alignment_name}) =~ s/:/ x /o;
-        $vrf->{_plot_aln} || 
-            ($vrf->{subtitle} = 
-              'This alignment sequence was not found on GFF input records.\n'.
-              '...Please, check your command-line and/or data...');
-    };
+        $vrf->{_plot_aln} || do {
+            # PS --> angle string valn haln {fz fn} tcol x y  xtxt
+            my ($epo,$epe) = (
+                              ($vrf->{_x_end} - $vrf->{_x_start}) / 2 ,
+                              ($vrf->{_y_end} - $vrf->{_y_start}) / 2 ,
+                             );
+            push @{ $SpecialCache{POST} },
+                 [ $epo,$epo,$epe,$epe,
+                   '[ 45 (GFF-record Alignment Features NOT FOUND) '.
+                   '(bv) (ch) 18 pt /Helvetica-Bold _f '.
+                   ($epo - 10).' '.($epe + 10).' xtxt' ];
+            push @{ $SpecialCache{POST} },
+                 [ $epo,$epo,$epe,$epe,
+                   '[ 45 (...Please, check your command-line and/or GFF '.
+                   'input files...) (tv) (ch) 15 pt /Helvetica _f '.
+                   ($epo + 10).' '.($epe - 10).' xtxt' ];
+        }; # _plot_aln
+    }; # defined($vrf->{title})
     defined($vrf->{subtitle}) || ($vrf->{subtitle} = "");
     defined($vrf->{x_label})  || do {
         $vrf->{x_label} = $vrf->{_x_sequence_name};
         $vrf->{_plot_x_sequence} ||
-            ($vrf->{x_label} .= " (Annotation NOT FOUND)");
-    };
+            ($vrf->{x_label} .= " ... X-Sequence Annotation NOT FOUND ... ");
+    }; # defined($vrf->{x_label})
     defined($vrf->{y_label})  || do {
         $vrf->{y_label} = $vrf->{_y_sequence_name};
         $vrf->{_plot_y_sequence} ||
-            ($vrf->{y_label} .= " (Annotation NOT FOUND)");
-    };
+            ($vrf->{y_label} .= " ... Y-Sequence Annotation NOT FOUND ... ");
+    }; # defined($vrf->{y_label})
     defined($vrf->{percent_box_label})    ||
         ($vrf->{percent_box_label} = '');
     defined($vrf->{percent_box_sublabel}) ||
@@ -8723,15 +8818,19 @@ D        %:%
 D              %-%         
 %-% feature labels: X-sequence vars
 /FTXw                                  %-% max feature label length
-  $vr->{feature_x_label_length}        %-%
-  FTf glblw                            %-%
+  FTz 0 gt {                           %-%
+    $vr->{feature_x_label_length}      %-%
+    FTf glblw                          %-%
+  } { 0 } ifelse                       %-%
 D                                      %-%
 /FTXa $vr->{feature_x_label_angle} D   %-%
 /FTXrb @{[ &tobool($vr->{feature_x_label_rotate}) ]} D  %-%
 %-% feature labels: Y-sequence vars
 /FTYw                                  %-% max feature label length
-  $vr->{feature_y_label_length}        %-%
-  FTf glblw                            %-%
+  FTz 0 gt {                           %-%
+    $vr->{feature_y_label_length}      %-%
+    FTf glblw                          %-%
+  } { 0 } ifelse                       %-%
 D                                      %-%
 /FTYa $vr->{feature_y_label_angle} D   %-%
 /FTYrb @{[ &tobool($vr->{feature_y_label_rotate}) ]} D  %:%
@@ -8756,15 +8855,19 @@ D               %-%
 D               %-%
 %-% group labels: X-sequence vars
 /GPXw                                %-% max group label length
-  $vr->{group_x_label_length}        %-%
-  GPf glblw                          %-%
+  GPz 0 gt {                         %-%
+    $vr->{group_x_label_length}      %-%
+    GPf glblw                        %-%
+  } { 0 } ifelse                     %-%
 D                                    %-%
 /GPXa $vr->{group_x_label_angle} D   %-%
 /GPXrb @{[ &tobool($vr->{group_x_label_rotate}) ]} D  %-%
 %-% group labels: Y-sequence vars
 /GPYw                                %-% max group label length
-  $vr->{group_y_label_length}        %-%
-  GPf glblw                          %-%
+  GPz 0 gt {                         %-%
+    $vr->{group_y_label_length}      %-%
+    GPf glblw                        %-%
+  } { 0 } ifelse                     %-%
 D                                    %-%
 /GPYa $vr->{group_y_label_angle} D   %-%
 /GPYrb @{[ &tobool($vr->{group_y_label_rotate}) ]} D  %:%
@@ -8955,9 +9058,9 @@ BLOCKRB =>
 BLOCKRBL =>
   "###       + drawing \%s ribbons outline...\n",
 BLOCKXY =>
-  "###       + drawing \%s annotation...\n",
+  "###       + drawing \%s annotation (\%s)...\n",
 BLOCKA =>
-  "###       + drawing alignment features...\n",
+  "###       + drawing alignment features (\%s)...\n",
 BLOCKFX =>
   "###       + drawing special features from custom files...\n",
 BLOCKTODO =>
@@ -8974,9 +9077,7 @@ sub ps_block_aplot() {
     #
     &report('BLOCKTODO','APLOT-BOX');
     #
-    $StringCache{$vlr->{_x_sequence_name}} = {};
-    $StringCache{$vlr->{_y_sequence_name}} = {};
-    $StringCache{$vlr->{_alignment_name}}  = '';
+    <<initializing StringCache and SpecialCache variables>>
     #
     print STDOUT << '+++MAINProcs+++';
 %
@@ -8990,42 +9091,46 @@ DoHeader
 begindata
 +++MAINProcs+++
     # tag definitions: Box,Join,Arrow,Banner,Ribbons;
-    $vlr->{_plot_x_sequence} && do { # horizontal
-        &ps_plot_features($vlr->{_x_sequence_name},$T);
-    }; # _plot_x_sequence
-    $vlr->{_plot_y_sequence} && do { # vertical
-        &ps_plot_features($vlr->{_y_sequence_name},$F);
-    }; # _plot_y_sequence
+    &ps_plot_features($vlr->{_x_sequence_name},$T) if $vlr->{_plot_x_sequence};
+    &ps_plot_features($vlr->{_y_sequence_name},$F) if $vlr->{_plot_y_sequence};
     # nice ribbon lines finishing
-    $vlr->{_plot_x_sequence} && 
-        &ps_plot_outlines($vlr->{_x_sequence_name},$T);
-    $vlr->{_plot_y_sequence} && 
-        &ps_plot_outlines($vlr->{_y_sequence_name},$F);
-    # extras
-    scalar(@SpecialCache) > 0 && do {
-        &ps_plot_addons;
-    }; # _plot_addons
+    &ps_plot_outlines($vlr->{_x_sequence_name},$T) if $vlr->{_plot_x_sequence};
+    &ps_plot_outlines($vlr->{_y_sequence_name},$F) if $vlr->{_plot_y_sequence};
+    # extras: PRE (under aln features)
+    &ps_plot_addons('PRE')  if scalar(@{ $SpecialCache{PRE} })  > 0;
     # alignment
-    $vlr->{_plot_aln} && do {
-        &ps_plot_aln($vlr->{_alignment_name});
-    }; # _plot_aln
-    # zoom area
-    $vlr->{zoom_area} && do {
-        my $kt = defined($vlr->{zoom_area_fill_color}) 
-                 ? "$vlr->{zoom_area_fill_color} ".&tobool($T)
-                 : &tobool($F);
-        printf STDOUT "%s %s %s %s %s %s %s Msquare\n",
-            $vlr->{zoom_area_mark_width}, $vlr->{zoom_area_mark_color}, $kt,
-            &max($vlr->{_x_zoomarea_start}, $vlr->{_x_start}),
-            &min($vlr->{_x_zoomarea_end},   $vlr->{_x_end}),
-            &max($vlr->{_y_zoomarea_start}, $vlr->{_y_start}),
-            &min($vlr->{_y_zoomarea_end},   $vlr->{_y_end});
-    }; # zoom_area
+    &ps_plot_aln($vlr->{_alignment_name}) if $vlr->{_plot_aln};
+    # extras: POST (over aln features)
+    &ps_plot_addons('POST') if scalar(@{ $SpecialCache{POST} }) > 0;
+    #
     print STDOUT "\%\nenddata\n\%\n";
     &report('BLOCKDONE','APLOT-BOX');
 } # ps_block_aplot
 @ %def &ps_block_aplot
 
+<<initializing StringCache and SpecialCache variables>>=
+$StringCache{$vlr->{_x_sequence_name}} = {} if $vlr->{_plot_x_sequence};
+$StringCache{$vlr->{_y_sequence_name}} = {} if $vlr->{_plot_y_sequence};
+$StringCache{$vlr->{_alignment_name}}  = '' if $vlr->{_plot_aln};
+# zoom area
+$vlr->{zoom_area} && do {
+    my %kt;
+    $kt{color} = defined($vlr->{zoom_area_fill_color}) 
+                 ? "$vlr->{zoom_area_fill_color} ".&tobool($T)
+                 : &tobool($F);
+    $kt{xo} = &max($vlr->{_x_zoomarea_start}, $vlr->{_x_start});
+    $kt{xe} = &min($vlr->{_x_zoomarea_end},   $vlr->{_x_end});
+    $kt{yo} = &max($vlr->{_y_zoomarea_start}, $vlr->{_y_start});
+    $kt{ye} = &min($vlr->{_y_zoomarea_end},   $vlr->{_y_end});
+    unshift @{ $SpecialCache{PRE} },
+          [ $kt{xo}, $kt{xe}, $kt{yo}, $kt{ye},
+            join(" ",$vlr->{zoom_area_mark_color},
+                     &get_units($vlr->{zoom_area_mark_width}),
+                     $vlr->{zoom_area_mark_style},
+                     $kt{color},$kt{xo},$kt{xe},$kt{yo},$kt{ye})." xbox" ];
+}; # zoom_area
+@ 
+% PS --> l_col l_wdth l_sty { fill_col+fill_flg } xo xe yo ye  xbox
 
 \subsubsctn{Main aplot box: sequence annotation}
 
@@ -9037,7 +9142,7 @@ sub ps_plot_features() {
     $vaf = \%{ $Vars{LAYOUT} };
     ($go,$orf) = &get_ordered_ary('GFF',$seq);
     $what = $flg ? 'X-sequence' : 'Y-sequence';
-    &report('BLOCKXY', $what);
+    &report('BLOCKXY', $what,$seq);
     $go && do {
         print STDOUT "\%\n\%\%\%\% DATA ---> $what Annotations\n\%\n".
                      ($flg ? 'beginXseq'  : 'beginYseq')."\n"; 
@@ -9136,8 +9241,8 @@ $this{lbl} = $this{lbl_flg}
                 ? "($this{lbl_tmp}) _t"
                 : "($elst->[$_ftid]) _t")
              : "_f"; 
-# {show_ribbons} {ribbons_style}
-@@{ $this{rbnsty} } = @{ $Ribbons{&get_var_value('ribbons_style',\@rflst)} };
+# {show_ribbons} {ribbon_style}
+@@{ $this{rbnsty} } = @{ $Ribbons{&get_var_value('ribbon_style',\@rflst)} };
 (!$this{rbnsty}[0] &&  $this{rbnsty}[1]) && ($this{rbnflg} = $T);
 $this{rbnflg} = &get_var_value('show_ribbons',\@rflst);
 (!$this{rbnsty}[0] && !$this{rbnsty}[1]) && ($this{rbnflg} = $F);
@@ -9175,11 +9280,14 @@ print STDOUT "\/$this{shape} $this{grid_flg} $this{col} $this{lbl} ".
 
 <<PostScript PLOT>>=
 sub ps_plot_addons() {
+    my $vky = shift;
     my $vsf = \%{ $Vars{LAYOUT} };
     my %they;
+    scalar(@{ $SpecialCache{$vky} }) > 0 || return;
     &report('BLOCKFX');
-    print STDOUT "\%\n\%\%\%\% Extra features from custom files...\n\%\nbeginaln\n"; 
-    foreach my $ilm (@SpecialCache) {
+    print STDOUT "\%\n\%\%\%\% Extra features from custom files ($vky)...\n".
+                 "\%\nbeginaln\n"; 
+    foreach my $ilm (@{ $SpecialCache{$vky} }) {
         ($they{xo},$they{xe},$they{yo},$they{ye},$they{string}) = @{ $ilm };
         ( &check_seqlim($they{xo},$they{xe},
                         $vsf->{_x_start},$vsf->{_x_end}) &&
@@ -9203,7 +9311,7 @@ sub ps_plot_aln() {
     $vaf = \%{ $Vars{LAYOUT} };
     ($go,$orf) = &get_ordered_ary('ALN',$aln);
     $StringCache{$aln} = '';
-    &report('BLOCKA');
+    &report('BLOCKA',$aln);
     $go && do {
         print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\nbeginaln\n"; 
         <<looping into alignment data structure>>
@@ -9240,6 +9348,7 @@ for (my $a = 0; $a <= $#{ $orf }; $a++) {
                                 $vaf->{_x_start},$vaf->{_x_end}) &&
                   &check_seqlim($this{yo},$this{ye},
                                 $vaf->{_y_start},$vaf->{_y_end}) ) && do {
+                    <<strand correction for alignment feature coords>>
                     <<generating alignment ps code for current aln>>
                 }; # check_nuclim
             }; # for $d 
@@ -9262,6 +9371,15 @@ if ($vaf->{_swap_aln}) {
     $this{yo} = $elst->[$_ftnori];
     $this{ye} = $elst->[$_ftnend];
 };
+@ 
+
+We must swap coords for reverse strand features in order to display alignments properly.
+
+<<strand correction for alignment feature coords>>=
+($this{xn},$this{yn}) = (split //o, $str);
+defined($this{yn}) || ($this{yn} = $this{xn});
+$this{xn} eq '-' && do { ($this{xo},$this{xe}) = ($this{xe},$this{xo}) };
+$this{yn} eq '-' && do { ($this{yo},$this{ye}) = ($this{ye},$this{yo}) };
 @ 
 
 Finally, the alignment specific output is produced in the following piece of code:
@@ -9322,7 +9440,7 @@ beginmatches
 <<PostScript PLOT>>=
 sub ps_plot_pctaln() {
     my ($aln) = @_;
-    &report('BLOCKA');
+    &report('BLOCKA',$aln);
     print STDOUT "\%\n\%\%\%\% DATA ---> Alignment\n\%\nbeginaln\n"; 
     print STDOUT $StringCache{$aln};
     print STDOUT "endseq\n";
@@ -9450,6 +9568,10 @@ sub get_var_value() {
     foreach $v (@$refs) {
         defined($v->[$_prop]{$name}) && ($out = $v->[$_prop]{$name});
     }; # foreach
+    (defined($Vars{LAYOUT}{$name}) && 
+     ( ! defined($Defaults{LAYOUT}{$name}) ||
+       $Vars{LAYOUT}{$name} ne $Defaults{LAYOUT}{$name})) &&
+         ($out = $Vars{LAYOUT}{$name});
     return $out;
 } # get_var_value
 @ %def &get_var_value
@@ -10952,6 +11074,12 @@ end % aplotdict
     not {      %-> if text color is not given, use foreground color
       fg       %->
     } if       %-> mark x! y! angle string valn haln {fz fn} tcol
+    ttshw      %-> %%% X Y angle string valign halign fnt color ttshw
+    pop        %-% removing mark     
+  R            %->
+} B            %:%
+/kkdevaka {         %->
+  S                 %->
     cmyk            %->
     sfnt            %->
     8 dict begin    %->
@@ -11738,10 +11866,11 @@ It seems to work both ways, when visualizing through a screen device and when se
 } B           %:%
 %-%
 /hrsg {      %->
-  0.00  1.0  %->
-  1.00  1.0  %->
   1.00  0.0  %->
-  3          %->
+  0.75  1.1  %->
+  0.75  1.0  %->
+  0.00  1.0  %->
+  4          %->
   0.25 0.0   %->
   mkshp      %->
 } B          %:%
@@ -12420,33 +12549,38 @@ by Josep F. ABRIL, Thomas WIEHE & Roderic GUIGO)  %-> x y x y angle string
 
 <<PSFunctions - seqs annotation>>=
 /beginXseq {         %-> setting X-sequence origin and clip path
+  %-% vflg { (beginXseq) msg } if
   S                  %->
+    0 0              %->
+    AX YH ATX add    %->
+      bbox           %-% setting clip area
+    clip             %->
+    newpath          %->
     XO neg Xscm      %->
     YH               %->
       T              %->
-    0 AY neg AX ATX  %-% setting clip area
-               bbox  %->
-    clip             %->
-    newpath          %->
     colordict begin  %->
     HT               %-> switch on horizontal flag
 } B                  %-%
 %-%
 /beginYseq {         %-> setting Y-sequence origin and clip path
+  %-% vflg { (beginYseq) msg } if
   S                  %->
+    ATY neg 0        %->
+    AX YH            %->
+      bbox           %-% setting clip area
+    clip             %->
+    newpath          %->
     0                %->
     YO neg Yscm      %->
       T              %->
     90 rotate        %->
-    0 AX neg YH ATY  %-% setting clip area
-               bbox  %->
-    clip             %->
-    newpath          %->
     colordict begin  %->
     VT               %-> switch off horizontal flag (then vertical mode... ;^D)
 } B                  %-%
 %-%
 /beginaln {          %-> setting aplot origin and clip path
+  %-% vflg { (beginaln) msg } if
   S                  %->
     0  0             %->
     AX YH            %->
@@ -13702,7 +13836,7 @@ sub tex_header() {
     my ($a,$b) = @_;
     $a =~ m{/([^/]*)$}o && ($a = $1);
     return "\%\n\% $a\n\%\n\% $b\n\%\n\%".
-           ' $Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $ '.
+           ' $Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $ '.
            "\n\%\n"; 
 } # tex_header
 @
@@ -14860,9 +14994,9 @@ $BIN/gff2aplot.pl --debug -V $WORK/tests/running.log
      --percent-box-color lightcyan
      --extra-box-color   lightseagreen
      --show-percent-box --show-extra-box
-     --feature-var 'exon::ribbons_style=lines'
+     --feature-var 'exon::ribbon_style=lines'
      --feature-var 'exon@e4::show_feature_label=on'
-     --feature-var 'mrna::ribbons_style=r'
+     --feature-var 'mrna::ribbon_style=r'
      --feature-var '*::show_ribbons=on'
      --feature-var 'mrna::feature_layer=-1'
      --feature-var 'align::feature_layer=5'
@@ -15296,7 +15430,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: gff2aplot.nw,v 1.31 2002-01-08 17:09:40 jabril Exp $
+# $Id: gff2aplot.nw,v 1.32 2002-01-11 20:05:15 jabril Exp $
 @ 
 
 \subsctn{GNU General Public License}
@@ -15395,7 +15529,7 @@ notangle -R"APLOT" $WORK/$nwfile.nw | \
     perltidy - | cpif $BIN/$nwfile.pl ;
 # html pretty-printing program with perltidy
 notangle -R"APLOT" $WORK/$nwfile.nw | \
-    perltidy -html - | cpif $DOCS/html/$nwfile.html ;
+    perltidy -html - | cpif $DOCS/html/gff2aplot_code/$nwfile.html ;
 #
 @
 
@@ -15420,7 +15554,8 @@ notangle -R"APLOT" \
 # html pretty-printing program with perltidy
 notangle -R"APLOT" \
     -filter '$BIN/PScompactnw.pl "POSTSCRIPT|PSFunction|PSVariables"' \
-    $WORK/$nwfile.nw | perltidy -html - | cpif $DOCS/html/$nwfile.html ;
+    $WORK/$nwfile.nw | perltidy -html - | \
+    cpif $DOCS/html/gff2aplot_code/$nwfile.html ;
 #
 @ 
 
