@@ -1,0 +1,104 @@
+\documentclass[a4paper,11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: flowchart_GFFrecordparsing.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $
+%
+% T='flowchart_GFFrecordparsing'; latex $T.tex; dvips $T.dvi -o $T.tmp.ps; # ps2ps $T.tmp.ps $T.ps;
+% gs -sDEVICE=epswrite -sOutputFile=$T.ps -dNOPAUSE -dBATCH $T.tmp.ps
+%
+% \usepackage{noweb}
+% noweb options
+% \noweboptions{smallcode,shortxref}
+% \def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+% \let\nwdocspar=\par                    %
+%
+\usepackage[offset={0pt,0pt},hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+\usepackage{fancyvrb}
+%
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+%
+\begin{document}
+\thispagestyle{empty}
+
+\fvset{fontfamily=courier,fontseries=b}
+\DefineShortVerb{\|}
+\SaveVerb{parseGFFfiles}|&parse_GFF_files|
+\SaveVerb{fieldscheck}|&fieldscheck|
+\SaveVerb{loadgff}|&load_gff|
+\SaveVerb{loadaplot}|&load_aplot|
+\SaveVerb{loadgrouping}|&load_grouping|
+\SaveVerb{checkgfffields}|&check_gff_fields|
+\SaveVerb{checkcoords}|&check_coords|
+\SaveVerb{checkstrand}|&check_strand|
+\SaveVerb{checkframe}|&check_frame|
+\SaveVerb{checkaplotfields}|&check_aplot_fields|
+\SaveVerb{addgffrecord}|&add_gff_record|
+\SaveVerb{addaplotrecord}|&add_aplot_record|
+\SaveVerb{GFFDATA}|%GFF_DATA|
+\SaveVerb{ALNDATA}|%ALN_DATA|
+\newcommand{\mapsbx}[1]{\psframebox[framearc=.2,framesep=5pt,linestyle=dotted,linewidth=0.5pt]{#1}}
+\begin{center}\small
+\fbox{%
+\begin{pspicture}(21,11)
+ %\showgrid%
+ \rput[t](10.5,10){%
+   \begin{psmatrix}[rowsep=20pt,colsep=0.5cm]
+%
+     []\rnode{A}{\UseVerb{parseGFFfiles}} &  & \rnode{B}{\UseVerb{fieldscheck}} &  &  \\[2ex]
+%
+     & \rnode{C}{\UseVerb{loadgff}} &  & \rnode{D}{\UseVerb{loadaplot}} &  \\
+%
+     &  & \rnode{E}{\mapsbx{\UseVerb{loadgrouping}}} &  &  \\
+%    
+     &  & \mapsbx{\shortstack{\UseVerb{checkcoords}\\\pnode{G}\UseVerb{checkstrand}\pnode{GG}\\\UseVerb{checkframe}}} &  &  \\
+%
+     & \rnode{F}{\UseVerb{checkgfffields}} &  & \rnode{H}{\UseVerb{checkaplotfields}} &  \\
+%
+     \rnode{I}{\UseVerb{addgffrecord}} &  &  &  & \rnode{J}{\UseVerb{addaplotrecord}} \\
+%
+     \shortstack{\rnode{K}{\UseVerb{GFFDATA}}\\[1ex]} & \shortstack[l]{\rnode{RG}{Raw GFF Features}\\[2.5ex]\rnode{VG}{Vector GFF Features}} &  &  & \shortstack{\rnode{L}{\UseVerb{ALNDATA}}\\[1ex]} \\
+%
+   \psset{arrows=->,linecolor=black,linewidth=2pt,nodesep=5pt}
+   \ncline{A}{B}
+   \ncarc[angleA=-90,angleB=0,arcangle=-8]{B}{C}
+          %\ncline[angleA=-90,angleB=0]{B}{C}%\nccurve[angleA=-90,angleB=60]{B}{C}
+   \ncarc[angleA=-90,angleB=180]{B}{D}
+          %\ncline[angleA=-90,angleB=180]{B}{D}%\nccurve[angleA=-90,angleB=150]{B}{D}
+   %
+   \ncline{C}{F}
+   \ncarc[angleA=-90,angleB=180,arcangle=-8]{C}{E}
+   \nccurve[angleA=180,angleB=90]{E}{I}
+   \ncarc[angleA=180,angleB=90,arcangle=-8]{F}{I}
+   \ncarc[angleA=45,angleB=180,arrows=<->,nodesepB=10pt]{F}{G}
+   \ncline{I}{K}
+   \ncline[linewidth=1pt,linestyle=dotted]{K}{RG}
+   \ncline[linewidth=1pt,linestyle=dotted]{K}{VG}
+   %
+   \ncline{D}{H}
+   \ncarc[angleA=-90,angleB=0]{D}{E}
+   \nccurve[angleA=0,angleB=90]{E}{J}
+   \ncarc[angleA=0,angleB=90]{H}{J}
+   \ncarc[angleA=180,angleB=0,linewidth=1.5pt,linestyle=dotted]{H}{I}
+   \ncarc[angleA=135,angleB=0,arrows=<->,nodesepB=10pt,arcangle=-8]{H}{GG}
+   \ncline{J}{L}
+   \end{psmatrix}
+ }%rput
+\end{pspicture}
+}%fbox
+\vskip 0.5cm
+
+{\large\bfseries \verb+>>+ flowchart\_GFFrecordparsing.ps \verb+<<+}
+\end{center}
+
+\end{document}
+

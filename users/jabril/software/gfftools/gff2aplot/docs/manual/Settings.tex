@@ -1,0 +1,22 @@
+%
+% Settings.tex
+%
+% How to install gff2ps for ``gff2ps Manual''.
+%
+% $Id: Settings.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $
+%
+%\newcommand{\csh}[1]{\texttt{\textbf{[\textsl{cshell}]\$} #1}}
+%\newcommand{\bsh}[1]{\texttt{\textbf{[\textsl{bshell}]\$} #1}}
+%\newcommand{\pgm}[1]{\textit{#1}}
+
+\sctn{Using \prog}
+	
+In this chapter it is explained how you can set system variables in order to start working with \prog. This program was designed to work under UNIX and has been tested under Irix, Solaris and Linux. In table~\ref{testedon} you can see the program versions with which we have worked. \prog\ has three inner modules: the shell script, the GNU awk script, and the PostScript prologue code. This prologue contains all procedure sets we have written to obtain the PostScript plots and it is embedded into `\texttt{gff2ps}'. This is a Bourne shell script ---using \textit{sh} or \textit{bash} (systems under Linux have a link for \textit{sh} to \textit{bash})--, that handles with command-line options, checks if given files exist and pass them to the GNU awk script. This loads data records and custom definitions generating the full PostScript output. You can visualize that with a PostScript viewer ---like ghostview, xpsview--- or send to a PostScript printer to obtain a hardcopy.\par
+
+The main difference from older versions is that GNU awk script is now included within the shell script to facilitate installation of our program.\par
+
+	\input{Install}
+
+	\input{CommandLine}
+
+	\input{BugReport}

@@ -1,0 +1,116 @@
+\documentclass[10pt]{article}
+%
+%        1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%
+% $Id: aln_strands.tex,v 1.1 2002-12-24 13:07:36 jabril Exp $
+%
+\usepackage[offset={0pt,0pt},hmargin=1cm,vmargin=1cm,noheadfoot]{geometry}
+%\usepackage{layout}
+\usepackage[dvips]{graphics}
+\usepackage[dvips]{graphicx}
+%% layout
+%\usepackage{fancyhdr} % Do not use \usepackage{fancybox} -> TOCs disappear
+\usepackage{lscape}
+%\usepackage{verbatim}
+%\usepackage{fancyvrb}
+%% fonts
+\usepackage{helvet}
+%%
+\newcommand{\shwfig}[2]{%
+ \begin{tabular}{@{}c@{}}%
+   \fbox{%
+    \includegraphics[height=0.45\textheight]%
+                    {#1}%
+   }%fbox
+  \\%
+   \textbf{#2}%
+  \\%
+ \end{tabular}%
+}%shwfig
+%%
+
+\sffamily
+\begin{document}
+\pagestyle{empty}
+%
+% four_strands.gff
+% four_strands.rc 
+
+\ \vfill
+\begin{center}
+\begin{tabular}{cc}
+ \shwfig{four_strands_raw.ps}{four\_strands\_raw.ps}
+&
+ \shwfig{four_strands_col.ps}{four\_strands\_col.ps}
+\\
+\rule{0pt}{0.25cm}
+\\
+ \shwfig{four_strands_lim.ps}{four\_strands\_lim.ps}
+&
+ \shwfig{four_strands_arw.ps}{four\_strands\_arw.ps}
+\\
+\end{tabular}
+\end{center}
+\vfill\ 
+
+%
+\newpage
+
+% \landscape
+
+\ \vfill
+\begin{center}
+\begin{tabular}{cc}
+ \shwfig{four_strands_arw.ps}{four\_strands\_arw.ps}
+&
+ \shwfig{four_strands_swp.ps}{four\_strands\_swp.ps}
+\\
+\end{tabular}
+\end{center}
+\vfill\ 
+
+% \endlandscape
+
+%
+\newpage
+
+\ \vfill
+\begin{center}
+\begin{tabular}{cc}
+ \shwfig{four_strands_zmm.ps}{four\_strands\_zmm.ps}
+&
+ \shwfig{four_strands_zmmswp.ps}{four\_strands\_zmmswp.ps}
+\\
+\rule{0pt}{0.25cm}
+\\
+ \shwfig{four_strands_zmy.ps}{four\_strands\_zmy.ps}
+&
+ \shwfig{four_strands_zmyswp.ps}{four\_strands\_zmyswp.ps}
+\\
+\end{tabular}
+\end{center}
+\vfill\ 
+
+%
+\newpage
+% four_strands_aplotformat.gff
+
+\ \vfill
+\begin{center}
+\begin{tabular}{cc}
+ \shwfig{four_strands_arw.ps}{four\_strands\_arw.ps}
+&
+ \shwfig{four_strands_aplotformat_arw.ps}{four\_strands\_aplotformat\_arw.ps}
+\\
+\rule{0pt}{0.25cm}
+\\
+ \shwfig{four_strands_swp.ps}{four\_strands\_swp.ps}
+&
+ \shwfig{four_strands_aplotformat_swp.ps}{four\_strands\_aplotformat\_swp.ps}
+\\
+\end{tabular}
+\end{center}
+\vfill\ 
+
+\end{document}

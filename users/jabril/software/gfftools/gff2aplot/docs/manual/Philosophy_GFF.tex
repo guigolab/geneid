@@ -1,0 +1,153 @@
+%
+% Philosophy_GFF.tex
+%
+% Brief description on GFF-format.
+%
+% $Id: Philosophy_GFF.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $
+%
+% \pslongbox{mypsframe}{\psframebox[framearc=0,linecolor=darkred,linewidth=2pt,fillstyle=solid,fillcolor=verylightgreen,framesep=2ex]}
+
+\label{sec:philoGFF}
+\newcommand{\IR}[1]{ %
+  \rule{2.5em}{0pt}\makebox[0cm][c]{\rotatebox{35}{\ $<$#1$>$}}
+  } % #1 string rotated
+
+GFF Protocol Specification was initially proposed by Richard Durbin and David Haussler with amendments proposed by Lincoln Stein, Suzana Lewis, Anders Krogh and others. The GFF Specification is nowadays maintained at the Sanger Center by Richard Bruskievich\footnote{\texttt{rbsk@sanger.ac.uk}}.\par
+
+We have developed \prog\ under \textbf{GFF Version 1} and \textbf{GFF Version 2} specifications, here we are going to summarize the basic aspects for it. You can obtain a more complete definition at Sanger Center GFF format page at:
+
+  \centerline{\bfseries\texttt{http://www.sanger.ac.uk/Software/GFF/gff.shtml}} \vspace{0.5ex}
+
+and the full specs at:
+
+  \centerline{\bfseries\texttt{http://www.sanger.ac.uk/Software/GFF/GFF\_Spec.shtml}} \vspace{0.5ex}
+
+There is a mailing list to which you can send comments, enquiries, complaints, etc\ldots about GFF. To be added to the mailing list you have to send a mail to \texttt{\bfseries Majordomo@sanger.ac.uk} with the following command in the body of your email message: \texttt{\bfseries subscribe gff-list}\par
+
+\subsubsctn{GFF Format Definition:}\label{sec:GFFdefs}
+\textbf{GFF} ---General Feature Format (formerly called 'Gene Feature Finding')--- is a format specification for describing genes and other features associated with genomic sequences and the transfer of feature information. A GFF record is an extension of a basic (name,start,end) tuple (or "NSE") that can be used to identify a substring of a biological sequence. (For example, the NSE (ChromosomeI,2000,3000) specifies the third kilobase of the sequence named "ChromosomeI"). Filename extension for GFF format has been defined as `.gff'.\par
+GFF format is not conceived to be used for complete data management of the analysis and annotation of genomic sequences, there are other much powerful systems developed for that (as Acedb, Genotator, \ldots). This format is intended to be easy to parse and process by a variety of programs in different languages ---i.e. Unix tools like grep, sort and simple perl and awk scripts---. So, GFF format has a record-based structure, where each feature is described on a single line, and line order is not relevant. In Version 2, all the fields of every single record must be separated by TAB characters (`$\backslash$t'), revoking previous permissions to use arbitrary whitespaces as field delimiters. Table~\ref{GFFrecords} placed below, shows some simple example records.\par
+
+\begin{table}[!ht]
+\caption{The simplest GFF-format records.}
+\label{GFFrecords}
+\begin{center}
+\begin{mypsframe}
+\begin{minipage}[!ht][][c]{0.8\linewidth}
+\scriptsize\ttfamily
+\begin{tabbing}
+12345678\=12345678\=12345678\=12345678\=12345678\=12345678\=12345678\=12345678\=12345678\=12345678\=\kill
+SEQ1\>netgene\>splice5\>172\>173\>0.94\>+\>.\>\\
+SEQ1\>genie\>sp5-20\>163\>182\>2.3\>+\>.\>\\
+SEQ1\>genie\>sp5-10\>168\>177\>2.1\>+\>.\>\\
+SEQ2\>grail\>ATG\>17\>19\>2.1\>-\>0\>\\
+SEQ1\>EMBL\>atg\>103\>105\>.\>+\>0\>labl\>\#\\
+SEQ1\>EMBL\>exon\>103\>172\>.\>+\>0\>labl\>\#\\
+SEQ1\>EMBL\>splice5\>172\>173\>.\>+\>.\>.\>\#
+\end{tabbing}
+\end{minipage}
+\end{mypsframe}
+\end{center}
+\end{table}
+
+\subsubsctn{Fields Definition:}
+
+Fields are:\\[1ex]
+\centerline{\small\hspace{-0.25cm}\framebox{\hspace{0.5cm}\pa{seqname} \pa{source} \pa{feature} \pa{start} \pa{end} \pa{score} \pa{strand} \pa{frame} \symbol{91}\textmd{\textsf{\textsl{group}}}\symbol{93} \symbol{91}\ldots\symbol{93}\hspace{0.5cm}}}
+
+\begin{description}
+\item[$<$seqname$>$] The name of the sequence. Having an explicit sequence name allows a feature file to be prepared for a data set of multiple sequences. You can use the identifier of the sequence in an accompanying file containing the sequence nucleotides string, or the identifier for a sequence in a public database ---as EMBL/Genbank/DDBJ accession number---.
+\item[$<$source$>$] The source of this feature. This field will normally be used to indicate the program making the prediction, or if it comes from public database annotation, or is experimentally verified, etc\ldots
+\item[$<$feature$>$] The feature type name. As you can use other features, it would be desirable to have a Standard Table for common features. For this standard table has been proposed to fall back on the international public standards for genomic database feature annotation, specifically, the DDBJ/EMBL/GenBank feature table\footnote{See the DDBJ/EMBL/GenBank feature key table definition at:\\\centerline{\bfseries\texttt{http://www.ebi.ac.uk/embl/Documentation/FT\_definitions/feature\_table.html}}}. Some of the most used terms in genomics from that table are summarized at Appendix~\ref{sec:gff-featbl}.
+\item[$<$start$>$, $<$end$>$] Integers. $<$start$>$ must be less than or equal to $<$end$>$, so reverse strand coordinates must be defined in forward coords. In GFF Version 1 sequence numbering starts at 1, so these numbers should be between 1 and the length of the relevant sequence, inclusive. Version 2 condones values of $<$start$>$ and $<$end$>$ that extend outside the reference sequence. 
+\item[$<$score$>$] A floating point value. When there is no score you should use `.'.
+\item[$<$strand$>$] One of `+', `-' or `.'. `.' should be used when strand is not relevant.
+\item[$<$frame$>$] One of `0', `1', `2' or `.'. `0' indicates that the specified region is in frame, i.e. that its first base corresponds to the first base of a codon. `1' indicates that there is one extra base, i.e. that the second base of the region corresponds to the first base of a codon, and `2' means that the third base of the region is the first base of a codon. If the strand is `-', then the first base of the region is value of $<$end$>$, because the corresponding coding region will run from $<$end$>$ to $<$start$>$ on the reverse strand. As with $<$strand$>$, if the frame is not relevant then set $<$frame$>$ to `.'. It has been pointed out that "phase" might be a better descriptor than "frame" for this field.
+\item[\symbol{91}group\symbol{93}] An optional string-valued field that can be used as a name to group together a set of records. Typical uses include to group the introns and exons in one gene prediction (or experimentally verified gene structure). In Version 2, group must be defined within a Tag-Value pair. Tags must be standard identifiers (\symbol{91}A-Za-z\symbol{93}\symbol{91}A-Za-z0-9\_\symbol{93}$\ast$). Free text values must be quoted within double quotes. Examples for group field can be found in table~\ref{GFFgroups}. Standard table for Group Tag Identifiers has not yet been completely formalized, however a useful constraint is that they are equivalent, where appropriate, to DDBJ/EMBL/GenBank feature `qualifiers' of given features\footnote{See the EMBL feature and qualifiers description at:\\\centerline{\bfseries\texttt{http://www3.ebi.ac.uk/Services/WebFeat/}}}.
+\end{description}
+
+\newlength{\wdth}
+\newcommand{\defbox}[1]{\settowidth{\wdth}{#1}}
+\newcommand{\texbox}[2]{\makebox[\wdth][#1]{#2}}
+\newcommand{\frmbox}[1]{\framebox[\wdth]{#1}}
+%
+\begin{center}
+\begin{table}[!ht]
+\caption{Grouping GFF records.}\vspace{2ex}
+\label{GFFgroups}
+\setlength{\parindent}{-0.05\linewidth}
+\begin{mypsframe}
+\begin{minipage}[!ht][][c]{1.1\linewidth}
+{\footnotesize\ttfamily
+\centerline{\normalsize\bfseries Simple Group Names (GFF Version 1)}\vspace{1ex}
+\begin{tabular}{llllllllll}
+\hline\hline
+\defbox{dJ102G20}\texbox{l}{CETBB} &
+\defbox{GD\_mRNA}\texbox{l}{search} &
+\defbox{similarity}\texbox{l}{cds} &
+\defbox{32727}\texbox{l}{2189} &
+\defbox{32740}\texbox{l}{2884} &
+\defbox{1.6e-23}\texbox{l}{.} &
+\defbox{+}\texbox{l}{+} &
+\defbox{2}\texbox{l}{.} &
+\defbox{Target "HBA\_HUMAN" 11 55}\texbox{l}{125}\\
+rt2202 &predict &gene &1289 &12852 &64.07 &- &. &trypsin \\
+MMPROT &blast &similarity &32727 &32740 &1.6e-23 &+ &1 &"RNA polymerases" \\
+\end{tabular}\\[2.5ex]
+\centerline{\normalsize\bfseries Tag-Value Group Names (GFF Version 2)}\vspace{1ex}
+\begin{tabular}{llllllllll}
+\hline\hline
+\defbox{dJ102G20}\texbox{l}{jj\_lk2} &
+\defbox{GD\_mRNA}\texbox{l}{finder} &
+\defbox{similarity}\texbox{l}{cds} &
+\defbox{32727}\texbox{l}{6718} &
+\defbox{32740}\texbox{l}{7051} &
+\defbox{1.6e-23}\texbox{l}{.} &
+\defbox{+}\texbox{l}{-} &
+\defbox{2}\texbox{l}{.} &
+\defbox{Target "HBA\_HUMAN" 11 55}\texbox{l}{Transcript "1"}\\
+dJ102G20 &GD\_mRNA &exon &7105 &7201 &. &- &2 &Sequence "dJ102G20.C1.1" \\
+seq1 &BLASTX &similarity &101 &235 &87.1 &+ &0 &Target "HBA\_HUMAN" 11 55\\
+\end{tabular}}
+\end{minipage}
+\end{mypsframe}
+\end{table}
+\end{center}
+
+\begin{description}
+\item[Comments] Comments are allowed starting with character `\#', everything following `\#' until the end of the line is ignored. Effectively this can be used in two ways: at the beginning of the line to make the whole line a comment, or the comment could come after all the required fields on the line.  
+\item[Meta Information] You can define optionally a number of special comment lines for meta information at the top of your gff file with `\#\#'. Current proposed `\#\#' lines are: 
+\begin{description}
+\item[\small\texttt{\#\#gff-version \{version}\}]\ \\GFF version, current version is 2.
+\item[\small\texttt{\#\#source-version \{source\} \{version\}}]\ \\You can record program or package version generated the data in this file.
+\item[\small\texttt{\#\#date \{date\}}]\ \\The date the file was made, or perhaps when prediction programs were run. Use of astronomical format is recommended (1997-11-08 for 8th November 1997), first because this sort properly, and second to avoid any US/European bias. 
+\item[\parbox{0.5\linewidth}{\small\ttfamily\#\#DNA \{seqname\}\\\#\#acggctcggattggcgctggatgatagatcagacgac\\\#\#...\\\#\#end-DNA}]\ \\To give a DNA sequence. Several people have pointed out that it may be convenient to include the sequence in the file. It should not become mandatory to do so. Often the seqname will be a well-known identifier, and the sequence can easily be retrieved from a database, or an accompanying file. 
+\item[\small\texttt{\#\#sequence-region \{seqname\} \{start\} \{end\}}]\ \\To indicate that this file only contains entries for the specified subregion of a sequence. 
+\end{description}
+\end{description}\vspace{-1ex}
+
+\begin{table}[!ht]
+\caption{Some remarks on GFF Standard Format Version 2.}
+\label{GFFremarks}
+\begin{center}
+\begin{mypsframe}
+\begin{minipage}[!ht][][c]{0.8\linewidth}
+  \begin{itemize}\setlength{\itemsep}{0ex plus0.1ex}
+    \item[$\triangleright$] Intended to be easy to parse and process.
+    \item[$\triangleright$] Field separator must be a TAB character (`$\backslash$t').
+    \item[$\triangleright$] Fields must not include whitespace.
+    \item[$\triangleright$] $<$start$>$ must be lower or equal than $<$end$>$.
+    \item[$\triangleright$] When there is no $<$score$>$ you should use `.'.
+    \item[$\triangleright$] When $<$strand$>$ is not relevant you should use `.'.
+    \item[$\triangleright$] Available $<$frames$>$ are `.', `0', `1' and `2'.
+    \item[$\triangleright$] Tag-Value pairs accepted for $<$group$>$ field.
+	\begin{itemize}
+    	\item[$\circ$] Group tag must be a standard identifier (\symbol{91}A-Za-z\symbol{93}\symbol{91}A-Za-z0-9\_\symbol{93}$\ast$).
+    	\item[$\circ$] Free text values must be quoted within double quotes.
+	\end{itemize}
+  \end{itemize}
+\end{minipage}
+\end{mypsframe}
+\end{center}
+\end{table}
+

@@ -1,0 +1,381 @@
+%
+% AplotCFvars_dscLayout.tex
+%
+% Description items for LAYOUT
+%
+% $Id: AplotCFvars_dscLayout.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $ 
+%
+\idesc{\op{page\_bbox} $\,=\,$ \pp{width,height} \hfill [ \bydef ]}
+   { \label{sec:pagebbox} This variable allows users to define an arbitrary page format, by defining the width and height for that page ({\prog} assigns automatically a format name for this new page dimensions). Do not include this variable in your custom files if you are using standard page sizes which can be set using \op{page\_size}, because \op{page\_bbox} overrides any further page definition by that variable. If the variable is not set, default value forces the use of any settings given for \op{page\_size}. \pp{width} and \pp{height} are set to points if no unit is given, now you can also use points, milimeters, centimeters or inches (pt, mm, cm or in, respectively). See table~\ref{tbl:PageSizes} for a reference on already defined page sizes and their dimensions. }
+%
+\idesc{\op{page\_size} $\,=\,$ \pp{format\_name} \hfill [ \vp{a4} ]}
+   { Setting a standard page size, available values for \pp{format\_name} are listed in table~\ref{tbl:PageSizes}. Page width and height values are coded for most common paper formats. }
+%
+\ijoin{\op{margin\_left} $\,=\,$ \pp{length} \hfill [ \vp{1cm} ]}
+%
+\ijoin{\op{margin\_right} $\,=\,$ \pp{length} \hfill [ \vp{1cm} ]}
+%
+\ijoin{\op{margin\_top} $\,=\,$ \pp{length} \hfill [ \vp{1cm} ]}
+%
+\idesc{\op{margin\_bottom} $\,=\,$ \pp{length} \hfill [ \vp{1cm} ]}
+   { You can set page margin with those four variables. \pp{length} can be given in points, milimeters, centimeters or inches (pt, mm, cm or in, respectively), but is set to points if no units are provided. }
+%
+\ijoin{\op{background\_color} $\,=\,$ \pp{color} \hfill [ \vp{white} ]}
+%
+\idesc{\op{foreground\_color} $\,=\,$ \pp{color} \hfill [ \vp{black} ]}
+   { These two customization variables accept any \pp{color} from those listed on table~\ref{tbl:CMYKcolor}. Default values are \vp{white} and \vp{black} for \op{background\_color} and \op{foreground\_color} respectively. These two variables also set the aliases \op{BGcolor} and \op{FGcolor}, so that you can use \vp{bgcolor} and \vp{bg}, or \vp{fgcolor} and \vp{fg}, to set any other color-related variable with the same colors you are defining as background/foreground colors. }
+%
+\idesc{\op{title} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { \op{title} sets the main title to \pp{string} for the current figure, by default showing \vp{align\_name} in the form of \vp{sequence1\_name} x \vp{sequence2\_name}. }
+%
+\idesc{\op{show\_title} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { \op{show\_title} switches on/off displaying the figure title. If you do not want to visualize the default title you can set this variable to \vp{off}, but you are not able to reuse the area of plot where title appears (set \op{title\_fontsize} to \vp{0} if you want to remove that area from plot). }
+%
+\idesc{\op{title\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica-bold} ]}
+   { {\tbdef} }
+%
+\idesc{\op{title\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{24pt} ]}
+   { Sets title fontsize, \pp{length} can be in pt, mm, cm or in (default is points if no units are given). Setting \op{title\_fontsize} to \vp{0} forces {\prog} to remove title area from plot, so no space is left for it. }
+%
+\idesc{\op{subtitle} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { \op{subtitle} sets the current figure subtitle to \pp{string}, by default it is defined as an empty string. }
+%
+\idesc{\op{show\_subtitle} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { \op{show\_subtitle} switches on/off displaying the subtitle text. If you do not want to visualize the default subtitle you can set this variable to \vp{off}, as with \op{show\_title} you are not able to reuse the area of plot where subtitle appears (so set \op{subtitle\_fontsize} to \vp{0} if you want to remove that area from plot too). }
+%
+\idesc{\op{subtitle\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica} ]}
+   { {\tbdef} }
+%
+\idesc{\op{subtitle\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{16pt} ]}
+   { Sets subtitle fontsize, \pp{length} can be in pt, mm, cm or in (default is points if no units are given). Setting \op{subtitle\_fontsize} to \vp{0} forces {\prog} to remove subtitle area from plot, so no space is left for it. }
+%
+\idesc{\op{x\_label} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_x\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { \op{show\_x\_label} switches on/off displaying the subtitle text. If you do not want to visualize the default subtitle you can set this variable to \vp{off}, as with \op{show\_title} you are not able to reuse the area of plot where subtitle appears (so set \op{subtitle\_fontsize} to \vp{0} if you want to remove that area from plot too). }
+%
+\idesc{\op{x\_label\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica-bold} ]}
+   { {\tbdef} }
+%
+\idesc{\op{x\_label\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{12pt} ]}
+   { Sets X-label fontsize, \pp{length} can be in pt, mm, cm or in (default is points if no units are given). Setting \op{subtitle\_fontsize} to \vp{0} forces {\prog} to remove subtitle area from plot, so no space is left for it. }
+%
+\idesc{\op{y\_label} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_y\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { \op{show\_x\_label} switches on/off displaying the subtitle text. If you do not want to visualize the default subtitle you can set this variable to \vp{off}, as with \op{show\_title} you are not able to reuse the area of plot where subtitle appears (so set \op{subtitle\_fontsize} to \vp{0} if you want to remove that area from plot too). }
+%
+\idesc{\op{y\_label\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica-bold} ]}
+   { {\tbdef} }
+%
+\idesc{\op{y\_label\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{12pt} ]}
+   { Sets Y-label fontsize, \pp{length} can be in pt, mm, cm or in (default is points if no units are given). Setting \op{subtitle\_fontsize} to \vp{0} forces {\prog} to remove subtitle area from plot, so no space is left for it. }
+%
+\idesc{\op{show\_percent\_box\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_label} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_label\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica-bold} ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_label\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{12pt} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_percent\_box\_sublabel} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_sublabel} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_label\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica} ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_label\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{9pt} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_extra\_box\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_label} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_label\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica-bold} ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_label\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{10pt} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_extra\_box\_sublabel} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_sublabel} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_sublabel\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica} ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_sublabel\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{9pt} ]}
+   { {\tbdef} }
+%
+\idesc{\op{x\_sequence\_coords} $\,=\,$ \pp{pos..pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{x\_sequence\_start} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{x\_sequence\_end} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{y\_sequence\_coords} $\,=\,$ \pp{pos..pos} \hfill [ \vp{*..*} ]}
+   { {\tbdef} }
+%
+\idesc{\op{y\_sequence\_start} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{y\_sequence\_end} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{x\_sequence\_zoom} $\,=\,$ \pp{pos..pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{x\_sequence\_zoom\_start} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{x\_sequence\_zoom\_end} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{y\_sequence\_zoom} $\,=\,$ \pp{pos..pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{y\_sequence\_zoom\_start} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{y\_sequence\_zoom\_end} $\,=\,$ \pp{pos} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{zoom} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{zoom-area} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{zoom\_marks} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{zoom\_area\_mark\_width} $\,=\,$ \pp{length} \hfill [ \vp{2pt} ]}
+   { {\tbdef} }
+%
+\idesc{\op{zoom\_area\_mark\_style} $\,=\,$ \pp{line\_style} \hfill [ \vp{solid} ]}
+   { {\tbdef} }
+%
+\idesc{\op{zoom\_area\_mark\_color} $\,=\,$ \pp{color} \hfill [ \vp{lightred} ]}
+   { {\tbdef} }
+%
+\idesc{\op{zoom\_area\_fill\_color} $\,=\,$ \pp{color} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{alignment\_name} $\,=\,$ \pp{seqXname:seqYname} \hfill [ \bydef ]}
+   { \label{sec:seqXseqY} When you are providing several alignments from input, you can select which one to be plotted. By default program uses first alignment found in the input stream if \op{x\_sequence\_name} and \op{y\_sequence\_name} were also not defined, else it will try combining those variables if they are set by user or relying on their default values. The precedence of those variables is the following: \centerline{\pp{seqXname:seqYname} $\gg$ \pp{seqXname}:\pp{seqYname} $\gg$ \pp{defaults}} Where \pp{seqXname}:\pp{seqYname} stands for the combination of the values set for \op{x\_sequence\_name} and \op{y\_sequence\_name} variables. If you set \op{alignment\_name} and \pp{seqXname:seqYname} is not found in the list of read alignments, program tries to find the reverse, \pp{seqYname:seqXname}, else no alignment will be drawn. \\ Remember that if you set this variable on command-line and the other two in a customization file or viceversa, you will get a plot in which sequence annotation along the axes does not correlate to the alignment shown, so that make sure that you are using all three in a coordinated way (although you are looking for that uncorrelated effect, but then it will be your fault, do not blame on {\prog}). This can seem a drawback, but think that it will be very useful if you are parsing GFF input and the alignment name was set with different sequence names: say here you have \vp{SeqA} and \vp{SeqB}, and the alignment sequence name from filtered output after running those sequences through your alignment program was set to \vp{my\_a:my\_b} instead of \vp{SeqA:SeqB}, so you do not have to reformat the GFF records for the alignment or the annotation. Following with that example, if nothing else is defined, \vp{SeqA} will be drawn on X-axis and \vp{SeqB} on Y-axis. If happens that \vp{my\_a:my\_b} (neither in case you already have \vp{SeqA:SeqB}) does not appear on GFF input, but program finds an alignment named as \vp{my\_b:my\_a}, then annotations will swap on axes, having \vp{SeqA} along Y-axis and \vp{SeqB} on X-axis. }
+%
+\idesc{\op{x\_sequence\_name} $\,=\,$ \pp{seqXname} \hfill [ \bydef ]}
+   { We define which sequence annotation is going to be drawn on X-axis, having two or more sequences from GFF input. By default, the program will use the first sequence id from that input (unless you have set something different on \op{alignment\_name} or from command-line). \pp{seqXname} will be the same as \pp{seqYname} (but then you must define both variables, \op{x\_sequence\_name} and \op{y\_sequence\_name}), this is useful when comparing a sequence against itself to find repeated elements, but take care not doing that when you are trying to compare different sequences because the program cannot guess that you do not want to do that. }
+%
+\idesc{\op{y\_sequence\_name} $\,=\,$ \pp{seqYname} \hfill [ \bydef ]}
+   { This variable allows you to define which sequence is going to be drawn along the Y-axis. Take a look to \op{alignment\_name} and \op{x\_sequence\_name} variables descriptions for a deeper explanation of their settings and behaviour. }
+%
+\idesc{\op{aplot\_xy\_same\_length} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{aplot\_xy\_scale} $\,=\,$ \pp{X/Y ratio} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{alignment\_scale\_width} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{alignment\_scale\_color} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_ribbons} $\,=\,$ \pp{boolean} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_grid} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_percent\_box} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_extra\_box} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{aplot\_box\_bgcolor} $\,=\,$ \pp{color} \hfill [ \vp{bg} ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_bgcolor} $\,=\,$ \pp{color} \hfill [ \vp{bg} ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_bgcolor} $\,=\,$ \pp{color} \hfill [ \vp{bg} ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_height} $\,=\,$ \pp{length} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_height} $\,=\,$ \pp{length} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_tickmark\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_only\_bottom\_ticks} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_aplot\_x\_ticks} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_aplot\_y\_ticks} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_percent\_x\_ticks} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_percent\_y\_ticks} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_extrabox\_x\_ticks} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_extrabox\_y\_ticks} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{aplot\_major\_tickmark} $\,=\,$ \pp{integer} \hfill [ \vp{2} ]}
+   { {\tbdef} }
+%
+\idesc{\op{aplot\_minor\_tickmark} $\,=\,$ \pp{integer} \hfill [ \vp{5} ]}
+   { {\tbdef} }
+%
+\idesc{\op{aplot\_score\_range} $\,=\,$ \pp{score..score} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_major\_tickmark} $\,=\,$ \pp{integer} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_minor\_tickmark} $\,=\,$ \pp{integer} \hfill [ \vp{4} ]}
+   { {\tbdef} }
+%
+\idesc{\op{percent\_box\_score\_range} $\,=\,$ \pp{score..score} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_major\_tickmark} $\,=\,$ \pp{integer} \hfill [ \vp{2} ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_minor\_tickmark} $\,=\,$ \pp{integer} \hfill [ \vp{5} ]}
+   { {\tbdef} }
+%
+\idesc{\op{extra\_box\_score\_range} $\,=\,$ \pp{score..score} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{major\_tickmark\_nucleotide} $\,=\,$ \pp{nucleotides} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{minor\_tickmark\_nucleotide} $\,=\,$ \pp{nucleotides} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{major\_tickmark\_score} $\,=\,$ \pp{score-step} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{minor\_tickmark\_score} $\,=\,$ \pp{score-step} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\ijoin{\op{show\_feature\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+%
+\ijoin{\op{feature\_label\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica} ]}
+%
+\idesc{\op{feature\_label\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{6pt} ]}
+   { {\tbdef} }
+%
+\ijoin{\op{feature\_x\_label\_length} $\,=\,$ \pp{char-length} \hfill [ \bydef ]}
+%
+\ijoin{\op{feature\_x\_label\_angle} $\,=\,$ \pp{degrees} \hfill [ \vp{$0^{\,\circ}$} ]}
+%
+\idesc{\op{feature\_x\_label\_rotate} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\ijoin{\op{feature\_y\_label\_length} $\,=\,$ \pp{char-length} \hfill [ \bydef ]}
+%
+\ijoin{\op{feature\_y\_label\_angle} $\,=\,$ \pp{degrees} \hfill [ \vp{$0^{\,\circ}$} ]}
+%
+\idesc{\op{feature\_y\_label\_rotate} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\ijoin{\op{show\_group\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+%
+\ijoin{\op{group\_label\_font} $\,=\,$ \pp{font} \hfill [ \vp{helvetica} ]}
+%
+\idesc{\op{group\_label\_fontsize} $\,=\,$ \pp{length} \hfill [ \vp{8pt} ]}
+   { {\tbdef} }
+%
+\ijoin{\op{group\_x\_label\_length} $\,=\,$ \pp{char-length} \hfill [ \bydef ]}
+%
+\ijoin{\op{group\_x\_label\_angle} $\,=\,$ \pp{degrees} \hfill [ \vp{$0^{\,\circ}$} ]}
+%
+\idesc{\op{group\_x\_label\_rotate} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\ijoin{\op{group\_y\_label\_length} $\,=\,$ \pp{char-length} \hfill [ \bydef ]}
+%
+\ijoin{\op{group\_y\_label\_angle} $\,=\,$ \pp{degrees} \hfill [ \vp{$0^{\,\circ}$} ]}
+%
+\idesc{\op{group\_y\_label\_rotate} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { {\tbdef} }
+%
+\idesc{\op{align\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{target} ]}
+   { \op{align\_tag} holds the specific tag (for a grouping Tag-Value pair) to detect those GFF records coding for alignment data and having any of the three following group structures:\\[1.5ex] 
+ \begin{minipage}{\linewidth} \begin{small} \flushleft \hspace{0.5cm}\shortstack[l]{ [ \ldots ]\,\,\,align\_tag "group\_name" \pp{seq2\_start} \pp{seq2\_end} \eoline\\\hspace{20ex} [ \pp{seq2\_strand} [ \pp{seq2\_frame} ]\,]\,\,\,[ ; \ldots ] } \\[1.5ex] \hspace{0.5cm}\shortstack[l]{ [ \ldots ]\,\,\,align\_tag "group\_name" \pp{seq2\_start} \pp{seq2\_end} \eoline\\\hspace{20ex} [ ; strand\_tag \pp{seq2\_strand} [ ; frame\_tag \pp{seq2\_frame} ]\,]\,\,\,[ ; \ldots ] } \\[1.5ex] \hspace{0.5cm}\shortstack[l]{ [ \ldots ]\,\,\,align\_tag "group\_name" ; start\_tag \pp{seq2\_start} ; end\_tag \pp{seq2\_end} \eoline\\\hspace{20ex} [ ; strand\_tag \pp{seq2\_strand} [ ; frame\_tag \pp{seq2\_frame} ]\,]\,\,\,[ ; \ldots ] } \end{small} \end{minipage}\\[1.5ex] 
+ The program can recover the coords for the target sequence from those grouping fields. If no strand or frame are given for the subject sequence then {\prog} gets them from query sequence. Remember that tags are not case-sensitive and that the grouping fields separator is the semi-colon (';'). }
+%
+\idesc{\op{vector\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{vector} ]}
+   { \op{vector\_tag} sets the specific tag (for a grouping Tag-Value pair) to detect scoring vector GFF records, which have the following group structure: \\[1.5ex] 
+ \begin{minipage}{\linewidth} \begin{small} \flushleft \hspace{0.5cm}\shortstack[r]{ [ \ldots ]\,\,\,vector\_tag "group\_name" [ \pp{vector\_type} ] [ ; Window \pp{window\_length} \eoline\\\, [ ; Step \pp{step\_length} ]\,] ; Scores \pp{score$\_0$} ... \pp{score$\_n$}\hspace{3ex} } \end{small} \end{minipage}\\[1.5ex] 
+ so the program can parse the list of single scores from the grouping fields. Remember that tags are not case-sensitive and that the grouping fields separator is the semi-colon (';'). }
+%
+\idesc{\op{label\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{id} ]}
+   { \op{label\_tag} sets the specific tag (for a grouping Tag-Value pair) that allows to identify a single record. The program looks for the grouping Tag-Value pair for which the tag matches \op{label\_tag} and takes \pp{value} as the specific record label. You must have an attribute like this within the grouping attribute list: \\[0.75ex] 
+ \centerline{ \ldots ; label\_tag "element\_label" [ \ldots other sub-fields \ldots ] [ ; \ldots ] }\\[0.75ex] 
+ if ``other sub-fields'' are present they are ignored by \prog. Using this attribute makes easy to set specific properties for one or more records of your GFF dataset. Remember that tags are not case-sensitive. }
+%
+\idesc{\op{start\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{start} ]}
+   { {\tbdef} }
+%
+\idesc{\op{end\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{end} ]}
+   { {\tbdef} }
+%
+\idesc{\op{score\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{e\_value} ]}
+   { {\tbdef} }
+%
+\idesc{\op{strand\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{strand} ]}
+   { {\tbdef} }
+%
+\idesc{\op{frame\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{frame} ]}
+   { {\tbdef} }
+%
+\idesc{\op{scotype\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{vectype} ]}
+   { {\tbdef} }
+%
+\idesc{\op{window\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{window} ]}
+   { {\tbdef} }
+%
+\idesc{\op{step\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{step} ]}
+   { {\tbdef} }
+%
+\idesc{\op{scoary\_tag} $\,=\,$ \pp{tag} \hfill [ \vp{scores} ]}
+   { {\tbdef} }
+%
+\idesc{\op{ribbon\_style} $\,=\,$ \pp{ribbon-type} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{ribbon\_color} $\,=\,$ \pp{color} \hfill [ \bydef ]}
+   { {\tbdef} }
+%

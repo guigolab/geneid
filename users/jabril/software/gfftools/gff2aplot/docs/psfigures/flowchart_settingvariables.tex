@@ -1,0 +1,237 @@
+\documentclass[a4paper,11pt]{article}
+%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+%
+% $Id: flowchart_settingvariables.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $
+%
+% T='flowchart_settingvariables'; latex $T.tex; dvips $T.dvi -o $T.tmp.ps; ps2ps $T.tmp.ps $T.ps;
+% gs -sDEVICE=epswrite -sOutputFile=$T.ps  -dNOPAUSE -dBATCH $T.tmp.ps
+%
+% \usepackage{noweb}
+% noweb options
+% \noweboptions{smallcode,shortxref}
+% \def\nwendcode{\endtrivlist \endgroup} % relax page breaking scheme
+% \let\nwdocspar=\par                    %
+%
+\usepackage[offset={0pt,0pt},hmargin=0.5cm,vmargin=0.5cm,noheadfoot]{geometry}
+\usepackage{graphics}
+\usepackage[dvips]{graphicx}
+%% pstricks
+\usepackage[dvips]{pstcol}
+\usepackage{pstricks}
+\usepackage{pst-node}
+%\usepackage{pst-char}
+%\usepackage{pst-grad}
+\usepackage{lscape}
+\usepackage{fancyvrb}
+%
+\newpsobject{showgrid}{psgrid}{subgriddiv=0,griddots=1,gridlabels=6pt}
+%
+\input ../tables/AplotColorDefs.tex
+%
+\begin{document}
+\pagestyle{empty}
+\landscape
+%
+\fvset{fontfamily=courier,fontseries=b}
+\DefineShortVerb{\|}
+\SaveVerb{parsecommandline}|&parse_command_line|
+\SaveVerb{getopts}|GetOpt::Long|
+\SaveVerb{getoptions}|GetOptions|
+\SaveVerb{setdefaultvars}|&set_default_vars|
+\SaveVerb{setinputfile}|&set_input_file|
+\SaveVerb{parseGFFfiles}|&parse_GFF_files|
+\SaveVerb{setcustomfiles}|&set_custom_files|
+\SaveVerb{checkcommandlinevars}|&check_command_line_vars|
+\SaveVerb{commandlineforvars}|&command_line_for_vars|
+\SaveVerb{commandlineforlayout}|&command_line_for_layout|
+\SaveVerb{varscheck}|&vars_check|
+\SaveVerb{parsecustomfiles}|&parse_custom_files|
+\SaveVerb{mergecustomvars}|&merge_custom_vars|
+\SaveVerb{DATAF}|@data_files|
+\SaveVerb{CUSTF}|@custom_files|
+\SaveVerb{DEFVARS}|%DefaultVars|
+\SaveVerb{DEFAULT}|%Defaults|
+\SaveVerb{CUSVARS}|%CustomVars|
+\SaveVerb{COMVARS}|%CmdLineVars|
+\SaveVerb{VARS}|%Vars|
+%
+\newcommand{\mnpsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=none,linestyle=dotted,linewidth=0.5pt]{#1}}
+\newcommand{\mapsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=solid,fillcolor=verylightgreen,linestyle=dotted,linewidth=0.5pt]{#1}}
+\newcommand{\mbpsbx}[1]{\psframebox[framearc=.2,framesep=5pt,fillstyle=solid,fillcolor=verylightviolet,linestyle=dotted,linewidth=0.5pt]{#1}}
+\newcommand{\mcpsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightyellow,linestyle=solid,linewidth=0.25pt]{#1}}
+\newcommand{\mdpsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightorange,linestyle=solid,linewidth=0.25pt]{#1}}
+\newcommand{\mepsbx}[1]{\psframebox[framearc=.1,framesep=5pt,fillstyle=solid,fillcolor=verylightred,linestyle=solid,linewidth=0.25pt]{#1}}
+%
+\newcommand{\thynod}[2]{\rnode{#1}{#2}}
+%
+\begin{center}
+\small
+\fbox{%
+\begin{pspicture}(28,19)
+ %\showgrid%
+ \rput[t](14.5,18){%
+   \begin{psmatrix}[rowsep=20pt,colsep=1cm]
+%
+     \rnode{A}{\mapsbx{\UseVerb{parsecommandline}}} &  & \rnode{B}{\mbpsbx{\UseVerb{setinputfile}}} & \rnode{vB}{\UseVerb{DATAF}} & \mapsbx{\rnode{vBB}{\UseVerb{parseGFFfiles}}} \\
+      &  &  &  
+                & \mbpsbx{\rnode{C}{\UseVerb{checkcommandlinevars}}} \\
+      & \raisebox{3ex}{\rnode{D}{\mbpsbx{\UseVerb{setcustomfiles}}}} & \rnode{E}{\mbpsbx{\UseVerb{setdefaultvars}}} & \raisebox{0ex}{\mbpsbx{\shortstack[c]{\rnode{F}{\UseVerb{getopts}}\\(\UseVerb{getoptions})}}} & \rnode{vC}{\UseVerb{commandlineforlayout}} \\
+      \rnode{G}{\mapsbx{\UseVerb{parsecustomfiles}}} & \raisebox{3ex}{\rnode{vD}{\UseVerb{CUSTF}}} & \rnode{vE}{\mcpsbx{\UseVerb{DEFVARS}}} &  & \rnode{vCC}{\UseVerb{commandlineforvars}} & \\[1cm]
+      \rnode{vGG}{\UseVerb{varscheck}}\hspace{1cm} & \rnode{vG}{\mdpsbx{\UseVerb{CUSVARS}}} & \rnode{vEE}{\mdpsbx{\UseVerb{DEFAULT}}} & \rnode{vF}{\mdpsbx{\UseVerb{COMVARS}}} & \hspace{1cm}\rnode{vCG}{\UseVerb{varscheck}}\hspace{1cm}\pnode{pBB}\\[1cm]
+      & \rnode{H}{\mepsbx{\UseVerb{VARS}}} & \mapsbx{\rnode{I}{\UseVerb{mergecustomvars}}} & \rnode{J}{\mepsbx{\UseVerb{VARS}}} &  \\
+%
+   \psset{arrows=->,linecolor=black,linewidth=1pt,nodesep=5pt}
+   \ncline{A}{B}
+   \nccurve[angleA=-5,angleB=180,ncurvB=0.250,nodesepB=10pt]{A}{C}
+   \nccurve[angleA=-20,angleB=115,ncurvB=0.125]{A}{D}
+   \nccurve[angleA=-15,angleB=115,ncurvB=0.125]{A}{E}
+   \nccurve[angleA=-10,angleB=115,ncurvB=0.125,nodesepB=10pt]{A}{F}
+   \ncline[nodesepA=10pt]{C}{vC}
+   \nccurve[angleA=-15,angleB=5,ncurvA=1.50,ncurvB=0.65,nodesepA=10pt]{C}{vCC}
+   \psset{arrows=<->,linecolor=black,linewidth=1pt,nodesep=5pt}
+   \ncline{G}{vGG}
+   \ncline{vCC}{vCG}
+   \psset{arrows=->,linecolor=red,linestyle=dashed,linewidth=1pt,nodesep=5pt}
+   \ncline{B}{vB}
+   \ncline[nodesepB=5pt]{vB}{vBB}
+   \ncline{D}{vD}
+   \ncarc[angleA=-90,angleB=0]{vD}{G}
+   \ncline{E}{vE}
+   \ncline{vE}{vEE}
+   \ncarc[angleA=-20,angleB=20,arcangle=65]{E}{vEE}
+   \ncline[nodesepA=25pt]{F}{vF}
+   \nccurve[angleA=190,angleB=60]{vC}{vF}
+   \nccurve[angleA=190,angleB=35]{vCC}{vF}
+   \ncline{G}{vG}
+   \nccurve[angleA=-45,angleB=90,ncurvB=0.5,nodesepB=10pt]{vG}{I}
+   \nccurve[angleA=-90,angleB=150,ncurvB=1.5,nodesepB=10pt]{vEE}{I}
+   \nccurve[angleA=-135,angleB=30,ncurvB=0.5,arcangle=25,nodesepB=10pt]{vF}{I}
+   \ncline[arrows=-,doubleline=true,nodesepB=1ex]{H}{I}\ncline[doubleline=true,nodesepA=1ex]{I}{J}
+   \psset{arrows=->,linecolor=verydarkgreen,linestyle=dashed,linewidth=3pt,nodesep=5pt}
+   \ncline{A}{G}
+   \nccurve[angleA=-55,angleB=172,ncurvA=1,ncurvB=0.5,nodesepB=10pt]{G}{I}
+   \nccurve[arrows=-,angleA=8,angleB=-180,ncurvA=2,ncurvB=0,nodesepA=10pt,nodesepB=0pt]{I}{pBB}
+   \nccurve[angleA=30,angleB=-7.5,ncurvA=0.7,ncurvB=0.675,nodesepA=3pt,nodesepB=10pt]{pBB}{vBB}
+%
+   \end{psmatrix}
+ }%rput
+ \rput[b](14,1){%
+  \begin{tabular}{ccccc}
+   \mcpsbx{% 
+    \begin{minipage}[b][5cm][t]{5.25cm}
+     \rnode{VA}{\mnpsbx{\UseVerb{DEFVARS}}}
+     \tiny
+     \vskip 2ex
+     \setlength{\parindent}{-0.5cm}
+     \begin{psmatrix}[rowsep=10pt,colsep=-0.55cm]
+       \thynod{VAA}{\hspace{1.5cm}} \\
+       & \thynod{VAB}{SECTION$_1$} \\
+       & & \thynod{VABA}{VAR$_1$ $\Rightarrow$ [ TYPE$_1$, VALUE$_1$ ]} \\
+       & & \thynod{VABN}{\ \ldots\ } \\
+       & & \thynod{VABB}{VAR$_n$ $\Rightarrow$ [ TYPE$_n$, VALUE$_n$ ]} \\
+       & \thynod{VABM}{\ \ldots\ } \\
+       & \thynod{VAC}{SECTION$_N$} \ldots \\
+     \psset{armB=5pt,arrows=-,linecolor=black,linestyle=solid,linewidth=1pt,nodesepA=2pt,nodesepB=2pt,angleA=-90,angleB=180}
+     \ncangle[armA=1ex,nodesepB=-1ex,angleA=-90,angleB=90]{VA}{VAA}
+     \ncangle{VAA}{VAB}\ncangle{VAB}{VABA}\ncangle{VAB}{VABB}
+     \ncangle{VAA}{VAC}
+     \end{psmatrix}
+    \end{minipage}
+   }%mcpsbx
+  &
+   \mdpsbx{%
+    \begin{minipage}[b][5cm][t]{4cm}
+     \rnode{VB}{\mnpsbx{\UseVerb{DEFAULT}}}
+     \tiny
+     \vskip 2ex
+     \setlength{\parindent}{-0.5cm}
+     \begin{psmatrix}[rowsep=10pt,colsep=-0.55cm]
+       \thynod{VBA}{\hspace{1.5cm}} \\
+       & \thynod{VBB}{SECTION$_1$} \\
+       & & \thynod{VBBA}{VAR$_1$ $\Rightarrow$ VALUE$_1$} \\
+       & & \thynod{VBBN}{\ \ldots\ } \\
+       & & \thynod{VBBB}{VAR$_n$ $\Rightarrow$ VALUE$_n$} \\
+       & \thynod{VBBM}{\ \ldots\ } \\
+       & \thynod{VBC}{SECTION$_N$} \ldots \\
+     \psset{armB=5pt,arrows=-,linecolor=black,linestyle=solid,linewidth=1pt,nodesepA=2pt,nodesepB=2pt,angleA=-90,angleB=180}
+     \ncangle[armA=1ex,nodesepB=-1ex,angleA=-90,angleB=90]{VB}{VBA}
+     \ncangle{VBA}{VBB}\ncangle{VBB}{VBBA}\ncangle{VBB}{VBBB}
+     \ncangle{VBA}{VBC}
+     \end{psmatrix}
+    \end{minipage}
+   }%mdpsbx
+  &
+   \mdpsbx{%
+    \begin{minipage}[b][5cm][t]{3.5cm}
+     \rnode{VC}{\mnpsbx{\UseVerb{CUSVARS}}}
+    \end{minipage}
+   }%mdpsbx
+  &
+   \mdpsbx{%
+    \begin{minipage}[b][5cm][t]{3.5cm}
+     \rnode{VD}{\mnpsbx{\UseVerb{COMVARS}}}
+    \end{minipage}
+   }%mdpsbx
+  &
+   \mepsbx{%
+    \begin{minipage}[b][5cm][t]{3.5cm}
+     \rnode{VE}{\mnpsbx{\UseVerb{VARS}}}
+    \end{minipage}
+   }%mepsbx
+  \\
+  \end{tabular}
+%
+%
+  \psset{arrows=->,linecolor=black,linestyle=solid,linewidth=2pt,nodesep=2.5pt}
+  \ncline[nodesepB=5pt]{VA}{VB}
+  \ncdiag[angleA=75,angleB=105,arm=10pt]{VB}{VE}
+  \ncdiag[angleA=75,angleB=105,arm=10pt]{VC}{VE}
+  \ncdiag[angleA=75,angleB=105,arm=10pt]{VD}{VE}
+ }%rput
+ \rput[b](19.55,1.25){%
+   \mcpsbx{% 
+    \begin{minipage}[b][3.75cm][t]{12cm}
+     \tiny
+     \setlength{\parindent}{-0.5cm}
+     \begin{psmatrix}[rowsep=10pt,colsep=-0.55cm]
+       \thynod{VCA}{\hspace{1.5cm}} \\
+       & \thynod{VCB}{SECTION$_1$} \\
+       & & \thynod{VCBA}{VAR$_1$ $\Rightarrow$ [ @VALUE$_{11}$, \ldots, @VALUE$_{1F}$ ] } \\
+       & & \thynod{VCBN}{\ \ldots\ } \\
+       & & \thynod{VCBB}{VAR$_n$ $\Rightarrow$ [ @VALUE$_{11}$, \ldots, @VALUE$_{1F}$ ] } \\
+       & \thynod{VCBM}{\ \ldots\ } \\
+       & \thynod{VCC}{SECTION$_N$} \ldots \\
+     \psset{armB=5pt,arrows=-,linecolor=black,linestyle=solid,linewidth=1pt,nodesepA=2pt,nodesepB=2pt,angleA=-90,angleB=180}
+     \ncangle[armA=1ex,nodesepB=-1ex,angleA=-90,angleB=90]{VC}{VCA}
+     \ncangle[armA=1ex,nodesepB=-1ex,angleA=-90,angleB=90]{VD}{VCA}
+     \ncangle[armA=1ex,nodesepB=-1ex,angleA=-90,angleB=90]{VE}{VCA}
+     \ncangle{VCA}{VCB}\ncangle{VCB}{VCBA}\ncangle{VCB}{VCBB}
+     \ncangle{VCA}{VCC}
+     \end{psmatrix}
+     \hspace{0.25cm}\rule[0.75cm]{1.5pt}{3cm}\hspace{0.25cm}
+     \begin{minipage}[b][3.75cm][t]{4.5cm}
+     \setlength{\parindent}{0cm}
+     LAYOUT SECTION: \\[1ex]
+     \centerline{VAR$_X$ $\Rightarrow$ VALUE$_X$}
+     \vskip 3ex
+     OTHER SECTIONS: \\[1ex]
+     \centerline{VAR$_X$ $\Rightarrow$ $\left[ \begin{array}{c} \mbox{@VALUE}_{X1} \\ \cdots \\ \mbox{@VALUE}_{XF} \end{array} \right]$}
+     \vskip 1ex
+     \hspace{2ex} where each $\mbox{@VALUE}_{xf}$ has five fields: \\[1ex]
+     \centerline{[ IsRegExpOK, IsNegation, IsID, }\\[0.5ex]
+     \centerline{  RegExpString, VarValue ]}
+	 \end{minipage}
+    \end{minipage}
+   }%mcpsbx
+ }%rput
+\end{pspicture}
+}%fbox
+\vskip 0.25cm
+
+{\large\bfseries \verb+>>+ flowchart\_settingvariables.ps \verb+<<+}
+\end{center}
+\endlandscape
+\end{document}
+

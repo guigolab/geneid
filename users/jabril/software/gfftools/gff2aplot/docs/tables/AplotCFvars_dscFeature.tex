@@ -1,0 +1,51 @@
+%
+% AplotCFvars_dscFeature.tex
+%
+% Description items for FEATURE
+%
+% $Id: AplotCFvars_dscFeature.tex,v 1.1 2002-12-24 13:07:37 jabril Exp $ 
+%
+\idesc{\op{hide} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{feature\_color} $\,=\,$ \pp{color} \hfill [ \vp{fg} ]}
+   { {\tbdef} }
+%
+\idesc{\op{alignment\_color} $\,=\,$ \pp{color} \hfill [ \vp{fg} ]}
+   { {\tbdef} }
+%
+\idesc{\op{ribbon\_color} $\,=\,$ \pp{color} \hfill [ \vp{verylightgrey} ]}
+   { {\tbdef} }
+%
+\idesc{\op{feature\_shape} $\,=\,$ \pp{shape} \hfill [ \vp{box} ]}
+   { {\tbdef} }
+%
+\idesc{\op{feature\_label} $\,=\,$ \pp{string} \hfill [ \bydef ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_feature\_label} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{show\_ribbons} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{ribbon\_style} $\,=\,$ \pp{ribbon} \hfill [ \vp{none} ]}
+   { {\tbdef} }
+%
+\idesc{\op{feature\_scale\_height} $\,=\,$ \pp{boolean} \hfill [ \vp{on} ]}
+   { When this variable is \vp{on}, height of the feature shapes is proportional to the score, ranging from minimum to maximum score values of the sequence to which the feature belongs. }
+%
+\idesc{\op{feature\_scale\_color} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { Feature shape is color filled with a color gradient which depends on feature score and ranges from white to \op{feature\_color} definition, mapped from minimum score to maximum score of the sequence to which that feature belongs. }
+%
+\idesc{\op{alignment\_scale\_width} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{alignment\_scale\_color} $\,=\,$ \pp{boolean} \hfill [ \vp{off} ]}
+   { {\tbdef} }
+%
+\idesc{\op{feature\_layer} $\,=\,$ \pp{integer} \hfill [ \bydef ]}
+   { Setting layer on annotation tiers where to draw this feature shape. By default all features are drawn on layer 0, which represents the bottomest layer. Higher layer values move features forward, this allows users to visualize features that were hidden by others if they were overlapping. {\prog} sorts features prior visualization by acceptor, but before that it sorts by layer, so features having smaller acceptor coords and are longer than others can be placed on top. What it actually happens is that feature layers are contained into their group layer, it migth be seen as those feature layers are sub-layers of the group ones. 
+ 
+ Imagine you have ``exons'' and the ``mrna'' features for a gene, and would like to display the ``mrna'' (which contains all the ``exons'' between its starting and final coordinates), as a lower ---than the ``exons''--- box. If all feature had same layer you will see fragments of the ``mrna'' rising between each consecutive ``exons''. Increasing layer number for ``mrna'' while preserving layer number for ``exons'' will make ``mrna'' box to be fully drawn on top of the exons. }
+%
