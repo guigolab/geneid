@@ -24,8 +24,8 @@ download() {
    /usr/bin/perl >index2.html <<EOF
       open(FIT,"index.html");
       foreach \$lin (<FIT>) {
-         \$lin =~ s/<A HREF="(\?.=.|.*\/)">//g;
-         \$lin =~ s/<IMG SRC[^>]+>//g;
+         \$lin =~ s/<A HREF="(\?.=.|.*\/)">//ig;
+         \$lin =~ s/<IMG SRC[^>]+>//ig;
          print "\$lin";
       }
       close(FIT);

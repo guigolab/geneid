@@ -15,13 +15,22 @@
 #
 # eidolon a les 3:45, i ajunta tots els resultats en un sol fitxer
 
+###############
+#nom=/tmp/__`hostname -s`
+#find  /  -mount -perm  +4000 >$nom
+#md5sum -c /home/ug/ogonzalez/no_backup/soft/__SucKIT/chkrootkit.binaris/0_check.md5 >$nom 2>&1
+#/home/ug/ogonzalez/no_backup/soft/__SucKIT/chkrootkit-0.43/chkrootkit -p /home/ug/ogonzalez/no_backup/soft/__SucKIT/chkrootkit.binaris >>$nom 2>&1
+#chown ogonzalez:users $nom
+#mv $nom /home/ug/ogonzalez/scripts/_LOGS
+#################3
+
 cd /home/ug/ogonzalez/scripts/_LOGS
 
 maquina=`hostname -s`
 
 echo >ntp.$maquina
 
-if [ $maquina = monstre1 ]
+if [ $maquina = monstre1 -o $maquina = blaster ]
 then
    # aprofito per revisar l'estat dels RAID de monstre1
    cat /proc/mdstat >>ntp.$maquina
@@ -55,7 +64,8 @@ then
    log=ntp-`date +%Y%m%d-%H%M`
    for busca in monstre1 monstre2 monstre3 monstre4 nautilus eidolon xinxan \
                 tro rantanplan cel basileia tmatik zapiron kalamos icarus \
-                mar drac nit nin
+                mar drac nit nin thunderbird roma marsella altair antares \
+                sonic blaster
    do
       if [ -s ntp.$busca ]
       then

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# copia els users de /home/ugvell a /home/ug
+
+cd /home/ugvell
+for i in [a-z]*
+do
+
+   echo -n cp -a $i ../ug ...
+   cp -a $i ../ug
+   echo OK
+
+   echo -n mv $i __$i ...
+   mv $i __$i
+   echo OK
+
+done

@@ -86,6 +86,10 @@ then
    estrategia=total
 fi
 
+# data i hora d'avui. agafo l'hora per si de cas coincideixen 2 backups el
+# mateix dia per qualsevol motiu
+avui=`date +%Y%m%d-%H%M` 
+
 # si l'estrategia es total, canvio de disc; si sembla que no hi cabra,
 # esborro el total mes antic i els incrementals "associats".
 # el directori actual es diu '<data inici>-actual' i en acabar es dira
@@ -100,7 +104,7 @@ then
       inicidarrer=${nomdarrer%-actual}
       finaldarrer=`date -r backup/$nomdarrer +%Y%m%d`
       mv backup/$nomdarrer backup/$inicidarrer-$finaldarrer
-      echo "          des de $inicidarrer fins a $finaldarrer son a $discnou" >>index.log
+      echo "$avui: backups de $inicidarrer a $finaldarrer a disc $discactual" >>index.log
       umount backup
       case $discactual in
          sdb1 ) discnou=sdc1
@@ -113,34 +117,53 @@ then
                 exit
                 ;;
       esac
-   else # si no existeix, "provoco" que apunti al primer disc
+   else # si no existeix, comencem emprant el primer disc
       discnou=sdb1
    fi
    echo $discnou >disc.info
    mount /dev/$discnou backup
-   avui=`date +%Y%m%d`
-   mkdir backup/$avui-actual
-   echo $avui: el disc actual es $discnou >>index.log
-
-   ###################################
-   #### FALTA REVISAR SI HI HA PROU ESPAI AL DISC O CAL ESBORRAR EL BACKUP MES ANTIC ####################
-   ###################################
-
+   rm -rf backup/200* # esborro qualsevol backup antic que hi pugui haver
+   mkdir backup/`date +%Y%m%d`-actual
+   echo >>index.log
+   echo $avui: disc actual canviat a $discnou >>index.log
 else
    mount /dev/`cat disc.info` backup
 fi
 
-# fem backup de /var/lib/mysql, /usr/local i /mnt/MD2_RAID (ftp i prediccions) de m1...
-mount -t nfs -o ro monstre1:/var/lib/mysql var/lib/mysql
-mount -t nfs -o ro monstre1:/usr/local usr/local
-mount -t nfs -o ro monstre1:/mnt/MD2_RAID mnt/MD2_RAID
+# monstre1: fem backup de /var/lib/mysql, /usr/local i /mnt/MD2_RAID (ftp i prediccions)
+# resta   : fem backup de /usr/local
+mount -t nfs -o ro monstre1:/var/lib/mysql mounts/monstre1/var/lib/mysql
+mount -t nfs -o ro monstre1:/usr/local mounts/monstre1/usr/local
+mount -t nfs -o ro monstre1:/mnt/MD2_RAID mounts/monstre1/mnt/MD2_RAID
+mount -t nfs -o ro darwin:/aplicacions/genomics/linux mounts/general/usr/local
 
 # tar: no cal especificar si es total o incremental. depen de l'existencia
 # del fitxer de referencia
-NOM=`date +%Y%m%d-%H%M`-$estrategia
+NOM=$avui-$estrategia
 DIREC=`basename backup/*actual`
-tar -cz -g backup/$DIREC/referencia -f backup/$DIREC/$NOM.tgz --exclude lost+found var usr mnt
+tar -cz -g backup/$DIREC/referencia -f backup/$DIREC/$NOM.tgz --exclude lost+found mounts 2>/tmp/$avui.log
+
+echo -n "$avui: backup $estrategia a `cat disc.info`; " >>index.log
+bytes=`ls -l backup/$DIREC/$NOM.tgz | awk '{ print $5 }'`
+while [ `echo $bytes. | egrep -c '[0-9]{4}\.'` = 1 ]
+do
+   tmp=${bytes%%???.*}
+   bytes=$tmp.${bytes#$tmp}
+done
+
+echo ${bytes%.} bytes >>index.log
+
+# envio els logs a STDOUT perque l'script principal els envii per mail
+tail -1 index.log
+echo
+cat /tmp/$avui.log
+
+# guardo una copia a index.log
+paste - /tmp/$avui.log >>index.log <<EOF
+EOF
+rm /tmp/$avui.log
 
 # desmuntem allo que hem muntat
-umount var/lib/mysql usr/local mnt/MD2_RAID
+umount mounts/monstre1/var/lib/mysql mounts/monstre1/usr/local mounts/monstre1/mnt/MD2_RAID
+umount mounts/general/usr/local
 umount backup

@@ -80,7 +80,7 @@ else
       local=/seq/databases/embl/release
 
       cd $local
-      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       versio=`ls -1 Release_* | tail -1`
       # COMPTE: AIXO DEPEN DE $local
@@ -104,7 +104,7 @@ else
       excdirecs=/pub/databases/embl/new/list
 
       cd $local
-      wget -m -nH --cut-dirs=3 --progres=dot:mega -R $excfiles -X $excdirecs $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega -R $excfiles -X $excdirecs $URL 2>&1 | tee $OUT
 
       AVIS=""
 
@@ -118,7 +118,7 @@ else
       local=/seq/databases/swiss-prot/release_compressed
 
       cd $local
-      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -130,7 +130,7 @@ else
       local=/seq/databases/swiss-prot/updates_compressed
 
       cd $local
-      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -142,7 +142,7 @@ else
       local=/seq/databases/trembl/release_compressed
 
       cd $local
-      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -154,7 +154,7 @@ else
       local=/seq/databases/sp_tr_nrdb
 
       cd $local
-      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=2 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -166,7 +166,7 @@ else
       local=/seq/databases/pir/release
 
       cd $local
-      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -178,7 +178,7 @@ else
       local=/seq/databases/pir/updates
 
       cd $local
-      wget -m -nH --cut-dirs=3 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -190,7 +190,7 @@ else
       local=/seq/databases/pdb_seq
 
       cd $local
-      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=2 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -208,7 +208,7 @@ else
       local=/seq/databases/pdb
 
       cd $local
-      wget -m -nH -nd --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH -nd --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre -norm
 
@@ -220,7 +220,7 @@ else
       local=/seq/databases/pfam
 
       cd $local
-      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=2 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 
@@ -232,7 +232,21 @@ else
       local=/seq/databases/hssp
 
       cd $local
-      wget -m -nH --cut-dirs=2 --progres=dot:mega $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=2 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
+
+      filtre
+
+   ##########
+   # ASD
+   ##########
+
+      # embnet espanya no te aquesta bdd ==> canvi de URL i de --cut-dirs!!!!
+      # URL=$FTPSITE/databases/ASD
+      URL=ftp://ftp.ebi.ac.uk/pub/databases/ASD
+      local=/seq/databases/ASD
+
+      cd $local
+      wget -m -nH --cut-dirs=3 --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
 
       filtre
 

@@ -82,7 +82,7 @@ else
       excdirecs=/refseq/cumulative,/refseq/daily
 
       cd $local
-      wget -m -nH --cut-dirs=1 -X $excdirecs $URL 2>&1 | tee $OUT
+      wget -m -nH --cut-dirs=1 --passive-ftp --progres=dot:mega -X $excdirecs $URL 2>&1 | tee $OUT
 
       AVIS=""
 
@@ -92,7 +92,7 @@ else
    # GoldenPath - ensGene, ensPep, refGene...
    ##########
 
-      URL=http://genome.ucsc.edu/goldenPath
+      URL=http://hgdownload.cse.ucsc.edu/goldenPath
       rm $OUT
       AVIS=""
 
@@ -103,12 +103,14 @@ else
          do
             cd $local/database
             nom=`basename $local`
-            remot=`grep $nom /home/ug/ogonzalez/scripts/MirrorGP.dat | awk '{print $1 }'`
-            for fitxer in ensGene ensLink ensPep ensMrna refGene refLink refPep refMrna
+            remot=`grep $nom$ /home/ug/ogonzalez/scripts/MirrorGP.dat | awk '{ print $1 }'`
+            for fitxer in acembly all_est ECgene ensEstGene ensGene ensLink ensMrna ensPep exoniphy geneid genscan knownGene mgcGenes miRNA pseudoGeneLink refGene refLink refMrna refPep rnaGene sgpGene snpMap snpNih softberryGene superfamily tableDescriptions twinscan vegaGene vegaPseudoGene
             do
+               echo "$URL/$remot/database/$fitxer.sql" >>/tmp/gp
                echo "$URL/$remot/database/$fitxer.txt.gz" >>/tmp/gp
             done
-            wget -m -nH -nd -i /tmp/gp 2>&1 | tee $OUT
+            wget -m -nH -nd --passive-ftp --progres=dot:mega -i /tmp/gp 2>&1 | tee $OUT
+            #wget -N -nH -nd --passive-ftp -i /tmp/gp 2>&1 | tee $OUT
             rm /tmp/gp
             filtre NO_RM
          done

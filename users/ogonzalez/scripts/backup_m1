@@ -7,7 +7,7 @@ echo $data >$log
 echo >>$log
 
 #`dirname $0`/backup_m1.1 >/dev/null 2>>$log
-`dirname $0`/backup_m1.1 >>$log 2>>$log
+`dirname $0`/backup_m1.1 >>$log 2>&1
 
 mail -s"backup_m1 $data" ogonzalez@imim.es <$log
 

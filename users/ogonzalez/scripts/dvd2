@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# si hem fet volums amb mkisofs (per ficar la iso en discos que no acceptin
+# fitxers >2Gb, hem de passar-los TOTS al cdrecord
+
+# si passo un fitxer inexistent sense "_00" i existeix un amb "_00", passo
+# automaticament tots els noms
+
+# si passo un fitxer amb "_??" (qualsevol valor), tambe
+
+nomtot=$1
+
+if [ -e "${nomtot}_00" -a ! -e "$nomtot" ]
+then
+   set `ls ${nomtot}_[0-9][0-9]`
+fi
+
+nom=${nomtot%_[0-9][0-9]}
+
+if [ "$nomtot" != "$nom" ]
+then
+   set `ls -1 ${nom}_[0-9][0-9]`
+fi
+
+cdrw="0,0,0"
+
+# COMPTE: POTSER NOMES FUNCIONI ESPECIFICANT "-dao"!!!
+
+/home/ug/ogonzalez/no_backup/soft/CD-R/cdrecord-proDVD/cdrecord-wrapper.sh \
+    -v -dao fs=96m speed=2 dev=$cdrw $*
+

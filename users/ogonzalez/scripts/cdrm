@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ $# != 1 ]
+then
+   echo "ERROR: cdrm <veloc>"
+   exit
+fi
+
 cdrw="0,0,0"
 
-cdrecord -v blank=fast speed=4 dev=$cdrw
+cdrecord -v blank=fast speed="$1" dev=$cdrw

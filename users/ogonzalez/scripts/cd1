@@ -9,7 +9,7 @@
 
 # A basileia es grava a 8x, la gravadora es "1,0,0" i la lectora es "1,1,0"
 
-# les imatges es creen a /home/cd_images
+# les imatges es creen a /mnt/dosd/cd-images
 
 # Crea la imatge amb el nom del directori que especifiquem. Aquest nom es
 # fara servir tambe con a etiqueta de volum. Si el nom ja existeix, no pot
@@ -18,25 +18,36 @@
 error=0
 if [ $# != 1 -o ! -s $1 ]
 then
-   echo Parametros incorrectos: el formato es \"cd1 <directorio>\"
+   echo "ERROR: cd1 <directorio>"
    exit
 fi
 
-imatge=/home/cd_images/$1.iso
-txt=/home/cd_images/$1.txt
+direc=/home/cd_images
+imatge=$direc/$1.iso
+txt=$direc/$1.txt
 
 if [ -s $imatge ]
 then
-   echo Ja existe una imagen en /home/cd_images llamada $1.iso
+   echo ERROR: $imatge ja existeix
    exit
 fi
 
 # creem una etiqueta que nomes contingui "A-Z0-9_" i un maxim d'onze chars
 etiq=`echo $1 | tr a-z A-Z | tr -cd A-Z0-9_ | awk '{ print substr($0,0,11) }'`
 
-echo Creando $1.iso en /home/cd_images...
+echo Creant $imatge...
 
-mkisofs -V"$etiq" -R -J -L -l -o $imatge $1 >$txt 2>&1 &
+# -r : Rock Ridge amb UID=0, GID=0, chmod=555
+# -J : Joliet
+# -L : els noms poden comencar per "."
+# -l : permet noms ISO9660 (no Joliet) de 31 caracters
+# -f : no crea links simbolics, sino que segueix el link
+# -split-output : particionar en fitxers d'1 Gb (per FAT32 i tal)
+if (( `du -s $1 | awk '{ print $1 }'` > 750000 )) # es mes gran que 1 CD ==> es DVD i fem split
+then
+   splitoutput="-split-output"
+fi
+mkisofs -V"$etiq" -r -J -L -l -f $splitoutput -o $imatge $1 >$txt 2>&1 &
 
 while [ `ps | grep -c mkisofs` != 1 ]
 do

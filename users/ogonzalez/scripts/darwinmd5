@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# la idea es fer un fixer per fer md5sum -c un cop copiat cada directori
+#
+# no ho puc fer a darwin perque no te "md5sum", aixi que ho haure de fer
+# via nfs :-(
+
+cd /home/ugvell
+for i in [a-z]*
+do
+   echo -n `date` - $i...
+   find $i -type f -exec md5sum {} \; >/root/DARWIN/DARWIN_$i.md5
+   #mv $i __$i
+   echo OK
+done
+echo `date`

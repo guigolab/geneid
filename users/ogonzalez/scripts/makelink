@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# la idea es linkar des del /usr/local/Install/<direc> al /usr/local/bin
+# o des del /usr/local/molbio/Install/<direc> al /usr/local/molbio/bin
+#
+# aixi podem fer instal.lacions "netes" i als directoris generics tenir
+# nomes links que queda clar a on apunten. es mes facil el manteniment.
+
+# des del directori actual, linka:
+#
+#    /usr/local[/molbio]/bin/<nom> a ../Install/<direc>/bin/<nom>
+#    /usr/local[/molbio]/lib/<nom> a ../Install/<direc>/lib/<nom>
+#    /usr/local[/molbio]/include/<nom> a ../Install/<direc>/include/<nom>
+#    /usr/local[/molbio]/man/man?/<nom> a ../Install/<direc>/man/man?/<nom>
+
+# amb -f linka per collons; contrariament, si existeix quelcom amb el
+# mateix nom (link o fitxer) avisa pero no fa res. si linka al mateix
+# punt, ni avisa ni res (perque segones execucions no han d'avisar dels
+# links creats per la primera)
+
+# amb -l nomes informa de que fara, independentment de si fem -f o no.
+# es per si vull fer una primera revisio
+
+# amb -h monstra una ajuda basica
+
+# fem `ls ...` en comptes de posar el path directament als "for" perque
+# si posem path, retorna path/nom, pero amb `ls` nomes retorna nom, que
+# es el que volem
+
+
+
+# crea el link... si pot
+crealink() {
+   if [ $force = 0 ]
+   then
+      if [ -L "$2" ] # existeix i es un link, no fem res
+      then
+         desti=`ls -l "$2" | awk '{ print $11 }'`
+         if [ "$desti" != "$1" ] # si apunta a un altre lloc, avisem
+         then
+            echo "	Ignorat: link $2 -> $desti"
+         elif [ $prova = 1 ] # si apunta al mateix pero demanem prova, avisem
+         then
+            echo "	OK: link $2 -> $desti"
+         fi
+         return
+      elif [ -s "$2" ] # existeix i es un fitxer
+      then
+         echo "	Ignorat: fitxer $2"
+         return
+      fi
+   fi
+   if [ $prova = 1 ]
+   then
+      echo "	Prova: ln -sf $1 $2"
+   else
+      echo "	Creat: $2 -> $1"
+      ln -sf "$1" "$2"
+   fi
+}
+
+
+# main
+force=0
+prova=0
+while [ $# != 0 ]
+do
+   case $1 in
+      -f ) force=1
+           ;;
+      -l ) prova=1
+           ;;
+      -h ) echo "Des del directori /usr/local/[molbio/]Install/<aplicacio>:"
+           echo "   makelink [-f] [-h] [-l]"
+           echo "-f crea el link tant si com no"
+           echo "-l llista els canvis previstos pero no els fa; anul.la -f"
+           echo "-h mostra ajuda basica"
+           exit
+           ;;
+      *  ) echo parametre $1 no reconegut
+           exit
+           ;;
+   esac
+   shift
+done
+
+base=`dirname \`pwd\``
+subdir=`basename $base`
+basedir=`dirname $base`
+if [ $subdir != "Install" ] # ho preparo per si el dia de dema vull treballar
+                            # des de d'un altre directori
+then
+   echo `pwd`: Directori no suportat
+   exit
+fi
+if [ $basedir != "/usr/local" -a $basedir != "/usr/local/molbio" ]
+then
+   echo "`pwd`: No som a /usr/local[/molbio]"
+   exit
+fi
+
+aplic=$subdir/`basename \`pwd\``
+
+cd $basedir
+for direc in bin # lib include
+do
+   if [ -d "$aplic/$direc" ]
+   then
+      echo $direc:
+      cd "$direc"
+      for nom in `ls "../$aplic/$direc"`
+      do
+         crealink "../$aplic/$direc/$nom" "$nom"
+      done
+      cd ..
+   fi
+done
+
+aplic="$aplic/man"
+if [ -d "$aplic" ]
+then
+   cd man
+   for direc in `ls "../$aplic"`
+   do
+      echo $direc:
+      cd $direc
+      for nom in `ls "../../$aplic/$direc"`
+      do
+         crealink "../../$aplic/$direc/$nom" "$nom"
+      done
+      cd ..
+   done
+fi

@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# com makelink, pero per a wublast (executables al directori d'instal.lacio)
+
+# SE SUPOSA QUE /usr/local/molbio/Install/wu-blast JA APUNTA A LA VERSIO
+# CORRECTA!!!
+
+force=0 # per omisio, no sobreescrivim si ja existeix; amb -f sobreescrivim
+linka=1 # per omisio fem el link; amb -t nomes informem el que farem
+while [ $# != 0 ]
+do
+   case $1 in
+      -f ) force=1
+           ;;
+      -t ) linka=0
+           ;;
+      *  ) echo "Opcio $1 no reconeguda"
+           exit
+   esac
+   shift
+done
+
+cd /usr/local/molbio/bin
+
+echo
+echo EXECUTABLES:
+ls -l ../Install/wublast/ | grep ^-..x | awk '{ print $9 }' | while read nom
+do
+   accio=$linka
+   if [ -e $nom ]
+   then
+      if [ $force = 1 ]
+      then
+         echo -n "Sobreescrit: "
+      else
+         echo -n "Ignorat: actual "
+         ls -l $nom | cut -c57-
+         echo -n "         nou    "
+         accio=0
+      fi
+   fi
+   if [ $accio = 1 ]
+   then
+      ln -sf ../Install/wublast/$nom $nom
+   fi
+   echo "$nom -> ../Install/wublast/$nom"
+done
+
+echo
+echo LINKS:
+ls -l ../Install/wublast/ | grep ^l..x | awk '{ print $9 }' | while read nom
+do
+   accio=$linka
+   if [ -e $nom ]
+   then
+      if [ $force = 1 ]
+      then
+         echo -n "Sobreescrit: "
+      else
+         echo -n "Ignorat: actual "
+         ls -l $nom | cut -c57-
+         echo -n "         nou    "
+         accio=0
+      fi
+   fi
+   desti=`ls -l ../Install/wublast/$nom | awk '{ print $11 }'`
+   if [ $accio = 1 ]
+   then
+      ln -sf ../Install/wublast/$desti $nom
+   fi
+   echo "$nom -> ../Install/wublast/$desti"
+done
+
+echo
+echo \"wu-\" LINKS A blasta:
+for nom in wu-blastn wu-blastp wu-blastx
+do
+   accio=$linka
+   if [ -e $nom ]
+   then
+      if [ $force = 1 ]
+      then
+         echo -n "Sobreescrit: "
+      else
+         echo -n "Ignorat: actual "
+         ls -l $nom | cut -c57-
+         echo -n "         nou    "
+         accio=0
+      fi
+   fi
+   if [ $accio = 1 ]
+   then
+      ln -sf ../Install/wublast/blasta $nom
+   fi
+   echo "$nom -> ../Install/wublast/blasta"
+done
+
+echo
+if [ $linka = 0 ]
+then
+   echo "--- NO S'HA CREAT CAP LINK ---"
+fi

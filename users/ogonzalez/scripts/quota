@@ -6,37 +6,51 @@
 # la darrera linia es el total, i hi haura una linia que contindra el
 # no_backup. restant-les, trobem el que es guarda
 
+#numero() {
+#   typeset -i num
+#   num=1
+#   valor=$1
+#   str=""
+#   str2=0
+#   while (( num < 10 ))
+#   do
+#      davant=${valor%?}
+#      digit=${valor#$davant}
+#      if [ "$digit" != "" ]
+#      then
+#         nou=$digit
+#      else
+#         nou=" "
+#         str2=1
+#      fi
+#      if [ $num = 4 -o $num = 7 ]
+#      then
+#         if [ $str2 = 0 ]
+#         then
+#            nou="$nou."
+#         else
+#            nou="  "
+#         fi
+#      fi
+#      str="$nou$str"
+#      valor=${valor%?}
+#      let num=num+1
+#   done
+#   echo -n "$str "
+#}
+
 numero() {
-   typeset -i num
-   num=1
    valor=$1
-   str=""
-   str2=0
-   while (( num < 10 ))
+   if [ "$valor" = "" ]
+   then
+      valor=0
+   fi
+   while [ `echo $valor. | egrep -c '[0-9][0-9][0-9][0-9]\.'` = 1 ]
    do
-      davant=${valor%?}
-      digit=${valor#$davant}
-      if [ "$digit" != "" ]
-      then
-         nou=$digit
-      else
-         nou=" "
-         str2=1
-      fi
-      if [ $num = 4 -o $num = 7 ]
-      then
-         if [ $str2 = 0 ]
-         then
-            nou="$nou."
-         else
-            nou="  "
-         fi
-      fi
-      str="$nou$str"
-      valor=${valor%?}
-      let num=num+1
+      tmp=${valor%%???.*}
+      valor=$tmp.${valor#$tmp}
    done
-   echo -n "$str "
+   printf "%11s " ${valor%.}
 }
 
 quotes() {

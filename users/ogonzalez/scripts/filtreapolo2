@@ -1,0 +1,53 @@
+#!/bin/ksh
+
+if [ $# = 0 ]
+then
+   log=SYSLOG
+elif [ $# = 1 -a -s $1 ]
+then
+   log=$1
+else
+   echo
+   echo Error - agafem SYSLOG
+   sleep 3
+   log=SYSLOG
+fi
+
+linies=`wc -l <$log | awk '{ print $1 '}`
+
+cerca1=':apolo sendmail'
+{
+echo "$log ($linies) - sendmail:"
+grep -n -E "$cerca1" $log
+} | more
+
+echo
+
+cerca2=':apolo gnu-pop3d'
+{
+echo "$log ($linies) - POP3:"
+grep -n -E "$cerca2" $log
+} | more
+
+echo
+
+cerca3=':apolo (telnetd|login)'
+{
+echo "$log ($linies) - telnet:"
+grep -n -E "$cerca3" $log
+} | more
+
+echo
+
+cerca4=':apolo sshd'
+{
+echo "$log ($linies) - sshd:"
+grep -n -E "$cerca4" $log
+} | more
+
+echo
+
+{
+echo "$log ($linies) - Resta:"
+grep -n -v -E -e "$cerca1" -e "$cerca2" -e "$cerca3" -e "$cerca4" $log
+} | more

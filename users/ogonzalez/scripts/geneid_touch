@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# fa un touch dels fitxers empaquetats, posant la data de cada fitxer en funcio
+# del seu nom. la data sera del dia 1 del mes seguent.
+#
+# canvio el propietari a gmaster:users
+#
+# he de ser a webfiles per corre aixo. sense parametres.
+
+for fitxer in */200?-??.tgz
+do
+   data=`basename ${fitxer%.tgz}`
+   any=${data%-??}
+   mes=${data#????-}
+   mes=${mes#0}
+   let mes=mes+1
+   if [ $mes = 13 ]
+   then
+      mes=1
+      let any=any+1
+   fi
+   if [ "${mes%?}" = "" ]
+   then
+      mes=0$mes
+   fi
+   touch -d "$any${mes}01" $fitxer
+   chown 1186:20 $fitxer
+done
+
