@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: humus.nw,v 1.10 2002-03-27 18:47:48 jabril Exp $ 
+% # $Id: humus.nw,v 1.11 2002-03-28 13:52:14 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: humus.nw,v 1.10 2002-03-27 18:47:48 jabril Exp $$>$ }
+{\small$<$ \verb$Id: humus.nw,v 1.11 2002-03-28 13:52:14 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -3841,9 +3841,7 @@ $PROG = 'stepper.pl';
 $PRGVER = '0.91alpha';
 # $MySQLPAR/$admfiles[$i].tbl
 # my @admfiles = qw/ chrs seqs jobs steps status /;
-
-&init_signals();
-<<stepper.pl: redefining CHILD signals>>
+#
 &init_timer(\@exectime);
 
 #
@@ -3881,6 +3879,7 @@ if (!defined($paramfile)) {
 
 #
 ## MAIN
+&my_init_signals();
 &parse_cmdline();
 &program_started($PROG);
 
@@ -3902,8 +3901,8 @@ exit(0);
 
 #
 ## SUBS
+<<stepper.pl: trapping signals>>
 <<stepper.pl: subs>>
-<<stepper.pl: new child reaper>>
 <<stepper.pl: job scheduling functions>>
 @
 
@@ -3935,83 +3934,50 @@ sub get_steps() {
 } # get_steps
 @ 
 
-\subsubsctn{Attempting to avoid zombie child processes}
+
+\subsubsctn{Trapping system signals}
 
 <<stepper.pl: Use modules>>=
 <<global.pm: use POSIX>>
-@
+@ 
 
-<<stepper.pl: redefining CHILD signals>>=
-$SIG{CHLD} = \&new_child_reaper;
+<<stepper.pl: trapping signals>>=
+#
+# Trapping signals
+sub my_init_signals() {
+    $SIG{HUP}  = \&trap_signals_prog;
+    $SIG{ABRT} = \&trap_signals;
+    $SIG{INT}  = \&trap_signals;
+    $SIG{QUIT} = \&trap_signals;
+    $SIG{TERM} = \&trap_signals;
+    $SIG{KILL} = \&trap_signals;
+    $SIG{CHLD} = \&my_child_reaper;
+    @skip_next = ($F, undef);
+} # my_init_signals
 @ 
 
 We require the status checking function from the POSIX module we used in [[<<global.pm: trapping signals>>]] code chunk to reap zombie child processes, removing their process execution id from [[@semaphore]]. But we must redefine the child exit signal handler function to take care of the semaphore variable.
 
-<<stepper.pl: new child reaper>>=
+<<stepper.pl: trapping signals>>=
 # redefining child-exit signal handler (already defined in global.pm)
-sub new_child_reaper() {
+sub my_child_reaper() {
     $handle->shlock();
-    my $maxval = $#semaphore;
-    for (my $v = 0; $v <= $maxval; $v++) {
+    for (my $v = 0; $v <= $maxjobs; $v++) {
         my ($spid,$cpid,$ecod);
         ($semaphore[$v][0] != 0) && do {
             $semaphore[$v][0] =~ m/^(.*?)\./o && ($spid = $1);
             $cpid = waitpid($spid, &WNOHANG);
+            $ecod = $?;
             if ($cpid > 0) {
                 # child died
                 print $ERRFH "## $spid ## CHILD EXIT STATUS:\n".
-                             "## $spid -> $?\n";
+                             "## $spid -> $ecod\n";
             };
         }; # ($semaphore[$v][0] != 0)
     }; # for 
     $handle->shunlock();
-    &show_curr_pids($gid);
-    $SIG{CHLD} = \&new_child_reaper;
-} # new_child_reaper
-@ 
-<<HIDE: stepper.pl: new child reaper>>=
-# redefining child-exit signal handler (already defined in global.pm)
-sub new_child_reaper() {
-    $handle->shlock();
-    my $maxval = $#semaphore;
-    for (my $v = 0; $v <= $maxval; $v++) {
-        my ($spid,$cpid,$ecod);
-        ($semaphore[$v][0] != 0) && do {
-#            $semaphore[$v][0] =~ m/^(.*?)\./o && ($cpid = $1);
-            $semaphore[$v][0] =~ m/^(.*?)\./o && ($spid = $1);
-            $cpid = waitpid($spid, &WNOHANG);
-            # $ecod = $?;
-            # if ($cpid == -1) {
-            #     # no childs waiting
-            #     next;
-            # } els
-            if ($cpid == 0) {
-                # (&POSIX::WIFEXITED($ecod))
-                # no childs died
-                $skip_next[0] && do { # check if main program halted
-                    kill 9 => $spid;
-                    $ecod = $exit_codes{'PROGHALT'}{SHORT};
-                    &update_DB_exec_tbl($status{'KILLED'}{'code'},
-                                        $semaphore[$v][1],$semaphore[$v][2],
-                                        $spid,undef,$ecod);
-                    &reset_semaphore($v);
-                    print $ERRFH $Messages{'CHILD_KILLED'}->($PROG, $spid);
-                };
-            };
-            # } else {
-            #     # child died
-            # };
-        }; # ($semaphore[$v][0] != 0)
-    }; # for 
-    $handle->shunlock();
-    &show_curr_pids($gid);
-    $SIG{CHLD} = \&new_child_reaper;
-} # new_child_reaper
-# sub trap_signals_prog() {
-#     print $ERRFH $Messages{'PROCESS_HALT'}->($PROG);
-#     @skip_next = ($T, $T);
-#     &new_child_reaper;
-# } # trap_signals_prog
+    $SIG{CHLD} = \&my_child_reaper;
+} # my_child_reaper
 @
 
 
@@ -4030,13 +3996,12 @@ sub brown_dispatcher() {
 #    my $oldFHE = $ERRFH;
 #    open(FHERR, "> $TMP/run.rpt");
 #    $ERRFH = \*FHERR;
-    my ($seqs_done,$seqnum,@tmpsq);
+    my ($seqs_done,$seqnum,@tmpsq,$thesem);
     print $ERRFH "### MAIN $gid ### BEGIN MAIN LOOP\n";
     &show_curr_pids($gid);
     $seqs_done = 0;
     $seqnum = scalar(@seqs);
     while ($seqs_done < $seqnum) { # loop through sequences
-        my $sem;
         for ($sem = 0; $sem < $maxjobs; $sem++) {
            $semaphore[$sem][0] || do {
                next if (! &is_host_there($hosts[$sem]));
@@ -4058,19 +4023,15 @@ sub brown_dispatcher() {
 } # brown_dispatcher
 #
 sub do_wait() {
-    &show_curr_pids($gid);
-#    $skip_next[0] && do {
-#        &new_child_reaper();
-#        return;
-#    };
     sleep 1; # select(undef,undef,undef,1);
+    &show_curr_pids($gid);
 } # do_wait
 sub show_curr_pids() {
-    my $gid = shift;
-    $handle->shlock();
-    print $ERRFH "### MAIN $gid ### SEMAPHORE: ".
-                 join(" ", (map { $semaphore[$_][0] } (0..$#semaphore)))."\n";
-    $handle->shunlock();
+    my $gd = shift;
+#    $handle->shlock();
+    print $ERRFH "### MAIN $gd ### SEMAPHORE: ".
+          (join(" ", ( map { $semaphore[$_][0] } (0..$maxjobs) )))."\n";
+#    $handle->shunlock();
 } # show_curr_pids
 sub not_all_done() {
     my $sum = 0;
@@ -4122,7 +4083,10 @@ sub breed_crows() {
         my ($stdin,$stdout,$stderr);
         my ($thejob,$thestep) = @{ $jobary };
         $jobstep_code = $jobs{$thejob}{steps}{$thestep}{code};
-        &mod_semaphore($pos,$chldpid,$chrseq_code,$jobstep_code);
+        # &mod_semaphore($pos,$chldpid,$chrseq_code,$jobstep_code);
+        $handle->shlock();
+        @{ $semaphore[$pos] } = ($chldpid,$chrseq_code,$jobstep_code);
+        $handle->shunlock();
         ($stdin,$stdout,$stderr) = ( $jobs{$thejob}{steps}{$thestep}{idir},
                                      $jobs{$thejob}{steps}{$thestep}{odir},
                                      $jobs{$thejob}{steps}{$thestep}{edir} );
@@ -4226,8 +4190,9 @@ exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
                             $chldpid,$stdout,$script_err);
         $handle->shunlock();
     }; # foreach job
+    # &mod_semaphore($pos,0,0,0);
     $handle->shlock();
-    &reset_semaphore($pos);
+    @{ $semaphore[$pos] } = (0,0,0);
     $handle->shunlock();
     # removing scripts once they have been run
 #    print $ERRFH "## $chldpid ## Removing scripts from tmp dir !!!\n";
@@ -4236,12 +4201,6 @@ exit \`cat \$PSRF 2> /dev/null || echo 3\` ;
     print $ERRFH "## $chldpid ## Child process is exiting now !!!\n";
     exit(0); # child process exits when done
 } # breed_crows
-sub reset_semaphore() {
-    my $qq = shift;
-    $handle->shlock();
-    @{ $semaphore[$qq] } = ( 0, 0, 0 );
-    $handle->shunlock();
-} # reset_semaphore
 sub mod_semaphore() {
     my ($p,$v,$sq,$jb) = @_;
     $handle->shlock();
@@ -4256,14 +4215,8 @@ sub report_crow_status() {
     print $ERRFH "## $ppid ## ERROR: ".
                  ($exit_codes{$err}{MSG}->($ppid,$job,$seq,$emsg))."\n";
     $whatelse = $exit_codes{$err}{SHORT};
-    $whatever = $skip_next[0]
-                ? ( defined($skip_next[1])
-                    ? ( $skip_next[1] ? $status{'DIED'}{'code'}
-                                      : $status{'KILLED'}{'code'} )
-                    : (                 $status{'DIED'}{'code'} )
-                    )
-                : ( $okflg            ? $status{'DONE'}{'code'}
-                                      : $status{'CHECK'}{'code'}  );
+    $whatever = ($okflg) ? $status{'DONE'}{'code'}
+                         : $status{'CHECK'}{'code'};
     return ($whatever, $whatelse);
 } # report_crow_status
 sub init_DB_exec_tbl() { # to db_Hsapiens.pm ?
@@ -4281,6 +4234,12 @@ sub update_DB_exec_tbl() { # to db_Hsapiens.pm
     my (@sel_fields,@data_fields,$tbl,@fld);
     defined($sout) || ($sout = 'NULL');
     defined($serr) || ($serr = 'NULL');
+    if ($stat != $status{'SKIPPED'}{'code'} && $skip_next[0]) {
+        if (defined($skip_next[1])) {
+            $stat = ($skip_next[1]) ? $status{'DIED'}{'code'}
+                                        : $status{'KILLED'}{'code'};
+        } else { $stat = $status{'DIED'}{'code'} };
+    };
     ($tbl, @fld) = qw( tb_exec 0 1 ); # we do not tae care of execution PID (2)
     @sel_fields =  qw( chr_seq job_step exec_pid
                        status exec_date host user stdout stderr );
@@ -4292,7 +4251,7 @@ sub update_DB_exec_tbl() { # to db_Hsapiens.pm
 
 <<stepper.pl: forked childs related vars>>=
 my (%hosts_list,@hosts,$hc,$gid,%pids,$pid,$maxjobs,
-    $handle,@semaphore,$seqs_done);
+    $handle,$sem,@semaphore,$seqs_done);
 %pids = ();
 $hc = 0;
 %hosts_list = (
@@ -4308,14 +4267,14 @@ $hc = 0;
     i10      => [ $hc++,  1,       $F     ],
     i26      => [ $hc++,  1,       $F     ],
     );
-@hosts = map  { shift @$_; @$_ }
+@@hosts = map  { shift @$_; @$_ }
          sort { $a->[0] <=> $b->[0] }
          map  { [ $hosts_list{$_}[0], ($_) x $hosts_list{$_}[1] ] }
          keys %hosts_list;
 $maxjobs = scalar(@hosts);
 $gid = $$;
 $handle = tie @semaphore, 'IPC::Shareable', undef, { destroy => 1 };
-@semaphore = ( [ 0, 0, 0 ] ) x $maxjobs;
+@@semaphore = ( [ 0, 0, 0 ] ) x $maxjobs;
 @
 
 \subsubsctn{Sequence and jobs related vars}
@@ -6077,7 +6036,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: humus.nw,v 1.10 2002-03-27 18:47:48 jabril Exp $
+# $Id: humus.nw,v 1.11 2002-03-28 13:52:14 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
