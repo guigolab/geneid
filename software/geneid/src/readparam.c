@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.3 2000-08-16 07:45:00 eblanco Exp $  */
+/*  $Id: readparam.c,v 1.4 2001-04-25 08:04:02 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -319,6 +319,7 @@ int readparam (char *name, gparam** isochores)
 				       isochores[0]->md,
 				       isochores[0]->Md,
 				       isochores[0]->block);
+
   sprintf(mess,"%d GM-lines read and stored", isochores[0]->nclass);
   printMess(mess);   
 
