@@ -22,7 +22,7 @@ ALINK="black">
 <font face=courier size=5 color=red>manager.c</font>
 </td>
 <td align=right>
-<font face=courier size=3>geneid v 1.1</font>
+<font face=courier size=3>geneid v 1.2</font>
 <font face=arial black size=3>source documentation</font>
 </td>
 </table>
@@ -53,7 +53,9 @@ void manager(char *Sequence,
              packSites* allSites,
              packExons* allExons,
              long l1, long l2,
-             int Strand, packSR* sr, 
+             int Strand, 
+             packExternalInformation* external,
+             packHSP* hsp,
              gparam* gp,
              gparam** isochores,
              int nIsochores,
@@ -107,7 +109,7 @@ var modifieddate=document.lastModified
 </table>
 
 <br><p>
-Enrique Blanco Garcia &copy; 2001<br><p><br><p>
+Enrique Blanco Garcia &copy; 2003<br><p><br><p>
 </center>
 </body>
 </html>
