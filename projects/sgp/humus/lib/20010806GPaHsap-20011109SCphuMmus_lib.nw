@@ -4,7 +4,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 %
-% # $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.4 2002-05-17 19:28:37 jabril Exp $ 
+% # $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.5 2002-05-24 18:55:06 jabril Exp $ 
 %
 \usepackage{noweb}
 \usepackage[a4paper,offset={0pt,0pt},hmargin={2cm,2cm},vmargin={1cm,1cm}]{geometry}
@@ -269,7 +269,7 @@ Universitat Pompeu Fabra\\[2ex]
 
 \vfill
 \begin{center}
-{\small$<$ \verb$Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.4 2002-05-17 19:28:37 jabril Exp $$>$ }
+{\small$<$ \verb$Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.5 2002-05-24 18:55:06 jabril Exp $$>$ }
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%% MAINMATTER
@@ -2168,7 +2168,7 @@ exit 0
 This document is under Revision Control System (RCS). The version you are currently reading is the following:
 
 <<Version Control Id Tag>>=
-# $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.4 2002-05-17 19:28:37 jabril Exp $
+# $Id: 20010806GPaHsap-20011109SCphuMmus_lib.nw,v 1.5 2002-05-24 18:55:06 jabril Exp $
 @ 
 
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2552,12 +2552,8 @@ enscript --columns=3 -Gjf Courier5 -M A4 $HUMUS/evaluations/ALL_Phusion.genes_by
 #
 perl -ne 'BEGIN{ $prog="???"; print STDOUT "PROG CLASS SEQ GENES\n"; } next if /^\s+$/o; /^\#\#\#->\s+(.*?)\s+/o && ($prog=$1, next); next if /^\#/o; next unless /^\s*chr/; chomp; $_ =~ s/^\s+//o; @f=split /\s+/og; $type="ASSEMBLED"; $f[0] =~ s/_random$//o && ($type="RANDOM"); printf STDOUT "%s %s %s %s\n", $prog,$type,@f[0,1];' $HUMUS/evaluations/ALL_Phusion.genes_by_seq.report > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl # | gawk '{ tots[$1]+=$4 }END{for (i in tots) print i"->"tots[i] }' 
 #
-function splittbls ()
-{
-perl -ne 'BEGIN{ $cls=shift @ARGV; } next unless $.>1; chomp; @f = split /\s+/o, $_; next unless ($f[1] eq $cls); $seq=$f[2]; $prg=$f[0]; defined($hprg{$prg}) || do { push @prog, $prg }; $hprg{$prg}++; defined($hseq{$seq}) || do { push @seqs, $seq }; $hseq{$seq}++; $genes{$seq}{$prg}=$f[3]; END{ $fmt=("\%-10s" x (scalar(@prog)+1))."\n"; printf STDOUT $fmt,"CHR",@prog; for ($n=0;$n<scalar(@seqs);$n++) { $s=$seqs[$n]; @tt=(); for ($p=0;$p<scalar(@prog);$p++) { push @tt, $genes{$s}{$prog[$p]}; }; printf STDOUT $fmt, $seqs[$n],@tt;} }' "$@"
-}
-splittbls "ASSEMBLED" $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq_ASM.tbl 
-splittbls "RANDOM" $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq_RND.tbl 
+$BIN/splittbls.pl "ASSEMBLED" $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq_ASM.tbl 
+$BIN/splittbls.pl "RANDOM" $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq.tbl > $HUMUS/evaluations/r-plots/ALL_Phusion.genes_by_seq_RND.tbl 
 #
 # drawing histograms with R
 def.par <- par()# save default, for resetting...
