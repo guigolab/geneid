@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Dictionary.c,v 1.3 2002-01-18 13:41:25 eblanco Exp $  */
+/*  $Id: Dictionary.c,v 1.4 2003-02-26 10:58:18 eblanco Exp $  */
 
 #include "geneid.h"
 
@@ -97,6 +97,8 @@ int getkeyDict(dict* d, char s[])
   int key;
   node *p;
   
+  key = NOTFOUND;
+
   /* Computing hash function */
   i = f(s);
   
@@ -214,6 +216,8 @@ char getAADict(dict* d, char s[])
   int found=0;
   int aa;
   node *p;
+
+  aa = 'X';
   
   i = f(s);
   if(d->T[i]==NULL)
