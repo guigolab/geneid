@@ -52,7 +52,8 @@ if ($ARGV[0] and $ARGV[0] =~ /^--daemon$/) {
 	$x = new SOAP::Transport::HTTP::CGI || die "Can't get SOAP: $!\n";
 }
 $x->dispatch_with({
-    'http://biomoby.org/#runGeneID' => 'INB::GRIB::Services::GeneIDServices',
+    'http://biomoby.org/#runGeneID'    => 'INB::GRIB::Services::GeneIDServices',
     'http://biomoby.org/#runGeneIDGFF' => 'INB::GRIB::Services::GeneIDServices',
+    'http://biomoby.org/#runSGP2GFF'   => 'INB::GRIB::Services::SGP2Services',
 });
 $x->handle;
