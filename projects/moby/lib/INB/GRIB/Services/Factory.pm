@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.1 2005-05-06 10:53:53 arnau Exp $
+# $Id: Factory.pm,v 1.2 2005-05-06 16:47:35 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -103,8 +103,8 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 #  @EXPORT = qw( &func1 &func2);
 # 
 our @EXPORT = qw(
-  &GeneID_call 
-
+  &GeneID_call
+  &SGP2_call
 );
 
 our $VERSION = '1.00';
@@ -256,6 +256,107 @@ sub GeneID_call {
         
         if (defined $geneid_output) {
 		return $geneid_output;
+	}	
+	else {
+		# What else better to return ??
+		return undef;
+	}
+}
+
+
+=head2 SGP2_call
+
+ Title   : SGP2_call
+ Usage   : $report = SGP2_call (@params);
+         : 
+         : ## where @params are,
+         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+         :            'arg2'  => "query 1", ## optional
+         :            'arg3'  => "nr");     ## optional (default: nr)
+ Returns : Devuelve un string que contiene el resultado de la ejecución.
+
+=cut
+
+sub SGP2_call {
+        my %args = @_; 
+        # relleno los parametros por defecto SGP2_call (nucleotide  => $nucleotide, seqIdentifier => $sequenceIdentifier);
+        my $sequences          = $args{sequences} || undef;
+        my $tblastx_output     = $args{tblastx_output} || undef;
+	my $format             = $args{format} || "";
+	my $parameters         = $args{parameters} || undef;
+
+	# Get the parameters
+	# No one yet!
+
+        # Llama a SGP2 localmente
+        my $_sgp2_dir  = "/home/ug/gmaster/sgp2/sgp2_2003/";
+	# my $_sgp2_dir  = $ENV{SGP2};
+        my $_sgp2_bin  = "bin/sgp2";
+        my $_sgp2_args = "";
+	
+        if ($format eq "GFF") {
+	    $_sgp2_args .= "-g G";
+        }
+	
+	# Generate a temporary file locally with the sequence in FASTA format
+	# locally, ie not on a NFS mounted directory, for speed sake
+
+	# my ($fh, $seqfile) = tempfile("/tmp/SGP2_Sequence.XXXXXX", UNLINK => 1);
+	# close($fh);
+
+	my @seqIds = keys (%$sequences);
+	foreach my $sequenceIdentifier (@seqIds) {
+
+	    my $nucleotide = $sequences->{$sequenceIdentifier};
+
+	    # bioperl object
+	    
+	    my $seqobj = Bio::Seq->new (
+					-display_id => $sequenceIdentifier,
+					-sequence   => $nucleotide
+					);
+	    
+	    # Bioperl sequence factory
+	    
+	    # my $sout = Bio::SeqIO->new (
+	    # 			    -file   => ">$seqfile",
+	    #			    -format => 'fasta'
+	    #			    );
+	    # $sout->write_seq ($seqobj);
+	    
+	}
+
+	my $seqfile = "/home/ug/arnau/projects/sgp2/sgp2/samples/Hsap_BTK.msk.fa";
+
+	# TBLASTX Output File
+
+	# Generate a temporary file locally with the TBLASTX Output
+	# locally, ie not on a NFS mounted directory, for speed sake
+
+	# my ($fh, $tblastx_output_file) = tempfile("/tmp/SGP2_TBLASTX.XXXXXX", UNLINK => 1);
+	# close($fh);
+
+	# qx/echo "$tblastx_output" > $tblastx_output_file/;
+
+	my $tblastx_output_file = "/home/ug/arnau/projects/sgp2/sgp2/samples/Hsap_BTK.tbx";
+
+	# Test empty files
+
+	if (-z $seqfile) {
+	    print STDERR "Error, empty sequence file...\n";
+	}
+
+	if (-z $tblastx_output_file) {
+	    print STDERR "Error, empty tblastx output file...\n";
+	}
+
+	# print STDERR "Running SGP2, with this command:\n";
+	# print STDERR "$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file\n";
+
+        my $sgp2_output = qx/$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file/;
+        
+        if (defined $sgp2_output) {
+		return $sgp2_output;
 	}	
 	else {
 		# What else better to return ??
