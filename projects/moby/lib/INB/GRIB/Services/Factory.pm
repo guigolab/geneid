@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.4 2005-05-10 14:32:53 arnau Exp $
+# $Id: Factory.pm,v 1.5 2005-05-10 15:48:51 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -229,8 +229,7 @@ sub GeneID_call {
 	# Generate a temporary file locally with the sequence(s) in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	my ($seq_fh, $seqfile) = tempfile("/tmp/moby/GENEID.XXXXXX", UNLINK => 1);
-	# close($seq_fh);
+	my ($seq_fh, $seqfile) = tempfile("/tmp/moby/GENEID.XXXXXX", UNLINK => 0);
 
 	my @seqIds = keys (%$sequences);
 	foreach my $sequenceIdentifier (@seqIds) {
@@ -241,13 +240,13 @@ sub GeneID_call {
 	    
 	    my $seqobj = Bio::Seq->new (
 					-display_id => $sequenceIdentifier,
-					-sequence   => $nucleotide
+					-seq        => $nucleotide
 					);
 	    
 	    # Bioperl sequence factory
 	    
 	    my $sout = Bio::SeqIO->new (
-					-fh   => ">$seq_fh",
+					-fh     => $seq_fh,
 					-format => 'fasta'
 					);
 	    $sout->write_seq ($seqobj);
@@ -256,15 +255,19 @@ sub GeneID_call {
 
 	close $seq_fh;
 
-	# my $seqfile = "/home/ug/arnau/data/AC005155.fa";
-
 	# Test empty file
 	if (-z $seqfile) {
 	    print STDERR "Error, empty sequence file...\n";
 	}
 
+	# print STDERR "Running GeneID, with this command:\n";
+	# print STDERR "$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile \n";
+
         my $geneid_output = qx/$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile/;
         
+	# Comment this thine if you want to keep the file...
+	unlink $seqfile;
+
         if (defined $geneid_output) {
 		return $geneid_output;
 	}	

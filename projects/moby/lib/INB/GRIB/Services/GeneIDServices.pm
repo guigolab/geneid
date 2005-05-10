@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.2 2005-05-10 14:46:38 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.3 2005-05-10 15:48:51 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -330,7 +330,7 @@ sub _do_query_GeneID {
 	    # Si le hemos puesto nombre a los articulos del servicio,  
 	    # podemos recoger a traves de estos nombres el valor. 
 	    
-	    if ($articleName eq "sequence") { 
+	    if ($articleName eq "sequences") { 
 
 		##################################################################
 		#
@@ -371,6 +371,12 @@ sub _do_query_GeneID {
 	    }
 	} # Next article
 	
+	# Check that we have parsed properly the sequences
+
+	if (not defined $nucleotide) {
+	    print STDERR "Error, can't parsed any sequences tag...\n";
+	}
+
 	# Una vez recogido todos los parametros necesarios, llamamos a 
 	# la funcion que nos devuelve el report. 	
 
