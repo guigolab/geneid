@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.3 2005-05-10 14:03:11 arnau Exp $
+# $Id: Factory.pm,v 1.4 2005-05-10 14:32:53 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -190,8 +190,8 @@ sub GeneID_call {
 	my $strands = $parameters->{strands};
 	
         # Llama a GeneID en local
-        my $_geneid_dir  = "/usr/local/molbio/Install/geneid";
-        my $_geneid_bin  = "bin/geneid";
+        my $_geneid_dir  = "/home/ug/gmaster/GeneID/geneid_2002";
+        my $_geneid_bin  = "bin/geneid_1.2";
         my $_geneid_args = "";
 	
         if ($format eq "GFF") {
@@ -207,13 +207,23 @@ sub GeneID_call {
 	elsif ($strands eq "Reverse") {
 	    $_geneid_args .= "C";
 	}
-
-	if ($profile eq "Human") {
-	    $_geneid_args .= "P $_geneid_dir/param/human.param";
-	}
-	else {
+	
+        SWITCH: {
+	    if ($profile eq "Human")         { $_geneid_args .= "P $_geneid_dir/human.param"; last SWITCH; }
+	    if ($profile eq "Tetraodon")     { $_geneid_args .= "P $_geneid_dir/tetraodon.param"; last SWITCH; }
+	    if ($profile eq "Drosophila")    { $_geneid_args .= "P $_geneid_dir/dros.param"; last SWITCH; }
+	    if ($profile eq "Celegans")      { $_geneid_args .= "P $_geneid_dir/celegans.param"; last SWITCH; }
+	    if ($profile eq "Wheat")         { $_geneid_args .= "P $_geneid_dir/wheat.param"; last SWITCH; }
+	    if ($profile eq "Arabidopsis")   { $_geneid_args .= "P $_geneid_dir/arabidopsis.param"; last SWITCH; }
+	    if ($profile eq "Rice")          { $_geneid_args .= "P $_geneid_dir/rice.param"; last SWITCH; }
+	    if ($profile eq "Plasmodium")    { $_geneid_args .= "P $_geneid_dir/plasmodium.param"; last SWITCH; }
+	    if ($profile eq "Dictyostelium") { $_geneid_args .= "P $_geneid_dir/dictyostelium.param"; last SWITCH; }
+	    if ($profile eq "Aspergillus")   { $_geneid_args .= "P $_geneid_dir/aspergillus.param"; last SWITCH; }
+	    if ($profile eq "Neurospora")    { $_geneid_args .= "P $_geneid_dir/neurospora.param"; last SWITCH; }
+	    if ($profile eq "Cryptococcus")  { $_geneid_args .= "P $_geneid_dir/cneomorfans.param"; last SWITCH; }
+	    if ($profile eq "Coprinus")      { $_geneid_args .= "P $_geneid_dir/cinereus.param"; last SWITCH; }
 	    # Default is Human
-	    $_geneid_args .= "P $_geneid_dir/param/human.param";
+	    $_geneid_args .= "P $_geneid_dir/human.param";
 	}
         
 	# Generate a temporary file locally with the sequence(s) in FASTA format
