@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.1 2005-05-06 10:53:53 arnau Exp $
+# $Id: GeneIDServices.pm,v 1.2 2005-05-10 14:46:38 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -558,7 +558,7 @@ sub runGeneIDGFF {
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
 	    
-	    # my $query_str = $query->toString();
+	    # my $query_str = $queryInput->toString();
 	    # print STDERR "query text: $query_str\n";
 
 	    my $query_response = _do_query_GeneID ($queryInput, $_format);
