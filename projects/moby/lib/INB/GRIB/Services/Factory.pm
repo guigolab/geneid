@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.2 2005-05-06 16:47:35 arnau Exp $
+# $Id: Factory.pm,v 1.3 2005-05-10 14:03:11 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -191,7 +191,6 @@ sub GeneID_call {
 	
         # Llama a GeneID en local
         my $_geneid_dir  = "/usr/local/molbio/Install/geneid";
-	# $_geneid_dir     = "/home/ug/arnau/psu_software_cd";
         my $_geneid_bin  = "bin/geneid";
         my $_geneid_args = "";
 	
@@ -217,11 +216,11 @@ sub GeneID_call {
 	    $_geneid_args .= "P $_geneid_dir/param/human.param";
 	}
         
-	# Generate a temporary file locally with the sequence in FASTA format
+	# Generate a temporary file locally with the sequence(s) in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	# my ($fh, $seqfile) = tempfile("/tmp/GENEID.XXXXXX", UNLINK => 1);
-	# close($fh);
+	my ($seq_fh, $seqfile) = tempfile("/tmp/moby/GENEID.XXXXXX", UNLINK => 1);
+	# close($seq_fh);
 
 	my @seqIds = keys (%$sequences);
 	foreach my $sequenceIdentifier (@seqIds) {
@@ -237,15 +236,17 @@ sub GeneID_call {
 	    
 	    # Bioperl sequence factory
 	    
-	    # my $sout = Bio::SeqIO->new (
-	    # 			    -file   => ">$seqfile",
-	    #			    -format => 'fasta'
-	    #			    );
-	    # $sout->write_seq ($seqobj);
+	    my $sout = Bio::SeqIO->new (
+					-fh   => ">$seq_fh",
+					-format => 'fasta'
+					);
+	    $sout->write_seq ($seqobj);
 	    
 	}
 
-	my $seqfile = "/home/ug/arnau/data/AC005155.fa";
+	close $seq_fh;
+
+	# my $seqfile = "/home/ug/arnau/data/AC005155.fa";
 
 	# Test empty file
 	if (-z $seqfile) {
@@ -290,7 +291,7 @@ sub SGP2_call {
 
         # Llama a SGP2 localmente
         my $_sgp2_dir  = "/home/ug/gmaster/sgp2/sgp2_2003/";
-	# my $_sgp2_dir  = $ENV{SGP2};
+	$_sgp2_dir  = $ENV{SGP2};
         my $_sgp2_bin  = "bin/sgp2";
         my $_sgp2_args = "";
 	
@@ -301,7 +302,7 @@ sub SGP2_call {
 	# Generate a temporary file locally with the sequence in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	# my ($fh, $seqfile) = tempfile("/tmp/SGP2_Sequence.XXXXXX", UNLINK => 1);
+	# my ($fh, $seqfile) = tempfile("/tmp/moby/SGP2_Sequence.XXXXXX", UNLINK => 1);
 	# close($fh);
 
 	my @seqIds = keys (%$sequences);
@@ -333,7 +334,7 @@ sub SGP2_call {
 	# Generate a temporary file locally with the TBLASTX Output
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	# my ($fh, $tblastx_output_file) = tempfile("/tmp/SGP2_TBLASTX.XXXXXX", UNLINK => 1);
+	# my ($fh, $tblastx_output_file) = tempfile("/tmp/moby/SGP2_TBLASTX.XXXXXX", UNLINK => 1);
 	# close($fh);
 
 	# qx/echo "$tblastx_output" > $tblastx_output_file/;
