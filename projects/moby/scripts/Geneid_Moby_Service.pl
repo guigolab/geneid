@@ -28,11 +28,9 @@ my $_debug = 0;
 #
 ##################################################################
 
-my $nucleotide = shift @ARGV;
-my $datasource = shift @ARGV || "";
-
-my $in_file    = "/home/ug/arnau/data/AC005155.fa";
-$datasource    = "EMBL";
+my $in_file    = shift @ARGV || "/home/ug/arnau/data/AC005155.fa";
+my $datasource = "EMBL";
+my $nucleotide;
 my $profile    = "Human";
 my $strands    = "Reverse";
 
@@ -140,7 +138,7 @@ PRT
 PRT
 
     my $result = $Service->execute(XMLinputlist => [
-						    ['sequence', $input, 'profile', $profile_xml, 'strands', $strand_xml]
+						    ['sequences', $input, 'profile', $profile_xml, 'strands', $strand_xml]
 						   ]);
     
     ##################################################################
