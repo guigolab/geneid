@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.5 2005-05-10 15:48:51 gmaster Exp $
+# $Id: Factory.pm,v 1.6 2005-05-11 15:20:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -231,7 +231,15 @@ sub GeneID_call {
 
 	my ($seq_fh, $seqfile) = tempfile("/tmp/moby/GENEID.XXXXXX", UNLINK => 0);
 
+	# Bioperl sequence factory
+	
+	my $sout = Bio::SeqIO->new (
+				    -fh     => $seq_fh,
+				    -format => 'fasta'
+				    );
+	
 	my @seqIds = keys (%$sequences);
+
 	foreach my $sequenceIdentifier (@seqIds) {
 
 	    my $nucleotide = $sequences->{$sequenceIdentifier};
@@ -243,12 +251,6 @@ sub GeneID_call {
 					-seq        => $nucleotide
 					);
 	    
-	    # Bioperl sequence factory
-	    
-	    my $sout = Bio::SeqIO->new (
-					-fh     => $seq_fh,
-					-format => 'fasta'
-					);
 	    $sout->write_seq ($seqobj);
 	    
 	}

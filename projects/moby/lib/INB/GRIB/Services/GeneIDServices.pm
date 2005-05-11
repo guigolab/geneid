@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.3 2005-05-10 15:48:51 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.4 2005-05-11 15:20:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -280,66 +280,62 @@ PRT
 =cut
 
 sub _do_query_GeneID {
-	# $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
-	my $queryInput_DOM = shift @_;
-	# $_format is the type of output that returns GeneID (e.g. GFF)
-	my $_format        = shift @_;
+    # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
+    my $queryInput_DOM = shift @_;
+    # $_format is the type of output that returns GeneID (e.g. GFF)
+    my $_format        = shift @_;
+    
+    my $MOBY_RESPONSE = "";     # set empty response
+    
+    # Aqui escribimos las variables que necesitamos para la funcion. 
+    my $profile;
+    my $strands;
+    
+    # Variables that will be passed to GeneID_call
+    my %sequences;
+    my %parameters;
+    
+    my $queryID  = getInputID ($queryInput_DOM);
+    my @articles = getArticles($queryInput_DOM);
+    
+    # Get the parameters
+    
+    ($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
+    if (not defined $profile) {
+	# Default is "Human"
+	$profile = "Human";
+    }
+    
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
+    if (not defined $strands) {
+	# Default is running GeneID on both strands
+	$strands = "Both";
+    }
+    
+    # Add the parsed parameters in a hash table
+    
+    $parameters{profile} = $profile;
+    $parameters{strands} = $strands;
+    
+    # Tratamos a cada uno de los articulos
+    foreach my $article (@articles) {       
 	
-        my $MOBY_RESPONSE = "";     # set empty response
-
-	# Aqui escribimos las variables que necesitamos para la funcion. 
-	my $nucleotide;  
-	my $sequenceIdentifier;
-	my $profile;
-	my $strands;
-
-	# Variables that will be passed to GeneID_call
-	my %sequences;
-	my %parameters;
-
-	my $queryID  = getInputID ($queryInput_DOM);
-	my @articles = getArticles($queryInput_DOM);
-
-	# Get the parameters
-
-	($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
-	if (not defined $profile) {
-	    # Default is "Human"
-	    $profile = "Human";
-	}
-
-	($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
-	if (not defined $strands) {
-	    # Default is running GeneID on both strands
-	    $strands = "Both";
-	}
-
-	# Add the parsed parameters in a hash table
+	# El articulo es una tupla que contiene el nombre de este 
+	# y su texto xml. 
 	
-	$parameters{profile} = $profile;
-	$parameters{strands} = $strands;
+	my ($articleName, $DOM) = @{$article}; # get the named article
+	
+	# Si le hemos puesto nombre a los articulos del servicio,  
+	# podemos recoger a traves de estos nombres el valor. 	
+	
+	if ($articleName eq "sequences") { 
+	    
+	    if (isSimpleArticle ($DOM)) {
 
-	# Tratamos a cada uno de los articulos
-	foreach my $article (@articles) {       
-	    
-	    # El articulo es una tupla que contiene el nombre de este 
-	    # y su texto xml. 
-	    
-	    my ($articleName, $DOM) = @{$article}; # get the named article
-	    
-	    # Si le hemos puesto nombre a los articulos del servicio,  
-	    # podemos recoger a traves de estos nombres el valor. 
-	    
-	    if ($articleName eq "sequences") { 
-
-		##################################################################
-		#
-		# Not sure it works for multiple DNAsequence entries...
-		# I need to play with this to make it cope with multiple sequences...
-		#
-		##################################################################
-
-		# Get the sequence identifier - not this way, because it supposes that there is only one sequence......
+		# print STDERR "sequences tag is a simple article...\n";
+		
+		my $sequenceIdentifier;
+		my $nucleotide;
 		
 		my @articles = ($DOM);
 		my @ids = getSimpleArticleIDs (\@articles);
@@ -354,58 +350,89 @@ sub _do_query_GeneID {
 		# el objeto de la ontologia podria tener una relacion
 		# "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
 		
-		# Make the sequence file here, so we can have more than one sequence...
-		# In case of collection
-		
 		# The Sequence as a string
 		
 		($nucleotide) = getNodeContentWithArticle($DOM, "String", "SequenceString");
 		# Lo que hacemos aqui es limpiar un sting de caracteres raros 
 		# (espacios, \n, ...) pq nadie asegura que no los hayan. 
 		$nucleotide =~ s/\W+//sg; # trim trailing whitespace
-
-		# Add the sequence into a hash table
-
-		$sequences{$sequenceIdentifier} = $nucleotide;
 		
+		# Add the sequence into a hash table
+		
+		$sequences{$sequenceIdentifier} = $nucleotide;		
 	    }
-	} # Next article
+	    elsif (isCollectionArticle ($DOM)) {
+		
+		# print STDERR "sequences is a collection article...\n";
+		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		
+		my @sequence_articles_DOM = getCollectedSimples ($DOM);
+		
+		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
+		    
+		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $sequence_article_DOM ] );
+
+		    # print STDERR "Sequence DOM: " . $sequence_article_DOM->toString() . "\n";
+
+		    my ($nucleotide) = getNodeContentWithArticle($sequence_article_DOM, "String", "SequenceString");
+		    # Lo que hacemos aqui es limpiar un sting de caracteres raros 
+		    # (espacios, \n, ...) pq nadie asegura que no los hayan.
+		    $nucleotide =~ s/\W+//sg; # trim trailing whitespace
+		    
+		    if (length ($nucleotide) < 1) {
+			print STDERR "nucleotide sequence not parsed properly...\n";
+		    }
+
+		    # print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
+		    # print STDERR "nucleotide length: " . length ($nucleotide) . "\n";
+		    
+		    # Add the sequence into a hash table
+		    
+		    $sequences{$sequenceIdentifier} = $nucleotide;
+		}
+	    }
+	    else {
+		print STDERR "It is not a simple or collection article...\n";
+		print STDERR "DOM: " . $DOM->toString() . "\n";
+	    }
+	    
+	} # End parsing sequences article tag
 	
-	# Check that we have parsed properly the sequences
-
-	if (not defined $nucleotide) {
-	    print STDERR "Error, can't parsed any sequences tag...\n";
-	}
-
-	# Una vez recogido todos los parametros necesarios, llamamos a 
-	# la funcion que nos devuelve el report. 	
-
-	# Set up the temporary file here and give it as a parameter or give a hash of sequence entries, so we can submit multiple sequences...
-
-	my $report = GeneID_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
-	
-	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
-	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
-	# la podriamos realizar en una funcion a parte si fuese compleja.  
-
-	my $input = <<PRT;
+    } # Next article
+    
+    # Check that we have parsed properly the sequences
+    
+    if ((keys (%sequences)) == 0) {
+	print STDERR "Error, can't parsed any sequences...\n";
+    }
+    
+    # Una vez recogido todos los parametros necesarios, llamamos a 
+    # la funcion que nos devuelve el report. 	
+    
+    my $report = GeneID_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
+    
+    # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
+    # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
+    # la podriamos realizar en una funcion a parte si fuese compleja.  
+    
+    my $input = <<PRT;
 <moby:$_format namespace='' id=''>
 <![CDATA["
 $report
 "]]>
 </moby:$_format>
 PRT
-        # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
-        # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
-        # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
-        # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
-        # a collection response. 
-        # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
-        # el mismo que el de la query. 
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
+    # a collection response. 
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
+    # el mismo que el de la query. 
 
-        $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
+    $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
 	
-        return $MOBY_RESPONSE;
+    return $MOBY_RESPONSE;
 }
 
 
