@@ -20,6 +20,12 @@ use SOAP::Lite;
 
 use Bio::SeqIO;
 
+# Benchmark Module
+use Benchmark;
+##################################################################
+
+my $t1 = Benchmark->new ();
+
 my $_debug = 0;
 
 ##################################################################
@@ -150,3 +156,6 @@ PRT
     print "result\n", $result, "\n";
 
 }
+
+my $t2 = Benchmark->new ();
+print  STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
