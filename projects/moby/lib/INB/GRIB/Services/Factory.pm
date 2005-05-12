@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.6 2005-05-11 15:20:16 gmaster Exp $
+# $Id: Factory.pm,v 1.7 2005-05-12 09:51:16 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -191,7 +191,7 @@ sub GeneID_call {
 	
         # Llama a GeneID en local
         my $_geneid_dir  = "/home/ug/gmaster/GeneID/geneid_2002";
-        my $_geneid_bin  = "bin/geneid_1.2";
+        my $_geneid_bin  = "bin/geneid";
         my $_geneid_args = "";
 	
         if ($format eq "GFF") {
