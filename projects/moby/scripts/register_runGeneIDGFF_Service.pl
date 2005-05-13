@@ -159,7 +159,7 @@ my ($REG) = $Central->registerService(
 					      enum     => ['Forward', 'Reverse','Both'],
 					      default  => 'Both',
 					      max      => 'MAX',
-						min      => 'MIN',
+					      min      => 'MIN',
 					  },
 					  'engine' => {
 					      datatype => 'String',

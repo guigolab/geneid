@@ -38,7 +38,7 @@ my $in_file    = shift @ARGV || "/home/ug/arnau/data/AC005155.fa";
 my $datasource = "EMBL";
 my $nucleotide;
 my $profile    = "Human";
-my $strands    = "Reverse";
+my $strands    = "Both";
 
 my $seqin = Bio::SeqIO->new (
 			     -file => $in_file,
