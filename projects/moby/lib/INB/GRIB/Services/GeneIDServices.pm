@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.4 2005-05-11 15:20:16 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.5 2005-05-13 09:29:34 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -294,10 +294,10 @@ sub _do_query_GeneID {
     # Variables that will be passed to GeneID_call
     my %sequences;
     my %parameters;
-    
+
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
-    
+
     # Get the parameters
     
     ($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
@@ -326,9 +326,13 @@ sub _do_query_GeneID {
 	my ($articleName, $DOM) = @{$article}; # get the named article
 	
 	# Si le hemos puesto nombre a los articulos del servicio,  
-	# podemos recoger a traves de estos nombres el valor. 	
+	# podemos recoger a traves de estos nombres el valor.
+	# Sino sabemos que es el input articulo porque es un simple/collection articulo
+
+	# It's not very nice but taverna does'nt set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
+	# In case of GeneID, it doesn't really matter as there is only one input anyway
 	
-	if ($articleName eq "sequences") { 
+	if (($articleName eq "sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) { 
 	    
 	    if (isSimpleArticle ($DOM)) {
 
