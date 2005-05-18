@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.5 2005-05-13 09:29:34 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.6 2005-05-18 13:17:20 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -421,9 +421,9 @@ sub _do_query_GeneID {
     
     my $input = <<PRT;
 <moby:$_format namespace='' id=''>
-<![CDATA["
+<![CDATA[
 $report
-"]]>
+]]>
 </moby:$_format>
 PRT
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda

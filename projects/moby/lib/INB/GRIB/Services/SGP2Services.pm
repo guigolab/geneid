@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.1 2005-05-06 16:47:35 arnau Exp $
+# $Id: SGP2Services.pm,v 1.2 2005-05-18 13:17:20 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -266,9 +266,9 @@ sub _do_query_SGP2 {
 
 	my $input = <<PRT;
 <moby:$_format namespace='' id=''>
-<![CDATA["
+<![CDATA[
 $report
-"]]>
+]]>
 </moby:$_format>
 PRT
         # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
