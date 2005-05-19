@@ -18,7 +18,7 @@ sub help {
 Description: Deregister a service in Moby Central
   Usage:
     
-    deregisterService.pl [-h] -x {Moby Central} -s {Service Name}
+    deregisterService.pl [-h] -x {Moby Central} -s {Service Name} -a {Authoritative URI}
     -h help
 	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
 	<1> or Chirimoyo
@@ -26,9 +26,10 @@ Description: Deregister a service in Moby Central
 	<3> or Inab
 	<4> or BioMoby
 	-s Service Name
-	
+	-a Authoritative URI
+
 	Examples using some combinations:
-	perl deregisterService.pl -x 1 -s runGeneIDGFF
+	perl deregisterService.pl -x 1 -s runGeneIDGFF -a genome.imim.es
 
 END_HELP
 
@@ -37,16 +38,16 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_s/;
+    use vars qw/$opt_h $opt_x $opt_s $opt_a/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'hxs';
+    my $switches = 'hxsa';
     
     # Get the switches
     getopt($switches);
     
     # If the user does not write nothing, skip to help
-    if (defined($opt_h) || !defined($opt_x) || !defined($opt_s)){
+    if (defined($opt_h) || !defined($opt_x) || !defined($opt_s) || !defined($opt_a)){
 	print STDERR help;
 	exit 0;
     }
@@ -54,7 +55,7 @@ BEGIN {
 }
 
 # URI
-$::authURI = 'genome.imim.es';
+$::authURI = $opt_a;
 
 # Service Name
 my $serviceName = $opt_s;
@@ -117,7 +118,7 @@ my($sia,$ro);
 ($sia,$ro) = $Central->findService(serviceName=>$serviceName,authURI=>$::authURI);
 
 if ((defined $ro) || (not defined $sia)) {
-	print STDERR "No service, $serviceName, registred at $::authURI.\n";
+	print STDERR "No service, $serviceName, registered at $::authURI.\n";
 	exit 0;
 }
 
