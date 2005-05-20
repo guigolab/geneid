@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.7 2005-05-12 09:51:16 arnau Exp $
+# $Id: Factory.pm,v 1.8 2005-05-20 10:18:42 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -103,6 +103,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 #  @EXPORT = qw( &func1 &func2);
 # 
 our @EXPORT = qw(
+  &GeneID_call_CGI
   &GeneID_call
   &SGP2_call
 );
@@ -142,26 +143,51 @@ BEGIN {
 
 sub GeneID_call_CGI {
         my %args = @_; 
-        # relleno los parametros por defecto GeneID_call_CGI (nucleotide  => $nucleotide, seqIdentifier => $sequenceIdentifier);
-        my $nucleotide = $args{nucleotide} || "";
-	my $sequenceIdentifier = $args{seqIdentifier} || "unknown";
+	
+	# relleno los parametros por defecto GeneID_call
+	
+        my $sequences          = $args{sequences}  || undef;
+	my $format             = $args{format}     || "";
+	my $parameters         = $args{parameters} || undef;
 
-        # Llama a GeneID usando el interface web
-        my $diagplot_url = "http://genome.imim.es/cgi-bin/GeneID_cgi/geneid_2002/geneid_2002.cgi";
-	my $agent_diag   = LWP::UserAgent->new(timeout => 30000);
-        my $request_diag = POST($diagplot_url,
-	       "Content-type" => "form-data",
-	       "Content" => [
-	       "seq"     => ">$sequenceIdentifier\n".$nucleotide,
-	       "profile" => "Human",
-	       "engines" => "normal",
-	       "strands" => "both",
-	       "format"  => "gff"
-        ]);
-        my $result_diag = $agent_diag->request($request_diag);
-	   
-	return $result_diag->content;
-}
+	# Get the parameters
+
+	my $profile = $parameters->{profile};
+	my $strands = $parameters->{strands};
+	my $mode    = "normal";
+
+	# print STDERR "GeneID parameters (profile, strands, format): $profile, $strands, $format.\n";
+
+	my $results = "";
+
+	# Parse the sequences hash
+	
+	my @seqIds = keys (%$sequences);
+
+	foreach my $sequenceIdentifier (@seqIds) {
+
+	    my $nucleotides = $sequences->{$sequenceIdentifier};
+
+	    # print STDERR "Submitting sequence, $sequenceIdentifier, of length, " . length ($nucleotides) . ", to GeneID CGI...\n";
+
+	    # Llama a GeneID usando el interface web
+	    my $diagplot_url = "http://genome.imim.es/cgi-bin/GeneID_cgi/geneid_2002/geneid_2002.cgi";
+	    my $agent_diag   = LWP::UserAgent->new(timeout => 30000);
+	    my $request_diag = POST($diagplot_url,
+				    "Content-type" => "form-data",
+				    "Content" => [
+						  "seq"     => ">$sequenceIdentifier\n".$nucleotides,
+						  "profile" => $profile,
+						  "engines" => lc ($mode),
+						  "strands" => lc ($strands),
+						  "format"  => lc ($format)
+						  ]);
+	    my $result_diag = $agent_diag->request($request_diag);
+	    $results       .= $result_diag->content;
+	}
+
+	return $results;
+    }
 
 
 =head2 GeneID_call
@@ -178,8 +204,10 @@ sub GeneID_call_CGI {
 =cut
 
 sub GeneID_call {
-        my %args = @_; 
-        # relleno los parametros por defecto GeneID_call (nucleotide  => $nucleotide, seqIdentifier => $sequenceIdentifier);
+        my %args = @_;
+
+        # relleno los parametros por defecto GeneID_call
+
         my $sequences          = $args{sequences} || undef;
 	my $format             = $args{format} || "";
 	my $parameters         = $args{parameters} || undef;
@@ -242,13 +270,13 @@ sub GeneID_call {
 
 	foreach my $sequenceIdentifier (@seqIds) {
 
-	    my $nucleotide = $sequences->{$sequenceIdentifier};
+	    my $nucleotides = $sequences->{$sequenceIdentifier};
 
 	    # bioperl object
 	    
 	    my $seqobj = Bio::Seq->new (
 					-display_id => $sequenceIdentifier,
-					-seq        => $nucleotide
+					-seq        => $nucleotides
 					);
 	    
 	    $sout->write_seq ($seqobj);
@@ -323,13 +351,13 @@ sub SGP2_call {
 	my @seqIds = keys (%$sequences);
 	foreach my $sequenceIdentifier (@seqIds) {
 
-	    my $nucleotide = $sequences->{$sequenceIdentifier};
+	    my $nucleotides = $sequences->{$sequenceIdentifier};
 
 	    # bioperl object
 	    
 	    my $seqobj = Bio::Seq->new (
 					-display_id => $sequenceIdentifier,
-					-sequence   => $nucleotide
+					-sequence   => $nucleotides
 					);
 	    
 	    # Bioperl sequence factory

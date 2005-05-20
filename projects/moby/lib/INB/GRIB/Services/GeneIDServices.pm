@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.6 2005-05-18 13:17:20 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.7 2005-05-20 10:18:42 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -177,78 +177,165 @@ our $VERSION = '1.0';
 =cut
 
 sub _do_query_GeneID_CGI {
-	# $query es un objeto DOM::Node con la informacion de una query biomoby 
-	my $query = shift @_;
-        my $MOBY_RESPONSE = "";             # set empty response
-	# Aqui escribimos las variables que necesitamos para la funcion. 
-	my $nucleotide;  
-	my $sequenceIdentifier;
+    # $query es un objeto DOM::Node con la informacion de una query biomoby 
+    my $queryInput_DOM     = shift @_;
+    my $moby_output_format = shift @_;
+    
+    my $_geneid_output_format = "GFF";
+    
+    my $MOBY_RESPONSE = "";             # set empty response
+    
+    # Aqui escribimos las variables que necesitamos para la funcion. 
+    my $profile;
+    my $strands;
+    
+    # Variables that will be passed to GeneID_call
+    my %sequences;
+    my %parameters;
 
-	# get the queryID attribute of the queryInput
-        my $queryID = getInputID($query);  
-	# Obtenemos todos los articulos que forman parte de la query. 
-	my @input_articles = getArticles($query);
+    my $queryID  = getInputID ($queryInput_DOM);
+    my @articles = getArticles($queryInput_DOM);
 
-	# Tratamos a cada uno de los articulos
-	foreach my $article(@input_articles) {       
+    # Get the parameters
+    
+    ($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
+    if (not defined $profile) {
+	# Default is "Human"
+	$profile = "Human";
+    }
+    
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
+    if (not defined $strands) {
+	# Default is running GeneID on both strands
+	$strands = "Both";
+    }
+    
+    # Add the parsed parameters in a hash table
+    
+    $parameters{profile} = $profile;
+    $parameters{strands} = $strands;
+    
+    # Tratamos a cada uno de los articulos
+    foreach my $article (@articles) {       
 
-		# El articulo es una tupla que contiene el nombre de este 
-		# y su texto xml. 
+	# El articulo es una tupla que contiene el nombre de este 
+	# y su texto xml. 
+	
+	my ($articleName, $DOM) = @{$article}; # get the named article
+	
+	# Si le hemos puesto nombre a los articulos del servicio,  
+	# podemos recoger a traves de estos nombres el valor.
+	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 
-		my ($articleName, $DOM) = @{$article}; # get the named article
+	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
+	# In case of GeneID, it doesn't really matter as there is only one input anyway
+	
+	if (($articleName eq "sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) { 
+	    
+	    if (isSimpleArticle ($DOM)) {
+
+		# print STDERR "sequences tag is a simple article...\n";
 		
-		# Si le hemos puesto nombre a los articulos del servicio,  
-		# podemos recoger a traves de estos nombres el valor. 
-
-		if ($articleName eq "sequence") { 
-
-		    # Test get the sequence identifier another way !
-		    
-		    my @articles = ($DOM);
-		    my @ids = getSimpleArticleIDs (\@articles);
-		    my $seqId = "Moby";
-		     if (@ids > 0) {
-			 $seqId = $ids[0];
-		    }
-		    
-		    # Los contenidos los devuelve como una lista, dado que 
-		    # el objeto de la ontologia podria tener una relacion
-		    # "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
-
-		    # The Sequence as a string
-
-		    ($nucleotide) = getNodeContentWithArticle($DOM, "String", "SequenceString");
-		    # Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		    # (espacios, \n, ...) pq nadie asegura que no los hayan. 
-		    $nucleotide =~ s/\W+//sg; # trim trailing whitespace
-
+		my $sequenceIdentifier;
+		my $nucleotide;
+		
+		my @articles = ($DOM);
+		my @ids = getSimpleArticleIDs (\@articles);
+		if (@ids > 0) {
+		    $sequenceIdentifier = $ids[0];
 		}
-	}
-	# Una vez recogido todos los parametros necesarios, llamamos a 
-	# la funcion que nos devuelve el report. 
+		else {
+		    print STDERR "Error - no sequence identifier!!!\n";
+		}
+		
+		# Los contenidos los devuelve como una lista, dado que 
+		# el objeto de la ontologia podria tener una relacion
+		# "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
+		
+		# The Sequence as a string
+		
+		($nucleotide) = getNodeContentWithArticle($DOM, "String", "SequenceString");
+		# Lo que hacemos aqui es limpiar un sting de caracteres raros 
+		# (espacios, \n, ...) pq nadie asegura que no los hayan. 
+		$nucleotide =~ s/\W+//sg; # trim trailing whitespace
+		
+		# Add the sequence into a hash table
+		
+		$sequences{$sequenceIdentifier} = $nucleotide;		
+	    }
+	    elsif (isCollectionArticle ($DOM)) {
+		
+		# print STDERR "sequences is a collection article...\n";
+		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		
+		my @sequence_articles_DOM = getCollectedSimples ($DOM);
+		
+		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
+		    
+		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $sequence_article_DOM ] );
 
-	my $report = GeneID_call_CGI (nucleotide  => $nucleotide, seqIdentifier => $sequenceIdentifier);
+		    # print STDERR "Sequence DOM: " . $sequence_article_DOM->toString() . "\n";
 
-	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
-	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
-	# la podriamos realizar en una funcion a parte si fuese compleja.  
-my $input = <<PRT;
-<moby:text-html namespace='' id=''>
+		    my ($nucleotide) = getNodeContentWithArticle($sequence_article_DOM, "String", "SequenceString");
+		    # Lo que hacemos aqui es limpiar un sting de caracteres raros 
+		    # (espacios, \n, ...) pq nadie asegura que no los hayan.
+		    $nucleotide =~ s/\W+//sg; # trim trailing whitespace
+		    
+		    if (length ($nucleotide) < 1) {
+			print STDERR "nucleotide sequence not parsed properly...\n";
+		    }
+
+		    # print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
+		    # print STDERR "nucleotide length: " . length ($nucleotide) . "\n";
+		    
+		    # Add the sequence into a hash table
+		    
+		    $sequences{$sequenceIdentifier} = $nucleotide;
+		}
+	    }
+	    else {
+		print STDERR "It is not a simple or collection article...\n";
+		print STDERR "DOM: " . $DOM->toString() . "\n";
+	    }
+	    
+	} # End parsing sequences article tag
+	
+    } # Next article
+    
+    # Check that we have parsed properly the sequences
+    
+    if ((keys (%sequences)) == 0) {
+	print STDERR "Error, can't parsed any sequences...\n";
+    }
+    
+    # Una vez recogido todos los parametros necesarios, llamamos a 
+    # la funcion que nos devuelve el report. 	
+    
+    my $report = GeneID_call_CGI (sequences  => \%sequences, format => $_geneid_output_format, parameters => \%parameters);
+    
+    # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
+    # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
+    # la podriamos realizar en una funcion a parte si fuese compleja.  
+    
+    my $input = <<PRT;
+<moby:$moby_output_format namespace='' id=''>
 <![CDATA["
 $report
 "]]>
-</moby:text-html>
+</moby:$moby_output_format>
 PRT
-	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
-	# volver a encapsularlo en un objeto biomoby de respuesta. Pero 
-	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
-	# una respuesta compleja (de verdad, esta era simple ;) llamariamos 
-	# a collection response. 
-	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
-	# el mismo que el de la query. 
-	$MOBY_RESPONSE .= simpleResponse($input, "report", $queryID);
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
+    # a collection response. 
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
+    # el mismo que el de la query. 
+
+    $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
 	
-        return $MOBY_RESPONSE;
+    return $MOBY_RESPONSE;
+	
 }
 
 
@@ -329,7 +416,7 @@ sub _do_query_GeneID {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 
-	# It's not very nice but taverna does'nt set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
+	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of GeneID, it doesn't really matter as there is only one input anyway
 	
 	if (($articleName eq "sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) { 
@@ -487,6 +574,7 @@ sub runGeneID {
 
 	# El parametro $message es un texto xml con la peticion.
 	my ($caller, $message) = @_;        # get the incoming MOBY query XML
+
 	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
 	# a la ontologia, y debemos contentarnos con trabajar directamente 
 	# con objetos DOM. Por consiguiente lo primero es recolectar la 
@@ -503,16 +591,25 @@ sub runGeneID {
 	# es una coleccion de respuestas a cada una de las consultas.
         my $MOBY_RESPONSE = "";             # set empty response
 
+	#
+	# The moby output format for this service is text-html
+	# (The GeneID output format for this service is by default GFF - right now it is hardcoded)
+	#
+
+	my $_moby_output_format   = "text-html";
+
 	# Para cada query ejecutaremos el _execute_query.
         foreach my $query(@queries){
-		# En este punto es importante recordar que el objeto $query 
-		# es un XML::DOM::Node, y que si queremos trabajar con 
-		# el mensaje de texto debemos llamar a: $query->toString() 
-		my $query_response = _do_query_GeneID($query);
-		# $query_response es un string que contiene el codigo xml de
-		# la respuesta.  Puesto que es un codigo bien formado, podemos 
-		# encadenar sin problemas una respuesta con otra. 
-		$MOBY_RESPONSE .= $query_response;
+	    
+	    # En este punto es importante recordar que el objeto $query 
+	    # es un XML::DOM::Node, y que si queremos trabajar con 
+	    # el mensaje de texto debemos llamar a: $query->toString() 
+	    my $query_response = _do_query_GeneID_CGI ($query, $_moby_output_format);
+	    
+	    # $query_response es un string que contiene el codigo xml de
+	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
+	    # encadenar sin problemas una respuesta con otra. 
+	    $MOBY_RESPONSE .= $query_response;
 	}
 	# Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
 	# todas ellas con una cabecera y un final. Esto lo podemos hacer 
