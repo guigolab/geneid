@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.8 2005-05-20 10:18:42 gmaster Exp $
+# $Id: Factory.pm,v 1.9 2005-05-23 14:03:25 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -257,7 +257,7 @@ sub GeneID_call {
 	# Generate a temporary file locally with the sequence(s) in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	my ($seq_fh, $seqfile) = tempfile("/tmp/moby/GENEID.XXXXXX", UNLINK => 0);
+	my ($seq_fh, $seqfile) = tempfile("/tmp/GENEID.XXXXXX", UNLINK => 0);
 
 	# Bioperl sequence factory
 	
@@ -345,7 +345,7 @@ sub SGP2_call {
 	# Generate a temporary file locally with the sequence in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	# my ($fh, $seqfile) = tempfile("/tmp/moby/SGP2_Sequence.XXXXXX", UNLINK => 1);
+	# my ($fh, $seqfile) = tempfile("/tmp/SGP2_Sequence.XXXXXX", UNLINK => 1);
 	# close($fh);
 
 	my @seqIds = keys (%$sequences);
@@ -377,7 +377,7 @@ sub SGP2_call {
 	# Generate a temporary file locally with the TBLASTX Output
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	# my ($fh, $tblastx_output_file) = tempfile("/tmp/moby/SGP2_TBLASTX.XXXXXX", UNLINK => 1);
+	# my ($fh, $tblastx_output_file) = tempfile("/tmp/SGP2_TBLASTX.XXXXXX", UNLINK => 1);
 	# close($fh);
 
 	# qx/echo "$tblastx_output" > $tblastx_output_file/;
