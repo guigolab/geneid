@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.9 2005-05-23 14:03:25 gmaster Exp $
+# $Id: Factory.pm,v 1.10 2005-05-26 16:28:46 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -106,6 +106,7 @@ our @EXPORT = qw(
   &GeneID_call_CGI
   &GeneID_call
   &SGP2_call
+  &GOstat_call
 );
 
 our $VERSION = '1.00';
@@ -406,6 +407,63 @@ sub SGP2_call {
 		# What else better to return ??
 		return undef;
 	}
+}
+
+
+=head2 GOstat_call
+
+ Title   : GOstat_call
+ Usage   : $report = GOstat_call (@params);
+         : 
+         : ## where @params are,
+         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+         :            'arg2'  => "query 1", ## optional
+         :            'arg3'  => "nr");     ## optional (default: nr)
+ Returns : Devuelve un string que contiene el resultado de la ejecución.
+
+=cut
+
+sub GOstat_call {
+    my %args = @_;
+
+    my $regulated_genes    = $args{regulated_genes} || undef;
+    my $array_genes        = $args{array_genes}     || undef;
+    my $format             = $args{format}          || "";
+    my $parameters         = $args{parameters}      || undef;
+    
+    # Llama a GOstat localmente
+    my $_gostat_dir  = "/home/ug/gmaster/projects/gostat";
+    my $_gostat_bin  = "gostat.pl";
+    my $_gostat_args = "";
+    
+    # Make two temporary files for both input lists of genes
+    
+    my ($regulated_genes_fh, $regulated_genes_file) = tempfile("/tmp/REGULATED_GENES.XXXXXX", UNLINK => 0);
+    close ($regulated_genes_fh);
+    my ($array_genes_fh, $array_genes_file) = tempfile("/tmp/ARRAY_GENES.XXXXXX", UNLINK => 0);
+    close ($array_genes_fh);
+
+    open (FILE, ">$regulated_genes_file") or die "can't open temp file, $regulated_genes_file!\n";
+    print FILE (join ("\n", @$regulated_genes) . "\n");
+    close FILE;
+
+    open (FILE, ">$array_genes_file") or die "can't open temp file, $array_genes_file!\n";
+    print FILE (join ("\n", @$array_genes) . "\n");
+    close FILE;
+    
+    my $gostat_output = qx/$_gostat_dir\/$_gostat_bin $_gostat_args $regulated_genes_file $array_genes_file/;
+        
+    # unlink $regulated_genes_file;
+    # unlink $array_genes_file;
+
+    if (defined $gostat_output) {
+	return $gostat_output;
+    }
+    else {
+	# What else better to return ??
+	return undef;
+    }
+
 }
 
 1;
