@@ -106,9 +106,12 @@ my @array_genes_xml     = ();
 open (FILE, "<$in_file_1") or die "can't open file with regulated genes, $in_file_1!\n";
 
 while (<FILE>) {
-    my $line = $_;
+    my $seq_id = $_;
+    chomp ($seq_id);
 
-    my $seq_id = chomp ($line);
+    if ($_debug) {
+	print STDERR "Sequence identifier, $seq_id\n";
+    }
     
     #
     # Sequence Input in XML format
@@ -128,9 +131,13 @@ close FILE;
 open (FILE, "<$in_file_2") or die "can't open file with all array genes, $in_file_2!\n";;
 
 while (<FILE>) {
-    my $line = $_;
-    my $seq_id = chomp ($line);
-    
+    my $seq_id = $_;
+    chomp ($seq_id);
+
+    if ($_debug) {
+	print STDERR "Sequence identifier, $seq_id\n";
+    }
+
     #
     # Sequence Input in XML format
     #
