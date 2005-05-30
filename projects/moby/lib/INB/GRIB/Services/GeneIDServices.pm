@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.7 2005-05-20 10:18:42 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.8 2005-05-30 13:37:46 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -371,7 +371,7 @@ sub _do_query_GeneID {
     my $queryInput_DOM = shift @_;
     # $_format is the type of output that returns GeneID (e.g. GFF)
     my $_format        = shift @_;
-    
+
     my $MOBY_RESPONSE = "";     # set empty response
     
     # Aqui escribimos las variables que necesitamos para la funcion. 
@@ -398,11 +398,33 @@ sub _do_query_GeneID {
 	# Default is running GeneID on both strands
 	$strands = "Both";
     }
+
+    my @exons = getNodeContentWithArticle($queryInput_DOM, "Parameter", "exons");
+
+    # print STDERR "exons: " . Dumper (@exons) . ".\n";
+
+    if (@exons < 1) {
+        # Do nothing
+	# Default is not to report any signals => empty array
+	@exons = ();
+    }
+
+    my @signals = getNodeContentWithArticle($queryInput_DOM, "Parameter", "signals");
+
+    # print STDERR "signals: " . Dumper (@signals) . ".\n";
+
+    if (@signals < 1) {
+	# Do nothing
+	# Default is not to report any signals => empty array
+	@signals = ();
+    }
     
     # Add the parsed parameters in a hash table
     
     $parameters{profile} = $profile;
     $parameters{strands} = $strands;
+    $parameters{exons}   = \@exons;
+    $parameters{signals} = \@signals;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
