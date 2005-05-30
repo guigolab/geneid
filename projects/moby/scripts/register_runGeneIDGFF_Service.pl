@@ -63,6 +63,12 @@ BEGIN {
 my $MOBY_URI = $ENV{MOBY_URI}    ='http://chirimoyo.ac.uma.es/MOBY/Central';
 my $MOBY_SERVER = $ENV{MOBY_SERVER} ='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
 
+# URL
+
+# Development by default, but if the registry server is the production one,
+# then the URL will be the production server at genome.imim.es
+$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
+
 if (defined($opt_x)) {
     # Delete spaces
     $opt_x =~ s/\s//g;
@@ -72,6 +78,8 @@ if (defined($opt_x)) {
 	
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://chirimoyo.ac.uma.es/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
+
+	$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
 	
     }
     elsif (($opt_x == 2) || ($opt_x eq 'Xistral')) {
@@ -85,6 +93,13 @@ if (defined($opt_x)) {
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://www.inab.org/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 	
+	# Production
+	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
+
+	print STDERR "Not allowed !!!\n";
+	print STDERR 'Contact Sergio Ramirez, serr@ac.uma.es, to update the registry' . "\n";
+	exit 1;
+
     }
     elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
 	
@@ -109,9 +124,6 @@ $::authURI = 'genome.imim.es';
 # Contact e-mail
 $::contactEmail = 'akerhornou@imim.es';
 
-# URL
-$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
-
 # Service Name
 
 my $serviceName = $opt_s;
@@ -130,6 +142,8 @@ if ((defined $sia) && (@$sia > 0)) {
 	print STDERR "The registration of the service, $serviceName, has failed. A service already exists at $::authURI.\n";
 	exit 0;
 }
+
+print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
 # Declare register variable.
 my ($REG) = $Central->registerService(
@@ -156,7 +170,7 @@ my ($REG) = $Central->registerService(
 					  },
 					  'strands' => {
 					      datatype => 'String',
-					      enum     => ['Forward', 'Reverse','Both'],
+					      enum     => ['Forward','Reverse','Both'],
 					      default  => 'Both',
 					      max      => 'MAX',
 					      min      => 'MIN',
@@ -168,6 +182,18 @@ my ($REG) = $Central->registerService(
 					      max      => 'MAX',
 					      min      => 'MIN',
 					  },
+					  'exons'  => {
+					      datatype => 'String',
+					      enum     => ['First exons','Internal exons','Terminal exons','Single genes','Open reading frames','All exons'],
+					      max      => 'MAX',
+					      min      => 'MIN',
+					  },
+					  'signals' => {
+					      datatype => 'String',
+					      enum     => ['Acceptor sites','Donor sites','Start codons','Stop codons'],
+					      max      => 'MAX',
+					      min      => 'MIN',
+					  }
 				}
 				      );
 
