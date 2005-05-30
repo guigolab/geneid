@@ -102,8 +102,8 @@ if (defined($opt_x)) {
 
 		# export MOBY_URI
 		# export MOBY_SERVER
-		#$ENV{MOBY_URI}='http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/Central';
-		#$ENV{MOBY_SERVER}='http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/mobycentral.pl';
+		$ENV{MOBY_URI}='http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/Central';
+		$ENV{MOBY_SERVER}='http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/mobycentral.pl';
 
 	}else {
 		print help;
