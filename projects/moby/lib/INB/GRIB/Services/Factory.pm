@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.10 2005-05-26 16:28:46 gmaster Exp $
+# $Id: Factory.pm,v 1.11 2005-05-30 10:01:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -453,8 +453,8 @@ sub GOstat_call {
     
     my $gostat_output = qx/$_gostat_dir\/$_gostat_bin $_gostat_args $regulated_genes_file $array_genes_file/;
         
-    # unlink $regulated_genes_file;
-    # unlink $array_genes_file;
+    unlink $regulated_genes_file;
+    unlink $array_genes_file;
 
     if (defined $gostat_output) {
 	return $gostat_output;
