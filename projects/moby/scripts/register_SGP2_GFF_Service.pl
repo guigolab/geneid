@@ -22,7 +22,7 @@ $::authURI = 'genome.imim.es';
 $::contactEmail = 'akerhornou@imim.es';
 
 # URL
-$::URL = 'http://cel.imim.es/cgi-bin/moby/MobyServices.cgi';
+$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
