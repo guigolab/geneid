@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.1 2003-09-10 14:53:34 gparra Exp $  */
+/*  $Id: readargv.c,v 1.2 2005-05-31 13:21:11 arnau Exp $  */
 
 #include "geneid.h"
 
@@ -94,42 +94,44 @@ void printHelp()
 
 void printDTD()
 {
-  printf("<?xml version=\"1.0\" ?>
-   <!-- DTD for XML format in geneid output -->
 
-   <!-- Element declarations -->
-   <!ELEMENT prediction (gene*)>
-   <!ELEMENT gene ((exon+),cDNA,protein)>
-   <!ELEMENT exon (site,site)>
-   <!ELEMENT cDNA (#PCDATA)>
-   <!ELEMENT protein (#PCDATA)>
-
-   <!-- Attribute declarations -->
-   <!ATTLIST prediction
-        locus    CDATA   #REQUIRED
-        length   CDATA   #IMPLIED
-        source   CDATA   #IMPLIED
-        date     CDATA   #IMPLIED
-        genes    CDATA   #REQUIRED
-	score    CDATA   #REQUIRED>
-
-   <!ATTLIST gene
-        idGene   ID      #REQUIRED
-        strand   (fwd|rvs)   #IMPLIED
-        nExons   CDATA   #IMPLIED
-        score    CDATA   #REQUIRED>
-
-   <!ATTLIST exon  
-        idExon   ID      #REQUIRED
-        type     (First | Internal | Terminal | Single) #REQUIRED
-	frame    (0|1|2) #REQUIRED
-        score    CDATA   #REQUIRED>
-
-   <!ATTLIST site
-        idSite   ID      #REQUIRED
-        type     (Acceptor | Donor | Start | Stop) #REQUIRED
-	position CDATA   #REQUIRED
-        score    CDATA   #REQUIRED>\n\n");
+  printf("<?xml version=\"1.0\" ?>");
+  printf("<!-- DTD for XML format in geneid output -->");
+  
+  printf("<!-- Element declarations -->");
+  printf("<!ELEMENT prediction (gene*)>");
+  printf("<!ELEMENT gene ((exon+),cDNA,protein)>");
+  printf("<!ELEMENT exon (site,site)>");
+  printf("<!ELEMENT cDNA (#PCDATA)>");
+  printf("<!ELEMENT protein (#PCDATA)>");
+  
+  printf("<!-- Attribute declarations -->");
+  printf("<!ATTLIST prediction");
+  printf("\tlocus    CDATA   #REQUIRED");
+  printf("\tlength   CDATA   #IMPLIED");
+  printf("\tsource   CDATA   #IMPLIED");
+  printf("\tdate     CDATA   #IMPLIED");
+  printf("\tgenes    CDATA   #REQUIRED");
+  printf("\tscore    CDATA   #REQUIRED>");
+  
+  printf("<!ATTLIST gene");
+  printf("\tidGene   ID      #REQUIRED");
+  printf("\tstrand   (fwd|rvs)   #IMPLIED");
+  printf("\tnExons   CDATA   #IMPLIED");
+  printf("\tscore    CDATA   #REQUIRED>");
+  
+  printf("<!ATTLIST exon");  
+  printf("\tidExon   ID      #REQUIRED");
+  printf("\ttype     (First | Internal | Terminal | Single) #REQUIRED");
+  printf("frame    (0|1|2) #REQUIRED");
+  printf("\tscore    CDATA   #REQUIRED>");
+  
+  printf("<!ATTLIST site");
+  printf("\tidSite   ID      #REQUIRED");
+  printf("\ttype     (Acceptor | Donor | Start | Stop) #REQUIRED");
+  printf("position CDATA   #REQUIRED");
+  printf("\tscore    CDATA   #REQUIRED>\n\n");
+  
 }
 
 void readargv (int argc,char* argv[],
