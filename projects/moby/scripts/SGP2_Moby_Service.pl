@@ -42,7 +42,7 @@ my $seqin = Bio::SeqIO->new (
 			     -format => 'fasta',
 			     );
 
-# Execute GeneID Web service on each individual sequence
+# Execute SGP2 Web service on each individual sequence
 
 # Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
 
