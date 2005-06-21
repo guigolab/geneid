@@ -89,6 +89,10 @@ if (defined($opt_x)) {
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://www.inab.org/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 	
+	print STDERR "It is not adviced to deregister a service in production!\n";
+        print STDERR "Contact Oswaldo Trelles (ots@ac.uma.es) or Sergio Ramirez (serr@ac.uma.es) for updating a service\n";
+        exit 1;
+	
     }
     elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
 	
