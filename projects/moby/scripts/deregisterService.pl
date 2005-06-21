@@ -90,7 +90,7 @@ if (defined($opt_x)) {
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 	
 	print STDERR "It is not adviced to deregister a service in production!\n";
-        print STDERR "Contact Oswaldo Trelles (ots@ac.uma.es) or Sergio Ramirez (serr@ac.uma.es) for updating a service\n";
+        print STDERR "Contact Oswaldo Trelles (ots\@ac.uma.es) or Sergio Ramirez (serr\@ac.uma.es) for updating a service\n";
         exit 1;
 	
     }
@@ -111,10 +111,14 @@ else {
     exit 0;
 }
 
+print STDERR "Connecting to registry server, $MOBY_URI...\n";
+
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
 					  Registries => {mobycentral => {URL => => $MOBY_SERVER, URI => $MOBY_URI}}
 					  );
+
+print STDERR "Connection done.\n";
 
 # Check if the service exist !!
 
@@ -136,12 +140,12 @@ my $REG = $Central->deregisterService (
 if ($REG->success) {
     
     # The result is valid.
-    print "The 'runGeneIDGFF' service has been deregistered in Malaga successfully: ", $REG->success, "\n";
+    print "The '$serviceName' service has been deregistered successfully: ", $REG->success, "\n";
     
 } else {
     
     # The result is valid.
-    print "The 'runGeneIDGFF' service has failed: ", $REG->message,"\n"; 
+    print "The '$serviceName' service deregistration has failed: ", $REG->message,"\n"; 
     
 }
 
