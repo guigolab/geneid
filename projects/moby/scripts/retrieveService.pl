@@ -121,9 +121,11 @@ my $MOBYCentral = MOBY::Client::Central->new();
 my($sia,$si,$ro);
 ($sia,$ro) = $MOBYCentral->findService(serviceName=>$opt_s,authURI=>$::authURI);
 
-if ((defined $ro) || (not defined $sia)) {
+if ((defined $ro) || (not defined $sia) || (not defined $sia->[0])) {
 	print STDERR "Can't get information about the given service !!\n";
-	print STDERR $ro->message . "\n";
+	if (defined $ro) {
+	    print STDERR $ro->message . "\n";
+	}
 	exit 1;
 }
 
