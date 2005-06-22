@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.8 2005-05-30 13:37:46 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.9 2005-06-22 10:02:38 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -401,22 +401,18 @@ sub _do_query_GeneID {
 
     my @exons = getNodeContentWithArticle($queryInput_DOM, "Parameter", "exons");
 
-    # print STDERR "exons: " . Dumper (@exons) . ".\n";
-
     if (@exons < 1) {
         # Do nothing
-	# Default is not to report any signals => empty array
-	@exons = ();
+	# Default is not to report any signals => an element array called 'None'
+	@exons = ('None');
     }
 
     my @signals = getNodeContentWithArticle($queryInput_DOM, "Parameter", "signals");
 
-    # print STDERR "signals: " . Dumper (@signals) . ".\n";
-
     if (@signals < 1) {
 	# Do nothing
-	# Default is not to report any signals => empty array
-	@signals = ();
+	# Default is not to report any signals => an element array called 'None'
+	@signals = ('None');
     }
     
     # Add the parsed parameters in a hash table

@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.12 2005-05-30 13:37:46 gmaster Exp $
+# $Id: Factory.pm,v 1.13 2005-06-22 10:02:38 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -259,22 +259,27 @@ sub GeneID_call {
         
         foreach my $exon (@$exons_ref) {
 	  SWITCH: {
+	      if ($exon eq "None")                { last SWITCH; }
 	      if ($exon eq "First exons")         { $_geneid_args .= " -f"; last SWITCH; }
 	      if ($exon eq "Internal exons")      { $_geneid_args .= " -i"; last SWITCH; }
 	      if ($exon eq "Terminal exons")      { $_geneid_args .= " -t"; last SWITCH; }
 	      if ($exon eq "All exons")           { $_geneid_args .= " -x"; last SWITCH; }
 	      if ($exon eq "Single genes")        { $_geneid_args .= " -s"; last SWITCH; }
 	      if ($exon eq "Open reading frames") { $_geneid_args .= " -z"; last SWITCH; }
-	      # Default is to leave blank the GeneID parameters line for reporting Exons Features
+	      # Default is to leave blank the GeneID parameters line for not reporting Potential Exons Features
 	  }
 	}
 
 	foreach my $signal (@$signals_ref) {
 	  SWITCH: {
-	      if ($signal eq "Donor splice sites")    { $_geneid_args .= " -d"; last SWITCH; }
-	      if ($signal eq "Acceptor splice sites") { $_geneid_args .= " -a"; last SWITCH; }
-	      if ($signal eq "Start codons")          { $_geneid_args .= " -b"; last SWITCH; }
-	      if ($signal eq "Stop codons")           { $_geneid_args .= " -e"; last SWITCH; }
+	      if ($signal eq "None")                  { last SWITCH; }
+	      if ($signal eq "Donor splice sites")    { $_geneid_args .= " -d";  last SWITCH; }
+	      if ($signal eq "Acceptor splice sites") { $_geneid_args .= " -a";  last SWITCH; }
+	      if ($signal eq "All splice sites")      { $_geneid_args .= " -ad"; last SWITCH; }
+	      if ($signal eq "Start codons")          { $_geneid_args .= " -b";  last SWITCH; }
+	      if ($signal eq "Stop codons")           { $_geneid_args .= " -e";  last SWITCH; }
+	      if ($signal eq "All codons")            { $_geneid_args .= " -be"; last SWITCH; }
+	      if ($signal eq "All")                   { $_geneid_args .= " -adbe"; last SWITCH; }
 	      # No signals reported by default
 	  }
 	}
