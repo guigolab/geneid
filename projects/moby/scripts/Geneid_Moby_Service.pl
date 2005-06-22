@@ -255,16 +255,12 @@ PRT
 
     # Signals parameters
 
-    my $signal_start_codons_xml = <<PRT;
-<Value>Start codons</Value>
+    my $signals_xml = <<PRT;
+<Value>None</Value>
 PRT
 
-    my $signal_stop_codons_xml = <<PRT;
-<Value>Stop codons</Value>
-PRT
-
-    my $exon_all_exons_xml = <<PRT;
-<Value>All exons</Value>
+    my $exons_xml = <<PRT;
+<Value>None</Value>
 PRT
 
     ##################################################################
@@ -281,13 +277,13 @@ PRT
 
 # with some reported exons options
 
-#    my $result = $Service->execute(XMLinputlist => [
-#						    ["$articleName", $input, 'profile', $profile_xml, 'strands', $strand_xml, 'signals' => $signal_start_codons_xml, 'signals' => $exon_all_exons_xml]
-#						   ]);
+    my $result = $Service->execute(XMLinputlist => [
+						    ["$articleName", $input, 'profile', $profile_xml, 'strands', $strand_xml, 'signals' => $signals_xml, 'exons' => $exons_xml]
+						   ]);
 
-my $result = $Service->execute(XMLinputlist => [
-						["$articleName", $input, 'profile', $profile_xml, 'strands', $strand_xml]
-						]);
+# my $result = $Service->execute(XMLinputlist => [
+# 						["$articleName", $input, 'profile', $profile_xml, 'strands', $strand_xml]
+# 						]);
     
     ##################################################################
     #
