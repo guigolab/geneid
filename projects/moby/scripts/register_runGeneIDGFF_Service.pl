@@ -184,13 +184,15 @@ my ($REG) = $Central->registerService(
 					  },
 					  'exons'  => {
 					      datatype => 'String',
-					      enum     => ['First exons','Internal exons','Terminal exons','Single genes','Open reading frames','All exons'],
+					      enum     => ['None', 'First exons','Internal exons','All exons','Terminal exons','Single genes','Open reading frames'],
+					      default  => 'None',
 					      max      => 'MAX',
 					      min      => 'MIN',
 					  },
 					  'signals' => {
 					      datatype => 'String',
-					      enum     => ['Acceptor sites','Donor sites','Start codons','Stop codons'],
+					      enum     => ['None', 'Acceptor sites','Donor sites','All splice sites','Start codons','Stop codons','All codons','All'],
+                                              default  => 'None',
 					      max      => 'MAX',
 					      min      => 'MIN',
 					  }
