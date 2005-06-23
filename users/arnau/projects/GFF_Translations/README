@@ -1,0 +1,1 @@
+Make the GFF parsing in a separate package, Bui::GRIB::GeneIDGFFParser
