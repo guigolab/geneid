@@ -77,28 +77,28 @@ if (defined($opt_x)) {
 	$opt_x =~ s/\s//g;
 
 	# Assign the MOBY Server and MOBY URI
-	if (($opt_x == 1) || ($opt_x eq 'Chirimoyo')) {
+	if (($opt_x =~ /chirimoyo/i) || (($opt_x =~ /\d/) && ($opt_x == 1))) {
 	
 		# export MOBY_URI
 		# export MOBY_SERVER
 		$ENV{MOBY_URI}='http://chirimoyo.ac.uma.es/MOBY/Central';
 		$ENV{MOBY_SERVER}='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
 	
-	}elsif (($opt_x == 2) || ($opt_x eq 'Xistral')) {
+	}elsif (($opt_x =~ /xistral/i) || (($opt_x =~ /\d/) && ($opt_x == 2))) {
 	
 		# export MOBY_URI
 		# export MOBY_SERVER
 		$ENV{MOBY_URI}='http://xistral/MOBY/Central';
 		$ENV{MOBY_SERVER}='http://xistral/cgi-bin/MOBY-Central.pl';
 
-	}elsif (($opt_x == 3) || ($opt_x eq 'Inab')) {
+	}elsif (($opt_x =~ /inab/i) || (($opt_x =~ /\d/) && ($opt_x == 3))) {
 
 		# export MOBY_URI
 		# export MOBY_SERVER
 		$ENV{MOBY_URI}='http://www.inab.org/MOBY/Central';
 		$ENV{MOBY_SERVER}='http://www.inab.org/cgi-bin/MOBY-Central.pl';
 	
-	}elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
+	}elsif (($opt_x =~ /biomoby/i) || (($opt_x =~ /\d/) && ($opt_x == 4))) {
 
 		# export MOBY_URI
 		# export MOBY_SERVER
