@@ -286,12 +286,12 @@ foreach my $geneId (@geneIds) {
 	$sout->write_seq ($seqobj);
 	
 	print STDERR "sequence done.\n";
-
+	
 	if ($report_features) {
 
 	    print STDERR "getting the features...\n";
 	    
-	    my $upstream_features = getFeatures ($slice_region, $strand, $downstream_length, $tss);
+	    my $upstream_features = getFeatures ($slice_region, $gene_stable_id);
 	    
 	    if (@$upstream_features > 0) {
 		
@@ -327,39 +327,43 @@ print STDERR "processing done.\n";
 ##
 
 sub convertEnsembl2GFF {
-    my ($seqId, $ensembl_features) = @_;
+    my ($seqId, $ensembl_features, $comments) = @_;
     my $gff_output = "";
 
     foreach my $feature (@$ensembl_features) {
 
-	print STDERR "processing feature, " . $feature->stable_id . "...\n";
+	my $feature_module_name = ref ($feature);
+	$feature_module_name    =~ /\w+\:+\w+\:+(\w+)/;
+	my $feature_type        = $1;
 
-	my $feature_module_name;
-	my $feature_type;
+	print STDERR "processing feature, " . $feature->stable_id . ", of type, $feature_type...\n";
 
-	print STDERR "processing feature...\n";
+	my $feature_id  = $feature->stable_id;
+	my $comments = "EnsemblIdentifier=$feature_id";
 
 	# if Exon
-	# my $evidences = $feature->get_all_supporting_features();
-	my $evidences = [];
-
-	if (@$evidences > 0) {
-	    $feature_module_name = ref ($evidences->[0]);
-	    $feature_module_name    =~ /\w+\:+\w+\:+(\w+)/;
-	    $feature_type        = $1;
+	if ($feature_type eq "exon") {
 	    
-	    foreach my $evidence (@$evidences) {
-		$gff_output .= parse_ensembl_feature ($seqId, $evidence, $feature_type);
-	    }	    
+	    # my $transcript_id = ?;
+	    # my $gene_id       = ?;
+	    
+	    my $evidences = $feature->get_all_supporting_features();
+	    $evidences = [];
+	    
+	    if (@$evidences > 0) {
+		$feature_module_name = ref ($evidences->[0]);
+		$feature_module_name =~ /\w+\:+\w+\:+(\w+)/;
+		$feature_type        = $1;
+		
+		foreach my $evidence (@$evidences) {
+		    $gff_output .= parse_ensembl_feature ($seqId, $evidence, $feature_type, "");
+		}	    
+	    }
 	}
-
-	# print STDERR "processing feature, " . Dumper ($feature) . "...\n";
 	
-	$feature_module_name = ref ($feature);
-	$feature_module_name    =~ /\w+\:+\w+\:+(\w+)/;
-	$feature_type        = $1;
+	# print STDERR "processing feature, " . Dumper ($feature) . "...\n";
 
-	$gff_output .= parse_ensembl_feature ($seqId, $feature, $feature_type);
+	$gff_output .= parse_ensembl_feature ($seqId, $feature, $feature_type, $comments);
     }
 
     return $gff_output;
@@ -367,7 +371,7 @@ sub convertEnsembl2GFF {
 
 
 sub parse_ensembl_feature {
-    my ($seqId, $feature, $feature_type) = @_;
+    my ($seqId, $feature, $feature_type, $comments) = @_;
     my $gff_output = "";
 
     # Get the gene name for each exon and report it.
@@ -388,9 +392,7 @@ sub parse_ensembl_feature {
     my $algorithm = "Ensembl";
     # score
     my $score = "";
-    # Comments
-    my $comments = "";
-    
+
     $gff_output .= "$seqId\t$algorithm\t$feature_type\t$start\t$end\t$score\t$strand\t$comments\n";
 
     return $gff_output;
@@ -401,35 +403,26 @@ sub parse_ensembl_feature {
 sub has_gene_upstream {
     my ($slice_region, $strand, $downstream_length, $tss) = @_;
     
-    # my $exons1 = $slice_region->get_all_Exons();
-    # my $genes1 = $slice_region->get_all_Genes();
-
-    # print STDERR @$exons1 . " exons upstream before processing\n";
-    # print STDERR @$genes1 . " genes upstream before processing\n";
-
-    # Get rid of the downstream region if any
+    my $genes = $slice_region->get_all_Genes();
+    # print STDERR @$genes . " genes upstream before processing\n";
+    # foreach my $gene (@$genes) {
+	# print STDERR "stable id, " . $gene->stable_id . "\n";
+    # }
     
-    my $slice_subregion = $slice_region;
     if ($downstream_length > 0) {
-	if ($strand == 1) {
-	    $slice_subregion = $slice_region->sub_Slice ($slice_region->start, $tss - 1, $strand);
+	
+	# In that case include the input gene, so don't take it into account
+	
+	if (@$genes > 1) {
+	    return 1;
 	}
-	else {
-	    # Strand parameter = 1, so we stay on the reversed strand
-	    $slice_subregion = $slice_region->sub_Slice ($tss + 1, $slice_region->end, 1);
+    }
+    else {
+	if (@$genes > 0) {
+	    return 1;
 	}
     }
     
-    # my $exons2 = $slice_subregion->get_all_Exons();
-    # my $genes2 = $slice_subregion->get_all_Genes();
-
-    # print STDERR @$exons2 . " exons upstream after processing\n";
-    # print STDERR @$genes2 . " genes upstream after processing\n";
-
-    if (@{$slice_subregion->get_all_Genes} > 0) {
-	return 1;
-    }
-
     return 0;
 }
 
@@ -443,13 +436,13 @@ sub getIntergenicSequence {
     my $subslice_end   = $slice_region->end - $slice_region->start;
     # Shift also the tss coordinate
     $tss = $tss - $slice_region->start;
-
+    
     print STDERR "slice start and end, " . $slice_region->start . ", " . $slice_region->end . "\n";
     print STDERR "sub slice start and end shifted, $subslice_start, $subslice_end\n";
     print STDERR "tss shifted, $tss\n";
     
     # Get the end of the most downstream of the upstream genes...
-
+    
     my $latest_gene;
     # forward strand
     my $previous_gene_end = 1;
@@ -543,43 +536,36 @@ sub getIntergenicSequence {
 
 
 sub getFeatures {
-    my ($slice_region, $strand, $downstream_length, $tss) = @_;
+    my ($slice_region, $input_gene_id) = @_;
     my $features = [];
-
-    print STDERR "slice start and end, " . $slice_region->start . ", " . $slice_region->end . "\n";
-    print STDERR "TSS, $tss\n";
+    
+    # Right now, only report gene and exon features...
+    # What else ?
 
     my @genes = @{$slice_region->get_all_Genes()};
-
-    print STDERR "in getFeatures, got " . @genes . " genes\n";
-
-    foreach my $gene (@genes) {
-	print STDERR "stable id, " . $gene->stable_id . "\n";
-    }
-
-    # Check we don't get the exons of the input gene itself !
-    # Get rid of the downstream region if any
     
-    my $slice_subregion = $slice_region;
+    # Filter the input gene
+    
     if ($downstream_length > 0) {
-	if ($strand == 1) {
-	    $slice_subregion = $slice_region->sub_Slice ($slice_region->start, $tss - 1, 1);
-	}
-	else {
-	    # Doesn't seem to work !!!?? we're getting a new gene attached !!
-	    # Because we're getting genes reversly ?
-	    $slice_subregion = $slice_region->sub_Slice ($tss + 1, $slice_region->end, 1);
+	foreach my $gene (@genes) {
+	    if ($gene->stable_id ne $input_gene_id) {
+		push (@$features, $gene);
+		# Get the exons
+		my $exons = $gene->get_all_Exons;
+		push (@$features, @$exons);
+	    }
 	}
     }
-    
-    my $gene_features = $slice_subregion->get_all_Genes();
-    
-    print STDERR "got " . @$gene_features . "\n";
-
-    push (@$features, @$gene_features);
+    else {
+	push (@$features, @genes);
+	foreach my $gene (@genes) {
+	    my $exons = $gene->get_all_Exons;
+	    push (@$features, @$exons);
+	}
+    }
 
     # What other features do we want to report ??
-
+    
     return $features;
 }
 
