@@ -38,6 +38,8 @@ Examples using some combinations:
 	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 29_35b -u 2000 -d 500 -i -g
 	promoter_extraction.pl -f refseqs.lst -s rattus_norvegicus -r 29_3f -u 2000 -d 500 -i -g
 
+	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 31_35d -u 2000 -d 500 -i -g
+
 END_HELP
 
 }
@@ -215,6 +217,15 @@ foreach my $geneId (@geneIds) {
 	my $end               = "";
 	my $features = [];
 	
+	my $tss               = $gene->start;
+	if ($strand == -1) {
+	    $tss = $gene->end;
+	}
+
+	print STDERR "tss, $tss\n";
+
+	# Make sure we don't go over the chromosome start/end !!!
+
 	if ($strand > 0) {
 	    $start = $gene->start - $upstream_length;
 	    $end   = $gene->start + $downstream_length;
@@ -224,6 +235,8 @@ foreach my $geneId (@geneIds) {
 	    $start = $gene->end - $downstream_length;
 	}
 	
+	print STDERR "gene coordinates, " . $gene->start . ".." . $gene->end . " on strand $strand\n";
+
 	# Get rid of the base 0 if we don't want any downstream region, this way we won't get any overlapping feature associated with the given gene (its first exon for example)
 	
 	if (($downstream_length == 0) && ($strand == 1)) {
@@ -232,26 +245,38 @@ foreach my $geneId (@geneIds) {
 	elsif (($downstream_length == 0) && ($strand == -1)) {
 	    $start += 1;
 	}
+
+	print STDERR "start and end of the slice region, $start, $end\n";
 	
 	# Get the Slice object corresponding to the region of the genome we want to extract
 	
 	my $slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$start,$end,$strand);
 	
+	print STDERR "length of the extracted region, " . $slice_region->length . "\n";
+
 	if ($intergenic_only) {
-	    if (has_gene_upstream ($slice_region, $strand, $downstream_length)) {
+	    if (has_gene_upstream ($slice_region, $strand, $downstream_length, $tss)) {
 		
 		print STDERR "has gene upstream\n";
 		
-		my ($subslice_start, $subslice_end) = getIntergenicSequence ($slice_region, $strand, $downstream_length);
+		my ($subslice_start, $subslice_end) = getIntergenicSequence ($slice_region, $strand, $downstream_length, $tss);
 		
 		print STDERR "subslice start, end: $subslice_start, $subslice_end\n";
 
-		# Update the slice object so it inlcudes only the intergenic sequence
+		# Update the slice object so it includes only the intergenic sequence
 		
 		$slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$subslice_start,$subslice_end,$strand);
+
+		print STDERR "length of the extracted region after intergenic processing, " . $slice_region->length . "\n";
+
+	    }
+	    else {
+		print STDERR "no gene upstream.\n";
 	    }
 	}
 	
+	print STDERR "writing down the sequence...\n";
+
 	my $upstream_sequence = $slice_region->seq;
 	my $seqobj = Bio::PrimarySeq->new (
 					   -id    => $gene_stable_id,
@@ -260,9 +285,13 @@ foreach my $geneId (@geneIds) {
 					   );
 	$sout->write_seq ($seqobj);
 	
+	print STDERR "sequence done.\n";
+
 	if ($report_features) {
+
+	    print STDERR "getting the features...\n";
 	    
-	    my $upstream_features = getFeatures ($slice_region, $strand, $downstream_length);
+	    my $upstream_features = getFeatures ($slice_region, $strand, $downstream_length, $tss);
 	    
 	    if (@$upstream_features > 0) {
 		
@@ -303,15 +332,25 @@ sub convertEnsembl2GFF {
 
     foreach my $feature (@$ensembl_features) {
 
+	print STDERR "processing feature, " . $feature->stable_id . "...\n";
+
+	my $feature_module_name;
+	my $feature_type;
+
+	print STDERR "processing feature...\n";
+
 	# if Exon
-	my $evidences = $feature->get_all_supporting_features();
+	# my $evidences = $feature->get_all_supporting_features();
+	my $evidences = [];
 
-	my $feature_module_name = ref ($evidences->[0]);
-	$feature_module_name    =~ /\w+\:+\w+\:+(\w+)/;
-	my $feature_type        = $1;
-
-	foreach my $evidence (@$evidences) {
-	    $gff_output .= parse_ensembl_feature ($seqId, $evidence, $feature_type);
+	if (@$evidences > 0) {
+	    $feature_module_name = ref ($evidences->[0]);
+	    $feature_module_name    =~ /\w+\:+\w+\:+(\w+)/;
+	    $feature_type        = $1;
+	    
+	    foreach my $evidence (@$evidences) {
+		$gff_output .= parse_ensembl_feature ($seqId, $evidence, $feature_type);
+	    }	    
 	}
 
 	# print STDERR "processing feature, " . Dumper ($feature) . "...\n";
@@ -330,6 +369,8 @@ sub convertEnsembl2GFF {
 sub parse_ensembl_feature {
     my ($seqId, $feature, $feature_type) = @_;
     my $gff_output = "";
+
+    # Get the gene name for each exon and report it.
 
     my $start  = $feature->start;
     my $end    = $feature->end;
@@ -358,35 +399,32 @@ sub parse_ensembl_feature {
 
 
 sub has_gene_upstream {
-    my ($slice_region, $strand, $downstream_length) = @_;
+    my ($slice_region, $strand, $downstream_length, $tss) = @_;
     
-    print STDERR "length slice region, " . $slice_region->length()  . "\n";
-    
-    my $tss;
-    if ($strand == 1) {
-	$tss = $slice_region->end   - $downstream_length;
-    }
-    else {
-	$tss    = $slice_region->start + $downstream_length;
-    }
+    # my $exons1 = $slice_region->get_all_Exons();
+    # my $genes1 = $slice_region->get_all_Genes();
 
-    my $exons1 = $slice_region->get_all_Exons();
-    print STDERR @$exons1 . " exons upstream before processing\n";
-    
+    # print STDERR @$exons1 . " exons upstream before processing\n";
+    # print STDERR @$genes1 . " genes upstream before processing\n";
+
     # Get rid of the downstream region if any
     
     my $slice_subregion = $slice_region;
     if ($downstream_length > 0) {
 	if ($strand == 1) {
 	    $slice_subregion = $slice_region->sub_Slice ($slice_region->start, $tss - 1, $strand);
-	    $slice_subregion = $slice_region->sub_Slice ($tss + 1, $slice_region->end, $strand);
+	}
+	else {
+	    # Strand parameter = 1, so we stay on the reversed strand
+	    $slice_subregion = $slice_region->sub_Slice ($tss + 1, $slice_region->end, 1);
 	}
     }
     
-    print STDERR "length sub slice region, " . $slice_subregion->length()  . "\n";
+    # my $exons2 = $slice_subregion->get_all_Exons();
+    # my $genes2 = $slice_subregion->get_all_Genes();
 
-    my $exons2 = $slice_subregion->get_all_Exons();
-    print STDERR @$exons2 . " exons upstream after processing\n";
+    # print STDERR @$exons2 . " exons upstream after processing\n";
+    # print STDERR @$genes2 . " genes upstream after processing\n";
 
     if (@{$slice_subregion->get_all_Genes} > 0) {
 	return 1;
@@ -396,65 +434,76 @@ sub has_gene_upstream {
 }
 
 sub getIntergenicSequence {
-    my ($slice_region, $strand, $downstream_length) = @_;
-
-    print STDERR "strand, $strand\n";
-
-    # Initialize the downstream coordinate - kept unchanged
-
-    my $subslice_start;
-    my $subslice_end;
-    if ($strand == 1) {
-	$subslice_start = $slice_region->start;
-	$subslice_end   = $slice_region->end;
-    }
-    else {
-	$subslice_start = $slice_region->start;
-	$subslice_end   = $slice_region->end;
-    }
+    my ($slice_region, $strand, $downstream_length, $tss) = @_;
+    
+    # The slice coordinates are related to chromosome coordinates therefore slice->start is not equal to 1
+    # But genes associated with the slice region are attached to it with slice->start = 1 therefore we need to shift the coordinate of slice->start
+    
+    my $subslice_start = 1;
+    my $subslice_end   = $slice_region->end - $slice_region->start;
+    # Shift also the tss coordinate
+    $tss = $tss - $slice_region->start;
 
     print STDERR "slice start and end, " . $slice_region->start . ", " . $slice_region->end . "\n";
+    print STDERR "sub slice start and end shifted, $subslice_start, $subslice_end\n";
+    print STDERR "tss shifted, $tss\n";
     
     # Get the end of the most downstream of the upstream genes...
-    
-    my $tss;
-    if ($strand == 1) {
-	$tss = $slice_region->end - $downstream_length;
-    }
-    else {
-	$tss    = $slice_region->start + $downstream_length;
-    }
 
     my $latest_gene;
     # forward strand
-    my $previous_gene_end = 0;
+    my $previous_gene_end = 1;
     # reverse strand
     if ($strand != 1) {
-	$previous_gene_end = $slice_region->end;
+	$previous_gene_end = $subslice_end;
     }
 
     my @upstream_genes = @{$slice_region->get_all_Genes};
     my @upstream_exons = @{$slice_region->get_all_Exons};
     
     if (@upstream_genes > 0) {
-	print STDERR "genes upstream...\n";
+	print STDERR @upstream_genes . " genes upstream...\n";
     }
     
     if (@upstream_exons > 0) {
-	print STDERR "exons upstream...\n";
+	print STDERR @upstream_exons . " exons upstream...\n";
     }
     
     foreach my $gene (@upstream_genes) {
+
+	print STDERR "previous_gene_end, $previous_gene_end\n";
 	
+	my $gene_start = $gene->start;
+	my $gene_end   = $gene->end;
+
+	print STDERR "processing gene, " . $gene->stable_id . " at " . $gene_start . ".." . $gene_end . " on strand " . $gene->strand . "\n";
+
+	if ($strand == -1) {
+	    print STDERR "reversing gene coordinates!!\n";
+	    my $gene_end_tmp = $subslice_end - $gene_start;
+	    $gene_start = $subslice_end - $gene_end;
+	    $gene_end   = $gene_end_tmp;
+	}
+	
+	print STDERR "processing gene after reversing its coordinates, " . $gene->stable_id . " at " . $gene_start . ".." . $gene_end . " on strand " . $gene->strand . "\n";
+
 	if ($strand == 1) {
-	    if (($gene->end > $previous_gene_end) && ($gene->end < $tss)) {
-		$previous_gene_end = $gene->end;
+	    if (($gene_end > $previous_gene_end) && ($gene_end < ($tss - 1))) {
+		
+		print STDERR "\tupdating previous_gene_end - strand 1 processing\n";
+		
+		$previous_gene_end = $gene_end;
 		$latest_gene = $gene;
+		
+		print STDERR "previous_gene_end updated, $previous_gene_end\n";
 	    }
 	}
 	else {
-	    if (($gene->start < $previous_gene_end) && ($gene->start > $tss)) {
-		$previous_gene_end = $gene->start;
+	    if (($gene_start < $previous_gene_end) && ($gene_start > ($tss + 1))) {
+		
+		print STDERR "\tupdating previous_gene_end - strand -1 processing\n";
+		
+		$previous_gene_end = $gene_start;
 		$latest_gene = $gene;
 	    }
 	}
@@ -476,23 +525,58 @@ sub getIntergenicSequence {
 
     print STDERR "after, got subslice, start, end, $subslice_start, $subslice_end\n";
 
+    # Now we shift back to chromosome coordinates
+
+    if ($strand == 1) {
+	$subslice_start = $subslice_start + $slice_region->start;
+	$subslice_end   = $slice_region->end;
+    }
+    else {
+	$subslice_start = $slice_region->start;
+	$subslice_end   = $subslice_end + $slice_region->start;
+    }
+
+    print STDERR "back to chromosome coordinates, this is giving, $subslice_start..$subslice_end\n";
+    
     return ($subslice_start, $subslice_end);
 }
 
 
 sub getFeatures {
-    my ($slice_region, $strand, $downstream_length) = @_;
+    my ($slice_region, $strand, $downstream_length, $tss) = @_;
     my $features = [];
-    
-    if (not $intergenic_only) {
-	my $exon_features = $slice_region->get_all_Exons();
 
-	# Check we don't get the exons of the input gene itself !
+    print STDERR "slice start and end, " . $slice_region->start . ", " . $slice_region->end . "\n";
+    print STDERR "TSS, $tss\n";
 
-	# ...
+    my @genes = @{$slice_region->get_all_Genes()};
 
-	push (@$features, @$exon_features);
+    print STDERR "in getFeatures, got " . @genes . " genes\n";
+
+    foreach my $gene (@genes) {
+	print STDERR "stable id, " . $gene->stable_id . "\n";
     }
+
+    # Check we don't get the exons of the input gene itself !
+    # Get rid of the downstream region if any
+    
+    my $slice_subregion = $slice_region;
+    if ($downstream_length > 0) {
+	if ($strand == 1) {
+	    $slice_subregion = $slice_region->sub_Slice ($slice_region->start, $tss - 1, 1);
+	}
+	else {
+	    # Doesn't seem to work !!!?? we're getting a new gene attached !!
+	    # Because we're getting genes reversly ?
+	    $slice_subregion = $slice_region->sub_Slice ($tss + 1, $slice_region->end, 1);
+	}
+    }
+    
+    my $gene_features = $slice_subregion->get_all_Genes();
+    
+    print STDERR "got " . @$gene_features . "\n";
+
+    push (@$features, @$gene_features);
 
     # What other features do we want to report ??
 
