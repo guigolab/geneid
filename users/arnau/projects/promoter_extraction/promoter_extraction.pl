@@ -58,7 +58,7 @@ BEGIN {
     if (-f "config.pl") {
         require "config.pl";
     }
-
+    
     # these are switches taking an argument (a value)
     my $switches = 'hf:s:r:u:d:ig';
     
@@ -69,54 +69,52 @@ BEGIN {
     if (defined($opts{h}) || !defined($opts{f}) || !defined($opts{s}) || !defined($opts{r})){
 	print help;
 	exit 0;
-    }
+    }    
     
-    my $species;
-    my $release;
+}
 
-    $_debug            = 0;
-    $upstream_length   = 2000;
-    $downstream_length = 500;
-    $report_features   = 0;
-    $intergenic_only   = 0;
-    
-    defined $opts{f} and $geneIds_file      = $opts{f};
-    defined $opts{s} and $species           = $opts{s};
-    defined $opts{r} and $release           = $opts{r};
-    defined $opts{u} and $upstream_length   = $opts{u};
-    defined $opts{d} and $downstream_length = $opts{d};
-    defined $opts{g} and $report_features++;
-    defined $opts{i} and $intergenic_only++;
-    
-    # Ensembl database configuration
-    
-    $dbhost      = "ensembldb.ensembl.org";
-    $dbuser      = "anonymous";
-    $dbensembl = $species . "_core_" . $release;
-    
-    $release =~ /^(\d+)_\w+$/;
-    my $branch = $1;
-    
-    my $ensembl_API_path = "./lib/ensembl-$branch/modules";
-    
-    if ($_debug) {
-	print STDERR "ensembl_API_path, $ensembl_API_path.\n";
-    }
+my $species;
+my $release;
 
-    if (-d $ensembl_API_path) {
-	# use lib "$ensembl_API_path";
-	unshift (@INC, $ensembl_API_path);
-    }
-    else {
-	print STDERR "release, $release, not supported, contact gmaster\@imim.es for help\n";
-	exit 1;
-    }
-    
-    # print STDERR "INC, @INC\n";
-    
-    use Bio::EnsEMBL::DBSQL::DBAdaptor;
-    
- }
+$_debug            = 0;
+$upstream_length   = 2000;
+$downstream_length = 500;
+$report_features   = 0;
+$intergenic_only   = 0;
+
+defined $opts{f} and $geneIds_file      = $opts{f};
+defined $opts{s} and $species           = $opts{s};
+defined $opts{r} and $release           = $opts{r};
+defined $opts{u} and $upstream_length   = $opts{u};
+defined $opts{d} and $downstream_length = $opts{d};
+defined $opts{g} and $report_features++;
+defined $opts{i} and $intergenic_only++;
+
+# Ensembl database configuration
+
+$dbhost      = "ensembldb.ensembl.org";
+$dbuser      = "anonymous";
+$dbensembl = $species . "_core_" . $release;
+
+$release =~ /^(\d+)_\w+$/;
+my $branch = $1;
+
+my $ensembl_API_path = "./lib/ensembl-$branch/modules";
+
+if ($_debug) {
+    print STDERR "ensembl_API_path, $ensembl_API_path.\n";
+}
+
+if (-d $ensembl_API_path) {
+    # use lib "$ensembl_API_path";
+    unshift (@INC, $ensembl_API_path);
+}
+else {
+    print STDERR "release, $release, not supported, contact gmaster\@imim.es for help\n";
+    exit 1;
+}
+
+use Bio::EnsEMBL::DBSQL::DBAdaptor;
 
 if ($_debug) {
     print STDERR "connecting to Ensembl database...\n";
