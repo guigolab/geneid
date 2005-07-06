@@ -20,6 +20,7 @@ use strict;
 use Getopt::Std;
 
 use Data::Dumper;
+use Benchmark;
 
 # Bioperl
 use Bio::SeqIO;
@@ -55,8 +56,12 @@ BEGIN {
     # Global variables definition
     use vars qw /$_debug %opts $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbensembl/;
 
-    if (-f "config.pl") {
-        require "config.pl";
+    if (-f "/home/ug/gmaster/projects/promoter_extraction/config.pl") {
+        require "/home/ug/gmaster/projects/promoter_extraction/config.pl";
+    }
+    else {
+        print STDERR "There is a problem with the configuration, contact gmaster\@imim.es for help\n";
+        exit 1;
     }
     
     # these are switches taking an argument (a value)
@@ -72,6 +77,9 @@ BEGIN {
     }    
     
 }
+
+## Benchmarking code
+my $time0 = new Benchmark;
 
 my $species;
 my $release;
@@ -99,7 +107,7 @@ $dbensembl = $species . "_core_" . $release;
 $release =~ /^(\d+)_\w+$/;
 my $branch = $1;
 
-my $ensembl_API_path = "./lib/ensembl-$branch/modules";
+my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$branch/modules";
 
 if ($_debug) {
     print STDERR "ensembl_API_path, $ensembl_API_path.\n";
@@ -360,6 +368,13 @@ if ($report_features) {
 
 if ($_debug) {
     print STDERR "processing done.\n";
+}
+
+## Benchmarking code
+my $time1 = new Benchmark;
+
+if ($_debug) {
+   print STDERR "Script Benchmark: ".timestr(timediff($time1,$time0))."\n";
 }
 
 ##
