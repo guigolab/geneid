@@ -1,6 +1,14 @@
 #!/usr/local/bin/perl -w
 
-# NB: Start of gene definition: TSS or if not known, start codon
+# NB: Ensembl start of gene definition: TSS or if not known, start codon
+# Do we want ot include it in the output sequence ?
+
+# ..........................
+
+# Make sure we don't go over the chromosome start/end !!!
+# Perldoc to make
+
+# ..........................
 
 # Issue warnings about suspicious programming.
 use warnings 'all';
@@ -12,8 +20,6 @@ use strict;
 use Getopt::Std;
 
 use Data::Dumper;
-
-use Bio::EnsEMBL::DBSQL::DBAdaptor;
 
 # Bioperl
 use Bio::SeqIO;
@@ -46,9 +52,8 @@ END_HELP
 
 BEGIN {
 	
-    # Determines the options with values from program
-    # use vars qw/$opt_h $opt_f $opt_s $opt_r $opt_u $opt_d $opt_i $opt_g/;
-    use vars qw /%opts/;
+    # Global variables definition
+    use vars qw /$_debug %opts $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $host $user $dbensembl/;
     
     # these are switches taking an argument (a value)
     my $switches = 'hf:s:r:u:d:ig';
@@ -62,60 +67,63 @@ BEGIN {
 	exit 0;
     }
     
-    
+    my $species;
+    my $release;
 
+    $_debug            = 0;
+    $upstream_length   = 2000;
+    $downstream_length = 500;
+    $report_features   = 0;
+    $intergenic_only   = 0;
+    
+    defined $opts{f} and $geneIds_file      = $opts{f};
+    defined $opts{s} and $species           = $opts{s};
+    defined $opts{r} and $release           = $opts{r};
+    defined $opts{u} and $upstream_length   = $opts{u};
+    defined $opts{d} and $downstream_length = $opts{d};
+    defined $opts{g} and $report_features++;
+    defined $opts{i} and $intergenic_only++;
+    
+    # Ensembl database configuration
+    
+    $host      = "ensembldb.ensembl.org";
+    $user      = "anonymous";
+    $dbensembl = $species . "_core_" . $release;
+    
+    $release =~ /^(\d+)_\w+$/;
+    my $branch = $1;
+    
+    my $ensembl_API_path = "/home/ug/arnau/cvs/ensembl-$branch/modules";
+    
+    if ($_debug) {
+	print STDERR "ensembl_API_path, $ensembl_API_path.\n";
+    }
+
+    if (-d $ensembl_API_path) {
+	# use lib "$ensembl_API_path";
+	unshift (@INC, $ensembl_API_path);
+    }
+    else {
+	print STDERR "release, $release, not supported, contact gmaster\@imim.es for help\n";
+	exit 1;
+    }
+    
+    # print STDERR "INC, @INC\n";
+    
+    use Bio::EnsEMBL::DBSQL::DBAdaptor;
+    
  }
 
-my $_debug = 1;
-
-my $geneIds_file;
-my $species;
-my $release;
-my $upstream_length   = 2000;
-my $downstream_length = 500;
-my $report_features   = 0;
-my $intergenic_only   = 0;
-
-defined $opts{f} and $geneIds_file      = $opts{f};
-defined $opts{s} and $species           = $opts{s};
-defined $opts{r} and $release           = $opts{r};
-defined $opts{u} and $upstream_length   = $opts{u};
-defined $opts{d} and $downstream_length = $opts{d};
-defined $opts{g} and $report_features++;
-defined $opts{i} and $intergenic_only++;
-
-print STDERR "report features, $report_features, intergenic only, $intergenic_only\n";
-
-# Ensembl database configuration
-
-my $host      = "ensembldb.ensembl.org";
-my $user      = "anonymous";
-my $dbensembl = $species . "_core_" . $release;
-
-$release =~ /^(\d+)_\w+$/;
-my $branch = $1;
-
-print STDERR "branch, $branch\n";
-
-my $ensembl_API_path = "/home/ug/arnau/cvs/ensembl-$branch/modules";
-
-print STDERR "ensembl_API_path, $ensembl_API_path.\n";
-
-if (-d $ensembl_API_path) {
-    use lib "$ensembl_API_path";
+if ($_debug) {
+    print STDERR "connecting to Ensembl database...\n";
 }
-else {
-    print STDERR "release, $release, not supported, contact gmaster\@imim.es for help\n";
-    exit 1;
-}
-print STDERR "connecting to Ensembl database...\n";
 
 my $dbh = new Bio::EnsEMBL::DBSQL::DBAdaptor (
-					      -host => $host,
-					      -user => $user,
+					      -host   => $host,
+					      -user   => $user,
 					      -dbname => $dbensembl
 					      )
-or die "can't connect to Ensembl database, $dbensembl, contact gmaster\@imim.es for help!\n";
+    or die "can't connect to Ensembl database, $dbensembl, contact gmaster\@imim.es for help!\n";
 
 my $dbEntry_adaptor = $dbh->get_DBEntryAdaptor ();
 my $gene_adaptor    = $dbh->get_GeneAdaptor ();
@@ -153,12 +161,16 @@ if ($report_features) {
     open GFF, ">$gff_output_file" or die "can't open file, $gff_output_file!\n";
 }
 
-print STDERR "processing the " . @geneIds . " gene identifiers...\n";
+if ($_debug) {
+    print STDERR "processing the " . @geneIds . " gene identifiers...\n";
+}
 
 foreach my $geneId (@geneIds) {
 
-    print STDERR "\nprocessing gene identifier, $geneId...\n";
-
+    if ($_debug) {
+	print STDERR "\nprocessing gene identifier, $geneId...\n";
+    }
+    
     # Get the stable identifier if not it
     
     # Mapping
@@ -182,34 +194,30 @@ foreach my $geneId (@geneIds) {
 
     # It is an external identifier
     
-    if (@$genes > 0) {
-	if (@$genes > 1) {
-	    print STDERR "Found more than one Ensembl gene (" . @$genes . ") associated with external identifier, $geneId!!!\n";
-	    print STDERR "Will return the upsteam region of all Ensembl genes\n";
-	    
-	}
+    if (@$genes > 1) {
+	print STDERR "Found more than one Ensembl gene (" . @$genes . ") associated with external identifier, $geneId!!!\n";
+	print STDERR "Will return the upsteam region of all Ensembl genes\n";
+	
     }
     
     # It must be an Ensembl identifier
-
+    
     if ((not defined $genes) || (@$genes == 0)) {
 	my $gene = $gene_adaptor->fetch_by_stable_id ($geneId) or warn "can't instanciate gene object with identifier, $geneId!\n";
 	if (not defined $gene) {
-	    print STDERR "can't find any gene for this given identifier, $geneId!\n";
+	    print STDERR "can't find any Ensembl gene for this given identifier, $geneId!\n";
 	}
 	else {
-	    print STDERR "gene stable identifier found: " . $gene->stable_id . ", on strand, " . $gene->strand . "\n";
+	    if ($_debug) {
+		print STDERR "gene stable identifier found: " . $gene->stable_id . ", on strand, " . $gene->strand . "\n";
+	    }
 	    $genes = [ $gene ];
 	}
     }
 
     foreach my $gene (@$genes) {
 
-	my $gene_stable_id = $gene->stable_id;
-	my $dblinks = $gene->get_all_DBLinks ();
-	
-	# print STDERR "db links, " . Dumper ($dblinks) . "\n";
-	
+	my $gene_stable_id    = $gene->stable_id;
 	my $coordinate_system = $gene->coord_system_name();
 	my $chromosome        = $gene->seq_region_name();
 	my $strand            = $gene->strand;
@@ -222,10 +230,12 @@ foreach my $geneId (@geneIds) {
 	    $tss = $gene->end;
 	}
 
-	print STDERR "tss, $tss\n";
+	if ($_debug) {
+	    print STDERR "tss, $tss\n";
+	}
 
 	# Make sure we don't go over the chromosome start/end !!!
-
+	
 	if ($strand > 0) {
 	    $start = $gene->start - $upstream_length;
 	    $end   = $gene->start + $downstream_length;
@@ -235,8 +245,10 @@ foreach my $geneId (@geneIds) {
 	    $start = $gene->end - $downstream_length;
 	}
 	
-	print STDERR "gene coordinates, " . $gene->start . ".." . $gene->end . " on strand $strand\n";
-
+	if ($_debug) {
+	    print STDERR "gene coordinates, " . $gene->start . ".." . $gene->end . " on strand $strand\n";
+	}
+	
 	# Get rid of the base 0 if we don't want any downstream region, this way we won't get any overlapping feature associated with the given gene (its first exon for example)
 	
 	if (($downstream_length == 0) && ($strand == 1)) {
@@ -245,38 +257,52 @@ foreach my $geneId (@geneIds) {
 	elsif (($downstream_length == 0) && ($strand == -1)) {
 	    $start += 1;
 	}
-
-	print STDERR "start and end of the slice region, $start, $end\n";
+	
+	if ($_debug) {
+	    print STDERR "start and end of the slice region, $start, $end\n";
+	}
 	
 	# Get the Slice object corresponding to the region of the genome we want to extract
 	
 	my $slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$start,$end,$strand);
 	
-	print STDERR "length of the extracted region, " . $slice_region->length . "\n";
-
+	if ($_debug) {
+	    print STDERR "length of the extracted region, " . $slice_region->length . "\n";
+	}
+	
 	if ($intergenic_only) {
 	    if (has_gene_upstream ($slice_region, $strand, $downstream_length, $tss)) {
 		
-		print STDERR "has gene upstream\n";
+		if ($_debug) {
+		    print STDERR "has gene upstream\n";
+		}
 		
 		my ($subslice_start, $subslice_end) = getIntergenicSequence ($slice_region, $strand, $downstream_length, $tss);
 		
-		print STDERR "subslice start, end: $subslice_start, $subslice_end\n";
-
+		if ($_debug) {
+		    print STDERR "subslice start, end: $subslice_start, $subslice_end\n";
+		}
+		
 		# Update the slice object so it includes only the intergenic sequence
 		
 		$slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$subslice_start,$subslice_end,$strand);
-
-		print STDERR "length of the extracted region after intergenic processing, " . $slice_region->length . "\n";
-
+		
+		if ($_debug) {
+		    print STDERR "length of the extracted region after intergenic processing, " . $slice_region->length . "\n";
+		}
+		
 	    }
 	    else {
-		print STDERR "no gene upstream.\n";
+		if ($_debug) {
+		    print STDERR "no gene upstream.\n";
+		}
 	    }
 	}
 	
-	print STDERR "writing down the sequence...\n";
-
+	if ($_debug) {
+	    print STDERR "writing down the sequence...\n";
+	}
+	
 	my $upstream_sequence = $slice_region->seq;
 	my $seqobj = Bio::PrimarySeq->new (
 					   -id    => $gene_stable_id,
@@ -285,11 +311,15 @@ foreach my $geneId (@geneIds) {
 					   );
 	$sout->write_seq ($seqobj);
 	
-	print STDERR "sequence done.\n";
+	if ($_debug) {
+	    print STDERR "sequence done.\n";
+	}
 	
 	if ($report_features) {
-
-	    print STDERR "getting the features...\n";
+	    
+	    if ($_debug) {
+		print STDERR "getting the features...\n";
+	    }
 	    
 	    my $upstream_features = getFeatures ($slice_region, $gene_stable_id);
 	    
@@ -298,21 +328,27 @@ foreach my $geneId (@geneIds) {
 		my $gff_output = convertEnsembl2GFF ($geneId, $upstream_features);
 		
 		if ($gff_output ne "") {
-		
-		    print STDERR "writing GFF output...\n";
+		    
+		    if ($_debug) {
+			print STDERR "writing GFF output...\n";
+		    }
 		    
 		    print GFF "$gff_output";
 		}
 		else {
-		    print STDERR "Warning: no GFF output returned!!\n";
+		    if ($_debug) {
+			print STDERR "Warning: no GFF output returned!!\n";
+		    }
 		}
 		
 	    }
 	    else {
-		print STDERR "no overlapping features\n";
+		if ($_debug) {
+		    print STDERR "no overlapping features\n";
+		}
 	    }
 	} # End reporting Features
-
+	
     } # End processing Ensembl gene objects
 }
 
@@ -320,7 +356,9 @@ if ($report_features) {
     close GFF;
 }
 
-print STDERR "processing done.\n";
+if ($_debug) {
+    print STDERR "processing done.\n";
+}
 
 ##
 # End
@@ -336,7 +374,9 @@ sub convertEnsembl2GFF {
 	$feature_module_name    =~ /\w+\:+\w+\:+(\w+)/;
 	my $feature_type        = $1;
 
-	print STDERR "processing feature, " . $feature->stable_id . ", of type, $feature_type...\n";
+	if ($_debug) {
+	    print STDERR "processing feature, " . $feature->stable_id . ", of type, $feature_type...\n";
+	}
 
 	my $feature_id  = $feature->stable_id;
 	my $comments = "EnsemblIdentifier=$feature_id";
@@ -361,11 +401,9 @@ sub convertEnsembl2GFF {
 	    }
 	}
 	
-	# print STDERR "processing feature, " . Dumper ($feature) . "...\n";
-
 	$gff_output .= parse_ensembl_feature ($seqId, $feature, $feature_type, $comments);
     }
-
+    
     return $gff_output;
 }
 
@@ -437,10 +475,12 @@ sub getIntergenicSequence {
     # Shift also the tss coordinate
     $tss = $tss - $slice_region->start;
     
-    print STDERR "slice start and end, " . $slice_region->start . ", " . $slice_region->end . "\n";
-    print STDERR "sub slice start and end shifted, $subslice_start, $subslice_end\n";
-    print STDERR "tss shifted, $tss\n";
-    
+    if ($_debug) {
+	print STDERR "slice start and end, " . $slice_region->start . ", " . $slice_region->end . "\n";
+	print STDERR "sub slice start and end shifted, $subslice_start, $subslice_end\n";
+	print STDERR "tss shifted, $tss\n";
+    }
+
     # Get the end of the most downstream of the upstream genes...
     
     my $latest_gene;
@@ -453,49 +493,66 @@ sub getIntergenicSequence {
 
     my @upstream_genes = @{$slice_region->get_all_Genes};
     my @upstream_exons = @{$slice_region->get_all_Exons};
-    
-    if (@upstream_genes > 0) {
-	print STDERR @upstream_genes . " genes upstream...\n";
+
+    if ($_debug) {
+	if (@upstream_genes > 0) {
+	    print STDERR @upstream_genes . " genes upstream...\n";
+	}
+	
+	if (@upstream_exons > 0) {
+	    print STDERR @upstream_exons . " exons upstream...\n";
+	}
     }
-    
-    if (@upstream_exons > 0) {
-	print STDERR @upstream_exons . " exons upstream...\n";
-    }
-    
+
     foreach my $gene (@upstream_genes) {
 
-	print STDERR "previous_gene_end, $previous_gene_end\n";
-	
+	if ($_debug) {
+	    print STDERR "previous_gene_end, $previous_gene_end\n";
+	}
+
 	my $gene_start = $gene->start;
 	my $gene_end   = $gene->end;
 
-	print STDERR "processing gene, " . $gene->stable_id . " at " . $gene_start . ".." . $gene_end . " on strand " . $gene->strand . "\n";
+	if ($_debug) {
+	    print STDERR "processing gene, " . $gene->stable_id . " at " . $gene_start . ".." . $gene_end . " on strand " . $gene->strand . "\n";
+	}
 
 	if ($strand == -1) {
-	    print STDERR "reversing gene coordinates!!\n";
+	    if ($_debug) {
+		print STDERR "reversing gene coordinates!!\n";
+	    }
+
 	    my $gene_end_tmp = $subslice_end - $gene_start;
 	    $gene_start = $subslice_end - $gene_end;
 	    $gene_end   = $gene_end_tmp;
 	}
-	
-	print STDERR "processing gene after reversing its coordinates, " . $gene->stable_id . " at " . $gene_start . ".." . $gene_end . " on strand " . $gene->strand . "\n";
+
+	if ($_debug) {
+	    print STDERR "processing gene after reversing its coordinates, " . $gene->stable_id . " at " . $gene_start . ".." . $gene_end . " on strand " . $gene->strand . "\n";
+	}
 
 	if ($strand == 1) {
 	    if (($gene_end > $previous_gene_end) && ($gene_end < ($tss - 1))) {
-		
-		print STDERR "\tupdating previous_gene_end - strand 1 processing\n";
-		
+
+		if ($_debug) {
+		    print STDERR "\tupdating previous_gene_end - strand 1 processing\n";
+		}
+
 		$previous_gene_end = $gene_end;
 		$latest_gene = $gene;
-		
-		print STDERR "previous_gene_end updated, $previous_gene_end\n";
+
+		if ($_debug) {
+		    print STDERR "previous_gene_end updated, $previous_gene_end\n";
+		}
 	    }
 	}
 	else {
 	    if (($gene_start < $previous_gene_end) && ($gene_start > ($tss + 1))) {
 		
-		print STDERR "\tupdating previous_gene_end - strand -1 processing\n";
-		
+		if ($_debug) {
+		    print STDERR "\tupdating previous_gene_end - strand -1 processing\n";
+		}
+
 		$previous_gene_end = $gene_start;
 		$latest_gene = $gene;
 	    }
@@ -504,11 +561,15 @@ sub getIntergenicSequence {
     }
 
     if (not defined $latest_gene) {
-	print STDERR "problem, suppose to have a gene in the upstream region but can't find it !!\n";
+	if ($_debug) {
+	    print STDERR "problem, suppose to have a gene in the upstream region but can't find it !!\n";
+	}
     }
     
-    print STDERR "before, got subslice, start, end, $subslice_start, $subslice_end\n";
-
+    if ($_debug) {
+	print STDERR "before, got subslice, start, end, $subslice_start, $subslice_end\n";
+    }
+    
     if ($strand == 1) {
 	$subslice_start = $previous_gene_end + 1;
     }
@@ -516,7 +577,9 @@ sub getIntergenicSequence {
 	$subslice_end   = $previous_gene_end - 1;
     }
 
-    print STDERR "after, got subslice, start, end, $subslice_start, $subslice_end\n";
+    if ($_debug) {
+	print STDERR "after, got subslice, start, end, $subslice_start, $subslice_end\n";
+    }
 
     # Now we shift back to chromosome coordinates
 
@@ -529,8 +592,10 @@ sub getIntergenicSequence {
 	$subslice_end   = $subslice_end + $slice_region->start;
     }
 
-    print STDERR "back to chromosome coordinates, this is giving, $subslice_start..$subslice_end\n";
-    
+    if ($_debug) {
+	print STDERR "back to chromosome coordinates, this is giving, $subslice_start..$subslice_end\n";
+    }
+
     return ($subslice_start, $subslice_end);
 }
 
