@@ -99,8 +99,8 @@ if (defined($opt_x)) {
     }
     elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
 	
-	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/Central';
-	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/mobycentral.pl';
+	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://mobycentral.icapture.ubc.ca/MOBY/Central';
+	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
 
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
