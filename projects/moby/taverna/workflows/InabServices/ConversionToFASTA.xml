@@ -15,7 +15,7 @@
   <s:processor name="GenericSequence2FASTA">
     <s:description>Converson of MOBY Generic Sequence objects to FASTA objects</s:description>
     <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>GenericSequence2FASTA</s:serviceName>
       <s:authorityName>icapture.ubc.ca</s:authorityName>
     </s:biomobywsdl>
