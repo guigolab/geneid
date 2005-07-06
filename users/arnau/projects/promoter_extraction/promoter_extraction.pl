@@ -53,8 +53,12 @@ END_HELP
 BEGIN {
 	
     # Global variables definition
-    use vars qw /$_debug %opts $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $host $user $dbensembl/;
-    
+    use vars qw /$_debug %opts $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbensembl/;
+
+    if (-f "config.pl") {
+        require "config.pl";
+    }
+
     # these are switches taking an argument (a value)
     my $switches = 'hf:s:r:u:d:ig';
     
@@ -86,14 +90,14 @@ BEGIN {
     
     # Ensembl database configuration
     
-    $host      = "ensembldb.ensembl.org";
-    $user      = "anonymous";
+    $dbhost      = "ensembldb.ensembl.org";
+    $dbuser      = "anonymous";
     $dbensembl = $species . "_core_" . $release;
     
     $release =~ /^(\d+)_\w+$/;
     my $branch = $1;
     
-    my $ensembl_API_path = "/home/ug/arnau/cvs/ensembl-$branch/modules";
+    my $ensembl_API_path = "./lib/ensembl-$branch/modules";
     
     if ($_debug) {
 	print STDERR "ensembl_API_path, $ensembl_API_path.\n";
@@ -119,8 +123,8 @@ if ($_debug) {
 }
 
 my $dbh = new Bio::EnsEMBL::DBSQL::DBAdaptor (
-					      -host   => $host,
-					      -user   => $user,
+					      -host   => $dbhost,
+					      -user   => $dbuser,
 					      -dbname => $dbensembl
 					      )
     or die "can't connect to Ensembl database, $dbensembl, contact gmaster\@imim.es for help!\n";
