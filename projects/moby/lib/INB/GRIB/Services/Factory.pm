@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.14 2005-07-11 15:03:12 arnau Exp $
+# $Id: Factory.pm,v 1.15 2005-07-11 15:23:05 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -503,7 +503,7 @@ sub TranslateGeneIDPredictions_call {
     my $geneid_predictions = $args{predictions} || undef;
     my $parameters         = $args{parameter}   || undef;
     
-    my $translation_table  = $parameter{translation_table};
+    my $translation_table  = $parameters->{translation_table};
     my $translation_code;
     SWITCH: {
 	if ($translation_table eq "Standard (1)")   { $translation_code = 1; last SWITCH; }
@@ -558,7 +558,7 @@ sub TranslateGeneIDPredictions_call {
     close ($feature_fh);
 
     open (FILE, ">$featurefile") or die "can't open temp file, $featurefile!\n";
-    print FILE "$geneID_predictions";
+    print FILE "$geneid_predictions";
     close FILE;
     
     my $translateGeneID_output = qx/$_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile/;
