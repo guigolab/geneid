@@ -55,5 +55,6 @@ $x->dispatch_with({
     'http://biomoby.org/#runGeneID'    => 'INB::GRIB::Services::GeneIDServices',
     'http://biomoby.org/#runGeneIDGFF' => 'INB::GRIB::Services::GeneIDServices',
     'http://biomoby.org/#runSGP2GFF'   => 'INB::GRIB::Services::SGP2Services',
+    'http://biomoby.org/#translateGeneIDPredictionsGFF' => 'INB::GRIB::Services::UtilsServices',
 });
 $x->handle;
