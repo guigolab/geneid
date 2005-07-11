@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.13 2005-06-22 10:02:38 gmaster Exp $
+# $Id: Factory.pm,v 1.14 2005-07-11 15:03:12 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -107,6 +107,7 @@ our @EXPORT = qw(
   &GeneID_call
   &SGP2_call
   &GOstat_call
+  &TranslateGeneIDPredictions_call
 );
 
 our $VERSION = '1.00';
@@ -115,8 +116,8 @@ our $VERSION = '1.00';
 ###############################################################################
 sub _exists_env {
 	my $var_name = shift;
-        croak "Environment variable \$$var_name not defined.\n" 
-	if (not exists $ENV{$var_name}); 
+        croak "Environment variable \$$var_name not defined.\n"
+	if (not exists $ENV{$var_name});
 }
 
 BEGIN {
@@ -129,7 +130,7 @@ BEGIN {
 
 ###############################################################################
 
-=head2 GeneID_call_CGI  
+=head2 GeneID_call_CGI
 
  Title   : GeneID_call_CGI 
  Usage   : $report = GeneID_call_CGI (@params);
@@ -487,6 +488,86 @@ sub GOstat_call {
 
     if (defined $gostat_output) {
 	return $gostat_output;
+    }
+    else {
+	# What else better to return ??
+	return undef;
+    }
+
+}
+
+sub TranslateGeneIDPredictions_call {
+    my %args = @_;
+    
+    my $sequences          = $args{sequences}   || undef;
+    my $geneid_predictions = $args{predictions} || undef;
+    my $parameters         = $args{parameter}   || undef;
+    
+    my $translation_table  = $parameter{translation_table};
+    my $translation_code;
+    SWITCH: {
+	if ($translation_table eq "Standard (1)")   { $translation_code = 1; last SWITCH; }
+	if ($translation_table eq "bacterial (11)") { $translation_code = 11; last SWITCH; }
+	# Default is Standard
+	$translation_code = 1;
+    }
+    
+    # Llama a GOstat localmente
+    my $_translateGeneID_dir  = "/home/ug/gmaster/projects/GFF_Translations";
+    my $_translateGeneID_bin  = "/home/ug/gmaster/projects/";
+    my $_translateGeneID_args = "-t $translation_code";
+    
+    # Make two temporary files for both input lists of genes
+    
+
+    my ($seq_fh, $seqfile) = tempfile("/tmp/SEQS.TRANSLATION.XXXXXX", UNLINK => 0);
+    close ($seq_fh);
+
+    # Bioperl sequence factory
+    
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+    
+    my @seqIds = keys (%$sequences);
+    
+    foreach my $sequenceIdentifier (@seqIds) {
+	
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+	
+	# bioperl object
+	
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
+				    );
+	
+	$sout->write_seq ($seqobj);
+	
+    }
+    
+    close $seq_fh;
+    
+    # Test empty file
+    if (-z $seqfile) {
+	print STDERR "Error, empty sequence file...\n";
+    }
+    
+    my ($feature_fh, $featurefile) = tempfile("/tmp/FEATURES.TRANSLATION.XXXXXX", UNLINK => 0);
+    close ($feature_fh);
+
+    open (FILE, ">$featurefile") or die "can't open temp file, $featurefile!\n";
+    print FILE "$geneID_predictions";
+    close FILE;
+    
+    my $translateGeneID_output = qx/$_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile/;
+        
+    unlink $seqfile;
+    unlink $featurefile;
+
+    if (defined $translateGeneID_output) {
+	return $translateGeneID_output;
     }
     else {
 	# What else better to return ??
