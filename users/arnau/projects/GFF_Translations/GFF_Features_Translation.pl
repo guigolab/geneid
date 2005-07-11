@@ -26,13 +26,14 @@ return <<"END_HELP";
 Description: Translate Features in GFF format
 Usage:
 
-    promoter_extraction.pl [-h] -s {Sequence in FASTA format} -f {Features in GFF format}
+    promoter_extraction.pl [-h] -s {Sequence in FASTA format} -f {Features in GFF format} -t {translation table}
 	-h help
 	-s Sequence in FASTA format
 	-f Features in GFF format
-
+	-t Translation table (Standard => 1, Bacterial => 11) - default is the Standard Genetic Code
+	
 Examples using some combinations:
-	GFF_Features_Translation.pl -s AC005155.fa -f AC005155.geneid.gff
+	GFF_Features_Translation.pl -s AC005155.fa -f AC005155.geneid.gff -t 1
 
 END_HELP
 
@@ -43,14 +44,14 @@ BEGIN {
     use vars qw /%opts/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'hf:s:';
+    my $switches = 'hf:s:t:';
     
     # Get the switches
     getopts($switches, \%opts);
     
     # If the user does not write nothing, skip to help
     if (defined($opts{h}) || !defined($opts{f}) || !defined($opts{s})){
-	print help;
+	print STDERR help;
 	exit 0;
     }
     
@@ -60,9 +61,28 @@ my $_debug = 0;
 
 my $seqfile;
 my $featurefile;
+my $translation_table = 1;
 
-defined $opts{f} and $featurefile      = $opts{f};
-defined $opts{s} and $seqfile          = $opts{s};
+defined $opts{f} and $featurefile       = $opts{f};
+defined $opts{s} and $seqfile           = $opts{s};
+defined $opts{t} and $translation_table = $opts{t};
+
+# Check that the files exist !!!
+
+if (not -f $featurefile) {
+    print STDERR "Error, can't find feature file, $featurefile\n";
+    exit 0;
+}
+if (not -f $seqfile) {
+    print STDERR "Error, can't find sequence file, $seqfile\n";
+    exit 0;
+}
+
+if ((not ($translation_table =~ /^\d+$/)) || ($translation_table > 22)) {
+   print STDERR "the translation code, $translation_table, is not recognized !\n";
+   print STDERR "must be a number between 1 and 21\n";
+   exit 0;
+}
 
 # The sequence object factory
 
@@ -71,26 +91,21 @@ my $sin  = Bio::SeqIO->new(
 			   -format => 'fasta'
 			   );
 
-# The feature object factory
-
-my $fin  = Bio::SeqIO->new(
-			   -file   => $featurefile,
-			   -format => 'feature'
-			   );
-
 # The peptide sequence factory
 
 my $sout = Bio::SeqIO->new(
 			   -format => 'fasta'
 			   );
 
-print STDERR "processing the GFF file...\n";
-
+if ($_debug) {
+    print STDERR "processing the GFF file...\n";
+}
 my $featuresPerSeqId = parse_gff ($featurefile);
 
-print STDERR "processing done.\n";
-
-print STDERR "processing the sequence fasta file\n";
+if ($_debug) {
+    print STDERR "processing done.\n";
+    print STDERR "processing the sequence fasta file\n";
+}
 
 while ( my $seqobj = $sin->next_seq() ) {
     if ($_debug) {
@@ -103,11 +118,13 @@ while ( my $seqobj = $sin->next_seq() ) {
 	foreach my $f (@$features) {
 	    $f->attach_seq ($seqobj);
 	    my $splicedseq = $f->spliced_seq();
-	    my $pepobj     = $splicedseq->translate();
+	    my $pepobj     = $splicedseq->translate(undef, undef, undef, $translation_table);
 	    if (defined $pepobj) {
-		
-		print STDERR "writing out translation for " . $pepobj->id . "\n";
-		
+
+		if ($_debug) {
+		    print STDERR "writing out translation for " . $pepobj->id . "\n";
+		}
+
 		$sout->write_seq($pepobj);
 	    }
 	    else {
@@ -117,11 +134,15 @@ while ( my $seqobj = $sin->next_seq() ) {
 	
     }
     else {
-	print STDERR "No features for sequence, " . $seqobj->id . "\n";
-    }    
+	if ($_debug) {
+	    print STDERR "No features for sequence, " . $seqobj->id . "\n";
+	} 
+    }
 }
 
-print STDERR "processing done.\n";
+if ($_debug) {
+    print STDERR "processing done.\n";
+}
 
 ##
 # End
@@ -229,8 +250,10 @@ sub parse_gff {
 	    
 	    # build the feature object
 
-	    print STDERR "instanciating feature object...\n";
-	    
+	    if ($_debug) {
+		print STDERR "instanciating feature object...\n";
+	    }
+
 	    my $feature = new Bio::SeqFeature::Generic (
 							-location     => $splitlocation,
 							-primary      => 'CDS',
@@ -238,7 +261,9 @@ sub parse_gff {
 							);
 	    $feature->add_tag_value ('codon_start', $codon_start);
 
-	    print STDERR "instanciation done.\n";
+	    if ($_debug) {
+		print STDERR "instanciation done.\n";
+	    }
 
 	    push (@features, $feature);
 	}
@@ -249,7 +274,9 @@ sub parse_gff {
 	}
     }
     
-    print STDERR "Adding " . @features . " features to sequence, $seqName\n";
+    if ($_debug) {
+	print STDERR "Adding " . @features . " features to sequence, $seqName\n";
+    }
     $features->{$seqName} = [ @features ];
 
     close GENEID;
