@@ -20,8 +20,11 @@ BEGIN {
 
 ###############################################################################
 
-# Where are installed INB libraries, See EnvServices package
+# To know where are installed INB libraries, See EnvServices package
 use INB::GRIB::Services::GeneIDServices;
+use INB::GRIB::Services::SGP2Services;
+use INB::GRIB::Services::GOstatServices;
+use INB::GRIB::Services::UtilsServices;
 ###############################################################################
 
 sub daemonize {
@@ -51,6 +54,7 @@ if ($ARGV[0] and $ARGV[0] =~ /^--daemon$/) {
 } else {
 	$x = new SOAP::Transport::HTTP::CGI || die "Can't get SOAP: $!\n";
 }
+
 $x->dispatch_with({
     'http://biomoby.org/#runGeneID'    => 'INB::GRIB::Services::GeneIDServices',
     'http://biomoby.org/#runGeneIDGFF' => 'INB::GRIB::Services::GeneIDServices',
