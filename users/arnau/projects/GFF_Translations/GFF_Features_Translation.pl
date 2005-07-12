@@ -116,10 +116,24 @@ while ( my $seqobj = $sin->next_seq() ) {
     
     if ((defined $features) && (@$features > 0)) {
 	foreach my $f (@$features) {
+	    # The gene name
+	    my $geneName = $f->display_name;
+
 	    $f->attach_seq ($seqobj);
 	    my $splicedseq = $f->spliced_seq();
 	    my $pepobj     = $splicedseq->translate(undef, undef, undef, $translation_table);
 	    if (defined $pepobj) {
+		
+		# Changing the id to match the gene name
+
+		if (defined $geneName) {
+		    if ($_debug) {
+			print STDERR "changing peptide identifier to gene name, $geneName\n";
+		    }
+
+		    $pepobj->id ($geneName);
+
+		}
 
 		if ($_debug) {
 		    print STDERR "writing out translation for " . $pepobj->id . "\n";
@@ -181,7 +195,7 @@ sub parse_gff {
 	    # CDS locations
 	    my $splitlocation = new Bio::Location::Split();
 	    my $codon_start   = undef;
-	    my $geneName      = "unknown";
+	    my $geneName      = undef;
 
 	    # build the cds feature by joining the exon together
 	    
@@ -194,7 +208,7 @@ sub parse_gff {
 		    print STDERR "feature line : $line\n";
 		}
 		
-		$line =~ /^([^\t]+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+.+/;
+		$line =~ /^([^\t]+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+(.+)/;
 		my $seqName_tmp = $1;
 		my $nameFeature = $3;
 		my $start       = $4;
@@ -204,12 +218,18 @@ sub parse_gff {
 		    $strand = -1;
 		}
 		my $frame       = $8;
+		$geneName = $9;
+		chomp $geneName;
+
 		# parsing problem when the strand is "-", can not get the frame in that case !!!
 		# so substitute - by + to make the parsing work
 		if (not defined $frame) {
 		    $line =~ s/-/\+/g;
-		    $line =~ /(\w+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+.+/;
+		    $line =~ /(\w+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+(.+)/;
 		    $frame = $8;
+
+		    $geneName = $9;
+		    chomp $geneName;
 		}
 		# specify the frame for the first exon, which might not start with a MET
 		if (($strand==1 && $i==1) || ($strand==-1 && $i==$nb_exons)) {
@@ -223,8 +243,10 @@ sub parse_gff {
 			$codon_start = 3;
 		    }
 		}
-
-		# parse the geneName...
+	
+		if ($_debug) {
+		    print STDERR "found gene name, $geneName\n";
+		}
 		
 		if (not defined $seqName) {
 		    $seqName = $seqName_tmp;
