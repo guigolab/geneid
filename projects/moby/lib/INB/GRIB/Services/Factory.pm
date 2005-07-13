@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.15 2005-07-11 15:23:05 gmaster Exp $
+# $Id: Factory.pm,v 1.16 2005-07-13 10:46:39 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -498,10 +498,10 @@ sub GOstat_call {
 
 sub TranslateGeneIDPredictions_call {
     my %args = @_;
-    
-    my $sequences          = $args{sequences}   || undef;
-    my $geneid_predictions = $args{predictions} || undef;
-    my $parameters         = $args{parameter}   || undef;
+
+    my $sequences          = $args{sequences}    || undef;
+    my $geneid_predictions = $args{predictions}  || undef;
+    my $parameters         = $args{parameters}   || undef;
     
     my $translation_table  = $parameters->{translation_table};
     my $translation_code;
@@ -514,14 +514,17 @@ sub TranslateGeneIDPredictions_call {
     
     # Llama a GOstat localmente
     my $_translateGeneID_dir  = "/home/ug/gmaster/projects/GFF_Translations";
-    my $_translateGeneID_bin  = "/home/ug/gmaster/projects/";
+    my $_translateGeneID_bin  = "GFF_Features_Translation.pl";
     my $_translateGeneID_args = "-t $translation_code";
     
     # Make two temporary files for both input lists of genes
     
-
     my ($seq_fh, $seqfile) = tempfile("/tmp/SEQS.TRANSLATION.XXXXXX", UNLINK => 0);
-    close ($seq_fh);
+    # close ($seq_fh);
+
+    my ($feature_fh, $featurefile) = tempfile("/tmp/FEATURES.TRANSLATION.XXXXXX", UNLINK => 0);
+    close ($feature_fh);
+    open (FILE, ">$featurefile") or die "can't open temp file, $featurefile!\n";
 
     # Bioperl sequence factory
     
@@ -534,6 +537,8 @@ sub TranslateGeneIDPredictions_call {
     
     foreach my $sequenceIdentifier (@seqIds) {
 	
+	# Sequence
+
 	my $nucleotides = $sequences->{$sequenceIdentifier};
 	
 	# bioperl object
@@ -544,22 +549,24 @@ sub TranslateGeneIDPredictions_call {
 				    );
 	
 	$sout->write_seq ($seqobj);
+
+	# GeneID Predictions
+
+	my $geneid_prediction = $geneid_predictions->{$sequenceIdentifier};
+
+	print FILE "$geneid_prediction";
 	
     }
     
     close $seq_fh;
-    
+    close FILE;
+
     # Test empty file
     if (-z $seqfile) {
 	print STDERR "Error, empty sequence file...\n";
     }
-    
-    my ($feature_fh, $featurefile) = tempfile("/tmp/FEATURES.TRANSLATION.XXXXXX", UNLINK => 0);
-    close ($feature_fh);
 
-    open (FILE, ">$featurefile") or die "can't open temp file, $featurefile!\n";
-    print FILE "$geneid_predictions";
-    close FILE;
+    # print STDERR "Running the following command, $_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile...\n";
     
     my $translateGeneID_output = qx/$_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile/;
         

@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.1 2005-07-11 15:03:12 arnau Exp $
+# $Id: UtilsServices.pm,v 1.2 2005-07-13 10:46:39 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -105,7 +105,7 @@ methods. Internal methods are usually preceded with a _
 
 # Let the code begin...
 
-package INB::GRIB::Services::GeneIDServices;
+package INB::GRIB::Services::UtilsServices;
 
 use strict;
 use warnings;
@@ -137,11 +137,12 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # 
 our @EXPORT = qw(
   &translateGeneIDPredictionsGFF
-
 );
 
 our $VERSION = '1.0';
 
+my $_debug = 0;
+my $CDATA_SECTION_NODE = 4;
 
 # Preloaded methods go here.
 
@@ -179,6 +180,8 @@ sub _do_query_TranslateGeneIDGFF {
     my $queryInput_DOM = shift @_;
     
     my $MOBY_RESPONSE = "";     # set empty response
+
+    my $_output_format = "FASTA";
     
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $translation_table = "Standard (1)";
@@ -194,6 +197,16 @@ sub _do_query_TranslateGeneIDGFF {
     # Get the parameters
     
     ($translation_table) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "translation table");
+
+    if ($_debug) {
+	if (defined $translation_table) {
+	    print STDERR "parsed translation table, $translation_table\n";
+	}
+	else {
+	    print STDERR "no translation table parameter\n";
+	}
+    }
+
     if (not defined $translation_table) {
 	# Default is the eukaryotic translation table
 	$translation_table = "Standard (1)";
@@ -201,6 +214,10 @@ sub _do_query_TranslateGeneIDGFF {
     
     # Add the parsed parameters in a hash table
     
+    if ($_debug) {
+	print STDERR "translation table, $translation_table\n";
+    }
+
     $parameters{translation_table} = $translation_table;
     
     # Tratamos a cada uno de los articulos
@@ -210,6 +227,10 @@ sub _do_query_TranslateGeneIDGFF {
 	# y su texto xml. 
 	
 	my ($articleName, $DOM) = @{$article}; # get the named article
+
+	if ($_debug) {
+	    print STDERR "processing article, $articleName...\n";
+	}
 	
 	# Si le hemos puesto nombre a los articulos del servicio,  
 	# podemos recoger a traves de estos nombres el valor.
@@ -222,7 +243,9 @@ sub _do_query_TranslateGeneIDGFF {
 	    
 	    if (isSimpleArticle ($DOM)) {
 
-		print STDERR "\"sequences\" tag is a simple article...\n";
+		if ($_debug) {
+		    print STDERR "\"sequences\" tag is a simple article...\n";
+		}
 
 		my $sequenceIdentifier;
 		my $nucleotide;
@@ -252,18 +275,22 @@ sub _do_query_TranslateGeneIDGFF {
 		$sequences{$sequenceIdentifier} = $nucleotide;
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
-		
-		# print STDERR "sequences is a collection article...\n";
-		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		
+
+		if ($_debug) {
+		    print STDERR "sequences is a collection article...\n";
+		    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		}
+
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
 		
 		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
 		    
 		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $sequence_article_DOM ] );
-		    
-		    # print STDERR "Sequence DOM: " . $sequence_article_DOM->toString() . "\n";
-		    
+
+		    if ($_debug) {
+			# print STDERR "Sequence DOM: " . $sequence_article_DOM->toString() . "\n";
+		    }
+
 		    my ($nucleotide) = getNodeContentWithArticle($sequence_article_DOM, "String", "SequenceString");
 		    # Lo que hacemos aqui es limpiar un sting de caracteres raros 
 		    # (espacios, \n, ...) pq nadie asegura que no los hayan.
@@ -272,10 +299,12 @@ sub _do_query_TranslateGeneIDGFF {
 		    if (length ($nucleotide) < 1) {
 			print STDERR "nucleotide sequence not parsed properly...\n";
 		    }
-		    
-		    # print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
-		    # print STDERR "nucleotide length: " . length ($nucleotide) . "\n";
-		    
+		  
+		    if ($_debug) {
+			print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
+			print STDERR "nucleotide length: " . length ($nucleotide) . "\n";
+		    }
+
 		    # Add the sequence into a hash table
 		    
 		    $sequences{$sequenceIdentifier} = $nucleotide;
@@ -291,9 +320,11 @@ sub _do_query_TranslateGeneIDGFF {
 	if ($articleName eq "geneid_predictions") {
 	    
 	    if (isSimpleArticle ($DOM)) {
-		
-		print STDERR "\"predictions\" tag is a simple article...\n";
-		
+
+		if ($_debug) {
+		    print STDERR "\"geneid_predictions\" tag is a simple article...\n";
+		}
+
 		my $sequenceIdentifier;
 
 		my @articles = ($DOM);
@@ -305,54 +336,38 @@ sub _do_query_TranslateGeneIDGFF {
 		    print STDERR "Error - no sequence identifier!!!\n";
 		}
 		
-		# Los contenidos los devuelve como una lista, dado que 
-		# el objeto de la ontologia podria tener una relacion
-		# "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
-		
-		# ???
-		# my ($prediction) = getNodeContentWithArticle($DOM, "String", "SequenceString");
-		my $predction = <<PRT;
-# Gene 1 (Forward). 8 exons. 360 aa. Score = 15.97
-AC005155        geneid_v1.2     Internal        8670    8861     5.01   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        9168    9248     2.24   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        10054   10212    5.99   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        15646   15664    1.46   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        18188   18289    0.54   +       2       AC005155_1
-AC005155        geneid_v1.2     Internal        25273   25556    0.22   +       2       AC005155_1
-AC005155        geneid_v1.2     Internal        30838   30906    0.85   +       0       AC005155_1
-AC005155        geneid_v1.2     Terminal        40309   40482   -0.34   +       0       AC005155_1
-PRT
-		
+		my $prediction = extractRawContent ($DOM);
+
 		# Add the predictions data into a hash table
 		
 		$predictions{$sequenceIdentifier} = $prediction;
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
-		# print STDERR "sequences is a collection article...\n";
-		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		
+		if ($_debug) {
+		    print STDERR "article, geneid_predictions, is a collection article...\n";
+		    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		}
+
 		my @prediction_articles_DOM = getCollectedSimples ($DOM);
 		
 		foreach my $prediction_article_DOM (@prediction_articles_DOM) {
-		    
+
+		    if ($_debug) {
+			print STDERR "node ref, " . ref ($prediction_article_DOM) . "\n";
+			print STDERR "processing tag, " . $prediction_article_DOM->getTagName . "\n";
+		    }
+
 		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $prediction_article_DOM ] );
 
-		    # my ($prediction) = getNodeContentWithArticle($sequence_article_DOM, "String", "SequenceString");
-		    my $predction = <<PRT;
-# Gene 1 (Forward). 8 exons. 360 aa. Score = 15.97
-AC005155        geneid_v1.2     Internal        8670    8861     5.01   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        9168    9248     2.24   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        10054   10212    5.99   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        15646   15664    1.46   +       0       AC005155_1
-AC005155        geneid_v1.2     Internal        18188   18289    0.54   +       2       AC005155_1
-AC005155        geneid_v1.2     Internal        25273   25556    0.22   +       2       AC005155_1
-AC005155        geneid_v1.2     Internal        30838   30906    0.85   +       0       AC005155_1
-AC005155        geneid_v1.2     Terminal        40309   40482   -0.34   +       0       AC005155_1
-PRT
-
-		    # print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
+		    my $childGFF = $prediction_article_DOM->getFirstChild;
+		    my $prediction = extractRawContent ($childGFF);
 		    
+		    if ($_debug) {
+			print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
+			print STDERR "prediction data:\n$prediction\n";
+		    }
+
 		    # Add the prediction data into a hash table
 		    
 		    $predictions{$sequenceIdentifier} = $prediction;
@@ -379,18 +394,18 @@ PRT
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $report = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, $_parameters => \%parameters);
+    my $report = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, parameters => \%parameters);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
     my $input = <<PRT;
-<moby:$_format namespace='' id=''>
+<moby:$_output_format namespace='' id=''>
 <![CDATA[
 $report
 ]]>
-</moby:$_format>
+</moby:$_output_format>
 PRT
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
@@ -448,9 +463,13 @@ PRT
 =cut
 
 sub translateGeneIDPredictionsGFF {
+    
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
-	# El parametro $message es un texto xml con la peticion.
-	my ($caller, $message) = @_;        # get the incoming MOBY query XML
+    if ($_debug) {
+	print STDERR "processing Moby translateGeneIDPredictionsGFF query...\n";
+    }
 
 	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
 	# a la ontologia, y debemos contentarnos con trabajar directamente 
@@ -475,8 +494,10 @@ sub translateGeneIDPredictionsGFF {
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
 	    
-	    # my $query_str = $queryInput->toString();
-	    # print STDERR "query text: $query_str\n";
+	    if ($_debug) {
+		my $query_str = $queryInput->toString();
+		print STDERR "query text: $query_str\n";
+	    }
 
 	    my $query_response = _do_query_TranslateGeneIDGFF ($queryInput);
 	    
@@ -491,8 +512,6 @@ sub translateGeneIDPredictionsGFF {
 	return responseHeader("genome.imim.es") 
 	. $MOBY_RESPONSE . responseFooter;
 }
-
-
 
 1;
 
