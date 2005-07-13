@@ -219,7 +219,9 @@ sub parse_gff {
 		}
 		my $frame       = $8;
 		$geneName = $9;
-		chomp $geneName;
+		if (defined $geneName) {
+		    chomp $geneName;
+		}
 
 		# parsing problem when the strand is "-", can not get the frame in that case !!!
 		# so substitute - by + to make the parsing work
