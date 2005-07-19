@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.9 2005-06-22 10:02:38 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.10 2005-07-19 15:41:08 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -315,8 +315,10 @@ sub _do_query_GeneID_CGI {
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
-    # la podriamos realizar en una funcion a parte si fuese compleja.  
-    
+    # la podriamos realizar en una funcion a parte si fuese compleja.
+
+    my $output_article_name = "geneid_predictions";
+
     my $input = <<PRT;
 <moby:$moby_output_format namespace='' id=''>
 <![CDATA["
@@ -332,7 +334,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
 
-    $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
+    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 	
     return $MOBY_RESPONSE;
 	
@@ -524,6 +526,8 @@ sub _do_query_GeneID {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
+    my $output_article_name = "geneid_predictions";
+
     my $input = <<PRT;
 <moby:$_format namespace='' id=''>
 <![CDATA[
@@ -539,7 +543,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
 
-    $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
+    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 	
     return $MOBY_RESPONSE;
 }

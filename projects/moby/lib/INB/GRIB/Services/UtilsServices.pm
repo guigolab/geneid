@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.2 2005-07-13 10:46:39 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.3 2005-07-19 15:42:28 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -352,14 +352,14 @@ sub _do_query_TranslateGeneIDGFF {
 		my @prediction_articles_DOM = getCollectedSimples ($DOM);
 		
 		foreach my $prediction_article_DOM (@prediction_articles_DOM) {
-
+		    
 		    if ($_debug) {
 			print STDERR "node ref, " . ref ($prediction_article_DOM) . "\n";
 			print STDERR "processing tag, " . $prediction_article_DOM->getTagName . "\n";
 		    }
-
+		    
 		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $prediction_article_DOM ] );
-
+		    
 		    my $childGFF = $prediction_article_DOM->getFirstChild;
 		    my $prediction = extractRawContent ($childGFF);
 		    
@@ -400,6 +400,8 @@ sub _do_query_TranslateGeneIDGFF {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
+    my $output_article_name = "translated_sequences";
+
     my $input = <<PRT;
 <moby:$_output_format namespace='' id=''>
 <![CDATA[
@@ -415,7 +417,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
 
-    $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
+    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 	
     return $MOBY_RESPONSE;
 }

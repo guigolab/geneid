@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.2 2005-05-18 13:17:20 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.3 2005-07-19 15:41:27 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -264,6 +264,8 @@ sub _do_query_SGP2 {
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
 	# la podriamos realizar en una funcion a parte si fuese compleja.  
 
+	my $output_article_name = "geneid_predictions";
+
 	my $input = <<PRT;
 <moby:$_format namespace='' id=''>
 <![CDATA[
@@ -279,7 +281,7 @@ PRT
         # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
         # el mismo que el de la query. 
 
-        $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
+        $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 	
         return $MOBY_RESPONSE;
 }
