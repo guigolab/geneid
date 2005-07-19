@@ -66,7 +66,7 @@ my $MOBY_SERVER = $ENV{MOBY_SERVER} ='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Ce
 # URL
 
 # Development by default, but if the registry server is the production one,
-# then the URL will be the production server at genome.imim.es
+# then the URL will be the production script, 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi'
 $::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
 
 if (defined($opt_x)) {
@@ -159,7 +159,7 @@ my ($REG) = $Central->registerService(
 							    ['geneid_predictions', ["GFF" => []]],
 							    ],
 				      output		=> [
-							    ['peptides', ["FASTA" => []]],
+							    ['translated_sequences', ["FASTA" => []]],
 							    ],
 				      secondary	=> {
 					  'translation table' => {

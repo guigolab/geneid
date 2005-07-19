@@ -47,7 +47,7 @@ my ($REG) = $Central->registerService(
 				['tblastx', ["BLAST-Text" => []]],
 				],
 		output		=> [
-				    ['', ["GFF" => []]],
+				    ['geneid_predictions', ["GFF" => []]],
 				    ],
 		);
 		
