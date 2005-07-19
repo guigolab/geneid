@@ -143,8 +143,8 @@ if (defined($opt_x)) {
 
 		# export MOBY_URI
 		# export MOBY_SERVER
-		$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/mobycentral.pl';
-		$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://mobycentral.cbr.nrc.ca/cgi-bin/MOBY05/Central';
+		$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
+		$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://mobycentral.icapture.ubc.ca/MOBY/Central';
 		$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 	}else {
@@ -163,12 +163,23 @@ if (defined($opt_x)) {
 #
 ##################################################################
 
+if ($_debug) {
+    print STDERR "Instanciating Central object...\n";
+}
+
 my $C = MOBY::Client::Central->new(
 				   Registries => {mobycentral => {URL => $URL,URI => $URI}}
 				   );
 
-if ($_debug) {
-    print "TESTING MOBY CLIENT with\n\tURL: $URL\n\tURI: $URI\n\tProxy: $PROXY\n\n";
+if (defined $C) {
+    if ($_debug) {
+	print STDERR "Instanciation done.\n";
+	print STDERR "TESTING MOBY CLIENT with\n\tURL: $URL\n\tURI: $URI\n\tProxy: $PROXY\n\n";
+    }
+}
+else {
+    print STDERR "Error, Central could not be instanciated!\n";
+    exit 0;
 }
 
 ##################################################################
@@ -177,6 +188,10 @@ if ($_debug) {
 #
 ##################################################################
 
+if ($_debug) {
+    print STDERR "finding service, $serviceName...\n";
+}
+
 my ($service_instances, $reg) = $C->findService (
 						 serviceName  => "$serviceName",
 						 authURI      => $::authURI
@@ -184,6 +199,11 @@ my ($service_instances, $reg) = $C->findService (
 
 if ($_debug) {
     print STDERR "Service instances references: " . @$service_instances . "\n";
+}
+
+if (@$service_instances == 0) {
+    print STDERR "Error, can't find any service called $serviceName!\n";
+    exit 0;
 }
 
 my $service_instance = $service_instances->[0];
