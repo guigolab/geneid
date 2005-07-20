@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.3 2005-07-19 15:42:28 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.4 2005-07-20 13:48:04 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -355,7 +355,6 @@ sub _do_query_TranslateGeneIDGFF {
 		    
 		    if ($_debug) {
 			print STDERR "node ref, " . ref ($prediction_article_DOM) . "\n";
-			print STDERR "processing tag, " . $prediction_article_DOM->getTagName . "\n";
 		    }
 		    
 		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $prediction_article_DOM ] );
