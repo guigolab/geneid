@@ -20,6 +20,9 @@ use SOAP::Lite;
 use Benchmark;
 ##################################################################
 
+# Bioperl
+use Bio::SeqIO;
+
 my $t1 = Benchmark->new ();
 
 my $_debug = 0;
@@ -92,6 +95,11 @@ if (!$wsdl || ($wsdl !~ /\<definitions/)){
 
 my $Service = MOBY::Client::Service->new(service => $wsdl);
 
+if (not defined $Service) {
+    print STDERR "Error, service not instanciated!\n";
+    exit 0;
+}
+
 ##################################################################
 #
 # Setup sequence input data
@@ -129,6 +137,9 @@ PRT
 
 } # Next sequence
 
+# Hardcoded, should match the query sequence !!
+my $seq_id = "AC005155";
+
 my @predictions_xml = ();
 
 my @GFFs = qx/cat $in_file_2/;
@@ -139,11 +150,21 @@ foreach my $GFF_line (@GFFs) {
 }
 undef @GFFs;
 
+chomp $GFF;
+
 my $prediction_xml = <<PRT;
 <GFF namespace="$datasource" id="$seq_id">
+<![CDATA[
 $GFF
+]]>
 </GFF>
 PRT
+
+# $prediction_xml = <<PRT;
+# <GFF namespace="$datasource" id="$seq_id">
+# $GFF
+# </GFF>
+# PRT
 
 push (@predictions_xml, $prediction_xml);
 
@@ -160,6 +181,8 @@ PRT
 # Service execution
 #
 ##################################################################
+
+    print STDERR "Executing Moby request...\n";
 
 my $result = $Service->execute(XMLinputlist => [
 						[$articleName_1, \@sequences_xml, $articleName_2, \@predictions_xml, "translation table", $translation_table]
