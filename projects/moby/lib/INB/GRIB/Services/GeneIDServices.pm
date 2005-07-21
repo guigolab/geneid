@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.10 2005-07-19 15:41:08 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.11 2005-07-21 17:03:33 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -525,11 +525,17 @@ sub _do_query_GeneID {
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
+
+    # Quick hack to add the sequence identifier
+    # Anyway even if the parsing code handles input collection, the output report code doesn't and the specs tell that the input and the output are simple articles !!
+
+    my @sequences = keys (%sequences);
+    my $sequenceIdentifier = $sequences[0];
     
     my $output_article_name = "geneid_predictions";
 
     my $input = <<PRT;
-<moby:$_format namespace='' id=''>
+<moby:$_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[
 $report
 ]]>
