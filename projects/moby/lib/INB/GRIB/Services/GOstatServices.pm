@@ -1,4 +1,4 @@
-# $Id: GOstatServices.pm,v 1.1 2005-05-26 16:28:03 gmaster Exp $
+# $Id: GOstatServices.pm,v 1.2 2005-07-22 16:44:10 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -231,7 +231,7 @@ sub _do_query_GOstat {
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
-		print STDERR "\"array genes\" is a collection article...\n";
+		print STDERR "\"regulated genes\" is a collection article...\n";
 		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		
 		my @genes_articles_DOM = getCollectedSimples ($DOM);
@@ -287,6 +287,8 @@ sub _do_query_GOstat {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
+    my $output_article_name = "";
+    
     my $input = <<PRT;
 <moby:$_format namespace='' id=''>
 <String namespace='' id=''><![CDATA[
@@ -303,7 +305,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
 
-    $MOBY_RESPONSE .= simpleResponse($input, "seqFeatures", $queryID);
+    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 	
     return $MOBY_RESPONSE;
 }
