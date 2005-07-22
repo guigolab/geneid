@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
   <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:4EN3STOHL67" author="" title="" />
-  <s:processor name="Create_moby_data">
-    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
-  </s:processor>
   <s:processor name="parse_moby_GFF_data">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="Create_moby_data">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_sequence_data">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
@@ -122,22 +122,6 @@ output = OutObj;</s:scriptvalue>
       </s:scufl>
     </s:workflow>
   </s:processor>
-  <s:processor name="translateGeneIDPredictionsGFF">
-    <s:description>Translate the GeneID gene predictions in GFF format. Return a set of peptide sequences in FASTA format</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
-      <s:serviceName>translateGeneIDPredictionsGFF</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="runGeneIDGFF">
-    <s:description>Ab initio gene prediction tool - Return the output predictions in GFF format.</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
-      <s:serviceName>runGeneIDGFF</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
   <s:processor name="getFASTAfromEMBL">
     <s:description>Retrieve a sequence in FASTA format from EMBL database.</s:description>
     <s:biomobywsdl>
@@ -154,6 +138,25 @@ output = OutObj;</s:scriptvalue>
       <s:authorityName>www.pcm.uam.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
+  <s:processor name="translateGeneIDPredictionsGFF">
+    <s:description>Translate the GeneID gene predictions in GFF format. Return a set of peptide sequences in FASTA format</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>translateGeneIDPredictionsGFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runGeneIDGFF">
+    <s:description>Ab initio gene prediction tool - Return the output predictions in GFF format.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runGeneIDGFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="parse_moby_peptide_data">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
   <s:link source="sequenceID" sink="Create_moby_data:id" />
   <s:link source="namespace" sink="Create_moby_data:namespace" />
   <s:link source="parse_moby_sequence_data:value" sink="sequence" />
@@ -162,8 +165,6 @@ output = OutObj;</s:scriptvalue>
   <s:link source="Create_moby_data:mobydata" sink="getFASTAfromEMBL:input" />
   <s:link source="getFASTAfromEMBL:output" sink="parse_moby_sequence_data:mobydata" />
   <s:link source="getFASTAfromEMBL:output" sink="fromFASTAtoGenericSequence:input" />
-  <s:link source="translateGeneIDPredictionsGFF:FASTA(peptides)" sink="peptides_moby" />
-  <s:link source="translateGeneIDPredictionsGFF:output" sink="peptides2" />
   <s:link source="fromFASTAtoGenericSequence:GenericSequence(_ANON_)" sink="AddArticleName:input" />
   <s:link source="articleName" sink="AddArticleName:articleName" />
   <s:link source="AddArticleName:output" sink="runGeneIDGFF:NucleotideSequence(sequences)" />
@@ -171,6 +172,9 @@ output = OutObj;</s:scriptvalue>
   <s:link source="AddArticleName:output" sink="Sequence_Moby" />
   <s:link source="runGeneIDGFF:output" sink="GeneID_Moby" />
   <s:link source="runGeneIDGFF:output" sink="translateGeneIDPredictionsGFF:GFF(geneid_predictions)" />
+  <s:link source="translateGeneIDPredictionsGFF:output" sink="parse_moby_peptide_data:mobydata" />
+  <s:link source="translateGeneIDPredictionsGFF:output" sink="peptides_moby" />
+  <s:link source="parse_moby_peptide_data:value" sink="peptides2" />
   <s:source name="sequenceID" />
   <s:source name="namespace" />
   <s:source name="articleName" />
@@ -201,6 +205,7 @@ output = OutObj;</s:scriptvalue>
     <s:metadata>
       <s:mimeTypes>
         <s:mimeType>text/xml</s:mimeType>
+        <s:mimeType>text/plain</s:mimeType>
       </s:mimeTypes>
     </s:metadata>
   </s:sink>
