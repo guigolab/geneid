@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.4 2005-07-20 13:48:04 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.5 2005-07-22 10:09:31 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -111,7 +111,8 @@ use strict;
 use warnings;
 use Carp;
 
-use INB::GRIB::Services::Factory; 
+use INB::GRIB::Services::Factory;
+use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
 use Data::Dumper;
@@ -142,7 +143,6 @@ our @EXPORT = qw(
 our $VERSION = '1.0';
 
 my $_debug = 0;
-my $CDATA_SECTION_NODE = 4;
 
 # Preloaded methods go here.
 
@@ -320,23 +320,29 @@ sub _do_query_TranslateGeneIDGFF {
 	if ($articleName eq "geneid_predictions") {
 	    
 	    if (isSimpleArticle ($DOM)) {
-
+		
 		if ($_debug) {
 		    print STDERR "\"geneid_predictions\" tag is a simple article...\n";
-		}
-
-		my $sequenceIdentifier;
-
-		my @articles = ($DOM);
-		my @ids = getSimpleArticleIDs (\@articles);
-		if (@ids > 0) {
-		    $sequenceIdentifier = $ids[0];
-		}
-		else {
-		    print STDERR "Error - no sequence identifier!!!\n";
+		    print STDERR "node ref, " . ref ($DOM) . "\n";
+		    print STDERR "DOM: " . $DOM->toString () . "\n";
 		}
 		
-		my $prediction = extractRawContent ($DOM);
+		my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
+		
+		if ((not defined $sequenceIdentifier) || (length ($sequenceIdentifier) == 0)) {
+		    print STDERR "Error, can not parsed the sequence identifier the GFF is attach to!\n";
+		    exit 0;
+		}
+		
+		if ($_debug) {
+		    print STDERR "parsed the following sequence identifier, $sequenceIdentifier\n";
+		}
+		
+		my $prediction = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
+		
+		if ($_debug) {
+		    print STDERR "prediction, $prediction\n";
+		}
 
 		# Add the predictions data into a hash table
 		
@@ -355,21 +361,30 @@ sub _do_query_TranslateGeneIDGFF {
 		    
 		    if ($_debug) {
 			print STDERR "node ref, " . ref ($prediction_article_DOM) . "\n";
+			print STDERR "DOM: " . $prediction_article_DOM->toString () . "\n";
 		    }
 		    
 		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $prediction_article_DOM ] );
-		    
-		    my $childGFF = $prediction_article_DOM->getFirstChild;
-		    my $prediction = extractRawContent ($childGFF);
+
+		    if ((not defined $sequenceIdentifier) || (length ($sequenceIdentifier) == 0)) {
+			print STDERR "Error, can not parsed the sequence identifier the GFF is attach to!\n";
+			exit 0;
+		    }
 		    
 		    if ($_debug) {
-			print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
-			print STDERR "prediction data:\n$prediction\n";
+			print STDERR "parsed the following sequence identifier, $sequenceIdentifier\n";
 		    }
-
-		    # Add the prediction data into a hash table
+		    
+		    my $prediction = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
+		    
+		    if ($_debug) {
+			print STDERR "prediction, $prediction\n";
+		    }
+		    
+		    # Add the predictions data into a hash table
 		    
 		    $predictions{$sequenceIdentifier} = $prediction;
+
 		}
 		
 	    }
