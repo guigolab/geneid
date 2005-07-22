@@ -174,7 +174,7 @@ output = OutObj;</s:scriptvalue>
   <s:link source="runGeneIDGFF:output" sink="translateGeneIDPredictionsGFF:GFF(geneid_predictions)" />
   <s:link source="translateGeneIDPredictionsGFF:output" sink="parse_moby_peptide_data:mobydata" />
   <s:link source="translateGeneIDPredictionsGFF:output" sink="peptides_moby" />
-  <s:link source="parse_moby_peptide_data:value" sink="peptides2" />
+  <s:link source="parse_moby_peptide_data:value" sink="peptides" />
   <s:source name="sequenceID" />
   <s:source name="namespace" />
   <s:source name="articleName" />
@@ -201,7 +201,7 @@ output = OutObj;</s:scriptvalue>
       </s:mimeTypes>
     </s:metadata>
   </s:sink>
-  <s:sink name="peptides2">
+  <s:sink name="peptides">
     <s:metadata>
       <s:mimeTypes>
         <s:mimeType>text/xml</s:mimeType>
