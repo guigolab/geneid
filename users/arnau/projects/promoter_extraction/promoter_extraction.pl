@@ -33,19 +33,20 @@ Usage:
 
     promoter_extraction.pl [-h] -f {gene ids} -s {Species} -r {Genome Release} -u {upstream} -d {downstream} -i {Flag intergenic regions only} -g {Flag report attached features in GFF format}
 	-h help
-	-f Gene Identifiers input file
-	-s Gender species, e.g. homo_sapiens
-	-r Database release, e.g 29_35b
+	-f gene identifiers input file
+	-s gender species, e.g. homo_sapiens
+	-r database release, e.g 29_35b
 	-u length of the upstream region   (Default 2000)
 	-d length of the downstream region (Default 500)
-	-i 
-	-g
+	-i intergenic sequence only
+	-g report overlapping gene features in GFF format
 
 Examples using some combinations:
 	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 29_35b -u 2000 -d 500 -i -g
 	promoter_extraction.pl -f refseqs.lst -s rattus_norvegicus -r 29_3f -u 2000 -d 500 -i -g
 
 	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 31_35d -u 2000 -d 500 -i -g
+	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 30_35c -u 2000 -d 500 -i -g
 
 END_HELP
 
@@ -105,9 +106,9 @@ $dbuser      = "anonymous";
 $dbensembl = $species . "_core_" . $release;
 
 $release =~ /^(\d+)_\w+$/;
-my $branch = $1;
+my $releaseNumber = $1;
 
-my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$branch/modules";
+my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$releaseNumber/modules";
 
 if ($_debug) {
     print STDERR "ensembl_API_path, $ensembl_API_path.\n";
@@ -331,26 +332,15 @@ foreach my $geneId (@geneIds) {
 		print STDERR "getting the features...\n";
 	    }
 	    
-	    my $upstream_features = getFeatures ($slice_region, $gene_stable_id);
+	    my $gff_output = getFeatures ($slice_region, $gene_stable_id);
 	    
-	    if (@$upstream_features > 0) {
+	    if ($gff_output ne "") {
 		
-		my $gff_output = convertEnsembl2GFF ($geneId, $upstream_features);
-		
-		if ($gff_output ne "") {
-		    
-		    if ($_debug) {
-			print STDERR "writing GFF output...\n";
-		    }
-		    
-		    print GFF "$gff_output";
+		if ($_debug) {
+		    print STDERR "writing GFF output...\n";
 		}
-		else {
-		    if ($_debug) {
-			print STDERR "Warning: no GFF output returned!!\n";
-		    }
-		}
-		
+		    
+		print GFF "$gff_output";
 	    }
 	    else {
 		if ($_debug) {
@@ -380,6 +370,8 @@ if ($_debug) {
 ##
 # End
 ##
+
+# Deprecated !!
 
 sub convertEnsembl2GFF {
     my ($seqId, $ensembl_features, $comments) = @_;
@@ -413,12 +405,12 @@ sub convertEnsembl2GFF {
 		$feature_type        = $1;
 		
 		foreach my $evidence (@$evidences) {
-		    $gff_output .= parse_ensembl_feature ($seqId, $evidence, $feature_type, "");
+		    $gff_output .= parse_ensembl_feature ($seqId, $evidence, $feature_type, "", "ensembl");
 		}	    
 	    }
 	}
 	
-	$gff_output .= parse_ensembl_feature ($seqId, $feature, $feature_type, $comments);
+	$gff_output .= parse_ensembl_feature ($seqId, $feature, $feature_type, $comments, "ensembl");
     }
     
     return $gff_output;
@@ -426,10 +418,8 @@ sub convertEnsembl2GFF {
 
 
 sub parse_ensembl_feature {
-    my ($seqId, $feature, $feature_type, $comments) = @_;
+    my ($seqId, $feature, $feature_type, $comments, $source) = @_;
     my $gff_output = "";
-
-    # Get the gene name for each exon and report it.
 
     my $start  = $feature->start;
     my $end    = $feature->end;
@@ -443,12 +433,30 @@ sub parse_ensembl_feature {
     
     # Analysis data ?????
     
-    # algorithm
-    my $algorithm = "Ensembl";
     # score
     my $score = "";
 
-    $gff_output .= "$seqId\t$algorithm\t$feature_type\t$start\t$end\t$score\t$strand\t$comments\n";
+    $gff_output .= "$seqId\t$source\t$feature_type\t$start\t$end\t$score\t$strand\t$comments\n";
+
+    return $gff_output;
+    
+}
+
+sub parse_ensembl_sequence {
+    my ($seqId, $start, $end, $sequence_type, $comments, $strand, $source) = @_;
+    my $gff_output = "";
+
+    if ($strand == 1) {
+	$strand = "+";
+    }
+    else {
+	$strand = "-";
+    }
+    
+    # score
+    my $score = "";
+
+    $gff_output .= "$seqId\t$source\t$sequence_type\t$start\t$end\t$score\t$strand\t$comments\n";
 
     return $gff_output;
     
@@ -619,35 +627,162 @@ sub getIntergenicSequence {
 
 sub getFeatures {
     my ($slice_region, $input_gene_id) = @_;
-    my $features = [];
+    my $gff_output = "";
+
     
     # Right now, only report gene and exon features...
     # What else ?
+   
+    # Report also introns, and UTRs
 
-    my @genes = @{$slice_region->get_all_Genes()};
+    # Only those on the slice !!
+
+    
+    my @genes = ();
+    my @genes_tmp = @{$slice_region->get_all_Genes()};
     
     # Filter the input gene
     
     if ($downstream_length > 0) {
-	foreach my $gene (@genes) {
+	foreach my $gene (@genes_tmp) {
 	    if ($gene->stable_id ne $input_gene_id) {
-		push (@$features, $gene);
-		# Get the exons
-		my $exons = $gene->get_all_Exons;
-		push (@$features, @$exons);
+		push (@genes, $gene);
 	    }
 	}
     }
     else {
-	push (@$features, @genes);
-	foreach my $gene (@genes) {
-	    my $exons = $gene->get_all_Exons;
-	    push (@$features, @$exons);
+	@genes = @genes_tmp;
+    }
+
+    # Get the transcripts, exons, introns, UTRs information for each gene
+    
+    foreach my $gene (@genes) {
+
+	# Process the Gene Feature
+
+	# Check the coordinates... (no negative ones)
+
+	my $geneId      = $gene->stable_id;
+	# soruce is only available since Ensembl release 31
+	my $source      = "ensembl";
+	
+	if ($releaseNumber >= 31) {
+	    $source = $gene->source;
+	}
+
+	my $gene_strand = $gene->strand;
+	my $comments    = "EnsemblIdentifier=$geneId";
+	my $GFF_feature = parse_ensembl_feature ($input_gene_id, $gene, "gene", $comments ,$source);
+	$gff_output    .= $GFF_feature;
+	
+	my $biotype     = $gene->type;
+	if ($releaseNumber >= 31) {
+	    # Since Ensembl release 31, type is deprecated and has been replaced by biotype
+	    $biotype = $gene->biotype;
+	}
+	my $RNA_type;
+        SWITCH: {
+	    if ($biotype eq "protein_coding") { $RNA_type = "mRNA";   last SWITCH; }
+	    if ($biotype =~ "rRNA")           { $RNA_type = "rRNA";   last SWITCH; }
+	    if ($biotype =~ "tRNA")           { $RNA_type = "tRNA";   last SWITCH; }
+	    if ($biotype =~ "ncRNA")          { $RNA_type = "ncRNA";  last SWITCH; }
+	    if ($biotype =~ "snRNA")          { $RNA_type = "snRNA";  last SWITCH; }
+	    if ($biotype =~ "snoRNA")         { $RNA_type = "snoRNA"; last SWITCH; }
+	    if ($biotype =~ "scRNA")          { $RNA_type = "scRNA";  last SWITCH; }
+	    if ($biotype =~ "miRNA")          { $RNA_type = "miRNA";  last SWITCH; }
+	    # ensembl type returned for protein coding transcript for release before v31 !!!
+	    if ($biotype =~ "ensembl")          { $RNA_type = "mRNA";  last SWITCH; }
+	    # Default is to map biotype as a RNA type
+	    print STDERR "don't know anything about this gene biotype, $biotype!\n";
+	    
+	    if ($biotype =~ /^(\w+)_pseudogene/) {
+		$RNA_type = $biotype;
+	    }
+	    else {
+		$RNA_type = $biotype;
+	    }
+	}
+
+        # Process the Transcript Features
+	
+	my $transcripts = $gene->get_all_Transcripts;
+	foreach my $transcript (@$transcripts) {
+	    my $transcriptId = $transcript->stable_id;
+	    $comments        = "EnsemblIdentifier=$transcriptId; GeneIdentifier=$geneId";
+	    $GFF_feature     = parse_ensembl_feature ($input_gene_id, $transcript, $RNA_type, $comments, $source);
+	    $gff_output     .= $GFF_feature;
+	    
+	    # Process the Transcripts subfeatures
+
+	    my $exons = $transcript->get_all_translateable_Exons;
+	    if (@$exons > 0) {
+
+		# Deal with protein coding genes
+		
+		# Check we have the UTRs (something they're not predicted !! therefore the gene start end = CDS start end)
+		# Get the UTRs start/end
+		
+		my $five_UTR_start;
+		my $five_UTR_end;
+
+		my $three_UTR_start;
+		my $three_UTR_end;
+		
+		my $has_UTRs = 0;
+		if (($gene->start < $transcript->coding_region_start) && ($gene->end > $transcript->coding_region_end)) {
+		    $has_UTRs++;
+		}
+
+		if ($has_UTRs) {
+		    if ($gene_strand == 1) {
+			$five_UTR_start  = $gene->start;
+			$five_UTR_end    = $transcript->coding_region_start - 1;
+			
+			$three_UTR_start = $transcript->coding_region_end + 1;
+			$three_UTR_end   = $gene->end;
+		    }
+		    else {
+			$five_UTR_end    = $gene->end;
+			$five_UTR_start  = $transcript->coding_region_end + 1;
+			
+			$three_UTR_end   = $transcript->coding_region_start - 1;
+			$three_UTR_start = $gene->start;
+		    }
+		    
+		    my $five_UTR     = $transcript->five_prime_utr;
+		    $comments        = "TranscriptIdentifier=$transcriptId; GeneIdentifier=$geneId";
+		    $GFF_feature     = parse_ensembl_sequence ($input_gene_id, $five_UTR_start, $five_UTR_end, "5'UTR", $comments, $gene_strand, $source);
+		    $gff_output     .= $GFF_feature;
+		}
+
+		foreach my $exon (@$exons) {
+		    my $exonId   = $transcript->stable_id;
+		    $comments    = "EnsemblIdentifier=$exonId; TranscriptIdentifier=$transcriptId; GeneIdentifier=$geneId";
+		    $GFF_feature = parse_ensembl_feature ($input_gene_id, $exon, "exon", $comments, $source);
+		    $gff_output .= $GFF_feature;
+		}
+		
+		if (@$exons > 1) {
+		    # More than one exon, we've got at least one intron
+		    my $introns      = $transcript->get_all_Introns;
+		    foreach my $intron (@$introns) {
+			$comments    = "TranscriptIdentifier=$transcriptId; GeneIdentifier=$geneId";
+			$GFF_feature = parse_ensembl_feature ($input_gene_id, $intron, "intron", $comments, $source);
+			$gff_output .= $GFF_feature;
+		    }
+		}
+
+		if ($has_UTRs) {
+		    my $three_UTR    = $transcript->three_prime_utr;
+		    $comments        = "TranscriptIdentifier=$transcriptId; GeneIdentifier=$geneId";
+		    $GFF_feature     = parse_ensembl_sequence ($input_gene_id, $three_UTR_start, $three_UTR_end, "3'UTR", $comments, $gene_strand, $source);
+		    $gff_output     .= $GFF_feature;
+		}
+
+	    }
 	}
     }
 
-    # What other features do we want to report ??
-    
-    return $features;
+    return $gff_output;
 }
 
