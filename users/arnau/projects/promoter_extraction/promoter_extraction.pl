@@ -433,10 +433,10 @@ sub parse_ensembl_feature {
     
     # Analysis data ?????
     
-    # score
     my $score = "";
+    my $frame = "";
 
-    $gff_output .= "$seqId\t$source\t$feature_type\t$start\t$end\t$score\t$strand\t$comments\n";
+    $gff_output .= "$seqId\t$source\t$feature_type\t$start\t$end\t$score\t$strand\t$frame\t$comments\n";
 
     return $gff_output;
     
@@ -453,10 +453,10 @@ sub parse_ensembl_sequence {
 	$strand = "-";
     }
     
-    # score
     my $score = "";
+    my $frame = "";
 
-    $gff_output .= "$seqId\t$source\t$sequence_type\t$start\t$end\t$score\t$strand\t$comments\n";
+    $gff_output .= "$seqId\t$source\t$sequence_type\t$start\t$end\t$score\t$strand\t$frame\t$comments\n";
 
     return $gff_output;
     
@@ -628,15 +628,11 @@ sub getIntergenicSequence {
 sub getFeatures {
     my ($slice_region, $input_gene_id) = @_;
     my $gff_output = "";
-
     
     # Right now, only report gene and exon features...
-    # What else ?
-   
     # Report also introns, and UTRs
 
-    # Only those on the slice !!
-
+    # Only those on the slice !! - Make sure that's the case...
     
     my @genes = ();
     my @genes_tmp = @{$slice_region->get_all_Genes()};
@@ -663,7 +659,8 @@ sub getFeatures {
 	# Check the coordinates... (no negative ones)
 
 	my $geneId      = $gene->stable_id;
-	# soruce is only available since Ensembl release 31
+	# source is only available since Ensembl release 31
+	# Default source is "ensembl"
 	my $source      = "ensembl";
 	
 	if ($releaseNumber >= 31) {
@@ -672,9 +669,6 @@ sub getFeatures {
 
 	my $gene_strand = $gene->strand;
 	my $comments    = "EnsemblIdentifier=$geneId";
-	my $GFF_feature = parse_ensembl_feature ($input_gene_id, $gene, "gene", $comments ,$source);
-	$gff_output    .= $GFF_feature;
-	
 	my $biotype     = $gene->type;
 	if ($releaseNumber >= 31) {
 	    # Since Ensembl release 31, type is deprecated and has been replaced by biotype
@@ -703,9 +697,26 @@ sub getFeatures {
 	    }
 	}
 
+	my $strand_info;
+	if ($gene_strand == 1) {
+	    $strand_info = "Forward";
+	}
+	else {
+	    $strand_info = "Reverse";
+	}
+	
+	my $GFF_feature = parse_ensembl_feature ($input_gene_id, $gene, "gene", $comments ,$source);
+	$gff_output    .= $GFF_feature;
+
         # Process the Transcript Features
 	
 	my $transcripts = $gene->get_all_Transcripts;
+
+	if ($RNA_type eq "mRNA") {
+	    # Report the number of transcripts of the protein coding genes
+	    $gff_output    .= "# Gene $geneId ($strand_info). " . @$transcripts . " transcripts.\n";
+	}
+	
 	foreach my $transcript (@$transcripts) {
 	    my $transcriptId = $transcript->stable_id;
 	    $comments        = "EnsemblIdentifier=$transcriptId; GeneIdentifier=$geneId";
@@ -713,9 +724,14 @@ sub getFeatures {
 	    $gff_output     .= $GFF_feature;
 	    
 	    # Process the Transcripts subfeatures
-
+	    
 	    my $exons = $transcript->get_all_translateable_Exons;
 	    if (@$exons > 0) {
+
+		# Gene 1 (Forward). 8 exons. 360 aa.
+	    
+		my $pep_length  = $transcript->translate->length;
+		$gff_output    .= "# Gene $transcriptId ($strand_info). " . @$exons . " exons. $pep_length aa\n";
 
 		# Deal with protein coding genes
 		
