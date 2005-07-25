@@ -57,7 +57,7 @@ BEGIN {
     
 }
 
-my $_debug = 0;
+my $_debug = 1;
 
 my $seqfile;
 my $featurefile;
@@ -178,12 +178,12 @@ sub parse_gff {
 	chomp $line;
 	
 	if ($_debug) {
-	    print STDERR "new line : $line";
+	    print STDERR "new line : $line\n";
 	}
 	
 	# extracting the number of exons for the current gene
 	
-	if ($line =~ /# Gene \d+\s*\(\w+\)\. (\d+) exons\..+/) {
+	if ($line =~ /\# Gene [^\s]+\s+\(\w+\)\. (\d+) exons\..+/) {
 	    
 	    my $nb_exons = $1;
 	    my $i = 1;
@@ -201,76 +201,102 @@ sub parse_gff {
 	    
 	    while ($i <= $nb_exons) {
 		$line = <GENEID>;
+		chomp $line;
+
+		if ($_debug) {
+		    print STDERR "parsing line, $line...\n";
+		}
+
 		# remove the white spaces just keep the tabulations
 		$line =~ s/ //g;
 		
-		if ($_debug) {
-		    print STDERR "feature line : $line\n";
-		}
-		
-		$line =~ /^([^\t]+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+(.+)/;
-		my $seqName_tmp = $1;
-		my $nameFeature = $3;
-		my $start       = $4;
-		my $end         = $5;
-		my $strand      = 1;
-		if ($7 =~ /-/) {
-		    $strand = -1;
-		}
-		my $frame       = $8;
-		$geneName = $9;
-		if (defined $geneName) {
-		    chomp $geneName;
-		}
-
-		# parsing problem when the strand is "-", can not get the frame in that case !!!
-		# so substitute - by + to make the parsing work
-		if (not defined $frame) {
-		    $line =~ s/-/\+/g;
-		    $line =~ /(\w+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+(.+)/;
-		    $frame = $8;
-
-		    $geneName = $9;
-		    chomp $geneName;
-		}
-		# specify the frame for the first exon, which might not start with a MET
-		if (($strand==1 && $i==1) || ($strand==-1 && $i==$nb_exons)) {
-		    if ($frame =~ /0/) {
-			$codon_start = 1;
-		    }
-		    elsif ($frame =~ /1/) {
-			$codon_start = 2;
-		    }
-		    elsif ($frame =~ /2/) {
-			$codon_start = 3;
-		    }
-		}
+		my $featureName = extractFeatureName ($line);
 	
 		if ($_debug) {
-		    print STDERR "found gene name, $geneName\n";
+		    print STDERR "featureName, $featureName\n";
 		}
-		
-		if (not defined $seqName) {
-		    $seqName = $seqName_tmp;
+	
+		# Make sure we are parsing an exon feature
+		if ((defined $featureName) && ($featureName =~ /exon|single|first|internal|terminal/i)) {
+		    
+		    if ($line =~ /^([^\t]+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+([^\t]*)\t+(\+|-)\t+(\d*)\t+(.+)/) {
+			if ($_debug) {
+			    print STDERR "feature line : $line\n";
+			}
+			
+			my $seqName_tmp = $1;
+			my $start       = $4;
+			my $end         = $5;
+			my $strand      = 1;
+			my $strand_tmp  = $7;
+			if ($strand_tmp =~ /-/) {
+			    $strand = -1;
+			}
+			my $frame       = $8;
+			$geneName = $9;
+			if (defined $geneName) {
+			    chomp $geneName;
+			}
+			
+			# parsing problem when the strand is "-", can not get the frame in that case !!!
+			# so substitute - by + to make the parsing work
+			if (not defined $frame) {
+			    $line =~ s/-/\+/g;
+			    $line =~ /(\w+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+(.+)/;
+			    $frame = $8;
+			    
+			    $geneName = $9;
+			    chomp $geneName;
+			}
+			# specify the frame for the first exon, which might not start with a MET
+			if (($strand==1 && $i==1) || ($strand==-1 && $i==$nb_exons)) {
+			    if ($frame =~ /0/) {
+				$codon_start = 1;
+			    }
+			    elsif ($frame =~ /1/) {
+				$codon_start = 2;
+			    }
+			    elsif ($frame =~ /2/) {
+				$codon_start = 3;
+			    }
+			}
+			    
+			if ($_debug) {
+			    print STDERR "found gene name, $geneName\n";
+			}
+			    
+			if (not defined $seqName) {
+			    if ($_debug) {
+				print STDERR "Assigning the sequence name, $seqName\n";
+			    }
+			    $seqName = $seqName_tmp;
+			}
+			elsif ($seqName ne $seqName_tmp) {
+			    
+			    print STDERR "Adding " . @features . " features to sequence, $seqName\n";
+			    
+			    $features->{$seqName} = [ @features ];
+			    @features = ();
+			    $seqName  = $seqName_tmp;
+			}
+			
+			my $sublocation = new Bio::Location::Simple (
+								     -start  => $start,
+								     -end    => $end,
+								     -strand => $strand
+								     );
+			$splitlocation->add_sub_Location ($sublocation);
+			
+			$i++;
+		    }
+		    else {
+			print STDERR "can't parsed current GFF feature line!\n";
+		    }
 		}
-		elsif ($seqName ne $seqName_tmp) {
-
-		    print STDERR "Adding " . @features . " features to sequence, $seqName\n";
-
-		    $features->{$seqName} = [ @features ];
-		    @features = ();
-		    $seqName  = $seqName_tmp;
+		else {
+		    print STDERR "not an exon line\n";
 		}
-		
-		my $sublocation = new Bio::Location::Simple (
-							     -start  => $start,
-							     -end    => $end,
-							     -strand => $strand
-							     );
-		$splitlocation->add_sub_Location ($sublocation);
-		
-		$i++;
-	    }
+	    } # While
 	    
 	    # build the feature object
 
@@ -288,23 +314,31 @@ sub parse_gff {
 	    if ($_debug) {
 		print STDERR "instanciation done.\n";
 	    }
-
+	    
 	    push (@features, $feature);
 	}
-	else {
-	    if ($_debug) {
-		print STDERR "next execution shouldn't occur\n";
-	    }
-	}
     }
-    
+
     if ($_debug) {
 	print STDERR "Adding " . @features . " features to sequence, $seqName\n";
     }
+    
     $features->{$seqName} = [ @features ];
-
+    
     close GENEID;
     
     return $features;
     
+}
+
+sub extractFeatureName {
+    my ($gff_line) = @_;
+
+    if ($gff_line =~ /^[^\t]+\t+[^\t]+\t+([^\t]+)\t+.+/) {
+	my $featureName = $1;
+	return $featureName;
+    }
+    
+    return undef;
+
 }
