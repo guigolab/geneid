@@ -207,8 +207,10 @@ sub parse_gff {
 		    print STDERR "parsing line, $line...\n";
 		}
 
-		# remove the white spaces just keep the tabulations
-		$line =~ s/ //g;
+		# remove the white spaces whenever they are present associated with tabulations !!
+		# just keep the tabulations
+
+		$line =~ s/\t\s+/\t/g;
 		
 		my $featureName = extractFeatureName ($line);
 	
@@ -219,7 +221,7 @@ sub parse_gff {
 		# Make sure we are parsing an exon feature
 		if ((defined $featureName) && ($featureName =~ /exon|single|first|internal|terminal/i)) {
 		    
-		    if ($line =~ /^([^\t]+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+([^\t]*)\t+(\+|-)\t+(\d*)\t+(.+)/) {
+		    if ($line =~ /^([^\t]+)\t([^\t]+)\t([^\t]+)\t(\d+)\t(\d+)\t*([^\t]*)\t*([^\t])\t([^\t])\t(.*)/) {
 			if ($_debug) {
 			    print STDERR "feature line : $line\n";
 			}
@@ -229,27 +231,46 @@ sub parse_gff {
 			my $end         = $5;
 			my $strand      = 1;
 			my $strand_tmp  = $7;
+
+			if ($_debug) {
+			    print STDERR "parsed strand, $strand_tmp\n";
+			}
+			
 			if ($strand_tmp =~ /-/) {
 			    $strand = -1;
 			}
-			my $frame       = $8;
+
+			if ($_debug) {
+			    print STDERR "strand, $strand\n";
+			}
+
+			my $frame = $8;
 			$geneName = $9;
 			if (defined $geneName) {
 			    chomp $geneName;
 			}
-			
+
+			if (defined $frame && defined $geneName) {
+			    print STDERR "before, frame, $frame, geneName, $geneName\n";
+			}
+
 			# parsing problem when the strand is "-", can not get the frame in that case !!!
 			# so substitute - by + to make the parsing work
 			if (not defined $frame) {
 			    $line =~ s/-/\+/g;
-			    $line =~ /(\w+)\t+(\S+)\t+(\w+)\t+(\d+)\t+(\d+)\t+(\S+)\t+(\+|-)\t+(\d+)\t+(.+)/;
-			    $frame = $8;
+			    $line =~ /(\w+)\t(\S+)\t(\w+)\t(\d+)\t(\d+)\t*([^\t]*)\t*([^\t])\t([^\t])\t(.+)/;
+			    $frame = $8 || ".";
 			    
-			    $geneName = $9;
-			    chomp $geneName;
+			    if (not defined $geneName) {
+				$geneName = $9;
+				chomp $geneName;
+			    }
+
+			    print STDERR "after, frame, $frame, geneName, $geneName\n";
+
 			}
 			# specify the frame for the first exon, which might not start with a MET
-			if (($strand==1 && $i==1) || ($strand==-1 && $i==$nb_exons)) {
+			if (($frame =~ /\d/) && (($strand==1 && $i==1) || ($strand==-1 && $i==$nb_exons))) {
 			    if ($frame =~ /0/) {
 				$codon_start = 1;
 			    }
@@ -267,7 +288,7 @@ sub parse_gff {
 			    
 			if (not defined $seqName) {
 			    if ($_debug) {
-				print STDERR "Assigning the sequence name, $seqName\n";
+				print STDERR "Assigning the sequence name, $seqName_tmp\n";
 			    }
 			    $seqName = $seqName_tmp;
 			}
