@@ -6,4 +6,4 @@ use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-31/modules";
 # Ensembl database parameters
 
 $dbhost = "ensembldb.ensembl.org";
-$dbuser = "anunymous";
+$dbuser = "anonymous";
