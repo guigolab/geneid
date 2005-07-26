@@ -373,7 +373,7 @@ if ($_debug) {
 
 # Deprecated !!
 
-sub convertEnsembl2GFF {
+sub onvertEnsembl2GFF {
     my ($seqId, $ensembl_features, $comments) = @_;
     my $gff_output = "";
 
@@ -421,6 +421,11 @@ sub parse_ensembl_feature {
     my ($seqId, $feature, $feature_type, $comments, $source) = @_;
     my $gff_output = "";
 
+    my $frame = "";
+    if ($feature_type eq "exon") {
+	$frame = $feature->frame;
+    }
+
     my $start  = $feature->start;
     my $end    = $feature->end;
     my $strand = $feature->strand;
@@ -434,7 +439,6 @@ sub parse_ensembl_feature {
     # Analysis data ?????
     
     my $score = "";
-    my $frame = "";
 
     $gff_output .= "$seqId\t$source\t$feature_type\t$start\t$end\t$score\t$strand\t$frame\t$comments\n";
 
