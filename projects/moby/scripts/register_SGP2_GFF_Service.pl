@@ -43,7 +43,7 @@ my ($REG) = $Central->registerService(
 				category     => "moby",
 				URL          => $::URL,
 		input		=> [
-				['sequence', ["NucleotideSequence" => []]],
+				['sequences', ["NucleotideSequence" => []]],
 				['tblastx', ["BLAST-Text" => []]],
 				],
 		output		=> [
