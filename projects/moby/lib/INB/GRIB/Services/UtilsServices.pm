@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.5 2005-07-22 10:09:31 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.6 2005-07-27 16:30:05 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -137,7 +137,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # @EXPORT = qw( &func1 &func2);
 # 
 our @EXPORT = qw(
-  &translateGeneIDPredictionsGFF
+  &translateGeneIDGFFPredictions
 );
 
 our $VERSION = '1.0';
@@ -408,21 +408,16 @@ sub _do_query_TranslateGeneIDGFF {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $report = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, parameters => \%parameters);
+    my $fasta_sequences = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, parameters => \%parameters);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
-    my $output_article_name = "translated_sequences";
+    my $output_object_type  = "AminoAcidSequence";
+    my $output_article_name = "peptides";
+    my $aminoacid_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type);
 
-    my $input = <<PRT;
-<moby:$_output_format namespace='' id=''>
-<![CDATA[
-$report
-]]>
-</moby:$_output_format>
-PRT
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
     # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
@@ -431,15 +426,15 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
 
-    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
+    $MOBY_RESPONSE .= collectionResponse($aminoacid_objects, $output_article_name, $queryID);
 	
     return $MOBY_RESPONSE;
 }
 
 
-=head2 translateGeneIDPredicitionsGFF
+=head2 translateGeneIDGFFPredictions
 
- Title   : translateGeneIDPredictionsGFF
+ Title   : translateGeneIDGFFPredictions
  Usage   : Esta función está pensada para llamarla desde un cliente SOAP. 
          : No obstante, se recomienda probarla en la misma máquina, antes 
          : de instalar el servicio. Para ello, podemos llamarla de la 
@@ -478,13 +473,13 @@ PRT
 
 =cut
 
-sub translateGeneIDPredictionsGFF {
+sub translateGeneIDGFFPredictions {
     
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     if ($_debug) {
-	print STDERR "processing Moby translateGeneIDPredictionsGFF query...\n";
+	print STDERR "processing Moby translateGeneIDGFFPredictions query...\n";
     }
 
 	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
