@@ -57,7 +57,7 @@ BEGIN {
     
 }
 
-my $_debug = 1;
+my $_debug = 0;
 
 my $seqfile;
 my $featurefile;
@@ -250,10 +250,6 @@ sub parse_gff {
 			    chomp $geneName;
 			}
 
-			if (defined $frame && defined $geneName) {
-			    print STDERR "before, frame, $frame, geneName, $geneName\n";
-			}
-
 			# parsing problem when the strand is "-", can not get the frame in that case !!!
 			# so substitute - by + to make the parsing work
 			if (not defined $frame) {
@@ -265,9 +261,7 @@ sub parse_gff {
 				$geneName = $9;
 				chomp $geneName;
 			    }
-
-			    print STDERR "after, frame, $frame, geneName, $geneName\n";
-
+			    
 			}
 			# specify the frame for the first exon, which might not start with a MET
 			if (($frame =~ /\d/) && (($strand==1 && $i==1) || ($strand==-1 && $i==$nb_exons))) {
