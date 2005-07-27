@@ -27,7 +27,7 @@ my $t1 = Benchmark->new ();
 
 my $_debug = 0;
 
-my $serviceName   = "translateGeneIDPredictionsGFF";
+my $serviceName   = "translateGeneIDGFFPredictions";
 my $articleName_1 = "sequences";
 my $articleName_2 = "geneid_predictions";
 
