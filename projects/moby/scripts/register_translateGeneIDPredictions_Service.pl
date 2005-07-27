@@ -10,6 +10,8 @@ use strict;
 use MOBY::Client::Central;
 use MOBY::CommonSubs;
 
+# use SOAP::Lite + 'trace';
+
 # be prepare for command-line options/arguments
 use Getopt::Std;
 
@@ -126,6 +128,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
+# Service Name = translateGeneIDGFFPredictions
 my $serviceName = $opt_s;
 
 # Connect to MOBY-Central registries for searching.
@@ -145,6 +148,8 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
+my @namespaces = ();
+
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
@@ -154,13 +159,13 @@ my ($REG) = $Central->registerService(
 				      description  => "Translate the GeneID gene predictions in GFF format. Return a set of peptide sequences in FASTA format",
 				      category     => "moby",
 				      URL          => $::URL,
-				      input		=> [
-							    ['sequences', ["NucleotideSequence" => []]],
-							    ['geneid_predictions', ["GFF" => []]],
-							    ],
-				      output		=> [
-							    ['translated_sequences', ["FASTA" => []]],
-							    ],
+				      input	   => [
+						       ['sequences', ["NucleotideSequence" => []]],
+						       ['geneid_predictions', ["GFF" => []]]
+						      ],
+				      output       => [
+						       ['peptides', [['AminoAcidSequence' => \@namespaces]]] # collection of one object type
+						      ],
 				      secondary	=> {
 					  'translation table' => {
 					      datatype => 'String',
