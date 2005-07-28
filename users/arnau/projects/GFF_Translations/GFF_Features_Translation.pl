@@ -309,7 +309,9 @@ sub parse_gff {
 		    }
 		}
 		else {
-		    print STDERR "not an exon line\n";
+		    if ($_debug) {
+			print STDERR "not an exon line\n";
+		    }
 		}
 	    } # While
 	    
