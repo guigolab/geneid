@@ -10,6 +10,8 @@ use strict;
 # Use the code module that contains MOBY Service.
 use MOBY::Client::Central;
 
+# use SOAP::Lite + 'trace';
+
 # be prepare for command-line options/arguments
 use Getopt::Std;
 
@@ -146,7 +148,7 @@ foreach my $article (@{$si->input}) {
 		my @namespaces = @{$article->namespaces};
 		print "\t\tnamespaces: ",join (', ', @namespaces),"\n";
 	} else {
-		print "\t\tarticleName: ",$article->articleName," collection of=>\n";
+		print "\t\tarticleName: ",$article->articleName," collection of =>\n";
 		foreach my $sarticle (@{$article->Simples()}) {
 			print "\t\t\tarticleName: ",$sarticle->articleName," objectType: ",$sarticle->objectType,"\n";
 			my @namespaces = @{$article->namespaces};
@@ -155,13 +157,14 @@ foreach my $article (@{$si->input}) {
 	}
 }
 print "\t* Output:\n";
+
 foreach my $article (@{$si->output}) {
 	if(ref($article) eq 'MOBY::Client::SimpleArticle') {
 		print "\t\tarticleName: ",$article->articleName," objectType: ",$article->objectType,"\n";
 	} else {
-		print "\t\tarticleName: ",$article->articleName," collection of=>\n";
+		print "\t\tarticleName: ",$article->articleName,", collection of =>\n";
 		foreach my $sarticle (@{$article->Simples()}) {
-		print "\t\t\tarticleName: ",$sarticle->articleName," objectType: ",$sarticle->objectType,"\n";
+		    print "\t\t\tarticleName: ",$sarticle->articleName," objectType: ",$sarticle->objectType,"\n";
 		}
 	}
 }
