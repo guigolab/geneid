@@ -306,6 +306,7 @@ sub parse_gff {
 		    }
 		    else {
 			print STDERR "can't parsed current GFF feature line!\n";
+			exit 0;
 		    }
 		}
 		else {
@@ -353,9 +354,19 @@ sub extractFeatureName {
 
     if ($gff_line =~ /^[^\t]+\t+[^\t]+\t+([^\t]+)\t+.+/) {
 	my $featureName = $1;
+
+	if ($_debug) {
+	    print STDERR "parsed feature name, $featureName\n";
+	}
+
 	return $featureName;
     }
-    
+
+    if ($_debug) {
+	print STDERR "can't parse the GFF line properly to extract the feature name!!\n";
+	exit 0;
+    }
+
     return undef;
 
 }
