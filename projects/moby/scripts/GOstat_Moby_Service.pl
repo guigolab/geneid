@@ -97,7 +97,8 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 ##################################################################
 
 my $in_file_1  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
-my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
+# my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
+my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
 my $datasource = "FB";
 
 if ((! -f $in_file_1) || (! -f $in_file_2)) {
@@ -107,6 +108,11 @@ if ((! -f $in_file_1) || (! -f $in_file_2)) {
 
 my $regulated_genes = qx/cat $in_file_1/;
 my $array_genes     = qx/cat $in_file_2/;
+
+# I don't think these 2 objects below are right but for backward compatibility, check it works on them !!
+# (corresponds to former design where text-formatted is-a String)
+
+# Works !!
 
 my $regulated_genes_xml = <<PRT;
 <text-formatted namespace="$datasource" id="">
@@ -125,26 +131,50 @@ $array_genes
 PRT
 
 # should be in a string attribute:
+# then this string should have an article name, which one !?????????
+# text-formatted
+
+# Works !!
 
 $regulated_genes_xml = <<PRT;
 <text-formatted namespace="$datasource" id="">
-<string namespace="$datasource" id="">
+<String namespace="$datasource" id="">
 <![CDATA[
 $regulated_genes
 ]]>
-</string>
+</String>
 </text-formatted>
 PRT
 
 $array_genes_xml = <<PRT;
 <text-formatted namespace="$datasource" id="">
-<string namespace="$datasource" id="">
+<String namespace="$datasource" id="">
 <![CDATA[
 $array_genes
 ]]>
-</string>
+</String>
 </text-formatted>
 PRT
+
+# taverna input objects !! - for testing
+
+# works
+
+#$regulated_genes_xml = <<PRT;
+#<String namespace="$datasource" id="">
+#<![CDATA[
+#$regulated_genes
+#]]>
+#</String>
+#PRT
+
+#$array_genes_xml = <<PRT;
+#<String namespace="$datasource" id="">
+#<![CDATA[
+#$array_genes
+#]]>
+#</String>
+#PRT
 
 #
 # Parameters
