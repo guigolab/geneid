@@ -1,4 +1,4 @@
-# $Id: GOstatServices.pm,v 1.2 2005-07-22 16:44:10 arnau Exp $
+# $Id: GOstatServices.pm,v 1.3 2005-08-01 12:56:31 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -141,6 +141,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
+my $_debug = 0;
 
 # Preloaded methods go here.
 
@@ -216,64 +217,55 @@ sub _do_query_GOstat {
 	# In case of GeneID, it doesn't really matter as there is only one input anyway
 	
 	if ($articleName eq "regulated genes") { 
-	    
+
 	    if (isSimpleArticle ($DOM)) {
 
-		print STDERR "\"regulated genes\" tag is a simple article...\n";
-		
-		my @articles = ($DOM);
-		@regulated_genes = getSimpleArticleIDs (\@articles);
-
-		if ((@regulated_genes == 0) || (((@regulated_genes == 1) && (not defined $regulated_genes[0])))) {
-		    print STDERR "Error, no gene identifier found for the regulated genes list!\n";
+		if ($_debug) {
+		    print STDERR "\"regulated genes\" tag is a simple article...\n";
+		    print STDERR "node ref, " . ref ($DOM) . "\n";
+		    print STDERR "DOM: " . $DOM->toString () . "\n";
 		}
+		
+		my $genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+		@regulated_genes = split ("\n", $genes_lst);
 
+		print STDERR "got a list of " . @regulated_genes . " regulated genes\n";
+		
+		if ($_debug) {
+		    print STDERR "regulated genes_lst, $genes_lst\n";
+		}
+		
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
 		print STDERR "\"regulated genes\" is a collection article...\n";
 		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		
-		my @genes_articles_DOM = getCollectedSimples ($DOM);
-		@regulated_genes = getSimpleArticleIDs (\@genes_articles_DOM);
-
-		print STDERR "Got a list of " . @regulated_genes . " regulated genes\n";
+		print STDERR "collection is not expected!!\n";
+		exit 0;
 	    }
 	    else {
 		print STDERR "It is not a simple or collection article...\n";
 		print STDERR "DOM: " . $DOM->toString() . "\n";
+		exit 0;
 	    }
 	} # End parsing regulated genes tag
 	    
 	if ($articleName eq "array genes") { 
-	    
-	    if (isSimpleArticle ($DOM)) {
-		
+	    if ($_debug) {
 		print STDERR "\"array genes\" tag is a simple article...\n";
-		
-		my @articles = ($DOM);
-		@array_genes = getSimpleArticleIDs (\@articles);
-		
-		if ((@array_genes == 0) || (((@array_genes == 1) && (not defined $array_genes[0])))) {
-		    print STDERR "Error, no gene identifier found for the array genes list!\n";
-		}
-		
+		print STDERR "node ref, " . ref ($DOM) . "\n";
+		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
-	    elsif (isCollectionArticle ($DOM)) {
-		
-		print STDERR "\"array genes\" is a collection article...\n";
-		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		
-		my @genes_articles_DOM = getCollectedSimples ($DOM);
-		@array_genes = getSimpleArticleIDs (\@genes_articles_DOM);
-		
-		print STDERR "Got a list of " . @array_genes . " array genes\n";
+
+	    my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    @array_genes  = split ("\n", $genes_lst);
+	    
+	    print STDERR "got a list of " . @array_genes . " array genes\n";
+
+	    if ($_debug) {
+		print STDERR "array genes_lst, $genes_lst\n";
 	    }
-	    else {
-		print STDERR "It is not a simple or collection article...\n";
-		print STDERR "DOM: " . $DOM->toString() . "\n";
-	    }
-		
 	} # End parsing array genes article tag
 	
     } # Next article
@@ -287,11 +279,12 @@ sub _do_query_GOstat {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
-    my $output_article_name = "";
+    my $output_article_name = "GOterms";
     
     my $input = <<PRT;
 <moby:$_format namespace='' id=''>
-<String namespace='' id=''><![CDATA[
+<String namespace='' id=''>
+<![CDATA[
 $report
 ]]>
 </String>
@@ -378,7 +371,7 @@ sub runGOstat {
 	# (The GeneID output format for this service is by default GFF - right now it is hardcoded)
 	#
 
-	my $_moby_output_format   = "text-formated";
+	my $_moby_output_format   = "text-formatted";
 
 	# Para cada query ejecutaremos el _execute_query.
         foreach my $query(@queries){
