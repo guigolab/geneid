@@ -100,59 +100,52 @@ my $in_file_1  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downre
 my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
 my $datasource = "FB";
 
-my @regulated_genes_xml = ();
-my @array_genes_xml     = ();
+if ((! -f $in_file_1) || (! -f $in_file_2)) {
+    print STDERR "Error, can't find one or both of these files, $in_file_1, $in_file_2!\n";
+    exit 0;
+}
 
-open (FILE, "<$in_file_1") or die "can't open file with regulated genes, $in_file_1!\n";
+my $regulated_genes = qx/cat $in_file_1/;
+my $array_genes     = qx/cat $in_file_2/;
 
-while (<FILE>) {
-    my $seq_id = $_;
-    chomp ($seq_id);
-
-    if ($_debug) {
-	print STDERR "Sequence identifier, $seq_id\n";
-    }
-    
-    #
-    # Sequence Input in XML format
-    #
-    
-    my $regulated_genes_xml = <<PRT;
-<Object namespace="$datasource" id="$seq_id">
-</Object>
+my $regulated_genes_xml = <<PRT;
+<text-formatted namespace="$datasource" id="">
+<![CDATA[
+$regulated_genes
+]]>
+</text-formatted>
 PRT
 
-push (@regulated_genes_xml, $regulated_genes_xml);
-
-} # Next sequence identifier
-
-close FILE;
-
-open (FILE, "<$in_file_2") or die "can't open file with all array genes, $in_file_2!\n";;
-
-while (<FILE>) {
-    my $seq_id = $_;
-    chomp ($seq_id);
-
-    if ($_debug) {
-	print STDERR "Sequence identifier, $seq_id\n";
-    }
-
-    #
-    # Sequence Input in XML format
-    #
-    
-    my $array_genes_xml = <<PRT;
-<Object namespace="$datasource" id="$seq_id">
-</Object>
+my $array_genes_xml = <<PRT;
+<text-formatted namespace="$datasource" id="">
+<![CDATA[
+$array_genes
+]]>
+</text-formatted>
 PRT
 
-push (@array_genes_xml, $array_genes_xml);
+# should be in a string attribute:
 
-} # Next sequence identifier
+$regulated_genes_xml = <<PRT;
+<text-formatted namespace="$datasource" id="">
+<string namespace="$datasource" id="">
+<![CDATA[
+$regulated_genes
+]]>
+</string>
+</text-formatted>
+PRT
 
-close FILE;
-	
+$array_genes_xml = <<PRT;
+<text-formatted namespace="$datasource" id="">
+<string namespace="$datasource" id="">
+<![CDATA[
+$array_genes
+]]>
+</string>
+</text-formatted>
+PRT
+
 #
 # Parameters
 #
@@ -166,8 +159,8 @@ close FILE;
 ##################################################################
 
 my $result = $Service->execute(XMLinputlist => [
-						[$articleName_1, \@regulated_genes_xml, $articleName_2, \@array_genes_xml]
-						]);
+						[ $articleName_1, $regulated_genes_xml, $articleName_2, $array_genes_xml ]
+					       ]);
 
 ##################################################################
 #
