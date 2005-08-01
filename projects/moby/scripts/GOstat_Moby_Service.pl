@@ -97,8 +97,8 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 ##################################################################
 
 my $in_file_1  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
-# my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
-my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
+my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
+# my $in_file_2  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
 my $datasource = "FB";
 
 if ((! -f $in_file_1) || (! -f $in_file_2)) {
