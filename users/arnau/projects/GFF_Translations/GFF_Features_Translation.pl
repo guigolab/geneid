@@ -52,7 +52,7 @@ BEGIN {
     # If the user does not write nothing, skip to help
     if (defined($opts{h}) || !defined($opts{f}) || !defined($opts{s})){
 	print STDERR help;
-	exit 0;
+	exit 0
     }
     
 }
@@ -361,8 +361,7 @@ sub extractFeatureName {
 
 	return $featureName;
     }
-
-    if ($_debug) {
+    else {
 	print STDERR "can't parse the GFF line properly to extract the feature name!!\n";
 	exit 0;
     }
