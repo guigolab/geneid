@@ -1,4 +1,4 @@
-# $Id: GOstatServices.pm,v 1.3 2005-08-01 12:56:31 gmaster Exp $
+# $Id: GOstatServices.pm,v 1.4 2005-08-01 17:17:23 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -226,7 +226,19 @@ sub _do_query_GOstat {
 		    print STDERR "DOM: " . $DOM->toString () . "\n";
 		}
 		
-		my $genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+		# Should pick the String because text-formatted has-a String now,
+		# and not text-formatted is-a String - for backward compatibility, let the users give a text-formatted object without a String attribute !!
+
+		my $genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
+		if (length ($genes_lst) < 1) {
+		    $genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+		}
+
+		if (length ($genes_lst) < 1) {
+		    print STDERR "can't get the regulated genes list!\n";
+		    exit 0;
+		}
+
 		@regulated_genes = split ("\n", $genes_lst);
 
 		print STDERR "got a list of " . @regulated_genes . " regulated genes\n";
@@ -258,7 +270,19 @@ sub _do_query_GOstat {
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
 
-	    my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    # Should pick the String because text-formatted has-a String now,
+	    # and not text-formatted is-a String - for backward compatibility, let the users give a text-formatted object without a String attribute !!
+
+	    my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
+	    if (length ($genes_lst) < 1) {
+		$genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    }
+	    
+	    if (length ($genes_lst) < 1) {
+		print STDERR "can't get the array genes list!\n";
+		exit 0;
+	    }
+
 	    @array_genes  = split ("\n", $genes_lst);
 	    
 	    print STDERR "got a list of " . @array_genes . " array genes\n";
@@ -280,6 +304,8 @@ sub _do_query_GOstat {
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
     my $output_article_name = "GOterms";
+
+    # I think it is the standard, but is not recognized by taverna 1.2 or MowServ !!!
     
     my $input = <<PRT;
 <moby:$_format namespace='' id=''>
@@ -288,6 +314,16 @@ sub _do_query_GOstat {
 $report
 ]]>
 </String>
+</moby:$_format>
+PRT
+
+# So we stick with this standard - No string attribute !!!!!
+
+   $input = <<PRT;
+<moby:$_format namespace='' id=''>
+<![CDATA[
+$report
+]]>
 </moby:$_format>
 PRT
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
