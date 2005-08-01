@@ -154,11 +154,11 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['regulated genes', ["Object" => []]],
-							    ['array genes', ["Object" => []]],
+							    ['regulated genes', ["text-formatted" => []]],
+							    ['array genes', ["text-formatted" => []]],
 							    ],
 				      output		=> [
-							    ['', ["text-formatted" => []]],
+							    ['GOTerms', ["text-formatted" => []]],
 							    ],
 				      secondary	=> {
 					  'ontology' => {
