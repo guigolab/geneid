@@ -16,6 +16,8 @@ use Getopt::Std;
 # For debugging
 use Data::Dumper;
 
+use SOAP::Lite + 'trace';
+
 sub help {
     return <<"END_HELP";
 Description: Register a service in Moby Central
@@ -143,6 +145,8 @@ if ((defined $sia) && (@$sia > 0)) {
 }
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
+
+my @namespaces = ();
 
 # Declare register variable.
 my ($REG) = $Central->registerService(
