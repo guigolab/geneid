@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
   <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:LXX1R4PAOL1" author="" title="" />
-  <s:processor name="Create_ArrayGenes_moby_data">
+  <s:processor name="Create_ReferenceGenes_moby_data">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
   </s:processor>
   <s:processor name="Create_RegulatedGenes_moby_data">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
   </s:processor>
-  <s:processor name="ChangeArticleNameArray">
+  <s:processor name="ChangeArticleNameReference">
     <s:workflow>
       <s:scufl version="0.2" log="0">
         <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:LXX1R4PAOL56" author="" title="" />
@@ -243,28 +243,28 @@ output = OutObj;</s:scriptvalue>
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:link source="namespace" sink="Create_RegulatedGenes_moby_data:namespace" />
-  <s:link source="namespace" sink="Create_ArrayGenes_moby_data:namespace" />
+  <s:link source="namespace" sink="Create_ReferenceGenes_moby_data:namespace" />
   <s:link source="runGOstat:output" sink="GOstat_Moby" />
   <s:link source="Create_RegulatedGenes_moby_data:mobydata" sink="ChangeArticleNameRegulated:input" />
-  <s:link source="Create_ArrayGenes_moby_data:mobydata" sink="ChangeArticleNameArray:input" />
-  <s:link source="array gene id" sink="Create_ArrayGenes_moby_data:id" />
+  <s:link source="Create_ReferenceGenes_moby_data:mobydata" sink="ChangeArticleNameReference:input" />
+  <s:link source="reference gene id" sink="Create_ReferenceGenes_moby_data:id" />
   <s:link source="regulated gene id" sink="Create_RegulatedGenes_moby_data:id" />
-  <s:link source="ChangeArticleNameArray:output" sink="array_genes_Moby" />
+  <s:link source="ChangeArticleNameReference:output" sink="reference_genes_Moby" />
   <s:link source="ChangeArticleNameRegulated:output" sink="regulated_genes_Moby" />
-  <s:link source="array genes" sink="Create_ArrayGenes_moby_data:stringvalue" />
+  <s:link source="reference genes" sink="Create_ReferenceGenes_moby_data:stringvalue" />
   <s:link source="regulated genes" sink="Create_RegulatedGenes_moby_data:stringvalue" />
-  <s:link source="ArrayGenesArticleName" sink="ChangeArticleNameArray:articleName" />
+  <s:link source="ReferenceGenesArticleName" sink="ChangeArticleNameReference:articleName" />
   <s:link source="RegulatedGenesArticleName" sink="ChangeArticleNameRegulated:articleName" />
-  <s:link source="ChangeArticleNameArray:output" sink="runGOstat:text-formatted(array genes)" />
+  <s:link source="ChangeArticleNameReference:output" sink="runGOstat:text-formatted(reference genes)" />
   <s:link source="ChangeArticleNameRegulated:output" sink="runGOstat:text-formatted(regulated genes)" />
   <s:link source="runGOstat:output" sink="parse_moby_GOstat:mobydata" />
   <s:link source="parse_moby_GOstat:value" sink="GOstat" />
-  <s:source name="array genes" />
+  <s:source name="reference genes" />
   <s:source name="regulated genes" />
   <s:source name="namespace" />
   <s:source name="regulated gene id" />
-  <s:source name="array gene id" />
-  <s:source name="ArrayGenesArticleName" />
+  <s:source name="reference gene id" />
+  <s:source name="ReferenceGenesArticleName" />
   <s:source name="RegulatedGenesArticleName" />
   <s:sink name="GOstat_Moby">
     <s:metadata>
@@ -273,7 +273,7 @@ output = OutObj;</s:scriptvalue>
       </s:mimeTypes>
     </s:metadata>
   </s:sink>
-  <s:sink name="array_genes_Moby">
+  <s:sink name="reference_genes_Moby">
     <s:metadata>
       <s:mimeTypes>
         <s:mimeType>text/xml</s:mimeType>
