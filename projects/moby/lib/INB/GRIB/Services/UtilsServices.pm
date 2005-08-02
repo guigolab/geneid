@@ -1,6 +1,4 @@
-# $Id: UtilsServices.pm,v 1.6 2005-07-27 16:30:05 gmaster Exp $
-#
-# INBPerl module for INB::GRIB::geneid::MobyParser
+# $Id: UtilsServices.pm,v 1.7 2005-08-02 12:50:35 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -18,34 +16,6 @@ Con este package podremos parsear las llamadas xml de BioMoby para
 poder llamar al servicio runGeneid. Una vez que tengamos la salida de llamando
 a las funciones de Factory.pm, podremos encapsularla a objectos BioMoby.
 
-  # 
-  # En este módulo parsearemos los mensajes de BioMoby para realizar la
-  # llamada al programa geneid. 
-  # Este modulo requiere las librerias de BioMoby. Para ver su 
-  # funcionamiento en modo linea de comandos (antes de activar el servicio)
-  # enviaremos directamente un mensaje <xml> en BioMoby. Por ejemplo:
-  $in = <<EOF
- <?xml version='1.0' encoding='UTF-8'?>
- <moby:MOBY xmlns:moby='http://www.biomoby.org/moby-s'>
- <moby:mobyContent>
-   <moby:mobyData queryID='1'>
-     <moby:Simple moby:articleName='seq'>
-     <moby:DNASequence namespace='Global_Keyword' id=''>
-       <moby:Integer namespace="" id="" articleName="Length">126</moby:Integer>
-       <moby:String namespace="" id=""  articleName="SequenceString">
-    ACTGCATGCTAAAGGTACATGACCGATCGGACTGTGACTGAACCTGCATTGA 
-    </moby:String>
-     </moby:DNASequence>
-     </moby:Simple>
-     <moby:Parameter moby:articleName='arg2'><Value>swissprot</Value>
-     </moby:Parameter>
-   </moby:mobyData>
- </moby:mobyContent>
- </moby:MOBY>
- EOF 
-  my $result = GeneID("call", $in); 
-
- 
   # Esta llamada/s nos devuelve una variable que contiene el texto con la
   # salida del programa Geneid encapsulado en objetos Moby. 
 
@@ -81,11 +51,11 @@ hacemos servir, puede que debamos modificar el código.
 
 =head1 AUTHOR
 
-Francisco Camara, fcamara@imim.es
+Arnaud Kerhornou, akerhornou@imim.es
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004, Roman Roset Mayals and INB - Nodo Computacional UPC/CIRI.
+Copyright (c) 2005, Arnaud Kerhornou and INB - Nodo 1 - GRIB/IMIM.
  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify

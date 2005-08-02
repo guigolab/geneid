@@ -1,6 +1,5 @@
-# $Id: GOstatServices.pm,v 1.5 2005-08-02 09:17:40 gmaster Exp $
+# $Id: GOstatServices.pm,v 1.6 2005-08-02 12:50:35 gmaster Exp $
 #
-# INBPerl module for INB::GRIB::geneid::MobyParser
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -17,34 +16,6 @@ INB::GRIB::Services::GOStatServices  - Package for parser the Moby message to ca
 Con este package podremos parsear las llamadas xml de BioMoby para
 poder llamar al servicio runGeneid. Una vez que tengamos la salida de llamando
 a las funciones de Factory.pm, podremos encapsularla a objectos BioMoby.
-
-  # 
-  # En este módulo parsearemos los mensajes de BioMoby para realizar la
-  # llamada al programa geneid. 
-  # Este modulo requiere las librerias de BioMoby. Para ver su 
-  # funcionamiento en modo linea de comandos (antes de activar el servicio)
-  # enviaremos directamente un mensaje <xml> en BioMoby. Por ejemplo:
-  $in = <<EOF
- <?xml version='1.0' encoding='UTF-8'?>
- <moby:MOBY xmlns:moby='http://www.biomoby.org/moby-s'>
- <moby:mobyContent>
-   <moby:mobyData queryID='1'>
-     <moby:Simple moby:articleName='seq'>
-     <moby:DNASequence namespace='Global_Keyword' id=''>
-       <moby:Integer namespace="" id="" articleName="Length">126</moby:Integer>
-       <moby:String namespace="" id=""  articleName="SequenceString">
-    ACTGCATGCTAAAGGTACATGACCGATCGGACTGTGACTGAACCTGCATTGA 
-    </moby:String>
-     </moby:DNASequence>
-     </moby:Simple>
-     <moby:Parameter moby:articleName='arg2'><Value>swissprot</Value>
-     </moby:Parameter>
-   </moby:mobyData>
- </moby:mobyContent>
- </moby:MOBY>
- EOF 
-  my $result = GeneID("call", $in); 
-
  
   # Esta llamada/s nos devuelve una variable que contiene el texto con la
   # salida del programa Geneid encapsulado en objetos Moby. 
@@ -85,7 +56,7 @@ Arnaud Kerhornou, akerhornou@imim.es
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004, Roman Roset Mayals and INB - Nodo Computacional UPC/CIRI.
+Copyright (c) 2005, Arnaud Kerhornou and INB - Nodo Vertical 1 GRIB/IMIM.
  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify
@@ -182,9 +153,6 @@ sub _do_query_GOstat {
     
     my $MOBY_RESPONSE = "";     # set empty response
     
-    # Aqui escribimos las variables que necesitamos para la funcion. 
-    # ...
-
     # Variables that will be passed to GeneID_call
     my @regulated_genes;
     my @reference_genes;
@@ -241,8 +209,10 @@ sub _do_query_GOstat {
 
 		@regulated_genes = split ("\n", $genes_lst);
 
-		print STDERR "got a list of " . @regulated_genes . " regulated genes\n";
-		
+		if ($_debug) {
+		    print STDERR "got a list of " . @regulated_genes . " regulated genes\n";
+		}
+
 		if ($_debug) {
 		    print STDERR "regulated genes_lst, $genes_lst\n";
 		}
@@ -271,7 +241,9 @@ sub _do_query_GOstat {
 	    }
 
 	    # Should pick the String because text-formatted has-a String now,
-	    # and not text-formatted is-a String - for backward compatibility, let the users give a text-formatted object without a String attribute !!
+	    # and not text-formatted is-a String
+	    # For backward compatibility, let the users give a text-formatted object without a String attribute !!
+	    # Anyway no choice, because MowServ and taverna doesn't support the new design !!
 
 	    my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
 	    if (length ($genes_lst) < 1) {
@@ -285,7 +257,9 @@ sub _do_query_GOstat {
 
 	    @reference_genes  = split ("\n", $genes_lst);
 	    
-	    print STDERR "got a list of " . @reference_genes . " reference genes\n";
+	    if ($_debug) {
+		print STDERR "got a list of " . @reference_genes . " reference genes\n";
+	    }
 
 	    if ($_debug) {
 		print STDERR "reference genes_lst, $genes_lst\n";
@@ -305,21 +279,7 @@ sub _do_query_GOstat {
     
     my $output_article_name = "GOterms";
 
-    # I think it is the standard, but is not recognized by taverna 1.2 or MowServ !!!
-    
     my $input = <<PRT;
-<moby:$_format namespace='' id=''>
-<String namespace='' id=''>
-<![CDATA[
-$report
-]]>
-</String>
-</moby:$_format>
-PRT
-
-# So we stick with the old standard - No string attribute !!!!!
-
-   $input = <<PRT;
 <moby:$_format namespace='' id=''>
 <![CDATA[
 $report
