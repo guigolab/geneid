@@ -154,7 +154,7 @@ my ($REG) = $Central->registerService(
 				      serviceType  => "Retrieval",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Upstream sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. This identifiers could be external ones, such as Refseq Ids or Affymetrix ids.",
+				      description  => "Upstream sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. This identifiers could be external ones, such as Refseq Ids or Affymetrix ids.\n In case you select the orthologous mode, it will returns the upstream sequence of all orthologous genes of a given input gene (only one input gene identifier in that case)",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
@@ -191,6 +191,13 @@ my ($REG) = $Central->registerService(
 					      min      => 'MIN',
 					  },
 					  'intergenic only' => {
+					      datatype => 'String',
+					      enum     => ['True','False'],
+					      default  => 'False',
+					      max      => 'MAX',
+					      min      => 'MIN',
+					  },
+					  'orthologous mode' => {
 					      datatype => 'String',
 					      enum     => ['True','False'],
 					      default  => 'False',
