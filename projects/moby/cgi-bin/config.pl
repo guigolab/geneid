@@ -2,8 +2,6 @@
 use lib "/home/ug/gmaster/projects/moby/prod/lib";
 
 # BioMoby core libraries
-# use lib "/home/ug/gmaster/projects/moby/biomoby.0.8.1/Perl";
-# have to use biomoby 0.8.2a to parse properly CDATA section !!!!!
 use lib "/home/ug/gmaster/projects/moby/biomoby.0.8.2a/Perl";
 
 # Also need SOAP and Bioperl libraries that are already installed in the default perl library path
