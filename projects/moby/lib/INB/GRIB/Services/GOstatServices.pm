@@ -1,4 +1,4 @@
-# $Id: GOstatServices.pm,v 1.4 2005-08-01 17:17:23 gmaster Exp $
+# $Id: GOstatServices.pm,v 1.5 2005-08-02 09:17:40 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -187,7 +187,7 @@ sub _do_query_GOstat {
 
     # Variables that will be passed to GeneID_call
     my @regulated_genes;
-    my @array_genes;
+    my @reference_genes;
     my %parameters;
 
     my $queryID  = getInputID ($queryInput_DOM);
@@ -263,9 +263,9 @@ sub _do_query_GOstat {
 	    }
 	} # End parsing regulated genes tag
 	    
-	if ($articleName eq "array genes") { 
+	if ($articleName eq "reference genes") { 
 	    if ($_debug) {
-		print STDERR "\"array genes\" tag is a simple article...\n";
+		print STDERR "\"reference genes\" tag is a simple article...\n";
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
@@ -279,25 +279,25 @@ sub _do_query_GOstat {
 	    }
 	    
 	    if (length ($genes_lst) < 1) {
-		print STDERR "can't get the array genes list!\n";
+		print STDERR "can't get the reference genes list!\n";
 		exit 0;
 	    }
 
-	    @array_genes  = split ("\n", $genes_lst);
+	    @reference_genes  = split ("\n", $genes_lst);
 	    
-	    print STDERR "got a list of " . @array_genes . " array genes\n";
+	    print STDERR "got a list of " . @reference_genes . " reference genes\n";
 
 	    if ($_debug) {
-		print STDERR "array genes_lst, $genes_lst\n";
+		print STDERR "reference genes_lst, $genes_lst\n";
 	    }
-	} # End parsing array genes article tag
+	} # End parsing reference genes article tag
 	
     } # Next article
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $report = GOstat_call (regulated_genes => \@regulated_genes, array_genes => \@array_genes, format => $_format, parameters => \%parameters);
+    my $report = GOstat_call (regulated_genes => \@regulated_genes, reference_genes => \@reference_genes, format => $_format, parameters => \%parameters);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -317,7 +317,7 @@ $report
 </moby:$_format>
 PRT
 
-# So we stick with this standard - No string attribute !!!!!
+# So we stick with the old standard - No string attribute !!!!!
 
    $input = <<PRT;
 <moby:$_format namespace='' id=''>

@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.16 2005-07-13 10:46:39 gmaster Exp $
+# $Id: Factory.pm,v 1.17 2005-08-02 09:17:40 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -457,7 +457,7 @@ sub GOstat_call {
     my %args = @_;
 
     my $regulated_genes    = $args{regulated_genes} || undef;
-    my $array_genes        = $args{array_genes}     || undef;
+    my $reference_genes    = $args{reference_genes} || undef;
     my $format             = $args{format}          || "";
     my $parameters         = $args{parameters}      || undef;
     
@@ -470,21 +470,21 @@ sub GOstat_call {
     
     my ($regulated_genes_fh, $regulated_genes_file) = tempfile("/tmp/REGULATED_GENES.XXXXXX", UNLINK => 0);
     close ($regulated_genes_fh);
-    my ($array_genes_fh, $array_genes_file) = tempfile("/tmp/ARRAY_GENES.XXXXXX", UNLINK => 0);
-    close ($array_genes_fh);
+    my ($reference_genes_fh, $reference_genes_file) = tempfile("/tmp/REFERENCE_GENES.XXXXXX", UNLINK => 0);
+    close ($reference_genes_fh);
 
     open (FILE, ">$regulated_genes_file") or die "can't open temp file, $regulated_genes_file!\n";
     print FILE (join ("\n", @$regulated_genes) . "\n");
     close FILE;
 
-    open (FILE, ">$array_genes_file") or die "can't open temp file, $array_genes_file!\n";
-    print FILE (join ("\n", @$array_genes) . "\n");
+    open (FILE, ">$reference_genes_file") or die "can't open temp file, $reference_genes_file!\n";
+    print FILE (join ("\n", @$reference_genes) . "\n");
     close FILE;
     
-    my $gostat_output = qx/$_gostat_dir\/$_gostat_bin $_gostat_args $regulated_genes_file $array_genes_file/;
+    my $gostat_output = qx/$_gostat_dir\/$_gostat_bin $_gostat_args --reg $regulated_genes_file --ref $reference_genes_file/;
         
     unlink $regulated_genes_file;
-    unlink $array_genes_file;
+    unlink $reference_genes_file;
 
     if (defined $gostat_output) {
 	return $gostat_output;
