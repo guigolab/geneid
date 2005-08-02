@@ -155,22 +155,29 @@ my ($REG) = $Central->registerService(
 				      URL          => $::URL,
 				      input		=> [
 							    ['regulated genes', ["text-formatted" => []]],
-							    ['array genes', ["text-formatted" => []]],
+							    ['reference genes', ["text-formatted" => []]],
 							    ],
 				      output		=> [
 							    ['GOTerms', ["text-formatted" => []]],
 							    ],
 				      secondary	=> {
+					  'organism' => {
+					      datatype => 'String',
+					      enum     => ['Drosophila melanogaster'],
+					      default  => 'Drosophila melanogaster',
+					      max      => 'MAX',
+					      min      => 'MIN',
+					  },
 					  'ontology' => {
 					      datatype => 'String',
-					      enum => ['All','Molecular Function','Cellular Component','Biological Process'],
-					      default => 'All',
-					      max => 'MAX',
-					      min => 'MIN',
+					      enum     => ['All','Molecular Function','Cellular Component','Biological Process'],
+					      default  => 'All',
+					      max      => 'MAX',
+					      min      => 'MIN',
 					  },
 					  'minimum level' => {
 					      datatype => 'Integer',
-					      default  => 'MAX',
+					      default  => '3',
 					      max      => 'MAX',
 					      min      => 'MIN',
 					  },

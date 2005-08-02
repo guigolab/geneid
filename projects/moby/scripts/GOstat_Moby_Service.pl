@@ -26,7 +26,7 @@ my $_debug = 0;
 
 my $serviceName   = "runGOstat";
 my $articleName_1 = "regulated genes";
-my $articleName_2 = "array genes";
+my $articleName_2 = "reference genes";
 
 # URI
 $::authURI = 'genome.imim.es';
@@ -107,7 +107,7 @@ if ((! -f $in_file_1) || (! -f $in_file_2)) {
 }
 
 my $regulated_genes = qx/cat $in_file_1/;
-my $array_genes     = qx/cat $in_file_2/;
+my $reference_genes     = qx/cat $in_file_2/;
 
 # I don't think these 2 objects below are right but for backward compatibility, check it works on them !!
 # (corresponds to former design where text-formatted is-a String)
@@ -122,10 +122,10 @@ $regulated_genes
 </text-formatted>
 PRT
 
-my $array_genes_xml = <<PRT;
+my $reference_genes_xml = <<PRT;
 <text-formatted namespace="$datasource" id="">
 <![CDATA[
-$array_genes
+$reference_genes
 ]]>
 </text-formatted>
 PRT
@@ -136,25 +136,25 @@ PRT
 
 # Works !!
 
-$regulated_genes_xml = <<PRT;
-<text-formatted namespace="$datasource" id="">
-<String namespace="$datasource" id="">
-<![CDATA[
-$regulated_genes
-]]>
-</String>
-</text-formatted>
-PRT
+# $regulated_genes_xml = <<PRT;
+#<text-formatted namespace="$datasource" id="">
+#<String namespace="$datasource" id="">
+#<![CDATA[
+#$regulated_genes
+#]]>
+#</String>
+#</text-formatted>
+#PRT
 
-$array_genes_xml = <<PRT;
-<text-formatted namespace="$datasource" id="">
-<String namespace="$datasource" id="">
-<![CDATA[
-$array_genes
-]]>
-</String>
-</text-formatted>
-PRT
+# $reference_genes_xml = <<PRT;
+#<text-formatted namespace="$datasource" id="">
+#<String namespace="$datasource" id="">
+#<![CDATA[
+#$reference_genes
+#]]>
+#</String>
+#</text-formatted>
+#PRT
 
 # taverna input objects !! - for testing
 
@@ -168,10 +168,10 @@ PRT
 #</String>
 #PRT
 
-#$array_genes_xml = <<PRT;
+#$reference_genes_xml = <<PRT;
 #<String namespace="$datasource" id="">
 #<![CDATA[
-#$array_genes
+#$reference_genes
 #]]>
 #</String>
 #PRT
@@ -189,7 +189,7 @@ PRT
 ##################################################################
 
 my $result = $Service->execute(XMLinputlist => [
-						[ $articleName_1, $regulated_genes_xml, $articleName_2, $array_genes_xml ]
+						[ $articleName_1, $regulated_genes_xml, $articleName_2, $reference_genes_xml ]
 					       ]);
 
 ##################################################################
