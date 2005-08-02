@@ -130,7 +130,31 @@ PRT
 # Parameters
 #
 
-# ...
+my $organism          = "Homo sapiens";
+my $dbrelease         = "32";
+my $upstream_length   = 20000;
+my $downstream_length = 0;
+my $intergenic_only   = "False";
+
+my $organism_xml = <<PRT;
+<Value>$organism</Value>
+PRT
+
+my $dbrelease_xml = <<PRT;
+<Value>$dbrelease</Value>
+PRT
+
+my $upstream_length_xml = <<PRT;
+<Value>$upstream_length</Value>
+PRT
+
+my $downstream_length_xml = <<PRT;
+<Value>$downstream_length</Value>
+PRT
+
+my $intergenic_only_xml = <<PRT;
+<Value>$intergenic_only</Value>
+PRT
 
 ##################################################################
 #
@@ -139,7 +163,8 @@ PRT
 ##################################################################
 
 my $result = $Service->execute(XMLinputlist => [
-						[ $articleName, $genes_xml ]
+						[ $articleName, $genes_xml, 
+						  'organism', $organism_xml, 'ensembl release', $dbrelease_xml, 'upstream length', $upstream_length_xml, 'downstream length', $downstream_length_xml, 'intergenic only', $intergenic_only_xml]
 					       ]);
 
 ##################################################################
