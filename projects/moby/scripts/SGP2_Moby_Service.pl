@@ -9,6 +9,9 @@
 use strict;
 use Data::Dumper;
 
+# be prepare for command-line options/arguments
+use Getopt::Std;
+
 # BioMoby and SOAP libraries
 
 use MOBY::Client::Central;
@@ -44,7 +47,7 @@ my $seqin = Bio::SeqIO->new (
 
 # Execute SGP2 Web service on each individual sequence
 
-# Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
+# Another way would be to set up a collection of sequences and Run SGP2 web service for the whole lot
 
 while (my $seqobj = $seqin->next_seq) {
     my $default_nucleotide = $seqobj->seq;
@@ -60,23 +63,29 @@ while (my $seqobj = $seqin->next_seq) {
     #
     ##################################################################
 
+    # Chirimoyo (Development)
+
     my $URL = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
     my $URI = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://chirimoyo.ac.uma.es/MOBY/Central';
     my $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
     
+    # Inab (Production)
+
+    # $URL = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
+    # $URI = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
+    # $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
+
     ##################################################################
     #
     # Moby Server Instanciation
     #
     ##################################################################
 
+    print STDERR "TESTING MOBY CLIENT with\n\tURL: $URL\n\tURI: $URI\n\tProxy: $PROXY\n\n";
+
     my $C = MOBY::Client::Central->new(
 				       Registries => {mobycentral => {URL => $URL,URI => $URI}}
-				       );
-    
-    if ($_debug) {
-	print "TESTING MOBY CLIENT with\n\tURL: $URL\n\tURI: $URI\n\tProxy: $PROXY\n\n";
-    }
+				      );
     
     ##################################################################
     #
@@ -87,7 +96,7 @@ while (my $seqobj = $seqin->next_seq) {
     my ($service_instances, $reg) = $C->findService (
 						     serviceName  => "runSGP2GFF",
 						     authURI      => "genome.imim.es",
-						     );
+						    );
     
     if ($_debug) {
 	print STDERR "Service instances references: " . @$service_instances . "\n";
@@ -130,13 +139,17 @@ PRT
     #
 
     my $tblastx_xml = <<PRT;
-<Blast-Text namespace="$datasource" id="$seq_id">\'$tblastx_output\'</Blast-Text>
+<Blast-Text namespace="$datasource" id="$seq_id">
+<![CDATA[
+$tblastx_output
+]]>
+</Blast-Text>
 PRT
 
-my $result = $Service->execute(
+    my $result = $Service->execute(
 			       XMLinputlist => [
-						['sequence', $sequence_xml, 'tblastx', $tblastx_xml]
-						]
+						['sequences', $sequence_xml, 'tblastx', $tblastx_xml]
+					       ]
 			       ) ;
     
     ##################################################################
@@ -145,6 +158,8 @@ my $result = $Service->execute(
     #
     ##################################################################
 
-    print "result\n", $result, "\n";
+    print STDERR "result\n";
+    print $result;
+    print STDERR "\n";
 
 }
