@@ -101,12 +101,20 @@ if (defined($opt_x)) {
 		$ENV{MOBY_SERVER}='http://www.inab.org/cgi-bin/MOBY-Central.pl';
 	
 	}elsif (($opt_x =~ /biomoby/i) || (($opt_x =~ /\d/) && ($opt_x == 4))) {
-
-		# export MOBY_URI
-		# export MOBY_SERVER
-		$ENV{MOBY_URI}='http://mobycentral.icapture.ubc.ca/MOBY/Central';
-		$ENV{MOBY_SERVER}='http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
-
+	    
+	    # export MOBY_URI
+	    # export MOBY_SERVER
+	    
+	    # Production Canada server
+	    
+	    $ENV{MOBY_URI}='http://mobycentral.icapture.ubc.ca/MOBY/Central';
+	    $ENV{MOBY_SERVER}='http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
+	    
+	    # Testing Canada server
+	    
+	    # $ENV{MOBY_URI}='http://bioinfo.icapture.ubc.ca/MOBY/Central';
+	    # $ENV{MOBY_SERVER}='http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl';
+	    
 	}else {
 		print help;
 		exit 0;

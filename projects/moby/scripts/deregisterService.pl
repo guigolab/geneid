@@ -91,13 +91,20 @@ if (defined($opt_x)) {
 	
 	print STDERR "It is not adviced to deregister a service in production!\n";
         print STDERR "Contact Oswaldo Trelles (ots\@ac.uma.es) or Sergio Ramirez (serr\@ac.uma.es) for updating a service\n";
-        exit 1;
+        exit 0;
 	
     }
     elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
 	
+	# Production
+
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://mobycentral.icapture.ubc.ca/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
+
+	# Development
+
+	# $MOBY_URI    = $ENV{MOBY_URI}    = 'http://bioinfo.icapture.ubc.ca/MOBY/Central';
+	# $MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl';
 	
     }
     else {
