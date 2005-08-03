@@ -166,43 +166,35 @@ my ($REG) = $Central->registerService(
 				      secondary	=> {
 					  'organism' => {
 					      datatype => 'String',
-					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Gallus gallus', 'Takifugu rubripes', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Caenorhabditis elegans'],
+					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Caenorhabditis elegans'],
 					      default  => 'Homo sapiens',
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  },
 					  'ensembl release' => {
 					      datatype => 'String',
 					      enum     => ['32','31','30','29'],
 					      default  => '32',
-					      max      => 'MAX',
-					      min      => 'MIN',
+					      max      => '32',
+					      min      => '29',
 					  },
 					  'upstream length' => {
 					      datatype => 'Integer',
-					      default  => '2000',
-					      max      => 'MAX',
-					      min      => 'MIN',
+					      default  => 2000,
+					      min      => 0,
 					  },
 					  'downstream length' => {
 					      datatype => 'Integer',
-					      default  => '0',
-					      max      => 'MAX',
-					      min      => 'MIN',
+					      default  => 0,
+					      min      => 0,
 					  },
 					  'intergenic only' => {
 					      datatype => 'String',
 					      enum     => ['True','False'],
 					      default  => 'False',
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  },
 					  'orthologous mode' => {
 					      datatype => 'String',
 					      enum     => ['True','False'],
 					      default  => 'False',
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  },
 				      }
 				      );

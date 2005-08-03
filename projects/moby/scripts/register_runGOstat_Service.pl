@@ -98,11 +98,18 @@ if (defined($opt_x)) {
 
     }
     elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
-	
+
+	# Production
+
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://mobycentral.icapture.ubc.ca/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
 
-	# Production
+	# Development
+
+	# $MOBY_URI    = $ENV{MOBY_URI}    = 'http://bioinfo.icapture.ubc.ca/MOBY/Central';
+	# $MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://bioinfo.icapture.ubc.ca/cgi-bin/mobycentral/MOBY-Central.pl';
+
+	# GRIB cgi-bin URL
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 
     }
@@ -177,15 +184,12 @@ my ($REG) = $Central->registerService(
 					  },
 					  'minimum level' => {
 					      datatype => 'Integer',
-					      default  => '3',
-					      max      => 'MAX',
-					      min      => 'MIN',
+					      default  => 3,
+					      min      => 1,
 					  },
 					  'p-value cutoff' => {
 					      datatype => 'Float',
-					      default  => '1',
-					      max      => 'MAX',
-					      min      => 'MIN',
+					      default  => 1,
 					  },
 				}
 				      );
