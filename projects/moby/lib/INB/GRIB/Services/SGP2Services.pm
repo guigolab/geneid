@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.4 2005-08-02 12:50:35 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.5 2005-08-03 13:53:32 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -111,6 +111,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
+my $_debug = 0;
 
 # Preloaded methods go here.
 
@@ -152,7 +153,7 @@ sub _do_query_SGP2 {
         my $MOBY_RESPONSE = "";     # set empty response
 
 	# Aqui escribimos las variables que necesitamos para la funcion. 
-	my $nucleotide;  
+	my $nucleotides;  
 	my $sequenceIdentifier;
 
 	# Variables that will be passed to SGP2_call
@@ -178,24 +179,19 @@ sub _do_query_SGP2 {
 	    # Si le hemos puesto nombre a los articulos del servicio,  
 	    # podemos recoger a traves de estos nombres el valor. 
 	    
-	    if ($articleName eq "sequence") { 
+	    if ($articleName eq "sequences") { 
 
-		##################################################################
-		#
-		# Not sure it works for multiple DNAsequence entries...
-		# I need to play with this to make it cope with multiple sequences...
-		#
-		##################################################################
+		if ($_debug) {
+		    print STDERR "parsing the article \"sequences\"...\n";
+		}
 
 		# Get the sequence identifier - not this way, because it supposes that there is only one sequence......
 		
 		my @articles = ($DOM);
-		my @ids = getSimpleArticleIDs (\@articles);
-		if (@ids > 0) {
-		    $sequenceIdentifier = $ids[0];
-		}
-		else {
+		($sequenceIdentifier) = getSimpleArticleIDs (\@articles);
+		if (not defined $sequenceIdentifier) {
 		    print STDERR "Error - no sequence identifier!!!\n";
+		    exit 0;
 		}
 		
 		# Los contenidos los devuelve como una lista, dado que 
@@ -207,19 +203,37 @@ sub _do_query_SGP2 {
 		
 		# The Sequence as a string
 		
-		($nucleotide) = getNodeContentWithArticle($DOM, "String", "SequenceString");
+		($nucleotides) = getNodeContentWithArticle($DOM, "String", "SequenceString");
 		# Lo que hacemos aqui es limpiar un sting de caracteres raros 
 		# (espacios, \n, ...) pq nadie asegura que no los hayan. 
-		$nucleotide =~ s/\W+//sg; # trim trailing whitespace
+		$nucleotides =~ s/\W+//sg; # trim trailing whitespace
+		
+		if (not defined $nucleotides) {
+		    print STDERR "Error, i haven't got any sequence to process\n";
+		    exit 0;
+		}
+		
+		if ($_debug) {
+		    print STDERR "processing sequence, $sequenceIdentifier, of length " . length ($nucleotides) . "\n";
+		}
 
 		# Add the sequence into a hash table
 
-		$sequences{$sequenceIdentifier} = $nucleotide;
+		$sequences{$sequenceIdentifier} = $nucleotides;
 		
 	    }
-	    
 	    elsif ($articleName eq "tblastx") {
-	    	$tblastx_output = "";
+
+		if ($_debug) {
+		    print STDERR "parsing the article \"tblastx\"...\n";
+		}
+
+	    	$tblastx_output = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "Blast-Text");
+
+		if (length ($tblastx_output) < 1) {
+		    print STDERR "can't get the tblastx output!\n";
+		    exit 0;
+		}
 	    }
 	} # Next article
 	
@@ -237,7 +251,7 @@ sub _do_query_SGP2 {
 	my $output_article_name = "geneid_predictions";
 
 	my $input = <<PRT;
-<moby:$_format namespace='' id=''>
+<moby:$_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[
 $report
 ]]>
@@ -332,9 +346,11 @@ sub runSGP2GFF {
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    
-	    # my $query_str = $queryInput->toString();
-	    # print STDERR "query text: $query_str\n";
+
+	    if ($_debug) {
+		my $query_str = $queryInput->toString();
+		print STDERR "query text: $query_str\n";
+	    }
 
 	    my $query_response = _do_query_SGP2 ($queryInput, $_format);
 	    
