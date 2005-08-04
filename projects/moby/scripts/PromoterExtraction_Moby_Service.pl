@@ -25,7 +25,7 @@ my $t1 = Benchmark->new ();
 my $_debug = 0;
 
 my $serviceName   = "getUpstreamSeqfromEnsembl";
-my $articleName_1 = "genes";
+my $articleName = "genes";
 
 # URI
 $::authURI = 'genome.imim.es';
@@ -97,6 +97,7 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 
 my $in_file  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
 # my $in_file  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
+$in_file  = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/data/geneIds.forward.lst";
 my $datasource = "Ensembl";
 
 if ((! -f $in_file)) {
