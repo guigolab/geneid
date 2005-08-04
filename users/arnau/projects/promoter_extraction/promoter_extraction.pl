@@ -35,18 +35,18 @@ Usage:
 	-h help
 	-f gene identifiers input file
 	-s gender species, e.g. homo_sapiens
-	-r database release, e.g 29_35b
+	-r database release, e.g 29
 	-u length of the upstream region   (Default 2000)
 	-d length of the downstream region (Default 500)
 	-i intergenic sequence only
 	-g report overlapping gene features in GFF format
 
 Examples using some combinations:
-	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 29_35b -u 2000 -d 500 -i -g
-	promoter_extraction.pl -f refseqs.lst -s rattus_norvegicus -r 29_3f -u 2000 -d 500 -i -g
+	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 29 -u 2000 -d 500 -i -g
+	promoter_extraction.pl -f refseqs.lst -s rattus_norvegicus -r 29 -u 2000 -d 500 -i -g
 
-	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 31_35d -u 2000 -d 500 -i -g
-	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 30_35c -u 2000 -d 500 -i -g
+	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 31 -u 2000 -d 500 -i -g
+	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 30 -u 2000 -d 500 -i -g
 
 	Output Nota Bene:
 
@@ -108,10 +108,38 @@ defined $opts{i} and $intergenic_only++;
 
 $dbhost      = "ensembldb.ensembl.org";
 $dbuser      = "anonymous";
-$dbensembl = $species . "_core_" . $release;
 
-$release =~ /^(\d+)_\w+$/;
-my $releaseNumber = $1;
+if ($_debug) {
+    print STDERR "connecting to Ensembl MySQL server for getting the database name...\n";
+}
+
+use Mysql;
+
+my $dbh = Mysql->connect($dbhost, "", $dbuser, "");
+my @database_names = $dbh->listdbs;
+
+if ($_debug) {
+    print STDERR "database names: @database_names.\n";
+}
+
+my $dbname_pattern = $species . "_core_" . $release . '_\w+';
+my ($dbensembl) = map {/($dbname_pattern)/} @database_names;
+
+if ($_debug) {
+    print STDERR "got this database name: $dbensembl\n";
+}
+
+if (not defined $dbensembl) {
+    print STDERR "can't find any ensembl database for species, $species, and for release, $release!\n";
+    print STDERR "contact gmaster\@imim.es for help!\n";
+    exit 0;
+}
+
+# $release =~ /^(\d+)_\w+$/;
+# my $releaseNumber = $1;
+
+# now they're the same
+my $releaseNumber = $release;
 
 my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$releaseNumber/modules";
 
@@ -131,14 +159,14 @@ else {
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
 
 if ($_debug) {
-    print STDERR "connecting to Ensembl database...\n";
+    print STDERR "connecting to Ensembl database, $dbensembl...\n";
 }
 
-my $dbh = new Bio::EnsEMBL::DBSQL::DBAdaptor (
-					      -host   => $dbhost,
-					      -user   => $dbuser,
-					      -dbname => $dbensembl
-					      )
+$dbh = new Bio::EnsEMBL::DBSQL::DBAdaptor (
+					   -host   => $dbhost,
+					   -user   => $dbuser,
+					   -dbname => $dbensembl
+					   )
     or die "can't connect to Ensembl database, $dbensembl, contact gmaster\@imim.es for help!\n";
 
 my $dbEntry_adaptor = $dbh->get_DBEntryAdaptor ();
