@@ -166,7 +166,7 @@ my ($REG) = $Central->registerService(
 				      secondary	=> {
 					  'organism' => {
 					      datatype => 'String',
-					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Caenorhabditis elegans'],
+					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
 					      default  => 'Homo sapiens',
 					  },
 					  'ensembl release' => {
@@ -179,12 +179,12 @@ my ($REG) = $Central->registerService(
 					  'upstream length' => {
 					      datatype => 'Integer',
 					      default  => 2000,
-					      min      => 0,
+					      min      => 'MIN',
 					  },
 					  'downstream length' => {
 					      datatype => 'Integer',
 					      default  => 0,
-					      min      => 0,
+					      min      => 'MIN',
 					  },
 					  'intergenic only' => {
 					      datatype => 'String',
