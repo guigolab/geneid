@@ -48,6 +48,11 @@ Examples using some combinations:
 	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 31_35d -u 2000 -d 500 -i -g
 	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 30_35c -u 2000 -d 500 -i -g
 
+	Output Nota Bene:
+
+	If you ask only for the upstream sequence (not the features), the output is redirected to the standard output
+	Otherwise it will generate two files called "upstream_sequences.fa" and "upstream_sequences.gff"
+
 END_HELP
 
 }
@@ -160,13 +165,27 @@ while (my $geneId = <FILE>) {
 }
 close FILE;
 
-my $fasta_output_file = "upstream_regions.fa";
-my $gff_output_file   = "upstream_regions.gff";
+# Output sequence factory object
+my $sout;
 
-my $sout = Bio::SeqIO->new (
-			    -file   => ">$fasta_output_file",
-			    -format => 'fasta'
+my $fasta_output_file = "upstream_sequences.fa";
+my $gff_output_file   = "upstream_sequences.gff";
+
+if (not $report_features) {
+    $sout = Bio::SeqIO->new (
+			     -fh     => \*STDOUT,
+			     -format => 'fasta'
 			    );
+}
+else {
+    
+    # Otherwise into a file !
+    
+    $sout = Bio::SeqIO->new (
+			     -file   => ">$fasta_output_file",
+			     -format => 'fasta'
+			    );
+}
 
 if ($report_features) {
     open GFF, ">$gff_output_file" or die "can't open file, $gff_output_file!\n";
