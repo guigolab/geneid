@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.19 2005-08-04 15:00:57 gmaster Exp $
+# $Id: Factory.pm,v 1.20 2005-08-04 16:15:48 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -634,8 +634,7 @@ sub PromoterExtraction_call {
 	$_promExtraction_args .= " -s homo_sapiens";
     }
 
-    $_promExtraction_args .= " -r $dbrelease" || " -r 32";
-    # $_promExtraction_args .= " -r 32_35e";
+    $_promExtraction_args .= " -r $dbrelease" || die "no ensembl release was given!\n";
     
     # Make a temporary file for the input list of genes
     
@@ -646,8 +645,8 @@ sub PromoterExtraction_call {
     print FILE (join ("\n", @$genes_ref) . "\n");
     close FILE;
     
-    print STDERR "running command,\n";
-    print STDERR "$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file\n";
+    # print STDERR "running command,\n";
+    # print STDERR "$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file\n";
     
     my $promoterExtraction_output = qx/$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file/;
     

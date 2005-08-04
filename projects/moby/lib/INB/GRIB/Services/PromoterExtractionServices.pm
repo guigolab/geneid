@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.2 2005-08-04 15:00:57 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.3 2005-08-04 16:15:48 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -112,7 +112,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 1;
+my $_debug = 0;
 
 # Preloaded methods go here.
 
