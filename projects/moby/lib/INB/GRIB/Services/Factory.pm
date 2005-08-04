@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.18 2005-08-03 13:53:32 gmaster Exp $
+# $Id: Factory.pm,v 1.19 2005-08-04 15:00:57 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -587,9 +587,78 @@ sub TranslateGeneIDPredictions_call {
 sub PromoterExtraction_call {
     my %args = @_;
 
-    # ...
+    # relleno los parametros por defecto GeneID_call
+    
+    my $genes_ref  = $args{genes}      || undef;
+    my $parameters = $args{parameters} || undef;
+    
+    # Get the parameters
+    
+    my $organism          = $parameters->{organism};
+    my $dbrelease         = $parameters->{dbrelease};
+    my $upstream_length   = $parameters->{upstream_length};
+    my $downstream_length = $parameters->{downstream_length};
+    my $intergenic_only   = $parameters->{intergenic_only};
+    
+    # Llama a GeneID en local
+    my $_promExtraction_dir  = "/home/ug/gmaster/projects/promoter_extraction";
+    my $_promExtraction_bin  = "promoter_extraction.pl";
+    my $_promExtraction_args = "";
 
-    return undef;
+    if ($intergenic_only eq "True") {
+	$_promExtraction_args .= "-i";
+    }
+
+    $_promExtraction_args .= " -u $upstream_length";
+    $_promExtraction_args .= " -d $downstream_length";
+
+    SWITCH: {
+	if ($organism eq "Homo sapiens")             { $_promExtraction_args .= " -s homo_sapiens"; last SWITCH; }
+	if ($organism eq "Pan troglodytes")          { $_promExtraction_args .= " -s pan_troglodytes"; last SWITCH; }
+	if ($organism eq "Mus musculus")             { $_promExtraction_args .= " -s mus_musculus"; last SWITCH; }
+	if ($organism eq "Rattus norvegicus")        { $_promExtraction_args .= " -s rattus_norvegicus"; last SWITCH; }
+	if ($organism eq "Canis familiaris")         { $_promExtraction_args .= " -s canis_familiaris"; last SWITCH; }
+	if ($organism eq "Bos taurus")               { $_promExtraction_args .= " -s bos_taurus"; last SWITCH; }
+	if ($organism eq "Gallus gallus")            { $_promExtraction_args .= " -s gallus_gallus"; last SWITCH; }
+	if ($organism eq "Xenopus tropicalis")       { $_promExtraction_args .= " -s xenopus_tropicalis"; last SWITCH; }
+	if ($organism eq "Danio rerio")              { $_promExtraction_args .= " -s danio_rerio"; last SWITCH; }
+	if ($organism eq "Takifugu rubripes")        { $_promExtraction_args .= " -s takifugu_rubripes"; last SWITCH; }
+	if ($organism eq "Tetraodon nigroviridis")   { $_promExtraction_args .= " -s tetraodon_nigroviridis"; last SWITCH; }
+	if ($organism eq "Ciona intestinalis")       { $_promExtraction_args .= " -s ciona_intestinalis"; last SWITCH; }
+	if ($organism eq "Drosophila melanogaster")  { $_promExtraction_args .= " -s drosophila_melanogaster"; last SWITCH; }
+	if ($organism eq "Anopheles gambiae")        { $_promExtraction_args .= " -s anopheles_gambiae"; last SWITCH; }
+	if ($organism eq "Apis mellifera")           { $_promExtraction_args .= " -s apis_mellifera"; last SWITCH; }
+	if ($organism eq "Caenorhabditis elegans")   { $_promExtraction_args .= " -s caenorhabditis_elegans"; last SWITCH; }
+	if ($organism eq "Saccharomyces cerevisiae") { $_promExtraction_args .= " -s saccharomyces_cerevisiae"; last SWITCH; }
+	# Default is Human
+	$_promExtraction_args .= " -s homo_sapiens";
+    }
+
+    $_promExtraction_args .= " -r $dbrelease" || " -r 32";
+    # $_promExtraction_args .= " -r 32_35e";
+    
+    # Make a temporary file for the input list of genes
+    
+    my ($genes_list_fh, $genes_list_file) = tempfile("/tmp/PROM_EXTRACTION_GENES.XXXXXX", UNLINK => 1);
+    close ($genes_list_fh);
+    
+    open (FILE, ">$genes_list_file") or die "can't open temp file, $genes_list_file!\n";
+    print FILE (join ("\n", @$genes_ref) . "\n");
+    close FILE;
+    
+    print STDERR "running command,\n";
+    print STDERR "$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file\n";
+    
+    my $promoterExtraction_output = qx/$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file/;
+    
+    unlink $genes_list_file;
+    
+    if (defined $promoterExtraction_output) {
+	return $promoterExtraction_output;
+    }
+    else {
+	return undef;
+    }
 }
 
 1;

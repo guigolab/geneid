@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.1 2005-08-02 14:00:57 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.2 2005-08-04 15:00:57 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -112,7 +112,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 0;
+my $_debug = 1;
 
 # Preloaded methods go here.
 
@@ -150,10 +150,9 @@ sub _do_query_PromoterExtraction {
     my $queryInput_DOM = shift @_;
     
     my $MOBY_RESPONSE = "";     # set empty response
-    
+
     # Variables that will be passed to PromoterExtraction_call
-    my @regulated_genes;
-    my @reference_genes;
+    my @genes;
     my %parameters;
 
     my $queryID  = getInputID ($queryInput_DOM);
@@ -161,11 +160,19 @@ sub _do_query_PromoterExtraction {
 
     # Get the parameters
     
-    # ...
+    my ($organism)          = getNodeContentWithArticle($queryInput_DOM, "Parameter", "organism")          || "Homo sapiens";
+    my ($dbrelease)         = getNodeContentWithArticle($queryInput_DOM, "Parameter", "dbrelease")         || "32";
+    my ($upstream_length)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "upstream_length")   || 2000;
+    my ($downstream_length) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "downstream_length") || 0;
+    my ($intergenic_only)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "intergenic_only")   || "False";
     
     # Add the parsed parameters in a hash table
     
-    # ...
+    $parameters{organism}          = $organism;
+    $parameters{dbrelease}         = $dbrelease;
+    $parameters{upstream_length}   = $upstream_length;
+    $parameters{downstream_length} = $downstream_length;
+    $parameters{intergenic_only}   = $intergenic_only;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
@@ -182,12 +189,12 @@ sub _do_query_PromoterExtraction {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of GeneID, it doesn't really matter as there is only one input anyway
 	
-	if ($articleName eq "regulated genes") { 
+	if ($articleName eq "genes") { 
 
 	    if (isSimpleArticle ($DOM)) {
 
 		if ($_debug) {
-		    print STDERR "\"regulated genes\" tag is a simple article...\n";
+		    print STDERR "\"genes\" tag is a simple article...\n";
 		    print STDERR "node ref, " . ref ($DOM) . "\n";
 		    print STDERR "DOM: " . $DOM->toString () . "\n";
 		}
@@ -201,24 +208,32 @@ sub _do_query_PromoterExtraction {
 		}
 
 		if (length ($genes_lst) < 1) {
-		    print STDERR "can't get the regulated genes list!\n";
+		    print STDERR "can't get the genes list!\n";
 		    exit 0;
 		}
 
-		@regulated_genes = split ("\n", $genes_lst);
+		my @genes_tmp = split ("\n", $genes_lst);
 
 		if ($_debug) {
-		    print STDERR "got a list of " . @regulated_genes . " regulated genes\n";
+		    print STDERR "got a list before filtering of " . @genes_tmp . " genes\n";
+		}
+
+		# Filter the list from empty elements
+
+		@genes = map { /(\S+)/ } @genes_tmp;
+
+		if ($_debug) {
+		    print STDERR "got a list of " . @genes . " genes\n";
 		}
 
 		if ($_debug) {
-		    print STDERR "regulated genes_lst, $genes_lst\n";
+		    print STDERR "genes_lst,\n@genes.\n";
 		}
 		
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
-		print STDERR "\"regulated genes\" is a collection article...\n";
+		print STDERR "\"genes\" is a collection article...\n";
 		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		
 		print STDERR "collection is not expected!!\n";
@@ -229,47 +244,14 @@ sub _do_query_PromoterExtraction {
 		print STDERR "DOM: " . $DOM->toString() . "\n";
 		exit 0;
 	    }
-	} # End parsing regulated genes tag
-	    
-	if ($articleName eq "reference genes") { 
-	    if ($_debug) {
-		print STDERR "\"reference genes\" tag is a simple article...\n";
-		print STDERR "node ref, " . ref ($DOM) . "\n";
-		print STDERR "DOM: " . $DOM->toString () . "\n";
-	    }
-
-	    # Should pick the String because text-formatted has-a String now,
-	    # and not text-formatted is-a String
-	    # For backward compatibility, let the users give a text-formatted object without a String attribute !!
-	    # Anyway no choice, because MowServ and taverna doesn't support the new design !!
-
-	    my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
-	    if (length ($genes_lst) < 1) {
-		$genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
-	    }
-	    
-	    if (length ($genes_lst) < 1) {
-		print STDERR "can't get the reference genes list!\n";
-		exit 0;
-	    }
-
-	    @reference_genes  = split ("\n", $genes_lst);
-	    
-	    if ($_debug) {
-		print STDERR "got a list of " . @reference_genes . " reference genes\n";
-	    }
-
-	    if ($_debug) {
-		print STDERR "reference genes_lst, $genes_lst\n";
-	    }
-	} # End parsing reference genes article tag
-	
+	} # End parsing genes tag
+	    	
     } # Next article
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $fasta_sequences = PromoterExtraction_call (regulated_genes => \@regulated_genes, reference_genes => \@reference_genes, parameters => \%parameters);
+    my $fasta_sequences = PromoterExtraction_call (genes => \@genes, parameters => \%parameters);
 
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -278,7 +260,7 @@ sub _do_query_PromoterExtraction {
     my $output_object_type  = "DNASequence";
     my $output_article_name = "upstream_sequences";
 
-    if (not defined $fasta_sequence) {
+    if (not defined $fasta_sequences) {
 	# Return an emtpy message !
 	return collectionResponse (undef, $output_article_name, $queryID);
     }
