@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.3 2005-08-04 16:15:48 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.4 2005-08-05 10:19:59 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -186,10 +186,10 @@ sub _do_query_PromoterExtraction {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 
-	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
-	# In case of GeneID, it doesn't really matter as there is only one input anyway
+	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'genes')
+	# In case of this service, it doesn't really matter as there is only one input anyway
 	
-	if ($articleName eq "genes") { 
+	if (($articleName eq "genes") || ($articleName eq "")) { 
 
 	    if (isSimpleArticle ($DOM)) {
 
@@ -247,6 +247,11 @@ sub _do_query_PromoterExtraction {
 	} # End parsing genes tag
 	    	
     } # Next article
+
+    if (@genes < 1) {
+	print STDERR "Error, found no gene identifiers\n";
+	exit 0;
+    }
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
