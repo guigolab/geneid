@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.20 2005-08-04 16:15:48 gmaster Exp $
+# $Id: Factory.pm,v 1.21 2005-08-05 14:29:42 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -599,7 +599,8 @@ sub PromoterExtraction_call {
     my $upstream_length   = $parameters->{upstream_length};
     my $downstream_length = $parameters->{downstream_length};
     my $intergenic_only   = $parameters->{intergenic_only};
-    
+    my $orthologous_mode  = $parameters->{orthologous_mode};
+
     # Llama a GeneID en local
     my $_promExtraction_dir  = "/home/ug/gmaster/projects/promoter_extraction";
     my $_promExtraction_bin  = "promoter_extraction.pl";
