@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.4 2005-08-05 10:19:59 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.5 2005-08-05 14:31:23 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -160,11 +160,19 @@ sub _do_query_PromoterExtraction {
 
     # Get the parameters
     
-    my ($organism)          = getNodeContentWithArticle($queryInput_DOM, "Parameter", "organism")          || "Homo sapiens";
-    my ($dbrelease)         = getNodeContentWithArticle($queryInput_DOM, "Parameter", "dbrelease")         || "32";
-    my ($upstream_length)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "upstream_length")   || 2000;
-    my ($downstream_length) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "downstream_length") || 0;
-    my ($intergenic_only)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "intergenic_only")   || "False";
+    my ($organism)          = getNodeContentWithArticle($queryInput_DOM, "Parameter", "organism");
+    my ($dbrelease)         = getNodeContentWithArticle($queryInput_DOM, "Parameter", "ensembl release");
+    my ($upstream_length)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "upstream length");
+    my ($downstream_length) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "downstream length");
+    my ($intergenic_only)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "intergenic only");
+    my ($orthologous_mode)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "orthologous mode");
+
+    (not defined $organism)          and $organism = "Homo sapiens";
+    (not defined $dbrelease)         and $dbrelease = 32;
+    (not defined $upstream_length)   and $upstream_length = 2000;
+    (not defined $downstream_length) and $downstream_length = 0; 
+    (not defined $intergenic_only)   and $intergenic_only = "False";
+    (not defined $orthologous_mode)  and $orthologous_mode = "False";
     
     # Add the parsed parameters in a hash table
     
@@ -173,7 +181,8 @@ sub _do_query_PromoterExtraction {
     $parameters{upstream_length}   = $upstream_length;
     $parameters{downstream_length} = $downstream_length;
     $parameters{intergenic_only}   = $intergenic_only;
-    
+    $parameters{orthologous_mode}  = $orthologous_mode;
+
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
 	
