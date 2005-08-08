@@ -6,9 +6,39 @@
 # ..........................
 
 # Make sure we don't go over the chromosome start/end !!!
-# Perldoc to make
 
-# ..........................
+=head1 NAME
+
+promoter_extraction.pl - Script for extracting the upstream sequence of a set of given Ensembl genes
+
+=head1 SYNOPSIS
+ 
+ Examples:
+  
+     
+=head1 DESCRIPTION
+
+promoter extraction script
+
+=head1 AUTHOR
+
+Arnaud Kerhornou, akerhornou@imim.es
+
+=head1 COPYRIGHT
+
+Copyright (c) 2005, Arnaud Kehornou and GRIB/IMIM.
+ All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 APPENDIX
+
+=cut
 
 # Issue warnings about suspicious programming.
 use warnings 'all';
@@ -28,16 +58,16 @@ use Bio::PrimarySeq;
 
 sub help {
 return <<"END_HELP";
-Description: Extract Promoter regions for a set of given genes
+Description: Extract Promoter sequences for a set of given genes
 Usage:
 
-    promoter_extraction.pl [-h] -f {gene ids} -s {Species} -r {Genome Release} -u {upstream} -d {downstream} -i {Flag intergenic regions only} -g {Flag report attached features in GFF format}
+    promoter_extraction.pl [-h] -f {gene ids} -s {Species} -r {Genome Release} -u {upstream} -d {downstream} -i {Flag intergenic sequences only} -g {Flag report attached features in GFF format}
 	-h help
 	-f gene identifiers input file
 	-s gender species, e.g. homo_sapiens
 	-r database release, e.g 29
-	-u length of the upstream region   (Default 2000)
-	-d length of the downstream region (Default 500)
+	-u length of the upstream sequence   (Default 2000)
+	-d length of the downstream sequence (Default 500)
 	-i intergenic sequence only
 	-g report overlapping gene features in GFF format
 
@@ -67,7 +97,7 @@ BEGIN {
     }
     else {
         print STDERR "There is a problem with the configuration, contact gmaster\@imim.es for help\n";
-        exit 1;
+        exit 0;
     }
     
     # these are switches taking an argument (a value)
@@ -90,7 +120,7 @@ my $time0 = new Benchmark;
 my $species;
 my $release;
 
-$_debug            = 0;
+$_debug            = 1;
 $upstream_length   = 2000;
 $downstream_length = 500;
 $report_features   = 0;
@@ -135,25 +165,20 @@ if (not defined $dbensembl) {
     exit 0;
 }
 
-# $release =~ /^(\d+)_\w+$/;
-# my $releaseNumber = $1;
+undef @database_names;
 
-# now they're the same
-my $releaseNumber = $release;
-
-my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$releaseNumber/modules";
+my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$release/modules";
 
 if ($_debug) {
     print STDERR "ensembl_API_path, $ensembl_API_path.\n";
 }
 
 if (-d $ensembl_API_path) {
-    # use lib "$ensembl_API_path";
     unshift (@INC, $ensembl_API_path);
 }
 else {
     print STDERR "release, $release, not supported, contact gmaster\@imim.es for help\n";
-    exit 1;
+    exit 0;
 }
 
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
@@ -169,21 +194,11 @@ $dbh = new Bio::EnsEMBL::DBSQL::DBAdaptor (
 					   )
     or die "can't connect to Ensembl database, $dbensembl, contact gmaster\@imim.es for help!\n";
 
-my $dbEntry_adaptor = $dbh->get_DBEntryAdaptor ();
 my $gene_adaptor    = $dbh->get_GeneAdaptor ();
 my $slice_adaptor   = $dbh->get_SliceAdaptor ();
 
 # Parse input file
 
-# Mapping : RefSeq DNA XM_346823 or AFFY_Rat230_2: 1374933_at, 1369793_a_at
-# AFFY_RG_U34C: rc_AA859350_at
-
-# to
-
-# ensembl identifier: ENSRNOG00000007726
-
-# my @geneIds = ("ENSG00000179403", "ENSG00000197185", "ENSG00000197785");
-# my @geneIds = ("ENSRNOG00000007726");
 my @geneIds = ();
 
 open FILE, "<$geneIds_file" or die "can't open file, $geneIds_file!\n";
@@ -229,32 +244,17 @@ foreach my $geneId (@geneIds) {
 	print STDERR "\nprocessing gene identifier, $geneId...\n";
     }
     
-    # Get the stable identifier if not it
-    
-    # Mapping
-    
-    # RefSeq DNA XM_346823 or AFFY_Rat230_2: 1374933_at, 1369793_a_at
-    # AFFY_RG_U34C: rc_AA859350_at
-    # This is display_id or primary_id, different from dbid!
-    # Only using dbid, 16078 ???
-    
-    # to
-    
-    # ensembl identifier: ENSRNOG00000007726
-
-    my $genes = $gene_adaptor->fetch_all_by_external_name ($geneId);
-    # my $genes = $gene_adaptor->fetch_all_by_external_name ("NM_023983");
-    # my $genes = $gene_adaptor->fetch_all_by_external_name ("XM_346823");
-    # Affy Id
-    # $genes = $gene_adaptor->fetch_all_by_external_name ("1369793_a_at");
-
     # We don't know if the geneId is an external identifier or an Ensembl identifier
+    # So we check first if it's an external identifier
+    # If so, get the stable identifier
+    
+    my $genes = $gene_adaptor->fetch_all_by_external_name ($geneId);
 
     # It is an external identifier
     
     if (@$genes > 1) {
 	print STDERR "Found more than one Ensembl gene (" . @$genes . ") associated with external identifier, $geneId!!!\n";
-	print STDERR "Will return the upsteam region of all Ensembl genes\n";
+	print STDERR "Will return the upsteam sequence of all Ensembl genes\n";
 	
     }
     
@@ -307,7 +307,7 @@ foreach my $geneId (@geneIds) {
 	    print STDERR "gene coordinates, " . $gene->start . ".." . $gene->end . " on strand $strand\n";
 	}
 	
-	# Get rid of the base 0 if we don't want any downstream region, this way we won't get any overlapping feature associated with the given gene (its first exon for example)
+	# Get rid of the base 0 if we don't want any downstream sequence, this way we won't get any overlapping feature associated with the given gene (its first exon for example)
 	
 	if (($downstream_length == 0) && ($strand == 1)) {
 	    $end -= 1;
@@ -329,7 +329,7 @@ foreach my $geneId (@geneIds) {
 	}
 	
 	if ($intergenic_only) {
-	    if (has_gene_upstream ($slice_region, $strand, $downstream_length, $tss)) {
+	    if (has_gene_upstream ($slice_region, $downstream_length)) {
 		
 		if ($_debug) {
 		    print STDERR "has gene upstream\n";
@@ -418,110 +418,10 @@ if ($_debug) {
 # End
 ##
 
-# Deprecated !!
-
-sub onvertEnsembl2GFF {
-    my ($seqId, $ensembl_features, $comments) = @_;
-    my $gff_output = "";
-
-    foreach my $feature (@$ensembl_features) {
-
-	my $feature_module_name = ref ($feature);
-	$feature_module_name    =~ /\w+\:+\w+\:+(\w+)/;
-	my $feature_type        = $1;
-
-	if ($_debug) {
-	    print STDERR "processing feature, " . $feature->stable_id . ", of type, $feature_type...\n";
-	}
-
-	my $feature_id  = $feature->stable_id;
-	my $comments = "EnsemblIdentifier=$feature_id";
-
-	# if Exon
-	if ($feature_type eq "exon") {
-	    
-	    # my $transcript_id = ?;
-	    # my $gene_id       = ?;
-	    
-	    my $evidences = $feature->get_all_supporting_features();
-	    $evidences = [];
-	    
-	    if (@$evidences > 0) {
-		$feature_module_name = ref ($evidences->[0]);
-		$feature_module_name =~ /\w+\:+\w+\:+(\w+)/;
-		$feature_type        = $1;
-		
-		foreach my $evidence (@$evidences) {
-		    $gff_output .= parse_ensembl_feature ($seqId, $evidence, $feature_type, "", "ensembl");
-		}	    
-	    }
-	}
-	
-	$gff_output .= parse_ensembl_feature ($seqId, $feature, $feature_type, $comments, "ensembl");
-    }
-    
-    return $gff_output;
-}
-
-
-sub parse_ensembl_feature {
-    my ($seqId, $feature, $feature_type, $comments, $source) = @_;
-    my $gff_output = "";
-
-    my $frame = "";
-    if ($feature_type eq "exon") {
-	$frame = $feature->frame;
-    }
-
-    my $start  = $feature->start;
-    my $end    = $feature->end;
-    my $strand = $feature->strand;
-    if ($strand == 1) {
-	$strand = "+";
-    }
-    else {
-	$strand = "-";
-    }
-    
-    # Analysis data ?????
-    
-    my $score = "";
-
-    $gff_output .= "$seqId\t$source\t$feature_type\t$start\t$end\t$score\t$strand\t$frame\t$comments\n";
-
-    return $gff_output;
-    
-}
-
-sub parse_ensembl_sequence {
-    my ($seqId, $start, $end, $sequence_type, $comments, $strand, $source) = @_;
-    my $gff_output = "";
-
-    if ($strand == 1) {
-	$strand = "+";
-    }
-    else {
-	$strand = "-";
-    }
-    
-    my $score = "";
-    my $frame = "";
-
-    $gff_output .= "$seqId\t$source\t$sequence_type\t$start\t$end\t$score\t$strand\t$frame\t$comments\n";
-
-    return $gff_output;
-    
-}
-
-
 sub has_gene_upstream {
-    my ($slice_region, $strand, $downstream_length, $tss) = @_;
+    my ($slice_region, $downstream_length) = @_;
     
     my $genes = $slice_region->get_all_Genes();
-    # print STDERR @$genes . " genes upstream before processing\n";
-    # foreach my $gene (@$genes) {
-	# print STDERR "stable id, " . $gene->stable_id . "\n";
-    # }
     
     if ($downstream_length > 0) {
 	
@@ -568,13 +468,13 @@ sub getIntergenicSequence {
     }
 
     my @upstream_genes = @{$slice_region->get_all_Genes};
-    my @upstream_exons = @{$slice_region->get_all_Exons};
 
     if ($_debug) {
 	if (@upstream_genes > 0) {
 	    print STDERR @upstream_genes . " genes upstream...\n";
 	}
 	
+	my @upstream_exons = @{$slice_region->get_all_Exons};
 	if (@upstream_exons > 0) {
 	    print STDERR @upstream_exons . " exons upstream...\n";
 	}
@@ -714,14 +614,14 @@ sub getFeatures {
 	# Default source is "ensembl"
 	my $source      = "ensembl";
 	
-	if ($releaseNumber >= 31) {
+	if ($release >= 31) {
 	    $source = $gene->source;
 	}
 
 	my $gene_strand = $gene->strand;
 	my $comments    = "EnsemblIdentifier=$geneId";
 	my $biotype     = $gene->type;
-	if ($releaseNumber >= 31) {
+	if ($release >= 31) {
 	    # Since Ensembl release 31, type is deprecated and has been replaced by biotype
 	    $biotype = $gene->biotype;
 	}
@@ -730,7 +630,7 @@ sub getFeatures {
 	    if ($biotype eq "protein_coding") { $RNA_type = "mRNA";   last SWITCH; }
 	    if ($biotype =~ "rRNA")           { $RNA_type = "rRNA";   last SWITCH; }
 	    if ($biotype =~ "tRNA")           { $RNA_type = "tRNA";   last SWITCH; }
-	    if ($biotype =~ "ncRNA")          { $RNA_type = "ncRNA";  last SWITCH; }
+    if ($biotype =~ "ncRNA")          { $RNA_type = "ncRNA";  last SWITCH; }
 	    if ($biotype =~ "snRNA")          { $RNA_type = "snRNA";  last SWITCH; }
 	    if ($biotype =~ "snoRNA")         { $RNA_type = "snoRNA"; last SWITCH; }
 	    if ($biotype =~ "scRNA")          { $RNA_type = "scRNA";  last SWITCH; }
@@ -778,9 +678,6 @@ sub getFeatures {
 	    
 	    my $exons = $transcript->get_all_translateable_Exons;
 	    if (@$exons > 0) {
-
-		# Gene 1 (Forward). 8 exons. 360 aa.
-	    
 		my $pep_length  = $transcript->translate->length;
 		$gff_output    .= "# Gene $transcriptId ($strand_info). " . @$exons . " exons. $pep_length aa\n";
 
@@ -853,3 +750,49 @@ sub getFeatures {
     return $gff_output;
 }
 
+sub parse_ensembl_feature {
+    my ($seqId, $feature, $feature_type, $comments, $source) = @_;
+    my $gff_output = "";
+
+    my $frame = "";
+    if ($feature_type eq "exon") {
+	$frame = $feature->frame;
+    }
+
+    my $start  = $feature->start;
+    my $end    = $feature->end;
+    my $strand = $feature->strand;
+    if ($strand == 1) {
+	$strand = "+";
+    }
+    else {
+	$strand = "-";
+    }
+    
+    my $score = "";
+
+    $gff_output .= "$seqId\t$source\t$feature_type\t$start\t$end\t$score\t$strand\t$frame\t$comments\n";
+
+    return $gff_output;
+    
+}
+
+sub parse_ensembl_sequence {
+    my ($seqId, $start, $end, $sequence_type, $comments, $strand, $source) = @_;
+    my $gff_output = "";
+
+    if ($strand == 1) {
+	$strand = "+";
+    }
+    else {
+	$strand = "-";
+    }
+    
+    my $score = "";
+    my $frame = "";
+
+    $gff_output .= "$seqId\t$source\t$sequence_type\t$start\t$end\t$score\t$strand\t$frame\t$comments\n";
+
+    return $gff_output;
+    
+}
