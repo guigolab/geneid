@@ -9,16 +9,70 @@
 
 =head1 NAME
 
-promoter_extraction.pl - Script for extracting the upstream sequence of a set of given Ensembl genes
+promoter_extraction.pl
 
 =head1 SYNOPSIS
  
- Examples:
-  
+ Script for extracting the upstream sequence of a set of given genes from Ensembl.
+
+ The script takes from an input file, a list of gene identifiers. These identifiers are Ensembl gene identifiers but actually it can be any external identifiers that Ensembl recognizes (Refseq, Flybase, Affymetrix...).
+ The script also requires the species (for exemple, homo_sapiens) and a database release number (for exemple, from Ensembl release 32).
+
+ You can also specify the length of the sequence upstream and/or downstream of the start of the gene. The start of the gene can be either the start of the transcription, if known, otherwise it will be the start of the coding sequence.
+ The sequences are reported in FASTA format.
+
+ You can also specify whether you want a report of the features overlapping the returned region. Currently it only reports Gene features (any type of genes, ie not only protein coding genes) as well as gene subfeatures, ie transcripts and foreach transcript - in case of protein coding genes - UTRs, exon and intron features.
+ The features are reported in GFF format.
+
+ You can also report only intergenic sequences
+
+ Examples: 
+
+        * Retrieve from Ensembl release 29 the upstream sequence of a set of human genes:
+
+           * To retrieve the sequence 2000 bp upstream of the gene start up to 500 bp downstream of it
+           => promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 29 -u 2000 -d 500 > upstream_sequences.fa
+        
+           * To retrieve the intergenic sequence 2000 bp upstream of the gene start up to 500 bp downstream of it
+           => promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 29 -u 2000 -d 500 -i > intergenic_upstream_sequences.fa
+
+        * Retrieve from Ensembl release 32 the upstream sequence of a set of rats genes (by giving Refseq ids):
+
+           * To retrieve the sequence 2000 bp upstream of the gene start, as well as the overlapping features
+           => promoter_extraction.pl -f refseqs.lst -s rattus_norvegicus -r 32 -u 2000 -d 0 -g
      
 =head1 DESCRIPTION
 
-promoter extraction script
+upstream sequence extraction script.
+It is using the Ensembl Perl API to retrieve the upstream sequence of a given set of genes from the Ensembl database hosted by ensembldb.ensembl.org
+
+Output:
+
+It returns the sequences in FASTA format. The sequence identifiers are the gene identifiers. By default the sequences are reported in the standard output (STDOUT) if the report_features flag is off otherwise it generates two files called upstream_sequences.fa and upstream_sequence.gff
+
+Dependencies:
+
+  * bioperl (at least 1.2 version)
+
+    See http://www.bioperl.org for download
+
+  * ensembl
+  * ensembl-compara
+
+  For download, you can use cvs (See http://www.ensembl.org/info/software/api_installation.html for more information),
+  
+  cvs -d :pserver:cvsuser@cvs.sanger.ac.uk:/cvsroot/ensembl login
+  When prompted the password is 'CVSUSER'.
+
+  Install the Ensembl Core Perl API for version 31
+
+  cvs -d :pserver:cvsuser@cvs.sanger.ac.uk:/cvsroot/ensembl co -r branch-ensembl-31 ensembl
+
+  Install the Ensembl Compara Perl API for verion 31
+
+  cvs -d :pserver:cvsuser@cvs.sanger.ac.uk:/cvsroot/ensembl co -r branch-ensembl-31 ensembl-compara
+
+  * DBI and depedencies, DBD::MySQL, MySQL
 
 =head1 AUTHOR
 
@@ -26,7 +80,7 @@ Arnaud Kerhornou, akerhornou@imim.es
 
 =head1 COPYRIGHT
 
-Copyright (c) 2005, Arnaud Kehornou and GRIB/IMIM.
+Copyright (c) 2005, Arnaud Kerhornou and GRIB/IMIM.
  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify
@@ -67,20 +121,17 @@ Usage:
 	-s gender species, e.g. homo_sapiens
 	-r database release, e.g 29
 	-u length of the upstream sequence   (Default 2000)
-	-d length of the downstream sequence (Default 500)
+	-d length of the downstream sequence (Default 0)
 	-i intergenic sequence only
 	-g report overlapping gene features in GFF format
 
 Examples using some combinations:
-	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 29 -u 2000 -d 500 -i -g
-	promoter_extraction.pl -f refseqs.lst -s rattus_norvegicus -r 29 -u 2000 -d 500 -i -g
-
-	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 31 -u 2000 -d 500 -i -g
-	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 30 -u 2000 -d 500 -i -g
-
+	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 32 -u 20000 -d 500 -i -g
+	promoter_extraction.pl -f refseqs.lst -s rattus_norvegicus -r 29 -u 2000 -d 0 -i
+	
 	Output Nota Bene:
-
-	If you ask only for the upstream sequence (not the features), the output is redirected to the standard output
+	
+	If you ask only for the upstream sequences (not the features), the output is redirected to the standard output
 	Otherwise it will generate two files called "upstream_sequences.fa" and "upstream_sequences.gff"
 
 END_HELP
@@ -90,7 +141,7 @@ END_HELP
 BEGIN {
 	
     # Global variables definition
-    use vars qw /$_debug %opts $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbensembl/;
+    use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbensembl/;
 
     if (-f "/home/ug/gmaster/projects/promoter_extraction/config.pl") {
         require "/home/ug/gmaster/projects/promoter_extraction/config.pl";
@@ -117,12 +168,9 @@ BEGIN {
 ## Benchmarking code
 my $time0 = new Benchmark;
 
-my $species;
-my $release;
-
-$_debug            = 1;
+$_debug            = 0;
 $upstream_length   = 2000;
-$downstream_length = 500;
+$downstream_length = 0;
 $report_features   = 0;
 $intergenic_only   = 0;
 
@@ -139,8 +187,12 @@ defined $opts{i} and $intergenic_only++;
 $dbhost      = "ensembldb.ensembl.org";
 $dbuser      = "anonymous";
 
+#
+# Get the database name associated to the species and release information
+#
+
 if ($_debug) {
-    print STDERR "connecting to Ensembl MySQL server for getting the database name...\n";
+    print STDERR "connecting to Ensembl MySQL server to get the database name...\n";
 }
 
 use Mysql;
@@ -166,6 +218,10 @@ if (not defined $dbensembl) {
 }
 
 undef @database_names;
+
+#
+# Instanciate the Ensembl DB objects adaptors
+#
 
 my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$release/modules";
 
@@ -197,7 +253,9 @@ $dbh = new Bio::EnsEMBL::DBSQL::DBAdaptor (
 my $gene_adaptor    = $dbh->get_GeneAdaptor ();
 my $slice_adaptor   = $dbh->get_SliceAdaptor ();
 
-# Parse input file
+#
+# Parse input file to get the list of gene identifiers
+#
 
 my @geneIds = ();
 
@@ -207,6 +265,10 @@ while (my $geneId = <FILE>) {
     push (@geneIds, $geneId);
 }
 close FILE;
+
+#
+# Output initialisation
+#
 
 # Output sequence factory object
 my $sout;
@@ -238,7 +300,17 @@ if ($_debug) {
     print STDERR "processing the " . @geneIds . " gene identifiers...\n";
 }
 
+#
+# Process the list of gene identifiers
+#
+
 foreach my $geneId (@geneIds) {
+
+    #
+    # Instanciation of the ensembl gene object(s)
+    #
+
+    # It is a possibility that we instanciate more than one gene objects, because external identifier could be actually mapped to more than one ensembl gene !!
 
     if ($_debug) {
 	print STDERR "\nprocessing gene identifier, $geneId...\n";
@@ -247,7 +319,7 @@ foreach my $geneId (@geneIds) {
     # We don't know if the geneId is an external identifier or an Ensembl identifier
     # So we check first if it's an external identifier
     # If so, get the stable identifier
-    
+
     my $genes = $gene_adaptor->fetch_all_by_external_name ($geneId);
 
     # It is an external identifier
@@ -272,6 +344,10 @@ foreach my $geneId (@geneIds) {
 	    $genes = [ $gene ];
 	}
     }
+
+    #
+    # Process the Ensembl gene objects
+    #
 
     foreach my $gene (@$genes) {
 
@@ -319,9 +395,11 @@ foreach my $geneId (@geneIds) {
 	if ($_debug) {
 	    print STDERR "start and end of the slice region, $start, $end\n";
 	}
-	
+
+	#
 	# Get the Slice object corresponding to the region of the genome we want to extract
-	
+	#
+
 	my $slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$start,$end,$strand);
 	
 	if ($_debug) {
@@ -334,6 +412,10 @@ foreach my $geneId (@geneIds) {
 		if ($_debug) {
 		    print STDERR "has gene upstream\n";
 		}
+		
+		#
+		# Get the Slice object corresponding to the intergenic region only of the genome we want to extract
+		#
 		
 		my ($subslice_start, $subslice_end) = getIntergenicSequence ($slice_region, $strand, $downstream_length, $tss);
 		
@@ -357,6 +439,10 @@ foreach my $geneId (@geneIds) {
 	    }
 	}
 	
+	#
+	# Processing done, format the sequence object into FASTA
+        #
+
 	if ($_debug) {
 	    print STDERR "writing down the sequence...\n";
 	}
@@ -373,6 +459,10 @@ foreach my $geneId (@geneIds) {
 	    print STDERR "sequence done.\n";
 	}
 	
+	#
+	# format the feature objects into GFF
+        #
+
 	if ($report_features) {
 	    
 	    if ($_debug) {
