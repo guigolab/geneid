@@ -3,10 +3,6 @@
 # NB: Ensembl start of gene definition: TSS or if not known, start codon
 # Do we want ot include it in the output sequence ?
 
-# ..........................
-
-# Make sure we don't go over the chromosome start/end !!!
-
 =head1 NAME
 
 promoter_extraction.pl
@@ -368,8 +364,6 @@ foreach my $geneId (@geneIds) {
 	    print STDERR "tss, $tss\n";
 	}
 
-	# Make sure we don't go over the chromosome start/end !!!
-	
 	if ($strand > 0) {
 	    $start = $gene->start - $upstream_length;
 	    $end   = $gene->start + $downstream_length;
