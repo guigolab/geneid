@@ -32,7 +32,7 @@ return <<"END_HELP";
 Description: Execute GeneID Moby services available from genome.imim.es
 Usage:
 
-    retrieveService.pl [-h] -x {Moby Central} -s {Service Name} -i {sequence FASTA file}
+    retrieveService.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
 	-h help
 	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
 		<1> or Chirimoyo
