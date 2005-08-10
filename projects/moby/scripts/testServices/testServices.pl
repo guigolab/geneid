@@ -70,31 +70,36 @@ $AUTH = "genome.imim.es";
 #
 ##################################################################
 
-my $input_data_dir      = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices/inputData";
-my $control_data_dir    = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices/outputControl";
+my $input_data_dir            = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices/inputData";
+my $control_data_dir          = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices/outputControl";
 
 my $nucleotide_sequence_xml_file = "Hsap_BTK.msk.xml";
-my $tblastx_output_xml_file = "Hsap_BTK.tbx.xml";
-my $GeneIDGFF_xml_file      = "Hsap_BTK.msk.GeneIDGFF.xml";
-my $geneIds_lst_xml_file    = "geneIds.lst.xml";
+my $tblastx_output_xml_file   = "Hsap_BTK.tbx.xml";
+my $GeneIDGFF_xml_file        = "Hsap_BTK.msk.GeneIDGFF.xml";
+my $geneIds_lst_xml_file      = "geneIds.lst.xml";
+my $gostat_regulated_xml_file = "mut1_downreg.fbgn.xml";
+my $gostat_allArray_xml_file  = "allArray.fbgn.xml";
 
-# Check that the files exists !!!
+# Check that the files exist !!!
 
-if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file")) {
+if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file")) {
     print STDERR "Error, can't find one of the input files in directory, $input_data_dir!\n";
     exit 0;
 }
 
-my $tblastx_output_xml  = qx/cat $input_data_dir\/$tblastx_output_xml_file/;
+my $tblastx_output_xml   = qx/cat $input_data_dir\/$tblastx_output_xml_file/;
 my $nucleotide_sequence_xml = qx/cat $input_data_dir\/$nucleotide_sequence_xml_file/;
-my $GeneIDGFF_xml       = qx/cat $input_data_dir\/$GeneIDGFF_xml_file/;
-my $geneIds_lst_xml     = qx/cat $input_data_dir\/$geneIds_lst_xml_file/;
+my $GeneIDGFF_xml        = qx/cat $input_data_dir\/$GeneIDGFF_xml_file/;
+my $geneIds_lst_xml      = qx/cat $input_data_dir\/$geneIds_lst_xml_file/;
+my $gostat_regulated_xml = qx/cat $input_data_dir\/$gostat_regulated_xml_file/;
+my $gostat_allArray_xml  = qx/cat $input_data_dir\/$gostat_allArray_xml_file/;
 
-my $runGeneID_control_file         = "Hsap_BTK.msk.runGeneID.control";
-my $runGeneIDGFF_control_file      = "Hsap_BTK.msk.runGeneIDGFF.control";
+my $runGeneID_control_file            = "Hsap_BTK.msk.runGeneID.control";
+my $runGeneIDGFF_control_file         = "Hsap_BTK.msk.runGeneIDGFF.control";
 my $runSGP2GFF_control_file           = "Hsap_BTK.msk.runSGP2GFF.control";
 my $translateGeneIDGFFPredictions_control_file = "Hsap_BTK.msk.GeneIDGFF.translateGeneIDGFFPredictions.control";
 my $getUpstreamSeqfromEnsembl_control_file = "geneIds.lst.getUpstreamSeqfromEnsembl.control";
+my $runGOstat_control_file = "mut1_downreg.fbgn.runGOstat.control";
 
 ##################################################################
 #
@@ -321,7 +326,7 @@ if (defined $service) {
     }
 }
 
-# Execute SGP2 Web service
+# Execute runSGP2GFF Web service
 
 print STDERR "\ntesting runSGP2GFF...\n\n";
 
@@ -340,7 +345,7 @@ if (defined $service) {
     my @diff_results = qx/diff $control_data_dir\/$runSGP2GFF_control_file $results_file/;
     
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
-	print STDERR "runSGP2GFF pas okay!!\n";
+	print STDERR "runSGP2GFF service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
 	
 	close $results_fh;
@@ -350,6 +355,42 @@ if (defined $service) {
     else {
 	
 	print STDERR "runSGP2GFF okay...\n";
+	
+	close $results_fh;
+	unlink $results_file;
+    }
+    
+}
+
+# Execute runGOstat Web service
+
+print STDERR "\ntesting runGOstat...\n\n";
+
+$service = MobyServiceInstantiation ($C, "runGOstat", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['regulated genes', $gostat_regulated_xml, 'reference genes', $gostat_allArray_xml]
+						    ]
+				   );
+    
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+    
+    print $results_fh "$result\n";
+    
+    my @diff_results = qx/diff $control_data_dir\/$runGOstat_control_file $results_file/;
+    
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "runGOstat service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+	
+	close $results_fh;
+	unlink $results_file;
+	
+    }
+    else {
+	
+	print STDERR "runGOstat okay...\n";
 	
 	close $results_fh;
 	unlink $results_file;
