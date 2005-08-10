@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
+        <moby:mobyData moby:queryID='6'>
+            <moby:Simple moby:articleName='GOterms'><moby:text-formatted namespace='' id=''>
+<![CDATA[
+GO Statistics
+-------------
+
+
+Pos	GO Term	Ontology	Obs/Exp	p-value	GO Desc	Genes
+1	GO:0019202	F	1 / 0.001 (965.000)	0.00103626943005221	amino acid kinase activity	Argk 
+2	GO:0016775	F	1 / 0.001 (965.000)	0.00103626943005221	phosphotransferase activity, nitrogenous group as acceptor	Argk 
+3	GO:0004054	F	1 / 0.001 (965.000)	0.00103626943005221	arginine kinase activity	Argk 
+4	GO:0016310	P	1 / 0.057 (17.545)	0.0569948186529597	phosphorylation	Argk 
+5	GO:0016301	F	1 / 0.065 (15.317)	0.0652849740933767	kinase activity	Argk 
+6	GO:0006793	P	1 / 0.079 (12.697)	0.0787564766840495	phosphorus metabolism	Argk 
+7	GO:0006796	P	1 / 0.079 (12.697)	0.0787564766840495	phosphate metabolism	Argk 
+8	GO:0016772	F	1 / 0.080 (12.532)	0.0797927461141067	transferase activity, transferring phosphorus-containing groups	Argk 
+9	GO:0016740	F	1 / 0.108 (9.279)	0.107772020725506	transferase activity	Argk 
+10	GO:0003824	F	1 / 0.336 (2.978)	0.335751295337029	catalytic activity	Argk 
+11	GO:0008152	P	1 / 0.592 (1.690)	0.591709844559974	metabolism	Argk 
+12	GO:0007582	P	1 / 0.861 (1.161)	0.861139896371859	physiological process	Argk 
+13	GO:0003674	F	1 / 0.894 (1.118)	0.894300518135119	molecular_function	Argk 
+14	GO:0008150	P	1 / 0.955 (1.047)	0.955440414508843	biological_process	Argk 
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+        </moby:mobyData>
+        </moby:mobyContent></moby:MOBY>
