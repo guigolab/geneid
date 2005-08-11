@@ -1,4 +1,4 @@
-# $Id: GOstatServices.pm,v 1.6 2005-08-02 12:50:35 gmaster Exp $
+# $Id: GOstatServices.pm,v 1.7 2005-08-11 10:46:19 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -184,12 +184,12 @@ sub _do_query_GOstat {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of GeneID, it doesn't really matter as there is only one input anyway
 	
-	if ($articleName eq "regulated genes") { 
+	if ($articleName eq "regulated_genes") { 
 
 	    if (isSimpleArticle ($DOM)) {
 
 		if ($_debug) {
-		    print STDERR "\"regulated genes\" tag is a simple article...\n";
+		    print STDERR "\"regulated_genes\" tag is a simple article...\n";
 		    print STDERR "node ref, " . ref ($DOM) . "\n";
 		    print STDERR "DOM: " . $DOM->toString () . "\n";
 		}
@@ -220,7 +220,7 @@ sub _do_query_GOstat {
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
-		print STDERR "\"regulated genes\" is a collection article...\n";
+		print STDERR "\"regulated_genes\" is a collection article...\n";
 		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		
 		print STDERR "collection is not expected!!\n";
@@ -233,9 +233,9 @@ sub _do_query_GOstat {
 	    }
 	} # End parsing regulated genes tag
 	    
-	if ($articleName eq "reference genes") { 
+	if ($articleName eq "reference_genes") { 
 	    if ($_debug) {
-		print STDERR "\"reference genes\" tag is a simple article...\n";
+		print STDERR "\"reference_genes\" tag is a simple article...\n";
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
@@ -254,13 +254,13 @@ sub _do_query_GOstat {
 		print STDERR "can't get the reference genes list!\n";
 		exit 0;
 	    }
-
+	    
 	    @reference_genes  = split ("\n", $genes_lst);
 	    
 	    if ($_debug) {
 		print STDERR "got a list of " . @reference_genes . " reference genes\n";
 	    }
-
+	    
 	    if ($_debug) {
 		print STDERR "reference genes_lst, $genes_lst\n";
 	    }
