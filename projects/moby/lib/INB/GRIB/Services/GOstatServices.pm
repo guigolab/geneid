@@ -1,4 +1,4 @@
-# $Id: GOstatServices.pm,v 1.7 2005-08-11 10:46:19 gmaster Exp $
+# $Id: GOstatServices.pm,v 1.8 2005-08-11 12:20:42 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -277,7 +277,7 @@ sub _do_query_GOstat {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
-    my $output_article_name = "GOterms";
+    my $output_article_name = "GOTerms";
 
     my $input = <<PRT;
 <moby:$_format namespace='' id=''>
