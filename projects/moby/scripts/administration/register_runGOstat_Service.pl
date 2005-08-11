@@ -161,8 +161,8 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['regulated genes', ["text-formatted" => []]],
-							    ['reference genes', ["text-formatted" => []]],
+							    ['regulated_genes', ["text-formatted" => []]],
+							    ['reference_genes', ["text-formatted" => []]],
 							   ],
 				      output		=> [
 							    ['GOTerms', ["text-formatted" => []]],

@@ -370,7 +370,7 @@ $service = MobyServiceInstantiation ($C, "runGOstat", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
-						    ['regulated genes', $gostat_regulated_xml, 'reference genes', $gostat_allArray_xml]
+						    ['regulated_genes', $gostat_regulated_xml, 'reference_genes', $gostat_allArray_xml]
 						    ]
 				   );
     

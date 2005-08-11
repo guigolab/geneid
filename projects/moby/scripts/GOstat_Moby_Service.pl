@@ -13,8 +13,8 @@ use Data::Dumper;
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
-# use SOAP::Lite + 'trace';
+# use SOAP::Lite;
+use SOAP::Lite + 'trace';
 
 # Benchmark Module
 use Benchmark;
@@ -25,8 +25,8 @@ my $t1 = Benchmark->new ();
 my $_debug = 0;
 
 my $serviceName   = "runGOstat";
-my $articleName_1 = "regulated genes";
-my $articleName_2 = "reference genes";
+my $articleName_1 = "regulated_genes";
+my $articleName_2 = "reference_genes";
 
 # URI
 $::authURI = 'genome.imim.es';

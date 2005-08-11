@@ -255,8 +255,8 @@ output = OutObj;</s:scriptvalue>
   <s:link source="regulated genes" sink="Create_RegulatedGenes_moby_data:stringvalue" />
   <s:link source="ReferenceGenesArticleName" sink="ChangeArticleNameReference:articleName" />
   <s:link source="RegulatedGenesArticleName" sink="ChangeArticleNameRegulated:articleName" />
-  <s:link source="ChangeArticleNameReference:output" sink="runGOstat:text-formatted(reference genes)" />
-  <s:link source="ChangeArticleNameRegulated:output" sink="runGOstat:text-formatted(regulated genes)" />
+  <s:link source="ChangeArticleNameReference:output" sink="runGOstat:text-formatted(reference_genes)" />
+  <s:link source="ChangeArticleNameRegulated:output" sink="runGOstat:text-formatted(regulated_genes)" />
   <s:link source="runGOstat:output" sink="parse_moby_GOstat:mobydata" />
   <s:link source="parse_moby_GOstat:value" sink="GOstat" />
   <s:source name="reference genes" />
