@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
         <moby:mobyData moby:queryID='6'>
-            <moby:Simple moby:articleName='GOterms'><moby:text-formatted namespace='' id=''>
+            <moby:Simple moby:articleName='GOTerms'><moby:text-formatted namespace='' id=''>
 <![CDATA[
 GO Statistics
 -------------
