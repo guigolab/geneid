@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.5 2005-08-03 13:53:32 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.6 2005-09-05 14:50:16 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -81,7 +81,8 @@ use strict;
 use warnings;
 use Carp;
 
-use INB::GRIB::Services::Factory; 
+use INB::GRIB::Services::Factory;
+use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
 use Data::Dumper;
@@ -152,10 +153,6 @@ sub _do_query_SGP2 {
 	
         my $MOBY_RESPONSE = "";     # set empty response
 
-	# Aqui escribimos las variables que necesitamos para la funcion. 
-	my $nucleotides;  
-	my $sequenceIdentifier;
-
 	# Variables that will be passed to SGP2_call
 	my %sequences;
 	my $tblastx_output;
@@ -185,41 +182,7 @@ sub _do_query_SGP2 {
 		    print STDERR "parsing the article \"sequences\"...\n";
 		}
 
-		# Get the sequence identifier - not this way, because it supposes that there is only one sequence......
-		
-		my @articles = ($DOM);
-		($sequenceIdentifier) = getSimpleArticleIDs (\@articles);
-		if (not defined $sequenceIdentifier) {
-		    print STDERR "Error - no sequence identifier!!!\n";
-		    exit 0;
-		}
-		
-		# Los contenidos los devuelve como una lista, dado que 
-		# el objeto de la ontologia podria tener una relacion
-		# "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
-		
-		# Make the sequences file here, so we can have more than one sequence...
-		# In case of collection
-		
-		# The Sequence as a string
-		
-		($nucleotides) = getNodeContentWithArticle($DOM, "String", "SequenceString");
-		# Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		# (espacios, \n, ...) pq nadie asegura que no los hayan. 
-		$nucleotides =~ s/\W+//sg; # trim trailing whitespace
-		
-		if (not defined $nucleotides) {
-		    print STDERR "Error, i haven't got any sequence to process\n";
-		    exit 0;
-		}
-		
-		if ($_debug) {
-		    print STDERR "processing sequence, $sequenceIdentifier, of length " . length ($nucleotides) . "\n";
-		}
-
-		# Add the sequence into a hash table
-
-		$sequences{$sequenceIdentifier} = $nucleotides;
+		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 		
 	    }
 	    elsif ($articleName eq "tblastx") {
@@ -248,8 +211,9 @@ sub _do_query_SGP2 {
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
 	# la podriamos realizar en una funcion a parte si fuese compleja.  
 
-	my $output_article_name = "geneid_predictions";
-
+	my $output_article_name  = "geneid_predictions";
+	my ($sequenceIdentifier) = keys (%sequences);
+	
 	my $input = <<PRT;
 <moby:$_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[

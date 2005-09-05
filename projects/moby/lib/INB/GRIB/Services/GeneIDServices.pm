@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.11 2005-07-21 17:03:33 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.12 2005-09-05 14:50:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -111,7 +111,8 @@ use strict;
 use warnings;
 use Carp;
 
-use INB::GRIB::Services::Factory; 
+use INB::GRIB::Services::Factory;
+use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
 use Data::Dumper;
@@ -236,32 +237,7 @@ sub _do_query_GeneID_CGI {
 
 		# print STDERR "sequences tag is a simple article...\n";
 		
-		my $sequenceIdentifier;
-		my $nucleotide;
-		
-		my @articles = ($DOM);
-		my @ids = getSimpleArticleIDs (\@articles);
-		if (@ids > 0) {
-		    $sequenceIdentifier = $ids[0];
-		}
-		else {
-		    print STDERR "Error - no sequence identifier!!!\n";
-		}
-		
-		# Los contenidos los devuelve como una lista, dado que 
-		# el objeto de la ontologia podria tener una relacion
-		# "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
-		
-		# The Sequence as a string
-		
-		($nucleotide) = getNodeContentWithArticle($DOM, "String", "SequenceString");
-		# Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		# (espacios, \n, ...) pq nadie asegura que no los hayan. 
-		$nucleotide =~ s/\W+//sg; # trim trailing whitespace
-		
-		# Add the sequence into a hash table
-		
-		$sequences{$sequenceIdentifier} = $nucleotide;		
+		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
@@ -271,26 +247,7 @@ sub _do_query_GeneID_CGI {
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
 		
 		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
-		    
-		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $sequence_article_DOM ] );
-
-		    # print STDERR "Sequence DOM: " . $sequence_article_DOM->toString() . "\n";
-
-		    my ($nucleotide) = getNodeContentWithArticle($sequence_article_DOM, "String", "SequenceString");
-		    # Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		    # (espacios, \n, ...) pq nadie asegura que no los hayan.
-		    $nucleotide =~ s/\W+//sg; # trim trailing whitespace
-		    
-		    if (length ($nucleotide) < 1) {
-			print STDERR "nucleotide sequence not parsed properly...\n";
-		    }
-
-		    # print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
-		    # print STDERR "nucleotide length: " . length ($nucleotide) . "\n";
-		    
-		    # Add the sequence into a hash table
-		    
-		    $sequences{$sequenceIdentifier} = $nucleotide;
+		    %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
 		}
 	    }
 	    else {
@@ -317,10 +274,11 @@ sub _do_query_GeneID_CGI {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.
 
-    my $output_article_name = "geneid_predictions";
-
+    my $output_article_name  = "geneid_predictions";
+    my ($sequenceIdentifier) = keys (%sequences);
+ 
     my $input = <<PRT;
-<moby:$moby_output_format namespace='' id=''>
+<moby:$moby_output_format namespace='' id='$sequenceIdentifier'>
 <![CDATA["
 $report
 "]]>
@@ -444,33 +402,8 @@ sub _do_query_GeneID {
 	    if (isSimpleArticle ($DOM)) {
 
 		# print STDERR "sequences tag is a simple article...\n";
-		
-		my $sequenceIdentifier;
-		my $nucleotide;
-		
-		my @articles = ($DOM);
-		my @ids = getSimpleArticleIDs (\@articles);
-		if (@ids > 0) {
-		    $sequenceIdentifier = $ids[0];
-		}
-		else {
-		    print STDERR "Error - no sequence identifier!!!\n";
-		}
-		
-		# Los contenidos los devuelve como una lista, dado que 
-		# el objeto de la ontologia podria tener una relacion
-		# "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
-		
-		# The Sequence as a string
-		
-		($nucleotide) = getNodeContentWithArticle($DOM, "String", "SequenceString");
-		# Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		# (espacios, \n, ...) pq nadie asegura que no los hayan. 
-		$nucleotide =~ s/\W+//sg; # trim trailing whitespace
-		
-		# Add the sequence into a hash table
-		
-		$sequences{$sequenceIdentifier} = $nucleotide;		
+
+		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
@@ -480,26 +413,7 @@ sub _do_query_GeneID {
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
 		
 		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
-		    
-		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $sequence_article_DOM ] );
-
-		    # print STDERR "Sequence DOM: " . $sequence_article_DOM->toString() . "\n";
-
-		    my ($nucleotide) = getNodeContentWithArticle($sequence_article_DOM, "String", "SequenceString");
-		    # Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		    # (espacios, \n, ...) pq nadie asegura que no los hayan.
-		    $nucleotide =~ s/\W+//sg; # trim trailing whitespace
-		    
-		    if (length ($nucleotide) < 1) {
-			print STDERR "nucleotide sequence not parsed properly...\n";
-		    }
-
-		    # print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
-		    # print STDERR "nucleotide length: " . length ($nucleotide) . "\n";
-		    
-		    # Add the sequence into a hash table
-		    
-		    $sequences{$sequenceIdentifier} = $nucleotide;
+		   %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
 		}
 	    }
 	    else {
@@ -527,11 +441,9 @@ sub _do_query_GeneID {
     # la podriamos realizar en una funcion a parte si fuese compleja.  
 
     # Quick hack to add the sequence identifier
-    # Anyway even if the parsing code handles input collection, the output report code doesn't and the specs tell that the input and the output are simple articles !!
+    # Anyway even if the parsing code handles input collection, the output report code doesn't and the runGeneIDGFF service registration specs tell that the input and the output are simple articles !!
 
-    my @sequences = keys (%sequences);
-    my $sequenceIdentifier = $sequences[0];
-    
+    my ($sequenceIdentifier) = keys (%sequences);
     my $output_article_name = "geneid_predictions";
 
     my $input = <<PRT;
@@ -553,8 +465,6 @@ PRT
 	
     return $MOBY_RESPONSE;
 }
-
-
 
 
 =head2 runGeneID 

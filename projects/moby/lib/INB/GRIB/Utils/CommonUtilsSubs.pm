@@ -7,7 +7,11 @@ use Data::Dumper;
 
 use XML::LibXML;
 
+# Bioperl
 use Bio::Seq;
+
+# Biomoby
+use MOBY::CommonSubs qw(:all);
 
 require Exporter;
 
@@ -31,6 +35,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
   &getTextContentfromXML
   &createSequenceObjectsFromFASTA
+  &parseMobySequenceObjectFromDOM
 );
 
 our $VERSION = '1.0';
@@ -156,6 +161,39 @@ sub _parse_fasta_sequences {
     }
     
     return $seqobjs;
+}
+
+
+sub parseMobySequenceObjectFromDOM {
+  my $self = shift;
+  my ($DOM, $sequences_hash) = @_;
+
+  my $sequenceIdentifier;  
+  my $sequence_str;
+  
+  my @articles = ($DOM);
+  ($sequenceIdentifier) = getSimpleArticleIDs (\@articles);
+  if (not defined $sequenceIdentifier) {
+    print STDERR "Error - no sequence identifier!!!\n";
+    exit 0;
+  }                                    
+  
+  # Los contenidos los devuelve como una lista, dado que
+  # el objeto de la ontologia podria tener una relacion
+  # "has" n-aria. Bien, en nuestro caso solo habia un peptido.
+
+  # The Sequence as a string  
+
+  ($sequence_str) = getNodeContentWithArticle($DOM, "String", "SequenceString");
+  # Lo que hacemos aqui es limpiar un sting de caracteres raros
+  # (espacios, \n, ...) pq nadie asegura que no los hayan.
+  $sequence_str =~ s/\W+//sg; # trim trailing whitespace
+
+  # Add the sequence into a hash table
+   
+  $sequences_hash->{$sequenceIdentifier} = $sequence_str;
+  
+  return %$sequences_hash;
 }
 
 1;

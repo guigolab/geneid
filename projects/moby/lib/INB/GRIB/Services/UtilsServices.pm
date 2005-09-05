@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.7 2005-08-02 12:50:35 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.8 2005-09-05 14:50:16 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -151,8 +151,6 @@ sub _do_query_TranslateGeneIDGFF {
     
     my $MOBY_RESPONSE = "";     # set empty response
 
-    my $_output_format = "FASTA";
-    
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $translation_table = "Standard (1)";
 
@@ -217,32 +215,8 @@ sub _do_query_TranslateGeneIDGFF {
 		    print STDERR "\"sequences\" tag is a simple article...\n";
 		}
 
-		my $sequenceIdentifier;
-		my $nucleotide;
+                %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 
-		my @articles = ($DOM);
-		my @ids = getSimpleArticleIDs (\@articles);
-		if (@ids > 0) {
-		    $sequenceIdentifier = $ids[0];
-		}
-		else {
-		    print STDERR "Error - no sequence identifier!!!\n";
-		}
-
-		# Los contenidos los devuelve como una lista, dado que 
-		# el objeto de la ontologia podria tener una relacion
-		# "has" n-aria. Bien, en nuestro caso solo habia un peptido. 
-		
-		# The Sequence as a string
-		
-		($nucleotide) = getNodeContentWithArticle($DOM, "String", "SequenceString");
-		# Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		# (espacios, \n, ...) pq nadie asegura que no los hayan. 
-		$nucleotide =~ s/\W+//sg; # trim trailing whitespace
-		
-		# Add the sequence into a hash table
-		
-		$sequences{$sequenceIdentifier} = $nucleotide;
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 
@@ -254,30 +228,7 @@ sub _do_query_TranslateGeneIDGFF {
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
 		
 		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
-		    
-		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $sequence_article_DOM ] );
-
-		    if ($_debug) {
-			# print STDERR "Sequence DOM: " . $sequence_article_DOM->toString() . "\n";
-		    }
-
-		    my ($nucleotide) = getNodeContentWithArticle($sequence_article_DOM, "String", "SequenceString");
-		    # Lo que hacemos aqui es limpiar un sting de caracteres raros 
-		    # (espacios, \n, ...) pq nadie asegura que no los hayan.
-		    $nucleotide =~ s/\W+//sg; # trim trailing whitespace
-		    
-		    if (length ($nucleotide) < 1) {
-			print STDERR "nucleotide sequence not parsed properly...\n";
-		    }
-		  
-		    if ($_debug) {
-			print STDERR "sequenceIdentifier: $sequenceIdentifier\n";
-			print STDERR "nucleotide length: " . length ($nucleotide) . "\n";
-		    }
-
-		    # Add the sequence into a hash table
-		    
-		    $sequences{$sequenceIdentifier} = $nucleotide;
+		    %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
 		}
 		
 	    }
