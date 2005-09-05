@@ -70,8 +70,8 @@ $AUTH = "genome.imim.es";
 #
 ##################################################################
 
-my $input_data_dir            = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices/inputData";
-my $control_data_dir          = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices/outputControl";
+my $input_data_dir            = "./inputData";
+my $control_data_dir          = "./outputControl";
 
 my $nucleotide_sequence_xml_file = "Hsap_BTK.msk.xml";
 my $tblastx_output_xml_file   = "Hsap_BTK.tbx.xml";
