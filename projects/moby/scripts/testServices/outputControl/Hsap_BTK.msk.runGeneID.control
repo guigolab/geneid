@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
         <moby:mobyData moby:queryID='1'>
-            <moby:Simple moby:articleName='geneid_predictions'><moby:text-html namespace='' id=''>
+            <moby:Simple moby:articleName='geneid_predictions'><moby:text-html namespace='' id='Hsap_BTK'>
 <![CDATA["
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -8,7 +8,7 @@
  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
  <META NAME="Generator" CONTENT="Hacker Hands">
  <META NAME="author" CONTENT="Josep F. Abril and Enrique Blanco">
- <!-- $Id: Hsap_BTK.msk.runGeneID.control,v 1.1 2005-08-10 14:10:21 arnau Exp $ -->
+ <!-- $Id: Hsap_BTK.msk.runGeneID.control,v 1.2 2005-09-05 14:48:43 arnau Exp $ -->
  <!-- KEYWORDS and DESCRIPTION for INTERNET SEARCH ENGINES -->
   <META NAME="keywords"    CONTENT="Results of geneid server, gene prediction server, geneid, geneid 1.0, geneid 1.1">
   <META NAME="description" CONTENT="This is the gene-prediction server running geneid software.">
@@ -192,7 +192,7 @@ Hsap_BTK	geneid_v1.2	Single	66498	67766	26.10	+	0	Hsap_BTK_5
 Hsap_BTK	geneid_v1.2	First	72723	72965	-0.37	+	0	Hsap_BTK_6
 Hsap_BTK	geneid_v1.2	Terminal	73338	73418	 0.40	+	0	Hsap_BTK_6
 </pre></tt>
-<blockquote><hr><TABLE border=0 cellpadding=0 cellspacing=0 width=600><TR><TD bgcolor=lightblue><FONT size=2>Species:<br><i>Homo sapiens</i><br><br>Command:<br><code>geneid -P human.param -G geneid14473monstre1.imim.es.fasta</code><br><br>Running time:<br><font color=red>0.3 secs</font><br></font></TD></TR></TABLE></<blockquote><P><!-- $Id: Hsap_BTK.msk.runGeneID.control,v 1.1 2005-08-10 14:10:21 arnau Exp $ -->
+<blockquote><hr><TABLE border=0 cellpadding=0 cellspacing=0 width=600><TR><TD bgcolor=lightblue><FONT size=2>Species:<br><i>Homo sapiens</i><br><br>Command:<br><code>geneid -P human.param -G geneid14473monstre1.imim.es.fasta</code><br><br>Running time:<br><font color=red>0.3 secs</font><br></font></TD></TR></TABLE></<blockquote><P><!-- $Id: Hsap_BTK.msk.runGeneID.control,v 1.2 2005-09-05 14:48:43 arnau Exp $ -->
 </P>
 </td>
 <td class="userspace" border=0 cellpadding=0 cellspacing=0 width="10px">&nbsp;</td>
@@ -208,7 +208,7 @@ Hsap_BTK	geneid_v1.2	Terminal	73338	73418	 0.40	+	0	Hsap_BTK_6
  onMouseover="window.status='Data Release Policy and Software License';">Disclaimer</A>
  </td>
  <td id="trailb" align=center> &nbsp;
-<!-- <B>Last Updated&nbsp;<I>$Date: 2005-08-10 14:10:21 $</I><BR>&copy;&nbsp;Genome BioInformatics Research Laboratory</B> -->
+<!-- <B>Last Updated&nbsp;<I>$Date: 2005-09-05 14:48:43 $</I><BR>&copy;&nbsp;Genome BioInformatics Research Laboratory</B> -->
  </td>
  <td id="trailc" align=rigth>
 <A HREF="MAILTO:gmaster@imim.es"
