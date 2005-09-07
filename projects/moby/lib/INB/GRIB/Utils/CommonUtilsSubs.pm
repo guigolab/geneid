@@ -64,7 +64,7 @@ sub getTextContentFromXML {
 
 sub createSequenceObjectsFromFASTA {
     my $self = shift;
-    my ($fasta_sequences, $object_type) = @_;
+    my ($fasta_sequences, $object_type, $namespace) = @_;
 
     my $moby_sequence_objects = [];
     my $sequence_objects      = _parse_fasta_sequences ($fasta_sequences);
@@ -78,7 +78,7 @@ sub createSequenceObjectsFromFASTA {
 	my $seq_length = length ($sequence);
 	
 	my $moby_object = <<PRT;
-<moby:$object_type namespace='' id='$seq_id'>
+<moby:$object_type namespace='$namespace' id='$seq_id'>
   <Integer namespace="" id="" articleName="Length">$seq_length</Integer>
   <String namespace="" id=""  articleName="SequenceString">$sequence</String>
 </moby:$object_type>

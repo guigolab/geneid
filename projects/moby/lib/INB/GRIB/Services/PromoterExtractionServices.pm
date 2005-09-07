@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.5 2005-08-05 14:31:23 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.6 2005-09-07 15:48:56 arnau Exp $
 #
 #
 # This file is an instance of a template written 
@@ -273,13 +273,14 @@ sub _do_query_PromoterExtraction {
 
     my $output_object_type  = "DNASequence";
     my $output_article_name = "upstream_sequences";
+    my $namespace = "ENSEMBL";
 
     if (not defined $fasta_sequences) {
 	# Return an emtpy message !
 	return collectionResponse (undef, $output_article_name, $queryID);
     }
 
-    my $sequence_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type);
+    my $sequence_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type, $namespace);
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
@@ -356,11 +357,6 @@ sub getUpstreamSeqfromEnsembl {
 	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
 	# es una coleccion de respuestas a cada una de las consultas.
         my $MOBY_RESPONSE = "";             # set empty response
-
-	#
-	# The moby output format for this service is text-html
-	# (The GeneID output format for this service is by default GFF - right now it is hardcoded)
-	#
 
 	# Para cada query ejecutaremos el _execute_query.
         foreach my $query(@queries){

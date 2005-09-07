@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.8 2005-09-05 14:50:16 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.9 2005-09-07 15:48:56 arnau Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -337,7 +337,14 @@ sub _do_query_TranslateGeneIDGFF {
     
     my $output_object_type  = "AminoAcidSequence";
     my $output_article_name = "peptides";
-    my $aminoacid_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type);
+    my $namespace = "";
+
+    if (not defined $fasta_sequences) {
+	# Return an emtpy message !
+	return collectionResponse (undef, $output_article_name, $queryID);
+    
+}
+    my $aminoacid_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type, $namespace);
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
