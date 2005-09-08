@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.22 2005-09-08 10:38:37 gmaster Exp $
+# $Id: Factory.pm,v 1.23 2005-09-08 15:12:34 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -766,7 +766,7 @@ sub MatScan_call {
 	unlink $seqfile;
 
         if (defined $matscan_output) {
-		return ($matscan_output);
+		return $matscan_output;
 	}	
 	else {
 		# What else better to return ??
