@@ -35,6 +35,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
   &getTextContentfromXML
   &createSequenceObjectsFromFASTA
+  &parseSingleGFFIntoCollectionGFF
   &parseMobySequenceObjectFromDOM
 );
 
@@ -88,6 +89,71 @@ PRT
     }
 
     return $moby_sequence_objects;
+}
+
+sub parseSingleGFFIntoCollectionGFF {
+    my ($report, $output_format, $namespace) = @_;
+    my $output_objects = [];
+    
+    my @lines = split ('\n', $report);
+    my $sequenceIdentifier;
+    
+    my $report_tmp = "";
+
+    while (my $line = shift @lines) {
+	my $sequenceIdentifier_tmp;
+
+	# Get the sequence identifier
+	if ($line =~ /^([^\t])\t.+/) {
+	    my $sequenceIdentifier = $1;
+	}
+	else {
+	    print STDERR "in parseSingleGFFIntoCollectionGFF, can't parse sequence identifier from GFF,\n$line\n";
+	    exit 0;
+	}
+	
+	if (not defined $sequenceIdentifier) {
+	    $sequenceIdentifier = $sequenceIdentifier_tmp;
+	    $report_tmp .= $line;
+	}
+	elsif ($sequenceIdentifier_tmp eq $sequenceIdentifier_tmp) {
+	    $report_tmp .= $line;
+	}
+	else {
+	    # New sequence report
+	    # Build the GFF Moby object
+
+	    my $input = <<PRT;
+<moby:$output_format namespace='' id='$sequenceIdentifier'>
+<![CDATA[
+$report_tmp
+]]>
+</moby:$output_format>
+PRT
+
+            push (@$output_objects, $input);
+
+	    # Reinitialisation
+	    $sequenceIdentifier = $sequenceIdentifier_tmp;
+	    $report_tmp         = $line;
+	    
+        }
+    }
+
+    # Add the last report !
+
+    my $input = <<PRT;
+<moby:$output_format namespace='' id='$sequenceIdentifier'>
+<![CDATA[
+$report_tmp
+]]>
+</moby:$output_format>
+PRT
+
+    push (@$output_objects, $input);
+
+    return $output_objects;
+   
 }
 
 # @param sequences in FASTA format as a string
