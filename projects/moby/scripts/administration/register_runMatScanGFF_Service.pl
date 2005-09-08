@@ -166,14 +166,14 @@ my ($REG) = $Central->registerService(
 				      secondary	=> {
 					  'matrix' => {
 					      datatype => 'String',
-					      enum     => ['Transfax','MEME','Jaspar'],
-					      default  => 'Transfax',
+					      enum     => ['Transfac','MEME','Jaspar'],
+					      default  => 'Transfac',
 					  },
 					  'threshold' => {
 					      datatype => 'Float',
 					      max      => 1,
 					      min      => 0,
-					      default  => 0.5
+					      default  => 0.8
 					  },
 					  'strands' => {
 					      datatype => 'String',
