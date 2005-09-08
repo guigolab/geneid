@@ -32,7 +32,7 @@ return <<"END_HELP";
 Description: Execute GeneID Moby services available from genome.imim.es
 Usage:
 
-    retrieveService.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
+    Geneid_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
 	-h help
 	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
 		<1> or Chirimoyo
@@ -43,7 +43,7 @@ Usage:
 	-i Sequence(s) input file, in FASTA format - optional
 	
 Examples using some combinations:
-	perl retrieveService.pl -x 1 -s runGeneIDGFF -f /home/ug/arnau/data/AC005155.fa
+	perl Geneid_Moby_service.pl -x 1 -s runGeneIDGFF -f /home/ug/arnau/data/AC005155.fa
 
 END_HELP
 
