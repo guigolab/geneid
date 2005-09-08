@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.21 2005-08-05 14:29:42 gmaster Exp $
+# $Id: Factory.pm,v 1.22 2005-09-08 10:38:37 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -109,6 +109,7 @@ our @EXPORT = qw(
   &GOstat_call
   &TranslateGeneIDPredictions_call
   &PromoterExtraction_call
+  &MatScan_call
 );
 
 our $VERSION = '1.00';
@@ -338,7 +339,6 @@ sub GeneID_call {
 		return undef;
 	}
 }
-
 
 =head2 SGP2_call
 
@@ -660,6 +660,120 @@ sub PromoterExtraction_call {
 	return undef;
     }
 }
+
+
+=head2 MatScan_call
+
+ Title   : MatScan_call
+ Usage   : $report = MatScan_call (@params);
+         : 
+         : ## where @params are,
+         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+         :            'arg2'  => "query 1", ## optional
+         :            'arg3'  => "nr");     ## optional (default: nr)
+ Returns : Devuelve un string que contiene el resultado de la ejecución.
+
+=cut
+
+sub MatScan_call {
+        my %args = @_;
+
+	##############################
+	# 
+	# Code doesn't cope with collection !!!
+	#
+        ##############################
+
+        # relleno los parametros por defecto MatScan_call
+
+        my $sequences          = $args{sequences} || undef;
+	my $format             = $args{format} || "";
+	my $parameters         = $args{parameters} || undef;
+
+	# Get the parameters
+
+	my $threshold = $parameters->{threshold};
+	my $strands   = $parameters->{strands};
+	my $matrix    = $parameters->{matrix};
+	
+        # Llama a GeneID en local
+        my $_matscan_dir  = "/home/ug/gmaster/Meta/";
+        my $_matscan_bin  = "bin/matscan";
+        my $_matscan_args = "-T $threshold -s";
+	my $_matrix_file;
+	
+	if ($strands eq "Both") {
+	    # Default anyway
+	}
+	elsif ($strands eq "Forward") {
+	    $_matscan_args .= "W";
+	}
+	elsif ($strands eq "Reverse") {
+	    $_matscan_args .= "C";
+	}
+	
+        SWITCH: {
+	    if ($matrix eq "Transfac") { $_matscan_args .= "m"; $_matrix_file = "$_matscan_dir/collections/Transfac_likelihood.matrices"; last SWITCH; }
+	    if ($matrix eq "MEME")     { $_matscan_args .= "l"; $_matrix_file = "$_matscan_dir/collections/Promo_likelihood.matrices"; last SWITCH; }
+	    if ($matrix eq "Jaspar")   { $_matscan_args .= "j"; $_matrix_file = "$_matscan_dir/collections/Jaspar_likelihood.matrices"; last SWITCH; }
+	    # Default is Transfac
+	    $_matscan_args .= "m";
+	    $_matrix_file = "$_matscan_dir/collections/Transfac_likelihood.matrices";
+	}
+        
+	# Generate a temporary file locally with the sequence(s) in FASTA format
+	# locally, ie not on a NFS mounted directory, for speed sake
+
+	my ($seq_fh, $seqfile) = tempfile("/tmp/MATSCAN.XXXXXX", UNLINK => 0);
+
+	# Bioperl sequence factory
+	
+	my $sout = Bio::SeqIO->new (
+				    -fh     => $seq_fh,
+				    -format => 'fasta'
+				    );
+	
+	my @seqIds = keys (%$sequences);
+
+	foreach my $sequenceIdentifier (@seqIds) {
+
+	    my $nucleotides = $sequences->{$sequenceIdentifier};
+
+	    # bioperl object
+	    
+	    my $seqobj = Bio::Seq->new (
+					-display_id => $sequenceIdentifier,
+					-seq        => $nucleotides
+					);
+	    
+	    $sout->write_seq ($seqobj);
+	    
+	}
+
+	close $seq_fh;
+
+	# Test empty file
+	if (-z $seqfile) {
+	    print STDERR "Error, empty sequence file...\n";
+	}
+
+	# print STDERR "Running Matscan, with this command:\n";
+	# print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file\n";
+
+        my $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file | grep MatScan/;
+        
+	# Comment this line if you want to keep the file...
+	unlink $seqfile;
+
+        if (defined $matscan_output) {
+		return ($matscan_output);
+	}	
+	else {
+		# What else better to return ??
+		return undef;
+	}
+}
+
 
 1;
 
