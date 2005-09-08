@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.1 2005-09-08 10:38:15 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.2 2005-09-08 15:13:12 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -312,35 +312,13 @@ PRT
         return $MOBY_RESPONSE;
     }
     elsif ($_input_type eq "collection") {
-
+	
 	# The input was a collection of Sequences, so we have to return a collection of GFF objects
 	
-	my @reports        = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
-	my $output_objects = [];
-	foreach my $report (@reports) {
-	    # Get the sequence identifier
-	    my $sequenceIdentifier;
-	    if ($report =~ /^([^\t]+)\t.+/) {
-		$sequenceIdentifier = $1;
-	    }
-	    else {
-		print STDERR "Error, can't parse the sequence identifier in _do_query_MatScan method\n";
-	    }
-
-	    print STDERR "sequenceIdentifier, $sequenceIdentifier\n";
-
-	    # Build the GFF Moby object
-	    my $input = <<PRT;
-<moby:$_format namespace='' id='$sequenceIdentifier'>
-<![CDATA[
-$report
-]]>
-</moby:$_format>
-PRT
-	    my $output_object = simpleResponse($input, $output_article_name, $queryID);
-	    push (@$output_objects, $output_object);
-	}
+	my $report         = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
 	
+	my $output_objects = parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+		
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
 	# volver a encapsularlo en un objeto biomoby de respuesta. Pero 
 	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
