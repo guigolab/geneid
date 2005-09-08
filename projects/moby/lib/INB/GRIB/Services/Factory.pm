@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.23 2005-09-08 15:12:34 gmaster Exp $
+# $Id: Factory.pm,v 1.24 2005-09-08 16:05:33 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -110,6 +110,7 @@ our @EXPORT = qw(
   &TranslateGeneIDPredictions_call
   &PromoterExtraction_call
   &MatScan_call
+  &MetaAlignment_call
 );
 
 our $VERSION = '1.00';
@@ -678,12 +679,6 @@ sub PromoterExtraction_call {
 sub MatScan_call {
         my %args = @_;
 
-	##############################
-	# 
-	# Code doesn't cope with collection !!!
-	#
-        ##############################
-
         # relleno los parametros por defecto MatScan_call
 
         my $sequences          = $args{sequences} || undef;
@@ -696,7 +691,7 @@ sub MatScan_call {
 	my $strands   = $parameters->{strands};
 	my $matrix    = $parameters->{matrix};
 	
-        # Llama a GeneID en local
+        # Llama a MatScan en local
         my $_matscan_dir  = "/home/ug/gmaster/Meta/";
         my $_matscan_bin  = "bin/matscan";
         my $_matscan_args = "-T $threshold -s";
@@ -772,6 +767,77 @@ sub MatScan_call {
 		# What else better to return ??
 		return undef;
 	}
+}
+
+
+sub MetaAlignment_call {
+    my %args = @_;  
+
+    #
+    # Make sure that the map GFF data are ordered - "sort -3"
+    # 
+
+    # relleno los parametros por defecto MetaAlignment_call
+
+    my $map1 = $args{map1};
+    my $map2 = $args{map2};
+    my $parameters = $args{parameters} || undef;
+
+    # Get the parameters
+
+    my $alpha_penalty  = $parameters->{alpha_penalty};
+    my $lambda_penalty = $parameters->{lambda_penalty};
+    my $mu_penalty     = $parameters->{mu_penalty};
+	
+    # Llama a Meta-alignment en local
+    my $_meta_alignment_dir  = "/home/ug/gmaster/Meta/";
+    my $_meta_alignment_bin  = "bin/meta";
+    my $_meta_alignment_args = "-g -a $alpha_penalty -l $lambda_penalty -m $mu_penalty";
+
+    # Create the temp map files
+
+    my ($map1_fh, $map1_file) = tempfile("/tmp/META_MAP1.XXXXXX", UNLINK => 0);
+    close ($map1_fh);
+    
+    open (FILE, ">$map1_file") or die "can't open temp file, $map1_file!\n";
+    print FILE $map1;
+    close FILE;
+
+    # Create the temp map files
+
+    my ($map2_fh, $map2_file) = tempfile("/tmp/META_MAP2.XXXXXX", UNLINK => 0);
+    close ($map2_fh);
+    
+    open (FILE, ">$map2_file") or die "can't open temp file, $map2_file!\n";
+    print FILE $map2;
+    close FILE;
+
+    # Sorting
+
+    my $map1_sorted = qx/cat $map1_file | sort +3n/;
+
+    open (FILE, ">$map1_file") or die "can't open temp file, $map1_file!\n";
+    print FILE $map1_sorted;
+    close FILE;
+
+    my $map2_sorted = qx/cat $map2_file | sort +3n/;
+
+    open (FILE, ">$map2_file") or die "can't open temp file, $map2_file!\n";
+    print FILE $map2_sorted;
+    close FILE;
+
+    # Run meta
+
+    # print STDERR "Running Meta-alignment, with this command:\n";
+    # print STDERR "$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file\n";
+
+    my $meta_output = qx/$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file/;
+
+    unlink $map1_file;
+    unlink $map2_file;
+
+    return $meta_output;
+    
 }
 
 
