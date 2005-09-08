@@ -26,6 +26,7 @@ use INB::GRIB::Services::SGP2Services;
 use INB::GRIB::Services::GOstatServices;
 use INB::GRIB::Services::UtilsServices;
 use INB::GRIB::Services::PromoterExtractionServices;
+use INB::GRIB::Services::MatScanServices;
 ###############################################################################
 
 sub daemonize {
@@ -63,5 +64,7 @@ $x->dispatch_with({
     'http://biomoby.org/#runGOstat'    => 'INB::GRIB::Services::GOstatServices',
     'http://biomoby.org/#translateGeneIDGFFPredictions' => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#getUpstreamSeqfromEnsembl'     => 'INB::GRIB::Services::PromoterExtractionServices',
+    'http://biomoby.org/#runMatScanGFF'                 => 'INB::GRIB::Services::MatScanServices',
+    'http://biomoby.org/#runMatScanGFFCollection'       => 'INB::GRIB::Services::MatScanServices',
 });
 $x->handle;
