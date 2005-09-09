@@ -5,10 +5,15 @@ use warnings;
 use Carp;
 use Data::Dumper;
 
+use File::Temp qw/tempfile/;
+use FileHandle;
+
+# XML DOM parsing library
 use XML::LibXML;
 
 # Bioperl
 use Bio::Seq;
+use Bio::SeqIO;
 
 # Biomoby
 use MOBY::CommonSubs qw(:all);
@@ -37,6 +42,8 @@ our @EXPORT = qw(
   &createSequenceObjectsFromFASTA
   &parseSingleGFFIntoCollectionGFF
   &parseMobySequenceObjectFromDOM
+  &parseMobySequenceObjectFromDOMintoBioperlObject
+  &convertSequencesIntoFASTA
 );
 
 our $VERSION = '1.0';
@@ -229,12 +236,17 @@ sub _parse_fasta_sequences {
     return $seqobjs;
 }
 
+# @Input $sequences_hash, a reference to a hashtable of sequences
+# The hash keys are the sequence identifiers, and the hash values are the string sequences.
+# @Input $DOM, The XML Moby Document containing the sequence data
+
+# @Return %sequences_hash, the input Hashtable (as a hash not a reference). The parsed sequences will be appended to it.
 
 sub parseMobySequenceObjectFromDOM {
   my $self = shift;
   my ($DOM, $sequences_hash) = @_;
 
-  my $sequenceIdentifier;  
+  my $sequenceIdentifier;
   my $sequence_str;
   
   my @articles = ($DOM);
@@ -260,6 +272,76 @@ sub parseMobySequenceObjectFromDOM {
   $sequences_hash->{$sequenceIdentifier} = $sequence_str;
   
   return %$sequences_hash;
+}
+
+# @Input $DOM, The XML Moby Document containing the sequence data
+
+# @Return $seqobj, a Bioperl sequence object
+
+sub parseMobySequenceObjectFromDOMintoBioperlObject {
+  my $self = shift;
+  my ($DOM) = @_;
+
+  my $sequenceIdentifier;
+  my $sequence_str;
+  my $description;
+  
+  my @articles = ($DOM);
+  ($sequenceIdentifier) = getSimpleArticleIDs (\@articles);
+  if (not defined $sequenceIdentifier) {
+    print STDERR "Error - no sequence identifier!!!\n";
+    exit 0;
+  }                                    
+  
+  # Los contenidos los devuelve como una lista, dado que
+  # el objeto de la ontologia podria tener una relacion
+  # "has" n-aria. Bien, en nuestro caso solo habia un peptido.
+
+  # The Sequence as a string  
+
+  ($sequence_str) = getNodeContentWithArticle($DOM, "String", "SequenceString");
+  # Lo que hacemos aqui es limpiar un sting de caracteres raros
+  # (espacios, \n, ...) pq nadie asegura que no los hayan.
+  $sequence_str =~ s/\W+//sg; # trim trailing whitespace
+
+  # The description
+  ($description) = getNodeContentWithArticle($DOM, "String", "Description");
+  if (not defined $description) {
+      $description = "";
+  }
+
+  # Instanciate the bioperl object
+   
+  my $seqobj = Bio::Seq->new (
+			      -display_id => $sequenceIdentifier,
+			      -seq        => $sequence_str,
+			      -desc       => $description,
+			      );
+  
+  return $seqobj;
+}
+
+sub convertSequencesIntoFASTA {
+    my ($seqobjs)  = @_;
+
+    my ($fh, $tempfile) = tempfile("/tmp/FASTA.XXXXXX", UNLINK => 0);
+    my $out = Bio::SeqIO->new(
+			      -fh => $fh,
+			      -format => 'fasta'
+			      );
+
+    foreach my $seqobj (@$seqobjs) {
+	$out->write_seq ($seqobj);
+    }
+
+    close $fh;
+    $fh = new FileHandle "$tempfile", "r";
+    my @fasta_sequences = $fh->getlines;
+    unlink $tempfile;
+
+    my $fasta_sequences = join ('', @fasta_sequences);
+
+    return $fasta_sequences;
 }
 
 1;
