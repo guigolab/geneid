@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:LDYEIP8P2T4" author="" title="" />
+  <s:processor name="fromFASTAtoGenericSequence_1">
+    <s:description>Converts a sequence in Fasta format into a GenericSequence object</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>fromFASTAtoGenericSequence</s:serviceName>
+      <s:authorityName>www.pcm.uam.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="fromFASTAtoGenericSequence_2">
+    <s:description>Converts a sequence in Fasta format into a GenericSequence object</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>fromFASTAtoGenericSequence</s:serviceName>
+      <s:authorityName>www.pcm.uam.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFF_1">
+    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a simple DNASequence object and returns a simple GFF object</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFF_2">
+    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a simple DNASequence object and returns a simple GFF object</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMetaAlignment">
+    <s:description>Promoter regions analysis program. Meta-alignment produces alignments of sequences of TF binding sites. Use runMatScanGFF to produce the input GFF files</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runMetaAlignment</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="Create_fasta_object_1">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
+  </s:processor>
+  <s:processor name="create_fasta_object_2">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
+  </s:processor>
+  <s:link source="id_1" sink="Create_fasta_object_1:id" />
+  <s:link source="id_2" sink="create_fasta_object_2:id" />
+  <s:link source="namespace" sink="Create_fasta_object_1:namespace" />
+  <s:link source="namespace" sink="create_fasta_object_2:namespace" />
+  <s:link source="sequence_fasta_1" sink="Create_fasta_object_1:stringvalue" />
+  <s:link source="sequence_fasta_2" sink="create_fasta_object_2:stringvalue" />
+  <s:link source="Create_fasta_object_1:mobydata" sink="fromFASTAtoGenericSequence_1:FASTA(_ANON_)" />
+  <s:link source="create_fasta_object_2:mobydata" sink="fromFASTAtoGenericSequence_2:FASTA(_ANON_)" />
+  <s:link source="fromFASTAtoGenericSequence_1:GenericSequence(_ANON_)" sink="runMatScanGFF_1:DNASequence(upstream_sequences)" />
+  <s:link source="fromFASTAtoGenericSequence_2:GenericSequence(_ANON_)" sink="runMatScanGFF_2:DNASequence(upstream_sequences)" />
+  <s:link source="runMatScanGFF_1:GFF(matscan_predictions)" sink="runMetaAlignment:GFF(map1)" />
+  <s:link source="runMatScanGFF_1:output" sink="MatScan_Moby_1" />
+  <s:link source="runMatScanGFF_2:GFF(matscan_predictions)" sink="runMetaAlignment:GFF(map2)" />
+  <s:link source="runMatScanGFF_2:output" sink="MatScan_Moby_2" />
+  <s:link source="runMetaAlignment:output" sink="Meta_Moby_output" />
+  <s:source name="id_1" />
+  <s:source name="id_2" />
+  <s:source name="namespace" />
+  <s:source name="sequence_fasta_1" />
+  <s:source name="sequence_fasta_2" />
+  <s:sink name="Meta_Moby_output" />
+  <s:sink name="MatScan_Moby_1" />
+  <s:sink name="MatScan_Moby_2" />
+</s:scufl>
+
+
