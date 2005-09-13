@@ -398,6 +398,9 @@ if (defined $service) {
     
 }
 
+my $t2 = Benchmark->new ();
+print  STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
+
 #
 # End
 #
