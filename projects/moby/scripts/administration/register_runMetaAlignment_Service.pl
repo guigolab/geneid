@@ -16,7 +16,7 @@ use Getopt::Std;
 # For debugging
 use Data::Dumper;
 
-use SOAP::Lite + 'trace';
+# use SOAP::Lite + 'trace';
 
 sub help {
     return <<"END_HELP";
