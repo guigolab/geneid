@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.25 2005-09-15 12:37:55 gmaster Exp $
+# $Id: Factory.pm,v 1.26 2005-09-15 13:07:02 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -769,8 +769,8 @@ sub MatScan_call {
 	    print STDERR "Error, empty sequence file...\n";
 	}
 
-	print STDERR "Running Matscan, with this command:\n";
-	print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file\n";
+	# print STDERR "Running Matscan, with this command:\n";
+	# print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file\n";
 
         my $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file | grep MatScan/;
         
@@ -805,11 +805,17 @@ sub MetaAlignment_call {
     my $alpha_penalty  = $parameters->{alpha_penalty};
     my $lambda_penalty = $parameters->{lambda_penalty};
     my $mu_penalty     = $parameters->{mu_penalty};
+
+    my $output_format  = $parameters->{output_format};
 	
     # Llama a Meta-alignment en local
     my $_meta_alignment_dir  = "/home/ug/gmaster/Meta/";
     my $_meta_alignment_bin  = "bin/meta";
-    my $_meta_alignment_args = "-g -a $alpha_penalty -l $lambda_penalty -m $mu_penalty";
+    my $_meta_alignment_args = "-a $alpha_penalty -l $lambda_penalty -m $mu_penalty";
+
+    if ($output_format eq "GFF") {
+	$_meta_alignment_args .= " -g";
+    }
 
     # Create the temp map files
 
