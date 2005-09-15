@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.24 2005-09-08 16:05:33 gmaster Exp $
+# $Id: Factory.pm,v 1.25 2005-09-15 12:37:55 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -687,40 +687,57 @@ sub MatScan_call {
 
 	# Get the parameters
 
-	my $threshold = $parameters->{threshold};
-	my $strands   = $parameters->{strands};
-	my $matrix    = $parameters->{matrix};
+	my $threshold   = $parameters->{threshold};
+	my $strands     = $parameters->{strands};
+	my $matrix      = $parameters->{matrix};
+	my $matrix_mode = $parameters->{matrix_mode};
 	
         # Llama a MatScan en local
-        my $_matscan_dir  = "/home/ug/gmaster/Meta/";
+        my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";
         my $_matscan_bin  = "bin/matscan";
-        my $_matscan_args = "-T $threshold -s";
+        my $_matscan_args = "-T $threshold";
 	my $_matrix_file;
 	
 	if ($strands eq "Both") {
 	    # Default anyway
 	}
 	elsif ($strands eq "Forward") {
-	    $_matscan_args .= "W";
+	    $_matscan_args .= " -W";
 	}
 	elsif ($strands eq "Reverse") {
-	    $_matscan_args .= "C";
+	    $_matscan_args .= " -C";
 	}
 	
-        SWITCH: {
-	    if ($matrix eq "Transfac") { $_matscan_args .= "m"; $_matrix_file = "$_matscan_dir/collections/Transfac_likelihood.matrices"; last SWITCH; }
-	    if ($matrix eq "MEME")     { $_matscan_args .= "l"; $_matrix_file = "$_matscan_dir/collections/Promo_likelihood.matrices"; last SWITCH; }
-	    if ($matrix eq "Jaspar")   { $_matscan_args .= "j"; $_matrix_file = "$_matscan_dir/collections/Jaspar_likelihood.matrices"; last SWITCH; }
-	    # Default is Transfac
-	    $_matscan_args .= "m";
-	    $_matrix_file = "$_matscan_dir/collections/Transfac_likelihood.matrices";
+	if ($matrix_mode eq "raw format") {
+	    SWITCH: {
+	      if ($matrix eq "Transfac") { $_matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
+	      if ($matrix eq "MEME")     { $_matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
+	      if ($matrix eq "Jaspar")   { $_matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
+	      # Default is Transfac
+	      $_matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices";
+	  }
+	}
+	elsif ($matrix_mode eq "log-likelihood") {
+
+	  SWITCH: {
+	      if ($matrix eq "Transfac") { $_matscan_args .= " -sm"; $_matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
+	      if ($matrix eq "MEME")     { $_matscan_args .= " -sm"; $_matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
+	      if ($matrix eq "Jaspar")   { $_matscan_args .= " -sm"; $_matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
+	      # Default is Transfac
+	      $_matscan_args .= " -sm";
+	      $_matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices";
+	  }
+	}
+	else {
+	    print STDERR "don't know anything about matrix mode, $matrix_mode!\n";
+	    exit 0;
 	}
         
 	# Generate a temporary file locally with the sequence(s) in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
-
+	
 	my ($seq_fh, $seqfile) = tempfile("/tmp/MATSCAN.XXXXXX", UNLINK => 0);
-
+	
 	# Bioperl sequence factory
 	
 	my $sout = Bio::SeqIO->new (
@@ -729,7 +746,7 @@ sub MatScan_call {
 				    );
 	
 	my @seqIds = keys (%$sequences);
-
+	
 	foreach my $sequenceIdentifier (@seqIds) {
 
 	    my $nucleotides = $sequences->{$sequenceIdentifier};
@@ -752,8 +769,8 @@ sub MatScan_call {
 	    print STDERR "Error, empty sequence file...\n";
 	}
 
-	# print STDERR "Running Matscan, with this command:\n";
-	# print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file\n";
+	print STDERR "Running Matscan, with this command:\n";
+	print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file\n";
 
         my $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file | grep MatScan/;
         

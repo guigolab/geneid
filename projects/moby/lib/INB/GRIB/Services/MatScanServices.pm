@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.2 2005-09-08 15:13:12 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.3 2005-09-15 12:37:55 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -192,6 +192,7 @@ sub _do_query_MatScan {
     
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $matrix;
+    my $matrix_mode;
     my $threshold;
     my $strands;
     
@@ -205,15 +206,21 @@ sub _do_query_MatScan {
     # Get the parameters
     
     ($matrix) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "matrix");
-    if (not defined $strands) {
+    if (not defined $matrix) {
 	# Default is to use Transfac Matrices
 	$matrix = "Transfac";
     }
 
+    ($matrix_mode) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "matrix mode");
+    if (not defined $matrix_mode) {
+	# Default is to use 'log-likelihood' mode
+	$matrix = "log-likelihood";
+    }
+
     ($threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "threshold");
     if (not defined $threshold) {
-	# Default is 0.5
-	$threshold = "0.5";
+	# Default is 0.8
+	$threshold = "0.8";
     }
     
     ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
@@ -224,9 +231,13 @@ sub _do_query_MatScan {
 
     # Add the parsed parameters in a hash table
     
-    $parameters{threshold} = $threshold;
-    $parameters{strands}   = $strands;
-    $parameters{matrix}    = $matrix;
+    $parameters{threshold}   = $threshold;
+    $parameters{strands}     = $strands;
+    $parameters{matrix}      = $matrix;
+    $parameters{matrix_mode} = $matrix_mode;
+    
+    print STDERR "matrix, $matrix\n";
+    print STDERR "matrix mode, $matrix_mode\n";
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
