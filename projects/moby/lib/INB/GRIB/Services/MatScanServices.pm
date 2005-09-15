@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.3 2005-09-15 12:37:55 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.4 2005-09-15 15:05:09 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -140,6 +140,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
+my $_debug = 0;
 
 # Preloaded methods go here.
 
@@ -214,7 +215,7 @@ sub _do_query_MatScan {
     ($matrix_mode) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "matrix mode");
     if (not defined $matrix_mode) {
 	# Default is to use 'log-likelihood' mode
-	$matrix = "log-likelihood";
+	$matrix_mode = "log-likelihood";
     }
 
     ($threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "threshold");
@@ -236,9 +237,11 @@ sub _do_query_MatScan {
     $parameters{matrix}      = $matrix;
     $parameters{matrix_mode} = $matrix_mode;
     
-    print STDERR "matrix, $matrix\n";
-    print STDERR "matrix mode, $matrix_mode\n";
-    
+    if ($_debug) {
+	print STDERR "matrix, $matrix\n";
+	print STDERR "matrix mode, $matrix_mode\n";
+    }
+
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
 	
