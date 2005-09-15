@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="" author="" title="" />
+  <s:processor name="MobyChangeArticleName">
+    <s:beanshell>
+      <s:scriptvalue>import java.io.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import org.apache.xml.serialize.XMLSerializer;
+
+String OutObj="";
+String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
+
+
+DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+
+InputSource Source1 = new InputSource(new StringReader(input));
+InputSource SourceSkel = new InputSource(new StringReader(skel));
+
+Document doc1=db.parse(Source1);
+Document docsalida=db.parse(SourceSkel);
+
+XMLSerializer serializer = new XMLSerializer();
+StringWriter sw=new StringWriter();
+
+// First, Simples
+NodeList nodelist1an = doc1.getElementsByTagName("moby:Simple");
+NodeList nodelist1a = doc1.getElementsByTagName("Simple");
+// Second, Collection
+NodeList nodelist1bn = doc1.getElementsByTagName("moby:Collection");
+NodeList nodelist1b = doc1.getElementsByTagName("Collection");
+// Third, secondary Parameter
+NodeList nodelist1cn = doc1.getElementsByTagName("moby:Parameter");
+NodeList nodelist1c = doc1.getElementsByTagName("Parameter");
+
+NodeList[] globalS={nodelist1an,nodelist1a};
+NodeList[] globalC={nodelist1bn,nodelist1b,nodelist1cn,nodelist1c};
+
+NodeList nodelistfinal = docsalida.getElementsByTagName("moby:mobyData");
+
+serializer.setOutputCharStream(sw);
+
+Node comienzo = nodelistfinal.item(0);
+
+// Common index variable for all this work
+int gi;
+int maxgi;
+
+for(gi=0,maxgi=globalS.length;gi&lt;maxgi;gi++) {
+	if(globalS[gi].getLength()&gt;0) {
+		Node found=globalS[gi].item(0);
+		// Skipping Simples inside collections
+		String nname=found.getParentNode().getNodeName();
+		if(nname.equals("moby:Collection") || nname.equals("Collection"))  next;
+		Node changed=docsalida.importNode(found,true);
+		changed.setAttribute("articleName",articleName);
+		comienzo.appendChild(changed);
+		break;
+	}
+}
+
+if(gi==maxgi) {
+	for(gi=0,maxgi=globalC.length;gi&lt;maxgi;gi++) {
+		if(globalC[gi].getLength()&gt;0) {
+			Node found=globalC[gi].item(0);
+			// Skipping Simples inside collections
+			Node changed=docsalida.importNode(found,true);
+			changed.setAttribute("articleName",articleName);
+			comienzo.appendChild(changed);
+			break;
+		}
+	}
+}
+
+// Last step!!!
+serializer.serialize(docsalida);
+OutObj = sw.toString();
+
+output = OutObj;</s:scriptvalue>
+      <s:beanshellinputlist>
+        <s:beanshellinput s:syntactictype="'text/xml'">input</s:beanshellinput>
+        <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
+      </s:beanshellinputlist>
+      <s:beanshelloutputlist>
+        <s:beanshelloutput s:syntactictype="'text/xml'">output</s:beanshelloutput>
+      </s:beanshelloutputlist>
+    </s:beanshell>
+  </s:processor>
+  <s:link source="input" sink="MobyChangeArticleName:input" />
+  <s:link source="articleName" sink="MobyChangeArticleName:articleName" />
+  <s:link source="MobyChangeArticleName:output" sink="output" />
+  <s:source name="input">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/xml</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:source>
+  <s:source name="articleName" />
+  <s:sink name="output">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/xml</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
+</s:scufl>
+
+
