@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.3 2005-09-15 15:04:44 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.4 2005-09-15 15:39:15 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -178,10 +178,10 @@ sub _do_query_MetaAlignment {
 	$alpha_penalty = 0.5;
     }
     if (not defined $lambda_penalty) {
-	$alpha_penalty = 0.1;
+	$lambda_penalty = 0.1;
     }
     if (not defined $mu_penalty) {
-	$alpha_penalty = 0.1;
+	$mu_penalty = 0.1;
     }
 
     # Add the parsed parameters in a hash table
