@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.2 2005-09-15 13:06:12 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.3 2005-09-15 15:04:44 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -107,6 +107,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # 
 our @EXPORT = qw(
   &runMetaAlignment
+  &runMetaAlignmentGFF
 );
 
 our $VERSION = '1.0';
