@@ -87,9 +87,10 @@ my $datasource = "EMBL";
 
 # Parameters
 
-my $threshold = "0.8";
-my $strands   = "Both";
-my $matrix    = "Transfac";
+my $threshold   = "0.8";
+my $strands     = "Both";
+my $matrix      = "MEME";
+my $matrix_mode = "raw format";
 
 ##################################################################
 #
@@ -271,6 +272,12 @@ PRT
 <Value>$matrix</Value>
 PRT
 
+    # Matrix parameter
+
+    my $matrix_mode_xml = <<PRT;
+<Value>$matrix_mode</Value>
+PRT
+
     # Strands parameters
 
     my $strands_xml = <<PRT;
@@ -284,7 +291,7 @@ PRT
     ##################################################################
 
     my $result = $Service->execute(XMLinputlist => [
-						    ["$articleName", $input, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'strands' => $strands_xml]
+						    ["$articleName", $input, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
 						   ]);
 
     ##################################################################
