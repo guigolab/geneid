@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:WY0SWYJEKO4" author="" title="" />
+  <s:processor name="Create_moby_data">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
+  </s:processor>
+  <s:processor name="getUpstreamSeqfromEnsembl">
+    <s:description>Upstream sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. This identifiers could be external ones, such as Refseq Ids or Affymetrix ids.
+ In case you select the orthologous mode, it will returns the upstream sequence of all orthologous genes of a given input gene (only one input gene identifier in that case)</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>getUpstreamSeqfromEnsembl</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFF">
+    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a simple DNASequence object and returns a simple GFF object. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:link source="id" sink="Create_moby_data:id" />
+  <s:link source="namespace" sink="Create_moby_data:namespace" />
+  <s:link source="genes_list" sink="Create_moby_data:stringvalue" />
+  <s:link source="Create_moby_data:mobydata" sink="Moby_Genes_list" />
+  <s:link source="Create_moby_data:mobydata" sink="getUpstreamSeqfromEnsembl:text-formatted(genes)" />
+  <s:link source="getUpstreamSeqfromEnsembl:output" sink="Moby_Upstream_Sequences" />
+  <s:link source="runMatScanGFF:GFF(matscan_predictions)" sink="Moby_MatScan_GFF" />
+  <s:link source="getUpstreamSeqfromEnsembl:output" sink="runMatScanGFF:input" />
+  <s:source name="genes_list">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/xml</s:mimeType>
+        <s:mimeType>text/plain</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:source>
+  <s:source name="id" />
+  <s:source name="namespace" />
+  <s:sink name="Moby_Upstream_Sequences">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/xml</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
+  <s:sink name="Moby_Genes_list">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/xml</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
+  <s:sink name="Moby_MatScan_GFF">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/xml</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
+</s:scufl>
+
+
