@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.26 2005-09-15 13:07:02 gmaster Exp $
+# $Id: Factory.pm,v 1.27 2005-09-16 15:06:32 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -790,10 +790,6 @@ sub MatScan_call {
 sub MetaAlignment_call {
     my %args = @_;  
 
-    #
-    # Make sure that the map GFF data are ordered - "sort -3"
-    # 
-
     # relleno los parametros por defecto MetaAlignment_call
 
     my $map1 = $args{map1};
@@ -850,10 +846,10 @@ sub MetaAlignment_call {
     close FILE;
 
     # Run meta
-
+    
     # print STDERR "Running Meta-alignment, with this command:\n";
     # print STDERR "$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file\n";
-
+    
     my $meta_output = qx/$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file/;
 
     unlink $map1_file;
