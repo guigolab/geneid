@@ -82,7 +82,13 @@ my $serviceName = $opt_s;
 my $articleName = "sequences";
 $::authURI = 'genome.imim.es';
 
-my $in_file    = $opt_f || "/home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa";
+my $serviceType = "Simple";
+if ($serviceName =~ /collection/i) {
+    $serviceType = "Collection";
+}
+
+my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa";
+my $in_file_2    = "/home/ug/arnau/data/promoterExtraction/ENSG00000160087.upstream_region.5000.fa";
 my $datasource = "EMBL";
 
 # Parameters
@@ -225,86 +231,105 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 #
 ##################################################################
 
-my $seqin = Bio::SeqIO->new (
-			     -file   => $in_file,
-			     -format => 'fasta',
-			     );
+my $inputs = [];
+my $files = [$in_file_1, $in_file_2];
+my $i = 0;
+while ($i < 2) {
+    my $seqin = Bio::SeqIO->new (
+				 -file   => $files->[$i],
+				 -format => 'fasta',
+				 );
 
-# Execute GeneID Web service on each individual sequence
-# Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
-# See Geneid_Moby_Service.v2.pl for this
-
-while (my $seqobj = $seqin->next_seq) {
-    my $nucleotides  = $seqobj->seq;
-    my $seq_id       = $seqobj->display_id;
-    my $lnucleotides = length($nucleotides);
-
-    ##################################################################
-    #
-    # Set up the service input and the secondary articles in XML format 
-    #
-    ##################################################################
-
-    #
-    # Sequence Input
-    #
-
-    my $input = <<PRT;
+    # Execute GeneID Web service on each individual sequence
+    # Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
+    # See Geneid_Moby_Service.v2.pl for this
+    
+    while (my $seqobj = $seqin->next_seq) {
+	my $nucleotides  = $seqobj->seq;
+	my $seq_id       = $seqobj->display_id;
+	my $lnucleotides = length($nucleotides);
+	
+	##################################################################
+	#
+	# Set up the service input and the secondary articles in XML format 
+	#
+	##################################################################
+	
+	#
+	# Sequence Input
+	#
+	
+	my $input = <<PRT;
 <DNASequence namespace="$datasource" id="$seq_id">
-  <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
-  <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
+<Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
+<String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
 </DNASequence>
 PRT
+	    
+	    push (@$inputs, $input);
+    }
 
-    #
-    # Parameters (secondary articles)
-    #
+    $i++;
+}
 
-    # Threshold parameter
+#
+# Parameters (secondary articles)
+#
 
-    my $threshold_xml = <<PRT;
+# Threshold parameter
+
+my $threshold_xml = <<PRT;
 <Value>$threshold</Value>
 PRT
 
-    # Matrix parameter
+# Matrix parameter
 
-    my $matrix_xml = <<PRT;
+my $matrix_xml = <<PRT;
 <Value>$matrix</Value>
 PRT
 
-    # Matrix parameter
+# Matrix parameter
 
-    my $matrix_mode_xml = <<PRT;
+my $matrix_mode_xml = <<PRT;
 <Value>$matrix_mode</Value>
 PRT
 
-    # Strands parameters
+# Strands parameters
 
-    my $strands_xml = <<PRT;
+my $strands_xml = <<PRT;
 <Value>$strands</Value>
 PRT
 
-    ##################################################################
-    #
-    # Service execution
-    #
-    ##################################################################
+##################################################################
+#
+# Service execution
+#
+##################################################################
 
-    my $result = $Service->execute(XMLinputlist => [
-						    ["$articleName", $input, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
-						   ]);
+my $result;
 
-    ##################################################################
-    #
-    # Result processing
-    #
-    ##################################################################
+if ($serviceType eq "Collection") {
 
-    print STDERR "result\n";
-    print $result;
-    print STDERR "\n";
-
+    $result = $Service->execute(XMLinputlist => [
+						 ["$articleName", $inputs, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
+						 ]);
 }
+else {
+    my $input = $inputs->[0];
+    $result = $Service->execute(XMLinputlist => [
+						 ["$articleName", $input, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
+						 ]);
+}
+
+##################################################################
+#
+# Result processing
+#
+##################################################################
+
+print STDERR "result\n";
+print $result;
+print STDERR "\n";
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
