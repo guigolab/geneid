@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.4 2005-09-15 15:05:09 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.5 2005-09-16 10:37:27 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -110,6 +110,7 @@ use warnings;
 use Carp;
 
 use INB::GRIB::Services::Factory;
+use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
 use Data::Dumper;
@@ -331,7 +332,7 @@ PRT
 	
 	my $report         = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
 	
-	my $output_objects = parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+	my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
 		
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
 	# volver a encapsularlo en un objeto biomoby de respuesta. Pero 

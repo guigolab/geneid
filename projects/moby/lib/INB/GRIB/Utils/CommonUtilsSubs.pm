@@ -99,20 +99,27 @@ PRT
 }
 
 sub parseSingleGFFIntoCollectionGFF {
+    my $self = shift;
     my ($report, $output_format, $namespace) = @_;
     my $output_objects = [];
     
     my @lines = split ('\n', $report);
-    my $sequenceIdentifier;
     
+    # print STDERR "got " . @lines . "\n";
+    # my $line_tmp = $lines[0];
+    # print STDERR "first line, $line_tmp.\n";
+    # $line_tmp = $lines[1];
+    # print STDERR "second line, $line_tmp.\n";
+
+    my $sequenceIdentifier;    
     my $report_tmp = "";
 
     while (my $line = shift @lines) {
 	my $sequenceIdentifier_tmp;
 
 	# Get the sequence identifier
-	if ($line =~ /^([^\t])\t.+/) {
-	    my $sequenceIdentifier = $1;
+	if ($line =~ /^([^\t]+)\t.+/) {
+	    $sequenceIdentifier_tmp = $1;
 	}
 	else {
 	    print STDERR "in parseSingleGFFIntoCollectionGFF, can't parse sequence identifier from GFF,\n$line\n";
@@ -121,17 +128,18 @@ sub parseSingleGFFIntoCollectionGFF {
 	
 	if (not defined $sequenceIdentifier) {
 	    $sequenceIdentifier = $sequenceIdentifier_tmp;
-	    $report_tmp .= $line;
+	    $report_tmp .= $line . "\n";
 	}
-	elsif ($sequenceIdentifier_tmp eq $sequenceIdentifier_tmp) {
-	    $report_tmp .= $line;
+	elsif ($sequenceIdentifier_tmp eq $sequenceIdentifier) {
+	    $report_tmp .= $line . "\n";
 	}
 	else {
+
 	    # New sequence report
 	    # Build the GFF Moby object
 
 	    my $input = <<PRT;
-<moby:$output_format namespace='' id='$sequenceIdentifier'>
+<moby:$output_format namespace='$namespace' id='$sequenceIdentifier'>
 <![CDATA[
 $report_tmp
 ]]>
@@ -142,7 +150,7 @@ PRT
 
 	    # Reinitialisation
 	    $sequenceIdentifier = $sequenceIdentifier_tmp;
-	    $report_tmp         = $line;
+	    $report_tmp         = $line . "\n";
 	    
         }
     }
@@ -150,7 +158,7 @@ PRT
     # Add the last report !
 
     my $input = <<PRT;
-<moby:$output_format namespace='' id='$sequenceIdentifier'>
+<moby:$output_format namespace='$namespace' id='$sequenceIdentifier'>
 <![CDATA[
 $report_tmp
 ]]>
