@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.27 2005-09-16 15:06:32 gmaster Exp $
+# $Id: Factory.pm,v 1.28 2005-09-19 15:49:50 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -609,6 +609,9 @@ sub PromoterExtraction_call {
 
     if ($intergenic_only eq "True") {
 	$_promExtraction_args .= "-i";
+    }
+    if ($orthologous_mode eq "True") {
+	$_promExtraction_args .= " -o";
     }
 
     $_promExtraction_args .= " -u $upstream_length";
