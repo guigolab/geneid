@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.10 2005-09-09 14:26:45 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.11 2005-09-19 09:42:06 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -471,9 +471,16 @@ sub _do_query_fromGenericSequencestoFASTA {
     my $moby_output_format  = "FASTA";
     my $output_article_name = "sequences";
     my $namespace = "";
+
+    my $sequenceIdentifier = "";
+    # Specify the sequence identifier only in case there is only one sequence in the FASTA output
+    if (@$seqobjs == 1) {
+	my $seqobj = $seqobjs->[0];
+	$sequenceIdentifier = $seqobjs->[0]->display_id;
+    }
     
     my $fasta_object = <<PRT;
-<moby:$moby_output_format namespace='' id=''>
+<moby:$moby_output_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[
 $fasta_sequences
 ]]>
