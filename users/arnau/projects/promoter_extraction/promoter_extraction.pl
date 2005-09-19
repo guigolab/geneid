@@ -111,7 +111,7 @@ return <<"END_HELP";
 Description: Extract Promoter sequences for a set of given genes
 Usage:
 
-    promoter_extraction.pl [-h] -f {gene ids} -s {Species} -r {Genome Release} -u {upstream} -d {downstream} -i {Flag intergenic sequences only} -g {Flag report attached features in GFF format}
+    promoter_extraction.pl [-h] -f {gene ids} -s {Species} -r {Genome Release} -u {upstream} -d {downstream} -i {Flag intergenic sequences only} -g {Flag report attached features in GFF format} -o {Orthologous Mode flag}
 	-h help
 	-f gene identifiers input file
 	-s gender species, e.g. homo_sapiens
@@ -120,6 +120,7 @@ Usage:
 	-d length of the downstream sequence (Default 0)
 	-i intergenic sequence only
 	-g report overlapping gene features in GFF format
+	-o orthologous mode (default is off)
 
 Examples using some combinations:
 	promoter_extraction.pl -f geneIds.lst -s homo_sapiens -r 32 -u 20000 -d 500 -i -g
@@ -130,6 +131,8 @@ Examples using some combinations:
 	If you ask only for the upstream sequences (not the features), the output is redirected to the standard output
 	Otherwise it will generate two files called "upstream_sequences.fa" and "upstream_sequences.gff"
 
+	if you flag the orthologous mode it will return the upstream sequence of all orthologous genes of you input gene identifier
+
 END_HELP
 
 }
@@ -137,7 +140,7 @@ END_HELP
 BEGIN {
 	
     # Global variables definition
-    use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbensembl/;
+    use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbensembl $orthologous_mode/;
 
     if (-f "/home/ug/gmaster/projects/promoter_extraction/config.pl") {
         require "/home/ug/gmaster/projects/promoter_extraction/config.pl";
@@ -148,7 +151,7 @@ BEGIN {
     }
     
     # these are switches taking an argument (a value)
-    my $switches = 'hf:s:r:u:d:ig';
+    my $switches = 'hf:s:r:u:d:igo';
     
     # Get the switches
     getopts($switches, \%opts);
@@ -169,6 +172,7 @@ $upstream_length   = 2000;
 $downstream_length = 0;
 $report_features   = 0;
 $intergenic_only   = 0;
+$orthologous_mode  = 0;
 
 defined $opts{f} and $geneIds_file      = $opts{f};
 defined $opts{s} and $species           = $opts{s};
@@ -177,6 +181,7 @@ defined $opts{u} and $upstream_length   = $opts{u};
 defined $opts{d} and $downstream_length = $opts{d};
 defined $opts{g} and $report_features++;
 defined $opts{i} and $intergenic_only++;
+defined $opts{o} and $orthologous_mode++;
 
 # Ensembl database configuration
 
@@ -213,7 +218,8 @@ if (not defined $dbensembl) {
     exit 0;
 }
 
-undef @database_names;
+# Keep it to initialise the compara part in case the ortholog mode is on
+# undef @database_names;
 
 #
 # Instanciate the Ensembl DB objects adaptors
@@ -248,6 +254,77 @@ $dbh = new Bio::EnsEMBL::DBSQL::DBAdaptor (
 
 my $gene_adaptor    = $dbh->get_GeneAdaptor ();
 my $slice_adaptor   = $dbh->get_SliceAdaptor ();
+
+#
+# Ensembl DB compara initialisation
+#
+
+my $ensembl_compara_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-$release/modules";
+
+if ($_debug) {
+    print STDERR "ensembl_compara_API_path, $ensembl_compara_API_path.\n";
+}
+
+if (-d $ensembl_compara_API_path) {
+    unshift (@INC, $ensembl_compara_API_path);
+}
+else {
+    print STDERR "release, $release, not supported, contact gmaster\@imim.es for help\n";
+    exit 0;
+}
+
+use Bio::EnsEMBL::Compara::DBSQL::DBAdaptor;
+
+my $dbcompara_name = "ensembl_compara_" . $release;
+my $dbh_compara;
+my $homologyAdaptor;
+
+# To make the initialisation step faster, do it only when it is required, ie when the orthologous mode is turned on.
+
+if ($orthologous_mode) {
+
+    $dbh_compara = new Bio::EnsEMBL::Compara::DBSQL::DBAdaptor (
+							       -host   => $dbhost,
+							       -user   => $dbuser,
+							       -dbname => $dbcompara_name
+							       )
+    or die "can't connect to Ensembl Compara database, $dbcompara_name, contact gmaster\@imim.es for help!\n";
+ $homologyAdaptor = $dbh_compara->get_HomologyAdaptor ();
+
+#
+# The orthologous Mode need more than that, it requires preloading an adaptor for each database (one database for each species)
+#
+
+    use Bio::EnsEMBL::Registry;
+    foreach my $dbname (@database_names) {
+	if ($dbname =~ /core_$release/) {
+	    $dbname =~ /^(\w)([^_]+)_([^_]+)_.+/;
+	    
+	    # Species syntax, e.g Human => $organism = "Homo sapiens"
+	    
+	    my $firstLetter = $1;
+	    $firstLetter = uc ($firstLetter);
+	    
+	    my $gender  = $firstLetter . $2;
+	    my $species = $3;
+	    
+	    my $organism = $gender . " " . $species;
+	    
+	    my $dba = new Bio::EnsEMBL::DBSQL::DBAdaptor (
+							  -host    => $dbhost,
+							  -user    => $dbuser,
+							  -dbname  => $dbname,
+							  -species => "$organism",
+							  )
+		or die "can't connect to Ensembl Compara database, $dbcompara_name, contact gmaster\@imim.es for help!\n";
+	    Bio::EnsEMBL::Registry->add_DBAdaptor ("$species", "core", $dba);
+	}
+    }
+}
+
+#
+# Initialisation section is finished !
+#
 
 #
 # Parse input file to get the list of gene identifiers
@@ -348,138 +425,130 @@ foreach my $geneId (@geneIds) {
     foreach my $gene (@$genes) {
 
 	my $gene_stable_id    = $gene->stable_id;
-	my $coordinate_system = $gene->coord_system_name();
-	my $chromosome        = $gene->seq_region_name();
-	my $strand            = $gene->strand;
-	my $start             = "";
-	my $end               = "";
-	my $features = [];
-	
-	my $tss               = $gene->start;
-	if ($strand == -1) {
-	    $tss = $gene->end;
-	}
 
-	if ($_debug) {
-	    print STDERR "tss, $tss\n";
-	}
+	if ($orthologous_mode) {
+	    my $member = $dbh_compara->get_MemberAdaptor->fetch_by_source_stable_id ("ENSEMBLGENE", $gene_stable_id);
+	    my $homologies = $homologyAdaptor->fetch_by_Member ($member);
+	    foreach my $homology (@$homologies) {
 
-	if ($strand > 0) {
-	    $start = $gene->start - $upstream_length;
-	    $end   = $gene->start + $downstream_length;
-	}
+		foreach my $member_attribute (@{$homology->get_all_Member_Attribute}) {
+		    my ($member, $attribute) = @{$member_attribute};
+		    # Get the Stable identifier
+		    my $homologue_stable_id = $member->stable_id();
+		    
+		    if ($homologue_stable_id ne $gene_stable_id) {
+		    
+			my $upstream_slice_region = getHomologueUpstreamSliceRegion ($member, $upstream_length, $downstream_length, $intergenic_only);
+			
+			#
+			# Processing done, format the sequence object into FASTA
+			#
+
+			if (defined $upstream_slice_region) {
+			 
+			    if ($_debug) {
+				print STDERR "writing down the sequence...\n";
+			    }
+			    
+			    my $upstream_sequence = $upstream_slice_region->seq;
+			    my $seqobj = Bio::PrimarySeq->new (
+							       -id    => $homologue_stable_id,
+							       -desc  => $geneId,
+							       -seq   => $upstream_sequence,
+							       );
+			    $sout->write_seq ($seqobj);
+			    
+			    if ($_debug) {
+				print STDERR "sequence done.\n";
+			    }
+			    
+			    #
+			    # format the feature objects into GFF
+			    #
+			
+			    if ($report_features) {
+			    
+				if ($_debug) {
+				    print STDERR "getting the features...\n";
+				}
+				
+				my $gff_output = getFeatures ($upstream_slice_region, $homologue_stable_id);
+				
+				if ($gff_output ne "") {
+				    
+				    if ($_debug) {
+					print STDERR "writing GFF output...\n";
+				    }
+				    
+				print GFF "$gff_output";
+				}
+				else {
+				    if ($_debug) {
+					print STDERR "no overlapping features\n";
+				    }
+				}
+			    } # End reporting Features
+			}
+		    }
+		}
+	    }
+	} # End orthologous mode processing
 	else {
-	    $end   = $gene->end + $upstream_length;
-	    $start = $gene->end - $downstream_length;
-	}
-	
-	if ($_debug) {
-	    print STDERR "gene coordinates, " . $gene->start . ".." . $gene->end . " on strand $strand\n";
-	}
-	
-	# Get rid of the base 0 if we don't want any downstream sequence, this way we won't get any overlapping feature associated with the given gene (its first exon for example)
-	
-	if (($downstream_length == 0) && ($strand == 1)) {
-	    $end -= 1;
-	}
-	elsif (($downstream_length == 0) && ($strand == -1)) {
-	    $start += 1;
-	}
-	
-	if ($_debug) {
-	    print STDERR "start and end of the slice region, $start, $end\n";
-	}
-
-	#
-	# Get the Slice object corresponding to the region of the genome we want to extract
-	#
-
-	my $slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$start,$end,$strand);
-	
-	if ($_debug) {
-	    print STDERR "length of the extracted region, " . $slice_region->length . "\n";
-	}
-	
-	if ($intergenic_only) {
-	    if (has_gene_upstream ($slice_region, $downstream_length)) {
-		
-		if ($_debug) {
-		    print STDERR "has gene upstream\n";
-		}
-		
-		#
-		# Get the Slice object corresponding to the intergenic region only of the genome we want to extract
-		#
-		
-		my ($subslice_start, $subslice_end) = getIntergenicSequence ($slice_region, $strand, $downstream_length, $tss);
-		
-		if ($_debug) {
-		    print STDERR "subslice start, end: $subslice_start, $subslice_end\n";
-		}
-		
-		# Update the slice object so it includes only the intergenic sequence
-		
-		$slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$subslice_start,$subslice_end,$strand);
-		
-		if ($_debug) {
-		    print STDERR "length of the extracted region after intergenic processing, " . $slice_region->length . "\n";
-		}
-		
-	    }
-	    else {
-		if ($_debug) {
-		    print STDERR "no gene upstream.\n";
-		}
-	    }
-	}
-	
-	#
-	# Processing done, format the sequence object into FASTA
-        #
-
-	if ($_debug) {
-	    print STDERR "writing down the sequence...\n";
-	}
-	
-	my $upstream_sequence = $slice_region->seq;
-	my $seqobj = Bio::PrimarySeq->new (
-					   -id    => $gene_stable_id,
-					   -desc  => $geneId,
-					   -seq   => $upstream_sequence,
-					   );
-	$sout->write_seq ($seqobj);
-	
-	if ($_debug) {
-	    print STDERR "sequence done.\n";
-	}
-	
-	#
-	# format the feature objects into GFF
-        #
-
-	if ($report_features) {
+	    
+	    # Get the SliceRegion object associated with the upstream sequence we want to retrieve,
+	    # taking into account the intergenic_only flag, the given upstream and downstream lengths
+	    
+	    my $upstream_slice_region = getUpstreamSliceRegion ($gene, $slice_adaptor, $upstream_length, $downstream_length, $intergenic_only);
+	    
+            #
+	    # Processing done, format the sequence object into FASTA
+	    #
 	    
 	    if ($_debug) {
-		print STDERR "getting the features...\n";
+		print STDERR "writing down the sequence...\n";
 	    }
 	    
-	    my $gff_output = getFeatures ($slice_region, $gene_stable_id);
+	    my $upstream_sequence = $upstream_slice_region->seq;
+	    my $seqobj = Bio::PrimarySeq->new (
+					       -id    => $gene_stable_id,
+					       -desc  => $geneId,
+					       -seq   => $upstream_sequence,
+					       );
+	    $sout->write_seq ($seqobj);
 	    
-	    if ($gff_output ne "") {
+	    if ($_debug) {
+		print STDERR "sequence done.\n";
+	    }
+
+	    #
+	    # format the feature objects into GFF
+	    #
+	    
+	    if ($report_features) {
 		
 		if ($_debug) {
-		    print STDERR "writing GFF output...\n";
+		    print STDERR "getting the features...\n";
 		}
+		
+		my $gff_output = getFeatures ($upstream_slice_region, $gene_stable_id);
+		
+		if ($gff_output ne "") {
 		    
-		print GFF "$gff_output";
-	    }
-	    else {
-		if ($_debug) {
-		    print STDERR "no overlapping features\n";
+		    if ($_debug) {
+			print STDERR "writing GFF output...\n";
+		    }
+		    
+		    print GFF "$gff_output";
 		}
-	    }
-	} # End reporting Features
-	
+		else {
+		    if ($_debug) {
+			print STDERR "no overlapping features\n";
+		    }
+		}
+	    } # End reporting Features
+	    
+	} # End non orthologous mode processing
+
     } # End processing Ensembl gene objects
 }
 
@@ -880,3 +949,137 @@ sub parse_ensembl_sequence {
     return $gff_output;
     
 }
+
+
+
+sub getUpstreamSliceRegion {
+    my ($gene, $slice_adaptor, $upstream_length, $dowstream_length, $intergenic_only) = @_;
+    
+    my $gene_stable_id    = $gene->stable_id;
+    my $coordinate_system = $gene->coord_system_name();
+    my $chromosome        = $gene->seq_region_name();
+    my $strand            = $gene->strand;
+    my $start             = "";
+    my $end               = "";
+    
+    my $slice_region;
+
+    my $tss               = $gene->start;
+    if ($strand == -1) {
+	$tss = $gene->end;
+    }
+    
+    if ($_debug) {
+	print STDERR "tss, $tss\n";
+    }
+    
+    if ($strand > 0) {
+	$start = $gene->start - $upstream_length;
+	$end   = $gene->start + $downstream_length;
+    }
+    else {
+	$end   = $gene->end + $upstream_length;
+	$start = $gene->end - $downstream_length;
+    }
+    
+    if ($_debug) {
+	print STDERR "gene coordinates, " . $gene->start . ".." . $gene->end . " on strand $strand\n";
+    }
+    
+    # Get rid of the base 0 if we don't want any downstream sequence, this way we won't get any overlapping feature associated with the given gene (its first exon for example)
+    
+    if (($downstream_length == 0) && ($strand == 1)) {
+	$end -= 1;
+    }
+    elsif (($downstream_length == 0) && ($strand == -1)) {
+	$start += 1;
+    }
+    
+    if ($_debug) {
+	print STDERR "start and end of the slice region, $start, $end\n";
+    }
+    
+    #
+    # Get the Slice object corresponding to the region of the genome we want to extract
+    #
+    
+    $slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$start,$end,$strand);
+    
+    if ($_debug) {
+	print STDERR "length of the extracted region, " . $slice_region->length . "\n";
+    }
+    
+    if ($intergenic_only) {
+	if (has_gene_upstream ($slice_region, $downstream_length)) {
+	    
+	    if ($_debug) {
+		print STDERR "has gene upstream\n";
+	    }
+	    
+	    #
+	    # Get the Slice object corresponding to the intergenic region only of the genome we want to extract
+	    #
+	    
+	    my ($subslice_start, $subslice_end) = getIntergenicSequence ($slice_region, $strand, $downstream_length, $tss);
+	    
+	    if ($_debug) {
+		print STDERR "subslice start, end: $subslice_start, $subslice_end\n";
+	    }
+	    
+	    # Update the slice object so it includes only the intergenic sequence
+	    
+	    $slice_region = $slice_adaptor->fetch_by_region ($coordinate_system,$chromosome,$subslice_start,$subslice_end,$strand);
+	    
+	    if ($_debug) {
+		print STDERR "length of the extracted region after intergenic processing, " . $slice_region->length . "\n";
+	    }
+	    
+	}
+	else {
+	    if ($_debug) {
+		print STDERR "no gene upstream.\n";
+	    }
+	}
+    }
+
+    return $slice_region;
+}
+
+
+sub getHomologueUpstreamSliceRegion { 
+    my ($homologue, $upstream_length, $dowstream_length, $intergenic_only) = @_;
+    my $homologue_stable_id = $homologue->stable_id;
+
+    if ($_debug) {
+	print STDERR "getting the upstream sequence for homologue, $homologue_stable_id...\n";
+    }
+
+    my $upstream_slice_region;
+    
+    my $gdb = $homologue->genome_db();
+    
+    if (not defined $gdb) {
+	print STDERR "no genome DB found for homologue gene, $homologue_stable_id!\n";
+    }
+    else {
+	if ($_debug) {
+	    print STDERR "found genome DB, " . $gdb->name . "\n";
+	}
+    }
+    
+    my $gdba = $gdb->db_adaptor();
+    if (defined $gdba) {	
+	my $ga = $gdba->get_GeneAdaptor;
+	
+	my $gene = $ga->fetch_by_stable_id($homologue_stable_id);
+	$gene->transform('toplevel');
+	my $homologue_slice_adaptor = $homologue->genome_db->db_adaptor->get_SliceAdaptor || warn "problem, no homologue slice adaptor!!\n";
+	$upstream_slice_region = getUpstreamSliceRegion ($gene, $homologue_slice_adaptor, $upstream_length, $dowstream_length, $intergenic_only);
+    }
+    else {
+	print STDERR "no DB adaptor found for DB, " . $gdb->name . "!\n";
+    }
+
+    return $upstream_slice_region;
+}
+
