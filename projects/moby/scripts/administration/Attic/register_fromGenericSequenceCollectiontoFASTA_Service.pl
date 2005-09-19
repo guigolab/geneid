@@ -16,8 +16,6 @@ use Getopt::Std;
 # For debugging
 use Data::Dumper;
 
-use SOAP::Lite + 'trace';
-
 sub help {
     return <<"END_HELP";
 Description: Register a service in Moby Central
@@ -103,7 +101,7 @@ if (defined($opt_x)) {
 	
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://mobycentral.icapture.ubc.ca/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
-
+	
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 
@@ -151,52 +149,19 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Retrieval",
+				      serviceType  => "Conversion",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.\n In case you select the orthologous mode, it will returns the upstream sequence of all orthologous genes of a given input gene (only one input gene identifier in that case)",
+				      description  => "Converts a collection of GenericSequence moby object into a FASTA object",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['genes', ["text-formatted" => []]],
-							   ],
+							    ['sequences', [["GenericSequence" => \@namespaces]]],
+							    ],
 				      output		=> [
-							    ['upstream_sequences', [['DNASequence' => \@namespaces]]] # collection of one object type
-							   ],
-				      secondary	=> {
-					  'organism' => {
-					      datatype => 'String',
-					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
-					      default  => 'Homo sapiens',
-					  },
-					  'ensembl release' => {
-					      datatype => 'String',
-					      enum     => ['33','32','31','30','29'],
-					      default  => '33',
-					      max      => '33',
-					      min      => '29',
-					  },
-					  'upstream length' => {
-					      datatype => 'Integer',
-					      default  => 2000,
-					      min      => 'MIN',
-					  },
-					  'downstream length' => {
-					      datatype => 'Integer',
-					      default  => 0,
-					      min      => 'MIN',
-					  },
-					  'intergenic only' => {
-					      datatype => 'String',
-					      enum     => ['True','False'],
-					      default  => 'False',
-					  },
-					  'orthologous mode' => {
-					      datatype => 'String',
-					      enum     => ['True','False'],
-					      default  => 'False',
-					  },
-				      }
+							    ['sequences', ["FASTA" => \@namespaces]],
+							    ],
+				      
 				      );
 
 # Check if the result has been registered successfully.
