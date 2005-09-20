@@ -79,10 +79,11 @@ my $GeneIDGFF_xml_file        = "Hsap_BTK.msk.GeneIDGFF.xml";
 my $geneIds_lst_xml_file      = "geneIds.lst.xml";
 my $gostat_regulated_xml_file = "mut1_downreg.fbgn.xml";
 my $gostat_allArray_xml_file  = "allArray.fbgn.xml";
+my $ENSG00000197785_upstream_sequence_xml_file = "ENSG00000197785.xml";
 
 # Check that the files exist !!!
 
-if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file")) {
+if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_upstream_sequence_xml_file")) {
     print STDERR "Error, can't find one of the input files in directory, $input_data_dir!\n";
     exit 0;
 }
@@ -93,6 +94,7 @@ my $GeneIDGFF_xml        = qx/cat $input_data_dir\/$GeneIDGFF_xml_file/;
 my $geneIds_lst_xml      = qx/cat $input_data_dir\/$geneIds_lst_xml_file/;
 my $gostat_regulated_xml = qx/cat $input_data_dir\/$gostat_regulated_xml_file/;
 my $gostat_allArray_xml  = qx/cat $input_data_dir\/$gostat_allArray_xml_file/;
+my $ENSG00000197785_upstream_sequence_xml = qx/cat $input_data_dir\/$ENSG00000197785_upstream_sequence_xml_file/;
 
 my $runGeneID_control_file            = "Hsap_BTK.msk.runGeneID.control";
 my $runGeneIDGFF_control_file         = "Hsap_BTK.msk.runGeneIDGFF.control";
@@ -100,6 +102,10 @@ my $runSGP2GFF_control_file           = "Hsap_BTK.msk.runSGP2GFF.control";
 my $translateGeneIDGFFPredictions_control_file = "Hsap_BTK.msk.GeneIDGFF.translateGeneIDGFFPredictions.control";
 my $getUpstreamSeqfromEnsembl_control_file = "geneIds.lst.getUpstreamSeqfromEnsembl.control";
 my $runGOstat_control_file = "mut1_downreg.fbgn.runGOstat.control";
+my $fromGenericSequencetoFASTA_control_file = "Hsap_BTK.msk.fromGenericSequencetoFASTA.control";
+my $fromGenericSequenceCollectiontoFASTA_control_file = "Hsap_BTK.msk.fromGenericSequenceCollectiontoFASTA.control";
+my $runMatScanGFF_control_file = "ENSG00000197785.runMatScanGFF.control";
+my $runMatScanGFFCollection_control_file = "ENSG00000197785.runMatScanGFFCollection.control";
 
 ##################################################################
 #
@@ -326,6 +332,146 @@ if (defined $service) {
     }
 }
 
+# Execute fromGenericSequencetoFASTA Web service
+
+print STDERR "\ntesting fromGenericSequencetoFASTA...\n\n";
+
+$service = MobyServiceInstantiation ($C, "fromGenericSequencetoFASTA", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['sequences', $nucleotide_sequence_xml]
+						    ]
+				   );
+    
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+    
+    print $results_fh "$result\n";
+    
+    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequencetoFASTA_control_file $results_file/;    
+    
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "fromGenericSequencetoFASTA service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+	
+	close $results_fh;
+	unlink $results_file;
+	
+    }
+    else {
+	
+	print STDERR "fromGenericSequencetoFASTA okay...\n";
+	
+	close $results_fh;
+	unlink $results_file;
+    }
+}
+
+# Execute fromGenericSequenceCollectiontoFASTA Web service
+
+print STDERR "\ntesting fromGenericSequenceCollectiontoFASTA...\n\n";
+
+$service = MobyServiceInstantiation ($C, "fromGenericSequenceCollectiontoFASTA", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['sequences', [$nucleotide_sequence_xml]]
+						    ]
+				   );
+    
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+    
+    print $results_fh "$result\n";
+    
+    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequenceCollectiontoFASTA_control_file $results_file/;    
+    
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "fromGenericSequenceCollectiontoFASTA service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+	
+	close $results_fh;
+	unlink $results_file;
+	
+    }
+    else {
+	
+	print STDERR "fromGenericSequenceCollectiontoFASTA okay...\n";
+	
+	close $results_fh;
+	unlink $results_file;
+    }
+}
+
+# Execute runMatScanGFF Web service
+
+print STDERR "\ntesting runMatScanGFF...\n\n";
+
+$service = MobyServiceInstantiation ($C, "runMatScanGFF", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['upstream_sequences', $ENSG00000197785_upstream_sequence_xml]
+						    ]
+				   );
+    
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+    
+    print $results_fh "$result\n";
+    
+    my @diff_results = qx/diff $control_data_dir\/$runMatScanGFF_control_file $results_file/;    
+    
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "runMatScanGFF service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+	
+	close $results_fh;
+	unlink $results_file;
+	
+    }
+    else {
+	
+	print STDERR "runMatScanGFF okay...\n";
+	
+	close $results_fh;
+	unlink $results_file;
+    }
+}
+
+# Execute runMatScanGFFCollection Web service
+
+print STDERR "\ntesting runMatScanGFFCollection...\n\n";
+
+$service = MobyServiceInstantiation ($C, "runMatScanGFFCollection", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['upstream_sequences', [$ENSG00000197785_upstream_sequence_xml]]
+						    ]
+				   );
+    
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+    
+    print $results_fh "$result\n";
+    
+    my @diff_results = qx/diff $control_data_dir\/$runMatScanGFFCollection_control_file $results_file/;    
+    
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "runMatScanGFFCollection service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+	
+	close $results_fh;
+	# unlink $results_file;
+	
+    }
+    else {
+	
+	print STDERR "runMatScanGFFCollection okay...\n";
+	
+	close $results_fh;
+	unlink $results_file;
+    }
+}
+
 # Execute runSGP2GFF Web service
 
 print STDERR "\ntesting runSGP2GFF...\n\n";
@@ -397,6 +543,8 @@ if (defined $service) {
     }
     
 }
+
+
 
 my $t2 = Benchmark->new ();
 print  STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
