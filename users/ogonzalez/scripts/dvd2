@@ -27,5 +27,5 @@ cdrw="0,0,0"
 # COMPTE: POTSER NOMES FUNCIONI ESPECIFICANT "-dao"!!!
 
 /home/ug/ogonzalez/no_backup/soft/CD-R/cdrecord-proDVD/cdrecord-wrapper.sh \
-    -v -dao fs=96m speed=2 dev=$cdrw $*
+    -v -dao fs=96m speed=1 dev=$cdrw $*
 

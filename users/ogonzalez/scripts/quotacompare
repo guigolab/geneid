@@ -38,7 +38,7 @@ sub data {
 }
 
 
-# ordenai els noms segons l'ordre numeric del camp $camp
+# ordena els noms segons l'ordre numeric del camp $camp
 sub ordena {
    @dades1=split(/ +/,$a);
    @dades2=split(/ +/,$b);
@@ -101,7 +101,7 @@ sub taula {
          if ( $i == 0 || $anterior{$usuari} eq "" || $ocupacio == 0 ) {
             print "&nbsp;";
          } elsif ( $anterior{$usuari} == $ocupacio ) {
-            print "<font color=\"#0000ff\">-</font>";
+            print "<font color=\"#ffff00\"><b>=</b></font>";
          } elsif ( $anterior{$usuari} > $ocupacio ) {
             print "<font color=\"#00c000\">&dArr;</font>";
          } else {

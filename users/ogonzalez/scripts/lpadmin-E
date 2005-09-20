@@ -1,0 +1,20 @@
+#!/bin/bash
+
+for impressora in `grep '^<.*Printer ' /etc/cups/printers.conf | cut -d" " -f2 | tr -d ">"`
+do
+   ok=0
+   echo -n $impressora...
+   while [ $ok = 0 ]
+   do
+      lpadmin -p $impressora -E &> /dev/null
+      if [ $? = 0 ]
+      then
+         echo OK
+         ok=1
+      else 
+         echo -n .
+         sleep 1
+      fi
+   done
+done
+

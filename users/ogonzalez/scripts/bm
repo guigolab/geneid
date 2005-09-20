@@ -46,7 +46,7 @@ formatbm() {
    printf "\r%50s\r   gunzip OK ($num1/$num2)\n   formatdb... "
    pbmkdir $direc
    pb formatdb -p F -i $pack -n $direc/$base
-#   rm $pack
+   rm $pack
    echo OK
    popd >/dev/null
 }

@@ -1,0 +1,109 @@
+#!/usr/local/bin/perl
+##
+## snapdiff -- Compare the contents of two CPAN.pm autobundle snapshot
+##             files for differing versions
+##
+## Mike Fletcher <fletch+perl@phydeaux.org>
+##
+## http://perlmonks.thepen.com
+##
+use strict;
+use Pod::Parser;
+
+{
+  ## Define a Pod::Parser subclass that pulls version information out
+  ## of the autobundle file
+  package MyParser;
+
+  our @ISA = qw( Pod::Parser );
+
+  ## command -- note when we see `=head1 CONTENTS'
+  sub command {
+    my ($parser, $command, $paragraph, $line_num) = @_;
+
+    if( $command eq 'head1' and $paragraph =~ /CONTENTS/ ) {
+      $parser->{in_contents} = 1;
+    } else {
+      $parser->{in_contents} = undef;
+    }
+  }
+
+  ## textblock -- Pull out module/version pairs if we're inside a
+  ##              CONTENTS section
+  sub textblock {
+    my( $parser, $para, $line_num ) = @_;
+
+    ## Ignore text if we haven't seen a `=head1 CONTENTS' command
+    return unless $parser->{in_contents};
+
+    $para =~ /(\S+)\s+(\S+)/;
+    $parser->{results}->{$1} = $2;
+  }
+}
+
+## back in package main main
+
+## Check that we're given two filenames
+die "usage: $0 snap1 snap2\n" unless @ARGV == 2;
+
+my( $snap1, $snap2 ) = @ARGV;
+
+## Create some hashes to hold the results for each file
+my $results = {
+           $snap1 => {},
+           $snap2 => {},
+          };
+
+## To track mismatched versions that we've already seen
+my %mismatch;
+
+## Parse out the bundle contents from each file
+foreach( $snap1, $snap2 ) {
+  local( *IN );
+  open( IN, $_ ) or die "Error opening $_: $!\n";
+
+  ## Create new MyParser, passing it the hashref to store results into
+  ## for the file in question
+  my $p = MyParser->new( results => $results->{$_} );
+
+  $p->parse_from_filehandle( \*IN );
+
+  close( IN );
+}
+
+print "$snap1 vs $snap2\n";
+cmp_hashes( $results->{$snap1}, $results->{$snap2}, \%mismatch );
+
+print "\n\n$snap2 vs $snap1\n";
+cmp_hashes( $results->{$snap2}, $results->{$snap1}, \%mismatch );
+
+exit 0;
+
+##
+## cmp_hashes -- Compare contents of hash $ha to hash $hb.  $mismatch
+##               contains keys we already know don't match
+##
+sub cmp_hashes {
+  my( $ha, $hb, $mismatch ) = @_;
+
+  foreach( sort keys %{ $ha } ) {
+    ## format a nice, space justified version of name for printing
+    my $name = sprintf "%-35s", $_;
+
+    unless( exists $hb->{$_} ) {
+      ## it exists in hash a but not b
+      print "$name ver ", $ha->{$_}, " only here\n";
+    } else {
+      ## If they're not equal and we don't know about the mismatch
+      ## already then gripe about it (and make note of the fact)
+      if( $ha->{$_} ne $hb->{$_} and not $mismatch->{$_} ) {
+    print "$name here ver ", $ha->{$_}, " there ver ", $hb->{$_}, "\n"
++;
+    $mismatch->{$_}++;    # note that there was a mismatch
+      }
+    }
+  }
+
+}
+
+

@@ -96,7 +96,7 @@ for ( $i=0;$i<=$#log;$i++) {
    if ( $log[$i] =~ /gnu-pop3d\[(\d+)\]: connect from (.+)$/ ) {
       $PID=$1;
       $maquina=$2;
-      if ( $maquina =~ /(193\.146\.190\.\d+|193\.147\.241\.\d+|45.red-213-96-48.pooles.rima-tde.net|fpuigvert.cesca.es)$/ ) {
+      if ( $maquina =~ /(193\.146\.190\.\d+|\.imim\.es|45.red-213-96-48.pooles.rima-tde.net|fpuigvert.cesca.es)$/ ) {
          for ( $j=$i;$j<=$#log;$j++ ) {
             if ( $log[$j] =~ /gnu-pop3d\[$PID\]: / ) {
                $comanda=$';
@@ -123,8 +123,7 @@ for ( $i=0;$i<=$#log;$i++) {
 }
 print STDERR "\n";
 
-# elimino els ssh des d'IP fixes fiables: qualsevol IP GRIB, ADSL rguigo,
-# ADSL jabril, ADSL mburset
+# elimino els ssh des d'IP fixes fiables: qualsevol IP GRIB, ADSL rguigo, ADSL jabril, ADSL mburset
 for ( $i=0;$i<=$#log;$i++) {
    print STDERR "\rSSHD: $i/$#log          ";
    if ( $log[$i] =~ /sshd\[(\d+)\]: PAM _pam_init_handlers:/ ) {
@@ -139,7 +138,7 @@ for ( $i=0;$i<=$#log;$i++) {
          }
       }
       $final=$j+20; # si no apareix res mes amb aquest PID 20 linies despres, asumeixo que ja no apareixera
-      if ( $maquina =~ /(193\.146\.190\.\d+|193\.147\.241\.\d+|213\.96\.48\.45|193\.62\.201\.130|80\.224\.32\.5)/ ) {
+      if ( $maquina =~ /(193\.146\.190\.\d+|213\.96\.48\.45|193\.62\.201\.130|80\.224\.32\.5)/ ) {
          for ( $j=$inicial;$j<=$final;$j++) {
             if ( $log[$j] =~ /sshd[^\[]*\[$PID\]:/ ) {
                splice(@log,$j,1);

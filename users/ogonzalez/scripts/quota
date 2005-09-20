@@ -1,43 +1,8 @@
-#!/bin/ksh
+#!/bin/bash
 
-# a darwin la comanda du no accepta --exclude, aixi que ho farem a ma
-#
 # fem du de cada directori, de tal manera que ens dona info de cada directori.
 # la darrera linia es el total, i hi haura una linia que contindra el
 # no_backup. restant-les, trobem el que es guarda
-
-#numero() {
-#   typeset -i num
-#   num=1
-#   valor=$1
-#   str=""
-#   str2=0
-#   while (( num < 10 ))
-#   do
-#      davant=${valor%?}
-#      digit=${valor#$davant}
-#      if [ "$digit" != "" ]
-#      then
-#         nou=$digit
-#      else
-#         nou=" "
-#         str2=1
-#      fi
-#      if [ $num = 4 -o $num = 7 ]
-#      then
-#         if [ $str2 = 0 ]
-#         then
-#            nou="$nou."
-#         else
-#            nou="  "
-#         fi
-#      fi
-#      str="$nou$str"
-#      valor=${valor%?}
-#      let num=num+1
-#   done
-#   echo -n "$str "
-#}
 
 numero() {
    valor=$1
@@ -50,7 +15,7 @@ numero() {
       tmp=${valor%%???.*}
       valor=$tmp.${valor#$tmp}
    done
-   printf "%11s " ${valor%.}
+   printf "%13s " ${valor%.}
 }
 
 quotes() {
@@ -118,8 +83,8 @@ quotes() {
       if [ `grep -c no_backup$ /tmp/quota` = 0 ]
       then
          numero $resta >>/tmp/quota1
-         printf '          - ' >>/tmp/quota1
-         printf '          - ' >>/tmp/quota1
+         printf '            - ' >>/tmp/quota1
+         printf '            - ' >>/tmp/quota1
          numero $total >>/tmp/quota1
          echo "$grup   $nom" >>/tmp/quota1
          echo $resta - $total $grup>>/tmp/quota2
@@ -152,17 +117,17 @@ echo '           local sense desorganitzar res)' >>/tmp/quota
 echo 'total:     espai total ocupat al disc: backup+no_backup' >>/tmp/quota
 echo >>/tmp/quota
 
-echo '     backup   no_backup       arrel       total grup usuari' >>/tmp/quota
-echo '----------- ----------- ----------- ----------- ---- ---------' >>/tmp/quota
+echo '    backup      no_backup       arrel         total     grup usuari' >>/tmp/quota
+echo '------------- ------------- ------------- ------------- ---- ---------' >>/tmp/quota
 sort -r /tmp/quota1 >>/tmp/quota
 
-echo '----------- ----------- ----------- ----------- ---- ---------' >>/tmp/quota
+echo '------------- ------------- ------------- ------------- ---- ---------' >>/tmp/quota
 restat=`awk 'BEGIN { tot=0 } / ug$/ { tot=tot+$1 } END { print tot }' </tmp/quota2`
 nobackupt=`awk 'BEGIN { tot=0 } / ug$/ { tot=tot+$2 } END { print tot }' </tmp/quota2`
 totalt=`awk 'BEGIN { tot=0 } / ug$/ { tot=tot+$3 } END { print tot }' </tmp/quota2`
 numero $restat >>/tmp/quota
 numero $nobackupt >>/tmp/quota
-printf '          - ' >>/tmp/quota
+printf '            - ' >>/tmp/quota
 numero $totalt >>/tmp/quota
 echo "total ug" >>/tmp/quota
 
@@ -171,24 +136,24 @@ nobackupt=`awk 'BEGIN { tot=0 } / um$/ { tot=tot+$2 } END { print tot }' </tmp/q
 totalt=`awk 'BEGIN { tot=0 } / um$/ { tot=tot+$3 } END { print tot }' </tmp/quota2`
 numero $restat >>/tmp/quota
 numero $nobackupt >>/tmp/quota
-printf '          - ' >>/tmp/quota
+printf '            - ' >>/tmp/quota
 numero $totalt >>/tmp/quota
 echo "total um" >>/tmp/quota
 
-echo '----------- ----------- ----------- ----------- ---- ---------' >>/tmp/quota
+echo '------------- ------------- ------------- ------------- ---- ---------' >>/tmp/quota
 restat=`awk 'BEGIN { tot=0 } { tot=tot+$1 } END { print tot }' </tmp/quota2`
 nobackupt=`awk 'BEGIN { tot=0 } { tot=tot+$2 } END { print tot }' </tmp/quota2`
 totalt=`awk 'BEGIN { tot=0 } { tot=tot+$3 } END { print tot }' </tmp/quota2`
 numero $restat >>/tmp/quota
 numero $nobackupt >>/tmp/quota
-printf '          - ' >>/tmp/quota
+printf '            - ' >>/tmp/quota
 numero $totalt >>/tmp/quota
 echo TOTAL >>/tmp/quota
 
 let restat=restat/1048576
 let nobackupt=nobackupt/1048576
 let totalt=totalt/1048576
-printf "%8d Gb %8d Gb             %8d Gb aprox\n" $restat $nobackupt $totalt >>/tmp/quota
+printf "%10d Gb %10d Gb               %10d Gb aprox\n" $restat $nobackupt $totalt >>/tmp/quota
 
 chown 2014:20 /tmp/quota
 ara=`date +%Y%m%d-%H%M`

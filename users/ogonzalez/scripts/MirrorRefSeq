@@ -36,39 +36,37 @@ filtre() {
 # mirror no fara res, necessita crear alguns fitxers temporals.
 # el que fem es emprar el PID del proces
 
-OUT=/tmp/MirrorRefSeq$$
-MAIL=/tmp/MirrorRefSeqMail$$
-LOG=/tmp/MirrorRefSeqLog$$
+DIREC=/tmp/MirrorRefSeq
+OUT=$DIREC.out
+MAIL=$DIREC.mail
+LOG=$DIREC.log
+PID=$DIREC.pid
 LOGDIR=/home/ug/ogonzalez/scripts/_LOGS
 
 echo Mirror arrencat: `date +"%d %b %Y - %H:%M"` >$MAIL
 
-# TRUQUILLO!!! (O bug del linux?)
-#
-# amb RH73 i kernel 2.4.18 o 2.4.20 el grep del pipe apareix moltes
-# vegades al ps com a 'bash ./comanda' i provoca l'error d'execucions
-# multiples. Fer-ho de la manera aparentment mes senzilla:
-#
-#   ps -ef | grep 'bash ./MirrorRefSeq' >$LOG
-#
-# no funciona. Executa varies vegades aquest script i ho veuras:
-#
-#   #!/bin/bash
-#   echo $$
-#   ps -ef | grep $$
-#
-
-if [ `ps -e | grep -c "^ *$$"` != 1 ]
+if [ -e $PID ]
 then
 
-   # JA HI HA UN MIRROR EN MARXA
-
-   echo >>$MAIL
-   echo APARENTMENT JA HI HA UN MIRROR EN MARXA!!! >>$MAIL
-   echo >>$MAIL
+   PIDVELL=`cat $PID`
+   if [ `ps -e | grep -c "^ *$PIDVELL"` != 0 ]
+   then
+      # JA HI HA UN MIRROR EN MARXA
+      echo >>$MAIL
+      echo JA HI HA UN MIRROR EN MARXA!!! >>$MAIL
+      echo >>$MAIL
+   else
+      # L'EXECUCIO ANTERIOR NO VA ACABAR NETAMENT
+      # DAVANT DEL DUBTE, TAMPOC CONTINUO EL MIRROR
+      echo >>$MAIL
+      echo Fitxer $PID detectat >>$MAIL
+      echo >>$MAIL
+   fi
    echo EXECUCIO CANCEL.LADA >>$MAIL | tee $LOG
 
 else
+
+   echo $$ >$PID
 
    rm -rf $LOG >/dev/null 2>&1
 
@@ -88,33 +86,36 @@ else
 
       filtre
 
-   ##########
-   # GoldenPath - ensGene, ensPep, refGene...
-   ##########
-
-      URL=http://hgdownload.cse.ucsc.edu/goldenPath
-      rm $OUT
-      AVIS=""
-
-      rm /tmp/gp >/dev/null 2>&1
-      for organisme in H.sapiens M.musculus R.norvegicus
-      do
-         for local in `ls -1d /seq/genomes/$organisme/golden_path* | tail -3`
-         do
-            cd $local/database
-            nom=`basename $local`
-            remot=`grep $nom$ /home/ug/ogonzalez/scripts/MirrorGP.dat | awk '{ print $1 }'`
-            for fitxer in acembly all_est ECgene ensEstGene ensGene ensLink ensMrna ensPep exoniphy geneid genscan knownGene mgcGenes miRNA pseudoGeneLink refGene refLink refMrna refPep rnaGene sgpGene snpMap snpNih softberryGene superfamily tableDescriptions twinscan vegaGene vegaPseudoGene
-            do
-               echo "$URL/$remot/database/$fitxer.sql" >>/tmp/gp
-               echo "$URL/$remot/database/$fitxer.txt.gz" >>/tmp/gp
-            done
-            wget -m -nH -nd --passive-ftp --progres=dot:mega -i /tmp/gp 2>&1 | tee $OUT
-            #wget -N -nH -nd --passive-ftp -i /tmp/gp 2>&1 | tee $OUT
-            rm /tmp/gp
-            filtre NO_RM
-         done
-      done
+########################################################
+# 24-ago-2005: aixo ja no es fa des d'aqui!!!
+########################################################
+#   ##########
+#   # GoldenPath - ensGene, ensPep, refGene...
+#   ##########
+#
+#      URL=http://hgdownload.cse.ucsc.edu/goldenPath
+#      rm $OUT
+#      AVIS=""
+#
+#      rm /tmp/gp >/dev/null 2>&1
+#      for organisme in H.sapiens M.musculus R.norvegicus
+#      do
+#         for local in `ls -1d /seq/compressed_genomes/$organisme/golden_path* | tail -3`
+#         do
+#            cd $local/database
+#            nom=`basename $local`
+#            remot=`grep $nom$ /home/ug/ogonzalez/scripts/MirrorGP.dat | awk '{ print $1 }'`
+#            for fitxer in acembly all_est ECgene ensEstGene ensGene ensLink ensMrna ensPep exoniphy geneid genscan knownGene mgcGenes miRNA pseudoGeneLink refGene refLink refMrna refPep rnaGene sgpGene snpMap snpNih softberryGene superfamily tableDescriptions transRegCode transRegCodeCondition transRegCodeMotif transRegCodeProbe twinscan vegaGene vegaPseudoGene
+#            do
+#               echo "$URL/$remot/database/$fitxer.sql" >>/tmp/gp
+#               echo "$URL/$remot/database/$fitxer.txt.gz" >>/tmp/gp
+#            done
+#            wget -m -nH -nd --passive-ftp --progres=dot:mega -i /tmp/gp 2>&1 | tee $OUT
+#            #wget -N -nH -nd --passive-ftp -i /tmp/gp 2>&1 | tee $OUT
+#            rm /tmp/gp
+#            filtre NO_RM
+#         done
+#      done
 
 fi
 

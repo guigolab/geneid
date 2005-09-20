@@ -15,14 +15,12 @@
 #
 # eidolon a les 3:45, i ajunta tots els resultats en un sol fitxer
 
-###############
-#nom=/tmp/__`hostname -s`
-#find  /  -mount -perm  +4000 >$nom
-#md5sum -c /home/ug/ogonzalez/no_backup/soft/__SucKIT/chkrootkit.binaris/0_check.md5 >$nom 2>&1
-#/home/ug/ogonzalez/no_backup/soft/__SucKIT/chkrootkit-0.43/chkrootkit -p /home/ug/ogonzalez/no_backup/soft/__SucKIT/chkrootkit.binaris >>$nom 2>&1
-#chown ogonzalez:users $nom
-#mv $nom /home/ug/ogonzalez/scripts/_LOGS
-#################3
+# reviso aqui temporalment l'estat de les impressores
+for impressora in `grep '^<.*Printer ' /etc/cups/printers.conf | cut -d" " -f2 | tr -d ">"`
+do
+   lpadmin -p $impressora -E
+done
+# final revisio impressores
 
 cd /home/ug/ogonzalez/scripts/_LOGS
 
@@ -30,7 +28,7 @@ maquina=`hostname -s`
 
 echo >ntp.$maquina
 
-if [ $maquina = monstre1 -o $maquina = blaster ]
+if [ $maquina = monstre1 -o $maquina = monstre3 -o $maquina = nin  -o $maquina = monstrex ]
 then
    # aprofito per revisar l'estat dels RAID de monstre1
    cat /proc/mdstat >>ntp.$maquina
@@ -47,8 +45,8 @@ then
       error=1
    else
       echo ntpd REARRENCAT >> ntp.$maquina
-      sleep 5 # perque m'he trobat que de vegades l'ntpq de mes avall
-              # no ha donat temps a l'ntp a obrir-se
+      sleep 60 # perque m'he trobat que de vegades l'ntpq de mes avall
+               # no ha donat temps a l'ntp a obrir-se
    fi
 fi
 
@@ -65,7 +63,7 @@ then
    for busca in monstre1 monstre2 monstre3 monstre4 nautilus eidolon xinxan \
                 tro rantanplan cel basileia tmatik zapiron kalamos icarus \
                 mar drac nit nin thunderbird roma marsella altair antares \
-                sonic blaster
+                sonic blaster llamp foc corb newton galileo kepler monstrex
    do
       if [ -s ntp.$busca ]
       then

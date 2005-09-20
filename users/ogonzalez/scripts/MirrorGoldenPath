@@ -1,66 +1,55 @@
 #!/bin/bash
 
-# els fitxers GP son a servidors http, aixi que un "wget -m" no xuta
+#########################################################################
 #
-# si no canvien el format, un wget retorna l'index.html autogenerat per
-# mostrar el directori. A partir d'aquest puc baixar la resta
+# ATENCIO:
 #
-# El primer parametre es la URL. D'aqui treurem el bigZips i el database.
-# Aquests dos directoris es generen, aixi que aixo s'ha d'executar des
-# del directori "golden_path_200xyyzz", que has de crear tu
+# PER BAIXAR UN SOL ORGANISME, EXECUTA MirrorGoldenPath.1!!!!
 #
-# COMPTE: ets tu qui ha de controlar si la URL es correcta i si conte el
-#         que ha de contenir!!
-
-download() {
-
-   if [ ! -e $1 ]
-   then
-      mkdir $1
-   fi
-   cd $1
-   wget $URL/$1
-
-   /usr/bin/perl >index2.html <<EOF
-      open(FIT,"index.html");
-      foreach \$lin (<FIT>) {
-         \$lin =~ s/<A HREF="(\?.=.|.*\/)">//ig;
-         \$lin =~ s/<IMG SRC[^>]+>//ig;
-         print "\$lin";
-      }
-      close(FIT);
-EOF
-
-   # -F: interpreta els fitxers d'entrada com html
-   # -B: especifica la URL "base"
-   # -i: fitxer d'entrada amb les URL
-# NOOO: -c obliga l'wget a continuar. Si una segona execucio es
-#       troba un fitxer diferent i mes llarg, afegira la part nova
-#       del segon fitxer al final del primer, carregant-se'l
-#   wget -c -F -B "$URL/$1/" -i index2.html
-
-   # afegim -N: timestamping
-   wget -F -N -B "$URL/$1/" -i index2.html
-
-# aqui faltaria quelcom per comprovar la integritat dels fitxers
-# que han baixat!!!
-
-   rm index.html index2.html
-
-   cd ..
-
-}
+#########################################################################
 
 
-#BASE=`pwd`
-#if [ `dirname $BASE` != '/seq/genomes/H.sapiens' ]
+#if [ `whoami` != bdadmin ]
 #then
-#   echo No som al directori H.sapiens!!!
+#   echo Has de ser bdadmin
 #   exit
 #fi
 
-URL=$1
+URL[0]=http://genome-archive.cse.ucsc.edu/goldenPath
+URL[1]=http://hgdownload.cse.ucsc.edu/goldenPath
+genomes=/seq/compressed_genomes
+llista=/home/ug/ogonzalez/scripts/MirrorGoldenPath.lst
 
-download bigZips
-download database
+cat $llista | cut -d\# -f1 | while read linia
+do
+   organisme=${linia%:}
+   if [ "$organisme:" = "$linia" ]
+   then
+echo $organisme---
+      while read col1 col2
+      do
+         if [ "$col1" = "" ]
+         then
+            break
+         fi
+         direc=${col1#??}
+         servidor=${col1%?$direc}
+         dirremot=${URL[$servidor]}/$direc
+         dirlocal=$genomes/$col2
+# AQUEST IF S'HAURIA DE FER A MIRRORGOLDENPATH.1!!!!
+         if wget --spider $dirremot &> /dev/null
+         then
+echo ${URL[$servidor]}/$direc - $genomes/$local
+#         cd $dirlocal
+#         /home/ug/ogonzalez/scripts/MirrorGoldenPath.1 $dirremot
+#         echo "Mirrored from $URL/$remot" > README.txt
+#         echo -n "Last mirrored on " >> README.txt
+#         date >> README.txt
+         else
+            echo "ERROR DE CONNEXIO, O JO QUE SE"
+         fi
+      done
+echo
+   fi
+done
 

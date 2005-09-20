@@ -1,0 +1,24 @@
+#!/bin/bash
+
+cd /tmp
+wget http://www.xtec.es/formaciotic/antivirus/htm/Novetats.htm
+data=`tr -d "\012\015" <Novetats.htm | \
+   perl -e '
+      $lin=<STDIN>;
+      $lin=~s/.*Data\s+d.actualitzaci.+:\s+//;
+      $lin=~s/^(\d{2})-(\d{2})-\d\d(\d{2}).*/$3$2$1/;
+      print "$lin\n";
+   '`
+exit
+cd /home/ogonzalez/CD/_classificar/__OK
+if [ ! -s pav$data.exe ]
+then
+   wget -m -nH --cut-dirs=3 http://www.xtec.es/formaciotic/antivirus/act/pav.exe
+   mv pav.exe pav$data.exe
+   echo
+   echo Versio baixada: $data
+else
+   echo Versions local i remota iguals: $data
+fi
+echo
+rm /tmp/Novetats.htm

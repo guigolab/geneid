@@ -1,0 +1,40 @@
+# correspondencia entre URLs a golden path i direcs a /seq/compressed_genomes
+#
+# aixo *NO* actualitzara els genomes descomprimits!!!
+#
+# el primer argument de la URL es 0 o 1 segons el servidor on es trobi
+# la versio del genoma (depen de l'antiguitat). Veure "MirrorGoldenPath"
+#
+#	0 = http://genome-archive.cse.ucsc.edu/goldenPath/
+#	1 = http://hgdownload.cse.ucsc.edu/goldenPath/
+#
+# el tercer argument es la versio, per incloure al README automaticament
+#
+# des del '#' s'ignora la linia. cada organisme va des de la linia amb ':'
+# fins a una linia en blanc o final de fitxer. format lliure.
+#
+
+
+M.musculus:
+   0/mmFeb2002	 golden_path_200202
+   0/mmFeb2003	 golden_path_200302
+   0/mm4	 golden_path_200310
+   1/mm5	 golden_path_200405
+   1/mm6	 golden_path_200505
+
+R.norvegicus:
+   0/rnNov2002	 golden_path_200211
+   1/rnJan2003	 golden_path_200301
+   1/rnJun2003	 golden_path_200306
+
+H.sapiens:
+   0/01apr2001	 golden_path_20010401
+   0/06aug2001	 golden_path_20010806
+   0/22dec2001	 golden_path_20011222
+   0/05apr2002	 golden_path_20020405
+   0/28jun2002	 golden_path_20020628
+   0/hg13	 golden_path_20021114
+   1/10april2003 golden_path_20030410
+   1/hg16	 golden_path_200307
+   1/hg17	 golden_path_200405
+
