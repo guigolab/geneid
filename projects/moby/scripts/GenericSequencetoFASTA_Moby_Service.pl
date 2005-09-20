@@ -40,7 +40,7 @@ Usage:
 		<3> or Inab
 		<4> or BioMoby
 	-s Service Name
-	-i Sequence(s) input file, in FASTA format - optional
+	-f Sequence(s) input file, in FASTA format - optional
 	
 Examples using some combinations:
 	perl GenericSequencetoFASTA_Moby_service.pl -x 1 -s runGeneIDGFF -f /home/ug/arnau/data/AC005155.fa
@@ -284,7 +284,7 @@ PRT
     ##################################################################
 
     print STDERR "result\n";
-    print STDERR $result;
+    print $result;
     print STDERR "\n";
 
 }
