@@ -433,6 +433,7 @@ foreach my $geneId (@geneIds) {
 
 		foreach my $member_attribute (@{$homology->get_all_Member_Attribute}) {
 		    my ($member, $attribute) = @{$member_attribute};
+
 		    # Get the Stable identifier
 		    my $homologue_stable_id = $member->stable_id();
 		    
@@ -451,9 +452,20 @@ foreach my $geneId (@geneIds) {
 			    }
 			    
 			    my $upstream_sequence = $upstream_slice_region->seq;
+			    
+			    # Make up a description
+			    my $chromosome  = $upstream_slice_region->seq_region_name;
+			    my $slice_start = $upstream_slice_region->start;
+			    my $slice_end   = $upstream_slice_region->end;
+			    my $strand      = $upstream_slice_region->strand;
+			    my $assembly    = $upstream_slice_region->coord_system->version;
+			    my $species     = $member->genome_db()->name;
+			    
+			    my $description = "$geneId:$species:$assembly:$chromosome:$slice_start:$slice_end:$strand";
+			    
 			    my $seqobj = Bio::PrimarySeq->new (
 							       -id    => $homologue_stable_id,
-							       -desc  => $geneId,
+							       -desc  => $description,
 							       -seq   => $upstream_sequence,
 							       );
 			    $sout->write_seq ($seqobj);
@@ -509,9 +521,18 @@ foreach my $geneId (@geneIds) {
 	    }
 	    
 	    my $upstream_sequence = $upstream_slice_region->seq;
+	    
+	    # Make up a description
+	    my $chromosome  = $upstream_slice_region->seq_region_name;
+	    my $slice_start = $upstream_slice_region->start;
+	    my $slice_end   = $upstream_slice_region->end;
+	    my $strand      = $upstream_slice_region->strand;
+	    my $assembly    = $upstream_slice_region->coord_system->version;
+	    
+	    my $description = "$geneId:$assembly:$chromosome:$slice_start:$slice_end:$strand";
 	    my $seqobj = Bio::PrimarySeq->new (
 					       -id    => $gene_stable_id,
-					       -desc  => $geneId,
+					       -desc  => $description,
 					       -seq   => $upstream_sequence,
 					       );
 	    $sout->write_seq ($seqobj);
