@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.6 2005-09-07 15:48:56 arnau Exp $
+# $Id: PromoterExtractionServices.pm,v 1.7 2005-10-03 13:22:36 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -271,7 +271,10 @@ sub _do_query_PromoterExtraction {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
 
-    my $output_object_type  = "DNASequence";
+    # Return CommentedDNASequence so we also add a description
+    # The specs say to return DNASequence but that shouldn't matter returning CommentedDNASequence because CommentedDNASequence is-a DNASequence !!
+
+    my $output_object_type  = "CommentedDNASequence";
     my $output_article_name = "upstream_sequences";
     my $namespace = "ENSEMBL";
 
