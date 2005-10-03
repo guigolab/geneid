@@ -73,24 +73,41 @@ sub getTextContentFromXML {
 sub createSequenceObjectsFromFASTA {
     my $self = shift;
     my ($fasta_sequences, $object_type, $namespace) = @_;
-
+    
     my $moby_sequence_objects = [];
     my $sequence_objects      = _parse_fasta_sequences ($fasta_sequences);
-
+    
     # Parsing the Bioperl objects returned by _parse_fasta_sequences method
-
+    
     foreach my $seqobj (@$sequence_objects) {
-
+	
 	my $seq_id     = $seqobj->display_id;
+	my $seq_desc   = $seqobj->desc || "";
 	my $sequence   = $seqobj->seq;
 	my $seq_length = length ($sequence);
 	
-	my $moby_object = <<PRT;
+	my $moby_object;
+
+	if ($object_type =~ /commented/i) {
+	    $moby_object = <<PRT;
+<moby:$object_type namespace='$namespace' id='$seq_id'>
+  <Integer namespace="" id="" articleName="Length">$seq_length</Integer>
+  <String namespace="" id=""  articleName="SequenceString">$sequence</String>
+  <String namespace="" id=""  articleName="Description">$seq_desc</String>
+</moby:$object_type>
+PRT
+        }
+	else {
+
+	    # No description
+
+	    $moby_object = <<PRT;
 <moby:$object_type namespace='$namespace' id='$seq_id'>
   <Integer namespace="" id="" articleName="Length">$seq_length</Integer>
   <String namespace="" id=""  articleName="SequenceString">$sequence</String>
 </moby:$object_type>
 PRT
+	}
 
         push (@$moby_sequence_objects, $moby_object);
     }
