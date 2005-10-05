@@ -130,7 +130,7 @@ PRT
 #
 
 my $organism          = "Homo sapiens";
-my $dbrelease         = "32";
+my $dbrelease         = "34";
 my $upstream_length   = 5000;
 my $downstream_length = 0;
 my $intergenic_only   = "False";
