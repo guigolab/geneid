@@ -10,7 +10,7 @@ import org.xml.sax.*;
 import org.apache.xml.serialize.XMLSerializer;
 
 String OutObj="";
-String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
+String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
 
 DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
 DocumentBuilder db = dbf.newDocumentBuilder();
