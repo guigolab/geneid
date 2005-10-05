@@ -131,9 +131,10 @@ PRT
 
 my $organism          = "Homo sapiens";
 my $dbrelease         = "32";
-my $upstream_length   = 20000;
+my $upstream_length   = 5000;
 my $downstream_length = 0;
 my $intergenic_only   = "False";
+my $orthologous_mode  = "False";
 
 my $organism_xml = <<PRT;
 <Value>$organism</Value>
@@ -155,6 +156,10 @@ my $intergenic_only_xml = <<PRT;
 <Value>$intergenic_only</Value>
 PRT
 
+my $orthologous_mode_xml = <<PRT;
+<Value>$orthologous_mode</Value>
+PRT
+
 ##################################################################
 #
 # Service execution
@@ -163,7 +168,7 @@ PRT
 
 my $result = $Service->execute(XMLinputlist => [
 						[ $articleName, $genes_xml, 
-						  'organism', $organism_xml, 'ensembl release', $dbrelease_xml, 'upstream length', $upstream_length_xml, 'downstream length', $downstream_length_xml, 'intergenic only', $intergenic_only_xml]
+						  'organism', $organism_xml, 'ensembl release', $dbrelease_xml, 'upstream length', $upstream_length_xml, 'downstream length', $downstream_length_xml, 'intergenic only', $intergenic_only_xml, 'orthologous mode', $orthologous_mode_xml]
 					       ]);
 
 ##################################################################
