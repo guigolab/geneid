@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.7 2005-10-03 13:22:36 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.8 2005-10-05 13:39:14 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -150,11 +150,11 @@ sub _do_query_PromoterExtraction {
     my $queryInput_DOM = shift @_;
     
     my $MOBY_RESPONSE = "";     # set empty response
-
+    
     # Variables that will be passed to PromoterExtraction_call
     my @genes;
     my %parameters;
-
+    
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
 
@@ -167,12 +167,12 @@ sub _do_query_PromoterExtraction {
     my ($intergenic_only)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "intergenic only");
     my ($orthologous_mode)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "orthologous mode");
 
-    (not defined $organism)          and $organism = "Homo sapiens";
-    (not defined $dbrelease)         and $dbrelease = 32;
-    (not defined $upstream_length)   and $upstream_length = 2000;
+    (not defined $organism)          and $organism          = "Homo sapiens";
+    (not defined $dbrelease)         and $dbrelease         = 32;
+    (not defined $upstream_length)   and $upstream_length   = 2000;
     (not defined $downstream_length) and $downstream_length = 0; 
-    (not defined $intergenic_only)   and $intergenic_only = "False";
-    (not defined $orthologous_mode)  and $orthologous_mode = "False";
+    (not defined $intergenic_only)   and $intergenic_only   = "False";
+    (not defined $orthologous_mode)  and $orthologous_mode  = "False";
     
     # Add the parsed parameters in a hash table
     
