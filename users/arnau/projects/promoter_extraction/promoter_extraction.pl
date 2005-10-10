@@ -408,7 +408,7 @@ foreach my $geneId (@geneIds) {
     if ((not defined $genes) || (@$genes == 0)) {
 	my $gene = $gene_adaptor->fetch_by_stable_id ($geneId) or warn "can't instanciate gene object with identifier, $geneId!\n";
 	if (not defined $gene) {
-	    print STDERR "can't find any Ensembl gene for this given identifier, $geneId!\n";
+	    print STDERR "can't find any Ensembl gene for this given identifier, $geneId, for this given species, $species!\n";
 	}
 	else {
 	    if ($_debug) {
