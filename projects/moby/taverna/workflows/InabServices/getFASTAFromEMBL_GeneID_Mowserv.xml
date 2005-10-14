@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:4EN3STOHL67" author="" title="" />
+  <s:processor name="Create_moby_data">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
+  </s:processor>
+  <s:processor name="fromFASTAtoGenericSequence">
+    <s:description>Converts a sequence in Fasta format into a GenericSequence object</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>fromFASTAtoGenericSequence</s:serviceName>
+      <s:authorityName>www.pcm.uam.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runGeneIDGFF">
+    <s:description>Ab initio gene prediction tool - Return the output predictions in GFF format.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runGeneIDGFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="getFASTAfromEMBL">
+    <s:description>Retrieve a sequence in FASTA format from EMBL database.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>getFASTAfromEMBL</s:serviceName>
+      <s:authorityName>www.pcm.uam.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:link source="namespace" sink="Create_moby_data:namespace" />
+  <s:link source="sequenceID" sink="Create_moby_data:id" />
+  <s:link source="Create_moby_data:mobydata" sink="getFASTAfromEMBL:input" />
+  <s:link source="fromFASTAtoGenericSequence:output" sink="runGeneIDGFF:input" />
+  <s:link source="getFASTAfromEMBL:output" sink="fromFASTAtoGenericSequence:input" />
+  <s:link source="sequenceID" sink="Create_moby_data:stringvalue" />
+  <s:link source="getFASTAfromEMBL:output" sink="sequence" />
+  <s:link source="runGeneIDGFF:output" sink="GeneID Predictions" />
+  <s:source name="sequenceID" />
+  <s:source name="namespace" />
+  <s:sink name="sequence">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/plain</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
+  <s:sink name="GeneID Predictions">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/plain</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
+</s:scufl>
+
+
