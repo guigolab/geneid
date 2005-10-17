@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.5 2005-09-16 10:37:27 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.6 2005-10-17 09:46:16 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -504,9 +504,11 @@ sub runMatScanGFFCollection {
 	# es un XML::DOM::Node, y que si queremos trabajar con 
 	# el mensaje de texto debemos llamar a: $query->toString() 
 	
-	# my $query_str = $queryInput->toString();
-	# print STDERR "query text: $query_str\n";
-	
+	if ($_debug) {
+	    my $query_str = $queryInput->toString();
+	    print STDERR "query text: $query_str\n";
+	}
+
 	my $query_response = _do_query_MatScan ($queryInput, $_format, "collection");
 	
 	# $query_response es un string que contiene el codigo xml de
