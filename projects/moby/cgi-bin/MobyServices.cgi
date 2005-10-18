@@ -69,6 +69,8 @@ $x->dispatch_with({
     'http://biomoby.org/#runMatScanGFFCollection'       => 'INB::GRIB::Services::MatScanServices',
     'http://biomoby.org/#runMetaAlignment'              => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMetaAlignmentGFF'           => 'INB::GRIB::Services::MetaAlignmentServices',
+    'http://biomoby.org/#runMultiMetaAlignment'         => 'INB::GRIB::Services::MetaAlignmentServices',
+    'http://biomoby.org/#runMultiMetaAlignmentGFF'      => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#fromGenericSequencetoFASTA'    => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA' => 'INB::GRIB::Services::UtilsServices',
 });
