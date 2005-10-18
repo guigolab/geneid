@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
         <moby:mobyData moby:queryID='10'>
             <moby:Simple moby:articleName='meta_predictions'><moby:GFF namespace='' id='ENSG00000197785'>
-<![CDATA["
+<![CDATA[
 # meta_v1.0
 # date Thu Oct  6 11:02:39 2005
 # MAP1 ENSG00000197785 - Length = 203 elems
@@ -193,7 +193,7 @@ ENSG00000197785	meta_v1.0	V$NKX62_Q2	1948	1959	7.780000	.	.
 ENSG00000197785	meta_v1.0	V$STAT3_02	1973	1980	5.440000	.	.
 ENSG00000197785	meta_v1.0	V$STAT3_02	1973	1980	5.440000	.	.
 
-"]]>
+]]>
 </moby:GFF>
 </moby:Simple>
         </moby:mobyData>

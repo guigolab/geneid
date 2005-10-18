@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
         <moby:mobyData moby:queryID='9'>
             <moby:Simple moby:articleName='meta_predictions'><moby:text-formatted namespace='' id='ENSG00000197785'>
-<![CDATA["
+<![CDATA[
 # meta_v1.0
 # date Thu Oct  6 11:02:37 2005
 # MAP1 ENSG00000197785 - Length = 203 elems
@@ -102,7 +102,7 @@ V$GATA1_04:		 1926-1938	 :	 1926-1938 	8.08-8.08
 V$NKX62_Q2:		 1948-1959	 :	 1948-1959 	7.78-7.78
 V$STAT3_02:		 1973-1980	 :	 1973-1980 	5.44-5.44
 
-"]]>
+]]>
 </moby:text-formatted>
 </moby:Simple>
         </moby:mobyData>
