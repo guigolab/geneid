@@ -82,7 +82,7 @@ my $serviceName = $opt_s;
 my $articleName = "maps";
 $::authURI = 'genome.imim.es';
 
-my $maps_file = "/home/ug/arnau/data/promoterExtraction/mut1_downreg.1000.matscan.gff.xml";
+my $maps_file = "/home/ug/arnau/data/promoterExtraction/mut1_downreg.1000.intergenic.matscan.gff.xml";
 
 # Parameters
 
@@ -225,9 +225,17 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 
 open FILE, "$maps_file" or die "can't open maps file!\n";
 my $maps_xml = [];
-my $map_xml = "";
+my $map_xml  = "";
+
+my $maximum_pairs = 100000;
+my $index = 0;
 
 while (<FILE>) {
+
+    if ($index >= $maximum_pairs) {
+	last;
+    }
+
     my $line = $_;
     if ($line =~ /<moby:Simple>/) {
 	my $parsing = 1;
@@ -236,15 +244,23 @@ while (<FILE>) {
 		$map_xml .= $line;
 	    }
 	    else {
+		
+		# print STDERR "map_xml: $map_xml\n";
+		
 		push (@$maps_xml, $map_xml);
 		$map_xml = "";
 		$parsing = 0;
+		$index++;
 	    }
 	}
     }
 }
 
 close FILE;
+
+if ($_debug) {
+    print STDERR "got " . @$maps_xml . " maps\n";
+}
 
 #
 # Parameters (secondary articles)
