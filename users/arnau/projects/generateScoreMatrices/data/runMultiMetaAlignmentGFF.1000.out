@@ -1,0 +1,1506 @@
+<?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
+        <moby:mobyData moby:queryID='1'>
+            <moby:Collection moby:articleName='meta_predictions'>
+                
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:29 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG31911 - Length = 94 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 28.38
+# SimMatrix: 281 matches / 8648 positions (3.25 %)
+### Best meta-alignment contains 13 elements
+CG9855	meta_v1.0	V$FOXO1_01	29	38	7.820000	.	.
+CG31911	meta_v1.0	V$FOXO1_01	1	10	8.400000	.	.
+CG9855	meta_v1.0	V$NKX62_Q2	201	212	8.070000	.	.
+CG31911	meta_v1.0	V$NKX62_Q2	140	151	7.780000	.	.
+CG9855	meta_v1.0	V$CDXA_02	229	235	5.040000	.	.
+CG31911	meta_v1.0	V$CDXA_02	174	180	5.680000	.	.
+CG9855	meta_v1.0	V$CDXA_02	237	243	5.040000	.	.
+CG31911	meta_v1.0	V$CDXA_02	255	261	5.170000	.	.
+CG9855	meta_v1.0	V$STAT5A_03	251	258	6.460000	.	.
+CG31911	meta_v1.0	V$STAT5A_03	265	272	5.810000	.	.
+CG9855	meta_v1.0	V$NKX62_Q2	259	270	8.190000	.	.
+CG31911	meta_v1.0	V$NKX62_Q2	310	321	8.760000	.	.
+CG9855	meta_v1.0	V$CDXA_02	319	325	4.980000	.	.
+CG31911	meta_v1.0	V$CDXA_02	384	390	5.620000	.	.
+CG9855	meta_v1.0	V$CDXA_02	350	356	5.620000	.	.
+CG31911	meta_v1.0	V$CDXA_02	451	457	5.040000	.	.
+CG9855	meta_v1.0	V$CEBP_Q3	420	429	6.630000	.	.
+CG31911	meta_v1.0	V$CEBP_Q3	511	520	6.470000	.	.
+CG9855	meta_v1.0	V$CDXA_02	432	438	5.560000	.	.
+CG31911	meta_v1.0	V$CDXA_02	540	546	5.290000	.	.
+CG9855	meta_v1.0	V$CDXA_02	469	475	5.170000	.	.
+CG31911	meta_v1.0	V$CDXA_02	576	582	5.560000	.	.
+CG9855	meta_v1.0	V$CDXA_02	567	573	5.620000	.	.
+CG31911	meta_v1.0	V$CDXA_02	677	683	5.680000	.	.
+CG9855	meta_v1.0	V$CDXA_01	594	600	6.280000	.	.
+CG31911	meta_v1.0	V$CDXA_01	684	690	5.030000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:29 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG1916 - Length = 95 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 17.67
+# SimMatrix: 244 matches / 8740 positions (2.79 %)
+### Best meta-alignment contains 11 elements
+CG9855	meta_v1.0	V$MYB_Q3	50	55	5.390000	.	.
+CG1916	meta_v1.0	V$MYB_Q3	95	100	5.170000	.	.
+CG9855	meta_v1.0	V$EN1_01	56	62	5.980000	.	.
+CG1916	meta_v1.0	V$EN1_01	170	176	5.130000	.	.
+CG9855	meta_v1.0	V$CDXA_02	350	356	5.620000	.	.
+CG1916	meta_v1.0	V$CDXA_02	453	459	5.740000	.	.
+CG9855	meta_v1.0	V$STAT3_02	363	370	5.090000	.	.
+CG1916	meta_v1.0	V$STAT3_02	476	483	5.370000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	400	407	5.430000	.	.
+CG1916	meta_v1.0	V$STAT5A_04	505	512	5.050000	.	.
+CG9855	meta_v1.0	V$SRY_01	414	420	6.680000	.	.
+CG1916	meta_v1.0	V$SRY_01	519	525	6.050000	.	.
+CG9855	meta_v1.0	V$EN1_01	453	459	5.410000	.	.
+CG1916	meta_v1.0	V$EN1_01	537	543	4.880000	.	.
+CG9855	meta_v1.0	V$CDXA_02	520	526	5.620000	.	.
+CG1916	meta_v1.0	V$CDXA_02	584	590	5.290000	.	.
+CG9855	meta_v1.0	V$CDXA_02	567	573	5.620000	.	.
+CG1916	meta_v1.0	V$CDXA_02	620	626	5.620000	.	.
+CG9855	meta_v1.0	V$CDXA_02	594	600	5.680000	.	.
+CG1916	meta_v1.0	V$CDXA_02	643	649	5.620000	.	.
+CG9855	meta_v1.0	V$HMGIY_Q6	647	653	7.610000	.	.
+CG1916	meta_v1.0	V$HMGIY_Q6	719	725	6.690000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG40178 - Length = 121 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 35.56
+# SimMatrix: 528 matches / 11132 positions (4.74 %)
+### Best meta-alignment contains 13 elements
+CG9855	meta_v1.0	V$STAT5A_04	196	203	5.270000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	217	224	4.940000	.	.
+CG9855	meta_v1.0	V$CDXA_02	229	235	5.040000	.	.
+CG40178	meta_v1.0	V$CDXA_02	228	234	5.040000	.	.
+CG9855	meta_v1.0	V$CDXA_02	237	243	5.040000	.	.
+CG40178	meta_v1.0	V$CDXA_02	238	244	5.040000	.	.
+CG9855	meta_v1.0	V$CDXA_02	319	325	4.980000	.	.
+CG40178	meta_v1.0	V$CDXA_02	300	306	4.640000	.	.
+CG9855	meta_v1.0	V$CDXA_02	350	356	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	313	319	5.290000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	363	370	5.330000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	323	330	5.240000	.	.
+CG9855	meta_v1.0	V$STAT4_01	400	407	6.180000	.	.
+CG40178	meta_v1.0	V$STAT4_01	351	358	5.520000	.	.
+CG9855	meta_v1.0	V$CAP_01	450	457	4.420000	.	.
+CG40178	meta_v1.0	V$CAP_01	399	406	4.370000	.	.
+CG9855	meta_v1.0	V$CDXA_02	469	475	5.170000	.	.
+CG40178	meta_v1.0	V$CDXA_02	418	424	5.740000	.	.
+CG9855	meta_v1.0	V$CDXA_02	567	573	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	549	555	4.640000	.	.
+CG9855	meta_v1.0	V$CDXA_01	594	600	6.280000	.	.
+CG40178	meta_v1.0	V$CDXA_01	578	584	5.880000	.	.
+CG9855	meta_v1.0	V$DBP_Q6	620	626	6.100000	.	.
+CG40178	meta_v1.0	V$DBP_Q6	605	611	5.980000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	646	653	5.070000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	651	658	5.270000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 11.06
+# SimMatrix: 176 matches / 4600 positions (3.83 %)
+### Best meta-alignment contains 9 elements
+CG9855	meta_v1.0	V$STAT4_01	159	166	5.520000	.	.
+CG5390	meta_v1.0	V$STAT4_01	60	67	5.770000	.	.
+CG9855	meta_v1.0	V$NKX62_Q2	201	212	8.070000	.	.
+CG5390	meta_v1.0	V$NKX62_Q2	94	105	8.190000	.	.
+CG9855	meta_v1.0	V$CDXA_02	237	243	5.040000	.	.
+CG5390	meta_v1.0	V$CDXA_02	135	141	4.980000	.	.
+CG9855	meta_v1.0	V$HNF3ALPHA_Q6	258	268	9.330000	.	.
+CG5390	meta_v1.0	V$HNF3ALPHA_Q6	151	161	8.760000	.	.
+CG9855	meta_v1.0	V$CDXA_02	319	325	4.980000	.	.
+CG5390	meta_v1.0	V$CDXA_02	192	198	5.740000	.	.
+CG9855	meta_v1.0	V$CDXA_02	350	356	5.620000	.	.
+CG5390	meta_v1.0	V$CDXA_02	200	206	5.040000	.	.
+CG9855	meta_v1.0	V$STAT1_03	363	370	6.270000	.	.
+CG5390	meta_v1.0	V$STAT1_03	227	234	5.990000	.	.
+CG9855	meta_v1.0	V$STAT3_02	397	404	4.780000	.	.
+CG5390	meta_v1.0	V$STAT3_02	253	260	4.980000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	407	414	5.640000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	291	298	5.030000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 14.51
+# SimMatrix: 261 matches / 10212 positions (2.56 %)
+### Best meta-alignment contains 10 elements
+CG9855	meta_v1.0	V$DBP_Q6	68	74	6.100000	.	.
+CG6936	meta_v1.0	V$DBP_Q6	92	98	6.100000	.	.
+CG9855	meta_v1.0	V$STAT5A_03	251	258	6.460000	.	.
+CG6936	meta_v1.0	V$STAT5A_03	295	302	5.450000	.	.
+CG9855	meta_v1.0	V$CDXA_02	319	325	4.980000	.	.
+CG6936	meta_v1.0	V$CDXA_02	326	332	5.740000	.	.
+CG9855	meta_v1.0	V$STAT1_02	363	370	7.980000	.	.
+CG6936	meta_v1.0	V$STAT1_02	379	386	6.520000	.	.
+CG9855	meta_v1.0	V$FOXO4_01	412	422	8.500000	.	.
+CG6936	meta_v1.0	V$FOXO4_01	396	406	9.190000	.	.
+CG9855	meta_v1.0	V$STAT3_02	549	556	4.940000	.	.
+CG6936	meta_v1.0	V$STAT3_02	521	528	5.310000	.	.
+CG9855	meta_v1.0	V$CDXA_02	567	573	5.620000	.	.
+CG6936	meta_v1.0	V$CDXA_02	575	581	4.930000	.	.
+CG9855	meta_v1.0	V$CDXA_02	594	600	5.680000	.	.
+CG6936	meta_v1.0	V$CDXA_02	590	596	5.040000	.	.
+CG9855	meta_v1.0	V$CAP_01	610	617	4.410000	.	.
+CG6936	meta_v1.0	V$CAP_01	655	662	4.360000	.	.
+CG9855	meta_v1.0	V$STAT6_01	646	653	5.340000	.	.
+CG6936	meta_v1.0	V$STAT6_01	674	681	5.770000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 21.82
+# SimMatrix: 238 matches / 10304 positions (2.31 %)
+### Best meta-alignment contains 13 elements
+CG9855	meta_v1.0	V$MYB_Q3	50	55	5.390000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	64	69	5.980000	.	.
+CG9855	meta_v1.0	V$EN1_01	56	62	5.980000	.	.
+CG5304	meta_v1.0	V$EN1_01	150	156	4.850000	.	.
+CG9855	meta_v1.0	V$GATA2_01	99	108	5.610000	.	.
+CG5304	meta_v1.0	V$GATA2_01	240	249	6.370000	.	.
+CG9855	meta_v1.0	V$CIZ_01	184	192	8.410000	.	.
+CG5304	meta_v1.0	V$CIZ_01	322	330	7.980000	.	.
+CG9855	meta_v1.0	V$CDXA_02	262	268	4.640000	.	.
+CG5304	meta_v1.0	V$CDXA_02	408	414	5.740000	.	.
+CG9855	meta_v1.0	V$CDXA_02	319	325	4.980000	.	.
+CG5304	meta_v1.0	V$CDXA_02	425	431	5.620000	.	.
+CG9855	meta_v1.0	V$STAT5A_03	363	370	5.940000	.	.
+CG5304	meta_v1.0	V$STAT5A_03	472	479	6.460000	.	.
+CG9855	meta_v1.0	V$AP3_Q6	422	429	7.890000	.	.
+CG5304	meta_v1.0	V$AP3_Q6	531	538	7.040000	.	.
+CG9855	meta_v1.0	V$CAP_01	450	457	4.420000	.	.
+CG5304	meta_v1.0	V$CAP_01	568	575	4.490000	.	.
+CG9855	meta_v1.0	V$CDXA_02	469	475	5.170000	.	.
+CG5304	meta_v1.0	V$CDXA_02	605	611	5.620000	.	.
+CG9855	meta_v1.0	V$CDXA_02	520	526	5.620000	.	.
+CG5304	meta_v1.0	V$CDXA_02	621	627	4.640000	.	.
+CG9855	meta_v1.0	V$HOXA3_01	567	575	5.060000	.	.
+CG5304	meta_v1.0	V$HOXA3_01	661	669	5.060000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	646	653	5.070000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	742	749	5.220000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 22.16
+# SimMatrix: 290 matches / 12236 positions (2.37 %)
+### Best meta-alignment contains 10 elements
+CG9855	meta_v1.0	V$MYB_Q3	50	55	5.390000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	27	32	5.230000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	196	203	5.270000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	161	168	5.930000	.	.
+CG9855	meta_v1.0	V$CDXA_02	350	356	5.620000	.	.
+CG11331	meta_v1.0	V$CDXA_02	308	314	5.740000	.	.
+CG9855	meta_v1.0	V$STAT5A_03	363	370	5.940000	.	.
+CG11331	meta_v1.0	V$STAT5A_03	317	324	5.540000	.	.
+CG9855	meta_v1.0	V$SRY_01	414	420	6.680000	.	.
+CG11331	meta_v1.0	V$SRY_01	399	405	7.090000	.	.
+CG9855	meta_v1.0	V$CAP_01	450	457	4.420000	.	.
+CG11331	meta_v1.0	V$CAP_01	420	427	4.360000	.	.
+CG9855	meta_v1.0	V$CDXA_02	469	475	5.170000	.	.
+CG11331	meta_v1.0	V$CDXA_02	432	438	4.930000	.	.
+CG9855	meta_v1.0	V$CDXA_02	520	526	5.620000	.	.
+CG11331	meta_v1.0	V$CDXA_02	494	500	5.290000	.	.
+CG9855	meta_v1.0	V$CDXA_02	594	600	5.680000	.	.
+CG11331	meta_v1.0	V$CDXA_02	570	576	5.620000	.	.
+CG9855	meta_v1.0	V$STAT1_03	646	653	5.080000	.	.
+CG11331	meta_v1.0	V$STAT1_03	634	641	5.520000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -5.02
+# SimMatrix: 106 matches / 1564 positions (6.78 %)
+### Best meta-alignment contains 1 elements
+CG9855	meta_v1.0	V$MYB_Q3	50	55	5.390000	.	.
+CG5731	meta_v1.0	V$MYB_Q3	54	59	5.170000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 23.39
+# SimMatrix: 251 matches / 9752 positions (2.57 %)
+### Best meta-alignment contains 10 elements
+CG9855	meta_v1.0	V$MYB_Q3	50	55	5.390000	.	.
+CG14439	meta_v1.0	V$MYB_Q3	19	24	5.390000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	196	203	5.270000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	152	159	5.610000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	251	258	4.960000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	202	209	4.980000	.	.
+CG9855	meta_v1.0	V$LFA1_Q6	299	306	7.510000	.	.
+CG14439	meta_v1.0	V$LFA1_Q6	244	251	7.510000	.	.
+CG9855	meta_v1.0	V$TEF1_Q6	363	368	6.890000	.	.
+CG14439	meta_v1.0	V$TEF1_Q6	348	353	6.480000	.	.
+CG9855	meta_v1.0	V$STAT5A_04	400	407	5.430000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	363	370	5.140000	.	.
+CG9855	meta_v1.0	V$SRY_01	414	420	6.680000	.	.
+CG14439	meta_v1.0	V$SRY_01	402	408	5.700000	.	.
+CG9855	meta_v1.0	V$STAT4_01	469	476	6.180000	.	.
+CG14439	meta_v1.0	V$STAT4_01	446	453	6.600000	.	.
+CG9855	meta_v1.0	V$CAP_01	610	617	4.410000	.	.
+CG14439	meta_v1.0	V$CAP_01	600	607	5.130000	.	.
+CG9855	meta_v1.0	V$STAT6_01	646	653	5.340000	.	.
+CG14439	meta_v1.0	V$STAT6_01	649	656	5.770000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG1916 - Length = 95 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 41.74
+# SimMatrix: 221 matches / 8930 positions (2.47 %)
+### Best meta-alignment contains 12 elements
+CG31911	meta_v1.0	V$SRY_01	4	10	7.090000	.	.
+CG1916	meta_v1.0	V$SRY_01	35	41	6.130000	.	.
+CG31911	meta_v1.0	V$STAT1_03	56	63	5.500000	.	.
+CG1916	meta_v1.0	V$STAT1_03	96	103	5.100000	.	.
+CG31911	meta_v1.0	V$MEF2_Q6	113	122	7.900000	.	.
+CG1916	meta_v1.0	V$MEF2_Q6	127	136	7.680000	.	.
+CG31911	meta_v1.0	V$NKX25_02	152	159	7.830000	.	.
+CG1916	meta_v1.0	V$NKX25_02	169	176	9.220000	.	.
+CG31911	meta_v1.0	V$AP3_Q6	191	198	7.040000	.	.
+CG1916	meta_v1.0	V$AP3_Q6	227	234	6.820000	.	.
+CG31911	meta_v1.0	V$CDXA_02	384	390	5.620000	.	.
+CG1916	meta_v1.0	V$CDXA_02	447	453	5.740000	.	.
+CG31911	meta_v1.0	V$AREB6_04	435	443	6.850000	.	.
+CG1916	meta_v1.0	V$AREB6_04	481	489	7.040000	.	.
+CG31911	meta_v1.0	V$TEF1_Q6	509	514	6.890000	.	.
+CG1916	meta_v1.0	V$TEF1_Q6	552	557	6.480000	.	.
+CG31911	meta_v1.0	V$CDXA_02	540	546	5.290000	.	.
+CG1916	meta_v1.0	V$CDXA_02	584	590	5.290000	.	.
+CG31911	meta_v1.0	V$CDXA_02	576	582	5.560000	.	.
+CG1916	meta_v1.0	V$CDXA_02	620	626	5.620000	.	.
+CG31911	meta_v1.0	V$MYB_Q3	643	648	5.230000	.	.
+CG1916	meta_v1.0	V$MYB_Q3	654	659	5.350000	.	.
+CG31911	meta_v1.0	V$CDXA_01	684	690	5.030000	.	.
+CG1916	meta_v1.0	V$CDXA_01	699	705	5.370000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG40178 - Length = 121 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 32.83
+# SimMatrix: 463 matches / 11374 positions (4.07 %)
+### Best meta-alignment contains 12 elements
+CG31911	meta_v1.0	V$CDXA_02	22	28	5.170000	.	.
+CG40178	meta_v1.0	V$CDXA_02	38	44	5.740000	.	.
+CG31911	meta_v1.0	V$MEF2_Q6	113	122	7.900000	.	.
+CG40178	meta_v1.0	V$MEF2_Q6	168	177	7.460000	.	.
+CG31911	meta_v1.0	V$CDXA_02	129	135	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	186	192	4.930000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	147	154	5.540000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	217	224	4.940000	.	.
+CG31911	meta_v1.0	V$CDXA_02	174	180	5.680000	.	.
+CG40178	meta_v1.0	V$CDXA_02	238	244	5.040000	.	.
+CG31911	meta_v1.0	V$STAT4_01	254	261	5.770000	.	.
+CG40178	meta_v1.0	V$STAT4_01	312	319	5.520000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	265	272	5.430000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	323	330	5.240000	.	.
+CG31911	meta_v1.0	V$CDXA_02	384	390	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	418	424	5.740000	.	.
+CG31911	meta_v1.0	V$CDXA_02	540	546	5.290000	.	.
+CG40178	meta_v1.0	V$CDXA_02	569	575	5.740000	.	.
+CG31911	meta_v1.0	V$CDXA_02	576	582	5.560000	.	.
+CG40178	meta_v1.0	V$CDXA_02	581	587	4.640000	.	.
+CG31911	meta_v1.0	V$CDXA_01	677	683	6.280000	.	.
+CG40178	meta_v1.0	V$CDXA_01	689	695	5.880000	.	.
+CG31911	meta_v1.0	V$CDXA_02	684	690	5.560000	.	.
+CG40178	meta_v1.0	V$CDXA_02	704	710	5.170000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:30 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 12.47
+# SimMatrix: 152 matches / 4700 positions (3.23 %)
+### Best meta-alignment contains 6 elements
+CG31911	meta_v1.0	V$STAT5A_03	21	28	5.230000	.	.
+CG5390	meta_v1.0	V$STAT5A_03	60	67	6.000000	.	.
+CG31911	meta_v1.0	V$STAT4_01	56	63	5.520000	.	.
+CG5390	meta_v1.0	V$STAT4_01	105	112	5.930000	.	.
+CG31911	meta_v1.0	V$MEF2_Q6	113	122	7.900000	.	.
+CG5390	meta_v1.0	V$MEF2_Q6	146	155	7.750000	.	.
+CG31911	meta_v1.0	V$CDXA_02	129	135	5.620000	.	.
+CG5390	meta_v1.0	V$CDXA_02	168	174	5.560000	.	.
+CG31911	meta_v1.0	V$CDXA_01	174	180	6.280000	.	.
+CG5390	meta_v1.0	V$CDXA_01	197	203	5.880000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	265	272	5.430000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	291	298	5.030000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 34.92
+# SimMatrix: 259 matches / 10434 positions (2.48 %)
+### Best meta-alignment contains 13 elements
+CG31911	meta_v1.0	V$STAT5A_04	21	28	5.040000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	24	31	4.980000	.	.
+CG31911	meta_v1.0	V$PU1_Q6	35	42	9.360000	.	.
+CG6936	meta_v1.0	V$PU1_Q6	42	49	9.360000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	56	63	5.460000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	82	89	5.520000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	147	154	5.540000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	120	127	5.770000	.	.
+CG31911	meta_v1.0	V$AREB6_04	246	254	6.790000	.	.
+CG6936	meta_v1.0	V$AREB6_04	197	205	7.190000	.	.
+CG31911	meta_v1.0	V$CDXA_02	384	390	5.620000	.	.
+CG6936	meta_v1.0	V$CDXA_02	326	332	5.740000	.	.
+CG31911	meta_v1.0	V$AREB6_04	435	443	6.850000	.	.
+CG6936	meta_v1.0	V$AREB6_04	379	387	6.970000	.	.
+CG31911	meta_v1.0	V$GATA6_01	556	565	5.660000	.	.
+CG6936	meta_v1.0	V$GATA6_01	498	507	6.400000	.	.
+CG31911	meta_v1.0	V$EN1_01	611	617	5.290000	.	.
+CG6936	meta_v1.0	V$EN1_01	508	514	5.290000	.	.
+CG31911	meta_v1.0	V$STAT3_02	622	629	5.090000	.	.
+CG6936	meta_v1.0	V$STAT3_02	521	528	5.310000	.	.
+CG31911	meta_v1.0	V$CDXA_02	677	683	5.680000	.	.
+CG6936	meta_v1.0	V$CDXA_02	578	584	5.620000	.	.
+CG31911	meta_v1.0	V$CDXA_02	684	690	5.560000	.	.
+CG6936	meta_v1.0	V$CDXA_02	590	596	5.040000	.	.
+CG31911	meta_v1.0	V$MYB_Q3	693	698	5.350000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	690	695	5.170000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 38.27
+# SimMatrix: 237 matches / 10528 positions (2.25 %)
+### Best meta-alignment contains 14 elements
+CG31911	meta_v1.0	V$HMGIY_Q6	19	25	6.410000	.	.
+CG5304	meta_v1.0	V$HMGIY_Q6	17	23	6.630000	.	.
+CG31911	meta_v1.0	V$IRF1_Q6	40	46	7.620000	.	.
+CG5304	meta_v1.0	V$IRF1_Q6	65	71	7.930000	.	.
+CG31911	meta_v1.0	V$STAT4_01	56	63	5.520000	.	.
+CG5304	meta_v1.0	V$STAT4_01	73	80	5.930000	.	.
+CG31911	meta_v1.0	V$IRF1_Q6	171	177	7.650000	.	.
+CG5304	meta_v1.0	V$IRF1_Q6	96	102	7.650000	.	.
+CG31911	meta_v1.0	V$EN1_01	224	230	5.690000	.	.
+CG5304	meta_v1.0	V$EN1_01	150	156	4.850000	.	.
+CG31911	meta_v1.0	V$DBP_Q6	437	443	7.350000	.	.
+CG5304	meta_v1.0	V$DBP_Q6	327	333	6.370000	.	.
+CG31911	meta_v1.0	V$CDXA_02	540	546	5.290000	.	.
+CG5304	meta_v1.0	V$CDXA_02	425	431	5.620000	.	.
+CG31911	meta_v1.0	V$GATA6_01	556	565	5.660000	.	.
+CG5304	meta_v1.0	V$GATA6_01	466	475	5.680000	.	.
+CG31911	meta_v1.0	V$CDXA_02	576	582	5.560000	.	.
+CG5304	meta_v1.0	V$CDXA_02	492	498	5.740000	.	.
+CG31911	meta_v1.0	V$EN1_01	611	617	5.290000	.	.
+CG5304	meta_v1.0	V$EN1_01	530	536	5.290000	.	.
+CG31911	meta_v1.0	V$CAP_01	626	633	4.450000	.	.
+CG5304	meta_v1.0	V$CAP_01	568	575	4.490000	.	.
+CG31911	meta_v1.0	V$VMYB_02	641	649	8.300000	.	.
+CG5304	meta_v1.0	V$VMYB_02	590	598	7.400000	.	.
+CG31911	meta_v1.0	V$CDXA_02	677	683	5.680000	.	.
+CG5304	meta_v1.0	V$CDXA_02	621	627	4.640000	.	.
+CG31911	meta_v1.0	V$HOXA3_01	684	692	5.180000	.	.
+CG5304	meta_v1.0	V$HOXA3_01	661	669	5.060000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 34.93
+# SimMatrix: 291 matches / 12502 positions (2.33 %)
+### Best meta-alignment contains 12 elements
+CG31911	meta_v1.0	V$OSF2_Q6	16	23	7.610000	.	.
+CG11331	meta_v1.0	V$OSF2_Q6	6	13	7.320000	.	.
+CG31911	meta_v1.0	V$STAT4_01	56	63	5.520000	.	.
+CG11331	meta_v1.0	V$STAT4_01	59	66	5.520000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	147	154	5.540000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	161	168	5.930000	.	.
+CG31911	meta_v1.0	V$CEBP_Q3	155	164	7.240000	.	.
+CG11331	meta_v1.0	V$CEBP_Q3	196	205	6.180000	.	.
+CG31911	meta_v1.0	V$CDXA_02	255	261	5.170000	.	.
+CG11331	meta_v1.0	V$CDXA_02	308	314	5.740000	.	.
+CG31911	meta_v1.0	V$STAT5A_03	265	272	5.810000	.	.
+CG11331	meta_v1.0	V$STAT5A_03	317	324	5.540000	.	.
+CG31911	meta_v1.0	V$NKX62_Q2	310	321	8.760000	.	.
+CG11331	meta_v1.0	V$NKX62_Q2	376	387	7.900000	.	.
+CG31911	meta_v1.0	V$CDXA_02	384	390	5.620000	.	.
+CG11331	meta_v1.0	V$CDXA_02	432	438	4.930000	.	.
+CG31911	meta_v1.0	V$CDXA_02	451	457	5.040000	.	.
+CG11331	meta_v1.0	V$CDXA_02	499	505	5.740000	.	.
+CG31911	meta_v1.0	V$CDXA_02	540	546	5.290000	.	.
+CG11331	meta_v1.0	V$CDXA_02	570	576	5.620000	.	.
+CG31911	meta_v1.0	V$MYB_Q3	643	648	5.230000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	665	670	4.820000	.	.
+CG31911	meta_v1.0	V$CDXA_01	684	690	5.030000	.	.
+CG11331	meta_v1.0	V$CDXA_01	715	721	5.370000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -6.61
+# SimMatrix: 89 matches / 1598 positions (5.57 %)
+### Best meta-alignment contains 3 elements
+CG31911	meta_v1.0	V$SRY_01	4	10	7.090000	.	.
+CG5731	meta_v1.0	V$SRY_01	50	56	6.050000	.	.
+CG31911	meta_v1.0	V$CDXA_02	22	28	5.170000	.	.
+CG5731	meta_v1.0	V$CDXA_02	62	68	4.980000	.	.
+CG31911	meta_v1.0	V$CDXA_02	129	135	5.620000	.	.
+CG5731	meta_v1.0	V$CDXA_02	102	108	5.680000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 20.19
+# SimMatrix: 238 matches / 9964 positions (2.39 %)
+### Best meta-alignment contains 10 elements
+CG31911	meta_v1.0	V$STAT5A_04	21	28	5.040000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	29	36	5.110000	.	.
+CG31911	meta_v1.0	V$STAT4_01	56	63	5.520000	.	.
+CG14439	meta_v1.0	V$STAT4_01	71	78	5.770000	.	.
+CG31911	meta_v1.0	V$CDXA_02	129	135	5.620000	.	.
+CG14439	meta_v1.0	V$CDXA_02	119	125	4.860000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	147	154	5.540000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	131	138	5.070000	.	.
+CG31911	meta_v1.0	V$STAT5A_04	254	261	5.460000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	202	209	4.980000	.	.
+CG31911	meta_v1.0	V$AREB6_04	435	443	6.850000	.	.
+CG14439	meta_v1.0	V$AREB6_04	368	376	7.480000	.	.
+CG31911	meta_v1.0	V$CDXA_02	451	457	5.040000	.	.
+CG14439	meta_v1.0	V$CDXA_02	387	393	5.110000	.	.
+CG31911	meta_v1.0	V$TEF1_Q6	509	514	6.890000	.	.
+CG14439	meta_v1.0	V$TEF1_Q6	494	499	6.480000	.	.
+CG31911	meta_v1.0	V$CAP_01	626	633	4.450000	.	.
+CG14439	meta_v1.0	V$CAP_01	600	607	5.130000	.	.
+CG31911	meta_v1.0	V$CDXA_02	677	683	5.680000	.	.
+CG14439	meta_v1.0	V$CDXA_02	668	674	5.110000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG40178 - Length = 121 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 42.22
+# SimMatrix: 446 matches / 11495 positions (3.88 %)
+### Best meta-alignment contains 15 elements
+CG1916	meta_v1.0	V$CDXA_01	32	38	5.270000	.	.
+CG40178	meta_v1.0	V$CDXA_01	38	44	5.880000	.	.
+CG1916	meta_v1.0	V$MEF2_Q6	127	136	7.680000	.	.
+CG40178	meta_v1.0	V$MEF2_Q6	122	131	7.900000	.	.
+CG1916	meta_v1.0	V$CDXA_02	169	175	5.560000	.	.
+CG40178	meta_v1.0	V$CDXA_02	142	148	5.040000	.	.
+CG1916	meta_v1.0	V$GATA6_01	242	251	6.290000	.	.
+CG40178	meta_v1.0	V$GATA6_01	175	184	6.230000	.	.
+CG1916	meta_v1.0	V$TATA_C	306	315	9.610000	.	.
+CG40178	meta_v1.0	V$TATA_C	227	236	10.160000	.	.
+CG1916	meta_v1.0	V$CDXA_02	447	453	5.740000	.	.
+CG40178	meta_v1.0	V$CDXA_02	418	424	5.740000	.	.
+CG1916	meta_v1.0	V$STAT5A_04	517	524	5.540000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	556	563	5.520000	.	.
+CG1916	meta_v1.0	V$TCF4_Q5	573	580	8.930000	.	.
+CG40178	meta_v1.0	V$TCF4_Q5	597	604	7.550000	.	.
+CG1916	meta_v1.0	V$STAT5A_04	584	591	5.430000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	651	658	5.270000	.	.
+CG1916	meta_v1.0	V$CDXA_02	620	626	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	689	695	5.740000	.	.
+CG1916	meta_v1.0	V$SRY_01	629	635	6.680000	.	.
+CG40178	meta_v1.0	V$SRY_01	696	702	6.530000	.	.
+CG1916	meta_v1.0	V$CDXA_02	643	649	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	704	710	5.170000	.	.
+CG1916	meta_v1.0	V$USF2_Q6	672	677	5.830000	.	.
+CG40178	meta_v1.0	V$USF2_Q6	725	730	6.530000	.	.
+CG1916	meta_v1.0	V$CDXA_02	817	823	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	868	874	5.560000	.	.
+CG1916	meta_v1.0	V$MYB_Q3	934	939	5.390000	.	.
+CG40178	meta_v1.0	V$MYB_Q3	989	994	4.820000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -2.50
+# SimMatrix: 153 matches / 4750 positions (3.22 %)
+### Best meta-alignment contains 2 elements
+CG1916	meta_v1.0	V$CDXA_02	135	141	5.110000	.	.
+CG5390	meta_v1.0	V$CDXA_02	135	141	4.980000	.	.
+CG1916	meta_v1.0	V$CDXA_02	169	175	5.560000	.	.
+CG5390	meta_v1.0	V$CDXA_02	168	174	5.560000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 17.58
+# SimMatrix: 271 matches / 10545 positions (2.57 %)
+### Best meta-alignment contains 8 elements
+CG1916	meta_v1.0	V$STAT1_03	96	103	5.100000	.	.
+CG6936	meta_v1.0	V$STAT1_03	100	107	5.460000	.	.
+CG1916	meta_v1.0	V$FOXM1_01	441	449	7.450000	.	.
+CG6936	meta_v1.0	V$FOXM1_01	434	442	8.550000	.	.
+CG1916	meta_v1.0	V$EN1_01	537	543	4.880000	.	.
+CG6936	meta_v1.0	V$EN1_01	508	514	5.290000	.	.
+CG1916	meta_v1.0	V$STAT5A_04	584	591	5.430000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	551	558	5.520000	.	.
+CG1916	meta_v1.0	V$CDXA_02	620	626	5.620000	.	.
+CG6936	meta_v1.0	V$CDXA_02	578	584	5.620000	.	.
+CG1916	meta_v1.0	V$CDXA_02	643	649	5.620000	.	.
+CG6936	meta_v1.0	V$CDXA_02	590	596	5.040000	.	.
+CG1916	meta_v1.0	V$CDXA_02	817	823	5.620000	.	.
+CG6936	meta_v1.0	V$CDXA_02	790	796	5.620000	.	.
+CG1916	meta_v1.0	V$SRY_01	826	832	7.090000	.	.
+CG6936	meta_v1.0	V$SRY_01	798	804	6.050000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 37.41
+# SimMatrix: 257 matches / 10640 positions (2.42 %)
+### Best meta-alignment contains 11 elements
+CG1916	meta_v1.0	V$MYB_Q3	95	100	5.170000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	64	69	5.980000	.	.
+CG1916	meta_v1.0	V$STAT3_02	148	155	4.920000	.	.
+CG5304	meta_v1.0	V$STAT3_02	111	118	5.120000	.	.
+CG1916	meta_v1.0	V$EN1_01	170	176	5.130000	.	.
+CG5304	meta_v1.0	V$EN1_01	150	156	4.850000	.	.
+CG1916	meta_v1.0	V$CDXA_02	447	453	5.740000	.	.
+CG5304	meta_v1.0	V$CDXA_02	425	431	5.620000	.	.
+CG1916	meta_v1.0	V$ETS_Q4	507	512	7.230000	.	.
+CG5304	meta_v1.0	V$ETS_Q4	472	477	6.130000	.	.
+CG1916	meta_v1.0	V$EN1_01	537	543	4.880000	.	.
+CG5304	meta_v1.0	V$EN1_01	530	536	5.290000	.	.
+CG1916	meta_v1.0	V$FREAC7_01	584	599	10.980000	.	.
+CG5304	meta_v1.0	V$FREAC7_01	616	631	11.150000	.	.
+CG1916	meta_v1.0	V$SOX5_01	812	821	8.680000	.	.
+CG5304	meta_v1.0	V$SOX5_01	850	859	7.870000	.	.
+CG1916	meta_v1.0	V$IRF1_Q6	840	846	7.930000	.	.
+CG5304	meta_v1.0	V$IRF1_Q6	871	877	7.650000	.	.
+CG1916	meta_v1.0	V$SRY_01	881	887	6.110000	.	.
+CG5304	meta_v1.0	V$SRY_01	883	889	6.110000	.	.
+CG1916	meta_v1.0	V$CIZ_01	902	910	7.860000	.	.
+CG5304	meta_v1.0	V$CIZ_01	896	904	7.430000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 35.19
+# SimMatrix: 305 matches / 12635 positions (2.41 %)
+### Best meta-alignment contains 16 elements
+CG1916	meta_v1.0	V$MYB_Q3	95	100	5.170000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	27	32	5.230000	.	.
+CG1916	meta_v1.0	V$STAT3_02	148	155	4.920000	.	.
+CG11331	meta_v1.0	V$STAT3_02	57	64	5.670000	.	.
+CG1916	meta_v1.0	V$CDXA_02	169	175	5.560000	.	.
+CG11331	meta_v1.0	V$CDXA_02	66	72	5.740000	.	.
+CG1916	meta_v1.0	V$GATA6_01	242	251	6.290000	.	.
+CG11331	meta_v1.0	V$GATA6_01	87	96	5.790000	.	.
+CG1916	meta_v1.0	V$CDXA_02	453	459	5.740000	.	.
+CG11331	meta_v1.0	V$CDXA_02	308	314	5.740000	.	.
+CG1916	meta_v1.0	V$STAT5A_04	505	512	5.050000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	317	324	5.110000	.	.
+CG1916	meta_v1.0	V$SRY_01	519	525	6.050000	.	.
+CG11331	meta_v1.0	V$SRY_01	339	345	6.050000	.	.
+CG1916	meta_v1.0	V$STAT5A_04	584	591	5.430000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	426	433	5.430000	.	.
+CG1916	meta_v1.0	V$CDXA_02	643	649	5.620000	.	.
+CG11331	meta_v1.0	V$CDXA_02	499	505	5.740000	.	.
+CG1916	meta_v1.0	V$MYB_Q3	654	659	5.350000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	516	521	5.170000	.	.
+CG1916	meta_v1.0	V$HMGIY_Q6	719	725	6.690000	.	.
+CG11331	meta_v1.0	V$HMGIY_Q6	587	593	6.690000	.	.
+CG1916	meta_v1.0	V$STAT1_03	776	783	5.100000	.	.
+CG11331	meta_v1.0	V$STAT1_03	634	641	5.520000	.	.
+CG1916	meta_v1.0	V$SOX5_01	812	821	8.680000	.	.
+CG11331	meta_v1.0	V$SOX5_01	655	664	7.990000	.	.
+CG1916	meta_v1.0	V$HNF3ALPHA_Q6	824	834	10.550000	.	.
+CG11331	meta_v1.0	V$HNF3ALPHA_Q6	721	731	8.710000	.	.
+CG1916	meta_v1.0	V$IRF1_Q6	840	846	7.930000	.	.
+CG11331	meta_v1.0	V$IRF1_Q6	811	817	8.630000	.	.
+CG1916	meta_v1.0	V$SRY_01	881	887	6.110000	.	.
+CG11331	meta_v1.0	V$SRY_01	889	895	6.130000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:31 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -6.71
+# SimMatrix: 109 matches / 1615 positions (6.75 %)
+### Best meta-alignment contains 1 elements
+CG1916	meta_v1.0	V$SRY_01	35	41	6.130000	.	.
+CG5731	meta_v1.0	V$SRY_01	50	56	6.050000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 12.36
+# SimMatrix: 225 matches / 10070 positions (2.23 %)
+### Best meta-alignment contains 7 elements
+CG1916	meta_v1.0	V$CDXA_02	135	141	5.110000	.	.
+CG14439	meta_v1.0	V$CDXA_02	119	125	4.860000	.	.
+CG1916	meta_v1.0	V$STAT1_03	159	166	5.090000	.	.
+CG14439	meta_v1.0	V$STAT1_03	131	138	5.080000	.	.
+CG1916	meta_v1.0	V$SRY_01	178	184	6.110000	.	.
+CG14439	meta_v1.0	V$SRY_01	181	187	6.680000	.	.
+CG1916	meta_v1.0	V$SRY_01	195	201	6.680000	.	.
+CG14439	meta_v1.0	V$SRY_01	213	219	7.090000	.	.
+CG1916	meta_v1.0	V$AREB6_04	481	489	7.040000	.	.
+CG14439	meta_v1.0	V$AREB6_04	499	507	6.630000	.	.
+CG1916	meta_v1.0	V$CDXA_02	643	649	5.620000	.	.
+CG14439	meta_v1.0	V$CDXA_02	668	674	5.110000	.	.
+CG1916	meta_v1.0	V$GEN_INI2_B	957	964	5.670000	.	.
+CG14439	meta_v1.0	V$GEN_INI2_B	985	992	5.350000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 20.95
+# SimMatrix: 331 matches / 6050 positions (5.47 %)
+### Best meta-alignment contains 8 elements
+CG40178	meta_v1.0	V$LMO2COM_02	7	15	8.570000	.	.
+CG5390	meta_v1.0	V$LMO2COM_02	47	55	8.020000	.	.
+CG40178	meta_v1.0	V$CDXA_02	41	47	5.040000	.	.
+CG5390	meta_v1.0	V$CDXA_02	93	99	4.640000	.	.
+CG40178	meta_v1.0	V$MEF2_Q6	122	131	7.900000	.	.
+CG5390	meta_v1.0	V$MEF2_Q6	146	155	7.750000	.	.
+CG40178	meta_v1.0	V$CDXA_02	142	148	5.040000	.	.
+CG5390	meta_v1.0	V$CDXA_02	168	174	5.560000	.	.
+CG40178	meta_v1.0	V$GATA1_06	175	184	8.580000	.	.
+CG5390	meta_v1.0	V$GATA1_06	185	194	8.580000	.	.
+CG40178	meta_v1.0	V$CDXA_02	186	192	4.930000	.	.
+CG5390	meta_v1.0	V$CDXA_02	197	203	5.740000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	217	224	4.940000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	227	234	5.140000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	312	319	5.430000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	291	298	5.030000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 22.08
+# SimMatrix: 427 matches / 13431 positions (3.18 %)
+### Best meta-alignment contains 12 elements
+CG40178	meta_v1.0	V$CDXA_02	41	47	5.040000	.	.
+CG6936	meta_v1.0	V$CDXA_02	56	62	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	313	319	5.290000	.	.
+CG6936	meta_v1.0	V$CDXA_02	326	332	5.740000	.	.
+CG40178	meta_v1.0	V$MYB_Q3	497	502	4.820000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	490	495	4.820000	.	.
+CG40178	meta_v1.0	V$STAT6_02	556	563	5.630000	.	.
+CG6936	meta_v1.0	V$STAT6_02	551	558	5.630000	.	.
+CG40178	meta_v1.0	V$CDXA_02	569	575	5.740000	.	.
+CG6936	meta_v1.0	V$CDXA_02	578	584	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	578	584	5.740000	.	.
+CG6936	meta_v1.0	V$CDXA_02	590	596	5.040000	.	.
+CG40178	meta_v1.0	V$TBP_01	689	696	9.090000	.	.
+CG6936	meta_v1.0	V$TBP_01	771	778	7.350000	.	.
+CG40178	meta_v1.0	V$CDXA_02	704	710	5.170000	.	.
+CG6936	meta_v1.0	V$CDXA_02	790	796	5.620000	.	.
+CG40178	meta_v1.0	V$USF2_Q6	725	730	6.530000	.	.
+CG6936	meta_v1.0	V$USF2_Q6	815	820	5.830000	.	.
+CG40178	meta_v1.0	V$CDXA_02	736	742	5.290000	.	.
+CG6936	meta_v1.0	V$CDXA_02	837	843	5.740000	.	.
+CG40178	meta_v1.0	V$EN1_01	765	771	5.070000	.	.
+CG6936	meta_v1.0	V$EN1_01	878	884	5.070000	.	.
+CG40178	meta_v1.0	V$E2F1_Q3	830	837	6.050000	.	.
+CG6936	meta_v1.0	V$E2F1_Q3	906	913	5.830000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 21.05
+# SimMatrix: 388 matches / 13552 positions (2.86 %)
+### Best meta-alignment contains 12 elements
+CG40178	meta_v1.0	V$STAT5A_04	217	224	4.940000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	285	292	5.640000	.	.
+CG40178	meta_v1.0	V$GATA6_01	266	275	6.000000	.	.
+CG5304	meta_v1.0	V$GATA6_01	399	408	6.110000	.	.
+CG40178	meta_v1.0	V$CDXA_02	299	305	4.640000	.	.
+CG5304	meta_v1.0	V$CDXA_02	425	431	5.620000	.	.
+CG40178	meta_v1.0	V$SRY_01	319	325	6.120000	.	.
+CG5304	meta_v1.0	V$SRY_01	436	442	6.120000	.	.
+CG40178	meta_v1.0	V$STAT6_02	351	358	6.210000	.	.
+CG5304	meta_v1.0	V$STAT6_02	472	479	5.820000	.	.
+CG40178	meta_v1.0	V$CDXA_02	418	424	5.740000	.	.
+CG5304	meta_v1.0	V$CDXA_02	492	498	5.740000	.	.
+CG40178	meta_v1.0	V$MYB_Q3	497	502	4.820000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	569	574	5.980000	.	.
+CG40178	meta_v1.0	V$CDXA_02	548	554	4.640000	.	.
+CG5304	meta_v1.0	V$CDXA_02	605	611	5.620000	.	.
+CG40178	meta_v1.0	V$CDXA_02	578	584	5.740000	.	.
+CG5304	meta_v1.0	V$CDXA_02	621	627	4.640000	.	.
+CG40178	meta_v1.0	V$SRY_01	696	702	6.530000	.	.
+CG5304	meta_v1.0	V$SRY_01	712	718	7.090000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	735	742	6.090000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	742	749	5.220000	.	.
+CG40178	meta_v1.0	V$CDXA_02	884	890	5.620000	.	.
+CG5304	meta_v1.0	V$CDXA_02	888	894	5.620000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 32.10
+# SimMatrix: 502 matches / 16093 positions (3.12 %)
+### Best meta-alignment contains 13 elements
+CG40178	meta_v1.0	V$CDXA_02	41	47	5.040000	.	.
+CG11331	meta_v1.0	V$CDXA_02	66	72	5.740000	.	.
+CG40178	meta_v1.0	V$CDXA_02	300	306	4.640000	.	.
+CG11331	meta_v1.0	V$CDXA_02	324	330	4.980000	.	.
+CG40178	meta_v1.0	V$SRY_01	319	325	6.120000	.	.
+CG11331	meta_v1.0	V$SRY_01	339	345	6.050000	.	.
+CG40178	meta_v1.0	V$CAP_01	399	406	4.370000	.	.
+CG11331	meta_v1.0	V$CAP_01	420	427	4.360000	.	.
+CG40178	meta_v1.0	V$CDXA_02	418	424	5.740000	.	.
+CG11331	meta_v1.0	V$CDXA_02	432	438	4.930000	.	.
+CG40178	meta_v1.0	V$STAT5A_03	480	487	5.190000	.	.
+CG11331	meta_v1.0	V$STAT5A_03	493	500	5.450000	.	.
+CG40178	meta_v1.0	V$MYB_Q3	497	502	4.820000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	516	521	5.170000	.	.
+CG40178	meta_v1.0	V$CDXA_02	547	553	4.640000	.	.
+CG11331	meta_v1.0	V$CDXA_02	570	576	5.620000	.	.
+CG40178	meta_v1.0	V$STAT6_02	556	563	5.630000	.	.
+CG11331	meta_v1.0	V$STAT6_02	587	594	6.200000	.	.
+CG40178	meta_v1.0	V$CDXA_01	578	584	5.880000	.	.
+CG11331	meta_v1.0	V$CDXA_01	617	623	5.270000	.	.
+CG40178	meta_v1.0	V$CDXA_01	689	695	5.880000	.	.
+CG11331	meta_v1.0	V$CDXA_01	715	721	5.370000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	735	742	6.090000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	762	769	5.230000	.	.
+CG40178	meta_v1.0	V$STAT3_02	839	846	4.780000	.	.
+CG11331	meta_v1.0	V$STAT3_02	813	820	5.810000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -7.65
+# SimMatrix: 246 matches / 2057 positions (11.96 %)
+### Best meta-alignment contains 3 elements
+CG40178	meta_v1.0	V$CDXA_02	41	47	5.040000	.	.
+CG5731	meta_v1.0	V$CDXA_02	45	51	4.980000	.	.
+CG40178	meta_v1.0	V$CDXA_02	132	138	4.930000	.	.
+CG5731	meta_v1.0	V$CDXA_02	82	88	4.640000	.	.
+CG40178	meta_v1.0	V$CDXA_02	142	148	5.040000	.	.
+CG5731	meta_v1.0	V$CDXA_02	102	108	5.680000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 16.87
+# SimMatrix: 323 matches / 12826 positions (2.52 %)
+### Best meta-alignment contains 13 elements
+CG40178	meta_v1.0	V$CDXA_02	132	138	4.930000	.	.
+CG14439	meta_v1.0	V$CDXA_02	119	125	4.860000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	217	224	4.940000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	202	209	4.980000	.	.
+CG40178	meta_v1.0	V$CDXA_02	300	306	4.640000	.	.
+CG14439	meta_v1.0	V$CDXA_02	364	370	5.110000	.	.
+CG40178	meta_v1.0	V$SRY_01	319	325	6.120000	.	.
+CG14439	meta_v1.0	V$SRY_01	402	408	5.700000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	326	333	5.080000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	446	453	5.620000	.	.
+CG40178	meta_v1.0	V$STAT6_02	351	358	6.210000	.	.
+CG14439	meta_v1.0	V$STAT6_02	467	474	6.200000	.	.
+CG40178	meta_v1.0	V$CDXA_02	547	553	4.640000	.	.
+CG14439	meta_v1.0	V$CDXA_02	668	674	5.110000	.	.
+CG40178	meta_v1.0	V$DBP_Q6	605	611	5.980000	.	.
+CG14439	meta_v1.0	V$DBP_Q6	751	757	5.980000	.	.
+CG40178	meta_v1.0	V$DBP_Q6	643	649	6.660000	.	.
+CG14439	meta_v1.0	V$DBP_Q6	801	807	6.660000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	735	742	6.090000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	885	892	5.580000	.	.
+CG40178	meta_v1.0	V$AREB6_04	787	795	7.660000	.	.
+CG14439	meta_v1.0	V$AREB6_04	949	957	6.630000	.	.
+CG40178	meta_v1.0	V$STAT5A_04	839	846	4.960000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	960	967	5.460000	.	.
+CG40178	meta_v1.0	V$GEN_INI3_B	876	883	5.820000	.	.
+CG14439	meta_v1.0	V$GEN_INI3_B	985	992	5.530000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -2.31
+# SimMatrix: 135 matches / 5550 positions (2.43 %)
+### Best meta-alignment contains 4 elements
+CG5390	meta_v1.0	V$STAT5A_04	60	67	4.990000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	24	31	4.980000	.	.
+CG5390	meta_v1.0	V$NKX62_Q2	94	105	8.190000	.	.
+CG6936	meta_v1.0	V$NKX62_Q2	57	68	8.480000	.	.
+CG5390	meta_v1.0	V$MYB_Q3	221	226	5.390000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	165	170	4.820000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	291	298	5.030000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	295	302	5.700000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:32 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -3.56
+# SimMatrix: 126 matches / 5600 positions (2.25 %)
+### Best meta-alignment contains 3 elements
+CG5390	meta_v1.0	V$MYB_Q3	66	71	5.980000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	64	69	5.980000	.	.
+CG5390	meta_v1.0	V$STAT4_01	105	112	5.930000	.	.
+CG5304	meta_v1.0	V$STAT4_01	73	80	5.930000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	291	298	5.030000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	285	292	5.640000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -0.16
+# SimMatrix: 171 matches / 6650 positions (2.57 %)
+### Best meta-alignment contains 6 elements
+CG5390	meta_v1.0	V$AP2REP_01	13	19	5.770000	.	.
+CG11331	meta_v1.0	V$AP2REP_01	44	50	5.770000	.	.
+CG5390	meta_v1.0	V$MYB_Q3	66	71	5.980000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	135	140	5.860000	.	.
+CG5390	meta_v1.0	V$STAT4_01	105	112	5.930000	.	.
+CG11331	meta_v1.0	V$STAT4_01	161	168	5.520000	.	.
+CG5390	meta_v1.0	V$TBP_01	192	199	8.930000	.	.
+CG11331	meta_v1.0	V$TBP_01	204	211	7.350000	.	.
+CG5390	meta_v1.0	V$HMGIY_Q6	227	233	6.630000	.	.
+CG11331	meta_v1.0	V$HMGIY_Q6	277	283	6.410000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	291	298	5.030000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	317	324	5.110000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 5.25
+# SimMatrix: 70 matches / 850 positions (8.24 %)
+### Best meta-alignment contains 4 elements
+CG5390	meta_v1.0	V$MYB_Q3	66	71	5.980000	.	.
+CG5731	meta_v1.0	V$MYB_Q3	54	59	5.170000	.	.
+CG5390	meta_v1.0	V$CDXA_02	93	99	4.640000	.	.
+CG5731	meta_v1.0	V$CDXA_02	62	68	4.980000	.	.
+CG5390	meta_v1.0	V$CDXA_02	135	141	4.980000	.	.
+CG5731	meta_v1.0	V$CDXA_02	82	88	4.640000	.	.
+CG5390	meta_v1.0	V$CDXA_02	148	154	5.040000	.	.
+CG5731	meta_v1.0	V$CDXA_02	102	108	5.680000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 7.99
+# SimMatrix: 105 matches / 5300 positions (1.98 %)
+### Best meta-alignment contains 5 elements
+CG5390	meta_v1.0	V$STAT5A_03	60	67	6.000000	.	.
+CG14439	meta_v1.0	V$STAT5A_03	71	78	6.000000	.	.
+CG5390	meta_v1.0	V$CDXA_02	97	103	4.640000	.	.
+CG14439	meta_v1.0	V$CDXA_02	119	125	4.860000	.	.
+CG5390	meta_v1.0	V$HMGIY_Q6	115	121	6.630000	.	.
+CG14439	meta_v1.0	V$HMGIY_Q6	131	137	7.610000	.	.
+CG5390	meta_v1.0	V$FOXO1_01	179	188	7.870000	.	.
+CG14439	meta_v1.0	V$FOXO1_01	181	190	7.850000	.	.
+CG5390	meta_v1.0	V$STAT5A_04	227	234	5.140000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	202	209	4.980000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 44.56
+# SimMatrix: 263 matches / 12432 positions (2.12 %)
+### Best meta-alignment contains 16 elements
+CG6936	meta_v1.0	V$USF2_Q6	8	13	6.120000	.	.
+CG5304	meta_v1.0	V$USF2_Q6	4	9	6.530000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	24	31	4.980000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	16	23	5.460000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	165	170	4.820000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	151	156	4.820000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	295	302	5.700000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	285	292	5.640000	.	.
+CG6936	meta_v1.0	V$CIZ_01	430	438	8.280000	.	.
+CG5304	meta_v1.0	V$CIZ_01	322	330	7.980000	.	.
+CG6936	meta_v1.0	V$GATA6_01	498	507	6.400000	.	.
+CG5304	meta_v1.0	V$GATA6_01	399	408	6.110000	.	.
+CG6936	meta_v1.0	V$EN1_01	508	514	5.290000	.	.
+CG5304	meta_v1.0	V$EN1_01	412	418	5.130000	.	.
+CG6936	meta_v1.0	V$STAT6_02	551	558	5.630000	.	.
+CG5304	meta_v1.0	V$STAT6_02	472	479	5.820000	.	.
+CG6936	meta_v1.0	V$CDXA_02	578	584	5.620000	.	.
+CG5304	meta_v1.0	V$CDXA_02	492	498	5.740000	.	.
+CG6936	meta_v1.0	V$CAP_01	655	662	4.360000	.	.
+CG5304	meta_v1.0	V$CAP_01	568	575	4.490000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	690	695	5.170000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	591	596	5.350000	.	.
+CG6936	meta_v1.0	V$CEBP_Q3	766	775	6.450000	.	.
+CG5304	meta_v1.0	V$CEBP_Q3	701	710	6.300000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	799	806	5.270000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	742	749	5.220000	.	.
+CG6936	meta_v1.0	V$EN1_01	878	884	5.070000	.	.
+CG5304	meta_v1.0	V$EN1_01	854	860	4.880000	.	.
+CG6936	meta_v1.0	V$CAP_01	897	904	4.300000	.	.
+CG5304	meta_v1.0	V$CAP_01	869	876	4.430000	.	.
+CG6936	meta_v1.0	V$PAX2_02	919	927	6.290000	.	.
+CG5304	meta_v1.0	V$PAX2_02	901	909	5.670000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 29.38
+# SimMatrix: 331 matches / 14763 positions (2.24 %)
+### Best meta-alignment contains 13 elements
+CG6936	meta_v1.0	V$STAT3_02	24	31	5.010000	.	.
+CG11331	meta_v1.0	V$STAT3_02	57	64	5.670000	.	.
+CG6936	meta_v1.0	V$CDXA_02	56	62	5.620000	.	.
+CG11331	meta_v1.0	V$CDXA_02	66	72	5.740000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	136	143	4.950000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	161	168	5.930000	.	.
+CG6936	meta_v1.0	V$CDXA_01	272	278	5.470000	.	.
+CG11331	meta_v1.0	V$CDXA_01	308	314	5.880000	.	.
+CG6936	meta_v1.0	V$STAT5A_03	295	302	5.450000	.	.
+CG11331	meta_v1.0	V$STAT5A_03	317	324	5.540000	.	.
+CG6936	meta_v1.0	V$SRY_01	398	404	7.090000	.	.
+CG11331	meta_v1.0	V$SRY_01	399	405	7.090000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	412	417	5.170000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	437	442	4.820000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	490	495	4.820000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	516	521	5.170000	.	.
+CG6936	meta_v1.0	V$EN1_01	508	514	5.290000	.	.
+CG11331	meta_v1.0	V$EN1_01	528	534	5.290000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	521	526	5.390000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	550	555	5.170000	.	.
+CG6936	meta_v1.0	V$STAT6_02	551	558	5.630000	.	.
+CG11331	meta_v1.0	V$STAT6_02	587	594	6.200000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	799	806	5.270000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	813	820	5.150000	.	.
+CG6936	meta_v1.0	V$CAP_01	854	861	4.430000	.	.
+CG11331	meta_v1.0	V$CAP_01	850	857	4.310000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -7.30
+# SimMatrix: 85 matches / 1887 positions (4.50 %)
+### Best meta-alignment contains 1 elements
+CG6936	meta_v1.0	V$CDXA_02	56	62	5.620000	.	.
+CG5731	meta_v1.0	V$CDXA_02	62	68	4.980000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 46.78
+# SimMatrix: 278 matches / 11766 positions (2.36 %)
+### Best meta-alignment contains 18 elements
+CG6936	meta_v1.0	V$USF2_Q6	8	13	6.120000	.	.
+CG14439	meta_v1.0	V$USF2_Q6	36	41	6.120000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	16	23	4.960000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	71	78	4.990000	.	.
+CG6936	meta_v1.0	V$STAT3_02	24	31	5.010000	.	.
+CG14439	meta_v1.0	V$STAT3_02	88	95	5.940000	.	.
+CG6936	meta_v1.0	V$CDXA_02	56	62	5.620000	.	.
+CG14439	meta_v1.0	V$CDXA_02	119	125	4.860000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	82	89	5.520000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	131	138	5.070000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	120	127	5.770000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	152	159	5.610000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	136	143	4.950000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	202	209	4.980000	.	.
+CG6936	meta_v1.0	V$STAT5A_04	295	302	5.700000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	363	370	5.140000	.	.
+CG6936	meta_v1.0	V$CDXA_02	326	332	5.740000	.	.
+CG14439	meta_v1.0	V$CDXA_02	387	393	5.110000	.	.
+CG6936	meta_v1.0	V$STAT1_03	379	386	5.460000	.	.
+CG14439	meta_v1.0	V$STAT1_03	446	453	5.840000	.	.
+CG6936	meta_v1.0	V$MYB_Q3	412	417	5.170000	.	.
+CG14439	meta_v1.0	V$MYB_Q3	522	527	5.390000	.	.
+CG6936	meta_v1.0	V$CIZ_01	430	438	8.280000	.	.
+CG14439	meta_v1.0	V$CIZ_01	553	561	7.430000	.	.
+CG6936	meta_v1.0	V$STAT6_01	580	587	6.370000	.	.
+CG14439	meta_v1.0	V$STAT6_01	649	656	5.770000	.	.
+CG6936	meta_v1.0	V$CDXA_02	590	596	5.040000	.	.
+CG14439	meta_v1.0	V$CDXA_02	668	674	5.110000	.	.
+CG6936	meta_v1.0	V$TEF1_Q6	661	666	6.890000	.	.
+CG14439	meta_v1.0	V$TEF1_Q6	693	698	6.890000	.	.
+CG6936	meta_v1.0	V$GEN_INI_B	701	708	5.310000	.	.
+CG14439	meta_v1.0	V$GEN_INI_B	728	735	5.370000	.	.
+CG6936	meta_v1.0	V$E2F1_Q3	906	913	5.830000	.	.
+CG14439	meta_v1.0	V$E2F1_Q3	867	874	6.860000	.	.
+CG6936	meta_v1.0	V$SOX5_01	934	943	8.070000	.	.
+CG14439	meta_v1.0	V$SOX5_01	908	917	9.070000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG5304 - Length = 112 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 41.23
+# SimMatrix: 305 matches / 14896 positions (2.05 %)
+### Best meta-alignment contains 19 elements
+CG5304	meta_v1.0	V$MYB_Q3	64	69	5.980000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	27	32	5.230000	.	.
+CG5304	meta_v1.0	V$STAT3_02	111	118	5.120000	.	.
+CG11331	meta_v1.0	V$STAT3_02	57	64	5.670000	.	.
+CG5304	meta_v1.0	V$AML1_01	188	193	6.540000	.	.
+CG11331	meta_v1.0	V$AML1_01	118	123	7.540000	.	.
+CG5304	meta_v1.0	V$PAX2_02	253	261	5.450000	.	.
+CG11331	meta_v1.0	V$PAX2_02	129	137	5.320000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	285	292	5.640000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	161	168	5.930000	.	.
+CG5304	meta_v1.0	V$HMGIY_Q6	328	334	6.410000	.	.
+CG11331	meta_v1.0	V$HMGIY_Q6	277	283	6.410000	.	.
+CG5304	meta_v1.0	V$AML1_01	370	375	7.540000	.	.
+CG11331	meta_v1.0	V$AML1_01	292	297	6.540000	.	.
+CG5304	meta_v1.0	V$CDXA_02	408	414	5.740000	.	.
+CG11331	meta_v1.0	V$CDXA_02	308	314	5.740000	.	.
+CG5304	meta_v1.0	V$CDXA_02	425	431	5.620000	.	.
+CG11331	meta_v1.0	V$CDXA_02	324	330	4.980000	.	.
+CG5304	meta_v1.0	V$SRY_01	436	442	6.120000	.	.
+CG11331	meta_v1.0	V$SRY_01	339	345	6.050000	.	.
+CG5304	meta_v1.0	V$STAT5A_04	472	479	4.960000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	426	433	5.430000	.	.
+CG5304	meta_v1.0	V$CDXA_02	492	498	5.740000	.	.
+CG11331	meta_v1.0	V$CDXA_02	499	505	5.740000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	504	509	5.860000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	516	521	5.170000	.	.
+CG5304	meta_v1.0	V$EN1_01	530	536	5.290000	.	.
+CG11331	meta_v1.0	V$EN1_01	528	534	5.290000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	569	574	5.980000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	550	555	5.170000	.	.
+CG5304	meta_v1.0	V$CDXA_02	605	611	5.620000	.	.
+CG11331	meta_v1.0	V$CDXA_02	570	576	5.620000	.	.
+CG5304	meta_v1.0	V$CEBP_Q3	701	710	6.300000	.	.
+CG11331	meta_v1.0	V$CEBP_Q3	630	639	6.160000	.	.
+CG5304	meta_v1.0	V$IRF_Q6	870	878	8.930000	.	.
+CG11331	meta_v1.0	V$IRF_Q6	805	813	7.590000	.	.
+CG5304	meta_v1.0	V$SRY_01	883	889	6.110000	.	.
+CG11331	meta_v1.0	V$SRY_01	889	895	6.130000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG5304 - Length = 112 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -7.93
+# SimMatrix: 89 matches / 1904 positions (4.67 %)
+### Best meta-alignment contains 1 elements
+CG5304	meta_v1.0	V$MYB_Q3	64	69	5.980000	.	.
+CG5731	meta_v1.0	V$MYB_Q3	54	59	5.170000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG5304 - Length = 112 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 31.06
+# SimMatrix: 206 matches / 11872 positions (1.74 %)
+### Best meta-alignment contains 14 elements
+CG5304	meta_v1.0	V$STAT5A_04	16	23	5.460000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	29	36	5.110000	.	.
+CG5304	meta_v1.0	V$STAT4_01	73	80	5.930000	.	.
+CG14439	meta_v1.0	V$STAT4_01	71	78	5.770000	.	.
+CG5304	meta_v1.0	V$STAT3_02	111	118	5.120000	.	.
+CG14439	meta_v1.0	V$STAT3_02	88	95	5.940000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	151	156	4.820000	.	.
+CG14439	meta_v1.0	V$MYB_Q3	146	151	5.980000	.	.
+CG5304	meta_v1.0	V$CDXA_02	408	414	5.740000	.	.
+CG14439	meta_v1.0	V$CDXA_02	364	370	5.110000	.	.
+CG5304	meta_v1.0	V$CDXA_02	425	431	5.620000	.	.
+CG14439	meta_v1.0	V$CDXA_02	387	393	5.110000	.	.
+CG5304	meta_v1.0	V$SRY_01	436	442	6.120000	.	.
+CG14439	meta_v1.0	V$SRY_01	402	408	5.700000	.	.
+CG5304	meta_v1.0	V$STAT1_03	446	453	5.430000	.	.
+CG14439	meta_v1.0	V$STAT1_03	446	453	5.840000	.	.
+CG5304	meta_v1.0	V$ETS_Q4	472	477	6.130000	.	.
+CG14439	meta_v1.0	V$ETS_Q4	469	474	6.130000	.	.
+CG5304	meta_v1.0	V$MYB_Q3	504	509	5.860000	.	.
+CG14439	meta_v1.0	V$MYB_Q3	522	527	5.390000	.	.
+CG5304	meta_v1.0	V$CAP_01	568	575	4.490000	.	.
+CG14439	meta_v1.0	V$CAP_01	600	607	5.130000	.	.
+CG5304	meta_v1.0	V$CDXA_02	621	627	4.640000	.	.
+CG14439	meta_v1.0	V$CDXA_02	668	674	5.110000	.	.
+CG5304	meta_v1.0	V$SOX5_01	850	859	7.870000	.	.
+CG14439	meta_v1.0	V$SOX5_01	908	917	9.070000	.	.
+CG5304	meta_v1.0	V$IRF_Q6	870	878	8.930000	.	.
+CG14439	meta_v1.0	V$IRF_Q6	962	970	8.170000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:33 2005
+# MAP1 CG11331 - Length = 133 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -6.09
+# SimMatrix: 114 matches / 2261 positions (5.04 %)
+### Best meta-alignment contains 2 elements
+CG11331	meta_v1.0	V$PAX2_02	33	41	6.080000	.	.
+CG5731	meta_v1.0	V$PAX2_02	51	59	5.370000	.	.
+CG11331	meta_v1.0	V$CDXA_02	66	72	5.740000	.	.
+CG5731	meta_v1.0	V$CDXA_02	82	88	4.640000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:34 2005
+# MAP1 CG11331 - Length = 133 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 26.73
+# SimMatrix: 264 matches / 14098 positions (1.87 %)
+### Best meta-alignment contains 12 elements
+CG11331	meta_v1.0	V$MYB_Q3	27	32	5.230000	.	.
+CG14439	meta_v1.0	V$MYB_Q3	19	24	5.390000	.	.
+CG11331	meta_v1.0	V$STAT4_01	59	66	5.520000	.	.
+CG14439	meta_v1.0	V$STAT4_01	71	78	5.770000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	135	140	5.860000	.	.
+CG14439	meta_v1.0	V$MYB_Q3	146	151	5.980000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	161	168	5.930000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	202	209	4.980000	.	.
+CG11331	meta_v1.0	V$CDXA_02	308	314	5.740000	.	.
+CG14439	meta_v1.0	V$CDXA_02	364	370	5.110000	.	.
+CG11331	meta_v1.0	V$CDXA_02	324	330	4.980000	.	.
+CG14439	meta_v1.0	V$CDXA_02	387	393	5.110000	.	.
+CG11331	meta_v1.0	V$SRY_01	339	345	6.050000	.	.
+CG14439	meta_v1.0	V$SRY_01	402	408	5.700000	.	.
+CG11331	meta_v1.0	V$STAT5A_04	426	433	5.430000	.	.
+CG14439	meta_v1.0	V$STAT5A_04	446	453	5.620000	.	.
+CG11331	meta_v1.0	V$MYB_Q3	516	521	5.170000	.	.
+CG14439	meta_v1.0	V$MYB_Q3	522	527	5.390000	.	.
+CG11331	meta_v1.0	V$LBP1_Q6	534	540	7.360000	.	.
+CG14439	meta_v1.0	V$LBP1_Q6	538	544	6.950000	.	.
+CG11331	meta_v1.0	V$MZF1_01	630	637	8.520000	.	.
+CG14439	meta_v1.0	V$MZF1_01	581	588	7.220000	.	.
+CG11331	meta_v1.0	V$DBP_Q6	863	869	6.790000	.	.
+CG14439	meta_v1.0	V$DBP_Q6	830	836	6.660000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+                <moby:Simple><moby:GFF namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:17:34 2005
+# MAP1 CG5731 - Length = 17 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -9.03
+# SimMatrix: 46 matches / 1802 positions (2.55 %)
+### Best meta-alignment contains 1 elements
+CG5731	meta_v1.0	V$CDXA_02	102	108	5.680000	.	.
+CG14439	meta_v1.0	V$CDXA_02	119	125	4.860000	.	.
+
+]]>
+</moby:GFF>
+</moby:Simple>
+            
+            </moby:Collection>
+        </moby:mobyData>
+        </moby:mobyContent></moby:MOBY>

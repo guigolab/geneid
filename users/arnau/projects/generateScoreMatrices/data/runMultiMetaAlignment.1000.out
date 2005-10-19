@@ -1,0 +1,1094 @@
+<?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
+        <moby:mobyData moby:queryID='1'>
+            <moby:Collection moby:articleName='meta_predictions'>
+                
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:39 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG31911 - Length = 94 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 28.38
+# SimMatrix: 281 matches / 8648 positions (3.25 %)
+### Best meta-alignment contains 13 elements
+V$FOXO1_01:		 29-38	 :	 1-10 	7.82-8.40
+V$NKX62_Q2:		 201-212	 :	 140-151 	8.07-7.78
+V$CDXA_02:		 229-235	 :	 174-180 	5.04-5.68
+V$CDXA_02:		 237-243	 :	 255-261 	5.04-5.17
+V$STAT5A_03:		 251-258	 :	 265-272 	6.46-5.81
+V$NKX62_Q2:		 259-270	 :	 310-321 	8.19-8.76
+V$CDXA_02:		 319-325	 :	 384-390 	4.98-5.62
+V$CDXA_02:		 350-356	 :	 451-457 	5.62-5.04
+V$CEBP_Q3:		 420-429	 :	 511-520 	6.63-6.47
+V$CDXA_02:		 432-438	 :	 540-546 	5.56-5.29
+V$CDXA_02:		 469-475	 :	 576-582 	5.17-5.56
+V$CDXA_02:		 567-573	 :	 677-683 	5.62-5.68
+V$CDXA_01:		 594-600	 :	 684-690 	6.28-5.03
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:39 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG1916 - Length = 95 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 17.67
+# SimMatrix: 244 matches / 8740 positions (2.79 %)
+### Best meta-alignment contains 11 elements
+V$MYB_Q3:		 50-55	 :	 95-100 	5.39-5.17
+V$EN1_01:		 56-62	 :	 170-176 	5.98-5.13
+V$CDXA_02:		 350-356	 :	 453-459 	5.62-5.74
+V$STAT3_02:		 363-370	 :	 476-483 	5.09-5.37
+V$STAT5A_04:		 400-407	 :	 505-512 	5.43-5.05
+V$SRY_01:		 414-420	 :	 519-525 	6.68-6.05
+V$EN1_01:		 453-459	 :	 537-543 	5.41-4.88
+V$CDXA_02:		 520-526	 :	 584-590 	5.62-5.29
+V$CDXA_02:		 567-573	 :	 620-626 	5.62-5.62
+V$CDXA_02:		 594-600	 :	 643-649 	5.68-5.62
+V$HMGIY_Q6:		 647-653	 :	 719-725 	7.61-6.69
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:39 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG40178 - Length = 121 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 35.56
+# SimMatrix: 528 matches / 11132 positions (4.74 %)
+### Best meta-alignment contains 13 elements
+V$STAT5A_04:		 196-203	 :	 217-224 	5.27-4.94
+V$CDXA_02:		 229-235	 :	 228-234 	5.04-5.04
+V$CDXA_02:		 237-243	 :	 238-244 	5.04-5.04
+V$CDXA_02:		 319-325	 :	 300-306 	4.98-4.64
+V$CDXA_02:		 350-356	 :	 313-319 	5.62-5.29
+V$STAT5A_04:		 363-370	 :	 323-330 	5.33-5.24
+V$STAT4_01:		 400-407	 :	 351-358 	6.18-5.52
+V$CAP_01:		 450-457	 :	 399-406 	4.42-4.37
+V$CDXA_02:		 469-475	 :	 418-424 	5.17-5.74
+V$CDXA_02:		 567-573	 :	 549-555 	5.62-4.64
+V$CDXA_01:		 594-600	 :	 578-584 	6.28-5.88
+V$DBP_Q6:		 620-626	 :	 605-611 	6.10-5.98
+V$STAT5A_04:		 646-653	 :	 651-658 	5.07-5.27
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 11.06
+# SimMatrix: 176 matches / 4600 positions (3.83 %)
+### Best meta-alignment contains 9 elements
+V$STAT4_01:		 159-166	 :	 60-67 	5.52-5.77
+V$NKX62_Q2:		 201-212	 :	 94-105 	8.07-8.19
+V$CDXA_02:		 237-243	 :	 135-141 	5.04-4.98
+V$HNF3ALPHA_Q6:		 258-268	 :	 151-161 	9.33-8.76
+V$CDXA_02:		 319-325	 :	 192-198 	4.98-5.74
+V$CDXA_02:		 350-356	 :	 200-206 	5.62-5.04
+V$STAT1_03:		 363-370	 :	 227-234 	6.27-5.99
+V$STAT3_02:		 397-404	 :	 253-260 	4.78-4.98
+V$STAT5A_04:		 407-414	 :	 291-298 	5.64-5.03
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 14.51
+# SimMatrix: 261 matches / 10212 positions (2.56 %)
+### Best meta-alignment contains 10 elements
+V$DBP_Q6:		 68-74	 :	 92-98 	6.10-6.10
+V$STAT5A_03:		 251-258	 :	 295-302 	6.46-5.45
+V$CDXA_02:		 319-325	 :	 326-332 	4.98-5.74
+V$STAT1_02:		 363-370	 :	 379-386 	7.98-6.52
+V$FOXO4_01:		 412-422	 :	 396-406 	8.50-9.19
+V$STAT3_02:		 549-556	 :	 521-528 	4.94-5.31
+V$CDXA_02:		 567-573	 :	 575-581 	5.62-4.93
+V$CDXA_02:		 594-600	 :	 590-596 	5.68-5.04
+V$CAP_01:		 610-617	 :	 655-662 	4.41-4.36
+V$STAT6_01:		 646-653	 :	 674-681 	5.34-5.77
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 21.82
+# SimMatrix: 238 matches / 10304 positions (2.31 %)
+### Best meta-alignment contains 13 elements
+V$MYB_Q3:		 50-55	 :	 64-69 	5.39-5.98
+V$EN1_01:		 56-62	 :	 150-156 	5.98-4.85
+V$GATA2_01:		 99-108	 :	 240-249 	5.61-6.37
+V$CIZ_01:		 184-192	 :	 322-330 	8.41-7.98
+V$CDXA_02:		 262-268	 :	 408-414 	4.64-5.74
+V$CDXA_02:		 319-325	 :	 425-431 	4.98-5.62
+V$STAT5A_03:		 363-370	 :	 472-479 	5.94-6.46
+V$AP3_Q6:		 422-429	 :	 531-538 	7.89-7.04
+V$CAP_01:		 450-457	 :	 568-575 	4.42-4.49
+V$CDXA_02:		 469-475	 :	 605-611 	5.17-5.62
+V$CDXA_02:		 520-526	 :	 621-627 	5.62-4.64
+V$HOXA3_01:		 567-575	 :	 661-669 	5.06-5.06
+V$STAT5A_04:		 646-653	 :	 742-749 	5.07-5.22
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 22.16
+# SimMatrix: 290 matches / 12236 positions (2.37 %)
+### Best meta-alignment contains 10 elements
+V$MYB_Q3:		 50-55	 :	 27-32 	5.39-5.23
+V$STAT5A_04:		 196-203	 :	 161-168 	5.27-5.93
+V$CDXA_02:		 350-356	 :	 308-314 	5.62-5.74
+V$STAT5A_03:		 363-370	 :	 317-324 	5.94-5.54
+V$SRY_01:		 414-420	 :	 399-405 	6.68-7.09
+V$CAP_01:		 450-457	 :	 420-427 	4.42-4.36
+V$CDXA_02:		 469-475	 :	 432-438 	5.17-4.93
+V$CDXA_02:		 520-526	 :	 494-500 	5.62-5.29
+V$CDXA_02:		 594-600	 :	 570-576 	5.68-5.62
+V$STAT1_03:		 646-653	 :	 634-641 	5.08-5.52
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -5.02
+# SimMatrix: 106 matches / 1564 positions (6.78 %)
+### Best meta-alignment contains 1 elements
+V$MYB_Q3:		 50-55	 :	 54-59 	5.39-5.17
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG9855 - Length = 92 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 23.39
+# SimMatrix: 251 matches / 9752 positions (2.57 %)
+### Best meta-alignment contains 10 elements
+V$MYB_Q3:		 50-55	 :	 19-24 	5.39-5.39
+V$STAT5A_04:		 196-203	 :	 152-159 	5.27-5.61
+V$STAT5A_04:		 251-258	 :	 202-209 	4.96-4.98
+V$LFA1_Q6:		 299-306	 :	 244-251 	7.51-7.51
+V$TEF1_Q6:		 363-368	 :	 348-353 	6.89-6.48
+V$STAT5A_04:		 400-407	 :	 363-370 	5.43-5.14
+V$SRY_01:		 414-420	 :	 402-408 	6.68-5.70
+V$STAT4_01:		 469-476	 :	 446-453 	6.18-6.60
+V$CAP_01:		 610-617	 :	 600-607 	4.41-5.13
+V$STAT6_01:		 646-653	 :	 649-656 	5.34-5.77
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG1916 - Length = 95 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 41.74
+# SimMatrix: 221 matches / 8930 positions (2.47 %)
+### Best meta-alignment contains 12 elements
+V$SRY_01:		 4-10	 :	 35-41 	7.09-6.13
+V$STAT1_03:		 56-63	 :	 96-103 	5.50-5.10
+V$MEF2_Q6:		 113-122	 :	 127-136 	7.90-7.68
+V$NKX25_02:		 152-159	 :	 169-176 	7.83-9.22
+V$AP3_Q6:		 191-198	 :	 227-234 	7.04-6.82
+V$CDXA_02:		 384-390	 :	 447-453 	5.62-5.74
+V$AREB6_04:		 435-443	 :	 481-489 	6.85-7.04
+V$TEF1_Q6:		 509-514	 :	 552-557 	6.89-6.48
+V$CDXA_02:		 540-546	 :	 584-590 	5.29-5.29
+V$CDXA_02:		 576-582	 :	 620-626 	5.56-5.62
+V$MYB_Q3:		 643-648	 :	 654-659 	5.23-5.35
+V$CDXA_01:		 684-690	 :	 699-705 	5.03-5.37
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG40178 - Length = 121 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 32.83
+# SimMatrix: 463 matches / 11374 positions (4.07 %)
+### Best meta-alignment contains 12 elements
+V$CDXA_02:		 22-28	 :	 38-44 	5.17-5.74
+V$MEF2_Q6:		 113-122	 :	 168-177 	7.90-7.46
+V$CDXA_02:		 129-135	 :	 186-192 	5.62-4.93
+V$STAT5A_04:		 147-154	 :	 217-224 	5.54-4.94
+V$CDXA_02:		 174-180	 :	 238-244 	5.68-5.04
+V$STAT4_01:		 254-261	 :	 312-319 	5.77-5.52
+V$STAT5A_04:		 265-272	 :	 323-330 	5.43-5.24
+V$CDXA_02:		 384-390	 :	 418-424 	5.62-5.74
+V$CDXA_02:		 540-546	 :	 569-575 	5.29-5.74
+V$CDXA_02:		 576-582	 :	 581-587 	5.56-4.64
+V$CDXA_01:		 677-683	 :	 689-695 	6.28-5.88
+V$CDXA_02:		 684-690	 :	 704-710 	5.56-5.17
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 12.47
+# SimMatrix: 152 matches / 4700 positions (3.23 %)
+### Best meta-alignment contains 6 elements
+V$STAT5A_03:		 21-28	 :	 60-67 	5.23-6.00
+V$STAT4_01:		 56-63	 :	 105-112 	5.52-5.93
+V$MEF2_Q6:		 113-122	 :	 146-155 	7.90-7.75
+V$CDXA_02:		 129-135	 :	 168-174 	5.62-5.56
+V$CDXA_01:		 174-180	 :	 197-203 	6.28-5.88
+V$STAT5A_04:		 265-272	 :	 291-298 	5.43-5.03
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 34.92
+# SimMatrix: 259 matches / 10434 positions (2.48 %)
+### Best meta-alignment contains 13 elements
+V$STAT5A_04:		 21-28	 :	 24-31 	5.04-4.98
+V$PU1_Q6:		 35-42	 :	 42-49 	9.36-9.36
+V$STAT5A_04:		 56-63	 :	 82-89 	5.46-5.52
+V$STAT5A_04:		 147-154	 :	 120-127 	5.54-5.77
+V$AREB6_04:		 246-254	 :	 197-205 	6.79-7.19
+V$CDXA_02:		 384-390	 :	 326-332 	5.62-5.74
+V$AREB6_04:		 435-443	 :	 379-387 	6.85-6.97
+V$GATA6_01:		 556-565	 :	 498-507 	5.66-6.40
+V$EN1_01:		 611-617	 :	 508-514 	5.29-5.29
+V$STAT3_02:		 622-629	 :	 521-528 	5.09-5.31
+V$CDXA_02:		 677-683	 :	 578-584 	5.68-5.62
+V$CDXA_02:		 684-690	 :	 590-596 	5.56-5.04
+V$MYB_Q3:		 693-698	 :	 690-695 	5.35-5.17
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 38.27
+# SimMatrix: 237 matches / 10528 positions (2.25 %)
+### Best meta-alignment contains 14 elements
+V$HMGIY_Q6:		 19-25	 :	 17-23 	6.41-6.63
+V$IRF1_Q6:		 40-46	 :	 65-71 	7.62-7.93
+V$STAT4_01:		 56-63	 :	 73-80 	5.52-5.93
+V$IRF1_Q6:		 171-177	 :	 96-102 	7.65-7.65
+V$EN1_01:		 224-230	 :	 150-156 	5.69-4.85
+V$DBP_Q6:		 437-443	 :	 327-333 	7.35-6.37
+V$CDXA_02:		 540-546	 :	 425-431 	5.29-5.62
+V$GATA6_01:		 556-565	 :	 466-475 	5.66-5.68
+V$CDXA_02:		 576-582	 :	 492-498 	5.56-5.74
+V$EN1_01:		 611-617	 :	 530-536 	5.29-5.29
+V$CAP_01:		 626-633	 :	 568-575 	4.45-4.49
+V$VMYB_02:		 641-649	 :	 590-598 	8.30-7.40
+V$CDXA_02:		 677-683	 :	 621-627 	5.68-4.64
+V$HOXA3_01:		 684-692	 :	 661-669 	5.18-5.06
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 34.93
+# SimMatrix: 291 matches / 12502 positions (2.33 %)
+### Best meta-alignment contains 12 elements
+V$OSF2_Q6:		 16-23	 :	 6-13 	7.61-7.32
+V$STAT4_01:		 56-63	 :	 59-66 	5.52-5.52
+V$STAT5A_04:		 147-154	 :	 161-168 	5.54-5.93
+V$CEBP_Q3:		 155-164	 :	 196-205 	7.24-6.18
+V$CDXA_02:		 255-261	 :	 308-314 	5.17-5.74
+V$STAT5A_03:		 265-272	 :	 317-324 	5.81-5.54
+V$NKX62_Q2:		 310-321	 :	 376-387 	8.76-7.90
+V$CDXA_02:		 384-390	 :	 432-438 	5.62-4.93
+V$CDXA_02:		 451-457	 :	 499-505 	5.04-5.74
+V$CDXA_02:		 540-546	 :	 570-576 	5.29-5.62
+V$MYB_Q3:		 643-648	 :	 665-670 	5.23-4.82
+V$CDXA_01:		 684-690	 :	 715-721 	5.03-5.37
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -6.61
+# SimMatrix: 89 matches / 1598 positions (5.57 %)
+### Best meta-alignment contains 3 elements
+V$SRY_01:		 4-10	 :	 50-56 	7.09-6.05
+V$CDXA_02:		 22-28	 :	 62-68 	5.17-4.98
+V$CDXA_02:		 129-135	 :	 102-108 	5.62-5.68
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG31911 - Length = 94 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 20.19
+# SimMatrix: 238 matches / 9964 positions (2.39 %)
+### Best meta-alignment contains 10 elements
+V$STAT5A_04:		 21-28	 :	 29-36 	5.04-5.11
+V$STAT4_01:		 56-63	 :	 71-78 	5.52-5.77
+V$CDXA_02:		 129-135	 :	 119-125 	5.62-4.86
+V$STAT5A_04:		 147-154	 :	 131-138 	5.54-5.07
+V$STAT5A_04:		 254-261	 :	 202-209 	5.46-4.98
+V$AREB6_04:		 435-443	 :	 368-376 	6.85-7.48
+V$CDXA_02:		 451-457	 :	 387-393 	5.04-5.11
+V$TEF1_Q6:		 509-514	 :	 494-499 	6.89-6.48
+V$CAP_01:		 626-633	 :	 600-607 	4.45-5.13
+V$CDXA_02:		 677-683	 :	 668-674 	5.68-5.11
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:40 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG40178 - Length = 121 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 42.22
+# SimMatrix: 446 matches / 11495 positions (3.88 %)
+### Best meta-alignment contains 15 elements
+V$CDXA_01:		 32-38	 :	 38-44 	5.27-5.88
+V$MEF2_Q6:		 127-136	 :	 122-131 	7.68-7.90
+V$CDXA_02:		 169-175	 :	 142-148 	5.56-5.04
+V$GATA6_01:		 242-251	 :	 175-184 	6.29-6.23
+V$TATA_C:		 306-315	 :	 227-236 	9.61-10.16
+V$CDXA_02:		 447-453	 :	 418-424 	5.74-5.74
+V$STAT5A_04:		 517-524	 :	 556-563 	5.54-5.52
+V$TCF4_Q5:		 573-580	 :	 597-604 	8.93-7.55
+V$STAT5A_04:		 584-591	 :	 651-658 	5.43-5.27
+V$CDXA_02:		 620-626	 :	 689-695 	5.62-5.74
+V$SRY_01:		 629-635	 :	 696-702 	6.68-6.53
+V$CDXA_02:		 643-649	 :	 704-710 	5.62-5.17
+V$USF2_Q6:		 672-677	 :	 725-730 	5.83-6.53
+V$CDXA_02:		 817-823	 :	 868-874 	5.62-5.56
+V$MYB_Q3:		 934-939	 :	 989-994 	5.39-4.82
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -2.50
+# SimMatrix: 153 matches / 4750 positions (3.22 %)
+### Best meta-alignment contains 2 elements
+V$CDXA_02:		 135-141	 :	 135-141 	5.11-4.98
+V$CDXA_02:		 169-175	 :	 168-174 	5.56-5.56
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 17.58
+# SimMatrix: 271 matches / 10545 positions (2.57 %)
+### Best meta-alignment contains 8 elements
+V$STAT1_03:		 96-103	 :	 100-107 	5.10-5.46
+V$FOXM1_01:		 441-449	 :	 434-442 	7.45-8.55
+V$EN1_01:		 537-543	 :	 508-514 	4.88-5.29
+V$STAT5A_04:		 584-591	 :	 551-558 	5.43-5.52
+V$CDXA_02:		 620-626	 :	 578-584 	5.62-5.62
+V$CDXA_02:		 643-649	 :	 590-596 	5.62-5.04
+V$CDXA_02:		 817-823	 :	 790-796 	5.62-5.62
+V$SRY_01:		 826-832	 :	 798-804 	7.09-6.05
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 37.41
+# SimMatrix: 257 matches / 10640 positions (2.42 %)
+### Best meta-alignment contains 11 elements
+V$MYB_Q3:		 95-100	 :	 64-69 	5.17-5.98
+V$STAT3_02:		 148-155	 :	 111-118 	4.92-5.12
+V$EN1_01:		 170-176	 :	 150-156 	5.13-4.85
+V$CDXA_02:		 447-453	 :	 425-431 	5.74-5.62
+V$ETS_Q4:		 507-512	 :	 472-477 	7.23-6.13
+V$EN1_01:		 537-543	 :	 530-536 	4.88-5.29
+V$FREAC7_01:		 584-599	 :	 616-631 	10.98-11.15
+V$SOX5_01:		 812-821	 :	 850-859 	8.68-7.87
+V$IRF1_Q6:		 840-846	 :	 871-877 	7.93-7.65
+V$SRY_01:		 881-887	 :	 883-889 	6.11-6.11
+V$CIZ_01:		 902-910	 :	 896-904 	7.86-7.43
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 35.19
+# SimMatrix: 305 matches / 12635 positions (2.41 %)
+### Best meta-alignment contains 16 elements
+V$MYB_Q3:		 95-100	 :	 27-32 	5.17-5.23
+V$STAT3_02:		 148-155	 :	 57-64 	4.92-5.67
+V$CDXA_02:		 169-175	 :	 66-72 	5.56-5.74
+V$GATA6_01:		 242-251	 :	 87-96 	6.29-5.79
+V$CDXA_02:		 453-459	 :	 308-314 	5.74-5.74
+V$STAT5A_04:		 505-512	 :	 317-324 	5.05-5.11
+V$SRY_01:		 519-525	 :	 339-345 	6.05-6.05
+V$STAT5A_04:		 584-591	 :	 426-433 	5.43-5.43
+V$CDXA_02:		 643-649	 :	 499-505 	5.62-5.74
+V$MYB_Q3:		 654-659	 :	 516-521 	5.35-5.17
+V$HMGIY_Q6:		 719-725	 :	 587-593 	6.69-6.69
+V$STAT1_03:		 776-783	 :	 634-641 	5.10-5.52
+V$SOX5_01:		 812-821	 :	 655-664 	8.68-7.99
+V$HNF3ALPHA_Q6:		 824-834	 :	 721-731 	10.55-8.71
+V$IRF1_Q6:		 840-846	 :	 811-817 	7.93-8.63
+V$SRY_01:		 881-887	 :	 889-895 	6.11-6.13
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -6.71
+# SimMatrix: 109 matches / 1615 positions (6.75 %)
+### Best meta-alignment contains 1 elements
+V$SRY_01:		 35-41	 :	 50-56 	6.13-6.05
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG1916 - Length = 95 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 12.36
+# SimMatrix: 225 matches / 10070 positions (2.23 %)
+### Best meta-alignment contains 7 elements
+V$CDXA_02:		 135-141	 :	 119-125 	5.11-4.86
+V$STAT1_03:		 159-166	 :	 131-138 	5.09-5.08
+V$SRY_01:		 178-184	 :	 181-187 	6.11-6.68
+V$SRY_01:		 195-201	 :	 213-219 	6.68-7.09
+V$AREB6_04:		 481-489	 :	 499-507 	7.04-6.63
+V$CDXA_02:		 643-649	 :	 668-674 	5.62-5.11
+V$GEN_INI2_B:		 957-964	 :	 985-992 	5.67-5.35
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG5390 - Length = 50 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 20.95
+# SimMatrix: 331 matches / 6050 positions (5.47 %)
+### Best meta-alignment contains 8 elements
+V$LMO2COM_02:		 7-15	 :	 47-55 	8.57-8.02
+V$CDXA_02:		 41-47	 :	 93-99 	5.04-4.64
+V$MEF2_Q6:		 122-131	 :	 146-155 	7.90-7.75
+V$CDXA_02:		 142-148	 :	 168-174 	5.04-5.56
+V$GATA1_06:		 175-184	 :	 185-194 	8.58-8.58
+V$CDXA_02:		 186-192	 :	 197-203 	4.93-5.74
+V$STAT5A_04:		 217-224	 :	 227-234 	4.94-5.14
+V$STAT5A_04:		 312-319	 :	 291-298 	5.43-5.03
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 22.08
+# SimMatrix: 427 matches / 13431 positions (3.18 %)
+### Best meta-alignment contains 12 elements
+V$CDXA_02:		 41-47	 :	 56-62 	5.04-5.62
+V$CDXA_02:		 313-319	 :	 326-332 	5.29-5.74
+V$MYB_Q3:		 497-502	 :	 490-495 	4.82-4.82
+V$STAT6_02:		 556-563	 :	 551-558 	5.63-5.63
+V$CDXA_02:		 569-575	 :	 578-584 	5.74-5.62
+V$CDXA_02:		 578-584	 :	 590-596 	5.74-5.04
+V$TBP_01:		 689-696	 :	 771-778 	9.09-7.35
+V$CDXA_02:		 704-710	 :	 790-796 	5.17-5.62
+V$USF2_Q6:		 725-730	 :	 815-820 	6.53-5.83
+V$CDXA_02:		 736-742	 :	 837-843 	5.29-5.74
+V$EN1_01:		 765-771	 :	 878-884 	5.07-5.07
+V$E2F1_Q3:		 830-837	 :	 906-913 	6.05-5.83
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 21.05
+# SimMatrix: 388 matches / 13552 positions (2.86 %)
+### Best meta-alignment contains 12 elements
+V$STAT5A_04:		 217-224	 :	 285-292 	4.94-5.64
+V$GATA6_01:		 266-275	 :	 399-408 	6.00-6.11
+V$CDXA_02:		 299-305	 :	 425-431 	4.64-5.62
+V$SRY_01:		 319-325	 :	 436-442 	6.12-6.12
+V$STAT6_02:		 351-358	 :	 472-479 	6.21-5.82
+V$CDXA_02:		 418-424	 :	 492-498 	5.74-5.74
+V$MYB_Q3:		 497-502	 :	 569-574 	4.82-5.98
+V$CDXA_02:		 548-554	 :	 605-611 	4.64-5.62
+V$CDXA_02:		 578-584	 :	 621-627 	5.74-4.64
+V$SRY_01:		 696-702	 :	 712-718 	6.53-7.09
+V$STAT5A_04:		 735-742	 :	 742-749 	6.09-5.22
+V$CDXA_02:		 884-890	 :	 888-894 	5.62-5.62
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 32.10
+# SimMatrix: 502 matches / 16093 positions (3.12 %)
+### Best meta-alignment contains 13 elements
+V$CDXA_02:		 41-47	 :	 66-72 	5.04-5.74
+V$CDXA_02:		 300-306	 :	 324-330 	4.64-4.98
+V$SRY_01:		 319-325	 :	 339-345 	6.12-6.05
+V$CAP_01:		 399-406	 :	 420-427 	4.37-4.36
+V$CDXA_02:		 418-424	 :	 432-438 	5.74-4.93
+V$STAT5A_03:		 480-487	 :	 493-500 	5.19-5.45
+V$MYB_Q3:		 497-502	 :	 516-521 	4.82-5.17
+V$CDXA_02:		 547-553	 :	 570-576 	4.64-5.62
+V$STAT6_02:		 556-563	 :	 587-594 	5.63-6.20
+V$CDXA_01:		 578-584	 :	 617-623 	5.88-5.27
+V$CDXA_01:		 689-695	 :	 715-721 	5.88-5.37
+V$STAT5A_04:		 735-742	 :	 762-769 	6.09-5.23
+V$STAT3_02:		 839-846	 :	 813-820 	4.78-5.81
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -7.65
+# SimMatrix: 246 matches / 2057 positions (11.96 %)
+### Best meta-alignment contains 3 elements
+V$CDXA_02:		 41-47	 :	 45-51 	5.04-4.98
+V$CDXA_02:		 132-138	 :	 82-88 	4.93-4.64
+V$CDXA_02:		 142-148	 :	 102-108 	5.04-5.68
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG40178 - Length = 121 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 16.87
+# SimMatrix: 323 matches / 12826 positions (2.52 %)
+### Best meta-alignment contains 13 elements
+V$CDXA_02:		 132-138	 :	 119-125 	4.93-4.86
+V$STAT5A_04:		 217-224	 :	 202-209 	4.94-4.98
+V$CDXA_02:		 300-306	 :	 364-370 	4.64-5.11
+V$SRY_01:		 319-325	 :	 402-408 	6.12-5.70
+V$STAT5A_04:		 326-333	 :	 446-453 	5.08-5.62
+V$STAT6_02:		 351-358	 :	 467-474 	6.21-6.20
+V$CDXA_02:		 547-553	 :	 668-674 	4.64-5.11
+V$DBP_Q6:		 605-611	 :	 751-757 	5.98-5.98
+V$DBP_Q6:		 643-649	 :	 801-807 	6.66-6.66
+V$STAT5A_04:		 735-742	 :	 885-892 	6.09-5.58
+V$AREB6_04:		 787-795	 :	 949-957 	7.66-6.63
+V$STAT5A_04:		 839-846	 :	 960-967 	4.96-5.46
+V$GEN_INI3_B:		 876-883	 :	 985-992 	5.82-5.53
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG6936 - Length = 111 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -2.31
+# SimMatrix: 135 matches / 5550 positions (2.43 %)
+### Best meta-alignment contains 4 elements
+V$STAT5A_04:		 60-67	 :	 24-31 	4.99-4.98
+V$NKX62_Q2:		 94-105	 :	 57-68 	8.19-8.48
+V$MYB_Q3:		 221-226	 :	 165-170 	5.39-4.82
+V$STAT5A_04:		 291-298	 :	 295-302 	5.03-5.70
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:41 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -3.56
+# SimMatrix: 126 matches / 5600 positions (2.25 %)
+### Best meta-alignment contains 3 elements
+V$MYB_Q3:		 66-71	 :	 64-69 	5.98-5.98
+V$STAT4_01:		 105-112	 :	 73-80 	5.93-5.93
+V$STAT5A_04:		 291-298	 :	 285-292 	5.03-5.64
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -0.16
+# SimMatrix: 171 matches / 6650 positions (2.57 %)
+### Best meta-alignment contains 6 elements
+V$AP2REP_01:		 13-19	 :	 44-50 	5.77-5.77
+V$MYB_Q3:		 66-71	 :	 135-140 	5.98-5.86
+V$STAT4_01:		 105-112	 :	 161-168 	5.93-5.52
+V$TBP_01:		 192-199	 :	 204-211 	8.93-7.35
+V$HMGIY_Q6:		 227-233	 :	 277-283 	6.63-6.41
+V$STAT5A_04:		 291-298	 :	 317-324 	5.03-5.11
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 5.25
+# SimMatrix: 70 matches / 850 positions (8.24 %)
+### Best meta-alignment contains 4 elements
+V$MYB_Q3:		 66-71	 :	 54-59 	5.98-5.17
+V$CDXA_02:		 93-99	 :	 62-68 	4.64-4.98
+V$CDXA_02:		 135-141	 :	 82-88 	4.98-4.64
+V$CDXA_02:		 148-154	 :	 102-108 	5.04-5.68
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG5390 - Length = 50 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 7.99
+# SimMatrix: 105 matches / 5300 positions (1.98 %)
+### Best meta-alignment contains 5 elements
+V$STAT5A_03:		 60-67	 :	 71-78 	6.00-6.00
+V$CDXA_02:		 97-103	 :	 119-125 	4.64-4.86
+V$HMGIY_Q6:		 115-121	 :	 131-137 	6.63-7.61
+V$FOXO1_01:		 179-188	 :	 181-190 	7.87-7.85
+V$STAT5A_04:		 227-234	 :	 202-209 	5.14-4.98
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG5304 - Length = 112 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 44.56
+# SimMatrix: 263 matches / 12432 positions (2.12 %)
+### Best meta-alignment contains 16 elements
+V$USF2_Q6:		 8-13	 :	 4-9 	6.12-6.53
+V$STAT5A_04:		 24-31	 :	 16-23 	4.98-5.46
+V$MYB_Q3:		 165-170	 :	 151-156 	4.82-4.82
+V$STAT5A_04:		 295-302	 :	 285-292 	5.70-5.64
+V$CIZ_01:		 430-438	 :	 322-330 	8.28-7.98
+V$GATA6_01:		 498-507	 :	 399-408 	6.40-6.11
+V$EN1_01:		 508-514	 :	 412-418 	5.29-5.13
+V$STAT6_02:		 551-558	 :	 472-479 	5.63-5.82
+V$CDXA_02:		 578-584	 :	 492-498 	5.62-5.74
+V$CAP_01:		 655-662	 :	 568-575 	4.36-4.49
+V$MYB_Q3:		 690-695	 :	 591-596 	5.17-5.35
+V$CEBP_Q3:		 766-775	 :	 701-710 	6.45-6.30
+V$STAT5A_04:		 799-806	 :	 742-749 	5.27-5.22
+V$EN1_01:		 878-884	 :	 854-860 	5.07-4.88
+V$CAP_01:		 897-904	 :	 869-876 	4.30-4.43
+V$PAX2_02:		 919-927	 :	 901-909 	6.29-5.67
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 29.38
+# SimMatrix: 331 matches / 14763 positions (2.24 %)
+### Best meta-alignment contains 13 elements
+V$STAT3_02:		 24-31	 :	 57-64 	5.01-5.67
+V$CDXA_02:		 56-62	 :	 66-72 	5.62-5.74
+V$STAT5A_04:		 136-143	 :	 161-168 	4.95-5.93
+V$CDXA_01:		 272-278	 :	 308-314 	5.47-5.88
+V$STAT5A_03:		 295-302	 :	 317-324 	5.45-5.54
+V$SRY_01:		 398-404	 :	 399-405 	7.09-7.09
+V$MYB_Q3:		 412-417	 :	 437-442 	5.17-4.82
+V$MYB_Q3:		 490-495	 :	 516-521 	4.82-5.17
+V$EN1_01:		 508-514	 :	 528-534 	5.29-5.29
+V$MYB_Q3:		 521-526	 :	 550-555 	5.39-5.17
+V$STAT6_02:		 551-558	 :	 587-594 	5.63-6.20
+V$STAT5A_04:		 799-806	 :	 813-820 	5.27-5.15
+V$CAP_01:		 854-861	 :	 850-857 	4.43-4.31
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -7.30
+# SimMatrix: 85 matches / 1887 positions (4.50 %)
+### Best meta-alignment contains 1 elements
+V$CDXA_02:		 56-62	 :	 62-68 	5.62-4.98
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG6936 - Length = 111 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 46.78
+# SimMatrix: 278 matches / 11766 positions (2.36 %)
+### Best meta-alignment contains 18 elements
+V$USF2_Q6:		 8-13	 :	 36-41 	6.12-6.12
+V$STAT5A_04:		 16-23	 :	 71-78 	4.96-4.99
+V$STAT3_02:		 24-31	 :	 88-95 	5.01-5.94
+V$CDXA_02:		 56-62	 :	 119-125 	5.62-4.86
+V$STAT5A_04:		 82-89	 :	 131-138 	5.52-5.07
+V$STAT5A_04:		 120-127	 :	 152-159 	5.77-5.61
+V$STAT5A_04:		 136-143	 :	 202-209 	4.95-4.98
+V$STAT5A_04:		 295-302	 :	 363-370 	5.70-5.14
+V$CDXA_02:		 326-332	 :	 387-393 	5.74-5.11
+V$STAT1_03:		 379-386	 :	 446-453 	5.46-5.84
+V$MYB_Q3:		 412-417	 :	 522-527 	5.17-5.39
+V$CIZ_01:		 430-438	 :	 553-561 	8.28-7.43
+V$STAT6_01:		 580-587	 :	 649-656 	6.37-5.77
+V$CDXA_02:		 590-596	 :	 668-674 	5.04-5.11
+V$TEF1_Q6:		 661-666	 :	 693-698 	6.89-6.89
+V$GEN_INI_B:		 701-708	 :	 728-735 	5.31-5.37
+V$E2F1_Q3:		 906-913	 :	 867-874 	5.83-6.86
+V$SOX5_01:		 934-943	 :	 908-917 	8.07-9.07
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG5304 - Length = 112 elems
+# MAP2 CG11331 - Length = 133 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 41.23
+# SimMatrix: 305 matches / 14896 positions (2.05 %)
+### Best meta-alignment contains 19 elements
+V$MYB_Q3:		 64-69	 :	 27-32 	5.98-5.23
+V$STAT3_02:		 111-118	 :	 57-64 	5.12-5.67
+V$AML1_01:		 188-193	 :	 118-123 	6.54-7.54
+V$PAX2_02:		 253-261	 :	 129-137 	5.45-5.32
+V$STAT5A_04:		 285-292	 :	 161-168 	5.64-5.93
+V$HMGIY_Q6:		 328-334	 :	 277-283 	6.41-6.41
+V$AML1_01:		 370-375	 :	 292-297 	7.54-6.54
+V$CDXA_02:		 408-414	 :	 308-314 	5.74-5.74
+V$CDXA_02:		 425-431	 :	 324-330 	5.62-4.98
+V$SRY_01:		 436-442	 :	 339-345 	6.12-6.05
+V$STAT5A_04:		 472-479	 :	 426-433 	4.96-5.43
+V$CDXA_02:		 492-498	 :	 499-505 	5.74-5.74
+V$MYB_Q3:		 504-509	 :	 516-521 	5.86-5.17
+V$EN1_01:		 530-536	 :	 528-534 	5.29-5.29
+V$MYB_Q3:		 569-574	 :	 550-555 	5.98-5.17
+V$CDXA_02:		 605-611	 :	 570-576 	5.62-5.62
+V$CEBP_Q3:		 701-710	 :	 630-639 	6.30-6.16
+V$IRF_Q6:		 870-878	 :	 805-813 	8.93-7.59
+V$SRY_01:		 883-889	 :	 889-895 	6.11-6.13
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG5304 - Length = 112 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -7.93
+# SimMatrix: 89 matches / 1904 positions (4.67 %)
+### Best meta-alignment contains 1 elements
+V$MYB_Q3:		 64-69	 :	 54-59 	5.98-5.17
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG5304 - Length = 112 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 31.06
+# SimMatrix: 206 matches / 11872 positions (1.74 %)
+### Best meta-alignment contains 14 elements
+V$STAT5A_04:		 16-23	 :	 29-36 	5.46-5.11
+V$STAT4_01:		 73-80	 :	 71-78 	5.93-5.77
+V$STAT3_02:		 111-118	 :	 88-95 	5.12-5.94
+V$MYB_Q3:		 151-156	 :	 146-151 	4.82-5.98
+V$CDXA_02:		 408-414	 :	 364-370 	5.74-5.11
+V$CDXA_02:		 425-431	 :	 387-393 	5.62-5.11
+V$SRY_01:		 436-442	 :	 402-408 	6.12-5.70
+V$STAT1_03:		 446-453	 :	 446-453 	5.43-5.84
+V$ETS_Q4:		 472-477	 :	 469-474 	6.13-6.13
+V$MYB_Q3:		 504-509	 :	 522-527 	5.86-5.39
+V$CAP_01:		 568-575	 :	 600-607 	4.49-5.13
+V$CDXA_02:		 621-627	 :	 668-674 	4.64-5.11
+V$SOX5_01:		 850-859	 :	 908-917 	7.87-9.07
+V$IRF_Q6:		 870-878	 :	 962-970 	8.93-8.17
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG11331 - Length = 133 elems
+# MAP2 CG5731 - Length = 17 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -6.09
+# SimMatrix: 114 matches / 2261 positions (5.04 %)
+### Best meta-alignment contains 2 elements
+V$PAX2_02:		 33-41	 :	 51-59 	6.08-5.37
+V$CDXA_02:		 66-72	 :	 82-88 	5.74-4.64
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG11331 - Length = 133 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: 26.73
+# SimMatrix: 264 matches / 14098 positions (1.87 %)
+### Best meta-alignment contains 12 elements
+V$MYB_Q3:		 27-32	 :	 19-24 	5.23-5.39
+V$STAT4_01:		 59-66	 :	 71-78 	5.52-5.77
+V$MYB_Q3:		 135-140	 :	 146-151 	5.86-5.98
+V$STAT5A_04:		 161-168	 :	 202-209 	5.93-4.98
+V$CDXA_02:		 308-314	 :	 364-370 	5.74-5.11
+V$CDXA_02:		 324-330	 :	 387-393 	4.98-5.11
+V$SRY_01:		 339-345	 :	 402-408 	6.05-5.70
+V$STAT5A_04:		 426-433	 :	 446-453 	5.43-5.62
+V$MYB_Q3:		 516-521	 :	 522-527 	5.17-5.39
+V$LBP1_Q6:		 534-540	 :	 538-544 	7.36-6.95
+V$MZF1_01:		 630-637	 :	 581-588 	8.52-7.22
+V$DBP_Q6:		 863-869	 :	 830-836 	6.79-6.66
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+                <moby:Simple><moby:text-formatted namespace='' id=''>
+<![CDATA[
+# meta_v1.0
+# date Tue Oct 18 16:36:42 2005
+# MAP1 CG5731 - Length = 17 elems
+# MAP2 CG14439 - Length = 106 elems
+# ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
+# Maximum similarity: -9.03
+# SimMatrix: 46 matches / 1802 positions (2.55 %)
+### Best meta-alignment contains 1 elements
+V$CDXA_02:		 102-108	 :	 119-125 	5.68-4.86
+
+]]>
+</moby:text-formatted>
+</moby:Simple>
+            
+            </moby:Collection>
+        </moby:mobyData>
+        </moby:mobyContent></moby:MOBY>
