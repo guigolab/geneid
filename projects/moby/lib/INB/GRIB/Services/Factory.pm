@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.28 2005-09-19 15:49:50 gmaster Exp $
+# $Id: Factory.pm,v 1.29 2005-10-20 12:39:35 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -111,6 +111,7 @@ our @EXPORT = qw(
   &PromoterExtraction_call
   &MatScan_call
   &MetaAlignment_call
+  &generateScoreMatrix_call
 );
 
 our $VERSION = '1.00';
@@ -862,6 +863,9 @@ sub MetaAlignment_call {
     
 }
 
+sub generateScoreMatrix_call {
+  
+}
 
 1;
 
