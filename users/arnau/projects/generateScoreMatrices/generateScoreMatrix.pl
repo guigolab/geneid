@@ -16,7 +16,7 @@ my $_delimitor  = "\t";
 my $_equal_mark = "-";
 
 my $inputformat  = shift || "meta-alignment";
-my $outputformat = shift || "sota";
+my $outputformat = shift || "SOTA";
 
 my $scores_per_sequences;
 my $sequence_identifiers;
@@ -68,7 +68,7 @@ for (my $i=0; $i < @$sequence_identifiers; $i++) {
 
 # Ximo Dopazo compliant formatting
 
-if ($outputformat eq "sota") {
+if ($outputformat eq "SOTA") {
     
     print "#$_delimitor" . join ("$_delimitor", @$sequence_identifiers) . "\n";
     
