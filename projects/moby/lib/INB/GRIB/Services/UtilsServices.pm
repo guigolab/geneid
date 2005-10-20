@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.12 2005-10-20 12:39:36 arnau Exp $
+# $Id: UtilsServices.pm,v 1.13 2005-10-20 14:01:28 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -547,11 +547,11 @@ sub _do_query_generateScoreMatrix {
 
     # Get the parameters
     
-    ($input format)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "input format");
-    ($output format) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "output format");
+    ($input_format)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "input format");
+    ($output_format) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "output format");
     
     if (not defined $input_format) {
-	$input_format = "Phylip";
+	$input_format = "meta-alignment";
     }
     if (not defined $output_format) {
 	$output_format = "SOTA";
@@ -574,8 +574,6 @@ sub _do_query_generateScoreMatrix {
 
     $parameters{input_format}  = $input_format;
     $parameters{output_format} = $output_format;
-
-    $parameters{moby_output_format} = $_moby_output_format;
 
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
@@ -631,16 +629,17 @@ sub _do_query_generateScoreMatrix {
 	
     } # Next article
 
-		    my $matrix = generateScoreMatrix_call (similarity_results  => $input_data, parameters => \%parameters);
-                    # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
-	            # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
-	            # la podriamos realizar en una funcion a parte si fuese compleja.  
+    my $matrix = generateScoreMatrix_call (similarity_results  => $input_data, parameters => \%parameters);
+
+    # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
+    # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
+    # la podriamos realizar en una funcion a parte si fuese compleja.  
 		    
-		    my $namespace = "";
-	
-		    # Build the Moby object
-		    
-		    my $output_object = <<PRT;
+    my $namespace = "";
+    
+    # Build the Moby object
+    
+    my $output_object = <<PRT;
 <moby:$_moby_output_format namespace='$namespace' id=''>
 <![CDATA[
 $matrix
