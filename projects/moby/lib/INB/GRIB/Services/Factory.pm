@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.29 2005-10-20 12:39:35 arnau Exp $
+# $Id: Factory.pm,v 1.30 2005-10-20 14:02:26 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -191,7 +191,7 @@ sub GeneID_call_CGI {
 	    my $result_diag = $agent_diag->request($request_diag);
 	    $results       .= $result_diag->content;
 	}
-
+	
 	return $results;
     }
 
@@ -864,7 +864,32 @@ sub MetaAlignment_call {
 }
 
 sub generateScoreMatrix_call {
+  my %args = @_;  
   
+  # relleno los parametros por defecto generateScoreMatrix_call
+  
+  my $inputdata_arrayref = $args{similarity_results};
+  my $parameters    = $args{parameters} || undef;
+  
+  # Get the parameters
+  
+  my $input_format   = $parameters->{input_format};
+  my $output_format  = $parameters->{output_format};
+  
+  # Llama a generateScoreMatrix script en local
+  my $_application_dir  = "/home/ug/gmaster/projects/generateScoreMatrices";
+  my $_application_bin  = "generateScoreMatrix.pl";
+  my $_application_args = "$input_format";
+  
+  # Run generateScoreMatrix
+    
+  # print STDERR "Running generateScoreMatrix.pl, with this command:\n";
+  # print STDERR "echo \"\@\$inputdata_arrayref\" | $_application_dir\/$_application_bin $_application_args\n";
+  
+  my $matrix = qx/echo "@$inputdata_arrayref" | $_application_dir\/$_application_bin $_application_args/;
+  
+  return $matrix;
+
 }
 
 1;
