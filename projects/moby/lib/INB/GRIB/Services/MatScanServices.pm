@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.6 2005-10-17 09:46:16 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.7 2005-11-03 18:11:51 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -261,15 +261,19 @@ sub _do_query_MatScan {
 	if (($articleName eq "upstream_sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) { 
 	    
 	    if (isSimpleArticle ($DOM)) {
-
-		# print STDERR "sequences tag is a simple article...\n";
-
+		
+		if ($_debug) {
+		    print STDERR "sequences tag is a simple article...\n";
+		}
+		
 		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 		
-		# print STDERR "sequences is a collection article...\n";
-		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		if ($_debug) {
+		    print STDERR "sequences is a collection article...\n";
+		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		}
 		
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
 		
@@ -294,13 +298,17 @@ sub _do_query_MatScan {
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
-
+    
     my $output_article_name = "matscan_predictions";
     
     if ($_input_type eq "simple") {
-
+	
+	if ($_debug) {
+	    print STDERR "making a simple response\n";
+	}
+	
 	my ($report) = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
-
+	
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
 	# la podriamos realizar en una funcion a parte si fuese compleja.  
@@ -327,6 +335,10 @@ PRT
         return $MOBY_RESPONSE;
     }
     elsif ($_input_type eq "collection") {
+
+	if ($_debug) {
+	    print STDERR "making a collection response\n";
+	}
 	
 	# The input was a collection of Sequences, so we have to return a collection of GFF objects
 	
