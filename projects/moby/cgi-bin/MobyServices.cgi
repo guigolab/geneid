@@ -2,7 +2,8 @@
 #
 # INBPerl module 
 #
-# Cared for by Roman Roset Mayals, rroset@lsi.upc.es
+# Initially written by Roman Roset Mayals, rroset@lsi.upc.es
+# Cared by Arnaud Kerhornou, akerhornou@imim.es
 # For copyright and disclaimer see below.
 # 
 
@@ -73,5 +74,6 @@ $x->dispatch_with({
     'http://biomoby.org/#runMultiMetaAlignmentGFF'      => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#fromGenericSequencetoFASTA'    => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA' => 'INB::GRIB::Services::UtilsServices',
+    'http://biomoby.org/#generateScoreMatrix'           => 'INB::GRIB::Services::UtilsServices',
 });
 $x->handle;
