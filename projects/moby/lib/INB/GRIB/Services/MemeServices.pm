@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.2 2005-11-08 14:35:43 gmaster Exp $
+# $Id: MemeServices.pm,v 1.3 2005-11-08 14:45:30 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -317,7 +317,7 @@ PRT
          :    </moby:mobyContent>
          :   </moby:mobyContent>
          :  </moby:MOBY>
- Returns : Return a text_html object with MEME results
+ Returns : Return a text-html object with MEME results
 
 =cut
 
@@ -345,7 +345,7 @@ sub runMemeHTML {
     #
     # The moby output format for this service is text-html
     #    
-    my $_moby_output_format   = "text_html";
+    my $_moby_output_format   = "text-html";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -395,7 +395,7 @@ sub runMemeHTML {
          :    </moby:mobyContent>
          :   </moby:mobyContent>
          :  </moby:MOBY>
- Returns : Return a text_formatted object with MEME results
+ Returns : Return a text-formatted object with MEME results
 
 =cut
 
@@ -420,7 +420,7 @@ sub runMemeText {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE = "";             # set empty response
     
-    my $_format = "text_formatted";
+    my $_format = "text-formatted";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
