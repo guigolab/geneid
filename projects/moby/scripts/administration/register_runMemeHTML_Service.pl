@@ -158,7 +158,7 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['upstream_sequences', [['GenericSequence' => \@namespaces]]] # collection of one object type
+							    ['sequences', [['GenericSequence' => \@namespaces]]] # collection of one object type
 							   ],
 				      output		=> [
 							    ['meme_predictions', ['text-html' => \@namespaces]]
@@ -195,6 +195,11 @@ my ($REG) = $Central->registerService(
 					      default  => 50,
 					      min      => 2,
 					      max      => 300,
+					  },
+					  'motif E-value cutoff' => {
+					      datatype => 'Float',
+					      default  => 1,
+					      min      => 0,
 					  },
 				      }
 				      );
