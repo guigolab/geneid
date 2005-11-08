@@ -16,7 +16,7 @@ use Getopt::Std;
 # For debugging
 use Data::Dumper;
 
-use SOAP::Lite + 'trace';
+# use SOAP::Lite + 'trace';
 
 sub help {
     return <<"END_HELP";
@@ -161,7 +161,7 @@ my ($REG) = $Central->registerService(
 							    ['genes', ["text-formatted" => []]],
 							   ],
 				      output		=> [
-							    ['upstream_sequences', [['DNASequence' => \@namespaces]]] # collection of one object type
+							    ['upstream_sequences', [['CommentedDNASequence' => \@namespaces]]] # collection of one object type
 							   ],
 				      secondary	=> {
 					  'organism' => {
