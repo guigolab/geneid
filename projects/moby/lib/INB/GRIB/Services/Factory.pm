@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.30 2005-10-20 14:02:26 gmaster Exp $
+# $Id: Factory.pm,v 1.31 2005-11-08 14:34:14 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -112,6 +112,7 @@ our @EXPORT = qw(
   &MatScan_call
   &MetaAlignment_call
   &generateScoreMatrix_call
+  &MEME_call
 );
 
 our $VERSION = '1.00';
@@ -869,7 +870,7 @@ sub generateScoreMatrix_call {
   # relleno los parametros por defecto generateScoreMatrix_call
   
   my $inputdata_arrayref = $args{similarity_results};
-  my $parameters    = $args{parameters} || undef;
+  my $parameters         = $args{parameters} || undef;
   
   # Get the parameters
   
@@ -890,6 +891,137 @@ sub generateScoreMatrix_call {
   
   return $matrix;
 
+}
+
+sub MEME_call {
+    my %args = @_;
+    
+    my $sequences  = $args{sequences};
+    my $format     = $args{format};
+    my $parameters = $args{parameters};
+    my $_debug     = $args{debug};
+
+    my $motif_distribution    = $parameters->{motif_distribution};
+    my $maximum_number_motifs = $parameters->{maximum_number_motifs};
+    my $minimum_number_sites  = $parameters->{minimum_number_sites};
+    my $maximum_number_sites  = $parameters->{maximum_number_sites};
+    my $minimum_motif_width   = $parameters->{minimum_motif_width};
+    my $maximum_motif_width   = $parameters->{maximum_motif_width};
+
+    # Llama a Meme en local
+    my $_meme_dir  = "/home/ug/gmaster/projects/meme/";
+    my $_meme_bin  = "bin/bin/meme";
+    my $_meme_args = "";
+    
+    # Setting up the MEME parameters
+
+    # Default is HTML
+    if ($format eq "text-formatted") {
+	$_meme_args .= "-text ";
+    }
+    
+    if (not defined $motif_distribution) {
+	$_meme_args .= "-mod zoops";
+    }
+    else {
+      SWITCH: {
+	  if ($motif_distribution eq "zero or one")               { $_meme_args .= "-mod zoops"; last SWITCH; }
+	  if ($motif_distribution eq "one")                       { $_meme_args .= "-mod ops"; last SWITCH; }
+	  if ($motif_distribution eq "any number of repetitions") { $_meme_args .= "-mod anr"; last SWITCH; }
+	  # Default is "zero or one motif per sequence"
+	  $_meme_args .= "-mod zoops";
+      }
+    }
+
+    if (defined $maximum_number_motifs) {
+	$_meme_args .= " -nmotifs $maximum_number_motifs";
+    }
+    else {
+	$_meme_args .= " -nmotifs 3";
+    }
+
+    if (defined $minimum_number_sites) {
+	$_meme_args .= " -minsites $minimum_number_sites";
+    }
+    else {
+	# No default, ie let meme figure out what is the default !!
+	# Will make it up on the fly, according a hardcoded protocol of their own.
+    }
+    
+    if (defined $maximum_number_sites) {
+	$_meme_args .= " -maxsites $maximum_number_sites";
+    }
+    else {
+	# No default, ie let meme figure out what is the default !!
+	# Will make it up on the fly, according a hardcoded protocol of their own.
+    }
+
+    if (defined $minimum_motif_width) {
+	$_meme_args .= " -minw $minimum_motif_width";
+    }
+    else {
+	$_meme_args .= " -minw 6";
+    }
+    
+    if (defined $maximum_motif_width) {
+	$_meme_args .= " -maxw $maximum_motif_width";
+    }
+    else {
+	$_meme_args .= " -maxw 50";
+    }
+    
+    # Generate a temporary file locally with the sequence(s) in FASTA format
+    # locally, ie not on a NFS mounted directory, for speed sake
+    
+    my ($seq_fh, $seqfile) = tempfile("/tmp/MEME.XXXXXX", UNLINK => 0);
+    
+    # Bioperl sequence factory
+    
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+    
+    my @seqIds = keys (%$sequences);
+    
+    foreach my $sequenceIdentifier (@seqIds) {
+	
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+	
+	# bioperl object
+	
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
+				   );
+	
+	$sout->write_seq ($seqobj);
+	
+    }
+    close $seq_fh;
+    
+    # Test empty file
+    if (-z $seqfile) {
+	print STDERR "Error, empty sequence file...\n";
+    }
+    
+    if ($_debug) {
+	print STDERR "Running Meme, with this command:\n";
+	print STDERR "$_meme_dir\/$_meme_bin $seqfile $_meme_args\n";
+    }
+    
+    my $meme_output = qx/MEME_DIRECTORY=$_meme_dir; export MEME_DIRECTORY; $_meme_dir\/$_meme_bin $seqfile $_meme_args/;
+    
+    # Comment this line if you want to keep the file...
+    # unlink $seqfile;
+    
+    if (defined $meme_output) {
+	return $meme_output;
+    }	
+    else {
+	# What else better to return ??
+	return undef;
+    }
 }
 
 1;
