@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.3 2005-11-08 14:45:30 gmaster Exp $
+# $Id: MemeServices.pm,v 1.4 2005-11-08 17:11:06 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -129,6 +129,7 @@ sub _do_query_Meme {
     my $maximum_number_sites;
     my $minimum_motif_width;
     my $maximum_motif_width;
+    my $e_value_cutoff;
     
     # Variables that will be passed to MatScan_call
     my %sequences;
@@ -188,6 +189,11 @@ sub _do_query_Meme {
 	print STDERR "Error, the maximum width is too big, should be at most 300\n";
 	exit 1;
     }
+
+    ($e_value_cutoff) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "motif E-value cutoff");
+    if (not defined $e_value_cutoff) {
+	$e_value_cutoff = "1";
+    }
     
     # Add the parsed parameters in a hash table
     
@@ -197,6 +203,7 @@ sub _do_query_Meme {
     $parameters{maximum_number_sites}  = $maximum_number_sites;
     $parameters{minimum_motif_width}   = $minimum_motif_width;
     $parameters{maximum_motif_width}   = $maximum_motif_width;
+    $parameters{e_value_cutoff}        = $e_value_cutoff;
     
     if ($_debug) {
 	print STDERR "motif distribution, $motif_distribution\n";
@@ -205,6 +212,7 @@ sub _do_query_Meme {
 	print STDERR "maximum number sites, $maximum_number_sites\n";
 	print STDERR "minimum motif width, $minimum_motif_width\n";
 	print STDERR "maximum motif width, $maximum_motif_width\n";
+	print STDERR "E-value cutoff, $e_value_cutoff\n";
     }
     
     # Tratamos a cada uno de los articulos

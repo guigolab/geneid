@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.32 2005-11-08 14:35:43 gmaster Exp $
+# $Id: Factory.pm,v 1.33 2005-11-08 17:11:06 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -907,14 +907,15 @@ sub MEME_call {
     my $maximum_number_sites  = $parameters->{maximum_number_sites};
     my $minimum_motif_width   = $parameters->{minimum_motif_width};
     my $maximum_motif_width   = $parameters->{maximum_motif_width};
-
+    my $e_value_cutoff        = $parameters->{e_value_cutoff};
+    
     # Llama a Meme en local
     my $_meme_dir  = "/home/ug/gmaster/projects/meme/";
     my $_meme_bin  = "bin/bin/meme";
     my $_meme_args = "";
     
     # Setting up the MEME parameters
-
+    
     # Default is HTML
     if ($format eq "text-formatted") {
 	$_meme_args .= "-text ";
@@ -968,6 +969,13 @@ sub MEME_call {
     }
     else {
 	$_meme_args .= " -maxw 50";
+    }
+
+    if (defined $e_value_cutoff) {
+	$_meme_args .= " -evt $e_value_cutoff";
+    }
+    else {
+	$_meme_args .= " -evt 1";
     }
     
     # Generate a temporary file locally with the sequence(s) in FASTA format
