@@ -29,6 +29,7 @@ use INB::GRIB::Services::UtilsServices;
 use INB::GRIB::Services::PromoterExtractionServices;
 use INB::GRIB::Services::MatScanServices;
 use INB::GRIB::Services::MetaAlignmentServices;
+use INB::GRIB::Services::MemeServices;
 ###############################################################################
 
 sub daemonize {
@@ -75,5 +76,7 @@ $x->dispatch_with({
     'http://biomoby.org/#fromGenericSequencetoFASTA'    => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA' => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#generateScoreMatrix'           => 'INB::GRIB::Services::UtilsServices',
+    'http://biomoby.org/#runMemeHTML'                   => 'INB::GRIB::Services::MemeServices',
+    'http://biomoby.org/#runMemeText'                   => 'INB::GRIB::Services::MemeServices',
 });
 $x->handle;
