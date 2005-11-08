@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.1 2005-11-08 14:33:49 gmaster Exp $
+# $Id: MemeServices.pm,v 1.2 2005-11-08 14:35:43 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -81,7 +81,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 1;
+my $_debug = 0;
 
 # Preloaded methods go here.
 
