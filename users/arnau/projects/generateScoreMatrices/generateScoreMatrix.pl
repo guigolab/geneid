@@ -31,7 +31,7 @@ else {
     exit 0;
 }
 
-# Format the matrix, as an array of arrays
+# Generate the matrix, as an array of arrays
 
 my @matrix       = ();
 
@@ -66,7 +66,7 @@ for (my $i=0; $i < @$sequence_identifiers; $i++) {
 
 # Format the matrix for output
 
-# Ximo Dopazo compliant formatting
+# SOTA compliant formatting
 
 if ($outputformat eq "SOTA") {
     
@@ -91,7 +91,7 @@ else {
 sub parseMeta {
     
     my $scores_per_sequences;
-    my $sequence_identifiers = [];
+    my $sequence_identifiers = {};
 
     while (my $line = <STDIN>) {
 	my $map1;
@@ -108,9 +108,9 @@ sub parseMeta {
 	    }
 	    else {
 
-		# Add the sequence identifier in the seqids array if not in there yet.
-		if ((not defined $sequence_identifiers->[0]) || ($sequence_identifiers->[@$sequence_identifiers-1] ne $map1)) {
-		    push (@$sequence_identifiers, $map1);
+		# Add the sequence identifier in the seqids hash if not in there yet.
+		if ((not defined $sequence_identifiers->{$map1}) || (not $sequence_identifiers->{$map1})) {
+		    $sequence_identifiers->{$map1} = 1;
 		}
 		
 		# parse map2
@@ -120,6 +120,12 @@ sub parseMeta {
 		if ($line =~ /MAP2 ([^\s]+) .+/) {
 		    # parse map2 identifier
 		    $map2 = $1;
+
+		    # Add the sequence identifier in the seqids hash if not in there yet.
+		    if ((not defined $sequence_identifiers->{$map2}) || (not $sequence_identifiers->{$map2})) {
+			$sequence_identifiers->{$map2} = 1;
+		    }
+
 		}
 		else {
 		    print STDERR "Error, can not parse map2!!\n";
@@ -158,5 +164,6 @@ sub parseMeta {
 	print STDERR "parsed " . keys (%$scores_per_sequences) . " scores.\n";
     }
     
-    return ($sequence_identifiers, $scores_per_sequences);
+    my @seqids = keys (%$sequence_identifiers);
+    return (\@seqids, $scores_per_sequences);
 }
