@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:7MEJ3ZYR4P0" author="" title="" />
+  <s:processor name="identifier" boring="true">
+    <s:stringconstant>id</s:stringconstant>
+  </s:processor>
+  <s:processor name="Create_moby_data">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
+  </s:processor>
+  <s:processor name="generateScoreMatrix">
+    <s:description>Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>generateScoreMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMultiMetaAlignment">
+    <s:description>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMultiMetaAlignment</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFFCollection">
+    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a collection of DNASequence objects and returns a collection of GFF objects (one GFF object for each DNASequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFFCollection</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:link source="fasta_sequences" sink="Create_moby_data:stringvalue" />
+  <s:link source="namespace" sink="Create_moby_data:namespace" />
+  <s:link source="identifier:value" sink="Create_moby_data:id" />
+  <s:link source="generateScoreMatrix:text-formatted(score_matrix)" sink="Moby_Matrix" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="Moby_MatScan" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignment:GFF(Collection - 'maps')" />
+  <s:link source="runMultiMetaAlignment:text-formatted(Collection - 'meta_predictions')" sink="Moby_Meta" />
+  <s:link source="runMultiMetaAlignment:text-formatted(Collection - 'meta_predictions')" sink="generateScoreMatrix:text-formatted(Collection - 'similarity_results')" />
+  <s:source name="namespace" />
+  <s:source name="fasta_sequences" />
+  <s:sink name="Moby_Matrix" />
+  <s:sink name="Moby_Meta" />
+  <s:sink name="Moby_MatScan" />
+</s:scufl>
+
+
