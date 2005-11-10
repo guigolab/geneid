@@ -95,8 +95,8 @@ my $datasource = "EMBL";
 
 my $threshold   = "0.8";
 my $strands     = "Both";
-my $matrix      = "MEME";
-my $matrix_mode = "raw format";
+my $matrix      = "Transfac";
+my $matrix_mode = "log-likelihood";
 
 ##################################################################
 #
@@ -311,7 +311,7 @@ my $result;
 if ($serviceType eq "Collection") {
 
     $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", $inputs, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
+						 ["$articleName", $inputs, 'threshold', $threshold_xml, 'matrix', $matrix_xml, 'matrix mode', $matrix_mode_xml, 'strands', $strands_xml]
 						 ]);
 }
 else {
