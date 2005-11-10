@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.34 2005-11-10 15:10:39 gmaster Exp $
+# $Id: Factory.pm,v 1.35 2005-11-10 17:37:09 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -910,7 +910,7 @@ sub MEME_call {
     my $e_value_cutoff        = $parameters->{e_value_cutoff};
     
     # Llama a Meme en local
-    my $_meme_dir  = "/home/ug/gmaster/projects/meme/";
+    my $_meme_dir   = "/usr/local/molbio/Install/meme-3.5.0";
     my $_meme_bin  = "bin/meme";
     my $_meme_args = "";
     
