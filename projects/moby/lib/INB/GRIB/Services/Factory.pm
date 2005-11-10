@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.33 2005-11-08 17:11:06 gmaster Exp $
+# $Id: Factory.pm,v 1.34 2005-11-10 15:10:39 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -911,7 +911,7 @@ sub MEME_call {
     
     # Llama a Meme en local
     my $_meme_dir  = "/home/ug/gmaster/projects/meme/";
-    my $_meme_bin  = "bin/bin/meme";
+    my $_meme_bin  = "bin/meme";
     my $_meme_args = "";
     
     # Setting up the MEME parameters
@@ -1018,7 +1018,7 @@ sub MEME_call {
 	print STDERR "$_meme_dir\/$_meme_bin $seqfile $_meme_args\n";
     }
     
-    my $meme_output = qx/MEME_DIRECTORY=$_meme_dir; export MEME_DIRECTORY; $_meme_dir\/$_meme_bin $seqfile $_meme_args/;
+    my $meme_output = qx/source $_meme_dir\/etc\/meme.sh; $_meme_dir\/$_meme_bin $seqfile $_meme_args/;
     
     # Comment this line if you want to keep the file...
     unlink $seqfile;
