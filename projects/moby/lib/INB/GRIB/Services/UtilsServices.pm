@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.13 2005-10-20 14:01:28 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.14 2005-11-11 14:24:54 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -110,6 +110,7 @@ our @EXPORT = qw(
   &translateGeneIDGFFPredictions
   &fromGenericSequencetoFASTA
   &fromGenericSequenceCollectiontoFASTA
+  &fromFASTAtoDNASequenceCollection
   &generateScoreMatrix
 );
 
@@ -498,6 +499,129 @@ PRT
 
     $MOBY_RESPONSE .= simpleResponse($fasta_object, $output_article_name, $queryID);
 	
+    return $MOBY_RESPONSE;
+}
+
+
+=head2 _do_query_fromFASTAtoMobySequences
+
+ Title   : _do_query_fromFASTAtoMobySequences
+         : 
+         : private function (NOT EXPORTED)
+         : 
+ Usage   : my $query_response = _do_query_GeneID($query);
+         : 
+         : donde:
+         :   $query es un XML::DOM::Node que contiene el arbol xml que
+         :   engloba:  
+         :     <moby:mobyData queryID='1'>...</moby:mobyData>
+         : 
+ Returns : Devuelve un string que contiene el resultado de la ejecución
+         : para una sola query.
+         : Un ejemplo sería: 
+         : 
+         : <moby:mobyData moby:queryID='1'>
+         :   <moby:Simple moby:articleName='report'>
+         :     <moby:text-plain namespace='Global_Keyword' id=''>
+	 :    ....
+         :     </moby:text-plain>
+         :   </moby:Simple>
+         : </moby:mobyData>
+
+=cut
+
+sub _do_query_fromFASTAtoMobySequences {
+    # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
+    my $queryInput_DOM   = shift @_;
+    my $moby_object_type = shift @_;
+
+    if ($_debug) {
+	print STDERR "moby_object_type, $moby_object_type\n";
+    }
+    
+    my $MOBY_RESPONSE = "";     # set empty response
+    
+    my $fasta_seqs;
+    
+    my $queryID  = getInputID ($queryInput_DOM);
+    my @articles = getArticles($queryInput_DOM);
+    
+    # Tratamos a cada uno de los articulos
+    foreach my $article (@articles) {
+	
+	# El articulo es una tupla que contiene el nombre de este 
+	# y su texto xml. 
+	
+	my ($articleName, $DOM) = @{$article}; # get the named article
+	
+	if ($_debug) {
+	    print STDERR "processing article, $articleName...\n";
+	}
+	
+	# Si le hemos puesto nombre a los articulos del servicio,  
+	# podemos recoger a traves de estos nombres el valor.
+	# Sino sabemos que es el input articulo porque es un simple articulo
+	
+	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
+	# In case of GeneID, it doesn't really matter as there is only one input anyway
+	
+	if (((defined $articleName) && ($articleName eq "sequences")) || isSimpleArticle ($DOM)) {
+	    
+	    if (isSimpleArticle ($DOM)) {
+		
+		if ($_debug) {
+		    print STDERR "\"sequences\" tag is a simple article...\n";
+		    print STDERR "stringified DOM, " . $DOM->toString () . "\n";
+		}
+		
+		$fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "FASTA");
+		if ((not defined $fasta_seqs) || ($fasta_seqs eq "")) {
+		    $fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
+		}		
+	    }
+	    elsif (isCollectionArticle ($DOM)) {
+		print STDERR "sequences is a collection article...\n";
+		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		print STDERR "should be receiving a simple article\n";
+		exit 0;
+	    }
+	    else {
+		print STDERR "It is not a simple or collection article...\n";
+		print STDERR "DOM: " . $DOM->toString() . "\n";
+		exit 0;
+	    }
+	}
+	elsif (isCollectionArticle ($DOM)) {
+	    print STDERR "input is a collection article...\n";
+	    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+	    print STDERR "should be receiving a simple article\n";
+	    exit 0;
+	} # End parsing sequences article tag
+	else {
+	    print STDERR "nothing I know of,\n";
+	    print STDERR "$DOM\n";
+	}
+    } # Next article
+    
+    # Parse the FASTA sequences
+    
+    my $namespace = "";
+    
+    if ($_debug) {
+	print STDERR "fasta sequences,\n$fasta_seqs.\n";
+    }
+    
+    my $seqobjs   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_seqs, $moby_object_type, $namespace);
+    
+    # Check that we have parsed properly the sequences
+    
+    if (@$seqobjs == 0) {
+	print STDERR "Error, can't parsed any sequences...\n";
+    }
+    
+    my $output_article_name = "sequences";
+    $MOBY_RESPONSE .= collectionResponse($seqobjs, $output_article_name, $queryID);
+    
     return $MOBY_RESPONSE;
 }
 
@@ -943,6 +1067,100 @@ sub fromGenericSequenceCollectiontoFASTA {
 	return responseHeader("genome.imim.es") 
 	. $MOBY_RESPONSE . responseFooter;
 }
+
+
+=head2 fromFASTAtoDNASequenceCollection
+
+ Title   : fromDNASequenceCollectiontoFASTA
+ Usage   : Esta función está pensada para llamarla desde un cliente SOAP. 
+         : No obstante, se recomienda probarla en la misma máquina, antes 
+         : de instalar el servicio. Para ello, podemos llamarla de la 
+         : siguiente forma:
+         : 
+         : my $result = GeneID("call", $in);
+         : 
+         : donde $in es texto que con el mensaje biomoby que contendría
+         : la parte del <tag> "BODY" del mensaje soap. Es decir, un string
+         : de la forma: 
+         :  
+         :  <?xml version='1.0' encoding='UTF-8'?>
+         :   <moby:MOBY xmlns:moby='http://www.biomoby.org/moby-s'>
+         :    <moby:mobyContent>
+         :      <moby:mobyData queryID='1'> 
+         :      ...
+         :      </moby:mobyData>
+         :    </moby:mobyContent>
+         :   </moby:mobyContent>
+         :  </moby:MOBY>
+ Returns : Devuelve un string que contiene el resultado de todas las 
+         : queries en GFF formate. Es decir, un mensaje xml de la forma:
+         :
+         : <?xml version='1.0' encoding='UTF-8'?>
+         : <moby:MOBY xmlns:moby='http://www.biomoby.org/moby' 
+         : xmlns='http://www.biomoby.org/moby'>
+         :   <moby:mobyContent moby:authority='inb.lsi.upc.es'>
+         :     <moby:mobyData moby:queryID='1'>
+         :       ....
+         :     </moby:mobyData>
+         :     <moby:mobyData moby:queryID='2'>
+         :       ....
+         :     </moby:mobyData>
+         :   </moby:mobyContent>
+         :</moby:MOBY>
+
+=cut
+
+sub fromFASTAtoDNASequenceCollection {
+    
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+
+    if ($_debug) {
+	print STDERR "processing Moby fromFASTAtoDNASequenceCollection query...\n";
+    }
+
+	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
+	# a la ontologia, y debemos contentarnos con trabajar directamente 
+	# con objetos DOM. Por consiguiente lo primero es recolectar la 
+	# lista de peticiones (queries) que tiene la peticion. 
+	# 
+	# En una misma llamada podemos tener mas de una peticion, y de  
+	# cada servicio depende la forma de trabajar con ellas. En este 
+	# caso las trataremos una a una, pero podriamos hacer Threads para 
+	# tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
+	# etc.. 
+	my @queries = getInputs($message);  # returns XML::DOM nodes
+	# 
+	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+	# es una coleccion de respuestas a cada una de las consultas.
+        my $MOBY_RESPONSE = "";             # set empty response
+
+	# Para cada query ejecutaremos el _execute_query.
+        foreach my $queryInput (@queries){
+
+	    # En este punto es importante recordar que el objeto $query 
+	    # es un XML::DOM::Node, y que si queremos trabajar con 
+	    # el mensaje de texto debemos llamar a: $query->toString() 
+	    
+	    if ($_debug) {
+		my $query_str = $queryInput->toString();
+		print STDERR "query text: $query_str\n";
+	    }
+
+	    my $query_response = _do_query_fromFASTAtoMobySequences ($queryInput, "DNASequence");
+	    
+	    # $query_response es un string que contiene el codigo xml de
+	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
+	    # encadenar sin problemas una respuesta con otra. 
+	    $MOBY_RESPONSE .= $query_response;
+	}
+	# Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
+	# todas ellas con una cabecera y un final. Esto lo podemos hacer 
+	# con las llamadas de la libreria Common de BioMoby. 
+	return responseHeader("genome.imim.es") 
+	. $MOBY_RESPONSE . responseFooter;
+}
+
 
 =head2 generateScoreMatrix
 
