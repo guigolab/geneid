@@ -171,9 +171,9 @@ my ($REG) = $Central->registerService(
 					  },
 					  'ensembl release' => {
 					      datatype => 'String',
-					      enum     => ['34','33','32','31','30','29'],
-					      default  => '34',
-					      max      => '34',
+					      enum     => ['35','34','33','32','31','30','29'],
+					      default  => '35',
+					      max      => '35',
 					      min      => '29',
 					  },
 					  'upstream length' => {
