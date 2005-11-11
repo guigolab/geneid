@@ -55,16 +55,17 @@ our $VERSION = '1.0';
 sub getTextContentFromXML {
     my $self = shift;
     my ( $XML, $tagName ) = @_;
-
+    
     unless ( ref( $XML ) =~ /XML\:\:LibXML/ ) {
 	my $parser = XML::LibXML->new();
 	my $doc    = $parser->parse_string( $XML );
 	$XML       = $doc->getDocumentElement();
-    }
+    }	
+
     return '' unless (   
 			 my $elements = $XML->getElementsByTagName( "$tagName" ) 
 			                || $XML->getElementsByTagName( "moby:$tagName" )
-		     ); 
+		     );
     my $element = $elements->get_node(0); 
     return $element->textContent;
 }
@@ -74,12 +75,48 @@ sub createSequenceObjectsFromFASTA {
     my $self = shift;
     my ($fasta_sequences, $object_type, $namespace) = @_;
     
-    my $moby_sequence_objects = [];
-    my $sequence_objects      = _parse_fasta_sequences ($fasta_sequences);
+    my $moby_sequence_objects    = [];
+    my $bioperl_sequence_objects = _parse_fasta_sequences ($fasta_sequences);
     
     # Parsing the Bioperl objects returned by _parse_fasta_sequences method
     
-    foreach my $seqobj (@$sequence_objects) {
+    foreach my $seqobj (@$bioperl_sequence_objects) {
+	
+	# Check the alphabet of the bioperl sequence,
+	# if it doesn't match the type of the Moby object, then exit !
+	my $alphabet = $seqobj->alphabet();
+	
+	if ($object_type eq "GenericSequence") {
+	    # Don't bother
+	}
+	elsif ($object_type =~ /AminoAcidSequence|CommentedAASequence/) {
+	    if ($alphabet ne "protein") {
+		print STDERR "Error FASTA sequences are not protein sequences!\n";
+		exit 0;
+	    }
+	}
+	elsif ($object_type eq "NucleotideSequence") {
+	    if (not ($alphabet =~ /dna|rna/)) {
+		print STDERR "Error FASTA sequences are not nucleotide sequences!\n";
+		exit 0;
+	    }
+	}
+	elsif ($object_type =~ /DNASequence/){
+	    if (not ($alphabet eq "dna")) {
+		print STDERR "Error FASTA sequences are not DNA sequences!\n";
+		exit 0;
+	    }
+	}
+	elsif (($object_type =~ /RNASequence/)) {
+	    if (not ($alphabet eq "rna")) {
+		print STDERR "Error FASTA sequences are not RNA sequences!\n";
+		exit 0;
+	    }
+	}
+	else {
+	    print STDERR "problem with the fasta sequence alphabet, $alphabet - not matching the returned moby object type, $object_type!\n";
+	    exit 0;
+	}
 	
 	my $seq_id     = $seqobj->display_id;
 	my $seq_desc   = $seqobj->desc || "";
@@ -127,10 +164,10 @@ sub parseSingleGFFIntoCollectionGFF {
     # print STDERR "first line, $line_tmp.\n";
     # $line_tmp = $lines[1];
     # print STDERR "second line, $line_tmp.\n";
-
+    
     my $sequenceIdentifier;    
     my $report_tmp = "";
-
+    
     while (my $line = shift @lines) {
 	my $sequenceIdentifier_tmp;
 
@@ -183,9 +220,9 @@ $report_tmp
 PRT
 
     push (@$output_objects, $input);
-
+    
     return $output_objects;
-   
+    
 }
 
 # @param sequences in FASTA format as a string
@@ -193,7 +230,7 @@ PRT
 
 sub _parse_fasta_sequences {
     my ($fasta_sequences) = @_;
-
+    
     my @fasta_sequence_lines = split (/\n/, $fasta_sequences);
     my $seqobjs = [];
     
