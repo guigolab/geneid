@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:T9WSZBQIOK0" author="" title="" />
+  <s:processor name="createComparisonPairs">
+    <s:description>Consumes a list of strings and returns two lists intended to be interpreted as the 'all against all' set of the inputs. By default this excludes duplicates (i.e. matching a-a) and inverses (so includes a-b but not b-a), if you want to change this then you can edit the beanshell script and follow the enclosed instructions (right click on the processor and select the 'configure beanshell' option).</s:description>
+    <s:beanshell>
+      <s:scriptvalue>/**
+ * Script to create an all against all target from a list
+ * of inputs. Configure the 'allowSelf' and 'allowInverse'
+ * options to suit whether you want to allow self comparisons
+ * (i.e. a-a) and inverse duplicates (i.e. both a-b and b-a) 
+ * in the output.
+ * tmo@ebi.ac.uk, 5th August 2005
+ */
+
+allowSelf = false;
+allowInverse = false;
+
+/**
+ * Do not edit below here
+ */
+a = new ArrayList();
+b = new ArrayList();
+for (int i = 0; i &lt; input.size(); i++) {
+  for (int j = 0; j &lt; input.size(); j++) {
+    if ((i != j || allowSelf) &amp;&amp; (i &lt;= j || allowInverse)) {
+      a.add(input.get(i));
+      b.add(input.get(j));
+    }
+  }
+}</s:scriptvalue>
+      <s:beanshellinputlist>
+        <s:beanshellinput s:syntactictype="l('text/plain')">input</s:beanshellinput>
+      </s:beanshellinputlist>
+      <s:beanshelloutputlist>
+        <s:beanshelloutput s:syntactictype="l('text/plain')">a</s:beanshelloutput>
+        <s:beanshelloutput s:syntactictype="l('text/plain')">b</s:beanshelloutput>
+      </s:beanshelloutputlist>
+    </s:beanshell>
+  </s:processor>
+  <s:processor name="sampleStringArray">
+    <s:description>Generate some test strings</s:description>
+    <s:defaults>
+      <s:default name="string">a,b,c,d,e</s:default>
+    </s:defaults>
+    <s:local>org.embl.ebi.escience.scuflworkers.java.SplitByRegex</s:local>
+  </s:processor>
+  <s:processor name="concatenateStrings">
+    <s:description>Convenience to show the output - note the dot iteration strategy</s:description>
+    <s:local>org.embl.ebi.escience.scuflworkers.java.StringConcat</s:local>
+    <s:iterationstrategy>
+      <i:dot xmlns:i="http://org.embl.ebi.escience/xscufliteration/0.1beta10">
+        <i:iterator name="string1" />
+        <i:iterator name="string2" />
+      </i:dot>
+    </s:iterationstrategy>
+  </s:processor>
+  <s:processor name="stringList" boring="true">
+    <s:stringconstant>a,b,c,d,e</s:stringconstant>
+  </s:processor>
+  <s:link source="concatenateStrings:output" sink="pairs" />
+  <s:link source="createComparisonPairs:a" sink="concatenateStrings:string1" />
+  <s:link source="createComparisonPairs:b" sink="concatenateStrings:string2" />
+  <s:link source="sampleStringArray:split" sink="createComparisonPairs:input" />
+  <s:link source="stringList:value" sink="sampleStringArray:string" />
+  <s:sink name="pairs" />
+</s:scufl>
+
+
