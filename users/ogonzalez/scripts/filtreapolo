@@ -18,7 +18,7 @@
 #
 #    gnu-pop3d: 4 linies del rode
 #
-#       gnu-pop3d[PID]: connect from 45.red-213-96-48.pooles.rima-tde.net
+#       gnu-pop3d[PID]: connect from 45.Red-213-96-48.staticIP.rima-tde.net
 #       gnu-pop3d[PID]: Incoming connection opened
 #       gnu-pop3d[PID]: User 'rguigo' logged in with mailbox 'rguigo'
 #       gnu-pop3d[PID]: Session ended for user: rguigo
@@ -90,13 +90,51 @@ foreach $j (@manual) {
    @log=grep( ! /$j/ , @log );
 }
 
+# elimino les entrades de l'exploit tocapilotes, pero nomes les que esta clar
+# que no representen cap problema que s'hagi de revisar mes a fons.
+#
+# si l'usuari no existeix:
+#
+#    sshd[...]: input_userauth_request: illegal user ...
+#    sshd[...]: PAM _pam_init_handlers: no default config /etc/pam.d/other
+#    sshd[...]: Failed password for illegal user ... from ... port .... ssh...
+#    sshd[...]: Received disconnect from ...: 11: Bye Bye
+#
+# i si existeix:
+#
+#    sshd[...]: PAM _pam_init_handlers: no default config /etc/pam.d/other
+#    sshd(pam_unix)[...]: authentication failure; logname= uid=0 euid=0 tty= ruser= rhost=...  user=...
+#    sshd[...]: Failed password for ... from ... port ... ssh...
+#    sshd[...]: Received disconnect from ...: 11: Bye Bye
+for ( $i=0;$i<=$#log;$i++) {
+   print STDERR "\rEXPLOIT SSHD: $i/$#log          ";
+   if ( $log[$i] =~ /sshd\[(\d+)\]: input_userauth_request: illegal user / ) {
+      $inicial=$i; # per a l'exploit no sembla haver entrades previes amb el mateix PID
+      $PID=$1;
+      for ( $j=$i;$j<=$#log;$j++ ) {
+         if ( $log[$j] =~ /sshd[^\[]*\[$PID\]: Failed password for illegal user / ) {
+            last;
+         }
+      }
+      $final=$j+20; # si no apareix res mes amb aquest PID 20 linies despres, asumeixo que ja no apareixera
+      for ( $j=$inicial;$j<=$final;$j++) {
+         if ( $log[$j] =~ /sshd[^\[]*\[$PID\]:/ ) {
+            splice(@log,$j,1);
+            $j--;
+            $i--;
+         }
+      }
+   }
+}
+print STDERR "\n";
+
 # elimino els pop3 del rode i del moi des del GRIB i des de les IPs de sempre
 for ( $i=0;$i<=$#log;$i++) {
    print STDERR "\rPOP3: $i/$#log          ";
    if ( $log[$i] =~ /gnu-pop3d\[(\d+)\]: connect from (.+)$/ ) {
       $PID=$1;
       $maquina=$2;
-      if ( $maquina =~ /(193\.146\.190\.\d+|\.imim\.es|45.red-213-96-48.pooles.rima-tde.net|fpuigvert.cesca.es)$/ ) {
+      if ( $maquina =~ /(193\.146\.190\.\d+|\.imim\.es|45.Red-213-96-48.staticIP.rima-tde.net|fpuigvert.cesca.es)$/ ) {
          for ( $j=$i;$j<=$#log;$j++ ) {
             if ( $log[$j] =~ /gnu-pop3d\[$PID\]: / ) {
                $comanda=$';
@@ -150,23 +188,6 @@ for ( $i=0;$i<=$#log;$i++) {
    }
 }
 print STDERR "\n";
-
-# elimino les entrades de l'exploit tocapilotes, pero nomes les que esta clar
-# que no representen cap problema que s'hagi de revisar mes a fons.
-#
-# si l'usuari no existeix:
-#
-#    sshd[...]: input_userauth_request: illegal user ...
-#    sshd[...]: PAM _pam_init_handlers: no default config /etc/pam.d/other
-#    sshd[...]: Failed password for illegal user ... from ... port .... ssh...
-#    sshd[...]: Received disconnect from ...: 11: Bye Bye
-#
-# i si existeix:
-#
-#    sshd[...]: PAM _pam_init_handlers: no default config /etc/pam.d/other
-#    sshd(pam_unix)[...]: authentication failure; logname= uid=0 euid=0 tty= ruser= rhost=...  user=...
-#    sshd[...]: Failed password for ... from ... port ... ssh...
-#    sshd[...]: Received disconnect from ...: 11: Bye Bye
 
 
 # mostro el que queda

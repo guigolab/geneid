@@ -112,7 +112,7 @@ dirinst=${diract%/Install/*}
 dirlink=..${diract#$dirinst}
 if [ $diract = $dirinst ]
 then
-   echo "`pwd`: No som a un subdirectori de /usr/local[/molbio]/Install"
+   echo "`pwd`: No som a un subdirectori de [molbio/]Install"
    exit
 fi
 if [ $dirinst != "/usr/local" -a $dirinst != "/usr/local/molbio" ]

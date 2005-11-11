@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# algunes coses que vull baixar cada dia
+
+md5 () {
+   echo `md5sum $1 | cut -c-32`
+}
+
+download() {
+   URL=$1
+   nom=$2
+   md5old="xxxx"
+   nomold=`ls -1 *-$nom | tail -1`
+   md5old=`md5 $nomold`
+   cp -a $nomold $nom
+   wget -N $URL/$nom
+   if [ $? != 0 ]
+   then
+      echo ERROR $nom >>/tmp/crons_farsa.log 2>&1
+      rm $nom
+   else
+      nomnou=`date +"%Y%m%d-%H%M" -r $nom`-$nom
+      mv $nom $nomnou
+      if [ `md5 $nomnou` != $md5old ]
+      then
+         ls -l $nomnou | awk '{ print $7" "$6" "$8" "$9 }' >>/tmp/crons_farsa.log 2>&1
+      else
+         echo $nom no ha canviat >>/tmp/crons_farsa.log 2>&1
+      fi
+   fi
+}
+
+cd /home/ogonzalez/CD/_classificar/__OK/crons_farsa
+echo "-----------------" > /tmp/crons_farsa.log
+
+# antivir i fitxer de firmes
+download 'http://www.avup.de/personal/en' 'avwinsfx.exe'
+download 'http://www.free-av.de/down/vdf' 'vdf_h.zip'
+
+# BDE
+download 'http://www.bde.es/infoest' 'a1801.pdf'
+
+cat /tmp/crons_farsa.log
+rm /tmp/crons_farsa.log

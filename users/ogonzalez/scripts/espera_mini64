@@ -1,9 +1,0 @@
-#!/bin/bash
-
-echo -n Esperant autoumount...
-while [ `mount|grep -c usbdrive` == 1 ]
-do
-   sleep 1
-   echo -n .
-done
-echo " OK"

@@ -100,8 +100,8 @@ else
 
    rm -rf $LOG >/dev/null 2>&1
 
-   FTPSITE1=ftp://ftp.es.embnet.org/pub
-   FTPSITE2=ftp://ftp.ebi.ac.uk/pub
+   FTPSITE1=ftp://ftp.ebi.ac.uk/pub
+   FTPSITE2=ftp://ftp.es.embnet.org/pub
 
    ##########
    # EMBL - release
@@ -213,24 +213,6 @@ else
       filtre
 
    ##########
-   # PDB
-   ##########
-
-#      # no volem recrear l'estructura del servidor, sino tenir totes les
-#      # molecules al mateix directori. per aixo fem -nd
-#      # PROBLEMA: ELS .listing NO SON COMPLETS, AIXI QUE NO PODEM BASAR-NOS
-#      # EN ELLS PER ESBORRAR FITXERS DESAPAREGUTS AL SERVIDOR. DESACTIVO
-#      # AQUESTA FUNCIONALITAT AMB EL -norm A filtre
-#
-#      URL=$FTPSITE/databases/pdb/structures/divided/pdb
-#      local=/seq/databases/pdb
-#
-#      cd $local
-#      wget -m -nH -nd --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
-#
-#      filtre -norm
-
-   ##########
    # PFAM
    ##########
 
@@ -246,8 +228,9 @@ else
    # HSSP
    ##########
 
-      # embnet espanya no te aquesta bdd completa ==> canvi de URL
-      FTPSITE1=ftp://ftp.ebi.ac.uk/pub
+      # COMPTE: embnet espanya no te aquesta bdd
+      FTPSITE2=$FTPSITE1
+
       URLPATH=databases/hssp
       excfiles=""
       excdirecs=""
@@ -260,8 +243,8 @@ else
    # DSSP
    ##########
 
-      # embnet espanya no te aquesta bdd completa ==> canvi de URL
-      FTPSITE1=ftp://ftp.ebi.ac.uk/pub
+      # COMPTE: embnet espanya no te aquesta bdd
+
       URLPATH=databases/dssp
       excfiles=""
       excdirecs=""
@@ -274,8 +257,8 @@ else
    # ASD
    ##########
 
-      # embnet espanya no te aquesta bdd ==> canvi de URL
-      FTPSITE1=ftp://ftp.ebi.ac.uk/pub
+      # COMPTE: embnet espanya no te aquesta bdd
+
       URLPATH=databases/ASD
       excfiles=""
       excdirecs=""
@@ -283,6 +266,28 @@ else
 
       download
       filtre
+
+   ##########
+   # PDB
+   ##########
+
+      # no volem recrear l'estructura del servidor, sino tenir totes les
+      # molecules al mateix directori. per aixo fem -nd
+      # PROBLEMA: ELS .listing NO SON COMPLETS, AIXI QUE NO PODEM BASAR-NOS
+      # EN ELLS PER ESBORRAR FITXERS DESAPAREGUTS AL SERVIDOR. DESACTIVO
+      # AQUESTA FUNCIONALITAT AMB EL -norm A filtre
+
+      # COMPTE: EBI no te aquesta bdd
+      FTPSITE1=ftp://ftp.es.embnet.org/pub
+      FTPSITE2=$FTPSITE1
+
+      URL=$FTPSITE/databases/pdb/structures/divided/pdb
+      local=/seq/databases/pdb
+
+      cd $local
+      wget -m -nH -nd --passive-ftp --progres=dot:mega $URL 2>&1 | tee $OUT
+
+      filtre -norm
 
    ##########
    # GeneOntology - godatabase

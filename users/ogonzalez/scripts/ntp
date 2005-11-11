@@ -15,12 +15,34 @@
 #
 # eidolon a les 3:45, i ajunta tots els resultats en un sol fitxer
 
+# ================= COSES ===================
+
 # reviso aqui temporalment l'estat de les impressores
-for impressora in `grep '^<.*Printer ' /etc/cups/printers.conf | cut -d" " -f2 | tr -d ">"`
-do
-   lpadmin -p $impressora -E
-done
-# final revisio impressores
+   for impressora in `grep '^<.*Printer ' /etc/cups/printers.conf | \
+      cut -d" " -f2 | tr -d ">"`
+   do
+      lpadmin -p $impressora -E
+   done
+
+# reviso si hi ha un directori d'usuari al /home per cada usuari actiu
+# he d'afegir els nous quan arribin
+   if [ `grep -c Fedora /etc/redhat-release` = 1 ]
+   then
+      for usuari in jabril acorvelo mplass cchapple eblanco nlopez \
+                    rcastelo eeyras talioto msammeth jjw sfoissac \
+                    fdenoeud fcamara jlagarde arnau htilgner nbellora \
+                    loris dfarre malba rguigo \
+                    bdadmin agomez miguel
+      do
+         if [ ! -d /home/$usuari ]
+         then
+            mkdir /home/$usuari
+            chown $usuari:users /home/$usuari
+         fi
+      done
+   fi
+
+# ================= FINAL COSES ===================
 
 cd /home/ug/ogonzalez/scripts/_LOGS
 
@@ -34,6 +56,8 @@ then
    cat /proc/mdstat >>ntp.$maquina
    echo >>ntp.$maquina
 fi
+
+uptime >>ntp.$maquina
 
 error=0
 if ! /sbin/service ntpd status >/dev/null 2>&1

@@ -27,7 +27,7 @@
 #
 # generem 3 taules al fitxer: total, backup i nobackup
 #
-# POTSER 3 MES: VARIACIO DE LA QUOTA D'UN FITXER RESPECTE L'ANTERIOR
+# N'HAURIEM DE GENERAR 3 MES: VARIACIO DE LA QUOTA D'UN FITXER RESPECTE L'ANTERIOR
 
 
 # retorna la data del nom del fitxer
@@ -38,7 +38,7 @@ sub data {
 }
 
 
-# ordena els noms segons ordre numeric del camp $camp
+# ordena els noms segons l'ordre numeric del camp $camp
 sub ordena {
    @dades1=split(/ +/,$a);
    @dades2=split(/ +/,$b);
@@ -51,20 +51,21 @@ sub ordena {
 # imprimeix una taula de resultats
 sub taula {
 
-   print "<div align=\"center\"><h1>$_[0]</h1>\n";
+   print "<center><h1>$_[0]</h1></center>\n";
 
-   print "<div class=\"taula\">\n";
+   print "<table>\n";
    $camp=$_[1];
 
    # capceleres: dates dels fitxers emprats
-   print "<ul id=\"cap\"><li></li>";
+   print "<tr><td></td>";
    foreach $nom (@fitxers) {
-      print "<li>" . &data($nom) . "</li>";
+      print "<td align=center><b>&nbsp;" . &data($nom) . "&nbsp;</b></td>";
    }
-   print "</ul>\n";
+   print "</tr>\n";
 
    $indexcolor=0;
-   @color=("parell","senar");
+   #@color=("b0ffb0","b0dfb0","ff0000","0000ff");
+   @color=("d0d0d0","f0f0f0","ff0000","0000ff");
 
    # posem a zero els totals (hi ha una manera mes directa de fer aixo?)
    for ( $i=0 ; $i <= $#fitxers ; $i++ ) {
@@ -81,27 +82,32 @@ sub taula {
    foreach $linia (@dadesusuaris) {
       ($grup,$usuari)=(split(/ +/,$linia))[5,6];
       chop($usuari);
-      print "<ul id=\"$color[$indexcolor]\">";
-      $indexcolor=1-$indexcolor;
-      print "<li id=\"esquerra\">$usuari</li>";
+      print "<tr bgcolor=\"$color[$indexcolor]\">";
+      $indexcolor=(++$indexcolor)%2;
+      if ( $grup eq "ug" ) {
+         print "<td><font color=\"$color[2]\">";
+      } else {
+         print "<td><font color=\"$color[3]\">";
+      }
+      print "<b>&nbsp;&nbsp;$usuari&nbsp;&nbsp;</b></font></td>";
       for ( $i=0 ; $i<=$#fitxers ; $i++) {
          open(QUOTA,"$fitxers[$i]");
          ($dades)=grep(/ $usuari$/,<QUOTA>);
          close(QUOTA);
          ($ocupacio)=(split(/ +/,$dades))[$camp];
          $ocupacio =~ s/-//g;
-         $ocupaciopunts=$ocupacio;
+         print "<td align=right>&nbsp;&nbsp;$ocupacio&nbsp;<tt>";
          $ocupacio =~ s/\.//g;
          if ( $i == 0 || $anterior{$usuari} eq "" || $ocupacio == 0 ) {
-            print "<li>";
+            print "&nbsp;";
          } elsif ( $anterior{$usuari} == $ocupacio ) {
-            print "<li>";
+            print "<font color=\"#ffff00\"><b>=</b></font>";
          } elsif ( $anterior{$usuari} > $ocupacio ) {
-            print "<li id=\"verd\">";
+            print "<font color=\"#00c000\">&dArr;</font>";
          } else {
-            print "<li id=\"vermell\">";
+            print "<font color=\"#ff0000\">&uArr;</font>";
          }
-         print "$ocupaciopunts</li>";
+         print "</tt>&nbsp;</td>";
          $anterior{$usuari}=$ocupacio if ( $ocupacio ne "" );
          if ( $grup eq "ug" ) {
             $totalug[$i] += $ocupacio;
@@ -109,31 +115,41 @@ sub taula {
             $totalum[$i] += $ocupacio;
          }
       }
-      print "<li id=\"dreta\">$usuari</li>";
-      print "</ul>\n";
+      if ( $grup eq "ug" ) {
+         print "<td align=right><font color=\"$color[2]\">";
+      } else {
+         print "<td align=right><font color=\"$color[3]\">";
+      }
+      print "<b>&nbsp;&nbsp;$usuari&nbsp;&nbsp;</b></font></td>";
+      print "</tr>\n";
    }
 
    # mostrem els totals
    if ( $pattern eq gm ) {
-      print "<ul id=\"peu\"><li>/home/ug</li>";
+      print "<tr><td><b>&nbsp;&nbsp;/home/ug&nbsp;&nbsp;</b></td>";
       for ( $i=0 ; $i<=$#fitxers ; $i++ ) {
-         print "<li>" . int($totalug[$i]/(1024**2)) . " Gb</li>";
+         print "<td align=right><b>&nbsp;&nbsp;";
+         print int($totalug[$i]/(1024**2));
+         print " Gb&nbsp;&nbsp;</b></td>";
       }
-      print "<li>/home/ug</li></ul>\n";
-      print "<ul id=\"peu\"><li>/home/um</li>";
+      print "<td align=right><b>&nbsp;&nbsp;/home/ug&nbsp;&nbsp;</b></td></tr>\n";
+      print "<tr><td><b>&nbsp;&nbsp;/home/um&nbsp;&nbsp;</b></td>";
       for ( $i=0 ; $i<=$#fitxers ; $i++ ) {
-         print "<li>" . int($totalum[$i]/(1024**2)) . " Gb</li>";
+         print "<td align=right><b>&nbsp;&nbsp;";
+         print int($totalum[$i]/(1024**2));
+         print " Gb&nbsp;&nbsp;</b></td>";
       }
-      print "<li>/home/um</li></ul>\n";
+      print "<td align=right><b>&nbsp;&nbsp;/home/um&nbsp;&nbsp;</b></td></tr>\n";
    }
-   print "<ul id=\"peu\"><li>TOTAL</li>";
+   print "<tr><td><b>&nbsp;&nbsp;TOTAL</b></td>";
    for ( $i=0 ; $i<=$#fitxers ; $i++ ) {
-      print "<li>" . int(($totalug[$i]+$totalum[$i])/(1024**2)) . " Gb</li>";
+      print "<td align=right><b>&nbsp;&nbsp;";
+      print int(($totalug[$i]+$totalum[$i])/(1024**2));
+      print " Gb&nbsp;&nbsp;</b></td>";
    }
-   print "<li>TOTAL</li></ul>\n";
+   print "<td align=right><b>&nbsp;&nbsp;TOTAL</b></td></tr>\n";
 
-   print "</div><br>\n";
-   print "</div>\n";
+   print "</table><br>\n";
 
 }
 
@@ -168,7 +184,7 @@ foreach $nom (@ARGV) {
 }
 
 # alguns tags inicials...
-print "<html><head><link rel=\"stylesheet\" href=\"quota.css\" type=\"text/css\"></head>\n";
+print "<html><head><style type=\"text/css\">td { font-size: 12 }</style></head>\n";
 print "<body>\n";
 
 &taula("TOTAL",4);

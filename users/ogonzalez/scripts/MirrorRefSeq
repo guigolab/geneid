@@ -86,6 +86,11 @@ else
 
       filtre
 
+   ###############
+   # nomes quan acaben tots els mirrors puc esborrar $PID
+   rm $PID
+
+
 ########################################################
 # 24-ago-2005: aixo ja no es fa des d'aqui!!!
 ########################################################
