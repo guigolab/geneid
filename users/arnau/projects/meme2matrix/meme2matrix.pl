@@ -33,18 +33,12 @@ while (<FILE>) {
     }
     elsif ($mode =~ /^probability$/i) {
 	if ($line =~ /position-specific probability matrix/) {
-	    
-	    print STDERR "parsing score matrix...\n";
-	    
 	    # Jump the next line
 	    $line = <FILE>;
 	    # parse from this line upto "----" line
 	    my $matrix = "";
 	    $line = <FILE>;
 	    while (not ($line =~ /^-/)) {
-		
-		print STDERR "parsing score matrix line...\n";
-		
 		$matrix .= $line;
 		$line = <FILE>;
 	    }
