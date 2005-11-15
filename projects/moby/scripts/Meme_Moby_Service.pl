@@ -84,8 +84,8 @@ $::authURI = 'genome.imim.es';
 
 my $serviceType = "Collection";
 
-my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/mut1_downreg.1000.intergenic.fa";
-$in_file_1    = "/home/ug/arnau/data/promoterExtraction/Homo_sapiens.1000.intergenic.fa";
+my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/Homo_sapiens.1000.intergenic.fa";
+# $in_file_1    = "/home/ug/arnau/data/promoterExtraction/mut1_downreg.1000.intergenic.fa";
 my $datasource = "EMBL";
 
 # Parameters
