@@ -50,4 +50,3 @@ close FILE;
 
 print STDERR "matrices:\n";
 print join ("\n", @$matrices);
-# return $matrices;
