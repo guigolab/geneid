@@ -79,5 +79,6 @@ $x->dispatch_with({
     'http://biomoby.org/#generateScoreMatrix'           => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#runMemeHTML'                   => 'INB::GRIB::Services::MemeServices',
     'http://biomoby.org/#runMemeText'                   => 'INB::GRIB::Services::MemeServices',
+    'http://biomoby.org/#parseMotifMatricesfromMEME'    => 'INB::GRIB::Services::MemeServices',
 });
 $x->handle;
