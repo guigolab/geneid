@@ -82,6 +82,12 @@ my $serviceName = $opt_s;
 my $articleName = "sequences";
 $::authURI = 'genome.imim.es';
 
+# You can also ask to execute plantspMEME web service, but apparently has moved to another URLS, so basically not maintained anymore.....
+
+if ($serviceName eq "plantspMEME") {
+    $::authURI   = "www.sdsc.edu";
+    $articleName = "";
+}
 my $serviceType = "Collection";
 
 my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/Homo_sapiens.1000.intergenic.fa";
