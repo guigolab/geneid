@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.35 2005-11-10 17:37:09 gmaster Exp $
+# $Id: Factory.pm,v 1.36 2005-11-15 15:16:02 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -113,6 +113,7 @@ our @EXPORT = qw(
   &MetaAlignment_call
   &generateScoreMatrix_call
   &MEME_call
+  &meme2matrix_call
 );
 
 our $VERSION = '1.00';
@@ -912,11 +913,16 @@ sub MEME_call {
     # Llama a Meme en local
     my $_meme_dir   = "/usr/local/molbio/Install/meme-3.5.0";
     my $_meme_bin  = "bin/meme";
-    my $_meme_args = "";
+    my $_meme_args = "-nostatus -time 160 -maxiter 20 ";
     
     # Setting up the MEME parameters
     
     # Default is HTML
+    
+    if ($_debug) {
+	print STDERR "format, $format\n";
+    }
+    
     if ($format eq "text-formatted") {
 	$_meme_args .= "-text ";
     }
@@ -983,6 +989,9 @@ sub MEME_call {
     
     my ($seq_fh, $seqfile) = tempfile("/tmp/MEME.XXXXXX", UNLINK => 0);
     
+    # Get the alphabet
+    my $alphabet;
+
     # Bioperl sequence factory
     
     my $sout = Bio::SeqIO->new (
@@ -1003,6 +1012,13 @@ sub MEME_call {
 				    -seq        => $nucleotides
 				   );
 	
+	if (not defined $alphabet) {
+	    $alphabet = $seqobj->alphabet();
+	    if ($_debug) {
+		print STDERR "alphabet: $alphabet\n";
+	    }
+	}
+
 	$sout->write_seq ($seqobj);
 	
     }
@@ -1013,6 +1029,12 @@ sub MEME_call {
 	print STDERR "Error, empty sequence file...\n";
     }
     
+    # MEME default is protein alphabet so if it is dna sequences, specify it, as the MEME model will be then different
+    
+    if (defined $alphabet && (($alphabet eq "dna") || ($alphabet eq "rna"))) {
+	$_meme_args .= " -dna -revcomp";
+    }
+
     if ($_debug) {
 	print STDERR "Running Meme, with this command:\n";
 	print STDERR "$_meme_dir\/$_meme_bin $seqfile $_meme_args\n";
@@ -1030,6 +1052,104 @@ sub MEME_call {
 	# What else better to return ??
 	return undef;
     }
+}
+
+
+sub meme2matrix_call {
+    my %args = @_;
+    
+    # relleno los parametros por defecto meme2matrix_call
+    
+    my $meme_predictions   = $args{meme_predictions} || undef;
+    my $parameters         = $args{parameters}       || undef;
+    my $_debug             = $args{debug};
+    
+    # Get the parameters
+    
+    my $matrix_mode = $parameters->{matrix_mode};
+    
+    # Llama a Meme2matrix en local
+    my $_meme2matrix_dir  = "/home/ug/gmaster/projects/meme2matrix";
+    my $_meme2matrix_bin  = "meme2matrix.pl";
+    my $_meme2matrix_args = "";
+    
+    if ($matrix_mode eq "raw format") {
+	$_meme2matrix_args = "score";
+    }
+    elsif ($matrix_mode eq "log-likelihood") {
+	$_meme2matrix_args = "probability";
+    }
+
+    # Create the temp map files
+
+    my ($meme2matrix_fh, $meme2matrix_file) = tempfile("/tmp/MEME2MATRIX.XXXXXX", UNLINK => 0);
+    close ($meme2matrix_fh);
+    
+    open (FILE, ">$meme2matrix_file") or die "can't open MEME2MATRIX temp file, $meme2matrix_file!\n";
+    print FILE $meme_predictions;
+    close FILE;
+    
+    if ($_debug) {
+	print STDERR "Running meme2matrix, with this command:\n";
+	print STDERR "$_meme2matrix_dir\/$_meme2matrix_bin $meme2matrix_file $_meme2matrix_args\n";
+    }
+    
+    my $matrices_output = qx/$_meme2matrix_dir\/$_meme2matrix_bin $meme2matrix_file $_meme2matrix_args/;
+    
+    # Comment this line if you want to keep the file...
+    unlink $meme2matrix_file;
+    
+    my @matrices = ();
+    
+    # Return an array of matrices from the output (which is a string)
+    # Because we want to return a collection of text-formatted objects (each object containing a matrix)
+    # So better to return an array rather than just a string
+    
+    my @positions = ();
+    if ($matrix_mode eq "raw format") {
+	while ($matrices_output =~ m/log/g) {
+	    push (@positions, pos ($matrices_output) - 3);
+	}
+    }
+    elsif ($matrix_mode eq "log-likelihood") {
+	while ($matrices_output =~ m/letter/g) {
+	    push (@positions, pos ($matrices_output) - 6);
+	}
+    }
+    
+    if ($_debug) {
+	print STDERR "positions: @positions\n";
+    }
+    
+    if (@positions == 0) {
+	return undef;
+    }
+    
+    my $position_1 = $positions[0];
+    my $index = 1;
+    while (my $position_2 = $positions[$index]) {
+	my $matrix = substr ($matrices_output, $position_1, $position_2 - $position_1);
+	push (@matrices, $matrix);
+	$position_1 = $position_2;
+	$index++;
+    }
+    my $end = length ($matrices_output);
+    my $matrix = substr ($matrices_output, $position_1, $end - $position_1);
+    push (@matrices, $matrix);
+    
+    if ($_debug) {
+	print STDERR "nb matrices: " . @matrices . ".\n";
+        print STDERR "Dumping matrices array,\n" . Dumper (@matrices) . "\n";
+    }
+    
+    if (@matrices > 0) {
+	return \@matrices;
+    }	
+    else {
+	# What else better to return ??
+	return undef;
+    }
+    
 }
 
 1;
