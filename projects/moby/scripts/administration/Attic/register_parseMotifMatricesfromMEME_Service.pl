@@ -158,7 +158,7 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['meme_predictions', ['MEME_Text' => \@namespaces]]
+							    ['meme_predictions', ['text-formatted' => \@namespaces]]
 							   ],
 				      output		=> [
 							    ['meme_matrices', [['Text-formatted' => \@namespaces]]]
