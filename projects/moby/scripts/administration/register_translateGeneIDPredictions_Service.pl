@@ -158,8 +158,8 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input	   => [
-						       ['sequences', ["NucleotideSequence" => []]],
-						       ['geneid_predictions', ["GFF" => []]]
+						       ['sequences', ["NucleotideSequence" => \@namespaces]],
+						       ['geneid_predictions', ["GFF" => \@namespaces]]
 						      ],
 				      output       => [
 						       ['peptides', [['AminoAcidSequence' => \@namespaces]]] # collection of one object type
