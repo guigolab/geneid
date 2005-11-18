@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.9 2005-10-10 10:52:10 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.10 2005-11-18 17:19:40 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -362,12 +362,17 @@ sub getUpstreamSeqfromEnsembl {
         my $MOBY_RESPONSE = "";             # set empty response
 
 	# Para cada query ejecutaremos el _execute_query.
-        foreach my $query(@queries){
+        foreach my $queryInput(@queries){
+	    
+	    if ($_debug) {
+		print STDERR "upstream sequence retrieval service queryInput,\n";
+		print STDERR $queryInput->toString() . "\n";
+	    }
 	    
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    my $query_response = _do_query_PromoterExtraction ($query);
+	    my $query_response = _do_query_PromoterExtraction ($queryInput);
 	    
 	    # $query_response es un string que contiene el codigo xml de
 	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
