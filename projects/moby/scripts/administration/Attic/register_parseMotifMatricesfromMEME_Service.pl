@@ -161,7 +161,7 @@ my ($REG) = $Central->registerService(
 							    ['meme_predictions', ['text-formatted' => \@namespaces]]
 							   ],
 				      output		=> [
-							    ['meme_matrices', [['Text-formatted' => \@namespaces]]]
+							    ['meme_matrices', ['Text-formatted' => \@namespaces]]
 							   ],
 				      secondary	=> {
 					  'matrix mode' => {
