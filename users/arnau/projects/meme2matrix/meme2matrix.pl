@@ -19,14 +19,18 @@ while (<FILE>) {
     my $line = $_;
     if ($mode =~ /^score$/i) {
 	if ($line =~ /position-specific scoring matrix/) {
+	    my $index = 1;
 	    # Jump the next line
 	    $line = <FILE>;
 	    # parse from this line upto "----" line
 	    my $matrix = "";
 	    $line = <FILE>;
+	    $matrix .= "$line";
+	    $line = <FILE>;
 	    while (not ($line =~ /^-/)) {
-		$matrix .= $line;
+		$matrix .= "$index   $line";
 		$line = <FILE>;
+                $index++;
 	    }
 	    # add //
 	    $matrix .= "//";
@@ -35,14 +39,18 @@ while (<FILE>) {
     }
     elsif ($mode =~ /^probability$/i) {
 	if ($line =~ /position-specific probability matrix/) {
+	    my $index = 1;
 	    # Jump the next line
 	    $line = <FILE>;
 	    # parse from this line upto "----" line
 	    my $matrix = "";
 	    $line = <FILE>;
+	    $matrix .= "$line";
+	    $line = <FILE>;
 	    while (not ($line =~ /^-/)) {
-		$matrix .= $line;
+		$matrix .= "$index   $line";
 		$line = <FILE>;
+		$index++;
 	    }
 	    # add //
 	    $matrix .= "//";
