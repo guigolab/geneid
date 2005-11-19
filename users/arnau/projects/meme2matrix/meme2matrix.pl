@@ -28,6 +28,8 @@ while (<FILE>) {
 		$matrix .= $line;
 		$line = <FILE>;
 	    }
+	    # add //
+	    $matrix .= "//";
 	    push (@$matrices, $matrix);
 	}
     }
@@ -42,6 +44,8 @@ while (<FILE>) {
 		$matrix .= $line;
 		$line = <FILE>;
 	    }
+	    # add //
+	    $matrix .= "//";
 	    push (@$matrices, $matrix);
 	}
     }
