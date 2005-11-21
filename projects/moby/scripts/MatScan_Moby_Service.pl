@@ -16,7 +16,6 @@ use Getopt::Std;
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
 # use SOAP::Lite + 'trace';
 
 # Bioperl Libraries
@@ -43,7 +42,7 @@ Usage:
 	-i Sequence(s) input file, in FASTA format - optional
 	
 Examples using some combinations:
-	perl MatScan_Moby_Service.pl -x 1 -s runMatScanGFF -f /home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa
+	perl MatScan_Moby_Service.pl -x 1 -s runMatScanGFF -f /home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa -m /home/ug/arnau/data/MeMe/meme2matrix.text-formatted.out
 
 END_HELP
 
@@ -52,10 +51,10 @@ END_HELP
 BEGIN {
 	
 	# Determines the options with values from program
-	use vars qw/$opt_h $opt_x $opt_s $opt_f/;
+	use vars qw/$opt_h $opt_x $opt_s $opt_f $opt_m/;
 	   
 	# these are switches taking an argument (a value)
-	my $switches = 'hxsf';
+	my $switches = 'hxsfm';
 	   
 	# Get the switches
 	getopt($switches);
@@ -79,7 +78,11 @@ my $_debug = 0;
 ##################################################################
 
 my $serviceName = $opt_s;
-my $articleName = "sequences";
+
+print STDERR "service name, $serviceName\n";
+
+my $sequence_articleName = "upstream_sequences";
+my $matrix_articleName   = "matrix";
 $::authURI = 'genome.imim.es';
 
 my $serviceType = "Simple";
@@ -89,14 +92,19 @@ if ($serviceName =~ /collection/i) {
 
 my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa";
 my $in_file_2    = "/home/ug/arnau/data/promoterExtraction/ENSG00000160087.upstream_region.5000.fa";
-my $datasource = "EMBL";
+my $matrix_file  = $opt_m || "/home/ug/arnau/data/MeMe/meme2matrix.text-formatted.out";
+my $datasource   = "EMBL";
 
 # Parameters
 
 my $threshold   = "0.8";
 my $strands     = "Both";
-my $matrix      = "Transfac";
 my $matrix_mode = "log-likelihood";
+my $matrix;
+if ($serviceName ne "runMatScanGFFCollectionVsInputMatrix") {
+    print STDERR "initialising matrix...\n";
+    $matrix = "Transfac";
+}
 
 ##################################################################
 #
@@ -239,10 +247,6 @@ while ($i < 2) {
 				 -file   => $files->[$i],
 				 -format => 'fasta',
 				 );
-
-    # Execute GeneID Web service on each individual sequence
-    # Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
-    # See Geneid_Moby_Service.v2.pl for this
     
     while (my $seqobj = $seqin->next_seq) {
 	my $nucleotides  = $seqobj->seq;
@@ -266,10 +270,24 @@ while ($i < 2) {
 </DNASequence>
 PRT
 	    
-	    push (@$inputs, $input);
+	push (@$inputs, $input);
     }
 
     $i++;
+}
+
+# Input Matrix
+
+my $input_matrix_xml;
+if ($serviceName eq "runMatScanGFFCollectionVsInputMatrix") {
+    my $input_matrix = qx/cat $matrix_file/;
+    $input_matrix_xml = <<PRT;
+<text-formatted namespace="MEME" id="id">
+<![CDATA[
+$input_matrix
+]]>
+</text-formatted>
+PRT
 }
 
 #
@@ -284,9 +302,12 @@ PRT
 
 # Matrix parameter
 
-my $matrix_xml = <<PRT;
+my $matrix_xml;
+if (defined $matrix) {
+   $matrix_xml = <<PRT;
 <Value>$matrix</Value>
 PRT
+}
 
 # Matrix parameter
 
@@ -310,14 +331,34 @@ my $result;
 
 if ($serviceType eq "Collection") {
 
-    $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", $inputs, 'threshold', $threshold_xml, 'matrix', $matrix_xml, 'matrix mode', $matrix_mode_xml, 'strands', $strands_xml]
-						 ]);
+    print STDERR "Collection mode\n";
+
+    if ($serviceName eq "runMatScanGFFCollection") {
+	
+	print STDERR "serviceName, $serviceName\n";
+	print STDERR "matrix parameter, $matrix_xml\n";
+	
+	$result = $Service->execute(XMLinputlist => [
+						     ["$sequence_articleName", $inputs, 'threshold', $threshold_xml, 'matrix', $matrix_xml, 'matrix mode', $matrix_mode_xml, 'strands', $strands_xml]
+						     ]);
+    }
+    else {
+
+	print STDERR "serviceName, $serviceName\n";
+	
+	$result = $Service->execute(XMLinputlist => [
+						     ["$sequence_articleName", $inputs, "$matrix_articleName", $input_matrix_xml, 'threshold', $threshold_xml, 'matrix mode', $matrix_mode_xml, 'strands', $strands_xml]
+						     ]);
+    }
 }
 else {
+    
+    print STDERR "Simple mode\n";
+    print STDERR "matrix parameter, $matrix_xml\n";
+    
     my $input = $inputs->[0];
     $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", $input, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
+						 ["$sequence_articleName", $input, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
 						 ]);
 }
 
