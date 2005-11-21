@@ -4,11 +4,11 @@
   <s:processor name="identifier" boring="true">
     <s:stringconstant>id</s:stringconstant>
   </s:processor>
-  <s:processor name="Create_moby_data">
-    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
-  </s:processor>
   <s:processor name="parse_moby_matscan">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="Create_moby_data">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_matrix">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
@@ -16,35 +16,17 @@
   <s:processor name="parse_moby_meta">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
+  <s:processor name="parse_moby_meme_text">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="parse_moby_meme_matrices">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
   <s:processor name="fromFASTAtoDNASequenceCollection">
     <s:description>Converts a FASTA object into a collection of DNASequence moby objects</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>fromFASTAtoDNASequenceCollection</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="runMatScanGFFCollection">
-    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a collection of DNASequence objects and returns a collection of GFF objects (one GFF object for each DNASequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMatScanGFFCollection</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="runMultiMetaAlignment">
-    <s:description>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMultiMetaAlignment</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="generateScoreMatrix">
-    <s:description>Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>generateScoreMatrix</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
@@ -56,6 +38,30 @@
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
+  <s:processor name="generateScoreMatrix">
+    <s:description>Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>generateScoreMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMultiMetaAlignment">
+    <s:description>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMultiMetaAlignment</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFFCollectionVsInputMatrix">
+    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. This service only accepts a collection of DNASequence objects and returns a collection of GFF objects (one GFF object for each DNASequence). It will run MatScan for each sequence in the colelction against the input matrix. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFFCollectionVsInputMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
   <s:processor name="parseMotifMatricesfromMEME">
     <s:description>Parse the score or probability matrices from MEME output. It reports one matrix for each predicted motif.</s:description>
     <s:biomobywsdl>
@@ -64,23 +70,50 @@
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
+  <s:processor name="inbHierarchicalCluster">
+    <s:description>Hierarchical clustering server for gene expression patterns</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>inbHierarchicalCluster</s:serviceName>
+      <s:authorityName>bioinfo.ochoa.fib.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="inbTreeView">
+    <s:description>Viewer for Newick Trees (PNG image)</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>inbTreeView</s:serviceName>
+      <s:authorityName>bioinfo.ochoa.fib.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="parse_moby_tree">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
   <s:link source="fasta_sequences" sink="Create_moby_data:stringvalue" />
   <s:link source="namespace" sink="Create_moby_data:namespace" />
   <s:link source="Create_moby_data:mobydata" sink="fromFASTAtoDNASequenceCollection:input" />
-  <s:link source="fromFASTAtoDNASequenceCollection:DNASequence(Collection - 'sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'upstream_sequences')" />
+  <s:link source="fromFASTAtoDNASequenceCollection:DNASequence(Collection - 'sequences')" sink="runMatScanGFFCollectionVsInputMatrix:DNASequence(Collection - 'upstream_sequences')" />
   <s:link source="fromFASTAtoDNASequenceCollection:DNASequence(Collection - 'sequences')" sink="runMemeText:GenericSequence(Collection - 'sequences')" />
+  <s:link source="generateScoreMatrix:output" sink="inbHierarchicalCluster:input" />
   <s:link source="generateScoreMatrix:output" sink="parse_moby_matrix:mobydata" />
   <s:link source="identifier:value" sink="Create_moby_data:id" />
-  <s:link source="parseMotifMatricesfromMEME:output" sink="Moby_MEME_Matrices" />
-  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignment:GFF(Collection - 'maps')" />
-  <s:link source="runMatScanGFFCollection:output" sink="parse_moby_matscan:mobydata" />
-  <s:link source="runMemeText:text-formatted(meme_predictions)" sink="parseMotifMatricesfromMEME:text-formatted(meme_predictions)" />
+  <s:link source="inbHierarchicalCluster:output" sink="inbTreeView:input" />
+  <s:link source="inbTreeView:b64_Encoded_PNG(_ANON_)" sink="parse_moby_tree:mobydata" />
+  <s:link source="inbHierarchicalCluster:Clustering(_ANON_)" sink="Moby_Newick" />
+  <s:link source="parseMotifMatricesfromMEME:output" sink="runMatScanGFFCollectionVsInputMatrix:text-formatted(matrix)" />
+  <s:link source="parseMotifMatricesfromMEME:text-formatted(meme_matrices)" sink="parse_moby_meme_matrices:mobydata" />
   <s:link source="parse_moby_matrix:value" sink="Moby_Matrix" />
   <s:link source="parse_moby_matscan:value" sink="Moby_MatScan" />
   <s:link source="parse_moby_meta:value" sink="Moby_Meta" />
-  <s:link source="runMemeText:text-formatted(meme_predictions)" sink="Moby_MEME" />
+  <s:link source="parse_moby_tree:value" sink="Moby_Tree" />
+  <s:link source="runMatScanGFFCollectionVsInputMatrix:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignment:GFF(Collection - 'maps')" />
+  <s:link source="runMatScanGFFCollectionVsInputMatrix:output" sink="parse_moby_matscan:mobydata" />
+  <s:link source="runMemeText:output" sink="parseMotifMatricesfromMEME:input" />
+  <s:link source="runMemeText:text-formatted(meme_predictions)" sink="parse_moby_meme_text:mobydata" />
   <s:link source="runMultiMetaAlignment:output" sink="parse_moby_meta:mobydata" />
   <s:link source="runMultiMetaAlignment:text-formatted(Collection - 'meta_predictions')" sink="generateScoreMatrix:text-formatted(Collection - 'similarity_results')" />
+  <s:link source="parse_moby_meme_matrices:value" sink="Moby_MEME_Matrices" />
+  <s:link source="parse_moby_meme_text:value" sink="Moby_MEME" />
   <s:source name="namespace" />
   <s:source name="fasta_sequences" />
   <s:sink name="Moby_Matrix" />
@@ -88,6 +121,8 @@
   <s:sink name="Moby_MatScan" />
   <s:sink name="Moby_MEME" />
   <s:sink name="Moby_MEME_Matrices" />
+  <s:sink name="Moby_Newick" />
+  <s:sink name="Moby_Tree" />
 </s:scufl>
 
 
