@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.7 2005-11-03 18:11:51 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.8 2005-11-21 15:40:01 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -137,6 +137,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
   &runMatScanGFF
   &runMatScanGFFCollection
+  &runMatScanGFFCollectionVsInputMatrix
 );
 
 our $VERSION = '1.0';
@@ -183,7 +184,9 @@ sub _do_query_MatScan {
     # We need this because the two services, runMatScanGFF and MatScanGFFCollection call both this method, so they share the same code
     # But the output type will have to be different
     my $_input_type     = shift @_;
-
+    
+    print STDERR "MatScan Sequences Vs predefined matrix...\n";
+    
     if (($_input_type ne "simple") && ($_input_type ne "collection")) {
 	# Don't know the type, don't know what to return !
 	print STDERR "_input_type unknown (should be setup as being simple or collection)\n";
@@ -307,7 +310,7 @@ sub _do_query_MatScan {
 	    print STDERR "making a simple response\n";
 	}
 	
-	my ($report) = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
+	my ($report) = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters, debug => $_debug);
 	
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -342,10 +345,13 @@ PRT
 	
 	# The input was a collection of Sequences, so we have to return a collection of GFF objects
 	
-	my $report         = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
+	my $report         = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters, debug => $_debug);
+
+	my $output_objects;
+	if (defined $report) {
+	    $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+	}
 	
-	my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
-		
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
 	# volver a encapsularlo en un objeto biomoby de respuesta. Pero 
 	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
@@ -364,6 +370,153 @@ PRT
 	print STDERR "_input_type unknown (should be setup as being simple or collection)\n";
 	exit 1;
     }
+}
+
+
+sub _do_query_MatScanVsInputMatrix {
+    # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
+    my $queryInput_DOM = shift @_;
+    # $_format is the type of output that returns MatScan (e.g. GFF)
+    my $_format        = shift @_;
+    # $_input_type tells if the service specifies a collection of input objects or just a simple input object
+    # We need this because the two services, runMatScanGFF and MatScanGFFCollection call both this method, so they share the same code
+    # But the output type will have to be different
+    my $_input_type     = shift @_;
+
+    print STDERR "MatScan Sequences Vs Input Matrix mode...\n";
+    
+    if (($_input_type ne "simple") && ($_input_type ne "collection")) {
+	# Don't know the type, don't know what to return !
+	print STDERR "_input_type unknown (should be setup as being simple or collection)\n";
+	exit 1;
+    }
+    
+    my $MOBY_RESPONSE = "";     # set empty response
+    
+    # Aqui escribimos las variables que necesitamos para la funcion. 
+    my $threshold;
+    my $strands;
+    my $matrix_mode;
+    
+    # Variables that will be passed to MatScan_call
+    my %sequences;
+    my $matrix;
+    my %parameters;
+
+    my $queryID  = getInputID ($queryInput_DOM);
+    my @articles = getArticles($queryInput_DOM);
+
+    # Get the parameters
+    
+    ($matrix_mode) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "matrix mode");
+    if (not defined $matrix_mode) {
+	# Default is to use 'log-likelihood' mode
+	$matrix_mode = "log-likelihood";
+    }
+    
+    ($threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "threshold");
+    if (not defined $threshold) {
+	# Default is 0.8
+	$threshold = "0.8";
+    }
+    
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
+    if (not defined $strands) {
+	# Default is running MatScan on both strands
+	$strands = "Both";
+    }
+    
+    # Add the parsed parameters in a hash table
+    
+    $parameters{threshold}   = $threshold;
+    $parameters{strands}     = $strands;
+    $parameters{matrix_mode} = $matrix_mode;
+    
+    if ($_debug) {
+	print STDERR "matrix mode, $matrix_mode\n";
+    }
+    
+    # Tratamos a cada uno de los articulos
+    foreach my $article (@articles) {       
+	
+	# El articulo es una tupla que contiene el nombre de este 
+	# y su texto xml. 
+	
+	my ($articleName, $DOM) = @{$article}; # get the named article
+	
+	# Si le hemos puesto nombre a los articulos del servicio,  
+	# podemos recoger a traves de estos nombres el valor.
+	# Sino sabemos que es el input articulo porque es un simple/collection articulo
+	
+	if (($articleName eq "upstream_sequences") || isCollectionArticle ($DOM)) { 
+	    
+	    if (isSimpleArticle ($DOM)) {
+		
+		if ($_debug) {
+		    print STDERR "sequences tag is a simple article...\n";
+		    print STDERR "requires a collection...\n";
+		    exit 0;
+		}
+		
+		# %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
+	    }
+	    elsif (isCollectionArticle ($DOM)) {
+		
+		if ($_debug) {
+		    print STDERR "sequences is a collection article...\n";
+		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		}
+		
+		my @sequence_articles_DOM = getCollectedSimples ($DOM);
+		
+		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
+		   %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
+		}
+	    }
+	    else {
+		print STDERR "It is not a simple or collection article...\n";
+		print STDERR "DOM: " . $DOM->toString() . "\n";
+	    }
+	    
+	} # End parsing sequences article tag	
+	elsif (($articleName eq "matrix") || isSimpleArticle ($DOM)) {
+	    # Must be the matrix !
+	    $matrix = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    
+	    if (not defined $matrix) {
+		print STDERR "Error, can't parse the input matrix...\n";
+	    }
+	}
+	
+    } # Next article
+    
+    # Check that we have parsed properly the sequences
+    
+    if ((keys (%sequences)) == 0) {
+	print STDERR "Error, can't parsed any sequences...\n";
+    }
+    
+    # Una vez recogido todos los parametros necesarios, llamamos a 
+    # la funcion que nos devuelve el report. 	
+    
+    my $output_article_name = "matscan_predictions";
+    
+    # The input was a collection of Sequences, so we have to return a collection of GFF objects
+    
+    my $report         = MatScan_call (sequences  => \%sequences, matrix => $matrix, format => $_format, parameters => \%parameters);
+    my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+    
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
+    # a collection response. 
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
+    # el mismo que el de la query. 
+    
+    $MOBY_RESPONSE .= collectionResponse($output_objects, $output_article_name, $queryID);
+    
+    return $MOBY_RESPONSE;
 }
 
 
@@ -437,12 +590,17 @@ sub runMatScanGFF {
     my $_moby_output_format   = "GFF";
     
     # Para cada query ejecutaremos el _execute_query.
-    foreach my $query(@queries){
+    foreach my $queryInput(@queries){
+
+	if ($_debug) {
+	    my $query_str = $queryInput->toString();
+	    print STDERR "query text: $query_str\n";
+	}
 	
 	# En este punto es importante recordar que el objeto $query 
 	# es un XML::DOM::Node, y que si queremos trabajar con 
 	# el mensaje de texto debemos llamar a: $query->toString() 
-	my $query_response = _do_query_MatScan ($query, $_moby_output_format, "simple");
+	my $query_response = _do_query_MatScan ($queryInput, $_moby_output_format, "simple");
 	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos 
@@ -522,6 +680,59 @@ sub runMatScanGFFCollection {
 	}
 
 	my $query_response = _do_query_MatScan ($queryInput, $_format, "collection");
+	
+	# $query_response es un string que contiene el codigo xml de
+	# la respuesta.  Puesto que es un codigo bien formado, podemos 
+	# encadenar sin problemas una respuesta con otra. 
+	$MOBY_RESPONSE .= $query_response;
+    }
+    # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
+    # todas ellas con una cabecera y un final. Esto lo podemos hacer 
+    # con las llamadas de la libreria Common de BioMoby. 
+    return responseHeader("genome.imim.es") 
+	. $MOBY_RESPONSE . responseFooter;
+}
+
+
+sub runMatScanGFFCollectionVsInputMatrix {
+    
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+    
+    # Hasta el momento, no existen objetos Perl de BioMoby paralelos 
+    # a la ontologia, y debemos contentarnos con trabajar directamente 
+    # con objetos DOM. Por consiguiente lo primero es recolectar la 
+    # lista de peticiones (queries) que tiene la peticion. 
+    # 
+    # En una misma llamada podemos tener mas de una peticion, y de  
+    # cada servicio depende la forma de trabajar con ellas. En este 
+    # caso las trataremos una a una, pero podriamos hacer Threads para 
+    # tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
+    # etc.. 
+    my @queries = getInputs($message);  # returns XML::DOM nodes
+    # 
+    # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+    # es una coleccion de respuestas a cada una de las consultas.
+    my $MOBY_RESPONSE = "";             # set empty response
+    
+    #
+    # The output format for this service is GFF
+    #
+    my $_format = "GFF";
+    
+    # Para cada query ejecutaremos el _execute_query.
+    foreach my $queryInput (@queries){
+	
+	# En este punto es importante recordar que el objeto $query 
+	# es un XML::DOM::Node, y que si queremos trabajar con 
+	# el mensaje de texto debemos llamar a: $query->toString() 
+	
+	if ($_debug) {
+	    my $query_str = $queryInput->toString();
+	    print STDERR "query text: $query_str\n";
+	}
+
+	my $query_response = _do_query_MatScanVsInputMatrix ($queryInput, $_format, "collection");
 	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos 

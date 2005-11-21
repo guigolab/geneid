@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.36 2005-11-15 15:16:02 gmaster Exp $
+# $Id: Factory.pm,v 1.37 2005-11-21 15:40:01 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -684,25 +684,27 @@ sub PromoterExtraction_call {
 
 sub MatScan_call {
         my %args = @_;
-
+	
         # relleno los parametros por defecto MatScan_call
-
-        my $sequences          = $args{sequences} || undef;
-	my $format             = $args{format} || "";
-	my $parameters         = $args{parameters} || undef;
-
+	
+        my $sequences    = $args{sequences}  || undef;
+	my $matrix_input = $args{matrix}     || undef;
+	my $format       = $args{format}     || "";
+	my $parameters   = $args{parameters} || undef;
+	my $debug        = $args{debug}      || 0;
+	
 	# Get the parameters
-
-	my $threshold   = $parameters->{threshold};
-	my $strands     = $parameters->{strands};
-	my $matrix      = $parameters->{matrix};
-	my $matrix_mode = $parameters->{matrix_mode};
+	
+	my $threshold        = $parameters->{threshold};
+	my $strands          = $parameters->{strands};
+	my $matrix_parameter = $parameters->{matrix};
+	my $matrix_mode      = $parameters->{matrix_mode};
 	
         # Llama a MatScan en local
         my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";
         my $_matscan_bin  = "bin/matscan";
         my $_matscan_args = "-T $threshold";
-	my $_matrix_file;
+	my ($matrix_fh, $matrix_file);
 	
 	if ($strands eq "Both") {
 	    # Default anyway
@@ -714,35 +716,64 @@ sub MatScan_call {
 	    $_matscan_args .= " -C";
 	}
 	
-	if ($matrix_mode eq "raw format") {
-	    SWITCH: {
-	      if ($matrix eq "Transfac") { $_matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
-	      if ($matrix eq "MEME")     { $_matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
-	      if ($matrix eq "Jaspar")   { $_matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
-	      # Default is Transfac
-	      $_matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices";
-	  }
-	}
-	elsif ($matrix_mode eq "log-likelihood") {
+	if (defined $matrix_parameter) {
 
-	  SWITCH: {
-	      if ($matrix eq "Transfac") { $_matscan_args .= " -sm"; $_matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
-	      if ($matrix eq "MEME")     { $_matscan_args .= " -sm"; $_matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
-	      if ($matrix eq "Jaspar")   { $_matscan_args .= " -sm"; $_matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
-	      # Default is Transfac
-	      $_matscan_args .= " -sm";
-	      $_matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices";
-	  }
+	    print STDERR "matrix as a parameter...\n";
+
+	    if ($matrix_mode eq "raw format") {
+
+		print STDERR "raw mode\n";
+
+	      SWITCH: {
+		  if ($matrix_parameter eq "Transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
+		  if ($matrix_parameter eq "MEME")     { $matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
+		  if ($matrix_parameter eq "Jaspar")   { $matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
+		  # Default is Transfac
+		  $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices";
+	      }
+	    }
+	    elsif ($matrix_mode eq "log-likelihood") {
+		
+	      print STDERR "log-likelihood mode\n";
+		
+	      SWITCH: {
+		  if ($matrix_parameter eq "Transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
+		  if ($matrix_parameter eq "MEME")     { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
+		  if ($matrix_parameter eq "Jaspar")   { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
+		  # Default is Transfac
+		  $_matscan_args .= " -sm";
+		  $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices";
+	      }
+	    }
+	    else {
+		print STDERR "don't know anything about matrix mode, $matrix_mode!\n";
+		exit 0;
+	    }
+	}
+	elsif (defined $matrix_input) {
+	    
+	    print STDERR "matrix as an input...\n";
+	    
+	    # Make a temporary file with the matrix input
+	    $_matscan_args = " -sm";
+	    ($matrix_fh, $matrix_file) = tempfile("/tmp/MATSCAN_MATRIX.XXXXXX", UNLINK => 0);
+	    print $matrix_fh "$matrix_input";
+	    close $matrix_fh;
 	}
 	else {
-	    print STDERR "don't know anything about matrix mode, $matrix_mode!\n";
+	    print STDERR "matrix_input neither matrix_parameter are defined!!\n";
 	    exit 0;
 	}
-        
+	
+	if (not defined $matrix_file) {
+	    print STDERR "Error, no defined matrix file!\n";
+	    exit 0;
+	}
+
 	# Generate a temporary file locally with the sequence(s) in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 	
-	my ($seq_fh, $seqfile) = tempfile("/tmp/MATSCAN.XXXXXX", UNLINK => 0);
+	my ($seq_fh, $seqfile) = tempfile("/tmp/MATSCAN_SEQS.XXXXXX", UNLINK => 0);
 	
 	# Bioperl sequence factory
 	
@@ -754,9 +785,9 @@ sub MatScan_call {
 	my @seqIds = keys (%$sequences);
 	
 	foreach my $sequenceIdentifier (@seqIds) {
-
+	    
 	    my $nucleotides = $sequences->{$sequenceIdentifier};
-
+	    
 	    # bioperl object
 	    
 	    my $seqobj = Bio::Seq->new (
@@ -767,25 +798,30 @@ sub MatScan_call {
 	    $sout->write_seq ($seqobj);
 	    
 	}
-
+	
 	close $seq_fh;
-
+	
 	# Test empty file
 	if (-z $seqfile) {
 	    print STDERR "Error, empty sequence file...\n";
 	}
 
-	# print STDERR "Running Matscan, with this command:\n";
-	# print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file\n";
-
-        my $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $_matrix_file | grep MatScan/;
+	if ($debug) {
+	    print STDERR "Running Matscan, with this command:\n";
+	    print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file\n";
+	}
+	
+        my $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan/;
         
 	# Comment this line if you want to keep the file...
 	unlink $seqfile;
-
+	if (defined $matrix_input) {
+	    unlink $matrix_file;
+	}
+	
         if (defined $matscan_output) {
 		return $matscan_output;
-	}	
+	}
 	else {
 		# What else better to return ??
 		return undef;
