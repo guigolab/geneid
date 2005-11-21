@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.14 2005-11-11 14:24:54 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.15 2005-11-21 13:30:02 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -687,7 +687,10 @@ sub _do_query_generateScoreMatrix {
     if ($output_format eq "Phylip") {
     	$_moby_output_format = "Phylip_matrix_Text";
     }
-
+    elsif ($output_format eq "SOTA") {
+	$_moby_output_format = "MicroArrayData_Text";
+    }
+    
     # Add the parsed parameters in a hash table
     
     if ($_debug) {
