@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.6 2005-11-15 15:16:02 gmaster Exp $
+# $Id: MemeServices.pm,v 1.7 2005-11-21 14:54:45 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -372,35 +372,32 @@ sub _do_query_MemeMotifMatrices {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $matrices = meme2matrix_call (meme_predictions => $meme_predictions, format => $_output_format, parameters => \%parameters);
+    # Return an array of matrices
+    my $matrices_aref = meme2matrix_call (meme_predictions => $meme_predictions, format => $_output_format, parameters => \%parameters);
 	
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
 
-    # Return CommentedDNASequence so we also add a description
-    # The specs say to return DNASequence but that shouldn't matter returning CommentedDNASequence because CommentedDNASequence is-a DNASequence !!
-
     my $output_object_type  = "$_output_format";
     my $output_article_name = "meme_matrices";
     my $namespace = "";
     
-    if (not defined $matrices) {
+    if (not defined $matrices_aref) {
 	# Return an emtpy message !
-	return collectionResponse (undef, $output_article_name, $queryID);
+	$MOBY_RESPONSE .= simpleResponse (undef, $output_article_name, $queryID);
+	return $MOBY_RESPONSE;
     }
     
-    my $meme_matrix_objects = [];
-    foreach my $matrix (@$matrices) {
-	my $meme_matrix_object = <<PRT;
+    # Concatenate all matrices of the array into one string
+    my $matrices = join ('', @$matrices_aref);
+    my $meme_matrix_object = <<PRT;
 <moby:$_output_format namespace='$namespace' id=''>
 <![CDATA[
-$matrix
+$matrices
 ]]>
 </moby:$_output_format>
 PRT
-        push (@$meme_matrix_objects, $meme_matrix_object);
-    }
     
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
@@ -410,8 +407,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
 
-    $MOBY_RESPONSE .= collectionResponse($meme_matrix_objects, $output_article_name, $queryID);
-	
+    $MOBY_RESPONSE .= simpleResponse($meme_matrix_object, $output_article_name, $queryID);	
     return $MOBY_RESPONSE;
 
 }
