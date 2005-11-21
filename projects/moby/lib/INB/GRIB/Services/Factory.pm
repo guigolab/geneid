@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.37 2005-11-21 15:40:01 gmaster Exp $
+# $Id: Factory.pm,v 1.38 2005-11-21 17:34:42 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -610,10 +610,10 @@ sub PromoterExtraction_call {
     my $_promExtraction_bin  = "promoter_extraction.pl";
     my $_promExtraction_args = "";
 
-    if ($intergenic_only eq "True") {
+    if (lc ($intergenic_only) eq "true") {
 	$_promExtraction_args .= "-i";
     }
-    if ($orthologous_mode eq "True") {
+    if (lc ($orthologous_mode) eq "true") {
 	$_promExtraction_args .= " -o";
     }
 
@@ -621,23 +621,23 @@ sub PromoterExtraction_call {
     $_promExtraction_args .= " -d $downstream_length";
 
     SWITCH: {
-	if ($organism eq "Homo sapiens")             { $_promExtraction_args .= " -s homo_sapiens"; last SWITCH; }
-	if ($organism eq "Pan troglodytes")          { $_promExtraction_args .= " -s pan_troglodytes"; last SWITCH; }
-	if ($organism eq "Mus musculus")             { $_promExtraction_args .= " -s mus_musculus"; last SWITCH; }
-	if ($organism eq "Rattus norvegicus")        { $_promExtraction_args .= " -s rattus_norvegicus"; last SWITCH; }
-	if ($organism eq "Canis familiaris")         { $_promExtraction_args .= " -s canis_familiaris"; last SWITCH; }
-	if ($organism eq "Bos taurus")               { $_promExtraction_args .= " -s bos_taurus"; last SWITCH; }
-	if ($organism eq "Gallus gallus")            { $_promExtraction_args .= " -s gallus_gallus"; last SWITCH; }
-	if ($organism eq "Xenopus tropicalis")       { $_promExtraction_args .= " -s xenopus_tropicalis"; last SWITCH; }
-	if ($organism eq "Danio rerio")              { $_promExtraction_args .= " -s danio_rerio"; last SWITCH; }
-	if ($organism eq "Takifugu rubripes")        { $_promExtraction_args .= " -s takifugu_rubripes"; last SWITCH; }
-	if ($organism eq "Tetraodon nigroviridis")   { $_promExtraction_args .= " -s tetraodon_nigroviridis"; last SWITCH; }
-	if ($organism eq "Ciona intestinalis")       { $_promExtraction_args .= " -s ciona_intestinalis"; last SWITCH; }
-	if ($organism eq "Drosophila melanogaster")  { $_promExtraction_args .= " -s drosophila_melanogaster"; last SWITCH; }
-	if ($organism eq "Anopheles gambiae")        { $_promExtraction_args .= " -s anopheles_gambiae"; last SWITCH; }
-	if ($organism eq "Apis mellifera")           { $_promExtraction_args .= " -s apis_mellifera"; last SWITCH; }
-	if ($organism eq "Caenorhabditis elegans")   { $_promExtraction_args .= " -s caenorhabditis_elegans"; last SWITCH; }
-	if ($organism eq "Saccharomyces cerevisiae") { $_promExtraction_args .= " -s saccharomyces_cerevisiae"; last SWITCH; }
+	if (lc ($organism) eq "homo sapiens")             { $_promExtraction_args .= " -s homo_sapiens"; last SWITCH; }
+	if (lc ($organism) eq "pan troglodytes")          { $_promExtraction_args .= " -s pan_troglodytes"; last SWITCH; }
+	if (lc ($organism) eq "mus musculus")             { $_promExtraction_args .= " -s mus_musculus"; last SWITCH; }
+	if (lc ($organism) eq "rattus norvegicus")        { $_promExtraction_args .= " -s rattus_norvegicus"; last SWITCH; }
+	if (lc ($organism) eq "canis familiaris")         { $_promExtraction_args .= " -s canis_familiaris"; last SWITCH; }
+	if (lc ($organism) eq "bos taurus")               { $_promExtraction_args .= " -s bos_taurus"; last SWITCH; }
+	if (lc ($organism) eq "gallus gallus")            { $_promExtraction_args .= " -s gallus_gallus"; last SWITCH; }
+	if (lc ($organism) eq "xenopus tropicalis")       { $_promExtraction_args .= " -s xenopus_tropicalis"; last SWITCH; }
+	if (lc ($organism) eq "danio rerio")              { $_promExtraction_args .= " -s danio_rerio"; last SWITCH; }
+	if (lc ($organism) eq "takifugu rubripes")        { $_promExtraction_args .= " -s takifugu_rubripes"; last SWITCH; }
+	if (lc ($organism) eq "tetraodon nigroviridis")   { $_promExtraction_args .= " -s tetraodon_nigroviridis"; last SWITCH; }
+	if (lc ($organism) eq "ciona intestinalis")       { $_promExtraction_args .= " -s ciona_intestinalis"; last SWITCH; }
+	if (lc ($organism) eq "drosophila melanogaster")  { $_promExtraction_args .= " -s drosophila_melanogaster"; last SWITCH; }
+	if (lc ($organism) eq "anopheles gambiae")        { $_promExtraction_args .= " -s anopheles_gambiae"; last SWITCH; }
+	if (lc ($organism) eq "apis mellifera")           { $_promExtraction_args .= " -s apis_mellifera"; last SWITCH; }
+	if (lc ($organism) eq "caenorhabditis elegans")   { $_promExtraction_args .= " -s caenorhabditis_elegans"; last SWITCH; }
+	if (lc ($organism) eq "saccharomyces cerevisiae") { $_promExtraction_args .= " -s saccharomyces_cerevisiae"; last SWITCH; }
 	# Default is Human
 	$_promExtraction_args .= " -s homo_sapiens";
     }
