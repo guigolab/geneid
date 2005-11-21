@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.8 2005-11-21 15:40:01 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.9 2005-11-21 22:47:22 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -185,12 +185,14 @@ sub _do_query_MatScan {
     # But the output type will have to be different
     my $_input_type     = shift @_;
     
-    print STDERR "MatScan Sequences Vs predefined matrix...\n";
-    
+    if ($_debug) {
+      print STDERR "MatScan Sequences Vs predefined matrix...\n";
+    }
+  
     if (($_input_type ne "simple") && ($_input_type ne "collection")) {
 	# Don't know the type, don't know what to return !
 	print STDERR "_input_type unknown (should be setup as being simple or collection)\n";
-	exit 1;
+	exit 0;
     }
 
     my $MOBY_RESPONSE = "";     # set empty response
@@ -383,7 +385,9 @@ sub _do_query_MatScanVsInputMatrix {
     # But the output type will have to be different
     my $_input_type     = shift @_;
 
-    print STDERR "MatScan Sequences Vs Input Matrix mode...\n";
+    if ($_debug) {
+    	print STDERR "MatScan Sequences Vs Input Matrix mode...\n";
+    }
     
     if (($_input_type ne "simple") && ($_input_type ne "collection")) {
 	# Don't know the type, don't know what to return !

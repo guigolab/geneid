@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.38 2005-11-21 17:34:42 gmaster Exp $
+# $Id: Factory.pm,v 1.39 2005-11-21 22:47:22 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -718,12 +718,16 @@ sub MatScan_call {
 	
 	if (defined $matrix_parameter) {
 
-	    print STDERR "matrix as a parameter...\n";
+	    if ($debug) {
+	      print STDERR "matrix as a parameter...\n";
+            }
 
 	    if ($matrix_mode eq "raw format") {
 
-		print STDERR "raw mode\n";
-
+	        if ($debug) {
+  		  print STDERR "raw mode\n";
+                }
+                
 	      SWITCH: {
 		  if ($matrix_parameter eq "Transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
 		  if ($matrix_parameter eq "MEME")     { $matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
@@ -733,9 +737,10 @@ sub MatScan_call {
 	      }
 	    }
 	    elsif ($matrix_mode eq "log-likelihood") {
-		
-	      print STDERR "log-likelihood mode\n";
-		
+	      if ($debug) {	
+  	        print STDERR "log-likelihood mode\n";
+              }
+	
 	      SWITCH: {
 		  if ($matrix_parameter eq "Transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
 		  if ($matrix_parameter eq "MEME")     { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
@@ -751,8 +756,9 @@ sub MatScan_call {
 	    }
 	}
 	elsif (defined $matrix_input) {
-	    
-	    print STDERR "matrix as an input...\n";
+	    if ($debug) {
+	      print STDERR "matrix as an input...\n";
+	    }
 	    
 	    # Make a temporary file with the matrix input
 	    $_matscan_args = " -sm";
@@ -798,7 +804,6 @@ sub MatScan_call {
 	    $sout->write_seq ($seqobj);
 	    
 	}
-	
 	close $seq_fh;
 	
 	# Test empty file
