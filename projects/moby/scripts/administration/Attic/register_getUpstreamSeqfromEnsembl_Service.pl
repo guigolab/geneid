@@ -166,7 +166,7 @@ my ($REG) = $Central->registerService(
 				      secondary	=> {
 					  'organism' => {
 					      datatype => 'String',
-					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
+					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Monodelphis domestica', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
 					      default  => 'Homo sapiens',
 					  },
 					  'ensembl release' => {
