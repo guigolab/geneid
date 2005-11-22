@@ -1,284 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
-  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:7MEJ3ZYR4P0" author="Arnaud Kerhornou - akerhornou@imim.es" title="Promoter analysis of coexpressed genes. The input is a list of genes which upstream sequences will be retrieved from Ensembl database." />
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:7MEJ3ZYR4P0" author="Arnaud Kerhornou - akerhornou@imim.es" title="Upstream sequence analysis of coexpressed genes. This version takes a list of identifiers.">The input is a list of genes which upstream sequences will be retrieved from Ensembl database.
+It can be Ensembl identifiers, but also any external identifiers Ensembl recognizes (e.g. MOD ids such as Flybase ids, RefSeq ids, affymetrix ids etc.).
+
+It will be running MatScan to get a set of maps of putative binding sites (Transfac v6.4). Then these maps will be compared pair-by-pair by meta-alignment software. A score matrix is generated. This matrix will be used to cluster sequences using neighbour-joining algorithm. finally a pretty picture (png format) is generated.
+
+The output is:
+* a set of upstream sequences in FASTA format
+* a set of MatScan maps in GFF format
+* a set of Meta-Alignment output (Meta-alignment specific format)
+* a score matrix,
+* a sequence clustering tree in newick format,
+* a cluster tree picture in PNG format.</s:workflowdescription>
   <s:processor name="identifier" boring="true">
     <s:stringconstant>id</s:stringconstant>
+  </s:processor>
+  <s:processor name="Decode_base64_to_byte">
+    <s:local>org.embl.ebi.escience.scuflworkers.java.DecodeBase64</s:local>
   </s:processor>
   <s:processor name="Create_moby_data">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_meta">
+  <s:processor name="parse_moby_sequences">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_matscan">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_sequences">
-    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
-  </s:processor>
-  <s:processor name="parse_moby_matrix">
+  <s:processor name="parse_moby_meta">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_tree">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="parse_moby_matrix">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="NestedWorkflow">
     <s:workflow>
       <s:scufl version="0.2" log="0">
         <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:AHTHN6PNI32" author="" title="" />
-        <s:processor name="organism_articleName" boring="true">
-          <s:stringconstant>organism</s:stringconstant>
-        </s:processor>
-        <s:processor name="intergenic_only_articleName" boring="true">
-          <s:stringconstant>intergenic only</s:stringconstant>
-        </s:processor>
-        <s:processor name="CreateUpstreamLengthMobySecondary">
-          <s:beanshell>
-            <s:scriptvalue>import java.io.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.apache.xml.serialize.XMLSerializer;
-
-String OutObj="";
-String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
-
-DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
-DocumentBuilder db = dbf.newDocumentBuilder();
-
-InputSource SourceSkel = new InputSource(new StringReader(skel));
-
-Document docsalida=db.parse(SourceSkel);
-
-XMLSerializer serializer = new XMLSerializer();
-StringWriter sw=new StringWriter();
-
-NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
-
-serializer.setOutputCharStream(sw);
-
-Node comienzo = nodelistfinal.item(0);
-
-comienzo.setAttribute("articleName",articleName);
-// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
-// and it is its only child, we are going to reuse it!
-comienzo.getFirstChild().getFirstChild().setNodeValue(value);
-
-// Last step!!!
-serializer.serialize(docsalida);
-OutObj = sw.toString();
-
-MobySecondary = OutObj;</s:scriptvalue>
-            <s:beanshellinputlist>
-              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
-              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
-            </s:beanshellinputlist>
-            <s:beanshelloutputlist>
-              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
-            </s:beanshelloutputlist>
-          </s:beanshell>
-        </s:processor>
-        <s:processor name="CombineMoby">
-          <s:beanshell>
-            <s:scriptvalue>import java.io.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.apache.xml.serialize.XMLSerializer;
-
-String OutObj="";
-String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
-
-
-DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
-DocumentBuilder db = dbf.newDocumentBuilder();
-
-InputSource Source1 = new InputSource(new StringReader(MobyA));
-InputSource Source2 = new InputSource(new StringReader(MobyB));
-InputSource SourceSkel = new InputSource(new StringReader(skel));
-
-Document doc1=db.parse(Source1);
-Document doc2=db.parse(Source2);
-Document docsalida=db.parse(SourceSkel);
-
-XMLSerializer serializer = new XMLSerializer();
-StringWriter sw=new StringWriter();
-
-// First, Simples
-NodeList nodelist1an = doc1.getElementsByTagName("moby:Simple");
-NodeList nodelist1a = doc1.getElementsByTagName("Simple");
-NodeList nodelist2an = doc2.getElementsByTagName("moby:Simple");
-NodeList nodelist2a = doc2.getElementsByTagName("Simple");
-// Second, Collection
-NodeList nodelist1bn = doc1.getElementsByTagName("moby:Collection");
-NodeList nodelist1b = doc1.getElementsByTagName("Collection");
-NodeList nodelist2bn = doc2.getElementsByTagName("moby:Collection");
-NodeList nodelist2b = doc2.getElementsByTagName("Collection");
-// Third, secondary Parameter
-NodeList nodelist1cn = doc1.getElementsByTagName("moby:Parameter");
-NodeList nodelist1c = doc1.getElementsByTagName("Parameter");
-NodeList nodelist2cn = doc2.getElementsByTagName("moby:Parameter");
-NodeList nodelist2c = doc2.getElementsByTagName("Parameter");
-
-// We will iterate over these lists
-NodeList[] globalS={
-	nodelist1an,
-	nodelist1a,
-	nodelist2an,
-	nodelist2a
-};
-
-NodeList[] globalC={
-	nodelist1bn,
-	nodelist1b,
-	nodelist2bn,
-	nodelist2b,
-	nodelist1cn,
-	nodelist1c,
-	nodelist2cn,
-	nodelist2c
-};
-
-NodeList nodelistfinal = docsalida.getElementsByTagName("moby:mobyData");
-
-serializer.setOutputCharStream(sw);
-
-Node comienzo = nodelistfinal.item(0);
-
-// Common index variable for all this work
-int gi;
-int maxgi;
-
-// We are skipping over Collected Simples
-for(gi=0,maxgi=globalS.length;gi&lt;maxgi;gi++) {
-	int i;
-	int maxi;
-	for(i=0,maxi=globalS[gi].getLength();i&lt;maxi;i++) {
-		Node found=globalS[gi].item(i);
-		String nname=found.getParentNode().getNodeName();
-		if(nname.equals("moby:Collection") || nname.equals("Collection"))  next;
-		comienzo.appendChild(docsalida.importNode(found,true));
-	}
-}
-
-for(gi=0,maxgi=globalC.length;gi&lt;maxgi;gi++) {
-	int i;
-	int maxi;
-	for(i=0,maxi=globalC[gi].getLength();i&lt;maxi;i++) {
-		Node found=globalC[gi].item(i);
-		comienzo.appendChild(docsalida.importNode(found,true));
-	}
-}
-
-// Last step!!!
-serializer.serialize(docsalida);
-OutObj = sw.toString();
-
-CombinedMOBY = OutObj;</s:scriptvalue>
-            <s:beanshellinputlist>
-              <s:beanshellinput s:syntactictype="'text/xml'">MobyA</s:beanshellinput>
-              <s:beanshellinput s:syntactictype="'text/xml'">MobyB</s:beanshellinput>
-            </s:beanshellinputlist>
-            <s:beanshelloutputlist>
-              <s:beanshelloutput s:syntactictype="'text/xml'">CombinedMOBY</s:beanshelloutput>
-            </s:beanshelloutputlist>
-          </s:beanshell>
-        </s:processor>
-        <s:processor name="CreateIntergenicOnlyMobySecondary">
-          <s:beanshell>
-            <s:scriptvalue>import java.io.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.apache.xml.serialize.XMLSerializer;
-
-String OutObj="";
-String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
-
-DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
-DocumentBuilder db = dbf.newDocumentBuilder();
-
-InputSource SourceSkel = new InputSource(new StringReader(skel));
-
-Document docsalida=db.parse(SourceSkel);
-
-XMLSerializer serializer = new XMLSerializer();
-StringWriter sw=new StringWriter();
-
-NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
-
-serializer.setOutputCharStream(sw);
-
-Node comienzo = nodelistfinal.item(0);
-
-comienzo.setAttribute("articleName",articleName);
-// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
-// and it is its only child, we are going to reuse it!
-comienzo.getFirstChild().getFirstChild().setNodeValue(value);
-
-// Last step!!!
-serializer.serialize(docsalida);
-OutObj = sw.toString();
-
-MobySecondary = OutObj;</s:scriptvalue>
-            <s:beanshellinputlist>
-              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
-              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
-            </s:beanshellinputlist>
-            <s:beanshelloutputlist>
-              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
-            </s:beanshelloutputlist>
-          </s:beanshell>
-        </s:processor>
-        <s:processor name="CreateOrganismMobySecondary">
-          <s:beanshell>
-            <s:scriptvalue>import java.io.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.apache.xml.serialize.XMLSerializer;
-
-String OutObj="";
-String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
-
-DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
-DocumentBuilder db = dbf.newDocumentBuilder();
-
-InputSource SourceSkel = new InputSource(new StringReader(skel));
-
-Document docsalida=db.parse(SourceSkel);
-
-XMLSerializer serializer = new XMLSerializer();
-StringWriter sw=new StringWriter();
-
-NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
-
-serializer.setOutputCharStream(sw);
-
-Node comienzo = nodelistfinal.item(0);
-
-comienzo.setAttribute("articleName",articleName);
-// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
-// and it is its only child, we are going to reuse it!
-comienzo.getFirstChild().getFirstChild().setNodeValue(value);
-
-// Last step!!!
-serializer.serialize(docsalida);
-OutObj = sw.toString();
-
-MobySecondary = OutObj;</s:scriptvalue>
-            <s:beanshellinputlist>
-              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
-              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
-            </s:beanshellinputlist>
-            <s:beanshelloutputlist>
-              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
-            </s:beanshelloutputlist>
-          </s:beanshell>
-        </s:processor>
-        <s:processor name="upstream_length_articleName" boring="true">
-          <s:stringconstant>upstream length</s:stringconstant>
-        </s:processor>
         <s:processor name="Combine3Secondaries">
           <s:beanshell>
             <s:scriptvalue>import java.io.*;
@@ -400,6 +161,259 @@ CombinedMOBY = OutObj;</s:scriptvalue>
             </s:beanshelloutputlist>
           </s:beanshell>
         </s:processor>
+        <s:processor name="organism_articleName" boring="true">
+          <s:stringconstant>organism</s:stringconstant>
+        </s:processor>
+        <s:processor name="upstream_length_articleName" boring="true">
+          <s:stringconstant>upstream length</s:stringconstant>
+        </s:processor>
+        <s:processor name="CombineMoby">
+          <s:beanshell>
+            <s:scriptvalue>import java.io.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import org.apache.xml.serialize.XMLSerializer;
+
+String OutObj="";
+String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
+
+
+DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+
+InputSource Source1 = new InputSource(new StringReader(MobyA));
+InputSource Source2 = new InputSource(new StringReader(MobyB));
+InputSource SourceSkel = new InputSource(new StringReader(skel));
+
+Document doc1=db.parse(Source1);
+Document doc2=db.parse(Source2);
+Document docsalida=db.parse(SourceSkel);
+
+XMLSerializer serializer = new XMLSerializer();
+StringWriter sw=new StringWriter();
+
+// First, Simples
+NodeList nodelist1an = doc1.getElementsByTagName("moby:Simple");
+NodeList nodelist1a = doc1.getElementsByTagName("Simple");
+NodeList nodelist2an = doc2.getElementsByTagName("moby:Simple");
+NodeList nodelist2a = doc2.getElementsByTagName("Simple");
+// Second, Collection
+NodeList nodelist1bn = doc1.getElementsByTagName("moby:Collection");
+NodeList nodelist1b = doc1.getElementsByTagName("Collection");
+NodeList nodelist2bn = doc2.getElementsByTagName("moby:Collection");
+NodeList nodelist2b = doc2.getElementsByTagName("Collection");
+// Third, secondary Parameter
+NodeList nodelist1cn = doc1.getElementsByTagName("moby:Parameter");
+NodeList nodelist1c = doc1.getElementsByTagName("Parameter");
+NodeList nodelist2cn = doc2.getElementsByTagName("moby:Parameter");
+NodeList nodelist2c = doc2.getElementsByTagName("Parameter");
+
+// We will iterate over these lists
+NodeList[] globalS={
+	nodelist1an,
+	nodelist1a,
+	nodelist2an,
+	nodelist2a
+};
+
+NodeList[] globalC={
+	nodelist1bn,
+	nodelist1b,
+	nodelist2bn,
+	nodelist2b,
+	nodelist1cn,
+	nodelist1c,
+	nodelist2cn,
+	nodelist2c
+};
+
+NodeList nodelistfinal = docsalida.getElementsByTagName("moby:mobyData");
+
+serializer.setOutputCharStream(sw);
+
+Node comienzo = nodelistfinal.item(0);
+
+// Common index variable for all this work
+int gi;
+int maxgi;
+
+// We are skipping over Collected Simples
+for(gi=0,maxgi=globalS.length;gi&lt;maxgi;gi++) {
+	int i;
+	int maxi;
+	for(i=0,maxi=globalS[gi].getLength();i&lt;maxi;i++) {
+		Node found=globalS[gi].item(i);
+		String nname=found.getParentNode().getNodeName();
+		if(nname.equals("moby:Collection") || nname.equals("Collection"))  next;
+		comienzo.appendChild(docsalida.importNode(found,true));
+	}
+}
+
+for(gi=0,maxgi=globalC.length;gi&lt;maxgi;gi++) {
+	int i;
+	int maxi;
+	for(i=0,maxi=globalC[gi].getLength();i&lt;maxi;i++) {
+		Node found=globalC[gi].item(i);
+		comienzo.appendChild(docsalida.importNode(found,true));
+	}
+}
+
+// Last step!!!
+serializer.serialize(docsalida);
+OutObj = sw.toString();
+
+CombinedMOBY = OutObj;</s:scriptvalue>
+            <s:beanshellinputlist>
+              <s:beanshellinput s:syntactictype="'text/xml'">MobyA</s:beanshellinput>
+              <s:beanshellinput s:syntactictype="'text/xml'">MobyB</s:beanshellinput>
+            </s:beanshellinputlist>
+            <s:beanshelloutputlist>
+              <s:beanshelloutput s:syntactictype="'text/xml'">CombinedMOBY</s:beanshelloutput>
+            </s:beanshelloutputlist>
+          </s:beanshell>
+        </s:processor>
+        <s:processor name="intergenic_only_articleName" boring="true">
+          <s:stringconstant>intergenic only</s:stringconstant>
+        </s:processor>
+        <s:processor name="CreateOrganismMobySecondary">
+          <s:beanshell>
+            <s:scriptvalue>import java.io.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import org.apache.xml.serialize.XMLSerializer;
+
+String OutObj="";
+String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
+
+DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+
+InputSource SourceSkel = new InputSource(new StringReader(skel));
+
+Document docsalida=db.parse(SourceSkel);
+
+XMLSerializer serializer = new XMLSerializer();
+StringWriter sw=new StringWriter();
+
+NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
+
+serializer.setOutputCharStream(sw);
+
+Node comienzo = nodelistfinal.item(0);
+
+comienzo.setAttribute("articleName",articleName);
+// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
+// and it is its only child, we are going to reuse it!
+comienzo.getFirstChild().getFirstChild().setNodeValue(value);
+
+// Last step!!!
+serializer.serialize(docsalida);
+OutObj = sw.toString();
+
+MobySecondary = OutObj;</s:scriptvalue>
+            <s:beanshellinputlist>
+              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
+              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
+            </s:beanshellinputlist>
+            <s:beanshelloutputlist>
+              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
+            </s:beanshelloutputlist>
+          </s:beanshell>
+        </s:processor>
+        <s:processor name="CreateUpstreamLengthMobySecondary">
+          <s:beanshell>
+            <s:scriptvalue>import java.io.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import org.apache.xml.serialize.XMLSerializer;
+
+String OutObj="";
+String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
+
+DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+
+InputSource SourceSkel = new InputSource(new StringReader(skel));
+
+Document docsalida=db.parse(SourceSkel);
+
+XMLSerializer serializer = new XMLSerializer();
+StringWriter sw=new StringWriter();
+
+NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
+
+serializer.setOutputCharStream(sw);
+
+Node comienzo = nodelistfinal.item(0);
+
+comienzo.setAttribute("articleName",articleName);
+// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
+// and it is its only child, we are going to reuse it!
+comienzo.getFirstChild().getFirstChild().setNodeValue(value);
+
+// Last step!!!
+serializer.serialize(docsalida);
+OutObj = sw.toString();
+
+MobySecondary = OutObj;</s:scriptvalue>
+            <s:beanshellinputlist>
+              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
+              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
+            </s:beanshellinputlist>
+            <s:beanshelloutputlist>
+              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
+            </s:beanshelloutputlist>
+          </s:beanshell>
+        </s:processor>
+        <s:processor name="CreateIntergenicOnlyMobySecondary">
+          <s:beanshell>
+            <s:scriptvalue>import java.io.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import org.apache.xml.serialize.XMLSerializer;
+
+String OutObj="";
+String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
+
+DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+
+InputSource SourceSkel = new InputSource(new StringReader(skel));
+
+Document docsalida=db.parse(SourceSkel);
+
+XMLSerializer serializer = new XMLSerializer();
+StringWriter sw=new StringWriter();
+
+NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
+
+serializer.setOutputCharStream(sw);
+
+Node comienzo = nodelistfinal.item(0);
+
+comienzo.setAttribute("articleName",articleName);
+// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
+// and it is its only child, we are going to reuse it!
+comienzo.getFirstChild().getFirstChild().setNodeValue(value);
+
+// Last step!!!
+serializer.serialize(docsalida);
+OutObj = sw.toString();
+
+MobySecondary = OutObj;</s:scriptvalue>
+            <s:beanshellinputlist>
+              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
+              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
+            </s:beanshellinputlist>
+            <s:beanshelloutputlist>
+              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
+            </s:beanshelloutputlist>
+          </s:beanshell>
+        </s:processor>
         <s:link source="intergenic_only" sink="CreateIntergenicOnlyMobySecondary:value" />
         <s:link source="moby_GenesList" sink="CombineMoby:MobyA" />
         <s:link source="organism" sink="CreateOrganismMobySecondary:value" />
@@ -436,30 +450,6 @@ CombinedMOBY = OutObj;</s:scriptvalue>
       <s:authorityName>bioinfo.ochoa.fib.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="runMatScanGFFCollection">
-    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a collection of DNASequence objects and returns a collection of GFF objects (one GFF object for each DNASequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMatScanGFFCollection</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="runMultiMetaAlignment">
-    <s:description>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMultiMetaAlignment</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="generateScoreMatrix">
-    <s:description>Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>generateScoreMatrix</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
   <s:processor name="fromGenericSequenceCollectiontoFASTA">
     <s:description>Converts a collection of GenericSequence moby object into a FASTA object</s:description>
     <s:biomobywsdl>
@@ -477,26 +467,47 @@ CombinedMOBY = OutObj;</s:scriptvalue>
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="Decode_base64_to_byte">
-    <s:local>org.embl.ebi.escience.scuflworkers.java.DecodeBase64</s:local>
+  <s:processor name="generateScoreMatrix">
+    <s:description>Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>generateScoreMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFFCollection">
+    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a collection of DNASequence objects and returns a collection of GFF objects (one GFF object for each DNASequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFFCollection</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMultiMetaAlignment">
+    <s:description>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMultiMetaAlignment</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
   </s:processor>
   <s:link source="gene_identifiers" sink="Create_moby_data:stringvalue" />
   <s:link source="namespace" sink="Create_moby_data:namespace" />
   <s:link source="Create_moby_data:mobydata" sink="NestedWorkflow:moby_GenesList" />
   <s:link source="organism" sink="NestedWorkflow:organism" />
-  <s:link source="Decode_base64_to_byte:bytes" sink="Moby_Tree_png" />
   <s:link source="fromGenericSequenceCollectiontoFASTA:output" sink="parse_moby_sequences:mobydata" />
   <s:link source="generateScoreMatrix:output" sink="inbHierarchicalCluster:input" />
+  <s:link source="generateScoreMatrix:output" sink="parse_moby_matrix:mobydata" />
   <s:link source="getUpstreamSeqfromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="fromGenericSequenceCollectiontoFASTA:GenericSequence(Collection - 'sequences')" />
   <s:link source="getUpstreamSeqfromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'upstream_sequences')" />
   <s:link source="identifier:value" sink="Create_moby_data:id" />
   <s:link source="intergenic_only" sink="NestedWorkflow:intergenic_only" />
   <s:link source="upstream_length" sink="NestedWorkflow:upstream_length" />
   <s:link source="NestedWorkflow:getUpstreamSeqfromEnsemblInput" sink="getUpstreamSeqfromEnsembl:input" />
-  <s:link source="generateScoreMatrix:output" sink="parse_moby_matrix:mobydata" />
   <s:link source="inbHierarchicalCluster:output" sink="inbTreeView:input" />
   <s:link source="inbTreeView:b64_Encoded_PNG(_ANON_)" sink="parse_moby_tree:mobydata" />
   <s:link source="parse_moby_tree:value" sink="Decode_base64_to_byte:base64" />
+  <s:link source="Decode_base64_to_byte:bytes" sink="Moby_Tree_png" />
   <s:link source="inbHierarchicalCluster:Clustering(_ANON_)" sink="Moby_Newick" />
   <s:link source="parse_moby_matrix:value" sink="Moby_Matrix" />
   <s:link source="parse_moby_matscan:value" sink="Moby_MatScan" />
