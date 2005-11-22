@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.39 2005-11-21 22:47:22 gmaster Exp $
+# $Id: Factory.pm,v 1.40 2005-11-22 09:32:44 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -627,6 +627,7 @@ sub PromoterExtraction_call {
 	if (lc ($organism) eq "rattus norvegicus")        { $_promExtraction_args .= " -s rattus_norvegicus"; last SWITCH; }
 	if (lc ($organism) eq "canis familiaris")         { $_promExtraction_args .= " -s canis_familiaris"; last SWITCH; }
 	if (lc ($organism) eq "bos taurus")               { $_promExtraction_args .= " -s bos_taurus"; last SWITCH; }
+	if (lc ($organism) eq "monodelphis domestica")               { $_promExtraction_args .= " -s monodelphis-domestica"; last SWITCH; }
 	if (lc ($organism) eq "gallus gallus")            { $_promExtraction_args .= " -s gallus_gallus"; last SWITCH; }
 	if (lc ($organism) eq "xenopus tropicalis")       { $_promExtraction_args .= " -s xenopus_tropicalis"; last SWITCH; }
 	if (lc ($organism) eq "danio rerio")              { $_promExtraction_args .= " -s danio_rerio"; last SWITCH; }

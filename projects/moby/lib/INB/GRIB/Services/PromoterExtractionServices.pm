@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.10 2005-11-18 17:19:40 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.11 2005-11-22 09:32:44 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -168,7 +168,7 @@ sub _do_query_PromoterExtraction {
     my ($orthologous_mode)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "orthologous mode");
 
     (not defined $organism)          and $organism          = "Homo sapiens";
-    (not defined $dbrelease)         and $dbrelease         = 34;
+    (not defined $dbrelease)         and $dbrelease         = 35;
     (not defined $upstream_length)   and $upstream_length   = 2000;
     (not defined $downstream_length) and $downstream_length = 0; 
     (not defined $intergenic_only)   and $intergenic_only   = "False";
