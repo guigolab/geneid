@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.41 2005-11-23 13:52:58 gmaster Exp $
+# $Id: Factory.pm,v 1.42 2005-11-23 14:15:09 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -928,18 +928,15 @@ sub generateScoreMatrix_call {
   # Generate a temporary file
 
   my ($meta_fh, $meta_file) = tempfile("/tmp/META_OUTPUT.XXXXXX", UNLINK => 0);
-  # close ($meta_fh);
   print $meta_fh "@$inputdata_arrayref\n";
   close $meta_fh;
   
   # Run generateScoreMatrix
-    
+  
+  # print STDERR "got " . @$inputdata_arrayref . " array references (meta alignments)\n";
   # print STDERR "Running generateScoreMatrix.pl, with this command:\n";
   # print STDERR "cat $meta_file | $_application_dir\/$_application_bin $_application_args\n";
 
-  # echo not good !!!
-  # probably better to use a temporary file...
-  # my $matrix = qx/echo "@$inputdata_arrayref" | $_application_dir\/$_application_bin $_application_args/;
   my $matrix = qx/cat $meta_file | $_application_dir\/$_application_bin $_application_args/;
 
   unlink $meta_file;
