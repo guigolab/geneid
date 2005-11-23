@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.42 2005-11-23 14:15:09 gmaster Exp $
+# $Id: Factory.pm,v 1.43 2005-11-23 16:12:54 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -762,7 +762,7 @@ sub MatScan_call {
 	    }
 	    
 	    # Make a temporary file with the matrix input
-	    $_matscan_args = " -sm";
+	    $_matscan_args .= " -sm";
 	    ($matrix_fh, $matrix_file) = tempfile("/tmp/MATSCAN_MATRIX.XXXXXX", UNLINK => 0);
 	    print $matrix_fh "$matrix_input";
 	    close $matrix_fh;
@@ -811,7 +811,7 @@ sub MatScan_call {
 	if (-z $seqfile) {
 	    print STDERR "Error, empty sequence file...\n";
 	}
-
+	
 	if ($debug) {
 	    print STDERR "Running Matscan, with this command:\n";
 	    print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file\n";
