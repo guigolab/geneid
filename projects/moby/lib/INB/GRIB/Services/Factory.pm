@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.43 2005-11-23 16:12:54 gmaster Exp $
+# $Id: Factory.pm,v 1.44 2005-11-23 16:56:21 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -853,7 +853,7 @@ sub MetaAlignment_call {
     my $output_format  = $parameters->{output_format};
 	
     # Llama a Meta-alignment en local
-    my $_meta_alignment_dir  = "/home/ug/gmaster/Meta/";
+    my $_meta_alignment_dir  = "/home/ug/gmaster/projects/Meta";
     my $_meta_alignment_bin  = "bin/meta";
     my $_meta_alignment_args = "-a $alpha_penalty -l $lambda_penalty -m $mu_penalty";
 
