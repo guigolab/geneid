@@ -2,6 +2,8 @@
 
 use strict;
 
+my $_debug = 0;
+
 my $in_file = shift;
 # score matrix or probability matrix mode
 my $mode    = shift;
@@ -13,6 +15,7 @@ if (not ($mode =~ /^score$/i || $mode =~ /^probability$/i)) {
 }
 
 my $matrices = [];
+my $motif_index = 1;
 
 open FILE, "<$in_file" or die "can't open file, $in_file!\n";
 while (<FILE>) {
@@ -23,9 +26,9 @@ while (<FILE>) {
 	    # Jump the next line
 	    $line = <FILE>;
 	    # parse from this line upto "----" line
-	    my $matrix = "";
 	    $line = <FILE>;
-	    $matrix .= "$line";
+	    my $matrix .= "MEME_Motif_" . $motif_index . " $line";
+	    $motif_index++;
 	    $line = <FILE>;
 	    while (not ($line =~ /^-/)) {
 		$matrix .= "$index   $line";
@@ -43,9 +46,9 @@ while (<FILE>) {
 	    # Jump the next line
 	    $line = <FILE>;
 	    # parse from this line upto "----" line
-	    my $matrix = "";
 	    $line = <FILE>;
-	    $matrix .= "$line";
+	    my $matrix = "MEME_Motif_" . $motif_index . " $line";
+	    $motif_index++;
 	    $line = <FILE>;
 	    while (not ($line =~ /^-/)) {
 		$matrix .= "$index   $line";
@@ -60,5 +63,7 @@ while (<FILE>) {
 }
 close FILE;
 
-print STDERR "matrices:\n";
+if ($_debug) {
+    print STDERR "matrices:\n";
+}
 print join ("\n", @$matrices);

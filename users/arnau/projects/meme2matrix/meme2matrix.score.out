@@ -1,4 +1,4 @@
-log-odds matrix: alength= 4 w= 41 n= 12590 bayes= 10.5834 E= 1.7e-013 
+MEME_Motif_1 log-odds matrix: alength= 4 w= 41 n= 12590 bayes= 10.5834 E= 1.7e-013 
 1      142    -17   -117   -982 
 2     -982   -982    141     42 
 3     -117    115   -117    -17 
@@ -41,7 +41,7 @@ log-odds matrix: alength= 4 w= 41 n= 12590 bayes= 10.5834 E= 1.7e-013
 40     -982    183   -982   -117 
 41      115     41   -117   -982 
 //
-log-odds matrix: alength= 4 w= 21 n= 12870 bayes= 10.6508 E= 1.9e-001 
+MEME_Motif_2 log-odds matrix: alength= 4 w= 21 n= 12870 bayes= 10.6508 E= 1.9e-001 
 1     -965   -965   -965    200 
 2      100   -100   -965     59 
 3      132   -100   -965      0 
