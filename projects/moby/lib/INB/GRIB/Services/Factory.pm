@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.44 2005-11-23 16:56:21 gmaster Exp $
+# $Id: Factory.pm,v 1.45 2005-11-24 11:12:23 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1156,16 +1156,10 @@ sub meme2matrix_call {
     # Because we want to return a collection of text-formatted objects (each object containing a matrix)
     # So better to return an array rather than just a string
     
+    # To split the matrices, check which position they start, ie chech th position of 'MEME'
     my @positions = ();
-    if ($matrix_mode eq "raw format") {
-	while ($matrices_output =~ m/log/g) {
-	    push (@positions, pos ($matrices_output) - 3);
-	}
-    }
-    elsif ($matrix_mode eq "log-likelihood") {
-	while ($matrices_output =~ m/letter/g) {
-	    push (@positions, pos ($matrices_output) - 6);
-	}
+    while ($matrices_output =~ m/MEME/g) {
+	push (@positions, pos ($matrices_output) - 4);
     }
     
     if ($_debug) {
