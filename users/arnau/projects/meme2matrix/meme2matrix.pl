@@ -27,7 +27,7 @@ while (<FILE>) {
 	    $line = <FILE>;
 	    # parse from this line upto "----" line
 	    $line = <FILE>;
-	    my $matrix .= "MEME_Motif_" . $motif_index . " $line";
+	    my $matrix = "MEME_Motif_" . $motif_index . " $line";
 	    $motif_index++;
 	    $line = <FILE>;
 	    while (not ($line =~ /^-/)) {
