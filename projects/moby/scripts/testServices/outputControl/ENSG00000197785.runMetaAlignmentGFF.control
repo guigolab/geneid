@@ -2,8 +2,8 @@
         <moby:mobyData moby:queryID='10'>
             <moby:Simple moby:articleName='meta_predictions'><moby:GFF namespace='' id='ENSG00000197785'>
 <![CDATA[
-# meta_v1.0
-# date Thu Oct  6 11:02:39 2005
+# meta_v1.1
+# date Fri Nov 25 12:30:37 2005
 # MAP1 ENSG00000197785 - Length = 203 elems
 # MAP2 ENSG00000197785 - Length = 203 elems
 # ALPHA = 0.50, LAMBDA = 0.10, MU = 0.10
