@@ -32,7 +32,7 @@ return <<"END_HELP";
 Description: Execute GeneID Moby services available from genome.imim.es
 Usage:
 
-    GenericSequencetoFASTA_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
+    GenericSequencetoFASTA_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file} -t {sequence format type}
 	-h help
 	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
 		<1> or Chirimoyo
@@ -40,10 +40,11 @@ Usage:
 		<3> or Inab
 		<4> or BioMoby
 	-s Service Name
-	-f Sequence(s) input file, in FASTA format - optional
+	-f Sequence(s) input file, in FASTA format or XML
+	-t sequence format type (xml or fasta)
 	
 Examples using some combinations:
-	perl GenericSequencetoFASTA_Moby_service.pl -x 1 -s runGeneIDGFF -f /home/ug/arnau/data/AC005155.fa
+	perl GenericSequencetoFASTA_Moby_service.pl -x 1 -s fromGenericSequencetoFASTA -f /home/ug/arnau/data/AC005155.fa -t fasta
 
 END_HELP
 
@@ -52,18 +53,18 @@ END_HELP
 BEGIN {
 	
 	# Determines the options with values from program
-	use vars qw/$opt_h $opt_x $opt_s $opt_f/;
+	use vars qw/$opt_h $opt_x $opt_s $opt_f $opt_t/;
 	   
 	# these are switches taking an argument (a value)
-	my $switches = 'hxsf';
+	my $switches = 'hxsft';
 	   
 	# Get the switches
 	getopt($switches);
 	
 	# If the user does not write nothing, skip to help
-	if (defined($opt_h) || !defined($opt_x) || !defined($opt_s)){
-		print help;
-		exit 0;
+	if (defined($opt_h) || !defined($opt_x) || !defined($opt_s) || !defined($opt_t)){
+	    print help;
+	    exit 0;
 	}
 	
 }
@@ -84,6 +85,13 @@ $::authURI = 'genome.imim.es';
 
 my $in_file    = $opt_f || "/home/ug/arnau/data/AC005155.fa";
 my $datasource = "EMBL";
+my $format_type = $opt_t;
+if (not ((lc ($format_type) eq "fasta") || (lc ($format_type) eq "xml"))) {
+    print STDERR "don't know about this sequence format type, $format_type\n";
+    print STDERR "should be xml or fasta\n";
+    exit 0;
+}
+
 
 ##################################################################
 #
@@ -218,49 +226,22 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 #
 ##################################################################
 
-my $seqin = Bio::SeqIO->new (
-			     -file   => $in_file,
-			     -format => 'fasta',
-			     );
+my $result;
 
-# Execute GeneID Web service on each individual sequence
-# Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
-# See Geneid_Moby_Service.v2.pl for this
+if ($format_type eq "xml") {
 
-while (my $seqobj = $seqin->next_seq) {
-    my $nucleotides  = $seqobj->seq;
-    my $seq_id       = $seqobj->display_id;
-    my $lnucleotides = length($nucleotides);
-
-    ##################################################################
-    #
-    # Set up the service input and the secondary articles in XML format 
-    #
-    ##################################################################
-
-    #
-    # Sequence Input
-    #
-
-    my $xml_input = <<PRT;
-<DNASequence namespace="$datasource" id="$seq_id">
-  <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
-  <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
-</DNASequence>
-PRT
-
+    my $xml_input = qx/cat $in_file/;
+    
     ##################################################################
     #
     # Service execution
     #
     ##################################################################
-
-    my $result;
-
+    
     if ($serviceName =~ /collection/i) {
-
+	
 	# Collection
-
+	
 	# Make a collection
 	my $xml_inputs = [$xml_input,$xml_input];
 	
@@ -276,18 +257,72 @@ PRT
 						     ["$articleName", $xml_input]
 						     ]);
     }
-
-    ##################################################################
-    #
-    # Result processing
-    #
-    ##################################################################
-
-    print STDERR "result\n";
-    print $result;
-    print STDERR "\n";
-
 }
+else {
+    my $seqin = Bio::SeqIO->new (
+				 -file   => $in_file,
+				 -format => 'fasta',
+				 );
+    
+    while (my $seqobj = $seqin->next_seq) {
+	my $nucleotides  = $seqobj->seq;
+	my $seq_id       = $seqobj->display_id;
+	my $lnucleotides = length($nucleotides);
+	
+	##################################################################
+	#
+	# Set up the service input and the secondary articles in XML format 
+	#
+	##################################################################
+	
+	#
+	# Sequence Input
+	#
+	
+	my $xml_input = <<PRT;
+<DNASequence namespace="$datasource" id="$seq_id">
+    <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
+    <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
+    </DNASequence>
+PRT
+	    
+        ##################################################################
+        #
+        # Service execution
+	#
+        ##################################################################
+
+        if ($serviceName =~ /collection/i) {
+	    
+	    # Collection
+	    
+	    # Make a collection
+	    my $xml_inputs = [$xml_input,$xml_input];
+	    
+	    $result = $Service->execute(XMLinputlist => [
+							 ["$articleName", $xml_inputs]
+							 ]);
+	}
+	else {
+	    
+	    # Simple
+	    
+	    $result = $Service->execute(XMLinputlist => [
+							 ["$articleName", $xml_input]
+							 ]);
+	}
+    }
+}
+    
+##################################################################
+#
+# Result processing
+#
+##################################################################
+
+print STDERR "result\n";
+print $result;
+print STDERR "\n";
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
