@@ -11,7 +11,7 @@ use strict;
 # be prepare for command-line options/arguments
 use Getopt::Std;
 use Benchmark;
-
+use Data::Dumper;
 # BioMoby and SOAP libraries
 
 use MOBY::Client::Central;
@@ -82,10 +82,11 @@ my $gostat_allArray_xml_file  = "allArray.fbgn.xml";
 my $ENSG00000197785_upstream_sequence_xml_file = "ENSG00000197785.xml";
 my $ENSG00000197785_matscan_xml_file           = "ENSG00000197785.runMatScanGFF.xml";
 my $ENSG00000197785_fasta_xml_file             = "ENSG00000197785.fa.xml";
+my $Dmel_MultiMeta_xml_file = "Dmel.MultiMetaOutput.xml";
 
 # Check that the files exist !!!
 
-if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_upstream_sequence_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_matscan_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_fasta_xml_file")) {
+if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_upstream_sequence_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_matscan_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_fasta_xml_file") || (not -f "$input_data_dir/$Dmel_MultiMeta_xml_file")) {
     print STDERR "Error, can't find one of the input files in directory, $input_data_dir!\n";
     exit 0;
 }
@@ -99,6 +100,7 @@ my $gostat_allArray_xml  = qx/cat $input_data_dir\/$gostat_allArray_xml_file/;
 my $ENSG00000197785_upstream_sequence_xml = qx/cat $input_data_dir\/$ENSG00000197785_upstream_sequence_xml_file/;
 my $ENSG00000197785_matscan_xml           = qx/cat $input_data_dir\/$ENSG00000197785_matscan_xml_file/;
 my $ENSG00000197785_fasta_xml             = qx/cat $input_data_dir\/$ENSG00000197785_fasta_xml_file/;
+my $Dmel_MultiMeta_xml   = qx/cat $input_data_dir\/$Dmel_MultiMeta_xml_file/;
 
 my $runGeneID_control_file                  = "Hsap_BTK.msk.runGeneID.control";
 my $runGeneIDGFF_control_file               = "Hsap_BTK.msk.runGeneIDGFF.control";
@@ -112,7 +114,8 @@ my $runMatScanGFF_control_file              = "ENSG00000197785.runMatScanGFF.con
 my $runMatScanGFFCollection_control_file    = "ENSG00000197785.runMatScanGFFCollection.control";
 my $runMetaAlignment_control_file           = "ENSG00000197785.runMetaAlignment.control";
 my $runMetaAlignmentGFF_control_file        = "ENSG00000197785.runMetaAlignmentGFF.control";
-my $fromFASTAtoDNASequenceCollection_control_file     = "ENSG00000197785.fromFASTAtoDNASequenceCollection.control";
+my $fromFASTAtoDNASequenceCollection_control_file = "ENSG00000197785.fromFASTAtoDNASequenceCollection.control";
+my $generateScoreMatrix_control_file        = "mut1_downreg.fbgn.ScoresMatrix.control";
 
 ##################################################################
 #
@@ -250,8 +253,6 @@ if (defined $service) {
     
     my @diff_results = qx/diff $control_data_dir\/$runGeneIDGFF_control_file $results_file/;
 
-    
-    
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "runGeneIDGFF service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
@@ -286,7 +287,7 @@ if (defined $service) {
     print $results_fh "$result\n";
     
     my @diff_results = qx/diff $control_data_dir\/$translateGeneIDGFFPredictions_control_file $results_file/;
-
+    
     if (@diff_results > 0) {
 	print STDERR "translateGeneIDGFFPredictions service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
@@ -580,6 +581,45 @@ if (defined $service) {
     else {
 	
 	print STDERR "fromFASTAtoDNASequenceCollection okay...\n";
+	
+	close $results_fh;
+	unlink $results_file;
+    }
+}
+
+# Execute generateScoreMatrix Web service
+
+print STDERR "\ntesting generateScoreMatrix...\n\n";
+
+# Construct the meta output moby objects array from the concatenated string
+
+my @meta_output_objects = split ("\n\n", $Dmel_MultiMeta_xml);
+
+$service = MobyServiceInstantiation ($C, "generateScoreMatrix", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['meta_predictions', \@meta_output_objects]
+						    ]
+				   );
+    
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+    
+    print $results_fh "$result\n";
+    
+    my @diff_results = qx/diff $control_data_dir\/$generateScoreMatrix_control_file $results_file/;    
+    
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "generateScoreMatrix service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+	
+	close $results_fh;
+	unlink $results_file;
+	
+    }
+    else {
+	
+	print STDERR "generateScoreMatrix okay...\n";
 	
 	close $results_fh;
 	unlink $results_file;
