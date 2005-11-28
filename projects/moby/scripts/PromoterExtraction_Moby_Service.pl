@@ -2,7 +2,7 @@
 
 ##################################################################
 #
-# GOstat Moby Service Client
+# Upstream Sequence retrieval from Ensembl Moby Service Client
 #
 ##################################################################
 
@@ -95,7 +95,7 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 
 my $in_file  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
 # my $in_file  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
-$in_file  = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/data/geneIds.forward.lst";
+# $in_file  = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/data/geneIds.forward.lst";
 my $datasource = "Ensembl";
 
 if ((! -f $in_file)) {
@@ -129,12 +129,12 @@ PRT
 # Parameters
 #
 
-my $organism          = "Homo sapiens";
+my $organism          = "homo sapiens";
 my $dbrelease         = "34";
 my $upstream_length   = 5000;
 my $downstream_length = 0;
-my $intergenic_only   = "False";
-my $orthologous_mode  = "False";
+my $intergenic_only   = "true";
+my $orthologous_mode  = "false";
 
 my $organism_xml = <<PRT;
 <Value>$organism</Value>

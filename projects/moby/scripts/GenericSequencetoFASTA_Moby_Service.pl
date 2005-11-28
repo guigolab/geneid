@@ -16,7 +16,6 @@ use Getopt::Std;
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
 # use SOAP::Lite + 'trace';
 
 # Bioperl Libraries
@@ -29,7 +28,7 @@ use Benchmark;
 
 sub help {
 return <<"END_HELP";
-Description: Execute GeneID Moby services available from genome.imim.es
+Description: Execute fromGenericSequencetoFASTA Moby services available from genome.imim.es
 Usage:
 
     GenericSequencetoFASTA_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file} -t {sequence format type}
@@ -63,7 +62,7 @@ BEGIN {
 	
 	# If the user does not write nothing, skip to help
 	if (defined($opt_h) || !defined($opt_x) || !defined($opt_s) || !defined($opt_t)){
-	    print help;
+	    print STDERR help;
 	    exit 0;
 	}
 	
@@ -283,7 +282,7 @@ else {
 <DNASequence namespace="$datasource" id="$seq_id">
     <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
     <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
-    </DNASequence>
+</DNASequence>
 PRT
 	    
         ##################################################################

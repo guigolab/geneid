@@ -227,7 +227,7 @@ open FILE, "$maps_file" or die "can't open maps file!\n";
 my $maps_xml = [];
 my $map_xml  = "";
 
-my $maximum_pairs = 100000;
+my $maximum_pairs = 50;
 my $index = 0;
 
 while (<FILE>) {
