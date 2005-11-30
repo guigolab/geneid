@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.48 2005-11-30 15:37:00 gmaster Exp $
+# $Id: Factory.pm,v 1.49 2005-11-30 16:14:53 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -858,44 +858,68 @@ sub MetaAlignment_call {
     my $alpha_penalty  = $parameters->{alpha_penalty};
     my $lambda_penalty = $parameters->{lambda_penalty};
     my $mu_penalty     = $parameters->{mu_penalty};
-
+    
     my $output_format  = $parameters->{output_format};
-	
+    
     # Llama a Meta-alignment en local
     my $_meta_alignment_dir  = "/home/ug/gmaster/projects/Meta";
     my $_meta_alignment_bin  = "bin/meta";
     my $_meta_alignment_args = "-a $alpha_penalty -l $lambda_penalty -m $mu_penalty";
 
+    # Check that the binary is in place
+    if (! -f "$_meta_alignment_dir/$_meta_alignment_bin") {
+	$note = "meta-alignment binary not found";
+	print STDERR "$note\n";
+	$code = 701;
+	return ("", $note, $code);
+    }
+    
     if ($output_format eq "GFF") {
 	$_meta_alignment_args .= " -g";
     }
-
-    # Create the temp map files
-
-    my ($map1_fh, $map1_file) = tempfile("/tmp/META_MAP1.XXXXXX", UNLINK => 0);
-    close ($map1_fh);
     
-    open (FILE, ">$map1_file") or die "can't open temp file, $map1_file!\n";
+    # Create the temp map files
+    
+    my ($map1_fh, $map1_file);
+    eval {
+	($map1_fh, $map1_file) = tempfile("/tmp/META_MAP1.XXXXXX", UNLINK => 0);
+	close ($map1_fh);
+	open (FILE, ">$map1_file");
+    };
+    if ($@) {
+	$note = "can't open meta-alignment input temporary file!\n";
+	$code = 701;
+	print STDERR "$note\n";
+	return ("", $note, $code);
+    }
     print FILE $map1;
     close FILE;
-
-    # Create the temp map files
-
-    my ($map2_fh, $map2_file) = tempfile("/tmp/META_MAP2.XXXXXX", UNLINK => 0);
-    close ($map2_fh);
     
-    open (FILE, ">$map2_file") or die "can't open temp file, $map2_file!\n";
+    # Create the temp map files
+    
+    my ($map2_fh, $map2_file);
+    eval {
+	($map2_fh, $map2_file) = tempfile("/tmp/META_MAP2.XXXXXX", UNLINK => 0);
+	close ($map2_fh);
+	open (FILE, ">$map2_file");
+    };
+    if ($@) {
+	$note = "can't open meta-alignment input temporary file!\n";
+	$code = 701;
+	print STDERR "$note\n";
+	return ("", $note, $code);
+    }
     print FILE $map2;
     close FILE;
 
     # Sorting
-
+    
     my $map1_sorted = qx/cat $map1_file | sort +3n/;
-
+    
     open (FILE, ">$map1_file") or die "can't open temp file, $map1_file!\n";
     print FILE $map1_sorted;
     close FILE;
-
+    
     my $map2_sorted = qx/cat $map2_file | sort +3n/;
     
     open (FILE, ">$map2_file") or die "can't open temp file, $map2_file!\n";
@@ -907,13 +931,23 @@ sub MetaAlignment_call {
     # print STDERR "Running Meta-alignment, with this command:\n";
     # print STDERR "$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file\n";
     
-    my ($stdout_fh, $stdout_file) = tempfile("/tmp/META_OUTPUT.XXXXXX", UNLINK => 0);
-    close $stdout_fh;
+    my ($stdout_fh, $stdout_file);
+    eval {
+	($stdout_fh, $stdout_file) = tempfile("/tmp/META_OUTPUT.XXXXXX", UNLINK => 0);
+	close $stdout_fh;
+    };
+    if ($@) {
+	$note = "can't open a temporary file to store meta-alignment output!\n";
+	$code = 701;
+	print STDERR "$note\n";
+	return ("", $note, $code);
+    }
+    
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
     
     my $failed = system (@args);
     if ($failed > 0) {
-	$note = "meta-alignment system call died (with error code, $?), must be due to a segmentation fault!\n";
+	$note = "meta-alignment system call died (with error code, $?).\n";
 	$code = 701;
 	
 	if (($! != ENOTTY) || ($! ne "Inappropriate ioctl for device")) {
