@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.46 2005-11-29 13:13:21 gmaster Exp $
+# $Id: Factory.pm,v 1.47 2005-11-30 14:51:28 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -70,19 +70,25 @@ package INB::GRIB::Services::Factory;
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 use Carp;
+# Just for Running GeneID - CGI call
 use CGI;
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Request::Common;
 
+# Create temporary data files
 use File::Temp qw/tempfile/;
 
 # Bioperl
 
 use Bio::SeqIO;
 use Bio::Seq;
+
+# Report Unix Error codes
+use Errno qw (EINTR EIO :POSIX);
 
 require Exporter;
 
@@ -838,6 +844,9 @@ sub MatScan_call {
 sub MetaAlignment_call {
     my %args = @_;  
 
+    # method output
+    my ($meta_output, $note, $code) = ("", undef, undef);
+    
     # relleno los parametros por defecto MetaAlignment_call
 
     my $map1 = $args{map1};
@@ -888,11 +897,11 @@ sub MetaAlignment_call {
     close FILE;
 
     my $map2_sorted = qx/cat $map2_file | sort +3n/;
-
+    
     open (FILE, ">$map2_file") or die "can't open temp file, $map2_file!\n";
     print FILE $map2_sorted;
     close FILE;
-
+    
     # Run meta
     
     # print STDERR "Running Meta-alignment, with this command:\n";
@@ -900,18 +909,27 @@ sub MetaAlignment_call {
     
     my $stdout_file = "/tmp/meta_stdout";
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
+    
     my $failed = system (@args);
     if ($failed > 0) {
-	print STDERR "meta system call died: $?, must be a seg fault!\n";
-	exit 0;
+	$note = "meta-alignment system call died (with error code, $?), must be due to a segmentation fault!\n";
+	$code = 701;
+	
+	if (($! != ENOTTY) || ($! ne "Inappropriate ioctl for device")) {
+	    # This is not an error, just mean that stdout is a terminal !!
+	    print STDERR "Error, '$!'\n";
+	}
+	print STDERR $note;
     }
-    my $meta_output = qx/cat $stdout_file/;
+    else {
+	$meta_output = qx/cat $stdout_file/;
+    }
     
     unlink $stdout_file;
     unlink $map1_file;
     unlink $map2_file;
     
-    return $meta_output;
+    return ($meta_output, $note, $code);
     
 }
 
