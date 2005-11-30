@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.6 2005-11-30 14:51:29 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.7 2005-11-30 15:10:20 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -495,7 +495,9 @@ sub _do_query_MultiMetaAlignment {
 		    }
 		    
 		    my ($meta_report, $note, $code) = MetaAlignment_call (map1  => $map1, map2  => $map2, parameters => \%parameters);
-		    push (@notes, $note);
+		    if (defined $note) {
+			push (@notes, $note);
+		    }
 		    
 		    # Leave it for now on, because for such collection, i don't know how to report properly exceptions
 
@@ -851,7 +853,7 @@ sub runMultiMetaAlignment {
 	}
 	
 	my ($query_response, $notes_aref) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
-	if (defined $notes_aref) {
+	if (@$notes_aref > 0) {
 	    push (@notes, @$notes_aref);
 	}
 	
@@ -864,6 +866,8 @@ sub runMultiMetaAlignment {
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby.
     if (@notes > 0) {
+	print STDERR "exception raised\n";
+	
 	return responseHeader(
 			      -authority => "genome.imim.es",
 			      -note      => "<Notes>" . join ("\n", @notes) . "</Notes>"
@@ -871,6 +875,8 @@ sub runMultiMetaAlignment {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	print STDERR "fine\n";
+	
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -963,7 +969,7 @@ sub runMultiMetaAlignmentGFF {
 	}
 	
 	my ($query_response, $notes_aref) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
-	if (defined $notes_aref) {
+	if (@$notes_aref > 0) {
 	    push (@notes, @$notes_aref);
 	}
 	
