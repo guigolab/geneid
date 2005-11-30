@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.47 2005-11-30 14:51:28 gmaster Exp $
+# $Id: Factory.pm,v 1.48 2005-11-30 15:37:00 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -907,7 +907,8 @@ sub MetaAlignment_call {
     # print STDERR "Running Meta-alignment, with this command:\n";
     # print STDERR "$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file\n";
     
-    my $stdout_file = "/tmp/meta_stdout";
+    my ($stdout_fh, $stdout_file) = tempfile("/tmp/META_OUTPUT.XXXXXX", UNLINK => 0);
+    close $stdout_fh;
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
     
     my $failed = system (@args);
