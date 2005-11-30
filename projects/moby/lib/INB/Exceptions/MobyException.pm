@@ -29,7 +29,7 @@ sub new {
 	# Add attribute of exception code
 	if (exists($args{code}) && defined($args{code})) {
 		# Check if input code is correct 
-		my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($args{code});
+		my ($standardMessage) = INB::Exceptions::MobyExceptionCodes::getExceptionCodeDescription($args{code});
 	
 		# If standard message is defined that means, the exception code is correct
 		if (defined($standardMessage)) {
@@ -87,7 +87,7 @@ sub getExceptionMessage {
 	croak("This is an instance method!")  unless(ref($self));
 	
 	# Get standard exception message from given code
-	my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($self->{code});
+	my ($standardMessage) = INB::Exceptions::MobyExceptionCodes::getExceptionCodeDescription($self->{code});
 
 	# If standard message is not defined that means, the exception code is wrong => return undef
 	return undef unless(defined($standardMessage));
@@ -117,7 +117,7 @@ sub setExceptionCode {
 	croak("This is an instance method!")  unless(ref($self));
 
 	# Check if input code is correct 
-	my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($code);
+	my ($standardMessage) = INB::Exceptions::MobyExceptionCodes::getExceptionCodeDescription($code);
 	
 	# If standard message is defined that means, the exception code is correct
 	if (defined($standardMessage)) {
@@ -170,7 +170,7 @@ sub retrieveExceptionResponse {
 	croak("This is an instance method!")  unless(ref($self));
 	
 	# Get standard exception message from given code
-	my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($self->{code});
+	my ($standardMessage) = INB::Exceptions::MobyExceptionCodes::getExceptionCodeDescription($self->{code});
 
 	#return undef unless(defined($standardMessage));
 	croak("code of exception is wrong or does not exists") unless(defined($standardMessage));
@@ -237,183 +237,6 @@ sub embedMOBYArticlesIntoMOBYData {
 	return "<moby:mobyData moby:queryID='".$self->{queryID}."'>$outputMOBYArticles</moby:mobyData>";
 
 }
-
-#--------------------------------------------------------------------------------------------
-#---------------------------------OLD VERSION 2.0--------------------------------------------
-#--------------------------------------------------------------------------------------------
-
-
-# # Return xml block of ERROR exception response
-# # If the exception code is wrong, then the method returns undef
-# sub retrieveErrorExceptionResponse {
-# 	# Get parameters
-# 	my($self) = shift;
-# 
-# 	my ($exceptionResponse) = undef;
-# 	
-# 	croak("This is an instance method!")  unless(ref($self));
-# 	
-# 	# Get standard exception message from given code
-# 	my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($self->{code});
-# 
-# 	# If standard message is not defined that means, the exception code is wrong => return undef
-# 	return undef unless(defined($standardMessage));
-# 
-# 	# User could add dynamic message into satandard exception message
-# 	my ($exceptionMessage) = (defined($self->{message})) ? $standardMessage.$self->{message} : $standardMessage;
-# 
-# 	return "<mobyException refQueryID='".$self->{queryID}."' refElement='".$self->{refElement}."' severity='error'>\n\t<exceptionCode>".$self->{code}."</exceptionCode>\n\t<exceptionMessage>".$exceptionMessage."</exceptionMessage>\n</mobyException>";
-# }
-# 
-# # Return xml block of WARNING exception response
-# # If the exception code is wrong, then the method returns undef
-# sub retrieveWarningExceptionResponse {
-# 	# Get parameters
-# 	my($self) = shift;
-# 
-# 	my ($exceptionResponse) = undef;
-# 	
-# 	croak("This is an instance method!")  unless(ref($self));
-# 	
-# 	# Get standard exception message from given code
-# 	my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($self->{code});
-# 
-# 	# If standard message is not defined that means, the exception code is wrong => return undef
-# 	return undef unless(defined($standardMessage));
-# 
-# 	# User could add dynamic message into satandard exception message
-# 	my ($exceptionMessage) = (defined($self->{message})) ? $standardMessage.$self->{message} : $standardMessage;
-# 
-# 	return "<mobyException refQueryID='".$self->{queryID}."' refElement='".$self->{refElement}."' severity='warning'>\n\t<exceptionCode>".$self->{code}."</exceptionCode>\n\t<exceptionMessage>".$exceptionMessage."</exceptionMessage>\n</mobyException>";
-# }
-# 
-# # Return xml block of INFORMATION exception response
-# # If the exception code is wrong, then the method returns undef
-# sub retrieveInfoExceptionResponse {
-# 	# Get parameters
-# 	my($self) = shift;
-# 
-# 	my ($exceptionResponse) = undef;
-# 	
-# 	croak("This is an instance method!")  unless(ref($self));
-# 	
-# 	# Get standard exception message from given code
-# 	my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($self->{code});
-# 
-# 	# If standard message is not defined that means, the exception code is wrong => return undef
-# 	return undef unless(defined($standardMessage));
-# 
-# 	# User could add dynamic message into satandard exception message
-# 	my ($exceptionMessage) = (defined($self->{message})) ? $standardMessage.$self->{message} : $standardMessage;
-# 
-# 	return "<mobyException refQueryID='".$self->{queryID}."' refElement='".$self->{refElement}."' severity='information'>\n\t<exceptionCode>".$self->{code}."</exceptionCode>\n\t<exceptionMessage>".$exceptionMessage."</exceptionMessage>\n</mobyException>";
-# }
-
-#--------------------------------------------------------------------------------------------
-#---------------------------------OLD VERSION------------------------------------------------
-#--------------------------------------------------------------------------------------------
-
-# # Assign type of exception
-# sub setExceptionType {
-# 	# Get parameters
-# 	my($self, $type) = @_;
-# 
-# 	croak("This is an instance method!")  unless(ref($self));
-# 
-# 	if (defined($type) && ($type eq 'info' || $type eq 'warning' || $type eq 'error')) {
-# 		$self->{type} = $type; 
-# 	} else {
-# 		croak("input argument not well-know define"); 
-# 	}
-# }
-# 
-# # Assign type of exception
-# sub setExceptionLevel {
-# 	# Get parameters
-# 	my($self, $type) = @_;
-# 
-# 	croak("This is an instance method!")  unless(ref($self));
-# 
-# 	if (defined($type) && ($type eq 'info' || $type eq 'warning' || $type eq 'error')) {
-# 		$self->{type} = $type; 
-# 	} else {
-# 		croak("input argument not well-know define"); 
-# 	}
-# }
-
-# # Return type of exception (info, warning or error)
-# sub getExceptionType {
-# 	# Get parameters
-# 	my($self)=shift;
-# 	
-# 	croak("This is an instance method!")  unless(ref($self));
-# 	
-# 	return $self->{type};
-# }
-# 
-# # Return "Moby level" where exception was produced
-# sub getExceptionLevel {
-# 	# Get parameters
-# 	my($self)=shift;
-# 	
-# 	croak("This is an instance method!")  unless(ref($self));
-# 	
-# 	return $self->{level};
-# }
-
-# # Return xml block that will be the empty Moby response
-# sub retrieveEmptyMobyResponse {
-# 	# Get parameters
-# 	my($self)=shift;
-# 	
-# 	croak("This is an instance method!")  unless(ref($self));
-# 	
-# 	my ($mobyResponse) = undef;
-# 
-# 	if (defined($self->{level}) && ($self->{level} eq 'mobySimple' || $self->{level} eq 'mobyCollection' || $self->{level} eq 'mobyData')) {
-# 		if ($self->{level} eq 'mobySimple') {
-# 			$mobyResponse =  "\n\t<moby:Simple moby:articleName='".$self->{refElement}."' />\n";
-# 		} elsif ($self->{level} eq 'mobyCollection') {
-#  			$mobyResponse =  "\n\t<moby:Collection moby:articleName='".$self->{refElement}."' />\n";
-# 		} elsif ($self->{level} eq 'mobyData') {
-#  			$mobyResponse =  "\n\t<moby:Data moby:queryID='".$self->{queryID}."' />\n";
-# 		}
-# 	}
-# 	
-# 	return $mobyResponse;
-# }
-
-# # Return xml block that will be the exception response
-# sub retrieveExceptionResponse {
-# 	# Get parameters
-# 	my($self)=shift;
-# 	my ($exceptionResponse) = undef;
-# 	
-# 	croak("This is an instance method!")  unless(ref($self));
-# 	
-# 	# Get standard exception message from given code
-# 	my ($standardMessage) = MobyExceptionCodes::getExceptionCodeDescription($self->{code});
-# 
-# 	return undef unless(defined($standardMessage));
-# 
-# 	# User could add dynamic message into satandard exception message
-# 	my ($exceptionMessage) = (defined($self->{message})) ? $standardMessage.$self->{message} : $standardMessage;
-# 
-# 	if (defined($self->{type}) && ($self->{type} eq 'info' || $self->{type} eq 'warning' || $self->{type} eq 'error')) {
-# 		if ($self->{type} eq 'error') {
-# 			$exceptionResponse = "\n<mobyException refQueryID='".$self->{queryID}."' refElement='".$self->{refElement}."' severity='error'>\n\t<exceptionCode>".$self->{code}."</exceptionCode>\n\t<exceptionMessage>".$exceptionMessage."</exceptionMessage>\n</mobyException>\n";
-# 		
-# 		} elsif ($self->{type} eq 'warning') {
-# 			$exceptionResponse = "\n<mobyException refQueryID='".$self->{queryID}."' refElement='".$self->{refElement}."' severity='warning'>\n\t<exceptionCode>".$self->{code}."</exceptionCode>\n\t<exceptionMessage>".$exceptionMessage."</exceptionMessage>\n</mobyException>\n";
-# 			
-# 		} elsif ($self->{type} eq 'info') {
-# 			$exceptionResponse = "\n<mobyException refQueryID='".$self->{queryID}."' refElement='".$self->{refElement}."' severity='information'>\n\t<exceptionCode>".$self->{code}."</exceptionCode>\n\t<exceptionMessage>".$exceptionMessage."</exceptionMessage>\n</mobyException>\n"; 
-# 		
-# 		}
-# 	}
-# 	
-# 	return $exceptionResponse;
-# }
 
 sub DESTROY {}
 
