@@ -107,7 +107,7 @@ use Bio::SeqIO;
 use Bio::PrimarySeq;
 
 sub help {
-return <<"END_HELP";
+my $usage = "
 Description: Extract Promoter sequences for a set of given genes
 Usage:
 
@@ -129,11 +129,14 @@ Examples using some combinations:
 	Output Nota Bene:
 	
 	If you ask only for the upstream sequences (not the features), the output is redirected to the standard output
-	Otherwise it will generate two files called "upstream_sequences.fa" and "upstream_sequences.gff"
+	Otherwise it will generate two files called \"upstream_sequences.fa\" and \"upstream_sequences.gff\"
 
 	if you flag the orthologous mode it will return the upstream sequence of all orthologous genes of you input gene identifier
 
-END_HELP
+";
+
+print STDERR "$usage\n";
+exit 1;
 
 }
 
@@ -158,7 +161,7 @@ BEGIN {
     
     # If the user does not write nothing, skip to help
     if (defined($opts{h}) || !defined($opts{f}) || !defined($opts{s}) || !defined($opts{r})){
-	print help;
+	print STDERR help;
 	exit 0;
     }    
     
