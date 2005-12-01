@@ -19,6 +19,15 @@ use lib "/home/ug/gmaster/lib/site_perl/5.8.5/i686-linux-thread-multi";
 
 $_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
 
+# Ensembl perl API is release 32 by default
+# Initialised here because otherwise it breaks !!
+# but actually the script will be using the perl API related to the database release given by the user !
+
+# Libraries Path - Modify to fit your system here as well !!
+
+use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-32/modules";
+use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-32/modules";
+
 # Ensembl database parameters
 
 $dbhost = "ensembldb.ensembl.org";
