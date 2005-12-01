@@ -143,10 +143,19 @@ exit 1;
 BEGIN {
 	
     # Global variables definition
-    use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbensembl $orthologous_mode/;
+    use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbpassword $dbensembl $orthologous_mode $_config_file_path $_libraries_path/;
 
-    if (-f "/home/ug/gmaster/projects/promoter_extraction/config.pl") {
-        require "/home/ug/gmaster/projects/promoter_extraction/config.pl";
+    #########################################
+    #
+    # Paths - Modify to fit your system !
+    #
+    #########################################
+    
+    $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
+    $_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
+    
+    if (-f "$_config_file_path") {
+        require "$_config_file_path";
     }
     else {
         print STDERR "There is a problem with the configuration, contact gmaster\@imim.es for help\n";
@@ -186,11 +195,6 @@ defined $opts{g} and $report_features++;
 defined $opts{i} and $intergenic_only++;
 defined $opts{o} and $orthologous_mode++;
 
-# Ensembl database configuration
-
-$dbhost      = "ensembldb.ensembl.org";
-$dbuser      = "anonymous";
-
 #
 # Get the database name associated to the species and release information
 #
@@ -201,7 +205,7 @@ if ($_debug) {
 
 use Mysql;
 
-my $dbh = Mysql->connect($dbhost, "", $dbuser, "");
+my $dbh = Mysql->connect($dbhost, "", $dbuser, "$dbpassword");
 my @database_names = $dbh->listdbs;
 
 if ($_debug) {
@@ -228,7 +232,7 @@ if (not defined $dbensembl) {
 # Instanciate the Ensembl DB objects adaptors
 #
 
-my $ensembl_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-$release/modules";
+my $ensembl_API_path = "$_libraries_path/ensembl-$release/modules";
 
 if ($_debug) {
     print STDERR "ensembl_API_path, $ensembl_API_path.\n";
@@ -262,7 +266,7 @@ my $slice_adaptor   = $dbh->get_SliceAdaptor ();
 # Ensembl DB compara initialisation
 #
 
-my $ensembl_compara_API_path = "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-$release/modules";
+my $ensembl_compara_API_path = "$_libraries_path/ensembl-compara-$release/modules";
 
 if ($_debug) {
     print STDERR "ensembl_compara_API_path, $ensembl_compara_API_path.\n";
