@@ -28,10 +28,26 @@ $_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
 use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-32/modules";
 use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-32/modules";
 
-# Ensembl database parameters
+# Latest Ensembl release
 
-$dbhost = "ensembldb.ensembl.org";
-$dbuser = "anonymous";
-$dbpassword = "";
+#########################################################
+#
+# Modify every time there is a new Ensembl Release !!!!
+#
+#########################################################
+
+$latest_release = "35";
+
+# Ensembl database connection parameters
+# Two sets of parameters to allow connecting to a different server depending on which release the user is asking !!!
+# The default is ensembldb server but you can specify another server below
+
+$dbhost_default = "ensembldb.ensembl.org";
+$dbuser_default = "anonymous";
+$dbpassword_default = "";
+
+$dbhost_latest = "ensembldb.ensembl.org";
+$dbuser_latest = "anonymous";
+$dbpassword_latest = "";
 
 1;

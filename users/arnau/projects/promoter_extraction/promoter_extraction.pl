@@ -143,9 +143,10 @@ exit 1;
 BEGIN {
 	
     # Global variables definition
-    use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbpassword $dbensembl $orthologous_mode $_config_file_path $_libraries_path/;
+    use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost_default $dbuser_default $dbpassword_default $dbhost_latest $dbuser_latest $dbpassword_latest $dbensembl $orthologous_mode $_config_file_path $_libraries_path $latest_release/;
     
     $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
+    # $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
     
     if (-f "$_config_file_path") {
         require "$_config_file_path";
@@ -198,7 +199,33 @@ if ($_debug) {
 
 use Mysql;
 
+# connect to Madrid if it is the latest
+# Otherwise connect to Sanger
+
+my $dbhost = $dbhost_default;
+my $dbuser = $dbuser_default;
+my $dbpassword = $dbpassword_default;
+
+if ("$release" eq "$latest_release") {
+    if ($_debug) {
+	print STDERR "Connecting to $dbhost_latest...\n";
+    }
+    $dbhost     = $dbhost_latest;
+    $dbuser     = $dbuser_latest;
+    $dbpassword = $dbpassword_latest;
+}
+else {
+    # Connect to Sanger
+    if ($_debug) {
+	print STDERR "Connecting to $dbhost_default...\n";
+    }
+    $dbhost     = $dbhost_default;
+    $dbuser     = $dbuser_default;
+    $dbpassword = $dbpassword_default;
+}
+
 my $dbh = Mysql->connect($dbhost, "", $dbuser, "$dbpassword");
+
 my @database_names = $dbh->listdbs;
 
 if ($_debug) {
