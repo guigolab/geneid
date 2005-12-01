@@ -144,15 +144,8 @@ BEGIN {
 	
     # Global variables definition
     use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost $dbuser $dbpassword $dbensembl $orthologous_mode $_config_file_path $_libraries_path/;
-
-    #########################################
-    #
-    # Paths - Modify to fit your system !
-    #
-    #########################################
     
-    $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
-    $_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
+    $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
     
     if (-f "$_config_file_path") {
         require "$_config_file_path";
