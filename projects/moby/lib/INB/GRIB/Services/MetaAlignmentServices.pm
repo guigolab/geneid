@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.7 2005-11-30 15:10:20 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.8 2005-12-02 16:17:20 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -156,6 +156,7 @@ sub _do_query_MetaAlignment {
     # The moby output format
     my $_moby_output_format = shift @_;
 
+    # Output definition
     my $MOBY_RESPONSE = "";     # set empty response
     my $moby_exception_response;
     
@@ -866,8 +867,6 @@ sub runMultiMetaAlignment {
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby.
     if (@notes > 0) {
-	print STDERR "exception raised\n";
-	
 	return responseHeader(
 			      -authority => "genome.imim.es",
 			      -note      => "<Notes>" . join ("\n", @notes) . "</Notes>"
@@ -875,8 +874,6 @@ sub runMultiMetaAlignment {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
-	print STDERR "fine\n";
-	
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
