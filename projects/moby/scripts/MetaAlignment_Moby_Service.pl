@@ -16,7 +16,7 @@ use Getopt::Std;
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
+use MOBY::CommonSubs qw(:all);
 # use SOAP::Lite + 'trace';
 
 # Bioperl Libraries
@@ -266,9 +266,19 @@ my $result = $Service->execute(XMLinputlist => [
 #
 ##################################################################
 
-print STDERR "result\n";
-print $result;
-print STDERR "\n";
+if (defined $result) {
+    print STDERR "result\n";
+    print $result;
+    print STDERR "\n";
+
+    my $notes = getServiceNotes ($result);
+    if (defined $notes) {
+	print STDERR "service notes:\n$notes.\n";
+    }
+}
+else {
+    print STDERR "Error, no moby object returned!!\n";
+}
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
