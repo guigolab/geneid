@@ -81,12 +81,13 @@ my $gostat_regulated_xml_file = "mut1_downreg.fbgn.xml";
 my $gostat_allArray_xml_file  = "allArray.fbgn.xml";
 my $ENSG00000197785_upstream_sequence_xml_file = "ENSG00000197785.xml";
 my $ENSG00000197785_matscan_xml_file           = "ENSG00000197785.runMatScanGFF.xml";
+my $ENSPTRG00000000031_matscan_xml_file        = "ENSPTRG00000000031.runMatScanGFF.xml";
 my $ENSG00000197785_fasta_xml_file             = "ENSG00000197785.fa.xml";
-my $Dmel_MultiMeta_xml_file = "Dmel.MultiMetaOutput.xml";
+my $Dmel_MultiMeta_xml_file   = "Dmel.MultiMetaOutput.xml";
 
 # Check that the files exist !!!
 
-if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_upstream_sequence_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_matscan_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_fasta_xml_file") || (not -f "$input_data_dir/$Dmel_MultiMeta_xml_file")) {
+if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_upstream_sequence_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_matscan_xml_file") || (not -f "$input_data_dir/$ENSPTRG00000000031_matscan_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_fasta_xml_file") || (not -f "$input_data_dir/$Dmel_MultiMeta_xml_file")) {
     print STDERR "Error, can't find one of the input files in directory, $input_data_dir!\n";
     exit 0;
 }
@@ -99,6 +100,7 @@ my $gostat_regulated_xml = qx/cat $input_data_dir\/$gostat_regulated_xml_file/;
 my $gostat_allArray_xml  = qx/cat $input_data_dir\/$gostat_allArray_xml_file/;
 my $ENSG00000197785_upstream_sequence_xml = qx/cat $input_data_dir\/$ENSG00000197785_upstream_sequence_xml_file/;
 my $ENSG00000197785_matscan_xml           = qx/cat $input_data_dir\/$ENSG00000197785_matscan_xml_file/;
+my $ENSPTRG00000000031_matscan_xml        = qx/cat $input_data_dir\/$ENSPTRG00000000031_matscan_xml_file/;
 my $ENSG00000197785_fasta_xml             = qx/cat $input_data_dir\/$ENSG00000197785_fasta_xml_file/;
 my $Dmel_MultiMeta_xml   = qx/cat $input_data_dir\/$Dmel_MultiMeta_xml_file/;
 
@@ -488,7 +490,7 @@ $service = MobyServiceInstantiation ($C, "runMetaAlignment", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
-						    ['map1', "$ENSG00000197785_matscan_xml", 'map2', "$ENSG00000197785_matscan_xml"]
+						    ['map1', "$ENSG00000197785_matscan_xml", 'map2', "$ENSPTRG00000000031_matscan_xml"]
 						    ]
 				   );
     
@@ -524,7 +526,7 @@ $service = MobyServiceInstantiation ($C, "runMetaAlignmentGFF", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
-						    ['map1', "$ENSG00000197785_matscan_xml", 'map2', "$ENSG00000197785_matscan_xml"]
+						    ['map1', "$ENSG00000197785_matscan_xml", 'map2', "$ENSPTRG00000000031_matscan_xml"]
 						    ]
 				   );
     
@@ -539,7 +541,7 @@ if (defined $service) {
 	print STDERR "diff_results: @diff_results\n";
 	
 	close $results_fh;
-	# unlink $results_file;
+	unlink $results_file;
 	
     }
     else {
