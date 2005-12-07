@@ -105,7 +105,7 @@
   <s:link source="inbHierarchicalCluster:Clustering(_ANON_)" sink="Moby_Newick" />
   <s:link source="inbHierarchicalCluster:output" sink="inbTreeView:input" />
   <s:link source="inbTreeView:b64_Encoded_PNG(_ANON_)" sink="parse_moby_tree:mobydata" />
-  <s:link source="parseMotifMatricesfromMEME:output" sink="runMatScanGFFCollectionVsInputMatrix:text-formatted(matrix)" />
+  <s:link source="parseMotifMatricesfromMEME:output" sink="runMatScanGFFCollectionVsInputMatrix:text-formatted(matrices)" />
   <s:link source="parseMotifMatricesfromMEME:text-formatted(meme_matrices)" sink="parse_moby_meme_matrices:mobydata" />
   <s:link source="parse_moby_meme_matrices:value" sink="Moby_MEME_Matrices" />
   <s:link source="parse_moby_meme_text:value" sink="Moby_MEME" />
