@@ -466,7 +466,7 @@ foreach my $geneId (@geneIds) {
 		    
 		    if ($homologue_stable_id ne $gene_stable_id) {
 		    
-			my $upstream_slice_region = getHomologueUpstreamSliceRegion ($member, $upstream_length, $downstream_length, $intergenic_only);
+			my ($upstream_slice_region, $tss_information) = getHomologueUpstreamSliceRegion ($member, $upstream_length, $downstream_length, $intergenic_only);
 			
 			#
 			# Processing done, format the sequence object into FASTA
@@ -488,7 +488,7 @@ foreach my $geneId (@geneIds) {
 			    my $assembly    = $upstream_slice_region->coord_system->version;
 			    my $species     = $member->genome_db()->name;
 			    
-			    my $description = "$geneId:$species:$assembly:$chromosome:$slice_start:$slice_end:$strand";
+			    my $description = "$geneId:$species:$assembly:$chromosome:$slice_start:$slice_end:$strand:$tss_information";
 			    
 			    my $seqobj = Bio::PrimarySeq->new (
 							       -id    => $homologue_stable_id,
@@ -534,6 +534,9 @@ foreach my $geneId (@geneIds) {
 	} # End orthologous mode processing
 	else {
 	    
+	    # Check whether or not ATG and TSS correspond
+	    my $tss_information = is_tss ($gene);
+	    
 	    # Get the SliceRegion object associated with the upstream sequence we want to retrieve,
 	    # taking into account the intergenic_only flag, the given upstream and downstream lengths
 	    
@@ -556,7 +559,7 @@ foreach my $geneId (@geneIds) {
 	    my $strand      = $upstream_slice_region->strand;
 	    my $assembly    = $upstream_slice_region->coord_system->version;
 	    
-	    my $description = "$geneId:$assembly:$chromosome:$slice_start:$slice_end:$strand";
+	    my $description = "$geneId:$assembly:$chromosome:$slice_start:$slice_end:$strand:$tss_information";
 	    my $seqobj = Bio::PrimarySeq->new (
 					       -id    => $gene_stable_id,
 					       -desc  => $description,
@@ -1103,6 +1106,7 @@ sub getHomologueUpstreamSliceRegion {
     }
 
     my $upstream_slice_region;
+    my $tss_information;
     
     my $gdb = $homologue->genome_db();
     
@@ -1123,11 +1127,38 @@ sub getHomologueUpstreamSliceRegion {
 	$gene->transform('toplevel');
 	my $homologue_slice_adaptor = $homologue->genome_db->db_adaptor->get_SliceAdaptor || warn "problem, no homologue slice adaptor!!\n";
 	$upstream_slice_region = getUpstreamSliceRegion ($gene, $homologue_slice_adaptor, $upstream_length, $dowstream_length, $intergenic_only);
+	# Check whether or not ATG and TSS correspond
+	$tss_information = is_tss ($gene);
     }
     else {
 	print STDERR "no DB adaptor found for DB, " . $gdb->name . "!\n";
     }
-
-    return $upstream_slice_region;
+    
+    return ($upstream_slice_region, $tss_information);
 }
 
+sub is_tss {
+    my $gene = shift;
+    
+    # Let's figure out the TSS or ATG
+    
+    my $tss_is_start_codon = 1;
+    my $tss_information    = "TSS not predicted (is start codon)";
+    my $transcripts        = $gene->get_all_Transcripts;
+    foreach my $transcript (@$transcripts) {
+	
+	# If at least one transcript doesn't start at the start codon, that means that there is a predicted 5' UTR for at least one of the transcripts
+	
+	if ($transcript->cdna_coding_start > 1) {
+	    $tss_is_start_codon = 0;
+	    $tss_information = "TSS predicted";
+	    last;
+	}
+    }
+    
+    if ($_debug) {
+	print STDERR "tss is start codon, $tss_is_start_codon - gene, " . $gene->stable_id . "\n";
+    }
+    
+    return $tss_information;
+}
