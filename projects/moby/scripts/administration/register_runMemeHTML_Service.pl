@@ -197,8 +197,8 @@ my ($REG) = $Central->registerService(
 					      max      => 300,
 					  },
 					  'motif E-value cutoff' => {
-					      datatype => 'Float',
-					      default  => 1,
+					      datatype => 'String',
+					      default  => "1e-4",
 					      min      => 0,
 					  },
 				      }
