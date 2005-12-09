@@ -7,22 +7,28 @@
   <s:processor name="regexp" boring="true">
     <s:stringconstant>\n</s:stringconstant>
   </s:processor>
-  <s:processor name="split_genes_list">
-    <s:local>org.embl.ebi.escience.scuflworkers.java.SplitByRegex</s:local>
+  <s:processor name="parse_moby_matrix">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="Create_moby_data">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.CreateMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_sequences">
-    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  <s:processor name="split_genes_list">
+    <s:local>org.embl.ebi.escience.scuflworkers.java.SplitByRegex</s:local>
   </s:processor>
-  <s:processor name="parse_moby_matrix">
+  <s:processor name="parse_moby_meta">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_matscan">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_meta">
+  <s:processor name="parse_moby_tree">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="Decode_base64_to_byte">
+    <s:local>org.embl.ebi.escience.scuflworkers.java.DecodeBase64</s:local>
+  </s:processor>
+  <s:processor name="parse_moby_sequences">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="NestedWorkflow">
@@ -37,9 +43,6 @@
         </s:processor>
         <s:processor name="organism_articleName" boring="true">
           <s:stringconstant>organism</s:stringconstant>
-        </s:processor>
-        <s:processor name="intergenic_only_articleName" boring="true">
-          <s:stringconstant>intergenic only</s:stringconstant>
         </s:processor>
         <s:processor name="CombineInput_SecondariesMoby">
           <s:beanshell>
@@ -147,51 +150,8 @@ CombinedMOBY = OutObj;</s:scriptvalue>
             </s:beanshelloutputlist>
           </s:beanshell>
         </s:processor>
-        <s:processor name="CreateOrganismMobySecondary">
-          <s:beanshell>
-            <s:scriptvalue>import java.io.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.apache.xml.serialize.XMLSerializer;
-
-String OutObj="";
-String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
-
-DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
-DocumentBuilder db = dbf.newDocumentBuilder();
-
-InputSource SourceSkel = new InputSource(new StringReader(skel));
-
-Document docsalida=db.parse(SourceSkel);
-
-XMLSerializer serializer = new XMLSerializer();
-StringWriter sw=new StringWriter();
-
-NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
-
-serializer.setOutputCharStream(sw);
-
-Node comienzo = nodelistfinal.item(0);
-
-comienzo.setAttribute("articleName",articleName);
-// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
-// and it is its only child, we are going to reuse it!
-comienzo.getFirstChild().getFirstChild().setNodeValue(value);
-
-// Last step!!!
-serializer.serialize(docsalida);
-OutObj = sw.toString();
-
-MobySecondary = OutObj;</s:scriptvalue>
-            <s:beanshellinputlist>
-              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
-              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
-            </s:beanshellinputlist>
-            <s:beanshelloutputlist>
-              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
-            </s:beanshelloutputlist>
-          </s:beanshell>
+        <s:processor name="intergenic_only_articleName" boring="true">
+          <s:stringconstant>intergenic only</s:stringconstant>
         </s:processor>
         <s:processor name="CreateUpstreamLengthMobySecondary">
           <s:beanshell>
@@ -285,7 +245,7 @@ MobySecondary = OutObj;</s:scriptvalue>
             </s:beanshelloutputlist>
           </s:beanshell>
         </s:processor>
-        <s:processor name="CreateIntergenicOnlyMobySecondary">
+        <s:processor name="CreateOrganismMobySecondary">
           <s:beanshell>
             <s:scriptvalue>import java.io.*;
 import javax.xml.parsers.*;
@@ -470,6 +430,52 @@ CombinedMOBY = OutObj;</s:scriptvalue>
         <s:processor name="orthologousMode_articleName" boring="true">
           <s:stringconstant>orthologous mode</s:stringconstant>
         </s:processor>
+        <s:processor name="CreateIntergenicOnlyMobySecondary">
+          <s:beanshell>
+            <s:scriptvalue>import java.io.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import org.apache.xml.serialize.XMLSerializer;
+
+String OutObj="";
+String skel="&lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;&lt;moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'&gt;&lt;moby:mobyContent&gt;&lt;moby:mobyData queryID='one'&gt;&lt;moby:Parameter moby:articleName=''&gt;&lt;moby:Value&gt;EMPTY&lt;/moby:Value&gt;&lt;/moby:Parameter&gt;&lt;/moby:mobyData&gt;&lt;/moby:mobyContent&gt;&lt;/moby:MOBY&gt;";
+
+DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+
+InputSource SourceSkel = new InputSource(new StringReader(skel));
+
+Document docsalida=db.parse(SourceSkel);
+
+XMLSerializer serializer = new XMLSerializer();
+StringWriter sw=new StringWriter();
+
+NodeList nodelistfinal = docsalida.getElementsByTagName("moby:Parameter");
+
+serializer.setOutputCharStream(sw);
+
+Node comienzo = nodelistfinal.item(0);
+
+comienzo.setAttribute("articleName",articleName);
+// As the skeleton already contains a &lt;moby:Value&gt; with a TEXT_NODE,
+// and it is its only child, we are going to reuse it!
+comienzo.getFirstChild().getFirstChild().setNodeValue(value);
+
+// Last step!!!
+serializer.serialize(docsalida);
+OutObj = sw.toString();
+
+MobySecondary = OutObj;</s:scriptvalue>
+            <s:beanshellinputlist>
+              <s:beanshellinput s:syntactictype="'text/plain'">articleName</s:beanshellinput>
+              <s:beanshellinput s:syntactictype="'text/plain'">value</s:beanshellinput>
+            </s:beanshellinputlist>
+            <s:beanshelloutputlist>
+              <s:beanshelloutput s:syntactictype="'text/xml'">MobySecondary</s:beanshelloutput>
+            </s:beanshelloutputlist>
+          </s:beanshell>
+        </s:processor>
         <s:link source="intergenic_only" sink="CreateIntergenicOnlyMobySecondary:value" />
         <s:link source="moby_GenesList" sink="CombineInput_SecondariesMoby:MobyA" />
         <s:link source="organism" sink="CreateOrganismMobySecondary:value" />
@@ -494,20 +500,20 @@ CombinedMOBY = OutObj;</s:scriptvalue>
       </s:scufl>
     </s:workflow>
   </s:processor>
-  <s:processor name="runMatScanGFFCollection">
-    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a collection of DNASequence objects and returns a collection of GFF objects (one GFF object for each DNASequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
+  <s:processor name="inbTreeView">
+    <s:description>Viewer for Newick Trees (PNG image)</s:description>
     <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMatScanGFFCollection</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>inbTreeView</s:serviceName>
+      <s:authorityName>bioinfo.ochoa.fib.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="runMultiMetaAlignment">
-    <s:description>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</s:description>
+  <s:processor name="inbHierarchicalCluster">
+    <s:description>Hierarchical clustering server for gene expression patterns</s:description>
     <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMultiMetaAlignment</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>inbHierarchicalCluster</s:serviceName>
+      <s:authorityName>bioinfo.ochoa.fib.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="getUpstreamSeqfromEnsembl">
@@ -519,14 +525,6 @@ CombinedMOBY = OutObj;</s:scriptvalue>
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="generateScoreMatrix">
-    <s:description>Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>generateScoreMatrix</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
   <s:processor name="fromGenericSequenceCollectiontoFASTA">
     <s:description>Converts a collection of GenericSequence moby object into a FASTA object</s:description>
     <s:biomobywsdl>
@@ -535,26 +533,56 @@ CombinedMOBY = OutObj;</s:scriptvalue>
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
+  <s:processor name="generateScoreMatrix">
+    <s:description>Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>generateScoreMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMultiMetaAlignment">
+    <s:description>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMultiMetaAlignment</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFFCollection">
+    <s:description>Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a collection of DNASequence objects and returns a collection of GFF objects (one GFF object for each DNASequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFFCollection</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
   <s:link source="gene_identifiers" sink="split_genes_list:string" />
   <s:link source="namespace" sink="Create_moby_data:namespace" />
   <s:link source="Create_moby_data:mobydata" sink="NestedWorkflow:moby_GenesList" />
   <s:link source="organism" sink="NestedWorkflow:organism" />
   <s:link source="fromGenericSequenceCollectiontoFASTA:output" sink="parse_moby_sequences:mobydata" />
+  <s:link source="generateScoreMatrix:output" sink="inbHierarchicalCluster:input" />
   <s:link source="generateScoreMatrix:output" sink="parse_moby_matrix:mobydata" />
   <s:link source="getUpstreamSeqfromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="fromGenericSequenceCollectiontoFASTA:GenericSequence(Collection - 'sequences')" />
-  <s:link source="Create_moby_data:mobydata" sink="Moby_InputList" />
-  <s:link source="NestedWorkflow:getUpstreamSeqfromEnsemblInput" sink="Moby_OutputList" />
   <s:link source="getUpstreamSeqfromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'upstream_sequences')" />
   <s:link source="identifier:value" sink="Create_moby_data:id" />
   <s:link source="intergenic_only" sink="NestedWorkflow:intergenic_only" />
   <s:link source="upstream_length" sink="NestedWorkflow:upstream_length" />
+  <s:link source="inbHierarchicalCluster:output" sink="inbTreeView:input" />
+  <s:link source="inbTreeView:output" sink="parse_moby_tree:mobydata" />
+  <s:link source="parse_moby_tree:value" sink="Decode_base64_to_byte:base64" />
+  <s:link source="regexp:value" sink="split_genes_list:regex" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignment:GFF(Collection - 'maps')" />
+  <s:link source="Create_moby_data:mobydata" sink="Moby_InputList" />
+  <s:link source="NestedWorkflow:getUpstreamSeqfromEnsemblInput" sink="Moby_OutputList" />
   <s:link source="NestedWorkflow:getUpstreamSeqfromEnsemblInput" sink="getUpstreamSeqfromEnsembl:input" />
+  <s:link source="Decode_base64_to_byte:bytes" sink="Moby_Tree_png" />
+  <s:link source="inbHierarchicalCluster:output" sink="Moby_Newick" />
   <s:link source="parse_moby_matrix:value" sink="Moby_Matrix" />
   <s:link source="parse_moby_matscan:value" sink="Moby_MatScan" />
   <s:link source="parse_moby_meta:value" sink="Moby_Meta" />
   <s:link source="parse_moby_sequences:value" sink="Moby_Sequences" />
-  <s:link source="regexp:value" sink="split_genes_list:regex" />
-  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignment:GFF(Collection - 'maps')" />
   <s:link source="runMatScanGFFCollection:output" sink="parse_moby_matscan:mobydata" />
   <s:link source="runMultiMetaAlignment:output" sink="parse_moby_meta:mobydata" />
   <s:link source="runMultiMetaAlignment:text-formatted(Collection - 'meta_predictions')" sink="generateScoreMatrix:text-formatted(Collection - 'similarity_results')" />
@@ -576,6 +604,14 @@ CombinedMOBY = OutObj;</s:scriptvalue>
   <s:sink name="Moby_Sequences" />
   <s:sink name="Moby_InputList" />
   <s:sink name="Moby_OutputList" />
+  <s:sink name="Moby_Newick" />
+  <s:sink name="Moby_Tree_png">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>image/png</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
 </s:scufl>
 
 
