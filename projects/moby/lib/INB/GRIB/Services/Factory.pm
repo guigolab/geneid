@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.50 2005-12-09 14:44:20 gmaster Exp $
+# $Id: Factory.pm,v 1.51 2005-12-09 16:37:59 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1099,7 +1099,7 @@ sub MEME_call {
 	$_meme_args .= " -evt $e_value_cutoff";
     }
     else {
-	$_meme_args .= " -evt 1";
+	$_meme_args .= " -evt 1e-4";
     }
     
     # Generate a temporary file locally with the sequence(s) in FASTA format
