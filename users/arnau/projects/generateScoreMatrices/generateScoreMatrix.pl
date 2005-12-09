@@ -13,7 +13,9 @@ use strict;
 
 my $_debug      = 0;
 my $_delimitor  = "\t";
-my $_equal_mark = "-";
+# inbHierarchicalCluster not working with dashes!!
+# my $_equal_mark = "-";
+my $_equal_mark = "";
 
 my $inputformat  = shift || "meta-alignment";
 my $outputformat = shift || "SOTA";
