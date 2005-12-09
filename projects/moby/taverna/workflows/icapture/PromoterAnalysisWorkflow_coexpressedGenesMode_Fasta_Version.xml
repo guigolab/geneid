@@ -35,7 +35,7 @@ The output is:
   <s:processor name="inbTreeView">
     <s:description>Viewer for Newick Trees (PNG image)</s:description>
     <s:biomobywsdl>
-      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
       <s:serviceName>inbTreeView</s:serviceName>
       <s:authorityName>bioinfo.ochoa.fib.es</s:authorityName>
     </s:biomobywsdl>
@@ -43,7 +43,7 @@ The output is:
   <s:processor name="inbHierarchicalCluster">
     <s:description>Hierarchical clustering server for gene expression patterns</s:description>
     <s:biomobywsdl>
-      <s:mobyEndpoint>http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
       <s:serviceName>inbHierarchicalCluster</s:serviceName>
       <s:authorityName>bioinfo.ochoa.fib.es</s:authorityName>
     </s:biomobywsdl>
