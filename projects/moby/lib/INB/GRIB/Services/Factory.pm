@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.49 2005-11-30 16:14:53 gmaster Exp $
+# $Id: Factory.pm,v 1.50 2005-12-09 14:44:20 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -706,6 +706,12 @@ sub MatScan_call {
 	my $strands          = $parameters->{strands};
 	my $matrix_parameter = $parameters->{matrix};
 	my $matrix_mode      = $parameters->{matrix_mode};
+	
+	if ($debug) {
+	    print STDERR "threshold, $threshold\n";
+	    print STDERR "matrix parameter, $matrix_parameter\n";
+	    print STDERR "matrix mode, $matrix_mode\n";
+	}
 	
         # Llama a MatScan en local
         my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";

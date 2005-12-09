@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.9 2005-11-21 22:47:22 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.10 2005-12-09 14:44:20 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -246,6 +246,7 @@ sub _do_query_MatScan {
     if ($_debug) {
 	print STDERR "matrix, $matrix\n";
 	print STDERR "matrix mode, $matrix_mode\n";
+	print STDERR "threshold, $threshold\n";
     }
 
     # Tratamos a cada uno de los articulos
@@ -507,7 +508,7 @@ sub _do_query_MatScanVsInputMatrix {
     
     # The input was a collection of Sequences, so we have to return a collection of GFF objects
     
-    my $report         = MatScan_call (sequences  => \%sequences, matrix => $matrix, format => $_format, parameters => \%parameters);
+    my $report         = MatScan_call (sequences  => \%sequences, matrix => $matrix, format => $_format, parameters => \%parameters, debug => $_debug);
     my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
     
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -682,7 +683,7 @@ sub runMatScanGFFCollection {
 	    my $query_str = $queryInput->toString();
 	    print STDERR "query text: $query_str\n";
 	}
-
+	
 	my $query_response = _do_query_MatScan ($queryInput, $_format, "collection");
 	
 	# $query_response es un string que contiene el codigo xml de
