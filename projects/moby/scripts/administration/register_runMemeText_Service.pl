@@ -171,7 +171,7 @@ my ($REG) = $Central->registerService(
 					  },
 					  'maximum number of motifs' => {
 					      datatype => 'Integer',
-					      default  => 3,
+					      default  => 12,
 					      max      => 10,
 					  },
 					  'minimum sites for each motif' => {
@@ -192,13 +192,13 @@ my ($REG) = $Central->registerService(
 					  },
 					  'maximum optimum width' => {
 					      datatype => 'Integer',
-					      default  => 50,
+					      default  => 15,
 					      min      => 2,
 					      max      => 300,
 					  },
 					  'motif E-value cutoff' => {
 					      datatype => 'String',
-					      default  => "1e-4",
+					      default  => "1",
 					      min      => 0,
 					  },
 				      }
