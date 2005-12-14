@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.51 2005-12-09 16:37:59 gmaster Exp $
+# $Id: Factory.pm,v 1.52 2005-12-14 18:26:15 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1051,7 +1051,7 @@ sub MEME_call {
     else {
       SWITCH: {
 	  if ($motif_distribution eq "zero or one")               { $_meme_args .= "-mod zoops"; last SWITCH; }
-	  if ($motif_distribution eq "one")                       { $_meme_args .= "-mod ops"; last SWITCH; }
+	  if ($motif_distribution eq "one")                       { $_meme_args .= "-mod oops"; last SWITCH; }
 	  if ($motif_distribution eq "any number of repetitions") { $_meme_args .= "-mod anr"; last SWITCH; }
 	  # Default is "zero or one motif per sequence"
 	  $_meme_args .= "-mod zoops";
