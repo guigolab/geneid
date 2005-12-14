@@ -192,6 +192,23 @@ if ($REG->success) {
     # The result is valid.
     print STDERR "The '$serviceName' service has been registered in successfully: ", $REG->success, "\n";
     
+    # Get the RDF document
+    
+    my $rdf_document = $REG->RDF;
+    
+    if (not defined $rdf_document) {
+	print STDERR "can't find any RDF ducument!\n";
+	print STDERR "Dumping REG, " . Dumper ($REG) . "\n";
+	exit 0;
+    }
+    
+    my $rdf_file = $serviceName . "_registration.rdf";
+    open RDF, ">$rdf_file" or die "can't rdf file, $rdf_file\n";
+    print RDF "$rdf_document";
+    close RDF;
+    
+    print STDERR "See file, $rdf_file, for returned RDF document\n";
+    
 } else {
     
     # The result is valid.
