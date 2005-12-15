@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.10 2005-12-09 14:44:20 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.11 2005-12-15 14:48:05 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -226,8 +226,8 @@ sub _do_query_MatScan {
 
     ($threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "threshold");
     if (not defined $threshold) {
-	# Default is 0.8
-	$threshold = "0.8";
+	# Default is 0.85
+	$threshold = "0.85";
     }
     
     ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
@@ -421,8 +421,8 @@ sub _do_query_MatScanVsInputMatrix {
     
     ($threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "threshold");
     if (not defined $threshold) {
-	# Default is 0.8
-	$threshold = "0.8";
+	# Default is 0.85
+	$threshold = "0.85";
     }
     
     ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
