@@ -183,3 +183,5 @@ if (@secondaryArticles > 0) {
 	print "Secondary Article, \"" . $sa->articleName . "\":\n\t\t\t" . $sa->XML . "\n";
     }
 }
+
+# print "***********\nXML:\n", $si->XML,"\n***********\n";
