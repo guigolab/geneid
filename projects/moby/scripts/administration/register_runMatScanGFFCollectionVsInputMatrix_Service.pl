@@ -174,7 +174,7 @@ my ($REG) = $Central->registerService(
 					      datatype => 'Float',
 					      max      => 1,
 					      min      => 0,
-					      default  => 0.8
+					      default  => 0.85
 					  },
 					  'strands' => {
 					      datatype => 'String',

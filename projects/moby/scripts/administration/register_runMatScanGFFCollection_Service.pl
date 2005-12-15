@@ -178,7 +178,7 @@ my ($REG) = $Central->registerService(
 					      datatype => 'Float',
 					      max      => 1,
 					      min      => 0,
-					      default  => 0.8
+					      default  => 0.85
 					  },
 					  'strands' => {
 					      datatype => 'String',
@@ -193,6 +193,16 @@ if ($REG->success) {
     
     # The result is valid.
     print STDERR "The '$serviceName' service has been registered in successfully: ", $REG->success, "\n";
+
+    # Get the RDF document
+
+    my $rdf_document = $REG->RDF;
+    my $rdf_file = $serviceName . "_registration.rdf";
+    open RDF ">$rdf_file" or die "can't rdf file, $rdf_file\n";
+    print RDF "$rdf_document";
+    close RDF;
+    
+    print STDERR "See file, $rdf_file, for returned RDF document\n";
     
 } else {
     
