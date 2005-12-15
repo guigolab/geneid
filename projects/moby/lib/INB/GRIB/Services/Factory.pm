@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.52 2005-12-14 18:26:15 gmaster Exp $
+# $Id: Factory.pm,v 1.53 2005-12-15 14:50:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -742,9 +742,9 @@ sub MatScan_call {
                 }
                 
 	      SWITCH: {
-		  if ($matrix_parameter eq "Transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
-		  if ($matrix_parameter eq "MEME")     { $matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
-		  if ($matrix_parameter eq "Jaspar")   { $matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
+		  if (lc ($matrix_parameter) eq "transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
+		  if (lc ($matrix_parameter) eq "meme")     { $matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
+		  if (lc ($matrix_parameter) eq "jaspar")   { $matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
 		  # Default is Transfac
 		  $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices";
 	      }
@@ -755,9 +755,9 @@ sub MatScan_call {
               }
 	
 	      SWITCH: {
-		  if ($matrix_parameter eq "Transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
-		  if ($matrix_parameter eq "MEME")     { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
-		  if ($matrix_parameter eq "Jaspar")   { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
+		  if (lc ($matrix_parameter) eq "transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
+		  if (lc ($matrix_parameter) eq "meme")     { $_matscan_args .= " -sl"; $matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
+		  if (lc ($matrix_parameter) eq "jaspar")   { $_matscan_args .= " -s"; $matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
 		  # Default is Transfac
 		  $_matscan_args .= " -sm";
 		  $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices";
@@ -774,7 +774,7 @@ sub MatScan_call {
 	    }
 	    
 	    # Make a temporary file with the matrix input
-	    $_matscan_args .= " -sm";
+	    $_matscan_args .= " -s";
 	    ($matrix_fh, $matrix_file) = tempfile("/tmp/MATSCAN_MATRIX.XXXXXX", UNLINK => 0);
 	    print $matrix_fh "$matrix_input";
 	    close $matrix_fh;
