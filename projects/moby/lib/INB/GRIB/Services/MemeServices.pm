@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.8 2005-12-09 16:37:59 gmaster Exp $
+# $Id: MemeServices.pm,v 1.9 2005-12-15 18:04:36 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -148,7 +148,7 @@ sub _do_query_Meme {
     
     ($maximum_number_motifs) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "maximum number of motifs");
     if (not defined $maximum_number_motifs) {
-	$maximum_number_motifs = 3;
+	$maximum_number_motifs = 12;
     }
     
     ($minimum_number_sites) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "minimum sites for each motif");
@@ -183,7 +183,7 @@ sub _do_query_Meme {
     
     ($maximum_motif_width) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "maximum optimum width");
     if (not defined $maximum_motif_width) {
-	$maximum_motif_width = 50;
+	$maximum_motif_width = 15;
     }
     # Check for constraint
     if (defined $maximum_motif_width && ($maximum_motif_width > 300)) {
@@ -193,7 +193,7 @@ sub _do_query_Meme {
 
     ($e_value_cutoff) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "motif E-value cutoff");
     if (not defined $e_value_cutoff) {
-	$e_value_cutoff = "1e-4";
+	$e_value_cutoff = "1";
     }
     
     # Add the parsed parameters in a hash table
