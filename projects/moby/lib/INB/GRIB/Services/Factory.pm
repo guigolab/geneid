@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.54 2005-12-22 09:49:15 gmaster Exp $
+# $Id: Factory.pm,v 1.55 2005-12-22 15:37:44 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1026,6 +1026,7 @@ sub MEME_call {
     my $minimum_motif_width   = $parameters->{minimum_motif_width};
     my $maximum_motif_width   = $parameters->{maximum_motif_width};
     my $e_value_cutoff        = $parameters->{e_value_cutoff};
+    my $background_order      = $parameters->{background_order};
     
     # Llama a Meme en local
     my $_meme_dir   = "/usr/local/molbio/Install/meme-3.5.0";
@@ -1098,7 +1099,7 @@ sub MEME_call {
 	$_meme_args .= " -evt $e_value_cutoff";
     }
     else {
-	$_meme_args .= " -evt 1e-4";
+	$_meme_args .= " -evt 1";
     }
     
     # Generate a temporary file locally with the sequence(s) in FASTA format
@@ -1151,6 +1152,38 @@ sub MEME_call {
     if (defined $alphabet && (($alphabet eq "dna") || ($alphabet eq "rna"))) {
 	$_meme_args .= " -dna -revcomp";
     }
+    
+    my ($bfile, $bfh);
+    # Train a background model if required
+    if (defined $background_order && (lc ($background_order) eq "none")) {
+	if ($_debug) {
+	    print STDERR "no training...\n";
+	}
+    }
+    else {
+	if ($_debug) {
+	    print STDERR "background training with order, $background_order\n";
+	}
+	
+	# Do a background training
+	my $training_bin = "bin/fasta-get-markov";
+	
+	my $training_args = "-m $background_order";
+	if ($alphabet eq "protein") {
+	    $training_args .= " -p";
+	}
+	
+	($bfh, $bfile) = tempfile("/tmp/MEME_BG.XXXXXX", UNLINK => 0);
+	close $bfh;
+	my @args = ("$_meme_dir/$training_bin $training_args < $seqfile > $bfile");
+	system (@args);
+	
+	if (! -f $bfile) {
+	    print STDERR "Error, could not train a background model!\n";
+	}
+	
+	$_meme_args .= " -bfile $bfile";
+    }
 
     if ($_debug) {
 	print STDERR "Running Meme, with this command:\n";
@@ -1160,7 +1193,10 @@ sub MEME_call {
     my $meme_output = qx/source $_meme_dir\/etc\/meme.sh; $_meme_dir\/$_meme_bin $seqfile $_meme_args/;
     
     # Comment this line if you want to keep the file...
-    unlink $seqfile;
+    unlink $seqfile unless $_debug;
+    if (defined $bfile && (not $_debug)) {
+	unlink $bfile;
+    }
     
     if (defined $meme_output) {
 	return $meme_output;

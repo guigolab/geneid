@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.9 2005-12-15 18:04:36 gmaster Exp $
+# $Id: MemeServices.pm,v 1.10 2005-12-22 15:37:44 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -131,6 +131,7 @@ sub _do_query_Meme {
     my $minimum_motif_width;
     my $maximum_motif_width;
     my $e_value_cutoff;
+    my $background_order;
     
     # Variables that will be passed to MatScan_call
     my %sequences;
@@ -148,7 +149,7 @@ sub _do_query_Meme {
     
     ($maximum_number_motifs) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "maximum number of motifs");
     if (not defined $maximum_number_motifs) {
-	$maximum_number_motifs = 12;
+	$maximum_number_motifs = 8;
     }
     
     ($minimum_number_sites) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "minimum sites for each motif");
@@ -196,6 +197,11 @@ sub _do_query_Meme {
 	$e_value_cutoff = "1";
     }
     
+    ($background_order) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "background markov model training (value is the model order)");
+    if (not defined $background_order) {
+	$background_order = "1";
+    }
+
     # Add the parsed parameters in a hash table
     
     $parameters{motif_distribution}    = $motif_distribution;
@@ -205,6 +211,7 @@ sub _do_query_Meme {
     $parameters{minimum_motif_width}   = $minimum_motif_width;
     $parameters{maximum_motif_width}   = $maximum_motif_width;
     $parameters{e_value_cutoff}        = $e_value_cutoff;
+    $parameters{background_order}      = $background_order;
     
     if ($_debug) {
 	print STDERR "motif distribution, $motif_distribution\n";
@@ -214,6 +221,7 @@ sub _do_query_Meme {
 	print STDERR "minimum motif width, $minimum_motif_width\n";
 	print STDERR "maximum motif width, $maximum_motif_width\n";
 	print STDERR "E-value cutoff, $e_value_cutoff\n";
+	print STDERR "background model order, $background_order\n";
     }
     
     # Tratamos a cada uno de los articulos
