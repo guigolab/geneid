@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.11 2005-12-15 14:48:05 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.12 2005-12-22 15:38:42 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -490,6 +490,12 @@ sub _do_query_MatScanVsInputMatrix {
 	    
 	    if (not defined $matrix) {
 		print STDERR "Error, can't parse the input matrix...\n";
+	    }
+	    
+	    if (not ($matrix =~ /^\w/)) {
+		print STDERR "matrix formatting requires some cleaning - not starting with a letter, neither finishing properly!\n";
+		$matrix =~ s/^\s+//;
+		$matrix =~ s/\s+$//;
 	    }
 	}
 	
