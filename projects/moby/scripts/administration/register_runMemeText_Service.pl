@@ -171,8 +171,8 @@ my ($REG) = $Central->registerService(
 					  },
 					  'maximum number of motifs' => {
 					      datatype => 'Integer',
-					      default  => 12,
-					      max      => 10,
+					      default  => 8,
+					      max      => 12,
 					  },
 					  'minimum sites for each motif' => {
 					      datatype => 'Integer',
@@ -200,6 +200,11 @@ my ($REG) = $Central->registerService(
 					      datatype => 'String',
 					      default  => "1",
 					      min      => 0,
+					  },
+					  'background markov model training (value is the model order)' => {
+					      datatype => 'String',
+					      default  => "1",
+					      enum     => ['None', '1','2','3','4','5'],
 					  },
 				      }
 				      );
