@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.53 2005-12-15 14:50:16 gmaster Exp $
+# $Id: Factory.pm,v 1.54 2005-12-22 09:49:15 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -831,9 +831,8 @@ sub MatScan_call {
 	
         my $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan/;
         
-	# Comment this line if you want to keep the file...
-	unlink $seqfile;
-	if (defined $matrix_input) {
+	unlink $seqfile unless $debug;
+	if ((not $debug) && (defined $matrix_input)) {
 	    unlink $matrix_file;
 	}
 	
