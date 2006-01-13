@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.15 2005-11-21 13:30:02 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.16 2006-01-13 12:02:24 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -111,6 +111,7 @@ our @EXPORT = qw(
   &fromGenericSequencetoFASTA
   &fromGenericSequenceCollectiontoFASTA
   &fromFASTAtoDNASequenceCollection
+  &fromFASTAtoGenericSequenceCollection
   &generateScoreMatrix
 );
 
@@ -1164,6 +1165,98 @@ sub fromFASTAtoDNASequenceCollection {
 	. $MOBY_RESPONSE . responseFooter;
 }
 
+
+=head2 fromFASTAtoGenericSequenceCollection
+
+ Title   : fromGenericSequenceCollectiontoFASTA
+ Usage   : Esta función está pensada para llamarla desde un cliente SOAP. 
+         : No obstante, se recomienda probarla en la misma máquina, antes 
+         : de instalar el servicio. Para ello, podemos llamarla de la 
+         : siguiente forma:
+         : 
+         : my $result = GeneID("call", $in);
+         : 
+         : donde $in es texto que con el mensaje biomoby que contendría
+         : la parte del <tag> "BODY" del mensaje soap. Es decir, un string
+         : de la forma: 
+         :  
+         :  <?xml version='1.0' encoding='UTF-8'?>
+         :   <moby:MOBY xmlns:moby='http://www.biomoby.org/moby-s'>
+         :    <moby:mobyContent>
+         :      <moby:mobyData queryID='1'> 
+         :      ...
+         :      </moby:mobyData>
+         :    </moby:mobyContent>
+         :   </moby:mobyContent>
+         :  </moby:MOBY>
+ Returns : Devuelve un string que contiene el resultado de todas las 
+         : queries en GFF formate. Es decir, un mensaje xml de la forma:
+         :
+         : <?xml version='1.0' encoding='UTF-8'?>
+         : <moby:MOBY xmlns:moby='http://www.biomoby.org/moby' 
+         : xmlns='http://www.biomoby.org/moby'>
+         :   <moby:mobyContent moby:authority='inb.lsi.upc.es'>
+         :     <moby:mobyData moby:queryID='1'>
+         :       ....
+         :     </moby:mobyData>
+         :     <moby:mobyData moby:queryID='2'>
+         :       ....
+         :     </moby:mobyData>
+         :   </moby:mobyContent>
+         :</moby:MOBY>
+
+=cut
+
+sub fromFASTAtoGenericSequenceCollection {
+    
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+
+    if ($_debug) {
+	print STDERR "processing Moby fromFASTAtoGenericSequenceCollection query...\n";
+    }
+
+	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
+	# a la ontologia, y debemos contentarnos con trabajar directamente 
+	# con objetos DOM. Por consiguiente lo primero es recolectar la 
+	# lista de peticiones (queries) que tiene la peticion. 
+	# 
+	# En una misma llamada podemos tener mas de una peticion, y de  
+	# cada servicio depende la forma de trabajar con ellas. En este 
+	# caso las trataremos una a una, pero podriamos hacer Threads para 
+	# tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
+	# etc.. 
+	my @queries = getInputs($message);  # returns XML::DOM nodes
+	# 
+	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+	# es una coleccion de respuestas a cada una de las consultas.
+        my $MOBY_RESPONSE = "";             # set empty response
+
+	# Para cada query ejecutaremos el _execute_query.
+        foreach my $queryInput (@queries){
+
+	    # En este punto es importante recordar que el objeto $query 
+	    # es un XML::DOM::Node, y que si queremos trabajar con 
+	    # el mensaje de texto debemos llamar a: $query->toString() 
+	    
+	    if ($_debug) {
+		my $query_str = $queryInput->toString();
+		print STDERR "query text: $query_str\n";
+	    }
+
+	    my $query_response = _do_query_fromFASTAtoMobySequences ($queryInput, "GenericSequence");
+	    
+	    # $query_response es un string que contiene el codigo xml de
+	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
+	    # encadenar sin problemas una respuesta con otra. 
+	    $MOBY_RESPONSE .= $query_response;
+	}
+	# Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
+	# todas ellas con una cabecera y un final. Esto lo podemos hacer 
+	# con las llamadas de la libreria Common de BioMoby. 
+	return responseHeader("genome.imim.es") 
+	. $MOBY_RESPONSE . responseFooter;
+}
 
 =head2 generateScoreMatrix
 
