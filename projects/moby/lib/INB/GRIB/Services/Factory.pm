@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.55 2005-12-22 15:37:44 gmaster Exp $
+# $Id: Factory.pm,v 1.56 2006-01-13 17:56:51 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -86,6 +86,9 @@ use File::Temp qw/tempfile/;
 
 use Bio::SeqIO;
 use Bio::Seq;
+
+# Moby Exceptions module
+use INB::Exceptions::MobyException;
 
 # Report Unix Error codes
 use Errno qw (EINTR EIO :POSIX);
@@ -850,12 +853,14 @@ sub MetaAlignment_call {
     my %args = @_;  
 
     # method output
-    my ($meta_output, $note, $code) = ("", undef, undef);
+    my $meta_output     = "";
+    my $moby_exceptions = [];
     
     # relleno los parametros por defecto MetaAlignment_call
 
     my $map1 = $args{map1};
     my $map2 = $args{map2};
+    my $queryID    = $args{queryID};
     my $parameters = $args{parameters} || undef;
 
     # Get the parameters
@@ -873,10 +878,16 @@ sub MetaAlignment_call {
 
     # Check that the binary is in place
     if (! -f "$_meta_alignment_dir/$_meta_alignment_bin") {
-	$note = "meta-alignment binary not found";
+	my $note = "meta-alignment binary not found";
 	print STDERR "$note\n";
-	$code = 701;
-	return ("", $note, $code);
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
     }
     
     if ($output_format eq "GFF") {
@@ -892,10 +903,16 @@ sub MetaAlignment_call {
 	open (FILE, ">$map1_file");
     };
     if ($@) {
-	$note = "can't open meta-alignment input temporary file!\n";
-	$code = 701;
+	my $note = "can't open meta-alignment input temporary file!\n";
+	my $code = 701;
 	print STDERR "$note\n";
-	return ("", $note, $code);
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
     }
     print FILE $map1;
     close FILE;
@@ -909,10 +926,16 @@ sub MetaAlignment_call {
 	open (FILE, ">$map2_file");
     };
     if ($@) {
-	$note = "can't open meta-alignment input temporary file!\n";
-	$code = 701;
+	my $note = "can't open meta-alignment input temporary file!\n";
+	my $code = 701;
 	print STDERR "$note\n";
-	return ("", $note, $code);
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
     }
     print FILE $map2;
     close FILE;
@@ -942,24 +965,36 @@ sub MetaAlignment_call {
 	close $stdout_fh;
     };
     if ($@) {
-	$note = "can't open a temporary file to store meta-alignment output!\n";
-	$code = 701;
+	my $note = "can't open a temporary file to store meta-alignment output!\n";
+	my $code = 701;
 	print STDERR "$note\n";
-	return ("", $note, $code);
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
     }
     
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
     
     my $failed = system (@args);
     if ($failed > 0) {
-	$note = "meta-alignment system call died (with error code, $?).\n";
-	$code = 701;
+	my $note = "meta-alignment system call died (with error code, $?).\n";
+	my $code = 701;
 	
 	if (($! != ENOTTY) || ($! ne "Inappropriate ioctl for device")) {
 	    # This is not an error, just mean that stdout is a terminal !!
 	    print STDERR "Error, '$!'\n";
 	}
-	print STDERR $note;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
     }
     else {
 	$meta_output = qx/cat $stdout_file/;
@@ -969,7 +1004,7 @@ sub MetaAlignment_call {
     unlink $map1_file;
     unlink $map2_file;
     
-    return ($meta_output, $note, $code);
+    return ($meta_output, $moby_exceptions);
     
 }
 

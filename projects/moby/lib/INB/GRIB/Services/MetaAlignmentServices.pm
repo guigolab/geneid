@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.8 2005-12-02 16:17:20 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.9 2006-01-13 17:56:51 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -158,7 +158,7 @@ sub _do_query_MetaAlignment {
 
     # Output definition
     my $MOBY_RESPONSE = "";     # set empty response
-    my $moby_exception_response;
+    my $moby_exceptions = [];
     
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $alpha_penalty;
@@ -287,17 +287,8 @@ sub _do_query_MetaAlignment {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my ($meta_report, $note, $code) = MetaAlignment_call (map1  => $map1, map2  => $map2, parameters => \%parameters);
-
-    if (defined $code) {
-	my $moby_exception_object = INB::Exceptions::MobyException->new (
-									 code       => $code,
-									 type       => 'error',
-									 queryID    => $queryID,
-									 message    => "$note",
-									);
-	$moby_exception_response = $moby_exception_object->retrieveExceptionResponse();
-    }
+    my $meta_report;
+    ($meta_report, $moby_exceptions) = MetaAlignment_call (map1  => $map1, map2  => $map2, queryID => $queryID, parameters => \%parameters);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -323,10 +314,10 @@ PRT
     # a collection response. 
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
-
-    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
     
-    return ($MOBY_RESPONSE, $note, $moby_exception_response);
+    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
+
+    return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
 
@@ -364,8 +355,8 @@ sub _do_query_MultiMetaAlignment {
     my $_moby_output_format = shift @_;
 
     # Output definition
-    my @notes = ();
-    my $MOBY_RESPONSE = "";     # set empty response
+    my $moby_exceptions = [];
+    my $MOBY_RESPONSE   = "";     # set empty response
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $alpha_penalty;
@@ -495,10 +486,8 @@ sub _do_query_MultiMetaAlignment {
 			print STDERR "j: $j\n";
 		    }
 		    
-		    my ($meta_report, $note, $code) = MetaAlignment_call (map1  => $map1, map2  => $map2, parameters => \%parameters);
-		    if (defined $note) {
-			push (@notes, $note);
-		    }
+		    my ($meta_report, $moby_exceptions_tmp) = MetaAlignment_call (map1  => $map1, map2  => $map2, queryID => $queryID, parameters => \%parameters);
+		    push (@$moby_exceptions, @$moby_exceptions_tmp);
 		    
 		    # Leave it for now on, because for such collection, i don't know how to report properly exceptions
 
@@ -535,7 +524,7 @@ PRT
     my $output_article_name = "meta_predictions";
     $MOBY_RESPONSE .= collectionResponse($output_objects, $output_article_name, $queryID);
     
-    return ($MOBY_RESPONSE, \@notes);
+    return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
 
@@ -586,8 +575,6 @@ sub runMetaAlignment {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format = "text-formatted";
-    my @notes = ();
-    my $moby_exceptions = "";
     
     if ($_debug) {
 	print STDERR "processing Moby runMetaAlignment query...\n";
@@ -607,7 +594,8 @@ sub runMetaAlignment {
     # 
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -621,14 +609,8 @@ sub runMetaAlignment {
 	    print STDERR "query text: $query_str\n";
 	}
 	
-	my ($query_response, $note, $moby_exceptions_tmp) = _do_query_MetaAlignment ($queryInput, $_output_format);
-	# I don't need them actually as they are already encapsulated within the exceptions
-	if (defined $note) {
-	    push (@notes, $note);
-	}
-	if (defined $moby_exceptions_tmp) {
-	    $moby_exceptions .= $moby_exceptions_tmp;
-	}
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MetaAlignment ($queryInput, $_output_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos 
@@ -638,10 +620,16 @@ sub runMetaAlignment {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (length ($moby_exceptions) > 0) {
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
         return responseHeader( 
 			       -authority => "genome.imim.es",
-			       -note      => "$moby_exceptions"
+			       -note      => "$moby_exception_response"
 			       )
 	    . $MOBY_RESPONSE . responseFooter;
     }
@@ -702,9 +690,7 @@ sub runMetaAlignmentGFF {
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
-    my $_output_format = "GFF";
-    my @notes = ();
-    my $moby_exceptions = "";
+    my $_output_format  = "GFF";
     
     if ($_debug) {
 	print STDERR "processing Moby runMetaAlignmentGFF query...\n";
@@ -724,7 +710,8 @@ sub runMetaAlignmentGFF {
     # 
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -738,14 +725,8 @@ sub runMetaAlignmentGFF {
 	    print STDERR "query text: $query_str\n";
 	}
 	
-	my ($query_response, $note, $moby_exceptions_tmp) = _do_query_MetaAlignment ($queryInput, $_output_format);
-	# I don't need them actually as they are already encapsulated within the exceptions
-	if (defined $note) {
-	    push (@notes, $note);
-	}
-	if (defined $moby_exceptions_tmp) {
-	    $moby_exceptions .= $moby_exceptions_tmp;
-	}
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MetaAlignment ($queryInput, $_output_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos 
@@ -755,10 +736,16 @@ sub runMetaAlignmentGFF {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (length ($moby_exceptions) > 0) {
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
         return responseHeader( 
 			       -authority => "genome.imim.es",
-			       -note      => "$moby_exceptions"
+			       -note      => "$moby_exception_response"
 			       )
 	    . $MOBY_RESPONSE . responseFooter;
     }
@@ -819,7 +806,6 @@ sub runMultiMetaAlignment {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format = "text-formatted";
-    my @notes = ();
     
     if ($_debug) {
 	print STDERR "processing Moby runMultiMetaAlignment query...\n";
@@ -839,7 +825,8 @@ sub runMultiMetaAlignment {
     # 
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -853,10 +840,8 @@ sub runMultiMetaAlignment {
 	    print STDERR "query text: $query_str\n";
 	}
 	
-	my ($query_response, $notes_aref) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
-	if (@$notes_aref > 0) {
-	    push (@notes, @$notes_aref);
-	}
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos 
@@ -866,10 +851,16 @@ sub runMultiMetaAlignment {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby.
-    if (@notes > 0) {
+    if (@$moby_exceptions > 0) {
+        # build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
 	return responseHeader(
 			      -authority => "genome.imim.es",
-			      -note      => "<Notes>" . join ("\n", @notes) . "</Notes>"
+			      -note      => $moby_exception_response
 			      )
 	    . $MOBY_RESPONSE . responseFooter;
     }
@@ -931,8 +922,7 @@ sub runMultiMetaAlignmentGFF {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format = "GFF";
-    my @notes = ();
-    
+
     if ($_debug) {
 	print STDERR "processing Moby runMultiMetaAlignmentGFF query...\n";
     }
@@ -952,6 +942,7 @@ sub runMultiMetaAlignmentGFF {
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE = "";             # set empty response
+    my $moby_exceptions = [];
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -965,10 +956,8 @@ sub runMultiMetaAlignmentGFF {
 	    print STDERR "query text: $query_str\n";
 	}
 	
-	my ($query_response, $notes_aref) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
-	if (@$notes_aref > 0) {
-	    push (@notes, @$notes_aref);
-	}
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos 
@@ -978,10 +967,16 @@ sub runMultiMetaAlignmentGFF {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@notes > 0) {
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
 	return responseHeader(
 			      -authority => "genome.imim.es",
-			      -note      => "<Notes>" . join ("\n", @notes) . "</Notes>"
+			      -note      => $moby_exception_response
 			      )
 	    . $MOBY_RESPONSE . responseFooter;
     }
