@@ -95,11 +95,7 @@ if (defined($opt_x)) {
 	
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
-
-	print STDERR "Not allowed !!!\n";
-	print STDERR 'Contact Sergio Ramirez, serr@ac.uma.es, to update the registry' . "\n";
-	exit 0;
-
+	
     }
     elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
 	
