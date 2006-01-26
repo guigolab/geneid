@@ -13,7 +13,6 @@ use Data::Dumper;
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
 # use SOAP::Lite + 'trace';
 
 # Benchmark Module
@@ -29,6 +28,9 @@ my $articleName = "genes";
 
 # URI
 $::authURI = 'genome.imim.es';
+$::authURI = 'www.pcm.uam.es';
+
+print STDERR "\nrequesting, $::authURI...\n\n";
 
 ##################################################################
 #
@@ -44,6 +46,12 @@ my $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 $URL = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 $URI = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
+$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
+
+# icapture
+
+$URI = $ENV{MOBY_URI}='http://mobycentral.icapture.ubc.ca/MOBY/Central';
+$URL = $ENV{MOBY_SERVER}='http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
 $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 ##################################################################
@@ -107,11 +115,19 @@ my $genes = qx/cat $in_file/;
 
 my $genes_xml = <<PRT;
 <text-formatted namespace="$datasource" id="">
+<String id='' articleName='content'>
 <![CDATA[
 $genes
 ]]>
+</String>
 </text-formatted>
 PRT
+
+# my $genes_xml = <<PRT;
+# <text-formatted namespace="$datasource" id="">
+# $genes
+# </text-formatted>
+# PRT
 
 # taverna input objects !! - for testing
 
@@ -130,8 +146,9 @@ PRT
 #
 
 my $organism          = "homo sapiens";
-my $dbrelease         = "34";
-my $upstream_length   = 5000;
+$organism             = "Drosophila melanogaster";
+my $dbrelease         = "30";
+my $upstream_length   = 1000;
 my $downstream_length = 0;
 my $intergenic_only   = "true";
 my $orthologous_mode  = "false";
