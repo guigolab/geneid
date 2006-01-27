@@ -1,8 +1,8 @@
-# $Id: Factory.pm,v 1.56 2006-01-13 17:56:51 gmaster Exp $
+# $Id: Factory.pm,v 1.57 2006-01-27 17:04:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
-# This file is an instance of a template written 
+# This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
 #
 
@@ -23,7 +23,7 @@ INB::GRIB::Services::Factory - Package for calling geneid service.
  $report = INB::GRIB::Services::Factory::factory_call(@params);
 
   # Esta llamada nos devuelve una variable que contiene el texto con la
-  # salida del programa geneid. 
+  # salida del programa geneid.
 
 =head1 DESCRIPTION
 
@@ -107,10 +107,10 @@ our %EXPORT_TAGS = ( 'all' => [ qw() ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-# Aqui pondremos las funciones que exportaremos a otros módulos. Ejemplo 
-# 
+# Aqui pondremos las funciones que exportaremos a otros módulos. Ejemplo
+#
 #  @EXPORT = qw( &func1 &func2);
-# 
+#
 our @EXPORT = qw(
   &GeneID_call_CGI
   &GeneID_call
@@ -131,13 +131,13 @@ our $VERSION = '1.00';
 ###############################################################################
 sub _exists_env {
 	my $var_name = shift;
-        croak "Environment variable \$$var_name not defined.\n"
+	croak "Environment variable \$$var_name not defined.\n"
 	if (not exists $ENV{$var_name});
 }
 
 BEGIN {
 	## in este array escribiremos las variables de entorno que le hacen
-	## falta a la aplicacion para que funcione correctamente. 
+	## falta a la aplicacion para que funcione correctamente.
 	## Ejemplo:  my @needed_vars = qw(DIR DATADIR);
 	my @needed_vars = qw();
 	_exists_env($_) foreach @needed_vars;
@@ -147,23 +147,23 @@ BEGIN {
 
 =head2 GeneID_call_CGI
 
- Title   : GeneID_call_CGI 
+ Title   : GeneID_call_CGI
  Usage   : $report = GeneID_call_CGI (@params);
-         : 
-         : ## where @params are,
-         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
-         :            'arg2'  => "query 1", ## optional
-         :            'arg3'  => "nr");     ## optional (default: nr)
+	 :
+	 : ## where @params are,
+	 : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+	 :            'arg2'  => "query 1", ## optional
+	 :            'arg3'  => "nr");     ## optional (default: nr)
  Returns : Devuelve un string que contiene el resultado de la ejecución.
 
 =cut
 
 sub GeneID_call_CGI {
-        my %args = @_; 
-	
+	my %args = @_;
+
 	# relleno los parametros por defecto GeneID_call
-	
-        my $sequences          = $args{sequences}  || undef;
+
+	my $sequences          = $args{sequences}  || undef;
 	my $format             = $args{format}     || "";
 	my $parameters         = $args{parameters} || undef;
 
@@ -178,7 +178,7 @@ sub GeneID_call_CGI {
 	my $results = "";
 
 	# Parse the sequences hash
-	
+
 	my @seqIds = keys (%$sequences);
 
 	foreach my $sequenceIdentifier (@seqIds) {
@@ -202,7 +202,7 @@ sub GeneID_call_CGI {
 	    my $result_diag = $agent_diag->request($request_diag);
 	    $results       .= $result_diag->content;
 	}
-	
+
 	return $results;
     }
 
@@ -211,245 +211,345 @@ sub GeneID_call_CGI {
 
  Title   : GeneID_call
  Usage   : $report = GeneID_call (@params);
-         : 
-         : ## where @params are,
-         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
-         :            'arg2'  => "query 1", ## optional
-         :            'arg3'  => "nr");     ## optional (default: nr)
+	 :
+	 : ## where @params are,
+	 : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+	 :            'arg2'  => "query 1", ## optional
+	 :            'arg3'  => "nr");     ## optional (default: nr)
  Returns : Devuelve un string que contiene el resultado de la ejecución.
 
 =cut
 
 sub GeneID_call {
-        my %args = @_;
+    my %args = @_;
 
-        # relleno los parametros por defecto GeneID_call
+    # output specs
+    my $geneid_output   = "";
+    my $moby_exceptions = [];
 
-        my $sequences          = $args{sequences} || undef;
-	my $format             = $args{format} || "";
-	my $parameters         = $args{parameters} || undef;
+    # relleno los parametros por defecto GeneID_call
 
-	# Get the parameters
+    my $sequences          = $args{sequences}  || undef;
+    my $format             = $args{format}     || "";
+    my $parameters         = $args{parameters} || undef;
+    my $queryID            = $args{queryID}    || "";
 
-	my $profile     = $parameters->{profile};
-	my $strands     = $parameters->{strands};
-	my $exons_ref   = $parameters->{exons};
-	my $signals_ref = $parameters->{signals};
+    # Get the parameters
 
-        # Llama a GeneID en local
-        my $_geneid_dir  = "/home/ug/gmaster/GeneID/geneid_2002";
-        my $_geneid_bin  = "bin/geneid";
-        my $_geneid_args = "";
-	
-        if ($format eq "GFF") {
-	    $_geneid_args .= "-G";
-        }
-	
-	if ($strands eq "Both") {
-	    # Default anyway
-	}
-	elsif ($strands eq "Forward") {
-	    $_geneid_args .= "W";
-	}
-	elsif ($strands eq "Reverse") {
-	    $_geneid_args .= "C";
-	}
-	
-        SWITCH: {
-	    if ($profile eq "Human")         { $_geneid_args .= "P $_geneid_dir/human.param"; last SWITCH; }
-	    if ($profile eq "Tetraodon")     { $_geneid_args .= "P $_geneid_dir/tetraodon.param"; last SWITCH; }
-	    if ($profile eq "Drosophila")    { $_geneid_args .= "P $_geneid_dir/dros.param"; last SWITCH; }
-	    if ($profile eq "Celegans")      { $_geneid_args .= "P $_geneid_dir/celegans.param"; last SWITCH; }
-	    if ($profile eq "Wheat")         { $_geneid_args .= "P $_geneid_dir/wheat.param"; last SWITCH; }
-	    if ($profile eq "Arabidopsis")   { $_geneid_args .= "P $_geneid_dir/arabidopsis.param"; last SWITCH; }
-	    if ($profile eq "Rice")          { $_geneid_args .= "P $_geneid_dir/rice.param"; last SWITCH; }
-	    if ($profile eq "Plasmodium")    { $_geneid_args .= "P $_geneid_dir/plasmodium.param"; last SWITCH; }
-	    if ($profile eq "Dictyostelium") { $_geneid_args .= "P $_geneid_dir/dictyostelium.param"; last SWITCH; }
-	    if ($profile eq "Aspergillus")   { $_geneid_args .= "P $_geneid_dir/aspergillus.param"; last SWITCH; }
-	    if ($profile eq "Neurospora")    { $_geneid_args .= "P $_geneid_dir/neurospora.param"; last SWITCH; }
-	    if ($profile eq "Cryptococcus")  { $_geneid_args .= "P $_geneid_dir/cneomorfans.param"; last SWITCH; }
-	    if ($profile eq "Coprinus")      { $_geneid_args .= "P $_geneid_dir/cinereus.param"; last SWITCH; }
-	    # Default is Human
-	    $_geneid_args .= "P $_geneid_dir/human.param";
-	}
-        
-        foreach my $exon (@$exons_ref) {
-	  SWITCH: {
-	      if ($exon eq "None")                { last SWITCH; }
-	      if ($exon eq "First exons")         { $_geneid_args .= " -f"; last SWITCH; }
-	      if ($exon eq "Internal exons")      { $_geneid_args .= " -i"; last SWITCH; }
-	      if ($exon eq "Terminal exons")      { $_geneid_args .= " -t"; last SWITCH; }
-	      if ($exon eq "All exons")           { $_geneid_args .= " -x"; last SWITCH; }
-	      if ($exon eq "Single genes")        { $_geneid_args .= " -s"; last SWITCH; }
-	      if ($exon eq "Open reading frames") { $_geneid_args .= " -z"; last SWITCH; }
-	      # Default is to leave blank the GeneID parameters line for not reporting Potential Exons Features
-	  }
-	}
+    my $profile     = $parameters->{profile};
+    my $strands     = $parameters->{strands};
+    my $exons_ref   = $parameters->{exons};
+    my $signals_ref = $parameters->{signals};
 
-	foreach my $signal (@$signals_ref) {
-	  SWITCH: {
-	      if ($signal eq "None")                  { last SWITCH; }
-	      if ($signal eq "Donor splice sites")    { $_geneid_args .= " -d";  last SWITCH; }
-	      if ($signal eq "Acceptor splice sites") { $_geneid_args .= " -a";  last SWITCH; }
-	      if ($signal eq "All splice sites")      { $_geneid_args .= " -ad"; last SWITCH; }
-	      if ($signal eq "Start codons")          { $_geneid_args .= " -b";  last SWITCH; }
-	      if ($signal eq "Stop codons")           { $_geneid_args .= " -e";  last SWITCH; }
-	      if ($signal eq "All codons")            { $_geneid_args .= " -be"; last SWITCH; }
-	      if ($signal eq "All")                   { $_geneid_args .= " -adbe"; last SWITCH; }
-	      # No signals reported by default
-	  }
-	}
+    # Llama a GeneID en local
+    my $_geneid_dir  = "/home/ug/gmaster/projects/geneid";
+    my $_geneid_bin  = "bin/geneid";
+    my $_geneid_args = "";
 
-	# Generate a temporary file locally with the sequence(s) in FASTA format
-	# locally, ie not on a NFS mounted directory, for speed sake
+    # Check that the binary is in place
+    if (! -f "$_geneid_dir/$_geneid_bin") {
+	my $note = "geneid binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
+    }
 
-	my ($seq_fh, $seqfile) = tempfile("/tmp/GENEID.XXXXXX", UNLINK => 0);
+    if ($format eq "GFF") {
+	$_geneid_args .= "-G";
+    }
 
-	# Bioperl sequence factory
-	
-	my $sout = Bio::SeqIO->new (
-				    -fh     => $seq_fh,
-				    -format => 'fasta'
+    if ($strands eq "Both") {
+	# Default anyway
+    }
+    elsif ($strands eq "Forward") {
+	$_geneid_args .= "W";
+    }
+    elsif ($strands eq "Reverse") {
+	$_geneid_args .= "C";
+    }
+
+  SWITCH: {
+      if ($profile eq "Human")         { $_geneid_args .= "P $_geneid_dir/params/human.param"; last SWITCH; }
+      if ($profile eq "Tetraodon")     { $_geneid_args .= "P $_geneid_dir/params/tetraodon.param"; last SWITCH; }
+      if ($profile eq "Drosophila")    { $_geneid_args .= "P $_geneid_dir/params/dros.param"; last SWITCH; }
+      if ($profile eq "Celegans")      { $_geneid_args .= "P $_geneid_dir/params/celegans.param"; last SWITCH; }
+      if ($profile eq "Wheat")         { $_geneid_args .= "P $_geneid_dir/params/wheat.param"; last SWITCH; }
+      if ($profile eq "Arabidopsis")   { $_geneid_args .= "P $_geneid_dir/params/arabidopsis.param"; last SWITCH; }
+      if ($profile eq "Rice")          { $_geneid_args .= "P $_geneid_dir/params/rice.param"; last SWITCH; }
+      if ($profile eq "Plasmodium")    { $_geneid_args .= "P $_geneid_dir/params/plasmodium.param"; last SWITCH; }
+      if ($profile eq "Dictyostelium") { $_geneid_args .= "P $_geneid_dir/params/dictyostelium.param"; last SWITCH; }
+      if ($profile eq "Aspergillus")   { $_geneid_args .= "P $_geneid_dir/params/aspergillus.param"; last SWITCH; }
+      if ($profile eq "Neurospora")    { $_geneid_args .= "P $_geneid_dir/params/neurospora.param"; last SWITCH; }
+      if ($profile eq "Cryptococcus")  { $_geneid_args .= "P $_geneid_dir/params/cneomorfans.param"; last SWITCH; }
+      if ($profile eq "Coprinus")      { $_geneid_args .= "P $_geneid_dir/params/cinereus.param"; last SWITCH; }
+      # Default is Human
+      $_geneid_args .= "P $_geneid_dir/params/human.param";
+  }
+
+    foreach my $exon (@$exons_ref) {
+      SWITCH: {
+	  if ($exon eq "None")                { last SWITCH; }
+	  if ($exon eq "First exons")         { $_geneid_args .= " -f"; last SWITCH; }
+	  if ($exon eq "Internal exons")      { $_geneid_args .= " -i"; last SWITCH; }
+	  if ($exon eq "Terminal exons")      { $_geneid_args .= " -t"; last SWITCH; }
+	  if ($exon eq "All exons")           { $_geneid_args .= " -x"; last SWITCH; }
+	  if ($exon eq "Single genes")        { $_geneid_args .= " -s"; last SWITCH; }
+	  if ($exon eq "Open reading frames") { $_geneid_args .= " -z"; last SWITCH; }
+	  # Default is to leave blank the GeneID parameters line for not reporting Potential Exons Features
+      }
+    }
+
+    foreach my $signal (@$signals_ref) {
+      SWITCH: {
+	  if ($signal eq "None")                  { last SWITCH; }
+	  if ($signal eq "Donor splice sites")    { $_geneid_args .= " -d";  last SWITCH; }
+	  if ($signal eq "Acceptor splice sites") { $_geneid_args .= " -a";  last SWITCH; }
+	  if ($signal eq "All splice sites")      { $_geneid_args .= " -ad"; last SWITCH; }
+	  if ($signal eq "Start codons")          { $_geneid_args .= " -b";  last SWITCH; }
+	  if ($signal eq "Stop codons")           { $_geneid_args .= " -e";  last SWITCH; }
+	  if ($signal eq "All codons")            { $_geneid_args .= " -be"; last SWITCH; }
+	  if ($signal eq "All")                   { $_geneid_args .= " -adbe"; last SWITCH; }
+	  # No signals reported by default
+      }
+    }
+
+    # Generate a temporary file locally with the sequence(s) in FASTA format
+    # locally, ie not on a NFS mounted directory, for speed sake
+
+    my ($seq_fh, $seqfile);
+    eval {
+	($seq_fh, $seqfile) = tempfile("/tmp/GENEID.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "can't open geneid input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
+    }
+
+    # Bioperl sequence factory
+
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+
+    my @seqIds = keys (%$sequences);
+    foreach my $sequenceIdentifier (@seqIds) {
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+	# bioperl object
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
 				    );
-	
-	my @seqIds = keys (%$sequences);
+	$sout->write_seq ($seqobj);
+    }
+    close $seq_fh;
 
-	foreach my $sequenceIdentifier (@seqIds) {
+    # Test empty file
+    if (-z $seqfile) {
+	my $note = "Error, empty geneid input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
+    }
 
-	    my $nucleotides = $sequences->{$sequenceIdentifier};
+    # print STDERR "Running GeneID, with this command:\n";
+    # print STDERR "$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile \n";
 
-	    # bioperl object
-	    
-	    my $seqobj = Bio::Seq->new (
-					-display_id => $sequenceIdentifier,
-					-seq        => $nucleotides
-					);
-	    
-	    $sout->write_seq ($seqobj);
-	    
-	}
+    $geneid_output = qx/$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile/;
 
-	close $seq_fh;
+    # Comment this line if you want to keep the file...
+    unlink $seqfile;
 
-	# Test empty file
-	if (-z $seqfile) {
-	    print STDERR "Error, empty sequence file...\n";
-	}
-
-	# print STDERR "Running GeneID, with this command:\n";
-	# print STDERR "$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile \n";
-
-        my $geneid_output = qx/$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile/;
-        
-	# Comment this thine if you want to keep the file...
-	unlink $seqfile;
-
-        if (defined $geneid_output) {
-		return $geneid_output;
-	}	
-	else {
-		# What else better to return ??
-		return undef;
-	}
+    if (defined $geneid_output) {
+	return ($geneid_output, $moby_exceptions);
+    }
+    else {
+	print STDERR "no geneid_output defined!!\n";
+	return ("", $moby_exceptions);
+    }
 }
 
 =head2 SGP2_call
 
  Title   : SGP2_call
  Usage   : $report = SGP2_call (@params);
-         : 
-         : ## where @params are,
-         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
-         :            'arg2'  => "query 1", ## optional
-         :            'arg3'  => "nr");     ## optional (default: nr)
+	 :
+	 : ## where @params are,
+	 : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+	 :            'arg2'  => "query 1", ## optional
+	 :            'arg3'  => "nr");     ## optional (default: nr)
  Returns : Devuelve un string que contiene el resultado de la ejecución.
 
 =cut
 
 sub SGP2_call {
-        my %args = @_; 
-        # relleno los parametros por defecto SGP2_call (nucleotide  => $nucleotide, seqIdentifier => $sequenceIdentifier);
-        my $sequences          = $args{sequences}      || undef;
-        my $tblastx_output     = $args{tblastx_output} || undef;
+	my %args = @_;
+
+	# output specs declaration
+	my $sgp2_output     = "";
+	my $moby_exceptions = [];
+
+	# relleno los parametros por defecto SGP2_call (nucleotide  => $nucleotide, seqIdentifier => $sequenceIdentifier);
+	my $sequences          = $args{sequences}      || undef;
+	my $tblastx_output     = $args{tblastx_output} || undef;
 	my $format             = $args{format}         || "";
 	my $parameters         = $args{parameters}     || undef;
+	my $queryID            = $args{queryID}        || "";
 
 	# No parameters yet !!
 
-        # Llama a SGP2 localmente
-        my $_sgp2_dir  = "/home/ug/gmaster/sgp2/sgp2_2003/";
+	# Llama a SGP2 localmente
+	my $_sgp2_dir  = "/home/ug/gmaster/projects/sgp2/";
 	$_sgp2_dir     = $ENV{SGP2};
-        my $_sgp2_bin  = "bin/sgp2";
-        my $_sgp2_args = "";
+	my $_sgp2_bin  = "bin/sgp2";
+	my $_sgp2_args = "";
 	
-        if ($format eq "GFF") {
+	# Check that the binary is in place
+	if (! -f "$_sgp2_dir/$_sgp2_bin") {
+	    my $note = "sgp2 binary not found";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return ("", [$moby_exception]);
+	}
+
+	if ($format eq "GFF") {
 	    $_sgp2_args .= "-g G";
-        }
-	
+	}
+
 	# Generate a temporary file locally with the sequence in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	my ($fh1, $seqfile) = tempfile("/tmp/SGP2_Sequence.XXXXXX", UNLINK => 0);
-	close($fh1);
+	my ($seq_fh, $seqfile);
+	eval {
+	    ($seq_fh, $seqfile) = tempfile("/tmp/SGP2_Sequence.XXXXXX", UNLINK => 0);
+	};
+	if ($@) {
+	    my $note = "can't open SGP2 sequence input temporary file!\n";
+	    my $code = 701;
+	    print STDERR "$note\n";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return ("", [$moby_exception]);
+	}
+
+	# Bioperl sequence factory
+
+	my $sout = Bio::SeqIO->new (
+				    -fh     => $seq_fh,
+				    -format => 'fasta'
+				    );
 
 	my @seqIds = keys (%$sequences);
 	foreach my $sequenceIdentifier (@seqIds) {
-
 	    my $nucleotides = $sequences->{$sequenceIdentifier};
-	    
-	    # bioperl object
-	    
+
+	    # bioperl sequence object
+
 	    my $seqobj = Bio::Seq->new (
 					-display_id => $sequenceIdentifier,
 					-seq        => $nucleotides
 					);
-	    
-	    # Bioperl sequence factory
-	    
-	    my $sout = Bio::SeqIO->new (
-	     			    -file   => ">$seqfile",
-	    			    -format => 'fasta'
-	    			    );
 	    $sout->write_seq ($seqobj);
-	    
 	}
-	
+	close $seq_fh;
+
 	# TBLASTX Output File
 
 	# Generate a temporary file locally with the TBLASTX Output
 	# locally, ie not on a NFS mounted directory, for speed sake
 
-	my ($fh2, $tblastx_output_file) = tempfile("/tmp/SGP2_TBLASTX.XXXXXX", UNLINK => 0);
-	close($fh2);
-	
-	qx/echo "$tblastx_output" > $tblastx_output_file/;
-	
+	my ($blast_fh, $tblastx_output_file);
+	eval {
+	    ($blast_fh, $tblastx_output_file) = tempfile("/tmp/SGP2_TBLASTX.XXXXXX", UNLINK => 0);
+	    close($blast_fh);
+	    qx/echo "$tblastx_output" > $tblastx_output_file/;
+	};
+	if ($@) {
+	    my $note = "can't open SGP2 tblastx input temporary file!\n";
+	    my $code = 701;
+	    print STDERR "$note\n";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return ("", [$moby_exception]);
+	}
+
 	# Test empty files
 
 	if (-z $seqfile) {
-	    print STDERR "Error, empty sequence file...\n";
-	    exit 0;
+	    my $note = "Error, empty SGP2 input sequence file...\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return ("", [$moby_exception]);
 	}
 
 	if (-z $tblastx_output_file) {
-	    print STDERR "Error, empty tblastx output file...\n";
-	    exit 0;
+	    my $note = "Error, empty SGP2 input tblastx file...\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return ("", [$moby_exception]);
 	}
 
 	# print STDERR "Running SGP2, with this command:\n";
 	# print STDERR "$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file\n";
-	
-        my $sgp2_output = qx/$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file/;
-        
+
+	$sgp2_output = qx/$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file/;
+
+	# Comment these two lines if you want to keep the file...
 	unlink $seqfile;
 	unlink $tblastx_output_file;
-	
-        if (defined $sgp2_output) {
-	    return $sgp2_output;
-	}	
+
+	if (defined $sgp2_output) {
+	    return ($sgp2_output, $moby_exceptions);
+	}
 	else {
-	    # What else better to return ??
-	    return undef;
+	    print STDERR "no sgp2_output defined!!\n";
+	    return ("", $moby_exceptions);
 	}
 }
 
@@ -458,11 +558,11 @@ sub SGP2_call {
 
  Title   : GOstat_call
  Usage   : $report = GOstat_call (@params);
-         : 
-         : ## where @params are,
-         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
-         :            'arg2'  => "query 1", ## optional
-         :            'arg3'  => "nr");     ## optional (default: nr)
+	 :
+	 : ## where @params are,
+	 : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+	 :            'arg2'  => "query 1", ## optional
+	 :            'arg3'  => "nr");     ## optional (default: nr)
  Returns : Devuelve un string que contiene el resultado de la ejecución.
 
 =cut
@@ -470,18 +570,23 @@ sub SGP2_call {
 sub GOstat_call {
     my %args = @_;
 
+    # output specs declaration
+    my $gostat_output   = "";
+    my $moby_exceptions = [];
+
     my $regulated_genes    = $args{regulated_genes} || undef;
     my $reference_genes    = $args{reference_genes} || undef;
     my $format             = $args{format}          || "";
     my $parameters         = $args{parameters}      || undef;
-    
+    my $queryID            = $args{queryID}         || "";
+
     # Llama a GOstat localmente
     my $_gostat_dir  = "/home/ug/gmaster/projects/gostat";
     my $_gostat_bin  = "gostat.pl";
     my $_gostat_args = "";
-    
+
     # Make two temporary files for both input lists of genes
-    
+
     my ($regulated_genes_fh, $regulated_genes_file) = tempfile("/tmp/REGULATED_GENES.XXXXXX", UNLINK => 0);
     close ($regulated_genes_fh);
     my ($reference_genes_fh, $reference_genes_file) = tempfile("/tmp/REFERENCE_GENES.XXXXXX", UNLINK => 0);
@@ -494,9 +599,9 @@ sub GOstat_call {
     open (FILE, ">$reference_genes_file") or die "can't open temp file, $reference_genes_file!\n";
     print FILE (join ("\n", @$reference_genes) . "\n");
     close FILE;
-    
-    my $gostat_output = qx/$_gostat_dir\/$_gostat_bin $_gostat_args --reg $regulated_genes_file --ref $reference_genes_file/;
-        
+
+    $gostat_output = qx/$_gostat_dir\/$_gostat_bin $_gostat_args --reg $regulated_genes_file --ref $reference_genes_file/;
+
     unlink $regulated_genes_file;
     unlink $reference_genes_file;
 
@@ -513,10 +618,15 @@ sub GOstat_call {
 sub TranslateGeneIDPredictions_call {
     my %args = @_;
 
+    # output specs declaration
+    my $translateGeneID_output = "";
+    my $moby_exceptions        = [];
+
     my $sequences          = $args{sequences}    || undef;
     my $geneid_predictions = $args{predictions}  || undef;
     my $parameters         = $args{parameters}   || undef;
-    
+    my $queryID            = $args{queryID}      || "";
+
     my $translation_table  = $parameters->{translation_table};
     my $translation_code;
     SWITCH: {
@@ -525,74 +635,91 @@ sub TranslateGeneIDPredictions_call {
 	# Default is Standard
 	$translation_code = 1;
     }
-    
+
     # Llama a GOstat localmente
     my $_translateGeneID_dir  = "/home/ug/gmaster/projects/GFF_Translations";
     my $_translateGeneID_bin  = "GFF_Features_Translation.pl";
     my $_translateGeneID_args = "-t $translation_code";
-    
-    # Make two temporary files for both input lists of genes
-    
-    my ($seq_fh, $seqfile) = tempfile("/tmp/SEQS.TRANSLATION.XXXXXX", UNLINK => 0);
-    # close ($seq_fh);
 
-    my ($feature_fh, $featurefile) = tempfile("/tmp/FEATURES.TRANSLATION.XXXXXX", UNLINK => 0);
-    close ($feature_fh);
-    open (FILE, ">$featurefile") or die "can't open temp file, $featurefile!\n";
+    # Check that the binary is in place
+    if (! -f "$_translateGeneID_dir/$_translateGeneID_bin") {
+	my $note = "GFF_Translations binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
+    }
+
+    # Make two temporary files for both input lists of genes
+
+    my ($seq_fh, $seqfile);
+    eval {
+	($seq_fh, $seqfile) = tempfile("/tmp/SEQS.TRANSLATION.XXXXXX", UNLINK => 0);
+    };
+    my ($feature_fh, $featurefile);
+    eval {
+	($feature_fh, $featurefile) = tempfile("/tmp/FEATURES.TRANSLATION.XXXXXX", UNLINK => 0);
+    };
 
     # Bioperl sequence factory
-    
     my $sout = Bio::SeqIO->new (
 				-fh     => $seq_fh,
 				-format => 'fasta'
 				);
-    
-    my @seqIds = keys (%$sequences);
-    
-    foreach my $sequenceIdentifier (@seqIds) {
-	
-	# Sequence
 
+    my @seqIds = keys (%$sequences);
+    foreach my $sequenceIdentifier (@seqIds) {
+	# Sequence
 	my $nucleotides = $sequences->{$sequenceIdentifier};
-	
-	# bioperl object
-	
+
+	# bioperl sequence object
 	my $seqobj = Bio::Seq->new (
 				    -display_id => $sequenceIdentifier,
 				    -seq        => $nucleotides
 				    );
-	
 	$sout->write_seq ($seqobj);
 
 	# GeneID Predictions
-
 	my $geneid_prediction = $geneid_predictions->{$sequenceIdentifier};
+	print $feature_fh "$geneid_prediction";
 
-	print FILE "$geneid_prediction";
-	
     }
-    
     close $seq_fh;
-    close FILE;
+    close $feature_fh;
 
     # Test empty file
     if (-z $seqfile) {
-	print STDERR "Error, empty sequence file...\n";
+	my $note = "Error when calling translateGeneIDPredictions sequence, empty sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
     }
 
     # print STDERR "Running the following command, $_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile...\n";
-    
-    my $translateGeneID_output = qx/$_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile/;
-        
+
+    $translateGeneID_output = qx/$_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile/;
+
+    # Comment these two lines if you want to keep those files...
     unlink $seqfile;
     unlink $featurefile;
 
     if (defined $translateGeneID_output) {
-	return $translateGeneID_output;
+	return ($translateGeneID_output, $moby_exceptions);
     }
     else {
-	# What else better to return ??
-	return undef;
+	print STDERR "no translateGeneID_output defined!!\n";
+	return ("", $moby_exceptions);
     }
 
 }
@@ -600,13 +727,18 @@ sub TranslateGeneIDPredictions_call {
 sub PromoterExtraction_call {
     my %args = @_;
 
+    # output specs declaration
+    my $promoterExtraction_output = "";
+    my $moby_exceptions           = [];
+
     # relleno los parametros por defecto GeneID_call
-    
+
     my $genes_ref  = $args{genes}      || undef;
     my $parameters = $args{parameters} || undef;
-    
+    my $queryID    = $args{queryID}    || "";
+
     # Get the parameters
-    
+
     my $organism          = $parameters->{organism};
     my $dbrelease         = $parameters->{dbrelease};
     my $upstream_length   = $parameters->{upstream_length};
@@ -653,23 +785,23 @@ sub PromoterExtraction_call {
     }
 
     $_promExtraction_args .= " -r $dbrelease" || die "no ensembl release was given!\n";
-    
+
     # Make a temporary file for the input list of genes
-    
+
     my ($genes_list_fh, $genes_list_file) = tempfile("/tmp/PROM_EXTRACTION_GENES.XXXXXX", UNLINK => 1);
     close ($genes_list_fh);
-    
+
     open (FILE, ">$genes_list_file") or die "can't open temp file, $genes_list_file!\n";
     print FILE (join ("\n", @$genes_ref) . "\n");
     close FILE;
-    
+
     # print STDERR "running command,\n";
     # print STDERR "$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file\n";
-    
-    my $promoterExtraction_output = qx/$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file/;
-    
+
+    $promoterExtraction_output = qx/$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file/;
+
     unlink $genes_list_file;
-    
+
     if (defined $promoterExtraction_output) {
 	return $promoterExtraction_output;
     }
@@ -683,179 +815,239 @@ sub PromoterExtraction_call {
 
  Title   : MatScan_call
  Usage   : $report = MatScan_call (@params);
-         : 
-         : ## where @params are,
-         : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
-         :            'arg2'  => "query 1", ## optional
-         :            'arg3'  => "nr");     ## optional (default: nr)
+	 :
+	 : ## where @params are,
+	 : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+	 :            'arg2'  => "query 1", ## optional
+	 :            'arg3'  => "nr");     ## optional (default: nr)
  Returns : Devuelve un string que contiene el resultado de la ejecución.
 
 =cut
 
 sub MatScan_call {
-        my %args = @_;
-	
-        # relleno los parametros por defecto MatScan_call
-	
-        my $sequences    = $args{sequences}  || undef;
-	my $matrix_input = $args{matrix}     || undef;
-	my $format       = $args{format}     || "";
-	my $parameters   = $args{parameters} || undef;
-	my $debug        = $args{debug}      || 0;
-	
-	# Get the parameters
-	
-	my $threshold        = $parameters->{threshold};
-	my $strands          = $parameters->{strands};
-	my $matrix_parameter = $parameters->{matrix};
-	my $matrix_mode      = $parameters->{matrix_mode};
-	
+    my %args = @_;
+
+    # output specs declaration
+    my $matscan_output   = "";
+    my $moby_exceptions  = [];
+
+    # relleno los parametros por defecto MatScan_call
+
+    my $sequences    = $args{sequences}  || undef;
+    my $matrix_input = $args{matrix}     || undef;
+    my $format       = $args{format}     || "";
+    my $parameters   = $args{parameters} || undef;
+    my $debug        = $args{debug}      || 0;
+    my $queryID      = $args{queryID}    || "";
+
+    # Get the parameters
+
+    my $threshold        = $parameters->{threshold};
+    my $strands          = $parameters->{strands};
+    my $matrix_parameter = $parameters->{matrix};
+    my $matrix_mode      = $parameters->{matrix_mode};
+
+    if ($debug) {
+	print STDERR "threshold, $threshold\n";
+	print STDERR "matrix parameter, $matrix_parameter\n";
+	print STDERR "matrix mode, $matrix_mode\n";
+    }
+
+    # Llama a MatScan en local
+    my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";
+    my $_matscan_bin  = "bin/matscan";
+    my $_matscan_args = "-T $threshold";
+    # Check that the binary is in place
+    if (! -f "$_matscan_dir/$_matscan_bin") {
+	my $note = "matscan binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
+    }
+
+    my ($matrix_fh, $matrix_file);
+
+    if ($strands eq "Both") {
+	# Default anyway
+    }
+    elsif ($strands eq "Forward") {
+	$_matscan_args .= " -W";
+    }
+    elsif ($strands eq "Reverse") {
+	$_matscan_args .= " -C";
+    }
+
+    if (defined $matrix_parameter) {
+
 	if ($debug) {
-	    print STDERR "threshold, $threshold\n";
-	    print STDERR "matrix parameter, $matrix_parameter\n";
-	    print STDERR "matrix mode, $matrix_mode\n";
+	    print STDERR "matrix as a parameter...\n";
 	}
-	
-        # Llama a MatScan en local
-        my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";
-        my $_matscan_bin  = "bin/matscan";
-        my $_matscan_args = "-T $threshold";
-	my ($matrix_fh, $matrix_file);
-	
-	if ($strands eq "Both") {
-	    # Default anyway
-	}
-	elsif ($strands eq "Forward") {
-	    $_matscan_args .= " -W";
-	}
-	elsif ($strands eq "Reverse") {
-	    $_matscan_args .= " -C";
-	}
-	
-	if (defined $matrix_parameter) {
+
+	if ($matrix_mode eq "raw format") {
 
 	    if ($debug) {
-	      print STDERR "matrix as a parameter...\n";
-            }
+		print STDERR "raw mode\n";
+	    }
 
-	    if ($matrix_mode eq "raw format") {
-
-	        if ($debug) {
-  		  print STDERR "raw mode\n";
-                }
-                
-	      SWITCH: {
-		  if (lc ($matrix_parameter) eq "transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
-		  if (lc ($matrix_parameter) eq "meme")     { $matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
-		  if (lc ($matrix_parameter) eq "jaspar")   { $matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
-		  # Default is Transfac
-		  $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices";
-	      }
-	    }
-	    elsif ($matrix_mode eq "log-likelihood") {
-	      if ($debug) {	
-  	        print STDERR "log-likelihood mode\n";
-              }
-	
-	      SWITCH: {
-		  if (lc ($matrix_parameter) eq "transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
-		  if (lc ($matrix_parameter) eq "meme")     { $_matscan_args .= " -sl"; $matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
-		  if (lc ($matrix_parameter) eq "jaspar")   { $_matscan_args .= " -s"; $matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
-		  # Default is Transfac
-		  $_matscan_args .= " -sm";
-		  $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices";
-	      }
-	    }
-	    else {
-		print STDERR "don't know anything about matrix mode, $matrix_mode!\n";
-		exit 0;
-	    }
+	  SWITCH: {
+	      if (lc ($matrix_parameter) eq "transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
+	      if (lc ($matrix_parameter) eq "meme")     { $matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
+	      if (lc ($matrix_parameter) eq "jaspar")   { $matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
+	      # Default is Transfac
+	      $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices";
+	  }
 	}
-	elsif (defined $matrix_input) {
+	elsif ($matrix_mode eq "log-likelihood") {
 	    if ($debug) {
-	      print STDERR "matrix as an input...\n";
+		print STDERR "log-likelihood mode\n";
 	    }
-	    
-	    # Make a temporary file with the matrix input
-	    $_matscan_args .= " -s";
+
+	  SWITCH: {
+	      if (lc ($matrix_parameter) eq "transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
+	      if (lc ($matrix_parameter) eq "meme")     { $_matscan_args .= " -sl"; $matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
+	      if (lc ($matrix_parameter) eq "jaspar")   { $_matscan_args .= " -s"; $matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
+	      # Default is Transfac
+	      $_matscan_args .= " -sm";
+	      $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices";
+	  }
+	}
+	else {
+	    # should be validated before...
+	    print STDERR "don't know anything about matrix mode, $matrix_mode!\n";
+	    exit 0;
+	}
+    }
+    elsif (defined $matrix_input) {
+	if ($debug) {
+	    print STDERR "matrix as an input...\n";
+	}
+
+	# Make a temporary file with the matrix input
+	$_matscan_args .= " -s";
+	eval {
 	    ($matrix_fh, $matrix_file) = tempfile("/tmp/MATSCAN_MATRIX.XXXXXX", UNLINK => 0);
 	    print $matrix_fh "$matrix_input";
 	    close $matrix_fh;
-	}
-	else {
-	    print STDERR "matrix_input neither matrix_parameter are defined!!\n";
-	    exit 0;
-	}
-	
-	if (not defined $matrix_file) {
-	    print STDERR "Error, no defined matrix file!\n";
-	    exit 0;
+	};
+	if ($@) {
+	    my $note = "can't open MatScan matrix input temporary file!\n";
+	    my $code = 701;
+	    print STDERR "$note\n";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return ("", [$moby_exception]);
 	}
 
-	# Generate a temporary file locally with the sequence(s) in FASTA format
-	# locally, ie not on a NFS mounted directory, for speed sake
-	
-	my ($seq_fh, $seqfile) = tempfile("/tmp/MATSCAN_SEQS.XXXXXX", UNLINK => 0);
-	
-	# Bioperl sequence factory
-	
-	my $sout = Bio::SeqIO->new (
-				    -fh     => $seq_fh,
-				    -format => 'fasta'
+    }
+    else {
+	print STDERR "matrix_input neither matrix_parameter are defined!!\n";
+	exit 0;
+    }
+
+    if ((not defined $matrix_file) || (-z $matrix_file)) {
+	# could well be possible if the input matrix set is empty, ie if MEME didn't predict any !!
+	# But i guess in that case, no need to go up there, validation will be done before MatScan_call
+	print STDERR "No defined matrix file!\n";
+	return ("", []);
+    }
+
+    # Generate a temporary file locally with the sequence(s) in FASTA format
+    # locally, ie not on a NFS mounted directory, for speed sake
+
+    my ($seq_fh, $seqfile);
+    eval {
+	($seq_fh, $seqfile) = tempfile("/tmp/MATSCAN_SEQS.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "can't open MatScan sequence input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
+    }
+
+    # Bioperl sequence factory
+
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+
+    my @seqIds = keys (%$sequences);
+    foreach my $sequenceIdentifier (@seqIds) {
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+
+	# bioperl sequence object
+
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
 				    );
-	
-	my @seqIds = keys (%$sequences);
-	
-	foreach my $sequenceIdentifier (@seqIds) {
-	    
-	    my $nucleotides = $sequences->{$sequenceIdentifier};
-	    
-	    # bioperl object
-	    
-	    my $seqobj = Bio::Seq->new (
-					-display_id => $sequenceIdentifier,
-					-seq        => $nucleotides
-					);
-	    
-	    $sout->write_seq ($seqobj);
-	    
-	}
-	close $seq_fh;
-	
-	# Test empty file
-	if (-z $seqfile) {
-	    print STDERR "Error, empty sequence file...\n";
-	}
-	
-	if ($debug) {
-	    print STDERR "Running Matscan, with this command:\n";
-	    print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file\n";
-	}
-	
-        my $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan/;
-        
-	unlink $seqfile unless $debug;
-	if ((not $debug) && (defined $matrix_input)) {
-	    unlink $matrix_file;
-	}
-	
-        if (defined $matscan_output) {
-		return $matscan_output;
-	}
-	else {
-		# What else better to return ??
-		return undef;
-	}
+	$sout->write_seq ($seqobj);
+    }
+    close $seq_fh;
+
+    # Test empty file
+    if (-z $seqfile) {
+	my $note = "Error, empty MatScan input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ("", [$moby_exception]);
+    }
+
+    if ($debug) {
+	print STDERR "Running Matscan, with this command:\n";
+	print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file\n";
+    }
+
+    $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan/;
+
+    unlink $seqfile unless $debug;
+    if ((not $debug) && (defined $matrix_input)) {
+	# Only remove the matrix input file when this matrix collection is given by the user!!
+	# If it is transfac or jaspar, don't remove it !!! - as they are stored locally !
+	unlink $matrix_file;
+    }
+
+    if (defined $matscan_output) {
+	return ($matscan_output, $moby_exceptions);
+    }
+    else {
+	print STDERR "no matscan_output defined!\n";
+	return ("", $moby_exceptions);
+
+    }
 }
 
 
 sub MetaAlignment_call {
-    my %args = @_;  
+    my %args = @_;
 
     # method output
     my $meta_output     = "";
     my $moby_exceptions = [];
-    
+
     # relleno los parametros por defecto MetaAlignment_call
 
     my $map1 = $args{map1};
@@ -868,9 +1060,9 @@ sub MetaAlignment_call {
     my $alpha_penalty  = $parameters->{alpha_penalty};
     my $lambda_penalty = $parameters->{lambda_penalty};
     my $mu_penalty     = $parameters->{mu_penalty};
-    
+
     my $output_format  = $parameters->{output_format};
-    
+
     # Llama a Meta-alignment en local
     my $_meta_alignment_dir  = "/home/ug/gmaster/projects/Meta";
     my $_meta_alignment_bin  = "bin/meta";
@@ -889,13 +1081,13 @@ sub MetaAlignment_call {
 								  );
 	return ([], [$moby_exception]);
     }
-    
+
     if ($output_format eq "GFF") {
 	$_meta_alignment_args .= " -g";
     }
-    
+
     # Create the temp map files
-    
+
     my ($map1_fh, $map1_file);
     eval {
 	($map1_fh, $map1_file) = tempfile("/tmp/META_MAP1.XXXXXX", UNLINK => 0);
@@ -916,9 +1108,9 @@ sub MetaAlignment_call {
     }
     print FILE $map1;
     close FILE;
-    
+
     # Create the temp map files
-    
+
     my ($map2_fh, $map2_file);
     eval {
 	($map2_fh, $map2_file) = tempfile("/tmp/META_MAP2.XXXXXX", UNLINK => 0);
@@ -941,24 +1133,24 @@ sub MetaAlignment_call {
     close FILE;
 
     # Sorting
-    
+
     my $map1_sorted = qx/cat $map1_file | sort +3n/;
-    
+
     open (FILE, ">$map1_file") or die "can't open temp file, $map1_file!\n";
     print FILE $map1_sorted;
     close FILE;
-    
+
     my $map2_sorted = qx/cat $map2_file | sort +3n/;
-    
+
     open (FILE, ">$map2_file") or die "can't open temp file, $map2_file!\n";
     print FILE $map2_sorted;
     close FILE;
-    
+
     # Run meta
-    
+
     # print STDERR "Running Meta-alignment, with this command:\n";
     # print STDERR "$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file\n";
-    
+
     my ($stdout_fh, $stdout_file);
     eval {
 	($stdout_fh, $stdout_file) = tempfile("/tmp/META_OUTPUT.XXXXXX", UNLINK => 0);
@@ -976,14 +1168,14 @@ sub MetaAlignment_call {
 								  );
 	return ([], [$moby_exception]);
     }
-    
+
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
-    
+
     my $failed = system (@args);
     if ($failed > 0) {
 	my $note = "meta-alignment system call died (with error code, $?).\n";
 	my $code = 701;
-	
+
 	if (($! != ENOTTY) || ($! ne "Inappropriate ioctl for device")) {
 	    # This is not an error, just mean that stdout is a terminal !!
 	    print STDERR "Error, '$!'\n";
@@ -999,60 +1191,113 @@ sub MetaAlignment_call {
     else {
 	$meta_output = qx/cat $stdout_file/;
     }
-    
+
     unlink $stdout_file;
     unlink $map1_file;
     unlink $map2_file;
     
-    return ($meta_output, $moby_exceptions);
-    
+    if (defined $meta_output) {
+	return ($meta_output, $moby_exceptions);
+    }
+    else {
+	print STDERR "meta_output not defined!\n";
+	return ("", $moby_exceptions);
+    }
 }
 
 sub generateScoreMatrix_call {
-  my %args = @_;  
-  
+  my %args = @_;
+
+  # output specs declaration
+  my $matrix_output   = "";
+  my $moby_exceptions = [];
+
   # relleno los parametros por defecto generateScoreMatrix_call
-  
+
   my $inputdata_arrayref = $args{similarity_results};
   my $parameters         = $args{parameters} || undef;
-  
+  my $queryID            = $args{queryID}    || "";
+
   # Get the parameters
-  
+
   my $input_format   = $parameters->{input_format};
   my $output_format  = $parameters->{output_format};
-  
+
   # Llama a generateScoreMatrix script en local
   my $_application_dir  = "/home/ug/gmaster/projects/generateScoreMatrices";
   my $_application_bin  = "generateScoreMatrix.pl";
   my $_application_args = "$input_format";
   
-  # Generate a temporary file
-
-  my ($meta_fh, $meta_file) = tempfile("/tmp/META_OUTPUT.XXXXXX", UNLINK => 0);
-  print $meta_fh "@$inputdata_arrayref\n";
-  close $meta_fh;
+  # Check that the binary is in place
+  if (! -f "$_application_dir/$_application_bin") {
+      my $note = "generateScoreMatrix script not found";
+      print STDERR "$note\n";
+      my $code = 701;
+      my $moby_exception = INB::Exceptions::MobyException->new (
+								code       => $code,
+								type       => 'error',
+								queryID    => $queryID,
+								message    => "$note",
+								);
+      return ("", [$moby_exception]);
+  }
+  
+  # Generate a temporary file to store meta-alignment data
+  
+  my ($meta_fh, $meta_file);
+  eval {
+      ($meta_fh, $meta_file) = tempfile("/tmp/META_OUTPUT.XXXXXX", UNLINK => 0);
+      print $meta_fh "@$inputdata_arrayref\n";
+      close $meta_fh;
+  };
+  if ($@) {
+      my $note = "can't open generateScoreMatrix meta input temporary file!\n";
+      my $code = 701;
+      print STDERR "$note\n";
+      my $moby_exception = INB::Exceptions::MobyException->new (
+								code       => $code,
+								type       => 'error',
+								queryID    => $queryID,
+								message    => "$note",
+								);
+      return ("", [$moby_exception]);
+  }
+  
+  # Check the file is empty ?
+  # I don't think so, all validation of the input data should be made before calling Factory.pm method
   
   # Run generateScoreMatrix
-  
+
   # print STDERR "got " . @$inputdata_arrayref . " array references (meta alignments)\n";
   # print STDERR "Running generateScoreMatrix.pl, with this command:\n";
   # print STDERR "cat $meta_file | $_application_dir\/$_application_bin $_application_args\n";
 
-  my $matrix = qx/cat $meta_file | $_application_dir\/$_application_bin $_application_args/;
+  $matrix_output = qx/cat $meta_file | $_application_dir\/$_application_bin $_application_args/;
 
   unlink $meta_file;
-  
-  return $matrix;
+
+  if (defined $matrix_output) {
+      return ($matrix_output, $moby_exceptions);
+  }
+  else {
+      print STDERR "matrix_output not defined!!\n";
+      return ("", $moby_exceptions);
+  }
 
 }
 
 sub MEME_call {
     my %args = @_;
-    
+
+    # output specs declaration
+    my $meme_output   = "";
+    my $moby_exceptions = [];
+
     my $sequences  = $args{sequences};
     my $format     = $args{format};
     my $parameters = $args{parameters};
     my $_debug     = $args{debug};
+    my $queryID    = $args{queryID}    || "";
 
     my $motif_distribution    = $parameters->{motif_distribution};
     my $maximum_number_motifs = $parameters->{maximum_number_motifs};
@@ -1062,24 +1307,38 @@ sub MEME_call {
     my $maximum_motif_width   = $parameters->{maximum_motif_width};
     my $e_value_cutoff        = $parameters->{e_value_cutoff};
     my $background_order      = $parameters->{background_order};
-    
+
     # Llama a Meme en local
     my $_meme_dir   = "/usr/local/molbio/Install/meme-3.5.0";
     my $_meme_bin  = "bin/meme";
     my $_meme_args = "-nostatus -time 160 -maxiter 20 ";
     
+    # Check that the binary is in place
+    if (! -f "$_meme_dir/$_meme_bin") {
+	my $note = "meme binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
+    }
+    
     # Setting up the MEME parameters
-    
+
     # Default is HTML
-    
+
     if ($_debug) {
 	print STDERR "format, $format\n";
     }
-    
+
     if ($format eq "text-formatted") {
 	$_meme_args .= "-text ";
     }
-    
+
     if (not defined $motif_distribution) {
 	$_meme_args .= "-mod zoops";
     }
@@ -1107,7 +1366,7 @@ sub MEME_call {
 	# No default, ie let meme figure out what is the default !!
 	# Will make it up on the fly, according a hardcoded protocol of their own.
     }
-    
+
     if (defined $maximum_number_sites) {
 	$_meme_args .= " -maxsites $maximum_number_sites";
     }
@@ -1122,7 +1381,7 @@ sub MEME_call {
     else {
 	$_meme_args .= " -minw 6";
     }
-    
+
     if (defined $maximum_motif_width) {
 	$_meme_args .= " -maxw $maximum_motif_width";
     }
@@ -1136,15 +1395,30 @@ sub MEME_call {
     else {
 	$_meme_args .= " -evt 1";
     }
-    
+
     # Generate a temporary file locally with the sequence(s) in FASTA format
     # locally, ie not on a NFS mounted directory, for speed sake
     
-    my ($seq_fh, $seqfile) = tempfile("/tmp/MEME.XXXXXX", UNLINK => 0);
+    my ($seq_fh, $seqfile);
+    eval {
+	($seq_fh, $seqfile) = tempfile("/tmp/MEME.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "can't open meme input sequences temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
+    }
     
     # Get the alphabet
     my $alphabet;
-
+    
     # Bioperl sequence factory
     
     my $sout = Bio::SeqIO->new (
@@ -1153,17 +1427,15 @@ sub MEME_call {
 				);
     
     my @seqIds = keys (%$sequences);
-    
     foreach my $sequenceIdentifier (@seqIds) {
-	
 	my $nucleotides = $sequences->{$sequenceIdentifier};
 	
-	# bioperl object
+	# bioperl sequence object
 	
 	my $seqobj = Bio::Seq->new (
 				    -display_id => $sequenceIdentifier,
 				    -seq        => $nucleotides
-				   );
+				    );
 	
 	if (not defined $alphabet) {
 	    $alphabet = $seqobj->alphabet();
@@ -1171,23 +1443,22 @@ sub MEME_call {
 		print STDERR "alphabet: $alphabet\n";
 	    }
 	}
-
-	$sout->write_seq ($seqobj);
 	
+	$sout->write_seq ($seqobj);
     }
     close $seq_fh;
-    
+
     # Test empty file
     if (-z $seqfile) {
 	print STDERR "Error, empty sequence file...\n";
     }
-    
+
     # MEME default is protein alphabet so if it is dna sequences, specify it, as the MEME model will be then different
-    
+
     if (defined $alphabet && (($alphabet eq "dna") || ($alphabet eq "rna"))) {
 	$_meme_args .= " -dna -revcomp";
     }
-    
+
     my ($bfile, $bfh);
     # Train a background model if required
     if (defined $background_order && (lc ($background_order) eq "none")) {
@@ -1199,22 +1470,36 @@ sub MEME_call {
 	if ($_debug) {
 	    print STDERR "background training with order, $background_order\n";
 	}
-	
+
 	# Do a background training
 	my $training_bin = "bin/fasta-get-markov";
-	
+
 	my $training_args = "-m $background_order";
 	if ($alphabet eq "protein") {
 	    $training_args .= " -p";
 	}
+
+	eval {
+	    ($bfh, $bfile) = tempfile("/tmp/MEME_BG.XXXXXX", UNLINK => 0);
+	    close $bfh;
+	    my @args = ("$_meme_dir/$training_bin $training_args < $seqfile > $bfile");
+	    system (@args);
+	};
+	if ($@) {
+	    my $note = "can't open meme background temporary file!\n";
+	    my $code = 701;
+	    print STDERR "$note\n";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return ([], [$moby_exception]);
+	}
 	
-	($bfh, $bfile) = tempfile("/tmp/MEME_BG.XXXXXX", UNLINK => 0);
-	close $bfh;
-	my @args = ("$_meme_dir/$training_bin $training_args < $seqfile > $bfile");
-	system (@args);
-	
-	if (! -f $bfile) {
-	    print STDERR "Error, could not train a background model!\n";
+	if (-z $bfile) {
+	    print STDERR "made an empty background model file while preparing meme execution!!\n";
 	}
 	
 	$_meme_args .= " -bfile $bfile";
@@ -1224,42 +1509,61 @@ sub MEME_call {
 	print STDERR "Running Meme, with this command:\n";
 	print STDERR "$_meme_dir\/$_meme_bin $seqfile $_meme_args\n";
     }
-    
-    my $meme_output = qx/source $_meme_dir\/etc\/meme.sh; $_meme_dir\/$_meme_bin $seqfile $_meme_args/;
-    
+
+    $meme_output = qx/source $_meme_dir\/etc\/meme.sh; $_meme_dir\/$_meme_bin $seqfile $_meme_args/;
+
     # Comment this line if you want to keep the file...
     unlink $seqfile unless $_debug;
     if (defined $bfile && (not $_debug)) {
 	unlink $bfile;
     }
-    
+
     if (defined $meme_output) {
-	return $meme_output;
-    }	
+	return ($meme_output, $moby_exceptions);
+    }
     else {
-	# What else better to return ??
-	return undef;
+	print STDERR "meme_output not defined!\n";
+	return ("", $moby_exceptions);
     }
 }
 
 
 sub meme2matrix_call {
     my %args = @_;
-    
+
+    # output specs declaration
+    my @PWMs = ();
+    my $moby_exceptions = [];
+
     # relleno los parametros por defecto meme2matrix_call
-    
+
     my $meme_predictions   = $args{meme_predictions} || undef;
     my $parameters         = $args{parameters}       || undef;
     my $_debug             = $args{debug};
-    
+    my $queryID            = $args{queryID}          || "";
+
     # Get the parameters
-    
+
     my $matrix_mode = $parameters->{matrix_mode};
-    
+
     # Llama a Meme2matrix en local
     my $_meme2matrix_dir  = "/home/ug/gmaster/projects/meme2matrix";
     my $_meme2matrix_bin  = "meme2matrix.pl";
     my $_meme2matrix_args = "";
+    
+    # Check that the binary is in place
+    if (! -f "$_meme2matrix_dir/$_meme2matrix_bin") {
+	my $note = "meme2matrix script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
+    }
     
     if ($matrix_mode eq "raw format") {
 	$_meme2matrix_args = "score";
@@ -1267,74 +1571,83 @@ sub meme2matrix_call {
     elsif ($matrix_mode eq "log-likelihood") {
 	$_meme2matrix_args = "probability";
     }
-
+    
     # Create the temp map files
 
-    my ($meme2matrix_fh, $meme2matrix_file) = tempfile("/tmp/MEME2MATRIX.XXXXXX", UNLINK => 0);
-    close ($meme2matrix_fh);
-    
-    open (FILE, ">$meme2matrix_file") or die "can't open MEME2MATRIX temp file, $meme2matrix_file!\n";
-    print FILE $meme_predictions;
-    close FILE;
+    my ($meme2matrix_fh, $meme2matrix_file);
+    eval {
+	($meme2matrix_fh, $meme2matrix_file) = tempfile("/tmp/MEME2MATRIX.XXXXXX", UNLINK => 0);
+	print $meme2matrix_fh $meme_predictions;
+	close $meme2matrix_fh;
+    };
+    if ($@) {
+	my $note = "can't open meme2matrix input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return ([], [$moby_exception]);
+    }
     
     if ($_debug) {
 	print STDERR "Running meme2matrix, with this command:\n";
 	print STDERR "$_meme2matrix_dir\/$_meme2matrix_bin $meme2matrix_file $_meme2matrix_args\n";
     }
-    
+
     my $matrices_output = qx/$_meme2matrix_dir\/$_meme2matrix_bin $meme2matrix_file $_meme2matrix_args/;
-    
+
     # Comment this line if you want to keep the file...
     unlink $meme2matrix_file;
-    
-    my @matrices = ();
-    
+
     # Return an array of matrices from the output (which is a string)
     # Because we want to return a collection of text-formatted objects (each object containing a matrix)
     # So better to return an array rather than just a string
-    
+
     # To split the matrices, check which position they start, ie chech th position of 'MEME'
     my @positions = ();
     while ($matrices_output =~ m/MEME/g) {
 	push (@positions, pos ($matrices_output) - 4);
     }
-    
+
     if ($_debug) {
 	print STDERR "positions: @positions\n";
     }
-    
+
     if (@positions == 0) {
 	return undef;
     }
-    
+
     my $position_1 = $positions[0];
     my $index = 1;
     while (my $position_2 = $positions[$index]) {
 	my $matrix = substr ($matrices_output, $position_1, $position_2 - $position_1);
-	push (@matrices, $matrix);
+	push (@PWMs, $matrix);
 	$position_1 = $position_2;
 	$index++;
     }
     my $end = length ($matrices_output);
     my $matrix = substr ($matrices_output, $position_1, $end - $position_1);
-    push (@matrices, $matrix);
-    
+    push (@PWMs, $matrix);
+
     if ($_debug) {
-	print STDERR "nb matrices: " . @matrices . ".\n";
-        print STDERR "Dumping matrices array,\n" . Dumper (@matrices) . "\n";
+	print STDERR "nb matrices: " . @PWMs . ".\n";
+	print STDERR "Dumping matrices array,\n" . Dumper (@PWMs) . "\n";
     }
-    
-    if (@matrices > 0) {
-	return \@matrices;
-    }	
+
+    if (@PWMs > 0) {
+	return (\@PWMs, $moby_exceptions);
+    }
     else {
-	# What else better to return ??
-	return undef;
+	print STDERR "meme2matrix didn't parsed any motif matrix from meme data file!\n";
+	return ([], $moby_exceptions);
     }
-    
+
 }
 
 1;
 
 __END__
-

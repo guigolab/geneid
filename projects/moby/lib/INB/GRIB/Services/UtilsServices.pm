@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.16 2006-01-13 12:02:24 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.17 2006-01-27 17:04:16 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -334,7 +334,7 @@ sub _do_query_TranslateGeneIDGFF {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $fasta_sequences = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, parameters => \%parameters);
+    my ($fasta_sequences, $moby_exceptions) = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, queryID => $queryID, parameters => \%parameters);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -757,7 +757,7 @@ sub _do_query_generateScoreMatrix {
 	
     } # Next article
 
-    my $matrix = generateScoreMatrix_call (similarity_results  => $input_data, parameters => \%parameters);
+    my ($matrix, $moby_exceptions) = generateScoreMatrix_call (similarity_results  => $input_data, queryID => $queryID, parameters => \%parameters);
 
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 

@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.13 2005-12-13 15:35:27 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.14 2006-01-27 17:04:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -268,7 +268,7 @@ sub _do_query_GeneID_CGI {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $report = GeneID_call_CGI (sequences  => \%sequences, format => $_geneid_output_format, parameters => \%parameters);
+    my $report = GeneID_call_CGI (sequences  => \%sequences, format => $_geneid_output_format, queryID => $queryID, parameters => \%parameters);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -432,9 +432,9 @@ sub _do_query_GeneID {
     }
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
-    # la funcion que nos devuelve el report. 	
+    # la funcion que nos devuelve el report.
     
-    my $report = GeneID_call (sequences  => \%sequences, format => $_format, parameters => \%parameters);
+    my ($report, $moby_exceptions) = GeneID_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 

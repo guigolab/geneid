@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.6 2005-09-05 14:50:16 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.7 2006-01-27 17:04:16 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -205,7 +205,7 @@ sub _do_query_SGP2 {
 
 	# Set up the temporary file here and give it as a parameter or give a hash of sequence entries, so we can submit multiple sequences...
 	
-	my $report = SGP2_call (sequences  => \%sequences, tblastx_output => $tblastx_output, format => $_format, parameters => \%parameters);
+	my ($report, $moby_exceptions) = SGP2_call (sequences  => \%sequences, tblastx_output => $tblastx_output, format => $_format, queryID => $queryID, parameters => \%parameters);
 	
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
