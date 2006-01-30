@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
-        <moby:mobyData moby:queryID='6'>
+        <moby:mobyData moby:queryID='5'>
             <moby:Simple moby:articleName='sequences'><moby:FASTA namespace='' id='Hsap_BTK'>
 <![CDATA[
 >Hsap_BTK

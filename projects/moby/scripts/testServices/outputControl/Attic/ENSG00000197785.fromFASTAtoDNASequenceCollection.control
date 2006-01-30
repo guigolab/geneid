@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
-        <moby:mobyData moby:queryID='11'>
+        <moby:mobyData moby:queryID='10'>
             <moby:Collection moby:articleName='sequences'>
                 
                 <moby:Simple><moby:DNASequence namespace='' id='ENSG00000197785'>

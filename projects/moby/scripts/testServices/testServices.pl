@@ -33,7 +33,7 @@ Usage:
 		<3> or Inab
 		<4> or BioMoby
 	-s Service Name
-	
+
 Examples using some combinations:
 	testServices -x 1
 
@@ -42,22 +42,22 @@ END_HELP
 }
 
 BEGIN {
-	
+
 	# Determines the options with values from program
 	use vars qw/$opt_h $opt_x $URL $URI $PROXY $AUTH $_debug/;
-	   
+
 	# these are switches taking an argument (a value)
 	my $switches = 'hx';
-	   
+
 	# Get the switches
 	getopt($switches);
-	
+
 	# If the user does not write nothing, skip to help
 	if (defined($opt_h) || !defined($opt_x)){
 		print STDERR help;
 		exit 0;
 	}
-	
+
 }
 
 my $t1 = Benchmark->new ();
@@ -70,8 +70,9 @@ $AUTH = "genome.imim.es";
 #
 ##################################################################
 
-my $input_data_dir            = "./inputData";
-my $control_data_dir          = "./outputControl";
+my $rootdir                   = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices";
+my $input_data_dir            = "$rootdir/inputData";
+my $control_data_dir          = "$rootdir/outputControl";
 
 my $nucleotide_sequence_xml_file = "Hsap_BTK.msk.xml";
 my $tblastx_output_xml_file   = "Hsap_BTK.tbx.xml";
@@ -126,37 +127,37 @@ my $generateScoreMatrix_control_file        = "mut1_downreg.fbgn.ScoresMatrix.co
 ##################################################################
 
 if (defined($opt_x)) {
-    
+
     # Assign the MOBY Server and MOBY URI
     if (($opt_x == 1) || ($opt_x eq 'Chirimoyo')) {
-	
+
 	$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
 	$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://chirimoyo.ac.uma.es/MOBY/Central';
 	$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
-	
+
     }elsif (($opt_x == 2) || ($opt_x eq 'Xistral')) {
-	
+
 	$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://xistral/cgi-bin/MOBY-Central.pl';
 	$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://xistral/MOBY/Central';
 	$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
-	
+
     }elsif (($opt_x == 3) || ($opt_x eq 'Inab')) {
 
 	$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 	$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
 	$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
-	
+
     }elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
-	
+
 	$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
 	$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://mobycentral.icapture.ubc.ca/MOBY/Central';
 	$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
-	
+
     }else {
 	print STDERR help;
 	exit 0;
     }
-    
+
 }else {
     print STDERR help;
     exit 0;
@@ -187,59 +188,67 @@ else {
     exit 0;
 }
 
+my $service;
+
 # Execute runGeneID Web service
 
-print STDERR "testing runGeneID...\n\n";
+###################################
+#
+# Disabled !!
+#
+###################################
 
-my $service = MobyServiceInstantiation ($C, "runGeneID", $AUTH);
-if (defined $service) {
-    my $result = $service->execute(
-				   XMLinputlist => [
-						    ['sequences', $nucleotide_sequence_xml]
-						    ]
-				   ) ;
-    
-    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
-    print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$runGeneID_control_file $results_file/;
-    
-    # The execution date report is obviously different so don't check this !!
+# print STDERR "testing runGeneID...\n\n";
 
-    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
-
-	# Don't check either the temporary file name which is also different !
-
-	if (! ($diff_results[5] =~ /geneid\d+monstre1.imim.es.fasta/)) {
-	    
-	    print STDERR "runGeneID failed!\n";
-	    print STDERR "diff_results: @diff_results\n";
-	    
-	    close $results_fh;
-	    unlink $results_file;
-	    
-	}
-	else {
-	
-	    print STDERR "runGeneID okay...\n";
-	    
-	    close $results_fh;
-	    unlink $results_file;
-	}
-    }
-    else {
-	
-	print STDERR "runGeneID okay...\n";
-	
-	close $results_fh;
-	unlink $results_file;
-    }
-}
+# my $service = MobyServiceInstantiation ($C, "runGeneID", $AUTH);
+# if (defined $service) {
+#    my $result = $service->execute(
+#				   XMLinputlist => [
+#						    ['sequences', $nucleotide_sequence_xml]
+#						    ]
+#				   ) ;
+#
+#    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+#
+#    print $results_fh "$result\n";
+#
+#    my @diff_results = qx/diff $control_data_dir\/$runGeneID_control_file $results_file/;
+#
+#    # The execution date report is obviously different so don't check this !!
+#
+#    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+#
+#	# Don't check either the temporary file name which is also different !
+#
+#	if (! ($diff_results[5] =~ /geneid\d+monstre1.imim.es.fasta/)) {
+#
+#	    print STDERR "runGeneID failed!\n";
+#	    print STDERR "diff_results: @diff_results\n";
+#
+#	    close $results_fh;
+#	    unlink $results_file;
+#
+#	}
+#	else {
+#
+#	    print STDERR "runGeneID okay...\n";
+#
+#	    close $results_fh;
+#	    unlink $results_file;
+#	}
+#    }
+#    else {
+#
+#	print STDERR "runGeneID okay...\n";
+#
+#	close $results_fh;
+#	unlink $results_file;
+#    }
+#}
 
 # Execute runGeneIDGFF Web service
 
-print STDERR "\ntesting runGeneIDGFF...\n\n";
+print "\ntesting runGeneIDGFF...\n\n";
 
 $service = MobyServiceInstantiation ($C, "runGeneIDGFF", $AUTH);
 if (defined $service) {
@@ -248,25 +257,25 @@ if (defined $service) {
 						    ['sequences', $nucleotide_sequence_xml]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
+
     my @diff_results = qx/diff $control_data_dir\/$runGeneIDGFF_control_file $results_file/;
 
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "runGeneIDGFF service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "runGeneIDGFF okay...\n";
-	
+
+	print "runGeneIDGFF okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -274,7 +283,7 @@ if (defined $service) {
 
 # Execute translateGeneIDGFFPredictions Web service
 
-print STDERR "\ntesting translateGeneIDGFFPredictions...\n\n";
+print  "\ntesting translateGeneIDGFFPredictions...\n\n";
 
 $service = MobyServiceInstantiation ($C, "translateGeneIDGFFPredictions", $AUTH);
 if (defined $service) {
@@ -283,25 +292,25 @@ if (defined $service) {
 						    ['sequences', $nucleotide_sequence_xml, 'geneid_predictions', $GeneIDGFF_xml]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
+
     my @diff_results = qx/diff $control_data_dir\/$translateGeneIDGFFPredictions_control_file $results_file/;
-    
+
     if (@diff_results > 0) {
 	print STDERR "translateGeneIDGFFPredictions service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "translateGeneIDGFFPredictions okay...\n";
-	
+
+	print  "translateGeneIDGFFPredictions okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -309,7 +318,7 @@ if (defined $service) {
 
 # Execute getUpstreamSeqfromEnsembl Web service
 
-print STDERR "\ntesting getUpstreamSeqfromEnsembl...\n\n";
+print  "\ntesting getUpstreamSeqfromEnsembl...\n\n";
 
 $service = MobyServiceInstantiation ($C, "getUpstreamSeqfromEnsembl", $AUTH);
 if (defined $service) {
@@ -318,25 +327,25 @@ if (defined $service) {
 						    ['genes', $geneIds_lst_xml]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
 
     print $results_fh "$result\n";
-    
+
     my @diff_results = qx/diff $control_data_dir\/$getUpstreamSeqfromEnsembl_control_file $results_file/;
-    
+
     if (@diff_results > 0) {
 	print STDERR "getUpstreamSeqfromEnsembl service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "getUpstreamSeqfromEnsembl okay...\n";
-	
+
+	print  "getUpstreamSeqfromEnsembl okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -344,7 +353,7 @@ if (defined $service) {
 
 # Execute fromGenericSequencetoFASTA Web service
 
-print STDERR "\ntesting fromGenericSequencetoFASTA...\n\n";
+print  "\ntesting fromGenericSequencetoFASTA...\n\n";
 
 $service = MobyServiceInstantiation ($C, "fromGenericSequencetoFASTA", $AUTH);
 if (defined $service) {
@@ -353,25 +362,25 @@ if (defined $service) {
 						    ['sequences', $nucleotide_sequence_xml]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequencetoFASTA_control_file $results_file/;    
-    
+
+    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequencetoFASTA_control_file $results_file/;
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "fromGenericSequencetoFASTA service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "fromGenericSequencetoFASTA okay...\n";
-	
+
+	print  "fromGenericSequencetoFASTA okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -379,7 +388,7 @@ if (defined $service) {
 
 # Execute fromGenericSequenceCollectiontoFASTA Web service
 
-print STDERR "\ntesting fromGenericSequenceCollectiontoFASTA...\n\n";
+print  "\ntesting fromGenericSequenceCollectiontoFASTA...\n\n";
 
 $service = MobyServiceInstantiation ($C, "fromGenericSequenceCollectiontoFASTA", $AUTH);
 if (defined $service) {
@@ -388,25 +397,25 @@ if (defined $service) {
 						    ['sequences', [$nucleotide_sequence_xml]]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequenceCollectiontoFASTA_control_file $results_file/;    
-    
+
+    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequenceCollectiontoFASTA_control_file $results_file/;
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "fromGenericSequenceCollectiontoFASTA service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "fromGenericSequenceCollectiontoFASTA okay...\n";
-	
+
+	print  "fromGenericSequenceCollectiontoFASTA okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -414,7 +423,7 @@ if (defined $service) {
 
 # Execute runMatScanGFF Web service
 
-print STDERR "\ntesting runMatScanGFF...\n\n";
+print  "\ntesting runMatScanGFF...\n\n";
 
 $service = MobyServiceInstantiation ($C, "runMatScanGFF", $AUTH);
 if (defined $service) {
@@ -423,25 +432,25 @@ if (defined $service) {
 						    ['upstream_sequences', $ENSG00000197785_upstream_sequence_xml]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$runMatScanGFF_control_file $results_file/;    
-    
+
+    my @diff_results = qx/diff $control_data_dir\/$runMatScanGFF_control_file $results_file/;
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "runMatScanGFF service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "runMatScanGFF okay...\n";
-	
+
+	print  "runMatScanGFF okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -449,7 +458,7 @@ if (defined $service) {
 
 # Execute runMatScanGFFCollection Web service
 
-print STDERR "\ntesting runMatScanGFFCollection...\n\n";
+print  "\ntesting runMatScanGFFCollection...\n\n";
 
 $service = MobyServiceInstantiation ($C, "runMatScanGFFCollection", $AUTH);
 if (defined $service) {
@@ -458,25 +467,25 @@ if (defined $service) {
 						    ['upstream_sequences', [$ENSG00000197785_upstream_sequence_xml]]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$runMatScanGFFCollection_control_file $results_file/;    
-    
+
+    my @diff_results = qx/diff $control_data_dir\/$runMatScanGFFCollection_control_file $results_file/;
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "runMatScanGFFCollection service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "runMatScanGFFCollection okay...\n";
-	
+
+	print  "runMatScanGFFCollection okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -484,7 +493,7 @@ if (defined $service) {
 
 # Execute runMetaAlignment Web service
 
-print STDERR "\ntesting runMetaAlignment...\n\n";
+print  "\ntesting runMetaAlignment...\n\n";
 
 $service = MobyServiceInstantiation ($C, "runMetaAlignment", $AUTH);
 if (defined $service) {
@@ -493,34 +502,34 @@ if (defined $service) {
 						    ['map1', "$ENSG00000197785_matscan_xml", 'map2', "$ENSPTRG00000000031_matscan_xml"]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
+
     my @diff_results = qx/diff $control_data_dir\/$runMetaAlignment_control_file $results_file/;
-    
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "runMetaAlignment service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "runMetaAlignment okay...\n";
-	
+
+	print  "runMetaAlignment okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
-    
+
 }
 
 # Execute runMetaAlignmentGFF Web service
 
-print STDERR "\ntesting runMetaAlignmentGFF...\n\n";
+print  "\ntesting runMetaAlignmentGFF...\n\n";
 
 $service = MobyServiceInstantiation ($C, "runMetaAlignmentGFF", $AUTH);
 if (defined $service) {
@@ -529,34 +538,34 @@ if (defined $service) {
 						    ['map1', "$ENSG00000197785_matscan_xml", 'map2', "$ENSPTRG00000000031_matscan_xml"]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
+
     my @diff_results = qx/diff $control_data_dir\/$runMetaAlignmentGFF_control_file $results_file/;
-    
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "runMetaAlignmentGFF service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "runMetaAlignmentGFF okay...\n";
-	
+
+	print  "runMetaAlignmentGFF okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
-    
+
 }
 
 # Execute fromFASTAtoDNASequenceCollection Web service
 
-print STDERR "\ntesting fromFASTAtoDNASequenceCollection...\n\n";
+print  "\ntesting fromFASTAtoDNASequenceCollection...\n\n";
 
 $service = MobyServiceInstantiation ($C, "fromFASTAtoDNASequenceCollection", $AUTH);
 if (defined $service) {
@@ -565,25 +574,25 @@ if (defined $service) {
 						    ['sequences', $ENSG00000197785_fasta_xml]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$fromFASTAtoDNASequenceCollection_control_file $results_file/;    
-    
+
+    my @diff_results = qx/diff $control_data_dir\/$fromFASTAtoDNASequenceCollection_control_file $results_file/;
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "fromFASTAtoDNASequenceCollection service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "fromFASTAtoDNASequenceCollection okay...\n";
-	
+
+	print  "fromFASTAtoDNASequenceCollection okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -591,7 +600,7 @@ if (defined $service) {
 
 # Execute generateScoreMatrix Web service
 
-print STDERR "\ntesting generateScoreMatrix...\n\n";
+print  "\ntesting generateScoreMatrix...\n\n";
 
 # Construct the meta output moby objects array from the concatenated string
 
@@ -604,25 +613,25 @@ if (defined $service) {
 						    ['meta_predictions', \@meta_output_objects]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$generateScoreMatrix_control_file $results_file/;    
-    
+
+    my @diff_results = qx/diff $control_data_dir\/$generateScoreMatrix_control_file $results_file/;
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "generateScoreMatrix service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "generateScoreMatrix okay...\n";
-	
+
+	print  "generateScoreMatrix okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
@@ -630,7 +639,7 @@ if (defined $service) {
 
 # Execute runSGP2GFF Web service
 
-print STDERR "\ntesting runSGP2GFF...\n\n";
+print  "\ntesting runSGP2GFF...\n\n";
 
 $service = MobyServiceInstantiation ($C, "runSGP2GFF", $AUTH);
 if (defined $service) {
@@ -639,70 +648,73 @@ if (defined $service) {
 						    ['sequences', $nucleotide_sequence_xml, 'tblastx', $tblastx_output_xml]
 						    ]
 				   );
-    
+
     my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
+
     print $results_fh "$result\n";
-    
+
     my @diff_results = qx/diff $control_data_dir\/$runSGP2GFF_control_file $results_file/;
-    
+
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
 	print STDERR "runSGP2GFF service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
-	
+
 	close $results_fh;
 	unlink $results_file;
-	
+
     }
     else {
-	
-	print STDERR "runSGP2GFF okay...\n";
-	
+
+	print  "runSGP2GFF okay...\n";
+
 	close $results_fh;
 	unlink $results_file;
     }
-    
+
 }
 
-# Execute runGOstat Web service
+if (($opt_x == 1) || ($opt_x eq 'Chirimoyo')) {
 
-print STDERR "\ntesting runGOstat...\n\n";
+    # Execute runGOstat Web service
 
-$service = MobyServiceInstantiation ($C, "runGOstat", $AUTH);
-if (defined $service) {
-    my $result = $service->execute(
-				   XMLinputlist => [
-						    ['regulated_genes', $gostat_regulated_xml, 'reference_genes', $gostat_allArray_xml]
-						    ]
-				   );
-    
-    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
-    
-    print $results_fh "$result\n";
-    
-    my @diff_results = qx/diff $control_data_dir\/$runGOstat_control_file $results_file/;
-    
-    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
-	print STDERR "runGOstat service failed!\n";
-	print STDERR "diff_results: @diff_results\n";
-	
-	close $results_fh;
-	unlink $results_file;
-	
+    print  "\ntesting runGOstat...\n\n";
+
+    $service = MobyServiceInstantiation ($C, "runGOstat", $AUTH);
+    if (defined $service) {
+	my $result = $service->execute(
+				       XMLinputlist => [
+							['regulated_genes', $gostat_regulated_xml, 'reference_genes', $gostat_allArray_xml]
+							]
+				       );
+
+	my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+
+	print $results_fh "$result\n";
+
+	my @diff_results = qx/diff $control_data_dir\/$runGOstat_control_file $results_file/;
+
+	if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	    print STDERR "runGOstat service failed!\n";
+	    print STDERR "diff_results: @diff_results\n";
+
+	    close $results_fh;
+	    unlink $results_file;
+
+	}
+	else {
+
+	    print  "runGOstat okay...\n";
+
+	    close $results_fh;
+	    unlink $results_file;
+	}
+
     }
-    else {
-	
-	print STDERR "runGOstat okay...\n";
-	
-	close $results_fh;
-	unlink $results_file;
-    }
-    
+
 }
-
 
 my $t2 = Benchmark->new ();
-print  STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
+print   "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
 
 #
 # End
@@ -717,16 +729,16 @@ sub MobyServiceInstantiation {
     # Moby Service instantiation
     #
     ##################################################################
-    
+
     my ($service_instances, $reg) = $central->findService (
 							   serviceName  => $serviceName,
 							   authURI      => $serviceAuthority,
 							   );
-    
+
     if ($_debug) {
 	print STDERR "Service instances references: " . @$service_instances . "\n";
     }
-    
+
     my $service_instance = $service_instances->[0];
 
     if (@$service_instances > 1) {
@@ -734,15 +746,15 @@ sub MobyServiceInstantiation {
     }
 
     my $wsdl = $C->retrieveService($service_instance);
-    
+
     if ($_debug) {
 	print STDERR "wsdl: $wsdl\n";
     }
-    
+
     if (!$wsdl || ($wsdl !~ /\<definitions/)){
-        print STDERR "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
+	# print STDERR "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
     }
-    
+
     my $service = MOBY::Client::Service->new(service => $wsdl);
 
     if (! (defined $service)) {

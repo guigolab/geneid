@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'>
-        <moby:mobyData moby:queryID='7'>
+        <moby:mobyData moby:queryID='6'>
             <moby:Simple moby:articleName='matscan_predictions'><moby:GFF namespace='' id='ENSG00000197785'>
 <![CDATA[
 ENSG00000197785	MatScan	I$CF2II_01	117	125	 9.68	+	.	# ATATATATA
