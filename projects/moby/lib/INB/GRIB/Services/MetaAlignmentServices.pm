@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.10 2006-01-27 17:04:16 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.11 2006-01-30 18:10:55 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -157,7 +157,7 @@ sub _do_query_MetaAlignment {
     my $_moby_output_format = shift @_;
 
     # Output definition
-    my $MOBY_RESPONSE = "";     # set empty response
+    my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
 
     # Aqui escribimos las variables que necesitamos para la funcion.
@@ -287,9 +287,9 @@ sub _do_query_MetaAlignment {
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
 
-    my $meta_report;
-    ($meta_report, $moby_exceptions) = MetaAlignment_call (map1  => $map1, map2  => $map2, queryID => $queryID, parameters => \%parameters);
-
+    my ($meta_report, $moby_exceptions_tmp) = MetaAlignment_call (map1  => $map1, map2  => $map2, queryID => $queryID, parameters => \%parameters);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
+    
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio
     # la podriamos realizar en una funcion a parte si fuese compleja.

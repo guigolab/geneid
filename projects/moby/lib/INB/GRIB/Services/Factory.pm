@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.57 2006-01-27 17:04:16 gmaster Exp $
+# $Id: Factory.pm,v 1.58 2006-01-30 18:10:55 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -166,23 +166,26 @@ sub GeneID_call_CGI {
 	my $sequences          = $args{sequences}  || undef;
 	my $format             = $args{format}     || "";
 	my $parameters         = $args{parameters} || undef;
-
+	
 	# Get the parameters
-
+	
 	my $profile = $parameters->{profile};
 	my $strands = $parameters->{strands};
 	my $mode    = "normal";
-
+	
 	# print STDERR "GeneID parameters (profile, strands, format): $profile, $strands, $format.\n";
-
-	my $results = "";
-
+	
+	# Output definition
+	
+	my $results         = "";
+	my $moby_exceptions = [];
+	
 	# Parse the sequences hash
-
+	
 	my @seqIds = keys (%$sequences);
-
+	
 	foreach my $sequenceIdentifier (@seqIds) {
-
+	    
 	    my $nucleotides = $sequences->{$sequenceIdentifier};
 
 	    # print STDERR "Submitting sequence, $sequenceIdentifier, of length, " . length ($nucleotides) . ", to GeneID CGI...\n";
@@ -202,8 +205,8 @@ sub GeneID_call_CGI {
 	    my $result_diag = $agent_diag->request($request_diag);
 	    $results       .= $result_diag->content;
 	}
-
-	return $results;
+	
+	return ($results, $moby_exceptions);
     }
 
 

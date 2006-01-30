@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.14 2006-01-27 17:04:16 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.15 2006-01-30 18:10:55 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -184,7 +184,8 @@ sub _do_query_GeneID_CGI {
     
     my $_geneid_output_format = "GFF";
     
-    my $MOBY_RESPONSE = "";             # set empty response
+    my $MOBY_RESPONSE   = "";         # set empty response
+    my $moby_exceptions = [];
     
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $profile;
@@ -268,7 +269,8 @@ sub _do_query_GeneID_CGI {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $report = GeneID_call_CGI (sequences  => \%sequences, format => $_geneid_output_format, queryID => $queryID, parameters => \%parameters);
+    my ($report, $moby_exceptions_tmp) = GeneID_call_CGI (sequences  => \%sequences, format => $_geneid_output_format, queryID => $queryID, parameters => \%parameters);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -294,7 +296,7 @@ PRT
 
     $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 	
-    return $MOBY_RESPONSE;
+    return ($MOBY_RESPONSE, $moby_exceptions);
 	
 }
 
@@ -332,7 +334,9 @@ sub _do_query_GeneID {
     # $_format is the type of output that returns GeneID (e.g. GFF)
     my $_format        = shift @_;
 
-    my $MOBY_RESPONSE = "";     # set empty response
+    # Output definition
+    my $MOBY_RESPONSE   = "";     # set empty response
+    my $moby_exceptions = [];
     
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $profile;
@@ -434,18 +438,19 @@ sub _do_query_GeneID {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report.
     
-    my ($report, $moby_exceptions) = GeneID_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters);
+    my ($report, $moby_exceptions_tmp) = GeneID_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
-
+    
     # Quick hack to add the sequence identifier
     # Anyway even if the parsing code handles input collection, the output report code doesn't and the runGeneIDGFF service registration specs tell that the input and the output are simple articles !!
-
+    
     my ($sequenceIdentifier) = keys (%sequences);
     my $output_article_name = "geneid_predictions";
-
+    
     my $input = <<PRT;
 <moby:$_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[
@@ -462,8 +467,8 @@ PRT
     # el mismo que el de la query. 
 
     $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
-	
-    return $MOBY_RESPONSE;
+    
+    return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
 
@@ -528,7 +533,8 @@ sub runGeneID {
 	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
 	# es una coleccion de respuestas a cada una de las consultas.
         my $MOBY_RESPONSE = "";             # set empty response
-
+	my $moby_exceptions = [];
+	
 	#
 	# The moby output format for this service is text-html
 	# (The GeneID output format for this service is by default GFF - right now it is hardcoded)
@@ -542,7 +548,8 @@ sub runGeneID {
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    my $query_response = _do_query_GeneID_CGI ($query, $_moby_output_format);
+	    my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID_CGI ($query, $_moby_output_format);
+	    push (@$moby_exceptions, @$moby_exceptions_tmp);
 	    
 	    # $query_response es un string que contiene el codigo xml de
 	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
@@ -616,8 +623,9 @@ sub runGeneIDGFF {
 	# 
 	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
 	# es una coleccion de respuestas a cada una de las consultas.
-        my $MOBY_RESPONSE = "";             # set empty response
-
+        my $MOBY_RESPONSE   = "";             # set empty response
+	my $moby_exceptions = [];
+	
 	#
 	# The output format for this service is GFF
 	#
@@ -625,15 +633,16 @@ sub runGeneIDGFF {
 
 	# Para cada query ejecutaremos el _execute_query.
         foreach my $queryInput (@queries){
-
+	    
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
 	    
 	    # my $query_str = $queryInput->toString();
 	    # print STDERR "query text: $query_str\n";
-
-	    my $query_response = _do_query_GeneID ($queryInput, $_format);
+	    
+	    my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID ($queryInput, $_format);
+	    push (@$moby_exceptions, @$moby_exceptions_tmp);
 	    
 	    # $query_response es un string que contiene el codigo xml de
 	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
