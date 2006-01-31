@@ -433,6 +433,17 @@ sub validateDataType {
 	    
 	    $inputDataType = $node->nodeName;
 	    
+	    if ($specifiedType eq "GenericSequence") {
+		if (($inputDataType =~ /GenericSequence|AminoAcidSequence|AASequence|NucleotideSequence|DNASequence|RNASequence/)) {
+		    $rightType = 1;
+		    return ($rightType, $inputDataType);
+		}
+		else {
+		    # Wrong input type
+		    return ($rightType, $inputDataType);
+		}
+	    }
+	    
 	    if ($specifiedType eq "NucleotideSequence") {
 		if (($inputDataType =~ /NucleotideSequence|DNASequence|RNASequence/)) {
 		    $rightType = 1;
@@ -443,6 +454,63 @@ sub validateDataType {
 		    return ($rightType, $inputDataType);
 		}
 	    }
+	    
+	    if ($specifiedType =~ /DNASequence/) {
+		if (($inputDataType =~ /DNASequence/)) {
+		    $rightType = 1;
+		    return ($rightType, $inputDataType);
+		}
+		else {
+		    # Wrong input type
+		    return ($rightType, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType =~ /RNASequence/) {
+		if (($inputDataType =~ /RNASequence/)) {
+		    $rightType = 1;
+		    return ($rightType, $inputDataType);
+		}
+		else {
+		    # Wrong input type
+		    return ($rightType, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType eq "AminoAcidSequence") {
+		if (($inputDataType =~ /AminoAcidSequence|AASequence/)) {
+		    $rightType = 1;
+		    return ($rightType, $inputDataType);
+		}
+		else {
+		    # Wrong input type
+		    return ($rightType, $inputDataType);
+		}
+	    }
+
+	    if ($specifiedType =~ /AASequence/) {
+		if (($inputDataType =~ /AASequence/)) {
+		    $rightType = 1;
+		    return ($rightType, $inputDataType);
+		}
+		else {
+		    # Wrong input type
+		    return ($rightType, $inputDataType);
+		}
+	    }
+
+	    if (($specifiedType eq "Blast-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
+		if (($inputDataType =~ /Blast-Text|NCBI_BLAST_Text|WU_BLAST_Text/)) {
+		    $rightType = 1;
+		    return ($rightType, $inputDataType);
+		}
+		else {
+		    # Wrong input type
+		    return ($rightType, $inputDataType);
+		}
+	    }
+	    
+	    # ...
 	    
 	}
     }
