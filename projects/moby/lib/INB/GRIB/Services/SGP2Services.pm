@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.8 2006-01-31 10:37:05 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.9 2006-01-31 17:38:14 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -153,7 +153,8 @@ sub _do_query_SGP2 {
 	
         my $MOBY_RESPONSE   = "";     # set empty response
 	my $moby_exceptions = [];
-
+	my $output_article_name  = "geneid_predictions";
+	
 	# Variables that will be passed to SGP2_call
 	my %sequences;
 	my $tblastx_output;
@@ -177,12 +178,55 @@ sub _do_query_SGP2 {
 	    # Si le hemos puesto nombre a los articulos del servicio,  
 	    # podemos recoger a traves de estos nombres el valor. 
 	    
+	    # Don't allow the use of collections...
+	    
+	    if (isCollectionArticle ($DOM)) {
+		my $note = "Received a collection input article instead of a simple";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);	    
+		
+		# Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	    
 	    if ($articleName eq "sequences") { 
 		
 		if ($_debug) {
 		    print STDERR "parsing the article \"sequences\"...\n";
 		}
+		# Validate the type first
 		
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		if (!$rightType) {
+		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		else {
+		    # print STDERR "type is fine\n";
+		}
+		
+		# Get the sequence
 		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 		
 	    }
@@ -190,6 +234,29 @@ sub _do_query_SGP2 {
 		
 		if ($_debug) {
 		    print STDERR "parsing the article \"tblastx\"...\n";
+		}
+		
+		# Validate the type first
+
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Blast-Text");
+		if (!$rightType) {
+		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		else {
+		    # print STDERR "type is fine\n";
 		}
 		
 	    	$tblastx_output = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "Blast-Text");
@@ -212,17 +279,28 @@ sub _do_query_SGP2 {
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
 	# la podriamos realizar en una funcion a parte si fuese compleja.  
-
-	my $output_article_name  = "geneid_predictions";
-	my ($sequenceIdentifier) = keys (%sequences);
 	
-	my $input = <<PRT;
+	
+	my $input = undef;
+	if (defined $report) {
+	    
+	    # Quick hack to add the sequence identifier
+	    # Anyway even if the parsing code handles input collection, the output report code doesn't and the runGeneIDGFF service registration specs tell that the input and the output are simple articles !!
+	    my ($sequenceIdentifier) = keys (%sequences);
+	    $input = <<PRT;
 <moby:$_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[
 $report
 ]]>
 </moby:$_format>
 PRT
+
+            $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);
+        }
+	else {
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	}
+	
         # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
         # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
         # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
@@ -231,9 +309,7 @@ PRT
         # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
         # el mismo que el de la query. 
 
-        $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
-	
-        return ($MOBY_RESPONSE, $moby_exceptions);
+	return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
 

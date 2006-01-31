@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.59 2006-01-31 16:43:06 gmaster Exp $
+# $Id: Factory.pm,v 1.60 2006-01-31 17:38:14 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -251,7 +251,7 @@ sub GeneID_call {
 
     # Check that the binary is in place
     if (! -f "$_geneid_dir/$_geneid_bin") {
-	my $note = "geneid binary not found";
+	my $note = "Geneid binary not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -330,7 +330,7 @@ sub GeneID_call {
 	($seq_fh, $seqfile) = tempfile("/tmp/GENEID.XXXXXX", UNLINK => 0);
     };
     if ($@) {
-	my $note = "can't open geneid input temporary file!\n";
+	my $note = "Internal System Error. Can not open geneid input temporary file!\n";
 	my $code = 701;
 	print STDERR "$note\n";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -363,7 +363,7 @@ sub GeneID_call {
 
     # Test empty file
     if (-z $seqfile) {
-	my $note = "Error, empty geneid input sequence file...\n";
+	my $note = "Internal System Error. Empty geneid input sequence file...\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -387,7 +387,7 @@ sub GeneID_call {
 	return ($geneid_output, $moby_exceptions);
     }
     else {
-	my $note = "geneid has failed!\n";
+	my $note = "Internal System Error. Geneid has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -438,7 +438,7 @@ sub SGP2_call {
 	
 	# Check that the binary is in place
 	if (! -f "$_sgp2_dir/$_sgp2_bin") {
-	    my $note = "sgp2 binary not found";
+	    my $note = "Internal System Error. SGP2 binary not found";
 	    print STDERR "$note\n";
 	    my $code = 701;
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -447,7 +447,7 @@ sub SGP2_call {
 								      queryID    => $queryID,
 								      message    => "$note",
 								      );
-	    return ("", [$moby_exception]);
+	    return (undef, [$moby_exception]);
 	}
 
 	if ($format eq "GFF") {
@@ -462,7 +462,7 @@ sub SGP2_call {
 	    ($seq_fh, $seqfile) = tempfile("/tmp/SGP2_Sequence.XXXXXX", UNLINK => 0);
 	};
 	if ($@) {
-	    my $note = "can't open SGP2 sequence input temporary file!\n";
+	    my $note = "Internal System Error. Can not open SGP2 sequence input temporary file!\n";
 	    my $code = 701;
 	    print STDERR "$note\n";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -471,7 +471,7 @@ sub SGP2_call {
 								      queryID    => $queryID,
 								      message    => "$note",
 								      );
-	    return ("", [$moby_exception]);
+	    return (undef, [$moby_exception]);
 	}
 
 	# Bioperl sequence factory
@@ -507,7 +507,7 @@ sub SGP2_call {
 	    qx/echo "$tblastx_output" > $tblastx_output_file/;
 	};
 	if ($@) {
-	    my $note = "can't open SGP2 tblastx input temporary file!\n";
+	    my $note = "Internal System Error. Can not open SGP2 tblastx input temporary file!\n";
 	    my $code = 701;
 	    print STDERR "$note\n";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -516,13 +516,13 @@ sub SGP2_call {
 								      queryID    => $queryID,
 								      message    => "$note",
 								      );
-	    return ("", [$moby_exception]);
+	    return (undef, [$moby_exception]);
 	}
 
 	# Test empty files
 
 	if (-z $seqfile) {
-	    my $note = "Error, empty SGP2 input sequence file...\n";
+	    my $note = "Internal System Error. Empty SGP2 input sequence file...\n";
 	    print STDERR "$note\n";
 	    my $code = 701;
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -531,11 +531,11 @@ sub SGP2_call {
 								      queryID    => $queryID,
 								      message    => "$note",
 								      );
-	    return ("", [$moby_exception]);
+	    return (undef, [$moby_exception]);
 	}
 
 	if (-z $tblastx_output_file) {
-	    my $note = "Error, empty SGP2 input tblastx file...\n";
+	    my $note = "Internal System Error. Empty SGP2 input tblastx file...\n";
 	    print STDERR "$note\n";
 	    my $code = 701;
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -544,7 +544,7 @@ sub SGP2_call {
 								      queryID    => $queryID,
 								      message    => "$note",
 								      );
-	    return ("", [$moby_exception]);
+	    return (undef, [$moby_exception]);
 	}
 
 	# print STDERR "Running SGP2, with this command:\n";
@@ -560,8 +560,17 @@ sub SGP2_call {
 	    return ($sgp2_output, $moby_exceptions);
 	}
 	else {
-	    print STDERR "no sgp2_output defined!!\n";
-	    return ("", $moby_exceptions);
+	    my $note = "Internal System Error. SGP2 has failed!\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    return (undef, $moby_exceptions);
 	}
 }
 
@@ -655,7 +664,7 @@ sub TranslateGeneIDPredictions_call {
 
     # Check that the binary is in place
     if (! -f "$_translateGeneID_dir/$_translateGeneID_bin") {
-	my $note = "GFF_Translations binary not found";
+	my $note = "Internal System Error. GFF_Translations binary not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -706,7 +715,7 @@ sub TranslateGeneIDPredictions_call {
 
     # Test empty file
     if (-z $seqfile) {
-	my $note = "Error when calling translateGeneIDPredictions sequence, empty sequence file...\n";
+	my $note = "Internal System Error when calling translateGeneIDPredictions sequence. Empty sequence file...\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -730,7 +739,7 @@ sub TranslateGeneIDPredictions_call {
 	return ($translateGeneID_output, $moby_exceptions);
     }
     else {
-	print STDERR "no translateGeneID_output defined!!\n";
+	print STDERR "Internal System Error. No translateGeneID_output defined!!\n";
 	return ("", $moby_exceptions);
     }
 
@@ -871,7 +880,7 @@ sub MatScan_call {
     my $_matscan_args = "-T $threshold";
     # Check that the binary is in place
     if (! -f "$_matscan_dir/$_matscan_bin") {
-	my $note = "matscan binary not found";
+	my $note = "Internal System Error. Matscan binary not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -948,7 +957,7 @@ sub MatScan_call {
 	    close $matrix_fh;
 	};
 	if ($@) {
-	    my $note = "can't open MatScan matrix input temporary file!\n";
+	    my $note = "Internal System Error. Can not open MatScan matrix input temporary file!\n";
 	    my $code = 701;
 	    print STDERR "$note\n";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -962,6 +971,7 @@ sub MatScan_call {
 
     }
     else {
+	# To change !
 	print STDERR "matrix_input neither matrix_parameter are defined!!\n";
 	exit 0;
     }
@@ -969,7 +979,7 @@ sub MatScan_call {
     if ((not defined $matrix_file) || (-z $matrix_file)) {
 	# could well be possible if the input matrix set is empty, ie if MEME didn't predict any !!
 	# But i guess in that case, no need to go up there, validation will be done before MatScan_call
-	print STDERR "No defined matrix file!\n";
+	print STDERR "Internal System Error. No defined matrix file!\n";
 	return ("", []);
     }
 
@@ -981,7 +991,7 @@ sub MatScan_call {
 	($seq_fh, $seqfile) = tempfile("/tmp/MATSCAN_SEQS.XXXXXX", UNLINK => 0);
     };
     if ($@) {
-	my $note = "can't open MatScan sequence input temporary file!\n";
+	my $note = "Internal System Error. Can not open MatScan sequence input temporary file!\n";
 	my $code = 701;
 	print STDERR "$note\n";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1016,7 +1026,7 @@ sub MatScan_call {
 
     # Test empty file
     if (-z $seqfile) {
-	my $note = "Error, empty MatScan input sequence file...\n";
+	my $note = "Internal System Error. Empty MatScan input sequence file...\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1046,7 +1056,7 @@ sub MatScan_call {
 	return ($matscan_output, $moby_exceptions);
     }
     else {
-	print STDERR "no matscan_output defined!\n";
+	print STDERR "Internal System Error. Matscan_output defined!\n";
 	return ("", $moby_exceptions);
 
     }
@@ -1082,7 +1092,7 @@ sub MetaAlignment_call {
 
     # Check that the binary is in place
     if (! -f "$_meta_alignment_dir/$_meta_alignment_bin") {
-	my $note = "meta-alignment binary not found";
+	my $note = "Internal System Error. Meta-alignment binary not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1107,7 +1117,7 @@ sub MetaAlignment_call {
 	open (FILE, ">$map1_file");
     };
     if ($@) {
-	my $note = "can't open meta-alignment input temporary file!\n";
+	my $note = "Internal System Error. Can not open meta-alignment input (map1) temporary file!\n";
 	my $code = 701;
 	print STDERR "$note\n";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1130,7 +1140,7 @@ sub MetaAlignment_call {
 	open (FILE, ">$map2_file");
     };
     if ($@) {
-	my $note = "can't open meta-alignment input temporary file!\n";
+	my $note = "Internal System Error. Can not open meta-alignment input (map2) temporary file!\n";
 	my $code = 701;
 	print STDERR "$note\n";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1143,11 +1153,11 @@ sub MetaAlignment_call {
     }
     print FILE $map2;
     close FILE;
-
+    
     # Sorting
-
+    
     my $map1_sorted = qx/cat $map1_file | sort +3n/;
-
+    
     open (FILE, ">$map1_file") or die "can't open temp file, $map1_file!\n";
     print FILE $map1_sorted;
     close FILE;
@@ -1169,7 +1179,7 @@ sub MetaAlignment_call {
 	close $stdout_fh;
     };
     if ($@) {
-	my $note = "can't open a temporary file to store meta-alignment output!\n";
+	my $note = "Internal System Error. Can not open a temporary file to store meta-alignment output!\n";
 	my $code = 701;
 	print STDERR "$note\n";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1182,12 +1192,12 @@ sub MetaAlignment_call {
     }
 
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
-
+    
     my $failed = system (@args);
     if ($failed > 0) {
-	my $note = "meta-alignment system call died (with error code, $?).\n";
+	my $note = "Internal System Error.  Meta-alignment system call died (with error code, $?).\n";
 	my $code = 701;
-
+	
 	if (($! != ENOTTY) || ($! ne "Inappropriate ioctl for device")) {
 	    # This is not an error, just mean that stdout is a terminal !!
 	    print STDERR "Error, '$!'\n";
@@ -1212,7 +1222,7 @@ sub MetaAlignment_call {
 	return ($meta_output, $moby_exceptions);
     }
     else {
-	print STDERR "meta_output not defined!\n";
+	print STDERR "Internal System Error. Meta_output not defined!\n";
 	return ("", $moby_exceptions);
     }
 }
@@ -1223,9 +1233,9 @@ sub generateScoreMatrix_call {
   # output specs declaration
   my $matrix_output   = "";
   my $moby_exceptions = [];
-
+  
   # relleno los parametros por defecto generateScoreMatrix_call
-
+  
   my $inputdata_arrayref = $args{similarity_results};
   my $parameters         = $args{parameters} || undef;
   my $queryID            = $args{queryID}    || "";
@@ -1242,7 +1252,7 @@ sub generateScoreMatrix_call {
   
   # Check that the binary is in place
   if (! -f "$_application_dir/$_application_bin") {
-      my $note = "generateScoreMatrix script not found";
+      my $note = "Internal System Error. generateScoreMatrix script not found";
       print STDERR "$note\n";
       my $code = 701;
       my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1263,7 +1273,7 @@ sub generateScoreMatrix_call {
       close $meta_fh;
   };
   if ($@) {
-      my $note = "can't open generateScoreMatrix meta input temporary file!\n";
+      my $note = "Internal System Error. Can not open generateScoreMatrix meta input temporary file!\n";
       my $code = 701;
       print STDERR "$note\n";
       my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1292,7 +1302,7 @@ sub generateScoreMatrix_call {
       return ($matrix_output, $moby_exceptions);
   }
   else {
-      print STDERR "matrix_output not defined!!\n";
+      print STDERR "Internal System Error. Matrix_output not defined!!\n";
       return ("", $moby_exceptions);
   }
 
@@ -1310,7 +1320,7 @@ sub MEME_call {
     my $parameters = $args{parameters};
     my $_debug     = $args{debug};
     my $queryID    = $args{queryID}    || "";
-
+    
     my $motif_distribution    = $parameters->{motif_distribution};
     my $maximum_number_motifs = $parameters->{maximum_number_motifs};
     my $minimum_number_sites  = $parameters->{minimum_number_sites};
@@ -1327,7 +1337,7 @@ sub MEME_call {
     
     # Check that the binary is in place
     if (! -f "$_meme_dir/$_meme_bin") {
-	my $note = "meme binary not found";
+	my $note = "Internal System Error. MEME binary not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1416,7 +1426,7 @@ sub MEME_call {
 	($seq_fh, $seqfile) = tempfile("/tmp/MEME.XXXXXX", UNLINK => 0);
     };
     if ($@) {
-	my $note = "can't open meme input sequences temporary file!\n";
+	my $note = "Internal System Error. Can not open MEME input sequences temporary file!\n";
 	my $code = 701;
 	print STDERR "$note\n";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1462,7 +1472,7 @@ sub MEME_call {
 
     # Test empty file
     if (-z $seqfile) {
-	print STDERR "Error, empty sequence file...\n";
+	print STDERR "Internal System Error when calling MEME software. Empty input sequences file...\n";
     }
 
     # MEME default is protein alphabet so if it is dna sequences, specify it, as the MEME model will be then different
@@ -1498,7 +1508,7 @@ sub MEME_call {
 	    system (@args);
 	};
 	if ($@) {
-	    my $note = "can't open meme background temporary file!\n";
+	    my $note = "Internal System Error. Can not open MEME background temporary file!\n";
 	    my $code = 701;
 	    print STDERR "$note\n";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1534,7 +1544,7 @@ sub MEME_call {
 	return ($meme_output, $moby_exceptions);
     }
     else {
-	print STDERR "meme_output not defined!\n";
+	print STDERR "Internal System Error. Meme_output not defined!\n";
 	return ("", $moby_exceptions);
     }
 }
@@ -1565,7 +1575,7 @@ sub meme2matrix_call {
     
     # Check that the binary is in place
     if (! -f "$_meme2matrix_dir/$_meme2matrix_bin") {
-	my $note = "meme2matrix script not found";
+	my $note = "Internal System Error. meme2matrix script not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1593,7 +1603,7 @@ sub meme2matrix_call {
 	close $meme2matrix_fh;
     };
     if ($@) {
-	my $note = "can't open meme2matrix input temporary file!\n";
+	my $note = "Internal System Error. Can not open meme2matrix input temporary file!\n";
 	my $code = 701;
 	print STDERR "$note\n";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1654,6 +1664,8 @@ sub meme2matrix_call {
 	return (\@PWMs, $moby_exceptions);
     }
     else {
+	# It's not an error, it is a warning !!
+	# it can be normal not find find motifs !!
 	print STDERR "meme2matrix didn't parsed any motif matrix from meme data file!\n";
 	return ([], $moby_exceptions);
     }

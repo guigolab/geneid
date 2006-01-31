@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.17 2006-01-31 16:42:19 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.18 2006-01-31 17:38:14 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -121,8 +121,6 @@ use INB::Exceptions::MobyException;
 # MOBY
 
 use MOBY::CommonSubs qw(:all);
-# This module contains the Node type constants
-use MOBY::MobyXMLConstants;
 
 # Logging
 use Log::Log4perl;
@@ -409,11 +407,8 @@ sub _do_query_GeneID {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple articulo
 
-	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
-	# In case of GeneID, it doesn't really matter as there is only one input anyway
-	
 	if (isCollectionArticle ($DOM)) {
-	    my $note = "received a collection input article instead of a simple";
+	    my $note = "Received a collection input article instead of a simple";
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -429,12 +424,15 @@ sub _do_query_GeneID {
 	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
+	# taverna doesn't setup the articlename nicely, so let them not specify it - as there is only one article, no big deal !
 	elsif (($articleName eq "sequences") || (isSimpleArticle ($DOM))) { 
 	    
 	    if (isSimpleArticle ($DOM)) {
 		
 		# print STDERR "sequences tag is a simple article...\n";
 		
+		# Validate the type first
+
 		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
 		if (!$rightType) {
 		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
@@ -459,22 +457,6 @@ sub _do_query_GeneID {
 		# Get the sequence
 		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
-	    elsif (isCollection ($DOM)) {
-		my $note = "received a collection input article instead of a simple";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
-		
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
-		return ($MOBY_RESPONSE, $moby_exceptions);
-	    }
-	    
 	} # End parsing sequences article tag
 	
     } # Next article
@@ -522,16 +504,20 @@ $report
 </moby:$_format>
 PRT
 
-        # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
-        # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
-        # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
-        # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
-        # a collection response. 
-        # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
-        # el mismo que el de la query. 
+        $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);   
     }
+    else {
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+    }
+
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
+    # a collection response. 
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
+    # el mismo que el de la query. 
     
-    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);    
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
