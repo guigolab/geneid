@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.15 2006-01-30 18:10:55 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.16 2006-01-31 10:37:05 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -515,52 +515,72 @@ PRT
 
 sub runGeneID {
 
-	# El parametro $message es un texto xml con la peticion.
-	my ($caller, $message) = @_;        # get the incoming MOBY query XML
-
-	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
-	# a la ontologia, y debemos contentarnos con trabajar directamente 
-	# con objetos DOM. Por consiguiente lo primero es recolectar la 
-	# lista de peticiones (queries) que tiene la peticion. 
-	# 
-	# En una misma llamada podemos tener mas de una peticion, y de  
-	# cada servicio depende la forma de trabajar con ellas. En este 
-	# caso las trataremos una a una, pero podriamos hacer Threads para 
-	# tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
-	# etc.. 
-	my @queries = getInputs($message);  # returns XML::DOM nodes
-	# 
-	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
-	# es una coleccion de respuestas a cada una de las consultas.
-        my $MOBY_RESPONSE = "";             # set empty response
-	my $moby_exceptions = [];
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+    
+    # Hasta el momento, no existen objetos Perl de BioMoby paralelos 
+    # a la ontologia, y debemos contentarnos con trabajar directamente 
+    # con objetos DOM. Por consiguiente lo primero es recolectar la 
+    # lista de peticiones (queries) que tiene la peticion. 
+    # 
+    # En una misma llamada podemos tener mas de una peticion, y de  
+    # cada servicio depende la forma de trabajar con ellas. En este 
+    # caso las trataremos una a una, pero podriamos hacer Threads para 
+    # tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
+    # etc.. 
+    my @queries = getInputs($message);  # returns XML::DOM nodes
+    # 
+    # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+    # es una coleccion de respuestas a cada una de las consultas.
+    my $MOBY_RESPONSE = "";             # set empty response
+    my $moby_exceptions = [];
+    
+    #
+    # The moby output format for this service is text-html
+    # (The GeneID output format for this service is by default GFF - right now it is hardcoded)
+    #
+    
+    my $_moby_output_format   = "text-html";
+    
+    # Para cada query ejecutaremos el _execute_query.
+    foreach my $query(@queries){
 	
-	#
-	# The moby output format for this service is text-html
-	# (The GeneID output format for this service is by default GFF - right now it is hardcoded)
-	#
-
-	my $_moby_output_format   = "text-html";
-
-	# Para cada query ejecutaremos el _execute_query.
-        foreach my $query(@queries){
-	    
-	    # En este punto es importante recordar que el objeto $query 
-	    # es un XML::DOM::Node, y que si queremos trabajar con 
-	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID_CGI ($query, $_moby_output_format);
-	    push (@$moby_exceptions, @$moby_exceptions_tmp);
-	    
-	    # $query_response es un string que contiene el codigo xml de
-	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
-	    # encadenar sin problemas una respuesta con otra. 
-	    $MOBY_RESPONSE .= $query_response;
+	# En este punto es importante recordar que el objeto $query 
+	# es un XML::DOM::Node, y que si queremos trabajar con 
+	# el mensaje de texto debemos llamar a: $query->toString() 
+	my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID_CGI ($query, $_moby_output_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
+	# $query_response es un string que contiene el codigo xml de
+	# la respuesta.  Puesto que es un codigo bien formado, podemos 
+	# encadenar sin problemas una respuesta con otra. 
+	$MOBY_RESPONSE .= $query_response;
+    }
+    
+    # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
+    # todas ellas con una cabecera y un final. Esto lo podemos hacer 
+    # con las llamadas de la libreria Common de BioMoby. 
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
 	}
-	# Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
-	# todas ellas con una cabecera y un final. Esto lo podemos hacer 
-	# con las llamadas de la libreria Common de BioMoby. 
-	return responseHeader("genome.imim.es") 
-	. $MOBY_RESPONSE . responseFooter;
+
+	return responseHeader(
+			       -authority => "genome.imim.es",
+			       -note      => "$moby_exception_response"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 =head2 runGeneIDGFF
@@ -606,56 +626,74 @@ sub runGeneID {
 
 sub runGeneIDGFF {
 
-	# El parametro $message es un texto xml con la peticion.
-	my ($caller, $message) = @_;        # get the incoming MOBY query XML
-
-	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
-	# a la ontologia, y debemos contentarnos con trabajar directamente 
-	# con objetos DOM. Por consiguiente lo primero es recolectar la 
-	# lista de peticiones (queries) que tiene la peticion. 
-	# 
-	# En una misma llamada podemos tener mas de una peticion, y de  
-	# cada servicio depende la forma de trabajar con ellas. En este 
-	# caso las trataremos una a una, pero podriamos hacer Threads para 
-	# tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
-	# etc.. 
-	my @queries = getInputs($message);  # returns XML::DOM nodes
-	# 
-	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
-	# es una coleccion de respuestas a cada una de las consultas.
-        my $MOBY_RESPONSE   = "";             # set empty response
-	my $moby_exceptions = [];
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+    
+    # Hasta el momento, no existen objetos Perl de BioMoby paralelos 
+    # a la ontologia, y debemos contentarnos con trabajar directamente 
+    # con objetos DOM. Por consiguiente lo primero es recolectar la 
+    # lista de peticiones (queries) que tiene la peticion. 
+    # 
+    # En una misma llamada podemos tener mas de una peticion, y de  
+    # cada servicio depende la forma de trabajar con ellas. En este 
+    # caso las trataremos una a una, pero podriamos hacer Threads para 
+    # tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
+    # etc.. 
+    my @queries = getInputs($message);  # returns XML::DOM nodes
+    # 
+    # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+    # es una coleccion de respuestas a cada una de las consultas.
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
+    #
+    # The output format for this service is GFF
+    #
+    my $_format = "GFF";
+    
+    # Para cada query ejecutaremos el _execute_query.
+    foreach my $queryInput (@queries){
 	
-	#
-	# The output format for this service is GFF
-	#
-        my $_format = "GFF";
-
-	# Para cada query ejecutaremos el _execute_query.
-        foreach my $queryInput (@queries){
-	    
-	    # En este punto es importante recordar que el objeto $query 
-	    # es un XML::DOM::Node, y que si queremos trabajar con 
-	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    
-	    # my $query_str = $queryInput->toString();
-	    # print STDERR "query text: $query_str\n";
-	    
-	    my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID ($queryInput, $_format);
-	    push (@$moby_exceptions, @$moby_exceptions_tmp);
-	    
-	    # $query_response es un string que contiene el codigo xml de
-	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
-	    # encadenar sin problemas una respuesta con otra. 
-	    $MOBY_RESPONSE .= $query_response;
+	# En este punto es importante recordar que el objeto $query 
+	# es un XML::DOM::Node, y que si queremos trabajar con 
+	# el mensaje de texto debemos llamar a: $query->toString() 
+	
+	# my $query_str = $queryInput->toString();
+	# print STDERR "query text: $query_str\n";
+	
+	my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID ($queryInput, $_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
+	# $query_response es un string que contiene el codigo xml de
+	# la respuesta.  Puesto que es un codigo bien formado, podemos 
+	# encadenar sin problemas una respuesta con otra. 
+	$MOBY_RESPONSE .= $query_response;
+    }
+    # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
+    # todas ellas con una cabecera y un final. Esto lo podemos hacer 
+    # con las llamadas de la libreria Common de BioMoby.    
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
 	}
-	# Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
-	# todas ellas con una cabecera y un final. Esto lo podemos hacer 
-	# con las llamadas de la libreria Common de BioMoby. 
-	return responseHeader("genome.imim.es") 
-	. $MOBY_RESPONSE . responseFooter;
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
-
 
 
 1;

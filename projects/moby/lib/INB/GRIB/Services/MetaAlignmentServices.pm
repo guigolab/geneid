@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.11 2006-01-30 18:10:55 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.12 2006-01-31 10:37:05 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -941,7 +941,7 @@ sub runMultiMetaAlignmentGFF {
     #
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
+    my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
 
     # Para cada query ejecutaremos el _execute_query.

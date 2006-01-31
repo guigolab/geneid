@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.11 2006-01-27 17:04:16 gmaster Exp $
+# $Id: MemeServices.pm,v 1.12 2006-01-31 10:37:05 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -121,8 +121,9 @@ sub _do_query_Meme {
     # $_format is the type of output that returns Meme (e.g. HTML or Text)
     my $_output_format        = shift @_;
 
-    my $MOBY_RESPONSE = "";     # set empty response
-
+    my $MOBY_RESPONSE   = "";     # set empty response
+    my $moby_exceptions = [];
+    
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $motif_distribution;
     my $maximum_number_motifs;
@@ -283,7 +284,8 @@ sub _do_query_Meme {
 	print STDERR "making a simple response\n";
     }
 
-    my ($report, $moby_exceptions) = MEME_call (sequences  => \%sequences, format => $_output_format, debug => $_debug, queryID => $queryID, parameters => \%parameters);
+    my ($report, $moby_exceptions_tmp) = MEME_call (sequences  => \%sequences, format => $_output_format, debug => $_debug, queryID => $queryID, parameters => \%parameters);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio
@@ -307,7 +309,7 @@ PRT
 
     $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 
-   return $MOBY_RESPONSE;
+   return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
 sub _do_query_MemeMotifMatrices {
@@ -315,8 +317,9 @@ sub _do_query_MemeMotifMatrices {
     my $queryInput_DOM = shift @_;
     my $_output_format        = shift @_;
 
-    my $MOBY_RESPONSE = "";     # set empty response
-
+    my $MOBY_RESPONSE   = "";     # set empty response
+    my $moby_exceptions = [];
+    
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $matrix_mode;
 
@@ -381,7 +384,8 @@ sub _do_query_MemeMotifMatrices {
     # la funcion que nos devuelve el report.
 
     # Return an array of matrices
-    my ($matrices_aref, $moby_exceptions) = meme2matrix_call (meme_predictions => $meme_predictions, format => $_output_format, queryID => $queryID, parameters => \%parameters);
+    my ($matrices_aref, $moby_exceptions_tmp) = meme2matrix_call (meme_predictions => $meme_predictions, format => $_output_format, queryID => $queryID, parameters => \%parameters);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio
@@ -414,10 +418,10 @@ PRT
     # a collection response.
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
-
+    
     $MOBY_RESPONSE .= simpleResponse($meme_matrix_object, $output_article_name, $queryID);
-    return $MOBY_RESPONSE;
-
+    return ($MOBY_RESPONSE, $moby_exceptions);
+    
 }
 
 =head2 runMemeHTML
@@ -466,8 +470,9 @@ sub runMemeHTML {
     #
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
-
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
     #
     # The moby output format for this service is text-html
     #
@@ -484,8 +489,9 @@ sub runMemeHTML {
 	# En este punto es importante recordar que el objeto $query
 	# es un XML::DOM::Node, y que si queremos trabajar con
 	# el mensaje de texto debemos llamar a: $query->toString()
-	my $query_response = _do_query_Meme ($queryInput, $_moby_output_format);
-
+	my ($query_response, $moby_exceptions_tmp) = _do_query_Meme ($queryInput, $_moby_output_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos
 	# encadenar sin problemas una respuesta con otra.
@@ -494,8 +500,27 @@ sub runMemeHTML {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    return responseHeader("genome.imim.es")
-	. $MOBY_RESPONSE . responseFooter;
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 =head2 parseMotifMatricesfromMEME
@@ -544,8 +569,9 @@ sub parseMotifMatricesfromMEME {
     #
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
-
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
     my $_format = "text-formatted";
 
     # Para cada query ejecutaremos el _execute_query.
@@ -560,8 +586,9 @@ sub parseMotifMatricesfromMEME {
 	    print STDERR "query text: $query_str\n";
 	}
 
-	my $query_response = _do_query_MemeMotifMatrices ($queryInput, $_format);
-
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MemeMotifMatrices ($queryInput, $_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos
 	# encadenar sin problemas una respuesta con otra.
@@ -570,8 +597,27 @@ sub parseMotifMatricesfromMEME {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    return responseHeader("genome.imim.es")
-	. $MOBY_RESPONSE . responseFooter;
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 
@@ -621,13 +667,14 @@ sub runMemeText {
     #
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
-
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
     my $_format = "text-formatted";
-
+    
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
-
+	
 	# En este punto es importante recordar que el objeto $query
 	# es un XML::DOM::Node, y que si queremos trabajar con
 	# el mensaje de texto debemos llamar a: $query->toString()
@@ -636,9 +683,10 @@ sub runMemeText {
 	    my $query_str = $queryInput->toString();
 	    print STDERR "query text: $query_str\n";
 	}
-
-	my $query_response = _do_query_Meme ($queryInput, $_format);
-
+	
+	my ($query_response, $moby_exceptions_tmp) = _do_query_Meme ($queryInput, $_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos
 	# encadenar sin problemas una respuesta con otra.
@@ -647,8 +695,27 @@ sub runMemeText {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    return responseHeader("genome.imim.es")
-	. $MOBY_RESPONSE . responseFooter;
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 1;

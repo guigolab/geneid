@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.13 2006-01-27 17:04:16 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.14 2006-01-31 10:37:05 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -195,8 +195,9 @@ sub _do_query_MatScan {
 	exit 0;
     }
 
-    my $MOBY_RESPONSE = "";     # set empty response
-
+    my $MOBY_RESPONSE   = "";     # set empty response
+    my $moby_exceptions = [];
+    
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $matrix;
     my $matrix_mode;
@@ -313,8 +314,9 @@ sub _do_query_MatScan {
 	    print STDERR "making a simple response\n";
 	}
 
-	my ($report, $moby_exceptions) = MatScan_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters, debug => $_debug);
-
+	my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters, debug => $_debug);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio
 	# la podriamos realizar en una funcion a parte si fuese compleja.
@@ -337,8 +339,8 @@ PRT
 	# el mismo que el de la query.
 
 	$MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
-
-	return $MOBY_RESPONSE;
+	
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     elsif ($_input_type eq "collection") {
 
@@ -348,7 +350,8 @@ PRT
 
 	# The input was a collection of Sequences, so we have to return a collection of GFF objects
 
-	my ($report, $moby_exceptions) = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters, debug => $_debug);
+	my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters, debug => $_debug);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
 
 	my $output_objects;
 	if (defined $report) {
@@ -365,7 +368,7 @@ PRT
 
 	$MOBY_RESPONSE .= collectionResponse($output_objects, $output_article_name, $queryID);
 
-	return $MOBY_RESPONSE;
+	return ($MOBY_RESPONSE, $moby_exceptions);
 
     }
     else {
@@ -396,8 +399,9 @@ sub _do_query_MatScanVsInputMatrix {
 	exit 1;
     }
 
-    my $MOBY_RESPONSE = "";     # set empty response
-
+    my $MOBY_RESPONSE   = "";     # set empty response
+    my $moby_exceptions = [];
+    
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $threshold;
     my $strands;
@@ -514,7 +518,9 @@ sub _do_query_MatScanVsInputMatrix {
 
     # The input was a collection of Sequences, so we have to return a collection of GFF objects
 
-    my ($report, $moby_exceptions) = MatScan_call (sequences  => \%sequences, matrix => $matrix, format => $_format, parameters => \%parameters, debug => $_debug);
+    my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, matrix => $matrix, format => $_format, parameters => \%parameters, debug => $_debug);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
+    
     my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -527,7 +533,7 @@ sub _do_query_MatScanVsInputMatrix {
 
     $MOBY_RESPONSE .= collectionResponse($output_objects, $output_article_name, $queryID);
 
-    return $MOBY_RESPONSE;
+    return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
 
@@ -573,7 +579,7 @@ sub _do_query_MatScanVsInputMatrix {
 =cut
 
 sub runMatScanGFF {
-
+	
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
@@ -591,8 +597,9 @@ sub runMatScanGFF {
     #
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
-
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
     #
     # The moby output format for this service is text-html
     # (The MatScan output format for this service is by default GFF - right now it is hardcoded)
@@ -611,8 +618,9 @@ sub runMatScanGFF {
 	# En este punto es importante recordar que el objeto $query
 	# es un XML::DOM::Node, y que si queremos trabajar con
 	# el mensaje de texto debemos llamar a: $query->toString()
-	my $query_response = _do_query_MatScan ($queryInput, $_moby_output_format, "simple");
-
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MatScan ($queryInput, $_moby_output_format, "simple");
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos
 	# encadenar sin problemas una respuesta con otra.
@@ -621,8 +629,27 @@ sub runMatScanGFF {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    return responseHeader("genome.imim.es")
-	. $MOBY_RESPONSE . responseFooter;
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 =head2 runMatScanGFFCollection
@@ -671,8 +698,9 @@ sub runMatScanGFFCollection {
     #
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
-
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
     #
     # The output format for this service is GFF
     #
@@ -690,8 +718,9 @@ sub runMatScanGFFCollection {
 	    print STDERR "query text: $query_str\n";
 	}
 
-	my $query_response = _do_query_MatScan ($queryInput, $_format, "collection");
-
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MatScan ($queryInput, $_format, "collection");
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos
 	# encadenar sin problemas una respuesta con otra.
@@ -700,8 +729,27 @@ sub runMatScanGFFCollection {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    return responseHeader("genome.imim.es")
-	. $MOBY_RESPONSE . responseFooter;
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 
@@ -724,8 +772,9 @@ sub runMatScanGFFCollectionVsInputMatrix {
     #
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
-
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
     #
     # The output format for this service is GFF
     #
@@ -743,8 +792,9 @@ sub runMatScanGFFCollectionVsInputMatrix {
 	    print STDERR "query text: $query_str\n";
 	}
 
-	my $query_response = _do_query_MatScanVsInputMatrix ($queryInput, $_format, "collection");
-
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MatScanVsInputMatrix ($queryInput, $_format, "collection");
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos
 	# encadenar sin problemas una respuesta con otra.
@@ -753,8 +803,27 @@ sub runMatScanGFFCollectionVsInputMatrix {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    return responseHeader("genome.imim.es")
-	. $MOBY_RESPONSE . responseFooter;
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	foreach my $moby_exception (@$moby_exceptions) {
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 
