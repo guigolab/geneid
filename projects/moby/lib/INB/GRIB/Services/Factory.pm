@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.58 2006-01-30 18:10:55 gmaster Exp $
+# $Id: Factory.pm,v 1.59 2006-01-31 16:43:06 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -260,7 +260,7 @@ sub GeneID_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     if ($format eq "GFF") {
@@ -339,7 +339,7 @@ sub GeneID_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     # Bioperl sequence factory
@@ -372,7 +372,7 @@ sub GeneID_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     # print STDERR "Running GeneID, with this command:\n";
@@ -387,8 +387,17 @@ sub GeneID_call {
 	return ($geneid_output, $moby_exceptions);
     }
     else {
-	print STDERR "no geneid_output defined!!\n";
-	return ("", $moby_exceptions);
+	my $note = "geneid has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
     }
 }
 
