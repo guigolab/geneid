@@ -17,6 +17,8 @@ use Bio::SeqIO;
 
 # Biomoby
 use MOBY::CommonSubs qw(:all);
+# This module contains the Node type constants
+use MOBY::MobyXMLConstants;
 
 require Exporter;
 
@@ -44,6 +46,7 @@ our @EXPORT = qw(
   &parseMobySequenceObjectFromDOM
   &parseMobySequenceObjectFromDOMintoBioperlObject
   &convertSequencesIntoFASTA
+  &validateDataType
 );
 
 our $VERSION = '1.0';
@@ -404,6 +407,47 @@ sub convertSequencesIntoFASTA {
     my $fasta_sequences = join ('', @fasta_sequences);
 
     return $fasta_sequences;
+}
+
+# Check that the input datatype matched the specified one
+
+sub validateDataType {
+    my $self = shift;
+    my ($DOM, $specifiedType) = @_;
+
+    # input 
+    # * DOM containing articles we want to validate the type
+    # * the specified expected type
+    
+    my $inputDataType = undef;
+    my $rightType = 0;
+    
+    # Should be a simple or a collection ??
+    # Check with a service that takes more than one input article
+    my @nodes = $DOM->childNodes();
+    foreach my $node (@nodes) {
+	my $nodeType = $node->nodeType();
+	if ($node->nodeType() == ELEMENT_NODE) {
+	    
+	    # That should be the object - Validate code is here!!
+	    
+	    $inputDataType = $node->nodeName;
+	    
+	    if ($specifiedType eq "NucleotideSequence") {
+		if (($inputDataType =~ /NucleotideSequence|DNASequence|RNASequence/)) {
+		    $rightType = 1;
+		    return ($rightType, $inputDataType);
+		}
+		else {
+		    # Wrong input type
+		    return ($rightType, $inputDataType);
+		}
+	    }
+	    
+	}
+    }
+    
+    return ($rightType, $inputDataType);
 }
 
 1;
