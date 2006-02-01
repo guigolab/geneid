@@ -154,11 +154,11 @@ my ($REG) = $Central->registerService(
 				      serviceType  => "Analysis",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a simple DNASequence object and returns a simple GFF object. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
+				      description  => "Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a simple NucleotideSequence object and returns a simple GFF object. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['upstream_sequences', ['DNASequence' => \@namespaces]]
+							    ['upstream_sequences', ['NucleotideSequence' => \@namespaces]]
 							   ],
 				      output		=> [
 							    ['matscan_predictions', ['GFF' => \@namespaces]]
