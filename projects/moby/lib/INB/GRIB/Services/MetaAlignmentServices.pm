@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.13 2006-02-01 14:10:31 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.14 2006-02-01 15:09:16 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -218,36 +218,29 @@ sub _do_query_MetaAlignment {
 	    print STDERR "processing article, $articleName...\n";
 	}
 
-	# Si le hemos puesto nombre a los articulos del servicio,
-	# podemos recoger a traves de estos nombres el valor.
-	# Sino sabemos que es el input articulo porque es un simple/collection articulo
-
-	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
-	# In case of GeneID, it doesn't really matter as there is only one input anyway
+	if (isCollectionArticle($DOM)) {
+		    
+	    # not allowed
+	    
+	    my $note = "Received a collection input article instead of a simple";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "map1",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
 	
 	if ($articleName eq "map1") {
-	    
-	    if (isCollectionArticle($DOM)) {
-		    
-		# not allowed
-		
-		my $note = "Received a collection input article instead of a simple";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "map1",
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
-		
-		# Return an empty moby data object, as well as an exception telling what nothing got returned
-		
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
-		return ($MOBY_RESPONSE, $moby_exceptions);
-	    }
 	    
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
@@ -280,28 +273,6 @@ sub _do_query_MetaAlignment {
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
 	    
-	    if (isCollectionArticle($DOM)) {
-		    
-		# not allowed
-		
-		my $note = "Received a collection input article instead of a simple";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "map2",
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
-		
-		# Return an empty moby data object, as well as an exception telling what nothing got returned
-		
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
-		return ($MOBY_RESPONSE, $moby_exceptions);
-	    }
-	    
 	    ($sequenceIdentifier_2) = getSimpleArticleIDs ( [ $DOM ] );
 	    
 	    if ((not defined $sequenceIdentifier_2) || (length ($sequenceIdentifier_2) == 0)) {
@@ -325,15 +296,46 @@ sub _do_query_MetaAlignment {
 
     # Check that we have parsed properly the sequences and the predictions
 
-    if ((not defined $map1) || (not defined $map2)) {
-	print STDERR "Error, can't parsed any maps...\n";
-	# generate a moby exception
-	# ...
+    if ((not defined $map1) || (length $map1 < 1)) {
+	my $note = "could not parse any data in 'map1' article";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "map1",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-
+    if (not defined $map2) {
+	my $note = "could not parse any data in 'map2' article";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "map2",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
-
+    
     my ($meta_report, $moby_exceptions_tmp) = MetaAlignment_call (map1  => $map1, map2  => $map2, queryID => $queryID, parameters => \%parameters);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
@@ -342,6 +344,8 @@ sub _do_query_MetaAlignment {
     # la podriamos realizar en una funcion a parte si fuese compleja.
 
     if (defined $meta_report) {
+
+	print STDERR "meta output defined\n";
     
 	my $namespace = "";
 	
@@ -358,7 +362,10 @@ PRT
         $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);
     }
     else {
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	
+	print STDERR "meta output not defined\n";
+	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
     }
     
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -523,8 +530,22 @@ sub _do_query_MultiMetaAlignment {
     my $output_objects = [];
 
     if (@$maps_gff < 2) {
-	print STDERR "Error, less than two maps parsed from the input, can not run meta-alignment!!\n";
-	exit 0;
+	my $note = "Parsed less than two maps from the article input, the service requires at least two maps\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "maps",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     else {
 
@@ -537,10 +558,10 @@ sub _do_query_MultiMetaAlignment {
 	for (my $i = 0; $i < @$maps_gff; $i++) {
 	    for (my $j = 0; $j < @$maps_gff; $j++) {
 		if (($i != $j || $allowSelf) && ($i <= $j || $allowInverse)) {
-
+		    
 		    my $map1 = $maps_gff->[$i];
 		    my $map2 = $maps_gff->[$j];
-
+		    
 		    if (not defined $map1) {
 			print STDERR "pb, map1 not defined !!\n";
 			print STDERR "i: $i\n";
@@ -552,21 +573,23 @@ sub _do_query_MultiMetaAlignment {
 			print STDERR "i: $i\n";
 			print STDERR "j: $j\n";
 		    }
-
+		    
 		    my ($meta_report, $moby_exceptions_tmp) = MetaAlignment_call (map1  => $map1, map2  => $map2, queryID => $queryID, parameters => \%parameters);
 		    push (@$moby_exceptions, @$moby_exceptions_tmp);
-
+		    
 		    # Leave it for now on, because for such collection, i don't know how to report properly exceptions
-
+		    
 		    # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
 		    # nos queda encapsularla en un Objeto bioMoby. Esta operacio
 		    # la podriamos realizar en una funcion a parte si fuese compleja.
-
-		    my $namespace = "";
-
-		    # Build the Moby object
-
-		    my $output_object = <<PRT;
+		    
+		    if (defined $meta_report) {
+			
+			my $namespace = "";
+			
+			# Build the Moby object
+			
+			my $output_object = <<PRT;
 <moby:$_moby_output_format namespace='' id=''>
 <![CDATA[
 $meta_report
@@ -574,7 +597,13 @@ $meta_report
 </moby:$_moby_output_format>
 PRT
 
-		    push (@$output_objects, $output_object);
+                        push (@$output_objects, $output_object);
+		    }
+		    else {
+			print STDERR "meta-alignment call failed\n";
+			print STDERR "map1 index, $i\n";
+			print STDERR "map2 index, $j\n";
+		    }
 		}
 	    }
 	}
@@ -589,7 +618,6 @@ PRT
     # el mismo que el de la query.
 
     $MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
-
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
 

@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.61 2006-02-01 14:10:31 gmaster Exp $
+# $Id: Factory.pm,v 1.62 2006-02-01 15:09:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1203,20 +1203,23 @@ sub MetaAlignment_call {
     
     my $failed = system (@args);
     if ($failed > 0) {
-	my $note = "Internal System Error.  Meta-alignment system call died (with error code, $?).\n";
-	my $code = 701;
-	
 	if (($! != ENOTTY) || ($! ne "Inappropriate ioctl for device")) {
 	    # This is not an error, just mean that stdout is a terminal !!
 	    print STDERR "Error, '$!'\n";
 	}
-	my $moby_exception = INB::Exceptions::MobyException->new (
-								  code       => $code,
-								  type       => 'error',
-								  queryID    => $queryID,
-								  message    => "$note",
-								  );
-	push (@$moby_exceptions, $moby_exception);
+	else {
+	    my $note = "Internal System Error.  Meta-alignment system call died (with error code, $?).\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    return (undef, $moby_exceptions);
+	}
     }
     else {
 	$meta_output = qx/cat $stdout_file/;
