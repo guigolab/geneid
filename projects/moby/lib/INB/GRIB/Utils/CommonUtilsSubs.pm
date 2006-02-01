@@ -433,7 +433,6 @@ sub validateDataType {
 	}
     }
     else {
-	print STDERR "it is a simple!\n";
 	# it is a simple - get directly the object node from the DOM
 	my ($node) = $DOM->getElementsByTagName ('*');
 	push (@object_nodes, $node);
