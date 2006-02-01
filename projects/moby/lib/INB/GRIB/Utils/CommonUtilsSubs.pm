@@ -414,19 +414,37 @@ sub convertSequencesIntoFASTA {
 sub validateDataType {
     my $self = shift;
     my ($DOM, $specifiedType) = @_;
-
+    
     # input 
     # * DOM containing articles we want to validate the type
     # * the specified expected type
     
     my $inputDataType = undef;
-    my $rightType = 0;
+    my $rightType     = undef;
+
+    my @object_nodes = ();
     
-    # Should be a simple or a collection ??
-    # Check with a service that takes more than one input article
-    my @nodes = $DOM->childNodes();
-    foreach my $node (@nodes) {
+    if ($DOM->nodeName =~ /collection/i) {
+	my @simple_nodes = getCollectedSimples ($DOM);
+	foreach my $simple_node (@simple_nodes) {
+	    # Get the object node
+	    my ($node) = $simple_node->getElementsByTagName ('*');
+	    push (@object_nodes, $node);
+	}
+    }
+    else {
+	print STDERR "it is a simple!\n";
+	# it is a simple - get directly the object node from the DOM
+	my ($node) = $DOM->getElementsByTagName ('*');
+	push (@object_nodes, $node);
+    }
+    
+    foreach my $node (@object_nodes) {
+
+	# must all match the specified type
+	
 	my $nodeType = $node->nodeType();
+	# should be already this type !!
 	if ($node->nodeType() == ELEMENT_NODE) {
 	    
 	    # That should be the object - Validate code is here!!
@@ -436,82 +454,78 @@ sub validateDataType {
 	    if ($specifiedType eq "GenericSequence") {
 		if (($inputDataType =~ /GenericSequence|AminoAcidSequence|AASequence|NucleotideSequence|DNASequence|RNASequence/)) {
 		    $rightType = 1;
-		    return ($rightType, $inputDataType);
 		}
 		else {
 		    # Wrong input type
-		    return ($rightType, $inputDataType);
+		    return (0, $inputDataType);
 		}
 	    }
 	    
 	    if ($specifiedType eq "NucleotideSequence") {
 		if (($inputDataType =~ /NucleotideSequence|DNASequence|RNASequence/)) {
 		    $rightType = 1;
-		    return ($rightType, $inputDataType);
 		}
 		else {
 		    # Wrong input type
-		    return ($rightType, $inputDataType);
+		    return (0, $inputDataType);
 		}
 	    }
 	    
 	    if ($specifiedType =~ /DNASequence/) {
 		if (($inputDataType =~ /DNASequence/)) {
 		    $rightType = 1;
-		    return ($rightType, $inputDataType);
 		}
 		else {
 		    # Wrong input type
-		    return ($rightType, $inputDataType);
+		    return (0, $inputDataType);
 		}
 	    }
 	    
 	    if ($specifiedType =~ /RNASequence/) {
 		if (($inputDataType =~ /RNASequence/)) {
 		    $rightType = 1;
-		    return ($rightType, $inputDataType);
 		}
 		else {
 		    # Wrong input type
-		    return ($rightType, $inputDataType);
+		    return (0, $inputDataType);
 		}
 	    }
 	    
 	    if ($specifiedType eq "AminoAcidSequence") {
 		if (($inputDataType =~ /AminoAcidSequence|AASequence/)) {
 		    $rightType = 1;
-		    return ($rightType, $inputDataType);
 		}
 		else {
 		    # Wrong input type
-		    return ($rightType, $inputDataType);
+		    return (0, $inputDataType);
 		}
 	    }
 
 	    if ($specifiedType =~ /AASequence/) {
 		if (($inputDataType =~ /AASequence/)) {
 		    $rightType = 1;
-		    return ($rightType, $inputDataType);
 		}
 		else {
 		    # Wrong input type
-		    return ($rightType, $inputDataType);
+		    return (0, $inputDataType);
 		}
 	    }
 
 	    if (($specifiedType eq "Blast-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
 		if (($inputDataType =~ /Blast-Text|NCBI_BLAST_Text|WU_BLAST_Text/)) {
 		    $rightType = 1;
-		    return ($rightType, $inputDataType);
 		}
 		else {
 		    # Wrong input type
-		    return ($rightType, $inputDataType);
+		    return (0, $inputDataType);
 		}
 	    }
 	    
 	    # ...
 	    
+	}
+	else {
+	    print STDERR "not an ELEMENT node...\n";
 	}
     }
     
