@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.12 2006-01-31 10:37:05 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.13 2006-02-01 14:10:31 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -159,24 +159,25 @@ sub _do_query_MetaAlignment {
     # Output definition
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
-
+    my $output_article_name = "meta_predictions";
+    
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $alpha_penalty;
     my $lambda_penalty;
     my $mu_penalty;
     my $sequenceIdentifier_1;
     my $sequenceIdentifier_2;
-
+    
     # Variables that will be passed to MetaAlignment_call
     my $map1;
     my $map2;
     my %parameters;
-
+    
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
-
+    
     # Get the parameters
-
+    
     ($alpha_penalty)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "alpha penalty");
     ($lambda_penalty) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "lambda penalty");
     ($mu_penalty)     = getNodeContentWithArticle($queryInput_DOM, "Parameter", "mu penalty");
@@ -223,16 +224,38 @@ sub _do_query_MetaAlignment {
 
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of GeneID, it doesn't really matter as there is only one input anyway
-
+	
 	if ($articleName eq "map1") {
-
+	    
+	    if (isCollectionArticle($DOM)) {
+		    
+		# not allowed
+		
+		my $note = "Received a collection input article instead of a simple";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "map1",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	    
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
-
+	    
 	    ($sequenceIdentifier_1) = getSimpleArticleIDs ( [ $DOM ] );
-
+	    
 	    if ((not defined $sequenceIdentifier_1) || (length ($sequenceIdentifier_1) == 0)) {
 		print STDERR "Error, can not parsed the sequence identifier the GFF (map1) is attach to!\n";
 		exit 0;
@@ -241,13 +264,13 @@ sub _do_query_MetaAlignment {
 	    if ($_debug) {
 		print STDERR "parsed the following sequence identifier for map1, $sequenceIdentifier_1\n";
 	    }
-
+	    
 	    $map1 = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
 
 	    if ($_debug) {
 		print STDERR "map1, $map1\n";
 	    }
-
+	    
 	} # End parsing map1 article tag
 
 	if ($articleName eq "map2") {
@@ -256,32 +279,56 @@ sub _do_query_MetaAlignment {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
-
+	    
+	    if (isCollectionArticle($DOM)) {
+		    
+		# not allowed
+		
+		my $note = "Received a collection input article instead of a simple";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "map2",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	    
 	    ($sequenceIdentifier_2) = getSimpleArticleIDs ( [ $DOM ] );
-
+	    
 	    if ((not defined $sequenceIdentifier_2) || (length ($sequenceIdentifier_2) == 0)) {
 		print STDERR "Error, can not parsed the sequence identifier the GFF (map2) is attach to!\n";
 		exit 0;
 	    }
-
+	    
 	    if ($_debug) {
 		print STDERR "parsed the following sequence identifier for map2, $sequenceIdentifier_2\n";
 	    }
-
+	    
 	    $map2 = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
-
+	    
 	    if ($_debug) {
 		print STDERR "map2, $map2\n";
 	    }
-
+	    
 	} # End parsing map2 article tag
-
+	
     } # Next article
 
     # Check that we have parsed properly the sequences and the predictions
 
     if ((not defined $map1) || (not defined $map2)) {
 	print STDERR "Error, can't parsed any maps...\n";
+	# generate a moby exception
+	# ...
     }
 
     # Una vez recogido todos los parametros necesarios, llamamos a
@@ -294,19 +341,26 @@ sub _do_query_MetaAlignment {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio
     # la podriamos realizar en una funcion a parte si fuese compleja.
 
-    my $output_article_name = "meta_predictions";
-    my $namespace = "";
-
-    # Build the Moby object
-
-    my $input = <<PRT;
+    if (defined $meta_report) {
+    
+	my $namespace = "";
+	
+	# Build the Moby object
+	
+	my $input = <<PRT;
 <moby:$_moby_output_format namespace='' id='$sequenceIdentifier_1'>
 <![CDATA[
 $meta_report
 ]]>
 </moby:$_moby_output_format>
 PRT
-
+  
+        $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);
+    }
+    else {
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+    }
+    
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero
     # en este caso disponemos de una funcion que lo realiza. Si tuvieramos
@@ -314,8 +368,6 @@ PRT
     # a collection response.
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
-
-    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
 
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
@@ -357,7 +409,8 @@ sub _do_query_MultiMetaAlignment {
     # Output definition
     my $moby_exceptions = [];
     my $MOBY_RESPONSE   = "";     # set empty response
-
+    my $output_article_name = "meta_predictions";
+    
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $alpha_penalty;
     my $lambda_penalty;
@@ -419,32 +472,46 @@ sub _do_query_MultiMetaAlignment {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of GeneID, it doesn't really matter as there is only one input anyway
 
+	if (isSimpleArticle($DOM)) {
+	    my $note = "Received a simple input article instead of a collection";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "maps",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+
 	if ((isCollectionArticle ($DOM)) || (defined ($articleName) && ($articleName eq "maps"))) {
-
-	    if (isSimpleArticle($DOM)) {
-		print STDERR "problem, input article is simple - should be a collection!!!\n";
-		exit 0;
-	    }
-
+	    
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
-
+	    
 	    my @maps_article_DOMs = getCollectedSimples ($DOM);
 	    foreach my $map_DOM (@maps_article_DOMs) {
-
+		
 		my $map = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($map_DOM, "GFF");
-
+		
 		if ($_debug) {
 		    print STDERR "map, $map\n";
 		}
-
+		
 		push (@$maps_gff, $map);
-
+		
 	    }
 	}
-
+	
     } # Next article
 
     # Make GFF pairs
@@ -521,8 +588,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
 
-    my $output_article_name = "meta_predictions";
-    $MOBY_RESPONSE .= collectionResponse($output_objects, $output_article_name, $queryID);
+    $MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
 
     return ($MOBY_RESPONSE, $moby_exceptions);
 }

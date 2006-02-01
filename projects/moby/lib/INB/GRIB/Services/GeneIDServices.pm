@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.18 2006-01-31 17:38:14 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.19 2006-02-01 14:10:31 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -412,12 +412,13 @@ sub _do_query_GeneID {
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
-									      code       => $code,
-									      type       => 'error',
-									      queryID    => $queryID,
-									      message    => "$note",
-									      );
-	    push (@$moby_exceptions, $moby_exception);	    
+								      refElement => "sequences",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
@@ -439,6 +440,7 @@ sub _do_query_GeneID {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "sequences",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,

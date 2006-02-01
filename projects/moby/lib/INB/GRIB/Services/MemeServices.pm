@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.12 2006-01-31 10:37:05 gmaster Exp $
+# $Id: MemeServices.pm,v 1.13 2006-02-01 14:10:31 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -123,6 +123,7 @@ sub _do_query_Meme {
 
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $output_article_name = "meme_predictions";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $motif_distribution;
@@ -240,46 +241,100 @@ sub _do_query_Meme {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of MatScan, it doesn't really matter as there is only one input anyway
 
-	if (($articleName eq "upstream_sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) {
-
+	if (($articleName eq "upstream_sequences") || (isCollectionArticle ($DOM))) {
+	
 	    if (isSimpleArticle ($DOM)) {
-
-		print STDERR "sequences tag is a simple article, should be a collection...\n";
-		exit 1;
-	    }
-	    elsif (isCollectionArticle ($DOM)) {
-
-		if ($_debug) {
-		    print STDERR "sequences is a collection article...\n";
-		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		}
-
-		my @sequence_articles_DOM = getCollectedSimples ($DOM);
-
-		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
-		    %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
-		}
-	    }
-	    else {
-		print STDERR "It is not a simple or collection article...\n";
-		print STDERR "DOM: " . $DOM->toString() . "\n";
+		my $note = "Received a simple input article instead of a collection one";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "upstream_sequences",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 
+	    if ($_debug) {
+		print STDERR "sequences is a collection article...\n";
+		print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+	    }
+	    
+	    # Validate the type of the simples in the collection - should all be NucleotideSequence objects
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "GenericSequence");
+	    if (!$rightType) {
+		my $note = "Expecting a GenericSequence object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "upstream_sequences",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	    
+	    my @sequence_articles_DOM = getCollectedSimples ($DOM);
+	    
+	    foreach my $sequence_article_DOM (@sequence_articles_DOM) {
+		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
+	    }
+	    
 	} # End parsing sequences article tag
-
+	if (isSimpleArticle ($DOM)) {
+	    my $note = "Received a simple input article instead of a collection";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "upstream_sequences",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
     } # Next article
 
     # Check that we have parsed properly the sequences
 
     if ((keys (%sequences)) == 0) {
-	print STDERR "Error, can't parsed any sequences...\n";
+	my $note = "can't parsed any sequences...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
-
-    my $output_article_name = "meme_predictions";
-
+    
     if ($_debug) {
 	print STDERR "making a simple response\n";
     }
@@ -290,8 +345,9 @@ sub _do_query_Meme {
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio
     # la podriamos realizar en una funcion a parte si fuese compleja.
-
-    my $input = <<PRT;
+    
+    if (defined $report) {
+	my $input = <<PRT;
 <moby:$_output_format namespace='' id=''>
 <![CDATA[
 $report
@@ -299,6 +355,12 @@ $report
 </moby:$_output_format>
 PRT
 
+        $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);
+    }
+    else {
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+    }
+    
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero
     # en este caso disponemos de una funcion que lo realiza. Si tuvieramos
@@ -307,18 +369,17 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
 
-    $MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
-
-   return ($MOBY_RESPONSE, $moby_exceptions);
+    return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
 sub _do_query_MemeMotifMatrices {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby
     my $queryInput_DOM = shift @_;
-    my $_output_format        = shift @_;
+    my $_output_format = shift @_;
 
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $output_article_name = "meme_matrices";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $matrix_mode;
@@ -339,7 +400,7 @@ sub _do_query_MemeMotifMatrices {
 
     # Add the parsed parameters in a hash table
 
-    $parameters{matrix_mode}    = $matrix_mode;
+    $parameters{matrix_mode} = $matrix_mode;
 
     if ($_debug) {
 	print STDERR "matrix mode, $matrix_mode\n";
@@ -366,7 +427,28 @@ sub _do_query_MemeMotifMatrices {
 		print STDERR "meme_predictions...\n";
 		print STDERR "Simple article DOM: " . $DOM->toString() . "\n";
 	    }
+	    
+	    if (isCollectionArticle ($DOM)) {
+		my $note = "Received a collection input article instead of a simple one";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "meme_predictions",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
 
+	    # Validation ...
+	    
 	    $meme_predictions = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
 
 	    if ($_debug) {
@@ -375,8 +457,22 @@ sub _do_query_MemeMotifMatrices {
 
 	}
 	if (isCollectionArticle ($DOM)) {
-	    print STDERR "Error, collection input are not expected!\n";
-	    exit 0;
+	    my $note = "Received a collection input article instead of a simple one";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "meme_predictions",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
     }
 
@@ -392,12 +488,11 @@ sub _do_query_MemeMotifMatrices {
     # la podriamos realizar en una funcion a parte si fuese compleja.
 
     my $output_object_type  = "$_output_format";
-    my $output_article_name = "meme_matrices";
     my $namespace = "";
     
     if (not defined $matrices_aref) {
 	# Return an emtpy message !
-	$MOBY_RESPONSE .= simpleResponse (undef, $output_article_name, $queryID);
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";	
 	return $MOBY_RESPONSE;
     }
     
@@ -419,7 +514,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
     
-    $MOBY_RESPONSE .= simpleResponse($meme_matrix_object, $output_article_name, $queryID);
+    $MOBY_RESPONSE = simpleResponse($meme_matrix_object, $output_article_name, $queryID);
     return ($MOBY_RESPONSE, $moby_exceptions);
     
 }

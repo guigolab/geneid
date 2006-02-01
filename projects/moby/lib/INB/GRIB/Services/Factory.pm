@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.60 2006-01-31 17:38:14 gmaster Exp $
+# $Id: Factory.pm,v 1.61 2006-02-01 14:10:31 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -889,7 +889,7 @@ sub MatScan_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     my ($matrix_fh, $matrix_file);
@@ -966,7 +966,7 @@ sub MatScan_call {
 								      queryID    => $queryID,
 								      message    => "$note",
 								      );
-	    return ("", [$moby_exception]);
+	    return (undef, [$moby_exception]);
 	}
 
     }
@@ -980,7 +980,7 @@ sub MatScan_call {
 	# could well be possible if the input matrix set is empty, ie if MEME didn't predict any !!
 	# But i guess in that case, no need to go up there, validation will be done before MatScan_call
 	print STDERR "Internal System Error. No defined matrix file!\n";
-	return ("", []);
+	return (undef, []);
     }
 
     # Generate a temporary file locally with the sequence(s) in FASTA format
@@ -1000,7 +1000,7 @@ sub MatScan_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     # Bioperl sequence factory
@@ -1035,7 +1035,7 @@ sub MatScan_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     if ($debug) {
@@ -1056,9 +1056,17 @@ sub MatScan_call {
 	return ($matscan_output, $moby_exceptions);
     }
     else {
-	print STDERR "Internal System Error. Matscan_output defined!\n";
-	return ("", $moby_exceptions);
-
+	my $note = "Internal System Error. MatScan has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
     }
 }
 
@@ -1101,7 +1109,7 @@ sub MetaAlignment_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     if ($output_format eq "GFF") {
@@ -1126,7 +1134,7 @@ sub MetaAlignment_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
     print FILE $map1;
     close FILE;
@@ -1149,7 +1157,7 @@ sub MetaAlignment_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
     print FILE $map2;
     close FILE;
@@ -1188,7 +1196,7 @@ sub MetaAlignment_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
@@ -1222,8 +1230,17 @@ sub MetaAlignment_call {
 	return ($meta_output, $moby_exceptions);
     }
     else {
-	print STDERR "Internal System Error. Meta_output not defined!\n";
-	return ("", $moby_exceptions);
+	my $note = "Internal System Error. Meta-alignment has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
     }
 }
 
@@ -1346,7 +1363,7 @@ sub MEME_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
     
     # Setting up the MEME parameters
@@ -1435,7 +1452,7 @@ sub MEME_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
     
     # Get the alphabet
@@ -1517,7 +1534,7 @@ sub MEME_call {
 								      queryID    => $queryID,
 								      message    => "$note",
 								      );
-	    return ([], [$moby_exception]);
+	    return (undef, [$moby_exception]);
 	}
 	
 	if (-z $bfile) {
@@ -1544,8 +1561,17 @@ sub MEME_call {
 	return ($meme_output, $moby_exceptions);
     }
     else {
-	print STDERR "Internal System Error. Meme_output not defined!\n";
-	return ("", $moby_exceptions);
+	my $note = "Internal System Error. MEME has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
     }
 }
 
@@ -1584,7 +1610,7 @@ sub meme2matrix_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
     
     if ($matrix_mode eq "raw format") {
@@ -1612,7 +1638,7 @@ sub meme2matrix_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ([], [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
     
     if ($_debug) {
@@ -1628,6 +1654,20 @@ sub meme2matrix_call {
     # Return an array of matrices from the output (which is a string)
     # Because we want to return a collection of text-formatted objects (each object containing a matrix)
     # So better to return an array rather than just a string
+
+    if (! defined $matrices_output) {
+	my $note = "Internal System Error. the parsing of MEME data has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
+    }
 
     # To split the matrices, check which position they start, ie chech th position of 'MEME'
     my @positions = ();
@@ -1666,7 +1706,16 @@ sub meme2matrix_call {
     else {
 	# It's not an error, it is a warning !!
 	# it can be normal not find find motifs !!
-	print STDERR "meme2matrix didn't parsed any motif matrix from meme data file!\n";
+	my $note = "meme2matrix didn't find any motif matrix in meme data file!\n";
+	print STDERR "$note\n";
+	my $code = 700;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'warning',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
 	return ([], $moby_exceptions);
     }
 

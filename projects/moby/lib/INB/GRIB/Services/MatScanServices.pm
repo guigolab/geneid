@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.14 2006-01-31 10:37:05 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.15 2006-02-01 14:10:31 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -197,6 +197,7 @@ sub _do_query_MatScan {
 
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $output_article_name = "matscan_predictions";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $matrix;
@@ -261,18 +262,60 @@ sub _do_query_MatScan {
 	# Si le hemos puesto nombre a los articulos del servicio,
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
-
+	
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of MatScan, it doesn't really matter as there is only one input anyway
 
 	if (($articleName eq "upstream_sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) {
 
 	    if (isSimpleArticle ($DOM)) {
-
+		
 		if ($_debug) {
 		    print STDERR "sequences tag is a simple article...\n";
 		}
+		
+		if ($_input_type eq "collection") {
+		    
+		    # not allowed
+		    
+		    my $note = "Received a collection input article instead of a simple";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "upstream_sequences",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
 
+		# Validate the type
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		if (!$rightType) {
+		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "upstream_sequences",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
 		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
@@ -281,18 +324,60 @@ sub _do_query_MatScan {
 		    print STDERR "sequences is a collection article...\n";
 		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		}
-
+		
+		if ($_input_type eq "simple") {
+		    # is it allowed ? - check this out
+		    # at the moment - disallow this !!
+		    # Anyway the client is supposed to deal with this before the execution of the service
+		    
+		    my $note = "Received a simple input article instead of a collection";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "upstream_sequences",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Return an empty moby data object, as well as an exception telling what nothing got returned
+		    
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
+		# Validate the type of the simples in the collection - should all be NucleotideSequence objects
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		if (!$rightType) {
+		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "upstream_sequences",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
-
 		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
 		   %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
 		}
 	    }
 	    else {
-		print STDERR "It is not a simple or collection article...\n";
+		print STDERR "not supposed to ge here!\n";
+		print STDERR "not a simple or a collection, what is it there then!!\n";
 		print STDERR "DOM: " . $DOM->toString() . "\n";
 	    }
-
 	} # End parsing sequences article tag
 
     } # Next article
@@ -300,14 +385,24 @@ sub _do_query_MatScan {
     # Check that we have parsed properly the sequences
 
     if ((keys (%sequences)) == 0) {
-	print STDERR "Error, can't parsed any sequences...\n";
+	my $note = "can't parsed any sequences...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
-
-    my $output_article_name = "matscan_predictions";
-
+    
     if ($_input_type eq "simple") {
 
 	if ($_debug) {
@@ -321,15 +416,23 @@ sub _do_query_MatScan {
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio
 	# la podriamos realizar en una funcion a parte si fuese compleja.
 
-	my ($sequenceIdentifier) = keys (%sequences);
+	if (defined $report) {
+	    my ($sequenceIdentifier) = keys (%sequences);
 
-	my $input = <<PRT;
+	    my $input = <<PRT;
 <moby:$_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[
 $report
 ]]>
 </moby:$_format>
 PRT
+
+            $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);   
+	}
+	else {
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	}
+	
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
 	# volver a encapsularlo en un objeto biomoby de respuesta. Pero
 	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos
@@ -338,8 +441,6 @@ PRT
 	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
 	# el mismo que el de la query.
 
-	$MOBY_RESPONSE .= simpleResponse($input, $output_article_name, $queryID);
-	
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     elsif ($_input_type eq "collection") {
@@ -353,9 +454,12 @@ PRT
 	my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters, debug => $_debug);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 
-	my $output_objects;
 	if (defined $report) {
-	    $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+	    my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+	    $MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
+	}
+	else {
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	}
 
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -366,15 +470,8 @@ PRT
 	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
 	# el mismo que el de la query.
 
-	$MOBY_RESPONSE .= collectionResponse($output_objects, $output_article_name, $queryID);
-
 	return ($MOBY_RESPONSE, $moby_exceptions);
 
-    }
-    else {
-	# Don't know the type, don't know what to return !
-	print STDERR "_input_type unknown (should be setup as being simple or collection)\n";
-	exit 1;
     }
 }
 
@@ -401,6 +498,7 @@ sub _do_query_MatScanVsInputMatrix {
 
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $output_article_name = "matscan_predictions";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $threshold;
@@ -453,20 +551,29 @@ sub _do_query_MatScanVsInputMatrix {
 
 	my ($articleName, $DOM) = @{$article}; # get the named article
 
-	# Si le hemos puesto nombre a los articulos del servicio,
-	# podemos recoger a traves de estos nombres el valor.
-	# Sino sabemos que es el input articulo porque es un simple/collection articulo
-
-	if (($articleName eq "upstream_sequences") || isCollectionArticle ($DOM)) {
+	if ($articleName eq "upstream_sequences") {
 
 	    if (isSimpleArticle ($DOM)) {
 
-		if ($_debug) {
-		    print STDERR "sequences tag is a simple article...\n";
-		    print STDERR "requires a collection...\n";
-		    exit 0;
-		}
-
+		# not allowed
+		
+		my $note = "Received a simple input article instead of a collection";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "upstream_sequences",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		return ($MOBY_RESPONSE, $moby_exceptions);
+		
 		# %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
@@ -475,9 +582,28 @@ sub _do_query_MatScanVsInputMatrix {
 		    print STDERR "sequences is a collection article...\n";
 		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		}
+		
+		# Validate the type of the simples in the collection - should all be NucleotideSequence objects
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		if (!$rightType) {
+		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "upstream_sequences",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
 
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
-
 		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
 		   %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
 		}
@@ -488,8 +614,8 @@ sub _do_query_MatScanVsInputMatrix {
 	    }
 
 	} # End parsing sequences article tag
-	elsif (($articleName eq "matrix") || isSimpleArticle ($DOM)) {
-	    # Must be the matrix !
+	elsif ($articleName eq "matrix") {
+	    
 	    $matrix = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
 
 	    if (not defined $matrix) {
@@ -508,20 +634,36 @@ sub _do_query_MatScanVsInputMatrix {
     # Check that we have parsed properly the sequences
 
     if ((keys (%sequences)) == 0) {
-	print STDERR "Error, can't parsed any sequences...\n";
+	my $note = "can't parsed any sequences...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
-
-    my $output_article_name = "matscan_predictions";
-
+    
     # The input was a collection of Sequences, so we have to return a collection of GFF objects
-
+    
     my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, matrix => $matrix, format => $_format, parameters => \%parameters, debug => $_debug);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
-    
-    my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+
+    if (defined $report) {
+	my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+	$MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
+    }
+    else {
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+    }
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero
@@ -530,8 +672,6 @@ sub _do_query_MatScanVsInputMatrix {
     # a collection response.
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
-
-    $MOBY_RESPONSE .= collectionResponse($output_objects, $output_article_name, $queryID);
 
     return ($MOBY_RESPONSE, $moby_exceptions);
 }

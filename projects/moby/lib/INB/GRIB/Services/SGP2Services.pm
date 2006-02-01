@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.9 2006-01-31 17:38:14 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.10 2006-02-01 14:10:31 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -211,6 +211,7 @@ sub _do_query_SGP2 {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "sequences",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -229,6 +230,24 @@ sub _do_query_SGP2 {
 		# Get the sequence
 		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 		
+		if (keys (%sequences) == 0) {
+		    my $note = "Couldn't parse any sequence";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "sequences",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
 	    }
 	    elsif ($articleName eq "tblastx") {
 		
@@ -240,10 +259,11 @@ sub _do_query_SGP2 {
 
 		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Blast-Text");
 		if (!$rightType) {
-		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    my $note = "Expecting a Blast-Text object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "tblastx",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -262,8 +282,21 @@ sub _do_query_SGP2 {
 	    	$tblastx_output = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "Blast-Text");
 		
 		if (length ($tblastx_output) < 1) {
-		    print STDERR "can't get the tblastx output!\n";
-		    exit 0;
+		    my $note = "Couldn't parse any tblastx data";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "tblastx",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 	    }
 	} # Next article
