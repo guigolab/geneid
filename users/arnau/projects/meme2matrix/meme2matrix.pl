@@ -66,4 +66,10 @@ close FILE;
 if ($_debug) {
     print STDERR "matrices:\n";
 }
-print join ("\n", @$matrices);
+
+if (@$matrices > 0) {
+    print join ("\n", @$matrices);
+}
+else {
+    print "";
+}
