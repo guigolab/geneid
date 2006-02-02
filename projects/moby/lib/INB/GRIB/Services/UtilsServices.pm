@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.18 2006-01-31 10:37:05 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.19 2006-02-02 17:22:57 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -156,6 +156,7 @@ sub _do_query_TranslateGeneIDGFF {
     
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $output_article_name = "peptides";
     
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $translation_table = "Standard (1)";
@@ -210,115 +211,87 @@ sub _do_query_TranslateGeneIDGFF {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 
-	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
-	# In case of GeneID, it doesn't really matter as there is only one input anyway
+	if (isCollectionArticle ($DOM)) {
+	    # collection input is not allowed
+	    
+	    my $note = "Received a collection input article instead of a simple";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "$articleName",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
 	
 	if ($articleName eq "sequences") { 
 	    
-	    if (isSimpleArticle ($DOM)) {
-
-		if ($_debug) {
-		    print STDERR "\"sequences\" tag is a simple article...\n";
-		}
-
-                %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
-
+	    if ($_debug) {
+		print STDERR "\"sequences\" tag is a simple article...\n";
 	    }
-	    elsif (isCollectionArticle ($DOM)) {
-
-		if ($_debug) {
-		    print STDERR "sequences is a collection article...\n";
-		    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		}
-
-		my @sequence_articles_DOM = getCollectedSimples ($DOM);
+	    
+	    # Validate the type
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+	    if (!$rightType) {
+		my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "$articleName",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
 		
-		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
-		    %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
-		}
-		
+		# Empty response
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
-	    else {
-		print STDERR "It is not a simple or collection article...\n";
-		print STDERR "DOM: " . $DOM->toString() . "\n";
-	    }
+	    
+	    %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
+	    
 	} # End parsing sequences article tag
 	
 	if ($articleName eq "geneid_predictions") {
 	    
-	    if (isSimpleArticle ($DOM)) {
-		
-		if ($_debug) {
-		    print STDERR "\"geneid_predictions\" tag is a simple article...\n";
-		    print STDERR "node ref, " . ref ($DOM) . "\n";
-		    print STDERR "DOM: " . $DOM->toString () . "\n";
-		}
-		
-		my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
-		
-		if ((not defined $sequenceIdentifier) || (length ($sequenceIdentifier) == 0)) {
-		    print STDERR "Error, can not parsed the sequence identifier the GFF is attach to!\n";
-		    exit 0;
-		}
-		
-		if ($_debug) {
-		    print STDERR "parsed the following sequence identifier, $sequenceIdentifier\n";
-		}
-		
-		my $prediction = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
-		
-		if ($_debug) {
-		    print STDERR "prediction, $prediction\n";
-		}
-
-		# Add the predictions data into a hash table
-		
-		$predictions{$sequenceIdentifier} = $prediction;
+	    if ($_debug) {
+		print STDERR "\"geneid_predictions\" tag is a simple article...\n";
+		print STDERR "node ref, " . ref ($DOM) . "\n";
+		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
-	    elsif (isCollectionArticle ($DOM)) {
-		
-		if ($_debug) {
-		    print STDERR "article, geneid_predictions, is a collection article...\n";
-		    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		}
-
-		my @prediction_articles_DOM = getCollectedSimples ($DOM);
-		
-		foreach my $prediction_article_DOM (@prediction_articles_DOM) {
-		    
-		    if ($_debug) {
-			print STDERR "node ref, " . ref ($prediction_article_DOM) . "\n";
-			print STDERR "DOM: " . $prediction_article_DOM->toString () . "\n";
-		    }
-		    
-		    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $prediction_article_DOM ] );
-
-		    if ((not defined $sequenceIdentifier) || (length ($sequenceIdentifier) == 0)) {
-			print STDERR "Error, can not parsed the sequence identifier the GFF is attach to!\n";
-			exit 0;
-		    }
-		    
-		    if ($_debug) {
-			print STDERR "parsed the following sequence identifier, $sequenceIdentifier\n";
-		    }
-		    
-		    my $prediction = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
-		    
-		    if ($_debug) {
-			print STDERR "prediction, $prediction\n";
-		    }
-		    
-		    # Add the predictions data into a hash table
-		    
-		    $predictions{$sequenceIdentifier} = $prediction;
-		    
-		}
-		
+	    
+	    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
+	    
+	    if ((not defined $sequenceIdentifier) || (length ($sequenceIdentifier) == 0)) {
+		print STDERR "Error, can not parsed the sequence identifier the GFF is attach to!\n";
+		print STDERR "GFF object - 'id' attribute not set!\n";
+		exit 1;
 	    }
-	    else {
-		print STDERR "It is not a simple or collection article...\n";
-		print STDERR "DOM: " . $DOM->toString() . "\n";
+	    
+	    if ($_debug) {
+		print STDERR "parsed the following sequence identifier, $sequenceIdentifier\n";
 	    }
+	    
+	    my $prediction = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
+	    
+	    if ($_debug) {
+		print STDERR "prediction, $prediction\n";
+	    }
+	    
+	    # Add the predictions data into a hash table
+	    
+	    $predictions{$sequenceIdentifier} = $prediction;
+	    
 	} # End parsing predictionss article tag
 	
     } # Next article
@@ -326,14 +299,40 @@ sub _do_query_TranslateGeneIDGFF {
     # Check that we have parsed properly the sequences and the predictions
     
     if ((keys (%sequences)) == 0) {
-	print STDERR "Error, can't parsed any sequences...\n";
+	my $note = "can't parse any sequences...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "sequences",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     if ((keys (%predictions)) == 0) {
-	print STDERR "Error, can't parsed any predictions...\n";
+	my $note = "can't parse any GeneID predictions...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "geneid_predictions",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
-    # la funcion que nos devuelve el report. 	
+    # la funcion que nos devuelve el report.
     
     my ($fasta_sequences, $moby_exceptions_tmp) = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, queryID => $queryID, parameters => \%parameters);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
@@ -343,12 +342,10 @@ sub _do_query_TranslateGeneIDGFF {
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
     my $output_object_type  = "AminoAcidSequence";
-    my $output_article_name = "peptides";
     my $namespace = "";
     
     if (not defined $fasta_sequences) {
-	# emtpy message !
-	$MOBY_RESPONSE .= collectionResponse (undef, $output_article_name, $queryID);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
     }
     else {
 	my $aminoacid_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type, $namespace);
@@ -361,7 +358,7 @@ sub _do_query_TranslateGeneIDGFF {
 	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
 	# el mismo que el de la query. 
 	
-	$MOBY_RESPONSE .= collectionResponse($aminoacid_objects, $output_article_name, $queryID);
+	$MOBY_RESPONSE = collectionResponse($aminoacid_objects, $output_article_name, $queryID);
     }
     
     return ($MOBY_RESPONSE, $moby_exceptions);
@@ -400,11 +397,13 @@ sub _do_query_fromGenericSequencestoFASTA {
     
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $output_article_name = "sequences";
     
     my $seqobjs = [];
     
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
+    my $namespace = "";
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
@@ -433,6 +432,15 @@ sub _do_query_fromGenericSequencestoFASTA {
 		    print STDERR "\"sequences\" tag is a simple article...\n";
 		}
 		
+		# Get the namespace
+		
+		($namespace) = INB::GRIB::Utils::CommonUtilsSubs->getNamespace ($DOM);
+		
+		if (!defined $namespace) {
+		    print STDERR "namespace not defined\n";
+		    $namespace = "";
+		}
+		
                 my $seqobj = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOMintoBioperlObject ($DOM);
 		push (@$seqobjs, $seqobj);
 		
@@ -442,6 +450,25 @@ sub _do_query_fromGenericSequencestoFASTA {
 		if ($_debug) {
 		    print STDERR "sequences is a collection article...\n";
 		    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		}
+
+		# Get the namespace
+		
+		my @namespaces = INB::GRIB::Utils::CommonUtilsSubs->getNamespace ($DOM);
+		if (@namespaces > 1) {
+		    my $note = "Collection contains sequence objects belonging to more than one namespace. Returning a FASTA object with an empty namespace\n";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      code       => $code,
+									      type       => 'warning',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		}
+		else {
+		    ($namespace) = @namespaces;
 		}
 		
 		my @sequence_articles_DOM = getCollectedSimples ($DOM);
@@ -463,11 +490,22 @@ sub _do_query_fromGenericSequencestoFASTA {
     # Check that we have parsed properly the sequences and the predictions
     
     if (@$seqobjs == 0) {
-	print STDERR "Error, can't parsed any sequences...\n";
+	my $note = "can't parse any sequences...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
-    # la funcion que nos devuelve el report. 	
+    # la funcion que nos devuelve el report.
     
     my $fasta_sequences = convertSequencesIntoFASTA ($seqobjs);
     
@@ -475,24 +513,39 @@ sub _do_query_fromGenericSequencestoFASTA {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
     
-    my $moby_output_format  = "FASTA";
-    my $output_article_name = "sequences";
-    my $namespace = "";
-
-    my $sequenceIdentifier = "";
-    # Specify the sequence identifier only in case there is only one sequence in the FASTA output
-    if (@$seqobjs == 1) {
-	my $seqobj = $seqobjs->[0];
-	$sequenceIdentifier = $seqobjs->[0]->display_id;
+    if (not defined $fasta_sequences) {
+	my $note = "sequences conversion into FASTA format failed\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-    
-    my $fasta_object = <<PRT;
-<moby:$moby_output_format namespace='' id='$sequenceIdentifier'>
+    else {
+	my $moby_output_format  = "FASTA";	
+	my $sequenceIdentifier = "";
+	# Specify the sequence identifier only in case there is only one sequence in the FASTA output
+	if (@$seqobjs == 1) {
+	    my $seqobj = $seqobjs->[0];
+	    $sequenceIdentifier = $seqobjs->[0]->display_id;
+	}
+	
+	my $fasta_object = <<PRT;
+<moby:$moby_output_format namespace='$namespace' id='$sequenceIdentifier'>
 <![CDATA[
 $fasta_sequences
 ]]>
 </moby:$moby_output_format>
 PRT
+ 
+        $MOBY_RESPONSE = simpleResponse($fasta_object, $output_article_name, $queryID);
+    }
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
@@ -502,8 +555,6 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query. 
 
-    $MOBY_RESPONSE .= simpleResponse($fasta_object, $output_article_name, $queryID);
-	
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
@@ -546,11 +597,13 @@ sub _do_query_fromFASTAtoMobySequences {
     
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $output_article_name = "sequences";
     
     my $fasta_seqs;
     
-    my $queryID  = getInputID ($queryInput_DOM);
-    my @articles = getArticles($queryInput_DOM);
+    my $queryID   = getInputID ($queryInput_DOM);
+    my @articles  = getArticles($queryInput_DOM);
+    my $namespace = "";
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {
@@ -567,51 +620,64 @@ sub _do_query_fromFASTAtoMobySequences {
 	# Si le hemos puesto nombre a los articulos del servicio,  
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple articulo
+
+	if (isCollectionArticle ($DOM)) {
+	    # not allowed
+		    
+	    my $note = "Received a collection input article instead of a simple";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "$articleName",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
 	
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
-	# In case of GeneID, it doesn't really matter as there is only one input anyway
-	
+
 	if (((defined $articleName) && ($articleName eq "sequences")) || isSimpleArticle ($DOM)) {
+
+	    # Get the namespace
 	    
-	    if (isSimpleArticle ($DOM)) {
-		
-		if ($_debug) {
-		    print STDERR "\"sequences\" tag is a simple article...\n";
-		    print STDERR "stringified DOM, " . $DOM->toString () . "\n";
-		}
-		
-		$fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "FASTA");
-		if ((not defined $fasta_seqs) || ($fasta_seqs eq "")) {
-		    $fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
-		}		
-	    }
-	    elsif (isCollectionArticle ($DOM)) {
-		print STDERR "sequences is a collection article...\n";
-		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		print STDERR "should be receiving a simple article\n";
-		exit 0;
+	    my @namespaces = INB::GRIB::Utils::CommonUtilsSubs->getNamespace ($DOM);
+	    if (@namespaces > 1) {
+		my $note = "Collection contains sequence objects belonging to more than one namespace. Returning a FASTA object with an empty namespace\n";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  code       => $code,
+									  type       => 'warning',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
 	    }
 	    else {
-		print STDERR "It is not a simple or collection article...\n";
-		print STDERR "DOM: " . $DOM->toString() . "\n";
-		exit 0;
+		($namespace) = @namespaces;
 	    }
-	}
-	elsif (isCollectionArticle ($DOM)) {
-	    print STDERR "input is a collection article...\n";
-	    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-	    print STDERR "should be receiving a simple article\n";
-	    exit 0;
-	} # End parsing sequences article tag
-	else {
-	    print STDERR "nothing I know of,\n";
-	    print STDERR "$DOM\n";
+	    
+	    if ($_debug) {
+		print STDERR "\"sequences\" tag is a simple article...\n";
+		print STDERR "stringified DOM, " . $DOM->toString () . "\n";
+	    }
+	    
+	    $fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "FASTA");
+	    if ((not defined $fasta_seqs) || ($fasta_seqs eq "")) {
+		$fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
+	    }
 	}
     } # Next article
     
     # Parse the FASTA sequences
-    
-    my $namespace = "";
     
     if ($_debug) {
 	print STDERR "fasta sequences,\n$fasta_seqs.\n";
@@ -622,11 +688,23 @@ sub _do_query_fromFASTAtoMobySequences {
     # Check that we have parsed properly the sequences
     
     if (@$seqobjs == 0) {
-	print STDERR "Error, can't parsed any sequences...\n";
+	my $note = "can't parse any sequences...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "sequences",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    my $output_article_name = "sequences";
-    $MOBY_RESPONSE .= collectionResponse($seqobjs, $output_article_name, $queryID);
+    $MOBY_RESPONSE = collectionResponse($seqobjs, $output_article_name, $queryID);
     
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
@@ -668,14 +746,16 @@ sub _do_query_generateScoreMatrix {
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $input_format;
     my $output_format;
-        
+    my $output_article_name = "score_matrix";
+    
     # Variables that will be passed to generateScoreMatrix_call
     
     my %parameters;
     my $input_data = [];
     my $queryID    = getInputID ($queryInput_DOM);
     my @articles   = getArticles($queryInput_DOM);
-    
+    my $namespace = "";
+        
     # Get the parameters
     
     ($input_format)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "input format");
@@ -716,7 +796,7 @@ sub _do_query_generateScoreMatrix {
 	# y su texto xml. 
 	
 	my ($articleName, $DOM) = @{$article}; # get the named article
-
+	
 	if ($_debug) {
 	    print STDERR "processing article, $articleName...\n";
 	}
@@ -725,14 +805,30 @@ sub _do_query_generateScoreMatrix {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 
-	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
-
+	if (isSimpleArticle ($DOM)) {
+	    # simple input is not allowed
+	    
+	    my $note = "Received a simple input article instead of a collection";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "$articleName",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+	
+	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input
+	
 	if ((isCollectionArticle ($DOM)) || (defined ($articleName) && ($articleName eq "similarity_results"))) {
-
-	    if (isSimpleArticle($DOM)) {
-		print STDERR "problem, input article is simple - should be a collection!!!\n";
-		exit 0;
-	    }
 	    
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
@@ -762,25 +858,48 @@ sub _do_query_generateScoreMatrix {
 	}	
 	
     } # Next article
-
+    
+    if ($input_data eq "") {
+	my $note = "can't parse any pairwise similarity data...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "similarity_results",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     my ($matrix, $moby_exceptions_tmp) = generateScoreMatrix_call (similarity_results  => $input_data, queryID => $queryID, parameters => \%parameters);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
-		    
-    my $namespace = "";
     
-    # Build the Moby object
-    
-    my $output_object = <<PRT;
+    if (defined $matrix) {
+	
+	# Build the Moby object
+	
+	my $output_object = <<PRT;
 <moby:$_moby_output_format namespace='$namespace' id=''>
 <![CDATA[
 $matrix
 ]]>
 </moby:$_moby_output_format>
 PRT
+
+        $MOBY_RESPONSE = simpleResponse($output_object, $output_article_name, $queryID);
+    }
+    else {
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+    }
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
@@ -789,9 +908,6 @@ PRT
     # a collection response. 
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
     # el mismo que el de la query.
-    
-    my $output_article_name = "score_matrix";
-    $MOBY_RESPONSE .= simpleResponse($output_object, $output_article_name, $queryID);
     
     return ($MOBY_RESPONSE, $moby_exceptions);
 }

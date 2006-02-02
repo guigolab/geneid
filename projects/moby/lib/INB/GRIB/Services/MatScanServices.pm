@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.16 2006-02-02 09:50:38 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.17 2006-02-02 17:22:57 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -292,7 +292,7 @@ sub _do_query_MatScan {
 		    
 		    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 
@@ -311,8 +311,8 @@ sub _do_query_MatScan {
 									      );
 		    push (@$moby_exceptions, $moby_exception);
 		    
-		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    # Empty response
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
@@ -344,7 +344,7 @@ sub _do_query_MatScan {
 		    
 		    # Return an empty moby data object, as well as an exception telling what nothing got returned
 		    
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
@@ -362,9 +362,8 @@ sub _do_query_MatScan {
 									      message    => "$note",
 									      );
 		    push (@$moby_exceptions, $moby_exception);
-		    
-		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
@@ -379,11 +378,11 @@ sub _do_query_MatScan {
 		print STDERR "DOM: " . $DOM->toString() . "\n";
 	    }
 	} # End parsing sequences article tag
-
+	
     } # Next article
-
+    
     # Check that we have parsed properly the sequences
-
+    
     if ((keys (%sequences)) == 0) {
 	my $note = "can't parsed any sequences...\n";
 	print STDERR "$note\n";
@@ -396,29 +395,34 @@ sub _do_query_MatScan {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	if ($_input_type eq "simple") {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	}
+	else {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	}
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-
+    
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
     
     if ($_input_type eq "simple") {
-
+	
 	if ($_debug) {
 	    print STDERR "making a simple response\n";
 	}
-
+	
 	my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters, debug => $_debug);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio
 	# la podriamos realizar en una funcion a parte si fuese compleja.
-
+	
 	if (defined $report) {
 	    my ($sequenceIdentifier) = keys (%sequences);
-
+	    
 	    my $input = <<PRT;
 <moby:$_format namespace='' id='$sequenceIdentifier'>
 <![CDATA[
@@ -430,7 +434,7 @@ PRT
             $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);   
 	}
 	else {
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	}
 	
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -459,7 +463,7 @@ PRT
 	    $MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
 	}
 	else {
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	}
 
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -571,7 +575,7 @@ sub _do_query_MatScanVsInputMatrix {
 		
 		# Return an empty moby data object, as well as an exception telling what nothing got returned
 		
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 		
 		# %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
@@ -599,7 +603,7 @@ sub _do_query_MatScanVsInputMatrix {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 
@@ -645,7 +649,7 @@ sub _do_query_MatScanVsInputMatrix {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
@@ -662,7 +666,7 @@ sub _do_query_MatScanVsInputMatrix {
 	$MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
     }
     else {
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
     }
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda

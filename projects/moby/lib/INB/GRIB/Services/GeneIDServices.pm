@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.20 2006-02-02 09:50:38 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.21 2006-02-02 17:22:57 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -422,7 +422,7 @@ sub _do_query_GeneID {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	# taverna doesn't setup the articlename nicely, so let them not specify it - as there is only one article, no big deal !
@@ -449,7 +449,7 @@ sub _do_query_GeneID {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		else {
@@ -477,7 +477,7 @@ sub _do_query_GeneID {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -509,7 +509,7 @@ PRT
         $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);   
     }
     else {
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
     }
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda

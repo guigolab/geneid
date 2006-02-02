@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.11 2006-02-02 09:50:38 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.12 2006-02-02 17:22:57 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -194,7 +194,7 @@ sub _do_query_SGP2 {
 		
 		# Return an empty moby data object, as well as an exception telling what nothing got returned
 		
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
@@ -220,7 +220,7 @@ sub _do_query_SGP2 {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		else {
@@ -244,7 +244,7 @@ sub _do_query_SGP2 {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
@@ -272,7 +272,7 @@ sub _do_query_SGP2 {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		else {
@@ -295,7 +295,7 @@ sub _do_query_SGP2 {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 	    }
@@ -331,7 +331,7 @@ PRT
             $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);
         }
 	else {
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	}
 	
         # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda

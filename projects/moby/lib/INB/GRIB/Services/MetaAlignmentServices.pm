@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.15 2006-02-02 09:50:38 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.16 2006-02-02 17:22:57 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -236,7 +236,7 @@ sub _do_query_MetaAlignment {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	
@@ -311,7 +311,7 @@ sub _do_query_MetaAlignment {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     if (not defined $map2 || (length $map1 < 1)) {
@@ -329,7 +329,7 @@ sub _do_query_MetaAlignment {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -365,7 +365,7 @@ PRT
 	
 	print STDERR "meta output not defined\n";
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
     }
     
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -494,7 +494,7 @@ sub _do_query_MultiMetaAlignment {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 
@@ -542,9 +542,9 @@ sub _do_query_MultiMetaAlignment {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     else {
@@ -617,6 +617,24 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
 
+    if (@$output_objects < 1) {
+	my $note = "MultiMetaAlignment didn't report any results";
+	print STDERR "$note\n";
+	my $code = "700";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'warning',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     $MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
