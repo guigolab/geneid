@@ -47,11 +47,18 @@ our @EXPORT = qw(
   &parseMobySequenceObjectFromDOMintoBioperlObject
   &convertSequencesIntoFASTA
   &validateDataType
+  &MOBY_EMPTY_RESPONSE
 );
 
 our $VERSION = '1.0';
 
 # Common subs
+
+sub MOBY_EMPTY_RESPONSE {
+    my $self = shift;
+    my ($queryID, $output_article_name) = @_;
+    return "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+}
 
 # Works for both raw text content and CDATA bloc
 
