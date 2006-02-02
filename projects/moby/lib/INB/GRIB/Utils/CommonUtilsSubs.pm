@@ -47,7 +47,10 @@ our @EXPORT = qw(
   &parseMobySequenceObjectFromDOMintoBioperlObject
   &convertSequencesIntoFASTA
   &validateDataType
+  &getNamespace
   &MOBY_EMPTY_RESPONSE
+  &MOBY_EMPTY_SIMPLE_RESPONSE
+  &MOBY_EMPTY_COLLECTION_RESPONSE
 );
 
 our $VERSION = '1.0';
@@ -58,6 +61,18 @@ sub MOBY_EMPTY_RESPONSE {
     my $self = shift;
     my ($queryID, $output_article_name) = @_;
     return "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+}
+
+sub MOBY_EMPTY_SIMPLE_RESPONSE {
+    my $self = shift;
+    my ($queryID, $output_article_name) = @_;
+    return "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+}
+
+sub MOBY_EMPTY_COLLECTION_RESPONSE {
+    my $self = shift;
+    my ($queryID, $output_article_name) = @_;
+    return "<moby:mobyData moby:queryID='$queryID'><moby:Collection moby:articleName='$output_article_name'/></moby:mobyData>";
 }
 
 # Works for both raw text content and CDATA bloc
@@ -536,6 +551,56 @@ sub validateDataType {
     }
     
     return ($rightType, $inputDataType);
+}
+
+# Return an array of all namespaces associated with a simple or a collection
+# If the collection contains simples with different namespace, then return all of them.
+
+sub getNamespace {
+    my $self = shift;
+    my ($DOM) = @_;
+    
+    # input 
+    # * DOM containing articles we want to validate the type
+    
+    my @namespaces = ();
+    my @object_nodes = ();
+    
+    if ($DOM->nodeName =~ /collection/i) {
+	my @simple_nodes = getCollectedSimples ($DOM);
+	foreach my $simple_node (@simple_nodes) {
+	    # Get the object node
+	    my ($node) = $simple_node->getElementsByTagName ('*');
+	    push (@object_nodes, $node);
+	}
+    }
+    else {
+	# it is a simple - get directly the object node from the DOM
+	my ($node) = $DOM->getElementsByTagName ('*');
+	push (@object_nodes, $node);
+    }
+    
+    foreach my $node (@object_nodes) {
+	# should be already this type !!
+	if ($node->nodeType() == ELEMENT_NODE) {
+	    my $namespace = $node->getAttributeNode ("namespace")->getValue();
+	    if (! is_in (\@namespaces, $namespace)) {
+		push (@namespaces, $namespace);
+	    }
+	}
+    }
+    
+    return @namespaces;
+}
+
+sub is_in {
+    my ($aref, $input_element) = @_;
+    foreach my $element (@$aref) {
+	if ($element eq $input_element) {
+	    return 1;
+	}
+    }
+    return 0;
 }
 
 1;
