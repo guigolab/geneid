@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.13 2006-02-01 14:10:31 gmaster Exp $
+# $Id: MemeServices.pm,v 1.14 2006-02-02 09:50:38 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -258,7 +258,7 @@ sub _do_query_Meme {
 		
 		# Return an empty moby data object, as well as an exception telling what nothing got returned
 		
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 
@@ -283,7 +283,7 @@ sub _do_query_Meme {
 		push (@$moby_exceptions, $moby_exception);
 		
 		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
@@ -309,7 +309,7 @@ sub _do_query_Meme {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
     } # Next article
@@ -328,7 +328,7 @@ sub _do_query_Meme {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
@@ -358,7 +358,7 @@ PRT
         $MOBY_RESPONSE = simpleResponse($input, $output_article_name, $queryID);
     }
     else {
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
     }
     
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -443,7 +443,7 @@ sub _do_query_MemeMotifMatrices {
 		
 		# Return an empty moby data object, as well as an exception telling what nothing got returned
 		
-		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+		$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 
@@ -471,7 +471,7 @@ sub _do_query_MemeMotifMatrices {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
     }
@@ -492,7 +492,7 @@ sub _do_query_MemeMotifMatrices {
     
     if (not defined $matrices_aref) {
 	# Return an emtpy message !
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";	
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";	
 	return $MOBY_RESPONSE;
     }
     

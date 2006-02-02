@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.14 2006-02-01 15:09:16 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.15 2006-02-02 09:50:38 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -226,7 +226,7 @@ sub _do_query_MetaAlignment {
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
-								      refElement => "map1",
+								      refElement => "$articleName",
 								      code       => $code,
 								      type       => 'error',
 								      queryID    => $queryID,
@@ -236,7 +236,7 @@ sub _do_query_MetaAlignment {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	
@@ -311,10 +311,10 @@ sub _do_query_MetaAlignment {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-    if (not defined $map2) {
+    if (not defined $map2 || (length $map1 < 1)) {
 	my $note = "could not parse any data in 'map2' article";
 	print STDERR "$note\n";
 	my $code = "201";
@@ -329,7 +329,7 @@ sub _do_query_MetaAlignment {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -494,7 +494,7 @@ sub _do_query_MultiMetaAlignment {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	    $MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 
@@ -544,7 +544,7 @@ sub _do_query_MultiMetaAlignment {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'/><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
+	$MOBY_RESPONSE = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name'/></moby:mobyData>";
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     else {
