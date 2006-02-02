@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.62 2006-02-01 15:09:16 gmaster Exp $
+# $Id: Factory.pm,v 1.63 2006-02-02 17:26:14 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -673,7 +673,7 @@ sub TranslateGeneIDPredictions_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     # Make two temporary files for both input lists of genes
@@ -724,7 +724,7 @@ sub TranslateGeneIDPredictions_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return ("", [$moby_exception]);
+	return (undef, [$moby_exception]);
     }
 
     # print STDERR "Running the following command, $_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile...\n";
@@ -740,7 +740,7 @@ sub TranslateGeneIDPredictions_call {
     }
     else {
 	print STDERR "Internal System Error. No translateGeneID_output defined!!\n";
-	return ("", $moby_exceptions);
+	return (undef, $moby_exceptions);
     }
 
 }
@@ -1281,7 +1281,7 @@ sub generateScoreMatrix_call {
 								queryID    => $queryID,
 								message    => "$note",
 								);
-      return ("", [$moby_exception]);
+      return (undef, [$moby_exception]);
   }
   
   # Generate a temporary file to store meta-alignment data
@@ -1302,7 +1302,7 @@ sub generateScoreMatrix_call {
 								queryID    => $queryID,
 								message    => "$note",
 								);
-      return ("", [$moby_exception]);
+      return (undef, [$moby_exception]);
   }
   
   # Check the file is empty ?
@@ -1323,7 +1323,7 @@ sub generateScoreMatrix_call {
   }
   else {
       print STDERR "Internal System Error. Matrix_output not defined!!\n";
-      return ("", $moby_exceptions);
+      return (undef, $moby_exceptions);
   }
 
 }
