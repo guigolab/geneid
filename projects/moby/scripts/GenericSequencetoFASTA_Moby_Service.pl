@@ -296,7 +296,26 @@ PRT
 	    # Collection
 	    
 	    # Make a collection
-	    my $xml_inputs = [$xml_input,$xml_input];
+	    
+	    my $namespace_1 = "$datasource" . "_1";
+	    my $namespace_2 = "$datasource" . "_2";
+
+	    my $namespace   = "$datasource";
+	    
+	    my $xml_input_1 = <<PRT;
+<DNASequence namespace="$namespace" id="$seq_id">
+    <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
+    <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
+</DNASequence>
+PRT
+            my $xml_input_2 = <<PRT;
+<DNASequence namespace="$namespace" id="$seq_id">
+    <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
+    <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
+</DNASequence>
+PRT
+
+	    my $xml_inputs = [$xml_input_1,$xml_input_2];
 	    
 	    $result = $Service->execute(XMLinputlist => [
 							 ["$articleName", $xml_inputs]
