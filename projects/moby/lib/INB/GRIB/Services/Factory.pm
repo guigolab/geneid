@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.63 2006-02-02 17:26:14 gmaster Exp $
+# $Id: Factory.pm,v 1.64 2006-02-02 18:00:39 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1653,7 +1653,7 @@ sub meme2matrix_call {
 
     # Comment this line if you want to keep the file...
     unlink $meme2matrix_file;
-
+    
     # Return an array of matrices from the output (which is a string)
     # Because we want to return a collection of text-formatted objects (each object containing a matrix)
     # So better to return an array rather than just a string
@@ -1671,21 +1671,33 @@ sub meme2matrix_call {
 	push (@$moby_exceptions, $moby_exception);
 	return (undef, $moby_exceptions);
     }
-
+    
     # To split the matrices, check which position they start, ie chech th position of 'MEME'
     my @positions = ();
     while ($matrices_output =~ m/MEME/g) {
 	push (@positions, pos ($matrices_output) - 4);
     }
-
+    
     if ($_debug) {
 	print STDERR "positions: @positions\n";
     }
-
+    
     if (@positions == 0) {
-	return undef;
+	# It's not an error, it is a warning !!
+	# it can be normal not find find motifs !!
+	my $note = "meme2matrix didn't find any motif matrix in meme data file!\n";
+	print STDERR "$note\n";
+	my $code = 700;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'information',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return ([], $moby_exceptions);
     }
-
+    
     my $position_1 = $positions[0];
     my $index = 1;
     while (my $position_2 = $positions[$index]) {
@@ -1714,7 +1726,7 @@ sub meme2matrix_call {
 	my $code = 700;
 	my $moby_exception = INB::Exceptions::MobyException->new (
 								  code       => $code,
-								  type       => 'warning',
+								  type       => 'information',
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
