@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.17 2006-02-02 17:22:57 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.18 2006-02-03 10:53:04 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -638,10 +638,11 @@ sub _do_query_MatScanVsInputMatrix {
     # Check that we have parsed properly the sequences
 
     if ((keys (%sequences)) == 0) {
-	my $note = "can't parsed any sequences...\n";
+	my $note = "can't parse any sequences...\n";
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => 'upstream_sequences',
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -652,7 +653,24 @@ sub _do_query_MatScanVsInputMatrix {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-
+    
+    if ($matrix eq "") {
+	my $note = "can't parse any matrix...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => 'matrix',
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
     
