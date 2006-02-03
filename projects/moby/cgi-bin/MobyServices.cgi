@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -w
 #
-# INBPerl module 
+# MobyServices dispatcher CGI script
 #
 # Initially written by Roman Roset Mayals, rroset@lsi.upc.es
 # Cared by Arnaud Kerhornou, akerhornou@imim.es
@@ -8,16 +8,20 @@
 # 
 
 use strict;
+use EnvServices;
 use FindBin qw($Bin);
 use lib "$Bin";
 use SOAP::Transport::HTTP;
-use EnvServices;
 use POSIX qw(setsid);
 
 ###############################################################################
 BEGIN {
-	load_environment();
+    load_environment();
 }
+
+# Statistics and logs managment
+use Benchmark;
+use Log::Log4perl;
 
 ###############################################################################
 
@@ -33,16 +37,15 @@ use INB::GRIB::Services::MemeServices;
 ###############################################################################
 
 sub daemonize {
-
-	my $port = shift;
-
-	open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
-	defined(my $pid = fork) or die "Can't fork: $!";
-	exit if $pid;
-	POSIX::setsid or die "Can't start a new session: $!";
-	print "[$$]Contact to SOAP server at port $port\n";
-	open STDERR, '>&STDOUT' or die "Can't dup stdout: $!";
-	umask(0);
+    my $port = shift;
+    
+    open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
+    defined(my $pid = fork) or die "Can't fork: $!";
+    exit if $pid;
+    POSIX::setsid or die "Can't start a new session: $!";
+    print "[$$]Contact to SOAP server at port $port\n";
+    open STDERR, '>&STDOUT' or die "Can't dup stdout: $!";
+    umask(0);
 }
 ###############################################################################
 
@@ -51,14 +54,39 @@ my $port      = 8081;
 my $x;
 
 if ($ARGV[0] and $ARGV[0] =~ /^--daemon$/) {
-	$port = $ARGV[1] || 8081;
-	daemonize($port);
-	$x = new SOAP::Transport::HTTP::Daemon(
-		  LocalPort => $port
-		, host      => 'localhost') or die "Can't get SOAP: $!\n";
+    $port = $ARGV[1] || 8081;
+    daemonize($port);
+    $x = new SOAP::Transport::HTTP::Daemon(
+					   LocalPort => $port,
+					   host      => 'localhost') or die "Can't get SOAP: $!\n";
 } else {
-	$x = new SOAP::Transport::HTTP::CGI || die "Can't get SOAP: $!\n";
+    $x = new SOAP::Transport::HTTP::CGI || die "Can't get SOAP: $!\n";
 }
+
+my $starttime_benchmark = Benchmark->new ();
+my $starttime;
+{
+  my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+  $year += 1900;	
+  $starttime = sprintf "%s%2.2d%2.2d%2.2d%2.2d%2.2d", $year, $mon, $mday, $hour, $min, $sec;
+}
+my $serviceName = "";
+my $URI         = "genome.imim.es";
+my $IP_address  = $ENV{REMOTE_ADDR};
+my $remote_host = $ENV{REMOTE_HOST};
+
+print STDERR "user request from remote host, $remote_host($IP_address)\n";
+print STDERR "started at, $starttime\n";
+
+# Get the service name
+
+$x->on_action(sub {
+    my $action = shift;
+    $action =~ /^([^#]+)#(\w+)/;
+    # die "SOAPAction shall match 'uri#method'\n" if $action ne join '#', @_;
+    $serviceName = $2;
+    print STDERR "executing $serviceName service hosted by service provider authority, $URI\n";
+});
 
 $x->dispatch_with({
     'http://biomoby.org/#runGeneID'    => 'INB::GRIB::Services::GeneIDServices',
@@ -84,3 +112,16 @@ $x->dispatch_with({
     'http://biomoby.org/#parseMotifMatricesfromMEME'    => 'INB::GRIB::Services::MemeServices',
 });
 $x->handle;
+
+# what else, execution status => el codigo del peor error o OK (700) si OK
+
+my $endtime_benchmark = Benchmark->new ();
+my $endtime;
+{
+  my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+  $year += 1900;	
+  $endtime = sprintf "%s%2.2d%2.2d%2.2d%2.2d%2.2d", $year, $mon, $mday, $hour, $min, $sec;
+}
+
+print STDERR "ending at, $endtime\n";
+print STDERR "\nTotal execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)), "\n";
