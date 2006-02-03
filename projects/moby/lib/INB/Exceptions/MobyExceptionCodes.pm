@@ -1,3 +1,24 @@
+#$Id: MobyExceptionCodes.pm ,v 1.1 
+# Created: 26-01-2006
+# Updated: 26-01-2006
+
+
+=head1 NAME
+
+MobyExceptionCodes
+
+=head1 DESCRIPTION
+
+Library that contains structure of exception codes and exception descriptions
+
+=head1 AUTHORS
+
+Jose Manuel Rodriguez Carrasco -jmrc@cnb.uam.es- (INB-CNB)
+
+=head1 METHODS
+
+=cut
+
 package INB::Exceptions::MobyExceptionCodes;
 
 use strict;
@@ -8,53 +29,39 @@ use strict;
 ###############################################################################
 sub getExceptionCodeDescription($);
 
-	
-##############################################################################
-# NAME: getExceptionCodeDescription
-#
-# DESCRIPTION: An exception code is received by giving input and then, 
-#		the method retrieves itself exception code and exception description.
-#		Also, if exception message input is defined, then it will be added into 
-#		exception description output.
-#		The exception error come from INB Exception Codes.
-#		See. 0501INB-ExceptionReporting-v1.7 documentation
-#
-# INPUTS: 	- Exception Code
-#		- Dynamic Exception Description
-#
-# OUTPUTS:	- INB Exception hash: Code, Description
-#
-# MODIFIED DATE: 02-Sep-2005
-#
-# AUTHOR: Jose Manuel Rodriguez Carrasco -jmrc@cnb.uam.es- (INB-CNB)
-###############################################################################
+
+=head2 getExceptionCodeDescription
+
+ Function  : An exception code is received by giving input and then, the method retrieves itself exception description. 
+		You can see the exception codes in 0501INB-ExceptionReporting-v1.7 documentation
+ Args      : - Exception Code
+ Returns   : - INB Exception Description
+
+=cut
+
 sub getExceptionCodeDescription($) {
 	
 	my ($exceptionCode) = @_;
-	my ($INB_Exception) = undef;
+	my ($INB_Exception) = {code => '', message => ''};
 	
 switch: {
 
 # ERROR CODES DEALING WITH ANALYSIS DATA
 	if ($exceptionCode == 200) { # UNKNOWN NAME: [200] "Setting input data under a non-existing name, or asking for a result using an unknown name"
 		
-		($INB_Exception) = {
-			'code' => $exceptionCode,
-			'message' => "Setting input data under a non-existing name, or asking for a result using an unknown name.",
-		};
+		$INB_Exception->{code} = $exceptionCode;
+		$INB_Exception->{message} = "Setting input data under a non-existing name, or asking for a result using an unknown name.";
 		
 	} elsif ($exceptionCode == 201) { # INPUTS INVALID: [201] "Input data are invalid; not match with its definitions, or with its dependency condition"
 
-		($INB_Exception) = {
-			'code' => $exceptionCode,
-			'message' => "Input data are invalid; not match with its definitions, or with its dependency condition.",
-		};
+		$INB_Exception->{code} = $exceptionCode;
+		$INB_Exception->{message} = "Input data are invalid; not match with its definitions, or with its dependency condition.";
 		
-	} elsif ($exceptionCode == 202) { # INPUT NOT ACCEPTED: [202] "Input data are accepted"
+	} elsif ($exceptionCode == 202) { # INPUT NOT ACCEPTED: [202] "Input data are not accepted"
 
 		($INB_Exception) = {
 			'code' => $exceptionCode,
-			'message' => "Input data are accepted.",
+			'message' => "Input data are not accepted.",
 		};
 
 	} elsif ($exceptionCode == 221) { # INPUT REQUIRED PARAMETER: [221] "Service require parameter X"
@@ -159,7 +166,7 @@ switch: {
 		};
 
 # GENERAL EXCEPTION CODES
-	} elsif ($exceptionCode == 600) { # INTERNAL PROCESSING ERROR: [600] "A generic catch-all for errors not specifically mentioned elsewhere in this list"
+	} elsif ($exceptionCode == 600) { # INTERNAL PROCESSING ERROR: [600] "A generic error during internal processing"
 
 		($INB_Exception) = {
 			'code' => $exceptionCode,
@@ -200,6 +207,14 @@ switch: {
 # NUEVO------------------------------------------------------
 
 # SERVICE INTRISIC ERRORS
+	
+	} elsif ($exceptionCode == 700) { # OK: [700] "Service execution was correct"
+
+		($INB_Exception) = {
+			'code' => $exceptionCode,
+			'message' => "Service execution was correct.",
+		};
+		
 	} elsif ($exceptionCode == 701) { # SERVICE INTERNAL ERROR: [701] "Specific errors from the BioMOBY service"
 
 		($INB_Exception) = {
