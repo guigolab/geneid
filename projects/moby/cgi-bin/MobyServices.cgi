@@ -21,7 +21,8 @@ BEGIN {
 
 # Statistics and logs managment
 use Benchmark;
-use Log::Log4perl;
+use Log::Log4perl qw(get_logger :levels);
+use Log::Dispatch::File;
 
 ###############################################################################
 
@@ -63,6 +64,18 @@ if ($ARGV[0] and $ARGV[0] =~ /^--daemon$/) {
     $x = new SOAP::Transport::HTTP::CGI || die "Can't get SOAP: $!\n";
 }
 
+##############################################################################
+# Stats reporting into a file
+
+Log::Log4perl->easy_init($INFO);
+my $appender = Log::Log4perl::Appender->new(
+					    "Log::Dispatch::File",
+					    filename => "/home/ug/gmaster/projects/moby_logs/moby_services_statistics.log",
+					    mode     => "append",
+					    );
+my $moby_logger = get_logger ();
+$moby_logger->add_appender ($appender);
+
 my $starttime_benchmark = Benchmark->new ();
 my $starttime;
 {
@@ -75,8 +88,11 @@ my $URI         = "genome.imim.es";
 my $IP_address  = $ENV{REMOTE_ADDR};
 my $remote_host = $ENV{REMOTE_HOST};
 
-print STDERR "user request from remote host, $remote_host($IP_address)\n";
-print STDERR "started at, $starttime\n";
+# print STDERR "User request from remote host, $remote_host($IP_address)\n";
+# print STDERR "Started at, $starttime\n";
+
+$moby_logger->info ("User request from remote host, $remote_host($IP_address)");
+$moby_logger->info ("Started at, $starttime");
 
 # Get the service name
 
@@ -85,7 +101,9 @@ $x->on_action(sub {
     $action =~ /^([^#]+)#(\w+)/;
     # die "SOAPAction shall match 'uri#method'\n" if $action ne join '#', @_;
     $serviceName = $2;
-    print STDERR "executing $serviceName service hosted by service provider authority, $URI\n";
+    
+    # print STDERR "Executing $serviceName service hosted by service provider authority, $URI\n";
+    $moby_logger->info ("Executing $serviceName service hosted by service provider authority, $URI");
 });
 
 $x->dispatch_with({
@@ -123,5 +141,8 @@ my $endtime;
   $endtime = sprintf "%s%2.2d%2.2d%2.2d%2.2d%2.2d", $year, $mon, $mday, $hour, $min, $sec;
 }
 
-print STDERR "ending at, $endtime\n";
-print STDERR "\nTotal execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)), "\n";
+# print STDERR "Ending at, $endtime\n";
+# print STDERR "Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)), "\n";
+$moby_logger->info ("Ending at, $endtime");
+$moby_logger->info ("Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
+$moby_logger->info ("#");
