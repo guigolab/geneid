@@ -23,10 +23,11 @@ intergenic_only=false
 articleName=sequences
 authURI=genome.imim.es
 >runMatScanGFFCollection
-articleName=sequences
+articleName=upstream_sequences
 authURI=genome.imim.es
 threshold=0.92
-matrix=jaspar
+matrix=Jaspar
+matrix_mode=log-likelihood
 >runMultiMetaAlignment
 articleName=maps
 authURI=genome.imim.es
@@ -34,6 +35,10 @@ authURI=genome.imim.es
 articleName=similarity_results
 authURI=genome.imim.es
 >inbHierarchicalCluster
-# ???
+articleName=
+authURI=bioinfo.ochoa.fib.es
+# method = ["Nearest neighbor (single linkage)", "Furthest neighbor (complete linkage)"]
+method=Nearest neighbor (single linkage)
 >inbTreeView
-# ???
+articleName=
+authURI=bioinfo.ochoa.fib.es
