@@ -371,7 +371,7 @@ $result = $Service->execute (XMLinputlist => [
 					     ]);
 
 if ($_debug) {
-	print STDERR "result\n";
+	print STDERR "$serviceName result\n";
 	print STDERR $result;
 	print STDERR "\n";
 }
@@ -396,7 +396,7 @@ $result = $Service->execute (XMLinputlist => [
 					      ["$articleName", $input_xml]
 					     ]);
 
-if (1 || $_debug) {
+if ($_debug) {
 	print STDERR "$serviceName result\n";
 	print STDERR $result;
 	print STDERR "\n";
@@ -420,20 +420,25 @@ $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 # inbHierarchicalCluster
 
+print STDERR "\nExecuting inbHierarchicalCluster...\n\n";
+print STDERR "inbHierarchicalCluster input xml, $input_xml\n";
+
+print "$input_xml\n";
+
 $serviceName   = "inbHierarchicalCluster";
 $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-$articleName   = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+$articleName   = $parameters{$serviceName}->{articleName} || "";
 my $method     = $parameters{$serviceName}->{method}      || die "no method for $articleName\n";
 my $method_xml = "<Value>$method</Value>";
 
 $Service = getService ($C, $serviceName, $authURI);
 
 $result = $Service->execute (XMLinputlist => [
-					      ["$articleName", $input_xml, "method", $method]
+					      ["$articleName", "$input_xml\n", "method", $method]
 					     ]);
 
 if (1 || $_debug) {
-	print STDERR "result\n";
+	print STDERR "\n$serviceName result\n";
 	print STDERR $result;
 	print STDERR "\n";
 }
@@ -446,6 +451,8 @@ if ($_debug) {
 	print STDERR ".\n";
 }
 
+exit 0;
+
 # convert the input xml into a scalar
 $input_xml =  $input_xml_tmp->[0];
 
@@ -453,7 +460,7 @@ $input_xml =  $input_xml_tmp->[0];
 
 $serviceName   = "inbTreeView";
 $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-$articleName   = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+$articleName   = $parameters{$serviceName}->{articleName} || "";
 
 $Service = getService ($C, $serviceName, $authURI);
 
@@ -462,7 +469,7 @@ $result = $Service->execute (XMLinputlist => [
 					     ]);
 
 if ($_debug) {
-	print STDERR "result\n";
+	print STDERR "$serviceName result\n";
 	print STDERR $result;
 	print STDERR "\n";
 }
@@ -586,26 +593,23 @@ sub parseResults {
     my ($XML, $object_type) = @_;
     my $inputs_xml = [];
     
-    print STDERR "parsing XML results...\n";
-
     my $parser = XML::LibXML->new();
     my $doc    = $parser->parse_string( $XML );
     $XML       = $doc->getDocumentElement();
-    my $elements = $XML->getElementsByTagName( "moby:$object_type" ) 
-	|| $XML->getElementsByTagName( "object_type" );
+    my $elements = $XML->getElementsByTagName( "moby:$object_type" );
     
     my $size = $elements->size();
     
     if ($size == 0) {
-	print STDERR "Error, can't parse the moby output from the moby XML...\n";
+	$elements = $XML->getElementsByTagName( "object_type" );
+	if ($size == 0) {
+	    print STDERR "Error, can't parse the moby output from the moby XML...\n";
+	}
     }
     
     my $i = 0;
     while (my $element = $elements->get_node($i)) {
 	my $input_xml = $element->toString();
-	
-	print STDERR "input_xml, $input_xml\n";
-	
 	push (@$inputs_xml, $input_xml);
 	
 	$i++;
