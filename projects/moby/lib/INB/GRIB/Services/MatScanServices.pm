@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.18 2006-02-03 10:53:04 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.19 2006-02-07 12:13:00 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -113,6 +113,8 @@ use INB::GRIB::Services::Factory;
 use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
+# Logging
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 require Exporter;
@@ -768,7 +770,9 @@ sub runMatScanGFF {
     #
 
     my $_moby_output_format   = "GFF";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMatScanGFF";
+    
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput(@queries){
 
@@ -805,6 +809,9 @@ sub runMatScanGFF {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -867,7 +874,9 @@ sub runMatScanGFFCollection {
     # The output format for this service is GFF
     #
     my $_format = "GFF";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMatScanGFFCollection";
+    
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
 
@@ -905,6 +914,9 @@ sub runMatScanGFFCollection {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -941,7 +953,9 @@ sub runMatScanGFFCollectionVsInputMatrix {
     # The output format for this service is GFF
     #
     my $_format = "GFF";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMatScanGFFCollectionVsInputMatrix";
+    
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
 
@@ -979,6 +993,9 @@ sub runMatScanGFFCollectionVsInputMatrix {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",

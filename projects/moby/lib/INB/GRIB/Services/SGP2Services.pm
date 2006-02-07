@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.12 2006-02-02 17:22:57 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.13 2006-02-07 12:13:00 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -85,6 +85,8 @@ use INB::GRIB::Services::Factory;
 use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
+# Logging
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 require Exporter;
@@ -415,6 +417,8 @@ sub runSGP2GFF {
     # The output format for this service is GFF
     #
     my $_format = "GFF";
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runSGP2GFF";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -453,6 +457,9 @@ sub runSGP2GFF {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",

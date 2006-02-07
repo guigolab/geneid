@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.15 2006-02-02 17:22:57 gmaster Exp $
+# $Id: MemeServices.pm,v 1.16 2006-02-07 12:13:00 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -53,6 +53,8 @@ use INB::GRIB::Services::Factory;
 use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
+# Logging
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 require Exporter;
@@ -572,7 +574,9 @@ sub runMemeHTML {
     # The moby output format for this service is text-html
     #
     my $_moby_output_format   = "text-html";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMemeHTML";
+    
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
 
@@ -609,6 +613,9 @@ sub runMemeHTML {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -668,7 +675,9 @@ sub parseMotifMatricesfromMEME {
     my $moby_exceptions = [];
     
     my $_format = "text-formatted";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "parseMotifMatricesfromMEME";
+    
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
 
@@ -706,6 +715,9 @@ sub parseMotifMatricesfromMEME {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -766,6 +778,8 @@ sub runMemeText {
     my $moby_exceptions = [];
     
     my $_format = "text-formatted";
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMemeText";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -804,6 +818,9 @@ sub runMemeText {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",

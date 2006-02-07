@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.16 2006-02-02 17:22:57 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.17 2006-02-07 12:13:00 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -87,6 +87,8 @@ use MOBY::CommonSubs qw(:all);
 # Moby Exceptions
 use INB::Exceptions::MobyException;
 
+# Logging
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 require Exporter;
@@ -687,7 +689,9 @@ sub runMetaAlignment {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format = "text-formatted";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMetaAlignment";
+    
     if ($_debug) {
 	print STDERR "processing Moby runMetaAlignment query...\n";
     }
@@ -746,6 +750,9 @@ sub runMetaAlignment {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -803,7 +810,9 @@ sub runMetaAlignmentGFF {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format  = "GFF";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMetaAlignmentGFF";
+    
     if ($_debug) {
 	print STDERR "processing Moby runMetaAlignmentGFF query...\n";
     }
@@ -862,6 +871,9 @@ sub runMetaAlignmentGFF {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -918,7 +930,9 @@ sub runMultiMetaAlignment {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format = "text-formatted";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMultiMetaAlignment";
+    
     if ($_debug) {
 	print STDERR "processing Moby runMultiMetaAlignment query...\n";
     }
@@ -977,6 +991,9 @@ sub runMultiMetaAlignment {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+	
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -1034,7 +1051,9 @@ sub runMultiMetaAlignmentGFF {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format = "GFF";
-
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMultiMetaAlignmentGFF";
+    
     if ($_debug) {
 	print STDERR "processing Moby runMultiMetaAlignmentGFF query...\n";
     }
@@ -1093,6 +1112,9 @@ sub runMultiMetaAlignmentGFF {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",

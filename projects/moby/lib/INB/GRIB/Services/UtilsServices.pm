@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.19 2006-02-02 17:22:57 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.20 2006-02-07 12:13:00 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -85,6 +85,8 @@ use INB::GRIB::Services::Factory;
 use INB::GRIB::Utils::CommonUtilsSubs;
 use MOBY::CommonSubs qw(:all);
 
+# Logging
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 require Exporter;
@@ -985,6 +987,8 @@ sub translateGeneIDGFFPredictions {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE  = "";             # set empty response
     my $moby_exceptions = [];
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "translateGeneIDGFFPredictions";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1023,6 +1027,9 @@ sub translateGeneIDGFFPredictions {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -1098,6 +1105,8 @@ sub fromGenericSequencetoFASTA {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "fromGenericSequencetoFASTA";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1136,6 +1145,9 @@ sub fromGenericSequencetoFASTA {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -1211,6 +1223,8 @@ sub fromGenericSequenceCollectiontoFASTA {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "fromGenericSequenceCollectiontoFASTA";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1249,6 +1263,9 @@ sub fromGenericSequenceCollectiontoFASTA {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -1325,7 +1342,9 @@ sub fromFASTAtoDNASequenceCollection {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "fromFASTAtoDNASequenceCollection";
+
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
 	
@@ -1363,6 +1382,9 @@ sub fromFASTAtoDNASequenceCollection {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -1439,6 +1461,8 @@ sub fromFASTAtoGenericSequenceCollection {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE = "";             # set empty response
     my $moby_exceptions = [];
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "fromFASTAtoGenericSequenceCollection";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1476,6 +1500,9 @@ sub fromFASTAtoGenericSequenceCollection {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -1552,7 +1579,9 @@ sub generateScoreMatrix {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "generateScoreMatrix";
+
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
 	
@@ -1590,6 +1619,9 @@ sub generateScoreMatrix {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",

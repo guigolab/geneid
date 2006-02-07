@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.21 2006-02-02 17:22:57 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.22 2006-02-07 12:13:00 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -123,7 +123,7 @@ use INB::Exceptions::MobyException;
 use MOBY::CommonSubs qw(:all);
 
 # Logging
-use Log::Log4perl;
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 require Exporter;
@@ -593,6 +593,8 @@ sub runGeneID {
     #
     
     my $_moby_output_format   = "text-html";
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runGeneID";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $query(@queries){
@@ -626,6 +628,9 @@ sub runGeneID {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+	
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
@@ -697,11 +702,28 @@ sub runGeneIDGFF {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
+
+    ####
+    # stats information
+
+    my $serviceName = "runGeneIDGFF";
+    my $URI         = "genome.imim.es";
+    my $IP_address  = $ENV{REMOTE_ADDR};
+    my $remote_host = $ENV{REMOTE_HOST};
     
+    # what else, start time, end time, execution time, execution status => el codigo del peor error o OK (700) si OK
+    
+    # print STDERR "IP address, $IP_address\n";
+    # print STDERR "remote host, $remote_host\n";
+    # print STDERR "executing $serviceName service...\n";
+    
+    ####
+
     #
     # The output format for this service is GFF
     #
     my $_format = "GFF";
+    my $moby_logger = get_logger ("MobyServices");
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -727,8 +749,26 @@ sub runGeneIDGFF {
     if (@$moby_exceptions > 0) {
 	# build the moby exception response
 	my $moby_exception_response = "";
+	my %severities;
 	foreach my $moby_exception (@$moby_exceptions) {
+	    my $severity = $moby_exception->getExceptionType;
+	    $severities{$severity} = $moby_exception;
 	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	# logging report
+	# Check 'error' first then 'warning' or 'information'
+	if (defined $severities{error}) {
+	    my $exception = $severities{error};
+	    $moby_logger->info ("$serviceName failed");
+	    $moby_logger->info ("Exception code, " . $exception->getExceptionCode);
+	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
+	}
+	elsif (defined $severities{warning} || defined $severities{information}) {
+	    my $exception = $severities{error};
+	    $moby_logger->info ("$serviceName terminated successfully with warning or information notes");
+	    $moby_logger->info ("Exception code, " . $exception->getExceptionCode);
+	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
 	}
 	
 	return responseHeader(
@@ -737,7 +777,10 @@ sub runGeneIDGFF {
 			      )
 	    . $MOBY_RESPONSE . responseFooter;
     }
-    else {
+    else {	
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+
 	my $note = "Service execution succeeded";
 	return responseHeader (
 			       -authority => "genome.imim.es",
