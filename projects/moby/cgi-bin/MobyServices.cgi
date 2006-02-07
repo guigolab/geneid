@@ -73,7 +73,7 @@ my $appender = Log::Log4perl::Appender->new(
 					    filename => "/home/ug/gmaster/projects/moby_logs/moby_services_statistics.log",
 					    mode     => "append",
 					    );
-my $moby_logger = get_logger ();
+my $moby_logger = get_logger ("MobyServices");
 $moby_logger->add_appender ($appender);
 
 my $starttime_benchmark = Benchmark->new ();
