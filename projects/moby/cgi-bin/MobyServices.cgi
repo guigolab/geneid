@@ -91,7 +91,7 @@ my $remote_host = $ENV{REMOTE_HOST};
 # print STDERR "User request from remote host, $remote_host($IP_address)\n";
 # print STDERR "Started at, $starttime\n";
 
-$moby_logger->info ("User request from remote host, $remote_host($IP_address)");
+$moby_logger->info ("User request from remote host, $remote_host ($IP_address)");
 $moby_logger->info ("Started at, $starttime");
 
 # Get the service name
