@@ -1,0 +1,215 @@
+.credits A:link {text-decoration: none; underline: overline; color: #f46b66;}
+.credits A:visited {text-decoration: none;underline: overline; color: #f46b66;}
+.credits A:active {text-decoration: none;underline: overline; color: #f46b66;}
+.credits A:hover {text-decoration: none; underline:overline; color: #f46b66;}
+
+.title A:link {text-decoration: none; underline: overline; color: darkblue;}
+.title A:visited {text-decoration: none;underline: overline; color: darkblue;}
+.title A:active {text-decoration: none;underline: overline; color: darkblue;}
+.title A:hover {text-decoration: none; underline:overline; color: darkblue;}
+
+.textogris2 A:link {text-decoration: none; underline: overline; color: 7c7c7c;}
+.textogris2 A:visited {text-decoration: none;underline: overline; color: 7c7c7c;}
+.textogris2 A:active {text-decoration: none;underline: overline; color: 7c7c7c;}
+.textogris2 A:hover {text-decoration: none; underline:overline; color: 7c7c7c;}
+
+.text2 A:link {text-decoration: none; underline: overline; color: darkblue;}
+.text2 A:visited {text-decoration: none;underline: overline; color: darkblue;}
+.text2 A:active {text-decoration: none;underline: overline; color: darkblue;}
+.text2 A:hover {text-decoration: none; underline:overline; color: darkblue;}
+
+
+
+.nom_grup_capsalera
+{
+	font-family: Century Gothic;
+	font-size: 14px;
+	font-weight: normal;
+	text-decoration: italic;
+}
+
+.titol_seccio
+{
+	font-family: Century Gothic;
+	font-size: 13px;
+	font-weight: bold;
+	text-decoration: italic;
+}
+
+.titular {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+	color: c91784;
+	text-decoration: none;
+}
+.textogris {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	font-weight: normal;
+	color: 7c7c7c;
+	text-align: justify;
+	text-decoration: none;
+}
+.textogris2 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	font-weight: normal;
+	color: 7c7c7c;
+	text-align: justify;
+	text-decoration: none;
+}
+
+.textonegro {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	font-weight: normal;
+	color: black;
+	text-align: justify;
+	text-decoration: none;
+
+
+}
+a.index
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-style: normal;
+	font-size: 9px;
+    font-weight: normal;
+	color: #FFFFFF;
+	text-decoration: none;
+}
+a.index:hover
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-style: normal;
+    font-size: 9px;
+	font-weight: normal;
+	color: #FFFFFF;
+	text-decoration: underline;
+}
+a.textogris:hover{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-style: normal;
+	font-weight: normal;
+	color: C91784;
+	text-align: justify;
+	text-decoration: none;
+}
+.textorosa {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	font-weight: normal;
+	color: c91784;
+	text-align: justify;
+	text-decoration: none;
+
+
+}
+.titulo {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: normal;
+	color: #000000;
+	text-decoration: none;
+
+}
+a.titulo:hover {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: normal;
+	color: #C91784;
+	text-decoration: underline;
+
+}
+.subir {
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	font-style: normal;
+	font-weight: normal;
+	color: 7c7c7c;
+	text-align: justify;
+	text-decoration: none;
+}
+a.subir:hover{
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	font-style: normal;
+	font-weight: normal;
+	color: C91784;
+	text-align: justify;
+	text-decoration: none;
+}
+.titulogris {
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+	color: #7c7c7c;
+	text-decoration: none;
+}
+
+a.titulogris:hover {
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+	color: #c91784;
+	text-decoration: none;
+}
+
+
+.title  {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+        font-size: 14px;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: bold;
+        color: darkblue;
+        text-alignment: center;
+}
+
+.text {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        font-weight: normal;
+        color: darkBlue;
+}
+
+.text2 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        font-weight: normal;
+        color: darkBlue;
+}
+
+.credits {
+	font-family: clearlyu;
+        font-size: 10px;
+        font-weight: normal;
+        color: #e2c3ae;
+}
+
+input {
+font-size:10px;
+margin-top:2px;
+margin-bottom:0px;
+margin-left:0px;
+border-top:1px solid #666;
+border-right:1px solid #999;
+border-bottom:1px solid #999;
+border-left:1px solid #666;
+clear:right;
+padding:2px;
+border:1px solid #ccc;
+background:#fff;
+padding:2px;
+color:#444;
+
+}
