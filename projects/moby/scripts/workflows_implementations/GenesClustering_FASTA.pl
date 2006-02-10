@@ -81,7 +81,7 @@ my $_debug = 0;
 
 # input file
 
-my $in_file = $opt_f || "~/data/promoterExtraction/Homo_sapiens.fa";
+my $in_file = $opt_f || "/home/ug/arnau/data/promoterExtraction/Homo_sapiens.fa";
 if (not (-f $in_file)) {
     print STDERR "Error, can't find input file, $in_file\n";
     exit 1;
@@ -94,7 +94,7 @@ if (not (-f $in_file)) {
 
 my $serviceName = undef;
 
-my $config_file = $opt_c || "~/cvs/GRIB/projects/moby/scripts/workflows_implementations/config.txt";
+my $config_file = $opt_c || "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/workflows_implementations/config.txt";
 if (not (-f $config_file)) {
     print STDERR "Error, can't find config file, $config_file\n";
     exit 1;
@@ -402,6 +402,7 @@ if ($_debug) {
 	print STDERR "\n";
 }
 
+# returns an array reference
 my $input_xml_tmp = parseResults ($result, "MicroArrayData_Text");
 
 if ($_debug) {
@@ -410,20 +411,53 @@ if ($_debug) {
 	print STDERR ".\n";
 }
 
-# convert the input xml into a scalar
+# returns the MicroArrayData_text Moby object
 $input_xml =  $input_xml_tmp->[0];
+
+#######################################################################################
+# No need - just for debugging...
+
+# my $matrices_tmp = parseTextContent ($result, "MicroArrayData_Text");
+# my $matrix_data = $matrices_tmp->[0];
+
+# while (chomp $matrix_data) {}
+# $matrix_data =~ s/\n\n//;
+
+# print STDERR "$matrix\n";
+
+# my $input_xml_parsed = <<PRT;
+# <moby:MicroArrayData_Text namespace="" id="">
+# <![CDATA[
+# $matrix_data
+# ]]>
+# </moby:MicroArrayData_Text>
+# PRT
+
+#########################################################################################
 
 # Request Inab registry for the two following ones
 $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
 $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
+$C = MOBY::Client::Central->new(
+				Registries => {mobycentral => {URL => $URL,URI => $URI}}
+				);
+
+if (defined $C) {
+    if ($_debug) {
+	print STDERR "Instanciation done.\n";
+	print STDERR "TESTING MOBY CLIENT with\n\tURL: $URL\n\tURI: $URI\n\tProxy: $PROXY\n\n";
+    }
+}
+else {
+    print STDERR "Error, Central could not be instanciated!\n";
+    exit 0;
+}
+
 # inbHierarchicalCluster
 
 print STDERR "\nExecuting inbHierarchicalCluster...\n\n";
-print STDERR "inbHierarchicalCluster input xml, $input_xml\n";
-
-print "$input_xml\n";
 
 $serviceName   = "inbHierarchicalCluster";
 $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -433,11 +467,9 @@ my $method_xml = "<Value>$method</Value>";
 
 $Service = getService ($C, $serviceName, $authURI);
 
-$result = $Service->execute (XMLinputlist => [
-					      ["$articleName", "$input_xml\n", "method", $method]
-					     ]);
+$result = $Service->execute (XMLinputlist => [ ["$articleName", "$input_xml", "method", "$method_xml"] ]);
 
-if (1 || $_debug) {
+if ($_debug) {
 	print STDERR "\n$serviceName result\n";
 	print STDERR $result;
 	print STDERR "\n";
@@ -450,8 +482,6 @@ if ($_debug) {
 	print STDERR join (', ', @$input_xml_tmp);
 	print STDERR ".\n";
 }
-
-exit 0;
 
 # convert the input xml into a scalar
 $input_xml =  $input_xml_tmp->[0];
@@ -474,17 +504,10 @@ if ($_debug) {
 	print STDERR "\n";
 }
 
-$input_xml_tmp = parseResults ($result, "b64_Encoded_PNG");
+# Get the binary data, and decode them to return the tree picture in png format
 
-if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml_tmp);
-	print STDERR ".\n";
-}
-
-# convert the input xml into a scalar
-$input_xml =  $input_xml_tmp->[0];
-my $picture_b64 = parseTextContent ($input_xml);
+my $picture_b64_aref = parseTextContent ($result, "b64_Encoded_PNG");
+my $picture_b64 = $picture_b64_aref->[0];
 
 # Convert in to a picture and store into a file
 
@@ -578,7 +601,7 @@ sub getService {
     }
 
     if (!$wsdl || ($wsdl !~ /\<definitions/)){
-	print "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
+	print STDERR "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
     }
     
     my $Service = MOBY::Client::Service->new(service => $wsdl);
@@ -619,14 +642,31 @@ sub parseResults {
 }
 
 sub parseTextContent {
-    my ($XML) = @_;
-    my $data;
-
+    my ($XML, $object_type) = @_;
+    my $inputs_text = [];
+    
     my $parser = XML::LibXML->new();
     my $doc    = $parser->parse_string( $XML );
     $XML       = $doc->getDocumentElement();
+    my $elements = $XML->getElementsByTagName( "moby:$object_type" );
+    
+    my $size = $elements->size();
+    
+    if ($size == 0) {
+	$elements = $XML->getElementsByTagName( "object_type" );
+	if ($size == 0) {
+	    print STDERR "Error, can't parse the moby output from the moby XML...\n";
+	}
+    }
+    
+    my $i = 0;
+    while (my $element = $elements->get_node($i)) {
+	my $input_text = $element->textContent();
+	push (@$inputs_text, $input_text);
+	
+	$i++;
+    }
+    
+    return $inputs_text;
 
-    $data = $XML->toString();
-
-    return $data;
 }
