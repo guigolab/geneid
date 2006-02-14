@@ -127,7 +127,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = "getUpstreamSeqfromEnsembl";
+my $serviceName = "getUpstreamSeqfromEnsemblCollection";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -158,7 +158,7 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['genes', ["Object" => $namespaces]],
+							    ['genes', [["Object" => $namespaces]]],
 							   ],
 				      output		=> [
 							    ['upstream_sequences', [['CommentedDNASequence' => ['Ensembl']]]] # collection of one object type

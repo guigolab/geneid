@@ -127,7 +127,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = "getUpstreamSeqfromEnsembl";
+my $serviceName = "getOrthologousUpstreamSeqfromEnsembl";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -154,7 +154,7 @@ my ($REG) = $Central->registerService(
 				      serviceType  => "Retrieval",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.",
+				      description  => "Sequence retrieval tool from Ensembl database. It returns the upstream sequence of all orthologues of a given Ensembl gene identifier. Identifiers could be external ones, such as Refseq Ids or Affymetrix ids.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
