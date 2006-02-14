@@ -7,13 +7,12 @@
 ##################################################################
 
 use strict;
-use Data::Dumper;
 
 # BioMoby and SOAP libraries
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
+
 # use SOAP::Lite + 'trace';
 
 # Benchmark Module
@@ -108,6 +107,7 @@ my $in_file_1  = shift @ARGV || "/home/ug/arnau/data/AC005155.fa";
 my $in_file_2  = shift @ARGV || "/home/ug/arnau/data/AC005155.geneid.gff.out";
 my $datasource = "EMBL";
 
+my $sequence_xml;
 my @sequences_xml = ();
 
 my $seqin = Bio::SeqIO->new (
@@ -124,7 +124,7 @@ while (my $seqobj = $seqin->next_seq) {
     # Sequence Input in XML format
     #
 
-    my $sequence_xml = <<PRT;
+    $sequence_xml = <<PRT;
 <DNASequence namespace="$datasource" id="$seq_id">
   <Integer namespace="" id="" articleName="Length">$lnucleotide</Integer>
   <String namespace="" id=""  articleName="SequenceString">$nucleotide</String>
@@ -158,11 +158,15 @@ $GFF
 </GFF>
 PRT
 
-# $prediction_xml = <<PRT;
-# <GFF namespace="$datasource" id="$seq_id">
-# $GFF
-# </GFF>
-# PRT
+$prediction_xml = <<PRT;
+<GFF namespace="$datasource" id="$seq_id">
+<String namespace="" id="" articleName="Content">
+<![CDATA[
+$GFF
+]]>
+</String>
+</GFF>
+PRT
 
 push (@predictions_xml, $prediction_xml);
 
@@ -183,7 +187,7 @@ PRT
     print STDERR "Executing Moby request...\n";
 
 my $result = $Service->execute(XMLinputlist => [
-						[$articleName_1, \@sequences_xml, $articleName_2, \@predictions_xml, "translation table", $translation_table]
+						[$articleName_1, $sequence_xml, $articleName_2, $prediction_xml, "translation table", $translation_table]
 						]);
 
 ##################################################################
@@ -196,7 +200,9 @@ if (defined $result) {
     # NB : it doesn't it worked, a way to know is by using SOAP::Lite +trace
     # Any better way ??????
     
-    print "result\n", $result, "\n";
+    print STDERR "result\n";
+    print "$result\n";
+    print STDERR "\n";
 }
 else {
     print STDERR "The service didn't return any results!\n";
