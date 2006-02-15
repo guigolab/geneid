@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.64 2006-02-02 18:00:39 gmaster Exp $
+# $Id: Factory.pm,v 1.65 2006-02-15 15:46:21 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1090,7 +1090,8 @@ sub MetaAlignment_call {
     my $alpha_penalty  = $parameters->{alpha_penalty};
     my $lambda_penalty = $parameters->{lambda_penalty};
     my $mu_penalty     = $parameters->{mu_penalty};
-
+    my $debug = 0;
+    
     my $output_format  = $parameters->{output_format};
 
     # Llama a Meta-alignment en local
@@ -1199,6 +1200,11 @@ sub MetaAlignment_call {
 	return (undef, [$moby_exception]);
     }
 
+    if ($debug) {
+	print STDERR "Executing meta-alignment,\n";
+	print STDERR "$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file\n";
+    }
+    
     my @args = ("$_meta_alignment_dir\/$_meta_alignment_bin $_meta_alignment_args $map1_file $map2_file > $stdout_file");
     
     my $failed = system (@args);
@@ -1225,9 +1231,11 @@ sub MetaAlignment_call {
 	$meta_output = qx/cat $stdout_file/;
     }
 
-    unlink $stdout_file;
-    unlink $map1_file;
-    unlink $map2_file;
+    if (!$debug) {
+	unlink $stdout_file;
+	unlink $map1_file;
+	unlink $map2_file;
+    }
     
     if (defined $meta_output) {
 	return ($meta_output, $moby_exceptions);
@@ -1259,7 +1267,8 @@ sub generateScoreMatrix_call {
   my $inputdata_arrayref = $args{similarity_results};
   my $parameters         = $args{parameters} || undef;
   my $queryID            = $args{queryID}    || "";
-
+  my $debug = 0;
+  
   # Get the parameters
 
   my $input_format   = $parameters->{input_format};
@@ -1310,14 +1319,22 @@ sub generateScoreMatrix_call {
   
   # Run generateScoreMatrix
 
-  # print STDERR "got " . @$inputdata_arrayref . " array references (meta alignments)\n";
-  # print STDERR "Running generateScoreMatrix.pl, with this command:\n";
-  # print STDERR "cat $meta_file | $_application_dir\/$_application_bin $_application_args\n";
+  if ($debug) {
+      print STDERR "got " . @$inputdata_arrayref . " array references (meta alignments)\n";
+      print STDERR "Running generateScoreMatrix.pl, with this command:\n";
+      print STDERR "cat $meta_file | $_application_dir\/$_application_bin $_application_args\n";
+  }
 
   $matrix_output = qx/cat $meta_file | $_application_dir\/$_application_bin $_application_args/;
 
-  unlink $meta_file;
-
+  if ($debug) {
+      print STDERR "matrix ouput, $matrix_output\n";
+  }
+  
+  if (!$debug) {
+      unlink $meta_file;
+  }
+  
   if (defined $matrix_output) {
       return ($matrix_output, $moby_exceptions);
   }
