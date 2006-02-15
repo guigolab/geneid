@@ -91,8 +91,18 @@ sub getTextContentFromXML {
 			 my $elements = $XML->getElementsByTagName( "$tagName" ) 
 			                || $XML->getElementsByTagName( "moby:$tagName" )
 		     );
-    my $element = $elements->get_node(0); 
-    return $element->textContent;
+    my $element = $elements->get_node(0);
+    my $content = $element->textContent;
+
+    # Do some cleaning...
+    # Get rid of empty lines (those with only spaces or tab...)
+    # Get rid of spaces at beginning of lines
+    
+    $content =~ s/^\s+//;
+    $content =~ s/\n\s+/\n/;
+    $content =~ s/\s+$//;
+
+    return $content;
 }
 
 
@@ -219,9 +229,11 @@ sub parseSingleGFFIntoCollectionGFF {
 
 	    my $input = <<PRT;
 <moby:$output_format namespace='$namespace' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $report_tmp
 ]]>
+</String>
 </moby:$output_format>
 PRT
 
@@ -238,9 +250,11 @@ PRT
 
     my $input = <<PRT;
 <moby:$output_format namespace='$namespace' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $report_tmp
 ]]>
+</String>
 </moby:$output_format>
 PRT
 
@@ -436,13 +450,15 @@ sub convertSequencesIntoFASTA {
 sub validateDataType {
     my $self = shift;
     my ($DOM, $specifiedType) = @_;
+
+    my $inputDataType = undef;
+    my $rightType     = undef;
+
+    eval {
     
     # input 
     # * DOM containing articles we want to validate the type
     # * the specified expected type
-    
-    my $inputDataType = undef;
-    my $rightType     = undef;
 
     my @object_nodes = ();
     
@@ -550,6 +566,13 @@ sub validateDataType {
 	}
     }
     
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not parse input XML for validating type, $specifiedType!\n";
+	print STDERR "$note\n";
+	return (undef, undef);
+    }
+
     return ($rightType, $inputDataType);
 }
 
