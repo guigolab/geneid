@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'><moby:serviceNotes>&lt;Notes&gt;Service execution succeeded&lt;/Notes&gt;</moby:serviceNotes>
         <moby:mobyData moby:queryID='9'>
             <moby:Simple moby:articleName='meta_predictions'><moby:GFF namespace='' id='ENSG00000197785'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 # meta_v1.1
 # date Mon Dec  5 12:54:14 2005
@@ -40,6 +41,7 @@ ENSG00000197785	meta_v1.1	V$GATA1_04	1926	1938	8.080000	.	.
 ENSPTRG00000000031	meta_v1.1	V$GATA1_04	1926	1938	8.080000	.	.
 
 ]]>
+</String>
 </moby:GFF>
 </moby:Simple>
         </moby:mobyData>

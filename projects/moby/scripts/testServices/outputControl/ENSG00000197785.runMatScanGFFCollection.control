@@ -3,6 +3,7 @@
             <moby:Collection moby:articleName='matscan_predictions'>
                 
                 <moby:Simple><moby:GFF namespace='' id='ENSG00000197785'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 ENSG00000197785	MatScan	I$CF2II_01	117	125	 9.68	+	.	# ATATATATA
 ENSG00000197785	MatScan	I$CF2II_01	118	126	 9.68	-	.	# ATATATATA
@@ -225,6 +226,7 @@ ENSG00000197785	MatScan	V$MYB_Q3	1824	1829	 5.98	-	.	# CAGTTG
 ENSG00000197785	MatScan	V$MYB_Q3	1319	1324	 5.39	-	.	# CAGTTC
 
 ]]>
+</String>
 </moby:GFF>
 </moby:Simple>
             

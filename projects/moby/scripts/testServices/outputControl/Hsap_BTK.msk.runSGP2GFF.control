@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'><moby:serviceNotes>&lt;Notes&gt;Service execution succeeded&lt;/Notes&gt;</moby:serviceNotes>
         <moby:mobyData moby:queryID='12'>
             <moby:Simple moby:articleName='geneid_predictions'><moby:GFF namespace='' id='Hsap_BTK'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 ## gff-version 2
 ## date Wed Aug 10 12:21:50 2005
@@ -42,6 +43,7 @@ Hsap_BTK	sgp2_v1.0	Internal	66364	66458	12.62	+	1	gene_6
 Hsap_BTK	sgp2_v1.0	Terminal	66487	67766	271.19	+	2	gene_6
 
 ]]>
+</String>
 </moby:GFF>
 </moby:Simple>
         </moby:mobyData>
