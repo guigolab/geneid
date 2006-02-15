@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.13 2006-02-07 12:13:00 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.14 2006-02-15 15:45:56 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -324,9 +324,11 @@ sub _do_query_SGP2 {
 	    my ($sequenceIdentifier) = keys (%sequences);
 	    $input = <<PRT;
 <moby:$_format namespace='' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $report
 ]]>
+</String>
 </moby:$_format>
 PRT
 

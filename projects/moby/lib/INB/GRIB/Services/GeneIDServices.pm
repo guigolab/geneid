@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.22 2006-02-07 12:13:00 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.23 2006-02-15 15:45:56 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -289,9 +289,11 @@ sub _do_query_GeneID_CGI {
  
     my $input = <<PRT;
 <moby:$moby_output_format namespace='' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $report
 ]]>
+</String>
 </moby:$moby_output_format>
 PRT
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -500,9 +502,11 @@ sub _do_query_GeneID {
 	
 	$input = <<PRT;
 	<moby:$_format namespace='' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $report
 ]]>
+</String>
 </moby:$_format>
 PRT
 
