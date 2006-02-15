@@ -16,7 +16,6 @@ use Getopt::Std;
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
 # use SOAP::Lite + 'trace';
 
 # Bioperl Libraries
@@ -71,9 +70,9 @@ while (my $seqobj = $seqin->next_seq) {
     
     # Inab (Production)
 
-    # $URL = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
-    # $URI = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
-    # $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
+    $URL = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
+    $URI = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
+    $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
     ##################################################################
     #
