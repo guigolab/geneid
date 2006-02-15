@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.16 2006-02-07 12:13:00 gmaster Exp $
+# $Id: MemeServices.pm,v 1.17 2006-02-15 16:49:18 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -351,9 +351,11 @@ sub _do_query_Meme {
     if (defined $report) {
 	my $input = <<PRT;
 <moby:$_output_format namespace='' id=''>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $report
 ]]>
+</String>
 </moby:$_output_format>
 PRT
 
@@ -502,9 +504,11 @@ sub _do_query_MemeMotifMatrices {
     my $matrices = join ('', @$matrices_aref);
     my $meme_matrix_object = <<PRT;
 <moby:$_output_format namespace='$namespace' id=''>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $matrices
 ]]>
+</String>
 </moby:$_output_format>
 PRT
 

@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.19 2006-02-07 12:13:00 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.20 2006-02-15 16:49:18 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -427,9 +427,11 @@ sub _do_query_MatScan {
 	    
 	    my $input = <<PRT;
 <moby:$_format namespace='' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $report
 ]]>
+</String>
 </moby:$_format>
 PRT
 
@@ -556,15 +558,23 @@ sub _do_query_MatScanVsInputMatrix {
 	# y su texto xml.
 
 	my ($articleName, $DOM) = @{$article}; # get the named article
-
-	if ($articleName eq "upstream_sequences") {
-
+	
+	# make it more 'interoperable' by testing also pattern matching!!!
+	# i think it should be up to the clients to adjust the article names
+	
+	if (($articleName eq "upstream_sequences") || ($articleName =~ /sequences/i)) {
+	    
 	    if (isSimpleArticle ($DOM)) {
 
 		# not allowed
 		
+		print STDERR "parsing the sequences input...\n";
+
 		my $note = "Received a simple input article instead of a collection";
 		print STDERR "$note\n";
+
+		print STDERR "DOM: " . $DOM->toString() . "\n";
+
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
 									  refElement => "upstream_sequences",
@@ -579,8 +589,6 @@ sub _do_query_MatScanVsInputMatrix {
 		
 		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
-		
-		# %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
 	    elsif (isCollectionArticle ($DOM)) {
 
@@ -620,18 +628,16 @@ sub _do_query_MatScanVsInputMatrix {
 	    }
 
 	} # End parsing sequences article tag
-	elsif ($articleName eq "matrix") {
+	elsif (($articleName eq "matrices") || ($articleName =~ /matrices/i)) {
 	    
 	    $matrix = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    
+	    if ($_debug) {
+		print STDERR "parsed matrix, $matrix\n";
+	    }
 
 	    if (not defined $matrix) {
 		print STDERR "Error, can't parse the input matrix...\n";
-	    }
-
-	    if (not ($matrix =~ /^\w/)) {
-		print STDERR "matrix formatting requires some cleaning - not starting with a letter, neither finishing properly!\n";
-		$matrix =~ s/^\s+//;
-		$matrix =~ s/\s+$//;
 	    }
 	}
 
@@ -656,7 +662,7 @@ sub _do_query_MatScanVsInputMatrix {
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    if ($matrix eq "") {
+    if ((! defined $matrix) || ($matrix eq "")) {
 	my $note = "can't parse any matrix...\n";
 	print STDERR "$note\n";
 	my $code = "201";

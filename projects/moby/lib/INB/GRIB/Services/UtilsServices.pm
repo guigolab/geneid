@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.20 2006-02-07 12:13:00 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.21 2006-02-15 16:49:18 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -242,7 +242,7 @@ sub _do_query_TranslateGeneIDGFF {
 	    
 	    # Validate the type
 	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
-	    if (!$rightType) {
+	    if ((! defined $rightType) || !$rightType) {
 		my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
 		print STDERR "$note\n";
 		my $code = "201";
@@ -540,9 +540,11 @@ sub _do_query_fromGenericSequencestoFASTA {
 	
 	my $fasta_object = <<PRT;
 <moby:$moby_output_format namespace='$namespace' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $fasta_sequences
 ]]>
+</String>
 </moby:$moby_output_format>
 PRT
  
@@ -705,9 +707,14 @@ sub _do_query_fromFASTAtoMobySequences {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
+
+    print STDERR "nb sequences, " . @$seqobjs . "\n";
     
     $MOBY_RESPONSE = collectionResponse($seqobjs, $output_article_name, $queryID);
-    
+
+    print STDERR "MOBY response,\n";
+    print STDERR "$MOBY_RESPONSE\n";
+
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
@@ -757,7 +764,7 @@ sub _do_query_generateScoreMatrix {
     my $queryID    = getInputID ($queryInput_DOM);
     my @articles   = getArticles($queryInput_DOM);
     my $namespace = "";
-        
+
     # Get the parameters
     
     ($input_format)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "input format");
@@ -883,7 +890,7 @@ sub _do_query_generateScoreMatrix {
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
-    # la podriamos realizar en una funcion a parte si fuese compleja.  
+    # la podriamos realizar en una funcion a parte si fuese compleja.
     
     if (defined $matrix) {
 	
@@ -891,11 +898,29 @@ sub _do_query_generateScoreMatrix {
 	
 	my $output_object = <<PRT;
 <moby:$_moby_output_format namespace='$namespace' id=''>
+<String namespace='' id='' articleName='content'>
+<![CDATA[
+$matrix
+]]>
+</String>
+</moby:$_moby_output_format>
+PRT
+
+        # Until Joaquim updates inbTreeView, we need to remain with the former String specs for this service....
+
+	$output_object = <<PRT;
+<moby:$_moby_output_format namespace='$namespace' id=''>
 <![CDATA[
 $matrix
 ]]>
 </moby:$_moby_output_format>
 PRT
+
+
+        if ($_debug) {
+	    print STDERR "Matrix moby object,\n";
+	    print STDERR "$output_object\n";
+	}
 
         $MOBY_RESPONSE = simpleResponse($output_object, $output_article_name, $queryID);
     }

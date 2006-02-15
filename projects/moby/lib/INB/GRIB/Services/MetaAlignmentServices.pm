@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.17 2006-02-07 12:13:00 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.18 2006-02-15 16:49:18 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -355,9 +355,11 @@ sub _do_query_MetaAlignment {
 	
 	my $input = <<PRT;
 <moby:$_moby_output_format namespace='' id='$sequenceIdentifier_1'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $meta_report
 ]]>
+</String>
 </moby:$_moby_output_format>
 PRT
   
@@ -593,9 +595,11 @@ sub _do_query_MultiMetaAlignment {
 			
 			my $output_object = <<PRT;
 <moby:$_moby_output_format namespace='' id=''>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 $meta_report
 ]]>
+</String>
 </moby:$_moby_output_format>
 PRT
 
