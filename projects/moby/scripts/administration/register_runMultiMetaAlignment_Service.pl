@@ -161,7 +161,7 @@ my ($REG) = $Central->registerService(
 							    ['maps', [['GFF' => \@namespaces]]],
 							   ],
 				      output		=> [
-							    ['meta_predictions', [['text-formatted' => \@namespaces]]]
+							    ['meta_predictions', [['meta_alignment_text' => \@namespaces]]]
 							   ],
 				      secondary	=> {
 					  'alpha penalty' => {
