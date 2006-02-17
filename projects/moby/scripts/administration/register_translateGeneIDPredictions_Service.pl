@@ -158,7 +158,7 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input	   => [
-						       ['sequences', ["NucleotideSequence" => \@namespaces]],
+						       ['sequence', ["DNASequence" => \@namespaces]],
 						       ['geneid_predictions', ["GFF" => \@namespaces]]
 						      ],
 				      output       => [

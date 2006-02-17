@@ -154,7 +154,7 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', ["NucleotideSequence" => []]],
+							    ['sequence', ["DNASequence" => []]],
 							    ],
 				      output		=> [
 							    ['geneid_predictions', ["text-html" => []]],
