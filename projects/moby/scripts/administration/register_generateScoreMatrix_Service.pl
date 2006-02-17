@@ -51,7 +51,7 @@ BEGIN {
     getopt($switches);
     
     # If the user does not write nothing, skip to help
-    if (defined($opt_h) || !defined($opt_x) || !defined($opt_s)){
+    if (defined($opt_h) || !defined($opt_x)){
 	print STDERR help;
 	exit 0;
     }
@@ -127,7 +127,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "fromMetaAlignmentstoScoreMatrix";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -151,24 +151,19 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "Parsing",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Compute similarity data, such as meta-alignment output, to produce a sequence similarity score matrix.",
+				      description  => "Parse a collection of meta-alignment outputs to produce a sequence similarity score matrix.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['similarity_results', [['text-formatted' => \@namespaces]]],
+							    ['similarity_results', [['meta_alignment_text' => \@namespaces]]],
 							   ],
 				      output		=> [
 							    ['score_matrix', ['text-formatted' => \@namespaces]]
 							   ],
 				      secondary	=> {
-					  'input format' => {
-					      datatype => 'String',
-					      enum     => ['meta-alignment'],
-					      default  => 'meta-alignment'
-					  },
   					  'output format' => {
 					      datatype => 'String',
 					      enum     => ['Phylip','SOTA'],
