@@ -127,7 +127,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s || "runMatScanGFFCollectionVsMotifMatrices";
+my $serviceName = $opt_s || "runMatScanGFFCollectionVsInputMatrices";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
