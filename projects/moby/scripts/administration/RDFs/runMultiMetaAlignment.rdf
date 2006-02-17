@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xmlns:serviceInstances="http://biomoby.org/RESOURCES/MOBY-S/ServiceInstances#"
+    xmlns:mobyServiceDescription="http://biomoby.org/RESOURCES/MOBY-S/ServiceDescription#"
+    xmlns:mygrid="http://www.mygrid.org.uk/ontology#"
+    xmlns:mobyObject="http://biomoby.org/RESOURCES/MOBY-S/Objects#"
+    xmlns:mobyNamespace="http://biomoby.org/RESOURCES/MOBY-S/Namespaces#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:mobyService="http://biomoby.org/RESOURCES/MOBY-S/Services#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+     <mygrid:serviceDescription rdf:about="urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runMultiMetaAlignment">
+          <mygrid:hasServiceDescriptionText>Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files</mygrid:hasServiceDescriptionText>
+          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceNameText>runMultiMetaAlignment</mygrid:hasServiceNameText>
+          <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
+          <dc:format>moby</dc:format>
+          <mygrid:hasOperation>
+               <mygrid:operation>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterType>
+                                   <mygrid:collectionParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:objectType rdf:resource="http://biomoby.org/RESOURCES/MOBY-S/Objects#GFF"/>
+                              <mygrid:hasParameterNameText>maps</mygrid:hasParameterNameText>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Float</mobyServiceDescription:datatype>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >0.1</mygrid:hasDefaultValue>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >lamba penalty</mygrid:hasParameterNameText>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Float</mobyServiceDescription:datatype>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >0.5</mygrid:hasDefaultValue>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >alpha penalty</mygrid:hasParameterNameText>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:hasOperationNameText>runMultiMetaAlignment</mygrid:hasOperationNameText>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >0.1</mygrid:hasDefaultValue>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Float</mobyServiceDescription:datatype>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >mu penalty</mygrid:hasParameterNameText>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:outputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterNameText>meta_predictions</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:objectType rdf:resource="http://biomoby.org/RESOURCES/MOBY-S/Objects#text-formatted"/>
+                              <mygrid:hasParameterType>
+                                   <mygrid:collectionParameter/>
+                              </mygrid:hasParameterType>
+                         </mygrid:parameter>
+                    </mygrid:outputParameter>
+                    <mygrid:performsTask>
+                         <mobyService:Analysis>
+                              <rdf:type rdf:resource="http://www.mygrid.org.uk/ontology#operationTask"/>
+                         </mobyService:Analysis>
+                    </mygrid:performsTask>
+               </mygrid:operation>
+          </mygrid:hasOperation>
+          <mygrid:providedBy>
+               <mygrid:organisation>
+                    <dc:creator>akerhornou@imim.es</dc:creator>
+                    <mobyServiceDescription:authoritative>false</mobyServiceDescription:authoritative>
+                    <dc:publisher>genome.imim.es</dc:publisher>
+               </mygrid:organisation>
+          </mygrid:providedBy>
+     </mygrid:serviceDescription>
+</rdf:RDF>

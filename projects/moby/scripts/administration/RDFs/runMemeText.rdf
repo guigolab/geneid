@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xmlns:serviceInstances="http://biomoby.org/RESOURCES/MOBY-S/ServiceInstances#"
+    xmlns:mobyServiceDescription="http://biomoby.org/RESOURCES/MOBY-S/ServiceDescription#"
+    xmlns:mygrid="http://www.mygrid.org.uk/ontology#"
+    xmlns:mobyObject="http://biomoby.org/RESOURCES/MOBY-S/Objects#"
+    xmlns:mobyNamespace="http://biomoby.org/RESOURCES/MOBY-S/Namespaces#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:mobyService="http://biomoby.org/RESOURCES/MOBY-S/Services#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+     <mygrid:serviceDescription rdf:about="urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runMemeText">
+          <mygrid:hasServiceNameText>runMemeText</mygrid:hasServiceNameText>
+          <mygrid:hasOperation>
+               <mygrid:operation>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterNameText>sequences</mygrid:hasParameterNameText>
+                              <mygrid:hasParameterType>
+                                   <mygrid:collectionParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:objectType rdf:resource="http://biomoby.org/RESOURCES/MOBY-S/Objects#GenericSequence"/>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >zero or one</mobyServiceDescription:enum>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >motif distribution</mygrid:hasParameterNameText>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >any number of repetitions</mobyServiceDescription:enum>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >String</mobyServiceDescription:datatype>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >zero or one</mygrid:hasDefaultValue>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >one</mobyServiceDescription:enum>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mobyServiceDescription:min rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >2</mobyServiceDescription:min>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Integer</mobyServiceDescription:datatype>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >minimum sites for each motif</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:max rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >300</mobyServiceDescription:max>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >6</mygrid:hasDefaultValue>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >minimum optimum width</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Integer</mobyServiceDescription:datatype>
+                              <mobyServiceDescription:min rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >2</mobyServiceDescription:min>
+                              <mobyServiceDescription:max rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >300</mobyServiceDescription:max>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mobyServiceDescription:min rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >2</mobyServiceDescription:min>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >15</mygrid:hasDefaultValue>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >maximum optimum width</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Integer</mobyServiceDescription:datatype>
+                              <mobyServiceDescription:max rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >300</mobyServiceDescription:max>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >motif E-value cutoff</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >String</mobyServiceDescription:datatype>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >1</mygrid:hasDefaultValue>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:outputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterNameText>meme_predictions</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:objectType rdf:resource="http://biomoby.org/RESOURCES/MOBY-S/Objects#text-formatted"/>
+                              <mygrid:hasParameterType>
+                                   <mygrid:simpleParameter/>
+                              </mygrid:hasParameterType>
+                         </mygrid:parameter>
+                    </mygrid:outputParameter>
+                    <mygrid:hasOperationNameText>runMemeText</mygrid:hasOperationNameText>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mobyServiceDescription:min rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >-2147483648</mobyServiceDescription:min>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:max rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >12</mobyServiceDescription:max>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Integer</mobyServiceDescription:datatype>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >8</mygrid:hasDefaultValue>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >maximum number of motifs</mygrid:hasParameterNameText>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:performsTask>
+                         <mobyService:Analysis>
+                              <rdf:type rdf:resource="http://www.mygrid.org.uk/ontology#operationTask"/>
+                         </mobyService:Analysis>
+                    </mygrid:performsTask>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >5</mobyServiceDescription:enum>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >None</mobyServiceDescription:enum>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >3</mobyServiceDescription:enum>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >4</mobyServiceDescription:enum>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >background markov model training (value is the model order)</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >1</mobyServiceDescription:enum>
+                              <mygrid:hasDefaultValue rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >1</mygrid:hasDefaultValue>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:enum rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >2</mobyServiceDescription:enum>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >String</mobyServiceDescription:datatype>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+                    <mygrid:inputParameter>
+                         <mygrid:parameter>
+                              <mygrid:hasParameterNameText rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#string"
+                              >maximum sites for each motif</mygrid:hasParameterNameText>
+                              <mobyServiceDescription:datatype
+                               rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                              >Integer</mobyServiceDescription:datatype>
+                              <mobyServiceDescription:max rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >300</mobyServiceDescription:max>
+                              <mygrid:hasParameterType>
+                                   <mygrid:secondaryParameter/>
+                              </mygrid:hasParameterType>
+                              <mobyServiceDescription:min rdf:datatype=
+                              "http://www.w3.org/2001/XMLSchema#int"
+                              >2</mobyServiceDescription:min>
+                         </mygrid:parameter>
+                    </mygrid:inputParameter>
+               </mygrid:operation>
+          </mygrid:hasOperation>
+          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <dc:format>moby</dc:format>
+          <mygrid:providedBy>
+               <mygrid:organisation>
+                    <dc:publisher>genome.imim.es</dc:publisher>
+                    <dc:creator>akerhornou@imim.es</dc:creator>
+                    <mobyServiceDescription:authoritative>false</mobyServiceDescription:authoritative>
+               </mygrid:organisation>
+          </mygrid:providedBy>
+          <mygrid:hasServiceDescriptionText>MEME analyzes a set of protein or DNA sequences for similarities among them and produce a description (motif) for each pattern it discovers. The results are returned in text format</mygrid:hasServiceDescriptionText>
+          <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
+     </mygrid:serviceDescription>
+</rdf:RDF>
