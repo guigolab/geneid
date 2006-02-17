@@ -156,10 +156,10 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', ["GenericSequence" => \@namespaces]],
+							    ['sequence', ["GenericSequence" => \@namespaces]],
 							    ],
 				      output		=> [
-							    ['sequences', ["FASTA" => \@namespaces]],
+							    ['sequence', ["FASTA" => \@namespaces]],
 							    ],
 				      
 				      );
