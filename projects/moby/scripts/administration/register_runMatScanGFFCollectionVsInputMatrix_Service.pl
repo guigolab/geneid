@@ -51,7 +51,7 @@ BEGIN {
     getopt($switches);
     
     # If the user does not write nothing, skip to help
-    if (defined($opt_h) || !defined($opt_x) || !defined($opt_s)){
+    if (defined($opt_h) || !defined($opt_x)){
 	print STDERR help;
 	exit 0;
     }
@@ -127,7 +127,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "runMatScanGFFCollectionVsMotifMatrices";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
