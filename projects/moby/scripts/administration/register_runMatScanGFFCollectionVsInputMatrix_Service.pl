@@ -158,8 +158,8 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['upstream_sequences', [['NucleotideSequence' => \@namespaces]]], # collection of one object type,
-							    ['matrices', ['Text-formatted' => \@namespaces]]
+							    ['sequences', [['NucleotideSequence' => \@namespaces]]], # collection of one object type,
+							    ['motif_matrices', ['Text-formatted' => \@namespaces]]
 							   ],
 				      output		=> [
 							    ['matscan_predictions', [['GFF' => \@namespaces]]] # collection of one object type

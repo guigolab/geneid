@@ -158,15 +158,15 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['upstream_sequences', [['NucleotideSequence' => \@namespaces]]] # collection of one object type
+							    ['sequences', [['NucleotideSequence' => \@namespaces]]] # collection of one object type
 							   ],
 				      output		=> [
 							    ['matscan_predictions', [['GFF' => \@namespaces]]] # collection of one object type
 							   ],
 				      secondary	=> {
-					  'matrix' => {
+					  'motif database' => {
 					      datatype => 'String',
-					      enum     => ['Transfac','MEME','Jaspar'],
+					      enum     => ['Transfac','Jaspar'],
 					      default  => 'Transfac',
 					  },
 					  'matrix mode' => {
