@@ -161,7 +161,7 @@ my ($REG) = $Central->registerService(
 							    ['sequences', [['GenericSequence' => \@namespaces]]] # collection of one object type
 							   ],
 				      output		=> [
-							    ['meme_predictions', ['text-formatted' => \@namespaces]]
+							    ['meme_predictions', ['MEME_Text' => \@namespaces]]
 							   ],
 				      secondary	=> {
 					  'motif distribution' => {
