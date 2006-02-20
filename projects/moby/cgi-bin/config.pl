@@ -12,8 +12,9 @@ use lib "/home/ug/gmaster/projects/moby/biomoby.0.8.2a/Perl";
 # use lib "/home/ug/gmaster/projects/lib/site_perl/5.8.5";
 
 # Log::Log4perl and depedencies - temporary place !
-use lib "/home/ug/gmaster/projects/lib/site_perl/5.8.5";
-use lib "/home/ug/gmaster/projects/lib/site_perl/5.8.5/i686-linux-thread-multi";
+# Installed Globally now
+# use lib "/home/ug/gmaster/projects/lib/site_perl/5.8.5";
+# use lib "/home/ug/gmaster/projects/lib/site_perl/5.8.5/i686-linux-thread-multi";
 
 # GOstat setup
 
