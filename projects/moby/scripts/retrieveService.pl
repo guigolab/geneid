@@ -24,16 +24,16 @@ Usage:
 
 retrieveService.pl [-h] -x {Moby Central} -s {Service Name} -w {Host Server}
 	-h help
-	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
+	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 		<1> or Chirimoyo
-		<2> or Xistral
+		<2> or Mobydev
 		<3> or Inab
 		<4> or BioMoby
 	-s Service Name
 	-w Host Server
 	
 Examples using some combinations:
-	perl retrieveService.pl -x Xistral -s runGeneIDGFF -w genome.imim.es
+	perl retrieveService.pl -x Mobydev -s runGeneIDGFF -w genome.imim.es
 
 END_HELP
 
@@ -86,12 +86,12 @@ if (defined($opt_x)) {
 		$ENV{MOBY_URI}='http://chirimoyo.ac.uma.es/MOBY/Central';
 		$ENV{MOBY_SERVER}='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
 	
-	}elsif (($opt_x =~ /xistral/i) || (($opt_x =~ /\d/) && ($opt_x == 2))) {
+	}elsif (($opt_x =~ /moby-dev.inab.org/i) || (($opt_x =~ /\d/) && ($opt_x == 2))) {
 	
 		# export MOBY_URI
 		# export MOBY_SERVER
-		$ENV{MOBY_URI}='http://xistral/MOBY/Central';
-		$ENV{MOBY_SERVER}='http://xistral/cgi-bin/MOBY-Central.pl';
+		$ENV{MOBY_URI}='http://moby-dev.inab.org/MOBY/Central';
+		$ENV{MOBY_SERVER}='http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
 
 	}elsif (($opt_x =~ /inab/i) || (($opt_x =~ /\d/) && ($opt_x == 3))) {
 
@@ -184,4 +184,4 @@ if (@secondaryArticles > 0) {
     }
 }
 
-# print "***********\nXML:\n", $si->XML,"\n***********\n";
+print "***********\nXML:\n", $si->XML,"\n***********\n";

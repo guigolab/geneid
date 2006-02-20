@@ -25,9 +25,9 @@ Description: Register a service in Moby Central
     
     registerService.pl [-h] -x {Moby Central} -s {Service Name}
     -h help
-	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
+	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 	<1> or Chirimoyo
-	<2> or Xistral
+	<2> or Mobydev
 	<3> or Inab
 	<4> or BioMoby
 	-s Service Name
@@ -84,10 +84,12 @@ if (defined($opt_x)) {
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
 	
     }
-    elsif (($opt_x == 2) || ($opt_x eq 'Xistral')) {
+    elsif (($opt_x == 2) || ($opt_x eq 'Mobydev')) {
 	
-	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://xistral/MOBY/Central';
-	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://xistral/cgi-bin/MOBY-Central.pl';
+	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://moby-dev.inab.org/MOBY/Central';
+	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
+
+	$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
 	
     }
     elsif (($opt_x == 3) || ($opt_x eq 'Inab')) {
@@ -158,22 +160,22 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['genes', ["Object" => $namespaces]],
+							    ['gene', ["Object" => $namespaces]],
 							   ],
 				      output		=> [
-							    ['upstream_sequences', [['CommentedDNASequence' => ['Ensembl']]]] # collection of one object type
+							    ['upstream_sequence', [['CommentedDNASequence' => ['Ensembl']]]] # collection of one object type
 							   ],
 				      secondary	=> {
 					  'organism' => {
 					      datatype => 'String',
-					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Monodelphis domestica', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
+					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Macaca mulatta', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Monodelphis domestica', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
 					      default  => 'Homo sapiens',
 					  },
 					  'ensembl release' => {
 					      datatype => 'String',
-					      enum     => ['35','34','33','32','31','30','29'],
-					      default  => '35',
-					      max      => '35',
+					      enum     => ['37','36','35','34','33','32','31','30','29'],
+					      default  => '37',
+					      max      => '37',
 					      min      => '29',
 					  },
 					  'upstream length' => {

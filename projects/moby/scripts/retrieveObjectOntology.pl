@@ -83,7 +83,7 @@ sub createImageOntologyFileByDotProgram($$$\%);
 #
 # INPUTS: 	- Input parameter giving by user ($opt_x)
 #
-# OUTPUT: 	- Moby Central name (Chirimoyo, Inab, Xistral, ...)
+# OUTPUT: 	- Moby Central name (Chirimoyo, Inab, Mobydev, ...)
 #
 # AUTHOR: Jose Manuel Rodriguez Carrasco -jmrc@cnb.uam.es- (INB-CNB)
 ###############################################################################

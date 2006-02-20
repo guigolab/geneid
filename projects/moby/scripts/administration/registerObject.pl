@@ -12,10 +12,10 @@ use MOBY::Client::Central;
 use MOBY::CommonSubs;
 
 # URI
-$::authURI = 'pdg.cnb.uam.es';
+$::authURI = 'genome.imim.es';
 
 # Contac e-mail
-$::contactEmail = 'jmrc@cnb.uam.es';
+$::contactEmail = 'akerhornou@imim.es';
 
 
 # Connect to MOBY-Central registries for searching.

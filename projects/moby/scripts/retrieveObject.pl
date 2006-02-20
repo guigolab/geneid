@@ -19,15 +19,15 @@ Usage:
 
 retrieveObject.pl [-h] -x {Moby Central} -o {Object Name}
 	-h help
-	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
+	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 		<1> or Chirimoyo
-		<2> or Xistral
+		<2> or mobydev
 		<3> or Inab
 		<4> or BioMoby
 	-o Object Name
 	
 Examples using some combinations:
-	perl retrieveObject.pl -x Xistral -o Object
+	perl retrieveObject.pl -x Inab -o Object
 
 END_HELP
 
@@ -70,12 +70,12 @@ if (defined($opt_x)) {
 		$ENV{MOBY_URI}='http://chirimoyo.ac.uma.es/MOBY/Central';
 		$ENV{MOBY_SERVER}='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
 	
-	}elsif (($opt_x == 2) || ($opt_x eq 'Xistral')) {
+	}elsif (($opt_x == 2) || ($opt_x eq 'Mobydev')) {
 	
 		# export MOBY_URI
 		# export MOBY_SERVER
-		$ENV{MOBY_URI}='http://xistral/MOBY/Central';
-		$ENV{MOBY_SERVER}='http://xistral/cgi-bin/MOBY-Central.pl';
+		$ENV{MOBY_URI}='http://moby-dev.inab.org/MOBY/Central';
+		$ENV{MOBY_SERVER}='http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
 
 	}elsif (($opt_x == 3) || ($opt_x eq 'Inab')) {
 
@@ -104,6 +104,11 @@ if (defined($opt_x)) {
 
 # Connect to MOBY-Central registries for searching.
 my $MOBYCentral = MOBY::Client::Central->new();
+
+if (! defined $MOBYCentral) {
+	print STDERR "Error, could not instanciate MOBY Central!\n";
+	exit 1;
+}
 
 # Retrieve the definition (type, description, relations, ...) from the input object.
 my $objDefinition = $MOBYCentral->retrieveObjectDefinition($opt_o);

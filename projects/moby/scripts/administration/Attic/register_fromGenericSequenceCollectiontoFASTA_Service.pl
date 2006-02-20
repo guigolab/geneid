@@ -23,9 +23,9 @@ Description: Register a service in Moby Central
     
     registerService.pl [-h] -x {Moby Central} -s {Service Name}
     -h help
-	-x MOBY Central: Chirimoyo, Xistral, Inab or BioMoby
+	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 	<1> or Chirimoyo
-	<2> or Xistral
+	<2> or Mobydev
 	<3> or Inab
 	<4> or BioMoby
 	-s Service Name
@@ -82,11 +82,13 @@ if (defined($opt_x)) {
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
 	
     }
-    elsif (($opt_x == 2) || ($opt_x eq 'Xistral')) {
+    elsif (($opt_x == 2) || ($opt_x eq 'Mobydev')) {
 	
-	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://xistral/MOBY/Central';
-	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://xistral/cgi-bin/MOBY-Central.pl';
+	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://moby-dev.inab.org/MOBY/Central';
+	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
 	
+	$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
+
     }
     elsif (($opt_x == 3) || ($opt_x eq 'Inab')) {
 
