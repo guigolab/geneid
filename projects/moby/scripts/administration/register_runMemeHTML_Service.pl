@@ -204,7 +204,7 @@ my ($REG) = $Central->registerService(
 					  'background markov model training (value is the model order)' => {
 					      datatype => 'String',
 					      default  => "1",
-					      enum     => ['None', '1','2','3','4','5'],
+					      enum     => ['None', '1','2','3'],
 					  },
 				      }
 				      );
