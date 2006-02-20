@@ -145,17 +145,6 @@ BEGIN {
     # Global variables definition
     use vars qw /$_debug %opts $release $species $report_features $intergenic_only $upstream_length $downstream_length $geneIds_file $dbhost_default $dbuser_default $dbpassword_default $dbhost_latest $dbuser_latest $dbpassword_latest $dbensembl $orthologous_mode $_config_file_path $_libraries_path $latest_release/;
     
-    $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
-    # $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
-    
-    if (-f "$_config_file_path") {
-        require "$_config_file_path";
-    }
-    else {
-        print STDERR "There is a problem with the configuration, contact gmaster\@imim.es for help\n";
-        exit 0;
-    }
-    
     # these are switches taking an argument (a value)
     my $switches = 'hf:s:r:u:d:igo';
     
@@ -166,7 +155,18 @@ BEGIN {
     if (defined($opts{h}) || !defined($opts{f}) || !defined($opts{s}) || !defined($opts{r})){
 	print STDERR help;
 	exit 0;
-    }    
+    }
+
+    $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
+    # $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
+    
+    if (-f "$_config_file_path") {
+        require "$_config_file_path";
+    }
+    else {
+        print STDERR "There is a problem with the configuration, contact gmaster\@imim.es for help\n";
+        exit 0;
+    }
     
 }
 
