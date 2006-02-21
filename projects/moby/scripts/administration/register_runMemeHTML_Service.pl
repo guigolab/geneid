@@ -153,7 +153,7 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "SequenceAnalysis",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "MEME analyzes a set of protein or DNA sequences for similarities among them and produce a description (motif) for each pattern it discovers. The results are returned in HTML format",
