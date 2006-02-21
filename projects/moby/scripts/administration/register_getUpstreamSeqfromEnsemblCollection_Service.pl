@@ -163,7 +163,7 @@ my ($REG) = $Central->registerService(
 							    ['genes', [["Object" => $namespaces]]],
 							   ],
 				      output		=> [
-							    ['upstream_sequences', [['CommentedDNASequence' => ['Ensembl']]]] # collection of one object type
+							    ['upstream_sequences', [['CommentedDNASequence' => ['ENSEMBL']]]] # collection of one object type
 							   ],
 				      secondary	=> {
 					  'organism' => {
