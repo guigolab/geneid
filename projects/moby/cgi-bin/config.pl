@@ -25,4 +25,7 @@ $ENV{GOSTAT} = "/home/ug/gmaster/projects/gostat";
 # SGP2 setup
 $ENV{SGP2} = "/home/ug/gmaster/sgp2/sgp2_2003/";
 
+# Statistic reporting file name
+$ENV{STATS_FILE}="/home/ug/gmaster/projects/moby_logs/moby_services_statistics.log";
+
 1;

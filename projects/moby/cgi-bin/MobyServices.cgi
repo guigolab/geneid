@@ -67,10 +67,11 @@ if ($ARGV[0] and $ARGV[0] =~ /^--daemon$/) {
 ##############################################################################
 # Stats reporting into a file
 
+my $logfile = $ENV{STATS_FILE};
 Log::Log4perl->easy_init($INFO);
 my $appender = Log::Log4perl::Appender->new(
 					    "Log::Dispatch::File",
-					    filename => "/home/ug/gmaster/projects/moby_logs/moby_services_statistics.log",
+					    filename => "$logfile",
 					    mode     => "append",
 					    );
 my $moby_logger = get_logger ("MobyServices");
