@@ -48,6 +48,7 @@ our @EXPORT = qw(
   &convertSequencesIntoFASTA
   &validateDataType
   &getNamespace
+  &setMobyResponse
   &MOBY_EMPTY_RESPONSE
   &MOBY_EMPTY_SIMPLE_RESPONSE
   &MOBY_EMPTY_COLLECTION_RESPONSE
@@ -624,6 +625,62 @@ sub is_in {
 	}
     }
     return 0;
+}
+
+# Set a Moby response that will return to a user
+# It takes:
+# * the output embedded in a mobyData block
+# * a set of Exceptions
+# * the moby_logger instance so we can log the executino status of the requested service
+# * the service name
+# it returns a mobyContent object
+
+sub setMobyResponse {
+    my $self = shift;
+    my ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName) = @_;
+    
+    if (@$moby_exceptions > 0) {
+	# build the moby exception response
+	my $moby_exception_response = "";
+	my %severities;
+	foreach my $moby_exception (@$moby_exceptions) {
+	    my $severity = $moby_exception->getExceptionType;
+	    $severities{$severity} = $moby_exception;
+	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
+	}
+	
+	# logging report
+	# Check 'error' first then 'warning' or 'information'
+	if (defined $severities{error}) {
+	    my $exception = $severities{error};
+	    $moby_logger->info ("$serviceName failed");
+	    $moby_logger->info ("Exception code, " . $exception->getExceptionCode);
+	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
+	}
+	elsif (defined $severities{warning} || defined $severities{information}) {
+	    my $exception = $severities{error};
+	    $moby_logger->info ("$serviceName terminated successfully with warning or information notes");
+	    $moby_logger->info ("Exception code, " . $exception->getExceptionCode);
+	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
+	}
+	
+	return responseHeader(
+			      -authority => "genome.imim.es",
+			      -note      => "$moby_exception_response"
+			      )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
+    else {
+	$moby_logger->info ("$serviceName terminated successfully");
+	$moby_logger->info ("Exception code, 700");
+	
+	my $note = "Service execution succeeded";
+	return responseHeader (
+			       -authority => "genome.imim.es",
+			       -note      => "<Notes>$note</Notes>"
+			       )
+	    . $MOBY_RESPONSE . responseFooter;
+    }
 }
 
 1;
