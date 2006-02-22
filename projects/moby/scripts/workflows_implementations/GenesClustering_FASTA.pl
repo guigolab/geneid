@@ -878,8 +878,6 @@ sub getFileNameSuffix {
 sub hasFailed {
     my ($moby_response) = @_;
     
-    # print STDERR "XML Dumping, before, $moby_response\n";
-
     # convert 
     # "&lt;Notes&gt;Service execution succeeded&lt;/Notes&gt;"
     # into
@@ -900,7 +898,7 @@ sub hasFailed {
 sub getExceptionMessage {
     my ($moby_response) = @_;
     
-    # convert 
+    # convert string like the following one
     # "&lt;Notes&gt;Service execution succeeded&lt;/Notes&gt;"
     # into
     # "<Notes>Service execution succeeded</Notes>"
