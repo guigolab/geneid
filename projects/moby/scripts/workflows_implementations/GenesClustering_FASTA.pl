@@ -43,10 +43,10 @@ Usage:
         -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
-	-c workflow configuration file (default is $HOME/.workflow.config)
+	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c $HOME/.workflow.config -t 0.80 -d jaspar -m nearest -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -m nearest -o output
 
 END_HELP
 
