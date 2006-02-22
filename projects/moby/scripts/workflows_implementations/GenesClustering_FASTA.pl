@@ -587,7 +587,9 @@ my $picture = decode_base64($picture_b64);
 
 print STDERR "Picture done\n\n";
 print STDERR "Workflow has terminated.\n";
-print $picture;
+if (! defined $output_dir) {
+    print $picture;
+}
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
