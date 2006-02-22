@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.21 2006-02-15 16:49:18 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.22 2006-02-22 18:22:33 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -654,6 +654,9 @@ sub _do_query_fromFASTAtoMobySequences {
 	    
 	    my @namespaces = INB::GRIB::Utils::CommonUtilsSubs->getNamespace ($DOM);
 	    if (@namespaces > 1) {
+
+		# Will never happen as it is a simple...
+
 		my $note = "Collection contains sequence objects belonging to more than one namespace. Returning a FASTA object with an empty namespace\n";
 		print STDERR "$note\n";
 		my $code = "201";
@@ -673,7 +676,10 @@ sub _do_query_fromFASTAtoMobySequences {
 		print STDERR "\"sequences\" tag is a simple article...\n";
 		print STDERR "stringified DOM, " . $DOM->toString () . "\n";
 	    }
-	    
+
+	    # with this method, if the FASTA object is not compliant with latest specs, it won't be parsed
+	    # ($fasta_seqs) = getNodeContentWithArticle($DOM, "String", "content");	
+	    # Let's be backward compatible for the time being...
 	    $fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "FASTA");
 	    if ((not defined $fasta_seqs) || ($fasta_seqs eq "")) {
 		$fasta_seqs = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
@@ -692,7 +698,7 @@ sub _do_query_fromFASTAtoMobySequences {
     # Check that we have parsed properly the sequences
     
     if (@$seqobjs == 0) {
-	my $note = "can't parse any sequences...\n";
+	my $note = "Can't parse any sequences, Please check the syntax of your fasta file.\n";
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -708,12 +714,7 @@ sub _do_query_fromFASTAtoMobySequences {
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
-    print STDERR "nb sequences, " . @$seqobjs . "\n";
-    
     $MOBY_RESPONSE = collectionResponse($seqobjs, $output_article_name, $queryID);
-
-    print STDERR "MOBY response,\n";
-    print STDERR "$MOBY_RESPONSE\n";
 
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
