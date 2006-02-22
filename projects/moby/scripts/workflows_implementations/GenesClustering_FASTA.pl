@@ -34,18 +34,18 @@ Usage:
 
     GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -m {Hierarchical clustering method} -o {Output directory}
 	-h help
-	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
-		<1> or Chirimoyo
-		<2> or Mobydev
-		<3> or Inab
-		<4> or BioMoby
+	-x MOBY Central: Inab, BioMoby, Mobydev
+		<1> or Inab     (Default)
+		<2> or BioMoby
+		<3> or Mobydev
 	-f Sequence(s) input file, in FASTA format
         -t MatScan probability threshold (Default is 0.85)
         -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
+
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 3 -f /home/ug/arnau/data/AC005155.fa -c config.txt -t 0.80 -d jaspar -m nearest -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c config.txt -t 0.80 -d jaspar -m nearest -o output
 
 END_HELP
 
@@ -82,7 +82,7 @@ my $_debug = 0;
 
 # input file
 
-my $in_file = $opt_f || "~/data/promoterExtraction/Homo_sapiens.fa";
+my $in_file = $opt_f || $ENV{HOME} . "/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa";
 if (not (-f $in_file)) {
     print STDERR "Error, can't find input file, $in_file\n";
     exit 1;
@@ -111,7 +111,7 @@ my $database  = $opt_d || "transfac";
 
 my $serviceName = undef;
 
-my $config_file = $opt_c || "~/cvs/GRIB/projects/moby/scripts/workflows_implementations/config.txt";
+my $config_file = $opt_c || $ENV{HOME} . "/.workflow.config";
 if (not (-f $config_file)) {
     print STDERR "Error, can't find config file, $config_file\n";
     exit 1;
@@ -168,29 +168,23 @@ if (defined($opt_x)) {
         $opt_x =~ s/\s//g;
     
 	# Assign the MOBY Server and MOBY URI
-	if (($opt_x == 1) || ($opt_x eq 'Chirimoyo')) {
-	    
-	    $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
-	    $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://chirimoyo.ac.uma.es/MOBY/Central';
+	if (($opt_x == 1) || (lc ($opt_x) eq 'inab')) {
+
+	    $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
+	    $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
 	    $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
-	
-	}elsif (($opt_x == 2) || ($opt_x eq 'Mobydev')) {
-	
-		$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
-		$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://moby-dev.inab.org/MOBY/Central';
-		$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
-	}elsif (($opt_x == 3) || ($opt_x eq 'Inab')) {
+	}elsif (($opt_x == 2) || (lc ($opt_x) eq 'biomoby')) {
 
-		$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
-		$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
-		$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
-	
-	}elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
+	    $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
+	    $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://mobycentral.icapture.ubc.ca/MOBY/Central';
+	    $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
+		
+	}elsif (($opt_x == 3) || (lc ($opt_x) eq 'mobydev')) {
 
-		$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
-		$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://mobycentral.icapture.ubc.ca/MOBY/Central';
-		$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
+	    $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
+	    $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://moby-dev.inab.org/MOBY/Central';
+	    $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 	}else {
 	    print STDERR "Don't anything about this registry, $opt_x!\n";
