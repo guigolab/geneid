@@ -103,6 +103,13 @@ sub getTextContentFromXML {
     $content =~ s/\n\s+/\n/;
     $content =~ s/\s+$//;
 
+    $content =~ s/^\n//g;
+    
+    # Get rid of empty lines at the end
+    while (chomp $content) {
+	# just chomp !!
+    }
+    
     return $content;
 }
 
@@ -272,6 +279,7 @@ sub _parse_fasta_sequences {
     my ($fasta_sequences) = @_;
     
     my @fasta_sequence_lines = split (/\n/, $fasta_sequences);
+    
     my $seqobjs = [];
     
     my $seq_id_previous;
@@ -295,8 +303,12 @@ sub _parse_fasta_sequences {
 	    }
 	    else {
 		$line =~ /^>(.+)/;
-
+		
 		$seq_id_current = $1;
+	    }
+	    
+	    if (!defined $seq_id_current) {
+		print STDERR "Problem parsing sequence identifier FASTA line,\n$line\n";
 	    }
 
 	    if (defined ($seq_id_previous)) {
@@ -317,10 +329,14 @@ sub _parse_fasta_sequences {
 	    $seq_desc_previous = $seq_desc_current;
 	    $seq_str  = "";
 	}
-	else {
+	elsif (length ($line) > 0) {
+	    
 	    # It's a sequence line
-
+	    
 	    $seq_str .= $line;
+	}
+	else {
+	    # empty line
 	}
     }
     
@@ -332,6 +348,7 @@ sub _parse_fasta_sequences {
 				    -desc       => $seq_desc_current,
 				    -seq        => $seq_str,
 				   );
+
 	push (@$seqobjs, $seqobj);
     }
     
