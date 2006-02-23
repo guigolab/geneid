@@ -275,6 +275,10 @@ my $evalue_cutoff_xml = <<PRT;
 <Value>$evalue_cutoff</Value>
 PRT
 
+my $motif_distribution_xml = <<PRT;
+<Value>zero or one</Value>
+PRT
+
 # ...
 
 ##################################################################
@@ -283,13 +287,17 @@ PRT
 #
 ##################################################################
 
+if ($_debug) {
+    print STDERR "service execution...\n";
+}
+
 my $result;
 
 if ($serviceType eq "Collection") {
 
     $result = $Service->execute(XMLinputlist => [
 						 ["$articleName", $inputs, 'motif E-value cutoff', $evalue_cutoff_xml]
-						 ]);
+						]);
 }
 
 ##################################################################
