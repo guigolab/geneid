@@ -1,0 +1,101 @@
+* "getUpstreamSeqfromEnsembl";
+
+				      serviceType  => "GettingNucleotides",
+				      description  => "This service has been designed to retrieve from the Ensembl database the upstream sequence of a given Ensembl gene identifier. This identifier could also be an external one, such as a Refseq Id or a Affymetrix id.",
+				      input		=> [
+							    ['gene', ["Object" => [] ]], # a simple
+							   ],
+				      output		=> [
+							    ['upstream_sequence', [['CommentedDNASequence' => ['ENSEMBL']]]] # collection of one object type
+							   ],
+				      secondary	=> {
+					  'organism' => {
+					      datatype => 'String',
+					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Macaca mulatta', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Monodelphis domestica', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
+					      default  => 'Homo sapiens',
+					  },
+					  'upstream length' => {
+					      datatype => 'Integer',
+					      default  => 2000,
+					      min      => 0,
+					  },
+					  'downstream length' => {
+					      datatype => 'Integer',
+					      default  => 0,
+					      min      => 0,
+					  },
+					  'intergenic only' => {
+					      datatype => 'String',
+					      enum     => ['True','False'],
+					      default  => 'False',
+					  },
+				      }
+
+* "getUpstreamSeqfromEnsemblCollection";
+
+				      serviceType  => "GettingNucleotides",
+				      description  => "This service has been designed to retrieve from the Ensembl database the upstream sequence of a collection of given Ensembl gene identifiers. These identifiers could also be external ones, such as Refseq Ids or Affymetrix ids.",
+				      input		=> [
+							    ['genes', [["Object" => [] ]]], # a collection
+							   ],
+				      output		=> [
+							    ['upstream_sequences', [['CommentedDNASequence' => ['ENSEMBL']]]] # collection of one object type
+							   ],
+				      secondary	=> {
+					  'organism' => {
+					      datatype => 'String',
+					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Macaca mulatta', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Monodelphis domestica', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
+					      default  => 'Homo sapiens',
+					  },
+					  'upstream length' => {
+					      datatype => 'Integer',
+					      default  => 2000,
+					      min      => 0,
+					  },
+					  'downstream length' => {
+					      datatype => 'Integer',
+					      default  => 0,
+					      min      => 0,
+					  },
+					  'intergenic only' => {
+					      datatype => 'String',
+					      enum     => ['True','False'],
+					      default  => 'False',
+					  },
+				      }
+
+
+* "getOrthologousUpstreamSeqfromEnsembl";
+
+				      serviceType  => "GettingNucleotides",
+				      description  => "This service has been designed to retrieve from the Ensembl database the upstream sequence of all orthologs of a given Ensembl gene identifier. This identifier could also be an external one, such as a Refseq Id or a Affymetrix id.",
+				      input		=> [
+							    ['gene', ["Object" => [] ]], # a simple
+							   ],
+				      output		=> [
+							    ['upstream_sequences', [['CommentedDNASequence' => ['ENSEMBL']]]] # collection of one object type
+							   ],
+				      secondary	=> {
+					  'organism' => {
+					      datatype => 'String',
+					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Macaca mulatta', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Monodelphis domestica', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
+					      default  => 'Homo sapiens',
+					  },
+					  'upstream length' => {
+					      datatype => 'Integer',
+					      default  => 2000,
+					      min      => 0,
+					  },
+					  'downstream length' => {
+					      datatype => 'Integer',
+					      default  => 0,
+					      min      => 0,
+					  },
+					  'intergenic only' => {
+					      datatype => 'String',
+					      enum     => ['True','False'],
+					      default  => 'False',
+					  },
+				      }
+
+
