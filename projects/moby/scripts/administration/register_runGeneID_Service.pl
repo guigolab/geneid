@@ -149,7 +149,7 @@ print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "GeneFinding",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Ab initio gene prediction tool.",
