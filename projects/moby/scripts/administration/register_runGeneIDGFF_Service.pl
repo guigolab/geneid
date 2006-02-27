@@ -153,7 +153,7 @@ print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "SequenceAnalysis",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Ab initio gene prediction tool - Return the output predictions in GFF format.",
@@ -168,7 +168,7 @@ my ($REG) = $Central->registerService(
 				      secondary	=> {
 					  'profile' => {
 					      datatype => 'String',
-					      enum => ['Human','Tetraodon','Drosophila','Celegans','Wheat','Arabidopsis','Rice','Plasmodium','Dictyostelium','Aspergillus','Neurospora','Cryptococcus','Coprinus'],
+					      enum => ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis'],
 					      default => 'Human',
 					      max => 'MAX',
 					      min => 'MIN',
