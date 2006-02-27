@@ -23,7 +23,7 @@ sub help {
 Description: Register a service in Moby Central
   Usage:
     
-    registerService.pl [-h] -x {Moby Central} -s {Service Name}
+    registerService.pl [-h] -x {Moby Central}
     -h help
 	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 	<1> or Chirimoyo
@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 2
 
 END_HELP
 
@@ -153,7 +153,7 @@ my $namespaces = [];
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Retrieval",
+				      serviceType  => "GettingNucleotides",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.",
@@ -171,22 +171,15 @@ my ($REG) = $Central->registerService(
 					      enum     => ['Homo sapiens', 'Pan troglodytes', 'Macaca mulatta', 'Mus musculus', 'Rattus norvegicus', 'Canis familiaris', 'Bos taurus', 'Monodelphis domestica', 'Gallus gallus', 'Xenopus tropicalis', 'Danio rerio', 'Takifugu rubripes', 'Tetraodon nigroviridis', 'Ciona intestinalis', 'Drosophila melanogaster', 'Anopheles gambiae', 'Apis mellifera', 'Caenorhabditis elegans', 'Saccharomyces cerevisiae'],
 					      default  => 'Homo sapiens',
 					  },
-					  'ensembl release' => {
-					      datatype => 'String',
-					      enum     => ['37','36','35','34','33','32','31','30','29'],
-					      default  => '37',
-					      max      => '37',
-					      min      => '29',
-					  },
 					  'upstream length' => {
 					      datatype => 'Integer',
 					      default  => 2000,
-					      min      => 'MIN',
+					      min      => 0,
 					  },
 					  'downstream length' => {
 					      datatype => 'Integer',
 					      default  => 0,
-					      min      => 'MIN',
+					      min      => 0,
 					  },
 					  'intergenic only' => {
 					      datatype => 'String',
