@@ -90,10 +90,10 @@ else {
 }
 
 # URI
-my $::authURI = 'genome.imim.es';
+$::authURI = 'genome.imim.es';
 
 # Contac e-mail
-my $::contactEmail = 'akerhornou@imim.es';
+$::contactEmail = 'akerhornou@imim.es';
 
 my $objectName = "Meta_Alignment_Text";
 my $objectDescription = "Meta-alignment text report";

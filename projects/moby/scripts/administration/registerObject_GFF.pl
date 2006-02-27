@@ -90,10 +90,10 @@ else {
 }
 
 # URI
-my $::authURI = 'genome.imim.es';
+$::authURI = 'genome.imim.es';
 
 # Contac e-mail
-my $::contactEmail = 'akerhornou@imim.es';
+$::contactEmail = 'akerhornou@imim.es';
 
 my $objectName = "GFF";
 my $objectDescription = "Generic Feature Format (GFF) text report. GFF is a format for describing genes or any other features associated with DNA, RNA and Protein sequences";
