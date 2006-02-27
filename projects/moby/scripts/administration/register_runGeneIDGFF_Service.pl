@@ -170,36 +170,26 @@ my ($REG) = $Central->registerService(
 					      datatype => 'String',
 					      enum => ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis'],
 					      default => 'Homo sapiens (suitable for mammals)',
-					      max => 'MAX',
-					      min => 'MIN',
 					  },
 					  'strands' => {
 					      datatype => 'String',
 					      enum     => ['Forward','Reverse','Both'],
 					      default  => 'Both',
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  },
 					  'engine' => {
 					      datatype => 'String',
 					      default  => 'Normal',
 					      enum     => ['Normal','Exon Mode','Gene Assembly Mode'],
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  },
 					  'exons'  => {
 					      datatype => 'String',
 					      enum     => ['None', 'First exons','Internal exons','All exons','Terminal exons','Single genes','Open reading frames'],
 					      default  => 'None',
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  },
 					  'signals' => {
 					      datatype => 'String',
 					      enum     => ['None', 'Acceptor sites','Donor sites','All splice sites','Start codons','Stop codons','All codons','All'],
                                               default  => 'None',
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  }
 				}
 				      );
