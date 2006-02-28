@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.17 2006-02-15 16:49:18 gmaster Exp $
+# $Id: MemeServices.pm,v 1.18 2006-02-28 12:02:30 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -147,55 +147,182 @@ sub _do_query_Meme {
     # Get the parameters
 
     ($motif_distribution) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "motif distribution");
+
     if (not defined $motif_distribution) {
 	$motif_distribution = "zero or one";
+    }
+    elsif (! (($motif_distribution eq "zero or one") || ($motif_distribution eq "one") || ($motif_distribution eq "any number of repetitions"))) {
+	my $note = "motif distribution parameter, '$motif_distribution', not accepted, should be ['zero or one','one','any number of repetitions']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "motif distribution",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     ($maximum_number_motifs) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "maximum number of motifs");
     if (not defined $maximum_number_motifs) {
 	$maximum_number_motifs = 8;
     }
-
+    elsif (($maximum_number_motifs > 12) || ($maximum_number_motifs < 0)) {
+	my $note = "maximum number of motifs is out of range, [0,12]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "maximum number motifs",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     ($minimum_number_sites) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "minimum sites for each motif");
     if (not defined $minimum_number_sites) {
 	# no default
     }
-    # Check for constraint
-    if (defined $minimum_number_sites && ($minimum_number_sites < 2)) {
-	print STDERR "Error, the minimum number of sites should be at least 2\n";
-	exit 1;
+    elsif (($minimum_number_sites < 2) ||  ($minimum_number_sites > 300)) {
+	my $note = "minimum number of sites is out of range [2,300]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "minimum number sites",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-
+    
     ($maximum_number_sites) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "maximum sites for each motif");
     if (not defined $maximum_number_sites) {
 	# no default
     }
-    # Check for constraint
-    if (defined $maximum_number_sites && ($maximum_number_sites > 300)) {
-	print STDERR "Error, the maximum number of sites is too big, should be at most 300\n";
-	exit 1;
+    elsif (($maximum_number_sites < 2) ||  ($maximum_number_sites > 300)) {
+	my $note = "maximum number of sites is out of range [2,300]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "maximum number sites",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    if (defined $minimum_number_sites && defined $maximum_number_sites && $minimum_number_sites > $maximum_number_sites) {
+	my $note = "Range incompatibility, you gave a minimum number of sites greater than the maximum one";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "minimum number sites",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     ($minimum_motif_width) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "minimum optimum width");
     if (not defined $minimum_motif_width) {
 	$minimum_motif_width = 6;
     }
-    # Check for constraint
-    if (defined $minimum_motif_width && ($minimum_motif_width < 2)) {
-	print STDERR "Error, the minimum width should be at least 2\n";
-	exit 1;
+    elsif (($minimum_motif_width < 2) || ($minimum_motif_width > 300)) {
+	my $note = "minimum motif width is out of range [2,300]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "minimum motif width",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     ($maximum_motif_width) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "maximum optimum width");
     if (not defined $maximum_motif_width) {
 	$maximum_motif_width = 15;
     }
-    # Check for constraint
-    if (defined $maximum_motif_width && ($maximum_motif_width > 300)) {
-	print STDERR "Error, the maximum width is too big, should be at most 300\n";
-	exit 1;
+    elsif (($maximum_motif_width < 2) || ($maximum_motif_width > 300)) {
+	my $note = "maximum motif width is out of range [2,300]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "maximum motif width",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-
+    
+    if ($minimum_motif_width > $maximum_motif_width) {
+	my $note = "Range incompatibility, you gave a minimum number of sites greater than the maximum one";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "minimum motif width",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     ($e_value_cutoff) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "motif E-value cutoff");
     if (not defined $e_value_cutoff) {
 	$e_value_cutoff = "1";
@@ -203,9 +330,45 @@ sub _do_query_Meme {
 
     ($background_order) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "background markov model training (value is the model order)");
     if (not defined $background_order) {
-	$background_order = "1";
+	$background_order = 1;
     }
-
+    elsif (($background_order =~ /\d+/) && (($background_order > 3) || ($background_order < 1))) {
+	my $note = "background order is out of range [1,3]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "background markov model training (value is the model order)",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    elsif (lc ($background_order) ne "none") {
+	my $note = "background order doesn't match any expected value ['None', 1, 2, 3]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "background markov model training (value is the model order)",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     # Add the parsed parameters in a hash table
 
     $parameters{motif_distribution}    = $motif_distribution;
@@ -243,27 +406,27 @@ sub _do_query_Meme {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of MatScan, it doesn't really matter as there is only one input anyway
 
-	if (($articleName eq "upstream_sequences") || (isCollectionArticle ($DOM))) {
-	
-	    if (isSimpleArticle ($DOM)) {
-		my $note = "Received a simple input article instead of a collection one";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "upstream_sequences",
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
-		
-		# Return an empty moby data object, as well as an exception telling what nothing got returned
-		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-		return ($MOBY_RESPONSE, $moby_exceptions);
-	    }
+	if (isSimpleArticle ($DOM)) {
+	    my $note = "Received a simple input article instead of a collection";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "sequences",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
 
+	if (($articleName eq "sequences") || (isCollectionArticle ($DOM)) || ($articleName =~ /sequences/i)) {
+	    
 	    if ($_debug) {
 		print STDERR "sequences is a collection article...\n";
 		print STDERR "Collection DOM: " . $DOM->toString() . "\n";
@@ -276,7 +439,7 @@ sub _do_query_Meme {
 		print STDERR "$note\n";
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "upstream_sequences",
+									  refElement => "sequences",
 									  code       => $code,
 									  type       => 'error',
 									  queryID    => $queryID,
@@ -296,26 +459,8 @@ sub _do_query_Meme {
 	    }
 	    
 	} # End parsing sequences article tag
-	if (isSimpleArticle ($DOM)) {
-	    my $note = "Received a simple input article instead of a collection";
-	    print STDERR "$note\n";
-	    my $code = "201";
-	    my $moby_exception = INB::Exceptions::MobyException->new (
-								      refElement => "upstream_sequences",
-								      code       => $code,
-								      type       => 'error',
-								      queryID    => $queryID,
-								      message    => "$note",
-								      );
-	    push (@$moby_exceptions, $moby_exception);
-	    
-	    # Return an empty moby data object, as well as an exception telling what nothing got returned
-	    
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-	    return ($MOBY_RESPONSE, $moby_exceptions);
-	}
     } # Next article
-
+    
     # Check that we have parsed properly the sequences
 
     if ((keys (%sequences)) == 0) {
@@ -453,7 +598,7 @@ sub _do_query_MemeMotifMatrices {
 
 	    # Validation ...
 	    
-	    $meme_predictions = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    $meme_predictions = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "MEME_Text");
 
 	    if ($_debug) {
 		print STDERR "parsed meme_predictions,\n$meme_predictions.\n";
@@ -524,6 +669,90 @@ PRT
     return ($MOBY_RESPONSE, $moby_exceptions);
     
 }
+
+=head2
+
+ Title   : runMemeText
+ Usage   : Esta función está pensada para llamarla desde un cliente SOAP.
+	 : No obstante, se recomienda probarla en la misma máquina, antes
+	 : de instalar el servicio. Para ello, podemos llamarla de la
+	 : siguiente forma:
+	 :
+	 : my $result = MatScan("call", $in);
+	 :
+	 : donde $in es texto que con el mensaje biomoby que contendría
+	 : la parte del <tag> "BODY" del mensaje soap. Es decir, un string
+	 : de la forma:
+	 :
+	 :  <?xml version='1.0' encoding='UTF-8'?>
+	 :   <moby:MOBY xmlns:moby='http://www.biomoby.org/moby-s'>
+	 :    <moby:mobyContent>
+	 :      <moby:mobyData queryID='1'>
+	 :      ...
+	 :      </moby:mobyData>
+	 :    </moby:mobyContent>
+	 :   </moby:mobyContent>
+	 :  </moby:MOBY>
+ Returns : Return a MEME_Text object with MEME results
+
+=cut
+
+sub runMemeText {
+
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+
+    # Hasta el momento, no existen objetos Perl de BioMoby paralelos
+    # a la ontologia, y debemos contentarnos con trabajar directamente
+    # con objetos DOM. Por consiguiente lo primero es recolectar la
+    # lista de peticiones (queries) que tiene la peticion.
+    #
+    # En una misma llamada podemos tener mas de una peticion, y de
+    # cada servicio depende la forma de trabajar con ellas. En este
+    # caso las trataremos una a una, pero podriamos hacer Threads para
+    # tratarlas en paralelo, podemos ver si se pueden aprovechar resultados
+    # etc..
+    my @queries = getInputs($message);  # returns XML::DOM nodes
+    #
+    # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+    # es una coleccion de respuestas a cada una de las consultas.
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
+    my $_format = "MEME_Text";
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMemeText";
+    
+    # Para cada query ejecutaremos el _execute_query.
+    foreach my $queryInput (@queries){
+	
+	# En este punto es importante recordar que el objeto $query
+	# es un XML::DOM::Node, y que si queremos trabajar con
+	# el mensaje de texto debemos llamar a: $query->toString()
+
+	if ($_debug) {
+	    my $query_str = $queryInput->toString();
+	    print STDERR "query text: $query_str\n";
+	}
+	
+	my ($query_response, $moby_exceptions_tmp) = _do_query_Meme ($queryInput, $_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
+	# $query_response es un string que contiene el codigo xml de
+	# la respuesta.  Puesto que es un codigo bien formado, podemos
+	# encadenar sin problemas una respuesta con otra.
+	$MOBY_RESPONSE .= $query_response;
+    }
+    # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
+    # todas ellas con una cabecera y un final. Esto lo podemos hacer
+    # con las llamadas de la libreria Common de BioMoby.
+    
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
+
+}
+
 
 =head2 runMemeHTML
 
@@ -603,30 +832,10 @@ sub runMemeHTML {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 =head2 parseMotifMatricesfromMEME
@@ -678,7 +887,7 @@ sub parseMotifMatricesfromMEME {
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
     
-    my $_format = "text-formatted";
+    my $_format = "MEME_Text";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "parseMotifMatricesfromMEME";
     
@@ -705,134 +914,13 @@ sub parseMotifMatricesfromMEME {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
+    
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
 }
 
-
-=head2
-
- Title   : runMemeText
- Usage   : Esta función está pensada para llamarla desde un cliente SOAP.
-	 : No obstante, se recomienda probarla en la misma máquina, antes
-	 : de instalar el servicio. Para ello, podemos llamarla de la
-	 : siguiente forma:
-	 :
-	 : my $result = MatScan("call", $in);
-	 :
-	 : donde $in es texto que con el mensaje biomoby que contendría
-	 : la parte del <tag> "BODY" del mensaje soap. Es decir, un string
-	 : de la forma:
-	 :
-	 :  <?xml version='1.0' encoding='UTF-8'?>
-	 :   <moby:MOBY xmlns:moby='http://www.biomoby.org/moby-s'>
-	 :    <moby:mobyContent>
-	 :      <moby:mobyData queryID='1'>
-	 :      ...
-	 :      </moby:mobyData>
-	 :    </moby:mobyContent>
-	 :   </moby:mobyContent>
-	 :  </moby:MOBY>
- Returns : Return a text-formatted object with MEME results
-
-=cut
-
-sub runMemeText {
-
-    # El parametro $message es un texto xml con la peticion.
-    my ($caller, $message) = @_;        # get the incoming MOBY query XML
-
-    # Hasta el momento, no existen objetos Perl de BioMoby paralelos
-    # a la ontologia, y debemos contentarnos con trabajar directamente
-    # con objetos DOM. Por consiguiente lo primero es recolectar la
-    # lista de peticiones (queries) que tiene la peticion.
-    #
-    # En una misma llamada podemos tener mas de una peticion, y de
-    # cada servicio depende la forma de trabajar con ellas. En este
-    # caso las trataremos una a una, pero podriamos hacer Threads para
-    # tratarlas en paralelo, podemos ver si se pueden aprovechar resultados
-    # etc..
-    my @queries = getInputs($message);  # returns XML::DOM nodes
-    #
-    # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
-    # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE   = "";             # set empty response
-    my $moby_exceptions = [];
-    
-    my $_format = "text-formatted";
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "runMemeText";
-    
-    # Para cada query ejecutaremos el _execute_query.
-    foreach my $queryInput (@queries){
-	
-	# En este punto es importante recordar que el objeto $query
-	# es un XML::DOM::Node, y que si queremos trabajar con
-	# el mensaje de texto debemos llamar a: $query->toString()
-
-	if ($_debug) {
-	    my $query_str = $queryInput->toString();
-	    print STDERR "query text: $query_str\n";
-	}
-	
-	my ($query_response, $moby_exceptions_tmp) = _do_query_Meme ($queryInput, $_format);
-	push (@$moby_exceptions, @$moby_exceptions_tmp);
-	
-	# $query_response es un string que contiene el codigo xml de
-	# la respuesta.  Puesto que es un codigo bien formado, podemos
-	# encadenar sin problemas una respuesta con otra.
-	$MOBY_RESPONSE .= $query_response;
-    }
-    # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
-    # todas ellas con una cabecera y un final. Esto lo podemos hacer
-    # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-}
 
 1;
 
