@@ -127,7 +127,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "fromGenericSequencetoFASTA";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -151,10 +151,10 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Conversion",
+				      serviceType  => "Converting",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Converts a collection of GenericSequence moby object into a FASTA object",
+				      description  => "Converts a collection of GenericSequence moby objects into a FASTA object",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
