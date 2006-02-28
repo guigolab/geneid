@@ -566,6 +566,16 @@ sub validateDataType {
 		}
 	    }
 
+	    if ($specifiedType =~ /FASTA/) {
+		if ($inputDataType =~ /FASTA/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+
 	    if (($specifiedType eq "Blast-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
 		if (($inputDataType =~ /Blast-Text|NCBI_BLAST_Text|WU_BLAST_Text/)) {
 		    $rightType = 1;
