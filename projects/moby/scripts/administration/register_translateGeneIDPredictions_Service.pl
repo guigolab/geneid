@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s translateGeneIDPredictionsGFF
+	perl registerService.pl -x 1 -s translateGeneIDGFFPredictions
 
 END_HELP
 
