@@ -166,22 +166,16 @@ my ($REG) = $Central->registerService(
 					      datatype => 'String',
 					      enum => ['Human','Tetraodon','Drosophila','Celegans','Wheat','Arabidopsis','Rice','Plasmodium','Dictyostelium','Aspergillus','Neurospora','Cryptococcus','Coprinus'],
 					      default => 'Human',
-					      max => 'MAX',
-					      min => 'MIN',
 					  },
-					  'strands' => {
+					  'strand' => {
 					      datatype => 'String',
 					      enum     => ['Forward', 'Reverse','Both'],
 					      default  => 'Both',
-					      max      => 'MAX',
-					      min      => 'MIN',
 					  },
 					  'engine' => {
 					      datatype => 'String',
 					      default  => 'Normal',
-					      enum     => ['Normal','Exon Mode','Gene Assembly Mode'],
-					      max      => 'MAX',
-					      min      => 'MIN',
+					      enum     => ['Normal','Exon Mode'],
 					  },
 				}
 				      );
