@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.24 2006-02-28 09:34:32 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.25 2006-02-28 10:51:34 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -198,6 +198,7 @@ sub _do_query_GeneID_CGI {
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $profile;
     my $strands;
+    my $engine;
     
     # Variables that will be passed to GeneID_call
     my %sequences;
@@ -214,16 +215,23 @@ sub _do_query_GeneID_CGI {
 	$profile = "Human";
     }
     
-    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strand");
     if (not defined $strands) {
 	# Default is running GeneID on both strands
 	$strands = "Both";
+    }
+    
+    ($engine) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "engine");
+    if (not defined $engine) {
+	# Default is "Normal"
+	$engine = "Normal";
     }
     
     # Add the parsed parameters in a hash table
     
     $parameters{profile} = $profile;
     $parameters{strands} = $strands;
+    $parameters{engine}  = $engine;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
@@ -352,6 +360,7 @@ sub _do_query_GeneID {
     # Aqui escribimos las variables que necesitamos para la funcion. 
     my $profile;
     my $strands;
+    my $engine;
     
     # Variables that will be passed to GeneID_call
     my %sequences;
@@ -362,40 +371,166 @@ sub _do_query_GeneID {
 
     # Get the parameters
     
+    my $profiles = {
+	"Homo sapiens (suitable for mammals)"      => 1,
+	"Tetraodon nigroviridis (pupper fish)"     => 1,
+	"Drosophila melanogaster (fruit fly)"      => 1,
+	"Caenorhabditis elegans (worm)"            => 1,
+	"Triticum aestivum (wheat)"                => 1,
+	"Arabidopsis thaliana (weed)"              => 1,
+	"Oryza sativa (rice)"                      => 1,
+	"Plasmodium falciparum (malaria parasite)" => 1,
+	"Dictyostelium discoideum (slime mold)"    => 1,
+	"Aspergillus nidulans"                     => 1,
+	"Neurospora crassa"                        => 1,
+	"Cryptococcus neomorfans"                  => 1,
+	"Coprinus cinereus"                        => 1,
+	"Apis mellifera (honey bee)"               => 1,
+	"haetomium globosum"                       => 1,
+	"Schistosoma japonica"                     => 1,
+	"Stagnospora nodorum"                      => 1,
+	"Solanaceae"                               => 1,
+	"Sclerotinia sclerotiorum"                 => 1,
+	"Coccidioides immitis"                     => 1,
+	"Histoplasma capsulatum"                   => 1,
+    };
+    
     ($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
     if (not defined $profile) {
-	# Default is "Human"
-	$profile = "Human";
+	# Default is "Homo sapiens"
+	$profile = "Homo sapiens (suitable for mammals)";
+    }
+    elsif (! $profiles->{$profile}) {
+	my $note = "profile parameter, '$profile', not accepted, should be ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "profile",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strand");
     if (not defined $strands) {
 	# Default is running GeneID on both strands
 	$strands = "Both";
     }
-
+    elsif (! (($strands eq "Both") || (($strands eq "Forward") || ($strands eq "Reverse")))) {
+	my $note = "strand parameter, '$strands', not accepted, should be ['Both', 'Forward', 'Reverse']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "strand",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+	   
     my @exons = getNodeContentWithArticle($queryInput_DOM, "Parameter", "exons");
-
     if (@exons < 1) {
         # Do nothing
 	# Default is not to report any signals => an element array called 'None'
 	@exons = ('None');
     }
-
+    else {
+	foreach my $exon (@exons) {
+	    if (! (($exon eq 'None') || ($exon eq 'First exons') || ($exon eq 'Internal exons') || ($exon eq 'All exons') || ($exon eq 'Terminal exons') || ($exon eq 'Single genes') || ($exon eq 'Open reading frames'))) {
+		my $note = "exons parameter, '$exon', not accepted, should be ['None', 'First exons','Internal exons','All exons','Terminal exons','Single genes','Open reading frames']";
+		print STDERR "$note\n";
+		my $code = "222";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "exons",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling why nothing got returned
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	}
+    }
+    
     my @signals = getNodeContentWithArticle($queryInput_DOM, "Parameter", "signals");
-
     if (@signals < 1) {
 	# Do nothing
 	# Default is not to report any signals => an element array called 'None'
 	@signals = ('None');
     }
-    
+    else {
+	foreach my $signal (@signals) {
+	    if (! (($signal eq 'None') || ($signal eq 'Acceptor sites') || ($signal eq 'Donor sites') || ($signal eq 'All splice sites') || ($signal eq 'Start codons') || ($signal eq 'Stop codons') || ($signal eq 'All codons') || ($signal eq 'All'))) {
+		my $note = "signals parameter, '$signal', not accepted, should be ['None', 'Acceptor sites','Donor sites','All splice sites','Start codons','Stop codons','All codons','All']";
+		print STDERR "$note\n";
+		my $code = "222";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "signals",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling why nothing got returned
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	}
+    }
+      
+    ($engine) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "engine");
+    if (not defined $engine) {
+	$engine = "Normal";
+    }
+    elsif (! (($engine eq 'Normal') || ($engine eq 'Exon Mode'))) {
+        my $note = "engine parameter, '$engine', not accepted, should be ['Normal','Exon Mode']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "engine",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+  
     # Add the parsed parameters in a hash table
     
     $parameters{profile} = $profile;
     $parameters{strands} = $strands;
     $parameters{exons}   = \@exons;
     $parameters{signals} = \@signals;
+    $parameters{engine}  = $engine;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
