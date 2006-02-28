@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 1 -s runMatScanGFF
 
 END_HELP
 
@@ -156,7 +156,7 @@ my ($REG) = $Central->registerService(
 				      serviceType  => "Nucleotic_Motifs",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Reports putative predicted motifs on a given collection of DNA sequences. The motifs collections currently available are Transcription Factor binding site collections. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode."
+				      description  => "Reports putative predicted motifs on a given collection of DNA sequences. The motifs collections currently available are Transcription Factor binding site collections. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
