@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.23 2006-02-15 15:45:56 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.24 2006-02-28 09:34:32 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -240,11 +240,11 @@ sub _do_query_GeneID_CGI {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of GeneID, it doesn't really matter as there is only one input anyway
 	
-	if (($articleName eq "sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) { 
+	if (($articleName eq "sequence") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) { 
 	    
 	    if (isSimpleArticle ($DOM)) {
 
-		# print STDERR "sequences tag is a simple article...\n";
+		# print STDERR "sequence tag is a simple article...\n";
 		
 		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 	    }
@@ -414,7 +414,7 @@ sub _do_query_GeneID {
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
-								      refElement => "sequences",
+								      refElement => "sequence",
 								      code       => $code,
 								      type       => 'error',
 								      queryID    => $queryID,
@@ -428,21 +428,21 @@ sub _do_query_GeneID {
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	# taverna doesn't setup the articlename nicely, so let them not specify it - as there is only one article, no big deal !
-	elsif (($articleName eq "sequences") || (isSimpleArticle ($DOM))) { 
+	elsif (($articleName eq "sequence") || (isSimpleArticle ($DOM))) { 
 	    
 	    if (isSimpleArticle ($DOM)) {
 		
-		# print STDERR "sequences tag is a simple article...\n";
+		# print STDERR "sequence tag is a simple article...\n";
 		
 		# Validate the type first
 
-		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
 		if (!$rightType) {
-		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    my $note = "Expecting a DNASequence object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "sequences",
+									      refElement => "sequence",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -472,6 +472,7 @@ sub _do_query_GeneID {
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => 'sequence',
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -706,28 +707,13 @@ sub runGeneIDGFF {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-
-    ####
-    # stats information
-
-    my $serviceName = "runGeneIDGFF";
-    my $URI         = "genome.imim.es";
-    my $IP_address  = $ENV{REMOTE_ADDR};
-    my $remote_host = $ENV{REMOTE_HOST};
     
-    # what else, start time, end time, execution time, execution status => el codigo del peor error o OK (700) si OK
-    
-    # print STDERR "IP address, $IP_address\n";
-    # print STDERR "remote host, $remote_host\n";
-    # print STDERR "executing $serviceName service...\n";
-    
-    ####
-
     #
     # The output format for this service is GFF
     #
     my $_format = "GFF";
     my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runGeneIDGFF";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
