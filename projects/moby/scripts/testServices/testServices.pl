@@ -70,7 +70,7 @@ $AUTH = "genome.imim.es";
 #
 ##################################################################
 
-my $rootdir                   = "/home/ug/arnau/cvs/GRIB/projects/moby/scripts/testServices";
+my $rootdir                   = $ENV{HOME} . "/cvs/GRIB/projects/moby/scripts/testServices";
 my $input_data_dir            = "$rootdir/inputData";
 my $control_data_dir          = "$rootdir/outputControl";
 
