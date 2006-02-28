@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.20 2006-02-15 16:49:18 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.21 2006-02-28 11:44:14 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -139,7 +139,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
   &runMatScanGFF
   &runMatScanGFFCollection
-  &runMatScanGFFCollectionVsInputMatrix
+  &runMatScanGFFCollectionVsInputMatrices
 );
 
 our $VERSION = '1.0';
@@ -188,7 +188,7 @@ sub _do_query_MatScan {
     my $_input_type     = shift @_;
 
     if ($_debug) {
-      print STDERR "MatScan Sequences Vs predefined matrix...\n";
+      print STDERR "MatScan - Sequences Vs internally stored motif collections...\n";
     }
 
     if (($_input_type ne "simple") && ($_input_type ne "collection")) {
@@ -202,7 +202,7 @@ sub _do_query_MatScan {
     my $output_article_name = "matscan_predictions";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
-    my $matrix;
+    my $motif_database;
     my $matrix_mode;
     my $threshold;
     my $strands;
@@ -216,16 +216,52 @@ sub _do_query_MatScan {
 
     # Get the parameters
 
-    ($matrix) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "matrix");
-    if (not defined $matrix) {
+    ($motif_database) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "motif database");
+    if (not defined $motif_database) {
 	# Default is to use Transfac Matrices
-	$matrix = "Transfac";
+	$motif_database = "Transfac";
     }
-
+    elsif (! ((lc $motif_database eq "transfac") || (lc $motif_database eq "jaspar"))) {
+	my $note = "motif database parameter, '$motif_database', not accepted, should be ['Transfac', 'Jaspar']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "motif database",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     ($matrix_mode) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "matrix mode");
     if (not defined $matrix_mode) {
 	# Default is to use 'log-likelihood' mode
 	$matrix_mode = "log-likelihood";
+    }
+    elsif (! ((lc $matrix_mode eq "raw format") || (lc $matrix_mode eq "log-likelihood"))) {
+	my $note = "matrix mode parameter, '$matrix_mode', not accepted, should be ['raw format', 'log-likelihood']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "matrix mode",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     ($threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "threshold");
@@ -233,34 +269,70 @@ sub _do_query_MatScan {
 	# Default is 0.85
 	$threshold = "0.85";
     }
+    elsif ($threshold > 1 || $threshold < 0) {
+	my $note = "threshold parameter, '$threshold', not accepted, should between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "threshold",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
 
-    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strand");
     if (not defined $strands) {
 	# Default is running MatScan on both strands
 	$strands = "Both";
     }
-
+    elsif (! (($strands eq "Both") || (($strands eq "Forward") || ($strands eq "Reverse")))) {
+	my $note = "strand parameter, '$strands', not accepted, should be ['Both', 'Forward', 'Reverse']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "strand",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     # Add the parsed parameters in a hash table
-
-    $parameters{threshold}   = $threshold;
-    $parameters{strands}     = $strands;
-    $parameters{matrix}      = $matrix;
-    $parameters{matrix_mode} = $matrix_mode;
-
+    
+    $parameters{threshold}      = $threshold;
+    $parameters{strands}        = $strands;
+    $parameters{motif_database} = $motif_database;
+    $parameters{matrix_mode}    = $matrix_mode;
+    
     if ($_debug) {
-	print STDERR "matrix, $matrix\n";
+	print STDERR "motif_database, $motif_database\n";
 	print STDERR "matrix mode, $matrix_mode\n";
 	print STDERR "threshold, $threshold\n";
     }
-
+    
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {
-
+	
 	# El articulo es una tupla que contiene el nombre de este
 	# y su texto xml.
-
+	
 	my ($articleName, $DOM) = @{$article}; # get the named article
-
+	
 	# Si le hemos puesto nombre a los articulos del servicio,
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
@@ -268,12 +340,12 @@ sub _do_query_MatScan {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
 	# In case of MatScan, it doesn't really matter as there is only one input anyway
 
-	if (($articleName eq "upstream_sequences") || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) {
+	if (($articleName =~ /sequence/i) || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) {
 
 	    if (isSimpleArticle ($DOM)) {
 		
 		if ($_debug) {
-		    print STDERR "sequences tag is a simple article...\n";
+		    print STDERR "$articleName tag is a simple article...\n";
 		}
 		
 		if ($_input_type eq "collection") {
@@ -284,7 +356,7 @@ sub _do_query_MatScan {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "upstream_sequences",
+									      refElement => 'sequence',
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -301,11 +373,11 @@ sub _do_query_MatScan {
 		# Validate the type
 		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
 		if (!$rightType) {
-		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    my $note = "Expecting NucleotideSequence objects, and receiving $inputDataType objects";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "upstream_sequences",
+									      refElement => "sequence",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -323,7 +395,7 @@ sub _do_query_MatScan {
 	    elsif (isCollectionArticle ($DOM)) {
 
 		if ($_debug) {
-		    print STDERR "sequences is a collection article...\n";
+		    print STDERR "$articleName is a collection article...\n";
 		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		}
 		
@@ -336,7 +408,7 @@ sub _do_query_MatScan {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "upstream_sequences",
+									      refElement => 'sequences',
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -357,7 +429,7 @@ sub _do_query_MatScan {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "upstream_sequences",
+									      refElement => 'sequences',
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -389,7 +461,19 @@ sub _do_query_MatScan {
 	my $note = "can't parsed any sequences...\n";
 	print STDERR "$note\n";
 	my $code = "201";
+
+	my $refElement;
+	if ($_input_type eq "simple") {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	    $refElement = "sequence";
+	}
+	else {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	    $refElement = "sequences"
+	}
+	
 	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => $refElement,
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -397,12 +481,6 @@ sub _do_query_MatScan {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	if ($_input_type eq "simple") {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	}
-	else {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
-	}
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -448,20 +526,20 @@ PRT
 	# a collection response.
 	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
 	# el mismo que el de la query.
-
+	
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     elsif ($_input_type eq "collection") {
-
+	
 	if ($_debug) {
 	    print STDERR "making a collection response\n";
 	}
-
+	
 	# The input was a collection of Sequences, so we have to return a collection of GFF objects
-
+	
 	my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, format => $_format, parameters => \%parameters, debug => $_debug);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
-
+	
 	if (defined $report) {
 	    my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
 	    $MOBY_RESPONSE = collectionResponse($output_objects, $output_article_name, $queryID);
@@ -469,7 +547,7 @@ PRT
 	else {
 	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	}
-
+	
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
 	# volver a encapsularlo en un objeto biomoby de respuesta. Pero
 	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos
@@ -477,9 +555,9 @@ PRT
 	# a collection response.
 	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
 	# el mismo que el de la query.
-
+	
 	return ($MOBY_RESPONSE, $moby_exceptions);
-
+	
     }
 }
 
@@ -495,7 +573,7 @@ sub _do_query_MatScanVsInputMatrix {
     my $_input_type     = shift @_;
 
     if ($_debug) {
-	print STDERR "MatScan Sequences Vs Input Matrix mode...\n";
+	print STDERR "MatScan sequences Vs input motif matrices...\n";
     }
 
     if (($_input_type ne "simple") && ($_input_type ne "collection")) {
@@ -515,7 +593,7 @@ sub _do_query_MatScanVsInputMatrix {
 
     # Variables that will be passed to MatScan_call
     my %sequences;
-    my $matrix;
+    my $matrices;
     my %parameters;
 
     my $queryID  = getInputID ($queryInput_DOM);
@@ -535,7 +613,7 @@ sub _do_query_MatScanVsInputMatrix {
 	$threshold = "0.85";
     }
 
-    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strands");
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strand");
     if (not defined $strands) {
 	# Default is running MatScan on both strands
 	$strands = "Both";
@@ -562,10 +640,10 @@ sub _do_query_MatScanVsInputMatrix {
 	# make it more 'interoperable' by testing also pattern matching!!!
 	# i think it should be up to the clients to adjust the article names
 	
-	if (($articleName eq "upstream_sequences") || ($articleName =~ /sequences/i)) {
+	if (($articleName eq "sequences") || ($articleName =~ /sequence/i)) {
 	    
 	    if (isSimpleArticle ($DOM)) {
-
+		
 		# not allowed
 		
 		print STDERR "parsing the sequences input...\n";
@@ -577,7 +655,7 @@ sub _do_query_MatScanVsInputMatrix {
 
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "upstream_sequences",
+									  refElement => 'sequences',
 									  code       => $code,
 									  type       => 'error',
 									  queryID    => $queryID,
@@ -604,7 +682,7 @@ sub _do_query_MatScanVsInputMatrix {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "upstream_sequences",
+									      refElement => 'sequences',
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -628,16 +706,16 @@ sub _do_query_MatScanVsInputMatrix {
 	    }
 
 	} # End parsing sequences article tag
-	elsif (($articleName eq "matrices") || ($articleName =~ /matrices/i)) {
+	elsif (($articleName eq "motif_matrices") || ($articleName =~ /matrices/i)) {
 	    
-	    $matrix = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    $matrices = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
 	    
 	    if ($_debug) {
-		print STDERR "parsed matrix, $matrix\n";
+		print STDERR "parsed matrices, $matrices\n";
 	    }
 
-	    if (not defined $matrix) {
-		print STDERR "Error, can't parse the input matrix...\n";
+	    if (not defined $matrices) {
+		print STDERR "Error, can't parse the input matrices...\n";
 	    }
 	}
 
@@ -650,7 +728,7 @@ sub _do_query_MatScanVsInputMatrix {
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => 'upstream_sequences',
+								  refElement => 'sequences',
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -662,12 +740,12 @@ sub _do_query_MatScanVsInputMatrix {
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    if ((! defined $matrix) || ($matrix eq "")) {
-	my $note = "can't parse any matrix...\n";
+    if ((! defined $matrices) || ($matrices eq "")) {
+	my $note = "can't parse any matrices...\n";
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => 'matrix',
+								  refElement => 'matrices',
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -684,7 +762,7 @@ sub _do_query_MatScanVsInputMatrix {
     
     # The input was a collection of Sequences, so we have to return a collection of GFF objects
     
-    my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, matrix => $matrix, format => $_format, parameters => \%parameters, debug => $_debug);
+    my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, matrices => $matrices, format => $_format, parameters => \%parameters, debug => $_debug);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
 
     if (defined $report) {
@@ -933,7 +1011,7 @@ sub runMatScanGFFCollection {
 }
 
 
-sub runMatScanGFFCollectionVsInputMatrix {
+sub runMatScanGFFCollectionVsInputMatrices {
 
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
@@ -960,7 +1038,7 @@ sub runMatScanGFFCollectionVsInputMatrix {
     #
     my $_format = "GFF";
     my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "runMatScanGFFCollectionVsInputMatrix";
+    my $serviceName = "runMatScanGFFCollectionVsInputMatrices";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -974,7 +1052,7 @@ sub runMatScanGFFCollectionVsInputMatrix {
 	    print STDERR "query text: $query_str\n";
 	}
 
-	my ($query_response, $moby_exceptions_tmp) = _do_query_MatScanVsInputMatrix ($queryInput, $_format, "collection");
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MatScanVsInputMatrices ($queryInput, $_format, "collection");
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
