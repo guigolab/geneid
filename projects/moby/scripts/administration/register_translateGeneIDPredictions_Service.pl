@@ -128,7 +128,7 @@ $::contactEmail = 'akerhornou@imim.es';
 # Service Name
 
 # Service Name = translateGeneIDGFFPredictions
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "translateGeneIDGFFPredictions";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -152,7 +152,7 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "Translating",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Translate the GeneID gene predictions in GFF format. Return a set of peptide sequences in FASTA format",
@@ -170,8 +170,6 @@ my ($REG) = $Central->registerService(
 					      datatype => 'String',
 					      enum => ['Standard (1)','Bacterial (11)'],
 					      default => 'Standard (1)',
-					      max => 'MAX',
-					      min => 'MIN',
 					  },
 				      }
 				     );
