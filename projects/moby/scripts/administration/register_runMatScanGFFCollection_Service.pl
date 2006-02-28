@@ -153,14 +153,14 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "Nucleotic_Motifs",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Promoter regions analysis program. Matscan is a program to search putative binding sites in genomic sequences. You can search for example the Transfac database, but also MEME or jaspar matrices. This service only accepts a collection of NucleotideSequence objects and returns a collection of GFF objects (one GFF object for each NucleotideSequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', [['NucleotideSequence' => \@namespaces]]] # collection of one object type
+							    ['sequences', [['DNASequence' => \@namespaces]]] # collection of one object type
 							   ],
 				      output		=> [
 							    ['matscan_predictions', [['GFF' => \@namespaces]]] # collection of one object type
@@ -182,7 +182,7 @@ my ($REG) = $Central->registerService(
 					      min      => 0,
 					      default  => 0.85
 					  },
-					  'strands' => {
+					  'strand' => {
 					      datatype => 'String',
 					      enum     => ['Both','Forward','Reverse'],
 					      default  => 'Both'
