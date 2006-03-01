@@ -27,7 +27,7 @@ my $t1 = Benchmark->new ();
 my $_debug = 0;
 
 my $serviceName   = "translateGeneIDGFFPredictions";
-my $articleName_1 = "sequences";
+my $articleName_1 = "sequence";
 my $articleName_2 = "geneid_predictions";
 
 my $translation_table = "Standard (1)";
@@ -49,6 +49,12 @@ my $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 $URL = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 $URI = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
+$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
+
+# Moby-dev
+
+$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
+$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://moby-dev.inab.org/MOBY/Central';
 $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 ##################################################################
