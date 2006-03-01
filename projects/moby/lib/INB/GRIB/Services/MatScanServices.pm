@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.21 2006-02-28 11:44:14 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.22 2006-03-01 11:46:56 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -879,30 +879,9 @@ sub runMatScanGFF {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 =head2 runMatScanGFFCollection
@@ -984,30 +963,9 @@ sub runMatScanGFFCollection {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 
