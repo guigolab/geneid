@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.18 2006-02-28 12:02:30 gmaster Exp $
+# $Id: MemeServices.pm,v 1.19 2006-03-02 15:08:18 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -777,7 +777,7 @@ sub runMemeText {
 	 :    </moby:mobyContent>
 	 :   </moby:mobyContent>
 	 :  </moby:MOBY>
- Returns : Return a text-html object with MEME results
+ Returns : Return a text_html object with MEME results
 
 =cut
 
@@ -804,9 +804,9 @@ sub runMemeHTML {
     my $moby_exceptions = [];
     
     #
-    # The moby output format for this service is text-html
+    # The moby output format for this service is text_html
     #
-    my $_moby_output_format   = "text-html";
+    my $_moby_output_format   = "text_html";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "runMemeHTML";
     
