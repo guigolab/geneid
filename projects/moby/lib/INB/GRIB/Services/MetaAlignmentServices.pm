@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.18 2006-02-15 16:49:18 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.19 2006-03-02 14:00:32 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -187,13 +187,69 @@ sub _do_query_MetaAlignment {
     if (not defined $alpha_penalty) {
 	$alpha_penalty = 0.5;
     }
+    elsif ($alpha_penalty < 0 && $alpha_penalty > 1) {
+	my $note = "alpha penalty parameter, '$alpha_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "alpha penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+
     if (not defined $lambda_penalty) {
 	$lambda_penalty = 0.1;
     }
+    elsif ($lambda_penalty < 0 && $lambda_penalty > 1) {
+	my $note = "lambda penalty parameter, '$lambda_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "lambda penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     if (not defined $mu_penalty) {
 	$mu_penalty = 0.1;
     }
-
+    elsif ($mu_penalty < 0 && $mu_penalty > 1) {
+	my $note = "mu penalty parameter, '$mu_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "mu penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     # Add the parsed parameters in a hash table
 
     if ($_debug) {
@@ -201,11 +257,11 @@ sub _do_query_MetaAlignment {
 	print STDERR "lambda penalty, $lambda_penalty\n";
 	print STDERR "mu penalty, $mu_penalty\n";
     }
-
+    
     $parameters{alpha_penalty}  = $alpha_penalty;
     $parameters{lambda_penalty} = $lambda_penalty;
     $parameters{mu_penalty}     = $mu_penalty;
-
+    
     $parameters{output_format} = $_moby_output_format;
 
     # Tratamos a cada uno de los articulos
@@ -248,6 +304,27 @@ sub _do_query_MetaAlignment {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
+
+	    # Validate the type first
+		
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "GFF");
+	    if (!$rightType) {
+		my $note = "Expecting a GFF object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "map1",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
 	    
 	    ($sequenceIdentifier_1) = getSimpleArticleIDs ( [ $DOM ] );
 	    
@@ -273,6 +350,27 @@ sub _do_query_MetaAlignment {
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
+	    }
+	    
+	    # Validate the type first
+		
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "GFF");
+	    if (!$rightType) {
+		my $note = "Expecting a GFF object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "map2",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
 	    ($sequenceIdentifier_2) = getSimpleArticleIDs ( [ $DOM ] );
@@ -419,7 +517,7 @@ sub _do_query_MultiMetaAlignment {
 
     # Output definition
     my $moby_exceptions = [];
-    my $MOBY_RESPONSE   = "";     # set empty response
+    my $MOBY_RESPONSE   = ""; # set empty response
     my $output_article_name = "meta_predictions";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
@@ -443,11 +541,67 @@ sub _do_query_MultiMetaAlignment {
     if (not defined $alpha_penalty) {
 	$alpha_penalty = 0.5;
     }
+    elsif ($alpha_penalty < 0 && $alpha_penalty > 1) {
+	my $note = "alpha penalty parameter, '$alpha_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "alpha penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+
     if (not defined $lambda_penalty) {
 	$lambda_penalty = 0.1;
     }
+    elsif ($lambda_penalty < 0 && $lambda_penalty > 1) {
+	my $note = "lambda penalty parameter, '$lambda_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "lambda penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     if (not defined $mu_penalty) {
 	$mu_penalty = 0.1;
+    }
+    elsif ($mu_penalty < 0 && $mu_penalty > 1) {
+	my $note = "mu penalty parameter, '$mu_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "mu penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     # Add the parsed parameters in a hash table
@@ -507,6 +661,25 @@ sub _do_query_MultiMetaAlignment {
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
+	    }
+	    
+	    # Validate the type of the simples in the collection - should all be GFF objects
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "GFF");
+	    if (!$rightType) {
+		my $note = "Expecting a set of GFF objects, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => 'maps',
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
 	    my @maps_article_DOMs = getCollectedSimples ($DOM);
@@ -692,7 +865,7 @@ sub runMetaAlignment {
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
-    my $_output_format = "text-formatted";
+    my $_output_format = "meta_alignment_text";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "runMetaAlignment";
     
@@ -740,30 +913,9 @@ sub runMetaAlignment {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-
-	return responseHeader(
-			       -authority => "genome.imim.es",
-			       -note      => "$moby_exception_response"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 
@@ -814,8 +966,8 @@ sub runMetaAlignmentGFF {
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format  = "GFF";
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "runMetaAlignmentGFF";
+    my $moby_logger     = get_logger ("MobyServices");
+    my $serviceName     = "runMetaAlignmentGFF";
     
     if ($_debug) {
 	print STDERR "processing Moby runMetaAlignmentGFF query...\n";
@@ -861,30 +1013,9 @@ sub runMetaAlignmentGFF {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-
-	return responseHeader(
-			       -authority => "genome.imim.es",
-			       -note      => "$moby_exception_response"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 =head2 runMultiMetaAlignment
@@ -933,7 +1064,7 @@ sub runMultiMetaAlignment {
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
-    my $_output_format = "text-formatted";
+    my $_output_format = "meta_alignment_text";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "runMultiMetaAlignment";
     
@@ -981,30 +1112,9 @@ sub runMultiMetaAlignment {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => $moby_exception_response
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-	
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 
@@ -1102,30 +1212,9 @@ sub runMultiMetaAlignmentGFF {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
     # todas ellas con una cabecera y un final. Esto lo podemos hacer
     # con las llamadas de la libreria Common de BioMoby.
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => $moby_exception_response
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 1;
