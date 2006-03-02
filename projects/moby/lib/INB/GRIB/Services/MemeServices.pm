@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.19 2006-03-02 15:08:18 gmaster Exp $
+# $Id: MemeServices.pm,v 1.20 2006-03-02 15:23:29 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -333,7 +333,7 @@ sub _do_query_Meme {
 	$background_order = 1;
     }
     elsif (($background_order =~ /\d+/) && (($background_order > 3) || ($background_order < 1))) {
-	my $note = "background order is out of range [1,3]";
+	my $note = "background order, $background_order, is out of range [1,3]";
 	print STDERR "$note\n";
 	my $code = "222";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -350,8 +350,8 @@ sub _do_query_Meme {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-    elsif (lc ($background_order) ne "none") {
-	my $note = "background order doesn't match any expected value ['None', 1, 2, 3]";
+    elsif ((! $background_order =~ /\d+/) && (lc ($background_order) ne "none")) {
+	my $note = "background order, $background_order, doesn't match any expected value ['None', 1, 2, 3]";
 	print STDERR "$note\n";
 	my $code = "222";
 	my $moby_exception = INB::Exceptions::MobyException->new (
