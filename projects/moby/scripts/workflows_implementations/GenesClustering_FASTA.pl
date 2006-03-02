@@ -6,6 +6,8 @@
 #
 ##################################################################
 
+use lib "/home/ug/arnau/lib/biomoby.0.8.2a/Perl";
+
 use strict;
 use Data::Dumper;
 
@@ -59,20 +61,20 @@ END_HELP
 
 BEGIN {
 	
-	# Determines the options with values from program
-	use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_m $opt_o/;
-	   
-	# these are switches taking an argument (a value)
-	my $switches = 'hxfctdmo';
-	   
-	# Get the switches
-	getopt($switches);
-	
-	# If the user does not write nothing, skip to help
-	if (defined($opt_h) || !defined ($opt_f)){
-		print STDERR help;
-		exit 0;
-	}
+    # Determines the options with values from program
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_m $opt_o/;
+    
+    # these are switches taking an argument (a value)
+    my $switches = 'hxfctdmo';
+    
+    # Get the switches
+    getopt($switches);
+    
+    # If the user does not write nothing, skip to help
+    if (defined($opt_h) || !defined ($opt_f)){
+	print STDERR help;
+	exit 0;
+    }
 	
 }
 
@@ -401,10 +403,50 @@ if ($_debug) {
 
 print STDERR "First step done\n\n";
 
-# runMultiMetaAlignment
+# runMultiMetaAlignmentGFF & runMultiMetaAlignment
 
 print STDERR "Second step, making the pairwise alignments of the binding site maps...\n";
 print STDERR "Executing meta-alignment...\n";
+
+# runMultiMetaAlignmentGFF first
+
+# Run this service just to save the results in GFF format
+
+if (defined $output_dir) {
+
+    $serviceName = "runMultiMetaAlignmentGFF";
+    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+    
+    $Service = getService ($C, $serviceName, $authURI);
+    
+    $moby_response = $Service->execute (XMLinputlist => [
+							 ["$articleName", $input_xml]
+							 ]);
+    
+    if ($_debug) {
+	print STDERR "$serviceName result\n";
+	print STDERR $moby_response;
+	print STDERR "\n";
+    }
+    
+    if (hasFailed ($moby_response)) {
+	print STDERR "service, $serviceName, has failed!\n";
+	my $moby_error_message = getExceptionMessage ($moby_response);
+	print STDERR "reason is the following,\n$moby_error_message\n";
+	exit 1;
+    }
+    
+    saveResults ($moby_response, "GFF", "Meta", $output_dir);
+}
+
+if ($_debug) {
+	print STDERR "input xml for next service:\n";
+	print STDERR join (', ', @$input_xml);
+	print STDERR ".\n";
+}
+
+# Then runMultiMetaAlignment
 
 $serviceName = "runMultiMetaAlignment";
 $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -453,8 +495,8 @@ $articleName = $parameters{$serviceName}->{articleName} || die "article name for
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", $input_xml]
-					     ]);
+						     ["$articleName", $input_xml]
+						     ]);
 
 if ($_debug) {
 	print STDERR "$serviceName results\n";
