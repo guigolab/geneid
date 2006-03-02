@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.23 2006-02-28 17:21:17 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.24 2006-03-02 14:02:09 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -1157,10 +1157,10 @@ sub translateGeneIDGFFPredictions {
     # 
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE  = "";             # set empty response
+    my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "translateGeneIDGFFPredictions";
+    my $moby_logger     = get_logger ("MobyServices");
+    my $serviceName     = "translateGeneIDGFFPredictions";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1185,30 +1185,9 @@ sub translateGeneIDGFFPredictions {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 =head2 fromGenericSequencetoFASTA
@@ -1277,8 +1256,8 @@ sub fromGenericSequencetoFASTA {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "fromGenericSequencetoFASTA";
+    my $moby_logger     = get_logger ("MobyServices");
+    my $serviceName     = "fromGenericSequencetoFASTA";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1303,30 +1282,9 @@ sub fromGenericSequencetoFASTA {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 =head2 fromGenericSequenceCollectiontoFASTA
@@ -1395,8 +1353,8 @@ sub fromGenericSequenceCollectiontoFASTA {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "fromGenericSequenceCollectiontoFASTA";
+    my $moby_logger     = get_logger ("MobyServices");
+    my $serviceName     = "fromGenericSequenceCollectiontoFASTA";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1421,30 +1379,9 @@ sub fromGenericSequenceCollectiontoFASTA {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 
@@ -1514,8 +1451,8 @@ sub fromFASTAtoDNASequenceCollection {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "fromFASTAtoDNASequenceCollection";
+    my $moby_logger     = get_logger ("MobyServices");
+    my $serviceName     = "fromFASTAtoDNASequenceCollection";
 
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1540,30 +1477,9 @@ sub fromFASTAtoDNASequenceCollection {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 
@@ -1631,10 +1547,10 @@ sub fromFASTAtoGenericSequenceCollection {
     # 
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
-    my $MOBY_RESPONSE = "";             # set empty response
+    my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "fromFASTAtoGenericSequenceCollection";
+    my $moby_logger     = get_logger ("MobyServices");
+    my $serviceName     = "fromFASTAtoGenericSequenceCollection";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1658,30 +1574,9 @@ sub fromFASTAtoGenericSequenceCollection {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
     
 }
 
@@ -1751,8 +1646,8 @@ sub fromMetaAlignmentstoScoreMatrix {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-    my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "fromMetaAlignmentstoScoreMatrix";
+    my $moby_logger     = get_logger ("MobyServices");
+    my $serviceName     = "fromMetaAlignmentstoScoreMatrix";
 
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -1777,30 +1672,9 @@ sub fromMetaAlignmentstoScoreMatrix {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 
