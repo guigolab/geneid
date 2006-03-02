@@ -129,7 +129,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "runMatScanGFF";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
