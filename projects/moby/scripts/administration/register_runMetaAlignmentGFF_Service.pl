@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 1 -s runMetaAlignmentGFF
 
 END_HELP
 
@@ -129,7 +129,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "runMetaAlignmentGFF";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -153,10 +153,10 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "SequenceAnalysis",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Promoter regions analysis program. Meta-alignment produces alignments of sequences of TF binding sites. It returns the predictions in GFF format. Use runMatScanGFF to produce the input GFF files",
+				      description  => "Meta-alignment produces alignments of sequences of TF binding sites. It returns the predictions in GFF format. You can use runMatScanGFF to produce the input GFF files",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
