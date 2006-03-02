@@ -586,6 +586,36 @@ sub validateDataType {
 		}
 	    }
 	    
+	    if ($specifiedType eq "GFF2") {
+		if ($inputDataType =~ /GFF2$/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+
+	    if ($specifiedType eq "GFF3") {
+		if ($inputDataType =~ /GFF3$/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+
+	    if ($specifiedType eq "GFF") {
+		if (($inputDataType =~ /GFF\d*$/)) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
 	    # ...
 	    
 	}
@@ -671,6 +701,9 @@ sub setMobyResponse {
 	my $moby_exception_response = "";
 	my %severities;
 	foreach my $moby_exception (@$moby_exceptions) {
+
+	    print STDERR "going through exceptions\n";
+
 	    my $severity = $moby_exception->getExceptionType;
 	    $severities{$severity} = $moby_exception;
 	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
