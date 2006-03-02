@@ -289,7 +289,7 @@ $service = MobyServiceInstantiation ($C, "translateGeneIDGFFPredictions", $AUTH)
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
-						    ['sequences', $nucleotide_sequence_xml, 'geneid_predictions', $GeneIDGFF_xml]
+						    ['sequence', $nucleotide_sequence_xml, 'geneid_predictions', $GeneIDGFF_xml]
 						    ]
 				   );
 
