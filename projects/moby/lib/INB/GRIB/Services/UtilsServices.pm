@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.24 2006-03-02 14:02:09 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.25 2006-03-02 14:07:37 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -242,7 +242,7 @@ sub _do_query_TranslateGeneIDGFF {
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	
-	if ($articleName eq "sequence") { 
+	if ($articleName =~ /sequence/i) { 
 	    
 	    if ($_debug) {
 		print STDERR "\"sequence\" tag is a simple article...\n";
