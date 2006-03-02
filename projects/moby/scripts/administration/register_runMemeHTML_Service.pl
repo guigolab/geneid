@@ -179,7 +179,7 @@ my ($REG) = $Central->registerService(
 					  'minimum sites for each motif' => {
 					      datatype => 'Integer',
 					      min      => 2,
-					      max      => 300
+					      max      => 300,
 					  },
 					  'maximum sites for each motif' => {
 					      datatype => 'Integer',
