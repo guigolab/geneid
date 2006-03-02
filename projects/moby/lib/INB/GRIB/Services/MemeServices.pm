@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.20 2006-03-02 15:23:29 gmaster Exp $
+# $Id: MemeServices.pm,v 1.21 2006-03-02 19:28:45 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -641,21 +641,18 @@ sub _do_query_MemeMotifMatrices {
     
     if (not defined $matrices_aref) {
 	# Return an emtpy message !
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-	return $MOBY_RESPONSE;
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    # Concatenate all matrices of the array into one string
-    my $matrices = join ('', @$matrices_aref);
-    my $meme_matrix_object = <<PRT;
-<moby:$_output_format namespace='$namespace' id=''>
-<String namespace='' id='' articleName='content'>
-<![CDATA[
-$matrices
-]]>
-</String>
-</moby:$_output_format>
-PRT
+    my $meme_matrix_objects = [];    
+    foreach my $matrix (@$matrices_aref) {
+	
+	my $matrix_type = "Float";
+	my $moby_matrix = INB::GRIB::Utils::CommonUtilsSubs->convert_tabularMatrix_into_MobyMatrix ($matrix, $matrix_type);
+	
+	push (@$meme_matrix_objects, $moby_matrix);
+    }
 
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero
@@ -665,7 +662,7 @@ PRT
     # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
     # el mismo que el de la query.
     
-    $MOBY_RESPONSE = simpleResponse($meme_matrix_object, $output_article_name, $queryID);
+    $MOBY_RESPONSE = collectionResponse($meme_matrix_objects, $output_article_name, $queryID);
     return ($MOBY_RESPONSE, $moby_exceptions);
     
 }

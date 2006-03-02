@@ -52,6 +52,7 @@ our @EXPORT = qw(
   &MOBY_EMPTY_RESPONSE
   &MOBY_EMPTY_SIMPLE_RESPONSE
   &MOBY_EMPTY_COLLECTION_RESPONSE
+  &convert_tabularMatrix_into_MobyMatrix
 );
 
 our $VERSION = '1.0';
@@ -741,6 +742,131 @@ sub setMobyResponse {
 			       )
 	    . $MOBY_RESPONSE . responseFooter;
     }
+}
+
+# PWM syntax - tab-delimited
+
+# motif0
+# 1    0.206132  0.759466  0.027833  0.006569
+# 2    0.027765  0.591999  0.188669  0.191568
+# 3    0.292155  0.060594  0.048565  0.598686
+# 4    0.028134  0.779645  0.008042  0.184179
+# 5    0.069995  0.019596  0.905345  0.005063
+# 6    0.013693  0.973960  0.005145  0.007203
+# 7    0.086467  0.207722  0.372804  0.333006
+# 8    0.002733  0.015888  0.245232  0.736148
+# 9    0.011034  0.873492  0.080148  0.035326
+# 10    0.002281  0.983921  0.007792  0.006006
+# 11    0.056512  0.865194  0.056446  0.021847
+# 12    0.206273  0.375163  0.292359  0.126204
+# //
+
+sub convert_tabularMatrix_into_MobyMatrix {
+    my $self = shift;
+    my ($tab_matrix, $matrix_type) = @_;
+
+    my @matrix;    
+    # output
+    my $moby_matrix_object;
+
+    #####################################
+    #
+    # parsing the matrix in tab-delimited format
+    # 
+    #####################################
+    
+    my @lines = split ('\n', $tab_matrix);
+    
+    if (@lines == 0) {
+	print STDERR "can't parse any lines...\n";
+	exit 1;
+    }
+
+    # The first line is the identifier
+
+    my $first_line = shift @lines;
+    chomp $first_line;
+    $first_line =~ /^([^\s]+)/;
+    my $motif_identifier = $1;
+    
+    print STDERR "motif identifier, $motif_identifier.\n";
+    
+    # the last line is a separator '//'
+
+    pop @lines;
+
+    # Now we are only left with a set of arrays of values, 
+    # first column of each array is a label
+
+    my $i = 0;
+    foreach my $line (@lines) {
+	
+	chomp $line;
+	if (($line =~ /\t$/) || ($line =~ /\s$/)) {
+	    chop $line;
+	}
+	
+	print STDERR "parsing line,$line...\n";
+	
+	if (! ($line =~ /\t/)) {
+	    print STDERR "Problem, matrix doesn't include any tabulations (\t) - wrong syntax!!!\n";
+	}
+	
+	my @values =  split ('\s+', $line);
+	
+	if (@values == 0) {
+	    print STDERR "can't parse any values...\n";
+	    exit 1;
+	}
+	
+	# Get rid of the label (first column)
+	shift @values;
+	
+	my $j = 0;
+	foreach my $value (@values) {
+	    
+	    print STDERR "parsing value,$value...\n";
+
+	    chomp $value;
+
+	    $matrix[$i][$j] = $value;
+	    $j++;
+	}
+
+	$i++;
+    }
+    
+    #####################################
+    #
+    # Writing out the moby matrix object
+    #
+    #####################################
+    
+    $moby_matrix_object = "<Matrix" . $matrix_type . " namespace='' id='$motif_identifier'>\n";
+    $moby_matrix_object .= "\t<Integer articleName='Key'/>\n";
+    
+    for my $row (0..$#matrix) {
+	$moby_matrix_object .= "\t<Array" . $matrix_type . " articleName='Array'>\n";
+        $moby_matrix_object .= "\t\t<Integer articleName='Key'>$row</Integer>\n";
+
+	for my $col (0..$#{$matrix[$row]}) {
+	    my $value = $matrix[$row][$col];
+	    
+            $moby_matrix_object .= "\t\t<Element" . $matrix_type . " articleName='Element'>\n";
+	    $moby_matrix_object .= "\t\t\t<Integer articleName='Key'>$col</Integer>\n";
+	    $moby_matrix_object .= "\t\t\t<" . $matrix_type . " articleName='Value'>" . $value . "</" . $matrix_type . ">\n";
+	    $moby_matrix_object .= "\t\t</Element" . $matrix_type . ">\n";
+	}
+
+	$moby_matrix_object .= "\t</Array" . $matrix_type . ">\n";
+
+    }
+    
+    $moby_matrix_object .= "</Matrix" . $matrix_type . ">\n";
+
+    # print STDERR "debugging moby matrix object, $moby_matrix_object\n";
+
+    return $moby_matrix_object;
 }
 
 1;
