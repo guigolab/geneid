@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.14 2006-02-15 15:45:56 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.15 2006-03-02 14:02:31 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -200,20 +200,20 @@ sub _do_query_SGP2 {
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
-	    if ($articleName eq "sequences") { 
+	    if (($articleName eq "sequence") || ($articleName =~ /sequence/i)) { 
 		
 		if ($_debug) {
-		    print STDERR "parsing the article \"sequences\"...\n";
+		    print STDERR "parsing the article \"sequence\"...\n";
 		}
 		# Validate the type first
 		
-		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
 		if (!$rightType) {
 		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "sequences",
+									      refElement => "sequence",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -237,7 +237,7 @@ sub _do_query_SGP2 {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "sequences",
+									      refElement => "sequence",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,

@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.65 2006-02-15 15:46:21 gmaster Exp $
+# $Id: Factory.pm,v 1.66 2006-03-02 14:01:30 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -171,9 +171,9 @@ sub GeneID_call_CGI {
 	
 	my $profile = $parameters->{profile};
 	my $strands = $parameters->{strands};
-	my $mode    = "normal";
+	my $mode    = $parameters->{engine};
 	
-	# print STDERR "GeneID parameters (profile, strands, format): $profile, $strands, $format.\n";
+	# print STDERR "GeneID parameters (profile, strands, format, engine): $profile, $strands, $format, $engine.\n";
 	
 	# Output definition
 	
@@ -243,7 +243,8 @@ sub GeneID_call {
     my $strands     = $parameters->{strands};
     my $exons_ref   = $parameters->{exons};
     my $signals_ref = $parameters->{signals};
-
+    my $engine      = $parameters->{engine};
+    
     # Llama a GeneID en local
     my $_geneid_dir  = "/home/ug/gmaster/projects/geneid";
     my $_geneid_bin  = "bin/geneid";
@@ -276,21 +277,29 @@ sub GeneID_call {
     elsif ($strands eq "Reverse") {
 	$_geneid_args .= "C";
     }
-
+    
   SWITCH: {
-      if ($profile eq "Human")         { $_geneid_args .= "P $_geneid_dir/params/human.param"; last SWITCH; }
-      if ($profile eq "Tetraodon")     { $_geneid_args .= "P $_geneid_dir/params/tetraodon.param"; last SWITCH; }
-      if ($profile eq "Drosophila")    { $_geneid_args .= "P $_geneid_dir/params/dros.param"; last SWITCH; }
-      if ($profile eq "Celegans")      { $_geneid_args .= "P $_geneid_dir/params/celegans.param"; last SWITCH; }
-      if ($profile eq "Wheat")         { $_geneid_args .= "P $_geneid_dir/params/wheat.param"; last SWITCH; }
-      if ($profile eq "Arabidopsis")   { $_geneid_args .= "P $_geneid_dir/params/arabidopsis.param"; last SWITCH; }
-      if ($profile eq "Rice")          { $_geneid_args .= "P $_geneid_dir/params/rice.param"; last SWITCH; }
-      if ($profile eq "Plasmodium")    { $_geneid_args .= "P $_geneid_dir/params/plasmodium.param"; last SWITCH; }
-      if ($profile eq "Dictyostelium") { $_geneid_args .= "P $_geneid_dir/params/dictyostelium.param"; last SWITCH; }
-      if ($profile eq "Aspergillus")   { $_geneid_args .= "P $_geneid_dir/params/aspergillus.param"; last SWITCH; }
-      if ($profile eq "Neurospora")    { $_geneid_args .= "P $_geneid_dir/params/neurospora.param"; last SWITCH; }
-      if ($profile eq "Cryptococcus")  { $_geneid_args .= "P $_geneid_dir/params/cneomorfans.param"; last SWITCH; }
-      if ($profile eq "Coprinus")      { $_geneid_args .= "P $_geneid_dir/params/cinereus.param"; last SWITCH; }
+      if ($profile eq "Homo sapiens (suitable for mammals)")      { $_geneid_args .= "P $_geneid_dir/params/human.param"; last SWITCH; }
+      if ($profile eq "Tetraodon nigroviridis (pupper fish)")     { $_geneid_args .= "P $_geneid_dir/params/tetraodon.param"; last SWITCH; }
+      if ($profile eq "Drosophila melanogaster (fruit fly)")      { $_geneid_args .= "P $_geneid_dir/params/dros.param"; last SWITCH; }
+      if ($profile eq "Caenorhabditis elegans (worm)") { $_geneid_args .= "P $_geneid_dir/params/celegans.param"; last SWITCH; }
+      if ($profile eq "Triticum aestivum (wheat)")     { $_geneid_args .= "P $_geneid_dir/params/wheat.param"; last SWITCH; }
+      if ($profile eq "Arabidopsis thaliana (weed)")   { $_geneid_args .= "P $_geneid_dir/params/arabidopsis.param"; last SWITCH; }
+      if ($profile eq "Oryza sativa (rice)")           { $_geneid_args .= "P $_geneid_dir/params/rice.param"; last SWITCH; }
+      if ($profile eq "Plasmodium falciparum (malaria parasite)") { $_geneid_args .= "P $_geneid_dir/params/plasmodium.param"; last SWITCH; }
+      if ($profile eq "Dictyostelium discoideum (slime mold)")    { $_geneid_args .= "P $_geneid_dir/params/dictyostelium.param"; last SWITCH; }
+      if ($profile eq "Aspergillus nidulans")          { $_geneid_args .= "P $_geneid_dir/params/aspergillus.param"; last SWITCH; }
+      if ($profile eq "Neurospora crassa")             { $_geneid_args .= "P $_geneid_dir/params/neurospora.param"; last SWITCH; }
+      if ($profile eq "Cryptococcus neomorfans")       { $_geneid_args .= "P $_geneid_dir/params/cneomorfans.param"; last SWITCH; }
+      if ($profile eq "Coprinus cinereus")             { $_geneid_args .= "P $_geneid_dir/params/cinereus.param"; last SWITCH; }
+      if ($profile eq "Apis mellifera (honey bee)")    { $_geneid_args .= "P $_geneid_dir/params/bee.param"; last SWITCH; }
+      if ($profile eq "Chaetomium globosum")           { $_geneid_args .= "P $_geneid_dir/params/chaetomium.param"; last SWITCH; }
+      if ($profile eq "Schistosoma japonica")          { $_geneid_args .= "P $_geneid_dir/params/sjaponica.param"; last SWITCH; }
+      if ($profile eq "Stagnospora nodorum")           { $_geneid_args .= "P $_geneid_dir/params/snodorum.param"; last SWITCH; }
+      if ($profile eq "Solanaceae")                    { $_geneid_args .= "P $_geneid_dir/params/solanaceae.param"; last SWITCH; }
+      if ($profile eq "Sclerotinia sclerotiorum")      { $_geneid_args .= "P $_geneid_dir/params/ssclerotiorum.param"; last SWITCH; }
+      if ($profile eq "Coccidioides immitis")          { $_geneid_args .= "P $_geneid_dir/params/cimmitis.param"; last SWITCH; }
+      if ($profile eq "Histoplasma capsulatum")        { $_geneid_args .= "P $_geneid_dir/params/hcapsulatum.param"; last SWITCH; }
       # Default is Human
       $_geneid_args .= "P $_geneid_dir/params/human.param";
   }
@@ -321,7 +330,13 @@ sub GeneID_call {
 	  # No signals reported by default
       }
     }
-
+    
+  SWITCH: {
+      if ($engine eq "Normal")             { last SWITCH; }
+      if ($engine eq "Exon Mode")          { $_geneid_args .= " -o"; last SWITCH; }
+      # Default is Normal - nothing to add then
+  }
+    
     # Generate a temporary file locally with the sequence(s) in FASTA format
     # locally, ie not on a NFS mounted directory, for speed sake
 
@@ -854,26 +869,26 @@ sub MatScan_call {
 
     # relleno los parametros por defecto MatScan_call
 
-    my $sequences    = $args{sequences}  || undef;
-    my $matrix_input = $args{matrix}     || undef;
-    my $format       = $args{format}     || "";
-    my $parameters   = $args{parameters} || undef;
-    my $debug        = $args{debug}      || 0;
-    my $queryID      = $args{queryID}    || "";
+    my $sequences      = $args{sequences}  || undef;
+    my $matrices_input = $args{matrices}   || undef;
+    my $format         = $args{format}     || "";
+    my $parameters     = $args{parameters} || undef;
+    my $debug          = $args{debug}      || 0;
+    my $queryID        = $args{queryID}    || "";
 
     # Get the parameters
 
-    my $threshold        = $parameters->{threshold};
-    my $strands          = $parameters->{strands};
-    my $matrix_parameter = $parameters->{matrix};
-    my $matrix_mode      = $parameters->{matrix_mode};
-
+    my $threshold          = $parameters->{threshold};
+    my $strands            = $parameters->{strands};
+    my $database_parameter = $parameters->{motif_database};
+    my $matrix_mode        = $parameters->{matrix_mode};
+    
     if ($debug) {
 	print STDERR "threshold, $threshold\n";
-	print STDERR "matrix parameter, $matrix_parameter\n";
+	print STDERR "motif database parameter, $database_parameter\n";
 	print STDERR "matrix mode, $matrix_mode\n";
     }
-
+    
     # Llama a MatScan en local
     my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";
     my $_matscan_bin  = "bin/matscan";
@@ -904,7 +919,7 @@ sub MatScan_call {
 	$_matscan_args .= " -C";
     }
 
-    if (defined $matrix_parameter) {
+    if (defined $database_parameter) {
 
 	if ($debug) {
 	    print STDERR "matrix as a parameter...\n";
@@ -917,9 +932,8 @@ sub MatScan_call {
 	    }
 
 	  SWITCH: {
-	      if (lc ($matrix_parameter) eq "transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
-	      if (lc ($matrix_parameter) eq "meme")     { $matrix_file = "$_matscan_dir/matrices/Promo_raw_format.matrices"; last SWITCH; }
-	      if (lc ($matrix_parameter) eq "jaspar")   { $matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "transfac") { $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "jaspar")   { $matrix_file = "$_matscan_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
 	      # Default is Transfac
 	      $matrix_file = "$_matscan_dir/matrices/Transfac_raw_format.matrices";
 	  }
@@ -930,9 +944,8 @@ sub MatScan_call {
 	    }
 
 	  SWITCH: {
-	      if (lc ($matrix_parameter) eq "transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
-	      if (lc ($matrix_parameter) eq "meme")     { $_matscan_args .= " -sl"; $matrix_file = "$_matscan_dir/matrices/Promo_likelihood.matrices"; last SWITCH; }
-	      if (lc ($matrix_parameter) eq "jaspar")   { $_matscan_args .= " -s"; $matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "transfac") { $_matscan_args .= " -sm"; $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "jaspar")   { $_matscan_args .= " -s"; $matrix_file = "$_matscan_dir/matrices/Jaspar_likelihood.matrices"; last SWITCH; }
 	      # Default is Transfac
 	      $_matscan_args .= " -sm";
 	      $matrix_file = "$_matscan_dir/matrices/Transfac_likelihood.matrices";
@@ -944,16 +957,16 @@ sub MatScan_call {
 	    exit 0;
 	}
     }
-    elsif (defined $matrix_input) {
+    elsif (defined $matrices_input) {
 	if ($debug) {
-	    print STDERR "matrix as an input...\n";
+	    print STDERR "matrices as an input...\n";
 	}
 
 	# Make a temporary file with the matrix input
 	$_matscan_args .= " -s";
 	eval {
 	    ($matrix_fh, $matrix_file) = tempfile("/tmp/MATSCAN_MATRIX.XXXXXX", UNLINK => 0);
-	    print $matrix_fh "$matrix_input";
+	    print $matrix_fh "$matrices_input";
 	    close $matrix_fh;
 	};
 	if ($@) {
@@ -972,7 +985,7 @@ sub MatScan_call {
     }
     else {
 	# To change !
-	print STDERR "matrix_input neither matrix_parameter are defined!!\n";
+	print STDERR "matrices_input neither database_parameter are defined!!\n";
 	exit 0;
     }
 
@@ -1046,7 +1059,7 @@ sub MatScan_call {
     $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan/;
 
     unlink $seqfile unless $debug;
-    if ((not $debug) && (defined $matrix_input)) {
+    if ((not $debug) && (defined $matrices_input)) {
 	# Only remove the matrix input file when this matrix collection is given by the user!!
 	# If it is transfac or jaspar, don't remove it !!! - as they are stored locally !
 	unlink $matrix_file;
@@ -1394,7 +1407,7 @@ sub MEME_call {
 	print STDERR "format, $format\n";
     }
 
-    if ($format eq "text-formatted") {
+    if ($format =~ /text/i) {
 	$_meme_args .= "-text ";
     }
 
