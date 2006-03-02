@@ -129,7 +129,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "parseMotifMatricesfromMEME";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -163,7 +163,7 @@ my ($REG) = $Central->registerService(
 							    ['meme_predictions', ['MEME_Text' => \@namespaces]]
 							   ],
 				      output		=> [
-							    ['meme_matrices', ['text-formatted' => \@namespaces]]
+							    ['meme_matrices', [['Matrix' => \@namespaces]]]
 							   ],
 				      secondary	=> {
 					  'matrix mode' => {
