@@ -92,16 +92,16 @@ if ($serviceName =~ /collection/i) {
 
 my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa";
 my $in_file_2    = "/home/ug/arnau/data/promoterExtraction/ENSG00000160087.upstream_region.5000.fa";
-my $matrix_file  = $opt_m || "/home/ug/arnau/data/MeMe/meme2matrix.text-formatted.out";
+my $matrix_file  = $opt_m || "/home/ug/arnau/data/MeMe/meme_motifs.collection.xml";
 my $datasource   = "EMBL";
 
 # Parameters
 
-my $threshold   = "0.8";
+my $threshold   = "0.9";
 my $strands     = "Both";
 my $matrix_mode = "log-likelihood";
 my $matrix;
-if ($serviceName ne "runMatScanGFFCollectionVsInputMatrix") {
+if ($serviceName ne "runMatScanGFFCollectionVsInputMatrices") {
     print STDERR "initialising matrix...\n";
     $matrix = "Transfac";
 }
@@ -278,16 +278,9 @@ PRT
 
 # Input Matrix
 
-my $input_matrix_xml;
-if ($serviceName eq "runMatScanGFFCollectionVsInputMatrix") {
-    my $input_matrix = qx/cat $matrix_file/;
-    $input_matrix_xml = <<PRT;
-<text-formatted namespace="MEME" id="id">
-<![CDATA[
-$input_matrix
-]]>
-</text-formatted>
-PRT
+my $input_matrices_xml;
+if ($serviceName eq "runMatScanGFFCollectionVsInputMatrices") {
+    $input_matrices_xml = qx/cat $matrix_file/;
 }
 
 #
@@ -339,7 +332,7 @@ if ($serviceType eq "Collection") {
 	print STDERR "matrix parameter, $matrix_xml\n";
 	
 	$result = $Service->execute(XMLinputlist => [
-						     ["$sequence_articleName", $inputs, 'threshold', $threshold_xml, 'matrix', $matrix_xml, 'matrix mode', $matrix_mode_xml, 'strands', $strands_xml]
+						     ["$sequence_articleName", $inputs, 'threshold', $threshold_xml, 'motif database', $matrix_xml, 'matrix mode', $matrix_mode_xml, 'strand', $strands_xml]
 						     ]);
     }
     else {
@@ -347,7 +340,7 @@ if ($serviceType eq "Collection") {
 	print STDERR "serviceName, $serviceName\n";
 	
 	$result = $Service->execute(XMLinputlist => [
-						     ["$sequence_articleName", $inputs, "$matrix_articleName", $input_matrix_xml, 'threshold', $threshold_xml, 'matrix mode', $matrix_mode_xml, 'strands', $strands_xml]
+						     ["$sequence_articleName", $inputs, "motif_weight_matrices", [$input_matrices_xml], 'threshold', $threshold_xml, 'matrix mode', $matrix_mode_xml, 'strand', $strands_xml]
 						     ]);
     }
 }
@@ -358,7 +351,7 @@ else {
     
     my $input = $inputs->[0];
     $result = $Service->execute(XMLinputlist => [
-						 ["$sequence_articleName", $input, 'threshold', $threshold_xml, 'matrix' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strands' => $strands_xml]
+						 ["$sequence_articleName", $input, 'threshold', $threshold_xml, 'motif database' => $matrix_xml, 'matrix mode' => $matrix_mode_xml, 'strand' => $strands_xml]
 						 ]);
 }
 
