@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.24 2006-03-03 14:05:51 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.25 2006-03-03 16:32:22 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -790,7 +790,7 @@ sub _do_query_MatScanVsInputMatrices {
 	    
 	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Matrix" . $matrix_type);
 	    if (!$rightType) {
-		my $note = "Expecting a $matrix_type object, and receiving a $inputDataType object";
+		my $note = "Expecting a Matrix$matrix_type object, and receiving a $inputDataType object";
 		print STDERR "$note\n";
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
