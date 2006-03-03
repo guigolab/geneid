@@ -53,6 +53,7 @@ our @EXPORT = qw(
   &MOBY_EMPTY_SIMPLE_RESPONSE
   &MOBY_EMPTY_COLLECTION_RESPONSE
   &convert_tabularMatrix_into_MobyMatrix
+  &convert_MobyMatrix_into_tabularMatrix
 );
 
 our $VERSION = '1.0';
@@ -508,7 +509,7 @@ sub validateDataType {
 	    $inputDataType = $node->nodeName;
 	    
 	    if ($specifiedType eq "GenericSequence") {
-		if (($inputDataType =~ /GenericSequence|AminoAcidSequence|AASequence|NucleotideSequence|DNASequence|RNASequence/)) {
+		if ($inputDataType =~ /GenericSequence|AminoAcidSequence|AASequence|NucleotideSequence|DNASequence|RNASequence/) {
 		    $rightType = 1;
 		}
 		else {
@@ -518,7 +519,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "NucleotideSequence") {
-		if (($inputDataType =~ /NucleotideSequence|DNASequence|RNASequence/)) {
+		if ($inputDataType =~ /NucleotideSequence|DNASequence|RNASequence/) {
 		    $rightType = 1;
 		}
 		else {
@@ -528,7 +529,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType =~ /DNASequence/) {
-		if (($inputDataType =~ /DNASequence/)) {
+		if ($inputDataType =~ /DNASequence/) {
 		    $rightType = 1;
 		}
 		else {
@@ -538,7 +539,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType =~ /RNASequence/) {
-		if (($inputDataType =~ /RNASequence/)) {
+		if ($inputDataType =~ /RNASequence/) {
 		    $rightType = 1;
 		}
 		else {
@@ -548,7 +549,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "AminoAcidSequence") {
-		if (($inputDataType =~ /AminoAcidSequence|AASequence/)) {
+		if ($inputDataType =~ /AminoAcidSequence|AASequence/) {
 		    $rightType = 1;
 		}
 		else {
@@ -558,7 +559,7 @@ sub validateDataType {
 	    }
 
 	    if ($specifiedType =~ /AASequence/) {
-		if (($inputDataType =~ /AASequence/)) {
+		if ($inputDataType =~ /AASequence/) {
 		    $rightType = 1;
 		}
 		else {
@@ -578,7 +579,7 @@ sub validateDataType {
 	    }
 
 	    if (($specifiedType eq "Blast-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
-		if (($inputDataType =~ /Blast-Text|NCBI_BLAST_Text|WU_BLAST_Text/)) {
+		if ($inputDataType =~ /Blast-Text|NCBI_BLAST_Text|WU_BLAST_Text/) {
 		    $rightType = 1;
 		}
 		else {
@@ -608,7 +609,7 @@ sub validateDataType {
 	    }
 
 	    if ($specifiedType eq "GFF") {
-		if (($inputDataType =~ /GFF\d*$/)) {
+		if ($inputDataType =~ /GFF\d*$/) {
 		    $rightType = 1;
 		}
 		else {
@@ -617,6 +618,36 @@ sub validateDataType {
 		}
 	    }
 	    
+	    if ($specifiedType eq "MatrixFloat") {
+		if ($inputDataType =~ /^MatrixFloat$/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType eq "MatrixInteger") {
+		if ($inputDataType =~ /^MatrixInteger$/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+
+	    if ($specifiedType eq "Matrix") {
+		if ($inputDataType =~ /^Matrix/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+
 	    # ...
 	    
 	}
@@ -867,6 +898,169 @@ sub convert_tabularMatrix_into_MobyMatrix {
     # print STDERR "debugging moby matrix object, $moby_matrix_object\n";
 
     return $moby_matrix_object;
+}
+
+# Check if the matrix mode matches the type of the Matrix
+
+sub convert_MobyMatrix_into_tabularMatrix {
+    my $self = shift;
+    my ($DOM, $matrix_type, $debug) = @_;
+    
+    # output
+    my $matrix_text = "";
+    my $moby_exceptions = [];
+    
+    my $matrixIdentifier;
+    my $_delimitor = "   ";
+    
+    my @articles = ($DOM);
+    ($matrixIdentifier) = getSimpleArticleIDs (\@articles);
+    
+    if (not defined $matrixIdentifier) {
+	print STDERR "Error - no matrix identifier!!!\n";
+	# return exception
+	# ...
+	return ("", $moby_exceptions);
+    }
+    
+    $matrix_text = "$matrixIdentifier\n";
+    
+    if ($debug) {
+	print STDERR "motif identifer, $matrixIdentifier\n";
+    }
+    
+    # Parse the matrix object
+    
+    my @matrix = _parseMatrixMobyObject ($DOM, $matrix_type, $debug);
+
+    if (@matrix == 0) {
+	print STDERR "Empty matrix!!! - Error parsing the Matrix object\n";
+	# return exception
+	# ...
+	return ("", $moby_exceptions);
+    }
+    
+    # Build the matrix in text format from the matrix array reference - matrix[$row][$col]
+    
+    for my $row (0..$#matrix) {
+	my $row_index = $row + 1;
+	$matrix_text .= "$row_index" . "$_delimitor";
+	for my $col (0..$#{$matrix[$row]}) {
+	    $matrix_text .= "$_delimitor" if ($col);
+	    $matrix_text .= $matrix[$row][$col];
+	}
+	$matrix_text .= "\n";
+    }
+    
+    $matrix_text .= "//\n";
+    
+    return ($matrix_text, $moby_exceptions);
+}
+
+sub _parseMatrixMobyObject {
+    my ($matrix_DOM, $matrix_type, $debug) = @_;
+    my @matrix;
+    
+    unless ( ref( $matrix_DOM ) =~ /XML\:\:LibXML/ ) {
+	my $parser  = XML::LibXML->new();
+	my $doc     = $parser->parse_string( $matrix_DOM );
+	$matrix_DOM = $doc->getDocumentElement();
+    }
+    
+    my $array_elements = $matrix_DOM->getElementsByTagName ("Array" . $matrix_type);
+    my $size = $array_elements->size();
+    if ($size == 0) {
+	$array_elements = $matrix_DOM->getElementsByTagName ("moby:Array" . $matrix_type);
+	$size = $array_elements->size();
+	if ($size == 0) {
+	    print STDERR "Error, can't parse any array element from the Matrix moby XML...\n";
+	    return ();
+	}
+    }
+    
+    my $i = 0;
+    while ($i < $size) {
+	my $array_element = $array_elements->get_node ($i);
+
+	# Get the row index
+	
+	my $row_elements = $array_element->getElementsByTagName ("Integer");
+	my $row_size = $row_elements->size();
+	if ($row_size == 0) {
+	    $row_elements = $array_element->getElementsByTagName ("moby:Integer");
+	    $row_size = $row_elements->size();
+	    if ($row_size == 0) {
+		print STDERR "Error, can't parse any row index element from the Matrix moby XML...\n";
+		return ();
+	    }
+	}
+	my $row = $row_elements->[0]->textContent();
+	
+	if ($debug) {
+	    print STDERR "row, $row\n";
+	}
+	
+	# Get the elements in the array
+	
+	my $array_element_elements = $array_element->getElementsByTagName ("Element" . $matrix_type);
+	my $element_size  = $array_element_elements->size();
+	if ($element_size == 0) {
+	    $array_element_elements = $array_element->getElementsByTagName ("moby:Element" . $matrix_type);
+	    $element_size = $array_element_elements->size();
+	    if ($element_size == 0) {
+		print STDERR "Error, can't parse any array_element element from the Matrix moby XML...\n";
+		return ();
+	    }
+	}
+	
+	if ($debug) {
+	    print STDERR "element size, $element_size\n";
+	}
+	
+	my $j = 0;
+	while ($j < $element_size) {
+	    my $array_element_element = $array_element_elements->[$j];
+	
+	    if ($debug) {
+		print STDERR "array_element element dumping, " . $array_element_element->toString() . "\n";
+	    }
+	    
+	    # Get content of all elements and get it as a single string !
+	    # then just split the string based on '\n' character
+
+	    my $values_str = $array_element_element->textContent();
+	    
+	    if ($debug) {
+		print STDERR "values, $values_str\n";
+	    }
+	    
+	    my @values = split ('\n', $values_str);
+	    if (! $values[0] =~ /\d/) {
+		shift @values;
+	    }
+	    
+	    my $col    = $values[0];
+	    my $value  = $values[1];
+	    
+	    # Clean it !
+	    
+	    $col   =~ s/\t//g;
+	    $value =~ s/\t//g;
+	    
+	    if ($debug) {
+		print STDERR "column,$col.\n";
+		print STDERR "value,$value.\n";
+	    }
+	    
+	    $matrix[$row][$col] = $value;
+
+	    $j++;
+	}
+	
+	$i++;
+    }
+    
+    return @matrix;
 }
 
 1;

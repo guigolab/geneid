@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.23 2006-03-02 13:58:40 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.24 2006-03-03 14:05:51 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -562,7 +562,7 @@ PRT
 }
 
 
-sub _do_query_MatScanVsInputMatrix {
+sub _do_query_MatScanVsInputMatrices {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby
     my $queryInput_DOM = shift @_;
     # $_format is the type of output that returns MatScan (e.g. GFF)
@@ -590,21 +590,39 @@ sub _do_query_MatScanVsInputMatrix {
     my $threshold;
     my $strands;
     my $matrix_mode;
-
+    
     # Variables that will be passed to MatScan_call
     my %sequences;
     my $matrices;
     my %parameters;
-
+    
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
-
+    
     # Get the parameters
-
+    
     ($matrix_mode) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "matrix mode");
     if (not defined $matrix_mode) {
 	# Default is to use 'log-likelihood' mode
 	$matrix_mode = "log-likelihood";
+    }
+    elsif (! ((lc $matrix_mode eq "raw format") || (lc $matrix_mode eq "log-likelihood"))) {
+	my $note = "matrix mode parameter, '$matrix_mode', not accepted, should be ['raw format', 'log-likelihood']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "matrix mode",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     ($threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "threshold");
@@ -612,11 +630,47 @@ sub _do_query_MatScanVsInputMatrix {
 	# Default is 0.85
 	$threshold = "0.85";
     }
+    elsif ($threshold > 1 || $threshold < 0) {
+	my $note = "threshold parameter, '$threshold', not accepted, should between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "threshold",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
 
     ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strand");
     if (not defined $strands) {
 	# Default is running MatScan on both strands
 	$strands = "Both";
+    }
+    elsif (! (($strands eq "Both") || (($strands eq "Forward") || ($strands eq "Reverse")))) {
+	my $note = "strand parameter, '$strands', not accepted, should be ['Both', 'Forward', 'Reverse']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "strand",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
 
     # Add the parsed parameters in a hash table
@@ -640,19 +694,14 @@ sub _do_query_MatScanVsInputMatrix {
 	# make it more 'interoperable' by testing also pattern matching!!!
 	# i think it should be up to the clients to adjust the article names
 	
-	if (($articleName eq "sequences") || ($articleName =~ /sequence/i)) {
+	if ($articleName =~ /sequence/i) {
 	    
 	    if (isSimpleArticle ($DOM)) {
 		
 		# not allowed
 		
-		print STDERR "parsing the sequences input...\n";
-
 		my $note = "Received a simple input article instead of a collection";
 		print STDERR "$note\n";
-
-		print STDERR "DOM: " . $DOM->toString() . "\n";
-
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
 									  refElement => 'sequences',
@@ -675,10 +724,10 @@ sub _do_query_MatScanVsInputMatrix {
 		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		}
 		
-		# Validate the type of the simples in the collection - should all be NucleotideSequence objects
-		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		# Validate the type of the simples in the collection - should all be DNASequence objects
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
 		if (!$rightType) {
-		    my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		    my $note = "Expecting a DNA object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -706,9 +755,64 @@ sub _do_query_MatScanVsInputMatrix {
 	    }
 
 	} # End parsing sequences article tag
-	elsif (($articleName eq "motif_matrices") || ($articleName =~ /matrices/i)) {
+	elsif ($articleName =~ /matrices/i) {
 	    
-	    $matrices = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
+	    if (isSimpleArticle ($DOM)) {
+		
+		# not allowed
+		
+		my $note = "Received a simple input article instead of a collection";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => 'motif_weight_matrices',
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+
+	    my $matrix_type;
+	    # Validate Type
+	    if ($matrix_mode eq "raw format") {
+		$matrix_type = "Integer";
+	    }
+	    else {
+		$matrix_type = "Float";
+	    }
+	    
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Matrix" . $matrix_type);
+	    if (!$rightType) {
+		my $note = "Expecting a $matrix_type object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => 'motif_weight_matrices',
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	    
+	    my @matrix_articles_DOM = getCollectedSimples ($DOM);
+	    foreach my $matrix_article_DOM (@matrix_articles_DOM) {
+		my ($matrices_tmp, $moby_exceptions_tmp) = INB::GRIB::Utils::CommonUtilsSubs->convert_MobyMatrix_into_tabularMatrix ($matrix_article_DOM, $matrix_type, $_debug);
+		push (@$moby_exceptions, @$moby_exceptions_tmp);
+		$matrices .= $matrices_tmp;
+	    }
 	    
 	    if ($_debug) {
 		print STDERR "parsed matrices, $matrices\n";
@@ -745,7 +849,7 @@ sub _do_query_MatScanVsInputMatrix {
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => 'matrices',
+								  refElement => 'motif_weight_matrices',
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -772,7 +876,7 @@ sub _do_query_MatScanVsInputMatrix {
     else {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
     }
-
+    
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero
     # en este caso disponemos de una funcion que lo realiza. Si tuvieramos
