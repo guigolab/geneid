@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 1 -s runMatScanGFFCollectionVsInputMatrices
 
 END_HELP
 
@@ -153,15 +153,15 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "Nucleotic_Motifs",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Promoter regions analysis program. Matscan is a program to search putative binding sites (or motifs in a more general sense) in genomic sequences. This service takes two inputs, a collection of NucleotideSequence objects and motif matrices within a text-formatted object (e.g. MEME generated-matrices). It returns a collection of GFF objects (one GFF object for each NucleotideSequence). If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
+				      description  => "Reports putative predicted motifs on a given collection of DNA sequences. The set of motifs is given by the user. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', [['NucleotideSequence' => \@namespaces]]], # collection of one object type,
-							    ['motif_matrices', ['Text-formatted' => \@namespaces]]
+							    ['sequences', [['DNASequence' => \@namespaces]]], # collection of one object type,
+							    ['motif_weight_matrices', [['Matrix' => \@namespaces]]]
 							   ],
 				      output		=> [
 							    ['matscan_predictions', [['GFF' => \@namespaces]]] # collection of one object type
@@ -178,7 +178,7 @@ my ($REG) = $Central->registerService(
 					      min      => 0,
 					      default  => 0.85
 					  },
-					  'strands' => {
+					  'strand' => {
 					      datatype => 'String',
 					      enum     => ['Both','Forward','Reverse'],
 					      default  => 'Both'
