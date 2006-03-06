@@ -1035,7 +1035,12 @@ sub _parseMatrixMobyObject {
 	    }
 	    
 	    my @values = split ('\n', $values_str);
-	    if (! $values[0] =~ /\d/) {
+
+	    if ($debug) {
+		print STDERR "values array, " . join (', ', @values) . ".\n";
+	    }
+
+	    while (defined $values[0] && (! ($values[0] =~ /\d/))) {
 		shift @values;
 	    }
 	    
@@ -1046,6 +1051,9 @@ sub _parseMatrixMobyObject {
 	    
 	    $col   =~ s/\t//g;
 	    $value =~ s/\t//g;
+
+	    $col   =~ s/\s//g;
+	    $value =~ s/\s//g;
 	    
 	    if ($debug) {
 		print STDERR "column,$col.\n";
