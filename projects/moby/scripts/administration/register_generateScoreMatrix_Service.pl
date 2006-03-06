@@ -163,15 +163,8 @@ my ($REG) = $Central->registerService(
 							    ['similarity_results', [['meta_alignment_text' => \@namespaces]]],
 							   ],
 				      output		=> [
-							    ['score_matrix', ['text-formatted' => \@namespaces]]
+							    ['matrix', ['Distance_Matrix' => \@namespaces]]
 							   ],
-				      secondary	=> {
-  					  'output format' => {
-					      datatype => 'String',
-					      enum     => ['Phylip','SOTA'],
-					      default  => 'SOTA'
-					  },
-				      }
 				      );
 
 # Check if the result has been registered successfully.
