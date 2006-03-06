@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.21 2006-03-02 19:28:45 gmaster Exp $
+# $Id: MemeServices.pm,v 1.22 2006-03-06 16:21:05 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -546,9 +546,43 @@ sub _do_query_MemeMotifMatrices {
     if (not defined $matrix_mode) {
 	$matrix_mode = "log-likelihood";
     }
+    elsif (! ((lc ($matrix_mode) eq "raw format") || (lc ($matrix_mode) eq "log-likelihood"))) {
+	my $note = "matrix mode parameter, '$matrix_mode', not accepted, should be ['raw format','log-likelihood']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "matrix mode",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
 
+    # Match the matrix object name and the type of its element depending on matrix mode, ie
+    # raw format     => MatrixInteger
+    # log-likelihood => MatrixFloat
+
+    my $matrix_object_name;
+    my $matrix_element_type;
+    if ($matrix_mode eq "log-likelihood") {
+	$matrix_object_name  = "MatrixFloat";
+	$matrix_element_type = "Float";
+    }
+    elsif ($matrix_mode eq "raw format") {
+	$matrix_object_name  = "MatrixInteger";
+	$matrix_element_type = "Integer";
+    }
+    
     # Add the parsed parameters in a hash table
-
+    
     $parameters{matrix_mode} = $matrix_mode;
 
     if ($_debug) {
@@ -647,10 +681,7 @@ sub _do_query_MemeMotifMatrices {
     
     my $meme_matrix_objects = [];    
     foreach my $matrix (@$matrices_aref) {
-	
-	my $matrix_type = "Float";
-	my $moby_matrix = INB::GRIB::Utils::CommonUtilsSubs->convert_tabularMatrix_into_MobyMatrix ($matrix, $matrix_type);
-	
+	my $moby_matrix = INB::GRIB::Utils::CommonUtilsSubs->convert_tabularMatrix_into_MobyMatrix ($matrix, $matrix_object_name, $matrix_element_type);
 	push (@$meme_matrix_objects, $moby_matrix);
     }
 
