@@ -31,7 +31,7 @@ return <<"END_HELP";
 Description: Execute MatScan Moby services available from genome.imim.es
 Usage:
 
-    MatScan_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
+    MatScan_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file} -m {motif matrices file}
 	-h help
 	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 		<1> or Chirimoyo
@@ -40,9 +40,10 @@ Usage:
 		<4> or BioMoby
 	-s Service Name
 	-i Sequence(s) input file, in FASTA format - optional
+	-m the Matrices in xml format
 	
 Examples using some combinations:
-	perl MatScan_Moby_Service.pl -x 1 -s runMatScanGFF -f /home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa -m /home/ug/arnau/data/MeMe/meme2matrix.text-formatted.out
+	perl MatScan_Moby_Service.pl -x 2 -s runMatScanGFFVsInputMatrices -f /home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa -m /home/ug/arnau/data/MeMe/meme2matrix.xml
 
 END_HELP
 
@@ -81,8 +82,8 @@ my $serviceName = $opt_s;
 
 print STDERR "service name, $serviceName\n";
 
-my $sequence_articleName = "upstream_sequences";
-my $matrix_articleName   = "matrix";
+my $sequence_articleName = "sequences";
+my $matrix_articleName   = "motif_weight_matrices";
 $::authURI = 'genome.imim.es';
 
 my $serviceType = "Simple";
@@ -91,7 +92,6 @@ if ($serviceName =~ /collection/i) {
 }
 
 my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa";
-my $in_file_2    = "/home/ug/arnau/data/promoterExtraction/ENSG00000160087.upstream_region.5000.fa";
 my $matrix_file  = $opt_m || "/home/ug/arnau/data/MeMe/meme_motifs.collection.xml";
 my $datasource   = "EMBL";
 
@@ -240,40 +240,34 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 ##################################################################
 
 my $inputs = [];
-my $files = [$in_file_1, $in_file_2];
-my $i = 0;
-while ($i < 2) {
-    my $seqin = Bio::SeqIO->new (
-				 -file   => $files->[$i],
-				 -format => 'fasta',
-				 );
+my $seqin = Bio::SeqIO->new (
+			     -file   => $in_file_1,
+			     -format => 'fasta',
+			     );
+
+while (my $seqobj = $seqin->next_seq) {
+    my $nucleotides  = $seqobj->seq;
+    my $seq_id       = $seqobj->display_id;
+    my $lnucleotides = length($nucleotides);
     
-    while (my $seqobj = $seqin->next_seq) {
-	my $nucleotides  = $seqobj->seq;
-	my $seq_id       = $seqobj->display_id;
-	my $lnucleotides = length($nucleotides);
-	
-	##################################################################
-	#
-	# Set up the service input and the secondary articles in XML format 
-	#
-	##################################################################
-	
-	#
-	# Sequence Input
-	#
-	
-	my $input = <<PRT;
+    ##################################################################
+    #
+    # Set up the service input and the secondary articles in XML format 
+    #
+    ##################################################################
+    
+    #
+    # Sequence Input
+    #
+    
+    my $input = <<PRT;
 <DNASequence namespace="$datasource" id="$seq_id">
 <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
 <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
 </DNASequence>
 PRT
 	    
-	push (@$inputs, $input);
-    }
-
-    $i++;
+    push (@$inputs, $input);
 }
 
 # Input Matrix
