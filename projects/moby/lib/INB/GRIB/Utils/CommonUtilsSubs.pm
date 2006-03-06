@@ -792,19 +792,23 @@ sub setMobyResponse {
 # 12    0.206273  0.375163  0.292359  0.126204
 # //
 
+# matrix_object_name  = ['Matrix', 'MatrixFloat', 'MatrixInteger', 'Distance_Matrix']
+# matrix_element_type = ['String', 'Integer', 'Float']
+
 sub convert_tabularMatrix_into_MobyMatrix {
     my $self = shift;
-    my ($tab_matrix, $matrix_type) = @_;
+    my ($tab_matrix, $matrix_object_name, $matrix_element_type) = @_;
 
-    my @matrix;    
-    # output
+    # intermediary matrix object as an array of array
+    my @matrix;
+    # output moby matrix object
     my $moby_matrix_object;
-
-    #####################################
+    
+    #############################################
     #
     # parsing the matrix in tab-delimited format
     # 
-    #####################################
+    #############################################
     
     my @lines = split ('\n', $tab_matrix);
     
@@ -840,7 +844,7 @@ sub convert_tabularMatrix_into_MobyMatrix {
 	print STDERR "parsing line,$line...\n";
 	
 	if (! ($line =~ /\t/)) {
-	    print STDERR "Problem, matrix doesn't include any tabulations (\t) - wrong syntax!!!\n";
+	    print STDERR "Warning, it could be a problem, matrix doesn't have a tab-delimited syntax (\t).\n";
 	}
 	
 	my @values =  split ('\s+', $line);
@@ -873,27 +877,27 @@ sub convert_tabularMatrix_into_MobyMatrix {
     #
     #####################################
     
-    $moby_matrix_object = "<Matrix" . $matrix_type . " namespace='' id='$motif_identifier'>\n";
+    $moby_matrix_object = "<$matrix_object_name namespace='' id='$motif_identifier'>\n";
     $moby_matrix_object .= "\t<Integer articleName='Key'/>\n";
     
     for my $row (0..$#matrix) {
-	$moby_matrix_object .= "\t<Array" . $matrix_type . " articleName='Array'>\n";
+	$moby_matrix_object .= "\t<Array" . $matrix_element_type . " articleName='Array'>\n";
         $moby_matrix_object .= "\t\t<Integer articleName='Key'>$row</Integer>\n";
-
+	
 	for my $col (0..$#{$matrix[$row]}) {
 	    my $value = $matrix[$row][$col];
 	    
-            $moby_matrix_object .= "\t\t<Element" . $matrix_type . " articleName='Element'>\n";
+            $moby_matrix_object .= "\t\t<Element" . $matrix_element_type . " articleName='Element'>\n";
 	    $moby_matrix_object .= "\t\t\t<Integer articleName='Key'>$col</Integer>\n";
-	    $moby_matrix_object .= "\t\t\t<" . $matrix_type . " articleName='Value'>" . $value . "</" . $matrix_type . ">\n";
-	    $moby_matrix_object .= "\t\t</Element" . $matrix_type . ">\n";
+	    $moby_matrix_object .= "\t\t\t<" . $matrix_element_type . " articleName='Value'>" . $value . "</" . $matrix_element_type . ">\n";
+	    $moby_matrix_object .= "\t\t</Element" . $matrix_element_type . ">\n";
 	}
-
-	$moby_matrix_object .= "\t</Array" . $matrix_type . ">\n";
-
+	
+	$moby_matrix_object .= "\t</Array" . $matrix_element_type . ">\n";
+	
     }
     
-    $moby_matrix_object .= "</Matrix" . $matrix_type . ">\n";
+    $moby_matrix_object .= "</$matrix_object_name>\n";
 
     # print STDERR "debugging moby matrix object, $moby_matrix_object\n";
 
