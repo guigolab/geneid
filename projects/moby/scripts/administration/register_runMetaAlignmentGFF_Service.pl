@@ -153,7 +153,7 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "SequenceAnalysis",
+				      serviceType  => "Alignment",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Meta-alignment produces alignments of sequences of TF binding sites. It returns the predictions in GFF format. You can use runMatScanGFF to produce the input GFF files",
