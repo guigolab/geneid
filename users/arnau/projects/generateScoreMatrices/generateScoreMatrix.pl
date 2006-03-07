@@ -14,8 +14,14 @@ use strict;
 my $_debug      = 0;
 my $_delimitor  = "\t";
 # inbHierarchicalCluster not working with dashes!!
-# my $_equal_mark = "";
-my $_equal_mark = "-";
+# my $_equal_mark    = "";
+my $_equal_mark    = "-";
+my $_plus_infinite_mark = "1000000";
+my $_minus_infinite_mark = "-1000000";
+$_plus_infinite_mark = "-";
+$_minus_infinite_mark = "-";
+
+# SOTA is compliant with valencia and uam
 
 my $inputformat  = shift || "meta-alignment";
 my $outputformat = shift || "SOTA";
@@ -45,20 +51,20 @@ for (my $i=0; $i < @$sequence_identifiers; $i++) {
     for (my $j=0; $j < @$sequence_identifiers; $j++) {
 
 	if ($i == $j) {
-	    push (@scores_per_row, $_equal_mark);
+	    push (@scores_per_row, $_plus_infinite_mark);
 	}
 
 	if ($i < $j) {
 	    my $seq_identifier_2 = $sequence_identifiers->[$j];
 	    my $id    = $seq_identifier_1 . "_" . $seq_identifier_2;
-	    my $score = $scores_per_sequences->{$id} || $_equal_mark;
+	    my $score = $scores_per_sequences->{$id} || $_minus_infinite_mark;
 	    
 	    push (@scores_per_row, $score);
 	}
 	if ($i > $j) {
 	    my $seq_identifier_2 = $sequence_identifiers->[$j];
 	    my $id    = $seq_identifier_2 . "_" . $seq_identifier_1;
-	    my $score = $scores_per_sequences->{$id} || $_equal_mark;
+	    my $score = $scores_per_sequences->{$id} || $_minus_infinite_mark;
 	    
 	    push (@scores_per_row, $score);
 	}
