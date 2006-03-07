@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.25 2006-03-02 14:07:37 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.26 2006-03-07 14:29:25 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -191,7 +191,7 @@ sub _do_query_TranslateGeneIDGFF {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
 	
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
@@ -236,7 +236,7 @@ sub _do_query_TranslateGeneIDGFF {
 								      );
 	    push (@$moby_exceptions, $moby_exception);
 	    
-	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    # Return an empty moby data object, as well as an exception telling why nothing got returned
 	    
 	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
@@ -461,7 +461,7 @@ sub _do_query_fromGenericSequencestoFASTA {
 									      );
 		    push (@$moby_exceptions, $moby_exception);
 		    
-		    # Return an empty moby data object, as well as an exception telling what nothing got returned
+		    # Return an empty moby data object, as well as an exception telling why nothing got returned
 		    
 		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
@@ -521,7 +521,7 @@ sub _do_query_fromGenericSequencestoFASTA {
 									      );
 		    push (@$moby_exceptions, $moby_exception);
 		    
-		    # Return an empty moby data object, as well as an exception telling what nothing got returned
+		    # Return an empty moby data object, as well as an exception telling why nothing got returned
 		    
 		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
@@ -737,7 +737,7 @@ sub _do_query_fromFASTAtoMobySequences {
 								      );
 	    push (@$moby_exceptions, $moby_exception);
 	    
-	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    # Return an empty moby data object, as well as an exception telling why nothing got returned
 	    
 	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
@@ -889,17 +889,17 @@ sub _do_query_fromFASTAtoMobySequences {
 
 =cut
 
-sub _do_query_generateScoreMatrix {
+sub _do_query_generateScoreMatrixFromMetaAlignment {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
     my $queryInput_DOM = shift @_;
-
+    
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $input_format;
-    my $output_format;
-    my $output_article_name = "score_matrix";
+    my $output_format = "Distance_Matrix";
+    my $output_article_name = "matrix";
     
     # Variables that will be passed to generateScoreMatrix_call
     
@@ -911,37 +911,8 @@ sub _do_query_generateScoreMatrix {
 
     # Get the parameters
     
-    ($input_format)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "input format");
-    ($output_format) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "output format");
+    # no parameter !
     
-    if (not defined $input_format) {
-	$input_format = "meta-alignment";
-    }
-    if (not defined $output_format) {
-	$output_format = "SOTA";
-    }
-
-    # The moby output format
-    # Default is text-formatted
-    my $_moby_output_format = "text-formatted";
-    if ($output_format eq "Phylip") {
-    	$_moby_output_format = "Phylip_matrix_Text";
-    }
-    elsif ($output_format eq "SOTA") {
-	$_moby_output_format = "MicroArrayData_Text";
-    }
-    
-    # Add the parsed parameters in a hash table
-    
-    if ($_debug) {
-	print STDERR "input format, $input_format\n";
-	print STDERR "output format, $output_format\n";
-	print STDERR "moby_output_format, $_moby_output_format\n";
-    }
-
-    $parameters{input_format}  = $input_format;
-    $parameters{output_format} = $output_format;
-
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
 	
@@ -965,7 +936,7 @@ sub _do_query_generateScoreMatrix {
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
-								      refElement => "$articleName",
+								      refElement => "similarity_results",
 								      code       => $code,
 								      type       => 'error',
 								      queryID    => $queryID,
@@ -973,7 +944,7 @@ sub _do_query_generateScoreMatrix {
 								      );
 	    push (@$moby_exceptions, $moby_exception);
 	    
-	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    # Return an empty moby data object, as well as an exception telling why nothing got returned
 	    
 	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
@@ -988,16 +959,32 @@ sub _do_query_generateScoreMatrix {
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
 	    
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Meta_Alignment_Text");
+	    if (!$rightType) {
+		my $note = "Expecting a Meta_Alignment_Text object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => 'similarity_results',
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+
 	    my @inputs_article_DOMs = getCollectedSimples ($DOM);
 	    foreach my $input_DOM (@inputs_article_DOMs) {
 		
 		# check that out, could well not be text-formatted but GFF !!!
-		# ???
-		# there is no global score in GFF ??
-		my $input = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($input_DOM, "meta_alignment_text");
+		my $input = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($input_DOM, "Meta_Alignment_Text");
 		if (not defined $input) {
-		    print STDERR "input object is not meta_alignment_text!!!\n";
-		    # $input = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($input_DOM, "GFF");
+		    print STDERR "input objects are not Meta_Alignment_Text!!!\n";
 		}
 		if (not defined $input) {
 		    print STDERR "Error, can't parse any input!!\n";
@@ -1015,7 +1002,7 @@ sub _do_query_generateScoreMatrix {
 	
     } # Next article
     
-    if ($input_data eq "") {
+    if (@$input_data < 1) {
 	my $note = "can't parse any pairwise similarity data...\n";
 	print STDERR "$note\n";
 	my $code = "201";
@@ -1032,38 +1019,19 @@ sub _do_query_generateScoreMatrix {
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    my ($matrix, $moby_exceptions_tmp) = generateScoreMatrix_call (similarity_results  => $input_data, queryID => $queryID, parameters => \%parameters);
+    my ($matrix_text, $moby_exceptions_tmp) = generateScoreMatrix_call (similarity_results  => $input_data, queryID => $queryID, parameters => \%parameters);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.
     
-    if (defined $matrix) {
+    if (defined $matrix_text) {
 	
-	# Build the Moby object
+	# Build the Moby Matrix object
 	
-	my $output_object = <<PRT;
-<moby:$_moby_output_format namespace='$namespace' id=''>
-<String namespace='' id='' articleName='content'>
-<![CDATA[
-$matrix
-]]>
-</String>
-</moby:$_moby_output_format>
-PRT
-
-        # Until Joaquim updates inbTreeView, we need to remain with the former String specs for this service....
-
-	$output_object = <<PRT;
-<moby:$_moby_output_format namespace='$namespace' id=''>
-<![CDATA[
-$matrix
-]]>
-</moby:$_moby_output_format>
-PRT
-
-
+	my $output_object = INB::GRIB::Utils::CommonUtilsSubs->convert_tabularScoreMatrix_into_MobyMatrix ($matrix_text, "Distance_Matrix", "Float");
+	
         if ($_debug) {
 	    print STDERR "Matrix moby object,\n";
 	    print STDERR "$output_object\n";
@@ -1661,7 +1629,7 @@ sub fromMetaAlignmentstoScoreMatrix {
 	    print STDERR "query text: $query_str\n";
 	}
 	
-	my ($query_response, $moby_exceptions_tmp) = _do_query_generateScoreMatrix ($queryInput);
+	my ($query_response, $moby_exceptions_tmp) = _do_query_generateScoreMatrixFromMetaAlignment ($queryInput);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
