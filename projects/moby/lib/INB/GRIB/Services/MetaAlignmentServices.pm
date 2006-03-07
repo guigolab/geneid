@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.19 2006-03-02 14:00:32 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.20 2006-03-07 10:46:29 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -865,7 +865,7 @@ sub runMetaAlignment {
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
-    my $_output_format = "meta_alignment_text";
+    my $_output_format = "Meta_Alignment_Text";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "runMetaAlignment";
     
@@ -1064,7 +1064,7 @@ sub runMultiMetaAlignment {
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
-    my $_output_format = "meta_alignment_text";
+    my $_output_format = "Meta_Alignment_Text";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "runMultiMetaAlignment";
     
