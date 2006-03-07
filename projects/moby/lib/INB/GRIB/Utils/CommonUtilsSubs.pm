@@ -52,7 +52,8 @@ our @EXPORT = qw(
   &MOBY_EMPTY_RESPONSE
   &MOBY_EMPTY_SIMPLE_RESPONSE
   &MOBY_EMPTY_COLLECTION_RESPONSE
-  &convert_tabularMatrix_into_MobyMatrix
+  &convert_tabularPositionWeightMatrix_into_MobyMatrix
+  &convert_tabularScoreMatrix_into_MobyMatrix
   &convert_MobyMatrix_into_tabularMatrix
 );
 
@@ -786,6 +787,7 @@ sub setMobyResponse {
 }
 
 # PWM syntax - tab-delimited
+# Transfac or jaspar compliant format
 
 # motif0
 # 1    0.206132  0.759466  0.027833  0.006569
@@ -805,7 +807,7 @@ sub setMobyResponse {
 # matrix_object_name  = ['Matrix', 'MatrixFloat', 'MatrixInteger', 'Distance_Matrix']
 # matrix_element_type = ['String', 'Integer', 'Float']
 
-sub convert_tabularMatrix_into_MobyMatrix {
+sub convert_tabularPositionWeightMatrix_into_MobyMatrix {
     my $self = shift;
     my ($tab_matrix, $matrix_object_name, $matrix_element_type) = @_;
 
@@ -834,7 +836,7 @@ sub convert_tabularMatrix_into_MobyMatrix {
     $first_line =~ /^([^\s]+)/;
     my $motif_identifier = $1;
     
-    print STDERR "motif identifier, $motif_identifier.\n";
+    # print STDERR "motif identifier, $motif_identifier.\n";
     
     # the last line is a separator '//'
 
@@ -851,7 +853,7 @@ sub convert_tabularMatrix_into_MobyMatrix {
 	    chop $line;
 	}
 	
-	print STDERR "parsing line,$line...\n";
+	# print STDERR "parsing line,$line...\n";
 	
 	if (! ($line =~ /\t/)) {
 	    print STDERR "Warning, it could be a problem, matrix doesn't have a tab-delimited syntax (\t).\n";
@@ -869,9 +871,7 @@ sub convert_tabularMatrix_into_MobyMatrix {
 	
 	my $j = 0;
 	foreach my $value (@values) {
-	    
-	    print STDERR "parsing value,$value...\n";
-
+	    # print STDERR "parsing value,$value...\n";
 	    chomp $value;
 
 	    $matrix[$i][$j] = $value;
@@ -888,22 +888,22 @@ sub convert_tabularMatrix_into_MobyMatrix {
     #####################################
     
     $moby_matrix_object = "<$matrix_object_name namespace='' id='$motif_identifier'>\n";
-    $moby_matrix_object .= "\t<Integer articleName='Key'/>\n";
+    $moby_matrix_object .= "<Integer articleName='Key'/>\n";
     
     for my $row (0..$#matrix) {
-	$moby_matrix_object .= "\t<Array" . $matrix_element_type . " articleName='Array'>\n";
-        $moby_matrix_object .= "\t\t<Integer articleName='Key'>$row</Integer>\n";
+	$moby_matrix_object .= "<Array" . $matrix_element_type . " articleName='Array'>\n";
+        $moby_matrix_object .= "<Integer articleName='Key'>$row</Integer>\n";
 	
 	for my $col (0..$#{$matrix[$row]}) {
 	    my $value = $matrix[$row][$col];
 	    
-            $moby_matrix_object .= "\t\t<Element" . $matrix_element_type . " articleName='Element'>\n";
-	    $moby_matrix_object .= "\t\t\t<Integer articleName='Key'>$col</Integer>\n";
-	    $moby_matrix_object .= "\t\t\t<" . $matrix_element_type . " articleName='Value'>" . $value . "</" . $matrix_element_type . ">\n";
-	    $moby_matrix_object .= "\t\t</Element" . $matrix_element_type . ">\n";
+            $moby_matrix_object .= "<Element" . $matrix_element_type . " articleName='Element'>";
+	    $moby_matrix_object .= "\<Integer articleName='Key'>$col</Integer>";
+	    $moby_matrix_object .= "<" . $matrix_element_type . " articleName='Value'>" . $value . "</" . $matrix_element_type . ">";
+	    $moby_matrix_object .= "</Element" . $matrix_element_type . ">\n";
 	}
 	
-	$moby_matrix_object .= "\t</Array" . $matrix_element_type . ">\n";
+	$moby_matrix_object .= "</Array" . $matrix_element_type . ">\n";
 	
     }
     
@@ -913,6 +913,144 @@ sub convert_tabularMatrix_into_MobyMatrix {
 
     return $moby_matrix_object;
 }
+
+# Score distance matrix format
+# The first line is a commented line with the list of identifiers
+# These identifiers are also in the first column
+# So we will parse the identifiers from the first column and will not take into account the commented line at the top of the file !
+
+# e.g.
+
+#       CG9855  CG31911 CG1916  CG40178 CG5390  CG6936  CG5304  CG11331 CG5731
+# CG9855  -       28.38   17.67   35.56   11.06   14.51   21.82   22.16   -5.02
+# CG31911 28.38   -       41.74   32.83   12.47   34.92   38.27   34.93   -6.61
+# CG1916  17.67   41.74   -       42.22   -2.50   17.58   37.41   35.19   -6.71
+# CG40178 35.56   32.83   42.22   -       20.95   22.08   21.05   32.10   -7.65
+# CG5390  11.06   12.47   -2.50   20.95   -       -2.31   -3.56   -0.16   5.25
+# CG6936  14.51   34.92   17.58   22.08   -2.31   -       44.56   29.38   -7.30
+# CG5304  21.82   38.27   37.41   21.05   -3.56   44.56   -       41.23   -7.93
+# CG11331 22.16   34.93   35.19   32.10   -0.16   29.38   41.23   -       -6.09
+# CG5731  -5.02   -6.61   -6.71   -7.65   5.25    -7.30   -7.93   -6.09   -
+
+# matrix_object_name  = ['Matrix', 'MatrixFloat', 'MatrixInteger', 'Distance_Matrix']
+# matrix_element_type = ['String', 'Integer', 'Float']
+
+sub convert_tabularScoreMatrix_into_MobyMatrix {
+    my $self = shift;
+    my ($tab_matrix, $matrix_object_name, $matrix_element_type) = @_;
+
+    # intermediary matrix object as an array of array
+    my @matrix;
+    my @labels = ();
+    # output moby matrix object
+    my $moby_matrix_object;
+    
+    #############################################
+    #
+    # parsing the matrix in tab-delimited format
+    # 
+    #############################################
+    
+    my @lines = split ('\n', $tab_matrix);
+    
+    if (@lines == 0) {
+	print STDERR "can't parse any lines...\n";
+	exit 1;
+    }
+
+    my $i = 0;
+    foreach my $line (@lines) {
+	
+	chomp $line;
+	
+	if ($line =~ /^#/) {
+	    # don't parse commented line
+	    next;
+	}
+	
+	if (($line =~ /\t$/) || ($line =~ /\s$/)) {
+	    chop $line;
+	}
+
+	# print STDERR "parsing line,$line...\n";
+	
+	if (! ($line =~ /\t/)) {
+	    print STDERR "Warning, it could be a problem, matrix doesn't have a tab-delimited syntax (\t).\n";
+	}
+	
+	my @values =  split ('\s+', $line);
+	
+	if (@values == 0) {
+	    print STDERR "can't parse any values...\n";
+	    exit 1;
+	}
+	
+	# Get the label (first column)
+	my $identifier = shift @values;
+	push (@labels, $identifier);
+	
+	my $j = 0;
+	foreach my $value (@values) {
+	
+	    # print STDERR "parsing value,$value...\n";
+	    
+	    chomp $value;
+	    
+	    $matrix[$i][$j] = $value;
+	    $j++;
+	}
+	
+	$i++;
+    }
+    
+    #####################################
+    #
+    # Writing out the moby matrix object
+    #
+    #####################################
+    
+    $moby_matrix_object = "<$matrix_object_name namespace='' id=''>\n";
+    $moby_matrix_object .= "<Integer articleName='Key'/>\n";
+    
+    # The labels in an ArrayString
+    
+    $moby_matrix_object .= "<ArrayString articleName='Label'>\n";
+    $moby_matrix_object .= "<Integer articleName='Key'>0</Integer>\n";
+    
+    for $i  (0..$#labels) {
+	my $identifier = $labels[$i];
+
+	$moby_matrix_object .= "<ElementString articleName='Element'>";
+	$moby_matrix_object .= "<Integer articleName='Key'>$i</Integer>";
+	$moby_matrix_object .= "<String articleName='Value'>$identifier</String>";
+	$moby_matrix_object .= "</ElementString>\n";
+    }
+    $moby_matrix_object .= "</ArrayString>\n";
+
+    for my $row (0..$#matrix) {
+	$moby_matrix_object .= "<Array" . $matrix_element_type . " articleName='Array'>\n";
+        $moby_matrix_object .= "<Integer articleName='Key'>$row</Integer>\n";
+	
+	for my $col (0..$#{$matrix[$row]}) {
+	    my $value = $matrix[$row][$col];
+	    
+            $moby_matrix_object .= "<Element" . $matrix_element_type . " articleName='Element'>";
+	    $moby_matrix_object .= "<Integer articleName='Key'>$col</Integer>";
+	    $moby_matrix_object .= "<" . $matrix_element_type . " articleName='Value'>" . $value . "</" . $matrix_element_type . ">";
+	    $moby_matrix_object .= "</Element" . $matrix_element_type . ">\n";
+	}
+	
+	$moby_matrix_object .= "</Array" . $matrix_element_type . ">\n";
+	
+    }
+    
+    $moby_matrix_object .= "</$matrix_object_name>\n";
+    
+    # print STDERR "debugging moby matrix object, $moby_matrix_object\n";
+    
+    return $moby_matrix_object;
+}
+
 
 # Check if the matrix mode matches the type of the Matrix
 
@@ -946,7 +1084,7 @@ sub convert_MobyMatrix_into_tabularMatrix {
     # Parse the matrix object
     
     my @matrix = _parseMatrixMobyObject ($DOM, $matrix_type, $debug);
-
+    
     if (@matrix == 0) {
 	print STDERR "Empty matrix!!! - Error parsing the Matrix object\n";
 	# return exception
@@ -967,6 +1105,10 @@ sub convert_MobyMatrix_into_tabularMatrix {
     }
     
     $matrix_text .= "//\n";
+
+    if ($debug) {
+	print STDERR "matrix text, $matrix_text\n";
+    }
     
     return ($matrix_text, $moby_exceptions);
 }
@@ -981,6 +1123,8 @@ sub _parseMatrixMobyObject {
 	$matrix_DOM = $doc->getDocumentElement();
     }
     
+    # Be careful with the labels as they are also in ArrayString, it is confusing !!!
+
     my $array_elements = $matrix_DOM->getElementsByTagName ("Array" . $matrix_type);
     my $size = $array_elements->size();
     if ($size == 0) {
@@ -1039,35 +1183,45 @@ sub _parseMatrixMobyObject {
 		print STDERR "array_element element dumping, " . $array_element_element->toString() . "\n";
 	    }
 	    
-	    # Get content of all elements and get it as a single string !
-	    # then just split the string based on '\n' character
-
-	    my $values_str = $array_element_element->textContent();
+	    # The key
+	    
+	    my $key_elements = $array_element_element->getElementsByTagName ("Integer");
+	    my $sub_element_size  = $key_elements->size();
+	    if ($sub_element_size == 0) {
+		$key_elements = $array_element_element->getElementsByTagName ("moby:Integer");
+		$sub_element_size = $key_elements->size();
+		if ($sub_element_size == 0) {
+		    print STDERR "Error, can't parse any array_element element from the Matrix moby XML...\n";
+		    return ();
+		}
+	    }
 	    
 	    if ($debug) {
-		print STDERR "values, $values_str\n";
+		print STDERR "sub element size, $sub_element_size\n";
 	    }
 	    
-	    my @values = split ('\n', $values_str);
+	    my $key_element = $key_elements->[0];
+	    my $col = $key_element->textContent();
 
+	    # The value
+	    
+	    my $value_elements = $array_element_element->getElementsByTagName ($matrix_type);
+	    $sub_element_size  = $key_elements->size();
+	    if ($sub_element_size == 0) {
+		$value_elements = $array_element_element->getElementsByTagName ("moby:" . $matrix_type);
+		$sub_element_size = $value_elements->size();
+		if ($sub_element_size == 0) {
+		    print STDERR "Error, can't parse any array_element element from the Matrix moby XML...\n";
+		    return ();
+		}
+	    }
+	    
 	    if ($debug) {
-		print STDERR "values array, " . join (', ', @values) . ".\n";
-	    }
-
-	    while (defined $values[0] && (! ($values[0] =~ /\d/))) {
-		shift @values;
+		print STDERR "sub element size, $sub_element_size\n";
 	    }
 	    
-	    my $col    = $values[0];
-	    my $value  = $values[1];
-	    
-	    # Clean it !
-	    
-	    $col   =~ s/\t//g;
-	    $value =~ s/\t//g;
-
-	    $col   =~ s/\s//g;
-	    $value =~ s/\s//g;
+	    my $value_element = $value_elements->[0];
+	    my $value = $value_element->textContent();
 	    
 	    if ($debug) {
 		print STDERR "column,$col.\n";
