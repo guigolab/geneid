@@ -113,7 +113,7 @@ my ($REG) = $Central->registerObject(
 				     contactEmail  => $::contactEmail ,
 				     Relationships => {
 					 ISA	=> [
-						    ['Sequence_alignment_report', ""]
+						    ['text_formatted', ""]
 						    ],
 						}
 				     );

@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 1 -s runMultiMetaAlignment
 
 END_HELP
 
@@ -129,7 +129,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "runMultiMetaAlignment";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -153,17 +153,17 @@ my @namespaces = ();
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "Alignment",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Promoter regions analysis program. runMultiMetaAlignment runs Meta-alignment on a multiple mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. Use runMatScanGFF to produce the input GFF files",
+				      description  => "runMultiMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
 							    ['maps', [['GFF' => \@namespaces]]],
 							   ],
 				      output		=> [
-							    ['meta_predictions', [['meta_alignment_text' => \@namespaces]]]
+							    ['meta_predictions', [['Meta_Alignment_Text' => \@namespaces]]]
 							   ],
 				      secondary	=> {
 					  'alpha penalty' => {

@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 1 -s fromMetaAlignmentstoScoreMatrix
 
 END_HELP
 
@@ -160,7 +160,7 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['similarity_results', [['meta_alignment_text' => \@namespaces]]],
+							    ['similarity_results', [['Meta_Alignment_Text' => \@namespaces]]],
 							   ],
 				      output		=> [
 							    ['matrix', ['Distance_Matrix' => \@namespaces]]
