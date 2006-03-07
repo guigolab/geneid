@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.22 2006-03-06 16:21:05 gmaster Exp $
+# $Id: MemeServices.pm,v 1.23 2006-03-07 14:28:29 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -681,7 +681,7 @@ sub _do_query_MemeMotifMatrices {
     
     my $meme_matrix_objects = [];    
     foreach my $matrix (@$matrices_aref) {
-	my $moby_matrix = INB::GRIB::Utils::CommonUtilsSubs->convert_tabularMatrix_into_MobyMatrix ($matrix, $matrix_object_name, $matrix_element_type);
+	my $moby_matrix = INB::GRIB::Utils::CommonUtilsSubs->convert_tabularPositionWeightMatrix_into_MobyMatrix ($matrix, $matrix_object_name, $matrix_element_type);
 	push (@$meme_matrix_objects, $moby_matrix);
     }
 
