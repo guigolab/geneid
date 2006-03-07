@@ -648,6 +648,16 @@ sub validateDataType {
 		}
 	    }
 
+	    if ($specifiedType eq "Meta_Alignment_Text") {
+		if ($inputDataType eq "Meta_Alignment_Text") {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
 	    # ...
 	    
 	}
