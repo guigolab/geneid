@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.26 2006-03-06 14:31:46 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.27 2006-03-07 15:08:07 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -787,10 +787,11 @@ sub _do_query_MatScanVsInputMatrices {
 	    else {
 		$matrix_type = "Float";
 	    }
-	    
-	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Matrix" . $matrix_type);
+	    my $matrix_object_name = "Matrix" . $matrix_type;
+
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, $matrix_object_name);
 	    if (!$rightType) {
-		my $note = "Expecting a Matrix$matrix_type object, and receiving a $inputDataType object";
+		my $note = "Expecting a $matrix_object_name object, and receiving a $inputDataType object";
 		print STDERR "$note\n";
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
@@ -869,7 +870,9 @@ sub _do_query_MatScanVsInputMatrices {
     my ($report, $moby_exceptions_tmp) = MatScan_call (sequences  => \%sequences, matrices => $matrices, format => $_format, parameters => \%parameters, debug => $_debug);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
 
-    print STDERR "TF maps report, $report.\n";
+    if ($_debug) {
+	print STDERR "TF maps report, $report.\n";
+    }
     
     if ((defined $report) && ($report ne "")) {
 	
