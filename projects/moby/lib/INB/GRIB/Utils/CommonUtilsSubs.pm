@@ -938,7 +938,9 @@ sub convert_tabularPositionWeightMatrix_into_MobyMatrix {
 sub convert_tabularScoreMatrix_into_MobyMatrix {
     my $self = shift;
     my ($tab_matrix, $matrix_object_name, $matrix_element_type) = @_;
-
+    
+    my $debug = 0;
+    
     # intermediary matrix object as an array of array
     my @matrix;
     my @labels = ();
@@ -1034,9 +1036,22 @@ sub convert_tabularScoreMatrix_into_MobyMatrix {
 	for my $col (0..$#{$matrix[$row]}) {
 	    my $value = $matrix[$row][$col];
 	    
+	    if ($debug) {
+		print STDERR "value, $value\n";
+	    }
+	    
+	    if ($value eq "-") {
+		$value = undef;
+	    }
+	    
             $moby_matrix_object .= "<Element" . $matrix_element_type . " articleName='Element'>";
 	    $moby_matrix_object .= "<Integer articleName='Key'>$col</Integer>";
-	    $moby_matrix_object .= "<" . $matrix_element_type . " articleName='Value'>" . $value . "</" . $matrix_element_type . ">";
+	    if (defined $value) {
+		$moby_matrix_object .= "<" . $matrix_element_type . " articleName='Value'>" . $value . "</" . $matrix_element_type . ">";
+	    }
+	    else {
+		$moby_matrix_object .= "<" . $matrix_element_type . " articleName='Value'/>";
+	    }
 	    $moby_matrix_object .= "</Element" . $matrix_element_type . ">\n";
 	}
 	
