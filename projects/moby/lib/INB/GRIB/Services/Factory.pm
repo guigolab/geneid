@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.66 2006-03-02 14:01:30 gmaster Exp $
+# $Id: Factory.pm,v 1.67 2006-03-07 14:27:46 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1282,15 +1282,10 @@ sub generateScoreMatrix_call {
   my $queryID            = $args{queryID}    || "";
   my $debug = 0;
   
-  # Get the parameters
-
-  my $input_format   = $parameters->{input_format};
-  my $output_format  = $parameters->{output_format};
-
   # Llama a generateScoreMatrix script en local
   my $_application_dir  = "/home/ug/gmaster/projects/generateScoreMatrices";
   my $_application_bin  = "generateScoreMatrix.pl";
-  my $_application_args = "$input_format";
+  my $_application_args    = "";
   
   # Check that the binary is in place
   if (! -f "$_application_dir/$_application_bin") {
