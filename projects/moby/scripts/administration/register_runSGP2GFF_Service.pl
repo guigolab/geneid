@@ -31,7 +31,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 1 -s runSGP2GFF
 
 END_HELP
 
@@ -126,7 +126,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "runSGP2GFF";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -148,7 +148,7 @@ print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Analysis",
+				      serviceType  => "GeneFinding",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Ab initio gene prediction tool - Return the output predictions in GFF format.",

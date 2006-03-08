@@ -31,7 +31,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneID
+	perl registerService.pl -x 1 -s runGeneIDHTML
 
 END_HELP
 
@@ -127,7 +127,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "runGeneIDHTML";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
