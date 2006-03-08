@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.23 2006-03-07 14:28:29 gmaster Exp $
+# $Id: MemeServices.pm,v 1.24 2006-03-08 11:34:36 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -468,6 +468,24 @@ sub _do_query_Meme {
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => 'sequences',
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    if (((keys (%sequences)) == 1) && ! ($motif_distribution eq "any number of repetitions")) {
+	my $note = "You must specify 'any number of repetitions' under the 'motif distibution' parameter since your dataset contains only one sequence. Alternatively, you might wish to break your sequence into several sequences.\n";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => 'motif distribution',
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
