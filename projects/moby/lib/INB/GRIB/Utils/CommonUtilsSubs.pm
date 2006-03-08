@@ -744,9 +744,6 @@ sub setMobyResponse {
 	my $moby_exception_response = "";
 	my %severities;
 	foreach my $moby_exception (@$moby_exceptions) {
-
-	    print STDERR "going through exceptions\n";
-
 	    my $severity = $moby_exception->getExceptionType;
 	    $severities{$severity} = $moby_exception;
 	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
