@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.67 2006-03-07 14:27:46 gmaster Exp $
+# $Id: Factory.pm,v 1.68 2006-03-08 14:13:03 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -712,18 +712,18 @@ sub TranslateGeneIDPredictions_call {
     foreach my $sequenceIdentifier (@seqIds) {
 	# Sequence
 	my $nucleotides = $sequences->{$sequenceIdentifier};
-
+	
 	# bioperl sequence object
 	my $seqobj = Bio::Seq->new (
 				    -display_id => $sequenceIdentifier,
 				    -seq        => $nucleotides
 				    );
 	$sout->write_seq ($seqobj);
-
+	
 	# GeneID Predictions
 	my $geneid_prediction = $geneid_predictions->{$sequenceIdentifier};
 	print $feature_fh "$geneid_prediction";
-
+	
     }
     close $seq_fh;
     close $feature_fh;
@@ -743,18 +743,33 @@ sub TranslateGeneIDPredictions_call {
     }
 
     # print STDERR "Running the following command, $_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile...\n";
-
+    
     $translateGeneID_output = qx/$_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile/;
-
-    # Comment these two lines if you want to keep those files...
-    unlink $seqfile;
-    unlink $featurefile;
-
-    if (defined $translateGeneID_output) {
+    
+    if ((defined $translateGeneID_output) && ($translateGeneID_output ne "")) {
+	# Comment these two lines if you want to keep those files...
+	unlink $seqfile;
+	unlink $featurefile;
+	
 	return ($translateGeneID_output, $moby_exceptions);
     }
     else {
-	print STDERR "Internal System Error. No translateGeneID_output defined!!\n";
+	my $note = "Internal System Error. The translation of GeneID GFF exon features has failed!!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	print STDERR "Ran the following command, $_translateGeneID_dir\/$_translateGeneID_bin $_translateGeneID_args -s $seqfile -f $featurefile...\n";
+	# Let's keep the files for debugging purposes
+	# unlink $seqfile;
+	# unlink $featurefile;
+
 	return (undef, $moby_exceptions);
     }
 
@@ -1055,9 +1070,9 @@ sub MatScan_call {
 	print STDERR "Running Matscan, with this command:\n";
 	print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file\n";
     }
-
+    
     $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan/;
-
+    
     unlink $seqfile unless $debug;
     if ((not $debug) && (defined $matrices_input)) {
 	# Only remove the matrix input file when this matrix collection is given by the user!!

@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.26 2006-03-07 14:29:25 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.27 2006-03-08 14:13:03 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -167,7 +167,13 @@ sub _do_query_TranslateGeneIDGFF {
     my %sequences;
     my %predictions;
     my %parameters;
-
+    # Store the sequence identifier so we can match the GFF object identifier with the sequence object identifier
+    # If they don't match, this will break the code !!
+    # So return an exception in that case
+    my $sequenceIdentifier;
+    my $GFF_sequenceIdentifier;
+    my $predictions_gff_str;
+    
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
     
@@ -242,12 +248,19 @@ sub _do_query_TranslateGeneIDGFF {
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	
-	if ($articleName =~ /sequence/i) { 
+	if ($articleName =~ /sequence/i) {
 	    
 	    if ($_debug) {
 		print STDERR "\"sequence\" tag is a simple article...\n";
 	    }
 	    
+	    ($sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
+	    if (! defined $sequenceIdentifier) {
+		$sequenceIdentifier = "";
+	    }
+
+	    print STDERR "Sequence identifier, $sequenceIdentifier.\n";
+
 	    # Validate the type
 	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
 	    if ((! defined $rightType) || !$rightType) {
@@ -280,32 +293,73 @@ sub _do_query_TranslateGeneIDGFF {
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
 	    
-	    my ($sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
+	    ($GFF_sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
+	    if (! defined $GFF_sequenceIdentifier) {
+		$GFF_sequenceIdentifier = "";
+	    }
 	    
-	    if ((not defined $sequenceIdentifier) || (length ($sequenceIdentifier) == 0)) {
+	    if ((not (defined ($GFF_sequenceIdentifier))) || ($GFF_sequenceIdentifier eq "")) {
 		print STDERR "Error, can not parsed the sequence identifier the GFF is attach to!\n";
 		print STDERR "GFF object - 'id' attribute not set!\n";
-		exit 1;
+		
+		# return an exception instead
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
 	    if ($_debug) {
-		print STDERR "parsed the following sequence identifier, $sequenceIdentifier\n";
+		print STDERR "parsed the following sequence identifier, $GFF_sequenceIdentifier\n";
 	    }
 	    
-	    my $prediction = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
+	    $predictions_gff_str = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
+
+	    if ((! defined $predictions_gff_str) || ($predictions_gff_str eq "")) {
+		my $note = "can't parse any GeneID predictions...\n";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "geneid_predictions",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
 	    
 	    if ($_debug) {
-		print STDERR "prediction, $prediction\n";
+		print STDERR "predictions in GFF format:\n$predictions_gff_str\n";
 	    }
-	    
-	    # Add the predictions data into a hash table
-	    
-	    $predictions{$sequenceIdentifier} = $prediction;
 	    
 	} # End parsing predictionss article tag
 	
     } # Next article
+
+    if ($sequenceIdentifier ne $GFF_sequenceIdentifier) {
+	my $note = "The identifiers of the input articles don't match each other. Make sure they have the same article identifier.";
+	print STDERR "$note\n";
+	print STDERR "sequence identifier, $sequenceIdentifier\n";
+	print STDERR "GFF identifier, $GFF_sequenceIdentifier\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
     
+    # Add the predictions data into a hash table
+    $predictions{$sequenceIdentifier} = $predictions_gff_str;
+
     # Check that we have parsed properly the sequences and the predictions
     
     if ((keys (%sequences)) == 0) {
@@ -324,6 +378,7 @@ sub _do_query_TranslateGeneIDGFF {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
+    
     if ((keys (%predictions)) == 0) {
 	my $note = "can't parse any GeneID predictions...\n";
 	print STDERR "$note\n";
@@ -340,6 +395,10 @@ sub _do_query_TranslateGeneIDGFF {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
+    
+    # Validate the sequence id and GFF sequence id matches
+    
+    # ...
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report.
