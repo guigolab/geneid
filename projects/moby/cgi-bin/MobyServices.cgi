@@ -140,6 +140,8 @@ my $endtime_benchmark = Benchmark->new ();
 my $endtime;
 {
   my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
+  # month = [0..11] so increment it
+  $mon++;
   $year += 1900;	
   $endtime = sprintf "%s%2.2d%2.2d%2.2d%2.2d%2.2d", $year, $mon, $mday, $hour, $min, $sec;
 }
