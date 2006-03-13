@@ -31,7 +31,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runSGP2GFF
+	perl registerService.pl -x 2 -s runSGP2GFF
 
 END_HELP
 
@@ -151,18 +151,24 @@ my ($REG) = $Central->registerService(
 				      serviceType  => "GeneFinding",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Ab initio gene prediction tool - Return the output predictions in GFF format.",
+				      description  => "Ab initio gene prediction service. It runs geneid with synteny evidences to improve the accuracy of the results and returns the output predictions in GFF format. To generate the synteny evidences, use a service that provides tblastx.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
 							    ['sequence', ["DNASequence" => []]],
-							    ['tblastx', ["BLAST-Text" => []]],
+							    ['tblastx_report', ["BLAST-Text" => []]],
 							   ],
 				      output		=> [
 							    ['geneid_predictions', ["GFF" => []]],
 							   ],
+				      secondary	=> {
+					  'profile' => {
+					      datatype => 'String',
+					      enum => ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis'],
+					      default => 'Homo sapiens (suitable for mammals)',
+					  },
 				      );
-
+				      
 # Check if the result has been registered successfully.
 if ($REG->success) {
     
