@@ -161,7 +161,7 @@ my ($REG) = $Central->registerService(
 							    ['sequences', ["FASTA" => \@namespaces]],
 							   ],
 				      output		=> [
-							    ['sequences', [["DNASequence" => \@namespaces]]],
+							    ['sequences', [["AminoAcidSequence" => \@namespaces]]],
 							   ],
 				      );
 
