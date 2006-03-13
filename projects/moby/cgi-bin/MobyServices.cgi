@@ -82,7 +82,7 @@ my $starttime;
 {
   my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime;
   # month = [0..11] so increment it
-  $month++;
+  $mon++;
   $year += 1900;	
   $starttime = sprintf "%s%2.2d%2.2d%2.2d%2.2d%2.2d", $year, $mon, $mday, $hour, $min, $sec;
 }
