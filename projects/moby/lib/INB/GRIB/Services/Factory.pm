@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.68 2006-03-08 14:13:03 gmaster Exp $
+# $Id: Factory.pm,v 1.69 2006-03-13 17:34:53 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -278,31 +278,31 @@ sub GeneID_call {
 	$_geneid_args .= "C";
     }
     
-  SWITCH: {
-      if ($profile eq "Homo sapiens (suitable for mammals)")      { $_geneid_args .= "P $_geneid_dir/params/human.param"; last SWITCH; }
-      if ($profile eq "Tetraodon nigroviridis (pupper fish)")     { $_geneid_args .= "P $_geneid_dir/params/tetraodon.param"; last SWITCH; }
-      if ($profile eq "Drosophila melanogaster (fruit fly)")      { $_geneid_args .= "P $_geneid_dir/params/dros.param"; last SWITCH; }
-      if ($profile eq "Caenorhabditis elegans (worm)") { $_geneid_args .= "P $_geneid_dir/params/celegans.param"; last SWITCH; }
-      if ($profile eq "Triticum aestivum (wheat)")     { $_geneid_args .= "P $_geneid_dir/params/wheat.param"; last SWITCH; }
-      if ($profile eq "Arabidopsis thaliana (weed)")   { $_geneid_args .= "P $_geneid_dir/params/arabidopsis.param"; last SWITCH; }
-      if ($profile eq "Oryza sativa (rice)")           { $_geneid_args .= "P $_geneid_dir/params/rice.param"; last SWITCH; }
-      if ($profile eq "Plasmodium falciparum (malaria parasite)") { $_geneid_args .= "P $_geneid_dir/params/plasmodium.param"; last SWITCH; }
-      if ($profile eq "Dictyostelium discoideum (slime mold)")    { $_geneid_args .= "P $_geneid_dir/params/dictyostelium.param"; last SWITCH; }
-      if ($profile eq "Aspergillus nidulans")          { $_geneid_args .= "P $_geneid_dir/params/aspergillus.param"; last SWITCH; }
-      if ($profile eq "Neurospora crassa")             { $_geneid_args .= "P $_geneid_dir/params/neurospora.param"; last SWITCH; }
-      if ($profile eq "Cryptococcus neomorfans")       { $_geneid_args .= "P $_geneid_dir/params/cneomorfans.param"; last SWITCH; }
-      if ($profile eq "Coprinus cinereus")             { $_geneid_args .= "P $_geneid_dir/params/cinereus.param"; last SWITCH; }
-      if ($profile eq "Apis mellifera (honey bee)")    { $_geneid_args .= "P $_geneid_dir/params/bee.param"; last SWITCH; }
-      if ($profile eq "Chaetomium globosum")           { $_geneid_args .= "P $_geneid_dir/params/chaetomium.param"; last SWITCH; }
-      if ($profile eq "Schistosoma japonica")          { $_geneid_args .= "P $_geneid_dir/params/sjaponica.param"; last SWITCH; }
-      if ($profile eq "Stagnospora nodorum")           { $_geneid_args .= "P $_geneid_dir/params/snodorum.param"; last SWITCH; }
-      if ($profile eq "Solanaceae")                    { $_geneid_args .= "P $_geneid_dir/params/solanaceae.param"; last SWITCH; }
-      if ($profile eq "Sclerotinia sclerotiorum")      { $_geneid_args .= "P $_geneid_dir/params/ssclerotiorum.param"; last SWITCH; }
-      if ($profile eq "Coccidioides immitis")          { $_geneid_args .= "P $_geneid_dir/params/cimmitis.param"; last SWITCH; }
-      if ($profile eq "Histoplasma capsulatum")        { $_geneid_args .= "P $_geneid_dir/params/hcapsulatum.param"; last SWITCH; }
-      # Default is Human
-      $_geneid_args .= "P $_geneid_dir/params/human.param";
-  }
+    SWITCH: {
+	if ($profile eq "Homo sapiens (suitable for mammals)")      { $_geneid_args .= "P $_geneid_dir/params/human.param"; last SWITCH; }
+	if ($profile eq "Tetraodon nigroviridis (pupper fish)")     { $_geneid_args .= "P $_geneid_dir/params/tetraodon.param"; last SWITCH; }
+	if ($profile eq "Drosophila melanogaster (fruit fly)")      { $_geneid_args .= "P $_geneid_dir/params/dros.param"; last SWITCH; }
+	if ($profile eq "Caenorhabditis elegans (worm)") { $_geneid_args .= "P $_geneid_dir/params/celegans.param"; last SWITCH; }
+	if ($profile eq "Triticum aestivum (wheat)")     { $_geneid_args .= "P $_geneid_dir/params/wheat.param"; last SWITCH; }
+	if ($profile eq "Arabidopsis thaliana (weed)")   { $_geneid_args .= "P $_geneid_dir/params/arabidopsis.param"; last SWITCH; }
+	if ($profile eq "Oryza sativa (rice)")           { $_geneid_args .= "P $_geneid_dir/params/rice.param"; last SWITCH; }
+	if ($profile eq "Plasmodium falciparum (malaria parasite)") { $_geneid_args .= "P $_geneid_dir/params/plasmodium.param"; last SWITCH; }
+	if ($profile eq "Dictyostelium discoideum (slime mold)")    { $_geneid_args .= "P $_geneid_dir/params/dictyostelium.param"; last SWITCH; }
+	if ($profile eq "Aspergillus nidulans")          { $_geneid_args .= "P $_geneid_dir/params/aspergillus.param"; last SWITCH; }
+	if ($profile eq "Neurospora crassa")             { $_geneid_args .= "P $_geneid_dir/params/neurospora.param"; last SWITCH; }
+	if ($profile eq "Cryptococcus neomorfans")       { $_geneid_args .= "P $_geneid_dir/params/cneomorfans.param"; last SWITCH; }
+	if ($profile eq "Coprinus cinereus")             { $_geneid_args .= "P $_geneid_dir/params/cinereus.param"; last SWITCH; }
+	if ($profile eq "Apis mellifera (honey bee)")    { $_geneid_args .= "P $_geneid_dir/params/bee.param"; last SWITCH; }
+	if ($profile eq "Chaetomium globosum")           { $_geneid_args .= "P $_geneid_dir/params/chaetomium.param"; last SWITCH; }
+	if ($profile eq "Schistosoma japonica")          { $_geneid_args .= "P $_geneid_dir/params/sjaponica.param"; last SWITCH; }
+	if ($profile eq "Stagnospora nodorum")           { $_geneid_args .= "P $_geneid_dir/params/snodorum.param"; last SWITCH; }
+	if ($profile eq "Solanaceae")                    { $_geneid_args .= "P $_geneid_dir/params/solanaceae.param"; last SWITCH; }
+	if ($profile eq "Sclerotinia sclerotiorum")      { $_geneid_args .= "P $_geneid_dir/params/ssclerotiorum.param"; last SWITCH; }
+	if ($profile eq "Coccidioides immitis")          { $_geneid_args .= "P $_geneid_dir/params/cimmitis.param"; last SWITCH; }
+	if ($profile eq "Histoplasma capsulatum")        { $_geneid_args .= "P $_geneid_dir/params/hcapsulatum.param"; last SWITCH; }
+	# Default is Human
+	$_geneid_args .= "P $_geneid_dir/params/human.param";
+    }
 
     foreach my $exon (@$exons_ref) {
       SWITCH: {
@@ -331,15 +331,15 @@ sub GeneID_call {
       }
     }
     
-  SWITCH: {
-      if ($engine eq "Normal")             { last SWITCH; }
-      if ($engine eq "Exon Mode")          { $_geneid_args .= " -o"; last SWITCH; }
-      # Default is Normal - nothing to add then
-  }
+    SWITCH: {
+	if ($engine eq "Normal")             { last SWITCH; }
+	if ($engine eq "Exon Mode")          { $_geneid_args .= " -o"; last SWITCH; }
+	# Default is Normal - nothing to add then
+    }
     
     # Generate a temporary file locally with the sequence(s) in FASTA format
     # locally, ie not on a NFS mounted directory, for speed sake
-
+    
     my ($seq_fh, $seqfile);
     eval {
 	($seq_fh, $seqfile) = tempfile("/tmp/GENEID.XXXXXX", UNLINK => 0);
@@ -442,9 +442,12 @@ sub SGP2_call {
 	my $format             = $args{format}         || "";
 	my $parameters         = $args{parameters}     || undef;
 	my $queryID            = $args{queryID}        || "";
-
-	# No parameters yet !!
-
+	
+	# Get the parameters
+	
+	my $profile = $parameters->{profile};
+	# print STDERR "GeneID parameters (profile, format): $profile, $format.\n";
+	
 	# Llama a SGP2 localmente
 	my $_sgp2_dir  = "/home/ug/gmaster/projects/sgp2/";
 	$_sgp2_dir     = $ENV{SGP2};
@@ -464,11 +467,37 @@ sub SGP2_call {
 								      );
 	    return (undef, [$moby_exception]);
 	}
-
+	
 	if ($format eq "GFF") {
 	    $_sgp2_args .= "-g G";
 	}
-
+	
+        SWITCH: {
+	    if ($profile eq "Homo sapiens (suitable for mammals)")      { $_sgp2_args .= " -P $_sgp2_dir/params/human.param"; last SWITCH; }
+	    if ($profile eq "Tetraodon nigroviridis (pupper fish)")     { $_sgp2_args .= " -P $_sgp2_dir/params/tetraodon.param"; last SWITCH; }
+	    if ($profile eq "Drosophila melanogaster (fruit fly)")      { $_sgp2_args .= " -P $_sgp2_dir/params/dros.param"; last SWITCH; }
+	    if ($profile eq "Caenorhabditis elegans (worm)") { $_sgp2_args .= " -P $_sgp2_dir/params/celegans.param"; last SWITCH; }
+	    if ($profile eq "Triticum aestivum (wheat)")     { $_sgp2_args .= " -P $_sgp2_dir/params/wheat.param"; last SWITCH; }
+	    if ($profile eq "Arabidopsis thaliana (weed)")   { $_sgp2_args .= " -P $_sgp2_dir/params/arabidopsis.param"; last SWITCH; }
+	    if ($profile eq "Oryza sativa (rice)")           { $_sgp2_args .= " -P $_sgp2_dir/params/rice.param"; last SWITCH; }
+	    if ($profile eq "Plasmodium falciparum (malaria parasite)") { $_sgp2_args .= " -P $_sgp2_dir/params/plasmodium.param"; last SWITCH; }
+	    if ($profile eq "Dictyostelium discoideum (slime mold)")    { $_sgp2_args .= " -P $_sgp2_dir/params/dictyostelium.param"; last SWITCH; }
+	    if ($profile eq "Aspergillus nidulans")          { $_sgp2_args .= " -P $_sgp2_dir/params/aspergillus.param"; last SWITCH; }
+	    if ($profile eq "Neurospora crassa")             { $_sgp2_args .= " -P $_sgp2_dir/params/neurospora.param"; last SWITCH; }
+	    if ($profile eq "Cryptococcus neomorfans")       { $_sgp2_args .= " -P $_sgp2_dir/params/cneomorfans.param"; last SWITCH; }
+	    if ($profile eq "Coprinus cinereus")             { $_sgp2_args .= " -P $_sgp2_dir/params/cinereus.param"; last SWITCH; }
+	    if ($profile eq "Apis mellifera (honey bee)")    { $_sgp2_args .= " -P $_sgp2_dir/params/bee.param"; last SWITCH; }
+	    if ($profile eq "Chaetomium globosum")           { $_sgp2_args .= " -P $_sgp2_dir/params/chaetomium.param"; last SWITCH; }
+	    if ($profile eq "Schistosoma japonica")          { $_sgp2_args .= " -P $_sgp2_dir/params/sjaponica.param"; last SWITCH; }
+	    if ($profile eq "Stagnospora nodorum")           { $_sgp2_args .= " -P $_sgp2_dir/params/snodorum.param"; last SWITCH; }
+	    if ($profile eq "Solanaceae")                    { $_sgp2_args .= " -P $_sgp2_dir/params/solanaceae.param"; last SWITCH; }
+	    if ($profile eq "Sclerotinia sclerotiorum")      { $_sgp2_args .= " -P $_sgp2_dir/params/ssclerotiorum.param"; last SWITCH; }
+	    if ($profile eq "Coccidioides immitis")          { $_sgp2_args .= " -P $_sgp2_dir/params/cimmitis.param"; last SWITCH; }
+	    if ($profile eq "Histoplasma capsulatum")        { $_sgp2_args .= " -P $_sgp2_dir/params/hcapsulatum.param"; last SWITCH; }
+	    # Default is Human
+	    $_sgp2_args .= " -P $_sgp2_dir/params/human.param";
+	}
+	
 	# Generate a temporary file locally with the sequence in FASTA format
 	# locally, ie not on a NFS mounted directory, for speed sake
 
@@ -488,9 +517,9 @@ sub SGP2_call {
 								      );
 	    return (undef, [$moby_exception]);
 	}
-
+	
 	# Bioperl sequence factory
-
+	
 	my $sout = Bio::SeqIO->new (
 				    -fh     => $seq_fh,
 				    -format => 'fasta'
@@ -499,9 +528,9 @@ sub SGP2_call {
 	my @seqIds = keys (%$sequences);
 	foreach my $sequenceIdentifier (@seqIds) {
 	    my $nucleotides = $sequences->{$sequenceIdentifier};
-
+	    
 	    # bioperl sequence object
-
+	    
 	    my $seqobj = Bio::Seq->new (
 					-display_id => $sequenceIdentifier,
 					-seq        => $nucleotides
@@ -561,22 +590,26 @@ sub SGP2_call {
 								      );
 	    return (undef, [$moby_exception]);
 	}
-
+	
 	# print STDERR "Running SGP2, with this command:\n";
 	# print STDERR "$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file\n";
-
+	
 	$sgp2_output = qx/$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file/;
-
+	
 	# Comment these two lines if you want to keep the file...
 	unlink $seqfile;
 	unlink $tblastx_output_file;
-
-	if (defined $sgp2_output) {
+	
+	if ((defined $sgp2_output) && (length ($sgp2_output) > 1)) {
 	    return ($sgp2_output, $moby_exceptions);
 	}
 	else {
 	    my $note = "Internal System Error. SGP2 has failed!\n";
 	    print STDERR "$note\n";
+	    
+	    # print STDERR "Running SGP2, with this command:\n";
+	    print STDERR "$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file\n";
+	    
 	    my $code = 701;
 	    my $moby_exception = INB::Exceptions::MobyException->new (
 								      code       => $code,

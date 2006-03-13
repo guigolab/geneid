@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.15 2006-03-02 14:02:31 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.16 2006-03-13 17:34:53 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -157,6 +157,9 @@ sub _do_query_SGP2 {
 	my $moby_exceptions = [];
 	my $output_article_name  = "geneid_predictions";
 	
+	# Aqui escribimos las variables que necesitamos para la funcion. 
+	my $profile;
+	
 	# Variables that will be passed to SGP2_call
 	my %sequences;
 	my $tblastx_output;
@@ -167,8 +170,58 @@ sub _do_query_SGP2 {
 
 	# Get the parameters
 
-	# No parameters available yet...
-
+	my $profiles = {
+	    "Homo sapiens (suitable for mammals)"      => 1,
+	    "Tetraodon nigroviridis (pupper fish)"     => 1,
+	    "Drosophila melanogaster (fruit fly)"      => 1,
+	    "Caenorhabditis elegans (worm)"            => 1,
+	    "Triticum aestivum (wheat)"                => 1,
+	    "Arabidopsis thaliana (weed)"              => 1,
+	    "Oryza sativa (rice)"                      => 1,
+	    "Plasmodium falciparum (malaria parasite)" => 1,
+	    "Dictyostelium discoideum (slime mold)"    => 1,
+	    "Aspergillus nidulans"                     => 1,
+	    "Neurospora crassa"                        => 1,
+	    "Cryptococcus neomorfans"                  => 1,
+	    "Coprinus cinereus"                        => 1,
+	    "Apis mellifera (honey bee)"               => 1,
+	    "haetomium globosum"                       => 1,
+	    "Schistosoma japonica"                     => 1,
+	    "Stagnospora nodorum"                      => 1,
+	    "Solanaceae"                               => 1,
+	    "Sclerotinia sclerotiorum"                 => 1,
+	    "Coccidioides immitis"                     => 1,
+	    "Histoplasma capsulatum"                   => 1,
+	};
+	
+	($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
+	if (not defined $profile) {
+	    # Default is "Homo sapiens"
+	    $profile = "Homo sapiens (suitable for mammals)";
+	}
+	elsif (! $profiles->{$profile}) {
+	    my $note = "profile parameter, '$profile', not accepted, should be ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis']";
+	    print STDERR "$note\n";
+	    my $code = "222";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "profile",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling why nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+	
+	# Add the parsed parameters in a hash table
+	
+	$parameters{profile} = $profile;
+	
 	# Tratamos a cada uno de los articulos
 	foreach my $article (@articles) {       
 	    
@@ -187,6 +240,7 @@ sub _do_query_SGP2 {
 		print STDERR "$note\n";
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => '$articleName',
 									  code       => $code,
 									  type       => 'error',
 									  queryID    => $queryID,
@@ -251,21 +305,21 @@ sub _do_query_SGP2 {
 		}
 		
 	    }
-	    elsif ($articleName eq "tblastx") {
+	    elsif (($articleName eq "tblastx_report") || ($articleName =~ /tblastx_report/i)) {
 		
 		if ($_debug) {
 		    print STDERR "parsing the article \"tblastx\"...\n";
 		}
 		
 		# Validate the type first
-
+		
 		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Blast-Text");
 		if (!$rightType) {
 		    my $note = "Expecting a Blast-Text object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "tblastx",
+									      refElement => "tblastx_report",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -288,7 +342,7 @@ sub _do_query_SGP2 {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "tblastx",
+									      refElement => "tblastx_report",
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -445,30 +499,9 @@ sub runSGP2GFF {
     # Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
     # todas ellas con una cabecera y un final. Esto lo podemos hacer 
     # con las llamadas de la libreria Common de BioMoby. 
-    if (@$moby_exceptions > 0) {
-	# build the moby exception response
-	my $moby_exception_response = "";
-	foreach my $moby_exception (@$moby_exceptions) {
-	    $moby_exception_response .= $moby_exception->retrieveExceptionResponse() . "\n";
-	}
-	
-	return responseHeader(
-			      -authority => "genome.imim.es",
-			      -note      => "$moby_exception_response"
-			      )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
-    else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
-
-	my $note = "Service execution succeeded";
-	return responseHeader (
-			       -authority => "genome.imim.es",
-			       -note      => "<Notes>$note</Notes>"
-			       )
-	    . $MOBY_RESPONSE . responseFooter;
-    }
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
 }
 
 
