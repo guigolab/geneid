@@ -1,0 +1,493 @@
+############
+# Objects  #
+############
+
+* GFF:
+
+	description => "Generic Feature Format"
+	ISA	=> [
+			['text_formatted', ""] 
+		   ],
+
+* Meta_Alignment_Text
+
+	description => "Plain text Meta-alignment report"
+	ISA	=> [
+			['text_formatted', ""] 
+		   ],
+
+############
+# Services #
+############
+
+* "fromFASTAtoDNASequenceCollection";
+
+				      serviceType  => "Converting",
+				      description  => "Converts a FASTA object into a collection of DNASequence moby objects",
+				      input		=> [
+							    ['sequences', ["FASTA" => [] ]],
+							   ],
+				      output		=> [
+							    ['sequences', [["DNASequence" => [] ]]],
+							   ],
+
+
+* "fromFASTAtoAminoAcidSequenceCollection";
+
+				      serviceType  => "Converting",
+				      description  => "Converts a FASTA object into a collection of AminoAcidSequence moby objects",
+				      input		=> [
+							    ['sequences', ["FASTA" => [] ]],
+							   ],
+				      output		=> [
+							    ['sequences', [["AminoAcidSequence" => [] ]]],
+							   ],
+
+* "fromGenericSequenceCollectiontoFASTA";
+
+				      serviceType  => "Converting",
+				      description  => "Converts a collection of GenericSequence moby object into a FASTA object",
+				      input		=> [
+							    ['sequences', [["GenericSequence" => [] ]]],
+							    ],
+				      output		=> [
+							    ['sequences', ["FASTA" => [] ]],
+							    ],
+
+* "fromGenericSequencetoFASTA";
+
+				      serviceType  => "Converting",
+				      description  => "Converts a GenericSequence moby object into a FASTA object",
+				      input		=> [
+							    ['sequence', ["GenericSequence" => [] ]],
+							   ],
+				      output		=> [
+							    ['sequence', ["FASTA" => [] ]],
+							   ],
+
+
+* "runGeneIDGFF";
+
+				      serviceType  => "GeneFinding",
+				      description  => "Ab initio gene prediction tool - Returns the gene predictions in GFF format.",
+				      input		=> [
+							    ['sequence', ["DNASequence" => [] ]],
+							    ],
+				      output		=> [
+							    ['geneid_predictions', ["GFF" => [] ]],
+							    ],
+				      secondary	=> {
+					  'profile' => {
+					      datatype => 'String',
+					      enum => ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis'],
+					      default => ''Homo sapiens (suitable for mammals)'',
+					  },
+					  'strands' => {
+					      datatype => 'String',
+					      enum     => ['Forward','Reverse','Both'],
+					      default  => 'Both',
+					  },
+					  'engine' => {
+					      datatype => 'String',
+					      default  => 'Normal',
+					      enum     => ['Normal','Exon Mode','Gene Assembly Mode'],
+					  },
+					  'exons'  => {
+					      datatype => 'String',
+					      enum     => ['None', 'First exons','Internal exons','All exons','Terminal exons','Single genes','Open reading frames'],
+					      default  => 'None',
+					  },
+					  'signals' => {
+					      datatype => 'String',
+					      enum     => ['None', 'Acceptor sites','Donor sites','All splice sites','Start codons','Stop codons','All codons','All'],
+                                              default  => 'None',
+					  }
+				      }
+
+
+* "translateGeneIDGFFPredictions";
+
+				      serviceType  => "Translating",
+				      description  => "Translate the GeneID gene predictions given in GFF format. Returns a set of aminoacid sequences",
+				      input	   => [
+						       ['sequence', ["DNASequence" => [] ]],
+						       ['geneid_predictions', ["GFF" => [] ]]
+						      ],
+				      output       => [
+						       ['peptides', [['AminoAcidSequence' => [] ]]] # collection of one object type
+						      ],
+				      secondary	=> {
+					  'translation table' => {
+					      datatype => 'String',
+					      enum => ['Standard (1)','Bacterial (11)'],
+					      default => 'Standard (1)',
+					  },
+				      }
+
+* "runMatScanGFF";
+
+				      serviceType  => "Nucleotic_Motifs",
+				      description  => "Reports putative predicted motifs on a given collection of DNA sequences. The motifs collections currently available are Transcription Factor binding site collections. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
+				      input		=> [
+							    ['sequence', ['DNASequence' => [] ]]
+							   ],
+				      output		=> [
+							    ['matscan_predictions', ['GFF' => [] ]]
+							   ],
+				      secondary	=> {
+					  'motif database' => {
+					      datatype => 'String',
+					      enum     => ['Transfac','Jaspar'],
+					      default  => 'Transfac',
+					  },
+					  'matrix mode' => {
+					      datatype => 'String',
+					      enum     => ['raw format','log-likelihood'],
+					      default  => 'log-likelihood',
+					  },
+					  'threshold' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.85
+					  },
+					  'strand' => {
+					      datatype => 'String',
+					      enum     => ['Both','Forward','Reverse'],
+					      default  => 'Both'
+					  },	  
+				      }
+
+* "runMatScanGFFCollection";
+
+				      serviceType  => "Nucleotic_Motifs",
+				      description  => "Reports putative predicted motifs on a given collection of DNA sequences. The motifs collections currently available are Transcription Factor binding site collections. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
+				      input		=> [
+							    ['sequences', [['DNASequence' => [] ]]] # collection of one object type
+							   ],
+				      output		=> [
+							    ['matscan_predictions', [['GFF' => [] ]]] # collection of one object type
+							   ],
+				      secondary	=> {
+					  'motif database' => {
+					      datatype => 'String',
+					      enum     => ['Transfac','Jaspar'],
+					      default  => 'Transfac',
+					  },
+					  'matrix mode' => {
+					      datatype => 'String',
+					      enum     => ['raw format','log-likelihood'],
+					      default  => 'log-likelihood',
+					  },
+					  'threshold' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.85
+					  },
+					  'strands' => {
+					      datatype => 'String',
+					      enum     => ['Both','Forward','Reverse'],
+					      default  => 'Both'
+					  },
+				      }
+
+* "runMatScanGFFCollectionVsInputMatrices";
+
+				      serviceType  => "Nucleotic_Motifs",
+				      description  => "Reports putative predicted motifs on a given collection of DNA sequences. The set of motifs is given by the user. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
+				      input		=> [
+							    ['sequences', [['DNASequence' => [] ]]], # collection of one object type,
+							    ['motif_weight_matrices', [['Matrix' => [] ]]]
+							   ],
+				      output		=> [
+							    ['matscan_predictions', [['GFF' => [] ]]] # collection of one object type
+							   ],
+				      secondary	=> {
+					  'matrix mode' => {
+					      datatype => 'String',
+					      enum     => ['raw format','log-likelihood'],
+					      default  => 'log-likelihood',
+					  },
+					  'threshold' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.85
+					  },
+					  'strands' => {
+					      datatype => 'String',
+					      enum     => ['Both','Forward','Reverse'],
+					      default  => 'Both'
+					  },
+				      }
+
+* "runMemeHTML";
+
+				      serviceType  => "SequenceAnalysis",
+				      description  => "MEME analyzes a set of protein or DNA sequences for similarities among them and produce a description (motif) for each pattern it discovers. The results are returned in HTML format",
+				      input		=> [
+							    ['sequences', [['GenericSequence' => [] ]]] # collection of one object type
+							   ],
+				      output		=> [
+							    ['meme_predictions', ['text-html' => [] ]]
+							   ],
+				      secondary	=> {
+					  'motif distribution' => {
+					      datatype => 'String',
+					      enum     => ['one','zero or one','any number of repetitions'],
+					      default  => 'zero or one',
+					  },
+					  'maximum number of motifs' => {
+					      datatype => 'Integer',
+					      default  => 8,
+					      max      => 12,
+					  },
+					  'minimum sites for each motif' => {
+					      datatype => 'Integer',
+					      min      => 2,
+					      max      => 300
+					  },
+					  'maximum sites for each motif' => {
+					      datatype => 'Integer',
+					      min      => 2,
+					      max      => 300,
+					  },
+					  'minimum optimum width' => {
+					      datatype => 'Integer',
+					      default  => 6,
+					      min      => 2,
+					      max      => 300,
+					  },
+					  'maximum optimum width' => {
+					      datatype => 'Integer',
+					      default  => 15,
+					      min      => 2,
+					      max      => 300,
+					  },
+					  'motif E-value cutoff' => {
+					      datatype => 'String',
+					      default  => "1",
+					      min      => 0,
+					  },
+					  'background markov model training (value is the model order)' => {
+					      datatype => 'String',
+					      default  => "1",
+					      enum     => ['None', '1','2','3'],
+					  },
+				      }
+
+* "runMemeText";
+
+				      serviceType  => "SequenceAnalysis",
+				      description  => "MEME analyzes a set of protein or DNA sequences for similarities among them and produce a description (motif) for each pattern it discovers. The results are returned in MEME text format",
+				      input		=> [
+							    ['sequences', [['GenericSequence' => [] ]]] # collection of one object type
+							   ],
+				      output		=> [
+							    ['meme_predictions', ['MEME_Text' => [] ]]
+							   ],
+				      secondary	=> {
+					  'motif distribution' => {
+					      datatype => 'String',
+					      enum     => ['one','zero or one','any number of repetitions'],
+					      default  => 'zero or one',
+					  },
+					  'maximum number of motifs' => {
+					      datatype => 'Integer',
+					      default  => 8,
+					      max      => 12,
+					  },
+					  'minimum sites for each motif' => {
+					      datatype => 'Integer',
+					      min      => 2,
+					      max      => 300,
+					  },
+					  'maximum sites for each motif' => {
+					      datatype => 'Integer',
+					      min      => 2,
+					      max      => 300,
+					  },
+					  'minimum optimum width' => {
+					      datatype => 'Integer',
+					      default  => 6,
+					      min      => 2,
+					      max      => 300,
+					  },
+					  'maximum optimum width' => {
+					      datatype => 'Integer',
+					      default  => 15,
+					      min      => 2,
+					      max      => 300,
+					  },
+					  'motif E-value cutoff' => {
+					      datatype => 'String',
+					      default  => "1",
+					      min      => 0,
+					  },
+					  'background markov model training (value is the model order)' => {
+					      datatype => 'String',
+					      default  => "1",
+					      enum     => ['None', '1','2','3'],
+					  },
+				      }
+
+* "parseMotifMatricesfromMEME";
+
+				      serviceType  => "Parsing",
+				      description  => "Parse the score or probability motif matrices from MEME output. It reports one matrix for each predicted motif.",
+				      input		=> [
+							    ['meme_predictions', ['MEME_Text' => [] ]]
+							   ],
+				      output		=> [
+							    ['meme_matrices', [['Matrix' => [] ]]]
+							   ],
+				      secondary	=> {
+					  'matrix mode' => {
+					      datatype => 'String',
+					      enum     => ['raw format','log-likelihood'],
+					      default  => 'log-likelihood',
+					  },
+				      }
+
+
+* "runMetaAlignmentGFF";
+
+				      serviceType  =>"Alignment",
+				      description  => "Meta-alignment produces alignments of sequences of TF binding sites. It returns the predictions in GFF format. You can use runMatScanGFF to produce the input GFF files",
+				      input		=>
+							    ['map1', ['GFF' => [] ]],
+							    ['map2', ['GFF' => [] ]],
+							   ],
+				      output		=> [
+							    ['meta_predictions', ['GFF' => [] ]]
+							   ],
+				      secondary	=> {
+					  'alpha penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.5
+					  },
+					  'lamba penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+					  'mu penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+				      }
+
+
+* "runMetaAlignment";
+
+				      serviceType  => "Alignment",
+				      description  => "Meta-alignment produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files",
+				      input		=> [
+							    ['map1', ['GFF' => [] ]],
+							    ['map2', ['GFF' => [] ]],
+							   ],
+				      output		=> [
+							    ['meta_predictions', ['Meta_Alignment_Text' => [] ]]
+							   ],
+				      secondary	=> {
+					  'alpha penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.5
+					  },
+					  'lamba penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+					  'mu penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+				      }
+
+
+* "runMultiMetaAlignmentGFF";
+
+				      serviceType  => "Alignment",
+				      description  => "runMultiMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in GFF format. You can use runMatScanGFF to produce the input GFF files",
+				      input		=> [
+							    ['maps', [['GFF' => [] ]],
+							   ],
+				      output		=> [
+							    ['meta_predictions', [['GFF' => [] ]]]
+							   ],
+				      secondary	=> {
+					  'alpha penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.5
+					  },
+					  'lamba penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+					  'mu penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+				      }
+
+
+* "runMultiMetaAlignment";
+
+				      serviceType  => "Alignment",
+				      description  => "runMultiMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files",
+				      input		=> [
+							    ['maps', [['GFF' => [] ]]],
+							   ],
+				      output		=> [
+							    ['meta_predictions', [['Meta_Alignment_Text' => [] ]]]
+							   ],
+				      secondary	=> {
+					  'alpha penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.5
+					  },
+					  'lamba penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+					  'mu penalty' => {
+					      datatype => 'Float',
+					      max      => 1,
+					      min      => 0,
+					      default  => 0.1
+					  },
+				      }
+
+* "fromMetaAlignmentstoScoreMatrix";
+
+				      serviceType  => "Parsing",
+				      description  => "Parse a collection of meta-alignment outputs to produce a sequence similarity score matrix.",
+				      input		=> [
+							    ['similarity_results', [['meta_alignment_text' => [] ]]],
+							   ],
+				      output		=> [
+							    ['matrix', ['Distance_Matrix' => [] ]]
+							   ],
+				      }
