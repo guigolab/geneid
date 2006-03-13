@@ -2,7 +2,7 @@
 
 ##################################################################
 #
-# GeneID Moby Service Client
+# SGP2 Moby Service Client
 #
 ##################################################################
 
@@ -74,6 +74,12 @@ while (my $seqobj = $seqin->next_seq) {
     $URI = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
     $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
+    # Moby-dev
+
+    $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
+    $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://moby-dev.inab.org/MOBY/Central';
+    $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
+
     ##################################################################
     #
     # Moby Server Instanciation
@@ -139,15 +145,20 @@ PRT
 
     my $tblastx_xml = <<PRT;
 <Blast-Text namespace="$datasource" id="$seq_id">
+<String namespace="" id="" articleName="content">
 <![CDATA[
 $tblastx_output
 ]]>
+</String>
 </Blast-Text>
 PRT
 
+    # print STDERR "tblastx, $tblastx_xml\n";
+    # print STDERR "sequence, $sequence_xml\n";
+
     my $result = $Service->execute(
 			       XMLinputlist => [
-						['sequences', $sequence_xml, 'tblastx', $tblastx_xml]
+						['sequence', $sequence_xml, 'tblastx_report', $tblastx_xml]
 					       ]
 			       ) ;
     
