@@ -160,15 +160,16 @@ my ($REG) = $Central->registerService(
 							   ],
 				      output		=> [
 							    ['geneid_predictions', ["GFF" => []]],
-							   ],
+							    ],
 				      secondary	=> {
 					  'profile' => {
 					      datatype => 'String',
 					      enum => ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis'],
 					      default => 'Homo sapiens (suitable for mammals)',
 					  },
+				      }
 				      );
-				      
+
 # Check if the result has been registered successfully.
 if ($REG->success) {
     
