@@ -126,6 +126,7 @@ $x->dispatch_with({
     'http://biomoby.org/#fromGenericSequencetoFASTA'    => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA' => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromFASTAtoDNASequenceCollection'     => 'INB::GRIB::Services::UtilsServices',
+    'http://biomoby.org/#fromFASTAtoAminoAcidSequenceCollection' => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromFASTAtoGenericSequenceCollection' => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#generateScoreMatrix'           => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#runMemeHTML'                   => 'INB::GRIB::Services::MemeServices',
