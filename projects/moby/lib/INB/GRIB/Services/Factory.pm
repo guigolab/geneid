@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.69 2006-03-13 17:34:53 gmaster Exp $
+# $Id: Factory.pm,v 1.70 2006-03-14 10:17:26 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -473,29 +473,10 @@ sub SGP2_call {
 	}
 	
         SWITCH: {
-	    if ($profile eq "Homo sapiens (suitable for mammals)")      { $_sgp2_args .= " -P $_sgp2_dir/params/human.param"; last SWITCH; }
-	    if ($profile eq "Tetraodon nigroviridis (pupper fish)")     { $_sgp2_args .= " -P $_sgp2_dir/params/tetraodon.param"; last SWITCH; }
-	    if ($profile eq "Drosophila melanogaster (fruit fly)")      { $_sgp2_args .= " -P $_sgp2_dir/params/dros.param"; last SWITCH; }
-	    if ($profile eq "Caenorhabditis elegans (worm)") { $_sgp2_args .= " -P $_sgp2_dir/params/celegans.param"; last SWITCH; }
-	    if ($profile eq "Triticum aestivum (wheat)")     { $_sgp2_args .= " -P $_sgp2_dir/params/wheat.param"; last SWITCH; }
-	    if ($profile eq "Arabidopsis thaliana (weed)")   { $_sgp2_args .= " -P $_sgp2_dir/params/arabidopsis.param"; last SWITCH; }
-	    if ($profile eq "Oryza sativa (rice)")           { $_sgp2_args .= " -P $_sgp2_dir/params/rice.param"; last SWITCH; }
-	    if ($profile eq "Plasmodium falciparum (malaria parasite)") { $_sgp2_args .= " -P $_sgp2_dir/params/plasmodium.param"; last SWITCH; }
-	    if ($profile eq "Dictyostelium discoideum (slime mold)")    { $_sgp2_args .= " -P $_sgp2_dir/params/dictyostelium.param"; last SWITCH; }
-	    if ($profile eq "Aspergillus nidulans")          { $_sgp2_args .= " -P $_sgp2_dir/params/aspergillus.param"; last SWITCH; }
-	    if ($profile eq "Neurospora crassa")             { $_sgp2_args .= " -P $_sgp2_dir/params/neurospora.param"; last SWITCH; }
-	    if ($profile eq "Cryptococcus neomorfans")       { $_sgp2_args .= " -P $_sgp2_dir/params/cneomorfans.param"; last SWITCH; }
-	    if ($profile eq "Coprinus cinereus")             { $_sgp2_args .= " -P $_sgp2_dir/params/cinereus.param"; last SWITCH; }
-	    if ($profile eq "Apis mellifera (honey bee)")    { $_sgp2_args .= " -P $_sgp2_dir/params/bee.param"; last SWITCH; }
-	    if ($profile eq "Chaetomium globosum")           { $_sgp2_args .= " -P $_sgp2_dir/params/chaetomium.param"; last SWITCH; }
-	    if ($profile eq "Schistosoma japonica")          { $_sgp2_args .= " -P $_sgp2_dir/params/sjaponica.param"; last SWITCH; }
-	    if ($profile eq "Stagnospora nodorum")           { $_sgp2_args .= " -P $_sgp2_dir/params/snodorum.param"; last SWITCH; }
-	    if ($profile eq "Solanaceae")                    { $_sgp2_args .= " -P $_sgp2_dir/params/solanaceae.param"; last SWITCH; }
-	    if ($profile eq "Sclerotinia sclerotiorum")      { $_sgp2_args .= " -P $_sgp2_dir/params/ssclerotiorum.param"; last SWITCH; }
-	    if ($profile eq "Coccidioides immitis")          { $_sgp2_args .= " -P $_sgp2_dir/params/cimmitis.param"; last SWITCH; }
-	    if ($profile eq "Histoplasma capsulatum")        { $_sgp2_args .= " -P $_sgp2_dir/params/hcapsulatum.param"; last SWITCH; }
-	    # Default is Human
-	    $_sgp2_args .= " -P $_sgp2_dir/params/human.param";
+	    if ($profile eq "Human Vs Mouse")      { $_sgp2_args .= " -P $_sgp2_dir/params/human3iso.sgp.Hs-Mm.param"; last SWITCH; }
+	    if ($profile eq "Human Vs Chicken")     { $_sgp2_args .= " -P $_sgp2_dir/params/human3iso.sgp.Gg-Hs.param"; last SWITCH; }
+	    # Default is Human Vs Mouse
+	    $_sgp2_args .= " -P $_sgp2_dir/params/human3iso.sgp.Hs-Mm.param";
 	}
 	
 	# Generate a temporary file locally with the sequence in FASTA format

@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.16 2006-03-13 17:34:53 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.17 2006-03-14 10:17:27 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -171,36 +171,17 @@ sub _do_query_SGP2 {
 	# Get the parameters
 
 	my $profiles = {
-	    "Homo sapiens (suitable for mammals)"      => 1,
-	    "Tetraodon nigroviridis (pupper fish)"     => 1,
-	    "Drosophila melanogaster (fruit fly)"      => 1,
-	    "Caenorhabditis elegans (worm)"            => 1,
-	    "Triticum aestivum (wheat)"                => 1,
-	    "Arabidopsis thaliana (weed)"              => 1,
-	    "Oryza sativa (rice)"                      => 1,
-	    "Plasmodium falciparum (malaria parasite)" => 1,
-	    "Dictyostelium discoideum (slime mold)"    => 1,
-	    "Aspergillus nidulans"                     => 1,
-	    "Neurospora crassa"                        => 1,
-	    "Cryptococcus neomorfans"                  => 1,
-	    "Coprinus cinereus"                        => 1,
-	    "Apis mellifera (honey bee)"               => 1,
-	    "haetomium globosum"                       => 1,
-	    "Schistosoma japonica"                     => 1,
-	    "Stagnospora nodorum"                      => 1,
-	    "Solanaceae"                               => 1,
-	    "Sclerotinia sclerotiorum"                 => 1,
-	    "Coccidioides immitis"                     => 1,
-	    "Histoplasma capsulatum"                   => 1,
+	    "Human Vs Mouse"       => 1,
+	    "Human Vs Chicken"     => 1,
 	};
 	
 	($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
 	if (not defined $profile) {
-	    # Default is "Homo sapiens"
-	    $profile = "Homo sapiens (suitable for mammals)";
+	    # Default is "Human Vs Mouse"
+	    $profile = "Human Vs Mouse";
 	}
 	elsif (! $profiles->{$profile}) {
-	    my $note = "profile parameter, '$profile', not accepted, should be ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis']";
+	    my $note = "profile parameter, '$profile', not accepted, should be ['Human Vs Mouse',''Human Vs Chicken]";
 	    print STDERR "$note\n";
 	    my $code = "222";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
