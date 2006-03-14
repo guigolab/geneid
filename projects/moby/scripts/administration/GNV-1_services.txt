@@ -104,6 +104,24 @@
 					  }
 				      }
 
+* "runSGP2GFF";
+
+				      serviceType  => "GeneFinding",
+				      description  => "Ab initio gene prediction service. It runs geneid with synteny evidences to improve the accuracy of the results and returns the output predictions in GFF format. To generate the synteny evidences, use a service that provides tblastx.",
+				      input		=> [
+							    ['sequence', ["DNASequence" => []]],
+							    ['tblastx_report', ["BLAST-Text" => []]],
+							   ],
+				      output		=> [
+							    ['geneid_predictions', ["GFF" => []]],
+							   ],
+				      secondary	=> {
+					  'profile' => {
+					      datatype => 'String',
+					      enum => ['Human Vs Mouse','Human Vs Chicken'],
+					      default => 'Human Vs Mouse',
+					  }
+
 
 * "translateGeneIDGFFPredictions";
 
