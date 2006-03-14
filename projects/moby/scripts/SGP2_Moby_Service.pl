@@ -156,9 +156,12 @@ PRT
     # print STDERR "tblastx, $tblastx_xml\n";
     # print STDERR "sequence, $sequence_xml\n";
 
+    my $profile_xml = "<Value>Human Vs Mouse</Value>";
+    # my $profile_xml = "<Value>Human Vs Chicken</Value>";
+
     my $result = $Service->execute(
 			       XMLinputlist => [
-						['sequence', $sequence_xml, 'tblastx_report', $tblastx_xml]
+						['sequence', $sequence_xml, 'tblastx_report', $tblastx_xml, 'profile', $profile_xml]
 					       ]
 			       ) ;
     
