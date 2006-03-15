@@ -1,0 +1,30 @@
+#!/bin/sh
+
+########################################
+#
+# Howto - Update the Ensembl Perl API libraries from Ensembl CVS
+#
+########################################
+
+# NB: This shows how to install locally the Perl API for the Ensembl Release 35, change the release index accordingly to the one you wish to install
+
+# e.g. substitute 35 by ${relsease}
+
+release=35
+
+# Connect to the Ensembl CVS server
+
+	cvs -d :pserver:cvsuser@cvs.sanger.ac.uk:/cvsroot/ensembl login
+	# When prompted the password is 'CVSUSER'.
+
+# Install the Ensembl Core Perl API for version 35
+
+	cvs -d :pserver:cvsuser@cvs.sanger.ac.uk:/cvsroot/ensembl checkout -r branch-ensembl-35 ensembl/modules
+
+# Install the Ensembl Compara Perl API for verion 35
+
+	cvs -d :pserver:cvsuser@cvs.sanger.ac.uk:/cvsroot/ensembl checkout -r branch-ensembl-35 ensembl-compara/modules
+
+# Rename the directories to include the release index
+	mv ensembl ensembl-35
+	mv ensembl-compara ensembl-compara-35
