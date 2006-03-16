@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.30 2006-03-16 15:16:56 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.31 2006-03-16 16:24:08 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -263,7 +263,7 @@ sub _do_query_TranslateGeneIDGFF {
 	    # Validate the type
 	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
 	    if ((! defined $rightType) || !$rightType) {
-		my $note = "Expecting a NucleotideSequence object, and receiving a $inputDataType object";
+		my $note = "Expecting a DNASequence object, and receiving a $inputDataType object";
 		print STDERR "$note\n";
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
