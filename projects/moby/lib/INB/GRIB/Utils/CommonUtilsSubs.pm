@@ -579,8 +579,8 @@ sub validateDataType {
 		}
 	    }
 
-	    if (($specifiedType eq "Blast-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
-		if ($inputDataType =~ /Blast-Text|NCBI_BLAST_Text|WU_BLAST_Text/) {
+	    if (($specifiedType eq "BLAST-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
+		if ($inputDataType =~ /BLAST-Text|NCBI_BLAST_Text|WU_BLAST_Text/) {
 		    $rightType = 1;
 		}
 		else {

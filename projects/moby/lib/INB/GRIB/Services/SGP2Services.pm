@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.17 2006-03-14 10:17:27 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.18 2006-03-16 16:07:02 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -294,7 +294,7 @@ sub _do_query_SGP2 {
 		
 		# Validate the type first
 		
-		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Blast-Text");
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "BLAST-Text");
 		if (!$rightType) {
 		    my $note = "Expecting a Blast-Text object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
