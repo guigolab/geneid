@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.31 2006-03-16 16:24:08 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.32 2006-03-16 17:26:54 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -957,7 +957,7 @@ sub _do_query_fromFASTAtoMobySequences {
 sub _do_query_generateScoreMatrixFromMetaAlignment {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
     my $queryInput_DOM = shift @_;
-    
+
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
     
@@ -1045,13 +1045,8 @@ sub _do_query_generateScoreMatrixFromMetaAlignment {
 
 	    my @inputs_article_DOMs = getCollectedSimples ($DOM);
 	    foreach my $input_DOM (@inputs_article_DOMs) {
-		
-		# check that out, could well not be text-formatted but GFF !!!
 		my $input = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($input_DOM, "Meta_Alignment_Text");
-		if (not defined $input) {
-		    print STDERR "input objects are not Meta_Alignment_Text!!!\n";
-		}
-		if (not defined $input) {
+		if ((not defined $input) || (length ($input) < 1)) {
 		    print STDERR "Error, can't parse any input!!\n";
 		    exit 0;
 		}
