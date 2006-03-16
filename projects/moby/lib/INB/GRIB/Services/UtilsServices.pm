@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.28 2006-03-13 14:01:20 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.29 2006-03-16 15:16:09 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -300,10 +300,17 @@ sub _do_query_TranslateGeneIDGFF {
 	    }
 	    
 	    if ((not (defined ($GFF_sequenceIdentifier))) || ($GFF_sequenceIdentifier eq "")) {
-		print STDERR "Error, can not parsed the sequence identifier the GFF is attach to!\n";
-		print STDERR "GFF object - 'id' attribute not set!\n";
-		
-		# return an exception instead
+		my $note = "Can not parsed the sequence identifier the GFF is attach to!\n";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "geneid_predictions",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
 		
 		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
