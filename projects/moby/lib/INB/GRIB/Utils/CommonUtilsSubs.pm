@@ -468,6 +468,8 @@ sub convertSequencesIntoFASTA {
 
 # Check that the input datatype matched the specified one
 
+# Be careful with this validation as the input datatype could well have the 'moby:' prefix
+
 sub validateDataType {
     my $self = shift;
     my ($DOM, $specifiedType) = @_;
@@ -620,7 +622,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "MatrixFloat") {
-		if ($inputDataType =~ /^MatrixFloat$/) {
+		if ($inputDataType =~ /MatrixFloat$/) {
 		    $rightType = 1;
 		}
 		else {
@@ -630,7 +632,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "MatrixInteger") {
-		if ($inputDataType =~ /^MatrixInteger$/) {
+		if ($inputDataType =~ /MatrixInteger$/) {
 		    $rightType = 1;
 		}
 		else {
@@ -640,7 +642,7 @@ sub validateDataType {
 	    }
 
 	    if ($specifiedType eq "Matrix") {
-		if ($inputDataType =~ /^Matrix/) {
+		if ($inputDataType =~ /Matrix$/) {
 		    $rightType = 1;
 		}
 		else {
@@ -650,7 +652,7 @@ sub validateDataType {
 	    }
 
 	    if ($specifiedType eq "Meta_Alignment_Text") {
-		if ($inputDataType eq "Meta_Alignment_Text") {
+		if ($inputDataType =~ /Meta_Alignment_Text$/) {
 		    $rightType = 1;
 		}
 		else {
