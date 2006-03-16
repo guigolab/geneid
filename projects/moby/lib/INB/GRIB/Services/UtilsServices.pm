@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.29 2006-03-16 15:16:09 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.30 2006-03-16 15:16:56 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -259,8 +259,6 @@ sub _do_query_TranslateGeneIDGFF {
 	    if (! defined $sequenceIdentifier) {
 		$sequenceIdentifier = "";
 	    }
-
-	    print STDERR "Sequence identifier, $sequenceIdentifier.\n";
 
 	    # Validate the type
 	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
