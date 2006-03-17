@@ -93,10 +93,6 @@ my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/Homo_sapien
 # $in_file_1    = "/home/ug/arnau/data/promoterExtraction/mut1_downreg.1000.intergenic.fa";
 my $datasource = "EMBL";
 
-# Parameters
-
-my $evalue_cutoff = 1000;
-
 ##################################################################
 #
 # Setup Moby configuration parameters
@@ -230,6 +226,7 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 #
 ##################################################################
 
+my $input;
 my $inputs = [];
 my $files = [$in_file_1];
 my $i = 0;
@@ -254,14 +251,14 @@ while ($i < @$files) {
 	# Sequence Input
 	#
 	
-	my $input = <<PRT;
+	$input = <<PRT;
 <DNASequence namespace="$datasource" id="$seq_id">
 <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
 <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
 </DNASequence>
 PRT
 	    
-	    push (@$inputs, $input);
+	push (@$inputs, $input);
     }
 
     $i++;
@@ -272,14 +269,15 @@ PRT
 #
 
 my $evalue_cutoff_xml = <<PRT;
-<Value>$evalue_cutoff</Value>
+<Value>1000</Value>
 PRT
 
 my $motif_distribution_xml = <<PRT;
 <Value>zero or one</Value>
 PRT
 
-# ...
+my $nb_motifs = "<Value>6</Value>";
+my $motif_size = "<Value>18</Value>";
 
 ##################################################################
 #
@@ -292,11 +290,15 @@ if ($_debug) {
 }
 
 my $result;
-
 if ($serviceType eq "Collection") {
 
     $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", $inputs, 'motif E-value cutoff', $evalue_cutoff_xml]
+						 ["$articleName", $inputs, 'motif E-value cutoff', $evalue_cutoff_xml, 'maximum optimum width', $motif_size, 'maximum number of motifs', $nb_motifs]
+						]);
+}
+else {
+    $result = $Service->execute(XMLinputlist => [
+						 ["$articleName", $input, 'motif E-value cutoff', $evalue_cutoff_xml, 'maximum optimum width', $motif_size, 'maximum number of motifs', $nb_motifs]
 						]);
 }
 
