@@ -144,20 +144,20 @@ PRT
     #
 
     my $tblastx_xml = <<PRT;
-<Blast-Text namespace="$datasource" id="$seq_id">
+<BLAST-Text namespace="$datasource" id="$seq_id">
 <String namespace="" id="" articleName="content">
 <![CDATA[
 $tblastx_output
 ]]>
 </String>
-</Blast-Text>
+</BLAST-Text>
 PRT
 
     # print STDERR "tblastx, $tblastx_xml\n";
     # print STDERR "sequence, $sequence_xml\n";
 
     my $profile_xml = "<Value>Human Vs Mouse</Value>";
-    # my $profile_xml = "<Value>Human Vs Chicken</Value>";
+    # $profile_xml = "<Value>Human Vs Chicken</Value>";
 
     my $result = $Service->execute(
 			       XMLinputlist => [
