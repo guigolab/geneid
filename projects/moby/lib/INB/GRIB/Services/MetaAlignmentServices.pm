@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.20 2006-03-07 10:46:29 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.21 2006-03-21 17:52:44 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -113,8 +113,8 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
   &runMetaAlignment
   &runMetaAlignmentGFF
-  &runMultiMetaAlignment
-  &runMultiMetaAlignmentGFF
+  &runMultiPairwiseMetaAlignment
+  &runMultiPairwiseMetaAlignmentGFF
 );
 
 our $VERSION = '1.0';
@@ -509,7 +509,7 @@ PRT
 
 =cut
 
-sub _do_query_MultiMetaAlignment {
+sub _do_query_MultiPairwiseMetaAlignment {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby
     my $queryInput_DOM = shift @_;
     # The moby output format
@@ -1018,9 +1018,9 @@ sub runMetaAlignmentGFF {
     return $response;
 }
 
-=head2 runMultiMetaAlignment
+=head2 runMultiPairwiseMetaAlignment
 
- Title   : runMultiMetaAlignment
+ Title   : runMultiPairwiseMetaAlignment
  Usage   : Esta función está pensada para llamarla desde un cliente SOAP.
 	 : No obstante, se recomienda probarla en la misma máquina, antes
 	 : de instalar el servicio. Para ello, podemos llamarla de la
@@ -1059,17 +1059,17 @@ sub runMetaAlignmentGFF {
 
 =cut
 
-sub runMultiMetaAlignment {
+sub runMultiPairwiseMetaAlignment {
 
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
 
     my $_output_format = "Meta_Alignment_Text";
     my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "runMultiMetaAlignment";
+    my $serviceName = "runMultiPairwiseMetaAlignment";
     
     if ($_debug) {
-	print STDERR "processing Moby runMultiMetaAlignment query...\n";
+	print STDERR "processing Moby runMultiPairwiseMetaAlignment query...\n";
     }
 
     # Hasta el momento, no existen objetos Perl de BioMoby paralelos
@@ -1101,7 +1101,7 @@ sub runMultiMetaAlignment {
 	    print STDERR "query text: $query_str\n";
 	}
 
-	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiPairwiseMetaAlignment ($queryInput, $_output_format);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 
 	# $query_response es un string que contiene el codigo xml de
@@ -1118,9 +1118,9 @@ sub runMultiMetaAlignment {
 }
 
 
-=head2 runMultiMetaAlignmentGFF
+=head2 runMultiPairwiseMetaAlignmentGFF
 
- Title   : runMultiMetaAlignmentGFF
+ Title   : runMultiPairwiseMetaAlignmentGFF
  Usage   : Esta función está pensada para llamarla desde un cliente SOAP.
 	 : No obstante, se recomienda probarla en la misma máquina, antes
 	 : de instalar el servicio. Para ello, podemos llamarla de la
@@ -1159,19 +1159,19 @@ sub runMultiMetaAlignment {
 
 =cut
 
-sub runMultiMetaAlignmentGFF {
-
+sub runMultiPairwiseMetaAlignmentGFF {
+    
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
-
+    
     my $_output_format = "GFF";
     my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "runMultiMetaAlignmentGFF";
+    my $serviceName = "runMultiPairwiseMetaAlignmentGFF";
     
     if ($_debug) {
-	print STDERR "processing Moby runMultiMetaAlignmentGFF query...\n";
+	print STDERR "processing Moby runMultiPairwiseMetaAlignmentGFF query...\n";
     }
-
+    
     # Hasta el momento, no existen objetos Perl de BioMoby paralelos
     # a la ontologia, y debemos contentarnos con trabajar directamente
     # con objetos DOM. Por consiguiente lo primero es recolectar la
@@ -1188,22 +1188,22 @@ sub runMultiMetaAlignmentGFF {
     # es una coleccion de respuestas a cada una de las consultas.
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
-
+    
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
-
+	
 	# En este punto es importante recordar que el objeto $query
 	# es un XML::DOM::Node, y que si queremos trabajar con
 	# el mensaje de texto debemos llamar a: $query->toString()
-
+	
 	if ($_debug) {
 	    my $query_str = $queryInput->toString();
 	    print STDERR "query text: $query_str\n";
 	}
-
-	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
+	
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiPairwiseMetaAlignment ($queryInput, $_output_format);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
-
+	
 	# $query_response es un string que contiene el codigo xml de
 	# la respuesta.  Puesto que es un codigo bien formado, podemos
 	# encadenar sin problemas una respuesta con otra.

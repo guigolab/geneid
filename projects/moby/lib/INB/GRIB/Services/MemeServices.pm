@@ -1,4 +1,4 @@
-# $Id: MemeServices.pm,v 1.24 2006-03-08 11:34:36 gmaster Exp $
+# $Id: MemeServices.pm,v 1.25 2006-03-21 17:52:44 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -79,7 +79,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
   &runMemeHTML
   &runMemeText
-  &parseMotifMatricesfromMEME
+  &parseMotifMatricesFromMEME
 );
 
 our $VERSION = '1.0';
@@ -546,7 +546,7 @@ sub _do_query_MemeMotifMatrices {
 
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
-    my $output_article_name = "meme_matrices";
+    my $output_article_name = "motif_weight_matrices";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $matrix_mode;
@@ -884,9 +884,9 @@ sub runMemeHTML {
     return $response;
 }
 
-=head2 parseMotifMatricesfromMEME
+=head2 parseMotifMatricesFromMEME
 
- Title   : parseMotifMatricesfromMEME
+ Title   : parseMotifMatricesFromMEME
  Usage   : Esta función está pensada para llamarla desde un cliente SOAP.
 	 : No obstante, se recomienda probarla en la misma máquina, antes
 	 : de instalar el servicio. Para ello, podemos llamarla de la
@@ -911,7 +911,7 @@ sub runMemeHTML {
 
 =cut
 
-sub parseMotifMatricesfromMEME {
+sub parseMotifMatricesFromMEME {
 
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
@@ -935,7 +935,7 @@ sub parseMotifMatricesfromMEME {
     
     my $_format = "MEME_Text";
     my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "parseMotifMatricesfromMEME";
+    my $serviceName = "parseMotifMatricesFromMEME";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
