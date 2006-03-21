@@ -10,13 +10,13 @@ use strict;
 use MOBY::Client::Central;
 use MOBY::CommonSubs;
 
-# use SOAP::Lite + 'trace';
-
 # be prepare for command-line options/arguments
 use Getopt::Std;
 
 # For debugging
 use Data::Dumper;
+
+# use SOAP::Lite + 'trace';
 
 sub help {
     return <<"END_HELP";
@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 2 -s translateGeneIDGFFPredictions
+	perl registerService.pl -x 2 -s fromMetaAlignmentsToScoreMatrix
 
 END_HELP
 
@@ -51,17 +51,17 @@ BEGIN {
     getopt($switches);
     
     # If the user does not write nothing, skip to help
-    if (defined($opt_h) || !defined($opt_x) || !defined($opt_s)){
+    if (defined($opt_h) || !defined($opt_x)){
 	print STDERR help;
 	exit 0;
     }
     
 }
 
-my $serviceName = $opt_s || "translateGeneIDGFFPredictions";
-my $serviceType = "Translating";
 $::authURI      = 'genome.imim.es';
 $::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "fromMetaAlignmentsToScoreMatrix";
+my $serviceType = "Parsing";
 my @namespaces  = ();
 
 # MOBY Central configuration
@@ -74,7 +74,7 @@ my $MOBY_SERVER = $ENV{MOBY_SERVER} ='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Ce
 # URL
 
 # Development by default, but if the registry server is the production one,
-# then the URL will be the production script, 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi'
+# then the URL will be the production server at genome.imim.es
 $::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
 
 if (defined($opt_x)) {
@@ -94,8 +94,9 @@ if (defined($opt_x)) {
 	
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://moby-dev.inab.org/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl';
-	
+
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
+	
     }
     elsif (($opt_x == 3) || ($opt_x eq 'Inab')) {
 
@@ -113,9 +114,8 @@ if (defined($opt_x)) {
 
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
-	
-	$serviceType = "Analysis";
-	
+
+	$serviceType = "Parsing";
     }
     else {
 	print STDERR help;
@@ -151,24 +151,16 @@ my ($REG) = $Central->registerService(
 				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Translates the GeneID gene predictions, given in GFF format, into a set of aminoacid sequences",
+				      description  => "Parses a collection of meta-alignment outputs to produce a sequence similarity score matrix",
 				      category     => "moby",
 				      URL          => $::URL,
-				      input	   => [
-						       ['sequence', ["DNASequence" => \@namespaces]],
-						       ['geneid_predictions', ["GFF" => \@namespaces]]
-						      ],
-				      output       => [
-						       ['peptides', [['AminoAcidSequence' => \@namespaces]]] # collection of one object type
-						      ],
-				      secondary	=> {
-					  'translation table' => {
-					      datatype => 'String',
-					      enum => ['Standard (1)','Bacterial (11)'],
-					      default => 'Standard (1)',
-					  },
-				      }
-				     );
+				      input		=> [
+							    ['similarity_results', [['Meta_Alignment_Text' => \@namespaces]]],
+							   ],
+				      output		=> [
+							    ['matrix', ['Distance_Matrix' => \@namespaces]]
+							   ],
+				      );
 
 # Check if the result has been registered successfully.
 if ($REG->success) {

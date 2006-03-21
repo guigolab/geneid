@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runMemeHTML
+	perl registerService.pl -x 2 -s runMemeHTML
 
 END_HELP
 
@@ -57,6 +57,12 @@ BEGIN {
     }
     
 }
+
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "runMemeHTML";
+my $serviceType = "SequenceAnalysis";
+my @namespaces  = ();
 
 # MOBY Central configuration
 
@@ -108,7 +114,8 @@ if (defined($opt_x)) {
 
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
-
+	
+	$serviceType = "Analysis";
     }
     else {
 	print STDERR help;
@@ -120,16 +127,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "runMemeHTML";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -148,15 +145,13 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "SequenceAnalysis",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "MEME analyzes a set of protein or DNA sequences for similarities among them and produce a description (motif) for each pattern it discovers. The results are returned in HTML format",
+				      description  => "Analyzes a set of protein or DNA sequences for similarities among them and produces a description (motif) for each pattern it discovers. The results are returned in HTML format",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [

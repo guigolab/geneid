@@ -31,7 +31,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s fromFASTAtoAminoAcidSequenceCollection
+	perl registerService.pl -x 2 -s fromFASTAToAminoAcidSequenceCollection
 
 END_HELP
 
@@ -55,6 +55,12 @@ BEGIN {
     }
     
 }
+
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "fromFASTAToAminoAcidSequenceCollection";
+my $serviceType = "Converting";
+my @namespaces  = ();
 
 # MOBY Central configuration
 
@@ -107,6 +113,7 @@ if (defined($opt_x)) {
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 	
+	$serviceType = "Conversion";
     }
     else {
 	print STDERR help;
@@ -118,16 +125,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "fromFASTAtoAminoAcidSequenceCollection";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -146,19 +143,17 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Converting",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Converts a FASTA object into a collection of AminoAcidSequence moby objects",
+				      description  => "Converts aminoacid FASTA sequences into a collection of aminoacid sequences",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', ["FASTA" => \@namespaces]],
+							    ['sequences', ["FASTA_AA_multi" => \@namespaces]],
 							   ],
 				      output		=> [
 							    ['sequences', [["AminoAcidSequence" => \@namespaces]]],

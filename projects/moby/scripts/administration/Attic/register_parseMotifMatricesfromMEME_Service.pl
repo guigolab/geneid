@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s parseMotifMatricesfromMEME
+	perl registerService.pl -x 2 -s parseMotifMatricesFromMEME
 
 END_HELP
 
@@ -57,6 +57,12 @@ BEGIN {
     }
     
 }
+
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "parseMotifMatricesFromMEME";
+my $serviceType = "Parsing";
+my @namespaces  = ();
 
 # MOBY Central configuration
 
@@ -109,6 +115,8 @@ if (defined($opt_x)) {
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 
+	$serviceType = "Parsing";
+
     }
     else {
 	print STDERR help;
@@ -120,16 +128,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "parseMotifMatricesfromMEME";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -148,22 +146,20 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Parsing",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Parse the score or probability matrices from MEME output. It reports one matrix for each predicted motif.",
+				      description  => "Parses the score or probability motif matrices from MEME output",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
 							    ['meme_predictions', ['MEME_Text' => \@namespaces]]
 							   ],
 				      output		=> [
-							    ['meme_matrices', [['Matrix' => \@namespaces]]]
+							    ['motif_weight_matrices', [['Matrix' => \@namespaces]]]
 							   ],
 				      secondary	=> {
 					  'matrix mode' => {

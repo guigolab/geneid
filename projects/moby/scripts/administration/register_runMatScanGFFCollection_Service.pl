@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runMatScanGFFCollection
+	perl registerService.pl -x 2 -s runMatScanGFFCollection
 
 END_HELP
 
@@ -57,6 +57,12 @@ BEGIN {
     }
     
 }
+
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "runMatScanGFFCollection";
+my $serviceType = "Nucleotic_Motifs";
+my @namespaces  = ();
 
 # MOBY Central configuration
 
@@ -108,7 +114,8 @@ if (defined($opt_x)) {
 
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
-
+	
+	$serviceType = "Analysis";
     }
     else {
 	print STDERR help;
@@ -120,16 +127,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s;
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -148,15 +145,13 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Nucleotic_Motifs",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Reports putative predicted motifs on a given collection of DNA sequences. The motifs collections currently available are Transcription Factor binding site collections. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.",
+				      description  => "Analyzes a collection of DNA sequences for putative transcription factor binding sites from Transfac or Jaspar and reports them in GFF format",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [

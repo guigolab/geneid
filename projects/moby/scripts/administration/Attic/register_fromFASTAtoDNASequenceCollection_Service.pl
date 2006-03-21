@@ -31,7 +31,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s fromFASTAtoDNASequenceCollection
+	perl registerService.pl -x 2 -s fromFASTAToDNASequenceCollection
 
 END_HELP
 
@@ -56,11 +56,18 @@ BEGIN {
     
 }
 
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "fromFASTAToDNASequenceCollection";
+my $serviceType = "Converting";
+my @namespaces  = ();
+
+
 # MOBY Central configuration
 
 # Default registry server is Chirimoyo in Malaga
 
-my $MOBY_URI = $ENV{MOBY_URI}    ='http://chirimoyo.ac.uma.es/MOBY/Central';
+my $MOBY_URI    = $ENV{MOBY_URI}    ='http://chirimoyo.ac.uma.es/MOBY/Central';
 my $MOBY_SERVER = $ENV{MOBY_SERVER} ='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Central.pl';
 
 # URL
@@ -107,6 +114,7 @@ if (defined($opt_x)) {
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 	
+	$serviceType = "Conversion";
     }
     else {
 	print STDERR help;
@@ -118,16 +126,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "fromFASTAtoDNASequenceCollection";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -146,19 +144,17 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Converting",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Converts a FASTA object into a collection of DNASequence moby objects",
+				      description  => "Converts DNA FASTA sequences into a collection of DNA sequences",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', ["FASTA" => \@namespaces]],
+							    ['sequences', ["FASTA_NA_multi" => \@namespaces]],
 							   ],
 				      output		=> [
 							    ['sequences', [["DNASequence" => \@namespaces]]],

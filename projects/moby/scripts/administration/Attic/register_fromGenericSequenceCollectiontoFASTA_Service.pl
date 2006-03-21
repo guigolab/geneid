@@ -31,7 +31,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 2 -s fromGenericSequenceCollectionToFASTA
 
 END_HELP
 
@@ -55,6 +55,12 @@ BEGIN {
     }
     
 }
+
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "fromGenericSequenceCollectionToFASTA";
+my $serviceType = "Converting";
+my @namespaces  = ();
 
 # MOBY Central configuration
 
@@ -106,6 +112,8 @@ if (defined($opt_x)) {
 	
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
+	
+	$serviceType = "Conversion";
 
     }
     else {
@@ -118,16 +126,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "fromGenericSequencetoFASTA";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -146,15 +144,13 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Converting",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Converts a collection of GenericSequence moby objects into a FASTA object",
+				      description  => "Converts a collection of generic sequences into FASTA sequences",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [

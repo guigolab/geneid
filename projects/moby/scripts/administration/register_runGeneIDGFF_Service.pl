@@ -31,7 +31,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runGeneIDGFF
+	perl registerService.pl -x 2 -s runGeneIDGFF
 
 END_HELP
 
@@ -55,6 +55,11 @@ BEGIN {
     }
     
 }
+
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "runGeneIDGFF";
+my $serviceType = "GeneFinding";
 
 # MOBY Central configuration
 
@@ -110,6 +115,8 @@ if (defined($opt_x)) {
 
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
+
+	$serviceType = "Analysis";
 	
     }
     else {
@@ -122,16 +129,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s;
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -153,10 +150,10 @@ print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "GeneFinding",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Ab initio gene prediction tool - Return the output predictions in GFF format.",
+				      description  => "Ab initio gene prediction tool that returns the gene predictions in GFF format.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [

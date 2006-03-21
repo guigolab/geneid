@@ -56,6 +56,11 @@ BEGIN {
     
 }
 
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "runSGP2GFF";
+my $serviceType = "GeneFinding";
+
 # MOBY Central configuration
 
 # Default registry server is Chirimoyo in Malaga
@@ -106,6 +111,8 @@ if (defined($opt_x)) {
 
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
+	
+	$serviceType = "Analysis";
     }
     else {
 	print STDERR help;
@@ -117,16 +124,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "runSGP2GFF";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -148,10 +145,10 @@ print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "GeneFinding",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Ab initio gene prediction service. It runs geneid with synteny evidences to improve the accuracy of the results and returns the output predictions in GFF format. To generate the synteny evidences, use a service that provides tblastx.",
+				      description  => "Ab initio gene prediction service that runs geneid with synteny evidences and returns the output predictions in GFF format. To generate the synteny evidences, use a tblastx service",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [

@@ -56,6 +56,12 @@ BEGIN {
     
 }
 
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "fromFASTAToAminoAcidSequence";
+my $serviceType = "Converting";
+my @namespaces  = ();
+
 # MOBY Central configuration
 
 # Default registry server is Chirimoyo in Malaga
@@ -107,6 +113,7 @@ if (defined($opt_x)) {
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 	
+	$serviceType = "Conversion";
     }
     else {
 	print STDERR help;
@@ -118,16 +125,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "fromFASTAToAminoAcidSequence";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -146,22 +143,20 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Converting",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Converts aminoacid FASTA sequence into an aminoacid sequence",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', ["FASTA_AA" => \@namespaces]],
+							    ['sequence', ["FASTA_AA" => \@namespaces]],
 							   ],
 				      output		=> [
-							    ['sequences', [["AminoAcidSequence" => \@namespaces]]],
+							    ['sequence', ["AminoAcidSequence" => \@namespaces]],
 							   ],
 				      );
 

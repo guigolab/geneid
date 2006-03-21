@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 1 -s runMetaAlignment
+	perl registerService.pl -x 2 -s runMetaAlignment
 
 END_HELP
 
@@ -57,6 +57,12 @@ BEGIN {
     }
     
 }
+
+$::authURI      = 'genome.imim.es';
+$::contactEmail = 'akerhornou@imim.es';
+my $serviceName = $opt_s || "runMetaAlignment";
+my $serviceType = "Alignment";
+my @namespaces  = ();
 
 # MOBY Central configuration
 
@@ -109,6 +115,7 @@ if (defined($opt_x)) {
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 
+	$serviceType = "Analysis";
     }
     else {
 	print STDERR help;
@@ -120,16 +127,6 @@ else {
     print STDERR help;
     exit 0;
 }
-
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
-# Service Name
-
-my $serviceName = $opt_s || "runMetaAlignment";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
@@ -148,15 +145,13 @@ if ((defined $sia) && (@$sia > 0)) {
 
 print STDERR "Registrying service, $serviceName, $::URL from this server, $::URL ...\n";
 
-my @namespaces = ();
-
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "Alignment",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Meta-alignment produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files",
+				      description  => "Produces alignments of sequences of TF binding sites and returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files, specifying the 'log-likelihood' matrix mode.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
