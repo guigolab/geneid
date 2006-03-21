@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.33 2006-03-21 17:51:11 gmaster Exp $
+# $Id: ParsingServices.pm,v 1.1 2006-03-21 17:51:11 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -8,7 +8,7 @@
 
 =head1 NAME
 
-INB::GRIB::Services::UtilsServices  - Package for auxialiary services such as translating a set of GeneID predicitions or converting blast output into GeneID evidences GFFF format.
+INB::GRIB::Services::ParsingServices  - Package for Parsing services
 
 =head1 SYNOPSIS
 
@@ -75,7 +75,7 @@ methods. Internal methods are usually preceded with a _
 
 # Let the code begin...
 
-package INB::GRIB::Services::UtilsServices;
+package INB::GRIB::Services::ParsingServices;
 
 use strict;
 use warnings;
@@ -109,7 +109,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # @EXPORT = qw( &func1 &func2);
 # 
 our @EXPORT = qw(
-  &translateGeneIDGFFPredictions
+  &fromMetaAlignmentstoScoreMatrix
 );
 
 our $VERSION = '1.0';
@@ -120,13 +120,15 @@ my $_debug = 0;
 
 ###############################################################################
 
-=head2 _do_query_TranslateGeneIDGFF
 
- Title   : _do_query_TranslateGeneIDGFF
+
+=head2 _do_query_generateScoreMatrixFromMetaAlignment
+
+ Title   : _do_query_generateScoreMatrixFromMetaAlignment
          : 
          : private function (NOT EXPORTED)
          : 
- Usage   : my $query_response = _do_query_GeneID($query);
+ Usage   : my $query_response = _do_query_generateScoreMatrix($query);
          : 
          : donde:
          :   $query es un XML::DOM::Node que contiene el arbol xml que
@@ -147,64 +149,29 @@ my $_debug = 0;
 
 =cut
 
-sub _do_query_TranslateGeneIDGFF {
+sub _do_query_generateScoreMatrixFromMetaAlignment {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
     my $queryInput_DOM = shift @_;
-    
+
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
-    my $output_article_name = "peptides";
     
-    # Aqui escribimos las variables que necesitamos para la funcion. 
-    my $translation_table = "Standard (1)";
-
-    # Variables that will be passed to GeneID_call
-    my %sequences;
-    my %predictions;
+    # Aqui escribimos las variables que necesitamos para la funcion.
+    my $input_format;
+    my $output_format = "Distance_Matrix";
+    my $output_article_name = "matrix";
+    
+    # Variables that will be passed to generateScoreMatrix_call
+    
     my %parameters;
-    # Store the sequence identifier so we can match the GFF object identifier with the sequence object identifier
-    # If they don't match, this will break the code !!
-    # So return an exception in that case
-    my $sequenceIdentifier;
-    my $GFF_sequenceIdentifier;
-    my $predictions_gff_str;
-    
-    my $queryID  = getInputID ($queryInput_DOM);
-    my @articles = getArticles($queryInput_DOM);
-    
+    my $input_data = [];
+    my $queryID    = getInputID ($queryInput_DOM);
+    my @articles   = getArticles($queryInput_DOM);
+    my $namespace = "";
+
     # Get the parameters
     
-    ($translation_table) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "translation table");
-    if (not defined $translation_table) {
-	# Default is the eukaryotic translation table
-	$translation_table = "Standard (1)";
-    }
-    elsif (! (($translation_table eq "Standard (1)") || ($translation_table eq "Bacterial (11)"))) {
-	my $note = "translation table parameter, '$translation_table', not accepted, should be ['Standard (1)','Bacterial (11)']";
-	print STDERR "$note\n";
-	my $code = "222";
-	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => "translation table",
-								  code       => $code,
-								  type       => 'error',
-								  queryID    => $queryID,
-								  message    => "$note",
-								  );
-	push (@$moby_exceptions, $moby_exception);
-	
-	# Return an empty moby data object, as well as an exception telling why nothing got returned
-	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-	return ($MOBY_RESPONSE, $moby_exceptions);
-    }
-    
-    # Add the parsed parameters in a hash table
-    
-    if ($_debug) {
-	print STDERR "translation table, $translation_table\n";
-    }
-
-    $parameters{translation_table} = $translation_table;
+    # no parameter !
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {       
@@ -213,7 +180,7 @@ sub _do_query_TranslateGeneIDGFF {
 	# y su texto xml. 
 	
 	my ($articleName, $DOM) = @{$article}; # get the named article
-
+	
 	if ($_debug) {
 	    print STDERR "processing article, $articleName...\n";
 	}
@@ -222,14 +189,14 @@ sub _do_query_TranslateGeneIDGFF {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 
-	if (isCollectionArticle ($DOM)) {
-	    # collection input is not allowed
+	if (isSimpleArticle ($DOM)) {
+	    # simple input is not allowed
 	    
-	    my $note = "Received a collection input article instead of a simple";
+	    my $note = "Received a simple input article instead of a collection";
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    my $moby_exception = INB::Exceptions::MobyException->new (
-								      refElement => "$articleName",
+								      refElement => "similarity_results",
 								      code       => $code,
 								      type       => 'error',
 								      queryID    => $queryID,
@@ -239,64 +206,26 @@ sub _do_query_TranslateGeneIDGFF {
 	    
 	    # Return an empty moby data object, as well as an exception telling why nothing got returned
 	    
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	
-	if ($articleName =~ /sequence/i) {
-	    
-	    if ($_debug) {
-		print STDERR "\"sequence\" tag is a simple article...\n";
-	    }
-	    
-	    ($sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
-	    if (! defined $sequenceIdentifier) {
-		$sequenceIdentifier = "";
-	    }
-
-	    # Validate the type
-	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
-	    if ((! defined $rightType) || !$rightType) {
-		my $note = "Expecting a DNASequence object, and receiving a $inputDataType object";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "$articleName",
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
-		
-		# Empty response
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-		return ($MOBY_RESPONSE, $moby_exceptions);
-	    }
-	    
-	    %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
-	    
-	} # End parsing sequences article tag
+	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input
 	
-	if ($articleName eq "geneid_predictions") {
+	if ((isCollectionArticle ($DOM)) || (defined ($articleName) && ($articleName eq "similarity_results"))) {
 	    
 	    if ($_debug) {
-		print STDERR "\"geneid_predictions\" tag is a simple article...\n";
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
 	    
-	    ($GFF_sequenceIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
-	    if (! defined $GFF_sequenceIdentifier) {
-		$GFF_sequenceIdentifier = "";
-	    }
-	    
-	    if ((not (defined ($GFF_sequenceIdentifier))) || ($GFF_sequenceIdentifier eq "")) {
-		my $note = "Can not parsed the sequence identifier the GFF is attach to!\n";
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Meta_Alignment_Text");
+	    if (!$rightType) {
+		my $note = "Expecting a Meta_Alignment_Text object, and receiving a $inputDataType object";
 		print STDERR "$note\n";
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "geneid_predictions",
+									  refElement => 'similarity_results',
 									  code       => $code,
 									  type       => 'error',
 									  queryID    => $queryID,
@@ -304,48 +233,36 @@ sub _do_query_TranslateGeneIDGFF {
 									  );
 		push (@$moby_exceptions, $moby_exception);
 		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
-	    
-	    if ($_debug) {
-		print STDERR "parsed the following sequence identifier, $GFF_sequenceIdentifier\n";
-	    }
-	    
-	    $predictions_gff_str = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "GFF");
 
-	    if ((! defined $predictions_gff_str) || ($predictions_gff_str eq "")) {
-		my $note = "can't parse any GeneID predictions...\n";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "geneid_predictions",
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
+	    my @inputs_article_DOMs = getCollectedSimples ($DOM);
+	    foreach my $input_DOM (@inputs_article_DOMs) {
+		my $input = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($input_DOM, "Meta_Alignment_Text");
+		if ((not defined $input) || (length ($input) < 1)) {
+		    print STDERR "Error, can't parse any input!!\n";
+		    exit 0;
+		}
 		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-		return ($MOBY_RESPONSE, $moby_exceptions);
+		if ($_debug) {
+		    print STDERR "input, $input\n";
+		}
+		
+		push (@$input_data, $input);
+		
 	    }
-	    
-	    if ($_debug) {
-		print STDERR "predictions in GFF format:\n$predictions_gff_str\n";
-	    }
-	    
-	} # End parsing predictionss article tag
+	}	
 	
     } # Next article
-
-    if ($sequenceIdentifier ne $GFF_sequenceIdentifier) {
-	my $note = "The identifiers of the input articles don't match each other. Make sure they have the same article identifier.";
+    
+    if (@$input_data < 1) {
+	my $note = "can't parse any pairwise similarity data...\n";
 	print STDERR "$note\n";
-	print STDERR "sequence identifier, $sequenceIdentifier\n";
-	print STDERR "GFF identifier, $GFF_sequenceIdentifier\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "similarity_results",
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -353,85 +270,45 @@ sub _do_query_TranslateGeneIDGFF {
 								  );
 	push (@$moby_exceptions, $moby_exception);
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    # Add the predictions data into a hash table
-    $predictions{$sequenceIdentifier} = $predictions_gff_str;
-
-    # Check that we have parsed properly the sequences and the predictions
-    
-    if ((keys (%sequences)) == 0) {
-	my $note = "can't parse any sequences...\n";
-	print STDERR "$note\n";
-	my $code = "201";
-	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => "sequence",
-								  code       => $code,
-								  type       => 'error',
-								  queryID    => $queryID,
-								  message    => "$note",
-								  );
-	push (@$moby_exceptions, $moby_exception);
-	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	return ($MOBY_RESPONSE, $moby_exceptions);
-    }
-    
-    if ((keys (%predictions)) == 0) {
-	my $note = "can't parse any GeneID predictions...\n";
-	print STDERR "$note\n";
-	my $code = "201";
-	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => "geneid_predictions",
-								  code       => $code,
-								  type       => 'error',
-								  queryID    => $queryID,
-								  message    => "$note",
-								  );
-	push (@$moby_exceptions, $moby_exception);
-	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	return ($MOBY_RESPONSE, $moby_exceptions);
-    }
-    
-    # Validate the sequence id and GFF sequence id matches
-    
-    # ...
-    
-    # Una vez recogido todos los parametros necesarios, llamamos a 
-    # la funcion que nos devuelve el report.
-    
-    my ($fasta_sequences, $moby_exceptions_tmp) = TranslateGeneIDPredictions_call (sequences  => \%sequences, predictions  => \%predictions, queryID => $queryID, parameters => \%parameters);
+    my ($matrix_text, $moby_exceptions_tmp) = generateScoreMatrix_call (similarity_results  => $input_data, queryID => $queryID, parameters => \%parameters);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
-    # la podriamos realizar en una funcion a parte si fuese compleja.  
+    # la podriamos realizar en una funcion a parte si fuese compleja.
     
-    my $output_object_type  = "AminoAcidSequence";
-    my $namespace = "";
-    
-    if (not defined $fasta_sequences) {
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+    if (defined $matrix_text) {
+	
+	# Build the Moby Matrix object
+	
+	my $output_object = INB::GRIB::Utils::CommonUtilsSubs->convert_tabularScoreMatrix_into_MobyMatrix ($matrix_text, "Distance_Matrix", "Float");
+	
+        if ($_debug) {
+	    print STDERR "Matrix moby object,\n";
+	    print STDERR "$output_object\n";
+	}
+
+        $MOBY_RESPONSE = simpleResponse($output_object, $output_article_name, $queryID);
     }
     else {
-	my $aminoacid_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type, $namespace);
-	
-	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
-	# volver a encapsularlo en un objeto biomoby de respuesta. Pero 
-	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
-	# una respuesta compleja (de verdad, esta era simple ;) llamariamos 
-	# a collection response. 
-	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
-	# el mismo que el de la query. 
-	
-	$MOBY_RESPONSE = collectionResponse($aminoacid_objects, $output_article_name, $queryID);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
     }
+
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
+    # a collection response. 
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
+    # el mismo que el de la query.
     
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
+
 
 
 #################################
@@ -439,9 +316,9 @@ sub _do_query_TranslateGeneIDGFF {
 #################################
 
 
-=head2 translateGeneIDGFFPredictions
+=head2 fromMetaAlignmentstoScoreMatrix
 
- Title   : translateGeneIDGFFPredictions
+ Title   : fromMetaAlignmentstoScoreMatrix
  Usage   : Esta función está pensada para llamarla desde un cliente SOAP. 
          : No obstante, se recomienda probarla en la misma máquina, antes 
          : de instalar el servicio. Para ello, podemos llamarla de la 
@@ -480,13 +357,13 @@ sub _do_query_TranslateGeneIDGFF {
 
 =cut
 
-sub translateGeneIDGFFPredictions {
+sub fromMetaAlignmentsToScoreMatrix {
     
     # El parametro $message es un texto xml con la peticion.
-    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+    my ($caller, $message) = @_; # get the incoming MOBY query XML
 
     if ($_debug) {
-	print STDERR "processing Moby translateGeneIDGFFPredictions query...\n";
+	print STDERR "processing Moby fromMetaAlignmentsToScoreMatrix query...\n";
     }
 
     # Hasta el momento, no existen objetos Perl de BioMoby paralelos 
@@ -506,7 +383,7 @@ sub translateGeneIDGFFPredictions {
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
     my $moby_logger     = get_logger ("MobyServices");
-    my $serviceName     = "translateGeneIDGFFPredictions";
+    my $serviceName     = "fromMetaAlignmentsToScoreMatrix";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput (@queries){
@@ -520,7 +397,7 @@ sub translateGeneIDGFFPredictions {
 	    print STDERR "query text: $query_str\n";
 	}
 	
-	my ($query_response, $moby_exceptions_tmp) = _do_query_TranslateGeneIDGFF ($queryInput);
+	my ($query_response, $moby_exceptions_tmp) = _do_query_generateScoreMatrixFromMetaAlignment ($queryInput);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
