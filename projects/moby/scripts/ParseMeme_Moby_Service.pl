@@ -72,7 +72,7 @@ my $_debug = 0;
 #
 ##################################################################
 
-my $serviceName = "parseMotifMatricesfromMEME";
+my $serviceName = "parseMotifMatricesFromMEME";
 my $articleName = "meme_predictions";
 $::authURI = 'genome.imim.es';
 
