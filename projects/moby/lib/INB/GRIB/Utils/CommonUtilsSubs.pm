@@ -571,8 +571,48 @@ sub validateDataType {
 		}
 	    }
 
-	    if ($specifiedType =~ /FASTA/) {
-		if ($inputDataType =~ /FASTA/) {
+	    if ($specifiedType eq "FASTA") {
+		if ($inputDataType =~ /^FASTA/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType eq "FASTA_NA") {
+		if ($inputDataType eq "FASTA_NA") {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType eq "FASTA_NA_multi") {
+		if ($inputDataType =~ /^FASTA_NA/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType eq "FASTA_AA") {
+		if ($inputDataType eq "FASTA_AA") {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType eq "FASTA_AA_multi") {
+		if ($inputDataType =~ /^FASTA_AA/) {
 		    $rightType = 1;
 		}
 		else {
