@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.18 2006-03-16 16:07:02 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.19 2006-03-21 17:51:55 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -296,7 +296,7 @@ sub _do_query_SGP2 {
 		
 		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "BLAST-Text");
 		if (!$rightType) {
-		    my $note = "Expecting a Blast-Text object, and receiving a $inputDataType object";
+		    my $note = "Expecting a BLAST-Text object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
@@ -316,7 +316,7 @@ sub _do_query_SGP2 {
 		    # print STDERR "type is fine\n";
 		}
 		
-	    	$tblastx_output = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "Blast-Text");
+	    	$tblastx_output = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "BLAST-Text");
 		
 		if (length ($tblastx_output) < 1) {
 		    my $note = "Couldn't parse any tblastx data";
