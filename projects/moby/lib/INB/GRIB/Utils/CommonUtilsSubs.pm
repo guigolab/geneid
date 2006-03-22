@@ -582,7 +582,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "FASTA_NA") {
-		if ($inputDataType eq "FASTA_NA") {
+		if ($inputDataType =~ /FASTA_NA$/) {
 		    $rightType = 1;
 		}
 		else {
@@ -592,7 +592,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "FASTA_NA_multi") {
-		if ($inputDataType =~ /^FASTA_NA/) {
+		if ($inputDataType =~ /FASTA_NA/) {
 		    $rightType = 1;
 		}
 		else {
@@ -602,7 +602,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "FASTA_AA") {
-		if ($inputDataType eq "FASTA_AA") {
+		if ($inputDataType =~ /FASTA_AA$/) {
 		    $rightType = 1;
 		}
 		else {
@@ -612,7 +612,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "FASTA_AA_multi") {
-		if ($inputDataType =~ /^FASTA_AA/) {
+		if ($inputDataType =~ /FASTA_AA/) {
 		    $rightType = 1;
 		}
 		else {
@@ -620,7 +620,7 @@ sub validateDataType {
 		    return (0, $inputDataType);
 		}
 	    }
-
+	    
 	    if (($specifiedType eq "BLAST-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
 		if ($inputDataType =~ /BLAST-Text|NCBI_BLAST_Text|WU_BLAST_Text/) {
 		    $rightType = 1;
@@ -692,7 +692,7 @@ sub validateDataType {
 	    }
 
 	    if ($specifiedType eq "Meta_Alignment_Text") {
-		if ($inputDataType =~ /^Meta_Alignment_Text$/) {
+		if ($inputDataType =~ /Meta_Alignment_Text$/) {
 		    $rightType = 1;
 		}
 		else {
@@ -702,7 +702,7 @@ sub validateDataType {
 	    }
 	    
 	    if ($specifiedType eq "MEME_Text") {
-		if ($inputDataType =~ /^MEME_Text$/) {
+		if ($inputDataType =~ /MEME_Text$/) {
 		    $rightType = 1;
 		}
 		else {
