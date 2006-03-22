@@ -35,6 +35,10 @@ use INB::GRIB::Services::PromoterExtractionServices;
 use INB::GRIB::Services::MatScanServices;
 use INB::GRIB::Services::MetaAlignmentServices;
 use INB::GRIB::Services::MemeServices;
+use INB::GRIB::Services::ParsingServices;
+use INB::GRIB::Services::ConversionServices;
+
+use INB::GRIB::Services::OldServices;
 ###############################################################################
 
 sub daemonize {
@@ -112,28 +116,52 @@ $x->on_action(sub {
 $x->dispatch_with({
     'http://biomoby.org/#runGeneID'    => 'INB::GRIB::Services::GeneIDServices',
     'http://biomoby.org/#runGeneIDGFF' => 'INB::GRIB::Services::GeneIDServices',
+    
     'http://biomoby.org/#runSGP2GFF'   => 'INB::GRIB::Services::SGP2Services',
+    
     'http://biomoby.org/#runGOstat'    => 'INB::GRIB::Services::GOstatServices',
+
     'http://biomoby.org/#translateGeneIDGFFPredictions' => 'INB::GRIB::Services::UtilsServices',
+    
     'http://biomoby.org/#getUpstreamSeqfromEnsembl'     => 'INB::GRIB::Services::PromoterExtractionServices',
+    
     'http://biomoby.org/#runMatScanGFF'                 => 'INB::GRIB::Services::MatScanServices',
     'http://biomoby.org/#runMatScanGFFCollection'       => 'INB::GRIB::Services::MatScanServices',
-    'http://biomoby.org/#runMatScanGFFCollectionVsInputMatrix'   => 'INB::GRIB::Services::MatScanServices',
     'http://biomoby.org/#runMatScanGFFCollectionVsInputMatrices' => 'INB::GRIB::Services::MatScanServices',
+
     'http://biomoby.org/#runMetaAlignment'              => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMetaAlignmentGFF'           => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiMetaAlignment'         => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiMetaAlignmentGFF'      => 'INB::GRIB::Services::MetaAlignmentServices',
-    'http://biomoby.org/#fromGenericSequencetoFASTA'    => 'INB::GRIB::Services::UtilsServices',
+    'http://biomoby.org/#runMultiPairwiseMetaAlignment'          => 'INB::GRIB::Services::MetaAlignmentServices',
+    'http://biomoby.org/#runMultiPairwiseMetaAlignmentGFF'       => 'INB::GRIB::Services::MetaAlignmentServices',
+
+    'http://biomoby.org/#fromGenericSequencetoFASTA'             => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA'   => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromFASTAtoDNASequenceCollection'       => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromFASTAtoAminoAcidSequenceCollection' => 'INB::GRIB::Services::UtilsServices',
     'http://biomoby.org/#fromFASTAtoGenericSequenceCollection'   => 'INB::GRIB::Services::UtilsServices',
-    'http://biomoby.org/#generateScoreMatrix'           => 'INB::GRIB::Services::UtilsServices',
-    'http://biomoby.org/#fromMetaAlignmentstoScoreMatrix'        => 'INB::GRIB::Services::UtilsServices',
-    'http://biomoby.org/#runMemeHTML'                   => 'INB::GRIB::Services::MemeServices',
-    'http://biomoby.org/#runMemeText'                   => 'INB::GRIB::Services::MemeServices',
-    'http://biomoby.org/#parseMotifMatricesfromMEME'    => 'INB::GRIB::Services::MemeServices',
+    
+    'http://biomoby.org/#fromGenericSequenceToFASTA'             => 'INB::GRIB::Services::ConversionServices',
+    'http://biomoby.org/#fromGenericSequenceCollectionToFASTA'   => 'INB::GRIB::Services::ConversionServices',
+    'http://biomoby.org/#fromFASTAToDNASequence'                 => 'INB::GRIB::Services::ConversionServices',
+    'http://biomoby.org/#fromFASTAToDNASequenceCollection'       => 'INB::GRIB::Services::ConversionServices',
+    'http://biomoby.org/#fromFASTAToAminoAcidSequence          ' => 'INB::GRIB::Services::ConversionServices',
+    'http://biomoby.org/#fromFASTAToAminoAcidSequenceCollection' => 'INB::GRIB::Services::ConversionServices',
+    'http://biomoby.org/#fromFASTAToGenericSequenceCollection'   => 'INB::GRIB::Services::ConversionServices',
+    
+    'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
+    'http://biomoby.org/#fromMetaAlignmentsToScoreMatrix'        => 'INB::GRIB::Services::ParsingServices',
+    'http://biomoby.org/#fromMetaAlignmentsToScoreTextMatrix'    => 'INB::GRIB::Services::ParsingServices',
+    
+    'http://biomoby.org/#runMemeHTML'                            => 'INB::GRIB::Services::MemeServices',
+    'http://biomoby.org/#runMemeText'                            => 'INB::GRIB::Services::MemeServices',
+    
+    'http://biomoby.org/#parseMotifMatricesFromMEME'             => 'INB::GRIB::Services::ParsingServices',
+    
+    'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
+    'http://biomoby.org/#parseMotifMatricesfromMEME'             => 'INB::GRIB::Services::OldServices',
+    'http://biomoby.org/#runMatScanGFFCollectionVsInputMatrix'   => 'INB::GRIB::Services::OldServices',
 });
 $x->handle;
 
