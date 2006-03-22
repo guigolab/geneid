@@ -87,10 +87,10 @@ my $datasource = "EMBL";
 
 my $serviceName;
 if ($sequence_type eq "DNASequence") {
-    $serviceName = "fromFASTAtoDNASequenceCollection";
+    $serviceName = "fromFASTAToDNASequenceCollection";
 }
 elsif ($sequence_type eq "AminoAcidSequence") {
-    $serviceName = "fromFASTAtoAminoAcidSequenceCollection";
+    $serviceName = "fromFASTAToAminoAcidSequenceCollection";
 }
 else {
     print STDERR "sequence type, $sequence_type, unknown!\n";
@@ -230,11 +230,11 @@ my $fasta_sequences = qx/cat $in_file/;
 # </String>
 
 my $fasta_xml = <<PRT;
-<FASTA namespace="$datasource" id="">
+<FASTA_NA_multi namespace="$datasource" id="">
 <![CDATA[
 $fasta_sequences
 ]]>
-</FASTA>
+</FASTA_NA_multi>
 PRT
 
 if ($_debug) {
