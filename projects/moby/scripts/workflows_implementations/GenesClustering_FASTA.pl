@@ -1,11 +1,14 @@
 #!/usr/local/bin/perl -w
 
+# Disclaimer ....
+
 ##################################################################
 #
 # GenericSequence to FASTA conversion Moby Service Client
 #
 ##################################################################
 
+# For those who don't have it already in their PERL5LIB
 use lib "/home/ug/arnau/lib/biomoby.0.8.2a/Perl";
 
 use strict;
@@ -236,18 +239,18 @@ my $input_xml;
 
 if ($input_type eq "FASTA") {
 
-    # fromFASTAtoDNASequenceCollection
+    # fromFASTAToDNASequenceCollection
 
     my $input = qx/cat $in_file/;
     
     $input_xml = <<PRT;
-<FASTA namespace="$namespace" id="">
-<String articleName="content">
+<FASTA_NA_multi namespace="$namespace" id="">
+<String id="" namespace="" articleName="content">
 <![CDATA[
 $input
 ]]>
 </String>
-</FASTA>
+</FASTA_NA_multi>
 PRT
 
 }
@@ -259,7 +262,7 @@ else {
     
     $input_xml = <<PRT;
 <text-formatted namespace="$namespace" id="">
-<String articleName="content">
+<String id="" namespace="" articleName="content">
 <![CDATA[
 $input
 ]]>
@@ -277,7 +280,7 @@ if ($_debug) {
 
 if ($input_type eq "FASTA") {
 	# fromFASTAtoDNASequenceCollection
-	$serviceName = "fromFASTAtoDNASequenceCollection";
+	$serviceName = "fromFASTAToDNASequenceCollection";
 }
 else {
 	# getUpstreamSeqfromEnsembl
@@ -286,7 +289,7 @@ else {
 
 # Get the parameters from the configuration file
 
-my $authURI           = $parameters{$serviceName}->{authURI} || die "no URI\n";
+my $authURI           = $parameters{$serviceName}->{authURI} || die "no URI for $serviceName\n";
 my $articleName       = $parameters{$serviceName}->{articleName} || die "no article name\n";
 my $species_xml           = "";
 my $upstream_length_xml   = "";
@@ -403,18 +406,18 @@ if ($_debug) {
 
 print STDERR "First step done\n\n";
 
-# runMultiMetaAlignmentGFF & runMultiMetaAlignment
+# runMultiPairwiseMetaAlignmentGFF & runMultiPairwiseMetaAlignment
 
 print STDERR "Second step, making the pairwise alignments of the binding site maps...\n";
 print STDERR "Executing meta-alignment...\n";
 
-# runMultiMetaAlignmentGFF first
+# runMultiPairwiseMetaAlignmentGFF first
 
 # Run this service just to save the results in GFF format
 
 if (defined $output_dir) {
 
-    $serviceName = "runMultiMetaAlignmentGFF";
+    $serviceName = "runMultiPairwiseMetaAlignmentGFF";
     $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
     $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
     
@@ -446,9 +449,9 @@ if ($_debug) {
 	print STDERR ".\n";
 }
 
-# Then runMultiMetaAlignment
+# Then runMultiPairwiseMetaAlignment
 
-$serviceName = "runMultiMetaAlignment";
+$serviceName = "runMultiPairwiseMetaAlignment";
 $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
 $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
 
@@ -471,9 +474,9 @@ if (hasFailed ($moby_response)) {
     exit 1;
 }
 
-$input_xml = parseResults ($moby_response, "text-formatted");
+$input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
 if (defined $output_dir) {
-  saveResults ($moby_response, "text-formatted", "Meta", $output_dir);
+  saveResults ($moby_response, "Meta_Alignment_Text", "Meta", $output_dir);
 }
 
 if ($_debug) {
@@ -484,11 +487,11 @@ if ($_debug) {
 
 print STDERR "Second step done!\n\n";
 
-# generateScoreMatrix
+# fromMetaAlignmentsToTextScoreMatrix
 
 print STDERR "Third step, generating a score matrix by parsing meta-alignment data...\n";
 
-$serviceName = "generateScoreMatrix";
+$serviceName = "fromMetaAlignmentsToTextScoreMatrix";
 $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
 $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
 
