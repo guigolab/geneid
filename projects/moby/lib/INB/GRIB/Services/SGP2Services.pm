@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.19 2006-03-21 17:51:55 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.20 2006-03-22 15:44:43 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -267,26 +267,8 @@ sub _do_query_SGP2 {
 		# Get the sequence
 		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
 		
-		if (keys (%sequences) == 0) {
-		    my $note = "Couldn't parse any sequence";
-		    print STDERR "$note\n";
-		    my $code = "201";
-		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "sequence",
-									      code       => $code,
-									      type       => 'error',
-									      queryID    => $queryID,
-									      message    => "$note",
-									      );
-		    push (@$moby_exceptions, $moby_exception);
-		    
-		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-		    return ($MOBY_RESPONSE, $moby_exceptions);
-		}
-		
 	    }
-	    elsif (($articleName eq "tblastx_report") || ($articleName =~ /tblastx_report/i)) {
+	    elsif (($articleName eq "tblastx_report") || ($articleName =~ /tblastx/i)) {
 		
 		if ($_debug) {
 		    print STDERR "parsing the article \"tblastx\"...\n";
@@ -318,31 +300,49 @@ sub _do_query_SGP2 {
 		
 	    	$tblastx_output = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "BLAST-Text");
 		
-		if (length ($tblastx_output) < 1) {
-		    my $note = "Couldn't parse any tblastx data";
-		    print STDERR "$note\n";
-		    my $code = "201";
-		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "tblastx_report",
-									      code       => $code,
-									      type       => 'error',
-									      queryID    => $queryID,
-									      message    => "$note",
-									      );
-		    push (@$moby_exceptions, $moby_exception);
-		    
-		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-		    return ($MOBY_RESPONSE, $moby_exceptions);
-		}
 	    }
 	} # Next article
+	
+	# Check we have parsed the inputs
+	
+	if ((keys (%sequences)) == 0) {
+	    my $note = "can't parse any sequence...\n";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "sequence",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+	
+	if (length ($tblastx_output) < 1) {
+	    my $note = "Couldn't parse any tblastx report";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "tblastx_report",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
 	
 	# Una vez recogido todos los parametros necesarios, llamamos a 
 	# la funcion que nos devuelve el report. 	
 
-	# Set up the temporary file here and give it as a parameter or give a hash of sequence entries, so we can submit multiple sequences...
-	
 	my ($report, $moby_exceptions_tmp) = SGP2_call (sequences  => \%sequences, tblastx_output => $tblastx_output, format => $_format, queryID => $queryID, parameters => \%parameters);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
