@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.70 2006-03-14 10:17:26 gmaster Exp $
+# $Id: Factory.pm,v 1.71 2006-03-22 11:25:16 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1405,7 +1405,7 @@ sub MEME_call {
     my $background_order      = $parameters->{background_order};
 
     # Llama a Meme en local
-    my $_meme_dir   = "/usr/local/molbio/Install/meme-3.5.0";
+    my $_meme_dir   = "/usr/local/molbio/Install/meme-3.5.2";
     my $_meme_bin  = "bin/meme";
     my $_meme_args = "-nostatus -time 160 -maxiter 20 ";
     
@@ -1431,7 +1431,12 @@ sub MEME_call {
 	print STDERR "format, $format\n";
     }
 
-    if ($format =~ /text/i) {
+    if ($format =~ /meme.text/i) {
+
+	if ($_debug) {
+	    print STDERR "MEME report will be text formatted\n";
+	}
+
 	$_meme_args .= "-text ";
     }
 
