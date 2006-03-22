@@ -43,7 +43,7 @@ Usage:
 	-t sequence format type (xml or fasta)
 	
 Examples using some combinations:
-	perl GenericSequencetoFASTA_Moby_service.pl -x 1 -s fromGenericSequencetoFASTA -f /home/ug/arnau/data/AC005155.fa -t fasta
+	perl GenericSequencetoFASTA_Moby_service.pl -x 2 -s fromGenericSequenceToFASTA -f /home/ug/arnau/data/AC005155.fa -t fasta
 
 END_HELP
 
