@@ -111,13 +111,13 @@ my $runSGP2GFF_control_file                 = "Hsap_BTK.msk.runSGP2GFF.control";
 my $translateGeneIDGFFPredictions_control_file = "Hsap_BTK.msk.GeneIDGFF.translateGeneIDGFFPredictions.control";
 my $getUpstreamSeqfromEnsembl_control_file  = "geneIds.lst.getUpstreamSeqfromEnsembl.control";
 my $runGOstat_control_file                  = "mut1_downreg.fbgn.runGOstat.control";
-my $fromGenericSequencetoFASTA_control_file = "Hsap_BTK.msk.fromGenericSequencetoFASTA.control";
-my $fromGenericSequenceCollectiontoFASTA_control_file = "Hsap_BTK.msk.fromGenericSequenceCollectiontoFASTA.control";
+my $fromGenericSequenceToFASTA_control_file = "Hsap_BTK.msk.fromGenericSequenceToFASTA.control";
+my $fromGenericSequenceCollectionToFASTA_control_file = "Hsap_BTK.msk.fromGenericSequenceCollectionToFASTA.control";
 my $runMatScanGFF_control_file              = "ENSG00000197785.runMatScanGFF.control";
 my $runMatScanGFFCollection_control_file    = "ENSG00000197785.runMatScanGFFCollection.control";
 my $runMetaAlignment_control_file           = "ENSG00000197785.runMetaAlignment.control";
 my $runMetaAlignmentGFF_control_file        = "ENSG00000197785.runMetaAlignmentGFF.control";
-my $fromFASTAtoDNASequenceCollection_control_file = "ENSG00000197785.fromFASTAtoDNASequenceCollection.control";
+my $fromFASTAToDNASequenceCollection_control_file = "ENSG00000197785.fromFASTAToDNASequenceCollection.control";
 my $generateScoreMatrix_control_file        = "mut1_downreg.fbgn.ScoresMatrix.control";
 
 ##################################################################
@@ -351,11 +351,11 @@ if (defined $service) {
     }
 }
 
-# Execute fromGenericSequencetoFASTA Web service
+# Execute fromGenericSequenceToFASTA Web service
 
-print  "\ntesting fromGenericSequencetoFASTA...\n\n";
+print  "\ntesting fromGenericSequenceToFASTA...\n\n";
 
-$service = MobyServiceInstantiation ($C, "fromGenericSequencetoFASTA", $AUTH);
+$service = MobyServiceInstantiation ($C, "fromGenericSequenceToFASTA", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
@@ -367,10 +367,10 @@ if (defined $service) {
 
     print $results_fh "$result\n";
 
-    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequencetoFASTA_control_file $results_file/;
+    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequenceToFASTA_control_file $results_file/;
 
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
-	print STDERR "fromGenericSequencetoFASTA service failed!\n";
+	print STDERR "fromGenericSequenceToFASTA service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
 
 	close $results_fh;
@@ -379,18 +379,18 @@ if (defined $service) {
     }
     else {
 
-	print  "fromGenericSequencetoFASTA okay...\n";
+	print  "fromGenericSequenceToFASTA okay...\n";
 
 	close $results_fh;
 	unlink $results_file;
     }
 }
 
-# Execute fromGenericSequenceCollectiontoFASTA Web service
+# Execute fromGenericSequenceCollectionToFASTA Web service
 
-print  "\ntesting fromGenericSequenceCollectiontoFASTA...\n\n";
+print  "\ntesting fromGenericSequenceCollectionToFASTA...\n\n";
 
-$service = MobyServiceInstantiation ($C, "fromGenericSequenceCollectiontoFASTA", $AUTH);
+$service = MobyServiceInstantiation ($C, "fromGenericSequenceCollectionToFASTA", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
@@ -402,10 +402,10 @@ if (defined $service) {
 
     print $results_fh "$result\n";
 
-    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequenceCollectiontoFASTA_control_file $results_file/;
+    my @diff_results = qx/diff $control_data_dir\/$fromGenericSequenceCollectionToFASTA_control_file $results_file/;
 
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
-	print STDERR "fromGenericSequenceCollectiontoFASTA service failed!\n";
+	print STDERR "fromGenericSequenceCollectionToFASTA service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
 
 	close $results_fh;
@@ -414,7 +414,7 @@ if (defined $service) {
     }
     else {
 
-	print  "fromGenericSequenceCollectiontoFASTA okay...\n";
+	print  "fromGenericSequenceCollectionToFASTA okay...\n";
 
 	close $results_fh;
 	unlink $results_file;
@@ -563,11 +563,11 @@ if (defined $service) {
 
 }
 
-# Execute fromFASTAtoDNASequenceCollection Web service
+# Execute fromFASTAToDNASequenceCollection Web service
 
-print  "\ntesting fromFASTAtoDNASequenceCollection...\n\n";
+print  "\ntesting fromFASTAToDNASequenceCollection...\n\n";
 
-$service = MobyServiceInstantiation ($C, "fromFASTAtoDNASequenceCollection", $AUTH);
+$service = MobyServiceInstantiation ($C, "fromFASTAToDNASequenceCollection", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
@@ -579,10 +579,10 @@ if (defined $service) {
 
     print $results_fh "$result\n";
 
-    my @diff_results = qx/diff $control_data_dir\/$fromFASTAtoDNASequenceCollection_control_file $results_file/;
+    my @diff_results = qx/diff $control_data_dir\/$fromFASTAToDNASequenceCollection_control_file $results_file/;
 
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
-	print STDERR "fromFASTAtoDNASequenceCollection service failed!\n";
+	print STDERR "fromFASTAToDNASequenceCollection service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
 
 	close $results_fh;
@@ -591,7 +591,7 @@ if (defined $service) {
     }
     else {
 
-	print  "fromFASTAtoDNASequenceCollection okay...\n";
+	print  "fromFASTAToDNASequenceCollection okay...\n";
 
 	close $results_fh;
 	unlink $results_file;
