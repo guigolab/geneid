@@ -206,6 +206,16 @@ if ($REG->success) {
     
     print STDERR "See file, $rdf_file, for returned RDF document\n";
     
+    # Get the RDF document
+
+    my $rdf_document = $REG->RDF;
+    my $rdf_file = $serviceName . "_registration.rdf";
+    open RDF, ">$rdf_file" or die "can't rdf file, $rdf_file\n";
+    print RDF "$rdf_document";
+    close RDF;
+    
+    print STDERR "See file, $rdf_file, for returned RDF document\n";
+    
 } else {
     
     # The result is valid.
