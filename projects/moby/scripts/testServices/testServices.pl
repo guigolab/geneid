@@ -645,7 +645,7 @@ $service = MobyServiceInstantiation ($C, "runSGP2GFF", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
-						    ['sequences', $nucleotide_sequence_xml, 'tblastx', $tblastx_output_xml]
+						    ['sequence', $nucleotide_sequence_xml, 'tblastx_report', $tblastx_output_xml]
 						    ]
 				   );
 
