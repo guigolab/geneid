@@ -1,4 +1,5 @@
 <moby:GFF namespace='' id='Hsap_BTK'>
+<String namespace='' id='' articleName='content'>
 <![CDATA[
 ## gff-version 2
 ## date Wed Aug 10 12:21:50 2005
@@ -39,4 +40,5 @@ Hsap_BTK	sgp2_v1.0	Internal	62560	62669	 3.63	+	0	gene_6
 Hsap_BTK	sgp2_v1.0	Internal	66364	66458	12.62	+	1	gene_6
 Hsap_BTK	sgp2_v1.0	Terminal	66487	67766	271.19	+	2	gene_6
 ]]>
+</String>
 </moby:GFF>
