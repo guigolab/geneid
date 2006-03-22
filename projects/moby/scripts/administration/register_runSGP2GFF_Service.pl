@@ -60,6 +60,7 @@ $::authURI      = 'genome.imim.es';
 $::contactEmail = 'akerhornou@imim.es';
 my $serviceName = $opt_s || "runSGP2GFF";
 my $serviceType = "GeneFinding";
+my $category    = "moby";
 
 # MOBY Central configuration
 
@@ -149,7 +150,7 @@ my ($REG) = $Central->registerService(
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Ab initio gene prediction service that runs geneid with synteny evidences and returns the output predictions in GFF format. To generate the synteny evidences, use a tblastx service",
-				      category     => "moby",
+				      category     => $category,
 				      URL          => $::URL,
 				      input		=> [
 							    ['sequence', ["DNASequence" => []]],
