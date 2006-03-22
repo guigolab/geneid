@@ -1,4 +1,4 @@
-# $Id: ParsingServices.pm,v 1.2 2006-03-21 21:19:27 gmaster Exp $
+# $Id: ParsingServices.pm,v 1.3 2006-03-22 10:15:15 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -416,10 +416,26 @@ sub _do_query_MemeMotifMatrices {
 		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
-
-	    # Validation ...
-
-	    # ...
+	    
+	    # Validation input datatype
+	    
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "MEME_Text");
+	    if (!$rightType) {
+		my $note = "Expecting a MEME_Text object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => 'meme_predictions',
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
 	    
 	    $meme_predictions = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "MEME_Text");
 
@@ -443,7 +459,7 @@ sub _do_query_MemeMotifMatrices {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
     }

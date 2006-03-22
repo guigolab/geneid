@@ -692,7 +692,17 @@ sub validateDataType {
 	    }
 
 	    if ($specifiedType eq "Meta_Alignment_Text") {
-		if ($inputDataType =~ /Meta_Alignment_Text$/) {
+		if ($inputDataType =~ /^Meta_Alignment_Text$/) {
+		    $rightType = 1;
+		}
+		else {
+		    # Wrong input type
+		    return (0, $inputDataType);
+		}
+	    }
+	    
+	    if ($specifiedType eq "MEME_Text") {
+		if ($inputDataType =~ /^MEME_Text$/) {
 		    $rightType = 1;
 		}
 		else {
