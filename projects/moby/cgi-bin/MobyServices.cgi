@@ -152,7 +152,7 @@ $x->dispatch_with({
     
     'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
     'http://biomoby.org/#fromMetaAlignmentsToScoreMatrix'        => 'INB::GRIB::Services::ParsingServices',
-    'http://biomoby.org/#fromMetaAlignmentsToScoreTextMatrix'    => 'INB::GRIB::Services::ParsingServices',
+    'http://biomoby.org/#fromMetaAlignmentsToTextScoreMatrix'    => 'INB::GRIB::Services::ParsingServices',
     
     'http://biomoby.org/#runMemeHTML'                            => 'INB::GRIB::Services::MemeServices',
     'http://biomoby.org/#runMemeText'                            => 'INB::GRIB::Services::MemeServices',
