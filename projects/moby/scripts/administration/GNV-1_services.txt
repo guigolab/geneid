@@ -35,7 +35,7 @@
 * "fromFASTAtoAminoAcidSequenceCollection";
 
 				      serviceType  => "Converting",
-				      description  => "Converts a FASTA object into a collection of AminoAcidSequence moby objects",
+				      description  => "Converts aminoacid FASTA sequences into a collection of aminoacid sequences",
 				      input		=> [
 							    ['sequences', ["FASTA" => [] ]],
 							   ],
@@ -69,7 +69,7 @@
 * "runGeneIDGFF";
 
 				      serviceType  => "GeneFinding",
-				      description  => "Ab initio gene prediction tool - Returns the gene predictions in GFF format.",
+				      description  => "Ab initio gene prediction tool that returns the gene predictions in GFF format.",
 				      input		=> [
 							    ['sequence', ["DNASequence" => [] ]],
 							    ],
@@ -126,7 +126,7 @@
 * "translateGeneIDGFFPredictions";
 
 				      serviceType  => "Translating",
-				      description  => "Translate the GeneID gene predictions given in GFF format. Returns a set of aminoacid sequences",
+				      description  => "Translates the GeneID gene predictions, given in GFF format, into a set of aminoacid sequences",
 				      input	   => [
 						       ['sequence', ["DNASequence" => [] ]],
 						       ['geneid_predictions', ["GFF" => [] ]]

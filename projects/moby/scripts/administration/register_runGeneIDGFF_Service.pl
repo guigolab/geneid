@@ -116,7 +116,7 @@ if (defined($opt_x)) {
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 
-	$serviceType = "Analysis";
+	# $serviceType = "Analysis";
 	
     }
     else {
