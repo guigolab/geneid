@@ -32,7 +32,7 @@ return <<"END_HELP";
 Description: Execute MetaAlignment Moby services available from genome.imim.es
 Usage:
 
-    MetaAlignment_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
+    MetaAlignment_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {map file}
 	-h help
 	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 		<1> or Chirimoyo
@@ -40,7 +40,7 @@ Usage:
 		<3> or Inab
 		<4> or BioMoby
 	-s Service Name
-	-i Sequence(s) input file, in FASTA format - optional
+	-i Map input file, in GFF format - optional
 	
 Examples using some combinations:
 	perl MetaAlignment_Moby_Service.pl -x 1 -s runMetaAlignment

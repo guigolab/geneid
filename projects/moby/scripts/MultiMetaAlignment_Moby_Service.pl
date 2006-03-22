@@ -40,10 +40,10 @@ Usage:
 		<3> or Inab
 		<4> or BioMoby
 	-s Service Name
-	-i Sequence(s) input file, in FASTA format - optional
+	-i Maps input file, in GFF format - optional
 	
 Examples using some combinations:
-	perl MetaAlignment_Moby_Service.pl -x 1 -s runMetaAlignment
+	perl MetaAlignment_Moby_Service.pl -x 2 -s runMultiPairwiseMetaAlignment
 
 END_HELP
 
