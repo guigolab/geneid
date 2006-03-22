@@ -1,4 +1,4 @@
-# $Id: UtilsServices.pm,v 1.33 2006-03-21 17:51:11 gmaster Exp $
+# $Id: UtilsServices.pm,v 1.34 2006-03-22 16:54:07 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -363,7 +363,7 @@ sub _do_query_TranslateGeneIDGFF {
     # Check that we have parsed properly the sequences and the predictions
     
     if ((keys (%sequences)) == 0) {
-	my $note = "can't parse any sequences...\n";
+	my $note = "can't parse any sequence...\n";
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
