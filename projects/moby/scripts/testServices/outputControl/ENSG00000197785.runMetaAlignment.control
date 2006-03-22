@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'><moby:mobyContent moby:authority='genome.imim.es'><moby:serviceNotes>&lt;Notes&gt;Service execution succeeded&lt;/Notes&gt;</moby:serviceNotes>
         <moby:mobyData moby:queryID='8'>
-            <moby:Simple moby:articleName='meta_predictions'><moby:text-formatted namespace='' id='ENSG00000197785'>
+            <moby:Simple moby:articleName='meta_predictions'><moby:Meta_Alignment_Text namespace='' id='ENSG00000197785'>
 <String namespace='' id='' articleName='content'>
 <![CDATA[
 # meta_v1.1
@@ -28,7 +28,7 @@ V$GATA1_04:		 1926-1938	 :	 1926-1938 	8.08-8.08
 
 ]]>
 </String>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 </moby:Simple>
         </moby:mobyData>
         </moby:mobyContent></moby:MOBY>
