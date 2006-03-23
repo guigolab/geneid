@@ -478,247 +478,254 @@ sub validateDataType {
     my $rightType     = undef;
 
     eval {
-    
-    # input 
-    # * DOM containing articles we want to validate the type
-    # * the specified expected type
-
-    my @object_nodes = ();
-    
-    if ($DOM->nodeName =~ /collection/i) {
-	my @simple_nodes = getCollectedSimples ($DOM);
-	foreach my $simple_node (@simple_nodes) {
-	    # Get the object node
-	    my ($node) = $simple_node->getElementsByTagName ('*');
-	    push (@object_nodes, $node);
-	}
-    }
-    else {
-	# it is a simple - get directly the object node from the DOM
-	my ($node) = $DOM->getElementsByTagName ('*');
-	push (@object_nodes, $node);
-    }
-    
-    foreach my $node (@object_nodes) {
-
-	# must all match the specified type
 	
-	my $nodeType = $node->nodeType();
-	# should be already this type !!
-	if ($node->nodeType() == ELEMENT_NODE) {
-	    
-	    # That should be the object - Validate code is here!!
-	    
-	    $inputDataType = $node->nodeName;
-	    
-	    if ($specifiedType eq "GenericSequence") {
-		if ($inputDataType =~ /GenericSequence|AminoAcidSequence|AASequence|NucleotideSequence|DNASequence|RNASequence/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType eq "NucleotideSequence") {
-		if ($inputDataType =~ /NucleotideSequence|DNASequence|RNASequence/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType =~ /DNASequence/) {
-		if ($inputDataType =~ /DNASequence/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType =~ /RNASequence/) {
-		if ($inputDataType =~ /RNASequence/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType eq "AminoAcidSequence") {
-		if ($inputDataType =~ /AminoAcidSequence|AASequence/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
+	# input 
+	# * DOM containing articles we want to validate the type
+	# * the specified expected type
+	
+	my @object_nodes = ();
 
-	    if ($specifiedType =~ /AASequence/) {
-		if ($inputDataType =~ /AASequence/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-
-	    if ($specifiedType eq "FASTA") {
-		if ($inputDataType =~ /^FASTA/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
+	if ($DOM->nodeName =~ /collection/i) {
 	    
-	    if ($specifiedType eq "FASTA_NA") {
-		if ($inputDataType =~ /FASTA_NA$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
+	    my @simple_nodes = getCollectedSimples ($DOM);
 	    
-	    if ($specifiedType eq "FASTA_NA_multi") {
-		if ($inputDataType =~ /FASTA_NA/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
+	    foreach my $simple_node (@simple_nodes) {
+		# Get the object node
+		my ($node) = $simple_node->getElementsByTagName ('*');
+		push (@object_nodes, $node);
 	    }
-	    
-	    if ($specifiedType eq "FASTA_AA") {
-		if ($inputDataType =~ /FASTA_AA$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType eq "FASTA_AA_multi") {
-		if ($inputDataType =~ /FASTA_AA/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if (($specifiedType eq "BLAST-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
-		if ($inputDataType =~ /BLAST-Text|NCBI_BLAST_Text|WU_BLAST_Text/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType eq "GFF2") {
-		if ($inputDataType =~ /GFF2$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-
-	    if ($specifiedType eq "GFF3") {
-		if ($inputDataType =~ /GFF3$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-
-	    if ($specifiedType eq "GFF") {
-		if ($inputDataType =~ /GFF\d*$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType eq "MatrixFloat") {
-		if ($inputDataType =~ /MatrixFloat$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType eq "MatrixInteger") {
-		if ($inputDataType =~ /MatrixInteger$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-
-	    if ($specifiedType eq "Matrix") {
-		if ($inputDataType =~ /Matrix$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-
-	    if ($specifiedType eq "Meta_Alignment_Text") {
-		if ($inputDataType =~ /Meta_Alignment_Text$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    if ($specifiedType eq "MEME_Text") {
-		if ($inputDataType =~ /MEME_Text$/) {
-		    $rightType = 1;
-		}
-		else {
-		    # Wrong input type
-		    return (0, $inputDataType);
-		}
-	    }
-	    
-	    # ...
-	    
 	}
 	else {
-	    print STDERR "not an ELEMENT node...\n";
+	    # it is a simple - get directly the object node from the DOM
+	    
+	    my ($node) = $DOM->getElementsByTagName ('*');
+	    push (@object_nodes, $node);
 	}
-    }
-    
+	
+	if (@object_nodes < 1) {
+	    print STDERR "error - not a single simple element found!!!!\n";
+	    print STDERR "DOM,\n". $DOM->toString() . "\n";
+	}
+	
+	foreach my $node (@object_nodes) {
+	    
+	    # must all match the specified type
+	    
+	    my $nodeType = $node->nodeType();
+	    # should be already this type !!
+	    if ($node->nodeType() == ELEMENT_NODE) {
+		
+		# That should be the object - Validate code is here!!
+		
+		$inputDataType = $node->nodeName;
+		
+		if ($specifiedType eq "GenericSequence") {
+		    if ($inputDataType =~ /GenericSequence|AminoAcidSequence|AASequence|NucleotideSequence|DNASequence|RNASequence/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "NucleotideSequence") {
+		    if ($inputDataType =~ /NucleotideSequence|DNASequence|RNASequence/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType =~ /DNASequence/) {
+		    if ($inputDataType =~ /DNASequence/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType =~ /RNASequence/) {
+		    if ($inputDataType =~ /RNASequence/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "AminoAcidSequence") {
+		    if ($inputDataType =~ /AminoAcidSequence|AASequence/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType =~ /AASequence/) {
+		    if ($inputDataType =~ /AASequence/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "FASTA") {
+		    if ($inputDataType =~ /^FASTA/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "FASTA_NA") {
+		    if ($inputDataType =~ /FASTA_NA$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "FASTA_NA_multi") {
+		    if ($inputDataType =~ /FASTA_NA/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "FASTA_AA") {
+		    if ($inputDataType =~ /FASTA_AA$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "FASTA_AA_multi") {
+		    if ($inputDataType =~ /FASTA_AA/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if (($specifiedType eq "BLAST-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
+		    if ($inputDataType =~ /BLAST-Text|NCBI_BLAST_Text|WU_BLAST_Text/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "GFF2") {
+		    if ($inputDataType =~ /GFF2$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "GFF3") {
+		    if ($inputDataType =~ /GFF3$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "GFF") {
+		    if ($inputDataType =~ /GFF\d*$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "MatrixFloat") {
+		    if ($inputDataType =~ /MatrixFloat$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "MatrixInteger") {
+		    if ($inputDataType =~ /MatrixInteger$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "Matrix") {
+		    if ($inputDataType =~ /Matrix$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "Meta_Alignment_Text") {
+		    if ($inputDataType =~ /Meta_Alignment_Text$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "MEME_Text") {
+		    if ($inputDataType =~ /MEME_Text$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		# ...
+		
+	    }
+	    else {
+		print STDERR "not an ELEMENT node...\n";
+	    }
+	}
     };
     if ($@) {
 	my $note = "Internal System Error. Can not parse input XML for validating type, $specifiedType!\n";
