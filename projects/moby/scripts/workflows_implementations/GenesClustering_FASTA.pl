@@ -49,7 +49,7 @@ Usage:
 		<2> or BioMoby
 		<3> or Mobydev
 	-f Sequence(s) input file, in FASTA format
-        -t MatScan probability threshold (Default is 0.85)
+	-t MatScan probability threshold (Default is 0.85)
         -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
@@ -367,7 +367,7 @@ if ($_debug) {
 
 # runMatScanGFFCollection
 
-print STDERR "First step, binding sites predictions...\n";
+print STDERR "First step, $database binding sites predictions...\n";
 print STDERR "Executing MatScan...\n";
 
 $serviceName        = "runMatScanGFFCollection";
@@ -377,7 +377,7 @@ $articleName        = $parameters{$serviceName}->{articleName} || die "article n
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", $input_xml, "threshold", $threshold_xml, "matrix", $matrix_xml]
+					      ["$articleName", $input_xml, "threshold", $threshold_xml, "motif database", $matrix_xml]
 					     ]);
 
 if ($_debug) {
@@ -553,7 +553,7 @@ else {
 
 # inbHierarchicalCluster
 
-print STDERR "Fourth step, gene clustering using a neighbour joining clustering algorithm...\n";
+print STDERR "Fourth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
 
 if ($_debug) {
   print STDERR "\nExecuting inbHierarchicalCluster...\n\n";
