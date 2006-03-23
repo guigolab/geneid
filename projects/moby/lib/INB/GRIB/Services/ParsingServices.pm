@@ -1,4 +1,4 @@
-# $Id: ParsingServices.pm,v 1.5 2006-03-23 13:35:20 gmaster Exp $
+# $Id: ParsingServices.pm,v 1.6 2006-03-23 16:09:16 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -514,7 +514,7 @@ sub _do_query_MemeMotifMatrices {
     my $output_object_type  = "$_output_format";
     my $namespace = "";
     
-    if (not defined $matrices_aref) {
+    if ((!defined $matrices_aref) || (@$matrices_aref == 0)) {
 	# Return an emtpy message !
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
