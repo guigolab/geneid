@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.71 2006-03-22 11:25:16 gmaster Exp $
+# $Id: Factory.pm,v 1.72 2006-03-23 13:34:41 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1309,7 +1309,7 @@ sub generateScoreMatrix_call {
   my $inputdata_arrayref = $args{similarity_results};
   my $parameters         = $args{parameters} || undef;
   my $queryID            = $args{queryID}    || "";
-  my $debug = 0;
+  my $debug              = $args{debug}       || 0;
   
   # Llama a generateScoreMatrix script en local
   my $_application_dir  = "/home/ug/gmaster/projects/generateScoreMatrices";
@@ -1361,9 +1361,9 @@ sub generateScoreMatrix_call {
       print STDERR "Running generateScoreMatrix.pl, with this command:\n";
       print STDERR "cat $meta_file | $_application_dir\/$_application_bin $_application_args\n";
   }
-
+  
   $matrix_output = qx/cat $meta_file | $_application_dir\/$_application_bin $_application_args/;
-
+  
   if ($debug) {
       print STDERR "matrix ouput, $matrix_output\n";
   }
