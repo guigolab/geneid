@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.11 2005-11-22 09:32:44 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.12 2006-03-23 14:27:26 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -82,7 +82,10 @@ use strict;
 use warnings;
 use Carp;
 
+# INB
 use INB::GRIB::Services::Factory; 
+use INB::GRIB::Utils::CommonUtilsSubs;
+
 use MOBY::CommonSubs qw(:all);
 
 use Data::Dumper;
@@ -360,7 +363,11 @@ sub getUpstreamSeqfromEnsembl {
 	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
 	# es una coleccion de respuestas a cada una de las consultas.
         my $MOBY_RESPONSE = "";             # set empty response
-
+	my $moby_exceptions = [];
+	
+	my $moby_logger = get_logger ("MobyServices");
+	my $serviceName = "getUpstreamSeqfromEnsembl";
+	
 	# Para cada query ejecutaremos el _execute_query.
         foreach my $queryInput(@queries){
 	    
@@ -382,8 +389,9 @@ sub getUpstreamSeqfromEnsembl {
 	# Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
 	# todas ellas con una cabecera y un final. Esto lo podemos hacer 
 	# con las llamadas de la libreria Common de BioMoby. 
-	return responseHeader("genome.imim.es") 
-	. $MOBY_RESPONSE . responseFooter;
+	my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+	
+	return $response;
 }
 
 
