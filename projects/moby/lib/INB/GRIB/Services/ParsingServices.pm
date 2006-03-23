@@ -1,4 +1,4 @@
-# $Id: ParsingServices.pm,v 1.4 2006-03-22 16:47:04 gmaster Exp $
+# $Id: ParsingServices.pm,v 1.5 2006-03-23 13:35:20 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -274,8 +274,13 @@ sub _do_query_generateScoreMatrixFromMetaAlignment {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
+    else {
+	if ($_debug) {
+	    print STDERR "\nparsed @$input_data Meta_Alignment_Text objects\n\n";
+	}
+    }
     
-    my ($matrix_text, $moby_exceptions_tmp) = generateScoreMatrix_call (similarity_results  => $input_data, queryID => $queryID, parameters => \%parameters);
+    my ($matrix_text, $moby_exceptions_tmp) = generateScoreMatrix_call (similarity_results  => $input_data, queryID => $queryID, parameters => \%parameters, debug => $_debug);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
