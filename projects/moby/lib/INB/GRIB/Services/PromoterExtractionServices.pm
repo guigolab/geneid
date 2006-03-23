@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.12 2006-03-23 14:27:26 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.13 2006-03-23 14:33:07 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -88,6 +88,8 @@ use INB::GRIB::Utils::CommonUtilsSubs;
 
 use MOBY::CommonSubs qw(:all);
 
+# Logging
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 require Exporter;
