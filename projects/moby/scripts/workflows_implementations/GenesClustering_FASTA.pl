@@ -1,6 +1,28 @@
 #!/usr/local/bin/perl -w
 
-# Disclaimer ....
+=head1 AUTHOR
+
+Arnaud Kerhornou, akerhornou@imim.es
+
+=head1 COPYRIGHT
+
+Copyright (c) 2006, Arnaud Kerhornou and INB - Nodo Vertical INB/CRG.
+ All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+
+=head1 DISCLAIMER
+
+This software is provided "as is" without warranty of any kind.
+
+=head1 APPENDIX
+
+The rest of the documentation details each of the object
+methods. Internal methods are usually preceded with a _
+
+=cut
 
 ##################################################################
 #
