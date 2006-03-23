@@ -10,6 +10,7 @@
 # you can get different types of formatting for your matrices, e.g. for fneighbor, it's got to be space delimited, in other cases it's got to be tab delimited.
 
 use strict;
+use Data::Dumper;
 
 my $_debug      = 0;
 my $_delimitor  = "\t";
@@ -32,6 +33,11 @@ my $sequence_identifiers;
 # Parsing input file
 
 if ($inputformat eq "meta-alignment") {
+
+    if ($_debug) {
+	print STDERR "parsing meta-alignment input data...\n";
+    }
+    
     ($sequence_identifiers, $scores_per_sequences) = parseMeta ();
 }
 else {
@@ -41,7 +47,7 @@ else {
 
 # Generate the matrix, as an array of arrays
 
-my @matrix       = ();
+my @matrix = ();
 
 for (my $i=0; $i < @$sequence_identifiers; $i++) {
     my @scores_per_row = ();
@@ -57,15 +63,30 @@ for (my $i=0; $i < @$sequence_identifiers; $i++) {
 	if ($i < $j) {
 	    my $seq_identifier_2 = $sequence_identifiers->[$j];
 	    my $id    = $seq_identifier_1 . "_" . $seq_identifier_2;
-	    my $score = $scores_per_sequences->{$id} || $_minus_infinite_mark;
+	    my $score;
+	    if (defined $scores_per_sequences->{$id}) {
+		$score = $scores_per_sequences->{$id};
+	    }
+	    else {
+		# it's the other way around !!
+		$id    = $seq_identifier_2 . "_" . $seq_identifier_1;
+		$score = $scores_per_sequences->{$id} || $_minus_infinite_mark;
+	    }
 	    
 	    push (@scores_per_row, $score);
 	}
 	if ($i > $j) {
 	    my $seq_identifier_2 = $sequence_identifiers->[$j];
 	    my $id    = $seq_identifier_2 . "_" . $seq_identifier_1;
-	    my $score = $scores_per_sequences->{$id} || $_minus_infinite_mark;
-	    
+	    my $score;
+	    if (defined $scores_per_sequences->{$id}) {
+		$score = $scores_per_sequences->{$id};
+	    }
+	    else {
+		# it's the other way around !!
+		$id    = $seq_identifier_1 . "_" . $seq_identifier_2;
+		$score = $scores_per_sequences->{$id} || $_minus_infinite_mark;
+	    }
 	    push (@scores_per_row, $score);
 	}
     }
@@ -98,7 +119,7 @@ else {
 
 sub parseMeta {
     
-    my $scores_per_sequences;
+    my $scores_per_sequences = {};
     my $sequence_identifiers = {};
 
     while (my $line = <STDIN>) {
@@ -168,7 +189,7 @@ sub parseMeta {
     }
 
     if ($_debug) {
-	print STDERR "parsed " . @$sequence_identifiers . " sequences.\n";
+	print STDERR "parsed " . keys (%$sequence_identifiers) . " sequences.\n";
 	print STDERR "parsed " . keys (%$scores_per_sequences) . " scores.\n";
     }
     
