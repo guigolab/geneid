@@ -276,7 +276,7 @@ if ($_debug) {
     print STDERR "input xml,\n $input_xml\n";
 }
 
-# 1/ fromFASTAtoDNASequenceCollection
+# 1/ fromFASTAtoDNASequenceCollection or getUpstreamSeqfromEnsembl
 
 if ($input_type eq "FASTA") {
 	# fromFASTAtoDNASequenceCollection
@@ -289,8 +289,9 @@ else {
 
 # Get the parameters from the configuration file
 
-my $authURI           = $parameters{$serviceName}->{authURI} || die "no URI for $serviceName\n";
-my $articleName       = $parameters{$serviceName}->{articleName} || die "no article name\n";
+my $authURI           = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+my $articleName       = $parameters{$serviceName}->{articleName} || die "no article name for $serviceName\n";
+my $output_datatype   = $parameters{$serviceName}->{outputType}  || die "no output type for $serviceName\n";
 my $species_xml           = "";
 my $upstream_length_xml   = "";
 my $downstream_length_xml = "";
@@ -299,7 +300,7 @@ my $intergenic_only_xml   = "";
 if ($input_type eq "identifiers") {
     my $species           = $parameters{$serviceName}->{species} || die "no species\n";
     my $upstream_length   = $parameters{$serviceName}->{upstream_length}   || die "no upstream length\n";
-    my $downstream_length = $parameters{$serviceName}->{downstream_length} || die "no downstream length\n";
+    my $downstream_length = $parameters{$serviceName}->{downstream_length} || 0;
     my $intergenic_only   = $parameters{$serviceName}->{intergenic_only}   || die "no intergenic only\n";
     
     $species_xml           = "<Value>$species</Value>";
@@ -334,7 +335,7 @@ if ($input_type eq "FASTA") {
 }
 else {
     $moby_response = $Service->execute (XMLinputlist => [
-						  ["$articleName", $input_xml, "species", $species_xml, "upstream_length", $upstream_length_xml, "downstream_length", $downstream_length_xml, "intergenic_only", $intergenic_only_xml]
+						  ["$articleName", $input_xml, "species", $species_xml, "upstream length", $upstream_length_xml, "downstream length", $downstream_length_xml, "intergenic only", $intergenic_only_xml]
 						 ]);
 }
 
@@ -357,7 +358,7 @@ if (hasFailed ($moby_response)) {
     exit 1;
 }
 
-$input_xml = parseResults ($moby_response, "DNASequence");
+$input_xml = parseResults ($moby_response, $output_datatype);
 
 if ($_debug) {
 	print STDERR "input xml for next service:\n";
@@ -377,8 +378,8 @@ $articleName        = $parameters{$serviceName}->{articleName} || die "article n
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", $input_xml, "threshold", $threshold_xml, "motif database", $matrix_xml]
-					     ]);
+						     ["$articleName", $input_xml, "threshold", $threshold_xml, "motif database", $matrix_xml]
+						     ]);
 
 if ($_debug) {
 	print STDERR "$serviceName results\n";
