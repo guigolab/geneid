@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.27 2006-03-07 15:08:07 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.28 2006-03-23 16:51:48 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -788,7 +788,7 @@ sub _do_query_MatScanVsInputMatrices {
 		$matrix_type = "Float";
 	    }
 	    my $matrix_object_name = "Matrix" . $matrix_type;
-
+	    
 	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, $matrix_object_name);
 	    if (!$rightType) {
 		my $note = "Expecting a $matrix_object_name object, and receiving a $inputDataType object";
