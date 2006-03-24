@@ -3,6 +3,12 @@
 # e.g. perl GFF2_to_GFF3.pl features.gff2 > features.gff3
 # Can deal with GeneID, MatScan, Meta-alignment GFF output
 
+###############################################
+#
+# Still to do - support partial CDSs if it the last reported exon !!
+#
+###############################################
+
 use strict;
 
 my $in_file = shift;
