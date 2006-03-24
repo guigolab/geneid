@@ -1,6 +1,10 @@
 #!/usr/local/bin/perl -w
 
+# e.g. perl GFF2_to_GFF3.pl features.gff2 > features.gff3
+# Can deal with GeneID, MatScan, Meta-alignment GFF output
+
 use strict;
+
 my $in_file = shift;
 
 my $_debug = 0;
@@ -70,10 +74,10 @@ while (<FILE>) {
 	else { $geneStrand = "-"; }
     }
     
-    if ($line =~ /^([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)/) {
+    if ($line =~ /^([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t*([^\t]*)/) {
 	
 	if ($_debug) {
-	    print STDERR "Feature (Exon) information\n";
+	    print STDERR "Feature information\n";
 	}
 	
 	$seqId     = $1;
@@ -84,12 +88,18 @@ while (<FILE>) {
 	my $score  = $6;
 	my $strand = $7;
 	my $phase  = $8;
-	my $attributes = "";
+	chomp $phase;
+	my $attributes = $9;
 	
 	# Feature type mapping if genes
 	if ($featureType =~ /Internal|First|Terminal|Single/) {
+	    
+	    if ($_debug) {
+		print STDERR "it is an exon feature\n";
+	    }
+	    
 	    $featureType = "CDS";
-	    $attributes = "Parent=$mRNAId";
+	    $attributes  = "Parent=$mRNAId";
 	    
 	    my $cds_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
 	    push (@$cds_features, $cds_feature);
@@ -102,13 +112,42 @@ while (<FILE>) {
 	    $geneEnd = $end;
 	}
 	elsif ($algorithm =~ /MatScan|meta/) {
-	    my $featureId = $featureType;
-	    $featureType = "binding_site";
-	    $attributes = "ID=$featureId";
+	    
+	    if ($_debug) {
+		print STDERR "it is an binding_site feature\n";
+	    }
+	    
+	    my $featureId   = $featureType;
+	    $featureType    = "binding_site";
+	    
+	    my $sequenceAttribute = "";
+	    if ($algorithm eq "MatScan") {
+		
+		# Store also the binding_site sequence
+		
+		print STDERR "attributes, $attributes\n";
+		
+		if ($attributes =~ /^# (\w+)/) {
+		    $sequenceAttribute = "Seq=" . $1;
+		    $attributes  = "ID=$featureId;$sequenceAttribute";
+		}
+		else {
+		    $attributes  = "ID=$featureId";
+		}
+	    }
+	    else {
+		$attributes     = "ID=$featureId";
+	    }
+	    
 	    my $gff_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
 	    push (@gff_features, $gff_feature);
 	}
 	else {
+	    
+	    if ($_debug) {
+		print STDERR "it is a feature of unprocessed type\n";
+	    }
+	    
 	    chomp $line;
 	    push (@gff_features, $line);
 	}
