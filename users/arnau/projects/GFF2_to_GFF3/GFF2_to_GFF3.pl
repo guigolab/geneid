@@ -55,6 +55,10 @@ while (<FILE>) {
 	if ($parsed_first_exon) {
 	    $parsed_first_exon = 0;
 	    
+	    # Need to process an extra information, re. the last exon if it is partial gene or not !!!
+	    
+	    # ...
+	    
 	    my $gene_feature = "$seqId\t$algorithm\tgene\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$geneId";
 	    my $mRNA_feature = "$seqId\t$algorithm\tmRNA\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$mRNAId;Parent=$geneId";
 	    push (@gff_features, $gene_feature, $mRNA_feature, @$cds_features);
@@ -94,20 +98,38 @@ while (<FILE>) {
 	# Feature type mapping if genes
 	if ($featureType =~ /Internal|First|Terminal|Single/) {
 	    
+	    $attributes = undef;
+	    
 	    if ($_debug) {
 		print STDERR "it is an exon feature\n";
 	    }
 	    
-	    $featureType = "CDS";
-	    $attributes  = "Parent=$mRNAId";
-	    
-	    my $cds_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
-	    push (@$cds_features, $cds_feature);
-	    
 	    if (! $parsed_first_exon) {
 		$parsed_first_exon = 1;
 		$geneStart = $start;
+		
+		# if featureType is equal to Internal then it is a partial CDS
+		if ($featureType eq "Internal") {
+		    if ($strand eq "+") {
+			$attributes .= "5_prime_partial=true";
+		    }
+		    else {
+			$attributes .= "3_prime_partial=true";
+		    }
+		}
+		
 	    }
+	    
+	    $featureType = "CDS";
+	    if (! defined $attributes) {
+		$attributes  = "Parent=$mRNAId";
+	    }
+	    else {
+		$attributes  = "Parent=$mRNAId;" . $attributes;
+	    }
+	    
+	    my $cds_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
+	    push (@$cds_features, $cds_feature);
 	    
 	    $geneEnd = $end;
 	}
@@ -171,6 +193,11 @@ close FILE;
 
 if ($has_genes) {
     # The last gene
+    
+    # Need to process an extra information, re. the last exon if it is partial gene or not !!!
+    
+    # ...
+    
     my $gene_feature = "$seqId\t$algorithm\tgene\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$geneId";
     my $mRNA_feature = "$seqId\t$algorithm\tmRNA\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$mRNAId;Parent=$geneId";
     push (@gff_features, $gene_feature, $mRNA_feature, @$cds_features);
