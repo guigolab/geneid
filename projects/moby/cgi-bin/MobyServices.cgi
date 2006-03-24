@@ -87,8 +87,7 @@ my $appender = Log::Log4perl::Appender->new(
 					    mode     => "append",
 					    );
 
-# Not sure it expends the log filename, that's why i append a Log::Log4perl::Appender instance
-my $conf = q(
+my $conf = qq(
     log4perl.logger                    = INFO, FileApp
     log4perl.appender.FileApp          = Log::Log4perl::Appender::File
     log4perl.appender.FileApp.filename = $logfile
@@ -100,7 +99,8 @@ my $conf = q(
 Log::Log4perl->init( \$conf );
 
 my $moby_logger = get_logger ("MobyServices");
-$moby_logger->add_appender ($appender);
+# No need to append any longer as it is already done !!!
+# $moby_logger->add_appender ($appender);
 
 ###############################################################################
 
