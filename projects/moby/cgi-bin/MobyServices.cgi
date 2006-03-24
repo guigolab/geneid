@@ -71,15 +71,38 @@ if ($ARGV[0] and $ARGV[0] =~ /^--daemon$/) {
 ##############################################################################
 # Stats reporting into a file
 
+###############################################################################
+#
+# Moby Logger initialisation
+#
+###############################################################################
+
 my $logfile = $ENV{STATS_FILE};
-Log::Log4perl->easy_init($INFO);
+
+# No longer using easy_init, because it was duplicating logs in error_log file !!!!
+# Log::Log4perl->easy_init($INFO);
 my $appender = Log::Log4perl::Appender->new(
 					    "Log::Dispatch::File",
 					    filename => "$logfile",
 					    mode     => "append",
 					    );
+
+# Not sure it expends the log filename, that's why i append a Log::Log4perl::Appender instance
+my $conf = q(
+    log4perl.logger                    = INFO, FileApp
+    log4perl.appender.FileApp          = Log::Log4perl::Appender::File
+    log4perl.appender.FileApp.filename = $logfile
+    log4perl.appender.FileApp.layout   = PatternLayout
+    log4perl.appender.FileApp.layout.ConversionPattern = %d> %m%n
+    );
+
+# Initialize logging behaviour
+Log::Log4perl->init( \$conf );
+
 my $moby_logger = get_logger ("MobyServices");
 $moby_logger->add_appender ($appender);
+
+###############################################################################
 
 my $starttime_benchmark = Benchmark->new ();
 my $starttime;
