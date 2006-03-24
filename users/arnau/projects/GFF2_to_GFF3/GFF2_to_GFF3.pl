@@ -120,15 +120,12 @@ while (<FILE>) {
 	    my $featureId   = $featureType;
 	    $featureType    = "binding_site";
 	    
-	    my $sequenceAttribute = "";
 	    if ($algorithm eq "MatScan") {
 		
 		# Store also the binding_site sequence
 		
-		print STDERR "attributes, $attributes\n";
-		
 		if ($attributes =~ /^# (\w+)/) {
-		    $sequenceAttribute = "Seq=" . $1;
+		    my $sequenceAttribute = "Seq=" . $1;
 		    $attributes  = "ID=$featureId;$sequenceAttribute";
 		}
 		else {
@@ -137,6 +134,22 @@ while (<FILE>) {
 	    }
 	    else {
 		$attributes     = "ID=$featureId";
+	    }
+	    
+	    # Figure out the Dbxref attribute
+	    
+	    if ($featureId =~ /^\w\$/) {
+		# It is Transfac identifier
+		my $Dbxref = "Dbxref=Transfac:$featureId";
+		$attributes  .= ";" . $Dbxref;
+	    }
+	    elsif ($featureId =~ /^MEME/) {
+		# MEME motif
+	    }
+	    else {
+		# Must be a Jaspar motif !!!
+		my $Dbxref = "Dbxref=Jaspar:$featureId";
+		$attributes  .= ";" . $Dbxref;
 	    }
 	    
 	    my $gff_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
