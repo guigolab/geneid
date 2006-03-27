@@ -188,10 +188,10 @@ if (! ($input_type eq "FASTA" || $input_type eq "identifiers")) {
 #
 ##############################################
 
-# Default is Inab production registry
+# Default is Icapture production registry
 
-my $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
-my $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
+my $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
+my $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://mobycentral.icapture.ubc.ca/MOBY/Central';
 my $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
 
 if (defined($opt_x)) {
@@ -352,13 +352,16 @@ my $Service = getService ($C, $serviceName, $authURI);
 my $moby_response;
 if ($input_type eq "FASTA") {
     $moby_response = $Service->execute (XMLinputlist => [
-						  ["$articleName", $input_xml],
-						 ]);
+							 ["$articleName", $input_xml],
+							]);
 }
 else {
+
+    print STDERR "Preliminary step, upstream sequence retrieval from Ensembl...\n\n";
+    
     $moby_response = $Service->execute (XMLinputlist => [
-						  ["$articleName", $input_xml, "species", $species_xml, "upstream length", $upstream_length_xml, "downstream length", $downstream_length_xml, "intergenic only", $intergenic_only_xml]
-						 ]);
+							 ["$articleName", $input_xml, "species", $species_xml, "upstream length", $upstream_length_xml, "downstream length", $downstream_length_xml, "intergenic only", $intergenic_only_xml]
+							]);
 }
 
 ##################################################################
@@ -381,6 +384,16 @@ if (hasFailed ($moby_response)) {
 }
 
 $input_xml = parseResults ($moby_response, $output_datatype);
+
+# Convert into FASTA if necessary
+
+if (($input_type ne "FASTA") && (defined $output_dir)) {
+    my $Conversion_Service = getService ($C, "fromGenericSequenceCollectionToFASTA", $authURI);
+    my $moby_fasta_response = $Conversion_Service->execute (XMLinputlist => [
+									     ["sequences", $input_xml]
+									     ]);
+    saveResults ($moby_fasta_response, "FASTA", "upstream_sequences", $output_dir);
+}
 
 if ($_debug) {
 	print STDERR "input xml for next service:\n";
@@ -937,7 +950,10 @@ sub getFileNameSuffix {
   elsif (lc ($object_type) eq "b64_encoded_png") {
     return "png";
   }
-
+  elsif (lc ($object_type) eq "fasta") {
+      return "fa";
+  }
+  
   print STDERR "Suffix for object_type, $object_type unknown, return txt!\n"; 
   
   return $suffix;
