@@ -472,7 +472,7 @@ foreach my $geneId (@geneIds) {
 		next;
 	    }
 	    
-	    my $homologies = $homologyAdaptor->fetch_all_by_Member ($member);
+	    my $homologies = $homologyAdaptor->fetch_by_Member ($member);
 	    foreach my $homology (@$homologies) {
 		
 		foreach my $member_attribute (@{$homology->get_all_Member_Attribute}) {
