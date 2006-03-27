@@ -901,10 +901,9 @@ sub saveResults {
     
     my $data = $inputs_text{$id};
     # clean data
-    while ($data =~ s/^\n//) {
-    }
-    while (chomp $data) { # just chomp...
-    }
+    
+    $data =~ s/^\n+//;
+    $data =~ s/\n+$/\n/;
     
     open FILE, ">$output_dir/$filename" or die "can' open output file, $output_dir/$filename";
     print FILE "$data";
@@ -922,11 +921,10 @@ sub saveResults {
       my $filename = $id . "." . $softwareName . "." . $suffix;
       my $data = $inputs_text{$id};
       # clean data
-      while ($data =~ s/^\n//) {
-      }
-      while (chomp $data) { # just chomp...
-      }
-
+      
+      $data =~ s/^\n+//;
+      $data =~ s/\n+$/\n/;
+      
       open FILE, ">$output_dir/$subdir/$filename" or die "can' open output file, $output_dir/$subdir/$filename";
       print FILE "$data";
       close FILE;
