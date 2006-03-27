@@ -158,7 +158,7 @@ BEGIN {
     }
 
     $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
-    # $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
+    $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
     
     if (-f "$_config_file_path") {
         require "$_config_file_path";
@@ -433,9 +433,19 @@ foreach my $geneId (@geneIds) {
     # It must be an Ensembl identifier
     
     if ((not defined $genes) || (@$genes == 0)) {
-	my $gene = $gene_adaptor->fetch_by_stable_id ($geneId) or warn "can't instanciate gene object with identifier, $geneId!\n";
+	my $gene = $gene_adaptor->fetch_by_stable_id ($geneId);
 	if (not defined $gene) {
-	    print STDERR "can't find any Ensembl gene for this given identifier, $geneId, for this given species, $species!\n";
+	    # Cheeck also by transcript id
+	    $gene = $gene_adaptor->fetch_by_transcript_stable_id ($geneId);
+	    if (not defined $gene) {
+		print STDERR "can't find any Ensembl gene for this given identifier, $geneId, for this given species, $species!\n";
+	    }
+	    else {
+		if ($_debug) {
+		    print STDERR "gene stable identifier found: " . $gene->stable_id . ", on strand, " . $gene->strand . "\n";
+		}
+		$genes = [ $gene ];
+	    }
 	}
 	else {
 	    if ($_debug) {
@@ -444,7 +454,7 @@ foreach my $geneId (@geneIds) {
 	    $genes = [ $gene ];
 	}
     }
-
+    
     #
     # Process the Ensembl gene objects
     #
@@ -452,15 +462,22 @@ foreach my $geneId (@geneIds) {
     foreach my $gene (@$genes) {
 
 	my $gene_stable_id    = $gene->stable_id;
-
+	
 	if ($orthologous_mode) {
 	    my $member = $dbh_compara->get_MemberAdaptor->fetch_by_source_stable_id ("ENSEMBLGENE", $gene_stable_id);
-	    my $homologies = $homologyAdaptor->fetch_by_Member ($member);
+	    
+	    if (! defined $member) {
+		print STDERR "error, homology member not defined in compara_db for gene, $gene_stable_id!\n";
+		print STDERR "might be because it is a pseudogene!\n";
+		next;
+	    }
+	    
+	    my $homologies = $homologyAdaptor->fetch_all_by_Member ($member);
 	    foreach my $homology (@$homologies) {
-
+		
 		foreach my $member_attribute (@{$homology->get_all_Member_Attribute}) {
 		    my ($member, $attribute) = @{$member_attribute};
-
+		    
 		    # Get the Stable identifier
 		    my $homologue_stable_id = $member->stable_id();
 		    
@@ -1145,11 +1162,21 @@ sub is_tss {
     my $tss_is_start_codon = 1;
     my $tss_information    = "TSS not predicted (is start codon)";
     my $transcripts        = $gene->get_all_Transcripts;
+    
+    if ($_debug) {
+	print STDERR "is tss - " . @$transcripts . " transcripts for gene, " . $gene->stable_id . "\n";
+    }
+    
     foreach my $transcript (@$transcripts) {
 	
 	# If at least one transcript doesn't start at the start codon, that means that there is a predicted 5' UTR for at least one of the transcripts
 	
-	if ($transcript->cdna_coding_start > 1) {
+	if (! defined $transcript->cdna_coding_start) {
+	    print STDERR $transcript->stable_id . " is not coding!!!\n";
+	    print STDERR "might be a pseudogene!\n";
+	    $tss_information = "TSS predicted";
+	}
+	elsif ($transcript->cdna_coding_start > 1) {
 	    $tss_is_start_codon = 0;
 	    $tss_information = "TSS predicted";
 	    last;
