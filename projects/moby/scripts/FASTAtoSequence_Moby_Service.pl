@@ -28,7 +28,7 @@ return <<"END_HELP";
 Description: Converts FASTA sequences to a collection of DNASequence or AminoAcidSequence objects Moby services available from genome.imim.es
 Usage:
 
-    FASTAtoSequenceCollection_Moby_Service.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {sequence type}
+    FASTAtoSequence_Moby_Service.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {sequence type}
 	-h help
 	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 		<1> or Chirimoyo
@@ -39,7 +39,7 @@ Usage:
 	-t Sequence type [DNASequence, AminoAcidSequence]
 	
 Examples using some combinations:
-	perl FASTAtoSequenceCollection_Moby_service.pl -x 2 -f /home/ug/arnau/data/AC005155.fa -t DNASequence
+	perl FASTAtoSequence_Moby_service.pl -x 2 -f /home/ug/arnau/data/AC005155.fa -t DNASequence
 
 END_HELP
 
@@ -74,7 +74,7 @@ my $_debug = 0;
 #
 ##################################################################
 
-my $articleName = "sequences";
+my $articleName = "sequence";
 $::authURI = 'genome.imim.es';
 my $sequence_type = $opt_t || "DNASequence";
 
@@ -87,10 +87,10 @@ my $datasource = "EMBL";
 
 my $serviceName;
 if ($sequence_type eq "DNASequence") {
-    $serviceName = "fromFASTAToDNASequenceCollection";
+    $serviceName = "fromFASTAToDNASequence";
 }
 elsif ($sequence_type eq "AminoAcidSequence") {
-    $serviceName = "fromFASTAToAminoAcidSequenceCollection";
+    $serviceName = "fromFASTAToAminoAcidSequence";
 }
 else {
     print STDERR "sequence type, $sequence_type, unknown!\n";
@@ -232,20 +232,20 @@ my $fasta_sequences = qx/cat $in_file/;
 my $fasta_xml;
 if ($sequence_type eq "DNASequence") {
     $fasta_xml = <<PRT;
-<FASTA_NA_multi namespace="$datasource" id="">
+<FASTA_NA namespace="$datasource" id="">
 <![CDATA[
 $fasta_sequences
 ]]>
-</FASTA_NA_multi>
+</FASTA_NA>
 PRT
 }
 else {
     $fasta_xml = <<PRT;
-<FASTA_AA_multi namespace="$datasource" id="">
+<FASTA_AA namespace="$datasource" id="">
 <![CDATA[
 $fasta_sequences
 ]]>
-</FASTA_AA_multi>
+</FASTA_AA>
 PRT
 }
 
