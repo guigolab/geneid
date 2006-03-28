@@ -159,17 +159,17 @@ $x->dispatch_with({
     'http://biomoby.org/#runMultiPairwiseMetaAlignment'          => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiPairwiseMetaAlignmentGFF'       => 'INB::GRIB::Services::MetaAlignmentServices',
 
-    'http://biomoby.org/#fromGenericSequencetoFASTA'             => 'INB::GRIB::Services::UtilsServices',
-    'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA'   => 'INB::GRIB::Services::UtilsServices',
-    'http://biomoby.org/#fromFASTAtoDNASequenceCollection'       => 'INB::GRIB::Services::UtilsServices',
-    'http://biomoby.org/#fromFASTAtoAminoAcidSequenceCollection' => 'INB::GRIB::Services::UtilsServices',
-    'http://biomoby.org/#fromFASTAtoGenericSequenceCollection'   => 'INB::GRIB::Services::UtilsServices',
+    # 'http://biomoby.org/#fromGenericSequencetoFASTA'             => 'INB::GRIB::Services::UtilsServices',
+    # 'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA'   => 'INB::GRIB::Services::UtilsServices',
+    # 'http://biomoby.org/#fromFASTAtoDNASequenceCollection'       => 'INB::GRIB::Services::UtilsServices',
+    # 'http://biomoby.org/#fromFASTAtoAminoAcidSequenceCollection' => 'INB::GRIB::Services::UtilsServices',
+    # 'http://biomoby.org/#fromFASTAtoGenericSequenceCollection'   => 'INB::GRIB::Services::UtilsServices',
     
     'http://biomoby.org/#fromGenericSequenceToFASTA'             => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromGenericSequenceCollectionToFASTA'   => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromFASTAToDNASequence'                 => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromFASTAToDNASequenceCollection'       => 'INB::GRIB::Services::ConversionServices',
-    'http://biomoby.org/#fromFASTAToAminoAcidSequence          ' => 'INB::GRIB::Services::ConversionServices',
+    'http://biomoby.org/#fromFASTAToAminoAcidSequence'           => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromFASTAToAminoAcidSequenceCollection' => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromFASTAToGenericSequenceCollection'   => 'INB::GRIB::Services::ConversionServices',
     
