@@ -101,6 +101,9 @@ while (<FILE>) {
 	chomp $phase;
 	my $attributes = $9;
 	
+	# Clean the score
+	$score =~ s/\s//g;
+	
 	# Feature type mapping if genes
 	if ($featureType =~ /Internal|First|Terminal|Single/) {
 	    
