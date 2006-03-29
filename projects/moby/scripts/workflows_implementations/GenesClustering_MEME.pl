@@ -105,7 +105,7 @@ BEGIN {
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 0;
+my $_debug = 1;
 
 ##################################################################
 #
@@ -431,7 +431,7 @@ if ($_debug) {
 	print STDERR "\n";
 }
 
-if (hasFailed ($moby_response)) {
+if ((! defined $moby_response) || hasFailed ($moby_response)) {
     print STDERR "service, $serviceName, has failed!\n";
     my $moby_error_message = getExceptionMessage ($moby_response);
     print STDERR "reason is the following,\n$moby_error_message\n";
@@ -506,6 +506,9 @@ if (hasFailed ($moby_response)) {
 }
 
 $input_xml = parseResults ($moby_response, "MatrixFloat");
+if (defined $output_dir) {
+  saveResults ($moby_response, "MatrixFloat", "MatrixFloat", $output_dir);
+}
 
 if ($_debug) {
 	print STDERR "input xml for next service:\n";
@@ -993,9 +996,16 @@ sub saveResults {
         $id = "";
       }
     }
-    my $input_text = $element->textContent();
-    if ($object_type eq "b64_Encoded_PNG") {
-      $input_text = decode_base64($input_text);
+    
+    my $input_text;
+    if ($object_type =~ /^Matrix/) {
+	$input_text = $element->toString();
+    }
+    else {
+	$input_text = $element->textContent();
+	if ($object_type eq "b64_Encoded_PNG") {
+	    $input_text = decode_base64($input_text);
+	}
     }
     
     $inputs_text{$id} = $input_text;
@@ -1068,6 +1078,9 @@ sub getFileNameSuffix {
   }
   elsif (lc ($object_type) =~ /html/) {
       return "html";
+  }
+  elsif (lc ($object_type) eq "matrixfloat") {
+      return "xml";
   }
   
   print STDERR "Suffix for object_type, $object_type unknown, return txt!\n"; 
