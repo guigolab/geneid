@@ -1,4 +1,4 @@
-# $Id: ParsingServices.pm,v 1.6 2006-03-23 16:09:16 gmaster Exp $
+# $Id: ParsingServices.pm,v 1.7 2006-03-29 12:47:58 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -344,6 +344,7 @@ PRT
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
+
 sub _do_query_MemeMotifMatrices {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby
     my $queryInput_DOM = shift @_;
@@ -514,7 +515,12 @@ sub _do_query_MemeMotifMatrices {
     my $output_object_type  = "$_output_format";
     my $namespace = "";
     
-    if ((!defined $matrices_aref) || (@$matrices_aref == 0)) {
+    if ((!defined $matrices_aref) || (@$matrices_aref < 1)) {
+
+	if ($_debug) {
+	    print STDERR "no meme matrices, returning an empty collection object\n";
+	}
+
 	# Return an emtpy message !
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
