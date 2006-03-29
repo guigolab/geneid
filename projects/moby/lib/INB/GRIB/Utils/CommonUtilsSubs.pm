@@ -138,30 +138,30 @@ sub createSequenceObjectsFromFASTA {
 	elsif ($object_type =~ /AminoAcidSequence|CommentedAASequence/) {
 	    if ($alphabet ne "protein") {
 		print STDERR "Error FASTA sequences are not protein sequences!\n";
-		exit 0;
+		return undef;
 	    }
 	}
 	elsif ($object_type eq "NucleotideSequence") {
 	    if (not ($alphabet =~ /dna|rna/)) {
 		print STDERR "Error FASTA sequences are not nucleotide sequences!\n";
-		exit 0;
+		return undef;
 	    }
 	}
 	elsif ($object_type =~ /DNASequence/){
 	    if (not ($alphabet eq "dna")) {
 		print STDERR "Error FASTA sequences are not DNA sequences!\n";
-		exit 0;
+		return undef;
 	    }
 	}
 	elsif (($object_type =~ /RNASequence/)) {
 	    if (not ($alphabet eq "rna")) {
 		print STDERR "Error FASTA sequences are not RNA sequences!\n";
-		exit 0;
+		return undef;
 	    }
 	}
 	else {
 	    print STDERR "problem with the fasta sequence alphabet, $alphabet - not matching the returned moby object type, $object_type!\n";
-	    exit 0;
+	    return undef;
 	}
 	
 	my $seq_id     = $seqobj->display_id;
@@ -197,6 +197,7 @@ PRT
 
     return $moby_sequence_objects;
 }
+
 
 sub parseSingleGFFIntoCollectionGFF {
     my $self = shift;
@@ -817,7 +818,7 @@ sub setMobyResponse {
 	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
 	}
 	elsif (defined $severities{warning} || defined $severities{information}) {
-	    my $exception = $severities{error};
+	    my $exception = $severities{warning} || $severities{information};
 	    $moby_logger->info ("$serviceName terminated successfully with warning or information notes");
 	    $moby_logger->info ("Exception code, " . $exception->getExceptionCode);
 	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
