@@ -731,7 +731,7 @@ sub saveResults {
 
     my $input_text;
     if ($object_type =~ /^Matrix/) {
-	$input_text = $element->toString();
+	$input_text = $element->toString() . "\n";
     }
     else {
 	$input_text = $element->textContent();
