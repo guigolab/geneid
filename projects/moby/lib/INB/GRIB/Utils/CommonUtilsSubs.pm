@@ -893,7 +893,12 @@ sub convert_tabularPositionWeightMatrix_into_MobyMatrix {
     $first_line =~ /^([^\s]+)/;
     my $motif_identifier = $1;
     
-    # print STDERR "motif identifier, $motif_identifier.\n";
+    if (! defined $motif_identifier) {
+	print STDERR "motif identifier not defined\n";
+    }
+    else {
+	#print STDERR "motif identifier, $motif_identifier\n";
+    }
     
     # the last line is a separator '//'
 
