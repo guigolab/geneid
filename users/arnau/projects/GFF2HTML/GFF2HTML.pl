@@ -9,26 +9,30 @@ my $_debug = 0;
 my @input_files = @ARGV;
 
 if ($_debug) {
-    print STDERR "files:@input_files.\n";
+    print STDERR "files: @input_files.\n";
 }
 
 # could be 'Lowest p-value' if MEME
 my $score_type = "Score";
-my $seq_start;
-my $seq_end;
-my $seq_length;
+
+# Get this from the command line in case of meta-alignment or MatScan !!!
+
+my $seq_start = 1;
+my $seq_end = 500;
+my $seq_length = 500;
+
 # Default
 my $gap   = 25;
 my $gap_width = 50;
 my $gap_width_adjusted = $gap_width - 2;
-
-my $index = 1;
 
 my %sequences;
 
 # parse GFF3 input file
 
 foreach my $input_file (@input_files) {
+
+    my $index = 1;
 
     if ($_debug) {
 	print STDERR "parsing $input_file...\n";
@@ -38,12 +42,13 @@ foreach my $input_file (@input_files) {
     my @seq_starts = ();
     my %feature_index_by_seq_starts;
     my $seq_id;
+    my $seq_score = "&nbsp";
     
     open FILE, "<$input_file" or die "can't open file, $input_file!\n";
     while (<FILE>) {
 	my $line = $_;
 	
-	# parse the sequence length
+	# Parse the sequence length
 	
 	if ($line =~ /\# Sequence.region [^\s]+\s([^\s]+)\s(\d+)/) {
 	    if ($_debug) {
@@ -52,6 +57,12 @@ foreach my $input_file (@input_files) {
 	    $seq_start   = $1;
 	    $seq_end     = $2;
 	    $seq_length = $seq_end - $seq_start + 1;
+	}
+	
+	# Parse the meta-alignment sequence similarity score
+	
+	if ($line =~ /^\# Maximum similarity\: (.+)/) {
+	    $seq_score = $1;
 	}
 	
 	if ($line =~ /^([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t*([^\t]*)/) {
@@ -67,6 +78,11 @@ foreach my $input_file (@input_files) {
 	    my $end    = $5;
 	    my $score  = $6;
 	    my $feature_id;
+	    
+	    if ($_debug) {
+		print STDERR "start, $start\n";
+		print STDERR "end, $end\n";
+	    }
 	    
 	    if ($method =~ /geneid/i) {
 		# keep only exon features
@@ -131,6 +147,7 @@ foreach my $input_file (@input_files) {
 	features   => \%features,
 	seq_starts => \@seq_starts,
 	feature_index_by_seq_starts => \%feature_index_by_seq_starts,
+	seq_score  => $seq_score,
     };
     
     $sequences{$seq_id} = $sequence;
@@ -145,6 +162,9 @@ if ($_debug) {
 
 # HTML generation
 
+my $width = 1032;
+my $length_feature = 1;
+
 print "<html>\n<body BGCOLOR='#D5F0FF'>\n";
 print "<CENTER><BIG><B>Features block diagrams</B></BIG></CENTER><HR>\n";
 
@@ -156,12 +176,12 @@ foreach my $seq_id (@seq_ids) {
     
     my $sequence_href = $sequences{$seq_id};
     
+    my $seq_score = $sequence_href->{seq_score} || "&nbsp";
+    
     print "<TR>\n";
     
-    my $score = $sequence_href->{score} || "&nbsp;";
-    
     print "<TD>$seq_id\n";
-    print "<TD ALIGN=RIGHT NOWRAP>$score\n";
+    print "<TD ALIGN=RIGHT NOWRAP>$seq_score\n";
     
     my $features_href   = $sequence_href->{features};
     my $feature_index_by_seq_starts_href = $sequence_href->{feature_index_by_seq_starts};
@@ -169,8 +189,6 @@ foreach my $seq_id (@seq_ids) {
     
     print "<TD>\n";
     
-    my $width = 1032;
-    my $length_feature = 1;
     my $before_feature_width;
     
     print "<TABLE SUMMARY='diagram $seq_id' WIDTH=$width BORDER=0 ALIGN=LEFT CELLSPACING=0 CELLPADDING=0><TR ALIGN=CENTER>\n";
@@ -213,29 +231,36 @@ foreach my $seq_id (@seq_ids) {
     else {
 	print "<TD WIDTH=$width><HR SIZE=4 NOSHADE>\n";
     }
-    
+
     print "</TABLE>\n";
-    print "<TR><TH CLASS='blue' COLSPAN=2 ROWSPAN=2 ALIGN=LEFT>SCALE\n";
-    print "<TD><TABLE SUMMARY='scale' WIDTH=$width BORDER=0 ALIGN=LEFT CELLSPACING=0 CELLPADDING=0><TR ALIGN=CENTER>\n";
     
-    # The scale
-    
-    print "<TD CLASS='blue' WIDTH=$gap_width_adjusted ALIGN=LEFT>|</TD>\n";
-    for (my $i =1; $i < 20; $i++) {
-	print "<TD CLASS='blue' WIDTH=$gap_width ALIGN=LEFT>|</TD>\n";
-    }
-    
-    print "<TR>\n";
-    
-    print "<TD CLASS='blue' WIDTH=$gap_width_adjusted ALIGN=LEFT>$seq_start</TD>\n";
-    
-    for (my $i =1; $i < 20; $i++) {
-	my $coordinate = $seq_start + ($i * $gap);
-	print "<TD CLASS='blue' WIDTH=$gap_width ALIGN=LEFT>$coordinate</TD>\n";
-    }
-    print "</TABLE>\n";
+   # score not here anymore !!!
 
 }
+
+# Scale here now !!
+print "<TR><TH CLASS='blue' COLSPAN=2 ROWSPAN=2 ALIGN=LEFT>SCALE\n";
+print "<TD><TABLE SUMMARY='scale' WIDTH=$width BORDER=0 ALIGN=LEFT CELLSPACING=0 CELLPADDING=0><TR ALIGN=CENTER>\n";
+
+# The scale
+
+print "<TD CLASS='blue' WIDTH=$gap_width_adjusted ALIGN=LEFT>|</TD>\n";
+for (my $i =1; $i < 20; $i++) {
+    print "<TD CLASS='blue' WIDTH=$gap_width ALIGN=LEFT>|</TD>\n";
+}
+
+print "<TR>\n";
+
+print "<TD CLASS='blue' WIDTH=$gap_width_adjusted ALIGN=LEFT>$seq_start</TD>\n";
+
+for (my $i =1; $i < 20; $i++) {
+    my $coordinate = $seq_start + ($i * $gap);
+    print "<TD CLASS='blue' WIDTH=$gap_width ALIGN=LEFT>$coordinate</TD>\n";
+}
+print "</TABLE>\n";
+
+
+####
 
 print "</TABLE>\n";
 
