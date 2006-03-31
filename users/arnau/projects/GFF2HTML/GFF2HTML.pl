@@ -30,12 +30,14 @@ my %sequences;
 
 # parse GFF3 input file
 
+my $file_index = 1;
+
 foreach my $input_file (@input_files) {
 
     my $index = 1;
 
     if ($_debug) {
-	print STDERR "parsing $input_file...\n";
+	print STDERR "\nparsing $input_file...\n\n";
     }
     
     my %features;
@@ -78,6 +80,29 @@ foreach my $input_file (@input_files) {
 	    my $end    = $5;
 	    my $score  = $6;
 	    my $feature_id;
+	    my $dbxref;
+	    my $attributes = $9;
+	    if (defined $attributes) {
+		
+		chomp $attributes;
+		
+		print STDERR "attributes defined, $attributes\n";
+		
+		if ($attributes =~ /^ID=([^;]+);*.*/) {
+		    $feature_id = $1;
+		    if ($_debug) {
+			print STDERR "feature_id: $feature_id\n";
+		    }
+		}
+		if ($attributes =~ /Dbxref=([^;]+);*.*/) {
+		    $dbxref     = $1;
+		    $dbxref = convert_into_url ($dbxref);
+		    if ($_debug) {
+			print STDERR "dbxref: $dbxref\n";
+		    }
+		}
+		
+	    }
 	    
 	    if ($_debug) {
 		print STDERR "start, $start\n";
@@ -98,9 +123,11 @@ foreach my $input_file (@input_files) {
 	    
 	    my $feature = {
 		feature_type => $feature_type,
-		start => $start,
-		end   => $end,
-		score => $score,
+		start  => $start,
+		end    => $end,
+		score  => $score,
+		feature_id => $feature_id,
+		dbxref => $dbxref,
 	    };
 	    
 	    $features{$index} = $feature;
@@ -150,8 +177,15 @@ foreach my $input_file (@input_files) {
 	seq_score  => $seq_score,
     };
     
-    $sequences{$seq_id} = $sequence;
+    my $seq_index = $seq_id . $file_index;
+    $sequences{$seq_index} = $sequence;
     
+    $file_index ++;
+    
+}
+
+if ($_debug) {
+    print STDERR "\nparsing done\n\n";
 }
 
 $gap = floor ($seq_length / 20);
@@ -163,7 +197,8 @@ if ($_debug) {
 # HTML generation
 
 my $width = 1032;
-my $length_feature = 1;
+my $length_feature = 10;
+my $length_feature_width = $length_feature * $width / $seq_length;
 
 print "<html>\n<body BGCOLOR='#D5F0FF'>\n";
 print "<CENTER><BIG><B>Features block diagrams</B></BIG></CENTER><HR>\n";
@@ -171,11 +206,16 @@ print "<CENTER><BIG><B>Features block diagrams</B></BIG></CENTER><HR>\n";
 print "<TABLE SUMMARY='feature diagrams' BORDER=1 ALIGN=CENTER>\n";
 print "<TR><TH>Name<TH>Lowest<BR>$score_type<TH ALIGN=LEFT>&nbsp;&nbsp; Features\n";
 
-my @seq_ids = keys ( %sequences);
-foreach my $seq_id (@seq_ids) {
+my @seq_id_indexes = keys ( %sequences);
+foreach my $seq_id_index (@seq_id_indexes) {
     
-    my $sequence_href = $sequences{$seq_id};
+    if ($_debug) {
+	print STDERR "\nprocessing next track...\n\n";
+    }
     
+    my $sequence_href = $sequences{$seq_id_index};
+    
+    my $seq_id    = $sequence_href->{seq_id};
     my $seq_score = $sequence_href->{seq_score} || "&nbsp";
     
     print "<TR>\n";
@@ -194,9 +234,9 @@ foreach my $seq_id (@seq_ids) {
     print "<TABLE SUMMARY='diagram $seq_id' WIDTH=$width BORDER=0 ALIGN=LEFT CELLSPACING=0 CELLPADDING=0><TR ALIGN=CENTER>\n";
     if (keys %$features_href > 0) {
 	
-	my $start_reference = 1;
+	my $start_reference = 0;
 	
-	# Loop over the features but in the order of position onto the sequence from 5' to 3' !!!!!!!!!!!
+	# Loop over the features but in the order of positions onto the sequence from 5' to 3' !!!!!!!!!!!
 	
 	foreach my $seq_start (@$seq_starts_aref) {
 	    my $feature_indexes_aref = $feature_index_by_seq_starts_href->{$seq_start};
@@ -206,7 +246,8 @@ foreach my $seq_id (@seq_ids) {
 		my $feature = $features_href->{$feature_index};
 		my $start   = $feature->{start};
 		my $end     = $feature->{end};
-		$before_feature_width = floor (($start - $start_reference) * $width / $seq_length);
+		my $dbxref  = $feature->{dbxref};
+		$before_feature_width = floor (($start - 1 - $start_reference) * $width / $seq_length);
 		
 		if ($_debug) {
 		    print STDERR "feature index, $feature_index\n";
@@ -215,12 +256,17 @@ foreach my $seq_id (@seq_ids) {
 		}
 		
 		print "<TD WIDTH=$before_feature_width><HR SIZE=4 NOSHADE>\n";
-		print "<TD CLASS='c0' WIDTH=$length_feature>+$feature_index\n";
+		if (defined $dbxref) {
+		    print "<TD CLASS='c0' WIDTH=$length_feature_width><a href=\"$dbxref\" target=\"_blank\">+$feature_index</a>\n";
+		}
+		else {
+		    print "<TD CLASS='c0' WIDTH=$length_feature_width>+$feature_index\n";
+		}
 		
-		$start_reference = $start;
+		$start_reference = $start + $length_feature;
 	    }
 	    
-	    my $remaining = $width - $before_feature_width - $length_feature;
+	    my $remaining = floor ($width - ($start_reference * $width / $seq_length));
 	    
 	    if ($_debug) {
 		print STDERR "remaining, $remaining\n";
@@ -278,3 +324,31 @@ sub is_in {
     
     return 0;
 }
+
+
+sub convert_into_url {
+    my ($dbxref) = @_;
+    
+    if ($dbxref =~ /transfac/i) {
+	$dbxref =~ /Transfac:(.+)/;
+	my $id = $1;
+	
+	print STDERR "identifier, $id\n";
+
+	$dbxref = "http://www.gene-regulation.com/cgi-bin/pub/databases/transfac/search.cgi?TABLE_FIELD=ALL&TABLE_NAME=factor&TABLE_DESC=Factor&STATUS=SECOND&SEARCH_TERM=$id";
+    }
+    elsif ($dbxref =~ /jaspar/i) {
+	$dbxref =~ /Jaspar:(.+)/;
+	my $id = $1;
+	
+	print STDERR "identifier, $id\n";
+	
+	$dbxref = "http://jaspar.cgb.ki.se/cgi-bin/jaspar_db.pl?rm=present&Name=$id";
+    }
+    else {
+	print STDERR "Dbxref unknown, $dbxref!\n";
+	return undef;
+    }
+    
+}
+
