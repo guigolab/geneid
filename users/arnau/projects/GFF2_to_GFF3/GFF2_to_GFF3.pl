@@ -34,6 +34,19 @@ open FILE, "<$in_file" or die "can't open input file, $in_file!\n";
 while (<FILE>) {
     my $line = $_;
     
+    # Meta-alignment Global score
+    
+    if ($line =~ /^# Maximum similarity/) {
+
+	if ($_debug) {
+	    print STDERR "Sequence score similarity information\n";
+	}
+	
+	chomp $line;
+	
+	push (@gff_features, $line);
+    }
+    
     # Sequence information
     
     if ($line =~ /^# Sequence ([^\s]+)\s\D+(\d+) bps/) {
