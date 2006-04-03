@@ -5,6 +5,10 @@
 use strict;
 use POSIX qw(ceil floor);
 
+# Use a namespace somehow
+# e.g. in GFF3 => Ensembl:ENSG00000172831
+my $_ensembl_dbxref = "http://www.ensembl.org/Homo_sapiens/geneview?gene=";
+
 my $_debug = 0;
 my @input_files = @ARGV;
 
@@ -18,8 +22,8 @@ my $score_type = "Score";
 # Get this from the command line in case of meta-alignment or MatScan !!!
 
 my $seq_start = 1;
-my $seq_end = 500;
-my $seq_length = 500;
+my $seq_end = 1000;
+my $seq_length = 1000;
 
 # Default
 my $gap   = 25;
@@ -74,6 +78,16 @@ foreach my $input_file (@input_files) {
 	    }
 	    
 	    $seq_id    = $1;
+	    
+	    if (! defined $seq_id) {
+		print STDERR "sequence identifier is not defined, $line\n";
+	    }
+	    else {
+		if ($_debug) {
+		    print STDERR "seq id, $seq_id\n";
+		}
+	    }
+	    
 	    my $method = $2;
 	    my $feature_type = $3;
 	    my $start  = $4;
@@ -86,7 +100,9 @@ foreach my $input_file (@input_files) {
 		
 		chomp $attributes;
 		
-		print STDERR "attributes defined, $attributes\n";
+		if ($_debug) {
+		    print STDERR "attributes defined, $attributes\n";
+		}
 		
 		if ($attributes =~ /^ID=([^;]+);*.*/) {
 		    $feature_id = $1;
@@ -165,23 +181,31 @@ foreach my $input_file (@input_files) {
 	print STDERR "nb features, $nb_features\n";
     }
     
-    # Sort the sequence starts
-    @seq_starts = sort {$a <=> $b} @seq_starts;
-    
-    my $sequence = {
-	seq_id     => $seq_id,
-	seq_length => $seq_length,
-	features   => \%features,
-	seq_starts => \@seq_starts,
-	feature_index_by_seq_starts => \%feature_index_by_seq_starts,
-	seq_score  => $seq_score,
-    };
-    
-    my $seq_index = $seq_id . $file_index;
-    $sequences{$seq_index} = $sequence;
+    if ($nb_features > 0) {
+	# Sort the sequence starts
+	@seq_starts = sort {$a <=> $b} @seq_starts;
+	
+	my $sequence = {
+	    seq_id     => $seq_id,
+	    seq_length => $seq_length,
+	    features   => \%features,
+	    seq_starts => \@seq_starts,
+	    feature_index_by_seq_starts => \%feature_index_by_seq_starts,
+	    seq_score  => $seq_score,
+	};
+	
+	if ($_debug) {
+	    print STDERR "file index, $file_index, seq id, $seq_id\n";
+	}
+	
+	my $seq_index = $seq_id . $file_index;
+	$sequences{$seq_index} = $sequence;
+    }
+    else {
+	print STDERR "file, $input_file, doesn't have any feature!\n";
+    }
     
     $file_index ++;
-    
 }
 
 if ($_debug) {
@@ -196,17 +220,57 @@ if ($_debug) {
 
 # HTML generation
 
-my $width = 1032;
+# my $width = 1032;
+my $width = 2064;
 my $length_feature = 10;
 my $length_feature_width = $length_feature * $width / $seq_length;
 
-print "<html>\n<body BGCOLOR='#D5F0FF'>\n";
+print "<html>\n";
+
+print "<head>\n";
+print "<TITLE>GFF3_2_HTML</TITLE>\n";
+print "<STYLE type='text/css'>
+  TD.id { color: black; font-size:8pt;}
+  TD.invisible { color: '#D5F0FF'; }
+  TD.c0 { background: aqua; color: black; font-size:5pt;}
+  TD.black { color: black; }
+  TH.black { color: black; }
+</STYLE>\n";
+
+print "<body BGCOLOR='#D5F0FF'>\n";
 print "<CENTER><BIG><B>Features block diagrams</B></BIG></CENTER><HR>\n";
 
 print "<TABLE SUMMARY='feature diagrams' BORDER=1 ALIGN=CENTER>\n";
 print "<TR><TH>Name<TH>Lowest<BR>$score_type<TH ALIGN=LEFT>&nbsp;&nbsp; Features\n";
 
+# Scale here now !!
+print "<TR><TH CLASS='black' COLSPAN=2 ROWSPAN=1 ALIGN=LEFT>SCALE\n";
+print "<TD><TABLE SUMMARY='scale' WIDTH=$width BORDER=0 ALIGN=LEFT CELLSPACING=0 CELLPADDING=0>\n";
+print "<TR ALIGN=CENTER>\n";
+
+# The scale
+
+print "<TD CLASS='black' WIDTH=$gap_width_adjusted ALIGN=LEFT>|</TD>\n";
+for (my $i =1; $i < 20; $i++) {
+    print "<TD CLASS='black' WIDTH=$gap_width ALIGN=LEFT>|</TD>\n";
+}
+
+print "<TR>\n";
+
+print "<TD CLASS='black' WIDTH=$gap_width_adjusted ALIGN=LEFT>$seq_start</TD>\n";
+
+for (my $i =1; $i < 20; $i++) {
+    my $coordinate = $seq_start + ($i * $gap);
+    print "<TD CLASS='black' WIDTH=$gap_width ALIGN=LEFT>$coordinate</TD>\n";
+}
+print "</TABLE></TD>\n";
+###########################################    
+
 my @seq_id_indexes = keys ( %sequences);
+
+# Sort them!
+@seq_id_indexes = sort {$a cmp $b} @seq_id_indexes;
+
 foreach my $seq_id_index (@seq_id_indexes) {
     
     if ($_debug) {
@@ -217,11 +281,13 @@ foreach my $seq_id_index (@seq_id_indexes) {
     
     my $seq_id    = $sequence_href->{seq_id};
     my $seq_score = $sequence_href->{seq_score} || "&nbsp";
-    
+
     print "<TR>\n";
     
-    print "<TD>$seq_id\n";
-    print "<TD ALIGN=RIGHT NOWRAP>$seq_score\n";
+    my $ensembl_dbxref = $_ensembl_dbxref . $seq_id;
+    
+    print "<TD CLASS=\"id\"><a href=\"$ensembl_dbxref\" target=\"_blank\">$seq_id</a>\n";
+    print "<TD CLASS=\"id\" ALIGN=RIGHT NOWRAP>$seq_score\n";
     
     my $features_href   = $sequence_href->{features};
     my $feature_index_by_seq_starts_href = $sequence_href->{feature_index_by_seq_starts};
@@ -247,6 +313,8 @@ foreach my $seq_id_index (@seq_id_indexes) {
 		my $start   = $feature->{start};
 		my $end     = $feature->{end};
 		my $dbxref  = $feature->{dbxref};
+		my $feature_id = $feature->{feature_id};
+		
 		$before_feature_width = floor (($start - 1 - $start_reference) * $width / $seq_length);
 		
 		if ($_debug) {
@@ -258,9 +326,11 @@ foreach my $seq_id_index (@seq_id_indexes) {
 		print "<TD WIDTH=$before_feature_width><HR SIZE=4 NOSHADE>\n";
 		if (defined $dbxref) {
 		    print "<TD CLASS='c0' WIDTH=$length_feature_width><a href=\"$dbxref\" target=\"_blank\">+$feature_index</a>\n";
+		    # print "<TD CLASS='c0' WIDTH=$length_feature_width><a href=\"$dbxref\" target=\"_blank\">$feature_id</a>\n";
 		}
 		else {
 		    print "<TD CLASS='c0' WIDTH=$length_feature_width>+$feature_index\n";
+		    # print "<TD CLASS='c0' WIDTH=$length_feature_width>$feature_id\n";
 		}
 		
 		$start_reference = $start + $length_feature;
@@ -285,23 +355,23 @@ foreach my $seq_id_index (@seq_id_indexes) {
 }
 
 # Scale here now !!
-print "<TR><TH CLASS='blue' COLSPAN=2 ROWSPAN=2 ALIGN=LEFT>SCALE\n";
+print "<TR><TH CLASS='black' COLSPAN=2 ROWSPAN=2 ALIGN=LEFT>SCALE\n";
 print "<TD><TABLE SUMMARY='scale' WIDTH=$width BORDER=0 ALIGN=LEFT CELLSPACING=0 CELLPADDING=0><TR ALIGN=CENTER>\n";
 
 # The scale
 
-print "<TD CLASS='blue' WIDTH=$gap_width_adjusted ALIGN=LEFT>|</TD>\n";
+print "<TD CLASS='black' WIDTH=$gap_width_adjusted ALIGN=LEFT>|</TD>\n";
 for (my $i =1; $i < 20; $i++) {
-    print "<TD CLASS='blue' WIDTH=$gap_width ALIGN=LEFT>|</TD>\n";
+    print "<TD CLASS='black' WIDTH=$gap_width ALIGN=LEFT>|</TD>\n";
 }
 
 print "<TR>\n";
 
-print "<TD CLASS='blue' WIDTH=$gap_width_adjusted ALIGN=LEFT>$seq_start</TD>\n";
+print "<TD CLASS='black' WIDTH=$gap_width_adjusted ALIGN=LEFT>$seq_start</TD>\n";
 
 for (my $i =1; $i < 20; $i++) {
     my $coordinate = $seq_start + ($i * $gap);
-    print "<TD CLASS='blue' WIDTH=$gap_width ALIGN=LEFT>$coordinate</TD>\n";
+    print "<TD CLASS='black' WIDTH=$gap_width ALIGN=LEFT>$coordinate</TD>\n";
 }
 print "</TABLE>\n";
 
@@ -333,15 +403,19 @@ sub convert_into_url {
 	$dbxref =~ /Transfac:(.+)/;
 	my $id = $1;
 	
-	print STDERR "identifier, $id\n";
-
+	if ($_debug) {
+	    print STDERR "identifier, $id\n";
+	}
+	
 	$dbxref = "http://www.gene-regulation.com/cgi-bin/pub/databases/transfac/search.cgi?TABLE_FIELD=ALL&TABLE_NAME=factor&TABLE_DESC=Factor&STATUS=SECOND&SEARCH_TERM=$id";
     }
     elsif ($dbxref =~ /jaspar/i) {
 	$dbxref =~ /Jaspar:(.+)/;
 	my $id = $1;
 	
-	print STDERR "identifier, $id\n";
+	if ($_debug) {
+	    print STDERR "identifier, $id\n";
+	}
 	
 	$dbxref = "http://jaspar.cgb.ki.se/cgi-bin/jaspar_db.pl?rm=present&Name=$id";
     }
