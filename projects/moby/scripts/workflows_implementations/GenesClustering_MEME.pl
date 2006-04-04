@@ -105,7 +105,7 @@ BEGIN {
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 1;
+my $_debug = 0;
 
 ##################################################################
 #
@@ -705,15 +705,15 @@ else {
 }
 
 
-# inbHierarchicalCluster
+# runHierarchicalClustering
 
 print STDERR "Fifth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
 
 if ($_debug) {
-  print STDERR "\nExecuting inbHierarchicalCluster...\n\n";
+  print STDERR "\nExecuting runHierarchicalClustering...\n\n";
 }
 
-$serviceName   = "inbHierarchicalCluster";
+$serviceName   = "runHierarchicalClustering";
 $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
 $articleName   = $parameters{$serviceName}->{articleName} || "";
 
@@ -738,7 +738,7 @@ if ($newick_tree eq "") {
     exit 1;
 }
 
-$input_xml_aref = parseResults ($moby_response, "Clustering");
+$input_xml_aref = parseResults ($moby_response, "HierarchicalClustering");
 if (defined $output_dir) {
   saveResults ($moby_response, "Newick_Text", "newick", $output_dir);
 }
@@ -754,11 +754,11 @@ $input_xml =  $input_xml_aref->[0];
 
 print STDERR "Clustering done!\n\n";
 
-# inbTreeView
+# plotClustersTree
 
 print STDERR "Generating a picture of the clustering tree...\n";
 
-$serviceName   = "inbTreeView";
+$serviceName   = "plotClustersTree";
 $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
 $articleName   = $parameters{$serviceName}->{articleName} || "";
 
@@ -774,10 +774,7 @@ if ($_debug) {
 	print STDERR "\n";
 }
 
-if (defined $output_dir) {
-  saveResults ($moby_response, "b64_Encoded_PNG", "clustering_tree", $output_dir);
-}
-my $picture_b64_aref = parseTextContent ($moby_response, "b64_Encoded_PNG");
+my $picture_b64_aref = parseTextContent ($moby_response, "Image_Encoded");
 my $picture_b64 = $picture_b64_aref->[0];
 
 # Convert in to a picture and store into a file
@@ -788,6 +785,11 @@ print STDERR "Picture done\n\n";
 print STDERR "Workflow has terminated.\n";
 if (! defined $output_dir) {
     print $picture;
+}
+else {
+    open FILE, ">$output_dir/clustering_tree.png" or die "can't open in write access file, '$output_dir/clustering_tree.png'!\n";
+    print FILE $picture;
+    close FILE;
 }
 
 my $t2 = Benchmark->new ();
