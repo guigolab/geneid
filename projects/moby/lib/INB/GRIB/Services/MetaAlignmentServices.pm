@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.21 2006-03-21 17:52:44 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.22 2006-04-18 10:28:15 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -444,9 +444,11 @@ sub _do_query_MetaAlignment {
     # la podriamos realizar en una funcion a parte si fuese compleja.
 
     if (defined $meta_report) {
-
-	print STDERR "meta output defined\n";
-    
+	
+	if ($_debug) {
+	    print STDERR "meta output defined\n";
+	}
+	
 	my $namespace = "";
 	
 	# Build the Moby object
@@ -465,7 +467,9 @@ PRT
     }
     else {
 	
-	print STDERR "meta output not defined\n";
+	if ($_debug) {
+	    print STDERR "meta output not defined\n";
+	}
 	
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
     }
