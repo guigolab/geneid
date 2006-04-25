@@ -67,6 +67,9 @@ if ($ARGV[0] and $ARGV[0] =~ /^--daemon$/) {
 } else {
     $x = new SOAP::Transport::HTTP::CGI || die "Can't get SOAP: $!\n";
 }
+# Compression handling
+# How does that work ????????
+# $x->options({compress_threshold => 1});
 
 ##############################################################################
 # Stats reporting into a file
@@ -117,9 +120,13 @@ my $serviceName = "";
 my $URI         = "genome.imim.es";
 my $IP_address  = $ENV{REMOTE_ADDR};
 my $remote_host = $ENV{REMOTE_HOST};
+my $unique_id   = int (rand (9)) . int (rand (9));
+my $request_id  = $starttime . "_" . $unique_id;
 
-# print STDERR "User request from remote host, $remote_host($IP_address)\n";
-# print STDERR "Started at, $starttime\n";
+# Disable for the time being until i find out how to propagate the request id...
+
+# $moby_logger->info ("$request_id: User request from remote host, $remote_host ($IP_address)");
+# $moby_logger->info ("$request_id: Started at, $starttime");
 
 $moby_logger->info ("User request from remote host, $remote_host ($IP_address)");
 $moby_logger->info ("Started at, $starttime");
@@ -131,8 +138,8 @@ $x->on_action(sub {
     $action =~ /^([^#]+)#(\w+)/;
     # die "SOAPAction shall match 'uri#method'\n" if $action ne join '#', @_;
     $serviceName = $2;
-    
-    # print STDERR "Executing $serviceName service hosted by service provider authority, $URI\n";
+
+    # $moby_logger->info ("$request_id: Executing $serviceName service hosted by service provider authority, $URI");
     $moby_logger->info ("Executing $serviceName service hosted by service provider authority, $URI");
 });
 
@@ -200,8 +207,8 @@ my $endtime;
   $endtime = sprintf "%s%2.2d%2.2d%2.2d%2.2d%2.2d", $year, $mon, $mday, $hour, $min, $sec;
 }
 
-# print STDERR "Ending at, $endtime\n";
-# print STDERR "Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)), "\n";
+# $moby_logger->info ("$request_id: Ending at, $endtime");
+# $moby_logger->info ("$request_id: Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
 $moby_logger->info ("Ending at, $endtime");
 $moby_logger->info ("Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
 $moby_logger->info ("#");
