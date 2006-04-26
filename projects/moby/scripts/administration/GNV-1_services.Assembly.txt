@@ -97,7 +97,7 @@ ATAAATAAAAAAAAAAAAAAAAAAAAGAGGCGGC
 
 * runScreenVector
 				      serviceType  => "Pairwise_Sequence_Comparison",
-				      description  => "Runs cross-match to screen out vector sequences from a DNA sequence. The vector sequences dataset is stored internally.",
+				      description  => "Runs cross_match to screen out vector sequences from a DNA sequence. The vector sequences dataset is stored internally.",
 				      input		=> [
 							    ['sequence', ['DNASequence' => \@namespaces]], # simple
 							    ['base_quality_data', ['FASTA_Base_Quality' => \@namespaces]] # simple
@@ -147,7 +147,7 @@ ATAAATAAAAAAAAAAAAAAAAAAAAGAGGCGGC
 * runPhrap
 
 				      serviceType  => "Sequence_Assembly",
-				      description  => "Assembles a set of DNA sequences",
+				      description  => "Runs Phrap to Assemble a set of DNA sequences",
 				      input		=> [
 							    ['sequences', [['DNASequence' => \@namespaces]]], # collection
 							    ],
@@ -168,7 +168,7 @@ ATAAATAAAAAAAAAAAAAAAAAAAAGAGGCGGC
 * runPhrapWithQualityData
 
 				      serviceType  => "Sequence_Assembly",
-				      description  => "Assembles a set of DNA sequences",
+				      description  => "Runs Phrap to assemble a set of DNA sequences, taking into account base quality data.",
 				      input		=> [
 							    ['sequences', [['DNASequence' => \@namespaces]]], # collection
 							    ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]] # simple
