@@ -1,0 +1,286 @@
+********************
+* New objects
+********************
+
+  * chromatogram (Description: binary format to represent trace data)
+    is-a Object
+
+  * ABI is-a chromatogram
+  * ESD is-a chromatogram
+  * SCF is-a chromatogram
+
+  * FASTA_Base_Quality (Description: sequence base quality data in FASTA format
+    
+    is-a FASTA
+
+  * FASTA_Base_Quality_multi (Description: sequences base quality data in FASTA format)
+
+    is-a FASTA_Base_Quality
+
+  * Ace_Text (Description: data format for assembly information)
+    is-a text_formatted
+
+********************
+* New service types
+********************
+
+  * "Base_Calling"
+  * "Sequence_Assembly"
+  * "DNA_Repeat_Masking"
+  * "DNA_Low_Complexity_Masking"
+
+********************
+* New services
+********************
+
+@namespaces = ();
+
+* runPhred
+
+				      serviceType  => "Base_Calling",
+				      description  => "Phred writes the base calls from a chromatogram and returns a DNA sequence and FASTA base quality data",
+				      input		=> [
+							    ['trace', ['chromatogram' => \@namespaces]] # simple
+							   ],
+				      output		=> [
+							    ['sequence', ['CommentedDNASequence' => \@namespaces]], # simple
+							    ['base_quality_data', ['FASTA_Base_Quality' => \@namespaces]] # simple
+							   ],
+
+* runPhredCollection
+
+				      serviceType  => "Base_Calling",
+				      description  => "Phred writes the base calls from a set of chromatograms and returns a set of DNA sequences and FASTA base quality data",
+				      input		=> [
+							    ['traces', [['chromatogram' => \@namespaces]]] # collection of one object type
+							   ],
+				      output		=> [
+							    ['sequences', [['CommentedDNASequence' => \@namespaces]]], # collection
+							    ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]] # simple
+							   ],
+
+e.g. in FASTA format, an EST sequence could look like:
+"
+>EST_identifier DIRECTION: fwd CHEM: term DYE: big TEMPLATE: clone_name
+AAACAGTGTGACGACGATTCTATGCAAATCGAAAAAAGCAGCGGCGGCGTAAAGACTACG
+GCAATCATCGTTCACTTCTAATATAAAAAAGTGTGTATATTTGTTGTAAAAAATTGATAA
+ATTAAACGAGAAATAGAACCGAAATTGGAAAATAAATCAGTGGACTCTTCTGTATCAAAC
+ATCAAAAACATATAAGTGTGTAAAAGGAGTCAGCAACAATTTCCTTTGTCTAGATAAAAT
+TTTGTGGAAACCAAAAAAGAAGAAAAAAAAAGAAAAAACACAAAGAACTAACCCACTCGG
+AGATAATTTTTACACAATGTCCGAACGTGAAAATAATGTTTACAAGGCTAAATTGGCCGA
+ACAAGCAGAGCGTTACGATGAAATGGTTGAGGCCATGAAAAAGGTTGCCTCCATGGATGT
+GGAATTAACTGTTGAGGAGCGTAACTTATTATCGGTAGCCTATAAGAATGTAATTGGAGC
+CCGACGTGCTTCTTGGCGTATTATTACTTCCATCGAGCAGAAGGAAGAAAATAAGGGAGC
+CGAAGAAAAGCTCGAGATGATTAAAACTTATCGAGGCCAAGTAGAAAAAGAACTGCGCGA
+AATATGTTCGGATATACTGAATGTTCTTGAAAAACATCTCATTCCATGTGCCACAACCGG
+CGAAAGCAAAGTATTTTATTACAAAATGAAAGGCGATTATCATCGCTATTTGGCTGAATT
+TGCTACCGGTTCGGACCGCAAAGATGCTGCCGAAAATTCATTGATTGCATATAAAGCAGC
+CAGCGATATTGCCATGAATGATCTGCCGCCGACACATCCCATACGTTTGGGGCTGGCTCT
+TAATTTCTCGGTATTTTATTATGAAATTCTCAACTCGCCCGATCGTGCTTGCCGATTGGC
+GAAAGCAGCTTTTGATGATGCCATTGCTGAATTGGATACCTTAAGCGAAGAGAGCTACAA
+AGACTCTACCCTAATTATGCAACTGTTAAGGGATAATCTGACATTATGGACGTCTGATAT
+GCAAGCCGATGGTGATGGCGAACAAAAAGAACAAATTCAAGATGTCGAGGATCAAGATGT
+GTCGTAATTTAAGTAAACTCCCCCAACTCCACAAACCTTCAAATAAAACAAAATAATACT
+GTATGCATTTCTTACTTTTAAAAAATTGTGCTCCTATTACGATTACTGCTCCTTTTTATT
+TTTCTCTCTCTCTCCCTCTCTTTCTCAATCTTTGTCTTGCTATTTTCTTTGTCCTTCTTA
+AACAAAATTTTCTTTAATTTCGGCCACAATCAAACCAAATCACAACCAAACGCCCACCAC
+CTACTGCTACGGCTGTTGGCCTAATCCTCAACAAGCAGCGTTTTAATAATAGTAATAACA
+AGAAGAAGAACAAGCAGCATGATTTTTTGTGTAGAAACTACATCCATTAAAATGTATATC
+AGTTGCCAATCTCCTTCCCCACTCCACCCAATTCTCAATTTAATACCGATTAGTTGCTAC
+CTCTTACAGTTTGTTTTTCCAAATTCATTTTTATTTTCGAAACCTTGTTGCCCAAGTCTC
+TAATCACCATCAAACACGCCCATATTTCAATGTGTGAAAATTTTTTGCATTAATACACAT
+AAATATAATATAACAATTATAAAACAGAATATATATATTATTAAAGCAACAACCACAACA
+AAAACAAAAACATCAGAATAATAATAATAATAATAAAAAAAAAAAAAAAAACAAAAATTA
+ATAAATAAAAAAAAAAAAAAAAAAAAGAGGCGGC
+"
+
+
+* runScreenVector
+				      serviceType  => "Pairwise_Sequence_Comparison",
+				      description  => "Runs cross-match to screen out vector sequences from a DNA sequence. The vector sequences dataset is stored internally.",
+				      input		=> [
+							    ['sequence', ['DNASequence' => \@namespaces]], # simple
+							    ['base_quality_data', ['FASTA_Base_Quality' => \@namespaces]] # simple
+							   ],
+				      output		=> [
+							    ['screen_sequence', ['DNASequence' => \@namespaces]], # simple
+							   ],
+				      secondary	=> {
+					  'minmatch' => {
+					      datatype => 'Integer',
+					      min      => 0,
+					      default => '12',
+					  },
+					  'minscore' => {
+					      datatype => 'Integer',
+					      min      => 0,
+					      default => '20',
+					  },
+				      }
+
+
+* runScreenVectorCollection
+
+				      serviceType  => "Pairwise_Sequence_Comparison",
+				      description  => "Runs cross-match to screen out vector sequences from a set of DNA sequences. The vector sequences dataset is stored internally.",
+				      input		=> [
+							    ['sequences', [['DNASequence' => \@namespaces]]], # collection
+							    ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]] # simple
+							   ],
+				      output		=> [
+							    ['screen_sequences', [['DNASequence' => \@namespaces]]],	# collection
+							   ],
+				      secondary	=> {
+					  'minmatch' => {
+					      datatype => 'Integer',
+					      min      => 0,
+					      default => '12',
+					  },
+					  'minscore' => {
+					      datatype => 'Integer',
+					      min      => 0,
+					      default => '20',
+					  },
+				      }
+
+
+* runPhrap
+
+				      serviceType  => "Sequence_Assembly",
+				      description  => "Assembles a set of DNA sequences",
+				      input		=> [
+							    ['sequences', [['DNASequence' => \@namespaces]]], # collection
+							    ],
+				      output		=> [
+							    ['assembly', ['Ace_Text' => \@namespaces]], # simple
+							    ['contig_and_singlet_sequences', [['CommentedDNASequence' => \@namespaces]]], # collection
+							   ],
+				      secondary	=> {
+					  'node_space' => {
+					      datatype => 'Integer',
+					      default => 4,
+					  'node_seg' => {
+					      datatype => 'Integer',
+					      default => 8,
+					  },
+				      }
+
+* runPhrapWithQualityData
+
+				      serviceType  => "Sequence_Assembly",
+				      description  => "Assembles a set of DNA sequences",
+				      input		=> [
+							    ['sequences', [['DNASequence' => \@namespaces]]], # collection
+							    ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]] # simple
+							    ],
+				      output		=> [
+							    ['assembly', ['Ace_Text' => \@namespaces]], # simple
+							    ['contig_and_singlet_sequences', [['CommentedDNASequence' => \@namespaces]]], # collection
+							   ],
+				      secondary	=> {
+					  'node_space' => {
+					      datatype => 'Integer',
+					      default => 4,
+					  'node_seg' => {
+					      datatype => 'Integer',
+					      default => 8,
+					  },
+
+NB: 2 outputs
+    * ace file for visualization purposes
+    * a set of commented DNA sequences with a desscription specifying singlet or contig sequence type and if it is a cluster, list and number of members (ie a list of EST sequences)
+
+    * important, each reported sequence (singlet or contig) should be assigned a unique identifier - or shall we do this assignment later on in the project ?
+    * phrap reports sometimes a cluster of one member, this should be converted into one singleton sequence.
+
+e.g. in FASTA format, a contig sequence could look like:
+"
+>Contig-1234 CONTIG of 3 members, constructed from EST1.q1k, EST1.p1k, EST2.q1k
+AAACAGTGTGACGACGATTCTATGCAAATCGAAAAAAGCAGCGGCGGCGTAAAGACTACG
+GCAATCATCGTTCACTTCTAATATAAAAAAGTGTGTATATTTGTTGTAAAAAATTGATAA
+ATTAAACGAGAAATAGAACCGAAATTGGAAAATAAATCAGTGGACTCTTCTGTATCAAAC
+ATCAAAAACATATAAGTGTGTAAAAGGAGTCAGCAACAATTTCCTTTGTCTAGATAAAAT
+TTTGTGGAAACCAAAAAAGAAGAAAAAAAAAGAAAAAACACAAAGAACTAACCCACTCGG
+AGATAATTTTTACACAATGTCCGAACGTGAAAATAATGTTTACAAGGCTAAATTGGCCGA
+ACAAGCAGAGCGTTACGATGAAATGGTTGAGGCCATGAAAAAGGTTGCCTCCATGGATGT
+GGAATTAACTGTTGAGGAGCGTAACTTATTATCGGTAGCCTATAAGAATGTAATTGGAGC
+CCGACGTGCTTCTTGGCGTATTATTACTTCCATCGAGCAGAAGGAAGAAAATAAGGGAGC
+CGAAGAAAAGCTCGAGATGATTAAAACTTATCGAGGCCAAGTAGAAAAAGAACTGCGCGA
+AATATGTTCGGATATACTGAATGTTCTTGAAAAACATCTCATTCCATGTGCCACAACCGG
+CGAAAGCAAAGTATTTTATTACAAAATGAAAGGCGATTATCATCGCTATTTGGCTGAATT
+TGCTACCGGTTCGGACCGCAAAGATGCTGCCGAAAATTCATTGATTGCATATAAAGCAGC
+CAGCGATATTGCCATGAATGATCTGCCGCCGACACATCCCATACGTTTGGGGCTGGCTCT
+TAATTTCTCGGTATTTTATTATGAAATTCTCAACTCGCCCGATCGTGCTTGCCGATTGGC
+GAAAGCAGCTTTTGATGATGCCATTGCTGAATTGGATACCTTAAGCGAAGAGAGCTACAA
+AGACTCTACCCTAATTATGCAACTGTTAAGGGATAATCTGACATTATGGACGTCTGATAT
+GCAAGCCGATGGTGATGGCGAACAAAAAGAACAAATTCAAGATGTCGAGGATCAAGATGT
+GTCGTAATTTAAGTAAACTCCCCCAACTCCACAAACCTTCAAATAAAACAAAATAATACT
+GTATGCATTTCTTACTTTTAAAAAATTGTGCTCCTATTACGATTACTGCTCCTTTTTATT
+TTTCTCTCTCTCTCCCTCTCTTTCTCAATCTTTGTCTTGCTATTTTCTTTGTCCTTCTTA
+AACAAAATTTTCTTTAATTTCGGCCACAATCAAACCAAATCACAACCAAACGCCCACCAC
+CTACTGCTACGGCTGTTGGCCTAATCCTCAACAAGCAGCGTTTTAATAATAGTAATAACA
+AGAAGAAGAACAAGCAGCATGATTTTTTGTGTAGAAACTACATCCATTAAAATGTATATC
+AGTTGCCAATCTCCTTCCCCACTCCACCCAATTCTCAATTTAATACCGATTAGTTGCTAC
+CTCTTACAGTTTGTTTTTCCAAATTCATTTTTATTTTCGAAACCTTGTTGCCCAAGTCTC
+TAATCACCATCAAACACGCCCATATTTCAATGTGTGAAAATTTTTTGCATTAATACACAT
+AAATATAATATAACAATTATAAAACAGAATATATATATTATTAAAGCAACAACCACAACA
+AAAACAAAAACATCAGAATAATAATAATAATAATAAAAAAAAAAAAAAAAACAAAAATTA
+ATAAATAAAAAAAAAAAAAAAAAAAAGAGGCGGC
+"
+
+* runRepeatMasker
+
+				      serviceType  => "DNA_Repeat_Masking",
+				      description  => "Masks repeat sequences within a DNA sequence",
+				      input		=> [
+							    ['sequence', ['DNASequence' => \@namespaces]], # simple
+							    ],
+				      output		=> [
+							    ['masked_sequence', ['DNASequence' => \@namespaces]], # simple
+							   ],
+				      secondary	=> {
+					  'species' => {
+					      datatype => 'String',
+					      enum     => ['None', 'human', 'mouse', 'rat', 'cow', 'pig', 'cat', 'dog', 'rodentia', 'carnivore', 'mammal', 'chicken', 'fugu', 'danio', 'drosophila', 'anopheles', 'elegans', 'diatoaea', 'artiodactyl', 'arabidopsis', 'rice', 'wheat', 'maize'],
+					      default  => 'None',
+					  },
+				      }
+
+* runRepeatMaskerCollection
+
+				      serviceType  => "DNA_Repeat_Masking",
+				      description  => "Masks repeat sequences within a set of DNA sequences",
+				      input		=> [
+							    ['sequences', [['DNASequence' => \@namespaces]]], # collection
+							    ],
+				      output		=> [
+							    ['masked_sequences', [['DNASequence' => \@namespaces]]], # collection
+							   ],
+				      secondary	=> {
+					  'species' => {
+					      datatype => 'String',
+					      enum     => ['None', 'human', 'mouse', 'rat', 'cow', 'pig', 'cat', 'dog', 'rodentia', 'carnivore', 'mammal', 'chicken', 'fugu', 'danio', 'drosophila', 'anopheles', 'elegans', 'diatoaea', 'artiodactyl', 'arabidopsis', 'rice', 'wheat', 'maize'],
+					      default  => 'None',
+					  },
+				      }
+
+* runDust
+				      serviceType  => "DNA_Low_Complexity_Masking",
+				      description  => "Masks low-complexity regions within a DNA sequence, using dust",
+				      input		=> [
+							    ['sequence', ['DNASequence' => \@namespaces]], # simple
+							    ],
+				      output		=> [
+							    ['masked_sequence', ['DNASequence' => \@namespaces]], # simple
+							   ],
+
+* runDustCollection
+				      serviceType  => "DNA_Low_Complexity_Masking",
+				      description  => "Masks low-complexity regions within a set of DNA sequences, using dust",
+				      input		=> [
+							    ['sequences', [['DNASequence' => \@namespaces]]], # collection
+							    ],
+				      output		=> [
+							    ['masked_sequences', [['DNASequence' => \@namespaces]]], # collection
+							   ],
+
