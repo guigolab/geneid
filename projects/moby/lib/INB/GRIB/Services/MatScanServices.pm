@@ -1,4 +1,4 @@
-# $Id: MatScanServices.pm,v 1.28 2006-03-23 16:51:48 gmaster Exp $
+# $Id: MatScanServices.pm,v 1.29 2006-04-27 11:06:20 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -371,9 +371,9 @@ sub _do_query_MatScan {
 		}
 
 		# Validate the type
-		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "NucleotideSequence");
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
 		if (!$rightType) {
-		    my $note = "Expecting NucleotideSequence objects, and receiving $inputDataType objects";
+		    my $note = "Expecting DNASequence objects, and receiving $inputDataType objects";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
