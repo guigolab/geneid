@@ -159,8 +159,7 @@ my ($REG) = $Central->registerService(
 							   ],
 				      output		=> [
 							    ['masked_sequence', ['DNASequence' => \@namespaces]],
-							   ],
-				      }
+							    ],
 				      );
 
 # Check if the result has been registered successfully.
