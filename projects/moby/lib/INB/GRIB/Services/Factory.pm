@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.72 2006-03-23 13:34:41 gmaster Exp $
+# $Id: Factory.pm,v 1.73 2006-04-28 10:38:31 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -123,6 +123,8 @@ our @EXPORT = qw(
   &generateScoreMatrix_call
   &MEME_call
   &meme2matrix_call
+  &RepeatMasker_call
+  &Dust_call
 );
 
 our $VERSION = '1.00';
@@ -1794,6 +1796,130 @@ sub meme2matrix_call {
     }
 
 }
+
+sub RepeatMasker_call {
+    my %args = @_;
+
+    # ...
+    
+}
+
+sub Dust_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my @masked_seqs_fasta = "";
+    my $moby_exceptions   = [];
+    
+    # relleno los parametros por defecto meme2matrix_call
+    
+    my $sequences          = $args{sequences}  || undef;
+    my $parameters         = $args{parameters} || undef;
+    my $_debug             = $args{debug};
+    my $queryID            = $args{queryID}    || "";
+    
+    # No parameters
+    
+    # Llama a Dust en local
+    my $_dust_dir  = "/home/ug/gmaster/projects/bin";
+    my $_dust_bin  = "dust";
+    
+    # Check that the binary is in place
+    if (! -f "$_dust_dir/$_dust_bin") {
+	my $note = "Internal System Error. dust script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Create the temp map files
+
+    my ($seq_fh, $dust_file);
+    eval {
+	($seq_fh, $dust_file) = tempfile("/tmp/DUST.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open dust input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Bioperl sequence factory
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+    
+    my @seqIds = keys (%$sequences);
+    foreach my $sequenceIdentifier (@seqIds) {
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+	
+	# bioperl sequence object
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
+				    );
+	$sout->write_seq ($seqobj);
+    }
+    close $seq_fh;
+
+    # Test empty file
+    if (-z $dust_file) {
+	my $note = "Internal System Error. Empty dust input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    if ($_debug) {
+	print STDERR "Running dust, with this command:\n";
+	print STDERR "$_dust_dir\/$_dust_bin $dust_file\n";
+    }
+
+    my $masked_sequences = qx/$_dust_dir\/$_dust_bin $dust_file/;
+    
+    # Comment this line if you want to keep the file...
+    unlink $dust_file;
+    
+    if (! defined $masked_sequences) {
+	my $note = "Internal System Error. the parsing of MEME data has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
+    }
+    else {
+	return ($masked_sequences, $moby_exceptions);
+    }
+    
+}
+
+
 
 1;
 
