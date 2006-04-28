@@ -95,7 +95,7 @@ $::authURI = 'genome.imim.es';
 # Contac e-mail
 $::contactEmail = 'akerhornou@imim.es';
 
-my $objectName = "GFF";
+my $objectName = "FASTA_Base_Quality_multi";
 my $objectDescription = "sequences base quality data in FASTA format";
 
 print STDERR "registrying object $objectName at registry, $MOBY_URI...\n";
