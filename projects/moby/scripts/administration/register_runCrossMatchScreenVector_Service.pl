@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 2 -s runScreenVectorCollection
+	perl registerService.pl -x 2 -s runCrossMatchToScreenVector
 
 END_HELP
 
@@ -60,7 +60,7 @@ BEGIN {
 
 $::authURI      = 'genome.imim.es';
 $::contactEmail = 'akerhornou@imim.es';
-my $serviceName = $opt_s || "runScreenVectorCollection";
+my $serviceName = $opt_s || "runCrossMatchToScreenVector";
 my $serviceType = "Pairwise_Sequence_Comparison";
 my @namespaces  = ();
 
@@ -151,15 +151,15 @@ my ($REG) = $Central->registerService(
 				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Runs cross_match to screen out vector sequences from a set of DNA sequences. The vector sequences dataset is stored internally",
+				      description  => "Runs cross_match to screen out vector sequences from a DNA sequence. The vector sequences dataset is stored internally",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', [['DNASequence' => \@namespaces]]],
-							    ['base_quality_data', ['FASTA_NA_multi' => \@namespaces]]
+							    ['sequence', ['DNASequence' => \@namespaces]],
+							    ['base_quality_data', ['FASTA_Base_Quality' => \@namespaces]]
 							   ],
 				      output		=> [
-							    ['screen_sequences', [['DNASequence' => \@namespaces]]],
+							    ['screen_sequence', ['DNASequence' => \@namespaces]],
 							   ],
 				      secondary	=> {
 					  'minmatch' => {
