@@ -1,4 +1,4 @@
-# $Id: MaskingServices.pm,v 1.3 2006-04-28 13:06:26 gmaster Exp $
+# $Id: MaskingServices.pm,v 1.4 2006-04-28 13:18:04 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -145,7 +145,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 1;
+my $_debug = 0;
 
 # Preloaded methods go here.
 
@@ -211,7 +211,13 @@ sub _do_query_RepeatMasker {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	if ($input_type =~ /simple/i) {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	}
+	else {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	}
+	
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
