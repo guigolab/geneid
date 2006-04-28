@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.74 2006-04-28 11:18:35 gmaster Exp $
+# $Id: Factory.pm,v 1.75 2006-04-28 13:32:57 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -125,6 +125,7 @@ our @EXPORT = qw(
   &meme2matrix_call
   &RepeatMasker_call
   &Dust_call
+  &CrossMatchToScreenVector_call
 );
 
 our $VERSION = '1.00';
@@ -1818,10 +1819,10 @@ sub RepeatMasker_call {
     # Llama a RepeatMasker en local
     my $_repeatmasker_dir  = "/home/ug/gmaster/projects/RepeatMasker-3.0.8";
     my $_repeatmasker_bin  = "RepeatMasker";
-    my $_repeatmasker_args;
+    my $_repeatmasker_args = "";
     
     if (defined $species) {
-	$_repeatmasker_args = "-species $species";
+	$_repeatmasker_args .= "-species $species";
     }
     
     # Check that the binary is in place
@@ -2035,7 +2036,133 @@ sub Dust_call {
     
 }
 
+sub CrossMatchToScreenVector_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my @masked_seqs_fasta = "";
+    my $moby_exceptions   = [];
+    
+    # relleno los parametros por defecto CrossMatchToScreenVector_call
+    
+    my $sequences          = $args{sequences}  || undef;
+    my $parameters         = $args{parameters} || undef;
+    my $_debug             = $args{debug};
+    my $queryID            = $args{queryID}    || "";
+    
+    # parameters
+    
+    my $minmatch = $parameters->{minmatch};
+    my $minscore = $parameters->{minscore};
+    
+    # Llama a Cross_Match en local
+    my $_cross_match_dir    = "/home/ug/gmaster/projects/cross_match";
+    my $_cross_match_bin    = "cross_match";
+    my $_cross_match_args   = "-screen ";
+    my $_cross_match_vectors = "/home/ug/gmaster/projects/data_libraries/vector.seq";
 
+    if (defined $minmatch) {
+	$_cross_match_args .= "-minmatch $minmatch ";
+    }
+    if (defined $minscore) {
+	$_cross_match_args .= "-minscore $minscore ";
+    }
+    
+    # Check that the binary is in place
+    if (! -f "$_cross_match_dir/$_cross_match_bin") {
+	my $note = "Internal System Error. cross_match script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Create the temp map files
+
+    my ($seq_fh, $cross_match_file);
+    eval {
+	($seq_fh, $cross_match_file) = tempfile("/tmp/CROSS_MATCH.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open cross_match input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Bioperl sequence factory
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+    
+    my @seqIds = keys (%$sequences);
+    foreach my $sequenceIdentifier (@seqIds) {
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+	
+	# bioperl sequence object
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
+				    );
+	$sout->write_seq ($seqobj);
+    }
+    close $seq_fh;
+
+    # Test empty file
+    if (-z $cross_match_file) {
+	my $note = "Internal System Error. Empty cross_match input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    if ($_debug) {
+	print STDERR "Running cross_match, with this command:\n";
+	print STDERR "$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args\n";
+    }
+
+    my $screened_sequences = qx/$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args/;
+    
+    # Comment this line if you want to keep the file...
+    unlink $cross_match_file;
+    
+    if (! defined $screened_sequences) {
+	my $note = "Internal System Error. the parsing of the screened sequence data has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
+    }
+    else {
+	return ($screened_sequences, $moby_exceptions);
+    }
+    
+    
+}
 
 1;
 
