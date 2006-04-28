@@ -1,4 +1,4 @@
-# $Id: MaskingServices.pm,v 1.2 2006-04-28 11:18:35 gmaster Exp $
+# $Id: MaskingServices.pm,v 1.3 2006-04-28 13:06:26 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -896,9 +896,9 @@ sub runRepeatMasker {
     return $response;
 }
 
-=head2 runRepeatMasker
+=head2 runRepeatMaskerCollection
 
- Title   : runRepeatMasker
+ Title   : runRepeatMaskerCollection
  Usage   : Esta función está pensada para llamarla desde un cliente SOAP.
 	 : No obstante, se recomienda probarla en la misma máquina, antes
 	 : de instalar el servicio. Para ello, podemos llamarla de la
