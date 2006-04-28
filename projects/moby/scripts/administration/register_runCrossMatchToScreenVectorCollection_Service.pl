@@ -159,7 +159,7 @@ my ($REG) = $Central->registerService(
 							    ['base_quality_data', ['FASTA_NA_multi' => \@namespaces]]
 							   ],
 				      output		=> [
-							    ['screen_sequences', [['DNASequence' => \@namespaces]]],
+							    ['screened_sequences', [['DNASequence' => \@namespaces]]],
 							   ],
 				      secondary	=> {
 					  'minmatch' => {
