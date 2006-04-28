@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.73 2006-04-28 10:38:31 gmaster Exp $
+# $Id: Factory.pm,v 1.74 2006-04-28 11:18:35 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1799,8 +1799,124 @@ sub meme2matrix_call {
 
 sub RepeatMasker_call {
     my %args = @_;
+    
+    # output specs declaration
+    my @masked_seqs_fasta = "";
+    my $moby_exceptions   = [];
+    
+    # relleno los parametros por defecto RepeatMasker_call
+    
+    my $sequences          = $args{sequences}  || undef;
+    my $parameters         = $args{parameters} || undef;
+    my $_debug             = $args{debug};
+    my $queryID            = $args{queryID}    || "";
+    
+    # parameters
 
-    # ...
+    my $species = $parameters->{species};
+    
+    # Llama a RepeatMasker en local
+    my $_repeatmasker_dir  = "/home/ug/gmaster/projects/RepeatMasker-3.0.8";
+    my $_repeatmasker_bin  = "RepeatMasker";
+    my $_repeatmasker_args;
+    
+    if (defined $species) {
+	$_repeatmasker_args = "-species $species";
+    }
+    
+    # Check that the binary is in place
+    if (! -f "$_repeatmasker_dir/$_repeatmasker_bin") {
+	my $note = "Internal System Error. repeatmasker script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Create the temp map files
+
+    my ($seq_fh, $repeatmasker_file);
+    eval {
+	($seq_fh, $repeatmasker_file) = tempfile("/tmp/REPEATMASKER.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open repeatmasker input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Bioperl sequence factory
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+    
+    my @seqIds = keys (%$sequences);
+    foreach my $sequenceIdentifier (@seqIds) {
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+	
+	# bioperl sequence object
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
+				    );
+	$sout->write_seq ($seqobj);
+    }
+    close $seq_fh;
+
+    # Test empty file
+    if (-z $repeatmasker_file) {
+	my $note = "Internal System Error. Empty repeatmasker input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    if ($_debug) {
+	print STDERR "Running repeatmasker, with this command:\n";
+	print STDERR "$_repeatmasker_dir\/$_repeatmasker_bin $repeatmasker_file\n";
+    }
+
+    my $masked_sequences = qx/$_repeatmasker_dir\/$_repeatmasker_bin $_repeatmasker_args $repeatmasker_file/;
+    
+    # Comment this line if you want to keep the file...
+    unlink $repeatmasker_file;
+    
+    if (! defined $masked_sequences) {
+	my $note = "Internal System Error. the parsing of the masked sequence data has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
+    }
+    else {
+	return ($masked_sequences, $moby_exceptions);
+    }
+    
     
 }
 
@@ -1811,7 +1927,7 @@ sub Dust_call {
     my @masked_seqs_fasta = "";
     my $moby_exceptions   = [];
     
-    # relleno los parametros por defecto meme2matrix_call
+    # relleno los parametros por defecto Duct_call
     
     my $sequences          = $args{sequences}  || undef;
     my $parameters         = $args{parameters} || undef;
@@ -1901,7 +2017,7 @@ sub Dust_call {
     unlink $dust_file;
     
     if (! defined $masked_sequences) {
-	my $note = "Internal System Error. the parsing of MEME data has failed!\n";
+	my $note = "Internal System Error. the parsing of masked sequence data has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (

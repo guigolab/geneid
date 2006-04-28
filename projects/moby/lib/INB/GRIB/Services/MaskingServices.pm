@@ -1,4 +1,4 @@
-# $Id: MaskingServices.pm,v 1.1 2006-04-28 10:38:31 gmaster Exp $
+# $Id: MaskingServices.pm,v 1.2 2006-04-28 11:18:35 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -145,7 +145,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 0;
+my $_debug = 1;
 
 # Preloaded methods go here.
 
