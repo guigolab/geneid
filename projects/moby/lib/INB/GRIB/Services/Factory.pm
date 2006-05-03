@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.75 2006-04-28 13:32:57 gmaster Exp $
+# $Id: Factory.pm,v 1.76 2006-05-03 09:14:35 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1809,7 +1809,7 @@ sub RepeatMasker_call {
     
     my $sequences          = $args{sequences}  || undef;
     my $parameters         = $args{parameters} || undef;
-    my $_debug             = $args{debug};
+    my $debug              = $args{debug};
     my $queryID            = $args{queryID}    || "";
     
     # parameters
@@ -1817,11 +1817,11 @@ sub RepeatMasker_call {
     my $species = $parameters->{species};
     
     # Llama a RepeatMasker en local
-    my $_repeatmasker_dir  = "/home/ug/gmaster/projects/RepeatMasker-3.0.8";
+    my $_repeatmasker_dir  = "/usr/local/molbio/Install/repeatmasker-3.1.5/";
     my $_repeatmasker_bin  = "RepeatMasker";
     my $_repeatmasker_args = "";
     
-    if (defined $species) {
+    if ((defined $species) && (lc ($species) ne "none")) {
 	$_repeatmasker_args .= "-species $species";
     }
     
@@ -1891,15 +1891,20 @@ sub RepeatMasker_call {
 	return (undef, [$moby_exception]);
     }
     
-    if ($_debug) {
+    if ($debug) {
 	print STDERR "Running repeatmasker, with this command:\n";
 	print STDERR "$_repeatmasker_dir\/$_repeatmasker_bin $repeatmasker_file\n";
     }
 
-    my $masked_sequences = qx/$_repeatmasker_dir\/$_repeatmasker_bin $_repeatmasker_args $repeatmasker_file/;
+    my $result = qx/$_repeatmasker_dir\/$_repeatmasker_bin $_repeatmasker_args $repeatmasker_file/;
+    my $masked_sequences_file = $repeatmasker_file . ".masked";
+    my $masked_sequences      = qx/cat $masked_sequences_file/;
     
     # Comment this line if you want to keep the file...
-    unlink $repeatmasker_file;
+    if (! $debug) {
+	unlink $repeatmasker_file;
+	# Also unlink all files in /tmp (e.g. *.cat ...)
+    }
     
     if (! defined $masked_sequences) {
 	my $note = "Internal System Error. the parsing of the masked sequence data has failed!\n";
@@ -1932,7 +1937,7 @@ sub Dust_call {
     
     my $sequences          = $args{sequences}  || undef;
     my $parameters         = $args{parameters} || undef;
-    my $_debug             = $args{debug};
+    my $debug              = $args{debug};
     my $queryID            = $args{queryID}    || "";
     
     # No parameters
@@ -2007,7 +2012,7 @@ sub Dust_call {
 	return (undef, [$moby_exception]);
     }
     
-    if ($_debug) {
+    if ($debug) {
 	print STDERR "Running dust, with this command:\n";
 	print STDERR "$_dust_dir\/$_dust_bin $dust_file\n";
     }
@@ -2047,7 +2052,7 @@ sub CrossMatchToScreenVector_call {
     
     my $sequences          = $args{sequences}  || undef;
     my $parameters         = $args{parameters} || undef;
-    my $_debug             = $args{debug};
+    my $debug              = $args{debug};
     my $queryID            = $args{queryID}    || "";
     
     # parameters
@@ -2056,7 +2061,7 @@ sub CrossMatchToScreenVector_call {
     my $minscore = $parameters->{minscore};
     
     # Llama a Cross_Match en local
-    my $_cross_match_dir    = "/home/ug/gmaster/projects/cross_match";
+    my $_cross_match_dir    = "/usr/local/molbio/Install/cross_match";
     my $_cross_match_bin    = "cross_match";
     my $_cross_match_args   = "-screen ";
     my $_cross_match_vectors = "/home/ug/gmaster/projects/data_libraries/vector.seq";
@@ -2134,15 +2139,20 @@ sub CrossMatchToScreenVector_call {
 	return (undef, [$moby_exception]);
     }
     
-    if ($_debug) {
+    if ($debug) {
 	print STDERR "Running cross_match, with this command:\n";
 	print STDERR "$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args\n";
     }
 
-    my $screened_sequences = qx/$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args/;
+    my $result = qx/$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args/;
+    my $screened_sequences_file = $cross_match_file . ".screen";
+    my $screened_sequences = qx/cat $screened_sequences_file/;
     
     # Comment this line if you want to keep the file...
-    unlink $cross_match_file;
+    if (! $debug) {
+	unlink $cross_match_file;
+	# Also the .screen file 
+    }
     
     if (! defined $screened_sequences) {
 	my $note = "Internal System Error. the parsing of the screened sequence data has failed!\n";
