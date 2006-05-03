@@ -37,6 +37,8 @@ use INB::GRIB::Services::MetaAlignmentServices;
 use INB::GRIB::Services::MemeServices;
 use INB::GRIB::Services::ParsingServices;
 use INB::GRIB::Services::ConversionServices;
+use INB::GRIB::Services::MaskingServices;
+use INB::GRIB::Services::VectorScreeningServices;
 
 use INB::GRIB::Services::OldServices;
 ###############################################################################
@@ -188,6 +190,14 @@ $x->dispatch_with({
     'http://biomoby.org/#runMemeText'                            => 'INB::GRIB::Services::MemeServices',
     
     'http://biomoby.org/#parseMotifMatricesFromMEME'             => 'INB::GRIB::Services::ParsingServices',
+    
+    'http://biomoby.org/#runDust'                                => 'INB::GRIB::Services::MaskingServices',
+    'http://biomoby.org/#runDustCollection'                      => 'INB::GRIB::Services::MaskingServices',
+    'http://biomoby.org/#runRepeatMasker'                        => 'INB::GRIB::Services::MaskingServices',
+    'http://biomoby.org/#runRepeatMaskerCollection'              => 'INB::GRIB::Services::MaskingServices',
+    
+    'http://biomoby.org/#runCrossMatchToScreenVector'            => 'INB::GRIB::Services::VectorScreeningServices',
+    'http://biomoby.org/#runCrossMatchToScreenVectorCollection'  => 'INB::GRIB::Services::VectorScreeningServices',
     
     'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
     'http://biomoby.org/#parseMotifMatricesfromMEME'             => 'INB::GRIB::Services::OldServices',
