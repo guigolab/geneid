@@ -80,8 +80,6 @@ my $_debug = 0;
 
 my $serviceName = $opt_s;
 
-print STDERR "service name, $serviceName\n";
-
 my $sequence_articleName  = "sequence";
 my $evalue_articleName;
 my $nogaps_articleName    = "nogaps";
@@ -91,12 +89,17 @@ my $matrix_articleName    = "matrix";
 $::authURI = 'inb.bsc.es';
 $evalue_articleName = "expect_threshold"; # bsc
 
-$::authURI = 'www.pcm.uam.es';
-$evalue_articleName = "expected_threshold"; # uam
+# $::authURI = 'www.pcm.uam.es';
+if ($::authURI eq "ww.pcm.uam.es") {
+    $evalue_articleName = "expected_threshold"; # uam
+}
 
 my $in_file_1   = $opt_f || "/home/ug/arnau/data/AB065701.pep";
 my $database    = $opt_d || "Swiss-Prot";
 my $datasource  = "";
+
+print STDERR "Executing service name, $serviceName, from $::authURI...\n";
+print STDERR "Database parameter, $database\n";
 
 # Parameters
 
@@ -113,7 +116,7 @@ if ($serviceName eq "runWUBlastp") {
   $word_size = 6;
 }
 else {
-    # $matrix = "BLOSUM80";
+    $matrix = "BLOSUM80";
 }
 
 ##################################################################
