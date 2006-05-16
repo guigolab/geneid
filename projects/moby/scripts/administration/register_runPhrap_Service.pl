@@ -161,6 +161,14 @@ my ($REG) = $Central->registerService(
 							    ['assembly', ['Ace_Text' => \@namespaces]],
 							    ['contig_and_singlet_sequences', [['DNASequence' => \@namespaces]]],
 							   ],
+				      secondary	   => {
+					  'node_space' => {
+					      datatype => 'Integer',
+					      default => 4,
+					  'node_seg' => {
+					      datatype => 'Integer',
+					      default => 8,
+					  },
 				      }
 				      );
 
@@ -169,9 +177,9 @@ if ($REG->success) {
     
     # The result is valid.
     print STDERR "The '$serviceName' service has been registered in successfully: ", $REG->success, "\n";
-
+    
     # Get the RDF document
-
+    
     my $rdf_document = $REG->RDF;
     my $rdf_file = $serviceName . "_registration.rdf";
     open RDF, ">$rdf_file" or die "can't rdf file, $rdf_file\n";

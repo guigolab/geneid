@@ -170,6 +170,7 @@ my ($REG) = $Central->registerService(
 					      datatype => 'Integer',
 					      default => 8,
 					  },
+				      }
 				      );
 
 # Check if the result has been registered successfully.
@@ -177,7 +178,7 @@ if ($REG->success) {
     
     # The result is valid.
     print STDERR "The '$serviceName' service has been registered in successfully: ", $REG->success, "\n";
-
+    
     # Get the RDF document
 
     my $rdf_document = $REG->RDF;
