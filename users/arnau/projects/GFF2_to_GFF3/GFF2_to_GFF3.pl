@@ -146,8 +146,8 @@ while (<FILE>) {
 	# Set up the gene and mRNA identifiers
 	
 	my $index = $id_index_start + $gene_index;
-	$geneId = $id_prefix . "_GeneID_" . $index;
-	$mRNAId = $id_prefix . "_GeneID_mRNA_" . $index;
+	$geneId = $id_prefix . "_geneid_" . $index;
+	$mRNAId = $id_prefix . "_geneid_mRNA_" . $index;
 
 	# $geneId    = $seqId . "_gene_" . $gene_index;
 	# $mRNAId    = $seqId . "_mRNA_" . $gene_index;
