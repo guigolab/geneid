@@ -155,11 +155,11 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['trace', ['chromatogram' => \@namespaces]] # simple
+							    ['trace', ['Chromatogram_Encoded' => \@namespaces]] # simple
 							   ],
 				      output		=> [
 							    ['sequence', ['DNASequence' => \@namespaces]],
-							    ['base_quality_data', ['FASTA_NA' => \@namespaces]]
+							    ['base_quality_data', ['FASTA_Base_Quality' => \@namespaces]]
 							   ],
 				      }
 				      );
