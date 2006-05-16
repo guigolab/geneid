@@ -15,6 +15,11 @@ my $in_file = shift;
 
 my $_debug = 0;
 
+# Default => no filtering
+my $_score_filtering = -1;
+# meta-alignment filtering
+$_score_filtering = 7;
+
 my @gff_features = ("## gff-version 3");
 
 my $seqId;
@@ -116,6 +121,13 @@ while (<FILE>) {
 	
 	# Clean the score
 	$score =~ s/\s//g;
+	
+	# Filtering meta-alignment hits
+	if ($algorithm =~ /meta_/) {
+	    if ($score < $_score_filtering) {
+		next;
+	    }
+	}
 	
 	# Feature type mapping if genes
 	if ($featureType =~ /Internal|First|Terminal|Single/) {
