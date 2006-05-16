@@ -109,17 +109,16 @@ my ($REG) = $Central->registerObject(
 				     objectType    => $objectName,
 				     description   => $objectDescription,
 				     authURI       => $::authURI,
-				     contactEmail  => $::contactEmail ,
+				     contactEmail  => $::contactEmail,
 				     Relationships => {
 					 ISA	=> [
 						    ['Object', ""]
-						    ],
-						}
+						   ],
 				         HASA	=> [
 						    ['String', "rawdata"]
-						    ],
-						}
-				     );
+						   ],
+				     }
+				    );
 
 # Check if the result has been registered successfully.
 if ($REG->success) {

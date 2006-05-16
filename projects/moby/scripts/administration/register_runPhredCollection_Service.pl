@@ -161,7 +161,6 @@ my ($REG) = $Central->registerService(
 							    ['sequences', [['DNASequence' => \@namespaces]]],
 							    ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]]
 							   ],
-				      }
 				      );
 
 # Check if the result has been registered successfully.
