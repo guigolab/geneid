@@ -10,10 +10,59 @@
 ###############################################
 
 use strict;
+use Getopt::Std;
 
-my $in_file = shift;
+sub help {
+my $usage = "
+Description: Converts a set of features in GFF2 format into GFF3 format
+Usage:
 
-my $_debug = 0;
+    GFF2_to_GFF3.pl [-h] -f {input file} -p {Gene Identifier Prefix} {Gene Identifier Index Start}
+	-h help
+	-f Input file with the set of features in GFF3 format
+        -p Gene Identifier Prefix (Optional, no prefix by default)
+        -i Gene Identifier Index start, Default is 1
+
+Examples using some combinations:
+    GFF2_to_GFF3.pl -f AC005155.geneid.gff2 > AC005155.geneid.gff3
+    GFF2_to_GFF3.pl -f AC005155.geneid.gff2 -p Dm -i 26000000 > AC005155.geneid.gff3
+	
+";
+
+print STDERR "$usage\n";
+exit 1;
+
+}
+
+BEGIN {
+	
+    # Global variables definition
+    use vars qw /$_debug %opts $in_file $id_prefix $id_index_start/;
+    
+    # these are switches taking an argument (a value)
+    my $switches = 'hf:p:i:';
+    
+    # Get the switches
+    getopts($switches, \%opts);
+    
+    # If the user does not write anything, skip to help
+    if (defined($opts{h}) || !defined($opts{f})){
+	print STDERR "Specify an input file name!\n";
+	print STDERR help;
+	exit 0;
+    }
+    
+}
+
+# Default values
+$id_prefix      = "";
+$id_index_start = 0;
+
+defined $opts{f} and $in_file        = $opts{f};
+defined $opts{p} and $id_prefix      = $opts{p};
+defined $opts{i} and $id_index_start = $opts{i};
+
+$_debug = 0;
 
 # Default => no filtering
 my $_score_filtering = -1;
@@ -87,15 +136,22 @@ while (<FILE>) {
 	    my $mRNA_feature = "$seqId\t$algorithm\tmRNA\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$mRNAId;Parent=$geneId";
 	    push (@gff_features, $gene_feature, $mRNA_feature, @$cds_features);
 	    
-	    $cds_features      = [];
+	    $cds_features = [];
 	}
 	
 	my $gene_index = $1;
 	$geneStrand    = $2;
 	$geneScore     = $3;
 	
-	$geneId    = $seqId . "_gene_" . $gene_index;
-	$mRNAId    = $seqId . "_mRNA_" . $gene_index;
+	# Set up the gene and mRNA identifiers
+	
+	my $index = $id_index_start + $gene_index;
+	$geneId = $id_prefix . "_GeneID_" . $index;
+	$mRNAId = $id_prefix . "_GeneID_mRNA_" . $index;
+
+	# $geneId    = $seqId . "_gene_" . $gene_index;
+	# $mRNAId    = $seqId . "_mRNA_" . $gene_index;
+	
 	if ($geneStrand =~ /forward/i) {
 	    $geneStrand  = "+";
 	}
