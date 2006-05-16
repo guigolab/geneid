@@ -18,6 +18,9 @@ use MOBY::Client::Central;
 use MOBY::Client::Service;
 # use SOAP::Lite + 'trace';
 
+# MIME encoding/decoding
+use MIME::Base64;
+
 # Benchmark Module
 use Benchmark;
 ##################################################################
@@ -220,7 +223,13 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 
 # Object construction
 
-my $chromatogram_data = qx/cat $in_file/;
+# Chromatogram Data
+
+my $chromatogram_data     = qx/cat $in_file/;
+my $chromatogram_data_b64 = encode_base64($chromatogram_data);
+
+# Chromatogram Identifier
+
 my @words = split (/\./, $in_file);
 
 my $chromatogram_id = $words[0];
@@ -236,7 +245,7 @@ else {
 
 my $input_xml = <<PRT;
 <Chromatogram_Encoded namespace="$datasource" id="$chromatogram_id">
-  <String namespace="" id=""  articleName="rawdata"><![CDATA[$chromatogram_data]]</String>
+  <String namespace="" id=""  articleName="rawdata"><![CDATA[$chromatogram_data_b64]]></String>
 </Chromatogram_Encoded>
 PRT
 
@@ -252,6 +261,10 @@ PRT
 #
 ##################################################################
     
+if ($_debug) {
+    print STDERR "Service execution...\n";
+}
+
 my $result;
 if ($serviceName =~ /collection/i) {
     $result = $Service->execute(XMLinputlist => [
