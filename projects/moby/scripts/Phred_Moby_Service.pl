@@ -244,9 +244,9 @@ else {
 }
 
 my $input_xml = <<PRT;
-<Chromatogram_Encoded namespace="$datasource" id="$chromatogram_id">
+<ABI_Encoded namespace="$datasource" id="$chromatogram_id">
   <String namespace="" id=""  articleName="rawdata"><![CDATA[$chromatogram_data_b64]]></String>
-</Chromatogram_Encoded>
+</ABI_Encoded>
 PRT
 
 #
