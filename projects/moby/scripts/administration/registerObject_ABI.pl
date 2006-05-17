@@ -95,7 +95,7 @@ $::authURI = 'genome.imim.es';
 # Contac e-mail
 $::contactEmail = 'akerhornou@imim.es';
 
-my $objectName = "ABI";
+my $objectName = "ABI_Encoded";
 my $objectDescription = "Trace data in ABI format";
 
 print STDERR "registrying object $objectName at registry, $MOBY_URI...\n";

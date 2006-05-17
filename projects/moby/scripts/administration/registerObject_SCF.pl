@@ -95,7 +95,7 @@ $::authURI = 'genome.imim.es';
 # Contac e-mail
 $::contactEmail = 'akerhornou@imim.es';
 
-my $objectName = "SCF";
+my $objectName = "SCF_Encoded";
 my $objectDescription = "Trace data in SCF format";
 
 print STDERR "registrying object $objectName at registry, $MOBY_URI...\n";
