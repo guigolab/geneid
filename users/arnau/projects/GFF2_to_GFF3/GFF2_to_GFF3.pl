@@ -104,7 +104,20 @@ while (<FILE>) {
     # Sequence information
     
     if ($line =~ /^# Sequence ([^\s]+)\s\D+(\d+) bps/) {
-
+	
+	if ($has_genes) {
+	    
+	    # The last gene of the previous sequence if the GFF file contains more than one sequence
+	    
+	    # Need to process an extra information, re. the last exon if it is partial gene or not !!!
+	    
+	    # ...
+	    
+	    my $gene_feature = "$seqId\t$algorithm\tgene\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$geneId";
+	    my $mRNA_feature = "$seqId\t$algorithm\tmRNA\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$mRNAId;Parent=$geneId";
+	    push (@gff_features, $gene_feature, $mRNA_feature, @$cds_features);
+	}
+	
 	if ($_debug) {
 	    print STDERR "Sequence information\n";
 	}
