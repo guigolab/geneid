@@ -240,7 +240,9 @@ if (! defined $chromatogram_id) {
     die "can't get the chromatogram identifier from parsing the file name!\n";
 }
 else {
-    print STDERR "chromatogram identifier is the following, $chromatogram_id\n";
+    if ($_debug) {
+	print STDERR "chromatogram identifier is the following, $chromatogram_id\n";
+    }
 }
 
 my $input_xml = <<PRT;
