@@ -79,7 +79,7 @@ my $_debug = 0;
 my $serviceName = $opt_s || "runPhred";
 my $articleName = "trace";
 if ($serviceName =~ /collection/i) {
-    $articleName = "sequences";
+    $articleName = "traces";
 }
 $::authURI = 'genome.imim.es';
 
