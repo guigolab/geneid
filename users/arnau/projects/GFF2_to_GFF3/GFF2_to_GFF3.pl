@@ -55,7 +55,7 @@ BEGIN {
 }
 
 # Default values
-$id_prefix      = "";
+$id_prefix      = undef;
 $id_index_start = 0;
 
 defined $opts{f} and $in_file        = $opts{f};
@@ -80,9 +80,12 @@ my $geneScore;
 my $geneStart;
 my $geneEnd;
 
-my $parsed_first_exon = 0;
-my $cds_features      = [];
-my $has_genes         = 0;
+# use this for setting up the gene start coordinate
+my $parsed_first_exon  = 0;
+# Define the last type of the geneid exon. If it is an Internal or a First, then it is partial!
+my $previous_exon_type = undef;
+my $cds_features       = [];
+my $has_genes          = 0;
 
 open FILE, "<$in_file" or die "can't open input file, $in_file!\n";
 while (<FILE>) {
@@ -111,7 +114,24 @@ while (<FILE>) {
 	    
 	    # Need to process an extra information, re. the last exon if it is partial gene or not !!!
 	    
-	    # ...
+	    if ($geneStrand eq "+") {
+		if ($previous_exon_type =~ /first|internal/i) {
+		    # missing the last exon
+		    
+		    # pick back the previous cds feature to update its annotation
+		    my $last_cds_feature = pop (@$cds_features);
+		    $last_cds_feature .= ";3_prime_partial=true";
+		    push (@$cds_features, $last_cds_feature);
+		}
+	    }
+	    elsif ($previous_exon_type =~ /terminal|internal/i) {
+		# missing the last exon
+		
+		# pick back the previous cds feature to update its annotation
+		my $last_cds_feature = pop (@$cds_features);
+		$last_cds_feature .= ";5_prime_partial=true";
+		push (@$cds_features, $last_cds_feature);
+	    }
 	    
 	    my $gene_feature = "$seqId\t$algorithm\tgene\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$geneId";
 	    my $mRNA_feature = "$seqId\t$algorithm\tmRNA\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$mRNAId;Parent=$geneId";
@@ -122,7 +142,15 @@ while (<FILE>) {
 	    print STDERR "Sequence information\n";
 	}
 	
-	$seqId  = $1;
+	# Reinitialisation
+	
+	$parsed_first_exon = 0;
+	$has_genes    = 0;
+	$cds_features = [];
+	
+	# Processing new sequence information
+	
+	$seqId     = $1;
 	my $length = $2;
 	my $gff3_seq_line = "# Sequence-region $seqId 1 $length";
 	push (@gff_features, $gff3_seq_line);
@@ -136,14 +164,29 @@ while (<FILE>) {
 	    print STDERR "Gene information\n";
 	}
 	
-	$has_genes++;
-
-	if ($parsed_first_exon) {
+	if ($has_genes) {
 	    $parsed_first_exon = 0;
 	    
-	    # Need to process an extra information, re. the last exon if it is partial gene or not !!!
+	    if ($geneStrand eq "+") {
+		if ($previous_exon_type =~ /first|internal/i) {
+		    # missing the last exon
+		    
+		    # pick back the previous cds feature to update its annotation
+		    my $last_cds_feature = pop (@$cds_features);
+		    $last_cds_feature .= ";3_prime_partial=true";
+		    push (@$cds_features, $last_cds_feature);
+		}
+	    }
+	    elsif ($previous_exon_type =~ /terminal|internal/i) {
+		# missing the last exon
+		
+		# pick back the previous cds feature to update its annotation
+		my $last_cds_feature = pop (@$cds_features);
+		$last_cds_feature .= ";5_prime_partial=true";
+		push (@$cds_features, $last_cds_feature);
+	    }
 	    
-	    # ...
+	    # Store the previous gene
 	    
 	    my $gene_feature = "$seqId\t$algorithm\tgene\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$geneId";
 	    my $mRNA_feature = "$seqId\t$algorithm\tmRNA\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$mRNAId;Parent=$geneId";
@@ -152,18 +195,26 @@ while (<FILE>) {
 	    $cds_features = [];
 	}
 	
+	$has_genes++;
+	
+	# no need of this one any longer !!!
 	my $gene_index = $1;
+	
 	$geneStrand    = $2;
 	$geneScore     = $3;
 	
 	# Set up the gene and mRNA identifiers
 	
-	my $index = $id_index_start + $gene_index;
-	$geneId = $id_prefix . "_geneid_" . $index;
-	$mRNAId = $id_prefix . "_geneid_mRNA_" . $index;
-
-	# $geneId    = $seqId . "_gene_" . $gene_index;
-	# $mRNAId    = $seqId . "_mRNA_" . $gene_index;
+	$id_index_start++;
+	
+	if (defined $id_prefix) {
+	    $geneId   = $id_prefix . "_geneid_" . $id_index_start;
+	    $mRNAId   = $id_prefix . "_geneid_mRNA_" . $id_index_start;
+	}
+	else {
+	    $geneId    = $seqId . "_gene_" . $id_index_start;
+	    $mRNAId    = $seqId . "_mRNA_" . $id_index_start;
+	}
 	
 	if ($geneStrand =~ /forward/i) {
 	    $geneStrand  = "+";
@@ -200,7 +251,8 @@ while (<FILE>) {
 	
 	# Feature type mapping if genes
 	if ($featureType =~ /Internal|First|Terminal|Single/) {
-	    
+
+	    $previous_exon_type = $featureType;
 	    $attributes = undef;
 	    
 	    if ($_debug) {
@@ -299,7 +351,24 @@ if ($has_genes) {
     
     # Need to process an extra information, re. the last exon if it is partial gene or not !!!
     
-    # ...
+    if ($geneStrand eq "+") {
+	if ($previous_exon_type =~ /first|internal/i) {
+	    # missing the last exon
+	    
+	    # pick back the previous cds feature to update its annotation
+	    my $last_cds_feature = pop (@$cds_features);
+	    $last_cds_feature .= ";3_prime_partial=true";
+	    push (@$cds_features, $last_cds_feature);
+	}
+    }
+    elsif ($previous_exon_type =~ /terminal|internal/i) {
+	# missing the last exon
+	
+	# pick back the previous cds feature to update its annotation
+	my $last_cds_feature = pop (@$cds_features);
+	$last_cds_feature .= ";5_prime_partial=true";
+	push (@$cds_features, $last_cds_feature);
+    }
     
     my $gene_feature = "$seqId\t$algorithm\tgene\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$geneId";
     my $mRNA_feature = "$seqId\t$algorithm\tmRNA\t$geneStart\t$geneEnd\t$geneScore\t$geneStrand\t.\tID=$mRNAId;Parent=$geneId";
