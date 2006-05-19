@@ -28,10 +28,10 @@ use Benchmark;
 
 sub help {
 return <<"END_HELP";
-Description: Execute GeneID Moby services available from genome.imim.es
+Description: Execute Masking Moby services available from genome.imim.es
 Usage:
 
-    Geneid_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
+    Masking_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file}
 	-h help
 	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 		<1> or Chirimoyo
@@ -42,7 +42,7 @@ Usage:
 	-i Sequence(s) input file, in FASTA format - optional
 	
 Examples using some combinations:
-	perl Geneid_Moby_service.pl -x 1 -s runGeneIDGFF -f /home/ug/arnau/data/AC005155.fa
+	perl Masking_Moby_service.pl -x 1 -s runDust -f /home/ug/arnau/data/AC005155.fa
 
 END_HELP
 
@@ -69,7 +69,7 @@ BEGIN {
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 0;
+my $_debug = 1;
 
 ##################################################################
 #
@@ -84,7 +84,7 @@ if ($serviceName =~ /collection/i) {
 }
 $::authURI = 'genome.imim.es';
 
-my $in_file    = $opt_f || "/home/ug/arnau/data/AC005155.fa";
+my $in_file    = $opt_f || "/home/ug/arnau/data/AB065701.fa";
 my $datasource = "EMBL";
 
 # Parameters
@@ -213,7 +213,7 @@ if ($_debug) {
 }
 
 if (!$wsdl || ($wsdl !~ /\<definitions/)){
-    print "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
+    print STDERR "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
 }
 
 my $Service = MOBY::Client::Service->new(service => $wsdl);
@@ -233,6 +233,9 @@ my $seqin = Bio::SeqIO->new (
 # Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
 # See Geneid_Moby_Service.v2.pl for this
 
+my $input_xml;
+my $input_xmls = [];
+
 while (my $seqobj = $seqin->next_seq) {
     my $nucleotides  = $seqobj->seq;
     my $seq_id       = $seqobj->display_id;
@@ -248,46 +251,55 @@ while (my $seqobj = $seqin->next_seq) {
     # Sequence Input
     #
 
-    my $input = <<PRT;
+    $input_xml = <<PRT;
 <DNASequence namespace="$datasource" id="$seq_id">
   <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
   <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
 </DNASequence>
 PRT
 
-    #
-    # Parameters (secondary articles)
-    #
-
-
-
-    ##################################################################
-    #
-    # Service execution
-    #
-    ##################################################################
-
-    my $result;
-    if ($serviceName =~ /collection/i) {
-	$result = $Service->execute(XMLinputlist => [
-						     ["$articleName", [$input]]
-						     ]);
-    }
-    else {
-	$result = $Service->execute(XMLinputlist => [
-						     ["$articleName", $input]
-						     ]);
-    }
-
-    ##################################################################
-    #
-    # Result processing
-    #
-    ##################################################################
-
-    print "result\n", $result, "\n";
+    push (@$input_xmls, $input_xml);
 
 }
+
+#
+# Parameters (secondary articles)
+#
+
+
+
+##################################################################
+#
+# Service execution
+#
+##################################################################
+
+if ($_debug) {
+    print STDERR "$serviceName is being executed...\n";
+}
+
+my $result;
+if ($serviceName =~ /collection/i) {
+    $result = $Service->execute(XMLinputlist => [
+						 ["$articleName", $input_xmls]
+						 ]);
+}
+else {
+    $result = $Service->execute(XMLinputlist => [
+						 ["$articleName", $input_xml]
+						 ]);
+}
+
+##################################################################
+#
+# Result processing
+#
+##################################################################
+
+undef $input_xml;
+undef $input_xmls;
+
+print "result\n", $result, "\n";
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
