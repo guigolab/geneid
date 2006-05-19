@@ -79,11 +79,14 @@ my $_debug = 0;
 
 my $serviceName = "runPhrap";
 defined $opt_s and $serviceName = $opt_s;
-my $articleName = "sequences";
-my $input_object_type = "FASTA_NA_multi";
+my $sequences_articleName       = "sequences";
+my $quality_articleName         = "base_quality_data";
+my $input_sequences_object_type = "FASTA_NA_multi";
+my $input_quality_object_type   = "FASTA_Base_Quality_multi";
 $::authURI = 'genome.imim.es';
 
 my $in_file    = $opt_f || "/home/ug/arnau/data/Assembly_Galicia/seqs.fa";
+my $in_quality_file = $in_file . ".qual";
 my $datasource = "INB";
 my $seqId = "assembly_00001";
 
@@ -91,9 +94,15 @@ if (! -f $in_file) {
     die "can't find , input file, $in_file!\n";
 }
 
+if ($serviceName eq "runPhrapWithQualityData") {
+    if (! -f $in_quality_file) {
+	die "can't find , input quality file, $in_quality_file!\n";
+    }
+}
+
 # Parameters
 
-
+# ...
 
 ##################################################################
 #
@@ -232,29 +241,39 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 # Sequence Input
 #
 
-my $input_data = qx/cat $in_file/;
+my $input_sequences_data = qx/cat $in_file/;
 
-my $input_xml = <<PRT;
-<$input_object_type namespace="$datasource" id="$seqId">
-  <String namespace="" id=""  articleName="Content"><![CDATA[$input_data]]></String>
-</$input_object_type>
+my $input_sequences_xml = <<PRT;
+<$input_sequences_object_type namespace="$datasource" id="$seqId">
+  <String namespace="" id=""  articleName="Content"><![CDATA[$input_sequences_data]]></String>
+</$input_sequences_object_type>
+PRT
+
+#
+# Parameters (secondary articles)
+#
+  
+# ...
+
+my $results;
+if ($serviceName eq "runPhrap") {
+    $results = $Service->execute(XMLinputlist => [
+						 ["$sequences_articleName", $input_sequences_xml]
+						]);
+}
+else {
+    my $input_quality_data = qx/cat $in_quality_file/;
+
+    my $input_quality_xml = <<PRT;
+<$input_quality_object_type namespace="$datasource" id="$seqId">
+<String namespace="" id=""  articleName="Content"><![CDATA[$input_quality_data]]></String>
+</$input_quality_object_type>
 PRT
     
-    #
-    # Parameters (secondary articles)
-    #
-    
-    
-    
-    ##################################################################
-    #
-    # Service execution
-    #
-    ##################################################################
-    
-my $result = $Service->execute(XMLinputlist => [
-						["$articleName", $input_xml]
+    $results = $Service->execute(XMLinputlist => [
+						["$sequences_articleName", $input_sequences_xml, "$quality_articleName", $input_quality_xml,]
 					       ]);
+}
 
 ##################################################################
 #
@@ -262,7 +281,7 @@ my $result = $Service->execute(XMLinputlist => [
 #
 ##################################################################
 
-print "result\n", $result, "\n";
+print "results\n", $results, "\n";
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
