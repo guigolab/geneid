@@ -1,4 +1,4 @@
-# $Id: VectorScreeningServices.pm,v 1.1 2006-04-28 13:32:57 gmaster Exp $
+# $Id: VectorScreeningServices.pm,v 1.2 2006-05-23 15:21:35 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -171,9 +171,13 @@ sub _do_query_CrossMatchToScreenVector {
 
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
+    my $input_article_name  = "sequence";
+    my $input_format    = "FASTA_NA";
     my $output_article_name = "screened_sequence";
     if ($input_type eq "collection") {
-	$output_article_name    = "screened_sequences";
+	$input_format        = "FASTA_NA_multi";
+	$input_article_name  = "sequences";
+	$output_article_name = "screened_sequences";
     }
     my $namespace       = "";
     
@@ -181,13 +185,13 @@ sub _do_query_CrossMatchToScreenVector {
     my $minmatch;
     my $minscore;
     
-    # Variables that will be passed to MatScan_call
+    # Variables that will be passed to CrossMatchToScreenVector_call
     my %sequences;
     my %parameters;
     
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
-
+    
     # Get the parameters
     
     ($minmatch) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "minmatch");
@@ -209,12 +213,7 @@ sub _do_query_CrossMatchToScreenVector {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	if ($input_type =~ /simple/i) {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-	}
-	else {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	}
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -237,12 +236,7 @@ sub _do_query_CrossMatchToScreenVector {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	if ($input_type =~ /simple/i) {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-	}
-	else {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	}
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -268,46 +262,47 @@ sub _do_query_CrossMatchToScreenVector {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 	
-	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
-
-	if (($articleName =~ /sequence/i) || (isSimpleArticle ($DOM) || (isCollectionArticle ($DOM)))) {
-
+	if (isCollectionArticle ($DOM)) {
+	    
+	    if ($_debug) {
+		print STDERR "$articleName is a collection article...\n";
+		print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+	    }
+	    
+	    my $note = "Received a collection input article instead of a simple";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => $input_article_name,
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+	
+	if (($articleName =~ /sequence/i) || (isSimpleArticle ($DOM))) {
+	    
 	    if (isSimpleArticle ($DOM)) {
 		
 		if ($_debug) {
 		    print STDERR "$articleName tag is a simple article...\n";
 		}
 		
-		if ($input_type eq "collection") {
-		    
-		    # not allowed
-		    
-		    my $note = "Received a collection input article instead of a simple";
-		    print STDERR "$note\n";
-		    my $code = "201";
-		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => 'sequence',
-									      code       => $code,
-									      type       => 'error',
-									      queryID    => $queryID,
-									      message    => "$note",
-									      );
-		    push (@$moby_exceptions, $moby_exception);
-		    
-		    # Return an empty moby data object, as well as an exception telling what nothing got returned
-	    
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
-		    return ($MOBY_RESPONSE, $moby_exceptions);
-		}
-		
 		# Validate the type
-		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, $input_format);
 		if (!$rightType) {
-		    my $note = "Expecting DNASequence objects, and receiving $inputDataType objects";
+		    my $note = "Expecting a $input_format object, and receiving a $inputDataType object";
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => "sequence",
+									      refElement => $input_article_name,
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -320,66 +315,33 @@ sub _do_query_CrossMatchToScreenVector {
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
-		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
-	    }
-	    elsif (isCollectionArticle ($DOM)) {
+		if ($_debug) {
+		    print STDERR "Parsing the fasta sequences string...\n"
+		}
+		
+		my $fasta_sequences  = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
+		my $sequences_tbl_str = qx/echo "$fasta_sequences" | \/home\/ug\/gmaster\/projects\/bin\/FastaToTbl/;
+		
+		if ($_debug) {
+		    print STDERR "fasta tbl string, $sequences_tbl_str\n";
+		}
+		
+		my @sequences_tbl    = split ('\n', $sequences_tbl_str);
+		
+		if ($_debug) {
+		    print STDERR "got " . @sequences_tbl . " tbl sequences\n";
+		}
+		
+		foreach my $sequence_tbl_str (@sequences_tbl) {
+		    $sequence_tbl_str =~ /^([^\s]+)\s(.+)/;
+		    my $seqId          = $1;
+		    my $sequence_str   = $2;
+		    $sequences{$seqId} = $sequence_str;
+		}
 
 		if ($_debug) {
-		    print STDERR "$articleName is a collection article...\n";
-		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		    print STDERR "parsed " . keys (%sequences) . " sequences\n";
 		}
-		
-		if ($input_type eq "simple") {
-		    # is it allowed ? - check this out
-		    # at the moment - disallow this !!
-		    # Anyway the client is supposed to deal with this before the execution of the service
-		    
-		    my $note = "Received a simple input article instead of a collection";
-		    print STDERR "$note\n";
-		    my $code = "201";
-		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => 'sequences',
-									      code       => $code,
-									      type       => 'error',
-									      queryID    => $queryID,
-									      message    => "$note",
-									      );
-		    push (@$moby_exceptions, $moby_exception);
-		    
-		    # Return an empty moby data object, as well as an exception telling what nothing got returned
-		    
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-		    return ($MOBY_RESPONSE, $moby_exceptions);
-		}
-		
-		# Validate the type of the simples in the collection - should all be DNASequence objects
-		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
-		if (!$rightType) {
-		    my $note = "Expecting a DNASequence object, and receiving a $inputDataType object";
-		    print STDERR "$note\n";
-		    my $code = "201";
-		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => 'sequences',
-									      code       => $code,
-									      type       => 'error',
-									      queryID    => $queryID,
-									      message    => "$note",
-									      );
-		    push (@$moby_exceptions, $moby_exception);
-
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-		    return ($MOBY_RESPONSE, $moby_exceptions);
-		}
-		
-		my @sequence_articles_DOM = getCollectedSimples ($DOM);
-		foreach my $sequence_article_DOM (@sequence_articles_DOM) {
-		   %sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($sequence_article_DOM, \%sequences);
-		}
-	    }
-	    else {
-		print STDERR "not supposed to ge here!\n";
-		print STDERR "not a simple or a collection, what is it there then!!\n";
-		print STDERR "DOM: " . $DOM->toString() . "\n";
 	    }
 	} # End parsing sequences article tag
 	
@@ -392,18 +354,9 @@ sub _do_query_CrossMatchToScreenVector {
 	print STDERR "$note\n";
 	my $code = "201";
 
-	my $refElement;
-	if ($input_type eq "simple") {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	    $refElement = "sequence";
-	}
-	else {
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
-	    $refElement = "sequences"
-	}
-	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => $refElement,
+								  refElement => $input_article_name,
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -417,111 +370,55 @@ sub _do_query_CrossMatchToScreenVector {
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
     
-    if ($input_type eq "simple") {
-	
-	if ($_debug) {
-	    print STDERR "making a simple response\n";
-	}
-	
-	my ($screened_fasta_seqs, $moby_exceptions_tmp) = CrossMatchToScreenVector_call (sequences  => \%sequences, queryID => $queryID, parameters => \%parameters, debug => $_debug);
-	push (@$moby_exceptions, @$moby_exceptions_tmp);
-	
-	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
-	# nos queda encapsularla en un Objeto bioMoby. Esta operacio
-	# la podriamos realizar en una funcion a parte si fuese compleja.
-	
-	if (defined $screened_fasta_seqs) {
-	    my ($sequenceIdentifier) = keys (%sequences);
+    my ($screened_fasta_seqs, $moby_exceptions_tmp) = CrossMatchToScreenVector_call (sequences  => \%sequences, queryID => $queryID, parameters => \%parameters, debug => $_debug);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
+    
+    if (defined $screened_fasta_seqs) {
+	if ($input_type eq "simple") {
 	    
-	    # Convert FASTA into a DNASequence object
-	    my $moby_seqobjs = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($screened_fasta_seqs, $output_format, $namespace);
-	    if (@$moby_seqobjs != 1) {
-		my $note = "Can't parse any sequences, Please check the syntax of your fasta sequence.\n";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "sequence",
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
-		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
-		return ($MOBY_RESPONSE, $moby_exceptions);
+	    if ($_debug) {
+		print STDERR "making a simple response\n";
 	    }
 	    
-	    my $moby_seqobj = $moby_seqobjs->[0];
-            $MOBY_RESPONSE  = simpleResponse($moby_seqobj, $output_article_name, $queryID);   
+	    my ($sequenceIdentifier) = keys (%sequences);
+	    
+	    my $moby_seqobj = "<$output_format namespace='$namespace' id='$sequenceIdentifier'>\n<String id='' namespace='' articleName='content'><![CDATA[$screened_fasta_seqs]]></String>\n</$output_format>\n";
+            $MOBY_RESPONSE  = simpleResponse($moby_seqobj, $output_article_name, $queryID);
 	}
 	else {
-	    my $note = "VectorScreening failed, Please check the syntax of your fasta input sequence.\n";
-	    print STDERR "$note\n";
-	    my $code = "201";
-	    my $moby_exception = INB::Exceptions::MobyException->new (
-								      refElement => "sequence",
-								      code       => $code,
-								      type       => 'error',
-								      queryID    => $queryID,
-								      message    => "$note",
-								      );
-	    push (@$moby_exceptions, $moby_exception);
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	    if ($_debug) {
+		print STDERR "making a collection response\n";
+	    }
+	    
+	    my $moby_seqobj = "<$output_format namespace='$namespace' id='Default'>\n<String id='' namespace='' articleName='content'><![CDATA[$screened_fasta_seqs]]></String>\n</$output_format>\n";
+	    $MOBY_RESPONSE   = simpleResponse($moby_seqobj, $output_article_name, $queryID);
 	}
-	
-	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
-	# volver a encapsularlo en un objeto biomoby de respuesta. Pero
-	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos
-	# una respuesta compleja (de verdad, esta era simple ;) llamariamos
-	# a collection response.
-	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
-	# el mismo que el de la query.
-	
-	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-    elsif ($input_type eq "collection") {
-	
-	if ($_debug) {
-	    print STDERR "making a collection response\n";
-	}
-	
-	# The input was a collection of Sequences, so we have to return a collection of GFF objects
-	
-	my ($screened_seqs_fasta, $moby_exceptions_tmp) = CrossMatchToScreenVector_call (sequences  => \%sequences, format => $output_format, parameters => \%parameters, debug => $_debug);
-	push (@$moby_exceptions, @$moby_exceptions_tmp);
-	
-	if (defined $screened_seqs_fasta) {
-	    # Convert FASTA sequences into DNASequences
-	    my $moby_seqobjs = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($screened_seqs_fasta, $output_format, $namespace);
-	    $MOBY_RESPONSE   = collectionResponse($moby_seqobjs, $output_article_name, $queryID);
-	}
-	else {
-	    my $note = "VectorScreening failed, Please check the syntax of your fasta input sequences.\n";
-	    print STDERR "$note\n";
-	    my $code = "201";
-	    my $moby_exception = INB::Exceptions::MobyException->new (
-								      refElement => "sequences",
-								      code       => $code,
-								      type       => 'error',
-								      queryID    => $queryID,
-								      message    => "$note",
-								      );
-	    push (@$moby_exceptions, $moby_exception);
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	}
-	
-	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
-	# volver a encapsularlo en un objeto biomoby de respuesta. Pero
-	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos
-	# una respuesta compleja (de verdad, esta era simple ;) llamariamos
-	# a collection response.
-	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
-	# el mismo que el de la query.
-	
-	return ($MOBY_RESPONSE, $moby_exceptions);
-	
+    else {
+	my $note = "VectorScreening failed, Please check the syntax of your fasta input sequence.\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => $input_article_name,
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
     }
+    
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos
+    # a collection response.
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
+    # el mismo que el de la query.
+	
+    return ($MOBY_RESPONSE, $moby_exceptions);
+
 }
 
 
@@ -567,10 +464,10 @@ sub _do_query_CrossMatchToScreenVector {
 =cut
 
 sub runCrossMatchToScreenVector {
-	
+    
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_;        # get the incoming MOBY query XML
-
+    
     # Hasta el momento, no existen objetos Perl de BioMoby paralelos
     # a la ontologia, y debemos contentarnos con trabajar directamente
     # con objetos DOM. Por consiguiente lo primero es recolectar la
@@ -592,19 +489,19 @@ sub runCrossMatchToScreenVector {
     # The moby output format for this service is text-html
     # (The MatScan output format for this service is by default GFF - right now it is hardcoded)
     #
-
-    my $_moby_output_format   = "DNASequence";
+    
+    my $_moby_output_format   = "FASTA_NA";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "runCrossMatchToScreenVector";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput(@queries){
-
+	
 	if ($_debug) {
 	    my $query_str = $queryInput->toString();
 	    print STDERR "query text: $query_str\n";
 	}
-
+	
 	# En este punto es importante recordar que el objeto $query
 	# es un XML::DOM::Node, y que si queremos trabajar con
 	# el mensaje de texto debemos llamar a: $query->toString()
@@ -687,9 +584,9 @@ sub runCrossMatchToScreenVectorCollection {
     my $MOBY_RESPONSE   = "";             # set empty response
     my $moby_exceptions = [];
     
-    my $_moby_output_format = "DNASequence";
+    my $_moby_output_format = "FASTA_NA_multi";
     my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "runCrossMatchToScreenVector";
+    my $serviceName = "runCrossMatchToScreenVectorCollection";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput(@queries){

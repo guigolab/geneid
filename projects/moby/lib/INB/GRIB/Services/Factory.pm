@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.76 2006-05-03 09:14:35 gmaster Exp $
+# $Id: Factory.pm,v 1.77 2006-05-23 15:21:35 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -79,8 +79,12 @@ use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Request::Common;
 
-# Create temporary data files
+# Create temporary data files and directories
 use File::Temp qw/tempfile/;
+use File::Temp qw/tempdir/;
+
+# MIME encoding/decoding
+use MIME::Base64;
 
 # Bioperl
 
@@ -92,6 +96,9 @@ use INB::Exceptions::MobyException;
 
 # Report Unix Error codes
 use Errno qw (EINTR EIO :POSIX);
+
+# Module to delete directories
+use File::Path;
 
 require Exporter;
 
@@ -126,6 +133,8 @@ our @EXPORT = qw(
   &RepeatMasker_call
   &Dust_call
   &CrossMatchToScreenVector_call
+  &Phrap_call
+  &Phred_call
 );
 
 our $VERSION = '1.00';
@@ -1721,7 +1730,7 @@ sub meme2matrix_call {
     # So better to return an array rather than just a string
 
     if (! defined $matrices_output) {
-	my $note = "Internal System Error. the parsing of MEME data has failed!\n";
+	my $note = "Internal System Error. The parsing of MEME data has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1839,7 +1848,7 @@ sub RepeatMasker_call {
 	return (undef, [$moby_exception]);
     }
     
-    # Create the temp map files
+    # Create the temp sequences files
 
     my ($seq_fh, $repeatmasker_file);
     eval {
@@ -1907,7 +1916,7 @@ sub RepeatMasker_call {
     }
     
     if (! defined $masked_sequences) {
-	my $note = "Internal System Error. the parsing of the masked sequence data has failed!\n";
+	my $note = "Internal System Error. The parsing of the masked sequence data has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1948,7 +1957,7 @@ sub Dust_call {
     
     # Check that the binary is in place
     if (! -f "$_dust_dir/$_dust_bin") {
-	my $note = "Internal System Error. dust script not found";
+	my $note = "Internal System Error. dust binary not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -1960,7 +1969,7 @@ sub Dust_call {
 	return (undef, [$moby_exception]);
     }
     
-    # Create the temp map files
+    # Create the temp sequences file
 
     my ($seq_fh, $dust_file);
     eval {
@@ -2023,7 +2032,7 @@ sub Dust_call {
     unlink $dust_file;
     
     if (! defined $masked_sequences) {
-	my $note = "Internal System Error. the parsing of masked sequence data has failed!\n";
+	my $note = "Internal System Error. The parsing of masked sequence data has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -2045,7 +2054,7 @@ sub CrossMatchToScreenVector_call {
     my %args = @_;
     
     # output specs declaration
-    my @masked_seqs_fasta = "";
+    my @screened_seqs_fasta = "";
     my $moby_exceptions   = [];
     
     # relleno los parametros por defecto CrossMatchToScreenVector_call
@@ -2064,7 +2073,7 @@ sub CrossMatchToScreenVector_call {
     my $_cross_match_dir    = "/usr/local/molbio/Install/cross_match";
     my $_cross_match_bin    = "cross_match";
     my $_cross_match_args   = "-screen ";
-    my $_cross_match_vectors = "/home/ug/gmaster/projects/data_libraries/vector.seq";
+    my $_cross_match_vectors = "/home/ug/gmaster/projects/assembly/data_libraries/UniVec_Core.fa";
 
     if (defined $minmatch) {
 	$_cross_match_args .= "-minmatch $minmatch ";
@@ -2075,7 +2084,7 @@ sub CrossMatchToScreenVector_call {
     
     # Check that the binary is in place
     if (! -f "$_cross_match_dir/$_cross_match_bin") {
-	my $note = "Internal System Error. cross_match script not found";
+	my $note = "Internal System Error. cross_match binary not found";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -2087,7 +2096,7 @@ sub CrossMatchToScreenVector_call {
 	return (undef, [$moby_exception]);
     }
     
-    # Create the temp map files
+    # Create the temp sequences file
 
     my ($seq_fh, $cross_match_file);
     eval {
@@ -2144,18 +2153,19 @@ sub CrossMatchToScreenVector_call {
 	print STDERR "$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args\n";
     }
 
-    my $result = qx/$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args/;
+    my $result = qx/$_cross_match_dir\/$_cross_match_bin $cross_match_file $_cross_match_vectors $_cross_match_args >& \/dev\/null/;
     my $screened_sequences_file = $cross_match_file . ".screen";
     my $screened_sequences = qx/cat $screened_sequences_file/;
     
     # Comment this line if you want to keep the file...
     if (! $debug) {
 	unlink $cross_match_file;
-	# Also the .screen file 
+	unlink $screened_sequences_file;
+	unlink $cross_match_file . ".log"
     }
     
     if (! defined $screened_sequences) {
-	my $note = "Internal System Error. the parsing of the screened sequence data has failed!\n";
+	my $note = "Internal System Error. The parsing of the screened sequence data has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -2169,9 +2179,312 @@ sub CrossMatchToScreenVector_call {
     }
     else {
 	return ($screened_sequences, $moby_exceptions);
+    }   
+    
+}
+
+sub Phrap_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my $assembled_sequences;
+    my $ace_data;
+    my $moby_exceptions      = [];
+    
+    # relleno los parametros por defecto Phrap_call
+    
+    my $sequences          = $args{sequences}    || undef;
+    my $fasta_quality_data = $args{quality_data} || undef;
+    my $seqIds             = $args{seqIds}       || undef;
+    my $parameters         = $args{parameters}   || undef;
+    my $debug              = $args{debug};
+    my $queryID            = $args{queryID}      || "";
+    
+    # parameters
+    
+    my $node_seg   = $parameters->{node_seg};
+    my $node_space = $parameters->{node_space};
+    
+    # Llama a Phrap en local
+    my $_phrap_dir    = "/usr/local/molbio/Install/cross_match";
+    my $_phrap_bin    = "phrap";
+    my $_phrap_args   = "-new_ace";
+    
+    if (defined $node_seg) {
+	$_phrap_args .= " -node_seg $node_seg";
+    }
+    if (defined $node_space) {
+	$_phrap_args .= " -node_space $node_space";
     }
     
+    # Check that the binary is in place
+    if (! -f "$_phrap_dir/$_phrap_bin") {
+	my $note = "Internal System Error. phrap binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
     
+    # Create the temp sequences file
+
+    my ($seq_fh, $sequences_phrap_file);
+    eval {
+	($seq_fh, $sequences_phrap_file) = tempfile("/tmp/PHRAP.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open phrap input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
+    
+    # Bioperl sequence factory
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+
+    if ((!defined $seqIds) || (@$seqIds == 0)) {
+	my @seqIds = keys (%$sequences);
+	$seqIds = \@seqIds;
+    }
+    foreach my $sequenceIdentifier (@$seqIds) {
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+	
+	# bioperl sequence object
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
+				    );
+	$sout->write_seq ($seqobj);
+    }
+    close $seq_fh;
+
+    # Test empty file
+    if (-z $sequences_phrap_file) {
+	my $note = "Internal System Error. Empty phrap input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
+    
+    # Parse the quality data if any
+    
+    my $phrap_quality_file;
+    if (defined $fasta_quality_data) {
+	
+	$phrap_quality_file = $sequences_phrap_file . ".qual";
+	
+	if ($debug) {
+	    print STDERR "quality data hash defined!\n";
+	}
+	
+	open FILE, ">$phrap_quality_file" or die "can't open temporary file for phrap quality data, $phrap_quality_file!\n";
+	print FILE "$fasta_quality_data";
+	close FILE;
+	
+	if (-z $phrap_quality_file) {
+	my $note = "Internal System Error. Empty phrap input quality data file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
+	
+    }
+    
+    if ($debug) {
+	print STDERR "Running phrap, with this command:\n";
+	print STDERR "$_phrap_dir\/$_phrap_bin $sequences_phrap_file $_phrap_args\n";
+    }
+    
+    my $result;
+    if ($debug) {
+	$result = qx/$_phrap_dir\/$_phrap_bin $sequences_phrap_file $_phrap_args/;
+    }
+    else {
+	$result = qx/$_phrap_dir\/$_phrap_bin $sequences_phrap_file $_phrap_args >& \/dev\/null/;
+    }
+    
+    if ($debug) {
+	print STDERR "Phrap done\n";
+    }
+    
+    # Process the phrap results to get a unique FASTA file
+    
+    my $singlets_seqs = qx/cat $sequences_phrap_file".singlets"/;
+    my $contigs_seqs  = qx/cat $sequences_phrap_file".contigs"/;
+    $assembled_sequences = $contigs_seqs . $singlets_seqs;
+    
+    # Replace contigs of one member by singlets
+    
+    # ...
+    
+    $ace_data = qx/cat $sequences_phrap_file".ace"/;
+    
+    # Comment this line if you want to keep the file...
+    if (! $debug) {
+	# The phrap input files
+	unlink $sequences_phrap_file;
+	if (defined $phrap_quality_file) {
+	    unlink $phrap_quality_file;
+	}
+	# Also the phrap output files
+	unlink $sequences_phrap_file . ".log";
+	unlink $sequences_phrap_file . ".ace";
+	unlink $sequences_phrap_file . ".contigs";
+	unlink $sequences_phrap_file . ".contigs.qual";
+	unlink $sequences_phrap_file . ".singlets";
+	unlink $sequences_phrap_file . ".problems";
+	unlink $sequences_phrap_file . ".problems.qual";
+    }
+    
+    if (! defined $assembled_sequences) {
+	my $note = "Internal System Error. The parsing of the assembled sequence data has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, undef, $moby_exceptions);
+    }
+    else {
+	return ($assembled_sequences, $ace_data, $moby_exceptions);
+    }
+    
+}
+
+sub Phred_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my @seqs_fasta      = ();
+    my @quality_fasta   = ();
+    my $moby_exceptions = [];
+    
+    # relleno los parametros por defecto Phred_call
+    
+    my $chromatograms = $args{chromatograms} || undef;
+    my $parameters    = $args{parameters}    || undef;
+    my $debug         = $args{debug};
+    my $queryID       = $args{queryID}       || "";
+    
+    # no parameters !
+    
+    # Llama a Phred en local
+    my $_phred_dir     = "/usr/local/molbio/Install/phred-0.020425.c";
+    my $_phred_bin     = "phred";
+    my $_phred_args    = "";
+    my $_phred_config_file = "/home/ug/gmaster/projects/assembly/phredpar.dat";
+    my $_phd2fasta_bin = "phd2fasta";
+    
+    # Check that the binary is in place
+    if (! -f "$_phred_dir/$_phred_bin") {
+	my $note = "Internal System Error. phred binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
+    
+    # Prepare the input chromatograms data
+    
+    # Set up a temp input dir and a temp output dir
+    my $phred_input_dir = tempdir( "/tmp/PHRED.INPUT.XXXXXX" );
+    my $phred_output_dir = tempdir( "/tmp/PHRED.OUTPUT.XXXXXX" );
+    
+    if ($debug) {
+	print STDERR "phred_input_dir, $phred_input_dir, phred_output_dir, $phred_output_dir\n";
+    }
+    
+    my @chromatogram_ids = keys (%$chromatograms);
+    foreach my $chromatogram_id (@chromatogram_ids) {
+	my $chromatogram = $chromatograms->{$chromatogram_id};
+	
+	my $chromatogram_type     = $chromatogram->{type};
+	my $chromatogram_data_b64 = $chromatogram->{rawdata};
+	
+	my $tempfile = "$phred_input_dir/$chromatogram_id" . "." . $chromatogram_type;
+	open FILE, ">$tempfile";
+	
+	if ($debug) {
+	    print STDERR "temp input file name, $tempfile\n";
+	}
+	
+	# decode
+	my $chromatogram_data = decode_base64 ($chromatogram_data_b64);
+	# put the data in it
+	print FILE "$chromatogram_data";
+	close FILE;
+    }
+    
+    # Set up a temporary output sequence FASTA file and quality FASTA file
+    
+    my ($seq_fasta_fh, $seq_fasta_file) = tempfile ("/tmp/PHRED_SEQS_XXXXX", SUFFIX => ".dna");
+    close $seq_fasta_fh;
+    my $qual_fasta_file = $seq_fasta_file . ".qual";
+    
+    if ($debug) {
+	print STDERR "fasta sequence file, $seq_fasta_file\n";
+	print STDERR "fasta quality file, $qual_fasta_file\n";
+    }
+    
+    if ($debug) {
+	print STDERR "Running phred, with this command:\n";
+	print STDERR "$_phred_dir\/$_phred_bin -id $phred_input_dir -pd $phred_output_dir $_phred_args\n";
+    }
+    
+    my $result = qx/export PHRED_PARAMETER_FILE=$_phred_config_file; $_phred_dir\/$_phred_bin -id $phred_input_dir -pd $phred_output_dir $_phred_args/;
+    # then
+    $result = qx/$_phred_dir\/$_phd2fasta_bin -id $phred_output_dir -os $seq_fasta_file -oq $qual_fasta_file/;
+    
+    # Process the results
+    
+    my $fasta_sequences = qx/cat $seq_fasta_file/;
+    my $fasta_quality   = qx/cat $qual_fasta_file/;
+    
+    # Remove temprary files
+    
+    if (! $debug) {
+	unlink $seq_fasta_file;
+	unlink $qual_fasta_file;
+	# buggy !!!????
+	# rmtree (["$phred_input_dir", "$phred_output_dir"], 1, 1);
+    }
+    
+    return ($fasta_sequences, $fasta_quality, $moby_exceptions);
 }
 
 1;

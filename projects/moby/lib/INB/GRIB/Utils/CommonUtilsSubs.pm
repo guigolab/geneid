@@ -41,6 +41,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # 
 our @EXPORT = qw(
   &getTextContentfromXML
+  &getArticleDataType
   &createSequenceObjectsFromFASTA
   &parseSingleGFFIntoCollectionGFF
   &parseMobySequenceObjectFromDOM
@@ -52,9 +53,12 @@ our @EXPORT = qw(
   &MOBY_EMPTY_RESPONSE
   &MOBY_EMPTY_SIMPLE_RESPONSE
   &MOBY_EMPTY_COLLECTION_RESPONSE
+  &MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE
+  &MOBY_DOUBLE_SIMPLE_RESPONSE
   &convert_tabularPositionWeightMatrix_into_MobyMatrix
   &convert_tabularScoreMatrix_into_MobyMatrix
   &convert_MobyMatrix_into_tabularMatrix
+  &numberOccurrences
 );
 
 our $VERSION = '1.0';
@@ -79,6 +83,19 @@ sub MOBY_EMPTY_COLLECTION_RESPONSE {
     return "<moby:mobyData moby:queryID='$queryID'><moby:Collection moby:articleName='$output_article_name'/></moby:mobyData>";
 }
 
+sub MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE {
+    my $self = shift;
+    my ($queryID, $output_article_name_1, $output_article_name_2) = @_;
+    return "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name_1'/><moby:Simple moby:articleName='$output_article_name_2'/></moby:mobyData>";
+}
+
+sub MOBY_DOUBLE_SIMPLE_RESPONSE {
+    my $self = shift;
+    my ($output_object_1, $output_article_name_1, $output_object_2, $output_article_name_2, $queryID) = @_;
+    
+    return "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name_1'>$output_object_1</moby:Simple><moby:Simple moby:articleName='$output_article_name_2'>$output_object_2</moby:Simple></moby:mobyData>";
+}
+
 # Works for both raw text content and CDATA bloc
 
 sub getTextContentFromXML {
@@ -89,8 +106,8 @@ sub getTextContentFromXML {
 	my $parser = XML::LibXML->new();
 	my $doc    = $parser->parse_string( $XML );
 	$XML       = $doc->getDocumentElement();
-    }	
-
+    }
+    
     return '' unless (   
 			 my $elements = $XML->getElementsByTagName( "$tagName" ) 
 			                || $XML->getElementsByTagName( "moby:$tagName" )
@@ -116,6 +133,30 @@ sub getTextContentFromXML {
     return $content;
 }
 
+sub getArticleDataType {
+    my $self = shift;
+    my ( $XML ) = @_;
+    
+    unless ( ref( $XML ) =~ /XML\:\:LibXML/ ) {
+	my $parser = XML::LibXML->new();
+	my $doc    = $parser->parse_string( $XML );
+	$XML       = $doc->getDocumentElement();
+    }
+    
+    my @children = $XML->childNodes();
+    foreach my $child (@children) {	
+	my $node_type = $child->nodeType();
+	
+	if ($node_type == ELEMENT_NODE) {
+	    my $node_name = $child->nodeName();
+	    return $node_name;
+	}
+    }
+    
+    print STDERR "getArticleDataType can't find any object type...\n";
+    
+    return undef;
+}
 
 sub createSequenceObjectsFromFASTA {
     my $self = shift;
@@ -276,7 +317,7 @@ PRT
     
 }
 
-# @param sequences in FASTA format as a string
+# @param sequences in FASTA format as a unique string
 # @return a set of bioperl objects
 
 sub _parse_fasta_sequences {
@@ -505,7 +546,7 @@ sub validateDataType {
 	
 	if (@object_nodes < 1) {
 	    print STDERR "error - not a single simple element found!!!!\n";
-	    print STDERR "DOM,\n". $DOM->toString() . "\n";
+	    # print STDERR "DOM,\n". $DOM->toString() . "\n";
 	}
 	
 	foreach my $node (@object_nodes) {
@@ -630,6 +671,26 @@ sub validateDataType {
 		    }
 		}
 		
+		if ($specifiedType eq "FASTA_Base_Quality_multi") {
+		    if ($inputDataType =~ /FASTA_Base_Quality_multi$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "FASTA_Base_Quality") {
+		    if ($inputDataType =~ /FASTA_Base_Quality/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
 		if (($specifiedType eq "BLAST-Text") || ($specifiedType eq "NCBI_BLAST_Text") || ($specifiedType eq "WU_BLAST_Text")) {
 		    if ($inputDataType =~ /BLAST-Text|NCBI_BLAST_Text|WU_BLAST_Text/) {
 			$rightType = 1;
@@ -712,6 +773,46 @@ sub validateDataType {
 		
 		if ($specifiedType eq "MEME_Text") {
 		    if ($inputDataType =~ /MEME_Text$/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "Chromatogram_Encoded") {
+		    if ($inputDataType =~ /Chromatogram_Encoded|ABI|SCF|ESD/) {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "ABI_Encoded") {
+		    if ($inputDataType eq "ABI_Encoded") {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "SCF_Encoded") {
+		    if ($inputDataType eq "SCF_Encoded") {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		if ($specifiedType eq "ESD_Encoded") {
+		    if ($inputDataType eq "ESD_Encoded") {
 			$rightType = 1;
 		    }
 		    else {
@@ -1314,6 +1415,21 @@ sub _parseMatrixMobyObject {
     }
     
     return @matrix;
+}
+
+sub numberOccurrences {
+    my $self = shift;
+    my ($string, $pattern) = @_;
+    
+    my $nb_occurrences = 0;
+    my $pos = -1;
+    
+    while (($pos = index ($string, $pattern, $pos)) > -1) {
+	$pos++;
+	$nb_occurrences++;
+    }
+    
+    return $nb_occurrences;
 }
 
 1;
