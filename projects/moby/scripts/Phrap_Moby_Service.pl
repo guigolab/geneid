@@ -18,6 +18,9 @@ use MOBY::Client::Central;
 use MOBY::Client::Service;
 # use SOAP::Lite + 'trace';
 
+# MIME encoding/decoding
+use MIME::Base64;
+
 # Bioperl Libraries
 
 use Bio::SeqIO;
@@ -243,11 +246,22 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 
 my $input_sequences_data = qx/cat $in_file/;
 
+my $input_sequences_data_b64;
+# Compression
+# my $system_result = qx/gzip $in_file/;
+# $input_sequences_data_b64 = qx/cat $in_file".gz"/;
+
+# Binary encoding
+# $input_sequences_data_b64 = encode_base64 ($input_sequences_data);
+
 my $input_sequences_xml = <<PRT;
 <$input_sequences_object_type namespace="$datasource" id="$seqId">
   <String namespace="" id=""  articleName="Content"><![CDATA[$input_sequences_data]]></String>
 </$input_sequences_object_type>
 PRT
+
+undef $input_sequences_data;
+undef $input_sequences_data_b64;
 
 #
 # Parameters (secondary articles)
@@ -269,11 +283,15 @@ else {
 <String namespace="" id=""  articleName="Content"><![CDATA[$input_quality_data]]></String>
 </$input_quality_object_type>
 PRT
-    
+
+    undef $input_quality_data;
+
     $results = $Service->execute(XMLinputlist => [
 						["$sequences_articleName", $input_sequences_xml, "$quality_articleName", $input_quality_xml,]
 					       ]);
 }
+
+undef $input_sequences_xml;
 
 ##################################################################
 #
@@ -281,7 +299,8 @@ PRT
 #
 ##################################################################
 
-print "results\n", $results, "\n";
+print STDERR "results:\n";
+print "$results\n";
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";

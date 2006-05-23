@@ -266,7 +266,8 @@ my $result = $Service->execute(XMLinputlist => [
 #
 ##################################################################
 
-print "result\n", $result, "\n";
+print STDERR "results:\n";
+print "$result\n";
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
