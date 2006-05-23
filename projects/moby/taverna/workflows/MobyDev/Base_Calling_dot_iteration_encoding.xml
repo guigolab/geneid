@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:ZR18RDQYZP0" author="" title="" />
+  <s:processor name="String">
+    <s:description>a string</s:description>
+    <s:biomobyobject>
+      <s:mobyEndpoint>http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>String</s:serviceName>
+      <s:authorityName />
+    </s:biomobyobject>
+  </s:processor>
+  <s:processor name="ABI_Encoded">
+    <s:description>Trace data in ABI format</s:description>
+    <s:biomobyobject>
+      <s:mobyEndpoint>http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>ABI_Encoded</s:serviceName>
+      <s:authorityName />
+    </s:biomobyobject>
+    <s:iterationstrategy>
+      <i:cross xmlns:i="http://org.embl.ebi.escience/xscufliteration/0.1beta10">
+        <i:dot>
+          <i:iterator name="String(rawdata)" />
+          <i:iterator name="id" />
+        </i:dot>
+        <i:iterator name="namespace" />
+      </i:cross>
+    </s:iterationstrategy>
+  </s:processor>
+  <s:processor name="runPhred">
+    <s:description>Phred writes the base calls from a chromatogram and returns a DNA sequence and FASTA base quality data</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runPhred</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runCrossMatchToScreenVector">
+    <s:description>Runs cross_match to screen out vector sequences from a DNA sequence. The vector sequences dataset is stored internally</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://moby-dev.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runCrossMatchToScreenVector</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="articleName_ABI" boring="true">
+    <s:stringconstant>trace</s:stringconstant>
+  </s:processor>
+  <s:processor name="articleName_rawdata" boring="true">
+    <s:stringconstant>rawdata</s:stringconstant>
+  </s:processor>
+  <s:processor name="Encode_byte___to_base64">
+    <s:local>org.embl.ebi.escience.scuflworkers.java.EncodeBase64</s:local>
+  </s:processor>
+  <s:link source="ABI_Encoded:mobyData" sink="runPhred:Chromatogram_Encoded(trace)" />
+  <s:link source="String:mobyData" sink="ABI_Encoded:String(rawdata)" />
+  <s:link source="identifier" sink="ABI_Encoded:id" />
+  <s:link source="namespace" sink="ABI_Encoded:namespace" />
+  <s:link source="articleName_ABI:value" sink="ABI_Encoded:article name" />
+  <s:link source="articleName_rawdata:value" sink="String:article name" />
+  <s:link source="trace_data" sink="Encode_byte___to_base64:bytes" />
+  <s:link source="Encode_byte___to_base64:base64" sink="String:value" />
+  <s:link source="runCrossMatchToScreenVector:FASTA_NA(screened_sequence)" sink="sequences" />
+  <s:link source="runPhred:FASTA_Base_Quality(base_quality_data)" sink="quality_data" />
+  <s:link source="runPhred:FASTA_NA(sequence)" sink="runCrossMatchToScreenVector:FASTA_NA(sequence)" />
+  <s:source name="trace_data" />
+  <s:source name="namespace" />
+  <s:source name="identifier" />
+  <s:sink name="sequences" />
+  <s:sink name="quality_data" />
+</s:scufl>
+
+
