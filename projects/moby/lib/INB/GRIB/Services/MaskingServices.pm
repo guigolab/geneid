@@ -1,4 +1,4 @@
-# $Id: MaskingServices.pm,v 1.6 2006-05-03 13:10:55 gmaster Exp $
+# $Id: MaskingServices.pm,v 1.7 2006-05-23 15:26:22 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -299,7 +299,7 @@ sub _do_query_RepeatMasker {
 
 		if ($_debug) {
 		    print STDERR "$articleName is a collection article...\n";
-		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		}
 		
 		if ($input_type eq "simple") {
@@ -605,7 +605,7 @@ sub _do_query_Dust {
 
 		if ($_debug) {
 		    print STDERR "$articleName is a collection article...\n";
-		    print STDERR "Collection DOM: " . $DOM->toString() . "\n";
+		    # print STDERR "Collection DOM: " . $DOM->toString() . "\n";
 		}
 		
 		if ($input_type eq "simple") {
@@ -1067,8 +1067,8 @@ sub runDust {
     foreach my $queryInput(@queries){
 
 	if ($_debug) {
-	    my $query_str = $queryInput->toString();
-	    print STDERR "query text: $query_str\n";
+	    # my $query_str = $queryInput->toString();
+	    # print STDERR "query text: $query_str\n";
 	}
 
 	# En este punto es importante recordar que el objeto $query
@@ -1155,16 +1155,17 @@ sub runDustCollection {
     
     my $_moby_output_format = "DNASequence";
     my $moby_logger = get_logger ("MobyServices");
-    my $serviceName = "runDust";
+    my $serviceName = "runDustCollection";
     
     # Para cada query ejecutaremos el _execute_query.
     foreach my $queryInput(@queries){
 
 	if ($_debug) {
-	    my $query_str = $queryInput->toString();
-	    print STDERR "query text: $query_str\n";
+	    print STDERR "Processing the execution of runDustCollection service...\n";
+	    # my $query_str = $queryInput->toString();
+	    # print STDERR "query text: $query_str\n";
 	}
-
+	
 	# En este punto es importante recordar que el objeto $query
 	# es un XML::DOM::Node, y que si queremos trabajar con
 	# el mensaje de texto debemos llamar a: $query->toString()
