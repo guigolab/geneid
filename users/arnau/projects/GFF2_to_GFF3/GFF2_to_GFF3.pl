@@ -251,7 +251,7 @@ while (<FILE>) {
 	
 	# Feature type mapping if genes
 	if ($featureType =~ /Internal|First|Terminal|Single/) {
-
+	    
 	    $previous_exon_type = $featureType;
 	    $attributes = undef;
 	    
@@ -264,7 +264,7 @@ while (<FILE>) {
 		$geneStart = $start;
 		
 		# if featureType is equal to Internal then it is a partial CDS
-		if ($featureType eq "Internal") {
+		if ($featureType =~ /Internal$/) {
 		    if ($strand eq "+") {
 			$attributes .= "5_prime_partial=true";
 		    }
