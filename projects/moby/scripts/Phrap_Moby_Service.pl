@@ -256,7 +256,7 @@ my $input_sequences_data_b64;
 
 my $input_sequences_xml = <<PRT;
 <$input_sequences_object_type namespace="$datasource" id="$seqId">
-  <String namespace="" id=""  articleName="Content"><![CDATA[$input_sequences_data]]></String>
+  <String namespace="" id=""  articleName="content"><![CDATA[$input_sequences_data]]></String>
 </$input_sequences_object_type>
 PRT
 
@@ -266,7 +266,10 @@ undef $input_sequences_data_b64;
 #
 # Parameters (secondary articles)
 #
-  
+
+my $node_space = 4;
+my $node_space_xml = "<Value>$node_space</Value>";
+
 # ...
 
 my $results;
@@ -280,14 +283,14 @@ else {
 
     my $input_quality_xml = <<PRT;
 <$input_quality_object_type namespace="$datasource" id="$seqId">
-<String namespace="" id=""  articleName="Content"><![CDATA[$input_quality_data]]></String>
+<String namespace="" id=""  articleName="content"><![CDATA[$input_quality_data]]></String>
 </$input_quality_object_type>
 PRT
 
     undef $input_quality_data;
 
     $results = $Service->execute(XMLinputlist => [
-						["$sequences_articleName", $input_sequences_xml, "$quality_articleName", $input_quality_xml,]
+						["$sequences_articleName", $input_sequences_xml, "$quality_articleName", $input_quality_xml,, 'node_space', $node_space_xml]
 					       ]);
 }
 
