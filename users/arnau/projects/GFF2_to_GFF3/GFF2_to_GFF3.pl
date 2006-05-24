@@ -292,12 +292,7 @@ while (<FILE>) {
 	    $geneEnd = $end;
 	}
 	elsif ($featureType =~ /intron/i) {
-	    if (! defined $attributes) {
-		$attributes  = "Parent=$mRNAId";
-	    }
-	    else {
-		$attributes  = "Parent=$mRNAId;" . $attributes;
-	    }
+	    $attributes  = "Parent=$mRNAId";
 	    
 	    my $intron_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
 	    push (@$cds_features, $intron_feature);
