@@ -288,6 +288,17 @@ while (<FILE>) {
 	    
 	    $geneEnd = $end;
 	}
+	elsif ($featureType =~ /intron/i) {
+	    if (! defined $attributes) {
+		$attributes  = "Parent=$mRNAId";
+	    }
+	    else {
+		$attributes  = "Parent=$mRNAId;" . $attributes;
+	    }
+	    
+	    my $intron_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
+	    push (@gff_features, $intron_feature);
+	}
 	elsif ($algorithm =~ /MatScan|meta/) {
 	    
 	    if ($_debug) {
@@ -335,7 +346,7 @@ while (<FILE>) {
 	else {
 	    
 	    if ($_debug) {
-		print STDERR "it is a feature of unprocessed type\n";
+		print STDERR "it is a feature, $featureType, of unprocessed type\n";
 	    }
 	    
 	    chomp $line;
