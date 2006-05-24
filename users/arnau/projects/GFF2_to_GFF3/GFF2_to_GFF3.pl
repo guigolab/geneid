@@ -238,6 +238,9 @@ while (<FILE>) {
 	my $phase  = $8;
 	chomp $phase;
 	my $attributes = $9;
+	if (defined $attributes) {
+	    chomp $attributes;
+	}
 	
 	# Clean the score
 	$score =~ s/\s//g;
@@ -297,7 +300,7 @@ while (<FILE>) {
 	    }
 	    
 	    my $intron_feature = "$seqId\t$algorithm\t$featureType\t$start\t$end\t$score\t$strand\t$phase\t$attributes";
-	    push (@gff_features, $intron_feature);
+	    push (@$cds_features, $intron_feature);
 	}
 	elsif ($algorithm =~ /MatScan|meta/) {
 	    
