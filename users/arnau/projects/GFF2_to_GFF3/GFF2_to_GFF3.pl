@@ -152,7 +152,7 @@ while (<FILE>) {
 	
 	$seqId     = $1;
 	my $length = $2;
-	my $gff3_seq_line = "# Sequence-region $seqId 1 $length";
+	my $gff3_seq_line = "## Sequence-region $seqId 1 $length";
 	push (@gff_features, $gff3_seq_line);
     }
     
