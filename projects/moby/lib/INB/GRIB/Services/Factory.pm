@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.77 2006-05-23 15:21:35 gmaster Exp $
+# $Id: Factory.pm,v 1.78 2006-05-24 15:45:13 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1725,7 +1725,7 @@ sub meme2matrix_call {
     # Comment this line if you want to keep the file...
     unlink $meme2matrix_file;
     
-    # Return an array of matrices from the output (which is a string)
+   # Return an array of matrices from the output (which is a string)
     # Because we want to return a collection of text-formatted objects (each object containing a matrix)
     # So better to return an array rather than just a string
 
@@ -2195,7 +2195,6 @@ sub Phrap_call {
     
     my $sequences          = $args{sequences}    || undef;
     my $fasta_quality_data = $args{quality_data} || undef;
-    my $seqIds             = $args{seqIds}       || undef;
     my $parameters         = $args{parameters}   || undef;
     my $debug              = $args{debug};
     my $queryID            = $args{queryID}      || "";
@@ -2208,7 +2207,30 @@ sub Phrap_call {
     # Llama a Phrap en local
     my $_phrap_dir    = "/usr/local/molbio/Install/cross_match";
     my $_phrap_bin    = "phrap";
+    # $_phrap_bin    = "phrap.bigmalloc";
+    # $_phrap_bin    = "phrap.manyreads";
     my $_phrap_args   = "-new_ace";
+    
+    my %ace_parsing_options;
+    if (($_phrap_bin eq "phrap") || ($_phrap_bin eq "phrap.manyreads") || ($_phrap_bin eq "phrap.bigmalloc")) {
+	%ace_parsing_options = (
+				'ace_name_suffix' => '.ace',
+				'contig_pattern'  => 'CO\s(\S+)\s+.*',
+				'AF_test'         => '^AF',
+				'AF_pattern'      => 'AF\s+(\S+)\s+(C|U)\s+-?\d+.*',
+				'member_sequence' => 'RD\s+(\S+).*',
+				);
+    }
+    else {
+	# Old formatting
+	%ace_parsing_options = (
+				'ace_name_suffix'  => '.ace',
+				'contig_pattern'   => 'DNA\s(\S+)',
+				'AF_test'          => '^Assembled_from',
+				'AF_pattern'       => 'Assembled_from\*?\s+(\S+)\s+-?\d+\s+-?\d+',
+				'member_sequence'  => 'DNA\s(\S+)',
+				);
+    }
     
     if (defined $node_seg) {
 	$_phrap_args .= " -node_seg $node_seg";
@@ -2250,41 +2272,21 @@ sub Phrap_call {
 	return (undef, undef, [$moby_exception]);
     }
     
-    # Bioperl sequence factory
-    my $sout = Bio::SeqIO->new (
-				-fh     => $seq_fh,
-				-format => 'fasta'
-				);
-
-    if ((!defined $seqIds) || (@$seqIds == 0)) {
-	my @seqIds = keys (%$sequences);
-	$seqIds = \@seqIds;
-    }
-    foreach my $sequenceIdentifier (@$seqIds) {
-	my $nucleotides = $sequences->{$sequenceIdentifier};
-	
-	# bioperl sequence object
-	my $seqobj = Bio::Seq->new (
-				    -display_id => $sequenceIdentifier,
-				    -seq        => $nucleotides
-				    );
-	$sout->write_seq ($seqobj);
-    }
+    print $seq_fh "$sequences";
     close $seq_fh;
-
-    # Test empty file
+    
     if (-z $sequences_phrap_file) {
-	my $note = "Internal System Error. Empty phrap input sequence file...\n";
-	print STDERR "$note\n";
-	my $code = 701;
-	my $moby_exception = INB::Exceptions::MobyException->new (
-								  code       => $code,
-								  type       => 'error',
-								  queryID    => $queryID,
-								  message    => "$note",
-								  );
-	return (undef, undef, [$moby_exception]);
-    }
+	    my $note = "Internal System Error. Empty phrap input sequences data file...\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return (undef, undef, [$moby_exception]);
+	}
     
     # Parse the quality data if any
     
@@ -2302,19 +2304,23 @@ sub Phrap_call {
 	close FILE;
 	
 	if (-z $phrap_quality_file) {
-	my $note = "Internal System Error. Empty phrap input quality data file...\n";
-	print STDERR "$note\n";
-	my $code = 701;
-	my $moby_exception = INB::Exceptions::MobyException->new (
-								  code       => $code,
-								  type       => 'error',
-								  queryID    => $queryID,
-								  message    => "$note",
-								  );
-	return (undef, undef, [$moby_exception]);
-    }
+	    my $note = "Internal System Error. Empty phrap input quality data file...\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return (undef, undef, [$moby_exception]);
+	}
 	
     }
+           
+    # Free memory
+    undef $sequences;
+    undef $fasta_quality_data;
     
     if ($debug) {
 	print STDERR "Running phrap, with this command:\n";
@@ -2336,17 +2342,47 @@ sub Phrap_call {
     # Process the phrap results to get a unique FASTA file
     
     my $singlets_seqs = qx/cat $sequences_phrap_file".singlets"/;
-    my $contigs_seqs  = qx/cat $sequences_phrap_file".contigs"/;
-    $assembled_sequences = $contigs_seqs . $singlets_seqs;
     
     # Replace contigs of one member by singlets
+    # Also gives some information on the cluster members
+    # To do so, parse the ace file
     
-    # ...
+    my $ace_filename  = $sequences_phrap_file . ".ace";
+    my ($clusters_list, $extra_singlets_list) = _parse_ace_file ($ace_filename, $debug, %ace_parsing_options);
     
-    $ace_data = qx/cat $sequences_phrap_file".ace"/;
+    my $pattern = join ('|', @$extra_singlets_list);
+    
+    if ($debug) {
+	print STDERR "pattern, $pattern\n";
+    }
+    
+    my $sequence_search_bin = "/home/ug/gmaster/projects/bin/sequence_search.pl";
+    
+    # Extract the singlet sequences from the sequences input file
+    my $extra_singlets_seqs = qx/$sequence_search_bin -f $sequences_phrap_file -h -p \"$pattern\"/;
+    
+    # reprocess the contigs, using clusters_list data
+    
+    my $contigs_seqs = "";
+    
+    foreach my $cluster_info_href (@$clusters_list) {
+	my $contig_href = $cluster_info_href->{cluster_info};
+	my $header = $contig_href->{line_info};
+	my $seq    = $contig_href->{sequence};
+	
+	$contigs_seqs .= ">$header\n";
+	# FASTA Formatting of the contig sequence
+	while ($seq =~ /(.{1,60})/g) {
+	    $contigs_seqs .= "$1\n";
+	}
+    }
+    
+    $assembled_sequences = $contigs_seqs . $singlets_seqs . $extra_singlets_seqs;
+    
+    $ace_data = qx/cat $ace_filename/;
     
     # Comment this line if you want to keep the file...
-    if (! $debug) {
+    if (!$debug) {
 	# The phrap input files
 	unlink $sequences_phrap_file;
 	if (defined $phrap_quality_file) {
@@ -2480,11 +2516,181 @@ sub Phred_call {
     if (! $debug) {
 	unlink $seq_fasta_file;
 	unlink $qual_fasta_file;
-	# buggy !!!????
+	# doesn't work !!!????
 	# rmtree (["$phred_input_dir", "$phred_output_dir"], 1, 1);
     }
     
     return ($fasta_sequences, $fasta_quality, $moby_exceptions);
+}
+
+
+sub _parse_ace_file {
+    my ($ace_file_name, $debug, %ace_parsing_options) = @_;
+    
+    if ($debug) {
+	print STDERR "parsing the ace file, $ace_file_name...\n";
+    }
+    
+    # Open the ace file
+    
+    open (ACE, "< $ace_file_name") or die "can't open the ace file, $ace_file_name !!!\n";
+    
+    # parse it
+    
+    # this data structure stores everything !!!!
+    # this array will be returned to main
+    my @clusters_list = ();
+    # CLusters of one member are returned as being singlets
+    my @singlets = ();
+    
+    while (my $line = <ACE>) {
+	
+	chomp $line;
+	if ($debug) {
+	    print STDERR "processing line, $line...\n";
+	}
+	
+	if ($line =~ /$ace_parsing_options{contig_pattern}/) {
+	    my $contig_name = $1;
+	    if ($debug) {
+		print STDERR "new cluster, contig name : $contig_name\n";
+	    }
+	    # retrieve Contig sequence
+	    my $sequence_contig = "";
+	    if ($debug) {
+		print STDERR "parsing contig sequence...\n";
+	    }
+	    my $new_line = <ACE>;
+	    while (lc ($new_line) =~ /(a|c|t|g|n)\S+/) {
+		chomp ($new_line);
+		$sequence_contig = $sequence_contig . $new_line;
+		$new_line = <ACE>;
+	    }
+	    if ($debug) {
+		print STDERR "sequence_contig : $sequence_contig\n";
+	    }
+	    
+	    $sequence_contig =~ s/\*//g;
+	    
+	    # then Base quality
+	    while (not $new_line =~ /$ace_parsing_options{AF_test}/) {
+		$new_line = <ACE>;
+	    }
+	    my @members = ();
+	    # then information about the number of members within the current cluster
+	    while ($new_line =~ /$ace_parsing_options{AF_test}/) {
+		$new_line =~ /$ace_parsing_options{AF_pattern}/;
+		my $member_name = $1;
+		
+		if (! defined $member_name) {
+		    print STDERR "error, can't get the member name from line, $new_line!\n";
+		}
+		
+		if (not _is_in ($member_name, \@members)) {
+		    push (@members, $member_name);
+		}
+		
+		if ($debug) {
+		    print STDERR "found member $member_name, members list : @members, new_line : $new_line\n";
+		}
+		
+		$new_line = <ACE>;
+	    }
+	    my $members_nb = (@members+0);
+	    my $cpt = 0;
+	    my @members_list = ();
+	    
+	    if ($debug) {
+		print STDERR "found $members_nb members for the current cluster\n";
+	    }
+	    
+	    if ($members_nb > 1) {
+	    
+		# Retrieve the name and the sequence of each member
+		
+		while ($cpt < $members_nb) {
+		    if ($new_line =~ /$ace_parsing_options{member_sequence}/) {
+			my $member_name = $1;
+			if ($debug) {
+			    print STDERR "member name : $member_name\n";
+			}
+			my $new_line = <ACE>;
+			my $sequence = "";
+			while (lc ($new_line) =~ /(a|c|t|g|n)\S+/) {
+			    chomp ($new_line);
+			    $sequence = $sequence . $new_line;
+			    $new_line = <ACE>;
+			}
+			if ($debug) {
+			    print STDERR "member sequence : $sequence\n";
+			}
+			
+			# the sequence may contain * which don't fit with the fasta format, so remove them from the sequence
+			# this * is for a shift in the alignment
+			
+			$sequence =~ s/\*//g;
+			
+			my %h_member = (line_info => "$member_name",
+					sequence  => "$sequence",
+					);
+			$cpt ++;
+			push (@members_list, \%h_member);
+		    }
+		    $new_line = <ACE>;
+		}
+		
+		my $line_info = $contig_name . " $members_nb members: " . join ( ", ", @members);
+		
+		my %h_contig = (line_info => "$line_info",
+				sequence  => "$sequence_contig",
+				);
+		
+		# this data structure stores all the information about one contig and its members
+		my %cluster_info = (cluster_info => \%h_contig,
+				    members_info => \@members_list,
+				    );
+		push (@clusters_list, \%cluster_info);
+		
+		if ($debug) {
+		    print STDERR "Contig done - current line : $new_line\n";
+		}
+	    }
+	    else {
+		# Only one member, so it is a singlet !!
+		
+		my $member_id = $members[0];
+		
+		if ($debug) {
+		    print STDERR "singlet, $member_id\n";
+		}
+		
+		push (@singlets, $member_id);
+	    }
+	}
+    }
+    close (ACE);
+    
+    if ($debug) {
+	print STDERR "parsing $ace_file_name done\n";
+	print STDERR @clusters_list . " clusters found\n";
+	print STDERR @singlets . " singlets found\n";
+	
+    }
+    
+    return (\@clusters_list, \@singlets);
+    
+}
+
+sub _is_in {
+    my ($member_name, $members) = @_;
+    
+    foreach my $element (@$members) {
+	if ($element eq $member_name) {
+	    return 1;
+	}
+    }
+    
+    return 0;
 }
 
 1;

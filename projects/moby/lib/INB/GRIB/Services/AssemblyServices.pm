@@ -1,4 +1,4 @@
-# $Id: AssemblyServices.pm,v 1.1 2006-05-23 15:21:35 gmaster Exp $
+# $Id: AssemblyServices.pm,v 1.2 2006-05-24 15:45:13 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -203,9 +203,8 @@ sub _do_query_Phrap {
     my $node_seg;
     
     # Variables that will be passed to Phrap_call
-    my %sequences;
     my $fasta_quality_data_str;
-    my @seqIds = ();
+    my $fasta_sequences_str;
     my %parameters;
     
     my $queryID  = getInputID ($queryInput_DOM);
@@ -268,6 +267,9 @@ sub _do_query_Phrap {
 	print STDERR "node_seg, $node_seg\n";
 	print STDERR "node_space, $node_space\n";
     }
+
+    # Free some memory !
+    undef $queryInput_DOM;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {
@@ -333,36 +335,13 @@ sub _do_query_Phrap {
 	    }
 	    
 	    if ($_debug) {
-		print STDERR "Parsing the fasta sequences string...\n"
-		}
+		print STDERR "Parsing the fasta sequences string...\n";
+	    }
 	    
-	    my $fasta_sequences  = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
+	    $fasta_sequences_str  = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
 	    # Testing compression
 	    # $fasta_sequences = decode_base64 ($fasta_sequences);
-	    
-	    my $sequences_tbl_str = qx/echo "$fasta_sequences" | \/home\/ug\/gmaster\/projects\/bin\/FastaToTbl/;
-	    
-	    if ($_debug) {
-		print STDERR "fasta tbl string, $sequences_tbl_str\n";
-	    }
-	    
-	    my @sequences_tbl    = split ('\n', $sequences_tbl_str);
-	    
-	    if ($_debug) {
-		print STDERR "got " . @sequences_tbl . " tbl sequences\n";
-	    }
-	    
-	    foreach my $sequence_tbl_str (@sequences_tbl) {
-		$sequence_tbl_str =~ /^([^\s]+)\s(.+)/;
-		my $seqId          = $1;
-		my $sequence_str   = $2;
-		$sequences{$seqId} = $sequence_str;
-	    }
-	    
-	    if ($_debug) {
-		print STDERR "parsed " . keys (%sequences) . " sequences\n";
-	    }
-	    
+	    	    
 	} # End parsing sequences article tag
 	
 	# Parse the quality data if any - check the serviceName, if not "runPhrapWithQualityData" - tell that it is the wrong service !!
@@ -432,33 +411,33 @@ sub _do_query_Phrap {
 		
 		$fasta_quality_data_str = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
 		
-		# Get an array of sequence identifiers, to make sure the sequences and the quality data are ordered equally
+	    }
+	    else {
+		my $note = "Found an article with quality data, but the service, $serviceName, doesn't require them, so they won't be taken into account. Use runPhrapWithQualityData instead.";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => 'base_quality_data',
+									  code       => $code,
+									  type       => 'warning',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
 		
-		my $quality_data_tbl_str = qx/echo "$fasta_quality_data_str" | \/home\/ug\/gmaster\/projects\/bin\/FastaToTbl/;
-		
-		if ($_debug) {
-		    print STDERR "quality data tbl string, $quality_data_tbl_str\n";
-		}
-		
-		my @quality_data_tbl    = split ('\n', $quality_data_tbl_str);
-		
-		if ($_debug) {
-		    print STDERR "got " . @quality_data_tbl . " tbl quality_data\n";
-		}
-		
-		foreach my $quality_data_tbl_str (@quality_data_tbl) {
-		    $quality_data_tbl_str =~ /^([^\s]+)\s(.+)/;
-		    my $seqId = $1;
-		    push (@seqIds, $seqId);
-		}
-	    }   
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
 	} # End parsing base quality data
 	
     } # Next article
     
     # Check that we have parsed properly the sequences
     
-    if ((keys (%sequences)) == 0) {
+    # Free some memory!
+    undef @articles;
+    
+    if (length ($fasta_sequences_str) < 1) {
 	my $note = "can't parse any sequences...\n";
 	print STDERR "$note\n";
 	my $code = "201";
@@ -477,7 +456,7 @@ sub _do_query_Phrap {
     }
     
     if ($serviceName eq "runPhrapWithQualityData") {
-	if (@seqIds == 0) {
+	if (length ($fasta_quality_data_str) < 1) {
 	    my $note = "can't parse any quality data...\n";
 	    print STDERR "$note\n";
 	    my $code = "201";
@@ -495,11 +474,14 @@ sub _do_query_Phrap {
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	
+	#################################################################
+	
 	# Check also they have the same number of sequences
 	
-	my $nb_sequences = keys (%sequences);
-	my $nb_quality_sequences = @seqIds;
+	# to do !!!
 	
+	my $nb_sequences = -1;
+	my $nb_quality_sequences = -1;
 	if ($nb_sequences != $nb_quality_sequences) {
 	    my $note = "The number of DNA sequences, $nb_sequences, doesn't match the number of quality data sequences, $nb_quality_sequences...\n";
 	    print STDERR "$note\n";
@@ -516,6 +498,8 @@ sub _do_query_Phrap {
 	    
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
+	
+	###################################################################
     }
 	
     # Una vez recogido todos los parametros necesarios, llamamos a
@@ -525,8 +509,11 @@ sub _do_query_Phrap {
 	print STDERR "parsing of the Moby input data done, preparing now Phrap execution...\n";
     }
     
-    my ($assembled_seqs_fasta, $ace_data, $moby_exceptions_tmp) = Phrap_call (sequences  => \%sequences, quality_data => $fasta_quality_data_str, seqIds => \@seqIds, parameters => \%parameters, queryID => $queryID, debug => $_debug);
+    my ($assembled_seqs_fasta, $ace_data, $moby_exceptions_tmp) = Phrap_call (sequences  => $fasta_sequences_str, quality_data => $fasta_quality_data_str, parameters => \%parameters, queryID => $queryID, debug => $_debug);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
+    
+    undef $fasta_sequences_str;
+    undef $fasta_quality_data_str;
     
     if (defined $assembled_seqs_fasta) {
 	my $sequences_moby_seqobj = "<$sequences_output_format namespace='$namespace' id='Default'>\n<String id='' namespace='' articleName='content'><![CDATA[$assembled_seqs_fasta]]></String>\n</$sequences_output_format>\n";
