@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CorrectExon.c,v 1.3 2003-11-05 14:21:13 eblanco Exp $  */
+/*  $Id: CorrectExon.c,v 1.4 2006-05-25 14:08:26 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,12 +34,12 @@ void CorrectExon(exonGFF *e)
   /* Correct positions of begin / end of the exon */
   /* Stop codon included into the exon */
   e->offset1 =
-    ((!strcmp(e->Type,"Terminal") || !strcmp(e->Type,"Single"))
+    ((!strcmp(e->Type,"Terminal") || !strcmp(e->Type,"U12gtagTerminal") || !strcmp(e->Type,"U12atacTerminal") || !strcmp(e->Type,"Single"))
 	 && e->Strand =='-') ? 
     -LENGTHCODON + COFFSET : +COFFSET;
   
   e->offset2 = 
-    ((!strcmp(e->Type,"Terminal") || !strcmp(e->Type,"Single"))
+    ((!strcmp(e->Type,"Terminal") || !strcmp(e->Type,"U12gtagTerminal") || !strcmp(e->Type,"U12atacTerminal") || !strcmp(e->Type,"Single"))
 	 && e->Strand =='+')? 
     LENGTHCODON + COFFSET : +COFFSET;
 }
