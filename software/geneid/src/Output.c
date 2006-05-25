@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.13 2006-05-25 14:15:44 talioto Exp $  */
+/*  $Id: Output.c,v 1.14 2006-05-25 14:43:22 talioto Exp $  */
 
 #include "geneid.h"
 extern int U12GTAG;
@@ -108,7 +108,7 @@ void OutputHeader(char* locus, long l)
   /* 2. Output headers: gff, geneid or xml format */
   
   if (GFF3){
-    printf("## gff-version 3\n");
+    printf("##gff-version 3\n");
   } else {
   	if (GFF)
     printf("## gff-version 2\n");
