@@ -19,7 +19,7 @@ sub help {
 Description: Deregister an object in Moby Central
   Usage:
     
-    deregisterService.pl [-h] -x {Moby Central} -o {Object Name} -w {Authoritative URI}
+    deregisterObject.pl [-h] -x {Moby Central} -o {Object Name} -w {Authoritative URI}
     -h help
 	-x MOBY Central: Chirimoyo, Mobydev, Inab or BioMoby
 	<1> or Chirimoyo

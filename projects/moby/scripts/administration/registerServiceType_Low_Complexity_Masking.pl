@@ -26,7 +26,7 @@ Description: Register a service type in Moby Central
 	<4> or BioMoby
 	
 	Examples using some combinations:
-	perl registerServiceType.pl -x 2 -t DNA_Low_Complexity_Masking
+	perl registerServiceType.pl -x 2 -t Low_Complexity_Masking
 
 END_HELP
 
@@ -95,8 +95,8 @@ $::authURI = 'genome.imim.es';
 # Contac e-mail
 $::contactEmail = 'akerhornou@imim.es';
 
-my $serviceTypeName        = "DNA_Low_Complexity_Masking";
-my $serviceTypeDescription = "Masking low-complexity regions in DNA sequences";
+my $serviceTypeName        = "Low_Complexity_Masking";
+my $serviceTypeDescription = "Masking low-complexity regions";
 
 print STDERR "registrying object $serviceTypeName at registry, $MOBY_URI...\n";
 
@@ -112,7 +112,7 @@ my ($REG) = $Central->registerServiceType(
 				     authURI       => $::authURI,
 				     contactEmail  => $::contactEmail ,
 					  Relationships => {
-					      'ISA'	=> ['Low_Complexity_Masking'],
+					      'ISA'	=> ['Bioinformatics'],
 					  }
 				     );
 
