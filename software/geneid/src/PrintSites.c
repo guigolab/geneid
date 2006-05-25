@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.7 2004-01-27 16:15:26 eblanco Exp $  */
+/*  $Id: PrintSites.c,v 1.8 2006-05-25 14:20:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -41,6 +41,8 @@ void PrintSite(site* s, int type,
   int offset;
   char sAux[MAXSTRING];
   int i;
+  int acc_context;
+  acc_context = 0;
   
   /* Corrections because of geneid works with coding (useful) positions */
   /* position + k means "real beginning of the signal" */
@@ -74,12 +76,13 @@ void PrintSite(site* s, int type,
   
   /* Depending on the strand: exchange k and offset */
   /* Incomplete signals are filled in with "*" */
+  if(type == ACC){acc_context = ACCEPTOR_CONTEXT - p->offset;}
   switch(Strand)
     {
     case FORWARD: strand = '+';
-      for(i=0; i < p->dimension; i++)
-		if (s->Position - p->offset + i >= 0)
-		  sAux[i] = seq[s->Position - p->offset + i];
+      for(i=0; i < p->dimension + acc_context; i++)
+		if (s->Position - p->offset - acc_context + i >= 0)
+		  sAux[i] = seq[s->Position - p->offset - acc_context + i];
 		else
 		  sAux[i] = '*';
       sAux[i] = '\0';
@@ -88,15 +91,15 @@ void PrintSite(site* s, int type,
       k = -k;
       offset = -offset;
       ReverseSubSequence(s->Position - (p->dimension - p->offset - 1), 
-						 s->Position + (p->offset), seq, sAux);    
-      sAux[p->dimension] = '\0'; 
+						 s->Position + (p->offset + acc_context), seq, sAux);    
+      sAux[p->dimension + acc_context] = '\0'; 
       break;
 	default: 
 	  /* It will supposed to be forward */
 	  strand = '+';
-      for(i=0; i < p->dimension; i++)
-		if (s->Position - p->offset + i >= 0)
-		  sAux[i] = seq[s->Position - p->offset + i];
+      for(i=0; i < p->dimension + acc_context; i++)
+		if (s->Position - p->offset - acc_context + i >= 0)
+		  sAux[i] = seq[s->Position - p->offset - acc_context + i];
 		else
 		  sAux[i] = '*';
       sAux[i] = '\0';
@@ -107,10 +110,11 @@ void PrintSite(site* s, int type,
   if (GFF)
 	{
 	  /* Print site: gff format */
-	  printf("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t.\t# %s\n",
+	  printf("%s\t%s\t%s:%s\t%ld\t%ld\t%5.2f\t%c\t.\t# %s\n",
 			 Name,
 			 SITES,
 			 Type,
+			 s->subtype,
 			 (offset>0)? 
 			 s->Position+k+COFFSET : 
 			 s->Position+k+offset+COFFSET,
@@ -127,9 +131,9 @@ void PrintSite(site* s, int type,
 	{
 	  if (type != ACC)
 		/* Print site: default format */
-		printf("%8s %8ld %8ld\t%5.2f\t%c\t%s\n",
+		printf("%8s:%13s %8ld %8ld\t%5.2f\t%c\t%s\n",
 			   Type,
-			   
+			   s->subtype,
 			   (offset>0)? 
 			   s->Position+k+COFFSET : 
 			   s->Position+k+offset+COFFSET,
@@ -141,11 +145,12 @@ void PrintSite(site* s, int type,
 			   s->Score,
 			   strand,
 			   sAux);
+			   
 	  else
 		/* Print site: default format */
-		printf("%8s %8ld %8ld\t%5.2f\t%5.2f\t%5.2f\t%c\t%s\n",
+		printf("%8s:%13s %8ld %8ld\t%5.2f\t%5.2f\t%3d\t%5.2f\t%3d\t%c\t%s\n",
 			   Type,
-			   
+			   s->subtype,
 			   (offset>0)? 
 			   s->Position+k+COFFSET : 
 			   s->Position+k+offset+COFFSET,
@@ -156,7 +161,9 @@ void PrintSite(site* s, int type,
 			   
 			   s->Score,
 			   s->ScorePPT,
+			   s->PositionPPT,
 			   s->ScoreBP,
+			   s->PositionBP,
 			   strand,
 			   sAux);
 	}
