@@ -26,7 +26,7 @@ Description: Register a service type in Moby Central
 	<4> or BioMoby
 	
 	Examples using some combinations:
-	perl registerServiceType.pl -x 2 -t DNA_Repeat_Masking
+	perl registerServiceType.pl -x 2 -t Repeat_Masking
 
 END_HELP
 
@@ -95,8 +95,8 @@ $::authURI = 'genome.imim.es';
 # Contac e-mail
 $::contactEmail = 'akerhornou@imim.es';
 
-my $serviceTypeName        = "DNA_Repeat_Masking";
-my $serviceTypeDescription = "Masking repeat regions in DNA sequences";
+my $serviceTypeName        = "Repeat_Masking";
+my $serviceTypeDescription = "Repeat regions masking";
 
 print STDERR "registrying object $serviceTypeName at registry, $MOBY_URI...\n";
 
