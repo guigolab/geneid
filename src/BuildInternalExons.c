@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.5 2003-11-05 13:32:39 eblanco Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.6 2006-05-25 13:59:42 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -37,6 +37,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
                         int MaxDonors,
+						char* ExonType,
 						char* Sequence,
                         exonGFF* Exon)
 {
@@ -238,7 +239,8 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 										   ((Exon+nExon)->Acceptor->Position +
 											(Exon+nExon)->Frame)+ 1 ) % 3;
 				(Exon+nExon)->Remainder = (3 - (Exon+nExon)->Remainder) % 3;
-				strcpy((Exon+nExon)->Type,"Internal");
+				/* Assign Type according to Donor and Acceptor subtypes */
+				strcpy((Exon+nExon)->Type,ExonType);
 				strcpy((Exon+nExon)->Group,NOGROUP);
 				(Exon+nExon)->evidence = 0;
 				
