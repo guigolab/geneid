@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.17 2006-05-25 17:36:26 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.18 2006-05-25 22:58:16 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -479,7 +479,7 @@ void CookingGenes(exonGFF* e,
     {
 	  
       /* Translate gene into protein */
-      if (PSEQ)
+      
 	    TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
 	  
       /* Get genomic DNA for exons if required */
@@ -581,7 +581,7 @@ void CookingGenes(exonGFF* e,
 		  for(igen=ngen-1; igen>=0; igen--)
 			{
 			  /* Translate gene into protein */
-			  TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
+				TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
 			  /* Protein in FASTA format (except promoters) */
 				if (strcmp(info[igen].start->Type,sPROMOTER))
 				  printProt(Name,ngen-igen,prot,nAA,PROT);
