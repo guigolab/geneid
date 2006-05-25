@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.16 2006-05-25 14:44:15 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.17 2006-05-25 17:36:26 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -592,7 +592,7 @@ void CookingGenes(exonGFF* e,
 		  /* Pretty-printing of every gene */
 		  for(igen=ngen-1; igen>=0; igen--)
 			{
-
+    		  GetcDNA(info[igen].start,s,info[igen].nexons, tmpDNA, &nNN);
 			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
 
 			}
