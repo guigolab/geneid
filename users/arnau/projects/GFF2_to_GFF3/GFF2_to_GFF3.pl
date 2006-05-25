@@ -69,7 +69,7 @@ my $_score_filtering = -1;
 # meta-alignment filtering
 $_score_filtering = 7;
 
-my @gff_features = ("## gff-version 3");
+my @gff_features = ("##gff-version 3");
 
 my $seqId;
 my $algorithm;
@@ -152,7 +152,7 @@ while (<FILE>) {
 	
 	$seqId     = $1;
 	my $length = $2;
-	my $gff3_seq_line = "## Sequence-region $seqId 1 $length";
+	my $gff3_seq_line = "##Sequence-region $seqId 1 $length";
 	push (@gff_features, $gff3_seq_line);
     }
     
@@ -202,6 +202,9 @@ while (<FILE>) {
 	
 	$geneStrand    = $2;
 	$geneScore     = $3;
+	
+	# Get rid of the spaces if any
+	$geneScore = s/\s//g;
 	
 	# Set up the gene and mRNA identifiers
 	
