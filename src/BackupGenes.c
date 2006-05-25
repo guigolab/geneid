@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.4 2003-11-05 13:23:01 eblanco Exp $  */
+/*  $Id: BackupGenes.c,v 1.5 2006-05-25 13:45:57 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -49,12 +49,22 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
   /* back-up acceptor */
   d->dumpSites[d->ndumpSites].Position = E->Acceptor->Position;
   d->dumpSites[d->ndumpSites].Score = E->Acceptor->Score;
+  d->dumpSites[d->ndumpSites].ScorePPT = E->Acceptor->ScorePPT;
+  d->dumpSites[d->ndumpSites].ScoreBP = E->Acceptor->ScoreBP;
+  d->dumpSites[d->ndumpSites].PositionBP = E->Acceptor->PositionBP;
+  d->dumpSites[d->ndumpSites].PositionPPT = E->Acceptor->PositionPPT;
+  strcpy(d->dumpSites[d->ndumpSites].subtype,E->Acceptor->subtype);
   d->dumpExons[d->ndumpExons].Acceptor = &(d->dumpSites[d->ndumpSites]); 
   d->ndumpSites = IncrMod(d->ndumpSites, MAXBACKUPSITES);
   
   /* back-up donor */
   d->dumpSites[d->ndumpSites].Position = E->Donor->Position;
   d->dumpSites[d->ndumpSites].Score = E->Donor->Score;
+  d->dumpSites[d->ndumpSites].ScorePPT = E->Donor->ScorePPT;
+  d->dumpSites[d->ndumpSites].ScoreBP = E->Donor->ScoreBP;
+  d->dumpSites[d->ndumpSites].PositionBP = E->Donor->PositionBP;
+  d->dumpSites[d->ndumpSites].PositionPPT = E->Donor->PositionPPT;
+  strcpy(d->dumpSites[d->ndumpSites].subtype,E->Donor->subtype);
   d->dumpExons[d->ndumpExons].Donor = &(d->dumpSites[d->ndumpSites]); 
   d->ndumpSites = IncrMod(d->ndumpSites, MAXBACKUPSITES);
   
