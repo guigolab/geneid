@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.79 2006-05-25 14:30:11 gmaster Exp $
+# $Id: Factory.pm,v 1.80 2006-05-25 14:34:58 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1905,7 +1905,7 @@ sub RepeatMasker_call {
 	print STDERR "$_repeatmasker_dir\/$_repeatmasker_bin $repeatmasker_file\n";
     }
 
-    my $result = qx/$_repeatmasker_dir\/$_repeatmasker_bin $_repeatmasker_args $repeatmasker_file/;
+    my $result = qx/$_repeatmasker_dir\/$_repeatmasker_bin $_repeatmasker_args $repeatmasker_file >& \/dev\/null/;
     my $masked_sequences_file = $repeatmasker_file . ".masked";
     my $masked_sequences      = qx/cat $masked_sequences_file/;
     
