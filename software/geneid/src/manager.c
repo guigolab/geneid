@@ -24,18 +24,21 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.4 2004-01-15 10:47:03 eblanco Exp $ */
+/* $Id: manager.c,v 1.5 2006-05-25 14:59:30 talioto Exp $ */
 
 #include "geneid.h"
 
 extern int scanORF;
+extern int U12GTAG;
+extern int U12ATAC;
+extern int U2GCAG;
 
 /* Management of splice sites prediction and exon construction/scoring */
 void  manager(char *Sequence, 
 			  long LengthSequence,
 			  packSites* allSites,
 			  packExons* allExons,
-			  long l1, long l2,
+			  long l1, long l2, long lowerlimit, long upperlimit,
 			  int Strand,
 			  packExternalInformation* external,
 			  packHSP* hsp,
@@ -45,6 +48,7 @@ void  manager(char *Sequence,
 			  packGC* GCInfo)
 {
   char mess[MAXSTRING];
+  int BUILD_U12_U12_INTERNALS = 0;
   
   long l1a, l1b,
 	l2a, l2b,
@@ -59,7 +63,7 @@ void  manager(char *Sequence,
       /* Forward sense */
       /* Start codons and Acceptor sites limits */
       l1a = l1;
-      l2a = (l2 == LengthSequence - 1)? l2 : l2 - OVERLAP;
+      l2a = (l2 == upperlimit)? l2 : l2 - OVERLAP;
 
       /* Donor sites limits */
       l1b = l1;
@@ -82,7 +86,7 @@ void  manager(char *Sequence,
       l2a = l2;
 
       /* Donor sites limits */
-      l1b = (l1 == 0)? l1: l1 + OVERLAP;
+      l1b = (l1 == lowerlimit)? l1: l1 + OVERLAP;
       l2b = l2;
 
       /* Stop codon limits */
@@ -92,7 +96,7 @@ void  manager(char *Sequence,
       /* Terminal/Single exons: */
       /* are allowed if their Stop codon is placed behind cutPoint (RVS) */
       /* RVS: reading from right to left the forward sense sequence */
-      cutPoint = (l1 == 0)? l1 : l1 + OVERLAP;
+      cutPoint = (l1 == lowerlimit)? l1 : l1 + OVERLAP;
     }
 
   /* 1. Predicting splice sites of current split of DNA sequence */ 
@@ -105,19 +109,69 @@ void  manager(char *Sequence,
 
   allSites->nAcceptorSites =
     BuildAcceptors(Sequence,
+				   sU2,
 				   gp->AcceptorProfile,
 				   gp->PolyPTractProfile,
 				   gp->BranchPointProfile,
 				   allSites->AcceptorSites,
 				   l1a,l2a);
+  
   sprintf(mess, "Acceptor Sites \t\t%8ld", allSites->nAcceptorSites);
   printRes(mess);
 
+  if (U12GTAG){ 
+	  allSites->nU12gtagAcceptorSites =
+    	BuildU12Acceptors(Sequence,
+					   sU12gtag,
+					   gp->U12gtagAcceptorProfile,
+					   gp->U12BranchPointProfile,
+					   gp->PolyPTractProfile,
+					   allSites->U12gtagAcceptorSites,
+					   l1a,l2a);
+
+	  sprintf(mess, "U12gtag Acceptor Sites \t%8ld", allSites->nU12gtagAcceptorSites);
+	  printRes(mess);
+  }
+  if (U12ATAC){ 
+	  allSites->nU12atacAcceptorSites =
+    	BuildU12Acceptors(Sequence,
+				 	   sU12atac,
+					   gp->U12atacAcceptorProfile,
+					   gp->U12BranchPointProfile,
+					   gp->PolyPTractProfile,
+					   allSites->U12atacAcceptorSites,
+					   l1a,l2a);
+
+	  sprintf(mess, "U12atac Acceptor Sites \t%8ld", allSites->nU12atacAcceptorSites);
+	  printRes(mess);
+  }  
+  long numU2donsites = 0;
+
   allSites->nDonorSites =
-    GetSitesWithProfile(Sequence,gp->DonorProfile,allSites->DonorSites,l1b,l2b);
+    BuildDonors(Sequence,sU2, gp->DonorProfile,allSites->DonorSites,l1b,l2b,numU2donsites);
   sprintf (mess,"Donor Sites \t\t%8ld", allSites->nDonorSites);
+  numU2donsites = allSites->nDonorSites;
   printRes(mess);
 
+  if (U2GCAG){
+	  allSites->nDonorSites =
+    	BuildDonors(Sequence,sU2gcag, gp->U2gcagDonorProfile,allSites->DonorSites,l1b,l2b,numU2donsites);
+	  sprintf (mess,"U2gcag Donor Sites \t%8ld", allSites->nDonorSites - numU2donsites);
+	  numU2donsites = allSites->nDonorSites;
+	  printRes(mess);
+  }  
+  if (U12GTAG){
+	  allSites->nU12gtagDonorSites =
+    	BuildDonors(Sequence,sU12gtag, gp->U12gtagDonorProfile,allSites->U12gtagDonorSites,l1b,l2b,0);
+	  sprintf (mess,"U12gtag Donor Sites \t%8ld", allSites->nU12gtagDonorSites);
+	  printRes(mess);
+  }
+  if (U12ATAC){
+	  allSites->nU12atacDonorSites =
+    	BuildDonors(Sequence,sU12atac, gp->U12atacDonorProfile,allSites->U12atacDonorSites,l1b,l2b,0);
+	  sprintf (mess,"U12atac Donor Sites \t%8ld", allSites->nU12atacDonorSites);
+	  printRes(mess);
+  }
   allSites->nStopCodons =
 	GetStopCodons(Sequence,gp->StopProfile, allSites->StopCodons,l1c,l2c);
   sprintf (mess,"Stop Codons \t\t%8ld", allSites->nStopCodons);
@@ -127,7 +181,11 @@ void  manager(char *Sequence,
   allSites->nSites =
 	allSites->nStartCodons +
 	allSites->nAcceptorSites +
-	allSites->nDonorSites +
+	allSites->nU12gtagDonorSites +
+	allSites->nU12gtagAcceptorSites +
+	allSites->nU12atacDonorSites +
+	allSites->nU12atacAcceptorSites +
+	allSites->nDonorSites +	
 	allSites->nStopCodons;
 
   sprintf(mess,"---------\t\t%8ld", allSites->nSites);
@@ -136,32 +194,158 @@ void  manager(char *Sequence,
   /* 2. Building exons with splice sites predicted before */ 
   printMess ("Computing exons ...");   
   
+  /* If consecutive U12 introns are not allowed in gene model, we will not compute them. */
+  if ((getkeyDict(gp->D,"U12gtag-U12gtag-Internal+")) != NOTFOUND){BUILD_U12_U12_INTERNALS = 1;}
+  if ((getkeyDict(gp->D,"U12gtag-U12atac-Internal+")) != NOTFOUND){BUILD_U12_U12_INTERNALS = 1;}
+  if ((getkeyDict(gp->D,"U12atac-U12gtag-Internal+")) != NOTFOUND){BUILD_U12_U12_INTERNALS = 1;}
+  if ((getkeyDict(gp->D,"U12atac-U12atac-Internal+")) != NOTFOUND){BUILD_U12_U12_INTERNALS = 1;}
+
   allExons->nInitialExons =
     BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
 					  allSites->DonorSites,allSites->nDonorSites,
 					  allSites->StopCodons,allSites->nStopCodons,
-					  gp->MaxDonors,Sequence,
+					  gp->MaxDonors,sFIRST,Sequence,
 					  allExons->InitialExons);
   sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
   printRes(mess); 
   
+  if (U12GTAG){  
+	  allExons->nU12gtagInitialExons =
+    	BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
+						  allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
+						  allSites->StopCodons,allSites->nStopCodons,
+						  gp->MaxDonors,sU12gtagFIRST,Sequence,
+						  allExons->U12gtagInitialExons);
+	  sprintf(mess,"U12gtag Initial Exons \t%8ld", allExons->nU12gtagInitialExons);
+	  printRes(mess); 
+  }
+   if (U12ATAC){  
+	  allExons->nU12atacInitialExons =
+    	BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
+						  allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
+						  allSites->StopCodons,allSites->nStopCodons,
+						  gp->MaxDonors,sU12atacFIRST,Sequence,
+						  allExons->U12atacInitialExons);
+	  sprintf(mess,"U12atac Initial Exons \t%8ld", allExons->nU12atacInitialExons);
+	  printRes(mess); 
+  } 
   allExons->nInternalExons =
 	BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 					   allSites->DonorSites,allSites->nDonorSites,
 					   allSites->StopCodons,allSites->nStopCodons,
-					   gp->MaxDonors,Sequence,
+					   gp->MaxDonors,sINTERNAL,Sequence,
 					   allExons->InternalExons);
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
+
+  if (U12GTAG){   
+	  if (BUILD_U12_U12_INTERNALS){
+	  	allExons->nU12gtag_U12gtag_InternalExons =
+		BuildInternalExons(allSites->U12gtagAcceptorSites,allSites->nU12gtagAcceptorSites,
+						   allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU12gtag_U12gtagINTERNAL,Sequence,
+						   allExons->U12gtag_U12gtag_InternalExons);
+	  	sprintf(mess,"U12gtag-U12gtag Internal Exons \t%8ld", allExons->nU12gtag_U12gtag_InternalExons);
+	  	printRes(mess); 
+	  }
+	  allExons->nU12gtag_U2_InternalExons =
+		BuildInternalExons(allSites->U12gtagAcceptorSites,allSites->nU12gtagAcceptorSites,
+						   allSites->DonorSites,allSites->nDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU12gtag_U2INTERNAL,Sequence,
+						   allExons->U12gtag_U2_InternalExons);
+	  sprintf(mess,"U12gtag-U2 Internal Exons \t%8ld", allExons->nU12gtag_U2_InternalExons);
+	  printRes(mess); 
+
+	  allExons->nU2_U12gtag_InternalExons =
+		BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+						   allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU2_U12gtagINTERNAL,Sequence,
+						   allExons->U2_U12gtag_InternalExons);
+	  sprintf(mess,"U2-U12gtag Internal Exons \t%8ld", allExons->nU2_U12gtag_InternalExons);
+	  printRes(mess); 
+  }
+  if (U12ATAC){   
+   	  if (BUILD_U12_U12_INTERNALS){
+	  	allExons->nU12atac_U12atac_InternalExons =
+		BuildInternalExons(allSites->U12atacAcceptorSites,allSites->nU12atacAcceptorSites,
+						   allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU12atac_U12atacINTERNAL,Sequence,
+						   allExons->U12atac_U12atac_InternalExons);
+	  	sprintf(mess,"U12atac-U12atac Internal Exons \t%8ld", allExons->nU12atac_U12atac_InternalExons);
+	  	printRes(mess); 
+	  }
+	  allExons->nU12atac_U2_InternalExons =
+		BuildInternalExons(allSites->U12atacAcceptorSites,allSites->nU12atacAcceptorSites,
+						   allSites->DonorSites,allSites->nDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU12atac_U2INTERNAL,Sequence,
+						   allExons->U12atac_U2_InternalExons);
+	  sprintf(mess,"U12atac-U2 Internal Exons \t%8ld", allExons->nU12atac_U2_InternalExons);
+	  printRes(mess); 
+
+	  allExons->nU2_U12atac_InternalExons =
+		BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+						   allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU2_U12atacINTERNAL,Sequence,
+						   allExons->U2_U12atac_InternalExons);
+	  sprintf(mess,"U2-U12atac Internal Exons \t%8ld", allExons->nU2_U12atac_InternalExons);
+	  printRes(mess); 
+  }
+  if (U12GTAG && U12ATAC){  
+	  if (BUILD_U12_U12_INTERNALS){ 
+	  	allExons->nU12gtag_U12atac_InternalExons =
+		BuildInternalExons(allSites->U12gtagAcceptorSites,allSites->nU12gtagAcceptorSites,
+						   allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU12gtag_U12atacINTERNAL,Sequence,
+						   allExons->U12gtag_U12atac_InternalExons);
+	  	sprintf(mess,"U12gtag-U12atac Internal Exons \t%8ld", allExons->nU12gtag_U12atac_InternalExons);
+	  	printRes(mess); 
+
+	  	allExons->nU12atac_U12gtag_InternalExons =
+		BuildInternalExons(allSites->U12atacAcceptorSites,allSites->nU12atacAcceptorSites,
+						   allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   gp->MaxDonors,sU12atac_U12gtagINTERNAL,Sequence,
+						   allExons->U12atac_U12gtag_InternalExons);
+	  	sprintf(mess,"U12atac-U12gtag Internal Exons \t%8ld", allExons->nU12atac_U12gtag_InternalExons);
+	  	printRes(mess); 
+	  }
+  } 
   
   allExons->nTerminalExons =
     BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 					   allSites->StopCodons,allSites->nStopCodons,
-					   LengthSequence,cutPoint,Sequence,
+					   LengthSequence,cutPoint,sTERMINAL,Sequence,
 					   allExons->TerminalExons);
   sprintf(mess,"Terminal Exons \t\t%8ld", allExons->nTerminalExons);
   printRes(mess); 
 
+  if (U12GTAG){ 
+	  allExons->nU12gtagTerminalExons =
+    	BuildTerminalExons(allSites->U12gtagAcceptorSites,allSites->nU12gtagAcceptorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   LengthSequence,cutPoint,sU12gtagTERMINAL,Sequence,
+						   allExons->U12gtagTerminalExons);
+	  sprintf(mess,"U12gtag Terminal Exons \t%8ld", allExons->nU12gtagTerminalExons);
+	  printRes(mess); 
+  }
+
+  if (U12ATAC){ 
+	  allExons->nU12atacTerminalExons =
+    	BuildTerminalExons(allSites->U12atacAcceptorSites,allSites->nU12atacAcceptorSites,
+						   allSites->StopCodons,allSites->nStopCodons,
+						   LengthSequence,cutPoint,sU12atacTERMINAL,Sequence,
+						   allExons->U12atacTerminalExons);
+	  sprintf(mess,"U12atac Terminal Exons \t%8ld", allExons->nU12atacTerminalExons);
+	  printRes(mess); 
+  }
+  
   allExons->nSingles =
     BuildSingles(allSites->StartCodons,allSites->nStartCodons,
 				 allSites->StopCodons,allSites->nStopCodons,
@@ -195,6 +379,18 @@ void  manager(char *Sequence,
     allExons->nInitialExons +
     allExons->nInternalExons +
     allExons->nTerminalExons +
+	allExons->nU12gtagInitialExons +
+	allExons->nU12atacInitialExons +    
+	allExons->nU12gtag_U12gtag_InternalExons +
+	allExons->nU12gtag_U2_InternalExons +
+	allExons->nU2_U12gtag_InternalExons +
+	allExons->nU12atac_U12atac_InternalExons +
+	allExons->nU12atac_U2_InternalExons +
+	allExons->nU2_U12atac_InternalExons +
+    allExons->nU12gtag_U12atac_InternalExons +
+	allExons->nU12atac_U12gtag_InternalExons +
+	allExons->nU12gtagTerminalExons +
+    allExons->nU12atacTerminalExons +
     allExons->nSingles +
     allExons->nORFs;
 
