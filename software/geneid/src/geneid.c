@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.13 2006-05-25 14:51:53 talioto Exp $ */
+/* $Id: geneid.c,v 1.14 2006-05-25 23:07:59 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -293,13 +293,17 @@ int main (int argc, char *argv[])
 		  upperlimit = LengthSequence-1;
 		  lowerlimit = 0;
 		  
-		  if ((HI > 0)&&(HI>LOW)){upperlimit = HI - 1;}
-		  if (LOW > 0){lowerlimit = LOW - 1;}
+		  if ((HI > 0)&&(HI > LOW)&&(HI < LengthSequence)){
+		  	upperlimit = HI - 1;
+		  }else{ 
+		    upperlimit = LengthSequence-1;
+		  }
+		  if ((LOW > 0)&&(LOW < upperlimit)){lowerlimit = LOW - 1;}
 		  l1 = MAX(0,lowerlimit);
 		  l2 = MIN(l1 + LENGTHSi-1,LengthSequence-1);
 		  l2 = MIN(l2,upperlimit);
 		  lastSplit = (l2 == upperlimit);
-		  sprintf(mess,"LOW: %ld HI: %ld\n", 
+		  sprintf(mess,"Running on range %ld to %ld\n", 
 				  LOW,HI); 
 		  printMess(mess);
 		  while((l1 < (upperlimit + 1 - OVERLAP)) || (l1 == 0)|| (l1 == lowerlimit))
