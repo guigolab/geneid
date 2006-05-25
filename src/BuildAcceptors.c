@@ -40,17 +40,19 @@ extern int PPT;
 float ComputeExtraProfile(char* s,
 						  long positionAcc,
 						  long limitRight,
-						  profile* p)
+						  profile* p,
+						  site* splicesite)
 {
   float maxScore;
   float score;
   int index;
   long end;
   long i,j;
-  
+
+    
   maxScore = -INF;
 
-  i = MAX(0,positionAcc-ACCEPTOR_CONTEXT);
+  i = MAX(p->order,positionAcc - PPT_ACC_MAXDIST - p->dimension);
   end = MIN(positionAcc,limitRight);
   for (;
 	   i + p->dimension <= end;
@@ -70,8 +72,58 @@ float ComputeExtraProfile(char* s,
 			score = score + p->transitionValues[j][index];
 		}
 	  
-	  if (score >= maxScore)
+	  if (score >= maxScore){
 		maxScore = score;
+		splicesite->PositionPPT = i + p->offset - positionAcc;
+	  }
+	}
+  
+  /* Cutoff for BranchPoint and PPtracts are useless */
+  /* if (maxScore < p->cutoff) */
+  /* 	maxScore = 0.0; */
+
+  return maxScore;
+}
+
+float ComputeU2PPTProfile(char* s,
+						  long positionAcc,
+						  long limitRight,
+						  profile* p,
+						  site* splicesite)
+{
+  float maxScore;
+  float score;
+  int index;
+  long end;
+  long i,j;
+
+    
+  maxScore = -INF;
+
+  i = MAX(p->order,positionAcc - PPT_ACC_MAXDIST - p->dimension);
+  end = MIN(positionAcc,limitRight);
+  for (;
+	   i + p->dimension <= end;
+	   i++)
+	{
+	  /* Applying the additional profile */
+	  score=0.0;
+	  for (j=0;j < p->dimension;j++)
+		{
+		  /* i is the position inside the region */
+		  /* 5 is used because there are A,C,G,T and N */
+		  index = OligoToInt(s + i + j - p->order, p->order+1,5);
+		  
+		  if (index >= p->dimensionTrans)
+			score = score + -INFI;
+		  else
+			score = score + p->transitionValues[j][index];
+		}
+	  
+	  if (score >= maxScore){
+		maxScore = score;
+		splicesite->PositionPPT = i + p->offset - positionAcc;
+		}
 	}
   
   /* Cutoff for BranchPoint and PPtracts are useless */
@@ -83,6 +135,7 @@ float ComputeExtraProfile(char* s,
 
 /* Search for acceptor splice sites, using additional profiles */
 long  BuildAcceptors(char* s,
+					 char* type,
 					 profile* p,
 					 profile* ppt,
 					 profile* bp,
@@ -98,7 +151,6 @@ long  BuildAcceptors(char* s,
   long ns,is;
   long left,right;
   int index;
-  
 
   /* Final number of predicted signals (that type) */
   ns = 0;
@@ -129,12 +181,12 @@ long  BuildAcceptors(char* s,
 
 		  /* Using additional profiles */
 		  if (PPT)
-			scorePPT = ComputeExtraProfile(sOriginal,p->offset-is,l2,ppt);
-		  
+			scorePPT = ComputeU2PPTProfile(sOriginal,p->offset-is,l2,ppt,&st[ns]);
+		
 		  if (BP)
-			scoreBP = ComputeExtraProfile(sOriginal,p->offset-is,l2,bp);
+			scoreBP = ComputeExtraProfile(sOriginal,p->offset-is,l2,bp,&st[ns]);
 		  
-		  score = score + scorePPT + scoreBP;
+		  score = score + scoreBP; /* + scorePPT */
 		  
 		  /* Acceptor core is used as a global cutoff */
 		  if (score >= p->cutoff) 
@@ -143,6 +195,7 @@ long  BuildAcceptors(char* s,
 			  st[ns].ScoreBP = scoreBP;
 			  st[ns].ScorePPT = scorePPT;
 			  st[ns].Score = score;
+			  strcpy(st[ns].subtype,type);
 			  ns++;
 			}
 		}
@@ -177,12 +230,11 @@ long  BuildAcceptors(char* s,
 		  
 		  /* Using additional profiles */
 		  if (PPT)
-			scorePPT = ComputeExtraProfile(sOriginal,left + is,l2,ppt);
-		  
+			scorePPT = ComputeU2PPTProfile(sOriginal,left + is + p->offset,l2,ppt,&st[ns]);
 		  if (BP)
-			scoreBP = ComputeExtraProfile(sOriginal,left + is,l2,bp);
+			scoreBP = ComputeExtraProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
-		  score = score + scorePPT + scoreBP;
+		  score = score + scoreBP; /* + scorePPT */
 		  
 		  if (score >= p->cutoff) 
 			{
@@ -190,6 +242,7 @@ long  BuildAcceptors(char* s,
 			  st[ns].ScoreBP = scoreBP;
 			  st[ns].ScorePPT = scorePPT;
 			  st[ns].Score = score;
+			  strcpy(st[ns].subtype,type);
 			  ns++;
 			}
 		  is++;
@@ -219,12 +272,12 @@ long  BuildAcceptors(char* s,
 		  
 		  /* Using additional profiles */
 		  if (PPT)
-			scorePPT = ComputeExtraProfile(sOriginal,left + is,l2,ppt);
-		  
+			scorePPT = ComputeU2PPTProfile(sOriginal,left + is + p->offset,l2,ppt,&st[ns]);
+				
 		  if (BP)
-			scoreBP = ComputeExtraProfile(sOriginal,left + is,l2,bp);
+			scoreBP = ComputeExtraProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
-		  score = score + scorePPT + scoreBP;
+		  score = score + scoreBP; /* + scorePPT */
 		  
 		  if (score >= p->cutoff) 
 			{
@@ -232,7 +285,7 @@ long  BuildAcceptors(char* s,
 			  st[ns].ScoreBP = scoreBP;
 			  st[ns].ScorePPT = scorePPT;
 			  st[ns].Score = score;
-
+			  strcpy(st[ns].subtype,type);
 			  ns++;
 			}
 		  is++;
@@ -264,12 +317,12 @@ long  BuildAcceptors(char* s,
 		  
 		  /* Using additional profiles */
 		  if (PPT)
-			scorePPT = ComputeExtraProfile(sOriginal,left + is,l2,ppt);
-		  
+			scorePPT = ComputeU2PPTProfile(sOriginal,left + is + p->offset,l2,ppt,&st[ns]);
+			
 		  if (BP)
-			scoreBP = ComputeExtraProfile(sOriginal,left + is,l2,bp);
+			scoreBP = ComputeExtraProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
-		  score = score + scorePPT + scoreBP;
+		  score = score + scoreBP; /* + scorePPT */
 		  
 		  if (score >= p->cutoff) 
 			{
@@ -277,6 +330,7 @@ long  BuildAcceptors(char* s,
 			  st[ns].ScoreBP = scoreBP;
 			  st[ns].ScorePPT = scorePPT;
 			  st[ns].Score = score;
+			  strcpy(st[ns].subtype,type);
 			  ns++;
 			}
 		  is++;
