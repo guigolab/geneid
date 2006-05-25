@@ -112,7 +112,7 @@ my ($REG) = $Central->registerServiceType(
 				     authURI       => $::authURI,
 				     contactEmail  => $::contactEmail ,
 					  Relationships => {
-					      'ISA'	=> ['Bioinformatics'],
+					      'ISA'	=> ['Repeat_Masking'],
 					  }
 				     );
 
