@@ -14,16 +14,17 @@ PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
 CC=gcc
 OPTS=-I$(INCLUDE) -Wall -O3
-
+### OPTS=-I$(INCLUDE) -Wall -O3 -g
 #######
 
-OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o \
+OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildU12Acceptors.o $(OBJ)/BuildDonors.o \
+	$(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o \
 	$(OBJ)/BuildORFs.o $(OBJ)/BuildSingles.o $(OBJ)/BuildSort.o $(OBJ)/BuildTerminalExons.o \
 	$(OBJ)/ComputeStopInfo.o $(OBJ)/CookingGenes.o $(OBJ)/CorrectExon.o \
 	$(OBJ)/Dictionary.o $(OBJ)/DumpHash.o $(OBJ)/FetchSequence.o \
 	$(OBJ)/GetSitesWithProfile.o $(OBJ)/GetStopCodons.o $(OBJ)/Output.o \
 	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o \
-	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o\
+	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o \
 	$(OBJ)/RequestMemory.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
 	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SortHSPs.o $(OBJ)/SwitchFrames.o \
 	$(OBJ)/SwitchPositions.o $(OBJ)/Translate.o \
@@ -67,6 +68,15 @@ $(OBJ)/BackupGenes.o : $(CDIR)/BackupGenes.c $(HEADERS)
 
 $(OBJ)/BuildAcceptors.o : $(CDIR)/BuildAcceptors.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildAcceptors.c -o $(OBJ)/BuildAcceptors.o
+
+$(OBJ)/BuildU12Acceptors.o : $(CDIR)/BuildU12Acceptors.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/BuildU12Acceptors.c -o $(OBJ)/BuildU12Acceptors.o
+
+$(OBJ)/BuildDonors.o : $(CDIR)/BuildDonors.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/BuildDonors.c -o $(OBJ)/BuildDonors.o
+
+#$(OBJ)/BuildU12Donors.o : $(CDIR)/BuildU12Donors.c $(HEADERS)
+#	$(CC) -c $(OPTS) $(CDIR)/BuildU12Donors.c -o $(OBJ)/BuildU12Donors.o
 
 $(OBJ)/BuildInitialExons.o : $(CDIR)/BuildInitialExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildInitialExons.c -o $(OBJ)/BuildInitialExons.o
