@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.19 2004-09-16 13:32:57 eblanco Exp $ */
+/* $Id: geneid.h,v 1.20 2006-05-25 15:39:20 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -76,17 +76,17 @@ A. DEFINITIONS
 #define FDARRAY 5                
 
 /* Basic values (in addition to ratios)     */
-#define BASEVALUESITES_SHORT 100000
-#define BASEVALUEEXONS_SHORT 50000
-#define BASEVALUESITES_LARGE 6000000
-#define BASEVALUEEXONS_LARGE 3000000
+#define BASEVALUESITES_SHORT 10000
+#define BASEVALUEEXONS_SHORT 5000
+#define BASEVALUESITES_LARGE 600000
+#define BASEVALUEEXONS_LARGE 300000
 
 /* Max number of annotations per locus      */
 #define MAXEVIDENCES 50000       
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 100000             
+#define MAXHSP 25000             
 
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 200         
@@ -126,8 +126,15 @@ A. DEFINITIONS
 
 /* Number of nucloetides to scan for PPTs   */
 /* or Branch Points before the Acceptor site*/
-#define ACCEPTOR_CONTEXT 25
+/* #define ACCEPTOR_CONTEXT 25*/
+#define ACCEPTOR_CONTEXT 35
+#define PPT_ACC_MAXDIST 14
 
+/* Minimum distance between branch point    */
+/* and acceptor site                        */
+#define MIN_BPACC_DIST 7
+#define OPT_U12BP_DIST 13
+#define U12BP_PENALTY_SCALING_FACTOR 7 /* used to be 15 */
 /* Markov score penalty for unknown symbols */
 #define NULL_OLIGO_SCORE  -4     
 
@@ -147,7 +154,7 @@ A. DEFINITIONS
 #define FASTALINE 60             
 
 /* Maximum length for strings (mess)        */
-#define MAXSTRING 100            
+#define MAXSTRING 150            
 
 /* Mark rules up as blocking in Gene model  */
 #define BLOCK 1                  
@@ -173,9 +180,9 @@ A. DEFINITIONS
 #define PARAMETERFILE  "param.default"   
 
 /* The name of the game                     */
-#define VERSION   "geneid_v1.2"  
-#define SITES     "geneid_v1.2"  
-#define EXONS     "geneid_v1.2"        
+#define VERSION   "geneid_v1.2_u12"  
+#define SITES     "geneid_v1.2_u12"  
+#define EXONS     "geneid_v1.2_u12"       
 #define EVIDENCE  "evidence"           
 
 /* Constants:                               */
@@ -208,17 +215,40 @@ A. DEFINITIONS
 #define STA 2
 #define STO 3
 
-#define sACC "Acceptor"                
+#define sACC "Acceptor"
 #define sDON "Donor"
 #define sSTA "Start"
 #define sSTO "Stop"
 #define sPPT "PolyPyrimidineTract"
 #define sBP  "BranchPoint"
 
+/* Intron Subtypes                           */
+
+#define sU2 "U2"  
+#define sU2gcag "U2gcag"            
+#define sU12gtag "U12gtag"
+#define sU12atac "U12atac"
+
 /* Header profiles                          */
 #define sprofilePPT "Poly_Pyrimidine_Tract_profile"
 #define sprofileBP  "Branch_point_profile"
 #define sprofileACC "Acceptor_profile"
+#define sprofileU12BP  "U12_Branch_point_profile"
+#define sprofileU12gtagACC "U12gtag_Acceptor_profile"
+#define sprofileU12atacACC "U12atac_Acceptor_profile"
+#define sprofileDON "Donor_profile"
+#define sprofileU2gcagDON "U2gcag_Donor_profile"
+#define sprofileU12gtagDON "U12gtag_Donor_profile"
+#define sprofileU12atacDON "U12atac_Donor_profile"
+
+/* U12 splice site (sum d + a) and exon (sum d + a) score thresholds    */
+#define sU12_SPLICE_SCORE_THRESH "U12_Splice_Score_Threshold"
+#define sU12_EXON_SCORE_THRESH "U12_Exon_Score_Threshold"
+
+/* Header exon weights                          */
+#define sExon_weights "Exon_weights"
+#define sU12gtag_Exon_weights "U12gtag_Exon_weights"
+#define sU12atac_Exon_weights "U12atac_Exon_weights"
 
 /* Exons                                    */
 #define FIRST    0               
@@ -230,6 +260,18 @@ A. DEFINITIONS
 #define sFIRST    "First"              
 #define sINTERNAL "Internal"
 #define sTERMINAL "Terminal"
+#define sU12gtagFIRST "U12gtag-First"              
+#define sU12atacFIRST "U12atac-First"
+#define sU2_U12gtagINTERNAL  "U2-U12gtag-Internal"
+#define sU12gtag_U2INTERNAL  "U12gtag-U2-Internal"
+#define sU12gtag_U12gtagINTERNAL "U12gtag-U12gtag-Internal"
+#define sU2_U12atacINTERNAL  "U2-U12atac-Internal"
+#define sU12atac_U2INTERNAL  "U12atac-U2-Internal"
+#define sU12atac_U12atacINTERNAL "U12atac-U12atac-Internal"
+#define sU12gtag_U12atacINTERNAL "U12gtag-U12atac-Internal" 
+#define sU12atac_U12gtagINTERNAL "U12atac-U12gtag-Internal"                 
+#define sU12atacTERMINAL "U12atac-Terminal"              
+#define sU12gtagTERMINAL "U12gtag-Terminal"
 #define sSINGLE   "Single"
 #define sORF      "ORF"
 #define sEXON     "Exon"
@@ -307,6 +349,9 @@ typedef struct s_site
   float Score;                        
   float ScoreBP;
   float ScorePPT;
+  int PositionBP;
+  int PositionPPT;
+  char subtype[MAXSTRING];
 } site;
 
 typedef struct s_packSites             
@@ -314,11 +359,19 @@ typedef struct s_packSites
   site* StartCodons;                   
   site* AcceptorSites;
   site* DonorSites;
+  site* U12gtagAcceptorSites;
+  site* U12gtagDonorSites;
+  site* U12atacAcceptorSites;
+  site* U12atacDonorSites;
   site* StopCodons;
 
   long  nStartCodons;                  
   long  nAcceptorSites;
   long  nDonorSites;
+  long  nU12gtagAcceptorSites;
+  long  nU12gtagDonorSites;
+  long  nU12atacAcceptorSites;
+  long  nU12atacDonorSites;
   long  nStopCodons;
 
   long nSites;                         
@@ -345,6 +398,8 @@ typedef struct s_exonGFF
   short rValue;
   short evidence;
   short selected;
+  short three_prime_partial;
+  short five_prime_partial;
 } exonGFF;
 
 typedef struct s_packExons             
@@ -352,12 +407,36 @@ typedef struct s_packExons
   exonGFF* InitialExons;               
   exonGFF* InternalExons;
   exonGFF* TerminalExons;
+  exonGFF* U12gtagInitialExons;               
+  exonGFF* U12atacInitialExons;
+  exonGFF* U12gtag_U12gtag_InternalExons;
+  exonGFF* U12gtag_U2_InternalExons;
+  exonGFF* U2_U12gtag_InternalExons;
+  exonGFF* U12atac_U12atac_InternalExons;
+  exonGFF* U12atac_U2_InternalExons;
+  exonGFF* U2_U12atac_InternalExons;
+  exonGFF* U12gtag_U12atac_InternalExons;
+  exonGFF* U12atac_U12gtag_InternalExons;
+  exonGFF* U12gtagTerminalExons;  
+  exonGFF* U12atacTerminalExons;
   exonGFF* Singles;
   exonGFF* ORFs;
 
   long nInitialExons;                  
   long nInternalExons;
   long nTerminalExons;
+  long nU12gtagInitialExons;                  
+  long nU12atacInitialExons;
+  long nU12gtag_U12gtag_InternalExons;
+  long nU2_U12gtag_InternalExons;
+  long nU12gtag_U2_InternalExons;
+  long nU12atac_U12atac_InternalExons;
+  long nU2_U12atac_InternalExons;
+  long nU12atac_U2_InternalExons;
+  long nU12gtag_U12atac_InternalExons;
+  long nU12atac_U12gtag_InternalExons;
+  long nU12gtagTerminalExons;
+  long nU12atacTerminalExons;
   long nSingles;
   long nORFs;
 
@@ -485,6 +564,8 @@ typedef struct s_paramexons
   float HSPFactor;
 
   float ExonWeight;
+  float U12atacExonWeight;
+  float U12gtagExonWeight;
   float ExonCutoff;
 } paramexons;
 
@@ -498,6 +579,12 @@ typedef struct s_gparam
   profile* PolyPTractProfile;
   profile* BranchPointProfile;
   profile* DonorProfile;
+  profile* U2gcagDonorProfile;
+  profile* U12gtagAcceptorProfile;
+  profile* U12BranchPointProfile;
+  profile* U12gtagDonorProfile;
+  profile* U12atacAcceptorProfile;
+  profile* U12atacDonorProfile;
   profile* StopProfile;
 
   float* OligoLogsIni[3];              
@@ -544,12 +631,27 @@ void printReadingInfo(char* s);
 
 long GetSitesWithProfile(char *s, profile *p, site *st, long l1, long l2); 
 
+long BuildDonors(char* s,char* type,
+						  profile* p,
+                          site* st, 
+                          long l1, 
+                          long l2,
+						  long ns); 
+long BuildU12Donors(char* s,
+						  char* type,
+						  profile* u12gtag_p,
+						  profile* u12atac_p,
+                          site* st, 
+                          long l1, 
+                          long l2); 
+
 long GetStopCodons(char *s, profile *p, site *sc, long l1, long l2);
 
 long BuildInitialExons(site *Start, long nStarts, 
                        site *Donor, long nDonors,
                        site *Stop, long nStops,
                        int MaxDonors,
+					   char* ExonType,
 					   char* Sequence,
                        exonGFF *Exon);
 
@@ -557,6 +659,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
                         int MaxDonors,
+					    char* ExonType,
 						char* Sequence,
                         exonGFF* Exon);
  
@@ -564,6 +667,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
                          site *Stop, long nStops,
                          long LengthSequence,
                          long cutPoint,
+					     char* ExonType,
 						 char* Sequence,
 						 exonGFF* Exon);
 
@@ -621,6 +725,12 @@ void SortExons(packExons* allExons,
 			   packExternalInformation* external,
 			   packEvidence* pv,
                exonGFF* Exons,         
+               long l1, long l2,
+			   long LengthSequence);
+
+void SortSites(site* InputSites,
+			   long nInputSites,
+			   site* Sites,         
                long l1, long l2,
 			   long LengthSequence);
 
@@ -718,6 +828,15 @@ void PrintSite(site *s, int type, char Name[], int Strand,
 
 void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA, 
                long ngen, int AA1, int AA2, int nAA);
+			   
+void PrintGIntron(exonGFF *d, exonGFF *a, char Name[],long ngen);
+
+void PrintGGene(exonGFF *s, exonGFF *e, char Name[],
+               long ngen, float score);
+
+void PrintGmRNA(exonGFF *s, exonGFF *e, char Name[],
+               long ngen, float score);
+
 
 void PrintXMLExon(exonGFF *e, char Name[], 
 		  long ngen, long nExon, 
@@ -791,7 +910,7 @@ int SelectIsochore(float percent, gparam** isochores);
 void  manager(char *Sequence, long LengthSequence,
 			  packSites* allSites,
 			  packExons* allExons,
-			  long l1, long l2,
+			  long l1, long l2,long lower, long upper,
 			  int Strand,
 			  packExternalInformation* external,
 			  packHSP* hsp,
@@ -815,7 +934,17 @@ void SortHSPs(packHSP* p);
 
 HSP* RequestNewHSP();
 
+long  BuildU12Acceptors(char* s,
+					 char* type,
+					 profile* u12_p,
+					 profile* u12bp,
+					 profile* ppt,
+					 site* st, 
+					 long l1, 
+					 long l2);
+					 
 long  BuildAcceptors(char* s,
+					 char* type,
 					 profile* p,
 					 profile* ppt,
 					 profile* bp,
