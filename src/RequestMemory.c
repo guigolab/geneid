@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.7 2004-01-27 16:19:34 eblanco Exp $  */
+/*  $Id: RequestMemory.c,v 1.8 2006-05-25 14:27:01 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -80,6 +80,24 @@ packSites* RequestMemorySites()
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: donor sites");
 	      
+  /* U12 Acceptor sites */
+  if ((allSites->U12gtagAcceptorSites = 
+       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: U12gtag acceptor sites");
+	      	      
+  if ((allSites->U12atacAcceptorSites = 
+       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: U12atac acceptor sites");
+
+  /* U12 Donor sites */
+  if ((allSites->U12gtagDonorSites = 
+       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: U12gtag donor sites");
+
+  if ((allSites->U12atacDonorSites = 
+       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    printError("Not enough memory: U12atac donor sites");
+
   /* Stop codons */
   if ((allSites->StopCodons = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
@@ -116,7 +134,79 @@ packExons* RequestMemoryExons()
   if ((allExons->TerminalExons = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: terminal exons");
-  
+   
+  /* U12gtag InitialExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RFIRST);
+  if ((allExons->U12gtagInitialExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12gtag first exons");
+	
+  /* U12atac InitialExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RFIRST);
+  if ((allExons->U12atacInitialExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12atac first exons");
+          
+  /* U12gtag-U12gtag InternalExons HowMany/100*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U12gtag_U12gtag_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12gtag U12gtag internal exons");
+       
+  /* U12gtag-U2 InternalExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U12gtag_U2_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12gtag U2 internal exons");
+	      
+  /* U2-U12gtag InternalExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U2_U12gtag_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U2 U12gtag internal exons");
+ 
+  /* U12atac-U12atac InternalExons HowMany/100*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U12atac_U12atac_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12atac U12atac internal exons");
+       
+  /* U12atac-U2 InternalExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U12atac_U2_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12atac U2 internal exons");
+	      
+  /* U2-U12atac InternalExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U2_U12atac_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U2 U12atac internal exons");
+
+  /* U12gtag-U12atac InternalExons HowMany/100*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U12gtag_U12atac_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12gtag U12atac internal exons");
+   
+  /* U12atac-U12gtag InternalExons HowMany/100*/
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->U12atac_U12gtag_InternalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12atac U12gtag internal exons");
+   	     
+  /* U12atac TerminalExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RTERMI);
+  if ((allExons->U12atacTerminalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12atac terminal exons");
+	     
+  /* U12gtag TerminalExons HowMany/10*/
+  HowMany = (long)(NUMEXONS/RTERMI);
+  if ((allExons->U12gtagTerminalExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: U12gtag terminal exons");
+   
   /* SingleExons */
   HowMany = (long)(NUMEXONS/RSINGL);
   if ((allExons->Singles = 
@@ -345,14 +435,32 @@ gparam* RequestMemoryParams()
   if ((gp->AcceptorProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: acceptor profile");
 
+  if ((gp->U12gtagAcceptorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: u12gtag acceptor profile");
+
+  if ((gp->U12atacAcceptorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: u12atac acceptor profile");
+
   if ((gp->PolyPTractProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: acceptor Poly Pyrimidine Tract profile");
 
   if ((gp->BranchPointProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: acceptor Branch Point profile");
 
+  if ((gp->U12BranchPointProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: u12 acceptor Branch Point profile");
+	
   if ((gp->DonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
-    printError("Not enough memory: donor profile");
+    printError("Not enough memory: U2 donor profile");
+
+  if ((gp->U2gcagDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: U2 GCAG donor profile");
+	
+  if ((gp->U12gtagDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: u12gtag donor profile");
+
+  if ((gp->U12atacDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: u12atac donor profile");
 
   if ((gp->StopProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: stop profile");
