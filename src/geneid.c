@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.12 2004-01-27 16:22:25 eblanco Exp $ */
+/* $Id: geneid.c,v 1.13 2006-05-25 14:51:53 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -38,6 +38,8 @@ int
   SFP=0, SDP=0, SAP=0, STP=0,
   /* exons to print */
   EFP=0, EIP=0, ETP=0, EXP=0, ESP=0, EOP = 0,
+  /* introns to print */
+  INTRON = 0,
   /* Partial or full prediction engine */
   GENAMIC = 1, GENEID = 1, 
   /* Only forward or reverse prediction engine */
@@ -47,7 +49,7 @@ int
   /* Input annotations or homology to protein information */
   EVD = 0, SRP = 0,
   /* Output formats */
-  GFF = 0, X10 = 0, XML = 0, cDNA = 0,
+  GFF = 0, GFF3 = 0, X10 = 0, XML = 0, cDNA = 0, PSEQ = 0,
   /* Verbose flag (memory/processing information) */
   BEG=0, VRB=0,
   /* Score for regions not-supported by protein homology */
@@ -57,11 +59,25 @@ int
   /* Detection of PolyPTracts in Acceptors */
   PPT=0,
   /* Detection of BranchPoints in Acceptors */
-  BP=0;
-
+  BP=0,
+  /* Detection of U12gtag sites (acceptor uses BranchPoint)*/
+  U12GTAG=0,
+  /* Detection of U12atac sites (acceptor uses BranchPoint)*/
+  U12ATAC=0,
+  /* Detection of U2gcag sites */
+  U2GCAG=0;
+  
+long 
+  /* User defined lower limit */
+  LOW=0,
+  /* User defined upper limit */
+  HI=0;
+    
 /* Increase/decrease exon weight value (exon score) */
 float EW = NOVALUE;
-
+float U12EW = 0;
+float U12_SPLICE_SCORE_THRESH = -1000;
+float U12_EXON_SCORE_THRESH = -1000;
 /* Generic maximum values: sites, exons and backup elements */
 long NUMSITES,NUMEXONS,MAXBACKUPSITES,MAXBACKUPEXONS;
 
@@ -82,7 +98,8 @@ int main (int argc, char *argv[])
   
   /* Current split ends */
   long l1,l2;
-  
+  long upperlimit;
+  long lowerlimit;
   /* Forward semse data structures */
   packSites* allSites;
   packExons* allExons;
@@ -130,6 +147,7 @@ int main (int argc, char *argv[])
   float percentGC;
   int currentIsochore;
   int nIsochores;
+  
   
   int reading;
   int lastSplit;
@@ -272,10 +290,19 @@ int main (int argc, char *argv[])
 
 		  /* A.5. Processing sequence into several fragments if required */
 		  /* l1 is the left end and l2 is the right end in Sequence */
-		  l1 = 0;
-		  l2 = MIN(LENGTHSi-1,LengthSequence-1);
-		  lastSplit = (l2 == LengthSequence-1);
-		  while((l1 < (LengthSequence - OVERLAP)) || (l1 == 0))
+		  upperlimit = LengthSequence-1;
+		  lowerlimit = 0;
+		  
+		  if ((HI > 0)&&(HI>LOW)){upperlimit = HI - 1;}
+		  if (LOW > 0){lowerlimit = LOW - 1;}
+		  l1 = MAX(0,lowerlimit);
+		  l2 = MIN(l1 + LENGTHSi-1,LengthSequence-1);
+		  l2 = MIN(l2,upperlimit);
+		  lastSplit = (l2 == upperlimit);
+		  sprintf(mess,"LOW: %ld HI: %ld\n", 
+				  LOW,HI); 
+		  printMess(mess);
+		  while((l1 < (upperlimit + 1 - OVERLAP)) || (l1 == 0)|| (l1 == lowerlimit))
 			{
 			  /** B.1. Measure G+C content in the current fragment: l1,l2 **/
 			  GCScan(Sequence, GCInfo, l1, l2); 
@@ -302,7 +329,7 @@ int main (int argc, char *argv[])
 				  printMess(mess);
 				  manager(Sequence, LengthSequence, 
 						  allSites, allExons, 
-						  l1, l2,
+						  l1, l2, lowerlimit, upperlimit,
 						  FORWARD, 
 						  external, hsp, gp,
 						  isochores,nIsochores,
@@ -319,6 +346,7 @@ int main (int argc, char *argv[])
 						  allSites_r, allExons_r, 
 						  LengthSequence-1 - l2, 
 						  LengthSequence-1 - l1,
+						  LengthSequence-1 - upperlimit, LengthSequence-1 - lowerlimit,
 						  REVERSE, 
 						  external, hsp, gp,
 						  isochores,nIsochores,
@@ -372,6 +400,9 @@ int main (int argc, char *argv[])
 						l1, l2, 
 						LengthSequence);
 			  
+			  sprintf(mess,"Finished sorting %ld exons\n", nExons);  
+			  printMess(mess);
+			  
 			  /* Next block of annotations to be processed */
 			  if (EVD && evidence != NULL)
 				SwitchCounters(external);
@@ -408,8 +439,8 @@ int main (int argc, char *argv[])
 				}
 			  /* Computing new boundaries: next fragment in current sequence */
 			  l1 += LENGTHSi - OVERLAP;
-			  l2 = MIN(l1 + LENGTHSi -1, LengthSequence-1);
-			  lastSplit = (l2 == LengthSequence-1);
+			  l2 = MIN(l1 + LENGTHSi -1, upperlimit);
+			  lastSplit = (l2 == upperlimit);
 			} /* processing next fragment */
 		  
 		  /* A.6. Full sequence processed: displaying best predicted gene */
