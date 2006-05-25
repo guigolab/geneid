@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInitialExons.c,v 1.5 2003-11-05 13:27:37 eblanco Exp $  */
+/*  $Id: BuildInitialExons.c,v 1.6 2006-05-25 13:59:03 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -37,6 +37,7 @@ long BuildInitialExons(site *Start, long nStarts,
                        site *Donor, long nDonors,
                        site *Stop, long nStops,
                        int MaxDonors,
+					   char* ExonType,
 					   char* Sequence,
                        exonGFF *Exon) 
 {
@@ -148,7 +149,8 @@ long BuildInitialExons(site *Start, long nStarts,
 		  (Exon+nExon)->Remainder = ((Exon+nExon)->Donor->Position -
 									 (Exon+nExon)->Acceptor->Position + 1 ) % 3;
 		  (Exon+nExon)->Remainder = (3 - (Exon+nExon)->Remainder) % 3; 
-         strcpy((Exon+nExon)->Type,"First");
+         /* Assign Type according to donor subtype */
+		 strcpy((Exon+nExon)->Type,ExonType);
          strcpy((Exon+nExon)->Group,NOGROUP);
          (Exon+nExon)->evidence = 0;
 

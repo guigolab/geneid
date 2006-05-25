@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildTerminalExons.c,v 1.4 2003-11-05 13:39:30 eblanco Exp $  */
+/*  $Id: BuildTerminalExons.c,v 1.5 2006-05-25 14:01:30 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -37,6 +37,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
                          site *Stop, long nStops,
                          long LengthSequence,
                          long cutPoint,
+						 char* ExonType,
 						 char* Sequence,
 						 exonGFF* Exon)
 {
@@ -85,7 +86,8 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
 				  (Exon+nExon)->Donor=(Stop+js);
 				  (Exon+nExon)->Frame = f;
 				  (Exon+nExon)->Remainder = 0; 
-				  strcpy((Exon+nExon)->Type,"Terminal");
+				  /* Assign Type according to acceptor subtype */
+				  strcpy((Exon+nExon)->Type,ExonType);
 				  strcpy((Exon+nExon)->Group,NOGROUP);
 				  (Exon+nExon)->evidence = 0;
 
