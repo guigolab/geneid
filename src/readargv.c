@@ -24,27 +24,29 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.14 2004-01-27 16:27:57 eblanco Exp $  */
+/*  $Id: readargv.c,v 1.15 2006-05-25 15:04:06 talioto Exp $  */
 
 #include "geneid.h"
 
 /* geneid.c external vars */
 extern int 	SFP,SDP,SAP,STP,
             EFP,EIP,ETP,EXP,ESP,EOP,
+			INTRON,
             VRB,
             FWD,RVS,
             GENEID, GENAMIC,
-            GFF, X10,
+            GFF, GFF3, X10,
             EVD, SRP, BEG,
-            scanORF, XML, cDNA,
+            scanORF, XML, cDNA, PSEQ,
             SGE;
 extern float EW;
+extern long LOW,HI;
 
 /* required by getopts */
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitxsz]\n\t\t[-D] [-Z]\n\t\t[-G] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2a\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszjk]\n\t\t[-DA] [-Z]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2a\n";
 
 void printHelp()
 {
@@ -60,13 +62,18 @@ void printHelp()
   printf("\t-f: Output Initial exons\n");
   printf("\t-i: Output Internal exons\n");
   printf("\t-t: Output Terminal exons\n");
+  printf("\t-n: Output introns\n");
   printf("\t-s: Output Single genes\n");
   printf("\t-x: Output all predicted exons\n");
   printf("\t-z: Output Open Reading Frames\n\n");
   
-  printf("\t-D: Output genomic sequence of exons in predicted genes\n\n");
+  printf("\t-j: <lower_limit>: Begin prediction at this coordinate\n");
+  printf("\t-k: <upper_limit>: End prediction at this coordinate\n");
+  printf("\t-D: Output genomic sequence of exons in predicted genes\n");
+  printf("\t-A: Output amino acid sequence derived from predicted CDS\n\n");
   
   printf("\t-G: Use GFF format to print predictions\n");
+  printf("\t-3: Use GFF3 format to print predictions\n");
   printf("\t-X: Use extended-format to print gene predictions\n");
   printf("\t-M: Use XML format to print gene predictions\n");
   printf("\t-m: Show DTD for XML-format output \n\n");
@@ -89,7 +96,7 @@ void printHelp()
   printf("\t-h: Show this help\n");
 
   printf ("AUTHORS\n");
-  printf("\tgeneid v 1.2 has been developed by Enrique Blanco and Roderic Guigo.\n\tParameter files have been created by Genis Parra. Any bug or suggestion\n\tcan be reported to geneid@imim.es\n");
+  printf("\t%s has been developed by Enrique Blanco, Tyler Alioto and Roderic Guigo.\n\tParameter files have been created by Genis Parra and Tyler Alioto. Any bug or suggestion\n\tcan be reported to geneid@imim.es\n",VERSION);
 
   printf("\n\n\n");
 }
@@ -144,9 +151,10 @@ void readargv (int argc,char* argv[],
   int genamicOpts = 0;
   int printOptions =0;
   char mess[MAXSTRING];
-  
+  char *dummy1;
+  char *dummy2;
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitsxDzZXmMGBvE:R:S:WCFP:h")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitnsxj:k:DAzZXmMG3BvE:R:S:WCFP:h")) != -1)
     switch(c)
       {
       case 'B': BEG++; 
@@ -157,6 +165,9 @@ void readargv (int argc,char* argv[],
 	  case 'D': cDNA++;
 		genamicOpts++;
 		break;
+	  case 'A': PSEQ++;
+		genamicOpts++;
+		break;
 	  case 'E': EW = atof(optarg);
 		geneidOpts++;
 		break;
@@ -164,6 +175,9 @@ void readargv (int argc,char* argv[],
 		geneidOpts++;
 		break;
 	  case 'G': GFF++;
+		break;
+	  case '3': GFF3++;
+	  	GFF++;
 		break;
 	  case 'M': XML++;
         genamicOpts++;
@@ -217,6 +231,12 @@ void readargv (int argc,char* argv[],
 		geneidOpts++;
 		printOptions++;
 		break;
+	  case 'j': LOW = strtol(optarg,&dummy1,0);
+		geneidOpts++;
+		break;
+	  case 'k': HI = strtol(optarg,&dummy2,0);
+		geneidOpts++;
+		break;
 	  case 'm': printDTD();
 		exit(0);
 		break;
@@ -227,6 +247,10 @@ void readargv (int argc,char* argv[],
 		printOptions++;
 		break;
 	  case 't': ETP++;
+		printOptions++;
+		geneidOpts++;
+		break;
+	  case 'n': INTRON++;
 		printOptions++;
 		geneidOpts++;
 		break;
@@ -258,7 +282,7 @@ void readargv (int argc,char* argv[],
   if (XML && (GFF || X10))
     printError("Incompatible options (XML and other output formats)");
 
-  if (cDNA && GFF)
+  if (cDNA && GFF && !GFF3)
     printError("Incompatible options( -D | -G)");
   
   if (error)
