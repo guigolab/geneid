@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RecomputePositions.c,v 1.3 2003-11-05 14:58:25 eblanco Exp $  */
+/*  $Id: RecomputePositions.c,v 1.4 2006-05-25 14:23:58 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -40,6 +40,22 @@ void RecomputePositions(packSites* allSites, long l)
   for (i=0; i < allSites->nAcceptorSites; i++)
     (allSites->AcceptorSites+i)->Position = 
       l-(allSites->AcceptorSites+i)->Position-1;
+
+  for (i=0; i < allSites->nU12gtagAcceptorSites; i++)
+    (allSites->U12gtagAcceptorSites+i)->Position = 
+      l-(allSites->U12gtagAcceptorSites+i)->Position-1;
+
+  for (i=0; i < allSites->nU12gtagDonorSites; i++)
+    (allSites->U12gtagDonorSites+i)->Position = 
+      l-(allSites->U12gtagDonorSites+i)->Position-1;
+
+  for (i=0; i < allSites->nU12atacAcceptorSites; i++)
+    (allSites->U12atacAcceptorSites+i)->Position = 
+      l-(allSites->U12atacAcceptorSites+i)->Position-1;
+
+  for (i=0; i < allSites->nU12atacDonorSites; i++)
+    (allSites->U12atacDonorSites+i)->Position = 
+      l-(allSites->U12atacDonorSites+i)->Position-1;
 
   for (i=0; i < allSites->nDonorSites; i++)
     (allSites->DonorSites+i)->Position = 
