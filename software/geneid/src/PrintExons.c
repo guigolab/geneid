@@ -24,11 +24,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.8 2003-11-05 14:43:12 eblanco Exp $  */
+/*  $Id: PrintExons.c,v 1.9 2006-05-25 14:18:43 talioto Exp $  */
 
 #include "geneid.h"
 
 extern int GFF;
+extern int GFF3;
 
 /* Print a predicted exon from a list of exons */
 void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
@@ -37,6 +38,8 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
   char* rs;
   long p1, p2;
   int nAA;
+  char saux[MAXTYPE];
+  char saux2[MAXTYPE];
   
   /* Acquiring real positions of exon */
   p1 = e->Acceptor->Position + e->offset1 - COFFSET;
@@ -70,7 +73,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
   if (GFF)
     {
       /* GFF format */
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t%hd\n",
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tgene_id %s_%s_%ld_%ld\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
 			  Name,
 			  (e->evidence)? EVIDENCE : EXONS,
@@ -79,14 +82,22 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
 			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 			  (e->Score==MAXSCORE)? 0.0: e->Score,
 			  e->Strand,
-			  e->Frame);
+			  e->Frame,
+			  Name,e->Type,(e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2 );
     }
   else
     {
+	 if (memcmp(e->Donor->subtype,"U12",2)){
+	 	strcpy (saux, "-");
+		strcpy (saux2, e->Donor->subtype);
+		strcat(saux2,saux);
+		strcat(saux2,e->Type);
+	 }
       /* Default format */
       printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%d\t%s\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
-			  e->Type,
+			  saux2, /*e->Type,*/
 			  (e->evidence)? e->Acceptor->Position: e->Acceptor->Position + e->offset1,
 			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 			  (e->Score==MAXSCORE)? 0.0:e->Score,
@@ -156,10 +167,52 @@ void PrintGExon(exonGFF *e,
                 int AA2,
                 int nAA)
 {
-  if (GFF)
+	char attribute[MAXSTRING] = "";
+  if (GFF3)
     {
-      /* GFF format */
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t%hd\t%s_%ld\n",
+      /* GFF3 format 5_prime_partial=true ???*/
+      if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
+      if (e->three_prime_partial) { strcpy(attribute,";3_prime_partial=true");}
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;ExonType=%s\n",
+			  /* correct stop codon position, Terminal- & Terminal+ */ 
+			  Name,
+			  (e->evidence)? EVIDENCE : VERSION,     
+			  "exon",
+			  (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+			  (e->Score==MAXSCORE)? 0.0:e->Score,
+			  e->Strand,
+			  e->Frame,
+			  Name,
+			  ngen,
+			  e->Type);
+		printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;ID=cds_%s_%ld;Target=%s_predicted_protein_%s_%ld %d %d%s\n",
+			  /* correct stop codon position, Terminal- & Terminal+ */ 
+			  Name,
+			  (e->evidence)? EVIDENCE : VERSION,     
+			  "CDS",
+			  (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+			  (e->Score==MAXSCORE)? 0.0:e->Score,
+			  e->Strand,
+			  e->Frame,
+			  Name,
+			  ngen,
+			  Name,
+			  ngen,
+			  VERSION,
+			  Name,
+			  ngen,
+			  (e->Strand=='+')? nAA-AA2+COFFSET : AA1,
+			  (e->Strand=='+')? nAA-AA1+COFFSET : AA2,
+			  attribute);
+     
+    }
+  else
+    {
+		if (GFF){
+ 		/* GFF format */
+      		printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%ld\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
 			  Name,
 			  (e->evidence)? EVIDENCE : VERSION,     
@@ -171,9 +224,7 @@ void PrintGExon(exonGFF *e,
 			  e->Frame,
 			  Name,
 			  ngen);
-    }
-  else
-    {
+		} else {
       /* Default format for genes */
       printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\tAA %3d:%3d %s_%ld\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
@@ -192,7 +243,143 @@ void PrintGExon(exonGFF *e,
 			  (e->Strand=='+')? nAA-AA1+COFFSET : AA2,
 			  Name,
 			  ngen);
+		}
     }
+}
+
+/* Print a predicted gene from a assembled gene: gff/geneid format */
+void PrintGGene(exonGFF *s,
+				exonGFF *e,
+                char Name[],
+                long ngen,
+                float score)
+{
+  if (GFF3)
+    {
+		  /* GFF3 format */
+			printf ("%s\t%s\tgene\t%ld\t%ld\t%.2f\t%c\t.\tID=%s_%ld;Name=%s_%ld\n",
+		  /* correct stop codon position, Terminal- & Terminal+ */ 
+			  Name,
+			  (e->evidence)? EVIDENCE : VERSION,     
+			  (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+			  (e->evidence)? s->Donor->Position : s->Donor->Position + s->offset2,
+			  score,
+			  e->Strand,
+			  Name,
+			  ngen,
+			  Name,
+			  ngen); 
+    }
+  else
+    {
+		if (GFF){
+		      /* GFF format */
+      		  printf ("%s\t%s\tgene\t%ld\t%ld\t%.2f\t%c\t.\t%s_%ld\n",
+			  /* correct stop codon position, Terminal- & Terminal+ */ 
+			  Name,
+			  (e->evidence)? EVIDENCE : VERSION,     
+			  (e->evidence)? s->Acceptor->Position : s->Acceptor->Position + e->offset1,
+			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+			  score,
+			  e->Strand,
+			  Name,
+			  ngen);
+		}
+    }
+}
+/* Print a predicted mRNA from a assembled gene: gff/geneid format */
+void PrintGmRNA(exonGFF *s,
+				exonGFF *e,
+                char Name[],
+                long ngen,
+                float score)
+{
+  if (GFF3)
+    {
+		
+	  /* GFF3 format */
+	  printf ("%s\t%s\tmRNA\t%ld\t%ld\t%1.2f\t%c\t.\tID=mRNA_%s_%ld;Parent=%s_%ld\n",
+	  /* correct stop codon position, Terminal- & Terminal+ */ 
+		  Name,
+		  (e->evidence)? EVIDENCE : VERSION,     
+		  (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+		  (e->evidence)? s->Donor->Position : s->Donor->Position + s->offset2,
+		  score,
+		  e->Strand,
+		  Name,
+		  ngen,
+		  Name,
+		  ngen);
+    }
+  else
+    {
+		if (GFF){
+      	   /* GFF format */
+      		printf ("%s\t%s\tgene\t%ld\t%ld\t%1.2f\t%c\t.\t%s_%ld\n",
+				  /* correct stop codon position, Terminal- & Terminal+ */ 
+				  Name,
+				  (e->evidence)? EVIDENCE : VERSION,     
+				  (e->evidence)? s->Acceptor->Position : s->Acceptor->Position + e->offset1,
+				  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+				  score,
+				  e->Strand,
+				  Name,
+				  ngen);
+		}
+    }
+}
+/* Print a predicted intron from a assembled gene: gff/geneid format */
+void PrintGIntron(exonGFF *d,
+				exonGFF *a,
+                char Name[],
+                long ngen
+                )
+{
+	char intronType[MAXTYPE]; 
+	strcpy(intronType,"U2_intron");
+	short phase = (3 - d->Remainder)%3;
+	/* short phase = MIN(0, 3 - a->Frame); */
+	long start = (a->evidence)? d->Donor->Position + 1: d->Donor->Position + 1 + d->offset2;
+	long end = (a->evidence)? a->Acceptor->Position - 1: a->Acceptor->Position -1 + a->offset1;
+	float score = (d->Donor->Score + a->Acceptor->Score)/2;
+	if (!(strcmp(d->Donor->subtype,sU12gtag))||!(strcmp(d->Donor->subtype,sU12atac))){
+		strcpy(intronType,"U12_intron");
+	}
+	if (d->Strand == '-'){
+		phase = (3 - a->Remainder)%3;
+	}
+    if (GFF3) {
+	  /* GFF3 format */
+	  printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld\n",
+			  /* correct stop codon position, Terminal- & Terminal+ */ 
+			  Name,
+			  (a->evidence)? EVIDENCE : VERSION,     
+			  intronType,
+			  start,
+			  end,
+			  score,
+			  a->Strand,
+			  phase,
+			  Name,
+			  ngen);
+    } else {
+		if (GFF){		 
+		   /* GFF format */
+		   printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%ld\n",
+				   /* correct stop codon position, Terminal- & Terminal+ */ 
+				   Name,
+				   (a->evidence)? EVIDENCE : VERSION,     
+				   intronType,
+				   start,
+				   end,
+				   score,
+				   a->Strand,
+				   phase,
+				   Name,
+				   ngen);	  	
+		}
+	}
+
 }
 
 /* Print a predicted exon from a assembled gene: XML format */
