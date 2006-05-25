@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: account.c,v 1.4 2003-11-05 11:55:38 eblanco Exp $  */
+/*  $Id: account.c,v 1.5 2006-05-25 14:35:01 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -88,22 +88,54 @@ void updateTotals(account *m,
   m->starts += allSites->nStartCodons;
   m->stops += allSites->nStopCodons;
   m->acc += allSites->nAcceptorSites;
+  m->acc += allSites->nU12gtagAcceptorSites;
+  m->acc += allSites->nU12atacAcceptorSites;
   m->don += allSites->nDonorSites;
+  m->don += allSites->nU12gtagDonorSites;
+  m->don += allSites->nU12atacDonorSites;
 
   m->starts_r += allSites_r->nStartCodons;
   m->stops_r += allSites_r->nStopCodons;
   m->acc_r += allSites_r->nAcceptorSites;
+  m->acc_r += allSites_r->nU12gtagAcceptorSites;
+  m->acc_r += allSites_r->nU12atacAcceptorSites;
   m->don_r += allSites_r->nDonorSites;
-   
+  m->don += allSites_r->nU12gtagDonorSites;
+  m->don += allSites_r->nU12atacDonorSites;
+       
   m->first += allExons->nInitialExons;
+  m->first += allExons->nU12gtagInitialExons;
+  m->first += allExons->nU12atacInitialExons;
   m->internal += allExons->nInternalExons;
+  m->internal += allExons->nU12gtag_U2_InternalExons;
+  m->internal += allExons->nU2_U12gtag_InternalExons;
+  m->internal += allExons->nU12gtag_U12gtag_InternalExons;
+  m->internal += allExons->nU12atac_U2_InternalExons;
+  m->internal += allExons->nU2_U12atac_InternalExons;
+  m->internal += allExons->nU12atac_U12atac_InternalExons;
+  m->internal += allExons->nU12gtag_U12atac_InternalExons;
+  m->internal += allExons->nU12atac_U12gtag_InternalExons;
   m->terminal += allExons->nTerminalExons;
+  m->terminal += allExons->nU12gtagTerminalExons;
+  m->terminal += allExons->nU12atacTerminalExons;
   m->single += allExons->nSingles;
   m->orf += allExons->nORFs;
 
   m->first_r += allExons_r->nInitialExons;
+  m->first_r += allExons_r->nU12gtagInitialExons;
+  m->first_r += allExons_r->nU12atacInitialExons;
   m->internal_r += allExons_r->nInternalExons;
-  m->terminal_r += allExons_r->nTerminalExons;  
+  m->internal_r += allExons_r->nU12gtag_U2_InternalExons;
+  m->internal_r += allExons_r->nU2_U12gtag_InternalExons;
+  m->internal_r += allExons_r->nU12gtag_U12gtag_InternalExons;
+  m->internal_r += allExons_r->nU12atac_U2_InternalExons;
+  m->internal_r += allExons_r->nU2_U12atac_InternalExons;
+  m->internal_r += allExons_r->nU12atac_U12atac_InternalExons;
+  m->internal_r += allExons_r->nU12gtag_U12atac_InternalExons;
+  m->internal_r += allExons_r->nU12atac_U12gtag_InternalExons;
+  m->terminal_r += allExons_r->nTerminalExons;
+  m->terminal_r += allExons_r->nU12gtagTerminalExons;
+  m->terminal_r += allExons_r->nU12atacTerminalExons;
   m->single_r += allExons_r->nSingles;  
   m->orf_r += allExons_r->nORFs;  
 
