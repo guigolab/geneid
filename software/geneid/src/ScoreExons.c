@@ -28,8 +28,11 @@
 
 extern int scanORF;
 extern float EW;
+extern float U12EW;
 extern int SRP;
 extern float NO_SCORE;
+extern int U12GTAG;
+extern int U12ATAC;
 
 /* Matrix to translate characters to numbers. borrowed from jwf */
 int TRANS[] = {
@@ -526,7 +529,8 @@ long Score(exonGFF *Exons,
   paramexons* p;
   int OligoLength;
   gparam* gp;
-
+  int u12correction;
+  u12correction = 0;
   /* Number of survivor exons after scoring and filtering */
   n=0;
   /* For every exon computing scores: protein coding and homology info */
@@ -564,10 +568,50 @@ long Score(exonGFF *Exons,
       /* Selecting parameters according to exon type */
       if (!(strcmp((Exons+i)->Type,sFIRST)))
 		p = gp->Initial;
-      if (!(strcmp((Exons+i)->Type,sINTERNAL)))
+	  if (!(strcmp((Exons+i)->Type,sU12gtagFIRST))){
+		p = gp->Initial;
+		u12correction = U12EW + p->U12gtagExonWeight;
+		}
+	  if (!(strcmp((Exons+i)->Type,sU12atacFIRST))){
+		p = gp->Initial;
+		u12correction = U12EW + p->U12atacExonWeight;
+		}      
+	  if (!(strcmp((Exons+i)->Type,sINTERNAL)))
 		p = gp->Internal;
+	  if (!(strcmp((Exons+i)->Type,sU2_U12gtagINTERNAL))){
+		p = gp->Internal;
+		u12correction = U12EW + p->U12gtagExonWeight;
+		}
+      if (!(strcmp((Exons+i)->Type,sU12gtag_U2INTERNAL))){
+		p = gp->Internal;
+		u12correction = U12EW + p->U12gtagExonWeight;
+		}
+      if (!(strcmp((Exons+i)->Type,sU12gtag_U12gtagINTERNAL))){
+		p = gp->Internal;
+		u12correction = U12EW + p->U12gtagExonWeight;
+		}
+	  if (!(strcmp((Exons+i)->Type,sU2_U12atacINTERNAL))){
+		p = gp->Internal;
+		u12correction = U12EW + p->U12atacExonWeight;
+		}
+      if (!(strcmp((Exons+i)->Type,sU12atac_U2INTERNAL))){
+		p = gp->Internal;
+		u12correction = U12EW + p->U12atacExonWeight;
+		}
+      if (!(strcmp((Exons+i)->Type,sU12atac_U12atacINTERNAL))){
+		p = gp->Internal;
+		u12correction = U12EW + p->U12atacExonWeight;
+		}
       if (!(strcmp((Exons+i)->Type,sTERMINAL)))
 		p = gp->Terminal;
+	  if (!(strcmp((Exons+i)->Type,sU12gtagTERMINAL))){
+		p = gp->Terminal;
+		u12correction = U12EW + p->U12gtagExonWeight;
+		}
+	  if (!(strcmp((Exons+i)->Type,sU12atacTERMINAL))){
+		p = gp->Terminal;
+		u12correction = U12EW + p->U12atacExonWeight;
+		}
       if (!(strcmp((Exons+i)->Type,sSINGLE)))
 		p = gp->Single;
       if (!(strcmp((Exons+i)->Type,sORF)))
@@ -618,9 +662,9 @@ long Score(exonGFF *Exons,
 
 			  /* -E: increase/decrease current ExonWeight parameter */
 			  if (EW == NOVALUE)
-				ExonWeight = p->ExonWeight;
+				ExonWeight = p->ExonWeight + u12correction;
 			  else
-				ExonWeight = p->ExonWeight + EW;
+				ExonWeight = p->ExonWeight + EW  + u12correction;
 
 			  (Exons+n)->Score = scoreTotal + ExonWeight;
 			  (Exons+n)->PartialScore = scoreMarkov;
@@ -680,7 +724,25 @@ void ScoreExons(char *Sequence,
 								  isochores, GCInfo);
   sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
   printRes(mess); 
-  
+
+  if (U12GTAG){   
+	  allExons->nU12gtagInitialExons = Score(allExons->U12gtagInitialExons,
+									  allExons->nU12gtagInitialExons,
+									  l1, l2, Strand, 
+									  external, hsp, 
+									  isochores, GCInfo);
+	  sprintf(mess,"U12gtag Initial Exons \t%8ld", allExons->nU12gtagInitialExons);
+	  printRes(mess); 
+  }
+  if (U12ATAC){   
+	  allExons->nU12atacInitialExons = Score(allExons->U12atacInitialExons,
+									  allExons->nU12atacInitialExons,
+									  l1, l2, Strand, 
+									  external, hsp, 
+									  isochores, GCInfo);
+	  sprintf(mess,"U12atac Initial Exons \t%8ld", allExons->nU12atacInitialExons);
+	  printRes(mess); 
+  }
   allExons->nInternalExons=Score(allExons->InternalExons,
 								 allExons->nInternalExons, 
 								 l1, l2, Strand, 
@@ -688,7 +750,74 @@ void ScoreExons(char *Sequence,
 								 isochores, GCInfo);
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
-  
+   
+  if (U12GTAG){ 
+	  allExons->nU12gtag_U2_InternalExons=Score(allExons->U12gtag_U2_InternalExons,
+									 allExons->nU12gtag_U2_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12gtag-U2 Internal Exons \t%8ld", allExons->nU12gtag_U2_InternalExons);
+	  printRes(mess); 
+
+	  allExons->nU2_U12gtag_InternalExons=Score(allExons->U2_U12gtag_InternalExons,
+									 allExons->nU2_U12gtag_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U2-U12gtag Internal Exons \t%8ld", allExons->nU2_U12gtag_InternalExons);
+	  printRes(mess); 
+
+	  allExons->nU12gtag_U12gtag_InternalExons=Score(allExons->U12gtag_U12gtag_InternalExons,
+									 allExons->nU12gtag_U12gtag_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12gtag-U12gtag Internal Exons \t%8ld", allExons->nU12gtag_U12gtag_InternalExons);
+	  printRes(mess); 
+  }
+  if (U12ATAC){ 
+	  allExons->nU12atac_U2_InternalExons=Score(allExons->U12atac_U2_InternalExons,
+									 allExons->nU12atac_U2_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12atac-U2 Internal Exons \t%8ld", allExons->nU12atac_U2_InternalExons);
+	  printRes(mess); 
+
+	  allExons->nU2_U12atac_InternalExons=Score(allExons->U2_U12atac_InternalExons,
+									 allExons->nU2_U12atac_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U2-U12atac Internal Exons \t%8ld", allExons->nU2_U12atac_InternalExons);
+	  printRes(mess); 
+
+	  allExons->nU12atac_U12atac_InternalExons=Score(allExons->U12atac_U12atac_InternalExons,
+									 allExons->nU12atac_U12atac_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12atac-U12atac Internal Exons \t%8ld", allExons->nU12atac_U12atac_InternalExons);
+	  printRes(mess); 
+  }  
+  if (U12GTAG && U12ATAC){ 
+	  allExons->nU12gtag_U12atac_InternalExons=Score(allExons->U12gtag_U12atac_InternalExons,
+									 allExons->nU12gtag_U12atac_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12gtag-U12atac Internal Exons \t%8ld", allExons->nU12gtag_U12atac_InternalExons);
+	  printRes(mess); 
+	  
+	  allExons->nU12atac_U12gtag_InternalExons=Score(allExons->U12atac_U12gtag_InternalExons,
+									 allExons->nU12atac_U12gtag_InternalExons, 
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12atac-U12gtag Internal Exons \t%8ld", allExons->nU12atac_U12gtag_InternalExons);
+	  printRes(mess); 
+  }
   allExons->nTerminalExons=Score(allExons->TerminalExons,
 								 allExons->nTerminalExons,
 								 l1, l2, Strand, 
@@ -696,6 +825,25 @@ void ScoreExons(char *Sequence,
 								 isochores, GCInfo);
   sprintf(mess,"Terminal Exons \t\t%8ld", allExons->nTerminalExons);
   printRes(mess);  
+  
+  if (U12GTAG){   
+	  allExons->nU12gtagTerminalExons=Score(allExons->U12gtagTerminalExons,
+									 allExons->nU12gtagTerminalExons,
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12gtag Terminal Exons \t%8ld", allExons->nU12gtagTerminalExons);
+	  printRes(mess);  
+  }
+  if (U12ATAC){   
+	  allExons->nU12atacTerminalExons=Score(allExons->U12atacTerminalExons,
+									 allExons->nU12atacTerminalExons,
+									 l1, l2, Strand, 
+									 external, hsp, 
+									 isochores, GCInfo);
+	  sprintf(mess,"U12atac Terminal Exons \t%8ld", allExons->nU12atacTerminalExons);
+	  printRes(mess);  
+  }
   
   allExons->nSingles=Score(allExons->Singles,
 						   allExons->nSingles,
