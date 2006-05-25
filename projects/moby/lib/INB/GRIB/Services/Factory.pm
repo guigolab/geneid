@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.78 2006-05-24 15:45:13 gmaster Exp $
+# $Id: Factory.pm,v 1.79 2006-05-25 14:30:11 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1912,7 +1912,11 @@ sub RepeatMasker_call {
     # Comment this line if you want to keep the file...
     if (! $debug) {
 	unlink $repeatmasker_file;
-	# Also unlink all files in /tmp (e.g. *.cat ...)
+	unlink $repeatmasker_file . ".log";
+	unlink $repeatmasker_file . ".masked";
+	unlink $repeatmasker_file . ".cat";
+	unlink $repeatmasker_file . ".tbl";
+	unlink $repeatmasker_file . ".out";
     }
     
     if (! defined $masked_sequences) {
