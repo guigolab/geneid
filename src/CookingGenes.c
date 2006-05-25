@@ -24,14 +24,17 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.14 2004-02-03 10:24:04 eblanco Exp $  */
+/*  $Id: CookingGenes.c,v 1.15 2006-05-25 14:07:10 talioto Exp $  */
 
 #include "geneid.h"
 
 extern int X10;
 extern int GFF;
+extern int GFF3;
 extern int XML;
 extern int cDNA;
+extern int PSEQ;
+extern int INTRON;
 
 
 /* Local data structure to record stats about every gene */
@@ -54,21 +57,34 @@ void printProt(char* Name,
   char header[MAXLINE];
   
   /* 1. Print the header(geneid format): protein or genomic sequence */
-  if (mode == PROT)
-    sprintf(header,"\n>%s_%ld|%s_predicted_protein_%ld|%ld_AA\n",
-			Name,
-			ngen,
-			VERSION,
-			ngen,
-			nAA);
-  else
-    sprintf(header,"\n>%s_%ld|%s_predicted_cDNA_%ld|%ld_NN\n",
-			Name,
-			ngen,
-			VERSION,
-			ngen,
-			nAA);
-  
+  if (GFF3){
+  	  if (mode == PROT)
+		sprintf(header,"\n>%s_predicted_protein_%s_%ld\n",
+				VERSION,
+				Name,
+				ngen);
+	  else
+		sprintf(header,"\n>%s_predicted_cDNA_%s_%ld\n",
+				VERSION,
+				Name,
+				ngen);
+
+  } else {
+	  if (mode == PROT)
+		sprintf(header,"\n>%s_%ld|%s_predicted_protein_%ld|%ld_AA\n",
+				Name,
+				ngen,
+				VERSION,
+				ngen,
+				nAA);
+	  else
+		sprintf(header,"\n>%s_%ld|%s_predicted_cDNA_%ld|%ld_NN\n",
+				Name,
+				ngen,
+				VERSION,
+				ngen,
+				nAA);
+  }
   /* Header left out in XML format */
   if (!XML)
     printf("%s",header);
@@ -89,7 +105,7 @@ void printProt(char* Name,
   printf("\n");
   
   /* One while line between 2 genes */
-  if (!XML && (mode == PROT))
+  if (!GFF3 && !XML && (mode == PROT))
 	printf("\n");  	
 }
 
@@ -106,21 +122,21 @@ void selectFeatures(char* exonType,
   if (exonStrand == '+')
 	{
 	  *strand = FORWARD;
-	  if (!strcmp(exonType,sFIRST))
+	  if (!strcmp(exonType,sFIRST)||!strcmp(exonType,sU12gtagFIRST)||!strcmp(exonType,sU12atacFIRST))
 		{
 		  *type1 = STA;
 		  *type2 = DON;
 		  *p1 = gp->StartProfile;
 		  *p2 = gp->DonorProfile;
 		}
-	  if (!strcmp(exonType,sINTERNAL))
+	  if (!strcmp(exonType,sINTERNAL)||!strcmp(exonType,sU12gtag_U2INTERNAL)||!strcmp(exonType,sU2_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12gtagINTERNAL)||!strcmp(exonType,sU12atac_U2INTERNAL)||!strcmp(exonType,sU2_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12atacINTERNAL))
 		{
 		  *type1 = ACC;
 		  *type2 = DON;
 		  *p1 = gp->AcceptorProfile;
 		  *p2 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,sTERMINAL))
+	  if (!strcmp(exonType,sTERMINAL)||!strcmp(exonType,sU12gtagTERMINAL)||!strcmp(exonType,sU12atacTERMINAL))
 		{
 		  *type1 = ACC;
 		  *type2 = STO;
@@ -139,21 +155,21 @@ void selectFeatures(char* exonType,
   else
 	{
 	  *strand = REVERSE;
-	  if (!strcmp(exonType,"First"))
+	  if (!strcmp(exonType,sFIRST)||!strcmp(exonType,sU12gtagFIRST)||!strcmp(exonType,sU12atacFIRST))
 		{
 		  *type2 = STA;
 		  *type1 = DON;
 		  *p2 = gp->StartProfile;
 		  *p1 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,sINTERNAL))
+	  if (!strcmp(exonType,sINTERNAL)||!strcmp(exonType,sU12gtag_U2INTERNAL)||!strcmp(exonType,sU2_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12gtagINTERNAL)||!strcmp(exonType,sU12atac_U2INTERNAL)||!strcmp(exonType,sU2_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12atacINTERNAL))
 		{
 		  *type2 = ACC;
 		  *type1 = DON;
 		  *p2 = gp->AcceptorProfile;
 		  *p1 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,sTERMINAL))
+	  if (!strcmp(exonType,sTERMINAL)||!strcmp(exonType,sU12gtagTERMINAL)||!strcmp(exonType,sU12atacTERMINAL))
 		{
 		  *type2 = ACC;
 		  *type1 = STO;
@@ -244,7 +260,9 @@ long CookingInfo(exonGFF* eorig,
 				  /* stop means end of processing */
 				  stop = (e->Strand == '*');
 				  /* stop1 means change of gene: new gene found */
-				  stop1 = (!strcmp(e->Type,sFIRST) || 
+				  stop1 = (!strcmp(e->Type,sFIRST) ||
+				  		   !strcmp(e->Type,sU12gtagFIRST) ||
+				  		   !strcmp(e->Type,sU12atacFIRST) ||
 						   !strcmp(e->Type,sSINGLE) ||  
 						   !strcmp(e->Type,sPROMOTER) || 
 						   !strcmp(e->Type,sBEGIN) ||
@@ -263,7 +281,9 @@ long CookingInfo(exonGFF* eorig,
 					  e = (e-> PreviousExon);
 					  stop = (e->Strand == '*');
 					  stop1 = (!strcmp(e->Type,sFIRST) ||  
-							   !strcmp(e->Type,sSINGLE) ||
+				  		       !strcmp(e->Type,sU12gtagFIRST) ||
+				  		       !strcmp(e->Type,sU12atacFIRST) ||
+						   	   !strcmp(e->Type,sSINGLE) ||
 							   !strcmp(e->Type,sPROMOTER) || 
 							   !strcmp(e->Type,sBEGIN) || 
 							   e->Strand == '+'); 
@@ -286,6 +306,8 @@ long CookingInfo(exonGFF* eorig,
 					stop = (e->Strand == '*');
 					/* stop2 means change of gene */
 					stop2 = (!strcmp(e->Type,sTERMINAL) ||  
+							 !strcmp(e->Type,sU12gtagTERMINAL) ||
+							 !strcmp(e->Type,sU12atacTERMINAL) ||
 							 !strcmp(e->Type,sSINGLE) ||
 							 !strcmp(e->Type,sPROMOTER) ||
 							 !strcmp(e->Type,sBEGIN) ||
@@ -304,7 +326,9 @@ long CookingInfo(exonGFF* eorig,
 						e = (e-> PreviousExon);
 						stop = (e->Strand == '*');
 						stop2 = (!strcmp(e->Type,sTERMINAL) ||
-								 !strcmp(e->Type,sSINGLE) ||
+								 !strcmp(e->Type,sU12gtagTERMINAL) ||
+							     !strcmp(e->Type,sU12atacTERMINAL) ||
+							     !strcmp(e->Type,sSINGLE) ||
 								 !strcmp(e->Type,sPROMOTER) || 
 								 !strcmp(e->Type,sBEGIN) ||
 								 e->Strand == '-'); 
@@ -362,8 +386,10 @@ void PrintGene(exonGFF* start,
 			PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
 			PrintSite(start->Donor,type2,Name,strand,s,p2);
           }
-		else
+		else {
+		  if (INTRON) { PrintGIntron(eaux,start,Name,igen); }
 		  PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+		}
     }
   else
     {
@@ -385,9 +411,13 @@ void PrintGene(exonGFF* start,
 			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
 			PrintSite(end->Donor,type2,Name,strand,s,p2);
 		  }
-		else
-		  PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+		else {
+
+			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+		    
+		}
     }
+
 } 
 
 /* Main routine: post-processing of predicted genes to display them */
@@ -427,8 +457,9 @@ void CookingGenes(exonGFF* e,
   ngen = CookingInfo(e,info,&artificialScore);
 
   /* Protein space */
-  if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
-    printError("Not enough memory: protein product");
+  /* if (PSEQ) */
+    if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
+      printError("Not enough memory: protein product");
   
   /* cDNA memory if required */
   if (cDNA)
@@ -446,8 +477,10 @@ void CookingGenes(exonGFF* e,
   /* Pretty-printing of every gene */
   for(igen=ngen-1; igen>=0; igen--)
     {
+	  
       /* Translate gene into protein */
-      TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
+      if (PSEQ)
+	    TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
 	  
       /* Get genomic DNA for exons if required */
       if (cDNA)
@@ -462,22 +495,46 @@ void CookingGenes(exonGFF* e,
 			   info[igen].nexons,
 			   info[igen].score);
       else     
-		if (strcmp(info[igen].start->Type,sPROMOTER))
+		if (strcmp(info[igen].start->Type,sPROMOTER)){
 		  printf("# Gene %ld (%s). %ld exons. %ld aa. Score = %.2f \n",
 				 ngen-igen,
 				 (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
 				 info[igen].nexons,
 				 nAA,
 				 info[igen].score);
-		else
+			if (GFF3){
+				PrintGGene(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score);
+				PrintGmRNA(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score);
+				if (info[igen].start->Strand == '+'){
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].end->Type,sFIRST)||!strcmp(info[igen].end->Type,sU12gtagFIRST)||!strcmp(info[igen].end->Type,sU12atacFIRST))){
+						/* printf("# 5 prime partial: %s\n",info[igen].end->Type); */
+						info[igen].end->five_prime_partial = 1;
+					}
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].start->Type,sTERMINAL)||!strcmp(info[igen].start->Type,sU12gtagTERMINAL)||!strcmp(info[igen].start->Type,sU12atacTERMINAL))){
+						/* printf("# 3 prime partial: %s\n",info[igen].start->Type); */
+						info[igen].start->three_prime_partial = 1;
+					}
+				} else {
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].start->Type,sFIRST)||!strcmp(info[igen].start->Type,sU12gtagFIRST)||!strcmp(info[igen].start->Type,sU12atacFIRST))){
+						/* printf("# 5 prime partial: %s\n",info[igen].start->Type); */
+						info[igen].start->five_prime_partial = 1;
+					}
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].end->Type,sTERMINAL)||!strcmp(info[igen].end->Type,sU12gtagTERMINAL)||!strcmp(info[igen].end->Type,sU12atacTERMINAL))){
+						/* printf("# 3 prime partial: %s\n",info[igen].end->Type); */
+						info[igen].end->three_prime_partial = 1;
+					}
+				}
+			} 	 
+		} else {
 		  printf("# Gene %ld (%s). Promoter. %ld bp\n",
 				 ngen-igen,
 				 (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
 				 nAA*3);
-	  
+	  	}
       PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,
 				nAA,tAA,0,info[igen].nexons);
-	  
+	  if (GFF3)
+    	printf ("###\n");
       /* [cDNA] and translated protein */
       if (XML)
 		{
@@ -488,14 +545,15 @@ void CookingGenes(exonGFF* e,
 			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
 			  printf("      </cDNA>\n");
 			}
-	
-		  if (strcmp(info[igen].start->Type,sPROMOTER))
-			{
-			  printf("      <protein length=\"%ld\">\n",nAA);
-			  /* Protein in FASTA format */
-			  printProt(Name,ngen-igen,prot,nAA,PROT);
-			  printf("      </protein>\n");
-			}
+		  if (PSEQ) {
+			  if (strcmp(info[igen].start->Type,sPROMOTER))
+				{
+				  printf("      <protein length=\"%ld\">\n",nAA);
+				  /* Protein in FASTA format */
+				  printProt(Name,ngen-igen,prot,nAA,PROT);
+				  printf("      </protein>\n");
+				}
+		  }
 		  printf("   </gene>\n");
 		}
       else
@@ -506,16 +564,43 @@ void CookingGenes(exonGFF* e,
 			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
 			
 			/* Protein in FASTA format (except promoters) */
-			if (strcmp(info[igen].start->Type,sPROMOTER))
-			  printProt(Name,ngen-igen,prot,nAA,PROT);
+			if (PSEQ) {
+				if (strcmp(info[igen].start->Type,sPROMOTER))
+				  printProt(Name,ngen-igen,prot,nAA,PROT);
+			}
 			else
 			  if (!cDNA)
 				printf("\n");
 		  }
     }
-  
+  	if (GFF3){
+  		printf("\n##FASTA\n");
+	    /* Pretty-printing of every gene */
+	    if (PSEQ) {
+		  for(igen=ngen-1; igen>=0; igen--)
+			{
+			  /* Translate gene into protein */
+			  TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
+			  /* Protein in FASTA format (except promoters) */
+				if (strcmp(info[igen].start->Type,sPROMOTER))
+				  printProt(Name,ngen-igen,prot,nAA,PROT);
+
+			}
+		}
+		if (cDNA){
+		  /* Pretty-printing of every gene */
+		  for(igen=ngen-1; igen>=0; igen--)
+			{
+
+			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
+
+			}
+		}
+	}
+	
   /* Freedom operations */
-  free(prot);
+  if (PSEQ)
+  	free(prot);
   free(info);
   for(i=0; i<MAXEXONGENE; i++)
     free(tAA[i]);
