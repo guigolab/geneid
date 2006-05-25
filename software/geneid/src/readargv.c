@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.15 2006-05-25 15:04:06 talioto Exp $  */
+/*  $Id: readargv.c,v 1.16 2006-05-25 23:36:41 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -46,7 +46,7 @@ extern long LOW,HI;
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszjk]\n\t\t[-DA] [-Z]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2a\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxsz]\n\t\t[-DA] [-Z]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-j] <lower bound coord>\n\t\t[-k] <upper bound coord>\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2.2\n";
 
 void printHelp()
 {
