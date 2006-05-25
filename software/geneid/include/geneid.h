@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.20 2006-05-25 15:39:20 talioto Exp $ */
+/* $Id: geneid.h,v 1.21 2006-05-25 23:39:53 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -180,9 +180,9 @@ A. DEFINITIONS
 #define PARAMETERFILE  "param.default"   
 
 /* The name of the game                     */
-#define VERSION   "geneid_v1.2_u12"  
-#define SITES     "geneid_v1.2_u12"  
-#define EXONS     "geneid_v1.2_u12"       
+#define VERSION   "geneid_v1.2"  
+#define SITES     "geneid_v1.2"  
+#define EXONS     "geneid_v1.2"       
 #define EVIDENCE  "evidence"           
 
 /* Constants:                               */
