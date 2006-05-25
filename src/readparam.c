@@ -24,14 +24,19 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.7 2004-01-27 16:18:12 eblanco Exp $  */
+/*  $Id: readparam.c,v 1.8 2006-05-25 15:16:37 talioto Exp $  */
 
 #include "geneid.h"
 
 extern float NO_SCORE;
 extern int PPT;
 extern int BP;
+extern int U12GTAG;
+extern int U12ATAC;
+extern int U2GCAG;
 extern int SGE;
+extern float U12_SPLICE_SCORE_THRESH;
+extern float U12_EXON_SCORE_THRESH;
 
 /* Numeric values: read one line skipping comments and empty lines */
 void readLine(FILE *File, char* line)
@@ -303,51 +308,94 @@ void ReadProfile(FILE* RootFile, profile* p, char* signal, int H)
 }
 
 /* Read information useful to predict Acceptor splice sites */
-void ReadProfileAcceptors(FILE* RootFile, gparam* gp)
+void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 {
   char line[MAXLINE];
   char mess[MAXSTRING];
   char header[MAXSTRING];
   profile* p;
+  int u12bp=0;
+  int u12gtagAcc=0;
+  int u12atacAcc=0;
+  int u12gtagDon=0;
+  int u12atacDon=0;
 
-  /* A. Optional profiles: branch point or Poly Pyrimidine Tract */
+  /* A. Optional profiles: U12GTAG, U12ATAC Donor, acceptor and branch points 
+  and U2 branch points and Poly Pyrimidine Tract */
+  
   readHeader(RootFile,line);
   if ((sscanf(line,"%s",header))!=1)
 	{
-	  sprintf(mess,"Wrong format: header in optional profile for acceptor sites");
+	  sprintf(mess,"Wrong format: header in optional profile for splice sites");
 	  printError(mess);
 	}
 
   while(strcmp(header,sprofileACC))
 	{ 
-	  if (!strcmp(header,sprofilePPT))
-		{
-		  /* Switch on the acceptor prediction using PPTs */
-		  PPT++;
+	
+	/* Read optional profiles: sprofilePPT,sprofileBP,sprofileU12BP,sprofileU12gtagACC,sprofileU12atacACC */ 
 
-		  /* Reading the Poly Pyrimidine Tract profile */
-		  p = gp->PolyPTractProfile;
-		  ReadProfile(RootFile, p, sPPT, 0);
-		}
-	  else
+	  if (!strcmp(header,sprofileU12BP))
 		{
-		  if (!strcmp(header,sprofileBP))
-			{
-			  /* Switch on the acceptor prediction using BPs */
-			  BP++;
-			  
-			  /* Reading the Branch Point profile */
-			  p = gp->BranchPointProfile;
-			  ReadProfile(RootFile, p, sBP, 0);
-			}
-		  else
-			{
-			  sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for acceptors [only %s, %s or %s]",
-					  header, sprofileACC, sprofilePPT, sprofileBP);
-			  printError(mess);
-			}
+		  	u12bp++;
+
+		  	/* Reading the U12 Branch Point profile */
+		  	p = gp->U12BranchPointProfile;
+		  	ReadProfile(RootFile, p, sBP, 0);
 		}
-	  
+	  	else
+		  {
+		  	if (!strcmp(header,sprofileU12gtagACC))
+			  {
+			  	u12gtagAcc++;
+
+			  	/* Reading the U12gtag acceptor profile */
+			  	p = gp->U12gtagAcceptorProfile;
+			  	ReadProfile(RootFile, p, sACC, 0);
+			  }
+			  else
+				{
+			  	  if (!strcmp(header,sprofileU12atacACC))
+					{	
+				  	  u12atacAcc++;
+
+				  	  /* Reading the U12atac acceptor profile */
+				  	  p = gp->U12atacAcceptorProfile;
+				  	  ReadProfile(RootFile, p, sACC, 0);
+					}
+					else
+					  {
+						if (!strcmp(header,sprofilePPT))
+						  {
+					  		/* Switch on the acceptor prediction using PPTs */
+					  		PPT++;
+
+					  		/* Reading the Poly Pyrimidine Tract profile */
+					  		p = gp->PolyPTractProfile;
+					  		ReadProfile(RootFile, p, sPPT, 0);
+						  }
+				  		  else
+							{
+					   		  if (!strcmp(header,sprofileBP))
+								{
+						  		  /* Switch on the acceptor prediction using BPs */
+						  		  BP++;
+
+						  		  /* Reading the Branch Point profile */
+						  		  p = gp->BranchPointProfile;
+						  		  ReadProfile(RootFile, p, sBP, 0);
+								}
+					  			else
+								  {
+						  			sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for acceptors [only %s, %s, %s, %s, %s or %s]",
+								  	header, sprofileACC, sprofilePPT, sprofileBP, sprofileU12BP, sprofileU12gtagACC, sprofileU12atacACC);
+						  			printError(mess);
+								  }
+							}
+					  }
+				}
+		  }
+
 	  /* Next profile for acceptor site */
 	  readHeader(RootFile,line);
 	  if ((sscanf(line,"%s",header))!=1)
@@ -360,6 +408,75 @@ void ReadProfileAcceptors(FILE* RootFile, gparam* gp)
   /* Reading the Acceptor site profile */
   p = gp->AcceptorProfile;
   ReadProfile(RootFile, p, sACC, 0);
+  
+  readHeader(RootFile,line);
+  if ((sscanf(line,"%s",header))!=1)
+	{
+	  sprintf(mess,"Wrong format: header in optional profile for splice sites");
+	  printError(mess);
+	}
+
+  /* Read optional profiles: sprofileU12gtagDON,sprofileU12atacDON */
+  
+    while(strcmp(header,sprofileDON))
+	{ 
+
+	  if (!strcmp(header,sprofileU12gtagDON))
+		{
+
+		  u12gtagDon++;
+
+		  /* Reading the U12gtag donor profile */
+		  p = gp->U12gtagDonorProfile;
+		  ReadProfile(RootFile, p, sDON, 0);
+		}
+	  else
+		{
+		  if (!strcmp(header,sprofileU12atacDON))
+			{
+
+			  u12atacDon++;
+
+			  /* Reading the U12atac donor profile */
+			  p = gp->U12atacDonorProfile;
+			  ReadProfile(RootFile, p, sDON, 0);
+			}
+		  else
+		    {
+		  	  if (!strcmp(header,sprofileU2gcagDON))
+				{
+
+				  U2GCAG++;
+
+				  /* Reading the U12gtag donor profile */
+				  p = gp->U2gcagDonorProfile;
+				  ReadProfile(RootFile, p, sDON, 0);
+				}
+			  else
+				{		  
+				 	sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for donors [only %s, %s, %s or %s]",
+							  header, sprofileDON, sprofileU12gtagDON, sprofileU12atacDON,sprofileU2gcagDON);
+					printError(mess);		
+	  			}
+	  		}
+	  }
+	  /* Next profile for donor site */
+	  readHeader(RootFile,line);
+	  if ((sscanf(line,"%s",header))!=1)
+		{
+		  sprintf(mess,"Wrong format: header in optional profile for donor sites");
+		  printError(mess);
+		}
+	}
+
+  /* Reading the Donor site profile */
+  p = gp->DonorProfile;
+  ReadProfile(RootFile, p, sDON, 0);
+  
+  /* Switch on the site prediction of U12gtag and U12atac introns */
+  if (u12bp && u12gtagAcc && u12gtagDon){ U12GTAG++;}
+  if (u12bp && u12atacAcc && u12atacDon){ U12ATAC++;}
+  
 }
 
 /* Read information about signal and exon prediction in one isochore */
@@ -371,7 +488,8 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
   int i,j,f;
   char line[MAXLINE];
   char mess[MAXSTRING];
-
+  char header[MAXSTRING];
+  
   /* 1. read boundaries of isochores */
   readHeader(RootFile,line);
   readLine(RootFile,line);
@@ -473,8 +591,80 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  gp->Single->HSPFactor);
   printMess(mess); 
 
-  /* 7. read weigths to correct the score of exons after general cutoff */
+  /* 7. read weights to correct the score of exons after general cutoff */
   readHeader(RootFile,line);
+   if ((sscanf(line,"%s",header))!=1)
+		{
+		  sprintf(mess,"Wrong format: header for exon weights and optional U12 score threshold");
+		  printError(mess);
+		}
+  while(strcmp(header,sExon_weights))
+  { 
+	 /* 1. Read U12_SPLICE_SCORE_THRESH for sum of U12 donor and acceptor splice scores */
+	if(!strcmp(header,sU12_SPLICE_SCORE_THRESH)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n",
+					  &(U12_SPLICE_SCORE_THRESH)))!=1)
+			printError("Wrong format: U12_SPLICE_SCORE_THRESH value scores (number/type)");  
+
+		  sprintf(mess,"U12_SPLICE_SCORE_THRESH: \t%9.2f",
+				  U12_SPLICE_SCORE_THRESH);
+		  printMess(mess);
+	}
+	 /* 1. Read U12_EXON_SCORE_THRESH for sum of U12 donor and acceptor exon scores */
+	if(!strcmp(header,sU12_EXON_SCORE_THRESH)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n",
+					  &(U12_EXON_SCORE_THRESH)))!=1)
+			printError("Wrong format: U12_EXON_SCORE_THRESH value scores (number/type)");  
+
+		  sprintf(mess,"U12_EXON_SCORE_THRESH: \t%9.2f",
+				  U12_EXON_SCORE_THRESH);
+		  printMess(mess);
+	}
+
+	/* Read optional exon weights for U12 exons */ 
+	if(!strcmp(header,sU12gtag_Exon_weights)){
+      	readLine(RootFile,line);
+	  	if ((sscanf(line,"%f %f %f\n",
+				  &(gp->Initial->U12gtagExonWeight),
+				  &(gp->Internal->U12gtagExonWeight),
+				  &(gp->Terminal->U12gtagExonWeight)))!=3)
+    	printError("Wrong format: U12gtag exon weight values (number/type)"); 
+		gp->Single->U12gtagExonWeight = 0;
+
+	  	sprintf(mess,"U12gtag Exon weights: \t%9.3f\t%9.3f\t%9.3f",
+			  gp->Initial->U12gtagExonWeight,
+			  gp->Internal->U12gtagExonWeight,
+			  gp->Terminal->U12gtagExonWeight);
+	  	printMess(mess);
+
+  	} else {
+	
+		if(!strcmp(header,sU12atac_Exon_weights)){
+		  	readLine(RootFile,line);
+		  	if ((sscanf(line,"%f %f %f\n",
+					  &(gp->Initial->U12atacExonWeight),
+					  &(gp->Internal->U12atacExonWeight),
+					  &(gp->Terminal->U12atacExonWeight)))!=3)
+    		printError("Wrong format: U12atac exon weight values (number/type)"); 
+			gp->Single->U12atacExonWeight = 0;
+
+		  	sprintf(mess,"U12atac Exon weights: \t%9.3f\t%9.3f\t%9.3f",
+				  gp->Initial->U12atacExonWeight,
+				  gp->Internal->U12atacExonWeight,
+				  gp->Terminal->U12atacExonWeight);
+		  	printMess(mess);
+
+		}
+	}
+	readHeader(RootFile,line);
+	if ((sscanf(line,"%s",header))!=1)
+		{
+		  sprintf(mess,"Wrong format: header for exon weights");
+		  printError(mess);
+		}
+  }
   readLine(RootFile,line);
   if ((sscanf(line,"%f %f %f %f\n",
 			  &(gp->Initial->ExonWeight),
@@ -490,15 +680,16 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  gp->Single->ExonWeight);
   printMess(mess);
 
+ 
   /* 8. Read splice site profiles */
   /* (a).start codon profile */
   ReadProfile(RootFile, gp->StartProfile , sSTA,1);
 
-  /* (b).acceptor site profile */
-  ReadProfileAcceptors(RootFile, gp);
+  /* (b).acceptor and donor site profiles */
+  ReadProfileSpliceSites(RootFile, gp);
 
   /* (c).donor site profile */
-  ReadProfile(RootFile, gp->DonorProfile , sDON,1);
+  /* ReadProfile(RootFile, gp->DonorProfile , sDON,1); */
 
   /* (d).stop codon profile */
   ReadProfile(RootFile, gp->StopProfile , sSTO,1);
