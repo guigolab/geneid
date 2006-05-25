@@ -24,13 +24,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.5 2003-11-05 14:25:27 eblanco Exp $  */
+/*  $Id: genamic.c,v 1.6 2006-05-25 14:46:45 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Complete gene prediction (sites and exons) or only assembling */
 extern int GENEID;
-
+extern float U12_SPLICE_SCORE_THRESH;
+extern float U12_EXON_SCORE_THRESH;
 void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 {
   long i,j,j2;
@@ -41,7 +42,9 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   long MaxDist;
   long MinDist;
   char mess[MAXSTRING];
-  
+  int current_exon_is_u12 = 0;
+  int thresholdmet = 1;
+   
   /* 0. Starting process ... */
   printMess("-- Running gene assembling (genamic) --");
 
@@ -90,6 +93,13 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       (E+i)->PreviousExon = pg->Ghost;
       (E+i)->GeneScore = (E+i)->Score;
 
+	  if (!(strcmp((E+i)->Acceptor->subtype,sU12atac))||!(strcmp((E+i)->Acceptor->subtype,sU12gtag))){
+		  current_exon_is_u12 = 1;
+		  
+	  } else { 
+ 	  	  current_exon_is_u12 = 0;
+	  }
+	
 	  if (type != NOTFOUND)
 		{
 		  /* For every equivalent class building the best gene ending with it */
@@ -99,7 +109,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  j = pg->je[etype];
 			  MaxDist = gp->Md[etype];
 			  MinDist = gp->md[etype];
-			  
+			  thresholdmet = 1;
 			  /* Checking maximum distance allowed requirement */
 			  if ((MaxDist != INFI) &&
 				  (pg->Ga[etype][frame]->Strand !='*') &&
@@ -120,9 +130,28 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 						  - MaxDist))
 					{
 					  remainder = pg->d[etype][j2]->Remainder;
-					  if (pg->d[etype][j2]->GeneScore > 
+/*  					  if (current_exon_is_u12){
+			   			if (!(strcmp(pg->d[etype][j2]->Donor->subtype,sU12atac))||!(strcmp(pg->d[etype][j2]->Donor->subtype,sU12gtag))){
+		  					if(((pg->d[etype][j2]->Donor->Score + (E+i)->Acceptor->Score) > U12_SPLICE_SCORE_THRESH)
+									&&
+							   ((pg->d[etype][j2]->Score + (E+i)->Score) > U12_EXON_SCORE_THRESH)
+							){
+			  					thresholdmet = 1;
+							} else {
+								thresholdmet = 0;
+							}
+
+	  					} 
+
+					  } */
+
+					  if ((pg->d[etype][j2]->GeneScore > 
 						  pg->Ga[etype][remainder] -> GeneScore)
+							 &&
+					      (thresholdmet)  
+					      ){
 						pg->Ga[etype][remainder] = pg->d[etype][j2];
+					  }
 					  j2--;
 					}
 				}
@@ -147,8 +176,22 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 					}
 				  else
 					{
+/*  					  if (current_exon_is_u12){
+			   			if (!(strcmp(pg->d[etype][j]->Donor->subtype,sU12atac))||!(strcmp(pg->d[etype][j]->Donor->subtype,sU12gtag))){
+		  					if(((pg->d[etype][j]->Donor->Score + (E+i)->Acceptor->Score) > U12_SPLICE_SCORE_THRESH)
+								&&
+							   ((pg->d[etype][j]->Score + (E+i)->Score) > U12_EXON_SCORE_THRESH)
+							){
+			  					thresholdmet = 1;
+							} else {
+								thresholdmet = 0;
+							}
+
+	  					} 
+
+					  } */
 					  /* Updating best partial assembled gene */
-					  if (pg->d[etype][j]->GeneScore > pg->Ga[etype][remainder]->GeneScore)
+					  if ((pg->d[etype][j]->GeneScore > pg->Ga[etype][remainder]->GeneScore)&& (thresholdmet)) /* && (thresholdmet)*/
 						{
 						  pg->Ga[etype][remainder] = pg->d[etype][j];
 						}													
@@ -159,10 +202,32 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  
 			  /* Assembling the exon with the best compatible gene before it */
 			  /* Verify group rules if there are evidence exons (annotations) */
+ 			  if (current_exon_is_u12){
+			   	if (!(strcmp(pg->Ga[etype][frame]->Donor->subtype,sU12atac))||!(strcmp(pg->Ga[etype][frame]->Donor->subtype,sU12gtag))){
+		  			if(((pg->Ga[etype][frame]->Donor->Score + (E+i)->Acceptor->Score) > U12_SPLICE_SCORE_THRESH)
+					  	&&
+					   ((pg->Ga[etype][frame]->Score + (E+i)->Score) > U12_EXON_SCORE_THRESH)
+					){
+			  			thresholdmet = 1;
+/* 						sprintf(mess,"Thresh met: E score: %9.2f",(pg->Ga[etype][frame]->Score + (E+i)->Score));
+						printMess(mess); */
+					} else {
+						thresholdmet = 0;
+/* 						sprintf(mess,"Thresh not met: E score: %9.2f",(pg->Ga[etype][frame]->Score + (E+i)->Score));
+						printMess(mess); */
+					}
+		  
+	  			} 
+			  	
+			  }
+
 			  if ((!(strcmp(pg->Ga[etype][frame]->Group,(E+i)->Group))
 				   || gp->block[etype] == NONBLOCK)
 				  &&
-				  ((pg->Ga[etype][frame]->GeneScore + (E+i)->Score) > (E+i)->GeneScore))
+				  ((pg->Ga[etype][frame]->GeneScore + (E+i)->Score) > (E+i)->GeneScore)
+				   &&
+				  (thresholdmet) 
+				  )
 				{
 				  if (((E+i)->Strand == '+') && 
 					  ((pg->Ga[etype][frame]->rValue == 1 && (E+i)->lValue == 1)
