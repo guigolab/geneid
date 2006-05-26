@@ -24,14 +24,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.8 2006-05-25 14:27:01 talioto Exp $  */
+/*  $Id: RequestMemory.c,v 1.9 2006-05-26 13:33:00 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Predicted amount of sites and exons found in one split */
 extern long NUMSITES, NUMEXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
 extern int scanORF;
-extern int SRP,EVD,GENEID;
+extern int SRP,EVD,GENEID, U12GTAG, U12ATAC;
 
 /* Allocating accounting data structure in memory */
 account* RequestMemoryAccounting()
@@ -79,25 +79,27 @@ packSites* RequestMemorySites()
   if ((allSites->DonorSites = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: donor sites");
-	      
-  /* U12 Acceptor sites */
-  if ((allSites->U12gtagAcceptorSites = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12gtag acceptor sites");
-	      	      
-  if ((allSites->U12atacAcceptorSites = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12atac acceptor sites");
+  if (U12GTAG){	      
+	  /* U12 Acceptor sites */
+	  if ((allSites->U12gtagAcceptorSites = 
+    	   (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    	printError("Not enough memory: U12gtag acceptor sites");
+		
+	  /* U12 Donor sites */
+	  if ((allSites->U12gtagDonorSites = 
+    	   (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    	printError("Not enough memory: U12gtag donor sites");
 
-  /* U12 Donor sites */
-  if ((allSites->U12gtagDonorSites = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12gtag donor sites");
+  }  
+  if (U12ATAC){	      	      
+	  if ((allSites->U12atacAcceptorSites = 
+    	   (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    	printError("Not enough memory: U12atac acceptor sites");
 
-  if ((allSites->U12atacDonorSites = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12atac donor sites");
-
+	  if ((allSites->U12atacDonorSites = 
+    	   (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    	printError("Not enough memory: U12atac donor sites");
+  }
   /* Stop codons */
   if ((allSites->StopCodons = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
@@ -134,79 +136,87 @@ packExons* RequestMemoryExons()
   if ((allExons->TerminalExons = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: terminal exons");
-   
-  /* U12gtag InitialExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RFIRST);
-  if ((allExons->U12gtagInitialExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag first exons");
-	
-  /* U12atac InitialExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RFIRST);
-  if ((allExons->U12atacInitialExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac first exons");
-          
-  /* U12gtag-U12gtag InternalExons HowMany/100*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U12gtag_U12gtag_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag U12gtag internal exons");
-       
-  /* U12gtag-U2 InternalExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U12gtag_U2_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag U2 internal exons");
-	      
-  /* U2-U12gtag InternalExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U2_U12gtag_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U2 U12gtag internal exons");
- 
-  /* U12atac-U12atac InternalExons HowMany/100*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U12atac_U12atac_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac U12atac internal exons");
-       
-  /* U12atac-U2 InternalExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U12atac_U2_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac U2 internal exons");
-	      
-  /* U2-U12atac InternalExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U2_U12atac_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U2 U12atac internal exons");
 
-  /* U12gtag-U12atac InternalExons HowMany/100*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U12gtag_U12atac_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag U12atac internal exons");
-   
-  /* U12atac-U12gtag InternalExons HowMany/100*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U12atac_U12gtag_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac U12gtag internal exons");
-   	     
-  /* U12atac TerminalExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RTERMI);
-  if ((allExons->U12atacTerminalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac terminal exons");
-	     
-  /* U12gtag TerminalExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RTERMI);
-  if ((allExons->U12gtagTerminalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag terminal exons");
-   
+  if (U12GTAG){   
+	  /* U12gtag InitialExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RFIRST);
+	  if ((allExons->U12gtagInitialExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12gtag first exons");
+
+	  /* U12gtag-U12gtag InternalExons HowMany/100*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U12gtag_U12gtag_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12gtag U12gtag internal exons");
+
+	  /* U12gtag-U2 InternalExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U12gtag_U2_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12gtag U2 internal exons");
+
+	  /* U2-U12gtag InternalExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U2_U12gtag_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U2 U12gtag internal exons");
+
+	  /* U12gtag TerminalExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RTERMI);
+	  if ((allExons->U12gtagTerminalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12gtag terminal exons");
+  }
+  
+  if (U12ATAC){
+
+	  /* U12atac InitialExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RFIRST);
+	  if ((allExons->U12atacInitialExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12atac first exons");
+
+	  /* U12atac-U12atac InternalExons HowMany/100*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U12atac_U12atac_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12atac U12atac internal exons");
+
+	  /* U12atac-U2 InternalExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U12atac_U2_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12atac U2 internal exons");
+
+	  /* U2-U12atac InternalExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U2_U12atac_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U2 U12atac internal exons");
+
+	  /* U12atac TerminalExons HowMany/10*/
+	  HowMany = (long)(NUMEXONS/RTERMI);
+	  if ((allExons->U12atacTerminalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12atac terminal exons");  
+  }  
+  
+  if (U12ATAC && U12GTAG){
+  
+	  /* U12gtag-U12atac InternalExons HowMany/100*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U12gtag_U12atac_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12gtag U12atac internal exons");
+  
+	  /* U12atac-U12gtag InternalExons HowMany/100*/
+	  HowMany = (long)(NUMEXONS/RINTER); 
+	  if ((allExons->U12atac_U12gtag_InternalExons = 
+    	   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    	printError("Not enough memory: U12atac U12gtag internal exons");
+		  
+  }
   /* SingleExons */
   HowMany = (long)(NUMEXONS/RSINGL);
   if ((allExons->Singles = 
