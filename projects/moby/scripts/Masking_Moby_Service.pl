@@ -89,7 +89,8 @@ my $datasource = "EMBL";
 
 # Parameters
 
-
+my $engine = "crossmatch";
+# $engine = "wublast";
 
 ##################################################################
 #
@@ -266,7 +267,7 @@ PRT
 # Parameters (secondary articles)
 #
 
-
+my $engine_xml = "<Value>$engine</Value>";
 
 ##################################################################
 #
@@ -281,12 +282,12 @@ if ($_debug) {
 my $result;
 if ($serviceName =~ /collection/i) {
     $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", $input_xmls]
+						 ["$articleName", $input_xmls, 'engine', $engine_xml]
 						 ]);
 }
 else {
     $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", $input_xml]
+						 ["$articleName", $input_xml, 'engine', $engine_xml]
 						 ]);
 }
 

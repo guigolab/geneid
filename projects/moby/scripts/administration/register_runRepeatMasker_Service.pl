@@ -166,6 +166,11 @@ my ($REG) = $Central->registerService(
 					      enum     => ['None', 'human', 'mouse', 'rat', 'cow', 'pig', 'cat', 'dog', 'rodentia', 'carnivore', 'mammal', 'chicken', 'fugu', 'danio', 'drosophila', 'anopheles', 'elegans', 'diatoaea', 'artiodactyl', 'arabidopsis', 'rice', 'wheat', 'maize'],
 					      default  => 'None',
 					  },
+					  'engine' => {
+					      datatype => 'String',
+					      enum     => ['crossmatch'],
+					      default  => 'crossmatch',
+					  }
 				      }
 				      );
 
