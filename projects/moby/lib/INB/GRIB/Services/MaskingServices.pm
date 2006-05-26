@@ -1,4 +1,4 @@
-# $Id: MaskingServices.pm,v 1.7 2006-05-23 15:26:22 gmaster Exp $
+# $Id: MaskingServices.pm,v 1.8 2006-05-26 11:07:46 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -181,7 +181,8 @@ sub _do_query_RepeatMasker {
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $species;
-
+    my $engine;
+    
     # Variables that will be passed to MatScan_call
     my %sequences;
     my %parameters;
@@ -221,12 +222,44 @@ sub _do_query_RepeatMasker {
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
+    ($engine) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "engine");
+    if (not defined $engine) {
+	# Default is using cross-match
+	$engine = "crossmatch";
+    }
+    elsif (! ($engine =~ /crossmatch|wublast/i)) {
+	my $note = "engine parameter, '$engine', not accepted, should be ['crossmatch', 'wublast']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "engine",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling what nothing got returned
+	
+	if ($input_type =~ /simple/i) {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	}
+	else {
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	}
+	
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
     # Add the parsed parameters in a hash table
     
     $parameters{species} = $species;
+    $parameters{engine}  = $engine;
     
     if ($_debug) {
 	print STDERR "species, $species\n";
+	print STDERR "engine, $engine\n";
     }
     
     # Tratamos a cada uno de los articulos
@@ -409,7 +442,7 @@ sub _do_query_RepeatMasker {
 	    # Convert FASTA into a DNASequence object
 	    my $moby_seqobjs = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($masked_fasta_seqs, $output_format, $namespace);
 	    if (@$moby_seqobjs != 1) {
-		my $note = "Can't parse any sequences, Please check the syntax of your fasta sequence.\n";
+		my $note = "Can't parse any output sequences, Please check the syntax of your fasta sequence.\n";
 		print STDERR "$note\n";
 		my $code = "201";
 		my $moby_exception = INB::Exceptions::MobyException->new (

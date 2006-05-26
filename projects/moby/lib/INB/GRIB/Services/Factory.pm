@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.80 2006-05-25 14:34:58 gmaster Exp $
+# $Id: Factory.pm,v 1.81 2006-05-26 11:07:46 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1824,14 +1824,23 @@ sub RepeatMasker_call {
     # parameters
 
     my $species = $parameters->{species};
+    my $engine  = $parameters->{engine};
     
     # Llama a RepeatMasker en local
-    my $_repeatmasker_dir  = "/usr/local/molbio/Install/repeatmasker-3.1.5/";
+    my $_repeatmasker_dir  = "/usr/local/molbio/Install/repeatmasker-3.1.5";
     my $_repeatmasker_bin  = "RepeatMasker";
     my $_repeatmasker_args = "";
     
     if ((defined $species) && (lc ($species) ne "none")) {
-	$_repeatmasker_args .= "-species $species";
+	$_repeatmasker_args .= "-species $species ";
+    }
+
+    if (defined $engine) {
+	$_repeatmasker_args .= "-e $engine";
+    }
+    else {
+	# Default is cross-match
+	$_repeatmasker_args .= "-e crossmatch";
     }
     
     # Check that the binary is in place
@@ -1885,7 +1894,7 @@ sub RepeatMasker_call {
 	$sout->write_seq ($seqobj);
     }
     close $seq_fh;
-
+    
     # Test empty file
     if (-z $repeatmasker_file) {
 	my $note = "Internal System Error. Empty repeatmasker input sequence file...\n";
@@ -1902,10 +1911,11 @@ sub RepeatMasker_call {
     
     if ($debug) {
 	print STDERR "Running repeatmasker, with this command:\n";
-	print STDERR "$_repeatmasker_dir\/$_repeatmasker_bin $repeatmasker_file\n";
+	print STDERR "$_repeatmasker_dir\/$_repeatmasker_bin $_repeatmasker_args $repeatmasker_file\n";
     }
-
+    
     my $result = qx/$_repeatmasker_dir\/$_repeatmasker_bin $_repeatmasker_args $repeatmasker_file >& \/dev\/null/;
+    
     my $masked_sequences_file = $repeatmasker_file . ".masked";
     my $masked_sequences      = qx/cat $masked_sequences_file/;
     
