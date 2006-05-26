@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.21 2006-05-25 23:39:53 talioto Exp $ */
+/* $Id: geneid.h,v 1.22 2006-05-26 13:28:04 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -223,7 +223,7 @@ A. DEFINITIONS
 #define sBP  "BranchPoint"
 
 /* Intron Subtypes                           */
-
+#define MAXSUBTYPE 10
 #define sU2 "U2"  
 #define sU2gcag "U2gcag"            
 #define sU12gtag "U12gtag"
@@ -351,7 +351,7 @@ typedef struct s_site
   float ScorePPT;
   int PositionBP;
   int PositionPPT;
-  char subtype[MAXSTRING];
+  char subtype[MAXSUBTYPE];
 } site;
 
 typedef struct s_packSites             
