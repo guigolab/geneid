@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.15 2006-05-29 13:46:00 talioto Exp $ */
+/* $Id: geneid.c,v 1.16 2006-05-29 15:53:52 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -185,19 +185,13 @@ int main (int argc, char *argv[])
             &MAXBACKUPEXONS,
             LengthSequence);
   if (U12){
-    printMess("Prediction of U12 introns on");
     NUMU12SITES = MIN(NUMU12SITES,NUMSITES);
     NUMU12EXONS = MIN(NUMU12EXONS,NUMEXONS);
     NUMU12U12EXONS = MIN(NUMU12EXONS,NUMU12U12EXONS);
-    if ((!U12GTAG)&&(!U12ATAC)){
-      NUMU12SITES = 0;    
-      NUMU12EXONS = 0;
-      NUMU12U12EXONS = 0; 
-    }
   } else {
     NUMU12SITES = 0;
     NUMU12EXONS = 0;
-    NUMU12U12EXONS = 0;         
+    NUMU12U12EXONS = 0;      
   }
   /* Estimation of memory required to execute geneid */
   if (BEG)
@@ -229,7 +223,13 @@ int main (int argc, char *argv[])
   /** 2. Reading statistical model parameters file **/
   printMess("Reading parameters..."); 
   nIsochores = readparam(ParamFile, isochores);
-  if (!U12){
+  if (U12){
+    if ((!U12GTAG)&&(!U12ATAC)){
+      NUMU12SITES = 0;    
+      NUMU12EXONS = 0;
+      NUMU12U12EXONS = 0; 
+    }
+  }else{
     U12GTAG = 0;
     U12ATAC = 0;
   }
@@ -320,13 +320,15 @@ int main (int argc, char *argv[])
 		  }else{ 
 		    upperlimit = LengthSequence-1;
 		  }
-		  if ((LOW > 0)&&(LOW < upperlimit)){lowerlimit = LOW - 1;}
-		  l1 = MAX(0,lowerlimit);
+		  if ((LOW > 0)&&(LOW < upperlimit)){
+		    lowerlimit = LOW - 1;
+		  }else{lowerlimit = 0;}
+		  l1 = lowerlimit;
 		  l2 = MIN(l1 + LENGTHSi-1,LengthSequence-1);
 		  l2 = MIN(l2,upperlimit);
-		  lastSplit = (l2 == upperlimit);
+		  lastSplit = (l2 == upperlimit);		 		
 		  sprintf(mess,"Running on range %ld to %ld\n", 
-				  LOW,HI); 
+				 lowerlimit ,upperlimit); 
 		  printMess(mess);
 		  while((l1 < (upperlimit + 1 - OVERLAP)) || (l1 == 0)|| (l1 == lowerlimit))
 			{
