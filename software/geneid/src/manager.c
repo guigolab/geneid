@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.5 2006-05-25 14:59:30 talioto Exp $ */
+/* $Id: manager.c,v 1.6 2006-05-29 13:47:51 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -32,6 +32,7 @@ extern int scanORF;
 extern int U12GTAG;
 extern int U12ATAC;
 extern int U2GCAG;
+extern long NUMSITES,NUMU12EXONS,NUMU12U12EXONS,NUMU12SITES,NUMEXONS;
 
 /* Management of splice sites prediction and exon construction/scoring */
 void  manager(char *Sequence, 
@@ -148,27 +149,27 @@ void  manager(char *Sequence,
   long numU2donsites = 0;
 
   allSites->nDonorSites =
-    BuildDonors(Sequence,sU2, gp->DonorProfile,allSites->DonorSites,l1b,l2b,numU2donsites);
+    BuildDonors(Sequence,sU2, gp->DonorProfile,allSites->DonorSites,l1b,l2b,numU2donsites,NUMSITES);
   sprintf (mess,"Donor Sites \t\t%8ld", allSites->nDonorSites);
   numU2donsites = allSites->nDonorSites;
   printRes(mess);
 
   if (U2GCAG){
 	  allSites->nDonorSites =
-    	BuildDonors(Sequence,sU2gcag, gp->U2gcagDonorProfile,allSites->DonorSites,l1b,l2b,numU2donsites);
+    	BuildDonors(Sequence,sU2gcag, gp->U2gcagDonorProfile,allSites->DonorSites,l1b,l2b,numU2donsites,NUMSITES);
 	  sprintf (mess,"U2gcag Donor Sites \t%8ld", allSites->nDonorSites - numU2donsites);
 	  numU2donsites = allSites->nDonorSites;
 	  printRes(mess);
   }  
   if (U12GTAG){
 	  allSites->nU12gtagDonorSites =
-    	BuildDonors(Sequence,sU12gtag, gp->U12gtagDonorProfile,allSites->U12gtagDonorSites,l1b,l2b,0);
+    	BuildDonors(Sequence,sU12gtag, gp->U12gtagDonorProfile,allSites->U12gtagDonorSites,l1b,l2b,0,NUMU12SITES);
 	  sprintf (mess,"U12gtag Donor Sites \t%8ld", allSites->nU12gtagDonorSites);
 	  printRes(mess);
   }
   if (U12ATAC){
 	  allSites->nU12atacDonorSites =
-    	BuildDonors(Sequence,sU12atac, gp->U12atacDonorProfile,allSites->U12atacDonorSites,l1b,l2b,0);
+    	BuildDonors(Sequence,sU12atac, gp->U12atacDonorProfile,allSites->U12atacDonorSites,l1b,l2b,0,NUMU12SITES);
 	  sprintf (mess,"U12atac Donor Sites \t%8ld", allSites->nU12atacDonorSites);
 	  printRes(mess);
   }
@@ -205,7 +206,7 @@ void  manager(char *Sequence,
 					  allSites->DonorSites,allSites->nDonorSites,
 					  allSites->StopCodons,allSites->nStopCodons,
 					  gp->MaxDonors,sFIRST,Sequence,
-					  allExons->InitialExons);
+					  allExons->InitialExons,NUMEXONS);
   sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
   printRes(mess); 
   
@@ -215,7 +216,7 @@ void  manager(char *Sequence,
 						  allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
 						  allSites->StopCodons,allSites->nStopCodons,
 						  gp->MaxDonors,sU12gtagFIRST,Sequence,
-						  allExons->U12gtagInitialExons);
+						  allExons->U12gtagInitialExons,NUMU12EXONS);
 	  sprintf(mess,"U12gtag Initial Exons \t%8ld", allExons->nU12gtagInitialExons);
 	  printRes(mess); 
   }
@@ -225,7 +226,7 @@ void  manager(char *Sequence,
 						  allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
 						  allSites->StopCodons,allSites->nStopCodons,
 						  gp->MaxDonors,sU12atacFIRST,Sequence,
-						  allExons->U12atacInitialExons);
+						  allExons->U12atacInitialExons,NUMU12EXONS);
 	  sprintf(mess,"U12atac Initial Exons \t%8ld", allExons->nU12atacInitialExons);
 	  printRes(mess); 
   } 
@@ -234,7 +235,7 @@ void  manager(char *Sequence,
 					   allSites->DonorSites,allSites->nDonorSites,
 					   allSites->StopCodons,allSites->nStopCodons,
 					   gp->MaxDonors,sINTERNAL,Sequence,
-					   allExons->InternalExons);
+					   allExons->InternalExons,NUMEXONS);
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
 
@@ -245,7 +246,7 @@ void  manager(char *Sequence,
 						   allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU12gtag_U12gtagINTERNAL,Sequence,
-						   allExons->U12gtag_U12gtag_InternalExons);
+						   allExons->U12gtag_U12gtag_InternalExons,NUMU12EXONS);
 	  	sprintf(mess,"U12gtag-U12gtag Internal Exons \t%8ld", allExons->nU12gtag_U12gtag_InternalExons);
 	  	printRes(mess); 
 	  }
@@ -254,7 +255,7 @@ void  manager(char *Sequence,
 						   allSites->DonorSites,allSites->nDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU12gtag_U2INTERNAL,Sequence,
-						   allExons->U12gtag_U2_InternalExons);
+						   allExons->U12gtag_U2_InternalExons,NUMU12EXONS);
 	  sprintf(mess,"U12gtag-U2 Internal Exons \t%8ld", allExons->nU12gtag_U2_InternalExons);
 	  printRes(mess); 
 
@@ -263,7 +264,7 @@ void  manager(char *Sequence,
 						   allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU2_U12gtagINTERNAL,Sequence,
-						   allExons->U2_U12gtag_InternalExons);
+						   allExons->U2_U12gtag_InternalExons,NUMU12EXONS);
 	  sprintf(mess,"U2-U12gtag Internal Exons \t%8ld", allExons->nU2_U12gtag_InternalExons);
 	  printRes(mess); 
   }
@@ -274,7 +275,7 @@ void  manager(char *Sequence,
 						   allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU12atac_U12atacINTERNAL,Sequence,
-						   allExons->U12atac_U12atac_InternalExons);
+						   allExons->U12atac_U12atac_InternalExons,NUMU12EXONS);
 	  	sprintf(mess,"U12atac-U12atac Internal Exons \t%8ld", allExons->nU12atac_U12atac_InternalExons);
 	  	printRes(mess); 
 	  }
@@ -283,7 +284,7 @@ void  manager(char *Sequence,
 						   allSites->DonorSites,allSites->nDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU12atac_U2INTERNAL,Sequence,
-						   allExons->U12atac_U2_InternalExons);
+						   allExons->U12atac_U2_InternalExons,NUMU12EXONS);
 	  sprintf(mess,"U12atac-U2 Internal Exons \t%8ld", allExons->nU12atac_U2_InternalExons);
 	  printRes(mess); 
 
@@ -292,7 +293,7 @@ void  manager(char *Sequence,
 						   allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU2_U12atacINTERNAL,Sequence,
-						   allExons->U2_U12atac_InternalExons);
+						   allExons->U2_U12atac_InternalExons,NUMU12EXONS);
 	  sprintf(mess,"U2-U12atac Internal Exons \t%8ld", allExons->nU2_U12atac_InternalExons);
 	  printRes(mess); 
   }
@@ -303,7 +304,7 @@ void  manager(char *Sequence,
 						   allSites->U12atacDonorSites,allSites->nU12atacDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU12gtag_U12atacINTERNAL,Sequence,
-						   allExons->U12gtag_U12atac_InternalExons);
+						   allExons->U12gtag_U12atac_InternalExons,NUMU12U12EXONS);
 	  	sprintf(mess,"U12gtag-U12atac Internal Exons \t%8ld", allExons->nU12gtag_U12atac_InternalExons);
 	  	printRes(mess); 
 
@@ -312,7 +313,7 @@ void  manager(char *Sequence,
 						   allSites->U12gtagDonorSites,allSites->nU12gtagDonorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   gp->MaxDonors,sU12atac_U12gtagINTERNAL,Sequence,
-						   allExons->U12atac_U12gtag_InternalExons);
+						   allExons->U12atac_U12gtag_InternalExons,NUMU12U12EXONS);
 	  	sprintf(mess,"U12atac-U12gtag Internal Exons \t%8ld", allExons->nU12atac_U12gtag_InternalExons);
 	  	printRes(mess); 
 	  }
@@ -322,7 +323,7 @@ void  manager(char *Sequence,
     BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 					   allSites->StopCodons,allSites->nStopCodons,
 					   LengthSequence,cutPoint,sTERMINAL,Sequence,
-					   allExons->TerminalExons);
+					   allExons->TerminalExons,NUMEXONS);
   sprintf(mess,"Terminal Exons \t\t%8ld", allExons->nTerminalExons);
   printRes(mess); 
 
@@ -331,7 +332,7 @@ void  manager(char *Sequence,
     	BuildTerminalExons(allSites->U12gtagAcceptorSites,allSites->nU12gtagAcceptorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   LengthSequence,cutPoint,sU12gtagTERMINAL,Sequence,
-						   allExons->U12gtagTerminalExons);
+						   allExons->U12gtagTerminalExons,NUMU12EXONS);
 	  sprintf(mess,"U12gtag Terminal Exons \t%8ld", allExons->nU12gtagTerminalExons);
 	  printRes(mess); 
   }
@@ -341,7 +342,7 @@ void  manager(char *Sequence,
     	BuildTerminalExons(allSites->U12atacAcceptorSites,allSites->nU12atacAcceptorSites,
 						   allSites->StopCodons,allSites->nStopCodons,
 						   LengthSequence,cutPoint,sU12atacTERMINAL,Sequence,
-						   allExons->U12atacTerminalExons);
+						   allExons->U12atacTerminalExons,NUMU12EXONS);
 	  sprintf(mess,"U12atac Terminal Exons \t%8ld", allExons->nU12atacTerminalExons);
 	  printRes(mess); 
   }
