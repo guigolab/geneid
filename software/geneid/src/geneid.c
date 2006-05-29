@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.14 2006-05-25 23:07:59 talioto Exp $ */
+/* $Id: geneid.c,v 1.15 2006-05-29 13:46:00 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -60,6 +60,8 @@ int
   PPT=0,
   /* Detection of BranchPoints in Acceptors */
   BP=0,
+  /* Detection of U12 introns */
+  U12=0,
   /* Detection of U12gtag sites (acceptor uses BranchPoint)*/
   U12GTAG=0,
   /* Detection of U12atac sites (acceptor uses BranchPoint)*/
@@ -67,7 +69,7 @@ int
   /* Detection of U2gcag sites */
   U2GCAG=0;
   
-long 
+long
   /* User defined lower limit */
   LOW=0,
   /* User defined upper limit */
@@ -79,7 +81,7 @@ float U12EW = 0;
 float U12_SPLICE_SCORE_THRESH = -1000;
 float U12_EXON_SCORE_THRESH = -1000;
 /* Generic maximum values: sites, exons and backup elements */
-long NUMSITES,NUMEXONS,MAXBACKUPSITES,MAXBACKUPEXONS;
+long NUMSITES,NUMEXONS,MAXBACKUPSITES,MAXBACKUPEXONS,NUMU12SITES,NUMU12EXONS,NUMU12U12EXONS;
 
 /* Accounting time and results */
 account *m;
@@ -177,12 +179,29 @@ int main (int argc, char *argv[])
   
   /* 0.e. Computing ratios for every type of signal and exons */
   printMess("Computing Ratios");
-  SetRatios(&NUMSITES,
-            &NUMEXONS,
+  SetRatios(&NUMSITES,&NUMU12SITES,
+            &NUMEXONS,&NUMU12EXONS, &NUMU12U12EXONS,
             &MAXBACKUPSITES,
             &MAXBACKUPEXONS,
             LengthSequence);
-  
+  if (U12){
+    printMess("Prediction of U12 introns on");
+    NUMU12SITES = MIN(NUMU12SITES,NUMSITES);
+    NUMU12EXONS = MIN(NUMU12EXONS,NUMEXONS);
+    NUMU12U12EXONS = MIN(NUMU12EXONS,NUMU12U12EXONS);
+    if ((!U12GTAG)&&(!U12ATAC)){
+      NUMU12SITES = 0;    
+      NUMU12EXONS = 0;
+      NUMU12U12EXONS = 0; 
+    }
+  } else {
+    NUMU12SITES = 0;
+    NUMU12EXONS = 0;
+    NUMU12U12EXONS = 0;         
+  }
+  /* Estimation of memory required to execute geneid */
+  if (BEG)
+	beggar(LengthSequence);
   /** 1. Allocating main geneid data structures **/
   printMess("Request Memory to Operating System\n");
   
@@ -210,7 +229,10 @@ int main (int argc, char *argv[])
   /** 2. Reading statistical model parameters file **/
   printMess("Reading parameters..."); 
   nIsochores = readparam(ParamFile, isochores);
-  
+  if (!U12){
+    U12GTAG = 0;
+    U12ATAC = 0;
+  }
   /** 3. Starting processing: complete or partial prediction ? **/
   if (GENEID)
     {
