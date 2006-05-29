@@ -31,7 +31,7 @@
 extern int TRANS[];
 
 /* Maximum allowed number of generic sites */
-extern long NUMSITES;
+extern long NUMU12SITES;
 
 /* Additional profiles */
 extern int BP;
@@ -168,9 +168,9 @@ long  BuildU12Acceptors(char* s,
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < u12_p->offset && (ns<NUMSITES); is++)
+      for (is = 0; is < u12_p->offset && (ns<NUMU12SITES); is++)
 		{ 	  
-			if (ns<NUMSITES){
+			if (ns<NUMU12SITES){
 		  	  
 			  scorePPT = 0.0;
 			  scoreBP = 0.0;
@@ -220,9 +220,9 @@ long  BuildU12Acceptors(char* s,
   if (u12_p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMU12SITES))
 		{ 	
-			if (ns<NUMSITES){
+			if (ns<NUMU12SITES){
 
 		  	  scorePPT = 0.0;
 			  scoreBP = 0.0;
@@ -267,9 +267,9 @@ long  BuildU12Acceptors(char* s,
     {
 
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMU12SITES))
 		{ 		
-			if (ns<NUMSITES){
+			if (ns<NUMU12SITES){
 			/*Do for U12GTAG*/
 			  
 			  scorePPT = 0.0;
@@ -313,9 +313,9 @@ long  BuildU12Acceptors(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMU12SITES))
 		{ 
-			if (ns<NUMSITES){
+			if (ns<NUMU12SITES){
 			  
 			  scorePPT = 0.0;
 		  	  scoreBP = 0.0;
@@ -356,8 +356,8 @@ long  BuildU12Acceptors(char* s,
 		}
     }
   
-  if (ns >= NUMSITES)
-    printError("Too many predicted sites: decrease RSITES parameter");
+  if (ns >= NUMU12SITES)
+    printError("Too many predicted sites: decrease RU12SITES parameter");
   
   return(ns);
 }
