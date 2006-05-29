@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.8 2006-05-25 15:16:37 talioto Exp $  */
+/*  $Id: readparam.c,v 1.9 2006-05-29 13:52:26 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -330,12 +330,12 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 	  printError(mess);
 	}
 
-  while(strcmp(header,sprofileACC))
+  while(strcasecmp(header,sprofileACC))
 	{ 
 	
 	/* Read optional profiles: sprofilePPT,sprofileBP,sprofileU12BP,sprofileU12gtagACC,sprofileU12atacACC */ 
 
-	  if (!strcmp(header,sprofileU12BP))
+	  if (!strcasecmp(header,sprofileU12BP))
 		{
 		  	u12bp++;
 
@@ -345,7 +345,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 		}
 	  	else
 		  {
-		  	if (!strcmp(header,sprofileU12gtagACC))
+		  	if (!strcasecmp(header,sprofileU12gtagACC))
 			  {
 			  	u12gtagAcc++;
 
@@ -355,7 +355,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 			  }
 			  else
 				{
-			  	  if (!strcmp(header,sprofileU12atacACC))
+			  	  if (!strcasecmp(header,sprofileU12atacACC))
 					{	
 				  	  u12atacAcc++;
 
@@ -365,7 +365,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 					}
 					else
 					  {
-						if (!strcmp(header,sprofilePPT))
+						if (!strcasecmp(header,sprofilePPT))
 						  {
 					  		/* Switch on the acceptor prediction using PPTs */
 					  		PPT++;
@@ -376,7 +376,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 						  }
 				  		  else
 							{
-					   		  if (!strcmp(header,sprofileBP))
+					   		  if (!strcasecmp(header,sprofileBP))
 								{
 						  		  /* Switch on the acceptor prediction using BPs */
 						  		  BP++;
@@ -418,10 +418,10 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 
   /* Read optional profiles: sprofileU12gtagDON,sprofileU12atacDON */
   
-    while(strcmp(header,sprofileDON))
+    while(strcasecmp(header,sprofileDON))
 	{ 
 
-	  if (!strcmp(header,sprofileU12gtagDON))
+	  if (!strcasecmp(header,sprofileU12gtagDON))
 		{
 
 		  u12gtagDon++;
@@ -432,7 +432,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 		}
 	  else
 		{
-		  if (!strcmp(header,sprofileU12atacDON))
+		  if (!strcasecmp(header,sprofileU12atacDON))
 			{
 
 			  u12atacDon++;
@@ -443,7 +443,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 			}
 		  else
 		    {
-		  	  if (!strcmp(header,sprofileU2gcagDON))
+		  	  if (!strcasecmp(header,sprofileU2gcagDON))
 				{
 
 				  U2GCAG++;
@@ -598,10 +598,10 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  sprintf(mess,"Wrong format: header for exon weights and optional U12 score threshold");
 		  printError(mess);
 		}
-  while(strcmp(header,sExon_weights))
+  while(strcasecmp(header,sExon_weights)&& strcmp(header,"Exon_weigths"))
   { 
 	 /* 1. Read U12_SPLICE_SCORE_THRESH for sum of U12 donor and acceptor splice scores */
-	if(!strcmp(header,sU12_SPLICE_SCORE_THRESH)){
+	if(!strcasecmp(header,sU12_SPLICE_SCORE_THRESH)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n",
 					  &(U12_SPLICE_SCORE_THRESH)))!=1)
@@ -612,7 +612,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  printMess(mess);
 	}
 	 /* 1. Read U12_EXON_SCORE_THRESH for sum of U12 donor and acceptor exon scores */
-	if(!strcmp(header,sU12_EXON_SCORE_THRESH)){
+	if(!strcasecmp(header,sU12_EXON_SCORE_THRESH)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n",
 					  &(U12_EXON_SCORE_THRESH)))!=1)
@@ -624,7 +624,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 	}
 
 	/* Read optional exon weights for U12 exons */ 
-	if(!strcmp(header,sU12gtag_Exon_weights)){
+	if(!strcasecmp(header,sU12gtag_Exon_weights)){
       	readLine(RootFile,line);
 	  	if ((sscanf(line,"%f %f %f\n",
 				  &(gp->Initial->U12gtagExonWeight),
@@ -641,7 +641,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 
   	} else {
 	
-		if(!strcmp(header,sU12atac_Exon_weights)){
+		if(!strcasecmp(header,sU12atac_Exon_weights)){
 		  	readLine(RootFile,line);
 		  	if ((sscanf(line,"%f %f %f\n",
 					  &(gp->Initial->U12atacExonWeight),
