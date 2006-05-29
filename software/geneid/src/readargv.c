@@ -24,14 +24,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.16 2006-05-25 23:36:41 talioto Exp $  */
+/*  $Id: readargv.c,v 1.17 2006-05-29 14:00:54 talioto Exp $  */
 
 #include "geneid.h"
 
 /* geneid.c external vars */
 extern int 	SFP,SDP,SAP,STP,
             EFP,EIP,ETP,EXP,ESP,EOP,
-			INTRON,
+            U12, INTRON,
             VRB,
             FWD,RVS,
             GENEID, GENAMIC,
@@ -67,8 +67,6 @@ void printHelp()
   printf("\t-x: Output all predicted exons\n");
   printf("\t-z: Output Open Reading Frames\n\n");
   
-  printf("\t-j: <lower_limit>: Begin prediction at this coordinate\n");
-  printf("\t-k: <upper_limit>: End prediction at this coordinate\n");
   printf("\t-D: Output genomic sequence of exons in predicted genes\n");
   printf("\t-A: Output amino acid sequence derived from predicted CDS\n\n");
   
@@ -77,9 +75,12 @@ void printHelp()
   printf("\t-X: Use extended-format to print gene predictions\n");
   printf("\t-M: Use XML format to print gene predictions\n");
   printf("\t-m: Show DTD for XML-format output \n\n");
-  
+
+  printf("\t-j: <lower_limit>: Begin prediction at this coordinate\n");
+  printf("\t-k: <upper_limit>: End prediction at this coordinate\n");  
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
+  printf("\t-U: Allow U12 introns (Requires appropriate U12 parameters to be set in the parameter file)\n");
   printf("\t-F: Force the prediction of one gene structure\n");
   printf("\t-o: Only running exon prediction (disable gene prediction)\n");
   printf("\t-O  <exons_filename>: Only running gene prediction (not exon prediction)\n");
@@ -154,7 +155,7 @@ void readargv (int argc,char* argv[],
   char *dummy1;
   char *dummy2;
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitnsxj:k:DAzZXmMG3BvE:R:S:WCFP:h")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitnsxj:k:UDAzZXmMG3BvE:R:S:WCFP:h")) != -1)
     switch(c)
       {
       case 'B': BEG++; 
@@ -180,35 +181,35 @@ void readargv (int argc,char* argv[],
 	  	GFF++;
 		break;
 	  case 'M': XML++;
-        genamicOpts++;
+	        genamicOpts++;
 		break;
 	  case 'O': GENEID--;
 		strcpy (ExonsFile,optarg);
 		break;
 	  case 'P': strcpy (ParamFile,optarg); 
 		break;
-      case 'R': EVD++;
+          case 'R': EVD++;
 		strcpy (ExonsFile,optarg);
 		geneidOpts++;
 		break;
-      case 'S': SRP++;
+          case 'S': SRP++;
 		strcpy (HSPFile,optarg);
 		geneidOpts++;
 		break;
 	  case 'W': RVS--;
 		geneidOpts++;
 		break; 
-      case 'X': X10++;
+          case 'X': X10++;
 		genamicOpts++;
 		break;
-      case 'Z': scanORF++;
+          case 'Z': scanORF++;
 		geneidOpts++;
 		break;      
 	  case 'a': SAP++;
 		geneidOpts++;
 		printOptions++;
 		break;
-      case 'b': SFP++;
+          case 'b': SFP++;
 		geneidOpts++;
 		printOptions++;
 		break;
@@ -235,6 +236,9 @@ void readargv (int argc,char* argv[],
 		geneidOpts++;
 		break;
 	  case 'k': HI = strtol(optarg,&dummy2,0);
+		geneidOpts++;
+		break;
+	  case 'U': U12++;
 		geneidOpts++;
 		break;
 	  case 'm': printDTD();
