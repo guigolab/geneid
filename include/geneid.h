@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.22 2006-05-26 13:28:04 talioto Exp $ */
+/* $Id: geneid.h,v 1.23 2006-05-29 14:03:31 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -51,10 +51,16 @@ A. DEFINITIONS
 #define OVERLAP 10000            
 
 /* One signal per L / RSITES bp             */
-#define RSITES 5                 
+#define RSITES 5 
+
+/* One U12 signal per L / RU12SITES bp             */
+#define RU12SITES 10                 
 
 /* One exon per L / REXONS bp               */
 #define REXONS 3                 
+
+/* One U12 intron-flanking exon per L / RU12EXONS bp               */
+#define RU12EXONS 6 
 
 /* Estimated amount of backup signals       */
 #define RBSITES 75               
@@ -89,10 +95,10 @@ A. DEFINITIONS
 #define MAXHSP 25000             
 
 /* Max number of locus in multi-fasta files */
-#define MAXNSEQUENCES 200         
+#define MAXNSEQUENCES 10         
 
 /* Maximum number of predicted genes        */
-#define MAXGENE 100000            
+#define MAXGENE 20000            
 
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         
@@ -154,7 +160,7 @@ A. DEFINITIONS
 #define FASTALINE 60             
 
 /* Maximum length for strings (mess)        */
-#define MAXSTRING 150            
+#define MAXSTRING 100            
 
 /* Mark rules up as blocking in Gene model  */
 #define BLOCK 1                  
@@ -632,11 +638,13 @@ void printReadingInfo(char* s);
 long GetSitesWithProfile(char *s, profile *p, site *st, long l1, long l2); 
 
 long BuildDonors(char* s,char* type,
-						  profile* p,
+			  profile* p,
                           site* st, 
                           long l1, 
                           long l2,
-						  long ns); 
+			  long ns,
+		          long nsites
+		 ); 
 long BuildU12Donors(char* s,
 						  char* type,
 						  profile* u12gtag_p,
@@ -653,7 +661,7 @@ long BuildInitialExons(site *Start, long nStarts,
                        int MaxDonors,
 					   char* ExonType,
 					   char* Sequence,
-                       exonGFF *Exon);
+                       exonGFF *Exon,long nexons );
 
 long BuildInternalExons(site *Acceptor, long nAcceptors, 
                         site *Donor, long nDonors,
@@ -661,7 +669,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
                         int MaxDonors,
 					    char* ExonType,
 						char* Sequence,
-                        exonGFF* Exon);
+                        exonGFF* Exon,long nexons);
  
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
                          site *Stop, long nStops,
@@ -669,7 +677,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
                          long cutPoint,
 					     char* ExonType,
 						 char* Sequence,
-						 exonGFF* Exon);
+						 exonGFF* Exon,long nexons);
 
 long BuildSingles(site *Start, long nStarts, 
                   site *Stop, long nStops,
@@ -895,8 +903,8 @@ void GCScan(char* s, packGC* GCInfo, long l1, long l2);
 
 void beggar(long L);
 
-void SetRatios(long* NUMSITES,
-               long* NUMEXONS,
+void SetRatios(long* NUMSITES,long* NUMU12SITES,
+               long* NUMEXONS,long* NUMU12EXONS, long* NUMU12U12EXONS,
                long* MAXBACKUPSITES,
                long* MAXBACKUPEXONS,
                long L);
