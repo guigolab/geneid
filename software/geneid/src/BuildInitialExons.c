@@ -24,13 +24,13 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInitialExons.c,v 1.6 2006-05-25 13:59:03 talioto Exp $  */
+/*  $Id: BuildInitialExons.c,v 1.7 2006-05-29 13:53:39 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Maximum allowed number of generic exons (divided by RFIRST) */
 /* Sequence is used to save information to prevent Stop codons in frame */
-extern long NUMEXONS;
+/* extern long NUMEXONS; */
 extern long MAXBACKUPSITES;
 
 long BuildInitialExons(site *Start, long nStarts, 
@@ -39,7 +39,7 @@ long BuildInitialExons(site *Start, long nStarts,
                        int MaxDonors,
 					   char* ExonType,
 					   char* Sequence,
-                       exonGFF *Exon) 
+                       exonGFF *Exon,long nexons) 
 {
   /* Best exons built by using the current start codon */
   exonGFF *LocalExon;
@@ -64,7 +64,7 @@ long BuildInitialExons(site *Start, long nStarts,
   
   /* Main loop, forall start codon looking for donor sites... */
   /* ...until the first stop codon in frame is reached */
-  HowMany = (MAXBACKUPSITES)? (long)(NUMEXONS/RFIRST): NUMEXONS;
+  HowMany = (MAXBACKUPSITES)? (long)(nexons/RFIRST): nexons;
   for (i = 0, j = 0, k = 0, nExon = 0;
        (nExon < HowMany) && (i < nStarts); i++)
 	{ 
