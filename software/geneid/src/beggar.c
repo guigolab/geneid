@@ -24,12 +24,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: beggar.c,v 1.3 2006-05-26 13:29:23 talioto Exp $  */
+/*  $Id: beggar.c,v 1.4 2006-05-29 13:49:53 talioto Exp $  */
 
 #include "geneid.h"
 
-extern long NUMSITES, NUMEXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
-
+extern long NUMSITES, NUMU12SITES, NUMEXONS, NUMU12EXONS, NUMU12U12EXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
+extern int U12;
 /* Computing the memory required to execute geneid */
 void beggar(long L)
 {
@@ -43,17 +43,26 @@ void beggar(long L)
   float memParams;
   float memSequence;
   float memBackup;
+  int numprofiles = 4;
+  if (U12)
+    numprofiles = 8;
 
   /* packSites: +/- */
-  
-  memSites = STRANDS * (sizeof(struct s_packSites) +
-						(8 * NUMSITES * sizeof(struct s_site)));
+  memSites = STRANDS * (sizeof(struct s_packSites) + (4 * NUMSITES * sizeof(struct s_site))
+			+ (4 * NUMU12SITES * sizeof(struct s_site))
+			);
   
   /* packExons: +/- */
   memExons = STRANDS * (sizeof(struct s_packExons) +
 						((NUMEXONS/RFIRST + NUMEXONS/RINTER +
 						  NUMEXONS/RTERMI + NUMEXONS/RSINGL) *
-						 sizeof(exonGFF)));
+						 sizeof(exonGFF))
+			+ ((NUMU12EXONS/RFIRST + NUMU12EXONS/RINTER +
+			    NUMU12EXONS/RTERMI + NUMU12EXONS/RSINGL) *
+			   sizeof(exonGFF))
+		       	+ (( NUMU12U12EXONS/RINTER) *
+			   sizeof(exonGFF))
+			);
   /* Sort exons */
   memExons += NUMEXONS * FSORT * sizeof(exonGFF);
   
@@ -77,7 +86,7 @@ void beggar(long L)
   
   /* Statistical model: profiles, Markov model, Markov tmp, exon values,  */
   /* isochores and gene model */
-  memParams = (4 * (sizeof(profile) + AVG_DIM * AVG_ORDER * sizeof(float))) 
+  memParams = (numprofiles * (sizeof(profile) + AVG_DIM * AVG_ORDER * sizeof(float))) 
 	+ (6 * OLIGO_DIM * sizeof(float)) 
 	+ (6 * LENGTHSi * sizeof(float)) 
 	+ (4 * sizeof(paramexons));
