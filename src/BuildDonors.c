@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildDonors.c,v 1.1 2006-05-25 13:55:28 talioto Exp $  */
+/*  $Id: BuildDonors.c,v 1.2 2006-05-29 13:55:27 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -39,7 +39,9 @@ long  BuildDonors(char* s,char* type,
                           site* st, 
                           long l1, 
                           long l2,
-						  long ns) 
+			  long ns,
+		          long nsites
+) 
 {
   int i,j;
   float score;
@@ -54,7 +56,7 @@ long  BuildDonors(char* s,char* type,
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < p->offset && (ns<NUMSITES); is++)
+      for (is = 0; is < p->offset && (ns<nsites); is++)
 		{
 		  score=0.0;
 		  /* Applying part of the profile */
@@ -89,7 +91,7 @@ long  BuildDonors(char* s,char* type,
   if (p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension) && (is < right- left + 1) && (ns<nsites))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -119,7 +121,7 @@ long  BuildDonors(char* s,char* type,
   else if (p->order == 1)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension) && (is < right- left + 1) && (ns<nsites))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -149,7 +151,7 @@ long  BuildDonors(char* s,char* type,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension) && (is < right- left + 1) && (ns<nsites))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -178,8 +180,8 @@ long  BuildDonors(char* s,char* type,
 		}
     }
   
-  if (ns >= NUMSITES)
-    printError("Too many predicted sites: decrease RSITES parameter");
+  if (ns >= nsites)
+    printError("Too many predicted sites: decrease RSITES (or RU12SITES) parameter");
   
   return(ns);
 }
