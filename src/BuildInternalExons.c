@@ -24,13 +24,13 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.6 2006-05-25 13:59:42 talioto Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.7 2006-05-29 13:53:49 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Sequence is used to save information to prevent Stop codons in frame */
 /* Maximum allowed number of generic exons (divided by RINTER) */
-extern long NUMEXONS;
+/* extern long NUMEXONS; */
 extern long MAXBACKUPSITES;
 
 long BuildInternalExons(site *Acceptor, long nAcceptors, 
@@ -39,7 +39,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
                         int MaxDonors,
 						char* ExonType,
 						char* Sequence,
-                        exonGFF* Exon)
+                        exonGFF* Exon, long nexons)
 {
   /* Best exons built using the current Acceptor and frame availability */
   struct iexon
@@ -71,7 +71,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
   
   /* Main loop, forall Acceptor looking for donor sites... */
   /* ...until 3 windows are closed due to 3 stop codons */
-  HowMany = (MAXBACKUPSITES)? (long)(NUMEXONS/RINTER): NUMEXONS;
+  HowMany = (MAXBACKUPSITES)? (long)(nexons/RINTER): nexons;
   
   
   for (i=0, j=0, k=0, nExon = 0;

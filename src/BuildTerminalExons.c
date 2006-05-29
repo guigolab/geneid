@@ -24,13 +24,13 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildTerminalExons.c,v 1.5 2006-05-25 14:01:30 talioto Exp $  */
+/*  $Id: BuildTerminalExons.c,v 1.6 2006-05-29 13:53:59 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Maximum allowed number of generic exons (divided by RTERMI) */
 /* Sequence is used to save information to prevent Stop codons in frame */
-extern long NUMEXONS;
+/* extern long NUMEXONS; */
 extern long MAXBACKUPSITES;
 
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
@@ -39,7 +39,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
                          long cutPoint,
 						 char* ExonType,
 						 char* Sequence,
-						 exonGFF* Exon)
+						 exonGFF* Exon, long nexons)
 {
   int Frame[FRAMES];
   long i, f, j, js;
@@ -53,7 +53,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
   
   /* Main loop: forall Acceptor, first Stop in every Frame defines an exon */
   /* There are therefore, 3 terminal exons starting by this Acceptor */
-  HowMany = (MAXBACKUPSITES)? (long)(NUMEXONS/RTERMI): NUMEXONS;
+  HowMany = (MAXBACKUPSITES)? (long)(nexons/RTERMI): nexons;
   
   for (i=0, j=0, js=0, nExon=0;
        (i<nAcceptors) && (nExon<HowMany);
