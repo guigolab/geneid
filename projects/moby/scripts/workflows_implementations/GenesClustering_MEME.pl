@@ -422,7 +422,7 @@ my $motif_E_value_cutoff_xml  = "<Value>$motif_E_value_cutoff</Value>";
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-						     ["$articleName", $sequences_input_xml, "maximum_number of motifs", $nb_motifs_xml, "maximum optimum width", $maximum_optimum_width_xml, "motif E-value cutoff", $motif_E_value_cutoff_xml]
+						     ["$articleName", $sequences_input_xml, "maximum number of motifs", $nb_motifs_xml, "maximum optimum width", $maximum_optimum_width_xml, "motif E-value cutoff", $motif_E_value_cutoff_xml]
 						     ]);
 
 if ($_debug) {
@@ -460,7 +460,7 @@ $articleName        = $parameters{$serviceName}->{articleName} || die "no articl
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-						     ["$articleName", $sequences_input_xml, "maximum_number of motifs", $nb_motifs_xml, "maximum optimum width", $maximum_optimum_width_xml, "motif E-value cutoff", $motif_E_value_cutoff_xml]
+						     ["$articleName", $sequences_input_xml, "maximum number of motifs", $nb_motifs_xml, "maximum optimum width", $maximum_optimum_width_xml, "motif E-value cutoff", $motif_E_value_cutoff_xml]
 						     ]);
 
 if ($_debug) {
