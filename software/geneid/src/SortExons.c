@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.9 2006-05-25 14:32:34 talioto Exp $  */
+/*  $Id: SortExons.c,v 1.10 2006-06-01 21:06:36 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -36,7 +36,7 @@ extern int FWD,RVS;
 extern int scanORF;
 
 /* Artificial initial gene feature: force complete gene prediction */
-void InsertBeginExon(exonGFF* Exons)
+void InsertBeginExon(exonGFF* Exons, long lowerlimit)
 {
   exonGFF* e;
   exonGFF* re;
@@ -56,8 +56,8 @@ void InsertBeginExon(exonGFF* Exons)
        (struct s_site *) malloc(sizeof(struct s_site))) == NULL)
     printError("Not enough memory: donor site for artificial FWD Begin exon");
   
-  e->Acceptor->Position = 0;
-  e->Donor->Position = 0;
+  e->Acceptor->Position = lowerlimit;
+  e->Donor->Position = lowerlimit;
   
   /* Save the extracted exon */
   Exons[0].Acceptor = e->Acceptor;
@@ -238,8 +238,8 @@ void SortExons(packExons* allExons,
                packExternalInformation* external,
 			   packEvidence* pv,
 			   exonGFF* Exons,         
-               long l1, long l2,
-			   long LengthSequence)
+               long l1, long l2,long lowerlimit,
+			   long upperlimit)
 { 
   struct exonitem **ExonList, *q;
   long i;
@@ -627,9 +627,9 @@ void SortExons(packExons* allExons,
 
 
   /* FIRST SPLIT: Insert first artificial exon */
-  if (l1 == 0)
+  if (l1 == lowerlimit)
 	{
-	  InsertBeginExon(Exons);
+	  InsertBeginExon(Exons,lowerlimit);
 	  n = 2;
 	}
   else
@@ -676,9 +676,9 @@ void SortExons(packExons* allExons,
 	}
 
   /* FINISHING split: Insert last artificial exon */
-  if (l2 == LengthSequence - 1)
+  if (l2 == upperlimit)
 	{
-	  InsertEndExon(Exons, n, LengthSequence);
+	  InsertEndExon(Exons, n, upperlimit + 1);
 	  n = n + 2;
 	  
 	  if (n >= HowMany)
