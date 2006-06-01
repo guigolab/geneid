@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.23 2006-05-29 14:03:31 talioto Exp $ */
+/* $Id: geneid.h,v 1.24 2006-06-01 20:58:37 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -733,8 +733,8 @@ void SortExons(packExons* allExons,
 			   packExternalInformation* external,
 			   packEvidence* pv,
                exonGFF* Exons,         
-               long l1, long l2,
-			   long LengthSequence);
+               long l1, long l2,long lowerlimit,
+			   long upperlimit);
 
 void SortSites(site* InputSites,
 			   long nInputSites,
@@ -747,7 +747,7 @@ void SwitchCounters(packExternalInformation* external);
 void Output(packSites* allSites, packSites* allSites_r,
             packExons* allExons, packExons* allExons_r,
             exonGFF* exons, long nExons, char* Locus, 
-	    long l1, long l2, char* Sequence, gparam* gp, dict* dAA);
+	    long l1, long l2, long lowerlimit, char* Sequence, gparam* gp, dict* dAA);
 
 void updateTotals(account *m,
                   packSites* allSites,
@@ -797,7 +797,7 @@ long ForceGeneModel (dict* d,
 
 void PrintSites (site *s, long ns,int type,
                  char Name[], int Strand,
-                 long l1, long l2,
+                 long l1, long l2, long lowerlimit,
                  char* seq,
                  profile *p);
 
