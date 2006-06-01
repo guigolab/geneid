@@ -17,7 +17,7 @@ my $_delimitor  = "\t";
 
 # inbHierarchicalCluster not working with dashes!!
 my $_equal_mark    = "-";
-my $_equal_mark    = "";
+$_equal_mark    = "";
 
 my $_plus_infinite_mark  = "1000000";
 my $_minus_infinite_mark = "-1000000";
