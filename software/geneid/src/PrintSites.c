@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.8 2006-05-25 14:20:48 talioto Exp $  */
+/*  $Id: PrintSites.c,v 1.9 2006-06-01 21:02:51 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -176,6 +176,7 @@ void PrintSites (site* s,
                  char Name[],
                  int Strand,
                  long l1, long l2,
+                 long lowerlimit,
                  char* seq,
                  profile *p)
 {
@@ -194,7 +195,7 @@ void PrintSites (site* s,
   switch(type)
     {
     case ACC: strcpy(Type,sACC);
-      if ((Strand == REVERSE) && (l1))
+      if ((Strand == REVERSE) && (l1 != lowerlimit))
 		{
 		  i = ns-1;
 		  while(i>=0 && ((s+i)->Position < limit))
@@ -205,7 +206,7 @@ void PrintSites (site* s,
       break;
 	  
     case STA:strcpy(Type,sSTA);
-      if ((Strand == REVERSE) && (l1))
+      if ((Strand == REVERSE) && (l1 != lowerlimit))
 		{
 		  i = ns-1;
 		  while(i>=0 && ((s+i)->Position < limit))
@@ -216,7 +217,7 @@ void PrintSites (site* s,
       break;
 	  
     case DON:strcpy(Type,sDON);
-      if ((Strand == FORWARD) && (l1))
+      if ((Strand == FORWARD) && (l1 != lowerlimit))
 		{
 		  i = 0;
 		  while(i<ns && ((s+i)->Position < limit))
@@ -225,13 +226,13 @@ void PrintSites (site* s,
       break;
       
     case STO:strcpy(Type,sSTO);
-      if ((Strand == FORWARD) && (l1))
+      if ((Strand == FORWARD) && (l1 != lowerlimit))
 		{
 		  i = 0;
 		  while(i<ns && ((s+i)->Position < limit))
 			i++;
 		}
-      if ((Strand == REVERSE) && (l1))
+      if ((Strand == REVERSE) && (l1 != lowerlimit))
 		{
 		  i = ns-1;
 		  while(i>=0 && ((s+i)->Position < limit))
