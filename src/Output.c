@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.14 2006-05-25 14:43:22 talioto Exp $  */
+/*  $Id: Output.c,v 1.15 2006-06-01 20:59:52 talioto Exp $  */
 
 #include "geneid.h"
 extern int U12GTAG;
@@ -149,6 +149,7 @@ void Output(packSites* allSites,
             char* Locus,
             long l1,
             long l2,
+            long lowerlimit,
             char* Sequence,
             gparam* gp,
             dict* dAA)
@@ -161,34 +162,34 @@ void Output(packSites* allSites,
       /* sites */
       if (SFP) 
 		PrintSites(allSites->StartCodons, allSites->nStartCodons,
-				   STA, Locus, FORWARD, l1, l2, Sequence, gp->StartProfile);
+				   STA, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->StartProfile);
       if (SAP){
 		PrintSites(allSites->AcceptorSites, allSites->nAcceptorSites,
-				   ACC, Locus, FORWARD, l1, l2, Sequence, gp->AcceptorProfile);
+				   ACC, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->AcceptorProfile);
 		if (U12GTAG){
 			PrintSites(allSites->U12gtagAcceptorSites, allSites->nU12gtagAcceptorSites,
-				   ACC, Locus, FORWARD, l1, l2, Sequence, gp->U12gtagAcceptorProfile);
+				   ACC, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12gtagAcceptorProfile);
 		}		   
 		if (U12ATAC){
 			PrintSites(allSites->U12atacAcceptorSites, allSites->nU12atacAcceptorSites,
-				   ACC, Locus, FORWARD, l1, l2, Sequence, gp->U12atacAcceptorProfile);
+				   ACC, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12atacAcceptorProfile);
 		}
 	  }
       if (SDP){
 		PrintSites(allSites->DonorSites, allSites->nDonorSites,
-				   DON, Locus, FORWARD, l1, l2, Sequence, gp->DonorProfile);
+				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->DonorProfile);
 		if (U12GTAG){
 			PrintSites(allSites->U12gtagDonorSites, allSites->nU12gtagDonorSites,
-				   DON, Locus, FORWARD, l1, l2, Sequence, gp->U12gtagDonorProfile);
+				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12gtagDonorProfile);
 		}	
 		if (U12ATAC){
 			PrintSites(allSites->U12atacDonorSites, allSites->nU12atacDonorSites,
-				   DON, Locus, FORWARD, l1, l2, Sequence, gp->U12atacDonorProfile);
+				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12atacDonorProfile);
 		}	   
 	  }
       if (STP)
 		PrintSites(allSites->StopCodons, allSites->nStopCodons,
-				   STO, Locus, FORWARD, l1, l2, Sequence, gp->StopProfile);
+				   STO, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->StopProfile);
       
       /* exons */
       if (EFP){
@@ -257,34 +258,34 @@ void Output(packSites* allSites,
       /* sites */ 
       if (SFP)
 		PrintSites(allSites_r->StartCodons,allSites_r->nStartCodons,STA,
-				   Locus,REVERSE, l1, l2, Sequence, gp->StartProfile);
+				   Locus,REVERSE, l1, l2, lowerlimit, Sequence, gp->StartProfile);
       if (SAP){
 		PrintSites(allSites_r->AcceptorSites, allSites_r->nAcceptorSites,
-				   ACC, Locus, REVERSE, l1, l2, Sequence, gp->AcceptorProfile);
+				   ACC, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->AcceptorProfile);
 		if (U12GTAG){
 			PrintSites(allSites_r->U12gtagAcceptorSites, allSites_r->nU12gtagAcceptorSites,
-				   ACC, Locus, REVERSE, l1, l2, Sequence, gp->U12gtagAcceptorProfile);
+				   ACC, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12gtagAcceptorProfile);
 		}		   
 		if (U12ATAC){
 			PrintSites(allSites_r->U12atacAcceptorSites, allSites_r->nU12atacAcceptorSites,
-				   ACC, Locus, REVERSE, l1, l2, Sequence, gp->U12atacAcceptorProfile);
+				   ACC, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12atacAcceptorProfile);
 		}
 	  }
       if (SDP){
 		PrintSites(allSites_r->DonorSites, allSites_r->nDonorSites,
-				   DON, Locus, REVERSE, l1, l2, Sequence, gp->DonorProfile);
+				   DON, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->DonorProfile);
 		if (U12GTAG){
 			PrintSites(allSites_r->U12gtagDonorSites, allSites_r->nU12gtagDonorSites,
-				   DON, Locus, REVERSE, l1, l2, Sequence, gp->U12gtagDonorProfile);
+				   DON, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12gtagDonorProfile);
 		}	
 		if (U12ATAC){
 			PrintSites(allSites_r->U12atacDonorSites, allSites_r->nU12atacDonorSites,
-				   DON, Locus, REVERSE, l1, l2, Sequence, gp->U12atacDonorProfile);
+				   DON, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12atacDonorProfile);
 		}	   
 	  }
       if (STP)
 		PrintSites(allSites_r->StopCodons,allSites_r->nStopCodons,STO,
-				   Locus,REVERSE, l1, l2, Sequence, gp->StopProfile);
+				   Locus,REVERSE, l1, l2, lowerlimit, Sequence, gp->StopProfile);
       
       /* exons */
       if (EFP){
