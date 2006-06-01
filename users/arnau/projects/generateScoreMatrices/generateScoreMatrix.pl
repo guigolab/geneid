@@ -14,13 +14,18 @@ use Data::Dumper;
 
 my $_debug      = 0;
 my $_delimitor  = "\t";
+
 # inbHierarchicalCluster not working with dashes!!
-# my $_equal_mark    = "";
 my $_equal_mark    = "-";
-my $_plus_infinite_mark = "1000000";
+my $_equal_mark    = "";
+
+my $_plus_infinite_mark  = "1000000";
 my $_minus_infinite_mark = "-1000000";
-$_plus_infinite_mark = "-";
+$_plus_infinite_mark  = "-";
 $_minus_infinite_mark = "-";
+
+$_plus_infinite_mark  = "";
+$_minus_infinite_mark = "";
 
 # SOTA is compliant with valencia and uam
 
