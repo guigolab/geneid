@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.16 2006-05-29 15:53:52 talioto Exp $ */
+/* $Id: geneid.c,v 1.17 2006-06-01 21:05:49 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -326,6 +326,7 @@ int main (int argc, char *argv[])
 		  l1 = lowerlimit;
 		  l2 = MIN(l1 + LENGTHSi-1,LengthSequence-1);
 		  l2 = MIN(l2,upperlimit);
+		  /* l2 = MIN(upperlimit, MIN(l1 + LENGTHSi-1,LengthSequence-1)); */
 		  lastSplit = (l2 == upperlimit);		 		
 		  sprintf(mess,"Running on range %ld to %ld\n", 
 				 lowerlimit ,upperlimit); 
@@ -410,13 +411,17 @@ int main (int argc, char *argv[])
 				nExons = nExons + external->ivExons;
 
 			  /* BEGIN artificial exon: + and - */
-			  if (l1 == 0) 
+			  /* if (l1 == 0)  */
+			  if (l1 == lowerlimit){
 				nExons = nExons + 2;
-			  
+			  }
 			  /* END artitificial exon: + and - */
-			  if (l2 == LengthSequence-1)
-				nExons = nExons + 2;
-			  
+			 /*  if (l2 == LengthSequence-1) */
+			  if (l2 == upperlimit){
+			    nExons = nExons + 2;
+			  }
+			  sprintf(mess,"l1: %ld   ll:%ld   l2: %ld   ul: %ld\n", l1,lowerlimit,l2,upperlimit);
+			  printMess(mess);
 			  sprintf(mess,"Sorting %ld exons\n", nExons);  
 			  printMess(mess);
 			  
@@ -426,7 +431,8 @@ int main (int argc, char *argv[])
 						evidence, 
 						exons, 
 						l1, l2, 
-						LengthSequence);
+				                lowerlimit,
+				                upperlimit);
 			  
 			  sprintf(mess,"Finished sorting %ld exons\n", nExons);  
 			  printMess(mess);
@@ -437,7 +443,7 @@ int main (int argc, char *argv[])
 
 			  /* B.4. Printing current fragment predictions (sites and exons) */
 			  Output(allSites, allSites_r, allExons, allExons_r, 
-					 exons, nExons, Locus, l1, l2, Sequence, gp, dAA); 
+					 exons, nExons, Locus, l1, l2, lowerlimit, Sequence, gp, dAA); 
 
 			  /* recompute stats about splice sites and exons */
 			  updateTotals(m,allSites,allSites_r,allExons,allExons_r);
@@ -447,7 +453,7 @@ int main (int argc, char *argv[])
 				{
 				  genamic(exons, nExons, genes, gp);
 				  
-				  if (LengthSequence > LENGTHSi)
+				  if (upperlimit + 1 > LENGTHSi)
                     {
                       /* clean hash table of exons */
                       cleanDumpHash(dumpster->h);
@@ -482,7 +488,7 @@ int main (int argc, char *argv[])
 						 Locus, Sequence, gp, dAA);
 
 			  /* Reset best genes data structures for next input sequence */
-			  printMess("Cleanning gene structures and dumpster");
+			  printMess("Cleaning gene structures and dumpster");
 			  cleanGenes(genes,gp->nclass,dumpster);
 			}
 		  
