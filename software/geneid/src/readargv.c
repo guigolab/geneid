@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.17 2006-05-29 14:00:54 talioto Exp $  */
+/*  $Id: readargv.c,v 1.18 2006-06-02 09:53:52 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -46,7 +46,7 @@ extern long LOW,HI;
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxsz]\n\t\t[-DA] [-Z]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-j] <lower bound coord>\n\t\t[-k] <upper bound coord>\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2.2\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxsz]\n\t\t[-DA] [-Z]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-j <lower bound coord>]\n\t\t[-k <upper bound coord>]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2.2\n";
 
 void printHelp()
 {
@@ -76,8 +76,8 @@ void printHelp()
   printf("\t-M: Use XML format to print gene predictions\n");
   printf("\t-m: Show DTD for XML-format output \n\n");
 
-  printf("\t-j: <lower_limit>: Begin prediction at this coordinate\n");
-  printf("\t-k: <upper_limit>: End prediction at this coordinate\n");  
+  printf("\t-j  <lower_limit>: Begin prediction at this coordinate\n");
+  printf("\t-k  <upper_limit>: End prediction at this coordinate\n");  
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
   printf("\t-U: Allow U12 introns (Requires appropriate U12 parameters to be set in the parameter file)\n");
