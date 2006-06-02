@@ -195,6 +195,7 @@ $x->dispatch_with({
     
     'http://biomoby.org/#runDust'                                => 'INB::GRIB::Services::MaskingServices',
     'http://biomoby.org/#runDustCollection'                      => 'INB::GRIB::Services::MaskingServices',
+    'http://biomoby.org/#runDustFASTA_NA_multi'                  => 'INB::GRIB::Services::MaskingServices',
     'http://biomoby.org/#runRepeatMasker'                        => 'INB::GRIB::Services::MaskingServices',
     'http://biomoby.org/#runRepeatMaskerCollection'              => 'INB::GRIB::Services::MaskingServices',
     
