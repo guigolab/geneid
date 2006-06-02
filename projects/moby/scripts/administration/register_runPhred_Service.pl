@@ -158,7 +158,7 @@ my ($REG) = $Central->registerService(
 							    ['trace', ['Chromatogram_Encoded' => \@namespaces]] # simple
 							   ],
 				      output		=> [
-							    ['sequence', ['DNASequence' => \@namespaces]],
+							    ['sequence', ['FASTA_NA' => \@namespaces]],
 							    ['base_quality_data', ['FASTA_Base_Quality' => \@namespaces]]
 							   ],
 				      );
@@ -168,9 +168,9 @@ if ($REG->success) {
     
     # The result is valid.
     print STDERR "The '$serviceName' service has been registered in successfully: ", $REG->success, "\n";
-
+    
     # Get the RDF document
-
+    
     my $rdf_document = $REG->RDF;
     my $rdf_file = $serviceName . "_registration.rdf";
     open RDF, ">$rdf_file" or die "can't rdf file, $rdf_file\n";

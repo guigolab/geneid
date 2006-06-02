@@ -155,16 +155,17 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', [['DNASequence' => \@namespaces]]],
+							    ['sequences', ['FASTA_NA_multi' => \@namespaces]],
 							    ],
 				      output		=> [
 							    ['assembly', ['Ace_Text' => \@namespaces]],
-							    ['contig_and_singlet_sequences', [['DNASequence' => \@namespaces]]],
-							   ],
+							    ['contig_and_singlet_sequences', ['FASTA_NA_multi' => \@namespaces]],
+							    ],
 				      secondary	   => {
 					  'node_space' => {
 					      datatype => 'Integer',
 					      default => 4,
+					  },
 					  'node_seg' => {
 					      datatype => 'Integer',
 					      default => 8,

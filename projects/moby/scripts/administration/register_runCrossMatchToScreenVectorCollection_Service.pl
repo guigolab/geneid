@@ -155,11 +155,10 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['sequences', [['DNASequence' => \@namespaces]]],
-							    ['base_quality_data', ['FASTA_NA_multi' => \@namespaces]]
-							   ],
+							    ['sequences', ['FASTA_NA_multi' => \@namespaces]],
+							    ],
 				      output		=> [
-							    ['screened_sequences', [['DNASequence' => \@namespaces]]],
+							    ['screened_sequences', ['FASTA_NA_multi' => \@namespaces]],
 							   ],
 				      secondary	=> {
 					  'minmatch' => {

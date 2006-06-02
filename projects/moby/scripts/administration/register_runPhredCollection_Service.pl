@@ -158,7 +158,7 @@ my ($REG) = $Central->registerService(
 							    ['traces', [['Chromatogram_Encoded' => \@namespaces]]] # collection of one object type
 							   ],
 				      output		=> [
-							    ['sequences', [['DNASequence' => \@namespaces]]],
+							    ['sequences', ['FASTA_NA_multi' => \@namespaces]],
 							    ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]]
 							   ],
 				      );
