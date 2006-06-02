@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.81 2006-05-26 11:07:46 gmaster Exp $
+# $Id: Factory.pm,v 1.82 2006-06-02 13:25:02 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -132,6 +132,7 @@ our @EXPORT = qw(
   &meme2matrix_call
   &RepeatMasker_call
   &Dust_call
+  &Dust_FASTA_call
   &CrossMatchToScreenVector_call
   &Phrap_call
   &Phred_call
@@ -2040,6 +2041,105 @@ sub Dust_call {
 	print STDERR "$_dust_dir\/$_dust_bin $dust_file\n";
     }
 
+    my $masked_sequences = qx/$_dust_dir\/$_dust_bin $dust_file/;
+    
+    # Comment this line if you want to keep the file...
+    unlink $dust_file;
+    
+    if (! defined $masked_sequences) {
+	my $note = "Internal System Error. The parsing of masked sequence data has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
+    }
+    else {
+	return ($masked_sequences, $moby_exceptions);
+    }
+    
+}
+
+sub Dust_FASTA_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my @masked_seqs_fasta = "";
+    my $moby_exceptions   = [];
+    
+    # relleno los parametros por defecto Duct_call
+    
+    my $sequences          = $args{sequences}  || undef;
+    my $parameters         = $args{parameters} || undef;
+    my $debug              = $args{debug};
+    my $queryID            = $args{queryID}    || "";
+    
+    # No parameters
+    
+    # Llama a Dust en local
+    my $_dust_dir  = "/home/ug/gmaster/projects/bin";
+    my $_dust_bin  = "dust";
+    
+    # Check that the binary is in place
+    if (! -f "$_dust_dir/$_dust_bin") {
+	my $note = "Internal System Error. dust binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Create the temp sequences file
+
+    my ($seq_fh, $dust_file);
+    eval {
+	($seq_fh, $dust_file) = tempfile("/tmp/DUST.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open dust input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    print $seq_fh $sequences;
+    close $seq_fh;
+
+    # Test empty file
+    if (-z $dust_file) {
+	my $note = "Internal System Error. Empty dust input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    if ($debug) {
+	print STDERR "Running dust, with this command:\n";
+	print STDERR "$_dust_dir\/$_dust_bin $dust_file\n";
+    }
+    
     my $masked_sequences = qx/$_dust_dir\/$_dust_bin $dust_file/;
     
     # Comment this line if you want to keep the file...
