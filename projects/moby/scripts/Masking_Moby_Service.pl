@@ -225,42 +225,49 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 #
 ##################################################################
 
-my $seqin = Bio::SeqIO->new (
-			     -file   => $in_file,
-			     -format => 'fasta',
-			     );
-
-# Execute GeneID Web service on each individual sequence
-# Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
-# See Geneid_Moby_Service.v2.pl for this
-
 my $input_xml;
 my $input_xmls = [];
 
-while (my $seqobj = $seqin->next_seq) {
-    my $nucleotides  = $seqobj->seq;
-    my $seq_id       = $seqobj->display_id;
-    my $lnucleotides = length($nucleotides);
+if ($serviceName =~ /fasta/i) {
+    my $sequences_str = qx/cat $in_file/;
+    $input_xml = "<FASTA_NA_Multi><String namespace='' id='' articleName='content'><![CDATA[$sequences_str]]></String></FASTA_NA_Multi>";
+}
+else {
 
-    ##################################################################
-    #
-    # Set up the service input and the secondary articles in XML format 
-    #
-    ##################################################################
-
-    #
-    # Sequence Input
-    #
-
-    $input_xml = <<PRT;
+    my $seqin = Bio::SeqIO->new (
+				 -file   => $in_file,
+				 -format => 'fasta',
+				 );
+    
+# Execute GeneID Web service on each individual sequence
+# Another way would be to set up a collection of sequences and Run GeneID web service for the whole lot
+# See Geneid_Moby_Service.v2.pl for this
+    
+    while (my $seqobj = $seqin->next_seq) {
+	my $nucleotides  = $seqobj->seq;
+	my $seq_id       = $seqobj->display_id;
+	my $lnucleotides = length($nucleotides);
+	
+	##################################################################
+	#
+	# Set up the service input and the secondary articles in XML format 
+	#
+	##################################################################
+	
+	#
+	# Sequence Input
+	#
+	
+	$input_xml = <<PRT;
 <DNASequence namespace="$datasource" id="$seq_id">
   <Integer namespace="" id="" articleName="Length">$lnucleotides</Integer>
   <String namespace="" id=""  articleName="SequenceString">$nucleotides</String>
 </DNASequence>
 PRT
 
-    push (@$input_xmls, $input_xml);
-
+        push (@$input_xmls, $input_xml);
+	
+    }
 }
 
 #
