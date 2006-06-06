@@ -50,6 +50,7 @@ our @EXPORT = qw(
   &validateDataType
   &getNamespace
   &setMobyResponse
+  &setMobyData
   &MOBY_EMPTY_RESPONSE
   &MOBY_EMPTY_SIMPLE_RESPONSE
   &MOBY_EMPTY_COLLECTION_RESPONSE
@@ -64,6 +65,57 @@ our @EXPORT = qw(
 our $VERSION = '1.0';
 
 # Common subs
+
+# Generic method to build a moby data element, whatever number of output articles is in it, and whether or not those articles are empty !!
+
+sub setMobyData {
+    my $self = shift;
+    my %args = @_;
+    my $queryID  = $args{queryID};
+    my $articles = $args{articles};
+    
+    my $moby_response = "<moby:mobyData moby:queryID='$queryID'>";
+    
+    my @articleNames = keys (%$articles);
+    
+    print STDERR "article names, @articleNames\n";
+    
+    foreach my $articleName (@articleNames) {
+	my $article_hash = $articles->{$articleName};
+	
+	my $articleType  = $article_hash->{type};
+	my $moby_objects_array = $article_hash->{moby_objects};
+	
+	if ($articleType =~ /simple/i) {
+	    if (defined $moby_objects_array) {
+		my $moby_object = $moby_objects_array->[0];
+		$moby_response .= "<moby:Simple moby:articleName='$articleName'>$moby_object</moby:Simple>";
+	    }
+	    else {
+		$moby_response .= "<moby:Simple moby:articleName='$articleName'/>";
+	    }
+	}
+	elsif ($articleType =~ /collection/i) {
+	    if (defined $moby_objects_array) {
+		$moby_response .= "<moby:Collection moby:articleName='$articleName'>";
+		foreach my $moby_object (@$moby_objects_array) {
+		    $moby_response .= "<moby:Simple>$moby_object</moby:Simple>";
+		}
+		$moby_response .= "</moby:Collection>";
+	    }
+	    else {
+		$moby_response .= "<moby:Collection moby:articleName='$articleName'/>";
+	    }
+	}
+	else {
+	    print STDERR "Error, don't know about this article type, $articleType!!!\n";
+	}
+    }
+    
+    $moby_response .= "</moby:mobyData>";
+
+    return $moby_response;
+}
 
 sub MOBY_EMPTY_RESPONSE {
     my $self = shift;
