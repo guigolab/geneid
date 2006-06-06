@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.85 2006-06-06 09:59:13 gmaster Exp $
+# $Id: Factory.pm,v 1.86 2006-06-06 10:31:06 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -260,9 +260,9 @@ sub GeneID_call {
     
     # Llama a GeneID en local
     my $_geneid_dir  = "/home/ug/gmaster/projects/geneid";
-    my $_geneid_bin  = "bin/geneid";
+    my $_geneid_bin  = "bin/geneid_latest_withGFF3output";
     my $_geneid_args = "";
-
+    
     # Check that the binary is in place
     if (! -f "$_geneid_dir/$_geneid_bin") {
 	my $note = "Geneid binary not found";
@@ -277,10 +277,14 @@ sub GeneID_call {
 	return (undef, [$moby_exception]);
     }
 
-    if ($format eq "GFF") {
+    if (($format eq "GFF") || ($format eq "GFF2")) {
 	$_geneid_args .= "-G";
     }
-
+    
+    if ($format eq "GFF3") {
+	$_geneid_args .= "-3";
+    }
+    
     if ($strands eq "Both") {
 	# Default anyway
     }
