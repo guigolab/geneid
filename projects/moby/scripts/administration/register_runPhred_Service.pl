@@ -161,6 +161,17 @@ my ($REG) = $Central->registerService(
 							    ['sequence', ['FASTA_NA' => \@namespaces]],
 							    ['base_quality_data', ['FASTA_Base_Quality' => \@namespaces]]
 							   ],
+				      secondary	=> {
+					  'trim_alt' => {
+					      datatype => 'String',
+					      enum     => ['On', 'Off'],
+					      default  => 'Off',
+					  },
+					  'trim_cutoff' => {
+					      datatype => 'Float',
+					      default  => 0.05,
+					  }
+				      }
 				      );
 
 # Check if the result has been registered successfully.

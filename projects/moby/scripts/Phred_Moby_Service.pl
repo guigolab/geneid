@@ -255,8 +255,12 @@ PRT
 # Parameters (secondary articles)
 #
     
-  
-    
+my $trim_alt = "On";
+my $trim_cutoff = 0.1;
+
+my $trim_alt_xml    = "<Value>$trim_alt</Value>";
+my $trim_cutoff_xml = "<Value>$trim_cutoff</Value>";
+
 ##################################################################
 #
 # Service execution
@@ -270,12 +274,12 @@ if ($_debug) {
 my $result;
 if ($serviceName =~ /collection/i) {
     $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", [$input_xml]]
+						 ["$articleName", [$input_xml], "trim_alt", $trim_alt_xml, "trim_cutoff", $trim_cutoff_xml]
 						 ]);
 }
 else {
     $result = $Service->execute(XMLinputlist => [
-						 ["$articleName", $input_xml]
+						 ["$articleName", $input_xml, "trim_alt", $trim_alt_xml, "trim_cutoff", $trim_cutoff_xml]
 						 ]);
 }
 
