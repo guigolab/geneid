@@ -1,4 +1,4 @@
-# $Id: BaseCallingServices.pm,v 1.2 2006-06-06 09:06:57 arnau Exp $
+# $Id: BaseCallingServices.pm,v 1.3 2006-06-06 09:59:13 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -218,6 +218,10 @@ sub _do_query_Phred {
       return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
+    # Map it into a boolean
+    $trim_alt =~ /^on$/i  and $trim_alt = 1;
+    $trim_alt =~ /^off$/i and $trim_alt = 0;
+    
     ($trim_cutoff) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "trim_cutoff");
     if (not defined $trim_cutoff) {
       $trim_cutoff = 0.05;
@@ -246,7 +250,7 @@ sub _do_query_Phred {
 	# taverna right now doesn't set up the article name properly...
 	# ... no checking...
 	
-	if (1 || ($articleName =~ /trace/i)) {
+	if (($articleName =~ /trace/i) || isSimpleArticle ($DOM) || isCollectionArticle ($DOM)) {
 	    
 	    if ($_debug) {
 		print STDERR "parsing the trace article(s)...\n";

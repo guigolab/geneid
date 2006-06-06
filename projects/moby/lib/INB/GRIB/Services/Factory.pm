@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.84 2006-06-06 09:06:57 arnau Exp $
+# $Id: Factory.pm,v 1.85 2006-06-06 09:59:13 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -2549,8 +2549,8 @@ sub Phred_call {
     
     # parameters
     
-    my $trim_alt    = $parameters{trim_alt};
-    my $trim_cutoff = $parameters{trim_cutoff};
+    my $trim_alt    = $parameters->{trim_alt};
+    my $trim_cutoff = $parameters->{trim_cutoff};
     
     # Llama a Phred en local
     my $_phred_dir     = "/usr/local/molbio/Install/phred-0.020425.c";
@@ -2560,7 +2560,7 @@ sub Phred_call {
     my $_phd2fasta_bin = "phd2fasta";
     
     if ($trim_alt) {
-      $_phred_args .= "-trim_alt -trim_phd ";
+	$_phred_args .= "-trim_alt \"\" -trim_phd ";
     }
     
     if (defined $trim_cutoff) {
@@ -2644,6 +2644,20 @@ sub Phred_call {
 	unlink $qual_fasta_file;
 	# doesn't work !!!????
 	# rmtree (["$phred_input_dir", "$phred_output_dir"], 1, 1);
+    }
+    
+    if ((! defined $fasta_sequences) || (length $fasta_sequences < 1)) {
+	my $note = "Internal System Error. Phred base calling processing has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, undef, $moby_exceptions);
     }
     
     return ($fasta_sequences, $fasta_quality, $moby_exceptions);
