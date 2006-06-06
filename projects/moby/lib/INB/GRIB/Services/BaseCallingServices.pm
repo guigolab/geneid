@@ -1,4 +1,4 @@
-# $Id: BaseCallingServices.pm,v 1.1 2006-05-23 15:21:35 gmaster Exp $
+# $Id: BaseCallingServices.pm,v 1.2 2006-06-06 09:06:57 arnau Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -183,6 +183,9 @@ sub _do_query_Phred {
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     
+    my $trim_alt;
+    my $trim_cutoff;
+    
     # Variables that will be passed to Phred_call
     my %chromatograms;
     my %parameters;
@@ -192,7 +195,43 @@ sub _do_query_Phred {
     
     # Get the parameters
     
-    # no parameters !
+    ($trim_alt) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "trim_alt");
+    if (not defined $trim_alt) {
+      $trim_alt = 0;
+    }
+    elsif (! ($trim_alt =~ /on|off/i)) {
+      my $note = "'trim_alt' parameter, '$trim_alt', not accepted, should be ['On', 'Off']\n";
+      print STDERR "$note\n";
+      my $code = 222;
+      my $moby_exception = INB::Exceptions::MobyException->new (
+                                                              refElement => "trim_alt",
+                                                              code       => $code,
+                                                              type       => 'error',
+                                                              queryID    => $queryID,
+                                                              message    => "$note",
+                                                               );
+      push (@$moby_exceptions, $moby_exception);
+      
+      # Return an empty moby data object, as well as an exception telling what nothing got returned
+		
+      $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $quality_output_article_name);
+      return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    ($trim_cutoff) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "trim_cutoff");
+    if (not defined $trim_cutoff) {
+      $trim_cutoff = 0.05;
+    }
+
+    # Check it is a float 
+    if (! ($trim_cutoff =~ /\d\.*\d*/)) {
+      print STDERR "trim_cutoff parameter, $trim_cutoff, is not valid, should be a float!!\n";
+    }
+    
+    # check that if trim_cutoff is set up, trim_alt is settup too (as a warning)
+    
+    $parameters{trim_alt}    = $trim_alt;
+    $parameters{trim_cutoff} = $trim_cutoff;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {

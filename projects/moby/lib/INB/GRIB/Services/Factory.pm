@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.83 2006-06-02 15:44:19 gmaster Exp $
+# $Id: Factory.pm,v 1.84 2006-06-06 09:06:57 arnau Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -2547,7 +2547,10 @@ sub Phred_call {
     my $debug         = $args{debug};
     my $queryID       = $args{queryID}       || "";
     
-    # no parameters !
+    # parameters
+    
+    my $trim_alt    = $parameters{trim_alt};
+    my $trim_cutoff = $parameters{trim_cutoff};
     
     # Llama a Phred en local
     my $_phred_dir     = "/usr/local/molbio/Install/phred-0.020425.c";
@@ -2555,6 +2558,14 @@ sub Phred_call {
     my $_phred_args    = "";
     my $_phred_config_file = "/home/ug/gmaster/projects/assembly/phredpar.dat";
     my $_phd2fasta_bin = "phd2fasta";
+    
+    if ($trim_alt) {
+      $_phred_args .= "-trim_alt -trim_phd ";
+    }
+    
+    if (defined $trim_cutoff) {
+      $_phred_args .= "-trim_cutoff $trim_cutoff ";
+    }
     
     # Check that the binary is in place
     if (! -f "$_phred_dir/$_phred_bin") {
