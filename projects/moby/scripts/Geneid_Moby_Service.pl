@@ -310,7 +310,8 @@ PRT
     #
     ##################################################################
 
-    print "result\n", $result, "\n";
+    print STDERR "result\n";
+    print "$result\n";
 
 }
 
