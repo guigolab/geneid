@@ -43,8 +43,7 @@ public class EncodeWrapper extends GTFWrapper {
 		// "encode/RefSeqGenes_fromUCSC.inENCODE.gtf"
 		// "encode/RefSeqGenes_fromUCSC.gtf"
 		// "encode/EnsemblGenes_all_fromENSEMBL.gtf"
-		// "encode/RefseqGenes_all_fromENSEMBL.gtf"
-		String fName= "encode/RefseqGenes_all_fromENSEMBL.gtf";
+		String fName= "encode/EnsemblGenes_fromUCSC.gtf";
 		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
 		try {
 			myWrapper.read();
@@ -52,18 +51,18 @@ public class EncodeWrapper extends GTFWrapper {
 			e.printStackTrace(); 
 		}
 		boolean encode= false;
-		if (fName.equals("encode/44regions_genes_CHR_coord.gtf"))
+		if (fName.startsWith("encode/44regions_genes_CHR_coord"))
 			encode= true;
 		
 		long t0= System.currentTimeMillis();
 		Graph g= myWrapper.assemble(encode);		// <===== check ENCODE here !!!
-		System.out.println(g.getTranscriptCount());
 		g.filterNonCodingTranscripts();
-		System.out.println(g.getTranscriptCount());
 
 		
+		//ASAnalyzer.analyze1_transcripts_clusters(g);
 		//ASAnalyzer.outputASStatistics(g);
-		ASAnalyzer.analyze1_transcripts_clusters(g);
+		ASAnalyzer.test03_lengthVariationModulo(g);
+		//ASAnalyzer.determineVariations(g, System.out);
 		
 //		ASVariation[][] as= ASAnalyzer.determineVariations(g, (PrintStream) null);
 //		for (int i = 0; i < as.length; i++) {
@@ -237,7 +236,7 @@ public class EncodeWrapper extends GTFWrapper {
 		Species spec= new Species("human");
 
 			// cluster
-		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genes?
+		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genesç
 		HashMap chrHash= getChromosomes(hash);
 		
 			// construct transcripts

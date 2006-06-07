@@ -7,6 +7,7 @@
 package gphase.model;
 
 import gphase.Constants;
+import gphase.tools.Arrays;
 
 
 import java.io.BufferedReader;
@@ -526,19 +527,35 @@ public class Species implements Serializable {
 		return geneHash.values().size();
 	}
 	
-	public int getSpliceSites(int regionType, int ssType) {
+	public SpliceSite[] getSpliceSites(int regionType, int ssType) {
 		int perc= 0;
 		Gene[] ge= getGenes();
+		Vector v= new Vector();
 		for (int i = 0; i < ge.length; i++) {
-			perc+= ge[i].getSpliceSites(regionType, ssType); 
+			SpliceSite[] ssites= ge[i].getSpliceSites(regionType, ssType);
+			for (int j = 0; ssites!= null&& j < ssites.length; j++) 
+				v.add(ssites[j]);
 		}
-		return perc;
+		return (SpliceSite[]) Arrays.toField(v);
 	}
 	/**
 	 * @return Returns the buildVersion.
 	 */
 	public int getBuildVersion() {
 		return buildVersion;
+	}
+	public Exon[] getExons() {
+
+		Vector v= new Vector();
+		Iterator iter= geneHash.values().iterator();
+		while(iter.hasNext()) {
+			Gene ge= (Gene) iter.next();
+			Exon[] ex= ge.getExons();
+			for (int i = 0; i < ex.length; i++) {
+				v.add(ex[i]);
+			}
+		}
+		return (Exon[]) Arrays.toField(v);
 	}
 
 	/**
@@ -553,5 +570,50 @@ public class Species implements Serializable {
 	}
 	public EncodeRegion[] getEncodeRegions() {
 		return encodeRegions;
+	}
+	
+	public int countNonProteinCodingLoci() {
+		Gene[] ge= getGenes();
+		int cnt= 0;
+		for (int i = 0; i < ge.length; i++) 
+			if (!ge[i].isProteinCoding())
+				++cnt;
+		return cnt;
+	}
+	
+	public void recluster() {
+		Gene[] ge= getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[][] newTranscripts= ge[i].recluster();
+			
+			if (newTranscripts== null|| newTranscripts.length== 0) {
+				remove(ge[i], true);
+				continue;
+			}
+			if (newTranscripts.length< 2)	// nothing happened
+				continue;
+			
+				// create new clusters
+			for (int j = 0; j < newTranscripts.length; j++) {
+				Gene nuGene= new Gene(this, Gene.getUniqueID());
+				nuGene.setStrand(ge[i].getStrand());
+				for (int k = 0; k < newTranscripts[j].length; k++) 	{
+					Transcript t= new Transcript(nuGene, newTranscripts[j][k].getTranscriptID());
+					nuGene.addTranscript(t);
+					Exon[] ex= newTranscripts[j][k].getExons();
+					for (int m = 0; m < ex.length; m++) {
+						Exon e= new Exon(t, ex[m].getExonID(), ex[m].getStart(), ex[m].getEnd());
+						t.addExon(e);
+					}
+					Translation[] trans= newTranscripts[j][k].getTranslations();
+					for (int n = 0; n < trans.length; n++) {
+						Translation tra= new Translation(t);
+						t.addTranslation(tra);
+					}
+				}
+				geneHash.put(nuGene.getGeneID(), nuGene);
+			}			
+			remove(ge[i], true);
+		}
 	}
 }

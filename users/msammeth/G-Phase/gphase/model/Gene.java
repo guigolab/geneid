@@ -46,6 +46,14 @@ public class Gene extends DirectedRegion {
 	ASMultiVariation[] asComplexes= null;
 	AbstractSite[] sites= null;
 	
+	public boolean isProteinCoding() {
+		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
+			if (!transcripts[i].isNonCoding())
+				// transcripts[i].getTranslations()!= null&& transcripts[i].getTranslations().length> 0)
+				return true;
+		return false;
+	}
+	
 	public int getMinCDSStart() {
 		int min= Integer.MAX_VALUE;
 		for (int i = 0; i < transcripts.length; i++) {
@@ -60,7 +68,28 @@ public class Gene extends DirectedRegion {
 		return min;
 	}
 	
-	public int getSpliceSites(int regionType, int type) {
+	public Transcript[][] recluster() {
+		Arrays.sort(transcripts, new AbstractRegion.PositionComparator());
+		Vector v= null;
+		int max= Integer.MIN_VALUE;
+		Vector clusters= new Vector();
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].getStart()> max) {
+				if (v!= null)
+					clusters.add(v);
+				v= new Vector();
+			} 
+			v.add(transcripts[i]);
+			if (transcripts[i].getEnd()> max)
+				max= transcripts[i].getEnd();
+		}
+		if (v!= null)
+			clusters.add(v);
+		
+		return (Transcript[][]) gphase.tools.Arrays.toField(clusters);
+	}
+	
+	public SpliceSite[] getSpliceSites(int regionType, int type) {
 		AbstractRegion[] regions= new AbstractRegion[1];
 		if (regionType== AbstractRegion.REGION_5UTR)
 			regions[0]= getReal5UTR();
@@ -74,8 +103,8 @@ public class Gene extends DirectedRegion {
 		return getSpliceSites(regions, type);
 	}
 	
-	public int getSpliceSites(AbstractRegion[] target, int type) {
-		int cnt= 0;
+	public SpliceSite[] getSpliceSites(AbstractRegion[] target, int type) {
+		Vector v= new Vector();
 		for (int i = 0; spliceSites!= null&& i < spliceSites.length; i++) {
 			if ((type== SpliceSite.ALTERNATE_SS&& spliceSites[i].isConstitutive())
 				|| (type== SpliceSite.CONSTITUTIVE_SS&& !spliceSites[i].isConstitutive()))
@@ -84,11 +113,11 @@ public class Gene extends DirectedRegion {
 				if (spliceSites[i].getPos()< target[j].getStart()|| 
 						spliceSites[i].getPos()> target[j].getEnd())
 					continue;
-				++cnt;
+				v.add(spliceSites[i]);
 				break;
 			}
 		}
-		return cnt;
+		return (SpliceSite[]) gphase.tools.Arrays.toField(v);
 	}
 	
 	public AbstractRegion getReal5UTR() {
@@ -456,15 +485,8 @@ public class Gene extends DirectedRegion {
             return concat;
 		}
 		
-		/**
-	 * @param b
-	 */
-	public void setForward(boolean b) {
-		forward= b;
-	}
-	String assembly= null;
+		String assembly= null;
 	String geneID= null;
-	boolean forward = true;
 	HashMap homologies= null; // species to vector of genes
 	
 	Transcript[] transcripts= null;
@@ -510,12 +532,40 @@ public class Gene extends DirectedRegion {
 		return getStableID();
 	}
 
+	public void removeSpliceSite(SpliceSite ss) {
+		
+		if (spliceSites== null|| spliceSites.length< 1)
+			return;
+		
+		SpliceSite[] newSpliceSites= new SpliceSite[spliceSites.length- 1];
+		int pos= 0;
+		for (int i = 0; i < spliceSites.length; i++) {
+			if (spliceSites[i]!= ss)
+				newSpliceSites[pos++]= spliceSites[i];
+		}
+		spliceSites= newSpliceSites;
+	}
+	
 	public boolean removeTranscript(Transcript trans) {
 		
 		//System.out.print("Removing transcript "+trans.getStableID()+":");
 			// remove from shared exons
-		for (int i = 0; i < trans.getExons().length; i++) 
-			trans.getExons()[i].removeTranscript(trans);
+		for (int i = 0; i < trans.getExons().length; i++) {
+			Exon ex= trans.getExons()[i]; 
+			ex.removeTranscript(trans);
+			if (ex.getTranscripts().length== 0) {	// remove exon/ss
+				if (ex.getDonor()!= null) {
+					ex.getDonor().removeExon(ex);
+					if (ex.getDonor().getExons()== null|| ex.getDonor().getExons().length< 1)
+						removeSpliceSite(ex.getDonor());
+				} 
+				if (ex.getAcceptor()!= null) {
+					ex.getAcceptor().removeExon(ex);
+					if (ex.getAcceptor().getExons()== null|| ex.getAcceptor().getExons().length< 1)
+						removeSpliceSite(ex.getAcceptor());
+				}
+			}
+		}
 		
 			// remove from gene
 		Transcript[] newTranscripts= new Transcript[transcripts.length- 1];
@@ -713,6 +763,35 @@ public class Gene extends DirectedRegion {
 		}
 			
 		return (ASVariation[]) gphase.tools.Arrays.toField(resVec);
+	}
+	
+	/**
+	 * @deprecated does not work that easy for constitutive exons, 
+	 * bette take non-involvement in ASVariation as criterion
+	 * @param constitutive
+	 * @return
+	 */
+	public Exon[] getExons(boolean constitutive) {
+		
+		Vector v= new Vector();
+		for (int i = 0; i < transcripts.length; i++) {
+			for (int j = 0; j < transcripts.length; j++) {
+				Exon[] ex1= transcripts[i].getExons();
+				for (int k = 1; k < ex1.length- 1; k++) {	// no terminal exons for the comparison
+					if (!transcripts[j].contains(ex1[k]))
+						continue;
+					Exon[] ex2= transcripts[j].getExons();
+					int m;
+					for (m = 1; m < ex2.length- 2; m++) {
+						if (ex1[k].overlaps(ex2[m])) {
+							if (ex1[k].get)
+						}
+					}
+					if (m== ex2.length&& !constitutive)
+						v.add(ex1);
+				}
+			}
+		}
 	}
 	
 	public ASMultiVariation[] getASMultiVariations() {

@@ -55,6 +55,18 @@ public class SpliceSite extends AbstractSite {
 		addExon(exon);
 	}
 	
+	public void removeExon(Exon ex) {
+		if (ex== null)
+			return;
+		Exon[] newExons= new Exon[exons.length- 1];
+		int p= 0;
+		for (int i = 0; i < exons.length; i++) {
+			if (exons[i]!= ex)
+				newExons[p++]= exons[i];
+		}
+		exons= newExons;
+	}
+	
 	public boolean addExon(Exon newExon) {
 		if (exons== null) {
 			exons= new Exon[] {newExon};
@@ -64,7 +76,8 @@ public class SpliceSite extends AbstractSite {
 		Comparator compi= new AbstractRegion.PositionComparator();
 		int i;
 		for (i = 0; i < exons.length; i++) 
-			if (compi.compare(newExon, exons[i])== 0)
+			//if (compi.compare(newExon, exons[i])== 0)
+			if (newExon== exons[i])	// have to hold redundantly ALL exons, for SpliceSite.remove(Exon)
 				break;
 		if (i== exons.length) {
 			exons= (Exon[]) Arrays.add(exons, newExon);

@@ -58,6 +58,40 @@ import gphase.tools.Time;
 public class ASAnalyzer {
 
 	Graph graph;
+	
+	public static void outputConstitutiveExons(Graph g) {
+		Exon[] ex= g.getExons();
+		for (int i = 0; i < ex.length; i++) {
+			if (ex[i].getTranscripts().length== 1)
+				System.out.println(ex[i].toPosString());
+		}
+	}
+	
+	public static void test04_AA_AD(Graph g) {
+		
+		g.filterNonCodingTranscripts();
+		ASVariation[][] as= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+		
+			// get all events containing AA, AD
+		Vector adVec= new Vector();
+		Vector aaVec= new Vector();
+		for (int i = 0; i < as.length; i++) {
+			String s= as[i][0].toBitString();
+			if (s.contains("DBA")|| s.contains("DCA"))
+				adVec.add(as[i]);
+			if (s.contains("ABD")|| s.contains("ACD"))
+				aaVec.add(as[i]);
+		}
+		ASVariation[][] aa= (ASVariation[][]) Arrays.toField(aaVec);
+		ASVariation[][] ad= (ASVariation[][]) Arrays.toField(adVec);
+		
+		for (int i = 0; i < ad.length; i++) 
+			System.out.println(ad[i][0]);
+		for (int i = 0; i < aa.length; i++) 
+			System.out.println(aa[i][0]);
+		
+	}
+	
 	public ASAnalyzer(Graph newGraph) {
 		this.graph= newGraph;
 	}
@@ -177,7 +211,7 @@ public class ASAnalyzer {
 //			}
 		}
 
-	public static void lengthVariationModulo(Graph g) {
+	public static void test03_lengthVariationModulo(Graph g) {
 		ASVariation[][] classes= g.getASVariations(1);
 		classes= filter(classes, "isProteinCoding");
 		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
@@ -186,7 +220,7 @@ public class ASAnalyzer {
 		int cnt0= 0, cnt1= 0, cnt2= 0;
 		int scnt0= 0, scnt1= 0, scnt2= 0, stot= 0;
 		int tot= 0;
-		for (int x = 0; x < classes.length; x++) {
+		for (int x = 0; classes!= null&& x < classes.length; x++) {
 			cnt1= 0; cnt2= 0; cnt0= 0;
 			tot= 0;
 			ASVariation[] events= classes[x];
@@ -195,7 +229,8 @@ public class ASAnalyzer {
 				int[] a= events[i].getLength(true);
 				int[] b= events[i].getLength(false);
 				int diffA= Math.abs(a[0]- a[1]);
-//				events[i].outputDetail(System.out);
+//				if (x== 0)
+//					events[i].outputDetail(System.out);
 //				System.out.println(a[0]+","+a[1]+": "+diffA+"("+(diffA%3)+")");
 				if (diffA%3== 0)
 					cnt0++;
@@ -274,12 +309,18 @@ public class ASAnalyzer {
 	
 	public static void outputASStatistics(Graph g) {
 		g.getASVariations(ASMultiVariation.FILTER_NONE);
-		int[] res= g.getSpliceSites(AbstractRegion.REGION_5UTR);
-		System.out.println("5UTR: "+res[0]+" "+res[1]+"\t"+((float) res[0]/(float) res[1]));
+		SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_5UTR);
+		System.out.println("5UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) res[1].length));
+//		for (int i = 0; i < res[1].length; i++) 
+//			System.out.println(res[1][i]);
 		res= g.getSpliceSites(AbstractRegion.REGION_CDS);
-		System.out.println("CDS: "+res[0]+" "+res[1]+"\t"+((float) res[0]/(float) res[1]));
+		System.out.println("CDS: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) res[1].length));
+//		for (int i = 0; i < res[1].length; i++) 
+//			System.out.println(res[1][i]);
 		res= g.getSpliceSites(AbstractRegion.REGION_3UTR);
-		System.out.println("3UTR: "+res[0]+" "+res[1]+"\t"+((float) res[0]/(float) res[1]));
+		System.out.println("3UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) res[1].length));
+//		for (int i = 0; i < res[1].length; i++) 
+//			System.out.println(res[1][i]);
 	}
 	/** @deprecated ?
 	 * 
@@ -458,8 +499,8 @@ public class ASAnalyzer {
 	public static ASVariation[][] getSpecificVariations(Graph g, PrintStream p) {
 		
 		ASVariation[][] classes= g.getASVariations(0);
-		Comparator compi= new ASVariation.SpliceChainUniqueCodingComparator();
-		Comparator c= new ASVariation.SpliceChainCodingHierarchyFilter();
+		Comparator compi= new ASVariation.UniqueCodingComparator();
+		Comparator c= new ASVariation.CodingHierarchyFilter();
 		ASVariation[][] newClasses= new ASVariation[classes.length][];
 		for (int i = 0; i < classes.length; i++) {
 			Vector v= new Vector();
@@ -920,6 +961,10 @@ public class ASAnalyzer {
 		}
 	}
 	private static ASVariation[][] filter(ASVariation[][] hits, String methodName) {
+		
+		if (hits== null)
+			return hits;
+		
 		Method m= null;
 		try {
 			m = hits[0][0].getClass().getMethod(methodName, null);

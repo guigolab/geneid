@@ -304,6 +304,10 @@ public class Exon extends DirectedRegion {
 		return getExonID();
 	}
 
+	public String toPosString() {
+		return getGene().getChromosome()+" "+getStart()+" "+getEnd();
+	}
+
 	public String getChromosome() {
 		return getGene().getChromosome();
 	}

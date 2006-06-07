@@ -31,37 +31,36 @@ public abstract class AbstractRegion implements Region {
 	 */
 	public static class PositionComparator implements Comparator {
 		
-		public boolean equals(Object o1, Object o2) {
-			
-			if (compare(o1, o2)== 0)
-				return true;
-			return false;
-		}
-			
 		public int compare(Object o1, Object o2) {
-				
-			if (o1.equals(o2))	// object identity
+
+			int end1= ((Region) o1).getEnd();
+			int start2= ((Region) o2).getStart();
+			int end2= ((Region) o2).getEnd();
+			int start1= ((Region) o1).getStart();
+			
+			if (start1== start2&& end1== end2)	// no object identity
 				return 0;
 			
 				// non-overlapping, one before the other
-			if (((Region) o1).getEnd()< ((Region) o2).getStart())
+			if (end1< start2)
 				return -1;		// one stops before the other
-			if (((Region) o2).getEnd()< ((Region) o1).getStart())
+			if (end2< start1)
 				return 1;
 			
 				// overlapping: none stops before the other
-			if (((Region) o1).getStart()< ((Region) o2).getStart())
+			if (start1< start2)
 				return -1;
-			if (((Region) o2).getStart()< ((Region) o1).getStart())
+			if (start2< start1)
 				return 1;
 			
 				// overlapping and same start position
-			if (((Region) o1).getEnd()< ((Region) o2).getEnd())
+			if (start1< end2)
 				return -1;
-			if (((Region) o2).getEnd()< ((Region) o1).getEnd())
+			if (end2< start1)
 				return 1;
 			
-			return 0;	// identical positions
+			System.err.println("assertion in abstractregion.positioncomparator failed");
+			return 0;	// identical positions --> never reached
 			
 		}
 	}

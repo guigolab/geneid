@@ -38,8 +38,36 @@ public abstract class DirectedRegion extends AbstractRegion {
 			return 0;
 		}
 	}
+	/**
+	 * Returns <code>true</code> if <code>this</code> region contains <code>anotherRegion</code>.
+	 */
+	public boolean contains(Region anotherRegion) {
+
+		if (!anotherRegion.getChromosome().equalsIgnoreCase(getChromosome()))
+			return false;
+		
+		if ((Math.abs(getStart())<= Math.abs(anotherRegion.getStart()))&& 
+				(Math.abs(getEnd())>= Math.abs(anotherRegion.getEnd())))
+			return true;
+		return false;
+	}
+	
 	public int strand = 0;
 
+	public boolean overlaps(Region anotherRegion) {
+		
+		if (getChromosome()!= null&& anotherRegion.getChromosome()!= null
+			&& (!anotherRegion.getChromosome().equalsIgnoreCase(getChromosome())))
+			return false;
+		
+		if ((Math.abs(getStart())>= Math.abs(anotherRegion.getStart())&& 
+				Math.abs(getStart())< Math.abs(anotherRegion.getEnd()))
+				|| (Math.abs(anotherRegion.getStart())>= Math.abs(getStart())
+						&& Math.abs(anotherRegion.getStart())< Math.abs(getEnd())))
+			return true;
+		return false;
+	}
+	
 	/**
 	 * @param b
 	 */

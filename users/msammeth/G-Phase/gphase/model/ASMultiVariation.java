@@ -37,7 +37,7 @@ public class ASMultiVariation implements Serializable {
 		
 		
 		Comparator compi= null;
-		compi= new ASVariation.SpliceChainCodingHierarchyFilter();
+		compi= new ASVariation.CodingHierarchyFilter();
 		for (int i = 0; i < v.size(); i++) 
 			for (int j = i+1; j < v.size(); j++) {
 				int c= compi.compare(v.elementAt(i), v.elementAt(j));
@@ -61,7 +61,7 @@ public class ASMultiVariation implements Serializable {
 		
 		
 		Comparator compi= null;
-		compi= new ASVariation.SpliceChainCodingComparator();
+		compi= new ASVariation.CodingComparator();
 		for (int i = 0; i < v.size(); i++) 
 			for (int j = i+1; j < v.size(); j++) {
 				if (compi.compare(v.elementAt(i), v.elementAt(j))== 0)

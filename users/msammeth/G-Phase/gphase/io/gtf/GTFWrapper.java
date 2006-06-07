@@ -76,7 +76,7 @@ public class GTFWrapper extends DefaultIOWrapper {
 		while (buffy.ready()) {
 			lineCtr++;
 			line= buffy.readLine();
-			StringTokenizer toki= new StringTokenizer(line, "\t");	// must be tab, see specification
+			StringTokenizer toki= new StringTokenizer(line, " \t");	// must be tab, see specification
 			if (toki.countTokens()< 8)
 				System.err.println("line "+ lineCtr+ ": skipped (<8 token)!\n\t"+ line);
 			// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
@@ -100,7 +100,7 @@ public class GTFWrapper extends DefaultIOWrapper {
 			int smc= line.indexOf(';');		// GTF2
 			if (smc>= 0) {
 				int x= 0;
-				toki= new StringTokenizer(line, "\t");	// must be tab, see specification
+				toki= new StringTokenizer(line, " \t");	// must be tab, see specification
 				for (int i = 0; i < 8; i++) 
 					x+= toki.nextToken().length()+ 1;
 //				String h= line.substring(0, smc);			// last ';'

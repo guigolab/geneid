@@ -529,7 +529,7 @@ public class Transcript extends DirectedRegion {
 				int p= Arrays.binarySearch(
 						exons,
 						newExon,
-						new AbstractRegion.PositionComparator()	
+						new AbstractRegion.PositionComparator()	// has to be directed, end< start for two ident. regions	
 					);
 		
 				if (p>= 0) 
@@ -565,7 +565,7 @@ public class Transcript extends DirectedRegion {
 			int p= Arrays.binarySearch(
 					this.exons,
 					newExon,
-					new AbstractRegion.PositionComparator()	
+					new AbstractRegion.PositionComparator()		// here also abstractregion possible	
 			);
 			
 			if (p== 0) {

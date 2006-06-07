@@ -75,6 +75,9 @@ public class Arrays {
 	
 	public static Object[] sort2DFieldRev(Object o) {
 		
+		if (o== null)
+			return null;
+		
 		Object[] oo;
 		if (o instanceof Collection)
 			oo= (Object[]) ((Collection) o).toArray();

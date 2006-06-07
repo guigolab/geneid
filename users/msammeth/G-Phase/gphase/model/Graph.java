@@ -117,6 +117,14 @@ public class Graph implements Serializable {
 		
 	}
 	
+	public void recluster() {
+		Iterator iter= speciesHash.values().iterator();
+		while (iter.hasNext()) {
+			Species spe= (Species) iter.next();
+			spe.recluster();
+		}
+	}
+	
 	/**
 	 * Removes a gene and its homologies, but homologs only if they do not have any further homologies in the graph.
 	 * @deprecated not in use.
@@ -303,6 +311,16 @@ public class Graph implements Serializable {
 		
 	}
 	
+	public int countNonCodingLoci() {
+		Iterator iter= speciesHash.values().iterator();
+		int cnt= 0;
+		while (iter.hasNext()) {
+			Species spe= (Species) iter.next();
+			cnt+= spe.countNonProteinCodingLoci();
+		}
+		return cnt;
+	}
+	
 	public int getClustersWithAS() {
 		Gene[] ge= getGenes();
 		int cnt= 0;
@@ -372,6 +390,19 @@ public class Graph implements Serializable {
 		speciesHash.put(key, newSpecies);
 		return true;
 	}
+	public Exon[] getExons() {
+
+		Vector v= new Vector();
+		Iterator iter= speciesHash.values().iterator();
+		while(iter.hasNext()) {
+			Species sp= (Species) iter.next();
+			Exon[] ex= sp.getExons();
+			for (int i = 0; i < ex.length; i++) {
+				v.add(ex[i]);
+			}
+		}
+		return (Exon[]) gphase.tools.Arrays.toField(v);
+	}
 
 	/**
 	 * @return
@@ -387,15 +418,21 @@ public class Graph implements Serializable {
 		return sp;
 	}
 	
-	public int[] getSpliceSites(int regionType) {
+	public SpliceSite[][] getSpliceSites(int regionType) {
 		Species[] spe= getSpecies();
-		int[] result= new int[2];
-		result[0]= 0;
-		result[1]= 0;
+		Vector v1= new Vector();
+		Vector v2= new Vector();
 		for (int i = 0; i < spe.length; i++) {
-			result[0]+= spe[i].getSpliceSites(regionType, SpliceSite.ALTERNATE_SS);
-			result[1]+= spe[i].getSpliceSites(regionType, SpliceSite.NOTYPE_SS);
+			SpliceSite[] ssites= spe[i].getSpliceSites(regionType, SpliceSite.ALTERNATE_SS);
+			for (int j = 0; j < ssites.length; j++) 
+				v1.add(ssites[j]);
+			ssites= spe[i].getSpliceSites(regionType, SpliceSite.NOTYPE_SS);
+			for (int j = 0; j < ssites.length; j++) 
+				v2.add(ssites[j]);
 		}
+		SpliceSite[][] result= new SpliceSite[2][];
+		result[0]= (SpliceSite[]) gphase.tools.Arrays.toField(v1);
+		result[1]= (SpliceSite[]) gphase.tools.Arrays.toField(v2);
 		return result;
 	}
 
@@ -997,6 +1034,8 @@ public class Graph implements Serializable {
 		
 		}
 	
+	/**
+	 */
 	public void filterNonCodingTranscripts() {
 		Iterator iter= speciesHash.values().iterator();
 		while (iter.hasNext()) {
@@ -1008,8 +1047,11 @@ public class Graph implements Serializable {
 					if (trans[j].isNonCoding())
 						ge[i].removeTranscript(trans[j]);
 				}
+				if (ge[i].getTranscriptCount()< 1)	// remove gene if there are no more transcripts
+					spec.remove(ge[i], true);
 			}
 		}
+		recluster();
 	}
 	
 	/**
@@ -1100,7 +1142,7 @@ public class Graph implements Serializable {
 		if (asClasses == null) {
 			Gene[] ge= getGenes();
 			asVariations= 0;
-			Comparator compi= new ASVariation.SructureComparator();
+			Comparator compi= new ASVariation.SpliceStringComparator();
 			Vector asClassesV= new Vector();
 			for (int i = 0; i < ge.length; i++) {	// all genes
 				ASMultiVariation[] as= ge[i].getASMultiVariations();

@@ -32,7 +32,6 @@ public class ASVariation implements Serializable {
 	int degree= -1;
 	ASEvent[] asEvents= null; // events
 	
-	
 	public static class VarLengthFieldComparator implements Comparator {
 		public int compare(Object arg0, Object arg1) {
 			ASVariation[] v1= (ASVariation[]) arg0;
@@ -100,7 +99,7 @@ public class ASVariation implements Serializable {
 		return vars;
 	}
 	                            
-	public static class SructureComparator implements Comparator {
+	public static class SpliceStringComparator implements Comparator {
 
 		public int compare(Object arg0, Object arg1) {
 			
@@ -203,37 +202,37 @@ public class ASVariation implements Serializable {
 			return 0;
 		}
 		
-		// this is for comparing with other comparator!!
-		public boolean equals(Object obj) {
-			return false;
-		}
-		
 	}
 
-	public static class SpliceChainCodingComparator extends SpliceChainComparator {
+	public static class SpliceChainComparator extends StructureComparator {
 		
 		public int compare(Object arg0, Object arg1) {
 			
-			int eq= super.compare(arg0, arg1);
-			if (eq!= 0)
-				return -1;	// structurally different
+			SpliceSite[] s1= (SpliceSite[]) arg0;
+			SpliceSite[] s2= (SpliceSite[]) arg1;
 			
-			ASVariation as1= (ASVariation) arg0;
-			ASVariation as2= (ASVariation) arg1;
-//			if ((as1.isProteinCoding()!= as2.isProteinCoding())
-//				|| (as1.isPartiallyCoding()!= as2.isPartiallyCoding())
-//				|| (as1.isNotAtAllCoding()!= as2.isNotAtAllCoding()))
-//				return -1;
-			
-				// priority list
-			if ((as1.isProteinCoding()&& as2.isProteinCoding())||
-				(as1.isPartiallyCoding()&& as2.isPartiallyCoding())||
-				(as1.isNotAtAllCoding()&& as2.isNotAtAllCoding()))
-				return 0;
-			return 1;	
+			Comparator compi= new SpliceSite.PositionComparator();
+			if (s1== null|| s1.length< 1) {
+				if (s2== null|| s2.length< 1) 
+					return 0;
+				else 
+					return -1;
+			} else {
+				if (s2== null|| s2.length< 1)
+					return 1;
+				else {
+					if (s1.length!= s2.length)
+						return -1;
+					for (int i = 0; i < s2.length; i++) {
+						if (compi.compare(s1[i], s2[i])!= 0)
+							return compi.compare(s1[i], s2[i]);
+					}
+					return 0;
+				}
+			}
 		}
 	}
-	public static class SpliceChainUniqueCodingComparator extends SpliceChainComparator {
+	public static class UniqueCodingComparator extends StructureComparator {
 		
 		public int compare(Object arg0, Object arg1) {
 			
@@ -650,7 +649,7 @@ public class ASVariation implements Serializable {
 		return true;		
 	}
 
-	public static class SpliceChainComparator implements Comparator {
+	public static class StructureComparator implements Comparator {
 		
 		/**
 		 * @return <code>0</code> if both objects are equal, <code>1</code>
@@ -708,36 +707,46 @@ public class ASVariation implements Serializable {
 			ASVariation as1= (ASVariation) arg0;
 			ASVariation as2= (ASVariation) arg1;
 			
-				// compare splice universees
-			SpliceSite[] su1= as1.getSpliceUniverse();
-			SpliceSite[] su2= as2.getSpliceUniverse();
-			if (su1.length!= su2.length)
-				return -1;
+			Comparator compi= new SpliceChainComparator();
+			SpliceSite[][] s1= new SpliceSite[][] {as1.spliceChain1, as1.spliceChain2};
+			SpliceSite[][] s2= new SpliceSite[][] {as2.spliceChain1, as2.spliceChain2};
+			if (((compi.compare(s1[0], s2[0])== 0)&& (compi.compare(s1[1], s2[1])== 0))||
+				((compi.compare(s1[1], s2[0])== 0)&& (compi.compare(s1[0], s2[1])== 0)))
+				return 0;
+			return -1;
+			
+			// compare splice universees
+			// night of 6.6.06: NO! dbl exon skip/mut exclusive			
+//			SpliceSite[] su1= as1.getSpliceUniverse();
+//			SpliceSite[] su2= as2.getSpliceUniverse();
+//			if (su1.length!= su2.length)
+//				return -1;
 			
 				// check also flanking sites (not tss, tes)
-			SpliceSite[] flank= as1.getFlankingSpliceSites();
-			if (flank[0]!= null)
-				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[0]);
-			if (flank[1]!= null)
-				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[1]);
-			Comparator compi= new AbstractSite.PositionComparator();
-			Arrays.sort(su1, compi);
-			flank= as2.getFlankingSpliceSites();
-			if (flank[0]!= null)
-				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[0]);
-			if (flank[1]!= null)
-				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[1]);
-			Arrays.sort(su2, compi);
-			if (su1.length!= su2.length)
-				return -1;
+				// night of 6.6.06: no longer check flanking sites
+//			SpliceSite[] flank= as1.getFlankingSpliceSites();
+//			if (flank[0]!= null)
+//				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[0]);
+//			if (flank[1]!= null)
+//				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[1]);
+//			Comparator compi= new AbstractSite.PositionComparator();
+//			Arrays.sort(su1, compi);
+//			flank= as2.getFlankingSpliceSites();
+//			if (flank[0]!= null)
+//				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[0]);
+//			if (flank[1]!= null)
+//				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[1]);
+//			Arrays.sort(su2, compi);
+//			if (su1.length!= su2.length)
+//				return -1;
 			
-			for (int i = 0; i < su2.length; i++) 
-				if (su1[i].getPos()!= su2[i].getPos())
-					return -1;
-			return 0;
+//			for (int i = 0; i < su2.length; i++) 
+//				if (su1[i].getPos()!= su2[i].getPos())
+//					return -1;
+//			return 0;
 		}
 	}
-	public static class SpliceChainCodingHierarchyFilter extends SpliceChainComparator {
+	public static class CodingHierarchyFilter extends StructureComparator {
 			
 			public int compare(Object arg0, Object arg1) {
 				
@@ -762,6 +771,30 @@ public class ASVariation implements Serializable {
 				if (as2.isPartiallyCoding())
 					return 2;
 				return 0;	// keep one (whichever)
+			}
+		}
+
+	public static class CodingComparator extends StructureComparator {
+			
+			public int compare(Object arg0, Object arg1) {
+				
+				int eq= super.compare(arg0, arg1);
+				if (eq!= 0)
+					return -1;	// structurally different
+				
+				ASVariation as1= (ASVariation) arg0;
+				ASVariation as2= (ASVariation) arg1;
+	//			if ((as1.isProteinCoding()!= as2.isProteinCoding())
+	//				|| (as1.isPartiallyCoding()!= as2.isPartiallyCoding())
+	//				|| (as1.isNotAtAllCoding()!= as2.isNotAtAllCoding()))
+	//				return -1;
+				
+					// priority list
+				if ((as1.isProteinCoding()&& as2.isProteinCoding())||
+					(as1.isPartiallyCoding()&& as2.isPartiallyCoding())||
+					(as1.isNotAtAllCoding()&& as2.isNotAtAllCoding()))
+					return 0;
+				return 1;	
 			}
 		}
 
