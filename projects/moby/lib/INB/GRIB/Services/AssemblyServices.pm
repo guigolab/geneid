@@ -1,4 +1,4 @@
-# $Id: AssemblyServices.pm,v 1.2 2006-05-24 15:45:13 gmaster Exp $
+# $Id: AssemblyServices.pm,v 1.3 2006-06-07 15:56:55 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -8,7 +8,7 @@
 
 =head1 NAME
 
-INB::GRIB::Services::AssemblyServices  - Package for parser the Moby message to call the Assembly promoter regions analysis program .
+INB::GRIB::Services::AssemblyServices  - Package for parser the Moby message to call the Assembly program .
 
 =head1 SYNOPSIS
 
@@ -83,7 +83,7 @@ Arnaud Kerhornou, akerhornou@imim.es
 
 =head1 COPYRIGHT
 
-Copyright (c) 2005, Arnaud Kerhornou and INB - Nodo INB 1 - GRIB/IMIM.
+Copyright (c) 2006, Arnaud Kerhornou and INB - Nodo INB 1 - GRIB/CRG.
  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify
@@ -231,11 +231,11 @@ sub _do_query_Phrap {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    ($node_space) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "node_seg");
+    ($node_space) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "node_space");
     if (not defined $node_space) {
 	$node_space = 4;
     }
@@ -254,7 +254,7 @@ sub _do_query_Phrap {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -307,7 +307,7 @@ sub _do_query_Phrap {
 		
 		# Return an empty moby data object, as well as an exception telling what nothing got returned
 		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
@@ -330,7 +330,7 @@ sub _do_query_Phrap {
 									  );
 		push (@$moby_exceptions, $moby_exception);
 		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
@@ -378,7 +378,7 @@ sub _do_query_Phrap {
 		    
 		    # Return an empty moby data object, as well as an exception telling what nothing got returned
 		    
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
@@ -424,9 +424,6 @@ sub _do_query_Phrap {
 									  message    => "$note",
 									  );
 		push (@$moby_exceptions, $moby_exception);
-		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
-		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	} # End parsing base quality data
 	
@@ -442,7 +439,7 @@ sub _do_query_Phrap {
 	print STDERR "$note\n";
 	my $code = "201";
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 	my $moby_exception = INB::Exceptions::MobyException->new (
 								  refElement => "sequences",
 								  code       => $code,
@@ -461,7 +458,7 @@ sub _do_query_Phrap {
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 	    my $moby_exception = INB::Exceptions::MobyException->new (
 								      refElement => "base_quality_data",
 								      code       => $code,
@@ -487,7 +484,7 @@ sub _do_query_Phrap {
 	    print STDERR "$note\n";
 	    my $code = "201";
 	    
-	    $MOBY_RESPONSE     = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+	    $MOBY_RESPONSE     = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
 	    my $moby_exception = INB::Exceptions::MobyException->new (
 								      code    => $code,
 								      type    => 'error',
@@ -522,7 +519,7 @@ sub _do_query_Phrap {
 	$MOBY_RESPONSE  = INB::GRIB::Utils::CommonUtilsSubs->MOBY_DOUBLE_SIMPLE_RESPONSE ($sequences_moby_seqobj, $sequences_output_article_name, $ace_moby_seqobj, $phrap_output_article_name, $queryID);
     }
     else {
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
     }
     
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
