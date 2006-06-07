@@ -78,8 +78,6 @@ sub setMobyData {
     
     my @articleNames = keys (%$articles);
     
-    print STDERR "article names, @articleNames\n";
-    
     foreach my $articleName (@articleNames) {
 	my $article_hash = $articles->{$articleName};
 	
