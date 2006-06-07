@@ -114,7 +114,7 @@ if (defined($opt_x)) {
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
 
 	# Production
-	$::URL = 'http://genome.imim.es/cgi-bin/devel/moby/MobyServices.cgi';
+	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
 
 	# $serviceType = "Analysis";
 	
@@ -153,7 +153,7 @@ my ($REG) = $Central->registerService(
 				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Ab initio gene prediction tool that returns the gene predictions in GFF format (GFF version 3).",
+				      description  => "Ab initio gene prediction tool that returns the gene predictions in GFF format (GFF version 3). It also returns a set of translated aminoacid sequences.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
@@ -161,6 +161,7 @@ my ($REG) = $Central->registerService(
 							    ],
 				      output		=> [
 							    ['geneid_predictions', ["GFF3" => []]],
+							    ['peptides', [["AminoAcidSequence" => []]]],
 							    ],
 				      secondary	=> {
 					  'profile' => {
