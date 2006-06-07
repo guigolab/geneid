@@ -682,7 +682,7 @@ sub validateDataType {
 		}
 		
 		if ($specifiedType eq "FASTA_NA") {
-		    if ($inputDataType =~ /FASTA_NA$/) {
+		    if ($inputDataType =~ /^FASTA_NA/) {
 			$rightType = 1;
 		    }
 		    else {
@@ -692,7 +692,7 @@ sub validateDataType {
 		}
 		
 		if ($specifiedType eq "FASTA_NA_multi") {
-		    if ($inputDataType =~ /FASTA_NA/) {
+		    if ($inputDataType =~ /^FASTA_NA_multi$/) {
 			$rightType = 1;
 		    }
 		    else {
@@ -702,7 +702,7 @@ sub validateDataType {
 		}
 		
 		if ($specifiedType eq "FASTA_AA") {
-		    if ($inputDataType =~ /FASTA_AA$/) {
+		    if ($inputDataType =~ /^FASTA_AA/) {
 			$rightType = 1;
 		    }
 		    else {
@@ -712,7 +712,7 @@ sub validateDataType {
 		}
 		
 		if ($specifiedType eq "FASTA_AA_multi") {
-		    if ($inputDataType =~ /FASTA_AA/) {
+		    if ($inputDataType =~ /^FASTA_AA_multi$/) {
 			$rightType = 1;
 		    }
 		    else {
@@ -722,7 +722,7 @@ sub validateDataType {
 		}
 		
 		if ($specifiedType eq "FASTA_Base_Quality_multi") {
-		    if ($inputDataType =~ /FASTA_Base_Quality_multi$/) {
+		    if ($inputDataType =~ /^FASTA_Base_Quality_multi$/) {
 			$rightType = 1;
 		    }
 		    else {
@@ -732,7 +732,7 @@ sub validateDataType {
 		}
 		
 		if ($specifiedType eq "FASTA_Base_Quality") {
-		    if ($inputDataType =~ /FASTA_Base_Quality/) {
+		    if ($inputDataType =~ /^FASTA_Base_Quality/) {
 			$rightType = 1;
 		    }
 		    else {
