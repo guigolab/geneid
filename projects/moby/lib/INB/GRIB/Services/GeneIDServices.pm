@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.27 2006-06-06 10:31:06 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.28 2006-06-07 08:35:18 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -151,6 +151,8 @@ our @EXPORT = qw(
 );
 
 our $VERSION = '1.0';
+
+my $_debug = 1;
 
 # Preloaded methods go here.
 
@@ -345,6 +347,8 @@ PRT
          : </moby:mobyData>
 
 =cut
+
+## This method is associated with runGeneIDFF that returns the geneid predictions if GFF format (but no peptide translations), ie only one output article
 
 sub _do_query_GeneID {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
@@ -622,7 +626,8 @@ sub _do_query_GeneID {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report.
     
-    my ($report, $moby_exceptions_tmp) = GeneID_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters);
+    # peptides_report is disabled, see the next method for parsing and returning the peptides
+    my ($geneid_report, $peptides_report, $moby_exceptions_tmp) = GeneID_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
@@ -630,7 +635,7 @@ sub _do_query_GeneID {
     # la podriamos realizar en una funcion a parte si fuese compleja. 
     
     my $input = undef;
-    if (defined $report) {
+    if (defined $geneid_report) {
 	
 	# Quick hack to add the sequence identifier
 	# Anyway even if the parsing code handles input collection, the output report code doesn't and the runGeneIDGFF service registration specs tell that the input and the output are simple articles !!
@@ -640,7 +645,7 @@ sub _do_query_GeneID {
 	<moby:$_format namespace='' id='$sequenceIdentifier'>
 <String namespace='' id='' articleName='content'>
 <![CDATA[
-$report
+$geneid_report
 ]]>
 </String>
 </moby:$_format>
@@ -652,6 +657,464 @@ PRT
 	INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
     }
 
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
+    # a collection response. 
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
+    # el mismo que el de la query. 
+    
+    return ($MOBY_RESPONSE, $moby_exceptions);
+}
+
+# Internal processing method associated with runGeneIDGFF3
+# Deals with 2 outputs, the geneid predictions in GFF format and the peptides
+
+sub _do_query_GeneID_GFF_and_peptides {
+    # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
+    my $queryInput_DOM = shift @_;
+    # $_format is the type of output that returns GeneID (e.g. GFF)
+    my $_format        = shift @_;
+
+    # Output definition
+    my $MOBY_RESPONSE   = "";     # set empty response
+    my $moby_exceptions = [];
+    my $geneid_output_article_name = "geneid_predictions";
+    my $peptides_output_article_name = "peptides";
+    my $namespace = "";
+    
+    # Aqui escribimos las variables que necesitamos para la funcion. 
+    my $profile;
+    my $strands;
+    my $engine;
+    
+    # Variables that will be passed to GeneID_call
+    my %sequences;
+    my %parameters;
+    
+    my $queryID  = getInputID ($queryInput_DOM);
+    my @articles = getArticles($queryInput_DOM);
+    
+    # Get the parameters
+    
+    my $profiles = {
+	"Homo sapiens (suitable for mammals)"      => 1,
+	"Tetraodon nigroviridis (pupper fish)"     => 1,
+	"Drosophila melanogaster (fruit fly)"      => 1,
+	"Caenorhabditis elegans (worm)"            => 1,
+	"Triticum aestivum (wheat)"                => 1,
+	"Arabidopsis thaliana (weed)"              => 1,
+	"Oryza sativa (rice)"                      => 1,
+	"Plasmodium falciparum (malaria parasite)" => 1,
+	"Dictyostelium discoideum (slime mold)"    => 1,
+	"Aspergillus nidulans"                     => 1,
+	"Neurospora crassa"                        => 1,
+	"Cryptococcus neomorfans"                  => 1,
+	"Coprinus cinereus"                        => 1,
+	"Apis mellifera (honey bee)"               => 1,
+	"haetomium globosum"                       => 1,
+	"Schistosoma japonica"                     => 1,
+	"Stagnospora nodorum"                      => 1,
+	"Solanaceae"                               => 1,
+	"Sclerotinia sclerotiorum"                 => 1,
+	"Coccidioides immitis"                     => 1,
+	"Histoplasma capsulatum"                   => 1,
+    };
+    
+    ($profile) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "profile");
+    if (not defined $profile) {
+	# Default is "Homo sapiens"
+	$profile = "Homo sapiens (suitable for mammals)";
+    }
+    elsif (! $profiles->{$profile}) {
+	my $note = "profile parameter, '$profile', not accepted, should be ['Homo sapiens (suitable for mammals)','Tetraodon nigroviridis (pupper fish)','Drosophila melanogaster (fruit fly)','Apis mellifera (honey bee)', 'Caenorhabditis elegans (worm)', 'Schistosoma japonica', 'Triticum aestivum (wheat)','Arabidopsis thaliana (weed)','Oryza sativa (rice)', 'Solanaceae', 'Plasmodium falciparum (malaria parasite)','Dictyostelium discoideum (slime mold)','Aspergillus nidulans','Neurospora crassa','Cryptococcus neomorfans','Coprinus cinereus', 'Chaetomium globosum', 'Stagnospora nodorum', 'Rhizopus oryzae', 'Sclerotinia sclerotiorum', 'Histoplasma capsulatum', 'Coccidioides immitis']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "profile",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	my %geneid_predictions_article = (
+					  type => "Simple",
+					  moby_objects => undef,
+					  );
+	my %peptides_output_article = (
+				       type => "Collection",
+				       moby_objects => undef,
+				       );
+	my %articles = (
+			$geneid_output_article_name   => \%geneid_predictions_article,
+			$peptides_output_article_name => \%peptides_output_article
+			);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    ($strands) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "strand");
+    if (not defined $strands) {
+	# Default is running GeneID on both strands
+	$strands = "Both";
+    }
+    elsif (! (($strands eq "Both") || (($strands eq "Forward") || ($strands eq "Reverse")))) {
+	my $note = "strand parameter, '$strands', not accepted, should be ['Both', 'Forward', 'Reverse']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "strand",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	my %geneid_predictions_article = (
+					  type => "Simple",
+					  moby_objects => undef,
+					  );
+	my %peptides_output_article = (
+				       type => "Collection",
+				       moby_objects => undef,
+				       );
+	my %articles = (
+			$geneid_output_article_name   => \%geneid_predictions_article,
+			$peptides_output_article_name => \%peptides_output_article
+			);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+	
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+	   
+    my @exons = getNodeContentWithArticle($queryInput_DOM, "Parameter", "exons");
+    if (@exons < 1) {
+        # Do nothing
+	# Default is not to report any signals => an element array called 'None'
+	@exons = ('None');
+    }
+    else {
+	foreach my $exon (@exons) {
+	    if (! (($exon eq 'None') || ($exon eq 'First exons') || ($exon eq 'Internal exons') || ($exon eq 'All exons') || ($exon eq 'Terminal exons') || ($exon eq 'Single genes') || ($exon eq 'Open reading frames'))) {
+		my $note = "exons parameter, '$exon', not accepted, should be ['None', 'First exons','Internal exons','All exons','Terminal exons','Single genes','Open reading frames']";
+		print STDERR "$note\n";
+		my $code = "222";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "exons",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		my %geneid_predictions_article = (
+						  type => "Simple",
+						  moby_objects => undef,
+						  );
+		my %peptides_output_article = (
+					       type => "Collection",
+					       moby_objects => undef,
+					       );
+		my %articles = (
+				$geneid_output_article_name   => \%geneid_predictions_article,
+				$peptides_output_article_name => \%peptides_output_article
+				);
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+		
+		# Return an empty moby data object, as well as an exception telling why nothing got returned
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	}
+    }
+    
+    my @signals = getNodeContentWithArticle($queryInput_DOM, "Parameter", "signals");
+    if (@signals < 1) {
+	# Do nothing
+	# Default is not to report any signals => an element array called 'None'
+	@signals = ('None');
+    }
+    else {
+	foreach my $signal (@signals) {
+	    if (! (($signal eq 'None') || ($signal eq 'Acceptor sites') || ($signal eq 'Donor sites') || ($signal eq 'All splice sites') || ($signal eq 'Start codons') || ($signal eq 'Stop codons') || ($signal eq 'All codons') || ($signal eq 'All'))) {
+		my $note = "signals parameter, '$signal', not accepted, should be ['None', 'Acceptor sites','Donor sites','All splice sites','Start codons','Stop codons','All codons','All']";
+		print STDERR "$note\n";
+		my $code = "222";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "signals",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		my %geneid_predictions_article = (
+						  type => "Simple",
+						  moby_objects => undef,
+						  );
+		my %peptides_output_article = (
+					       type => "Collection",
+					       moby_objects => undef,
+					       );
+		my %articles = (
+				$geneid_output_article_name   => \%geneid_predictions_article,
+				$peptides_output_article_name => \%peptides_output_article
+				);
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+		
+		# Return an empty moby data object, as well as an exception telling why nothing got returned
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	}
+    }
+      
+    ($engine) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "engine");
+    if (not defined $engine) {
+	$engine = "Normal";
+    }
+    elsif (! (($engine eq 'Normal') || ($engine eq 'Exon Mode'))) {
+        my $note = "engine parameter, '$engine', not accepted, should be ['Normal','Exon Mode']";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "engine",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	my %geneid_predictions_article = (
+					  type => "Simple",
+					  moby_objects => undef,
+					  );
+	my %peptides_output_article = (
+				       type => "Collection",
+				       moby_objects => undef,
+				       );
+	my %articles = (
+			$geneid_output_article_name   => \%geneid_predictions_article,
+			$peptides_output_article_name => \%peptides_output_article
+			);
+		
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+  
+    # Add the parsed parameters in a hash table
+    
+    $parameters{profile} = $profile;
+    $parameters{strands} = $strands;
+    $parameters{exons}   = \@exons;
+    $parameters{signals} = \@signals;
+    $parameters{engine}  = $engine;
+    
+    # Tratamos a cada uno de los articulos
+    foreach my $article (@articles) {       
+	
+	# El articulo es una tupla que contiene el nombre de este 
+	# y su texto xml. 
+	
+	my ($articleName, $DOM) = @{$article}; # get the named article
+	
+	# Si le hemos puesto nombre a los articulos del servicio,  
+	# podemos recoger a traves de estos nombres el valor.
+	# Sino sabemos que es el input articulo porque es un simple articulo
+
+	if (isCollectionArticle ($DOM)) {
+	    my $note = "Received a collection input article instead of a simple";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "sequence",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    my %geneid_predictions_article = (
+					      type => "Simple",
+					      moby_objects => undef,
+					      );
+	    my %peptides_output_article = (
+					   type => "Collection",
+					   moby_objects => undef,
+					   );
+	    my %articles = (
+			    $geneid_output_article_name   => \%geneid_predictions_article,
+			    $peptides_output_article_name => \%peptides_output_article
+			    );
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+	# taverna doesn't setup the articlename nicely, so let them not specify it - as there is only one article, no big deal !
+	elsif (($articleName eq "sequence") || (isSimpleArticle ($DOM))) { 
+	    
+	    if (isSimpleArticle ($DOM)) {
+		
+		# print STDERR "sequence tag is a simple article...\n";
+		
+		# Validate the type first
+
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "DNASequence");
+		if (!$rightType) {
+		    my $note = "Expecting a DNASequence object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "sequence",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    my %geneid_predictions_article = (
+						      type => "Simple",
+						      moby_objects => undef,
+						      );
+		    my %peptides_output_article = (
+						   type => "Collection",
+						   moby_objects => undef,
+						   );
+		    my %articles = (
+				    $geneid_output_article_name   => \%geneid_predictions_article,
+				    $peptides_output_article_name => \%peptides_output_article
+				    );
+		    
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+		    
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		else {
+		    # print STDERR "type is fine\n";
+		}
+		
+		# Get the sequence
+		%sequences = INB::GRIB::Utils::CommonUtilsSubs->parseMobySequenceObjectFromDOM ($DOM, \%sequences);
+	    }
+	} # End parsing sequences article tag
+	
+    } # Next article
+    
+    # Check that we have parsed properly the sequences
+    
+    if ((keys (%sequences)) == 0) {
+	my $note = "can't parsed any sequences...\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => 'sequence',
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	my %geneid_predictions_article = (
+					  type => "Simple",
+					  moby_objects => undef,
+					  );
+	my %peptides_output_article = (
+				       type => "Collection",
+				       moby_objects => undef,
+				       );
+	my %articles = (
+			$geneid_output_article_name   => \%geneid_predictions_article,
+			$peptides_output_article_name => \%peptides_output_article
+			);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+	
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    # Una vez recogido todos los parametros necesarios, llamamos a 
+    # la funcion que nos devuelve el report.
+    
+    my ($geneid_report, $peptides_report, $moby_exceptions_tmp) = GeneID_call (sequences  => \%sequences, format => $_format, queryID => $queryID, parameters => \%parameters);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
+    
+    # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
+    # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
+    # la podriamos realizar en una funcion a parte si fuese compleja. 
+    
+    if (defined $geneid_report && defined $peptides_report) {
+	
+	# Quick hack to add the sequence identifier
+	# Anyway even if the parsing code handles input collection, the output report code doesn't and the runGeneIDGFF service registration specs tell that the input and the output are simple articles !!
+	my ($sequenceIdentifier) = keys (%sequences);
+	
+	my $geneid_predictions_object = <<PRT;
+	<moby:$_format namespace='$namespace' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
+<![CDATA[
+$geneid_report
+]]>
+</String>
+</moby:$_format>
+PRT
+
+        my %geneid_predictions_article = (
+					  type => "Simple",
+					  moby_objects => [$geneid_predictions_object],
+					  );
+	
+	my $aminoacid_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($peptides_report, "AminoAcidSequence", $namespace);
+	my %peptides_output_article = (
+				       type => "Collection",
+				       moby_objects => $aminoacid_objects,
+				       );
+	
+	my %articles = (
+			$geneid_output_article_name   => \%geneid_predictions_article,
+			$peptides_output_article_name => \%peptides_output_article
+			);
+	
+        $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+    }
+    else {
+	
+	my %geneid_predictions_article = (
+					  type => "Simple",
+					  moby_objects => undef,
+					  );
+	my %peptides_output_article = (
+				       type => "Collection",
+				       moby_objects => undef,
+				       );
+	my %articles = (
+			$geneid_output_article_name   => \%geneid_predictions_article,
+			$peptides_output_article_name => \%peptides_output_article
+			);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->setMobyData (queryID => $queryID, articles => \%articles);
+	
+    }
+    
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
     # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
     # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
@@ -956,7 +1419,7 @@ sub runGeneIDGFF3 {
 	# my $query_str = $queryInput->toString();
 	# print STDERR "query text: $query_str\n";
 	
-	my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID ($queryInput, $_format);
+	my ($query_response, $moby_exceptions_tmp) = _do_query_GeneID_GFF_and_peptides ($queryInput, $_format);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de

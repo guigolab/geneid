@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.86 2006-06-06 10:31:06 gmaster Exp $
+# $Id: Factory.pm,v 1.87 2006-06-07 08:35:18 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -241,6 +241,7 @@ sub GeneID_call {
 
     # output specs
     my $geneid_output   = "";
+    my $peptides_output = "";
     my $moby_exceptions = [];
 
     # relleno los parametros por defecto GeneID_call
@@ -274,7 +275,7 @@ sub GeneID_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return (undef, [$moby_exception]);
+	return (undef, undef, [$moby_exception]);
     }
 
     if (($format eq "GFF") || ($format eq "GFF2")) {
@@ -371,7 +372,7 @@ sub GeneID_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return (undef, [$moby_exception]);
+	return (undef, undef, [$moby_exception]);
     }
 
     # Bioperl sequence factory
@@ -382,6 +383,7 @@ sub GeneID_call {
 				);
 
     my @seqIds = keys (%$sequences);
+    my $seqId = $seqIds[0];
     foreach my $sequenceIdentifier (@seqIds) {
 	my $nucleotides = $sequences->{$sequenceIdentifier};
 	# bioperl object
@@ -392,7 +394,7 @@ sub GeneID_call {
 	$sout->write_seq ($seqobj);
     }
     close $seq_fh;
-
+    
     # Test empty file
     if (-z $seqfile) {
 	my $note = "Internal System Error. Empty geneid input sequence file...\n";
@@ -404,21 +406,18 @@ sub GeneID_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return (undef, [$moby_exception]);
+	return (undef, undef, [$moby_exception]);
     }
-
+    
     # print STDERR "Running GeneID, with this command:\n";
     # print STDERR "$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile \n";
-
+    
     $geneid_output = qx/$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile/;
-
+    
     # Comment this line if you want to keep the file...
     unlink $seqfile;
-
-    if (defined $geneid_output) {
-	return ($geneid_output, $moby_exceptions);
-    }
-    else {
+    
+    if ((! defined $geneid_output) || (length $geneid_output < 1)) {
 	my $note = "Internal System Error. Geneid has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
@@ -429,7 +428,50 @@ sub GeneID_call {
 								  message    => "$note",
 								  );
 	push (@$moby_exceptions, $moby_exception);
-	return (undef, $moby_exceptions);
+	return (undef, undef, $moby_exceptions);
+    }
+
+    # Just for speed sake, we check the format but would work also with data in GFF2 format
+    # runGeneIDGFF doesn't specify the peptides output so run this code just when it is runGeneIDGFF3 service
+    
+    if ($format eq "GFF3") {
+	
+	# Translate the gene predictions
+	
+	my %translation_parameters;
+	$translation_parameters{translation_table} = "Standard (1)";
+	my %geneid_predictions;
+	$geneid_predictions{$seqId} = $geneid_output;
+	
+	my $moby_exceptions_tmp;
+	($peptides_output, $moby_exceptions_tmp) = TranslateGeneIDPredictions_call (sequences => $sequences, predictions => \%geneid_predictions, parameters => \%translation_parameters);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
+	
+	if (defined $peptides_output && (length $peptides_output > 0)) {
+	    
+	    # Cleaning the mRNA identifier in the headers
+	    $peptides_output =~ s/Parent=//g;
+	    $peptides_output =~ s/;ExonType=\w+//g;
+	    
+	    return ($geneid_output, $peptides_output, $moby_exceptions);
+	}
+	else {
+	    my $note = "Internal System Error. Geneid has failed!\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    return (undef, undef, $moby_exceptions);
+	}
+    }
+    else {
+	return ($geneid_output, undef, $moby_exceptions);
     }
 }
 
