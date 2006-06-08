@@ -611,6 +611,9 @@ sub validateDataType {
 		
 		$inputDataType = $node->nodeName;
 		
+		# Get rid of the 'moby:' prefix if any !
+		$inputDataType =~ s/moby://;
+		
 		if ($specifiedType eq "GenericSequence") {
 		    if ($inputDataType =~ /GenericSequence|AminoAcidSequence|AASequence|NucleotideSequence|DNASequence|RNASequence/) {
 			$rightType = 1;
