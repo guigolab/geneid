@@ -287,7 +287,7 @@ PRT
     undef $input_quality_data;
 
     $results = $Service->execute(XMLinputlist => [
-						["$sequences_articleName", $input_sequences_xml, "$quality_articleName", $input_quality_xml,, 'trim_masked_regions', $trim_masked_regions, 'length_cutoff', $length_cutoff]
+						["$sequences_articleName", $input_sequences_xml, "$quality_articleName", $input_quality_xml,, 'trim_masked_regions', $trim_masked_regions_xml, 'length_cutoff', $length_cutoff_xml]
 					       ]);
 }
 
