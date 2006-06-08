@@ -156,11 +156,11 @@ my ($REG) = $Central->registerService(
 				      URL          => $::URL,
 				      input	   => [
 						       ['sequences', ['FASTA_NA_multi' => \@namespaces]],
-						       ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]] # simple
+						       ['base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]], # simple
 						       ],
 				      output	   => [
-						       ['filtered_base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]] # simple
 						       ['filtered_sequences', ['FASTA_NA_multi' => \@namespaces]],
+						       ['filtered_base_quality_data', ['FASTA_Base_Quality_multi' => \@namespaces]], # simple
 						       ],
 				      secondary	   => {
 					  'trim_masked_regions' => {
