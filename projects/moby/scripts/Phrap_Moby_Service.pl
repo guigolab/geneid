@@ -275,7 +275,7 @@ my $node_space_xml = "<Value>$node_space</Value>";
 my $results;
 if ($serviceName eq "runPhrap") {
     $results = $Service->execute(XMLinputlist => [
-						 ["$sequences_articleName", $input_sequences_xml]
+						 ["$sequences_articleName", $input_sequences_xml, 'node_space', $node_space_xml]
 						]);
 }
 else {
