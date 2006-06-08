@@ -96,7 +96,7 @@ $::authURI = 'genome.imim.es';
 $::contactEmail = 'akerhornou@imim.es';
 
 my $serviceTypeName        = "Sequence_Filtering";
-my $serviceTypeDescription = "Filter out sequences based on given criteriae such as the sequence length";
+my $serviceTypeDescription = "Filter out sequences based on given criteriae such as their length";
 
 print STDERR "registrying object $serviceTypeName at registry, $MOBY_URI...\n";
 
