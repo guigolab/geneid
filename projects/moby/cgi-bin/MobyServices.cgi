@@ -41,6 +41,7 @@ use INB::GRIB::Services::MaskingServices;
 use INB::GRIB::Services::VectorScreeningServices;
 use INB::GRIB::Services::AssemblyServices;
 use INB::GRIB::Services::BaseCallingServices;
+use INB::GRIB::Services::FilteringServices;
 
 use INB::GRIB::Services::OldServices;
 ###############################################################################
@@ -212,6 +213,10 @@ $x->dispatch_with({
     'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
     'http://biomoby.org/#parseMotifMatricesfromMEME'             => 'INB::GRIB::Services::OldServices',
     'http://biomoby.org/#runMatScanGFFCollectionVsInputMatrix'   => 'INB::GRIB::Services::OldServices',
+
+    'http://biomoby.org/#filterSequencesByLength'                => 'INB::GRIB::Services::FilteringServices',
+    'http://biomoby.org/#filterSequencesAndQualityDataByLength'  => 'INB::GRIB::Services::FilteringServices',
+
 });
 $x->handle;
 
