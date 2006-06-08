@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.88 2006-06-08 14:28:15 gmaster Exp $
+# $Id: Factory.pm,v 1.89 2006-06-08 14:34:55 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -2818,10 +2818,6 @@ sub SequenceFilteringByLength_call {
 	}
     }
            
-    # Free memory
-    undef $sequences;
-    undef $fasta_quality_data;
-    
     if ($debug) {
 	print STDERR "Running sequence filtering script, with this command:\n";
 	print STDERR "$_sequence_filtering_dir\/$_sequence_filtering_bin -i $sequences_file $_sequence_filtering_args\n";
@@ -2838,15 +2834,19 @@ sub SequenceFilteringByLength_call {
 	my $removed_sequences_list = qx/$_sequence_filtering_dir\/$_sequence_filtering_bin -i $sequences_file $_sequence_filtering_args -l/;
 	
 	$removed_sequences_list =~ s/\n/|/g;
-	my $pattern = $removed_sequences_list;
-	chop $pattern;
+	chop $removed_sequences_list;
 	
 	if ($debug) {
-	    print STDERR "pattern, $pattern\n";
+	    print STDERR "removed_sequences_list pattern, $removed_sequences_list\n";
 	}
 	
-	$filtered_quality_data = qx/$_sequence_filtering_dir\/FastaToTblWithDesc $quality_data_file | egrep -v "$pattern" | $_sequence_filtering_dir\/TblToFastaWithDesc/;
-	
+	if (length $removed_sequences_list > 0) {
+	    $filtered_quality_data = qx/$_sequence_filtering_dir\/FastaToTblWithDesc $quality_data_file | egrep -v "$removed_sequences_list" | $_sequence_filtering_dir\/TblToFastaWithDesc/;
+	}
+	else {
+	    # Empty, ie no sequences have been removed !
+	    $filtered_quality_data = $fasta_quality_data;
+	}
     }
     
     if (!$debug) {
