@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.87 2006-06-07 08:35:18 gmaster Exp $
+# $Id: Factory.pm,v 1.88 2006-06-08 14:28:15 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -42,7 +42,7 @@ funciones para llamar a los programas que se requieran.
 
 =head1 AUTHOR
 
-Francisco Camara, fcamara@imim.es
+Arnaud Kerhornou, akerhornou@imim.es
 
 =head1 COPYRIGHT
 
@@ -136,6 +136,7 @@ our @EXPORT = qw(
   &CrossMatchToScreenVector_call
   &Phrap_call
   &Phred_call
+  &SequenceFilteringByLength_call
 );
 
 our $VERSION = '1.00';
@@ -2709,6 +2710,175 @@ sub Phred_call {
     return ($fasta_sequences, $fasta_quality, $moby_exceptions);
 }
 
+sub SequenceFilteringByLength_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my $filtered_sequences;
+    my $filtered_quality_data;
+    my $moby_exceptions    = [];
+    
+    # relleno los parametros por defecto de SequenceFilteringByLength_call
+    
+    my $sequences          = $args{sequences}    || undef;
+    my $fasta_quality_data = $args{quality_data} || undef;
+    my $parameters         = $args{parameters}   || undef;
+    my $debug              = $args{debug};
+    my $queryID            = $args{queryID}      || "";
+    
+    # parameters
+    
+    my $trim_masked_regions = $parameters->{trim_masked_regions};
+    my $length_cutoff       = $parameters->{length_cutoff};
+    
+    # Llama a sequence filtering script en local
+    my $_sequence_filtering_dir    = "/home/ug/gmaster/projects/bin";
+    my $_sequence_filtering_bin    = "filter_sequences_by_length.pl";
+    my $_sequence_filtering_args   = "-c $length_cutoff";
+    
+    if ($trim_masked_regions) {
+	$_sequence_filtering_args .= " -t";
+    }
+    
+    # Check that the binary is in place
+    if (! -f "$_sequence_filtering_dir/$_sequence_filtering_bin") {
+	my $note = "Internal System Error. $_sequence_filtering_bin script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
+    
+    # Create the temp sequences file
+
+    my ($seq_fh, $sequences_file);
+    eval {
+	($seq_fh, $sequences_file) = tempfile("/tmp/SEQ_FILTERING.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open sequences input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
+    
+    print $seq_fh "$sequences";
+    close $seq_fh;
+    
+    if (-z $sequences_file) {
+	my $note = "Internal System Error. Empty input sequences data file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								      );
+	return (undef, undef, [$moby_exception]);
+    }
+    
+    # Parse the quality data if any
+    
+    my $quality_data_file;
+    if (defined $fasta_quality_data) {
+	
+	$quality_data_file = $sequences_file . ".qual";
+	
+	if ($debug) {
+	    print STDERR "quality data hash defined!\n";
+	}
+	
+	open FILE, ">$quality_data_file" or die "can't open temporary file for quality quality data, $quality_data_file!\n";
+	print FILE "$fasta_quality_data";
+	close FILE;
+	
+	if (-z $quality_data_file) {
+	    my $note = "Internal System Error. Empty input quality data file...\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return (undef, undef, [$moby_exception]);
+	}
+    }
+           
+    # Free memory
+    undef $sequences;
+    undef $fasta_quality_data;
+    
+    if ($debug) {
+	print STDERR "Running sequence filtering script, with this command:\n";
+	print STDERR "$_sequence_filtering_dir\/$_sequence_filtering_bin -i $sequences_file $_sequence_filtering_args\n";
+    }
+    
+    $filtered_sequences = qx/$_sequence_filtering_dir\/$_sequence_filtering_bin -i $sequences_file $_sequence_filtering_args/;
+    
+    if (defined $quality_data_file) {
+	
+	# Put in sync the quality data
+	
+	# Get also a list of removed sequences
+	
+	my $removed_sequences_list = qx/$_sequence_filtering_dir\/$_sequence_filtering_bin -i $sequences_file $_sequence_filtering_args -l/;
+	
+	$removed_sequences_list =~ s/\n/|/g;
+	my $pattern = $removed_sequences_list;
+	chop $pattern;
+	
+	if ($debug) {
+	    print STDERR "pattern, $pattern\n";
+	}
+	
+	$filtered_quality_data = qx/$_sequence_filtering_dir\/FastaToTblWithDesc $quality_data_file | egrep -v "$pattern" | $_sequence_filtering_dir\/TblToFastaWithDesc/;
+	
+    }
+    
+    if (!$debug) {
+	unlink $sequences_file;
+	if (defined $quality_data_file) {
+	    unlink $quality_data_file;
+	}
+    }
+    
+    if (! defined $filtered_sequences || (length $filtered_sequences < 1)) {
+	my $note = "Internal System Error. the sequence fitlering script execution has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, undef, $moby_exceptions);
+    }
+    
+    if ($debug) {
+	print STDERR "Sequence Filtering done\n";
+    }
+    
+    return ($filtered_sequences, $filtered_quality_data, $moby_exceptions);
+    
+}
+
+#####################################################################################################
 
 sub _parse_ace_file {
     my ($ace_file_name, $debug, %ace_parsing_options) = @_;
