@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+
+# compara dues llistes de fitxers o del que sigui. la idea es que
+# sigui capac de fer-ho alla on "diff" no podria: quan hi ha tantes
+# linies que el diff no considera iguals dues linies quan la seva
+# posicio a cada llista es molt diferent fins i tot havent-les
+# ordenat. a canvi, em veig obligat a ordenar les llistes i, llavors
+# la sortida *NO* es comparable amb les llistes d'entrada!!! la
+# idea no es que ho sigui, sino obtenir, en l'ordre que sigui, les
+# linies que nomes apareixen a una de les llistes
+
+# sense flags treu els que nomes surten a la primera amb "<" i els
+# que nomes surten a la segona amb ">", pero no treu els que surten
+# a totes dues llistes
+
+# flags (SON MUTUAMENT EXCLUSIUS):
+#
+#    -l: nomes indica els de la primera llista (left); sense "<"
+#    -r: nomes indica els de la segona llista (right); sense ">"
+#    -b: treu nomes els que surten a les dues llistes (both); sense "="
+#    -a: treu tots els fitxers, amb "<>="
+#
+# extra: -h mostra ajuda i *NO* executa res mes!!!
+
+use Getopt::Std;
+
+getopts("lrbah",\%flags);
+
+$l=1 if ( exists($flags{l}) );
+$r=1 if ( exists($flags{r}) );
+$b=1 if ( exists($flags{b}) );
+$a=1 if ( exists($flags{a}) );
+$h=1 if ( exists($flags{h}) );
+
+if ( $l+$r+$b+$a > 1 ) {
+   die "nomes es pot indicar un flag!!!\n";
+}
+
+if ( $#ARGV != 1 || $h == 1 ) {
+   die "Sintaxi: textcompare [-l|-r|-b|-a] [-h] <fit1> <fit2>\n";
+}
+
+if ( -e "$ARGV[0]" ) {
+   open (FIT1,"$ARGV[0]");
+} else {
+   die "Error llegint $ARGV[0]\n";
+}
+if ( -e "$ARGV[1]" ) {
+   open (FIT2,"$ARGV[1]");
+} else {
+   die "Error llegint $ARGV[1]\n";
+}
+
+@lin1=sort(<FIT1>);
+@lin2=sort(<FIT2>);
+
+$in1=0;
+$in2=0;
+# mentre quedin elements a totes dues llistes, els comparem
+while ( $in1 <= $#lin1 && $in2 <= $#lin2 ) {
+   if ( $lin1[$in1] eq $lin2[$in2] ) {
+      # el fitxer es a tots dos llistats
+      print "= " if ( $a == 1 );
+      print "$lin1[$in1]" if ( $b+$a != 0 );
+      $in1++;
+      $in2++;
+   } elsif ( $lin1[$in1] lt $lin2[$in2] ) {
+      # el fitxer nomes es a la llista de l'esquerra (lin1)
+      print "< " if ( $l+$r+$b == 0 );
+      print "$lin1[$in1]" if ( $r+$b == 0 );
+      $in1++;
+   } else {
+      # el fitxer nomes es a la llista de la dreta (lin2)
+      print "> " if ( $l+$r+$b == 0 );
+      print "$lin2[$in2]" if ( $l+$b == 0 );
+      $in2++;
+   }
+}
+# quan ja no queden elements a una de les llistes, imprimim tot
+# el que queda a l'altra
+if ( $in2 > $#lin2 && $r+$b == 0 ) {
+   foreach $lin (splice(@lin1,$in1)) {
+      print "< " if ( $l == 0 );
+      print "$lin";
+   }
+} elsif ( $in1 > $#lin1 && $l+$b == 0 ) {
+   foreach $lin (splice(@lin2,$in2)) {
+      print "> " if ( $r == 0 );
+      print "$lin";
+   }
+}
+
+close (FIT1);
+close (FIT2);

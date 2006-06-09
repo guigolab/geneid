@@ -19,37 +19,47 @@ download() {
       mkdir $1
    fi
    cd $1
-   wget $URL/$1
 
-   /usr/bin/perl >index2.html <<EOF
-      open(FIT,"index.html");
-      foreach \$lin (<FIT>) {
-         \$lin =~ s/<A HREF="(\?.=.|.*\/)">//ig;
-         \$lin =~ s/<IMG SRC[^>]+>//ig;
-         print "\$lin";
-      }
-      close(FIT);
-EOF
+   # llista de fitxers actuals
+   ls -1 > /tmp/MirrorGoldenPath_1
+
+   # llista de fitxers a baixar
+   wget $URL/$1
+   # COMPTE: AIXO DEPEN DE QUE index.html ES GENERI COM SEMPRE HAVIA FET!!!
+   tr -d '\012"' <index.html | tr '>' '\012' \
+      | awk -F= ' BEGIN { IGNORECASE=1 }
+                  /^ *<a href=[^\?/]/ { print $2 }' > /tmp/MirrorGoldenPath_2
+   rm index.html
 
    # -F: interpreta els fitxers d'entrada com html
    # -B: especifica la URL "base"
    # -i: fitxer d'entrada amb les URL
-# NOOO: -c obliga l'wget a continuar. Si una segona execucio es
-#       troba un fitxer diferent i mes llarg, afegira la part nova
-#       del segon fitxer al final del primer, carregant-se'l
-#   wget -c -F -B "$URL/$1/" -i index2.html
+   # -N: timestamping
+   # NO -c: si una segona execucio trobes un fitxer diferent i mes llarg,
+   #        afegiria la part nova del segon fitxer al final del primer!!
 
-   # afegim -N: timestamping
-   wget -F -N -B "$URL/$1/" -i index2.html
+   wget -N -B "$URL/$1/" -i /tmp/MirrorGoldenPath_2
+
+   # esborro els fitxers que ja no hi son a partir de les dues llistes
+   # que he generat abans
+   rm `/home/ug/ogonzalez/scripts/textcompare -l /tmp/MirrorGoldenPath_[12]` \
+      /tmp/MirrorGoldenPath_[12]
 
 # aqui faltaria quelcom per comprovar la integritat dels fitxers
 # que han baixat!!!
 
-   rm index.html index2.html
-
    cd ..
 
 }
+
+
+if [ $# != 1 ]
+then
+   echo "Sintaxi: MirrorGoldenPath.1 <URL>"
+   echo "         <URL> conte bigZips i database"
+   echo "         es creen al direc actual aquests dos subdirs"
+   exit
+fi
 
 
 #BASE=`pwd`
