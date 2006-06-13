@@ -343,10 +343,6 @@ public class Exon extends DirectedRegion {
 		this.donor = donor;
 	}
 	
-	public AbstractSite getStartSite() {
-		return getGene().getSite(getStart());
-	}
-
 	public AbstractSite getEndSite() {
 		return getGene().getSite(getEnd());
 	}

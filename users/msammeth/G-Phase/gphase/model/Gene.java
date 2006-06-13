@@ -58,9 +58,11 @@ public class Gene extends DirectedRegion {
 		int min= Integer.MAX_VALUE;
 		for (int i = 0; i < transcripts.length; i++) {
 			Translation[] tl= transcripts[i].getTranslations();
+			if (tl== null)
+				continue;
 			for (int j = 0; j < tl.length; j++) {
-				if (tl[j].getStart()< min)
-					min= tl[j].getStart();
+				if (Math.abs(tl[j].get5PrimeEdge())< Math.abs(min))
+					min= tl[j].get5PrimeEdge();
 			}
 		}
 		if (min== Integer.MAX_VALUE)
@@ -68,19 +70,37 @@ public class Gene extends DirectedRegion {
 		return min;
 	}
 	
+	public int getMinCDSEnd() {
+		int min= Integer.MAX_VALUE;
+		for (int i = 0; i < transcripts.length; i++) {
+			Translation[] tl= transcripts[i].getTranslations();
+			if (tl== null)
+				continue;
+			for (int j = 0; j < tl.length; j++) {
+				if (Math.abs(tl[j].get3PrimeEdge())< Math.abs(min))
+					min= tl[j].get3PrimeEdge();
+			}
+		}
+		if (min== Integer.MAX_VALUE)
+			return 0;
+		return min;
+	}
+	
+
+	
 	public Transcript[][] recluster() {
 		Arrays.sort(transcripts, new AbstractRegion.PositionComparator());
 		Vector v= null;
 		int max= Integer.MIN_VALUE;
 		Vector clusters= new Vector();
 		for (int i = 0; i < transcripts.length; i++) {
-			if (transcripts[i].getStart()> max) {
+			if (Math.abs(transcripts[i].getStart())> Math.abs(max)) {
 				if (v!= null)
 					clusters.add(v);
 				v= new Vector();
 			} 
 			v.add(transcripts[i]);
-			if (transcripts[i].getEnd()> max)
+			if (Math.abs(transcripts[i].getEnd())> Math.abs(max))
 				max= transcripts[i].getEnd();
 		}
 		if (v!= null)
@@ -90,84 +110,108 @@ public class Gene extends DirectedRegion {
 	}
 	
 	public SpliceSite[] getSpliceSites(int regionType, int type) {
-		AbstractRegion[] regions= new AbstractRegion[1];
+		DirectedRegion[] regions= new DirectedRegion[1];
 		if (regionType== AbstractRegion.REGION_5UTR)
 			regions[0]= getReal5UTR();
 		else if (regionType== AbstractRegion.REGION_CDS)
 			regions[0]= getRealCDS();
 		else if (regionType== AbstractRegion.REGION_3UTR)
 			regions[0]= getReal3UTR();
-		else
-			regions[0]= new DefaultRegion(getStart(), getEnd());
+		else if (regionType== AbstractRegion.REGION_COMPLETE_CLUSTER)
+			regions[0]= new DefaultDirectedRegion(getStart(), getEnd(), getStrand());
 		
+		if (regions[0]== null) {
+			return null;
+		}
 		return getSpliceSites(regions, type);
 	}
 	
-	public SpliceSite[] getSpliceSites(AbstractRegion[] target, int type) {
+	public SpliceSite[] getSpliceSites(DirectedRegion[] target, int type) {
 		Vector v= new Vector();
 		for (int i = 0; spliceSites!= null&& i < spliceSites.length; i++) {
 			if ((type== SpliceSite.ALTERNATE_SS&& spliceSites[i].isConstitutive())
 				|| (type== SpliceSite.CONSTITUTIVE_SS&& !spliceSites[i].isConstitutive()))
 				continue;
 			for (int j = 0; j < target.length; j++) {
-				if (spliceSites[i].getPos()< target[j].getStart()|| 
-						spliceSites[i].getPos()> target[j].getEnd())
+				
+				if (spliceSites[i].getPos()< target[j].get5PrimeEdge()|| 
+						spliceSites[i].getPos()> target[j].get3PrimeEdge())
 					continue;
 				v.add(spliceSites[i]);
 				break;
 			}
 		}
 		return (SpliceSite[]) gphase.tools.Arrays.toField(v);
-	}
+	} 
 	
-	public AbstractRegion getReal5UTR() {
-		int min= Integer.MAX_VALUE;
-		for (int i = 0; i < transcripts.length; i++) {
-			Translation[] trans= transcripts[i].getTranslations();
-			for (int j = 0; j < trans.length; j++) {
-				min= Math.min(min, trans[j].getStart());
-			}
+	public DirectedRegion getReal5UTR() {
+		if (isForward()) {
+			int x= getMinCDSStart();
+			if (x== 0)
+				return null;
+			return new DefaultDirectedRegion(getStart(), x- 1, getStrand());	// utr starts outside CDS			
+		} else {
+			int x= getMaxCDSStart();
+			if (x== 0)
+				return null;
+			return new DefaultDirectedRegion(x- 1, getEnd(), getStrand());
 		}
 		
-		return new DefaultRegion(getStart(), min- 1);	// utr starts outside CDS
 	}
 	
-	public AbstractRegion getRealCDS() {
-		int left= Integer.MIN_VALUE;
-		int right= Integer.MAX_VALUE;
-		for (int i = 0; i < transcripts.length; i++) {
-			Translation[] trans= transcripts[i].getTranslations();
-			for (int j = 0; j < trans.length; j++) {
-				left= Math.max(left, trans[j].getStart());
-				right= Math.min(right, trans[j].getEnd());
-			}
-		}
+	public DirectedRegion getRealCDS() {
 		
-		return new DefaultRegion(left, right);	
+		if (isForward())
+			return new DefaultDirectedRegion(getMaxCDSStart(), getMinCDSEnd(), getStrand());
+		else
+			return new DefaultDirectedRegion(getMaxCDSEnd(), getMinCDSStart(), getStrand());
 	}
 	
-	public AbstractRegion getReal3UTR() {
-		int max= Integer.MIN_VALUE;
-		for (int i = 0; i < transcripts.length; i++) {
-			Translation[] trans= transcripts[i].getTranslations();
-			for (int j = 0; j < trans.length; j++) {
-				max= Math.max(max, trans[j].getEnd());
-			}
+	public DirectedRegion getReal3UTR() {
+		
+		if (isForward()) {
+			int x= getMaxCDSEnd();
+			if (x== 0)
+				return null;
+			return new DefaultDirectedRegion(x+1, getEnd(), getStrand());	// utr starts outside CDS			
+		} else {
+			int x= getMinCDSEnd();
+			if (x== 0)
+				return null;
+			return new DefaultDirectedRegion(getStart(), x+ 1, getStrand());	// neg strand -(-1)
 		}
 		
-		return new DefaultRegion(max+1, getEnd());	// utr starts outside CDS
+		
 	}
 	
 	public int getMaxCDSEnd() {
-		int max= Integer.MIN_VALUE;
+		int max= 0;
 		for (int i = 0; i < transcripts.length; i++) {
 			Translation[] tl= transcripts[i].getTranslations();
+			if (tl== null)
+				continue;
 			for (int j = 0; j < tl.length; j++) {
-				if (tl[j].getStart()> max)
-					max= tl[j].getStart();
+				if (Math.abs(tl[j].get3PrimeEdge())> Math.abs(max))
+					max= tl[j].get3PrimeEdge();
 			}
 		}
-		if (max== Integer.MIN_VALUE)
+		if (max== 0)
+			return 0;
+		return max;
+	}
+
+	public int getMaxCDSStart() {
+		int max= 0;
+		for (int i = 0; i < transcripts.length; i++) {
+			Translation[] tl= transcripts[i].getTranslations();
+			if (tl== null)
+				continue;
+			for (int j = 0; j < tl.length; j++) {
+				if (Math.abs(tl[j].get5PrimeEdge())> Math.abs(max))
+					max= tl[j].get5PrimeEdge();
+			}
+		}
+		if (max== 0)
 			return 0;
 		return max;
 	}
@@ -583,6 +627,17 @@ public class Gene extends DirectedRegion {
 		} else 
 			;//System.out.println(" failed!");
 		
+			// update region
+		int minStart= Integer.MAX_VALUE, maxEnd= 0;
+		for (int i = 0; i < transcripts.length; i++) {
+			if (Math.abs(transcripts[i].getStart())< Math.abs(minStart))
+				minStart= transcripts[i].getStart();
+			if (Math.abs(transcripts[i].getEnd())> Math.abs(maxEnd))
+				maxEnd= transcripts[i].getEnd();
+		}
+		setStart(minStart);
+		setEnd(maxEnd);
+		
 		return flag;
 	}
 	
@@ -948,8 +1003,10 @@ public class Gene extends DirectedRegion {
 	public boolean addTranscript(Transcript newTranscript) {
 		
 			// update boundaries
-		setStart(Math.min(getStart(), newTranscript.getStart()));
-		setEnd(Math.max(getEnd(), newTranscript.getEnd()));
+		if (Math.abs(newTranscript.getStart())< Math.abs(getStart()))
+			setStart(newTranscript.getStart());
+		if (Math.abs(newTranscript.getEnd())> Math.abs(getEnd()))
+			setEnd(newTranscript.getEnd());
 		
 		if(transcripts== null) {
 			transcripts= new Transcript[] {newTranscript};

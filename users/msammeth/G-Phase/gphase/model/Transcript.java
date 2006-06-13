@@ -16,6 +16,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.mysql.jdbc.UpdatableResultSet;
+
 /**
  * 
  * 
@@ -229,8 +231,8 @@ public class Transcript extends DirectedRegion {
 			return null;
 		Vector result= new Vector();
 		for (int i = 0; i < translations.length; i++) {
-			if ((translations[i].getStart()<= start)&&
-				(translations[i].getEnd()>= end))
+			if ((translations[i].get5PrimeEdge()<= start)&&
+				(translations[i].get3PrimeEdge()>= end))
 				result.add(translations[i]);
 		}
 		
@@ -252,11 +254,8 @@ public class Transcript extends DirectedRegion {
 		
 		int i;
 		for (i = 0; i < translations.length; i++) {
-			if (getGene().isForward()&& translations[i].getStart()<= pos)
-				continue;
-			if (!getGene().isForward()&& translations[i].getEnd()> pos)		// reverse strand: rev coordinates
-				continue;
-			break;
+			if (translations[i].get5PrimeEdge()> pos)
+				break;
 		}
 		if (i< translations.length)
 			return true;
@@ -275,7 +274,7 @@ public class Transcript extends DirectedRegion {
 		
 		int i;
 		for (i = 0; i < translations.length; i++) 
-			if (pos>= translations[i].getStart()&& pos<= translations[i].getEnd())
+			if (pos>= translations[i].get5PrimeEdge()&& pos<= translations[i].get3PrimeEdge())
 				break;
 		
 		if (i< translations.length)
@@ -397,9 +396,9 @@ public class Transcript extends DirectedRegion {
 			return;
 		}
 			// else
-		if (start< translations[0].getStart())
+		if (Math.abs(start)< Math.abs(translations[0].getStart()))
 			translations[0].setStart(start);
-		if (end> translations[0].getEnd())
+		if (Math.abs(end)> Math.abs(translations[0].getEnd()))
 			translations[0].setEnd(end);
 	}
 	
@@ -510,128 +509,139 @@ public class Transcript extends DirectedRegion {
 			return true;
 		}
 
-		/**
-		 * Inserts the exons in an array sorted according to ascending order
-		 * of their start/stop position. <b>IMPORTANT</b>: add exons AFTER adding 
-		 * transcripts to ensure the correct init of AS types.
-		 * 
-		 * @param newExon
-		 * @return the exon already contained or <code>newExon</code> case of the exon was added successfully
-		 */
-		public boolean addExon(Exon newExon) {
-	
-				// new exon array
-			if (exons== null) 
-				exons= new Exon[] {newExon};
-			else {
-				
-					// search for identical exon (HERE necessary)
-				int p= Arrays.binarySearch(
-						exons,
-						newExon,
-						new AbstractRegion.PositionComparator()	// has to be directed, end< start for two ident. regions	
-					);
+			/**
+			 * Inserts the exons in an array sorted according to ascending order
+			 * of their start/stop position. <b>IMPORTANT</b>: add exons AFTER adding 
+			 * transcripts to ensure the correct init of AS types.
+			 * 
+			 * @param newExon
+			 * @return the exon already contained or <code>newExon</code> case of the exon was added successfully
+			 */
+			public boolean addExon(Exon newExon) {
 		
-				if (p>= 0) 
-					return false;	// already contained, not added
-				
-					// new Exon: search for overlapping exons 
-					// and accordingly construct SuperExon
-	//			Exon[] exs= getGene().getExons();		// in ALL transcripts
-	//			for (int i = 0; i < exons.length; i++) {
-	//				if ((exs[i].getStart()>= newExon.getStart()&& exs[i].getStart()< newExon.getEnd())||
-	//						newExon.getStart()>= exs[i].getStart()&& newExon.getStart()< exs[i].getEnd()) { // intersecting
-	//					if (exs[i].getSuperExon()!= null)
-	//						if (newExon.getSuperExon()!= null)
-	//							newExon.getSuperExon().merge(exs[i].getSuperExon()); 	// merge two super-exs
-	//						else
-	//							exs[i].getSuperExon().add(newExon);	// add to super-exon of the other
-	//					else {
-	//						SuperExon superEx= newExon.getSuperExon();
-	//						if (superEx== null) {
-	//							superEx= new SuperExon();
-	//							superEx.add(newExon);
-	//						}
-	//						superEx.add(exs[i]);
-	//					}
-	//				}
-	//			}
-				
-					// add exon
-				exons= (Exon[]) gphase.tools.Arrays.insert(this.exons, newExon, p);
-			}
-	
-				// init splice sites 
-			int p= Arrays.binarySearch(
-					this.exons,
-					newExon,
-					new AbstractRegion.PositionComparator()		// here also abstractregion possible	
-			);
+					// new exon array
+				if (exons== null) 
+					exons= new Exon[] {newExon};
+				else {
+					
+						// search for identical exon (HERE necessary)
+					int p= Arrays.binarySearch(
+							exons,
+							newExon,
+							new AbstractRegion.PositionComparator()	// has to be directed, end< start for two ident. regions	
+						);
 			
-			if (p== 0) {
-				int tss= isForward()?newExon.getStart():newExon.getEnd();
-				setStart(tss);
-				if (exons.length>1) {	// ex-first exon now has an acceptor
-					Exon ex= this.exons[1];
-					int posAcceptor= isForward()?ex.getStart():ex.getEnd();
-					SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false, ex);
+					if (p>= 0) 
+						return false;	// already contained, not added
+					
+						// new Exon: search for overlapping exons 
+						// and accordingly construct SuperExon
+		//			Exon[] exs= getGene().getExons();		// in ALL transcripts
+		//			for (int i = 0; i < exons.length; i++) {
+		//				if ((exs[i].getStart()>= newExon.getStart()&& exs[i].getStart()< newExon.getEnd())||
+		//						newExon.getStart()>= exs[i].getStart()&& newExon.getStart()< exs[i].getEnd()) { // intersecting
+		//					if (exs[i].getSuperExon()!= null)
+		//						if (newExon.getSuperExon()!= null)
+		//							newExon.getSuperExon().merge(exs[i].getSuperExon()); 	// merge two super-exs
+		//						else
+		//							exs[i].getSuperExon().add(newExon);	// add to super-exon of the other
+		//					else {
+		//						SuperExon superEx= newExon.getSuperExon();
+		//						if (superEx== null) {
+		//							superEx= new SuperExon();
+		//							superEx.add(newExon);
+		//						}
+		//						superEx.add(exs[i]);
+		//					}
+		//				}
+		//			}
+					
+						// add exon
+					exons= (Exon[]) gphase.tools.Arrays.insert(this.exons, newExon, p);
+				}
+		
+					// init splice sites 
+				int p= Arrays.binarySearch(
+						this.exons,
+						newExon,
+						new AbstractRegion.PositionComparator()		// here also abstractregion possible	
+				);
+				
+				if (p== 0) {
+					//int tss= isForward()?newExon.getStart():newExon.getEnd();
+					if (isForward())
+						setStart(newExon.getStart());
+					else
+						setEnd(newExon.getEnd());
+					if (exons.length>1) {	// ex-first exon now has an acceptor
+						Exon ex= this.exons[1];
+						int posAcceptor= isForward()?ex.getStart():ex.getEnd();
+						SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false, ex);
+						SpliceSite ss= getGene().checkSpliceSite(acceptor);
+						if (ss== null) 
+							getGene().addSpliceSite(acceptor);
+						else {
+							acceptor= ss;
+							ss.addExon(ex);
+						}
+						ex.setAcceptor(acceptor);
+					}
+				}
+				
+				if (p> 0) {										// has acceptor
+					int posAcceptor= isForward()?newExon.getStart():newExon.getEnd();
+					SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false, newExon);
 					SpliceSite ss= getGene().checkSpliceSite(acceptor);
 					if (ss== null) 
 						getGene().addSpliceSite(acceptor);
 					else {
 						acceptor= ss;
-						ss.addExon(ex);
+						ss.addExon(newExon);
 					}
-					ex.setAcceptor(acceptor);
+					exons[p].setAcceptor(acceptor);
 				}
-			}
-			
-			if (p> 0) {										// has acceptor
-				int posAcceptor= isForward()?newExon.getStart():newExon.getEnd();
-				SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false, newExon);
-				SpliceSite ss= getGene().checkSpliceSite(acceptor);
-				if (ss== null) 
-					getGene().addSpliceSite(acceptor);
-				else {
-					acceptor= ss;
-					ss.addExon(newExon);
-				}
-				exons[p].setAcceptor(acceptor);
-			}
-			
-			if (p< this.exons.length- 1) {					// has donor
-				int posDonor= isForward()?newExon.getEnd():newExon.getStart();
-				SpliceSite donor= new SpliceSite(getGene(), posDonor, true, newExon);
-				SpliceSite ss= getGene().checkSpliceSite(donor);
-				if (ss== null) 
-					getGene().addSpliceSite(donor);
-				else {
-					donor= ss;
-					ss.addExon(newExon);
-				}
-				exons[p].setDonor(donor);
-			}
-	
-			if (p== this.exons.length- 1) {
-				int tes= isForward()?newExon.getEnd():newExon.getStart();
-				setEnd(tes);
-				if (exons.length>1) {	// ex-last exon now has an donor
-					Exon ex= this.exons[exons.length- 2];
-					int posDonor= isForward()?ex.getEnd():ex.getStart();
-					SpliceSite donor= new SpliceSite(getGene(), posDonor, true, ex);
+				
+				if (p< this.exons.length- 1) {					// has donor
+					int posDonor= isForward()?newExon.getEnd():newExon.getStart();
+					SpliceSite donor= new SpliceSite(getGene(), posDonor, true, newExon);
 					SpliceSite ss= getGene().checkSpliceSite(donor);
 					if (ss== null) 
 						getGene().addSpliceSite(donor);
 					else {
 						donor= ss;
-						ss.addExon(ex);
+						ss.addExon(newExon);
 					}
-					ex.setDonor(donor);
+					exons[p].setDonor(donor);
 				}
+		
+				if (p== this.exons.length- 1) {
+					//int tes= isForward()?newExon.getEnd():newExon.getStart();
+					if (isForward())
+						setEnd(newExon.getEnd());
+					else
+						setStart(newExon.getStart());
+					if (exons.length>1) {	// ex-last exon now has an donor
+						Exon ex= this.exons[exons.length- 2];
+						int posDonor= isForward()?ex.getEnd():ex.getStart();
+						SpliceSite donor= new SpliceSite(getGene(), posDonor, true, ex);
+						SpliceSite ss= getGene().checkSpliceSite(donor);
+						if (ss== null) 
+							getGene().addSpliceSite(donor);
+						else {
+							donor= ss;
+							ss.addExon(ex);
+						}
+						ex.setDonor(donor);
+					}
+				}
+				
+				int sstart= start;
+				int send= end;
+				setBoundaries(newExon);
+				if (start!= sstart|| send!= end)
+					System.currentTimeMillis();
+				return true;
 			}
-			
-			return true;
-		}
 
 		/**
 		 * Inserts the exons in an array sorted according to ascending order
@@ -643,10 +653,22 @@ public class Transcript extends DirectedRegion {
 		 */
 		public void setBoundaries(Exon newExon) {
 	
-			if (getStart()== 0|| newExon.getStart()< getStart())
+			if (Math.abs(newExon.getStart())< Math.abs(getStart()))
 				setStart(newExon.getStart());
-			if (getEnd()== 0|| newExon.getEnd()> getEnd())
+			if (Math.abs(newExon.getEnd())> Math.abs(getEnd()))
 				setEnd(newExon.getEnd());
+//			if (newExon.getStart()< getStart())
+//				setStart(newExon.getStart());
+//			if (newExon.getEnd()> getEnd())
+//				setEnd(newExon.getEnd());
+		}
+		
+		public void setStart(int v) {
+			super.setStart(v);
+		}
+		
+		public void setEnd(int v) {
+			super.setEnd(v);
 		}
 
 	/**
@@ -677,7 +699,7 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public int getTSSPos() {
-		return exons[0].getStart();
+		return exons[0].get5PrimeEdge();
 	}
 
 	public AbstractSite getTSS() {
@@ -689,7 +711,7 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public int getTESPos() {
-		return exons[exons.length- 1].getEnd();
+		return exons[exons.length- 1].get3PrimeEdge();
 	}
 	
 	public Exon getExon(String stableID) {

@@ -52,6 +52,29 @@ public abstract class DirectedRegion extends AbstractRegion {
 		return false;
 	}
 	
+	public boolean isUpstream(int pos) {
+		if ((isForward()&& pos< start)||
+			(!isForward()&& pos< end))
+			return true;
+		return false;
+			
+	}
+	
+	public boolean isDownstream(int pos) {
+		if ((isForward()&& pos> end)||
+			(!isForward()&& pos> start))
+			return true;
+		return false;
+			
+	}
+	
+	public boolean contains(int pos) {
+		if ((isForward()&& pos>= start&& pos<= end)||
+			(!isForward()&& pos<= start&& pos>= end))
+			return true;
+		return false;
+	}
+	
 	public int strand = 0;
 
 	public boolean overlaps(Region anotherRegion) {
@@ -117,6 +140,32 @@ public abstract class DirectedRegion extends AbstractRegion {
 		else if (strand< 0)
 			this.start= -Math.abs(start);	// force neg
 	}
+	
+	public int get5PrimeEdge() {
+		if (isForward())
+			return getStart();
+		return getEnd();
+	}
+	
+	public void set5PrimeEdge(int val) {
+		if (isForward())
+			setStart(val);
+		else
+			setEnd(val);
+	}
+	
+	public void set3PrimeEdge(int val) {
+		if (isForward())
+			setEnd(val);
+		else
+			setStart(val);
+	}
+	
+	public int get3PrimeEdge() {
+		if (isForward())
+			return getEnd();
+		return getStart();
+	}
 
 	public void setStrand(int strand) {
 		this.strand = strand;
@@ -124,36 +173,6 @@ public abstract class DirectedRegion extends AbstractRegion {
 
 	public int getStrand() {
 		return strand;
-	}
-
-	public boolean overlaps(DirectedRegion anotherRegion) {
-		
-		if (getChromosome()!= null&& anotherRegion.getChromosome()!= null
-			&& (!anotherRegion.getChromosome().equalsIgnoreCase(getChromosome())))
-			return false;
-		
-		int start1, end1, start2, end2;
-		if (isForward()) {
-			start1= getStart();
-			end1= getEnd();
-		} else if (isReverse()) {
-			start1= -getEnd();
-			end1= -getStart();
-		} else
-			throw new RuntimeException("Error: strand not set!");
-		if (anotherRegion.isForward()) {
-			start2= anotherRegion.getStart();
-			end2= anotherRegion.getEnd();
-		} else if (anotherRegion.isReverse()) {
-			start2= -anotherRegion.getEnd();
-			end2= -anotherRegion.getStart();
-		} else
-			throw new RuntimeException("Error: strand not set!");
-		
-		if ((start1>= start2&& start1< end2)
-				|| (start2>= start1&& start2< end1))
-			return true;
-		return false;
 	}
 
 }

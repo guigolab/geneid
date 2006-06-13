@@ -6,10 +6,12 @@
  */
 package gphase.algo;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,6 +46,7 @@ import gphase.model.GraphHandler;
 import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
+import gphase.model.SpliceSite.PositionComparator;
 import gphase.regex.Automaton;
 import gphase.regex.ChessMaster;
 import gphase.regex.RegExp;
@@ -67,8 +70,30 @@ public class ASAnalyzer {
 		}
 	}
 	
-	public static void test04_AA_AD(Graph g) {
+	public static long[] getCDSUTRSizeComplement(Graph g) {
+		Species[] spe= g.getSpecies();
+		long[] regions= new long[3];
+		for (int i = 0; i < regions.length; i++) 
+			regions[i]= 0;
+		for (int i = 0; i < spe.length; i++) {
+			Gene[] ge= spe[i].getGenes();
+			for (int j = 0; j < ge.length; j++) {
+				try {
+					regions[0]+= Math.abs(ge[j].getReal5UTR().getEnd()- ge[j].getReal5UTR().getStart())+ 1;
+				} catch (NullPointerException e) {;}
+				try {
+					regions[1]+= Math.abs(ge[j].getCDSRegion().getEnd()- ge[j].getCDSRegion().getStart())+ 1;
+				} catch (NullPointerException e) {;}
+				try {
+					regions[2]+= Math.abs(ge[j].getReal3UTR().getEnd()- ge[j].getReal3UTR().getStart())+ 1;
+				} catch (NullPointerException e) {;}
+			}
+		}
 		
+		return regions;
+	}
+	
+	public static void check_AA_AD_old(Graph g, boolean pure, boolean filterLow, boolean filterFirstExon) {
 		g.filterNonCodingTranscripts();
 		ASVariation[][] as= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
 		
@@ -77,35 +102,380 @@ public class ASAnalyzer {
 		Vector aaVec= new Vector();
 		for (int i = 0; i < as.length; i++) {
 			String s= as[i][0].toBitString();
-			if (s.contains("DBA")|| s.contains("DCA"))
-				adVec.add(as[i]);
-			if (s.contains("ABD")|| s.contains("ACD"))
-				aaVec.add(as[i]);
+			int x= 0;
+			for (int j = 0; j < as[i].length; j++) {
+				Vector va= new Vector();
+				Vector vd= new Vector();
+				//if ((x= s.indexOf("DBA"))>= 0|| (x= s.indexOf("DCA"))>= 0) {
+				//if (s.startsWith("DBA")|| s.startsWith("DCA")) {
+				if (s.equals("DBA")|| s.equals("DCA")) {
+					SpliceSite[][] ss= as[i][j].getSpliceSites(x, x+2);
+					//if (Math.abs(ss[0][0].getPos()- ss[1][0].getPos())>= 10)	// filter short
+						vd.add(new ASVariation(
+							as[i][j].getTranscript1(),
+							as[i][j].getTranscript2(),
+							ss[0],
+							ss[1]
+						));
+				}
+				//if ((x= s.indexOf("ABD"))>= 0|| (x= s.indexOf("ACD"))>= 0) {
+				if (s.equals("ABD")|| s.equals("ACD")) {
+				//if (s.startsWith("ABD")|| s.startsWith("ACD")) {
+					SpliceSite[][] ss= as[i][j].getSpliceSites(x, x+2);
+					//if (Math.abs(ss[0][0].getPos()- ss[1][0].getPos())>= 10)	// filter short
+						va.add(new ASVariation(
+							as[i][j].getTranscript1(),
+							as[i][j].getTranscript2(),
+							ss[0],
+							ss[1]
+						));
+				}
+				if (va.size()> 0)
+					aaVec.add(va);
+				if (vd.size()> 0)
+					adVec.add(vd);
+			}
+		}
+		ASVariation[][] aa= (ASVariation[][]) Arrays.toField(aaVec);
+		ASVariation[][] ad= (ASVariation[][]) Arrays.toField(adVec);
+
+			// test out
+//		System.out.println("-- donors:");
+//		for (int i = 0; i < ad.length; i++) 
+//			System.out.println(ad[i][0]);		
+//		System.out.println("\n-- acceptors:");
+//		for (int i = 0; i < aa.length; i++) 
+//			System.out.println(aa[i][0]);
+
+			// count coding/non-coding
+		int cds= 0, utr= 0;
+		for (int i = 0; i < aa.length; i++) 
+			for (int j = 0; j < aa[i].length; j++) 
+				if (aa[i][j].isProteinCoding())
+					aa[i][j].outputDetail(System.out); //++cds;
+				else if (aa[i][j].isNotAtAllCoding())
+					aa[i][j].outputDetail(System.out); //++utr;
+			
+		System.out.println("acceptors: "+cds+" cds, "+utr+"utr");
+		cds= 0; utr= 0;
+		for (int i = 0; i < ad.length; i++) 
+			for (int j = 0; j < ad[i].length; j++) {
+				if (ad[i][j].isProteinCoding()) 
+					ad[i][j].outputDetail(System.out); //++cds;
+				else if (ad[i][j].isNotAtAllCoding()) {
+					ad[i][j].outputDetail(System.out); //++utr;
+					AbstractRegion rcds= ad[i][j].getGene().getRealCDS();
+					SpliceSite[] su= ad[i][j].getSpliceUniverse();
+					// TODO stopped here
+				}
+			}
+		System.out.println("donors: "+cds+" cds, "+utr+"utr");
+		
+	}
+
+
+	public static ASVariation[][] get_AA_AD(Graph g, boolean pure, boolean filterLow, boolean filterFirstExon) {
+		
+		//g.filterNonCodingTranscripts();
+		ASVariation[][] as= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+		
+			// get all events containing AA, AD
+		Vector adVec= new Vector();
+		Vector aaVec= new Vector();
+		for (int i = 0; i < as.length; i++) {
+			String s= as[i][0].toBitString();
+			int x= 0;
+			for (int j = 0; j < as[i].length; j++) {
+				Vector va= new Vector();
+				Vector vd= new Vector();
+				x= 0;
+				if ((pure&& ((s.equals("ABD")|| s.equals("ACD"))))||
+						(!pure&& ((x= s.indexOf("ABD"))>= 0|| (x= s.indexOf("ACD"))>= 0))) {
+					//if (s.startsWith("ABD")|| s.startsWith("ACD")) {
+						SpliceSite[][] ss= as[i][j].getSpliceSites(x, x+2);
+						SpliceSite[] flanks= as[i][j].getFlankingSpliceSites();		// skip terminal exon
+						if (((filterFirstExon&& flanks[1]!= null)|| !filterFirstExon)&&
+								(!filterLow|| Math.abs(ss[0][0].getPos()- ss[1][0].getPos())>= 10))	// filter short
+							va.add(new ASVariation(
+								as[i][j].getTranscript1(),
+								as[i][j].getTranscript2(),
+								ss[0],
+								ss[1]
+							));
+					}
+				
+				
+				x= 0;
+				if ((pure&& ((s.equals("DBA")|| s.equals("DCA"))))||
+					(!pure&& ((x= s.indexOf("DBA"))>= 0|| (x= s.indexOf("DCA"))>= 0))) {
+				//if (s.startsWith("DBA")|| s.startsWith("DCA")) {
+					SpliceSite[][] ss= as[i][j].getSpliceSites(x, x+2);
+					SpliceSite[] flanks= as[i][j].getFlankingSpliceSites();		// skip initial exons
+					if (((filterFirstExon&& flanks[0]!= null)|| !filterFirstExon)&&
+							(!filterLow|| Math.abs(ss[0][0].getPos()- ss[1][0].getPos())>= 10)) {	// filter short
+						vd.add(new ASVariation(
+							as[i][j].getTranscript1(),
+							as[i][j].getTranscript2(),
+							ss[0],
+							ss[1]
+						));
+//					} else {
+//						if (((filterFirstExon&& flanks[0]!= null)|| !filterFirstExon)&&
+//								(!filterLow|| Math.abs(ss[0][0].getPos()- ss[1][0].getPos())< 10)) {	// filter short
+//							if (as[i][j].isNotAtAllCoding())
+//								as[i][j].outputDetail(System.out);
+//						}
+					}
+				}
+				if (va.size()> 0)
+					aaVec.add(va);
+				if (vd.size()> 0)
+					adVec.add(vd);
+			}
 		}
 		ASVariation[][] aa= (ASVariation[][]) Arrays.toField(aaVec);
 		ASVariation[][] ad= (ASVariation[][]) Arrays.toField(adVec);
 		
-		for (int i = 0; i < ad.length; i++) 
-			System.out.println(ad[i][0]);
-		for (int i = 0; i < aa.length; i++) 
-			System.out.println(aa[i][0]);
+		return (ASVariation[][]) Arrays.merge(aa, ad).toArray();		
+	}
 		
+	public static void check_AA_AD(Graph g, boolean pure, boolean filterLow, boolean filterFirstIntron) {
+		
+		//g.filterNonCodingTranscripts();
+		ASVariation[][] as= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+		
+			// get all events containing AA, AD
+		Vector adVec= new Vector();
+		Vector aaVec= new Vector();
+		for (int i = 0; i < as.length; i++) {
+			String s= as[i][0].toBitString();
+			int x= 0;
+			for (int j = 0; j < as[i].length; j++) {
+				Vector va= new Vector();
+				Vector vd= new Vector();
+				x= 0;
+				if ((pure&& ((s.equals("ABD")|| s.equals("ACD"))))||
+						(!pure&& ((x= s.indexOf("ABD"))>= 0|| (x= s.indexOf("ACD"))>= 0))) {
+					//if (s.startsWith("ABD")|| s.startsWith("ACD")) {
+						SpliceSite[][] ss= as[i][j].getSpliceSites(x, x+2);
+						SpliceSite[] flanks= as[i][j].getFlankingSpliceSites();		// skip terminal exon
+//						if (((filterFirstExon&& flanks[1]!= null)|| !filterFirstExon)&&
+//								(!filterLow|| Math.abs(ss[0][0].getPos()- ss[1][0].getPos())>= 10))	// filter short
+						SpliceSite s1= as[i][j].getTranscript1().getSpliceChain()[0];	// skip first intron
+						if (s1.getPos()> as[i][j].getTranscript2().getSpliceChain()[0].getPos())
+							s1= as[i][j].getTranscript1().getSpliceChain()[0];
+						PositionComparator compi= new SpliceSite.PositionComparator();
+						if (((filterFirstIntron&& flanks[0]!= null&& compi.compare(flanks[0],s1)!= 0)|| !filterFirstIntron)&&
+								(!filterLow|| Math.abs(ss[0][0].getPos()- ss[1][0].getPos())>= 10))	// filter short
+							va.add(new ASVariation(
+								as[i][j].getTranscript1(),
+								as[i][j].getTranscript2(),
+								ss[0],
+								ss[1]
+							));
+					}
+				
+				
+				x= 0;
+				if ((pure&& ((s.equals("DBA")|| s.equals("DCA"))))||
+					(!pure&& ((x= s.indexOf("DBA"))>= 0|| (x= s.indexOf("DCA"))>= 0))) {
+				//if (s.startsWith("DBA")|| s.startsWith("DCA")) {
+					SpliceSite[][] ss= as[i][j].getSpliceSites(x, x+2);
+					SpliceSite[] flanks= as[i][j].getFlankingSpliceSites();		// skip initial exons
+					if (((filterFirstIntron&& flanks[0]!= null)|| !filterFirstIntron)&&
+							(!filterLow|| Math.abs(ss[0][0].getPos()- ss[1][0].getPos())>= 10)) {	// filter short
+						vd.add(new ASVariation(
+							as[i][j].getTranscript1(),
+							as[i][j].getTranscript2(),
+							ss[0],
+							ss[1]
+						));
+//					} else {
+//						if (((filterFirstExon&& flanks[0]!= null)|| !filterFirstExon)&&
+//								(!filterLow|| Math.abs(ss[0][0].getPos()- ss[1][0].getPos())< 10)) {	// filter short
+//							if (as[i][j].isNotAtAllCoding())
+//								as[i][j].outputDetail(System.out);
+//						}
+					}
+				}
+				if (va.size()> 0)
+					aaVec.add(va);
+				if (vd.size()> 0)
+					adVec.add(vd);
+			}
+		}
+		ASVariation[][] aa= (ASVariation[][]) Arrays.toField(aaVec);
+		ASVariation[][] ad= (ASVariation[][]) Arrays.toField(adVec);
+		
+		
+			// test out
+//		System.out.println("-- donors:");
+//		for (int i = 0; i < ad.length; i++) 
+//			System.out.println(ad[i][0]);		
+//		System.out.println("\n-- acceptors:");
+//		for (int i = 0; i < aa.length; i++) 
+//			System.out.println(aa[i][0]);
+
+		
+		System.out.print("\nAA/AD");
+		if (pure)
+			System.out.print(" pure");
+		else 
+			System.out.print(" all");
+		if (filterLow)
+			System.out.print(" filter <10 nt");
+		if (filterFirstIntron)
+			System.out.print(" filter 1st intron");
+		System.out.println(" (cds, utr)");
+		
+			// count coding/non-coding
+		int cds= 0, utr= 0;
+		for (int i = 0; i < aa.length; i++) 
+			for (int j = 0; j < aa[i].length; j++) 
+				if (aa[i][j].isProteinCoding())
+					++cds;	//aa[i][j].outputDetail(System.out); // aa[i][j].outputDetail(System.out); //
+				else if (aa[i][j].isNotAtAllCoding())
+					++utr; //aa[i][j].outputDetail(System.out); //
+			
+		System.out.println("AA: "+cds+" cds,\t"+utr+"utr");
+		
+		cds= 0; utr= 0;
+		for (int i = 0; i < ad.length; i++) 
+			for (int j = 0; j < ad[i].length; j++) {
+				if (ad[i][j].isProteinCoding()) 
+					++cds;	//ad[i][j].outputDetail(System.out); //
+				else if (ad[i][j].isNotAtAllCoding()) {
+					++utr;	// ad[i][j].outputDetail(System.out); //
+					AbstractRegion rcds= ad[i][j].getGene().getRealCDS();
+					SpliceSite[] su= ad[i][j].getSpliceUniverse();
+					// TODO stopped here
+				}
+			}
+		System.out.println("AD: "+cds+" cds,\t"+utr+"utr");
+		
+
 	}
 	
 	public ASAnalyzer(Graph newGraph) {
 		this.graph= newGraph;
 	}
 
-	public static void analyze1_transcripts_clusters(Graph g) {
-		System.out.println("clusters: "+g.getGenes().length+" transcripts: "+g.getTranscriptCount());
+	public static void test01_clusters_coverage_as(Graph g, PrintStream p) {
+		p.println("clusters: "+g.getGenes().length+" transcripts: "+g.getTranscriptCount());
 		ASAnalyzer.filterSingleExonClusters(g);
 		int x= g.getGenes().length;
 		int y= g.getTranscriptCount();
-		System.out.println("clusters: "+x+" transcripts: "+y+"\t"+ ((float) y/ (float) x));
+		p.println("clusters: "+x+" transcripts: "+y+"\t"+ ((float) y/ (float) x));
 		int z= g.getClustersWithAS();
-		System.out.println("clusters w as: "+z+"\t"+((float) z/ (float) x));
+		p.println("clusters w as: "+z+"\t"+((float) z/ (float) x));
+	}
+
+	static int getOutfileNumber() {
+		File dir= new File("./");
+		File[] files= dir.listFiles();
+		int max= 0;
+		for (int i = 0; i < files.length; i++) {
+			String s= files[i].getName();
+			if (!s.startsWith("out"))
+				continue;
+			s= s.substring(3, s.indexOf("_"));
+			int x= Integer.parseInt(s);
+			max= Math.max(x, max);
+		}
+		return max+1;
 	}
 	
+	public static void test(String[] methodName, Class[] args, boolean[] concat) {
+		
+		System.out.println(new Date(System.currentTimeMillis()));
+		try {
+			String[] outF= new String[methodName.length];
+			Method[] m= new Method[methodName.length];
+			int base= getOutfileNumber();
+			for (int i = 0; i < outF.length; i++) {
+				outF[i]= ""+ base++;
+				for (int j = 0; outF[i].length() < 3; j++) 
+					outF[i]= "0"+ outF[i];
+				outF[i]= "out"+ outF[i]+ "_"+ methodName[i];
+				
+				m[i]= null;
+				try {
+					m[i] = ASAnalyzer.class.getMethod(methodName[i], args);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+				
+			}
+		
+			PrintStream pr;
+			EncodeWrapper myEncode= new EncodeWrapper(new File("encode/44regions_genes_CHR_coord.gtf").getAbsolutePath());
+			Graph g= myEncode.getGraph(true);
+			for (int i = 0; i < m.length; i++) {
+				if (concat[i]) 
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_summary", true)));
+				else 
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_encode_total")));
+				pr.println("ENCODE total");
+				m[i].invoke(null, new Object[]{g,pr});
+				pr.flush(); pr.close();
+				System.out.println("ENCODE total finished with analysis "+m[i]);
+			}
+			
+				// rebuild graph: otherwise splice sites are not removed, test02 fails..
+			myEncode= new EncodeWrapper(new File("encode/44regions_genes_CHR_coord.gtf").getAbsolutePath());
+			g= myEncode.getGraph(true);
+			g.filterNonCodingTranscripts();
+			for (int i = 0; i < m.length; i++) {
+				if (concat[i]) {
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_summary", true)));
+					pr.println("\n\nENCODE coding");
+				} else
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_encode_coding")));
+				m[i].invoke(null, new Object[]{g,pr}); 	
+				pr.flush(); pr.close();
+				System.out.println("ENCODE coding finished with analysis "+m[i]);
+			}
+			g= null;
+			
+			
+			myEncode= new EncodeWrapper(new File("encode/EnsemblGenes_fromUCSC.gtf").getAbsolutePath());
+			g= myEncode.getGraph(false);
+			g.filterNonCodingTranscripts();
+			for (int i = 0; i < m.length; i++) {
+				if (concat[i]) {
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_summary", true)));
+					pr.println("\n\nENSEMBL coding");
+				} else
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_ensembl_coding")));
+				m[i].invoke(null, new Object[]{g,pr});
+				pr.flush(); pr.close();
+				System.out.println("ENSEMBL coding finished with analysis "+m[i]);
+			}
+			g= null;
+			
+			
+			myEncode= new EncodeWrapper(new File("encode/RefSeqGenes_fromUCSC.gtf").getAbsolutePath());
+			g= myEncode.getGraph(false);
+			g.filterNonCodingTranscripts();
+			for (int i = 0; i < m.length; i++) {
+				if (concat[i]) {
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_summary", true)));
+					pr.println("\n\nREFSEQ coding");
+				} else
+					pr= new PrintStream(new BufferedOutputStream(new FileOutputStream(outF[i]+"_refseq_coding")));
+				m[i].invoke(null, new Object[]{g,pr}); 	
+				pr.flush(); pr.close();
+				System.out.println("REFSEQ coding finished with analysis "+m[i]);
+			}
+
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println(new Date(System.currentTimeMillis()));
+		
+	}
+
 	public static void filterSingleExonClusters(Graph g) {
 		Species[] spe= g.getSpecies();
 		for (int i = 0; i < spe.length; i++) {
@@ -116,6 +486,64 @@ public class ASAnalyzer {
 			}
 		}
 	}
+	
+	public static void getSylvainsSize(Graph g, PrintStream p) {
+		
+		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+		
+		// skipped
+		p.println("--- skipped exon ---");
+		ASVariation[] sk= getVariation("( // 1=2^)", vars);
+		for (int i = 0; i < sk.length; i++) {
+			SpliceSite[] sc= (sk[i].getSpliceChain1()== null|| sk[i].getSpliceChain1().length< 1)?
+					sk[i].getSpliceChain2():sk[i].getSpliceChain1();
+			p.println(sk[i].getGene().getChromosome()+ " "
+					+ sk[i].getGene().getStrand()+ " "
+					+ sc[0].getPos()+ " "
+					+ sc[1].getPos()+ " "
+					+ sk[i].toCodingInfoString());
+		}
+
+		// donors
+		p.println();
+		p.println("--- alt donor ---");
+		ASVariation[] don= getVariation("(1^ // 2^)", vars);
+		for (int i = 0; i < don.length; i++) {
+			SpliceSite[] flanks= don[i].getFlankingSpliceSites();
+			if (flanks[0]== null)
+				continue;	// skip initial exons
+			p.println(don[i].getGene().getChromosome()+ " "
+					+ don[i].getGene().getStrand()+ " "
+					+ flanks[0].getPos()+ " "
+					+ don[i].getSpliceChain1()[0].getPos()+ " "
+					+ don[i].toCodingInfoString());
+			p.println(don[i].getGene().getChromosome()+ " "
+					+ don[i].getGene().getStrand()+ " "
+					+ flanks[0].getPos()+ " "
+					+ don[i].getSpliceChain2()[0].getPos()+ " "
+					+ don[i].toCodingInfoString());
+		}
+
+		// acceptors
+		p.println();
+		p.println("--- alt acceptor ---");
+		ASVariation[] acc= getVariation("(1= // 2=)", vars);
+		for (int i = 0; i < acc.length; i++) {
+			SpliceSite[] flanks= acc[i].getFlankingSpliceSites();
+			if (flanks[1]== null)
+				continue;	// skip terminal exons
+			p.println(acc[i].getGene().getChromosome()+ " "
+					+ acc[i].getGene().getStrand()+ " "
+					+ acc[i].getSpliceChain1()[0].getPos()+ " "
+					+ flanks[1].getPos()+ " "
+					+ acc[i].toCodingInfoString());
+			p.println(acc[i].getGene().getChromosome()+ " "
+					+ acc[i].getGene().getStrand()+ " "
+					+ acc[i].getSpliceChain2()[0].getPos()+ " "
+					+ flanks[1].getPos()+ " "
+					+ acc[i].toCodingInfoString());
+		}
+}
 	
 	public static void getAllASVariation(Graph g) {
 		ASVariation[][] classes= g.getASVariations(1);
@@ -211,7 +639,7 @@ public class ASAnalyzer {
 //			}
 		}
 
-	public static void test03_lengthVariationModulo(Graph g) {
+	public static void test03b_lengthVariationModuloAA_AD(Graph g, PrintStream p) {
 		ASVariation[][] classes= g.getASVariations(1);
 		classes= filter(classes, "isProteinCoding");
 		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
@@ -224,7 +652,51 @@ public class ASAnalyzer {
 			cnt1= 0; cnt2= 0; cnt0= 0;
 			tot= 0;
 			ASVariation[] events= classes[x];
-			System.out.println(events[0].toString());
+			p.println(events[0].toString());
+			boolean chkLen= false;
+			if (classes[x][0].toString().equals("(1^ // 2^)")||
+					classes[x][0].toString().equals("(1= // 2=)"))
+				chkLen= true;
+			for (int i = 0; i < events.length; i++) {
+				int[] a= events[i].getLength(true);
+				int[] b= events[i].getLength(false);
+				int diffA= Math.abs(a[0]- a[1]);
+				if (chkLen&& diffA< 11)
+					continue;
+//				if (x== 0)
+//					events[i].outputDetail(System.out);
+//				System.out.println(a[0]+","+a[1]+": "+diffA+"("+(diffA%3)+")");
+				if (diffA%3== 0)
+					cnt0++;
+				if (diffA%3== 1)
+					cnt1++;
+				if (diffA%3== 2)
+					cnt2++;
+				++tot;
+			}
+			p.println("0: "+cnt0+"\t1: "+cnt1+"\t2: "+cnt2+"\t("+tot+"): "+((double) cnt0/ tot));
+			scnt1+= cnt1;
+			scnt0+= cnt0;
+			scnt2+= cnt2;
+			stot+= tot;
+		}
+		p.println("===> 0: "+scnt0+"\t1: "+scnt1+"\t2: "+scnt2+"\t("+stot+"): "+((double) scnt0/ stot));
+	}
+	
+	public static void test03_lengthVariationModulo(Graph g, PrintStream p) {
+		ASVariation[][] classes= g.getASVariations(1);
+		classes= filter(classes, "isProteinCoding");
+		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+		
+		//ASVariation[] events= getVariation("( // 1^2=)", classes);
+		int cnt0= 0, cnt1= 0, cnt2= 0;
+		int scnt0= 0, scnt1= 0, scnt2= 0, stot= 0;
+		int tot= 0;
+		for (int x = 0; classes!= null&& x < classes.length; x++) {
+			cnt1= 0; cnt2= 0; cnt0= 0;
+			tot= 0;
+			ASVariation[] events= classes[x];
+			p.println(events[0].toString());
 			for (int i = 0; i < events.length; i++) {
 				int[] a= events[i].getLength(true);
 				int[] b= events[i].getLength(false);
@@ -240,13 +712,77 @@ public class ASAnalyzer {
 					cnt2++;
 			}
 			tot+= events.length;
-			System.out.println("0: "+cnt0+"\t1: "+cnt1+"\t2: "+cnt2+"\t("+tot+"): "+((double) cnt0/ tot));
+			p.println("0: "+cnt0+"\t1: "+cnt1+"\t2: "+cnt2+"\t("+tot+"): "+((double) cnt0/ tot));
 			scnt1+= cnt1;
 			scnt0+= cnt0;
 			scnt2+= cnt2;
 			stot+= tot;
 		}
-		System.out.println("===> 0: "+scnt0+"\t1: "+scnt1+"\t2: "+scnt2+"\t("+stot+"): "+((double) scnt0/ stot));
+		p.println("===> 0: "+scnt0+"\t1: "+scnt1+"\t2: "+scnt2+"\t("+stot+"): "+((double) scnt0/ stot));
+	}
+	
+	public static void outputCodingRegions() {
+		String fName= "encode/44regions_genes_CHR_coord.gtf";
+		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
+		boolean encode= false;
+		if (fName.equals("encode/44regions_genes_CHR_coord.gtf"))
+			encode= true;
+		Graph g= myWrapper.getGraph(encode);
+		g.filterNonCodingTranscripts();
+		Gene[] ge= g.getGenes();
+		try {
+			PrintStream buffy= new PrintStream("regions_coding.txt");
+			AbstractRegion re;
+			for (int i = 0; i < ge.length; i++) {
+				re= ge[i].getReal5UTR();
+				if (re!= null)
+					buffy.println(ge[i].getChromosome()+" "
+							+ re.getStart()+ " "
+							+ re.getEnd()+ " "
+							+ "5utr");
+				re= ge[i].getRealCDS();
+				if (re!= null)
+					buffy.println(ge[i].getChromosome()+" "
+							+ re.getStart()+ " "
+							+ re.getEnd()+ " "
+							+ "cds");
+				re= ge[i].getReal3UTR();
+				if (re!= null)
+					buffy.println(ge[i].getChromosome()+" "
+							+ re.getStart()+ " "
+							+ re.getEnd()+ " "
+							+ "3utr");
+			}
+			buffy.flush();
+			buffy.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void output3UTR() {
+		String fName= "encode/44regions_genes_CHR_coord.gtf";
+		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
+		boolean encode= false;
+		if (fName.equals("encode/44regions_genes_CHR_coord.gtf"))
+			encode= true;
+		Graph g= myWrapper.getGraph(encode);
+		g.filterNonCodingTranscripts();
+		Gene[] ge= g.getGenes();
+		try {
+			PrintStream buffy= new PrintStream("3utr_ss.txt");
+			AbstractRegion re;
+			for (int i = 0; i < ge.length; i++) {
+				SpliceSite[] ss= 
+					ge[i].getSpliceSites(AbstractRegion.REGION_3UTR, SpliceSite.CONSTITUTIVE_SS);
+				for (int j = 0; ss!= null&& j < ss.length; j++) 
+					buffy.println(ge[i].getChromosome()+ " "+ ss[j].getPos());
+			}
+			buffy.flush();
+			buffy.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void outputCheckFile() {
@@ -307,21 +843,67 @@ public class ASAnalyzer {
 		p.close();
 }
 	
-	public static void outputASStatistics(Graph g) {
-		g.getASVariations(ASMultiVariation.FILTER_NONE);
-		SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_5UTR);
-		System.out.println("5UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) res[1].length));
-//		for (int i = 0; i < res[1].length; i++) 
-//			System.out.println(res[1][i]);
-		res= g.getSpliceSites(AbstractRegion.REGION_CDS);
-		System.out.println("CDS: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) res[1].length));
-//		for (int i = 0; i < res[1].length; i++) 
-//			System.out.println(res[1][i]);
-		res= g.getSpliceSites(AbstractRegion.REGION_3UTR);
-		System.out.println("3UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) res[1].length));
-//		for (int i = 0; i < res[1].length; i++) 
-//			System.out.println(res[1][i]);
-	}
+	public static void test02_ss_statistics(Graph g, PrintStream p) {
+			g.getASVariations(ASMultiVariation.FILTER_NONE);
+			SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_5UTR);
+			p.println("#AS-SS\t#CONST-SS\tpercAS");
+			p.println("5UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
+			int utr5= res[1].length;
+	//		for (int i = 0; i < res[1].length; i++) 
+	//			System.out.println(res[1][i]);
+			res= g.getSpliceSites(AbstractRegion.REGION_CDS);
+			p.println("CDS: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
+			int cds= res[1].length;
+	//		for (int i = 0; i < res[1].length; i++) 
+	//			System.out.println(res[1][i]);
+			res= g.getSpliceSites(AbstractRegion.REGION_3UTR);
+			p.println("3UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
+			int utr3= res[1].length;
+	//		for (int i = 0; i < res[1].length; i++) 
+	//			System.out.println(res[1][i]);
+			res= g.getSpliceSites(AbstractRegion.REGION_COMPLETE_CLUSTER);
+			p.println("total: "+res[0].length+"\t"+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
+			float f1= ((float) utr5/(float) res[1].length);
+			float f2= ((float) cds/(float) res[1].length);
+			float f3= ((float) utr3/(float) res[1].length);
+			p.println("%5UTR\t%CDS\t%3UTR\t%Rest");
+			p.println(f1+"\t"+f2+"\t"+f3+"\t"+(1f- f1- f2- f3));
+		}
+
+	public static void test02_ss_statistics_outCDSalt(Graph g) {
+			g.getASVariations(ASMultiVariation.FILTER_NONE);
+			SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_CDS);
+			try {
+				PrintStream p= new PrintStream("check_as_cds");
+				for (int i = 0; i < res[0].length; i++) 
+					p.println(res[0][i].toOutString());
+				p.flush(); p.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+
+		}
+
+	public static void test02b_ss_statistics_3P(Graph g, PrintStream p) {
+			g.getASVariations(ASMultiVariation.FILTER_NONE);
+			SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_5UTR);
+
+			res= g.getSpliceSites(AbstractRegion.REGION_3UTR);
+			int ir= 0;
+			for (int i = 0; i < res[0].length; i++) {
+				ASVariation[] as= res[0][i].getAsVars();
+				for (int j = 0; j < as.length; j++) 
+					if (as[j].toString().equals("( // 1^2=)")) { 
+						++ir;
+						break;
+					}
+				
+			}
+			
+			p.println("SSir "+ir+", SSas "+res[0].length+", SStot "+res[1].length);
+		}
+
 	/** @deprecated ?
 	 * 
 	 * 
@@ -527,7 +1109,7 @@ public class ASAnalyzer {
 	 * @param respectCoding
 	 * @return
 	 */
-	public static ASVariation[][] determineVariations(Graph g, PrintStream p) {
+	public static void test04_determineVariations(Graph g, PrintStream p) {
 		
 		ASVariation[][] classes= g.getASVariations(1);
 		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
@@ -535,7 +1117,7 @@ public class ASAnalyzer {
 		try {
 			Method m = classes[0][0].getClass().getMethod("isTrue", null);
 			ASVariation[][] filtClasses= filter(classes, m);
-			outputVariations(filtClasses, true, false, p);
+			outputVariations(filtClasses, false, true, p);
 			
 			m = classes[0][0].getClass().getMethod("isProteinCoding", null);
 			filtClasses= filter(classes, m);
@@ -547,11 +1129,24 @@ public class ASAnalyzer {
 	
 			m = classes[0][0].getClass().getMethod("isNotAtAllCoding", null);
 			filtClasses= filter(classes, m);
-			return outputVariations(filtClasses, true, false, p);
+			outputVariations(filtClasses, true, false, p);
+			
+//			Comparator compi= new Comparator()
+//			for (int i = 0; i < filtClasses.length; i++) {
+//				for (int j = 0; j < filtClasses[i].length; j++) {
+//					for (int k = 0; k < filtClasses1.length; k++) {
+//						if (!filtClasses[i][0].toString().equals(filtClasses1[k][0].toString()))
+//							continue;
+//						for (int m = 0; m < filtClasses1[k].length; m++) {
+//							if (filtClasses[i][j])
+//						}
+//					}
+//				}
+//			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
-		return null;
 	}
 
 	public static void determineVariationsDetails(Graph g, String methodName, PrintStream p) {
@@ -568,7 +1163,9 @@ public class ASAnalyzer {
 		} 
 		classes= filter(classes, m);
 		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);	
+		int cnt= 0;
 		for (int i = 0; i < classes.length; i++) {
+			cnt+= classes[i].length;
 			for (int j = 0; j < classes[i].length; j++) {
 				classes[i][j].outputDetail(p);
 			}
@@ -589,7 +1186,7 @@ public class ASAnalyzer {
 		} 
 		classes= filter(classes, m);
 		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);	
-		return outputVariations(classes, true, false, p);
+		return outputVariations(classes, false, false, p);
 	}
 
 	public static ASVariation[][] determineVariations(Graph g, String methodName) {
@@ -691,13 +1288,19 @@ public class ASAnalyzer {
 						break;
 					}
 				}
-				if (j== classes.length) {
+				if (j== classes.length) {	// empty lines
 					v.add(null);
 					nullObj++;
 				}
-				
 			}
-				
+			for (int i = 0; i < classes.length; i++) {
+				int j;
+				for (j = 0; j < labels.length; j++) 
+					if (classes[i][0].toString().equals(labels[j]))
+						break;
+				if (j== labels.length)		// add missing ones
+					v.add(classes[i]);
+			}
 			classes= (ASVariation[][]) Arrays.toField(v);
 		}
 		
@@ -1316,7 +1919,9 @@ public class ASAnalyzer {
 		
 //		filterEvents(new File("human_graph_as_variations_non-redundant.log"));
 
-		outputCheckFile();
+		//outputCheckFile();
+		outputCodingRegions();
+		//output3UTR();
 		
 //		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 //		//Graph g= null;

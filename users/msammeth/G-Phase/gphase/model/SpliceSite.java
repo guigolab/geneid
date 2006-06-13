@@ -26,9 +26,11 @@ public class SpliceSite extends AbstractSite {
 	static final int SPLICE_SITE_FLANK_SIZE= 20; // Alternative splicing in the human, mouse and rat genomes is associated with an increased frequency of exon creation and/or loss
 												 // Barmak Modrek & Christopher J Lee
 
+	
 	Exon[] exons= null;
 	boolean donor= false;
 	boolean constitutive= true;
+	ASVariation[] asVars= null;
 	
 	public static class PositionComparator extends AbstractSite.PositionComparator {
 		public int compare(Object arg0, Object arg1) {
@@ -86,6 +88,13 @@ public class SpliceSite extends AbstractSite {
 		return false;
 	}
 	
+	public void addASVar(ASVariation newASVar) {
+		if (asVars== null) 
+			asVars= new ASVariation[] {newASVar};
+		
+		Arrays.add(asVars, newASVar);
+	}
+	
 	/**
 	 * checks for identity, not for homology
 	 */
@@ -124,6 +133,11 @@ public class SpliceSite extends AbstractSite {
 			result+= ">";
 		return result;
 	}
+	
+	public String toOutString() {
+		String result= getGene().getChromosome()+ " "+ Math.abs(getPos())+ " "+ getGene().getStrand();
+		return result;
+	}
 
 	public boolean isConstitutive() {
 		return constitutive;
@@ -131,5 +145,9 @@ public class SpliceSite extends AbstractSite {
 
 	public void setConstitutive(boolean constitutive) {
 		this.constitutive = constitutive;
+	}
+
+	public ASVariation[] getAsVars() {
+		return asVars;
 	}
 }

@@ -16,6 +16,7 @@ import java.util.Comparator;
  */
 public abstract class AbstractRegion implements Region {
 
+	public static final int REGION_COMPLETE_CLUSTER= 0;
 	public static final int REGION_5UTR= 1;
 	public static final int REGION_CDS= 2;
 	public static final int REGION_3UTR= 3;
@@ -23,6 +24,14 @@ public abstract class AbstractRegion implements Region {
 	static final long serialVersionUID=  5443375142823871946L;
 	public abstract Species getSpecies();
 
+	
+	public boolean hasInvalidCoordinates() {
+		if ((start== 0)|| end== 0|| start== Integer.MAX_VALUE|| end== Integer.MIN_VALUE|| 
+				((start< 0)!= (end< 0)))
+			return true;
+		return false;
+	}
+	
 	public abstract String getChromosome();
 
 	/* assumption: exons share same strand
@@ -42,10 +51,11 @@ public abstract class AbstractRegion implements Region {
 				return 0;
 			
 				// non-overlapping, one before the other
-			if (end1< start2)
-				return -1;		// one stops before the other
-			if (end2< start1)
-				return 1;
+			// cancelled, not working for neg. strand (clustering, sort array asc with start, end pos)
+//			if (end1< start2)
+//				return -1;		// one stops before the other
+//			if (end2< start1)
+//				return 1;
 			
 				// overlapping: none stops before the other
 			if (start1< start2)

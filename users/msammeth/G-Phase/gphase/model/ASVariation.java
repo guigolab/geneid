@@ -312,6 +312,192 @@ public class ASVariation implements Serializable {
 	public static SpliceSite[][] trim(SpliceSite[][] vars, Transcript[] trans) {
 		
 			// check for trimming left, right edge 
+		boolean end5= ((vars[0].length> 0&& trans[0].getPredSpliceSite(vars[0][0])== null) ||
+				(vars[1].length> 0&& trans[1].getPredSpliceSite(vars[1][0])== null))? true: false;
+		boolean end3= ((vars[0].length> 0&& trans[0].getSuccSpliceSite(vars[0][vars[0].length- 1])== null) ||
+				(vars[1].length> 0&& trans[1].getSuccSpliceSite(vars[1][vars[1].length- 1])== null))? true: false;				
+		if (!end5&& !end3)	// nothing to do
+			return vars;
+		
+			// create splice universe
+		Vector suVec= new Vector();
+		for (int i = 0; i < vars.length; i++) {
+			for (int j = 0; j < vars[i].length; j++) {
+				int k;
+				for (k = 0; k < suVec.size(); k++) 
+					if (((SpliceSite) suVec.elementAt(k)).getPos()== vars[i][j].getPos())
+						break;
+				if (k== suVec.size())
+					suVec.add(vars[i][j]);
+			}
+		}
+		Vector tsVec= new Vector();	// add tss, tes
+		if (end5) {
+			for (int i = 0; i < trans.length; i++) {
+				int k;
+				for (k = 0; k < tsVec.size(); k++) 
+					if (((Integer) tsVec.elementAt(k)).intValue()== trans[i].get5PrimeEdge())
+						break;
+				if (k== tsVec.size())
+					tsVec.add(new Integer(trans[i].get5PrimeEdge()));
+			}
+		}
+		if (end3) {
+			for (int i = 0; i < trans.length; i++) {
+				int k;
+				for (k = 0; k < tsVec.size(); k++) 
+					if (((Integer) tsVec.elementAt(k)).intValue()== trans[i].get3PrimeEdge())
+						break;
+				if (k== tsVec.size())
+					tsVec.add(new Integer(trans[i].get3PrimeEdge()));
+			}
+		}
+		int[] su= new int[suVec.size()+ tsVec.size()];	// convert to int[]
+		for (int i = 0; i < suVec.size(); i++) 
+			su[i]= ((SpliceSite) suVec.elementAt(i)).getPos();
+		for (int i = 0; i < tsVec.size(); i++) 
+			su[i+suVec.size()]= ((Integer) tsVec.elementAt(i)).intValue();
+		
+		if (su.length<= 0)
+			return vars;	// empty splice chains
+		
+		Comparator compi= new AbstractSite.PositionComparator();
+		Arrays.sort(su);
+		int min= su[0];
+		int max= su[su.length- 1];
+		
+			// trim end5
+		while (end5) {
+			// check for exonic area
+			int i;
+			for (i = 0; i < vars.length; i++) {
+				if (Transcript.getSpliceSiteByPos(vars[i], min)== null) {	
+//					if (vars[i]== null)	// if not containing edge site ----> bullshit, intron retention in 3'UTR
+//						break;
+					SpliceSite pred= Transcript.getPredSpliceSite(vars[i], min);
+					SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], min);
+					if (pred== null) {
+						if (succ== null) {
+							if (!trans[i].contains(min))
+								break;
+						} else {
+							if (trans[i].isUpstream(min)|| !succ.isDonor())
+								break;
+						}
+					} else {
+						if (succ== null) {
+							if (!pred.isAcceptor()|| trans[i].isDownstream(min))
+								break;
+						} else {
+							if (!pred.isAcceptor()|| !succ.isDonor())
+								break;
+						}
+					}
+				}
+			}
+			if (i== vars.length)	// finish: all exonic
+				break;
+					
+			int s= Transcript.getSuccPos(su, min);		// containing the splice site, accepted, next
+			if (s== 0) {
+				min= 0;
+				break;
+			}
+			min= s;
+		}
+				
+		// trim end3
+		while (end3) {
+			// check for exonic area
+			int i;
+			for (i = 0; i < vars.length; i++) {
+				if (Transcript.getSpliceSiteByPos(vars[i], max)== null) {
+//					if (vars[i].length== 0)	// cannot succeed in containing ----> bullshit, intron retention in 3'UTR
+//						break;
+					SpliceSite pred= Transcript.getPredSpliceSite(vars[i], max);
+					SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], max);
+					if (pred== null) {
+						if (succ== null) {
+							if (!trans[i].contains(max))
+								break;
+						} else {
+							if (trans[i].isUpstream(max)|| !succ.isDonor())
+								break;
+						}
+					} else {
+						if (succ== null) {
+							if (!pred.isAcceptor()|| trans[i].isDownstream(max))
+								break;
+						} else {
+							if (!pred.isAcceptor()|| !succ.isDonor())
+								break;
+						}
+					}
+				}
+			}
+			if (i== vars.length)
+				break;
+					
+			int s= Transcript.getPredPos(su, max);		// containing the splice site, accepted, next
+			if (s== 0) {
+				max= 0;
+				break;
+			}					
+			max= s;
+		}
+		
+		// cut
+		if (min== 0|| max== 0) {
+			return new SpliceSite[vars.length][0];
+		}
+		boolean tss= false, tes= false;	// check if trimmed flank contains a tss/tes
+		for (int i = 0; i < vars.length; i++) {
+			if (trans[i].get5PrimeEdge()== min)
+				tss= true;
+			if (trans[i].get3PrimeEdge()== max)
+				tes= true;
+		}
+		SpliceSite[][] trimmed= new SpliceSite[vars.length][];
+		for (int i = 0; i < vars.length; i++) {
+			Vector splicVec= new Vector();
+			int j= 0;
+			if (end5) {
+				for (j = 0; j < vars[i].length; j++) {
+					if ((vars[i][j].getPos()> min)
+					|| (tss&& vars[i][j].getPos()== min&& vars[i][j].isDonor()))	// conserve end5 end coincidence w tss
+						break;
+				}
+			} else {
+				for (j = 0; j < vars[i].length; j++) 
+					if (vars[i][j].getPos()>= min)
+						break;
+			}
+			
+			if (end3)
+				for (; j< vars[i].length&& vars[i][j].getPos()< max; j++) 
+					splicVec.add(vars[i][j]);
+			else 
+				for (; j< vars[i].length&& vars[i][j].getPos()<= max; j++) 
+					splicVec.add(vars[i][j]);
+			if (end3&& tes&& j< vars[i].length&& vars[i][j].isAcceptor()&& vars[i][j].getPos()== max)
+				splicVec.add(vars[i][j]);	// conserve end3 edge coincidence with tes
+			trimmed[i]= (SpliceSite[]) gphase.tools.Arrays.toField(splicVec);
+			if (trimmed[i]== null)
+				trimmed[i]= new SpliceSite[0];
+		}
+		
+		return trimmed;
+	}
+	/**
+	 * trims splice chains from both sides to the first splice site
+	 * that is covered by exonic positions in all other splice chains.
+	 *  
+	 * @param vars
+	 * @return
+	 */
+	public static SpliceSite[][] trimOld(SpliceSite[][] vars, Transcript[] trans) {
+		
+			// check for trimming left, right edge 
 		boolean left= ((vars[0].length> 0&& trans[0].getPredSpliceSite(vars[0][0])== null) ||
 				(vars[1].length> 0&& trans[1].getPredSpliceSite(vars[1][0])== null))? true: false;
 		boolean right= ((vars[0].length> 0&& trans[0].getSuccSpliceSite(vars[0][vars[0].length- 1])== null) ||
@@ -488,132 +674,6 @@ public class ASVariation implements Serializable {
 		
 		return trimmed;
 	}
-	/**
-	 * trims splice chains from both sides to the first splice site
-	 * that is covered by exonic positions in all other splice chains.
-	 *  
-	 * @param vars
-	 * @return
-	 */
-	public static SpliceSite[][] trim_old(SpliceSite[][] vars, boolean left, boolean right, Transcript[] trans) {
-		
-			// create splice universe
-		Vector suVec= new Vector();
-		for (int i = 0; i < vars.length; i++) {
-			for (int j = 0; j < vars[i].length; j++) {
-				int k;
-				for (k = 0; k < suVec.size(); k++) 
-					if (((SpliceSite) suVec.elementAt(k)).getPos()== vars[i][j].getPos())
-						break;
-				if (k== suVec.size())
-					suVec.add(vars[i][j]);
-			}
-		}
-		SpliceSite[] su= (SpliceSite[]) gphase.tools.Arrays.toField(suVec);
-		if (su== null)
-			return vars;	// empty splice chains
-		Comparator compi= new AbstractSite.PositionComparator();
-		Arrays.sort(su, compi);
-		int min= su[0].getPos();
-		int max= su[su.length- 1].getPos();
-		
-			// trim left
-		while (left) {
-			// check for exonic area
-			int i;
-			for (i = 0; i < vars.length; i++) {
-				if (Transcript.getSpliceSiteByPos(vars[i], min)== null&& vars[i].length!= 0) {	// if not containing edge site	
-					SpliceSite pred= Transcript.getPredSpliceSite(vars[i], min);
-					SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], min);
-					if (pred== null) {
-						if (succ== null) {
-							if (min< trans[i].getStart()|| min> trans[i].getEnd())
-								break;
-						} else {
-							if (min< trans[i].getStart()|| !succ.isDonor())
-								break;
-						}
-					} else {
-						if (succ== null) {
-							if (!pred.isAcceptor()|| min> trans[i].getEnd())
-								break;
-						} else {
-							if (!pred.isAcceptor()|| !succ.isDonor())
-								break;
-						}
-					}
-				}
-			}
-			if (i== vars.length)	// finish: all exonic
-				break;
-					
-			SpliceSite s= Transcript.getSuccSpliceSite(su, min);		// containing the splice site, accepted, next
-			if (s== null) {
-				min= 0;
-				break;
-			}
-			min= s.getPos();
-		}
-				
-		// trim right
-		while (right) {
-			// check for exonic area
-			int i;
-			for (i = 0; i < vars.length; i++) {
-				if (Transcript.getSpliceSiteByPos(vars[i], max)== null&& vars[i].length!= 0) {	
-					SpliceSite pred= Transcript.getPredSpliceSite(vars[i], max);
-					SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], max);
-					if (pred== null) {
-						if (succ== null) {
-							if (min< trans[i].getStart()|| min> trans[i].getEnd())
-								break;
-						} else {
-							if (min< trans[i].getStart()|| !succ.isDonor())
-								break;
-						}
-					} else {
-						if (succ== null) {
-							if (!pred.isAcceptor()|| min> trans[i].getEnd())
-								break;
-						} else {
-							if (!pred.isAcceptor()|| !succ.isDonor())
-								break;
-						}
-					}
-				}
-			}
-			if (i== vars.length)
-				break;
-					
-			SpliceSite s= Transcript.getPredSpliceSite(su, max);		// containing the splice site, accepted, next
-			if (s== null) {
-				max= 0;
-				break;
-			}
-			max= s.getPos();
-		}
-		
-		// cut
-		if (min== 0|| max== 0) {
-			return new SpliceSite[vars.length][0];
-		}
-		SpliceSite[][] trimmed= new SpliceSite[vars.length][];
-		for (int i = 0; i < vars.length; i++) {
-			Vector splicVec= new Vector();
-			int j;
-			for (j = 0; j < vars[i].length; j++) 
-				if (vars[i][j].getPos()>= min)
-					break;
-			for (; j< vars[i].length&& vars[i][j].getPos()<= max; j++) 
-				splicVec.add(vars[i][j]);
-			trimmed[i]= (SpliceSite[]) gphase.tools.Arrays.toField(splicVec);
-			if (trimmed[i]== null)
-				trimmed[i]= new SpliceSite[0];
-		}
-		
-		return trimmed;
-	}
-	
 	public boolean checkFramePreservation() {
 		
 		SpliceSite[] flanks= getFlankingSpliceSites();
@@ -710,6 +770,8 @@ public class ASVariation implements Serializable {
 			Comparator compi= new SpliceChainComparator();
 			SpliceSite[][] s1= new SpliceSite[][] {as1.spliceChain1, as1.spliceChain2};
 			SpliceSite[][] s2= new SpliceSite[][] {as2.spliceChain1, as2.spliceChain2};
+			SpliceSite[] su1= as1.getSpliceUniverse();
+			SpliceSite[] su2= as2.getSpliceUniverse();
 			if (((compi.compare(s1[0], s2[0])== 0)&& (compi.compare(s1[1], s2[1])== 0))||
 				((compi.compare(s1[1], s2[0])== 0)&& (compi.compare(s1[0], s2[1])== 0)))
 				return 0;
@@ -762,6 +824,10 @@ public class ASVariation implements Serializable {
 	//				return -1;
 				
 					// priority list
+				String t11= as1.getTranscript1().getTranscriptID();
+				String t12= as1.getTranscript2().getTranscriptID();
+				String t21= as2.getTranscript1().getTranscriptID();
+				String t22= as2.getTranscript2().getTranscriptID();
 				if (as1.isProteinCoding()) 
 					return (as2.isProteinCoding())?0:1;	// keep only first
 				if (as2.isProteinCoding())
@@ -831,6 +897,7 @@ public class ASVariation implements Serializable {
 	void markAS(SpliceSite[] schain) {
 		for (int i = 0; i < schain.length; i++) {
 			schain[i].setConstitutive(false);
+			//schain[i].addASVar(this);
 		}
 	}
 	
@@ -1153,6 +1220,10 @@ public class ASVariation implements Serializable {
 		return false;
 	}	
 	
+	/**
+	 * @deprecated check
+	 * @return
+	 */
 	// muy feo :(
 	// may the force be with you!
 	public ASEvent[] getASEvents() {
@@ -1463,6 +1534,16 @@ public class ASVariation implements Serializable {
 		return x;
 	}
 	
+	public String toCodingInfoString() {
+		if (isProteinCoding())
+			return "prot";
+		if (isPartiallyCoding())
+			return "part";
+		if (isNotAtAllCoding())
+			return "not";
+		return "";
+	}
+	
 	public String toBitString() {
 		int[][] bMatrix= toBitMatrix();
 		String s= "";
@@ -1481,6 +1562,33 @@ public class ASVariation implements Serializable {
 		}
 		
 		return s;
+	}
+	
+	public SpliceSite[][] getSpliceSites(int bitStart, int bitEnd) {
+		int[][] bMatrix= toBitMatrix();
+		int start1SS= 0, start2SS= 0, end1SS= 0, end2SS= 0;
+		for (int i = 1; i <= bitStart; i++) {	// count skipped ss until first ss
+			if (bMatrix[i][0]!= bMatrix[i-1][0])
+				++start1SS;
+			if (bMatrix[i][1]!= bMatrix[i-1][1])
+				++start2SS;
+		}
+		for (int i = (bitStart+1); i <= bitEnd; i++) {	// SSs taken 
+			if (bMatrix[i][0]!= bMatrix[i-1][0])
+				++end1SS;
+			if (bMatrix[i][1]!= bMatrix[i-1][1])
+				++end2SS;
+		}
+		
+		SpliceSite[][] result= new SpliceSite[2][];
+		result[0]= new SpliceSite[end1SS];
+		for (int i = 0; i < result[0].length; i++) 
+			result[0][i]= spliceChain1[start1SS+ i];	// +1 next, -1 0-based
+		result[1]= new SpliceSite[end2SS];
+		for (int i = 0; i < result[1].length; i++) 
+			result[1][i]= spliceChain2[start2SS+ i];
+		
+		return result;
 	}
 	
 	public int[][] toBitMatrix() {

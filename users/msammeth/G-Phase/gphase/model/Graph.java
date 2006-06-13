@@ -1139,6 +1139,7 @@ public class Graph implements Serializable {
 
 	public ASVariation[][] getASVariations(int filter) {
 		
+		asClasses= null;
 		if (asClasses == null) {
 			Gene[] ge= getGenes();
 			asVariations= 0;

@@ -15,8 +15,13 @@ import gphase.tools.Arrays;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.sql.Date;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,7 +48,7 @@ public class EncodeWrapper extends GTFWrapper {
 		// "encode/RefSeqGenes_fromUCSC.inENCODE.gtf"
 		// "encode/RefSeqGenes_fromUCSC.gtf"
 		// "encode/EnsemblGenes_all_fromENSEMBL.gtf"
-		String fName= "encode/EnsemblGenes_fromUCSC.gtf";
+		String fName= "encode/44regions_genes_CHR_coord.gtf";
 		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
 		try {
 			myWrapper.read();
@@ -55,14 +60,53 @@ public class EncodeWrapper extends GTFWrapper {
 			encode= true;
 		
 		long t0= System.currentTimeMillis();
-		Graph g= myWrapper.assemble(encode);		// <===== check ENCODE here !!!
+		Graph g= myWrapper.getGraph(encode);		// <===== check ENCODE here !!!
 		g.filterNonCodingTranscripts();
 
+//		try {
+//			PrintStream p= new PrintStream("sylvainSize");
+//			ASAnalyzer.getSylvainsSize(g, p);
+//			p.flush();
+//			p.close();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		
-		//ASAnalyzer.analyze1_transcripts_clusters(g);
-		//ASAnalyzer.outputASStatistics(g);
-		ASAnalyzer.test03_lengthVariationModulo(g);
-		//ASAnalyzer.determineVariations(g, System.out);
+		
+//		ASAnalyzer.getSylvainsSize(g, System.out);
+		//ASAnalyzer.test01_clusters_coverage_as(g, System.out);
+//		ASAnalyzer.test(new String[]{"test01_clusters_coverage_as",
+//				"test02_ss_statistics",
+//				"test03_lengthVariationModulo",
+//				"test04_determineVariations"}, 
+//				new Class[] {Graph.class, PrintStream.class}, 
+//				new boolean[] {true, true, false, false});
+//		ASAnalyzer.test(new String[]{"test02_ss_statistics"}, 
+//				new Class[] {Graph.class, PrintStream.class}, 
+//				new boolean[] {true});
+//		ASAnalyzer.test02_ss_statistics(g, System.out);
+		ASAnalyzer.test02_ss_statistics_outCDSalt(g);
+//		ASAnalyzer.test02b_ss_statistics_3P(g, System.out);
+//		ASAnalyzer.test03_lengthVariationModulo(g, System.out);
+//		ASAnalyzer.test03b_lengthVariationModuloAA_AD(g, System.out);
+//		ASAnalyzer.test04_determineVariations(g, System.out);
+		
+//		ASAnalyzer.check_AA_AD(g, true, false, false);
+//		ASAnalyzer.check_AA_AD(g, true, true, false);
+//		ASAnalyzer.check_AA_AD(g, true, false, true);
+//		ASAnalyzer.check_AA_AD(g, true, true, true);
+//		ASAnalyzer.check_AA_AD(g, false, false, false);
+//		ASAnalyzer.check_AA_AD(g, false, true, false);
+//		ASAnalyzer.check_AA_AD(g, false, false, true);
+//		ASAnalyzer.check_AA_AD(g, false, true, true);
+		
+//		long[] r=ASAnalyzer.getCDSUTRSizeComplement(g);
+//		System.out.println("5UTR "+r[0]+", CDS "+r[1]+", 3UTR "+r[2]);
+
+		//		ASVariation[] var= ASAnalyzer.getVariation("(1= // 2=)", g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY));
+//		for (int i = 0; i < var.length; i++) {
+//			var[i].outputDetail(System.out);
+//		}
 		
 //		ASVariation[][] as= ASAnalyzer.determineVariations(g, (PrintStream) null);
 //		for (int i = 0; i < as.length; i++) {
@@ -279,7 +323,7 @@ public class EncodeWrapper extends GTFWrapper {
 		
 			// cluster
 		HashMap gHash= new HashMap();
-		Comparator compi= new AbstractRegion.PositionComparator();
+		Comparator compi= new DirectedRegion.PositionComparator();
 		for (int i = 0; i < keys.length; i++) {	// chromosomes
 			String chrID= keys[i];
 			HashMap t2Hash= (HashMap) chr2Hash.get(chrID);
@@ -321,24 +365,39 @@ public class EncodeWrapper extends GTFWrapper {
 	
 	
 
-	private Transcript[][] clusterTranscripts(AbstractRegion[] regions) {
+	private Transcript[][] clusterTranscripts(DirectedRegion[] regions) {
 		
-		int max= Integer.MIN_VALUE;
+		int maxPlus= Integer.MIN_VALUE, maxMin= Integer.MIN_VALUE;
 		Vector clusters= new Vector();
-		Vector v= null;
+		Vector vPlus= null, vMinus= null;
 		for (int i = 0; i < regions.length; i++) {
 
-			if (regions[i].getStart()> max) {
-				if (v!= null)
-					clusters.add(v);
-				v= new Vector();
-			} 
-			v.add(regions[i]);
-			if (regions[i].getEnd()> max)
-				max= regions[i].getEnd();
+			DirectedRegion r= regions[i];
+			if (regions[i].isForward()) {
+				if (regions[i].getStart()> maxPlus) {
+					if (vPlus!= null)
+						clusters.add(vPlus);
+					vPlus= new Vector();
+				} 
+				vPlus.add(regions[i]);
+				if (regions[i].getEnd()> maxPlus)
+					maxPlus= regions[i].getEnd();
+			} else {
+				if (Math.abs(regions[i].getStart())> maxMin) {
+					if (vMinus!= null)
+						clusters.add(vMinus);
+					vMinus= new Vector();
+				} 
+				vMinus.add(regions[i]);
+				if (Math.abs(regions[i].getEnd())> maxMin)
+					maxMin= Math.abs(regions[i].getEnd());
+			}
 		}
-		if (v!= null)
-			clusters.add(v);
+
+		if (vPlus!= null)
+			clusters.add(vPlus);
+		if (vMinus!= null)
+			clusters.add(vMinus);
 		
 		return (Transcript[][]) Arrays.toField(clusters);
 	}

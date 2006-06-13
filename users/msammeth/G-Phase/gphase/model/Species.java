@@ -596,6 +596,7 @@ public class Species implements Serializable {
 				// create new clusters
 			for (int j = 0; j < newTranscripts.length; j++) {
 				Gene nuGene= new Gene(this, Gene.getUniqueID());
+				nuGene.setChromosome(ge[i].getChromosome());
 				nuGene.setStrand(ge[i].getStrand());
 				for (int k = 0; k < newTranscripts[j].length; k++) 	{
 					Transcript t= new Transcript(nuGene, newTranscripts[j][k].getTranscriptID());
