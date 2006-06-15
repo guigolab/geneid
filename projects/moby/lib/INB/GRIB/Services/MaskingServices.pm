@@ -1,4 +1,4 @@
-# $Id: MaskingServices.pm,v 1.9 2006-06-02 13:25:02 gmaster Exp $
+# $Id: MaskingServices.pm,v 1.10 2006-06-15 11:10:33 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -914,7 +914,7 @@ sub _do_query_Dust_FASTA {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Empty response
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $sequences_output_article_name);
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
@@ -942,7 +942,7 @@ sub _do_query_Dust_FASTA {
 		
 		# Return an empty moby data object, as well as an exception telling what nothing got returned
 		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $sequences_output_article_name);
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    else {
@@ -961,7 +961,7 @@ sub _do_query_Dust_FASTA {
 	print STDERR "$note\n";
 	my $code = "201";
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name);
 	my $moby_exception = INB::Exceptions::MobyException->new (
 								  refElement => "sequences",
 								  code       => $code,
@@ -980,7 +980,7 @@ sub _do_query_Dust_FASTA {
     
     my ($masked_fasta_seqs, $moby_exceptions_tmp) = Dust_FASTA_call (sequences  => $fasta_sequences_str, queryID => $queryID, parameters => \%parameters, debug => $_debug);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
-	
+    
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio
     # la podriamos realizar en una funcion a parte si fuese compleja.
