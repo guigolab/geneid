@@ -79,6 +79,11 @@ my $_debug = 0;
 
 my $serviceName = "runCrossMatchToScreenVector";
 defined $opt_s and $serviceName = $opt_s;
+
+if ($_debug) {
+    print STDERR "service name, $serviceName";
+}
+
 my $articleName = "sequence";
 my $input_object_type = "FASTA_NA";
 if ($serviceName =~ /collection/i) {
