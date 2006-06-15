@@ -1,4 +1,4 @@
-# $Id: VectorScreeningServices.pm,v 1.2 2006-05-23 15:21:35 gmaster Exp $
+# $Id: VectorScreeningServices.pm,v 1.3 2006-06-15 11:09:21 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -186,7 +186,7 @@ sub _do_query_CrossMatchToScreenVector {
     my $minscore;
     
     # Variables that will be passed to CrossMatchToScreenVector_call
-    my %sequences;
+    my $fasta_sequences_str;
     my %parameters;
     
     my $queryID  = getInputID ($queryInput_DOM);
@@ -213,7 +213,7 @@ sub _do_query_CrossMatchToScreenVector {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -236,7 +236,7 @@ sub _do_query_CrossMatchToScreenVector {
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -311,7 +311,7 @@ sub _do_query_CrossMatchToScreenVector {
 		    push (@$moby_exceptions, $moby_exception);
 		    
 		    # Empty response
-		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 		    return ($MOBY_RESPONSE, $moby_exceptions);
 		}
 		
@@ -319,29 +319,7 @@ sub _do_query_CrossMatchToScreenVector {
 		    print STDERR "Parsing the fasta sequences string...\n"
 		}
 		
-		my $fasta_sequences  = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
-		my $sequences_tbl_str = qx/echo "$fasta_sequences" | \/home\/ug\/gmaster\/projects\/bin\/FastaToTbl/;
-		
-		if ($_debug) {
-		    print STDERR "fasta tbl string, $sequences_tbl_str\n";
-		}
-		
-		my @sequences_tbl    = split ('\n', $sequences_tbl_str);
-		
-		if ($_debug) {
-		    print STDERR "got " . @sequences_tbl . " tbl sequences\n";
-		}
-		
-		foreach my $sequence_tbl_str (@sequences_tbl) {
-		    $sequence_tbl_str =~ /^([^\s]+)\s(.+)/;
-		    my $seqId          = $1;
-		    my $sequence_str   = $2;
-		    $sequences{$seqId} = $sequence_str;
-		}
-
-		if ($_debug) {
-		    print STDERR "parsed " . keys (%sequences) . " sequences\n";
-		}
+		$fasta_sequences_str  = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
 	    }
 	} # End parsing sequences article tag
 	
@@ -349,14 +327,14 @@ sub _do_query_CrossMatchToScreenVector {
     
     # Check that we have parsed properly the sequences
     
-    if ((keys (%sequences)) == 0) {
-	my $note = "can't parsed any sequences...\n";
+    if (length ($fasta_sequences_str) < 1) {
+	my $note = "can't parse any sequences...\n";
 	print STDERR "$note\n";
 	my $code = "201";
-
+	
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => $input_article_name,
+								  refElement => "sequences",
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -370,17 +348,30 @@ sub _do_query_CrossMatchToScreenVector {
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
     
-    my ($screened_fasta_seqs, $moby_exceptions_tmp) = CrossMatchToScreenVector_call (sequences  => \%sequences, queryID => $queryID, parameters => \%parameters, debug => $_debug);
+    my ($screened_fasta_seqs, $moby_exceptions_tmp) = CrossMatchToScreenVector_call (sequences  => $fasta_sequences_str, queryID => $queryID, parameters => \%parameters, debug => $_debug);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     if (defined $screened_fasta_seqs) {
+	
+	# Well the only differences between a simple response and a collection response are the data type (FASTA_NA or FASTA_NA_multi) and the presence of the sequence identifier in case of a FASTA_NA object.
+	
 	if ($input_type eq "simple") {
 	    
 	    if ($_debug) {
 		print STDERR "making a simple response\n";
 	    }
 	    
-	    my ($sequenceIdentifier) = keys (%sequences);
+	    # Get the sequence identifier
+	    my $sequenceIdentifier = "";
+	    
+	    $fasta_sequences_str =~ /^>([^\s]+)\s.+/;
+	    if (defined $1) {
+		$sequenceIdentifier = $1;
+	    }
+	    
+	    if ($_debug) {
+		print STDERR "sequenceIdentifier, $sequenceIdentifier.\n";
+	    }
 	    
 	    my $moby_seqobj = "<$output_format namespace='$namespace' id='$sequenceIdentifier'>\n<String id='' namespace='' articleName='content'><![CDATA[$screened_fasta_seqs]]></String>\n</$output_format>\n";
             $MOBY_RESPONSE  = simpleResponse($moby_seqobj, $output_article_name, $queryID);

@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.89 2006-06-08 14:34:55 gmaster Exp $
+# $Id: Factory.pm,v 1.90 2006-06-15 11:09:21 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -2217,14 +2217,14 @@ sub CrossMatchToScreenVector_call {
     
     # output specs declaration
     my @screened_seqs_fasta = "";
-    my $moby_exceptions   = [];
+    my $moby_exceptions     = [];
     
     # relleno los parametros por defecto CrossMatchToScreenVector_call
     
-    my $sequences          = $args{sequences}  || undef;
-    my $parameters         = $args{parameters} || undef;
-    my $debug              = $args{debug};
-    my $queryID            = $args{queryID}    || "";
+    my $fasta_sequences_str = $args{sequences}  || undef;
+    my $parameters          = $args{parameters} || undef;
+    my $debug               = $args{debug};
+    my $queryID             = $args{queryID}    || "";
     
     # parameters
     
@@ -2277,23 +2277,7 @@ sub CrossMatchToScreenVector_call {
 	return (undef, [$moby_exception]);
     }
     
-    # Bioperl sequence factory
-    my $sout = Bio::SeqIO->new (
-				-fh     => $seq_fh,
-				-format => 'fasta'
-				);
-    
-    my @seqIds = keys (%$sequences);
-    foreach my $sequenceIdentifier (@seqIds) {
-	my $nucleotides = $sequences->{$sequenceIdentifier};
-	
-	# bioperl sequence object
-	my $seqobj = Bio::Seq->new (
-				    -display_id => $sequenceIdentifier,
-				    -seq        => $nucleotides
-				    );
-	$sout->write_seq ($seqobj);
-    }
+    print $seq_fh $fasta_sequences_str;
     close $seq_fh;
 
     # Test empty file
