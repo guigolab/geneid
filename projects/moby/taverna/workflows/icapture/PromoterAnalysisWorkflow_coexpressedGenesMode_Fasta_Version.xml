@@ -7,10 +7,10 @@
   <s:processor name="StringArticleName" boring="true">
     <s:stringconstant>content</s:stringconstant>
   </s:processor>
-  <s:processor name="parse_moby_meta">
+  <s:processor name="parse_moby_clusters_tree">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_clusters_tree">
+  <s:processor name="parse_moby_meta">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_matscan_gff">
@@ -25,14 +25,6 @@
   <s:processor name="parse_moby_tree_image">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
-    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
   <s:processor name="plotClustersTree">
     <s:description>This service returns a PNG image representing a tree of clusters</s:description>
     <s:biomobywsdl>
@@ -41,12 +33,34 @@
       <s:authorityName>bioinfo.cipf.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
+  <s:processor name="runHierarchicalClustering">
+    <s:description>Hierarchical clustering application for gene expression patterns using different conditions, methods and distances</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
+      <s:serviceName>runHierarchicalClustering</s:serviceName>
+      <s:authorityName>bioinfo.cipf.es</s:authorityName>
+      <s:Parameter s:name="distance">Correlation Coeff. (linear)</s:Parameter>
+      <s:Parameter s:name="method">Nearest neighbor (single linkage)</s:Parameter>
+      <s:Parameter s:name="condition">None</s:Parameter>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
+    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
   <s:processor name="runMultiPairwiseMetaAlignment">
     <s:description>runMultiPairwiseMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>runMultiPairwiseMetaAlignment</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
+      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
+      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="fromFASTAToDNASequenceCollection">
@@ -57,20 +71,16 @@
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="runHierarchicalClustering">
-    <s:description>Hierarchical clustering application for gene expression patterns using different conditions, methods and distances</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://www.inab.org/cgi-bin/MOBY-Central.pl</s:mobyEndpoint>
-      <s:serviceName>runHierarchicalClustering</s:serviceName>
-      <s:authorityName>bioinfo.cipf.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
   <s:processor name="runMatScanGFFCollection">
     <s:description>Reports putative predicted motifs on a given collection of DNA sequences. The motifs collections currently available are Transcription Factor binding site collections. The predicted set of motifs are reported in GFF format. If you want to give MatScan output to Meta-alignment program, you MUST use the 'log-likelihood matrix' mode.</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>runMatScanGFFCollection</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="strand">Both</s:Parameter>
+      <s:Parameter s:name="matrix mode">log-likelihood</s:Parameter>
+      <s:Parameter s:name="threshold">0.85</s:Parameter>
+      <s:Parameter s:name="motif database">Transfac</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="String">
@@ -96,22 +106,22 @@
   <s:link source="StringArticleName:value" sink="String:article name" />
   <s:link source="articleName:value" sink="FASTA_NA_multi:article name" />
   <s:link source="sequences_fasta" sink="String:value" />
-  <s:link source="fromFASTAToDNASequenceCollection:DNASequence(Collection - 'sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'sequences')" />
-  <s:link source="fromMetaAlignmentsToTextScoreMatrix:output" sink="parse_moby_score_matrix:mobydata" />
-  <s:link source="fromMetaAlignmentsToTextScoreMatrix:output" sink="runHierarchicalClustering:input" />
+  <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="parse_moby_score_matrix:mobydata" />
+  <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="runHierarchicalClustering:MicroArrayData_Text(microarraydata)" />
+  <s:link source="parse_moby_tree_image:value" sink="Decode_base64_to_byte:base64" />
+  <s:link source="plotClustersTree:Image_Encoded(image)" sink="parse_moby_tree_image:mobydata" />
+  <s:link source="runHierarchicalClustering:HierarchicalClustering(clusters)" sink="parse_moby_clusters_tree:mobydata" />
+  <s:link source="runHierarchicalClustering:HierarchicalClustering(clusters)" sink="plotClustersTree:HierarchicalClustering(clusters)" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions' As Simples)" sink="parse_moby_matscan_gff:mobydata" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignment:GFF(Collection - 'maps')" />
+  <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta:mobydata" />
+  <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions')" sink="fromMetaAlignmentsToTextScoreMatrix:Meta_Alignment_Text(Collection - 'similarity_results')" />
   <s:link source="Decode_base64_to_byte:bytes" sink="clusters_tree_image" />
+  <s:link source="fromFASTAToDNASequenceCollection:DNASequence(Collection - 'sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'sequences')" />
   <s:link source="parse_moby_clusters_tree:value" sink="clusters_tree" />
   <s:link source="parse_moby_matscan_gff:value" sink="matscan_gff" />
   <s:link source="parse_moby_meta:value" sink="meta-alignment" />
-  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignment:GFF(Collection - 'maps')" />
-  <s:link source="runMatScanGFFCollection:output" sink="parse_moby_matscan_gff:mobydata" />
-  <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions')" sink="fromMetaAlignmentsToTextScoreMatrix:Meta_Alignment_Text(Collection - 'similarity_results')" />
-  <s:link source="runMultiPairwiseMetaAlignment:output" sink="parse_moby_meta:mobydata" />
   <s:link source="parse_moby_score_matrix:value" sink="score_matrix" />
-  <s:link source="parse_moby_tree_image:value" sink="Decode_base64_to_byte:base64" />
-  <s:link source="plotClustersTree:output" sink="parse_moby_tree_image:mobydata" />
-  <s:link source="runHierarchicalClustering:output" sink="parse_moby_clusters_tree:mobydata" />
-  <s:link source="runHierarchicalClustering:output" sink="plotClustersTree:input" />
   <s:source name="namespace" />
   <s:source name="sequences_fasta" />
   <s:source name="identifier" />
@@ -133,5 +143,4 @@
     </s:metadata>
   </s:sink>
 </s:scufl>
-
 
