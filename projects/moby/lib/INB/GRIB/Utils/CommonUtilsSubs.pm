@@ -1433,11 +1433,16 @@ sub _parseMatrixMobyObject {
 	    
 	    my $key_element = $key_elements->[0];
 	    my $col = $key_element->textContent();
-
+	    
+	    if ($debug) {
+		print STDERR "matrix type,$matrix_type.\n";
+		print STDERR "column,$col.\n";
+	    }
+	    
 	    # The value
 	    
 	    my $value_elements = $array_element_element->getElementsByTagName ($matrix_type);
-	    $sub_element_size  = $key_elements->size();
+	    $sub_element_size  = $value_elements->size();
 	    if ($sub_element_size == 0) {
 		$value_elements = $array_element_element->getElementsByTagName ("moby:" . $matrix_type);
 		$sub_element_size = $value_elements->size();
@@ -1455,7 +1460,6 @@ sub _parseMatrixMobyObject {
 	    my $value = $value_element->textContent();
 	    
 	    if ($debug) {
-		print STDERR "column,$col.\n";
 		print STDERR "value,$value.\n";
 	    }
 	    
