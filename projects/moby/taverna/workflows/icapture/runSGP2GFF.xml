@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:SSAVFCN82D1" author="" title="" />
+  <s:processor name="StringArticleName" boring="true">
+    <s:stringconstant>content</s:stringconstant>
+  </s:processor>
+  <s:processor name="parse_moby_gff">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="parse_moby_tblastx">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="runSGP2GFF">
+    <s:description>Ab initio gene prediction service. It runs geneid with synteny evidences to improve the accuracy of the results and returns the output predictions in GFF format. To generate the synteny evidences, use a service that provides tblastx.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runSGP2GFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="profile">Human Vs Mouse</s:Parameter>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runWUTBlastx_2Seqs">
+    <s:description>It  compares a nucleotide query sequence against another nucleotide sequence (used as a database) using the Washington University BLAST algorithm.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runWUTBlastx_2Seqs</s:serviceName>
+      <s:authorityName>inb.bsc.es</s:authorityName>
+      <s:Parameter s:name="scores">25</s:Parameter>
+      <s:Parameter s:name="gap_extension">2</s:Parameter>
+      <s:Parameter s:name="expected_threshold">0.01</s:Parameter>
+      <s:Parameter s:name="filter">seg+xnu</s:Parameter>
+      <s:Parameter s:name="statistics">sump</s:Parameter>
+      <s:Parameter s:name="word_size">5</s:Parameter>
+      <s:Parameter s:name="alignments">100000</s:Parameter>
+      <s:Parameter s:name="matrix">blosum65</s:Parameter>
+      <s:Parameter s:name="nogaps">on</s:Parameter>
+      <s:Parameter s:name="gap_open">9</s:Parameter>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="String_1">
+    <s:description>a string</s:description>
+    <s:biomobyobject>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>String</s:serviceName>
+      <s:authorityName />
+    </s:biomobyobject>
+  </s:processor>
+  <s:processor name="String_2">
+    <s:description>a string</s:description>
+    <s:biomobyobject>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>String</s:serviceName>
+      <s:authorityName />
+    </s:biomobyobject>
+  </s:processor>
+  <s:processor name="FASTA_NA_1">
+    <s:description>NA sequence in FASTA format</s:description>
+    <s:biomobyobject>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>FASTA_NA</s:serviceName>
+      <s:authorityName />
+    </s:biomobyobject>
+  </s:processor>
+  <s:processor name="FASTA_NA_2">
+    <s:description>NA sequence in FASTA format</s:description>
+    <s:biomobyobject>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>FASTA_NA</s:serviceName>
+      <s:authorityName />
+    </s:biomobyobject>
+  </s:processor>
+  <s:processor name="fromFASTAToDNASequence_1">
+    <s:description>Converts a DNA FASTA sequence into a DNA sequence</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>fromFASTAToDNASequence</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="fromFASTAToDNASequence_2">
+    <s:description>Converts a DNA FASTA sequence into a DNA sequence</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>fromFASTAToDNASequence</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:link source="fasta_sequence_2" sink="String_2:value" />
+  <s:link source="StringArticleName:value" sink="String_1:article name" />
+  <s:link source="fasta_sequence_1" sink="String_1:value" />
+  <s:link source="StringArticleName:value" sink="String_2:article name" />
+  <s:link source="String_1:mobyData" sink="FASTA_NA_1:String(content)" />
+  <s:link source="String_2:mobyData" sink="FASTA_NA_2:String(content)" />
+  <s:link source="identifier_1" sink="FASTA_NA_1:id" />
+  <s:link source="identifier_2" sink="FASTA_NA_2:id" />
+  <s:link source="namespace" sink="FASTA_NA_1:namespace" />
+  <s:link source="namespace" sink="FASTA_NA_2:namespace" />
+  <s:link source="FASTA_NA_1:mobyData" sink="fromFASTAToDNASequence_1:FASTA_NA(sequence)" />
+  <s:link source="FASTA_NA_2:mobyData" sink="fromFASTAToDNASequence_2:FASTA_NA(sequence)" />
+  <s:link source="fromFASTAToDNASequence_1:DNASequence(sequence)" sink="runSGP2GFF:DNASequence(sequence)" />
+  <s:link source="fromFASTAToDNASequence_1:DNASequence(sequence)" sink="runWUTBlastx_2Seqs:NucleotideSequence(sequence)" />
+  <s:link source="fromFASTAToDNASequence_2:DNASequence(sequence)" sink="runWUTBlastx_2Seqs:NucleotideSequence(database)" />
+  <s:link source="runSGP2GFF:GFF(geneid_predictions)" sink="parse_moby_gff:mobydata" />
+  <s:link source="runWUTBlastx_2Seqs:BLAST-Text(wutblastx_report)" sink="parse_moby_tblastx:mobydata" />
+  <s:link source="runWUTBlastx_2Seqs:BLAST-Text(wutblastx_report)" sink="runSGP2GFF:BLAST-Text(tblastx_report)" />
+  <s:link source="parse_moby_gff:value" sink="geneid_gff" />
+  <s:link source="parse_moby_tblastx:value" sink="tblastx_report" />
+  <s:source name="namespace" />
+  <s:source name="fasta_sequence_1" />
+  <s:source name="identifier_1" />
+  <s:source name="fasta_sequence_2" />
+  <s:source name="identifier_2" />
+  <s:sink name="geneid_gff" />
+  <s:sink name="tblastx_report" />
+</s:scufl>
+
