@@ -226,25 +226,26 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 
 my $fasta_sequences = qx/cat $in_file/;
 
-# <String namespace="" id="" articleName="content">
-# </String>
-
 my $fasta_xml;
 if ($sequence_type eq "DNASequence") {
     $fasta_xml = <<PRT;
 <FASTA_NA namespace="$datasource" id="">
+<String namespace="" id="" articleName="content">
 <![CDATA[
 $fasta_sequences
 ]]>
+</String>
 </FASTA_NA>
 PRT
 }
 else {
     $fasta_xml = <<PRT;
 <FASTA_AA namespace="$datasource" id="">
+<String namespace="" id="" articleName="content">
 <![CDATA[
 $fasta_sequences
 ]]>
+</String>
 </FASTA_AA>
 PRT
 }
