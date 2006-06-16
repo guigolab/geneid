@@ -1,4 +1,4 @@
-# $Id: SGP2Services.pm,v 1.20 2006-03-22 15:44:43 gmaster Exp $
+# $Id: SGP2Services.pm,v 1.21 2006-06-16 10:21:34 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -343,13 +343,12 @@ sub _do_query_SGP2 {
 	# Una vez recogido todos los parametros necesarios, llamamos a 
 	# la funcion que nos devuelve el report. 	
 
-	my ($report, $moby_exceptions_tmp) = SGP2_call (sequences  => \%sequences, tblastx_output => $tblastx_output, format => $_format, queryID => $queryID, parameters => \%parameters);
+	my ($report, $moby_exceptions_tmp) = SGP2_call (sequences  => \%sequences, tblastx_output => $tblastx_output, format => $_format, queryID => $queryID, parameters => \%parameters, debug => $_debug);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio 
-	# la podriamos realizar en una funcion a parte si fuese compleja.  
-	
+	# la podriamos realizar en una funcion a parte si fuese compleja.  	
 	
 	my $input = undef;
 	if (defined $report) {

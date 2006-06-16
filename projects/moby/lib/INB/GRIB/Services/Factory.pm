@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.90 2006-06-15 11:09:21 gmaster Exp $
+# $Id: Factory.pm,v 1.91 2006-06-16 10:21:34 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -502,7 +502,7 @@ sub SGP2_call {
 	my $format             = $args{format}         || "";
 	my $parameters         = $args{parameters}     || undef;
 	my $queryID            = $args{queryID}        || "";
-	
+	my $debug              = $args{debug}          || 0;
 	# Get the parameters
 	
 	my $profile = $parameters->{profile};
@@ -588,8 +588,8 @@ sub SGP2_call {
 	my ($blast_fh, $tblastx_output_file);
 	eval {
 	    ($blast_fh, $tblastx_output_file) = tempfile("/tmp/SGP2_TBLASTX.XXXXXX", UNLINK => 0);
-	    close($blast_fh);
-	    qx/echo "$tblastx_output" > $tblastx_output_file/;
+	    print $blast_fh "$tblastx_output";
+	    close $blast_fh;
 	};
 	if ($@) {
 	    my $note = "Internal System Error. Can not open SGP2 tblastx input temporary file!\n";
@@ -632,14 +632,17 @@ sub SGP2_call {
 	    return (undef, [$moby_exception]);
 	}
 	
-	# print STDERR "Running SGP2, with this command:\n";
-	# print STDERR "$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file\n";
+	if ($debug) {
+	    print STDERR "Running SGP2, with this command:\n";
+	    print STDERR "$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file\n";
+	}
 	
 	$sgp2_output = qx/$_sgp2_dir\/$_sgp2_bin $_sgp2_args -1 $seqfile -t $tblastx_output_file/;
 	
-	# Comment these two lines if you want to keep the file...
-	unlink $seqfile;
-	unlink $tblastx_output_file;
+	if (! $debug) {
+	    unlink $seqfile;
+	    unlink $tblastx_output_file;
+	}
 	
 	if ((defined $sgp2_output) && (length ($sgp2_output) > 1)) {
 	    return ($sgp2_output, $moby_exceptions);
