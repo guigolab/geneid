@@ -1,4 +1,4 @@
-# $Id: ConversionServices.pm,v 1.1 2006-03-21 17:51:11 gmaster Exp $
+# $Id: ConversionServices.pm,v 1.2 2006-06-16 10:22:40 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -386,6 +386,13 @@ sub _do_query_fromGenericSequencestoFASTA {
 	if (@$seqobjs == 1) {
 	    my $seqobj = $seqobjs->[0];
 	    $sequenceIdentifier = $seqobjs->[0]->display_id;
+	    
+	    if (! defined $sequenceIdentifier) {
+		print STDERR "sequence identifier is not defined!\n";
+		print STDERR "might be a problem with the fasta sequences...\n";
+		print STDERR "\n$fasta_sequences\n\n";
+	    }
+	    
 	}
 	
 	my $fasta_object = <<PRT;
@@ -570,7 +577,7 @@ sub _do_query_fromFASTAtoMobySequence {
     
     # Check that we have parsed properly the sequences
     
-    if (@$seqobjs != 1) {
+    if ((! defined $seqobjs) || (@$seqobjs != 1)) {
 	my $note = "Can't parse any sequences, Please check the syntax of your fasta sequence.\n";
 	print STDERR "$note\n";
 	my $code = "201";
