@@ -1,4 +1,4 @@
-# $Id: ConversionServices.pm,v 1.2 2006-06-16 10:22:40 gmaster Exp $
+# $Id: ConversionServices.pm,v 1.3 2006-06-16 13:51:52 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -161,11 +161,14 @@ sub _do_query_fromGenericSequencestoFASTA {
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
     my $output_article_name;
+    my $input_article_name;
     if ($inputType eq "simple") {
 	$output_article_name = "sequence";
+	$input_article_name = "sequence";
     }
     elsif ($inputType eq "collection") {
 	$output_article_name = "sequences";
+	$input_article_name = "sequences";
     }
     
     my $seqobjs = [];
@@ -206,7 +209,7 @@ sub _do_query_fromGenericSequencestoFASTA {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => $output_article_name,
+									      refElement => $input_article_name,
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -237,7 +240,7 @@ sub _do_query_fromGenericSequencestoFASTA {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => $output_article_name,
+									      refElement => $input_article_name,
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -266,7 +269,7 @@ sub _do_query_fromGenericSequencestoFASTA {
 		    print STDERR "$note\n";
 		    my $code = "201";
 		    my $moby_exception = INB::Exceptions::MobyException->new (
-									      refElement => $output_article_name,
+									      refElement => $input_article_name,
 									      code       => $code,
 									      type       => 'error',
 									      queryID    => $queryID,
@@ -344,7 +347,7 @@ sub _do_query_fromGenericSequencestoFASTA {
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => $output_article_name,
+								  refElement => $input_article_name,
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -369,7 +372,7 @@ sub _do_query_fromGenericSequencestoFASTA {
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => $output_article_name,
+								  refElement => $input_article_name,
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -388,9 +391,24 @@ sub _do_query_fromGenericSequencestoFASTA {
 	    $sequenceIdentifier = $seqobjs->[0]->display_id;
 	    
 	    if (! defined $sequenceIdentifier) {
-		print STDERR "sequence identifier is not defined!\n";
+		my $note = "sequence identifier is not defined!\n";
 		print STDERR "might be a problem with the fasta sequences...\n";
 		print STDERR "\n$fasta_sequences\n\n";
+		
+		$sequenceIdentifier = "";
+		
+		# Make a warning exception
+		
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => $input_article_name,
+									  code       => $code,
+									  type       => 'warning',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
 	    }
 	    
 	}
