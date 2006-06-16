@@ -28,7 +28,7 @@ use Benchmark;
 
 sub help {
 return <<"END_HELP";
-Description: Execute fromGenericSequencetoFASTA Moby services available from genome.imim.es
+Description: Execute fromGenericSequenceToFASTA Moby services available from genome.imim.es
 Usage:
 
     GenericSequencetoFASTA_Moby_Service.pl [-h] -x {Moby Central} -s {Service Name} -f {sequence FASTA file} -t {sequence format type}
