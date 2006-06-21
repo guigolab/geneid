@@ -4,11 +4,11 @@
   <s:processor name="parse_moby_meta">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_clusters_tree">
-    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
-  </s:processor>
   <s:processor name="StringArticleName" boring="true">
     <s:stringconstant>content</s:stringconstant>
+  </s:processor>
+  <s:processor name="parse_moby_clusters_tree">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="Decode_base64_to_byte">
     <s:local>org.embl.ebi.escience.scuflworkers.java.DecodeBase64</s:local>
@@ -19,17 +19,17 @@
   <s:processor name="parse_moby_matscan_gff">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
+  <s:processor name="merge_upstream_sequences">
+    <s:local>org.embl.ebi.escience.scuflworkers.java.StringSetUnion</s:local>
+  </s:processor>
+  <s:processor name="parse_moby_meme_text_output">
+    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
+  </s:processor>
   <s:processor name="parse_moby_tree_image">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="identifier" boring="true">
     <s:stringconstant />
-  </s:processor>
-  <s:processor name="parse_moby_meme_text_output">
-    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
-  </s:processor>
-  <s:processor name="merge_upstream_sequences">
-    <s:local>org.embl.ebi.escience.scuflworkers.java.StringSetUnion</s:local>
   </s:processor>
   <s:processor name="plotClustersTree">
     <s:description>This service returns a PNG image representing a tree of clusters</s:description>
@@ -50,7 +50,7 @@
       <s:Parameter s:name="condition">None</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="getOrthologousUpstreamSeqfromEnsembl">
+  <s:processor name="getUpstreamSeqfromEnsembl">
     <s:description>Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.
  In case you select the orthologous mode, it will returns the upstream sequence of all orthologous genes of a given input gene (only one input gene identifier in that case)</s:description>
     <s:biomobywsdl>
@@ -59,7 +59,7 @@
       <s:authorityName>genome.imim.es</s:authorityName>
       <s:Parameter s:name="upstream length">500</s:Parameter>
       <s:Parameter s:name="intergenic only">False</s:Parameter>
-      <s:Parameter s:name="orthologous mode">True</s:Parameter>
+      <s:Parameter s:name="orthologous mode">False</s:Parameter>
       <s:Parameter s:name="organism">Homo sapiens</s:Parameter>
       <s:Parameter s:name="ensembl release">34</s:Parameter>
       <s:Parameter s:name="downstream length" />
@@ -89,6 +89,15 @@
       <s:Parameter s:name="minimum sites for each motif" />
     </s:biomobywsdl>
   </s:processor>
+  <s:processor name="parseMotifMatricesFromMEME">
+    <s:description>Parses the score or probability motif matrices from MEME output</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>parseMotifMatricesFromMEME</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="matrix mode">log-likelihood</s:Parameter>
+    </s:biomobywsdl>
+  </s:processor>
   <s:processor name="runMultiPairwiseMetaAlignment">
     <s:description>runMultiPairwiseMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files</s:description>
     <s:biomobywsdl>
@@ -100,7 +109,7 @@
       <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="getUpstreamSeqfromEnsembl">
+  <s:processor name="getOrthologousUpstreamSeqfromEnsembl">
     <s:description>Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.
  In case you select the orthologous mode, it will returns the upstream sequence of all orthologous genes of a given input gene (only one input gene identifier in that case)</s:description>
     <s:biomobywsdl>
@@ -109,10 +118,21 @@
       <s:authorityName>genome.imim.es</s:authorityName>
       <s:Parameter s:name="upstream length">500</s:Parameter>
       <s:Parameter s:name="intergenic only">False</s:Parameter>
-      <s:Parameter s:name="orthologous mode">False</s:Parameter>
+      <s:Parameter s:name="orthologous mode">True</s:Parameter>
       <s:Parameter s:name="organism">Homo sapiens</s:Parameter>
       <s:Parameter s:name="ensembl release">34</s:Parameter>
       <s:Parameter s:name="downstream length" />
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMatScanGFFCollectionVsInputMatrices">
+    <s:description>Analyzes a collection of DNA sequences for putative motifs (transcription or splicing factor binding sites) and reports them in GFF format. The collection of motifs is given by the user as a set of Position Weight Matrices (PWMs)</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMatScanGFFCollectionVsInputMatrices</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="threshold">0.85</s:Parameter>
+      <s:Parameter s:name="strand">Both</s:Parameter>
+      <s:Parameter s:name="matrix mode">log-likelihood</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="String">
@@ -131,30 +151,23 @@
       <s:authorityName />
     </s:biomobyobject>
   </s:processor>
-  <s:processor name="runMatScanGFFCollectionVsInputMatrices">
-    <s:description>Analyzes a collection of DNA sequences for putative motifs (transcription or splicing factor binding sites) and reports them in GFF format. The collection of motifs is given by the user as a set of Position Weight Matrices (PWMs)</s:description>
+  <s:processor name="parse_moby_upstream_sequences">
+    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="fromGenericSequenceCollectionToFASTA">
+    <s:description>Converts a collection of generic sequences into FASTA sequences</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMatScanGFFCollectionVsInputMatrices</s:serviceName>
+      <s:serviceName>fromGenericSequenceCollectionToFASTA</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="threshold">0.85</s:Parameter>
-      <s:Parameter s:name="strand">Both</s:Parameter>
-      <s:Parameter s:name="matrix mode">log-likelihood</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="parseMotifMatricesFromMEME">
-    <s:description>Parses the score or probability motif matrices from MEME output</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>parseMotifMatricesFromMEME</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="matrix mode">log-likelihood</s:Parameter>
-    </s:biomobywsdl>
-  </s:processor>
+  <s:link source="List_Of_GeneIdentifiers:mobyData" sink="getOrthologousUpstreamSeqfromEnsembl:text-formatted(genes)" />
   <s:link source="List_Of_GeneIdentifiers:mobyData" sink="getUpstreamSeqfromEnsembl:text-formatted(genes)" />
   <s:link source="String:mobyData" sink="List_Of_GeneIdentifiers:String(content)" />
   <s:link source="StringArticleName:value" sink="String:article name" />
   <s:link source="list_of_geneIdentifiers_input" sink="String:value" />
+  <s:link source="fromGenericSequenceCollectionToFASTA:FASTA(sequences)" sink="parse_moby_upstream_sequences:mobydata" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="parse_moby_score_matrix:mobydata" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="runHierarchicalClustering:MicroArrayData_Text(microarraydata)" />
   <s:link source="getOrthologousUpstreamSeqfromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences' As Simples)" sink="merge_upstream_sequences:list2" />
@@ -162,26 +175,27 @@
   <s:link source="identifier:value" sink="List_Of_GeneIdentifiers:id" />
   <s:link source="identifier:value" sink="String:id" />
   <s:link source="namespace" sink="List_Of_GeneIdentifiers:namespace" />
+  <s:link source="merge_upstream_sequences:union" sink="fromGenericSequenceCollectionToFASTA:GenericSequence(Collection - 'sequences')" />
   <s:link source="merge_upstream_sequences:union" sink="runMatScanGFFCollectionVsInputMatrices:DNASequence(Collection - 'sequences')" />
+  <s:link source="merge_upstream_sequences:union" sink="runMemeText:GenericSequence(Collection - 'sequences')" />
+  <s:link source="Decode_base64_to_byte:bytes" sink="clusters_tree_image" />
   <s:link source="parseMotifMatricesFromMEME:Matrix(Collection - 'motif_weight_matrices')" sink="runMatScanGFFCollectionVsInputMatrices:Matrix(Collection - 'motif_weight_matrices')" />
+  <s:link source="parse_moby_clusters_tree:value" sink="clusters_tree" />
+  <s:link source="parse_moby_matscan_gff:value" sink="matscan_gff" />
+  <s:link source="parse_moby_meta:value" sink="meta-alignment" />
+  <s:link source="parse_moby_score_matrix:value" sink="score_matrix" />
   <s:link source="parse_moby_tree_image:value" sink="Decode_base64_to_byte:base64" />
+  <s:link source="parse_moby_upstream_sequences:value" sink="upstream_sequences_fasta" />
   <s:link source="plotClustersTree:Image_Encoded(image)" sink="parse_moby_tree_image:mobydata" />
   <s:link source="runHierarchicalClustering:HierarchicalClustering(clusters)" sink="parse_moby_clusters_tree:mobydata" />
   <s:link source="runHierarchicalClustering:HierarchicalClustering(clusters)" sink="plotClustersTree:HierarchicalClustering(clusters)" />
   <s:link source="runMatScanGFFCollectionVsInputMatrices:GFF(Collection - 'matscan_predictions' As Simples)" sink="parse_moby_matscan_gff:mobydata" />
   <s:link source="runMatScanGFFCollectionVsInputMatrices:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignment:GFF(Collection - 'maps')" />
   <s:link source="runMemeText:MEME_Text(meme_predictions)" sink="parseMotifMatricesFromMEME:MEME_Text(meme_predictions)" />
-  <s:link source="Decode_base64_to_byte:bytes" sink="clusters_tree_image" />
-  <s:link source="List_Of_GeneIdentifiers:mobyData" sink="getOrthologousUpstreamSeqfromEnsembl:text-formatted(genes)" />
-  <s:link source="merge_upstream_sequences:union" sink="runMemeText:GenericSequence(Collection - 'sequences')" />
-  <s:link source="parse_moby_clusters_tree:value" sink="clusters_tree" />
-  <s:link source="parse_moby_matscan_gff:value" sink="matscan_gff" />
-  <s:link source="parse_moby_meme_text_output:value" sink="MEME_results" />
   <s:link source="runMemeText:MEME_Text(meme_predictions)" sink="parse_moby_meme_text_output:mobydata" />
   <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta:mobydata" />
   <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions')" sink="fromMetaAlignmentsToTextScoreMatrix:Meta_Alignment_Text(Collection - 'similarity_results')" />
-  <s:link source="parse_moby_meta:value" sink="meta-alignment" />
-  <s:link source="parse_moby_score_matrix:value" sink="score_matrix" />
+  <s:link source="parse_moby_meme_text_output:value" sink="MEME_results" />
   <s:source name="namespace" />
   <s:source name="list_of_geneIdentifiers_input" />
   <s:sink name="clusters_tree" />
@@ -202,5 +216,6 @@
     </s:metadata>
   </s:sink>
   <s:sink name="MEME_results" />
+  <s:sink name="upstream_sequences_fasta" />
 </s:scufl>
 
