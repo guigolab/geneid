@@ -256,7 +256,7 @@ PRT
 #
     
 my $trim_alt = "On";
-my $trim_cutoff = 0.1;
+my $trim_cutoff = 0.05;
 
 my $trim_alt_xml    = "<Value>$trim_alt</Value>";
 my $trim_cutoff_xml = "<Value>$trim_cutoff</Value>";
