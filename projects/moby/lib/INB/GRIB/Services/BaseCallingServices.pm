@@ -1,4 +1,4 @@
-# $Id: BaseCallingServices.pm,v 1.3 2006-06-06 09:59:13 gmaster Exp $
+# $Id: BaseCallingServices.pm,v 1.4 2006-06-22 15:52:58 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -143,7 +143,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 0;
+my $_debug = 1;
 
 # Preloaded methods go here.
 
@@ -164,7 +164,7 @@ sub _do_query_Phred {
 	print STDERR "input_type unknown (should be setup as being simple or collection)\n";
 	exit 1;
     }
-
+    
     my $namespace       = "";
     my $MOBY_RESPONSE   = ""; # set empty response
     my $moby_exceptions = [];
@@ -197,7 +197,7 @@ sub _do_query_Phred {
     
     ($trim_alt) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "trim_alt");
     if (not defined $trim_alt) {
-      $trim_alt = 0;
+      $trim_alt = "Off";
     }
     elsif (! ($trim_alt =~ /on|off/i)) {
       my $note = "'trim_alt' parameter, '$trim_alt', not accepted, should be ['On', 'Off']\n";
@@ -230,6 +230,11 @@ sub _do_query_Phred {
     # Check it is a float 
     if (! ($trim_cutoff =~ /\d\.*\d*/)) {
       print STDERR "trim_cutoff parameter, $trim_cutoff, is not valid, should be a float!!\n";
+    }
+    
+    if ($_debug) {
+	print STDERR "trim_alt, $trim_alt\n";
+	print STDERR "trim_cutoff, $trim_cutoff\n";
     }
     
     # check that if trim_cutoff is set up, trim_alt is settup too (as a warning)
@@ -321,6 +326,13 @@ sub _do_query_Phred {
 	    if ($input_type eq "simple") {
 		($chromatogram_id) = getSimpleArticleIDs ([$DOM]);
 		
+		if ($_debug) {
+		    print STDERR "chromatogram identifier, $chromatogram_id.\n";
+		}
+		
+		# In case taverna adds an extra '\n'
+		chomp $chromatogram_id;
+		
 		if (! defined $chromatogram_id) {
 		    my $note = "Chromatogram_Encoded object is missing an indentifier. An identifier is required";
 		    print STDERR "$note\n";
@@ -373,6 +385,13 @@ sub _do_query_Phred {
 		    }
 		    
 		    ($chromatogram_id) = getSimpleArticleIDs ([$chromatogram_article_DOM]);
+		    
+		    if ($_debug) {
+			print STDERR "chromatogram identifier, $chromatogram_id.\n";
+		    }
+		    
+		    # In case taverna adds an extra '\n'
+		    chomp $chromatogram_id;
 		    
 		    if (! defined $chromatogram_id) {
 			my $note = "Chromatogram_Encoded object is missing an indentifier. An identifier is required";
