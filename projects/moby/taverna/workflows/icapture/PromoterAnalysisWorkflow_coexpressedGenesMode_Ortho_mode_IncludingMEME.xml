@@ -229,6 +229,12 @@
   </s:sink>
   <s:sink name="MEME_results_Text" />
   <s:sink name="upstream_sequences_fasta" />
-  <s:sink name="MEME_results_HTML" />
+  <s:sink name="MEME_results_HTML">
+    <s:metadata>
+      <s:mimeTypes>
+        <s:mimeType>text/html</s:mimeType>
+      </s:mimeTypes>
+    </s:metadata>
+  </s:sink>
 </s:scufl>
 
