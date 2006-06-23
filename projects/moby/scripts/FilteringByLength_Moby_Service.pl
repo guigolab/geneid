@@ -97,7 +97,7 @@ if (! -f $in_file) {
     die "can't find , input file, $in_file!\n";
 }
 
-if ($serviceName eq "runPhrapWithQualityData") {
+if ($serviceName eq "filterSequencesAndQualityDataByLength") {
     if (! -f $in_quality_file) {
 	die "can't find , input quality file, $in_quality_file!\n";
     }
@@ -264,7 +264,7 @@ undef $input_sequences_data_b64;
 #
 
 my $trim_masked_regions = "On";
-my $length_cutoff       = 200;
+my $length_cutoff       = 75;
 
 my $trim_masked_regions_xml = "<Value>$trim_masked_regions</Value>";
 my $length_cutoff_xml       = "<Value>$length_cutoff</Value>";
