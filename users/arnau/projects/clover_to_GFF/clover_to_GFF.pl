@@ -17,12 +17,21 @@ my $features = [];
 my $seqId;
 my $start_parsing = 0;
 
+if ($_debug) {
+    print STDERR "parsing clover output...\n";
+}
+
 open FILE, $filename or die "can't open input file, $filename!\n";
 while (my $line = <FILE>) {
-    if ($line =~ /^>([^\s]+)\s.+/) {
+    if ($line =~ /^>([^\s]+)\s*.*/) {
 	# sequence header, which means, new set of features
+
 	$seqId = $1;
 	$start_parsing++;
+	
+	if ($_debug) {
+	    print STDERR "sequence header parsed, $seqId\n";
+	}
 	
 	if (@$features > 0) {
 	    # Store previous putative binding sites dataset
@@ -79,10 +88,28 @@ while (my $line = <FILE>) {
 }
 close FILE;
 
+if ($_debug) {
+    print STDERR "parsing done.\n";
+}
+
 # Printing out in GFF
 
+if ($_debug) {
+    print STDERR "processing the clover data. Printing it out...\n";
+}
+
 foreach my $seqId (keys (%motifs_features_per_sequence)) {
+    
+    if ($_debug) {
+	print STDERR "processing data for sequence, $seqId\n";
+    }
+    
     my $features = $motifs_features_per_sequence{$seqId};
+    
+    if ($_debug) {
+	print STDERR "sequence has " . @$features . " features attached to\n";
+    }
+    
     foreach my $feature_href (@$features) {
 	my $algorithm = $feature_href->{algorithm} || die "algorithm not defined!\n";
 	my $motif_id  = $feature_href->{motif_id}  || die "motif identifier not defined!\n";
@@ -93,7 +120,14 @@ foreach my $seqId (keys (%motifs_features_per_sequence)) {
 	my $frame     = $feature_href->{frame}     || die "frame not defined!\n";
 	my $motif_seq = $feature_href->{motif_seq} || die "motif sequence not defined!\n";
 	
+	if ($_debug) {
+	    print STDERR "printing out current feature...\n";
+	}
+	
 	print "$seqId\t$algorithm\t$motif_id\t$start\t$end\t$score\t$strand\t$frame\t# $motif_seq\n";
     }
 }
 
+if ($_debug) {
+    print STDERR "processing done.\n";
+}
