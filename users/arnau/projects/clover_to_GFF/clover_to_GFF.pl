@@ -6,6 +6,10 @@ my $_algorithm = "clover";
 my $_debug     = 0;
 my $filename   = shift;
 
+if ((!defined $filename) || (! -f $filename)) {
+    die "Specify an input file!\n";
+}
+
 # Parsing clover output file
 
 my %motifs_features_per_sequence;
