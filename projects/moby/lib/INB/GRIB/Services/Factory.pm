@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.91 2006-06-16 10:21:34 gmaster Exp $
+# $Id: Factory.pm,v 1.92 2006-06-23 14:58:03 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -126,6 +126,7 @@ our @EXPORT = qw(
   &TranslateGeneIDPredictions_call
   &PromoterExtraction_call
   &MatScan_call
+  &Clover_call
   &MetaAlignment_call
   &generateScoreMatrix_call
   &MEME_call
@@ -1162,6 +1163,273 @@ sub MatScan_call {
     }
     else {
 	my $note = "Internal System Error. MatScan has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
+    }
+}
+
+=head2 Clover_call
+
+ Title   : Clover_call
+ Usage   : $report = Clover_call (@params);
+	 :
+	 : ## where @params are,
+	 : @params = ('arg1'  => "WKRPPEICENPRFIIGGANRTDIAAIACLTLNERL",
+	 :            'arg2'  => "query 1", ## optional
+	 :            'arg3'  => "nr");     ## optional (default: nr)
+ Returns : Devuelve un string que contiene el resultado de la ejecución.
+
+=cut
+
+sub Clover_call {
+    my %args = @_;
+
+    # output specs declaration
+    my $clover_output_gff   = "";
+    my $moby_exceptions  = [];
+
+    # relleno los parametros por defecto Clover_call
+
+    my $sequences      = $args{sequences}  || undef;
+    my $matrices_input = $args{matrices}   || undef;
+    my $format         = $args{format}     || "";
+    my $parameters     = $args{parameters} || undef;
+    my $debug          = $args{debug}      || 0;
+    my $queryID        = $args{queryID}    || "";
+
+    # Get the parameters
+
+    my $pvalue_threshold     = $parameters->{pvalue_threshold};
+    my $score_threshold      = $parameters->{score_threshold};
+    my $database_parameter   = $parameters->{motif_database};
+    my $matrix_mode          = $parameters->{matrix_mode};
+    my $background_sequences = $parameters->{background_sequences};
+    
+    if ($debug) {
+	print STDERR "pvalue threshold, $pvalue_threshold\n";
+	print STDERR "score threshold, $score_threshold\n";
+	print STDERR "motif database parameter, $database_parameter\n";
+	print STDERR "matrix mode, $matrix_mode\n";
+	print STDERR "background sequences, $background_sequences\n";
+    }
+    
+    # Llama a Clover en local
+    my $_clover_dir  = "/home/ug/gmaster/projects/Clover";
+    my $_clover_bin  = "bin/clover";
+    my $_clover_args = "-t $pvalue_threshold -s $score_threshold";
+    # Check that the binary is in place
+    if (! -f "$_clover_dir/$_clover_bin") {
+	my $note = "Internal System Error. Clover binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Clover_to_GFF perl script
+    
+    my $_clover_to_gff_bin = "/home/ug/gmaster/projects/clover_to_GFF/clover_to_GFF.pl";
+    
+    if (! -f "$_clover_to_gff_bin") {
+	my $note = "Internal System Error. Clover Output to GFF conversion script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    my ($matrix_fh, $matrix_file);
+
+    if (defined $database_parameter) {
+
+	if ($debug) {
+	    print STDERR "matrix as a parameter...\n";
+	}
+
+	if ($matrix_mode eq "raw format") {
+
+	    if ($debug) {
+		print STDERR "raw mode\n";
+	    }
+
+	  SWITCH: {
+	      if (lc ($database_parameter) eq "transfac") { $matrix_file = "$_clover_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "jaspar")   { $matrix_file = "$_clover_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
+	      # Default is Transfac
+	      $matrix_file = "$_clover_dir/matrices/Transfac_raw_format.matrices";
+	  }
+	}
+	elsif ($matrix_mode eq "log-likelihood") {
+	    if ($debug) {
+		print STDERR "log-likelihood mode\n";
+	    }
+
+	  SWITCH: {
+	      if (lc ($database_parameter) eq "transfac") { $matrix_file = "$_clover_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "jaspar")   { $matrix_file = "$_clover_dir/matrices/Jaspar-latest_likelihood.matrices.fa"; last SWITCH; }
+	      # Default is Transfac
+	      $matrix_file = "$_clover_dir/matrices/Transfac_likelihood.matrices";
+	  }
+	}
+	else {
+	    # should be validated before...
+	    print STDERR "don't know anything about matrix mode, $matrix_mode!\n";
+	    exit 0;
+	}
+    }
+    elsif (defined $matrices_input) {
+	if ($debug) {
+	    print STDERR "matrices as an input...\n";
+	}
+
+	# Make a temporary file with the matrix input
+	$_clover_args .= " -s";
+	eval {
+	    ($matrix_fh, $matrix_file) = tempfile("/tmp/CLOVER_MATRIX.XXXXXX", UNLINK => 0);
+	    print $matrix_fh "$matrices_input";
+	    close $matrix_fh;
+	};
+	if ($@) {
+	    my $note = "Internal System Error. Can not open Clover matrix input temporary file!\n";
+	    my $code = 701;
+	    print STDERR "$note\n";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    return (undef, [$moby_exception]);
+	}
+
+    }
+    else {
+	# To change !
+	print STDERR "matrices_input neither database_parameter are defined!!\n";
+	exit 0;
+    }
+
+    if ((not defined $matrix_file) || (-z $matrix_file)) {
+	# could well be possible if the input matrix set is empty, ie if MEME didn't predict any !!
+	# But i guess in that case, no need to go up there, validation will be done before Clover_call
+	print STDERR "Internal System Error. No defined matrix file!\n";
+	return (undef, []);
+    }
+
+    # Generate a temporary file locally with the sequence(s) in FASTA format
+    # locally, ie not on a NFS mounted directory, for speed sake
+
+    my ($seq_fh, $seqfile);
+    eval {
+	($seq_fh, $seqfile) = tempfile("/tmp/CLOVER_SEQS.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open Clover sequence input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+
+    # Bioperl sequence factory
+
+    my $sout = Bio::SeqIO->new (
+				-fh     => $seq_fh,
+				-format => 'fasta'
+				);
+
+    my @seqIds = keys (%$sequences);
+    foreach my $sequenceIdentifier (@seqIds) {
+	my $nucleotides = $sequences->{$sequenceIdentifier};
+
+	# bioperl sequence object
+
+	my $seqobj = Bio::Seq->new (
+				    -display_id => $sequenceIdentifier,
+				    -seq        => $nucleotides
+				    );
+	$sout->write_seq ($seqobj);
+    }
+    close $seq_fh;
+    
+    # Test empty file
+    if (-z $seqfile) {
+	my $note = "Internal System Error. Empty Clover input sequence file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    my ($clover_output_fh, $clover_output_filename) = tempfile("/tmp/CLOVER_OUTPUT.XXXXXX", UNLINK => 0);;
+    close $clover_output_fh;
+    
+    if ($debug) {
+	print STDERR "Running Clover, with this command:\n";
+	print STDERR "$_clover_dir\/$_clover_bin $_clover_args $matrix_file $seqfile > $clover_output_filename\n";
+    }
+    
+    qx/$_clover_dir\/$_clover_bin $_clover_args $matrix_file $seqfile > $clover_output_filename/;
+    
+    unlink $seqfile unless $debug;
+    
+    if (! -z $clover_output_filename) {
+	
+	# Convert it into GFF format
+	$clover_output_gff = qx/$_clover_to_gff_bin $clover_output_filename/;
+	
+	if ($debug) {
+	    # print STDERR "clover results in GFF format,\n$clover_output_gff\n";
+	}
+	
+	unlink $clover_output_filename unless $debug;
+	
+	if ((! defined $clover_output_gff) || ($clover_output_gff eq "")) {
+	    my $note = "Internal System Error. Converting Clover output into GFF format has failed!\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    return (undef, $moby_exceptions);
+	}
+	
+	return ($clover_output_gff, $moby_exceptions);
+    }
+    else {
+	my $note = "Internal System Error. Clover has failed!\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -2488,6 +2756,19 @@ sub Phrap_call {
 	print STDERR "Phrap done\n";
     }
     
+    if (! -f "$sequences_phrap_file.singlets") {
+	my $note = "Phrap failed";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, undef, [$moby_exception]);
+    }
+    
     # Process the phrap results to get a unique FASTA file
     
     my $singlets_seqs = qx/cat $sequences_phrap_file".singlets"/;
@@ -2627,6 +2908,9 @@ sub Phred_call {
     
     my @chromatogram_ids = keys (%$chromatograms);
     foreach my $chromatogram_id (@chromatogram_ids) {
+	
+	print STDERR "chromatogram identifier, $chromatogram_id.\n";
+	
 	my $chromatogram = $chromatograms->{$chromatogram_id};
 	
 	my $chromatogram_type     = $chromatogram->{type};
@@ -2660,6 +2944,8 @@ sub Phred_call {
     if ($debug) {
 	print STDERR "Running phred, with this command:\n";
 	print STDERR "$_phred_dir\/$_phred_bin -id $phred_input_dir -pd $phred_output_dir $_phred_args\n";
+	print STDERR "then running:\n";
+	print STDERR "$_phred_dir\/$_phd2fasta_bin -id $phred_output_dir -os $seq_fasta_file -oq $qual_fasta_file\n";
     }
     
     my $result = qx/export PHRED_PARAMETER_FILE=$_phred_config_file; $_phred_dir\/$_phred_bin -id $phred_input_dir -pd $phred_output_dir $_phred_args/;
@@ -2702,7 +2988,7 @@ sub SequenceFilteringByLength_call {
     
     # output specs declaration
     my $filtered_sequences;
-    my $filtered_quality_data;
+    my $filtered_quality_data = "";
     my $moby_exceptions    = [];
     
     # relleno los parametros por defecto de SequenceFilteringByLength_call
@@ -2828,7 +3114,40 @@ sub SequenceFilteringByLength_call {
 	}
 	
 	if (length $removed_sequences_list > 0) {
-	    $filtered_quality_data = qx/$_sequence_filtering_dir\/FastaToTblWithDesc $quality_data_file | egrep -v "$removed_sequences_list" | $_sequence_filtering_dir\/TblToFastaWithDesc/;
+	    my @quality_data_array = split ("\n", $fasta_quality_data);
+
+	    if ($debug) {
+		print STDERR "Quality array length, " . @quality_data_array  ."\n";
+	    }
+	    
+	    # Filtering processing
+	    
+	    my $keep = 0;
+	    foreach my $line (@quality_data_array) {
+		chomp $line;
+		if ($line =~ /^>/) {
+		    
+		    if ($debug) {
+			print STDERR "header line\n";
+		    }
+		    
+		    if ($line =~ /$removed_sequences_list/) {
+
+			if ($debug) {
+			    print STDERR "header match!\n";
+			}
+			
+			$keep = 0;
+		    }
+		    else {
+			$keep = 1;
+			$filtered_quality_data .= "$line\n";
+		    }
+		}
+		elsif ($keep) {
+		    $filtered_quality_data .= "$line\n";
+		}
+	    }
 	}
 	else {
 	    # Empty, ie no sequences have been removed !
