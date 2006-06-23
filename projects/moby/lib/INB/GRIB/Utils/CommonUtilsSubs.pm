@@ -315,7 +315,7 @@ sub parseSingleGFFIntoCollectionGFF {
 	}
 	else {
 	    print STDERR "in parseSingleGFFIntoCollectionGFF, can't parse sequence identifier from GFF,\n$line\n";
-	    exit 0;
+	    return undef;
 	}
 	
 	if (not defined $sequenceIdentifier) {
