@@ -1,4 +1,4 @@
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:49 2005
@@ -13,9 +13,9 @@ V$CDXA_02:		 60-66	 :	 62-68 	5.04-4.98
 V$CDXA_02:		 68-74	 :	 79-85 	5.04-4.64
 V$CDXA_02:		 93-99	 :	 102-108 	4.64-5.68
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:49 2005
@@ -37,9 +37,9 @@ F$NIT2_01:		 363-368	 :	 427-432 	6.92-5.82
 V$CDXA_02:		 398-404	 :	 437-443 	5.62-5.68
 V$CDXA_01:		 425-431	 :	 444-450 	6.28-5.03
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:49 2005
@@ -62,9 +62,9 @@ I$HSF_01:		 376-380	 :	 293-297 	4.99-4.83
 V$CDXA_02:		 398-404	 :	 317-323 	5.62-5.62
 I$HSF_01:		 408-412	 :	 401-405 	4.69-4.69
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:49 2005
@@ -90,9 +90,9 @@ F$HSF_01:		 376-380	 :	 363-367 	4.31-4.33
 V$CDXA_02:		 398-404	 :	 368-374 	5.62-5.56
 V$CDXA_02:		 425-431	 :	 384-390 	5.68-5.62
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:49 2005
@@ -115,9 +115,9 @@ F$HSF_01:		 232-236	 :	 266-270 	4.63-4.33
 I$HSF_01:		 239-243	 :	 283-287 	5.48-4.99
 V$STAT5A_04:		 300-307	 :	 291-298 	5.43-5.03
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:49 2005
@@ -142,9 +142,9 @@ I$HSF_01:		 408-412	 :	 374-378 	4.69-4.69
 V$CAP_01:		 441-448	 :	 397-404 	4.41-4.30
 V$STAT6_01:		 477-484	 :	 456-463 	5.34-5.52
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -167,9 +167,9 @@ I$HSF_01:		 408-412	 :	 367-371 	4.69-4.69
 V$CDXA_02:		 425-431	 :	 388-394 	5.68-5.62
 F$TBP_Q6:		 437-445	 :	 471-479 	8.20-9.36
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -187,9 +187,9 @@ V$STAT5A_04:		 238-245	 :	 313-320 	5.64-5.15
 V$CEBP_01:		 248-260	 :	 326-338 	7.18-7.22
 P$RITA1_01:		 311-317	 :	 355-361 	6.23-6.70
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -204,9 +204,9 @@ F$HSF_01:		 52-56	 :	 96-100 	4.72-5.18
 P$GT1_Q6:		 83-89	 :	 134-140 	6.22-6.22
 V$CDXA_02:		 102-108	 :	 144-150 	5.68-5.62
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -223,9 +223,9 @@ V$SRY_01:		 68-74	 :	 129-135 	6.68-6.68
 V$CDXA_02:		 82-88	 :	 143-149 	4.64-5.62
 F$HSF_01:		 116-120	 :	 191-195 	5.18-4.72
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -240,9 +240,9 @@ I$HSF_01:		 52-56	 :	 58-62 	5.48-4.99
 V$CDXA_02:		 62-68	 :	 69-75 	4.98-5.74
 F$TBP_Q6:		 79-87	 :	 79-87 	7.86-7.73
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -257,9 +257,9 @@ I$ANTP_Q6:		 61-67	 :	 84-90 	6.51-7.32
 V$CDXA_02:		 79-85	 :	 97-103 	4.64-4.64
 V$CDXA_02:		 102-108	 :	 135-141 	5.68-4.98
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -273,9 +273,9 @@ I$HSF_01:		 52-56	 :	 52-56 	5.48-4.99
 I$ANTP_Q6:		 61-67	 :	 74-80 	6.51-6.91
 V$POU1F1_Q6:		 82-91	 :	 87-96 	9.01-9.19
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -289,9 +289,9 @@ V$MYB_Q3:		 54-59	 :	 69-74 	5.17-5.98
 I$SGF3_Q6:		 93-99	 :	 95-101 	6.89-6.71
 V$CDXA_02:		 102-108	 :	 105-111 	5.68-5.62
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -306,9 +306,9 @@ V$SRY_01:		 68-74	 :	 60-66 	6.68-6.12
 V$CDXA_02:		 79-85	 :	 70-76 	4.64-5.62
 V$CDXA_01:		 102-108	 :	 117-123 	6.28-5.27
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -326,9 +326,9 @@ V$CDXA_02:		 144-150	 :	 120-126 	5.62-5.62
 V$CDXA_02:		 336-342	 :	 317-323 	5.56-5.62
 V$MYB_Q3:		 453-458	 :	 434-439 	5.35-5.39
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -349,9 +349,9 @@ V$EN1_01:		 298-304	 :	 265-271 	5.07-5.07
 V$STAT3_02:		 377-384	 :	 339-346 	5.12-4.78
 F$ADR1_01:		 410-415	 :	 379-384 	5.48-6.17
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -369,9 +369,9 @@ V$HOXA3_01:		 155-163	 :	 168-176 	5.11-5.18
 F$NIT2_01:		 184-189	 :	 188-193 	6.76-6.92
 V$CDXA_02:		 211-217	 :	 200-206 	5.04-5.04
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -395,9 +395,9 @@ V$CDXA_02:		 336-342	 :	 337-343 	5.56-5.74
 V$EN1_01:		 371-377	 :	 378-384 	5.29-5.07
 V$CAP_01:		 386-393	 :	 397-404 	4.45-4.30
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:50 2005
@@ -415,9 +415,9 @@ V$EN1_01:		 298-304	 :	 354-360 	5.07-4.88
 V$CDXA_02:		 336-342	 :	 388-394 	5.56-5.62
 V$CDXA_01:		 437-443	 :	 472-478 	6.28-5.88
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -432,9 +432,9 @@ V$CDXA_02:		 144-150	 :	 70-76 	5.62-5.62
 V$STAT3_02:		 377-384	 :	 303-310 	5.12-5.15
 F$NIT2_01:		 427-432	 :	 348-353 	5.82-5.66
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -458,9 +458,9 @@ V$CDXA_02:		 317-323	 :	 368-374 	5.62-5.56
 I$HSF_01:		 401-405	 :	 462-466 	4.69-4.69
 V$MYB_Q3:		 434-439	 :	 489-494 	5.39-4.82
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -480,9 +480,9 @@ V$MYB_Q3:		 154-159	 :	 221-226 	5.35-5.39
 V$HMGIY_Q6:		 219-225	 :	 227-233 	6.69-6.63
 I$HSF_01:		 293-297	 :	 292-296 	4.83-4.99
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -502,9 +502,9 @@ V$SRY_01:		 326-332	 :	 298-304 	7.09-6.05
 I$HSF_01:		 401-405	 :	 374-378 	4.69-4.69
 I$HSF_01:		 480-484	 :	 450-454 	4.69-4.83
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -524,9 +524,9 @@ V$IRF1_Q6:		 340-346	 :	 371-377 	7.93-7.65
 V$SRY_01:		 381-387	 :	 383-389 	6.11-6.11
 V$CIZ_01:		 402-410	 :	 396-404 	7.86-7.43
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -547,9 +547,9 @@ V$STAT1_03:		 276-283	 :	 303-310 	5.10-5.46
 V$IRF1_Q6:		 340-346	 :	 311-317 	7.93-8.63
 V$SRY_01:		 381-387	 :	 389-395 	6.11-6.13
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -567,9 +567,9 @@ V$CDXA_02:		 204-210	 :	 200-206 	5.17-5.04
 V$STAT5A_04:		 235-242	 :	 227-234 	6.09-5.14
 I$HSF_01:		 288-292	 :	 283-287 	5.48-4.99
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -594,9 +594,9 @@ V$E2F1_Q3:		 330-337	 :	 406-413 	6.05-5.83
 F$HSF_01:		 363-367	 :	 425-429 	4.33-5.18
 I$HSF_01:		 462-466	 :	 450-454 	4.69-4.83
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -613,9 +613,9 @@ V$SRY_01:		 196-202	 :	 212-218 	6.53-7.09
 V$STAT5A_04:		 235-242	 :	 242-249 	6.09-5.22
 V$CDXA_02:		 384-390	 :	 388-394 	5.62-5.62
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -633,9 +633,9 @@ V$CDXA_01:		 189-195	 :	 215-221 	5.88-5.37
 V$STAT5A_04:		 235-242	 :	 262-269 	6.09-5.23
 V$STAT3_02:		 339-346	 :	 313-320 	4.78-5.81
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -658,9 +658,9 @@ F$HSF_01:		 266-270	 :	 350-354 	4.33-4.63
 I$HSF_01:		 283-287	 :	 361-365 	4.99-5.48
 I$HSF_01:		 292-296	 :	 374-378 	4.99-4.69
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -677,9 +677,9 @@ V$HOXA3_01:		 168-176	 :	 161-169 	5.18-5.06
 V$FOXO1_01:		 179-188	 :	 209-218 	7.87-9.46
 V$STAT5A_04:		 227-234	 :	 242-249 	5.14-5.22
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -698,9 +698,9 @@ V$HMGIY_Q6:		 227-233	 :	 263-269 	6.63-7.79
 V$STAT3_02:		 253-260	 :	 303-310 	4.98-5.15
 V$STAT5A_04:		 291-298	 :	 313-320 	5.03-5.15
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:51 2005
@@ -722,9 +722,9 @@ I$HSF_01:		 361-365	 :	 360-364 	5.48-4.69
 I$HSF_01:		 374-378	 :	 367-371 	4.69-4.69
 V$PAX2_02:		 419-427	 :	 401-409 	6.29-5.67
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:52 2005
@@ -742,9 +742,9 @@ V$STAT6_01:		 174-181	 :	 262-269 	5.77-6.05
 V$IRF1_Q6:		 241-247	 :	 311-317 	7.93-8.63
 I$HB_01:		 339-348	 :	 380-389 	8.55-8.49
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>
 
-<moby:text-formatted namespace="" id="">
+<moby:Meta_Alignment_Text namespace="" id="">
 <![CDATA[
 # meta_v1.1
 # date Mon Nov 28 14:59:52 2005
@@ -765,4 +765,4 @@ V$NKX25_01:		 278-284	 :	 325-331 	7.04-8.37
 F$NIT2_01:		 313-318	 :	 348-353 	5.66-5.66
 V$SRY_01:		 383-389	 :	 389-395 	6.11-6.13
 ]]>
-</moby:text-formatted>
+</moby:Meta_Alignment_Text>

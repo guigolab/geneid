@@ -117,8 +117,8 @@ my $runMatScanGFF_control_file              = "ENSG00000197785.runMatScanGFF.con
 my $runMatScanGFFCollection_control_file    = "ENSG00000197785.runMatScanGFFCollection.control";
 my $runMetaAlignment_control_file           = "ENSG00000197785.runMetaAlignment.control";
 my $runMetaAlignmentGFF_control_file        = "ENSG00000197785.runMetaAlignmentGFF.control";
-my $fromFASTAToDNASequenceCollection_control_file = "ENSG00000197785.fromFASTAToDNASequenceCollection.control";
-my $generateScoreMatrix_control_file        = "mut1_downreg.fbgn.ScoresMatrix.control";
+my $fromFASTAToDNASequenceCollection_control_file    = "ENSG00000197785.fromFASTAToDNASequenceCollection.control";
+my $fromMetaAlignmentsToTextScoreMatrix_control_file = "mut1_downreg.fbgn.ScoresMatrix.control";
 
 ##################################################################
 #
@@ -598,15 +598,15 @@ if (defined $service) {
     }
 }
 
-# Execute generateScoreMatrix Web service
+# Execute fromMetaAlignmentsToTextScoreMatrix Web service
 
-print  "\ntesting generateScoreMatrix...\n\n";
+print  "\ntesting fromMetaAlignmentsToTextScoreMatrix...\n\n";
 
 # Construct the meta output moby objects array from the concatenated string
 
 my @meta_output_objects = split ("\n\n", $Dmel_MultiMeta_xml);
 
-$service = MobyServiceInstantiation ($C, "generateScoreMatrix", $AUTH);
+$service = MobyServiceInstantiation ($C, "fromMetaAlignmentsToTextScoreMatrix", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
@@ -618,10 +618,10 @@ if (defined $service) {
 
     print $results_fh "$result\n";
 
-    my @diff_results = qx/diff $control_data_dir\/$generateScoreMatrix_control_file $results_file/;
+    my @diff_results = qx/diff $control_data_dir\/$fromMetaAlignmentsToTextScoreMatrix_control_file $results_file/;
 
     if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
-	print STDERR "generateScoreMatrix service failed!\n";
+	print STDERR "fromMetaAlignmentsToTextScoreMatrix service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
 
 	close $results_fh;
@@ -630,7 +630,7 @@ if (defined $service) {
     }
     else {
 
-	print  "generateScoreMatrix okay...\n";
+	print  "fromMetaAlignmentsToTextScoreMatrix okay...\n";
 
 	close $results_fh;
 	unlink $results_file;
