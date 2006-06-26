@@ -43,6 +43,7 @@ use INB::GRIB::Services::AssemblyServices;
 use INB::GRIB::Services::BaseCallingServices;
 use INB::GRIB::Services::FilteringServices;
 
+# Deprecated but 'generateScoreMatrix' is still registered in icapture registry
 use INB::GRIB::Services::OldServices;
 ###############################################################################
 
@@ -156,7 +157,7 @@ $x->dispatch_with({
     'http://biomoby.org/#runSGP2GFF'    => 'INB::GRIB::Services::SGP2Services',
     
     'http://biomoby.org/#runGOstat'     => 'INB::GRIB::Services::GOstatServices',
-
+    
     'http://biomoby.org/#translateGeneIDGFFPredictions' => 'INB::GRIB::Services::UtilsServices',
     
     'http://biomoby.org/#getUpstreamSeqfromEnsembl'     => 'INB::GRIB::Services::PromoterExtractionServices',
@@ -164,19 +165,13 @@ $x->dispatch_with({
     'http://biomoby.org/#runMatScanGFF'                 => 'INB::GRIB::Services::MatScanServices',
     'http://biomoby.org/#runMatScanGFFCollection'       => 'INB::GRIB::Services::MatScanServices',
     'http://biomoby.org/#runMatScanGFFCollectionVsInputMatrices' => 'INB::GRIB::Services::MatScanServices',
-
+    
     'http://biomoby.org/#runMetaAlignment'              => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMetaAlignmentGFF'           => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiMetaAlignment'         => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiMetaAlignmentGFF'      => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiPairwiseMetaAlignment'          => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiPairwiseMetaAlignmentGFF'       => 'INB::GRIB::Services::MetaAlignmentServices',
-
-    # 'http://biomoby.org/#fromGenericSequencetoFASTA'             => 'INB::GRIB::Services::UtilsServices',
-    # 'http://biomoby.org/#fromGenericSequenceCollectiontoFASTA'   => 'INB::GRIB::Services::UtilsServices',
-    # 'http://biomoby.org/#fromFASTAtoDNASequenceCollection'       => 'INB::GRIB::Services::UtilsServices',
-    # 'http://biomoby.org/#fromFASTAtoAminoAcidSequenceCollection' => 'INB::GRIB::Services::UtilsServices',
-    # 'http://biomoby.org/#fromFASTAtoGenericSequenceCollection'   => 'INB::GRIB::Services::UtilsServices',
     
     'http://biomoby.org/#fromGenericSequenceToFASTA'             => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromGenericSequenceCollectionToFASTA'   => 'INB::GRIB::Services::ConversionServices',
@@ -186,7 +181,9 @@ $x->dispatch_with({
     'http://biomoby.org/#fromFASTAToAminoAcidSequenceCollection' => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromFASTAToGenericSequenceCollection'   => 'INB::GRIB::Services::ConversionServices',
     
+    # generateScoreMatrix is deprecated - Use fromMetaAlignmentsToTextScoreMatrix instead
     'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
+    
     'http://biomoby.org/#fromMetaAlignmentsToScoreMatrix'        => 'INB::GRIB::Services::ParsingServices',
     'http://biomoby.org/#fromMetaAlignmentsToTextScoreMatrix'    => 'INB::GRIB::Services::ParsingServices',
     
@@ -210,10 +207,6 @@ $x->dispatch_with({
     'http://biomoby.org/#runPhred'                               => 'INB::GRIB::Services::BaseCallingServices',
     'http://biomoby.org/#runPhredCollection'                     => 'INB::GRIB::Services::BaseCallingServices',
     
-    'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
-    'http://biomoby.org/#parseMotifMatricesfromMEME'             => 'INB::GRIB::Services::OldServices',
-    'http://biomoby.org/#runMatScanGFFCollectionVsInputMatrix'   => 'INB::GRIB::Services::OldServices',
-
     'http://biomoby.org/#filterSequencesByLength'                => 'INB::GRIB::Services::FilteringServices',
     'http://biomoby.org/#filterSequencesAndQualityDataByLength'  => 'INB::GRIB::Services::FilteringServices',
 
