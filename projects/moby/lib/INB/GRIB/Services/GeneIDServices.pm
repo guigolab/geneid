@@ -1,4 +1,4 @@
-# $Id: GeneIDServices.pm,v 1.28 2006-06-07 08:35:18 gmaster Exp $
+# $Id: GeneIDServices.pm,v 1.29 2006-06-26 09:09:46 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::MobyParser
 #
@@ -147,12 +147,13 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # 
 our @EXPORT = qw(
   &runGeneID
-  &runGeneIDGFF 
+  &runGeneIDGFF
+  &runGeneIDGFF3
 );
 
 our $VERSION = '1.0';
 
-my $_debug = 1;
+my $_debug = 0;
 
 # Preloaded methods go here.
 
