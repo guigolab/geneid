@@ -1,4 +1,4 @@
-# $Id: CloverServices.pm,v 1.1 2006-06-23 14:58:03 gmaster Exp $
+# $Id: CloverServices.pm,v 1.2 2006-06-27 13:33:07 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -198,7 +198,7 @@ sub _do_query_Clover {
 
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
-    my $output_article_name = "matscan_predictions";
+    my $output_article_name = "clover_predictions";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $motif_database;
@@ -213,9 +213,9 @@ sub _do_query_Clover {
     
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
-
+    
     # Get the parameters
-
+    
     ($motif_database) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "motif database");
     if (not defined $motif_database) {
 	# Default is to use Transfac Matrices
@@ -263,7 +263,7 @@ sub _do_query_Clover {
 	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
-
+    
     ($pvalue_threshold) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "p_value threshold");
     if (not defined $pvalue_threshold) {
 	$pvalue_threshold = 0.01;
@@ -314,7 +314,7 @@ sub _do_query_Clover {
     if (not defined $background_sequences) {
 	$background_sequences = "None";
     }
-    elsif (! ((lc $background_sequences eq "None") || (lc $background_sequences eq "Human") || (lc $background_sequences eq "Mouse") || (lc $background_sequences eq "Rat") || (lc $background_sequences eq "Drosophila"))) {
+    elsif (! ((lc $background_sequences eq "none") || (lc $background_sequences eq "human") || (lc $background_sequences eq "mouse") || (lc $background_sequences eq "rat") || (lc $background_sequences eq "drosophila"))) {
 	my $note = "background sequences parameter, '$background_sequences', not accepted, should be ['None','Human','Mouse', 'Rat', 'Drosophila']";
 	print STDERR "$note\n";
 	my $code = "222";
@@ -566,6 +566,10 @@ PRT
 
 	if (defined $report) {
 	    my $output_objects = INB::GRIB::Utils::CommonUtilsSubs->parseSingleGFFIntoCollectionGFF ($report, $_format, "");
+	    
+	    if ($_debug) {
+		print STDERR "got " . @$output_objects . " GFF Clover objects\n";
+	    }
 	    
 	    if (! defined $output_objects) {
 		my $note = "Parsing clover results has failed!\n";
