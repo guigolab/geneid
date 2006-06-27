@@ -99,8 +99,8 @@ my $datasource   = "EMBL";
 
 # Parameters
 
-my $pvalue_threshold   = "0.01";
-my $matrix_mode = "log-likelihood";
+my $pvalue_threshold = "0.01";
+my $matrix_mode      = "raw format";
 my $matrix;
 if ($serviceName ne "runCloverGFFCollectionVsInputMatrices") {
     if ($_debug) {
@@ -108,6 +108,7 @@ if ($serviceName ne "runCloverGFFCollectionVsInputMatrices") {
     }
     $matrix = "Jaspar";
 }
+my $background_sequences = "Human";
 
 ##################################################################
 #
@@ -305,6 +306,10 @@ my $matrix_mode_xml = <<PRT;
 <Value>$matrix_mode</Value>
 PRT
 
+# Background parameter
+
+my $background_sequences_xml = "<Value>$background_sequences</Value>";
+
 ##################################################################
 #
 # Service execution
@@ -327,7 +332,7 @@ if ($serviceType eq "Collection") {
 	}
 	
 	$result = $Service->execute(XMLinputlist => [
-						     ["$sequence_articleName", $inputs, 'p_value threshold', $pvalue_threshold_xml, 'motif database', $matrix_xml, 'matrix mode', $matrix_mode_xml]
+						     ["$sequence_articleName", $inputs, 'p_value threshold', $pvalue_threshold_xml, 'motif database', $matrix_xml, 'matrix mode', $matrix_mode_xml, 'background sequences', $background_sequences_xml]
 						     ]);
     }
     else {
