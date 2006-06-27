@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.92 2006-06-23 14:58:03 gmaster Exp $
+# $Id: Factory.pm,v 1.93 2006-06-27 13:33:34 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1225,6 +1225,10 @@ sub Clover_call {
     my $_clover_dir  = "/home/ug/gmaster/projects/Clover";
     my $_clover_bin  = "bin/clover";
     my $_clover_args = "-t $pvalue_threshold -s $score_threshold";
+    
+    my $_clover_bg_dir  = $_clover_dir . "/backgrounds";
+    my $clover_bg_file = "";
+    
     # Check that the binary is in place
     if (! -f "$_clover_dir/$_clover_bin") {
 	my $note = "Internal System Error. Clover binary not found";
@@ -1271,10 +1275,10 @@ sub Clover_call {
 	    }
 
 	  SWITCH: {
-	      if (lc ($database_parameter) eq "transfac") { $matrix_file = "$_clover_dir/matrices/Transfac_raw_format.matrices"; last SWITCH; }
-	      if (lc ($database_parameter) eq "jaspar")   { $matrix_file = "$_clover_dir/matrices/Jaspar_raw_format.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "transfac") { $matrix_file = "$_clover_dir/matrices/Transfac-latest_raw_format.matrices.fa"; last SWITCH; }
+	      if (lc ($database_parameter) eq "jaspar")   { $matrix_file = "$_clover_dir/matrices/Jaspar-latest_raw_format.matrices.fa"; last SWITCH; }
 	      # Default is Transfac
-	      $matrix_file = "$_clover_dir/matrices/Transfac_raw_format.matrices";
+	      $matrix_file = "$_clover_dir/matrices/Transfac_raw_format.matrices.fa";
 	  }
 	}
 	elsif ($matrix_mode eq "log-likelihood") {
@@ -1283,10 +1287,10 @@ sub Clover_call {
 	    }
 
 	  SWITCH: {
-	      if (lc ($database_parameter) eq "transfac") { $matrix_file = "$_clover_dir/matrices/Transfac_likelihood.matrices"; last SWITCH; }
+	      if (lc ($database_parameter) eq "transfac") { $matrix_file = "$_clover_dir/matrices/Transfac-latest_likelihood.matrices.fa"; last SWITCH; }
 	      if (lc ($database_parameter) eq "jaspar")   { $matrix_file = "$_clover_dir/matrices/Jaspar-latest_likelihood.matrices.fa"; last SWITCH; }
 	      # Default is Transfac
-	      $matrix_file = "$_clover_dir/matrices/Transfac_likelihood.matrices";
+	      $matrix_file = "$_clover_dir/matrices/Transfac-latest_likelihood.matrices.fa";
 	  }
 	}
 	else {
@@ -1333,10 +1337,16 @@ sub Clover_call {
 	print STDERR "Internal System Error. No defined matrix file!\n";
 	return (undef, []);
     }
-
+    
+    # Background sequences parameter
+    
+    if (lc ($background_sequences) eq "human") {
+	$clover_bg_file = $_clover_bg_dir . "/hs_chr20.mfa";
+    }
+    
     # Generate a temporary file locally with the sequence(s) in FASTA format
     # locally, ie not on a NFS mounted directory, for speed sake
-
+    
     my ($seq_fh, $seqfile);
     eval {
 	($seq_fh, $seqfile) = tempfile("/tmp/CLOVER_SEQS.XXXXXX", UNLINK => 0);
@@ -1394,12 +1404,17 @@ sub Clover_call {
     
     if ($debug) {
 	print STDERR "Running Clover, with this command:\n";
-	print STDERR "$_clover_dir\/$_clover_bin $_clover_args $matrix_file $seqfile > $clover_output_filename\n";
+	print STDERR "$_clover_dir\/$_clover_bin $_clover_args $matrix_file $seqfile $clover_bg_file > $clover_output_filename\n";
     }
     
-    qx/$_clover_dir\/$_clover_bin $_clover_args $matrix_file $seqfile > $clover_output_filename/;
+    # qx/$_clover_dir\/$_clover_bin $_clover_args $matrix_file $seqfile $clover_bg_file > $clover_output_filename/;
     
     unlink $seqfile unless $debug;
+    
+    ##
+    # Test in taverna
+    $clover_output_filename = "/tmp/CLOVER_OUTPUT.TEST";
+    ##
     
     if (! -z $clover_output_filename) {
 	
