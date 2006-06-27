@@ -57,6 +57,10 @@ use Benchmark;
 # HTML encoding/decoding module
 use HTML::Entities;
 
+# GEPAS CGI calls support
+use LWP::UserAgent;
+use HTTP::Request::Common;
+
 ##################################################################
 
 sub help {
@@ -602,76 +606,137 @@ $articleName   = $parameters{$serviceName}->{articleName} || "";
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", "$input_xml\n", "method", $method_xml]
-					     ]);
+						     ["$articleName", "$input_xml\n", "method", $method_xml]
+						     ]);
+if (! defined $moby_response) {
+    # moby service is not working, so use GEPAS instead !!!
+    
+    # GEPAS doesn't return any results, no idea why because it works fine with GeneID web server !!! ????
+    
+    print STDERR "using GEPAS...\n";
+    
+    print STDERR "method, $method\n";
+    
+    if ($method =~ /nearest/i) {
+	$method = "single";
+    }
+    else {
+	$method = "complete";
+    }
+    
+    # Assume the output flag was on, otherwise need to create a temporary file with the data which would be a pain !!!
+    my $curdir = qx/pwd/;
+    chomp $curdir;
+    
+    my $matrix_filename = "score_matrix.txt";
+    
+    if (! -f "$output_dir/$matrix_filename") {
+	print STDERR "problem, score matrix file not found, $output_dir/$matrix_filename!!\n";
+    }
+    
+    my $cluster_url = "http://gepas.bioinfo.cipf.es/cgi-bin/cluster";
+    my $agent_diag   = LWP::UserAgent->new(timeout => 30000);
+    
+    # Cluster CGI Call
+    
+    my $request_diag = POST($cluster_url,
+			    Content_Type => 'form-data',
+			    Content      => [
+					     file     => ["$curdir/$output_dir/$matrix_filename"],
+					     method   => "$method",
+					     ]
+			    );
+    my $result_diag = $agent_diag->request($request_diag);
+    
+    # print STDERR "Dumping result_diag, " . Dumper ($result_diag) . "\n";
+    
+    my $html_results = $result_diag->content;
+    
+    # Get the data from GEPAS server !
+    my $newick_tree = "";
+    if (defined $output_dir) {
+	open FILE, ">$output_dir/newick.txt" or die "can't open in write access newick text file, $output_dir/newick.txt!\n";
+	print FILE $newick_tree;
+	close FILE;
+    }
+    
+    # Call TreeView
+    
+    # ...
 
-if ($_debug) {
+}
+else {
+    
+    # Fine so carry on using BioMOBY infrastructure...
+    
+    if ($_debug) {
 	print STDERR "\n$serviceName results\n";
 	print STDERR $moby_response;
 	print STDERR "\n";
-}
-
-# Check if we got results
-my $newick_trees = parseTextContent ($moby_response, "Newick_Text");
-my $newick_tree  = $newick_trees->[0];
-
-if ($newick_tree eq "") {
-    print STDERR "Hierachical clustering failed!\n";
-    exit 1;
-}
-
-$input_xml_aref = parseResults ($moby_response, "HierarchicalClustering");
-if (defined $output_dir) {
-  saveResults ($moby_response, "Newick_Text", "newick", $output_dir);
-}
-
-if ($_debug) {
+    }
+    
+    # Check if we got results
+    my $newick_trees = parseTextContent ($moby_response, "Newick_Text");
+    my $newick_tree  = $newick_trees->[0];
+    
+    if ($newick_tree eq "") {
+	print STDERR "Hierachical clustering failed!\n";
+	exit 1;
+    }
+    
+    $input_xml_aref = parseResults ($moby_response, "HierarchicalClustering");
+    if (defined $output_dir) {
+	saveResults ($moby_response, "Newick_Text", "newick", $output_dir);
+    }
+    
+    if ($_debug) {
 	print STDERR "input xml for next service:\n";
 	print STDERR join (', ', @$input_xml_aref);
 	print STDERR ".\n";
-}
+    }
+    
+    # convert the input xml into a scalar
+    $input_xml =  $input_xml_aref->[0];
+    
+    print STDERR "Clustering done!\n\n";
 
-# convert the input xml into a scalar
-$input_xml =  $input_xml_aref->[0];
+    # plotClustersTree
 
-print STDERR "Clustering done!\n\n";
+    print STDERR "Generating a picture of the clustering tree...\n";
 
-# plotClustersTree
-
-print STDERR "Generating a picture of the clustering tree...\n";
-
-$serviceName   = "plotClustersTree";
-$authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-$articleName   = $parameters{$serviceName}->{articleName} || "";
-
-$Service = getService ($C, $serviceName, $authURI);
-
-$moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", $input_xml]
-					     ]);
-
-if ($_debug) {
+    $serviceName   = "plotClustersTree";
+    $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+    $articleName   = $parameters{$serviceName}->{articleName} || "";
+    
+    $Service = getService ($C, $serviceName, $authURI);
+    
+    $moby_response = $Service->execute (XMLinputlist => [
+							 ["$articleName", $input_xml]
+							 ]);
+    
+    if ($_debug) {
 	print STDERR "$serviceName results\n";
 	print STDERR $moby_response;
 	print STDERR "\n";
-}
-
-my $picture_b64_aref = parseTextContent ($moby_response, "Image_Encoded");
-my $picture_b64 = $picture_b64_aref->[0];
-
+    }
+    
+    my $picture_b64_aref = parseTextContent ($moby_response, "Image_Encoded");
+    my $picture_b64 = $picture_b64_aref->[0];
+    
 # Convert in to a picture and store into a file
-
-my $picture = decode_base64($picture_b64);
-
-print STDERR "Picture done\n\n";
-print STDERR "Workflow has terminated.\n";
-if (! defined $output_dir) {
-    print $picture;
-}
-else {
-    open FILE, ">$output_dir/clustering_tree.png" or die "can't open in write access file, '$output_dir/clustering_tree.png'!\n";
-    print FILE $picture;
-    close FILE;
+    
+    my $picture = decode_base64($picture_b64);
+    
+    print STDERR "Picture done\n\n";
+    print STDERR "Workflow has terminated.\n";
+    if (! defined $output_dir) {
+	print $picture;
+    }
+    else {
+	open FILE, ">$output_dir/clustering_tree.png" or die "can't open in write access file, '$output_dir/clustering_tree.png'!\n";
+	print FILE $picture;
+	close FILE;
+    }
 }
 
 my $t2 = Benchmark->new ();

@@ -704,6 +704,13 @@ else {
     exit 0;
 }
 
+##############################
+#
+# Disabled !!!!!!!!!!!!!!!!
+#
+##############################
+
+if (0) {
 
 # runHierarchicalClustering
 
@@ -791,6 +798,11 @@ else {
     print FILE $picture;
     close FILE;
 }
+
+}
+
+#
+############################################################################
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";

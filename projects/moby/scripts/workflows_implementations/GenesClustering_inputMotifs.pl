@@ -64,7 +64,7 @@ return <<"END_HELP";
 Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -m {Hierarchical clustering method} -o {Output directory}
+    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan input database} -m {Hierarchical clustering method} -o {Output directory}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is Inab registry)
 		<1> or Inab
@@ -72,7 +72,7 @@ Usage:
 		<3> or Mobydev
 	-f Sequence(s) input file, in FASTA format
 	-t MatScan probability threshold (Default is 0.85)
-        -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
+        -d MatScan Input Motifs database
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
 	-c workflow configuration file (default is \$HOME/.workflow.config)
@@ -610,6 +610,13 @@ else {
     exit 0;
 }
 
+#################################
+#
+# Disabled
+#
+#################################
+
+if (0) {
 
 # runHierarchicalClustering
 
@@ -697,6 +704,11 @@ else {
     print FILE $picture;
     close FILE;
 }
+
+}
+
+#
+################################################
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";

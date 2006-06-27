@@ -93,7 +93,7 @@ if ($serviceName =~ /collection/i) {
     $serviceType = "Collection";
 }
 
-my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa";
+my $in_file_1    = $opt_f || "/home/ug/arnau/data/breast_pregnancy/both/both.1000.formatted.fa";
 my $matrix_file  = $opt_m || "/home/ug/arnau/data/MeMe/meme_motifs.collection.xml";
 my $datasource   = "EMBL";
 

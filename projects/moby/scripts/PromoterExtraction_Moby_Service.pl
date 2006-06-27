@@ -28,7 +28,7 @@ my $articleName = "genes";
 
 # URI
 $::authURI = 'genome.imim.es';
-$::authURI = 'www.pcm.uam.es';
+# $::authURI = 'www.pcm.uam.es';
 
 print STDERR "\nrequesting, $::authURI...\n\n";
 
@@ -114,13 +114,31 @@ if ((! -f $in_file)) {
 my $genes = qx/cat $in_file/;
 
 my $genes_xml = <<PRT;
-<text-formatted namespace="$datasource" id="">
+<text-formatted namespace="$datasource" id="id">
 <String id='' articleName='content'>
 <![CDATA[
 $genes
 ]]>
 </String>
 </text-formatted>
+PRT
+
+$genes_xml = <<PRT;
+<moby:text-formatted moby:namespace="Ensembl" moby:id="id" moby:articleName="">
+                         <moby:String moby:namespace="" moby:id="" moby:articleName="content">$genes</moby:String>
+                    </moby:text-formatted>
+PRT
+
+$genes_xml = <<PRT;
+<moby:text-formatted moby:namespace="Ensembl" moby:id="id" moby:articleName="genes">
+<moby:String moby:namespace="" moby:id="" moby:articleName="content">ENSMUSG00000035042</moby:String>
+</moby:text-formatted>
+PRT
+
+$genes_xml = <<PRT;
+<moby:text-formatted moby:namespace="Ensembl" moby:id="" moby:articleName="genes">
+<moby:String moby:namespace="" moby:id="" moby:articleName="content">ENSG00000197490</moby:String>
+</moby:text-formatted>
 PRT
 
 # my $genes_xml = <<PRT;
@@ -146,8 +164,9 @@ PRT
 #
 
 my $organism          = "homo sapiens";
-$organism             = "Drosophila melanogaster";
-my $dbrelease         = "30";
+# $organism             = "Drosophila melanogaster";
+# $organism             = "mus musculus";
+my $dbrelease         = "35";
 my $upstream_length   = 1000;
 my $downstream_length = 0;
 my $intergenic_only   = "true";
@@ -183,10 +202,15 @@ PRT
 #
 ##################################################################
 
+# my $result = $Service->execute(XMLinputlist => [
+#     [ $articleName, $genes_xml, 
+#       'organism', $organism_xml, 'upstream length', $upstream_length_xml, 'downstream length', $downstream_length_xml, 'intergenic only', $intergenic_only_xml, 'orthologous mode', $orthologous_mode_xml]
+#    ]);
+
 my $result = $Service->execute(XMLinputlist => [
-						[ $articleName, $genes_xml, 
-						  'organism', $organism_xml, 'ensembl release', $dbrelease_xml, 'upstream length', $upstream_length_xml, 'downstream length', $downstream_length_xml, 'intergenic only', $intergenic_only_xml, 'orthologous mode', $orthologous_mode_xml]
-					       ]);
+                                                [ $articleName, $genes_xml]
+                                               ]
+                              );
 
 ##################################################################
 #
