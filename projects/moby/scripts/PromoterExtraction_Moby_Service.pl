@@ -101,9 +101,7 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 #
 ##################################################################
 
-my $in_file  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/mut1_downreg.fbgn";
-# my $in_file  = shift @ARGV || "/home/ug/arnau/projects/gostat/data/allArray.fbgn";
-# $in_file  = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/data/geneIds.forward.lst";
+my $in_file  = shift @ARGV || "/home/ug/arnau/data/promoterExtraction/Homo_sapiens.lst";
 my $datasource = "Ensembl";
 
 if ((! -f $in_file)) {
@@ -123,49 +121,13 @@ $genes
 </text-formatted>
 PRT
 
-$genes_xml = <<PRT;
-<moby:text-formatted moby:namespace="Ensembl" moby:id="id" moby:articleName="">
-                         <moby:String moby:namespace="" moby:id="" moby:articleName="content">$genes</moby:String>
-                    </moby:text-formatted>
-PRT
-
-$genes_xml = <<PRT;
-<moby:text-formatted moby:namespace="Ensembl" moby:id="id" moby:articleName="genes">
-<moby:String moby:namespace="" moby:id="" moby:articleName="content">ENSMUSG00000035042</moby:String>
-</moby:text-formatted>
-PRT
-
-$genes_xml = <<PRT;
-<moby:text-formatted moby:namespace="Ensembl" moby:id="" moby:articleName="genes">
-<moby:String moby:namespace="" moby:id="" moby:articleName="content">ENSG00000197490</moby:String>
-</moby:text-formatted>
-PRT
-
-# my $genes_xml = <<PRT;
-# <text-formatted namespace="$datasource" id="">
-# $genes
-# </text-formatted>
-# PRT
-
-# taverna input objects !! - for testing
-
-# works
-
-#$genes_xml = <<PRT;
-#<String namespace="$datasource" id="">
-#<![CDATA[
-#$genes
-#]]>
-#</String>
-#PRT
-
 #
 # Parameters
 #
 
 my $organism          = "homo sapiens";
 # $organism             = "Drosophila melanogaster";
-# $organism             = "mus musculus";
+# $organism             = "Mus musculus";
 my $dbrelease         = "35";
 my $upstream_length   = 1000;
 my $downstream_length = 0;
@@ -219,9 +181,6 @@ my $result = $Service->execute(XMLinputlist => [
 ##################################################################
 
 if (defined $result) {
-    # NB : it doesn't it worked, a way to know is by using SOAP::Lite +trace
-    # Any better way ??????
-    
     print STDERR "result\n";
     print $result;
     print STDERR "\n";
