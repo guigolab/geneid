@@ -113,9 +113,6 @@ my $in_file_1  = shift @ARGV || "/home/ug/arnau/data/AC005155.fa";
 my $in_file_2  = shift @ARGV || "/home/ug/arnau/data/AC005155.geneid.gff.out";
 my $datasource = "EMBL";
 
-$in_file_1 = "/home/ug/arnau/temp/ENr334_msk.fa";
-$in_file_2 = "/home/ug/arnau/temp/ENr334_msk.fa.ENr334_RP4-696P19.1-002_geneidpred.E-100.H3.transfrag.HL60_32.314164-314353.gff";
-
 my $sequence_xml;
 my @sequences_xml = ();
 
