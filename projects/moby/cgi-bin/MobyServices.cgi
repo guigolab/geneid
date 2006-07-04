@@ -182,7 +182,9 @@ $x->dispatch_with({
     'http://biomoby.org/#fromFASTAToGenericSequenceCollection'   => 'INB::GRIB::Services::ConversionServices',
     
     # generateScoreMatrix is deprecated - Use fromMetaAlignmentsToTextScoreMatrix instead
-    'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
+    # Don't dispatch the requests, as we want to have it tagged as being 'dead'
+    # (I can't deregister it !!! because it has a signature URL !)
+    # 'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
     
     'http://biomoby.org/#fromMetaAlignmentsToScoreMatrix'        => 'INB::GRIB::Services::ParsingServices',
     'http://biomoby.org/#fromMetaAlignmentsToTextScoreMatrix'    => 'INB::GRIB::Services::ParsingServices',
