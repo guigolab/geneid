@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.94 2006-07-07 11:11:36 gmaster Exp $
+# $Id: Factory.pm,v 1.95 2006-07-07 15:09:32 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3220,16 +3220,12 @@ sub KMeans_call {
     my $iteration_number = $parameters->{iteration_number};
     my $cluster_number   = $parameters->{cluster_number};
     
-    my $_output_prefix  = "/tmp/k_means_clustering";
-    my $output_filename = $_output_prefix . "_K_G" . $cluster_number . ".kgg";
-    
     # Llama a sequence filtering script en local
     my $_cluster_dir    = "/home/ug/gmaster/projects/cluster";
     my $_cluster_bin    = "cluster";
-    my $_cluster_args   = "-u $_output_prefix -k $cluster_number -r $iteration_number";
+    my $_cluster_args   = "-k $cluster_number -r $iteration_number";
     
     # Add the method
-    # -cg a
     
     if ($method =~ /k-means/i) {
 	$_cluster_args .= " -cg a";
@@ -3290,6 +3286,12 @@ sub KMeans_call {
 								      );
 	return (undef, [$moby_exception]);
     }
+    
+    # output prefix
+    
+    my $_output_prefix  = $gene_matrix_file;
+    my $output_filename = $_output_prefix . "_K_G" . $cluster_number . ".kgg";
+    $_cluster_args     .= " -u $_output_prefix";
     
     if ($debug) {
 	print STDERR "Running k-means clustering, with this command:\n";
@@ -3369,11 +3371,10 @@ sub KMeans_call {
 	    print STDERR "parsing done!\n";
 	}
 	
-	# unlink always the output - should be specific !!!!
-	# ...
-	
 	if (! $debug) {
 	    unlink $gene_matrix_file;
+	    unlink $output_filename;
+	    unlink $gene_matrix_file . "_K_G" . $cluster_number . ".cdt";
 	}
 	
 	return ($gene_clusters_aref, $moby_exceptions);
