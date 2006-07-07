@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.93 2006-06-27 13:33:34 gmaster Exp $
+# $Id: Factory.pm,v 1.94 2006-07-07 11:11:36 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -138,6 +138,7 @@ our @EXPORT = qw(
   &Phrap_call
   &Phred_call
   &SequenceFilteringByLength_call
+  &KMeans_call
 );
 
 our $VERSION = '1.00';
@@ -3197,6 +3198,186 @@ sub SequenceFilteringByLength_call {
     
     return ($filtered_sequences, $filtered_quality_data, $moby_exceptions);
     
+}
+
+sub KMeans_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my $gene_clusters_aref = [];
+    my $moby_exceptions    = [];
+    
+    # relleno los parametros por defecto de SequenceFilteringByLength_call
+    
+    my $gene_matrix        = $args{gene_matrix} || undef;
+    my $parameters         = $args{parameters}  || undef;
+    my $debug              = $args{debug}       || 0;
+    my $queryID            = $args{queryID}     || "";
+    
+    # parameters
+    
+    my $method           = $parameters->{method};
+    my $iteration_number = $parameters->{iteration_number};
+    my $cluster_number   = $parameters->{cluster_number};
+    
+    my $_output_prefix  = "/tmp/k_means_clustering";
+    my $output_filename = $_output_prefix . "_K_G" . $cluster_number . ".kgg";
+    
+    # Llama a sequence filtering script en local
+    my $_cluster_dir    = "/home/ug/gmaster/projects/cluster";
+    my $_cluster_bin    = "cluster";
+    my $_cluster_args   = "-u $_output_prefix -k $cluster_number -r $iteration_number";
+    
+    # Add the method
+    # -cg a
+    
+    if ($method =~ /k-means/i) {
+	$_cluster_args .= " -cg a";
+    }
+    elsif ($method =~ /k-Medians/i) {
+	$_cluster_args .= " -cg m";
+    }
+    else {
+	print STDERR "problem with the method parameter, $method, is unknown!\n";
+    }
+    
+    # Check that the binary is in place
+    if (! -f "$_cluster_dir/$_cluster_bin") {
+	my $note = "Internal System Error. $_cluster_bin script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Create the temp sequences file
+
+    my ($gene_matrix_fh, $gene_matrix_file);
+    eval {
+	($gene_matrix_fh, $gene_matrix_file) = tempfile("/tmp/GENE_MATRIX.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open gene matrix input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Be careful, i add an extra tabulation because the xml parsing didn't keep in place !!!
+    print $gene_matrix_fh "$gene_matrix\t\n";
+    close $gene_matrix_fh;
+    
+    if (-z $gene_matrix_file) {
+	my $note = "Internal System Error. Empty input gene matrix data file...\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								      );
+	return (undef, [$moby_exception]);
+    }
+    
+    if ($debug) {
+	print STDERR "Running k-means clustering, with this command:\n";
+	print STDERR "$_cluster_dir\/$_cluster_bin -f $gene_matrix_file $_cluster_args\n";
+    }
+    
+    my $result = qx/$_cluster_dir\/$_cluster_bin -f $gene_matrix_file $_cluster_args/;
+    
+    if ($debug) {
+	print STDERR "clustering result, $result\n";
+    }
+    
+    if (! -f $output_filename) {
+	my $note = "Internal System Error. K-means clustering has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	
+	return (undef, [$moby_exception]);
+    }
+    else {
+	$result    = qx/cat $output_filename/;
+	
+	# set up the array of clusters
+	
+	if ($debug) {
+	    print STDERR "parsing k-means clustering output file...\n";
+	}
+	
+	my @lines = split ('\n', $result);
+	my $cluster_index;
+	my $cluster = "";
+	foreach my $line (@lines) {
+	    if ($line =~ /^([^\t]+)\t(\d+)/) {
+		my $gene_identifier    = $1;
+		my $cluster_index_tmp  = $2;
+		
+		if (defined $cluster_index_tmp) {
+
+		    if ($debug) {
+			print STDERR "gene identifier, $gene_identifier\n";
+			print STDERR "cluster index, $cluster_index_tmp\n";
+		    }
+		    
+		    if (! defined $cluster_index || $cluster_index eq $cluster_index_tmp) {
+			# Same cluster
+			$cluster .= "$gene_identifier\n";
+			$cluster_index = $cluster_index_tmp;
+		    }
+		    else {
+			# new cluster
+			push (@$gene_clusters_aref, $cluster);
+			
+			# Initialisation
+			$cluster = "";
+			
+			$cluster .= "$gene_identifier\n";
+			$cluster_index = $cluster_index_tmp;
+		    }
+		}
+		else {
+		    print STDERR "problem parsing cluster info line, $line\n";
+		}
+	    }
+	}
+	
+	if (defined $cluster_index) {
+	    push (@$gene_clusters_aref, $cluster);
+	}
+	
+	if ($debug) {
+	    print STDERR "parsing done!\n";
+	}
+	
+	# unlink always the output - should be specific !!!!
+	# ...
+	
+	if (! $debug) {
+	    unlink $gene_matrix_file;
+	}
+	
+	return ($gene_clusters_aref, $moby_exceptions);
+    }
 }
 
 #####################################################################################################
