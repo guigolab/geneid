@@ -42,6 +42,7 @@ use INB::GRIB::Services::VectorScreeningServices;
 use INB::GRIB::Services::AssemblyServices;
 use INB::GRIB::Services::BaseCallingServices;
 use INB::GRIB::Services::FilteringServices;
+use INB::GRIB::Services::ClusteringServices;
 
 # Deprecated but 'generateScoreMatrix' is still registered in icapture registry
 use INB::GRIB::Services::OldServices;
@@ -211,7 +212,9 @@ $x->dispatch_with({
     
     'http://biomoby.org/#filterSequencesByLength'                => 'INB::GRIB::Services::FilteringServices',
     'http://biomoby.org/#filterSequencesAndQualityDataByLength'  => 'INB::GRIB::Services::FilteringServices',
-
+    
+    'http://biomoby.org/#runKMeansClustering'                    => 'INB::GRIB::Services::ClusteringServices',
+    
 });
 $x->handle;
 
