@@ -1,4 +1,4 @@
-# $Id: ClusteringServices.pm,v 1.1 2006-07-07 11:11:36 gmaster Exp $
+# $Id: ClusteringServices.pm,v 1.2 2006-07-07 15:08:53 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -293,13 +293,13 @@ sub _do_query_KMeans {
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
 	
-	if ($articleName eq "gene_score_matrix") {
+	if (($articleName eq "gene_score_matrix") || isSimpleArticle ($DOM)) {
 	    
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
-
+	    
 	    # Validate the type first
 		
 	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "MicroArrayData_Text");
