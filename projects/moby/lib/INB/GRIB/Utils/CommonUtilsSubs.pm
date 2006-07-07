@@ -874,6 +874,16 @@ sub validateDataType {
 		    }
 		}
 		
+		if ($specifiedType eq "MicroArrayData_Text") {
+		    if ($inputDataType eq "MicroArrayData_Text") {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
 		# ...
 		
 	    }
