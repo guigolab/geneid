@@ -151,11 +151,11 @@ my ($REG) = $Central->registerService(
 				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Runs the k-means algorithm to cluster genes together. The input is a gene score matrix represented as a MicroArrayData_Text object.",
+				      description  => "Runs cluster v3.0 to that implements k-means algorithm to cluster genes together. The input is a gene score matrix represented as a MicroArrayData_Text object.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['genes_score_matrix', ['MicroArrayData_Text' => \@namespaces]]
+							    ['gene_score_matrix', ['MicroArrayData_Text' => \@namespaces]]
 							   ],
 				      output		=> [
 							    ['gene_clusters', [['List_Text' => \@namespaces]]]
