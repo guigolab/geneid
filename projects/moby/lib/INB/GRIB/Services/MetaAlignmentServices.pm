@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.22 2006-04-18 10:28:15 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.23 2006-07-14 16:00:14 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -115,6 +115,7 @@ our @EXPORT = qw(
   &runMetaAlignmentGFF
   &runMultiPairwiseMetaAlignment
   &runMultiPairwiseMetaAlignmentGFF
+  &runMultiMetaAlignment
 );
 
 our $VERSION = '1.0';
@@ -822,6 +823,299 @@ PRT
     return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
+sub _do_query_MultiMetaAlignment {
+    # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby
+    my $queryInput_DOM = shift @_;
+    # The moby output format
+    my $_moby_output_format = shift @_;
+
+    # Output definition
+    my $moby_exceptions = [];
+    my $MOBY_RESPONSE   = ""; # set empty response
+    my $output_article_name = "multi_meta_predictions";
+    
+    # Aqui escribimos las variables que necesitamos para la funcion.
+    my $alpha_penalty;
+    my $lambda_penalty;
+    my $mu_penalty;
+    my $gap_penalty;
+    my $non_colinear_penalty;
+    
+    # Variables that will be passed to MultiMetaAlignment_call
+    
+    my %parameters;
+    my $maps_gff = [];
+    my $queryID  = getInputID ($queryInput_DOM);
+    my @articles = getArticles($queryInput_DOM);
+    
+    # Get the parameters
+    
+    ($alpha_penalty)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "alpha penalty");
+    ($lambda_penalty) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "lambda penalty");
+    ($mu_penalty)     = getNodeContentWithArticle($queryInput_DOM, "Parameter", "mu penalty");
+    
+    if (not defined $alpha_penalty) {
+	$alpha_penalty = 0.5;
+    }
+    elsif ($alpha_penalty < 0 && $alpha_penalty > 1) {
+	my $note = "alpha penalty parameter, '$alpha_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "alpha penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    if (not defined $lambda_penalty) {
+	$lambda_penalty = 0.1;
+    }
+    elsif ($lambda_penalty < 0 && $lambda_penalty > 1) {
+	my $note = "lambda penalty parameter, '$lambda_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "lambda penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    if (not defined $mu_penalty) {
+	$mu_penalty = 0.1;
+    }
+    elsif ($mu_penalty < 0 && $mu_penalty > 1) {
+	my $note = "mu penalty parameter, '$mu_penalty', not accepted should be between 0 and 1";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "mu penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    if (not defined $gap_penalty) {
+	$gap_penalty = -10;
+    }
+    
+    if (not defined $non_colinear_penalty) {
+	$non_colinear_penalty = 100;
+    }
+    
+    # Add the parsed parameters in a hash table
+
+    if ($_debug) {
+	print STDERR "alpha penalty, $alpha_penalty\n";
+	print STDERR "lambda penalty, $lambda_penalty\n";
+	print STDERR "mu penalty, $mu_penalty\n";
+	print STDERR "gap penalty, $gap_penalty\n";
+	print STDERR "non_colinear_penalty penalty, $non_colinear_penalty\n";
+    }
+    
+    $parameters{alpha_penalty}        = $alpha_penalty;
+    $parameters{lambda_penalty}       = $lambda_penalty;
+    $parameters{mu_penalty}           = $mu_penalty;
+    $parameters{gap_penalty}          = $gap_penalty;
+    $parameters{non_colinear_penalty} = $non_colinear_penalty;
+
+    $parameters{output_format} = $_moby_output_format;
+    
+    # Tratamos a cada uno de los articulos
+    foreach my $article (@articles) {
+
+	# El articulo es una tupla que contiene el nombre de este
+	# y su texto xml.
+
+	my ($articleName, $DOM) = @{$article}; # get the named article
+
+	if ($_debug) {
+	    print STDERR "processing article, $articleName...\n";
+	}
+
+	# Si le hemos puesto nombre a los articulos del servicio,
+	# podemos recoger a traves de estos nombres el valor.
+	# Sino sabemos que es el input articulo porque es un simple/collection articulo
+
+	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'sequences')
+	# In case of GeneID, it doesn't really matter as there is only one input anyway
+
+	if (isSimpleArticle($DOM)) {
+	    my $note = "Received a simple input article instead of a collection";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "maps",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+
+	if ((isCollectionArticle ($DOM)) || (defined ($articleName) && ($articleName eq "maps"))) {
+	    
+	    if ($_debug) {
+		print STDERR "node ref, " . ref ($DOM) . "\n";
+		print STDERR "DOM: " . $DOM->toString () . "\n";
+	    }
+	    
+	    # Validate the type of the simples in the collection - should all be GFF objects
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "GFF");
+	    if (!$rightType) {
+		my $note = "Expecting a set of GFF objects, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => 'maps',
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
+		
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
+	    }
+	    
+	    my @maps_article_DOMs = getCollectedSimples ($DOM);
+	    foreach my $map_DOM (@maps_article_DOMs) {
+		
+		my $map = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($map_DOM, "GFF");
+		
+		if ($_debug) {
+		    print STDERR "map, $map\n";
+		}
+		
+		push (@$maps_gff, $map);
+		
+	    }
+	}
+	
+    } # Next article
+
+    if ($_debug) {
+	print STDERR "parsed " . @$maps_gff . " maps.\n";
+    }
+
+    if (@$maps_gff < 2) {
+	my $note = "Parsed less than two maps from the article input, the service requires at least two maps\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "maps",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    else {
+	
+	if ($_debug) {
+	    print STDERR "calling MultiMetaAlignment_call...\n";
+	}
+	
+	my ($mmeta_report, $moby_exceptions_tmp) = MultiMetaAlignment_call (maps => $maps_gff, debug => $_debug, queryID => $queryID, parameters => \%parameters);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
+	if ($_debug) {
+	    print STDERR "MultiMetaAlignment_call call done.\n";
+	}
+	
+	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
+	# nos queda encapsularla en un Objeto bioMoby. Esta operacio
+	# la podriamos realizar en una funcion a parte si fuese compleja.
+	
+	if (defined $mmeta_report) {
+	    
+	    my $namespace = "";
+	    
+	    # Build the Moby object
+	    
+	    my $output_object = <<PRT;
+<moby:$_moby_output_format namespace='' id=''>
+<String namespace='' id='' articleName='content'>
+<![CDATA[
+$mmeta_report
+]]>
+</String>
+</moby:$_moby_output_format>
+PRT
+
+            $MOBY_RESPONSE = simpleResponse($output_object, $output_article_name, $queryID);
+	    
+        }
+	else {
+	    my $note = "multi-meta-alignment call failed\n";
+	    print STDERR "$note\n";
+	    my $code = "701";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+    }
+    
+    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+    # volver a encapsularlo en un objeto biomoby de respuesta. Pero
+    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos
+    # una respuesta compleja (de verdad, esta era simple ;) llamariamos
+    # a collection response.
+    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser
+    # el mismo que el de la query.
+
+    return ($MOBY_RESPONSE, $moby_exceptions);
+}
+
+###########################################################################################
+
 
 =head2 runMetaAlignment
 
@@ -1206,6 +1500,63 @@ sub runMultiPairwiseMetaAlignmentGFF {
 	}
 	
 	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiPairwiseMetaAlignment ($queryInput, $_output_format);
+	push (@$moby_exceptions, @$moby_exceptions_tmp);
+	
+	# $query_response es un string que contiene el codigo xml de
+	# la respuesta.  Puesto que es un codigo bien formado, podemos
+	# encadenar sin problemas una respuesta con otra.
+	$MOBY_RESPONSE .= $query_response;
+    }
+    # Una vez tenemos la coleccion de respuestas, debemos encapsularlas
+    # todas ellas con una cabecera y un final. Esto lo podemos hacer
+    # con las llamadas de la libreria Common de BioMoby.
+    my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+    
+    return $response;
+}
+
+sub runMultiMetaAlignment {
+    # El parametro $message es un texto xml con la peticion.
+    my ($caller, $message) = @_;        # get the incoming MOBY query XML
+    
+    my $_output_format = "Meta_Alignment_Text";
+    my $moby_logger = get_logger ("MobyServices");
+    my $serviceName = "runMultiMetaAlignment";
+    
+    if ($_debug) {
+	print STDERR "processing Moby runMultiMetaAlignment query...\n";
+    }
+    
+    # Hasta el momento, no existen objetos Perl de BioMoby paralelos
+    # a la ontologia, y debemos contentarnos con trabajar directamente
+    # con objetos DOM. Por consiguiente lo primero es recolectar la
+    # lista de peticiones (queries) que tiene la peticion.
+    #
+    # En una misma llamada podemos tener mas de una peticion, y de
+    # cada servicio depende la forma de trabajar con ellas. En este
+    # caso las trataremos una a una, pero podriamos hacer Threads para
+    # tratarlas en paralelo, podemos ver si se pueden aprovechar resultados
+    # etc..
+    my @queries = getInputs($message);  # returns XML::DOM nodes
+    #
+    # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+    # es una coleccion de respuestas a cada una de las consultas.
+    my $MOBY_RESPONSE   = "";             # set empty response
+    my $moby_exceptions = [];
+    
+    # Para cada query ejecutaremos el _execute_query.
+    foreach my $queryInput (@queries){
+	
+	# En este punto es importante recordar que el objeto $query
+	# es un XML::DOM::Node, y que si queremos trabajar con
+	# el mensaje de texto debemos llamar a: $query->toString()
+	
+	if ($_debug) {
+	    my $query_str = $queryInput->toString();
+	    print STDERR "query text: $query_str\n";
+	}
+	
+	my ($query_response, $moby_exceptions_tmp) = _do_query_MultiMetaAlignment ($queryInput, $_output_format);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de

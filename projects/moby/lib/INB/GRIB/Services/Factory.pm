@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.95 2006-07-07 15:09:32 gmaster Exp $
+# $Id: Factory.pm,v 1.96 2006-07-14 16:00:14 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -128,6 +128,7 @@ our @EXPORT = qw(
   &MatScan_call
   &Clover_call
   &MetaAlignment_call
+  &MultiMetaAlignment_call
   &generateScoreMatrix_call
   &MEME_call
   &meme2matrix_call
@@ -1643,6 +1644,168 @@ sub MetaAlignment_call {
 	return (undef, $moby_exceptions);
     }
 }
+
+
+sub MultiMetaAlignment_call {
+    my %args = @_;
+    
+    # method output
+    my $mmeta_output     = "";
+    my $moby_exceptions = [];
+    
+    # relleno los parametros por defecto MultiMetaAlignment_call
+    
+    my $maps       = $args{maps};
+    my $queryID    = $args{queryID};
+    my $parameters = $args{parameters} || undef;
+    my $debug      = $args{debug} || 0;
+    
+    # Get the parameters
+    
+    my $alpha_penalty  = $parameters->{alpha_penalty};
+    my $lambda_penalty = $parameters->{lambda_penalty};
+    my $mu_penalty     = $parameters->{mu_penalty};
+    my $gap_penalty    = $parameters->{gap_penalty};
+    my $non_colinear_penalty = $parameters->{non_colinear_penalty};
+    
+    my $output_format  = $parameters->{output_format};
+
+    # Llama a Multiple-Meta-alignment en local
+    my $_mmeta_alignment_dir  = "/home/ug/gmaster/projects/MultiMeta";
+    my $_mmeta_alignment_bin  = "bin/mmeta";
+    my $_mmeta_alignment_args = "-a $alpha_penalty -l $lambda_penalty -m $mu_penalty -p $gap_penalty -c $non_colinear_penalty";
+    
+    # Check that the binary is in place
+    if (! -f "$_mmeta_alignment_dir/$_mmeta_alignment_bin") {
+	my $note = "Internal System Error. Multiple-Meta-alignment binary not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    if ($output_format eq "GFF") {
+	$_mmeta_alignment_args .= " -g";
+    }
+    
+    # Create the temp map files
+    
+    my ($maps_fh, $maps_file);
+    eval {
+	($maps_fh, $maps_file) = tempfile("/tmp/MMETA_MAPS.XXXXXX", UNLINK => 0);
+	close ($maps_fh);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open mmeta-alignment input (maps) temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    foreach my $map (@$maps) {
+	
+	if ($debug) {
+	    print STDERR "concatenating map\n";
+	}
+	
+	my $result = qx/echo "$map" | sort +3n >> $maps_file/;
+
+	if ($debug) {
+	    print STDERR "result, $result\n";
+	}
+	
+    }
+    
+    # Run mmeta
+
+    if ($debug) {
+	print STDERR "Running Multiple-Meta-alignment, with this command:\n";
+	print STDERR "$_mmeta_alignment_dir\/$_mmeta_alignment_bin $_mmeta_alignment_args $maps_file\n";
+    }
+    
+    my ($stdout_fh, $stdout_file);
+    eval {
+	($stdout_fh, $stdout_file) = tempfile("/tmp/MMETA_OUTPUT.XXXXXX", UNLINK => 0);
+	close $stdout_fh;
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open a temporary file to store mmeta-alignment output!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+
+    if ($debug) {
+	print STDERR "Executing mmeta-alignment,\n";
+	print STDERR "$_mmeta_alignment_dir\/$_mmeta_alignment_bin $_mmeta_alignment_args $maps_file > $stdout_file\n";
+    }
+    
+    my @args = ("$_mmeta_alignment_dir\/$_mmeta_alignment_bin $_mmeta_alignment_args $maps_file > $stdout_file");
+    
+    my $failed = system (@args);
+    if ($failed > 0) {
+	if (($! != ENOTTY) || ($! ne "Inappropriate ioctl for device")) {
+	    # This is not an error, just mean that stdout is a terminal !!
+	    print STDERR "Error, '$!'\n";
+	}
+	else {
+	    my $note = "Internal System Error.  Multiple-Meta-alignment system call died (with error code, $?).\n";
+	    print STDERR "$note\n";
+	    my $code = 701;
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    return (undef, $moby_exceptions);
+	}
+    }
+    else {
+	$mmeta_output = qx/cat $stdout_file/;
+    }
+
+    if (!$debug) {
+	unlink $stdout_file;
+	unlink $maps_file;
+    }
+    
+    if (defined $mmeta_output) {
+	return ($mmeta_output, $moby_exceptions);
+    }
+    else {
+	my $note = "Internal System Error. Multiple-Meta-alignment has failed!\n";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	return (undef, $moby_exceptions);
+    }
+}
+
 
 sub generateScoreMatrix_call {
   my %args = @_;
