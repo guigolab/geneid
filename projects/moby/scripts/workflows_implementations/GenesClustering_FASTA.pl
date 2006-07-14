@@ -68,7 +68,7 @@ return <<"END_HELP";
 Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -m {Hierarchical clustering method} -o {Output directory}
+    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -m {Hierarchical clustering method} -n {number of clusters} -o {Output directory}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is Inab registry)
 		<1> or Inab
@@ -78,11 +78,12 @@ Usage:
 	-t MatScan probability threshold (Default is 0.85)
         -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
+	-n Number of clusters returned by the k-means algorithm
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -m nearest -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -m nearest -n 10 -o output
 
 END_HELP
 
@@ -91,10 +92,10 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_m $opt_o/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_m $opt_n $opt_o/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'hxfctdmo';
+    my $switches = 'hxfctdmno';
     
     # Get the switches
     getopt($switches);
@@ -146,6 +147,9 @@ my $database  = $opt_d || "transfac";
 
 my $threshold_xml   = "<Value>$threshold</Value>";
 my $matrix_xml      = "<Value>$database</Value>";
+
+my $cluster_number     = $opt_n || 10;
+my $cluster_number_xml = "<Value>$cluster_number</Value>";
 
 # parameters configuration file parsing
 
@@ -570,6 +574,43 @@ $input_xml =  $input_xml_aref->[0];
 
 print STDERR "Third step done!\n\n";
 
+# runKMeansClustering
+
+print STDERR "Fourth step, gene clustering using a k-means clustering algorithm...\n";
+
+if ($_debug) {
+  print STDERR "\nExecuting runKMeansClustering...\n\n";
+}
+
+$serviceName   = "runKMeansClustering";
+$authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+$articleName   = $parameters{$serviceName}->{articleName} || "";
+
+$Service = getService ($C, $serviceName, $authURI);
+
+$moby_response = $Service->execute (XMLinputlist => [
+						     ["$articleName", "$input_xml\n", "clusters number", $cluster_number_xml]
+						     ]);
+
+if ($_debug) {
+	print STDERR "$serviceName results\n";
+	print STDERR $moby_response;
+	print STDERR "\n";
+}
+
+if (hasFailed ($moby_response)) {
+    print STDERR "service, $serviceName, has failed!\n";
+    my $moby_error_message = getExceptionMessage ($moby_response);
+    print STDERR "reason is the following,\n$moby_error_message\n";
+    exit 1;
+}
+
+if (defined $output_dir) {
+    saveResults ($moby_response, "List_Text", "K-means_clusters", $output_dir);
+}
+
+print STDERR "Fourth step done!\n\n";
+
 # Request Inab registry for the two following ones
 $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
 $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
@@ -590,10 +631,9 @@ else {
     exit 0;
 }
 
-
 # runHierarchicalClustering
 
-print STDERR "Fourth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
+print STDERR "Fith step, gene clustering using a $method neighbour joining clustering algorithm...\n";
 
 if ($_debug) {
   print STDERR "\nExecuting runHierarchicalClustering...\n\n";
@@ -1009,7 +1049,7 @@ sub getFileNameSuffix {
   if (lc ($object_type) eq "gff") {
     return "gff";
   }
-  elsif (lc ($object_type) eq "text-formatted" || lc ($object_type) eq "microarraydata_text" || lc ($object_type) eq "newick_text") {
+  elsif (lc ($object_type) eq "text-formatted" || lc ($object_type) eq "text_formatted" || lc ($object_type) eq "microarraydata_text" || lc ($object_type) eq "newick_text") {
     return "txt";
   }
   elsif (lc ($object_type) eq "b64_encoded_png") {
@@ -1017,6 +1057,9 @@ sub getFileNameSuffix {
   }
   elsif (lc ($object_type) eq "fasta") {
       return "fa";
+  }
+  elsif (lc ($object_type) eq "list_text" || lc ($object_type) eq "list-text") {
+      return "lst";
   }
   
   print STDERR "Suffix for object_type, $object_type unknown, return txt!\n"; 
