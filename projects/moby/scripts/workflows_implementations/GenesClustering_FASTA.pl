@@ -682,7 +682,7 @@ if (! defined $moby_response) {
     my $request_diag = POST($cluster_url,
 			    Content_Type => 'form-data',
 			    Content      => [
-					     file     => ["$curdir/$output_dir/$matrix_filename"],
+					     file     => ["$output_dir/$matrix_filename"],
 					     method   => "$method",
 					     ]
 			    );
