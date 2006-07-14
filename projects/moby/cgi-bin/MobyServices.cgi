@@ -173,6 +173,7 @@ $x->dispatch_with({
     'http://biomoby.org/#runMultiMetaAlignmentGFF'      => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiPairwiseMetaAlignment'          => 'INB::GRIB::Services::MetaAlignmentServices',
     'http://biomoby.org/#runMultiPairwiseMetaAlignmentGFF'       => 'INB::GRIB::Services::MetaAlignmentServices',
+    'http://biomoby.org/#runMultiMetaAlignment'         => 'INB::GRIB::Services::MetaAlignmentServices',
     
     'http://biomoby.org/#fromGenericSequenceToFASTA'             => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromGenericSequenceCollectionToFASTA'   => 'INB::GRIB::Services::ConversionServices',
