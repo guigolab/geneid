@@ -83,21 +83,27 @@ if (-z $seqfile) {
 
 # Get the parameters
 
-my $matrix    = $cgi->param ('matrix');
-my $threshold = $cgi->param ('threshold');
-my $method    = $cgi->param ('method');
+my $matrix         = $cgi->param ('matrix');
+my $threshold      = $cgi->param ('threshold');
+my $method         = $cgi->param ('method');
+my $cluster_number = $cgi->param ('clusters');
+
+if (! ($cluster_number =~ /\d+/)) {
+    print STDERR "number of clusters is not numerical, $cluster_number!\n";
+}
 
 my $path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
 
 print STDERR "executing the gene clustering workflow...\n";
 
-# my $picture = qx/$path_to_script\/GenesClustering_FASTA.pl -x 1 -c $path_to_script\/workflow.config -d $matrix -t $threshold -m $method -f $seqfile >& \/dev\/null/;
-my $picture = qx/$path_to_script\/GenesClustering_FASTA.pl -x 1 -c $path_to_script\/workflow.config -d $matrix -t $threshold -m $method -f $seqfile/;
+# my $picture = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -m $method -n $cluster_number -f $seqfile >& \/dev\/null/;
+my $result = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -m $method -n $cluster_number -f $seqfile -o \/tmp\/output_clustering/;
 
 print STDERR "execution done\n";
 
-if (defined $picture && (length $picture > 0)) {
-
+if ((-f "/tmp/output_clustering/clustering_tree.png") && !(-z "/tmp/output_clustering/clustering_tree.png")) {
+    my $picture = qx/cat \/tmp\/output_clustering\/clustering_tree.png/;
+    
     if ($_debug) {
 	print STDERR "got a picture!\n";
     }
@@ -109,11 +115,23 @@ if (defined $picture && (length $picture > 0)) {
     print $picture;
 }
 else {
-    if (!$_debug) {
-	unlink $seqfile;
+    
+    # Get the clusters
+    
+    my @clusters = ();
+
+    #...
+    
+    if (@clusters < 1) {
+	
+	print STDERR "no clusters found, genes clustering failed!!\n";
+	
+	if (!$_debug) {
+	    unlink $seqfile;
+	}
+	print "Content-type: text/html\n\n";
+	print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
     }
-    print "Content-type: text/html\n\n";
-    print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
 }
 
 #################################################
