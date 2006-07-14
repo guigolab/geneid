@@ -43,7 +43,7 @@ Usage:
 	-i Maps input file, in GFF format - optional
 	
 Examples using some combinations:
-	perl MetaAlignment_Moby_Service.pl -x 2 -s runMultiPairwiseMetaAlignment
+	perl MetaAlignment_Moby_Service.pl -x 2 -s runMultiMetaAlignment
 
 END_HELP
 
@@ -61,7 +61,7 @@ BEGIN {
 	getopt($switches);
 	
 	# If the user does not write nothing, skip to help
-	if (defined($opt_h) || !defined($opt_x) || !defined($opt_s)){
+	if (defined($opt_h) || !defined($opt_x)){
 		print help;
 		exit 0;
 	}
@@ -78,11 +78,11 @@ my $_debug = 0;
 #
 ##################################################################
 
-my $serviceName = $opt_s;
+my $serviceName = $opt_s || "runMultiMetaAlignment";
 my $articleName = "maps";
 $::authURI = 'genome.imim.es';
 
-my $maps_file = "/home/ug/arnau/data/promoterExtraction/mut1_downreg.1000.intergenic.matscan.gff.xml";
+my $maps_file = "/home/ug/arnau/data/runMatScanGFFCollection-2006-2-28-03:56:17.xml";
 
 # Parameters
 
@@ -227,7 +227,7 @@ open FILE, "$maps_file" or die "can't open maps file!\n";
 my $maps_xml = [];
 my $map_xml  = "";
 
-my $maximum_pairs = 50;
+my $maximum_pairs = 10;
 my $index = 0;
 
 while (<FILE>) {
@@ -245,7 +245,37 @@ while (<FILE>) {
 	    }
 	    else {
 		
-		# print STDERR "map_xml: $map_xml\n";
+		if ($_debug) {
+		    print STDERR "map_xml: $map_xml\n";
+		}
+		
+		push (@$maps_xml, $map_xml);
+		$map_xml = "";
+		$parsing = 0;
+		$index++;
+	    }
+	}
+    }
+    elsif ($line =~ /<Simple>/) {
+	my $parsing = 1;
+	
+	$map_xml .= $line;
+	
+	while ($parsing && ($line = <FILE>)) {
+	    if (not ($line =~ /<\/Simple>/)) {
+		$map_xml .= $line;
+	    }
+	    else {
+		
+		$map_xml .= $line;
+		
+		# Cleaning
+		$map_xml =~ s/<Simple>//;
+		$map_xml =~ s/<\/Simple>//;
+
+		if ($_debug) {
+		    print STDERR "map_xml: $map_xml\n";
+		}
 		
 		push (@$maps_xml, $map_xml);
 		$map_xml = "";
@@ -259,7 +289,7 @@ while (<FILE>) {
 close FILE;
 
 if ($_debug) {
-    print STDERR "got " . @$maps_xml . " maps\n";
+    print STDERR "got " . @$maps_xml . " maps\n\n";
 }
 
 #
