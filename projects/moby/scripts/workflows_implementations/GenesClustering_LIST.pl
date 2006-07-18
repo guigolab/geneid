@@ -68,13 +68,13 @@ return <<"END_HELP";
 Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -m {Hierarchical clustering method} -n {number of clusters} -o {Output directory}
+    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {Gene identifiers input file} -t {MatScan threshold} -d {MatScan database} -m {Hierarchical clustering method} -n {number of clusters} -o {Output directory}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is Inab registry)
 		<1> or Inab
 		<2> or BioMoby
 		<3> or Mobydev
-	-f Sequence(s) input file, in FASTA format
+	-f Gene identifiers input file
 	-t MatScan probability threshold (Default is 0.85)
         -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
@@ -83,7 +83,7 @@ Usage:
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -m nearest -n 10 -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.lst -c \$HOME/.workflow.config -t 0.80 -d jaspar -m nearest -n 10 -o output
 
 END_HELP
 
@@ -120,7 +120,7 @@ my $_debug = 0;
 
 # input file
 
-my $in_file = $opt_f || $ENV{HOME} . "/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa";
+my $in_file = $opt_f || $ENV{HOME} . "/data/lep.lst";
 if (not (-f $in_file)) {
     print STDERR "Error, can't find input file, $in_file\n";
     exit 1;
@@ -625,7 +625,7 @@ print STDERR "Fourth step done!\n\n";
 
 # runMultiMetaAlignmentGFF & runMultiMetaAlignment
 
-print STDERR "Fifth step, making the multiple binding sites maps alignment...\n";
+print STDERR "Fifth step, foreach predicted gene cluster, make the multiple binding sites maps alignment...\n";
 print STDERR "Executing multiple meta-alignment...\n";
 
 foreach my $gene_cluster_input_xml (@$input_xml_aref) {
