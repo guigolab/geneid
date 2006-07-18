@@ -110,7 +110,7 @@ BEGIN {
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 0;
+my $_debug = 1;
 
 ##################################################################
 #
@@ -183,6 +183,7 @@ if ($_debug) {
   print STDERR "namespace, $namespace\n";
 }
 my $input_type = $parameters{input}->{input_type};
+$input_type = "FASTA";
 
 if (! ($input_type eq "FASTA" || $input_type eq "identifiers")) {
 	print STDERR "don't know about this input type, $input_type!\n";
@@ -438,6 +439,11 @@ if (hasFailed ($moby_response)) {
 }
 
 $input_xml = parseResults ($moby_response, "GFF");
+# Keep it for later !
+my $matscan_results_xml_aref = $input_xml;
+# Setup a hastable to fast access
+my %matscan_results = setMatScan_hash ($matscan_results_xml_aref);
+
 if (defined $output_dir) {
   saveResults ($moby_response, "GFF", "MatScan", $output_dir);
 }
@@ -609,7 +615,128 @@ if (defined $output_dir) {
     saveResults ($moby_response, "List_Text", "K-means_clusters", $output_dir);
 }
 
+# Get the simples (collection of List_Text)
+
+$input_xml_aref = parseResults ($moby_response, "List_Text");
+
 print STDERR "Fourth step done!\n\n";
+
+# runMultiMetaAlignmentGFF & runMultiMetaAlignment
+
+print STDERR "Fifth step, foreach predicted gene cluster, make the multiple binding sites maps alignment...\n";
+print STDERR "Executing multiple meta-alignment...\n";
+
+foreach my $gene_cluster_input_xml (@$input_xml_aref) {
+    
+    # Filter MatScan results based on the Moby identifier
+    # so prior, need to get the list of genes as an array
+    
+    my $gene_list_str_aref = parseTextContent ($gene_cluster_input_xml, "List_Text");
+    my $gene_number = 0;
+    
+    # So far the list of genes in a formatted string
+    my $gene_list_str = $gene_list_str_aref->[0];
+    # Convert the list as an array of identifiers
+    my @genes         = split ("\n", $gene_list_str);
+    
+    my $maps_input_xml = [];
+    foreach my $gene_identifier (@genes) {
+	
+	# Filter empty string
+	next if $gene_identifier eq "";
+	
+	if ($_debug) {
+	    print STDERR "processing gene identifier, $gene_identifier.\n";
+	}
+	
+	$gene_number++;
+	my $map_xml = $matscan_results{$gene_identifier};
+	push (@$maps_input_xml, $map_xml);
+    }
+    
+    if ($gene_number > 1) {
+	
+	# runMultiMetaAlignmentGFF first - only when more than one gene in the cluster
+	
+        # Disabled for now
+	if (0) {
+	    # Run this service just to save the results in GFF format and also for gff2ps
+	    
+	    if (defined $output_dir) {
+		
+		$serviceName = "runMultiMetaAlignmentGFF";
+		$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+		$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+		
+		$Service = getService ($C, $serviceName, $authURI);
+		
+		$moby_response = $Service->execute (XMLinputlist => [
+								     ["$articleName", $maps_input_xml]
+								     ]);
+		
+		if ($_debug) {
+		    print STDERR "$serviceName result\n";
+		    print STDERR $moby_response;
+		    print STDERR "\n";
+		}
+		
+		if (hasFailed ($moby_response)) {
+		    print STDERR "service, $serviceName, has failed!\n";
+		    my $moby_error_message = getExceptionMessage ($moby_response);
+		    print STDERR "reason is the following,\n$moby_error_message\n";
+		    exit 1;
+		}
+		
+		saveResults ($moby_response, "GFF", "MultiMeta", $output_dir);
+	    }
+	    
+	    if ($_debug) {
+		print STDERR "input xml for next service:\n";
+		print STDERR join (', ', @$input_xml);
+		print STDERR ".\n";
+	    }
+	}
+	
+        # Then runMultiMetaAlignment
+	
+	$serviceName = "runMultiMetaAlignment";
+	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	
+	$Service = getService ($C, $serviceName, $authURI);
+	
+	$moby_response = $Service->execute (XMLinputlist => [
+							     ["$articleName", $maps_input_xml]
+							     ]);
+	
+	if ($_debug) {
+	    print STDERR "$serviceName result\n";
+	    print STDERR $moby_response;
+	    print STDERR "\n";
+	}
+	
+	if (hasFailed ($moby_response)) {
+	    print STDERR "service, $serviceName, has failed!\n";
+	    my $moby_error_message = getExceptionMessage ($moby_response);
+	    print STDERR "reason is the following,\n$moby_error_message\n";
+	    exit 1;
+	}
+	
+        # Dead end for now !
+        # $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
+	if (defined $output_dir) {
+	    saveResults ($moby_response, "Meta_Alignment_Text", "MultiMeta", $output_dir);
+	}
+
+	if ($_debug) {
+	    # print STDERR "input xml for next service:\n";
+	    # print STDERR join (', ', @$input_xml);
+	    # print STDERR ".\n";
+	}
+    }
+}
+
+print STDERR "Fifth step done!\n\n";
 
 # Request Inab registry for the two following ones
 $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
@@ -917,6 +1044,18 @@ sub parseTextContent {
     my ($XML, $object_type) = @_;
     my $inputs_text = [];
     
+    # If the XML is not embbeded in a MOBY element, add it because otherwise we won't be able to instanciate an XML document
+    # I think it is compulsory to define a namespace attribute (xmlns)
+    
+    if (! ($XML =~ /MOBY/)) {
+	$XML = "<?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'>\n" . $XML;
+	$XML .= "</moby:MOBY>\n";
+	
+	if ($_debug) {
+	    print STDERR "List_Text element, $XML\n";
+	}
+    }
+    
     my $parser = XML::LibXML->new();
     my $doc    = $parser->parse_string( $XML );
     $XML       = $doc->getDocumentElement();
@@ -1108,5 +1247,26 @@ sub getExceptionMessage {
     }
     
     return $exceptionMessage;
+}
+
+sub setMatScan_hash {
+  my ($matscan_results_xml_aref) = @_;
+  my %matscan_results;
+  
+  foreach my $matscan_results_xml (@$matscan_results_xml_aref) {
+    
+    # print STDERR "parsed matscan results xml, $matscan_results_xml\n"; 
+    
+    $matscan_results_xml =~ /id="([^\"]+)"/;
+    my $gene_identifier = $1;
+    
+    if ($_debug) {
+      print STDERR "parsed gene identifier, $gene_identifier\n";
+    }
+    
+    $matscan_results{$gene_identifier} = $matscan_results_xml;
+  }
+  
+  return %matscan_results;
 }
 
