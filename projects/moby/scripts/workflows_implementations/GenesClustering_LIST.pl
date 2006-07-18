@@ -515,7 +515,7 @@ if ($_debug) {
 	print STDERR "$serviceName result\n";
 	print STDERR $moby_response;
 	print STDERR "\n";
-}
+    }
 
 if (hasFailed ($moby_response)) {
     print STDERR "service, $serviceName, has failed!\n";
@@ -526,13 +526,13 @@ if (hasFailed ($moby_response)) {
 
 $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
 if (defined $output_dir) {
-  saveResults ($moby_response, "Meta_Alignment_Text", "Meta", $output_dir);
+    saveResults ($moby_response, "Meta_Alignment_Text", "Meta", $output_dir);
 }
 
 if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml);
-	print STDERR ".\n";
+    print STDERR "input xml for next service:\n";
+    print STDERR join (', ', @$input_xml);
+    print STDERR ".\n";
 }
 
 print STDERR "Second step done!\n\n";
@@ -552,9 +552,9 @@ $moby_response = $Service->execute (XMLinputlist => [
 						     ]);
 
 if ($_debug) {
-	print STDERR "$serviceName results\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
+    print STDERR "$serviceName results\n";
+    print STDERR $moby_response;
+    print STDERR "\n";
 }
 
 if (hasFailed ($moby_response)) {
@@ -566,13 +566,13 @@ if (hasFailed ($moby_response)) {
 
 my $input_xml_aref = parseResults ($moby_response, "MicroArrayData_Text");
 if (defined $output_dir) {
-  saveResults ($moby_response, "MicroArrayData_Text", "score_matrix", $output_dir);
+    saveResults ($moby_response, "MicroArrayData_Text", "score_matrix", $output_dir);
 }
 
 if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml_aref);
-	print STDERR ".\n";
+    print STDERR "input xml for next service:\n";
+    print STDERR join (', ', @$input_xml_aref);
+    print STDERR ".\n";
 }
 
 # convert the input xml into a scalar
@@ -587,7 +587,7 @@ print STDERR "Third step done!\n\n";
 print STDERR "Fourth step, gene clustering using a k-means clustering algorithm...\n";
 
 if ($_debug) {
-  print STDERR "\nExecuting runKMeansClustering...\n\n";
+    print STDERR "\nExecuting runKMeansClustering...\n\n";
 }
 
 $serviceName   = "runKMeansClustering";
@@ -598,12 +598,12 @@ $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
 						     ["$articleName", "$input_xml\n", "clusters number", $cluster_number_xml]
-						     ]);
+						    ]);
 
 if ($_debug) {
-	print STDERR "$serviceName results\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
+    print STDERR "$serviceName results\n";
+    print STDERR $moby_response;
+    print STDERR "\n";
 }
 
 if (hasFailed ($moby_response)) {
@@ -629,111 +629,113 @@ print STDERR "Fifth step, making the multiple binding sites maps alignment...\n"
 print STDERR "Executing multiple meta-alignment...\n";
 
 foreach my $gene_cluster_input_xml (@$input_xml_aref) {
-
-# Filter MatScan results based on the Moby identifier
-# so prior, need to get the list of genes as an array
-
-my $gene_list_str_aref = parseTextContent ($gene_cluster_input_xml, "List_Text");
-my $gene_number = 0;
-
-my $gene_list_str = $gene_list_str_aref->[0];
-my @genes         = split ("\n", $gene_list_str);
-
-my $maps_input_xml = [];
-
-foreach my $gene_identifier (@genes) {
-  
-  next if $gene_identifier eq "";
-  
-  if ($_debug) {
-    print STDERR "processing gene identifier, $gene_identifier.\n";
-  }
-  
-  $gene_number++;  
-  my $map_xml = $matscan_results{$gene_identifier};
-  push (@$maps_input_xml, $map_xml);
-}
-
-# runMultiMetaAlignmentGFF first - only when more than one gene in the cluster
-
-# Run this service just to save the results in GFF format
-
-if ($gene_number > 1) {
-
-# Disabled for now
-if (0) {
-if (defined $output_dir) {
-
-    $serviceName = "runMultiMetaAlignmentGFF";
-    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
     
-    $Service = getService ($C, $serviceName, $authURI);
+    # Filter MatScan results based on the Moby identifier
+    # so prior, need to get the list of genes as an array
     
-    $moby_response = $Service->execute (XMLinputlist => [
-							 ["$articleName", $maps_input_xml]
-							 ]);
+    my $gene_list_str_aref = parseTextContent ($gene_cluster_input_xml, "List_Text");
+    my $gene_number = 0;
     
-    if ($_debug) {
-	print STDERR "$serviceName result\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
+    # So far the list of genes in a formatted string
+    my $gene_list_str = $gene_list_str_aref->[0];
+    # Convert the list as an array of identifiers
+    my @genes         = split ("\n", $gene_list_str);
+    
+    my $maps_input_xml = [];
+    foreach my $gene_identifier (@genes) {
+	
+	# Filter empty string
+	next if $gene_identifier eq "";
+	
+	if ($_debug) {
+	    print STDERR "processing gene identifier, $gene_identifier.\n";
+	}
+	
+	$gene_number++;
+	my $map_xml = $matscan_results{$gene_identifier};
+	push (@$maps_input_xml, $map_xml);
     }
     
-    if (hasFailed ($moby_response)) {
-	print STDERR "service, $serviceName, has failed!\n";
-	my $moby_error_message = getExceptionMessage ($moby_response);
-	print STDERR "reason is the following,\n$moby_error_message\n";
-	exit 1;
+    if ($gene_number > 1) {
+	
+	# runMultiMetaAlignmentGFF first - only when more than one gene in the cluster
+	
+        # Disabled for now
+	if (0) {
+	    # Run this service just to save the results in GFF format and also for gff2ps
+	    
+	    if (defined $output_dir) {
+		
+		$serviceName = "runMultiMetaAlignmentGFF";
+		$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+		$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+		
+		$Service = getService ($C, $serviceName, $authURI);
+		
+		$moby_response = $Service->execute (XMLinputlist => [
+								     ["$articleName", $maps_input_xml]
+								     ]);
+		
+		if ($_debug) {
+		    print STDERR "$serviceName result\n";
+		    print STDERR $moby_response;
+		    print STDERR "\n";
+		}
+		
+		if (hasFailed ($moby_response)) {
+		    print STDERR "service, $serviceName, has failed!\n";
+		    my $moby_error_message = getExceptionMessage ($moby_response);
+		    print STDERR "reason is the following,\n$moby_error_message\n";
+		    exit 1;
+		}
+		
+		saveResults ($moby_response, "GFF", "MultiMeta", $output_dir);
+	    }
+	    
+	    if ($_debug) {
+		print STDERR "input xml for next service:\n";
+		print STDERR join (', ', @$input_xml);
+		print STDERR ".\n";
+	    }
+	}
+	
+        # Then runMultiMetaAlignment
+	
+	$serviceName = "runMultiMetaAlignment";
+	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	
+	$Service = getService ($C, $serviceName, $authURI);
+	
+	$moby_response = $Service->execute (XMLinputlist => [
+							     ["$articleName", $maps_input_xml]
+							     ]);
+	
+	if ($_debug) {
+	    print STDERR "$serviceName result\n";
+	    print STDERR $moby_response;
+	    print STDERR "\n";
+	}
+	
+	if (hasFailed ($moby_response)) {
+	    print STDERR "service, $serviceName, has failed!\n";
+	    my $moby_error_message = getExceptionMessage ($moby_response);
+	    print STDERR "reason is the following,\n$moby_error_message\n";
+	    exit 1;
+	}
+	
+        # Dead end for now !
+        # $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
+	if (defined $output_dir) {
+	    saveResults ($moby_response, "Meta_Alignment_Text", "MultiMeta", $output_dir);
+	}
+
+	if ($_debug) {
+	    # print STDERR "input xml for next service:\n";
+	    # print STDERR join (', ', @$input_xml);
+	    # print STDERR ".\n";
+	}
     }
-    
-    saveResults ($moby_response, "GFF", "MultiMeta", $output_dir);
-}
-
-if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml);
-	print STDERR ".\n";
-}
-}
-
-# Then runMultiMetaAlignment
-
-$serviceName = "runMultiMetaAlignment";
-$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-
-$Service = getService ($C, $serviceName, $authURI);
-
-$moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", $maps_input_xml]
-					     ]);
-
-if ($_debug) {
-	print STDERR "$serviceName result\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
-}
-
-if (hasFailed ($moby_response)) {
-    print STDERR "service, $serviceName, has failed!\n";
-    my $moby_error_message = getExceptionMessage ($moby_response);
-    print STDERR "reason is the following,\n$moby_error_message\n";
-    exit 1;
-}
-
-# Dead end for now !
-# $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
-if (defined $output_dir) {
-  saveResults ($moby_response, "Meta_Alignment_Text", "MultiMeta", $output_dir);
-}
-
-if ($_debug) {
-	# print STDERR "input xml for next service:\n";
-	# print STDERR join (', ', @$input_xml);
-	# print STDERR ".\n";
-}
-}
 }
 
 print STDERR "Fifth step done!\n\n";
@@ -1043,6 +1045,9 @@ sub parseResults {
 sub parseTextContent {
     my ($XML, $object_type) = @_;
     my $inputs_text = [];
+    
+    # If the XML is not embbeded in a MOBY element, add it because otherwise we won't be able to instanciate an XML document
+    # I think it is compulsory to define a namespace attribute (xmlns)
     
     if (! ($XML =~ /MOBY/)) {
       $XML = "<?xml version='1.0' encoding='UTF-8'?><moby:MOBY xmlns:moby='http://www.biomoby.org/moby' xmlns='http://www.biomoby.org/moby'>\n" . $XML;
