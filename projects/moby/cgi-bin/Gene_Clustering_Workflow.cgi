@@ -119,11 +119,34 @@ else {
     # Get the clusters
     
     my @clusters = ();
-
-    #...
     
-    if (@clusters < 1) {
+    opendir (CLUSTERDIR, "/tmp/output_clustering/K-means_clusters");
+    my @cluster_files = grep { $_ ne '.' and $_ ne '..' } readdir CLUSTERDIR;
+    
+    closedir CLUSTERDIR;
+    
+    if (@cluster_files > 0) {
 	
+	print "Content-type: text/html\n\n";
+	print "<html><head><title>Gene clustering results</title></head>\n<body>";
+	
+	print "<ul>\n";
+	my $index = 1;
+	foreach my $cluster_file (@cluster_files) {
+	    print STDERR "parsing file, $cluster_file\n";
+	    my $genes = qx/cat \/tmp\/output_clustering\/K-means_clusters\/$cluster_file/;
+	    $genes =~ s/\n/<br>/g;
+	    
+	    print "<li><h3>cluster $index:</h3><br>";
+	    print "$genes<br>";
+	    
+	    $index++;
+	}
+	
+	print "</ul>\n";
+	print "</body></html>\n";
+    }
+    else {
 	print STDERR "no clusters found, genes clustering failed!!\n";
 	
 	if (!$_debug) {
