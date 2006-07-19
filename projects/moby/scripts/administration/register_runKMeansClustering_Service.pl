@@ -161,10 +161,10 @@ my ($REG) = $Central->registerService(
 							    ['gene_clusters', [['List_Text' => \@namespaces]]]
 							   ],
 				      secondary => {
-                                          'method' => {
+                                          'gene centering' => {
                                               datatype => 'String',
-                                              enum     => ['K-means', 'K-Medians'],
-                                              default  => 'K-Means',
+                                              enum     => ['None', 'K-means', 'K-Medians'],
+                                              default  => 'None',
                                           },
                                           'iterations number' => {
                                               datatype => 'Integer',
