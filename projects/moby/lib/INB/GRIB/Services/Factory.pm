@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.96 2006-07-14 16:00:14 gmaster Exp $
+# $Id: Factory.pm,v 1.97 2006-07-19 18:08:09 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3462,13 +3462,14 @@ sub KMeans_call {
     }
     
     my $result = qx/$_cluster_dir\/$_cluster_bin -f $gene_matrix_file $_cluster_args/;
+    chomp $result;
     
     if ($debug) {
 	print STDERR "clustering result, $result\n";
     }
     
     if (! -f $output_filename) {
-	my $note = "Internal System Error. K-means clustering has failed!\n";
+	my $note = "Internal System Error. K-means clustering has failed, here the error that has been given back by cluster software, '$result'\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
