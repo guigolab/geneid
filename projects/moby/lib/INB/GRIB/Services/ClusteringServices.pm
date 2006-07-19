@@ -1,4 +1,4 @@
-# $Id: ClusteringServices.pm,v 1.2 2006-07-07 15:08:53 gmaster Exp $
+# $Id: ClusteringServices.pm,v 1.3 2006-07-19 18:25:33 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -161,7 +161,7 @@ sub _do_query_KMeans {
     my $output_article_name = "gene_clusters";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
-    my $method;
+    my $gene_centering;
     my $iteration_number;
     my $cluster_number;
     my $sequenceIdentifier;
@@ -175,19 +175,19 @@ sub _do_query_KMeans {
     
     # Get the parameters
     
-    ($method)           = getNodeContentWithArticle($queryInput_DOM, "Parameter", "method");
+    ($gene_centering)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "gene centering");
     ($iteration_number) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "iterations clusters");
     ($cluster_number)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "clusters number");
 
-    if (not defined $method) {
-	$method = "K-means";
+    if (not defined $gene_centering) {
+	$gene_centering = "None";
     }
-    elsif (! (($method =~ /k-means/i) || ($method =~ /k-medians/i))) {
-	my $note = "method parameter, '$method', not accepted should be ['K-means', 'K-Medians']";
+    elsif (! (($gene_centering =~ /none/i) || ($gene_centering =~ /k-means/i) || ($gene_centering =~ /k-medians/i))) {
+	my $note = "'gene centering' parameter, '$gene_centering', not accepted should be part of ['None', 'K-means', 'K-Medians']";
 	print STDERR "$note\n";
 	my $code = "222";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => "method",
+								  refElement => "gene centering",
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -248,14 +248,14 @@ sub _do_query_KMeans {
     # Add the parsed parameters in a hash table
     
     if ($_debug) {
-	print STDERR "clustering method, $method\n";
+	print STDERR "gene centering, $gene_centering\n";
 	print STDERR "number of iterations, $iteration_number\n";
 	print STDERR "number of clusters, $cluster_number\n";
     }
     
-    $parameters{method}           = $method;
+    $parameters{gene_centering}   = $gene_centering;
     $parameters{iteration_number} = $iteration_number;
-    $parameters{cluster_number}  = $cluster_number;
+    $parameters{cluster_number}   = $cluster_number;
     
     $parameters{output_format} = $_moby_output_format;
     

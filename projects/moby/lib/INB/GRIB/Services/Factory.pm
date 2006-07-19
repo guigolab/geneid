@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.97 2006-07-19 18:08:09 gmaster Exp $
+# $Id: Factory.pm,v 1.98 2006-07-19 18:25:33 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3379,7 +3379,7 @@ sub KMeans_call {
     
     # parameters
     
-    my $method           = $parameters->{method};
+    my $gene_centering   = $parameters->{gene_centering};
     my $iteration_number = $parameters->{iteration_number};
     my $cluster_number   = $parameters->{cluster_number};
     
@@ -3388,16 +3388,19 @@ sub KMeans_call {
     my $_cluster_bin    = "cluster";
     my $_cluster_args   = "-k $cluster_number -r $iteration_number";
     
-    # Add the method
+    # Add the gene centering option
     
-    if ($method =~ /k-means/i) {
+    if ($gene_centering =~ /none/i) {
+	# nothing - it is default !
+    }
+    elsif ($gene_centering =~ /k-means/i) {
 	$_cluster_args .= " -cg a";
     }
-    elsif ($method =~ /k-Medians/i) {
+    elsif ($gene_centering =~ /k-medians/i) {
 	$_cluster_args .= " -cg m";
     }
     else {
-	print STDERR "problem with the method parameter, $method, is unknown!\n";
+	print STDERR "problem with the 'gene centering' parameter, $gene_centering, is unknown!\n";
     }
     
     # Check that the binary is in place
