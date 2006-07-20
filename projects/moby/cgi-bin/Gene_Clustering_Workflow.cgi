@@ -4,8 +4,9 @@ use strict;
 use CGI;
 
 use File::Temp qw/tempfile/;
+use File::Temp qw/tempdir/;
 
-my $_debug = 0;
+my $_debug = 1;
 
 my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
 my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";
@@ -65,6 +66,7 @@ else {
 
 	print "Content-type: text/html\n\n";
 	print_error("<b>ERROR> A DNA sequence has not been submitted.</b><br><br>Please, fill the textarea in or select a file for submitting a DNA sequence");
+	exit 1;
     }
 }
 
@@ -79,25 +81,47 @@ if (-z $seqfile) {
     
     print "Content-type: text/html\n\n";
     print_error("<b>ERROR> A DNA sequence has not been submitted.</b><br><br>Please, fill the textarea in or select a file for submitting a DNA sequence");
+
+    exit 1;
 }
 
 # Get the parameters
 
-my $matrix         = $cgi->param ('matrix');
-my $threshold      = $cgi->param ('threshold');
-my $method         = $cgi->param ('method');
-my $cluster_number = $cgi->param ('clusters');
+my $matrix           = $cgi->param ('matrix');
+my $threshold        = $cgi->param ('threshold');
+
+my $alpha            = $cgi->param ('alpha');
+my $lambda           = $cgi->param ('lambda');
+my $mu               = $cgi->param ('mu');
+
+my $nj_method        = $cgi->param ('method');
+
+my $iteration_number = $cgi->param ('iterations');
+my $cluster_number   = $cgi->param ('clusters');
 
 if (! ($cluster_number =~ /\d+/)) {
     print STDERR "number of clusters is not numerical, $cluster_number!\n";
 }
 
+if (! ($iteration_number =~ /\d+/)) {
+    print STDERR "number of k-means iterations is not numerical, $iteration_number!\n";
+}
+
+print STDERR "alpha, lambda, mu,  $alpha, $lambda, $mu\n";
+
 my $path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
 
 print STDERR "executing the gene clustering workflow...\n";
 
-# my $picture = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -m $method -n $cluster_number -f $seqfile >& \/dev\/null/;
-my $result = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -m $method -n $cluster_number -f $seqfile -o \/tmp\/output_clustering/;
+my $gene_clustering_output_dir = tempdir( "/tmp/GENE_CLUSTERING_OUTPUT.XXXXXX" );
+
+if ($_debug) {
+    print STDERR "executing the following command,\n";
+    print STDERR "$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile -o $gene_clustering_output_dir\n";
+}
+
+# my $picture = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile >& \/dev\/null/;
+my $result = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile -o $gene_clustering_output_dir/;
 
 print STDERR "execution done\n";
 
@@ -108,9 +132,6 @@ if ((-f "/tmp/output_clustering/clustering_tree.png") && !(-z "/tmp/output_clust
 	print STDERR "got a picture!\n";
     }
     
-    if (!$_debug) {
-	unlink $seqfile;
-    }
     print "Content-type: image/png\n\n";
     print $picture;
 }
@@ -120,7 +141,7 @@ else {
     
     my @clusters = ();
     
-    opendir (CLUSTERDIR, "/tmp/output_clustering/K-means_clusters");
+    opendir (CLUSTERDIR, "$gene_clustering_output_dir/K-means_clusters");
     my @cluster_files = grep { $_ ne '.' and $_ ne '..' } readdir CLUSTERDIR;
     
     closedir CLUSTERDIR;
@@ -149,12 +170,15 @@ else {
     else {
 	print STDERR "no clusters found, genes clustering failed!!\n";
 	
-	if (!$_debug) {
-	    unlink $seqfile;
-	}
 	print "Content-type: text/html\n\n";
 	print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
     }
+}
+
+if (!$_debug) {
+    # get rid of output directory, $gene_clustering_output_dir, and input file, $seqfile
+    unlink $seqfile;
+    # ...
 }
 
 #################################################
@@ -197,7 +221,5 @@ sub print_error {
 	print "$line";
     }  
     close(OUTPRINT);
-
-    exit(1);
 } 
 
