@@ -70,7 +70,7 @@ Usage:
 
     GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -m {Hierarchical clustering method} -n {Number of K-means clusters} -i {Number of K-means iterations} -e {K-means centering} -o {Output directory}
 	-h help
-	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is Inab registry)
+	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is BioMoby registry)
 		<1> or Inab
 		<2> or BioMoby
 		<3> or Mobydev
@@ -648,6 +648,7 @@ print STDERR "Fourth step done!\n\n";
 print STDERR "Fifth step, foreach predicted gene cluster, make the multiple binding sites maps alignment...\n";
 print STDERR "Executing multiple meta-alignment...\n";
 
+my $cluster_index = 1;
 foreach my $gene_cluster_input_xml (@$input_xml_aref) {
     
     # Filter MatScan results based on the Moby identifier
@@ -659,10 +660,10 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
     # So far the list of genes in a formatted string
     my $gene_list_str = $gene_list_str_aref->[0];
     # Convert the list as an array of identifiers
-    my @genes         = split ("\n", $gene_list_str);
+    my @cluster_genes = split ("\n", $gene_list_str);
     
     my $maps_input_xml = [];
-    foreach my $gene_identifier (@genes) {
+    foreach my $gene_identifier (@cluster_genes) {
 	
 	# Filter empty string
 	next if $gene_identifier eq "";
@@ -683,6 +684,11 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	# Run this service just to save the results in GFF format and also for gff2ps
 	
 	if (defined $output_dir) {
+	    
+	    if (! -d "$output_dir/MultiMeta") {
+		# Setup a subdirectory with the multiple meta-alignment results for each cluster
+		my $result = qx/mkdir $output_dir\/MultiMeta/;
+	    }
 	    
 	    $serviceName = "runMultiMetaAlignmentGFF";
 	    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -707,7 +713,7 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 		exit 1;
 	    }
 	    
-	    saveResults ($moby_response, "GFF", "MultiMeta", $output_dir);
+	    saveResults ($moby_response, "GFF", $cluster_index . ".MultiMeta", $output_dir . "/MultiMeta");
 	}
 	
 	if ($_debug) {
@@ -744,16 +750,19 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	
         # Dead end for now !
         # $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
+	# but later connect it to gff2ps
 	if (defined $output_dir) {
-	    saveResults ($moby_response, "Meta_Alignment_Text", "MultiMeta", $output_dir);
+	    saveResults ($moby_response, "Meta_Alignment_Text", $cluster_index . ".MultiMeta", $output_dir . "/MultiMeta");
 	}
-
+	
 	if ($_debug) {
 	    # print STDERR "input xml for next service:\n";
 	    # print STDERR join (', ', @$input_xml);
 	    # print STDERR ".\n";
 	}
     }
+    
+    $cluster_index++;
 }
 
 print STDERR "Fifth step done!\n\n";
