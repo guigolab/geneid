@@ -6,7 +6,7 @@ use CGI;
 use File::Temp qw/tempfile/;
 use File::Temp qw/tempdir/;
 
-my $_debug = 1;
+my $_debug = 0;
 
 my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
 my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";
@@ -25,11 +25,6 @@ my @params = $cgi->param;
 if ($_debug) {
     print STDERR "clustering param names, @params\n";
 }
-
-# print "Content-type: text/html\n\n";
-# print "hello!<br><br>";
-# print "being implemented...<br>";
-# exit 0;
 
 if (defined($cgi->param ('sequences')) && ($cgi->param ('sequences') =~ />/)) {
 
@@ -107,11 +102,15 @@ if (! ($iteration_number =~ /\d+/)) {
     print STDERR "number of k-means iterations is not numerical, $iteration_number!\n";
 }
 
-print STDERR "alpha, lambda, mu,  $alpha, $lambda, $mu\n";
+if ($_debug) {
+    print STDERR "alpha, lambda, mu,  $alpha, $lambda, $mu\n";
+}
 
 my $path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
 
-print STDERR "executing the gene clustering workflow...\n";
+if ($_debug) {
+    print STDERR "executing the gene clustering workflow...\n";
+}
 
 my $gene_clustering_output_dir = tempdir( "/tmp/GENE_CLUSTERING_OUTPUT.XXXXXX" );
 
@@ -120,10 +119,11 @@ if ($_debug) {
     print STDERR "$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile -o $gene_clustering_output_dir\n";
 }
 
-# my $picture = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile >& \/dev\/null/;
 my $result = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile -o $gene_clustering_output_dir/;
 
-print STDERR "execution done\n";
+if ($_debug) {
+    print STDERR "execution done\n";
+}
 
 if ((-f "$gene_clustering_output_dir/clustering_tree.png") && !(-z "$gene_clustering_output_dir/clustering_tree.png")) {
     my $picture = qx/cat $gene_clustering_output_dir\/clustering_tree.png/;
@@ -148,8 +148,23 @@ else {
     
     if (@cluster_files > 0) {
 	
+	# Make a n archive
+	my $archive_path = "/usr/local/Install/apache2/htdocs/webservices/workflows/results";
+	my $output_dir_name = $gene_clustering_output_dir;
+	$output_dir_name =~ s/\/tmp\///;
+	my $archive_filename = $output_dir_name . ".zip";
+	
+	print STDERR "output_dir_name, $output_dir_name\n";
+	
+	qx/cd \/tmp; zip -r $archive_path\/$archive_filename $output_dir_name/;
+	
 	print "Content-type: text/html\n\n";
+	
 	print "<html><head><title>Gene clustering results</title></head>\n<body>";
+	
+	my $archive_URL = "http://genome.imim.es/webservices/workflows/results/" . $archive_filename;
+	
+	print "There is an <a href=\"$archive_URL\">archive</a> available to download all the results\n";
 	
 	print "<ul>\n";
 	my $index = 1;
