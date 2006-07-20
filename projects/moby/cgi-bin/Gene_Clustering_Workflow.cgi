@@ -125,8 +125,8 @@ my $result = qx/$path_to_script\/GenesClustering_FASTA.pl -x 2 -c $path_to_scrip
 
 print STDERR "execution done\n";
 
-if ((-f "/tmp/output_clustering/clustering_tree.png") && !(-z "/tmp/output_clustering/clustering_tree.png")) {
-    my $picture = qx/cat \/tmp\/output_clustering\/clustering_tree.png/;
+if ((-f "$gene_clustering_output_dir/clustering_tree.png") && !(-z "$gene_clustering_output_dir/clustering_tree.png")) {
+    my $picture = qx/cat $gene_clustering_output_dir\/clustering_tree.png/;
     
     if ($_debug) {
 	print STDERR "got a picture!\n";
@@ -155,7 +155,7 @@ else {
 	my $index = 1;
 	foreach my $cluster_file (@cluster_files) {
 	    print STDERR "parsing file, $cluster_file\n";
-	    my $genes = qx/cat \/tmp\/output_clustering\/K-means_clusters\/$cluster_file/;
+	    my $genes = qx/cat $gene_clustering_output_dir\/K-means_clusters\/$cluster_file/;
 	    $genes =~ s/\n/<br>/g;
 	    
 	    print "<li><h3>cluster $index:</h3><br>";
