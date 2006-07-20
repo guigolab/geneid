@@ -13,18 +13,12 @@ use lib "/home/ug/gmaster/lib/site_perl/5.8.5/i686-linux-thread-multi";
 
 #########################################
 #
-# Libraries Path - Modify to fit your system !
+# Libraries Path - Modify to fit your system and the Ensembl release you want to use!
 #
 #########################################
 
 $_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
 # $_libraries_path = "/home/ug/arnau/no_backup/cvs";
-
-# Ensembl perl API is release 32 by default
-# Initialised here because otherwise it breaks !!
-# but actually the script will be using the perl API related to the database release given by the user !
-
-# Libraries Path - Modify to fit your system here as well !!
 
 use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-39/modules";
 use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-39/modules";
