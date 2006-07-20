@@ -680,46 +680,44 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	
 	# runMultiMetaAlignmentGFF first - only when more than one gene in the cluster
 	
-        # Disabled for now
-	if (0) {
-	    # Run this service just to save the results in GFF format and also for gff2ps
+	# Run this service just to save the results in GFF format and also for gff2ps
+	
+	if (defined $output_dir) {
 	    
-	    if (defined $output_dir) {
-		
-		$serviceName = "runMultiMetaAlignmentGFF";
-		$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-		$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-		
-		$Service = getService ($C, $serviceName, $authURI);
-		
-		$moby_response = $Service->execute (XMLinputlist => [
-								     ["$articleName", $maps_input_xml]
-								     ]);
-		
-		if ($_debug) {
-		    print STDERR "$serviceName result\n";
-		    print STDERR $moby_response;
-		    print STDERR "\n";
-		}
-		
-		if (hasFailed ($moby_response)) {
-		    print STDERR "service, $serviceName, has failed!\n";
-		    my $moby_error_message = getExceptionMessage ($moby_response);
-		    print STDERR "reason is the following,\n$moby_error_message\n";
-		    exit 1;
-		}
-		
-		saveResults ($moby_response, "GFF", "MultiMeta", $output_dir);
-	    }
+	    $serviceName = "runMultiMetaAlignmentGFF";
+	    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	    
+	    $Service = getService ($C, $serviceName, $authURI);
+	    
+	    $moby_response = $Service->execute (XMLinputlist => [
+								 ["$articleName", $maps_input_xml]
+								 ]);
 	    
 	    if ($_debug) {
-		print STDERR "input xml for next service:\n";
-		print STDERR join (', ', @$input_xml);
-		print STDERR ".\n";
+		print STDERR "$serviceName result\n";
+		print STDERR $moby_response;
+		print STDERR "\n";
 	    }
+	    
+	    if (hasFailed ($moby_response)) {
+		print STDERR "service, $serviceName, has failed!\n";
+		my $moby_error_message = getExceptionMessage ($moby_response);
+		print STDERR "reason is the following,\n$moby_error_message\n";
+		exit 1;
+	    }
+	    
+	    saveResults ($moby_response, "GFF", "MultiMeta", $output_dir);
 	}
 	
-        # Then runMultiMetaAlignment
+	if ($_debug) {
+	    print STDERR "input xml for next service:\n";
+	    print STDERR join (', ', @$input_xml);
+	    print STDERR ".\n";
+	}
+	
+	
+	# Then runMultiMetaAlignment
 	
 	$serviceName = "runMultiMetaAlignment";
 	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
