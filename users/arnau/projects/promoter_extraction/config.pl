@@ -20,8 +20,8 @@ use lib "/home/ug/gmaster/lib/site_perl/5.8.5/i686-linux-thread-multi";
 $_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
 # $_libraries_path = "/home/ug/arnau/no_backup/cvs";
 
-use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-39/modules";
-use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-39/modules";
+use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-38/modules";
+use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-38/modules";
 
 # Latest Ensembl release
 
@@ -31,7 +31,7 @@ use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-39/mo
 #
 #########################################################
 
-$latest_release = "39";
+$latest_release = "38";
 
 # Ensembl database connection parameters
 # Two sets of parameters to allow connecting to a different server depending on which release the user is asking !!!
