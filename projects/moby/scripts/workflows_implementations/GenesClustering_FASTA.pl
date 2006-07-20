@@ -6,7 +6,7 @@ Arnaud Kerhornou, akerhornou@imim.es
 
 =head1 COPYRIGHT
 
-Copyright (c) 2006, Arnaud Kerhornou and INB - Nodo Vertical INB/CRG.
+Copyright (c) 2006, Arnaud Kerhornou and INB - Nodo Vertical 1 INB/CRG.
  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify
@@ -68,7 +68,7 @@ return <<"END_HELP";
 Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -m {Hierarchical clustering method} -n {number of clusters} -o {Output directory}
+    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -m {Hierarchical clustering method} -n {Number of K-means clusters} -i {Number of K-means iterations} -e {K-means centering} -o {Output directory}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is Inab registry)
 		<1> or Inab
@@ -77,13 +77,17 @@ Usage:
 	-f Sequence(s) input file, in FASTA format
 	-t MatScan probability threshold (Default is 0.85)
         -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
+	-a Meta-alignment alpha penalty (Default is 0.5)
+	-l Meta-alignment lambda penalty (Default is 0.1)
+	-u Meta-alignment mu penalty (Default is 0.1)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
 	-n Number of clusters returned by the k-means algorithm
+	-i Number of k-means iterations (Default is 200)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -m nearest -n 10 -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -m nearest -n 4 -i 200 -o output
 
 END_HELP
 
@@ -92,10 +96,10 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_m $opt_n $opt_o/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_n $opt_i $opt_o/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'hxfctdmno';
+    my $switches = 'hxfctdalumnio';
     
     # Get the switches
     getopt($switches);
@@ -128,6 +132,8 @@ if (not (-f $in_file)) {
 
 # Command-line parameters
 
+# NJ parameters
+
 my $method    = $opt_m || "nearest";
 if (lc ($method) eq "nearest") {
   $method = "Nearest neighbor (single linkage)";
@@ -142,14 +148,30 @@ else {
 
 my $method_xml = "<Value>$method</Value>";
 
+# MatScan parameters
+
 my $threshold = $opt_t || 0.85;
 my $database  = $opt_d || "transfac";
 
 my $threshold_xml   = "<Value>$threshold</Value>";
 my $matrix_xml      = "<Value>$database</Value>";
 
-my $cluster_number     = $opt_n || 10;
-my $cluster_number_xml = "<Value>$cluster_number</Value>";
+# Meta-alignment parameters
+
+my $alpha  = $opt_a || 0.5;
+my $lambda = $opt_l || 0.1;
+my $mu     = $opt_u || 0.1;
+
+my $alpha_xml  = "<Value>$alpha</Value>";
+my $lambda_xml = "<Value>$lambda</Value>";
+my $mu_xml     = "<Value>$mu</Value>";
+
+# K-means parameters
+
+my $cluster_number       = $opt_n || 10;
+my $cluster_number_xml   = "<Value>$cluster_number</Value>";
+my $iteration_number     = $opt_i || 200;
+my $iteration_number_xml = "<Value>$iteration_number</Value>";
 
 # parameters configuration file parsing
 
@@ -474,7 +496,7 @@ if (defined $output_dir) {
     $Service = getService ($C, $serviceName, $authURI);
     
     $moby_response = $Service->execute (XMLinputlist => [
-							 ["$articleName", $input_xml]
+							 ["$articleName", $input_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml]
 							 ]);
     
     if ($_debug) {
@@ -508,7 +530,7 @@ $articleName = $parameters{$serviceName}->{articleName} || die "article name for
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", $input_xml]
+					      ["$articleName", $input_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml]
 					     ]);
 
 if ($_debug) {
@@ -595,7 +617,7 @@ $articleName   = $parameters{$serviceName}->{articleName} || "";
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-						     ["$articleName", "$input_xml\n", "clusters number", $cluster_number_xml]
+						     ["$articleName", "$input_xml\n", "clusters number", $cluster_number_xml, 'iterations number', $iteration_number_xml]
 						     ]);
 
 if ($_debug) {
