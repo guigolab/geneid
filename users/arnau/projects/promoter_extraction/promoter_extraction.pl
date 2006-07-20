@@ -460,7 +460,7 @@ foreach my $geneId (@geneIds) {
     #
 
     foreach my $gene (@$genes) {
-
+	
 	my $gene_stable_id    = $gene->stable_id;
 	
 	if ($orthologous_mode) {
@@ -1161,6 +1161,12 @@ sub is_tss {
     
     my $tss_is_start_codon = 1;
     my $tss_information    = "TSS not predicted (is start codon)";
+    
+    if ($_debug) {
+	# Hey that breaks with release 39 !!! ????????
+	print STDERR "Getting all transcripts...\n";
+    }
+    
     my $transcripts        = $gene->get_all_Transcripts;
     
     if ($_debug) {
