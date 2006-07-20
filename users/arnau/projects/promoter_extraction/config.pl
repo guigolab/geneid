@@ -26,8 +26,8 @@ $_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
 
 # Libraries Path - Modify to fit your system here as well !!
 
-use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-37/modules";
-use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-37/modules";
+use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-39/modules";
+use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-39/modules";
 
 # Latest Ensembl release
 
@@ -37,7 +37,7 @@ use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-37/mo
 #
 #########################################################
 
-$latest_release = "37";
+$latest_release = "39";
 
 # Ensembl database connection parameters
 # Two sets of parameters to allow connecting to a different server depending on which release the user is asking !!!
