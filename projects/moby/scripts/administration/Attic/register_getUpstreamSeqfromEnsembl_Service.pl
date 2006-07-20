@@ -160,10 +160,10 @@ my ($REG) = $Central->registerService(
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['gene', ["Object" => $namespaces]],
+							    ['genes', ["List_Text" => $namespaces]],
 							   ],
 				      output		=> [
-							    ['upstream_sequence', [['CommentedDNASequence' => ['ENSEMBL']]]] # collection of one object type
+							    ['upstream_sequences', [['CommentedDNASequence' => ['ENSEMBL']]]] # collection of one object type
 							   ],
 				      secondary	=> {
 					  'organism' => {

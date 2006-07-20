@@ -156,11 +156,11 @@ my ($REG) = $Central->registerService(
 				      serviceType  => "GettingNucleotides",
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Sequence retrieval tool from Ensembl database. It returns the upstream sequence of all orthologues of a given Ensembl gene identifier. Identifiers could be external ones, such as Refseq Ids or Affymetrix ids.",
+				      description  => "Sequence retrieval tool from Ensembl database. It returns the upstream sequence of all orthologues of a given Ensembl gene identifier. The identifier could be an external one, such as a Refseq Id or an Affymetrix id.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
-							    ['genes', ["Object" => $namespaces]],
+							    ['gene', ["Object" => $namespaces]],
 							   ],
 				      output		=> [
 							    ['upstream_sequences', [['CommentedDNASequence' => ['ENSEMBL']]]] # collection of one object type
