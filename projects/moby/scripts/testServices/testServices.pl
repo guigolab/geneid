@@ -109,7 +109,7 @@ my $runGeneID_control_file                  = "Hsap_BTK.msk.runGeneID.control";
 my $runGeneIDGFF_control_file               = "Hsap_BTK.msk.runGeneIDGFF.control";
 my $runSGP2GFF_control_file                 = "Hsap_BTK.msk.runSGP2GFF.control";
 my $translateGeneIDGFFPredictions_control_file = "Hsap_BTK.msk.GeneIDGFF.translateGeneIDGFFPredictions.control";
-my $getUpstreamSeqfromEnsembl_control_file  = "geneIds.lst.getUpstreamSeqfromEnsembl.control";
+my $getUpstreamSeqFromEnsembl_control_file  = "geneIds.lst.getUpstreamSeqFromEnsembl.control";
 my $runGOstat_control_file                  = "mut1_downreg.fbgn.runGOstat.control";
 my $fromGenericSequenceToFASTA_control_file = "Hsap_BTK.msk.fromGenericSequenceToFASTA.control";
 my $fromGenericSequenceCollectionToFASTA_control_file = "Hsap_BTK.msk.fromGenericSequenceCollectionToFASTA.control";
@@ -316,11 +316,11 @@ if (defined $service) {
     }
 }
 
-# Execute getUpstreamSeqfromEnsembl Web service
+# Execute getUpstreamSeqFromEnsembl Web service
 
-print  "\ntesting getUpstreamSeqfromEnsembl...\n\n";
+print  "\ntesting getUpstreamSeqFromEnsembl...\n\n";
 
-$service = MobyServiceInstantiation ($C, "getUpstreamSeqfromEnsembl", $AUTH);
+$service = MobyServiceInstantiation ($C, "getUpstreamSeqFromEnsembl", $AUTH);
 if (defined $service) {
     my $result = $service->execute(
 				   XMLinputlist => [
@@ -332,10 +332,10 @@ if (defined $service) {
 
     print $results_fh "$result\n";
 
-    my @diff_results = qx/diff $control_data_dir\/$getUpstreamSeqfromEnsembl_control_file $results_file/;
+    my @diff_results = qx/diff $control_data_dir\/$getUpstreamSeqFromEnsembl_control_file $results_file/;
 
     if (@diff_results > 0) {
-	print STDERR "getUpstreamSeqfromEnsembl service failed!\n";
+	print STDERR "getUpstreamSeqFromEnsembl service failed!\n";
 	print STDERR "diff_results: @diff_results\n";
 
 	close $results_fh;
@@ -344,7 +344,7 @@ if (defined $service) {
     }
     else {
 
-	print  "getUpstreamSeqfromEnsembl okay...\n";
+	print  "getUpstreamSeqFromEnsembl okay...\n";
 
 	close $results_fh;
 	unlink $results_file;
