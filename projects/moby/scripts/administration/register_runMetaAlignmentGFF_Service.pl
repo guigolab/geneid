@@ -204,8 +204,6 @@ if ($REG->success) {
     print RDF "$rdf_document";
     close RDF;
     
-    print STDERR "See file, $rdf_file, for returned RDF document\n";
-    
     # Get the RDF document
 
     my $rdf_document = $REG->RDF;
