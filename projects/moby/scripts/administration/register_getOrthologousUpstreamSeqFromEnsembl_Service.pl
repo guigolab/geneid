@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 2
+	perl registerService.pl -x 2 -s getOrthologousUpstreamSeqFromEnsembl
 
 END_HELP
 
@@ -129,7 +129,7 @@ $::contactEmail = 'akerhornou@imim.es';
 
 # Service Name
 
-my $serviceName = "getOrthologousUpstreamSeqfromEnsembl";
+my $serviceName = "getOrthologousUpstreamSeqFromEnsembl";
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
