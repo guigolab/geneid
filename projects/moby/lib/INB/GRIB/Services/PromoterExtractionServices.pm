@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.13 2006-03-23 14:33:07 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.14 2006-07-21 17:05:27 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -112,7 +112,8 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # @EXPORT = qw( &func1 &func2);
 # 
 our @EXPORT = qw(
-  &getUpstreamSeqfronEnsembl
+  &getUpstreamSeqFromEnsembl
+  &getOrthologousUpstreamSeqFromEnsembl
 );
 
 our $VERSION = '1.0';
@@ -152,8 +153,12 @@ my $_debug = 0;
 
 sub _do_query_PromoterExtraction {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby 
-    my $queryInput_DOM = shift @_;
+    my $queryInput_DOM   = shift @_;
+    my $orthologous_mode = shift @_;
     
+    # The latest that is working !
+    my $dbrelease = 38;
+
     my $MOBY_RESPONSE = "";     # set empty response
     
     # Variables that will be passed to PromoterExtraction_call
@@ -166,18 +171,14 @@ sub _do_query_PromoterExtraction {
     # Get the parameters
     
     my ($organism)          = getNodeContentWithArticle($queryInput_DOM, "Parameter", "organism");
-    my ($dbrelease)         = getNodeContentWithArticle($queryInput_DOM, "Parameter", "ensembl release");
     my ($upstream_length)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "upstream length");
     my ($downstream_length) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "downstream length");
     my ($intergenic_only)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "intergenic only");
-    my ($orthologous_mode)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "orthologous mode");
-
+    
     (not defined $organism)          and $organism          = "Homo sapiens";
-    (not defined $dbrelease)         and $dbrelease         = 35;
     (not defined $upstream_length)   and $upstream_length   = 2000;
-    (not defined $downstream_length) and $downstream_length = 0; 
+    (not defined $downstream_length) and $downstream_length = 0;
     (not defined $intergenic_only)   and $intergenic_only   = "False";
-    (not defined $orthologous_mode)  and $orthologous_mode  = "False";
     
     # Add the parsed parameters in a hash table
     
@@ -203,7 +204,7 @@ sub _do_query_PromoterExtraction {
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'genes')
 	# In case of this service, it doesn't really matter as there is only one input anyway
 	
-	if (($articleName eq "genes") || ($articleName eq "")) { 
+	if (($articleName =~ /gene/) || ($articleName eq "")) { 
 
 	    if (isSimpleArticle ($DOM)) {
 
@@ -270,7 +271,7 @@ sub _do_query_PromoterExtraction {
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $fasta_sequences = PromoterExtraction_call (genes => \@genes, parameters => \%parameters);
+    my $fasta_sequences = PromoterExtraction_call (genes => \@genes, debug => $_debug, queryID => $queryID, parameters => \%parameters);
 
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
@@ -304,9 +305,9 @@ sub _do_query_PromoterExtraction {
 }
 
 
-=head2 getUpstreamSeqfromEnsembl
+=head2 getUpstreamSeqFromEnsembl
 
- Title   : getUpstreamSeqfromEnsembl
+ Title   : getUpstreamSeqFromEnsembl
  Usage   : Esta función está pensada para llamarla desde un cliente SOAP. 
          : No obstante, se recomienda probarla en la misma máquina, antes 
          : de instalar el servicio. Para ello, podemos llamarla de la 
@@ -345,7 +346,7 @@ sub _do_query_PromoterExtraction {
 
 =cut
 
-sub getUpstreamSeqfromEnsembl {
+sub getUpstreamSeqFromEnsembl {
 
 	# El parametro $message es un texto xml con la peticion.
 	my ($caller, $message) = @_;        # get the incoming MOBY query XML
@@ -368,10 +369,10 @@ sub getUpstreamSeqfromEnsembl {
 	my $moby_exceptions = [];
 	
 	my $moby_logger = get_logger ("MobyServices");
-	my $serviceName = "getUpstreamSeqfromEnsembl";
+	my $serviceName = "getUpstreamSeqFromEnsembl";
 	
 	# Para cada query ejecutaremos el _execute_query.
-        foreach my $queryInput(@queries){
+        foreach my $queryInput(@queries) {
 	    
 	    if ($_debug) {
 		print STDERR "upstream sequence retrieval service queryInput,\n";
@@ -381,7 +382,7 @@ sub getUpstreamSeqfromEnsembl {
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    my $query_response = _do_query_PromoterExtraction ($queryInput);
+	    my $query_response = _do_query_PromoterExtraction ($queryInput, "False");
 	    
 	    # $query_response es un string que contiene el codigo xml de
 	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
@@ -396,6 +397,56 @@ sub getUpstreamSeqfromEnsembl {
 	return $response;
 }
 
+sub getOrthologousUpstreamSeqFromEnsembl {
+
+	# El parametro $message es un texto xml con la peticion.
+	my ($caller, $message) = @_;        # get the incoming MOBY query XML
+
+	# Hasta el momento, no existen objetos Perl de BioMoby paralelos 
+	# a la ontologia, y debemos contentarnos con trabajar directamente 
+	# con objetos DOM. Por consiguiente lo primero es recolectar la 
+	# lista de peticiones (queries) que tiene la peticion. 
+	# 
+	# En una misma llamada podemos tener mas de una peticion, y de  
+	# cada servicio depende la forma de trabajar con ellas. En este 
+	# caso las trataremos una a una, pero podriamos hacer Threads para 
+	# tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
+	# etc.. 
+	my @queries = getInputs($message);  # returns XML::DOM nodes
+	# 
+	# Inicializamos la Respuesta a string vacio. Recordar que la respuesta
+	# es una coleccion de respuestas a cada una de las consultas.
+        my $MOBY_RESPONSE = "";             # set empty response
+	my $moby_exceptions = [];
+	
+	my $moby_logger = get_logger ("MobyServices");
+	my $serviceName = "getOrthologousUpstreamSeqFromEnsembl";
+	
+	# Para cada query ejecutaremos el _execute_query.
+        foreach my $queryInput(@queries) {
+	    
+	    if ($_debug) {
+		print STDERR "upstream sequence retrieval service queryInput,\n";
+		print STDERR $queryInput->toString() . "\n";
+	    }
+	    
+	    # En este punto es importante recordar que el objeto $query 
+	    # es un XML::DOM::Node, y que si queremos trabajar con 
+	    # el mensaje de texto debemos llamar a: $query->toString() 
+	    my $query_response = _do_query_PromoterExtraction ($queryInput, "True");
+	    
+	    # $query_response es un string que contiene el codigo xml de
+	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
+	    # encadenar sin problemas una respuesta con otra. 
+	    $MOBY_RESPONSE .= $query_response;
+	}
+	# Una vez tenemos la coleccion de respuestas, debemos encapsularlas 
+	# todas ellas con una cabecera y un final. Esto lo podemos hacer 
+	# con las llamadas de la libreria Common de BioMoby. 
+	my $response = INB::GRIB::Utils::CommonUtilsSubs->setMobyResponse ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName);
+	
+	return $response;
+}
 
 1;
 
