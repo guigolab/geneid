@@ -70,6 +70,7 @@ my $MOBY_SERVER = $ENV{MOBY_SERVER} ='http://chirimoyo.ac.uma.es/cgi-bin/MOBY-Ce
 # Development by default, but if the registry server is the production one,
 # then the URL will be the production server at genome.imim.es
 $::URL = 'http://genome.imim.es/cgi-bin/moby/devel/MobyServices.cgi';
+my $serviceType = "GettingNucleotides";
 
 if (defined($opt_x)) {
     # Delete spaces
@@ -99,16 +100,17 @@ if (defined($opt_x)) {
 	
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
-
+	
     }
     elsif (($opt_x == 4) || ($opt_x eq 'BioMoby')) {
 	
 	$MOBY_URI    = $ENV{MOBY_URI}    = 'http://mobycentral.icapture.ubc.ca/MOBY/Central';
 	$MOBY_SERVER = $ENV{MOBY_SERVER} = 'http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl';
-
+	
 	# Production
 	$::URL = 'http://genome.imim.es/cgi-bin/moby/MobyServices.cgi';
-
+	
+	$serviceType = "Retrieval";
     }
     else {
 	print STDERR help;
@@ -153,7 +155,7 @@ my $namespaces = [];
 # Declare register variable.
 my ($REG) = $Central->registerService(
 				      serviceName  => $serviceName,
-				      serviceType  => "GettingNucleotides",
+				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
 				      description  => "Sequence retrieval tool from Ensembl database. It returns the upstream sequence of all orthologues of a given Ensembl gene identifier. The identifier could be an external one, such as a Refseq Id or an Affymetrix id.",
