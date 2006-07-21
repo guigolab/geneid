@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.98 2006-07-19 18:25:33 gmaster Exp $
+# $Id: Factory.pm,v 1.99 2006-07-21 17:03:57 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -867,7 +867,8 @@ sub PromoterExtraction_call {
     my $genes_ref  = $args{genes}      || undef;
     my $parameters = $args{parameters} || undef;
     my $queryID    = $args{queryID}    || "";
-
+    my $debug      = $args{debug}      || 0;
+    
     # Get the parameters
 
     my $organism          = $parameters->{organism};
@@ -921,18 +922,22 @@ sub PromoterExtraction_call {
 
     my ($genes_list_fh, $genes_list_file) = tempfile("/tmp/PROM_EXTRACTION_GENES.XXXXXX", UNLINK => 1);
     close ($genes_list_fh);
-
+    
     open (FILE, ">$genes_list_file") or die "can't open temp file, $genes_list_file!\n";
     print FILE (join ("\n", @$genes_ref) . "\n");
     close FILE;
-
-    # print STDERR "running command,\n";
-    # print STDERR "$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file\n";
-
+    
+    if ($debug) {
+	print STDERR "running command,\n";
+	print STDERR "$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file\n";
+    }
+    
     $promoterExtraction_output = qx/$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file/;
 
-    unlink $genes_list_file;
-
+    if (!$debug) {
+	unlink $genes_list_file;
+    }
+    
     if (defined $promoterExtraction_output) {
 	return $promoterExtraction_output;
     }
