@@ -161,8 +161,8 @@ $x->dispatch_with({
     
     'http://biomoby.org/#translateGeneIDGFFPredictions' => 'INB::GRIB::Services::UtilsServices',
     
-    'http://biomoby.org/#getUpstreamSeqfromEnsembl'            => 'INB::GRIB::Services::PromoterExtractionServices',
-    'http://biomoby.org/#getOrthologousUpstreamSeqfromEnsembl' => 'INB::GRIB::Services::PromoterExtractionServices',
+    'http://biomoby.org/#getUpstreamSeqFromEnsembl'            => 'INB::GRIB::Services::PromoterExtractionServices',
+    'http://biomoby.org/#getOrthologousUpstreamSeqFromEnsembl' => 'INB::GRIB::Services::PromoterExtractionServices',
     
     'http://biomoby.org/#runMatScanGFF'                 => 'INB::GRIB::Services::MatScanServices',
     'http://biomoby.org/#runMatScanGFFCollection'       => 'INB::GRIB::Services::MatScanServices',
