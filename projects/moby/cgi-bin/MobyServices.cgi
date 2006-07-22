@@ -43,6 +43,7 @@ use INB::GRIB::Services::AssemblyServices;
 use INB::GRIB::Services::BaseCallingServices;
 use INB::GRIB::Services::FilteringServices;
 use INB::GRIB::Services::ClusteringServices;
+use INB::GRIB::Services::GFF2PSServices;
 
 # Deprecated but 'generateScoreMatrix' is still registered in icapture registry
 use INB::GRIB::Services::OldServices;
@@ -185,11 +186,6 @@ $x->dispatch_with({
     'http://biomoby.org/#fromFASTAToAminoAcidSequenceCollection' => 'INB::GRIB::Services::ConversionServices',
     'http://biomoby.org/#fromFASTAToGenericSequenceCollection'   => 'INB::GRIB::Services::ConversionServices',
     
-    # generateScoreMatrix is deprecated - Use fromMetaAlignmentsToTextScoreMatrix instead
-    # Don't dispatch the requests, as we want to have it tagged as being 'dead'
-    # (I can't deregister it !!! because it has a signature URL !)
-    # 'http://biomoby.org/#generateScoreMatrix'                    => 'INB::GRIB::Services::OldServices',
-    
     'http://biomoby.org/#fromMetaAlignmentsToScoreMatrix'        => 'INB::GRIB::Services::ParsingServices',
     'http://biomoby.org/#fromMetaAlignmentsToTextScoreMatrix'    => 'INB::GRIB::Services::ParsingServices',
     
@@ -217,6 +213,8 @@ $x->dispatch_with({
     'http://biomoby.org/#filterSequencesAndQualityDataByLength'  => 'INB::GRIB::Services::FilteringServices',
     
     'http://biomoby.org/#runKMeansClustering'                    => 'INB::GRIB::Services::ClusteringServices',
+
+    'http://biomoby.org/#runGFF2JPEG'                            => 'INB::GRIB::Services::GFF2PSServices',
     
 });
 $x->handle;
