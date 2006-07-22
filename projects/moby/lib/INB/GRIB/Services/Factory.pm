@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.99 2006-07-21 17:03:57 gmaster Exp $
+# $Id: Factory.pm,v 1.100 2006-07-22 14:41:33 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -772,7 +772,7 @@ sub TranslateGeneIDPredictions_call {
     }
 
     # Make two temporary files for both input lists of genes
-
+    
     my ($seq_fh, $seqfile);
     eval {
 	($seq_fh, $seqfile) = tempfile("/tmp/SEQS.TRANSLATION.XXXXXX", UNLINK => 0);
@@ -862,37 +862,51 @@ sub PromoterExtraction_call {
     my $promoterExtraction_output = "";
     my $moby_exceptions           = [];
 
-    # relleno los parametros por defecto GeneID_call
-
+    # relleno los parametros por defecto PromoterExtraction_call
+    
     my $genes_ref  = $args{genes}      || undef;
     my $parameters = $args{parameters} || undef;
     my $queryID    = $args{queryID}    || "";
     my $debug      = $args{debug}      || 0;
     
     # Get the parameters
-
+    
     my $organism          = $parameters->{organism};
     my $dbrelease         = $parameters->{dbrelease};
     my $upstream_length   = $parameters->{upstream_length};
     my $downstream_length = $parameters->{downstream_length};
     my $intergenic_only   = $parameters->{intergenic_only};
     my $orthologous_mode  = $parameters->{orthologous_mode};
-
+    
     # Llama a GeneID en local
     my $_promExtraction_dir  = "/home/ug/gmaster/projects/promoter_extraction";
     my $_promExtraction_bin  = "promoter_extraction.pl";
     my $_promExtraction_args = "";
-
+    
+    # Check that the binary is in place
+    if (! -f "$_promExtraction_dir/$_promExtraction_bin") {
+	my $note = "Internal System Error. promoter_extraction.pl script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
     if (lc ($intergenic_only) eq "true") {
 	$_promExtraction_args .= "-i";
     }
     if (lc ($orthologous_mode) eq "true") {
 	$_promExtraction_args .= " -o";
     }
-
+    
     $_promExtraction_args .= " -u $upstream_length";
     $_promExtraction_args .= " -d $downstream_length";
-
+    
     SWITCH: {
 	if (lc ($organism) eq "homo sapiens")             { $_promExtraction_args .= " -s homo_sapiens"; last SWITCH; }
 	if (lc ($organism) eq "pan troglodytes")          { $_promExtraction_args .= " -s pan_troglodytes"; last SWITCH; }
@@ -915,17 +929,30 @@ sub PromoterExtraction_call {
 	# Default is Human
 	$_promExtraction_args .= " -s homo_sapiens";
     }
-
-    $_promExtraction_args .= " -r $dbrelease" || die "no ensembl release was given!\n";
-
-    # Make a temporary file for the input list of genes
-
-    my ($genes_list_fh, $genes_list_file) = tempfile("/tmp/PROM_EXTRACTION_GENES.XXXXXX", UNLINK => 1);
-    close ($genes_list_fh);
     
-    open (FILE, ">$genes_list_file") or die "can't open temp file, $genes_list_file!\n";
-    print FILE (join ("\n", @$genes_ref) . "\n");
-    close FILE;
+    $_promExtraction_args .= " -r $dbrelease";
+    
+    # Make a temporary file for the input list of genes
+    
+    my ($genes_list_fh, $genes_list_file);
+    eval {
+	($genes_list_fh, $genes_list_file) = tempfile("/tmp/PROM_EXTRACTION_GENES.XXXXXX", UNLINK => 1);
+	print $genes_list_fh (join ("\n", @$genes_ref) . "\n");
+    };
+    if ($@) {
+	close $genes_list_fh;
+	my $note = "Internal System Error. Can not open gene identifier list input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    close $genes_list_fh;
     
     if ($debug) {
 	print STDERR "running command,\n";
@@ -933,16 +960,25 @@ sub PromoterExtraction_call {
     }
     
     $promoterExtraction_output = qx/$_promExtraction_dir\/$_promExtraction_bin $_promExtraction_args -f $genes_list_file/;
-
+    
     if (!$debug) {
 	unlink $genes_list_file;
     }
     
     if (defined $promoterExtraction_output) {
-	return $promoterExtraction_output;
+	return ($promoterExtraction_output, $moby_exceptions);
     }
     else {
-	return undef;
+	my $note = "Internal System Error. prmoter extraction script execution has failed!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
     }
 }
 

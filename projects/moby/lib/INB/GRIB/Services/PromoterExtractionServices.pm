@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.14 2006-07-21 17:05:27 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.15 2006-07-22 14:41:33 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -158,8 +158,12 @@ sub _do_query_PromoterExtraction {
     
     # The latest that is working !
     my $dbrelease = 38;
-
-    my $MOBY_RESPONSE = "";     # set empty response
+    
+    my $MOBY_RESPONSE   = ""; # set empty response
+    my $moby_exceptions = [];
+    my $output_object_type  = "CommentedDNASequence";
+    my $output_article_name = "upstream_sequences";
+    my $namespace = "ENSEMBL";
     
     # Variables that will be passed to PromoterExtraction_call
     my @genes;
@@ -167,7 +171,7 @@ sub _do_query_PromoterExtraction {
     
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
-
+    
     # Get the parameters
     
     my ($organism)          = getNodeContentWithArticle($queryInput_DOM, "Parameter", "organism");
@@ -190,120 +194,135 @@ sub _do_query_PromoterExtraction {
     $parameters{orthologous_mode}  = $orthologous_mode;
 
     # Tratamos a cada uno de los articulos
-    foreach my $article (@articles) {       
+    foreach my $article (@articles) {
 	
 	# El articulo es una tupla que contiene el nombre de este 
 	# y su texto xml. 
 	
 	my ($articleName, $DOM) = @{$article}; # get the named article
 	
-	# Si le hemos puesto nombre a los articulos del servicio,  
-	# podemos recoger a traves de estos nombres el valor.
-	# Sino sabemos que es el input articulo porque es un simple/collection articulo
-
-	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input (which should be 'genes')
-	# In case of this service, it doesn't really matter as there is only one input anyway
+	if (isCollectionArticle ($DOM)) {
+	    
+	    # not allowed
+	    
+	    my $note = "Received a collection input article instead of a simple";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      refElement => "genes",
+								      code       => $code,
+								      type       => 'error',
+								      queryID    => $queryID,
+								      message    => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    # Return an empty moby data object, as well as an exception telling what nothing got returned
+	    
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
 	
-	if (($articleName =~ /gene/) || ($articleName eq "")) { 
-
-	    if (isSimpleArticle ($DOM)) {
-
-		if ($_debug) {
-		    print STDERR "\"genes\" tag is a simple article...\n";
-		    print STDERR "node ref, " . ref ($DOM) . "\n";
-		    print STDERR "DOM: " . $DOM->toString () . "\n";
-		}
-		
-		# Should pick the String because text-formatted has-a String now,
-		# and not text-formatted is-a String - for backward compatibility, let the users give a text-formatted object without a String attribute !!
-
-		my $genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "String");
-		if (length ($genes_lst) < 1) {
-		    $genes_lst    = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "text-formatted");
-		}
-
-		if (length ($genes_lst) < 1) {
-		    print STDERR "can't get the genes list!\n";
-		    exit 0;
-		}
-
-		my @genes_tmp = split ("\n", $genes_lst);
-
-		if ($_debug) {
-		    print STDERR "got a list before filtering of " . @genes_tmp . " genes\n";
-		}
-
-		# Filter the list from empty elements
-
-		@genes = map { /(\S+)/ } @genes_tmp;
-
-		if ($_debug) {
-		    print STDERR "got a list of " . @genes . " genes\n";
-		}
-
-		if ($_debug) {
-		    print STDERR "genes_lst,\n@genes.\n";
-		}
-		
+	if (($articleName =~ /gene/) || isSimpleArticle ($DOM)) { 
+	    if ($_debug) {
+		print STDERR "\"genes\" tag is a simple article...\n";
+		print STDERR "node ref, " . ref ($DOM) . "\n";
+		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
-	    elsif (isCollectionArticle ($DOM)) {
+	    
+	    # Validate the type first
+	    
+	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "List_Text");
+	    if (!$rightType) {
+		my $note = "Expecting a List_Text object, and receiving a $inputDataType object";
+		print STDERR "$note\n";
+		my $code = "201";
+		my $moby_exception = INB::Exceptions::MobyException->new (
+									  refElement => "genes",
+									  code       => $code,
+									  type       => 'error',
+									  queryID    => $queryID,
+									  message    => "$note",
+									  );
+		push (@$moby_exceptions, $moby_exception);
 		
-		print STDERR "\"genes\" is a collection article...\n";
-		# print STDERR "Collection DOM: " . $DOM->toString() . "\n";
-		
-		print STDERR "collection is not expected!!\n";
-		exit 0;
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
-	    else {
-		print STDERR "It is not a simple or collection article...\n";
-		print STDERR "DOM: " . $DOM->toString() . "\n";
-		exit 0;
+	    
+	    my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "List_Text");
+	    my @genes_tmp = split ("\n", $genes_lst);
+	    
+	    if ($_debug) {
+		print STDERR "got a list before filtering of " . @genes_tmp . " genes\n";
+	    }
+	    
+	    # Filter the list from empty elements
+	    
+	    @genes = map { /(\S+)/ } @genes_tmp;
+	    
+	    if ($_debug) {
+		print STDERR "got a list of " . @genes . " genes\n";
+	    }
+	    
+	    if ($_debug) {
+		print STDERR "genes_lst,\n@genes.\n";
 	    }
 	} # End parsing genes tag
-	    	
-    } # Next article
-
+    } # End parsing articles
+    
     if (@genes < 1) {
-	print STDERR "Error, found no gene identifiers\n";
-	exit 0;
+	my $note = "Error parsing input element, 'genes', the article doesn't contain any gene identifier!";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "genes",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
     
-    my $fasta_sequences = PromoterExtraction_call (genes => \@genes, debug => $_debug, queryID => $queryID, parameters => \%parameters);
-
+    my ($fasta_sequences, $moby_exceptions_tmp) = PromoterExtraction_call (genes => \@genes, debug => $_debug, queryID => $queryID, parameters => \%parameters);
+    push (@$moby_exceptions, @$moby_exceptions_tmp);
+    
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX 
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio 
     # la podriamos realizar en una funcion a parte si fuese compleja.  
-
-    # Return CommentedDNASequence so we also add a description
-    # The specs say to return DNASequence but that shouldn't matter returning CommentedDNASequence because CommentedDNASequence is-a DNASequence !!
-
-    my $output_object_type  = "CommentedDNASequence";
-    my $output_article_name = "upstream_sequences";
-    my $namespace = "ENSEMBL";
-
+    
     if (not defined $fasta_sequences) {
-	# Return an emtpy message !
-	return collectionResponse (undef, $output_article_name, $queryID);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
     }
-
-    my $sequence_objects   = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type, $namespace);
-
-    # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
-    # volver a encapsularlo en un objeto biomoby de respuesta. Pero 
-    # en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
-    # una respuesta compleja (de verdad, esta era simple ;) llamariamos 
-    # a collection response. 
-    # IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
-    # el mismo que el de la query. 
-
-    $MOBY_RESPONSE .= collectionResponse($sequence_objects, $output_article_name, $queryID);
+    else {
+	my $sequence_objects  = INB::GRIB::Utils::CommonUtilsSubs->createSequenceObjectsFromFASTA ($fasta_sequences, $output_object_type, $namespace);
 	
-    return $MOBY_RESPONSE;
+	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
+	# volver a encapsularlo en un objeto biomoby de respuesta. Pero 
+	# en este caso disponemos de una funcion que lo realiza. Si tuvieramos 
+	# una respuesta compleja (de verdad, esta era simple ;) llamariamos 
+	# a collection response. 
+	# IMPORTANTE: el identificador de la respuesta ($queryID) debe ser 
+	# el mismo que el de la query. 
+	
+	$MOBY_RESPONSE .= collectionResponse($sequence_objects, $output_article_name, $queryID);
+    }
+    
+    return ($MOBY_RESPONSE, $moby_exceptions);
 }
 
+##################################################################################################################
+#
+# Public methods
+#
+##
 
 =head2 getUpstreamSeqFromEnsembl
 
@@ -382,7 +401,8 @@ sub getUpstreamSeqFromEnsembl {
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
 	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    my $query_response = _do_query_PromoterExtraction ($queryInput, "False");
+	    my ($query_response, $moby_exceptions_tmp) = _do_query_PromoterExtraction ($queryInput, "False");
+	    push (@$moby_exceptions, @$moby_exceptions_tmp);
 	    
 	    # $query_response es un string que contiene el codigo xml de
 	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
