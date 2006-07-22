@@ -1,5 +1,7 @@
-<text-formatted namespace="Ensembl" id="">
+<List_Text namespace="Ensembl" id="">
+<String id='' articleName='content'>
 <![CDATA[
 ENSG00000197785
 ]]>
-</text-formatted>
+</String>
+</List_Text>
