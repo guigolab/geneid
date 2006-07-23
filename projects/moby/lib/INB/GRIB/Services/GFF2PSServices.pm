@@ -1,4 +1,4 @@
-# $Id: GFF2PSServices.pm,v 1.1 2006-07-23 18:19:29 gmaster Exp $
+# $Id: GFF2PSServices.pm,v 1.2 2006-07-23 20:55:59 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -143,7 +143,10 @@ sub _do_query_GFF2JPEG {
     my $queryID  = getInputID ($queryInput_DOM);
     my @articles = getArticles($queryInput_DOM);
     
+    my $title = "Transcription factor binding site maps";
+    
     $parameters{output_format} = $moby_output_format;
+    $parameters{title} = $title;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {
@@ -268,7 +271,7 @@ sub _do_query_GFF2JPEG {
 	    
 	    # Encode the JPEG image
 	    
-	    my $gff2jpeg_encoded_report = decode_base64 ($gff2jpeg_report);
+	    my $gff2jpeg_encoded_report = encode_base64 ($gff2jpeg_report);
 	    
 	    my $namespace = "";
 	    
