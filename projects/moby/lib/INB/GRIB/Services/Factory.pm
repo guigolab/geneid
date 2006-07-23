@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.101 2006-07-23 18:19:29 gmaster Exp $
+# $Id: Factory.pm,v 1.102 2006-07-23 20:55:08 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3602,7 +3602,7 @@ sub GFF2JPEG_call {
     my $debug              = $args{debug}      || 0;
     my $queryID            = $args{queryID}    || "";
     
-    my $title              = $args{title} || "annotations maps";
+    my $title              = $args{title}      || "annotations maps";
     
     # Llama a cluster binary en local
     my $_gff2ps_dir    = "/home/ug/gmaster/projects/gff2ps";
@@ -3676,6 +3676,10 @@ sub GFF2JPEG_call {
 	return (undef, [$moby_exception]);
     }
     close $ps_fh;
+    # rename the file so it has the extension .ps !!"
+    # otherwise the conversion into jpeg will not work !!
+    qx/mv $ps_file $ps_file.ps/;
+    $ps_file = $ps_file . ".ps";
     
     my ($jpeg_fh, $jpeg_file);
     eval {
@@ -3694,6 +3698,9 @@ sub GFF2JPEG_call {
 	return (undef, [$moby_exception]);
     }
     close $jpeg_fh;
+    # rename the file so it has the extension .jpg !!"
+    qx/mv $jpeg_file $jpeg_file.jpg/;
+    $jpeg_file = $jpeg_file . ".jpg";
     
     if ($debug) {
       print STDERR "executing gf2ps with the following command:\n";
@@ -3715,6 +3722,11 @@ sub GFF2JPEG_call {
       print STDERR "conversion into JPEG format done\n\n";
     }
     
+    # if not empty file
+    if (! -z $jpeg_file) {
+      $image = qx/cat $jpeg_file/;
+    }
+    
     if (!$debug) {
       foreach my $map_file (@gff_files) {
         unlink $map_file;
@@ -3723,11 +3735,7 @@ sub GFF2JPEG_call {
       unlink $jpeg_file;
     }
     
-    # if not empty file
-    if (! -z $jpeg_file) {
-      $image = qx/cat $jpeg_file/;
-    }
-    else {
+    if (! defined $image) {
       my $note = "Internal System Error. gff2ps has failed!\n";
       my $code = 701;
       print STDERR "$note\n";
