@@ -16,7 +16,6 @@ use Getopt::Std;
 
 use MOBY::Client::Central;
 use MOBY::Client::Service;
-use SOAP::Lite;
 # use SOAP::Lite + 'trace';
 
 # Bioperl Libraries
@@ -206,7 +205,7 @@ if ($_debug) {
 }
 
 if (!$wsdl || ($wsdl !~ /\<definitions/)){
-    print "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
+    print STDERR "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
 }
 
 my $Service = MOBY::Client::Service->new(service => $wsdl);
