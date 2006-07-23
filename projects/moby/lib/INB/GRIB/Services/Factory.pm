@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.100 2006-07-22 14:41:33 gmaster Exp $
+# $Id: Factory.pm,v 1.101 2006-07-23 18:19:29 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -140,6 +140,7 @@ our @EXPORT = qw(
   &Phred_call
   &SequenceFilteringByLength_call
   &KMeans_call
+  &GFF2JPEG_call
 );
 
 our $VERSION = '1.00';
@@ -3424,7 +3425,7 @@ sub KMeans_call {
     my $iteration_number = $parameters->{iteration_number};
     my $cluster_number   = $parameters->{cluster_number};
     
-    # Llama a sequence filtering script en local
+    # Llama a cluster binary en local
     my $_cluster_dir    = "/home/ug/gmaster/projects/cluster";
     my $_cluster_bin    = "cluster";
     my $_cluster_args   = "-k $cluster_number -r $iteration_number";
@@ -3587,6 +3588,159 @@ sub KMeans_call {
 	
 	return ($gene_clusters_aref, $moby_exceptions);
     }
+}
+
+sub GFF2JPEG_call {
+    my %args = @_;
+    
+    # output specs declaration
+    my $image = undef;
+    my $moby_exceptions    = [];
+    
+    my $gff_maps           = $args{maps}       || undef;
+    my $parameters         = $args{parameters} || undef;
+    my $debug              = $args{debug}      || 0;
+    my $queryID            = $args{queryID}    || "";
+    
+    my $title              = $args{title} || "annotations maps";
+    
+    # Llama a cluster binary en local
+    my $_gff2ps_dir    = "/home/ug/gmaster/projects/gff2ps";
+    my $_gff2ps_bin    = "bin/gff2ps";
+    my $_gff2ps_params = "params/matrices.gff2ps.param";
+    my $_gff2ps_data   = "data/empty.gff";
+    my $_gff2ps_args   = "-C $_gff2ps_dir/$_gff2ps_params -T \"$title\" -loOa";
+    
+    # Check that the binary is in place
+    if (! -f "$_gff2ps_dir/$_gff2ps_bin") {
+	my $note = "Internal System Error. $_gff2ps_bin script not found";
+	print STDERR "$note\n";
+	my $code = 701;
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    
+    # Create the temp GFF maps input files
+    
+    my @gff_files    = ();
+    my $gff2ps_input = "";
+    foreach my $gff_map (@$gff_maps) {
+    
+      if (length ($gff2ps_input) != 0) {
+        $gff2ps_input .= " $_gff2ps_dir/$_gff2ps_data ";
+      }
+    
+      my ($gff_map_fh, $gff_map_file);
+      eval {
+	($gff_map_fh, $gff_map_file) = tempfile("/tmp/GFF_MAP.XXXXXX", UNLINK => 0);
+      };
+      if ($@) {
+	my $note = "Internal System Error. Can not open GFF map input temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+      }
+      print $gff_map_fh "$gff_map\n";
+      close $gff_map_fh;
+      push (@gff_files, $gff_map_file);
+      $gff2ps_input .= "$gff_map_file";
+    }
+    
+    # Setup temporary output files
+    
+    my ($ps_fh, $ps_file);
+    eval {
+	($ps_fh, $ps_file) = tempfile("/tmp/GFF2PS_PS.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open gff2ps postcript output temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    close $ps_fh;
+    
+    my ($jpeg_fh, $jpeg_file);
+    eval {
+	($jpeg_fh, $jpeg_file) = tempfile("/tmp/GFF2PS_JPEG.XXXXXX", UNLINK => 0);
+    };
+    if ($@) {
+	my $note = "Internal System Error. Can not open convert jpeg output temporary file!\n";
+	my $code = 701;
+	print STDERR "$note\n";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	return (undef, [$moby_exception]);
+    }
+    close $jpeg_fh;
+    
+    if ($debug) {
+      print STDERR "executing gf2ps with the following command:\n";
+      print STDERR "$_gff2ps_dir/$_gff2ps_bin $_gff2ps_args $gff2ps_input > $ps_file\n";
+    }
+    
+    my $gff2ps_result = qx/$_gff2ps_dir\/$_gff2ps_bin $_gff2ps_args $gff2ps_input > $ps_file/;
+    
+    if ($debug) {
+      print STDERR "gff2ps execution done\n\n";
+      print STDERR "converting into JPEG format the postcript file, with the following command:\n";
+      print STDERR "convert -rotate 90 $ps_file $jpeg_file\n";
+    }
+    
+    # I expect convert tool to be in the PATH !
+    my $convert_result = qx/convert -rotate 90 $ps_file $jpeg_file/;
+    
+    if ($debug) {
+      print STDERR "conversion into JPEG format done\n\n";
+    }
+    
+    if (!$debug) {
+      foreach my $map_file (@gff_files) {
+        unlink $map_file;
+      }
+      unlink $ps_file;
+      unlink $jpeg_file;
+    }
+    
+    # if not empty file
+    if (! -z $jpeg_file) {
+      $image = qx/cat $jpeg_file/;
+    }
+    else {
+      my $note = "Internal System Error. gff2ps has failed!\n";
+      my $code = 701;
+      print STDERR "$note\n";
+      my $moby_exception = INB::Exceptions::MobyException->new (
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+      return (undef, [$moby_exception]);
+    }
+    
+    return ($image, $moby_exceptions);
 }
 
 #####################################################################################################
