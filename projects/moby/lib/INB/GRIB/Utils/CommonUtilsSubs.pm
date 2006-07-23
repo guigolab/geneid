@@ -884,6 +884,16 @@ sub validateDataType {
 		    }
 		}
 		
+		if ($specifiedType eq "List_Text") {
+		    if ($inputDataType eq "List_Text") {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
 		# ...
 		
 	    }
