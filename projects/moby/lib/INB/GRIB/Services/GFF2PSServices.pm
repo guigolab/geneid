@@ -1,4 +1,4 @@
-# $Id: GFF2PSServices.pm,v 1.2 2006-07-23 20:55:59 gmaster Exp $
+# $Id: GFF2PSServices.pm,v 1.3 2006-07-24 16:11:28 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -279,7 +279,9 @@ sub _do_query_GFF2JPEG {
 	    
 	    # Image_Encoded (Inab)
 	    
-	    my $output_object = <<PRT;
+	    my $output_object;
+	    if ($moby_output_format eq "Image_Encoded") {
+		$output_object = <<PRT;
 <moby:$moby_output_format namespace='' id=''>
 <String namespace='' id='' articleName='rawdata'>
 <![CDATA[
@@ -293,10 +295,11 @@ image/jpeg
 </String>
 </moby:$moby_output_format>
 PRT
-
-            # b64_encoded_jpeg (icapture)
-	    
-	    $output_object = <<PRT;
+            }
+            else {
+		# b64_encoded_jpeg (icapture)
+		
+		$output_object = <<PRT;
 <moby:$moby_output_format namespace='' id=''>
 <String namespace='' id='' articleName='content'>
 <![CDATA[
@@ -305,8 +308,8 @@ $gff2jpeg_encoded_report
 </String>
 </moby:$moby_output_format>
 PRT
-
-            $MOBY_RESPONSE = simpleResponse($output_object, $output_article_name, $queryID);
+            }
+	    $MOBY_RESPONSE = simpleResponse($output_object, $output_article_name, $queryID);
 	    
         }
 	else {
@@ -345,7 +348,7 @@ sub runGFF2JPEG {
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_; # get the incoming MOBY query XML
     
-    my $_output_format = "Image_Encoded";
+    my $_output_format = "b64_encoded_jpeg";
     my $moby_logger = get_logger ("MobyServices");
     my $serviceName = "runGFF2JPEG";
     
