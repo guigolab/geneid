@@ -45,8 +45,6 @@ use INB::GRIB::Services::FilteringServices;
 use INB::GRIB::Services::ClusteringServices;
 use INB::GRIB::Services::GFF2PSServices;
 
-# Deprecated but 'generateScoreMatrix' is still registered in icapture registry
-use INB::GRIB::Services::OldServices;
 ###############################################################################
 
 sub daemonize {
