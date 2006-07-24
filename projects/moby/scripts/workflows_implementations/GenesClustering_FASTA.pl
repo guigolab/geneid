@@ -633,9 +633,11 @@ if (hasFailed ($moby_response)) {
     exit 1;
 }
 
-if (defined $output_dir) {
-    saveResults ($moby_response, "List_Text", "K-means_clusters", $output_dir);
-}
+# A directory foreach cluster instead !!
+
+# if (defined $output_dir) {
+    # saveResults ($moby_response, "List_Text", "K-means_clusters", $output_dir);
+# }
 
 # Get the simples (collection of List_Text)
 
@@ -643,13 +645,18 @@ $input_xml_aref = parseResults ($moby_response, "List_Text");
 
 print STDERR "Fourth step done!\n\n";
 
-# runMultiMetaAlignmentGFF & runMultiMetaAlignment
+# runMultiMetaAlignmentGFF & runMultiMetaAlignment & runGFF2JPEG
 
 print STDERR "Fifth step, foreach predicted gene cluster, make the multiple binding sites maps alignment...\n";
-print STDERR "Executing multiple meta-alignment...\n";
 
 my $cluster_index = 1;
 foreach my $gene_cluster_input_xml (@$input_xml_aref) {
+    
+    my $matscan_maps_xml = [];
+    my $multimeta_map_xml;
+    
+    # Create a subdirectory which will contain cluster analysis results
+    qx/mkdir $output_dir\/$cluster_index".cluster_results"/;
     
     # Filter MatScan results based on the Moby identifier
     # so prior, need to get the list of genes as an array
@@ -660,13 +667,20 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
     # So far the list of genes in a formatted string
     my $gene_list_str = $gene_list_str_aref->[0];
     # Convert the list as an array of identifiers
-    my @cluster_genes = split ("\n", $gene_list_str);
+    # Filter empty lines
+    my @cluster_genes = grep {$_ ne ""} split ("\n", $gene_list_str);
     
-    my $maps_input_xml = [];
+    if ($_debug) {
+	print STDERR "cluster genes, " . join (', ', @cluster_genes) . ".\n";
+    }
+    
+    # store the list of gene identifiers in a file
+    open FILE, ">$output_dir/$cluster_index.cluster_results/$cluster_index.ids.lst" or die "can't open file, $output_dir/$cluster_index.cluster_results/$cluster_index.ids.lst!\n";
+    print FILE join ("\n", @cluster_genes);
+    print FILE "\n";
+    close FILE;
+    
     foreach my $gene_identifier (@cluster_genes) {
-	
-	# Filter empty string
-	next if $gene_identifier eq "";
 	
 	if ($_debug) {
 	    print STDERR "processing gene identifier, $gene_identifier.\n";
@@ -674,46 +688,44 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	
 	$gene_number++;
 	my $map_xml = $matscan_results{$gene_identifier};
-	push (@$maps_input_xml, $map_xml);
+	push (@$matscan_maps_xml, $map_xml);
     }
     
     if ($gene_number > 1) {
 	
 	# runMultiMetaAlignmentGFF first - only when more than one gene in the cluster
+	# Run this service just to save the results in GFF format and also for gff2ps visualization purposes
 	
-	# Run this service just to save the results in GFF format and also for gff2ps
+	print STDERR "Executing multiple meta-alignment...\n";
 	
-	if (defined $output_dir) {
+	$serviceName = "runMultiMetaAlignmentGFF";
+	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	
+	$Service = getService ($C, $serviceName, $authURI);
+	
+	$moby_response = $Service->execute (XMLinputlist => [
+							     ["$articleName", $matscan_maps_xml]
+							     ]);
+	
+	if ($_debug) {
+	    print STDERR "$serviceName result\n";
+	    print STDERR $moby_response;
+	    print STDERR "\n";
+	}
+	
+	if (hasFailed ($moby_response)) {
+	    print STDERR "service, $serviceName, has failed!\n";
+	    my $moby_error_message = getExceptionMessage ($moby_response);
+	    print STDERR "reason is the following,\n$moby_error_message\n";
+	}
+	else {
+	    my $multimeta_map_xml_aref = parseResults ($moby_response, "GFF");
+	    $multimeta_map_xml = $multimeta_map_xml_aref->[0];
 	    
-	    if (! -d "$output_dir/MultiMeta") {
-		# Setup a subdirectory with the multiple meta-alignment results for each cluster
-		my $result = qx/mkdir $output_dir\/MultiMeta/;
+	    if (defined $output_dir) {
+		saveResults ($moby_response, "GFF", $cluster_index . ".MultiMeta", $output_dir . "/$cluster_index.cluster_results");
 	    }
-	    
-	    $serviceName = "runMultiMetaAlignmentGFF";
-	    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-	    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-	    
-	    $Service = getService ($C, $serviceName, $authURI);
-	    
-	    $moby_response = $Service->execute (XMLinputlist => [
-								 ["$articleName", $maps_input_xml]
-								 ]);
-	    
-	    if ($_debug) {
-		print STDERR "$serviceName result\n";
-		print STDERR $moby_response;
-		print STDERR "\n";
-	    }
-	    
-	    if (hasFailed ($moby_response)) {
-		print STDERR "service, $serviceName, has failed!\n";
-		my $moby_error_message = getExceptionMessage ($moby_response);
-		print STDERR "reason is the following,\n$moby_error_message\n";
-		exit 1;
-	    }
-	    
-	    saveResults ($moby_response, "GFF", $cluster_index . ".MultiMeta", $output_dir . "/MultiMeta");
 	}
 	
 	if ($_debug) {
@@ -722,7 +734,6 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	    print STDERR ".\n";
 	}
 	
-	
 	# Then runMultiMetaAlignment
 	
 	$serviceName = "runMultiMetaAlignment";
@@ -730,6 +741,47 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
 	
 	$Service = getService ($C, $serviceName, $authURI);
+	
+	$moby_response = $Service->execute (XMLinputlist => [
+							     ["$articleName", $matscan_maps_xml]
+							     ]);
+	
+	if ($_debug) {
+	    print STDERR "$serviceName result\n";
+	    print STDERR $moby_response;
+	    print STDERR "\n";
+	}
+	
+	if (hasFailed ($moby_response)) {
+	    print STDERR "service, $serviceName, has failed!\n";
+	    my $moby_error_message = getExceptionMessage ($moby_response);
+	    print STDERR "reason is the following,\n$moby_error_message\n";
+	}
+	elsif (defined $output_dir) {
+	    saveResults ($moby_response, "Meta_Alignment_Text", $cluster_index . ".MultiMeta", $output_dir . "/$cluster_index.cluster_results");
+	}
+	
+	if ($_debug) {
+	    # print STDERR "input xml for next service:\n";
+	    # print STDERR join (', ', @$input_xml);
+	    # print STDERR ".\n";
+	}
+	
+	# runGFF2JPEG
+	
+	print STDERR "Executing gff2ps...\n";
+	
+	$serviceName = "runGFF2JPEG";
+	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	
+	$Service = getService ($C, $serviceName, $authURI);
+	
+	my $maps_input_xml = [];
+	push (@$maps_input_xml, $multimeta_map_xml);
+	push (@$maps_input_xml, @$matscan_maps_xml);
+
+	print STDERR "runGFF2JPEG input, " . @$maps_input_xml . " maps\n";
 	
 	$moby_response = $Service->execute (XMLinputlist => [
 							     ["$articleName", $maps_input_xml]
@@ -745,21 +797,34 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	    print STDERR "service, $serviceName, has failed!\n";
 	    my $moby_error_message = getExceptionMessage ($moby_response);
 	    print STDERR "reason is the following,\n$moby_error_message\n";
-	    exit 1;
+	}
+	elsif (defined $output_dir) {
+	    
+	    # Store the jpeg format image
+	    
+	    my $picture_b64_aref = parseTextContent ($moby_response, "b64_encoded_jpeg");
+	    
+	    if (! defined $picture_b64_aref) {
+		print STDERR "problem, can't parse anything from moby runGFF2JPEG response!\n";
+	    }
+	    else {
+		if ($_debug) {
+		    print STDERR "picture array has " . @$picture_b64_aref . " elements\n";
+		}
+		
+		# Store the image into a file
+		
+		my $picture_b64 = $picture_b64_aref->[0];
+		my $picture = decode_base64($picture_b64);
+		
+		open FILE, ">$output_dir/$cluster_index.cluster_results/$cluster_index.TFBSs_maps.jpg" or die "can't open file, $output_dir/$cluster_index.cluster_results/$cluster_index.TFBSs_maps.jpg!\n";
+		print FILE "$picture\n";
+		close FILE;
+	    }
 	}
 	
-        # Dead end for now !
-        # $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
-	# but later connect it to gff2ps
-	if (defined $output_dir) {
-	    saveResults ($moby_response, "Meta_Alignment_Text", $cluster_index . ".MultiMeta", $output_dir . "/MultiMeta");
-	}
+	print STDERR "\n";
 	
-	if ($_debug) {
-	    # print STDERR "input xml for next service:\n";
-	    # print STDERR join (', ', @$input_xml);
-	    # print STDERR ".\n";
-	}
     }
     
     $cluster_index++;
@@ -789,7 +854,7 @@ else {
 
 # runHierarchicalClustering
 
-print STDERR "Fith step, gene clustering using a $method neighbour joining clustering algorithm...\n";
+print STDERR "Sixth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
 
 if ($_debug) {
   print STDERR "\nExecuting runHierarchicalClustering...\n\n";
@@ -919,7 +984,7 @@ else {
     my $picture_b64_aref = parseTextContent ($moby_response, "Image_Encoded");
     my $picture_b64 = $picture_b64_aref->[0];
     
-# Convert in to a picture and store into a file
+    # Convert in to a picture and store into a file
     
     my $picture = decode_base64($picture_b64);
     
