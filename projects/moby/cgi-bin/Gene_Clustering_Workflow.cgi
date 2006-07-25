@@ -6,7 +6,7 @@ use CGI;
 use File::Temp qw/tempfile/;
 use File::Temp qw/tempdir/;
 
-my $_debug = 0;
+my $_debug = 1;
 
 my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
 
@@ -55,11 +55,6 @@ else {
 	
 	# Copy the uploaded data into a temporary file
 	while ( my $line = <$upload_filehandle> ) {
-	    if ($_debug) {
-		print STDERR "copying data...\n";
-		# print STDERR "line, $line\n";
-	    }
-	    
 	    print $seq_fh $line;
 	}
     }
@@ -145,7 +140,15 @@ else {
 }
 
 if ($_debug) {
-    print STDERR "execution done\n";
+    print STDERR "execution done\n\n";
+}
+
+if (length ($result) > 1) {
+    print STDERR "workflow execution has failed!\n";
+    print STDERR "execution result, $result\n";
+
+    print "Content-type: text/html\n\n";
+    print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
 }
 
 ##############################
@@ -154,61 +157,124 @@ if ($_debug) {
 #
 ##############################
 
-# Get the clusters
+if ($_debug) {
+    print STDERR "Make an archive...\n";
+}
 
-my @clusters = ();
-opendir (CLUSTERDIR, "$gene_clustering_output_dir/K-means_clusters");
-my @cluster_files = grep { $_ ne '.' and $_ ne '..' } readdir CLUSTERDIR;
-closedir CLUSTERDIR;
+# Make an archive
 
-if (@cluster_files > 0) {
+my $archive_path = "/usr/local/Install/apache2/htdocs/webservices/workflows/results";
+my $output_dir_name = $gene_clustering_output_dir;
+$output_dir_name =~ s/\/tmp\///;
+my $archive_filename = $output_dir_name . ".zip";
+my $archive_URL = "http://genome.imim.es/webservices/workflows/results/" . $archive_filename;
+
+$result = qx/cd \/tmp; zip -r $archive_path\/$archive_filename $output_dir_name/;
+
+# Display in HTML the results
+# First the archive link
+
+print "Content-type: text/html\n\n";
+print "<html><head><title>Gene clustering results</title></head>\n<body>";
+
+print "There is an <a href=\"$archive_URL\">archive</a> available to download all the results\n";
+
+if ($_debug) {
+    print STDERR "Archive done!\n";
+    print STDERR "zip result status, $result\n";
+}
+
+if ($_debug) {
+    print STDERR "process the cluster results\n";
+}
+
+# Now, get the cluster results
+
+print "<ul>\n";
+
+my $cluster_index = 1;
+while ($cluster_index <= $cluster_number) {
     
-    # Make a results archive
+    # The results for current cluster
     
-    my $archive_path = "/usr/local/Install/apache2/htdocs/webservices/workflows/results";
-    my $output_dir_name = $gene_clustering_output_dir;
-    $output_dir_name =~ s/\/tmp\///;
-    my $archive_filename = $output_dir_name . ".zip";
-    my $archive_URL = "http://genome.imim.es/webservices/workflows/results/" . $archive_filename;
+    my $cluster_directory_name = $cluster_index . ".cluster_results";
     
-    if ($_debug) {
-	print STDERR "output_dir_name, $output_dir_name\n";
-    }
-    
-    qx/cd \/tmp; zip -r $archive_path\/$archive_filename $output_dir_name/;
-    
-    # Display in HTML the results
-    
-    print "Content-type: text/html\n\n";
-    print "<html><head><title>Gene clustering results</title></head>\n<body>";
-    
-    print "There is an <a href=\"$archive_URL\">archive</a> available to download all the results\n";
-    
-    print "<ul>\n";
-    my $index = 1;
-    foreach my $cluster_file (@cluster_files) {
+    if (-d "$gene_clustering_output_dir/$cluster_directory_name") {
 	
 	if ($_debug) {
-	    print STDERR "parsing file, $cluster_file\n";
+	    print STDERR "processing cluster directory, $cluster_directory_name...\n";
 	}
 	
-	my $genes = qx/cat $gene_clustering_output_dir\/K-means_clusters\/$cluster_file/;
-	$genes =~ s/\n/<br>/g;
+	# The gene members
 	
-	print "<li><h3>cluster $index:</h3><br>";
-	print "$genes<br>";
+	my $genes = qx/cat $gene_clustering_output_dir\/$cluster_directory_name\/$cluster_index.ids.lst/;
+	my @genes = grep {$_ ne ""} split ("\n", $genes);
 	
-	$index++;
-    }
-    
-    print "</ul>\n";
-    print "</body></html>\n";
-}
-else {
-    print STDERR "no clusters found, genes clustering failed!!\n";
-    
-    print "Content-type: text/html\n\n";
-    print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
+	if ($_debug) {
+	    print STDERR "genes in cluster $cluster_index, @genes\n";
+	}
+	
+	my $nb_genes = @genes;
+	
+	print "<li><h3>cluster $cluster_index:</h3>";
+	print join ("<br>", @genes);
+	print "<br><br>\n";
+	
+	if ($nb_genes > 1) {
+	    
+	    # MatScan
+	    
+	    my $matscan_results = "";
+	    # ...
+	    
+	    # MMeta
+	    
+	    my $mmeta_results = "";
+	    my $mmeta_filename = "$gene_clustering_output_dir/$cluster_directory_name/" . $cluster_index . ".MultiMeta.txt";
+	    
+	    if ($_debug) {
+		print STDERR "mmeta filename for cluster $cluster_index, $mmeta_filename\n";
+	    }
+	    
+	    if (-f $mmeta_filename) {
+		$mmeta_results = qx/cat $mmeta_filename/;
+	    }
+	    else {
+		print STDERR "can't find mmeta results for cluster $cluster_index - filename is $mmeta_filename\n";
+	    }
+	    
+	    print "<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>\n";
+	    print "<TR>\n";
+	    print "<TD class='section'>\n";
+	    print "<FONT size=5 class='K'>\n";
+	    
+	    print "<code>Multiple meta-alignment</code> predictions for this cluster are:</FONT></TD></TR></TABLE><P><pre><tt>\n";
+	    
+	    # Multiple meta-alignment results
+	    print "$mmeta_results\n";
+	    
+	    print "<hr>\n";
+	    
+	    # MatScan results
+	    print "$matscan_results\n";
+	    
+	    print "</pre></tt>\n";
+	}
+	
+	if ($_debug) {
+	    print STDERR "cluster processing done\n";
+	}
+	
+    } # End processing current cluster
+
+    $cluster_index++;
+} # End processing all cluster results
+
+print "</ul>\n";
+print "</body></html>\n";
+
+if ($_debug) {
+    print STDERR "processing of the cluster results done\n";
 }
 
 ##############################
