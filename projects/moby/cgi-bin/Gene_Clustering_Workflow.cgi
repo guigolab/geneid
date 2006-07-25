@@ -6,7 +6,7 @@ use CGI;
 use File::Temp qw/tempfile/;
 use File::Temp qw/tempdir/;
 
-my $_debug = 1;
+my $_debug = 0;
 
 my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
 
@@ -124,7 +124,9 @@ if ($_debug) {
     print STDERR "executing the gene clustering workflow...\n";
 }
 
-my $gene_clustering_output_dir = tempdir( "/tmp/GENE_CLUSTERING_OUTPUT.XXXXXX" );
+my $gene_clustering_output_dir = tempdir( "/usr/local/Install/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING_OUTPUT.XXXXXX" );
+my $gene_clustering_output_dirname = $gene_clustering_output_dir;
+$gene_clustering_output_dirname =~ s/\/usr\/local\/Install\/apache2\/htdocs\/webservices\/workflows\/results\///;
 
 if ($_debug) {
     print STDERR "executing the following command,\n";
@@ -217,14 +219,28 @@ while ($cluster_index <= $cluster_number) {
 	my $nb_genes = @genes;
 	
 	print "<li><h3>cluster $cluster_index:</h3>";
+	# print "</ul>\n";
 	print join ("<br>", @genes);
 	print "<br><br>\n";
 	
 	if ($nb_genes > 1) {
 	    
+	    # JPEG
+	    
+	    my $cluster_image_filepath = "/webservices/workflows/results/$gene_clustering_output_dirname/$cluster_directory_name/" . $cluster_index . ".TFBSs_maps.jpg";
+	    
+	    if ($_debug) {
+		print STDERR "gff maps picture file path for cluster $cluster_index, $cluster_image_filepath\n";
+	    }
+	    
+	    if (! -f $cluster_image_filepath) {
+		print STDERR "can't find the gff maps picture for cluster $cluster_index - file path is $cluster_image_filepath\n";
+	    }
+	    
 	    # MatScan
 	    
 	    my $matscan_results = "";
+	    
 	    # ...
 	    
 	    # MMeta
@@ -242,6 +258,11 @@ while ($cluster_index <= $cluster_number) {
 	    else {
 		print STDERR "can't find mmeta results for cluster $cluster_index - filename is $mmeta_filename\n";
 	    }
+	    
+	    # HTML
+	    
+	    print "<font color=blue><b>Graphical representation of the TF-map alignment:</b><br><br></font>\n";
+	    print "<img src=\"$cluster_image_filepath\"><br>\n";
 	    
 	    print "<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>\n";
 	    print "<TR>\n";
