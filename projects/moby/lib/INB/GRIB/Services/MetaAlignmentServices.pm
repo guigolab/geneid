@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.24 2006-07-19 20:59:39 arnau Exp $
+# $Id: MetaAlignmentServices.pm,v 1.25 2006-07-26 13:23:03 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -714,6 +714,24 @@ sub _do_query_MultiPairwiseMetaAlignment {
 
     if (@$maps_gff < 2) {
 	my $note = "Parsed less than two maps from the article input, the service requires at least two maps\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "maps",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    elsif (@$maps_gff > 64) {
+	my $note = "Parsed more than 64 maps from the article input, the service requires won't be able to compute no more than 64 maps\n";
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
