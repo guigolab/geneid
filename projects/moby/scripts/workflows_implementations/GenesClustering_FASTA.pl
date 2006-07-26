@@ -81,7 +81,7 @@ Usage:
 	-l Meta-alignment lambda penalty (Default is 0.1)
 	-u Meta-alignment mu penalty (Default is 0.1)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
-	-n Number of clusters returned by the k-means algorithm
+	-n Number of clusters returned by the k-means algorithm (Default is 10)
 	-i Number of k-means iterations (Default is 200)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
 	-c workflow configuration file (default is \$HOME/.workflow.config)
@@ -96,10 +96,10 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_n $opt_i $opt_o/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_n $opt_i $opt_o $opt_s/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'hxfctdalumnio';
+    my $switches = 'shxfctdalumnio';
     
     # Get the switches
     getopt($switches);
@@ -121,6 +121,21 @@ my $_debug = 0;
 # Setup sequences input data and moby parameters
 #
 ##################################################################
+
+############################
+#
+# Hidden option - a hacky one !!
+#
+# use this (-s) flag when you have too many sequences, and you've done manually the multi pairwise alignments, and you want to start the workflow at the score matrix generation step!!
+#
+############################
+
+my $shortcut = 0;
+defined ($opt_s) && $shortcut++;
+
+if ($shortcut) {
+    print STDERR "shortcut activated, will start the workflow at 'fromMetaAlignmentsToTextScoreMatrix' step!\n";
+}
 
 # input file
 
@@ -188,10 +203,12 @@ my %parameters = setConfigurationData ($config_file);
 # Output
 my $output_dir = $opt_o || undef;
 if (defined $output_dir) {
-  if (-d $output_dir) {
-    qx/rm -rf $output_dir/;
+  if (!$shortcut) {
+      if (-d $output_dir) {
+	  qx/rm -rf $output_dir/;
+      }
+      qx/mkdir $output_dir/;
   }
-  qx/mkdir $output_dir/;
 }
 
 ##################################################################
@@ -427,69 +444,107 @@ if (($input_type ne "FASTA") && (defined $output_dir)) {
 }
 
 if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml);
-	print STDERR ".\n";
+    print STDERR "input xml for next service:\n";
+    print STDERR join (', ', @$input_xml);
+    print STDERR ".\n";
 }
 
-# runMatScanGFFCollection
+my %matscan_results;
 
-print STDERR "First step, $database binding sites predictions...\n";
-print STDERR "Executing MatScan...\n";
-
-$serviceName        = "runMatScanGFFCollection";
-$authURI            = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-$articleName        = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-
-$Service = getService ($C, $serviceName, $authURI);
-
-$moby_response = $Service->execute (XMLinputlist => [
-						     ["$articleName", $input_xml, "threshold", $threshold_xml, "motif database", $matrix_xml]
-						     ]);
-
-if ($_debug) {
+if (!$shortcut) {
+    
+    # runMatScanGFFCollection
+    
+    print STDERR "First step, $database binding sites predictions...\n";
+    print STDERR "Executing MatScan...\n";
+    
+    $serviceName        = "runMatScanGFFCollection";
+    $authURI            = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+    $articleName        = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+    
+    $Service = getService ($C, $serviceName, $authURI);
+    
+    $moby_response = $Service->execute (XMLinputlist => [
+							 ["$articleName", $input_xml, "threshold", $threshold_xml, "motif database", $matrix_xml]
+							 ]);
+    
+    if ($_debug) {
 	print STDERR "$serviceName results\n";
 	print STDERR $moby_response;
 	print STDERR "\n";
-}
-
-if (hasFailed ($moby_response)) {
-    print STDERR "service, $serviceName, has failed!\n";
-    my $moby_error_message = getExceptionMessage ($moby_response);
-    print STDERR "reason is the following,\n$moby_error_message\n";
-    exit 1;
-}
-
-$input_xml = parseResults ($moby_response, "GFF");
-# Keep it for later !
-my $matscan_results_xml_aref = $input_xml;
-# Setup a hastable to fast access
-my %matscan_results = setMatScan_hash ($matscan_results_xml_aref);
-
-if (defined $output_dir) {
-  saveResults ($moby_response, "GFF", "MatScan", $output_dir);
-}
-
-if ($_debug) {
+    }
+    
+    if (hasFailed ($moby_response)) {
+	print STDERR "service, $serviceName, has failed!\n";
+	my $moby_error_message = getExceptionMessage ($moby_response);
+	print STDERR "reason is the following,\n$moby_error_message\n";
+	exit 1;
+    }
+    
+    $input_xml = parseResults ($moby_response, "GFF");
+    # Keep it for later !
+    my $matscan_results_xml_aref = $input_xml;
+    # Setup a hastable to fast access
+    %matscan_results = setMatScan_hash ($matscan_results_xml_aref);
+    
+    if (defined $output_dir) {
+	saveResults ($moby_response, "GFF", "MatScan", $output_dir);
+    }
+    
+    if ($_debug) {
 	print STDERR "input xml for next service:\n";
 	print STDERR join (', ', @$input_xml);
 	print STDERR ".\n";
-}
-
-print STDERR "First step done\n\n";
-
-# runMultiPairwiseMetaAlignmentGFF & runMultiPairwiseMetaAlignment
-
-print STDERR "Second step, making the pairwise alignments of the binding site maps...\n";
-print STDERR "Executing meta-alignment...\n";
-
-# runMultiPairwiseMetaAlignmentGFF first
-
-# Run this service just to save the results in GFF format
-
-if (defined $output_dir) {
-
-    $serviceName = "runMultiPairwiseMetaAlignmentGFF";
+    }
+    
+    print STDERR "First step done\n\n";
+    
+    # runMultiPairwiseMetaAlignmentGFF & runMultiPairwiseMetaAlignment
+    
+    print STDERR "Second step, making the pairwise alignments of the binding site maps...\n";
+    print STDERR "Executing meta-alignment...\n";
+    
+    # runMultiPairwiseMetaAlignmentGFF first
+    
+    # Run this service just to save the results in GFF format
+    
+    if (defined $output_dir) {
+	
+	$serviceName = "runMultiPairwiseMetaAlignmentGFF";
+	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	
+	$Service = getService ($C, $serviceName, $authURI);
+	
+	$moby_response = $Service->execute (XMLinputlist => [
+							     ["$articleName", $input_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml]
+							     ]);
+	
+	if ($_debug) {
+	    print STDERR "$serviceName result\n";
+	    print STDERR $moby_response;
+	    print STDERR "\n";
+	}
+	
+	if (hasFailed ($moby_response)) {
+	    print STDERR "service, $serviceName, has failed!\n";
+	    my $moby_error_message = getExceptionMessage ($moby_response);
+	    print STDERR "reason is the following,\n$moby_error_message\n";
+	    exit 1;
+	}
+	
+	saveResults ($moby_response, "GFF", "Meta", $output_dir);
+    }
+    
+    if ($_debug) {
+	print STDERR "input xml for next service:\n";
+	print STDERR join (', ', @$input_xml);
+	print STDERR ".\n";
+    }
+    
+    # Then runMultiPairwiseMetaAlignment
+    
+    $serviceName = "runMultiPairwiseMetaAlignment";
     $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
     $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
     
@@ -512,52 +567,58 @@ if (defined $output_dir) {
 	exit 1;
     }
     
-    saveResults ($moby_response, "GFF", "Meta", $output_dir);
-}
-
-if ($_debug) {
+    $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
+    if (defined $output_dir) {
+	saveResults ($moby_response, "Meta_Alignment_Text", "Meta", $output_dir);
+    }
+    
+    if ($_debug) {
 	print STDERR "input xml for next service:\n";
 	print STDERR join (', ', @$input_xml);
 	print STDERR ".\n";
+    }
+    
+    print STDERR "Second step done!\n\n";
+    
 }
-
-# Then runMultiPairwiseMetaAlignment
-
-$serviceName = "runMultiPairwiseMetaAlignment";
-$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-
-$Service = getService ($C, $serviceName, $authURI);
-
-$moby_response = $Service->execute (XMLinputlist => [
-					      ["$articleName", $input_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml]
-					     ]);
-
-if ($_debug) {
-	print STDERR "$serviceName result\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
+else {
+    # Get the results from the Meta output directory
+    
+    $input_xml = [];
+    
+    print STDERR "parsing meta-alignment data in $output_dir/Meta directory...\n";
+    
+    opendir METADIR, "$output_dir/Meta";
+    my @metafiles = grep /\.txt/, readdir METADIR;
+    
+    if (@metafiles < 1) {
+	@metafiles = grep /\.meta/, readdir METADIR;
+	closedir METADIR;
+	
+	print STDERR "got " . @metafiles . " meta files\n";
+	if ($_debug) {
+	    print STDERR "(first one, " . $metafiles[0] . ")\n";
+	}
+	
+	if (@metafiles < 1) {
+	    print STDERR "Error, can't parse any meta-alignment data files in $output_dir/Meta!\n";
+	}
+    }
+    
+    foreach my $metafile (@metafiles) {
+	if (-f ("$output_dir/Meta/$metafile")) {
+	    my $meta_data = qx/cat $output_dir\/Meta\/$metafile/;
+	    my $metadata_xml = "<Meta_Alignment_Text namespace='' id=''><String namespace='' id='' articleName='Content'><![CDATA[\n" . $meta_data . "]]></String></Meta_Alignment_Text>";
+	    push (@$input_xml, $metadata_xml);
+	}
+	else {
+	    print STDERR "metafile, $output_dir/Meta/$metafile, doesn't exit!\n";
+	}
+    }
+    
+    print STDERR "shortcut processing done!\n";
+    
 }
-
-if (hasFailed ($moby_response)) {
-    print STDERR "service, $serviceName, has failed!\n";
-    my $moby_error_message = getExceptionMessage ($moby_response);
-    print STDERR "reason is the following,\n$moby_error_message\n";
-    exit 1;
-}
-
-$input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
-if (defined $output_dir) {
-  saveResults ($moby_response, "Meta_Alignment_Text", "Meta", $output_dir);
-}
-
-if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml);
-	print STDERR ".\n";
-}
-
-print STDERR "Second step done!\n\n";
 
 # fromMetaAlignmentsToTextScoreMatrix
 
@@ -1334,10 +1395,16 @@ sub getExceptionMessage {
     my $exceptionMessages = parseTextContent ($moby_response, "exceptionMessage");
     
     my $exceptionMessage = $exceptionMessages->[0];
-    # Clean the message
-    while ($exceptionMessage =~ s/^\n//) {
+    if (defined $exceptionMessage) {
+	# Clean the message
+	while ($exceptionMessage =~ s/^\n//) {
+	}
+	while (chomp $exceptionMessage) { # just chomp... 
+	}
     }
-    while (chomp $exceptionMessage) { # just chomp... 
+    else {
+	print STDERR "exception message could not be parsed!\n";
+	$exceptionMessage = "";
     }
     
     return $exceptionMessage;
