@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.102 2006-07-23 20:55:08 gmaster Exp $
+# $Id: Factory.pm,v 1.103 2006-07-28 14:56:15 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1193,7 +1193,7 @@ sub MatScan_call {
 	print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file\n";
     }
     
-    $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan/;
+    $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan | sort +3n/;
     
     unlink $seqfile unless $debug;
     if ((not $debug) && (defined $matrices_input)) {
