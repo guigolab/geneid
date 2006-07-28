@@ -1,4 +1,4 @@
-# $Id: ParsingServices.pm,v 1.7 2006-03-29 12:47:58 gmaster Exp $
+# $Id: ParsingServices.pm,v 1.8 2006-07-28 13:47:03 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -83,7 +83,11 @@ use Carp;
 
 use INB::GRIB::Services::Factory;
 use INB::GRIB::Utils::CommonUtilsSubs;
+# Official CommonSubs
+# that one uses DOM XML parsing which is not optimal for huge dataset
 use MOBY::CommonSubs qw(:all);
+# Seb Carrere CommonSubs which uses XSLT which is better, because faster !!!
+use MOBY::MOBYXSLT;
 
 # Logging
 use Log::Log4perl qw(get_logger :levels);
@@ -166,8 +170,8 @@ sub _do_query_generateScoreMatrixFromMetaAlignment {
     
     my %parameters;
     my $input_data = [];
-    my $queryID    = getInputID ($queryInput_DOM);
-    my @articles   = getArticles($queryInput_DOM);
+    my $queryID    = MOBY::MOBYXSLT::getInputID ($queryInput_DOM);
+    my @articles   = MOBY::MOBYXSLT::getArticles($queryInput_DOM);
     my $namespace = "";
 
     # Get the parameters
@@ -190,7 +194,7 @@ sub _do_query_generateScoreMatrixFromMetaAlignment {
 	# podemos recoger a traves de estos nombres el valor.
 	# Sino sabemos que es el input articulo porque es un simple/collection articulo
 
-	if (isSimpleArticle ($DOM)) {
+	if (MOBY::MOBYXSLT::isSimpleArticle ($DOM)) {
 	    # simple input is not allowed
 	    
 	    my $note = "Received a simple input article instead of a collection";
@@ -213,41 +217,50 @@ sub _do_query_generateScoreMatrixFromMetaAlignment {
 	
 	# It's not very nice but taverna doesn't set up easily article name for input data so we let the users not setting up the article name of the input
 	
-	if ((isCollectionArticle ($DOM)) || (defined ($articleName) && ($articleName eq "similarity_results"))) {
+	if ((MOBY::MOBYXSLT::isCollectionArticle ($DOM)) || (defined ($articleName) && ($articleName eq "similarity_results"))) {
 	    
 	    if ($_debug) {
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
 	    
-	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Meta_Alignment_Text");
-	    if (!$rightType) {
-		my $note = "Expecting a Meta_Alignment_Text object, and receiving a $inputDataType object";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => 'similarity_results',
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
-		
-		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
-		return ($MOBY_RESPONSE, $moby_exceptions);
-	    }
-	    
-	    my @inputs_article_DOMs = getCollectedSimples ($DOM);
+	    my @inputs_article_DOMs = MOBY::MOBYXSLT::getCollectedSimples ($DOM);
 	    foreach my $input_DOM (@inputs_article_DOMs) {
-		my $input = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($input_DOM, "Meta_Alignment_Text");
+		
+		my $inputDataType = MOBY::MOBYXSLT::getObjectType ($input_DOM);
+		my $rightType = 0;
+		
+		if ($inputDataType eq "Meta_Alignment_Text") {
+		  $rightType++;
+		}
+		
+		if (!$rightType) {
+		    my $note = "Expecting a Meta_Alignment_Text object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => 'similarity_results',
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    # Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
+		my $input = MOBY::MOBYXSLT::getObjectContent ($input_DOM);
 		if ((not defined $input) || (length ($input) < 1)) {
+		    # should be an exception!!
 		    print STDERR "Error, can't parse any input!!\n";
 		    exit 0;
 		}
 		
 		if ($_debug) {
+		    print STDERR "parsing content done!\n";
 		    print STDERR "input, $input\n";
 		}
 		
@@ -710,7 +723,12 @@ sub fromMetaAlignmentsToTextScoreMatrix {
     # caso las trataremos una a una, pero podriamos hacer Threads para 
     # tratarlas en paralelo, podemos ver si se pueden aprovechar resultados 
     # etc.. 
-    my @queries = getInputs($message);  # returns XML::DOM nodes
+    
+    # Using DOM
+    # my @queries = getInputs($message);  # returns XML::DOM nodes
+    # Using XSLT
+    my ($serviceNotes, $queries) = MOBY::MOBYXSLT::getInputs($message);  # returns XML::DOM nodes
+    
     # 
     # Inicializamos la Respuesta a string vacio. Recordar que la respuesta
     # es una coleccion de respuestas a cada una de las consultas.
@@ -720,7 +738,7 @@ sub fromMetaAlignmentsToTextScoreMatrix {
     my $serviceName     = "fromMetaAlignmentsToTextScoreMatrix";
     
     # Para cada query ejecutaremos el _execute_query.
-    foreach my $queryInput (@queries){
+    foreach my $queryInput (@$queries){
 	
 	# En este punto es importante recordar que el objeto $query 
 	# es un XML::DOM::Node, y que si queremos trabajar con 
