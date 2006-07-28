@@ -450,6 +450,7 @@ if ($_debug) {
 }
 
 my %matscan_results;
+my $moby_matscan_response;
 
 if (!$shortcut) {
     
@@ -482,10 +483,10 @@ if (!$shortcut) {
     }
     
     $input_xml = parseResults ($moby_response, "GFF");
-    # Keep it for later !
-    my $matscan_results_xml_aref = $input_xml;
-    # Setup a hastable to fast access
-    %matscan_results = setMatScan_hash ($matscan_results_xml_aref);
+    # Setup a hastable to fast access and keep it for later !
+    %matscan_results = setMatScan_hash ($input_xml);
+    $moby_matscan_response = $moby_response;
+    my @sequence_matscan_ids = keys (%matscan_results);
     
     if (defined $output_dir) {
 	saveResults ($moby_response, "GFF", "MatScan", $output_dir);
@@ -498,6 +499,10 @@ if (!$shortcut) {
     }
     
     print STDERR "First step done\n\n";
+    
+    if (@$input_xml < 50) {
+    
+      print STDERR "run MultiPairwise alignment as Web services\n";
     
     # runMultiPairwiseMetaAlignmentGFF & runMultiPairwiseMetaAlignment
     
@@ -580,6 +585,57 @@ if (!$shortcut) {
     
     print STDERR "Second step done!\n\n";
     
+    } # End running Multi Pairwise alignments Web services
+    else {
+      print STDERR "Running Multi Pairwise alignments locally\n";
+      
+      my $matscan_maps = parseTextContent ($moby_matscan_response, "GFF");
+      
+      print STDERR "got " , @$matscan_maps . " maps!\n";
+      
+      # Make the pairwise alignments
+      
+      my $i = 0;
+      my $j = 0;
+      my $meta_index = 1;
+      $input_xml = [];
+      qx/mkdir $output_dir\/Meta/;
+      
+      foreach my $id1 (@sequence_matscan_ids) {
+        my $file_map1 = "$output_dir/MatScan/$id1.MatScan.gff";
+        
+        if (! -f $file_map1) {
+          print STDERR "Error, can't find map file, $file_map1!\n";
+        }
+        
+        $j = 0;
+        foreach my $id2 (@sequence_matscan_ids) {
+          my $file_map2 = "$output_dir/MatScan/$id2.MatScan.gff";
+        
+          if (! -f $file_map2) {
+            print STDERR "Error, can't find map file, $file_map2!\n";
+          }
+          
+          if ($i < $j) {
+            my $meta_data = qx/meta -a 1 -l 0.1 -m 1 $file_map1 $file_map2/;
+            my $metadata_xml = "<Meta_Alignment_Text namespace='' id=''><String namespace='' id='' articleName='Content'><![CDATA[\n" . $meta_data . "]]></String></Meta_Alignment_Text>";
+	    push (@$input_xml, $metadata_xml);
+	    
+	    # Also Store it in a file
+	    
+	    my $meta_filename = "$output_dir/Meta/$meta_index.Meta.txt";
+	    qx/echo "$meta_data" > $meta_filename/;
+	    
+	    $meta_index++;
+          }
+          
+          $j++;
+        }
+        
+        $i++;
+      } # End performing the pairwise alignments
+  
+    } # End running Multi Pairwise meta-alignments locally
 }
 else {
     # Get the results from the Meta output directory
@@ -589,7 +645,7 @@ else {
     print STDERR "parsing meta-alignment data in $output_dir/Meta directory...\n";
     
     opendir METADIR, "$output_dir/Meta";
-    my @metafiles = grep /\.txt/, readdir METADIR;
+    my @metafiles = grep /\.meta/, readdir METADIR;
     
     if (@metafiles < 1) {
 	@metafiles = grep /\.meta/, readdir METADIR;
