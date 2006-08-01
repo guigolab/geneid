@@ -115,6 +115,9 @@ BEGIN {
 my $t1 = Benchmark->new ();
 
 my $_debug = 0;
+# Need meta-alignment software because it is run locally, in case there are too many input sequences!
+my $_meta_dir = "/usr/local/molbio/bin";
+my $_meta_bin = "meta";
 
 ##################################################################
 #
@@ -617,7 +620,7 @@ if (!$shortcut) {
           }
           
           if ($i < $j) {
-            my $meta_data = qx/meta -a 1 -l 0.1 -m 1 $file_map1 $file_map2/;
+            my $meta_data = qx/$_meta_dir\/$_meta_bin -a 1 -l 0.1 -m 1 $file_map1 $file_map2/;
             my $metadata_xml = "<Meta_Alignment_Text namespace='' id=''><String namespace='' id='' articleName='Content'><![CDATA[\n" . $meta_data . "]]></String></Meta_Alignment_Text>";
 	    push (@$input_xml, $metadata_xml);
 	    
