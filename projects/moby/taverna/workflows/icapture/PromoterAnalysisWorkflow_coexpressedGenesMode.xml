@@ -67,12 +67,12 @@
       <s:Parameter s:name="motif database">Transfac</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="getUpstreamSeqfromEnsembl">
+  <s:processor name="getUpstreamSeqFromEnsembl">
     <s:description>Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.
  In case you select the orthologous mode, it will returns the upstream sequence of all orthologous genes of a given input gene (only one input gene identifier in that case)</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>getUpstreamSeqfromEnsembl</s:serviceName>
+      <s:serviceName>getUpstreamSeqFromEnsembl</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
       <s:Parameter s:name="upstream length">1000</s:Parameter>
       <s:Parameter s:name="intergenic only">False</s:Parameter>
@@ -94,7 +94,7 @@
     <s:description>Fractional solvation report</s:description>
     <s:biomobyobject>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>text_formatted</s:serviceName>
+      <s:serviceName>List_Text</s:serviceName>
       <s:authorityName />
     </s:biomobyobject>
   </s:processor>
@@ -118,7 +118,7 @@
     <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
   <s:link source="fromGenericSequenceCollectionToFASTA:FASTA(sequences)" sink="parse_moby_upstream_sequences:mobydata" />
-  <s:link source="getUpstreamSeqfromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="fromGenericSequenceCollectionToFASTA:GenericSequence(Collection - 'sequences')" />
+  <s:link source="getUpstreamSeqFromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="fromGenericSequenceCollectionToFASTA:GenericSequence(Collection - 'sequences')" />
   <s:link source="parse_moby_tree_image:value" sink="Decode_base64_to_byte:base64" />
   <s:link source="Decode_base64_to_byte:bytes" sink="clusters_tree_image" />
   <s:link source="String:mobyData" sink="List_Of_GeneIdentifiers:String(content)" />
@@ -126,11 +126,11 @@
   <s:link source="list_of_geneIdentifiers_input" sink="String:value" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="parse_moby_score_matrix:mobydata" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="runHierarchicalClustering:MicroArrayData_Text(microarraydata)" />
-  <s:link source="getUpstreamSeqfromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'sequences')" />
+  <s:link source="getUpstreamSeqFromEnsembl:CommentedDNASequence(Collection - 'upstream_sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'sequences')" />
   <s:link source="identifier:value" sink="List_Of_GeneIdentifiers:id" />
   <s:link source="identifier:value" sink="String:id" />
   <s:link source="namespace" sink="List_Of_GeneIdentifiers:namespace" />
-  <s:link source="List_Of_GeneIdentifiers:mobyData" sink="getUpstreamSeqfromEnsembl:text-formatted(genes)" />
+  <s:link source="List_Of_GeneIdentifiers:mobyData" sink="getUpstreamSeqFromEnsembl:List_Text(genes)" />
   <s:link source="parse_moby_clusters_tree:value" sink="clusters_tree" />
   <s:link source="parse_moby_matscan_gff:value" sink="matscan_gff" />
   <s:link source="parse_moby_upstream_sequences:value" sink="upstream_sequences_fasta" />
