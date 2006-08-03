@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.104 2006-08-03 15:34:31 gmaster Exp $
+# $Id: Factory.pm,v 1.105 2006-08-03 17:18:24 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1198,6 +1198,11 @@ sub MatScan_call {
     # sort -s is to keep reference to the previous sort process somehow !! I don't know how it works, but it does !!!!!!!!
     $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan | sort -nk4,4 | sort -sk1,1/;
     
+    # Cleaning the score column, starts with a space !!
+    # Get rid of this extra sapce
+    
+    $matscan_output =~ s/\t\s/\t/g;
+    
     unlink $seqfile unless $debug;
     if ((not $debug) && (defined $matrices_input)) {
 	# Only remove the matrix input file when this matrix collection is given by the user!!
@@ -1695,7 +1700,7 @@ sub MultiMetaAlignment_call {
     my %args = @_;
     
     # method output
-    my $mmeta_output     = "";
+    my $mmeta_output    = "";
     my $moby_exceptions = [];
     
     # relleno los parametros por defecto MultiMetaAlignment_call
@@ -1764,8 +1769,8 @@ sub MultiMetaAlignment_call {
 	    print STDERR "concatenating map\n";
 	}
 	
-	my $result = qx/echo "$map" | sort +3n >> $maps_file/;
-
+	my $result = qx/echo '$map' | sort +3n >> $maps_file/;
+	
 	if ($debug) {
 	    print STDERR "result, $result\n";
 	}
