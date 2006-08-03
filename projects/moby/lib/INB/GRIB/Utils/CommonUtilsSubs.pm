@@ -894,6 +894,20 @@ sub validateDataType {
 		    }
 		}
 		
+		# Actually any object in the hierarchy would do then !!!
+		
+		if ($specifiedType eq "Object") {
+		    if ($inputDataType eq "Object") {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
+		# Not exhaustive validation !
+		
 		# ...
 		
 	    }
