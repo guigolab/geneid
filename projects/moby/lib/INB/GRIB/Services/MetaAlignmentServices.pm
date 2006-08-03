@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.25 2006-07-26 13:23:03 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.26 2006-08-03 15:35:04 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -488,13 +488,13 @@ PRT
 }
 
 
-=head2 _do_query_MultiMetaAlignment
+=head2 _do_query_MultiPairwiseMetaAlignment
 
- Title   : _do_query_MultiMetaAlignment
+ Title   : _do_query_MultiPairwiseMetaAlignment
 	 :
 	 : private function (NOT EXPORTED)
 	 :
- Usage   : my $query_response = _do_query_MultiMetaAlignment($query);
+ Usage   : my $query_response = _do_query_MultiPairwiseMetaAlignment($query);
 	 :
 	 : donde:
 	 :   $query es un XML::DOM::Node que contiene el arbol xml que
@@ -621,17 +621,17 @@ sub _do_query_MultiPairwiseMetaAlignment {
     $parameters{alpha_penalty}  = $alpha_penalty;
     $parameters{lambda_penalty} = $lambda_penalty;
     $parameters{mu_penalty}     = $mu_penalty;
-
+    
     $parameters{output_format} = $_moby_output_format;
-
+    
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {
-
+	
 	# El articulo es una tupla que contiene el nombre de este
 	# y su texto xml.
-
+	
 	my ($articleName, $DOM) = @{$article}; # get the named article
-
+	
 	if ($_debug) {
 	    print STDERR "processing article, $articleName...\n";
 	}
