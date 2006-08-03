@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.15 2006-07-22 14:41:33 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.16 2006-08-03 09:53:22 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -231,62 +231,116 @@ sub _do_query_PromoterExtraction {
 	    }
 	    
 	    # Validate the type first
-	    
-	    my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "List_Text");
-	    if (!$rightType) {
-		my $note = "Expecting a List_Text object, and receiving a $inputDataType object";
-		print STDERR "$note\n";
-		my $code = "201";
-		my $moby_exception = INB::Exceptions::MobyException->new (
-									  refElement => "genes",
-									  code       => $code,
-									  type       => 'error',
-									  queryID    => $queryID,
-									  message    => "$note",
-									  );
-		push (@$moby_exceptions, $moby_exception);
+	    if ($orthologous_mode eq "False") {
 		
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-		return ($MOBY_RESPONSE, $moby_exceptions);
+		# Default mode
+		# We receive a simple article of type "List_Text"
+		
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "List_Text");
+		if (!$rightType) {
+		    my $note = "Expecting a List_Text object, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "genes",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
+		my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "List_Text");
+		my @genes_tmp = split ("\n", $genes_lst);
+		
+		if ($_debug) {
+		    print STDERR "got a list before filtering of " . @genes_tmp . " genes\n";
+		}
+		
+		# Filter the list from empty elements
+		
+		@genes = map { /(\S+)/ } @genes_tmp;
+		
+		if ($_debug) {
+		    print STDERR "got a list of " . @genes . " genes\n";
+		}
+		
+		if ($_debug) {
+		    print STDERR "genes_lst,\n@genes.\n";
+		}
+
+		if (@genes < 1) {
+		    my $note = "Error parsing input element, 'genes', the article doesn't contain any gene identifier!";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "genes",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+								  );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+	    }
+	    else {
+		# Orthologous mode
+		# We receive a simple article of type "Object"
+		
+		my ($rightType, $inputDataType) = INB::GRIB::Utils::CommonUtilsSubs->validateDataType ($DOM, "Object");
+		if (!$rightType) {
+		    my $note = "Expecting an 'Object' instance, and receiving a $inputDataType object";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "gene",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
+		# Get the article identifier
+		my ($geneIdentifier) = getSimpleArticleIDs ( [ $DOM ] );
+		
+		if ($_debug) {
+		    print STDERR "gene identifier parsed, $geneIdentifier\n";
+		}
+		
+		if ((! defined $geneIdentifier) || ($geneIdentifier eq "")) {
+		    my $note = "No gene identifier defined";
+		    print STDERR "$note\n";
+		    my $code = "201";
+		    my $moby_exception = INB::Exceptions::MobyException->new (
+									      refElement => "gene",
+									      code       => $code,
+									      type       => 'error',
+									      queryID    => $queryID,
+									      message    => "$note",
+									      );
+		    push (@$moby_exceptions, $moby_exception);
+		    
+		    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		    return ($MOBY_RESPONSE, $moby_exceptions);
+		}
+		
+		push (@genes, $geneIdentifier);
 	    }
 	    
-	    my $genes_lst = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "List_Text");
-	    my @genes_tmp = split ("\n", $genes_lst);
-	    
-	    if ($_debug) {
-		print STDERR "got a list before filtering of " . @genes_tmp . " genes\n";
-	    }
-	    
-	    # Filter the list from empty elements
-	    
-	    @genes = map { /(\S+)/ } @genes_tmp;
-	    
-	    if ($_debug) {
-		print STDERR "got a list of " . @genes . " genes\n";
-	    }
-	    
-	    if ($_debug) {
-		print STDERR "genes_lst,\n@genes.\n";
-	    }
 	} # End parsing genes tag
     } # End parsing articles
-    
-    if (@genes < 1) {
-	my $note = "Error parsing input element, 'genes', the article doesn't contain any gene identifier!";
-	print STDERR "$note\n";
-	my $code = "201";
-	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => "genes",
-								  code       => $code,
-								  type       => 'error',
-								  queryID    => $queryID,
-								  message    => "$note",
-								  );
-	push (@$moby_exceptions, $moby_exception);
-	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
-	return ($MOBY_RESPONSE, $moby_exceptions);
-    }
     
     # Una vez recogido todos los parametros necesarios, llamamos a 
     # la funcion que nos devuelve el report. 	
@@ -400,8 +454,9 @@ sub getUpstreamSeqFromEnsembl {
 	    
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
-	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    my ($query_response, $moby_exceptions_tmp) = _do_query_PromoterExtraction ($queryInput, "False");
+	    # el mensaje de texto debemos llamar a: $query->toString()
+	    my $orthologous_mode = "False";
+	    my ($query_response, $moby_exceptions_tmp) = _do_query_PromoterExtraction ($queryInput, $orthologous_mode);
 	    push (@$moby_exceptions, @$moby_exceptions_tmp);
 	    
 	    # $query_response es un string que contiene el codigo xml de
@@ -452,8 +507,10 @@ sub getOrthologousUpstreamSeqFromEnsembl {
 	    
 	    # En este punto es importante recordar que el objeto $query 
 	    # es un XML::DOM::Node, y que si queremos trabajar con 
-	    # el mensaje de texto debemos llamar a: $query->toString() 
-	    my $query_response = _do_query_PromoterExtraction ($queryInput, "True");
+	    # el mensaje de texto debemos llamar a: $query->toString()
+	    my $orthologous_mode = "True";
+	    my ($query_response, $moby_exceptions_tmp) = _do_query_PromoterExtraction ($queryInput, $orthologous_mode);
+	    push (@$moby_exceptions, @$moby_exceptions_tmp);
 	    
 	    # $query_response es un string que contiene el codigo xml de
 	    # la respuesta.  Puesto que es un codigo bien formado, podemos 
