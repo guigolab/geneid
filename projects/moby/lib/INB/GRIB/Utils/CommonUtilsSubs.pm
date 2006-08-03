@@ -297,12 +297,6 @@ sub parseSingleGFFIntoCollectionGFF {
     
     my @lines = split ('\n', $report);
     
-    # print STDERR "got " . @lines . "\n";
-    # my $line_tmp = $lines[0];
-    # print STDERR "first line, $line_tmp.\n";
-    # $line_tmp = $lines[1];
-    # print STDERR "second line, $line_tmp.\n";
-    
     my $sequenceIdentifier;    
     my $report_tmp = "";
     
@@ -326,10 +320,10 @@ sub parseSingleGFFIntoCollectionGFF {
 	    $report_tmp .= $line . "\n";
 	}
 	else {
-
+	    
 	    # New sequence report
 	    # Build the GFF Moby object
-
+	    
 	    my $input = <<PRT;
 <moby:$output_format namespace='$namespace' id='$sequenceIdentifier'>
 <String namespace='' id='' articleName='content'>
