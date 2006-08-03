@@ -39,10 +39,11 @@ Usage:
 		<2> or Mobydev
 		<3> or Inab
 		<4> or BioMoby
-	-i Score Matrix file
-	
+	-f Score Matrix file
+	-n Number of clusters (Default is 10)
+
 Examples using some combinations:
-	perl runKMeansClustering.pl -x 2
+	perl runKMeansClustering.pl -x 2 -n 2 
 
 END_HELP
 
@@ -51,10 +52,10 @@ END_HELP
 BEGIN {
 	
 	# Determines the options with values from program
-	use vars qw/$opt_h $opt_x $opt_f/;
+	use vars qw/$opt_h $opt_x $opt_f $opt_n/;
 	   
 	# these are switches taking an argument (a value)
-	my $switches = 'hxf';
+	my $switches = 'hxfn';
 	   
 	# Get the switches
 	getopt($switches);
@@ -81,7 +82,7 @@ my $serviceName = "runKMeansClustering";
 my $articleName = "gene_score_matrix";
 $::authURI      = 'genome.imim.es';
 
-my $score_matrix_file = "/home/ug/arnau/dist_matrix/output_jaspar_0.87/score_matrix.txt";
+my $score_matrix_file = $opt_f || "/home/ug/arnau/dist_matrix/output_jaspar_0.87/score_matrix.txt";
 
 if (! -f $score_matrix_file) {
     die "can't find input file, $score_matrix_file\n";
@@ -97,7 +98,7 @@ PRT
 
 # Parameters
 
-my $cluster_number = 4;
+my $cluster_number = $opt_n || 10;
 my $cluster_number_xml = "<Value>$cluster_number</Value>";
 
 ##################################################################
@@ -222,7 +223,7 @@ if ($_debug) {
 }
 
 if (!$wsdl || ($wsdl !~ /\<definitions/)){
-    print "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
+    print STDERR "test \t\t[FAIL]\tWSDL was not retrieved\n\n";
 }
 
 my $Service = MOBY::Client::Service->new(service => $wsdl);
