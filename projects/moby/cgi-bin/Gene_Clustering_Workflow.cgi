@@ -6,6 +6,11 @@ use CGI;
 use File::Temp qw/tempfile/;
 use File::Temp qw/tempdir/;
 
+# Benchmark Module
+use Benchmark;
+
+my $t1 = Benchmark->new ();
+
 my $_debug = 0;
 
 my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
@@ -28,7 +33,13 @@ my @params = $cgi->param;
 my ($seq_fh, $seqfile);
 eval {
     ($seq_fh, $seqfile) = tempfile("/tmp/GENE_CLUSTERING_INPUT.XXXXXX", UNLINK => 0);
+    # for testing benchmarking using NFS!
+    # ($seq_fh, $seqfile) = tempfile("/usr/local/Install/apache2/htdocs/test/GENE_CLUSTERING_INPUT.XXXXXX", UNLINK => 0);
 };
+
+if ($_debug) {
+    print STDERR "temporary input file, $seqfile\n";
+}
 
 if ($_debug) {
     print STDERR "clustering param names, @params\n";
@@ -50,13 +61,26 @@ else {
 	print STDERR "check for upfile param...\n";
     }
     
-    if (defined ($cgi->param ('upfile'))) {
+    if (defined ($cgi->param ('upfile'))) {	
+	# Copy the uploaded data into a temporary file
+	
+	if ($_debug) {
+	    print STDERR "uploading...\n";
+	}
+	
 	my $upload_filehandle = $cgi->upload('upfile');
 	
-	# Copy the uploaded data into a temporary file
 	while ( my $line = <$upload_filehandle> ) {
 	    print $seq_fh $line;
 	}
+	
+	# Seems faster that way!
+	
+	# my $upfilename = $cgi->param ('upfile');
+	# binmode($seq_fh);
+	# while (my $bytesread = read($upfilename, my $buffer, 1024)) {
+	    # print $seq_fh $buffer || die "cannot write to file, $seqfile ($!)\n";
+	# }
     }
     else {
 	close $seq_fh;
@@ -81,6 +105,9 @@ if (-z $seqfile) {
 
     exit 1;
 }
+
+my $t2 = Benchmark->new ();
+print STDERR "\nGene clustering Input Uploading : ", timestr (timediff ($t2, $t1)), "\n";
 
 ##############################
 #
@@ -167,11 +194,11 @@ if ($_debug) {
 
 my $archive_path = "/usr/local/Install/apache2/htdocs/webservices/workflows/results";
 my $output_dir_name = $gene_clustering_output_dir;
-$output_dir_name =~ s/\/tmp\///;
+$output_dir_name =~ s/\/usr\/local\/Install\/apache2\/htdocs\/webservices\/workflows\/results\///;
 my $archive_filename = $output_dir_name . ".zip";
 my $archive_URL = "http://genome.imim.es/webservices/workflows/results/" . $archive_filename;
 
-$result = qx/cd \/tmp; zip -r $archive_path\/$archive_filename $output_dir_name/;
+$result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $output_dir_name/;
 
 # Display in HTML the results
 # First the archive link
@@ -200,6 +227,10 @@ while ($cluster_index <= $cluster_number) {
     # The results for current cluster
     
     my $cluster_directory_name = $cluster_index . ".cluster_results";
+    
+    if ($_debug) {
+	print STDERR "processing data from directory, $cluster_directory_name...\n";
+    }
     
     if (-d "$gene_clustering_output_dir/$cluster_directory_name") {
 	
@@ -305,9 +336,8 @@ if ($_debug) {
 ##############################
 
 if (!$_debug) {
-    # get rid of output directory, $gene_clustering_output_dir, and input file, $seqfile
+    # get rid of the input file, $seqfile
     unlink $seqfile;
-    # ...
 }
 
 ##############################
