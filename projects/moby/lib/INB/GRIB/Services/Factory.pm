@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.103 2006-07-28 14:56:15 gmaster Exp $
+# $Id: Factory.pm,v 1.104 2006-08-03 15:34:31 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1030,6 +1030,7 @@ sub MatScan_call {
     my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";
     my $_matscan_bin  = "bin/matscan";
     my $_matscan_args = "-T $threshold";
+    
     # Check that the binary is in place
     if (! -f "$_matscan_dir/$_matscan_bin") {
 	my $note = "Internal System Error. Matscan binary not found";
@@ -1193,7 +1194,9 @@ sub MatScan_call {
 	print STDERR "$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file\n";
     }
     
-    $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan | sort +3n/;
+    # Sort by start coordinates (field 4) and sort by sort by sequence identifier (field 1)
+    # sort -s is to keep reference to the previous sort process somehow !! I don't know how it works, but it does !!!!!!!!
+    $matscan_output = qx/$_matscan_dir\/$_matscan_bin $_matscan_args $seqfile $matrix_file | grep MatScan | sort -nk4,4 | sort -sk1,1/;
     
     unlink $seqfile unless $debug;
     if ((not $debug) && (defined $matrices_input)) {
