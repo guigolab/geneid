@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.26 2006-08-03 15:35:04 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.27 2006-08-04 10:01:31 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -1051,6 +1051,24 @@ sub _do_query_MultiMetaAlignment {
 
     if (@$maps_gff < 2) {
 	my $note = "Parsed less than two maps from the article input, the service requires at least two maps\n";
+	print STDERR "$note\n";
+	my $code = "201";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "maps",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    elsif (@$maps_gff > 40) {
+	my $note = "Parsed too many maps from the article input, the service does not accept no more than 40 maps\n";
 	print STDERR "$note\n";
 	my $code = "201";
 	my $moby_exception = INB::Exceptions::MobyException->new (
