@@ -32,9 +32,9 @@ Description: Register a service in Moby Central
 	
 	Examples using some combinations:
 	production version :
-	   => perl registerService.pl -x 4 -s http://genome.imim.es/webservices/RDFs/runGeneIDGFF.rdf
+	   => perl registerService.pl -x 4 -s http://genome.imim.es/webservices/RDFs/services.rdf
 	development version:
-	   => perl registerService.pl -x 4 -s http://genome.imim.es/webservices/RDFs/devel/runGeneIDGFF.rdf
+	   => perl registerService.pl -x 4 -s http://genome.imim.es/webservices/RDFs/devel/services.rdf
 
 END_HELP
 
@@ -108,15 +108,15 @@ else {
     exit 0;
 }
 
-# URI
-$::authURI = 'genome.imim.es';
-
-# Contact e-mail
-$::contactEmail = 'akerhornou@imim.es';
-
 # Service Name
 
 my $signatureURL = $opt_s;
+
+if (! defined $signatureURL) {
+    print STDERR "no signatureURL defined!\n";
+    print STDERR help;
+    exit 0;
+}
 
 # Connect to MOBY-Central registries for searching.
 my $Central = MOBY::Client::Central->new (
