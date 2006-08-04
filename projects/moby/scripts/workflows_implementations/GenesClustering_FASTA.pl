@@ -500,22 +500,55 @@ if (!$shortcut) {
     
     print STDERR "First step done\n\n";
     
-    if (@$input_xml < 50) {
-    
-      print STDERR "run MultiPairwise alignment as Web services\n";
-    
     # runMultiPairwiseMetaAlignmentGFF & runMultiPairwiseMetaAlignment
     
-    print STDERR "Second step, making the pairwise alignments of the binding site maps...\n";
-    print STDERR "Executing meta-alignment...\n";
+    print STDERR "Second step, making the pairwise alignments of the binding site maps, using meta-alignment...\n";
     
-    # runMultiPairwiseMetaAlignmentGFF first
-    
-    # Run this service just to save the results in GFF format
-    
-    if (defined $output_dir) {
+    if (@$input_xml < 50) {
 	
-	$serviceName = "runMultiPairwiseMetaAlignmentGFF";
+	print STDERR "Invoking meta-alignment remotely!\n";
+	
+	# runMultiPairwiseMetaAlignmentGFF first
+	
+	# Run this service just to save the results in GFF format
+	
+	if (defined $output_dir) {
+	    
+	    $serviceName = "runMultiPairwiseMetaAlignmentGFF";
+	    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	    
+	    $Service = getService ($C, $serviceName, $authURI);
+	    
+	    $moby_response = $Service->execute (XMLinputlist => [
+								 ["$articleName", $input_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml]
+								 ]);
+	    
+	    if ($_debug) {
+		print STDERR "$serviceName result\n";
+		print STDERR $moby_response;
+		print STDERR "\n";
+	    }
+	    
+	    if (hasFailed ($moby_response)) {
+		print STDERR "service, $serviceName, has failed!\n";
+		my $moby_error_message = getExceptionMessage ($moby_response);
+		print STDERR "reason is the following,\n$moby_error_message\n";
+		exit 1;
+	    }
+	    
+	    saveResults ($moby_response, "GFF", "Meta", $output_dir);
+	}
+	
+	if ($_debug) {
+	    print STDERR "input xml for next service:\n";
+	    print STDERR join (', ', @$input_xml);
+	    print STDERR ".\n";
+	}
+	
+	# Then runMultiPairwiseMetaAlignment
+	
+	$serviceName = "runMultiPairwiseMetaAlignment";
 	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
 	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
 	
@@ -538,106 +571,79 @@ if (!$shortcut) {
 	    exit 1;
 	}
 	
-	saveResults ($moby_response, "GFF", "Meta", $output_dir);
-    }
-    
-    if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml);
-	print STDERR ".\n";
-    }
-    
-    # Then runMultiPairwiseMetaAlignment
-    
-    $serviceName = "runMultiPairwiseMetaAlignment";
-    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-    
-    $Service = getService ($C, $serviceName, $authURI);
-    
-    $moby_response = $Service->execute (XMLinputlist => [
-							 ["$articleName", $input_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml]
-							 ]);
-    
-    if ($_debug) {
-	print STDERR "$serviceName result\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
-    }
-    
-    if (hasFailed ($moby_response)) {
-	print STDERR "service, $serviceName, has failed!\n";
-	my $moby_error_message = getExceptionMessage ($moby_response);
-	print STDERR "reason is the following,\n$moby_error_message\n";
-	exit 1;
-    }
-    
-    $input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
-    if (defined $output_dir) {
-	saveResults ($moby_response, "Meta_Alignment_Text", "Meta", $output_dir);
-    }
-    
-    if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml);
-	print STDERR ".\n";
-    }
+	$input_xml = parseResults ($moby_response, "Meta_Alignment_Text");
+	if (defined $output_dir) {
+	    saveResults ($moby_response, "Meta_Alignment_Text", "Meta", $output_dir);
+	}
+	
+	if ($_debug) {
+	    print STDERR "input xml for next service:\n";
+	    print STDERR join (', ', @$input_xml);
+	    print STDERR ".\n";
+	}
+	
+    } # End running Multi Pairwise alignments Web services
+    else {
+	
+	print STDERR "Too many maps to process, thus invoking meta-alignment locally\n";
+	
+	my $matscan_maps = parseTextContent ($moby_matscan_response, "GFF");
+	
+	if ($_debug) {
+	    print STDERR "got " , @$matscan_maps . " maps!\n";
+	}
+	
+	# Make the pairwise alignments
+	
+	my $i = 0;
+	my $j = 0;
+	my $meta_index = 1;
+	$input_xml = [];
+	qx/mkdir $output_dir\/Meta/;
+	
+	foreach my $id1 (@sequence_matscan_ids) {
+	    my $file_map1 = "$output_dir/MatScan/$id1.MatScan.gff";
+	    
+	    if (! -f $file_map1) {
+		print STDERR "Error, can't find map file, $file_map1!\n";
+	    }
+	    
+	    $j = 0;
+	    foreach my $id2 (@sequence_matscan_ids) {
+		my $file_map2 = "$output_dir/MatScan/$id2.MatScan.gff";
+		
+		if (! -f $file_map2) {
+		    print STDERR "Error, can't find map file, $file_map2!\n";
+		}
+		
+		if ($i < $j) {
+		    my $meta_data = qx/$_meta_dir\/$_meta_bin -a 1 -l 0.1 -m 1 $file_map1 $file_map2/;
+		    my $metadata_xml = "<Meta_Alignment_Text namespace='' id=''><String namespace='' id='' articleName='Content'><![CDATA[\n" . $meta_data . "]]></String></Meta_Alignment_Text>";
+		    push (@$input_xml, $metadata_xml);
+		    
+		    # Also Store it in a file
+		    
+		    my $meta_filename = "$output_dir/Meta/$meta_index.Meta.txt";
+		    qx/echo "$meta_data" > $meta_filename/;
+		    
+		    $meta_index++;
+		}
+		
+		$j++;
+	    }
+	    
+	    $i++;
+	} # End performing the pairwise alignments
+	
+    } # End running Multi Pairwise meta-alignments locally
     
     print STDERR "Second step done!\n\n";
     
-    } # End running Multi Pairwise alignments Web services
-    else {
-      print STDERR "Running Multi Pairwise alignments locally\n";
-      
-      my $matscan_maps = parseTextContent ($moby_matscan_response, "GFF");
-      
-      print STDERR "got " , @$matscan_maps . " maps!\n";
-      
-      # Make the pairwise alignments
-      
-      my $i = 0;
-      my $j = 0;
-      my $meta_index = 1;
-      $input_xml = [];
-      qx/mkdir $output_dir\/Meta/;
-      
-      foreach my $id1 (@sequence_matscan_ids) {
-        my $file_map1 = "$output_dir/MatScan/$id1.MatScan.gff";
-        
-        if (! -f $file_map1) {
-          print STDERR "Error, can't find map file, $file_map1!\n";
-        }
-        
-        $j = 0;
-        foreach my $id2 (@sequence_matscan_ids) {
-          my $file_map2 = "$output_dir/MatScan/$id2.MatScan.gff";
-        
-          if (! -f $file_map2) {
-            print STDERR "Error, can't find map file, $file_map2!\n";
-          }
-          
-          if ($i < $j) {
-            my $meta_data = qx/$_meta_dir\/$_meta_bin -a 1 -l 0.1 -m 1 $file_map1 $file_map2/;
-            my $metadata_xml = "<Meta_Alignment_Text namespace='' id=''><String namespace='' id='' articleName='Content'><![CDATA[\n" . $meta_data . "]]></String></Meta_Alignment_Text>";
-	    push (@$input_xml, $metadata_xml);
-	    
-	    # Also Store it in a file
-	    
-	    my $meta_filename = "$output_dir/Meta/$meta_index.Meta.txt";
-	    qx/echo "$meta_data" > $meta_filename/;
-	    
-	    $meta_index++;
-          }
-          
-          $j++;
-        }
-        
-        $i++;
-      } # End performing the pairwise alignments
-  
-    } # End running Multi Pairwise meta-alignments locally
 }
 else {
+    
+    # Shortcup path...
+    
     # Get the results from the Meta output directory
     
     $input_xml = [];
@@ -741,7 +747,7 @@ if ($_debug) {
 	print STDERR "$serviceName results\n";
 	print STDERR $moby_response;
 	print STDERR "\n";
-}
+    }
 
 if (hasFailed ($moby_response)) {
     print STDERR "service, $serviceName, has failed!\n";
@@ -749,12 +755,6 @@ if (hasFailed ($moby_response)) {
     print STDERR "reason is the following,\n$moby_error_message\n";
     exit 1;
 }
-
-# A directory foreach cluster instead !!
-
-# if (defined $output_dir) {
-    # saveResults ($moby_response, "List_Text", "K-means_clusters", $output_dir);
-# }
 
 # Get the simples (collection of List_Text)
 
@@ -784,7 +784,7 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
     # So far the list of genes in a formatted string
     my $gene_list_str = $gene_list_str_aref->[0];
     # Convert the list as an array of identifiers
-    # Filter empty lines
+    # and Filter empty lines
     my @cluster_genes = grep {$_ ne ""} split ("\n", $gene_list_str);
     
     if ($_debug) {
@@ -832,7 +832,7 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	}
 	
 	if (hasFailed ($moby_response)) {
-	    print STDERR "service, $serviceName, has failed!\n";
+	    print STDERR "service, $serviceName, has failed on cluster $cluster_index data!\n";
 	    my $moby_error_message = getExceptionMessage ($moby_response);
 	    print STDERR "reason is the following,\n$moby_error_message\n";
 	}
@@ -843,279 +843,286 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	    if (defined $output_dir) {
 		saveResults ($moby_response, "GFF", $cluster_index . ".MultiMeta", $output_dir . "/$cluster_index.cluster_results");
 	    }
-	}
-	
-	if ($_debug) {
-	    print STDERR "input xml for next service:\n";
-	    print STDERR join (', ', @$input_xml);
-	    print STDERR ".\n";
-	}
-	
-	# Then runMultiMetaAlignment
-	
-	$serviceName = "runMultiMetaAlignment";
-	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-	
-	$Service = getService ($C, $serviceName, $authURI);
-	
-	$moby_response = $Service->execute (XMLinputlist => [
-							     ["$articleName", $matscan_maps_xml]
-							     ]);
-	
-	if ($_debug) {
-	    print STDERR "$serviceName result\n";
-	    print STDERR $moby_response;
-	    print STDERR "\n";
-	}
-	
-	if (hasFailed ($moby_response)) {
-	    print STDERR "service, $serviceName, has failed!\n";
-	    my $moby_error_message = getExceptionMessage ($moby_response);
-	    print STDERR "reason is the following,\n$moby_error_message\n";
-	}
-	elsif (defined $output_dir) {
-	    saveResults ($moby_response, "Meta_Alignment_Text", $cluster_index . ".MultiMeta", $output_dir . "/$cluster_index.cluster_results");
-	}
-	
-	if ($_debug) {
-	    # print STDERR "input xml for next service:\n";
-	    # print STDERR join (', ', @$input_xml);
-	    # print STDERR ".\n";
-	}
-	
-	# runGFF2JPEG
-	
-	print STDERR "Executing gff2ps...\n";
-	
-	$serviceName = "runGFF2JPEG";
-	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-	$articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
-	
-	$Service = getService ($C, $serviceName, $authURI);
-	
-	my $maps_input_xml = [];
-	push (@$maps_input_xml, $multimeta_map_xml);
-	push (@$maps_input_xml, @$matscan_maps_xml);
-
-	print STDERR "runGFF2JPEG input, " . @$maps_input_xml . " maps\n";
-	
-	$moby_response = $Service->execute (XMLinputlist => [
-							     ["$articleName", $maps_input_xml]
-							     ]);
-	
-	if ($_debug) {
-	    print STDERR "$serviceName result\n";
-	    print STDERR $moby_response;
-	    print STDERR "\n";
-	}
-	
-	if (hasFailed ($moby_response)) {
-	    print STDERR "service, $serviceName, has failed!\n";
-	    my $moby_error_message = getExceptionMessage ($moby_response);
-	    print STDERR "reason is the following,\n$moby_error_message\n";
-	}
-	elsif (defined $output_dir) {
 	    
-	    # Store the jpeg format image
-	    
-	    my $picture_b64_aref = parseTextContent ($moby_response, "b64_encoded_jpeg");
-	    
-	    if (! defined $picture_b64_aref) {
-		print STDERR "problem, can't parse anything from moby runGFF2JPEG response!\n";
+	    if ($_debug) {
+		print STDERR "input xml for next service:\n";
+		print STDERR join (', ', @$input_xml);
+		print STDERR ".\n";
 	    }
-	    else {
-		if ($_debug) {
-		    print STDERR "picture array has " . @$picture_b64_aref . " elements\n";
+	    
+	    # Then runMultiMetaAlignment
+	    
+	    $serviceName = "runMultiMetaAlignment";
+	    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	    
+	    $Service = getService ($C, $serviceName, $authURI);
+	    
+	    $moby_response = $Service->execute (XMLinputlist => [
+								 ["$articleName", $matscan_maps_xml]
+								 ]);
+	    
+	    if ($_debug) {
+		print STDERR "$serviceName result\n";
+		print STDERR $moby_response;
+		print STDERR "\n";
+	    }
+	    
+	    if (hasFailed ($moby_response)) {
+		print STDERR "service, $serviceName, has failed!\n";
+		my $moby_error_message = getExceptionMessage ($moby_response);
+		print STDERR "reason is the following,\n$moby_error_message\n";
+	    }
+	    elsif (defined $output_dir) {
+		saveResults ($moby_response, "Meta_Alignment_Text", $cluster_index . ".MultiMeta", $output_dir . "/$cluster_index.cluster_results");
+	    }
+	    
+	    if ($_debug) {
+		# print STDERR "input xml for next service:\n";
+		# print STDERR join (', ', @$input_xml);
+		# print STDERR ".\n";
+	    }
+	    
+	    # runGFF2JPEG
+	    
+	    print STDERR "Executing gff2ps...\n";
+	
+	    $serviceName = "runGFF2JPEG";
+	    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	    $articleName = $parameters{$serviceName}->{articleName} || die "article name for $serviceName\n";
+	    
+	    $Service = getService ($C, $serviceName, $authURI);
+	    
+	    my $maps_input_xml = [];
+	    push (@$maps_input_xml, $multimeta_map_xml);
+	    push (@$maps_input_xml, @$matscan_maps_xml);
+	    
+	    if ($_debug) {
+		print STDERR "runGFF2JPEG input, " . @$maps_input_xml . " maps\n";
+	    }
+	    
+	    $moby_response = $Service->execute (XMLinputlist => [
+								 ["$articleName", $maps_input_xml]
+								 ]);
+	    
+	    if ($_debug) {
+		print STDERR "$serviceName result\n";
+		print STDERR $moby_response;
+		print STDERR "\n";
+	    }
+	    
+	    if (hasFailed ($moby_response)) {
+		print STDERR "service, $serviceName, has failed!\n";
+		my $moby_error_message = getExceptionMessage ($moby_response);
+		print STDERR "reason is the following,\n$moby_error_message\n";
+	    }
+	    elsif (defined $output_dir) {
+	    
+		# Store the jpeg format image
+		
+		my $picture_b64_aref = parseTextContent ($moby_response, "b64_encoded_jpeg");
+		
+		if (! defined $picture_b64_aref) {
+		    print STDERR "problem, can't parse anything from moby runGFF2JPEG response!\n";
 		}
-		
-		# Store the image into a file
-		
-		my $picture_b64 = $picture_b64_aref->[0];
-		my $picture = decode_base64($picture_b64);
-		
-		open FILE, ">$output_dir/$cluster_index.cluster_results/$cluster_index.TFBSs_maps.jpg" or die "can't open file, $output_dir/$cluster_index.cluster_results/$cluster_index.TFBSs_maps.jpg!\n";
-		print FILE "$picture\n";
-		close FILE;
+		else {
+		    if ($_debug) {
+			print STDERR "picture array has " . @$picture_b64_aref . " elements\n";
+		    }
+		    
+		    # Store the image into a file
+		    
+		    my $picture_b64 = $picture_b64_aref->[0];
+		    my $picture = decode_base64($picture_b64);
+		    
+		    open FILE, ">$output_dir/$cluster_index.cluster_results/$cluster_index.TFBSs_maps.jpg" or die "can't open file, $output_dir/$cluster_index.cluster_results/$cluster_index.TFBSs_maps.jpg!\n";
+		    print FILE "$picture\n";
+		    close FILE;
+		}
 	    }
+	    
+	    print STDERR "\n";
 	}
-	
-	print STDERR "\n";
-	
     }
     
     $cluster_index++;
 }
 
-print STDERR "Fifth step done!\n\n";
+# Neighbour-joining (NJ) service execution disabled as it is not working !!
 
-# Request Inab registry for the two following ones
-$URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
-$URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
-$PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
-
-$C = MOBY::Client::Central->new(
-                                Registries => {mobycentral => {URL => $URL,URI => $URI}}
-                               );
-
-if (defined $C) {
-    if ($_debug) {
-	print STDERR "Instanciation done.\n";
-	print STDERR "TESTING MOBY CLIENT with\n\tURL: $URL\n\tURI: $URI\n\tProxy: $PROXY\n\n";
-    }
-}
-else {
-    print STDERR "Error, Central could not be instanciated!\n";
-    exit 0;
-}
-
-# runHierarchicalClustering
-
-print STDERR "Sixth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
-
-if ($_debug) {
-  print STDERR "\nExecuting runHierarchicalClustering...\n\n";
-}
-
-$serviceName   = "runHierarchicalClustering";
-$authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
-$articleName   = $parameters{$serviceName}->{articleName} || "";
-
-$Service = getService ($C, $serviceName, $authURI);
-
-$moby_response = $Service->execute (XMLinputlist => [
-						     ["$articleName", "$input_xml\n", "method", $method_xml]
-						     ]);
-if (! defined $moby_response) {
-    # moby service is not working, so use GEPAS instead !!!
+if (0) {
     
-    # GEPAS doesn't return any results, no idea why because it works fine with GeneID web server !!! ????
+    print STDERR "Fifth step done!\n\n";
     
-    print STDERR "using GEPAS...\n";
+    # Request Inab registry for the two following ones
+    $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
+    $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
+    $PROXY = $ENV{MOBY_PROXY}?$ENV{MOBY_PROXY}:'No Proxy Server';
     
-    print STDERR "method, $method\n";
+    $C = MOBY::Client::Central->new(
+				    Registries => {mobycentral => {URL => $URL,URI => $URI}}
+				    );
     
-    if ($method =~ /nearest/i) {
-	$method = "single";
+    if (defined $C) {
+	if ($_debug) {
+	    print STDERR "Instanciation done.\n";
+	    print STDERR "TESTING MOBY CLIENT with\n\tURL: $URL\n\tURI: $URI\n\tProxy: $PROXY\n\n";
+	}
     }
     else {
-	$method = "complete";
+	print STDERR "Error, Central could not be instanciated!\n";
+	exit 0;
     }
     
-    # Assume the output flag was on, otherwise need to create a temporary file with the data which would be a pain !!!
-    my $curdir = qx/pwd/;
-    chomp $curdir;
+    # runHierarchicalClustering
     
-    my $matrix_filename = "score_matrix.txt";
-    
-    if (! -f "$output_dir/$matrix_filename") {
-	print STDERR "problem, score matrix file not found, $output_dir/$matrix_filename!!\n";
-    }
-    
-    my $cluster_url = "http://gepas.bioinfo.cipf.es/cgi-bin/cluster";
-    my $agent_diag   = LWP::UserAgent->new(timeout => 30000);
-    
-    # Cluster CGI Call
-    
-    my $request_diag = POST($cluster_url,
-			    Content_Type => 'form-data',
-			    Content      => [
-					     file     => ["$output_dir/$matrix_filename"],
-					     method   => "$method",
-					     ]
-			    );
-    my $result_diag = $agent_diag->request($request_diag);
-    
-    # print STDERR "Dumping result_diag, " . Dumper ($result_diag) . "\n";
-    
-    my $html_results = $result_diag->content;
-    
-    # Get the data from GEPAS server !
-    my $newick_tree = "";
-    if (defined $output_dir) {
-	open FILE, ">$output_dir/newick.txt" or die "can't open in write access newick text file, $output_dir/newick.txt!\n";
-	print FILE $newick_tree;
-	close FILE;
-    }
-    
-    # Call TreeView
-    
-    # ...
-
-}
-else {
-    
-    # Fine so carry on using BioMOBY infrastructure...
+    print STDERR "Sixth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
     
     if ($_debug) {
-	print STDERR "\n$serviceName results\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
+	print STDERR "\nExecuting runHierarchicalClustering...\n\n";
     }
     
-    # Check if we got results
-    my $newick_trees = parseTextContent ($moby_response, "Newick_Text");
-    my $newick_tree  = $newick_trees->[0];
-    
-    if ($newick_tree eq "") {
-	print STDERR "Hierachical clustering failed!\n";
-	exit 1;
-    }
-    
-    $input_xml_aref = parseResults ($moby_response, "HierarchicalClustering");
-    if (defined $output_dir) {
-	saveResults ($moby_response, "Newick_Text", "newick", $output_dir);
-    }
-    
-    if ($_debug) {
-	print STDERR "input xml for next service:\n";
-	print STDERR join (', ', @$input_xml_aref);
-	print STDERR ".\n";
-    }
-    
-    # convert the input xml into a scalar
-    $input_xml =  $input_xml_aref->[0];
-    
-    print STDERR "Clustering done!\n\n";
-
-    # plotClustersTree
-
-    print STDERR "Generating a picture of the clustering tree...\n";
-
-    $serviceName   = "plotClustersTree";
+    $serviceName   = "runHierarchicalClustering";
     $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
     $articleName   = $parameters{$serviceName}->{articleName} || "";
     
     $Service = getService ($C, $serviceName, $authURI);
     
     $moby_response = $Service->execute (XMLinputlist => [
-							 ["$articleName", $input_xml]
+							 ["$articleName", "$input_xml\n", "method", $method_xml]
 							 ]);
-    
-    if ($_debug) {
-	print STDERR "$serviceName results\n";
-	print STDERR $moby_response;
-	print STDERR "\n";
-    }
-    
-    my $picture_b64_aref = parseTextContent ($moby_response, "Image_Encoded");
-    my $picture_b64 = $picture_b64_aref->[0];
-    
-    # Convert in to a picture and store into a file
-    
-    my $picture = decode_base64($picture_b64);
-    
-    print STDERR "Picture done\n\n";
-    print STDERR "Workflow has terminated.\n";
-    if (! defined $output_dir) {
-	print $picture;
+    if (! defined $moby_response) {
+	# moby service is not working, so use GEPAS instead !!!
+	
+	# GEPAS doesn't return any results, no idea why because it works fine with GeneID web server !!! ????
+	
+	print STDERR "using GEPAS...\n";
+	
+	print STDERR "method, $method\n";
+	
+	if ($method =~ /nearest/i) {
+	    $method = "single";
+	}
+	else {
+	    $method = "complete";
+	}
+	
+	# Assume the output flag was on, otherwise need to create a temporary file with the data which would be a pain !!!
+	my $curdir = qx/pwd/;
+	chomp $curdir;
+	
+	my $matrix_filename = "score_matrix.txt";
+	
+	if (! -f "$output_dir/$matrix_filename") {
+	    print STDERR "problem, score matrix file not found, $output_dir/$matrix_filename!!\n";
+	}
+	
+	my $cluster_url = "http://gepas.bioinfo.cipf.es/cgi-bin/cluster";
+	my $agent_diag   = LWP::UserAgent->new(timeout => 30000);
+	
+	# Cluster CGI Call
+	
+	my $request_diag = POST($cluster_url,
+				Content_Type => 'form-data',
+				Content      => [
+						 file     => ["$output_dir/$matrix_filename"],
+						 method   => "$method",
+						 ]
+				);
+	my $result_diag = $agent_diag->request($request_diag);
+	
+	# print STDERR "Dumping result_diag, " . Dumper ($result_diag) . "\n";
+	
+	my $html_results = $result_diag->content;
+	
+	# Get the data from GEPAS server !
+	my $newick_tree = "";
+	if (defined $output_dir) {
+	    open FILE, ">$output_dir/newick.txt" or die "can't open in write access newick text file, $output_dir/newick.txt!\n";
+	    print FILE $newick_tree;
+	    close FILE;
+	}
+	
+	# Call TreeView
+	
+	# ...
+	
     }
     else {
-	open FILE, ">$output_dir/clustering_tree.png" or die "can't open in write access file, '$output_dir/clustering_tree.png'!\n";
-	print FILE $picture;
-	close FILE;
+	
+	# Fine so carry on using BioMOBY infrastructure...
+	
+	if ($_debug) {
+	    print STDERR "\n$serviceName results\n";
+	    print STDERR $moby_response;
+	    print STDERR "\n";
+	}
+	
+	# Check if we got results
+	my $newick_trees = parseTextContent ($moby_response, "Newick_Text");
+	my $newick_tree  = $newick_trees->[0];
+	
+	if ($newick_tree eq "") {
+	    print STDERR "Hierachical clustering failed!\n";
+	    exit 1;
+	}
+	
+	$input_xml_aref = parseResults ($moby_response, "HierarchicalClustering");
+	if (defined $output_dir) {
+	    saveResults ($moby_response, "Newick_Text", "newick", $output_dir);
+	}
+	
+	if ($_debug) {
+	    print STDERR "input xml for next service:\n";
+	    print STDERR join (', ', @$input_xml_aref);
+	    print STDERR ".\n";
+	}
+	
+	# convert the input xml into a scalar
+	$input_xml =  $input_xml_aref->[0];
+	
+	print STDERR "Clustering done!\n\n";
+	
+	# plotClustersTree
+	
+	print STDERR "Generating a picture of the clustering tree...\n";
+	
+	$serviceName   = "plotClustersTree";
+	$authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
+	$articleName   = $parameters{$serviceName}->{articleName} || "";
+	
+	$Service = getService ($C, $serviceName, $authURI);
+	
+	$moby_response = $Service->execute (XMLinputlist => [
+							     ["$articleName", $input_xml]
+							     ]);
+	
+	if ($_debug) {
+	    print STDERR "$serviceName results\n";
+	    print STDERR $moby_response;
+	    print STDERR "\n";
+	}
+	
+	my $picture_b64_aref = parseTextContent ($moby_response, "Image_Encoded");
+	my $picture_b64 = $picture_b64_aref->[0];
+	
+	# Convert in to a picture and store into a file
+	
+	my $picture = decode_base64($picture_b64);
+	
+	print STDERR "Picture done\n\n";
+	print STDERR "Workflow has terminated.\n";
+	if (! defined $output_dir) {
+	    print $picture;
+	}
+	else {
+	    open FILE, ">$output_dir/clustering_tree.png" or die "can't open in write access file, '$output_dir/clustering_tree.png'!\n";
+	    print FILE $picture;
+	    close FILE;
+	}
     }
-}
+    
+} # End disabling execution of NJ service
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
@@ -1412,7 +1419,9 @@ sub getFileNameSuffix {
       return "lst";
   }
   
-  print STDERR "Suffix for object_type, $object_type unknown, return txt!\n"; 
+  if ($_debug) {
+      print STDERR "Suffix for object_type, $object_type unknown, return txt!\n"; 
+  }
   
   return $suffix;
 }
