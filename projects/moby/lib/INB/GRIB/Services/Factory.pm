@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.105 2006-08-03 17:18:24 gmaster Exp $
+# $Id: Factory.pm,v 1.106 2006-08-04 10:02:44 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1699,8 +1699,8 @@ sub MetaAlignment_call {
 sub MultiMetaAlignment_call {
     my %args = @_;
     
-    # method output
-    my $mmeta_output    = "";
+    # method output initialisation
+    my $mmeta_output    = undef;
     my $moby_exceptions = [];
     
     # relleno los parametros por defecto MultiMetaAlignment_call
@@ -1826,7 +1826,7 @@ sub MultiMetaAlignment_call {
 								      message    => "$note",
 								      );
 	    push (@$moby_exceptions, $moby_exception);
-	    return (undef, $moby_exceptions);
+	    # return (undef, $moby_exceptions);
 	}
     }
     else {
