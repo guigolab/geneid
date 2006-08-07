@@ -580,7 +580,10 @@ if (!$shortcut) {
 		print STDERR "service, $serviceName, has failed!\n";
 		my $moby_error_message = getExceptionMessage ($moby_response);
 		print STDERR "reason is the following,\n$moby_error_message\n";
-		print 0;
+		if (defined $output_dir) {
+		    print 1;
+		}
+		exit 1;
 	    }
 	    
 	    saveResults ($moby_response, "GFF", "Meta", $output_dir);
