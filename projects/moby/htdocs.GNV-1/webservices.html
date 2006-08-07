@@ -34,28 +34,30 @@ if (typeof(mylink) == 'string')
           <td align="right" bgcolor="#ffffff" valign="top" width="796">
             <table border="0" cellpadding="0" cellspacing="0" width="758">
               <tr> 
-                <td height="28" width="11" valign="top"><img src="images/logo_01.gif" usemap="#Map" border="0" height="28" width="111"></td>
-                <td align="center" valign="top"><h4>National Institute of Bioinformatics</h4><h5>Bioinformatics and Genomics Node</h5></td>
+                <td height="28" width="11" valign="bottom"><img src="images/logo_01.gif" usemap="#Map" border="0" height="28" width="111"></td>
+		<td align="center" class="nom_grup_capsalera"><a href="http://www.inab.org/en/organization.htm"><h3>Bioinformatics and Genomics Node</h3></a></td>
                 <td align="right">
                  <table cellpadding="1" cellspacing="1">
                   <tr>
-                 <td height="2" bgcolor="#b7e505"></td>
+                   <td height="2" bgcolor="#b7e505"></td>
                    <td height="2" bgcolor="#0066CC"></td>
                    <td height="2" bgcolor="#CC6600"></td>
                    <td height="2" bgcolor="#E50083"></td>
+		   <td height="2" bgcolor="#660099"></td>
                   </tr>
                   <tr>
-                   <td height="20" bgcolor="#b7e505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#0066CC">&nbsp;&nbsp;<a class="index" href="webservices.html">WEBSERVICES</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#CC6600">&nbsp;&nbsp;<a class="index" href="workflows.html">WORKFLOWS</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#E50083">&nbsp;&nbsp;<a class="index" href="clients.html">CLIENTS</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#660099">&nbsp;&nbsp;<a class="index" href="contact.html">CONTACT US</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#b7e505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#0066CC">&nbsp;&nbsp;<a class="index" href="webservices.html">WEBSERVICES</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#CC6600">&nbsp;&nbsp;<a class="index" href="workflows.html">WORKFLOWS</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#E50083">&nbsp;&nbsp;<a class="index" href="clients.html">CLIENTS</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#660099">&nbsp;&nbsp;<a class="index" href="contact.html">CONTACT US</a>&nbsp;&nbsp;</td>
                   </tr>
                   <tr>
-                  <td height="5" bgcolor="#feffec"></td>
+                   <td height="5" bgcolor="#feffec"></td>
                    <td height="5" bgcolor="#CCFFFF"></td>
                    <td height="5" bgcolor="#FAEADA"></td>
                    <td height="5" bgcolor="#FBD6EB"></td>
+		   <td height="5" bgcolor="#FBD6FF"></td>
                   </tr>
                  </table>
                 </td>
@@ -92,65 +94,121 @@ if (typeof(mylink) == 'string')
 		<ul class="textogris">
 		<li> <b>runGeneIDGFF</b>: Reads a DNA Sequence and returns GeneID predictions in GFF format.
 		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runGeneIDGFF" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/AB065701.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runGeneIDGFF&idObject=0&origen=generate" target="_blank">MOWServ</a>.
-		</li></br>
-		<li> <b>runGeneID</b>: Reads a DNA Sequence and returns GeneID predictions in HTML format.
-		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runGeneID" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/AB065701.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runGeneID&idObject=0&origen=generate" target="_blank">MOWServ</a>.
-		</li></br>
+		<br><a href="examples/AB065701.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/modules/services/generateForm.php?services=697&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+		</li><br>
 		<li> <b>translateGeneIDGFFPredictions</b>: Reads a Nucleotide Sequence and Geneid predictions in GFF format <br>
 		and returns a collection of AminoAcid Sequences.
-		</li></br>
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=translateGeneIDGFFPredictions" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/AB065701.xml" target="_blank">DNA sequence input xml</a>.
+		</li><br>
 		</ul>
 		
 		<li><b><a href="http://genome.imim.es/software/sgp2/index.html" target="_blank">SGP2</a>: </b><br><br>
 		<ul class="textogris">
-		<li><b>runSGP2GFF</b>: being implemented.</li><br>
+		<li><b>runSGP2GFF</b>: Reads a DNA Sequence and tblastx report and returns GeneID predictions in GFF format.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runSGP2GFF" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/Hsap_BTK.xml" target="_blank">DNA sequence input xml</a>.
+		</li><br>
 		</ul>
-
+		
 		<li><b>MatScan: <br><br>
 		<ul class="textogris">
-		<li><b>runMatScanGFF</b>: Reads a Nucleotide Sequence and returns a map of putative Transcription Factors binding sites in GFF format. <br>
+		<li><b>runMatScanGFF</b>: Reads a DNA Sequence and returns a map of putative Transcription Factor binding sites <br>
+		in GFF format. <br>
 		You can select either <a href="http://www.gene-regulation.com/pub/databases.html#transfac" target="_blank">Transfac (v6.4)</a> or <a href="http://jaspar.cgb.ki.se/TEMPLATES/help.htm target="_blank"">Jaspar</a> motifs collections.
 		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMatScanGFF" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/ENSG00000174697.xml</li><br>.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runMatScanGFF&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+		<br><a href="examples/ENSG00000174697.xml</li><br>.xml" target="_blank">input xml</a>.
 		</li></br>
-		<li><b>runMatScanGFFCollection</b>: Reads a collection of Nucleotide Sequences and returns a collection of maps of putative binding sites in GFFF format.
+		<li><b>runMatScanGFFCollection</b>: Reads a collection of Nucleotide Sequences and returns <br>
+		a collection of maps of putative binding sites in GFFF format.
 		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMatScanGFFCollection" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runMatScanGFFCollection&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>.
 		</li><br>
 		</ul>
 		
 		<li><b><a href="http://genome.imim.es/software/meta/index.html" target="_blank">Meta-alignment</a>: </b> <br><br>
 		<ul class="textogris">
-		<li><b>runMetaAlignment</b>: Reads two binding sites maps in GFF format and returns the pairwise alignment of this maps in meta format.
+		<li><b>runMetaAlignment</b>: Reads two binding sites maps in GFF format and returns the pairwise alignments <br>
+		of these maps in meta-alignment format.
 		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMetaAlignment" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/ENSG00000174697.MatScan.GFF.xml" target="_blank">map1 xml</a> and <a href="examples/ENSMUSG00000059201.MatScan.GFF.xml" target="_blank">map2 xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runMetaAlignment&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+		<br><a href="examples/ENSG00000174697.MatScan.GFF.xml" target="_blank">map1 xml</a> and <a href="examples/ENSMUSG00000059201.MatScan.GFF.xml" target="_blank">map2 xml</a>.
 		</li><br>
-		<li><b>runMetaAlignmentGFF</b>: Reads two binding sites maps in GFF format and returns the pairwise alignment of this maps in GFF format.
+		<li><b>runMetaAlignmentGFF</b>: Reads two binding sites maps in GFF format and returns the pairwise alignments <br>
+		of these maps in GFF format.
 		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMetaAlignmentGFF" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/ENSG00000174697.MatScan.GFF.xml" target="_blank">map1 xml</a> and <a href="examples/ENSMUSG00000059201.MatScan.GFF.xml" target="_blank">map2 xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runMetaAlignmentGFF&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+		<br><a href="examples/ENSG00000174697.MatScan.GFF.xml" target="_blank">map1 xml</a> and <a href="examples/ENSMUSG00000059201.MatScan.GFF.xml" target="_blank">map2 xml</a>.
 		</li><br>
-		<li><b>runMultiMetaAlignment</b>: Reads a collection of binding sites maps in GFF format and a collection of pairwise alignment.<br>
-		It generates the map pairs internally, and runs meta-alignment internally.
+		<li><b>runMultiPairwiseMetaAlignment</b>: Reads a collection of binding sites maps in GFF format and <br>
+		returns a collection of pairwise alignments in meta-alignment format.<br>
+		It generates the map pairs internally, and runs meta-alignment for each pair of maps.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMultiPairwiseMetaAlignment" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/MatScan_collection.xml" target="_blank">input xml</a>.
 		</li><br>
-		<li><b>generateScoreMatrix</b>: Reads a collection of pairwise meta-alignment output and returns a score matrix.</li><br>
+		<li><b>runMultiPairwiseMetaAlignmentGFF</b>: Reads a collection of binding sites maps in GFF format and <br>
+		returns a collection of pairwise alignments in GFF format.<br>
+		It generates the map pairs internally, and runs meta-alignment for each pair of maps.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMultiPairwiseMetaAlignmentGFF" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/MatScan_collection.xml" target="_blank">input xml</a>.
+		</li><br>
+		<li><b>fromMetaAlignmentsToScoreMatrix</b>: Reads a collection of pairwise meta-alignment outputs and <br>
+		returns a score matrix in xml format.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromMetaAlignmentsToScoreMatrix" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/MetaAlignment_collection.xml" target="_blank">input xml</a>.
+		</li><br>
+		<li><b>fromMetaAlignmentsToTextScoreMatrix</b>: Reads a collection of pairwise meta-alignment outputs and <br>
+		returns a score matrix in text format.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromMetaAlignmentsToTextScoreMatrix" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/MetaAlignment_collection.xml" target="_blank">input xml</a>.
+		</li><br>
 		</ul>
 
-		<li><b><a href="http://meme.sdsc.edu/meme/website/intro.html" target="_blank">MEME v3.5</a>: </b></b> <br><br>
+		<li><b><a href="http://meme.sdsc.edu/meme/website/intro.html" target="_blank">MEME v3.5.2</a>: </b></b> <br><br>
 		<ul class="textogris">
 		<li><b>runMemeText</b>: reads a collection of generic sequences (it can be either AminoAcid sequences or Nucleotide sequences)<br>
 		and returns predicted MEME motifs in MEME Text output.
 		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMemeText" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runMemeText&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>.
 		</li><br>
 		<li><b>runMemeHTML</b>: reads a collection of generic sequences (it can be either AminoAcid sequences or Nucleotide sequences)<br>
 		and returns predicted MEME motifs in MEME HTML output.
 		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMemeHTML" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=runMemeHTML&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>.
 		</li><br>
-		<li><b>parseMotifMatricesfromMEME</b>: read MEME Text output and returns the set of predicted MEME motifs as a text-formatted object.</li><br>
+		<li><b>parseMotifMatricesFromMEME</b>: read MEME Text output and returns the set of predicted MEME motifs <br>
+		as a a collection of Matrix objects.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=parseMotifMatricesFromMEME" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/MEME.xml" target="_blank">input xml</a>.
+		</li><br>
 		</ul>
+		
+		<li><b><a href="http://www.repeatmasker.org" target="_blank">RepeatMasker v3.1.5</a>: </b></b> <br><br>
+		<ul class="textogris">
+		<li><b>runRepeatMasker</b>: reads a DNA sequence and returns a masked DNA sequence.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runRepeatMasker" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/AB065701.xml" target="_blank">input xml</a>.
+		</li><br>
+		<li><b>runRepeatMaskerCollection</b>: reads a collection of DNA sequences and returns masked DNA sequences.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runRepeatMaskerCollection" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>.
+		</li><br>
+		</ul>
+				
+		<li><b><a href="http://www.ncbi.nlm.nih.gov/Education/BLASTinfo/glossary2.html" target="_blank">Dust</a>: </b></b> <br><br>
+		<ul class="textogris">
+		<li><b>runDust</b>: reads a DNA sequence and returns low-complexity masked DNA sequence.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runDust" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/AB065701.xml" target="_blank">input xml</a>.
+		</li><br>
+		<li><b>runDustCollection</b>: reads a collection of DNA sequences and returns low-complexity masked DNA sequences.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runRepeatMaskerCollection" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>.
+		</li><br>
+		<li><b>runDustFASTA_NA_multi</b>: reads a set of DNA sequences in FASTA format and returns low-complexity masked DNA sequences.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runRepeatMaskerCollection" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/DNASequences_FASTA.xml" target="_blank">input xml</a>.
+		</li><br>
+		</ul>
+		
 		</ul>
              
 <span class="textorosa"><strong>Retrieval</strong><br>
@@ -160,10 +218,16 @@ if (typeof(mylink) == 'string')
                 <li><b><a href="http://www.ensembl.org" target="_blank">Ensembl</a>: </b> <br><br>
 
 		<ul class="textogris">
-<li><b>getUpstreamSeqfromEnsembl</b>. Reads an object (an Ensembl gene identifier) and returns the upstream sequence of this given gene from Ensembl.</li><br>
-<li><b>getUpstreamSeqfromEnsemblCollection</b>. Reads a collection of objects (a set of Ensembl gene identifiers) and returns the collection of upstream sequences.</li><br>
-<li><b>getOrthologousUpstreamSeqfromEnsembl</b>. Reads an object (an Ensembl gene identifier) and returns the upstream sequence of all Ensembl predicted orthologues of this given gene.</li><br>
-</ul>
+		<li><b>getUpstreamSeqFromEnsembl</b>. Reads a List_Text object (representation of a list of Ensembl gene identifiers) and returns the upstream sequence of these given genes from Ensembl.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=getUpstreamSeqFromEnsembl" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/co-expressed_genes_identifiers.xml" target="_blank">input xml (a set of human genes)</a>.
+		</li><br>
+		<li><b>getOrthologousUpstreamSeqFromEnsembl</b>. Reads an object (an Ensembl gene identifier) and returns <br>
+the upstream sequence of all Ensembl predicted orthologues of this given gene.
+                <br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=getOrthologousUpstreamSeqFromEnsembl" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/Leptin_identifier.xml" target="_blank">input xml (human leptin gene)</a>.
+		</li>
+		</ul>
 </ul>
 
 
@@ -172,11 +236,30 @@ if (typeof(mylink) == 'string')
 
 
 		<ul class="textogris">
-<li><b>fromGenericSequencetoFASTA</b>. Reads a GenericSequence object and converts it into FASTA format.</li><br>
-<li><b>fromGenericSequenceCollectiontoFASTA</b>. Reads a collection of GenericSequence objects and converts it into FASTA format.</li><br>
-<li><b>fromFASTAtoDNASequenceCollection</b>. Reads a set of DNA sequence in FASTA format and returns a collection of DNASequence objects.
-<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromFASTAtoDNASequenceCollection" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
-<br><a href="examples/DNASequences_FASTA.xml" target="_blank">input xml</a>, execute it using <a href="http://www.inab.org/MOWServ/services/generateForm.php?services=fromFASTAtoDNASequenceCollection&idObject=0&origen=generate" target="_blank">MOWServ</a>.
+<li><b>fromGenericSequenceToFASTA</b>. Reads a GenericSequence object and converts it into FASTA format.
+<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromGenericSequenceToFASTA" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+<br><a href="examples/ENSG00000174697.xml" target="_blank">input xml</a>.
+</li><br>
+<li><b>fromGenericSequenceCollectionToFASTA</b>. Reads a collection of GenericSequence objects and converts it into FASTA format.
+<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromGenericSequenceCollectionToFASTA" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+<br><a href="examples/DNASequence_collection.xml" target="_blank">input xml</a>.
+</li><br>
+<li><b>fromFASTAToDNASequence</b>. Reads a DNA sequence in FASTA format and returns a DNASequence object.
+<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromFASTAToDNASequence" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+<br><a href="examples/DNASequence_FASTA.xml" target="_blank">input xml</a>.
+</li><br>
+<li><b>fromFASTAToDNASequenceCollection</b>. Reads a set of DNA sequences in FASTA format and returns a collection of DNASequence objects.
+<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromFASTAToDNASequenceCollection" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+<br><a href="examples/DNASequences_FASTA.xml" target="_blank">input xml</a>.
+</li><br>
+<li><b>fromFASTAToAminoAcidSequence</b>. Reads an AminoAcid sequence in FASTA format and returns an AminoAcidSequence object.
+<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromFASTAToAminoAcidSequence" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+<br><a href="examples/AminoAcidSequence_FASTA.xml" target="_blank">input xml</a>.
+</li><br>
+<li><b>fromFASTAToAminoAcidSequenceCollection</b>. Reads a set of AminoAcid sequences in FASTA format and <br>
+returns a collection of AminoAcidSequence objects.
+<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=fromFASTAToAminoAcidSequenceCollection" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+<br><a href="examples/AminoAcidSequences_FASTA.xml" target="_blank">input xml</a>.
 </li><br>
 </ul>
 
@@ -184,7 +267,3 @@ if (typeof(mylink) == 'string')
               </tr>
                  </table>
 
-
-
-
-                  

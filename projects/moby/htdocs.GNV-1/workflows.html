@@ -35,27 +35,30 @@ if (typeof(mylink) == 'string')
             <table border="0" cellpadding="0" cellspacing="0" width="758">
               <tr> 
                 <td height="28" width="11" valign="bottom"><img src="images/logo_01.gif" usemap="#Map" border="0" height="28" width="111"></td>
-                <td class="nom_grup_capsalera"><a href="http://www.inab.org/en/organization.htm"><h3>Bioinformatics and Genomics Node</h3></a></td>
+                <td align="center" class="nom_grup_capsalera"><a href="http://www.inab.org/en/organization.htm"><h3>Bioinformatics and Genomics Node</h3></a></td>
+		<td class="nom_grup_capsalera"></td>
                 <td align="right">
                  <table cellpadding="1" cellspacing="1">
                   <tr>
-                 <td height="2" bgcolor="#b7e505"></td>
+                   <td height="2" bgcolor="#b7e505"></td>
                    <td height="2" bgcolor="#0066CC"></td>
                    <td height="2" bgcolor="#CC6600"></td>
                    <td height="2" bgcolor="#E50083"></td>
+		   <td height="2" bgcolor="#660099"></td>
                   </tr>
                   <tr>
-                   <td height="20" bgcolor="#b7e505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#0066CC">&nbsp;&nbsp;<a class="index" href="webservices.html">WEBSERVICES</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#CC6600">&nbsp;&nbsp;<a class="index" href="workflows.html">WORKFLOWS</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#E50083">&nbsp;&nbsp;<a class="index" href="clients.html">CLIENTS</a>&nbsp;&nbsp;</td>
-                   <td height="20" bgcolor="#660099">&nbsp;&nbsp;<a class="index" href="contact.html">CONTACT US</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#b7e505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#0066CC">&nbsp;&nbsp;<a class="index" href="webservices.html">WEBSERVICES</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#CC6600">&nbsp;&nbsp;<a class="index" href="workflows.html">WORKFLOWS</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#E50083">&nbsp;&nbsp;<a class="index" href="clients.html">CLIENTS</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#660099">&nbsp;&nbsp;<a class="index" href="contact.html">CONTACT US</a>&nbsp;&nbsp;</td>
                   </tr>
                   <tr>
-                  <td height="5" bgcolor="#feffec"></td>
+                   <td height="5" bgcolor="#feffec"></td>
                    <td height="5" bgcolor="#CCFFFF"></td>
                    <td height="5" bgcolor="#FAEADA"></td>
                    <td height="5" bgcolor="#FBD6EB"></td>
+		   <td height="5" bgcolor="#FBD6FF"></td>
                   </tr>
                  </table>
                 </td>
@@ -86,7 +89,7 @@ if (typeof(mylink) == 'string')
 		<span class="textorosa"><strong>Gene predictions<br>
 		<img src="images/linea_rosa.gif" height="1" width="281"></strong>
 		  <ul class="textogris">
-		  
+		  coming soon...
 		  </ul>
 		<br>
 		<span class="textorosa"><strong>Promoter analysis<br>
@@ -94,17 +97,30 @@ if (typeof(mylink) == 'string')
 		  <ul class="textogris">
 		  <li><b>co-expressed genes clustering workflow:</b><br>
 		  input: the upstream sequences (FASTA format) of a set of co-expressed genes<br>
-		  output: a gene clustering tree (picture in png format)<br>
-		  description: cluster genes together based on upstream DNA sequence patterns in order to validate expression clusters<br>
-		  <a href="workflows/WFProtocolDesign.jpg" target="_blank">Protocol design</a>:[short description]<br><br>
-		  A <a href="workflows/genes_clustering.html">web page</a> has been designed to execute it.<br>
-		  The workflow has also been implemented using <a href="clients.html">taverna</a> software. You can <a href="http://genome.imim.es/~arnau/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode_Fasta_Version.xml">download the workflow</a> and load it in your local taverna installation. You must have the latest version of taverna (v1.3.1).<br>Input document example: <a href="examples/ENSG00000174697.orthologs.500_Document.xml">ENSG00000174697 upstream sequence and its orthologs</a><br>
-		  Picture of this implemented workflow (using Taverna): <a href="workflows/coexpressedGenes_Workflow.png" onClick="return popup(this, 'workflow picture')">PromoterAnalysisWorkflow_coexpressedGenesMode</a><br><br>
-		  NB : There is also a version available accepting a gene identifiers list, instead of a set of FASTA sequences, <a href="http://genome.imim.es/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode.xml">gene identifiers input workflow</a><br>
-		   <a href="workflows/PromoterAnalysisWorkflow_coexpressedGenesMode.png">PromoterAnalysisWorkflow_coexpressedGenesMode</a>
+		  output: a gene clustering tree (picture in png format)<br><br>
+		  
+		  <a href="workflows/GeneClustering_Protocol.jpg" target="_blank">Protocol description</a>: cluster genes together based on upstream DNA sequence patterns in order to validate expression clusters<br><br>
+		  A <a href="workflows/gene_clustering.html">web page</a> has been set up to execute it.<br>
+		  The workflow has also been implemented using <a href="clients.html">taverna</a> software. You can <a href="http://genome.imim.es/~arnau/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode_Fasta_Version.xml">download the workflow</a> and load it in your local taverna installation. You must have the latest version of taverna (v1.4).<br>Input document example: <a href="examples/ENSG00000174697.orthologs.500_Document.xml">ENSG00000174697 upstream sequence and its orthologs</a><br>
+		  Picture of this implemented workflow (using Taverna): <a href="workflows/coexpressedGenes_Workflow_taverna.png" onClick="return popup(this, 'workflow picture')">PromoterAnalysisWorkflow_coexpressedGenesMode_taverna</a><br><br>
+		  NB : There is also a version available accepting a gene identifiers list, instead of a set of FASTA sequences, <a href="http://genome.imim.es/webservices/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode.xml">gene identifiers input workflow</a><br>
+		   <a href="workflows/coexpressedGenes_Workflow_list_of_genes.png">PromoterAnalysisWorkflow_coexpressedGenesMode</a>
 		  </li><br>                 
 		</ul>
 		
+		<span class="textorosa"><strong>ESTs assembly<br>
+		<img src="images/linea_rosa.gif" height="1" width="281"></strong>
+		  <ul class="textogris">
+		  input: chromatograms data<br>
+		  Output: the read sequences and associated quality data as well as the phrap assembly data<br><br>
+		  
+		  <a href="workflows/ESTs_assembly_Protocol.jpg" target="_blank">Protocol description</a><br><br>
+		  
+		  Picture of this implemented workflow (using Taverna): <a href="workflows/ESTs_Assembly_Workflow_taverna.png" onClick="return popup(this, 'workflow picture')">ESTs_Assembly_Workflow_taverna</a><br><br>
+		  Download the <a href="workflows/ESTs_assembly.xml">taverna workflow</a>.
+		  </ul>
+		<br>
+
                 </td>
 		</tr>
              </table>
