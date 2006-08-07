@@ -1,0 +1,18 @@
+<GFF namespace = '' id = 'AB065701'>
+<String namespace = '' id = '' articleName = 'content'><![CDATA[	
+## gff-version 2
+## date Tue Mar 21 12:22:39 2006
+## source-version: geneid v 1.2 -- geneid@imim.es
+# Sequence AB065701 - Length = 15576 bps
+# Optimal Gene Structure. 1 genes. Score = 17.38 
+# Gene 1 (Forward). 8 exons. 272 aa. Score = 17.38 
+AB065701	geneid_v1.2	Internal	5195	5302	 0.18	+	0	AB065701_1
+AB065701	geneid_v1.2	Internal	7251	7348	 3.21	+	0	AB065701_1
+AB065701	geneid_v1.2	Internal	8095	8273	 2.08	+	1	AB065701_1
+AB065701	geneid_v1.2	Internal	10561	10621	 2.15	+	2	AB065701_1
+AB065701	geneid_v1.2	Internal	11103	11172	 2.98	+	1	AB065701_1
+AB065701	geneid_v1.2	Internal	11909	12036	 2.40	+	0	AB065701_1
+AB065701	geneid_v1.2	Internal	12561	12690	 3.56	+	1	AB065701_1
+AB065701	geneid_v1.2	Internal	13413	13454	 0.81	+	0	AB065701_1
+]]></String>
+</GFF>
