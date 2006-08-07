@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.106 2006-08-04 10:02:44 gmaster Exp $
+# $Id: Factory.pm,v 1.107 2006-08-07 16:51:35 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -1709,7 +1709,7 @@ sub MultiMetaAlignment_call {
     my $queryID    = $args{queryID};
     my $parameters = $args{parameters} || undef;
     my $debug      = $args{debug} || 0;
-    
+
     # Get the parameters
     
     my $alpha_penalty  = $parameters->{alpha_penalty};
@@ -1765,14 +1765,11 @@ sub MultiMetaAlignment_call {
     
     foreach my $map (@$maps) {
 	
-	if ($debug) {
-	    print STDERR "concatenating map\n";
-	}
-	
 	my $result = qx/echo '$map' | sort +3n >> $maps_file/;
-	
-	if ($debug) {
-	    print STDERR "result, $result\n";
+
+	if ($result ne "") {
+	    print STDERR "concatenating matscan maps problem, result is not null!\n";
+	    print STDERR "result: $result\n";
 	}
 	
     }
