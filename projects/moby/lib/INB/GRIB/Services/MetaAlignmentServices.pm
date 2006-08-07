@@ -1,4 +1,4 @@
-# $Id: MetaAlignmentServices.pm,v 1.27 2006-08-04 10:01:31 gmaster Exp $
+# $Id: MetaAlignmentServices.pm,v 1.28 2006-08-07 16:50:56 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -821,7 +821,7 @@ PRT
     # el mismo que el de la query.
 
     if (@$output_objects < 1) {
-	my $note = "MultiMetaAlignment didn't report any results";
+	my $note = "MultiPairwiseMetaAlignment didn't report any results";
 	print STDERR "$note\n";
 	my $code = "700";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -872,7 +872,9 @@ sub _do_query_MultiMetaAlignment {
     ($alpha_penalty)  = getNodeContentWithArticle($queryInput_DOM, "Parameter", "alpha penalty");
     ($lambda_penalty) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "lambda penalty");
     ($mu_penalty)     = getNodeContentWithArticle($queryInput_DOM, "Parameter", "mu penalty");
-    
+    ($gap_penalty)    = getNodeContentWithArticle($queryInput_DOM, "Parameter", "gap penalty");
+    ($non_colinear_penalty) = getNodeContentWithArticle($queryInput_DOM, "Parameter", "NoN-colinear penalty");
+
     if (not defined $alpha_penalty) {
 	$alpha_penalty = 0.5;
     }
@@ -942,9 +944,45 @@ sub _do_query_MultiMetaAlignment {
     if (not defined $gap_penalty) {
 	$gap_penalty = -10;
     }
+    elsif ($gap_penalty > 0) {
+	my $note = "gap penalty parameter, '$gap_penalty', not accepted - should be a negative number";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "gap penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
     
     if (not defined $non_colinear_penalty) {
 	$non_colinear_penalty = 100;
+    }
+    elsif (! $non_colinear_penalty =~ /\d+/) {
+	my $note = "NoN-colinear penalty parameter, '$non_colinear_penalty', not accepted - should be a number";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "NoN-colinear penalty",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
     # Add the parsed parameters in a hash table
