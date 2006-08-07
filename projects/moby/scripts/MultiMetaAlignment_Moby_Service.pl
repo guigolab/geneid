@@ -89,6 +89,7 @@ my $maps_file = "/home/ug/arnau/data/runMatScanGFFCollection-2006-2-28-03:56:17.
 my $alpha_penalty  = "0.5";
 my $lambda_penalty = "0.1";
 my $mu_penalty     = "0.1";
+my $gap_penalty    = "-5";
 
 ##################################################################
 #
@@ -313,7 +314,13 @@ PRT
 my $mu_xml = <<PRT;
 <Value>$mu_penalty</Value>
 PRT
-    
+
+# Gap penalty parameter
+
+my $gap_xml = <<PRT;
+<Value>$gap_penalty</Value>
+PRT
+
 ##################################################################
 #
 # Service execution
@@ -321,7 +328,7 @@ PRT
 ##################################################################
 
 my $result = $Service->execute(XMLinputlist => [
-						["$articleName", $maps_xml, 'alpha penalty', $alpha_xml, 'lambda penalty' => $lambda_xml, 'mu penalty' => $mu_xml]
+						["$articleName", $maps_xml, 'alpha penalty', $alpha_xml, 'lambda penalty' => $lambda_xml, 'mu penalty' => $mu_xml, 'gap penalty', $gap_xml ]
 					       ]);
 
 ##################################################################
