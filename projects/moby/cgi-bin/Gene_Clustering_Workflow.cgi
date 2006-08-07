@@ -68,26 +68,25 @@ else {
 	    print STDERR "uploading...\n";
 	}
 	
-	my $upload_filehandle = $cgi->upload('upfile');
-	
-	while ( my $line = <$upload_filehandle> ) {
-	    print $seq_fh $line;
-	}
+	# my $upload_filehandle = $cgi->upload('upfile');
+	# while ( my $line = <$upload_filehandle> ) {
+	    # print $seq_fh $line;
+	# }
 	
 	# Seems faster that way!
 	
-	# my $upfilename = $cgi->param ('upfile');
-	# binmode($seq_fh);
-	# while (my $bytesread = read($upfilename, my $buffer, 1024)) {
-	    # print $seq_fh $buffer || die "cannot write to file, $seqfile ($!)\n";
-	# }
+	my $upfilename = $cgi->param ('upfile');
+	binmode($seq_fh);
+	while (my $bytesread = read($upfilename, my $buffer, 1024)) {
+	    print $seq_fh $buffer || die "cannot write to file, $seqfile ($!)\n";
+	}
     }
     else {
 	close $seq_fh;
 	unlink $seqfile;
 
 	print "Content-type: text/html\n\n";
-	print_error("<b>ERROR> A DNA sequence has not been submitted.</b><br><br>Please, fill the textarea in or select a file for submitting a DNA sequence");
+	print_error("<b>ERROR> No DNA sequences were submitted.</b><br><br>Please, fill the textarea in or select a file for submitting promoter sequences");
 	exit 1;
     }
 }
@@ -101,13 +100,15 @@ if (-z $seqfile) {
     unlink $seqfile;
     
     print "Content-type: text/html\n\n";
-    print_error("<b>ERROR> A DNA sequence has not been submitted.</b><br><br>Please, fill the textarea in or select a file for submitting a DNA sequence");
+    print_error("<b>ERROR> No DNA sequences were submitted.</b><br><br>Please, fill the textarea in or select a file for submitting promoter sequences");
 
     exit 1;
 }
 
 my $t2 = Benchmark->new ();
-print STDERR "\nGene clustering Input Uploading : ", timestr (timediff ($t2, $t1)), "\n";
+if ($_debug) {
+    print STDERR "\nGene clustering Input Uploading : ", timestr (timediff ($t2, $t1)), "\n";
+}
 
 ##############################
 #
@@ -122,10 +123,13 @@ my $alpha            = $cgi->param ('alpha');
 my $lambda           = $cgi->param ('lambda');
 my $mu               = $cgi->param ('mu');
 
-my $nj_method        = $cgi->param ('method');
+my $nj_method        = $cgi->param ('method') || "nearest";
 
 my $iteration_number = $cgi->param ('iterations');
 my $cluster_number   = $cgi->param ('clusters');
+
+my $gamma            = $cgi->param ('gamma');
+my $non_colinear     = $cgi->param ('noncol');
 
 # Parameters Validation
 
@@ -138,7 +142,11 @@ if (! ($iteration_number =~ /\d+/)) {
 }
 
 if ($_debug) {
-    print STDERR "alpha, lambda, mu,  $alpha, $lambda, $mu\n";
+    print STDERR "NJ method, $nj_method\n";
+}
+
+if ($_debug) {
+    print STDERR "alpha, lambda, mu, gamma, noncol, $alpha, $lambda, $mu, $gamma, $non_colinear\n";
 }
 
 ##############################
@@ -157,27 +165,31 @@ $gene_clustering_output_dirname =~ s/\/usr\/local\/Install\/apache2\/htdocs\/web
 
 if ($_debug) {
     print STDERR "executing the following command,\n";
-    print STDERR "$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile -o $gene_clustering_output_dir\n";
+    print STDERR "$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir\n";
 }
 
-my $result;
+my $failure;
 if ($_debug) {
-    $result = qx/$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile -o $gene_clustering_output_dir/;
+    $failure = qx/$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir/;
 }
 else {
-    $result = qx/$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -f $seqfile -o $gene_clustering_output_dir >& \/dev\/null/;
+    $failure = qx/$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir >& \/dev\/null/;
+}
+
+if ($_debug) {
+    print STDERR "workflow execution result, $failure\n";
 }
 
 if ($_debug) {
     print STDERR "execution done\n\n";
 }
 
-if (length ($result) > 1) {
+if ($failure) {
     print STDERR "workflow execution has failed!\n";
-    print STDERR "execution result, $result\n";
 
     print "Content-type: text/html\n\n";
     print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
+    exit 1;
 }
 
 ##############################
@@ -198,7 +210,7 @@ $output_dir_name =~ s/\/usr\/local\/Install\/apache2\/htdocs\/webservices\/workf
 my $archive_filename = $output_dir_name . ".zip";
 my $archive_URL = "http://genome.imim.es/webservices/workflows/results/" . $archive_filename;
 
-$result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $output_dir_name/;
+my $result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $output_dir_name/;
 
 # Display in HTML the results
 # First the archive link
@@ -267,50 +279,52 @@ while ($cluster_index <= $cluster_number) {
 	    if (! -f $cluster_image_filepath) {
 		print STDERR "can't find the gff maps picture for cluster $cluster_index - file path is $cluster_image_filepath\n";
 	    }
-	    
-	    # MatScan
-	    
-	    my $matscan_results = "";
-	    
-	    # ...
-	    
-	    # MMeta
-	    
-	    my $mmeta_results = "";
-	    my $mmeta_filename = "$gene_clustering_output_dir/$cluster_directory_name/" . $cluster_index . ".MultiMeta.txt";
-	    
-	    if ($_debug) {
-		print STDERR "mmeta filename for cluster $cluster_index, $mmeta_filename\n";
-	    }
-	    
-	    if (-f $mmeta_filename) {
-		$mmeta_results = qx/cat $mmeta_filename/;
-	    }
 	    else {
-		print STDERR "can't find mmeta results for cluster $cluster_index - filename is $mmeta_filename\n";
+		
+		# MatScan
+		
+		my $matscan_results = "";
+		
+		# ...
+		
+		# MMeta
+		
+		my $mmeta_results = "";
+		my $mmeta_filename = "$gene_clustering_output_dir/$cluster_directory_name/" . $cluster_index . ".MultiMeta.txt";
+		
+		if ($_debug) {
+		    print STDERR "mmeta filename for cluster $cluster_index, $mmeta_filename\n";
+		}
+		
+		if (-f $mmeta_filename) {
+		    $mmeta_results = qx/cat $mmeta_filename/;
+		}
+		else {
+		    print STDERR "can't find mmeta results for cluster $cluster_index - filename is $mmeta_filename\n";
+		}
+		
+		# HTML
+		
+		print "<font color=blue><b>Graphical representation of the TF-map alignment:</b><br><br></font>\n";
+		print "<img src=\"$cluster_image_filepath\"><br>\n";
+		
+		print "<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>\n";
+		print "<TR>\n";
+		print "<TD class='section'>\n";
+		print "<FONT size=5 class='K'>\n";
+		
+		print "<code>Multiple meta-alignment</code> predictions for this cluster are:</FONT></TD></TR></TABLE><P><pre><tt>\n";
+		
+		# Multiple meta-alignment results
+		print "$mmeta_results\n";
+		
+		print "<hr>\n";
+		
+		# MatScan results
+		print "$matscan_results\n";
+		
+		print "</pre></tt>\n";
 	    }
-	    
-	    # HTML
-	    
-	    print "<font color=blue><b>Graphical representation of the TF-map alignment:</b><br><br></font>\n";
-	    print "<img src=\"$cluster_image_filepath\"><br>\n";
-	    
-	    print "<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>\n";
-	    print "<TR>\n";
-	    print "<TD class='section'>\n";
-	    print "<FONT size=5 class='K'>\n";
-	    
-	    print "<code>Multiple meta-alignment</code> predictions for this cluster are:</FONT></TD></TR></TABLE><P><pre><tt>\n";
-	    
-	    # Multiple meta-alignment results
-	    print "$mmeta_results\n";
-	    
-	    print "<hr>\n";
-	    
-	    # MatScan results
-	    print "$matscan_results\n";
-	    
-	    print "</pre></tt>\n";
 	}
 	
 	if ($_debug) {
