@@ -65,7 +65,7 @@ return <<"END_HELP";
 Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -m {Hierarchical clustering method} -n {Number of K-means clusters} -i {Number of K-means iterations} -o {Output directory}
+    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -g {multiple meta-alignment gamma penalty} -r {non-collinearity penalty} -m {Hierarchical clustering method} -n {Number of K-means clusters} -i {Number of K-means iterations} -o {Output directory}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is BioMoby registry)
 		<1> or Inab
@@ -77,6 +77,8 @@ Usage:
 	-a Meta-alignment alpha penalty (Default is 0.5)
 	-l Meta-alignment lambda penalty (Default is 0.1)
 	-u Meta-alignment mu penalty (Default is 0.1)
+	-g Multiple meta-alignment gamma penalty (Default is -10)
+	-r Multiple meta-alignment non-collinearity penalty (Default is 100)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
 	-n Number of clusters returned by the k-means algorithm (Default is 10)
 	-i Number of k-means iterations (Default is 200)
@@ -84,7 +86,7 @@ Usage:
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -m nearest -n 4 -i 200 -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -n 4 -i 200 -o output
 
 END_HELP
 
@@ -93,10 +95,10 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_n $opt_i $opt_o $opt_s/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_s $output_dir/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'shxfctdalumnio';
+    my $switches = 'shxfctdalumgrnio';
     
     # Get the switches
     getopt($switches);
@@ -104,9 +106,12 @@ BEGIN {
     # If the user does not write nothing, skip to help
     if (defined($opt_h) || !defined ($opt_f)){
 	print STDERR help;
-	exit 0;
+	if (defined $output_dir) {
+	    print 1;
+	}
+	exit 1;
     }
-	
+    
 }
 
 my $t1 = Benchmark->new ();
@@ -139,9 +144,19 @@ if ($shortcut) {
 
 # input file
 
-my $in_file = $opt_f || $ENV{HOME} . "/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa";
+my $in_file = $opt_f;
+if (! defined $in_file) {
+    print STDERR "Error, please specify an input file with promoter FASTA sequences\n";
+    if (defined $output_dir) {
+	print 1;
+    }
+    exit 1;
+}
 if (not (-f $in_file)) {
     print STDERR "Error, can't find input file, $in_file\n";
+    if (defined $output_dir) {
+	print 1;
+    }
     exit 1;
 }
 
@@ -157,7 +172,11 @@ elsif (lc ($method) eq "furthest") {
   $method = "Furthest neighbor (complete linkage)";
 }
 else {
-  print STDERR "don't know about the value for method parameter, $method!";
+  print STDERR "don't know about the value for method parameter, $method!\n";
+  print STDERR help;
+  if (defined $output_dir) {
+      print 1;
+  }
   exit 1;
 }
 
@@ -171,7 +190,7 @@ my $database  = $opt_d || "transfac";
 my $threshold_xml   = "<Value>$threshold</Value>";
 my $matrix_xml      = "<Value>$database</Value>";
 
-# Meta-alignment parameters
+# Pairwise Meta-alignment parameters
 
 my $alpha  = $opt_a || 0.5;
 my $lambda = $opt_l || 0.1;
@@ -188,6 +207,15 @@ my $cluster_number_xml   = "<Value>$cluster_number</Value>";
 my $iteration_number     = $opt_i || 200;
 my $iteration_number_xml = "<Value>$iteration_number</Value>";
 
+# Multiple Meta-alignment parameters
+
+# Same than Pairwise Meta-alignment parameters, plus:
+my $gamma            = $opt_g || -10;
+my $non_collinearity = $opt_r || 100;
+
+my $gamma_xml = "<Value>$gamma</Value>";
+my $non_collinearity_xml = "<Value>$non_collinearity</Value>";
+
 # parameters configuration file parsing
 
 my $serviceName = undef;
@@ -195,13 +223,16 @@ my $serviceName = undef;
 my $config_file = $opt_c || $ENV{HOME} . "/.workflow.config";
 if (not (-f $config_file)) {
     print STDERR "Error, can't find config file, $config_file\n";
+    if (defined $output_dir) {
+	print 1;
+    }
     exit 1;
 }
 
 my %parameters = setConfigurationData ($config_file);
 
 # Output
-my $output_dir = $opt_o || undef;
+$output_dir = $opt_o || undef;
 if (defined $output_dir) {
   if (!$shortcut) {
       if (-d $output_dir) {
@@ -227,6 +258,9 @@ $input_type = "FASTA";
 if (! ($input_type eq "FASTA" || $input_type eq "identifiers")) {
 	print STDERR "don't know about this input type, $input_type!\n";
 	print STDERR "must be either 'FASTA' or 'identifiers'\n";
+	if (defined $output_dir) {
+	    print 1;
+	}
 	exit 1;
 }
 
@@ -269,7 +303,10 @@ if (defined($opt_x)) {
 	}else {
 	    print STDERR "Don't anything about this registry, $opt_x!\n";
 	    print help;
-	    exit 0;
+	    if (defined $output_dir) {
+		print 1;
+	    }
+	    exit 1;
 	}
 
 }
@@ -296,7 +333,10 @@ if (defined $C) {
 }
 else {
     print STDERR "Error, Central could not be instanciated!\n";
-    exit 0;
+    if (defined $output_dir) {
+	print 1;
+    }
+    exit 1;
 }
 
 ##################################################################
@@ -428,6 +468,9 @@ if (hasFailed ($moby_response)) {
     print STDERR "service, $serviceName, has failed!\n";
     my $moby_error_message = getExceptionMessage ($moby_response);
     print STDERR "reason is the following,\n$moby_error_message\n";
+    if (defined $output_dir) {
+	print 1;
+    }
     exit 1;
 }
 
@@ -479,6 +522,9 @@ if (!$shortcut) {
 	print STDERR "service, $serviceName, has failed!\n";
 	my $moby_error_message = getExceptionMessage ($moby_response);
 	print STDERR "reason is the following,\n$moby_error_message\n";
+	if (defined $output_dir) {
+	    print 1;
+	}
 	exit 1;
     }
     
@@ -534,7 +580,7 @@ if (!$shortcut) {
 		print STDERR "service, $serviceName, has failed!\n";
 		my $moby_error_message = getExceptionMessage ($moby_response);
 		print STDERR "reason is the following,\n$moby_error_message\n";
-		exit 1;
+		print 0;
 	    }
 	    
 	    saveResults ($moby_response, "GFF", "Meta", $output_dir);
@@ -568,6 +614,9 @@ if (!$shortcut) {
 	    print STDERR "service, $serviceName, has failed!\n";
 	    my $moby_error_message = getExceptionMessage ($moby_response);
 	    print STDERR "reason is the following,\n$moby_error_message\n";
+	    if (defined $output_dir) {
+		print 1;
+	    }
 	    exit 1;
 	}
 	
@@ -598,7 +647,7 @@ if (!$shortcut) {
 	my $i = 0;
 	my $j = 0;
 	my $meta_index = 1;
-	$input_xml = [];
+	$input_xml     = [];
 	qx/mkdir $output_dir\/Meta/;
 	
 	foreach my $id1 (@sequence_matscan_ids) {
@@ -674,7 +723,7 @@ else {
 	    push (@$input_xml, $metadata_xml);
 	}
 	else {
-	    print STDERR "metafile, $output_dir/Meta/$metafile, doesn't exit!\n";
+	    print STDERR "metafile, $output_dir/Meta/$metafile, doesn't return any data!\n";
 	}
     }
     
@@ -706,6 +755,9 @@ if (hasFailed ($moby_response)) {
     print STDERR "service, $serviceName, has failed!\n";
     my $moby_error_message = getExceptionMessage ($moby_response);
     print STDERR "reason is the following,\n$moby_error_message\n";
+    if (defined $output_dir) {
+	print 1;
+    }
     exit 1;
 }
 
@@ -753,6 +805,9 @@ if (hasFailed ($moby_response)) {
     print STDERR "service, $serviceName, has failed!\n";
     my $moby_error_message = getExceptionMessage ($moby_response);
     print STDERR "reason is the following,\n$moby_error_message\n";
+    if (defined $output_dir) {
+	print 1;
+    }
     exit 1;
 }
 
@@ -822,7 +877,7 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	$Service = getService ($C, $serviceName, $authURI);
 	
 	$moby_response = $Service->execute (XMLinputlist => [
-							     ["$articleName", $matscan_maps_xml]
+							     ["$articleName", $matscan_maps_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml, 'gap penalty', $gamma_xml, 'NoN-colinear penalty', $non_collinearity_xml]
 							     ]);
 	
 	if ($_debug) {
@@ -859,7 +914,7 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	    $Service = getService ($C, $serviceName, $authURI);
 	    
 	    $moby_response = $Service->execute (XMLinputlist => [
-								 ["$articleName", $matscan_maps_xml]
+								 ["$articleName", $matscan_maps_xml, 'alpha', $alpha_xml, 'lambda', $lambda_xml, 'mu', $mu_xml, 'gap penalty', $gamma_xml, 'NoN-colinear penalty', $non_collinearity_xml]
 								 ]);
 	    
 	    if ($_debug) {
@@ -971,7 +1026,10 @@ if (0) {
     }
     else {
 	print STDERR "Error, Central could not be instanciated!\n";
-	exit 0;
+	if (defined $output_dir) {
+	    print 1;
+	}
+	exit 1;
     }
     
     # runHierarchicalClustering
@@ -1064,6 +1122,9 @@ if (0) {
 	
 	if ($newick_tree eq "") {
 	    print STDERR "Hierachical clustering failed!\n";
+	    if (defined $output_dir) {
+		print 1;
+	    }
 	    exit 1;
 	}
 	
@@ -1126,6 +1187,8 @@ if (0) {
 
 my $t2 = Benchmark->new ();
 print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
+
+exit 0;
 
 ##
 # The end
@@ -1202,7 +1265,7 @@ sub getService {
     
     if (@$service_instances == 0) {
 	print STDERR "Error, can't find any service called $serviceName!\n";
-	exit 0;
+	return 0;
     }
     
     my $service_instance = $service_instances->[0];
