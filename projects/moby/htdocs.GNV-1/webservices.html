@@ -39,21 +39,21 @@ if (typeof(mylink) == 'string')
                 <td align="right">
                  <table cellpadding="1" cellspacing="1">
                   <tr>
-                   <td height="2" bgcolor="#b7e505"></td>
+                   <td height="2" bgcolor="#B7E505"></td>
                    <td height="2" bgcolor="#0066CC"></td>
                    <td height="2" bgcolor="#CC6600"></td>
                    <td height="2" bgcolor="#E50083"></td>
 		   <td height="2" bgcolor="#660099"></td>
                   </tr>
                   <tr>
-                   <td align="center" height="20" bgcolor="#b7e505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#B7E505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#0066CC">&nbsp;&nbsp;<a class="index" href="webservices.html">WEBSERVICES</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#CC6600">&nbsp;&nbsp;<a class="index" href="workflows.html">WORKFLOWS</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#E50083">&nbsp;&nbsp;<a class="index" href="clients.html">CLIENTS</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#660099">&nbsp;&nbsp;<a class="index" href="contact.html">CONTACT US</a>&nbsp;&nbsp;</td>
                   </tr>
                   <tr>
-                   <td height="5" bgcolor="#feffec"></td>
+                   <td height="5" bgcolor="#CCFFCC"></td>
                    <td height="5" bgcolor="#CCFFFF"></td>
                    <td height="5" bgcolor="#FAEADA"></td>
                    <td height="5" bgcolor="#FBD6EB"></td>
@@ -161,7 +161,21 @@ if (typeof(mylink) == 'string')
 		<br><a href="examples/MetaAlignment_collection.xml" target="_blank">input xml</a>.
 		</li><br>
 		</ul>
-
+		
+		<li><b><a href="http://genome.imim.es/software/mmeta/index.html" target="_blank">Multiple Meta-alignment</a>: </b> <br><br>
+		<ul class="textogris">
+		<li><b>runMultiMetaAlignment</b>: Reads a set of binding sites maps in GFF format and returns the multiple alignment <br>
+		of these maps in meta-alignment format.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMultiMetaAlignment" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/MetaAlignment_collection.xml" target="_blank">input xml</a>.
+		</li><br>
+		<li><b>runMultiMetaAlignmentGFF</b>: Reads a set of binding sites maps in GFF format and returns the multiple alignment <br>
+		of these maps in GFF format.
+		<br><a href="http://mobycentral.icapture.ubc.ca/cgi-bin/list.services.cgi?name=runMultiMetaAlignmentGFF" onClick="return popup(this, 'specifications', '1000', '250')">service specifications</a>
+		<br><a href="examples/MetaAlignment_collection.xml" target="_blank">input xml</a>.
+		</li><br>
+		</ul>
+		
 		<li><b><a href="http://meme.sdsc.edu/meme/website/intro.html" target="_blank">MEME v3.5.2</a>: </b></b> <br><br>
 		<ul class="textogris">
 		<li><b>runMemeText</b>: reads a collection of generic sequences (it can be either AminoAcid sequences or Nucleotide sequences)<br>
