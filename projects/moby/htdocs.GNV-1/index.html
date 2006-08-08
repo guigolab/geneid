@@ -21,21 +21,21 @@
                 <td align="right">
                  <table cellpadding="1" cellspacing="1">
                   <tr>
-                   <td height="2" bgcolor="#b7e505"></td>
+                   <td height="2" bgcolor="#B7E505"></td>
                    <td height="2" bgcolor="#0066CC"></td>
                    <td height="2" bgcolor="#CC6600"></td>
                    <td height="2" bgcolor="#E50083"></td>
 		   <td height="2" bgcolor="#660099"></td>
                   </tr>
                   <tr>
-                   <td align="center" height="20" bgcolor="#b7e505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
+                   <td align="center" height="20" bgcolor="#B7E505">&nbsp;&nbsp;<a class="index" href="index.html">OVERVIEW</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#0066CC">&nbsp;&nbsp;<a class="index" href="webservices.html">WEBSERVICES</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#CC6600">&nbsp;&nbsp;<a class="index" href="workflows.html">WORKFLOWS</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#E50083">&nbsp;&nbsp;<a class="index" href="clients.html">CLIENTS</a>&nbsp;&nbsp;</td>
                    <td align="center" height="20" bgcolor="#660099">&nbsp;&nbsp;<a class="index" href="contact.html">CONTACT US</a>&nbsp;&nbsp;</td>
                   </tr>
-                  <tr>
-                   <td height="5" bgcolor="#feffec"></td>
+                  <tr><!-- #FEFFEC  -->
+                   <td height="5" bgcolor="#CCFFCC"></td>
                    <td height="5" bgcolor="#CCFFFF"></td>
                    <td height="5" bgcolor="#FAEADA"></td>
                    <td height="5" bgcolor="#FBD6EB"></td>
@@ -69,18 +69,37 @@
   	        <td>&nbsp;</td>
                 <td width="700" colspan="2" class="textogris">
 		
-		The	project aims to provide bioinformatics resources through the web. It can be data retrieval resources or analysis resources. <br>
-		The GNV-1 node of the INB focuses on providing genome analysis resources.<br>
-		<br>Here are the main types of analysis that are explored:<br>
-		<ul>
-		  <li>gene prediction with GeneID</li>
-
-		  <li>signal predictions, such as transcription regulatory elements or splicing elements</li>
-		  <li>ESTs assembly projects</li>
-		</ul>
-		</td>
-	    </tr>
+		  The project aims to provide bioinformatics resources through the web. In this regard, we have designed and implemented a set of Web services<br>
+		  that are compliant with <a href="http://www.biomoby.org" target="_blank">MOBY</a> specifications.<br><br>
+		  
+		  We have been focusing on providing genome analysis resources. These resources are of various types:
+		  
+		  <ul>
+		    <li>Sequence analysis
+		      <ul>
+		        <li>Gene prediction
+		        <li>signal predicition (transcription regulatory elements or splicing elements)
+		        <li>ESTs assembly
+		      </ul>
+		    <li>Sequence data retrieval (promoter sequences from <a href="http://www.ensembl.org" target="_blank">Ensembl</a> database)
+		    <li>Data format conversion
+		  </ul>
+		  
+		  A more complete list of Web resources can be found in the <a href="webservices.html">WEB SERVICES</a> section
+		  	
+		  <br>		
+		  
+		  <br>We have also set up some pipelines of analysis to illustrate the use of these Web resources. Here are the main pipelines of computational analysis<br>
+		  that were implemented:<br>
+		  <ul>
+		    <li>Promoter analysis
+		    <li>ESTs assembly
+		  </ul>
+		  
+		  More information about our pipelines of analysis can be found in the <a href="workflows.html">WORKFLOWS</a> section
+		  
+	        </td>
+	      </tr>
 	    </tbody>
-	    </table>
-
+	  </table>
 </body>
