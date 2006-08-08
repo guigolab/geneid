@@ -270,7 +270,8 @@ while ($cluster_index <= $cluster_number) {
 	    
 	    # JPEG
 	    
-	    my $cluster_image_filepath = "/webservices/workflows/results/$gene_clustering_output_dirname/$cluster_directory_name/" . $cluster_index . ".TFBSs_maps.jpg";
+	    my $cluster_image_filepath = "/usr/local/Install/apache2/htdocs/webservices/workflows/results/$gene_clustering_output_dirname/$cluster_directory_name/" . $cluster_index . ".TFBSs_maps.jpg";
+	    my $cluster_image_webpath = "/webservices/workflows/results/$gene_clustering_output_dirname/$cluster_directory_name/" . $cluster_index . ".TFBSs_maps.jpg";
 	    
 	    if ($_debug) {
 		print STDERR "gff maps picture file path for cluster $cluster_index, $cluster_image_filepath\n";
@@ -306,7 +307,7 @@ while ($cluster_index <= $cluster_number) {
 		# HTML
 		
 		print "<font color=blue><b>Graphical representation of the TF-map alignment:</b><br><br></font>\n";
-		print "<img src=\"$cluster_image_filepath\"><br>\n";
+		print "<img src=\"$cluster_image_webpath\"><br>\n";
 		
 		print "<TABLE border=0 cellpadding=0 cellspacing=0 width=100%>\n";
 		print "<TR>\n";
