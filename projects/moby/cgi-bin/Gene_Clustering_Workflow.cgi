@@ -110,6 +110,30 @@ if ($_debug) {
     print STDERR "\nGene clustering Input Uploading : ", timestr (timediff ($t2, $t1)), "\n";
 }
 
+my $nb_sequences = qx/grep -c ">" $seqfile/;
+
+if ($_debug) {
+    print STDERR "number of input sequences, $nb_sequences\n";
+}
+
+if ($nb_sequences > 30) {
+    print "Content-type: text/html\n\n";
+    print_error("<b>ERROR> Too many sequences have been submitted, there is a limit of 30!");
+    exit 1;
+}
+
+my $nb_bases = qx/grep -v ">" $seqfile | wc -c/;
+
+if ($_debug) {
+    print STDERR "number of input bases, $nb_bases\n";
+}
+
+if ($nb_bases > 30) {
+    print "Content-type: text/html\n\n";
+    print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80 000bp!");
+    exit 1;
+}
+
 ##############################
 #
 # CGI PARAMETERS
@@ -387,9 +411,8 @@ sub print_error {
     print "<b>List of incompatibilities and suggestions:</b>";
     print "<ul>";
     print "<li>A DNA sequence in FASTA format must be always provided either by cut&paste or a file";
-    print "<li>To obtain a graphical representation of the predictions, please set the format field to <tt>gff</tt>";
-    print "<li>Submitted sequences must be lower than 100 Kbps when a graphical representation must be developed";
-    print "<li> Assembling mode requires entering some experimental evidences in GFF format";
+    print "<li>The limit of submitted sequences is 30";
+    print "<li>Submitted sequences must be lower than 80 Kbps";
     print "</ul>";
     print "<P>";
     
