@@ -1,4 +1,4 @@
-# $Id: BaseCallingServices.pm,v 1.4 2006-06-22 15:52:58 gmaster Exp $
+# $Id: BaseCallingServices.pm,v 1.5 2006-08-09 09:05:15 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -143,7 +143,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 1;
+my $_debug = 0;
 
 # Preloaded methods go here.
 
