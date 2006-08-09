@@ -202,7 +202,7 @@ $x->dispatch_with({
     'http://biomoby.org/#runCrossMatchToScreenVectorCollection'  => 'INB::GRIB::Services::VectorScreeningServices',
     
     'http://biomoby.org/#runPhrap'                               => 'INB::GRIB::Services::AssemblyServices',
-    'http://biomoby.org/#runPhrapWithQualityData'                => 'INB::GRIB::Services::Assemblyservices',
+    'http://biomoby.org/#runPhrapWithQualityData'                => 'INB::GRIB::Services::AssemblyServices',
     
     'http://biomoby.org/#runPhred'                               => 'INB::GRIB::Services::BaseCallingServices',
     'http://biomoby.org/#runPhredCollection'                     => 'INB::GRIB::Services::BaseCallingServices',
