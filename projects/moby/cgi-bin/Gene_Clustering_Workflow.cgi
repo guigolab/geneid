@@ -122,7 +122,7 @@ if ($nb_sequences > 30) {
     exit 1;
 }
 
-my $nb_bases = qx/grep -v ">" $seqfile | wc -c/;
+my $nb_bases = qx/grep -v ">" $seqfile | awk '{l+=length($1)}END{print l}'/;
 
 if ($_debug) {
     print STDERR "number of input bases, $nb_bases\n";
