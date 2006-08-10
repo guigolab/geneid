@@ -41,7 +41,7 @@ Usage:
 	-i Sequence(s) chromatogram - optional
 	
 Examples using some combinations:
-	perl Geneid_Moby_service.pl -x 4 -s runPhred -f /home/ug/arnau/data/Assembly_Galicia/ab1s/Clon1APlaca_G11-01PJZ.ab1
+	perl Geneid_Moby_service.pl -x 4 -s runPhred -f /home/arnau/data/Assembly_Galicia/AllMejillon/chromatograms/Clon1APlaca_G11-01PJZ.ab1
 
 END_HELP
 
@@ -83,7 +83,7 @@ if ($serviceName =~ /collection/i) {
 }
 $::authURI = 'genome.imim.es';
 
-my $in_file    = $opt_f || "/home/ug/arnau/data/Assembly_Galicia/ab1s/Clon1APlaca_G11-01PJZ.ab1";
+my $in_file    = $opt_f || "/home/arnau/data/Assembly_Galicia/AlmejaBacteria/chromatograms/Clon1APlaca_G11-01PJZ.ab1";
 my $datasource = "";
 
 if (! -f $in_file) {
