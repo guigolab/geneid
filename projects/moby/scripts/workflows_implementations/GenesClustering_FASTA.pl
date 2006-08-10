@@ -98,10 +98,10 @@ BEGIN {
     use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_s $output_dir/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'shxfctdalumgrnio';
+    my $switches = 'x:shf:c:t:d:a:l:u:m:g:r:n:i:o:';
     
     # Get the switches
-    getopt($switches);
+    getopts($switches);
     
     # If the user does not write nothing, skip to help
     if (defined($opt_h) || !defined ($opt_f)){
@@ -703,20 +703,18 @@ else {
     print STDERR "parsing meta-alignment data in $output_dir/Meta directory...\n";
     
     opendir METADIR, "$output_dir/Meta";
-    my @metafiles = grep /\.meta/, readdir METADIR;
+    my @metafiles = grep /\.meta|\.txt/, readdir METADIR;
     
     if (@metafiles < 1) {
-	@metafiles = grep /\.meta/, readdir METADIR;
+	print STDERR "Error, can't parse any meta-alignment data files in $output_dir/Meta!\n";
 	closedir METADIR;
-	
+	exit 1;
+    }
+    closedir METADIR;
+    
+    if ($_debug) {
 	print STDERR "got " . @metafiles . " meta files\n";
-	if ($_debug) {
-	    print STDERR "(first one, " . $metafiles[0] . ")\n";
-	}
-	
-	if (@metafiles < 1) {
-	    print STDERR "Error, can't parse any meta-alignment data files in $output_dir/Meta!\n";
-	}
+	print STDERR "(first one, " . $metafiles[0] . ")\n";
     }
     
     foreach my $metafile (@metafiles) {
