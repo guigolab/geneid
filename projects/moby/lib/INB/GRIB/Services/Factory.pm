@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.107 2006-08-07 16:51:35 gmaster Exp $
+# $Id: Factory.pm,v 1.108 2006-08-10 10:28:41 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3085,7 +3085,7 @@ sub Phred_call {
     
     my $chromatograms = $args{chromatograms} || undef;
     my $parameters    = $args{parameters}    || undef;
-    my $debug         = $args{debug};
+    my $debug         = $args{debug}         || 0;
     my $queryID       = $args{queryID}       || "";
     
     # parameters
@@ -3135,7 +3135,9 @@ sub Phred_call {
     my @chromatogram_ids = keys (%$chromatograms);
     foreach my $chromatogram_id (@chromatogram_ids) {
 	
-	print STDERR "chromatogram identifier, $chromatogram_id.\n";
+	if ($debug) {
+	    print STDERR "chromatogram identifier, $chromatogram_id.\n";
+	}
 	
 	my $chromatogram = $chromatograms->{$chromatogram_id};
 	
