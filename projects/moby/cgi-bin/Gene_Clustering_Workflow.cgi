@@ -128,7 +128,7 @@ if ($_debug) {
     print STDERR "number of input bases, $nb_bases\n";
 }
 
-if ($nb_bases > 30) {
+if ($nb_bases > 80000) {
     print "Content-type: text/html\n\n";
     print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80 000bp!");
     exit 1;
