@@ -86,7 +86,7 @@ else {
 	unlink $seqfile;
 
 	print "Content-type: text/html\n\n";
-	print_error("<b>ERROR> No DNA sequences were submitted.</b><br><br>Please, fill the textarea in or select a file for submitting promoter sequences");
+	print_error("<b>ERROR> No data were submitted.</b><br><br>Please, fill the textarea in or select a file");
 	exit 1;
     }
 }
@@ -100,7 +100,7 @@ if (-z $seqfile) {
     unlink $seqfile;
     
     print "Content-type: text/html\n\n";
-    print_error("<b>ERROR> No DNA sequences were submitted.</b><br><br>Please, fill the textarea in or select a file for submitting promoter sequences");
+    print_error("<b>ERROR> No data were submitted.</b><br><br>Please, fill the textarea in or select a file");
 
     exit 1;
 }
@@ -118,9 +118,9 @@ if ($_debug) {
     print STDERR "input type, $input_type\n";
 }
 
-if (!defined $input_type || $input_type ne "FASTA" || $input_type ne "LIST") {
+if ((!defined $input_type) || (($input_type ne "FASTA") && ($input_type ne "LIST"))) {
     print STDERR "Error, the input type has not been set up properly!\n";
-    if (defined $input) {
+    if (defined $input_type) {
 	print STDERR "input type, $input_type\n";
     }
     print "Content-type: text/html\n\n";
@@ -249,10 +249,10 @@ $gene_clustering_output_dirname =~ s/\/usr\/local\/Install\/apache2\/htdocs\/web
 my $args = "-x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir";
 
 if ($input_type eq "LIST") {
-    $args .= " -s $species -v $upstream -w $downstream";
+    $args .= " -s $species -v $upstream_length -w $downstream_length";
 }
 
-if (1 || $_debug) {
+if ($_debug) {
     print STDERR "executing the following command,\n";
     print STDERR "$_path_to_script\/$script_name $args\n";
 }
