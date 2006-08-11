@@ -246,19 +246,23 @@ $gene_clustering_output_dirname =~ s/\/usr\/local\/Install\/apache2\/htdocs\/web
 
 # Make the arguments line
 
-# ...
+my $args = "-x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir";
 
-if ($_debug) {
+if ($input_type eq "LIST") {
+    $args .= " -s $species -v $upstream -w $downstream";
+}
+
+if (1 || $_debug) {
     print STDERR "executing the following command,\n";
-    print STDERR "$_path_to_script\/$script_name -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir\n";
+    print STDERR "$_path_to_script\/$script_name $args\n";
 }
 
 my $failure;
 if ($_debug) {
-    $failure = qx/$_path_to_script\/$script_name -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir/;
+    $failure = qx/$_path_to_script\/$script_name $args/;
 }
 else {
-    $failure = qx/$_path_to_script\/$script_name -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir >& \/dev\/null/;
+    $failure = qx/$_path_to_script\/$script_name $args >& \/dev\/null/;
 }
 
 if ($_debug) {
