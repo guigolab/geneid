@@ -95,10 +95,10 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_s $output_dir/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_z $output_dir/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'x:shf:c:t:d:a:l:u:m:g:r:n:i:o:';
+    my $switches = 'x:zhf:c:t:d:a:l:u:m:g:r:n:i:o:';
     
     # Get the switches
     getopts($switches);
@@ -131,12 +131,12 @@ my $_meta_bin = "meta";
 #
 # Hidden option - a hacky one !!
 #
-# use this (-s) flag when you have too many sequences, and you've done manually the multi pairwise alignments, and you want to start the workflow at the score matrix generation step!!
+# use this (-z) flag when you have too many sequences, and you've done manually the multi pairwise alignments, and you want to start the workflow at the score matrix generation step!!
 #
 ############################
 
 my $shortcut = 0;
-defined ($opt_s) && $shortcut++;
+defined ($opt_z) && $shortcut++;
 
 if ($shortcut) {
     print STDERR "shortcut activated, will start the workflow at 'fromMetaAlignmentsToTextScoreMatrix' step!\n";
