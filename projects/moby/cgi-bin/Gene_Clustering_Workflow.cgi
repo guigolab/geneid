@@ -45,7 +45,7 @@ if ($_debug) {
     print STDERR "clustering param names, @params\n";
 }
 
-if (defined($cgi->param ('sequences')) && ($cgi->param ('sequences') =~ />/)) {
+if (defined($cgi->param ('sequences')) && (($cgi->param ('sequences') =~ />/) || (length ($cgi->param ('sequences')) > 0))) {
 
     if ($_debug) {
 	print STDERR "sequences...\n";
@@ -166,9 +166,9 @@ if ($input_type eq "FASTA") {
 }
 else {
     
-    $script_name = "GenesClustering_FASTA.pl";
+    $script_name = "GenesClustering_LIST.pl";
     
-    my $nb_genes = qx/wc -l $seqfile/;
+    my $nb_genes = qx/grep -c "" $seqfile/;
     
     if ($nb_genes > 20) {
 	print "Content-type: text/html\n\n";
