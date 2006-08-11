@@ -116,7 +116,7 @@ BEGIN {
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 0;
+my $_debug = 1;
 # Need meta-alignment software because it is run locally, in case there are too many input sequences!
 my $_meta_dir = "/usr/local/molbio/bin";
 my $_meta_bin = "meta";
@@ -366,18 +366,18 @@ PRT
 }
 else {
 
-    # getUpstreamSeqfromEnsembl
+    # getUpstreamSeqFromEnsembl
 
     my $input = qx/cat $in_file/;
     
     $input_xml = <<PRT;
-<text-formatted namespace="$namespace" id="">
+<List_Text namespace="$namespace" id="">
 <String id="" namespace="" articleName="content">
 <![CDATA[
 $input
 ]]>
 </String>
-</text-formatted>
+</List_Text>
 PRT
 
 }
@@ -386,15 +386,15 @@ if ($_debug) {
     print STDERR "input xml,\n $input_xml\n";
 }
 
-# 1/ fromFASTAtoDNASequenceCollection or getUpstreamSeqfromEnsembl
+# 1/ fromFASTAtoDNASequenceCollection or getUpstreamSeqFromEnsembl
 
 if ($input_type eq "FASTA") {
 	# fromFASTAtoDNASequenceCollection
 	$serviceName = "fromFASTAToDNASequenceCollection";
 }
 else {
-	# getUpstreamSeqfromEnsembl
-	$serviceName = "getUpstreamSeqfromEnsembl";
+	# getUpstreamSeqFromEnsembl
+	$serviceName = "getUpstreamSeqFromEnsembl";
 }
 
 # Get the parameters from the configuration file
@@ -898,12 +898,6 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	    
 	    if (defined $output_dir) {
 		saveResults ($moby_response, "GFF", $cluster_index . ".MultiMeta", $output_dir . "/$cluster_index.cluster_results");
-	    }
-	    
-	    if ($_debug) {
-		print STDERR "input xml for next service:\n";
-		print STDERR join (', ', @$input_xml);
-		print STDERR ".\n";
 	    }
 	    
 	    # Then runMultiMetaAlignment
