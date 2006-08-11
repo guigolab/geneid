@@ -62,16 +62,19 @@ use HTTP::Request::Common;
 
 sub help {
 return <<"END_HELP";
-Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
+Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a list of gene identifiers. The script will automatically extract the promoter sequence of the given genes from the Ensembl DB.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -g {multiple meta-alignment gamma penalty} -r {non-collinearity penalty} -m {Hierarchical clustering method} -n {Number of K-means clusters} -i {Number of K-means iterations} -o {Output directory}
+    GenesClustering_LIST.pl [-h] -x {Moby Central} -f {list of gene identifiers file} -s {Species of the genes} -v {upstream sequence length} -w {downstream sequence length} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -g {multiple meta-alignment gamma penalty} -r {non-collinearity penalty} -m {Hierarchical clustering method} -n {Number of K-means clusters} -i {Number of K-means iterations} -o {Output directory} -c {configuration file}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is BioMoby registry)
 		<1> or Inab
 		<2> or BioMoby
 		<3> or Mobydev
 	-f Sequence(s) input file, in FASTA format
+	-s Species (No default - the value to give is gender_species, e.g. homo_sapiens)
+	-v Length of the sequence to extract, upstream of the TSS (Default is 2000)
+	-w Length of the sequence to extract, downstream of the TSS (Default is 0)
 	-t MatScan probability threshold (Default is 0.85)
         -d MatScan Motifs database [Jaspar, Transfac] (Default is Transfac)
 	-a Meta-alignment alpha penalty (Default is 0.5)
@@ -86,7 +89,7 @@ Usage:
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -n 4 -i 200 -o output
+	perl GenesClustering_LIST.pl -x 2 -f /home/ug/arnau/data/breast_pregnancy/both.lst -c \$HOME/.workflow.config -s homo_sapiens -v 1000 -w 500 -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -n 4 -i 200 -o output
 
 END_HELP
 
@@ -95,10 +98,10 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_s $output_dir/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_s $opt_v $opt_w $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_z $output_dir/;
     
     # these are switches taking an argument (a value)
-    my $switches = 'x:shf:c:t:d:a:l:u:m:g:r:n:i:o:';
+    my $switches = 'x:zhf:c:s:v:w:t:d:a:l:u:m:g:r:n:i:o:';
     
     # Get the switches
     getopts($switches);
@@ -131,12 +134,12 @@ my $_meta_bin = "meta";
 #
 # Hidden option - a hacky one !!
 #
-# use this (-s) flag when you have too many sequences, and you've done manually the multi pairwise alignments, and you want to start the workflow at the score matrix generation step!!
+# use this (-z) flag when you have too many sequences, and you've done manually the multi pairwise alignments, and you want to start the workflow at the score matrix generation step!!
 #
 ############################
 
 my $shortcut = 0;
-defined ($opt_s) && $shortcut++;
+defined ($opt_z) && $shortcut++;
 
 if ($shortcut) {
     print STDERR "shortcut activated, will start the workflow at 'fromMetaAlignmentsToTextScoreMatrix' step!\n";
@@ -409,9 +412,9 @@ my $downstream_length_xml = "";
 my $intergenic_only_xml   = "";
 
 if ($input_type eq "identifiers") {
-    my $species           = $parameters{$serviceName}->{species} || die "no species\n";
-    my $upstream_length   = $parameters{$serviceName}->{upstream_length}   || die "no upstream length\n";
-    my $downstream_length = $parameters{$serviceName}->{downstream_length} || 0;
+    my $species           = $opt_s || die "No species specified\n";
+    my $upstream_length   = $opt_v || 2000;
+    my $downstream_length = $opt_w || 0;
     my $intergenic_only   = $parameters{$serviceName}->{intergenic_only}   || die "no intergenic only\n";
     
     $species_xml           = "<Value>$species</Value>";
