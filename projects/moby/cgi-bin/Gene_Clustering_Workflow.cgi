@@ -110,30 +110,87 @@ if ($_debug) {
     print STDERR "\nGene clustering Input Uploading : ", timestr (timediff ($t2, $t1)), "\n";
 }
 
-my $nb_sequences = qx/grep -c ">" $seqfile/;
+# Get The type of input, so we know if we have to deal with FASTA sequences or a list of genes
+
+my $input_type = $cgi->param ('input_type');
 
 if ($_debug) {
-    print STDERR "number of input sequences, $nb_sequences\n";
+    print STDERR "input type, $input_type\n";
 }
 
-if ($nb_sequences > 30) {
+if (!defined $input_type || $input_type ne "FASTA" || $input_type ne "LIST") {
+    print STDERR "Error, the input type has not been set up properly!\n";
+    if (defined $input) {
+	print STDERR "input type, $input_type\n";
+    }
     print "Content-type: text/html\n\n";
-    print_error("<b>ERROR> Too many sequences have been submitted, there is a limit of 30!");
+    print_error("<b>ERROR> Internal Error");
     exit 1;
 }
 
-my $nb_bases = qx/grep -v ">" $seqfile | awk '{l+=length($1)}END{print l}'/;
+# The script name that will be called, depending of the input type
+my $script_name;
 
-if ($_debug) {
-    print STDERR "number of input bases, $nb_bases\n";
+# Extraction parameters
+my $species;
+my $upstream_length;
+my $downstream_length;
+
+if ($input_type eq "FASTA") {
+    
+    $script_name = "GenesClustering_FASTA.pl";
+    
+    my $nb_sequences = qx/grep -c ">" $seqfile/;
+    
+    if ($_debug) {
+	print STDERR "number of input sequences, $nb_sequences\n";
+    }
+    
+    if ($nb_sequences > 30) {
+	print "Content-type: text/html\n\n";
+	print_error("<b>ERROR> Too many sequences have been submitted, there is a limit of 30!");
+	exit 1;
+    }
+    
+    my $nb_bases = qx/grep -v ">" $seqfile | awk '{l+=length($1)}END{print l}'/;
+    
+    if ($_debug) {
+	print STDERR "number of input bases, $nb_bases\n";
+    }
+    
+    if ($nb_bases > 80000) {
+	print "Content-type: text/html\n\n";
+	print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80 000bp!");
+	exit 1;
+    }
 }
+else {
+    
+    $script_name = "GenesClustering_FASTA.pl";
+    
+    my $nb_genes = qx/wc -l $seqfile/;
+    
+    if ($nb_genes > 20) {
+	print "Content-type: text/html\n\n";
+	print_error("<b>ERROR> Too many genes have been submitted, there is a limit of 20!");
+	exit 1;
+    }
+    
+    # Parse the promoter sequence extraction parameters
 
-if ($nb_bases > 80000) {
-    print "Content-type: text/html\n\n";
-    print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80 000bp!");
-    exit 1;
+    $species           = $cgi->param ('species');
+    $upstream_length   = $cgi->param ('upstream');
+    $downstream_length = $cgi->param ('downstream');
+    
+    my $nb_bases = $nb_genes * ($upstream_length + $downstream_length);
+    
+    if ($nb_bases > 80000) {
+	print "Content-type: text/html\n\n";
+	print_error("<b>ERROR> Too long sequences have been required, the overall limit is 80 000bp!");
+	exit 1;
+    }
 }
-
+   
 ##############################
 #
 # CGI PARAMETERS
@@ -187,17 +244,21 @@ my $gene_clustering_output_dir = tempdir( "/usr/local/Install/apache2/htdocs/web
 my $gene_clustering_output_dirname = $gene_clustering_output_dir;
 $gene_clustering_output_dirname =~ s/\/usr\/local\/Install\/apache2\/htdocs\/webservices\/workflows\/results\///;
 
+# Make the arguments line
+
+# ...
+
 if ($_debug) {
     print STDERR "executing the following command,\n";
-    print STDERR "$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir\n";
+    print STDERR "$_path_to_script\/$script_name -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir\n";
 }
 
 my $failure;
 if ($_debug) {
-    $failure = qx/$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir/;
+    $failure = qx/$_path_to_script\/$script_name -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir/;
 }
 else {
-    $failure = qx/$_path_to_script\/GenesClustering_FASTA.pl -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir >& \/dev\/null/;
+    $failure = qx/$_path_to_script\/$script_name -x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir >& \/dev\/null/;
 }
 
 if ($_debug) {
@@ -407,13 +468,6 @@ sub print_error {
     print "<P>";
     print @mess;
     print "<hr>";
-    print "<p>";
-    print "<b>List of incompatibilities and suggestions:</b>";
-    print "<ul>";
-    print "<li>A DNA sequence in FASTA format must be always provided either by cut&paste or a file";
-    print "<li>The limit of submitted sequences is 30";
-    print "<li>Submitted sequences must be lower than 80 Kbps";
-    print "</ul>";
     print "<P>";
     
     # imprimiendo final de la plantilla  
