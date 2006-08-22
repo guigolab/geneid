@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<b:dataThingMap xmlns:b="http://org.embl.ebi.escience/baclava/0.1alpha">
+  <b:dataThing key="namespace">
+    <b:myGridDataDocument lsid="" syntactictype="'text/plain'">
+      <s:metadata xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha">
+        <s:mimeTypes>
+          <s:mimeType>text/plain</s:mimeType>
+        </s:mimeTypes>
+      </s:metadata>
+      <b:dataElement lsid="">
+        <b:dataElementData>RU5TRU1CTA==</b:dataElementData>
+      </b:dataElement>
+    </b:myGridDataDocument>
+  </b:dataThing>
+  <b:dataThing key="list_of_geneIdentifiers_input">
+    <b:myGridDataDocument lsid="" syntactictype="'text/plain'">
+      <s:metadata xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha">
+        <s:mimeTypes>
+          <s:mimeType>text/plain</s:mimeType>
+        </s:mimeTypes>
+      </s:metadata>
+      <b:dataElement lsid="">
+        <b:dataElementData>SDJBRk8KUFNNRDcKRU5TRzAwMDAwMDY5Mjc1CkZMSjEwMTExClNRU1RNMQpQU0c0CkVOU0cwMDAw
+MDEzNjQ4NwpQU0c5ClBTRzMKUFNHNgpQU0cyClBBUFBBCkNTSDIKQ1lQMTkKQURBTTEyClBTRzUK
+VEZQSTIKUFNHNwo=</b:dataElementData>
+      </b:dataElement>
+    </b:myGridDataDocument>
+  </b:dataThing>
+</b:dataThingMap>
+
