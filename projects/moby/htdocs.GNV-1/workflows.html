@@ -88,16 +88,30 @@ if (typeof(mylink) == 'string')
 		<span class="textorosa"><strong>Promoter analysis<br>
 		<img src="images/linea_rosa.gif" height="1" width="281"></strong>
 		  <ul class="textogris">
-		  <li><b>Co-expressed genes clustering workflows:</b><br>
-		  input: the upstream sequences (FASTA format) of a set of co-expressed genes<br>
-		  output: a gene clustering tree (picture in png format)<br><br>
-		  
-		  <a href="workflows/GeneClustering_Protocol.jpg" target="_blank">Protocol description</a>: cluster genes together based on upstream DNA sequence patterns in order to validate expression clusters<br><br>
-		  A <a href="workflows/gene_clustering.html">web page</a> has been set up to execute it.<br>
-		  The workflow has also been implemented using <a href="clients.html">taverna</a> software. You can <a href="http://genome.imim.es/~arnau/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode_Fasta_Version.xml">download the workflow</a> and load it in your local taverna installation. You must have the latest version of taverna (v1.4).<br>Input document example: <a href="examples/ENSG00000174697.orthologs.500_Document.xml">ENSG00000174697 upstream sequence and its orthologs</a><br>
-		  Picture of this implemented workflow (using Taverna): <a href="workflows/coexpressedGenes_Workflow_taverna.png" onClick="return popup(this, 'workflow picture')">PromoterAnalysisWorkflow_coexpressedGenesMode_taverna</a><br><br>
-		  NB : There is also a version available accepting a gene identifiers list, instead of a set of FASTA sequences, <a href="http://genome.imim.es/webservices/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode.xml">gene identifiers input workflow</a><br>
-		   <a href="workflows/coexpressedGenes_Workflow_list_of_genes.png">PromoterAnalysisWorkflow_coexpressedGenesMode</a>
+		  <li><b>co-expressed genes clustering workflows:</b><br><br>
+		  <a href="workflows/GeneClustering_Protocol.jpg" target="_blank">Protocol description</a>: clustering of  genes based on
+the pairwise alignment of their TFBSs maps. Such protocol can be used to validate the clustering of gene expression data.<br><br>
+		  To facilitate its execution, we have prepared Web submission pages. You can either submit a list of ENSEMBL genes or a set of FASTA promoter
+sequences.<br>
+		  <ul>
+		  <li>If you have a list of ENSEMBL genes, submit your input data with this submission page, <a href="workflows/gene_clustering_2.html">gene_clustering_2.html</a>.
+		  <li>If you have a set of FASTA promoter sequences, submit your input data with this submission page, <a href="workflows/gene_clustering.html">gene_clustering.html</a>.
+		  </ul>
+		  <br>
+		  The protocol has also been implemented using <a href="clients.html">taverna</a> software. You can download the workflows and load them in your local taverna installation. You must have the latest version of taverna (v1.4).
+		  <ul>
+		  	<li>Workflow implemented with a <a href="http://genome.imim.es/webservices/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode_Fasta_Version.xml"> set of FASTA promoter sequences</a> input
+		  	<li>Workflow implemented with a <a
+href="http://genome.imim.es/webservices/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode.xml"> list of gene identifiers</a> input
+		  </ul>
+		  <br>
+		  Taverna Input document examples:
+		  <ul>
+		  	<li>List of genes: <a
+href="examples/coexpressed_genes_Document.xml">breast and placenta tissue specific genes.</a>
+		  	<li>FASTA promoter sequences: <a
+href="examples/ENSG00000174697.orthologs.500_Document.xml">Human Leptin gene and its orthologs 500 bp promoter sequences</a>
+		  </ul>
 		  </li><br>                 
 		</ul>
 		
