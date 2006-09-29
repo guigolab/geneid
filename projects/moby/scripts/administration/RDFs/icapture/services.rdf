@@ -44,7 +44,7 @@
                     <mygrid:hasOperationNameText>runDustCollection</mygrid:hasOperationNameText>
                </mygrid:operation>
           </mygrid:hasOperation>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:providedBy>
                <mygrid:organisation>
                     <mygrid:authoritative>false</mygrid:authoritative>
@@ -56,7 +56,7 @@
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runMetaAlignmentGFF">
           <mygrid:isAlive>true</mygrid:isAlive>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasServiceDescriptionText>Produces alignments of sequences of TF binding sites and returns the predictions in GFF format. You can use runMatScanGFF to produce the input GFF files, specifying the 'log-likelihood' matrix mode</mygrid:hasServiceDescriptionText>
           <mygrid:providedBy>
                <mygrid:organisation>
@@ -168,7 +168,7 @@
           </mygrid:providedBy>
           <mygrid:isAlive>true</mygrid:isAlive>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,getUpstreamSeqFromEnsembl:2006-07-21T16-55-53Z</protege-dc:identifier>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasServiceNameText>getUpstreamSeqFromEnsembl</mygrid:hasServiceNameText>
           <mygrid:hasServiceDescriptionText>Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.</mygrid:hasServiceDescriptionText>
           <protege-dc:format>moby</protege-dc:format>
@@ -407,12 +407,12 @@
                </mygrid:operation>
           </mygrid:hasOperation>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runMultiPairwiseMetaAlignment:2006-07-21T16-41-13Z</protege-dc:identifier>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:hasServiceDescriptionText>Runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, producing, in 'Meta-alignment' format, alignments of sequences of TF binding sites</mygrid:hasServiceDescriptionText>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,fromFASTAToDNASequence">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,fromFASTAToDNASequence:2006-07-21T16-13-43Z</protege-dc:identifier>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:hasServiceNameText>fromFASTAToDNASequence</mygrid:hasServiceNameText>
@@ -559,13 +559,13 @@
           <mygrid:hasServiceNameText>runMetaAlignment</mygrid:hasServiceNameText>
           <mygrid:hasServiceDescriptionText>Produces alignments of sequences of TF binding sites and returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files, specifying the 'log-likelihood' matrix mode.</mygrid:hasServiceDescriptionText>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:format>moby</protege-dc:format>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runMetaAlignment:2006-07-21T16-40-26Z</protege-dc:identifier>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,filterSequencesByLength">
           <mygrid:hasServiceDescriptionText>Filters a set of sequences based on their length. Only sequences which length is greater than the length cutoff will be returned.</mygrid:hasServiceDescriptionText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <mygrid:providedBy>
                <mygrid:organisation>
@@ -650,7 +650,7 @@
           <protege-dc:format>moby</protege-dc:format>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runGeneIDGFF">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasOperation>
                <mygrid:operation>
                     <mygrid:performsTask>
@@ -940,7 +940,7 @@
                     <mygrid:hasOperationNameText>runCrossMatchToScreenVector</mygrid:hasOperationNameText>
                </mygrid:operation>
           </mygrid:hasOperation>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runDustFASTA_NA_multi">
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
@@ -953,7 +953,7 @@
           </mygrid:providedBy>
           <mygrid:hasServiceDescriptionText>Runs dust to mask low-complexity regions within a set of DNA sequences in FASTA format</mygrid:hasServiceDescriptionText>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runDustFASTA_NA_multi:2006-06-02T15-31-58Z</protege-dc:identifier>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasOperation>
                <mygrid:operation>
                     <mygrid:performsTask>
@@ -991,7 +991,7 @@
           <protege-dc:format>moby</protege-dc:format>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runMultiMetaAlignment">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasOperation>
                <mygrid:operation>
                     <mygrid:inputParameter>
@@ -1124,7 +1124,7 @@
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runMultiPairwiseMetaAlignmentGFF">
           <mygrid:hasServiceDescriptionText>Runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, producing, in GFF format, alignments of sequences of TF binding sites</mygrid:hasServiceDescriptionText>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:providedBy>
                <mygrid:organisation>
@@ -1372,10 +1372,10 @@
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <protege-dc:format>moby</protege-dc:format>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,getOrthologousUpstreamSeqFromEnsembl:2006-08-03T09-42-32Z</protege-dc:identifier>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runRepeatMaskerCollection">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasOperation>
                <mygrid:operation>
                     <mygrid:outputParameter>
@@ -1501,7 +1501,7 @@
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runMatScanGFF">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:isAlive>true</mygrid:isAlive>
           <mygrid:hasServiceDescriptionText>Analyzes a DNA sequence for putative transcription factor binding sites from Transfac or Jaspar and reports them in GFF format</mygrid:hasServiceDescriptionText>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runMatScanGFF:2006-07-21T16-34-13Z</protege-dc:identifier>
@@ -1627,7 +1627,7 @@
           <mygrid:hasServiceDescriptionText>Converts a generic sequence into a FASTA sequence</mygrid:hasServiceDescriptionText>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,fromGenericSequenceToFASTA:2006-07-21T16-16-45Z</protege-dc:identifier>
           <mygrid:hasServiceNameText>fromGenericSequenceToFASTA</mygrid:hasServiceNameText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:providedBy>
                <mygrid:organisation>
                     <mygrid:authoritative>false</mygrid:authoritative>
@@ -1742,7 +1742,7 @@
           </mygrid:providedBy>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:isAlive>true</mygrid:isAlive>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,translateGeneIDGFFPredictions:2006-07-21T16-42-46Z</protege-dc:identifier>
           <mygrid:hasServiceNameText>translateGeneIDGFFPredictions</mygrid:hasServiceNameText>
           <mygrid:hasServiceDescriptionText>Translates the GeneID gene predictions, given in GFF format, into a set of aminoacid sequences</mygrid:hasServiceDescriptionText>
@@ -1784,7 +1784,7 @@
           <mygrid:hasServiceNameText>runGFF2JPEG</mygrid:hasServiceNameText>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runGFF2JPEG:2006-07-22T15-37-53Z</protege-dc:identifier>
           <mygrid:hasServiceDescriptionText>Runs gff2ps software to vizualize a set of GFF annotations maps. It returns an encoded image in JPEG format.</mygrid:hasServiceDescriptionText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:providedBy>
                <mygrid:organisation>
                     <protege-dc:publisher>genome.imim.es</protege-dc:publisher>
@@ -1810,7 +1810,7 @@
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:isAlive>true</mygrid:isAlive>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasOperation>
                <mygrid:operation>
                     <mygrid:hasOperationNameText>runPhrapWithQualityData</mygrid:hasOperationNameText>
@@ -1905,7 +1905,7 @@
           </mygrid:hasOperation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runSGP2GFF">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:providedBy>
                <mygrid:organisation>
@@ -2102,7 +2102,7 @@
           <mygrid:hasServiceDescriptionText>Analyzes a collection of DNA sequences for putative transcription factor binding sites from Transfac or Jaspar and reports them in GFF format</mygrid:hasServiceDescriptionText>
           <mygrid:isAlive>true</mygrid:isAlive>
           <mygrid:hasServiceNameText>runMatScanGFFCollection</mygrid:hasServiceNameText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runPhredCollection">
           <mygrid:isAlive>true</mygrid:isAlive>
@@ -2195,7 +2195,7 @@
                </mygrid:organisation>
           </mygrid:providedBy>
           <mygrid:hasServiceDescriptionText>Phred writes the base calls from a set of chromatograms and returns a set of DNA sequences and FASTA base quality data</mygrid:hasServiceDescriptionText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,fromFASTAToDNASequenceCollection">
           <mygrid:providedBy>
@@ -2238,7 +2238,7 @@
                     <mygrid:hasOperationNameText>fromFASTAToDNASequenceCollection</mygrid:hasOperationNameText>
                </mygrid:operation>
           </mygrid:hasOperation>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,fromFASTAToDNASequenceCollection:2006-07-21T16-13-30Z</protege-dc:identifier>
           <mygrid:hasServiceDescriptionText>Converts DNA FASTA sequences into a collection of DNA sequences</mygrid:hasServiceDescriptionText>
@@ -2246,7 +2246,7 @@
           <mygrid:hasServiceNameText>fromFASTAToDNASequenceCollection</mygrid:hasServiceNameText>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,parseMotifMatricesFromMEME">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,parseMotifMatricesFromMEME:2006-07-21T16-32-01Z</protege-dc:identifier>
           <mygrid:hasServiceDescriptionText>Parses the score or probability motif matrices from MEME output</mygrid:hasServiceDescriptionText>
           <mygrid:providedBy>
@@ -2358,7 +2358,7 @@
                </mygrid:organisation>
           </mygrid:providedBy>
           <mygrid:hasServiceDescriptionText>Parses a collection of meta-alignment outputs to produce a sequence similarity score matrix</mygrid:hasServiceDescriptionText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runRepeatMasker">
           <mygrid:hasServiceNameText>runRepeatMasker</mygrid:hasServiceNameText>
@@ -2372,7 +2372,7 @@
           </mygrid:providedBy>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:isAlive>true</mygrid:isAlive>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasOperation>
                <mygrid:operation>
                     <mygrid:inputParameter>
@@ -2581,7 +2581,7 @@
                </mygrid:operation>
           </mygrid:hasOperation>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runKMeansClustering">
           <mygrid:providedBy>
@@ -2688,7 +2688,7 @@
           <mygrid:hasServiceDescriptionText>Runs cluster v3.0 to that implements k-means algorithm to cluster genes together. The input is a gene score matrix represented as a MicroArrayData_Text object.</mygrid:hasServiceDescriptionText>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:isAlive>true</mygrid:isAlive>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runMatScanGFFCollectionVsInputMatrices">
           <mygrid:providedBy>
@@ -2698,7 +2698,7 @@
                     <protege-dc:publisher>genome.imim.es</protege-dc:publisher>
                </mygrid:organisation>
           </mygrid:providedBy>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:isAlive>true</mygrid:isAlive>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:hasOperation>
@@ -2988,7 +2988,7 @@
           <mygrid:isAlive>true</mygrid:isAlive>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:providedBy>
                <mygrid:organisation>
                     <protege-dc:creator>akerhornou@imim.es</protege-dc:creator>
@@ -3008,7 +3008,7 @@
                     <mygrid:authoritative>false</mygrid:authoritative>
                </mygrid:organisation>
           </mygrid:providedBy>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:isAlive>true</mygrid:isAlive>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runDust:2006-05-03T13-22-11Z</protege-dc:identifier>
@@ -3049,7 +3049,7 @@
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,fromGenericSequenceCollectionToFASTA">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,fromGenericSequenceCollectionToFASTA:2006-07-21T16-16-27Z</protege-dc:identifier>
           <mygrid:hasOperation>
@@ -3100,7 +3100,7 @@
           <mygrid:hasServiceNameText>fromMetaAlignmentsToTextScoreMatrix</mygrid:hasServiceNameText>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <mygrid:hasServiceDescriptionText>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</mygrid:hasServiceDescriptionText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:providedBy>
                <mygrid:organisation>
                     <protege-dc:creator>akerhornou@imim.es</protege-dc:creator>
@@ -3145,7 +3145,7 @@
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,fromMetaAlignmentsToTextScoreMatrix:2006-07-21T16-17-30Z</protege-dc:identifier>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runCrossMatchToScreenVectorCollection">
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:providedBy>
                <mygrid:organisation>
                     <protege-dc:publisher>genome.imim.es</protege-dc:publisher>
@@ -3234,7 +3234,7 @@
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <protege-dc:format>moby</protege-dc:format>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runMemeText:2006-07-21T16-38-07Z</protege-dc:identifier>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:isAlive>true</mygrid:isAlive>
           <mygrid:hasOperation>
                <mygrid:operation>
@@ -3529,7 +3529,7 @@
           <mygrid:isAlive>true</mygrid:isAlive>
           <protege-dc:format>moby</protege-dc:format>
           <mygrid:hasServiceNameText>filterSequencesAndQualityDataByLength</mygrid:hasServiceNameText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasServiceDescriptionText>Filters a set of sequences based on their length. Only sequences which length is greater than the length cutoff will be returned. It also filters out the quality data associated with the removed sequences.</mygrid:hasServiceDescriptionText>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,filterSequencesAndQualityDataByLength:2006-08-04T15-28-00Z</protege-dc:identifier>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
@@ -3580,7 +3580,7 @@
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,fromFASTAToGenericSequenceCollection:2006-07-21T16-14-11Z</protege-dc:identifier>
           <mygrid:hasServiceNameText>fromFASTAToGenericSequenceCollection</mygrid:hasServiceNameText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runPhred">
           <mygrid:hasOperation>
@@ -3672,7 +3672,7 @@
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runPhred:2006-08-04T15-24-20Z</protege-dc:identifier>
           <mygrid:hasServiceNameText>runPhred</mygrid:hasServiceNameText>
           <mygrid:hasServiceDescriptionText>Phred writes the base calls from a chromatogram and returns a DNA sequence and FASTA base quality data</mygrid:hasServiceDescriptionText>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
      </mygrid:serviceDescription>
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,fromFASTAToAminoAcidSequence">
@@ -3718,7 +3718,7 @@
                     <protege-dc:publisher>genome.imim.es</protege-dc:publisher>
                </mygrid:organisation>
           </mygrid:providedBy>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,fromFASTAToAminoAcidSequence:2006-07-21T16-13-17Z</protege-dc:identifier>
           <mygrid:hasServiceDescriptionText>Converts aminoacid FASTA sequence into an aminoacid sequence</mygrid:hasServiceDescriptionText>
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
@@ -3733,7 +3733,7 @@
           </mygrid:providedBy>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runMultiMetaAlignmentGFF:2006-07-20T09-18-21Z</protege-dc:identifier>
           <protege-dc:format>moby</protege-dc:format>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasServiceDescriptionText>Runs Multiple-Meta-Alignment software to perform multiple non-collinear transcription factor map alignments of promoter regions. It returns the multiple-meta-alignment output in GFF format.</mygrid:hasServiceDescriptionText>
           <mygrid:hasOperation>
                <mygrid:operation>
@@ -3857,7 +3857,7 @@
      <mygrid:serviceDescription rdf:about="http://bioinfo.icapture.ubc.ca:8090/RESOURCES/MOBY-S/ServiceInstances#genome.imim.es,runGeneIDGFF3">
           <mygrid:locationURI>http://genome.imim.es/cgi-bin/moby/MobyServices.cgi</mygrid:locationURI>
           <protege-dc:identifier>urn:lsid:biomoby.org:serviceinstance:genome.imim.es,runGeneIDGFF3:2006-06-07T08-44-28Z</protege-dc:identifier>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
           <mygrid:hasServiceNameText>runGeneIDGFF3</mygrid:hasServiceNameText>
           <mygrid:hasServiceDescriptionText>Ab initio gene prediction tool that returns the gene predictions in GFF format (GFF version 3). It also returns a set of translated aminoacid sequences.</mygrid:hasServiceDescriptionText>
           <mygrid:isAlive>true</mygrid:isAlive>
@@ -4118,6 +4118,6 @@
                     <mygrid:hasOperationNameText>fromFASTAToAminoAcidSequenceCollection</mygrid:hasOperationNameText>
                </mygrid:operation>
           </mygrid:hasOperation>
-          <mygrid:hasServiceDescriptionLocation></mygrid:hasServiceDescriptionLocation>
+          <mygrid:hasServiceDescriptionLocation>http://genome.imim.es/webservices/RDFs/services.rdf</mygrid:hasServiceDescriptionLocation>
      </mygrid:serviceDescription>
 </rdf:RDF>
