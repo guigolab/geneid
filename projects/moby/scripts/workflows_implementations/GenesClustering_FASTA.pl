@@ -116,7 +116,7 @@ BEGIN {
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 1;
+my $_debug = 0;
 # Need meta-alignment software because it is run locally, in case there are too many input sequences!
 my $_meta_dir = "/usr/local/molbio/bin";
 my $_meta_bin = "meta";
