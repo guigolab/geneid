@@ -24,3 +24,11 @@ If you want to install the Gene clustering command-line package, here are the re
 
 6/ Make sure all these libraries are in PERL5LIB environment variable
 
+7/ You also need the meta-alignment software to perform the pairwise alignments locally, when you are working on a huge dataset
+
+	The sources can be downloaded from here: ftp://genome.imim.es/pub/software/meta/meta_v1.1.Oct_28_2005.tar.gz
+	More information about installing it, http://genome.imim.es/software/meta/index.html#code
+
+	Then Setup META environment variable to point to the meta binary:
+	SH: export META=path_to_meta/bin/meta
+	CSH: setenv META path_to_meta/bin/meta
