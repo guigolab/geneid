@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.10 2006-10-25 09:50:55 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.11 2006-10-25 09:59:29 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -337,7 +337,7 @@ void PrintGIntron(exonGFF *d,
 {
 	char intronType[MAXTYPE]; 
 	strcpy(intronType,"U2");
-	char intronType[MAXTYPE]; 
+	char intronSubtype[MAXTYPE]; 
 	strcpy(intronSubtype,"GT-AG");
 	short phase = (3 - d->Remainder)%3;
 	/* short phase = MIN(0, 3 - a->Frame); */
@@ -358,7 +358,7 @@ void PrintGIntron(exonGFF *d,
 	}
     if (GFF3) {
 	  /* GFF3 format */
-      printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;type=$s;subtype=$s\n",
+      printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;type=%s;subtype=%s\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      Name,
 	      (a->evidence)? EVIDENCE : VERSION,     
@@ -375,7 +375,7 @@ void PrintGIntron(exonGFF *d,
     } else {
 		if (GFF){		 
 		   /* GFF format */
-		   printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%ld\n",
+		   printf ("%s\t%s\t%s_intron\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%ld\n",
 				   /* correct stop codon position, Terminal- & Terminal+ */ 
 				   Name,
 				   (a->evidence)? EVIDENCE : VERSION,     
