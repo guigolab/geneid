@@ -24,7 +24,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.9 2006-05-25 14:18:43 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.10 2006-10-25 09:50:55 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -173,7 +173,7 @@ void PrintGExon(exonGFF *e,
       /* GFF3 format 5_prime_partial=true ???*/
       if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
       if (e->three_prime_partial) { strcpy(attribute,";3_prime_partial=true");}
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;ExonType=%s\n",
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;type=%s\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
 			  Name,
 			  (e->evidence)? EVIDENCE : VERSION,     
@@ -336,32 +336,42 @@ void PrintGIntron(exonGFF *d,
                 )
 {
 	char intronType[MAXTYPE]; 
-	strcpy(intronType,"U2_intron");
+	strcpy(intronType,"U2");
+	char intronType[MAXTYPE]; 
+	strcpy(intronSubtype,"GT-AG");
 	short phase = (3 - d->Remainder)%3;
 	/* short phase = MIN(0, 3 - a->Frame); */
 	long start = (a->evidence)? d->Donor->Position + 1: d->Donor->Position + 1 + d->offset2;
 	long end = (a->evidence)? a->Acceptor->Position - 1: a->Acceptor->Position -1 + a->offset1;
 	float score = (d->Donor->Score + a->Acceptor->Score)/2;
 	if (!(strcmp(d->Donor->subtype,sU12gtag))||!(strcmp(d->Donor->subtype,sU12atac))){
-		strcpy(intronType,"U12_intron");
+		strcpy(intronType,"U12");
+	}
+	if (!(strcmp(d->Donor->subtype,sU12gtag))){
+		strcpy(intronSubtype,"GT-AG");
+	}
+	if (!(strcmp(d->Donor->subtype,sU12atac))){
+		strcpy(intronSubtype,"AT-AC");
 	}
 	if (d->Strand == '-'){
 		phase = (3 - a->Remainder)%3;
 	}
     if (GFF3) {
 	  /* GFF3 format */
-	  printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld\n",
-			  /* correct stop codon position, Terminal- & Terminal+ */ 
-			  Name,
-			  (a->evidence)? EVIDENCE : VERSION,     
-			  intronType,
-			  start,
-			  end,
-			  score,
-			  a->Strand,
-			  phase,
-			  Name,
-			  ngen);
+      printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;type=$s;subtype=$s\n",
+	      /* correct stop codon position, Terminal- & Terminal+ */ 
+	      Name,
+	      (a->evidence)? EVIDENCE : VERSION,     
+	      start,
+	      end,
+	      score,
+	      a->Strand,
+	      phase,
+	      Name,
+	      ngen,
+	      intronType,
+	      intronSubtype
+	      );
     } else {
 		if (GFF){		 
 		   /* GFF format */
