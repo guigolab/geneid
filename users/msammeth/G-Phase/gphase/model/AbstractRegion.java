@@ -16,6 +16,8 @@ import java.util.Comparator;
  */
 public abstract class AbstractRegion implements Region {
 
+	String id= null;
+	
 	public static final int REGION_COMPLETE_CLUSTER= 0;
 	public static final int REGION_5UTR= 1;
 	public static final int REGION_CDS= 2;
@@ -24,6 +26,9 @@ public abstract class AbstractRegion implements Region {
 	static final long serialVersionUID=  5443375142823871946L;
 	public abstract Species getSpecies();
 
+	public int getLength() {
+		return (getEnd()- getStart()+ 1);
+	}
 	
 	public boolean hasInvalidCoordinates() {
 		if ((start== 0)|| end== 0|| start== Integer.MAX_VALUE|| end== Integer.MIN_VALUE|| 
@@ -46,7 +51,6 @@ public abstract class AbstractRegion implements Region {
 			int start2= ((Region) o2).getStart();
 			int end2= ((Region) o2).getEnd();
 			int start1= ((Region) o1).getStart();
-			
 			if (start1== start2&& end1== end2)	// no object identity
 				return 0;
 			
@@ -133,4 +137,18 @@ public abstract class AbstractRegion implements Region {
 	public String toString() {
 		return "["+getStart()+";"+getEnd()+"]";
 	}
+	
+
+	public String getID() {
+		return id;
+	}
+
+	public void setID(String id) {
+		this.id = id;
+	}
+	
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+	
 }

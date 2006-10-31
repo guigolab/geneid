@@ -38,7 +38,7 @@ public class GraphHandler {
 		for (int i = 0; i < spec.length; i++) 
 			result+= spec[i].getCommonName()+"_";
 		
-		return Constants.HOME_DIR+ File.separator+ GRAPH_SUBDIR+ File.separator+ result+ GRAPH_FNAME; 
+		return Constants.HOME_DIR+ File.separator+ GRAPH_SUBDIR+ File.separator+result+ GRAPH_FNAME; 
 	}
 
 	public static Graph readIn(String fName) {

@@ -36,7 +36,7 @@ public class TSSite extends AbstractSite {
 			if (transcripts[i].equals(transcript))
 				return false;
 		
-		Arrays.add(transcripts, transcript);
+		transcripts= (Transcript[]) Arrays.add(transcripts, transcript);
 		return true;
 	}
 	public boolean isTsStart() {

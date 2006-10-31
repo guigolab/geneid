@@ -117,24 +117,6 @@ public class Exon extends DirectedRegion {
 		return flag;
 	}
 	
-	public boolean contains(Region anotherRegion) {
-
-		if (!anotherRegion.getChromosome().equalsIgnoreCase(getChromosome()))
-			return false;
-		
-		if ((getStart()<= anotherRegion.getStart())&& (getEnd()>= anotherRegion.getEnd()))
-			return true;
-		return false;
-	}
-
-	public boolean contains(int absPos) {
-		
-		if (absPos>= getStart()&& absPos<= getEnd())
-			return true;
-		return false;	// else
-	}
-	
-	
 	// assuming just one homolog
 	public boolean addHomolog(Gene g, Exon e) {
 

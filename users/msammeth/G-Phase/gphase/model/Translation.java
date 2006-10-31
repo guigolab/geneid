@@ -17,8 +17,7 @@ import java.util.HashMap;
 public class Translation extends DirectedRegion {
 
 	static final long serialVersionUID= 8996021902187779155L;
-	int translationID= -1;
-	String translationID_triv= null;
+	String translationID= null;
 	Transcript transcript= null;
 	public Translation(Transcript newTranscript) {
 		this.transcript= newTranscript;
@@ -28,11 +27,7 @@ public class Translation extends DirectedRegion {
 	public Translation(Transcript newTranscript, String stableTranslationID) {
 
 		this(newTranscript);
-			
-		if (stableTranslationID.startsWith(getSpecies().getEnsemblPrefix())) 
-			translationID= Integer.parseInt(Graph.decodeStableID(stableTranslationID, true));
-		else	// HOX-genes in tetraodon: eg HOXA1, HOXAb10, HOXB-EVX, HOXB1, ...
-			translationID_triv= stableTranslationID;
+		this.translationID= stableTranslationID;
 	}
 
 	public String getChromosome() {
@@ -51,14 +46,14 @@ public class Translation extends DirectedRegion {
 	/**
 	 * @return Returns the translationID.
 	 */
-	public int getTranslationID() {
+	public String getTranslationID() {
 		return translationID;
 	}
 	/**
 	 * @param translationID The translationID to set.
 	 */
-	public void setTranslationID(int translationID) {
-		this.translationID = translationID;
+	public void setTranslationID(String newTranslationID) {
+		this.translationID = newTranslationID;
 	}
 
 }

@@ -40,6 +40,7 @@ public class GeneHomology implements Serializable {
 	final static String[] METHODS= {	// field "type" in table "method_link" (ensembl.compara)
 			"ENSEMBL_ORTHOLOGUES",
 			"ENSEMBL_PARALOGUES",
+			"ENSEMBL_HOMOLOGUES",	// new
 			"FAMILY",
 			"SYNTENY",
 			"MLAGAN",
@@ -52,14 +53,27 @@ public class GeneHomology implements Serializable {
 			"BLASTZ_NET_TIGHT",
 			"BLASTZ_NET_RECIP_NET"
 	};
-	final static String[] TYPES= {	// field "description" in table "homology" (ensembl.compara)
+	final static String[] TYPES_old= {	// field "description" in table "homology" (ensembl.compara)
 			"UBRH", 
 			"MBRH", 			// multiple best reciprocal hit
 			"RHS", 				// reziprocal hit syntheny
 			"DWGA",				// derived from whole genome alignment 
 			"YoungParalogues"	
 	};
+	final static String[] TYPES= {
+		"ortholog_one2one",
+		"apparent_ortholog_one2one",
+		"ortholog_one2many",
+		"between_species_paralog",
+		"ortholog_many2many",
+		"within_species_paralog"
+	};
 	final static String[] SUBTYPES= {
+		"ENSEMBL_ORTHOLOGUES",
+		"ENSEMBL_PARALOGUES",
+		"SYNTHENY"
+	};
+	final static String[] SUBTYPES_old= {
 			"DUP1.1",
 			"DUP1.2",
 			"DUP1.3",
@@ -203,7 +217,7 @@ public class GeneHomology implements Serializable {
 	 */
 	public boolean setMethod(String descrpt) {
 		
-		if (descrpt== null|| type!= Constants.NOINIT)
+		if (descrpt== null|| method!= Constants.NOINIT)
 			return false;
 		
 		int i= Constants.findIgnoreCase(descrpt, METHODS);

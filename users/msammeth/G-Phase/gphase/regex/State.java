@@ -26,13 +26,14 @@ public class State {
 		this.id= idCounter++;
 	}
 	
-	public void addTransition(int label, boolean newDonor, State toState) {
+	public Transition addTransition(int label, boolean newDonor, State toState) {
 		Transition t= new Transition(label, newDonor, toState);
 		if (transitions== null) {
 			transitions= new Transition[] {t};
-			return;
+			return null;
 		}
-		transitions= (Transition[]) Arrays.extendField(transitions, t); 
+		transitions= (Transition[]) Arrays.extendField(transitions, t);
+		return t;
 	}
 	
 	public String toString() {

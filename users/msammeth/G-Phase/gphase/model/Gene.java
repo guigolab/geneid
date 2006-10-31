@@ -19,14 +19,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.plaf.SplitPaneUI;
 
-import com.p6spy.engine.logging.appender.StdoutLogger;
-import com.sun.corba.se.impl.ior.OldPOAObjectKeyTemplate;
-import com.sun.corba.se.spi.ior.Identifiable;
-
-import qalign.algo.CancelException;
-import qalign.algo.CostTable;
-import qalign.algo.msa.QAlign;
-
 /*
  * Created on Mar 3, 2005
  *
@@ -45,6 +37,7 @@ public class Gene extends DirectedRegion {
 	SpliceSite[] spliceSites= null; // ordered according to position
 	ASMultiVariation[] asComplexes= null;
 	AbstractSite[] sites= null;
+	TU[] tu= null;
 	
 	public boolean isProteinCoding() {
 		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
@@ -88,6 +81,57 @@ public class Gene extends DirectedRegion {
 	
 
 	
+	public void initTU() {
+		Vector codV= new Vector();
+		Vector ncV= new Vector();
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].isCoding())
+				codV.add(transcripts[i]);
+			else
+				ncV.add(transcripts[i]);
+		}
+		
+			// cluster first coding ones
+		for (int i = 0; i < codV.size(); i++) {
+			Transcript tr= ((Transcript) codV.elementAt(i));
+			Translation t= tr.getTranslations()[0];
+			int j;
+			for (j = 0; tu!= null&& j < tu.length; j++) {
+				if (tu[j].overlaps(t)) {	// overlapping CDS
+					SpliceSite[] ss= tr.getSpliceChain();
+					int k;
+					for (k = 0; k < ss.length; k++)	// mind 1 overlapping SS 
+						if (tu[j].contains(ss[k]))
+							break;
+					if (k< ss.length)
+						break;
+				}
+			}
+			if (tu== null)
+				tu= new TU[] {new TU(this, tr)};
+			else {
+				if(j< tu.length) 
+					tu[j].addTranscript(tr);
+				else
+					tu= (TU[]) gphase.tools.Arrays.add(tu, new TU(this, tr));
+			}
+		}
+		
+			// then join nc transcripts
+		for (int i = 0; i < ncV.size(); i++) {
+			Transcript tr= ((Transcript) ncV.elementAt(i));
+			for (int j = 0; tu!= null&& j < tu.length; j++) {
+				SpliceSite[] ss= tr.getSpliceChain();
+				int k;
+				for (k = 0; k < ss.length; k++)	// mind 1 overlapping SS 
+					if (tu[j].contains(ss[k]))
+						break;
+				if (k< ss.length)
+					tu[j].addTranscript(tr);
+			}
+		}
+	}
+	
 	public Transcript[][] recluster() {
 		Arrays.sort(transcripts, new AbstractRegion.PositionComparator());
 		Vector v= null;
@@ -118,7 +162,7 @@ public class Gene extends DirectedRegion {
 		else if (regionType== AbstractRegion.REGION_3UTR)
 			regions[0]= getReal3UTR();
 		else if (regionType== AbstractRegion.REGION_COMPLETE_CLUSTER)
-			regions[0]= new DefaultDirectedRegion(getStart(), getEnd(), getStrand());
+			regions[0]= new DirectedRegion(getStart(), getEnd(), getStrand());
 		
 		if (regions[0]== null) {
 			return null;
@@ -145,42 +189,76 @@ public class Gene extends DirectedRegion {
 	} 
 	
 	public DirectedRegion getReal5UTR() {
+		DirectedRegion reg;
 		if (isForward()) {
 			int x= getMinCDSStart();
 			if (x== 0)
 				return null;
-			return new DefaultDirectedRegion(getStart(), x- 1, getStrand());	// utr starts outside CDS			
+			reg= new DirectedRegion(getStart(), x- 1, getStrand());	// utr starts outside CDS			
 		} else {
 			int x= getMaxCDSStart();
 			if (x== 0)
 				return null;
-			return new DefaultDirectedRegion(x- 1, getEnd(), getStrand());
+			reg= new DirectedRegion(x- 1, getEnd(), getStrand());
 		}
+		reg.setChromosome(getChromosome());
+		return reg;
 		
 	}
 	
 	public DirectedRegion getRealCDS() {
 		
+		DirectedRegion reg;
 		if (isForward())
-			return new DefaultDirectedRegion(getMaxCDSStart(), getMinCDSEnd(), getStrand());
-		else
-			return new DefaultDirectedRegion(getMaxCDSEnd(), getMinCDSStart(), getStrand());
+			reg= new DirectedRegion(getMaxCDSStart(), getMinCDSEnd(), getStrand());
+		else 
+			reg= new DirectedRegion(getMaxCDSEnd(), getMinCDSStart(), getStrand());
+		reg.setChromosome(getChromosome());
+		return reg;
+
+	}
+	
+	public DirectedRegion getMaxCDS() {
+		
+		DirectedRegion reg;
+		if (isForward())
+			reg= new DirectedRegion(getMinCDSStart(), getMaxCDSEnd(), getStrand());
+		else 
+			reg= new DirectedRegion(getMinCDSEnd(), getMaxCDSStart(), getStrand());
+		reg.setChromosome(getChromosome());
+		return reg;
+
+	}
+	
+	public boolean isRealCDS(DirectedRegion reg) {
+		if (getRealCDS().contains(reg))
+			return true;
+		return false;
+	}
+	
+	public boolean isReal5UTR(DirectedRegion reg) {
+		if (getReal5UTR().contains(reg))
+			return true;
+		return false;
 	}
 	
 	public DirectedRegion getReal3UTR() {
 		
+		DirectedRegion reg;
 		if (isForward()) {
 			int x= getMaxCDSEnd();
 			if (x== 0)
 				return null;
-			return new DefaultDirectedRegion(x+1, getEnd(), getStrand());	// utr starts outside CDS			
+			reg= new DirectedRegion(x+1, getEnd(), getStrand());	// utr starts outside CDS			
 		} else {
 			int x= getMinCDSEnd();
 			if (x== 0)
 				return null;
-			return new DefaultDirectedRegion(getStart(), x+ 1, getStrand());	// neg strand -(-1)
+			reg= new DirectedRegion(getStart(), x+ 1, getStrand());	// neg strand -(-1)
 		}
 		
+		reg.setChromosome(getChromosome());
+		return reg;
 		
 	}
 	
@@ -575,6 +653,17 @@ public class Gene extends DirectedRegion {
 	public String toString() {
 		return getStableID();
 	}
+	
+	public String toStringSSPattern() {
+		String s= "";
+		for (int i = 0; getSpliceSites()!= null&& i < getSpliceSites().length; i++) {
+			if (getSpliceSites()[i].isDonor())
+				s+= "^";
+			else
+				s+= "-";
+		}
+		return s;
+	}
 
 	public void removeSpliceSite(SpliceSite ss) {
 		
@@ -594,7 +683,7 @@ public class Gene extends DirectedRegion {
 		
 		//System.out.print("Removing transcript "+trans.getStableID()+":");
 			// remove from shared exons
-		for (int i = 0; i < trans.getExons().length; i++) {
+		for (int i = 0; trans.getExons()!= null&& i < trans.getExons().length; i++) {
 			Exon ex= trans.getExons()[i]; 
 			ex.removeTranscript(trans);
 			if (ex.getTranscripts().length== 0) {	// remove exon/ss
@@ -609,6 +698,15 @@ public class Gene extends DirectedRegion {
 						removeSpliceSite(ex.getAcceptor());
 				}
 			}
+		}
+		
+			// remove from tu
+		for (int i = 0; tu!= null&& i < tu.length; i++) {
+			tu[i].removeTranscript(trans);
+			if (tu[i].getTranscripts().length< 1)
+				tu= (TU[]) gphase.tools.Arrays.remove(tu, tu[i]);
+			if (tu.length< 1)
+				tu= null;
 		}
 		
 			// remove from gene
@@ -679,6 +777,50 @@ public class Gene extends DirectedRegion {
 			exons[i]= (Exon) v.elementAt(i);
 		
 		return exons;
+	}
+	
+	public DirectedRegion[] getExonicRegions() {
+	
+		DirectedRegion[] superExons= DirectedRegion.unite((DirectedRegion[]) getExons());
+		// if (superExons.length== getExons().length)
+		//	System.err.println("No AS");
+		return superExons;
+	}
+	
+	public String getExonicRegionsSplicedSequence() {
+		
+		DirectedRegion[] superExons= getExonicRegions();
+		
+		String result= "";
+		for (int i = 0; i < superExons.length; i++) {
+			String tmp= Graph.readSequence(getSpecies(), getChromosome(), isForward(),
+					Math.abs(superExons[i].getStart()), Math.abs(superExons[i].getEnd()));
+			if (!isForward())
+				tmp= gphase.tools.Arrays.reverseComplement(tmp);
+			result+= tmp;
+		}
+		return result;
+	}
+	
+	public int[] getExonicRegionsSSCoords() {
+		SpliceSite[] ss= getSpliceSites();
+		Comparator compi= new SpliceSite.PositionComparator();
+		Arrays.sort(ss, compi);
+		
+		int[] result= new int[ss.length];
+		DirectedRegion[] sExons= getExonicRegions();
+		int j= 0;
+		int pos= 0;
+		for (int i = 0; j< ss.length&& i < sExons.length; i++) {
+			while (j< ss.length&& sExons[i].contains(ss[j].getPos())) {	// check for complained SSs
+				int aPos= pos+ ss[j].getPos()- sExons[i].get5PrimeEdge();
+					// forward/rev does not matter in this case since sequences are already reversed
+				result[j++]= aPos;
+			}
+			pos+= sExons[i].getLength();
+		}
+	
+		return result;
 	}
 	
 	/**
@@ -876,6 +1018,90 @@ public class Gene extends DirectedRegion {
 						SpliceSite[][] ss2= new SpliceSite[2][];
 						ss2[0]= cluster[i];
 						ss2[1]= cluster[j];
+	
+						Transcript[] tt= new Transcript[2];
+						tt[0]= transcripts[i];
+						tt[1]= transcripts[j];
+						
+						ss2= ASVariation.trim(ss2, tt);	// trim left in first, last at right
+						
+						if (ss2[0].length< 1&& ss2[1].length< 1)	// skip when both are empty
+							continue;
+						
+						Vector cc2= tokenizeASClusters(ss2, false, false);
+						for (int k = 0; k < cc2.size(); k++) {			// maybe more than one AS variation for a pair
+							SpliceSite[][] pwEvent= (SpliceSite[][]) cc2.elementAt(k);
+							ASVariation as2= new ASVariation(transcripts[i], transcripts[j],
+									pwEvent[0], pwEvent[1]);
+							as2Events.add(as2);
+						}
+					}
+				}
+				
+				ASVariation[] as2Evs= new ASVariation[as2Events.size()];
+				for (int i = 0; i < as2Events.size(); i++) 
+					as2Evs[i]= (ASVariation) as2Events.elementAt(i);
+				if (as2Evs.length!= 0)		// no pw var without a TSS/TES in multi-cluster
+					asComp.add(new ASMultiVariation(as2Evs));
+			}
+			
+			asComplexes = new ASMultiVariation[asComp.size()];
+			for (int i = 0; i < asComplexes.length; i++) 
+				asComplexes[i]= (ASMultiVariation) asComp.elementAt(i);
+		}
+	
+		return asComplexes;
+	}
+
+	public ASMultiVariation[] getASMultiVariations2() {
+		
+		if (transcripts== null|| transcripts.length< 2) 
+			return null;			
+		
+		SpliceSite[][] spliceChains= new SpliceSite[transcripts.length][];
+		for (int i = 0; i < transcripts.length; i++) 
+			spliceChains[i]= transcripts[i].getSpliceChain();
+		
+		Vector spliceClusters= tokenizeASClusters(spliceChains, false, false);	// get splice clusters across all sequences
+																		//TODO warning! TSS/TES flanked events included !!
+		ASMultiVariation[] multiVars= new ASMultiVariation[spliceClusters.size()];
+		for (int x = 0; x < spliceClusters.size(); x++) {	// iterate complexes
+			multiVars[x]= new ASMultiVariation((SpliceSite[][]) spliceClusters.elementAt(x), null);
+		}
+	
+		return multiVars;
+	}
+
+	public int[] getASMultiVariationsDebug() {
+		
+		asComplexes= null;
+		int[] result= new int[3];
+		if (asComplexes == null) {
+			if (transcripts== null|| transcripts.length< 2) 
+				return null;			
+			
+			SpliceSite[][] spliceChains= new SpliceSite[transcripts.length][];
+			for (int i = 0; i < transcripts.length; i++) 
+				spliceChains[i]= transcripts[i].getSpliceChain();
+			
+			Vector spliceClusters= tokenizeASClusters(spliceChains, false, false);	// get splice clusters across all sequences
+																			//TODO warning! TSS/TES flanked events included !!
+			
+				// determine pw splice vars
+			Vector asComp= new Vector(spliceClusters.size());
+			result[0]++;
+			for (int x = 0; x < spliceClusters.size(); x++) {	// iterate complexes
+				result[1]++;
+				
+				SpliceSite[][] cluster= (SpliceSite[][]) spliceClusters.elementAt(x);
+				
+				Vector as2Events= new Vector();
+				for (int i = 0; i < transcripts.length; i++) {		// iterate pw combinations for a complex 
+					for (int j = (i+1); j < transcripts.length; j++) {
+						result[2]++;
+						SpliceSite[][] ss2= new SpliceSite[2][];
+						ss2[0]= cluster[i];
+						ss2[1]= cluster[j];
 
 						Transcript[] tt= new Transcript[2];
 						tt[0]= transcripts[i];
@@ -908,7 +1134,7 @@ public class Gene extends DirectedRegion {
 				asComplexes[i]= (ASMultiVariation) asComp.elementAt(i);
 		}
 
-		return asComplexes;
+		return result;
 	}
 	
 	

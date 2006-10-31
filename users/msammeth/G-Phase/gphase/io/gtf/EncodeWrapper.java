@@ -1,6 +1,7 @@
-package gphase.io.gtf;
+	package gphase.io.gtf;
 
 import gphase.algo.ASAnalyzer;
+import gphase.graph.SpliceGraph;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.AbstractRegion;
@@ -10,13 +11,19 @@ import gphase.model.Exon;
 import gphase.model.Gene;
 import gphase.model.Graph;
 import gphase.model.Species;
+import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.tools.Arrays;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -26,11 +33,13 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
-import com.p6spy.engine.logging.appender.StdoutLogger;
 
 public class EncodeWrapper extends GTFWrapper {
+	
+	protected InputStream inputStream= null;
 	
 	public Graph getGraph(boolean encode) {
 		try {
@@ -43,12 +52,16 @@ public class EncodeWrapper extends GTFWrapper {
 	
 	public static void main(String[] args) {
 		//"encode/44regions_genes_CHR_coord.gtf"
+		// "encode/RefSeqGenes_fromUCSC.gtf"
+		//"encode/EnsemblGenes_fromUCSC.gtf"
+		
+		//"encode/gencode_races.gtf"
 		//"encode/EnsemblGenes_fromUCSC.gtf"
 		// "encode/EnsemblGenes_fromUCSC_inENCODEonly.gtf"
 		// "encode/RefSeqGenes_fromUCSC.inENCODE.gtf"
-		// "encode/RefSeqGenes_fromUCSC.gtf"
 		// "encode/EnsemblGenes_all_fromENSEMBL.gtf"
-		String fName= "encode/44regions_genes_CHR_coord.gtf";
+		// "encode/Sequences_mapped_HAVANA_136.gtf"
+		String fName= "encode/RefSeqGenes_fromUCSC.gtf";
 		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
 		try {
 			myWrapper.read();
@@ -56,25 +69,105 @@ public class EncodeWrapper extends GTFWrapper {
 			e.printStackTrace(); 
 		}
 		boolean encode= false;
-		if (fName.startsWith("encode/44regions_genes_CHR_coord"))
+		if (fName.startsWith("encode/44regions_genes_CHR_coord.gtf"))
 			encode= true;
 		
-		long t0= System.currentTimeMillis();
 		Graph g= myWrapper.getGraph(encode);		// <===== check ENCODE here !!!
-		g.filterNonCodingTranscripts();
+		//g.filterNonCodingTranscripts();
+		//g.filterCodingTranscripts();
+		//g.initTU();
 
+//		PrintStream pr= null;
 //		try {
-//			PrintStream p= new PrintStream("sylvainSize");
-//			ASAnalyzer.getSylvainsSize(g, p);
-//			p.flush();
-//			p.close();
+//			pr = new PrintStream(new File("deg_ensembl.txt"));
+//		} catch (FileNotFoundException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		ASAnalyzer.test04_determineVariations(g, pr);
+		
+		
+//		ASVariation[][] classes= g.getASVariations(1);
+//		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+//		for (int i = 0; i < classes.length; i++) {
+//			for (int j = 0; j < classes[i].length; j++) {
+//				if (classes[i][j].isProteinCoding_old_publ()&& !classes[i][j].isProteinCoding()) {
+//					classes[i][j].isProteinCoding_old_publ();
+//					classes[i][j].isProteinCoding();
+//				}
+//			}
+//		}
+		
+
+			// multi variations
+//		ASMultiVariation[][] vars= g.getASMultiVariations();
+//		vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
+//		for (int i = 0; i < vars.length; i++) {
+//			System.out.println(vars[i].length+"\t"+vars[i][0]);
+//		}
+		
+//		ASVariation[] vars= ASAnalyzer.getVariation("( // 1=2^)", g.getASVariations(ASMultiVariation.FILTER_NONE));
+//		System.out.println(vars.length+ " events");
+//		for (int i = 0; i < vars.length; i++) 
+//			;//vars[i].outputDetail(System.out);
+		
+//		ASAnalyzer.check_AA_AD(g, true, false, false);
+//		ASAnalyzer.check_AA_AD(g, true, true, false);
+//		ASAnalyzer.check_AA_AD(g, false, false, false);
+//		ASAnalyzer.check_AA_AD(g, false, true, false);
+		
+		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
+//		if (1== 1)
+//			System.exit(0);
+		
+		
+//		try {
+//			PrintStream buffy= new PrintStream(new File("atg_aa_analysis_vars_refseq").getAbsolutePath());
+//			ASAnalyzer.outputFirstExonIntronAtg2(g, buffy);
+//			SpliceSite[] ss1= ASAnalyzer.getFirstExonIntronAtg3(g, null);
+//			SpliceSite[] ss2= ASAnalyzer.getFirstExonIntronAtg4(g, null);
+//			int dnrEq= 0, accEq= 0, dnrNe= 0, accNe= 0;
+//			for (int i = 0; i < ss2.length; i++) {
+//				int j;
+//				for (j = 0; j < ss1.length; j++) {
+//					if (ss2[i]== ss1[j]) {
+//						if (ss2[i].isDonor())
+//							dnrEq++;
+//						else
+//							accEq++;
+//						break;
+//					}						
+//				}
+//				if (j== ss1.length) {
+//					if (ss2[i].isDonor())
+//						dnrNe++;
+//					else
+//						accNe++;
+//				}
+//			}
+//			System.out.println(dnrEq+","+accEq+" : "+dnrNe+","+accNe);
+//			buffy.flush(); buffy.close();
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
 		
+
+//		ASAnalyzer.outputVariations(new ASVariation[][] {ASAnalyzer.getVariation("( 1^3=// 2^4=)", g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY))}, false, false, System.out);
+		// "output5UTR_REFSEQ"
+		try {
+			PrintStream p= new PrintStream("SSout_encode");
+//			//ASAnalyzer.output5UTRLengthAnalysis(g, p);
+//			//ASAnalyzer.outputInternalIntrons(g, p);
+			ASAnalyzer.outputSSOutCdsUtr(g, p);
+			p.flush();
+			p.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		
 //		ASAnalyzer.getSylvainsSize(g, System.out);
-		//ASAnalyzer.test01_clusters_coverage_as(g, System.out);
+//		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
 //		ASAnalyzer.test(new String[]{"test01_clusters_coverage_as",
 //				"test02_ss_statistics",
 //				"test03_lengthVariationModulo",
@@ -85,10 +178,10 @@ public class EncodeWrapper extends GTFWrapper {
 //				new Class[] {Graph.class, PrintStream.class}, 
 //				new boolean[] {true});
 //		ASAnalyzer.test02_ss_statistics(g, System.out);
-		ASAnalyzer.test02_ss_statistics_outCDSalt(g);
+//		ASAnalyzer.test02_ss_statistics_outCDSalt(g);
 //		ASAnalyzer.test02b_ss_statistics_3P(g, System.out);
 //		ASAnalyzer.test03_lengthVariationModulo(g, System.out);
-//		ASAnalyzer.test03b_lengthVariationModuloAA_AD(g, System.out);
+//		ASAnalyzer.test03b_lengthVariationFirstExon(g, System.out);
 //		ASAnalyzer.test04_determineVariations(g, System.out);
 		
 //		ASAnalyzer.check_AA_AD(g, true, false, false);
@@ -199,6 +292,10 @@ public class EncodeWrapper extends GTFWrapper {
 		super(absFName);
 	}
 	
+	public EncodeWrapper(InputStream i) {
+		this.inputStream= i;
+	}
+	
 	GTFObject createGTFObject(){
 		return new France();
 	}
@@ -255,12 +352,12 @@ public class EncodeWrapper extends GTFWrapper {
 		return false;
 	}
 	
-	HashMap getChromosomes(HashMap transGTF) {
+	static HashMap getChromosomes(HashMap transGTF) {
 		Iterator iter= transGTF.values().iterator();
 		HashMap chrHash= new HashMap();
 		while (iter.hasNext()) {
 			Vector gtfsVec= (Vector) iter.next();
-			France o= (France) (gtfsVec).elementAt(0);
+			GTFObject o= (GTFObject) (gtfsVec).elementAt(0);
 			HashMap tHash= (HashMap) chrHash.remove(o.getChromosome());
 			if (tHash== null)
 				tHash= new HashMap();
@@ -275,12 +372,119 @@ public class EncodeWrapper extends GTFWrapper {
 		return chrHash;
 	}
 	
+	private void checkMegaClusters(Transcript[] trans) {
+		java.util.Arrays.sort(trans, new DirectedRegion.PositionComparator());	// sort ascending
+		for (int i = trans.length- 1; i >= 0; --i) {
+			System.out.println(trans[i].getTranscriptID()+ "\t"+ trans[i].getLength()+"\t"+trans[i].getExons().length);
+		}
+	}
+	
 	Graph assemble(boolean encode) {
+		
+		Species spec= new Species("human");
+	
+			// cluster
+		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genes?
+		HashMap chrHash= getChromosomes(hash);
+		
+			// construct transcripts
+		Collection co= ((Collection) chrHash.keySet());
+		String[] keys= new String[co.size()];
+		Iterator iter= co.iterator();
+		int x= 0;
+		while(iter.hasNext()) 
+			keys[x++]= (String) iter.next();
+		
+		HashMap chr2Hash= new HashMap(chrHash.size());
+		for (int i = 0; i < keys.length; i++) {	// chromosomes
+			String chrID= keys[i];
+			HashMap tHash= (HashMap) chrHash.get(chrID);
+			Collection co2= ((Collection) tHash.keySet());
+			String[] tkeys= new String[co2.size()];
+			Iterator iter2= co2.iterator();
+			x= 0;
+			while (iter2.hasNext())					
+				tkeys[x++]= (String) iter2.next();
+			HashMap t2Hash= new HashMap(tHash.size());
+			chr2Hash.put(chrID, t2Hash);
+			for (int j = 0; j < tkeys.length; j++) {	// transcripts
+				String tID= tkeys[j];
+				GTFObject[] gtfs= (GTFObject[]) Arrays.toField(tHash.get(tID));	// gtf entries for 1 transcript
+				France ff= (France) gtfs[0];
+				if (encode&& !ff.getSource().contains("VEGA"))
+					continue;
+				Transcript transcript= new Transcript(tID);
+				transcript.setStrand(ff.getStrand());
+				for (int k = 0; k < gtfs.length; k++) {		// exons 
+					France f= (France) gtfs[k];
+					if (f.isExon()) 
+						transcript.setBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
+				}
+				t2Hash.put(tID, transcript);	// fill tHash with transcripts
+			}
+			
+		}
+		
+			// check mega clusters
+//		HashMap[] maps= (HashMap[]) Arrays.toField(chr2Hash.values());
+//		Vector v= new Vector(maps.length* 100);
+//		for (int i = 0; i < maps.length; i++) 
+//			v.addAll(maps[i].values());
+//		checkMegaClusters(((Transcript[]) Arrays.toField(v)));
+		
+			// cluster
+		HashMap gHash= new HashMap();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		for (int i = 0; i < keys.length; i++) {	// chromosomes
+			String chrID= keys[i];
+			HashMap t2Hash= (HashMap) chr2Hash.get(chrID);
+			Object[] transcripts= t2Hash.values().toArray();
+			java.util.Arrays.sort(transcripts, compi);
+			Transcript[] t= new Transcript[transcripts.length];
+			for (int j = 0; j < t.length; j++) 
+				t[j]= (Transcript) transcripts[j];
+			Transcript[][] loci= clusterTranscripts(t);
+			for (int j = 0; j < loci.length; j++) {
+				String gID= Gene.getUniqueID();
+				Gene locus= new Gene(spec, gID);
+				locus.setStrand(loci[j][0].getStrand());
+				locus.setChromosome(chrID);
+				for (int k = 0; k < loci[j].length; k++) { // transcripts
+					loci[j][k].setGene(locus);
+					Vector v= (Vector) ((HashMap) chrHash.get(chrID)).get(loci[j][k].getTranscriptID());
+					for (int m = 0; m < v.size(); m++) {
+						France f= (France) v.elementAt(m);
+						if (f.isExon())
+							loci[j][k].addExon(new Exon(loci[j][k], f.getExonID(), f.getStart(), f.getEnd()));
+						else if (f.isCDS())
+							loci[j][k].addCDS(f.getStart(), f.getEnd());
+					}
+					locus.addTranscript(loci[j][k]);
+				}
+				gHash.put(gID, locus);
+			}
+		}		
+		
+			// build graph
+		iter= gHash.values().iterator();
+		Graph g= new Graph();
+		g.addSpecies(spec);
+		while (iter.hasNext()) 
+			g.addGene((Gene) iter.next());
+		return g;
+	}
+
+	/**
+	 * to create from the outside
+	 * @param encode
+	 * @return
+	 */
+	public static Graph assemble(boolean encode, GTFObject[] gtfObs) {
 		
 		Species spec= new Species("human");
 
 			// cluster
-		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genesç
+		HashMap hash= getGroups("transcript_id", gtfObs);	// cluster for genes?
 		HashMap chrHash= getChromosomes(hash);
 		
 			// construct transcripts
@@ -365,7 +569,7 @@ public class EncodeWrapper extends GTFWrapper {
 	
 	
 
-	private Transcript[][] clusterTranscripts(DirectedRegion[] regions) {
+	static protected Transcript[][] clusterTranscripts(DirectedRegion[] regions) {
 		
 		int maxPlus= Integer.MIN_VALUE, maxMin= Integer.MIN_VALUE;
 		Vector clusters= new Vector();
@@ -494,14 +698,15 @@ public class EncodeWrapper extends GTFWrapper {
 //		}
 	}
 	
-	private HashMap getGroups(String id, GTFObject[] obj) {
+	static protected HashMap getGroups(String id, GTFObject[] obj) {
 		
 		HashMap hash= new HashMap();
 		for (int i = 0; i < obj.length; i++) {
-			Vector tAttrib= (Vector) hash.get(obj[i].getAttribute(id));
+			String s= obj[i].getAttribute(id);
+			Vector tAttrib= (Vector) hash.get(s);
 			if (tAttrib== null) {
 				tAttrib= new Vector();
-				hash.put(obj[i].getAttribute(id), tAttrib);
+				hash.put(s, tAttrib);
 			}
 			tAttrib.add(obj[i]);
 		}
@@ -526,5 +731,78 @@ public class EncodeWrapper extends GTFWrapper {
 		
 		return tHash;
 	}
-	
+
+	/* (non-Javadoc)
+		 * @see gphase.io.IOWrapper#read()
+		 */
+		public void read() throws Exception {
+			
+			
+			BufferedReader buffy;
+			if (fPath!= null&& fName!= null)
+				buffy= new BufferedReader(new FileReader(fPath+ File.separator+ fName));
+			else 
+				buffy= new BufferedReader(new InputStreamReader(inputStream));
+			String line;
+			int lineCtr= 0;
+			Vector gtfVec= new Vector();
+			while (buffy.ready()) {
+				lineCtr++;
+				line= buffy.readLine();
+				StringTokenizer toki= new StringTokenizer(line, " \t");	// must be tab, see specification
+				if (toki.countTokens()< 8)
+					System.err.println("line "+ lineCtr+ ": skipped (<8 token)!\n\t"+ line);
+				// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+				GTFObject newObj= createGTFObject();
+				try {				
+					newObj.seqname= toki.nextToken();
+					newObj.source= toki.nextToken();
+					newObj.setFeature(toki.nextToken());
+					newObj.start= Integer.parseInt(toki.nextToken());
+					newObj.end= Integer.parseInt(toki.nextToken());
+					newObj.setScore(toki.nextToken());
+					newObj.setStrand(toki.nextToken());
+					newObj.setFrame(toki.nextToken());
+				} catch (Exception e) {
+					System.err.println("Invalid GTF format: line "+ lineCtr);
+					//e.printStackTrace();
+					//continue;
+				}
+				
+					// optional attributes
+				int smc= line.indexOf(';');		// GTF2
+				if (smc>= 0) {
+					String ss= toki.nextToken();
+	//				toki= new StringTokenizer(line, " \t");	// must be tab, see specification
+	//				for (int i = 0; i < 8; i++) 
+	//					ss= toki.nextToken();
+	//				String h= line.substring(0, smc);			// last ';'
+	//				h= line.substring(0, h.lastIndexOf(' '));	// two ' ' tokens before
+	//				h= line.substring(0, h.lastIndexOf(' '));
+					String h= line.substring(line.indexOf(ss), line.length()).trim();	// skip that part
+					
+					toki= new StringTokenizer(h, ";");		// attributes
+					while (toki.hasMoreTokens()) {
+						h= toki.nextToken().trim();
+						int sep= h.indexOf(' ');
+						if (sep < 0) {						// comments
+							String s= h;
+							while (toki.hasMoreTokens())
+								s+= " "+ toki.nextToken();
+							newObj.setComments(s);
+						}
+						if (sep>= 0) {
+							String id= h.substring(0, sep);
+							String val= h.substring(sep+ 1, h.length());
+							newObj.addAttribute(id, val);
+						}
+					}
+				}
+					
+				gtfVec.add(newObj);
+				//System.out.println(gtfVec.size());
+			}
+			
+			gtfObj= (GTFObject[]) Arrays.toField(gtfVec);
+		}
 }

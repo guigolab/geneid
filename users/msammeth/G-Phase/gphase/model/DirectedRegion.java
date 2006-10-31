@@ -1,12 +1,113 @@
 package gphase.model;
 
+import gphase.tools.Arrays;
+
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Vector;
 
-public abstract class DirectedRegion extends AbstractRegion {
+public class DirectedRegion extends DefaultRegion {
 
+	static final long serialVersionUID = 4346170163999111167l;
+	
+	public static class LengthComparator implements Comparator {
+		public int compare(Object arg0, Object arg1) {
+			DirectedRegion reg0= (DirectedRegion) arg0;
+			DirectedRegion reg1= (DirectedRegion) arg1;
+			int len0= reg0.getLength();
+			int len1= reg1.getLength();
+			if (len0< 0|| len1< 0) {
+				System.err.println("Invalid region length "+len0+", "+len1);
+			}
+			if (len0< len1)
+				return -1;
+			if (len0> len1)
+				return 1;
+			return 0;
+		}
+	}
+	public static DirectedRegion[] intersect(DirectedRegion[] dir1 , DirectedRegion[] dir2) {
+		Vector interV= new Vector();
+		for (int i = 0; i < dir1.length; i++) {
+			for (int j = 0; j < dir2.length; j++) {
+				if (dir1[i].overlaps(dir2[j]))
+					interV.add(dir1[i].intersect(dir2[j]));
+			}
+		}
+		return (DirectedRegion[]) Arrays.toField(interV);
+	}
+	
+	public static AbstractSite[] contained(DirectedRegion dir, AbstractSite[] s) {
+		if (s== null)
+			return null;
+		Vector v= new Vector();
+		for (int i = 0; i < s.length; i++) 
+			if (dir.contains(s[i]))
+				v.add(s[i]);
+		return (AbstractSite[]) Arrays.toField(v);
+	}
+	
+	public static DirectedRegion[] unite_old(DirectedRegion[] dir1, DirectedRegion[] dir2) {
+		
+		Comparator compi= new PositionComparator();
+		java.util.Arrays.sort(dir1, compi);
+		java.util.Arrays.sort(dir2, compi);
+		
+		
+		Vector interV= new Vector();
+		int i= 0, j= 0;
+		DirectedRegion lastCluster= null;
+		while (i < dir1.length&& j < dir2.length) {
+			
+			if (lastCluster== null) {
+				if (dir1[i].overlaps(dir2[j])) {
+					lastCluster= dir1[i].merge(dir2[j]);
+					++i; ++j;
+				} else {
+					if (Math.abs(dir1[i].getStart())< Math.abs(dir2[j].getStart())) {
+						interV.add(dir1[i++]);	// give up to merge this
+					} else {
+						interV.add(dir2[j++]);	// give up to merge this
+					}
+				}
+			} else {	// try to extend last cluster
+				if (lastCluster.overlaps(dir1[i])) {
+					lastCluster= lastCluster.merge(dir1[i]);
+					++i;
+				} else if (lastCluster.overlaps(dir2[j])) {
+					lastCluster= lastCluster.merge(dir2[j]);
+					++j;
+				} else {
+					interV.add(lastCluster);
+					lastCluster= null;
+				}
+			}
+			
+		}
+		if (lastCluster!= null)
+			interV.add(lastCluster);
+		for (; i < dir1.length; i++) 
+			interV.add(dir1[i]);
+		for (; j < dir2.length; j++) 
+			interV.add(dir2[j]);
+		
+		return (DirectedRegion[]) Arrays.toField(interV);
+	}
+	
+	public Object clone() {
+		DirectedRegion reg= new DirectedRegion();
+		reg.setStrand(getStrand());
+		reg.setStart(getStart());
+		reg.setEnd(getEnd());
+		reg.setChromosome(getChromosome());
+		reg.setSpecies(getSpecies());
+		reg.setID(getID());
+		return reg;
+	}
+	
 	/**
 	 * 
-	 * @author micha (written in the "Café de Indias" coffee shop 
+	 * @author micha (written in the "Caf? de Indias" coffee shop 
 	 * in Seville)
 	 *
 	 */
@@ -38,6 +139,21 @@ public abstract class DirectedRegion extends AbstractRegion {
 			return 0;
 		}
 	}
+	public DirectedRegion(int newStart, int newEnd, int strand) {
+		setStrand(strand);
+		setStart(newStart);
+		setEnd(newEnd);
+	}
+	
+	public DirectedRegion(DirectedRegion source) {
+		setStrand(source.getStrand());
+		setStart(source.getStart());
+		setEnd(source.getEnd());
+	}
+	
+	public DirectedRegion() {
+	}
+	
 	/**
 	 * Returns <code>true</code> if <code>this</code> region contains <code>anotherRegion</code>.
 	 */
@@ -68,11 +184,46 @@ public abstract class DirectedRegion extends AbstractRegion {
 			
 	}
 	
+	public int getLength() {
+		return (get3PrimeEdge()- get5PrimeEdge()+ 1);
+	}
+	
 	public boolean contains(int pos) {
 		if ((isForward()&& pos>= start&& pos<= end)||
 			(!isForward()&& pos<= start&& pos>= end))
 			return true;
 		return false;
+	}
+	
+	public boolean contains(AbstractSite ss) {
+		if (ss== null)
+			return false;
+		if (ss.getGene().getStrand()!= getStrand()||
+				ss.getGene().getChromosome()!= getChromosome())
+			return false;
+		return contains(ss.getPos());
+	}
+	
+	public DirectedRegion intersect(DirectedRegion anotherRegion) {
+		
+		if (!overlaps(anotherRegion))
+			return null;
+		
+		DirectedRegion dir= new DirectedRegion(Math.max(Math.abs(getStart()), Math.abs(anotherRegion.getStart())),
+				Math.min(Math.abs(getEnd()), Math.abs(anotherRegion.getEnd())), getStrand());
+		dir.setChromosome(getChromosome());
+		return dir;
+	}
+	
+	public DirectedRegion merge(DirectedRegion anotherRegion) {
+		
+		if (!overlaps(anotherRegion))
+			return null;
+		
+		DirectedRegion dir= new DirectedRegion(Math.min(Math.abs(getStart()), Math.abs(anotherRegion.getStart())),
+				Math.max(Math.abs(getEnd()), Math.abs(anotherRegion.getEnd())), getStrand());
+		dir.setChromosome(getChromosome());
+		return dir;
 	}
 	
 	public int strand = 0;
@@ -135,10 +286,23 @@ public abstract class DirectedRegion extends AbstractRegion {
 		if (strand== 0)	// not inited 
 			throw new RuntimeException("Error: set strand before start/end!");
 		
-		if (strand> 0&& start> 0)
+		if (strand> 0&& start>= 0)
 			this.start = Math.abs(start);	// force pos
 		else if (strand< 0)
 			this.start= -Math.abs(start);	// force neg
+	}
+	
+	public Region getAbsoluteRegion() {
+		int p1= Math.abs(getStart());
+		int p2= Math.abs(getEnd());
+		if (p1> p2) {
+			int h= p1;
+			p1= p2;
+			p2= h;
+		}
+		DefaultRegion reg= new DefaultRegion(p1, p2);
+		reg.setChromosome(getChromosome());
+		return reg;
 	}
 	
 	public int get5PrimeEdge() {
@@ -173,6 +337,59 @@ public abstract class DirectedRegion extends AbstractRegion {
 
 	public int getStrand() {
 		return strand;
+	}
+
+	// copy back to DirectedRegion some day
+	public static DirectedRegion[] unite(DirectedRegion[] dir) {
+		Comparator compi= new AbstractRegion.PositionComparator(); 
+		java.util.Arrays.sort(dir, compi);
+		
+		
+		Vector interV= new Vector();
+		int i= 0;
+		DirectedRegion lastCluster= null;
+		while (i < dir.length) {
+			
+			if (lastCluster== null) {
+				if (i+1< dir.length&& dir[i].overlaps(dir[i+1])) {
+					lastCluster= dir[i].merge(dir[i+1]);
+					i+= 2;
+				} else {
+					interV.add(new DirectedRegion(dir[i++]));	// give up to merge this
+				}
+			} else {	// try to extend last cluster
+				if (lastCluster.overlaps(dir[i])) {
+					lastCluster= lastCluster.merge(dir[i]);
+					++i;
+				} else {
+					interV.add(lastCluster);	// end cluster
+					lastCluster= null;
+				}
+			}
+			
+		}
+		if (lastCluster!= null)
+			interV.add(lastCluster);
+		
+		return (DirectedRegion[]) Arrays.toField(interV);
+	}
+
+	// copy back to DirectedRegion some day
+	public static DirectedRegion[] unite(DirectedRegion[][] dir2) {
+		if (dir2== null)
+			return null;
+		int len= 0;
+		for (int i = 0; i < dir2.length; i++) 			
+			len+= dir2[i].length;
+		DirectedRegion[] dir= new DirectedRegion[len];
+		int pos= 0;
+		for (int i = 0; i < dir2.length; i++) {
+			for (int j = 0; j < dir2[i].length; j++) 
+				dir[pos+ j]= dir2[i][j];
+			pos+= dir2[i].length;
+		}
+		
+		return unite(dir);
 	}
 
 }

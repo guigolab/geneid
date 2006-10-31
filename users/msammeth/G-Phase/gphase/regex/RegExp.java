@@ -11,49 +11,108 @@ import gphase.tools.Arrays;
 
 import java.util.*;
 
+
+
 /**
  * excluded: intersection (&), negation (^)
  * @author micha
  */
 public class RegExp {
 	
+	String regex= null;
+	Automaton auto= null;
 	String[] tokens;
 
 	
 	public static void main(String[] args) {
-		RegExp regex= new RegExp("2(3,4)*6");
-		Automaton auto= regex.toAutomaton();
+		RegExp regex= new RegExp("2-(3'4-)+6'");
+		Automaton auto= regex.getAutomaton();
 		System.currentTimeMillis();
 	}
 
 	public RegExp(String s) {
-	
-			// init tokenizer
-		StringBuffer sb= new StringBuffer(s);
-		for (int i = 0; i < sb.length(); i++) {
-			if (sb.charAt(i)== ',')
-				continue;
-			if (Character.isDigit(sb.charAt(i))) {
-				if (i> 0&& (!Character.isDigit(sb.charAt(i-1)))&& sb.charAt(i-1)!= ',') 
-					sb.insert((i++), ',');
-				if (i+1< sb.length()&& (!Character.isDigit(sb.charAt(i+1)))&& sb.charAt(i+1)!= ',') 
-					sb.insert((++i), ',');
-			}
-		}
-		StringTokenizer toki= new StringTokenizer(sb.toString(), ",");
-		tokens= new String[toki.countTokens()];
-		for (int i = 0; i < tokens.length; i++) 
-			tokens[i]= toki.nextToken();
-		
+		this.regex= s;
 	}
 
 	/**
 	 * Constructs new <code>Automaton</code> from this <code>RegExp</code>.
 	 * Same as <code>toAutomaton(null)</code> (empty automaton map).
 	 */
-	public Automaton toAutomaton() {
+	public Automaton getAutomaton() {
+		
+		if (auto == null) {
+			auto = parse();
+		}
+		return auto;
+	}
+	
+	Automaton parse() {
 		
 		Automaton auto= new Automaton();
+		State lastState= auto.getInitialState();
+		Transition lastInedge= null;
+		State jumpState= null;
+		Stack beforeBlockStates= new Stack();
+		
+		String digStr= "";
+		int dig= -1;
+		for (int i = 0; i < regex.length(); i++) {
+			if (Character.isDigit(regex.charAt(i))) {
+				digStr+= regex.charAt(i);
+				
+			} else {	// block (), quantifier +*?, marker '-
+				
+				if (digStr.length()> 0) {	// null for block start 
+					dig= Integer.parseInt(digStr);
+					digStr= "";
+				}
+				
+				switch (regex.charAt(i)) {
+				case '(':
+					beforeBlockStates.push(lastState);
+					break;
+				case ')':
+					lastInedge= ((State) beforeBlockStates.pop()).getTransitions()[0];
+					jumpState= lastInedge.getToState();
+					break;
+					
+				case '+':
+					if (jumpState!= null) {
+						lastState.addTransition(-1, lastInedge.isDonor(), jumpState);
+					} else {
+						lastState.addTransition(-1, lastInedge.isDonor(), lastState);
+					}
+					break;
+					
+//				case '?':	// only suitable for blocks (), no point otherwise..
+//					jumpState.addTransition(-1, 0, nextState);	
+//					break;
+
+				case '\'':
+					lastInedge= auto.createTransition(dig, true);
+					dig= -1;
+//					jumpState= lastState;
+					lastState= auto.getEndState();
+					break;
+				
+				case '-':
+					lastInedge= auto.createTransition(dig, false);
+					dig= -1;		
+//					jumpState= lastState;
+					lastState= auto.getEndState();
+					break;
+				}
+			}
+		}
+		
+		auto.sortTransitions();
+		return auto;
+	}
+	
+	Automaton parse_old() {
+		
+		Automaton auto= new Automaton();
+		
 		Stack repeatPos= new Stack();
 		repeatPos.push(auto.getInitialState());	// for skips from the beginning
 		
@@ -61,6 +120,7 @@ public class RegExp {
 		int label= -1;
 		State saveSourceForRepeats= null;
 		boolean donor= true;	// assume most patterns to start with donors
+		
 		while (pos< tokens.length) {
 			try {
 				label= Integer.parseInt(tokens[pos]);
@@ -114,6 +174,6 @@ public class RegExp {
 		}
 		
 		auto.sortTransitions();
-		return auto;
-	}
+		
+		return null;	}
 }

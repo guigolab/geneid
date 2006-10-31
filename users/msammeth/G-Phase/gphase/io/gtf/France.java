@@ -22,34 +22,12 @@ public class France extends GTFObject {
 	boolean france= false;
 	
 
-	public boolean isExon() {
-		return getFeature().equals("exon"); 
-	}
-	public boolean isIntron() {
-		return getFeature().equals("intron"); 
-	}
-	public boolean isCDS() {
-		return getFeature().equals("CDS"); 
-	}
-	public boolean isStartCodon() {
-		return getFeature().equals("start_codon"); 
-	}
-	public boolean isStopCodon() {
-		return getFeature().equals("stop_codon"); 
-	}
 	
 	private boolean isHotToday() {
 		return true;
 	}
-	public String getChromosome() {
-		String s= getSeqname();
-		if (s.startsWith("chr"))	// not in mart output
-			s= s.substring(3);	// "chr..."
-		return s;
-		
-	}
 	public int getStrand() {
-		if (isLeadingStrand())
+		if (isStrand())
 			return 1;
 		return -1;
 	}

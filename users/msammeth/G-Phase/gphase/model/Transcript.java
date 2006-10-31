@@ -7,6 +7,8 @@
 package gphase.model;
 
 import gphase.Constants;
+import gphase.tools.ENCODE;
+import gphase.tools.SpliceSiteConservationComparator;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -17,6 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.mysql.jdbc.UpdatableResultSet;
+import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
+import com.sun.org.apache.xerces.internal.impl.xs.opti.DefaultDocument;
 
 /**
  * 
@@ -28,7 +32,74 @@ public class Transcript extends DirectedRegion {
 	static final long serialVersionUID = 2863324463934791891L;
 	int type = Constants.NOINIT;
 	int confidence = Constants.NOINIT;
+	TU[] tu= null;
+	
+	public static int REGION_5UTR= 1;
+	public static int REGION_3UTR= 2;
+	public static int REGION_CDS= 3;
+	public static int REGION_COMPLETE_TRANSCRIPT= 4;
+	
+	
+	public boolean containsSS(SpliceSite ss) {
+		for (int i = 0; i < spliceChain.length; i++) {
+			if (ss.getPos()== spliceChain[i].getPos()&&
+					ss.isDonor()== spliceChain[i].isDonor())
+				return true;
+		}
+		return false;
+	}
+	/**
+	 * returns genomic position of 
+	 * @param pos genomic position, positive or negative
+	 * @param offset pos or neg (5', 3')
+	 * @return exonic pos, positive
+	 */
+	public int getExonicPosition(int pos) {
 		
+		if (pos> 0&& !isForward())
+			pos= -pos;
+		
+			// find containing exon
+		int x;
+		int dist= 0;
+		for (x = 0; x < exons.length; x++) {
+			if (exons[x].contains(pos))
+				break;
+			else
+				dist+= exons[x].getLength();
+		}
+	
+		if (x== exons.length)
+			return -1;
+		
+		return dist+ (pos- exons[x].get5PrimeEdge());	// dunno understand why not +1
+	}
+
+	public void addTU(TU newTU) {
+			// break multiple TUs by #SSs?
+		tu= (TU[]) gphase.tools.Arrays.add(tu, newTU);
+		//System.currentTimeMillis();
+	}
+	
+	public void removeTU(TU newTU) {
+		tu= (TU[]) gphase.tools.Arrays.remove(tu, newTU);
+	}
+	
+	public int getGenomicPosition(int exonPos) {
+		
+			// find containing exon
+		int x;
+		int dist= 0;
+		for (x = 0; dist< exonPos&& x < exons.length; x++) 
+			dist+= exons[x].getLength();
+		if (x> 0) {
+			--x;
+			dist-= exons[x].getLength();
+		}
+		
+		int genPos= exons[x].get5PrimeEdge()+ (exonPos- dist);		
+		return genPos;
+	}
 	
 	/**
 	 * 
@@ -117,6 +188,228 @@ public class Transcript extends DirectedRegion {
 		}
 		return spliceChain;
 	}
+	
+	public DirectedRegion[] get5UTRRegion(boolean beforeSplicing) {
+		Translation[] trans= getTranslations();
+		if (trans== null|| trans.length< 1)
+			return null;
+		if (beforeSplicing) {
+			return new DirectedRegion[] {
+					new DirectedRegion(
+						Math.min(Math.abs(trans[0].get5PrimeEdge()), Math.abs(get5PrimeEdge())),
+						Math.max(Math.abs(trans[0].get5PrimeEdge()), Math.abs(get5PrimeEdge())),
+						getStrand()
+					)};
+		} else {
+			int atg= trans[0].get5PrimeEdge();
+			Vector v= new Vector();
+			for (int i = 0; i < exons.length; i++) {
+				if (exons[i].get3PrimeEdge()>= atg) {	// atg containing exon
+					int min= exons[i].get5PrimeEdge();
+					int max= atg- 1;
+					if (!isForward()) {
+						int h= min;
+						min= max;
+						max= h;
+					}
+					DirectedRegion dir= null;
+					if (Math.abs(max)- Math.abs(min)>= 0) {	// non-empty region
+						dir= new DirectedRegion(min, max, getStrand());
+						dir.setChromosome(getChromosome());
+						v.add(dir);
+					}
+					break;
+				}
+				DirectedRegion dir= new DirectedRegion(exons[i].getStart(), exons[i].getEnd(), exons[i].getStrand());
+				dir.setChromosome(getChromosome());
+				v.add(dir);
+			}
+			return (DirectedRegion[]) gphase.tools.Arrays.toField(v);
+		}
+	}
+
+	public int get5UTR(boolean beforeSplicing) {
+		Translation[] trans= getTranslations();
+		if (trans== null|| trans.length< 1)
+			return -1;
+		if (beforeSplicing) {
+			return (trans[0].get5PrimeEdge()- get5PrimeEdge()+ 1);
+		} else {
+			int atg= trans[0].get5PrimeEdge();
+			int sum= 0;
+			for (int i = 0; i < exons.length; i++) {
+				if (exons[i].get3PrimeEdge()> atg) {	// atg containing exon
+					sum+= atg- exons[i].get5PrimeEdge()+ 1;	// add rest
+					break;
+				}
+				sum+= exons[i].getLength();
+			}
+			return sum;
+		}
+	}
+	
+	public DirectedRegion[] getExonicRegions() {
+		DirectedRegion[] regs= new DirectedRegion[exons.length];
+		for (int i = 0; i < regs.length; i++) {
+			regs[i]= new DirectedRegion(exons[i].getStart(), exons[i].getEnd(), exons[i].getStrand());
+			regs[i].setChromosome(getChromosome());
+		}
+		return regs;
+	}
+	
+	public int getCDSLength(boolean spliced) {
+		if (translations== null|| translations.length< 1)
+			return -1;
+		if (spliced) {
+			DirectedRegion[] reg= getCDSRegions();
+			int sum= 0;
+			for (int i = 0; i < reg.length; i++) 
+				sum+= reg[i].getLength();
+			return sum;
+		} else {
+			return translations[0].get3PrimeEdge()- translations[0].get5PrimeEdge()+ 1;
+		}
+	}
+	
+	public int get5UTRLength(boolean spliced) {
+		if (translations== null|| translations.length< 1)
+			return -1;
+		if (spliced) {
+			DirectedRegion[] reg= get5UTRRegion(false);
+			int sum= 0;
+			for (int i = 0; reg!= null&& i < reg.length; i++) 
+				sum+= reg[i].getLength();
+			return sum;
+		} else {
+			return translations[0].get5PrimeEdge()- getStart();
+		}
+	}
+	
+	public DirectedRegion[] getCDSRegions() {
+		
+		int tlStart= getTranslations()[0].get5PrimeEdge();
+		int tlEnd= getTranslations()[0].get3PrimeEdge();
+		Vector v= new Vector();
+		int i;
+		
+			// first region;
+		for (i = 0; i < exons.length; i++) 
+			if (exons[i].contains(tlStart)) {
+				int min= tlStart;
+				int max= exons[i].get3PrimeEdge();
+				if (Math.abs(min)> Math.abs(max)) {
+					int h= min;
+					min= max;
+					max= h;
+				}
+				DirectedRegion reg= new DirectedRegion(
+						min, 
+						max, 
+						exons[i].getStrand());
+				reg.setChromosome(getChromosome());
+				v.add(reg);
+				break;
+			}
+		
+		for (; i < exons.length; i++) {
+			
+				// last exon
+			if (exons[i].contains(tlEnd)) {
+				int min= exons[i].get5PrimeEdge();
+				int max= tlEnd;
+				if (Math.abs(min)> Math.abs(max)) {
+					int h= min;
+					min= max;
+					max= h;
+				}
+				DirectedRegion reg= new DirectedRegion(
+						min, 
+						max, 
+						exons[i].getStrand());
+				reg.setChromosome(getChromosome());
+				v.add(reg);
+				break;
+			}
+			
+				// intervening exons
+			DirectedRegion reg= new DirectedRegion(
+					exons[i].getStart(), 
+					exons[i].getEnd(), 
+					exons[i].getStrand());
+			reg.setChromosome(getChromosome());
+			v.add(reg);
+		}
+			
+		return (DirectedRegion[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	public String get5UTRSequence() {
+		DirectedRegion[] reg= get5UTRRegion(false);
+		
+		String region= "";
+		int min= 0, max= 0;
+		for (int j = 0; reg!= null&& j < reg.length; j++) {
+			if (j== 0)
+				min= Math.abs(reg[j].get5PrimeEdge());
+			if (j== reg.length- 1)
+				max= Math.abs(reg[j].get3PrimeEdge());
+			DirectedRegion regSav= (DirectedRegion) reg[j].clone();
+			reg[j]= ENCODE.convertToEncodeCoord(reg[j]);
+			if (reg[j]== null) {
+				System.err.println("outside encode, skipping transcript "+getTranscriptID());
+				return null;
+			}
+			String s= SpliceSiteConservationComparator.getSubstring( 
+					reg[j].getID(),
+					"human", 
+					Math.abs(reg[j].getStart()), 
+					Math.abs(reg[j].getEnd())+ 1);	// end excl
+			if (!reg[j].isForward())
+				s= gphase.tools.Arrays.reverseComplement(s);
+			region+= s;
+		}
+		
+		return region;
+		
+	}
+
+	public String getSequence(int regCode) {
+		DirectedRegion[] reg= null;
+		if (regCode== REGION_5UTR)
+			reg= get5UTRRegion(false);
+		else if (regCode== REGION_COMPLETE_TRANSCRIPT)
+			reg= getExonicRegions();
+		else if (regCode== REGION_CDS)
+			reg= getCDSRegions();
+		
+		String region= "";
+		int min= 0, max= 0;
+		for (int j = 0; reg!= null&& j < reg.length; j++) {
+			if (j== 0)
+				min= Math.abs(reg[j].get5PrimeEdge());
+			if (j== reg.length- 1)
+				max= Math.abs(reg[j].get3PrimeEdge());
+			DirectedRegion regSav= (DirectedRegion) reg[j].clone();
+			reg[j]= ENCODE.convertToEncodeCoord(reg[j]);
+			if (reg[j]== null) {
+				System.err.println("outside encode, skipping transcript "+getTranscriptID());	// skip fragments
+				return null;	// continue?
+			}
+			String s= SpliceSiteConservationComparator.getSubstring( 
+					reg[j].getID(),
+					"human", 
+					Math.abs(reg[j].getStart()), 
+					Math.abs(reg[j].getEnd())+ 1);	// end excl
+			if (!reg[j].isForward())
+				s= gphase.tools.Arrays.reverseComplement(s);
+			region+= s;
+		}
+		
+		return region;
+		
+	}
+	
+
 	
 	public SpliceSite getPredSpliceSite(SpliceSite s) {
 		
@@ -252,12 +545,30 @@ public class Transcript extends DirectedRegion {
 	
 	public boolean is5UTR(int pos) {
 		
+		if (translations== null)
+			return false;
+		
 		int i;
-		for (i = 0; i < translations.length; i++) {
+		for (i = 0; translations!= null&& i < translations.length; i++) {
 			if (translations[i].get5PrimeEdge()> pos)
 				break;
 		}
-		if (i< translations.length)
+		if (translations!= null&& i< translations.length)
+			return true;
+		return false;
+	}
+	
+	public boolean is3UTR(int pos) {
+		
+		if (translations== null)
+			return false;
+		
+		int i;
+		for (i = 0; translations!= null&& i < translations.length; i++) {
+			if (translations[i].get3PrimeEdge()< pos)
+				break;
+		}
+		if (translations!= null&& i< translations.length)
 			return true;
 		return false;
 	}
@@ -273,13 +584,24 @@ public class Transcript extends DirectedRegion {
 			return false;
 		
 		int i;
-		for (i = 0; i < translations.length; i++) 
+		for (i = 0; translations!= null&& i < translations.length; i++) 
 			if (pos>= translations[i].get5PrimeEdge()&& pos<= translations[i].get3PrimeEdge())
 				break;
 		
-		if (i< translations.length)
+		if (translations!= null&& i< translations.length)
 			return true;
 		return false;
+	}
+	
+	public boolean isExonic(int pos) {
+		for (int i = 0; exons!= null&& i < exons.length; i++) 
+			if (pos>= exons[i].get5PrimeEdge()&& pos<= exons[i].get3PrimeEdge())
+				return true;
+		return false;
+	}
+	
+	public boolean isCoding() {
+		return (translations!= null&& translations.length> 0);
 	}
 	
 	public boolean isForward() {
@@ -308,6 +630,21 @@ public class Transcript extends DirectedRegion {
 	 */
 	public Exon[] getExons() {
 		return exons;
+	}
+	
+	public DirectedRegion[] getIntrons() {
+		if (exons== null|| exons.length< 2)
+			return null;
+		DirectedRegion[] introns= new DirectedRegion[exons.length- 1];
+		for (int i = 0; i < introns.length; i++) {
+			int pos1= exons[i].get3PrimeEdge()+ 1;
+			int pos2= exons[i+1].get5PrimeEdge()- 1;
+			if (isForward())
+				introns[i]= new DirectedRegion(pos1, pos2, getStrand());
+			else
+				introns[i]= new DirectedRegion(pos2, pos1, getStrand());
+		}
+		return introns;
 	}
 	
 	/**
@@ -741,6 +1078,47 @@ public class Transcript extends DirectedRegion {
 		if (p>= 0)
 			return spliceChain[p];
 		return null;
+	}
+
+	public int getDistFromATG(int gPos) {
+
+		if (getTranslations()== null|| getTranslations().length!= 1)
+			return -1;
+		
+		int atg= getTranslations()[0].get5PrimeEdge();
+		int min= Math.min(gPos, atg);
+		int max= Math.max(gPos, atg);
+		
+		int i;
+		for (i = 0; i < exons.length; i++) 
+			if(exons[i].get3PrimeEdge()>= min)
+				break;
+		if (i== exons.length)	// outa range
+			return -1;
+
+		int j;
+		for (j = i; j < exons.length; j++) 
+			if(exons[j].get3PrimeEdge()>= max)
+				break;
+		if (j== exons.length)	// outa range
+			return -1;
+		
+		int dist= 0;
+		for (int k = i+1; k < j; k++) 
+			dist+= exons[k].getLength();
+		
+		if (i== j)
+			dist+= max- min;
+		else {
+			dist+= exons[i].get3PrimeEdge()- min;	// 1st exon, not +-1
+			dist+= max- exons[j].get5PrimeEdge();	// last exon, not +-1
+			++dist;	// and in both cases +1
+		}
+
+		return dist;
+	}
+	public TU[] getTu() {
+		return tu;
 	}
 
 

@@ -12,6 +12,7 @@ import gphase.algo.AlignmentGenerator;
 import gphase.algo.AlignmentWrapper;
 import gphase.db.EnsemblDBAdaptor;
 import gphase.ext.ClustalWrapper;
+import gphase.graph.SpliceGraph;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,39 +56,39 @@ public class Graph implements Serializable {
 	 * NCBI build (e.g., 35), trivial name (hg17), date (200411)
 	 * (which then are mapped to a Ensembl-version in ensemblDB)
 	 */
-	static {
-		
-		HashMap map;
-		for (int i = 0; i < EnsemblDBAdaptor.SPECIES.length; i++) {
-			if (EnsemblDBAdaptor.SPECIES[i].contains("homo_sapiens")) {
-				map= new HashMap(1);
-				map.put(new Integer(35), new Integer(200405));	// NCBI build 35 = golden path hg17
-				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
-			}else if (EnsemblDBAdaptor.SPECIES[i].contains("mus_musculus")) {
-				map= new HashMap(2);
-				map.put(new Integer(33), new Integer(200405));	// NCBI build 33 = golden path mm5 (200405)
-				map.put(new Integer(34), new Integer(200503));	// NCBI build 34 = golden path mm6
-				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
-			} else if (EnsemblDBAdaptor.SPECIES[i].contains("rattus_norvegicus")) {
-				map= new HashMap(1);
-				map.put(new Integer(34), new Integer(200411));	// RGSC build 3.45 (no golden path)
-				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
-			} else if (EnsemblDBAdaptor.SPECIES[i].contains("canis_familiaris")) {
-				map= new HashMap(1);
-				map.put(new Integer(1), new Integer(200407));	// UCSC
-				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
-			} else if (EnsemblDBAdaptor.SPECIES[i].contains("gallus_gallus")) {
-				map= new HashMap(1);
-				map.put(new Integer(1), new Integer(200402));	// UCSC
-				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
-			} else if (EnsemblDBAdaptor.SPECIES[i].contains("pan_troglodytes")) {
-				map= new HashMap(1);
-				map.put(new Integer(3), new Integer(200311));	// UCSC
-				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
-			}
-		}
-		
-	}
+//	static {
+//		
+//		HashMap map;
+//		for (int i = 0; i < EnsemblDBAdaptor.SPECIES.length; i++) {
+//			if (EnsemblDBAdaptor.SPECIES[i].contains("homo_sapiens")) {
+//				map= new HashMap(1);
+//				map.put(new Integer(35), new Integer(200405));	// NCBI build 35 = golden path hg17
+//				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
+//			}else if (EnsemblDBAdaptor.SPECIES[i].contains("mus_musculus")) {
+//				map= new HashMap(2);
+//				map.put(new Integer(33), new Integer(200405));	// NCBI build 33 = golden path mm5 (200405)
+//				map.put(new Integer(34), new Integer(200503));	// NCBI build 34 = golden path mm6
+//				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
+//			} else if (EnsemblDBAdaptor.SPECIES[i].contains("rattus_norvegicus")) {
+//				map= new HashMap(1);
+//				map.put(new Integer(34), new Integer(200411));	// RGSC build 3.45 (no golden path)
+//				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
+//			} else if (EnsemblDBAdaptor.SPECIES[i].contains("canis_familiaris")) {
+//				map= new HashMap(1);
+//				map.put(new Integer(1), new Integer(200407));	// UCSC
+//				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
+//			} else if (EnsemblDBAdaptor.SPECIES[i].contains("gallus_gallus")) {
+//				map= new HashMap(1);
+//				map.put(new Integer(1), new Integer(200402));	// UCSC
+//				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
+//			} else if (EnsemblDBAdaptor.SPECIES[i].contains("pan_troglodytes")) {
+//				map= new HashMap(1);
+//				map.put(new Integer(3), new Integer(200311));	// UCSC
+//				buildMap.put(EnsemblDBAdaptor.SPECIES[i], map);
+//			}
+//		}
+//		
+//	}
 
 	/**
 	 * @deprecated no longer used
@@ -122,6 +123,14 @@ public class Graph implements Serializable {
 		while (iter.hasNext()) {
 			Species spe= (Species) iter.next();
 			spe.recluster();
+		}
+	}
+	
+	public void initTU() {
+		Iterator iter= speciesHash.values().iterator();
+		while (iter.hasNext()) {
+			Species spe= (Species) iter.next();
+			spe.initTU();
 		}
 	}
 	
@@ -214,6 +223,16 @@ public class Graph implements Serializable {
 
 	public Graph() {
 		speciesHash= new HashMap();
+	}
+
+	public int countNonCodingLoci() {
+		Iterator iter= speciesHash.values().iterator();
+		int cnt= 0;
+		while (iter.hasNext()) {
+			Species spe= (Species) iter.next();
+			cnt+= spe.countNonProteinCodingLoci();
+		}
+		return cnt;
 	}
 	public Graph(int nbSpecies) {
 		speciesHash= new HashMap(nbSpecies);
@@ -311,17 +330,7 @@ public class Graph implements Serializable {
 		
 	}
 	
-	public int countNonCodingLoci() {
-		Iterator iter= speciesHash.values().iterator();
-		int cnt= 0;
-		while (iter.hasNext()) {
-			Species spe= (Species) iter.next();
-			cnt+= spe.countNonProteinCodingLoci();
-		}
-		return cnt;
-	}
-	
-	public int getClustersWithAS() {
+	public int getClusterCountWithAS() {
 		Gene[] ge= getGenes();
 		int cnt= 0;
 		for (int i = 0; i < ge.length; i++) {
@@ -331,6 +340,18 @@ public class Graph implements Serializable {
 		}
 		
 		return cnt;
+	}
+	
+	public Gene[] getClustersWithAS() {
+		Gene[] ge= getGenes();
+		Vector geV= new Vector();
+		for (int i = 0; i < ge.length; i++) {
+			ASVariation[] as= ge[i].getASVariations(ASMultiVariation.FILTER_CODING_REDUNDANT);
+			if (as!= null&& as.length> 0)
+				geV.add(ge[i]);
+		}
+		
+		return (Gene[]) gphase.tools.Arrays.toField(geV);
 	}
 	
 	public Species getSpeciesByGeneID(String stableGeneID) {
@@ -422,12 +443,13 @@ public class Graph implements Serializable {
 		Species[] spe= getSpecies();
 		Vector v1= new Vector();
 		Vector v2= new Vector();
+		getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);	// init AS marks
 		for (int i = 0; i < spe.length; i++) {
 			SpliceSite[] ssites= spe[i].getSpliceSites(regionType, SpliceSite.ALTERNATE_SS);
-			for (int j = 0; j < ssites.length; j++) 
+		for (int j = 0; ssites!= null&& j < ssites.length; j++) 
 				v1.add(ssites[j]);
-			ssites= spe[i].getSpliceSites(regionType, SpliceSite.NOTYPE_SS);
-			for (int j = 0; j < ssites.length; j++) 
+			ssites= spe[i].getSpliceSites(regionType, SpliceSite.CONSTITUTIVE_SS);
+			for (int j = 0; ssites!= null&& j < ssites.length; j++) 
 				v2.add(ssites[j]);
 		}
 		SpliceSite[][] result= new SpliceSite[2][];
@@ -536,6 +558,11 @@ public class Graph implements Serializable {
 	 */
 	public static String readSequence(Species spe, String chromosome, boolean forwardStrand, int start, int end) {
 			
+			if (start< 0) {	// neg strand genes
+				start= -start;
+				end= -end;
+			}
+		
 			start--;
 			if (chromosome.equals("MT"))	// correct Ensembl to GRIB jargon
 				chromosome= "M";
@@ -572,17 +599,20 @@ public class Graph implements Serializable {
 				e.printStackTrace();
 			}
 			
-			return new String(seq);
+			String s= new String(seq);
+			if (!forwardStrand) 
+				s= gphase.tools.Arrays.reverseComplement(s);
+			return s;
 		}
 
 	public static String getSequenceDirectory(Species spe) {
 
 		// Species spe= getSpeciesByName(realName);
 		String realName= spe.getBinomialName();
-		HashMap hm= (HashMap) buildMap.get(realName);
-		Object o= hm.get(new Integer(spe.getBuildVersion()));
-		int dateID= ((Integer) ((HashMap) buildMap.get(realName))
-						.get(new Integer(spe.getBuildVersion()))).intValue();		// extract ID (date of build)
+//		HashMap hm= (HashMap) buildMap.get(realName);
+//		Object o= hm.get(new Integer(spe.getBuildVersion()));
+//		int dateID= ((Integer) ((HashMap) buildMap.get(realName))
+//						.get(new Integer(spe.getBuildVersion()))).intValue();		// extract ID (date of build)
 		
 		
 		String seqDirName= Character.toUpperCase(realName.charAt(0))+ "."
@@ -593,7 +623,7 @@ public class Graph implements Serializable {
 		String[] list= speciesGenome.list();
 		int i;
 		for (i = 0; i < list.length; i++) {
-			if (list[i].indexOf(new Integer(dateID).toString())>= 0)
+			if (list[i].indexOf(new Integer(spe.getBuildVersion()).toString())>= 0)	// dateID
 				break;
 		}
 		if (i> list.length- 1) {
@@ -669,140 +699,320 @@ public class Graph implements Serializable {
 	
 	
 	/**
-	 * @deprecated no longer in use
+	 *deprecated no longer in use
 	 *
 	 */
-	void initExonHomology() {
+	public void initExonHomology() {
 			
-//			for (int i = 0; i < getSpecies().length; i++) 			// species pair
-//				for (int j = i; j < getSpecies().length; j++) {		// incl same species (paralogs)
-//					Gene[] genesI= getSpecies()[i].getGenes();
-//
-//					for (int k = 0; k < genesI.length; k++) {			// for all homolg gene pairs
-//						Gene[] hGenesIJ= genesI[k].getHomologGenes(getSpecies()[j]);
-//						for (int h = 0; h < hGenesIJ.length; h++) {
-//							
-//								// perform alignments
-//							for (int e = 0; e < genesI[k].getExons().length; e++) {	// for each exon pair
-//								for (int f = 0; f < hGenesIJ[h].getExons().length; f++) {
-//
-//									String[] seqs= new String[] {readSequence(genesI[k].getExons()[e]), readSequence(hGenesIJ[h].getExons()[f])};
-//									String[] names= new String[] {genesI[k].getExons()[e].getStableID(), hGenesIJ[h].getExons()[f].getStableID()};
-//									
-//									String delme= AlignmentGenerator.writeOutTemp(names, seqs);
-//									ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(delme));
-//									new File(delme).delete();					// remove output
-//									//new File(cw.getOutputFName()).delete();	// readin result immediately
-//
-//										// create hit
-//									PWHit hit= new PWHit(genesI[k].getExons()[e], hGenesIJ[h].getExons()[f]);
-//									hit.setScore(cw.getScore());
-//									hit.setAlignment(cw.getLayout());
-//									genesI[k].getExons()[e].addHit(hGenesIJ[h], hit);
-//									hGenesIJ[h].getExons()[f].addHit(genesI[k], hit);
-//								}
-//							}	// exon pair
-//							
-//								// assign relations
-//							for (int e = 0; e < genesI[k].getExons().length; e++) {	// for each exon pair
-//								
-//							}
-//							for (int f = 0; f < hGenesIJ[h].getExons().length; f++) {
-//							
-//						}
-//					}	// gene pair
-//					
-//				}
-//			}	// species pairs
-//		
-//		
-//		
-//			Gene[] as= getSpecies()[0].getGenes();	 
-//			for (int i = 0; i < as.length; i++) {
-//				Gene[] hGenes= as[i].getHomologGenes();
-//				System.out.println(i+": initing exon homology of "+as[i].getStableID());
-//	
-//					// gfx progress
-//				int sum= 0;
-//				for (int k = 0; k < hGenes.length; k++) {
-//					for (int j = 0; j < hGenes[k].getExons().length; j++) {				// align pw
-//						sum+= as[i].getHomologies().length- k;
-//					}				
-//				}
-//				char[] c= new char[sum];
-//				Arrays.fill(c, '.');
-//				System.out.println(c);
-//	
-//					// pw alignment of exons
-//				for (int k = 0; k < as[i].getHomologies().length; k++) {
-//					
-//					for (int j = 0; j < hGenes[k].getExons().length; j++) {				// align pw
-//	
-//						for (int ii = 0; ii < as[i].exons.length; ii++) {				// with base gene 					
-//							
-//							String[] seqs= new String[] {readSequence(as[i].exons[ii]), readSequence(hGenes[k].getExons()[j])};
-//							String[] names= new String[] {as[i].exons[ii].getStableID(), hGenes[k].getExons()[j].getStableID()};
-//							
-//							PWHit hit= new PWHit(as[i].exons[ii], hGenes[k].getExons()[j]);
-//							ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(AlignmentGenerator.writeOutTemp(names, seqs)));
-//							hit.setScore(cw.getScore());
-//							hit.setAlignment(cw.getLayout());
-//							as[i].exons[ii].addHit(hGenes[k], hit);
-//							hGenes[k].getExons()[j].addHit(as[i], hit);
-//						}
-//						
-//						System.out.print('*');		// gfx output
-//						System.out.flush();
-//						
-//						for (int kk = (k+1); kk < as[i].getHomologies().length; kk++) {
-//							
-//							for (int ii = 0; ii < hGenes[kk].exons.length; ii++) {				// with other homologs 					
-//								
-//								String[] seqs= new String[] {readSequence(hGenes[kk].exons[ii]), readSequence(hGenes[k].getExons()[j])};
-//								String[] names= new String[] {hGenes[kk].exons[ii].getStableID(), hGenes[k].getExons()[j].getStableID()};
-//								
-//								PWHit hit= new PWHit(hGenes[kk].exons[ii], hGenes[k].getExons()[j]);
-//								ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(AlignmentGenerator.writeOutTemp(names, seqs)));
-//								hit.setScore(cw.getScore());
-//								hit.setAlignment(cw.getLayout());
-//								hGenes[kk].exons[ii].addHit(hGenes[k], hit);
-//								hGenes[k].getExons()[j].addHit(hGenes[kk], hit);
-//							}
-//							System.out.print('*');
-//							System.out.flush();
-//						}
-//						
-//					}
-//				}
-//				System.out.println();
-//			}
-//			
-//	
-//			// output
-//			for (int i = 0; i < as.length; i++) {
-//				Gene[] hGenes= as[i].getHomologGenes();
-//				for (int j = 0; j < as[i].getExons().length; j++) { 
-//					for (int k = 0; k < as[i].getHomologies().length; k++) {
-//						// System.out.print(i+ " - "+as[i].getExons()[j].getStableID()+" x "+ as[i].getHomologs()[k].getStableID()+ " : ");
-//						PWHit[] bestHits= getBRH(as[i].getExons()[j], hGenes[k], true);
-//						if (bestHits.length== 1) {							// add UBRH
-//							Exon e1= (Exon) bestHits[0].getObject1();
-//							Exon e2= (Exon) bestHits[0].getObject2();
-//							e1.addHomolog(e2.getGene(), e2);
-//							e2.addHomolog(e1.getGene(), e1);
-//						
-//						} else if (bestHits.length> 1)
-//							System.err.println("MBRHs ("+bestHits.length+") -"+i+ "- "+as[i].getExons()[j].getStableID()+" x "+ hGenes[k].getStableID());
-//						else 	// < 1, one exon not found
-//							System.err.println("noBRHs -"+i+ "- "+as[i].getExons()[j].getStableID()+" ("+as[i].getExons().length+") x "+ 
-//									hGenes[k].getStableID()+ " ("+ hGenes[k].getExons().length+")");
-//							
-//	//					System.out.print(getBRH(as[i].getExons()[j], as[i].getHomologs()[k], true).length);
-//	//					System.out.println(" BRH / "+ as[i].getExons()[j].getHits(as[i].getHomologs()[k]).length+ " hits.");
-//					}
-//				}
-//			}
-//			
+			for (int i = 0; i < getSpecies().length; i++) 			// species pair
+				for (int j = i; j < getSpecies().length; j++) {		// incl same species (paralogs)
+					Gene[] genesI= getSpecies()[i].getGenes();
+	
+					for (int k = 0; k < genesI.length; k++) {			// for all homolg gene pairs
+						Gene[] hGenesIJ= genesI[k].getHomologGenes(getSpecies()[j]);
+						for (int h = 0; h < hGenesIJ.length; h++) {
+							
+								// perform alignments
+							for (int e = 0; e < genesI[k].getExons().length; e++) {	// for each exon pair
+								for (int f = 0; f < hGenesIJ[h].getExons().length; f++) {
+	
+									String[] seqs= new String[] {
+											readSequence(genesI[k].getExons()[e]), readSequence(hGenesIJ[h].getExons()[f])};
+									String[] names= new String[] {genesI[k].getExons()[e].getExonID(), hGenesIJ[h].getExons()[f].getExonID()};
+									
+									String delme= AlignmentGenerator.writeOutTemp(names, seqs);
+									ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(delme));
+									new File(delme).delete();					// remove output
+									//new File(cw.getOutputFName()).delete();	// readin result immediately
+	
+										// create hit
+									PWHit hit= new PWHit(genesI[k].getExons()[e], hGenesIJ[h].getExons()[f]);
+									hit.setScore(cw.getScore());
+									hit.setAlignment(cw.getLayout());
+									genesI[k].getExons()[e].addHit(hGenesIJ[h], hit);
+									hGenesIJ[h].getExons()[f].addHit(genesI[k], hit);
+								}
+							}	// exon pair
+							
+								// assign relations
+							for (int e = 0; e < genesI[k].getExons().length; e++) {	// for each exon pair
+								
+							}
+							for (int f = 0; f < hGenesIJ[h].getExons().length; f++) {
+							
+						}
+					}	// gene pair
+					
+				}
+			}	// species pairs
+		
+		
+		
+			Gene[] as= getSpecies()[0].getGenes();	 
+			for (int i = 0; i < as.length; i++) {
+				Gene[] hGenes= as[i].getHomologGenes();
+				System.out.println(i+": initing exon homology of "+as[i].getStableID());
+	
+					// gfx progress
+				int sum= 0;
+				for (int k = 0; k < hGenes.length; k++) {
+					for (int j = 0; j < hGenes[k].getExons().length; j++) {				// align pw
+						sum+= as[i].getHomologies().length- k;
+					}				
+				}
+				char[] c= new char[sum];
+				Arrays.fill(c, '.');
+				System.out.println(c);
+	
+					// pw alignment of exons
+				for (int k = 0; k < as[i].getHomologies().length; k++) {
+					
+					for (int j = 0; j < hGenes[k].getExons().length; j++) {				// align pw
+	
+						for (int ii = 0; ii < as[i].getExons().length; ii++) {				// with base gene 					
+							
+							String[] seqs= new String[] {readSequence(as[i].getExons()[ii]), readSequence(hGenes[k].getExons()[j])};
+							String[] names= new String[] {as[i].getExons()[ii].getExonID(), hGenes[k].getExons()[j].getExonID()};
+							
+							PWHit hit= new PWHit(as[i].getExons()[ii], hGenes[k].getExons()[j]);
+							ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(AlignmentGenerator.writeOutTemp(names, seqs)));
+							hit.setScore(cw.getScore());
+							hit.setAlignment(cw.getLayout());
+							as[i].getExons()[ii].addHit(hGenes[k], hit);
+							hGenes[k].getExons()[j].addHit(as[i], hit);
+						}
+						
+						System.out.print('*');		// gfx output
+						System.out.flush();
+						
+						for (int kk = (k+1); kk < as[i].getHomologies().length; kk++) {
+							
+							for (int ii = 0; ii < hGenes[kk].getExons().length; ii++) {				// with other homologs 					
+								
+								String[] seqs= new String[] {readSequence(hGenes[kk].getExons()[ii]), readSequence(hGenes[k].getExons()[j])};
+								String[] names= new String[] {hGenes[kk].getExons()[ii].getExonID(), hGenes[k].getExons()[j].getExonID()};
+								
+								PWHit hit= new PWHit(hGenes[kk].getExons()[ii], hGenes[k].getExons()[j]);
+								ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(AlignmentGenerator.writeOutTemp(names, seqs)));
+								hit.setScore(cw.getScore());
+								hit.setAlignment(cw.getLayout());
+								hGenes[kk].getExons()[ii].addHit(hGenes[k], hit);
+								hGenes[k].getExons()[j].addHit(hGenes[kk], hit);
+							}
+							System.out.print('*');
+							System.out.flush();
+						}
+						
+					}
+				}
+				System.out.println();
+			}
+			
+	
+			// output
+			for (int i = 0; i < as.length; i++) {
+				Gene[] hGenes= as[i].getHomologGenes();
+				for (int j = 0; j < as[i].getExons().length; j++) { 
+					for (int k = 0; k < as[i].getHomologies().length; k++) {
+						// System.out.print(i+ " - "+as[i].getExons()[j].getStableID()+" x "+ as[i].getHomologs()[k].getStableID()+ " : ");
+						PWHit[] bestHits= getBRH(as[i].getExons()[j], hGenes[k], true);
+						if (bestHits.length== 1) {							// add UBRH
+							Exon e1= (Exon) bestHits[0].getObject1();
+							Exon e2= (Exon) bestHits[0].getObject2();
+							e1.addHomolog(e2.getGene(), e2);
+							e2.addHomolog(e1.getGene(), e1);
+						
+						} else if (bestHits.length> 1)
+							System.err.println("MBRHs ("+bestHits.length+") -"+i+ "- "+as[i].getExons()[j].getExonID()+" x "+ hGenes[k].getStableID());
+						else 	// < 1, one exon not found
+							System.err.println("noBRHs -"+i+ "- "+as[i].getExons()[j].getExonID()+" ("+as[i].getExons().length+") x "+ 
+									hGenes[k].getStableID()+ " ("+ hGenes[k].getExons().length+")");
+							
+	//					System.out.print(getBRH(as[i].getExons()[j], as[i].getHomologs()[k], true).length);
+	//					System.out.println(" BRH / "+ as[i].getExons()[j].getHits(as[i].getHomologs()[k]).length+ " hits.");
+					}
+				}
+			}
+			
+			
+		}
+
+	/**
+	 *deprecated no longer in use
+	 *
+	 */
+	public void initSpliceSiteHomology() {
+			
+			for (int i = 0; i < getSpecies().length; i++) 			// species pair
+				for (int j = i; j < getSpecies().length; j++) {		// incl same species (paralogs)
+					Gene[] genesI= getSpecies()[i].getGenes();
+
+					for (int k = 0; k < genesI.length; k++) {			// for all homolg gene pairs
+						Gene[] hGenesIJ= genesI[k].getHomologGenes(getSpecies()[j]);
+						if (hGenesIJ== null)
+							continue;
+						for (int h = 0; h < hGenesIJ.length; h++) {
+							
+								// perform alignments
+							for (int e = 0; genesI[k].getSpliceSites()!= null&& e < genesI[k].getSpliceSites().length; e++) {	// for each exon pair
+								for (int f = 0; hGenesIJ[h].getSpliceSites()!= null&& f < hGenesIJ[h].getSpliceSites().length; f++) {
+
+									SpliceSite e1= genesI[k].getSpliceSites()[e];
+									SpliceSite e2= hGenesIJ[h].getSpliceSites()[f];
+									String[] seqs= new String[] {
+											readSequence(e1.getGene().getSpecies(), e1.getGene().getChromosome(), e1.getGene().isForward(), Math.abs(e1.getPos())- SpliceSite.DELTA_RANGE, Math.abs(e1.getPos())+ SpliceSite.DELTA_RANGE), 
+											readSequence(e2.getGene().getSpecies(), e2.getGene().getChromosome(), e2.getGene().isForward(), Math.abs(e2.getPos())- SpliceSite.DELTA_RANGE, Math.abs(e2.getPos())+ SpliceSite.DELTA_RANGE)};
+									String[] names= new String[] {e1.getExons()[0].getExonID()+(e1.isDonor()?"^":"-"), e2.getExons()[0].getExonID()+(e2.isDonor()?"^":"-")};
+									
+									String delme= AlignmentGenerator.writeOutTemp(names, seqs);
+									ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(delme));
+									new File(delme).delete();					// remove output
+									//new File(cw.getOutputFName()).delete();	// readin result immediately
+
+										// create hit
+									PWHit hit= new PWHit(genesI[k].getExons()[e], hGenesIJ[h].getExons()[f]);
+									hit.setScore(cw.getScore());
+									hit.setAlignment(cw.getLayout());
+									e1.addHit(hGenesIJ[h], hit);
+									e2.addHit(genesI[k], hit);
+								}
+							}	// ss pair
+							
+					}	// gene pair
+					
+				}
+			}	// species pairs
+
+	
+			// output
+			for (int i = 0; i < getSpecies().length; i++) 			// species pair
+				for (int j = i; j < getSpecies().length; j++) {		// incl same species (paralogs)
+					Gene[] genesI= getSpecies()[i].getGenes();
+
+					for (int k = 0; k < genesI.length; k++) {			// for all homolg gene pairs
+						Gene[] hGenesIJ= genesI[k].getHomologGenes(getSpecies()[j]);
+						if (hGenesIJ== null)
+							continue;
+						for (int h = 0; h < hGenesIJ.length; h++) {
+							for (int e = 0; genesI[k].getSpliceSites()!= null&& e < genesI[k].getSpliceSites().length; e++) {	// for each exon pair
+								PWHit[] bestHits= getBRH(genesI[k].getSpliceSites()[e], hGenesIJ[h], true);
+								if (bestHits.length== 1) {							// add UBRH
+									SpliceSite e1= (SpliceSite) bestHits[0].getObject1();
+									SpliceSite e2= (SpliceSite) bestHits[0].getObject2();
+									e1.addHomolog(e2.getGene(), e2);
+									e2.addHomolog(e1.getGene(), e1);
+								
+								} else if (bestHits.length> 1)
+									System.err.println("MBRHs ("+bestHits.length+") -"+i+ "- "+genesI[k].getSpliceSites()[e].getExons()[0].getExonID()+" x "+ 
+											hGenesIJ[h].getStableID());
+								else 	// < 1, one exon not found
+									System.err.println("noBRHs -"+i+ "- "+genesI[k].getSpliceSites()[e].getExons()[0].getExonID()+" ("+genesI[k].getSpliceSites().length+") x "+ 
+											hGenesIJ[h].getStableID()+ " ("+ hGenesIJ[h].getSpliceSites().length+")");
+
+								
+							}			
+					}
+				}
+			}
+	}
+		
+		
+
+	void initSpliceSiteHomology_alt() {
+			Gene[] as= getSpecies()[0].getGenes();	 
+			for (int i = 0; i < as.length; i++) {
+				Gene[] hGenes= as[i].getHomologGenes();
+				System.out.println(i+": initing exon homology of "+as[i].getStableID());
+	
+					// gfx progress
+				int sum= 0;
+				for (int k = 0; k < hGenes.length; k++) {
+					for (int j = 0; j < hGenes[k].getExons().length; j++) {				// align pw
+						sum+= as[i].getHomologies().length- k;
+					}				
+				}
+				char[] c= new char[sum];
+				Arrays.fill(c, '.');
+				System.out.println(c);
+	
+					// pw alignment of exons
+				for (int k = 0; k < as[i].getHomologies().length; k++) {
+					
+					for (int j = 0; j < hGenes[k].getSpliceSites().length; j++) {				// align pw
+	
+						for (int ii = 0; ii < as[i].getSpliceSites().length; ii++) {				// with base gene 					
+							
+							SpliceSite e1= as[i].getSpliceSites()[ii];
+							SpliceSite e2= hGenes[k].getSpliceSites()[j];
+							String[] seqs= new String[] {
+									readSequence(e1.getGene().getSpecies(), e1.getGene().getChromosome(), e1.getGene().isForward(), Math.abs(e1.getPos())- SpliceSite.DELTA_RANGE, Math.abs(e1.getPos())+ SpliceSite.DELTA_RANGE), 
+									readSequence(e2.getGene().getSpecies(), e2.getGene().getChromosome(), e2.getGene().isForward(), Math.abs(e2.getPos())- SpliceSite.DELTA_RANGE, Math.abs(e2.getPos())+ SpliceSite.DELTA_RANGE)};
+							String[] names= new String[] {e1.getExons()[0].getExonID()+(e1.isDonor()?"^":"-"), e2.getExons()[0].getExonID()+(e2.isDonor()?"^":"-")};
+							
+							PWHit hit= new PWHit(as[i].getExons()[ii], hGenes[k].getExons()[j]);
+							ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(AlignmentGenerator.writeOutTemp(names, seqs)));
+							hit.setScore(cw.getScore());
+							hit.setAlignment(cw.getLayout());
+							as[i].getSpliceSites()[ii].addHit(hGenes[k], hit);
+							hGenes[k].getSpliceSites()[j].addHit(as[i], hit);
+						}
+						
+						System.out.print('*');		// gfx output
+						System.out.flush();
+						
+						for (int kk = (k+1); kk < as[i].getHomologies().length; kk++) {
+							
+							for (int ii = 0; ii < hGenes[kk].getSpliceSites().length; ii++) {				// with other homologs 					
+								
+								SpliceSite e1= hGenes[k].getSpliceSites()[j];
+								SpliceSite e2= hGenes[kk].getSpliceSites()[ii];
+								String[] seqs= new String[] {
+										readSequence(e1.getGene().getSpecies(), e1.getGene().getChromosome(), e1.getGene().isForward(), Math.abs(e1.getPos())- SpliceSite.DELTA_RANGE, Math.abs(e1.getPos())+ SpliceSite.DELTA_RANGE), 
+										readSequence(e2.getGene().getSpecies(), e2.getGene().getChromosome(), e2.getGene().isForward(), Math.abs(e2.getPos())- SpliceSite.DELTA_RANGE, Math.abs(e2.getPos())+ SpliceSite.DELTA_RANGE)};
+								String[] names= new String[] {e1.getExons()[0].getExonID()+(e1.isDonor()?"^":"-"), e2.getExons()[0].getExonID()+(e2.isDonor()?"^":"-")};
+								
+								PWHit hit= new PWHit(hGenes[kk].getExons()[ii], hGenes[k].getExons()[j]);
+								ClustalWrapper cw= ((ClustalWrapper)AlignmentGenerator.alignClustal(AlignmentGenerator.writeOutTemp(names, seqs)));
+								hit.setScore(cw.getScore());
+								hit.setAlignment(cw.getLayout());
+								hGenes[kk].getSpliceSites()[ii].addHit(hGenes[k], hit);
+								hGenes[k].getSpliceSites()[j].addHit(hGenes[kk], hit);
+							}
+							System.out.print('*');
+							System.out.flush();
+						}
+						
+					}
+				}
+				System.out.println();
+			}
+			
+	
+			// output
+			for (int i = 0; i < as.length; i++) {
+				Gene[] hGenes= as[i].getHomologGenes();
+				for (int j = 0; j < as[i].getSpliceSites().length; j++) { 
+					for (int k = 0; k < as[i].getHomologies().length; k++) {
+						// System.out.print(i+ " - "+as[i].getExons()[j].getStableID()+" x "+ as[i].getHomologs()[k].getStableID()+ " : ");
+						PWHit[] bestHits= getBRH(as[i].getSpliceSites()[j], hGenes[k], true);
+						if (bestHits.length== 1) {							// add UBRH
+							Exon e1= (Exon) bestHits[0].getObject1();
+							Exon e2= (Exon) bestHits[0].getObject2();
+							e1.addHomolog(e2.getGene(), e2);
+							e2.addHomolog(e1.getGene(), e1);
+						
+						} else if (bestHits.length> 1)
+							System.err.println("MBRHs ("+bestHits.length+") -"+i+ "- "+as[i].getExons()[j].getExonID()+" x "+ hGenes[k].getStableID());
+						else 	// < 1, one exon not found
+							System.err.println("noBRHs -"+i+ "- "+as[i].getExons()[j].getExonID()+" ("+as[i].getExons().length+") x "+ 
+									hGenes[k].getStableID()+ " ("+ hGenes[k].getExons().length+")");
+							
+	//					System.out.print(getBRH(as[i].getExons()[j], as[i].getHomologs()[k], true).length);
+	//					System.out.println(" BRH / "+ as[i].getExons()[j].getHits(as[i].getHomologs()[k]).length+ " hits.");
+					}
+				}
+			}
+			
 			
 		}
 
@@ -900,6 +1110,41 @@ public class Graph implements Serializable {
 	}
 	
 	PWHit[] getBRH(Exon e, Gene g, boolean max) {
+	
+		Vector result= new Vector(e.getHits().length);
+		
+		PWHit[] hits= e.getHits(g);
+		int best= 0;
+		for (int i = 0; i < hits.length; i++) {
+			if (max&& hits[i].getScore()>= best) {			// for scores, look for max
+				best= hits[i].getScore();
+				PWHit[] counterHits= ((Exon) hits[i].getOtherObject(e)).getHits(e.getGene());
+				int j;
+				for (j = 0; j < counterHits.length; j++) 
+					if (counterHits[j].getScore()> best)
+						break;
+				if (j>= counterHits.length)		// BRH spotted
+					result.add(hits[i]);
+			} else if ((!max)&& hits[i].getScore()<= best) {	// for costs, look for min
+				best= hits[i].getScore();
+				PWHit[] counterHits= ((Exon) hits[i].getOtherObject(e)).getHits();
+				int j;
+				for (j = 0; j < counterHits.length; j++) 
+					if (counterHits[j].getScore()< best)
+						break;
+				if (j>= counterHits.length)		// BRH spotted
+					result.add(hits[i]);
+			} 
+		}
+		
+		PWHit[] res= new PWHit[result.size()];
+		for (int i = 0; i < res.length; i++) 
+			res[i]= (PWHit) result.elementAt(i);
+		
+		return res;
+	}
+
+	PWHit[] getBRH(SpliceSite e, Gene g, boolean max) {
 
 		Vector result= new Vector(e.getHits().length);
 		
@@ -939,7 +1184,7 @@ public class Graph implements Serializable {
 	 * filters off not alternatively spliced genes.
 	 *
 	 */
-	public void filterNonASGenes() {
+	public void filterSingleTranscriptGenes() {
 		int rgen= 0;
 		Species[] spec= getSpecies();
 		for (int i = 0; i < spec.length; i++) {
@@ -1000,12 +1245,14 @@ public class Graph implements Serializable {
 						if (removeTranscript) {
 							ge[j].removeTranscript(tra[k]);
 							++rtran;
-							if (tra.length< 1)
+							if (ge[j].getTranscripts().length< 1) {
 								removeGene= true;
+								break;
+							}
 							continue;	// next transcript
 						}
-						
-							// check for removing complete gene
+
+						// check for removing complete gene
 						for (int m = 0; !removeGene && m < tra[k].getExons().length; m++) 
 							for (int n = m+1; !removeGene && n < tra[k].getExons().length; n++) 
 								if ((tra[k].getExons()[m].getDonor()!= null&&
@@ -1021,8 +1268,9 @@ public class Graph implements Serializable {
 										break;
 								}
 							
-						
+
 					}
+					
 					if (removeGene) {
 						spec[i].remove(ge[j], true);
 						++rgen;
@@ -1045,6 +1293,24 @@ public class Graph implements Serializable {
 				Transcript[] trans= ge[i].getTranscripts();
 				for (int j = 0; j < trans.length; j++) {
 					if (trans[j].isNonCoding())
+						ge[i].removeTranscript(trans[j]);
+				}
+				if (ge[i].getTranscriptCount()< 1)	// remove gene if there are no more transcripts
+					spec.remove(ge[i], true);
+			}
+		}
+		recluster();
+	}
+	
+	public void filterCodingTranscripts() {
+		Iterator iter= speciesHash.values().iterator();
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			Gene[] ge= spec.getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				Transcript[] trans= ge[i].getTranscripts();
+				for (int j = 0; j < trans.length; j++) {
+					if (!trans[j].isNonCoding())
 						ge[i].removeTranscript(trans[j]);
 				}
 				if (ge[i].getTranscriptCount()< 1)	// remove gene if there are no more transcripts
@@ -1137,6 +1403,90 @@ public class Graph implements Serializable {
 		return result;
 	}
 
+	public ASMultiVariation[][] getASMultiVariations() {
+		Gene[] ge= getGenes();
+		int x= 0; 
+		Vector varsV= new Vector();
+		for (x = 0; x < ge.length; x++)  {
+			SpliceGraph gr= new SpliceGraph(ge[x].getTranscripts());
+			gr.init();
+			ASMultiVariation[] vars= gr.getMultiVariations(-1);
+			
+			for (int i = 0; vars!= null&& i < vars.length; i++) {
+				int j;
+				for (j = 0; j < varsV.size(); j++) {
+					Vector tmpV= (Vector) varsV.elementAt(j);
+					ASMultiVariation v= (ASMultiVariation) tmpV.elementAt(0);
+					if (v.toString().equals(vars[i].toString())) {
+						tmpV.add(vars[i]);
+						break;
+					}
+				}
+				if (j== varsV.size()) {	// not found
+					Vector tmpV= new Vector();
+					tmpV.add(vars[i]);
+					varsV.add(tmpV);
+				}
+			}
+		}
+		
+		return (ASMultiVariation[][]) gphase.tools.Arrays.toField(varsV);
+	}
+	
+	public ASMultiVariation[][] getASMultiVariations_alternativ() {
+		
+		Gene[] ge= getGenes();
+		Vector asMV= new Vector();
+		for (int i = 0; i < ge.length; i++) {	// all genes
+			ASMultiVariation[] as= ge[i].getASMultiVariations();
+			asMV.add(as);
+		}
+		
+		ASMultiVariation[][] multiV= null;
+		try {
+			multiV= (ASMultiVariation[][]) gphase.tools.Arrays.toField(asMV);
+		} catch (ClassCastException e) {
+			System.err.println("No AS Classes!");
+		}
+		
+		return multiV;
+	}
+
+	public ASMultiVariation[][] getASMultiVariations2() {
+		
+		Gene[] ge= getGenes();
+		Vector mvClasses= new Vector();
+		for (int i = 0; i < ge.length; i++) {	// all genes
+			ASMultiVariation[] as= ge[i].getASMultiVariations2();
+			if (as== null)
+				continue;
+			for (int j = 0; j < as.length; j++) {	// sort MVars into classes
+				int k;
+				for (k = 0; k < mvClasses.size(); k++) {
+					Vector tmpClass= (Vector) mvClasses.elementAt(k);
+					if (((ASMultiVariation) tmpClass.elementAt(0)).toString().equals(as[j].toString())) {
+						tmpClass.add(as[j]);
+						break;
+					}
+				}
+				if (k>= mvClasses.size()) {
+					Vector v= new Vector();
+					v.add(as[j]);
+					mvClasses.add(v);
+				}
+			}
+		}
+		
+		ASMultiVariation[][] multiV= null;
+		try {
+			multiV= (ASMultiVariation[][]) gphase.tools.Arrays.toField(mvClasses);
+		} catch (ClassCastException e) {
+			System.err.println("No multi variations!");
+		}
+		
+		return multiV;
+	}
+	
 	public ASVariation[][] getASVariations(int filter) {
 		
 		asClasses= null;
@@ -1155,6 +1505,8 @@ public class Graph implements Serializable {
 						asvars= as[j].getASVariationsHierarchicallyFiltered();
 					else if (filter== ASMultiVariation.FILTER_CODING_REDUNDANT)
 						asvars= as[j].getASVariationsClusteredCoding();
+					else if (filter== ASMultiVariation.FILTER_STRUCTURALLY)
+						asvars= as[j].getASVariationsStructurallyFiltered();
 					asVariations+= asvars.length;
 					for (int k = 0; k < asvars.length; k++) {	// get pw variations
 						int m;

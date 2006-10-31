@@ -6,6 +6,8 @@
  */
 package gphase.model;
 
+import gphase.tools.ENCODE;
+
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -23,7 +25,16 @@ import com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler;
  */
 public class ASVariation implements Serializable {
 
+	public static final String ID_PURE_AD= "(1^ // 2^)";
+	public static final String ID_PURE_AA= "(1= // 2=)";
+	
 	static final long serialVersionUID = 2433674838499118768L;
+	
+	public static final int TYPE_ALL= 0;
+	public static final int TYPE_CDS= 1;
+	public static final int TYPE_UTR= 2;
+	public static final int TYPE_5UTR= 3;
+	public static final int TYPE_3UTR= 4;
 	
 	Transcript trans1= null;
 	Transcript trans2= null;
@@ -49,6 +60,239 @@ public class ASVariation implements Serializable {
 		int diffA= Math.abs(a[0]- a[1]);
 		return diffA;
 	}
+	
+	public DirectedRegion getRegion() {
+		SpliceSite[] su= getSpliceUniverse();
+		int min= su[0].getPos();
+		int max= su[su.length- 1].getPos();
+		if (Math.abs(min)> Math.abs(max)) {
+			int h= min;
+			min= max;
+			max= h;
+		}
+		
+		DirectedRegion reg= new DirectedRegion(min, max, trans1.getStrand());
+		reg.setChromosome(trans1.getChromosome());
+		return reg;
+	}
+	
+	public int getLengthDiff_relative12(boolean exon) {
+		int[] a= getLength(exon);
+		int diffA= a[0]- a[1];
+		return diffA;
+	}
+	public int getCommonLength() {
+		
+		int value= 0;
+		SpliceSite[] borders= getBorderingSpliceSites();
+		SpliceSite[][] schains2= new SpliceSite[][] {spliceChain1, spliceChain2};
+		
+		SpliceSite[] su= getSpliceUniverse();
+		SpliceSite[] flanks= getFlankingSpliceSites();
+		Vector ssV= new Vector();
+		if (flanks[0]!= null)
+			ssV.add(flanks[0]);
+		for (int i = 0; i < su.length; i++) 
+			ssV.add(su[i]);
+		if (flanks[1]!= null)
+			ssV.add(flanks[1]);
+	
+		int commonLength= 0;
+		for (int i = 0; i < ssV.size(); i++) {
+			SpliceSite ss= (SpliceSite) ssV.elementAt(i);
+			if (ss.isDonor())
+				continue;
+			
+				// isolate first cluster
+			Transcript tx= null;
+			if (trans1.containsSS(ss))
+				tx= trans1;
+			else
+				tx= trans2;
+			int startCluster= ss.getPos();
+			int endCluster= 0;
+			for (int j = i+1; j < ssV.size(); j++) {
+				SpliceSite ss2= (SpliceSite) ssV.elementAt(j);
+				if (ss2.isDonor()&& tx.contains(ss2.getPos())) {
+					endCluster= ss2.getPos();
+					break;
+				}
+			}
+			if (endCluster== 0)
+				continue;
+			
+				// isolate second cluster
+			int start2Cluster= 0, end2Cluster= 0;
+			Transcript ty= (tx== trans1?trans2:trans1);
+			for (int j = 0; j < ssV.size(); j++) {
+				SpliceSite ss2= (SpliceSite) ssV.elementAt(j);
+				if (ss.getPos()< startCluster)
+					continue;
+				if (ss2.isAcceptor()&& ty.containsSS(ss2)) 
+					start2Cluster= ss2.getPos();
+				if (start2Cluster!= 0&& ss2.isDonor()&& ty.containsSS(ss2)) {
+					end2Cluster= ss2.getPos();
+					break;
+				}
+			}
+			if (start2Cluster== 0|| end2Cluster== 0)
+				continue;
+			
+				// check overlap
+			if (start2Cluster>= startCluster&& start2Cluster<= endCluster) {
+				commonLength+= Math.min(endCluster, end2Cluster)- Math.max(startCluster, start2Cluster)+ 1;
+				SpliceSite s= (SpliceSite) ssV.elementAt(i);
+				while(s.getPos()< Math.max(endCluster, end2Cluster)&& i< ssV.size()- 1)
+					s= (SpliceSite) ssV.elementAt(++i);
+			} else {
+				SpliceSite s= (SpliceSite) ssV.elementAt(i);
+				while(s.getPos()< endCluster&& i< ssV.size()- 1)
+					s= (SpliceSite) ssV.elementAt(++i);
+			}
+		}
+		
+		return commonLength;
+	}
+
+	public int getDiffLength() {
+		
+		SpliceSite[] su= getSpliceUniverse();
+		SpliceSite[] flanks= getFlankingSites();
+		Vector ssV= new Vector();
+		ssV.add(flanks[0]);
+		for (int i = 0; i < su.length; i++) 
+			ssV.add(su[i]);
+		ssV.add(flanks[1]);
+	
+		int length= 0;
+		for (int i = 0; i < ssV.size(); i++) {
+			
+			SpliceSite ss= (SpliceSite) ssV.elementAt(i);
+			if (ss.isDonor())
+				continue;
+			
+				// isolate first cluster
+			Transcript tx= null;
+			if (ss== ssV.elementAt(0)|| ss== ssV.elementAt(ssV.size()- 1)|| trans1.containsSS(ss))
+				tx= trans1;
+			else
+				tx= trans2; 
+			int startCluster= ss.getPos();
+			int endCluster= 0;
+			for (int j = i+1; j < ssV.size(); j++) {
+				SpliceSite ss2= (SpliceSite) ssV.elementAt(j);
+				if (ss2.isDonor()&& (tx.containsSS(ss2)|| ss2== flanks[1])) {
+					endCluster= ss2.getPos();
+					break;
+				}
+			}
+			if (endCluster== 0)
+				continue;
+			
+				// isolate second cluster
+			int start2Cluster= 0, end2Cluster= 0;
+			Transcript ty= (tx== trans1?trans2:trans1);
+			for (int j = i; j < ssV.size(); j++) {
+				SpliceSite ss2= (SpliceSite) ssV.elementAt(j);
+				if (ss.getPos()< startCluster)
+					continue;
+				if (ss2.isAcceptor()&& (ty.containsSS(ss2)|| ss2== flanks[0])) 
+					start2Cluster= ss2.getPos();
+				if (start2Cluster!= 0&& ss2.isDonor()&& (ty.containsSS(ss2)|| ss2== flanks[1])) {
+					end2Cluster= ss2.getPos();
+					break;
+				}
+			}
+			if ((start2Cluster== 0|| end2Cluster== 0)||  
+					start2Cluster< startCluster|| start2Cluster> endCluster){	// no 2nd cluster or no overlap
+				length+= endCluster- startCluster;
+				SpliceSite s= (SpliceSite) ssV.elementAt(i);
+				while(s.getPos()< endCluster&& i< ssV.size()- 1)
+					s= (SpliceSite) ssV.elementAt(++i);
+					
+			} else {
+				int common= Math.min(endCluster, end2Cluster)- Math.max(startCluster, start2Cluster)+ 1;
+				int diff= Math.max(endCluster, end2Cluster)- Math.min(startCluster, start2Cluster)+ 1- common;
+				length+= diff;
+				SpliceSite s= (SpliceSite) ssV.elementAt(i);
+				while(s.getPos()< Math.max(endCluster, end2Cluster)&& i< ssV.size()- 1)
+					s= (SpliceSite) ssV.elementAt(++i);
+			}
+		}
+		
+		return length;
+	}
+
+	public int getDiffLength_old() {
+		
+		SpliceSite[] su= getSpliceUniverse();
+		SpliceSite[] flanks= getFlankingSpliceSites();
+		Vector ssV= new Vector();
+		if (flanks[0]!= null)
+			ssV.add(flanks[0]);
+		for (int i = 0; i < su.length; i++) 
+			ssV.add(su[i]);
+		if (flanks[1]!= null)
+			ssV.add(flanks[1]);
+
+		int length= 0;
+		for (int i = 0; i < ssV.size(); i++) {
+			SpliceSite ss= (SpliceSite) ssV.elementAt(i);
+			if (ss.isDonor())
+				continue;
+			
+				// isolate first cluster
+			Transcript tx= null;
+			if (trans1.containsSS(ss))
+				tx= trans1;
+			else
+				tx= trans2;
+			int startCluster= ss.getPos();
+			int endCluster= 0;
+			for (int j = i+1; j < ssV.size(); j++) {
+				SpliceSite ss2= (SpliceSite) ssV.elementAt(j);
+				if (ss2.isDonor()&& tx.containsSS(ss2)) {
+					endCluster= ss2.getPos();
+					break;
+				}
+			}
+			if (endCluster== 0)
+				continue;
+			
+				// isolate second cluster
+			int start2Cluster= 0, end2Cluster= 0;
+			Transcript ty= (tx== trans1?trans2:trans1);
+			for (int j = i; j < ssV.size(); j++) {
+				SpliceSite ss2= (SpliceSite) ssV.elementAt(j);
+				if (ss.getPos()< startCluster)
+					continue;
+				if (ss2.isAcceptor()&& ty.containsSS(ss2)) 
+					start2Cluster= ss2.getPos();
+				if (start2Cluster!= 0&& ss2.isDonor()&& ty.containsSS(ss2)) {
+					end2Cluster= ss2.getPos();
+					break;
+				}
+			}
+			if ((start2Cluster== 0|| end2Cluster== 0)||  
+					start2Cluster< startCluster|| start2Cluster> endCluster){	// no 2nd cluster or no overlap
+				length+= endCluster- startCluster;
+				SpliceSite s= (SpliceSite) ssV.elementAt(i);
+				while(s.getPos()< endCluster&& i< ssV.size()- 1)
+					s= (SpliceSite) ssV.elementAt(++i);
+					
+			} else {
+				int common= Math.min(endCluster, end2Cluster)- Math.max(startCluster, start2Cluster)+ 1;
+				int diff= Math.max(endCluster, end2Cluster)- Math.min(startCluster, start2Cluster)+ 1- common;
+				length+= diff;
+				SpliceSite s= (SpliceSite) ssV.elementAt(i);
+				while(s.getPos()< Math.max(endCluster, end2Cluster)&& i< ssV.size()- 1)
+					s= (SpliceSite) ssV.elementAt(++i);
+			}
+		}
+		
+		return length;
+	}
+
 	public int[] getLength(boolean exon) {
 		
 		int value= 0;
@@ -83,8 +327,8 @@ public class ASVariation implements Serializable {
 		
 		return result;
 	}
-	
-	/**
+
+	/*
 	 * returns the first and the last splice site in the splice universe
 	 * @return
 	 */
@@ -302,192 +546,244 @@ public class ASVariation implements Serializable {
 //		}
 			
 	}
-	/**
-	 * trims splice chains from both sides to the first splice site
-	 * that is covered by exonic positions in all other splice chains.
-	 *  
-	 * @param vars
-	 * @return
-	 */
-	public static SpliceSite[][] trim(SpliceSite[][] vars, Transcript[] trans) {
+	public int trim(boolean end5) {
 		
-			// check for trimming left, right edge 
-		boolean end5= ((vars[0].length> 0&& trans[0].getPredSpliceSite(vars[0][0])== null) ||
-				(vars[1].length> 0&& trans[1].getPredSpliceSite(vars[1][0])== null))? true: false;
-		boolean end3= ((vars[0].length> 0&& trans[0].getSuccSpliceSite(vars[0][vars[0].length- 1])== null) ||
-				(vars[1].length> 0&& trans[1].getSuccSpliceSite(vars[1][vars[1].length- 1])== null))? true: false;				
-		if (!end5&& !end3)	// nothing to do
-			return vars;
+		int[] pos1= new int[trans1.getSpliceChain().length+ 2];
+		pos1[0]= trans1.getTSSPos();
+		for (int i = 1; i < pos1.length- 1; i++) 
+			pos1[i]= trans1.getSpliceChain()[i-1].getPos();
+		pos1[pos1.length- 1]= trans1.getTESPos();
+		int[] pos2= new int[trans2.getSpliceChain().length+ 2];
+		pos2[0]= trans2.getTSSPos();
+		for (int i = 1; i < pos2.length- 1; i++) 
+			pos2[i]= trans2.getSpliceChain()[i-1].getPos();
+		pos2[pos2.length- 1]= trans2.getTESPos();
 		
-			// create splice universe
-		Vector suVec= new Vector();
-		for (int i = 0; i < vars.length; i++) {
-			for (int j = 0; j < vars[i].length; j++) {
-				int k;
-				for (k = 0; k < suVec.size(); k++) 
-					if (((SpliceSite) suVec.elementAt(k)).getPos()== vars[i][j].getPos())
-						break;
-				if (k== suVec.size())
-					suVec.add(vars[i][j]);
-			}
-		}
-		Vector tsVec= new Vector();	// add tss, tes
 		if (end5) {
-			for (int i = 0; i < trans.length; i++) {
-				int k;
-				for (k = 0; k < tsVec.size(); k++) 
-					if (((Integer) tsVec.elementAt(k)).intValue()== trans[i].get5PrimeEdge())
-						break;
-				if (k== tsVec.size())
-					tsVec.add(new Integer(trans[i].get5PrimeEdge()));
-			}
-		}
-		if (end3) {
-			for (int i = 0; i < trans.length; i++) {
-				int k;
-				for (k = 0; k < tsVec.size(); k++) 
-					if (((Integer) tsVec.elementAt(k)).intValue()== trans[i].get3PrimeEdge())
-						break;
-				if (k== tsVec.size())
-					tsVec.add(new Integer(trans[i].get3PrimeEdge()));
-			}
-		}
-		int[] su= new int[suVec.size()+ tsVec.size()];	// convert to int[]
-		for (int i = 0; i < suVec.size(); i++) 
-			su[i]= ((SpliceSite) suVec.elementAt(i)).getPos();
-		for (int i = 0; i < tsVec.size(); i++) 
-			su[i+suVec.size()]= ((Integer) tsVec.elementAt(i)).intValue();
-		
-		if (su.length<= 0)
-			return vars;	// empty splice chains
-		
-		Comparator compi= new AbstractSite.PositionComparator();
-		Arrays.sort(su);
-		int min= su[0];
-		int max= su[su.length- 1];
-		
-			// trim end5
-		while (end5) {
-			// check for exonic area
-			int i;
-			for (i = 0; i < vars.length; i++) {
-				if (Transcript.getSpliceSiteByPos(vars[i], min)== null) {	
-//					if (vars[i]== null)	// if not containing edge site ----> bullshit, intron retention in 3'UTR
-//						break;
-					SpliceSite pred= Transcript.getPredSpliceSite(vars[i], min);
-					SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], min);
-					if (pred== null) {
-						if (succ== null) {
-							if (!trans[i].contains(min))
-								break;
-						} else {
-							if (trans[i].isUpstream(min)|| !succ.isDonor())
-								break;
-						}
-					} else {
-						if (succ== null) {
-							if (!pred.isAcceptor()|| trans[i].isDownstream(min))
-								break;
-						} else {
-							if (!pred.isAcceptor()|| !succ.isDonor())
-								break;
-						}
-					}
+			int min= Integer.MAX_VALUE;
+			for (int i = 0; i < pos1.length; i+= 2) {
+				int x= Arrays.binarySearch(pos2, pos1[i]);
+				if (x> 0|| (++x% 2!= 0)) {	// pos: don or acc pos ok, neg: insert before acc (after a donor)	
+					min= pos1[i];
+					break;
 				}
 			}
-			if (i== vars.length)	// finish: all exonic
-				break;
-					
-			int s= Transcript.getSuccPos(su, min);		// containing the splice site, accepted, next
-			if (s== 0) {
-				min= 0;
-				break;
-			}
-			min= s;
-		}
-				
-		// trim end3
-		while (end3) {
-			// check for exonic area
-			int i;
-			for (i = 0; i < vars.length; i++) {
-				if (Transcript.getSpliceSiteByPos(vars[i], max)== null) {
-//					if (vars[i].length== 0)	// cannot succeed in containing ----> bullshit, intron retention in 3'UTR
-//						break;
-					SpliceSite pred= Transcript.getPredSpliceSite(vars[i], max);
-					SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], max);
-					if (pred== null) {
-						if (succ== null) {
-							if (!trans[i].contains(max))
-								break;
-						} else {
-							if (trans[i].isUpstream(max)|| !succ.isDonor())
-								break;
-						}
-					} else {
-						if (succ== null) {
-							if (!pred.isAcceptor()|| trans[i].isDownstream(max))
-								break;
-						} else {
-							if (!pred.isAcceptor()|| !succ.isDonor())
-								break;
-						}
-					}
+			for (int i = 0; i < pos2.length; i+= 2) {
+				int x= Arrays.binarySearch(pos1, pos2[i]);
+				if (x> 0|| (++x% 2!= 0)) {	// pos: don or acc pos ok, neg: insert before acc (after a donor)	
+					min= Math.min(min, pos2[i]);
+					break;
 				}
 			}
-			if (i== vars.length)
-				break;
-					
-			int s= Transcript.getPredPos(su, max);		// containing the splice site, accepted, next
-			if (s== 0) {
-				max= 0;
-				break;
-			}					
-			max= s;
+			return min;
+		} else {
+			int max= Integer.MIN_VALUE;
+			for (int i = pos1.length- 1; i >= 0; i-= 2) {
+				int x= Arrays.binarySearch(pos2, pos1[i]);
+				if (x> 0|| (++x% 2!= 0)) {	// pos: don or acc pos ok, neg: insert before acc (after a donor)	
+					max= pos1[i];
+					break;
+				}
+			}
+			for (int i = pos2.length- 1; i >=0; i-= 2) {
+				int x= Arrays.binarySearch(pos1, pos2[i]);
+				if (x> 0|| (++x% 2!= 0)) {	// pos: don or acc pos ok, neg: insert before acc (after a donor)	
+					max= Math.max(max, pos2[i]);
+					break;
+				}
+			}
+			return max;
 		}
-		
-		// cut
-		if (min== 0|| max== 0) {
-			return new SpliceSite[vars.length][0];
-		}
-		boolean tss= false, tes= false;	// check if trimmed flank contains a tss/tes
-		for (int i = 0; i < vars.length; i++) {
-			if (trans[i].get5PrimeEdge()== min)
-				tss= true;
-			if (trans[i].get3PrimeEdge()== max)
-				tes= true;
-		}
-		SpliceSite[][] trimmed= new SpliceSite[vars.length][];
-		for (int i = 0; i < vars.length; i++) {
-			Vector splicVec= new Vector();
-			int j= 0;
+	}
+	
+	
+	/**
+		 * trims splice chains from both sides to the first splice site
+		 * that is covered by exonic positions in all other splice chains.
+		 *  
+		 * @param vars
+		 * @return
+		 */
+		public static SpliceSite[][] trim(SpliceSite[][] vars, Transcript[] trans) {
+			
+				// check for trimming left, right edge 
+			boolean end5= ((vars[0].length> 0&& trans[0].getPredSpliceSite(vars[0][0])== null) ||
+					(vars[1].length> 0&& trans[1].getPredSpliceSite(vars[1][0])== null))? true: false;
+			boolean end3= ((vars[0].length> 0&& trans[0].getSuccSpliceSite(vars[0][vars[0].length- 1])== null) ||
+					(vars[1].length> 0&& trans[1].getSuccSpliceSite(vars[1][vars[1].length- 1])== null))? true: false;				
+			if (!end5&& !end3)	// nothing to do
+				return vars;
+			
+				// create splice universe
+			Vector suVec= new Vector();
+			for (int i = 0; i < vars.length; i++) {
+				for (int j = 0; j < vars[i].length; j++) {
+					int k;
+					for (k = 0; k < suVec.size(); k++) 
+						if (((SpliceSite) suVec.elementAt(k)).getPos()== vars[i][j].getPos())
+							break;
+					if (k== suVec.size())
+						suVec.add(vars[i][j]);
+				}
+			}
+			Vector tsVec= new Vector();	// add tss, tes
 			if (end5) {
-				for (j = 0; j < vars[i].length; j++) {
-					if ((vars[i][j].getPos()> min)
-					|| (tss&& vars[i][j].getPos()== min&& vars[i][j].isDonor()))	// conserve end5 end coincidence w tss
-						break;
+				for (int i = 0; i < trans.length; i++) {
+					int k;
+					for (k = 0; k < tsVec.size(); k++) 
+						if (((Integer) tsVec.elementAt(k)).intValue()== trans[i].get5PrimeEdge())
+							break;
+					if (k== tsVec.size())
+						tsVec.add(new Integer(trans[i].get5PrimeEdge()));
 				}
-			} else {
-				for (j = 0; j < vars[i].length; j++) 
-					if (vars[i][j].getPos()>= min)
-						break;
+			}
+			if (end3) {
+				for (int i = 0; i < trans.length; i++) {
+					int k;
+					for (k = 0; k < tsVec.size(); k++) 
+						if (((Integer) tsVec.elementAt(k)).intValue()== trans[i].get3PrimeEdge())
+							break;
+					if (k== tsVec.size())
+						tsVec.add(new Integer(trans[i].get3PrimeEdge()));
+				}
+			}
+			int[] su= new int[suVec.size()+ tsVec.size()];	// convert to int[]
+			for (int i = 0; i < suVec.size(); i++) 
+				su[i]= ((SpliceSite) suVec.elementAt(i)).getPos();
+			for (int i = 0; i < tsVec.size(); i++) 
+				su[i+suVec.size()]= ((Integer) tsVec.elementAt(i)).intValue();
+			
+			if (su.length<= 0)
+				return vars;	// empty splice chains
+			
+			Comparator compi= new AbstractSite.PositionComparator();
+			Arrays.sort(su);
+			int min= su[0];
+			int max= su[su.length- 1];
+			
+				// trim end5
+			while (end5) {
+				// check for exonic area
+				int i;
+				for (i = 0; i < vars.length; i++) {
+					if (Transcript.getSpliceSiteByPos(vars[i], min)== null) {	
+	//					if (vars[i]== null)	// if not containing edge site ----> bullshit, intron retention in 3'UTR
+	//						break;
+						SpliceSite pred= Transcript.getPredSpliceSite(vars[i], min);
+						SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], min);
+						if (pred== null) {
+							if (succ== null) {
+								if (!trans[i].contains(min))
+									break;
+							} else {
+								if (trans[i].isUpstream(min)|| !succ.isDonor())
+									break;
+							}
+						} else {
+							if (succ== null) {
+								if (!pred.isAcceptor()|| trans[i].isDownstream(min))
+									break;
+							} else {
+								if (!pred.isAcceptor()|| !succ.isDonor())
+									break;
+							}
+						}
+					}
+				}
+				if (i== vars.length)	// finish: all exonic
+					break;
+						
+				int s= Transcript.getSuccPos(su, min);		// containing the splice site, accepted, next
+				if (s== 0) {
+					min= 0;
+					break;
+				}
+				min= s;
+			}
+					
+			// trim end3
+			while (end3) {
+				// check for exonic area
+				int i;
+				for (i = 0; i < vars.length; i++) {
+					if (Transcript.getSpliceSiteByPos(vars[i], max)== null) {
+	//					if (vars[i].length== 0)	// cannot succeed in containing ----> bullshit, intron retention in 3'UTR
+	//						break;
+						SpliceSite pred= Transcript.getPredSpliceSite(vars[i], max);
+						SpliceSite succ= Transcript.getSuccSpliceSite(vars[i], max);
+						if (pred== null) {
+							if (succ== null) {
+								if (!trans[i].contains(max))
+									break;
+							} else {
+								if (trans[i].isUpstream(max)|| !succ.isDonor())
+									break;
+							}
+						} else {
+							if (succ== null) {
+								if (!pred.isAcceptor()|| trans[i].isDownstream(max))
+									break;
+							} else {
+								if (!pred.isAcceptor()|| !succ.isDonor())
+									break;
+							}
+						}
+					}
+				}
+				if (i== vars.length)
+					break;
+						
+				int s= Transcript.getPredPos(su, max);		// containing the splice site, accepted, next
+				if (s== 0) {
+					max= 0;
+					break;
+				}					
+				max= s;
 			}
 			
-			if (end3)
-				for (; j< vars[i].length&& vars[i][j].getPos()< max; j++) 
-					splicVec.add(vars[i][j]);
-			else 
-				for (; j< vars[i].length&& vars[i][j].getPos()<= max; j++) 
-					splicVec.add(vars[i][j]);
-			if (end3&& tes&& j< vars[i].length&& vars[i][j].isAcceptor()&& vars[i][j].getPos()== max)
-				splicVec.add(vars[i][j]);	// conserve end3 edge coincidence with tes
-			trimmed[i]= (SpliceSite[]) gphase.tools.Arrays.toField(splicVec);
-			if (trimmed[i]== null)
-				trimmed[i]= new SpliceSite[0];
+			// cut
+			if (min== 0|| max== 0) {
+				return new SpliceSite[vars.length][0];
+			}
+			boolean tss= false, tes= false;	// check if trimmed flank contains a tss/tes
+			for (int i = 0; i < vars.length; i++) {
+				if (trans[i].get5PrimeEdge()== min)
+					tss= true;
+				if (trans[i].get3PrimeEdge()== max)
+					tes= true;
+			}
+			SpliceSite[][] trimmed= new SpliceSite[vars.length][];
+			for (int i = 0; i < vars.length; i++) {
+				Vector splicVec= new Vector();
+				int j= 0;
+				if (end5) {
+					for (j = 0; j < vars[i].length; j++) {
+						if ((vars[i][j].getPos()> min)
+						|| (tss&& vars[i][j].getPos()== min&& vars[i][j].isDonor()))	// conserve end5 end coincidence w tss
+							break;
+					}
+				} else {
+					for (j = 0; j < vars[i].length; j++) 
+						if (vars[i][j].getPos()>= min)
+							break;
+				}
+				
+				if (end3)
+					for (; j< vars[i].length&& vars[i][j].getPos()< max; j++) 
+						splicVec.add(vars[i][j]);
+				else 
+					for (; j< vars[i].length&& vars[i][j].getPos()<= max; j++) 
+						splicVec.add(vars[i][j]);
+				if (end3&& tes&& j< vars[i].length&& vars[i][j].isAcceptor()&& vars[i][j].getPos()== max)
+					splicVec.add(vars[i][j]);	// conserve end3 edge coincidence with tes
+				trimmed[i]= (SpliceSite[]) gphase.tools.Arrays.toField(splicVec);
+				if (trimmed[i]== null)
+					trimmed[i]= new SpliceSite[0];
+			}
+			
+			return trimmed;
 		}
-		
-		return trimmed;
-	}
+
 	/**
 	 * trims splice chains from both sides to the first splice site
 	 * that is covered by exonic positions in all other splice chains.
@@ -864,6 +1160,76 @@ public class ASVariation implements Serializable {
 			}
 		}
 
+	public static class StructureTSSComparator implements Comparator {
+			
+			/**
+			 * @return <code>0</code> if both objects are equal, <code>-1</code>
+			 * otherwise
+			 */
+			public int compare(Object arg0, Object arg1) {
+				
+				ASVariation as1= (ASVariation) arg0;
+				ASVariation as2= (ASVariation) arg1;
+				
+				Comparator compi= new SpliceChainComparator();
+				SpliceSite[][] s1= new SpliceSite[][] {as1.spliceChain1, as1.spliceChain2};
+				SpliceSite[][] s2= new SpliceSite[][] {as2.spliceChain1, as2.spliceChain2};
+				SpliceSite[] su1= as1.getSpliceUniverse();
+				SpliceSite[] su2= as2.getSpliceUniverse();
+				if (((compi.compare(s1[0], s2[0])== 0)&& (compi.compare(s1[1], s2[1])== 0))||
+					((compi.compare(s1[1], s2[0])== 0)&& (compi.compare(s1[0], s2[1])== 0))) {
+					int a1= as1.trans1.get5UTR(false);
+					int a2= as1.trans1.get5UTR(false);
+					int b1= as1.trans2.get5UTR(false);
+					int b2= as1.trans2.get5UTR(false);
+					
+					return 0;
+				}
+				return -1;
+				
+			}
+		}
+
+	public static class HierarchyFilter extends StructureComparator {
+			
+			public int compare(Object arg0, Object arg1) {
+				
+				int eq= super.compare(arg0, arg1);
+				if (eq!= 0)
+					return -1;	// structurally different
+				
+				ASVariation as1= (ASVariation) arg0;
+				ASVariation as2= (ASVariation) arg1;
+	//			if ((as1.isProteinCoding()!= as2.isProteinCoding())
+	//				|| (as1.isPartiallyCoding()!= as2.isPartiallyCoding())
+	//				|| (as1.isNotAtAllCoding()!= as2.isNotAtAllCoding()))
+	//				return -1;
+				
+					// priority list
+				String t11= as1.getTranscript1().getTranscriptID();
+				String t12= as1.getTranscript2().getTranscriptID();
+				String t21= as2.getTranscript1().getTranscriptID();
+				String t22= as2.getTranscript2().getTranscriptID();
+
+				if (as1.isCodingFunc()|| as1.is5UTRFunc()|| as1.is3UTRFunc()) 
+					return (as2.isProteinCoding())?0:1;	// keep only first
+				if (as2.isCodingFunc()|| as2.is5UTRFunc()|| as2.is3UTRFunc())
+					return 2;		// keep second
+				
+				if (as1.isProteinCoding()|| as1.isCompletelyIn5UTR()|| as1.isCompletelyIn3UTR()) 
+					return (as2.isProteinCoding())?0:1;	// keep only first
+				if (as2.isProteinCoding()|| as2.isCompletelyIn5UTR()|| as2.isCompletelyIn3UTR())
+					return 2;		// keep second
+
+					// separate from spooky twilight zone
+				if (as1.isTwilightCDS()|| as1.isTwilight5UTR()|| as1.isTwilight3UTR()) 
+					return (as2.isProteinCoding())?0:1;	// keep only first
+				if (as2.isTwilightCDS()|| as2.isTwilight5UTR()|| as2.isTwilight3UTR())
+					return 2;		// keep second
+				return 0;	// keep one (whichever)
+			}
+		}
+
 	public Gene getGene() {
 		Gene g1= trans1.getGene();
 		Gene g2= trans2.getGene();
@@ -952,12 +1318,174 @@ public class ASVariation implements Serializable {
 		return null;
 	}
 	
-			/**
+	/**
+	 * Returns the respective region
+	 * @param reg -1= 5'UTR, 0= CDS, 1= 3'UTR
+	 * @return the genomic start end end positions of the respective regions
+	 * 
+	 */
+	public AbstractRegion[] getASRegion(int reg) {
+		if ((trans1.isNonCoding()&& trans2.isNonCoding())||
+				reg< -1|| reg> 1)
+			return null;
+		
+		
+		if (!trans1.isNonCoding()) {
+			trans1.getTranslations()[0]
+		}
+	}
+	
+	public boolean isNotProteinCoding() {
+		return !(isProteinCoding());
+	}
+	
+	
+	// no coding transcr or contradicting locations of 2 CDSs 
+	public boolean isTwilightZone() {
+		if (trans1.getTranslations()== null&& trans2.getTranslations()== null)
+			return true;
+		if (isNotProteinCoding()&& (!isCompletelyIn5UTR())&& (!isCompletelyIn3UTR()))
+			return true;	// improbable to happen though ?!
+		return false;
+	}
+	
+	public boolean isTwilightCDS() {
+		if (!isTwilightZone())
+			return false;
+		
+		SpliceSite[] su= getSpliceUniverse();
+			// sharing SS with CDS
+//		for (int i = 0; trans1.getTu()!= null&& i < trans1.getTu().length; i++) {
+//			for (int j = 0; j < su.length; j++) {
+//				if (trans1.getTu()[i].contains(su[j]))
+//					return true;
+//			}
+//		}
+//		for (int i = 0; trans2.getTu()!= null&& i < trans2.getTu().length; i++) {
+//			for (int j = 0; j < su.length; j++) {
+//				if (trans2.getTu()[i].contains(su[j]))
+//					return true;
+//			}
+//		}
+		
+		boolean b= false; 
+		for (int i = 0; trans1.getTu()!= null&& i < trans1.getTu().length; i++) {
+			if (trans1.getTu()[i].contains(su[0].getPos())&& trans1.getTu()[i].contains(su[su.length- 1].getPos())) {
+				if (!b)
+					b= true;
+			} else {
+				if (b)
+					return false;	// contained in one CDS but not in the other one
+			}
+		}		
+		for (int i = 0; trans2.getTu()!= null&& i < trans2.getTu().length; i++) {
+			if (trans2.getTu()[i].contains(su[0].getPos())&& trans2.getTu()[i].contains(su[su.length- 1].getPos())) {
+				if (!b)
+					b= true;
+			} else {
+				if (b)
+					return false;	// contained in one CDS but not in the other one
+			}
+		}
+		return b;
+	}
+	
+	public boolean isTwilight5UTR() {
+		
+		if (!isTwilightZone())
+			return false;
+		
+		SpliceSite[] su= getSpliceUniverse();
+		SpliceSite rightS= su[su.length- 1];
+		boolean b= false;
+		for (int i = 0; trans1.getTu()!= null&& i < trans1.getTu().length; i++) {
+			if (rightS.getPos()< trans1.getTu()[i].get5PrimeEdge()) {
+				if (!b) b= true;
+			} else {
+				if (b) return false;
+			}
+		}		
+		for (int i = 0; trans2.getTu()!= null&& i < trans2.getTu().length; i++) {
+			if (rightS.getPos()< trans2.getTu()[i].get5PrimeEdge()) {
+					if (!b) b= true;
+			} else {
+				if (b) return false;
+			}
+		}		
+		return b;
+	}
+	
+	public boolean isTwilight3UTR() {
+		if (!isTwilightZone())
+			return false;
+		
+		SpliceSite[] su= getSpliceUniverse();
+		SpliceSite leftS= su[0];
+		boolean b= false;
+		for (int i = 0; trans1.getTu()!= null&& i < trans1.getTu().length; i++) {
+			if (leftS.getPos()> trans1.getTu()[i].get3PrimeEdge()) {
+				if (!b) b= true;
+			} else {
+				if (b) return false;
+			}
+		}		
+		for (int i = 0; trans2.getTu()!= null&& i < trans2.getTu().length; i++) {
+			if (leftS.getPos()> trans2.getTu()[i].get3PrimeEdge()) {
+					if (!b) b= true;
+			} else {
+				if (b) return false;
+			}
+		}		
+		return b;
+	}
+	
+	public boolean isTwilightSpooky() {
+		if (isTwilightZone()&& !isTwilightCDS()&& !isTwilight5UTR()&& !isTwilight3UTR())
+			return true;
+		return false;
+	}
+	
+	/**
+	 * A splice variation is defined to be protein coding if the 
+	 * splicing influences the CDS in one transcript, ie, at least one
+	 * ss is contained in a CDS
+	 */
+	public boolean isProteinCoding() {
+	
+		SpliceSite[] su1= getSpliceChain1();
+		SpliceSite[] su2= getSpliceChain2();
+		
+		if (su1!= null&& su1.length> 0) {
+			for (int i = 0; trans1.getTranslations()!= null&& i < su1.length; i++) {
+				if (trans1.getTranslations()[0].contains(su1[i].getPos()))
+					return true;
+			}
+			for (int i = 0; trans2.getTranslations()!= null&& i < su1.length; i++) {
+				if (trans2.getTranslations()[0].contains(su1[i].getPos()))
+					return true;
+			}
+		} 
+		
+		if (su2!= null&& su2.length> 0) {
+			for (int i = 0; i < su2.length&& trans2.getTranslations()!= null; i++) {
+				if (trans2.getTranslations()[0].contains(su2[i].getPos()))
+					return true;
+			}
+			for (int i = 0; i < su2.length&& trans1.getTranslations()!= null; i++) {
+				if (trans1.getTranslations()[0].contains(su2[i].getPos()))
+					return true;
+			}
+		} 
+		
+		return false;
+	}
+
+	/**
 			 * A splice variation is defined to be protein coding if the 
 			 * constitutive flanking splice sites lie within any translation
 			 * of the respective transcript.
 			 */
-			public boolean isProteinCoding() {
+			public boolean isProteinCoding_old_publ() {
 			
 				SpliceSite[] su= getSpliceUniverse();
 				if (trans1.getTranslation(su[0].getPos(), su[su.length- 1].getPos())== null)
@@ -1050,6 +1578,55 @@ public class ASVariation implements Serializable {
 				return true;
 			}
 
+	public int[] getFlankingPos() {
+				
+				SpliceSite[] borders= getBorderingSpliceSites();
+				SpliceSite pred= trans1.getPredSpliceSite(borders[0].getPos());			
+				SpliceSite succ= trans1.getSuccSpliceSite(borders[1].getPos());
+				SpliceSite pred2= trans2.getPredSpliceSite(borders[0].getPos());
+				SpliceSite succ2= trans2.getSuccSpliceSite(borders[1].getPos());
+			
+				int start;
+				if (pred== null|| pred2== null|| pred!= pred2) {
+					start= trim(true);
+				} else {
+					start= pred.getPos();
+				}
+					
+				int end;
+				if (succ== null|| succ2== null|| succ!= succ2) {
+					end= trim(false);
+				} else {
+					end= succ.getPos();
+				}
+			
+				return new int[] {start, end};
+			}
+
+	public SpliceSite[] getFlankingSites() {
+		
+		SpliceSite[] borders= getBorderingSpliceSites();
+		SpliceSite pred= trans1.getPredSpliceSite(borders[0].getPos());			
+		SpliceSite succ= trans1.getSuccSpliceSite(borders[1].getPos());
+		SpliceSite pred2= trans2.getPredSpliceSite(borders[0].getPos());
+		SpliceSite succ2= trans2.getSuccSpliceSite(borders[1].getPos());
+
+		SpliceSite[] result= new SpliceSite[2];
+		if (pred== null|| pred2== null|| pred!= pred2) {
+			result[0]= new SpliceSite(null, trim(true), false);	// trimmed tss
+		} else {
+			result[0]= pred;
+		}
+			
+		if (succ== null|| succ2== null|| succ!= succ2) {
+			result[1]= new SpliceSite(null, trim(false), true);
+		} else {
+			result[1]= succ;
+		}
+
+		return result;
+	}
+	
 	public SpliceSite[] getFlankingSpliceSites()  {
 		SpliceSite pred= null;
 		SpliceSite succ= null;
@@ -1181,41 +1758,59 @@ public class ASVariation implements Serializable {
 		return true;
 	}	
 	
-	public boolean is5UTR() {
-
-		SpliceSite pred= null;
-		SpliceSite succ= null;
-		if (spliceChain1!= null&& spliceChain1.length> 0) {	// one of both transcripts has to provide a non-empty splicechain
-			pred= trans1.getPredSpliceSite(spliceChain1[0]);			
-			succ= trans1.getSuccSpliceSite(spliceChain1[spliceChain1.length- 1]);
-		} 
-		if (spliceChain2!= null&& spliceChain2.length> 0) {
-			if (pred== null)
-				pred= trans2.getPredSpliceSite(spliceChain2[0]);
-			else
-				if (pred.getPos()!= trans2.getPredSpliceSite(spliceChain2[0]).getPos())
-					System.err.println("Not same flank "+trans2.getGene().getStableID());
-			if (succ== null)
-				succ= trans2.getSuccSpliceSite(spliceChain2[spliceChain2.length- 1]);
-			else
-				if (succ.getPos()!= trans2.getSuccSpliceSite(spliceChain2[spliceChain2.length- 1]).getPos())
-					System.err.println("Not same flank "+trans1.getGene().getStableID());
-				
+	public boolean is5UTRFunc() {
+		return (isCompletelyIn5UTR()&& trans1.getTranslations()!= null&& trans2.getTranslations()!= null);
+	}
+	
+	public boolean isCodingFunc() {
+		return (isProteinCoding()&& trans1.getTranslations()!= null&& trans2.getTranslations()!= null);
+	}
+	
+	public boolean isTwilightFunc() {
+		return (isTwilightZone()&& trans1.getTranslations()!= null&& trans2.getTranslations()!= null);
+	}
+	
+	public boolean is3UTRFunc() {
+		return (isCompletelyIn3UTR()&& trans1.getTranslations()!= null&& trans2.getTranslations()!= null);
+	}
+	
+	public boolean isCompletelyIn5UTR() {
+	
+			SpliceSite[] su= getSpliceUniverse();
+			boolean t1= (trans1.is5UTR(su[0].getPos())&& trans1.is5UTR(su[su.length- 1].getPos()));
+			boolean t2= (trans2.is5UTR(su[0].getPos())&& trans2.is5UTR(su[su.length- 1].getPos()));
+			
+			if ((t1&& t2)|| (t1&& trans2.getTranslations()== null)|| (t2&& trans1.getTranslations()== null))
+				return true;
+			return false;
 		}
-		
-		int x, y;
+
+	public boolean isCompletelyIn3UTR() {
+	
+			SpliceSite[] su= getSpliceUniverse();
+			boolean t1= trans1.is3UTR(su[0].getPos())&& trans1.is3UTR(su[su.length- 1].getPos());
+			boolean t2= trans2.is3UTR(su[0].getPos())&& trans2.is3UTR(su[su.length- 1].getPos());
+			
+			if ((t1&& t2)|| (t1&& trans2.getTranslations()== null)|| (t2&& trans1.getTranslations()== null))
+				return true;
+			return false;
+		}
+
+	public boolean isCompletelyInCDS() {
+	
+			SpliceSite[] su= getSpliceUniverse();
+			boolean t1= trans1.isCDS(su[0].getPos())&& trans1.isCDS(su[su.length- 1].getPos());
+			boolean t2= trans2.isCDS(su[0].getPos())&& trans2.isCDS(su[su.length- 1].getPos());
+			
+			if ((t1&& t2)|| t1&& (trans2.getTranslations()== null)|| t2&& trans1.getTranslations()== null)
+				return true;
+			return false;
+		}
+
+	public boolean isTouching5UTR() {
+
 		SpliceSite[] su= getSpliceUniverse();
-		if (pred== null)
-			x= su[0].getPos()- 1;
-		else
-			x= pred.getPos();
-		if (succ== null)
-			y= su[su.length- 1].getPos()- 1;
-		else
-			y= succ.getPos();
-		
-		
-		if (trans1.is5UTR(x)&& trans2.is5UTR(x)&& trans1.is5UTR(y)&& trans2.is5UTR(y))
+		if (trans1.is5UTR(su[0].getPos())|| trans2.is5UTR(su[0].getPos())|| trans1.is5UTR(su[su.length- 1].getPos())|| trans2.is5UTR(su[su.length- 1].getPos()))
 			return true;
 		return false;
 	}	
@@ -1564,6 +2159,80 @@ public class ASVariation implements Serializable {
 		return s;
 	}
 	
+	/**
+	 * 
+	 * @param bitStart
+	 * @param bitEnd
+	 * @return null if there is no flanking site (TSS/TES)
+	 */
+	public DirectedRegion getBitRegion(int bitPos) {
+
+		int[][] bMatrix= toBitMatrix();
+
+			// start
+		int start= 0;
+		int start1SS= -1, start2SS= -1, end1SS= 0, end2SS= 0;
+		if (bitPos< 1) {	// get last SS, max(TSS)
+			SpliceSite pred= getFlankingSpliceSites()[0];
+			if (pred== null)
+				start= Math.max(trans1.get5PrimeEdge(), trans2.get5PrimeEdge());
+			else
+				start= pred.getPos();
+		} else {			// find pred SS in schain
+			for (int i = 1; i <= bitPos; i++) {	// count skipped ss until first ss
+				if (bMatrix[i][0]!= bMatrix[i-1][0])
+					++start1SS;
+				if (bMatrix[i][1]!= bMatrix[i-1][1])
+					++start2SS;
+			}
+			if (start1SS>= 0) {
+				if (start2SS>= 0) 
+					start= Math.max(spliceChain1[start1SS].getPos(), spliceChain2[start2SS].getPos());
+				else 
+					start= spliceChain1[start1SS].getPos();
+			} else {
+				start= spliceChain2[start2SS].getPos();
+			}
+		}
+		
+			// end
+		int end= 0;
+		if (bitPos+ 1>= bMatrix.length) {
+			SpliceSite succ= getFlankingSpliceSites()[1];
+			if (succ== null)
+				end= Math.min(trans1.get3PrimeEdge(), trans2.get3PrimeEdge());
+			else
+				end= succ.getPos();
+		} else {
+			
+			if (bMatrix[bitPos][0]!= bMatrix[bitPos+ 1][0]) {
+				end= spliceChain1[start1SS+ 1].getPos();
+				if (bMatrix[bitPos][1]!= bMatrix[bitPos+ 1][1]) 
+					System.err.println("assertion failed, 2 cannot change in 1 bitmap col");
+			} else {
+				if (bMatrix[bitPos][1]!= bMatrix[bitPos+ 1][1]) 
+					end= spliceChain2[start2SS+ 1].getPos();
+				else
+					System.err.println("assertion failed, 1 has to change in a bitmap col");
+			}
+		}
+		
+		if (Math.abs(start)> Math.abs(end)) {
+			int h= start;
+			start= end;
+			end= h;
+		}
+		DirectedRegion dir= new DirectedRegion(start, end, getGene().getStrand());
+		dir.setChromosome(getGene().getChromosome());
+		return dir;
+	}
+
+	/**
+	 * 
+	 * @param bitStart
+	 * @param bitEnd
+	 * @return null if there is no flanking site (TSS/TES)
+	 */
 	public SpliceSite[][] getSpliceSites(int bitStart, int bitEnd) {
 		int[][] bMatrix= toBitMatrix();
 		int start1SS= 0, start2SS= 0, end1SS= 0, end2SS= 0;
@@ -1573,6 +2242,7 @@ public class ASVariation implements Serializable {
 			if (bMatrix[i][1]!= bMatrix[i-1][1])
 				++start2SS;
 		}
+		boolean lowerFlank= false, upperFlank= false;
 		for (int i = (bitStart+1); i <= bitEnd; i++) {	// SSs taken 
 			if (bMatrix[i][0]!= bMatrix[i-1][0])
 				++end1SS;
@@ -1582,10 +2252,10 @@ public class ASVariation implements Serializable {
 		
 		SpliceSite[][] result= new SpliceSite[2][];
 		result[0]= new SpliceSite[end1SS];
-		for (int i = 0; i < result[0].length; i++) 
+		for (int i= 0; i < result[0].length; i++) 
 			result[0][i]= spliceChain1[start1SS+ i];	// +1 next, -1 0-based
 		result[1]= new SpliceSite[end2SS];
-		for (int i = 0; i < result[1].length; i++) 
+		for (int i= 0; i < result[1].length; i++) 
 			result[1][i]= spliceChain2[start2SS+ i];
 		
 		return result;
@@ -1674,6 +2344,120 @@ public class ASVariation implements Serializable {
 	}
 	
 	
+	public DirectedRegion getVariationArea() {
+		SpliceSite[] su= getSpliceUniverse();
+		DirectedRegion reg= new DirectedRegion(su[0].getPos(), su[su.length- 1].getPos(), trans1.getStrand());
+		reg.setChromosome(trans1.getChromosome());
+		return reg;
+	}
+	
+	public DirectedRegion[] getVariableRegion() {
+		String bit= toBitString();
+		Vector regV= new Vector();
+		for (int i = 0; i < bit.length(); i++) {
+			if (bit.charAt(i)== 'B'|| bit.charAt(i)== 'C') {
+					// create variable area
+				SpliceSite[][] ss= getSpliceSites(i-1, i+1);
+				int min= 0, max= 0;
+				if (ss[0]!= null&& ss[0].length> 0) {
+					if (ss[1]!= null&& ss[1].length> 0) {
+						min= Math.min(Math.abs(ss[0][0].getPos()), 
+								Math.abs(ss[1][0].getPos()));
+						max= Math.max(Math.abs(ss[1][ss[1].length- 1].getPos()), 
+								Math.abs(ss[0][ss[0].length- 1].getPos()));
+					} else {
+						min= Math.abs(ss[0][0].getPos());
+						max= Math.abs(ss[0][ss[0].length- 1].getPos());
+					}
+				} else {
+					if (ss[1]!= null&& ss[1].length> 0) {
+						min= Math.abs(ss[1][0].getPos());
+						max= Math.abs(ss[1][ss[1].length- 1].getPos());
+					} else {
+						System.err.println("empty event");
+					}
+				}
+				if (min> max) {
+					int h= min;
+					min= max;
+					max= h;
+				}
+				
+					// create regions
+				DirectedRegion reg= new DirectedRegion(min, max, getGene().getStrand());
+				reg.setChromosome(getGene().getChromosome());
+				regV.add(reg);
+			}
+		}
+		return (DirectedRegion[]) gphase.tools.Arrays.toField(regV);
+	}
+
+	public DirectedRegion[] getExonicOnlyRegion() {
+		String bit= toBitString();
+		Vector regV= new Vector();
+		for (int i = 0; i < bit.length(); i++) {
+			if (bit.charAt(i)== 'D') {
+					// create variable area
+				DirectedRegion dir= getBitRegion(i);
+				regV.add(dir);
+			}
+		}
+		return (DirectedRegion[]) gphase.tools.Arrays.toField(regV);
+	}
+
+	public int getMinVarSSPos() {
+		if (spliceChain1!= null&& spliceChain1.length> 0) {
+			if (spliceChain2!= null&& spliceChain2.length> 0)
+				return Math.min(spliceChain1[0].getPos(), spliceChain2[0].getPos());
+			else
+				return spliceChain1[0].getPos();
+		} else {
+			if (spliceChain2!= null&& spliceChain2.length> 0)
+				return spliceChain2[0].getPos();
+			else
+				System.err.println("empty variation");
+		}
+		return -1;
+	}
+
+	
+		// genomic regions, pos
+	DefaultRegion[] getExonicRegions(SpliceSite[] sc) {
+		int min, max;
+		Vector regV= new Vector();
+		for (int i = 0; sc!= null&& i < sc.length; i++) {
+			if (!sc[i].isDonor())
+				continue;
+			if (i== 0) 
+				min= Math.abs(getMinVarSSPos());
+			else 
+				min= Math.abs(sc[i-1].getPos());
+			max= sc[i].getPos();
+			
+			if (min== max)	// empty
+				continue;
+			
+			if (min> max) {	// swap on neg strand
+				int h= min;
+				min= max;
+				max= h;
+			}
+			DefaultRegion reg= new DefaultRegion(min, max);
+			reg.setChromosome(getGene().getChromosome());
+			regV.add(reg);
+		}
+		
+		return (DefaultRegion[]) gphase.tools.Arrays.toField(regV);
+	}
+	
+	// returns genomic coordinates (always pos)
+	public AbstractRegion[][] getVariableRegions() {
+		
+		AbstractRegion[][] result= new AbstractRegion[2][];
+		result[0]= getExonicRegions(spliceChain1);
+		result[1]= getExonicRegions(spliceChain2);
+		return result;
+	}
 	
 	/**
 	 * Representation with absolute (chromosomal) coordinates for each splice site. 

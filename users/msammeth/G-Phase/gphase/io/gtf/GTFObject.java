@@ -29,7 +29,7 @@ public class GTFObject {
 			end+ "\t";
 		x+= (score== Float.NaN)?".":Float.toString(score);
 		x+= "\t";
-		x+= leadingStrand?"+":"-";
+		x+= strand?"+":"-";
 		x+= "\t";
 		x+= (frame> 0)?Integer.toString(frame):".";
 		
@@ -44,7 +44,7 @@ public class GTFObject {
 		return x;	
 	}
 	
-	public final static String[] FEATURE_VALID= {"CDS", "start_codon", "stop_codon", "exon", "intron"};
+	public final static String[] FEATURE_VALID= {"ATG", "CDS", "start_codon", "stop_codon", "exon", "intron", "splice_site", "gene", "mRNA", "5UTR", "3UTR", "CDS"};
 	public final static String GENE_ID_TAG= "gene_id";	
 	public final static String TRANSCRIPT_ID_TAG= "transcript_id";
 	public final static String EXON_ID_TAG= "exon_id";
@@ -85,12 +85,27 @@ public class GTFObject {
 //	0 indicates that the first whole codon of the reading frame is located at 5'-most base. 1 means that there is one extra base before the first codon and 2 means that there are two extra bases before the first codon. Note that the frame is not the length of the CDS mod 3.
 //	Here are the details excised from the GFF spec. Important: Note comment on reverse strand.
 //	'0' indicates that the specified region is in frame, i.e. that its first base corresponds to the first base of a codon. '1' indicates that there is one extra base, i.e. that the second base of the region corresponds to the first base of a codon, and '2' means that the third base of the region is the first base of a codon. If the strand is '-', then the first base of the region is value of <end>, because the corresponding coding region will run from <end> to <start> on the reverse strand.
-	boolean leadingStrand= false;
+	boolean strand= false;
 	int frame= -1;
 	
 	
 	String comments= null; // GTF2, not described
 	
+	public boolean isExon() {
+		return getFeature().equals("exon"); 
+	}
+	public boolean isIntron() {
+		return getFeature().equals("intron"); 
+	}
+	public boolean isCDS() {
+		return getFeature().equals("CDS"); 
+	}
+	public boolean isStartCodon() {
+		return getFeature().equals("start_codon"); 
+	}
+	public boolean isStopCodon() {
+		return getFeature().equals("stop_codon"); 
+	}
 	public void addAttribute(String name, String value) {
 		
 		value= value.trim();
@@ -98,6 +113,28 @@ public class GTFObject {
 			value= value.substring(1, value.length()- 1);	// remove quota
 		
 		getAttributes().put(name, value);
+	}
+	
+	public boolean equals(Object obj) {
+		
+		GTFObject anotherGTF;
+		try {
+			anotherGTF= (GTFObject) obj;
+		} catch (ClassCastException e) {
+			return false;
+		}
+		
+		if (!anotherGTF.getSeqname().equals(seqname)||
+			!anotherGTF.getSource().equals(source)||
+			!anotherGTF.getFeature().equals(feature)||
+			anotherGTF.getStart()!= start||
+			anotherGTF.getEnd()!= end||
+			anotherGTF.isStrand()!= isStrand())
+			return false;
+
+		// attributes and comments not checked
+		
+		return true;
 	}
 	
 	HashMap getAttributes() {
@@ -219,7 +256,11 @@ public void setFeature(String feature) throws Exception {
  * @return Returns the seqname.
  */
 public String getSeqname() {
-	return seqname;
+	String s= seqname;
+	if (s.startsWith("chr"))	// not in mart output
+		s= seqname.substring(3);	// "chr..."
+
+	return s;
 }
 /**
  * @param seqname The seqname to set.
@@ -244,6 +285,13 @@ public void setSeqname(String seqname) {
 	 */
 	public int getStart() {
 		return start;
+	}
+	
+	public int getStrand() {
+		if (isStrand())
+			return 1;
+		else
+			return -1;
 	}
 	/**
 	 * @param start The start to set.
@@ -275,21 +323,32 @@ public void setSeqname(String seqname) {
 /**
  * @return Returns the leadingStrand.
  */
-public boolean isLeadingStrand() {
-	return leadingStrand;
+public boolean isStrand() {
+	return strand;
 }
 /**
- * @param leadingStrand The leadingStrand to set.
+ * @param strand The leadingStrand to set.
  */
-public void setLeadingStrand(String leadingLagging) throws Exception{
-	if (leadingLagging.trim().equals("+")) {
-		leadingStrand= true;
+public void setStrand(String leadingLagging) throws Exception{
+	if (leadingLagging.trim().equals("+")|| leadingLagging.trim().equals("1")) {
+		strand= true;
 		return;
-	} else if (leadingLagging.trim().equals("-")) {
-		leadingStrand= false;
+	} else if (leadingLagging.trim().equals("-")|| leadingLagging.trim().equals("-1")) {
+		strand= false;
 		return;
 	}
 	Exception e= new Exception("no valid mark for orientation! "+leadingLagging);
+	throw(e);
+}
+public void setStrand(int strandInt) throws Exception {
+	if (strandInt== 1) {
+		strand= true;
+		return;
+	} else if (strandInt== -1) {
+		strand= false;
+		return;
+	}
+	Exception e= new Exception("no valid mark for orientation! "+strandInt);
 	throw(e);
 }
 	/**
@@ -303,5 +362,11 @@ public void setLeadingStrand(String leadingLagging) throws Exception{
 	 */
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public String getChromosome() {
+		String s= getSeqname();
+		return s;
+		
 	}
 }

@@ -10,6 +10,7 @@ import gphase.tools.Arrays;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Vector;
 
 /**
@@ -19,14 +20,63 @@ import java.util.Vector;
  */
 public class ASMultiVariation implements Serializable {
 
+	public static class SpliceChainComparator implements Comparator {
+		public int compare(Object arg0, Object arg1) {
+			SpliceSite[] s0= (SpliceSite[]) arg0;
+			SpliceSite[] s1= (SpliceSite[]) arg1;
+			
+				// exclude null cases
+			if (s0== null) {
+				if (s1 == null)
+					return 0;
+				else
+					return -1;
+			} else if (s1== null)
+				return 1;
+			
+				// compare chains
+			for (int i = 0; i < s0.length&& i< s1.length; i++) {
+				if (s0[i].getPos()< s1[i].getPos())
+					return -1;
+				if (s0[i].getPos()> s1[i].getPos())
+					return 1;
+			}
+				
+				// longer chain first
+			if (s0.length> s1.length)
+				return -1;
+			if (s1.length> s0.length)
+				return 1;
+			return 0;
+		}
+	}
 	public static final int FILTER_NONE= 0;
 	public static final int FILTER_HIERARCHICALLY= 1;
 	public static final int FILTER_CODING_REDUNDANT= 2;
+	public static final int FILTER_STRUCTURALLY= 3;
 	
 	ASVariation[] asVariations= null;
+	SpliceSite[][] spliceChains= null;
+	String relPosStr= null;
+	HashMap transHash= null;	// maps schains (ss[]) to transcripts
 	
 	public ASMultiVariation(ASVariation[] newASVariations) {
 		this.asVariations= newASVariations;
+	}
+	
+	public ASMultiVariation(SpliceSite[][] schains, Transcript[] trans) {
+		this.spliceChains= schains;
+	}
+	
+	public ASMultiVariation(SpliceSite[][] schains, HashMap newTransHash) {
+		setSpliceChains(schains);
+		this.transHash= newTransHash;
+	}
+	
+	void setSpliceChains(SpliceSite[][] schains) {
+		Comparator compi= new SpliceChainComparator();
+		java.util.Arrays.sort(schains, compi);
+		spliceChains= schains;
 	}
 	
 	ASVariation[] removeRedundancy(ASVariation[] vars) {
@@ -37,7 +87,8 @@ public class ASMultiVariation implements Serializable {
 		
 		
 		Comparator compi= null;
-		compi= new ASVariation.CodingHierarchyFilter();
+		//compi= new ASVariation.CodingHierarchyFilter();
+		compi= new ASVariation.HierarchyFilter();
 		for (int i = 0; i < v.size(); i++) 
 			for (int j = i+1; j < v.size(); j++) {
 				int c= compi.compare(v.elementAt(i), v.elementAt(j));
@@ -53,15 +104,13 @@ public class ASMultiVariation implements Serializable {
 		return (ASVariation[]) Arrays.toField(v);
 	}
 
-	ASVariation[] removeRedundancyCoding(ASVariation[] vars) {
+	ASVariation[] removeRedundancy(ASVariation[] vars, Comparator compi) {
 		
 		Vector v= new Vector(vars.length);
 		for (int i = 0; i < vars.length; i++) 
 			v.add(vars[i]);
 		
 		
-		Comparator compi= null;
-		compi= new ASVariation.CodingComparator();
 		for (int i = 0; i < v.size(); i++) 
 			for (int j = i+1; j < v.size(); j++) {
 				if (compi.compare(v.elementAt(i), v.elementAt(j))== 0)
@@ -78,6 +127,10 @@ public class ASMultiVariation implements Serializable {
 		public ASVariation[] getASVariationsHierarchicallyFiltered() {
 		return removeRedundancy(asVariations);
 	}
+		
+		public ASVariation[] getASVariationsStructurallyFiltered() {
+			return removeRedundancy(asVariations, new ASVariation.StructureComparator());
+		}
 		
 	public ASVariation[] getASVariations(Transcript transcriptID_1, Transcript transcriptID_2) {
 		if (asVariations== null)
@@ -98,17 +151,79 @@ public class ASMultiVariation implements Serializable {
 	}
 
 	public ASVariation[] getASVariationsClusteredCoding() {
-		return removeRedundancyCoding(asVariations);
+		return removeRedundancy(asVariations, new ASVariation.CodingComparator());
 	}
 
 
-	public String toString() {
+	public String toDegreeString() {
 		String result= getDegree()+ ": ( ";
 		for (int i = 0; i < asVariations.length; i++) {
 			result+= asVariations[i]+"; ";
 		}
 		result= result.substring(0,result.length()- 2)+ " )";
 		return result;
+	}
+	
+	public String toString() {
+		
+		if (relPosStr == null) {
+			if (spliceChains== null|| spliceChains.length< 1)
+				return "error";
+			
+			String[] c= new String[spliceChains.length];	// better: StringBuffer
+			for (int i = 0; i < c.length; i++) 
+				c[i]= "";
+			
+			int[] pos= new int[spliceChains.length];	// pos in the sChain
+			Vector[] relPosV= new Vector[spliceChains.length];
+			for (int i = 0; i < pos.length; i++) {
+				pos[i]= 0;
+				relPosV[i]= new Vector();
+			}
+			int currPos= 0;
+			
+			boolean finished= false;
+			while(!finished) {
+				int min= Integer.MAX_VALUE;
+				Vector minSCV= new Vector();
+				for (int i = 0; i < spliceChains.length; i++) {	// find next min
+					if (spliceChains[i]== null|| spliceChains[i].length< 1|| pos[i]>= spliceChains[i].length)
+						continue;
+					if (spliceChains[i][pos[i]].getPos()< min) {
+						min= spliceChains[i][pos[i]].getPos();	// work with +/- values
+						minSCV= new Vector();
+						minSCV.add(new Integer(i));
+					} else if (spliceChains[i][pos[i]].getPos()== min) {
+						minSCV.add(new Integer(i));
+					}
+				}
+				
+				++currPos;	// add next rel Pos
+				for (int i = 0; i < minSCV.size(); i++) {
+					int minSC= ((Integer) minSCV.elementAt(i)).intValue();
+					c[minSC]+= currPos+ (spliceChains[minSC][pos[minSC]].isDonor()?"^":"-");
+					++pos[minSC];
+					relPosV[minSC].add(new Integer(currPos));
+				}
+				
+				int x;
+				for (x = 0; x < pos.length; x++) 
+					if (spliceChains[x]!= null&& pos[x]< spliceChains[x].length)
+						break;
+				if (x>= pos.length)
+					finished= true;
+			}
+			
+			String result= "(";
+			for (int i = 0; i < c.length; i++) 
+				result+= c[i]+ " // ";
+			result= result.substring(0, result.length()- 4);
+			result+= ")";
+			
+			relPosStr= result;
+		}
+
+		return relPosStr;
 	}
 
 	public int getDegree() {
@@ -117,5 +232,9 @@ public class ASMultiVariation implements Serializable {
 			deg+= asVariations[i].getDegree();
 		
 		return deg;
+	}
+
+	public SpliceSite[][] getSpliceChains() {
+		return spliceChains;
 	}
 }

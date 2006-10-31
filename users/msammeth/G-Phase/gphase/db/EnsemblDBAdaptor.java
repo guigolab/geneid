@@ -8,6 +8,10 @@ package gphase.db;
 
 import gphase.Constants;
 
+import gphase.algo.ASAnalyzer;
+import gphase.io.gtf.GTFObject;
+import gphase.model.ASMultiVariation;
+import gphase.model.ASVariation;
 import gphase.model.Exon;
 import gphase.model.Gene;
 import gphase.model.GeneHomology;
@@ -29,6 +33,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -50,6 +57,8 @@ import org.ensembl.driver.compara.HomologyAdaptor;
 import org.ensembl.driver.plugin.standard.BaseDriver;
 import org.ensembl.util.PropertiesUtil;
 
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
+
 import qalign.tools.FASTAWrapper;
 import qalign.tools.SequenceWrapper;
 
@@ -70,8 +79,9 @@ public class EnsemblDBAdaptor {
 	public static final String[] SPECIES_ALL_SHORT = { "agambiae", "amellifera", "celegans", "cfamiliaris", "dmelanogaster", "drerio", "frubripes", "hsapiens", "mmusculus", "ptroglodytes", "rnorvegicus", "scerevisiae", "tnigroviridis" };
 	public static final String[] SPECIES_ENCODE = { Species.SP_NAMES_BINOMIAL[0], Species.SP_NAMES_BINOMIAL[1], Species.SP_NAMES_BINOMIAL[2], Species.SP_NAMES_BINOMIAL[3], Species.SP_NAMES_BINOMIAL[4], Species.SP_NAMES_BINOMIAL[5], Species.SP_NAMES_BINOMIAL[6], Species.SP_NAMES_BINOMIAL[7], Species.SP_NAMES_BINOMIAL[8], Species.SP_NAMES_BINOMIAL[9], Species.SP_NAMES_BINOMIAL[10], Species.SP_NAMES_BINOMIAL[11] };
 	public static final String[] SPECIES_ENSEMBL = { Species.SP_NAMES_BINOMIAL[0], Species.SP_NAMES_BINOMIAL[1], Species.SP_NAMES_BINOMIAL[2], Species.SP_NAMES_BINOMIAL[3], Species.SP_NAMES_BINOMIAL[4], Species.SP_NAMES_BINOMIAL[5], Species.SP_NAMES_BINOMIAL[6], Species.SP_NAMES_BINOMIAL[7], Species.SP_NAMES_BINOMIAL[8], Species.SP_NAMES_BINOMIAL[9], Species.SP_NAMES_BINOMIAL[10], Species.SP_NAMES_BINOMIAL[11] };
-	public static final String[] SPECIES_SMALL = { "homo_sapiens", "mus_musculus", "rattus_norvegicus" };
-	public static final String[] SPECIES = SPECIES_SMALL;
+	public static final String[] SPECIES_SMALL = { "mouse", "yeast" };
+	public static final String[] SPECIES_ISMB = { "human", "mouse", "rat", "cow", "dog", "chicken", "frog", "zebrafish", "fruitfly", "mosquito" };
+	public static final String[] SPECIES = SPECIES_ISMB;
 
 	/**
 	 * 
@@ -476,7 +486,82 @@ public class EnsemblDBAdaptor {
 			
 		}
 	
-	Transcript[] retrieveTranscripts(Connection con, Gene[] genes) {
+	Transcript[] retrieveTranscripts(Connection con, Species spec, Gene[] genes) {
+			
+			ResultSet rs= null;
+		
+				// build query
+			StringBuffer sb= new StringBuffer("SELECT transcript_stable_id.stable_id,transcript.seq_region_start,transcript.seq_region_end,transcript.seq_region_strand,gene_stable_id.stable_id,transcript.biotype,transcript.status ");	//
+			sb.append("FROM gene,gene_stable_id,transcript,transcript_stable_id "); 
+			sb.append("WHERE transcript.gene_id=gene.gene_id");
+			sb.append(" AND gene.gene_id=gene_stable_id.gene_id");
+			sb.append(" AND transcript.transcript_id=transcript_stable_id.transcript_id ");
+			Gene gene= genes[0];
+			sb.append(" AND (gene_stable_id.stable_id=\""); 
+			sb.append(gene.getStableID()); 
+			sb.append("\"");
+			for (int i= 1; i < genes.length; i++) {
+				gene= genes[i];
+				sb.append(" OR gene_stable_id.stable_id=\"");
+				sb.append(gene.getStableID());
+				sb.append("\"");
+			}
+			sb.append(")");
+		
+				// execute query
+			Vector transVec= new Vector();
+			try {
+				Statement stmt = con.createStatement(
+							ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+												// only one ResultSet per Statement possible
+		
+				rs = stmt.executeQuery(sb.toString());	// TYPE and CONCUR value given by Statement
+				if (rs== null) {
+					System.err.println("No result for Transcripts!");
+					return null;
+				}
+					
+					// store result
+				if (tempTranscriptMap== null) {
+					int ctr= countResults(rs);
+					tempTranscriptMap= new HashMap(ctr, (int) (1.3* ctr));
+					rs.beforeFirst();
+				}
+				while(rs.next()) {
+					gene= spec.getGene(rs.getString(5));
+					Transcript transcript= new Transcript(gene, rs.getString(1));	// stableID
+					//transcript.setGene(gene);		// stableID
+					transcript.setStart(Integer.parseInt(rs.getString(2)));
+					transcript.setEnd(Integer.parseInt(rs.getString(3)));
+					transcript.setType(rs.getString(6));
+					transcript.setConfidence(rs.getString(7));
+					
+						
+					if (gene== null) {
+						System.err.println("EnsemblDBAdaptor.getTranscripts(): no gene found for "+ rs.getString(5));
+						continue;
+					}
+					gene.addTranscript(transcript);
+					
+					if (!transcript.checkStrand(rs.getString(4)))
+						System.err.println("Strand mismatch gene "+gene.getStableID()
+							+"("+(transcript.getGene().isForward()?"fwd":"rev")
+							+") with transcript "+ transcript.getStableID()
+							+"("+(rs.getString(4).trim().equals("1")?"fwd":"rev"));
+					
+					tempTranscriptMap.put(rs.getString(1), transcript);
+					transVec.add(transcript);
+				}
+				
+				// do not close - connection is needed for translations and exons
+			} catch (SQLException e) { 			// thrown by both methods
+				System.err.println("Error fetching transcripts: "+ e);
+			}
+			
+			return Transcript.toTranscriptArray(transVec);
+		}
+
+	static GTFObject[] getTranslations(Connection con, Species spec, Gene[] genes) {
 		
 		ResultSet rs= null;
 
@@ -518,7 +603,7 @@ public class EnsemblDBAdaptor {
 				rs.beforeFirst();
 			}
 			while(rs.next()) {
-				gene= graph.getGene(rs.getString(5));
+				gene= spec.getGene(rs.getString(5));
 				Transcript transcript= new Transcript(gene, rs.getString(1));	// stableID
 				//transcript.setGene(gene);		// stableID
 				transcript.setStart(Integer.parseInt(rs.getString(2)));
@@ -611,16 +696,16 @@ public class EnsemblDBAdaptor {
 					
 					genes[x].setStart(Integer.parseInt(rs.getString(2)));
 					genes[x].setEnd(Integer.parseInt(rs.getString(3)));
-					genes[x].setForward(rs.getString(4));
+					genes[x].setStrand(Integer.parseInt(rs.getString(4)));
 					genes[x].setChromosome(rs.getString(5));	// !! also with NT.. genes (see old method)
-					int chk= genes[x].getConfidence();
+//					int chk= genes[x].getConfidence();
 					genes[x].setType(rs.getString(6));
-					if (chk!= genes[x].getConfidence())
-						System.err.println("mismatching confidence in gene "+genes[x]);
-					chk= genes[x].getType();
+//					if (chk!= genes[x].getConfidence())
+						//System.err.println("mismatching confidence in gene "+genes[x]);
+					//chk= genes[x].getType();
 					genes[x].setConfidence(rs.getString(7));
-					if (chk!= genes[x].getType())
-						System.err.println("mismatching type in gene "+genes[x]);
+					//if (chk!= genes[x].getType())
+						//System.err.println("mismatching type in gene "+genes[x]);
 						
 				}
 				con.close();
@@ -693,19 +778,12 @@ public class EnsemblDBAdaptor {
 					continue;
 				}
 				
+				genes[x].setStrand(Integer.parseInt(rs.getString(4)));
 				genes[x].setStart(Integer.parseInt(rs.getString(2)));
 				genes[x].setEnd(Integer.parseInt(rs.getString(3)));
-				genes[x].setForward(rs.getString(4));
 				genes[x].setChromosome(rs.getString(5));	// !! also with NT.. genes (see old method)
-				int chk= genes[x].getConfidence();
 				genes[x].setType(rs.getString(6));
-				if (chk!= genes[x].getConfidence())
-					System.err.println("mismatching confidence in gene "+genes[x]);
-				chk= genes[x].getType();
 				genes[x].setConfidence(rs.getString(7));
-				if (chk!= genes[x].getType())
-					System.err.println("mismatching type in gene "+genes[x]);
-					
 			}
 			con.close();
 		} catch (SQLException e) { 			// thrown by both methods
@@ -1222,9 +1300,12 @@ public class EnsemblDBAdaptor {
 													
 					String query= "SELECT "+tableXlink+".gene_stable_id,"+tableXlink+".homol_stable_id,"
 									+ tableGmainI+".biotype,"+ tableGmainI+".confidence,"
-									+ tableGmainI+".chr_name,"+ tableGmainI+".gene_chrom_start,"+ tableGmainI+".gene_chrom_end,"
+									+ tableGmainI+".chr_name,"+ tableGmainI+".chrom_strand," 
+									+ tableGmainI+".gene_chrom_start,"+ tableGmainI+".gene_chrom_end,"
 									+ tableGmainJ+".biotype,"+ tableGmainJ+".confidence," 
-									+ tableGmainJ+".chr_name,"+ tableGmainJ+".gene_chrom_start,"+ tableGmainJ+".gene_chrom_end"
+									+ tableGmainJ+".chr_name,"+ tableGmainJ+".chrom_strand,"
+									+ tableGmainJ+".gene_chrom_start,"+ tableGmainJ+".gene_chrom_end, "
+									+ tableXlink+".description"
 									+ " FROM "+ tableGmainI+","+tableGmainJ+","+tableXlink
 									+" WHERE homol_id is not NULL"	// does occur !!
 									// +" AND description=\"UBRH\""	// we want all
@@ -1234,9 +1315,10 @@ public class EnsemblDBAdaptor {
 					for (int k = 0; k < species.length; k++) {	// ensure there are homologs in all other species
 						if (k== i || k== j)
 							continue;
-						query+= " AND "+tableGmainI+"."+species[j].getNameAbbrev()+"_homolog_bool"
-								+ " AND "+tableGmainJ+"."+species[i].getNameAbbrev()+"_homolog_bool";
+						query+= " AND "+tableGmainI+"."+species[k].getNameAbbrev()+"_homolog_bool"
+								+ " AND "+tableGmainJ+"."+species[k].getNameAbbrev()+"_homolog_bool";
 					}
+					query+= " AND "+tableXlink+".description='ortholog_one2one'";
 					
 					rs = stmt.executeQuery(query);	// TYPE and CONCUR value given by Statement
 					 
@@ -1259,16 +1341,10 @@ public class EnsemblDBAdaptor {
 					rs.first();	// jump
 					String stableID1= rs.getString(1);
 					String stableID2= rs.getString(2);
-					Species spec1= g.getSpeciesByGeneID(stableID1);
-					if (spec1== null)
-						spec1= g.getSpeciesByEnsemblPrefix(Species.SP_NAMES_ENS_PFX[11]);	// guess tetraodon
-					if (spec1.getGeneNb()< 1)
-						spec1.setEstimatedGeneNb(ctr/2);
-					Species spec2= g.getSpeciesByGeneID(stableID2);	// generate Species
-					if (spec2== null)
-						spec2= g.getSpeciesByEnsemblPrefix(Species.SP_NAMES_ENS_PFX[11]);	// guess tetraodon
-					if (spec2.getGeneNb()< 1) 						
-						spec2.setEstimatedGeneNb(ctr/2);
+					if (species[i].getGeneNb()< 1)
+						species[i].setEstimatedGeneNb(ctr/2);
+					if (species[j].getGeneNb()< 1) 						
+						species[j].setEstimatedGeneNb(ctr/2);
 	
 						// get genes
 					rs.beforeFirst();
@@ -1277,31 +1353,34 @@ public class EnsemblDBAdaptor {
 						if (DEBUG&& ++x>= 100)
 							break;
 						stableID1= rs.getString(1);	// renew
-						Gene gene1= g.getGene(stableID1);
+						Gene gene1= species[i].getGene(stableID1);
 						if (gene1== null) {
-							newGenes1.add(gene1= new Gene(spec1, stableID1));
-							gene1.setSpecies(spec1);
+							newGenes1.add(gene1= new Gene(species[i], stableID1));
+							gene1.setSpecies(species[i]);
 							gene1.setType(rs.getString(3));
 							gene1.setConfidence(rs.getString(4));
 							gene1.setChromosome(rs.getString(5));
-							gene1.setStart(Integer.parseInt(rs.getString(6)));
-							gene1.setEnd(Integer.parseInt(rs.getString(7)));
+							gene1.setStrand(Integer.parseInt(rs.getString(6)));
+							gene1.setStart(Integer.parseInt(rs.getString(7)));
+							gene1.setEnd(Integer.parseInt(rs.getString(8)));
 							g.addGene(gene1);
 						}
 						stableID2= rs.getString(2);	// renew
-						Gene gene2= g.getGene(stableID2);
+						Gene gene2= species[j].getGene(stableID2);
 						if (gene2== null) { 
-							newGenes2.add(gene2= new Gene(spec2, stableID2));
-							gene2.setSpecies(spec2);
-							gene2.setType(rs.getString(8));
-							gene2.setConfidence(rs.getString(9));
-							gene2.setChromosome(rs.getString(10));
-							gene2.setStart(Integer.parseInt(rs.getString(11)));
-							gene2.setEnd(Integer.parseInt(rs.getString(12)));
+							newGenes2.add(gene2= new Gene(species[j], stableID2));
+							gene2.setSpecies(species[j]);
+							gene2.setType(rs.getString(9));
+							gene2.setConfidence(rs.getString(10));
+							gene2.setChromosome(rs.getString(11));
+							gene2.setStrand(Integer.parseInt(rs.getString(12)));
+							gene2.setStart(Integer.parseInt(rs.getString(13)));
+							gene2.setEnd(Integer.parseInt(rs.getString(14)));
 							g.addGene(gene2);
 						}
 						
 						GeneHomology hom= new GeneHomology(gene1, gene2);
+						hom.setType(rs.getString(15));
 						//hom.setDs();
 						//hom.setDn();
 						//hom.setDnDs();
@@ -1323,10 +1402,9 @@ public class EnsemblDBAdaptor {
 		return GeneHomology.toGeneHomologyArray(allHomologies); 
 	}
 
-	Graph retrieveGenesAll_mart(Graph g) {
+	Graph retrieveGenesAll_mart(Graph g, Species spec) {
 		
 		Species[] species= g.getSpecies();
-		Vector allHomologies= new Vector(10000);	// bit bigger than default (16)
 		
 		// connect
 		Connection con= connect("ensembl_mart");	// ensembl_mart_29
@@ -1348,9 +1426,10 @@ public class EnsemblDBAdaptor {
 													
 					String query= "SELECT "+tableGmainI+".gene_stable_id,"
 									+ tableGmainI+".biotype,"+ tableGmainI+".confidence,"
-									+ tableGmainI+".chr_name,"+ tableGmainI+".gene_chrom_start,"+ tableGmainI+".gene_chrom_end"
-									+ " FROM "+ tableGmainI
-									+ "  WHERE "+ tableGmainI+".biotype=\"protein_coding\"";
+									+ tableGmainI+".chr_name,"+ tableGmainI+ ".chrom_strand,"
+									+ tableGmainI+".gene_chrom_start,"+ tableGmainI+".gene_chrom_end"
+									+ " FROM "+ tableGmainI;
+									//+ "  WHERE "+ tableGmainI+".biotype=\"protein_coding\"";
 					
 					rs = stmt.executeQuery(query);	// TYPE and CONCUR value given by Statement
 					 
@@ -1366,22 +1445,13 @@ public class EnsemblDBAdaptor {
 				
 					// iterate result set, Xlink genes
 				Vector newGenes1= new Vector();
-				Vector newGenes2= new Vector();	
 				try {	
 						// prepare species
 					int ctr= countResults(rs);	// estimate gene nb (!! gene duplications)
 					rs.first();	// jump
 					String stableID1= rs.getString(1);
-					Species spec1= g.getSpeciesByGeneID(stableID1);
-					if (spec1== null) {
-						if (stableID1.startsWith("HOX"))
-							spec1= g.getSpeciesByEnsemblPrefix(Species.SP_NAMES_ENS_PFX[11]);	// guess tetraodon
-						if (stableID1.startsWith("CG")|| stableID1.startsWith("CR"))
-							spec1= g.getSpeciesByEnsemblPrefix(Species.SP_NAMES_ENS_PFX[12]);	// guess tetraodon
-						// !!! worm and yeast are missing
-					}
-					if (spec1.getGeneNb()< 1)
-						spec1.setEstimatedGeneNb(ctr/2);
+					if (spec.getGeneNb()< 1)
+						spec.setEstimatedGeneNb(ctr/2);
 	
 						// get genes
 					rs.beforeFirst();
@@ -1392,13 +1462,14 @@ public class EnsemblDBAdaptor {
 						stableID1= rs.getString(1);	// renew
 						Gene gene1= species[i].getGene(stableID1); // was g.getGene(stableID1);
 						if (gene1== null) {
-							newGenes1.add(gene1= new Gene(spec1, stableID1));
-							gene1.setSpecies(spec1);
+							newGenes1.add(gene1= new Gene(spec, stableID1)); 
+							gene1.setSpecies(spec);
 							gene1.setType(rs.getString(2));
 							gene1.setConfidence(rs.getString(3));
 							gene1.setChromosome(rs.getString(4));
-							gene1.setStart(Integer.parseInt(rs.getString(5)));
-							gene1.setEnd(Integer.parseInt(rs.getString(6)));
+							gene1.setStrand(Integer.parseInt(rs.getString(5)));
+							gene1.setStart(Integer.parseInt(rs.getString(6)));
+							gene1.setEnd(Integer.parseInt(rs.getString(7)));
 							g.addGene(gene1);
 						}
 					}
@@ -1437,6 +1508,8 @@ public class EnsemblDBAdaptor {
 		System.out.flush();
 		int pctCtr= 0;
 		int pctBase= homols.length/ 100;
+		if (pctBase< 1)	// for debugging, little gene sets
+			pctBase= 1;
 
 		for (int i= 0; i < homols.length; i++) {
 
@@ -1447,7 +1520,9 @@ public class EnsemblDBAdaptor {
 							ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY); // only one ResultSet per Statement possible
 												
 				String query= "SELECT DISTINCT "	// see method_link_species_set-Pfusch
-								+ "homology.homology_id, homology.description, subtype, type, n, s, dn, ds, threshold_on_ds, lnl," 
+								//+ "homology.homology_id, homology.description, "
+								+ "homology.homology_id, "
+								+ "homology.description, type, n, s, dn, ds, threshold_on_ds, lnl," 
 								+ "perc_cov, perc_id, perc_pos,"// homology_member 
 								+ "member.stable_id"			// unused just for strategy works with distinct: 
 																// s. method_link_species_set-Pfusch
@@ -1494,24 +1569,24 @@ public class EnsemblDBAdaptor {
 				
 				
 				homols[i].setType(rs.getString(2));
-				homols[i].setSubtype(rs.getString(3));
-				homols[i].setMethod(rs.getString(4));
-				homols[i].setN(rs.getDouble(5));
-				homols[i].setS(rs.getDouble(6));
-				homols[i].setDn(rs.getDouble(7));
-				homols[i].setDs(rs.getDouble(8));
-				homols[i].setThresholdOnDS(rs.getDouble(9));
-				homols[i].setLnl(rs.getDouble(10));
-				homols[i].setG1PercCov(rs.getInt(11));
-				homols[i].setG1PercId(rs.getInt(12));
-				homols[i].setG1PercPos(rs.getInt(13));
+				//homols[i].setSubtype(rs.getString(3));	// gibts net mehr
+				homols[i].setMethod(rs.getString(3));
+				homols[i].setN(rs.getDouble(4));
+				homols[i].setS(rs.getDouble(5));
+				homols[i].setDn(rs.getDouble(6));
+				homols[i].setDs(rs.getDouble(7));
+				homols[i].setThresholdOnDS(rs.getDouble(8));
+				homols[i].setLnl(rs.getDouble(9));
+				homols[i].setG1PercCov(rs.getInt(10));
+				homols[i].setG1PercId(rs.getInt(11));
+				homols[i].setG1PercPos(rs.getInt(12));
+				homols[i].setG2PercCov(rs.getInt(10));
+				homols[i].setG2PercId(rs.getInt(11));
+				homols[i].setG2PercPos(rs.getInt(12));
+				
 				
 				for (int j = 0; j < (x2- x1); j++) 
 					rs.next();	// jump
-				
-				homols[i].setG2PercCov(rs.getInt(11));
-				homols[i].setG2PercId(rs.getInt(12));
-				homols[i].setG2PercPos(rs.getInt(13));
 				
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -1654,7 +1729,7 @@ public class EnsemblDBAdaptor {
 
 			System.out.println("["+ new Date(System.currentTimeMillis())+"]: getting transcripts for "+ 
 					specName+"("+specGenes.length+" genes)");
-			Transcript[] specTrans= retrieveTranscripts(con, specGenes);	// transcripts
+			Transcript[] specTrans= retrieveTranscripts(con, spec[i], specGenes);	// transcripts
 			
 			System.out.println("["+ new Date(System.currentTimeMillis())+ "]: getting translations ("+
 					specTrans.length+" transcripts)");
@@ -1886,6 +1961,10 @@ public class EnsemblDBAdaptor {
 		
 	}
 	
+	public Graph getGraphAllGenes(String specName) {
+		return getGraphAllGenes(new Species(specName));
+	}
+	
 	public Graph getGraphAllGenes(Species spec) {
 		
 		System.out.println(Constants.getDateString()+ " loading Graph");
@@ -1900,7 +1979,9 @@ public class EnsemblDBAdaptor {
 			graph= new Graph(speci);
 			
 			System.out.println("["+new Date(System.currentTimeMillis())+"] "+graph.getSpecies().length+ " species.");
-			graph= retrieveGenesAll_mart(graph);
+			for (int i = 0; i < speci.length; i++) 
+				graph= retrieveGenesAll_mart(graph, speci[i]);
+			
 			
 			System.out.println("["+new Date(System.currentTimeMillis())+"] retrieving info for "+graph.getGenes().length+" genes.");
 			graph= retrieveGeneInfo(graph);
@@ -1930,12 +2011,12 @@ public class EnsemblDBAdaptor {
 	static void filter(Graph g) {
 		System.out.println("pw as variations: "+g.countASVariations());
 		g.filterNonsense();	// first remove transcripts, --> later genes have less transcripts
-		g.filterNonASGenes();
+		g.filterSingleTranscriptGenes();
 		System.out.println("pw as variations: "+g.countASVariations());
 		GraphHandler.writeOut(g);
 	}
 	
-	public Graph getGraphAllHomologs() {
+	public Graph getGraphAllHomologs(String[] specNames) {
 		
 		if (graph == null) {
 			System.out.println(Constants.getDateString()+ " loading Graph");
@@ -1944,20 +2025,20 @@ public class EnsemblDBAdaptor {
 				return graph;
 			
 				// rebuild
-			if (SPECIES== null || SPECIES.length< 1)	// or (< 2) ?
+			if (specNames== null || specNames.length< 1)	// or (< 2) ?
 				return null;
 			
 			System.out.println("["+new Date(System.currentTimeMillis())+"] -- start building graph --");
-			Species[] spec= new Species[SPECIES.length];
+			Species[] spec= new Species[specNames.length];
 			for (int i = 0; i < spec.length; i++) 
-				spec[i]= new Species(SPECIES[i]);
+				spec[i]= new Species(specNames[i]);
 				
 			graph= new Graph(spec);
 			
 			System.out.println("["+new Date(System.currentTimeMillis())+"] "+graph.getSpecies().length+ " species.");
 			GeneHomology[] homols= retrieveHomologGenesAll_mart(graph);
 			System.out.println("["+new Date(System.currentTimeMillis())+"] retrieving info for "+homols.length+" homologies.");
-			homols= retrieveHomologyInfo_single(homols);			// cannot join two databases (mart, compara)
+			//homols= retrieveHomologyInfo_single(homols);			// cannot join two databases (mart, compara)
 			
 			System.out.println("["+new Date(System.currentTimeMillis())+"] retrieving info for "+graph.getGenes().length+" genes.");
 			graph= retrieveGeneInfo(graph);
@@ -1990,6 +2071,82 @@ public class EnsemblDBAdaptor {
 		return graph;
 	}
 
+	static void outputVariantHomologs(Graph g) {
+		
+		PrintStream p= System.out;
+		
+		Gene[] ge= g.getSpecies()[0].getGenes();	// does not matter which spec is base
+		for (int i = 0; i < ge.length; i++) {
+			int grad= 0;
+			for (int j = 0; j < g.getSpecies().length; j++) {
+				Gene ge1= null;
+				if (g.getSpecies()[j]== ge[i].getSpecies())
+					ge1= ge[i];
+				else
+					ge1= ge[i].getHomologies(g.getSpecies()[j])[0].getOtherGene(ge[i]);
+				for (int k = (j+1); k < g.getSpecies().length; k++) {
+					Gene ge2= ge[i].getHomologies(g.getSpecies()[k])[0].getOtherGene(ge[i]);
+					if (!ge1.toStringSSPattern().equals(ge2.toStringSSPattern()))
+						++grad;
+				}
+			}
+			
+			if (grad> 0&& ge[i].toStringSSPattern().length()<= 18) {
+				p.println(grad);
+				for (int j = 0; j < g.getSpecies().length; j++) {
+					if (g.getSpecies()[j]== ge[i].getSpecies()) {
+						p.print(ge[i].toStringSSPattern()+"\t"+ ge[i].getSpecies().getCommonName()
+								+"("+ ge[i].getGeneID()+ ") "
+								+ ge[i].getTranscriptCount()+ " [");
+						for (int k = 0; k < ge[i].getTranscriptCount(); k++) 
+							p.print(ge[i].getTranscripts()[k].getExons().length);
+						p.println("]");
+					} else {
+						Gene gx= ge[i].getHomologies(g.getSpecies()[j])[0].getOtherGene(ge[i]);
+						p.print(gx.toStringSSPattern()+"\t"+ gx.getSpecies().getCommonName()
+								+"("+ gx.getGeneID()+ ")"
+								+ gx.getTranscriptCount()+ " [");
+						for (int k = 0; k < gx.getTranscriptCount(); k++) 
+							p.print(gx.getTranscripts()[k].getExons().length);
+						p.println("]");
+					}
+				}
+			}
+		}
+
+	}
+	
+	static void removeNotAllHomologGenes(Graph g) {
+		Vector v= new Vector();
+		for (int x = 0; x < g.getSpecies().length; x++) {
+			Gene[] ge= g.getSpecies()[x].getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				int j;
+				for (j = 0; j < g.getSpecies().length; j++) {
+					if (j== x)
+						continue;
+					if (ge[i].getHomologies(g.getSpecies()[j])== null)
+						break;
+				}
+				if (j< g.getSpecies().length) {
+					v.add(ge[i]);
+					for (int k = 0; k < g.getSpecies().length; k++) {
+						GeneHomology[] hgg= ge[i].getHomologies(g.getSpecies()[k]);
+						for (int m = 0; hgg!= null&& m < hgg.length; m++) {
+							Gene hg= hgg[m].getOtherGene(ge[i]);
+//							if (hg.getHomologies(ge[i].getSpecies())== null||
+//									hg.getHomologies(ge[i].getSpecies()).length< 1)
+								v.add(hg);
+						}
+					}
+				}
+			}
+		}
+		for (int i = 0; i < v.size(); i++) 
+			g.removeKill((Gene) v.elementAt(i)); 
+		//GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath()); 		// writeGraph();
+	}
+	
 	public static void main(String[] args) {
 			
 			EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
@@ -1997,8 +2154,60 @@ public class EnsemblDBAdaptor {
 	//		adaptor.testStatement(con);
 			
 	//		adaptor.testGraphEncode(adaptor.getGraphEncode());
-			adaptor.getGraphAllHomologs();
-		}
-	
+			
+			
+			Graph g= adaptor.getGraphAllHomologs(SPECIES_ISMB);
+			g.filterNonCodingTranscripts();
 
+			
+			try { 
+				PrintStream p= System.out;
+				Gene tst= g.getSpecies()[0].getGenes()[0];
+				p.println(tst.getSpecies().getCommonName()+"\t"+tst.getGeneID());
+				for (int i = 0; i < tst.getExons().length; i++) {
+					p.println(">"+ tst.getExons()[i].getExonID());
+					p.println(Graph.readSequence(tst.getExons()[i]));
+				}
+				p.flush(); p.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+//			try {
+//				PrintStream p= new PrintStream("vars_out");
+//				for (int i = 0; i < g.getSpecies().length; i++) {
+//					p.println(g.getSpecies()[i].getCommonName());
+//					ASVariation[][] classes= g.getSpecies()[i].getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+//					Method m = classes[0][0].getClass().getMethod("isTrue", null);
+//					ASVariation[][] filtClasses= ASAnalyzer.filter(classes, m);
+//					gphase.tools.Arrays.sort2DFieldRev(filtClasses);
+//					ASAnalyzer.outputVariations(filtClasses, false, false, p);
+//					p.println("\n");
+//				}
+//				p.flush(); p.close();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+			
+//			if (args.length< 1) {
+//				System.err.println("at least one species needed");
+//				System.exit(-1);
+//			}
+//			
+//			Graph g= null;
+//			if (args.length== 1) {
+//				g= adaptor.getGraphAllGenes(args[0]);
+//				g.filterNonCodingTranscripts();
+//				try {
+//					PrintStream p= new PrintStream("structures");
+//					ASAnalyzer.test04_determineVariations(g, p);
+//					p.flush(); p.close();
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			} else {
+//				g= adaptor.getGraphAllHomologs(args);
+//			}
+//			
+//			g.initSpliceSiteHomology();
+	}
 }

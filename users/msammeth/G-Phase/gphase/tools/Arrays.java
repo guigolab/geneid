@@ -9,9 +9,11 @@ package gphase.tools;
 import gphase.model.ASVariation;
 import gphase.model.SuperExon;
 
+import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Vector;
@@ -24,6 +26,51 @@ import java.util.Vector;
  */
 public class Arrays {
 
+	public static String reverseComplement(String in) {
+		return reverse(complement(in));
+	}
+	public static String complement(String in){
+		String normal= "ACGTN-";
+		String reverse= "TGCAN-";
+		StringBuffer buffy= new StringBuffer(in.length());
+		for (int i = 0; i < in.length(); i++) 
+			buffy.append(reverse.charAt(normal.indexOf(in.charAt(i))));
+		return buffy.toString();
+	}
+	public static String reverse(String in) {
+		StringBuffer buffy= new StringBuffer(in.length());
+		for (int i = 0; i < in.length(); i++) 
+			buffy.append(in.charAt(in.length()- 1- i));
+		return buffy.toString();
+	}
+	
+	public static int[] reverse (int[] a) {
+		if (a== null)
+			return null;
+		int[] b= new int[a.length];
+		for (int i = 0; i < a.length; i++) {
+			b[b.length- i- 1]= a[i];
+		}
+		return b;
+	}
+	public static String toString(int[] a) {
+		String result= "";
+		if (a== null|| a.length< 1)
+			return result;
+		for (int i = 0; i < a.length; i++) 
+			result+= a[i]+",";
+		return result.substring(0, result.length()- 1);
+	}
+	
+	public static void output(double[][] a, PrintStream p) {
+		for (int i = 0; i < a.length; i++) {
+			for (int j = 0; j < a[i].length; j++) {
+				p.print(((float) a[i][j])+ "\t");
+			}
+			p.println();
+		}
+	}
+	
 	public static class FieldSizeRevComparator extends FieldSizeComparator{
 		public int compare(Object arg0, Object arg1) {
 			return -super.compare(arg0, arg1);
@@ -52,6 +99,8 @@ public class Arrays {
 			return 0;
 		}
 	}
+	
+
 	
 	public static void main(String[] args) {
 		Integer[] a= new Integer[] {new Integer(2),new Integer(3),new Integer(5)};
@@ -90,15 +139,18 @@ public class Arrays {
 	
 	
 	public static Object[] add(Object[] a, Object o) {
-		return insert(a, o, a.length);
+		if (a== null)
+			return insert(a, o, 0);
+		else 
+			return insert(a, o, a.length);
 	}
 	
 	public static Object[] extendField(Object[] a, Object o) {
-//		if (a== null) {
-//			Object[] newA= (Object[]) Array.newInstance(o.getClass(), 1);
-//			newA[0]= o;
-//			return newA;
-//		}
+		if (a== null) {
+			Object[] newA= (Object[]) Array.newInstance(o.getClass(), 1);
+			newA[0]= o;
+			return newA;
+		}
 		
 		return insert(a, o, a.length);	
 	}
@@ -116,6 +168,12 @@ public class Arrays {
 	 */
 	public static Object[] insert(Object[] a, Object o, int p) {
 		
+		if (a== null&& p== 0) {
+			Object[] newA= (Object[]) Array.newInstance(o.getClass(), 1);
+			newA[0]= o;
+			return newA;
+		}
+			
 		if (p< 0)
 			p= (p+1)* (-1);
 		
@@ -138,7 +196,7 @@ public class Arrays {
 		
 		return (Object[]) toField(v);
 	}
-
+	
 	/**
 	 * Converts an eventually highdimensional Array or Vector to an Array.
 	 * @param base
@@ -159,22 +217,68 @@ public class Arrays {
 		if (o.length< 1)	// empty array
 			return null; //cannot guess the basic class for vectors anyway
 		
-		Object r= null;
-		int x= 0;
-		while (r== null&& x< o.length) {
-			r= toField(o[x]);
+		Object r= null;	// find reference
+		//int x= 0;
+		//while (r== null&& x< o.length) {
+		for (int x = 0; x < o.length; x++) {
+			Object ro= toField(o[x]);
+			if (ro== null) 
+				continue;
+			if (r== null|| ro.getClass().isAssignableFrom(r.getClass()))
+				r= ro;
 		}
 		Object[] result= null;
 		if (r!= null) {
 			result= (Object[]) Array.newInstance(r.getClass(), o.length);
-			result[0]= r;
-			for (int i = 1; i < o.length; i++) 
+			for (int i = 0; i < o.length; i++) 
 				result[i]= toField(o[i]);
+		} 
+
+		return result;
+	}
+		
+	public static int[] toPrimitive(Integer[] a) {
+		int[] i= new int[a.length];
+		for (int j = 0; j < i.length; j++) 
+			i[j]= a[j].intValue();
+		return i;
+	}
+	
+	/**
+	 * Converts an eventually highdimensional Array or Vector to an Array.
+	 * @param base
+	 * @return
+	 */
+	public static Object toPrimitiveField(Object base, Class type) {
+
+		if (!(base instanceof Collection)&& !(base instanceof Object[])) {
+			;
+		}
+	
+		Object[] o= null;
+		if (base instanceof Collection) 
+			o= ((Collection) base).toArray();
+		else 						// (base instanceof Object[]) 
+			o= ((Object[]) base);
+
+		if (o.length< 1)	// empty array
+			return null; //cannot guess the basic class for vectors anyway
+		
+		Object r= null;	// find reference
+		int x= 0;
+		while (r== null&& x< o.length) {
+			r= toField(o[x++]);
+		}
+		Object[] result= null;
+		if (r!= null) {
+			result= (Object[]) Array.newInstance(type, );
+			for (int i = 0; i < o.length; i++) 
+			result[i]= toPrimitiveField(o.length);
 		}
 		
 		return result;
 	}
-		
+	
 	public static Collection merge(Object o1, Object o2) {
 		Object[] oa1= null;
 		if (o1 instanceof Collection)
@@ -197,5 +301,69 @@ public class Arrays {
 			resVec.add(oa2[i]);
 		
 		return resVec;
+	}
+	public static Object[] filter(Object[] hits, Method target) {
+		Vector v= new Vector(hits.length);
+		for (int j = 0; j < hits.length; j++) {
+			Object o= null;
+			try {
+				o= target.invoke(hits[j], null);
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (((Boolean) o).booleanValue())
+				v.add(hits[j]);
+		}
+		return (Object[]) Arrays.toField(v);
+	}
+	public static Object[] filter(Object[] hits, String methodName) {
+		
+		if (hits== null|| hits.length< 0)
+			return hits;
+		
+		Method m= null;
+		try {
+			m = hits[0].getClass().getMethod(methodName, null);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} 
+		return filter(hits, m);
+	}
+	public static Object[][] filter(Object[][] hits, Method target) {
+		
+		Vector result= new Vector(hits.length);
+		for (int i = 0; i < hits.length; i++) {
+			Object[] filtered= filter(hits[i], target);
+			if (filtered!= null&& filtered.length> 0)
+				result.add(filtered);
+		}
+		
+		return (Object[][]) Arrays.toField(result);
+	}
+	public static Object[][] filter(Object[][] hits, String methodName) {
+		
+		if (hits== null|| hits.length< 0|| hits[0]== null|| hits[0].length< 0)
+			return hits;
+		
+		Method m= null;
+		try {
+			m = hits[0][0].getClass().getMethod(methodName, null);
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return filter(hits, m);
 	}
 }

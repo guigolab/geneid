@@ -19,10 +19,22 @@ public class DefaultRegion extends AbstractRegion implements Region {
 	String chromosome = null;
 	Species species = null;
 	
+	public Object clone() {
+		DefaultRegion clone= new DefaultRegion(getStart(), getEnd());
+		clone.setID(getID());
+		clone.setChromosome(getChromosome());
+		clone.setSpecies(getSpecies());
+		return clone;
+	}
+	
 	public DefaultRegion(int newStart, int newEnd) {
 		setStart(newStart);
 		setEnd(newEnd);
 	}
+	
+	public DefaultRegion() {
+	}
+	
 	/**
 	 * @return Returns the chromosome.
 	 */

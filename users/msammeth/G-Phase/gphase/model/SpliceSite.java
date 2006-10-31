@@ -11,6 +11,7 @@ import gphase.tools.Arrays;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Vector;
 
 /**
  * 
@@ -22,16 +23,24 @@ public class SpliceSite extends AbstractSite {
 	public final static int NOTYPE_SS= 0;
 	public final static int CONSTITUTIVE_SS= 1;
 	public final static int ALTERNATE_SS= 2;
+	public final static int DEFAULT_DONOR_5FLANK= 2;
+	public final static int DEFAULT_DONOR_3FLANK= 6;
+	public final static int DEFAULT_ACCEPTOR_5FLANK= 15;
+	public final static int DEFAULT_ACCEPTOR_3FLANK= 2;
+	
 	static final long serialVersionUID = 422169949942461293L;
 	static final int SPLICE_SITE_FLANK_SIZE= 20; // Alternative splicing in the human, mouse and rat genomes is associated with an increased frequency of exon creation and/or loss
 												 // Barmak Modrek & Christopher J Lee
-
+	public static final int DELTA_RANGE= 20;
+	
+	
+	HashMap hitparade= null;
+	HashMap homologs= null;	// maps genes to exon homologs
 	
 	Exon[] exons= null;
 	boolean donor= false;
 	boolean constitutive= true;
 	ASVariation[] asVars= null;
-	
 	public static class PositionComparator extends AbstractSite.PositionComparator {
 		public int compare(Object arg0, Object arg1) {
 			int res= super.compare(arg0, arg1);
@@ -47,7 +56,7 @@ public class SpliceSite extends AbstractSite {
 	
 	public SpliceSite(Gene gene, int pos, boolean donor) {
 
-		this.pos= pos;
+		super(pos);
 		this.donor= donor;
 		this.gene= gene;
 	}
@@ -70,6 +79,7 @@ public class SpliceSite extends AbstractSite {
 	}
 	
 	public boolean addExon(Exon newExon) {
+		addTranscripts(newExon.getTranscripts());
 		if (exons== null) {
 			exons= new Exon[] {newExon};
 			return true;
@@ -92,7 +102,7 @@ public class SpliceSite extends AbstractSite {
 		if (asVars== null) 
 			asVars= new ASVariation[] {newASVar};
 		
-		Arrays.add(asVars, newASVar);
+		asVars= (ASVariation[]) Arrays.add(asVars, newASVar);
 	}
 	
 	/**
@@ -100,13 +110,54 @@ public class SpliceSite extends AbstractSite {
 	 */
 	public boolean equals(Object anotherSS) {
 		
+		if (!super.equals(anotherSS))
+			return false;
+		
 		if (!(anotherSS instanceof SpliceSite))
 			return false;
 		
-		SpliceSite aSS= (SpliceSite) anotherSS;
-		if (gene!= aSS.getGene()|| pos!= aSS.getPos())
+		SpliceSite s2= (SpliceSite) anotherSS;
+		if (s2.isDonor()!= isDonor())
 			return false;
+//		SpliceSite aSS= (SpliceSite) anotherSS;
+//		if (gene!= aSS.getGene()|| pos!= aSS.getPos())
+//			return false;
 		return true;
+	}
+	
+//	---------------------------------------------- 
+//	hashCode 
+//	public int hashCode() 
+//	Returns a hash code value for the object. This method is supported for the 
+//	benefit of hashtables such as those provided by java.util.Hashtable. 
+//	The general contract of hashCode is: 
+//	* Whenever it is invoked on the same object more than once during an 
+//	execution of a Java application, the hashCode method must consistently 
+//	return the same integer, provided no information used in equals comparisons 
+//	on the object is modified. This integer need not remain consistent from one 
+//	execution of an application to another execution of the same application. 
+//	* If two objects are equal according to the equals(Object) method, then 
+//	calling the hashCode method on each of the two objects must produce the same 
+//	integer result. 
+//	* It is not required that if two objects are unequal according to the 
+//	equals(java.lang.Object) method, then calling the hashCode method on each of 
+//	the two objects must produce distinct integer results. However, the 
+//	programmer should be aware that producing distinct integer results for 
+//	unequal objects may improve the performance of hashtables. 
+//
+//
+//	As much as is reasonably practical, the hashCode method defined by class 
+//	Object does return distinct integers for distinct objects. (This is 
+//	typically implemented by converting the internal address of the object into 
+//	an integer, but this implementation technique is not required by the JavaTM 
+//	programming language.) 
+//	----------------------------------------------
+	public int hashCode() {
+		// not required, read text
+		// bullshit, gotta change otherwise ss overwrite as in hash
+		// and the other way
+		return super.hashCode();
+		
 	}
 	
 	public boolean isDonor() {
@@ -149,5 +200,85 @@ public class SpliceSite extends AbstractSite {
 
 	public ASVariation[] getAsVars() {
 		return asVars;
+	}
+
+	public boolean addHit(Gene g, PWHit h) {
+			
+			Vector v= null;
+			if (hitparade== null)	// create new
+				hitparade= new HashMap();
+			else 
+				v= (Vector) hitparade.get(g);	// lookup existing
+			
+			if (v== null)
+				v= new Vector();
+			else 
+				for (int i = 0; i < v.size(); i++) {	// check for already added hit
+					PWHit hit= (PWHit) v.elementAt(i);
+					if (hit.getOtherObject(this)== h.getOtherObject(this))
+						return false;
+				}
+			
+				// keep sorted with ascending costs
+	//		int i= 0;
+	//		for (i = 0; i < v.size(); i++) 
+	//			if (((PWHit) v.elementAt(i)).getCost()> h.getCost())
+	//				break;
+	//		v.insertElementAt(h, i);	// add
+			v.add(h);
+			hitparade.put(g, v);
+			return true;
+		}
+
+	/**
+	 * returns hits to exons of all homolog genes
+	 * @return
+	 */
+	public PWHit[] getHits() {
+		
+			// count values
+		Object[] oa= hitparade.values().toArray();
+		int size= 0;
+		for (int i = 0; i < oa.length; i++) 
+			size+= ((Vector) oa[i]).size();
+		
+		PWHit[] result= new PWHit[size];
+		int x= 0;
+		for (int i = 0; i < oa.length; i++) {
+			Vector v= (Vector) oa[i];
+			for (int j = 0; j < v.size(); j++) 
+				result[x++]= (PWHit) v.elementAt(j);
+		}
+		
+		return result;
+	}
+
+	public PWHit[] getHits(Gene g) {
+		
+		if (hitparade== null|| hitparade.get(g)== null)
+			return null;
+		
+		Vector v= (Vector) hitparade.get(g);
+		PWHit[] result= new PWHit[v.size()];
+		for (int i = 0; i < result.length; i++) 
+			result[i]= (PWHit) v.elementAt(i);
+		
+		return result;
+	}
+
+	// assuming just one homolog
+	public boolean addHomolog(Gene g, SpliceSite e) {
+	
+		if (homologs== null)	// create new
+			homologs= new HashMap();
+	
+		if (homologs.get(g)!= null) {
+			if (homologs.get(g)!= e)
+				System.err.println("Multiple exon homology: "+ e+ ", "+homologs.get(g));	
+			return false;
+		}
+	
+		homologs.put(g, e);
+		return true;
 	}
 }

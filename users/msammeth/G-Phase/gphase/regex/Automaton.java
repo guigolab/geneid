@@ -89,10 +89,11 @@ public class Automaton {
 		return (Transition[]) Arrays.toField(result);
 	}
 	
-	public void createTransition(int label, boolean donor) {
+	public Transition createTransition(int label, boolean donor) {
 		State newState= new State();
-		endState.addTransition(label, donor, newState);
+		Transition t= endState.addTransition(label, donor, newState);
 		endState= newState;
+		return t;
 	}
 	public State getInitialState() {
 		return initialState;

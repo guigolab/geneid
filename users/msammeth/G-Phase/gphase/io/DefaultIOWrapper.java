@@ -40,6 +40,10 @@ public abstract class DefaultIOWrapper implements IOWrapper {
 		this.fName= absFilePath.substring((p+1), absFilePath.length());		
 	}
 	
+	public DefaultIOWrapper() {
+		
+	}
+	
 	
 	/**
 	 * @see qalign.tools.IOWrapper#getFileName()

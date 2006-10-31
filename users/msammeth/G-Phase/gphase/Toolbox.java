@@ -10,6 +10,10 @@ import gphase.model.Exon;
 import gphase.model.Gene;
 
 import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * 
@@ -18,6 +22,44 @@ import java.awt.Point;
  */
 public class Toolbox {
 
+	public static String getAbsFileName(String fName) {
+		return new File(fName).getAbsolutePath();
+	}
+	
+	/**
+	 * 
+	 * @param fName
+	 * @return absolute file name
+	 */
+	public static String checkFileExists(String fName) {
+		File f= new File(fName);
+		if (f.exists()) {
+			System.out.println("File "+fName+" exists. Specify new name or press <CR> to overwrite.");
+			BufferedReader r= new BufferedReader(new InputStreamReader(System.in));
+			String s= "";
+			try {
+				s= r.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			s= s.trim();
+			if (s.length()< 1) {
+				System.out.println("Overwritten.");
+				return getAbsFileName(fName);
+			}
+			String p= "";
+			int pos= fName.lastIndexOf(File.separator);
+			if (pos>= 0)
+				p= fName.substring(0, pos);
+			if (p.length()> 0)
+				s= p+ File.separator+ s;
+			System.out.println("Redirected to file "+ s);
+			return getAbsFileName(s);
+		}
+		System.out.println("Output in file "+ fName);
+		return getAbsFileName(fName);
+	}
+	
 	static public String[] constraintFormater(String[] sequences, Point[][] constraints) {
 		
 			// clone (not loosing original)

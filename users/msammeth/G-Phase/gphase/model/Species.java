@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -257,8 +258,16 @@ public class Species implements Serializable {
 		
 		if (!silent)
 			System.out.print("Removing gene "+ g.getStableID()+":");
-		Object o= geneHash.remove(g.getStableID());
+		Object o= geneHash.remove(g.getStableID());		
 		if (o!= null) {
+			
+			g= (Gene) o;
+			GeneHomology[]  hgies= g.getHomologies();
+			for (int i = 0; hgies!= null&& i < hgies.length; i++) {
+				Gene gg= hgies[i].getOtherGene(g);
+				gg.removeHomology(g);
+			}
+			
 			if (!silent)
 				System.out.println(" ok.");
 			return true;
@@ -581,6 +590,13 @@ public class Species implements Serializable {
 		return cnt;
 	}
 	
+	public void initTU() {
+		Gene[] ge= getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			ge[i].initTU();
+		}
+	}
+	
 	public void recluster() {
 		Gene[] ge= getGenes();
 		for (int i = 0; i < ge.length; i++) {
@@ -590,7 +606,8 @@ public class Species implements Serializable {
 				remove(ge[i], true);
 				continue;
 			}
-			if (newTranscripts.length< 2)	// nothing happened
+			
+			if (newTranscripts.length< 2)	// nothing happened, still 1 cluster
 				continue;
 			
 				// create new clusters
@@ -607,8 +624,10 @@ public class Species implements Serializable {
 						t.addExon(e);
 					}
 					Translation[] trans= newTranscripts[j][k].getTranslations();
-					for (int n = 0; n < trans.length; n++) {
+					for (int n = 0; trans!= null&& n < trans.length; n++) {
 						Translation tra= new Translation(t);
+						tra.setStart(newTranscripts[j][k].getTranslations()[n].getStart());	// bugfix 21.6.
+						tra.setEnd(newTranscripts[j][k].getTranslations()[n].getEnd());
 						t.addTranslation(tra);
 					}
 				}
@@ -616,5 +635,53 @@ public class Species implements Serializable {
 			}			
 			remove(ge[i], true);
 		}
+	}
+
+	public ASVariation[][] getASVariations(int filter) {
+		
+		ASVariation[][] asClasses= null;
+		if (asClasses == null) {
+			Gene[] ge= getGenes();
+			int asVariations= 0;
+			Comparator compi= new ASVariation.SpliceStringComparator();
+			Vector asClassesV= new Vector();
+			for (int i = 0; i < ge.length; i++) {	// all genes
+				ASMultiVariation[] as= ge[i].getASMultiVariations();
+				for (int j = 0; as!= null&& j < as.length; j++) {	// get complexes of variations 
+					ASVariation[] asvars= null;
+					if (filter== ASMultiVariation.FILTER_NONE)	// all
+						asvars= as[j].getASVariationsAll();
+					else if (filter== ASMultiVariation.FILTER_HIERARCHICALLY) 	// hierarchical
+						asvars= as[j].getASVariationsHierarchicallyFiltered();
+					else if (filter== ASMultiVariation.FILTER_CODING_REDUNDANT)
+						asvars= as[j].getASVariationsClusteredCoding();
+					else if (filter== ASMultiVariation.FILTER_STRUCTURALLY)
+						asvars= as[j].getASVariationsStructurallyFiltered();
+					asVariations+= asvars.length;
+					for (int k = 0; k < asvars.length; k++) {	// get pw variations
+						int m;
+						for (m = 0; m < asClassesV.size(); m++)	// compare against already existing classes 
+							if (compi.compare(asvars[k],
+									((Vector) asClassesV.elementAt(m)).elementAt(0))== 0) {
+								((Vector) asClassesV.elementAt(m)).add(asvars[k]);
+								break;
+							}
+						if (m>= asClassesV.size()) {
+							Vector newClass= new Vector();
+							newClass.add(asvars[k]);
+							asClassesV.add(newClass);
+						}
+					}
+				}
+			}
+			
+			try {
+				asClasses= (ASVariation[][]) gphase.tools.Arrays.toField(asClassesV);
+			} catch (ClassCastException e) {
+				System.err.println("No AS Classes!");
+			}
+		}
+	
+		return asClasses;
 	}
 }

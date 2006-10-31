@@ -30,10 +30,10 @@ public class Constants {
 		if (OSChecker.isSunOS())
 			DATA_DIR= "/vol/cluster-data/micha/gphase";
 		else if (OSChecker.isLinux())
-			DATA_DIR= "/home/micha";
+			DATA_DIR= "/home/msammeth";
 	}
 	public final static String SEQUENCES_SUBDIR= "genomes";	// genomes 
-	public final static boolean CHROMOSOME_USE_MASKED= false;
+	public final static boolean CHROMOSOME_USE_MASKED= true;
 	public final static String CHROMOSOME_DIR= (CHROMOSOME_USE_MASKED?"chromFa_msk":"chromFa");	// masked or non-masked
 	public final static String CHROMOSOME_EXT= (CHROMOSOME_USE_MASKED?".fa.msk":".fa");	// masked or non-masked
 	public final static String ALIGNMENT_SUBDIR= "ali";

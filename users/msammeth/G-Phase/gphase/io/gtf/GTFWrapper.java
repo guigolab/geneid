@@ -10,8 +10,12 @@ import gphase.io.DefaultIOWrapper;
 import gphase.tools.Arrays;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -25,6 +29,8 @@ import java.util.Vector;
 public class GTFWrapper extends DefaultIOWrapper {
 	
 	GTFObject[] gtfObj= null;
+	String[] sortAttributes= null;
+	
 	
 	public static void main(String[] args) {
 		GTFWrapper myWrapper= new GTFWrapper(new File("encode/44regions_genes_CHR_coord.gtf").getAbsolutePath()); // testGTF.gtf
@@ -42,6 +48,9 @@ public class GTFWrapper extends DefaultIOWrapper {
 		super(absFName);
 	}
 	
+	public GTFWrapper() {
+	}
+	
 	/* (non-Javadoc)
 	 * @see gphase.io.IOWrapper#isApplicable()
 	 */
@@ -50,12 +59,54 @@ public class GTFWrapper extends DefaultIOWrapper {
 		return false;
 	}
 	
+	public void addFileSuffix(String newSfx) {
+		if (fName== null)
+			return;
+		this.fName+= newSfx;
+	}
+	
 	/**
-	 * @deprecated
 	 */
 	public void write() throws Exception {
-		// TODO Auto-generated method stub
-
+		String outName= getAbsFileName();
+//		if (new File(outName).exists())
+//			outName+= "_out";
+		BufferedWriter buffy= new BufferedWriter(new FileWriter(outName));
+		for (int i = 0; i < gtfObj.length; i++) {
+			// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+			buffy.write(
+					gtfObj[i].getSeqname()+ "\t"+
+					gtfObj[i].getSource()+ "\t"+
+					gtfObj[i].getFeature()+ "\t"+
+					gtfObj[i].getStart()+ "\t"+
+					gtfObj[i].getEnd()+ "\t"+
+					gtfObj[i].getScore()+ "\t"+
+					gtfObj[i].getStrand()+ "\t"+
+					gtfObj[i].getFrame()+ "\t"
+			);
+			Collection c= gtfObj[i].getAttributes().keySet();
+			Iterator iter= c.iterator();
+			String[] keys= new String[c.size()];
+			int cc= 0;
+			while (iter.hasNext())
+				keys[cc++]= (String) iter.next();
+			
+			if (sortAttributes!= null) 
+				for (int j = 0; j < sortAttributes.length; j++) 
+					for (int k = (j+1); k < keys.length; k++) 
+						if (sortAttributes[j].equals(keys[k])) {
+							String h= keys[k];
+							keys[k]= keys[j];
+							keys[j]= h;
+							break;
+						}
+			
+			for (int j = 0; j < keys.length; j++) {
+				buffy.write(keys[j]+ " \""+ gtfObj[i].getAttribute(keys[j])+ "\"; ");
+			}
+			buffy.write("\n");
+		}
+		buffy.flush(); buffy.close();
 	}
 	
 
@@ -88,7 +139,7 @@ public class GTFWrapper extends DefaultIOWrapper {
 				newObj.start= Integer.parseInt(toki.nextToken());
 				newObj.end= Integer.parseInt(toki.nextToken());
 				newObj.setScore(toki.nextToken());
-				newObj.setLeadingStrand(toki.nextToken());
+				newObj.setStrand(toki.nextToken());
 				newObj.setFrame(toki.nextToken());
 			} catch (Exception e) {
 				System.err.println("*line "+ lineCtr+": "+ e);
@@ -99,14 +150,14 @@ public class GTFWrapper extends DefaultIOWrapper {
 				// optional attributes
 			int smc= line.indexOf(';');		// GTF2
 			if (smc>= 0) {
-				int x= 0;
-				toki= new StringTokenizer(line, " \t");	// must be tab, see specification
-				for (int i = 0; i < 8; i++) 
-					x+= toki.nextToken().length()+ 1;
+				String ss= toki.nextToken();
+//				toki= new StringTokenizer(line, " \t");	// must be tab, see specification
+//				for (int i = 0; i < 8; i++) 
+//					ss= toki.nextToken();
 //				String h= line.substring(0, smc);			// last ';'
 //				h= line.substring(0, h.lastIndexOf(' '));	// two ' ' tokens before
 //				h= line.substring(0, h.lastIndexOf(' '));
-				String h= line.substring(x, line.length()).trim();	// skip that part
+				String h= line.substring(line.indexOf(ss), line.length()).trim();	// skip that part
 				
 				toki= new StringTokenizer(h, ";");		// attributes
 				while (toki.hasMoreTokens()) {
@@ -134,5 +185,11 @@ public class GTFWrapper extends DefaultIOWrapper {
 	 */
 	public GTFObject[] getGtfObj() {
 		return gtfObj;
+	}
+	public void setGtfObj(GTFObject[] gtfObj) {
+		this.gtfObj = gtfObj;
+	}
+	public void setSortAttributes(String[] sortAttributes) {
+		this.sortAttributes = sortAttributes;
 	}
 }
