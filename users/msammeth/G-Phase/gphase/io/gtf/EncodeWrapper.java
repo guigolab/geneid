@@ -85,6 +85,9 @@ public class EncodeWrapper extends GTFWrapper {
 //			e1.printStackTrace();
 //		}
 //		ASAnalyzer.test04_determineVariations(g, pr);
+		//ASAnalyzer.test01_clusters_coverage_as(g, System.out);
+		//ASAnalyzer.test02_ss_statistics(g, System.out);
+		ASAnalyzer.test04_determineVariations_rev(g, System.out);
 		
 		
 //		ASVariation[][] classes= g.getASVariations(1);
@@ -116,7 +119,7 @@ public class EncodeWrapper extends GTFWrapper {
 //		ASAnalyzer.check_AA_AD(g, false, false, false);
 //		ASAnalyzer.check_AA_AD(g, false, true, false);
 		
-		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
+//		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
 //		if (1== 1)
 //			System.exit(0);
 		
@@ -154,16 +157,16 @@ public class EncodeWrapper extends GTFWrapper {
 
 //		ASAnalyzer.outputVariations(new ASVariation[][] {ASAnalyzer.getVariation("( 1^3=// 2^4=)", g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY))}, false, false, System.out);
 		// "output5UTR_REFSEQ"
-		try {
-			PrintStream p= new PrintStream("SSout_encode");
-//			//ASAnalyzer.output5UTRLengthAnalysis(g, p);
-//			//ASAnalyzer.outputInternalIntrons(g, p);
-			ASAnalyzer.outputSSOutCdsUtr(g, p);
-			p.flush();
-			p.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			PrintStream p= new PrintStream("SSout_encode");
+////			//ASAnalyzer.output5UTRLengthAnalysis(g, p);
+////			//ASAnalyzer.outputInternalIntrons(g, p);
+//			ASAnalyzer.outputSSOutCdsUtr(g, p);
+//			p.flush();
+//			p.close();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		
 		
 //		ASAnalyzer.getSylvainsSize(g, System.out);
@@ -373,9 +376,11 @@ public class EncodeWrapper extends GTFWrapper {
 	}
 	
 	private void checkMegaClusters(Transcript[] trans) {
-		java.util.Arrays.sort(trans, new DirectedRegion.PositionComparator());	// sort ascending
-		for (int i = trans.length- 1; i >= 0; --i) {
-			System.out.println(trans[i].getTranscriptID()+ "\t"+ trans[i].getLength()+"\t"+trans[i].getExons().length);
+		java.util.Arrays.sort(trans, new DirectedRegion.LengthComparator());	// sort ascending
+		for (int i = trans.length- 1; i >= trans.length- 100; --i) {
+			System.out.println(trans[i].getTranscriptID()+ "\t"+ trans[i].getLength()+"\t"
+					+trans[i].getStart()+ "\t"+ trans[i].getEnd()
+					/*+trans[i].getExons().length*/);
 		}
 	}
 	
@@ -427,10 +432,12 @@ public class EncodeWrapper extends GTFWrapper {
 		
 			// check mega clusters
 //		HashMap[] maps= (HashMap[]) Arrays.toField(chr2Hash.values());
-//		Vector v= new Vector(maps.length* 100);
+//		Vector vv= new Vector(maps.length* 100);
 //		for (int i = 0; i < maps.length; i++) 
-//			v.addAll(maps[i].values());
-//		checkMegaClusters(((Transcript[]) Arrays.toField(v)));
+//			vv.addAll(maps[i].values());
+//		checkMegaClusters(((Transcript[]) Arrays.toField(vv)));
+//		if (1== 1)
+//			System.exit(0);
 		
 			// cluster
 		HashMap gHash= new HashMap();
