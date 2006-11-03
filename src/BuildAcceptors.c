@@ -52,8 +52,8 @@ float ComputeExtraProfile(char* s,
     
   maxScore = -INF;
 
-  i = MAX(p->order,positionAcc - PPT_ACC_MAXDIST - p->dimension);
-  end = MIN(positionAcc,limitRight);
+  i = MAX(p->order,positionAcc - ACCEPTOR_CONTEXT);
+  end = MIN(positionAcc - MIN_BPACC_DIST,limitRight);
   for (;
 	   i + p->dimension <= end;
 	   i++)
