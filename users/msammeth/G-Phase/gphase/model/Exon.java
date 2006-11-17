@@ -6,6 +6,8 @@
  */
 package gphase.model;
 
+import gphase.io.gtf.GTFObject;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
@@ -41,17 +43,62 @@ public class Exon extends DirectedRegion {
 	SuperExon superExon= null;
 	SpliceSite donor= null;
 	SpliceSite acceptor= null;
-	HashMap phases= new HashMap();
+	int frame= -1;
+	int startCDS= 0;
+	int endCDS= 0;
 	
+	public boolean isCoding() {
+		if (startCDS!= 0&& endCDS!= 0)
+			return true;
+		return false;
+	}
+	
+	public boolean setPhase(int phase) {
 		
-	public boolean setPhase(Translation trans, Phase phas) {
-		
-		if (phases.get(trans)!= null) {
-			System.out.println("Exon "+this+" already used in another phase by translation "+trans+"!");
+		int f= 3- phase;
+		if (frame>= 0&& frame!= f) {
+			System.out.println("Exon "+this+" already used in another frame "+frame+"!");
 			return false;
 		}
 		
-		phases.put(trans, phas);
+		frame= f;
+		return true;
+	}
+	
+	public int get5PrimeCDS() {
+		if (getGene().getStrand()< 0)
+			return endCDS;
+		return startCDS;
+	}
+	
+	public int get3PrimeCDS() {
+		if (getGene().getStrand()< 0)
+			return startCDS;
+		return endCDS;
+	}
+	
+	public boolean isCoding5Prime() {
+		int x= get5PrimeCDS();
+		if (x!= 0&& get5PrimeCDS()== get5PrimeEdge())
+			return true;
+		return false;
+	}
+	
+	public boolean isCoding3Prime() {
+		int x= get3PrimeCDS();
+		if (x!= 0&& get3PrimeCDS()== get3PrimeEdge())
+			return true;
+		return false;
+	}
+	
+	public boolean setFrame(int newFrame) {
+		
+		if (frame>= 0&& frame!= newFrame) {
+			System.out.println("Exon "+this+" already used in another frame "+frame+"!");
+			return false;
+		}
+				
+		frame= newFrame;
 		return true;
 	}
 	
@@ -253,6 +300,7 @@ public class Exon extends DirectedRegion {
 		
 			// decompose ID
 		this.exonID= stableExonID;
+		setID("exon");
 	}	
 	/**
 	 * @return
@@ -328,4 +376,39 @@ public class Exon extends DirectedRegion {
 	public AbstractSite getEndSite() {
 		return getGene().getSite(getEnd());
 	}
+
+	public int getFrame() {
+		return frame;
+	}
+
+	public int getEndCDS() {
+		return endCDS;
+	}
+
+	public void setEndCDS(int endCDS) {
+		if (getGene().getStrand()< 0)
+			endCDS= -endCDS;
+		this.endCDS = endCDS;
+	}
+
+	public int getStartCDS() {
+		return startCDS;
+	}
+
+	public void setStartCDS(int startCDS) {
+		if (getGene().getStrand()< 0)
+			startCDS= -startCDS;
+		this.startCDS = startCDS;
+	}
+	
+	public void extendStartCDS(int nuStartCDS) {
+		if ((this.startCDS== 0)|| (Math.abs(nuStartCDS)< Math.abs(this.startCDS)))
+			setStartCDS(nuStartCDS);
+	}
+
+	public void extendEndCDS(int nuEndCDS) {
+		if ((this.endCDS== 0)|| (Math.abs(nuEndCDS)> Math.abs(this.endCDS))) 
+			setEndCDS(nuEndCDS);
+	}
+
 }

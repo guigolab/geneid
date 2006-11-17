@@ -20,6 +20,39 @@ import java.util.Vector;
  */
 public class ASMultiVariation implements Serializable {
 
+	public static class PositionComparator implements Comparator {
+		public int compare(Object arg0, Object arg1) {
+			ASMultiVariation var0= (ASMultiVariation) arg0;
+			ASMultiVariation var1= (ASMultiVariation) arg1;
+			
+			SpliceSite[][] sc0= var0.getSpliceChains();	// are sorted! optimize			
+			SpliceSite[][] sc1= var1.getSpliceChains();
+			
+			if (sc0.length!= sc1.length)
+				return -1;
+			
+			int i;
+			for (i = 0; i < sc0.length; i++) {
+				int j;
+				for (j = 0; j < sc1.length; j++) {
+					if (sc0[i].length!= sc1[j].length)
+						continue;
+					int k;
+					for (k = 0; k < sc0[i].length; k++) {
+						if (sc0[i][k]!= sc1[j][k])
+							break;
+					}
+					if (k== sc0[i].length)
+						break;
+				}
+				if (j== sc1.length)
+					break;
+			}
+			if (i< sc0.length)
+				return -1;
+			return 0;	// cross-check not necessary if both equally large
+		}
+	}
 	public static class SpliceChainComparator implements Comparator {
 		public int compare(Object arg0, Object arg1) {
 			SpliceSite[] s0= (SpliceSite[]) arg0;
@@ -59,6 +92,20 @@ public class ASMultiVariation implements Serializable {
 	SpliceSite[][] spliceChains= null;
 	String relPosStr= null;
 	HashMap transHash= null;	// maps schains (ss[]) to transcripts
+	
+	public SpliceSite[] getSpliceUniverse() {
+		if (spliceChains== null|| spliceChains.length< 1)
+			return null;
+		
+		Vector ssV= new Vector();
+		for (int i = 0; i < spliceChains.length; i++) 
+			for (int j = 0; j < spliceChains[i].length; j++) 
+				ssV.add(spliceChains[i][j]);
+
+		SpliceSite[] ss= (SpliceSite[]) Arrays.toField(ssV);
+		java.util.Arrays.sort(ss, new SpliceSite.PositionComparator());
+		return ss;
+	}
 	
 	public ASMultiVariation(ASVariation[] newASVariations) {
 		this.asVariations= newASVariations;
@@ -232,6 +279,12 @@ public class ASMultiVariation implements Serializable {
 			deg+= asVariations[i].getDegree();
 		
 		return deg;
+	}
+	
+	public Gene getGene() {
+		if (transHash== null)
+			return null;
+		return ((Transcript[]) transHash.values().toArray()[0])[0].getGene();
 	}
 
 	public SpliceSite[][] getSpliceChains() {

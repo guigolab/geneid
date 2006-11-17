@@ -37,8 +37,30 @@ public class DirectedRegion extends DefaultRegion {
 		return (DirectedRegion[]) Arrays.toField(interV);
 	}
 	
+	
+	/**
+	 * returns sites contained in ANY of the regions. inefficient
+	 * 
+	 * @param regs
+	 * @param s
+	 * @return
+	 */
+	public static AbstractSite[] contained(DirectedRegion[] regs, AbstractSite[] s) {
+		if (regs== null|| s== null)
+			return null;
+		
+		Vector v= new Vector(s.length);
+		Comparator compi= new AbstractSite.PositionComparator();
+		for (int i = 0; regs!= null&& i < regs.length; i++) {
+			AbstractSite[] as= contained(regs[i], s);
+			v= Arrays.addUnique(v, as, compi);
+		}
+		
+		return (AbstractSite[]) Arrays.toField(v);
+	}
+	
 	public static AbstractSite[] contained(DirectedRegion dir, AbstractSite[] s) {
-		if (s== null)
+		if (dir== null|| s== null)
 			return null;
 		Vector v= new Vector();
 		for (int i = 0; i < s.length; i++) 
@@ -105,6 +127,31 @@ public class DirectedRegion extends DefaultRegion {
 		return reg;
 	}
 	
+	public static class OrderComparator implements Comparator {
+		/**
+		 * sorts regions according to their order on pos/neg strand 
+		 */
+		public int compare(Object o1, Object o2) {
+			DirectedRegion r1, r2;
+			try {
+				r1= (DirectedRegion) o1;
+				r2= (DirectedRegion) o2;
+			} catch (ClassCastException e) {
+				return -1;
+			}
+			if (r1.get5PrimeEdge()< r2.get5PrimeEdge())
+				return -1;
+			if (r1.get5PrimeEdge()> r2.get5PrimeEdge())
+				return 1;
+			if (r1.get3PrimeEdge()< r2.get3PrimeEdge())
+				return -1;
+			if (r1.get3PrimeEdge()> r2.get3PrimeEdge())
+				return 1;
+			return 0;
+		}
+		
+		
+	}
 	/**
 	 * 
 	 * @author micha (written in the "Caf? de Indias" coffee shop 
@@ -139,8 +186,47 @@ public class DirectedRegion extends DefaultRegion {
 			return 0;
 		}
 	}
+	/**
+	 * for ordering regions ascending according to their order in -1/+1
+	 * genes
+	 * @author micha 
+	 *
+	 */
+	public static class DirectedPositionComparator extends AbstractRegion.PositionComparator {
+		// allows exons on different strands
+		public int compare(Object o1, Object o2) {
+			
+			DirectedRegion r1, r2;
+			try {
+				r1= (DirectedRegion) o1;
+				r2= (DirectedRegion) o2;
+			} catch (ClassCastException e) {
+				return super.compare(o1, o2);
+			}
+			
+			int start1= r1.getStart();	
+			int end1= r1.getEnd();			// (start is the 5'position= end of rev exons)
+			int start2= r2.getStart();
+			int end2= r2.getEnd();
+			
+			if (start1> start2)
+				return 1;
+			if (start1< start2)
+				return -1;
+			if (end1> end2)
+				return 1;
+			if (end1< end2)
+				return -1;
+			return 0;
+		}
+	}
 	public DirectedRegion(int newStart, int newEnd, int strand) {
 		setStrand(strand);
+		if(Math.abs(newStart)> Math.abs(newEnd)) {
+			int h= newStart;
+			newStart= newEnd;
+			newEnd= h;
+		}
 		setStart(newStart);
 		setEnd(newEnd);
 	}

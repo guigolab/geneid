@@ -16,18 +16,23 @@ public class SplicePath {
 	private SplicePath() {
 	}
 	
+	public String toString() {
+		String res= "[";
+		for (int i = 0; i < minFlowTrans.length; i++) 
+			res+= minFlowTrans[i].toString()+ ", ";
+		return res.substring(0, res.length()- 2);
+	}
+	
 	public SplicePath(SpliceEdge newEdge) {
 		nodeV= new Vector();
 		nodeV.add(newEdge.getTail());	// root
 		nodeV.add(newEdge.getHead());	
 		minFlowTrans= newEdge.getTranscripts();
 	}
-	
 	public Vector getNodeV() {
 		return nodeV;
 	}
-	
-	public SplicePath createPath(SpliceEdge newEdge) {
+	public SplicePath exendPath(SpliceEdge newEdge) {
 		
 			// TODO: ??? chk
 		if (!(newEdge.getTail().getSite() instanceof SpliceSite))	// forbid ...->AS->... transitions
@@ -50,6 +55,8 @@ public class SplicePath {
 		} catch (CloneNotSupportedException e) {
 			System.err.println(e);
 		}
+		
+			//extend
 		path.nodeV.add(newEdge.getHead());	// add node
 		path.minFlowTrans= (Transcript[]) Arrays.toField(intersection);
 		return path;
@@ -64,5 +71,9 @@ protected Object clone() throws CloneNotSupportedException {
 
 public Transcript[] getTranscripts() {
 	return minFlowTrans;
+}
+
+public void setTranscripts(Transcript[] nuTrans) {
+	minFlowTrans= nuTrans;
 }
 }

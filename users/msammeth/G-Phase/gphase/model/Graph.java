@@ -284,8 +284,15 @@ public class Graph implements Serializable {
 		
 		return result;	
 	}
-
 	
+	public Exon[] getExons(int region) {
+		Vector v= new Vector();
+		Gene[] ge= getGenes();
+		for (int i = 0; i < ge.length; i++) 
+			v= (Vector) gphase.tools.Arrays.addAll(v, ge[i].getExons(region));
+		return (Exon[]) gphase.tools.Arrays.toField(v);
+	}
+
 	public Species getSpeciesByEnsemblPrefix(String speciesPfx) {
 		
 		if (Species.isValidEnsemblPrefix(speciesPfx))
@@ -457,6 +464,17 @@ public class Graph implements Serializable {
 		result[1]= (SpliceSite[]) gphase.tools.Arrays.toField(v2);
 		return result;
 	}
+	
+	public SpliceSite[] getSpliceSites(int spliceType, int regionType) {
+		Vector v= new Vector();
+		Gene[] ge= getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			SpliceSite[] ss= ge[i].getSpliceSites(spliceType, regionType);
+			v= (Vector) gphase.tools.Arrays.addAll(v, ss);
+		}
+		
+		return (SpliceSite[]) gphase.tools.Arrays.toField(v);
+	}
 
 	public static String readSequence(Gene g) {
 		
@@ -516,6 +534,20 @@ public class Graph implements Serializable {
 			seq= invertSequence(seq);
 		return seq;
 	}
+	
+	public static String readSequence(DirectedRegion reg) {
+		
+		String seq= readSequence(
+				reg.getSpecies(),
+				reg.getChromosome(),
+				reg.isForward(),
+				reg.getStart(),
+				reg.getEnd()
+		);
+		
+			// neg strand already reversed in subroutine
+		return seq;
+	}
 
 	public static String invertSequence(String seq) {
 		
@@ -562,6 +594,12 @@ public class Graph implements Serializable {
 				start= -start;
 				end= -end;
 			}
+			if (start> end) {
+				int h= start;
+				start= end;
+				end= h;
+			}
+				
 		
 			start--;
 			if (chromosome.equals("MT"))	// correct Ensembl to GRIB jargon
@@ -1403,14 +1441,14 @@ public class Graph implements Serializable {
 		return result;
 	}
 
-	public ASMultiVariation[][] getASMultiVariations() {
+	public ASMultiVariation[][] getASMultiVariations(int k) {
 		Gene[] ge= getGenes();
 		int x= 0; 
 		Vector varsV= new Vector();
 		for (x = 0; x < ge.length; x++)  {
 			SpliceGraph gr= new SpliceGraph(ge[x].getTranscripts());
 			gr.init();
-			ASMultiVariation[] vars= gr.getMultiVariations(-1);
+			ASMultiVariation[] vars= gr.getMultiVariations(k);
 			
 			for (int i = 0; vars!= null&& i < vars.length; i++) {
 				int j;
