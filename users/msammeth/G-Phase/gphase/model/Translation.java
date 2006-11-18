@@ -6,12 +6,8 @@
  */
 package gphase.model;
 
-import gphase.NMDSimulator;
-import gphase.tools.Arrays;
-
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Vector;
 
 /**
  * 
@@ -21,36 +17,13 @@ import java.util.Vector;
 public class Translation extends DirectedRegion {
 
 	static final long serialVersionUID= 8996021902187779155L;
-	
-	public static final String START_CODON= "ATG";
-	public static final String[] STOP_CODONS= new String[] {"TAA", "TGA", "TAG"};
-	
 	String translationID= null;
 	Transcript transcript= null;
-	int splicedLength= -1;
-	
-	public Translation(Transcript newTranscript, int newStart, int newEnd, int newStrand) {
-		super(newStart, newEnd, newStrand);
-		this.transcript= newTranscript;
-	}
-	
 	public Translation(Transcript newTranscript) {
 		this.transcript= newTranscript;
 		this.strand= getTranscript().getStrand();
-		setID("translation");
-		setStrand(getTranscript().getGene().getStrand());
 	}
-	
-	public int getSplicedLength() {
-		if (splicedLength< 0) {
-			DirectedRegion[] regs= transcript.getCDSRegions();
-			splicedLength= 0;
-			for (int i = 0; i < regs.length; i++) 
-				splicedLength+= regs[i].getLength();
-		}
-		return splicedLength;
-	}
-	
+		
 	public Translation(Transcript newTranscript, String stableTranslationID) {
 
 		this(newTranscript);
@@ -83,32 +56,4 @@ public class Translation extends DirectedRegion {
 		this.translationID = newTranslationID;
 	}
 
-	public void setSplicedLength(int splicedLength) {
-		this.splicedLength = splicedLength;
-	}
-
-	/**
-	 * Never annotate an ATG starting internal of another CDS > 35 aa upstream
-	 * of the ATG as is subject to NMD. [HAVANA]
-	 * 
-	 * @param trans
-	 * @param maxDistAA
-	 * @return
-	 */
-	public Translation[] getUsORF() {
-		
-		Translation[] trns= getTranscript().getAllORFs();
-		Vector uOrfV= new Vector();
-		for (int i = 0; i < trns.length; i++) {
-			if (trns[i].get3PrimeEdge()< get5PrimeEdge())
-				uOrfV.add(trns[i]);
-		}
-		
-		Translation[] uOrf= (Translation[]) Arrays.toField(uOrfV);
-		return uOrf;
-	}
-	
-	
-
-	
 }

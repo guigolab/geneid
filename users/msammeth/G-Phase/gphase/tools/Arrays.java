@@ -29,39 +29,9 @@ public class Arrays {
 	public static String reverseComplement(String in) {
 		return reverse(complement(in));
 	}
-	public static Vector addUnique(Collection c, Object[] a, Comparator compi) {
-		Object[] ca= c.toArray();
-		for (int i = 0; a!= null&& i < a.length; i++) {
-			int p= java.util.Arrays.binarySearch(ca, a[i], compi);
-			if (p< 0)
-				ca= insert(ca, a[i], p);
-		}
-		Vector v= new Vector(ca.length);
-		addAll(v, ca);
-		return v;
-	}
-	/**
-	 * assumes not sorted arrays
-	 * @param c
-	 * @param a
-	 * @return
-	 */
-	public static Collection addUnique(Collection c, Object[] a) {
-		Object[] ca= c.toArray();
-		for (int i = 0; a!= null&& i < a.length; i++) {
-			int j;
-			for (j = 0; j < ca.length; j++) 
-				if (a[i]== ca[j])
-					break;
-			if (j== ca.length)
-				c.add(a[i]);
-		}
-		return c;
-	}
-	
 	public static String complement(String in){
-		String normal= "ACGTN-acgt";
-		String reverse= "TGCAN-tgca";
+		String normal= "ACGTN-";
+		String reverse= "TGCAN-";
 		StringBuffer buffy= new StringBuffer(in.length());
 		for (int i = 0; i < in.length(); i++) 
 			buffy.append(reverse.charAt(normal.indexOf(in.charAt(i))));
@@ -175,27 +145,6 @@ public class Arrays {
 			return insert(a, o, a.length);
 	}
 	
-	public static Collection addAll(Collection c, Object[] a) {
-		for (int i = 0; a!= null&& i < a.length; i++) 
-			c.add(a[i]);
-		return c;
-	}
-	
-	public static Object[] addAll(Object[] a, Object[] b) {
-		Vector v= new Vector(a.length+ b.length);
-		v= (Vector) addAll(v, a);
-		v= (Vector) addAll(v, b);
-		return (Object[]) toField(v);
-	}
-	
-	public static Object[] addUnique(Object[] a, Object o) {
-		for (int i = 0; a!= null&& i < a.length; i++) {
-			if (a[i]== o)
-				return a;
-		}
-		return add(a, o);
-	}
-	
 	public static Object[] extendField(Object[] a, Object o) {
 		if (a== null) {
 			Object[] newA= (Object[]) Array.newInstance(o.getClass(), 1);
@@ -239,8 +188,6 @@ public class Arrays {
 	}
 	
 	public static Object[] remove(Object[] a, Object o) {
-		if (a== null)
-			return null;
 		
 		Vector v= new Vector();
 		for (int i = 0; i < a.length; i++) 
@@ -248,15 +195,6 @@ public class Arrays {
 				v.add(a[i]);
 		
 		return (Object[]) toField(v);
-	}
-	
-	public static void swap(Object[] o) {
-		if (o== null|| o.length!= 2)
-			return;
-
-		Object oh= o[0];
-		o[0]= o[1];
-		o[1]= oh;
 	}
 	
 	/**
@@ -300,8 +238,6 @@ public class Arrays {
 	}
 		
 	public static int[] toPrimitive(Integer[] a) {
-		if (a== null)
-			return null;
 		int[] i= new int[a.length];
 		for (int j = 0; j < i.length; j++) 
 			i[j]= a[j].intValue();

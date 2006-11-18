@@ -329,8 +329,9 @@ public class EnsemblDBAdaptor {
 					if (e== null) {						
 						e= new Exon(trans, rs.getString(1), start, end);	// stableID
 						// e.setGene(trans.getGene());
-						e.setPhase(Byte.parseByte(rs.getString(4))); 
-								//Byte.parseByte(rs.getString(5)))	// end phase
+						e.setPhase(trans.getDefaultTranslation(), new Phase(
+								Byte.parseByte(rs.getString(4)), 
+								Byte.parseByte(rs.getString(5))));
 						
 					} else
 						e.addTranscript(trans);	
@@ -942,7 +943,7 @@ public class EnsemblDBAdaptor {
 				if (e== null) {
 					e= new Exon(trans, rs.getString(1), start, end);	// stableID
 					// e.setGene(trans.getGene());
-					e.setFrame(trans.getDefaultTranslation(), new Phase(
+					e.setPhase(trans.getDefaultTranslation(), new Phase(
 							Byte.parseByte(rs.getString(4)), 
 							Byte.parseByte(rs.getString(5))));
 				}

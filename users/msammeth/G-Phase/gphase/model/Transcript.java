@@ -7,9 +7,8 @@
 package gphase.model;
 
 import gphase.Constants;
-import gphase.NMDSimulator;
-import gphase.SpliceSiteConservationComparator;
 import gphase.tools.ENCODE;
+import gphase.tools.SpliceSiteConservationComparator;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -91,7 +90,7 @@ public class Transcript extends DirectedRegion {
 			// find containing exon
 		int x;
 		int dist= 0;
-		for (x = 0; dist<= exonPos&& x < exons.length; x++) 
+		for (x = 0; dist< exonPos&& x < exons.length; x++) 
 			dist+= exons[x].getLength();
 		if (x> 0) {
 			--x;
@@ -254,20 +253,10 @@ public class Transcript extends DirectedRegion {
 		for (int i = 0; i < regs.length; i++) {
 			regs[i]= new DirectedRegion(exons[i].getStart(), exons[i].getEnd(), exons[i].getStrand());
 			regs[i].setChromosome(getChromosome());
-			regs[i].setSpecies(getSpecies());
 		}
 		return regs;
 	}
 	
-	public String getSplicedSequence() {
-		DirectedRegion[] regs= getExonicRegions();	// not sorted
-		java.util.Arrays.sort(regs, new DirectedRegion.DirectedPositionComparator());
-		StringBuffer sb= new StringBuffer();
-		for (int i = 0; i < regs.length; i++) 
-			sb.append(Graph.readSequence(regs[i]));
-		return sb.toString();
-	}
-		
 	public int getCDSLength(boolean spliced) {
 		if (translations== null|| translations.length< 1)
 			return -1;
@@ -296,11 +285,7 @@ public class Transcript extends DirectedRegion {
 		}
 	}
 	
-	/**
-	 * 	working with translation
-	 * @return
-	 */
-	public DirectedRegion[] getCDSRegions_old() {
+	public DirectedRegion[] getCDSRegions() {
 		
 		int tlStart= getTranslations()[0].get5PrimeEdge();
 		int tlEnd= getTranslations()[0].get3PrimeEdge();
@@ -634,12 +619,10 @@ public class Transcript extends DirectedRegion {
 		this.strand= newGene.getStrand();
 		this.gene= newGene;
 		this.transcriptID= stableTranscriptID;
-		setID("transcript");
 	}
 	
 	public Transcript(String newID) {
 		this.transcriptID= newID;
-		setID("transcript");
 	}
 	
 	/**
@@ -699,7 +682,6 @@ public class Transcript extends DirectedRegion {
 	 */
 	public void setGene(Gene gene) {
 		this.gene= gene;
-		setStrand(getGene().getStrand());
 	}
 
 	/**
@@ -1053,167 +1035,6 @@ public class Transcript extends DirectedRegion {
 		return -1;
 	}
 	
-	public Translation[][] findORFs() {
-		String seq= getSplicedSequence();
-		Translation[][] orfs= new Translation[3][];
-		for (int i = 0; i < 3; i++) {
-			orfs[i]= findORFs(seq, i);
-		}
-		// skipped for the moment
-//		int cntORFs= 0;
-//		for (int i = 0; i < orfs.length; i++) 
-//			if (orfs[i]!= null)
-//				cntORFs+= orfs[i].length;	// TODO min threshold
-//		if (cntORFs== 0) {
-//			for (int i = 0; i < orfs.length; i++) {
-//				orfs[i]= forceORFs(seq, i);
-//			}
-//		}
-		return orfs;
-	}
-	
-	/**
-	 * Use the most upstream ATG as start codon. If there is no stop codon 
-	 * upstream of the first ATG, check genomic sequence upstream beyond the 
-	 * gene for in-frame stop. If one is found and the start of the gene is
-	 * in a CpG island, use the ATG, otherwise start the open-ended CDS at the
-	 * start of the gene.
-	 * @return
-	 */
-	public Translation findHavanaORF() {
-		String seq= getSplicedSequence();
-		return null;
-	}
-	
-	public Translation findLongestORF() {
-		Translation longestORF= null;
-		Translation[][] predORFs= findORFs();
-		if (predORFs== null)
-			return null;
-		for (int i = 0; i < predORFs.length; i++) 
-			for (int j = 0; predORFs[i]!= null&& j < predORFs[i].length; j++) 
-				if (longestORF== null|| predORFs[i][j].getSplicedLength()> longestORF.getSplicedLength())
-					longestORF= predORFs[i][j];
-		
-		if (longestORF!= null&& longestORF.getSplicedLength()< (NMDSimulator.MIN_ORF_LENGTH_AA* 3))
-			return null;
-		return longestORF;
-	}
-	
-	public Translation[] getAllORFs() {
-		Translation[][] predORFs= findORFs();
-		if (predORFs== null)
-			return null;
-		Vector allOrfV= new Vector();
-		for (int i = 0; i < predORFs.length; i++) 
-			for (int j = 0; predORFs[i]!= null&& j < predORFs[i].length; j++) 
-				allOrfV.add(predORFs[i][j]);
-		
-		Translation[] allORFs= (Translation[]) gphase.tools.Arrays.toField(allOrfV);
-		return allORFs;
-	}
-	
-	public Translation[] findORFs(String seq, int frame) {
-			seq= seq.substring(frame).toUpperCase();
-			Vector startV= new Vector(), stopV= new Vector();
-			int pos= 0;
-			for (int i = 0; (i+3) < seq.length(); i+= 3) {
-				String codon= seq.substring(i, i+3);
-				if (codon.equals(Translation.START_CODON))
-					startV.add(new Integer(i));
-				else if (codon.equals(Translation.STOP_CODONS[0])||
-						codon.equals(Translation.STOP_CODONS[1])||
-						codon.equals(Translation.STOP_CODONS[2]))
-					stopV.add(new Integer(i));
-			}
-			int[] startPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(startV));
-			int[] stopPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(stopV));
-	
-				// determine ORFs
-			Vector v= new Vector();
-			Translation reg;
-			for (int i = 0; startPos!= null&& stopPos!= null&& i < startPos.length; i++) {
-				int j= Arrays.binarySearch(stopPos, startPos[i]);
-				if (j>= 0)
-					System.err.println("Assertion failed: start/stop at same pos!");
-				j= -j- 1;
-				if (j== stopPos.length) {
-					reg= new Translation(this, getGenomicPosition(frame+ startPos[i]), get3PrimeEdge(), getStrand());
-					reg.setSplicedLength(seq.length()- startPos[i]+ 1);
-				} else {
-					reg= new Translation(this, getGenomicPosition(frame+ startPos[i]), getGenomicPosition(frame+ stopPos[j]+ 2), getStrand());
-					reg.setSplicedLength(stopPos[j]+ 2- startPos[i]+ 1);
-				}
-				reg.setChromosome(getChromosome());
-				reg.setSpecies(getSpecies());
-				v.add(reg);
-			}
-	//		if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
-	//			reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
-	//			reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
-	//			reg.setChromosome(getChromosome());
-	//			reg.setSpecies(getSpecies());
-	//			
-	//			v.add(reg);
-	//		} else if (startPos!= null&& startPos.length> 0){	
-	//			reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
-	//			reg.setSplicedLength(seq.length()- startPos[0]+ 1);
-	//			reg.setChromosome(getChromosome());
-	//			reg.setSpecies(getSpecies());
-	//			v.add(reg);
-	//		}
-			
-			return (Translation[]) gphase.tools.Arrays.toField(v);
-		}
-	
-	/**
-	 * 
-	 * @param seq
-	 * @param frame
-	 * @deprecated not in use, check inframe stop
-	 * @return
-	 */
-	public Translation[] forceORFs(String seq, int frame) {
-		seq= seq.substring(frame).toUpperCase();
-		Vector startV= new Vector(), stopV= new Vector();
-		for (int i = 0; (i+3) < seq.length(); i+= 3) {
-			String codon= seq.substring(i, i+3);
-			if (codon.equals(Translation.START_CODON))
-				startV.add(new Integer(i));
-			else if (codon.equals(Translation.STOP_CODONS[0])||
-					codon.equals(Translation.STOP_CODONS[1])||
-					codon.equals(Translation.STOP_CODONS[2]))
-				stopV.add(new Integer(i));
-		}
-		int[] startPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(startV));
-		int[] stopPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(stopV));
-
-			// determine ORFs
-		Vector v= new Vector();
-		Translation reg;
-		if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
-			reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
-			reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
-			reg.setChromosome(getChromosome());
-			reg.setSpecies(getSpecies());
-			
-			v.add(reg);
-		} 
-		
-		if (startPos!= null&& startPos.length> 0){	
-			reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
-				// TODO check for no inframe stop
-			reg.setSplicedLength(seq.length()- startPos[0]+ 1);
-			reg.setChromosome(getChromosome());
-			reg.setSpecies(getSpecies());
-			v.add(reg);
-		}
-		
-		return (Translation[]) gphase.tools.Arrays.toField(v);
-	}
-	
-
-	
 	public int getTSSPos() {
 		return exons[0].get5PrimeEdge();
 	}
@@ -1298,38 +1119,6 @@ public class Transcript extends DirectedRegion {
 	}
 	public TU[] getTu() {
 		return tu;
-	}
-
-	/**
-	 * working with cds in exons
-	 * @return
-	 */
-	public DirectedRegion[] getCDSRegions() {
-		Exon[] exons= getExons();
-		Vector v= new Vector(exons.length);
-		DirectedRegion reg;
-		for (int i = 0; i < exons.length; i++) {
-			if (!exons[i].isCoding())
-				continue;
-			reg= new DirectedRegion(exons[i].get5PrimeCDS(), exons[i].get3PrimeCDS(), exons[i].getStrand());
-			reg.setChromosome(getChromosome());
-			reg.setSpecies(getSpecies());
-			v.add(reg);
-		}
-		
-		DirectedRegion[] regs= (DirectedRegion[]) gphase.tools.Arrays.toField(v);
-		// no longer necessary, stop in VEGA st included, st not
-		//regs[regs.length- 1].set3PrimeEdge(regs[regs.length- 1].get3PrimeEdge()+ 3);	// to include stop codon
-		return regs;
-	}
-	
-	public String getCDSSequenceNt() {
-		DirectedRegion[] regs= getCDSRegions();	// not sorted
-		java.util.Arrays.sort(regs, new DirectedRegion.DirectedPositionComparator());
-		StringBuffer sb= new StringBuffer();
-		for (int i = 0; i < regs.length; i++) 
-			sb.append(Graph.readSequence(regs[i]));
-		return sb.toString();
 	}
 
 

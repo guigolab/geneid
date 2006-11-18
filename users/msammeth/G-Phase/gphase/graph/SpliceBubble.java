@@ -26,54 +26,17 @@ public class SpliceBubble {
 		}
 	}
 	
-	public static class SizeComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			SpliceBubble bub1= (SpliceBubble) o1;
-			SpliceBubble bub2= (SpliceBubble) o2;
-			
-			int size1= bub1.getSize();
-			int size2= bub2.getSize();
-			
-			if (size1< size2)
-				return -1;
-			if (size1> size2)
-				return 1;
-			return 0;
-		}
-	}
-
 	SpliceNode source= null;
 	SpliceNode sink= null;
 	SpliceNode[][] pathes= null;
-	SplicePath[] savPathes= null;
-	HashMap transHash= null; // maps SpliceNode[]#Transcript[]
-	SpliceBubble[] parents= null;
-	SpliceBubble[] children= null;
-	/**
-	 * @deprecated now children, parents
-	 */
+	HashMap transHash= null;
 	SpliceBubble containerBubble= null;
-	/**
-	 * @deprecated now children, parents
-	 */
 	SpliceBubble[] containedBubbles= null;
 	
 	public SpliceBubble(SpliceNode src, SpliceNode snk, SplicePath[] newPathes) {
 		this.source= src;
 		this.sink= snk;
 		setPathes(newPathes);
-	}
-	
-	public boolean hasParents() {
-		if (parents== null|| parents.length< 1)
-			return false;
-		return true;
-	}
-	
-	public boolean hasChildren() {
-		if (children== null|| children.length< 1)
-			return false;
-		return true;
 	}
 	
 	public Transcript[][] getTranscriptPartitions() {
@@ -84,23 +47,8 @@ public class SpliceBubble {
 		return parts;
 	}
 	
-	protected Object clone() throws CloneNotSupportedException {
-		
-		SplicePath[] cPathes= null;
-		if (savPathes!= null) {
-			cPathes= new SplicePath[savPathes.length];
-			for (int i = 0; i < cPathes.length; i++) {
-				cPathes[i]= (SplicePath) savPathes[i].clone();
-			}
-		}
-		
-		SpliceBubble clone= new SpliceBubble(getSource(), getSink(), cPathes);
-		return clone;
-	}
-	
 	public void setPathes(SplicePath[] newPathes) {
 		pathes= new SpliceNode[newPathes.length][];
-		savPathes= newPathes;
 		transHash= new HashMap();
 		for (int i = 0; i < newPathes.length; i++) {
 			Vector v= newPathes[i].getNodeV();
@@ -114,9 +62,6 @@ public class SpliceBubble {
 			transHash.put(pathes[i], newPathes[i].getTranscripts());
 		}
 	}
-	/**
-	 * @deprecated now children, parents
-	 */
 	public void addContainedBubble(SpliceBubble blob) {
 		
 		blob.setContainerBubble(this);
@@ -125,6 +70,13 @@ public class SpliceBubble {
 		else {
 			containedBubbles= (SpliceBubble[]) Arrays.extendField(containedBubbles, blob);
 		}
+	}
+	
+	public void removeContainedBubble(SpliceBubble blob) {
+		blob.setContainerBubble(null);
+		containedBubbles= (SpliceBubble[]) Arrays.remove(containedBubbles, blob);
+		if (containedBubbles.length< 1)
+			containedBubbles= null;
 	}
 	
 	public SpliceNode getSource() {
@@ -140,59 +92,6 @@ public class SpliceBubble {
 	
 	public SpliceNode[][] getPathes() {
 		return pathes;
-	}
-	
-	public SpliceNode[] removePath(Transcript[] part) {
-		Object[] o= transHash.keySet().toArray();
-		for (int i = 0; i < o.length; i++) {
-			Transcript[] partmp= (Transcript[]) transHash.get(o[i]);
-			if (identical(partmp, part)) {
-				transHash.remove(o[i]);
-
-				//pathes= (SpliceNode[][]) Arrays.remove(pathes, o[i]);
-				SpliceNode[][] nuPathes= new SpliceNode[pathes.length- 1][];
-				int pos= 0;
-				for (int j = 0; pathes!= null&& j < pathes.length; j++) {
-					if (identical(pathes[j], (SpliceNode[]) o[i]))
-						continue;
-					nuPathes[pos++]= pathes[j];
-				}
-				pathes= nuPathes;
-				
-				for (int j = 0; j < savPathes.length; j++) {	// TODO second search ineficient, make data structure better
-					if (identical(part, savPathes[j].getTranscripts())) {
-						savPathes= (SplicePath[]) Arrays.remove(savPathes, savPathes[j]);
-						break;
-					}
-				}
-				return (SpliceNode[]) o[i];
-			} else if (contained(partmp, part)) {
-				transHash.remove(o[i]);
-				Vector v= new Vector(partmp.length);
-				for (int j = 0; j < partmp.length; j++) {
-					int k;
-					for (k = 0; k < part.length; k++) {
-						if (partmp[j]== part[k])
-							break;
-					}
-					if (k== part.length)
-						v.add(partmp[j]);	// not found in remove array
-				}
-				Transcript[] nuPart= (Transcript[]) Arrays.toField(v);
-				transHash.put(o[i], nuPart);
-				
-				// pathes hasnt to be changed, no path is completely lost
-				
-					// correct savPathes
-				for (int j = 0; j < savPathes.length; j++) {
-					if (identical(partmp, savPathes[j].getTranscripts())) {
-						savPathes[j].setTranscripts(nuPart);
-						break;	// can only happen once
-					}
-				}
-			}
-		}
-		return null;
 	}
 
 	public SpliceNode[][] getPathes_old() {
@@ -277,44 +176,25 @@ public class SpliceBubble {
 			return true;	// check for transcript set of anotherBubble is smaller or equal ?!
 		return false;
 	}
-
-	public boolean containsGeometrically(SpliceBubble anotherBubble) {
-		// positions not included
+	
+	public boolean contains(SpliceBubble anotherBubble) {
+			// positions not included
 		if (anotherBubble.getSink().getSite().getPos()< getSource().getSite().getPos()
 				|| anotherBubble.getSource().getSite().getPos()> getSink().getSite().getPos())
 			return false;
-		return true;
-	}
-	
-	public boolean contains(SpliceBubble anotherBubble) {
-		
-		if (!containsGeometrically(anotherBubble))
-			return false;
 		
 			// transcript set not included
-		Transcript[][] t1= getTranscriptPartitions();
-		Transcript[][] t2= anotherBubble.getTranscriptPartitions();
-		if (t2.length> t1.length)
-			return false;
-		if (SpliceBubble.containedByTranscript(t2, t1))
-			return true;
-		return false;
-	}
-	
-	public void addParent(SpliceBubble newParent) {
-		parents= (SpliceBubble[]) Arrays.addUnique(parents, newParent);
-	}
-	
-	public void removeParent(SpliceBubble toBremoved) {
-		parents= (SpliceBubble[]) Arrays.remove(parents, toBremoved);
-	}
-	
-	public void removeChild(SpliceBubble toBremoved) {
-		children= (SpliceBubble[]) Arrays.remove(children, toBremoved);
-	}
-	
-	public void addChild(SpliceBubble newChild) {
-		children= (SpliceBubble[]) Arrays.addUnique(children, newChild);
+		Transcript[] t1= getTranscripts();
+		Transcript[] t2= anotherBubble.getTranscripts();
+		for (int i = 0; i < t2.length; i++) {	// sort ?!
+			int j;
+			for (j = 0; j < t1.length; j++) 
+				if (t1[j]== t2[i])
+					break;
+			if (j== t1.length)
+				return false;
+		}
+		return true;
 	}
 	// -1 s1 transcript set included in s2, 0 equal, +1 s2 tset included in s1, 2 none included
 	public static int compareTranscriptSets_old(SpliceBubble s1, SpliceBubble s2) {
@@ -360,227 +240,37 @@ public class SpliceBubble {
 		return transHash;
 	}
 
-	public int getSize() {
-		return sink.getSite().getPos()- 
-			source.getSite().getPos();
+	public SpliceBubble[] getContainedBubbles() {
+		return containedBubbles;
 	}
 
-	/**
-	 * @deprecated now children, parents
-	 */
+	public void setContainedBubbles(SpliceBubble[] containedBubbles) {
+		this.containedBubbles = containedBubbles;
+	}
+
+	public SpliceBubble getContainerBubble() {
+		return containerBubble;
+	}
+
 	public void setContainerBubble(SpliceBubble containerBubble) {
 		this.containerBubble = containerBubble;
 	}
 
-	public boolean equals(Object obj) {
-		SpliceBubble b= null;
-		try {
-			b= (SpliceBubble) obj;
-		} catch (ClassCastException e) {
-			return super.equals(obj);
-		}
-
-		if (b.getSource()== getSource()&& b.getSink()== getSink()&&
-				identical(getTranscriptPartitions(), b.getTranscriptPartitions())) {
-			return true;
-		} else
-			return false;
-	}
-	
-	
-	public static boolean intersect_old(SpliceBubble bub0, SpliceBubble bub1, Vector chkBubV) {
-		
-			// find wider bubble
-		SpliceBubble wideBub= null, tinyBub= null;
-		if (bub0.getSource().getSite().getPos()<= bub1.getSource().getSite().getPos()
-				&& bub0.getSink().getSite().getPos()>= bub1.getSink().getSite().getPos()) {
-			wideBub= bub0;
-			tinyBub= bub1;
-		} else if (bub1.getSource().getSite().getPos()<= bub0.getSource().getSite().getPos()
-				&& bub1.getSink().getSite().getPos()>= bub0.getSink().getSite().getPos()) {
-			wideBub= bub1;
-			tinyBub= bub0;
-		} else
-			return false;	// geometrically not overlapping
-		
-			// create intersection bubble
-		Transcript[][] tinyPart= tinyBub.getTranscriptPartitions();
-		Transcript[][] widePart= wideBub.getTranscriptPartitions();
-		Vector v= new Vector();	// collects transcripts found in the intersection
-		for (int i = 0; i < tinyPart.length; i++) {
-			int j;
-			for (j = 0; j < widePart.length; j++) {
-				Transcript[][] iPart= intersect(tinyPart[i], widePart[j]);	// [0] sobre tiny, [1] sobre wide, [2] intersect
-				if (iPart!= null&& iPart[2]!= null) 
-						v= (Vector) Arrays.addUnique(v, iPart[2]);	// partitions a sobre in tiny
-			}
-		}
-		Vector vv= new Vector();	// collect transcript NOT found in any intersection
-		for (int i = 0; i < tinyPart.length; i++) 
-			for (int j = 0; j < tinyPart[i].length; j++) {
-				int k;
-				for (k = 0; k < v.size(); k++) 
-					if (v.elementAt(k)== tinyPart[i][j])
-						break;
-				if (k== v.size())
-					vv.add(tinyPart[i][j]);
-			}
-		
-		SpliceBubble interBub= null;
-		try {
-			interBub = (SpliceBubble) tinyBub.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
-		for (int i = 0; i < vv.size(); i++) 
-			interBub.removePath(new Transcript[] {(Transcript) vv.elementAt(i)});	
-					// works on [], not very efficient
-		int x;
-		for (x = 0; x < chkBubV.size(); x++) 
-			if (interBub.equals(chkBubV.elementAt(x))) {
-				interBub= (SpliceBubble) chkBubV.elementAt(x);
-				break;
-			}
-		if (x== chkBubV.size())
-			chkBubV.add(interBub);
-		
-			// insert into hierarchy
-		if (vv.size()> 0&& interBub.getPathes()!= null&& interBub.getPathes().length> 0) {
-			SpliceBubble[] c= wideBub.getChildren();
-			for (int i = 0; c!= null&& i < c.length; i++) 
-				if (interBub.contains(c[i])) {
-					try {
-						c[i].removeParent(wideBub);
-					} catch (Exception e) {;}
-					interBub.addChild(c[i]);
-					c[i].addParent(interBub);
-					wideBub.removeChild(c[i]);
-				}
-			wideBub.addChild(interBub);
-			interBub.addParent(wideBub);
-			
-			c= tinyBub.getChildren();
-			for (int i = 0; c!= null&& i < c.length; i++) 
-				if (interBub.contains(c[i])) {
-					try {
-						c[i].removeParent(tinyBub);
-					} catch (Exception e) {;}
-					interBub.addChild(c[i]);
-					c[i].addParent(interBub);
-					tinyBub.removeChild(c[i]);
-				}
-			tinyBub.addChild(interBub);
-			interBub.addParent(tinyBub);
-		} else 
-			return false;
-		
-		return true;
-	}
-	
-	public static boolean identical(SpliceNode[] p0, SpliceNode[] p1) {
-		if ((p0== null&& p1!= null)|| (p0!= null&& p1== null))
-			return false;
-		if (p0== null&& p1== null) 
-			return true;
-		
-		if (p0.length!= p1.length)
-			return false;
-		for (int i = 0; i < p1.length; i++) {
-			if (p0[i]!= p1[i])	// SpliceNode identity maintained
-				return false;
-		}
-		return true;
-	}
-		
-	public static boolean identical(Transcript[][] part0, Transcript[][] part1) {
-		if (part0.length!= part1.length)
-			return false;
-		
-		for (int i = 0; i < part0.length; i++) {
-			int j;
-			for (j = 0; j < part1.length; j++) {
-				if (identical(part0[i], part1[j]))
-					break;
-			}
-			if (j== part1.length)	// not found
-				return false;
-		}
-		return true;
-	}
-	
-	public static boolean identical(Transcript[] part0, Transcript[] part1) {
-		
-		if (part0== null|| part1== null)
-			return false;
-		
-		if (part0.length!= part1.length)
-			return false;
-		
-		for (int i = 0; i < part0.length; i++) {
-			int j;
-			for (j = 0; j < part1.length; j++) {
-				if (part0[i]== part1[j])
-					break;
-			}
-			if (j== part1.length)
-				return false;	// 1 trans not found
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * 
-	 * @param part0
-	 * @param part1
-	 * @return <code>Transcript[3][]</code> (sobre in part0, sobre in part1, intersection)
-	 * 		   iff there was an intersection possible,
-	 * 		   <code>null</code> else 
-	 */
-	public static Transcript[][] intersect(Transcript[] part0, Transcript[] part1) {
-		if (part0== null|| part1== null) {
-			System.err.println("assertion failed: empty transcript set partition");
-			return null;
-		}
-		Vector v0= new Vector();
-		Vector v2= new Vector();
-		for (int i = 0; i < part0.length; i++) {
-			int j;
-			for (j = 0; j < part1.length; j++) {
-				if (part0[i]== part1[j]) {
-					v2.add(part0[i]);
-					break;
-				}
-			}
-			if (j== part1.length)	// part0[i] not found
-				v0.add(part0[i]);
-		}
-		
-		if (v2.size()< 1)
-			return null;	// no intersection
-		
-		Vector v1= new Vector();
-		for (int i = 0; i < part1.length; i++) {
-			int j;
-			for (j = 0; j < v2.size(); j++) {
-				if (v2.elementAt(j)== part1[i])
-					break;
-			}
-			if (j== v2.size())
-				v1.add(part1[i]);	// sobre in part1
-		}
-		
-		Transcript[][] result= new Transcript[][] 
-		         {(Transcript[]) Arrays.toField(v0), (Transcript[]) Arrays.toField(v1), (Transcript[]) Arrays.toField(v2)};
-		return result;
-	}
-	
 	public static boolean contained(Transcript[][] containedTrans, Transcript[][] containingTrans) {
 		int i;
 		for (i = 0; i < containedTrans.length; i++) {
 			int j;
 			for (j = 0; j < containingTrans.length; j++) {
-				if (contained(containedTrans[i], containingTrans[j]))
+				int k;
+				for (k = 0; k < containedTrans[i].length; k++) {
+					int m;
+					for (m = 0; m < containingTrans[j].length; m++) 
+						if (containedTrans[i][k].getTranscriptID().equals(containingTrans[j][m].getTranscriptID()))
+							break;
+					if (m== containingTrans[j].length)	// tID of contained not found
+						break;
+				}
+				if (k== containedTrans[i].length)	// all tID of contained found 
 					break;
 			}
 			if (j == containingTrans.length)	// one partition of contained not found
@@ -588,79 +278,5 @@ public class SpliceBubble {
 		}
 		
 		return (i== containedTrans.length);
-	}
-	
-	public static boolean containedByTranscript(Transcript[][] containedTrans, Transcript[][] containingTrans) {
-		int i;
-		for (i = 0; i < containedTrans.length; i++) {
-			int j;
-			for (j = 0; j < containedTrans[i].length; j++) {
-				int k;
-				for (k = 0; k < containingTrans.length; k++) {
-					int m;
-					for (m = 0; m < containingTrans[k].length; m++) 
-						if (containedTrans[i][j]== containingTrans[k][m])
-							break;
-					if (m< containingTrans[k].length)	// found
-						break;
-				}
-				if (k== containingTrans.length)
-					return false;
-			}
-		}
-		
-		return true;
-	}
-
-	public static boolean contained(Transcript[] containedTrans, Transcript[] containingTrans) {
-		int k;
-		for (k = 0; k < containedTrans.length; k++) {
-			int m;
-			for (m = 0; m < containingTrans.length; m++) 
-				if (containedTrans[k].getTranscriptID().equals(containingTrans[m].getTranscriptID()))
-					break;
-			if (m== containingTrans.length)	// tID of contained not found
-				break;
-		}
-		if (k== containedTrans.length)	// all tID of contained found 
-			return true;
-		return false;
-	}
-
-	public SpliceBubble[] getChildren() {
-		return children;
-	}
-
-	public SpliceBubble[] getParents() {
-		return parents;
-	}
-	
-	Vector getAncestors(Vector v, Vector resV) {
-
-		v.add(this);
-		
-		if (!hasParents()) {
-			//resV.add(v);
-			return resV;	
-		}
-		
-		for (int i = 0; i < getParents().length; i++) {
-			Vector vv= (Vector) v.clone();
-			resV.add(vv);
-			getParents()[i].getAncestors(vv, resV);
-		}
-		return resV;
-	}
-	
-	public SpliceBubble[][] getAncestors() {
-		Vector resV= new Vector();
-		Vector v= new Vector();
-		resV.add(v);
-		resV= getAncestors(v, resV);
-		return (SpliceBubble[][]) Arrays.toField(resV); 
-	}
-	
-	public void setParents(SpliceBubble[] parents) {
-		this.parents = parents;
 	}
 }

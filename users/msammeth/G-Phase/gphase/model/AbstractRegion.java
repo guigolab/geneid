@@ -18,6 +18,11 @@ public abstract class AbstractRegion implements Region {
 
 	String id= null;
 	
+	public static final int REGION_COMPLETE_CLUSTER= 0;
+	public static final int REGION_5UTR= 1;
+	public static final int REGION_CDS= 2;
+	public static final int REGION_3UTR= 3;
+
 	static final long serialVersionUID=  5443375142823871946L;
 	public abstract Species getSpecies();
 

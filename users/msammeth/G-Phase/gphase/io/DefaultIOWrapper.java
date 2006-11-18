@@ -36,13 +36,8 @@ public abstract class DefaultIOWrapper implements IOWrapper {
 		int p= absFilePath.length();
 		while ((--p>= 0)&& (absFilePath.charAt(p)!= File.separatorChar))
 			; // count down
-		if (p< 0) {
-			this.fPath= ".";
-			this.fName= absFilePath;
-		} else {
-			this.fPath= absFilePath.substring(0,p);
-			this.fName= absFilePath.substring((p+1), absFilePath.length());
-		}
+		this.fPath= absFilePath.substring(0,p);
+		this.fName= absFilePath.substring((p+1), absFilePath.length());		
 	}
 	
 	public DefaultIOWrapper() {
