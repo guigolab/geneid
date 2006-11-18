@@ -617,10 +617,13 @@ public class Species implements Serializable {
 				nuGene.setStrand(ge[i].getStrand());
 				for (int k = 0; k < newTranscripts[j].length; k++) 	{
 					Transcript t= new Transcript(nuGene, newTranscripts[j][k].getTranscriptID());
+					//Transcript t= newTranscripts.removeAll
 					nuGene.addTranscript(t);
 					Exon[] ex= newTranscripts[j][k].getExons();
 					for (int m = 0; m < ex.length; m++) {
 						Exon e= new Exon(t, ex[m].getExonID(), ex[m].getStart(), ex[m].getEnd());
+						e.setStartCDS(ex[m].getStartCDS());
+						e.setEndCDS(ex[m].getEndCDS());
 						t.addExon(e);
 					}
 					Translation[] trans= newTranscripts[j][k].getTranslations();

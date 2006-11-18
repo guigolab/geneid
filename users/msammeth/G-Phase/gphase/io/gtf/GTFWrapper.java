@@ -68,14 +68,57 @@ public class GTFWrapper extends DefaultIOWrapper {
 	/**
 	 */
 	public void write() throws Exception {
+		writeGTF();
+	}
+	
+	public void writeGTF() throws Exception {
+			String outName= getAbsFileName();
+	//		if (new File(outName).exists())
+	//			outName+= "_out";
+			BufferedWriter buffy= new BufferedWriter(new FileWriter(outName));
+			for (int i = 0; i < gtfObj.length; i++) {
+				// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+				buffy.write(
+						gtfObj[i].seqname+ "\t"+	//!! getter removes "chr"
+						gtfObj[i].getSource()+ "\t"+
+						gtfObj[i].getFeature()+ "\t"+
+						gtfObj[i].getStart()+ "\t"+
+						gtfObj[i].getEnd()+ "\t"+
+						gtfObj[i].getScore()+ "\t"+
+						gtfObj[i].getStrand()+ "\t"+
+						gtfObj[i].getFrame()+ "\t"
+				);
+				Collection c= gtfObj[i].getAttributes().keySet();
+				Iterator iter= c.iterator();
+				String[] keys= new String[c.size()];
+				int cc= 0;
+				while (iter.hasNext())
+					keys[cc++]= (String) iter.next();
+				
+				if (sortAttributes!= null) 
+					for (int j = 0; j < sortAttributes.length; j++) 
+						for (int k = (j+1); k < keys.length; k++) 
+							if (sortAttributes[j].equals(keys[k])) {
+								String h= keys[k];
+								keys[k]= keys[j];
+								keys[j]= h;
+								break;
+							}
+				
+				for (int j = 0; j < keys.length; j++) {
+					buffy.write(keys[j]+ " \""+ gtfObj[i].getAttribute(keys[j])+ "\"; ");
+				}
+				buffy.write("\n");
+			}
+			buffy.flush(); buffy.close();
+		}
+	public void writeGFF() throws Exception {
 		String outName= getAbsFileName();
-//		if (new File(outName).exists())
-//			outName+= "_out";
 		BufferedWriter buffy= new BufferedWriter(new FileWriter(outName));
-		for (int i = 0; i < gtfObj.length; i++) {
-			// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
-			buffy.write(
-					gtfObj[i].getSeqname()+ "\t"+
+		
+		for (int i = 0; gtfObj!= null&& i < gtfObj.length; i++) {
+           buffy.write(
+					gtfObj[i].seqname+ "\t"+	//!! getter removes "chr"
 					gtfObj[i].getSource()+ "\t"+
 					gtfObj[i].getFeature()+ "\t"+
 					gtfObj[i].getStart()+ "\t"+
@@ -91,18 +134,19 @@ public class GTFWrapper extends DefaultIOWrapper {
 			while (iter.hasNext())
 				keys[cc++]= (String) iter.next();
 			
-			if (sortAttributes!= null) 
-				for (int j = 0; j < sortAttributes.length; j++) 
-					for (int k = (j+1); k < keys.length; k++) 
-						if (sortAttributes[j].equals(keys[k])) {
-							String h= keys[k];
-							keys[k]= keys[j];
-							keys[j]= h;
-							break;
-						}
+			java.util.Arrays.sort(keys);
+//			if (sortAttributes!= null) 
+//				for (int j = 0; j < sortAttributes.length; j++) 
+//					for (int k = (j+1); k < keys.length; k++) 
+//						if (sortAttributes[j].equals(keys[k])) {
+//							String h= keys[k];
+//							keys[k]= keys[j];
+//							keys[j]= h;
+//							break;
+//						}
 			
 			for (int j = 0; j < keys.length; j++) {
-				buffy.write(keys[j]+ " \""+ gtfObj[i].getAttribute(keys[j])+ "\"; ");
+				buffy.write(gtfObj[i].getAttribute(keys[j])+ "\t");
 			}
 			buffy.write("\n");
 		}

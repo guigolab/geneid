@@ -33,13 +33,17 @@ import javax.swing.plaf.multi.MultiViewportUI;
 import com.p6spy.engine.logging.appender.StdoutLogger;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.FilterGenerator;
 
+import gphase.Toolbox;
 import gphase.db.EnsemblDBAdaptor;
 import gphase.gui.Paparazzi;
 import gphase.gui.SpliceOSigner;
 import gphase.io.gtf.EncodeWrapper;
+import gphase.io.gtf.GTFObject;
+import gphase.io.gtf.GTFWrapper;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.AbstractRegion;
+import gphase.model.DefaultRegion;
 import gphase.model.DirectedRegion;
 import gphase.model.Exon;
 import gphase.model.Gene;
@@ -66,6 +70,232 @@ import gphase.tools.Time;
 public class ASAnalyzer {
 
 	Graph graph;
+	
+	/**
+	 * Generates a (highly redundant) file with all 5UTR exons/exon parts.
+	 * Iterated by transcripts.
+	 */
+	
+	public static void output5UTRExonFragments() {
+		
+		GTFWrapper gtf= null;
+		String fName= "5UTRexons.gff";
+		fName= Toolbox.checkFileExists(fName);
+		gtf= new GTFWrapper(fName);
+		
+		Graph g= getGraph(INPUT_ENCODE);
+		g.filterNonCodingTranscripts();
+		Comparator compi= new DirectedRegion.OrderComparator();
+		Vector regV= new Vector();
+		HashMap attMap= new HashMap();
+		Gene[] ge= g.getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] t= ge[i].getTranscripts();
+			for (int j = 0; j < t.length; j++) {
+				Exon[] e= t[j].getExons();
+				java.util.Arrays.sort(e, compi);
+				for (int k = 0; k < e.length; k++) {
+					String[] att= new String[] {t[j].getTranscriptID(), e[k].getExonID(), Gene.REGION_ID[Gene.REGION_TRANSCRIPT_5UTR]};
+					if (e[k].isCoding()) {
+						if (!e[k].isCoding5Prime()) {
+							int p1= Math.abs(e[k].get5PrimeEdge());
+							int p2= Math.abs(e[k].get5PrimeCDS()- 1);
+							if (p1> p2) {
+								int h= p1;
+								p1= p2;
+								p2= h;
+							}
+							DirectedRegion reg= new DirectedRegion(p1, p2, e[k].getGene().getStrand());
+							reg.setChromosome(e[k].getChromosome());
+							reg.setStrand(e[k].getGene().getStrand());
+							reg.setID("part_exon");
+							regV.add(reg);
+							attMap.put(reg, att);
+						}
+						break;
+					}
+					regV.add(e[k]);
+					e[k].setStrand(e[k].getGene().getStrand());
+					attMap.put(e[k], att);
+				}
+			}
+		}
+		
+		Vector v= new Vector(regV.size());		
+		for (int i = 0; i < regV.size(); i++) 
+			v.add(GTFObject.createGFFObject((DirectedRegion) regV.elementAt(i), "gencode", (String[]) attMap.get(regV.elementAt(i))));
+		gtf.setGtfObj((GTFObject[]) Arrays.toField(v)); 
+		try {
+			gtf.writeGFF();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	/**
+	 * Generates a (highly redundant) file with all 5UTR exons/exon parts.
+	 * Iterated by transcripts.
+	 */
+	
+	public static void output5UTRIntrons() {
+		
+		GTFWrapper gtf= null;
+		String fName= "5UTRintrons.gff";
+		fName= Toolbox.checkFileExists(fName);
+		gtf= new GTFWrapper(fName);
+		
+		Graph g= getGraph(INPUT_ENCODE);
+		g.filterNonCodingTranscripts();
+		Comparator compi= new DirectedRegion.OrderComparator();
+		Vector regV= new Vector();
+		HashMap attMap= new HashMap();
+		Gene[] ge= g.getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] t= ge[i].getTranscripts();
+			for (int j = 0; j < t.length; j++) {
+				Exon[] e= t[j].getExons();
+				java.util.Arrays.sort(e, compi);
+				for (int k = 1; k < e.length; k++) {	// 1st exon doesnt have an intron before..
+					String[] att= new String[] {t[j].getTranscriptID(), "before "+ e[k].getExonID(), Gene.REGION_ID[Gene.REGION_TRANSCRIPT_5UTR]};
+					int p1= Math.abs(e[k-1].get3PrimeEdge()+ 1);
+					int p2= Math.abs(e[k].get5PrimeEdge()- 1);
+					if (p1> p2) {
+						int h= p1;
+						p1= p2;
+						p2= h;
+					}					
+					DirectedRegion reg= new DirectedRegion(p1, p2, e[k].getStrand());
+					reg.setChromosome(e[k].getChromosome());
+					reg.setStrand(e[k].getGene().getStrand());
+					reg.setID("intron");
+					regV.add(reg);
+					attMap.put(reg, att);
+					if (e[k].isCoding())
+						break;
+				}
+			}
+		}
+		
+		Vector v= new Vector(regV.size());		
+		for (int i = 0; i < regV.size(); i++) 
+			v.add(GTFObject.createGFFObject((DirectedRegion) regV.elementAt(i), "gencode", (String[]) attMap.get(regV.elementAt(i))));
+		gtf.setGtfObj((GTFObject[]) Arrays.toField(v)); 
+		try {
+			gtf.writeGFF();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	/**
+	 * Generates a (highly redundant) file with all CDS introns.
+	 * Iterated by transcripts.
+	 */
+	
+	public static void outputCDSIntrons() {
+		
+		GTFWrapper gtf= null;
+		String fName= "CDSintrons.gff";
+		fName= Toolbox.checkFileExists(fName);
+		gtf= new GTFWrapper(fName);
+		
+		Graph g= getGraph(INPUT_ENCODE);
+		g.filterNonCodingTranscripts();
+		Comparator compi= new DirectedRegion.OrderComparator();
+		Vector regV= new Vector();
+		HashMap attMap= new HashMap();
+		Gene[] ge= g.getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] t= ge[i].getTranscripts();
+			for (int j = 0; j < t.length; j++) {
+				Exon[] e= t[j].getExons();
+				java.util.Arrays.sort(e, compi);
+				boolean start= false;
+				for (int k = 0; k < e.length; k++) {
+					if (!start) {
+						if (e[k].isCoding()) 
+							start= true;
+						continue;
+					}
+					String[] att= new String[] {t[j].getTranscriptID(), "before "+ e[k].getExonID(), Gene.REGION_ID[Gene.REGION_TRANSCRIPT_CDS]};
+					int p1= Math.abs(e[k-1].get3PrimeEdge()+ 1);
+					int p2= Math.abs(e[k].get5PrimeEdge()- 1);
+					if (p1> p2) {
+						int h= p1;
+						p1= p2;
+						p2= h;
+					}					
+					DirectedRegion reg= new DirectedRegion(p1, p2, e[k].getStrand());
+					reg.setChromosome(e[k].getChromosome());
+					reg.setStrand(e[k].getGene().getStrand());
+					reg.setID("intron");
+					regV.add(reg);
+					attMap.put(reg, att);
+
+					if (start&& !e[k].isCoding3Prime())
+						break;
+					
+				}
+			}
+		}
+		
+		Vector v= new Vector(regV.size());		
+		for (int i = 0; i < regV.size(); i++) 
+			v.add(GTFObject.createGFFObject((DirectedRegion) regV.elementAt(i), "gencode", (String[]) attMap.get(regV.elementAt(i))));
+		gtf.setGtfObj((GTFObject[]) Arrays.toField(v)); 
+		try {
+			gtf.writeGFF();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	/**
+	 * Generates a (highly redundant) file with all 5UTR exons/exon parts.
+	 * Iterated by transcripts.
+	 */
+	
+	public static void outputSpliceSites() {
+		
+		GTFWrapper gtf= null;
+		String fName= "splicesites_all_cod_transcripts.gtf";
+		Toolbox.checkFileExists(fName);
+		gtf= new GTFWrapper(fName);
+		
+		Graph g= getGraph(INPUT_ENCODE);
+		g.filterNonCodingTranscripts();
+		g.getASVariations(ASMultiVariation.FILTER_NONE);	// for init const/alt
+		Comparator compi= new DirectedRegion.OrderComparator();
+		Vector v= new Vector();
+		String[] attMap= null;
+		Gene[] ge= g.getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] t= ge[i].getTranscripts();
+			for (int j = 0; j < t.length; j++) {
+				SpliceSite[] ss= t[j].getSpliceChain();
+				for (int k = 0; k < ss.length; k++) {
+					if (ss[k].getPos()< t[j].getTranslations()[0].get5PrimeEdge()) 
+						attMap= new String[]{t[j].getTranscriptID(), "5UTR_transcript"};
+					else if (ss[k].getPos()> t[j].getTranslations()[0].get3PrimeEdge()) 
+						attMap= new String[]{t[j].getTranscriptID(), "3UTR_transcript"};
+					else
+						attMap= new String[]{t[j].getTranscriptID(), "CDS_transcript"};
+					v.add(GTFObject.createGFFObject(ss[k], "gencode", attMap));
+				}
+			}
+		}
+		
+		gtf.setGtfObj((GTFObject[]) Arrays.toField(v)); 
+		try {
+			gtf.writeGFF();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 	
 	public static void output5UTRLengthAnalysis(Graph g, PrintStream pr) {
 		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_STRUCTURALLY);
@@ -896,7 +1126,7 @@ public class ASAnalyzer {
 			AbstractRegion re;
 			for (int i = 0; i < ge.length; i++) {
 				SpliceSite[] ss= 
-					ge[i].getSpliceSites(AbstractRegion.REGION_3UTR, SpliceSite.CONSTITUTIVE_SS);
+					ge[i].getSpliceSites(Gene.REGION_REAL_3UTR, SpliceSite.CONSTITUTIVE_SS);
 				for (int j = 0; ss!= null&& j < ss.length; j++) 
 					buffy.println(ge[i].getChromosome()+ " "+ ss[j].getPos());
 			}
@@ -971,23 +1201,23 @@ public class ASAnalyzer {
 			g.filterNonCodingTranscripts();
 		
 			g.getASVariations(ASMultiVariation.FILTER_NONE);
-			SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_5UTR);
+			SpliceSite[][] res= g.getSpliceSites(Gene.REGION_REAL_5UTR);
 			p.println("#AS-SS\t#CONST-SS\tpercAS");
 			p.println("5UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
 			int utr5= res[1].length;
 	//		for (int i = 0; i < res[1].length; i++) 
 	//			System.out.println(res[1][i]);
-			res= g.getSpliceSites(AbstractRegion.REGION_CDS);
+			res= g.getSpliceSites(Gene.REGION_REAL_CDS);
 			p.println("CDS: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
 			int cds= res[1].length;
 	//		for (int i = 0; i < res[1].length; i++) 
 	//			System.out.println(res[1][i]);
-			res= g.getSpliceSites(AbstractRegion.REGION_3UTR);
+			res= g.getSpliceSites(Gene.REGION_REAL_3UTR);
 			p.println("3UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
 			int utr3= res[1].length;
 	//		for (int i = 0; i < res[1].length; i++) 
 	//			System.out.println(res[1][i]);
-			res= g.getSpliceSites(AbstractRegion.REGION_COMPLETE_CLUSTER);
+			res= g.getSpliceSites(Gene.REGION_COMPLETE_GENE);
 			p.println("total: "+res[0].length+"\t"+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
 			float f1= ((float) utr5/(float) res[1].length);
 			float f2= ((float) cds/(float) res[1].length);
@@ -1307,7 +1537,7 @@ public class ASAnalyzer {
 
 	public static void test02_ss_statistics_outCDSalt(Graph g) {
 			g.getASVariations(ASMultiVariation.FILTER_NONE);
-			SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_CDS);
+			SpliceSite[][] res= g.getSpliceSites(Gene.REGION_REAL_CDS);
 			try {
 				PrintStream p= new PrintStream("check_as_cds");
 				for (int i = 0; i < res[0].length; i++) 
@@ -1322,9 +1552,9 @@ public class ASAnalyzer {
 
 	public static void test02b_ss_statistics_3P(Graph g, PrintStream p) {
 			g.getASVariations(ASMultiVariation.FILTER_NONE);
-			SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_5UTR);
+			SpliceSite[][] res= g.getSpliceSites(Gene.REGION_REAL_5UTR);
 
-			res= g.getSpliceSites(AbstractRegion.REGION_3UTR);
+			res= g.getSpliceSites(Gene.REGION_REAL_3UTR);
 			int ir= 0;
 			for (int i = 0; i < res[0].length; i++) {
 				ASVariation[] as= res[0][i].getAsVars();
@@ -1473,6 +1703,16 @@ public class ASAnalyzer {
 		}
 	}
 
+	public final static String INPUT_ENCODE= "encode/44regions_genes_CHR_coord.gtf";
+	public final static String INPUT_ENCODE_RACES= "encode/gencode_races.gtf";
+	public final static String INPUT_ENSEMBL_CODING_FROM_UCSC= "encode/EnsemblGenes_fromUCSC.gtf";
+	public final static String INPUT_ENSEMBL_CODING_FROM_UCSC_ENCODE_ONLY= "encode/EnsemblGenes_fromUCSC_inENCODEonly.gtf";
+	public final static String INPUT_REFSEQ_CODING_FROM_UCSC_ENCODE_ONLY= "encode/RefSeqGenes_fromUCSC.inENCODE.gtf";
+	public final static String INPUT_REFSEQ_CODING_FROM_UCSC= "encode/RefSeqGenes_fromUCSC.gtf";
+	public final static String INPUT_ENSEMBL_FROM_ENSEMBL= "encode/EnsemblGenes_all_fromENSEMBL.gtf";
+	public final static String INPUT_HAVANA= "encode/Sequences_mapped_HAVANA_136.gtf";
+
+	
 	static void addVirtualGene1(Graph g) {
 		Gene newGene= new Gene(g.getSpeciesByEnsemblPrefix("ENS"), "ENSG00001000001");
 		Transcript trans1= new Transcript(newGene, "ENST00000100001");
@@ -1490,6 +1730,21 @@ public class ASAnalyzer {
 		trans1.addExon(e);
 		
 		g.addGene(newGene);
+	}
+	
+	public static Graph getGraph(String fName)  {
+		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
+		try {
+			myWrapper.read();
+		} catch (Exception e) {
+			e.printStackTrace(); 
+		}
+		boolean encode= false;
+		if (fName.startsWith("encode/44regions_genes_CHR_coord"))
+			encode= true;
+		
+		Graph g= myWrapper.getGraph(encode);		// <===== check ENCODE here !!!
+		return g;
 	}
 	
 	public static ASVariation[] getVariation(String s, ASVariation[][] classes) {
@@ -2359,7 +2614,7 @@ public class ASAnalyzer {
 	public static void outputSSOut(Graph g, PrintStream pr) {
 		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_NONE);		
 		System.out.println(g.countGenesTranscriptsExons());
-		SpliceSite[][] res= g.getSpliceSites(AbstractRegion.REGION_COMPLETE_CLUSTER);
+		SpliceSite[][] res= g.getSpliceSites(Gene.REGION_COMPLETE_GENE);
 		for (int j = 0; j < res[0].length; j++) {
 			pr.println(res[0][j].getGene().getChromosome()+ " "
 					+ Math.abs(res[0][j].getPos())+ " "+ res[0][j].getGene().getStrand()+ " "
@@ -2376,14 +2631,14 @@ public class ASAnalyzer {
 		g.getASVariations(ASMultiVariation.FILTER_NONE);
 		
 			// map for x-check
-		SpliceSite[][] ss= g.getSpliceSites(AbstractRegion.REGION_COMPLETE_CLUSTER);
+		SpliceSite[][] ss= g.getSpliceSites(Gene.REGION_COMPLETE_GENE);
 		HashMap map= new HashMap(ss[0].length+ ss[1].length);
 		for (int i = 0; i < ss[0].length; i++) 
 			map.put(ss[0][i], ss[0][i]);
 		for (int i = 0; i < ss[1].length; i++) 
 			map.put(ss[1][i], ss[1][i]);
 		
-		int[] types= new int[] {AbstractRegion.REGION_5UTR, AbstractRegion.REGION_CDS};
+		int[] types= new int[] {Gene.REGION_REAL_5UTR, Gene.REGION_REAL_CDS};
 		for (int i = 0; i < types.length; i++) {
 			SpliceSite[][] res= g.getSpliceSites(types[i]);
 			for (int j = 0; j < res[0].length; j++) {
@@ -2721,7 +2976,105 @@ public class ASAnalyzer {
 		}
 		System.out.println("--- eq:"+eq+", 1>:"+diff11+", 1<"+diff12+", 2>"+diff21+", 2<"+diff22+"("+hitcount+")");
 	}
+	
+	public static void getSpliceSites(Graph g, String fName, String source) {
+		g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);	// init SSs
+		Gene[] ge= g.getGenes();
+		Vector gffV= new Vector(ge.length* 10);
+		SpliceSite[] ss;
+		String[] attributes;
+		for (int i = 0; i < ge.length; i++) {
+			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_5UTR);
+			attributes= new String[] {"CONSTITUTIVE_SS", "REGION_REAL_5UTR"};
+			for (int j = 0; ss!= null&& j < ss.length; j++) 
+				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
+			
+			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATE_SS, Gene.REGION_REAL_5UTR);
+			attributes= new String[] {"ALTERNATE_SS", "REGION_REAL_5UTR"};
+			for (int j = 0; ss!= null&& j < ss.length; j++) 
+				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
 
+			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_CDS);
+			attributes= new String[] {"CONSTITUTIVE_SS", "REGION_REAL_CDS"};
+			for (int j = 0; ss!= null&& j < ss.length; j++) 
+				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
+
+			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATE_SS, Gene.REGION_REAL_CDS);
+			attributes= new String[] {"ALTERNATE_SS", "REGION_REAL_CDS"};
+			for (int j = 0; ss!= null&& j < ss.length; j++) 
+				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
+			
+			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_3UTR);
+			attributes= new String[] {"CONSTITUTIVE_SS", "REGION_REAL_3UTR"};
+			for (int j = 0; ss!= null&& j < ss.length; j++) 
+				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
+			
+			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATE_SS, Gene.REGION_REAL_3UTR);
+			attributes= new String[] {"ALTERNATE_SS", "REGION_REAL_3UTR"};
+			for (int j = 0; ss!= null&& j < ss.length; j++) 
+				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
+		}
+		
+		GTFWrapper wrapper= new GTFWrapper(fName);
+		wrapper.setGtfObj((GTFObject[]) Arrays.toField(gffV));
+		try {
+			wrapper.writeGFF();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void getUTRExons(Graph g, String fName) {
+		Exon[] ex5= g.getExons(Gene.REGION_REAL_5UTR);
+		Exon[] ex3= g.getExons(Gene.REGION_REAL_3UTR);
+		
+		Vector v= new Vector(ex5.length+ ex3.length);
+		for (int i = 0; i < ex5.length; i++) {
+			GTFObject gtf= new GTFObject();
+			try {
+				gtf.setSeqname(ex5[i].getChromosome());
+				gtf.setSource("REAL_5UTR");
+				gtf.setFeature("exon");
+				gtf.setStart(Math.abs(ex5[i].getStart()));
+				gtf.setEnd(Math.abs(ex5[i].getEnd()));
+				gtf.setStrand(ex5[i].getStrand());
+				Transcript[] tr= ex5[i].getTranscripts();
+				for (int j = 0; j < tr.length; j++)
+					gtf.addAttribute("trascript_id", tr[j].getTranscriptID());
+				v.add(gtf);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		for (int i = 0; i < ex3.length; i++) {
+			try {
+				GTFObject gtf= new GTFObject();
+				gtf.setSeqname(ex3[i].getChromosome());
+				gtf.setSource("REAL_5UTR");
+				gtf.setFeature("exon");
+				gtf.setStart(Math.abs(ex3[i].getStart()));
+				gtf.setEnd(Math.abs(ex3[i].getEnd()));
+				gtf.setStrand(ex3[i].getStrand());
+				Transcript[] tr= ex3[i].getTranscripts();
+				for (int j = 0; j < tr.length; j++)
+					gtf.addAttribute("trascript_id", tr[j].getTranscriptID());
+				v.add(gtf);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		GTFObject[] obj= (GTFObject[]) Arrays.toField(v);
+		GTFWrapper wrapper= new GTFWrapper(fName);
+		wrapper.setGtfObj(obj);
+		try {
+			wrapper.write();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	public static void outputMultiVars(ASMultiVariation[] mVars, PrintStream p) {
 		for (int j = 0; j < mVars.length; j++) {
 			HashMap map= mVars[j].getTransHash();
@@ -2740,34 +3093,65 @@ public class ASAnalyzer {
 		}
 
 	}
-	public static void main(String[] args) {
-		
-		//"encode/44regions_genes_CHR_coord.gtf"
-		//"encode/gencode_races.gtf"
-		//"encode/EnsemblGenes_fromUCSC.gtf"
-		// "encode/EnsemblGenes_fromUCSC_inENCODEonly.gtf"
-		// "encode/RefSeqGenes_fromUCSC.inENCODE.gtf"
-		// "encode/RefSeqGenes_fromUCSC.gtf"
-		// "encode/EnsemblGenes_all_fromENSEMBL.gtf"
-		// "encode/Sequences_mapped_HAVANA_136.gtf"
-		String fName= "encode/RefSeqGenes_fromUCSC.gtf";
-		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
-		try {
-			myWrapper.read();
-		} catch (Exception e) {
-			e.printStackTrace(); 
+	
+	public static void analyzeMutex(ASMultiVariation var, PrintStream p) {
+			// isolate all sc with 2 SSs
+		SpliceSite[][] sc= var.getSpliceChains();
+		Vector v= new Vector();
+		DirectedRegion reg;
+		for (int i = 0; i < sc.length; i++) {
+			if (sc[i]== null|| sc[i].length!= 2)
+				continue;
+			reg= new DirectedRegion(sc[i][0].getPos(), sc[i][1].getPos(), 
+					var.getGene().getStrand());
+			reg.setChromosome(var.getGene().getChromosome());
+			reg.setSpecies(var.getGene().getSpecies());
+			v.add(reg);
 		}
-		boolean encode= false;
-		if (fName.startsWith("encode/44regions_genes_CHR_coord"))
-			encode= true;
+
+			// length
+		p.println("lengthes:");
+		DirectedRegion[] regs= (DirectedRegion[]) Arrays.toField(v);
+		for (int i = 0; i < regs.length; i++) {
+			for (int j = (i+1); j < regs.length; j++) {
+				p.println(regs[i].getLength()+" ("+(regs[i].getLength()%3)+"), "+
+						regs[j].getLength()+" ("+(regs[j].getLength()%3)+"), "+
+						(regs[i].getLength()+ regs[j].getLength())+ " ("+ ((regs[i].getLength()+ regs[j].getLength())% 3)+ ")"
+						);
+			}
+		}
 		
-		Graph g= myWrapper.getGraph(encode);		// <===== check ENCODE here !!!
+			// ntID
+		for (int i = 0; i < regs.length; i++) {
+			for (int j = (i+1); j < regs.length; j++) {
+				String seq1= Graph.readSequence(regs[i]);
+				String seq2= Graph.readSequence(regs[j]);
+				int id= Toolbox.seqIdentity(seq1, seq2);
+				int percID= id* 100/ Math.min(seq1.length(), seq2.length());
+				p.print(percID+ ", ");
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+
+		//getSpliceSites(g, "sylvain_spicesites.gff", "gencode");
+		//output5UTRExonFragments();
+		//outputSpliceSites();
+		//output5UTRIntrons();
+		//outputCDSIntrons();
+//		if (1== 1)
+//			System.exit(0);
+		
+		
+		Graph g= getGraph(INPUT_REFSEQ_CODING_FROM_UCSC);		
 		g.filterNonCodingTranscripts();
 		//g.filterCodingTranscripts();
 		//test04a_determineVarDegree(g, System.out);
 		//test04_checkOutsideEncode(g, System.out);
-		
-		ASMultiVariation[][] vars= g.getASMultiVariations();
+
+//		ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
+		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	
 		vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
 		for (int i = 0; i < vars.length; i++) {
 			System.out.println(vars[i].length+ "\t"+ vars[i][0]);
@@ -2775,8 +3159,35 @@ public class ASAnalyzer {
 					vars[i][0].toString().startsWith("(1-2^3-4^ // 1-2^ // 3-4^)")||
 					vars[i][0].toString().startsWith("(1-2^ // 3-4^ // )")) {
 				outputMultiVars(vars[i], System.out);
+				for (int j = 0; j < vars[i].length; j++) {
+					analyzeMutex(vars[i][j], System.out);
+					System.out.println();
+				}
 			}
 		}
+		
+//		ASVariation[][] vars2= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+//		vars2= (ASVariation[][]) Arrays.sort2DFieldRev(vars2);
+//		for (int i = 0; i < vars2.length; i++) {
+//			System.out.println(vars2[i].length+ "\t"+ vars2[i][0]);
+//			if (vars2[i][0].toString().equals("(1=2^ // 3=4^)")) {
+//				System.out.println(vars2[i].length+ "\t"+ vars2[i][0]);
+//				for (int j = 0; j < vars2[i].length; j++) {
+//					System.out.print("\t"+ vars2[i][j].getGene().getChromosome()+" ");
+//					SpliceSite[] sc1= vars2[i][j].getSpliceChain1();
+//					SpliceSite[] sc2= vars2[i][j].getSpliceChain2();
+//					SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
+//					if (sc2.length> sc1.length)
+//						Arrays.swap(sc);
+//					for (int k = 0; k < sc.length; k++) {
+//						for (int m = 0; m < sc[k].length; m++) 
+//							System.out.print(sc[k][m]+ " ");
+//						System.out.print("\t// ");
+//					}
+//					System.out.println();
+//				}
+//			}
+//		}
 		
 		
 		

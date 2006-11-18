@@ -22,6 +22,17 @@ import java.io.InputStreamReader;
  */
 public class Toolbox {
 
+	public static int seqIdentity(String seq1, String seq2) {
+		int shorter= Math.min(seq1.length(), seq2.length());
+		int id= 0;
+		for (int i = 0; i < shorter; i++) {
+			if (Character.toUpperCase(seq1.charAt(i))== 
+				Character.toUpperCase(seq2.charAt(i)))
+				++id;
+		}
+		return id;
+	}
+	
 	public static String getAbsFileName(String fName) {
 		return new File(fName).getAbsolutePath();
 	}

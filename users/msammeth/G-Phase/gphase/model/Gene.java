@@ -3,6 +3,7 @@ package gphase.model;
 import gphase.Constants;
 import gphase.algo.AlignmentGenerator;
 
+import java.awt.List;
 import java.io.File;
 import java.io.Serializable;
 import java.sql.Types;
@@ -153,21 +154,28 @@ public class Gene extends DirectedRegion {
 		return (Transcript[][]) gphase.tools.Arrays.toField(clusters);
 	}
 	
-	public SpliceSite[] getSpliceSites(int regionType, int type) {
-		DirectedRegion[] regions= new DirectedRegion[1];
-		if (regionType== AbstractRegion.REGION_5UTR)
-			regions[0]= getReal5UTR();
-		else if (regionType== AbstractRegion.REGION_CDS)
-			regions[0]= getRealCDS();
-		else if (regionType== AbstractRegion.REGION_3UTR)
-			regions[0]= getReal3UTR();
-		else if (regionType== AbstractRegion.REGION_COMPLETE_CLUSTER)
-			regions[0]= new DirectedRegion(getStart(), getEnd(), getStrand());
-		
-		if (regions[0]== null) {
+	public SpliceSite[] getSpliceSites(int spliceType) {
+
+		if (spliceSites== null)
 			return null;
+		
+		Vector v= new Vector(spliceSites.length);
+		for (int i = 0; i < spliceSites.length; i++) {
+			if (spliceType== SpliceSite.ALTERNATE_SS&& !spliceSites[i].isConstitutive()) 
+				v.add(spliceSites[i]);
+			else if (spliceType== SpliceSite.CONSTITUTIVE_SS&& spliceSites[i].isConstitutive()) 
+				v.add(spliceSites[i]);
+			else if (spliceType!= SpliceSite.CONSTITUTIVE_SS&& spliceType!= SpliceSite.ALTERNATE_SS)
+				v.add(spliceSites[i]);
 		}
-		return getSpliceSites(regions, type);
+		
+		return (SpliceSite[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	public SpliceSite[] getSpliceSites(int spliceType, int regionType) {
+		SpliceSite[] sites= getSpliceSites(spliceType);
+		DirectedRegion[] regions= getRegion(regionType);
+		return (SpliceSite[]) DirectedRegion.contained(regions, sites);
 	}
 	
 	public SpliceSite[] getSpliceSites(DirectedRegion[] target, int type) {
@@ -618,6 +626,8 @@ public class Gene extends DirectedRegion {
 		setSpecies(spec);
 		
 		geneID= stableGeneID;
+		setID("gene");
+		setStrand(getStrand());
 	}
 	
 	/**
@@ -830,27 +840,28 @@ public class Gene extends DirectedRegion {
 	 * @deprecated too mem-intensive
 	 */
 	int align_qalign(String[] seqs) {
-		
-		QAlign qalign= new QAlign();
-		try {
-			qalign.setAll(
-			    0,	// weighting tree
-			    1,	// output console
-			    1,	// simultaneous alignment
-			    seqs,
-			    CostTable.DNARNA,
-			    5,	// minimal epsilon
-			    null,
-			    null,
-			    null);
-			qalign.run();
-			seqs[0]= qalign.getSimultaneousLayout()[0];
-			seqs[1]= qalign.getSimultaneousLayout()[1];
-		} catch (CancelException e) {
-			e.printStackTrace();
-		}
-		
-		return qalign.getCost();
+//		
+//		QAlign qalign= new QAlign();
+//		try {
+//			qalign.setAll(
+//			    0,	// weighting tree
+//			    1,	// output console
+//			    1,	// simultaneous alignment
+//			    seqs,
+//			    CostTable.DNARNA,
+//			    5,	// minimal epsilon
+//			    null,
+//			    null,
+//			    null);
+//			qalign.run();
+//			seqs[0]= qalign.getSimultaneousLayout()[0];
+//			seqs[1]= qalign.getSimultaneousLayout()[1];
+//		} catch (CancelException e) {
+//			e.printStackTrace();
+//		}
+//		
+//		return qalign.getCost();
+		return -1;
 	}
 	
 	/**
@@ -900,8 +911,8 @@ public class Gene extends DirectedRegion {
 	
 	public AbstractSite getSite(int pos) {
 		AbstractSite s= null;
-		AbstractSite o= new AbstractSite();
-		o.setPos(pos);
+		AbstractSite o= new AbstractSite(pos);
+		//o.setPos(pos);
 		int b= Arrays.binarySearch(getSites(), o, new AbstractSite.PositionComparator());
 		if (b>= 0)
 			s= getSites()[b];
@@ -981,7 +992,7 @@ public class Gene extends DirectedRegion {
 					int m;
 					for (m = 1; m < ex2.length- 2; m++) {
 						if (ex1[k].overlaps(ex2[m])) {
-							if (ex1[k].get)
+							//if (ex1[k].get)
 						}
 					}
 					if (m== ex2.length&& !constitutive)
@@ -989,6 +1000,7 @@ public class Gene extends DirectedRegion {
 				}
 			}
 		}
+		return null;
 	}
 	
 	public ASMultiVariation[] getASMultiVariations() {
@@ -1066,7 +1078,8 @@ public class Gene extends DirectedRegion {
 																		//TODO warning! TSS/TES flanked events included !!
 		ASMultiVariation[] multiVars= new ASMultiVariation[spliceClusters.size()];
 		for (int x = 0; x < spliceClusters.size(); x++) {	// iterate complexes
-			multiVars[x]= new ASMultiVariation((SpliceSite[][]) spliceClusters.elementAt(x), null);
+			multiVars[x]= new ASMultiVariation((SpliceSite[][]) spliceClusters.elementAt(x), (Transcript[]) null);
+			System.currentTimeMillis();
 		}
 	
 		return multiVars;
@@ -1352,6 +1365,42 @@ public class Gene extends DirectedRegion {
 	public String getConfidence() {
 		return confidence;
 	}
+	
+	public Exon[] getExons(int region) {
+		Vector v= new Vector();
+		for (int i = 0; i < transcripts.length; i++) 
+			v= (Vector) gphase.tools.Arrays.addAll(v, transcripts[i].getExons());
+			
+		DirectedRegion reg= getRegion(region);
+		if (reg== null)
+			return null;
+		for (int i = 0; i < v.size(); i++) 
+			if (!reg.contains((Exon) v.elementAt(i)))
+				v.remove(i--);
+		
+		return  (Exon[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	public DirectedRegion[] getRegion(int regionID) {
+		
+		Object o= null;
+		if (regionID== REGION_REAL_5UTR)
+			o= getReal5UTR();
+		else if (regionID== REGION_REAL_CDS)
+			o= getRealCDS();
+		else if (regionID== REGION_REAL_3UTR)
+			o= getReal3UTR();
+		else if (regionID== REGION_MAX_CDS)
+			o= getMaxCDS();
+		else if (regionID== REGION_COMPLETE_GENE)
+			o= this;	// new DirectedRegion(getStart(), getEnd(), getStrand());
+		
+		if (o!= null&& !o.getClass().isArray())
+			o= new DirectedRegion[] {(DirectedRegion) o};
+		return (DirectedRegion[]) o;
+	}
+	
+
 	/**
 	 * @return Returns the type.
 	 */
@@ -1361,6 +1410,20 @@ public class Gene extends DirectedRegion {
 
 	String chromosome = null;
 	Species species = null;
+	public static final String[] REGION_ID= 
+	{"REGION_COMPLETE_GENE", "REGION_REAL_5UTR", "REGION_REAL_CDS", "REGION_REAL_3UTR",
+		"REGION_MAX_5UTR", "REGION_MAX_CDS", "REGION_MAX_3UTR", "REGION_TRANSCRIPT_5UTR",
+		"REGION_TRANSCRIPT_CDS", "REGION_TRANSCRIPT_3UTR"};
+	public static final int REGION_COMPLETE_GENE= 0;
+	public static final int REGION_REAL_5UTR= 1;
+	public static final int REGION_REAL_CDS= 2;
+	public static final int REGION_REAL_3UTR= 3;
+	public static final int REGION_MAX_5UTR= 4;
+	public static final int REGION_MAX_CDS= 5;
+	public static final int REGION_MAX_3UTR= 6;
+	public static final int REGION_TRANSCRIPT_5UTR= 7;
+	public static final int REGION_TRANSCRIPT_CDS= 8;
+	public static final int REGION_TRANSCRIPT_3UTR= 9;
 
 	/**
 	 * @return

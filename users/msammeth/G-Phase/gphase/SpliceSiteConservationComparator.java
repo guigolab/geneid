@@ -1,6 +1,5 @@
-package gphase.tools;
+package gphase;
 
-import gphase.Toolbox;
 import gphase.algo.ASAnalyzer;
 import gphase.io.gtf.EncodeWrapper;
 import gphase.io.gtf.GTFObject;
@@ -11,11 +10,13 @@ import gphase.model.AbstractRegion;
 import gphase.model.DefaultRegion;
 import gphase.model.DirectedRegion;
 import gphase.model.EncodeRegion;
+import gphase.model.Exon;
 import gphase.model.Gene;
 import gphase.model.Graph;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.model.Translation;
+import gphase.tools.ENCODE;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -1304,7 +1305,7 @@ public class SpliceSiteConservationComparator {
 		g.filterNonCodingTranscripts();
 
 		// splice sites
-		SpliceSite[][] ss2 = g.getSpliceSites(AbstractRegion.REGION_5UTR);
+		SpliceSite[][] ss2 = g.getSpliceSites(Gene.REGION_REAL_5UTR);
 		String[] species = { "human", "chimp", "macaque", "baboon", "galago",
 				"marmoset" };
 		DefaultRegion[] eRegs = ENCODE.getEncodeRegions();
@@ -1335,6 +1336,110 @@ public class SpliceSiteConservationComparator {
 //		frame.setVisible(true);
 	}
 
+	public static void analyzeStops(Graph g) {
+		
+			// "analyze_stop_constSS_maxCDS_statistics.txt"
+			// "analyze_stop_constSS_maxCDS_donors.txt"
+			// "analyze_stop_constSS_maxCDS_acceptors.txt"
+		PrintStream p= null;
+		try {
+			p= new PrintStream("analyze_stop_constSS_maxCDS_donors.txt");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		String[] stops= new String[] {"TAA", "TGA", "TAG"};
+		g.filterNonCodingTranscripts();
+		g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+		SpliceSite[] ss= g.getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_MAX_CDS);
+		DefaultRegion[] reg= ENCODE.getEncodeRegions();
+		int ctrStopDon= 0, ctrStopAcc= 0, ctrNoStopDon= 0, ctrNoStopAcc= 0;
+		Vector seqV= new Vector(ss.length);
+		for (int i = 0; i < reg.length; i++) {
+			Vector v= new Vector();
+			for (int j = 0; j < ss.length; j++) 
+				if (reg[i].contains(ss[j]))
+					v.add(ss[j]);
+			SpliceSite[] regSS= (SpliceSite[]) gphase.tools.Arrays.toField(v);
+				
+			SpliceSiteConservationComparator comp= 
+				new SpliceSiteConservationComparator(reg[i].getID(), new String[] {"human"});
+			
+			for (int j = 0; regSS!= null&& j < regSS.length; j++) {
+				int pos1, pos2, delta= 10;
+				if ((regSS[j].getGene().getStrand()> 0&& regSS[j].isDonor()) ||
+						regSS[j].getGene().getStrand()< 0&& regSS[j].isAcceptor()) {
+					pos1= Math.abs(regSS[j].getPos())- reg[i].getStart()+ 1- 2;
+					pos2= pos1+ delta;
+				} else {
+					pos2= Math.abs(regSS[j].getPos())- reg[i].getStart()+ 2;	// d kill +1
+					pos1= pos2- delta;
+				}
+				String s= comp.getSubstring("human", pos1, pos2);
+				if (regSS[j].getGene().getStrand()< 0)
+					s= gphase.tools.Arrays.reverseComplement(s);
+				System.currentTimeMillis();
+				
+				Exon[] e= regSS[j].getExons();
+				int k;
+				for (k = 0; k < e.length; k++) {
+						// 	skip nc SSs
+					if (regSS[j].isDonor()&& !e[k].isCoding3Prime())
+						continue;
+					if (regSS[j].isAcceptor()&& !e[k].isCoding5Prime())
+						continue;
+					
+					int fr= e[k].getFrame();	// for acceptors, this directly corresponds to frame of pos#2
+					if (regSS[j].isDonor()) {
+						fr+= (3- (Math.abs(e[k].get5PrimeEdge()- e[k].get5PrimeCDS())+ 1- 1)% 3);	// end frame, position#2 in string s
+						fr= --fr< 0?3+ fr:fr;	// pos#2 -> pos#3
+						fr= fr> 2?fr- 3:fr;
+					} 
+					
+					int backNt= (3-fr== 3)?0:3-fr;	// frame -> nt before					
+					int pos= 2- backNt;	// 3rd pos in string - Ns read before
+					while (pos+ 2< s.length()) {
+						String cod= s.substring(pos, pos+ 3);
+						int m;
+						for (m = 0; m < stops.length; m++) 
+							if (stops[m].equalsIgnoreCase(cod))
+								break;
+						if (m< stops.length)
+							break;
+						pos+= 3;
+					}
+					if (pos+ 2< s.length())
+						break;
+				}
+				if (k< e.length) {
+					if (regSS[j].isDonor()) {
+						++ctrStopDon; 
+						seqV.add(s);
+					} else {
+						++ctrStopAcc;
+					}
+				} else {
+					if (regSS[j].isDonor()) {
+						++ctrNoStopDon; 
+						seqV.add(s);
+					} else {
+						++ctrNoStopAcc;
+					}
+				}
+			}
+		}
+		
+//		p.println("Donor "+ctrStopDon+ " stop, "+ ctrNoStopDon+ " nostop");
+//		p.println("Actor "+ctrStopAcc+ " stop, "+ ctrNoStopAcc+ " nostop");
+		for (int i = 0; i < seqV.size(); i++) {
+			p.println(">const_don_realCDS");
+			p.println(seqV.elementAt(i));
+		}
+		
+	}
+	
+	
 	public static void outputRegions(Graph g, String fName) {
 		Gene[] ge= g.getGenes();
 		Vector v= new Vector(ge.length* 3);
@@ -1342,7 +1447,7 @@ public class SpliceSiteConservationComparator {
 		DirectedRegion r;
 		for (int i = 0; i < ge.length; i++) {
 			r= ge[i].getReal5UTR();
-			if (r!= null) {
+			if (r!= null&& Math.abs(r.getStart())<= Math.abs(r.getEnd())) {
 				o= new GTFObject();
 				o.setSeqname(r.getChromosome());
 				try {
@@ -1350,14 +1455,14 @@ public class SpliceSiteConservationComparator {
 					o.setStrand(ge[i].getStrand());
 				} catch (Exception e) {e.printStackTrace(); }
 				o.setSource(ge[i].getGeneID());
-				o.setStart(r.getStart());
-				o.setEnd(r.getEnd());
+				o.setStart(Math.abs(r.getStart()));
+				o.setEnd(Math.abs(r.getEnd()));
 				o.addAttribute("5UTR", "real");
 				v.add(o);
 			}
 			
-			if (r!= null) {
-				r= ge[i].getRealCDS();
+			r= ge[i].getRealCDS();
+			if (r!= null&& Math.abs(r.getStart())<= Math.abs(r.getEnd())) {
 				o= new GTFObject();
 				o.setSeqname(r.getChromosome());
 				try {
@@ -1365,8 +1470,8 @@ public class SpliceSiteConservationComparator {
 					o.setStrand(ge[i].getStrand());
 				} catch (Exception e) {e.printStackTrace(); }
 				o.setSource(ge[i].getGeneID());
-				o.setStart(r.getStart());
-				o.setEnd(r.getEnd());
+				o.setStart(Math.abs(r.getStart()));
+				o.setEnd(Math.abs(r.getEnd()));
 				o.addAttribute("CDS", "real");
 				v.add(o);
 			}
@@ -1381,24 +1486,13 @@ public class SpliceSiteConservationComparator {
 	
 	public static void main(String[] args) {
 		
-		//"encode/44regions_genes_CHR_coord.gtf"
-		// "encode/RefSeqGenes_fromUCSC.gtf"
+		Graph g= ASAnalyzer.getGraph(ASAnalyzer.INPUT_ENCODE);
 
-		String fName= "encode/44regions_genes_CHR_coord.gtf";
-		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
-		try {
-			myWrapper.read();
-		} catch (Exception e) {
-			e.printStackTrace(); 
-		}
-		boolean encode= false;
-		if (fName.startsWith("encode/44regions_genes_CHR_coord"))
-			encode= true;
-		Graph g= myWrapper.getGraph(encode);
+		analyzeStops(g);
 		
 		// "conserv_analysis_full.txt"
-		String outName= "regions.gtf";
-		outputRegions(g, outName);
+//		String outName= "regions.gtf";
+//		outputRegions(g, outName);
 		
 //		PrintStream p= null;
 //		try {

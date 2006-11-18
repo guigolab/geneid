@@ -19,6 +19,16 @@ public class DefaultRegion extends AbstractRegion implements Region {
 	String chromosome = null;
 	Species species = null;
 	
+	public boolean contains(SpliceSite ss) {
+		if (!ss.getGene().getChromosome().equals(chromosome))
+			return false;
+		
+		int apos= Math.abs(ss.getPos());
+		if (apos>= getStart()&& apos<= getEnd())
+			return true;
+		return false;
+	}
+	
 	public Object clone() {
 		DefaultRegion clone= new DefaultRegion(getStart(), getEnd());
 		clone.setID(getID());

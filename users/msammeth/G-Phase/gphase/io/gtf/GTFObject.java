@@ -6,6 +6,11 @@
  */
 package gphase.io.gtf;
 
+import gphase.model.AbstractSite;
+import gphase.model.DefaultRegion;
+import gphase.model.DirectedRegion;
+import gphase.model.SpliceSite;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -19,6 +24,8 @@ import java.util.Vector;
  */
 public class GTFObject {
 
+	boolean gff= false;
+	
 	public String toString() {
 		
 		String x= 
@@ -51,6 +58,99 @@ public class GTFObject {
 	public final static String GENE_ALIAS_TAG= "gene_alias";
 	public final static String INTRON_ID_TAG= "intron_id";
 	public final static String INTRON_STATUS_TAG= "intron_status";
+	
+	public static GTFObject createGTFObject(AbstractSite site) {
+//		<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments] 
+		GTFObject gtf= new GTFObject();
+		gtf.setSeqname(site.getGene().getChromosome());
+		gtf.setStart(Math.abs(site.getPos()));
+		gtf.setEnd(Math.abs(site.getPos()));
+		try {
+			gtf.setFeature("site");
+			gtf.setStrand(site.getGene().getStrand());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return gtf;
+	}
+	
+	public static GTFObject createGFFObject(DirectedRegion reg) {
+		GTFObject gtf= new GTFObject();
+		gtf.setGff(true);
+		gtf.setSeqname(reg.getChromosome());
+		gtf.setStart(Math.abs(reg.getStart()));
+		gtf.setEnd(Math.abs(reg.getEnd()));
+		try {
+			gtf.setFeature(reg.getID());
+			gtf.setStrand(reg.getStrand());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return gtf;
+	}
+	
+	public static GTFObject createGFFObject(DirectedRegion reg, String[] attributes) {
+		GTFObject gtf= createGFFObject(reg);
+		for (int i = 0; attributes!= null&& i < attributes.length; i++) 
+			gtf.addAttribute(Integer.toString(i), attributes[i]);
+		return gtf;
+	}
+	public static GTFObject createGFFObject(AbstractSite site) {
+//		<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments] 
+		GTFObject gtf= new GTFObject();
+		gtf.setGff(true);
+		gtf.setSeqname(site.getGene().getChromosome());
+		gtf.setStart(Math.abs(site.getPos()));
+		gtf.setEnd(Math.abs(site.getPos()));
+		try {
+			gtf.setFeature("site");
+			gtf.setStrand(site.getGene().getStrand());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return gtf;
+	}
+	public static GTFObject createGFFObject(SpliceSite site) {
+		GTFObject gtf= createGFFObject((AbstractSite) site);
+		try {
+			if (site.isDonor())
+				gtf.setFeature("donor");
+			else
+				gtf.setFeature("acceptor");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (site.isConstitutive()) 
+			gtf.addAttribute("modality", "constitutive");
+		else
+			gtf.addAttribute("modality", "alternative");
+		return gtf;
+	}
+	public static GTFObject createGFFObject(SpliceSite site, String source) {
+		GTFObject gtf= createGFFObject(site);
+		gtf.setSource(source);
+		return gtf;
+	}
+	public static GTFObject createGFFObject(DirectedRegion reg, String src, String[] attributes) {
+		GTFObject gtf= createGFFObject(reg, attributes);
+		gtf.setSource(src);
+		return gtf;
+	}
+	public static GTFObject createGFFObject(SpliceSite site, String[] attributes) {
+		GTFObject gtf= createGFFObject(site);
+		for (int i = 0; attributes!= null&& i < attributes.length; i++) 
+			gtf.addAttribute(Integer.toString(i), attributes[i]);
+		return gtf;
+	}
+	
+	public static GTFObject createGFFObject(SpliceSite site, String src, String[] attributes) {
+		GTFObject gtf= createGFFObject(site, src);
+		for (int i = 0; attributes!= null&& i < attributes.length; i++) 
+			gtf.addAttribute(Integer.toString(i), attributes[i]);
+		return gtf;
+	}
+	
+	
 	//	<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments] 
 	String seqname= null;	// The FPC contig ID from the Golden Path. 
 	// The source column should be a unique label indicating where the annotations came from --- typically the name of either a prediction program or a public database.
@@ -96,6 +196,9 @@ public class GTFObject {
 	}
 	public boolean isIntron() {
 		return getFeature().equals("intron"); 
+	}
+	public boolean isCoding() {
+		return (isCDS()|| isStartCodon()|| isStopCodon());
 	}
 	public boolean isCDS() {
 		return getFeature().equals("CDS"); 
@@ -221,19 +324,20 @@ public String getFeature() {
  */
 public void setFeature(String feature) throws Exception {
 	
-	Exception e;
-	int i;
-	for (i = 0; i < GTFObject.FEATURE_VALID.length; i++) { 
-		if (feature.equals(GTFObject.FEATURE_VALID[i]))
-			break;
-		if (feature.equalsIgnoreCase(GTFObject.FEATURE_VALID[i]))
-			System.err.println("check case spelling for "+feature);
+	if (!isGff()) {
+		Exception e;
+		int i;
+		for (i = 0; i < GTFObject.FEATURE_VALID.length; i++) { 
+			if (feature.equals(GTFObject.FEATURE_VALID[i]))
+				break;
+			if (feature.equalsIgnoreCase(GTFObject.FEATURE_VALID[i]))
+				System.err.println("check case spelling for "+feature);
+		}
+		if (i== GTFObject.FEATURE_VALID.length) {
+			e= new Exception("no valid entry for feature\n\t"+ feature);
+			throw(e);
+		}
 	}
-	if (i== GTFObject.FEATURE_VALID.length) {
-		e= new Exception("no valid entry for feature\n\t"+ feature);
-		throw(e);
-	}
-
 	this.feature = feature;
 }
 	/**
@@ -266,6 +370,10 @@ public String getSeqname() {
  * @param seqname The seqname to set.
  */
 public void setSeqname(String seqname) {
+	
+	if (seqname.length()<= 3)
+		seqname= "chr"+ seqname;
+	
 	this.seqname = seqname;
 }
 	/**
@@ -348,8 +456,10 @@ public void setStrand(int strandInt) throws Exception {
 		strand= false;
 		return;
 	}
-	Exception e= new Exception("no valid mark for orientation! "+strandInt);
-	throw(e);
+	if (!isGff()) {
+		Exception e= new Exception("no valid mark for orientation! "+strandInt);
+		throw(e);
+	}
 }
 	/**
 	 * @return Returns the comments.
@@ -368,5 +478,11 @@ public void setStrand(int strandInt) throws Exception {
 		String s= getSeqname();
 		return s;
 		
+	}
+	public boolean isGff() {
+		return gff;
+	}
+	public void setGff(boolean gff) {
+		this.gff = gff;
 	}
 }

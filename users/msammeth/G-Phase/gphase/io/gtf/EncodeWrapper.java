@@ -85,9 +85,6 @@ public class EncodeWrapper extends GTFWrapper {
 //			e1.printStackTrace();
 //		}
 //		ASAnalyzer.test04_determineVariations(g, pr);
-		//ASAnalyzer.test01_clusters_coverage_as(g, System.out);
-		//ASAnalyzer.test02_ss_statistics(g, System.out);
-		ASAnalyzer.test04_determineVariations_rev(g, System.out);
 		
 		
 //		ASVariation[][] classes= g.getASVariations(1);
@@ -119,7 +116,7 @@ public class EncodeWrapper extends GTFWrapper {
 //		ASAnalyzer.check_AA_AD(g, false, false, false);
 //		ASAnalyzer.check_AA_AD(g, false, true, false);
 		
-//		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
+		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
 //		if (1== 1)
 //			System.exit(0);
 		
@@ -157,16 +154,16 @@ public class EncodeWrapper extends GTFWrapper {
 
 //		ASAnalyzer.outputVariations(new ASVariation[][] {ASAnalyzer.getVariation("( 1^3=// 2^4=)", g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY))}, false, false, System.out);
 		// "output5UTR_REFSEQ"
-//		try {
-//			PrintStream p= new PrintStream("SSout_encode");
-////			//ASAnalyzer.output5UTRLengthAnalysis(g, p);
-////			//ASAnalyzer.outputInternalIntrons(g, p);
-//			ASAnalyzer.outputSSOutCdsUtr(g, p);
-//			p.flush();
-//			p.close();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		try {
+			PrintStream p= new PrintStream("SSout_encode");
+//			//ASAnalyzer.output5UTRLengthAnalysis(g, p);
+//			//ASAnalyzer.outputInternalIntrons(g, p);
+			ASAnalyzer.outputSSOutCdsUtr(g, p);
+			p.flush();
+			p.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		
 //		ASAnalyzer.getSylvainsSize(g, System.out);
@@ -376,17 +373,16 @@ public class EncodeWrapper extends GTFWrapper {
 	}
 	
 	private void checkMegaClusters(Transcript[] trans) {
-		java.util.Arrays.sort(trans, new DirectedRegion.LengthComparator());	// sort ascending
-		for (int i = trans.length- 1; i >= trans.length- 100; --i) {
-			System.out.println(trans[i].getTranscriptID()+ "\t"+ trans[i].getLength()+"\t"
-					+trans[i].getStart()+ "\t"+ trans[i].getEnd()
-					/*+trans[i].getExons().length*/);
+		java.util.Arrays.sort(trans, new DirectedRegion.PositionComparator());	// sort ascending
+		for (int i = trans.length- 1; i >= 0; --i) {
+			System.out.println(trans[i].getTranscriptID()+ "\t"+ trans[i].getLength()+"\t"+trans[i].getExons().length);
 		}
 	}
 	
 	Graph assemble(boolean encode) {
 		
 		Species spec= new Species("human");
+		spec.setBuildVersion(17);
 	
 			// cluster
 		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genes?
@@ -432,12 +428,10 @@ public class EncodeWrapper extends GTFWrapper {
 		
 			// check mega clusters
 //		HashMap[] maps= (HashMap[]) Arrays.toField(chr2Hash.values());
-//		Vector vv= new Vector(maps.length* 100);
+//		Vector v= new Vector(maps.length* 100);
 //		for (int i = 0; i < maps.length; i++) 
-//			vv.addAll(maps[i].values());
-//		checkMegaClusters(((Transcript[]) Arrays.toField(vv)));
-//		if (1== 1)
-//			System.exit(0);
+//			v.addAll(maps[i].values());
+//		checkMegaClusters(((Transcript[]) Arrays.toField(v)));
 		
 			// cluster
 		HashMap gHash= new HashMap();
@@ -461,10 +455,21 @@ public class EncodeWrapper extends GTFWrapper {
 					Vector v= (Vector) ((HashMap) chrHash.get(chrID)).get(loci[j][k].getTranscriptID());
 					for (int m = 0; m < v.size(); m++) {
 						France f= (France) v.elementAt(m);
-						if (f.isExon())
+						if (f.isExon()) {
 							loci[j][k].addExon(new Exon(loci[j][k], f.getExonID(), f.getStart(), f.getEnd()));
-						else if (f.isCDS())
+						} else if (f.isCoding()) {	// for extending translation
 							loci[j][k].addCDS(f.getStart(), f.getEnd());
+						}
+					}
+						// iterate again, all exons have to be there, order in input file not reliable
+					for (int m = 0; m < v.size(); m++) {
+						France f= (France) v.elementAt(m);
+						if (encode&& f.isCoding()) {		// in not-encode no exon ids..
+							Exon e= loci[j][k].getExon(f.getAttribute("exon_id"));	// 2nd iteration necessary, cds st b4 exon in file
+							e.extendStartCDS(f.getStart());
+							e.extendEndCDS(f.getEnd());
+							e.setFrame(f.getFrame());
+						}
 					}
 					locus.addTranscript(loci[j][k]);
 				}
@@ -489,6 +494,7 @@ public class EncodeWrapper extends GTFWrapper {
 	public static Graph assemble(boolean encode, GTFObject[] gtfObs) {
 		
 		Species spec= new Species("human");
+		spec.setBuildVersion(17);
 
 			// cluster
 		HashMap hash= getGroups("transcript_id", gtfObs);	// cluster for genes?
@@ -616,6 +622,8 @@ public class EncodeWrapper extends GTFWrapper {
 	Graph assemble_stable(boolean encode) {
 		
 		Species spec= new Species("human");
+		spec.setBuildVersion(17);
+		
 			// cluster
 		HashMap gHash= getGroups("gene_id", getGtfObj());	// cluster for genes
 		
