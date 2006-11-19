@@ -54,6 +54,7 @@ import gphase.model.Region;
 import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
+import gphase.model.Translation;
 import gphase.model.SpliceSite.PositionComparator;
 import gphase.regex.Automaton;
 import gphase.regex.ChessMaster;
@@ -3089,6 +3090,7 @@ public class ASAnalyzer {
 					System.out.print(trpt[m]+",");
 				p.println("]");
 			}
+			analyzeMutex(mVars[j], System.out);			
 			p.println("\n");
 		}
 
@@ -3102,12 +3104,25 @@ public class ASAnalyzer {
 		for (int i = 0; i < sc.length; i++) {
 			if (sc[i]== null|| sc[i].length!= 2)
 				continue;
+			Transcript t[]= (Transcript[]) var.getTransHash().get(sc[i]);
+			int j;
+			for (j = 0; j < t.length; j++) {
+				Translation trln= t[j].getTranslations()[0];
+				if (trln.contains(sc[i][0])|| trln.contains(sc[i][1])) {
+					p.print("cod, ");
+					break;
+				}
+			}
+			if (j== t.length)
+				p.print("ncod, ");
+			
 			reg= new DirectedRegion(sc[i][0].getPos(), sc[i][1].getPos(), 
 					var.getGene().getStrand());
 			reg.setChromosome(var.getGene().getChromosome());
 			reg.setSpecies(var.getGene().getSpecies());
 			v.add(reg);
 		}
+		p.println();
 
 			// length
 		p.println("lengthes:");
@@ -3120,7 +3135,7 @@ public class ASAnalyzer {
 						);
 			}
 		}
-		
+				
 			// ntID
 		for (int i = 0; i < regs.length; i++) {
 			for (int j = (i+1); j < regs.length; j++) {
@@ -3144,7 +3159,7 @@ public class ASAnalyzer {
 //			System.exit(0);
 		
 		
-		Graph g= getGraph(INPUT_REFSEQ_CODING_FROM_UCSC);		
+		Graph g= getGraph(INPUT_ENCODE);		
 		g.filterNonCodingTranscripts();
 		//g.filterCodingTranscripts();
 		//test04a_determineVarDegree(g, System.out);
@@ -3159,10 +3174,6 @@ public class ASAnalyzer {
 					vars[i][0].toString().startsWith("(1-2^3-4^ // 1-2^ // 3-4^)")||
 					vars[i][0].toString().startsWith("(1-2^ // 3-4^ // )")) {
 				outputMultiVars(vars[i], System.out);
-				for (int j = 0; j < vars[i].length; j++) {
-					analyzeMutex(vars[i][j], System.out);
-					System.out.println();
-				}
 			}
 		}
 		

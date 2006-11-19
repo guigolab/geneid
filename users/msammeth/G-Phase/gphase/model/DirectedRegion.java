@@ -69,6 +69,17 @@ public class DirectedRegion extends DefaultRegion {
 		return (AbstractSite[]) Arrays.toField(v);
 	}
 	
+	public boolean contains(SpliceSite ss) {
+		if (!ss.getGene().getChromosome().equals(chromosome))
+			return false;
+		
+		int apos= Math.abs(ss.getPos());
+		if (apos>= Math.abs(getStart())&& apos<= Math.abs(getEnd()))
+			return true;
+		return false;
+	}
+
+
 	public static DirectedRegion[] unite_old(DirectedRegion[] dir1, DirectedRegion[] dir2) {
 		
 		Comparator compi= new PositionComparator();
@@ -289,6 +300,8 @@ public class DirectedRegion extends DefaultRegion {
 			return false;
 		return contains(ss.getPos());
 	}
+	
+	
 	
 	public DirectedRegion intersect(DirectedRegion anotherRegion) {
 		

@@ -748,6 +748,8 @@ public class Transcript extends DirectedRegion {
 			translations= new Translation[] {new Translation(this)};
 			translations[0].setStart(start);
 			translations[0].setEnd(end);
+			translations[0].setChromosome(getChromosome());
+			translations[0].setSpecies(getSpecies());
 			return;
 		}
 			// else
