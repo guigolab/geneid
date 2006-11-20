@@ -624,6 +624,7 @@ public class Species implements Serializable {
 						Exon e= new Exon(t, ex[m].getExonID(), ex[m].getStart(), ex[m].getEnd());
 						e.setStartCDS(ex[m].getStartCDS());
 						e.setEndCDS(ex[m].getEndCDS());
+						e.setFrame(ex[m].getFrame());
 						t.addExon(e);
 					}
 					Translation[] trans= newTranscripts[j][k].getTranslations();

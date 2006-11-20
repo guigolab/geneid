@@ -142,6 +142,12 @@ public class AbstractSite implements Serializable {
 	public void setTranscripts(Transcript[] transcripts) {
 		this.transcripts = transcripts;
 	}
+	public void removeTranscript(Transcript aTrpt)  {
+		if (transcripts== null)
+			return;
+		transcripts= (Transcript[]) Arrays.remove(transcripts, aTrpt);
+	}
+
 	public void addTranscripts(Transcript[] newTrans) {
 		Vector v= new Vector(newTrans.length);
 		if (transcripts== null) {

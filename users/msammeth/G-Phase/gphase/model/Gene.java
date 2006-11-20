@@ -696,17 +696,19 @@ public class Gene extends DirectedRegion {
 		for (int i = 0; trans.getExons()!= null&& i < trans.getExons().length; i++) {
 			Exon ex= trans.getExons()[i]; 
 			ex.removeTranscript(trans);
-			if (ex.getTranscripts().length== 0) {	// remove exon/ss
-				if (ex.getDonor()!= null) {
+			if (ex.getDonor()!= null) {
+				ex.getDonor().removeTranscript(trans);
+				if (ex.getTranscripts().length== 0) 	// remove exon/ss
 					ex.getDonor().removeExon(ex);
-					if (ex.getDonor().getExons()== null|| ex.getDonor().getExons().length< 1)
-						removeSpliceSite(ex.getDonor());
-				} 
-				if (ex.getAcceptor()!= null) {
+				if (ex.getDonor().getExons()== null|| ex.getDonor().getExons().length< 1)
+					removeSpliceSite(ex.getDonor());
+			} 
+			if (ex.getAcceptor()!= null) {
+				ex.getAcceptor().removeTranscript(trans);
+				if (ex.getTranscripts().length== 0) 	// remove exon/ss
 					ex.getAcceptor().removeExon(ex);
-					if (ex.getAcceptor().getExons()== null|| ex.getAcceptor().getExons().length< 1)
-						removeSpliceSite(ex.getAcceptor());
-				}
+				if (ex.getAcceptor().getExons()== null|| ex.getAcceptor().getExons().length< 1)
+					removeSpliceSite(ex.getAcceptor());
 			}
 		}
 		

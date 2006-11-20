@@ -13,6 +13,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Vector;
 
+import org.freehep.graphicsio.swf.SWFAction.RemoveSprite;
+
 /**
  * 
  * 
@@ -69,6 +71,8 @@ public class SpliceSite extends AbstractSite {
 	public void removeExon(Exon ex) {
 		if (ex== null)
 			return;
+		
+			// remove exon
 		Exon[] newExons= new Exon[exons.length- 1];
 		int p= 0;
 		for (int i = 0; i < exons.length; i++) {
