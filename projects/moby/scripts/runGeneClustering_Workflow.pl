@@ -7,6 +7,7 @@
 # Add input options handling code
 
 use strict;
+use Getopt::Std;
 
 use File::Temp qw/tempfile/;
 use File::Temp qw/tempdir/;
@@ -17,6 +18,53 @@ use Benchmark;
 my $t1 = Benchmark->new ();
 
 my $_debug = 0;
+
+my $seqfile;
+my $html_output_file;
+
+my $input_type;
+
+my $species; 
+my $upstream_length;
+my $downstream_length;
+
+my $motif_database;
+my $threshold;
+
+my $alpha;
+my $lambda;
+my $mu;
+
+my $nj_method;
+
+my $iteration_number;
+my $cluster_number;
+
+my $gamma,
+my $non_colinear;
+
+my %options;
+getopts('f:o:e:s:v:w:d:t:a:l:u:m:n:i:g:r:', \%options);
+
+defined $options{f} and $seqfile = $options{f};
+defined $options{o} and $html_output_file = $options{o};
+defined $options{o} and $input_type = $options{e};
+defined $options{s} and $species = $options{s};
+defined $options{v} and $upstream_length = $options{v};
+defined $options{w} and $downstream_length = $options{w};
+defined $options{d} and $motif_database = $options{d};
+defined $options{t} and $threshold = $options{t};
+defined $options{a} and $alpha = $options{a};
+defined $options{l} and $lambda = $options{l};
+defined $options{u} and $mu = $options{u};
+defined $options{m} and $nj_method = $options{m};
+defined $options{n} and $iteration_number = $options{n};
+defined $options{i} and $cluster_number = $options{i};
+defined $options{g} and $gamma = $options{g};
+defined $options{r} and $non_colinear = $options{r};
+
+
+
 
 my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
 
@@ -44,8 +92,6 @@ my ($out_fh, $temp_output_html_file) = tempfile("/tmp/GENE_CLUSTERING_HTML_OUTPU
 
 # Get the sequences input and store it into a temporary file
 
-my ($seq_fh, $seqfile);
-
 if ($_debug) {
     print STDERR "temporary input file, $seqfile\n";
 }
@@ -71,8 +117,6 @@ if ($_debug) {
 
 # Get The type of input, so we know if we have to deal with FASTA sequences or a list of genes
 
-my $input_type;
-
 if ($_debug) {
     print STDERR "input type, $input_type\n";
 }
@@ -91,11 +135,6 @@ if ((!defined $input_type) || (($input_type ne "FASTA") && ($input_type ne "LIST
 # The script name that will be called, depending of the input type
 my $script_name;
 
-# Extraction parameters
-my $species;
-my $upstream_length;
-my $downstream_length;
-
 if ($input_type eq "FASTA") {
     
     $script_name = "GenesClustering_FASTA.pl";
@@ -109,24 +148,9 @@ else {
    
 ##############################
 #
-# CGI PARAMETERS
+# Workflow PARAMETERS
 #
 ##############################
-
-my $matrix;
-my $threshold;
-
-my $alpha;
-my $lambda;
-my $mu;
-
-my $nj_method;
-
-my $iteration_number;
-my $cluster_number;
-
-my $gamma;
-my $non_colinear;
 
 # Parameters Validation
 
@@ -162,7 +186,7 @@ $gene_clustering_output_dirname =~ s/\/usr\/local\/Install\/apache2\/htdocs\/web
 
 # Make the arguments line
 
-my $args = "-x 2 -c $_path_to_script\/workflow.config -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir";
+my $args = "-x 2 -c $_path_to_script\/workflow.config -d $motif_database -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir";
 
 if ($input_type eq "LIST") {
     $args .= " -s $species -v $upstream_length -w $downstream_length";
