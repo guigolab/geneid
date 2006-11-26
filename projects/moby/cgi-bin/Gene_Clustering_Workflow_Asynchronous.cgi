@@ -31,7 +31,7 @@ my @params = $cgi->param;
 
 my ($out_fh, $outfile);
 eval {
-    ($out_fh, $outfile) = tempfile("/usr/local/INSTALL/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING.XXXXXX.html", UNLINK => 0);
+    ($out_fh, $outfile) = tempfile("/usr/local/Install/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING.XXXXXX.html", UNLINK => 0);
 };
 close $out_fh;
 
@@ -255,11 +255,7 @@ if ($_debug) {
 
 # Make the arguments line
 
-# to do........................
-# add input type parameter
-# add output file name
-
-my $args = "-d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile";
+my $args = "-e $input_type -o $outfile -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile";
 
 if ($input_type eq "LIST") {
     $args .= " -s $species -v $upstream_length -w $downstream_length";
