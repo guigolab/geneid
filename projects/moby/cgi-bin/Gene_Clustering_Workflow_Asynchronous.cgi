@@ -1,5 +1,8 @@
 #!/usr/local/bin/perl -w
 
+# HTML::Template PATH
+use lib "/home/ug/gmaster/lib/site_perl/5.8.5/";
+
 use strict;
 use CGI;
 
@@ -8,6 +11,8 @@ use File::Temp qw/tempdir/;
 
 # Benchmark Module
 use Benchmark;
+
+use HTML::Template;
 
 my $t1 = Benchmark->new ();
 
@@ -33,7 +38,19 @@ my ($out_fh, $outfile);
 eval {
     ($out_fh, $outfile) = tempfile("/usr/local/Install/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING.XXXXXX.html", UNLINK => 0);
 };
-close $out_fh;
+if (defined $out_fh) {
+  close $out_fh;
+}
+
+if ($_debug) {
+  print STDERR "output html file, $outfile\n";
+  print STDERR "parsing the job id...\n";
+}
+
+$outfile =~ /GENE_CLUSTERING\.(\d+)\.html/;
+my $jobid = $1;
+
+print STDERR "Job ID: $jobid\n";
 
 ##############################
 #
@@ -271,7 +288,7 @@ if ($_debug) {
     $failure = qx/$_path_to_script\/$script_name $args &/;
 }
 else {
-    $failure = qx/$_path_to_script\/$script_name $args >& \/dev\/null &/;
+  $failure = qx/$_path_to_script\/$script_name $args >& \/dev\/null &/;
 }
 
 if ($_debug) {
@@ -300,10 +317,16 @@ if ($_debug) {
     print STDERR "Make a HTML page...\n";
 }
 
+my $_template_page = "/usr/local/Install/apache2/cgi-bin/moby/template/workflow_result.tmpl";
+
+# open the html template
+my $template = HTML::Template->new(filename => $_template_page);
+# fill in some parameters
+$template->param(JOBID => $jobid);
+     
 print "Content-type: text/html\n\n";
-
-# ...
-
+print $template->output;
+          
 ##############################
 #
 # The End
