@@ -14,7 +14,7 @@ use Benchmark;
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 1;
+my $_debug = 0;
 
 my $seqfile;
 my $html_output_file;
