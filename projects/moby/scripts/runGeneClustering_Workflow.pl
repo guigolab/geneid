@@ -3,9 +3,6 @@
 # This script is called by the Gene clustering Workflow CGI script
 # The cgi script delegates to it the execution of the workflow and the generation of the output HTML page.
 
-# To do..............................
-# Add input options handling code
-
 use strict;
 use Getopt::Std;
 
@@ -17,7 +14,7 @@ use Benchmark;
 
 my $t1 = Benchmark->new ();
 
-my $_debug = 0;
+my $_debug = 1;
 
 my $seqfile;
 my $html_output_file;
@@ -58,17 +55,14 @@ defined $options{a} and $alpha = $options{a};
 defined $options{l} and $lambda = $options{l};
 defined $options{u} and $mu = $options{u};
 defined $options{m} and $nj_method = $options{m};
-defined $options{n} and $iteration_number = $options{n};
-defined $options{i} and $cluster_number = $options{i};
+defined $options{i} and $iteration_number = $options{i};
+defined $options{n} and $cluster_number = $options{n};
 defined $options{g} and $gamma = $options{g};
 defined $options{r} and $non_colinear = $options{r};
 
-
-
-
 my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
 
-my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
+my $APACHE_ROOT = "/usr/local/Install/apache2";
 my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";
 my $FRAME2 = "$APACHE_ROOT/htdocs/software/geneid/Plantilla2.html";
 
@@ -78,10 +72,9 @@ my $FRAME2 = "$APACHE_ROOT/htdocs/software/geneid/Plantilla2.html";
 #
 ##############################
 
-# input argument
-my $output_html_file;
-# at the last moment, copy the result from the temp file to the visible file, $output_html_file
+# at the last moment, copy the result from the temp file to the visible file, $html_output_file
 # Because asynchronous test is based on whether the file exists or not !
+# So copy it at the last moment
 my ($out_fh, $temp_output_html_file) = tempfile("/tmp/GENE_CLUSTERING_HTML_OUTPUT.XXXXXX", UNLINK => 0);
 
 ##############################
@@ -103,10 +96,11 @@ if (-z $seqfile) {
     }
     unlink $seqfile;
     
-    print "Content-type: text/html\n\n";
     print_error("<b>ERROR> No data were submitted.</b><br><br>Please, fill the textarea in or select a file");
 
     close $out_fh;
+    qx/cp $temp_output_html_file $html_output_file/;
+    unlink $temp_output_html_file;
     exit 1;
 }
 
@@ -126,9 +120,10 @@ if ((!defined $input_type) || (($input_type ne "FASTA") && ($input_type ne "LIST
     if (defined $input_type) {
 	print STDERR "input type, $input_type\n";
     }
-    print "Content-type: text/html\n\n";
     print_error("<b>ERROR> Internal Error");
     close $out_fh;
+    qx/cp $temp_output_html_file $html_output_file/;
+    unlink $temp_output_html_file;
     exit 1;
 }
 
@@ -216,7 +211,6 @@ if ($_debug) {
 if ($failure) {
     print STDERR "workflow execution has failed!\n";
 
-    print "Content-type: text/html\n\n";
     print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
     close $out_fh;
     exit 1;
@@ -245,7 +239,6 @@ my $result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $outpu
 # Display in HTML the results
 # First the archive link
 
-print $out_fh "Content-type: text/html\n\n";
 print $out_fh "<html><head><title>Gene clustering results</title></head>\n<body>";
 
 print $out_fh "There is an <a href=\"$archive_URL\">archive</a> available to download all the results\n";
@@ -372,7 +365,7 @@ print $out_fh "</body></html>\n";
 
 close $out_fh;
 
-qx/cp $temp_output_html_file $output_html_file/;
+qx/cp $temp_output_html_file $html_output_file/;
 
 if ($_debug) {
     print STDERR "processing of the cluster results done\n";
