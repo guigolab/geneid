@@ -36,18 +36,25 @@ my @params = $cgi->param;
 
 my ($out_fh, $outfile);
 eval {
-    ($out_fh, $outfile) = tempfile("/usr/local/Install/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING.XXXXXX.html", UNLINK => 0);
+    ($out_fh, $outfile) = tempfile("/usr/local/Install/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING.XXXXXX", UNLINK => 0);
 };
+if ($@) {
+  print STDERR "Error, can't create a temporary file\n";
+    warn $@;
+}
 if (defined $out_fh) {
   close $out_fh;
 }
+unlink $outfile;
+# Add the HTML extension
+$outfile .= ".html";
 
 if ($_debug) {
   print STDERR "output html file, $outfile\n";
   print STDERR "parsing the job id...\n";
 }
 
-$outfile =~ /GENE_CLUSTERING\.(\d+)\.html/;
+$outfile =~ /GENE_CLUSTERING\.([^\.]+)\.html/;
 my $jobid = $1;
 
 print STDERR "Job ID: $jobid\n";
@@ -280,18 +287,22 @@ if ($input_type eq "LIST") {
 
 if ($_debug) {
     print STDERR "executing the following command,\n";
-    print STDERR "$_path_to_script\/$script_name $args\n";
+    print STDERR "$_path_to_script\/$_script_name $args\n";
 }
 
 my $failure;
 if ($_debug) {
-    $failure = qx/$_path_to_script\/$script_name $args &/;
+    # not working, not submitted in background!
+    # $failure = qx/$_path_to_script\/$_script_name $args &/;
+    my @commands = ("$_path_to_script\/$_script_name $args &");
+    system (@commands);
 }
 else {
-  $failure = qx/$_path_to_script\/$script_name $args >& \/dev\/null &/;
+    my @commands = ("$_path_to_script\/$_script_name $args >& /dev/null &");
+    system (@commands);
 }
 
-if ($_debug) {
+if ($_debug && defined $failure) {
     print STDERR "workflow submission result, $failure\n";
 }
 
