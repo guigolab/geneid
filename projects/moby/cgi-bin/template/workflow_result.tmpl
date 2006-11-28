@@ -1,20 +1,20 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html><head>
-<meta http-equiv="REFRESH"content="40;http://genome.imim.es/webservices/cgi-bin/moby/retrieve?jobid=<TMPL_VAR NAME=JOBID>">
+<meta http-equiv="REFRESH" content="http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=<TMPL_VAR ESCAPE=HTML NAME=JOBID>">
 <meta http-equiv="PRAGMA" content="NO-CACHE">
 <script language="JavaScript1.2">
-  var bookmarkurl="http://genome.imim.es/webservices/cgi-bin/moby/retrieve?jobid=<TMPL_VAR NAME=JOBID>"
-  var bookmarktitle="retrieve?jobid=<TMPL_VAR NAME=JOBID>"
+  var bookmarkurl="http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=<TMPL_VAR ESCAPE=HTML NAME=JOBID>"
+  var bookmarktitle="retrieveWorkflowResults.cgi?jobid=<TMPL_VAR ESCAPE=HTML NAME=JOBID>"
   function addbookmark(){
     if(document.all)
       window.external.AddFavorite(bookmarkurl,bookmarktitle)
   }
   function reLoad(){
-    window.location='http://genome.imim.es/webservices/cgi-bin/moby/retrieve?jobid=<TMPL_VAR NAME=JOBID>'
+    window.location='http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=<TMPL_VAR ESCAPE=HTML NAME=JOBID>'
     setTimeout ("reLoad()",50000);
   }
 </script>
-<title>Job running: http://genome.imim.es/webservices/cgi-bin/moby/retrieve?jobid=<TMPL_VAR NAME=JOBID></title>
+<title>Job running: http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=<TMPL_VAR NAME=JOBID></title>
 </head>
 
 <body onload="setTimeout('reLoad()',10000)" bgcolor="#ffffff" text="#000000">
@@ -27,15 +27,15 @@
         <td>
           <table bgcolor="#ffffff" border="0" bordercolor="#999999" cellpadding="0" cellspacing="0" width="611">
             <tbody><tr bgcolor="#eeeeee">
-<!--              <td align="center"> <img src="sumtab_files/logo_inb.gif" height="442" width="112">&nbsp;
+<!--              <td align="center"> <img src="http://genome.imim.es/webservices/images/logo_inb.gif" height="442" width="112">&nbsp;
                   </td> -->
               <td valign="top">
-                <div align="center"> <img src="sumtab_files/trans.gif" height="15" width="203"> <br>
+                <div align="center"> <img src="http://genome.imim.es/webservices/images/trans.gif" height="15" width="203"> <br>
 
                     <b><font color="#000000" face="Arial, Helvetica, sans-serif" size="2"> <nobr>Your job is currently running...</nobr><br>
                   </font></b> <font color="#000000" face="Arial, Helvetica, sans-serif" size="2"> ...please be patient</font> </div>
               </td>
-              <td valign="middle"> <img src="sumtab_files/trans.gif" height="10" width="5"> </td>
+              <td valign="middle"> <img src="http://genome.imim.es/webservices/images/trans.gif" height="10" width="5"> </td>
             </tr>
 
           </tbody></table>
@@ -43,23 +43,23 @@
             <tbody><tr>
               <td colspan="2" align="center" nowrap="nowrap" valign="top"><table border="0" cellpadding="0" cellspacing="0" width="100%">
                   <tbody><tr>
-                    <td><font face="Arial,Helvetica,Univers,Zurich BT" size="3"><b><img src="sumtab_files/trans.gif" height="10" width="10"></b></font></td>
-                    <td align="center" valign="top"><img src="sumtab_files/trans.gif" height="5" width="600"><br>
+                    <td><font face="Arial,Helvetica,Univers,Zurich BT" size="3"><b><img src="http://genome.imim.es/webservices/images/trans.gif" height="10" width="10"></b></font></td>
+                    <td align="center" valign="top"><img src="http://genome.imim.es/webservices/images/trans.gif" height="5" width="600"><br>
                         <font color="#000000" face="Arial, Helvetica, sans-serif" size="3"><b>The results of your job will appear in this browser window.</b></font><br>
                         <br>
-                        <font face="Arial, Helvetica, sans-serif" size="1">Your Job output: <a href="http://genome.imim.es/webservices/cgi-bin/moby/retrieve?jobid=<TMPL_VAR NAME=JOBID>">;http://genome.imim.es/webservices/cgi-bin/moby/retrieve?jobid=<TMPL_VAR NAME=JOBID></a></font><br>
-                        <img src="sumtab_files/trans.gif" height="10" width="600"></td>
-                    <td><img src="sumtab_files/trans.gif" height="10" width="10"></td>
+                        <font face="Arial, Helvetica, sans-serif" size="1">Your Job output: <a href="http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=<TMPL_VAR ESCAPE=HTML NAME=JOBID>">;http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=<TMPL_VAR NAME=JOBID></a></font><br>
+                        <img src="http://genome.imim.es/webservices/images/trans.gif" height="10" width="600"></td>
+                    <td><img src="http://genome.imim.es/webservices/images/trans.gif" height="10" width="10"></td>
                   </tr>
                 </tbody></table>
               </td>
 
-              <td rowspan="2" align="center" width="10"> <img src="sumtab_files/trans.gif" height="50" width="10"> </td>
-              <td rowspan="2" align="center" width="10"> <img src="sumtab_files/red_ani.gif" height="263" width="10"> </td>
-              <td rowspan="2" align="center" width="10"> <img src="sumtab_files/trans.gif" height="50" width="10"> </td>
+              <td rowspan="2" align="center" width="10"> <img src="http://genome.imim.es/webservices/images/trans.gif" height="50" width="10"> </td>
+              <td rowspan="2" align="center" width="10"> <img src="http://genome.imim.es/webservices/images/red_ani.gif" height="263" width="10"> </td>
+              <td rowspan="2" align="center" width="10"> <img src="http://genome.imim.es/webservices/images/trans.gif" height="50" width="10"> </td>
             </tr>
             <tr>
-              <td bgcolor="#eeeeee" valign="top" width="600"> <img src="sumtab_files/trans.gif" height="1" width="600">
+              <td bgcolor="#eeeeee" valign="top" width="600"> <img src="http://genome.imim.es/webservices/images/trans.gif" height="1" width="600">
 
                   <div align="center"><font face="Arial, Helvetica, sans-serif" size="2"> <b>Please Note the Following:</b></font> </div>
                   <ul>
@@ -76,7 +76,7 @@ the Shift+Refresh or Reload button on your browser.</font></li>
                   </ul>
                   <br>
               </td>
-              <td align="center" bgcolor="#eeeeee" valign="top" width="20"> <img src="sumtab_files/trans.gif" height="10" width="20"> </td>
+              <td align="center" bgcolor="#eeeeee" valign="top" width="20"> <img src="http://genome.imim.es/webservices/images/trans.gif" height="10" width="20"> </td>
             </tr>
           </tbody></table>
 
@@ -86,7 +86,7 @@ the Shift+Refresh or Reload button on your browser.</font></li>
     <table align="center" border="0" cellpadding="0" cellspacing="0" width="650">
   <tbody><tr>
     <td>
-    <img src="sumtab_files/trans.gif" height="5" width="50">
+    <img src="http://genome.imim.es/webservices/images/trans.gif" height="5" width="50">
     </td>
   </tr>
 
