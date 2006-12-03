@@ -120,9 +120,16 @@ BEGIN {
 my $t1 = Benchmark->new ();
 
 my $_debug = 0;
+my $_verbose = 0;
+
 # Need meta-alignment software because it is run locally, in case there are too many input sequences!
-my $_meta_dir = "/usr/local/molbio/bin";
+my $_meta_dir = "/home/ug/gmaster/projects/Meta/bin/";
 my $_meta_bin = "meta";
+
+if (! -f "$_meta_dir/$_meta_bin") {
+  print STDERR "meta-alignment binary not found at location, $_meta_dir/$_meta_bin\n";
+  exit 1;
+}
 
 ##################################################################
 #
@@ -142,7 +149,9 @@ my $shortcut = 0;
 defined ($opt_z) && $shortcut++;
 
 if ($shortcut) {
-    print STDERR "shortcut activated, will start the workflow at 'fromMetaAlignmentsToTextScoreMatrix' step!\n";
+    if ($_verbose) {
+      print STDERR "shortcut activated, will start the workflow at 'fromMetaAlignmentsToTextScoreMatrix' step!\n";
+    }
 }
 
 # input file
@@ -449,7 +458,9 @@ if ($input_type eq "FASTA") {
 }
 else {
 
-    print STDERR "Preliminary step, upstream sequence retrieval from Ensembl...\n\n";
+    if ($_verbose) {
+      print STDERR "Preliminary step, upstream sequence retrieval from Ensembl...\n\n";
+    }
     
     $moby_response = $Service->execute (XMLinputlist => [
 							 ["$articleName", $input_xml, "species", $species_xml, "upstream length", $upstream_length_xml, "downstream length", $downstream_length_xml, "intergenic only", $intergenic_only_xml]
@@ -503,8 +514,10 @@ if (!$shortcut) {
     
     # runMatScanGFFCollection
     
-    print STDERR "First step, $database binding sites predictions...\n";
-    print STDERR "Executing MatScan...\n";
+    if ($_verbose) {
+      print STDERR "First step, $database binding sites predictions...\n";
+      print STDERR "Executing MatScan...\n";
+    }
     
     $serviceName        = "runMatScanGFFCollection";
     $authURI            = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -548,15 +561,21 @@ if (!$shortcut) {
 	print STDERR ".\n";
     }
     
-    print STDERR "First step done\n\n";
-    
+    if ($_verbose) {
+      print STDERR "First step done\n\n";
+    }
+  
     # runMultiPairwiseMetaAlignmentGFF & runMultiPairwiseMetaAlignment
     
-    print STDERR "Second step, making the pairwise alignments of the binding site maps, using meta-alignment...\n";
+    if ($_verbose) {
+      print STDERR "Second step, making the pairwise alignments of the binding site maps, using meta-alignment...\n";
+    }
     
-    if (@$input_xml < 50) {
+    if (@$input_xml < 61) {
 	
-	print STDERR "Invoking meta-alignment remotely!\n";
+	if ($_verbose) {
+	  print STDERR "Invoking meta-alignment remotely!\n";
+	}
 	
 	# runMultiPairwiseMetaAlignmentGFF first
 	
@@ -641,7 +660,9 @@ if (!$shortcut) {
     } # End running Multi Pairwise alignments Web services
     else {
 	
-	print STDERR "Too many maps to process, thus invoking meta-alignment locally\n";
+	if ($_verbose) {
+  	  print STDERR "Too many maps to process, thus invoking meta-alignment locally\n";
+	}
 	
 	my $matscan_maps = parseTextContent ($moby_matscan_response, "GFF");
 	
@@ -693,8 +714,9 @@ if (!$shortcut) {
 	
     } # End running Multi Pairwise meta-alignments locally
     
-    print STDERR "Second step done!\n\n";
-    
+    if ($_verbose) {
+      print STDERR "Second step done!\n\n";
+    }
 }
 else {
     
@@ -704,7 +726,9 @@ else {
     
     $input_xml = [];
     
-    print STDERR "parsing meta-alignment data in $output_dir/Meta directory...\n";
+    if ($_verbose) {
+      print STDERR "parsing meta-alignment data in $output_dir/Meta directory...\n";
+    }
     
     opendir METADIR, "$output_dir/Meta";
     my @metafiles = grep /\.meta|\.txt/, readdir METADIR;
@@ -732,13 +756,16 @@ else {
 	}
     }
     
-    print STDERR "shortcut processing done!\n";
-    
+    if ($_verbose) {
+      print STDERR "shortcut processing done!\n";
+    }  
 }
 
 # fromMetaAlignmentsToTextScoreMatrix
 
-print STDERR "Third step, generating a score matrix by parsing meta-alignment data...\n";
+if ($_verbose) {
+  print STDERR "Third step, generating a score matrix by parsing meta-alignment data...\n";
+}
 
 $serviceName = "fromMetaAlignmentsToTextScoreMatrix";
 $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -780,11 +807,15 @@ if ($_debug) {
 # convert the input xml into a scalar
 $input_xml =  $input_xml_aref->[0];
 
-print STDERR "Third step done!\n\n";
+if ($_verbose) {
+  print STDERR "Third step done!\n\n";
+}
 
 # runKMeansClustering
 
-print STDERR "Fourth step, gene clustering using a k-means clustering algorithm...\n";
+if ($_verbose) {
+  print STDERR "Fourth step, gene clustering using a k-means clustering algorithm...\n";
+}
 
 if ($_debug) {
   print STDERR "\nExecuting runKMeansClustering...\n\n";
@@ -820,11 +851,15 @@ if (hasFailed ($moby_response)) {
 
 $input_xml_aref = parseResults ($moby_response, "List_Text");
 
-print STDERR "Fourth step done!\n\n";
+if ($_verbose) {
+  print STDERR "Fourth step done!\n\n";
+}
 
 # runMultiMetaAlignmentGFF & runMultiMetaAlignment & runGFF2JPEG
 
-print STDERR "Fifth step, foreach predicted gene cluster, make the multiple binding sites maps alignment...\n";
+if ($_verbose) {
+  print STDERR "Fifth step, foreach predicted gene cluster, make the multiple binding sites maps alignment...\n";
+}
 
 my $cluster_index = 1;
 foreach my $gene_cluster_input_xml (@$input_xml_aref) {
@@ -873,7 +908,9 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	# runMultiMetaAlignmentGFF first - only when more than one gene in the cluster
 	# Run this service just to save the results in GFF format and also for gff2ps visualization purposes
 	
-	print STDERR "Executing multiple meta-alignment...\n";
+	if ($_verbose) {
+	  print STDERR "Executing multiple meta-alignment...\n";
+	}
 	
 	$serviceName = "runMultiMetaAlignmentGFF";
 	$authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -939,7 +976,9 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 	    
 	    # runGFF2JPEG
 	    
-	    print STDERR "Executing gff2ps...\n";
+	    if ($_verbose) {
+	      print STDERR "Executing gff2ps...\n";
+            }
 	
 	    $serviceName = "runGFF2JPEG";
 	    $authURI     = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -995,7 +1034,9 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 		}
 	    }
 	    
-	    print STDERR "\n";
+	    if ($_verbose) {
+	      print STDERR "\n";
+            }
 	}
     }
     
@@ -1006,8 +1047,10 @@ foreach my $gene_cluster_input_xml (@$input_xml_aref) {
 
 if (0) {
     
-    print STDERR "Fifth step done!\n\n";
-    
+    if ($_verbose) {
+      print STDERR "Fifth step done!\n\n";
+    }
+  
     # Request Inab registry for the two following ones
     $URL   = $ENV{MOBY_SERVER}?$ENV{MOBY_SERVER}:'http://www.inab.org/cgi-bin/MOBY-Central.pl';
     $URI   = $ENV{MOBY_URI}?$ENV{MOBY_URI}:'http://www.inab.org/MOBY/Central';
@@ -1033,7 +1076,9 @@ if (0) {
     
     # runHierarchicalClustering
     
-    print STDERR "Sixth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
+    if ($_verbose) {
+      print STDERR "Sixth step, gene clustering using a $method neighbour joining clustering algorithm...\n";
+    }
     
     if ($_debug) {
 	print STDERR "\nExecuting runHierarchicalClustering...\n\n";
@@ -1053,9 +1098,10 @@ if (0) {
 	
 	# GEPAS doesn't return any results, no idea why because it works fine with GeneID web server !!! ????
 	
-	print STDERR "using GEPAS...\n";
-	
-	print STDERR "method, $method\n";
+	if ($_verbose) {
+	  print STDERR "using GEPAS...\n";
+	  print STDERR "method, $method\n";
+	}
 	
 	if ($method =~ /nearest/i) {
 	    $method = "single";
@@ -1141,11 +1187,15 @@ if (0) {
 	# convert the input xml into a scalar
 	$input_xml =  $input_xml_aref->[0];
 	
-	print STDERR "Clustering done!\n\n";
+	if ($_verbose) {
+	  print STDERR "Clustering done!\n\n";
+	}
 	
 	# plotClustersTree
 	
-	print STDERR "Generating a picture of the clustering tree...\n";
+	if ($_verbose) {
+  	  print STDERR "Generating a picture of the clustering tree...\n";
+	}
 	
 	$serviceName   = "plotClustersTree";
 	$authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
@@ -1170,8 +1220,11 @@ if (0) {
 	
 	my $picture = decode_base64($picture_b64);
 	
-	print STDERR "Picture done\n\n";
-	print STDERR "Workflow has terminated.\n";
+	if ($_verbose) {
+	  print STDERR "Picture done\n\n";
+	  print STDERR "Workflow has terminated.\n";
+        }
+        
 	if (! defined $output_dir) {
 	    print $picture;
 	}
@@ -1185,7 +1238,9 @@ if (0) {
 } # End disabling execution of NJ service
 
 my $t2 = Benchmark->new ();
-print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
+if ($_verbose) {
+  print STDERR "\nTotal : ", timestr (timediff ($t2, $t1)), "\n";
+}
 
 exit 0;
 
