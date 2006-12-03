@@ -188,17 +188,10 @@ if ($input_type eq "LIST") {
 }
 
 if ($_debug) {
-    print STDERR "executing the following command,\n";
-    print STDERR "$_path_to_script\/$script_name $args\n";
+    print STDERR "executing the following command: $_path_to_script\/$script_name $args\n";
 }
 
-my $failure;
-if ($_debug) {
-    $failure = qx/$_path_to_script\/$script_name $args/;
-}
-else {
-    $failure = qx/$_path_to_script\/$script_name $args >& \/dev\/null/;
-}
+my $failure = qx/$_path_to_script\/$script_name $args/;
 
 if ($_debug) {
     print STDERR "workflow execution result, $failure\n";
@@ -213,6 +206,8 @@ if ($failure) {
 
     print_error("<b>ERROR> The execution of the genes clustering workflow has failed!");
     close $out_fh;
+    qx/cp $temp_output_html_file $html_output_file/;
+    unlink $temp_output_html_file;
     exit 1;
 }
 
