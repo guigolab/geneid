@@ -183,9 +183,9 @@ if ($input_type eq "FASTA") {
 	print STDERR "number of input sequences, $nb_sequences\n";
     }
     
-    if ($nb_sequences > 30) {
+    if ($nb_sequences > 60) {
 	print "Content-type: text/html\n\n";
-	print_error("<b>ERROR> Too many sequences have been submitted, there is a limit of 30!");
+	print_error("<b>ERROR> Too many sequences have been submitted, there is a limit of 60!");
 	exit 1;
     }
     
@@ -197,7 +197,7 @@ if ($input_type eq "FASTA") {
     
     if ($nb_bases > 80000) {
 	print "Content-type: text/html\n\n";
-	print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80 000bp!");
+	print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80,000 bp!");
 	exit 1;
     }
 }
@@ -286,25 +286,16 @@ if ($input_type eq "LIST") {
 }
 
 if ($_debug) {
-    print STDERR "executing the following command,\n";
-    print STDERR "$_path_to_script\/$_script_name $args\n";
+    print STDERR "executing the following command: $_path_to_script\/$_script_name $args\n";
 }
 
-my $failure;
-if ($_debug) {
-    # not working, not submitted in background!
-    # $failure = qx/$_path_to_script\/$_script_name $args &/;
-    my @commands = ("$_path_to_script\/$_script_name $args &");
-    system (@commands);
-}
-else {
-    my @commands = ("$_path_to_script\/$_script_name $args >& /dev/null &");
-    system (@commands);
-}
+my $failure = 0;
+my @commands = ("$_path_to_script\/$_script_name $args &");
+system (@commands);
 
-if ($_debug && defined $failure) {
-    print STDERR "workflow submission result, $failure\n";
-}
+# if ($_debug && defined $failure) {
+    # print STDERR "workflow submission result, $failure\n";
+# }
 
 if ($_debug) {
     print STDERR "submission done\n\n";
