@@ -160,7 +160,7 @@ if ($input_type eq "FASTA") {
     
     if ($nb_bases > 80000) {
 	print "Content-type: text/html\n\n";
-	print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80 000bp!");
+	print_error("<b>ERROR> Too long sequences have been submitted, the overall limit is 80,000 bp!");
 	exit 1;
     }
 }
