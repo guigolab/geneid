@@ -257,13 +257,7 @@ if ($_debug) {
     print STDERR "$_path_to_script\/$script_name $args\n";
 }
 
-my $failure;
-if ($_debug) {
-    $failure = qx/$_path_to_script\/$script_name $args/;
-}
-else {
-    $failure = qx/$_path_to_script\/$script_name $args >& \/dev\/null/;
-}
+my $failure = qx/$_path_to_script\/$script_name $args/;
 
 if ($_debug) {
     print STDERR "workflow execution result, $failure\n";
@@ -299,7 +293,13 @@ $output_dir_name =~ s/\/usr\/local\/Install\/apache2\/htdocs\/webservices\/workf
 my $archive_filename = $output_dir_name . ".zip";
 my $archive_URL = "http://genome.imim.es/webservices/workflows/results/" . $archive_filename;
 
-my $result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $output_dir_name/;
+my $result;
+if ($_debug) {
+  $result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $output_dir_name/;
+}
+else {
+  $result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $output_dir_name >& \/dev\/null/;
+}
 
 # Display in HTML the results
 # First the archive link
