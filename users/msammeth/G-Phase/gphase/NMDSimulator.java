@@ -4,15 +4,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Vector;
 
 import gphase.algo.ASAnalyzer;
+import gphase.model.ASMultiVariation;
+import gphase.model.ASVariation;
 import gphase.model.DirectedRegion;
 import gphase.model.Gene;
 import gphase.model.Graph;
+import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.model.Translation;
+import gphase.tools.Arrays;
 
 public class NMDSimulator {
 	public static int MIN_DIST_NC_EJC= 50;
@@ -81,12 +86,94 @@ public class NMDSimulator {
 		p.flush(); p.close();
 	}
 
+	public static void outputNMDEvents() {
+		Graph g= ASAnalyzer.getGraph(ASAnalyzer.INPUT_ENCODE);		
+
+			// mark transcripts
+		int cntFP= 0, cntFN= 0;
+		Gene[] ge= g.getGenes();
+		Translation predORF;
+		NMDSimulator sim;
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] t= ge[i].getTranscripts();			
+			for (int j = 0; j < t.length; j++) {
+				predORF= t[j].findLongestORF();
+				sim= new NMDSimulator(t[j]);
+				if (predORF== null) {
+					if (t[j].isCoding())
+						++cntFP;
+					t[j].setNmd((byte) 0);
+					continue;
+				}
+				t[j].setPredORF(predORF);
+				sim= new NMDSimulator(t[j]);
+				if (sim.isTerminatingUpstreamOfEJC(predORF, MIN_DIST_NC_EJC))
+					t[j].setNmd((byte) 3);
+				else if (sim.hasUsORF(predORF, MIN_ORF_LENGTH_AA))
+					t[j].setNmd((byte) 5);
+				if ((!t[j].isCoding())&& (t[j].getNmd()> 0))
+					++cntFN;
+			}
+		}
+		
+			// extract events
+		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_NONE);
+		vars= (ASVariation[][]) Arrays.sort2DFieldRev(vars);
+		
+		
+			// output 
+		System.out.println("HAVANA protein coding FP "+cntFP+", FN"+cntFN);
+		String fName= "outEventsNMDSimulator.txt";
+		fName= Toolbox.checkFileExists(fName);
+		PrintStream p= null;
+		try {
+			p= new PrintStream(fName);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		p.println("AS Event // coding // trpt1 ID // annORF start // end // predORF start // end // NMD(3'/5'/no, hierachically) // schain ///" +
+				"trpt2 ID // annORF start // end // predORF start // end // NMD(3'/5'/no, hierachically) // schain");
+		Comparator compi= new ASVariation.SpliceSiteOrderComparator();
+		for (int i = 0; i < vars.length; i++) {
+			for (int j = 0; j < vars[i].length; j++) {
+				String s= vars[i][j].toString();
+				String codS= "";
+				if (vars[i][j].isTouching5UTR())
+					codS+= "5UTR-";
+				if (vars[i][j].isProteinCoding())
+					codS+= "cod-";
+				if (vars[i][j].isTouching3UTR())
+					codS+= "3UTR-";
+				if (codS.length()> 0)
+					codS= codS.substring(0, codS.length()- 1);
+				else
+					codS= ".";	// for 2 nc transcripts
+				s+= "\t"+ codS;
+					
+				Transcript t0= vars[i][j].getTranscript1();
+				Transcript t1= vars[i][j].getTranscript2();
+				SpliceSite[] sc0= vars[i][j].getSpliceChain1(); 
+				SpliceSite[] sc1= vars[i][j].getSpliceChain2();
+				if (compi.compare(sc0, sc1)> 0) {
+					SpliceSite[] sch= sc0; sc0= sc1; sc1= sch;
+					Transcript h= t0; t0= t1; t1= h;
+				}
+				s+= "\t"+ t0.toStringNMD()+ "\t"+ Transcript.toStringSChain(sc0);
+				s+= "\t"+ t1.toStringNMD()+ "\t"+ Transcript.toStringSChain(sc1);
+				p.println(s);
+			}
+		}
+		p.flush(); p.close();
+	}
+
 	public static void testNMD() {
 		Graph g= ASAnalyzer.getGraph(ASAnalyzer.INPUT_ENCODE);		
 		g.filterNonCodingTranscripts();
+		// g.getASVariations(ASMultiVariation.FILTER_NONE);		// for AS flags..
 		
-		int cntWrong= 0, cntCorr= 0, cntWrongNMD= 0, cntCorrNMD= 0;
+		int cntWrong= 0, cntCorr= 0, cntWrongNMD= 0, cntCorrNMD= 0, cntFilt1= 0, cntFilt2= 0;
 		HashMap wrongHash= new HashMap();
+		HashMap nmdHash= new HashMap();
 		Gene[] ge= g.getGenes();
 		Translation predORF, annORF;
 		NMDSimulator sim;
@@ -96,14 +183,16 @@ public class NMDSimulator {
 				annORF= t[j].getTranslations()[0];
 				if (annORF.get5PrimeEdge()== t[j].get5PrimeEdge()||
 						annORF.get3PrimeEdge()== t[j].get3PrimeEdge()) {
-					System.out.println("skipping (open ended HAVANA frame) "+ t[j]);
+					//System.out.println("skipping (open ended HAVANA frame) "+ t[j]);
+					++cntFilt1;
 					continue;
 				}
 				if (annORF.getSplicedLength()< NMDSimulator.MIN_ORF_LENGTH_AA* 3) {
-					System.out.println("skipping (HAVANA ORF too small) "+ t[j]);
+					//System.out.println("skipping (HAVANA ORF too small) "+ t[j]);
+					++cntFilt2;
 					continue;
 				}
-				predORF= t[j].findLongestORF();
+				predORF= t[j].findHavanaORF(); 	// findLongestORF();
 				sim= new NMDSimulator(t[j]);
 				if (predORF== null) {
 					++cntWrong;
@@ -126,6 +215,7 @@ public class NMDSimulator {
 		}
 		
 			// output wrong list
+		System.out.println("skipped "+(cntFilt1+ cntFilt2)+ " trpts ("+cntFilt1+" open ended, "+cntFilt2+" too short)");
 		Object[] wrongKeys= wrongHash.keySet().toArray();
 		System.out.println("correct "+cntCorr+"("+cntCorrNMD+
 				"), wrong "+cntWrong+"("+cntWrongNMD+")");
@@ -148,9 +238,44 @@ public class NMDSimulator {
 		}
 		p.flush(); p.close();
 	}
+
+	public static void testNMD_noncoding() {
+		Graph g= ASAnalyzer.getGraph(ASAnalyzer.INPUT_ENCODE);		
+		
+		int cntNMD3= 0, cntNMD0= 0, cntNoORF= 0;
+		HashMap wrongHash= new HashMap();
+		Gene[] ge= g.getGenes();
+		Translation predORF, annORF;
+		NMDSimulator sim;
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] t= ge[i].getTranscripts();
+			for (int j = 0; j < t.length; j++) {
+				if (t[j].isCoding())
+					continue;
+				predORF= t[j].findLongestORF();
+				sim= new NMDSimulator(t[j]);
+				if (predORF== null) { 
+					++cntNoORF;
+					continue;
+				}
+				if (sim.isNMD(predORF))
+					++cntNMD3;
+				else
+					++cntNMD0;
+			}
+		}
+		
+			// output wrong list
+		int total= (cntNMD3+ cntNMD0+ cntNoORF);
+		int total2= (cntNMD3+ cntNMD0);
+		System.out.println("total "+total+": no ORF "+cntNoORF+ "("+ ((float) cntNoORF/ total)+
+				"), NMD3 "+cntNMD3+"("+((float) cntNMD3/ total2)+"), NMD0 "+cntNMD0+"("+((float) cntNMD0/ total2)+")");
+	}
 	
 	public static void main(String[] args) {
-		testNMD();
+		//testNMD();
+		testNMD_noncoding();
+		//outputNMDEvents();
 	}
 	
 	Transcript trpt= null;
@@ -230,10 +355,12 @@ public class NMDSimulator {
 	
 		Translation[] uORFs= trans.getUsORF();
 		int cntORF= 0;
+		Vector usORFV= new Vector();
 		for (int i = 0; uORFs!= null&& i < uORFs.length; i++) {
 			if (uORFs[i].getSplicedLength()< minSizeNt)	// bit redundant since already not predicted, but important when predMinSize<> minSize here
 				continue;
 			++cntORF;
+			usORFV.add(uORFs[i]);
 		}
 		
 		return (cntORF> 0);
@@ -271,7 +398,7 @@ public class NMDSimulator {
 	
 	public boolean isNMD(Translation trln) {
 		boolean ejcDS= isTerminatingUpstreamOfEJC(trln, MIN_DIST_NC_EJC);
-		boolean atgUS= false; //hasUsORF(trln, MIN_ORF_LENGTH_AA);
+		boolean atgUS= hasUsORF(trln, MIN_ORF_LENGTH_AA);
 		return (ejcDS|| atgUS);
 	}
 	public boolean isNMD() {

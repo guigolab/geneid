@@ -516,6 +516,53 @@ public class SpliceGraph {
 		return nodes;
 	}
 	
+	public SpliceNode[] getRoots() {
+		SpliceNode[] nodes= getNodeList();
+		Vector v= new Vector();
+		for (int i = 0; i < nodes.length; i++) 
+			if (nodes[i].getInDegree()== 0)
+				v.add(nodes[i]);
+		
+		return (SpliceNode[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	public SpliceNode[] getLeafs() {
+		SpliceNode[] nodes= getNodeList();
+		Vector v= new Vector();
+		for (int i = 0; i < nodes.length; i++) 
+			if (nodes[i].getOutDegree()== 0)
+				v.add(nodes[i]);
+		
+		return (SpliceNode[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	
+	public SplicePath[] getPathes(SpliceNode[] src, SpliceNode[] tgt) {
+		Vector v= new Vector();
+		for (int i = 0; i < src.length; i++) {
+			v= getPathesRek(src[i], tgt, new SplicePath(), v);
+		}
+		return (SplicePath[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	Vector getPathesRek(SpliceNode nd, SpliceNode[] tgt, SplicePath ndPath, Vector result) {
+		
+			// abort
+		for (int i = 0; i < tgt.length; i++) 
+			if (nd== tgt[i]) {
+				result.add(ndPath);
+				return result;
+			}
+		
+			// rekursion
+		SpliceEdge[] out= nd.getOutEdges();
+		for (int i = 0; out!= null&& i < out.length; i++) 
+			getPathesRek(out[i].getHead(), tgt, ndPath.exendPath(out[i]), result);
+		
+		
+		return result;
+	}
+	
 	public SpliceEdge[] getEdgeList() {
 		// assuming that all edges have a src node
 		SpliceNode[] n= getNodeList();

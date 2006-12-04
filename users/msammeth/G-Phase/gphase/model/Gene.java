@@ -2,6 +2,7 @@ package gphase.model;
 
 import gphase.Constants;
 import gphase.algo.AlignmentGenerator;
+import gphase.graph.Tuple;
 
 import java.awt.List;
 import java.io.File;
@@ -198,6 +199,8 @@ public class Gene extends DirectedRegion {
 	
 	public DirectedRegion getReal5UTR() {
 		DirectedRegion reg;
+		if (!isProteinCoding())
+			System.currentTimeMillis();
 		if (isForward()) {
 			int x= getMinCDSStart();
 			if (x== 0)
@@ -1076,17 +1079,19 @@ public class Gene extends DirectedRegion {
 		for (int i = 0; i < transcripts.length; i++) 
 			spliceChains[i]= transcripts[i].getSpliceChain();
 		
-		Vector spliceClusters= tokenizeASClusters(spliceChains, false, false);	// get splice clusters across all sequences
+		Vector spliceClusters= tokenizeASClusters2(spliceChains, false, false);	// get splice clusters across all sequences
 																		//TODO warning! TSS/TES flanked events included !!
 		ASMultiVariation[] multiVars= new ASMultiVariation[spliceClusters.size()];
 		for (int x = 0; x < spliceClusters.size(); x++) {	// iterate complexes
-			multiVars[x]= new ASMultiVariation((SpliceSite[][]) spliceClusters.elementAt(x), (Transcript[]) null);
+			//SpliceSite[][] parts= (SpliceSite[][]) spliceClusters.elementAt(x);
+			HashMap trptHash= (HashMap) spliceClusters.elementAt(x);
+			multiVars[x]= new ASMultiVariation(trptHash);
 			System.currentTimeMillis();
 		}
 	
 		return multiVars;
 	}
-
+	
 	public int[] getASMultiVariationsDebug() {
 		
 		asComplexes= null;
@@ -1152,6 +1157,29 @@ public class Gene extends DirectedRegion {
 		return result;
 	}
 	
+	HashMap addTrptHash(HashMap trptHash, SpliceSite[] schain, Transcript trpt) {
+		Object[] o= trptHash.keySet().toArray();
+		int i;
+		for (i = 0; i < o.length; i++) {
+			SpliceSite[] keyChain= (SpliceSite[]) o[i];
+			if (keyChain.length!= schain.length)
+				continue;
+			int j;
+			for (j = 0; j < keyChain.length; j++) {
+				if (keyChain[j].getPos()!= schain[j].getPos())
+					break;
+			}
+			if (j>= keyChain.length) 
+				break;
+		}
+		Vector v= new Vector();
+		if (i< o.length) {
+			v= (Vector) trptHash.remove(o[i]);
+		}
+		v.add(trpt);
+		trptHash.put(schain, v);
+		return trptHash;
+	}
 	
 	Vector tokenizeASClusters(SpliceSite[][] spliceChains, boolean omitStart, boolean omitEnd) {
 		
@@ -1193,8 +1221,9 @@ public class Gene extends DirectedRegion {
 				if (len< 0)
 					break;
 				ass[j]= new SpliceSite[len];
-				for (int k = 0; k < ass[j].length; k++) 
-					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
+				for (int k = 0; k < ass[j].length; k++) { 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];
+				}
 			}
 			for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs
 				if (ass[j]!= null&& ass[j].length> 0) {
@@ -1217,6 +1246,85 @@ public class Gene extends DirectedRegion {
 			for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs 
 				if (ass[j].length> 0) {
 					result.add(ass);
+					break;
+				}
+		}
+		
+		return result;
+	}
+
+	Vector tokenizeASClusters2(SpliceSite[][] spliceChains, boolean omitStart, boolean omitEnd) {
+		
+			// find splice sites common in ALL transcripts
+		SpliceSite.PositionComparator c= new SpliceSite.PositionComparator();	// here! SpliceSite.PositionComparator
+		Vector tokens= new Vector();
+		for (int i = 0; i < spliceChains[0].length; i++) {
+			SpliceSite s= spliceChains[0][i];
+			int[] pos= new int[spliceChains.length];
+			pos[0]= i;
+			int j;
+			for (j = 1; j < spliceChains.length; j++) {
+				int p= Arrays.binarySearch(spliceChains[j], s, c);
+				if (p< 0)
+					break;	// as soon as not found in one schain, give up..
+				else
+					pos[j]= p;
+			}
+			if (j>= spliceChains.length)	// found
+				tokens.add(pos);
+		}
+		
+			// tokenize by these conserved splice sites
+		SpliceSite[][] ss= new SpliceSite[spliceChains.length][];
+		int[] posOld= new int[spliceChains.length];
+		for (int i = 0; i < posOld.length; i++) 
+			posOld[i]= (-1);	// anchor before sequence start	
+		int[] pos;
+		Vector result= new Vector();
+		for (int i = 0; i < tokens.size(); i++) {
+			HashMap trptHash= new HashMap();
+			pos= (int[]) tokens.elementAt(i);
+			if (omitStart&& i== 0) {	// omit splice chains containing start
+				posOld= pos;
+				continue;
+			}
+			SpliceSite[][] ass= new SpliceSite[pos.length][];
+			Transcript[] trpt= new Transcript[pos.length];
+			for (int j = 0; j < ass.length; j++) {
+				int len= pos[j]- posOld[j]- 1;
+				if (len< 0)
+					break;
+				ass[j]= new SpliceSite[len];
+				for (int k = 0; k < ass[j].length; k++) { 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];
+				}
+				addTrptHash(trptHash, ass[j], transcripts[j]);
+			}
+			for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs
+				if (ass[j]!= null&& ass[j].length> 0) {
+					//result.add(ass);
+					result.add(trptHash);
+					break;
+				}
+			posOld= pos;
+		}
+		
+		if (!omitEnd) {
+			HashMap trptHash= new HashMap();
+			pos= new int[spliceChains.length];		// anchor after sequence end
+			for (int i = 0; i < pos.length; i++) 
+				pos[i]= spliceChains[i].length;
+			SpliceSite[][] ass= new SpliceSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				ass[j]= new SpliceSite[pos[j]- posOld[j]- 1];
+				for (int k = 0; k < (pos[j]- posOld[j]- 1); k++) 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
+				addTrptHash(trptHash, ass[j], transcripts[j]);
+			}
+			for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs 
+				if (ass[j].length> 0) {
+					//result.add(ass);
+					result.add(trptHash);
 					break;
 				}
 		}
@@ -1457,6 +1565,30 @@ public class Gene extends DirectedRegion {
 
 	public SpliceSite[] getSpliceSites() {
 		return spliceSites;
+	}
+
+	public HashMap getSeparationIndex() {
+		ASMultiVariation[] mvars= getASMultiVariations2();
+		HashMap sepHash= new HashMap();
+		for (int i = 0; mvars!= null&& i < mvars.length; i++) {
+			for (int j = (i+1); j < mvars.length; j++) {
+					// only for not overlapping bubbles, cannot overlap for the moment..
+				//if (mvars[i].getRegion().overlaps(mvars[j].getRegion()))
+				//	continue;
+				
+				Tuple[] interSep= Tuple.intersect(mvars[i].getSeparationTuples(), mvars[j].getSeparationTuples());
+				
+				if (interSep== null|| interSep.length< 1)
+					continue;
+				Integer index= new Integer(interSep.length);
+				Vector v= (Vector) sepHash.remove(index);
+				if (v== null)
+					v= new Vector();
+				v.add(new ASMultiVariation[] {mvars[i], mvars[j]});
+				sepHash.put(index, v);
+			}
+		}
+		return sepHash;
 	}
 
 	private static int uniqueID= 0;

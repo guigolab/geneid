@@ -34,6 +34,8 @@ public class Transcript extends DirectedRegion {
 	int type = Constants.NOINIT;
 	int confidence = Constants.NOINIT;
 	TU[] tu= null;
+	byte nmd= 0;
+	Translation predORF= null;
 	
 	public static int REGION_5UTR= 1;
 	public static int REGION_3UTR= 2;
@@ -124,6 +126,30 @@ public class Transcript extends DirectedRegion {
 	
 	public String toString() {
 		return getTranscriptID();
+	}
+	
+	public String toStringNMD() {
+		String s= transcriptID+ "\t";
+		if ((translations!= null)&& (!translations[0].isOpenEnded()))
+			s+= translations[0].getStart()+ "\t"+ translations[0].getEnd()+ "\t";
+		else
+			s+= ".\t.\t";
+		if (predORF!= null)
+			s+= predORF.getStart()+ "\t"+ predORF.getEnd()+ "\t";
+		else
+			s+= ".\t.\t";
+		s+= "NMD"+ nmd;
+		return s;
+	}
+	
+	public static String toStringSChain(SpliceSite[] spliceChain) {
+		String s= "{";
+		for (int i = 0; spliceChain!= null&& i < spliceChain.length; i++) 
+			s+= spliceChain[i].getPos()+ ",";
+		if (spliceChain!= null&& spliceChain.length> 0)
+			s= s.substring(0, s.length()- 1);
+		s+= "}";
+		return s;
 	}
 
 	/**
@@ -1055,11 +1081,11 @@ public class Transcript extends DirectedRegion {
 		return -1;
 	}
 	
-	public Translation[][] findORFs() {
+	public Translation[][] findORFs(boolean openEnded) {
 		String seq= getSplicedSequence();
 		Translation[][] orfs= new Translation[3][];
 		for (int i = 0; i < 3; i++) {
-			orfs[i]= findORFs(seq, i);
+			orfs[i]= findORFs(seq, i, openEnded);
 		}
 		// skipped for the moment
 //		int cntORFs= 0;
@@ -1083,13 +1109,58 @@ public class Transcript extends DirectedRegion {
 	 * @return
 	 */
 	public Translation findHavanaORF() {
-		String seq= getSplicedSequence();
-		return null;
+		
+		Translation[][] tlns= findORFs(false);
+		if (tlns== null)
+			return null;
+		
+			// find annotated start atgs in the gene
+		Transcript[] trpts= getGene().getTranscripts();
+		Vector atgPosV= new Vector();
+		for (int i = 0; i < trpts.length; i++) {
+			if (trpts[i]== this)
+				continue;
+			if (trpts[i].isCoding()) {
+				Translation tmpTln= trpts[i].getTranslations()[0];
+				// now, predict open ended, if already reported
+				if (tmpTln.isOpenEnded())	
+					continue;
+				Integer pos= new Integer(tmpTln.get5PrimeEdge());
+				int j; 
+				for (j = 0; j < atgPosV.size(); j++) 
+					if (atgPosV.elementAt(j).equals(pos))
+						break;
+				if (j== atgPosV.size())
+					atgPosV.add(pos);
+			}
+		}
+		
+			// find ORFs at the corresponding starts
+		Vector tlnV= new Vector();
+		for (int i = 0; i < tlns.length; i++) {
+			for (int j = 0; tlns[i]!= null&& j < tlns[i].length; j++) {
+				int k;
+				for (k = 0; k < atgPosV.size(); k++) 
+					if (tlns[i][j].get5PrimeEdge()== ((Integer) atgPosV.elementAt(k)).intValue())
+						break;
+				if (k< atgPosV.size())
+					tlnV.add(tlns[i][j]);
+			}
+		}
+
+			// if coincidence with annotated ORF, get longest of this
+		if (tlnV.size()< 1)
+			return findLongestORF(tlns);
+		else
+			return findLongestORF(new Translation[][] {(Translation[]) gphase.tools.Arrays.toField(tlnV)});
 	}
 	
 	public Translation findLongestORF() {
+		return findLongestORF(findORFs(false));
+	}
+	
+	Translation findLongestORF(Translation[][] predORFs) {
 		Translation longestORF= null;
-		Translation[][] predORFs= findORFs();
 		if (predORFs== null)
 			return null;
 		for (int i = 0; i < predORFs.length; i++) 
@@ -1103,7 +1174,7 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public Translation[] getAllORFs() {
-		Translation[][] predORFs= findORFs();
+		Translation[][] predORFs= findORFs(false);
 		if (predORFs== null)
 			return null;
 		Vector allOrfV= new Vector();
@@ -1115,7 +1186,8 @@ public class Transcript extends DirectedRegion {
 		return allORFs;
 	}
 	
-	public Translation[] findORFs(String seq, int frame) {
+	public Translation[] findORFs(String seq, int frame, boolean openEnded) {
+			final int minORFlen= NMDSimulator.MIN_ORF_LENGTH_AA* 3;
 			seq= seq.substring(frame).toUpperCase();
 			Vector startV= new Vector(), stopV= new Vector();
 			int pos= 0;
@@ -1148,22 +1220,35 @@ public class Transcript extends DirectedRegion {
 				}
 				reg.setChromosome(getChromosome());
 				reg.setSpecies(getSpecies());
+				//if (reg.getLength()> minORFlen)
+					v.add(reg);
+			}
+			
+			if (!openEnded)
+				return (Translation[]) gphase.tools.Arrays.toField(v);
+
+				// 3'OpenEnded
+			if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
+				reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
+				reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
+				reg.setChromosome(getChromosome());
+				reg.setSpecies(getSpecies());
+				v.add(reg);
+			} else {	// bi-OpenEnded
+				reg= new Translation(this, get5PrimeEdge(), get3PrimeEdge(), getStrand());	// +2 to include stop_codon
+				reg.setSplicedLength(seq.length());	// here, q si frame ... goes outside transcript..
+				reg.setChromosome(getChromosome());
+				reg.setSpecies(getSpecies());
 				v.add(reg);
 			}
-	//		if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
-	//			reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
-	//			reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
-	//			reg.setChromosome(getChromosome());
-	//			reg.setSpecies(getSpecies());
-	//			
-	//			v.add(reg);
-	//		} else if (startPos!= null&& startPos.length> 0){	
-	//			reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
-	//			reg.setSplicedLength(seq.length()- startPos[0]+ 1);
-	//			reg.setChromosome(getChromosome());
-	//			reg.setSpecies(getSpecies());
-	//			v.add(reg);
-	//		}
+				// 5'OpenEnded
+			if (startPos!= null&& startPos.length> 0){	
+				reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
+				reg.setSplicedLength(seq.length()- startPos[0]+ 1);
+				reg.setChromosome(getChromosome());
+				reg.setSpecies(getSpecies());
+				v.add(reg);
+			} 
 			
 			return (Translation[]) gphase.tools.Arrays.toField(v);
 		}
@@ -1332,6 +1417,18 @@ public class Transcript extends DirectedRegion {
 		for (int i = 0; i < regs.length; i++) 
 			sb.append(Graph.readSequence(regs[i]));
 		return sb.toString();
+	}
+	public byte getNmd() {
+		return nmd;
+	}
+	public void setNmd(byte nmd) {
+		this.nmd = nmd;
+	}
+	public Translation getPredORF() {
+		return predORF;
+	}
+	public void setPredORF(Translation predORF) {
+		this.predORF = predORF;
 	}
 
 

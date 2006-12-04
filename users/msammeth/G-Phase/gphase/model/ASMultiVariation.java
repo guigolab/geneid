@@ -6,6 +6,7 @@
  */
 package gphase.model;
 
+import gphase.graph.Tuple;
 import gphase.tools.Arrays;
 
 import java.io.Serializable;
@@ -87,11 +88,13 @@ public class ASMultiVariation implements Serializable {
 	public static final int FILTER_HIERARCHICALLY= 1;
 	public static final int FILTER_CODING_REDUNDANT= 2;
 	public static final int FILTER_STRUCTURALLY= 3;
+	public static String[] FILTER_TO_STRING= {"none", "hierarchically", "coding_redundant", "structurally"};
 	
 	ASVariation[] asVariations= null;
 	SpliceSite[][] spliceChains= null;
 	String relPosStr= null;
 	HashMap transHash= null;	// maps schains (ss[]) to transcripts
+	AbstractSite[] flanks= null;
 	
 	public SpliceSite[] getSpliceUniverse() {
 		if (spliceChains== null|| spliceChains.length< 1)
@@ -120,13 +123,35 @@ public class ASMultiVariation implements Serializable {
 		this.transHash= newTransHash;
 	}
 	
+	public ASMultiVariation(HashMap newTransHash) {
+		this.transHash= newTransHash;
+		Object[] o= newTransHash.keySet().toArray();
+		SpliceSite[][] schains= new SpliceSite[o.length][];
+		for (int i = 0; i < schains.length; i++) 
+			schains[i]= (SpliceSite[]) o[i];
+		setSpliceChains(schains);
+	}
+	
+	public Tuple[] getSeparationTuples() {
+		Transcript[][] part= (Transcript[][]) Arrays.toField(transHash.values());
+		Vector v= new Vector();
+		for (int i = 0; i < part.length; i++) 
+			for (int j = i+1; j < part.length; j++) 
+				for (int k = 0; k < part[i].length; k++) 
+					for (int m = 0; m < part[j].length; m++) {
+						Tuple t= new Tuple(part[i][k].getTranscriptID(), part[j][m].getTranscriptID());
+						v.add(t);
+					}
+		return (Tuple[]) Arrays.toField(v);
+	}
+	
 	void setSpliceChains(SpliceSite[][] schains) {
 		Comparator compi= new SpliceChainComparator();
 		java.util.Arrays.sort(schains, compi);
 		spliceChains= schains;
 	}
 	
-	ASVariation[] removeRedundancy(ASVariation[] vars) {
+	public static ASVariation[] removeRedundancy(ASVariation[] vars) {
 		
 		Vector v= new Vector(vars.length);
 		for (int i = 0; i < vars.length; i++) 
@@ -139,9 +164,12 @@ public class ASMultiVariation implements Serializable {
 		for (int i = 0; i < v.size(); i++) 
 			for (int j = i+1; j < v.size(); j++) {
 				int c= compi.compare(v.elementAt(i), v.elementAt(j));
-				if (c== 0|| c== 1)
+				if (c== 0|| c== 1) {
+					((ASVariation) v.elementAt(j)).removeFromASS();
 					v.remove(j--);
+				} 
 				if (c== 2) {
+					((ASVariation) v.elementAt(i)).removeFromASS();
 					v.remove(i--);
 					break;
 				}
@@ -151,7 +179,7 @@ public class ASMultiVariation implements Serializable {
 		return (ASVariation[]) Arrays.toField(v);
 	}
 
-	ASVariation[] removeRedundancy(ASVariation[] vars, Comparator compi) {
+	public static ASVariation[] removeRedundancy(ASVariation[] vars, Comparator compi) {
 		
 		Vector v= new Vector(vars.length);
 		for (int i = 0; i < vars.length; i++) 
@@ -293,5 +321,41 @@ public class ASMultiVariation implements Serializable {
 
 	public HashMap getTransHash() {
 		return transHash;
+	}
+	
+	public Transcript[][] getTranscriptsFromHash() {
+		return (Transcript[][]) Arrays.toField(transHash.values());
+	}
+	
+	public SpliceSite[][] getSpliceChainsFromHash() {
+		return (SpliceSite[][]) Arrays.toField(transHash.keySet());
+	}
+	
+	public SpliceSite getMinSpliceSite() {
+		SpliceSite[][] schains= getSpliceChainsFromHash();
+		int min= Integer.MAX_VALUE;
+		SpliceSite result= null;
+		for (int i = 0; i < schains.length; i++) {
+			if (schains[i]== null)
+				continue;
+			if (schains[i][0].getPos()< min) {
+				min= schains[i][0].getPos();
+				result= schains[i][0];
+			}
+		}
+		return result;
+	}
+
+	public AbstractSite[] getFlanks() {
+		return flanks;
+	}
+	
+	public DirectedRegion getRegion() {
+		DirectedRegion reg= new DirectedRegion(flanks[0].getPos(), flanks[1].getPos(), getGene().getStrand());
+		return reg;
+	}
+
+	public void setFlanks(AbstractSite[] flanks) {
+		this.flanks = flanks;
 	}
 }

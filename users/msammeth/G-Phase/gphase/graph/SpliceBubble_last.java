@@ -533,6 +533,40 @@ public class SpliceBubble_last {
 	 * 
 	 * @param part0
 	 * @param part1
+	 * @return <code>true</code> iff there is at least one transcript in both
+	 * partitions
+	 */
+	public static boolean intersects(Transcript[][] part0, Transcript[][] part1) {
+		for (int i = 0; i < part0.length; i++) {
+			for (int j = 0; j < part1.length; j++) {
+				boolean b= intersects(part0[i], part1[j]);
+				if (b)
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param part0
+	 * @param part1
+	 * @return <code>true</code> iff there is at least one transcript in both
+	 * partitions
+	 */
+	public static boolean intersects(Transcript[] part0, Transcript[] part1) {
+		for (int i = 0; i < part0.length; i++) {
+			for (int j = 0; j < part1.length; j++) {
+				if (part0[i]== part1[j])
+					return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * 
+	 * @param part0
+	 * @param part1
 	 * @return <code>Transcript[3][]</code> (sobre in part0, sobre in part1, intersection)
 	 * 		   iff there was an intersection possible,
 	 * 		   <code>null</code> else 

@@ -36,6 +36,9 @@ public class ASVariation implements Serializable {
 	public static final int TYPE_5UTR= 3;
 	public static final int TYPE_3UTR= 4;
 	
+	byte ssRegionID3UTR= 0;
+	byte ssRegionIDCDS= 0;
+	byte ssRegionID5UTR= 0;
 	Transcript trans1= null;
 	Transcript trans2= null;
 	SpliceSite[] spliceChain1= null;	// sorted!
@@ -1066,8 +1069,6 @@ public class ASVariation implements Serializable {
 			Comparator compi= new SpliceChainComparator();
 			SpliceSite[][] s1= new SpliceSite[][] {as1.spliceChain1, as1.spliceChain2};
 			SpliceSite[][] s2= new SpliceSite[][] {as2.spliceChain1, as2.spliceChain2};
-			SpliceSite[] su1= as1.getSpliceUniverse();
-			SpliceSite[] su2= as2.getSpliceUniverse();
 			if (((compi.compare(s1[0], s2[0])== 0)&& (compi.compare(s1[1], s2[1])== 0))||
 				((compi.compare(s1[1], s2[0])== 0)&& (compi.compare(s1[0], s2[1])== 0)))
 				return 0;
@@ -1230,6 +1231,43 @@ public class ASVariation implements Serializable {
 			}
 		}
 
+	/**
+	 * sorts according to 
+	 * 		shortest schain first
+	 * 		lowest ss pos first
+	 * @author micha
+	 *
+	 */
+	public static class SpliceSiteOrderComparator implements Comparator {
+			
+			public int compare(Object arg0, Object arg1) {
+				
+					// exclude null pointers
+				if (arg0== null&& arg1== null)
+					return 0;	// cannot happen
+				else {
+					if (arg0== null)
+						return -1;
+					else if (arg1== null)
+						return 1;
+				}
+			
+				SpliceSite[] ss0= (SpliceSite[]) arg0;
+				SpliceSite[] ss1= (SpliceSite[]) arg1;
+
+				if (ss0.length< ss1.length)
+					return -1;
+				else if (ss1.length< ss0.length)
+					return 1;
+				
+					// 2 schains of equal length
+				if (ss0[0].getPos()< ss1[0].getPos())
+					return -1;
+				return 1;	// else, cannot be equal
+	
+			}
+		}
+
 	public Gene getGene() {
 		Gene g1= trans1.getGene();
 		Gene g2= trans2.getGene();
@@ -1262,9 +1300,18 @@ public class ASVariation implements Serializable {
 	
 	void markAS(SpliceSite[] schain) {
 		for (int i = 0; i < schain.length; i++) {
-			schain[i].setConstitutive(false);
-			//schain[i].addASVar(this);
+			//schain[i].setConstitutive(false);
+			schain[i].addASVar(this);
 		}
+	}
+	
+	public void removeFromASS() {
+		SpliceSite[] sc1= trans1.getSpliceChain();
+		for (int i = 0; sc1!= null&& i < sc1.length; i++) 
+			sc1[i].removeASVar(this);
+		SpliceSite[] sc2= trans2.getSpliceChain();
+		for (int i = 0; sc2!= null&& i < sc2.length; i++) 
+			sc2[i].removeASVar(this);
 	}
 	
 	public SpliceSite getSpliceSite(int pos) throws IllegalArgumentException {
@@ -1337,6 +1384,10 @@ public class ASVariation implements Serializable {
 	
 	public boolean isNotProteinCoding() {
 		return !(isProteinCoding());
+	}
+
+	public boolean isNotProteinCoding_1cover() {
+		return !(isProteinCoding_1cover());
 	}
 	
 	
@@ -1473,6 +1524,45 @@ public class ASVariation implements Serializable {
 			}
 			for (int i = 0; i < su2.length&& trans1.getTranslations()!= null; i++) {
 				if (trans1.getTranslations()[0].contains(su2[i].getPos()))
+					return true;
+			}
+		} 
+		
+		return false;
+	}
+
+	/**
+	 * A splice variation is defined to be protein coding if the 
+	 * splicing influences the CDS in one transcript, ie, at least one
+	 * ss is contained in a CDS
+	 */
+	public boolean isProteinCoding_1cover() {
+	
+		SpliceSite[] su1= getSpliceChain1();
+		SpliceSite[] su2= getSpliceChain2();
+		
+		if (su1!= null&& su1.length> 0) {
+			for (int i = 0; trans1.getTranslations()!= null&& i < su1.length; i++) {
+				if ((trans1.getTranslations()[0].contains(su1[i].getPos()))&&
+						(trans1.getTranslations()[0].contains(su1[su1.length- 1].getPos())))
+					return true;
+			}
+			for (int i = 0; trans2.getTranslations()!= null&& i < su1.length; i++) {
+				if ((trans2.getTranslations()[0].contains(su1[i].getPos()))&& 
+						(trans2.getTranslations()[0].contains(su1[su1.length- 1].getPos())))
+					return true;
+			}
+		} 
+		
+		if (su2!= null&& su2.length> 0) {
+			for (int i = 0; i < su2.length&& trans2.getTranslations()!= null; i++) {
+				if ((trans2.getTranslations()[0].contains(su2[i].getPos()))&&
+						(trans2.getTranslations()[0].contains(su2[su2.length- 1].getPos())))
+					return true;
+			}
+			for (int i = 0; i < su2.length&& trans1.getTranslations()!= null; i++) {
+				if ((trans1.getTranslations()[0].contains(su2[i].getPos()))&&
+						(trans1.getTranslations()[0].contains(su2[su2.length- 1].getPos())))
 					return true;
 			}
 		} 
@@ -1762,8 +1852,145 @@ public class ASVariation implements Serializable {
 		return (isCompletelyIn5UTR()&& trans1.getTranslations()!= null&& trans2.getTranslations()!= null);
 	}
 	
+	public boolean is5UTRMaxTranscriptSS() {
+		if (ssRegionID5UTR== 0) {
+			SpliceSite[] su= getSpliceUniverse();
+			int i;
+			for (i = 0; i < su.length; i++) 
+				if (su[i].is5UTRMaxTranscript()) {
+					ssRegionID5UTR= 1;
+					break;
+				}
+			if (i== su.length)
+				ssRegionID5UTR= -1;
+		}
+		return (ssRegionID5UTR> 0);
+	}
+	
+	public boolean is3UTRMaxTranscriptSS() {
+		if (ssRegionID3UTR== 0) {
+			SpliceSite[] su= getSpliceUniverse();
+			int i;
+			for (i = 0; i < su.length; i++) 
+				if (su[i].is3UTRMaxTranscript()) {
+					ssRegionID3UTR= 1;
+					break;
+				}
+			if (i== su.length)
+				ssRegionID3UTR= -1;
+		}
+		return (ssRegionID3UTR> 0);
+	}
+
+	public boolean is3UTRRedundant() {
+		if (ssRegionID3UTR== 0) {
+			SpliceSite[] su= getSpliceUniversePlusFlanks();
+			int i;
+			for (i = 0; i < su.length; i++) 
+				if ((trans1.getTranslations()!= null&& trans1.getTranslations()[0].get3PrimeEdge()< su[i].getPos())||
+						(trans2.getTranslations()!= null&& trans2.getTranslations()[0].get3PrimeEdge()< su[i].getPos())) {
+					ssRegionID3UTR= 1;
+					break;
+				}
+			if (i== su.length)
+				ssRegionID3UTR= -1;
+		}
+		return (ssRegionID3UTR> 0);
+	}
+
+	public boolean is5UTRRedundant() {
+		if (ssRegionID5UTR== 0) {
+			SpliceSite[] su= getSpliceUniversePlusFlanks();
+			int i;
+			for (i = 0; i < su.length; i++) 
+				if ((trans1.getTranslations()!= null&& trans1.getTranslations()[0].get5PrimeEdge()> su[i].getPos())||
+						(trans2.getTranslations()!= null&& trans2.getTranslations()[0].get5PrimeEdge()> su[i].getPos())) {
+					ssRegionID5UTR= 1;
+					break;
+				}
+			if (i== su.length)
+				ssRegionID5UTR= -1;
+		}
+		return (ssRegionID5UTR> 0);
+	}
+	
 	public boolean isCodingFunc() {
 		return (isProteinCoding()&& trans1.getTranslations()!= null&& trans2.getTranslations()!= null);
+	}
+	
+	public boolean isCodingMaxTranscriptSS() {
+		if (ssRegionIDCDS== 0) {
+			SpliceSite[] su= getSpliceUniverse();
+			int i;
+			for (i = 0; i < su.length; i++) 
+				if (su[i].isCDSMaxTranscript()) {
+					ssRegionIDCDS= 1;
+					break;
+				}
+			if (i== su.length)
+				ssRegionIDCDS= -1;
+		}
+		return (ssRegionIDCDS> 0);
+	}
+
+	public boolean isCDSRedundant() {
+		if (ssRegionIDCDS== 0) {
+			SpliceSite[] su= getSpliceUniverse();
+			int i;
+			for (i = 0; i < su.length; i++) 
+				if ((trans1.getTranslations()!= null&& trans1.getTranslations()[0].contains(su[i].getPos()))||
+						(trans2.getTranslations()!= null&& trans2.getTranslations()[0].contains(su[i].getPos()))) {
+					ssRegionIDCDS= 1;
+					break;
+				}
+			if (i== su.length)
+				ssRegionIDCDS= -1;
+		}
+		return (ssRegionIDCDS> 0);
+	}
+	
+	public boolean isTwilightMaxTranscriptSS() {
+		int ctr= 0;
+		if (is5UTRMaxTranscriptSS())
+			++ctr;
+		if (isCodingMaxTranscriptSS())
+			++ctr;
+		if (is3UTRMaxTranscriptSS())
+			++ctr;
+		return (ctr> 1);
+	}
+
+	public boolean isTwilightRedundant() {
+		int ctr= 0;
+		if (is5UTRRedundant())
+			++ctr;
+		if (isCDSRedundant())
+			++ctr;
+		if (is3UTRRedundant())
+			++ctr;
+		return (ctr> 1);
+	}
+	
+	public boolean isNoneMaxTranscriptSS() {
+		int ctr= 0;
+		if (is5UTRMaxTranscriptSS())
+			++ctr;
+		if (isCodingMaxTranscriptSS())
+			++ctr;
+		if (is3UTRMaxTranscriptSS())
+			++ctr;
+		return (ctr== 0);
+	}
+
+	public boolean isNoneRedundant() {
+		int ctr= 0;
+		if (is5UTRRedundant())
+			++ctr;
+		if (isCDSRedundant())
+			++ctr;
+		if (is3UTRRedundant())
+			++ctr;
+		return (ctr== 0);
 	}
 	
 	public boolean isTwilightFunc() {
@@ -1808,9 +2035,17 @@ public class ASVariation implements Serializable {
 		}
 
 	public boolean isTouching5UTR() {
-
+	
 		SpliceSite[] su= getSpliceUniverse();
 		if (trans1.is5UTR(su[0].getPos())|| trans2.is5UTR(su[0].getPos())|| trans1.is5UTR(su[su.length- 1].getPos())|| trans2.is5UTR(su[su.length- 1].getPos()))
+			return true;
+		return false;
+	}
+
+	public boolean isTouching3UTR() {
+
+		SpliceSite[] su= getSpliceUniverse();
+		if (trans1.is3UTR(su[0].getPos())|| trans2.is3UTR(su[0].getPos())|| trans1.is3UTR(su[su.length- 1].getPos())|| trans2.is3UTR(su[su.length- 1].getPos()))
 			return true;
 		return false;
 	}	
@@ -2505,6 +2740,23 @@ public class ASVariation implements Serializable {
 		}
 		return suniv;
 	}
+
+	public SpliceSite[] getSpliceUniversePlusFlanks() {
+		SpliceSite[] suniv= new SpliceSite[spliceChain1.length+ spliceChain2.length];
+		SpliceSite[] flanks= getFlankingSites();	// getFlankingSpliceSites();
+		suniv[0]= flanks[0];
+		int s1= 0; int s2= 0;
+		for (int i = 1; i < suniv.length- 1; i++) {
+			if (s2>= spliceChain2.length|| 
+					(s1< spliceChain1.length&& spliceChain1[s1].getPos()< spliceChain2[s2].getPos()))
+				suniv[i]= spliceChain1[s1++];
+			else
+				suniv[i]= spliceChain2[s2++];
+		}
+		suniv[suniv.length- 1]= flanks[1];
+		return suniv;
+	}
+	
 	public SpliceSite[] getSpliceChain1() {
 		return spliceChain1;
 	}

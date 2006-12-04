@@ -541,7 +541,7 @@ public class Species implements Serializable {
 		Gene[] ge= getGenes();
 		Vector v= new Vector();
 		for (int i = 0; i < ge.length; i++) {
-			SpliceSite[] ssites= ge[i].getSpliceSites(regionType, ssType);
+			SpliceSite[] ssites= ge[i].getSpliceSites(ssType, regionType);
 			for (int j = 0; ssites!= null&& j < ssites.length; j++) 
 				v.add(ssites[j]);
 		}

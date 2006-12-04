@@ -7,6 +7,7 @@
 package gphase.model;
 
 import gphase.Constants;
+import gphase.NMDSimulator;
 
 import gphase.algo.AlignmentGenerator;
 import gphase.algo.AlignmentWrapper;
@@ -1223,6 +1224,7 @@ public class Graph implements Serializable {
 	 *
 	 */
 	public void filterSingleTranscriptGenes() {
+		System.out.println("filter single transcript genes");
 		int rgen= 0;
 		Species[] spec= getSpecies();
 		for (int i = 0; i < spec.length; i++) {
@@ -1260,6 +1262,7 @@ public class Graph implements Serializable {
 	 * @return
 	 */
 	public void filterNonsense() {
+			System.out.println("filter nonsense");
 			
 			int rgen= 0; 
 			int rtran= 0; 
@@ -1323,6 +1326,7 @@ public class Graph implements Serializable {
 	/**
 	 */
 	public void filterNonCodingTranscripts() {
+		System.out.println("filter non-coding transcripts");
 		Iterator iter= speciesHash.values().iterator();
 		while (iter.hasNext()) {
 			Species spec= (Species) iter.next();
@@ -1339,8 +1343,37 @@ public class Graph implements Serializable {
 		}
 		recluster();
 	}
+
+	/**
+	 */
+	public void filterNMDTranscripts() {
+		System.out.println("filter NMD transcripts");
+		Iterator iter= speciesHash.values().iterator();
+		NMDSimulator nmd;
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			Gene[] ge= spec.getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				Transcript[] trans= ge[i].getTranscripts();
+				for (int j = 0; j < trans.length; j++) {					
+					nmd= new NMDSimulator(trans[j]);
+					Translation tln;
+					if (trans[j].getTranslations()== null|| trans[j].getTranslations()[0]== null)
+						tln= trans[j].findHavanaORF();	// *
+					else
+						tln= trans[j].getTranslations()[0];
+					if (tln!= null&& nmd.isNMD(tln))	// (tln== null|| nmd.isNMD(tln)) for removing trpts wo ORF
+						ge[i].removeTranscript(trans[j]);
+				}
+				if (ge[i].getTranscriptCount()< 1)	// remove gene if there are no more transcripts
+					spec.remove(ge[i], true);
+			}
+		}
+		recluster();
+	}
 	
 	public void filterCodingTranscripts() {
+		System.out.println("filter coding transcripts");
 		Iterator iter= speciesHash.values().iterator();
 		while (iter.hasNext()) {
 			Species spec= (Species) iter.next();
@@ -1528,6 +1561,7 @@ public class Graph implements Serializable {
 	public ASVariation[][] getASVariations(int filter) {
 		
 		asClasses= null;
+		System.out.println("Retrieving pw AS variations, filtered "+ ASMultiVariation.FILTER_TO_STRING[filter]);
 		if (asClasses == null) {
 			Gene[] ge= getGenes();
 			asVariations= 0;

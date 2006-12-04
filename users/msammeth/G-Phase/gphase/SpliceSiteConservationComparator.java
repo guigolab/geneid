@@ -1337,16 +1337,288 @@ public class SpliceSiteConservationComparator {
 	}
 
 	public static void analyzeStops(Graph g, boolean coding) {
-		 	final int DELTA= 5;	//10; 5= max to have a full codon in utr
-			final int EXONIC_POS= 0;
+					// "analyze_stop_constSS_maxCDS_statistics.txt"
+					// "analyze_stop_constSS_maxCDS_donors.txt"
+					// "analyze_stop_constSS_maxCDS_acceptors.txt"
+				String fName= "analyze_stop_constSS_all_acceptors.txt";
+				
+			 	final int DELTA= 10;	//10; 5= max to have a full codon in utr
+				final int EXONIC_POS= 2;
+		
+				PrintStream p= null;
+				try {
+					fName= Toolbox.checkFileExists(fName);
+					p= new PrintStream(fName);
+					//p= System.out;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	
+				String[] stops= new String[] {"TAA", "TGA", "TAG"};
+				g.filterNonCodingTranscripts();
+				g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+				SpliceSite[] ss= g.getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_MAX_CDS);
+				DefaultRegion[] reg= ENCODE.getEncodeRegions();
+				int ctrStopDon= 0, ctrStopAcc= 0, ctrNoStopDon= 0, ctrNoStopAcc= 0;
+				Vector seqV= new Vector(ss.length);
+				for (int i = 0; i < reg.length; i++) {
+					Vector v= new Vector();
+					for (int j = 0; j < ss.length; j++) 
+						if (reg[i].contains(ss[j]))
+							v.add(ss[j]);
+					SpliceSite[] regSS= (SpliceSite[]) gphase.tools.Arrays.toField(v);
+						
+					SpliceSiteConservationComparator comp= 
+						new SpliceSiteConservationComparator(reg[i].getID(), new String[] {"human"});
+					
+					for (int j = 0; regSS!= null&& j < regSS.length; j++) {
+						int pos1, pos2;
+						if ((regSS[j].getGene().getStrand()> 0&& regSS[j].isDonor()) ||
+								regSS[j].getGene().getStrand()< 0&& regSS[j].isAcceptor()) {
+							pos1= Math.abs(regSS[j].getPos())- reg[i].getStart()+ 1- EXONIC_POS;
+							pos2= pos1+ DELTA;
+						} else {
+							pos2= Math.abs(regSS[j].getPos())- reg[i].getStart()+ EXONIC_POS;	// d kill +1
+							pos1= pos2- DELTA;
+						}
+						String s= comp.getSubstring("human", pos1, pos2);
+						if (regSS[j].getGene().getStrand()< 0)
+							s= gphase.tools.Arrays.reverseComplement(s);
+						System.currentTimeMillis();
+						
+						Exon[] e= regSS[j].getExons();
+						int k;
+						if (coding) {
+							for (k = 0; k < e.length; k++) {
+									// 	skip nc SSs
+								if (regSS[j].isDonor()&& !e[k].isCoding3Prime())//(coding^ !e[k].isCoding3Prime()))
+									continue;
+								if (regSS[j].isAcceptor()&& !e[k].isCoding5Prime())//(coding^ e[k].isCoding5Prime()))
+									continue;
+								
+								int fr= e[k].getFrame();	
+	//							if (regSS[j].isDonor()) {		// for acceptors, this directly corresponds to frame of pos#2
+														 // get5PrimeEdge() ??!
+	//								fr+= (3- (Math.abs(e[k].get3PrimeEdge()- e[k].get5PrimeCDS())+ 1- 1)% 3);	// end frame, position#2 in string s
+	//								fr= --fr< 0?3+ fr:fr;	// pos#2 -> pos#3
+	//								fr= fr> 2?fr- 3:fr;
+	//							} 
+	//							int backNt= (3-fr== 3)?0:3-fr;	// frame -> nt before					
+	//							int pos= 2- backNt;	// 3rd pos in string - Ns read before
+								
+								if (regSS[j].isDonor()) {
+									fr+= 3- ((Math.abs(e[k].get3PrimeEdge()- e[k].get5PrimeCDS())+ 1)% 3);	// frame for the 1st pos after 3' exon end
+									fr+= EXONIC_POS; // adapt to pos0 of string
+								} else 
+									fr+= (DELTA- EXONIC_POS);	// 1 pos of s 
+								if (fr> 2) fr= fr% 3;	// reset fr to [0..2]
+								else if (fr< 0) fr= 3+ fr; 
+								int pos= fr;		// to be set to 1st codon start
+								
+								while (pos+ 2< s.length()) {	// 3<=, 2<
+									String cod= s.substring(pos, pos+ 3);
+									int m;
+									for (m = 0; m < stops.length; m++) 
+										if (stops[m].equalsIgnoreCase(cod))
+											break;
+									if (m< stops.length)
+										break;
+									pos+= 3;
+								}
+								if (pos+ 2< s.length())
+									break;
+							}
+							if (k< e.length) {
+								if (regSS[j].isDonor()) {
+									++ctrStopDon; 
+								} else {
+									++ctrStopAcc;
+									seqV.add(s);
+								}
+							} else {
+								if (regSS[j].isDonor()) {
+									++ctrNoStopDon; 
+								} else {
+									++ctrNoStopAcc;
+									seqV.add(s);
+								}
+							}
+								
+						} else {	// !coding
+							
+							Transcript[] t= regSS[j].getTranscripts();
+							int x;
+							for (x = 0; x < t.length; x++) 
+								if (t[x].getTranslations()[0].contains(regSS[j]))
+									break;
+							if (x< t.length)
+								continue;	// skip ss, coding
+							
+							for (x = 0; x < Translation.STOP_CODONS.length; x++) {
+								if (s.indexOf(Translation.STOP_CODONS[x])>= 0) {
+									if (regSS[j].isDonor()) {
+										++ctrStopDon; 
+										seqV.add(s);
+									} else {
+										++ctrStopAcc;
+									}
+								} else {
+									if (regSS[j].isDonor()) {
+										++ctrNoStopDon; 
+										seqV.add(s);
+									} else {
+										++ctrNoStopAcc;
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				String donStr= Float.toString((float) ctrStopDon* 100/ (ctrStopDon+ ctrNoStopDon));
+				String accStr= Float.toString((float) ctrStopAcc* 100/ (ctrStopAcc+ ctrNoStopAcc));
+				System.out.println("coding "+coding+", exonic "+ EXONIC_POS+", intronic "+(DELTA- EXONIC_POS));
+				System.out.println("Donor "+ctrStopDon+ " stop ("+ donStr.substring(0, donStr.indexOf('.')+ 2)+ "), "+
+						ctrNoStopDon+ " nostop");
+				System.out.println("Actor "+ctrStopAcc+ " stop ("+ accStr.substring(0, donStr.indexOf('.')+ 2)+ "), "+
+						ctrNoStopAcc+ " nostop");
+				
+	//			for (int i = 0; i < seqV.size(); i++) {
+	//				if (coding)
+	//					p.println(">const_don_CDS");
+	//				else
+	//					p.println(">const_don_UTR");
+	//				p.println(seqV.elementAt(i));
+	//			}
+				
+			}
+
+	/**
+	 * counts stop codons directly adjacent to exon boundary
+	 * @param g
+	 * @param coding
+	 */
+	public static void stopCodonsInPhase0(Graph g) {
+					// "analyze_stop_constSS_maxCDS_statistics.txt"
+					// "analyze_stop_constSS_maxCDS_donors.txt"
+					// "analyze_stop_constSS_maxCDS_acceptors.txt"
+				String fName= "adjacent_stop_codons.txt";
+				
+			 	final int DELTA= 5;	//10; 5= max to have a full codon in utr
+				final int EXONIC_POS= 0;
+		
+				PrintStream p= null;
+				try {
+					fName= Toolbox.checkFileExists(fName);
+					p= new PrintStream(fName);
+					//p= System.out;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				String[] stops= new String[] {"TAA", "TGA", "TAG"};
+				g.filterNonCodingTranscripts();
+				g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+				SpliceSite[] ss= g.getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_MAX_CDS);
+				DefaultRegion[] reg= ENCODE.getEncodeRegions();
+				int ctrStopDon= 0, ctrStopAcc= 0, ctrNoStopDon= 0, ctrNoStopAcc= 0;
+				Vector seqV= new Vector(ss.length);
+				for (int i = 0; i < reg.length; i++) {
+					Vector v= new Vector();
+					for (int j = 0; j < ss.length; j++) 
+						if (reg[i].contains(ss[j]))
+							v.add(ss[j]);
+					SpliceSite[] regSS= (SpliceSite[]) gphase.tools.Arrays.toField(v);
+						
+					SpliceSiteConservationComparator comp= 
+						new SpliceSiteConservationComparator(reg[i].getID(), new String[] {"human"});
+					
+					for (int j = 0; regSS!= null&& j < regSS.length; j++) {
+						int pos1, pos2;
+						if ((regSS[j].getGene().getStrand()> 0&& regSS[j].isDonor()) ||
+								regSS[j].getGene().getStrand()< 0&& regSS[j].isAcceptor()) {
+							pos1= Math.abs(regSS[j].getPos())- reg[i].getStart()+ 1- EXONIC_POS;
+							pos2= pos1+ DELTA;
+						} else {
+							pos2= Math.abs(regSS[j].getPos())- reg[i].getStart()+ EXONIC_POS;	// d kill +1
+							pos1= pos2- DELTA;
+						}
+						String s= comp.getSubstring("human", pos1, pos2);
+						if (regSS[j].getGene().getStrand()< 0)
+							s= gphase.tools.Arrays.reverseComplement(s);
+						System.currentTimeMillis();
+						
+						Exon[] e= regSS[j].getExons();
+						int k;
+							// how many stops in don.substring(1,4) and in acc.substring(-3, length)
+						if (regSS[j].isDonor()) 
+							s= s.substring(EXONIC_POS+ 1, EXONIC_POS+ 4);
+						else
+							s= s.substring(s.length()- EXONIC_POS- 3, s.length()- EXONIC_POS);
+						int w;
+						for (w = 0; w < Translation.STOP_CODONS.length; w++) {
+							if (s.toUpperCase().equals(Translation.STOP_CODONS[w])) {
+								if (regSS[j].isDonor()) 
+									++ctrStopDon;
+								else 
+									++ctrStopAcc;
+								break;
+							}
+						}
+						if (w== Translation.STOP_CODONS.length)
+							if (regSS[j].isDonor()) 
+								++ctrNoStopDon;
+							else 
+								++ctrNoStopAcc;
+						if (regSS[j].isDonor()) {
+	//						p.println(">const_don");
+	//						p.println(s);
+						} else {
+							p.println(">const_acc");
+							p.println(s);
+						}
+					}
+				}
+
+				System.out.println("Stop codons directly adjacent to exon boundary:");
+				String donStr= Float.toString((float) ctrStopDon* 100/ (ctrStopDon+ ctrNoStopDon));
+				String accStr= Float.toString((float) ctrStopAcc* 100/ (ctrStopAcc+ ctrNoStopAcc));
+				System.out.println("exonic "+ EXONIC_POS+", intronic "+(DELTA- EXONIC_POS));
+				System.out.println("Donor "+ctrStopDon+ " stop ("+ donStr.substring(0, donStr.indexOf('.')+ 2)+ "), "+
+						ctrNoStopDon+ " nostop");
+				System.out.println("Actor "+ctrStopAcc+ " stop ("+ accStr.substring(0, donStr.indexOf('.')+ 2)+ "), "+
+						ctrNoStopAcc+ " nostop");
+				
+	//			for (int i = 0; i < seqV.size(); i++) {
+	//				if (coding)
+	//					p.println(">const_don_CDS");
+	//				else
+	//					p.println(">const_don_UTR");
+	//				p.println(seqV.elementAt(i));
+	//			}
+				
+			}
+
+	/**
+	 * based on exons
+	 * @param g
+	 * @param coding
+	 */
+	public static void plotCodonsExtendTilStop(Graph g, boolean coding, boolean accumulate) {
+		 	final int DELTA= 100;	//10; 5= max to have a full codon in utr
+			final int EXONIC_POS= 2;
 			
 				// "analyze_stop_constSS_maxCDS_statistics.txt"
 				// "analyze_stop_constSS_maxCDS_donors.txt"
 				// "analyze_stop_constSS_maxCDS_acceptors.txt"
+			String fName= "plot_codons_extend_til_stop.txt";
 			PrintStream p= null;
 			try {
-				//p= new PrintStream("analyze_stop_constSS_maxCDS_donors.txt");
-				p= System.out;
+				fName= Toolbox.checkFileExists(fName);
+				p= new PrintStream(fName);
+				//p= System.out;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1358,7 +1630,8 @@ public class SpliceSiteConservationComparator {
 			SpliceSite[] ss= g.getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_MAX_CDS);
 			DefaultRegion[] reg= ENCODE.getEncodeRegions();
 			int ctrStopDon= 0, ctrStopAcc= 0, ctrNoStopDon= 0, ctrNoStopAcc= 0;
-			Vector seqV= new Vector(ss.length);
+			HashMap donMapCnt= new HashMap();
+			HashMap accMapCnt= new HashMap();
 			for (int i = 0; i < reg.length; i++) {
 				Vector v= new Vector();
 				for (int j = 0; j < ss.length; j++) 
@@ -1385,7 +1658,7 @@ public class SpliceSiteConservationComparator {
 					System.currentTimeMillis();
 					
 					Exon[] e= regSS[j].getExons();
-					int k;
+					int k;					
 					if (coding) {
 						for (k = 0; k < e.length; k++) {
 								// 	skip nc SSs
@@ -1394,51 +1667,73 @@ public class SpliceSiteConservationComparator {
 							if (regSS[j].isAcceptor()&& !e[k].isCoding5Prime())//(coding^ e[k].isCoding5Prime()))
 								continue;
 							
-							int fr= e[k].getFrame();	
-//							if (regSS[j].isDonor()) {		// for acceptors, this directly corresponds to frame of pos#2
-													 // get5PrimeEdge() ??!
-//								fr+= (3- (Math.abs(e[k].get3PrimeEdge()- e[k].get5PrimeCDS())+ 1- 1)% 3);	// end frame, position#2 in string s
-//								fr= --fr< 0?3+ fr:fr;	// pos#2 -> pos#3
-//								fr= fr> 2?fr- 3:fr;
-//							} 
-//							int backNt= (3-fr== 3)?0:3-fr;	// frame -> nt before					
-//							int pos= 2- backNt;	// 3rd pos in string - Ns read before
-							
+							int fr= e[k].getFrame();								
+							int pos;		// to be set to 1st codon start
 							if (regSS[j].isDonor()) {
 								fr+= 3- ((Math.abs(e[k].get3PrimeEdge()- e[k].get5PrimeCDS())+ 1)% 3);	// frame for the 1st pos after 3' exon end
 								fr+= EXONIC_POS; // adapt to pos0 of string
+								if (fr> 2) fr= fr% 3;	// reset fr to [0..2]
+								else if (fr< 0) fr= 3+ fr;
+								pos= fr;
 							} else 
-								fr+= (DELTA- EXONIC_POS);	// 1 pos of s 
-							if (fr> 2) fr= fr% 3;	// reset fr to [0..2]
-							else if (fr< 0) fr= 3+ fr; 
-							int pos= fr;		// to be set to 1st codon start
+								pos= (DELTA- EXONIC_POS)- (3- fr);	// 1 pos of s
 							
-							while (pos+ 2< s.length()) {	// 3<=, 2<
-								String cod= s.substring(pos, pos+ 3);
-								int m;
-								for (m = 0; m < stops.length; m++) 
-									if (stops[m].equalsIgnoreCase(cod))
+							int codCtr= 0;
+							if (regSS[j].isDonor()) {	// the donors
+								while (pos+ 2< s.length()) {	// 3<=, 2<
+									++codCtr;
+									String cod= s.substring(pos, pos+ 3);
+									int m;
+									for (m = 0; m < stops.length; m++)
+										if (stops[m].equalsIgnoreCase(cod)) 
+											break;
+									if (m< stops.length) 
 										break;
-								if (m< stops.length)
-									break;
-								pos+= 3;
-							}
-							if (pos+ 2< s.length())
-								break;
-						}
-						if (k< e.length) {
-							if (regSS[j].isDonor()) {
-								++ctrStopDon; 
-								seqV.add(s);
-							} else {
-								++ctrStopAcc;
-							}
-						} else {
-							if (regSS[j].isDonor()) {
-								++ctrNoStopDon; 
-								seqV.add(s);
-							} else {
-								++ctrNoStopAcc;
+									pos+= 3;
+								}
+								Integer val;
+								if (pos+ 2< s.length()) {
+									Integer key= new Integer(codCtr);
+									val= (Integer) donMapCnt.remove(key);
+									if (val== null)
+										val= new Integer(0);
+									donMapCnt.put(key, new Integer(val.intValue()+ 1));
+								} else {	// exon nostop extension
+									Integer key= new Integer(-1);
+									val= (Integer) donMapCnt.remove(key);
+									if (val== null)
+										val= new Integer(0);
+									donMapCnt.put(key, new Integer(val.intValue()+ 1));
+								}
+								
+							} else {		// the acceptors
+								
+								while (pos>=  0) {	// count down
+									++codCtr;
+									String cod= s.substring(pos, pos+ 3);
+									int m;
+									for (m = 0; m < stops.length; m++)
+										if (stops[m].equalsIgnoreCase(cod)) 
+											break;
+									if (m< stops.length) 
+										break;
+									pos-= 3;
+								}
+								Integer val;
+								if (pos>= 0) {
+									Integer key= new Integer(codCtr);
+									val= (Integer) accMapCnt.remove(key);
+									if (val== null)
+										val= new Integer(0);
+									accMapCnt.put(key, new Integer(val.intValue()+ 1));
+								} else {	// exon nostop extension
+									Integer key= new Integer(-1);
+									val= (Integer) accMapCnt.remove(key);
+									if (val== null)
+										val= new Integer(0);
+									accMapCnt.put(key, new Integer(val.intValue()+ 1));
+								}
+								
 							}
 						}
 							
@@ -1456,14 +1751,12 @@ public class SpliceSiteConservationComparator {
 							if (s.indexOf(Translation.STOP_CODONS[x])>= 0) {
 								if (regSS[j].isDonor()) {
 									++ctrStopDon; 
-									seqV.add(s);
 								} else {
 									++ctrStopAcc;
 								}
 							} else {
 								if (regSS[j].isDonor()) {
 									++ctrNoStopDon; 
-									seqV.add(s);
 								} else {
 									++ctrNoStopAcc;
 								}
@@ -1473,18 +1766,211 @@ public class SpliceSiteConservationComparator {
 				}
 			}
 			
-			String donStr= Float.toString((float) ctrStopDon* 100/ (ctrStopDon+ ctrNoStopDon));
-			String accStr= Float.toString((float) ctrStopAcc* 100/ (ctrStopAcc+ ctrNoStopAcc));
-			p.println("coding "+coding+", exonic "+ EXONIC_POS+", intronic "+(DELTA- EXONIC_POS));
-			p.println("Donor "+ctrStopDon+ " stop ("+ donStr.substring(0, donStr.indexOf('.')+ 2)+ "), "+
-					ctrNoStopDon+ " nostop");
-			p.println("Actor "+ctrStopAcc+ " stop ("+ accStr.substring(0, donStr.indexOf('.')+ 2)+ "), "+
-					ctrNoStopAcc+ " nostop");
-//			for (int i = 0; i < seqV.size(); i++) {
-//				p.println(">const_don_realCDS");
-//				p.println(seqV.elementAt(i));
-//			}
+			p.println("donors");
+			Object[] o= donMapCnt.keySet().toArray();
+			Arrays.sort(o);
+			int sum= 0; 
+			for (int i = 0; i < o.length; i++) {
+				if (((Integer) o[i]).intValue()< 0)
+					continue;
+				int x= ((Integer) donMapCnt.get(o[i])).intValue();
+				if (accumulate)
+					sum+= x;
+				else
+					sum= x;
+				p.println(o[i]+ "\t"+ sum);
+			}
+			p.println("acceptors");
+			o= accMapCnt.keySet().toArray();
+			Arrays.sort(o);
+			sum= 0;
+			for (int i = 0; i < o.length; i++) { 
+				if (((Integer) o[i]).intValue()< 0)
+					continue;
+				int x= ((Integer) accMapCnt.get(o[i])).intValue();
+				if (accumulate)
+					sum+= x;
+				else
+					sum= x;
+				p.println(o[i]+ "\t"+ sum);
+			}
+		}
+
+	/**
+	 * based on exons
+	 * @param g
+	 * @param coding
+	 */
+	public static void plotCodonsExtendTilStopSS(Graph g, boolean coding) {
+		 	final int DELTA= 100;	//10; 5= max to have a full codon in utr
+			final int EXONIC_POS= 2;
 			
+				// "analyze_stop_constSS_maxCDS_statistics.txt"
+				// "analyze_stop_constSS_maxCDS_donors.txt"
+				// "analyze_stop_constSS_maxCDS_acceptors.txt"
+			String fName= "plot_codons_extend_til_stop.txt";
+			PrintStream p= null;
+			try {
+				fName= Toolbox.checkFileExists(fName);
+				p= new PrintStream(fName);
+				//p= System.out;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	
+			String[] stops= new String[] {"TAA", "TGA", "TAG"};
+			g.filterNonCodingTranscripts();
+			g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+			SpliceSite[] ss= g.getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_MAX_CDS);
+			DefaultRegion[] reg= ENCODE.getEncodeRegions();
+			int ctrStopDon= 0, ctrStopAcc= 0, ctrNoStopDon= 0, ctrNoStopAcc= 0;
+			HashMap donMapCnt= new HashMap();
+			HashMap accMapCnt= new HashMap();
+			for (int i = 0; i < reg.length; i++) {
+				Vector v= new Vector();
+				for (int j = 0; j < ss.length; j++) 
+					if (reg[i].contains(ss[j]))
+						v.add(ss[j]);
+				SpliceSite[] regSS= (SpliceSite[]) gphase.tools.Arrays.toField(v);
+					
+				SpliceSiteConservationComparator comp= 
+					new SpliceSiteConservationComparator(reg[i].getID(), new String[] {"human"});
+				
+				for (int j = 0; regSS!= null&& j < regSS.length; j++) {
+					int pos1, pos2;
+					if ((regSS[j].getGene().getStrand()> 0&& regSS[j].isDonor()) ||
+							regSS[j].getGene().getStrand()< 0&& regSS[j].isAcceptor()) {
+						pos1= Math.abs(regSS[j].getPos())- reg[i].getStart()+ 1- EXONIC_POS;
+						pos2= pos1+ DELTA;
+					} else {
+						pos2= Math.abs(regSS[j].getPos())- reg[i].getStart()+ EXONIC_POS;	// d kill +1
+						pos1= pos2- DELTA;
+					}
+					String s= comp.getSubstring("human", pos1, pos2);
+					if (regSS[j].getGene().getStrand()< 0)
+						s= gphase.tools.Arrays.reverseComplement(s);
+					System.currentTimeMillis();
+					
+					Exon[] e= regSS[j].getExons();
+					int k;					
+					if (coding) {
+						for (k = 0; k < e.length; k++) {
+								// 	skip nc SSs
+							if (regSS[j].isDonor()&& !e[k].isCoding3Prime())//(coding^ !e[k].isCoding3Prime()))
+								continue;
+							if (regSS[j].isAcceptor()&& !e[k].isCoding5Prime())//(coding^ e[k].isCoding5Prime()))
+								continue;
+							
+							int fr= e[k].getFrame();								
+							int pos;		// to be set to 1st codon start
+							if (regSS[j].isDonor()) {
+								fr+= 3- ((Math.abs(e[k].get3PrimeEdge()- e[k].get5PrimeCDS())+ 1)% 3);	// frame for the 1st pos after 3' exon end
+								fr+= EXONIC_POS; // adapt to pos0 of string
+								if (fr> 2) fr= fr% 3;	// reset fr to [0..2]
+								else if (fr< 0) fr= 3+ fr;
+								pos= fr;
+							} else 
+								pos= (DELTA- EXONIC_POS)- (3- fr);	// 1 pos of s
+							
+							int codCtr= 0;
+							if (regSS[j].isDonor()) {	// ** the donors **
+								while (pos+ 2< s.length()) {	// 3<=, 2<
+									++codCtr;
+									String cod= s.substring(pos, pos+ 3);
+									int m;
+									for (m = 0; m < stops.length; m++)
+										if (stops[m].equalsIgnoreCase(cod)) 
+											break;
+									if (m< stops.length) 
+										break;
+									pos+= 3;
+								}
+								Integer val;
+								if (pos+ 2< s.length()) {
+									Integer key= new Integer(codCtr);
+									val= (Integer) donMapCnt.remove(key);
+									if (val== null)
+										val= new Integer(0);
+									donMapCnt.put(key, new Integer(val.intValue()+ 1));
+									break;
+								} 
+								
+							} else {		// ** the acceptors **
+								
+								while (pos>=  0) {	// count down
+									++codCtr;
+									String cod= s.substring(pos, pos+ 3);
+									int m;
+									for (m = 0; m < stops.length; m++)
+										if (stops[m].equalsIgnoreCase(cod)) 
+											break;
+									if (m< stops.length) 
+										break;
+									pos-= 3;
+								}
+								Integer val;
+								if (pos>= 0) {
+									Integer key= new Integer(codCtr);
+									val= (Integer) accMapCnt.remove(key);
+									if (val== null)
+										val= new Integer(0);
+									accMapCnt.put(key, new Integer(val.intValue()+ 1));
+									break;
+								} 
+							}
+						}
+							
+					} else {	// !coding
+						
+						System.err.println("Not implemented");
+						Transcript[] t= regSS[j].getTranscripts();
+						int x;
+						for (x = 0; x < t.length; x++) 
+							if (t[x].getTranslations()[0].contains(regSS[j]))
+								break;
+						if (x< t.length)
+							continue;	// skip ss, coding
+						
+						for (x = 0; x < Translation.STOP_CODONS.length; x++) {
+							if (s.indexOf(Translation.STOP_CODONS[x])>= 0) {
+								if (regSS[j].isDonor()) {
+									++ctrStopDon; 
+								} else {
+									++ctrStopAcc;
+								}
+							} else {
+								if (regSS[j].isDonor()) {
+									++ctrNoStopDon; 
+								} else {
+									++ctrNoStopAcc;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			p.println("donors");
+			Object[] o= donMapCnt.keySet().toArray();
+			Arrays.sort(o);
+			int sum= 0;
+			for (int i = 0; i < o.length; i++) {
+				if (((Integer) o[i]).intValue()< 0)
+					continue;
+				sum+= ((Integer) donMapCnt.get(o[i])).intValue();
+				p.println(o[i]+ "\t"+ sum);
+			}
+			p.println("acceptors");
+			o= accMapCnt.keySet().toArray();
+			Arrays.sort(o);
+			sum= 0;
+			for (int i = 0; i < o.length; i++) { 
+				if (((Integer) o[i]).intValue()< 0)
+					continue;
+				sum+= ((Integer) accMapCnt.get(o[i])).intValue();
+				p.println(o[i]+ "\t"+ sum);
+			}
 		}
 
 	public static void outputRegions(Graph g, String fName) {
@@ -1535,7 +2021,8 @@ public class SpliceSiteConservationComparator {
 		
 		Graph g= ASAnalyzer.getGraph(ASAnalyzer.INPUT_ENCODE);
 
-		analyzeStops(g, false);
+		plotCodonsExtendTilStop(g, true, true);
+		//analyzeStops(g, true);
 		
 		// "conserv_analysis_full.txt"
 //		String outName= "regions.gtf";

@@ -73,103 +73,6 @@ public class GraphAligner {
 		
 	}
 	
-	public static Mapping[] align_dp(SpliceGraph g1, SpliceGraph g2) {
-		
-		Comparator compi= new SpliceNode.PositionComparator();
-		SpliceNode[] listI= g1.getNodeList();
-		Arrays.sort(listI, compi);
-		SpliceNode[] listJ= g2.getNodeList();
-		Arrays.sort(listJ, compi);
-
-		double[][] dd= new double[listI.length][], 
-					vv= new double[listI.length][], 
-					hh= new double[listI.length][];
-		for (int i = 0; i < hh.length; i++) {
-			dd[i]= new double[listJ.length];
-			vv[i]= new double[listJ.length];
-			hh[i]= new double[listJ.length];
-			
-			dd[i][0]= Mapping.getCost();
-			
-		}
-		
-		if (listI.length> 0) {
-			Mapping m= new Mapping();
-			m.addMapping(listI[0], null);
-			q.add(m);
-		}
-		if (listJ.length> 0) {
-			Mapping m= new Mapping();
-			m.addMapping(null, listJ[0]);
-			q.add(m);
-		}
-		if ((listI.length> 0&& listJ.length> 0)&& isAligneable(listI[0], listJ[0])) {
-			Mapping m= new Mapping();
-			m.addMapping(listI[0], listJ[0]);
-			q.add(m);
-		}
-		Mapping map= (Mapping) q.poll();
-		int ulCost= Integer.MAX_VALUE;
-		Vector optMaps= new Vector();
-		while (map!= null&& map.getCost()<= ulCost) {
-			
-				// generate possibilities for next i, next j
-			int nextI= 0, nextJ= 0;
-			if (map.getMaxI()!= null)
-				nextI= Arrays.binarySearch(listI, map.getMaxI(), compi);
-			if (map.getMaxJ()!= null)
-				nextJ= Arrays.binarySearch(listJ, map.getMaxJ(), compi);
-	
-			if (nextI+ 1< listI.length) {
-				Mapping m= null;
-				try {
-					m = (Mapping) map.clone();
-				} catch (CloneNotSupportedException e) {
-					e.printStackTrace();
-				}
-				m.addMapping(listI[nextI+ 1], null);
-				q.add(m);
-			}
-			if (nextJ+ 1< listJ.length) {
-				Mapping m= null;
-				try {
-					m= (Mapping) map.clone();
-				} catch (CloneNotSupportedException e) {
-					e.printStackTrace();
-				}
-				m.addMapping(null, listJ[nextJ+ 1]);
-				q.add(m);
-			}
-			if (((nextI+ 1< listI.length)&& (nextJ+ 1< listJ.length))&& 
-					isAligneable(listI[nextI+ 1], listJ[nextJ+ 1])) {
-				Mapping m= null;
-				try {
-					m= (Mapping) map.clone();
-				} catch (CloneNotSupportedException e) {
-					e.printStackTrace();
-				}
-				m.addMapping(listI[nextI+ 1], listJ[nextJ+ 1]);
-				q.add(m);
-			}
-			
-				// update cheapest path
-			if ((nextI+ 1>= listI.length)&& (nextJ+ 1>= listJ.length)) {
-				if (map.getCost()<= ulCost) {
-					if (map.getCost()< ulCost) {
-						if (ulCost!= Integer.MAX_VALUE)
-							System.err.println("assertion failed: ulcost gets cheaper!");
-						ulCost= map.getCost();
-					}
-					optMaps.add(map);
-				}
-			}
-			
-			map= (Mapping) q.poll();	// next
-		}
-		
-		return (Mapping[]) gphase.tools.Arrays.toField(optMaps);
-	}
-
 	public static Mapping[] align(SpliceGraph g1, SpliceGraph g2) {
 		
 		PriorityQueue q= new PriorityQueue(11, new Mapping.PriorityComparator());
@@ -180,22 +83,22 @@ public class GraphAligner {
 		Arrays.sort(listJ, compi);
 		
 		if (listI.length> 0) {
-			Mapping m= new Mapping();
+			Mapping m= new Mapping(g1, g2);
 			m.addMapping(listI[0], null);
 			q.add(m);
 		}
 		if (listJ.length> 0) {
-			Mapping m= new Mapping();
+			Mapping m= new Mapping(g1, g2);
 			m.addMapping(null, listJ[0]);
-			q.add(m);
+			q.add(m); 
 		}
 		if ((listI.length> 0&& listJ.length> 0)&& isAligneable(listI[0], listJ[0])) {
-			Mapping m= new Mapping();
+			Mapping m= new Mapping(g1, g2);
 			m.addMapping(listI[0], listJ[0]);
 			q.add(m);
 		}
 		Mapping map= (Mapping) q.poll();
-		int ulCost= Integer.MAX_VALUE;
+		double ulCost= Double.MAX_VALUE;
 		Vector optMaps= new Vector();
 		while (map!= null&& map.getCost()<= ulCost) {
 			
@@ -265,53 +168,5 @@ public class GraphAligner {
 				(s1.isAcceptor()== s2.isAcceptor()))
 			return true;
 		return false;
-	}
-
-	public static void main_old(String[] args) {
-		Species spec= new Species("human");
-		Gene ge1= new Gene(spec, "ge1");
-		ge1.setChromosome("1");
-		ge1.setStrand(1);
-		Transcript t11= new Transcript(ge1, "t11");
-		t11.setStrand(1);
-		t11.addExon(new Exon(t11, "e11_1", 1, 2));
-		t11.addExon(new Exon(t11, "e11_2", 3, 4));
-		t11.addExon(new Exon(t11, "e11_3", 5, 6));
-		t11.addExon(new Exon(t11, "e11_4", 8, 9));
-		ge1.addTranscript(t11);
-		Transcript t12= new Transcript(ge1, "t12");
-		t12.setStrand(1);
-		t12.addExon(new Exon(t12, "e12_1", 1, 2));
-		t12.addExon(new Exon(t12, "e12_2", 3, 4));
-		t12.addExon(new Exon(t12, "e12_3", 5, 7));
-		t12.addExon(new Exon(t12, "e12_4", 8, 9));
-		ge1.addTranscript(t12);
-		SpliceGraph g1= new SpliceGraph(new Transcript[] {t11,t12});
-		g1.init();
-		g1.getBubbles();
-		
-		Gene ge2= new Gene(spec, "ge2");
-		ge2.setChromosome("2");
-		ge2.setStrand(1);
-		Transcript t21= new Transcript(ge2, "t21");
-		t21.setStrand(1);
-		t21.addExon(new Exon(t21, "e21_1", 1, 2));
-		t21.addExon(new Exon(t21, "e21_2", 3, 4));
-		t21.addExon(new Exon(t21, "e21_3", 6, 7));
-		ge2.addTranscript(t21);
-		Transcript t22= new Transcript(ge2, "t22");
-		t22.setStrand(1);
-		t22.addExon(new Exon(t22, "e22_1", 1, 2));
-		t22.addExon(new Exon(t22, "e22_2", 3, 5));
-		t22.addExon(new Exon(t22, "e22_3", 6, 7));
-		ge2.addTranscript(t22);
-		SpliceGraph g2= new SpliceGraph(new Transcript[] {t21,t22});
-		g2.init();
-		g2.getBubbles();
-		
-		Mapping[] maps= align(g1, g2);
-		for (int i = 0; i < maps.length; i++) {
-			System.out.println(maps[i]);
-		}
 	}
 }

@@ -92,6 +92,18 @@ public class Arrays {
 		return result.substring(0, result.length()- 1);
 	}
 	
+	public static String toString(Object[][] o) {
+		String s= "{";
+		for (int i = 0; i < o.length; i++) {
+			s+= "[";
+			for (int j = 0; j < o[i].length; j++) 
+				s+= o[i][j]+ ",";
+			s= s.substring(0, s.length()- 1)+ "];";			
+		}
+		s= s.substring(0, s.length()- 1)+ "}";	
+		return s;
+	}
+	
 	public static void output(double[][] a, PrintStream p) {
 		for (int i = 0; i < a.length; i++) {
 			for (int j = 0; j < a[i].length; j++) {

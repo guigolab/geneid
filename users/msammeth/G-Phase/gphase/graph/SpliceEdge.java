@@ -2,6 +2,7 @@ package gphase.graph;
 
 import com.sun.org.apache.xpath.internal.operations.Equals;
 
+import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.tools.Arrays;
 
@@ -29,6 +30,31 @@ public class SpliceEdge {
 	
 	public String toString() {
 		return "["+ getTail()+ " -> "+ getHead()+"]";
+	}
+
+	public int getLength() {
+		return (head.getSite().getPos()- tail.getSite().getPos()+ 1);	// hols also for neg strand
+	}
+	
+	public boolean isExonic() {
+		if (getTail().getSite() instanceof SpliceSite) {
+			SpliceSite ss= (SpliceSite) getTail().getSite();
+			if (ss.isAcceptor())
+				return true;
+			else
+				return false;
+		}
+		
+		if (getHead().getSite() instanceof SpliceSite) {
+			SpliceSite ss= (SpliceSite) getHead().getSite();
+			if (ss.isDonor())
+				return true;
+			else
+				return false;
+		}
+		
+			// two abstract sites
+		return true;
 	}
 	
 	public void addTranscripts(Transcript[] newTranscripts) {

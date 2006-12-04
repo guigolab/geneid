@@ -1,10 +1,7 @@
 package gphase.graph.alignment;
 
-import gphase.graph.SpliceBubble_last;
 import gphase.graph.SpliceEdge;
-import gphase.graph.SpliceGraph;
 import gphase.graph.SpliceNode;
-import gphase.graph.SplicePath;
 import gphase.model.AbstractSite;
 
 import java.util.Arrays;
@@ -14,33 +11,29 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-public class Mapping {
+public class Mapping_1stversion {
 
 	public static class PriorityComparator implements Comparator {
 		public int compare(Object arg0, Object arg1) {
-			if (((Mapping) arg0).getCost()< ((Mapping) arg1).getCost())
+			if (((Mapping_1stversion) arg0).getCost()< ((Mapping_1stversion) arg1).getCost())
 				return -1;
-			if (((Mapping) arg0).getCost()> ((Mapping) arg1).getCost())
+			if (((Mapping_1stversion) arg0).getCost()> ((Mapping_1stversion) arg1).getCost())
 				return 1;
 			return 0;
 		}
 	}
 	
-	double cost= 0;
+	int cost= 0;
 	HashMap mapTableI= new HashMap(), mapTableJ= new HashMap();
 	SpliceNode maxI= null, maxJ= null;
 	int maxRel= -1;
-	SpliceGraph g1, g2;
 	
-	
-	public Mapping(SpliceGraph newG1, SpliceGraph newG2) {
-		this.g1= newG1;
-		this.g2= newG2;
+	public Mapping_1stversion() {
 	}
 	
 	protected Object clone() throws CloneNotSupportedException {
 		
-		Mapping map= new Mapping(g1,g2);
+		Mapping_1stversion map= new Mapping_1stversion();
 		map.cost= getCost();
 		map.mapTableI= (HashMap) mapTableI.clone();
 		map.mapTableJ= (HashMap) mapTableJ.clone();
@@ -56,23 +49,19 @@ public class Mapping {
 		if (nI!= null) {
 			maxI= nI;
 			maxRel= 1;
-			if (nJ== null&& nI.getOutDegree()== 0)
-				cost+= getCost_pathes(nI, nJ);
 		}
 		if (nJ!= null) {
 			maxJ= nJ;
 			maxRel= 2;
-			if (nI== null&& nJ.getOutDegree()== 0)
-				cost+= getCost_pathes(nI, nJ);
 		}
 		
 		if (nI!= null&& nJ!= null) {
 			mapTableI.put(nI, nJ);
 			mapTableJ.put(nJ, nI);
 			maxRel= 3;
-			cost+= getCost_pathes(nI, nJ);
 		}
 		
+		cost+= getCost_weight(nI, nJ);
 	}
 	
 	int getCost_edge(SpliceNode nI, SpliceNode nJ) {		
@@ -175,108 +164,6 @@ public class Mapping {
 		return ctr;
 	}
 
-	SplicePath[] getShortestPathes(SplicePath[] pathes) {
-			// find pathes sharing at least one transcript
-		Vector remV= new Vector();
-		for (int i = 0; i < pathes.length; i++) {
-			for (int j = 0; j < pathes.length; j++) {
-				if (i== j)
-					continue;
-				if (SpliceBubble_last.intersects(pathes[i].getTranscripts(), pathes[j].getTranscripts())) {
-					if (pathes[i].edgeLength()> pathes[j].edgeLength())
-						remV.add(pathes[i]);
-					else
-						remV.add(pathes[j]);
-				}
-			}
-		}
-		
-			// remove longer ones
-		Vector v= new Vector();
-		for (int i = 0; i < pathes.length; i++) {
-			int j;
-			for (j = 0; j < remV.size(); j++) 
-				if (pathes[i]== remV.elementAt(j))
-					break;
-			if (j== remV.size())
-				v.add(pathes[i]);
-		}
-		
-		
-		return (SplicePath[]) gphase.tools.Arrays.toField(v);
-	}
-	double getCost(SplicePath path1, SplicePath path2) {
-		SpliceEdge[] edges= path1.getEdges();
-		int exLen1= 0;
-		int inNb1= 0;
-		for (int i = 0; i < edges.length; i++) {
-			if (edges[i].isExonic())
-				exLen1+= edges[i].getLength();
-			else
-				++inNb1;
-		}
-		
-		edges= path1.getEdges();
-		int exLen2= 0;
-		int inNb2= 0;
-		for (int i = 0; i < edges.length; i++) {
-			if (edges[i].isExonic())
-				exLen2+= edges[i].getLength();
-			else
-				++inNb2;
-		}
-		
-		double exID, inID;
-		if (exLen1== 0|| exLen2== 0)
-			exID= 1d;
-		else
-			exID= 1- Math.min((double) exLen1/ exLen2, (double) exLen2/ exLen1);
-		
-		if (inNb1== 0|| inNb2== 0)
-			inID= 1d;
-		else
-			inID= 1- Math.min((double) inNb1/ inNb2, (double) inNb2/ inNb1);
-		
-		return (exID+ inID);
-	}
-	
-	double getCost_pathes(SpliceNode nI, SpliceNode nJ) {
-		
-			// get sources and targets of delimited pathes
-		SpliceNode[] srcI= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableI.keySet());
-		gphase.tools.Arrays.addAll(srcI, g1.getRoots());
-		SpliceNode[] srcJ= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableJ.keySet());
-		gphase.tools.Arrays.addAll(srcJ, g2.getRoots());
-		SpliceNode[] tgtI= (nI!= null)? new SpliceNode[] {nI}:g1.getLeafs();
-		SpliceNode[] tgtJ= (nJ!= null)? new SpliceNode[] {nJ}:g2.getLeafs();
-		
-		
-			// get pathes in both graphs
-		SplicePath[] pathes1= g1.getPathes(srcI, tgtI);
-		pathes1= getShortestPathes(pathes1);
-		SplicePath[] pathes2= g2.getPathes(srcJ, tgtJ);
-		pathes2= getShortestPathes(pathes2);
-		
-			// match pathes
-		if (pathes1.length< pathes2.length) {	// swap, outer loop over longer path
-			SplicePath[] h= pathes1;
-			pathes1= pathes2;
-			pathes2= h;
-		}
-		double totCosts= 0d;
-		for (int i = 0; i < pathes1.length; i++) {
-			double min= Double.MAX_VALUE;
-			for (int j = 0; j < pathes2.length; j++) {
-				double cost= getCost(pathes1[i], pathes2[j]);
-				if (cost< min)
-					min= cost;
-			}
-			totCosts+= cost;
-		}
-		
-		return totCosts;
-	}
-
 	int getCost_ancestorPath(SpliceNode nI, SpliceNode nJ) {		
 		if (nI== null)
 			return nJ.getFromList().size();
@@ -311,7 +198,7 @@ public class Mapping {
 		return ctr;
 	}
 
-	public double getCost() {
+	public int getCost() {
 		return cost;
 	}
 

@@ -11,11 +11,19 @@ import javax.swing.tree.TreePath;
 
 public class SplicePath {
 	Vector nodeV= null;
+	Vector edgeV= null;
 	Transcript[] minFlowTrans= null;
 	
-	private SplicePath() {
+	public SplicePath() {
+		nodeV= new Vector();
+		edgeV= new Vector();
 	}
 	
+	/**
+	 * creates new path from current one
+	 * @param newEdge
+	 * @return
+	 */
 	public SplicePath createPath(SpliceEdge newEdge) {
 		
 			// TODO: ??? chk
@@ -40,6 +48,7 @@ public class SplicePath {
 			System.err.println(e);
 		}
 		path.nodeV.add(newEdge.getHead());	// add node
+		path.edgeV.add(newEdge);
 		path.minFlowTrans= (Transcript[]) Arrays.toField(intersection);
 		return path;
 	}
@@ -53,14 +62,26 @@ public class SplicePath {
 	}
 	
 	public SplicePath(SpliceEdge newEdge) {
-		nodeV= new Vector();
+		this();
 		nodeV.add(newEdge.getTail());	// root
 		nodeV.add(newEdge.getHead());	
+		edgeV.add(newEdge);
 		minFlowTrans= newEdge.getTranscripts();
 	}
 	public Vector getNodeV() {
 		return nodeV;
 	}
+	
+	public SpliceEdge[] getEdges() {
+		if (edgeV== null)
+			return null;
+		return (SpliceEdge[]) Arrays.toField(edgeV);
+	}
+	/**
+	 * creates new path from current one, and extends it by the new edge
+	 * @param newEdge
+	 * @return
+	 */
 	public SplicePath exendPath(SpliceEdge newEdge) {
 		
 			// TODO: ??? chk
@@ -87,13 +108,21 @@ public class SplicePath {
 		
 			//extend
 		path.nodeV.add(newEdge.getHead());	// add node
+		path.edgeV.add(newEdge);
 		path.minFlowTrans= (Transcript[]) Arrays.toField(intersection);
 		return path;
+	}
+	
+	public int edgeLength() {
+		if (edgeV== null)
+			return 0; 
+		return edgeV.size();
 	}
 	
 protected Object clone() throws CloneNotSupportedException {
 		SplicePath path= new SplicePath();
 		path.nodeV= (Vector) nodeV.clone();
+		path.edgeV= (Vector) edgeV.clone();
 		path.minFlowTrans= minFlowTrans;
 		return path; 
 	}

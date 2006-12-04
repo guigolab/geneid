@@ -1127,7 +1127,7 @@ public class ASAnalyzer {
 			AbstractRegion re;
 			for (int i = 0; i < ge.length; i++) {
 				SpliceSite[] ss= 
-					ge[i].getSpliceSites(Gene.REGION_REAL_3UTR, SpliceSite.CONSTITUTIVE_SS);
+					ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_3UTR);
 				for (int j = 0; ss!= null&& j < ss.length; j++) 
 					buffy.println(ge[i].getChromosome()+ " "+ ss[j].getPos());
 			}
@@ -1197,13 +1197,63 @@ public class ASAnalyzer {
 		p.close();
 }
 	
-	public static void test02_ss_statistics(Graph g, PrintStream p) {
+	public static void test02_ss_statistics(Graph g, PrintStream p, boolean codTranscripts) {
 		
-			g.filterNonCodingTranscripts();
+			if (codTranscripts)
+				g.filterNonCodingTranscripts();
 		
-			g.getASVariations(ASMultiVariation.FILTER_NONE);
+			g.getASVariations(ASMultiVariation.FILTER_NONE);	// init
+			
+			SpliceSite[][] res= g.getSpliceSites(Gene.REGION_COMPLETE_GENE);
+			p.println("tot\t"+res[0].length+"\t"+res[1].length);
+			int ctrAlt5UTR= 0, ctrAltCDS= 0, ctrAlt3UTR= 0, ctrAltRest= 0;
+			for (int i = 0; i < res[0].length; i++) {
+				if (res[0][i].isConstitutive())
+					continue;
+				if (res[0][i].is5UTRMaxTranscript())
+					++ctrAlt5UTR;
+				if (res[0][i].isCDSMaxTranscript())
+					++ctrAltCDS;
+				if (res[0][i].is3UTRMaxTranscript())
+					++ctrAlt3UTR;
+				if (!res[0][i].is5UTRMaxTranscript()&& !res[0][i].isCDSMaxTranscript()
+						&& !res[0][i].is3UTRMaxTranscript())
+					++ctrAltRest;
+			}
+			int ctrCon5UTR= 0, ctrConCDS= 0, ctrCon3UTR= 0, ctrConRest= 0;
+			for (int i = 0; i < res[1].length; i++) {
+				if (!res[1][i].isConstitutive())
+					continue;
+				if (res[1][i].is5UTRMaxTranscript())
+					++ctrCon5UTR;
+				if (res[1][i].isCDSMaxTranscript())
+					++ctrConCDS;
+				if (res[1][i].is3UTRMaxTranscript())
+					++ctrCon3UTR;
+				if (!res[1][i].is5UTRMaxTranscript()&& !res[1][i].isCDSMaxTranscript()
+						&& !res[1][i].is3UTRMaxTranscript())
+					++ctrConRest;
+			}
+
+			p.println("5UTR_alt\t"+ctrAlt5UTR+"("+((float) ctrAlt5UTR/(ctrAlt5UTR+ ctrCon5UTR))+")"+
+					"\t5UTR_con "+ctrCon5UTR+"("+((float) ctrCon5UTR/(ctrAlt5UTR+ ctrCon5UTR))+")");
+			p.println("CDS_alt\t"+ctrAltCDS+"("+((float) ctrAltCDS/(ctrAltCDS+ ctrConCDS))+")"+
+					"\tCDS_con "+ctrConCDS+"("+((float) ctrConCDS/(ctrAltCDS+ ctrConCDS))+")");
+			p.println("3UTR_alt\t"+ctrAlt3UTR+"("+((float) ctrAlt3UTR/(ctrAlt3UTR+ ctrCon3UTR))+")"+
+					"\t3UTR_con "+ctrCon3UTR+"("+((float) ctrCon3UTR/(ctrAlt3UTR+ ctrCon3UTR))+")");
+			p.println("REST_alt\t"+ctrAltRest+"("+((float) ctrAltRest/(ctrAltRest+ ctrConRest))+")"+
+					"\tREST_con "+ctrConRest+"("+((float) ctrConRest/(ctrAltRest+ ctrConRest))+")");
+		}
+
+	public static void test02_ss_statistics_1st_submission(Graph g, PrintStream p, boolean codTranscripts) {
+		
+			if (codTranscripts)
+				g.filterNonCodingTranscripts();
+		
+			g.getASVariations(ASMultiVariation.FILTER_NONE);	// init
+			
 			SpliceSite[][] res= g.getSpliceSites(Gene.REGION_REAL_5UTR);
-			p.println("#AS-SS\t#CONST-SS\tpercAS");
+			p.println("\t#AS-SS\t#CONST-SS\tpercAS");
 			p.println("5UTR: "+res[0].length+" "+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
 			int utr5= res[1].length;
 	//		for (int i = 0; i < res[1].length; i++) 
@@ -1219,7 +1269,7 @@ public class ASAnalyzer {
 	//		for (int i = 0; i < res[1].length; i++) 
 	//			System.out.println(res[1][i]);
 			res= g.getSpliceSites(Gene.REGION_COMPLETE_GENE);
-			p.println("total: "+res[0].length+"\t"+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
+			p.println("tot: "+res[0].length+"\t"+res[1].length+"\t"+((float) res[0].length/(float) (res[0].length+ res[1].length)));
 			float f1= ((float) utr5/(float) res[1].length);
 			float f2= ((float) cds/(float) res[1].length);
 			float f3= ((float) utr3/(float) res[1].length);
@@ -1854,106 +1904,187 @@ public class ASAnalyzer {
 
 
 		/**
+			 * @param g
+			 * @param respectCoding
+			 * @return
+			 */
+			public static void test04_determineVariations_rev(Graph g, PrintStream p) {
+				
+				ASVariation[][] classes= g.getASVariations(1);
+				classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+				
+				try {
+					
+					Method m = classes[0][0].getClass().getMethod("isTrue", null);
+		
+					ASVariation[][] filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, false, true, p);
+					
+					m = classes[0][0].getClass().getMethod("isProteinCoding", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+			
+					m = classes[0][0].getClass().getMethod("isNotProteinCoding", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+			
+					m = classes[0][0].getClass().getMethod("isCompletelyIn5UTR", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+					
+					m = classes[0][0].getClass().getMethod("isCompletelyIn3UTR", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+					
+					m = classes[0][0].getClass().getMethod("isTwilightZone", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+					
+					m = classes[0][0].getClass().getMethod("isCodingFunc", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+			
+					m = classes[0][0].getClass().getMethod("is5UTRFunc", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+			
+					m = classes[0][0].getClass().getMethod("is3UTRFunc", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+			
+					m = classes[0][0].getClass().getMethod("isTwilightFunc", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+	//				for (int i = 0; i < filtClasses.length; i++) {
+	//					if (filtClasses[i]!= null&& filtClasses[i].length> 0) 
+	//						for (int j = 0; j < filtClasses[i].length; j++) {
+	//							System.out.println(filtClasses[i][j].getTranscript1()+"\t"+filtClasses[i][j].getTranscript2()+"\t"+filtClasses[i][j].getSpliceUniverse()[0].getPos());
+	//						}
+	//				}
+					
+			
+					m = classes[0][0].getClass().getMethod("isTwilightCDS", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+					
+					m = classes[0][0].getClass().getMethod("isTwilight5UTR", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+		
+					m = classes[0][0].getClass().getMethod("isTwilight3UTR", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+					
+					m = classes[0][0].getClass().getMethod("isTwilightSpooky", null);
+					filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+					p.println(m.getName());
+					outputVariations(filtClasses, true, false, p);
+					
+		//			Comparator compi= new Comparator()
+		//			for (int i = 0; i < filtClasses.length; i++) {
+		//				for (int j = 0; j < filtClasses[i].length; j++) {
+		//					for (int k = 0; k < filtClasses1.length; k++) {
+		//						if (!filtClasses[i][0].toString().equals(filtClasses1[k][0].toString()))
+		//							continue;
+		//						for (int m = 0; m < filtClasses1[k].length; m++) {
+		//							if (filtClasses[i][j])
+		//						}
+		//					}
+		//				}
+		//			}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+			}
+
+		/**
 		 * @param g
 		 * @param respectCoding
 		 * @return
 		 */
-		public static void test04_determineVariations_rev(Graph g, PrintStream p) {
+		public static void test04_determineVariations_nmd() {
 			
-			ASVariation[][] classes= g.getASVariations(1);
-			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+			String fName= "test04_determineVariations_nmd.txt";			
+			PrintStream p= null;
+			try {
+				fName= Toolbox.checkFileExists(fName);
+				p= new PrintStream(fName);
+				//p= System.out;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			Graph g= getGraph(INPUT_ENCODE);
+			g.filterNMDTranscripts();
+			ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
+			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);			
 			
 			try {
-				Method m = classes[0][0].getClass().getMethod("isTrue", null);
-	
-				ASVariation[][] filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				Comparator compi= new ASVariation.StructureComparator();
+				Method m = classes[0][0].getClass().getMethod("isTrue", null);	// warum eigentlich?
+				ASVariation[][] filtClasses= new ASVariation[classes.length][];
+				for (int i = 0; i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(classes[i], compi);
+				filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
 				p.println(m.getName());
 				outputVariations(filtClasses, false, true, p);
 				
-				m = classes[0][0].getClass().getMethod("isProteinCoding", null);
+				// "isProteinCoding_1cover"
+				m = classes[0][0].getClass().getMethod("isCDSRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-		
-				m = classes[0][0].getClass().getMethod("isNotProteinCoding", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-		
-				m = classes[0][0].getClass().getMethod("isCompletelyIn5UTR", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-				
-				m = classes[0][0].getClass().getMethod("isCompletelyIn3UTR", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-				
-				m = classes[0][0].getClass().getMethod("isTwilightZone", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-				
-				m = classes[0][0].getClass().getMethod("isCodingFunc", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-		
-				m = classes[0][0].getClass().getMethod("is5UTRFunc", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-		
-				m = classes[0][0].getClass().getMethod("is3UTRFunc", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-		
-				m = classes[0][0].getClass().getMethod("isTwilightFunc", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
+				for (int i = 0; i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 //				for (int i = 0; i < filtClasses.length; i++) {
-//					if (filtClasses[i]!= null&& filtClasses[i].length> 0) 
+//					if (filtClasses[i]!= null&& filtClasses[i][0].toString().equals("( // 1^2=)"))
 //						for (int j = 0; j < filtClasses[i].length; j++) {
-//							System.out.println(filtClasses[i][j].getTranscript1()+"\t"+filtClasses[i][j].getTranscript2()+"\t"+filtClasses[i][j].getSpliceUniverse()[0].getPos());
+//							System.out.println(filtClasses[i][j].getTranscript1()+","+filtClasses[i][j].getTranscript2());
 //						}
 //				}
-				
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
 		
-				m = classes[0][0].getClass().getMethod("isTwilightCDS", null);
+				// "isNotProteinCoding_1cover"
+				m = classes[0][0].getClass().getMethod("is5UTRRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
+		
+				m = classes[0][0].getClass().getMethod("is3UTRRedundant", null);
+				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				
-				m = classes[0][0].getClass().getMethod("isTwilight5UTR", null);
+				m = classes[0][0].getClass().getMethod("isTwilightRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				p.println(m.getName());
-				outputVariations(filtClasses, true, false, p);
-	
-				m = classes[0][0].getClass().getMethod("isTwilight3UTR", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				
-				m = classes[0][0].getClass().getMethod("isTwilightSpooky", null);
+				m = classes[0][0].getClass().getMethod("isNoneRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
-				
-	//			Comparator compi= new Comparator()
-	//			for (int i = 0; i < filtClasses.length; i++) {
-	//				for (int j = 0; j < filtClasses[i].length; j++) {
-	//					for (int k = 0; k < filtClasses1.length; k++) {
-	//						if (!filtClasses[i][0].toString().equals(filtClasses1[k][0].toString()))
-	//							continue;
-	//						for (int m = 0; m < filtClasses1[k].length; m++) {
-	//							if (filtClasses[i][j])
-	//						}
-	//					}
-	//				}
-	//			}
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -3090,7 +3221,7 @@ public class ASAnalyzer {
 					System.out.print(trpt[m]+",");
 				p.println("]");
 			}
-			analyzeMutex(mVars[j], System.out);			
+			//analyzeMutex(mVars[j], System.out);			
 			p.println("\n");
 		}
 
@@ -3159,7 +3290,15 @@ public class ASAnalyzer {
 //			System.exit(0);
 		
 		
-		Graph g= getGraph(INPUT_ENCODE);		
+		Graph g= null;
+		//g= getGraph(INPUT_ENCODE);
+		//g.filterNMDTranscripts();
+		//test02_ss_statistics(g, System.out, false);
+		test04_determineVariations_nmd();
+		if (1== 1)
+			System.exit(0);
+		
+		
 		g.filterNonCodingTranscripts();
 		//g.filterCodingTranscripts();
 		//test04a_determineVarDegree(g, System.out);
@@ -3170,9 +3309,11 @@ public class ASAnalyzer {
 		vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
 		for (int i = 0; i < vars.length; i++) {
 			System.out.println(vars[i].length+ "\t"+ vars[i][0]);
-			if (vars[i][0].toString().startsWith("(1-2^ // 3-4^)")||
-					vars[i][0].toString().startsWith("(1-2^3-4^ // 1-2^ // 3-4^)")||
-					vars[i][0].toString().startsWith("(1-2^ // 3-4^ // )")) {
+//			if (vars[i][0].toString().startsWith("(1-2^ // 3-4^)")||
+//					vars[i][0].toString().startsWith("(1-2^3-4^ // 1-2^ // 3-4^)")||
+//					vars[i][0].toString().startsWith("(1-2^ // 3-4^ // )")) {
+			if ((vars[i][0].toString().startsWith("(1^ // 2^ // 3^)"))||
+					(vars[i][0].toString().startsWith("(1- // 2- // 3-)"))){
 				outputMultiVars(vars[i], System.out);
 			}
 		}

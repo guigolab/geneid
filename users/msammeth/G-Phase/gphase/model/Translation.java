@@ -108,6 +108,21 @@ public class Translation extends DirectedRegion {
 		return uOrf;
 	}
 	
+	public boolean isOpenEnded5() {
+		return (get5PrimeEdge()== transcript.get5PrimeEdge());
+	}
+	
+	public boolean isOpenEnded3() {
+		return (get3PrimeEdge()== transcript.get3PrimeEdge());
+	}
+	
+	public boolean isOpenEnded() {
+		// TODO: check seq for ATG/stop
+		if (isOpenEnded5()|| isOpenEnded3())
+			return true;
+		return false;
+	}
+	
 	
 
 	

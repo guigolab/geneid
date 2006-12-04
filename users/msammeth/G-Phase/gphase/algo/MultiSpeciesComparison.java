@@ -22,8 +22,8 @@ import qalign2.algo.sequence.dca.QDivideWrapper;
 
 import gphase.db.EnsemblDBAdaptor;
 import gphase.graph.SpliceGraph;
-import gphase.graph.alignment.GraphAligner;
-import gphase.graph.alignment.Mapping;
+import gphase.graph.alignment.GraphAligner_1stversion;
+import gphase.graph.alignment.Mapping_1stversion;
 import gphase.graph.gui.GraphView;
 import gphase.graph.gui.PFGraph;
 import gphase.io.TCoffeeWrapper;
@@ -91,7 +91,7 @@ public class MultiSpeciesComparison {
 						for (int i = 0; i < 1/*graphs.length*/; i++) {
 							for (int j = (i+2); j < 3/*graphs.length*/; j++) {
 								p.println(graphs[i]+ "\n"+ graphs[j]);
-								Mapping[] maps= GraphAligner.align(graphs[i], graphs[j]);
+								Mapping_1stversion[] maps= GraphAligner_1stversion.align(graphs[i], graphs[j]);
 						        //JFrame frame = GraphView.demo(new PFGraph(graphs[i]), "i");
 						        JFrame frame = GraphView.demo("i", new PFGraph(graphs[i]), "j", new PFGraph(graphs[j]));
 						        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

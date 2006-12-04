@@ -30,62 +30,44 @@ public class Eduardo extends EncodeWrapper {
 		//"encode/44regions_genes_CHR_coord.gtf"
 		// "encode/All_CrGI_library_to_Assembly_Broad1.gff"
 		// "encode/ASD_27.35a.1.CLASSES_tab.gff"
-		
-		String[] fNames= new String[] {
-				"encode/All_CrGI_library_to_Assembly_Broad1.gff",
-				"encode/All_CrGI_library_to_Assembly_Broad2.gff",
-				"encode/All_CrGI_library_to_Assembly_Duke.gff",
-				"encode/All_CrGI_library_to_Assembly_TIGR.gff",
-				"encode/combined_Broad1.gff",
-				"encode/combined_Broad2.gff",
-				"encode/combined_Duke.gff",
-				"encode/combined_TIGR.gff",
-				"encode/C_neomorfans.borad1.gff",
-				"encode/Cneo_CH99.broad2_exon.gff",
-				"encode/geneid_predictions_duke_exon.gff",
-				"encode/cryptococcus_neoformans_JEC21.TIGR.gff"
-		};
-		
-		for (int i = 0; i < fNames.length; i++) {
-			System.gc();
-			System.out.println(fNames[i]);
-			Eduardo myWrapper= new Eduardo(new File(fNames[i]).getAbsolutePath()); // testGTF.gtf
-			try {
-				myWrapper.read();
-			} catch (Exception e) {
-				e.printStackTrace(); 
-			}
-			
-			Graph g= myWrapper.getGraph();		// <===== check ENCODE here !!!
-			//g.filterNonCodingTranscripts();
-			//g.filterCodingTranscripts();
-			//g.initTU();
-		
-			PrintStream pr= null;
-			try {
-				pr = new PrintStream(new File(fNames[i]+".ana"));
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			ASAnalyzer.test01_clusters_coverage_as(g, pr);
-			pr.println("------------------------------------------------------");
-			ASVariation[][] classes= g.getASVariations(1);
-			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
-			if (classes!= null) {
-				Method m= null;
-				try {
-					m = classes[0][0].getClass().getMethod("isTrue", null);
-				} catch (Exception e) {
-					e.printStackTrace();
-				} 
-				ASVariation[][] filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				ASAnalyzer.outputVariations(filtClasses, false, false, pr);
-			}
-			
-			pr.flush(); pr.close();
+		String fName= "encode/parameciumV2.sgp.txt";
+		System.out.println(fName);
+		Eduardo myWrapper= new Eduardo(new File(fName).getAbsolutePath()); // testGTF.gtf
+		try {
+			myWrapper.read();
+		} catch (Exception e) {
+			e.printStackTrace(); 
 		}
+		
+		Graph g= myWrapper.getGraph();		// <===== check ENCODE here !!!
+		//g.filterNonCodingTranscripts();
+		//g.filterCodingTranscripts();
+		//g.initTU();
+	
+		PrintStream pr= null;
+		try {
+			pr = new PrintStream(new File(fName+".ana"));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		ASAnalyzer.test01_clusters_coverage_as(g, pr);
+		pr.println("------------------------------------------------------");
+		ASVariation[][] classes= g.getASVariations(1);
+		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+		if (classes!= null) {
+			Method m= null;
+			try {
+				m = classes[0][0].getClass().getMethod("isTrue", null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} 
+			ASVariation[][] filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+			ASAnalyzer.outputVariations(filtClasses, false, false, pr);
+		}
+		
+		pr.flush(); pr.close();
 	}
 
 	/* (non-Javadoc)
@@ -237,6 +219,68 @@ public class Eduardo extends EncodeWrapper {
 
 			GTFObject createGTFObject(){
 				return new GTFObject();
+			}
+
+			public static void main_Edu_batch(String[] args) {
+				//"encode/44regions_genes_CHR_coord.gtf"
+				// "encode/All_CrGI_library_to_Assembly_Broad1.gff"
+				// "encode/ASD_27.35a.1.CLASSES_tab.gff"
+				
+				String[] fNames= new String[] {
+						"encode/All_CrGI_library_to_Assembly_Broad1.gff",
+						"encode/All_CrGI_library_to_Assembly_Broad2.gff",
+						"encode/All_CrGI_library_to_Assembly_Duke.gff",
+						"encode/All_CrGI_library_to_Assembly_TIGR.gff",
+						"encode/combined_Broad1.gff",
+						"encode/combined_Broad2.gff",
+						"encode/combined_Duke.gff",
+						"encode/combined_TIGR.gff",
+						"encode/C_neomorfans.borad1.gff",
+						"encode/Cneo_CH99.broad2_exon.gff",
+						"encode/geneid_predictions_duke_exon.gff",
+						"encode/cryptococcus_neoformans_JEC21.TIGR.gff"
+				};
+				
+				for (int i = 0; i < fNames.length; i++) {
+					System.gc();
+					System.out.println(fNames[i]);
+					Eduardo myWrapper= new Eduardo(new File(fNames[i]).getAbsolutePath()); // testGTF.gtf
+					try {
+						myWrapper.read();
+					} catch (Exception e) {
+						e.printStackTrace(); 
+					}
+					
+					Graph g= myWrapper.getGraph();		// <===== check ENCODE here !!!
+					//g.filterNonCodingTranscripts();
+					//g.filterCodingTranscripts();
+					//g.initTU();
+				
+					PrintStream pr= null;
+					try {
+						pr = new PrintStream(new File(fNames[i]+".ana"));
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					ASAnalyzer.test01_clusters_coverage_as(g, pr);
+					pr.println("------------------------------------------------------");
+					ASVariation[][] classes= g.getASVariations(1);
+					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+					if (classes!= null) {
+						Method m= null;
+						try {
+							m = classes[0][0].getClass().getMethod("isTrue", null);
+						} catch (Exception e) {
+							e.printStackTrace();
+						} 
+						ASVariation[][] filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+						ASAnalyzer.outputVariations(filtClasses, false, false, pr);
+					}
+					
+					pr.flush(); pr.close();
+				}
 			}
 
 }

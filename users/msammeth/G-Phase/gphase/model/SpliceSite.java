@@ -195,11 +195,91 @@ public class SpliceSite extends AbstractSite {
 	}
 
 	public boolean isConstitutive() {
-		return constitutive;
+		//return constitutive;
+		return (asVars== null|| asVars.length< 1);
+	}
+	
+	public boolean isCDSRealTranscript() {
+		
+				// net gut, twilight-frontier events !
+	//		for (int i = 0; i < asVars.length; i++) 
+	//			if (asVars[i].isProteinCoding())
+	//				return true;
+			
+			int ctr= 0;
+			for (int i = 0; i < transcripts.length; i++) {
+				if (transcripts[i].getTranslations()== null|| transcripts[i].getTranslations().length< 1)
+					continue;
+				if (transcripts[i].getTranslations()[0].contains(this))
+					ctr++;	// at least in the CDS of one transcript
+				else 
+					return false;
+			}
+			return (ctr> 0);	// if all are non-annotated, ok, its never in CDS
+		}
+
+	public boolean isCDSMaxTranscript() {
+		
+		// net gut, twilight-frontier events !
+//		for (int i = 0; i < asVars.length; i++) 
+//			if (asVars[i].isProteinCoding())
+//				return true;
+	
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].getTranslations()== null|| transcripts[i].getTranslations().length< 1)
+				continue;
+			if (transcripts[i].getTranslations()[0].contains(getPos()))
+				return true;
+		}
+		return false;	// if all are non-annotated, ok, its never in CDS
+	}
+	
+	public boolean is5UTRRealTranscript() {
+		int ctr= 0;
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].getTranslations()== null|| transcripts[i].getTranslations().length< 1)
+				continue;
+			if (this.getPos()>= transcripts[i].getTranslations()[0].get5PrimeEdge())
+				return false;	// at least outside of 5UTR
+			++ctr;
+		}
+		return (ctr> 0);	// at least one transcript w annotated CDS found
+	}
+	
+	public boolean is5UTRMaxTranscript() {
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].getTranslations()== null|| transcripts[i].getTranslations().length< 1
+					|| transcripts[i].getTranslations()[0].isOpenEnded5())
+				continue;
+			if (this.getPos()< transcripts[i].getTranslations()[0].get5PrimeEdge())
+				return true;	// at least outside of 5UTR
+		}
+		return false;
 	}
 
+	public boolean is3UTRMaxTranscript() {
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].getTranslations()== null|| transcripts[i].getTranslations().length< 1||
+					transcripts[i].getTranslations()[0].isOpenEnded3())
+				continue;
+			if (this.getPos()> transcripts[i].getTranslations()[0].get3PrimeEdge())
+				return true;	// at least outside of 5UTR
+		}
+		return false;
+	}
+
+
+	/**
+	 * 
+	 * @param constitutive
+	 * @deprecated as to link SSs with ASVars
+	 */
 	public void setConstitutive(boolean constitutive) {
 		this.constitutive = constitutive;
+	}
+	
+	public void removeASVar(ASVariation var) {
+		asVars= (ASVariation[]) Arrays.remove(asVars, var);
 	}
 
 	public ASVariation[] getAsVars() {
