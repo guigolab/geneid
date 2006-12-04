@@ -1971,6 +1971,24 @@ public class ASVariation implements Serializable {
 		return (ctr> 1);
 	}
 	
+	public boolean isTwilightRedundant5CDS() {
+		if (is5UTRRedundant()&& isCDSRedundant())
+			return true;
+		return false;
+	}
+	
+	public boolean isTwilightRedundantCDS3() {
+		if (is3UTRRedundant()&& isCDSRedundant())
+			return true;
+		return false;
+	}
+	
+	public boolean isTwilightRedundant53() {
+		if (is3UTRRedundant()&& is5UTRRedundant())
+			return true;
+		return false;
+	}
+	
 	public boolean isNoneMaxTranscriptSS() {
 		int ctr= 0;
 		if (is5UTRMaxTranscriptSS())

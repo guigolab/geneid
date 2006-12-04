@@ -2028,8 +2028,9 @@ public class ASAnalyzer {
 				e.printStackTrace();
 			}
 			
-			Graph g= getGraph(INPUT_ENSEMBL_CODING_FROM_UCSC);
+			Graph g= getGraph(INPUT_ENCODE);
 			//g.filterNMDTranscripts();
+			g.filterNonCodingTranscripts();
 			ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);			
 			
@@ -2072,7 +2073,21 @@ public class ASAnalyzer {
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				
-				m = classes[0][0].getClass().getMethod("isTwilightRedundant", null);
+				m = classes[0][0].getClass().getMethod("isTwilightRedundant5CDS", null);
+				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
+				
+				m = classes[0][0].getClass().getMethod("isTwilightRedundantCDS3", null);
+				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
+				
+				m = classes[0][0].getClass().getMethod("isTwilightRedundant53", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
 				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
