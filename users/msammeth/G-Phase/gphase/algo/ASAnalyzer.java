@@ -2028,8 +2028,8 @@ public class ASAnalyzer {
 				e.printStackTrace();
 			}
 			
-			Graph g= getGraph(INPUT_ENCODE);
-			g.filterNMDTranscripts();
+			Graph g= getGraph(INPUT_ENSEMBL_CODING_FROM_UCSC);
+			//g.filterNMDTranscripts();
 			ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);			
 			
@@ -2037,7 +2037,7 @@ public class ASAnalyzer {
 				Comparator compi= new ASVariation.StructureComparator();
 				Method m = classes[0][0].getClass().getMethod("isTrue", null);	// warum eigentlich?
 				ASVariation[][] filtClasses= new ASVariation[classes.length][];
-				for (int i = 0; i < filtClasses.length; i++) 
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(classes[i], compi);
 				filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
 				p.println(m.getName());
@@ -2046,7 +2046,7 @@ public class ASAnalyzer {
 				// "isProteinCoding_1cover"
 				m = classes[0][0].getClass().getMethod("isCDSRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				for (int i = 0; i < filtClasses.length; i++) 
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 //				for (int i = 0; i < filtClasses.length; i++) {
 //					if (filtClasses[i]!= null&& filtClasses[i][0].toString().equals("( // 1^2=)"))
@@ -2060,28 +2060,28 @@ public class ASAnalyzer {
 				// "isNotProteinCoding_1cover"
 				m = classes[0][0].getClass().getMethod("is5UTRRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				for (int i = 0; i < filtClasses.length; i++) 
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 		
 				m = classes[0][0].getClass().getMethod("is3UTRRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				for (int i = 0; i < filtClasses.length; i++) 
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				
 				m = classes[0][0].getClass().getMethod("isTwilightRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				for (int i = 0; i < filtClasses.length; i++) 
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				
 				m = classes[0][0].getClass().getMethod("isNoneRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				for (int i = 0; i < filtClasses.length; i++) 
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
