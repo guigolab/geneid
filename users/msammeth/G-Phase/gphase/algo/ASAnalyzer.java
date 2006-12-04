@@ -2018,7 +2018,7 @@ public class ASAnalyzer {
 		 */
 		public static void test04_determineVariations_nmd() {
 			
-			String fName= "test04_determineVariations_coding.txt";			
+			String fName= "test04_determineVariations_encode_all.txt";			
 			PrintStream p= null;
 			try {
 				fName= Toolbox.checkFileExists(fName);
@@ -2030,14 +2030,18 @@ public class ASAnalyzer {
 			
 			Graph g= getGraph(INPUT_ENCODE);
 			//g.filterNMDTranscripts();
-			g.filterNonCodingTranscripts();
+			//g.filterNonCodingTranscripts();
 			ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
-			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);			
+			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+			ASVariation[][] filtClasses= new ASVariation[classes.length][];
+			Comparator compx= new ASVariation.HierarchyMergeFlags();
+			for (int i = 0; i < filtClasses.length; i++) 
+				filtClasses[i]= ASMultiVariation.removeRedundancyHierachically(classes[i], compx);
+			classes= filtClasses;
 			
 			try {
 				Comparator compi= new ASVariation.StructureComparator();
 				Method m = classes[0][0].getClass().getMethod("isTrue", null);	// warum eigentlich?
-				ASVariation[][] filtClasses= new ASVariation[classes.length][];
 				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(classes[i], compi);
 				filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
@@ -2049,12 +2053,6 @@ public class ASAnalyzer {
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
 				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
-//				for (int i = 0; i < filtClasses.length; i++) {
-//					if (filtClasses[i]!= null&& filtClasses[i][0].toString().equals("( // 1^2=)"))
-//						for (int j = 0; j < filtClasses[i].length; j++) {
-//							System.out.println(filtClasses[i][j].getTranscript1()+","+filtClasses[i][j].getTranscript2());
-//						}
-//				}
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 		
@@ -2068,6 +2066,13 @@ public class ASAnalyzer {
 				// "isNotProteinCoding_1cover"
 				m = classes[0][0].getClass().getMethod("is5UTRRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+//				System.out.println(m.getName());
+//				for (int i = 0; i < filtClasses.length; i++) {
+//					if (filtClasses[i]!= null&& filtClasses[i][0].toString().equals("(1^ // 2^)"))
+//						for (int j = 0; j < filtClasses[i].length; j++) {
+//							System.out.println(filtClasses[i][j].getTranscript1()+","+filtClasses[i][j].getTranscript2());
+//						}
+//				}
 				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
@@ -2115,10 +2120,17 @@ public class ASAnalyzer {
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				
-				m = classes[0][0].getClass().getMethod("isNoneRedundant", null);
+				m = classes[0][0].getClass().getMethod("isTwilightRedundantAll", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
 				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
+				
+				m = classes[0][0].getClass().getMethod("isNothingRedundant", null);
+				filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
+//				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+//					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				

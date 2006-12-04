@@ -151,16 +151,13 @@ public class ASMultiVariation implements Serializable {
 		spliceChains= schains;
 	}
 	
-	public static ASVariation[] removeRedundancy(ASVariation[] vars) {
+	public static ASVariation[] removeRedundancyHierachically(ASVariation[] vars, Comparator compi) {
 		
 		Vector v= new Vector(vars.length);
 		for (int i = 0; i < vars.length; i++) 
 			v.add(vars[i]);
 		
 		
-		Comparator compi= null;
-		//compi= new ASVariation.CodingHierarchyFilter();
-		compi= new ASVariation.HierarchyFilter();
 		for (int i = 0; i < v.size(); i++) 
 			for (int j = i+1; j < v.size(); j++) {
 				int c= compi.compare(v.elementAt(i), v.elementAt(j));
@@ -200,7 +197,11 @@ public class ASMultiVariation implements Serializable {
 	}
 	
 		public ASVariation[] getASVariationsHierarchicallyFiltered() {
-		return removeRedundancy(asVariations);
+			Comparator compi= null;
+			//compi= new ASVariation.CodingHierarchyFilter();
+			compi= new ASVariation.HierarchyFilter();
+
+		return removeRedundancy(asVariations, compi);
 	}
 		
 		public ASVariation[] getASVariationsStructurallyFiltered() {

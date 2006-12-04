@@ -1268,6 +1268,46 @@ public class ASVariation implements Serializable {
 			}
 		}
 
+	public static class RedundancyHierarchyFilter extends StructureComparator {
+			
+			public int compare(Object arg0, Object arg1) {
+				
+				int eq= super.compare(arg0, arg1);
+				if (eq!= 0)
+					return -1;	// structurally different
+				
+				ASVariation as1= (ASVariation) arg0;
+				ASVariation as2= (ASVariation) arg1;
+				if (as1.isNothingRedundant()) {
+					return (as2.isNothingRedundant())?0:2;	// keep only secd
+				} else {
+					return (as2.isNothingRedundant())?1:-1;	// keep only secd
+				}
+			}
+		}
+
+	public static class HierarchyMergeFlags extends StructureComparator {
+		
+		public int compare(Object arg0, Object arg1) {
+			
+			int eq= super.compare(arg0, arg1);
+			if (eq!= 0)
+				return -1;	// structurally different
+			
+			ASVariation as1= (ASVariation) arg0;
+			ASVariation as2= (ASVariation) arg1;
+			
+			if (as2.is5UTRRedundant())
+				as1.setSsRegionID5UTR((byte) 1);
+			if (as2.isCDSRedundant())
+				as1.setSsRegionID5UTR((byte) 1);
+			if (as2.is3UTRRedundant())
+				as1.setSsRegionID5UTR((byte) 1);
+			
+			return 2;
+		}
+	}
+
 	public Gene getGene() {
 		Gene g1= trans1.getGene();
 		Gene g2= trans2.getGene();
@@ -2006,6 +2046,12 @@ public class ASVariation implements Serializable {
 			return true;
 		return false;
 	}
+
+	public boolean isTwilightRedundantAll() {
+		if (is3UTRRedundant()&& is5UTRRedundant()&& isCDSRedundant())
+			return true;
+		return false;
+	}
 	
 	public boolean isNoneMaxTranscriptSS() {
 		int ctr= 0;
@@ -2018,7 +2064,7 @@ public class ASVariation implements Serializable {
 		return (ctr== 0);
 	}
 
-	public boolean isNoneRedundant() {
+	public boolean isNothingRedundant() {
 		int ctr= 0;
 		if (is5UTRRedundant())
 			++ctr;
@@ -2804,5 +2850,17 @@ public class ASVariation implements Serializable {
 	}
 	public Transcript getTranscript2() {
 		return trans2;
+	}
+
+	public void setSsRegionID3UTR(byte ssRegionID3UTR) {
+		this.ssRegionID3UTR = ssRegionID3UTR;
+	}
+
+	public void setSsRegionID5UTR(byte ssRegionID5UTR) {
+		this.ssRegionID5UTR = ssRegionID5UTR;
+	}
+
+	public void setSsRegionIDCDS(byte ssRegionIDCDS) {
+		this.ssRegionIDCDS = ssRegionIDCDS;
 	}
 }

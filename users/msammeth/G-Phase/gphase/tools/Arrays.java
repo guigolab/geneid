@@ -415,6 +415,8 @@ public class Arrays {
 		return filter(hits, m);
 	}
 	public static Object[][] filter(Object[][] hits, Method target) {
+		if (hits== null)
+			return null;
 		
 		Vector result= new Vector(hits.length);
 		for (int i = 0; i < hits.length; i++) {
