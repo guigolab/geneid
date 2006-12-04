@@ -2018,7 +2018,7 @@ public class ASAnalyzer {
 		 */
 		public static void test04_determineVariations_nmd() {
 			
-			String fName= "test04_determineVariations_nmd.txt";			
+			String fName= "test04_determineVariations_coding.txt";			
 			PrintStream p= null;
 			try {
 				fName= Toolbox.checkFileExists(fName);
@@ -2058,8 +2058,22 @@ public class ASAnalyzer {
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 		
+				m = classes[0][0].getClass().getMethod("isCDSNonRedundant", null);
+				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
+		
 				// "isNotProteinCoding_1cover"
 				m = classes[0][0].getClass().getMethod("is5UTRRedundant", null);
+				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
+		
+				m = classes[0][0].getClass().getMethod("is5UTRNonRedundant", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
 				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
@@ -2073,6 +2087,13 @@ public class ASAnalyzer {
 				p.println(m.getName());
 				outputVariations(filtClasses, true, false, p);
 				
+				m = classes[0][0].getClass().getMethod("is3UTRNonRedundant", null);
+				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+				p.println(m.getName());
+				outputVariations(filtClasses, true, false, p);
+		
 				m = classes[0][0].getClass().getMethod("isTwilightRedundant5CDS", null);
 				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
 				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 

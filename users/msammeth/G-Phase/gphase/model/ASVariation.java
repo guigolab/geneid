@@ -1949,6 +1949,24 @@ public class ASVariation implements Serializable {
 		return (ssRegionIDCDS> 0);
 	}
 	
+	public boolean isCDSNonRedundant() {
+		if (isCDSRedundant()&& !is5UTRRedundant()&& !is3UTRRedundant())
+			return true;
+		return false;
+	}
+	
+	public boolean is5UTRNonRedundant() {
+		if (!isCDSRedundant()&& is5UTRRedundant()&& !is3UTRRedundant())
+			return true;
+		return false;
+	}
+	
+	public boolean is3UTRNonRedundant() {
+		if (!isCDSRedundant()&& !is5UTRRedundant()&& is3UTRRedundant())
+			return true;
+		return false;
+	}
+	
 	public boolean isTwilightMaxTranscriptSS() {
 		int ctr= 0;
 		if (is5UTRMaxTranscriptSS())
