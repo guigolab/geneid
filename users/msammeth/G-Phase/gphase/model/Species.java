@@ -617,6 +617,9 @@ public class Species implements Serializable {
 				nuGene.setStrand(ge[i].getStrand());
 				for (int k = 0; k < newTranscripts[j].length; k++) 	{
 					Transcript t= new Transcript(nuGene, newTranscripts[j][k].getTranscriptID());
+					t.setStrand(newTranscripts[j][k].getStrand());
+					t.setStart(newTranscripts[j][k].getStart());
+					t.setEnd(newTranscripts[j][k].getEnd());
 					//Transcript t= newTranscripts.removeAll
 					nuGene.addTranscript(t);
 					Exon[] ex= newTranscripts[j][k].getExons();

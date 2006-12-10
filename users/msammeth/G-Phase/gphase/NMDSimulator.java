@@ -398,7 +398,7 @@ public class NMDSimulator {
 	
 	public boolean isNMD(Translation trln) {
 		boolean ejcDS= isTerminatingUpstreamOfEJC(trln, MIN_DIST_NC_EJC);
-		boolean atgUS= hasUsORF(trln, MIN_ORF_LENGTH_AA);
+		boolean atgUS= false;	// hasUsORF(trln, MIN_ORF_LENGTH_AA);
 		return (ejcDS|| atgUS);
 	}
 	public boolean isNMD() {

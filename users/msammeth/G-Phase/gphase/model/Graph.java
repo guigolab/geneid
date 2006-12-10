@@ -451,7 +451,7 @@ public class Graph implements Serializable {
 		Species[] spe= getSpecies();
 		Vector v1= new Vector();
 		Vector v2= new Vector();
-		getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);	// init AS marks
+		getASVariations(ASMultiVariation.FILTER_NONE);	// init AS marks
 		for (int i = 0; i < spe.length; i++) {
 			SpliceSite[] ssites= spe[i].getSpliceSites(regionType, SpliceSite.ALTERNATE_SS);
 		for (int j = 0; ssites!= null&& j < ssites.length; j++) 

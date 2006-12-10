@@ -2021,7 +2021,7 @@ public class SpliceSiteConservationComparator {
 		
 		Graph g= ASAnalyzer.getGraph(ASAnalyzer.INPUT_ENCODE);
 
-		plotCodonsExtendTilStop(g, true, true);
+		//plotCodonsExtendTilStop(g, true, true);
 		//analyzeStops(g, true);
 		
 		// "conserv_analysis_full.txt"

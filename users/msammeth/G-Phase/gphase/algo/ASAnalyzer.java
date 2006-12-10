@@ -1197,6 +1197,82 @@ public class ASAnalyzer {
 		p.close();
 }
 	
+	public static void test02_ss_statistics() {
+	
+		String fName= "test02_ss_statistics_encode_coding.txt";			
+		PrintStream p= null;
+		try {
+			fName= Toolbox.checkFileExists(fName);
+			p= new PrintStream(fName);
+			//p= System.out;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Graph g= getGraph(INPUT_ENCODE);
+		g.filterNonCodingTranscripts();
+		//g.filterNMDTranscripts();
+		boolean chk= false;
+	
+		SpliceSite[][] res= g.getSpliceSites(Gene.REGION_COMPLETE_GENE);
+		p.println("tot\t"+res[0].length+"\t"+res[1].length);
+		int ctrAlt5UTR= 0, ctrAltCDS= 0, ctrAlt3UTR= 0, ctrAltRest= 0;
+		Vector chkV= new Vector();
+		for (int i = 0; i < res[0].length; i++) {
+			if (res[0][i].isConstitutive())
+				continue;
+			if (res[0][i].is5UTRMaxTranscript()) {
+				++ctrAlt5UTR;
+				chkV.add(res[0][i]);
+			}
+			if (res[0][i].isCDSMaxTranscript())
+				++ctrAltCDS;
+			if (res[0][i].is3UTRMaxTranscript())
+				++ctrAlt3UTR;
+			if (!res[0][i].is5UTRMaxTranscript()&& !res[0][i].isCDSMaxTranscript()
+					&& !res[0][i].is3UTRMaxTranscript())
+				++ctrAltRest;
+		}
+		int ctrCon5UTR= 0, ctrConCDS= 0, ctrCon3UTR= 0, ctrConRest= 0;
+		for (int i = 0; i < res[1].length; i++) {
+			if (!res[1][i].isConstitutive())
+				continue;
+			if (res[1][i].is5UTRMaxTranscript()) {
+				++ctrCon5UTR;
+				chkV.add(res[1][i]);
+			}
+			if (res[1][i].isCDSMaxTranscript())
+				++ctrConCDS;
+			if (res[1][i].is3UTRMaxTranscript())
+				++ctrCon3UTR;
+			if (!res[1][i].is5UTRMaxTranscript()&& !res[1][i].isCDSMaxTranscript()
+					&& !res[1][i].is3UTRMaxTranscript())
+				++ctrConRest;
+		}
+	
+		p.println("5UTR_alt\t"+ctrAlt5UTR+"("+((float) ctrAlt5UTR/(ctrAlt5UTR+ ctrCon5UTR))+")"+
+				"\t5UTR_con "+ctrCon5UTR+"("+((float) ctrCon5UTR/(ctrAlt5UTR+ ctrCon5UTR))+")");
+		p.println("CDS_alt\t"+ctrAltCDS+"("+((float) ctrAltCDS/(ctrAltCDS+ ctrConCDS))+")"+
+				"\tCDS_con "+ctrConCDS+"("+((float) ctrConCDS/(ctrAltCDS+ ctrConCDS))+")");
+		p.println("3UTR_alt\t"+ctrAlt3UTR+"("+((float) ctrAlt3UTR/(ctrAlt3UTR+ ctrCon3UTR))+")"+
+				"\t3UTR_con "+ctrCon3UTR+"("+((float) ctrCon3UTR/(ctrAlt3UTR+ ctrCon3UTR))+")");
+		p.println("REST_alt\t"+ctrAltRest+"("+((float) ctrAltRest/(ctrAltRest+ ctrConRest))+")"+
+				"\tREST_con "+ctrConRest+"("+((float) ctrConRest/(ctrAltRest+ ctrConRest))+")");
+		
+		if (chk) {
+			try {
+				PrintStream pr= new PrintStream("test02_ss_statistics_SS_5UTR_encode_coding_nmd.txt");
+				for (int i = 0; i < chkV.size(); i++) {
+					SpliceSite ss= (SpliceSite) chkV.elementAt(i);
+					pr.println(ss.getGene().getChromosome()+" "+ss);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+
 	public static void test02_ss_statistics(Graph g, PrintStream p, boolean codTranscripts) {
 		
 			if (codTranscripts)
@@ -2018,7 +2094,7 @@ public class ASAnalyzer {
 		 */
 		public static void test04_determineVariations_nmd() {
 			
-			String fName= "test04_determineVariations_encode_all.txt";			
+			String fName= "test04_determineVariations_encode_coding_nmd.txt";			
 			PrintStream p= null;
 			try {
 				fName= Toolbox.checkFileExists(fName);
@@ -2029,8 +2105,8 @@ public class ASAnalyzer {
 			}
 			
 			Graph g= getGraph(INPUT_ENCODE);
-			//g.filterNMDTranscripts();
-			//g.filterNonCodingTranscripts();
+			g.filterNonCodingTranscripts();
+			g.filterNMDTranscripts();
 			ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
 			ASVariation[][] filtClasses= new ASVariation[classes.length][];
@@ -2128,7 +2204,7 @@ public class ASAnalyzer {
 				outputVariations(filtClasses, true, false, p);
 				
 				m = classes[0][0].getClass().getMethod("isNothingRedundant", null);
-				filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
+				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
 //				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 //					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
 				p.println(m.getName());
@@ -3339,10 +3415,11 @@ public class ASAnalyzer {
 		
 		
 		Graph g= null;
-		//g= getGraph(INPUT_ENCODE);
+		g= getGraph(INPUT_ENCODE);
 		//g.filterNMDTranscripts();
 		//test02_ss_statistics(g, System.out, false);
-		test04_determineVariations_nmd();
+		//test04_determineVariations_nmd();
+		test02_ss_statistics();
 		if (1== 1)
 			System.exit(0);
 		
