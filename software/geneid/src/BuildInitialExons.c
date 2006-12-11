@@ -4,10 +4,11 @@
 *                                                                        *
 *   From start/stop codons and donor sites, to build initial exons       *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInitialExons.c,v 1.7 2006-05-29 13:53:39 talioto Exp $  */
+/*  $Id: BuildInitialExons.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -97,7 +98,7 @@ long BuildInitialExons(site *Start, long nStarts,
 	  /* a) Every Donor between Start and that Stop defines an initial exon */
 	  /* b) If not any Stop in frame after current Start: every donor is OK */
 	  while ((js == nStops || (Donor+ks)->Position < (Stop+js)->Position + 1 + 2)
-			 && (ks < nDonors)) 
+			 && (ks < nDonors) && ((Donor+ks)->Position > (Start+i)->Position+2)) 
 		{
 		  /* a. There is room to save this new exon */
 		  if (nLocalExons < MaxDonors) 

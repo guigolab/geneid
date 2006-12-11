@@ -4,10 +4,11 @@
 *                                                                        *
 *   To save best partial genes between 2 contigous fragments             *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                *
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,12 +25,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.5 2006-05-25 13:45:57 talioto Exp $  */
+/*  $Id: BackupGenes.c,v 1.6 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Maximum allowed number of sites and exons to save */
 extern long MAXBACKUPSITES, MAXBACKUPEXONS;
+/* The number of compatible splice classes */
+extern short SPLICECLASSES;
 
 /* Increase counters modulus a long number */
 long IncrMod(long x, long Modulus)
@@ -53,7 +56,9 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
   d->dumpSites[d->ndumpSites].ScoreBP = E->Acceptor->ScoreBP;
   d->dumpSites[d->ndumpSites].PositionBP = E->Acceptor->PositionBP;
   d->dumpSites[d->ndumpSites].PositionPPT = E->Acceptor->PositionPPT;
+  d->dumpSites[d->ndumpSites].class = E->Acceptor->class;
   strcpy(d->dumpSites[d->ndumpSites].subtype,E->Acceptor->subtype);
+  strcpy(d->dumpSites[d->ndumpSites].type,E->Acceptor->type);
   d->dumpExons[d->ndumpExons].Acceptor = &(d->dumpSites[d->ndumpSites]); 
   d->ndumpSites = IncrMod(d->ndumpSites, MAXBACKUPSITES);
   
@@ -64,7 +69,9 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
   d->dumpSites[d->ndumpSites].ScoreBP = E->Donor->ScoreBP;
   d->dumpSites[d->ndumpSites].PositionBP = E->Donor->PositionBP;
   d->dumpSites[d->ndumpSites].PositionPPT = E->Donor->PositionPPT;
+  d->dumpSites[d->ndumpSites].class = E->Donor->class;
   strcpy(d->dumpSites[d->ndumpSites].subtype,E->Donor->subtype);
+  strcpy(d->dumpSites[d->ndumpSites].type,E->Donor->type);
   d->dumpExons[d->ndumpExons].Donor = &(d->dumpSites[d->ndumpSites]); 
   d->ndumpSites = IncrMod(d->ndumpSites, MAXBACKUPSITES);
   
@@ -120,12 +127,13 @@ exonGFF* backupGene(exonGFF* E, packDump* d)
 /* It saves the information about partial genes (packGenes) */
 void BackupGenes(packGenes* pg, int nclass, packDump* d)
 {
-  int i,j;
+  int i,j,k;
   
   /* 1. back-up best partial genes */
   for(i=0; i<nclass; i++)
     for(j=0; j<FRAMES; j++)
-      pg->Ga[i][j] = backupGene(pg->Ga[i][j], d);
+      for(k=0; k<SPLICECLASSES; k++)
+	pg->Ga[i][j][k] = backupGene(pg->Ga[i][j][k], d);
   
   /* 2. back-up optimal(partial gene) */
   pg->GOptim = backupGene(pg->GOptim, d);
@@ -142,6 +150,7 @@ void BackupArrayD(packGenes* pg, long accSearch,
   long MaxDist;
   long nBackups=0;
   short remainder;
+  short donorclass;
   char mess[MAXSTRING];
   
   /* Traversing sort-by-donor array to save some genes (assembling rules) */
@@ -164,8 +173,9 @@ void BackupArrayD(packGenes* pg, long accSearch,
 		  else
 			remainder = pg->d[i][j]->Frame;
 		  
-		  if (pg->d[i][j]->GeneScore > pg->Ga[i][remainder]->GeneScore)
-			pg->Ga[i][remainder] = pg->d[i][j];
+		  donorclass = pg->d[i][j]->Donor->class;
+		  if (pg->d[i][j]->GeneScore > pg->Ga[i][remainder][donorclass]->GeneScore)
+			pg->Ga[i][remainder][donorclass] = pg->d[i][j];
 		  j++;
 		}
       jUpdate = j;
@@ -204,18 +214,22 @@ void BackupArrayD(packGenes* pg, long accSearch,
 /* Reset counters and pointers for the next input sequence */
 void cleanGenes(packGenes* pg, int nclass, packDump* dumpster)
 {
-  int aux, aux2;
-  
+  int aux, aux2, aux3;
+/*   for(aux=0; aux<nclass; aux++) */
   for(aux=0; aux<nclass; aux++)
-	{
+    {
       /* Reset sort-by-donor functions */
       pg->je[aux] = 0;
       pg->km[aux] = 0;
       
       /* Reset Ga-exons: every Ga looks at Ghost exon */
-      for(aux2=0; aux2 < FRAMES; aux2++)
-		pg->Ga[aux][aux2] = pg->Ghost;
+      for(aux2=0; aux2 < FRAMES; aux2++){
+	for(aux3=0; aux3 < SPLICECLASSES; aux3++){
+	  pg->Ga[aux][aux2][aux3] = pg->Ghost;
 	}
+      }
+    }
+
   
   /* Reset Optimal Gene */
   pg->GOptim = pg->Ghost;

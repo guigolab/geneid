@@ -4,10 +4,11 @@
 *                                                                        *
 *   Processing best gene to print by using the selected format           *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.18 2006-05-25 22:58:16 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.19 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -122,21 +123,21 @@ void selectFeatures(char* exonType,
   if (exonStrand == '+')
 	{
 	  *strand = FORWARD;
-	  if (!strcmp(exonType,sFIRST)||!strcmp(exonType,sU12gtagFIRST)||!strcmp(exonType,sU12atacFIRST))
+	  if (!strcmp(exonType,sFIRST))
 		{
 		  *type1 = STA;
 		  *type2 = DON;
 		  *p1 = gp->StartProfile;
 		  *p2 = gp->DonorProfile;
 		}
-	  if (!strcmp(exonType,sINTERNAL)||!strcmp(exonType,sU12gtag_U2INTERNAL)||!strcmp(exonType,sU2_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12gtagINTERNAL)||!strcmp(exonType,sU12atac_U2INTERNAL)||!strcmp(exonType,sU2_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12atacINTERNAL))
+	  if (!strcmp(exonType,sINTERNAL))
 		{
 		  *type1 = ACC;
 		  *type2 = DON;
 		  *p1 = gp->AcceptorProfile;
 		  *p2 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,sTERMINAL)||!strcmp(exonType,sU12gtagTERMINAL)||!strcmp(exonType,sU12atacTERMINAL))
+	  if (!strcmp(exonType,sTERMINAL))
 		{
 		  *type1 = ACC;
 		  *type2 = STO;
@@ -155,21 +156,21 @@ void selectFeatures(char* exonType,
   else
 	{
 	  *strand = REVERSE;
-	  if (!strcmp(exonType,sFIRST)||!strcmp(exonType,sU12gtagFIRST)||!strcmp(exonType,sU12atacFIRST))
+	  if (!strcmp(exonType,sFIRST))
 		{
 		  *type2 = STA;
 		  *type1 = DON;
 		  *p2 = gp->StartProfile;
 		  *p1 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,sINTERNAL)||!strcmp(exonType,sU12gtag_U2INTERNAL)||!strcmp(exonType,sU2_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12gtagINTERNAL)||!strcmp(exonType,sU12atac_U2INTERNAL)||!strcmp(exonType,sU2_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12atacINTERNAL)||!strcmp(exonType,sU12atac_U12gtagINTERNAL)||!strcmp(exonType,sU12gtag_U12atacINTERNAL))
+	  if (!strcmp(exonType,sINTERNAL))
 		{
 		  *type2 = ACC;
 		  *type1 = DON;
 		  *p2 = gp->AcceptorProfile;
 		  *p1 = gp->DonorProfile;    
 		}
-	  if (!strcmp(exonType,sTERMINAL)||!strcmp(exonType,sU12gtagTERMINAL)||!strcmp(exonType,sU12atacTERMINAL))
+	  if (!strcmp(exonType,sTERMINAL))
 		{
 		  *type2 = ACC;
 		  *type1 = STO;
@@ -261,8 +262,6 @@ long CookingInfo(exonGFF* eorig,
 				  stop = (e->Strand == '*');
 				  /* stop1 means change of gene: new gene found */
 				  stop1 = (!strcmp(e->Type,sFIRST) ||
-				  		   !strcmp(e->Type,sU12gtagFIRST) ||
-				  		   !strcmp(e->Type,sU12atacFIRST) ||
 						   !strcmp(e->Type,sSINGLE) ||  
 						   !strcmp(e->Type,sPROMOTER) || 
 						   !strcmp(e->Type,sBEGIN) ||
@@ -281,8 +280,6 @@ long CookingInfo(exonGFF* eorig,
 					  e = (e-> PreviousExon);
 					  stop = (e->Strand == '*');
 					  stop1 = (!strcmp(e->Type,sFIRST) ||  
-				  		       !strcmp(e->Type,sU12gtagFIRST) ||
-				  		       !strcmp(e->Type,sU12atacFIRST) ||
 						   	   !strcmp(e->Type,sSINGLE) ||
 							   !strcmp(e->Type,sPROMOTER) || 
 							   !strcmp(e->Type,sBEGIN) || 
@@ -306,8 +303,6 @@ long CookingInfo(exonGFF* eorig,
 					stop = (e->Strand == '*');
 					/* stop2 means change of gene */
 					stop2 = (!strcmp(e->Type,sTERMINAL) ||  
-							 !strcmp(e->Type,sU12gtagTERMINAL) ||
-							 !strcmp(e->Type,sU12atacTERMINAL) ||
 							 !strcmp(e->Type,sSINGLE) ||
 							 !strcmp(e->Type,sPROMOTER) ||
 							 !strcmp(e->Type,sBEGIN) ||
@@ -326,8 +321,6 @@ long CookingInfo(exonGFF* eorig,
 						e = (e-> PreviousExon);
 						stop = (e->Strand == '*');
 						stop2 = (!strcmp(e->Type,sTERMINAL) ||
-								 !strcmp(e->Type,sU12gtagTERMINAL) ||
-							     !strcmp(e->Type,sU12atacTERMINAL) ||
 							     !strcmp(e->Type,sSINGLE) ||
 								 !strcmp(e->Type,sPROMOTER) || 
 								 !strcmp(e->Type,sBEGIN) ||
@@ -506,20 +499,20 @@ void CookingGenes(exonGFF* e,
 				PrintGGene(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score);
 				PrintGmRNA(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score);
 				if (info[igen].start->Strand == '+'){
-					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].end->Type,sFIRST)||!strcmp(info[igen].end->Type,sU12gtagFIRST)||!strcmp(info[igen].end->Type,sU12atacFIRST))){
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].end->Type,sFIRST))){
 						/* printf("# 5 prime partial: %s\n",info[igen].end->Type); */
 						info[igen].end->five_prime_partial = 1;
 					}
-					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].start->Type,sTERMINAL)||!strcmp(info[igen].start->Type,sU12gtagTERMINAL)||!strcmp(info[igen].start->Type,sU12atacTERMINAL))){
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].start->Type,sTERMINAL))){
 						/* printf("# 3 prime partial: %s\n",info[igen].start->Type); */
 						info[igen].start->three_prime_partial = 1;
 					}
 				} else {
-					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].start->Type,sFIRST)||!strcmp(info[igen].start->Type,sU12gtagFIRST)||!strcmp(info[igen].start->Type,sU12atacFIRST))){
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].start->Type,sFIRST))){
 						/* printf("# 5 prime partial: %s\n",info[igen].start->Type); */
 						info[igen].start->five_prime_partial = 1;
 					}
-					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].end->Type,sTERMINAL)||!strcmp(info[igen].end->Type,sU12gtagTERMINAL)||!strcmp(info[igen].end->Type,sU12atacTERMINAL))){
+					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].end->Type,sTERMINAL))){
 						/* printf("# 3 prime partial: %s\n",info[igen].end->Type); */
 						info[igen].end->three_prime_partial = 1;
 					}

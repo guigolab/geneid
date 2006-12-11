@@ -4,10 +4,11 @@
 *                                                                        *
 *   Formatted printing of predicted exons                                *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.11 2006-10-25 09:59:29 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.12 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -38,8 +39,8 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
   char* rs;
   long p1, p2;
   int nAA;
-  char saux[MAXTYPE];
-  char saux2[MAXTYPE];
+/*   char saux[MAXTYPE]; */
+/*   char saux2[MAXTYPE]; */
   
   /* Acquiring real positions of exon */
   p1 = e->Acceptor->Position + e->offset1 - COFFSET;
@@ -88,16 +89,11 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
     }
   else
     {
-	 if (memcmp(e->Donor->subtype,"U12",2)){
-	 	strcpy (saux, "-");
-		strcpy (saux2, e->Donor->subtype);
-		strcat(saux2,saux);
-		strcat(saux2,e->Type);
-	 }
       /* Default format */
       printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%d\t%s\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
-			  saux2, /*e->Type,*/
+			  /* saux2,  */
+	      e->Type,
 			  (e->evidence)? e->Acceptor->Position: e->Acceptor->Position + e->offset1,
 			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 			  (e->Score==MAXSCORE)? 0.0:e->Score,

@@ -4,10 +4,11 @@
 *                                                                        *
 *   Accounting: results and run-time stats                               *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: account.c,v 1.5 2006-05-25 14:35:01 talioto Exp $  */
+/*  $Id: account.c,v 1.6 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -88,54 +89,22 @@ void updateTotals(account *m,
   m->starts += allSites->nStartCodons;
   m->stops += allSites->nStopCodons;
   m->acc += allSites->nAcceptorSites;
-  m->acc += allSites->nU12gtagAcceptorSites;
-  m->acc += allSites->nU12atacAcceptorSites;
   m->don += allSites->nDonorSites;
-  m->don += allSites->nU12gtagDonorSites;
-  m->don += allSites->nU12atacDonorSites;
 
   m->starts_r += allSites_r->nStartCodons;
   m->stops_r += allSites_r->nStopCodons;
   m->acc_r += allSites_r->nAcceptorSites;
-  m->acc_r += allSites_r->nU12gtagAcceptorSites;
-  m->acc_r += allSites_r->nU12atacAcceptorSites;
   m->don_r += allSites_r->nDonorSites;
-  m->don += allSites_r->nU12gtagDonorSites;
-  m->don += allSites_r->nU12atacDonorSites;
        
   m->first += allExons->nInitialExons;
-  m->first += allExons->nU12gtagInitialExons;
-  m->first += allExons->nU12atacInitialExons;
   m->internal += allExons->nInternalExons;
-  m->internal += allExons->nU12gtag_U2_InternalExons;
-  m->internal += allExons->nU2_U12gtag_InternalExons;
-  m->internal += allExons->nU12gtag_U12gtag_InternalExons;
-  m->internal += allExons->nU12atac_U2_InternalExons;
-  m->internal += allExons->nU2_U12atac_InternalExons;
-  m->internal += allExons->nU12atac_U12atac_InternalExons;
-  m->internal += allExons->nU12gtag_U12atac_InternalExons;
-  m->internal += allExons->nU12atac_U12gtag_InternalExons;
   m->terminal += allExons->nTerminalExons;
-  m->terminal += allExons->nU12gtagTerminalExons;
-  m->terminal += allExons->nU12atacTerminalExons;
   m->single += allExons->nSingles;
   m->orf += allExons->nORFs;
 
   m->first_r += allExons_r->nInitialExons;
-  m->first_r += allExons_r->nU12gtagInitialExons;
-  m->first_r += allExons_r->nU12atacInitialExons;
   m->internal_r += allExons_r->nInternalExons;
-  m->internal_r += allExons_r->nU12gtag_U2_InternalExons;
-  m->internal_r += allExons_r->nU2_U12gtag_InternalExons;
-  m->internal_r += allExons_r->nU12gtag_U12gtag_InternalExons;
-  m->internal_r += allExons_r->nU12atac_U2_InternalExons;
-  m->internal_r += allExons_r->nU2_U12atac_InternalExons;
-  m->internal_r += allExons_r->nU12atac_U12atac_InternalExons;
-  m->internal_r += allExons_r->nU12gtag_U12atac_InternalExons;
-  m->internal_r += allExons_r->nU12atac_U12gtag_InternalExons;
   m->terminal_r += allExons_r->nTerminalExons;
-  m->terminal_r += allExons_r->nU12gtagTerminalExons;
-  m->terminal_r += allExons_r->nU12atacTerminalExons;
   m->single_r += allExons_r->nSingles;  
   m->orf_r += allExons_r->nORFs;  
 

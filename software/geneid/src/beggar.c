@@ -4,10 +4,11 @@
 *                                                                        *
 *   Estimate the memory needed to run geneid (current configuration)     *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: beggar.c,v 1.4 2006-05-29 13:49:53 talioto Exp $  */
+/*  $Id: beggar.c,v 1.5 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -43,25 +44,19 @@ void beggar(long L)
   float memParams;
   float memSequence;
   float memBackup;
-  int numprofiles = 4;
-  if (U12)
-    numprofiles = 8;
-
+  int numprofiles = 16;
+  int spliceclasses = 1;
+  if (U12){
+    spliceclasses = 3;
+  }
   /* packSites: +/- */
-  memSites = STRANDS * (sizeof(struct s_packSites) + (4 * NUMSITES * sizeof(struct s_site))
-			+ (4 * NUMU12SITES * sizeof(struct s_site))
-			);
+  memSites = STRANDS * (sizeof(struct s_packSites) + (4 * NUMSITES * sizeof(struct s_site)));
   
   /* packExons: +/- */
   memExons = STRANDS * (sizeof(struct s_packExons) +
 						((NUMEXONS/RFIRST + NUMEXONS/RINTER +
 						  NUMEXONS/RTERMI + NUMEXONS/RSINGL) *
 						 sizeof(exonGFF))
-			+ ((NUMU12EXONS/RFIRST + NUMU12EXONS/RINTER +
-			    NUMU12EXONS/RTERMI + NUMU12EXONS/RSINGL) *
-			   sizeof(exonGFF))
-		       	+ (( NUMU12U12EXONS/RINTER) *
-			   sizeof(exonGFF))
 			);
   /* Sort exons */
   memExons += NUMEXONS * FSORT * sizeof(exonGFF);
@@ -80,7 +75,7 @@ void beggar(long L)
   /* pack Genes: ghost, Ga, d, km-jm */
   memGenes = sizeof(struct s_packGenes) +
 	2 * (sizeof(exonGFF) + 2 * sizeof(struct s_site)) +
-	MAXENTRY * FRAMES * sizeof(exonGFF*) +
+	MAXENTRY * FRAMES * spliceclasses * sizeof(exonGFF*) +
 	MAXENTRY * (2 * NUMEXONS) * sizeof(exonGFF*) +
 	2 * MAXENTRY * sizeof(long);
   

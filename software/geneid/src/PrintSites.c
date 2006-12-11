@@ -6,8 +6,9 @@
 *                                                                        *
 *   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.9 2006-06-01 21:02:51 talioto Exp $  */
+/*  $Id: PrintSites.c,v 1.10 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -76,7 +77,7 @@ void PrintSite(site* s, int type,
   
   /* Depending on the strand: exchange k and offset */
   /* Incomplete signals are filled in with "*" */
-  if(type == ACC){acc_context = ACCEPTOR_CONTEXT - p->offset;}
+  if(type == ACC){acc_context = ACCEPTOR_CONTEXT - p->offset + 3;} /*The 3 is to make sure the full length of the branch profile is included*/
   switch(Strand)
     {
     case FORWARD: strand = '+';
@@ -91,14 +92,14 @@ void PrintSite(site* s, int type,
       k = -k;
       offset = -offset;
       ReverseSubSequence(s->Position - (p->dimension - p->offset - 1), 
-						 s->Position + (p->offset + acc_context), seq, sAux);    
+						 s->Position + (p->offset + acc_context ), seq, sAux);    
       sAux[p->dimension + acc_context] = '\0'; 
       break;
 	default: 
 	  /* It will supposed to be forward */
 	  strand = '+';
       for(i=0; i < p->dimension + acc_context; i++)
-		if (s->Position - p->offset - acc_context + i >= 0)
+		if (s->Position - p->offset - acc_context - p->order + i >= 0)
 		  sAux[i] = seq[s->Position - p->offset - acc_context + i];
 		else
 		  sAux[i] = '*';

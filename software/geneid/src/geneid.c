@@ -4,10 +4,11 @@
 *                                                                        *
 *   geneid main program                                                  *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *     with contributions from:                                           *
 *                          Moises  BURSET ALVAREDA                       *
 *                          Genis   PARRA FARRE                           *
@@ -28,7 +29,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.17 2006-06-01 21:05:49 talioto Exp $ */
+/* $Id: geneid.c,v 1.18 2006-12-11 09:50:48 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -67,8 +68,18 @@ int
   /* Detection of U12atac sites (acceptor uses BranchPoint)*/
   U12ATAC=0,
   /* Detection of U2gcag sites */
-  U2GCAG=0;
-  
+  U2GCAG=0,
+  /* Detection of U2gta donor sites */
+  U2GTA=0,
+  /* Detection of U2gtg donor sites */
+  U2GTG=0,
+  /* Detection of U2gty donor sites */
+  U2GTY=0;
+
+short
+  /* Splice classes */
+  SPLICECLASSES = 1;
+ 
 long
   /* User defined lower limit */
   LOW=0,
@@ -77,7 +88,7 @@ long
     
 /* Increase/decrease exon weight value (exon score) */
 float EW = NOVALUE;
-float U12EW = 0;
+float U12EW = 0; /*-1.9*/
 float U12_SPLICE_SCORE_THRESH = -1000;
 float U12_EXON_SCORE_THRESH = -1000;
 /* Generic maximum values: sites, exons and backup elements */
@@ -170,7 +181,7 @@ int main (int argc, char *argv[])
   
   /* 0.c. Read setup options */
   readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,HSPFile);
-  printRes("\n\n\t\t\t** Running geneid 1.2 2003 geneid@imim.es **\n\n");
+  printRes("\n\n\t\t\t** Running geneid 1.3 2003 geneid@imim.es **\n\n");
   
   /* 0.d. Prediction of DNA sequence length to request memory */
   LengthSequence = analizeFile(SequenceFile);
@@ -179,20 +190,12 @@ int main (int argc, char *argv[])
   
   /* 0.e. Computing ratios for every type of signal and exons */
   printMess("Computing Ratios");
-  SetRatios(&NUMSITES,&NUMU12SITES,
-            &NUMEXONS,&NUMU12EXONS, &NUMU12U12EXONS,
+  SetRatios(&NUMSITES,
+            &NUMEXONS,
             &MAXBACKUPSITES,
             &MAXBACKUPEXONS,
             LengthSequence);
-  if (U12){
-    NUMU12SITES = MIN(NUMU12SITES,NUMSITES);
-    NUMU12EXONS = MIN(NUMU12EXONS,NUMEXONS);
-    NUMU12U12EXONS = MIN(NUMU12EXONS,NUMU12U12EXONS);
-  } else {
-    NUMU12SITES = 0;
-    NUMU12EXONS = 0;
-    NUMU12U12EXONS = 0;      
-  }
+
   /* Estimation of memory required to execute geneid */
   if (BEG)
 	beggar(LengthSequence);
@@ -207,7 +210,6 @@ int main (int argc, char *argv[])
   allExons   = (packExons*)    RequestMemoryExons();
   allExons_r = (packExons*)    RequestMemoryExons();
   exons      = (exonGFF*)      RequestMemorySortExons();
-  genes      = (packGenes*)    RequestMemoryGenes();
   isochores  = (gparam**)      RequestMemoryIsochoresParams(); 
   GCInfo     = (packGC*)       RequestMemoryGC();
   GCInfo_r   = (packGC*)       RequestMemoryGC();
@@ -225,14 +227,16 @@ int main (int argc, char *argv[])
   nIsochores = readparam(ParamFile, isochores);
   if (U12){
     if ((!U12GTAG)&&(!U12ATAC)){
-      NUMU12SITES = 0;    
-      NUMU12EXONS = 0;
-      NUMU12U12EXONS = 0; 
+    U12GTAG = 0;
+    U12ATAC = 0;
     }
   }else{
     U12GTAG = 0;
     U12ATAC = 0;
   }
+   /** 1. Allocating genes data structure **/
+  genes      = (packGenes*)    RequestMemoryGenes();
+
   /** 3. Starting processing: complete or partial prediction ? **/
   if (GENEID)
     {

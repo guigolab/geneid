@@ -4,10 +4,11 @@
 *                                                                        *
 *   Asking operating system for memory for geneid data structures        *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.11 2006-05-29 13:59:32 talioto Exp $  */
+/*  $Id: RequestMemory.c,v 1.12 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -32,6 +33,7 @@
 extern long NUMSITES, NUMU12SITES, NUMU12EXONS, NUMU12U12EXONS, NUMEXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
 extern int scanORF;
 extern int SRP,EVD,GENEID, U12GTAG, U12ATAC;
+extern short SPLICECLASSES;
 
 /* Allocating accounting data structure in memory */
 account* RequestMemoryAccounting()
@@ -79,25 +81,6 @@ packSites* RequestMemorySites()
   if ((allSites->DonorSites = 
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: donor sites");
-      
-  /* U12 Acceptor sites */
-  if ((allSites->U12gtagAcceptorSites = 
-       (struct s_site *) calloc(NUMU12SITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12gtag acceptor sites");
-
-  /* U12 Donor sites */
-  if ((allSites->U12gtagDonorSites = 
-       (struct s_site *) calloc(NUMU12SITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12gtag donor sites");
-
-
-  if ((allSites->U12atacAcceptorSites = 
-       (struct s_site *) calloc(NUMU12SITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12atac acceptor sites");
-
-  if ((allSites->U12atacDonorSites = 
-       (struct s_site *) calloc(NUMU12SITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: U12atac donor sites");
 
   /* Stop codons */
   if ((allSites->StopCodons = 
@@ -136,78 +119,6 @@ packExons* RequestMemoryExons()
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: terminal exons");
 
-  /* U12gtag InitialExons HowMany/10*/
-  HowMany = (long)(NUMU12EXONS/RFIRST);
-  if ((allExons->U12gtagInitialExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag first exons");
-
-  /* U12gtag-U12gtag InternalExons HowMany/100*/
-  HowMany = (long)(NUMU12EXONS/RINTER); 
-  if ((allExons->U12gtag_U12gtag_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag U12gtag internal exons");
-
-  /* U12gtag-U2 InternalExons HowMany/10*/
-  HowMany = (long)(NUMU12EXONS/RINTER); 
-  if ((allExons->U12gtag_U2_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag U2 internal exons");
-
-  /* U2-U12gtag InternalExons HowMany/10*/
-  HowMany = (long)(NUMU12EXONS/RINTER); 
-  if ((allExons->U2_U12gtag_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U2 U12gtag internal exons");
-
-  /* U12gtag TerminalExons HowMany/10*/
-  HowMany = (long)(NUMU12EXONS/RTERMI);
-  if ((allExons->U12gtagTerminalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag terminal exons");
-
-  /* U12atac InitialExons HowMany/10*/
-  HowMany = (long)(NUMEXONS/RFIRST);
-  if ((allExons->U12atacInitialExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac first exons");
-
-  /* U12atac-U12atac InternalExons HowMany/100*/
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->U12atac_U12atac_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac U12atac internal exons");
-
-  /* U12atac-U2 InternalExons HowMany/10*/
-  HowMany = (long)(NUMU12EXONS/RINTER); 
-  if ((allExons->U12atac_U2_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac U2 internal exons");
-
-  /* U2-U12atac InternalExons HowMany/10*/
-  HowMany = (long)(NUMU12EXONS/RINTER); 
-  if ((allExons->U2_U12atac_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U2 U12atac internal exons");
-
-  /* U12atac TerminalExons HowMany/10*/
-  HowMany = (long)(NUMU12EXONS/RTERMI);
-  if ((allExons->U12atacTerminalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac terminal exons");  
-
-  /* U12gtag-U12atac InternalExons HowMany/100*/
-  HowMany = (long)(NUMU12U12EXONS/RINTER); 
-  if ((allExons->U12gtag_U12atac_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12gtag U12atac internal exons");
-
-  /* U12atac-U12gtag InternalExons HowMany/100*/
-  HowMany = (long)(NUMU12U12EXONS/RINTER); 
-  if ((allExons->U12atac_U12gtag_InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: U12atac U12gtag internal exons");
-
   /* SingleExons */
   HowMany = (long)(NUMEXONS/RSINGL);
   if ((allExons->Singles = 
@@ -239,6 +150,21 @@ exonGFF* RequestMemorySortExons()
     printError("Not enough memory: table to sort exons");
 
   return(exons);
+}
+
+/* Allocating memory for sorting the set of predicted sites */
+site* RequestMemorySortSites()
+{
+  site *sites;
+  long HowMany;
+
+  /* Sorting Exons */
+  HowMany = NUMSITES * FSORT;
+  if ((sites =
+       (site*) calloc(HowMany, sizeof(site)))  == NULL)
+    printError("Not enough memory: table to sort sites");
+
+  return(sites);
 }
 
 /* Allocating memory for input evidences (annotations) */
@@ -457,11 +383,23 @@ gparam* RequestMemoryParams()
   if ((gp->U2gcagDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: U2 GCAG donor profile");
 	
+  if ((gp->U2gcagDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: U2 GCAG donor profile");
+	
+  if ((gp->U2gtaDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: U2 GTA donor profile");
+	
+  if ((gp->U2gtgDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: U2 GTG donor profile");
+	
+  if ((gp->U2gtyDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
+    printError("Not enough memory: U2 GTY donor profile");
+
   if ((gp->U12gtagDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
-    printError("Not enough memory: u12gtag donor profile");
+    printError("Not enough memory: U12 GTAG donor profile");
 
   if ((gp->U12atacDonorProfile = (profile *) malloc(sizeof(profile))) == NULL)
-    printError("Not enough memory: u12atac donor profile");
+    printError("Not enough memory: U12 ATAC donor profile");
 
   if ((gp->StopProfile = (profile *) malloc(sizeof(profile))) == NULL)
     printError("Not enough memory: stop profile");
@@ -580,7 +518,7 @@ void RequestMemoryProfile(profile* p)
 packGenes* RequestMemoryGenes()
 {
   packGenes* pg;
-  int aux, aux2;
+  int aux, aux2, aux3;
 
   /* 0. Allocating memory for pack of genes (main structure) */
   if ((pg = 
@@ -598,27 +536,45 @@ packGenes* RequestMemoryGenes()
     printError("Not enough memory: Ghost Exon donor");
 
   /* Mark this exon as Ghost Exon */
-  pg->Ghost -> Strand = '*';
-  pg->Ghost -> GeneScore = 0.0;
-  pg->Ghost -> Donor -> Position = 0;
-  pg->Ghost -> offset1 = 0;
-  pg->Ghost -> offset2 = 0;
+  pg->Ghost->Strand = '*';
+  pg->Ghost->Remainder = 0;
+  pg->Ghost->Frame = 0;
+  pg->Ghost->GeneScore = 0.0;
+  pg->Ghost->Donor->Score = 0;
+  pg->Ghost->Donor->Position = 0;
+  pg->Ghost->Donor->class = 0;
+  pg->Ghost->Acceptor->Score = 0;
+  pg->Ghost->Acceptor->Position = 0;
+  pg->Ghost->Acceptor->class = 0;
+  strcpy(pg->Ghost->Donor->type,sU2type);
+  strcpy(pg->Ghost->Donor->subtype,sU2);
+  strcpy(pg->Ghost->Acceptor->type,sU2type);
+  strcpy(pg->Ghost->Acceptor->subtype,sU2);
+  pg->Ghost->offset1 = 0;
+  pg->Ghost->offset2 = 0;
   pg->GOptim = pg->Ghost;
   
   /* 2. Allocating memory space for Ga */
   /* Ga is the array of best predicted genes (in every gene class) */ 
-  if ((pg->Ga = (exonGFF* **)calloc(MAXENTRY, sizeof(exonGFF* *))) == NULL)
+  if ((pg->Ga = (exonGFF* ***)calloc(MAXENTRY, sizeof(exonGFF* **))) == NULL)
     printError("Not enough memory: Ga array of genes");
 
   /* Initialize Ga-exons: everybody looking at the Ghost exon */
   /* MAXENTRY represents the maximum number of gene classes */
   for(aux=0; aux<MAXENTRY; aux++)
     {
-      if ((pg->Ga[aux] = (exonGFF* *)calloc(FRAMES, sizeof(exonGFF*))) == NULL)
+      if ((pg->Ga[aux] = (exonGFF* **)calloc(FRAMES, sizeof(exonGFF* *))) == NULL)
         printError("Not enough memory: 6 frames in Ga array of genes");
 
-      for(aux2=0; aux2 < FRAMES; aux2++)
-      	pg->Ga[aux][aux2] = pg->Ghost;
+      for(aux2=0; aux2 < FRAMES; aux2++){
+      if ((pg->Ga[aux][aux2] = (exonGFF* *)calloc(SPLICECLASSES, sizeof(exonGFF*))) == NULL)
+        printError("Not enough memory: 3 splice classes in Ga array of genes");
+
+	for(aux3=0; aux3 < SPLICECLASSES; aux3++){
+	  pg->Ga[aux][aux2][aux3] = pg->Ghost;
+	}
+      }
+      	
     }
 
   /* 3. Allocate memory space for the set of auxiliary arrays */
