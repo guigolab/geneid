@@ -4,10 +4,13 @@
 # it executes in asynchronous mode the workflow
 # it uses ajax to add the data input HTML submission form
 
-# HTML::Template PATH
-use lib "/home/ug/gmaster/lib/site_perl/5.8.5/";
-
 use strict;
+use EnvServices;
+
+BEGIN {
+  load_environment();
+}
+
 use CGI;
 use CGI::Ajax;
 

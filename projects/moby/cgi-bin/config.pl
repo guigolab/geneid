@@ -14,8 +14,9 @@ use lib "/home/ug/gmaster/projects/moby/biomoby.0.8.2a/Perl";
 
 # Log::Log4perl and depedencies - temporary place !
 # Installed Globally now
-# use lib "/home/ug/gmaster/projects/lib/site_perl/5.8.5";
-# use lib "/home/ug/gmaster/projects/lib/site_perl/5.8.5/i686-linux-thread-multi";
+# Also CGI::Ajax HTML::Template Class::Accessor
+use lib "/home/ug/gmaster/lib/site_perl/5.8.5";
+use lib "/home/ug/gmaster/lib/site_perl/5.8.5/i686-linux-thread-multi";
 
 # GOstat setup
 
